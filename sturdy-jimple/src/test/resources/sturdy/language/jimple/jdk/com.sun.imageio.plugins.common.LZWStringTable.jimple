@@ -1,0 +1,560 @@
+public class com.sun.imageio.plugins.common.LZWStringTable extends java.lang.Object
+{
+    private static final int RES_CODES;
+    private static final short HASH_FREE;
+    private static final short NEXT_FIRST;
+    private static final int MAXBITS;
+    private static final int MAXSTR;
+    private static final short HASHSIZE;
+    private static final short HASHSTEP;
+    byte[] strChr;
+    short[] strNxt;
+    short[] strHsh;
+    short numStrings;
+    int[] strLen;
+
+    public void <init>()
+    {
+        byte[] $r1;
+        int[] $r3;
+        short[] $r2, $r4;
+        com.sun.imageio.plugins.common.LZWStringTable r0;
+
+        r0 := @this: com.sun.imageio.plugins.common.LZWStringTable;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = newarray (byte)[4096];
+
+        r0.<com.sun.imageio.plugins.common.LZWStringTable: byte[] strChr> = $r1;
+
+        $r2 = newarray (short)[4096];
+
+        r0.<com.sun.imageio.plugins.common.LZWStringTable: short[] strNxt> = $r2;
+
+        $r3 = newarray (int)[4096];
+
+        r0.<com.sun.imageio.plugins.common.LZWStringTable: int[] strLen> = $r3;
+
+        $r4 = newarray (short)[9973];
+
+        r0.<com.sun.imageio.plugins.common.LZWStringTable: short[] strHsh> = $r4;
+
+        return;
+    }
+
+    public int addCharString(short, byte)
+    {
+        byte[] $r3;
+        byte b2;
+        int[] $r5, $r6, $r8;
+        com.sun.imageio.plugins.common.LZWStringTable r0;
+        short[] $r1, $r2, $r4, $r7;
+        short $s0, s1, $s3, $s4, $s5, $s6, $s9, $s10, $s12, $s13, $s14, $s29;
+        int $i7, $i8, $i11, $i15, i16, $i17, $i19, $i20, $i22, $i23, $i24, $i26, $i27, $i30, $i31, $i32, $i33, $i34, $i35;
+
+        r0 := @this: com.sun.imageio.plugins.common.LZWStringTable;
+
+        s1 := @parameter0: short;
+
+        b2 := @parameter1: byte;
+
+        $s0 = r0.<com.sun.imageio.plugins.common.LZWStringTable: short numStrings>;
+
+        $i17 = (int) $s0;
+
+        if $i17 < 4096 goto label1;
+
+        $i19 = (int) 65535;
+
+        return $i19;
+
+     label1:
+        i16 = staticinvoke <com.sun.imageio.plugins.common.LZWStringTable: int hash(short,byte)>(s1, b2);
+
+     label2:
+        $r1 = r0.<com.sun.imageio.plugins.common.LZWStringTable: short[] strHsh>;
+
+        $s3 = $r1[i16];
+
+        $i20 = (int) $s3;
+
+        $i22 = (int) -1;
+
+        if $i20 == $i22 goto label3;
+
+        $i15 = i16 + 2039;
+
+        i16 = $i15 % 9973;
+
+        goto label2;
+
+     label3:
+        $r2 = r0.<com.sun.imageio.plugins.common.LZWStringTable: short[] strHsh>;
+
+        $s4 = r0.<com.sun.imageio.plugins.common.LZWStringTable: short numStrings>;
+
+        $r2[i16] = $s4;
+
+        $r3 = r0.<com.sun.imageio.plugins.common.LZWStringTable: byte[] strChr>;
+
+        $s5 = r0.<com.sun.imageio.plugins.common.LZWStringTable: short numStrings>;
+
+        $i23 = (int) $s5;
+
+        $r3[$i23] = b2;
+
+        $i24 = (int) s1;
+
+        $i26 = (int) -1;
+
+        if $i24 != $i26 goto label4;
+
+        $r7 = r0.<com.sun.imageio.plugins.common.LZWStringTable: short[] strNxt>;
+
+        $s13 = r0.<com.sun.imageio.plugins.common.LZWStringTable: short numStrings>;
+
+        $i27 = (int) $s13;
+
+        $s29 = (short) -1;
+
+        $r7[$i27] = $s29;
+
+        $r8 = r0.<com.sun.imageio.plugins.common.LZWStringTable: int[] strLen>;
+
+        $s14 = r0.<com.sun.imageio.plugins.common.LZWStringTable: short numStrings>;
+
+        $i30 = (int) $s14;
+
+        $r8[$i30] = 1;
+
+        goto label5;
+
+     label4:
+        $r4 = r0.<com.sun.imageio.plugins.common.LZWStringTable: short[] strNxt>;
+
+        $s6 = r0.<com.sun.imageio.plugins.common.LZWStringTable: short numStrings>;
+
+        $i31 = (int) $s6;
+
+        $r4[$i31] = s1;
+
+        $r6 = r0.<com.sun.imageio.plugins.common.LZWStringTable: int[] strLen>;
+
+        $s9 = r0.<com.sun.imageio.plugins.common.LZWStringTable: short numStrings>;
+
+        $r5 = r0.<com.sun.imageio.plugins.common.LZWStringTable: int[] strLen>;
+
+        $i32 = (int) s1;
+
+        $i7 = $r5[$i32];
+
+        $i8 = $i7 + 1;
+
+        $i33 = (int) $s9;
+
+        $r6[$i33] = $i8;
+
+     label5:
+        $s10 = r0.<com.sun.imageio.plugins.common.LZWStringTable: short numStrings>;
+
+        $i34 = (int) $s10;
+
+        $i11 = $i34 + 1;
+
+        $s12 = (short) $i11;
+
+        r0.<com.sun.imageio.plugins.common.LZWStringTable: short numStrings> = $s12;
+
+        $i35 = (int) $s10;
+
+        return $i35;
+    }
+
+    public short findCharString(short, byte)
+    {
+        byte[] $r3;
+        short s0, $s2, $s3, $s6, $s7, $s8, $s13, $s24;
+        byte b1, $b5;
+        int $i4, i9, $i10, $i12, $i14, $i16, $i17, $i18, $i19, $i20, $i21, $i22;
+        com.sun.imageio.plugins.common.LZWStringTable r0;
+        short[] $r1, $r2;
+
+        r0 := @this: com.sun.imageio.plugins.common.LZWStringTable;
+
+        s0 := @parameter0: short;
+
+        b1 := @parameter1: byte;
+
+        $i10 = (int) s0;
+
+        $i12 = (int) -1;
+
+        if $i10 != $i12 goto label1;
+
+        $s13 = (short) b1;
+
+        $s7 = $s13 & 255;
+
+        $s8 = (short) $s7;
+
+        return $s8;
+
+     label1:
+        i9 = staticinvoke <com.sun.imageio.plugins.common.LZWStringTable: int hash(short,byte)>(s0, b1);
+
+     label2:
+        $r1 = r0.<com.sun.imageio.plugins.common.LZWStringTable: short[] strHsh>;
+
+        $s2 = $r1[i9];
+
+        $i14 = (int) $s2;
+
+        $i16 = (int) -1;
+
+        if $i14 == $i16 goto label4;
+
+        $r2 = r0.<com.sun.imageio.plugins.common.LZWStringTable: short[] strNxt>;
+
+        $i17 = (int) $s2;
+
+        $s3 = $r2[$i17];
+
+        $i18 = (int) $s3;
+
+        $i19 = (int) s0;
+
+        if $i18 != $i19 goto label3;
+
+        $r3 = r0.<com.sun.imageio.plugins.common.LZWStringTable: byte[] strChr>;
+
+        $i20 = (int) $s2;
+
+        $b5 = $r3[$i20];
+
+        $i21 = (int) $b5;
+
+        $i22 = (int) b1;
+
+        if $i21 != $i22 goto label3;
+
+        $s6 = (short) $s2;
+
+        return $s6;
+
+     label3:
+        $i4 = i9 + 2039;
+
+        i9 = $i4 % 9973;
+
+        goto label2;
+
+     label4:
+        $s24 = (short) -1;
+
+        return $s24;
+    }
+
+    public void clearTable(int)
+    {
+        short $s7, $s9;
+        byte $b2;
+        int i0, $i1, i3, i4, i5;
+        short[] $r1;
+        com.sun.imageio.plugins.common.LZWStringTable r0;
+
+        r0 := @this: com.sun.imageio.plugins.common.LZWStringTable;
+
+        i0 := @parameter0: int;
+
+        r0.<com.sun.imageio.plugins.common.LZWStringTable: short numStrings> = 0;
+
+        i3 = 0;
+
+     label1:
+        if i3 >= 9973 goto label2;
+
+        $r1 = r0.<com.sun.imageio.plugins.common.LZWStringTable: short[] strHsh>;
+
+        $s7 = (short) -1;
+
+        $r1[i3] = $s7;
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label2:
+        $i1 = 1 << i0;
+
+        i4 = $i1 + 2;
+
+        i5 = 0;
+
+     label3:
+        if i5 >= i4 goto label4;
+
+        $b2 = (byte) i5;
+
+        $s9 = (short) -1;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.common.LZWStringTable: int addCharString(short,byte)>($s9, $b2);
+
+        i5 = i5 + 1;
+
+        goto label3;
+
+     label4:
+        return;
+    }
+
+    public static int hash(short, byte)
+    {
+        short s2, $s3, $s4;
+        byte b0;
+        int $i1, $i5, $i6, $i7, $i8, $i10;
+
+        s2 := @parameter0: short;
+
+        b0 := @parameter1: byte;
+
+        $i7 = (int) b0;
+
+        $i1 = $i7 << 8;
+
+        $s3 = (short) $i1;
+
+        $s4 = $s3 ^ s2;
+
+        $i8 = (int) $s4;
+
+        $i10 = (int) 65535;
+
+        $i5 = $i8 & $i10;
+
+        $i6 = $i5 % 9973;
+
+        return $i6;
+    }
+
+    public int expandCode(byte[], int, short, int)
+    {
+        byte[] r3, $r5;
+        short s8;
+        byte $b7;
+        int[] $r1, $r2;
+        int i0, $i1, $i2, i3, $i4, i5, $i6, i9, i10, i11, i12, $i14, $i15, $i17, $i18, $i19, $i20, $i22, $i24, $i26, $i27, $i28;
+        com.sun.imageio.plugins.common.LZWStringTable r0;
+        short[] $r4;
+
+        r0 := @this: com.sun.imageio.plugins.common.LZWStringTable;
+
+        r3 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        s8 := @parameter2: short;
+
+        i9 := @parameter3: int;
+
+        $i14 = (int) -2;
+
+        if i0 != $i14 goto label1;
+
+        if i9 != 1 goto label1;
+
+        i9 = 0;
+
+     label1:
+        $i15 = (int) s8;
+
+        $i17 = (int) -1;
+
+        if $i15 == $i17 goto label2;
+
+        $r1 = r0.<com.sun.imageio.plugins.common.LZWStringTable: int[] strLen>;
+
+        $i18 = (int) s8;
+
+        $i1 = $r1[$i18];
+
+        if i9 != $i1 goto label3;
+
+     label2:
+        return 0;
+
+     label3:
+        $r2 = r0.<com.sun.imageio.plugins.common.LZWStringTable: int[] strLen>;
+
+        $i19 = (int) s8;
+
+        $i2 = $r2[$i19];
+
+        i3 = $i2 - i9;
+
+        $i4 = lengthof r3;
+
+        i5 = $i4 - i0;
+
+        if i5 <= i3 goto label4;
+
+        i10 = i3;
+
+        goto label5;
+
+     label4:
+        i10 = i5;
+
+     label5:
+        i11 = i3 - i10;
+
+        i12 = i0 + i10;
+
+     label6:
+        if i12 <= i0 goto label8;
+
+        $i20 = (int) s8;
+
+        $i22 = (int) -1;
+
+        if $i20 == $i22 goto label8;
+
+        $i24 = (int) -1;
+
+        i11 = i11 + $i24;
+
+        if i11 >= 0 goto label7;
+
+        $i26 = (int) -1;
+
+        i12 = i12 + $i26;
+
+        $r5 = r0.<com.sun.imageio.plugins.common.LZWStringTable: byte[] strChr>;
+
+        $i27 = (int) s8;
+
+        $b7 = $r5[$i27];
+
+        r3[i12] = $b7;
+
+     label7:
+        $r4 = r0.<com.sun.imageio.plugins.common.LZWStringTable: short[] strNxt>;
+
+        $i28 = (int) s8;
+
+        s8 = $r4[$i28];
+
+        goto label6;
+
+     label8:
+        if i3 <= i10 goto label9;
+
+        $i6 = neg i10;
+
+        return $i6;
+
+     label9:
+        return i10;
+    }
+
+    public void dump(java.io.PrintStream)
+    {
+        byte[] $r9;
+        short $s0, $s1, $s3, $s8;
+        byte $b2;
+        int[] $r13;
+        int $i4, i5, $i6, $i7, $i9;
+        java.lang.String $r10, $r14, $r16;
+        com.sun.imageio.plugins.common.LZWStringTable r0;
+        java.io.PrintStream r1;
+        java.lang.StringBuilder $r3, $r4, $r5, $r7, $r8, $r11, $r12, $r15, $r17;
+        short[] $r6;
+
+        r0 := @this: com.sun.imageio.plugins.common.LZWStringTable;
+
+        r1 := @parameter0: java.io.PrintStream;
+
+        i5 = 258;
+
+     label1:
+        $s0 = r0.<com.sun.imageio.plugins.common.LZWStringTable: short numStrings>;
+
+        $i6 = (int) $s0;
+
+        if i5 >= $i6 goto label2;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" strNxt[");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i5);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("] = ");
+
+        $r6 = r0.<com.sun.imageio.plugins.common.LZWStringTable: short[] strNxt>;
+
+        $s1 = $r6[i5];
+
+        $i7 = (int) $s1;
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i7);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" strChr ");
+
+        $r9 = r0.<com.sun.imageio.plugins.common.LZWStringTable: byte[] strChr>;
+
+        $b2 = $r9[i5];
+
+        $s8 = (short) $b2;
+
+        $s3 = $s8 & 255;
+
+        $i9 = (int) $s3;
+
+        $r10 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i9);
+
+        $r11 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" strLen ");
+
+        $r13 = r0.<com.sun.imageio.plugins.common.LZWStringTable: int[] strLen>;
+
+        $i4 = $r13[i5];
+
+        $r14 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i4);
+
+        $r15 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r1.<java.io.PrintStream: void println(java.lang.String)>($r16);
+
+        i5 = i5 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.imageio.plugins.common.LZWStringTable: short HASHSTEP> = 2039;
+
+        <com.sun.imageio.plugins.common.LZWStringTable: short HASHSIZE> = 9973;
+
+        <com.sun.imageio.plugins.common.LZWStringTable: int MAXSTR> = 4096;
+
+        <com.sun.imageio.plugins.common.LZWStringTable: int MAXBITS> = 12;
+
+        <com.sun.imageio.plugins.common.LZWStringTable: short NEXT_FIRST> = -1;
+
+        <com.sun.imageio.plugins.common.LZWStringTable: short HASH_FREE> = -1;
+
+        <com.sun.imageio.plugins.common.LZWStringTable: int RES_CODES> = 2;
+
+        return;
+    }
+}

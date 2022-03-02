@@ -1,0 +1,407 @@
+public class sun.nio.ch.ThreadPool extends java.lang.Object
+{
+    private static final java.lang.String DEFAULT_THREAD_POOL_THREAD_FACTORY;
+    private static final java.lang.String DEFAULT_THREAD_POOL_INITIAL_SIZE;
+    private final java.util.concurrent.ExecutorService executor;
+    private final boolean isFixed;
+    private final int poolSize;
+
+    private void <init>(java.util.concurrent.ExecutorService, boolean, int)
+    {
+        sun.nio.ch.ThreadPool r0;
+        int i0;
+        java.util.concurrent.ExecutorService r1;
+        boolean z0;
+
+        r0 := @this: sun.nio.ch.ThreadPool;
+
+        r1 := @parameter0: java.util.concurrent.ExecutorService;
+
+        z0 := @parameter1: boolean;
+
+        i0 := @parameter2: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.nio.ch.ThreadPool: java.util.concurrent.ExecutorService executor> = r1;
+
+        r0.<sun.nio.ch.ThreadPool: boolean isFixed> = z0;
+
+        r0.<sun.nio.ch.ThreadPool: int poolSize> = i0;
+
+        return;
+    }
+
+    java.util.concurrent.ExecutorService executor()
+    {
+        sun.nio.ch.ThreadPool r0;
+        java.util.concurrent.ExecutorService $r1;
+
+        r0 := @this: sun.nio.ch.ThreadPool;
+
+        $r1 = r0.<sun.nio.ch.ThreadPool: java.util.concurrent.ExecutorService executor>;
+
+        return $r1;
+    }
+
+    boolean isFixedThreadPool()
+    {
+        sun.nio.ch.ThreadPool r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.ThreadPool;
+
+        $z0 = r0.<sun.nio.ch.ThreadPool: boolean isFixed>;
+
+        return $z0;
+    }
+
+    int poolSize()
+    {
+        int $i0;
+        sun.nio.ch.ThreadPool r0;
+
+        r0 := @this: sun.nio.ch.ThreadPool;
+
+        $i0 = r0.<sun.nio.ch.ThreadPool: int poolSize>;
+
+        return $i0;
+    }
+
+    static java.util.concurrent.ThreadFactory defaultThreadFactory()
+    {
+        java.util.concurrent.ThreadFactory $r1, $r2;
+        java.lang.SecurityManager $r0;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 != null goto label1;
+
+        $r2 = staticinvoke <sun.nio.ch.ThreadPool$lambda_defaultThreadFactory_0__405: java.util.concurrent.ThreadFactory bootstrap$()>();
+
+        return $r2;
+
+     label1:
+        $r1 = staticinvoke <sun.nio.ch.ThreadPool$lambda_defaultThreadFactory_2__403: java.util.concurrent.ThreadFactory bootstrap$()>();
+
+        return $r1;
+    }
+
+    static sun.nio.ch.ThreadPool getDefault()
+    {
+        sun.nio.ch.ThreadPool $r0;
+
+        $r0 = <sun.nio.ch.ThreadPool$DefaultThreadPoolHolder: sun.nio.ch.ThreadPool defaultThreadPool>;
+
+        return $r0;
+    }
+
+    static sun.nio.ch.ThreadPool createDefault()
+    {
+        sun.nio.ch.ThreadPool $r2;
+        java.lang.Runtime $r3;
+        int $i0, i1;
+        java.util.concurrent.ThreadFactory $r0, r4;
+        java.util.concurrent.ExecutorService $r1;
+
+        $i0 = staticinvoke <sun.nio.ch.ThreadPool: int getDefaultThreadPoolInitialSize()>();
+
+        i1 = $i0;
+
+        if $i0 >= 0 goto label1;
+
+        $r3 = staticinvoke <java.lang.Runtime: java.lang.Runtime getRuntime()>();
+
+        i1 = virtualinvoke $r3.<java.lang.Runtime: int availableProcessors()>();
+
+     label1:
+        $r0 = staticinvoke <sun.nio.ch.ThreadPool: java.util.concurrent.ThreadFactory getDefaultThreadPoolThreadFactory()>();
+
+        r4 = $r0;
+
+        if $r0 != null goto label2;
+
+        r4 = staticinvoke <sun.nio.ch.ThreadPool: java.util.concurrent.ThreadFactory defaultThreadFactory()>();
+
+     label2:
+        $r1 = staticinvoke <java.util.concurrent.Executors: java.util.concurrent.ExecutorService newCachedThreadPool(java.util.concurrent.ThreadFactory)>(r4);
+
+        $r2 = new sun.nio.ch.ThreadPool;
+
+        specialinvoke $r2.<sun.nio.ch.ThreadPool: void <init>(java.util.concurrent.ExecutorService,boolean,int)>($r1, 0, i1);
+
+        return $r2;
+    }
+
+    static sun.nio.ch.ThreadPool create(int, java.util.concurrent.ThreadFactory)
+    {
+        sun.nio.ch.ThreadPool $r2;
+        int i0;
+        java.util.concurrent.ThreadFactory r0;
+        java.lang.IllegalArgumentException $r3;
+        java.util.concurrent.ExecutorService $r1;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: java.util.concurrent.ThreadFactory;
+
+        if i0 > 0 goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("\'nThreads\' must be > 0");
+
+        throw $r3;
+
+     label1:
+        $r1 = staticinvoke <java.util.concurrent.Executors: java.util.concurrent.ExecutorService newFixedThreadPool(int,java.util.concurrent.ThreadFactory)>(i0, r0);
+
+        $r2 = new sun.nio.ch.ThreadPool;
+
+        specialinvoke $r2.<sun.nio.ch.ThreadPool: void <init>(java.util.concurrent.ExecutorService,boolean,int)>($r1, 1, i0);
+
+        return $r2;
+    }
+
+    public static sun.nio.ch.ThreadPool wrap(java.util.concurrent.ExecutorService, int)
+    {
+        java.util.concurrent.ThreadPoolExecutor $r1;
+        java.lang.Runtime $r2;
+        java.lang.NullPointerException $r3;
+        sun.nio.ch.ThreadPool $r4;
+        int $i0, i1;
+        java.util.concurrent.ExecutorService r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.util.concurrent.ExecutorService;
+
+        i1 := @parameter1: int;
+
+        if r0 != null goto label1;
+
+        $r3 = new java.lang.NullPointerException;
+
+        specialinvoke $r3.<java.lang.NullPointerException: void <init>(java.lang.String)>("\'executor\' is null");
+
+        throw $r3;
+
+     label1:
+        $z0 = r0 instanceof java.util.concurrent.ThreadPoolExecutor;
+
+        if $z0 == 0 goto label4;
+
+        $r1 = (java.util.concurrent.ThreadPoolExecutor) r0;
+
+        $i0 = virtualinvoke $r1.<java.util.concurrent.ThreadPoolExecutor: int getMaximumPoolSize()>();
+
+        if $i0 != 2147483647 goto label3;
+
+        if i1 >= 0 goto label2;
+
+        $r2 = staticinvoke <java.lang.Runtime: java.lang.Runtime getRuntime()>();
+
+        i1 = virtualinvoke $r2.<java.lang.Runtime: int availableProcessors()>();
+
+        goto label3;
+
+     label2:
+        i1 = 0;
+
+     label3:
+        goto label5;
+
+     label4:
+        if i1 >= 0 goto label5;
+
+        i1 = 0;
+
+     label5:
+        $r4 = new sun.nio.ch.ThreadPool;
+
+        specialinvoke $r4.<sun.nio.ch.ThreadPool: void <init>(java.util.concurrent.ExecutorService,boolean,int)>(r0, 0, i1);
+
+        return $r4;
+    }
+
+    private static int getDefaultThreadPoolInitialSize()
+    {
+        java.lang.Error $r11;
+        java.lang.NumberFormatException $r3;
+        sun.security.action.GetPropertyAction $r9;
+        int $i0, $i2;
+        java.lang.Object $r1;
+        java.lang.StringBuilder $r6, $r7, $r10;
+        java.lang.String r2, $r8;
+
+        $r9 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r9.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("java.nio.channels.DefaultThreadPool.initialSize");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r9);
+
+        r2 = (java.lang.String) $r1;
+
+        if r2 == null goto label4;
+
+     label1:
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>(r2);
+
+     label2:
+        return $i0;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r11 = new java.lang.Error;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Value of property \'java.nio.channels.DefaultThreadPool.initialSize\' is invalid: ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r3);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r11.<java.lang.Error: void <init>(java.lang.String)>($r8);
+
+        throw $r11;
+
+     label4:
+        $i2 = (int) -1;
+
+        return $i2;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label3;
+    }
+
+    private static java.util.concurrent.ThreadFactory getDefaultThreadPoolThreadFactory()
+    {
+        java.lang.IllegalAccessException $r7;
+        java.lang.Error $r8, $r10, $r12;
+        sun.security.action.GetPropertyAction $r0;
+        java.lang.InstantiationException $r9;
+        java.lang.Object $r1, $r5;
+        java.lang.Class $r4;
+        java.lang.ClassNotFoundException $r11;
+        java.lang.String r2;
+        java.lang.ClassLoader $r3;
+        java.util.concurrent.ThreadFactory $r6;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("java.nio.channels.DefaultThreadPool.threadFactory");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r2 = (java.lang.String) $r1;
+
+        if r2 == null goto label6;
+
+     label1:
+        $r3 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getSystemClassLoader()>();
+
+        $r4 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>(r2, 1, $r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.Class: java.lang.Object newInstance()>();
+
+        $r6 = (java.util.concurrent.ThreadFactory) $r5;
+
+     label2:
+        return $r6;
+
+     label3:
+        $r11 := @caughtexception;
+
+        $r12 = new java.lang.Error;
+
+        specialinvoke $r12.<java.lang.Error: void <init>(java.lang.Throwable)>($r11);
+
+        throw $r12;
+
+     label4:
+        $r9 := @caughtexception;
+
+        $r10 = new java.lang.Error;
+
+        specialinvoke $r10.<java.lang.Error: void <init>(java.lang.Throwable)>($r9);
+
+        throw $r10;
+
+     label5:
+        $r7 := @caughtexception;
+
+        $r8 = new java.lang.Error;
+
+        specialinvoke $r8.<java.lang.Error: void <init>(java.lang.Throwable)>($r7);
+
+        throw $r8;
+
+     label6:
+        return null;
+
+        catch java.lang.ClassNotFoundException from label1 to label2 with label3;
+        catch java.lang.InstantiationException from label1 to label2 with label4;
+        catch java.lang.IllegalAccessException from label1 to label2 with label5;
+    }
+
+    public static java.lang.Thread lambda$defaultThreadFactory$2(java.lang.Runnable)
+    {
+        java.lang.Thread $r3;
+        java.lang.Object $r2;
+        java.security.PrivilegedAction $r1;
+        java.lang.Runnable r0;
+
+        r0 := @parameter0: java.lang.Runnable;
+
+        $r1 = staticinvoke <sun.nio.ch.ThreadPool$lambda_null_1__404: java.security.PrivilegedAction bootstrap$(java.lang.Runnable)>(r0);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        $r3 = (java.lang.Thread) $r2;
+
+        return $r3;
+    }
+
+    public static java.lang.Thread lambda$null$1(java.lang.Runnable)
+    {
+        sun.misc.InnocuousThread $r0;
+        java.lang.Runnable r1;
+
+        r1 := @parameter0: java.lang.Runnable;
+
+        $r0 = new sun.misc.InnocuousThread;
+
+        specialinvoke $r0.<sun.misc.InnocuousThread: void <init>(java.lang.Runnable)>(r1);
+
+        virtualinvoke $r0.<java.lang.Thread: void setDaemon(boolean)>(1);
+
+        return $r0;
+    }
+
+    public static java.lang.Thread lambda$defaultThreadFactory$0(java.lang.Runnable)
+    {
+        java.lang.Runnable r1;
+        java.lang.Thread $r0;
+
+        r1 := @parameter0: java.lang.Runnable;
+
+        $r0 = new java.lang.Thread;
+
+        specialinvoke $r0.<java.lang.Thread: void <init>(java.lang.Runnable)>(r1);
+
+        virtualinvoke $r0.<java.lang.Thread: void setDaemon(boolean)>(1);
+
+        return $r0;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.nio.ch.ThreadPool: java.lang.String DEFAULT_THREAD_POOL_INITIAL_SIZE> = "java.nio.channels.DefaultThreadPool.initialSize";
+
+        <sun.nio.ch.ThreadPool: java.lang.String DEFAULT_THREAD_POOL_THREAD_FACTORY> = "java.nio.channels.DefaultThreadPool.threadFactory";
+
+        return;
+    }
+}

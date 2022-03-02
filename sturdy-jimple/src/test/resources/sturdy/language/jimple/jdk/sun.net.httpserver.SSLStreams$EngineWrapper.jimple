@@ -1,0 +1,508 @@
+class sun.net.httpserver.SSLStreams$EngineWrapper extends java.lang.Object
+{
+    java.nio.channels.SocketChannel chan;
+    javax.net.ssl.SSLEngine engine;
+    java.lang.Object wrapLock;
+    java.lang.Object unwrapLock;
+    java.nio.ByteBuffer unwrap_src;
+    java.nio.ByteBuffer wrap_dst;
+    boolean closed;
+    int u_remaining;
+    static final boolean $assertionsDisabled;
+    final sun.net.httpserver.SSLStreams this$0;
+
+    void <init>(sun.net.httpserver.SSLStreams, java.nio.channels.SocketChannel, javax.net.ssl.SSLEngine) throws java.io.IOException
+    {
+        sun.net.httpserver.SSLStreams$BufType $r6, $r8;
+        java.nio.ByteBuffer $r7, $r9;
+        javax.net.ssl.SSLEngine r3;
+        sun.net.httpserver.SSLStreams r1;
+        java.nio.channels.SocketChannel r2;
+        java.lang.Object $r4, $r5;
+        sun.net.httpserver.SSLStreams$EngineWrapper r0;
+
+        r0 := @this: sun.net.httpserver.SSLStreams$EngineWrapper;
+
+        r1 := @parameter0: sun.net.httpserver.SSLStreams;
+
+        r2 := @parameter1: java.nio.channels.SocketChannel;
+
+        r3 := @parameter2: javax.net.ssl.SSLEngine;
+
+        r0.<sun.net.httpserver.SSLStreams$EngineWrapper: sun.net.httpserver.SSLStreams this$0> = r1;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.net.httpserver.SSLStreams$EngineWrapper: boolean closed> = 0;
+
+        r0.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.channels.SocketChannel chan> = r2;
+
+        r0.<sun.net.httpserver.SSLStreams$EngineWrapper: javax.net.ssl.SSLEngine engine> = r3;
+
+        $r4 = new java.lang.Object;
+
+        specialinvoke $r4.<java.lang.Object: void <init>()>();
+
+        r0.<sun.net.httpserver.SSLStreams$EngineWrapper: java.lang.Object wrapLock> = $r4;
+
+        $r5 = new java.lang.Object;
+
+        specialinvoke $r5.<java.lang.Object: void <init>()>();
+
+        r0.<sun.net.httpserver.SSLStreams$EngineWrapper: java.lang.Object unwrapLock> = $r5;
+
+        $r6 = <sun.net.httpserver.SSLStreams$BufType: sun.net.httpserver.SSLStreams$BufType PACKET>;
+
+        $r7 = staticinvoke <sun.net.httpserver.SSLStreams: java.nio.ByteBuffer access$000(sun.net.httpserver.SSLStreams,sun.net.httpserver.SSLStreams$BufType)>(r1, $r6);
+
+        r0.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.ByteBuffer unwrap_src> = $r7;
+
+        $r8 = <sun.net.httpserver.SSLStreams$BufType: sun.net.httpserver.SSLStreams$BufType PACKET>;
+
+        $r9 = staticinvoke <sun.net.httpserver.SSLStreams: java.nio.ByteBuffer access$000(sun.net.httpserver.SSLStreams,sun.net.httpserver.SSLStreams$BufType)>(r1, $r8);
+
+        r0.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.ByteBuffer wrap_dst> = $r9;
+
+        return;
+    }
+
+    void close() throws java.io.IOException
+    {
+        sun.net.httpserver.SSLStreams$EngineWrapper r0;
+
+        r0 := @this: sun.net.httpserver.SSLStreams$EngineWrapper;
+
+        return;
+    }
+
+    sun.net.httpserver.SSLStreams$WrapperResult wrapAndSend(java.nio.ByteBuffer) throws java.io.IOException
+    {
+        sun.net.httpserver.SSLStreams$EngineWrapper r0;
+        java.nio.ByteBuffer r1;
+        sun.net.httpserver.SSLStreams$WrapperResult $r2;
+
+        r0 := @this: sun.net.httpserver.SSLStreams$EngineWrapper;
+
+        r1 := @parameter0: java.nio.ByteBuffer;
+
+        $r2 = virtualinvoke r0.<sun.net.httpserver.SSLStreams$EngineWrapper: sun.net.httpserver.SSLStreams$WrapperResult wrapAndSendX(java.nio.ByteBuffer,boolean)>(r1, 0);
+
+        return $r2;
+    }
+
+    sun.net.httpserver.SSLStreams$WrapperResult wrapAndSendX(java.nio.ByteBuffer, boolean) throws java.io.IOException
+    {
+        sun.net.httpserver.SSLStreams$BufType $r15;
+        java.nio.ByteBuffer $r4, r5, $r9, $r10, $r11, $r16, $r18, $r22;
+        java.nio.channels.SocketChannel $r12;
+        boolean $z0, $z1, z2;
+        sun.net.httpserver.SSLStreams$WrapperResult $r1;
+        java.lang.Throwable $r20;
+        java.lang.AssertionError $r14;
+        javax.net.ssl.SSLEngine $r21;
+        javax.net.ssl.SSLEngineResult $r8, $r13, $r23, $r24;
+        int $i0, $i1, $i2, $i3, i4;
+        javax.net.ssl.SSLEngineResult$Status $r6, $r7, $r25, $r26;
+        java.io.IOException $r19;
+        sun.net.httpserver.SSLStreams $r2, $r17;
+        java.lang.Object $r3;
+        sun.net.httpserver.SSLStreams$EngineWrapper r0;
+
+        r0 := @this: sun.net.httpserver.SSLStreams$EngineWrapper;
+
+        r5 := @parameter0: java.nio.ByteBuffer;
+
+        z2 := @parameter1: boolean;
+
+        $z0 = r0.<sun.net.httpserver.SSLStreams$EngineWrapper: boolean closed>;
+
+        if $z0 == 0 goto label01;
+
+        if z2 != 0 goto label01;
+
+        $r19 = new java.io.IOException;
+
+        specialinvoke $r19.<java.io.IOException: void <init>(java.lang.String)>("Engine is closed");
+
+        throw $r19;
+
+     label01:
+        $r1 = new sun.net.httpserver.SSLStreams$WrapperResult;
+
+        $r2 = r0.<sun.net.httpserver.SSLStreams$EngineWrapper: sun.net.httpserver.SSLStreams this$0>;
+
+        specialinvoke $r1.<sun.net.httpserver.SSLStreams$WrapperResult: void <init>(sun.net.httpserver.SSLStreams)>($r2);
+
+        $r3 = r0.<sun.net.httpserver.SSLStreams$EngineWrapper: java.lang.Object wrapLock>;
+
+        entermonitor $r3;
+
+     label02:
+        $r4 = r0.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.ByteBuffer wrap_dst>;
+
+        virtualinvoke $r4.<java.nio.ByteBuffer: java.nio.Buffer clear()>();
+
+     label03:
+        $r21 = r0.<sun.net.httpserver.SSLStreams$EngineWrapper: javax.net.ssl.SSLEngine engine>;
+
+        $r22 = r0.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.ByteBuffer wrap_dst>;
+
+        $r23 = virtualinvoke $r21.<javax.net.ssl.SSLEngine: javax.net.ssl.SSLEngineResult wrap(java.nio.ByteBuffer,java.nio.ByteBuffer)>(r5, $r22);
+
+        $r1.<sun.net.httpserver.SSLStreams$WrapperResult: javax.net.ssl.SSLEngineResult result> = $r23;
+
+        $r24 = $r1.<sun.net.httpserver.SSLStreams$WrapperResult: javax.net.ssl.SSLEngineResult result>;
+
+        $r25 = virtualinvoke $r24.<javax.net.ssl.SSLEngineResult: javax.net.ssl.SSLEngineResult$Status getStatus()>();
+
+        $r26 = <javax.net.ssl.SSLEngineResult$Status: javax.net.ssl.SSLEngineResult$Status BUFFER_OVERFLOW>;
+
+        if $r25 != $r26 goto label04;
+
+        $r17 = r0.<sun.net.httpserver.SSLStreams$EngineWrapper: sun.net.httpserver.SSLStreams this$0>;
+
+        $r16 = r0.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.ByteBuffer wrap_dst>;
+
+        $r15 = <sun.net.httpserver.SSLStreams$BufType: sun.net.httpserver.SSLStreams$BufType PACKET>;
+
+        $r18 = staticinvoke <sun.net.httpserver.SSLStreams: java.nio.ByteBuffer access$100(sun.net.httpserver.SSLStreams,java.nio.ByteBuffer,boolean,sun.net.httpserver.SSLStreams$BufType)>($r17, $r16, 1, $r15);
+
+        r0.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.ByteBuffer wrap_dst> = $r18;
+
+     label04:
+        $r6 = <javax.net.ssl.SSLEngineResult$Status: javax.net.ssl.SSLEngineResult$Status BUFFER_OVERFLOW>;
+
+        if $r25 == $r6 goto label03;
+
+        $r7 = <javax.net.ssl.SSLEngineResult$Status: javax.net.ssl.SSLEngineResult$Status CLOSED>;
+
+        if $r25 != $r7 goto label06;
+
+        if z2 != 0 goto label06;
+
+        r0.<sun.net.httpserver.SSLStreams$EngineWrapper: boolean closed> = 1;
+
+        exitmonitor $r3;
+
+     label05:
+        return $r1;
+
+     label06:
+        $r8 = $r1.<sun.net.httpserver.SSLStreams$WrapperResult: javax.net.ssl.SSLEngineResult result>;
+
+        $i0 = virtualinvoke $r8.<javax.net.ssl.SSLEngineResult: int bytesProduced()>();
+
+        if $i0 <= 0 goto label08;
+
+        $r9 = r0.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.ByteBuffer wrap_dst>;
+
+        virtualinvoke $r9.<java.nio.ByteBuffer: java.nio.Buffer flip()>();
+
+        $r10 = r0.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.ByteBuffer wrap_dst>;
+
+        $i1 = virtualinvoke $r10.<java.nio.ByteBuffer: int remaining()>();
+
+        i4 = $i1;
+
+        $z1 = <sun.net.httpserver.SSLStreams$EngineWrapper: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label07;
+
+        $r13 = $r1.<sun.net.httpserver.SSLStreams$WrapperResult: javax.net.ssl.SSLEngineResult result>;
+
+        $i3 = virtualinvoke $r13.<javax.net.ssl.SSLEngineResult: int bytesProduced()>();
+
+        if $i1 == $i3 goto label07;
+
+        $r14 = new java.lang.AssertionError;
+
+        specialinvoke $r14.<java.lang.AssertionError: void <init>()>();
+
+        throw $r14;
+
+     label07:
+        if i4 <= 0 goto label08;
+
+        $r12 = r0.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.channels.SocketChannel chan>;
+
+        $r11 = r0.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.ByteBuffer wrap_dst>;
+
+        $i2 = virtualinvoke $r12.<java.nio.channels.SocketChannel: int write(java.nio.ByteBuffer)>($r11);
+
+        i4 = i4 - $i2;
+
+        goto label07;
+
+     label08:
+        exitmonitor $r3;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r20 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label11:
+        throw $r20;
+
+     label12:
+        return $r1;
+
+        catch java.lang.Throwable from label02 to label05 with label10;
+        catch java.lang.Throwable from label06 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    sun.net.httpserver.SSLStreams$WrapperResult recvAndUnwrap(java.nio.ByteBuffer) throws java.io.IOException
+    {
+        sun.net.httpserver.SSLStreams$BufType $r17, $r27;
+        java.nio.ByteBuffer r3, $r4, $r6, $r7, $r15, $r16, $r18, $r20, $r21, $r22, $r23, $r24, $r25, $r26, $r28, $r30, $r31, $r33, $r35, $r36;
+        java.nio.channels.SocketChannel $r32;
+        boolean $z0, z1;
+        sun.net.httpserver.SSLStreams$WrapperResult $r41;
+        java.lang.Throwable $r38;
+        javax.net.ssl.SSLEngine $r8;
+        javax.net.ssl.SSLEngineResult $r9, $r10;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i8;
+        javax.net.ssl.SSLEngineResult$Status $r11, $r12, $r13, $r14, r39, $r40;
+        java.io.IOException $r42, $r43;
+        sun.net.httpserver.SSLStreams $r2, $r19, $r29;
+        java.lang.Object $r5;
+        sun.net.httpserver.SSLStreams$EngineWrapper r1;
+
+        r1 := @this: sun.net.httpserver.SSLStreams$EngineWrapper;
+
+        r3 := @parameter0: java.nio.ByteBuffer;
+
+        r39 = <javax.net.ssl.SSLEngineResult$Status: javax.net.ssl.SSLEngineResult$Status OK>;
+
+        $r41 = new sun.net.httpserver.SSLStreams$WrapperResult;
+
+        $r2 = r1.<sun.net.httpserver.SSLStreams$EngineWrapper: sun.net.httpserver.SSLStreams this$0>;
+
+        specialinvoke $r41.<sun.net.httpserver.SSLStreams$WrapperResult: void <init>(sun.net.httpserver.SSLStreams)>($r2);
+
+        $r41.<sun.net.httpserver.SSLStreams$WrapperResult: java.nio.ByteBuffer buf> = r3;
+
+        $z0 = r1.<sun.net.httpserver.SSLStreams$EngineWrapper: boolean closed>;
+
+        if $z0 == 0 goto label01;
+
+        $r42 = new java.io.IOException;
+
+        specialinvoke $r42.<java.io.IOException: void <init>(java.lang.String)>("Engine is closed");
+
+        throw $r42;
+
+     label01:
+        $i0 = r1.<sun.net.httpserver.SSLStreams$EngineWrapper: int u_remaining>;
+
+        if $i0 <= 0 goto label02;
+
+        $r35 = r1.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.ByteBuffer unwrap_src>;
+
+        virtualinvoke $r35.<java.nio.ByteBuffer: java.nio.ByteBuffer compact()>();
+
+        $r36 = r1.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.ByteBuffer unwrap_src>;
+
+        virtualinvoke $r36.<java.nio.ByteBuffer: java.nio.Buffer flip()>();
+
+        z1 = 0;
+
+        goto label03;
+
+     label02:
+        $r4 = r1.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.ByteBuffer unwrap_src>;
+
+        virtualinvoke $r4.<java.nio.ByteBuffer: java.nio.Buffer clear()>();
+
+        z1 = 1;
+
+     label03:
+        $r5 = r1.<sun.net.httpserver.SSLStreams$EngineWrapper: java.lang.Object unwrapLock>;
+
+        entermonitor $r5;
+
+     label04:
+        if z1 == 0 goto label07;
+
+     label05:
+        $r32 = r1.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.channels.SocketChannel chan>;
+
+        $r31 = r1.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.ByteBuffer unwrap_src>;
+
+        $i6 = virtualinvoke $r32.<java.nio.channels.SocketChannel: int read(java.nio.ByteBuffer)>($r31);
+
+        if $i6 == 0 goto label05;
+
+        $i8 = (int) -1;
+
+        if $i6 != $i8 goto label06;
+
+        $r43 = new java.io.IOException;
+
+        specialinvoke $r43.<java.io.IOException: void <init>(java.lang.String)>("connection closed for reading");
+
+        throw $r43;
+
+     label06:
+        $r33 = r1.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.ByteBuffer unwrap_src>;
+
+        virtualinvoke $r33.<java.nio.ByteBuffer: java.nio.Buffer flip()>();
+
+     label07:
+        $r8 = r1.<sun.net.httpserver.SSLStreams$EngineWrapper: javax.net.ssl.SSLEngine engine>;
+
+        $r7 = r1.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.ByteBuffer unwrap_src>;
+
+        $r6 = $r41.<sun.net.httpserver.SSLStreams$WrapperResult: java.nio.ByteBuffer buf>;
+
+        $r9 = virtualinvoke $r8.<javax.net.ssl.SSLEngine: javax.net.ssl.SSLEngineResult unwrap(java.nio.ByteBuffer,java.nio.ByteBuffer)>($r7, $r6);
+
+        $r41.<sun.net.httpserver.SSLStreams$WrapperResult: javax.net.ssl.SSLEngineResult result> = $r9;
+
+        $r10 = $r41.<sun.net.httpserver.SSLStreams$WrapperResult: javax.net.ssl.SSLEngineResult result>;
+
+        $r11 = virtualinvoke $r10.<javax.net.ssl.SSLEngineResult: javax.net.ssl.SSLEngineResult$Status getStatus()>();
+
+        $r12 = <javax.net.ssl.SSLEngineResult$Status: javax.net.ssl.SSLEngineResult$Status BUFFER_UNDERFLOW>;
+
+        if $r11 != $r12 goto label10;
+
+        $r21 = r1.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.ByteBuffer unwrap_src>;
+
+        $i2 = virtualinvoke $r21.<java.nio.ByteBuffer: int limit()>();
+
+        $r22 = r1.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.ByteBuffer unwrap_src>;
+
+        $i3 = virtualinvoke $r22.<java.nio.ByteBuffer: int capacity()>();
+
+        if $i2 != $i3 goto label08;
+
+        $r29 = r1.<sun.net.httpserver.SSLStreams$EngineWrapper: sun.net.httpserver.SSLStreams this$0>;
+
+        $r28 = r1.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.ByteBuffer unwrap_src>;
+
+        $r27 = <sun.net.httpserver.SSLStreams$BufType: sun.net.httpserver.SSLStreams$BufType PACKET>;
+
+        $r30 = staticinvoke <sun.net.httpserver.SSLStreams: java.nio.ByteBuffer access$100(sun.net.httpserver.SSLStreams,java.nio.ByteBuffer,boolean,sun.net.httpserver.SSLStreams$BufType)>($r29, $r28, 0, $r27);
+
+        r1.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.ByteBuffer unwrap_src> = $r30;
+
+        goto label09;
+
+     label08:
+        $r24 = r1.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.ByteBuffer unwrap_src>;
+
+        $r23 = r1.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.ByteBuffer unwrap_src>;
+
+        $i4 = virtualinvoke $r23.<java.nio.ByteBuffer: int limit()>();
+
+        virtualinvoke $r24.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i4);
+
+        $r26 = r1.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.ByteBuffer unwrap_src>;
+
+        $r25 = r1.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.ByteBuffer unwrap_src>;
+
+        $i5 = virtualinvoke $r25.<java.nio.ByteBuffer: int capacity()>();
+
+        virtualinvoke $r26.<java.nio.ByteBuffer: java.nio.Buffer limit(int)>($i5);
+
+     label09:
+        z1 = 1;
+
+        goto label13;
+
+     label10:
+        $r13 = <javax.net.ssl.SSLEngineResult$Status: javax.net.ssl.SSLEngineResult$Status BUFFER_OVERFLOW>;
+
+        if $r11 != $r13 goto label11;
+
+        $r19 = r1.<sun.net.httpserver.SSLStreams$EngineWrapper: sun.net.httpserver.SSLStreams this$0>;
+
+        $r18 = $r41.<sun.net.httpserver.SSLStreams$WrapperResult: java.nio.ByteBuffer buf>;
+
+        $r17 = <sun.net.httpserver.SSLStreams$BufType: sun.net.httpserver.SSLStreams$BufType APPLICATION>;
+
+        $r20 = staticinvoke <sun.net.httpserver.SSLStreams: java.nio.ByteBuffer access$100(sun.net.httpserver.SSLStreams,java.nio.ByteBuffer,boolean,sun.net.httpserver.SSLStreams$BufType)>($r19, $r18, 1, $r17);
+
+        $r41.<sun.net.httpserver.SSLStreams$WrapperResult: java.nio.ByteBuffer buf> = $r20;
+
+        z1 = 0;
+
+        goto label13;
+
+     label11:
+        $r14 = <javax.net.ssl.SSLEngineResult$Status: javax.net.ssl.SSLEngineResult$Status CLOSED>;
+
+        if $r11 != $r14 goto label13;
+
+        r1.<sun.net.httpserver.SSLStreams$EngineWrapper: boolean closed> = 1;
+
+        $r16 = $r41.<sun.net.httpserver.SSLStreams$WrapperResult: java.nio.ByteBuffer buf>;
+
+        virtualinvoke $r16.<java.nio.ByteBuffer: java.nio.Buffer flip()>();
+
+        exitmonitor $r5;
+
+     label12:
+        return $r41;
+
+     label13:
+        $r40 = <javax.net.ssl.SSLEngineResult$Status: javax.net.ssl.SSLEngineResult$Status OK>;
+
+        if $r11 != $r40 goto label04;
+
+        exitmonitor $r5;
+
+     label14:
+        goto label17;
+
+     label15:
+        $r38 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label16:
+        throw $r38;
+
+     label17:
+        $r15 = r1.<sun.net.httpserver.SSLStreams$EngineWrapper: java.nio.ByteBuffer unwrap_src>;
+
+        $i1 = virtualinvoke $r15.<java.nio.ByteBuffer: int remaining()>();
+
+        r1.<sun.net.httpserver.SSLStreams$EngineWrapper: int u_remaining> = $i1;
+
+        return $r41;
+
+        catch java.lang.Throwable from label04 to label12 with label15;
+        catch java.lang.Throwable from label13 to label14 with label15;
+        catch java.lang.Throwable from label15 to label16 with label15;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        $r0 = class "Lsun/net/httpserver/SSLStreams;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.net.httpserver.SSLStreams$EngineWrapper: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

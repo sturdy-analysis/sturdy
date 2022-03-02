@@ -1,0 +1,848 @@
+public class sun.security.x509.DistributionPoint extends java.lang.Object
+{
+    public static final int KEY_COMPROMISE;
+    public static final int CA_COMPROMISE;
+    public static final int AFFILIATION_CHANGED;
+    public static final int SUPERSEDED;
+    public static final int CESSATION_OF_OPERATION;
+    public static final int CERTIFICATE_HOLD;
+    public static final int PRIVILEGE_WITHDRAWN;
+    public static final int AA_COMPROMISE;
+    private static final java.lang.String[] REASON_STRINGS;
+    private static final byte TAG_DIST_PT;
+    private static final byte TAG_REASONS;
+    private static final byte TAG_ISSUER;
+    private static final byte TAG_FULL_NAME;
+    private static final byte TAG_REL_NAME;
+    private sun.security.x509.GeneralNames fullName;
+    private sun.security.x509.RDN relativeName;
+    private boolean[] reasonFlags;
+    private sun.security.x509.GeneralNames crlIssuer;
+    private volatile int hashCode;
+
+    public void <init>(sun.security.x509.GeneralNames, boolean[], sun.security.x509.GeneralNames)
+    {
+        sun.security.x509.DistributionPoint r0;
+        boolean[] r2;
+        sun.security.x509.GeneralNames r1, r3;
+        java.lang.IllegalArgumentException $r4;
+
+        r0 := @this: sun.security.x509.DistributionPoint;
+
+        r1 := @parameter0: sun.security.x509.GeneralNames;
+
+        r2 := @parameter1: boolean[];
+
+        r3 := @parameter2: sun.security.x509.GeneralNames;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        if r1 != null goto label1;
+
+        if r3 != null goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("fullName and crlIssuer may not both be null");
+
+        throw $r4;
+
+     label1:
+        r0.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames fullName> = r1;
+
+        r0.<sun.security.x509.DistributionPoint: boolean[] reasonFlags> = r2;
+
+        r0.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames crlIssuer> = r3;
+
+        return;
+    }
+
+    public void <init>(sun.security.x509.RDN, boolean[], sun.security.x509.GeneralNames)
+    {
+        sun.security.x509.DistributionPoint r0;
+        boolean[] r2;
+        sun.security.x509.GeneralNames r3;
+        java.lang.IllegalArgumentException $r4;
+        sun.security.x509.RDN r1;
+
+        r0 := @this: sun.security.x509.DistributionPoint;
+
+        r1 := @parameter0: sun.security.x509.RDN;
+
+        r2 := @parameter1: boolean[];
+
+        r3 := @parameter2: sun.security.x509.GeneralNames;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        if r1 != null goto label1;
+
+        if r3 != null goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("relativeName and crlIssuer may not both be null");
+
+        throw $r4;
+
+     label1:
+        r0.<sun.security.x509.DistributionPoint: sun.security.x509.RDN relativeName> = r1;
+
+        r0.<sun.security.x509.DistributionPoint: boolean[] reasonFlags> = r2;
+
+        r0.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames crlIssuer> = r3;
+
+        return;
+    }
+
+    public void <init>(sun.security.util.DerValue) throws java.io.IOException
+    {
+        byte $b0;
+        sun.security.x509.RDN $r5, $r20, $r30;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        sun.security.util.DerValue r1, $r9, $r22;
+        sun.security.util.BitArray $r15;
+        sun.security.util.DerInputStream $r2, $r7, $r8, $r21;
+        int $i1, $i2;
+        sun.security.x509.DistributionPoint r0;
+        boolean[] $r14, $r16;
+        java.io.IOException $r27, $r28, $r31, $r32, $r33, $r35, $r36;
+        sun.security.x509.GeneralNames $r3, $r4, $r11, $r18, $r29, $r34;
+
+        r0 := @this: sun.security.x509.DistributionPoint;
+
+        r1 := @parameter0: sun.security.util.DerValue;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $b0 = r1.<sun.security.util.DerValue: byte tag>;
+
+        $i2 = (int) $b0;
+
+        if $i2 == 48 goto label01;
+
+        $r27 = new java.io.IOException;
+
+        specialinvoke $r27.<java.io.IOException: void <init>(java.lang.String)>("Invalid encoding of DistributionPoint.");
+
+        throw $r27;
+
+     label01:
+        $r2 = r1.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        if $r2 == null goto label13;
+
+        $r7 = r1.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $i1 = virtualinvoke $r7.<sun.security.util.DerInputStream: int available()>();
+
+        if $i1 == 0 goto label13;
+
+        $r8 = r1.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $r9 = virtualinvoke $r8.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+        $z0 = virtualinvoke $r9.<sun.security.util.DerValue: boolean isContextSpecific(byte)>(0);
+
+        if $z0 == 0 goto label07;
+
+        $z5 = virtualinvoke $r9.<sun.security.util.DerValue: boolean isConstructed()>();
+
+        if $z5 == 0 goto label07;
+
+        $r18 = r0.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames fullName>;
+
+        if $r18 != null goto label02;
+
+        $r20 = r0.<sun.security.x509.DistributionPoint: sun.security.x509.RDN relativeName>;
+
+        if $r20 == null goto label03;
+
+     label02:
+        $r28 = new java.io.IOException;
+
+        specialinvoke $r28.<java.io.IOException: void <init>(java.lang.String)>("Duplicate DistributionPointName in DistributionPoint.");
+
+        throw $r28;
+
+     label03:
+        $r21 = $r9.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $r22 = virtualinvoke $r21.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+        $z6 = virtualinvoke $r22.<sun.security.util.DerValue: boolean isContextSpecific(byte)>(0);
+
+        if $z6 == 0 goto label04;
+
+        $z9 = virtualinvoke $r22.<sun.security.util.DerValue: boolean isConstructed()>();
+
+        if $z9 == 0 goto label04;
+
+        virtualinvoke $r22.<sun.security.util.DerValue: void resetTag(byte)>(48);
+
+        $r29 = new sun.security.x509.GeneralNames;
+
+        specialinvoke $r29.<sun.security.x509.GeneralNames: void <init>(sun.security.util.DerValue)>($r22);
+
+        r0.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames fullName> = $r29;
+
+        goto label06;
+
+     label04:
+        $z7 = virtualinvoke $r22.<sun.security.util.DerValue: boolean isContextSpecific(byte)>(1);
+
+        if $z7 == 0 goto label05;
+
+        $z8 = virtualinvoke $r22.<sun.security.util.DerValue: boolean isConstructed()>();
+
+        if $z8 == 0 goto label05;
+
+        virtualinvoke $r22.<sun.security.util.DerValue: void resetTag(byte)>(49);
+
+        $r30 = new sun.security.x509.RDN;
+
+        specialinvoke $r30.<sun.security.x509.RDN: void <init>(sun.security.util.DerValue)>($r22);
+
+        r0.<sun.security.x509.DistributionPoint: sun.security.x509.RDN relativeName> = $r30;
+
+        goto label06;
+
+     label05:
+        $r31 = new java.io.IOException;
+
+        specialinvoke $r31.<java.io.IOException: void <init>(java.lang.String)>("Invalid DistributionPointName in DistributionPoint");
+
+        throw $r31;
+
+     label06:
+        goto label12;
+
+     label07:
+        $z1 = virtualinvoke $r9.<sun.security.util.DerValue: boolean isContextSpecific(byte)>(1);
+
+        if $z1 == 0 goto label09;
+
+        $z4 = virtualinvoke $r9.<sun.security.util.DerValue: boolean isConstructed()>();
+
+        if $z4 != 0 goto label09;
+
+        $r14 = r0.<sun.security.x509.DistributionPoint: boolean[] reasonFlags>;
+
+        if $r14 == null goto label08;
+
+        $r32 = new java.io.IOException;
+
+        specialinvoke $r32.<java.io.IOException: void <init>(java.lang.String)>("Duplicate Reasons in DistributionPoint.");
+
+        throw $r32;
+
+     label08:
+        virtualinvoke $r9.<sun.security.util.DerValue: void resetTag(byte)>(3);
+
+        $r15 = virtualinvoke $r9.<sun.security.util.DerValue: sun.security.util.BitArray getUnalignedBitString()>();
+
+        $r16 = virtualinvoke $r15.<sun.security.util.BitArray: boolean[] toBooleanArray()>();
+
+        r0.<sun.security.x509.DistributionPoint: boolean[] reasonFlags> = $r16;
+
+        goto label12;
+
+     label09:
+        $z2 = virtualinvoke $r9.<sun.security.util.DerValue: boolean isContextSpecific(byte)>(2);
+
+        if $z2 == 0 goto label11;
+
+        $z3 = virtualinvoke $r9.<sun.security.util.DerValue: boolean isConstructed()>();
+
+        if $z3 == 0 goto label11;
+
+        $r11 = r0.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames crlIssuer>;
+
+        if $r11 == null goto label10;
+
+        $r33 = new java.io.IOException;
+
+        specialinvoke $r33.<java.io.IOException: void <init>(java.lang.String)>("Duplicate CRLIssuer in DistributionPoint.");
+
+        throw $r33;
+
+     label10:
+        virtualinvoke $r9.<sun.security.util.DerValue: void resetTag(byte)>(48);
+
+        $r34 = new sun.security.x509.GeneralNames;
+
+        specialinvoke $r34.<sun.security.x509.GeneralNames: void <init>(sun.security.util.DerValue)>($r9);
+
+        r0.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames crlIssuer> = $r34;
+
+        goto label12;
+
+     label11:
+        $r35 = new java.io.IOException;
+
+        specialinvoke $r35.<java.io.IOException: void <init>(java.lang.String)>("Invalid encoding of DistributionPoint.");
+
+        throw $r35;
+
+     label12:
+        goto label01;
+
+     label13:
+        $r3 = r0.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames crlIssuer>;
+
+        if $r3 != null goto label14;
+
+        $r4 = r0.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames fullName>;
+
+        if $r4 != null goto label14;
+
+        $r5 = r0.<sun.security.x509.DistributionPoint: sun.security.x509.RDN relativeName>;
+
+        if $r5 != null goto label14;
+
+        $r36 = new java.io.IOException;
+
+        specialinvoke $r36.<java.io.IOException: void <init>(java.lang.String)>("One of fullName, relativeName,  and crlIssuer has to be set");
+
+        throw $r36;
+
+     label14:
+        return;
+    }
+
+    public sun.security.x509.GeneralNames getFullName()
+    {
+        sun.security.x509.GeneralNames $r1;
+        sun.security.x509.DistributionPoint r0;
+
+        r0 := @this: sun.security.x509.DistributionPoint;
+
+        $r1 = r0.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames fullName>;
+
+        return $r1;
+    }
+
+    public sun.security.x509.RDN getRelativeName()
+    {
+        sun.security.x509.DistributionPoint r0;
+        sun.security.x509.RDN $r1;
+
+        r0 := @this: sun.security.x509.DistributionPoint;
+
+        $r1 = r0.<sun.security.x509.DistributionPoint: sun.security.x509.RDN relativeName>;
+
+        return $r1;
+    }
+
+    public boolean[] getReasonFlags()
+    {
+        boolean[] $r1;
+        sun.security.x509.DistributionPoint r0;
+
+        r0 := @this: sun.security.x509.DistributionPoint;
+
+        $r1 = r0.<sun.security.x509.DistributionPoint: boolean[] reasonFlags>;
+
+        return $r1;
+    }
+
+    public sun.security.x509.GeneralNames getCRLIssuer()
+    {
+        sun.security.x509.GeneralNames $r1;
+        sun.security.x509.DistributionPoint r0;
+
+        r0 := @this: sun.security.x509.DistributionPoint;
+
+        $r1 = r0.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames crlIssuer>;
+
+        return $r1;
+    }
+
+    public void encode(sun.security.util.DerOutputStream) throws java.io.IOException
+    {
+        byte $b0, $b1, $b2, $b3, $b4;
+        sun.security.x509.RDN $r5, $r14, $r17;
+        sun.security.x509.DistributionPoint r1;
+        boolean[] $r12, $r18;
+        sun.security.util.BitArray $r11;
+        sun.security.util.DerOutputStream $r0, $r3, r7, $r8, $r10, $r13, $r15;
+        sun.security.x509.GeneralNames $r2, $r4, $r6, $r9, $r16;
+
+        r1 := @this: sun.security.x509.DistributionPoint;
+
+        r7 := @parameter0: sun.security.util.DerOutputStream;
+
+        $r0 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r0.<sun.security.util.DerOutputStream: void <init>()>();
+
+        $r2 = r1.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames fullName>;
+
+        if $r2 != null goto label1;
+
+        $r17 = r1.<sun.security.x509.DistributionPoint: sun.security.x509.RDN relativeName>;
+
+        if $r17 == null goto label4;
+
+     label1:
+        $r3 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r3.<sun.security.util.DerOutputStream: void <init>()>();
+
+        $r4 = r1.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames fullName>;
+
+        if $r4 == null goto label2;
+
+        $r15 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r15.<sun.security.util.DerOutputStream: void <init>()>();
+
+        $r16 = r1.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames fullName>;
+
+        virtualinvoke $r16.<sun.security.x509.GeneralNames: void encode(sun.security.util.DerOutputStream)>($r15);
+
+        $b3 = staticinvoke <sun.security.util.DerValue: byte createTag(byte,boolean,byte)>(-128, 1, 0);
+
+        virtualinvoke $r3.<sun.security.util.DerOutputStream: void writeImplicit(byte,sun.security.util.DerOutputStream)>($b3, $r15);
+
+        goto label3;
+
+     label2:
+        $r5 = r1.<sun.security.x509.DistributionPoint: sun.security.x509.RDN relativeName>;
+
+        if $r5 == null goto label3;
+
+        $r13 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r13.<sun.security.util.DerOutputStream: void <init>()>();
+
+        $r14 = r1.<sun.security.x509.DistributionPoint: sun.security.x509.RDN relativeName>;
+
+        virtualinvoke $r14.<sun.security.x509.RDN: void encode(sun.security.util.DerOutputStream)>($r13);
+
+        $b2 = staticinvoke <sun.security.util.DerValue: byte createTag(byte,boolean,byte)>(-128, 1, 1);
+
+        virtualinvoke $r3.<sun.security.util.DerOutputStream: void writeImplicit(byte,sun.security.util.DerOutputStream)>($b2, $r13);
+
+     label3:
+        $b4 = staticinvoke <sun.security.util.DerValue: byte createTag(byte,boolean,byte)>(-128, 1, 0);
+
+        virtualinvoke $r0.<sun.security.util.DerOutputStream: void write(byte,sun.security.util.DerOutputStream)>($b4, $r3);
+
+     label4:
+        $r18 = r1.<sun.security.x509.DistributionPoint: boolean[] reasonFlags>;
+
+        if $r18 == null goto label5;
+
+        $r10 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r10.<sun.security.util.DerOutputStream: void <init>()>();
+
+        $r11 = new sun.security.util.BitArray;
+
+        $r12 = r1.<sun.security.x509.DistributionPoint: boolean[] reasonFlags>;
+
+        specialinvoke $r11.<sun.security.util.BitArray: void <init>(boolean[])>($r12);
+
+        virtualinvoke $r10.<sun.security.util.DerOutputStream: void putTruncatedUnalignedBitString(sun.security.util.BitArray)>($r11);
+
+        $b1 = staticinvoke <sun.security.util.DerValue: byte createTag(byte,boolean,byte)>(-128, 0, 1);
+
+        virtualinvoke $r0.<sun.security.util.DerOutputStream: void writeImplicit(byte,sun.security.util.DerOutputStream)>($b1, $r10);
+
+     label5:
+        $r6 = r1.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames crlIssuer>;
+
+        if $r6 == null goto label6;
+
+        $r8 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r8.<sun.security.util.DerOutputStream: void <init>()>();
+
+        $r9 = r1.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames crlIssuer>;
+
+        virtualinvoke $r9.<sun.security.x509.GeneralNames: void encode(sun.security.util.DerOutputStream)>($r8);
+
+        $b0 = staticinvoke <sun.security.util.DerValue: byte createTag(byte,boolean,byte)>(-128, 1, 2);
+
+        virtualinvoke $r0.<sun.security.util.DerOutputStream: void writeImplicit(byte,sun.security.util.DerOutputStream)>($b0, $r8);
+
+     label6:
+        virtualinvoke r7.<sun.security.util.DerOutputStream: void write(byte,sun.security.util.DerOutputStream)>(48, $r0);
+
+        return;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        sun.security.x509.RDN $r5, $r6;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        sun.security.x509.DistributionPoint r0, r2;
+        boolean[] $r9, $r10;
+        java.lang.Object r1;
+        sun.security.x509.GeneralNames $r3, $r4, $r7, $r8;
+
+        r0 := @this: sun.security.x509.DistributionPoint;
+
+        r1 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        $z0 = r1 instanceof sun.security.x509.DistributionPoint;
+
+        if $z0 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        r2 = (sun.security.x509.DistributionPoint) r1;
+
+        $r4 = r0.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames fullName>;
+
+        $r3 = r2.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames fullName>;
+
+        $z1 = staticinvoke <java.util.Objects: boolean equals(java.lang.Object,java.lang.Object)>($r4, $r3);
+
+        if $z1 == 0 goto label3;
+
+        $r6 = r0.<sun.security.x509.DistributionPoint: sun.security.x509.RDN relativeName>;
+
+        $r5 = r2.<sun.security.x509.DistributionPoint: sun.security.x509.RDN relativeName>;
+
+        $z2 = staticinvoke <java.util.Objects: boolean equals(java.lang.Object,java.lang.Object)>($r6, $r5);
+
+        if $z2 == 0 goto label3;
+
+        $r8 = r0.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames crlIssuer>;
+
+        $r7 = r2.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames crlIssuer>;
+
+        $z3 = staticinvoke <java.util.Objects: boolean equals(java.lang.Object,java.lang.Object)>($r8, $r7);
+
+        if $z3 == 0 goto label3;
+
+        $r10 = r0.<sun.security.x509.DistributionPoint: boolean[] reasonFlags>;
+
+        $r9 = r2.<sun.security.x509.DistributionPoint: boolean[] reasonFlags>;
+
+        $z4 = staticinvoke <java.util.Arrays: boolean equals(boolean[],boolean[])>($r10, $r9);
+
+        if $z4 == 0 goto label3;
+
+        $z5 = 1;
+
+        goto label4;
+
+     label3:
+        $z5 = 0;
+
+     label4:
+        return $z5;
+    }
+
+    public int hashCode()
+    {
+        int $i0, $i1, $i2, $i3, i4, i5;
+        sun.security.x509.RDN $r2, $r8;
+        boolean $z0;
+        sun.security.x509.DistributionPoint r0;
+        boolean[] $r4, $r5, $r6;
+        sun.security.x509.GeneralNames $r1, $r3, $r7, $r9;
+
+        r0 := @this: sun.security.x509.DistributionPoint;
+
+        i4 = r0.<sun.security.x509.DistributionPoint: int hashCode>;
+
+        if i4 != 0 goto label7;
+
+        i4 = 1;
+
+        $r1 = r0.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames fullName>;
+
+        if $r1 == null goto label1;
+
+        $r9 = r0.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames fullName>;
+
+        $i3 = virtualinvoke $r9.<sun.security.x509.GeneralNames: int hashCode()>();
+
+        i4 = 1 + $i3;
+
+     label1:
+        $r2 = r0.<sun.security.x509.DistributionPoint: sun.security.x509.RDN relativeName>;
+
+        if $r2 == null goto label2;
+
+        $r8 = r0.<sun.security.x509.DistributionPoint: sun.security.x509.RDN relativeName>;
+
+        $i2 = virtualinvoke $r8.<sun.security.x509.RDN: int hashCode()>();
+
+        i4 = i4 + $i2;
+
+     label2:
+        $r3 = r0.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames crlIssuer>;
+
+        if $r3 == null goto label3;
+
+        $r7 = r0.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames crlIssuer>;
+
+        $i1 = virtualinvoke $r7.<sun.security.x509.GeneralNames: int hashCode()>();
+
+        i4 = i4 + $i1;
+
+     label3:
+        $r4 = r0.<sun.security.x509.DistributionPoint: boolean[] reasonFlags>;
+
+        if $r4 == null goto label6;
+
+        i5 = 0;
+
+     label4:
+        $r5 = r0.<sun.security.x509.DistributionPoint: boolean[] reasonFlags>;
+
+        $i0 = lengthof $r5;
+
+        if i5 >= $i0 goto label6;
+
+        $r6 = r0.<sun.security.x509.DistributionPoint: boolean[] reasonFlags>;
+
+        $z0 = $r6[i5];
+
+        if $z0 == 0 goto label5;
+
+        i4 = i4 + i5;
+
+     label5:
+        i5 = i5 + 1;
+
+        goto label4;
+
+     label6:
+        r0.<sun.security.x509.DistributionPoint: int hashCode> = i4;
+
+     label7:
+        return i4;
+    }
+
+    private static java.lang.String reasonToString(int)
+    {
+        java.lang.String[] $r4, $r5;
+        int i0, $i1;
+        java.lang.StringBuilder $r0, $r1, $r2;
+        java.lang.String $r3, $r6;
+
+        i0 := @parameter0: int;
+
+        if i0 <= 0 goto label1;
+
+        $r4 = <sun.security.x509.DistributionPoint: java.lang.String[] REASON_STRINGS>;
+
+        $i1 = lengthof $r4;
+
+        if i0 >= $i1 goto label1;
+
+        $r5 = <sun.security.x509.DistributionPoint: java.lang.String[] REASON_STRINGS>;
+
+        $r6 = $r5[i0];
+
+        return $r6;
+
+     label1:
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown reason ");
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+    }
+
+    public java.lang.String toString()
+    {
+        sun.security.x509.RDN $r3, $r23;
+        boolean $z0;
+        java.lang.StringBuilder $r0, $r7, $r8, $r10, $r11, $r15, $r16, $r18, $r19, $r21, $r22, $r24, $r25, $r27, $r28, $r30, $r31;
+        int $i0, i1;
+        java.lang.String $r6, $r12, $r17, $r20, $r26, $r32;
+        sun.security.x509.DistributionPoint r1;
+        boolean[] $r4, $r13, $r14;
+        sun.security.x509.GeneralNames $r2, $r5, $r9, $r29;
+
+        r1 := @this: sun.security.x509.DistributionPoint;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = r1.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames fullName>;
+
+        if $r2 == null goto label1;
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DistributionPoint:\n     ");
+
+        $r29 = r1.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames fullName>;
+
+        $r30 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r29);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r32);
+
+     label1:
+        $r3 = r1.<sun.security.x509.DistributionPoint: sun.security.x509.RDN relativeName>;
+
+        if $r3 == null goto label2;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DistributionPoint:\n     ");
+
+        $r23 = r1.<sun.security.x509.DistributionPoint: sun.security.x509.RDN relativeName>;
+
+        $r24 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r23);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r26);
+
+     label2:
+        $r4 = r1.<sun.security.x509.DistributionPoint: boolean[] reasonFlags>;
+
+        if $r4 == null goto label5;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("   ReasonFlags:\n");
+
+        i1 = 0;
+
+     label3:
+        $r13 = r1.<sun.security.x509.DistributionPoint: boolean[] reasonFlags>;
+
+        $i0 = lengthof $r13;
+
+        if i1 >= $i0 goto label5;
+
+        $r14 = r1.<sun.security.x509.DistributionPoint: boolean[] reasonFlags>;
+
+        $z0 = $r14[i1];
+
+        if $z0 == 0 goto label4;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("    ");
+
+        $r17 = staticinvoke <sun.security.x509.DistributionPoint: java.lang.String reasonToString(int)>(i1);
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+     label4:
+        i1 = i1 + 1;
+
+        goto label3;
+
+     label5:
+        $r5 = r1.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames crlIssuer>;
+
+        if $r5 == null goto label6;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("   CRLIssuer:");
+
+        $r9 = r1.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames crlIssuer>;
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+     label6:
+        $r6 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r6;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.String[] $r0;
+
+        <sun.security.x509.DistributionPoint: byte TAG_REL_NAME> = 1;
+
+        <sun.security.x509.DistributionPoint: byte TAG_FULL_NAME> = 0;
+
+        <sun.security.x509.DistributionPoint: byte TAG_ISSUER> = 2;
+
+        <sun.security.x509.DistributionPoint: byte TAG_REASONS> = 1;
+
+        <sun.security.x509.DistributionPoint: byte TAG_DIST_PT> = 0;
+
+        <sun.security.x509.DistributionPoint: int AA_COMPROMISE> = 8;
+
+        <sun.security.x509.DistributionPoint: int PRIVILEGE_WITHDRAWN> = 7;
+
+        <sun.security.x509.DistributionPoint: int CERTIFICATE_HOLD> = 6;
+
+        <sun.security.x509.DistributionPoint: int CESSATION_OF_OPERATION> = 5;
+
+        <sun.security.x509.DistributionPoint: int SUPERSEDED> = 4;
+
+        <sun.security.x509.DistributionPoint: int AFFILIATION_CHANGED> = 3;
+
+        <sun.security.x509.DistributionPoint: int CA_COMPROMISE> = 2;
+
+        <sun.security.x509.DistributionPoint: int KEY_COMPROMISE> = 1;
+
+        $r0 = newarray (java.lang.String)[9];
+
+        $r0[0] = null;
+
+        $r0[1] = "key compromise";
+
+        $r0[2] = "CA compromise";
+
+        $r0[3] = "affiliation changed";
+
+        $r0[4] = "superseded";
+
+        $r0[5] = "cessation of operation";
+
+        $r0[6] = "certificate hold";
+
+        $r0[7] = "privilege withdrawn";
+
+        $r0[8] = "AA compromise";
+
+        <sun.security.x509.DistributionPoint: java.lang.String[] REASON_STRINGS> = $r0;
+
+        return;
+    }
+}

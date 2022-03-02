@@ -1,0 +1,215 @@
+final class sun.awt.datatransfer.ClassLoaderObjectInputStream extends java.io.ObjectInputStream
+{
+    private final java.util.Map map;
+
+    void <init>(java.io.InputStream, java.util.Map) throws java.io.IOException
+    {
+        java.util.Map r2;
+        sun.awt.datatransfer.ClassLoaderObjectInputStream r0;
+        java.lang.NullPointerException $r3;
+        java.io.InputStream r1;
+
+        r0 := @this: sun.awt.datatransfer.ClassLoaderObjectInputStream;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        r2 := @parameter1: java.util.Map;
+
+        specialinvoke r0.<java.io.ObjectInputStream: void <init>(java.io.InputStream)>(r1);
+
+        if r2 != null goto label1;
+
+        $r3 = new java.lang.NullPointerException;
+
+        specialinvoke $r3.<java.lang.NullPointerException: void <init>(java.lang.String)>("Null map");
+
+        throw $r3;
+
+     label1:
+        r0.<sun.awt.datatransfer.ClassLoaderObjectInputStream: java.util.Map map> = r2;
+
+        return;
+    }
+
+    protected java.lang.Class resolveClass(java.io.ObjectStreamClass) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        sun.awt.datatransfer.ClassLoaderObjectInputStream r3;
+        java.io.ObjectStreamClass r0;
+        java.util.HashSet $r2;
+        java.util.Map $r4;
+        java.lang.Object $r5;
+        java.lang.Class $r7, $r8;
+        java.lang.String $r1;
+        java.lang.ClassLoader r6;
+
+        r3 := @this: sun.awt.datatransfer.ClassLoaderObjectInputStream;
+
+        r0 := @parameter0: java.io.ObjectStreamClass;
+
+        $r1 = virtualinvoke r0.<java.io.ObjectStreamClass: java.lang.String getName()>();
+
+        $r2 = new java.util.HashSet;
+
+        specialinvoke $r2.<java.util.HashSet: void <init>(int)>(1);
+
+        interfaceinvoke $r2.<java.util.Set: boolean add(java.lang.Object)>($r1);
+
+        $r4 = r3.<sun.awt.datatransfer.ClassLoaderObjectInputStream: java.util.Map map>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Map: java.lang.Object get(java.lang.Object)>($r2);
+
+        r6 = (java.lang.ClassLoader) $r5;
+
+        if r6 == null goto label1;
+
+        $r8 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>($r1, 0, r6);
+
+        return $r8;
+
+     label1:
+        $r7 = specialinvoke r3.<java.io.ObjectInputStream: java.lang.Class resolveClass(java.io.ObjectStreamClass)>(r0);
+
+        return $r7;
+    }
+
+    protected java.lang.Class resolveProxyClass(java.lang.String[]) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        sun.awt.datatransfer.ClassLoaderObjectInputStream r2;
+        java.lang.String[] r1;
+        java.util.HashSet $r0;
+        java.util.Map $r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, i7;
+        java.lang.String $r7, $r12;
+        boolean z0, z1, z2;
+        java.lang.Class[] r5;
+        java.lang.IllegalArgumentException $r13;
+        java.lang.IllegalAccessError $r10;
+        java.lang.Object $r4;
+        java.lang.Class $r6, $r8, $r11;
+        java.lang.ClassNotFoundException $r14;
+        java.lang.ClassLoader $r9, r15, r16, $r17;
+
+        r2 := @this: sun.awt.datatransfer.ClassLoaderObjectInputStream;
+
+        r1 := @parameter0: java.lang.String[];
+
+        $r0 = new java.util.HashSet;
+
+        $i0 = lengthof r1;
+
+        specialinvoke $r0.<java.util.HashSet: void <init>(int)>($i0);
+
+        i6 = 0;
+
+     label01:
+        $i1 = lengthof r1;
+
+        if i6 >= $i1 goto label02;
+
+        $r12 = r1[i6];
+
+        interfaceinvoke $r0.<java.util.Set: boolean add(java.lang.Object)>($r12);
+
+        i6 = i6 + 1;
+
+        goto label01;
+
+     label02:
+        $r3 = r2.<sun.awt.datatransfer.ClassLoaderObjectInputStream: java.util.Map map>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>($r0);
+
+        r15 = (java.lang.ClassLoader) $r4;
+
+        if r15 != null goto label03;
+
+        $r11 = specialinvoke r2.<java.io.ObjectInputStream: java.lang.Class resolveProxyClass(java.lang.String[])>(r1);
+
+        return $r11;
+
+     label03:
+        r16 = null;
+
+        z0 = 0;
+
+        z2 = 0;
+
+        z1 = 0;
+
+        $i2 = lengthof r1;
+
+        r5 = newarray (java.lang.Class)[$i2];
+
+        i7 = 0;
+
+     label04:
+        $i3 = lengthof r1;
+
+        if i7 >= $i3 goto label07;
+
+        $r7 = r1[i7];
+
+        $r8 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>($r7, 0, r15);
+
+        $i4 = virtualinvoke $r8.<java.lang.Class: int getModifiers()>();
+
+        $i5 = $i4 & 1;
+
+        if $i5 != 0 goto label06;
+
+        if z2 == 0 goto label05;
+
+        $r9 = virtualinvoke $r8.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        if r16 == $r9 goto label06;
+
+        $r10 = new java.lang.IllegalAccessError;
+
+        specialinvoke $r10.<java.lang.IllegalAccessError: void <init>(java.lang.String)>("conflicting non-public interface class loaders");
+
+        throw $r10;
+
+     label05:
+        r16 = virtualinvoke $r8.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        z0 = 1;
+
+        z2 = 1;
+
+        z1 = 1;
+
+     label06:
+        r5[i7] = $r8;
+
+        i7 = i7 + 1;
+
+        goto label04;
+
+     label07:
+        if z1 == 0 goto label08;
+
+        $r17 = r16;
+
+        goto label09;
+
+     label08:
+        $r17 = r15;
+
+     label09:
+        $r6 = staticinvoke <java.lang.reflect.Proxy: java.lang.Class getProxyClass(java.lang.ClassLoader,java.lang.Class[])>($r17, r5);
+
+     label10:
+        return $r6;
+
+     label11:
+        $r13 := @caughtexception;
+
+        $r14 = new java.lang.ClassNotFoundException;
+
+        specialinvoke $r14.<java.lang.ClassNotFoundException: void <init>(java.lang.String,java.lang.Throwable)>(null, $r13);
+
+        throw $r14;
+
+        catch java.lang.IllegalArgumentException from label07 to label10 with label11;
+    }
+}

@@ -1,0 +1,631 @@
+class sun.swing.FilePane$DetailsTableModel extends javax.swing.table.AbstractTableModel implements javax.swing.event.ListDataListener
+{
+    private final javax.swing.JFileChooser chooser;
+    private final javax.swing.plaf.basic.BasicDirectoryModel directoryModel;
+    sun.awt.shell.ShellFolderColumnInfo[] columns;
+    int[] columnMap;
+    final sun.swing.FilePane this$0;
+
+    void <init>(sun.swing.FilePane, javax.swing.JFileChooser)
+    {
+        javax.swing.plaf.basic.BasicDirectoryModel $r3, $r4;
+        javax.swing.JFileChooser r2;
+        sun.swing.FilePane r1;
+        sun.swing.FilePane$DetailsTableModel r0;
+
+        r0 := @this: sun.swing.FilePane$DetailsTableModel;
+
+        r1 := @parameter0: sun.swing.FilePane;
+
+        r2 := @parameter1: javax.swing.JFileChooser;
+
+        r0.<sun.swing.FilePane$DetailsTableModel: sun.swing.FilePane this$0> = r1;
+
+        specialinvoke r0.<javax.swing.table.AbstractTableModel: void <init>()>();
+
+        r0.<sun.swing.FilePane$DetailsTableModel: javax.swing.JFileChooser chooser> = r2;
+
+        $r3 = virtualinvoke r1.<sun.swing.FilePane: javax.swing.plaf.basic.BasicDirectoryModel getModel()>();
+
+        r0.<sun.swing.FilePane$DetailsTableModel: javax.swing.plaf.basic.BasicDirectoryModel directoryModel> = $r3;
+
+        $r4 = r0.<sun.swing.FilePane$DetailsTableModel: javax.swing.plaf.basic.BasicDirectoryModel directoryModel>;
+
+        virtualinvoke $r4.<javax.swing.plaf.basic.BasicDirectoryModel: void addListDataListener(javax.swing.event.ListDataListener)>(r0);
+
+        virtualinvoke r0.<sun.swing.FilePane$DetailsTableModel: void updateColumnInfo()>();
+
+        return;
+    }
+
+    void updateColumnInfo()
+    {
+        sun.swing.FilePane$DetailsTableModel r0;
+        java.util.ArrayList $r18;
+        sun.swing.FilePane$DetailsTableRowSorter $r9, $r11;
+        int[] $r6, $r7, $r13, $r19;
+        int $i0, $i1, $i2, $i3, i4, $i5;
+        javax.swing.JFileChooser $r1, $r14;
+        sun.awt.shell.ShellFolderColumnInfo[] $r3, $r4, $r5, $r17;
+        boolean $z0, $z1;
+        java.io.File $r2, r16;
+        java.io.FileNotFoundException $r15;
+        sun.awt.shell.ShellFolderColumnInfo r12;
+        java.util.List $r20;
+        sun.swing.FilePane $r8, $r10;
+
+        r0 := @this: sun.swing.FilePane$DetailsTableModel;
+
+        $r1 = r0.<sun.swing.FilePane$DetailsTableModel: javax.swing.JFileChooser chooser>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.JFileChooser: java.io.File getCurrentDirectory()>();
+
+        r16 = $r2;
+
+        if $r2 == null goto label4;
+
+        $r14 = r0.<sun.swing.FilePane$DetailsTableModel: javax.swing.JFileChooser chooser>;
+
+        $z1 = staticinvoke <sun.swing.FilePane: boolean usesShellFolder(javax.swing.JFileChooser)>($r14);
+
+        if $z1 == 0 goto label4;
+
+     label1:
+        r16 = staticinvoke <sun.awt.shell.ShellFolder: sun.awt.shell.ShellFolder getShellFolder(java.io.File)>($r2);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r15 := @caughtexception;
+
+     label4:
+        $r17 = staticinvoke <sun.awt.shell.ShellFolder: sun.awt.shell.ShellFolderColumnInfo[] getFolderColumns(java.io.File)>(r16);
+
+        $r18 = new java.util.ArrayList;
+
+        specialinvoke $r18.<java.util.ArrayList: void <init>()>();
+
+        $i3 = lengthof $r17;
+
+        $r19 = newarray (int)[$i3];
+
+        r0.<sun.swing.FilePane$DetailsTableModel: int[] columnMap> = $r19;
+
+        i4 = 0;
+
+     label5:
+        $i5 = lengthof $r17;
+
+        if i4 >= $i5 goto label7;
+
+        r12 = $r17[i4];
+
+        $z0 = virtualinvoke r12.<sun.awt.shell.ShellFolderColumnInfo: boolean isVisible()>();
+
+        if $z0 == 0 goto label6;
+
+        $r13 = r0.<sun.swing.FilePane$DetailsTableModel: int[] columnMap>;
+
+        $i2 = virtualinvoke $r18.<java.util.ArrayList: int size()>();
+
+        $r13[$i2] = i4;
+
+        virtualinvoke $r18.<java.util.ArrayList: boolean add(java.lang.Object)>(r12);
+
+     label6:
+        i4 = i4 + 1;
+
+        goto label5;
+
+     label7:
+        $i0 = virtualinvoke $r18.<java.util.ArrayList: int size()>();
+
+        $r3 = newarray (sun.awt.shell.ShellFolderColumnInfo)[$i0];
+
+        r0.<sun.swing.FilePane$DetailsTableModel: sun.awt.shell.ShellFolderColumnInfo[] columns> = $r3;
+
+        $r4 = r0.<sun.swing.FilePane$DetailsTableModel: sun.awt.shell.ShellFolderColumnInfo[] columns>;
+
+        virtualinvoke $r18.<java.util.ArrayList: java.lang.Object[] toArray(java.lang.Object[])>($r4);
+
+        $r6 = r0.<sun.swing.FilePane$DetailsTableModel: int[] columnMap>;
+
+        $r5 = r0.<sun.swing.FilePane$DetailsTableModel: sun.awt.shell.ShellFolderColumnInfo[] columns>;
+
+        $i1 = lengthof $r5;
+
+        $r7 = staticinvoke <java.util.Arrays: int[] copyOf(int[],int)>($r6, $i1);
+
+        r0.<sun.swing.FilePane$DetailsTableModel: int[] columnMap> = $r7;
+
+        $r8 = r0.<sun.swing.FilePane$DetailsTableModel: sun.swing.FilePane this$0>;
+
+        $r9 = staticinvoke <sun.swing.FilePane: sun.swing.FilePane$DetailsTableRowSorter access$1000(sun.swing.FilePane)>($r8);
+
+        if $r9 != null goto label8;
+
+        $r20 = null;
+
+        goto label9;
+
+     label8:
+        $r10 = r0.<sun.swing.FilePane$DetailsTableModel: sun.swing.FilePane this$0>;
+
+        $r11 = staticinvoke <sun.swing.FilePane: sun.swing.FilePane$DetailsTableRowSorter access$1000(sun.swing.FilePane)>($r10);
+
+        $r20 = virtualinvoke $r11.<sun.swing.FilePane$DetailsTableRowSorter: java.util.List getSortKeys()>();
+
+     label9:
+        virtualinvoke r0.<sun.swing.FilePane$DetailsTableModel: void fireTableStructureChanged()>();
+
+        specialinvoke r0.<sun.swing.FilePane$DetailsTableModel: void restoreSortKeys(java.util.List)>($r20);
+
+        return;
+
+        catch java.io.FileNotFoundException from label1 to label2 with label3;
+    }
+
+    private void restoreSortKeys(java.util.List)
+    {
+        sun.swing.FilePane$DetailsTableModel r0;
+        javax.swing.RowSorter$SortKey r4;
+        sun.swing.FilePane$DetailsTableRowSorter $r2;
+        java.util.List r6;
+        int $i0, $i1, $i2, i3;
+        java.lang.Object $r3;
+        sun.swing.FilePane $r1;
+        sun.awt.shell.ShellFolderColumnInfo[] $r5;
+
+        r0 := @this: sun.swing.FilePane$DetailsTableModel;
+
+        r6 := @parameter0: java.util.List;
+
+        if r6 == null goto label4;
+
+        i3 = 0;
+
+     label1:
+        $i0 = interfaceinvoke r6.<java.util.List: int size()>();
+
+        if i3 >= $i0 goto label3;
+
+        $r3 = interfaceinvoke r6.<java.util.List: java.lang.Object get(int)>(i3);
+
+        r4 = (javax.swing.RowSorter$SortKey) $r3;
+
+        $i1 = virtualinvoke r4.<javax.swing.RowSorter$SortKey: int getColumn()>();
+
+        $r5 = r0.<sun.swing.FilePane$DetailsTableModel: sun.awt.shell.ShellFolderColumnInfo[] columns>;
+
+        $i2 = lengthof $r5;
+
+        if $i1 < $i2 goto label2;
+
+        r6 = null;
+
+        goto label3;
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        if r6 == null goto label4;
+
+        $r1 = r0.<sun.swing.FilePane$DetailsTableModel: sun.swing.FilePane this$0>;
+
+        $r2 = staticinvoke <sun.swing.FilePane: sun.swing.FilePane$DetailsTableRowSorter access$1000(sun.swing.FilePane)>($r1);
+
+        virtualinvoke $r2.<sun.swing.FilePane$DetailsTableRowSorter: void setSortKeys(java.util.List)>(r6);
+
+     label4:
+        return;
+    }
+
+    public int getRowCount()
+    {
+        javax.swing.plaf.basic.BasicDirectoryModel $r1;
+        int $i0;
+        sun.swing.FilePane$DetailsTableModel r0;
+
+        r0 := @this: sun.swing.FilePane$DetailsTableModel;
+
+        $r1 = r0.<sun.swing.FilePane$DetailsTableModel: javax.swing.plaf.basic.BasicDirectoryModel directoryModel>;
+
+        $i0 = virtualinvoke $r1.<javax.swing.plaf.basic.BasicDirectoryModel: int getSize()>();
+
+        return $i0;
+    }
+
+    public int getColumnCount()
+    {
+        int $i0;
+        sun.awt.shell.ShellFolderColumnInfo[] $r1;
+        sun.swing.FilePane$DetailsTableModel r0;
+
+        r0 := @this: sun.swing.FilePane$DetailsTableModel;
+
+        $r1 = r0.<sun.swing.FilePane$DetailsTableModel: sun.awt.shell.ShellFolderColumnInfo[] columns>;
+
+        $i0 = lengthof $r1;
+
+        return $i0;
+    }
+
+    public java.lang.Object getValueAt(int, int)
+    {
+        int i0, i1;
+        javax.swing.plaf.basic.BasicDirectoryModel $r1;
+        java.lang.Object $r2, $r4;
+        sun.swing.FilePane$DetailsTableModel r0;
+        java.io.File $r3;
+
+        r0 := @this: sun.swing.FilePane$DetailsTableModel;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r1 = r0.<sun.swing.FilePane$DetailsTableModel: javax.swing.plaf.basic.BasicDirectoryModel directoryModel>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.plaf.basic.BasicDirectoryModel: java.lang.Object getElementAt(int)>(i0);
+
+        $r3 = (java.io.File) $r2;
+
+        $r4 = specialinvoke r0.<sun.swing.FilePane$DetailsTableModel: java.lang.Object getFileColumnValue(java.io.File,int)>($r3, i1);
+
+        return $r4;
+    }
+
+    private java.lang.Object getFileColumnValue(java.io.File, int)
+    {
+        int[] $r2;
+        int i0, $i1;
+        java.lang.Object $r3;
+        java.io.File r0;
+        sun.swing.FilePane$DetailsTableModel r1;
+
+        r1 := @this: sun.swing.FilePane$DetailsTableModel;
+
+        r0 := @parameter0: java.io.File;
+
+        i0 := @parameter1: int;
+
+        if i0 != 0 goto label1;
+
+        $r3 = r0;
+
+        goto label2;
+
+     label1:
+        $r2 = r1.<sun.swing.FilePane$DetailsTableModel: int[] columnMap>;
+
+        $i1 = $r2[i0];
+
+        $r3 = staticinvoke <sun.awt.shell.ShellFolder: java.lang.Object getFolderColumnValue(java.io.File,int)>(r0, $i1);
+
+     label2:
+        return $r3;
+    }
+
+    public void setValueAt(java.lang.Object, int, int)
+    {
+        javax.swing.filechooser.FileSystemView $r30;
+        javax.swing.JFileChooser $r2;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.StringBuilder $r26, $r28, $r33;
+        sun.swing.FilePane $r1, $r11, $r15, $r19, $r23;
+        java.lang.Object[] $r13, $r21;
+        javax.swing.plaf.basic.BasicDirectoryModel $r10;
+        sun.swing.FilePane$DetailsTableModel r0;
+        int i0, i1, $i2, $i3, $i5;
+        java.lang.String $r5, $r6, $r8, $r9, $r12, $r14, $r16, $r20, $r22, $r24, $r27, r29;
+        sun.swing.FilePane$DetailsTableModel$1 $r34;
+        char $c4;
+        java.io.File r4, $r17, $r31, $r32;
+        java.lang.Object $r3, r7;
+
+        r0 := @this: sun.swing.FilePane$DetailsTableModel;
+
+        r7 := @parameter0: java.lang.Object;
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        if i0 != 0 goto label4;
+
+        $r1 = r0.<sun.swing.FilePane$DetailsTableModel: sun.swing.FilePane this$0>;
+
+        $r2 = virtualinvoke $r1.<sun.swing.FilePane: javax.swing.JFileChooser getFileChooser()>();
+
+        $r3 = virtualinvoke r0.<sun.swing.FilePane$DetailsTableModel: java.lang.Object getValueAt(int,int)>(i1, i0);
+
+        r4 = (java.io.File) $r3;
+
+        if r4 == null goto label4;
+
+        $r5 = virtualinvoke $r2.<javax.swing.JFileChooser: java.lang.String getName(java.io.File)>(r4);
+
+        $r6 = virtualinvoke r4.<java.io.File: java.lang.String getName()>();
+
+        $r8 = (java.lang.String) r7;
+
+        $r9 = virtualinvoke $r8.<java.lang.String: java.lang.String trim()>();
+
+        $z0 = virtualinvoke $r9.<java.lang.String: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 != 0 goto label4;
+
+        r29 = $r9;
+
+        $i2 = virtualinvoke $r6.<java.lang.String: int length()>();
+
+        $i3 = virtualinvoke $r5.<java.lang.String: int length()>();
+
+        if $i2 <= $i3 goto label1;
+
+        $c4 = virtualinvoke $r6.<java.lang.String: char charAt(int)>($i3);
+
+        $i5 = (int) $c4;
+
+        if $i5 != 46 goto label1;
+
+        $r33 = new java.lang.StringBuilder;
+
+        specialinvoke $r33.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r27 = virtualinvoke $r6.<java.lang.String: java.lang.String substring(int)>($i3);
+
+        $r28 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r27);
+
+        r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label1:
+        $r30 = virtualinvoke $r2.<javax.swing.JFileChooser: javax.swing.filechooser.FileSystemView getFileSystemView()>();
+
+        $r31 = virtualinvoke r4.<java.io.File: java.io.File getParentFile()>();
+
+        $r32 = virtualinvoke $r30.<javax.swing.filechooser.FileSystemView: java.io.File createFileObject(java.io.File,java.lang.String)>($r31, r29);
+
+        $z3 = virtualinvoke $r32.<java.io.File: boolean exists()>();
+
+        if $z3 == 0 goto label2;
+
+        $r19 = r0.<sun.swing.FilePane$DetailsTableModel: sun.swing.FilePane this$0>;
+
+        $r20 = staticinvoke <sun.swing.FilePane: java.lang.String access$1100(sun.swing.FilePane)>($r19);
+
+        $r21 = newarray (java.lang.Object)[1];
+
+        $r21[0] = $r6;
+
+        $r22 = staticinvoke <java.text.MessageFormat: java.lang.String format(java.lang.String,java.lang.Object[])>($r20, $r21);
+
+        $r23 = r0.<sun.swing.FilePane$DetailsTableModel: sun.swing.FilePane this$0>;
+
+        $r24 = staticinvoke <sun.swing.FilePane: java.lang.String access$1200(sun.swing.FilePane)>($r23);
+
+        staticinvoke <javax.swing.JOptionPane: void showMessageDialog(java.awt.Component,java.lang.Object,java.lang.String,int)>($r2, $r22, $r24, 0);
+
+        goto label4;
+
+     label2:
+        $r10 = r0.<sun.swing.FilePane$DetailsTableModel: javax.swing.plaf.basic.BasicDirectoryModel directoryModel>;
+
+        $z1 = virtualinvoke $r10.<javax.swing.plaf.basic.BasicDirectoryModel: boolean renameFile(java.io.File,java.io.File)>(r4, $r32);
+
+        if $z1 == 0 goto label3;
+
+        $r17 = virtualinvoke $r2.<javax.swing.JFileChooser: java.io.File getCurrentDirectory()>();
+
+        $z2 = virtualinvoke $r30.<javax.swing.filechooser.FileSystemView: boolean isParent(java.io.File,java.io.File)>($r17, $r32);
+
+        if $z2 == 0 goto label4;
+
+        $r34 = new sun.swing.FilePane$DetailsTableModel$1;
+
+        specialinvoke $r34.<sun.swing.FilePane$DetailsTableModel$1: void <init>(sun.swing.FilePane$DetailsTableModel,javax.swing.JFileChooser,java.io.File)>(r0, $r2, $r32);
+
+        staticinvoke <javax.swing.SwingUtilities: void invokeLater(java.lang.Runnable)>($r34);
+
+        goto label4;
+
+     label3:
+        $r11 = r0.<sun.swing.FilePane$DetailsTableModel: sun.swing.FilePane this$0>;
+
+        $r12 = staticinvoke <sun.swing.FilePane: java.lang.String access$1300(sun.swing.FilePane)>($r11);
+
+        $r13 = newarray (java.lang.Object)[1];
+
+        $r13[0] = $r6;
+
+        $r14 = staticinvoke <java.text.MessageFormat: java.lang.String format(java.lang.String,java.lang.Object[])>($r12, $r13);
+
+        $r15 = r0.<sun.swing.FilePane$DetailsTableModel: sun.swing.FilePane this$0>;
+
+        $r16 = staticinvoke <sun.swing.FilePane: java.lang.String access$1200(sun.swing.FilePane)>($r15);
+
+        staticinvoke <javax.swing.JOptionPane: void showMessageDialog(java.awt.Component,java.lang.Object,java.lang.String,int)>($r2, $r14, $r16, 0);
+
+     label4:
+        return;
+    }
+
+    public boolean isCellEditable(int, int)
+    {
+        sun.swing.FilePane$DetailsTableModel r0;
+        java.io.File $r3;
+        int i0, i1;
+        javax.swing.JFileChooser $r2;
+        sun.swing.FilePane $r1, $r4, $r5;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.swing.FilePane$DetailsTableModel;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        $r1 = r0.<sun.swing.FilePane$DetailsTableModel: sun.swing.FilePane this$0>;
+
+        $r2 = virtualinvoke $r1.<sun.swing.FilePane: javax.swing.JFileChooser getFileChooser()>();
+
+        $r3 = virtualinvoke $r2.<javax.swing.JFileChooser: java.io.File getCurrentDirectory()>();
+
+        $r4 = r0.<sun.swing.FilePane$DetailsTableModel: sun.swing.FilePane this$0>;
+
+        $z0 = staticinvoke <sun.swing.FilePane: boolean access$700(sun.swing.FilePane)>($r4);
+
+        if $z0 != 0 goto label1;
+
+        if i0 != 0 goto label1;
+
+        $r5 = r0.<sun.swing.FilePane$DetailsTableModel: sun.swing.FilePane this$0>;
+
+        $z1 = virtualinvoke $r5.<sun.swing.FilePane: boolean canWrite(java.io.File)>($r3);
+
+        if $z1 == 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+    }
+
+    public void contentsChanged(javax.swing.event.ListDataEvent)
+    {
+        sun.swing.FilePane$DelayedSelectionUpdater $r0;
+        javax.swing.event.ListDataEvent r3;
+        sun.swing.FilePane $r2;
+        sun.swing.FilePane$DetailsTableModel r1;
+
+        r1 := @this: sun.swing.FilePane$DetailsTableModel;
+
+        r3 := @parameter0: javax.swing.event.ListDataEvent;
+
+        $r0 = new sun.swing.FilePane$DelayedSelectionUpdater;
+
+        $r2 = r1.<sun.swing.FilePane$DetailsTableModel: sun.swing.FilePane this$0>;
+
+        specialinvoke $r0.<sun.swing.FilePane$DelayedSelectionUpdater: void <init>(sun.swing.FilePane)>($r2);
+
+        virtualinvoke r1.<sun.swing.FilePane$DetailsTableModel: void fireTableDataChanged()>();
+
+        return;
+    }
+
+    public void intervalAdded(javax.swing.event.ListDataEvent)
+    {
+        javax.swing.plaf.basic.BasicDirectoryModel $r2;
+        sun.swing.FilePane$DetailsTableModel r1;
+        java.io.File r4, $r6;
+        sun.swing.FilePane$DelayedSelectionUpdater $r7;
+        javax.swing.event.ListDataEvent r0;
+        int $i0, $i1, $i2, $i3;
+        java.lang.Object $r3;
+        sun.swing.FilePane $r5, $r8, $r9;
+        boolean $z0;
+
+        r1 := @this: sun.swing.FilePane$DetailsTableModel;
+
+        r0 := @parameter0: javax.swing.event.ListDataEvent;
+
+        $i0 = virtualinvoke r0.<javax.swing.event.ListDataEvent: int getIndex0()>();
+
+        $i1 = virtualinvoke r0.<javax.swing.event.ListDataEvent: int getIndex1()>();
+
+        if $i0 != $i1 goto label1;
+
+        $r2 = r1.<sun.swing.FilePane$DetailsTableModel: javax.swing.plaf.basic.BasicDirectoryModel directoryModel>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.plaf.basic.BasicDirectoryModel: java.lang.Object getElementAt(int)>($i0);
+
+        r4 = (java.io.File) $r3;
+
+        $r5 = r1.<sun.swing.FilePane$DetailsTableModel: sun.swing.FilePane this$0>;
+
+        $r6 = staticinvoke <sun.swing.FilePane: java.io.File access$1400(sun.swing.FilePane)>($r5);
+
+        $z0 = virtualinvoke r4.<java.io.File: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 == 0 goto label1;
+
+        $r7 = new sun.swing.FilePane$DelayedSelectionUpdater;
+
+        $r8 = r1.<sun.swing.FilePane$DetailsTableModel: sun.swing.FilePane this$0>;
+
+        specialinvoke $r7.<sun.swing.FilePane$DelayedSelectionUpdater: void <init>(sun.swing.FilePane,java.io.File)>($r8, r4);
+
+        $r9 = r1.<sun.swing.FilePane$DetailsTableModel: sun.swing.FilePane this$0>;
+
+        staticinvoke <sun.swing.FilePane: java.io.File access$1402(sun.swing.FilePane,java.io.File)>($r9, null);
+
+     label1:
+        $i2 = virtualinvoke r0.<javax.swing.event.ListDataEvent: int getIndex0()>();
+
+        $i3 = virtualinvoke r0.<javax.swing.event.ListDataEvent: int getIndex1()>();
+
+        virtualinvoke r1.<sun.swing.FilePane$DetailsTableModel: void fireTableRowsInserted(int,int)>($i2, $i3);
+
+        return;
+    }
+
+    public void intervalRemoved(javax.swing.event.ListDataEvent)
+    {
+        javax.swing.event.ListDataEvent r1;
+        int $i0, $i1;
+        sun.swing.FilePane$DetailsTableModel r0;
+
+        r0 := @this: sun.swing.FilePane$DetailsTableModel;
+
+        r1 := @parameter0: javax.swing.event.ListDataEvent;
+
+        $i0 = virtualinvoke r1.<javax.swing.event.ListDataEvent: int getIndex0()>();
+
+        $i1 = virtualinvoke r1.<javax.swing.event.ListDataEvent: int getIndex1()>();
+
+        virtualinvoke r0.<sun.swing.FilePane$DetailsTableModel: void fireTableRowsDeleted(int,int)>($i0, $i1);
+
+        return;
+    }
+
+    public sun.awt.shell.ShellFolderColumnInfo[] getColumns()
+    {
+        sun.awt.shell.ShellFolderColumnInfo[] $r1;
+        sun.swing.FilePane$DetailsTableModel r0;
+
+        r0 := @this: sun.swing.FilePane$DetailsTableModel;
+
+        $r1 = r0.<sun.swing.FilePane$DetailsTableModel: sun.awt.shell.ShellFolderColumnInfo[] columns>;
+
+        return $r1;
+    }
+
+    static java.lang.Object access$1800(sun.swing.FilePane$DetailsTableModel, java.io.File, int)
+    {
+        int i0;
+        java.lang.Object $r2;
+        sun.swing.FilePane$DetailsTableModel r0;
+        java.io.File r1;
+
+        r0 := @parameter0: sun.swing.FilePane$DetailsTableModel;
+
+        r1 := @parameter1: java.io.File;
+
+        i0 := @parameter2: int;
+
+        $r2 = specialinvoke r0.<sun.swing.FilePane$DetailsTableModel: java.lang.Object getFileColumnValue(java.io.File,int)>(r1, i0);
+
+        return $r2;
+    }
+}

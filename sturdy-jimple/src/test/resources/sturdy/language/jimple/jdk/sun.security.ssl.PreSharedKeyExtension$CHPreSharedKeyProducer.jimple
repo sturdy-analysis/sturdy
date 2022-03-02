@@ -1,0 +1,315 @@
+final class sun.security.ssl.PreSharedKeyExtension$CHPreSharedKeyProducer extends java.lang.Object implements sun.security.ssl.HandshakeProducer
+{
+
+    private void <init>()
+    {
+        sun.security.ssl.PreSharedKeyExtension$CHPreSharedKeyProducer r0;
+
+        r0 := @this: sun.security.ssl.PreSharedKeyExtension$CHPreSharedKeyProducer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public byte[] produce(sun.security.ssl.ConnectionContext, sun.security.ssl.SSLHandshake$HandshakeMessage) throws java.io.IOException
+    {
+        byte[] $r9, $r10, $r21, $r28, $r39, $r44;
+        sun.security.ssl.SSLHandshake$HandshakeMessage r16;
+        java.util.Map $r42;
+        sun.security.ssl.ClientHello$ClientHelloMessage $r31;
+        sun.security.ssl.HandshakeHash $r36, $r37;
+        sun.security.ssl.PreSharedKeyExtension$CHPreSharedKeyProducer r17;
+        javax.crypto.SecretKey $r8, $r30;
+        sun.security.ssl.CipherSuite $r33;
+        sun.security.ssl.PreSharedKeyExtension$CHPreSharedKeySpec $r35, $r41;
+        java.lang.Object[] $r2, $r18, $r19, $r22, $r23;
+        long $l0, $l1, $l2;
+        java.util.ArrayList $r24, $r40;
+        sun.security.ssl.CipherSuite$HashAlg $r34;
+        sun.security.ssl.ConnectionContext r0;
+        sun.security.ssl.SSLSessionImpl $r3, $r4, $r7, $r14, $r20, $r25, $r26, $r29, $r32, $r38;
+        javax.net.ssl.SSLSessionContext $r12;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11;
+        sun.security.ssl.PreSharedKeyExtension$PskIdentity $r27;
+        java.util.Collection $r5;
+        sun.security.ssl.SSLContextImpl $r11;
+        java.util.List $r6;
+        sun.security.ssl.SSLSessionContextImpl r13;
+        int $i3, $i4, $i5, $i6;
+        sun.security.ssl.ClientHandshakeContext r1;
+        sun.security.ssl.SSLExtension $r43;
+        sun.security.ssl.SessionId $r15;
+
+        r17 := @this: sun.security.ssl.PreSharedKeyExtension$CHPreSharedKeyProducer;
+
+        r0 := @parameter0: sun.security.ssl.ConnectionContext;
+
+        r16 := @parameter1: sun.security.ssl.SSLHandshake$HandshakeMessage;
+
+        r1 = (sun.security.ssl.ClientHandshakeContext) r0;
+
+        $z0 = r1.<sun.security.ssl.ClientHandshakeContext: boolean isResumption>;
+
+        if $z0 == 0 goto label01;
+
+        $r3 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLSessionImpl resumingSession>;
+
+        if $r3 != null goto label03;
+
+     label01:
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label02;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z2 == 0 goto label02;
+
+        $r2 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("No session to resume.", $r2);
+
+     label02:
+        return null;
+
+     label03:
+        $r4 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLSessionImpl resumingSession>;
+
+        $r5 = virtualinvoke $r4.<sun.security.ssl.SSLSessionImpl: java.util.Collection getLocalSupportedSignatureSchemes()>();
+
+        $r6 = r1.<sun.security.ssl.ClientHandshakeContext: java.util.List localSupportedSignAlgs>;
+
+        $z3 = interfaceinvoke $r6.<java.util.List: boolean containsAll(java.util.Collection)>($r5);
+
+        if $z3 != 0 goto label05;
+
+        $z10 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z10 == 0 goto label04;
+
+        $z11 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z11 == 0 goto label04;
+
+        $r23 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Existing session uses different signature algorithms", $r23);
+
+     label04:
+        return null;
+
+     label05:
+        $r7 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLSessionImpl resumingSession>;
+
+        $r8 = virtualinvoke $r7.<sun.security.ssl.SSLSessionImpl: javax.crypto.SecretKey getPreSharedKey()>();
+
+        if $r8 != null goto label07;
+
+        $z8 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z8 == 0 goto label06;
+
+        $z9 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z9 == 0 goto label06;
+
+        $r22 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Existing session has no PSK.", $r22);
+
+     label06:
+        return null;
+
+     label07:
+        $r9 = r1.<sun.security.ssl.ClientHandshakeContext: byte[] pskIdentity>;
+
+        if $r9 != null goto label08;
+
+        $r20 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLSessionImpl resumingSession>;
+
+        $r21 = virtualinvoke $r20.<sun.security.ssl.SSLSessionImpl: byte[] consumePskIdentity()>();
+
+        r1.<sun.security.ssl.ClientHandshakeContext: byte[] pskIdentity> = $r21;
+
+     label08:
+        $r10 = r1.<sun.security.ssl.ClientHandshakeContext: byte[] pskIdentity>;
+
+        if $r10 != null goto label10;
+
+        $z6 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z6 == 0 goto label09;
+
+        $z7 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z7 == 0 goto label09;
+
+        $r19 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("PSK has no identity, or identity was already used", $r19);
+
+     label09:
+        return null;
+
+     label10:
+        $r11 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLContextImpl sslContext>;
+
+        $r12 = virtualinvoke $r11.<sun.security.ssl.SSLContextImpl: javax.net.ssl.SSLSessionContext engineGetClientSessionContext()>();
+
+        r13 = (sun.security.ssl.SSLSessionContextImpl) $r12;
+
+        $r14 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLSessionImpl resumingSession>;
+
+        $r15 = virtualinvoke $r14.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.SessionId getSessionId()>();
+
+        virtualinvoke r13.<sun.security.ssl.SSLSessionContextImpl: void remove(sun.security.ssl.SessionId)>($r15);
+
+        $z4 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z4 == 0 goto label11;
+
+        $z5 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z5 == 0 goto label11;
+
+        $r18 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Found resumable session. Preparing PSK message.", $r18);
+
+     label11:
+        $r24 = new java.util.ArrayList;
+
+        specialinvoke $r24.<java.util.ArrayList: void <init>()>();
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r25 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLSessionImpl resumingSession>;
+
+        $l1 = virtualinvoke $r25.<sun.security.ssl.SSLSessionImpl: long getTicketCreationTime()>();
+
+        $l2 = $l0 - $l1;
+
+        $i3 = (int) $l2;
+
+        $r26 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLSessionImpl resumingSession>;
+
+        $i4 = virtualinvoke $r26.<sun.security.ssl.SSLSessionImpl: int getTicketAgeAdd()>();
+
+        $i5 = $i3 + $i4;
+
+        $r27 = new sun.security.ssl.PreSharedKeyExtension$PskIdentity;
+
+        $r28 = r1.<sun.security.ssl.ClientHandshakeContext: byte[] pskIdentity>;
+
+        specialinvoke $r27.<sun.security.ssl.PreSharedKeyExtension$PskIdentity: void <init>(byte[],int)>($r28, $i5);
+
+        interfaceinvoke $r24.<java.util.List: boolean add(java.lang.Object)>($r27);
+
+        $r29 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLSessionImpl resumingSession>;
+
+        $r30 = staticinvoke <sun.security.ssl.PreSharedKeyExtension: javax.crypto.SecretKey access$1200(sun.security.ssl.HandshakeContext,javax.crypto.SecretKey,sun.security.ssl.SSLSessionImpl)>(r1, $r8, $r29);
+
+        $r31 = (sun.security.ssl.ClientHello$ClientHelloMessage) r16;
+
+        $r32 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLSessionImpl resumingSession>;
+
+        $r33 = virtualinvoke $r32.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.CipherSuite getSuite()>();
+
+        $r34 = $r33.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$HashAlg hashAlg>;
+
+        $i6 = $r34.<sun.security.ssl.CipherSuite$HashAlg: int hashLength>;
+
+        $r35 = specialinvoke r17.<sun.security.ssl.PreSharedKeyExtension$CHPreSharedKeyProducer: sun.security.ssl.PreSharedKeyExtension$CHPreSharedKeySpec createPskPrototype(int,java.util.List)>($i6, $r24);
+
+        $r36 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.HandshakeHash handshakeHash>;
+
+        $r37 = virtualinvoke $r36.<sun.security.ssl.HandshakeHash: sun.security.ssl.HandshakeHash copy()>();
+
+        $r38 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLSessionImpl resumingSession>;
+
+        $r39 = staticinvoke <sun.security.ssl.PreSharedKeyExtension: byte[] access$1300(sun.security.ssl.HandshakeContext,javax.crypto.SecretKey,sun.security.ssl.HandshakeHash,sun.security.ssl.SSLSessionImpl,sun.security.ssl.HandshakeContext,sun.security.ssl.ClientHello$ClientHelloMessage,sun.security.ssl.PreSharedKeyExtension$CHPreSharedKeySpec)>(r1, $r30, $r37, $r38, r1, $r31, $r35);
+
+        $r40 = new java.util.ArrayList;
+
+        specialinvoke $r40.<java.util.ArrayList: void <init>()>();
+
+        interfaceinvoke $r40.<java.util.List: boolean add(java.lang.Object)>($r39);
+
+        $r41 = new sun.security.ssl.PreSharedKeyExtension$CHPreSharedKeySpec;
+
+        specialinvoke $r41.<sun.security.ssl.PreSharedKeyExtension$CHPreSharedKeySpec: void <init>(java.util.List,java.util.List)>($r24, $r40);
+
+        $r42 = r1.<sun.security.ssl.ClientHandshakeContext: java.util.Map handshakeExtensions>;
+
+        $r43 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension CH_PRE_SHARED_KEY>;
+
+        interfaceinvoke $r42.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r43, $r41);
+
+        $r44 = virtualinvoke $r41.<sun.security.ssl.PreSharedKeyExtension$CHPreSharedKeySpec: byte[] getEncoded()>();
+
+        return $r44;
+    }
+
+    private sun.security.ssl.PreSharedKeyExtension$CHPreSharedKeySpec createPskPrototype(int, java.util.List)
+    {
+        byte[] r1;
+        java.util.Iterator $r3;
+        sun.security.ssl.PreSharedKeyExtension$PskIdentity r6;
+        java.util.ArrayList $r0;
+        java.util.List r2;
+        sun.security.ssl.PreSharedKeyExtension$CHPreSharedKeyProducer r7;
+        int i0;
+        java.lang.Object $r5;
+        sun.security.ssl.PreSharedKeyExtension$CHPreSharedKeySpec $r4;
+        boolean $z0;
+
+        r7 := @this: sun.security.ssl.PreSharedKeyExtension$CHPreSharedKeyProducer;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.util.List;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+        r1 = newarray (byte)[i0];
+
+        $r3 = interfaceinvoke r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r5 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (sun.security.ssl.PreSharedKeyExtension$PskIdentity) $r5;
+
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>(r1);
+
+        goto label1;
+
+     label2:
+        $r4 = new sun.security.ssl.PreSharedKeyExtension$CHPreSharedKeySpec;
+
+        specialinvoke $r4.<sun.security.ssl.PreSharedKeyExtension$CHPreSharedKeySpec: void <init>(java.util.List,java.util.List)>(r2, $r0);
+
+        return $r4;
+    }
+
+    void <init>(sun.security.ssl.PreSharedKeyExtension$1)
+    {
+        sun.security.ssl.PreSharedKeyExtension$CHPreSharedKeyProducer r0;
+        sun.security.ssl.PreSharedKeyExtension$1 r1;
+
+        r0 := @this: sun.security.ssl.PreSharedKeyExtension$CHPreSharedKeyProducer;
+
+        r1 := @parameter0: sun.security.ssl.PreSharedKeyExtension$1;
+
+        specialinvoke r0.<sun.security.ssl.PreSharedKeyExtension$CHPreSharedKeyProducer: void <init>()>();
+
+        return;
+    }
+}

@@ -1,0 +1,285 @@
+public abstract class java.io.Reader extends java.lang.Object implements java.lang.Readable, java.io.Closeable
+{
+    protected java.lang.Object lock;
+    private static final int maxSkipBufferSize;
+    private char[] skipBuffer;
+
+    protected void <init>()
+    {
+        java.io.Reader r0;
+
+        r0 := @this: java.io.Reader;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.io.Reader: char[] skipBuffer> = null;
+
+        r0.<java.io.Reader: java.lang.Object lock> = r0;
+
+        return;
+    }
+
+    protected void <init>(java.lang.Object)
+    {
+        java.lang.Object r1;
+        java.io.Reader r0;
+        java.lang.NullPointerException $r2;
+
+        r0 := @this: java.io.Reader;
+
+        r1 := @parameter0: java.lang.Object;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.io.Reader: char[] skipBuffer> = null;
+
+        if r1 != null goto label1;
+
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        r0.<java.io.Reader: java.lang.Object lock> = r1;
+
+        return;
+    }
+
+    public int read(java.nio.CharBuffer) throws java.io.IOException
+    {
+        java.nio.CharBuffer r0;
+        int $i0, $i1;
+        char[] r1;
+        java.io.Reader r2;
+
+        r2 := @this: java.io.Reader;
+
+        r0 := @parameter0: java.nio.CharBuffer;
+
+        $i0 = virtualinvoke r0.<java.nio.CharBuffer: int remaining()>();
+
+        r1 = newarray (char)[$i0];
+
+        $i1 = virtualinvoke r2.<java.io.Reader: int read(char[],int,int)>(r1, 0, $i0);
+
+        if $i1 <= 0 goto label1;
+
+        virtualinvoke r0.<java.nio.CharBuffer: java.nio.CharBuffer put(char[],int,int)>(r1, 0, $i1);
+
+     label1:
+        return $i1;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        int $i0, $i3, $i5, $i6;
+        char[] r0;
+        char $c1;
+        java.io.Reader r1;
+
+        r1 := @this: java.io.Reader;
+
+        r0 = newarray (char)[1];
+
+        $i0 = virtualinvoke r1.<java.io.Reader: int read(char[],int,int)>(r0, 0, 1);
+
+        $i3 = (int) -1;
+
+        if $i0 != $i3 goto label1;
+
+        $i5 = (int) -1;
+
+        return $i5;
+
+     label1:
+        $c1 = r0[0];
+
+        $i6 = (int) $c1;
+
+        return $i6;
+    }
+
+    public int read(char[]) throws java.io.IOException
+    {
+        int $i0, $i1;
+        char[] r1;
+        java.io.Reader r0;
+
+        r0 := @this: java.io.Reader;
+
+        r1 := @parameter0: char[];
+
+        $i0 = lengthof r1;
+
+        $i1 = virtualinvoke r0.<java.io.Reader: int read(char[],int,int)>(r1, 0, $i0);
+
+        return $i1;
+    }
+
+    public abstract int read(char[], int, int) throws java.io.IOException;
+
+    public long skip(long) throws java.io.IOException
+    {
+        java.lang.Throwable $r7;
+        long l0, $l2, $l4, $l5, $l6, $l9, l11;
+        byte $b1, $b12;
+        int i3, $i7, $i8, $i10, $i13, $i14, $i16;
+        java.io.Reader r0;
+        java.lang.IllegalArgumentException $r8;
+        char[] $r2, $r3, $r4, $r5;
+        java.lang.Object $r1;
+
+        r0 := @this: java.io.Reader;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        $i13 = (int) $b1;
+
+        if $i13 >= 0 goto label01;
+
+        $r8 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("skip value is negative");
+
+        throw $r8;
+
+     label01:
+        $l2 = staticinvoke <java.lang.Math: long min(long,long)>(l0, 8192L);
+
+        i3 = (int) $l2;
+
+        $r1 = r0.<java.io.Reader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label02:
+        $r2 = r0.<java.io.Reader: char[] skipBuffer>;
+
+        if $r2 == null goto label03;
+
+        $r5 = r0.<java.io.Reader: char[] skipBuffer>;
+
+        $i10 = lengthof $r5;
+
+        if $i10 >= i3 goto label04;
+
+     label03:
+        $r3 = newarray (char)[i3];
+
+        r0.<java.io.Reader: char[] skipBuffer> = $r3;
+
+     label04:
+        l11 = l0;
+
+     label05:
+        $b12 = l11 cmp 0L;
+
+        $i14 = (int) $b12;
+
+        if $i14 <= 0 goto label07;
+
+        $r4 = r0.<java.io.Reader: char[] skipBuffer>;
+
+        $l5 = (long) i3;
+
+        $l6 = staticinvoke <java.lang.Math: long min(long,long)>(l11, $l5);
+
+        $i7 = (int) $l6;
+
+        $i8 = virtualinvoke r0.<java.io.Reader: int read(char[],int,int)>($r4, 0, $i7);
+
+        $i16 = (int) -1;
+
+        if $i8 != $i16 goto label06;
+
+        goto label07;
+
+     label06:
+        $l9 = (long) $i8;
+
+        l11 = l11 - $l9;
+
+        goto label05;
+
+     label07:
+        $l4 = l0 - l11;
+
+        exitmonitor $r1;
+
+     label08:
+        return $l4;
+
+     label09:
+        $r7 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label10:
+        throw $r7;
+
+        catch java.lang.Throwable from label02 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    public boolean ready() throws java.io.IOException
+    {
+        java.io.Reader r0;
+
+        r0 := @this: java.io.Reader;
+
+        return 0;
+    }
+
+    public boolean markSupported()
+    {
+        java.io.Reader r0;
+
+        r0 := @this: java.io.Reader;
+
+        return 0;
+    }
+
+    public void mark(int) throws java.io.IOException
+    {
+        int i0;
+        java.io.IOException $r0;
+        java.io.Reader r1;
+
+        r1 := @this: java.io.Reader;
+
+        i0 := @parameter0: int;
+
+        $r0 = new java.io.IOException;
+
+        specialinvoke $r0.<java.io.IOException: void <init>(java.lang.String)>("mark() not supported");
+
+        throw $r0;
+    }
+
+    public void reset() throws java.io.IOException
+    {
+        java.io.IOException $r0;
+        java.io.Reader r1;
+
+        r1 := @this: java.io.Reader;
+
+        $r0 = new java.io.IOException;
+
+        specialinvoke $r0.<java.io.IOException: void <init>(java.lang.String)>("reset() not supported");
+
+        throw $r0;
+    }
+
+    public abstract void close() throws java.io.IOException;
+
+    public static void <clinit>()
+    {
+        <java.io.Reader: int maxSkipBufferSize> = 8192;
+
+        return;
+    }
+}

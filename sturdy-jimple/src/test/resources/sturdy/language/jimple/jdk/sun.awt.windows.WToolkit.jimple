@@ -1,0 +1,2777 @@
+public final class sun.awt.windows.WToolkit extends sun.awt.SunToolkit implements java.lang.Runnable
+{
+    private static final sun.util.logging.PlatformLogger log;
+    public static final java.lang.String XPSTYLE_THEME_ACTIVE;
+    static java.awt.GraphicsConfiguration config;
+    sun.awt.windows.WClipboard clipboard;
+    private java.util.Hashtable cacheFontPeer;
+    private sun.awt.windows.WDesktopProperties wprops;
+    protected boolean dynamicLayoutSetting;
+    private static boolean areExtraMouseButtonsEnabled;
+    private static boolean loaded;
+    private final java.lang.Object anchor;
+    private boolean inited;
+    static java.awt.image.ColorModel screenmodel;
+    private static java.util.concurrent.ExecutorService displayChangeExecutor;
+    private static final java.lang.String prefix;
+    private static final java.lang.String postfix;
+    private static final java.lang.String awtPrefix;
+    private static final java.lang.String dndPrefix;
+    private static final java.lang.ref.WeakReference NULL_COMPONENT_WR;
+    private volatile java.lang.ref.WeakReference compOnTouchDownEvent;
+    private volatile java.lang.ref.WeakReference compOnMousePressedEvent;
+
+    private static native void initIDs();
+
+    public static void loadLibraries()
+    {
+        sun.awt.windows.WToolkit$1 $r0;
+        boolean $z0;
+
+        $z0 = <sun.awt.windows.WToolkit: boolean loaded>;
+
+        if $z0 != 0 goto label1;
+
+        $r0 = new sun.awt.windows.WToolkit$1;
+
+        specialinvoke $r0.<sun.awt.windows.WToolkit$1: void <init>()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        <sun.awt.windows.WToolkit: boolean loaded> = 1;
+
+     label1:
+        return;
+    }
+
+    private static native java.lang.String getWindowsVersion();
+
+    private static native void disableCustomPalette();
+
+    public static void resetGC()
+    {
+        java.awt.GraphicsConfiguration $r2;
+        java.awt.GraphicsDevice $r1;
+        java.awt.GraphicsEnvironment $r0;
+        boolean $z0;
+
+        $z0 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        if $z0 == 0 goto label1;
+
+        <sun.awt.windows.WToolkit: java.awt.GraphicsConfiguration config> = null;
+
+        goto label2;
+
+     label1:
+        $r0 = staticinvoke <java.awt.GraphicsEnvironment: java.awt.GraphicsEnvironment getLocalGraphicsEnvironment()>();
+
+        $r1 = virtualinvoke $r0.<java.awt.GraphicsEnvironment: java.awt.GraphicsDevice getDefaultScreenDevice()>();
+
+        $r2 = virtualinvoke $r1.<java.awt.GraphicsDevice: java.awt.GraphicsConfiguration getDefaultConfiguration()>();
+
+        <sun.awt.windows.WToolkit: java.awt.GraphicsConfiguration config> = $r2;
+
+     label2:
+        return;
+    }
+
+    public static native boolean embeddedInit();
+
+    public static native boolean embeddedDispose();
+
+    public native void embeddedEventLoopIdleProcessing();
+
+    private static native void postDispose();
+
+    private static native boolean startToolkitThread(java.lang.Runnable, java.lang.ThreadGroup);
+
+    public void <init>()
+    {
+        java.lang.Throwable $r16;
+        java.lang.ThreadGroup $r14;
+        java.lang.Thread $r13;
+        java.lang.String $r8, $r12;
+        java.lang.ref.WeakReference $r2, $r3;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        sun.awt.windows.WToolkit r0;
+        java.security.PrivilegedAction $r6;
+        sun.awt.windows.WToolkit$ToolkitDisposer $r4;
+        java.lang.InterruptedException $r15;
+        java.lang.Object $r1, $r5, $r7;
+        java.lang.StringBuilder $r9, $r10, $r11;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        specialinvoke r0.<sun.awt.SunToolkit: void <init>()>();
+
+        r0.<sun.awt.windows.WToolkit: boolean dynamicLayoutSetting> = 0;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<sun.awt.windows.WToolkit: java.lang.Object anchor> = $r1;
+
+        r0.<sun.awt.windows.WToolkit: boolean inited> = 0;
+
+        $r2 = <sun.awt.windows.WToolkit: java.lang.ref.WeakReference NULL_COMPONENT_WR>;
+
+        r0.<sun.awt.windows.WToolkit: java.lang.ref.WeakReference compOnTouchDownEvent> = $r2;
+
+        $r3 = <sun.awt.windows.WToolkit: java.lang.ref.WeakReference NULL_COMPONENT_WR>;
+
+        r0.<sun.awt.windows.WToolkit: java.lang.ref.WeakReference compOnMousePressedEvent> = $r3;
+
+        $z0 = staticinvoke <sun.misc.PerformanceLogger: boolean loggingEnabled()>();
+
+        if $z0 == 0 goto label01;
+
+        staticinvoke <sun.misc.PerformanceLogger: int setTime(java.lang.String)>("WToolkit construction");
+
+     label01:
+        $r5 = r0.<sun.awt.windows.WToolkit: java.lang.Object anchor>;
+
+        $r4 = new sun.awt.windows.WToolkit$ToolkitDisposer;
+
+        specialinvoke $r4.<sun.awt.windows.WToolkit$ToolkitDisposer: void <init>()>();
+
+        staticinvoke <sun.java2d.Disposer: void addRecord(java.lang.Object,sun.java2d.DisposerRecord)>($r5, $r4);
+
+        staticinvoke <sun.awt.AWTAutoShutdown: void notifyToolkitThreadBusy()>();
+
+        $r6 = staticinvoke <sun.awt.windows.WToolkit$getRootThreadGroup__472: java.security.PrivilegedAction bootstrap$()>();
+
+        $r7 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r6);
+
+        $r14 = (java.lang.ThreadGroup) $r7;
+
+        $z1 = staticinvoke <sun.awt.windows.WToolkit: boolean startToolkitThread(java.lang.Runnable,java.lang.ThreadGroup)>(r0, $r14);
+
+        if $z1 != 0 goto label02;
+
+        $r13 = new java.lang.Thread;
+
+        specialinvoke $r13.<java.lang.Thread: void <init>(java.lang.ThreadGroup,java.lang.Runnable,java.lang.String)>($r14, r0, "AWT-Windows");
+
+        virtualinvoke $r13.<java.lang.Thread: void setDaemon(boolean)>(1);
+
+        virtualinvoke $r13.<java.lang.Thread: void start()>();
+
+     label02:
+        entermonitor r0;
+
+     label03:
+        $z5 = r0.<sun.awt.windows.WToolkit: boolean inited>;
+
+        if $z5 != 0 goto label04;
+
+        virtualinvoke r0.<java.lang.Object: void wait()>();
+
+        goto label03;
+
+     label04:
+        exitmonitor r0;
+
+     label05:
+        goto label08;
+
+     label06:
+        $r16 := @caughtexception;
+
+        exitmonitor r0;
+
+     label07:
+        throw $r16;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r15 := @caughtexception;
+
+     label10:
+        virtualinvoke r0.<sun.awt.windows.WToolkit: void setDynamicLayout(boolean)>(1);
+
+        $r8 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String,java.lang.String)>("sun.awt.enableExtraMouseButtons", "true");
+
+        $z2 = staticinvoke <java.lang.Boolean: boolean parseBoolean(java.lang.String)>($r8);
+
+        <sun.awt.windows.WToolkit: boolean areExtraMouseButtonsEnabled> = $z2;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $z3 = <sun.awt.windows.WToolkit: boolean areExtraMouseButtonsEnabled>;
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z3);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <java.lang.System: java.lang.String setProperty(java.lang.String,java.lang.String)>("sun.awt.enableExtraMouseButtons", $r12);
+
+        $z4 = <sun.awt.windows.WToolkit: boolean areExtraMouseButtonsEnabled>;
+
+        staticinvoke <sun.awt.windows.WToolkit: void setExtraMouseButtonsEnabledNative(boolean)>($z4);
+
+        return;
+
+        catch java.lang.Throwable from label03 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+        catch java.lang.InterruptedException from label02 to label08 with label09;
+    }
+
+    private final void registerShutdownHook()
+    {
+        sun.awt.windows.WToolkit r0;
+        java.security.PrivilegedAction $r1;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        $r1 = staticinvoke <sun.awt.windows.WToolkit$lambda_registerShutdownHook_0__473: java.security.PrivilegedAction bootstrap$(sun.awt.windows.WToolkit)>(r0);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        return;
+    }
+
+    public void run()
+    {
+        java.lang.Throwable $r3;
+        java.lang.Thread $r1;
+        java.security.PrivilegedAction $r0;
+        sun.awt.windows.WToolkit r2;
+        boolean $z0;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        $r0 = staticinvoke <sun.awt.windows.WToolkit$lambda_run_1__474: java.security.PrivilegedAction bootstrap$()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r1.<java.lang.Thread: void setPriority(int)>(6);
+
+        $z0 = specialinvoke r2.<sun.awt.windows.WToolkit: boolean init()>();
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r2.<sun.awt.windows.WToolkit: void registerShutdownHook()>();
+
+     label1:
+        entermonitor r2;
+
+     label2:
+        r2.<sun.awt.windows.WToolkit: boolean inited> = 1;
+
+        virtualinvoke r2.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor r2;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r3 := @caughtexception;
+
+        exitmonitor r2;
+
+     label5:
+        throw $r3;
+
+     label6:
+        if $z0 == 0 goto label7;
+
+        specialinvoke r2.<sun.awt.windows.WToolkit: void eventLoop()>();
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private native boolean init();
+
+    private native void eventLoop();
+
+    public native void shutdown();
+
+    static native void startSecondaryEventLoop();
+
+    static native void quitSecondaryEventLoop();
+
+    public java.awt.peer.ButtonPeer createButton(java.awt.Button)
+    {
+        sun.awt.windows.WToolkit r2;
+        sun.awt.windows.WButtonPeer $r0;
+        java.awt.Button r1;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.Button;
+
+        $r0 = new sun.awt.windows.WButtonPeer;
+
+        specialinvoke $r0.<sun.awt.windows.WButtonPeer: void <init>(java.awt.Button)>(r1);
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetCreatedPeer(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return $r0;
+    }
+
+    public java.awt.peer.TextFieldPeer createTextField(java.awt.TextField)
+    {
+        sun.awt.windows.WToolkit r2;
+        sun.awt.windows.WTextFieldPeer $r0;
+        java.awt.TextField r1;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.TextField;
+
+        $r0 = new sun.awt.windows.WTextFieldPeer;
+
+        specialinvoke $r0.<sun.awt.windows.WTextFieldPeer: void <init>(java.awt.TextField)>(r1);
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetCreatedPeer(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return $r0;
+    }
+
+    public java.awt.peer.LabelPeer createLabel(java.awt.Label)
+    {
+        sun.awt.windows.WLabelPeer $r0;
+        sun.awt.windows.WToolkit r2;
+        java.awt.Label r1;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.Label;
+
+        $r0 = new sun.awt.windows.WLabelPeer;
+
+        specialinvoke $r0.<sun.awt.windows.WLabelPeer: void <init>(java.awt.Label)>(r1);
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetCreatedPeer(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return $r0;
+    }
+
+    public java.awt.peer.ListPeer createList(java.awt.List)
+    {
+        java.awt.List r1;
+        sun.awt.windows.WListPeer $r0;
+        sun.awt.windows.WToolkit r2;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.List;
+
+        $r0 = new sun.awt.windows.WListPeer;
+
+        specialinvoke $r0.<sun.awt.windows.WListPeer: void <init>(java.awt.List)>(r1);
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetCreatedPeer(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return $r0;
+    }
+
+    public java.awt.peer.CheckboxPeer createCheckbox(java.awt.Checkbox)
+    {
+        sun.awt.windows.WCheckboxPeer $r0;
+        sun.awt.windows.WToolkit r2;
+        java.awt.Checkbox r1;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.Checkbox;
+
+        $r0 = new sun.awt.windows.WCheckboxPeer;
+
+        specialinvoke $r0.<sun.awt.windows.WCheckboxPeer: void <init>(java.awt.Checkbox)>(r1);
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetCreatedPeer(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return $r0;
+    }
+
+    public java.awt.peer.ScrollbarPeer createScrollbar(java.awt.Scrollbar)
+    {
+        sun.awt.windows.WToolkit r2;
+        sun.awt.windows.WScrollbarPeer $r0;
+        java.awt.Scrollbar r1;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.Scrollbar;
+
+        $r0 = new sun.awt.windows.WScrollbarPeer;
+
+        specialinvoke $r0.<sun.awt.windows.WScrollbarPeer: void <init>(java.awt.Scrollbar)>(r1);
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetCreatedPeer(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return $r0;
+    }
+
+    public java.awt.peer.ScrollPanePeer createScrollPane(java.awt.ScrollPane)
+    {
+        java.awt.ScrollPane r1;
+        sun.awt.windows.WToolkit r2;
+        sun.awt.windows.WScrollPanePeer $r0;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.ScrollPane;
+
+        $r0 = new sun.awt.windows.WScrollPanePeer;
+
+        specialinvoke $r0.<sun.awt.windows.WScrollPanePeer: void <init>(java.awt.Component)>(r1);
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetCreatedPeer(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return $r0;
+    }
+
+    public java.awt.peer.TextAreaPeer createTextArea(java.awt.TextArea)
+    {
+        sun.awt.windows.WTextAreaPeer $r0;
+        java.awt.TextArea r1;
+        sun.awt.windows.WToolkit r2;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.TextArea;
+
+        $r0 = new sun.awt.windows.WTextAreaPeer;
+
+        specialinvoke $r0.<sun.awt.windows.WTextAreaPeer: void <init>(java.awt.TextArea)>(r1);
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetCreatedPeer(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return $r0;
+    }
+
+    public java.awt.peer.ChoicePeer createChoice(java.awt.Choice)
+    {
+        java.awt.Choice r1;
+        sun.awt.windows.WChoicePeer $r0;
+        sun.awt.windows.WToolkit r2;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.Choice;
+
+        $r0 = new sun.awt.windows.WChoicePeer;
+
+        specialinvoke $r0.<sun.awt.windows.WChoicePeer: void <init>(java.awt.Choice)>(r1);
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetCreatedPeer(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return $r0;
+    }
+
+    public java.awt.peer.FramePeer createFrame(java.awt.Frame)
+    {
+        java.awt.Frame r1;
+        sun.awt.windows.WToolkit r2;
+        sun.awt.windows.WFramePeer $r0;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.Frame;
+
+        $r0 = new sun.awt.windows.WFramePeer;
+
+        specialinvoke $r0.<sun.awt.windows.WFramePeer: void <init>(java.awt.Frame)>(r1);
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetCreatedPeer(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return $r0;
+    }
+
+    public java.awt.peer.FramePeer createLightweightFrame(sun.awt.LightweightFrame)
+    {
+        sun.awt.windows.WLightweightFramePeer $r0;
+        sun.awt.LightweightFrame r1;
+        sun.awt.windows.WToolkit r2;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: sun.awt.LightweightFrame;
+
+        $r0 = new sun.awt.windows.WLightweightFramePeer;
+
+        specialinvoke $r0.<sun.awt.windows.WLightweightFramePeer: void <init>(sun.awt.LightweightFrame)>(r1);
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetCreatedPeer(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return $r0;
+    }
+
+    public java.awt.peer.CanvasPeer createCanvas(java.awt.Canvas)
+    {
+        sun.awt.windows.WCanvasPeer $r0;
+        sun.awt.windows.WToolkit r2;
+        java.awt.Canvas r1;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.Canvas;
+
+        $r0 = new sun.awt.windows.WCanvasPeer;
+
+        specialinvoke $r0.<sun.awt.windows.WCanvasPeer: void <init>(java.awt.Component)>(r1);
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetCreatedPeer(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return $r0;
+    }
+
+    public void disableBackgroundErase(java.awt.Canvas)
+    {
+        sun.awt.windows.WCanvasPeer r2;
+        java.lang.IllegalStateException $r3;
+        java.awt.peer.ComponentPeer $r1;
+        sun.awt.windows.WToolkit r4;
+        java.awt.Canvas r0;
+
+        r4 := @this: sun.awt.windows.WToolkit;
+
+        r0 := @parameter0: java.awt.Canvas;
+
+        $r1 = virtualinvoke r0.<java.awt.Canvas: java.awt.peer.ComponentPeer getPeer()>();
+
+        r2 = (sun.awt.windows.WCanvasPeer) $r1;
+
+        if r2 != null goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Canvas must have a valid peer");
+
+        throw $r3;
+
+     label1:
+        virtualinvoke r2.<sun.awt.windows.WCanvasPeer: void disableBackgroundErase()>();
+
+        return;
+    }
+
+    public java.awt.peer.PanelPeer createPanel(java.awt.Panel)
+    {
+        java.awt.Panel r1;
+        sun.awt.windows.WPanelPeer $r0;
+        sun.awt.windows.WToolkit r2;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.Panel;
+
+        $r0 = new sun.awt.windows.WPanelPeer;
+
+        specialinvoke $r0.<sun.awt.windows.WPanelPeer: void <init>(java.awt.Component)>(r1);
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetCreatedPeer(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return $r0;
+    }
+
+    public java.awt.peer.WindowPeer createWindow(java.awt.Window)
+    {
+        sun.awt.windows.WWindowPeer $r0;
+        sun.awt.windows.WToolkit r2;
+        java.awt.Window r1;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.Window;
+
+        $r0 = new sun.awt.windows.WWindowPeer;
+
+        specialinvoke $r0.<sun.awt.windows.WWindowPeer: void <init>(java.awt.Window)>(r1);
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetCreatedPeer(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return $r0;
+    }
+
+    public java.awt.peer.DialogPeer createDialog(java.awt.Dialog)
+    {
+        sun.awt.windows.WDialogPeer $r0;
+        sun.awt.windows.WToolkit r2;
+        java.awt.Dialog r1;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.Dialog;
+
+        $r0 = new sun.awt.windows.WDialogPeer;
+
+        specialinvoke $r0.<sun.awt.windows.WDialogPeer: void <init>(java.awt.Dialog)>(r1);
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetCreatedPeer(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return $r0;
+    }
+
+    public java.awt.peer.FileDialogPeer createFileDialog(java.awt.FileDialog)
+    {
+        java.awt.FileDialog r1;
+        sun.awt.windows.WToolkit r2;
+        sun.awt.windows.WFileDialogPeer $r0;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.FileDialog;
+
+        $r0 = new sun.awt.windows.WFileDialogPeer;
+
+        specialinvoke $r0.<sun.awt.windows.WFileDialogPeer: void <init>(java.awt.FileDialog)>(r1);
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetCreatedPeer(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return $r0;
+    }
+
+    public java.awt.peer.MenuBarPeer createMenuBar(java.awt.MenuBar)
+    {
+        sun.awt.windows.WMenuBarPeer $r0;
+        sun.awt.windows.WToolkit r2;
+        java.awt.MenuBar r1;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.MenuBar;
+
+        $r0 = new sun.awt.windows.WMenuBarPeer;
+
+        specialinvoke $r0.<sun.awt.windows.WMenuBarPeer: void <init>(java.awt.MenuBar)>(r1);
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetCreatedPeer(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return $r0;
+    }
+
+    public java.awt.peer.MenuPeer createMenu(java.awt.Menu)
+    {
+        java.awt.Menu r1;
+        sun.awt.windows.WMenuPeer $r0;
+        sun.awt.windows.WToolkit r2;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.Menu;
+
+        $r0 = new sun.awt.windows.WMenuPeer;
+
+        specialinvoke $r0.<sun.awt.windows.WMenuPeer: void <init>(java.awt.Menu)>(r1);
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetCreatedPeer(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return $r0;
+    }
+
+    public java.awt.peer.PopupMenuPeer createPopupMenu(java.awt.PopupMenu)
+    {
+        sun.awt.windows.WToolkit r2;
+        sun.awt.windows.WPopupMenuPeer $r0;
+        java.awt.PopupMenu r1;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.PopupMenu;
+
+        $r0 = new sun.awt.windows.WPopupMenuPeer;
+
+        specialinvoke $r0.<sun.awt.windows.WPopupMenuPeer: void <init>(java.awt.PopupMenu)>(r1);
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetCreatedPeer(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return $r0;
+    }
+
+    public java.awt.peer.MenuItemPeer createMenuItem(java.awt.MenuItem)
+    {
+        java.awt.MenuItem r1;
+        sun.awt.windows.WToolkit r2;
+        sun.awt.windows.WMenuItemPeer $r0;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.MenuItem;
+
+        $r0 = new sun.awt.windows.WMenuItemPeer;
+
+        specialinvoke $r0.<sun.awt.windows.WMenuItemPeer: void <init>(java.awt.MenuItem)>(r1);
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetCreatedPeer(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return $r0;
+    }
+
+    public java.awt.peer.CheckboxMenuItemPeer createCheckboxMenuItem(java.awt.CheckboxMenuItem)
+    {
+        sun.awt.windows.WCheckboxMenuItemPeer $r0;
+        sun.awt.windows.WToolkit r2;
+        java.awt.CheckboxMenuItem r1;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.CheckboxMenuItem;
+
+        $r0 = new sun.awt.windows.WCheckboxMenuItemPeer;
+
+        specialinvoke $r0.<sun.awt.windows.WCheckboxMenuItemPeer: void <init>(java.awt.CheckboxMenuItem)>(r1);
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetCreatedPeer(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return $r0;
+    }
+
+    public java.awt.peer.RobotPeer createRobot(java.awt.Robot, java.awt.GraphicsDevice)
+    {
+        sun.awt.windows.WRobotPeer $r0;
+        java.awt.Robot r3;
+        java.awt.GraphicsDevice r1;
+        sun.awt.windows.WToolkit r2;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r3 := @parameter0: java.awt.Robot;
+
+        r1 := @parameter1: java.awt.GraphicsDevice;
+
+        $r0 = new sun.awt.windows.WRobotPeer;
+
+        specialinvoke $r0.<sun.awt.windows.WRobotPeer: void <init>(java.awt.GraphicsDevice)>(r1);
+
+        return $r0;
+    }
+
+    public sun.awt.windows.WEmbeddedFramePeer createEmbeddedFrame(sun.awt.windows.WEmbeddedFrame)
+    {
+        sun.awt.windows.WEmbeddedFramePeer $r0;
+        sun.awt.windows.WToolkit r2;
+        sun.awt.windows.WEmbeddedFrame r1;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: sun.awt.windows.WEmbeddedFrame;
+
+        $r0 = new sun.awt.windows.WEmbeddedFramePeer;
+
+        specialinvoke $r0.<sun.awt.windows.WEmbeddedFramePeer: void <init>(sun.awt.EmbeddedFrame)>(r1);
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetCreatedPeer(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return $r0;
+    }
+
+    sun.awt.windows.WPrintDialogPeer createWPrintDialog(sun.awt.windows.WPrintDialog)
+    {
+        sun.awt.windows.WPrintDialogPeer $r0;
+        sun.awt.windows.WToolkit r2;
+        sun.awt.windows.WPrintDialog r1;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: sun.awt.windows.WPrintDialog;
+
+        $r0 = new sun.awt.windows.WPrintDialogPeer;
+
+        specialinvoke $r0.<sun.awt.windows.WPrintDialogPeer: void <init>(sun.awt.windows.WPrintDialog)>(r1);
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetCreatedPeer(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return $r0;
+    }
+
+    sun.awt.windows.WPageDialogPeer createWPageDialog(sun.awt.windows.WPageDialog)
+    {
+        sun.awt.windows.WPageDialogPeer $r0;
+        sun.awt.windows.WPageDialog r1;
+        sun.awt.windows.WToolkit r2;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: sun.awt.windows.WPageDialog;
+
+        $r0 = new sun.awt.windows.WPageDialogPeer;
+
+        specialinvoke $r0.<sun.awt.windows.WPageDialogPeer: void <init>(sun.awt.windows.WPageDialog)>(r1);
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetCreatedPeer(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return $r0;
+    }
+
+    public java.awt.peer.TrayIconPeer createTrayIcon(java.awt.TrayIcon)
+    {
+        java.awt.TrayIcon r1;
+        sun.awt.windows.WToolkit r2;
+        sun.awt.windows.WTrayIconPeer $r0;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.TrayIcon;
+
+        $r0 = new sun.awt.windows.WTrayIconPeer;
+
+        specialinvoke $r0.<sun.awt.windows.WTrayIconPeer: void <init>(java.awt.TrayIcon)>(r1);
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetCreatedPeer(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return $r0;
+    }
+
+    public java.awt.peer.SystemTrayPeer createSystemTray(java.awt.SystemTray)
+    {
+        java.awt.SystemTray r1;
+        sun.awt.windows.WToolkit r2;
+        sun.awt.windows.WSystemTrayPeer $r0;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.SystemTray;
+
+        $r0 = new sun.awt.windows.WSystemTrayPeer;
+
+        specialinvoke $r0.<sun.awt.windows.WSystemTrayPeer: void <init>(java.awt.SystemTray)>(r1);
+
+        return $r0;
+    }
+
+    public boolean isTraySupported()
+    {
+        sun.awt.windows.WToolkit r0;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        return 1;
+    }
+
+    public sun.awt.datatransfer.DataTransferer getDataTransferer()
+    {
+        sun.awt.windows.WDataTransferer $r0;
+        sun.awt.windows.WToolkit r1;
+
+        r1 := @this: sun.awt.windows.WToolkit;
+
+        $r0 = staticinvoke <sun.awt.windows.WDataTransferer: sun.awt.windows.WDataTransferer getInstanceImpl()>();
+
+        return $r0;
+    }
+
+    public java.awt.peer.KeyboardFocusManagerPeer getKeyboardFocusManagerPeer() throws java.awt.HeadlessException
+    {
+        sun.awt.windows.WToolkit r1;
+        sun.awt.windows.WKeyboardFocusManagerPeer $r0;
+
+        r1 := @this: sun.awt.windows.WToolkit;
+
+        $r0 = staticinvoke <sun.awt.windows.WKeyboardFocusManagerPeer: sun.awt.windows.WKeyboardFocusManagerPeer getInstance()>();
+
+        return $r0;
+    }
+
+    private native void setDynamicLayoutNative(boolean);
+
+    public void setDynamicLayout(boolean)
+    {
+        sun.awt.windows.WToolkit r0;
+        boolean z0, $z1;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        z0 := @parameter0: boolean;
+
+        $z1 = r0.<sun.awt.windows.WToolkit: boolean dynamicLayoutSetting>;
+
+        if z0 != $z1 goto label1;
+
+        return;
+
+     label1:
+        r0.<sun.awt.windows.WToolkit: boolean dynamicLayoutSetting> = z0;
+
+        specialinvoke r0.<sun.awt.windows.WToolkit: void setDynamicLayoutNative(boolean)>(z0);
+
+        return;
+    }
+
+    protected boolean isDynamicLayoutSet()
+    {
+        sun.awt.windows.WToolkit r0;
+        boolean $z0;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        $z0 = r0.<sun.awt.windows.WToolkit: boolean dynamicLayoutSetting>;
+
+        return $z0;
+    }
+
+    private native boolean isDynamicLayoutSupportedNative();
+
+    public boolean isDynamicLayoutActive()
+    {
+        sun.awt.windows.WToolkit r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        $z0 = virtualinvoke r0.<sun.awt.windows.WToolkit: boolean isDynamicLayoutSet()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = specialinvoke r0.<sun.awt.windows.WToolkit: boolean isDynamicLayoutSupported()>();
+
+        if $z1 == 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+    }
+
+    public boolean isFrameStateSupported(int)
+    {
+        int i0;
+        sun.awt.windows.WToolkit r0;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        i0 := @parameter0: int;
+
+        lookupswitch(i0)
+        {
+            case 0: goto label1;
+            case 1: goto label1;
+            case 6: goto label1;
+            default: goto label2;
+        };
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    static native java.awt.image.ColorModel makeColorModel();
+
+    static java.awt.image.ColorModel getStaticColorModel()
+    {
+        java.awt.GraphicsConfiguration $r0, $r1;
+        java.awt.image.ColorModel $r2;
+        java.lang.IllegalArgumentException $r3;
+        boolean $z0;
+
+        $z0 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        if $z0 == 0 goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $r0 = <sun.awt.windows.WToolkit: java.awt.GraphicsConfiguration config>;
+
+        if $r0 != null goto label2;
+
+        staticinvoke <sun.awt.windows.WToolkit: void resetGC()>();
+
+     label2:
+        $r1 = <sun.awt.windows.WToolkit: java.awt.GraphicsConfiguration config>;
+
+        $r2 = virtualinvoke $r1.<java.awt.GraphicsConfiguration: java.awt.image.ColorModel getColorModel()>();
+
+        return $r2;
+    }
+
+    public java.awt.image.ColorModel getColorModel()
+    {
+        java.awt.image.ColorModel $r0;
+        sun.awt.windows.WToolkit r1;
+
+        r1 := @this: sun.awt.windows.WToolkit;
+
+        $r0 = staticinvoke <sun.awt.windows.WToolkit: java.awt.image.ColorModel getStaticColorModel()>();
+
+        return $r0;
+    }
+
+    public java.awt.Insets getScreenInsets(java.awt.GraphicsConfiguration)
+    {
+        java.awt.GraphicsConfiguration r1;
+        java.awt.Insets $r4;
+        java.awt.GraphicsDevice $r2;
+        int $i0;
+        sun.awt.windows.WToolkit r0;
+        sun.awt.Win32GraphicsDevice $r3;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.GraphicsConfiguration;
+
+        $r2 = virtualinvoke r1.<java.awt.GraphicsConfiguration: java.awt.GraphicsDevice getDevice()>();
+
+        $r3 = (sun.awt.Win32GraphicsDevice) $r2;
+
+        $i0 = virtualinvoke $r3.<sun.awt.Win32GraphicsDevice: int getScreen()>();
+
+        $r4 = specialinvoke r0.<sun.awt.windows.WToolkit: java.awt.Insets getScreenInsets(int)>($i0);
+
+        return $r4;
+    }
+
+    public int getScreenResolution()
+    {
+        int $i0;
+        sun.awt.Win32GraphicsEnvironment r1;
+        sun.awt.windows.WToolkit r2;
+        java.awt.GraphicsEnvironment $r0;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        $r0 = staticinvoke <java.awt.GraphicsEnvironment: java.awt.GraphicsEnvironment getLocalGraphicsEnvironment()>();
+
+        r1 = (sun.awt.Win32GraphicsEnvironment) $r0;
+
+        $i0 = virtualinvoke r1.<sun.awt.Win32GraphicsEnvironment: int getXResolution()>();
+
+        return $i0;
+    }
+
+    protected native int getScreenWidth();
+
+    protected native int getScreenHeight();
+
+    private native java.awt.Insets getScreenInsets(int);
+
+    public java.awt.FontMetrics getFontMetrics(java.awt.Font)
+    {
+        sun.font.SunFontManager $r4;
+        java.awt.Font r2;
+        sun.awt.windows.WToolkit r1;
+        sun.font.FontManager $r0;
+        java.awt.FontMetrics $r3, $r5;
+        boolean $z0, $z1;
+
+        r1 := @this: sun.awt.windows.WToolkit;
+
+        r2 := @parameter0: java.awt.Font;
+
+        $r0 = staticinvoke <sun.font.FontManagerFactory: sun.font.FontManager getInstance()>();
+
+        $z0 = $r0 instanceof sun.font.SunFontManager;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = (sun.font.SunFontManager) $r0;
+
+        $z1 = virtualinvoke $r4.<sun.font.SunFontManager: boolean usePlatformFontMetrics()>();
+
+        if $z1 == 0 goto label1;
+
+        $r5 = staticinvoke <sun.awt.windows.WFontMetrics: java.awt.FontMetrics getFontMetrics(java.awt.Font)>(r2);
+
+        return $r5;
+
+     label1:
+        $r3 = specialinvoke r1.<sun.awt.SunToolkit: java.awt.FontMetrics getFontMetrics(java.awt.Font)>(r2);
+
+        return $r3;
+    }
+
+    public java.awt.peer.FontPeer getFontPeer(java.lang.String, int)
+    {
+        sun.awt.windows.WFontPeer $r4;
+        int i0;
+        java.lang.String r0, $r1, $r11, $r17;
+        java.util.Hashtable $r3, $r5, $r6, $r8, $r12, $r14;
+        java.awt.peer.FontPeer r19;
+        sun.awt.windows.WToolkit r2;
+        java.lang.StringBuilder $r7, $r9, $r10, $r13, $r15, $r16;
+        java.lang.Object $r18;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r0 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $r1 = virtualinvoke r0.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $r3 = r2.<sun.awt.windows.WToolkit: java.util.Hashtable cacheFontPeer>;
+
+        if null == $r3 goto label1;
+
+        $r14 = r2.<sun.awt.windows.WToolkit: java.util.Hashtable cacheFontPeer>;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r18 = virtualinvoke $r14.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r17);
+
+        r19 = (java.awt.peer.FontPeer) $r18;
+
+        if null == r19 goto label1;
+
+        return r19;
+
+     label1:
+        $r4 = new sun.awt.windows.WFontPeer;
+
+        specialinvoke $r4.<sun.awt.windows.WFontPeer: void <init>(java.lang.String,int)>(r0, i0);
+
+        if $r4 == null goto label3;
+
+        $r5 = r2.<sun.awt.windows.WToolkit: java.util.Hashtable cacheFontPeer>;
+
+        if null != $r5 goto label2;
+
+        $r12 = new java.util.Hashtable;
+
+        specialinvoke $r12.<java.util.Hashtable: void <init>(int,float)>(5, 0.9F);
+
+        r2.<sun.awt.windows.WToolkit: java.util.Hashtable cacheFontPeer> = $r12;
+
+     label2:
+        $r6 = r2.<sun.awt.windows.WToolkit: java.util.Hashtable cacheFontPeer>;
+
+        if null == $r6 goto label3;
+
+        $r8 = r2.<sun.awt.windows.WToolkit: java.util.Hashtable cacheFontPeer>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r8.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r11, $r4);
+
+     label3:
+        return $r4;
+    }
+
+    private native void nativeSync();
+
+    public void sync()
+    {
+        sun.awt.windows.WToolkit r0;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        specialinvoke r0.<sun.awt.windows.WToolkit: void nativeSync()>();
+
+        staticinvoke <sun.java2d.opengl.OGLRenderQueue: void sync()>();
+
+        staticinvoke <sun.java2d.d3d.D3DRenderQueue: void sync()>();
+
+        return;
+    }
+
+    public java.awt.PrintJob getPrintJob(java.awt.Frame, java.lang.String, java.util.Properties)
+    {
+        java.awt.Frame r1;
+        java.util.Properties r4;
+        java.awt.PrintJob $r3;
+        java.lang.String r2;
+        sun.awt.windows.WToolkit r0;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.Frame;
+
+        r2 := @parameter1: java.lang.String;
+
+        r4 := @parameter2: java.util.Properties;
+
+        $r3 = virtualinvoke r0.<sun.awt.windows.WToolkit: java.awt.PrintJob getPrintJob(java.awt.Frame,java.lang.String,java.awt.JobAttributes,java.awt.PageAttributes)>(r1, r2, null, null);
+
+        return $r3;
+    }
+
+    public java.awt.PrintJob getPrintJob(java.awt.Frame, java.lang.String, java.awt.JobAttributes, java.awt.PageAttributes)
+    {
+        java.awt.Frame r0;
+        sun.awt.windows.WToolkit r6;
+        java.awt.JobAttributes r3;
+        java.lang.NullPointerException $r5;
+        sun.print.PrintJob2D $r1, r7;
+        java.awt.PageAttributes r4;
+        java.lang.String r2;
+        boolean $z0;
+
+        r6 := @this: sun.awt.windows.WToolkit;
+
+        r0 := @parameter0: java.awt.Frame;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.awt.JobAttributes;
+
+        r4 := @parameter3: java.awt.PageAttributes;
+
+        if r0 != null goto label1;
+
+        $r5 = new java.lang.NullPointerException;
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>(java.lang.String)>("frame must not be null");
+
+        throw $r5;
+
+     label1:
+        $r1 = new sun.print.PrintJob2D;
+
+        specialinvoke $r1.<sun.print.PrintJob2D: void <init>(java.awt.Frame,java.lang.String,java.awt.JobAttributes,java.awt.PageAttributes)>(r0, r2, r3, r4);
+
+        r7 = $r1;
+
+        $z0 = virtualinvoke $r1.<sun.print.PrintJob2D: boolean printDialog()>();
+
+        if $z0 != 0 goto label2;
+
+        r7 = null;
+
+     label2:
+        return r7;
+    }
+
+    public native void beep();
+
+    public boolean getLockingKeyState(int)
+    {
+        int i0;
+        sun.awt.windows.WToolkit r0;
+        java.lang.IllegalArgumentException $r1;
+        boolean $z0;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        i0 := @parameter0: int;
+
+        if i0 == 20 goto label1;
+
+        if i0 == 144 goto label1;
+
+        if i0 == 145 goto label1;
+
+        if i0 == 262 goto label1;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("invalid key for Toolkit.getLockingKeyState");
+
+        throw $r1;
+
+     label1:
+        $z0 = specialinvoke r0.<sun.awt.windows.WToolkit: boolean getLockingKeyStateNative(int)>(i0);
+
+        return $z0;
+    }
+
+    private native boolean getLockingKeyStateNative(int);
+
+    public void setLockingKeyState(int, boolean)
+    {
+        int i0;
+        sun.awt.windows.WToolkit r0;
+        java.lang.IllegalArgumentException $r1;
+        boolean z0;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        i0 := @parameter0: int;
+
+        z0 := @parameter1: boolean;
+
+        if i0 == 20 goto label1;
+
+        if i0 == 144 goto label1;
+
+        if i0 == 145 goto label1;
+
+        if i0 == 262 goto label1;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("invalid key for Toolkit.setLockingKeyState");
+
+        throw $r1;
+
+     label1:
+        specialinvoke r0.<sun.awt.windows.WToolkit: void setLockingKeyStateNative(int,boolean)>(i0, z0);
+
+        return;
+    }
+
+    private native void setLockingKeyStateNative(int, boolean);
+
+    public java.awt.datatransfer.Clipboard getSystemClipboard()
+    {
+        java.lang.Throwable $r6;
+        java.security.Permission $r5;
+        sun.awt.windows.WClipboard $r2, $r3, $r4;
+        sun.awt.windows.WToolkit r1;
+        java.lang.SecurityManager $r0;
+
+        r1 := @this: sun.awt.windows.WToolkit;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r5 = <sun.security.util.SecurityConstants$AWT: java.security.Permission ACCESS_CLIPBOARD_PERMISSION>;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r5);
+
+     label1:
+        entermonitor r1;
+
+     label2:
+        $r2 = r1.<sun.awt.windows.WToolkit: sun.awt.windows.WClipboard clipboard>;
+
+        if $r2 != null goto label3;
+
+        $r4 = new sun.awt.windows.WClipboard;
+
+        specialinvoke $r4.<sun.awt.windows.WClipboard: void <init>()>();
+
+        r1.<sun.awt.windows.WToolkit: sun.awt.windows.WClipboard clipboard> = $r4;
+
+     label3:
+        exitmonitor r1;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r6 := @caughtexception;
+
+        exitmonitor r1;
+
+     label6:
+        throw $r6;
+
+     label7:
+        $r3 = r1.<sun.awt.windows.WToolkit: sun.awt.windows.WClipboard clipboard>;
+
+        return $r3;
+
+        catch java.lang.Throwable from label2 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    protected native void loadSystemColors(int[]);
+
+    public static final java.lang.Object targetToPeer(java.lang.Object)
+    {
+        java.lang.Object r0, $r1;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $r1 = staticinvoke <sun.awt.SunToolkit: java.lang.Object targetToPeer(java.lang.Object)>(r0);
+
+        return $r1;
+    }
+
+    public static final void targetDisposedPeer(java.lang.Object, java.lang.Object)
+    {
+        java.lang.Object r0, r1;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r1 := @parameter1: java.lang.Object;
+
+        staticinvoke <sun.awt.SunToolkit: void targetDisposedPeer(java.lang.Object,java.lang.Object)>(r0, r1);
+
+        return;
+    }
+
+    public java.awt.im.spi.InputMethodDescriptor getInputMethodAdapterDescriptor()
+    {
+        sun.awt.windows.WToolkit r1;
+        sun.awt.windows.WInputMethodDescriptor $r0;
+
+        r1 := @this: sun.awt.windows.WToolkit;
+
+        $r0 = new sun.awt.windows.WInputMethodDescriptor;
+
+        specialinvoke $r0.<sun.awt.windows.WInputMethodDescriptor: void <init>()>();
+
+        return $r0;
+    }
+
+    public java.util.Map mapInputMethodHighlight(java.awt.im.InputMethodHighlight)
+    {
+        java.awt.im.InputMethodHighlight r0;
+        sun.awt.windows.WToolkit r2;
+        java.util.Map $r1;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r0 := @parameter0: java.awt.im.InputMethodHighlight;
+
+        $r1 = staticinvoke <sun.awt.windows.WInputMethod: java.util.Map mapInputMethodHighlight(java.awt.im.InputMethodHighlight)>(r0);
+
+        return $r1;
+    }
+
+    public boolean enableInputMethodsForTextComponent()
+    {
+        sun.awt.windows.WToolkit r0;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        return 1;
+    }
+
+    public java.util.Locale getDefaultKeyboardLocale()
+    {
+        sun.awt.windows.WToolkit r1;
+        java.util.Locale $r0, $r2;
+
+        r1 := @this: sun.awt.windows.WToolkit;
+
+        $r0 = staticinvoke <sun.awt.windows.WInputMethod: java.util.Locale getNativeLocale()>();
+
+        if $r0 != null goto label1;
+
+        $r2 = specialinvoke r1.<sun.awt.SunToolkit: java.util.Locale getDefaultKeyboardLocale()>();
+
+        return $r2;
+
+     label1:
+        return $r0;
+    }
+
+    public java.awt.Cursor createCustomCursor(java.awt.Image, java.awt.Point, java.lang.String) throws java.lang.IndexOutOfBoundsException
+    {
+        sun.awt.windows.WCustomCursor $r0;
+        java.awt.Image r1;
+        java.awt.Point r2;
+        java.lang.String r3;
+        sun.awt.windows.WToolkit r4;
+
+        r4 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.Image;
+
+        r2 := @parameter1: java.awt.Point;
+
+        r3 := @parameter2: java.lang.String;
+
+        $r0 = new sun.awt.windows.WCustomCursor;
+
+        specialinvoke $r0.<sun.awt.windows.WCustomCursor: void <init>(java.awt.Image,java.awt.Point,java.lang.String)>(r1, r2, r3);
+
+        return $r0;
+    }
+
+    public java.awt.Dimension getBestCursorSize(int, int)
+    {
+        java.awt.Dimension $r0;
+        int $i0, $i1, i2, i3;
+        sun.awt.windows.WToolkit r1;
+
+        r1 := @this: sun.awt.windows.WToolkit;
+
+        i2 := @parameter0: int;
+
+        i3 := @parameter1: int;
+
+        $r0 = new java.awt.Dimension;
+
+        $i0 = staticinvoke <sun.awt.windows.WCustomCursor: int getCursorWidth()>();
+
+        $i1 = staticinvoke <sun.awt.windows.WCustomCursor: int getCursorHeight()>();
+
+        specialinvoke $r0.<java.awt.Dimension: void <init>(int,int)>($i0, $i1);
+
+        return $r0;
+    }
+
+    public native int getMaximumCursorColors();
+
+    static void paletteChanged()
+    {
+        sun.awt.DisplayChangedListener $r1;
+        java.awt.GraphicsEnvironment $r0;
+        boolean $z0;
+
+        $r0 = staticinvoke <java.awt.GraphicsEnvironment: java.awt.GraphicsEnvironment getLocalGraphicsEnvironment()>();
+
+        $z0 = $r0 instanceof sun.awt.DisplayChangedListener;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = (sun.awt.DisplayChangedListener) $r0;
+
+        interfaceinvoke $r1.<sun.awt.DisplayChangedListener: void paletteChanged()>();
+
+     label1:
+        return;
+    }
+
+    public static void displayChanged()
+    {
+        sun.awt.AppContext $r1;
+        java.util.concurrent.ThreadFactory $r4;
+        java.lang.Runnable $r0;
+        java.util.concurrent.ExecutorService $r2, $r3, $r5;
+
+        $r0 = staticinvoke <sun.awt.windows.WToolkit$lambda_displayChanged_2__475: java.lang.Runnable bootstrap$()>();
+
+        $r1 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        if $r1 == null goto label1;
+
+        staticinvoke <java.awt.EventQueue: void invokeLater(java.lang.Runnable)>($r0);
+
+        goto label3;
+
+     label1:
+        $r2 = <sun.awt.windows.WToolkit: java.util.concurrent.ExecutorService displayChangeExecutor>;
+
+        if $r2 != null goto label2;
+
+        $r4 = staticinvoke <sun.awt.windows.WToolkit$lambda_displayChanged_3__476: java.util.concurrent.ThreadFactory bootstrap$()>();
+
+        $r5 = staticinvoke <java.util.concurrent.Executors: java.util.concurrent.ExecutorService newFixedThreadPool(int,java.util.concurrent.ThreadFactory)>(1, $r4);
+
+        <sun.awt.windows.WToolkit: java.util.concurrent.ExecutorService displayChangeExecutor> = $r5;
+
+     label2:
+        $r3 = <sun.awt.windows.WToolkit: java.util.concurrent.ExecutorService displayChangeExecutor>;
+
+        interfaceinvoke $r3.<java.util.concurrent.ExecutorService: java.util.concurrent.Future submit(java.lang.Runnable)>($r0);
+
+     label3:
+        return;
+    }
+
+    public java.awt.dnd.peer.DragSourceContextPeer createDragSourceContextPeer(java.awt.dnd.DragGestureEvent) throws java.awt.dnd.InvalidDnDOperationException
+    {
+        sun.awt.windows.WDragSourceContextPeer $r3;
+        sun.awt.LightweightFrame $r2;
+        java.awt.dnd.peer.DragSourceContextPeer $r4;
+        sun.awt.windows.WToolkit r5;
+        java.awt.dnd.DragGestureEvent r0;
+        java.awt.Component $r1;
+
+        r5 := @this: sun.awt.windows.WToolkit;
+
+        r0 := @parameter0: java.awt.dnd.DragGestureEvent;
+
+        $r1 = virtualinvoke r0.<java.awt.dnd.DragGestureEvent: java.awt.Component getComponent()>();
+
+        $r2 = staticinvoke <sun.awt.SunToolkit: sun.awt.LightweightFrame getLightweightFrame(java.awt.Component)>($r1);
+
+        if $r2 == null goto label1;
+
+        $r4 = virtualinvoke $r2.<sun.awt.LightweightFrame: java.awt.dnd.peer.DragSourceContextPeer createDragSourceContextPeer(java.awt.dnd.DragGestureEvent)>(r0);
+
+        return $r4;
+
+     label1:
+        $r3 = staticinvoke <sun.awt.windows.WDragSourceContextPeer: sun.awt.windows.WDragSourceContextPeer createDragSourceContextPeer(java.awt.dnd.DragGestureEvent)>(r0);
+
+        return $r3;
+    }
+
+    public java.awt.dnd.DragGestureRecognizer createDragGestureRecognizer(java.lang.Class, java.awt.dnd.DragSource, java.awt.Component, int, java.awt.dnd.DragGestureListener)
+    {
+        java.awt.dnd.DragGestureListener r6;
+        sun.awt.LightweightFrame $r1;
+        java.awt.dnd.DragSource r5;
+        sun.awt.windows.WToolkit r8;
+        java.awt.Component r0;
+        java.awt.dnd.DragGestureRecognizer $r7;
+        int i0;
+        java.lang.Class r2, $r3;
+        sun.awt.windows.WMouseDragGestureRecognizer $r4;
+        boolean $z0;
+
+        r8 := @this: sun.awt.windows.WToolkit;
+
+        r2 := @parameter0: java.lang.Class;
+
+        r5 := @parameter1: java.awt.dnd.DragSource;
+
+        r0 := @parameter2: java.awt.Component;
+
+        i0 := @parameter3: int;
+
+        r6 := @parameter4: java.awt.dnd.DragGestureListener;
+
+        $r1 = staticinvoke <sun.awt.SunToolkit: sun.awt.LightweightFrame getLightweightFrame(java.awt.Component)>(r0);
+
+        if $r1 == null goto label1;
+
+        $r7 = virtualinvoke $r1.<sun.awt.LightweightFrame: java.awt.dnd.DragGestureRecognizer createDragGestureRecognizer(java.lang.Class,java.awt.dnd.DragSource,java.awt.Component,int,java.awt.dnd.DragGestureListener)>(r2, r5, r0, i0, r6);
+
+        return $r7;
+
+     label1:
+        $r3 = class "Ljava/awt/dnd/MouseDragGestureRecognizer;";
+
+        $z0 = virtualinvoke $r3.<java.lang.Object: boolean equals(java.lang.Object)>(r2);
+
+        if $z0 == 0 goto label2;
+
+        $r4 = new sun.awt.windows.WMouseDragGestureRecognizer;
+
+        specialinvoke $r4.<sun.awt.windows.WMouseDragGestureRecognizer: void <init>(java.awt.dnd.DragSource,java.awt.Component,int,java.awt.dnd.DragGestureListener)>(r5, r0, i0, r6);
+
+        return $r4;
+
+     label2:
+        return null;
+    }
+
+    protected java.lang.Object lazilyLoadDesktopProperty(java.lang.String)
+    {
+        java.lang.Throwable $r11;
+        java.awt.Cursor $r10;
+        java.util.Map $r18;
+        int $i0, $i1;
+        java.lang.Boolean $r3;
+        java.lang.String r0, $r5, $r6, $r9, $r17;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.lang.RuntimeException $r13;
+        sun.awt.windows.WToolkit r1;
+        java.awt.AWTException $r12;
+        java.lang.Object $r2, $r19;
+        java.lang.StringBuilder $r4, $r7, $r8, $r14, $r15, $r16;
+
+        r1 := @this: sun.awt.windows.WToolkit;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("DnD.Cursor.");
+
+        if $z0 == 0 goto label04;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = "DnD.Cursor.";
+
+        $i0 = virtualinvoke $r5.<java.lang.String: int length()>();
+
+        $i1 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $r6 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>($i0, $i1);
+
+        $r7 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".32x32");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label01:
+        $r10 = staticinvoke <java.awt.Cursor: java.awt.Cursor getSystemCustomCursor(java.lang.String)>($r9);
+
+     label02:
+        return $r10;
+
+     label03:
+        $r12 := @caughtexception;
+
+        $r13 = new java.lang.RuntimeException;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("cannot load system cursor: ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<java.lang.RuntimeException: void <init>(java.lang.String,java.lang.Throwable)>($r17, $r12);
+
+        throw $r13;
+
+     label04:
+        $z1 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("awt.dynamicLayoutSupported");
+
+        if $z1 == 0 goto label05;
+
+        $z5 = specialinvoke r1.<sun.awt.windows.WToolkit: boolean isDynamicLayoutSupported()>();
+
+        $r3 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z5);
+
+        return $r3;
+
+     label05:
+        $z2 = staticinvoke <sun.awt.windows.WDesktopProperties: boolean isWindowsProperty(java.lang.String)>(r0);
+
+        if $z2 != 0 goto label06;
+
+        $z3 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("awt.");
+
+        if $z3 != 0 goto label06;
+
+        $z4 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("DnD.");
+
+        if $z4 == 0 goto label11;
+
+     label06:
+        entermonitor r1;
+
+     label07:
+        specialinvoke r1.<sun.awt.windows.WToolkit: void lazilyInitWProps()>();
+
+        $r18 = r1.<sun.awt.windows.WToolkit: java.util.Map desktopProperties>;
+
+        $r19 = interfaceinvoke $r18.<java.util.Map: java.lang.Object get(java.lang.Object)>(r0);
+
+        exitmonitor r1;
+
+     label08:
+        return $r19;
+
+     label09:
+        $r11 := @caughtexception;
+
+        exitmonitor r1;
+
+     label10:
+        throw $r11;
+
+     label11:
+        $r2 = specialinvoke r1.<sun.awt.SunToolkit: java.lang.Object lazilyLoadDesktopProperty(java.lang.String)>(r0);
+
+        return $r2;
+
+        catch java.awt.AWTException from label01 to label02 with label03;
+        catch java.lang.Throwable from label07 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    private synchronized void lazilyInitWProps()
+    {
+        sun.awt.windows.WDesktopProperties $r1, $r2, $r3;
+        java.util.Map $r4;
+        sun.awt.windows.WToolkit r0;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        $r1 = r0.<sun.awt.windows.WToolkit: sun.awt.windows.WDesktopProperties wprops>;
+
+        if $r1 != null goto label1;
+
+        $r2 = new sun.awt.windows.WDesktopProperties;
+
+        specialinvoke $r2.<sun.awt.windows.WDesktopProperties: void <init>(sun.awt.windows.WToolkit)>(r0);
+
+        r0.<sun.awt.windows.WToolkit: sun.awt.windows.WDesktopProperties wprops> = $r2;
+
+        $r3 = r0.<sun.awt.windows.WToolkit: sun.awt.windows.WDesktopProperties wprops>;
+
+        $r4 = virtualinvoke $r3.<sun.awt.windows.WDesktopProperties: java.util.Map getProperties()>();
+
+        specialinvoke r0.<sun.awt.windows.WToolkit: void updateProperties(java.util.Map)>($r4);
+
+     label1:
+        return;
+    }
+
+    private synchronized boolean isDynamicLayoutSupported()
+    {
+        java.util.Map $r1;
+        java.lang.Boolean r3;
+        java.lang.String $r12;
+        boolean $z0, $z1, $z2, $z3;
+        sun.util.logging.PlatformLogger$Level $r4;
+        sun.util.logging.PlatformLogger $r5, $r7;
+        sun.awt.windows.WToolkit r0;
+        java.lang.Object $r2;
+        java.lang.StringBuilder $r6, $r8, $r9, $r10, $r11;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        $z0 = specialinvoke r0.<sun.awt.windows.WToolkit: boolean isDynamicLayoutSupportedNative()>();
+
+        specialinvoke r0.<sun.awt.windows.WToolkit: void lazilyInitWProps()>();
+
+        $r1 = r0.<sun.awt.windows.WToolkit: java.util.Map desktopProperties>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.lang.Object get(java.lang.Object)>("awt.dynamicLayoutSupported");
+
+        r3 = (java.lang.Boolean) $r2;
+
+        $r5 = <sun.awt.windows.WToolkit: sun.util.logging.PlatformLogger log>;
+
+        $r4 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINER>;
+
+        $z1 = virtualinvoke $r5.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r4);
+
+        if $z1 == 0 goto label1;
+
+        $r7 = <sun.awt.windows.WToolkit: sun.util.logging.PlatformLogger log>;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("In WTK.isDynamicLayoutSupported()   nativeDynamic == ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("   wprops.dynamic == ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r3);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<sun.util.logging.PlatformLogger: void finer(java.lang.String)>($r12);
+
+     label1:
+        if r3 == null goto label2;
+
+        $z2 = virtualinvoke r3.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z0 == $z2 goto label3;
+
+     label2:
+        specialinvoke r0.<sun.awt.windows.WToolkit: void windowsSettingChange()>();
+
+        return $z0;
+
+     label3:
+        $z3 = virtualinvoke r3.<java.lang.Boolean: boolean booleanValue()>();
+
+        return $z3;
+    }
+
+    private void windowsSettingChange()
+    {
+        java.util.Map $r1;
+        sun.awt.AppContext $r3;
+        java.lang.Object $r2;
+        sun.awt.windows.WToolkit r0;
+        java.lang.Runnable $r4;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        $r1 = specialinvoke r0.<sun.awt.windows.WToolkit: java.util.Map getWProps()>();
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.lang.Object get(java.lang.Object)>("win.xpstyle.themeActive");
+
+        specialinvoke r0.<sun.awt.windows.WToolkit: void updateXPStyleEnabled(java.lang.Object)>($r2);
+
+        $r3 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        if $r3 != null goto label2;
+
+        specialinvoke r0.<sun.awt.windows.WToolkit: void updateProperties(java.util.Map)>($r1);
+
+        goto label3;
+
+     label2:
+        $r4 = staticinvoke <sun.awt.windows.WToolkit$lambda_windowsSettingChange_4__477: java.lang.Runnable bootstrap$(sun.awt.windows.WToolkit,java.util.Map)>(r0, $r1);
+
+        staticinvoke <java.awt.EventQueue: void invokeLater(java.lang.Runnable)>($r4);
+
+     label3:
+        return;
+    }
+
+    private synchronized void updateProperties(java.util.Map)
+    {
+        java.util.Map r0;
+        java.lang.String r6, $r16;
+        boolean $z0, $z1;
+        sun.util.logging.PlatformLogger$Level $r8;
+        sun.util.logging.PlatformLogger $r9, $r11;
+        java.util.Iterator $r4;
+        java.util.Set $r3;
+        sun.awt.windows.WToolkit r1;
+        java.lang.Object $r2, $r5, $r7;
+        java.lang.StringBuilder $r10, $r12, $r13, $r14, $r15;
+
+        r1 := @this: sun.awt.windows.WToolkit;
+
+        r0 := @parameter0: java.util.Map;
+
+        if null != r0 goto label1;
+
+        return;
+
+     label1:
+        $r2 = interfaceinvoke r0.<java.util.Map: java.lang.Object get(java.lang.Object)>("win.xpstyle.themeActive");
+
+        specialinvoke r1.<sun.awt.windows.WToolkit: void updateXPStyleEnabled(java.lang.Object)>($r2);
+
+        $r3 = interfaceinvoke r0.<java.util.Map: java.util.Set keySet()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.Set: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (java.lang.String) $r5;
+
+        $r7 = interfaceinvoke r0.<java.util.Map: java.lang.Object get(java.lang.Object)>(r6);
+
+        $r9 = <sun.awt.windows.WToolkit: sun.util.logging.PlatformLogger log>;
+
+        $r8 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINER>;
+
+        $z1 = virtualinvoke $r9.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r8);
+
+        if $z1 == 0 goto label3;
+
+        $r11 = <sun.awt.windows.WToolkit: sun.util.logging.PlatformLogger log>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("changed ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" to ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r7);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r11.<sun.util.logging.PlatformLogger: void finer(java.lang.String)>($r16);
+
+     label3:
+        virtualinvoke r1.<sun.awt.windows.WToolkit: void setDesktopProperty(java.lang.String,java.lang.Object)>(r6, $r7);
+
+        goto label2;
+
+     label4:
+        return;
+    }
+
+    private synchronized java.util.Map getWProps()
+    {
+        sun.awt.windows.WDesktopProperties $r1, $r2;
+        java.util.Map $r3;
+        sun.awt.windows.WToolkit r0;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        $r1 = r0.<sun.awt.windows.WToolkit: sun.awt.windows.WDesktopProperties wprops>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.awt.windows.WToolkit: sun.awt.windows.WDesktopProperties wprops>;
+
+        $r3 = virtualinvoke $r2.<sun.awt.windows.WDesktopProperties: java.util.Map getProperties()>();
+
+        goto label2;
+
+     label1:
+        $r3 = null;
+
+     label2:
+        return $r3;
+    }
+
+    private void updateXPStyleEnabled(java.lang.Object)
+    {
+        java.lang.Boolean $r1;
+        java.lang.Object r0;
+        sun.awt.windows.WToolkit r2;
+        boolean $z0;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $r1 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $z0 = virtualinvoke $r1.<java.lang.Boolean: boolean equals(java.lang.Object)>(r0);
+
+        <sun.awt.windows.ThemeReader: boolean xpStyleEnabled> = $z0;
+
+        return;
+    }
+
+    public synchronized void addPropertyChangeListener(java.lang.String, java.beans.PropertyChangeListener)
+    {
+        java.beans.PropertyChangeListener r2;
+        java.lang.String r0;
+        sun.awt.windows.WToolkit r1;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: sun.awt.windows.WToolkit;
+
+        r0 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.beans.PropertyChangeListener;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $z0 = staticinvoke <sun.awt.windows.WDesktopProperties: boolean isWindowsProperty(java.lang.String)>(r0);
+
+        if $z0 != 0 goto label2;
+
+        $z1 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("awt.");
+
+        if $z1 != 0 goto label2;
+
+        $z2 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("DnD.");
+
+        if $z2 == 0 goto label3;
+
+     label2:
+        specialinvoke r1.<sun.awt.windows.WToolkit: void lazilyInitWProps()>();
+
+     label3:
+        specialinvoke r1.<sun.awt.SunToolkit: void addPropertyChangeListener(java.lang.String,java.beans.PropertyChangeListener)>(r0, r2);
+
+        return;
+    }
+
+    protected synchronized void initializeDesktopProperties()
+    {
+        sun.awt.windows.WToolkit r0;
+        java.lang.Integer $r2, $r4;
+        java.util.Map $r1, $r3, $r6, $r7;
+        java.lang.Boolean $r5;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        $r1 = r0.<sun.awt.windows.WToolkit: java.util.Map desktopProperties>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(50);
+
+        interfaceinvoke $r1.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("DnD.Autoscroll.initialDelay", $r2);
+
+        $r3 = r0.<sun.awt.windows.WToolkit: java.util.Map desktopProperties>;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(50);
+
+        interfaceinvoke $r3.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("DnD.Autoscroll.interval", $r4);
+
+        $r6 = r0.<sun.awt.windows.WToolkit: java.util.Map desktopProperties>;
+
+        $r5 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        interfaceinvoke $r6.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("DnD.isDragImageSupported", $r5);
+
+        $r7 = r0.<sun.awt.windows.WToolkit: java.util.Map desktopProperties>;
+
+        interfaceinvoke $r7.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("Shell.shellFolderManager", "sun.awt.shell.Win32ShellFolderManager2");
+
+        return;
+    }
+
+    protected synchronized java.awt.RenderingHints getDesktopAAHints()
+    {
+        sun.awt.windows.WDesktopProperties $r1, $r2;
+        java.awt.RenderingHints $r3;
+        sun.awt.windows.WToolkit r0;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        $r1 = r0.<sun.awt.windows.WToolkit: sun.awt.windows.WDesktopProperties wprops>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<sun.awt.windows.WToolkit: sun.awt.windows.WDesktopProperties wprops>;
+
+        $r3 = virtualinvoke $r2.<sun.awt.windows.WDesktopProperties: java.awt.RenderingHints getDesktopAAHints()>();
+
+        return $r3;
+    }
+
+    public boolean isModalityTypeSupported(java.awt.Dialog$ModalityType)
+    {
+        java.awt.Dialog$ModalityType r0, $r1, $r2, $r3, $r4;
+        sun.awt.windows.WToolkit r5;
+        boolean $z0;
+
+        r5 := @this: sun.awt.windows.WToolkit;
+
+        r0 := @parameter0: java.awt.Dialog$ModalityType;
+
+        if r0 == null goto label1;
+
+        $r1 = <java.awt.Dialog$ModalityType: java.awt.Dialog$ModalityType MODELESS>;
+
+        if r0 == $r1 goto label1;
+
+        $r2 = <java.awt.Dialog$ModalityType: java.awt.Dialog$ModalityType DOCUMENT_MODAL>;
+
+        if r0 == $r2 goto label1;
+
+        $r3 = <java.awt.Dialog$ModalityType: java.awt.Dialog$ModalityType APPLICATION_MODAL>;
+
+        if r0 == $r3 goto label1;
+
+        $r4 = <java.awt.Dialog$ModalityType: java.awt.Dialog$ModalityType TOOLKIT_MODAL>;
+
+        if r0 != $r4 goto label2;
+
+     label1:
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+    }
+
+    public boolean isModalExclusionTypeSupported(java.awt.Dialog$ModalExclusionType)
+    {
+        java.awt.Dialog$ModalExclusionType r0, $r1, $r2, $r3;
+        sun.awt.windows.WToolkit r4;
+        boolean $z0;
+
+        r4 := @this: sun.awt.windows.WToolkit;
+
+        r0 := @parameter0: java.awt.Dialog$ModalExclusionType;
+
+        if r0 == null goto label1;
+
+        $r1 = <java.awt.Dialog$ModalExclusionType: java.awt.Dialog$ModalExclusionType NO_EXCLUDE>;
+
+        if r0 == $r1 goto label1;
+
+        $r2 = <java.awt.Dialog$ModalExclusionType: java.awt.Dialog$ModalExclusionType APPLICATION_EXCLUDE>;
+
+        if r0 == $r2 goto label1;
+
+        $r3 = <java.awt.Dialog$ModalExclusionType: java.awt.Dialog$ModalExclusionType TOOLKIT_EXCLUDE>;
+
+        if r0 != $r3 goto label2;
+
+     label1:
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+    }
+
+    public static sun.awt.windows.WToolkit getWToolkit()
+    {
+        sun.awt.windows.WToolkit r1;
+        java.awt.Toolkit $r0;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        r1 = (sun.awt.windows.WToolkit) $r0;
+
+        return r1;
+    }
+
+    public boolean useBufferPerWindow()
+    {
+        sun.awt.windows.WToolkit r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        $z0 = staticinvoke <sun.awt.Win32GraphicsEnvironment: boolean isDWMCompositionEnabled()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public void grab(java.awt.Window)
+    {
+        java.awt.peer.ComponentPeer $r1, $r2;
+        java.awt.Window r0;
+        sun.awt.windows.WWindowPeer $r3;
+        sun.awt.windows.WToolkit r4;
+
+        r4 := @this: sun.awt.windows.WToolkit;
+
+        r0 := @parameter0: java.awt.Window;
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.awt.peer.ComponentPeer getPeer()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = virtualinvoke r0.<java.awt.Window: java.awt.peer.ComponentPeer getPeer()>();
+
+        $r3 = (sun.awt.windows.WWindowPeer) $r2;
+
+        virtualinvoke $r3.<sun.awt.windows.WWindowPeer: void grab()>();
+
+     label1:
+        return;
+    }
+
+    public void ungrab(java.awt.Window)
+    {
+        java.awt.peer.ComponentPeer $r1, $r2;
+        java.awt.Window r0;
+        sun.awt.windows.WWindowPeer $r3;
+        sun.awt.windows.WToolkit r4;
+
+        r4 := @this: sun.awt.windows.WToolkit;
+
+        r0 := @parameter0: java.awt.Window;
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.awt.peer.ComponentPeer getPeer()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = virtualinvoke r0.<java.awt.Window: java.awt.peer.ComponentPeer getPeer()>();
+
+        $r3 = (sun.awt.windows.WWindowPeer) $r2;
+
+        virtualinvoke $r3.<sun.awt.windows.WWindowPeer: void ungrab()>();
+
+     label1:
+        return;
+    }
+
+    private boolean isComponentValidForTouchKeyboard(java.awt.Component)
+    {
+        java.awt.TextComponent $r2;
+        sun.awt.windows.WToolkit r3;
+        java.awt.Component r0;
+        javax.swing.text.JTextComponent $r1;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+
+        r3 := @this: sun.awt.windows.WToolkit;
+
+        r0 := @parameter0: java.awt.Component;
+
+        if r0 == null goto label3;
+
+        $z0 = virtualinvoke r0.<java.awt.Component: boolean isEnabled()>();
+
+        if $z0 == 0 goto label3;
+
+        $z1 = virtualinvoke r0.<java.awt.Component: boolean isFocusable()>();
+
+        if $z1 == 0 goto label3;
+
+        $z2 = r0 instanceof java.awt.TextComponent;
+
+        if $z2 == 0 goto label1;
+
+        $r2 = (java.awt.TextComponent) r0;
+
+        $z5 = virtualinvoke $r2.<java.awt.TextComponent: boolean isEditable()>();
+
+        if $z5 != 0 goto label2;
+
+     label1:
+        $z3 = r0 instanceof javax.swing.text.JTextComponent;
+
+        if $z3 == 0 goto label3;
+
+        $r1 = (javax.swing.text.JTextComponent) r0;
+
+        $z4 = virtualinvoke $r1.<javax.swing.text.JTextComponent: boolean isEditable()>();
+
+        if $z4 == 0 goto label3;
+
+     label2:
+        return 1;
+
+     label3:
+        return 0;
+    }
+
+    public void showOrHideTouchKeyboard(java.awt.Component, java.awt.AWTEvent)
+    {
+        java.awt.AWTEvent r1;
+        int $i0, $i1, $i2;
+        java.lang.ref.WeakReference $r5, $r7, $r8, $r10, $r12, $r13;
+        sun.awt.AWTAccessor$MouseEventAccessor $r4, $r11;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        sun.awt.windows.WToolkit r2;
+        java.awt.Component r0, $r3;
+        java.awt.event.MouseEvent r14;
+        java.awt.event.FocusEvent r15;
+        java.lang.Object $r6, $r9;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        r0 := @parameter0: java.awt.Component;
+
+        r1 := @parameter1: java.awt.AWTEvent;
+
+        $z0 = r0 instanceof java.awt.TextComponent;
+
+        if $z0 != 0 goto label1;
+
+        $z7 = r0 instanceof javax.swing.text.JTextComponent;
+
+        if $z7 != 0 goto label1;
+
+        return;
+
+     label1:
+        $z1 = r1 instanceof java.awt.event.MouseEvent;
+
+        if $z1 == 0 goto label8;
+
+        $z4 = specialinvoke r2.<sun.awt.windows.WToolkit: boolean isComponentValidForTouchKeyboard(java.awt.Component)>(r0);
+
+        if $z4 == 0 goto label8;
+
+        r14 = (java.awt.event.MouseEvent) r1;
+
+        $i1 = virtualinvoke r14.<java.awt.event.MouseEvent: int getID()>();
+
+        if $i1 != 501 goto label3;
+
+        $r11 = staticinvoke <sun.awt.AWTAccessor: sun.awt.AWTAccessor$MouseEventAccessor getMouseEventAccessor()>();
+
+        $z6 = interfaceinvoke $r11.<sun.awt.AWTAccessor$MouseEventAccessor: boolean isCausedByTouchEvent(java.awt.event.MouseEvent)>(r14);
+
+        if $z6 == 0 goto label2;
+
+        $r13 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r13.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>(r0);
+
+        r2.<sun.awt.windows.WToolkit: java.lang.ref.WeakReference compOnTouchDownEvent> = $r13;
+
+        goto label7;
+
+     label2:
+        $r12 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r12.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>(r0);
+
+        r2.<sun.awt.windows.WToolkit: java.lang.ref.WeakReference compOnMousePressedEvent> = $r12;
+
+        goto label7;
+
+     label3:
+        $i2 = virtualinvoke r14.<java.awt.event.MouseEvent: int getID()>();
+
+        if $i2 != 502 goto label7;
+
+        $r4 = staticinvoke <sun.awt.AWTAccessor: sun.awt.AWTAccessor$MouseEventAccessor getMouseEventAccessor()>();
+
+        $z5 = interfaceinvoke $r4.<sun.awt.AWTAccessor$MouseEventAccessor: boolean isCausedByTouchEvent(java.awt.event.MouseEvent)>(r14);
+
+        if $z5 == 0 goto label5;
+
+        $r8 = r2.<sun.awt.windows.WToolkit: java.lang.ref.WeakReference compOnTouchDownEvent>;
+
+        $r9 = virtualinvoke $r8.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        if $r9 != r0 goto label4;
+
+        specialinvoke r2.<sun.awt.windows.WToolkit: void showTouchKeyboard(boolean)>(1);
+
+     label4:
+        $r10 = <sun.awt.windows.WToolkit: java.lang.ref.WeakReference NULL_COMPONENT_WR>;
+
+        r2.<sun.awt.windows.WToolkit: java.lang.ref.WeakReference compOnTouchDownEvent> = $r10;
+
+        goto label7;
+
+     label5:
+        $r5 = r2.<sun.awt.windows.WToolkit: java.lang.ref.WeakReference compOnMousePressedEvent>;
+
+        $r6 = virtualinvoke $r5.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        if $r6 != r0 goto label6;
+
+        specialinvoke r2.<sun.awt.windows.WToolkit: void showTouchKeyboard(boolean)>(0);
+
+     label6:
+        $r7 = <sun.awt.windows.WToolkit: java.lang.ref.WeakReference NULL_COMPONENT_WR>;
+
+        r2.<sun.awt.windows.WToolkit: java.lang.ref.WeakReference compOnMousePressedEvent> = $r7;
+
+     label7:
+        goto label9;
+
+     label8:
+        $z2 = r1 instanceof java.awt.event.FocusEvent;
+
+        if $z2 == 0 goto label9;
+
+        r15 = (java.awt.event.FocusEvent) r1;
+
+        $i0 = virtualinvoke r15.<java.awt.event.FocusEvent: int getID()>();
+
+        if $i0 != 1005 goto label9;
+
+        $r3 = virtualinvoke r15.<java.awt.event.FocusEvent: java.awt.Component getOppositeComponent()>();
+
+        $z3 = specialinvoke r2.<sun.awt.windows.WToolkit: boolean isComponentValidForTouchKeyboard(java.awt.Component)>($r3);
+
+        if $z3 != 0 goto label9;
+
+        specialinvoke r2.<sun.awt.windows.WToolkit: void hideTouchKeyboard()>();
+
+     label9:
+        return;
+    }
+
+    private native void showTouchKeyboard(boolean);
+
+    private native void hideTouchKeyboard();
+
+    public native boolean syncNativeQueue(long);
+
+    public boolean isDesktopSupported()
+    {
+        sun.awt.windows.WToolkit r0;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        return 1;
+    }
+
+    public java.awt.peer.DesktopPeer createDesktopPeer(java.awt.Desktop)
+    {
+        java.awt.Desktop r2;
+        sun.awt.windows.WDesktopPeer $r0;
+        sun.awt.windows.WToolkit r1;
+
+        r1 := @this: sun.awt.windows.WToolkit;
+
+        r2 := @parameter0: java.awt.Desktop;
+
+        $r0 = new sun.awt.windows.WDesktopPeer;
+
+        specialinvoke $r0.<sun.awt.windows.WDesktopPeer: void <init>()>();
+
+        return $r0;
+    }
+
+    private static native void setExtraMouseButtonsEnabledNative(boolean);
+
+    public boolean areExtraMouseButtonsEnabled() throws java.awt.HeadlessException
+    {
+        sun.awt.windows.WToolkit r0;
+        boolean $z0;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        $z0 = <sun.awt.windows.WToolkit: boolean areExtraMouseButtonsEnabled>;
+
+        return $z0;
+    }
+
+    private synchronized native int getNumberOfButtonsImpl();
+
+    public int getNumberOfButtons()
+    {
+        int $i0, $i1, $i2, $i3;
+        sun.awt.windows.WToolkit r0;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        $i0 = <sun.awt.windows.WToolkit: int numberOfButtons>;
+
+        if $i0 != 0 goto label1;
+
+        $i2 = specialinvoke r0.<sun.awt.windows.WToolkit: int getNumberOfButtonsImpl()>();
+
+        <sun.awt.windows.WToolkit: int numberOfButtons> = $i2;
+
+     label1:
+        $i1 = <sun.awt.windows.WToolkit: int numberOfButtons>;
+
+        if $i1 <= 20 goto label2;
+
+        $i3 = 20;
+
+        goto label3;
+
+     label2:
+        $i3 = <sun.awt.windows.WToolkit: int numberOfButtons>;
+
+     label3:
+        return $i3;
+    }
+
+    public boolean isWindowOpacitySupported()
+    {
+        sun.awt.windows.WToolkit r0;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        return 1;
+    }
+
+    public boolean isWindowShapingSupported()
+    {
+        sun.awt.windows.WToolkit r0;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        return 1;
+    }
+
+    public boolean isWindowTranslucencySupported()
+    {
+        sun.awt.windows.WToolkit r0;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        return 1;
+    }
+
+    public boolean isTranslucencyCapable(java.awt.GraphicsConfiguration)
+    {
+        java.awt.GraphicsConfiguration r1;
+        sun.awt.windows.WToolkit r0;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.awt.GraphicsConfiguration;
+
+        return 1;
+    }
+
+    public boolean needUpdateWindow()
+    {
+        sun.awt.windows.WToolkit r0;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        return 1;
+    }
+
+    public void lambda$windowsSettingChange$4(java.util.Map)
+    {
+        sun.awt.windows.WToolkit r0;
+        java.util.Map r1;
+
+        r0 := @this: sun.awt.windows.WToolkit;
+
+        r1 := @parameter0: java.util.Map;
+
+        specialinvoke r0.<sun.awt.windows.WToolkit: void updateProperties(java.util.Map)>(r1);
+
+        return;
+    }
+
+    public static java.lang.Thread lambda$displayChanged$3(java.lang.Runnable)
+    {
+        java.util.concurrent.ThreadFactory $r0;
+        java.lang.Runnable r1;
+        java.lang.Thread $r2;
+
+        r1 := @parameter0: java.lang.Runnable;
+
+        $r0 = staticinvoke <java.util.concurrent.Executors: java.util.concurrent.ThreadFactory defaultThreadFactory()>();
+
+        $r2 = interfaceinvoke $r0.<java.util.concurrent.ThreadFactory: java.lang.Thread newThread(java.lang.Runnable)>(r1);
+
+        virtualinvoke $r2.<java.lang.Thread: void setDaemon(boolean)>(1);
+
+        return $r2;
+    }
+
+    public static void lambda$displayChanged$2()
+    {
+        sun.awt.DisplayChangedListener $r1;
+        java.awt.GraphicsEnvironment $r0;
+        boolean $z0;
+
+        $r0 = staticinvoke <java.awt.GraphicsEnvironment: java.awt.GraphicsEnvironment getLocalGraphicsEnvironment()>();
+
+        $z0 = $r0 instanceof sun.awt.DisplayChangedListener;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = (sun.awt.DisplayChangedListener) $r0;
+
+        interfaceinvoke $r1.<sun.awt.DisplayChangedListener: void displayChanged()>();
+
+     label1:
+        return;
+    }
+
+    public static java.lang.Void lambda$run$1()
+    {
+        java.lang.Thread $r0;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r0.<java.lang.Thread: void setContextClassLoader(java.lang.ClassLoader)>(null);
+
+        return null;
+    }
+
+    public java.lang.Void lambda$registerShutdownHook$0()
+    {
+        java.lang.Thread $r0;
+        java.lang.Runtime $r4;
+        java.lang.ThreadGroup $r1;
+        sun.awt.windows.WToolkit r2;
+        java.lang.Runnable $r3;
+
+        r2 := @this: sun.awt.windows.WToolkit;
+
+        $r0 = new java.lang.Thread;
+
+        $r1 = staticinvoke <sun.misc.ThreadGroupUtils: java.lang.ThreadGroup getRootThreadGroup()>();
+
+        $r3 = staticinvoke <sun.awt.windows.WToolkit$shutdown__478: java.lang.Runnable bootstrap$(sun.awt.windows.WToolkit)>(r2);
+
+        specialinvoke $r0.<java.lang.Thread: void <init>(java.lang.ThreadGroup,java.lang.Runnable)>($r1, $r3);
+
+        virtualinvoke $r0.<java.lang.Thread: void setContextClassLoader(java.lang.ClassLoader)>(null);
+
+        $r4 = staticinvoke <java.lang.Runtime: java.lang.Runtime getRuntime()>();
+
+        virtualinvoke $r4.<java.lang.Runtime: void addShutdownHook(java.lang.Thread)>($r0);
+
+        return null;
+    }
+
+    static void access$000()
+    {
+        staticinvoke <sun.awt.windows.WToolkit: void disableCustomPalette()>();
+
+        return;
+    }
+
+    static void access$100()
+    {
+        staticinvoke <sun.awt.windows.WToolkit: void postDispose()>();
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        sun.util.logging.PlatformLogger$Level $r1;
+        sun.util.logging.PlatformLogger $r0, $r2, $r6;
+        sun.awt.windows.WToolkit$2 $r3;
+        java.lang.StringBuilder $r5, $r7, $r9;
+        java.lang.String $r8, $r10;
+        java.lang.ref.WeakReference $r4;
+        boolean $z0;
+
+        <sun.awt.windows.WToolkit: java.lang.String dndPrefix> = "DnD.";
+
+        <sun.awt.windows.WToolkit: java.lang.String awtPrefix> = "awt.";
+
+        <sun.awt.windows.WToolkit: java.lang.String postfix> = ".32x32";
+
+        <sun.awt.windows.WToolkit: java.lang.String prefix> = "DnD.Cursor.";
+
+        <sun.awt.windows.WToolkit: java.lang.String XPSTYLE_THEME_ACTIVE> = "win.xpstyle.themeActive";
+
+        $r0 = staticinvoke <sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger getLogger(java.lang.String)>("sun.awt.windows.WToolkit");
+
+        <sun.awt.windows.WToolkit: sun.util.logging.PlatformLogger log> = $r0;
+
+        <sun.awt.windows.WToolkit: boolean areExtraMouseButtonsEnabled> = 1;
+
+        <sun.awt.windows.WToolkit: boolean loaded> = 0;
+
+        staticinvoke <sun.awt.windows.WToolkit: void loadLibraries()>();
+
+        staticinvoke <sun.awt.windows.WToolkit: void initIDs()>();
+
+        $r2 = <sun.awt.windows.WToolkit: sun.util.logging.PlatformLogger log>;
+
+        $r1 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINE>;
+
+        $z0 = virtualinvoke $r2.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        $r6 = <sun.awt.windows.WToolkit: sun.util.logging.PlatformLogger log>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Win version: ");
+
+        $r8 = staticinvoke <sun.awt.windows.WToolkit: java.lang.String getWindowsVersion()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<sun.util.logging.PlatformLogger: void fine(java.lang.String)>($r10);
+
+     label1:
+        $r3 = new sun.awt.windows.WToolkit$2;
+
+        specialinvoke $r3.<sun.awt.windows.WToolkit$2: void <init>()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r3);
+
+        $r4 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r4.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>(null);
+
+        <sun.awt.windows.WToolkit: java.lang.ref.WeakReference NULL_COMPONENT_WR> = $r4;
+
+        return;
+    }
+}

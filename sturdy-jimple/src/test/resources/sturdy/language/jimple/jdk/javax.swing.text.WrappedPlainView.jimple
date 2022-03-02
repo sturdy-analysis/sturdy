@@ -1,0 +1,1006 @@
+public class javax.swing.text.WrappedPlainView extends javax.swing.text.BoxView implements javax.swing.text.TabExpander
+{
+    java.awt.FontMetrics metrics;
+    javax.swing.text.Segment lineBuffer;
+    boolean widthChanging;
+    int tabBase;
+    int tabSize;
+    boolean wordWrap;
+    int sel0;
+    int sel1;
+    java.awt.Color unselected;
+    java.awt.Color selected;
+
+    public void <init>(javax.swing.text.Element)
+    {
+        javax.swing.text.Element r1;
+        javax.swing.text.WrappedPlainView r0;
+
+        r0 := @this: javax.swing.text.WrappedPlainView;
+
+        r1 := @parameter0: javax.swing.text.Element;
+
+        specialinvoke r0.<javax.swing.text.WrappedPlainView: void <init>(javax.swing.text.Element,boolean)>(r1, 0);
+
+        return;
+    }
+
+    public void <init>(javax.swing.text.Element, boolean)
+    {
+        javax.swing.text.Element r1;
+        javax.swing.text.WrappedPlainView r0;
+        boolean z0;
+
+        r0 := @this: javax.swing.text.WrappedPlainView;
+
+        r1 := @parameter0: javax.swing.text.Element;
+
+        z0 := @parameter1: boolean;
+
+        specialinvoke r0.<javax.swing.text.BoxView: void <init>(javax.swing.text.Element,int)>(r1, 1);
+
+        r0.<javax.swing.text.WrappedPlainView: boolean wordWrap> = z0;
+
+        return;
+    }
+
+    protected int getTabSize()
+    {
+        int $i0;
+        java.lang.Object $r2;
+        javax.swing.text.Document $r1;
+        javax.swing.text.WrappedPlainView r0;
+        java.lang.Integer r3;
+
+        r0 := @this: javax.swing.text.WrappedPlainView;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: javax.swing.text.Document getDocument()>();
+
+        $r2 = interfaceinvoke $r1.<javax.swing.text.Document: java.lang.Object getProperty(java.lang.Object)>("tabSize");
+
+        r3 = (java.lang.Integer) $r2;
+
+        if r3 == null goto label1;
+
+        $i0 = virtualinvoke r3.<java.lang.Integer: int intValue()>();
+
+        goto label2;
+
+     label1:
+        $i0 = 8;
+
+     label2:
+        return $i0;
+    }
+
+    protected void drawLine(int, int, java.awt.Graphics, int, int)
+    {
+        javax.swing.text.StateInvariantError $r6;
+        int i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, i8, i9, i10;
+        java.lang.String $r12;
+        boolean $z0;
+        javax.swing.text.BadLocationException $r5;
+        javax.swing.text.WrappedPlainView r0;
+        java.awt.Graphics r4;
+        java.lang.StringBuilder $r7, $r8, $r9, $r10, $r11;
+        javax.swing.text.Element $r1, $r2, $r3;
+
+        r0 := @this: javax.swing.text.WrappedPlainView;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        r4 := @parameter2: java.awt.Graphics;
+
+        i9 := @parameter3: int;
+
+        i8 := @parameter4: int;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: javax.swing.text.Element getElement()>();
+
+        $i1 = interfaceinvoke $r1.<javax.swing.text.Element: int getElementIndex(int)>(i0);
+
+        $r2 = interfaceinvoke $r1.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i1);
+
+     label1:
+        $z0 = interfaceinvoke $r2.<javax.swing.text.Element: boolean isLeaf()>();
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke r0.<javax.swing.text.WrappedPlainView: int drawText(javax.swing.text.Element,int,int,java.awt.Graphics,int,int)>($r2, i0, i2, r4, i9, i8);
+
+        goto label4;
+
+     label2:
+        i10 = interfaceinvoke $r2.<javax.swing.text.Element: int getElementIndex(int)>(i0);
+
+        $i3 = interfaceinvoke $r2.<javax.swing.text.Element: int getElementIndex(int)>(i2);
+
+     label3:
+        if i10 > $i3 goto label4;
+
+        $r3 = interfaceinvoke $r2.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(i10);
+
+        $i4 = interfaceinvoke $r3.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i5 = staticinvoke <java.lang.Math: int max(int,int)>($i4, i0);
+
+        $i6 = interfaceinvoke $r3.<javax.swing.text.Element: int getEndOffset()>();
+
+        $i7 = staticinvoke <java.lang.Math: int min(int,int)>($i6, i2);
+
+        i9 = specialinvoke r0.<javax.swing.text.WrappedPlainView: int drawText(javax.swing.text.Element,int,int,java.awt.Graphics,int,int)>($r3, $i5, $i7, r4, i9, i8);
+
+        i10 = i10 + 1;
+
+        goto label3;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r5 := @caughtexception;
+
+        $r6 = new javax.swing.text.StateInvariantError;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Can\'t render: ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i2);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<javax.swing.text.StateInvariantError: void <init>(java.lang.String)>($r12);
+
+        throw $r6;
+
+     label6:
+        return;
+
+        catch javax.swing.text.BadLocationException from label1 to label4 with label5;
+    }
+
+    private int drawText(javax.swing.text.Element, int, int, java.awt.Graphics, int, int) throws javax.swing.text.BadLocationException
+    {
+        java.awt.Color $r5, $r6, $r7;
+        javax.swing.text.AttributeSet $r3;
+        boolean $z0;
+        javax.swing.text.WrappedPlainView r0;
+        java.awt.Graphics r4;
+        javax.swing.text.Document $r1;
+        int $i0, $i1, $i2, $i3, i4, i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, i31, i32, i33, $i34;
+        javax.swing.text.Element r2;
+
+        r0 := @this: javax.swing.text.WrappedPlainView;
+
+        r2 := @parameter0: javax.swing.text.Element;
+
+        i5 := @parameter1: int;
+
+        i31 := @parameter2: int;
+
+        r4 := @parameter3: java.awt.Graphics;
+
+        i32 := @parameter4: int;
+
+        i4 := @parameter5: int;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: javax.swing.text.Document getDocument()>();
+
+        $i0 = interfaceinvoke $r1.<javax.swing.text.Document: int getLength()>();
+
+        $i1 = staticinvoke <java.lang.Math: int min(int,int)>($i0, i31);
+
+        $r3 = interfaceinvoke r2.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $z0 = staticinvoke <javax.swing.text.Utilities: boolean isComposedTextAttributeDefined(javax.swing.text.AttributeSet)>($r3);
+
+        if $z0 == 0 goto label1;
+
+        $r7 = r0.<javax.swing.text.WrappedPlainView: java.awt.Color unselected>;
+
+        virtualinvoke r4.<java.awt.Graphics: void setColor(java.awt.Color)>($r7);
+
+        $i27 = interfaceinvoke r2.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i28 = i5 - $i27;
+
+        $i29 = interfaceinvoke r2.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i30 = $i1 - $i29;
+
+        i33 = staticinvoke <javax.swing.text.Utilities: int drawComposedText(javax.swing.text.View,javax.swing.text.AttributeSet,java.awt.Graphics,int,int,int,int)>(r0, $r3, r4, i32, i4, $i28, $i30);
+
+        goto label8;
+
+     label1:
+        $i3 = r0.<javax.swing.text.WrappedPlainView: int sel0>;
+
+        $i2 = r0.<javax.swing.text.WrappedPlainView: int sel1>;
+
+        if $i3 == $i2 goto label2;
+
+        $r6 = r0.<javax.swing.text.WrappedPlainView: java.awt.Color selected>;
+
+        $r5 = r0.<javax.swing.text.WrappedPlainView: java.awt.Color unselected>;
+
+        if $r6 != $r5 goto label3;
+
+     label2:
+        i33 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: int drawUnselectedText(java.awt.Graphics,int,int,int,int)>(r4, i32, i4, i5, $i1);
+
+        goto label8;
+
+     label3:
+        $i6 = r0.<javax.swing.text.WrappedPlainView: int sel0>;
+
+        if i5 < $i6 goto label4;
+
+        $i24 = r0.<javax.swing.text.WrappedPlainView: int sel1>;
+
+        if i5 > $i24 goto label4;
+
+        $i25 = r0.<javax.swing.text.WrappedPlainView: int sel0>;
+
+        if $i1 < $i25 goto label4;
+
+        $i26 = r0.<javax.swing.text.WrappedPlainView: int sel1>;
+
+        if $i1 > $i26 goto label4;
+
+        i33 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: int drawSelectedText(java.awt.Graphics,int,int,int,int)>(r4, i32, i4, i5, $i1);
+
+        goto label8;
+
+     label4:
+        $i34 = r0.<javax.swing.text.WrappedPlainView: int sel0>;
+
+        if $i34 < i5 goto label6;
+
+        $i12 = r0.<javax.swing.text.WrappedPlainView: int sel0>;
+
+        if $i12 > $i1 goto label6;
+
+        $i13 = r0.<javax.swing.text.WrappedPlainView: int sel1>;
+
+        if $i13 < i5 goto label5;
+
+        $i17 = r0.<javax.swing.text.WrappedPlainView: int sel1>;
+
+        if $i17 > $i1 goto label5;
+
+        $i18 = r0.<javax.swing.text.WrappedPlainView: int sel0>;
+
+        $i19 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: int drawUnselectedText(java.awt.Graphics,int,int,int,int)>(r4, i32, i4, i5, $i18);
+
+        $i21 = r0.<javax.swing.text.WrappedPlainView: int sel0>;
+
+        $i20 = r0.<javax.swing.text.WrappedPlainView: int sel1>;
+
+        $i22 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: int drawSelectedText(java.awt.Graphics,int,int,int,int)>(r4, $i19, i4, $i21, $i20);
+
+        $i23 = r0.<javax.swing.text.WrappedPlainView: int sel1>;
+
+        i33 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: int drawUnselectedText(java.awt.Graphics,int,int,int,int)>(r4, $i22, i4, $i23, $i1);
+
+        goto label8;
+
+     label5:
+        $i14 = r0.<javax.swing.text.WrappedPlainView: int sel0>;
+
+        $i15 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: int drawUnselectedText(java.awt.Graphics,int,int,int,int)>(r4, i32, i4, i5, $i14);
+
+        $i16 = r0.<javax.swing.text.WrappedPlainView: int sel0>;
+
+        i33 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: int drawSelectedText(java.awt.Graphics,int,int,int,int)>(r4, $i15, i4, $i16, $i1);
+
+        goto label8;
+
+     label6:
+        $i7 = r0.<javax.swing.text.WrappedPlainView: int sel1>;
+
+        if $i7 < i5 goto label7;
+
+        $i8 = r0.<javax.swing.text.WrappedPlainView: int sel1>;
+
+        if $i8 > $i1 goto label7;
+
+        $i9 = r0.<javax.swing.text.WrappedPlainView: int sel1>;
+
+        $i10 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: int drawSelectedText(java.awt.Graphics,int,int,int,int)>(r4, i32, i4, i5, $i9);
+
+        $i11 = r0.<javax.swing.text.WrappedPlainView: int sel1>;
+
+        i33 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: int drawUnselectedText(java.awt.Graphics,int,int,int,int)>(r4, $i10, i4, $i11, $i1);
+
+        goto label8;
+
+     label7:
+        i33 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: int drawUnselectedText(java.awt.Graphics,int,int,int,int)>(r4, i32, i4, i5, $i1);
+
+     label8:
+        return i33;
+    }
+
+    protected int drawUnselectedText(java.awt.Graphics, int, int, int, int) throws javax.swing.text.BadLocationException
+    {
+        java.awt.Color $r2;
+        javax.swing.text.WrappedPlainView r1;
+        java.awt.Graphics r0;
+        int i0, i1, $i2, i3, i4, $i5;
+        javax.swing.text.Document $r3;
+        javax.swing.text.Segment $r4;
+
+        r1 := @this: javax.swing.text.WrappedPlainView;
+
+        r0 := @parameter0: java.awt.Graphics;
+
+        i3 := @parameter1: int;
+
+        i4 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        i1 := @parameter4: int;
+
+        $r2 = r1.<javax.swing.text.WrappedPlainView: java.awt.Color unselected>;
+
+        virtualinvoke r0.<java.awt.Graphics: void setColor(java.awt.Color)>($r2);
+
+        $r3 = virtualinvoke r1.<javax.swing.text.WrappedPlainView: javax.swing.text.Document getDocument()>();
+
+        $r4 = staticinvoke <javax.swing.text.SegmentCache: javax.swing.text.Segment getSharedSegment()>();
+
+        $i2 = i1 - i0;
+
+        interfaceinvoke $r3.<javax.swing.text.Document: void getText(int,int,javax.swing.text.Segment)>(i0, $i2, $r4);
+
+        $i5 = staticinvoke <javax.swing.text.Utilities: int drawTabbedText(javax.swing.text.View,javax.swing.text.Segment,int,int,java.awt.Graphics,javax.swing.text.TabExpander,int)>(r1, $r4, i3, i4, r0, r1, i0);
+
+        staticinvoke <javax.swing.text.SegmentCache: void releaseSharedSegment(javax.swing.text.Segment)>($r4);
+
+        return $i5;
+    }
+
+    protected int drawSelectedText(java.awt.Graphics, int, int, int, int) throws javax.swing.text.BadLocationException
+    {
+        java.awt.Color $r2;
+        javax.swing.text.WrappedPlainView r1;
+        java.awt.Graphics r0;
+        int i0, i1, $i2, i3, i4, $i5;
+        javax.swing.text.Document $r3;
+        javax.swing.text.Segment $r4;
+
+        r1 := @this: javax.swing.text.WrappedPlainView;
+
+        r0 := @parameter0: java.awt.Graphics;
+
+        i3 := @parameter1: int;
+
+        i4 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        i1 := @parameter4: int;
+
+        $r2 = r1.<javax.swing.text.WrappedPlainView: java.awt.Color selected>;
+
+        virtualinvoke r0.<java.awt.Graphics: void setColor(java.awt.Color)>($r2);
+
+        $r3 = virtualinvoke r1.<javax.swing.text.WrappedPlainView: javax.swing.text.Document getDocument()>();
+
+        $r4 = staticinvoke <javax.swing.text.SegmentCache: javax.swing.text.Segment getSharedSegment()>();
+
+        $i2 = i1 - i0;
+
+        interfaceinvoke $r3.<javax.swing.text.Document: void getText(int,int,javax.swing.text.Segment)>(i0, $i2, $r4);
+
+        $i5 = staticinvoke <javax.swing.text.Utilities: int drawTabbedText(javax.swing.text.View,javax.swing.text.Segment,int,int,java.awt.Graphics,javax.swing.text.TabExpander,int)>(r1, $r4, i3, i4, r0, r1, i0);
+
+        staticinvoke <javax.swing.text.SegmentCache: void releaseSharedSegment(javax.swing.text.Segment)>($r4);
+
+        return $i5;
+    }
+
+    protected final javax.swing.text.Segment getLineBuffer()
+    {
+        javax.swing.text.Segment $r1, $r2, $r3;
+        javax.swing.text.WrappedPlainView r0;
+
+        r0 := @this: javax.swing.text.WrappedPlainView;
+
+        $r1 = r0.<javax.swing.text.WrappedPlainView: javax.swing.text.Segment lineBuffer>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new javax.swing.text.Segment;
+
+        specialinvoke $r3.<javax.swing.text.Segment: void <init>()>();
+
+        r0.<javax.swing.text.WrappedPlainView: javax.swing.text.Segment lineBuffer> = $r3;
+
+     label1:
+        $r2 = r0.<javax.swing.text.WrappedPlainView: javax.swing.text.Segment lineBuffer>;
+
+        return $r2;
+    }
+
+    protected int calculateBreakPosition(int, int)
+    {
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, i11;
+        boolean $z0;
+        javax.swing.text.WrappedPlainView r1;
+        java.awt.FontMetrics $r2, $r3;
+        javax.swing.text.Segment $r0;
+
+        r1 := @this: javax.swing.text.WrappedPlainView;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r0 = staticinvoke <javax.swing.text.SegmentCache: javax.swing.text.Segment getSharedSegment()>();
+
+        virtualinvoke r1.<javax.swing.text.WrappedPlainView: void loadText(javax.swing.text.Segment,int,int)>($r0, i0, i1);
+
+        $i2 = virtualinvoke r1.<javax.swing.text.WrappedPlainView: int getWidth()>();
+
+        $z0 = r1.<javax.swing.text.WrappedPlainView: boolean wordWrap>;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = r1.<javax.swing.text.WrappedPlainView: java.awt.FontMetrics metrics>;
+
+        $i9 = r1.<javax.swing.text.WrappedPlainView: int tabBase>;
+
+        $i7 = r1.<javax.swing.text.WrappedPlainView: int tabBase>;
+
+        $i8 = $i7 + $i2;
+
+        $i10 = staticinvoke <javax.swing.text.Utilities: int getBreakLocation(javax.swing.text.Segment,java.awt.FontMetrics,int,int,javax.swing.text.TabExpander,int)>($r0, $r3, $i9, $i8, r1, i0);
+
+        i11 = i0 + $i10;
+
+        goto label2;
+
+     label1:
+        $r2 = r1.<javax.swing.text.WrappedPlainView: java.awt.FontMetrics metrics>;
+
+        $i5 = r1.<javax.swing.text.WrappedPlainView: int tabBase>;
+
+        $i3 = r1.<javax.swing.text.WrappedPlainView: int tabBase>;
+
+        $i4 = $i3 + $i2;
+
+        $i6 = staticinvoke <javax.swing.text.Utilities: int getTabbedTextOffset(javax.swing.text.Segment,java.awt.FontMetrics,int,int,javax.swing.text.TabExpander,int,boolean)>($r0, $r2, $i5, $i4, r1, i0, 0);
+
+        i11 = i0 + $i6;
+
+     label2:
+        staticinvoke <javax.swing.text.SegmentCache: void releaseSharedSegment(javax.swing.text.Segment)>($r0);
+
+        return i11;
+    }
+
+    protected void loadChildren(javax.swing.text.ViewFactory)
+    {
+        javax.swing.text.ViewFactory r5;
+        javax.swing.text.View[] r2;
+        javax.swing.text.WrappedPlainView r0;
+        int $i0, i1;
+        javax.swing.text.Element $r1, $r4;
+        javax.swing.text.WrappedPlainView$WrappedLine $r3;
+
+        r0 := @this: javax.swing.text.WrappedPlainView;
+
+        r5 := @parameter0: javax.swing.text.ViewFactory;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: javax.swing.text.Element getElement()>();
+
+        $i0 = interfaceinvoke $r1.<javax.swing.text.Element: int getElementCount()>();
+
+        if $i0 <= 0 goto label3;
+
+        r2 = newarray (javax.swing.text.View)[$i0];
+
+        i1 = 0;
+
+     label1:
+        if i1 >= $i0 goto label2;
+
+        $r3 = new javax.swing.text.WrappedPlainView$WrappedLine;
+
+        $r4 = interfaceinvoke $r1.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(i1);
+
+        specialinvoke $r3.<javax.swing.text.WrappedPlainView$WrappedLine: void <init>(javax.swing.text.WrappedPlainView,javax.swing.text.Element)>(r0, $r4);
+
+        r2[i1] = $r3;
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        virtualinvoke r0.<javax.swing.text.WrappedPlainView: void replace(int,int,javax.swing.text.View[])>(0, 0, r2);
+
+     label3:
+        return;
+    }
+
+    void updateChildren(javax.swing.event.DocumentEvent, java.awt.Shape)
+    {
+        javax.swing.text.View[] r6;
+        int $i0, $i1, $i2, $i3, i4;
+        java.awt.Container $r8;
+        javax.swing.event.DocumentEvent r2;
+        java.awt.Shape r7;
+        javax.swing.text.Element[] $r4, $r5;
+        javax.swing.text.WrappedPlainView r0;
+        javax.swing.event.DocumentEvent$ElementChange $r3;
+        javax.swing.text.Element $r1, $r10;
+        javax.swing.text.WrappedPlainView$WrappedLine $r9;
+
+        r0 := @this: javax.swing.text.WrappedPlainView;
+
+        r2 := @parameter0: javax.swing.event.DocumentEvent;
+
+        r7 := @parameter1: java.awt.Shape;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: javax.swing.text.Element getElement()>();
+
+        $r3 = interfaceinvoke r2.<javax.swing.event.DocumentEvent: javax.swing.event.DocumentEvent$ElementChange getChange(javax.swing.text.Element)>($r1);
+
+        if $r3 == null goto label3;
+
+        $r4 = interfaceinvoke $r3.<javax.swing.event.DocumentEvent$ElementChange: javax.swing.text.Element[] getChildrenRemoved()>();
+
+        $r5 = interfaceinvoke $r3.<javax.swing.event.DocumentEvent$ElementChange: javax.swing.text.Element[] getChildrenAdded()>();
+
+        $i0 = lengthof $r5;
+
+        r6 = newarray (javax.swing.text.View)[$i0];
+
+        i4 = 0;
+
+     label1:
+        $i1 = lengthof $r5;
+
+        if i4 >= $i1 goto label2;
+
+        $r9 = new javax.swing.text.WrappedPlainView$WrappedLine;
+
+        $r10 = $r5[i4];
+
+        specialinvoke $r9.<javax.swing.text.WrappedPlainView$WrappedLine: void <init>(javax.swing.text.WrappedPlainView,javax.swing.text.Element)>(r0, $r10);
+
+        r6[i4] = $r9;
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label2:
+        $i2 = interfaceinvoke $r3.<javax.swing.event.DocumentEvent$ElementChange: int getIndex()>();
+
+        $i3 = lengthof $r4;
+
+        virtualinvoke r0.<javax.swing.text.WrappedPlainView: void replace(int,int,javax.swing.text.View[])>($i2, $i3, r6);
+
+        if r7 == null goto label3;
+
+        virtualinvoke r0.<javax.swing.text.WrappedPlainView: void preferenceChanged(javax.swing.text.View,boolean,boolean)>(null, 1, 1);
+
+        $r8 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: java.awt.Container getContainer()>();
+
+        virtualinvoke $r8.<java.awt.Container: void repaint()>();
+
+     label3:
+        virtualinvoke r0.<javax.swing.text.WrappedPlainView: void updateMetrics()>();
+
+        return;
+    }
+
+    final void loadText(javax.swing.text.Segment, int, int)
+    {
+        javax.swing.text.BadLocationException $r3;
+        javax.swing.text.WrappedPlainView r0;
+        javax.swing.text.StateInvariantError $r4;
+        int i0, i1, $i2;
+        javax.swing.text.Document $r1;
+        javax.swing.text.Segment r2;
+
+        r0 := @this: javax.swing.text.WrappedPlainView;
+
+        r2 := @parameter0: javax.swing.text.Segment;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+     label1:
+        $r1 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: javax.swing.text.Document getDocument()>();
+
+        $i2 = i1 - i0;
+
+        interfaceinvoke $r1.<javax.swing.text.Document: void getText(int,int,javax.swing.text.Segment)>(i0, $i2, r2);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new javax.swing.text.StateInvariantError;
+
+        specialinvoke $r4.<javax.swing.text.StateInvariantError: void <init>(java.lang.String)>("Can\'t get line text");
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch javax.swing.text.BadLocationException from label1 to label2 with label3;
+    }
+
+    final void updateMetrics()
+    {
+        java.awt.Font $r2;
+        javax.swing.text.WrappedPlainView r0;
+        java.awt.FontMetrics $r3, $r4;
+        int $i0, $i1, $i2;
+        java.awt.Container $r1;
+
+        r0 := @this: javax.swing.text.WrappedPlainView;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: java.awt.Container getContainer()>();
+
+        $r2 = virtualinvoke $r1.<java.awt.Component: java.awt.Font getFont()>();
+
+        $r3 = virtualinvoke $r1.<java.awt.Component: java.awt.FontMetrics getFontMetrics(java.awt.Font)>($r2);
+
+        r0.<javax.swing.text.WrappedPlainView: java.awt.FontMetrics metrics> = $r3;
+
+        $i0 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: int getTabSize()>();
+
+        $r4 = r0.<javax.swing.text.WrappedPlainView: java.awt.FontMetrics metrics>;
+
+        $i1 = virtualinvoke $r4.<java.awt.FontMetrics: int charWidth(char)>(109);
+
+        $i2 = $i0 * $i1;
+
+        r0.<javax.swing.text.WrappedPlainView: int tabSize> = $i2;
+
+        return;
+    }
+
+    public float nextTabStop(float, int)
+    {
+        javax.swing.text.WrappedPlainView r0;
+        int $i0, $i1, $i2, $i3, $i4, i5, $i6, $i7, $i8, $i9, $i10, i11;
+        float f0, $f1;
+
+        r0 := @this: javax.swing.text.WrappedPlainView;
+
+        f0 := @parameter0: float;
+
+        i11 := @parameter1: int;
+
+        $i0 = r0.<javax.swing.text.WrappedPlainView: int tabSize>;
+
+        if $i0 != 0 goto label1;
+
+        return f0;
+
+     label1:
+        $i2 = (int) f0;
+
+        $i1 = r0.<javax.swing.text.WrappedPlainView: int tabBase>;
+
+        $i4 = $i2 - $i1;
+
+        $i3 = r0.<javax.swing.text.WrappedPlainView: int tabSize>;
+
+        i5 = $i4 / $i3;
+
+        $i9 = r0.<javax.swing.text.WrappedPlainView: int tabBase>;
+
+        $i7 = i5 + 1;
+
+        $i6 = r0.<javax.swing.text.WrappedPlainView: int tabSize>;
+
+        $i8 = $i7 * $i6;
+
+        $i10 = $i9 + $i8;
+
+        $f1 = (float) $i10;
+
+        return $f1;
+    }
+
+    public void paint(java.awt.Graphics, java.awt.Shape)
+    {
+        java.awt.Color $r8, $r9;
+        java.awt.Rectangle r1;
+        int $i0, $i1, $i2;
+        java.awt.Container $r3;
+        boolean $z0, $z1;
+        java.awt.Shape r0;
+        java.awt.Font $r10;
+        javax.swing.text.Caret $r5;
+        javax.swing.text.WrappedPlainView r2;
+        javax.swing.text.JTextComponent r4;
+        javax.swing.text.Highlighter $r7;
+        java.awt.Graphics r6;
+
+        r2 := @this: javax.swing.text.WrappedPlainView;
+
+        r6 := @parameter0: java.awt.Graphics;
+
+        r0 := @parameter1: java.awt.Shape;
+
+        r1 = (java.awt.Rectangle) r0;
+
+        $i0 = r1.<java.awt.Rectangle: int x>;
+
+        r2.<javax.swing.text.WrappedPlainView: int tabBase> = $i0;
+
+        $r3 = virtualinvoke r2.<javax.swing.text.WrappedPlainView: java.awt.Container getContainer()>();
+
+        r4 = (javax.swing.text.JTextComponent) $r3;
+
+        $i1 = virtualinvoke r4.<javax.swing.text.JTextComponent: int getSelectionStart()>();
+
+        r2.<javax.swing.text.WrappedPlainView: int sel0> = $i1;
+
+        $i2 = virtualinvoke r4.<javax.swing.text.JTextComponent: int getSelectionEnd()>();
+
+        r2.<javax.swing.text.WrappedPlainView: int sel1> = $i2;
+
+        $z0 = virtualinvoke r4.<javax.swing.text.JTextComponent: boolean isEnabled()>();
+
+        if $z0 == 0 goto label1;
+
+        $r8 = virtualinvoke r4.<javax.swing.text.JTextComponent: java.awt.Color getForeground()>();
+
+        goto label2;
+
+     label1:
+        $r8 = virtualinvoke r4.<javax.swing.text.JTextComponent: java.awt.Color getDisabledTextColor()>();
+
+     label2:
+        r2.<javax.swing.text.WrappedPlainView: java.awt.Color unselected> = $r8;
+
+        $r5 = virtualinvoke r4.<javax.swing.text.JTextComponent: javax.swing.text.Caret getCaret()>();
+
+        $z1 = interfaceinvoke $r5.<javax.swing.text.Caret: boolean isSelectionVisible()>();
+
+        if $z1 == 0 goto label3;
+
+        $r7 = virtualinvoke r4.<javax.swing.text.JTextComponent: javax.swing.text.Highlighter getHighlighter()>();
+
+        if $r7 == null goto label3;
+
+        $r9 = virtualinvoke r4.<javax.swing.text.JTextComponent: java.awt.Color getSelectedTextColor()>();
+
+        goto label4;
+
+     label3:
+        $r9 = r2.<javax.swing.text.WrappedPlainView: java.awt.Color unselected>;
+
+     label4:
+        r2.<javax.swing.text.WrappedPlainView: java.awt.Color selected> = $r9;
+
+        $r10 = virtualinvoke r4.<javax.swing.text.JTextComponent: java.awt.Font getFont()>();
+
+        virtualinvoke r6.<java.awt.Graphics: void setFont(java.awt.Font)>($r10);
+
+        specialinvoke r2.<javax.swing.text.BoxView: void paint(java.awt.Graphics,java.awt.Shape)>(r6, r0);
+
+        return;
+    }
+
+    public void setSize(float, float)
+    {
+        int $i0, $i1;
+        float f0, f1;
+        javax.swing.text.WrappedPlainView r0;
+
+        r0 := @this: javax.swing.text.WrappedPlainView;
+
+        f0 := @parameter0: float;
+
+        f1 := @parameter1: float;
+
+        virtualinvoke r0.<javax.swing.text.WrappedPlainView: void updateMetrics()>();
+
+        $i0 = (int) f0;
+
+        $i1 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: int getWidth()>();
+
+        if $i0 == $i1 goto label1;
+
+        virtualinvoke r0.<javax.swing.text.WrappedPlainView: void preferenceChanged(javax.swing.text.View,boolean,boolean)>(null, 1, 1);
+
+        r0.<javax.swing.text.WrappedPlainView: boolean widthChanging> = 1;
+
+     label1:
+        specialinvoke r0.<javax.swing.text.BoxView: void setSize(float,float)>(f0, f1);
+
+        r0.<javax.swing.text.WrappedPlainView: boolean widthChanging> = 0;
+
+        return;
+    }
+
+    public float getPreferredSpan(int)
+    {
+        int i0;
+        float $f0;
+        javax.swing.text.WrappedPlainView r0;
+
+        r0 := @this: javax.swing.text.WrappedPlainView;
+
+        i0 := @parameter0: int;
+
+        virtualinvoke r0.<javax.swing.text.WrappedPlainView: void updateMetrics()>();
+
+        $f0 = specialinvoke r0.<javax.swing.text.BoxView: float getPreferredSpan(int)>(i0);
+
+        return $f0;
+    }
+
+    public float getMinimumSpan(int)
+    {
+        int i0;
+        float $f0;
+        javax.swing.text.WrappedPlainView r0;
+
+        r0 := @this: javax.swing.text.WrappedPlainView;
+
+        i0 := @parameter0: int;
+
+        virtualinvoke r0.<javax.swing.text.WrappedPlainView: void updateMetrics()>();
+
+        $f0 = specialinvoke r0.<javax.swing.text.BoxView: float getMinimumSpan(int)>(i0);
+
+        return $f0;
+    }
+
+    public float getMaximumSpan(int)
+    {
+        int i0;
+        float $f0;
+        javax.swing.text.WrappedPlainView r0;
+
+        r0 := @this: javax.swing.text.WrappedPlainView;
+
+        i0 := @parameter0: int;
+
+        virtualinvoke r0.<javax.swing.text.WrappedPlainView: void updateMetrics()>();
+
+        $f0 = specialinvoke r0.<javax.swing.text.BoxView: float getMaximumSpan(int)>(i0);
+
+        return $f0;
+    }
+
+    public void insertUpdate(javax.swing.event.DocumentEvent, java.awt.Shape, javax.swing.text.ViewFactory)
+    {
+        java.awt.Shape r2;
+        java.awt.Rectangle $r4;
+        javax.swing.text.ViewFactory r3;
+        javax.swing.text.WrappedPlainView r0;
+        int $i0;
+        javax.swing.text.View $r5;
+        javax.swing.event.DocumentEvent r1;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.WrappedPlainView;
+
+        r1 := @parameter0: javax.swing.event.DocumentEvent;
+
+        r2 := @parameter1: java.awt.Shape;
+
+        r3 := @parameter2: javax.swing.text.ViewFactory;
+
+        virtualinvoke r0.<javax.swing.text.WrappedPlainView: void updateChildren(javax.swing.event.DocumentEvent,java.awt.Shape)>(r1, r2);
+
+        if r2 == null goto label1;
+
+        $z0 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: boolean isAllocationValid()>();
+
+        if $z0 == 0 goto label1;
+
+        $r4 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: java.awt.Rectangle getInsideAllocation(java.awt.Shape)>(r2);
+
+        goto label2;
+
+     label1:
+        $r4 = null;
+
+     label2:
+        $i0 = interfaceinvoke r1.<javax.swing.event.DocumentEvent: int getOffset()>();
+
+        $r5 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: javax.swing.text.View getViewAtPosition(int,java.awt.Rectangle)>($i0, $r4);
+
+        if $r5 == null goto label3;
+
+        virtualinvoke $r5.<javax.swing.text.View: void insertUpdate(javax.swing.event.DocumentEvent,java.awt.Shape,javax.swing.text.ViewFactory)>(r1, $r4, r3);
+
+     label3:
+        return;
+    }
+
+    public void removeUpdate(javax.swing.event.DocumentEvent, java.awt.Shape, javax.swing.text.ViewFactory)
+    {
+        java.awt.Shape r2;
+        java.awt.Rectangle $r4;
+        javax.swing.text.ViewFactory r3;
+        javax.swing.text.WrappedPlainView r0;
+        int $i0;
+        javax.swing.text.View $r5;
+        javax.swing.event.DocumentEvent r1;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.WrappedPlainView;
+
+        r1 := @parameter0: javax.swing.event.DocumentEvent;
+
+        r2 := @parameter1: java.awt.Shape;
+
+        r3 := @parameter2: javax.swing.text.ViewFactory;
+
+        virtualinvoke r0.<javax.swing.text.WrappedPlainView: void updateChildren(javax.swing.event.DocumentEvent,java.awt.Shape)>(r1, r2);
+
+        if r2 == null goto label1;
+
+        $z0 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: boolean isAllocationValid()>();
+
+        if $z0 == 0 goto label1;
+
+        $r4 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: java.awt.Rectangle getInsideAllocation(java.awt.Shape)>(r2);
+
+        goto label2;
+
+     label1:
+        $r4 = null;
+
+     label2:
+        $i0 = interfaceinvoke r1.<javax.swing.event.DocumentEvent: int getOffset()>();
+
+        $r5 = virtualinvoke r0.<javax.swing.text.WrappedPlainView: javax.swing.text.View getViewAtPosition(int,java.awt.Rectangle)>($i0, $r4);
+
+        if $r5 == null goto label3;
+
+        virtualinvoke $r5.<javax.swing.text.View: void removeUpdate(javax.swing.event.DocumentEvent,java.awt.Shape,javax.swing.text.ViewFactory)>(r1, $r4, r3);
+
+     label3:
+        return;
+    }
+
+    public void changedUpdate(javax.swing.event.DocumentEvent, java.awt.Shape, javax.swing.text.ViewFactory)
+    {
+        java.awt.Shape r2;
+        javax.swing.text.ViewFactory r3;
+        javax.swing.event.DocumentEvent r1;
+        javax.swing.text.WrappedPlainView r0;
+
+        r0 := @this: javax.swing.text.WrappedPlainView;
+
+        r1 := @parameter0: javax.swing.event.DocumentEvent;
+
+        r2 := @parameter1: java.awt.Shape;
+
+        r3 := @parameter2: javax.swing.text.ViewFactory;
+
+        virtualinvoke r0.<javax.swing.text.WrappedPlainView: void updateChildren(javax.swing.event.DocumentEvent,java.awt.Shape)>(r1, r2);
+
+        return;
+    }
+}

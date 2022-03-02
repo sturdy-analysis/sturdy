@@ -1,0 +1,1230 @@
+public class com.sun.corba.se.impl.activation.RepositoryImpl extends com.sun.corba.se.spi.activation._RepositoryImplBase implements java.io.Serializable
+{
+    private static final long serialVersionUID;
+    private transient boolean debug;
+    static final int illegalServerId;
+    private transient com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db;
+    transient com.sun.corba.se.spi.orb.ORB orb;
+    transient com.sun.corba.se.impl.logging.ActivationSystemException wrapper;
+
+    void <init>(com.sun.corba.se.spi.orb.ORB, java.io.File, boolean)
+    {
+        com.sun.corba.se.impl.activation.RepositoryImpl r0;
+        java.io.ObjectInputStream $r6;
+        com.sun.corba.se.impl.logging.ActivationSystemException $r2, $r12;
+        boolean z0, $z1;
+        java.io.FileInputStream $r5;
+        com.sun.corba.se.spi.orb.ORB r1;
+        java.io.File $r3, r4;
+        com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB $r8, $r9, $r10;
+        java.lang.Exception $r11;
+        org.omg.CORBA.INITIALIZE $r13;
+        java.lang.Object $r7;
+
+        r0 := @this: com.sun.corba.se.impl.activation.RepositoryImpl;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        r4 := @parameter1: java.io.File;
+
+        z0 := @parameter2: boolean;
+
+        specialinvoke r0.<com.sun.corba.se.spi.activation._RepositoryImplBase: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.activation.RepositoryImpl: boolean debug> = 0;
+
+        r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db> = null;
+
+        r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.spi.orb.ORB orb> = null;
+
+        r0.<com.sun.corba.se.impl.activation.RepositoryImpl: boolean debug> = z0;
+
+        r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.spi.orb.ORB orb> = r1;
+
+        $r2 = staticinvoke <com.sun.corba.se.impl.logging.ActivationSystemException: com.sun.corba.se.impl.logging.ActivationSystemException get(com.sun.corba.se.spi.orb.ORB,java.lang.String)>(r1, "orbd.repository");
+
+        r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.logging.ActivationSystemException wrapper> = $r2;
+
+        $r3 = new java.io.File;
+
+        specialinvoke $r3.<java.io.File: void <init>(java.io.File,java.lang.String)>(r4, "servers.db");
+
+        $z1 = virtualinvoke $r3.<java.io.File: boolean exists()>();
+
+        if $z1 != 0 goto label1;
+
+        $r9 = new com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB;
+
+        specialinvoke $r9.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: void <init>(com.sun.corba.se.impl.activation.RepositoryImpl,java.io.File)>(r0, $r3);
+
+        r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db> = $r9;
+
+        $r10 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db>;
+
+        virtualinvoke $r10.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: void flush()>();
+
+        goto label4;
+
+     label1:
+        $r5 = new java.io.FileInputStream;
+
+        specialinvoke $r5.<java.io.FileInputStream: void <init>(java.io.File)>($r3);
+
+        $r6 = new java.io.ObjectInputStream;
+
+        specialinvoke $r6.<java.io.ObjectInputStream: void <init>(java.io.InputStream)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        $r8 = (com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB) $r7;
+
+        r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db> = $r8;
+
+        virtualinvoke $r6.<java.io.ObjectInputStream: void close()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r11 := @caughtexception;
+
+        $r12 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.logging.ActivationSystemException wrapper>;
+
+        $r13 = virtualinvoke $r12.<com.sun.corba.se.impl.logging.ActivationSystemException: org.omg.CORBA.INITIALIZE cannotReadRepositoryDb(java.lang.Throwable)>($r11);
+
+        throw $r13;
+
+     label4:
+        virtualinvoke r1.<com.sun.corba.se.spi.orb.ORB: void connect(org.omg.CORBA.Object)>(r0);
+
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    private java.lang.String printServerDef(com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef)
+    {
+        com.sun.corba.se.impl.activation.RepositoryImpl r19;
+        java.lang.String $r3, $r6, $r9, $r12, $r15, $r18;
+        java.lang.StringBuilder $r0, $r1, $r4, $r5, $r7, $r8, $r10, $r11, $r13, $r14, $r16, $r17;
+        com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef r2;
+
+        r19 := @this: com.sun.corba.se.impl.activation.RepositoryImpl;
+
+        r2 := @parameter0: com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ServerDef[applicationName=");
+
+        $r3 = r2.<com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef: java.lang.String applicationName>;
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" serverName=");
+
+        $r6 = r2.<com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef: java.lang.String serverName>;
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" serverClassPath=");
+
+        $r9 = r2.<com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef: java.lang.String serverClassPath>;
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" serverArgs=");
+
+        $r12 = r2.<com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef: java.lang.String serverArgs>;
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" serverVmArgs=");
+
+        $r15 = r2.<com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef: java.lang.String serverVmArgs>;
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r18;
+    }
+
+    public int registerServer(com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef, int) throws com.sun.corba.se.spi.activation.ServerAlreadyRegistered
+    {
+        com.sun.corba.se.impl.activation.RepositoryImpl r0;
+        java.util.Enumeration $r4;
+        java.lang.Integer $r51;
+        boolean $z0, $z1, $z2, $z3;
+        com.sun.corba.se.spi.activation.ServerAlreadyRegistered $r49;
+        com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB $r1, $r2, $r7, $r10, $r27;
+        java.lang.StringBuilder $r13, $r15, $r16, $r17, $r21, $r23, $r24, $r25, $r33, $r35, $r36, $r38, $r39, $r40, $r41, $r47, $r48, $r52, $r53;
+        java.lang.Throwable $r43;
+        int i0, $i1, i2, $i4, $i6, $i8;
+        java.lang.String $r14, $r18, $r22, $r26, $r29, $r30, $r34, $r42, $r45;
+        java.util.Hashtable $r3, $r9;
+        java.io.PrintStream $r12, $r20, $r32;
+        java.lang.Object $r28;
+        com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef r44, $r50;
+        com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef r6;
+
+        r0 := @this: com.sun.corba.se.impl.activation.RepositoryImpl;
+
+        r6 := @parameter0: com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef;
+
+        i0 := @parameter1: int;
+
+        $r1 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db>;
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db>;
+
+        $r3 = $r2.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: java.util.Hashtable serverTable>;
+
+        $r4 = virtualinvoke $r3.<java.util.Hashtable: java.util.Enumeration elements()>();
+
+     label02:
+        $z0 = interfaceinvoke $r4.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label06;
+
+        $r28 = interfaceinvoke $r4.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r44 = (com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef) $r28;
+
+        $r30 = r6.<com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef: java.lang.String applicationName>;
+
+        $r29 = r44.<com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef: java.lang.String applicationName>;
+
+        $z2 = virtualinvoke $r30.<java.lang.String: boolean equals(java.lang.Object)>($r29);
+
+        if $z2 == 0 goto label02;
+
+        $z3 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: boolean debug>;
+
+        if $z3 == 0 goto label05;
+
+        $r32 = <java.lang.System: java.io.PrintStream out>;
+
+        $r47 = new java.lang.StringBuilder;
+
+        specialinvoke $r47.<java.lang.StringBuilder: void <init>()>();
+
+        $r33 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("RepositoryImpl: registerServer called to register ServerDef ");
+
+        $r34 = specialinvoke r0.<com.sun.corba.se.impl.activation.RepositoryImpl: java.lang.String printServerDef(com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef)>(r6);
+
+        $r35 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r34);
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" with ");
+
+        $i4 = (int) -1;
+
+        if i0 != $i4 goto label03;
+
+        $r45 = "a new server Id";
+
+        goto label04;
+
+     label03:
+        $r48 = new java.lang.StringBuilder;
+
+        specialinvoke $r48.<java.lang.StringBuilder: void <init>()>();
+
+        $r38 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("server Id ");
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r45 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label04:
+        $r40 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r45);
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" FAILED because it is already registered.");
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r32.<java.io.PrintStream: void println(java.lang.String)>($r42);
+
+     label05:
+        $r49 = new com.sun.corba.se.spi.activation.ServerAlreadyRegistered;
+
+        $i1 = r44.<com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef: int id>;
+
+        specialinvoke $r49.<com.sun.corba.se.spi.activation.ServerAlreadyRegistered: void <init>(int)>($i1);
+
+        throw $r49;
+
+     label06:
+        $i6 = (int) -1;
+
+        if i0 != $i6 goto label07;
+
+        $r27 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db>;
+
+        i2 = virtualinvoke $r27.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: int incrementServerIdCounter()>();
+
+        goto label08;
+
+     label07:
+        i2 = i0;
+
+     label08:
+        $r50 = new com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef;
+
+        specialinvoke $r50.<com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef: void <init>(com.sun.corba.se.impl.activation.RepositoryImpl,com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef,int)>(r0, r6, i2);
+
+        $r7 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db>;
+
+        $r9 = $r7.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: java.util.Hashtable serverTable>;
+
+        $r51 = new java.lang.Integer;
+
+        specialinvoke $r51.<java.lang.Integer: void <init>(int)>(i2);
+
+        virtualinvoke $r9.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r51, $r50);
+
+        $r10 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db>;
+
+        virtualinvoke $r10.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: void flush()>();
+
+        $z1 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: boolean debug>;
+
+        if $z1 == 0 goto label10;
+
+        $i8 = (int) -1;
+
+        if i0 != $i8 goto label09;
+
+        $r20 = <java.lang.System: java.io.PrintStream out>;
+
+        $r52 = new java.lang.StringBuilder;
+
+        specialinvoke $r52.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("RepositoryImpl: registerServer called to register ServerDef ");
+
+        $r22 = specialinvoke r0.<com.sun.corba.se.impl.activation.RepositoryImpl: java.lang.String printServerDef(com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef)>(r6);
+
+        $r23 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" with new serverId ");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i2);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r20.<java.io.PrintStream: void println(java.lang.String)>($r26);
+
+        goto label10;
+
+     label09:
+        $r12 = <java.lang.System: java.io.PrintStream out>;
+
+        $r53 = new java.lang.StringBuilder;
+
+        specialinvoke $r53.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("RepositoryImpl: registerServer called to register ServerDef ");
+
+        $r14 = specialinvoke r0.<com.sun.corba.se.impl.activation.RepositoryImpl: java.lang.String printServerDef(com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef)>(r6);
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" with assigned serverId ");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i2);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r12.<java.io.PrintStream: void println(java.lang.String)>($r18);
+
+     label10:
+        exitmonitor $r1;
+
+     label11:
+        return i2;
+
+     label12:
+        $r43 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label13:
+        throw $r43;
+
+        catch java.lang.Throwable from label01 to label11 with label12;
+        catch java.lang.Throwable from label12 to label13 with label12;
+    }
+
+    public int registerServer(com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef) throws com.sun.corba.se.spi.activation.ServerAlreadyRegistered, com.sun.corba.se.spi.activation.BadServerDefinition
+    {
+        com.sun.corba.se.impl.activation.RepositoryImpl r0;
+        java.net.ServerSocket $r5;
+        com.sun.corba.se.impl.logging.ActivationSystemException $r8;
+        com.sun.corba.se.spi.activation.BadServerDefinition $r14, $r15, $r16, $r17;
+        int $i0, $i1, $i2, $i4, $i6;
+        com.sun.corba.se.impl.activation.ServerTableEntry $r13;
+        com.sun.corba.se.spi.legacy.connection.LegacyServerSocketManager $r2;
+        boolean $z0;
+        com.sun.corba.se.spi.legacy.connection.LegacyServerSocketEndPointInfo $r3;
+        com.sun.corba.se.spi.transport.SocketOrChannelAcceptor $r4;
+        com.sun.corba.se.spi.orb.ORB $r1;
+        com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef r7;
+
+        r0 := @this: com.sun.corba.se.impl.activation.RepositoryImpl;
+
+        r7 := @parameter0: com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef;
+
+        $r1 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.legacy.connection.LegacyServerSocketManager getLegacyServerSocketManager()>();
+
+        $r3 = interfaceinvoke $r2.<com.sun.corba.se.spi.legacy.connection.LegacyServerSocketManager: com.sun.corba.se.spi.legacy.connection.LegacyServerSocketEndPointInfo legacyGetEndpoint(java.lang.String)>("BOOT_NAMING");
+
+        $r4 = (com.sun.corba.se.spi.transport.SocketOrChannelAcceptor) $r3;
+
+        $r5 = interfaceinvoke $r4.<com.sun.corba.se.spi.transport.SocketOrChannelAcceptor: java.net.ServerSocket getServerSocket()>();
+
+        $i0 = virtualinvoke $r5.<java.net.ServerSocket: int getLocalPort()>();
+
+        $r13 = new com.sun.corba.se.impl.activation.ServerTableEntry;
+
+        $r8 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.logging.ActivationSystemException wrapper>;
+
+        $z0 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: boolean debug>;
+
+        $i4 = (int) -1;
+
+        specialinvoke $r13.<com.sun.corba.se.impl.activation.ServerTableEntry: void <init>(com.sun.corba.se.impl.logging.ActivationSystemException,int,com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef,int,java.lang.String,boolean,boolean)>($r8, $i4, r7, $i0, "", 1, $z0);
+
+        $i1 = virtualinvoke $r13.<com.sun.corba.se.impl.activation.ServerTableEntry: int verify()>();
+
+        tableswitch($i1)
+        {
+            case 0: goto label1;
+            case 1: goto label2;
+            case 2: goto label3;
+            case 3: goto label4;
+            default: goto label5;
+        };
+
+     label1:
+        goto label6;
+
+     label2:
+        $r14 = new com.sun.corba.se.spi.activation.BadServerDefinition;
+
+        specialinvoke $r14.<com.sun.corba.se.spi.activation.BadServerDefinition: void <init>(java.lang.String)>("main class not found.");
+
+        throw $r14;
+
+     label3:
+        $r15 = new com.sun.corba.se.spi.activation.BadServerDefinition;
+
+        specialinvoke $r15.<com.sun.corba.se.spi.activation.BadServerDefinition: void <init>(java.lang.String)>("no main method found.");
+
+        throw $r15;
+
+     label4:
+        $r16 = new com.sun.corba.se.spi.activation.BadServerDefinition;
+
+        specialinvoke $r16.<com.sun.corba.se.spi.activation.BadServerDefinition: void <init>(java.lang.String)>("server application error.");
+
+        throw $r16;
+
+     label5:
+        $r17 = new com.sun.corba.se.spi.activation.BadServerDefinition;
+
+        specialinvoke $r17.<com.sun.corba.se.spi.activation.BadServerDefinition: void <init>(java.lang.String)>("unknown Exception.");
+
+        throw $r17;
+
+     label6:
+        $i6 = (int) -1;
+
+        $i2 = virtualinvoke r0.<com.sun.corba.se.impl.activation.RepositoryImpl: int registerServer(com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef,int)>(r7, $i6);
+
+        return $i2;
+    }
+
+    public void unregisterServer(int) throws com.sun.corba.se.spi.activation.ServerNotRegistered
+    {
+        java.lang.Throwable $r22;
+        com.sun.corba.se.impl.activation.RepositoryImpl r1;
+        java.lang.Integer $r0;
+        com.sun.corba.se.spi.activation.ServerNotRegistered $r15;
+        int i0;
+        java.lang.String $r14, $r21;
+        java.util.Hashtable $r4, $r7;
+        boolean $z0, $z1;
+        java.io.PrintStream $r10, $r17;
+        com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB $r2, $r3, $r6, $r8;
+        java.lang.Object $r5;
+        java.lang.StringBuilder $r9, $r11, $r12, $r13, $r16, $r18, $r19, $r20;
+        com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef r23;
+
+        r1 := @this: com.sun.corba.se.impl.activation.RepositoryImpl;
+
+        i0 := @parameter0: int;
+
+        $r0 = new java.lang.Integer;
+
+        specialinvoke $r0.<java.lang.Integer: void <init>(int)>(i0);
+
+        $r2 = r1.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db>;
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = r1.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db>;
+
+        $r4 = $r3.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: java.util.Hashtable serverTable>;
+
+        $r5 = virtualinvoke $r4.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r0);
+
+        r23 = (com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef) $r5;
+
+        if r23 != null goto label3;
+
+        $z1 = r1.<com.sun.corba.se.impl.activation.RepositoryImpl: boolean debug>;
+
+        if $z1 == 0 goto label2;
+
+        $r17 = <java.lang.System: java.io.PrintStream out>;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("RepositoryImpl: unregisterServer for serverId ");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" called: server not registered");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r17.<java.io.PrintStream: void println(java.lang.String)>($r21);
+
+     label2:
+        $r15 = new com.sun.corba.se.spi.activation.ServerNotRegistered;
+
+        specialinvoke $r15.<com.sun.corba.se.spi.activation.ServerNotRegistered: void <init>()>();
+
+        throw $r15;
+
+     label3:
+        $r6 = r1.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db>;
+
+        $r7 = $r6.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: java.util.Hashtable serverTable>;
+
+        virtualinvoke $r7.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>($r0);
+
+        $r8 = r1.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db>;
+
+        virtualinvoke $r8.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: void flush()>();
+
+        exitmonitor $r2;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r22 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label6:
+        throw $r22;
+
+     label7:
+        $z0 = r1.<com.sun.corba.se.impl.activation.RepositoryImpl: boolean debug>;
+
+        if $z0 == 0 goto label8;
+
+        $r10 = <java.lang.System: java.io.PrintStream out>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("RepositoryImpl: unregisterServer for serverId ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" called");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r10.<java.io.PrintStream: void println(java.lang.String)>($r14);
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    private com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef getDBServerDef(int) throws com.sun.corba.se.spi.activation.ServerNotRegistered
+    {
+        com.sun.corba.se.impl.activation.RepositoryImpl r1;
+        java.lang.Integer $r0;
+        com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB $r2;
+        com.sun.corba.se.spi.activation.ServerNotRegistered $r6;
+        int i0;
+        java.lang.Object $r4;
+        com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef r5;
+        java.util.Hashtable $r3;
+
+        r1 := @this: com.sun.corba.se.impl.activation.RepositoryImpl;
+
+        i0 := @parameter0: int;
+
+        $r0 = new java.lang.Integer;
+
+        specialinvoke $r0.<java.lang.Integer: void <init>(int)>(i0);
+
+        $r2 = r1.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db>;
+
+        $r3 = $r2.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: java.util.Hashtable serverTable>;
+
+        $r4 = virtualinvoke $r3.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r0);
+
+        r5 = (com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef) $r4;
+
+        if r5 != null goto label1;
+
+        $r6 = new com.sun.corba.se.spi.activation.ServerNotRegistered;
+
+        specialinvoke $r6.<com.sun.corba.se.spi.activation.ServerNotRegistered: void <init>(int)>(i0);
+
+        throw $r6;
+
+     label1:
+        return r5;
+    }
+
+    public com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef getServer(int) throws com.sun.corba.se.spi.activation.ServerNotRegistered
+    {
+        com.sun.corba.se.impl.activation.RepositoryImpl r0;
+        int i0;
+        java.lang.String $r3, $r4, $r5, $r6, $r7, $r13, $r15;
+        boolean $z0;
+        java.io.PrintStream $r9;
+        com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef $r1;
+        java.lang.StringBuilder $r8, $r10, $r11, $r12, $r14;
+        com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef $r2;
+
+        r0 := @this: com.sun.corba.se.impl.activation.RepositoryImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef getDBServerDef(int)>(i0);
+
+        $r2 = new com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef;
+
+        $r7 = $r1.<com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef: java.lang.String applicationName>;
+
+        $r6 = $r1.<com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef: java.lang.String name>;
+
+        $r5 = $r1.<com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef: java.lang.String classPath>;
+
+        $r4 = $r1.<com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef: java.lang.String args>;
+
+        $r3 = $r1.<com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef: java.lang.String vmArgs>;
+
+        specialinvoke $r2.<com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef: void <init>(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)>($r7, $r6, $r5, $r4, $r3);
+
+        $z0 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: boolean debug>;
+
+        if $z0 == 0 goto label1;
+
+        $r9 = <java.lang.System: java.io.PrintStream out>;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("RepositoryImpl: getServer for serverId ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" returns ");
+
+        $r13 = specialinvoke r0.<com.sun.corba.se.impl.activation.RepositoryImpl: java.lang.String printServerDef(com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef)>($r2);
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r9.<java.io.PrintStream: void println(java.lang.String)>($r15);
+
+     label1:
+        return $r2;
+    }
+
+    public boolean isInstalled(int) throws com.sun.corba.se.spi.activation.ServerNotRegistered
+    {
+        com.sun.corba.se.impl.activation.RepositoryImpl r0;
+        int i0;
+        com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.activation.RepositoryImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef getDBServerDef(int)>(i0);
+
+        $z0 = $r1.<com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef: boolean isInstalled>;
+
+        return $z0;
+    }
+
+    public void install(int) throws com.sun.corba.se.spi.activation.ServerNotRegistered, com.sun.corba.se.spi.activation.ServerAlreadyInstalled
+    {
+        com.sun.corba.se.impl.activation.RepositoryImpl r0;
+        com.sun.corba.se.spi.activation.ServerAlreadyInstalled $r3;
+        int i0;
+        com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef $r1;
+        com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB $r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.activation.RepositoryImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef getDBServerDef(int)>(i0);
+
+        $z0 = $r1.<com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef: boolean isInstalled>;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = new com.sun.corba.se.spi.activation.ServerAlreadyInstalled;
+
+        specialinvoke $r3.<com.sun.corba.se.spi.activation.ServerAlreadyInstalled: void <init>(int)>(i0);
+
+        throw $r3;
+
+     label1:
+        $r1.<com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef: boolean isInstalled> = 1;
+
+        $r2 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db>;
+
+        virtualinvoke $r2.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: void flush()>();
+
+        return;
+    }
+
+    public void uninstall(int) throws com.sun.corba.se.spi.activation.ServerNotRegistered, com.sun.corba.se.spi.activation.ServerAlreadyUninstalled
+    {
+        com.sun.corba.se.impl.activation.RepositoryImpl r0;
+        int i0;
+        com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef $r1;
+        com.sun.corba.se.spi.activation.ServerAlreadyUninstalled $r3;
+        com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB $r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.activation.RepositoryImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef getDBServerDef(int)>(i0);
+
+        $z0 = $r1.<com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef: boolean isInstalled>;
+
+        if $z0 != 0 goto label1;
+
+        $r3 = new com.sun.corba.se.spi.activation.ServerAlreadyUninstalled;
+
+        specialinvoke $r3.<com.sun.corba.se.spi.activation.ServerAlreadyUninstalled: void <init>(int)>(i0);
+
+        throw $r3;
+
+     label1:
+        $r1.<com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef: boolean isInstalled> = 0;
+
+        $r2 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db>;
+
+        virtualinvoke $r2.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: void flush()>();
+
+        return;
+    }
+
+    public int[] listRegisteredServers()
+    {
+        java.lang.Throwable $r16;
+        com.sun.corba.se.impl.activation.RepositoryImpl r0;
+        java.util.Enumeration $r7;
+        int[] r4;
+        java.lang.StringBuffer $r8;
+        int $i0, $i1, $i2, $i3, $i4, i5, i6;
+        java.lang.String $r12, $r14;
+        java.util.Hashtable $r3, $r6;
+        boolean $z0, $z1;
+        java.io.PrintStream $r10;
+        com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB $r1, $r2, $r5;
+        java.lang.StringBuilder $r9, $r11, $r13;
+        java.lang.Object $r15;
+        com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef r17;
+
+        r0 := @this: com.sun.corba.se.impl.activation.RepositoryImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db>;
+
+        entermonitor $r1;
+
+     label1:
+        i5 = 0;
+
+        $r2 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db>;
+
+        $r3 = $r2.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: java.util.Hashtable serverTable>;
+
+        $i0 = virtualinvoke $r3.<java.util.Hashtable: int size()>();
+
+        r4 = newarray (int)[$i0];
+
+        $r5 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db>;
+
+        $r6 = $r5.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: java.util.Hashtable serverTable>;
+
+        $r7 = virtualinvoke $r6.<java.util.Hashtable: java.util.Enumeration elements()>();
+
+     label2:
+        $z0 = interfaceinvoke $r7.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label3;
+
+        $r15 = interfaceinvoke $r7.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r17 = (com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef) $r15;
+
+        $i3 = i5;
+
+        i5 = i5 + 1;
+
+        $i4 = r17.<com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef: int id>;
+
+        r4[$i3] = $i4;
+
+        goto label2;
+
+     label3:
+        $z1 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: boolean debug>;
+
+        if $z1 == 0 goto label6;
+
+        $r8 = new java.lang.StringBuffer;
+
+        specialinvoke $r8.<java.lang.StringBuffer: void <init>()>();
+
+        i6 = 0;
+
+     label4:
+        $i1 = lengthof r4;
+
+        if i6 >= $i1 goto label5;
+
+        virtualinvoke $r8.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(32);
+
+        $i2 = r4[i6];
+
+        virtualinvoke $r8.<java.lang.StringBuffer: java.lang.StringBuffer append(int)>($i2);
+
+        i6 = i6 + 1;
+
+        goto label4;
+
+     label5:
+        $r10 = <java.lang.System: java.io.PrintStream out>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("RepositoryImpl: listRegisteredServers returns");
+
+        $r12 = virtualinvoke $r8.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r10.<java.io.PrintStream: void println(java.lang.String)>($r14);
+
+     label6:
+        exitmonitor $r1;
+
+     label7:
+        return r4;
+
+     label8:
+        $r16 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label9:
+        throw $r16;
+
+        catch java.lang.Throwable from label1 to label7 with label8;
+        catch java.lang.Throwable from label8 to label9 with label8;
+    }
+
+    public int getServerID(java.lang.String) throws com.sun.corba.se.spi.activation.ServerNotRegistered
+    {
+        java.lang.Throwable $r21;
+        com.sun.corba.se.impl.activation.RepositoryImpl r0;
+        java.util.Enumeration $r4;
+        java.lang.Integer r15;
+        com.sun.corba.se.spi.activation.ServerNotRegistered $r23;
+        int i0, $i2, $i4;
+        java.lang.String r9, $r13, $r20;
+        java.util.Hashtable $r3, $r17;
+        boolean $z0, $z1, $z2;
+        java.io.PrintStream $r7;
+        com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB $r1, $r2, $r16;
+        java.lang.StringBuilder $r8, $r10, $r11, $r12, $r22;
+        java.lang.Object $r14, $r18;
+        com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef r19;
+
+        r0 := @this: com.sun.corba.se.impl.activation.RepositoryImpl;
+
+        r9 := @parameter0: java.lang.String;
+
+        $r1 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db>;
+
+        entermonitor $r1;
+
+     label1:
+        $i2 = (int) -1;
+
+        i0 = $i2;
+
+        $r2 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db>;
+
+        $r3 = $r2.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: java.util.Hashtable serverTable>;
+
+        $r4 = virtualinvoke $r3.<java.util.Hashtable: java.util.Enumeration keys()>();
+
+     label2:
+        $z0 = interfaceinvoke $r4.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label4;
+
+        $r14 = interfaceinvoke $r4.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r15 = (java.lang.Integer) $r14;
+
+        $r16 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db>;
+
+        $r17 = $r16.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: java.util.Hashtable serverTable>;
+
+        $r18 = virtualinvoke $r17.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r15);
+
+        r19 = (com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef) $r18;
+
+        $r20 = r19.<com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef: java.lang.String applicationName>;
+
+        $z2 = virtualinvoke $r20.<java.lang.String: boolean equals(java.lang.Object)>(r9);
+
+        if $z2 == 0 goto label3;
+
+        i0 = virtualinvoke r15.<java.lang.Integer: int intValue()>();
+
+        goto label4;
+
+     label3:
+        goto label2;
+
+     label4:
+        $z1 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: boolean debug>;
+
+        if $z1 == 0 goto label5;
+
+        $r7 = <java.lang.System: java.io.PrintStream out>;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("RepositoryImpl: getServerID for ");
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<java.io.PrintStream: void println(java.lang.String)>($r13);
+
+     label5:
+        $i4 = (int) -1;
+
+        if i0 != $i4 goto label6;
+
+        $r23 = new com.sun.corba.se.spi.activation.ServerNotRegistered;
+
+        specialinvoke $r23.<com.sun.corba.se.spi.activation.ServerNotRegistered: void <init>()>();
+
+        throw $r23;
+
+     label6:
+        exitmonitor $r1;
+
+     label7:
+        return i0;
+
+     label8:
+        $r21 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label9:
+        throw $r21;
+
+        catch java.lang.Throwable from label1 to label7 with label8;
+        catch java.lang.Throwable from label8 to label9 with label8;
+    }
+
+    public java.lang.String[] getApplicationNames()
+    {
+        com.sun.corba.se.impl.activation.RepositoryImpl r0;
+        java.util.Enumeration $r5;
+        java.lang.Integer r23;
+        java.util.Vector $r2;
+        boolean $z0, $z1, $z2;
+        com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB $r1, $r3, $r17;
+        java.lang.StringBuilder $r7, $r9, $r11;
+        java.lang.Throwable $r22;
+        java.lang.String[] r25;
+        java.lang.StringBuffer $r6;
+        int $i0, $i1, $i2, i3, i4;
+        java.lang.String $r10, $r12, $r13, $r15, $r20, $r21;
+        java.util.Hashtable $r4, $r18;
+        java.io.PrintStream $r8;
+        java.lang.Object $r14, $r16, $r19;
+        com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef r24;
+
+        r0 := @this: com.sun.corba.se.impl.activation.RepositoryImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db>;
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = new java.util.Vector;
+
+        specialinvoke $r2.<java.util.Vector: void <init>()>();
+
+        $r3 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db>;
+
+        $r4 = $r3.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: java.util.Hashtable serverTable>;
+
+        $r5 = virtualinvoke $r4.<java.util.Hashtable: java.util.Enumeration keys()>();
+
+     label02:
+        $z0 = interfaceinvoke $r5.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label04;
+
+        $r16 = interfaceinvoke $r5.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r23 = (java.lang.Integer) $r16;
+
+        $r17 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB db>;
+
+        $r18 = $r17.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: java.util.Hashtable serverTable>;
+
+        $r19 = virtualinvoke $r18.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r23);
+
+        r24 = (com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef) $r19;
+
+        $r20 = r24.<com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef: java.lang.String applicationName>;
+
+        $z2 = virtualinvoke $r20.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z2 != 0 goto label03;
+
+        $r21 = r24.<com.sun.corba.se.impl.activation.RepositoryImpl$DBServerDef: java.lang.String applicationName>;
+
+        virtualinvoke $r2.<java.util.Vector: void addElement(java.lang.Object)>($r21);
+
+     label03:
+        goto label02;
+
+     label04:
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        r25 = newarray (java.lang.String)[$i0];
+
+        i3 = 0;
+
+     label05:
+        $i1 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        if i3 >= $i1 goto label06;
+
+        $r14 = virtualinvoke $r2.<java.util.Vector: java.lang.Object elementAt(int)>(i3);
+
+        $r15 = (java.lang.String) $r14;
+
+        r25[i3] = $r15;
+
+        i3 = i3 + 1;
+
+        goto label05;
+
+     label06:
+        $z1 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl: boolean debug>;
+
+        if $z1 == 0 goto label09;
+
+        $r6 = new java.lang.StringBuffer;
+
+        specialinvoke $r6.<java.lang.StringBuffer: void <init>()>();
+
+        i4 = 0;
+
+     label07:
+        $i2 = lengthof r25;
+
+        if i4 >= $i2 goto label08;
+
+        virtualinvoke $r6.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(32);
+
+        $r13 = r25[i4];
+
+        virtualinvoke $r6.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r13);
+
+        i4 = i4 + 1;
+
+        goto label07;
+
+     label08:
+        $r8 = <java.lang.System: java.io.PrintStream out>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("RepositoryImpl: getApplicationNames returns ");
+
+        $r10 = virtualinvoke $r6.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r8.<java.io.PrintStream: void println(java.lang.String)>($r12);
+
+     label09:
+        exitmonitor $r1;
+
+     label10:
+        return r25;
+
+     label11:
+        $r22 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label12:
+        throw $r22;
+
+        catch java.lang.Throwable from label01 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+    }
+
+    public static void main(java.lang.String[])
+    {
+        com.sun.corba.se.impl.activation.RepositoryImpl $r5;
+        java.util.Properties $r1;
+        java.lang.String[] r0;
+        com.sun.corba.se.spi.orb.ORB r3;
+        java.io.File $r6;
+        java.lang.Exception $r8;
+        org.omg.CORBA.ORB $r2;
+        int $i0, i1;
+        java.lang.String $r4, $r7;
+        boolean $z0, z1;
+
+        r0 := @parameter0: java.lang.String[];
+
+        z1 = 0;
+
+        i1 = 0;
+
+     label1:
+        $i0 = lengthof r0;
+
+        if i1 >= $i0 goto label3;
+
+        $r7 = r0[i1];
+
+        $z0 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>("-debug");
+
+        if $z0 == 0 goto label2;
+
+        z1 = 1;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        $r1 = new java.util.Properties;
+
+        specialinvoke $r1.<java.util.Properties: void <init>()>();
+
+        virtualinvoke $r1.<java.util.Properties: java.lang.Object put(java.lang.Object,java.lang.Object)>("org.omg.CORBA.ORBClass", "com.sun.corba.se.impl.orb.ORBImpl");
+
+        $r2 = staticinvoke <com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.ORB init(java.lang.String[],java.util.Properties)>(r0, $r1);
+
+        r3 = (com.sun.corba.se.spi.orb.ORB) $r2;
+
+        $r4 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String,java.lang.String)>("com.sun.CORBA.activation.db", "db");
+
+        $r5 = new com.sun.corba.se.impl.activation.RepositoryImpl;
+
+        $r6 = new java.io.File;
+
+        specialinvoke $r6.<java.io.File: void <init>(java.lang.String)>($r4);
+
+        specialinvoke $r5.<com.sun.corba.se.impl.activation.RepositoryImpl: void <init>(com.sun.corba.se.spi.orb.ORB,java.io.File,boolean)>(r3, $r6, z1);
+
+        virtualinvoke r3.<com.sun.corba.se.spi.orb.ORB: void run()>();
+
+     label4:
+        goto label6;
+
+     label5:
+        $r8 := @caughtexception;
+
+        virtualinvoke $r8.<java.lang.Exception: void printStackTrace()>();
+
+     label6:
+        return;
+
+        catch java.lang.Exception from label3 to label4 with label5;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.corba.se.impl.activation.RepositoryImpl: int illegalServerId> = -1;
+
+        <com.sun.corba.se.impl.activation.RepositoryImpl: long serialVersionUID> = 8458417785209341858L;
+
+        return;
+    }
+}

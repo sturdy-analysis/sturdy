@@ -1,0 +1,213 @@
+public final class sun.management.ExtendedPlatformComponent extends java.lang.Object
+{
+    private static jdk.management.cmm.SystemResourcePressureMXBean cmmBeanImpl;
+
+    private void <init>()
+    {
+        sun.management.ExtendedPlatformComponent r0;
+
+        r0 := @this: sun.management.ExtendedPlatformComponent;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static synchronized jdk.management.cmm.SystemResourcePressureMXBean getCMMBean()
+    {
+        jdk.management.cmm.SystemResourcePressureMXBean $r0, $r1;
+        jdk.internal.cmm.SystemResourcePressureImpl $r2;
+
+        $r0 = <sun.management.ExtendedPlatformComponent: jdk.management.cmm.SystemResourcePressureMXBean cmmBeanImpl>;
+
+        if $r0 != null goto label1;
+
+        $r2 = new jdk.internal.cmm.SystemResourcePressureImpl;
+
+        specialinvoke $r2.<jdk.internal.cmm.SystemResourcePressureImpl: void <init>()>();
+
+        <sun.management.ExtendedPlatformComponent: jdk.management.cmm.SystemResourcePressureMXBean cmmBeanImpl> = $r2;
+
+     label1:
+        $r1 = <sun.management.ExtendedPlatformComponent: jdk.management.cmm.SystemResourcePressureMXBean cmmBeanImpl>;
+
+        return $r1;
+    }
+
+    public static java.util.List getMXBeans()
+    {
+        java.util.List $r0, $r2;
+        jdk.management.cmm.SystemResourcePressureMXBean $r1;
+        boolean $z0;
+
+        $z0 = staticinvoke <sun.management.ExtendedPlatformComponent: boolean shouldRegisterCMMBean()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = staticinvoke <sun.management.ExtendedPlatformComponent: jdk.management.cmm.SystemResourcePressureMXBean getCMMBean()>();
+
+        $r2 = staticinvoke <java.util.Collections: java.util.List singletonList(java.lang.Object)>($r1);
+
+        return $r2;
+
+     label1:
+        $r0 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+        return $r0;
+    }
+
+    public static java.lang.management.PlatformManagedObject getMXBean(java.lang.Class)
+    {
+        jdk.management.cmm.SystemResourcePressureMXBean $r4;
+        java.lang.IllegalArgumentException $r3;
+        java.lang.management.PlatformManagedObject $r6;
+        java.lang.Class r0;
+        java.lang.Object $r5;
+        java.lang.String $r1, $r2;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.Class;
+
+        if r0 == null goto label2;
+
+        $r1 = "jdk.management.cmm.SystemResourcePressureMXBean";
+
+        $r2 = virtualinvoke r0.<java.lang.Class: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label2;
+
+        $z1 = staticinvoke <sun.management.ExtendedPlatformComponent: boolean isUnlockCommercialFeaturesEnabled()>();
+
+        if $z1 == 0 goto label1;
+
+        $r4 = staticinvoke <sun.management.ExtendedPlatformComponent: jdk.management.cmm.SystemResourcePressureMXBean getCMMBean()>();
+
+        $r5 = virtualinvoke r0.<java.lang.Class: java.lang.Object cast(java.lang.Object)>($r4);
+
+        $r6 = (java.lang.management.PlatformManagedObject) $r5;
+
+        return $r6;
+
+     label1:
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Cooperative Memory Management is a commercial feature which must be unlocked before being used.  To learn more about commercial features and how to unlock them visit http://www.oracle.com/technetwork/java/javaseproducts/");
+
+        throw $r3;
+
+     label2:
+        return null;
+    }
+
+    private static boolean shouldRegisterCMMBean()
+    {
+        java.lang.Object[] $r5, $r9;
+        java.lang.Class[] $r3, $r7;
+        java.lang.Exception $r12;
+        java.lang.Boolean $r11;
+        java.lang.Class $r2;
+        java.lang.Object $r6, $r10;
+        java.lang.ClassLoader $r0, $r1;
+        java.lang.reflect.Method $r4, $r8;
+        boolean $z0, z1;
+
+        $z0 = staticinvoke <sun.management.ExtendedPlatformComponent: boolean isUnlockCommercialFeaturesEnabled()>();
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        z1 = 0;
+
+     label2:
+        $r0 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getSystemClassLoader()>();
+
+        if $r0 != null goto label4;
+
+     label3:
+        return 0;
+
+     label4:
+        $r1 = virtualinvoke $r0.<java.lang.ClassLoader: java.lang.ClassLoader getParent()>();
+
+        $r2 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>("com.oracle.exalogic.ExaManager", 0, $r1);
+
+        $r3 = newarray (java.lang.Class)[0];
+
+        $r4 = virtualinvoke $r2.<java.lang.Class: java.lang.reflect.Method getMethod(java.lang.String,java.lang.Class[])>("instance", $r3);
+
+        $r5 = newarray (java.lang.Object)[0];
+
+        $r6 = virtualinvoke $r4.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>(null, $r5);
+
+        if $r6 == null goto label5;
+
+        $r7 = newarray (java.lang.Class)[0];
+
+        $r8 = virtualinvoke $r2.<java.lang.Class: java.lang.reflect.Method getMethod(java.lang.String,java.lang.Class[])>("isExalogicSystem", $r7);
+
+        $r9 = newarray (java.lang.Object)[0];
+
+        $r10 = virtualinvoke $r8.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>($r6, $r9);
+
+        $r11 = (java.lang.Boolean) $r10;
+
+        z1 = virtualinvoke $r11.<java.lang.Boolean: boolean booleanValue()>();
+
+     label5:
+        return z1;
+
+     label6:
+        $r12 := @caughtexception;
+
+        return 0;
+
+        catch java.lang.ClassNotFoundException from label2 to label3 with label6;
+        catch java.lang.NoSuchMethodException from label2 to label3 with label6;
+        catch java.lang.IllegalAccessException from label2 to label3 with label6;
+        catch java.lang.IllegalArgumentException from label2 to label3 with label6;
+        catch java.lang.reflect.InvocationTargetException from label2 to label3 with label6;
+        catch java.lang.ClassNotFoundException from label4 to label5 with label6;
+        catch java.lang.NoSuchMethodException from label4 to label5 with label6;
+        catch java.lang.IllegalAccessException from label4 to label5 with label6;
+        catch java.lang.IllegalArgumentException from label4 to label5 with label6;
+        catch java.lang.reflect.InvocationTargetException from label4 to label5 with label6;
+    }
+
+    private static boolean isUnlockCommercialFeaturesEnabled()
+    {
+        com.sun.management.VMOption $r2;
+        sun.management.Flag $r0;
+        java.lang.String $r1, $r3;
+        boolean $z0;
+
+        $r0 = staticinvoke <sun.management.Flag: sun.management.Flag getFlag(java.lang.String)>("UnlockCommercialFeatures");
+
+        if $r0 == null goto label1;
+
+        $r1 = "true";
+
+        $r2 = virtualinvoke $r0.<sun.management.Flag: com.sun.management.VMOption getVMOption()>();
+
+        $r3 = virtualinvoke $r2.<com.sun.management.VMOption: java.lang.String getValue()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    static void <clinit>()
+    {
+        <sun.management.ExtendedPlatformComponent: jdk.management.cmm.SystemResourcePressureMXBean cmmBeanImpl> = null;
+
+        return;
+    }
+}

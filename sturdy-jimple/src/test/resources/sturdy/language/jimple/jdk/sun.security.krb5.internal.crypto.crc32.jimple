@@ -1,0 +1,1082 @@
+public final class sun.security.krb5.internal.crypto.crc32 extends java.security.MessageDigestSpi implements java.lang.Cloneable
+{
+    private static final int CRC32_LENGTH;
+    private int seed;
+    private static boolean DEBUG;
+    private static int[] crc32Table;
+
+    public void <init>()
+    {
+        sun.security.krb5.internal.crypto.crc32 r0;
+
+        r0 := @this: sun.security.krb5.internal.crypto.crc32;
+
+        specialinvoke r0.<java.security.MessageDigestSpi: void <init>()>();
+
+        virtualinvoke r0.<sun.security.krb5.internal.crypto.crc32: void init()>();
+
+        return;
+    }
+
+    public java.lang.Object clone()
+    {
+        java.lang.Object $r1;
+        sun.security.krb5.internal.crypto.crc32 r0, r3;
+        java.lang.CloneNotSupportedException $r2;
+
+        r0 := @this: sun.security.krb5.internal.crypto.crc32;
+
+     label1:
+        $r1 = specialinvoke r0.<java.security.MessageDigestSpi: java.lang.Object clone()>();
+
+        r3 = (sun.security.krb5.internal.crypto.crc32) $r1;
+
+        virtualinvoke r3.<sun.security.krb5.internal.crypto.crc32: void init()>();
+
+     label2:
+        return r3;
+
+     label3:
+        $r2 := @caughtexception;
+
+        return null;
+
+        catch java.lang.CloneNotSupportedException from label1 to label2 with label3;
+    }
+
+    protected int engineGetDigestLength()
+    {
+        sun.security.krb5.internal.crypto.crc32 r0;
+
+        r0 := @this: sun.security.krb5.internal.crypto.crc32;
+
+        return 4;
+    }
+
+    protected byte[] engineDigest()
+    {
+        byte[] $r1, r2;
+        int $i0;
+        long $l1;
+        sun.security.krb5.internal.crypto.crc32 r0;
+
+        r0 := @this: sun.security.krb5.internal.crypto.crc32;
+
+        r2 = newarray (byte)[4];
+
+        $i0 = r0.<sun.security.krb5.internal.crypto.crc32: int seed>;
+
+        $l1 = (long) $i0;
+
+        $r1 = staticinvoke <sun.security.krb5.internal.crypto.crc32: byte[] int2quad(long)>($l1);
+
+        virtualinvoke r0.<sun.security.krb5.internal.crypto.crc32: void init()>();
+
+        return $r1;
+    }
+
+    protected int engineDigest(byte[], int, int) throws java.security.DigestException
+    {
+        byte[] $r1, r2, r5;
+        long $l1;
+        sun.security.krb5.internal.crypto.crc32 r0;
+        int $i0, i2, i3, $i4, $i5;
+        java.security.DigestException $r3, $r4;
+
+        r0 := @this: sun.security.krb5.internal.crypto.crc32;
+
+        r2 := @parameter0: byte[];
+
+        i3 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        r5 = newarray (byte)[4];
+
+        $i0 = r0.<sun.security.krb5.internal.crypto.crc32: int seed>;
+
+        $l1 = (long) $i0;
+
+        $r1 = staticinvoke <sun.security.krb5.internal.crypto.crc32: byte[] int2quad(long)>($l1);
+
+        if i2 >= 4 goto label1;
+
+        $r4 = new java.security.DigestException;
+
+        specialinvoke $r4.<java.security.DigestException: void <init>(java.lang.String)>("partial digests not returned");
+
+        throw $r4;
+
+     label1:
+        $i4 = lengthof r2;
+
+        $i5 = $i4 - i3;
+
+        if $i5 >= 4 goto label2;
+
+        $r3 = new java.security.DigestException;
+
+        specialinvoke $r3.<java.security.DigestException: void <init>(java.lang.String)>("insufficient space in the output buffer to store the digest");
+
+        throw $r3;
+
+     label2:
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, 0, r2, i3, 4);
+
+        virtualinvoke r0.<sun.security.krb5.internal.crypto.crc32: void init()>();
+
+        return 4;
+    }
+
+    protected synchronized void engineUpdate(byte)
+    {
+        byte[] r0;
+        byte b0;
+        int $i1;
+        sun.security.krb5.internal.crypto.crc32 r1;
+
+        r1 := @this: sun.security.krb5.internal.crypto.crc32;
+
+        b0 := @parameter0: byte;
+
+        r0 = newarray (byte)[1];
+
+        r0[0] = b0;
+
+        $i1 = r1.<sun.security.krb5.internal.crypto.crc32: int seed>;
+
+        virtualinvoke r1.<sun.security.krb5.internal.crypto.crc32: void engineUpdate(byte[],int,int)>(r0, $i1, 1);
+
+        return;
+    }
+
+    protected synchronized void engineUpdate(byte[], int, int)
+    {
+        byte[] r1;
+        int i0, i1;
+        sun.security.krb5.internal.crypto.crc32 r0;
+
+        r0 := @this: sun.security.krb5.internal.crypto.crc32;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<sun.security.krb5.internal.crypto.crc32: void processData(byte[],int,int)>(r1, i0, i1);
+
+        return;
+    }
+
+    protected void engineReset()
+    {
+        sun.security.krb5.internal.crypto.crc32 r0;
+
+        r0 := @this: sun.security.krb5.internal.crypto.crc32;
+
+        virtualinvoke r0.<sun.security.krb5.internal.crypto.crc32: void init()>();
+
+        return;
+    }
+
+    public void init()
+    {
+        sun.security.krb5.internal.crypto.crc32 r0;
+
+        r0 := @this: sun.security.krb5.internal.crypto.crc32;
+
+        r0.<sun.security.krb5.internal.crypto.crc32: int seed> = 0;
+
+        return;
+    }
+
+    private void processData(byte[], int, int)
+    {
+        byte[] r1;
+        sun.security.krb5.internal.crypto.crc32 r0;
+        byte $b1;
+        int[] $r2;
+        int i0, $i2, $i3, $i4, $i5, i6, i7, i8, $i9;
+
+        r0 := @this: sun.security.krb5.internal.crypto.crc32;
+
+        r1 := @parameter0: byte[];
+
+        i6 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i7 = r0.<sun.security.krb5.internal.crypto.crc32: int seed>;
+
+        i8 = 0;
+
+     label1:
+        if i8 >= i0 goto label2;
+
+        $i5 = i7 >>> 8;
+
+        $r2 = <sun.security.krb5.internal.crypto.crc32: int[] crc32Table>;
+
+        $b1 = r1[i8];
+
+        $i9 = (int) $b1;
+
+        $i2 = i7 ^ $i9;
+
+        $i3 = $i2 & 255;
+
+        $i4 = $r2[$i3];
+
+        i7 = $i5 ^ $i4;
+
+        i8 = i8 + 1;
+
+        goto label1;
+
+     label2:
+        r0.<sun.security.krb5.internal.crypto.crc32: int seed> = i7;
+
+        return;
+    }
+
+    public static int int2crc32(int)
+    {
+        int i0, $i1, $i2, i3, i4, $i6;
+
+        i0 := @parameter0: int;
+
+        i3 = i0;
+
+        i4 = 8;
+
+     label1:
+        if i4 <= 0 goto label4;
+
+        $i1 = i3 & 1;
+
+        if $i1 == 0 goto label2;
+
+        $i2 = i3 >>> 1;
+
+        i3 = $i2 ^ -306674912;
+
+        goto label3;
+
+     label2:
+        i3 = i3 >>> 1;
+
+     label3:
+        $i6 = (int) -1;
+
+        i4 = i4 + $i6;
+
+        goto label1;
+
+     label4:
+        return i3;
+    }
+
+    public static void printcrc32Table()
+    {
+        int $i0, $i1, $i2, i3;
+        java.lang.String $r2, $r6, $r9, $r12;
+        java.io.PrintStream $r0, $r1, $r4, $r10, $r11;
+        java.lang.StringBuilder $r3, $r5, $r7, $r8;
+
+        $r0 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void print(java.lang.String)>("\tpublic static int[] crc32Table = {");
+
+        i3 = 0;
+
+     label1:
+        if i3 >= 256 goto label4;
+
+        $i0 = i3 % 4;
+
+        if $i0 != 0 goto label2;
+
+        $r11 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r11.<java.io.PrintStream: void print(java.lang.String)>("\n\t\t");
+
+     label2:
+        $i1 = staticinvoke <sun.security.krb5.internal.crypto.crc32: int int2crc32(int)>(i3);
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i1);
+
+        $r4 = <java.lang.System: java.io.PrintStream out>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("0x");
+
+        $r12 = "00000000";
+
+        $i2 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        $r6 = virtualinvoke $r12.<java.lang.String: java.lang.String substring(int)>($i2);
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<java.io.PrintStream: void print(java.lang.String)>($r9);
+
+        if i3 == 255 goto label3;
+
+        $r10 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r10.<java.io.PrintStream: void print(java.lang.String)>(", ");
+
+     label3:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label4:
+        $r1 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>("\n\t};");
+
+        return;
+    }
+
+    public static int byte2crc32sum(int, byte[], int)
+    {
+        byte[] r0;
+        byte $b2;
+        int[] $r1;
+        int i0, i1, $i3, $i4, $i5, $i6, i7, i8, $i9;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: byte[];
+
+        i1 := @parameter2: int;
+
+        i7 = i0;
+
+        i8 = 0;
+
+     label1:
+        if i8 >= i1 goto label2;
+
+        $i6 = i7 >>> 8;
+
+        $r1 = <sun.security.krb5.internal.crypto.crc32: int[] crc32Table>;
+
+        $b2 = r0[i8];
+
+        $i9 = (int) $b2;
+
+        $i3 = i7 ^ $i9;
+
+        $i4 = $i3 & 255;
+
+        $i5 = $r1[$i4];
+
+        i7 = $i6 ^ $i5;
+
+        i8 = i8 + 1;
+
+        goto label1;
+
+     label2:
+        return i7;
+    }
+
+    public static int byte2crc32sum(int, byte[])
+    {
+        byte[] r0;
+        int i0, $i1, $i2;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: byte[];
+
+        $i1 = lengthof r0;
+
+        $i2 = staticinvoke <sun.security.krb5.internal.crypto.crc32: int byte2crc32sum(int,byte[],int)>(i0, r0, $i1);
+
+        return $i2;
+    }
+
+    public static int byte2crc32sum(byte[])
+    {
+        int $i0;
+        byte[] r0;
+
+        r0 := @parameter0: byte[];
+
+        $i0 = staticinvoke <sun.security.krb5.internal.crypto.crc32: int byte2crc32sum(int,byte[])>(0, r0);
+
+        return $i0;
+    }
+
+    public static int byte2crc32(byte[])
+    {
+        byte[] r0;
+        int $i0, $i1, $i3, $i5;
+
+        r0 := @parameter0: byte[];
+
+        $i3 = (int) -1;
+
+        $i0 = staticinvoke <sun.security.krb5.internal.crypto.crc32: int byte2crc32sum(int,byte[])>($i3, r0);
+
+        $i5 = (int) -1;
+
+        $i1 = $i0 ^ $i5;
+
+        return $i1;
+    }
+
+    public static byte[] byte2crc32sum_bytes(byte[])
+    {
+        byte[] r0, $r1;
+        int $i0;
+        long $l1;
+
+        r0 := @parameter0: byte[];
+
+        $i0 = staticinvoke <sun.security.krb5.internal.crypto.crc32: int byte2crc32sum(byte[])>(r0);
+
+        $l1 = (long) $i0;
+
+        $r1 = staticinvoke <sun.security.krb5.internal.crypto.crc32: byte[] int2quad(long)>($l1);
+
+        return $r1;
+    }
+
+    public static byte[] byte2crc32sum_bytes(byte[], int)
+    {
+        byte[] r0, $r1;
+        long $l2;
+        int i0, $i1;
+        java.lang.String $r5, $r7, $r11, $r13;
+        boolean $z0;
+        java.io.PrintStream $r3, $r9;
+        java.lang.StringBuilder $r2, $r4, $r6, $r8, $r10, $r12;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        $i1 = staticinvoke <sun.security.krb5.internal.crypto.crc32: int byte2crc32sum(int,byte[],int)>(0, r0, i0);
+
+        $z0 = <sun.security.krb5.internal.crypto.crc32: boolean DEBUG>;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = <java.lang.System: java.io.PrintStream out>;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">>>crc32: ");
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i1);
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>($r7);
+
+        $r9 = <java.lang.System: java.io.PrintStream out>;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">>>crc32: ");
+
+        $r11 = staticinvoke <java.lang.Integer: java.lang.String toBinaryString(int)>($i1);
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r9.<java.io.PrintStream: void println(java.lang.String)>($r13);
+
+     label1:
+        $l2 = (long) $i1;
+
+        $r1 = staticinvoke <sun.security.krb5.internal.crypto.crc32: byte[] int2quad(long)>($l2);
+
+        return $r1;
+    }
+
+    public static byte[] int2quad(long)
+    {
+        byte[] r0;
+        long l0, $l2, $l3;
+        byte $b5;
+        int $i1, $i4, i6;
+
+        l0 := @parameter0: long;
+
+        r0 = newarray (byte)[4];
+
+        i6 = 0;
+
+     label1:
+        if i6 >= 4 goto label2;
+
+        $i1 = i6 * 8;
+
+        $l2 = l0 >>> $i1;
+
+        $l3 = $l2 & 255L;
+
+        $i4 = (int) $l3;
+
+        $b5 = (byte) $i4;
+
+        r0[i6] = $b5;
+
+        i6 = i6 + 1;
+
+        goto label1;
+
+     label2:
+        return r0;
+    }
+
+    static void <clinit>()
+    {
+        int[] $r0;
+        boolean $z0;
+
+        <sun.security.krb5.internal.crypto.crc32: int CRC32_LENGTH> = 4;
+
+        $z0 = <sun.security.krb5.internal.Krb5: boolean DEBUG>;
+
+        <sun.security.krb5.internal.crypto.crc32: boolean DEBUG> = $z0;
+
+        $r0 = newarray (int)[256];
+
+        $r0[0] = 0;
+
+        $r0[1] = 1996959894;
+
+        $r0[2] = -301047508;
+
+        $r0[3] = -1727442502;
+
+        $r0[4] = 124634137;
+
+        $r0[5] = 1886057615;
+
+        $r0[6] = -379345611;
+
+        $r0[7] = -1637575261;
+
+        $r0[8] = 249268274;
+
+        $r0[9] = 2044508324;
+
+        $r0[10] = -522852066;
+
+        $r0[11] = -1747789432;
+
+        $r0[12] = 162941995;
+
+        $r0[13] = 2125561021;
+
+        $r0[14] = -407360249;
+
+        $r0[15] = -1866523247;
+
+        $r0[16] = 498536548;
+
+        $r0[17] = 1789927666;
+
+        $r0[18] = -205950648;
+
+        $r0[19] = -2067906082;
+
+        $r0[20] = 450548861;
+
+        $r0[21] = 1843258603;
+
+        $r0[22] = -187386543;
+
+        $r0[23] = -2083289657;
+
+        $r0[24] = 325883990;
+
+        $r0[25] = 1684777152;
+
+        $r0[26] = -43845254;
+
+        $r0[27] = -1973040660;
+
+        $r0[28] = 335633487;
+
+        $r0[29] = 1661365465;
+
+        $r0[30] = -99664541;
+
+        $r0[31] = -1928851979;
+
+        $r0[32] = 997073096;
+
+        $r0[33] = 1281953886;
+
+        $r0[34] = -715111964;
+
+        $r0[35] = -1570279054;
+
+        $r0[36] = 1006888145;
+
+        $r0[37] = 1258607687;
+
+        $r0[38] = -770865667;
+
+        $r0[39] = -1526024853;
+
+        $r0[40] = 901097722;
+
+        $r0[41] = 1119000684;
+
+        $r0[42] = -608450090;
+
+        $r0[43] = -1396901568;
+
+        $r0[44] = 853044451;
+
+        $r0[45] = 1172266101;
+
+        $r0[46] = -589951537;
+
+        $r0[47] = -1412350631;
+
+        $r0[48] = 651767980;
+
+        $r0[49] = 1373503546;
+
+        $r0[50] = -925412992;
+
+        $r0[51] = -1076862698;
+
+        $r0[52] = 565507253;
+
+        $r0[53] = 1454621731;
+
+        $r0[54] = -809855591;
+
+        $r0[55] = -1195530993;
+
+        $r0[56] = 671266974;
+
+        $r0[57] = 1594198024;
+
+        $r0[58] = -972236366;
+
+        $r0[59] = -1324619484;
+
+        $r0[60] = 795835527;
+
+        $r0[61] = 1483230225;
+
+        $r0[62] = -1050600021;
+
+        $r0[63] = -1234817731;
+
+        $r0[64] = 1994146192;
+
+        $r0[65] = 31158534;
+
+        $r0[66] = -1731059524;
+
+        $r0[67] = -271249366;
+
+        $r0[68] = 1907459465;
+
+        $r0[69] = 112637215;
+
+        $r0[70] = -1614814043;
+
+        $r0[71] = -390540237;
+
+        $r0[72] = 2013776290;
+
+        $r0[73] = 251722036;
+
+        $r0[74] = -1777751922;
+
+        $r0[75] = -519137256;
+
+        $r0[76] = 2137656763;
+
+        $r0[77] = 141376813;
+
+        $r0[78] = -1855689577;
+
+        $r0[79] = -429695999;
+
+        $r0[80] = 1802195444;
+
+        $r0[81] = 476864866;
+
+        $r0[82] = -2056965928;
+
+        $r0[83] = -228458418;
+
+        $r0[84] = 1812370925;
+
+        $r0[85] = 453092731;
+
+        $r0[86] = -2113342271;
+
+        $r0[87] = -183516073;
+
+        $r0[88] = 1706088902;
+
+        $r0[89] = 314042704;
+
+        $r0[90] = -1950435094;
+
+        $r0[91] = -54949764;
+
+        $r0[92] = 1658658271;
+
+        $r0[93] = 366619977;
+
+        $r0[94] = -1932296973;
+
+        $r0[95] = -69972891;
+
+        $r0[96] = 1303535960;
+
+        $r0[97] = 984961486;
+
+        $r0[98] = -1547960204;
+
+        $r0[99] = -725929758;
+
+        $r0[100] = 1256170817;
+
+        $r0[101] = 1037604311;
+
+        $r0[102] = -1529756563;
+
+        $r0[103] = -740887301;
+
+        $r0[104] = 1131014506;
+
+        $r0[105] = 879679996;
+
+        $r0[106] = -1385723834;
+
+        $r0[107] = -631195440;
+
+        $r0[108] = 1141124467;
+
+        $r0[109] = 855842277;
+
+        $r0[110] = -1442165665;
+
+        $r0[111] = -586318647;
+
+        $r0[112] = 1342533948;
+
+        $r0[113] = 654459306;
+
+        $r0[114] = -1106571248;
+
+        $r0[115] = -921952122;
+
+        $r0[116] = 1466479909;
+
+        $r0[117] = 544179635;
+
+        $r0[118] = -1184443383;
+
+        $r0[119] = -832445281;
+
+        $r0[120] = 1591671054;
+
+        $r0[121] = 702138776;
+
+        $r0[122] = -1328506846;
+
+        $r0[123] = -942167884;
+
+        $r0[124] = 1504918807;
+
+        $r0[125] = 783551873;
+
+        $r0[126] = -1212326853;
+
+        $r0[127] = -1061524307;
+
+        $r0[128] = -306674912;
+
+        $r0[129] = -1698712650;
+
+        $r0[130] = 62317068;
+
+        $r0[131] = 1957810842;
+
+        $r0[132] = -355121351;
+
+        $r0[133] = -1647151185;
+
+        $r0[134] = 81470997;
+
+        $r0[135] = 1943803523;
+
+        $r0[136] = -480048366;
+
+        $r0[137] = -1805370492;
+
+        $r0[138] = 225274430;
+
+        $r0[139] = 2053790376;
+
+        $r0[140] = -468791541;
+
+        $r0[141] = -1828061283;
+
+        $r0[142] = 167816743;
+
+        $r0[143] = 2097651377;
+
+        $r0[144] = -267414716;
+
+        $r0[145] = -2029476910;
+
+        $r0[146] = 503444072;
+
+        $r0[147] = 1762050814;
+
+        $r0[148] = -144550051;
+
+        $r0[149] = -2140837941;
+
+        $r0[150] = 426522225;
+
+        $r0[151] = 1852507879;
+
+        $r0[152] = -19653770;
+
+        $r0[153] = -1982649376;
+
+        $r0[154] = 282753626;
+
+        $r0[155] = 1742555852;
+
+        $r0[156] = -105259153;
+
+        $r0[157] = -1900089351;
+
+        $r0[158] = 397917763;
+
+        $r0[159] = 1622183637;
+
+        $r0[160] = -690576408;
+
+        $r0[161] = -1580100738;
+
+        $r0[162] = 953729732;
+
+        $r0[163] = 1340076626;
+
+        $r0[164] = -776247311;
+
+        $r0[165] = -1497606297;
+
+        $r0[166] = 1068828381;
+
+        $r0[167] = 1219638859;
+
+        $r0[168] = -670225446;
+
+        $r0[169] = -1358292148;
+
+        $r0[170] = 906185462;
+
+        $r0[171] = 1090812512;
+
+        $r0[172] = -547295293;
+
+        $r0[173] = -1469587627;
+
+        $r0[174] = 829329135;
+
+        $r0[175] = 1181335161;
+
+        $r0[176] = -882789492;
+
+        $r0[177] = -1134132454;
+
+        $r0[178] = 628085408;
+
+        $r0[179] = 1382605366;
+
+        $r0[180] = -871598187;
+
+        $r0[181] = -1156888829;
+
+        $r0[182] = 570562233;
+
+        $r0[183] = 1426400815;
+
+        $r0[184] = -977650754;
+
+        $r0[185] = -1296233688;
+
+        $r0[186] = 733239954;
+
+        $r0[187] = 1555261956;
+
+        $r0[188] = -1026031705;
+
+        $r0[189] = -1244606671;
+
+        $r0[190] = 752459403;
+
+        $r0[191] = 1541320221;
+
+        $r0[192] = -1687895376;
+
+        $r0[193] = -328994266;
+
+        $r0[194] = 1969922972;
+
+        $r0[195] = 40735498;
+
+        $r0[196] = -1677130071;
+
+        $r0[197] = -351390145;
+
+        $r0[198] = 1913087877;
+
+        $r0[199] = 83908371;
+
+        $r0[200] = -1782625662;
+
+        $r0[201] = -491226604;
+
+        $r0[202] = 2075208622;
+
+        $r0[203] = 213261112;
+
+        $r0[204] = -1831694693;
+
+        $r0[205] = -438977011;
+
+        $r0[206] = 2094854071;
+
+        $r0[207] = 198958881;
+
+        $r0[208] = -2032938284;
+
+        $r0[209] = -237706686;
+
+        $r0[210] = 1759359992;
+
+        $r0[211] = 534414190;
+
+        $r0[212] = -2118248755;
+
+        $r0[213] = -155638181;
+
+        $r0[214] = 1873836001;
+
+        $r0[215] = 414664567;
+
+        $r0[216] = -2012718362;
+
+        $r0[217] = -15766928;
+
+        $r0[218] = 1711684554;
+
+        $r0[219] = 285281116;
+
+        $r0[220] = -1889165569;
+
+        $r0[221] = -127750551;
+
+        $r0[222] = 1634467795;
+
+        $r0[223] = 376229701;
+
+        $r0[224] = -1609899400;
+
+        $r0[225] = -686959890;
+
+        $r0[226] = 1308918612;
+
+        $r0[227] = 956543938;
+
+        $r0[228] = -1486412191;
+
+        $r0[229] = -799009033;
+
+        $r0[230] = 1231636301;
+
+        $r0[231] = 1047427035;
+
+        $r0[232] = -1362007478;
+
+        $r0[233] = -640263460;
+
+        $r0[234] = 1088359270;
+
+        $r0[235] = 936918000;
+
+        $r0[236] = -1447252397;
+
+        $r0[237] = -558129467;
+
+        $r0[238] = 1202900863;
+
+        $r0[239] = 817233897;
+
+        $r0[240] = -1111625188;
+
+        $r0[241] = -893730166;
+
+        $r0[242] = 1404277552;
+
+        $r0[243] = 615818150;
+
+        $r0[244] = -1160759803;
+
+        $r0[245] = -841546093;
+
+        $r0[246] = 1423857449;
+
+        $r0[247] = 601450431;
+
+        $r0[248] = -1285129682;
+
+        $r0[249] = -1000256840;
+
+        $r0[250] = 1567103746;
+
+        $r0[251] = 711928724;
+
+        $r0[252] = -1274298825;
+
+        $r0[253] = -1022587231;
+
+        $r0[254] = 1510334235;
+
+        $r0[255] = 755167117;
+
+        <sun.security.krb5.internal.crypto.crc32: int[] crc32Table> = $r0;
+
+        return;
+    }
+}

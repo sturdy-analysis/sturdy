@@ -1,0 +1,1094 @@
+public class sun.java2d.d3d.D3DScreenUpdateManager extends sun.java2d.ScreenUpdateManager implements java.lang.Runnable
+{
+    private static final int MIN_WIN_SIZE;
+    private volatile boolean done;
+    private volatile java.lang.Thread screenUpdater;
+    private boolean needsUpdateNow;
+    private java.lang.Object runLock;
+    private java.util.ArrayList d3dwSurfaces;
+    private java.util.HashMap gdiSurfaces;
+
+    public void <init>()
+    {
+        java.lang.Object $r1;
+        java.security.PrivilegedAction $r2;
+        sun.java2d.d3d.D3DScreenUpdateManager r0;
+
+        r0 := @this: sun.java2d.d3d.D3DScreenUpdateManager;
+
+        specialinvoke r0.<sun.java2d.ScreenUpdateManager: void <init>()>();
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.lang.Object runLock> = $r1;
+
+        r0.<sun.java2d.d3d.D3DScreenUpdateManager: boolean done> = 0;
+
+        $r2 = staticinvoke <sun.java2d.d3d.D3DScreenUpdateManager$lambda_new_1__447: java.security.PrivilegedAction bootstrap$(sun.java2d.d3d.D3DScreenUpdateManager)>(r0);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        return;
+    }
+
+    public sun.java2d.SurfaceData createScreenSurface(sun.awt.Win32GraphicsConfig, sun.awt.windows.WComponentPeer, int, boolean)
+    {
+        sun.java2d.InvalidPipeException $r4;
+        sun.java2d.SurfaceData $r3, r5;
+        sun.java2d.d3d.D3DScreenUpdateManager r0;
+        sun.awt.windows.WComponentPeer r2;
+        int i0;
+        boolean $z0, z1, $z2, $z3;
+        sun.awt.Win32GraphicsConfig r1;
+
+        r0 := @this: sun.java2d.d3d.D3DScreenUpdateManager;
+
+        r1 := @parameter0: sun.awt.Win32GraphicsConfig;
+
+        r2 := @parameter1: sun.awt.windows.WComponentPeer;
+
+        i0 := @parameter2: int;
+
+        z1 := @parameter3: boolean;
+
+        $z0 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: boolean done>;
+
+        if $z0 != 0 goto label1;
+
+        $z2 = r1 instanceof sun.java2d.d3d.D3DGraphicsConfig;
+
+        if $z2 != 0 goto label2;
+
+     label1:
+        $r3 = specialinvoke r0.<sun.java2d.ScreenUpdateManager: sun.java2d.SurfaceData createScreenSurface(sun.awt.Win32GraphicsConfig,sun.awt.windows.WComponentPeer,int,boolean)>(r1, r2, i0, z1);
+
+        return $r3;
+
+     label2:
+        r5 = null;
+
+        $z3 = staticinvoke <sun.java2d.d3d.D3DScreenUpdateManager: boolean canUseD3DOnScreen(sun.awt.windows.WComponentPeer,sun.awt.Win32GraphicsConfig,int)>(r2, r1, i0);
+
+        if $z3 == 0 goto label6;
+
+     label3:
+        r5 = staticinvoke <sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DSurfaceData createData(sun.awt.windows.WComponentPeer)>(r2);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r4 := @caughtexception;
+
+        r5 = null;
+
+     label6:
+        if r5 != null goto label7;
+
+        r5 = staticinvoke <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.windows.GDIWindowSurfaceData createData(sun.awt.windows.WComponentPeer)>(r2);
+
+     label7:
+        if z1 == 0 goto label8;
+
+        specialinvoke r0.<sun.java2d.d3d.D3DScreenUpdateManager: void repaintPeerTarget(sun.awt.windows.WComponentPeer)>(r2);
+
+     label8:
+        return r5;
+
+        catch sun.java2d.InvalidPipeException from label3 to label4 with label5;
+    }
+
+    public static boolean canUseD3DOnScreen(sun.awt.windows.WComponentPeer, sun.awt.Win32GraphicsConfig, int)
+    {
+        java.awt.Rectangle $r6;
+        int $i0, i1, $i2;
+        java.lang.String $r5;
+        sun.java2d.d3d.D3DGraphicsConfig r1;
+        sun.java2d.d3d.D3DGraphicsDevice $r2;
+        sun.awt.Win32GraphicsConfig r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11;
+        java.awt.Window $r9;
+        java.awt.Component r8;
+        sun.awt.windows.WComponentPeer r3;
+        java.lang.Class $r4;
+        java.lang.Object $r7;
+
+        r3 := @parameter0: sun.awt.windows.WComponentPeer;
+
+        r0 := @parameter1: sun.awt.Win32GraphicsConfig;
+
+        i1 := @parameter2: int;
+
+        $z0 = r0 instanceof sun.java2d.d3d.D3DGraphicsConfig;
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        r1 = (sun.java2d.d3d.D3DGraphicsConfig) r0;
+
+        $r2 = virtualinvoke r1.<sun.java2d.d3d.D3DGraphicsConfig: sun.java2d.d3d.D3DGraphicsDevice getD3DDevice()>();
+
+        $r4 = virtualinvoke r3.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.Class: java.lang.String getName()>();
+
+        $r6 = virtualinvoke r3.<sun.awt.windows.WComponentPeer: java.awt.Rectangle getBounds()>();
+
+        $r7 = virtualinvoke r3.<sun.awt.windows.WComponentPeer: java.lang.Object getTarget()>();
+
+        r8 = (java.awt.Component) $r7;
+
+        $r9 = virtualinvoke $r2.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Window getFullScreenWindow()>();
+
+        $z1 = staticinvoke <sun.java2d.windows.WindowsFlags: boolean isD3DOnScreenEnabled()>();
+
+        if $z1 == 0 goto label5;
+
+        $z2 = virtualinvoke $r2.<sun.java2d.d3d.D3DGraphicsDevice: boolean isD3DEnabledOnDevice()>();
+
+        if $z2 == 0 goto label5;
+
+        $z3 = virtualinvoke r3.<sun.awt.windows.WComponentPeer: boolean isAccelCapable()>();
+
+        if $z3 == 0 goto label5;
+
+        $i0 = $r6.<java.awt.Rectangle: int width>;
+
+        if $i0 > 150 goto label2;
+
+        $i2 = $r6.<java.awt.Rectangle: int height>;
+
+        if $i2 <= 150 goto label5;
+
+     label2:
+        if i1 != 0 goto label5;
+
+        if $r9 == null goto label3;
+
+        if $r9 != r8 goto label5;
+
+        $z10 = staticinvoke <sun.java2d.d3d.D3DScreenUpdateManager: boolean hasHWChildren(java.awt.Component)>(r8);
+
+        if $z10 != 0 goto label5;
+
+     label3:
+        $z4 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("sun.awt.windows.WCanvasPeer");
+
+        if $z4 != 0 goto label4;
+
+        $z5 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("sun.awt.windows.WDialogPeer");
+
+        if $z5 != 0 goto label4;
+
+        $z6 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("sun.awt.windows.WPanelPeer");
+
+        if $z6 != 0 goto label4;
+
+        $z7 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("sun.awt.windows.WWindowPeer");
+
+        if $z7 != 0 goto label4;
+
+        $z8 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("sun.awt.windows.WFramePeer");
+
+        if $z8 != 0 goto label4;
+
+        $z9 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("sun.awt.windows.WEmbeddedFramePeer");
+
+        if $z9 == 0 goto label5;
+
+     label4:
+        $z11 = 1;
+
+        goto label6;
+
+     label5:
+        $z11 = 0;
+
+     label6:
+        return $z11;
+    }
+
+    public java.awt.Graphics2D createGraphics(sun.java2d.SurfaceData, sun.awt.windows.WComponentPeer, java.awt.Color, java.awt.Color, java.awt.Font)
+    {
+        java.awt.Color r2, r3;
+        sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData r5;
+        java.awt.Font r4;
+        sun.java2d.SurfaceData r7;
+        sun.java2d.d3d.D3DScreenUpdateManager r0;
+        java.awt.Graphics2D $r8;
+        sun.awt.windows.WComponentPeer r1;
+        sun.java2d.SunGraphics2D $r6;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: sun.java2d.d3d.D3DScreenUpdateManager;
+
+        r7 := @parameter0: sun.java2d.SurfaceData;
+
+        r1 := @parameter1: sun.awt.windows.WComponentPeer;
+
+        r2 := @parameter2: java.awt.Color;
+
+        r3 := @parameter3: java.awt.Color;
+
+        r4 := @parameter4: java.awt.Font;
+
+        $z0 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: boolean done>;
+
+        if $z0 != 0 goto label3;
+
+        $z1 = r7 instanceof sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData;
+
+        if $z1 == 0 goto label3;
+
+        r5 = (sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData) r7;
+
+        $z2 = virtualinvoke r5.<sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData: boolean isSurfaceLost()>();
+
+        if $z2 == 0 goto label1;
+
+        $z3 = specialinvoke r0.<sun.java2d.d3d.D3DScreenUpdateManager: boolean validate(sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData)>(r5);
+
+        if $z3 == 0 goto label2;
+
+     label1:
+        specialinvoke r0.<sun.java2d.d3d.D3DScreenUpdateManager: void trackScreenSurface(sun.java2d.SurfaceData)>(r5);
+
+        $r6 = new sun.java2d.SunGraphics2D;
+
+        specialinvoke $r6.<sun.java2d.SunGraphics2D: void <init>(sun.java2d.SurfaceData,java.awt.Color,java.awt.Color,java.awt.Font)>(r7, r2, r3, r4);
+
+        return $r6;
+
+     label2:
+        r7 = specialinvoke r0.<sun.java2d.d3d.D3DScreenUpdateManager: sun.java2d.SurfaceData getGdiSurface(sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData)>(r5);
+
+     label3:
+        $r8 = specialinvoke r0.<sun.java2d.ScreenUpdateManager: java.awt.Graphics2D createGraphics(sun.java2d.SurfaceData,sun.awt.windows.WComponentPeer,java.awt.Color,java.awt.Color,java.awt.Font)>(r7, r1, r2, r3, r4);
+
+        return $r8;
+    }
+
+    private void repaintPeerTarget(sun.awt.windows.WComponentPeer)
+    {
+        java.awt.Rectangle $r4;
+        java.awt.Component r2;
+        sun.awt.AWTAccessor$ComponentAccessor $r3;
+        sun.java2d.d3d.D3DScreenUpdateManager r5;
+        sun.awt.windows.WComponentPeer r0;
+        int $i0, $i1;
+        java.lang.Object $r1;
+
+        r5 := @this: sun.java2d.d3d.D3DScreenUpdateManager;
+
+        r0 := @parameter0: sun.awt.windows.WComponentPeer;
+
+        $r1 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: java.lang.Object getTarget()>();
+
+        r2 = (java.awt.Component) $r1;
+
+        $r3 = staticinvoke <sun.awt.AWTAccessor: sun.awt.AWTAccessor$ComponentAccessor getComponentAccessor()>();
+
+        $r4 = interfaceinvoke $r3.<sun.awt.AWTAccessor$ComponentAccessor: java.awt.Rectangle getBounds(java.awt.Component)>(r2);
+
+        $i1 = $r4.<java.awt.Rectangle: int width>;
+
+        $i0 = $r4.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void handlePaint(int,int,int,int)>(0, 0, $i1, $i0);
+
+        return;
+    }
+
+    private void trackScreenSurface(sun.java2d.SurfaceData)
+    {
+        java.lang.Throwable $r7;
+        sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData $r6;
+        sun.java2d.SurfaceData r1;
+        java.util.ArrayList $r2, $r3, $r4, $r5;
+        sun.java2d.d3d.D3DScreenUpdateManager r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.java2d.d3d.D3DScreenUpdateManager;
+
+        r1 := @parameter0: sun.java2d.SurfaceData;
+
+        $z0 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: boolean done>;
+
+        if $z0 != 0 goto label8;
+
+        $z1 = r1 instanceof sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData;
+
+        if $z1 == 0 goto label8;
+
+        entermonitor r0;
+
+     label1:
+        $r2 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.util.ArrayList d3dwSurfaces>;
+
+        if $r2 != null goto label2;
+
+        $r5 = new java.util.ArrayList;
+
+        specialinvoke $r5.<java.util.ArrayList: void <init>()>();
+
+        r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.util.ArrayList d3dwSurfaces> = $r5;
+
+     label2:
+        $r6 = (sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData) r1;
+
+        $r3 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.util.ArrayList d3dwSurfaces>;
+
+        $z2 = virtualinvoke $r3.<java.util.ArrayList: boolean contains(java.lang.Object)>($r6);
+
+        if $z2 != 0 goto label3;
+
+        $r4 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.util.ArrayList d3dwSurfaces>;
+
+        virtualinvoke $r4.<java.util.ArrayList: boolean add(java.lang.Object)>($r6);
+
+     label3:
+        exitmonitor r0;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r7 := @caughtexception;
+
+        exitmonitor r0;
+
+     label6:
+        throw $r7;
+
+     label7:
+        specialinvoke r0.<sun.java2d.d3d.D3DScreenUpdateManager: void startUpdateThread()>();
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public synchronized void dropScreenSurface(sun.java2d.SurfaceData)
+    {
+        sun.java2d.d3d.D3DScreenUpdateManager r0;
+        sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData r3;
+        sun.java2d.SurfaceData r2;
+        java.util.ArrayList $r1, $r4;
+        boolean $z0;
+
+        r0 := @this: sun.java2d.d3d.D3DScreenUpdateManager;
+
+        r2 := @parameter0: sun.java2d.SurfaceData;
+
+        $r1 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.util.ArrayList d3dwSurfaces>;
+
+        if $r1 == null goto label1;
+
+        $z0 = r2 instanceof sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData;
+
+        if $z0 == 0 goto label1;
+
+        r3 = (sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData) r2;
+
+        specialinvoke r0.<sun.java2d.d3d.D3DScreenUpdateManager: void removeGdiSurface(sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData)>(r3);
+
+        $r4 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.util.ArrayList d3dwSurfaces>;
+
+        virtualinvoke $r4.<java.util.ArrayList: boolean remove(java.lang.Object)>(r3);
+
+     label1:
+        return;
+    }
+
+    public sun.java2d.SurfaceData getReplacementScreenSurface(sun.awt.windows.WComponentPeer, sun.java2d.SurfaceData)
+    {
+        sun.java2d.d3d.D3DScreenUpdateManager r0;
+        sun.awt.windows.WComponentPeer r1;
+        sun.java2d.SurfaceData r2, $r3;
+
+        r0 := @this: sun.java2d.d3d.D3DScreenUpdateManager;
+
+        r1 := @parameter0: sun.awt.windows.WComponentPeer;
+
+        r2 := @parameter1: sun.java2d.SurfaceData;
+
+        $r3 = specialinvoke r0.<sun.java2d.ScreenUpdateManager: sun.java2d.SurfaceData getReplacementScreenSurface(sun.awt.windows.WComponentPeer,sun.java2d.SurfaceData)>(r1, r2);
+
+        specialinvoke r0.<sun.java2d.d3d.D3DScreenUpdateManager: void trackScreenSurface(sun.java2d.SurfaceData)>($r3);
+
+        return $r3;
+    }
+
+    private void removeGdiSurface(sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData)
+    {
+        sun.java2d.d3d.D3DScreenUpdateManager r0;
+        sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData r2;
+        java.util.HashMap $r1, $r3, $r6;
+        java.lang.Object $r4;
+        sun.java2d.windows.GDIWindowSurfaceData r5;
+
+        r0 := @this: sun.java2d.d3d.D3DScreenUpdateManager;
+
+        r2 := @parameter0: sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData;
+
+        $r1 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.util.HashMap gdiSurfaces>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.util.HashMap gdiSurfaces>;
+
+        $r4 = virtualinvoke $r3.<java.util.HashMap: java.lang.Object get(java.lang.Object)>(r2);
+
+        r5 = (sun.java2d.windows.GDIWindowSurfaceData) $r4;
+
+        if r5 == null goto label1;
+
+        virtualinvoke r5.<sun.java2d.windows.GDIWindowSurfaceData: void invalidate()>();
+
+        $r6 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.util.HashMap gdiSurfaces>;
+
+        virtualinvoke $r6.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>(r2);
+
+     label1:
+        return;
+    }
+
+    private synchronized void startUpdateThread()
+    {
+        sun.java2d.d3d.D3DScreenUpdateManager r0;
+        java.lang.Thread $r1, $r4, $r5;
+        java.lang.Object $r3;
+        java.security.PrivilegedAction $r2;
+
+        r0 := @this: sun.java2d.d3d.D3DScreenUpdateManager;
+
+        $r1 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.lang.Thread screenUpdater>;
+
+        if $r1 != null goto label1;
+
+        $r2 = staticinvoke <sun.java2d.d3d.D3DScreenUpdateManager$lambda_startUpdateThread_2__448: java.security.PrivilegedAction bootstrap$(sun.java2d.d3d.D3DScreenUpdateManager)>(r0);
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        $r4 = (java.lang.Thread) $r3;
+
+        r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.lang.Thread screenUpdater> = $r4;
+
+        $r5 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.lang.Thread screenUpdater>;
+
+        virtualinvoke $r5.<java.lang.Thread: void start()>();
+
+        goto label2;
+
+     label1:
+        virtualinvoke r0.<sun.java2d.d3d.D3DScreenUpdateManager: void wakeUpUpdateThread()>();
+
+     label2:
+        return;
+    }
+
+    public void wakeUpUpdateThread()
+    {
+        java.lang.Throwable $r3;
+        sun.java2d.d3d.D3DScreenUpdateManager r0;
+        java.lang.Object $r1, $r2;
+
+        r0 := @this: sun.java2d.d3d.D3DScreenUpdateManager;
+
+        $r1 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.lang.Object runLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.lang.Object runLock>;
+
+        virtualinvoke $r2.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r3;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void runUpdateNow()
+    {
+        java.lang.Throwable $r7, $r9;
+        java.util.ArrayList $r2, $r3;
+        sun.java2d.d3d.D3DScreenUpdateManager r0;
+        java.lang.InterruptedException $r8;
+        java.lang.Thread $r1;
+        int $i0;
+        java.lang.Object $r4, $r5, $r6;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.java2d.d3d.D3DScreenUpdateManager;
+
+        entermonitor r0;
+
+     label01:
+        $z0 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: boolean done>;
+
+        if $z0 != 0 goto label02;
+
+        $r1 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.lang.Thread screenUpdater>;
+
+        if $r1 == null goto label02;
+
+        $r2 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.util.ArrayList d3dwSurfaces>;
+
+        if $r2 == null goto label02;
+
+        $r3 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.util.ArrayList d3dwSurfaces>;
+
+        $i0 = virtualinvoke $r3.<java.util.ArrayList: int size()>();
+
+        if $i0 != 0 goto label04;
+
+     label02:
+        exitmonitor r0;
+
+     label03:
+        return;
+
+     label04:
+        exitmonitor r0;
+
+     label05:
+        goto label08;
+
+     label06:
+        $r9 := @caughtexception;
+
+        exitmonitor r0;
+
+     label07:
+        throw $r9;
+
+     label08:
+        $r4 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.lang.Object runLock>;
+
+        entermonitor $r4;
+
+     label09:
+        r0.<sun.java2d.d3d.D3DScreenUpdateManager: boolean needsUpdateNow> = 1;
+
+        $r5 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.lang.Object runLock>;
+
+        virtualinvoke $r5.<java.lang.Object: void notifyAll()>();
+
+     label10:
+        $z1 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: boolean needsUpdateNow>;
+
+        if $z1 == 0 goto label14;
+
+     label11:
+        $r6 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.lang.Object runLock>;
+
+        virtualinvoke $r6.<java.lang.Object: void wait()>();
+
+     label12:
+        goto label10;
+
+     label13:
+        $r8 := @caughtexception;
+
+        goto label10;
+
+     label14:
+        exitmonitor $r4;
+
+     label15:
+        goto label18;
+
+     label16:
+        $r7 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label17:
+        throw $r7;
+
+     label18:
+        return;
+
+        catch java.lang.Throwable from label01 to label03 with label06;
+        catch java.lang.Throwable from label04 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+        catch java.lang.InterruptedException from label11 to label12 with label13;
+        catch java.lang.Throwable from label09 to label15 with label16;
+        catch java.lang.Throwable from label16 to label17 with label16;
+    }
+
+    public void run()
+    {
+        sun.java2d.d3d.D3DRenderQueue $r8;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        sun.awt.windows.WComponentPeer $r7;
+        java.lang.Throwable $r11, $r12, $r13, $r14;
+        java.awt.Rectangle $r9;
+        java.lang.Object[] $r4;
+        sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData r18;
+        long $l4;
+        java.util.ArrayList $r2, $r3;
+        int $i0, i1, $i2, $i3, i5;
+        sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData[] r16, r17;
+        sun.java2d.d3d.D3DScreenUpdateManager r0;
+        java.lang.InterruptedException $r15;
+        java.lang.Object $r1, $r5, $r6, $r10;
+
+        r0 := @this: sun.java2d.d3d.D3DScreenUpdateManager;
+
+     label01:
+        $z0 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: boolean done>;
+
+        if $z0 != 0 goto label33;
+
+        $r1 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.lang.Object runLock>;
+
+        entermonitor $r1;
+
+     label02:
+        $r2 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.util.ArrayList d3dwSurfaces>;
+
+        $i0 = virtualinvoke $r2.<java.util.ArrayList: int size()>();
+
+        if $i0 <= 0 goto label03;
+
+        $l4 = 100L;
+
+        goto label04;
+
+     label03:
+        $l4 = 0L;
+
+     label04:
+        $z1 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: boolean needsUpdateNow>;
+
+        if $z1 != 0 goto label08;
+
+     label05:
+        $r10 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.lang.Object runLock>;
+
+        virtualinvoke $r10.<java.lang.Object: void wait(long)>($l4);
+
+     label06:
+        goto label08;
+
+     label07:
+        $r15 := @caughtexception;
+
+     label08:
+        exitmonitor $r1;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r14 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label11:
+        throw $r14;
+
+     label12:
+        r16 = newarray (sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData)[0];
+
+        entermonitor r0;
+
+     label13:
+        $r3 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.util.ArrayList d3dwSurfaces>;
+
+        $r4 = virtualinvoke $r3.<java.util.ArrayList: java.lang.Object[] toArray(java.lang.Object[])>(r16);
+
+        r17 = (sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData[]) $r4;
+
+        exitmonitor r0;
+
+     label14:
+        goto label17;
+
+     label15:
+        $r13 := @caughtexception;
+
+        exitmonitor r0;
+
+     label16:
+        throw $r13;
+
+     label17:
+        i1 = lengthof r17;
+
+        i5 = 0;
+
+     label18:
+        if i5 >= i1 goto label27;
+
+        r18 = r17[i5];
+
+        $z2 = virtualinvoke r18.<sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData: boolean isValid()>();
+
+        if $z2 == 0 goto label26;
+
+        $z3 = virtualinvoke r18.<sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData: boolean isDirty()>();
+
+        if $z3 != 0 goto label19;
+
+        $z6 = virtualinvoke r18.<sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData: boolean isSurfaceLost()>();
+
+        if $z6 == 0 goto label26;
+
+     label19:
+        $z4 = virtualinvoke r18.<sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData: boolean isSurfaceLost()>();
+
+        if $z4 != 0 goto label25;
+
+        $r8 = staticinvoke <sun.java2d.d3d.D3DRenderQueue: sun.java2d.d3d.D3DRenderQueue getInstance()>();
+
+        virtualinvoke $r8.<sun.java2d.d3d.D3DRenderQueue: void lock()>();
+
+     label20:
+        $r9 = virtualinvoke r18.<sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData: java.awt.Rectangle getBounds()>();
+
+        $i3 = $r9.<java.awt.Rectangle: int width>;
+
+        $i2 = $r9.<java.awt.Rectangle: int height>;
+
+        staticinvoke <sun.java2d.d3d.D3DSurfaceData: void swapBuffers(sun.java2d.d3d.D3DSurfaceData,int,int,int,int)>(r18, 0, 0, $i3, $i2);
+
+        virtualinvoke r18.<sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData: void markClean()>();
+
+     label21:
+        virtualinvoke $r8.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        goto label24;
+
+     label22:
+        $r12 := @caughtexception;
+
+     label23:
+        virtualinvoke $r8.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        throw $r12;
+
+     label24:
+        goto label26;
+
+     label25:
+        $z5 = specialinvoke r0.<sun.java2d.d3d.D3DScreenUpdateManager: boolean validate(sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData)>(r18);
+
+        if $z5 != 0 goto label26;
+
+        $r7 = virtualinvoke r18.<sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData: sun.awt.windows.WComponentPeer getPeer()>();
+
+        virtualinvoke $r7.<sun.awt.windows.WComponentPeer: void replaceSurfaceDataLater()>();
+
+     label26:
+        i5 = i5 + 1;
+
+        goto label18;
+
+     label27:
+        $r5 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.lang.Object runLock>;
+
+        entermonitor $r5;
+
+     label28:
+        r0.<sun.java2d.d3d.D3DScreenUpdateManager: boolean needsUpdateNow> = 0;
+
+        $r6 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.lang.Object runLock>;
+
+        virtualinvoke $r6.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor $r5;
+
+     label29:
+        goto label32;
+
+     label30:
+        $r11 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label31:
+        throw $r11;
+
+     label32:
+        goto label01;
+
+     label33:
+        return;
+
+        catch java.lang.InterruptedException from label05 to label06 with label07;
+        catch java.lang.Throwable from label02 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+        catch java.lang.Throwable from label13 to label14 with label15;
+        catch java.lang.Throwable from label15 to label16 with label15;
+        catch java.lang.Throwable from label20 to label21 with label22;
+        catch java.lang.Throwable from label22 to label23 with label22;
+        catch java.lang.Throwable from label28 to label29 with label30;
+        catch java.lang.Throwable from label30 to label31 with label30;
+    }
+
+    private boolean validate(sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData)
+    {
+        java.awt.Color $r2;
+        java.awt.Rectangle $r4, $r5;
+        sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData r0;
+        sun.java2d.InvalidPipeException $r8;
+        sun.java2d.d3d.D3DScreenUpdateManager r6;
+        sun.awt.windows.WComponentPeer $r1, $r7;
+        int $i0, $i1;
+        sun.java2d.SunGraphics2D $r3;
+        boolean $z0;
+
+        r6 := @this: sun.java2d.d3d.D3DScreenUpdateManager;
+
+        r0 := @parameter0: sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData;
+
+        $z0 = virtualinvoke r0.<sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData: boolean isSurfaceLost()>();
+
+        if $z0 == 0 goto label4;
+
+     label1:
+        virtualinvoke r0.<sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData: void restoreSurface()>();
+
+        $r1 = virtualinvoke r0.<sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData: sun.awt.windows.WComponentPeer getPeer()>();
+
+        $r2 = virtualinvoke $r1.<sun.awt.windows.WComponentPeer: java.awt.Color getBackgroundNoSync()>();
+
+        $r3 = new sun.java2d.SunGraphics2D;
+
+        specialinvoke $r3.<sun.java2d.SunGraphics2D: void <init>(sun.java2d.SurfaceData,java.awt.Color,java.awt.Color,java.awt.Font)>(r0, $r2, $r2, null);
+
+        $r4 = virtualinvoke r0.<sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData: java.awt.Rectangle getBounds()>();
+
+        $i0 = $r4.<java.awt.Rectangle: int width>;
+
+        $r5 = virtualinvoke r0.<sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData: java.awt.Rectangle getBounds()>();
+
+        $i1 = $r5.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r3.<sun.java2d.SunGraphics2D: void fillRect(int,int,int,int)>(0, 0, $i0, $i1);
+
+        virtualinvoke $r3.<sun.java2d.SunGraphics2D: void dispose()>();
+
+        virtualinvoke r0.<sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData: void markClean()>();
+
+        $r7 = virtualinvoke r0.<sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData: sun.awt.windows.WComponentPeer getPeer()>();
+
+        specialinvoke r6.<sun.java2d.d3d.D3DScreenUpdateManager: void repaintPeerTarget(sun.awt.windows.WComponentPeer)>($r7);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r8 := @caughtexception;
+
+        return 0;
+
+     label4:
+        return 1;
+
+        catch sun.java2d.InvalidPipeException from label1 to label2 with label3;
+    }
+
+    private synchronized sun.java2d.SurfaceData getGdiSurface(sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData)
+    {
+        sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData r2;
+        java.util.HashMap $r1, $r3, $r7, $r8;
+        sun.java2d.d3d.D3DScreenUpdateManager r0;
+        sun.awt.windows.WComponentPeer $r5;
+        java.lang.Object $r4;
+        sun.java2d.windows.GDIWindowSurfaceData $r6, $r9, r10;
+
+        r0 := @this: sun.java2d.d3d.D3DScreenUpdateManager;
+
+        r2 := @parameter0: sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData;
+
+        $r1 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.util.HashMap gdiSurfaces>;
+
+        if $r1 != null goto label1;
+
+        $r8 = new java.util.HashMap;
+
+        specialinvoke $r8.<java.util.HashMap: void <init>()>();
+
+        r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.util.HashMap gdiSurfaces> = $r8;
+
+     label1:
+        $r3 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.util.HashMap gdiSurfaces>;
+
+        $r4 = virtualinvoke $r3.<java.util.HashMap: java.lang.Object get(java.lang.Object)>(r2);
+
+        $r9 = (sun.java2d.windows.GDIWindowSurfaceData) $r4;
+
+        r10 = $r9;
+
+        if $r9 != null goto label2;
+
+        $r5 = virtualinvoke r2.<sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData: sun.awt.windows.WComponentPeer getPeer()>();
+
+        $r6 = staticinvoke <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.windows.GDIWindowSurfaceData createData(sun.awt.windows.WComponentPeer)>($r5);
+
+        r10 = $r6;
+
+        $r7 = r0.<sun.java2d.d3d.D3DScreenUpdateManager: java.util.HashMap gdiSurfaces>;
+
+        virtualinvoke $r7.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r2, $r6);
+
+     label2:
+        return r10;
+    }
+
+    private static boolean hasHWChildren(java.awt.Component)
+    {
+        java.awt.peer.ComponentPeer $r4;
+        java.awt.Component r0, r3;
+        java.awt.Component[] $r2;
+        int i0, i1;
+        java.awt.Container $r1;
+        boolean $z0, $z1, $z2;
+
+        r0 := @parameter0: java.awt.Component;
+
+        $z0 = r0 instanceof java.awt.Container;
+
+        if $z0 == 0 goto label4;
+
+        $r1 = (java.awt.Container) r0;
+
+        $r2 = virtualinvoke $r1.<java.awt.Container: java.awt.Component[] getComponents()>();
+
+        i0 = lengthof $r2;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label4;
+
+        r3 = $r2[i1];
+
+        $r4 = virtualinvoke r3.<java.awt.Component: java.awt.peer.ComponentPeer getPeer()>();
+
+        $z1 = $r4 instanceof sun.awt.windows.WComponentPeer;
+
+        if $z1 != 0 goto label2;
+
+        $z2 = staticinvoke <sun.java2d.d3d.D3DScreenUpdateManager: boolean hasHWChildren(java.awt.Component)>(r3);
+
+        if $z2 == 0 goto label3;
+
+     label2:
+        return 1;
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label4:
+        return 0;
+    }
+
+    public java.lang.Thread lambda$startUpdateThread$2()
+    {
+        java.lang.ThreadGroup $r0;
+        sun.java2d.d3d.D3DScreenUpdateManager r2;
+        java.lang.Thread $r1;
+
+        r2 := @this: sun.java2d.d3d.D3DScreenUpdateManager;
+
+        $r0 = staticinvoke <sun.misc.ThreadGroupUtils: java.lang.ThreadGroup getRootThreadGroup()>();
+
+        $r1 = new java.lang.Thread;
+
+        specialinvoke $r1.<java.lang.Thread: void <init>(java.lang.ThreadGroup,java.lang.Runnable,java.lang.String)>($r0, r2, "D3D Screen Updater");
+
+        virtualinvoke $r1.<java.lang.Thread: void setPriority(int)>(7);
+
+        virtualinvoke $r1.<java.lang.Thread: void setDaemon(boolean)>(1);
+
+        return $r1;
+    }
+
+    public java.lang.Void lambda$new$1()
+    {
+        sun.java2d.d3d.D3DScreenUpdateManager r2;
+        java.lang.Thread $r1;
+        java.lang.Runtime $r4;
+        java.lang.ThreadGroup $r0;
+        java.lang.Runnable $r3;
+        java.lang.Exception $r5;
+
+        r2 := @this: sun.java2d.d3d.D3DScreenUpdateManager;
+
+        $r0 = staticinvoke <sun.misc.ThreadGroupUtils: java.lang.ThreadGroup getRootThreadGroup()>();
+
+        $r1 = new java.lang.Thread;
+
+        $r3 = staticinvoke <sun.java2d.d3d.D3DScreenUpdateManager$lambda_null_0__449: java.lang.Runnable bootstrap$(sun.java2d.d3d.D3DScreenUpdateManager)>(r2);
+
+        specialinvoke $r1.<java.lang.Thread: void <init>(java.lang.ThreadGroup,java.lang.Runnable)>($r0, $r3);
+
+        virtualinvoke $r1.<java.lang.Thread: void setContextClassLoader(java.lang.ClassLoader)>(null);
+
+     label1:
+        $r4 = staticinvoke <java.lang.Runtime: java.lang.Runtime getRuntime()>();
+
+        virtualinvoke $r4.<java.lang.Runtime: void addShutdownHook(java.lang.Thread)>($r1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        r2.<sun.java2d.d3d.D3DScreenUpdateManager: boolean done> = 1;
+
+     label4:
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public void lambda$null$0()
+    {
+        sun.java2d.d3d.D3DScreenUpdateManager r0;
+
+        r0 := @this: sun.java2d.d3d.D3DScreenUpdateManager;
+
+        r0.<sun.java2d.d3d.D3DScreenUpdateManager: boolean done> = 1;
+
+        virtualinvoke r0.<sun.java2d.d3d.D3DScreenUpdateManager: void wakeUpUpdateThread()>();
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.java2d.d3d.D3DScreenUpdateManager: int MIN_WIN_SIZE> = 150;
+
+        return;
+    }
+}

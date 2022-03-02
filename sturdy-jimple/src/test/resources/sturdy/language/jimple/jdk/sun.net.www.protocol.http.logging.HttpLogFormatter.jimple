@@ -1,0 +1,307 @@
+public class sun.net.www.protocol.http.logging.HttpLogFormatter extends java.util.logging.SimpleFormatter
+{
+    private static volatile java.util.regex.Pattern pattern;
+    private static volatile java.util.regex.Pattern cpattern;
+
+    public void <init>()
+    {
+        sun.net.www.protocol.http.logging.HttpLogFormatter r0;
+        java.util.regex.Pattern $r1, $r2, $r3;
+
+        r0 := @this: sun.net.www.protocol.http.logging.HttpLogFormatter;
+
+        specialinvoke r0.<java.util.logging.SimpleFormatter: void <init>()>();
+
+        $r1 = <sun.net.www.protocol.http.logging.HttpLogFormatter: java.util.regex.Pattern pattern>;
+
+        if $r1 != null goto label1;
+
+        $r2 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("\\{[^\\}]*\\}");
+
+        <sun.net.www.protocol.http.logging.HttpLogFormatter: java.util.regex.Pattern pattern> = $r2;
+
+        $r3 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("[^,\\] ]{2,}");
+
+        <sun.net.www.protocol.http.logging.HttpLogFormatter: java.util.regex.Pattern cpattern> = $r3;
+
+     label1:
+        return;
+    }
+
+    public java.lang.String format(java.util.logging.LogRecord)
+    {
+        java.util.regex.Matcher $r9, $r17, $r24;
+        java.lang.StringBuilder $r5, $r6, $r11, $r12, $r19, $r20, $r26, $r27;
+        java.lang.String $r1, $r3, $r4, $r7, $r10, $r13, $r14, $r15, $r18, $r21, $r22, $r25, r28, r29, r30, r31, $r32;
+        sun.net.www.protocol.http.logging.HttpLogFormatter r2;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10;
+        java.util.logging.LogRecord r0;
+        java.util.regex.Pattern $r8, $r16, $r23;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21;
+
+        r2 := @this: sun.net.www.protocol.http.logging.HttpLogFormatter;
+
+        r0 := @parameter0: java.util.logging.LogRecord;
+
+        $r1 = virtualinvoke r0.<java.util.logging.LogRecord: java.lang.String getSourceClassName()>();
+
+        if $r1 == null goto label01;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("sun.net.www.protocol.http");
+
+        if $z0 != 0 goto label02;
+
+        $z9 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("sun.net.www.http");
+
+        if $z9 != 0 goto label02;
+
+     label01:
+        $r3 = specialinvoke r2.<java.util.logging.SimpleFormatter: java.lang.String format(java.util.logging.LogRecord)>(r0);
+
+        return $r3;
+
+     label02:
+        $r4 = virtualinvoke r0.<java.util.logging.LogRecord: java.lang.String getMessage()>();
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>(java.lang.String)>("HTTP: ");
+
+        $z1 = virtualinvoke $r4.<java.lang.String: boolean startsWith(java.lang.String)>("sun.net.www.MessageHeader@");
+
+        if $z1 == 0 goto label07;
+
+        $r23 = <sun.net.www.protocol.http.logging.HttpLogFormatter: java.util.regex.Pattern pattern>;
+
+        $r24 = virtualinvoke $r23.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r4);
+
+     label03:
+        $z6 = virtualinvoke $r24.<java.util.regex.Matcher: boolean find()>();
+
+        if $z6 == 0 goto label06;
+
+        $i13 = virtualinvoke $r24.<java.util.regex.Matcher: int start()>();
+
+        $i14 = virtualinvoke $r24.<java.util.regex.Matcher: int end()>();
+
+        $i16 = $i13 + 1;
+
+        $i15 = $i14 - 1;
+
+        $r25 = virtualinvoke $r4.<java.lang.String: java.lang.String substring(int,int)>($i16, $i15);
+
+        r28 = $r25;
+
+        $z7 = virtualinvoke $r25.<java.lang.String: boolean startsWith(java.lang.String)>("null: ");
+
+        if $z7 == 0 goto label04;
+
+        r28 = virtualinvoke $r25.<java.lang.String: java.lang.String substring(int)>(6);
+
+     label04:
+        $z8 = virtualinvoke r28.<java.lang.String: boolean endsWith(java.lang.String)>(": null");
+
+        if $z8 == 0 goto label05;
+
+        $i17 = virtualinvoke r28.<java.lang.String: int length()>();
+
+        $i18 = $i17 - 6;
+
+        r28 = virtualinvoke r28.<java.lang.String: java.lang.String substring(int,int)>(0, $i18);
+
+     label05:
+        $r26 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\t");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r28);
+
+        virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        goto label03;
+
+     label06:
+        goto label26;
+
+     label07:
+        $z2 = virtualinvoke $r4.<java.lang.String: boolean startsWith(java.lang.String)>("Cookies retrieved: {");
+
+        if $z2 == 0 goto label25;
+
+        r29 = virtualinvoke $r4.<java.lang.String: java.lang.String substring(int)>(20);
+
+        virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cookies from handler:\n");
+
+     label08:
+        $i19 = virtualinvoke r29.<java.lang.String: int length()>();
+
+        if $i19 < 7 goto label24;
+
+        $z3 = virtualinvoke r29.<java.lang.String: boolean startsWith(java.lang.String)>("Cookie=[");
+
+        if $z3 == 0 goto label16;
+
+        $r15 = virtualinvoke r29.<java.lang.String: java.lang.String substring(int)>(8);
+
+        r30 = $r15;
+
+        $i6 = virtualinvoke $r15.<java.lang.String: int indexOf(java.lang.String)>("Cookie2=[");
+
+        if $i6 <= 0 goto label09;
+
+        $i12 = $i6 - 1;
+
+        $r22 = virtualinvoke $r15.<java.lang.String: java.lang.String substring(int,int)>(0, $i12);
+
+        r30 = $r22;
+
+        r29 = virtualinvoke $r22.<java.lang.String: java.lang.String substring(int)>($i6);
+
+        goto label10;
+
+     label09:
+        r29 = "";
+
+     label10:
+        $i7 = virtualinvoke r30.<java.lang.String: int length()>();
+
+        if $i7 >= 4 goto label11;
+
+        goto label08;
+
+     label11:
+        $r16 = <sun.net.www.protocol.http.logging.HttpLogFormatter: java.util.regex.Pattern cpattern>;
+
+        $r17 = virtualinvoke $r16.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>(r30);
+
+     label12:
+        $z5 = virtualinvoke $r17.<java.util.regex.Matcher: boolean find()>();
+
+        if $z5 == 0 goto label16;
+
+        $i8 = virtualinvoke $r17.<java.util.regex.Matcher: int start()>();
+
+        $i9 = virtualinvoke $r17.<java.util.regex.Matcher: int end()>();
+
+        if $i8 < 0 goto label15;
+
+        $r21 = r30;
+
+        $i10 = $i8 + 1;
+
+        if $i9 <= 0 goto label13;
+
+        $i20 = $i9 - 1;
+
+        goto label14;
+
+     label13:
+        $i11 = virtualinvoke r30.<java.lang.String: int length()>();
+
+        $i20 = $i11 - 1;
+
+     label14:
+        $r18 = virtualinvoke $r21.<java.lang.String: java.lang.String substring(int,int)>($i10, $i20);
+
+        $r19 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\t");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+     label15:
+        goto label12;
+
+     label16:
+        $z4 = virtualinvoke r29.<java.lang.String: boolean startsWith(java.lang.String)>("Cookie2=[");
+
+        if $z4 == 0 goto label08;
+
+        $r7 = virtualinvoke r29.<java.lang.String: java.lang.String substring(int)>(9);
+
+        r31 = $r7;
+
+        $i0 = virtualinvoke $r7.<java.lang.String: int indexOf(java.lang.String)>("Cookie=[");
+
+        if $i0 <= 0 goto label17;
+
+        $i5 = $i0 - 1;
+
+        $r14 = virtualinvoke $r7.<java.lang.String: java.lang.String substring(int,int)>(0, $i5);
+
+        r31 = $r14;
+
+        r29 = virtualinvoke $r14.<java.lang.String: java.lang.String substring(int)>($i0);
+
+        goto label18;
+
+     label17:
+        r29 = "";
+
+     label18:
+        $r8 = <sun.net.www.protocol.http.logging.HttpLogFormatter: java.util.regex.Pattern cpattern>;
+
+        $r9 = virtualinvoke $r8.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>(r31);
+
+     label19:
+        $z10 = virtualinvoke $r9.<java.util.regex.Matcher: boolean find()>();
+
+        if $z10 == 0 goto label23;
+
+        $i1 = virtualinvoke $r9.<java.util.regex.Matcher: int start()>();
+
+        $i2 = virtualinvoke $r9.<java.util.regex.Matcher: int end()>();
+
+        if $i1 < 0 goto label22;
+
+        $r13 = r31;
+
+        $i3 = $i1 + 1;
+
+        if $i2 <= 0 goto label20;
+
+        $i21 = $i2 - 1;
+
+        goto label21;
+
+     label20:
+        $i4 = virtualinvoke r31.<java.lang.String: int length()>();
+
+        $i21 = $i4 - 1;
+
+     label21:
+        $r10 = virtualinvoke $r13.<java.lang.String: java.lang.String substring(int,int)>($i3, $i21);
+
+        $r11 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\t");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+     label22:
+        goto label19;
+
+     label23:
+        goto label08;
+
+     label24:
+        goto label26;
+
+     label25:
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+     label26:
+        $r32 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r32;
+    }
+
+    static void <clinit>()
+    {
+        <sun.net.www.protocol.http.logging.HttpLogFormatter: java.util.regex.Pattern pattern> = null;
+
+        <sun.net.www.protocol.http.logging.HttpLogFormatter: java.util.regex.Pattern cpattern> = null;
+
+        return;
+    }
+}

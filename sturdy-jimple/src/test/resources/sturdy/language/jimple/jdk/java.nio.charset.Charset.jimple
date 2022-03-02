@@ -1,0 +1,1011 @@
+public abstract class java.nio.charset.Charset extends java.lang.Object implements java.lang.Comparable
+{
+    private static volatile java.lang.String bugLevel;
+    private static java.nio.charset.spi.CharsetProvider standardProvider;
+    private static volatile java.lang.Object[] cache1;
+    private static volatile java.lang.Object[] cache2;
+    private static java.lang.ThreadLocal gate;
+    private static volatile java.nio.charset.Charset defaultCharset;
+    private final java.lang.String name;
+    private final java.lang.String[] aliases;
+    private java.util.Set aliasSet;
+
+    static boolean atBugLevel(java.lang.String)
+    {
+        java.lang.Object $r2;
+        java.lang.String r0, $r3, r4;
+        sun.security.action.GetPropertyAction $r1;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.String;
+
+        r4 = <java.nio.charset.Charset: java.lang.String bugLevel>;
+
+        if r4 != null goto label2;
+
+        $z1 = staticinvoke <sun.misc.VM: boolean isBooted()>();
+
+        if $z1 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r1 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r1.<sun.security.action.GetPropertyAction: void <init>(java.lang.String,java.lang.String)>("sun.nio.cs.bugLevel", "");
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        $r3 = (java.lang.String) $r2;
+
+        r4 = $r3;
+
+        <java.nio.charset.Charset: java.lang.String bugLevel> = $r3;
+
+     label2:
+        $z0 = virtualinvoke r4.<java.lang.String: boolean equals(java.lang.Object)>(r0);
+
+        return $z0;
+    }
+
+    private static void checkName(java.lang.String)
+    {
+        int $i0, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13;
+        java.nio.charset.IllegalCharsetNameException $r3, $r4;
+        java.lang.String r0;
+        boolean $z0;
+        char $c1;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $z0 = staticinvoke <java.nio.charset.Charset: boolean atBugLevel(java.lang.String)>("1.4");
+
+        if $z0 != 0 goto label01;
+
+        if $i0 != 0 goto label01;
+
+        $r3 = new java.nio.charset.IllegalCharsetNameException;
+
+        specialinvoke $r3.<java.nio.charset.IllegalCharsetNameException: void <init>(java.lang.String)>(r0);
+
+        throw $r3;
+
+     label01:
+        i2 = 0;
+
+     label02:
+        if i2 >= $i0 goto label12;
+
+        $c1 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i2);
+
+        $i3 = (int) $c1;
+
+        if $i3 < 65 goto label03;
+
+        $i4 = (int) $c1;
+
+        if $i4 > 90 goto label03;
+
+        goto label11;
+
+     label03:
+        $i5 = (int) $c1;
+
+        if $i5 < 97 goto label04;
+
+        $i6 = (int) $c1;
+
+        if $i6 > 122 goto label04;
+
+        goto label11;
+
+     label04:
+        $i7 = (int) $c1;
+
+        if $i7 < 48 goto label05;
+
+        $i8 = (int) $c1;
+
+        if $i8 > 57 goto label05;
+
+        goto label11;
+
+     label05:
+        $i9 = (int) $c1;
+
+        if $i9 != 45 goto label06;
+
+        if i2 == 0 goto label06;
+
+        goto label11;
+
+     label06:
+        $i10 = (int) $c1;
+
+        if $i10 != 43 goto label07;
+
+        if i2 == 0 goto label07;
+
+        goto label11;
+
+     label07:
+        $i11 = (int) $c1;
+
+        if $i11 != 58 goto label08;
+
+        if i2 == 0 goto label08;
+
+        goto label11;
+
+     label08:
+        $i12 = (int) $c1;
+
+        if $i12 != 95 goto label09;
+
+        if i2 == 0 goto label09;
+
+        goto label11;
+
+     label09:
+        $i13 = (int) $c1;
+
+        if $i13 != 46 goto label10;
+
+        if i2 == 0 goto label10;
+
+        goto label11;
+
+     label10:
+        $r4 = new java.nio.charset.IllegalCharsetNameException;
+
+        specialinvoke $r4.<java.nio.charset.IllegalCharsetNameException: void <init>(java.lang.String)>(r0);
+
+        throw $r4;
+
+     label11:
+        i2 = i2 + 1;
+
+        goto label02;
+
+     label12:
+        return;
+    }
+
+    private static void cache(java.lang.String, java.nio.charset.Charset)
+    {
+        java.lang.Object[] $r0, $r1;
+        java.nio.charset.Charset r3;
+        java.lang.String r2;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.nio.charset.Charset;
+
+        $r0 = <java.nio.charset.Charset: java.lang.Object[] cache1>;
+
+        <java.nio.charset.Charset: java.lang.Object[] cache2> = $r0;
+
+        $r1 = newarray (java.lang.Object)[2];
+
+        $r1[0] = r2;
+
+        $r1[1] = r3;
+
+        <java.nio.charset.Charset: java.lang.Object[] cache1> = $r1;
+
+        return;
+    }
+
+    private static java.util.Iterator providers()
+    {
+        java.nio.charset.Charset$1 $r0;
+
+        $r0 = new java.nio.charset.Charset$1;
+
+        specialinvoke $r0.<java.nio.charset.Charset$1: void <init>()>();
+
+        return $r0;
+    }
+
+    private static java.nio.charset.Charset lookupViaProviders(java.lang.String)
+    {
+        java.lang.Throwable $r9;
+        java.lang.ThreadLocal $r0, $r2, $r3, $r8, $r10;
+        java.nio.charset.Charset$2 $r4;
+        java.nio.charset.Charset r7;
+        java.lang.Object $r1, $r6;
+        java.lang.String r5;
+        boolean $z0;
+
+        r5 := @parameter0: java.lang.String;
+
+        $z0 = staticinvoke <sun.misc.VM: boolean isBooted()>();
+
+        if $z0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r0 = <java.nio.charset.Charset: java.lang.ThreadLocal gate>;
+
+        $r1 = virtualinvoke $r0.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        if $r1 == null goto label2;
+
+        return null;
+
+     label2:
+        $r3 = <java.nio.charset.Charset: java.lang.ThreadLocal gate>;
+
+        $r2 = <java.nio.charset.Charset: java.lang.ThreadLocal gate>;
+
+        virtualinvoke $r3.<java.lang.ThreadLocal: void set(java.lang.Object)>($r2);
+
+        $r4 = new java.nio.charset.Charset$2;
+
+        specialinvoke $r4.<java.nio.charset.Charset$2: void <init>(java.lang.String)>(r5);
+
+        $r6 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r4);
+
+        r7 = (java.nio.charset.Charset) $r6;
+
+     label3:
+        $r8 = <java.nio.charset.Charset: java.lang.ThreadLocal gate>;
+
+        virtualinvoke $r8.<java.lang.ThreadLocal: void set(java.lang.Object)>(null);
+
+        return r7;
+
+     label4:
+        $r9 := @caughtexception;
+
+        $r10 = <java.nio.charset.Charset: java.lang.ThreadLocal gate>;
+
+        virtualinvoke $r10.<java.lang.ThreadLocal: void set(java.lang.Object)>(null);
+
+        throw $r9;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+    }
+
+    private static java.nio.charset.Charset lookupExtendedCharset(java.lang.String)
+    {
+        java.lang.String r1;
+        java.nio.charset.Charset $r2;
+        java.nio.charset.spi.CharsetProvider r0;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0 = <java.nio.charset.Charset$ExtendedProviderHolder: java.nio.charset.spi.CharsetProvider extendedProvider>;
+
+        if r0 == null goto label1;
+
+        $r2 = virtualinvoke r0.<java.nio.charset.spi.CharsetProvider: java.nio.charset.Charset charsetForName(java.lang.String)>(r1);
+
+        goto label2;
+
+     label1:
+        $r2 = null;
+
+     label2:
+        return $r2;
+    }
+
+    private static java.nio.charset.Charset lookup(java.lang.String)
+    {
+        java.lang.Object[] $r1;
+        java.lang.IllegalArgumentException $r6;
+        java.nio.charset.Charset $r2, $r5;
+        java.lang.Object $r3, $r4;
+        java.lang.String r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Null charset name");
+
+        throw $r6;
+
+     label1:
+        $r1 = <java.nio.charset.Charset: java.lang.Object[] cache1>;
+
+        if $r1 == null goto label2;
+
+        $r3 = $r1[0];
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label2;
+
+        $r4 = $r1[1];
+
+        $r5 = (java.nio.charset.Charset) $r4;
+
+        return $r5;
+
+     label2:
+        $r2 = staticinvoke <java.nio.charset.Charset: java.nio.charset.Charset lookup2(java.lang.String)>(r0);
+
+        return $r2;
+    }
+
+    private static java.nio.charset.Charset lookup2(java.lang.String)
+    {
+        java.lang.Object[] $r0, $r7;
+        java.nio.charset.spi.CharsetProvider $r2;
+        java.nio.charset.Charset $r3, $r4, $r5, $r9, r10;
+        java.lang.Object $r6, $r8;
+        java.lang.String r1;
+        boolean $z0;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = <java.nio.charset.Charset: java.lang.Object[] cache2>;
+
+        if $r0 == null goto label1;
+
+        $r6 = $r0[0];
+
+        $z0 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 == 0 goto label1;
+
+        $r7 = <java.nio.charset.Charset: java.lang.Object[] cache1>;
+
+        <java.nio.charset.Charset: java.lang.Object[] cache2> = $r7;
+
+        <java.nio.charset.Charset: java.lang.Object[] cache1> = $r0;
+
+        $r8 = $r0[1];
+
+        $r9 = (java.nio.charset.Charset) $r8;
+
+        return $r9;
+
+     label1:
+        $r2 = <java.nio.charset.Charset: java.nio.charset.spi.CharsetProvider standardProvider>;
+
+        $r3 = virtualinvoke $r2.<java.nio.charset.spi.CharsetProvider: java.nio.charset.Charset charsetForName(java.lang.String)>(r1);
+
+        r10 = $r3;
+
+        if $r3 != null goto label2;
+
+        $r4 = staticinvoke <java.nio.charset.Charset: java.nio.charset.Charset lookupExtendedCharset(java.lang.String)>(r1);
+
+        r10 = $r4;
+
+        if $r4 != null goto label2;
+
+        $r5 = staticinvoke <java.nio.charset.Charset: java.nio.charset.Charset lookupViaProviders(java.lang.String)>(r1);
+
+        r10 = $r5;
+
+        if $r5 == null goto label3;
+
+     label2:
+        staticinvoke <java.nio.charset.Charset: void cache(java.lang.String,java.nio.charset.Charset)>(r1, r10);
+
+        return r10;
+
+     label3:
+        staticinvoke <java.nio.charset.Charset: void checkName(java.lang.String)>(r1);
+
+        return null;
+    }
+
+    public static boolean isSupported(java.lang.String)
+    {
+        java.lang.String r0;
+        java.nio.charset.Charset $r1;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <java.nio.charset.Charset: java.nio.charset.Charset lookup(java.lang.String)>(r0);
+
+        if $r1 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public static java.nio.charset.Charset forName(java.lang.String)
+    {
+        java.lang.String r0;
+        java.nio.charset.UnsupportedCharsetException $r2;
+        java.nio.charset.Charset $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <java.nio.charset.Charset: java.nio.charset.Charset lookup(java.lang.String)>(r0);
+
+        if $r1 == null goto label1;
+
+        return $r1;
+
+     label1:
+        $r2 = new java.nio.charset.UnsupportedCharsetException;
+
+        specialinvoke $r2.<java.nio.charset.UnsupportedCharsetException: void <init>(java.lang.String)>(r0);
+
+        throw $r2;
+    }
+
+    private static void put(java.util.Iterator, java.util.Map)
+    {
+        java.util.Iterator r0;
+        java.nio.charset.Charset r2;
+        java.util.Map r3;
+        java.lang.Object $r1;
+        java.lang.String $r4, $r5;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.util.Iterator;
+
+        r3 := @parameter1: java.util.Map;
+
+     label1:
+        $z0 = interfaceinvoke r0.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r1 = interfaceinvoke r0.<java.util.Iterator: java.lang.Object next()>();
+
+        r2 = (java.nio.charset.Charset) $r1;
+
+        $r4 = virtualinvoke r2.<java.nio.charset.Charset: java.lang.String name()>();
+
+        $z1 = interfaceinvoke r3.<java.util.Map: boolean containsKey(java.lang.Object)>($r4);
+
+        if $z1 != 0 goto label2;
+
+        $r5 = virtualinvoke r2.<java.nio.charset.Charset: java.lang.String name()>();
+
+        interfaceinvoke r3.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r5, r2);
+
+     label2:
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    public static java.util.SortedMap availableCharsets()
+    {
+        java.nio.charset.Charset$3 $r0;
+        java.lang.Object $r1;
+        java.util.SortedMap $r2;
+
+        $r0 = new java.nio.charset.Charset$3;
+
+        specialinvoke $r0.<java.nio.charset.Charset$3: void <init>()>();
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r2 = (java.util.SortedMap) $r1;
+
+        return $r2;
+    }
+
+    public static java.nio.charset.Charset defaultCharset()
+    {
+        java.lang.Throwable $r7;
+        sun.security.action.GetPropertyAction $r2;
+        java.nio.charset.Charset $r0, $r1, $r5, $r6;
+        java.lang.Object $r3;
+        java.lang.String r4;
+
+        $r0 = <java.nio.charset.Charset: java.nio.charset.Charset defaultCharset>;
+
+        if $r0 != null goto label7;
+
+        entermonitor class "Ljava/nio/charset/Charset;";
+
+     label1:
+        $r2 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r2.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("file.encoding");
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        r4 = (java.lang.String) $r3;
+
+        $r5 = staticinvoke <java.nio.charset.Charset: java.nio.charset.Charset lookup(java.lang.String)>(r4);
+
+        if $r5 == null goto label2;
+
+        <java.nio.charset.Charset: java.nio.charset.Charset defaultCharset> = $r5;
+
+        goto label3;
+
+     label2:
+        $r6 = staticinvoke <java.nio.charset.Charset: java.nio.charset.Charset forName(java.lang.String)>("UTF-8");
+
+        <java.nio.charset.Charset: java.nio.charset.Charset defaultCharset> = $r6;
+
+     label3:
+        exitmonitor class "Ljava/nio/charset/Charset;";
+
+     label4:
+        goto label7;
+
+     label5:
+        $r7 := @caughtexception;
+
+        exitmonitor class "Ljava/nio/charset/Charset;";
+
+     label6:
+        throw $r7;
+
+     label7:
+        $r1 = <java.nio.charset.Charset: java.nio.charset.Charset defaultCharset>;
+
+        return $r1;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    protected void <init>(java.lang.String, java.lang.String[])
+    {
+        java.lang.String[] r2, r3, $r5;
+        java.nio.charset.Charset r0;
+        int i0, $i1;
+        java.lang.String r1, $r4;
+
+        r0 := @this: java.nio.charset.Charset;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.nio.charset.Charset: java.util.Set aliasSet> = null;
+
+        staticinvoke <java.nio.charset.Charset: void checkName(java.lang.String)>(r1);
+
+        if r2 != null goto label1;
+
+        $r5 = newarray (java.lang.String)[0];
+
+        goto label2;
+
+     label1:
+        $r5 = r2;
+
+     label2:
+        r3 = $r5;
+
+        i0 = 0;
+
+     label3:
+        $i1 = lengthof r3;
+
+        if i0 >= $i1 goto label4;
+
+        $r4 = r3[i0];
+
+        staticinvoke <java.nio.charset.Charset: void checkName(java.lang.String)>($r4);
+
+        i0 = i0 + 1;
+
+        goto label3;
+
+     label4:
+        r0.<java.nio.charset.Charset: java.lang.String name> = r1;
+
+        r0.<java.nio.charset.Charset: java.lang.String[] aliases> = r3;
+
+        return;
+    }
+
+    public final java.lang.String name()
+    {
+        java.lang.String $r1;
+        java.nio.charset.Charset r0;
+
+        r0 := @this: java.nio.charset.Charset;
+
+        $r1 = r0.<java.nio.charset.Charset: java.lang.String name>;
+
+        return $r1;
+    }
+
+    public final java.util.Set aliases()
+    {
+        java.util.Set $r1, $r4, $r5, $r8;
+        java.lang.String[] $r2, $r6;
+        java.util.HashSet $r3;
+        java.nio.charset.Charset r0;
+        int i0, i1;
+        java.lang.String $r7;
+
+        r0 := @this: java.nio.charset.Charset;
+
+        $r1 = r0.<java.nio.charset.Charset: java.util.Set aliasSet>;
+
+        if $r1 == null goto label1;
+
+        $r8 = r0.<java.nio.charset.Charset: java.util.Set aliasSet>;
+
+        return $r8;
+
+     label1:
+        $r2 = r0.<java.nio.charset.Charset: java.lang.String[] aliases>;
+
+        i0 = lengthof $r2;
+
+        $r3 = new java.util.HashSet;
+
+        specialinvoke $r3.<java.util.HashSet: void <init>(int)>(i0);
+
+        i1 = 0;
+
+     label2:
+        if i1 >= i0 goto label3;
+
+        $r6 = r0.<java.nio.charset.Charset: java.lang.String[] aliases>;
+
+        $r7 = $r6[i1];
+
+        virtualinvoke $r3.<java.util.HashSet: boolean add(java.lang.Object)>($r7);
+
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label3:
+        $r4 = staticinvoke <java.util.Collections: java.util.Set unmodifiableSet(java.util.Set)>($r3);
+
+        r0.<java.nio.charset.Charset: java.util.Set aliasSet> = $r4;
+
+        $r5 = r0.<java.nio.charset.Charset: java.util.Set aliasSet>;
+
+        return $r5;
+    }
+
+    public java.lang.String displayName()
+    {
+        java.lang.String $r1;
+        java.nio.charset.Charset r0;
+
+        r0 := @this: java.nio.charset.Charset;
+
+        $r1 = r0.<java.nio.charset.Charset: java.lang.String name>;
+
+        return $r1;
+    }
+
+    public final boolean isRegistered()
+    {
+        java.nio.charset.Charset r0;
+        java.lang.String $r1, $r2;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.nio.charset.Charset;
+
+        $r1 = r0.<java.nio.charset.Charset: java.lang.String name>;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("X-");
+
+        if $z0 != 0 goto label1;
+
+        $r2 = r0.<java.nio.charset.Charset: java.lang.String name>;
+
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>("x-");
+
+        if $z1 != 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+    }
+
+    public java.lang.String displayName(java.util.Locale)
+    {
+        java.lang.String $r1;
+        java.nio.charset.Charset r0;
+        java.util.Locale r2;
+
+        r0 := @this: java.nio.charset.Charset;
+
+        r2 := @parameter0: java.util.Locale;
+
+        $r1 = r0.<java.nio.charset.Charset: java.lang.String name>;
+
+        return $r1;
+    }
+
+    public abstract boolean contains(java.nio.charset.Charset);
+
+    public abstract java.nio.charset.CharsetDecoder newDecoder();
+
+    public abstract java.nio.charset.CharsetEncoder newEncoder();
+
+    public boolean canEncode()
+    {
+        java.nio.charset.Charset r0;
+
+        r0 := @this: java.nio.charset.Charset;
+
+        return 1;
+    }
+
+    public final java.nio.CharBuffer decode(java.nio.ByteBuffer)
+    {
+        java.nio.charset.CharacterCodingException $r8;
+        java.nio.CharBuffer $r7;
+        java.lang.Error $r9;
+        java.nio.charset.CharsetDecoder $r1, $r3, $r5;
+        java.nio.ByteBuffer r6;
+        java.nio.charset.Charset r0;
+        java.nio.charset.CodingErrorAction $r2, $r4;
+
+        r0 := @this: java.nio.charset.Charset;
+
+        r6 := @parameter0: java.nio.ByteBuffer;
+
+     label1:
+        $r1 = staticinvoke <sun.nio.cs.ThreadLocalCoders: java.nio.charset.CharsetDecoder decoderFor(java.lang.Object)>(r0);
+
+        $r2 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPLACE>;
+
+        $r3 = virtualinvoke $r1.<java.nio.charset.CharsetDecoder: java.nio.charset.CharsetDecoder onMalformedInput(java.nio.charset.CodingErrorAction)>($r2);
+
+        $r4 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPLACE>;
+
+        $r5 = virtualinvoke $r3.<java.nio.charset.CharsetDecoder: java.nio.charset.CharsetDecoder onUnmappableCharacter(java.nio.charset.CodingErrorAction)>($r4);
+
+        $r7 = virtualinvoke $r5.<java.nio.charset.CharsetDecoder: java.nio.CharBuffer decode(java.nio.ByteBuffer)>(r6);
+
+     label2:
+        return $r7;
+
+     label3:
+        $r8 := @caughtexception;
+
+        $r9 = new java.lang.Error;
+
+        specialinvoke $r9.<java.lang.Error: void <init>(java.lang.Throwable)>($r8);
+
+        throw $r9;
+
+        catch java.nio.charset.CharacterCodingException from label1 to label2 with label3;
+    }
+
+    public final java.nio.ByteBuffer encode(java.nio.CharBuffer)
+    {
+        java.nio.charset.CharacterCodingException $r8;
+        java.nio.CharBuffer r6;
+        java.lang.Error $r9;
+        java.nio.ByteBuffer $r7;
+        java.nio.charset.Charset r0;
+        java.nio.charset.CharsetEncoder $r1, $r3, $r5;
+        java.nio.charset.CodingErrorAction $r2, $r4;
+
+        r0 := @this: java.nio.charset.Charset;
+
+        r6 := @parameter0: java.nio.CharBuffer;
+
+     label1:
+        $r1 = staticinvoke <sun.nio.cs.ThreadLocalCoders: java.nio.charset.CharsetEncoder encoderFor(java.lang.Object)>(r0);
+
+        $r2 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPLACE>;
+
+        $r3 = virtualinvoke $r1.<java.nio.charset.CharsetEncoder: java.nio.charset.CharsetEncoder onMalformedInput(java.nio.charset.CodingErrorAction)>($r2);
+
+        $r4 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPLACE>;
+
+        $r5 = virtualinvoke $r3.<java.nio.charset.CharsetEncoder: java.nio.charset.CharsetEncoder onUnmappableCharacter(java.nio.charset.CodingErrorAction)>($r4);
+
+        $r7 = virtualinvoke $r5.<java.nio.charset.CharsetEncoder: java.nio.ByteBuffer encode(java.nio.CharBuffer)>(r6);
+
+     label2:
+        return $r7;
+
+     label3:
+        $r8 := @caughtexception;
+
+        $r9 = new java.lang.Error;
+
+        specialinvoke $r9.<java.lang.Error: void <init>(java.lang.Throwable)>($r8);
+
+        throw $r9;
+
+        catch java.nio.charset.CharacterCodingException from label1 to label2 with label3;
+    }
+
+    public final java.nio.ByteBuffer encode(java.lang.String)
+    {
+        java.nio.charset.Charset r0;
+        java.nio.CharBuffer $r2;
+        java.lang.String r1;
+        java.nio.ByteBuffer $r3;
+
+        r0 := @this: java.nio.charset.Charset;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = staticinvoke <java.nio.CharBuffer: java.nio.CharBuffer wrap(java.lang.CharSequence)>(r1);
+
+        $r3 = virtualinvoke r0.<java.nio.charset.Charset: java.nio.ByteBuffer encode(java.nio.CharBuffer)>($r2);
+
+        return $r3;
+    }
+
+    public final int compareTo(java.nio.charset.Charset)
+    {
+        java.nio.charset.Charset r0, r2;
+        int $i0;
+        java.lang.String $r1, $r3;
+
+        r0 := @this: java.nio.charset.Charset;
+
+        r2 := @parameter0: java.nio.charset.Charset;
+
+        $r1 = virtualinvoke r0.<java.nio.charset.Charset: java.lang.String name()>();
+
+        $r3 = virtualinvoke r2.<java.nio.charset.Charset: java.lang.String name()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int compareToIgnoreCase(java.lang.String)>($r3);
+
+        return $i0;
+    }
+
+    public final int hashCode()
+    {
+        int $i0;
+        java.lang.String $r1;
+        java.nio.charset.Charset r0;
+
+        r0 := @this: java.nio.charset.Charset;
+
+        $r1 = virtualinvoke r0.<java.nio.charset.Charset: java.lang.String name()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int hashCode()>();
+
+        return $i0;
+    }
+
+    public final boolean equals(java.lang.Object)
+    {
+        java.nio.charset.Charset r1, $r2;
+        java.lang.Object r0;
+        java.lang.String $r3, $r4;
+        boolean $z0, $z1;
+
+        r1 := @this: java.nio.charset.Charset;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $z0 = r0 instanceof java.nio.charset.Charset;
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        if r1 != r0 goto label2;
+
+        return 1;
+
+     label2:
+        $r3 = r1.<java.nio.charset.Charset: java.lang.String name>;
+
+        $r2 = (java.nio.charset.Charset) r0;
+
+        $r4 = virtualinvoke $r2.<java.nio.charset.Charset: java.lang.String name()>();
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        return $z1;
+    }
+
+    public final java.lang.String toString()
+    {
+        java.lang.String $r1;
+        java.nio.charset.Charset r0;
+
+        r0 := @this: java.nio.charset.Charset;
+
+        $r1 = virtualinvoke r0.<java.nio.charset.Charset: java.lang.String name()>();
+
+        return $r1;
+    }
+
+    public volatile int compareTo(java.lang.Object)
+    {
+        java.nio.charset.Charset r0, $r2;
+        int $i0;
+        java.lang.Object r1;
+
+        r0 := @this: java.nio.charset.Charset;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = (java.nio.charset.Charset) r1;
+
+        $i0 = virtualinvoke r0.<java.nio.charset.Charset: int compareTo(java.nio.charset.Charset)>($r2);
+
+        return $i0;
+    }
+
+    static java.util.Iterator access$000()
+    {
+        java.util.Iterator $r0;
+
+        $r0 = staticinvoke <java.nio.charset.Charset: java.util.Iterator providers()>();
+
+        return $r0;
+    }
+
+    static java.nio.charset.spi.CharsetProvider access$100()
+    {
+        java.nio.charset.spi.CharsetProvider $r0;
+
+        $r0 = <java.nio.charset.Charset: java.nio.charset.spi.CharsetProvider standardProvider>;
+
+        return $r0;
+    }
+
+    static void access$200(java.util.Iterator, java.util.Map)
+    {
+        java.util.Iterator r0;
+        java.util.Map r1;
+
+        r0 := @parameter0: java.util.Iterator;
+
+        r1 := @parameter1: java.util.Map;
+
+        staticinvoke <java.nio.charset.Charset: void put(java.util.Iterator,java.util.Map)>(r0, r1);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.ThreadLocal $r1;
+        sun.nio.cs.StandardCharsets $r0;
+
+        <java.nio.charset.Charset: java.lang.String bugLevel> = null;
+
+        $r0 = new sun.nio.cs.StandardCharsets;
+
+        specialinvoke $r0.<sun.nio.cs.StandardCharsets: void <init>()>();
+
+        <java.nio.charset.Charset: java.nio.charset.spi.CharsetProvider standardProvider> = $r0;
+
+        <java.nio.charset.Charset: java.lang.Object[] cache1> = null;
+
+        <java.nio.charset.Charset: java.lang.Object[] cache2> = null;
+
+        $r1 = new java.lang.ThreadLocal;
+
+        specialinvoke $r1.<java.lang.ThreadLocal: void <init>()>();
+
+        <java.nio.charset.Charset: java.lang.ThreadLocal gate> = $r1;
+
+        return;
+    }
+}

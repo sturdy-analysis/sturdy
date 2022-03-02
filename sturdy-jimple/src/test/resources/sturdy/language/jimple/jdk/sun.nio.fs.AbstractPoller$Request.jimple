@@ -1,0 +1,156 @@
+class sun.nio.fs.AbstractPoller$Request extends java.lang.Object
+{
+    private final sun.nio.fs.AbstractPoller$RequestType type;
+    private final java.lang.Object[] params;
+    private boolean completed;
+    private java.lang.Object result;
+
+    transient void <init>(sun.nio.fs.AbstractPoller$RequestType, java.lang.Object[])
+    {
+        sun.nio.fs.AbstractPoller$Request r0;
+        java.lang.Object[] r2;
+        sun.nio.fs.AbstractPoller$RequestType r1;
+
+        r0 := @this: sun.nio.fs.AbstractPoller$Request;
+
+        r1 := @parameter0: sun.nio.fs.AbstractPoller$RequestType;
+
+        r2 := @parameter1: java.lang.Object[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.nio.fs.AbstractPoller$Request: boolean completed> = 0;
+
+        r0.<sun.nio.fs.AbstractPoller$Request: java.lang.Object result> = null;
+
+        r0.<sun.nio.fs.AbstractPoller$Request: sun.nio.fs.AbstractPoller$RequestType type> = r1;
+
+        r0.<sun.nio.fs.AbstractPoller$Request: java.lang.Object[] params> = r2;
+
+        return;
+    }
+
+    sun.nio.fs.AbstractPoller$RequestType type()
+    {
+        sun.nio.fs.AbstractPoller$Request r0;
+        sun.nio.fs.AbstractPoller$RequestType $r1;
+
+        r0 := @this: sun.nio.fs.AbstractPoller$Request;
+
+        $r1 = r0.<sun.nio.fs.AbstractPoller$Request: sun.nio.fs.AbstractPoller$RequestType type>;
+
+        return $r1;
+    }
+
+    java.lang.Object[] parameters()
+    {
+        sun.nio.fs.AbstractPoller$Request r0;
+        java.lang.Object[] $r1;
+
+        r0 := @this: sun.nio.fs.AbstractPoller$Request;
+
+        $r1 = r0.<sun.nio.fs.AbstractPoller$Request: java.lang.Object[] params>;
+
+        return $r1;
+    }
+
+    void release(java.lang.Object)
+    {
+        java.lang.Throwable $r2;
+        java.lang.Object r1;
+        sun.nio.fs.AbstractPoller$Request r0;
+
+        r0 := @this: sun.nio.fs.AbstractPoller$Request;
+
+        r1 := @parameter0: java.lang.Object;
+
+        entermonitor r0;
+
+     label1:
+        r0.<sun.nio.fs.AbstractPoller$Request: boolean completed> = 1;
+
+        r0.<sun.nio.fs.AbstractPoller$Request: java.lang.Object result> = r1;
+
+        virtualinvoke r0.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor r0;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r2;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    java.lang.Object awaitResult()
+    {
+        java.lang.Throwable $r3;
+        java.lang.InterruptedException $r4;
+        java.lang.Thread $r2;
+        java.lang.Object $r1;
+        sun.nio.fs.AbstractPoller$Request r0;
+        boolean z0, $z1;
+
+        r0 := @this: sun.nio.fs.AbstractPoller$Request;
+
+        z0 = 0;
+
+        entermonitor r0;
+
+     label1:
+        $z1 = r0.<sun.nio.fs.AbstractPoller$Request: boolean completed>;
+
+        if $z1 != 0 goto label5;
+
+     label2:
+        virtualinvoke r0.<java.lang.Object: void wait()>();
+
+     label3:
+        goto label1;
+
+     label4:
+        $r4 := @caughtexception;
+
+        z0 = 1;
+
+        goto label1;
+
+     label5:
+        if z0 == 0 goto label6;
+
+        $r2 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r2.<java.lang.Thread: void interrupt()>();
+
+     label6:
+        $r1 = r0.<sun.nio.fs.AbstractPoller$Request: java.lang.Object result>;
+
+        exitmonitor r0;
+
+     label7:
+        return $r1;
+
+     label8:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+     label9:
+        throw $r3;
+
+        catch java.lang.InterruptedException from label2 to label3 with label4;
+        catch java.lang.Throwable from label1 to label7 with label8;
+        catch java.lang.Throwable from label8 to label9 with label8;
+    }
+}

@@ -1,0 +1,262 @@
+public class java.security.SecureClassLoader extends java.lang.ClassLoader
+{
+    private final boolean initialized;
+    private final java.util.HashMap pdcache;
+    private static final sun.security.util.Debug debug;
+
+    protected void <init>(java.lang.ClassLoader)
+    {
+        java.security.SecureClassLoader r0;
+        java.util.HashMap $r2;
+        java.lang.ClassLoader r1;
+        java.lang.SecurityManager $r3;
+
+        r0 := @this: java.security.SecureClassLoader;
+
+        r1 := @parameter0: java.lang.ClassLoader;
+
+        specialinvoke r0.<java.lang.ClassLoader: void <init>(java.lang.ClassLoader)>(r1);
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>(int)>(11);
+
+        r0.<java.security.SecureClassLoader: java.util.HashMap pdcache> = $r2;
+
+        $r3 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r3 == null goto label1;
+
+        virtualinvoke $r3.<java.lang.SecurityManager: void checkCreateClassLoader()>();
+
+     label1:
+        r0.<java.security.SecureClassLoader: boolean initialized> = 1;
+
+        return;
+    }
+
+    protected void <init>()
+    {
+        java.security.SecureClassLoader r0;
+        java.util.HashMap $r1;
+        java.lang.SecurityManager $r2;
+
+        r0 := @this: java.security.SecureClassLoader;
+
+        specialinvoke r0.<java.lang.ClassLoader: void <init>()>();
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>(int)>(11);
+
+        r0.<java.security.SecureClassLoader: java.util.HashMap pdcache> = $r1;
+
+        $r2 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r2 == null goto label1;
+
+        virtualinvoke $r2.<java.lang.SecurityManager: void checkCreateClassLoader()>();
+
+     label1:
+        r0.<java.security.SecureClassLoader: boolean initialized> = 1;
+
+        return;
+    }
+
+    protected final java.lang.Class defineClass(java.lang.String, byte[], int, int, java.security.CodeSource)
+    {
+        java.security.SecureClassLoader r0;
+        byte[] r2;
+        java.security.ProtectionDomain $r4;
+        int i0, i1;
+        java.lang.Class $r5;
+        java.lang.String r1;
+        java.security.CodeSource r3;
+
+        r0 := @this: java.security.SecureClassLoader;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: byte[];
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        r3 := @parameter4: java.security.CodeSource;
+
+        $r4 = specialinvoke r0.<java.security.SecureClassLoader: java.security.ProtectionDomain getProtectionDomain(java.security.CodeSource)>(r3);
+
+        $r5 = virtualinvoke r0.<java.security.SecureClassLoader: java.lang.Class defineClass(java.lang.String,byte[],int,int,java.security.ProtectionDomain)>(r1, r2, i0, i1, $r4);
+
+        return $r5;
+    }
+
+    protected final java.lang.Class defineClass(java.lang.String, java.nio.ByteBuffer, java.security.CodeSource)
+    {
+        java.security.SecureClassLoader r0;
+        java.security.ProtectionDomain $r4;
+        java.lang.Class $r5;
+        java.lang.String r1;
+        java.security.CodeSource r3;
+        java.nio.ByteBuffer r2;
+
+        r0 := @this: java.security.SecureClassLoader;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.nio.ByteBuffer;
+
+        r3 := @parameter2: java.security.CodeSource;
+
+        $r4 = specialinvoke r0.<java.security.SecureClassLoader: java.security.ProtectionDomain getProtectionDomain(java.security.CodeSource)>(r3);
+
+        $r5 = virtualinvoke r0.<java.security.SecureClassLoader: java.lang.Class defineClass(java.lang.String,java.nio.ByteBuffer,java.security.ProtectionDomain)>(r1, r2, $r4);
+
+        return $r5;
+    }
+
+    protected java.security.PermissionCollection getPermissions(java.security.CodeSource)
+    {
+        java.security.SecureClassLoader r0;
+        java.security.CodeSource r2;
+        java.security.Permissions $r1;
+
+        r0 := @this: java.security.SecureClassLoader;
+
+        r2 := @parameter0: java.security.CodeSource;
+
+        specialinvoke r0.<java.security.SecureClassLoader: void check()>();
+
+        $r1 = new java.security.Permissions;
+
+        specialinvoke $r1.<java.security.Permissions: void <init>()>();
+
+        return $r1;
+    }
+
+    private java.security.ProtectionDomain getProtectionDomain(java.security.CodeSource)
+    {
+        java.lang.Throwable $r15;
+        java.util.HashMap $r2, $r3, $r7;
+        java.lang.String $r13;
+        java.security.SecureClassLoader r1;
+        java.security.PermissionCollection $r5;
+        sun.security.util.Debug $r8, $r10, $r14;
+        java.security.ProtectionDomain $r6, r16;
+        java.lang.Object $r4;
+        java.lang.StringBuilder $r9, $r11, $r12;
+        java.security.CodeSource r0;
+
+        r1 := @this: java.security.SecureClassLoader;
+
+        r0 := @parameter0: java.security.CodeSource;
+
+        if r0 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r1.<java.security.SecureClassLoader: java.util.HashMap pdcache>;
+
+        entermonitor $r2;
+
+     label2:
+        $r3 = r1.<java.security.SecureClassLoader: java.util.HashMap pdcache>;
+
+        $r4 = virtualinvoke $r3.<java.util.HashMap: java.lang.Object get(java.lang.Object)>(r0);
+
+        r16 = (java.security.ProtectionDomain) $r4;
+
+        if r16 != null goto label3;
+
+        $r5 = virtualinvoke r1.<java.security.SecureClassLoader: java.security.PermissionCollection getPermissions(java.security.CodeSource)>(r0);
+
+        $r6 = new java.security.ProtectionDomain;
+
+        specialinvoke $r6.<java.security.ProtectionDomain: void <init>(java.security.CodeSource,java.security.PermissionCollection,java.lang.ClassLoader,java.security.Principal[])>(r0, $r5, r1, null);
+
+        r16 = $r6;
+
+        $r7 = r1.<java.security.SecureClassLoader: java.util.HashMap pdcache>;
+
+        virtualinvoke $r7.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r0, $r6);
+
+        $r8 = <java.security.SecureClassLoader: sun.security.util.Debug debug>;
+
+        if $r8 == null goto label3;
+
+        $r10 = <java.security.SecureClassLoader: sun.security.util.Debug debug>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" getPermissions ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r10.<sun.security.util.Debug: void println(java.lang.String)>($r13);
+
+        $r14 = <java.security.SecureClassLoader: sun.security.util.Debug debug>;
+
+        virtualinvoke $r14.<sun.security.util.Debug: void println(java.lang.String)>("");
+
+     label3:
+        exitmonitor $r2;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r15 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label6:
+        throw $r15;
+
+     label7:
+        return r16;
+
+        catch java.lang.Throwable from label2 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    private void check()
+    {
+        java.security.SecureClassLoader r0;
+        java.lang.SecurityException $r1;
+        boolean $z0;
+
+        r0 := @this: java.security.SecureClassLoader;
+
+        $z0 = r0.<java.security.SecureClassLoader: boolean initialized>;
+
+        if $z0 != 0 goto label1;
+
+        $r1 = new java.lang.SecurityException;
+
+        specialinvoke $r1.<java.lang.SecurityException: void <init>(java.lang.String)>("ClassLoader object not initialized");
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.util.Debug $r0;
+
+        $r0 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String)>("scl");
+
+        <java.security.SecureClassLoader: sun.security.util.Debug debug> = $r0;
+
+        staticinvoke <java.lang.ClassLoader: boolean registerAsParallelCapable()>();
+
+        return;
+    }
+}

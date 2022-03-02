@@ -1,0 +1,200 @@
+public class sun.font.CreatedFontTracker extends java.lang.Object
+{
+    public static final int MAX_FILE_SIZE;
+    public static final int MAX_TOTAL_BYTES;
+    static sun.font.CreatedFontTracker tracker;
+    int numBytes;
+
+    public static synchronized sun.font.CreatedFontTracker getTracker()
+    {
+        sun.font.CreatedFontTracker $r0, $r1, $r2;
+
+        $r0 = <sun.font.CreatedFontTracker: sun.font.CreatedFontTracker tracker>;
+
+        if $r0 != null goto label1;
+
+        $r2 = new sun.font.CreatedFontTracker;
+
+        specialinvoke $r2.<sun.font.CreatedFontTracker: void <init>()>();
+
+        <sun.font.CreatedFontTracker: sun.font.CreatedFontTracker tracker> = $r2;
+
+     label1:
+        $r1 = <sun.font.CreatedFontTracker: sun.font.CreatedFontTracker tracker>;
+
+        return $r1;
+    }
+
+    private void <init>()
+    {
+        sun.font.CreatedFontTracker r0;
+
+        r0 := @this: sun.font.CreatedFontTracker;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.font.CreatedFontTracker: int numBytes> = 0;
+
+        return;
+    }
+
+    public synchronized int getNumBytes()
+    {
+        int $i0;
+        sun.font.CreatedFontTracker r0;
+
+        r0 := @this: sun.font.CreatedFontTracker;
+
+        $i0 = r0.<sun.font.CreatedFontTracker: int numBytes>;
+
+        return $i0;
+    }
+
+    public synchronized void addBytes(int)
+    {
+        int i0, $i1, $i2;
+        sun.font.CreatedFontTracker r0;
+
+        r0 := @this: sun.font.CreatedFontTracker;
+
+        i0 := @parameter0: int;
+
+        $i1 = r0.<sun.font.CreatedFontTracker: int numBytes>;
+
+        $i2 = $i1 + i0;
+
+        r0.<sun.font.CreatedFontTracker: int numBytes> = $i2;
+
+        return;
+    }
+
+    public synchronized void subBytes(int)
+    {
+        int i0, $i1, $i2;
+        sun.font.CreatedFontTracker r0;
+
+        r0 := @this: sun.font.CreatedFontTracker;
+
+        i0 := @parameter0: int;
+
+        $i1 = r0.<sun.font.CreatedFontTracker: int numBytes>;
+
+        $i2 = $i1 - i0;
+
+        r0.<sun.font.CreatedFontTracker: int numBytes> = $i2;
+
+        return;
+    }
+
+    private static synchronized java.util.concurrent.Semaphore getCS()
+    {
+        java.util.concurrent.Semaphore $r2, r3;
+        sun.awt.AppContext $r0;
+        java.lang.Object $r1;
+
+        $r0 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r1 = virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>(class "Lsun/font/CreatedFontTracker;");
+
+        r3 = (java.util.concurrent.Semaphore) $r1;
+
+        if r3 != null goto label1;
+
+        $r2 = new java.util.concurrent.Semaphore;
+
+        specialinvoke $r2.<java.util.concurrent.Semaphore: void <init>(int,boolean)>(5, 1);
+
+        r3 = $r2;
+
+        virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>(class "Lsun/font/CreatedFontTracker;", $r2);
+
+     label1:
+        return r3;
+    }
+
+    public boolean acquirePermit() throws java.lang.InterruptedException
+    {
+        java.util.concurrent.TimeUnit $r1;
+        java.util.concurrent.Semaphore $r0;
+        sun.font.CreatedFontTracker r2;
+        boolean $z0;
+
+        r2 := @this: sun.font.CreatedFontTracker;
+
+        $r0 = staticinvoke <sun.font.CreatedFontTracker: java.util.concurrent.Semaphore getCS()>();
+
+        $r1 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit SECONDS>;
+
+        $z0 = virtualinvoke $r0.<java.util.concurrent.Semaphore: boolean tryAcquire(long,java.util.concurrent.TimeUnit)>(120L, $r1);
+
+        return $z0;
+    }
+
+    public void releasePermit()
+    {
+        sun.font.CreatedFontTracker r1;
+        java.util.concurrent.Semaphore $r0;
+
+        r1 := @this: sun.font.CreatedFontTracker;
+
+        $r0 = staticinvoke <sun.font.CreatedFontTracker: java.util.concurrent.Semaphore getCS()>();
+
+        virtualinvoke $r0.<java.util.concurrent.Semaphore: void release()>();
+
+        return;
+    }
+
+    public void add(java.io.File)
+    {
+        sun.font.CreatedFontTracker r1;
+        java.io.File r0;
+
+        r1 := @this: sun.font.CreatedFontTracker;
+
+        r0 := @parameter0: java.io.File;
+
+        staticinvoke <sun.font.CreatedFontTracker$TempFileDeletionHook: void add(java.io.File)>(r0);
+
+        return;
+    }
+
+    public void set(java.io.File, java.io.OutputStream)
+    {
+        java.io.OutputStream r1;
+        sun.font.CreatedFontTracker r2;
+        java.io.File r0;
+
+        r2 := @this: sun.font.CreatedFontTracker;
+
+        r0 := @parameter0: java.io.File;
+
+        r1 := @parameter1: java.io.OutputStream;
+
+        staticinvoke <sun.font.CreatedFontTracker$TempFileDeletionHook: void set(java.io.File,java.io.OutputStream)>(r0, r1);
+
+        return;
+    }
+
+    public void remove(java.io.File)
+    {
+        sun.font.CreatedFontTracker r1;
+        java.io.File r0;
+
+        r1 := @this: sun.font.CreatedFontTracker;
+
+        r0 := @parameter0: java.io.File;
+
+        staticinvoke <sun.font.CreatedFontTracker$TempFileDeletionHook: void remove(java.io.File)>(r0);
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.font.CreatedFontTracker: int MAX_TOTAL_BYTES> = 335544320;
+
+        <sun.font.CreatedFontTracker: int MAX_FILE_SIZE> = 33554432;
+
+        return;
+    }
+}

@@ -1,0 +1,168 @@
+public abstract class sun.awt.CustomCursor extends java.awt.Cursor
+{
+    protected java.awt.Image image;
+
+    public void <init>(java.awt.Image, java.awt.Point, java.lang.String) throws java.lang.IndexOutOfBoundsException
+    {
+        java.lang.IndexOutOfBoundsException $r14;
+        java.awt.Point r5;
+        int[] r6;
+        boolean $z0;
+        java.awt.image.PixelGrabber $r8;
+        sun.awt.CustomCursor r0;
+        java.awt.Image $r9, r12;
+        java.awt.Canvas $r3;
+        java.awt.MediaTracker $r4;
+        java.awt.Dimension $r13;
+        java.awt.Toolkit $r2;
+        java.awt.image.ImageProducer $r7;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, i13, i14, $i15, $i16;
+        java.lang.String r1;
+        java.lang.InterruptedException $r10, $r11;
+
+        r0 := @this: sun.awt.CustomCursor;
+
+        r12 := @parameter0: java.awt.Image;
+
+        r5 := @parameter1: java.awt.Point;
+
+        r1 := @parameter2: java.lang.String;
+
+        specialinvoke r0.<java.awt.Cursor: void <init>(java.lang.String)>(r1);
+
+        r0.<sun.awt.CustomCursor: java.awt.Image image> = r12;
+
+        $r2 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r3 = new java.awt.Canvas;
+
+        specialinvoke $r3.<java.awt.Canvas: void <init>()>();
+
+        $r4 = new java.awt.MediaTracker;
+
+        specialinvoke $r4.<java.awt.MediaTracker: void <init>(java.awt.Component)>($r3);
+
+        virtualinvoke $r4.<java.awt.MediaTracker: void addImage(java.awt.Image,int)>(r12, 0);
+
+     label01:
+        virtualinvoke $r4.<java.awt.MediaTracker: void waitForAll()>();
+
+     label02:
+        goto label04;
+
+     label03:
+        $r11 := @caughtexception;
+
+     label04:
+        $i0 = virtualinvoke r12.<java.awt.Image: int getWidth(java.awt.image.ImageObserver)>($r3);
+
+        i13 = $i0;
+
+        $i1 = virtualinvoke r12.<java.awt.Image: int getHeight(java.awt.image.ImageObserver)>($r3);
+
+        i14 = $i1;
+
+        $z0 = virtualinvoke $r4.<java.awt.MediaTracker: boolean isErrorAny()>();
+
+        if $z0 != 0 goto label05;
+
+        if $i0 < 0 goto label05;
+
+        if $i1 >= 0 goto label06;
+
+     label05:
+        r5.<java.awt.Point: int y> = 0;
+
+        r5.<java.awt.Point: int x> = 0;
+
+     label06:
+        $r13 = virtualinvoke $r2.<java.awt.Toolkit: java.awt.Dimension getBestCursorSize(int,int)>($i0, $i1);
+
+        $i15 = $r13.<java.awt.Dimension: int width>;
+
+        if $i15 != $i0 goto label07;
+
+        $i12 = $r13.<java.awt.Dimension: int height>;
+
+        if $i12 == $i1 goto label08;
+
+     label07:
+        $i2 = $r13.<java.awt.Dimension: int width>;
+
+        if $i2 == 0 goto label08;
+
+        $i9 = $r13.<java.awt.Dimension: int height>;
+
+        if $i9 == 0 goto label08;
+
+        $i11 = $r13.<java.awt.Dimension: int width>;
+
+        $i10 = $r13.<java.awt.Dimension: int height>;
+
+        r12 = virtualinvoke r12.<java.awt.Image: java.awt.Image getScaledInstance(int,int,int)>($i11, $i10, 1);
+
+        i13 = $r13.<java.awt.Dimension: int width>;
+
+        i14 = $r13.<java.awt.Dimension: int height>;
+
+     label08:
+        $i16 = r5.<java.awt.Point: int x>;
+
+        if $i16 >= i13 goto label09;
+
+        $i3 = r5.<java.awt.Point: int y>;
+
+        if $i3 >= i14 goto label09;
+
+        $i4 = r5.<java.awt.Point: int x>;
+
+        if $i4 < 0 goto label09;
+
+        $i5 = r5.<java.awt.Point: int y>;
+
+        if $i5 >= 0 goto label10;
+
+     label09:
+        $r14 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r14.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("invalid hotSpot");
+
+        throw $r14;
+
+     label10:
+        $i6 = i13 * i14;
+
+        r6 = newarray (int)[$i6];
+
+        $r7 = virtualinvoke r12.<java.awt.Image: java.awt.image.ImageProducer getSource()>();
+
+        $r8 = new java.awt.image.PixelGrabber;
+
+        specialinvoke $r8.<java.awt.image.PixelGrabber: void <init>(java.awt.image.ImageProducer,int,int,int,int,int[],int,int)>($r7, 0, 0, i13, i14, r6, 0, i13);
+
+     label11:
+        virtualinvoke $r8.<java.awt.image.PixelGrabber: boolean grabPixels()>();
+
+     label12:
+        goto label14;
+
+     label13:
+        $r10 := @caughtexception;
+
+     label14:
+        $r9 = r0.<sun.awt.CustomCursor: java.awt.Image image>;
+
+        $i8 = r5.<java.awt.Point: int x>;
+
+        $i7 = r5.<java.awt.Point: int y>;
+
+        virtualinvoke r0.<sun.awt.CustomCursor: void createNativeCursor(java.awt.Image,int[],int,int,int,int)>($r9, r6, i13, i14, $i8, $i7);
+
+        return;
+
+        catch java.lang.InterruptedException from label01 to label02 with label03;
+        catch java.lang.InterruptedException from label11 to label12 with label13;
+    }
+
+    protected abstract void createNativeCursor(java.awt.Image, int[], int, int, int, int);
+}

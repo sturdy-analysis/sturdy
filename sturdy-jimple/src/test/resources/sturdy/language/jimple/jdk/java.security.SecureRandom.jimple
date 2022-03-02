@@ -1,0 +1,719 @@
+public class java.security.SecureRandom extends java.util.Random
+{
+    private static final sun.security.util.Debug pdebug;
+    private static final boolean skipDebug;
+    private java.security.Provider provider;
+    private java.security.SecureRandomSpi secureRandomSpi;
+    private java.lang.String algorithm;
+    private static volatile java.security.SecureRandom seedGenerator;
+    static final long serialVersionUID;
+    private byte[] state;
+    private java.security.MessageDigest digest;
+    private byte[] randomBytes;
+    private int randomBytesUsed;
+    private long counter;
+
+    public void <init>()
+    {
+        java.security.SecureRandom r0;
+
+        r0 := @this: java.security.SecureRandom;
+
+        specialinvoke r0.<java.util.Random: void <init>(long)>(0L);
+
+        r0.<java.security.SecureRandom: java.security.Provider provider> = null;
+
+        r0.<java.security.SecureRandom: java.security.SecureRandomSpi secureRandomSpi> = null;
+
+        r0.<java.security.SecureRandom: java.security.MessageDigest digest> = null;
+
+        specialinvoke r0.<java.security.SecureRandom: void getDefaultPRNG(boolean,byte[])>(0, null);
+
+        return;
+    }
+
+    public void <init>(byte[])
+    {
+        java.security.SecureRandom r0;
+        byte[] r1;
+
+        r0 := @this: java.security.SecureRandom;
+
+        r1 := @parameter0: byte[];
+
+        specialinvoke r0.<java.util.Random: void <init>(long)>(0L);
+
+        r0.<java.security.SecureRandom: java.security.Provider provider> = null;
+
+        r0.<java.security.SecureRandom: java.security.SecureRandomSpi secureRandomSpi> = null;
+
+        r0.<java.security.SecureRandom: java.security.MessageDigest digest> = null;
+
+        specialinvoke r0.<java.security.SecureRandom: void getDefaultPRNG(boolean,byte[])>(1, r1);
+
+        return;
+    }
+
+    private void getDefaultPRNG(boolean, byte[])
+    {
+        byte[] r8;
+        java.security.SecureRandom r3;
+        java.lang.String $r14, r19;
+        boolean $z0, z1, $z2;
+        java.util.Iterator $r2;
+        sun.security.provider.SecureRandom $r10;
+        java.lang.RuntimeException $r17;
+        java.security.Provider $r6, $r11, r13;
+        java.util.List $r1;
+        java.security.Provider$Service $r15, r18;
+        java.security.NoSuchAlgorithmException $r16;
+        sun.security.jca.ProviderList $r0;
+        java.lang.Object $r4, $r12;
+        java.lang.Class $r7;
+        java.security.SecureRandomSpi $r5, $r9;
+
+        r3 := @this: java.security.SecureRandom;
+
+        z1 := @parameter0: boolean;
+
+        r8 := @parameter1: byte[];
+
+        r18 = null;
+
+        r19 = null;
+
+        $r0 = staticinvoke <sun.security.jca.Providers: sun.security.jca.ProviderList getProviderList()>();
+
+        $r1 = virtualinvoke $r0.<sun.security.jca.ProviderList: java.util.List providers()>();
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label01:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label04;
+
+        $r12 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r13 = (java.security.Provider) $r12;
+
+        $r14 = virtualinvoke r13.<java.security.Provider: java.lang.String getName()>();
+
+        $z2 = virtualinvoke $r14.<java.lang.String: boolean equals(java.lang.Object)>("SUN");
+
+        if $z2 == 0 goto label02;
+
+        r19 = <sun.security.provider.SunEntries: java.lang.String DEF_SECURE_RANDOM_ALGO>;
+
+        r18 = virtualinvoke r13.<java.security.Provider: java.security.Provider$Service getService(java.lang.String,java.lang.String)>("SecureRandom", r19);
+
+        goto label04;
+
+     label02:
+        $r15 = virtualinvoke r13.<java.security.Provider: java.security.Provider$Service getDefaultSecureRandomService()>();
+
+        r18 = $r15;
+
+        if $r15 == null goto label03;
+
+        r19 = virtualinvoke $r15.<java.security.Provider$Service: java.lang.String getAlgorithm()>();
+
+        goto label04;
+
+     label03:
+        goto label01;
+
+     label04:
+        if r18 != null goto label05;
+
+        r19 = "SHA1PRNG";
+
+        $r10 = new sun.security.provider.SecureRandom;
+
+        specialinvoke $r10.<sun.security.provider.SecureRandom: void <init>()>();
+
+        r3.<java.security.SecureRandom: java.security.SecureRandomSpi secureRandomSpi> = $r10;
+
+        $r11 = staticinvoke <sun.security.jca.Providers: java.security.Provider getSunProvider()>();
+
+        r3.<java.security.SecureRandom: java.security.Provider provider> = $r11;
+
+        goto label08;
+
+     label05:
+        $r4 = virtualinvoke r18.<java.security.Provider$Service: java.lang.Object newInstance(java.lang.Object)>(null);
+
+        $r5 = (java.security.SecureRandomSpi) $r4;
+
+        r3.<java.security.SecureRandom: java.security.SecureRandomSpi secureRandomSpi> = $r5;
+
+        $r6 = virtualinvoke r18.<java.security.Provider$Service: java.security.Provider getProvider()>();
+
+        r3.<java.security.SecureRandom: java.security.Provider provider> = $r6;
+
+     label06:
+        goto label08;
+
+     label07:
+        $r16 := @caughtexception;
+
+        $r17 = new java.lang.RuntimeException;
+
+        specialinvoke $r17.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r16);
+
+        throw $r17;
+
+     label08:
+        if z1 == 0 goto label09;
+
+        $r9 = r3.<java.security.SecureRandom: java.security.SecureRandomSpi secureRandomSpi>;
+
+        virtualinvoke $r9.<java.security.SecureRandomSpi: void engineSetSeed(byte[])>(r8);
+
+     label09:
+        $r7 = virtualinvoke r3.<java.lang.Object: java.lang.Class getClass()>();
+
+        if $r7 != class "Ljava/security/SecureRandom;" goto label10;
+
+        r3.<java.security.SecureRandom: java.lang.String algorithm> = r19;
+
+     label10:
+        return;
+
+        catch java.security.NoSuchAlgorithmException from label05 to label06 with label07;
+    }
+
+    protected void <init>(java.security.SecureRandomSpi, java.security.Provider)
+    {
+        java.security.SecureRandom r0;
+        java.security.SecureRandomSpi r1;
+        java.security.Provider r2;
+
+        r0 := @this: java.security.SecureRandom;
+
+        r1 := @parameter0: java.security.SecureRandomSpi;
+
+        r2 := @parameter1: java.security.Provider;
+
+        specialinvoke r0.<java.security.SecureRandom: void <init>(java.security.SecureRandomSpi,java.security.Provider,java.lang.String)>(r1, r2, null);
+
+        return;
+    }
+
+    private void <init>(java.security.SecureRandomSpi, java.security.Provider, java.lang.String)
+    {
+        sun.security.util.Debug $r4, $r6;
+        java.security.Provider r2, $r10;
+        java.security.SecureRandom r0;
+        java.lang.StringBuilder $r5, $r7, $r8, $r9, $r12;
+        java.lang.String r3, $r11, $r13;
+        java.security.SecureRandomSpi r1;
+        boolean $z0;
+
+        r0 := @this: java.security.SecureRandom;
+
+        r1 := @parameter0: java.security.SecureRandomSpi;
+
+        r2 := @parameter1: java.security.Provider;
+
+        r3 := @parameter2: java.lang.String;
+
+        specialinvoke r0.<java.util.Random: void <init>(long)>(0L);
+
+        r0.<java.security.SecureRandom: java.security.Provider provider> = null;
+
+        r0.<java.security.SecureRandom: java.security.SecureRandomSpi secureRandomSpi> = null;
+
+        r0.<java.security.SecureRandom: java.security.MessageDigest digest> = null;
+
+        r0.<java.security.SecureRandom: java.security.SecureRandomSpi secureRandomSpi> = r1;
+
+        r0.<java.security.SecureRandom: java.security.Provider provider> = r2;
+
+        r0.<java.security.SecureRandom: java.lang.String algorithm> = r3;
+
+        $z0 = <java.security.SecureRandom: boolean skipDebug>;
+
+        if $z0 != 0 goto label1;
+
+        $r4 = <java.security.SecureRandom: sun.security.util.Debug pdebug>;
+
+        if $r4 == null goto label1;
+
+        $r6 = <java.security.SecureRandom: sun.security.util.Debug pdebug>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SecureRandom.");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" algorithm from: ");
+
+        $r10 = r0.<java.security.SecureRandom: java.security.Provider provider>;
+
+        $r11 = virtualinvoke $r10.<java.security.Provider: java.lang.String getName()>();
+
+        $r12 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<sun.security.util.Debug: void println(java.lang.String)>($r13);
+
+     label1:
+        return;
+    }
+
+    public static java.security.SecureRandom getInstance(java.lang.String) throws java.security.NoSuchAlgorithmException
+    {
+        java.security.SecureRandom $r2;
+        sun.security.jca.GetInstance$Instance $r1;
+        java.lang.Object $r3;
+        java.lang.String r0;
+        java.security.SecureRandomSpi $r5;
+        java.security.Provider $r4;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <sun.security.jca.GetInstance: sun.security.jca.GetInstance$Instance getInstance(java.lang.String,java.lang.Class,java.lang.String)>("SecureRandom", class "Ljava/security/SecureRandomSpi;", r0);
+
+        $r2 = new java.security.SecureRandom;
+
+        $r3 = $r1.<sun.security.jca.GetInstance$Instance: java.lang.Object impl>;
+
+        $r5 = (java.security.SecureRandomSpi) $r3;
+
+        $r4 = $r1.<sun.security.jca.GetInstance$Instance: java.security.Provider provider>;
+
+        specialinvoke $r2.<java.security.SecureRandom: void <init>(java.security.SecureRandomSpi,java.security.Provider,java.lang.String)>($r5, $r4, r0);
+
+        return $r2;
+    }
+
+    public static java.security.SecureRandom getInstance(java.lang.String, java.lang.String) throws java.security.NoSuchAlgorithmException, java.security.NoSuchProviderException
+    {
+        java.security.SecureRandom $r3;
+        sun.security.jca.GetInstance$Instance $r2;
+        java.lang.Object $r4;
+        java.lang.String r0, r1;
+        java.security.SecureRandomSpi $r6;
+        java.security.Provider $r5;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        $r2 = staticinvoke <sun.security.jca.GetInstance: sun.security.jca.GetInstance$Instance getInstance(java.lang.String,java.lang.Class,java.lang.String,java.lang.String)>("SecureRandom", class "Ljava/security/SecureRandomSpi;", r0, r1);
+
+        $r3 = new java.security.SecureRandom;
+
+        $r4 = $r2.<sun.security.jca.GetInstance$Instance: java.lang.Object impl>;
+
+        $r6 = (java.security.SecureRandomSpi) $r4;
+
+        $r5 = $r2.<sun.security.jca.GetInstance$Instance: java.security.Provider provider>;
+
+        specialinvoke $r3.<java.security.SecureRandom: void <init>(java.security.SecureRandomSpi,java.security.Provider,java.lang.String)>($r6, $r5, r0);
+
+        return $r3;
+    }
+
+    public static java.security.SecureRandom getInstance(java.lang.String, java.security.Provider) throws java.security.NoSuchAlgorithmException
+    {
+        java.security.SecureRandom $r3;
+        sun.security.jca.GetInstance$Instance $r2;
+        java.lang.Object $r4;
+        java.lang.String r0;
+        java.security.SecureRandomSpi $r6;
+        java.security.Provider r1, $r5;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.security.Provider;
+
+        $r2 = staticinvoke <sun.security.jca.GetInstance: sun.security.jca.GetInstance$Instance getInstance(java.lang.String,java.lang.Class,java.lang.String,java.security.Provider)>("SecureRandom", class "Ljava/security/SecureRandomSpi;", r0, r1);
+
+        $r3 = new java.security.SecureRandom;
+
+        $r4 = $r2.<sun.security.jca.GetInstance$Instance: java.lang.Object impl>;
+
+        $r6 = (java.security.SecureRandomSpi) $r4;
+
+        $r5 = $r2.<sun.security.jca.GetInstance$Instance: java.security.Provider provider>;
+
+        specialinvoke $r3.<java.security.SecureRandom: void <init>(java.security.SecureRandomSpi,java.security.Provider,java.lang.String)>($r6, $r5, r0);
+
+        return $r3;
+    }
+
+    public final java.security.Provider getProvider()
+    {
+        java.security.SecureRandom r0;
+        java.security.Provider $r1;
+
+        r0 := @this: java.security.SecureRandom;
+
+        $r1 = r0.<java.security.SecureRandom: java.security.Provider provider>;
+
+        return $r1;
+    }
+
+    public java.lang.String getAlgorithm()
+    {
+        java.security.SecureRandom r0;
+        java.lang.String $r1, $r2;
+
+        r0 := @this: java.security.SecureRandom;
+
+        $r1 = r0.<java.security.SecureRandom: java.lang.String algorithm>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<java.security.SecureRandom: java.lang.String algorithm>;
+
+        goto label2;
+
+     label1:
+        $r2 = "unknown";
+
+     label2:
+        return $r2;
+    }
+
+    public synchronized void setSeed(byte[])
+    {
+        java.security.SecureRandom r0;
+        byte[] r1;
+        java.security.SecureRandomSpi $r2;
+
+        r0 := @this: java.security.SecureRandom;
+
+        r1 := @parameter0: byte[];
+
+        $r2 = r0.<java.security.SecureRandom: java.security.SecureRandomSpi secureRandomSpi>;
+
+        virtualinvoke $r2.<java.security.SecureRandomSpi: void engineSetSeed(byte[])>(r1);
+
+        return;
+    }
+
+    public void setSeed(long)
+    {
+        java.security.SecureRandom r0;
+        byte[] $r2;
+        byte $b1;
+        long l0;
+        java.security.SecureRandomSpi $r1;
+
+        r0 := @this: java.security.SecureRandom;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        if $b1 == 0 goto label1;
+
+        $r1 = r0.<java.security.SecureRandom: java.security.SecureRandomSpi secureRandomSpi>;
+
+        $r2 = staticinvoke <java.security.SecureRandom: byte[] longToByteArray(long)>(l0);
+
+        virtualinvoke $r1.<java.security.SecureRandomSpi: void engineSetSeed(byte[])>($r2);
+
+     label1:
+        return;
+    }
+
+    public void nextBytes(byte[])
+    {
+        java.security.SecureRandom r0;
+        byte[] r1;
+        java.security.SecureRandomSpi $r2;
+
+        r0 := @this: java.security.SecureRandom;
+
+        r1 := @parameter0: byte[];
+
+        $r2 = r0.<java.security.SecureRandom: java.security.SecureRandomSpi secureRandomSpi>;
+
+        virtualinvoke $r2.<java.security.SecureRandomSpi: void engineNextBytes(byte[])>(r1);
+
+        return;
+    }
+
+    protected final int next(int)
+    {
+        byte[] r0;
+        java.security.SecureRandom r1;
+        short $s7, $s11;
+        byte $b6;
+        int i0, $i1, i2, $i3, $i4, $i5, $i8, i9, i10, $i12;
+
+        r1 := @this: java.security.SecureRandom;
+
+        i0 := @parameter0: int;
+
+        $i1 = i0 + 7;
+
+        i2 = $i1 / 8;
+
+        r0 = newarray (byte)[i2];
+
+        i9 = 0;
+
+        virtualinvoke r1.<java.security.SecureRandom: void nextBytes(byte[])>(r0);
+
+        i10 = 0;
+
+     label1:
+        if i10 >= i2 goto label2;
+
+        $i8 = i9 << 8;
+
+        $b6 = r0[i10];
+
+        $s11 = (short) $b6;
+
+        $s7 = $s11 & 255;
+
+        $i12 = (int) $s7;
+
+        i9 = $i8 + $i12;
+
+        i10 = i10 + 1;
+
+        goto label1;
+
+     label2:
+        $i3 = i2 * 8;
+
+        $i4 = $i3 - i0;
+
+        $i5 = i9 >>> $i4;
+
+        return $i5;
+    }
+
+    public static byte[] getSeed(int)
+    {
+        java.security.SecureRandom $r0, $r1, $r3;
+        byte[] $r2;
+        int i0;
+
+        i0 := @parameter0: int;
+
+        $r0 = <java.security.SecureRandom: java.security.SecureRandom seedGenerator>;
+
+        if $r0 != null goto label1;
+
+        $r3 = new java.security.SecureRandom;
+
+        specialinvoke $r3.<java.security.SecureRandom: void <init>()>();
+
+        <java.security.SecureRandom: java.security.SecureRandom seedGenerator> = $r3;
+
+     label1:
+        $r1 = <java.security.SecureRandom: java.security.SecureRandom seedGenerator>;
+
+        $r2 = virtualinvoke $r1.<java.security.SecureRandom: byte[] generateSeed(int)>(i0);
+
+        return $r2;
+    }
+
+    public byte[] generateSeed(int)
+    {
+        java.security.SecureRandom r0;
+        byte[] $r2;
+        int i0;
+        java.security.SecureRandomSpi $r1;
+        java.lang.NegativeArraySizeException $r3;
+
+        r0 := @this: java.security.SecureRandom;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 0 goto label1;
+
+        $r3 = new java.lang.NegativeArraySizeException;
+
+        specialinvoke $r3.<java.lang.NegativeArraySizeException: void <init>(java.lang.String)>("numBytes cannot be negative");
+
+        throw $r3;
+
+     label1:
+        $r1 = r0.<java.security.SecureRandom: java.security.SecureRandomSpi secureRandomSpi>;
+
+        $r2 = virtualinvoke $r1.<java.security.SecureRandomSpi: byte[] engineGenerateSeed(int)>(i0);
+
+        return $r2;
+    }
+
+    private static byte[] longToByteArray(long)
+    {
+        byte[] r0;
+        byte $b1;
+        int $i0, i3;
+        long l2;
+
+        l2 := @parameter0: long;
+
+        r0 = newarray (byte)[8];
+
+        i3 = 0;
+
+     label1:
+        if i3 >= 8 goto label2;
+
+        $i0 = (int) l2;
+
+        $b1 = (byte) $i0;
+
+        r0[i3] = $b1;
+
+        l2 = l2 >> 8;
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label2:
+        return r0;
+    }
+
+    public static java.security.SecureRandom getInstanceStrong() throws java.security.NoSuchAlgorithmException
+    {
+        java.security.SecureRandom $r13, $r14;
+        java.util.regex.Matcher $r10;
+        java.security.GeneralSecurityException $r15;
+        java.lang.String r2, $r8, $r11, $r12, r16;
+        boolean $z0, $z1;
+        java.security.SecureRandom$1 $r0;
+        java.security.NoSuchAlgorithmException $r3, $r4;
+        java.lang.Object $r1;
+        java.lang.StringBuilder $r5, $r6, $r7;
+        java.util.regex.Pattern $r9;
+
+        $r0 = new java.security.SecureRandom$1;
+
+        specialinvoke $r0.<java.security.SecureRandom$1: void <init>()>();
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r2 = (java.lang.String) $r1;
+
+        if r2 == null goto label01;
+
+        $z0 = virtualinvoke r2.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 == 0 goto label02;
+
+     label01:
+        $r3 = new java.security.NoSuchAlgorithmException;
+
+        specialinvoke $r3.<java.security.NoSuchAlgorithmException: void <init>(java.lang.String)>("Null/empty securerandom.strongAlgorithms Security Property");
+
+        throw $r3;
+
+     label02:
+        r16 = r2;
+
+     label03:
+        if r16 == null goto label11;
+
+        $r9 = staticinvoke <java.security.SecureRandom$StrongPatternHolder: java.util.regex.Pattern access$000()>();
+
+        $r10 = virtualinvoke $r9.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>(r16);
+
+        $z1 = virtualinvoke $r10.<java.util.regex.Matcher: boolean matches()>();
+
+        if $z1 == 0 goto label09;
+
+        $r11 = virtualinvoke $r10.<java.util.regex.Matcher: java.lang.String group(int)>(1);
+
+        $r12 = virtualinvoke $r10.<java.util.regex.Matcher: java.lang.String group(int)>(3);
+
+     label04:
+        if $r12 != null goto label06;
+
+        $r14 = staticinvoke <java.security.SecureRandom: java.security.SecureRandom getInstance(java.lang.String)>($r11);
+
+     label05:
+        return $r14;
+
+     label06:
+        $r13 = staticinvoke <java.security.SecureRandom: java.security.SecureRandom getInstance(java.lang.String,java.lang.String)>($r11, $r12);
+
+     label07:
+        return $r13;
+
+     label08:
+        $r15 := @caughtexception;
+
+        r16 = virtualinvoke $r10.<java.util.regex.Matcher: java.lang.String group(int)>(5);
+
+        goto label10;
+
+     label09:
+        r16 = null;
+
+     label10:
+        goto label03;
+
+     label11:
+        $r4 = new java.security.NoSuchAlgorithmException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No strong SecureRandom impls available: ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.security.NoSuchAlgorithmException: void <init>(java.lang.String)>($r8);
+
+        throw $r4;
+
+        catch java.security.NoSuchAlgorithmException from label04 to label05 with label08;
+        catch java.security.NoSuchProviderException from label04 to label05 with label08;
+        catch java.security.NoSuchAlgorithmException from label06 to label07 with label08;
+        catch java.security.NoSuchProviderException from label06 to label07 with label08;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.util.Debug $r0;
+        boolean $z0, $z1, $z2;
+
+        <java.security.SecureRandom: long serialVersionUID> = 4940670005562187L;
+
+        $r0 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String,java.lang.String)>("provider", "Provider");
+
+        <java.security.SecureRandom: sun.security.util.Debug pdebug> = $r0;
+
+        $z0 = staticinvoke <sun.security.util.Debug: boolean isOn(java.lang.String)>("engine=");
+
+        if $z0 == 0 goto label1;
+
+        $z1 = staticinvoke <sun.security.util.Debug: boolean isOn(java.lang.String)>("securerandom");
+
+        if $z1 != 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        <java.security.SecureRandom: boolean skipDebug> = $z2;
+
+        <java.security.SecureRandom: java.security.SecureRandom seedGenerator> = null;
+
+        return;
+    }
+}

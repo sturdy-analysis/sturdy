@@ -1,0 +1,266 @@
+public abstract class javax.net.ssl.SSLSocketFactory extends javax.net.SocketFactory
+{
+    private static javax.net.ssl.SSLSocketFactory theFactory;
+    private static boolean propertyChecked;
+    static final boolean DEBUG;
+
+    private static void log(java.lang.String)
+    {
+        java.io.PrintStream $r1;
+        java.lang.String r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = <javax.net.ssl.SSLSocketFactory: boolean DEBUG>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>(r0);
+
+     label1:
+        return;
+    }
+
+    public void <init>()
+    {
+        javax.net.ssl.SSLSocketFactory r0;
+
+        r0 := @this: javax.net.ssl.SSLSocketFactory;
+
+        specialinvoke r0.<javax.net.SocketFactory: void <init>()>();
+
+        return;
+    }
+
+    public static synchronized javax.net.SocketFactory getDefault()
+    {
+        javax.net.ssl.SSLContext $r1;
+        javax.net.ssl.DefaultSSLSocketFactory $r6, $r13;
+        java.lang.String $r3, $r10, $r12, $r22, $r28;
+        boolean $z0;
+        java.lang.Exception $r7;
+        javax.net.ssl.SSLSocketFactory $r0, $r2, $r4, $r14, $r24;
+        java.security.NoSuchAlgorithmException $r5;
+        java.lang.StringBuilder $r8, $r9, $r11, $r18, $r19, $r20, $r21, $r25, $r26, $r27;
+        java.lang.ClassNotFoundException $r15;
+        java.lang.Class r17;
+        java.lang.Object $r23;
+        java.lang.ClassLoader $r16;
+
+        $r0 = <javax.net.ssl.SSLSocketFactory: javax.net.ssl.SSLSocketFactory theFactory>;
+
+        if $r0 == null goto label01;
+
+        $r4 = <javax.net.ssl.SSLSocketFactory: javax.net.ssl.SSLSocketFactory theFactory>;
+
+        return $r4;
+
+     label01:
+        $z0 = <javax.net.ssl.SSLSocketFactory: boolean propertyChecked>;
+
+        if $z0 != 0 goto label09;
+
+        <javax.net.ssl.SSLSocketFactory: boolean propertyChecked> = 1;
+
+        $r3 = staticinvoke <javax.net.ssl.SSLSocketFactory: java.lang.String getSecurityProperty(java.lang.String)>("ssl.SocketFactory.provider");
+
+        if $r3 == null goto label09;
+
+        staticinvoke <javax.net.ssl.SSLSocketFactory: void log(java.lang.String)>("setting up default SSLSocketFactory");
+
+     label02:
+        r17 = null;
+
+     label03:
+        r17 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String)>($r3);
+
+     label04:
+        goto label06;
+
+     label05:
+        $r15 := @caughtexception;
+
+        $r16 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getSystemClassLoader()>();
+
+        if $r16 == null goto label06;
+
+        r17 = virtualinvoke $r16.<java.lang.ClassLoader: java.lang.Class loadClass(java.lang.String)>($r3);
+
+     label06:
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("class ");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is loaded");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <javax.net.ssl.SSLSocketFactory: void log(java.lang.String)>($r22);
+
+        $r23 = virtualinvoke r17.<java.lang.Class: java.lang.Object newInstance()>();
+
+        $r24 = (javax.net.ssl.SSLSocketFactory) $r23;
+
+        $r25 = new java.lang.StringBuilder;
+
+        specialinvoke $r25.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("instantiated an instance of class ");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <javax.net.ssl.SSLSocketFactory: void log(java.lang.String)>($r28);
+
+        <javax.net.ssl.SSLSocketFactory: javax.net.ssl.SSLSocketFactory theFactory> = $r24;
+
+     label07:
+        return $r24;
+
+     label08:
+        $r7 := @caughtexception;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SSLSocketFactory instantiation failed: ");
+
+        $r10 = virtualinvoke $r7.<java.lang.Exception: java.lang.String toString()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <javax.net.ssl.SSLSocketFactory: void log(java.lang.String)>($r12);
+
+        $r13 = new javax.net.ssl.DefaultSSLSocketFactory;
+
+        specialinvoke $r13.<javax.net.ssl.DefaultSSLSocketFactory: void <init>(java.lang.Exception)>($r7);
+
+        <javax.net.ssl.SSLSocketFactory: javax.net.ssl.SSLSocketFactory theFactory> = $r13;
+
+        $r14 = <javax.net.ssl.SSLSocketFactory: javax.net.ssl.SSLSocketFactory theFactory>;
+
+        return $r14;
+
+     label09:
+        $r1 = staticinvoke <javax.net.ssl.SSLContext: javax.net.ssl.SSLContext getDefault()>();
+
+        $r2 = virtualinvoke $r1.<javax.net.ssl.SSLContext: javax.net.ssl.SSLSocketFactory getSocketFactory()>();
+
+     label10:
+        return $r2;
+
+     label11:
+        $r5 := @caughtexception;
+
+        $r6 = new javax.net.ssl.DefaultSSLSocketFactory;
+
+        specialinvoke $r6.<javax.net.ssl.DefaultSSLSocketFactory: void <init>(java.lang.Exception)>($r5);
+
+        return $r6;
+
+        catch java.lang.ClassNotFoundException from label03 to label04 with label05;
+        catch java.lang.Exception from label02 to label07 with label08;
+        catch java.security.NoSuchAlgorithmException from label09 to label10 with label11;
+    }
+
+    static java.lang.String getSecurityProperty(java.lang.String)
+    {
+        javax.net.ssl.SSLSocketFactory$1 $r0;
+        java.lang.Object $r2;
+        java.lang.String r1, $r3;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = new javax.net.ssl.SSLSocketFactory$1;
+
+        specialinvoke $r0.<javax.net.ssl.SSLSocketFactory$1: void <init>(java.lang.String)>(r1);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r3 = (java.lang.String) $r2;
+
+        return $r3;
+    }
+
+    public abstract java.lang.String[] getDefaultCipherSuites();
+
+    public abstract java.lang.String[] getSupportedCipherSuites();
+
+    public abstract java.net.Socket createSocket(java.net.Socket, java.lang.String, int, boolean) throws java.io.IOException;
+
+    public java.net.Socket createSocket(java.net.Socket, java.io.InputStream, boolean) throws java.io.IOException
+    {
+        java.lang.UnsupportedOperationException $r0;
+        java.net.Socket r2;
+        javax.net.ssl.SSLSocketFactory r1;
+        java.io.InputStream r3;
+        boolean z0;
+
+        r1 := @this: javax.net.ssl.SSLSocketFactory;
+
+        r2 := @parameter0: java.net.Socket;
+
+        r3 := @parameter1: java.io.InputStream;
+
+        z0 := @parameter2: boolean;
+
+        $r0 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r0.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r0;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.action.GetPropertyAction $r0;
+        java.util.Locale $r2;
+        java.lang.Object $r1;
+        java.lang.String $r3, $r4;
+        boolean $z0, $z1, $z2;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String,java.lang.String)>("javax.net.debug", "");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r3 = (java.lang.String) $r1;
+
+        $r2 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r4 = virtualinvoke $r3.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r2);
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean contains(java.lang.CharSequence)>("all");
+
+        if $z0 != 0 goto label1;
+
+        $z1 = virtualinvoke $r4.<java.lang.String: boolean contains(java.lang.CharSequence)>("ssl");
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        <javax.net.ssl.SSLSocketFactory: boolean DEBUG> = $z2;
+
+        return;
+    }
+}

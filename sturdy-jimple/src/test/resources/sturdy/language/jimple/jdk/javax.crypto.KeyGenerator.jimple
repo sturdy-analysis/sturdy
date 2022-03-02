@@ -1,0 +1,833 @@
+public class javax.crypto.KeyGenerator extends java.lang.Object
+{
+    private static final sun.security.util.Debug pdebug;
+    private static final boolean skipDebug;
+    private static final int I_NONE;
+    private static final int I_RANDOM;
+    private static final int I_PARAMS;
+    private static final int I_SIZE;
+    private java.security.Provider provider;
+    private volatile javax.crypto.KeyGeneratorSpi spi;
+    private final java.lang.String algorithm;
+    private final java.lang.Object lock;
+    private java.util.Iterator serviceIterator;
+    private int initType;
+    private int initKeySize;
+    private java.security.spec.AlgorithmParameterSpec initParams;
+    private java.security.SecureRandom initRandom;
+
+    protected void <init>(javax.crypto.KeyGeneratorSpi, java.security.Provider, java.lang.String)
+    {
+        javax.crypto.KeyGenerator r0;
+        java.lang.String r4, $r12, $r14;
+        boolean $z0;
+        javax.crypto.KeyGeneratorSpi r2;
+        sun.security.util.Debug $r5, $r7;
+        java.security.Provider r3, $r11;
+        java.lang.Object $r1;
+        java.lang.StringBuilder $r6, $r8, $r9, $r10, $r13;
+
+        r0 := @this: javax.crypto.KeyGenerator;
+
+        r2 := @parameter0: javax.crypto.KeyGeneratorSpi;
+
+        r3 := @parameter1: java.security.Provider;
+
+        r4 := @parameter2: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<javax.crypto.KeyGenerator: java.lang.Object lock> = $r1;
+
+        r0.<javax.crypto.KeyGenerator: javax.crypto.KeyGeneratorSpi spi> = r2;
+
+        r0.<javax.crypto.KeyGenerator: java.security.Provider provider> = r3;
+
+        r0.<javax.crypto.KeyGenerator: java.lang.String algorithm> = r4;
+
+        $z0 = <javax.crypto.KeyGenerator: boolean skipDebug>;
+
+        if $z0 != 0 goto label1;
+
+        $r5 = <javax.crypto.KeyGenerator: sun.security.util.Debug pdebug>;
+
+        if $r5 == null goto label1;
+
+        $r7 = <javax.crypto.KeyGenerator: sun.security.util.Debug pdebug>;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("KeyGenerator.");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" algorithm from: ");
+
+        $r11 = r0.<javax.crypto.KeyGenerator: java.security.Provider provider>;
+
+        $r12 = virtualinvoke $r11.<java.security.Provider: java.lang.String getName()>();
+
+        $r13 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<sun.security.util.Debug: void println(java.lang.String)>($r14);
+
+     label1:
+        return;
+    }
+
+    private void <init>(java.lang.String) throws java.security.NoSuchAlgorithmException
+    {
+        javax.crypto.KeyGenerator r0;
+        java.lang.String r2, $r13, $r15, $r20;
+        boolean $z0;
+        javax.crypto.KeyGeneratorSpi $r5;
+        java.util.Iterator $r4;
+        sun.security.util.Debug $r6, $r8;
+        java.security.Provider $r12;
+        java.util.List $r3;
+        java.security.NoSuchAlgorithmException $r16;
+        java.lang.Object $r1;
+        java.lang.StringBuilder $r7, $r9, $r10, $r11, $r14, $r17, $r18, $r19;
+
+        r0 := @this: javax.crypto.KeyGenerator;
+
+        r2 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<javax.crypto.KeyGenerator: java.lang.Object lock> = $r1;
+
+        r0.<javax.crypto.KeyGenerator: java.lang.String algorithm> = r2;
+
+        $r3 = staticinvoke <sun.security.jca.GetInstance: java.util.List getServices(java.lang.String,java.lang.String)>("KeyGenerator", r2);
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+        r0.<javax.crypto.KeyGenerator: java.util.Iterator serviceIterator> = $r4;
+
+        r0.<javax.crypto.KeyGenerator: int initType> = 1;
+
+        $r5 = specialinvoke r0.<javax.crypto.KeyGenerator: javax.crypto.KeyGeneratorSpi nextSpi(javax.crypto.KeyGeneratorSpi,boolean)>(null, 0);
+
+        if $r5 != null goto label1;
+
+        $r16 = new java.security.NoSuchAlgorithmException;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" KeyGenerator not available");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r16.<java.security.NoSuchAlgorithmException: void <init>(java.lang.String)>($r20);
+
+        throw $r16;
+
+     label1:
+        $z0 = <javax.crypto.KeyGenerator: boolean skipDebug>;
+
+        if $z0 != 0 goto label2;
+
+        $r6 = <javax.crypto.KeyGenerator: sun.security.util.Debug pdebug>;
+
+        if $r6 == null goto label2;
+
+        $r8 = <javax.crypto.KeyGenerator: sun.security.util.Debug pdebug>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("KeyGenerator.");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" algorithm from: ");
+
+        $r12 = r0.<javax.crypto.KeyGenerator: java.security.Provider provider>;
+
+        $r13 = virtualinvoke $r12.<java.security.Provider: java.lang.String getName()>();
+
+        $r14 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r8.<sun.security.util.Debug: void println(java.lang.String)>($r15);
+
+     label2:
+        return;
+    }
+
+    public final java.lang.String getAlgorithm()
+    {
+        java.lang.String $r1;
+        javax.crypto.KeyGenerator r0;
+
+        r0 := @this: javax.crypto.KeyGenerator;
+
+        $r1 = r0.<javax.crypto.KeyGenerator: java.lang.String algorithm>;
+
+        return $r1;
+    }
+
+    public static final javax.crypto.KeyGenerator getInstance(java.lang.String) throws java.security.NoSuchAlgorithmException
+    {
+        java.lang.String r1;
+        javax.crypto.KeyGenerator $r0;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = new javax.crypto.KeyGenerator;
+
+        specialinvoke $r0.<javax.crypto.KeyGenerator: void <init>(java.lang.String)>(r1);
+
+        return $r0;
+    }
+
+    public static final javax.crypto.KeyGenerator getInstance(java.lang.String, java.lang.String) throws java.security.NoSuchAlgorithmException, java.security.NoSuchProviderException
+    {
+        javax.crypto.KeyGeneratorSpi $r6;
+        sun.security.jca.GetInstance$Instance $r2;
+        java.lang.Object $r4;
+        java.lang.String r0, r1;
+        javax.crypto.KeyGenerator $r3;
+        java.security.Provider $r5;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        $r2 = staticinvoke <javax.crypto.JceSecurity: sun.security.jca.GetInstance$Instance getInstance(java.lang.String,java.lang.Class,java.lang.String,java.lang.String)>("KeyGenerator", class "Ljavax/crypto/KeyGeneratorSpi;", r0, r1);
+
+        $r3 = new javax.crypto.KeyGenerator;
+
+        $r4 = $r2.<sun.security.jca.GetInstance$Instance: java.lang.Object impl>;
+
+        $r6 = (javax.crypto.KeyGeneratorSpi) $r4;
+
+        $r5 = $r2.<sun.security.jca.GetInstance$Instance: java.security.Provider provider>;
+
+        specialinvoke $r3.<javax.crypto.KeyGenerator: void <init>(javax.crypto.KeyGeneratorSpi,java.security.Provider,java.lang.String)>($r6, $r5, r0);
+
+        return $r3;
+    }
+
+    public static final javax.crypto.KeyGenerator getInstance(java.lang.String, java.security.Provider) throws java.security.NoSuchAlgorithmException
+    {
+        javax.crypto.KeyGeneratorSpi $r6;
+        sun.security.jca.GetInstance$Instance $r2;
+        java.lang.Object $r4;
+        java.lang.String r0;
+        javax.crypto.KeyGenerator $r3;
+        java.security.Provider r1, $r5;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.security.Provider;
+
+        $r2 = staticinvoke <javax.crypto.JceSecurity: sun.security.jca.GetInstance$Instance getInstance(java.lang.String,java.lang.Class,java.lang.String,java.security.Provider)>("KeyGenerator", class "Ljavax/crypto/KeyGeneratorSpi;", r0, r1);
+
+        $r3 = new javax.crypto.KeyGenerator;
+
+        $r4 = $r2.<sun.security.jca.GetInstance$Instance: java.lang.Object impl>;
+
+        $r6 = (javax.crypto.KeyGeneratorSpi) $r4;
+
+        $r5 = $r2.<sun.security.jca.GetInstance$Instance: java.security.Provider provider>;
+
+        specialinvoke $r3.<javax.crypto.KeyGenerator: void <init>(javax.crypto.KeyGeneratorSpi,java.security.Provider,java.lang.String)>($r6, $r5, r0);
+
+        return $r3;
+    }
+
+    public final java.security.Provider getProvider()
+    {
+        java.lang.Throwable $r3;
+        java.lang.Object $r1;
+        javax.crypto.KeyGenerator r0;
+        java.security.Provider $r2;
+
+        r0 := @this: javax.crypto.KeyGenerator;
+
+        $r1 = r0.<javax.crypto.KeyGenerator: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label1:
+        virtualinvoke r0.<javax.crypto.KeyGenerator: void disableFailover()>();
+
+        $r2 = r0.<javax.crypto.KeyGenerator: java.security.Provider provider>;
+
+        exitmonitor $r1;
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private javax.crypto.KeyGeneratorSpi nextSpi(javax.crypto.KeyGeneratorSpi, boolean)
+    {
+        javax.crypto.KeyGenerator r0;
+        java.security.SecureRandom $r15, $r16, $r18;
+        java.security.spec.AlgorithmParameterSpec $r17;
+        boolean $z0, $z1, z2, $z3;
+        javax.crypto.KeyGeneratorSpi r2, r9, $r19, $r20;
+        java.lang.Exception $r22;
+        java.security.Provider $r7, $r24;
+        java.lang.StringBuilder $r11, $r12, $r13;
+        java.lang.Throwable $r21;
+        java.lang.AssertionError $r10;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.lang.String $r14;
+        java.util.Iterator $r3, $r4, $r23;
+        java.security.Provider$Service r6;
+        java.lang.Object $r1, $r5, $r8;
+
+        r0 := @this: javax.crypto.KeyGenerator;
+
+        r2 := @parameter0: javax.crypto.KeyGeneratorSpi;
+
+        z2 := @parameter1: boolean;
+
+        $r1 = r0.<javax.crypto.KeyGenerator: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label01:
+        if r2 == null goto label03;
+
+        $r19 = r0.<javax.crypto.KeyGenerator: javax.crypto.KeyGeneratorSpi spi>;
+
+        if r2 == $r19 goto label03;
+
+        $r20 = r0.<javax.crypto.KeyGenerator: javax.crypto.KeyGeneratorSpi spi>;
+
+        exitmonitor $r1;
+
+     label02:
+        return $r20;
+
+     label03:
+        $r3 = r0.<javax.crypto.KeyGenerator: java.util.Iterator serviceIterator>;
+
+        if $r3 != null goto label05;
+
+        exitmonitor $r1;
+
+     label04:
+        return null;
+
+     label05:
+        $r23 = r0.<javax.crypto.KeyGenerator: java.util.Iterator serviceIterator>;
+
+        $z3 = interfaceinvoke $r23.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label16;
+
+        $r4 = r0.<javax.crypto.KeyGenerator: java.util.Iterator serviceIterator>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (java.security.Provider$Service) $r5;
+
+        $r7 = virtualinvoke r6.<java.security.Provider$Service: java.security.Provider getProvider()>();
+
+        $z0 = staticinvoke <javax.crypto.JceSecurity: boolean canUseProvider(java.security.Provider)>($r7);
+
+        if $z0 != 0 goto label06;
+
+        goto label05;
+
+     label06:
+        $r8 = virtualinvoke r6.<java.security.Provider$Service: java.lang.Object newInstance(java.lang.Object)>(null);
+
+        $z1 = $r8 instanceof javax.crypto.KeyGeneratorSpi;
+
+        if $z1 != 0 goto label08;
+
+     label07:
+        goto label05;
+
+     label08:
+        r9 = (javax.crypto.KeyGeneratorSpi) $r8;
+
+        if z2 == 0 goto label12;
+
+        $i0 = r0.<javax.crypto.KeyGenerator: int initType>;
+
+        if $i0 != 4 goto label09;
+
+        $i5 = r0.<javax.crypto.KeyGenerator: int initKeySize>;
+
+        $r18 = r0.<javax.crypto.KeyGenerator: java.security.SecureRandom initRandom>;
+
+        virtualinvoke r9.<javax.crypto.KeyGeneratorSpi: void engineInit(int,java.security.SecureRandom)>($i5, $r18);
+
+        goto label12;
+
+     label09:
+        $i1 = r0.<javax.crypto.KeyGenerator: int initType>;
+
+        if $i1 != 3 goto label10;
+
+        $r17 = r0.<javax.crypto.KeyGenerator: java.security.spec.AlgorithmParameterSpec initParams>;
+
+        $r16 = r0.<javax.crypto.KeyGenerator: java.security.SecureRandom initRandom>;
+
+        virtualinvoke r9.<javax.crypto.KeyGeneratorSpi: void engineInit(java.security.spec.AlgorithmParameterSpec,java.security.SecureRandom)>($r17, $r16);
+
+        goto label12;
+
+     label10:
+        $i2 = r0.<javax.crypto.KeyGenerator: int initType>;
+
+        if $i2 != 2 goto label11;
+
+        $r15 = r0.<javax.crypto.KeyGenerator: java.security.SecureRandom initRandom>;
+
+        virtualinvoke r9.<javax.crypto.KeyGeneratorSpi: void engineInit(java.security.SecureRandom)>($r15);
+
+        goto label12;
+
+     label11:
+        $i3 = r0.<javax.crypto.KeyGenerator: int initType>;
+
+        if $i3 == 1 goto label12;
+
+        $r10 = new java.lang.AssertionError;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("KeyGenerator initType: ");
+
+        $i4 = r0.<javax.crypto.KeyGenerator: int initType>;
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r10.<java.lang.AssertionError: void <init>(java.lang.Object)>($r14);
+
+        throw $r10;
+
+     label12:
+        $r24 = virtualinvoke r6.<java.security.Provider$Service: java.security.Provider getProvider()>();
+
+        r0.<javax.crypto.KeyGenerator: java.security.Provider provider> = $r24;
+
+        r0.<javax.crypto.KeyGenerator: javax.crypto.KeyGeneratorSpi spi> = r9;
+
+     label13:
+        exitmonitor $r1;
+
+     label14:
+        return r9;
+
+     label15:
+        $r22 := @caughtexception;
+
+        goto label05;
+
+     label16:
+        virtualinvoke r0.<javax.crypto.KeyGenerator: void disableFailover()>();
+
+        exitmonitor $r1;
+
+     label17:
+        return null;
+
+     label18:
+        $r21 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label19:
+        throw $r21;
+
+        catch java.lang.Exception from label06 to label07 with label15;
+        catch java.lang.Exception from label08 to label13 with label15;
+        catch java.lang.Throwable from label01 to label02 with label18;
+        catch java.lang.Throwable from label03 to label04 with label18;
+        catch java.lang.Throwable from label05 to label14 with label18;
+        catch java.lang.Throwable from label15 to label17 with label18;
+        catch java.lang.Throwable from label18 to label19 with label18;
+    }
+
+    void disableFailover()
+    {
+        javax.crypto.KeyGenerator r0;
+
+        r0 := @this: javax.crypto.KeyGenerator;
+
+        r0.<javax.crypto.KeyGenerator: java.util.Iterator serviceIterator> = null;
+
+        r0.<javax.crypto.KeyGenerator: int initType> = 0;
+
+        r0.<javax.crypto.KeyGenerator: java.security.spec.AlgorithmParameterSpec initParams> = null;
+
+        r0.<javax.crypto.KeyGenerator: java.security.SecureRandom initRandom> = null;
+
+        return;
+    }
+
+    public final void init(java.security.SecureRandom)
+    {
+        javax.crypto.KeyGeneratorSpi $r3, $r5, r7;
+        java.util.Iterator $r1;
+        java.lang.RuntimeException $r4, r6;
+        javax.crypto.KeyGenerator r0;
+        java.security.SecureRandom r2;
+
+        r0 := @this: javax.crypto.KeyGenerator;
+
+        r2 := @parameter0: java.security.SecureRandom;
+
+        $r1 = r0.<javax.crypto.KeyGenerator: java.util.Iterator serviceIterator>;
+
+        if $r1 != null goto label1;
+
+        $r3 = r0.<javax.crypto.KeyGenerator: javax.crypto.KeyGeneratorSpi spi>;
+
+        virtualinvoke $r3.<javax.crypto.KeyGeneratorSpi: void engineInit(java.security.SecureRandom)>(r2);
+
+        return;
+
+     label1:
+        r6 = null;
+
+        r7 = r0.<javax.crypto.KeyGenerator: javax.crypto.KeyGeneratorSpi spi>;
+
+     label2:
+        virtualinvoke r7.<javax.crypto.KeyGeneratorSpi: void engineInit(java.security.SecureRandom)>(r2);
+
+        r0.<javax.crypto.KeyGenerator: int initType> = 2;
+
+        r0.<javax.crypto.KeyGenerator: int initKeySize> = 0;
+
+        r0.<javax.crypto.KeyGenerator: java.security.spec.AlgorithmParameterSpec initParams> = null;
+
+        r0.<javax.crypto.KeyGenerator: java.security.SecureRandom initRandom> = r2;
+
+     label3:
+        return;
+
+     label4:
+        $r4 := @caughtexception;
+
+        if r6 != null goto label5;
+
+        r6 = $r4;
+
+     label5:
+        $r5 = specialinvoke r0.<javax.crypto.KeyGenerator: javax.crypto.KeyGeneratorSpi nextSpi(javax.crypto.KeyGeneratorSpi,boolean)>(r7, 0);
+
+        r7 = $r5;
+
+        if $r5 != null goto label2;
+
+        throw r6;
+
+        catch java.lang.RuntimeException from label2 to label3 with label4;
+    }
+
+    public final void init(java.security.spec.AlgorithmParameterSpec) throws java.security.InvalidAlgorithmParameterException
+    {
+        java.security.SecureRandom $r2;
+        java.security.spec.AlgorithmParameterSpec r1;
+        javax.crypto.KeyGenerator r0;
+
+        r0 := @this: javax.crypto.KeyGenerator;
+
+        r1 := @parameter0: java.security.spec.AlgorithmParameterSpec;
+
+        $r2 = <javax.crypto.JceSecurity: java.security.SecureRandom RANDOM>;
+
+        virtualinvoke r0.<javax.crypto.KeyGenerator: void init(java.security.spec.AlgorithmParameterSpec,java.security.SecureRandom)>(r1, $r2);
+
+        return;
+    }
+
+    public final void init(java.security.spec.AlgorithmParameterSpec, java.security.SecureRandom) throws java.security.InvalidAlgorithmParameterException
+    {
+        javax.crypto.KeyGeneratorSpi $r4, $r6, r11;
+        java.util.Iterator $r1;
+        java.lang.RuntimeException $r8;
+        javax.crypto.KeyGenerator r0;
+        java.lang.Exception $r5, r10;
+        java.security.InvalidAlgorithmParameterException $r7, $r9;
+        java.security.SecureRandom r3;
+        java.security.spec.AlgorithmParameterSpec r2;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.crypto.KeyGenerator;
+
+        r2 := @parameter0: java.security.spec.AlgorithmParameterSpec;
+
+        r3 := @parameter1: java.security.SecureRandom;
+
+        $r1 = r0.<javax.crypto.KeyGenerator: java.util.Iterator serviceIterator>;
+
+        if $r1 != null goto label1;
+
+        $r4 = r0.<javax.crypto.KeyGenerator: javax.crypto.KeyGeneratorSpi spi>;
+
+        virtualinvoke $r4.<javax.crypto.KeyGeneratorSpi: void engineInit(java.security.spec.AlgorithmParameterSpec,java.security.SecureRandom)>(r2, r3);
+
+        return;
+
+     label1:
+        r10 = null;
+
+        r11 = r0.<javax.crypto.KeyGenerator: javax.crypto.KeyGeneratorSpi spi>;
+
+     label2:
+        virtualinvoke r11.<javax.crypto.KeyGeneratorSpi: void engineInit(java.security.spec.AlgorithmParameterSpec,java.security.SecureRandom)>(r2, r3);
+
+        r0.<javax.crypto.KeyGenerator: int initType> = 3;
+
+        r0.<javax.crypto.KeyGenerator: int initKeySize> = 0;
+
+        r0.<javax.crypto.KeyGenerator: java.security.spec.AlgorithmParameterSpec initParams> = r2;
+
+        r0.<javax.crypto.KeyGenerator: java.security.SecureRandom initRandom> = r3;
+
+     label3:
+        return;
+
+     label4:
+        $r5 := @caughtexception;
+
+        if r10 != null goto label5;
+
+        r10 = $r5;
+
+     label5:
+        $r6 = specialinvoke r0.<javax.crypto.KeyGenerator: javax.crypto.KeyGeneratorSpi nextSpi(javax.crypto.KeyGeneratorSpi,boolean)>(r11, 0);
+
+        r11 = $r6;
+
+        if $r6 != null goto label2;
+
+        $z0 = r10 instanceof java.security.InvalidAlgorithmParameterException;
+
+        if $z0 == 0 goto label6;
+
+        $r9 = (java.security.InvalidAlgorithmParameterException) r10;
+
+        throw $r9;
+
+     label6:
+        $z1 = r10 instanceof java.lang.RuntimeException;
+
+        if $z1 == 0 goto label7;
+
+        $r8 = (java.lang.RuntimeException) r10;
+
+        throw $r8;
+
+     label7:
+        $r7 = new java.security.InvalidAlgorithmParameterException;
+
+        specialinvoke $r7.<java.security.InvalidAlgorithmParameterException: void <init>(java.lang.String,java.lang.Throwable)>("init() failed", r10);
+
+        throw $r7;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    public final void init(int)
+    {
+        int i0;
+        java.security.SecureRandom $r1;
+        javax.crypto.KeyGenerator r0;
+
+        r0 := @this: javax.crypto.KeyGenerator;
+
+        i0 := @parameter0: int;
+
+        $r1 = <javax.crypto.JceSecurity: java.security.SecureRandom RANDOM>;
+
+        virtualinvoke r0.<javax.crypto.KeyGenerator: void init(int,java.security.SecureRandom)>(i0, $r1);
+
+        return;
+    }
+
+    public final void init(int, java.security.SecureRandom)
+    {
+        javax.crypto.KeyGeneratorSpi $r3, $r5, r7;
+        java.util.Iterator $r1;
+        java.lang.RuntimeException $r4, r6;
+        javax.crypto.KeyGenerator r0;
+        java.security.SecureRandom r2;
+        int i0;
+
+        r0 := @this: javax.crypto.KeyGenerator;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.security.SecureRandom;
+
+        $r1 = r0.<javax.crypto.KeyGenerator: java.util.Iterator serviceIterator>;
+
+        if $r1 != null goto label1;
+
+        $r3 = r0.<javax.crypto.KeyGenerator: javax.crypto.KeyGeneratorSpi spi>;
+
+        virtualinvoke $r3.<javax.crypto.KeyGeneratorSpi: void engineInit(int,java.security.SecureRandom)>(i0, r2);
+
+        return;
+
+     label1:
+        r6 = null;
+
+        r7 = r0.<javax.crypto.KeyGenerator: javax.crypto.KeyGeneratorSpi spi>;
+
+     label2:
+        virtualinvoke r7.<javax.crypto.KeyGeneratorSpi: void engineInit(int,java.security.SecureRandom)>(i0, r2);
+
+        r0.<javax.crypto.KeyGenerator: int initType> = 4;
+
+        r0.<javax.crypto.KeyGenerator: int initKeySize> = i0;
+
+        r0.<javax.crypto.KeyGenerator: java.security.spec.AlgorithmParameterSpec initParams> = null;
+
+        r0.<javax.crypto.KeyGenerator: java.security.SecureRandom initRandom> = r2;
+
+     label3:
+        return;
+
+     label4:
+        $r4 := @caughtexception;
+
+        if r6 != null goto label5;
+
+        r6 = $r4;
+
+     label5:
+        $r5 = specialinvoke r0.<javax.crypto.KeyGenerator: javax.crypto.KeyGeneratorSpi nextSpi(javax.crypto.KeyGeneratorSpi,boolean)>(r7, 0);
+
+        r7 = $r5;
+
+        if $r5 != null goto label2;
+
+        throw r6;
+
+        catch java.lang.RuntimeException from label2 to label3 with label4;
+    }
+
+    public final javax.crypto.SecretKey generateKey()
+    {
+        javax.crypto.KeyGeneratorSpi $r3, $r6, r8;
+        java.util.Iterator $r1;
+        java.lang.RuntimeException $r5, r7;
+        javax.crypto.KeyGenerator r0;
+        javax.crypto.SecretKey $r2, $r4;
+
+        r0 := @this: javax.crypto.KeyGenerator;
+
+        $r1 = r0.<javax.crypto.KeyGenerator: java.util.Iterator serviceIterator>;
+
+        if $r1 != null goto label1;
+
+        $r3 = r0.<javax.crypto.KeyGenerator: javax.crypto.KeyGeneratorSpi spi>;
+
+        $r4 = virtualinvoke $r3.<javax.crypto.KeyGeneratorSpi: javax.crypto.SecretKey engineGenerateKey()>();
+
+        return $r4;
+
+     label1:
+        r7 = null;
+
+        r8 = r0.<javax.crypto.KeyGenerator: javax.crypto.KeyGeneratorSpi spi>;
+
+     label2:
+        $r2 = virtualinvoke r8.<javax.crypto.KeyGeneratorSpi: javax.crypto.SecretKey engineGenerateKey()>();
+
+     label3:
+        return $r2;
+
+     label4:
+        $r5 := @caughtexception;
+
+        if r7 != null goto label5;
+
+        r7 = $r5;
+
+     label5:
+        $r6 = specialinvoke r0.<javax.crypto.KeyGenerator: javax.crypto.KeyGeneratorSpi nextSpi(javax.crypto.KeyGeneratorSpi,boolean)>(r8, 1);
+
+        r8 = $r6;
+
+        if $r6 != null goto label2;
+
+        throw r7;
+
+        catch java.lang.RuntimeException from label2 to label3 with label4;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.util.Debug $r0;
+        boolean $z0, $z1, $z2;
+
+        <javax.crypto.KeyGenerator: int I_SIZE> = 4;
+
+        <javax.crypto.KeyGenerator: int I_PARAMS> = 3;
+
+        <javax.crypto.KeyGenerator: int I_RANDOM> = 2;
+
+        <javax.crypto.KeyGenerator: int I_NONE> = 1;
+
+        $r0 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String,java.lang.String)>("provider", "Provider");
+
+        <javax.crypto.KeyGenerator: sun.security.util.Debug pdebug> = $r0;
+
+        $z0 = staticinvoke <sun.security.util.Debug: boolean isOn(java.lang.String)>("engine=");
+
+        if $z0 == 0 goto label1;
+
+        $z1 = staticinvoke <sun.security.util.Debug: boolean isOn(java.lang.String)>("keygenerator");
+
+        if $z1 != 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        <javax.crypto.KeyGenerator: boolean skipDebug> = $z2;
+
+        return;
+    }
+}

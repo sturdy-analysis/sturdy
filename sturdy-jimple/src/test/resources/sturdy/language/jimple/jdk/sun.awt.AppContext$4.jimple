@@ -1,0 +1,121 @@
+class sun.awt.AppContext$4 extends java.lang.Object implements java.lang.Runnable
+{
+    final java.beans.PropertyChangeSupport val$changeSupport;
+    final java.lang.Object val$notificationLock;
+    final sun.awt.AppContext this$0;
+
+    void <init>(sun.awt.AppContext, java.beans.PropertyChangeSupport, java.lang.Object)
+    {
+        sun.awt.AppContext$4 r0;
+        sun.awt.AppContext r1;
+        java.beans.PropertyChangeSupport r2;
+        java.lang.Object r3;
+
+        r0 := @this: sun.awt.AppContext$4;
+
+        r1 := @parameter0: sun.awt.AppContext;
+
+        r2 := @parameter1: java.beans.PropertyChangeSupport;
+
+        r3 := @parameter2: java.lang.Object;
+
+        r0.<sun.awt.AppContext$4: sun.awt.AppContext this$0> = r1;
+
+        r0.<sun.awt.AppContext$4: java.beans.PropertyChangeSupport val$changeSupport> = r2;
+
+        r0.<sun.awt.AppContext$4: java.lang.Object val$notificationLock> = r3;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void run()
+    {
+        java.lang.Throwable $r8, $r9;
+        sun.awt.AppContext$4 r2;
+        sun.util.logging.PlatformLogger $r10;
+        java.awt.Window r7;
+        sun.awt.AppContext$4$1 $r1;
+        java.awt.Window[] $r0;
+        int i0, i1;
+        java.beans.PropertyChangeSupport $r3, $r6;
+        java.lang.Object $r4, $r5;
+
+        r2 := @this: sun.awt.AppContext$4;
+
+        $r0 = staticinvoke <java.awt.Window: java.awt.Window[] getOwnerlessWindows()>();
+
+        i0 = lengthof $r0;
+
+        i1 = 0;
+
+     label01:
+        if i1 >= i0 goto label06;
+
+        r7 = $r0[i1];
+
+     label02:
+        virtualinvoke r7.<java.awt.Window: void dispose()>();
+
+     label03:
+        goto label05;
+
+     label04:
+        $r9 := @caughtexception;
+
+        $r10 = staticinvoke <sun.awt.AppContext: sun.util.logging.PlatformLogger access$700()>();
+
+        virtualinvoke $r10.<sun.util.logging.PlatformLogger: void finer(java.lang.String,java.lang.Throwable)>("exception occurred while disposing app context", $r9);
+
+     label05:
+        i1 = i1 + 1;
+
+        goto label01;
+
+     label06:
+        $r1 = new sun.awt.AppContext$4$1;
+
+        specialinvoke $r1.<sun.awt.AppContext$4$1: void <init>(sun.awt.AppContext$4)>(r2);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        $r3 = r2.<sun.awt.AppContext$4: java.beans.PropertyChangeSupport val$changeSupport>;
+
+        if $r3 == null goto label07;
+
+        $r6 = r2.<sun.awt.AppContext$4: java.beans.PropertyChangeSupport val$changeSupport>;
+
+        virtualinvoke $r6.<java.beans.PropertyChangeSupport: void firePropertyChange(java.lang.String,boolean,boolean)>("guidisposed", 0, 1);
+
+     label07:
+        $r4 = r2.<sun.awt.AppContext$4: java.lang.Object val$notificationLock>;
+
+        entermonitor $r4;
+
+     label08:
+        $r5 = r2.<sun.awt.AppContext$4: java.lang.Object val$notificationLock>;
+
+        virtualinvoke $r5.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor $r4;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r8 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label11:
+        throw $r8;
+
+     label12:
+        return;
+
+        catch java.lang.Throwable from label02 to label03 with label04;
+        catch java.lang.Throwable from label08 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+}

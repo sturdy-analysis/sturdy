@@ -1,0 +1,456 @@
+class com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI extends java.lang.Object implements com.sun.org.apache.xml.internal.security.utils.XPathAPI
+{
+    private static final com.sun.org.slf4j.internal.Logger LOG;
+    private java.lang.String xpathStr;
+    private com.sun.org.apache.xpath.internal.XPath xpath;
+    private static com.sun.org.apache.xpath.internal.compiler.FunctionTable funcTable;
+    private static boolean installed;
+    private com.sun.org.apache.xpath.internal.XPathContext context;
+
+    void <init>()
+    {
+        com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public org.w3c.dom.NodeList selectNodeList(org.w3c.dom.Node, org.w3c.dom.Node, java.lang.String, org.w3c.dom.Node) throws javax.xml.transform.TransformerException
+    {
+        com.sun.org.apache.xpath.internal.objects.XObject $r5;
+        org.w3c.dom.NodeList $r6;
+        com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI r0;
+        org.w3c.dom.Node r1, r2, r4;
+        java.lang.String r3;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI;
+
+        r1 := @parameter0: org.w3c.dom.Node;
+
+        r2 := @parameter1: org.w3c.dom.Node;
+
+        r3 := @parameter2: java.lang.String;
+
+        r4 := @parameter3: org.w3c.dom.Node;
+
+        $r5 = specialinvoke r0.<com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: com.sun.org.apache.xpath.internal.objects.XObject eval(org.w3c.dom.Node,org.w3c.dom.Node,java.lang.String,org.w3c.dom.Node)>(r1, r2, r3, r4);
+
+        $r6 = virtualinvoke $r5.<com.sun.org.apache.xpath.internal.objects.XObject: org.w3c.dom.NodeList nodelist()>();
+
+        return $r6;
+    }
+
+    public boolean evaluate(org.w3c.dom.Node, org.w3c.dom.Node, java.lang.String, org.w3c.dom.Node) throws javax.xml.transform.TransformerException
+    {
+        com.sun.org.apache.xpath.internal.objects.XObject $r5;
+        com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI r0;
+        org.w3c.dom.Node r1, r2, r4;
+        java.lang.String r3;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI;
+
+        r1 := @parameter0: org.w3c.dom.Node;
+
+        r2 := @parameter1: org.w3c.dom.Node;
+
+        r3 := @parameter2: java.lang.String;
+
+        r4 := @parameter3: org.w3c.dom.Node;
+
+        $r5 = specialinvoke r0.<com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: com.sun.org.apache.xpath.internal.objects.XObject eval(org.w3c.dom.Node,org.w3c.dom.Node,java.lang.String,org.w3c.dom.Node)>(r1, r2, r3, r4);
+
+        $z0 = virtualinvoke $r5.<com.sun.org.apache.xpath.internal.objects.XObject: boolean bool()>();
+
+        return $z0;
+    }
+
+    public void clear()
+    {
+        com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI;
+
+        r0.<com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: java.lang.String xpathStr> = null;
+
+        r0.<com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: com.sun.org.apache.xpath.internal.XPath xpath> = null;
+
+        r0.<com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: com.sun.org.apache.xpath.internal.XPathContext context> = null;
+
+        return;
+    }
+
+    public static boolean isInstalled()
+    {
+        boolean $z0;
+
+        $z0 = <com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: boolean installed>;
+
+        return $z0;
+    }
+
+    private com.sun.org.apache.xpath.internal.objects.XObject eval(org.w3c.dom.Node, org.w3c.dom.Node, java.lang.String, org.w3c.dom.Node) throws javax.xml.transform.TransformerException
+    {
+        short $s0;
+        org.w3c.dom.Document $r9;
+        org.w3c.dom.Node r2, r6, r11, $r13;
+        int $i1, $i2, $i3;
+        java.lang.String r4, $r5;
+        boolean $z0;
+        com.sun.org.apache.xpath.internal.objects.XObject $r17;
+        com.sun.org.apache.xpath.internal.XPath $r7, $r15;
+        com.sun.org.apache.xml.internal.utils.PrefixResolverDefault $r19;
+        com.sun.org.apache.xpath.internal.XPathContext $r1, $r8, $r12, $r14, $r16, $r18;
+        com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI;
+
+        r6 := @parameter0: org.w3c.dom.Node;
+
+        r11 := @parameter1: org.w3c.dom.Node;
+
+        r4 := @parameter2: java.lang.String;
+
+        r2 := @parameter3: org.w3c.dom.Node;
+
+        $r1 = r0.<com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: com.sun.org.apache.xpath.internal.XPathContext context>;
+
+        if $r1 != null goto label1;
+
+        $r18 = new com.sun.org.apache.xpath.internal.XPathContext;
+
+        specialinvoke $r18.<com.sun.org.apache.xpath.internal.XPathContext: void <init>(java.lang.Object)>(r11);
+
+        r0.<com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: com.sun.org.apache.xpath.internal.XPathContext context> = $r18;
+
+        $r12 = r0.<com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: com.sun.org.apache.xpath.internal.XPathContext context>;
+
+        virtualinvoke $r12.<com.sun.org.apache.xpath.internal.XPathContext: void setSecureProcessing(boolean)>(1);
+
+     label1:
+        $s0 = interfaceinvoke r2.<org.w3c.dom.Node: short getNodeType()>();
+
+        $i3 = (int) $s0;
+
+        if $i3 != 9 goto label2;
+
+        $r9 = (org.w3c.dom.Document) r2;
+
+        $r13 = interfaceinvoke $r9.<org.w3c.dom.Document: org.w3c.dom.Element getDocumentElement()>();
+
+        goto label3;
+
+     label2:
+        $r13 = r2;
+
+     label3:
+        $r19 = new com.sun.org.apache.xml.internal.utils.PrefixResolverDefault;
+
+        specialinvoke $r19.<com.sun.org.apache.xml.internal.utils.PrefixResolverDefault: void <init>(org.w3c.dom.Node)>($r13);
+
+        $r5 = r0.<com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: java.lang.String xpathStr>;
+
+        $z0 = virtualinvoke r4.<java.lang.String: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 != 0 goto label5;
+
+        $i1 = virtualinvoke r4.<java.lang.String: int indexOf(java.lang.String)>("here()");
+
+        if $i1 <= 0 goto label4;
+
+        $r8 = r0.<com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: com.sun.org.apache.xpath.internal.XPathContext context>;
+
+        virtualinvoke $r8.<com.sun.org.apache.xpath.internal.XPathContext: void reset()>();
+
+     label4:
+        $r7 = specialinvoke r0.<com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: com.sun.org.apache.xpath.internal.XPath createXPath(java.lang.String,com.sun.org.apache.xml.internal.utils.PrefixResolver)>(r4, $r19);
+
+        r0.<com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: com.sun.org.apache.xpath.internal.XPath xpath> = $r7;
+
+        r0.<com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: java.lang.String xpathStr> = r4;
+
+     label5:
+        $r14 = r0.<com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: com.sun.org.apache.xpath.internal.XPathContext context>;
+
+        $i2 = virtualinvoke $r14.<com.sun.org.apache.xpath.internal.XPathContext: int getDTMHandleFromNode(org.w3c.dom.Node)>(r6);
+
+        $r15 = r0.<com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: com.sun.org.apache.xpath.internal.XPath xpath>;
+
+        $r16 = r0.<com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: com.sun.org.apache.xpath.internal.XPathContext context>;
+
+        $r17 = virtualinvoke $r15.<com.sun.org.apache.xpath.internal.XPath: com.sun.org.apache.xpath.internal.objects.XObject execute(com.sun.org.apache.xpath.internal.XPathContext,int,com.sun.org.apache.xml.internal.utils.PrefixResolver)>($r16, $i2, $r19);
+
+        return $r17;
+    }
+
+    private com.sun.org.apache.xpath.internal.XPath createXPath(java.lang.String, com.sun.org.apache.xml.internal.utils.PrefixResolver) throws javax.xml.transform.TransformerException
+    {
+        java.lang.Object[] $r2;
+        com.sun.org.apache.xpath.internal.compiler.FunctionTable $r6;
+        java.lang.Integer $r5;
+        java.lang.reflect.Constructor $r8;
+        java.lang.String r3, $r13;
+        com.sun.org.apache.xpath.internal.XPath $r10, r15;
+        java.lang.Class[] $r0;
+        java.lang.Exception $r11;
+        com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI r14;
+        java.lang.Class $r1, $r7;
+        java.lang.Object $r9;
+        com.sun.org.slf4j.internal.Logger $r12;
+        com.sun.org.apache.xml.internal.utils.PrefixResolver r4;
+
+        r14 := @this: com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI;
+
+        r3 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: com.sun.org.apache.xml.internal.utils.PrefixResolver;
+
+        r15 = null;
+
+        $r0 = newarray (java.lang.Class)[6];
+
+        $r0[0] = class "Ljava/lang/String;";
+
+        $r0[1] = class "Ljavax/xml/transform/SourceLocator;";
+
+        $r0[2] = class "Lcom/sun/org/apache/xml/internal/utils/PrefixResolver;";
+
+        $r1 = <java.lang.Integer: java.lang.Class TYPE>;
+
+        $r0[3] = $r1;
+
+        $r0[4] = class "Ljavax/xml/transform/ErrorListener;";
+
+        $r0[5] = class "Lcom/sun/org/apache/xpath/internal/compiler/FunctionTable;";
+
+        $r2 = newarray (java.lang.Object)[6];
+
+        $r2[0] = r3;
+
+        $r2[1] = null;
+
+        $r2[2] = r4;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        $r2[3] = $r5;
+
+        $r2[4] = null;
+
+        $r6 = <com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: com.sun.org.apache.xpath.internal.compiler.FunctionTable funcTable>;
+
+        $r2[5] = $r6;
+
+     label1:
+        $r7 = class "Lcom/sun/org/apache/xpath/internal/XPath;";
+
+        $r8 = virtualinvoke $r7.<java.lang.Class: java.lang.reflect.Constructor getConstructor(java.lang.Class[])>($r0);
+
+        $r9 = virtualinvoke $r8.<java.lang.reflect.Constructor: java.lang.Object newInstance(java.lang.Object[])>($r2);
+
+        r15 = (com.sun.org.apache.xpath.internal.XPath) $r9;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r11 := @caughtexception;
+
+        $r12 = <com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: com.sun.org.slf4j.internal.Logger LOG>;
+
+        $r13 = virtualinvoke $r11.<java.lang.Exception: java.lang.String getMessage()>();
+
+        virtualinvoke $r12.<com.sun.org.slf4j.internal.Logger: void debug(java.lang.String,java.lang.Throwable)>($r13, $r11);
+
+     label4:
+        if r15 != null goto label5;
+
+        $r10 = new com.sun.org.apache.xpath.internal.XPath;
+
+        specialinvoke $r10.<com.sun.org.apache.xpath.internal.XPath: void <init>(java.lang.String,javax.xml.transform.SourceLocator,com.sun.org.apache.xml.internal.utils.PrefixResolver,int,javax.xml.transform.ErrorListener)>(r3, null, r4, 0, null);
+
+        r15 = $r10;
+
+     label5:
+        return r15;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    private static synchronized void fixupFunctionTable()
+    {
+        java.lang.Object[] $r5, $r9, $r17, $r19;
+        com.sun.org.apache.xpath.internal.compiler.FunctionTable $r0, $r13, $r18;
+        int $i0, $i1;
+        java.lang.String $r8, $r12;
+        com.sun.org.apache.xml.internal.security.transforms.implementations.FuncHere $r20;
+        java.lang.reflect.Method $r4, $r16;
+        boolean $z0, $z1, $z2;
+        java.lang.Class[] $r2, $r14;
+        java.lang.Exception $r22, $r24;
+        com.sun.org.slf4j.internal.Logger $r1, $r7, $r11, $r21, $r23, $r25;
+        java.lang.Class $r3, $r6, $r10, $r15;
+
+        <com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: boolean installed> = 0;
+
+        $r0 = new com.sun.org.apache.xpath.internal.compiler.FunctionTable;
+
+        specialinvoke $r0.<com.sun.org.apache.xpath.internal.compiler.FunctionTable: void <init>()>();
+
+        $z0 = virtualinvoke $r0.<com.sun.org.apache.xpath.internal.compiler.FunctionTable: boolean functionAvailable(java.lang.String)>("here");
+
+        if $z0 == 0 goto label01;
+
+        $r21 = <com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: com.sun.org.slf4j.internal.Logger LOG>;
+
+        virtualinvoke $r21.<com.sun.org.slf4j.internal.Logger: void debug(java.lang.String)>("Here function already registered");
+
+        <com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: boolean installed> = 1;
+
+        return;
+
+     label01:
+        $r1 = <com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: com.sun.org.slf4j.internal.Logger LOG>;
+
+        virtualinvoke $r1.<com.sun.org.slf4j.internal.Logger: void debug(java.lang.String)>("Registering Here function");
+
+     label02:
+        $r2 = newarray (java.lang.Class)[2];
+
+        $r2[0] = class "Ljava/lang/String;";
+
+        $r2[1] = class "Lcom/sun/org/apache/xpath/internal/Expression;";
+
+        $r3 = class "Lcom/sun/org/apache/xpath/internal/compiler/FunctionTable;";
+
+        $r4 = virtualinvoke $r3.<java.lang.Class: java.lang.reflect.Method getMethod(java.lang.String,java.lang.Class[])>("installFunction", $r2);
+
+        $i0 = virtualinvoke $r4.<java.lang.reflect.Method: int getModifiers()>();
+
+        $i1 = $i0 & 8;
+
+        if $i1 == 0 goto label03;
+
+        $r19 = newarray (java.lang.Object)[2];
+
+        $r19[0] = "here";
+
+        $r20 = new com.sun.org.apache.xml.internal.security.transforms.implementations.FuncHere;
+
+        specialinvoke $r20.<com.sun.org.apache.xml.internal.security.transforms.implementations.FuncHere: void <init>()>();
+
+        $r19[1] = $r20;
+
+        virtualinvoke $r4.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>(null, $r19);
+
+        <com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: boolean installed> = 1;
+
+     label03:
+        goto label05;
+
+     label04:
+        $r24 := @caughtexception;
+
+        $r25 = <com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: com.sun.org.slf4j.internal.Logger LOG>;
+
+        virtualinvoke $r25.<com.sun.org.slf4j.internal.Logger: void debug(java.lang.String,java.lang.Throwable)>("Error installing function using the static installFunction method", $r24);
+
+     label05:
+        $z1 = <com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: boolean installed>;
+
+        if $z1 != 0 goto label09;
+
+     label06:
+        $r13 = new com.sun.org.apache.xpath.internal.compiler.FunctionTable;
+
+        specialinvoke $r13.<com.sun.org.apache.xpath.internal.compiler.FunctionTable: void <init>()>();
+
+        <com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: com.sun.org.apache.xpath.internal.compiler.FunctionTable funcTable> = $r13;
+
+        $r14 = newarray (java.lang.Class)[2];
+
+        $r14[0] = class "Ljava/lang/String;";
+
+        $r14[1] = class "Ljava/lang/Class;";
+
+        $r15 = class "Lcom/sun/org/apache/xpath/internal/compiler/FunctionTable;";
+
+        $r16 = virtualinvoke $r15.<java.lang.Class: java.lang.reflect.Method getMethod(java.lang.String,java.lang.Class[])>("installFunction", $r14);
+
+        $r17 = newarray (java.lang.Object)[2];
+
+        $r17[0] = "here";
+
+        $r17[1] = class "Lcom/sun/org/apache/xml/internal/security/transforms/implementations/FuncHere;";
+
+        $r18 = <com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: com.sun.org.apache.xpath.internal.compiler.FunctionTable funcTable>;
+
+        virtualinvoke $r16.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>($r18, $r17);
+
+        <com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: boolean installed> = 1;
+
+     label07:
+        goto label09;
+
+     label08:
+        $r22 := @caughtexception;
+
+        $r23 = <com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: com.sun.org.slf4j.internal.Logger LOG>;
+
+        virtualinvoke $r23.<com.sun.org.slf4j.internal.Logger: void debug(java.lang.String,java.lang.Throwable)>("Error installing function using the static installFunction method", $r22);
+
+     label09:
+        $z2 = <com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: boolean installed>;
+
+        if $z2 == 0 goto label10;
+
+        $r11 = <com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: com.sun.org.slf4j.internal.Logger LOG>;
+
+        $r9 = newarray (java.lang.Object)[1];
+
+        $r10 = class "Lcom/sun/org/apache/xml/internal/security/transforms/implementations/FuncHere;";
+
+        $r12 = virtualinvoke $r10.<java.lang.Class: java.lang.String getName()>();
+
+        $r9[0] = $r12;
+
+        virtualinvoke $r11.<com.sun.org.slf4j.internal.Logger: void debug(java.lang.String,java.lang.Object[])>("Registered class {} for XPath function \'here()\' function in internal table", $r9);
+
+        goto label11;
+
+     label10:
+        $r7 = <com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: com.sun.org.slf4j.internal.Logger LOG>;
+
+        $r5 = newarray (java.lang.Object)[1];
+
+        $r6 = class "Lcom/sun/org/apache/xml/internal/security/transforms/implementations/FuncHere;";
+
+        $r8 = virtualinvoke $r6.<java.lang.Class: java.lang.String getName()>();
+
+        $r5[0] = $r8;
+
+        virtualinvoke $r7.<com.sun.org.slf4j.internal.Logger: void debug(java.lang.String,java.lang.Object[])>("Unable to register class {} for XPath function \'here()\' function in internal table", $r5);
+
+     label11:
+        return;
+
+        catch java.lang.Exception from label02 to label03 with label04;
+        catch java.lang.Exception from label06 to label07 with label08;
+    }
+
+    static void <clinit>()
+    {
+        com.sun.org.slf4j.internal.Logger $r0;
+
+        $r0 = staticinvoke <com.sun.org.slf4j.internal.LoggerFactory: com.sun.org.slf4j.internal.Logger getLogger(java.lang.Class)>(class "Lcom/sun/org/apache/xml/internal/security/utils/XalanXPathAPI;");
+
+        <com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: com.sun.org.slf4j.internal.Logger LOG> = $r0;
+
+        staticinvoke <com.sun.org.apache.xml.internal.security.utils.XalanXPathAPI: void fixupFunctionTable()>();
+
+        return;
+    }
+}

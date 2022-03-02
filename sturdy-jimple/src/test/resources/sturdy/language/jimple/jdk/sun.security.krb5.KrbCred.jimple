@@ -1,0 +1,396 @@
+public class sun.security.krb5.KrbCred extends java.lang.Object
+{
+    private static boolean DEBUG;
+    private byte[] obuf;
+    private sun.security.krb5.internal.KRBCred credMessg;
+    private sun.security.krb5.internal.Ticket ticket;
+    private sun.security.krb5.internal.EncKrbCredPart encPart;
+    private sun.security.krb5.Credentials creds;
+    private sun.security.krb5.internal.KerberosTime timeStamp;
+
+    public void <init>(sun.security.krb5.Credentials, sun.security.krb5.Credentials, sun.security.krb5.EncryptionKey) throws sun.security.krb5.KrbException, java.io.IOException
+    {
+        byte[] $r13;
+        sun.security.krb5.PrincipalName $r2, $r3, $r5, $r6;
+        sun.security.krb5.internal.HostAddresses $r14, r16;
+        sun.security.krb5.KrbException $r15;
+        sun.security.krb5.KrbTgsReq $r8;
+        sun.security.krb5.internal.KDCOptions $r7;
+        int $i0;
+        boolean $z0;
+        sun.security.krb5.Credentials r1, r4, $r9;
+        sun.security.krb5.EncryptionKey r10;
+        sun.security.krb5.internal.KRBCred $r11, $r12;
+        sun.security.krb5.KrbCred r0;
+
+        r0 := @this: sun.security.krb5.KrbCred;
+
+        r1 := @parameter0: sun.security.krb5.Credentials;
+
+        r4 := @parameter1: sun.security.krb5.Credentials;
+
+        r10 := @parameter2: sun.security.krb5.EncryptionKey;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.krb5.KrbCred: byte[] obuf> = null;
+
+        r0.<sun.security.krb5.KrbCred: sun.security.krb5.internal.KRBCred credMessg> = null;
+
+        r0.<sun.security.krb5.KrbCred: sun.security.krb5.internal.Ticket ticket> = null;
+
+        r0.<sun.security.krb5.KrbCred: sun.security.krb5.internal.EncKrbCredPart encPart> = null;
+
+        r0.<sun.security.krb5.KrbCred: sun.security.krb5.Credentials creds> = null;
+
+        r0.<sun.security.krb5.KrbCred: sun.security.krb5.internal.KerberosTime timeStamp> = null;
+
+        $r2 = virtualinvoke r1.<sun.security.krb5.Credentials: sun.security.krb5.PrincipalName getClient()>();
+
+        $r3 = virtualinvoke r1.<sun.security.krb5.Credentials: sun.security.krb5.PrincipalName getServer()>();
+
+        $r5 = virtualinvoke r4.<sun.security.krb5.Credentials: sun.security.krb5.PrincipalName getServer()>();
+
+        $r6 = virtualinvoke r4.<sun.security.krb5.Credentials: sun.security.krb5.PrincipalName getClient()>();
+
+        $z0 = virtualinvoke $r6.<sun.security.krb5.PrincipalName: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 != 0 goto label1;
+
+        $r15 = new sun.security.krb5.KrbException;
+
+        specialinvoke $r15.<sun.security.krb5.KrbException: void <init>(int,java.lang.String)>(60, "Client principal does not match");
+
+        throw $r15;
+
+     label1:
+        $r7 = new sun.security.krb5.internal.KDCOptions;
+
+        specialinvoke $r7.<sun.security.krb5.internal.KDCOptions: void <init>()>();
+
+        virtualinvoke $r7.<sun.security.krb5.internal.KDCOptions: void set(int,boolean)>(2, 1);
+
+        virtualinvoke $r7.<sun.security.krb5.internal.KDCOptions: void set(int,boolean)>(1, 1);
+
+        r16 = null;
+
+        $i0 = virtualinvoke $r5.<sun.security.krb5.PrincipalName: int getNameType()>();
+
+        if $i0 != 3 goto label2;
+
+        $r14 = new sun.security.krb5.internal.HostAddresses;
+
+        specialinvoke $r14.<sun.security.krb5.internal.HostAddresses: void <init>(sun.security.krb5.PrincipalName)>($r5);
+
+        r16 = $r14;
+
+     label2:
+        $r8 = new sun.security.krb5.KrbTgsReq;
+
+        specialinvoke $r8.<sun.security.krb5.KrbTgsReq: void <init>(sun.security.krb5.internal.KDCOptions,sun.security.krb5.Credentials,sun.security.krb5.PrincipalName,sun.security.krb5.PrincipalName,sun.security.krb5.internal.KerberosTime,sun.security.krb5.internal.KerberosTime,sun.security.krb5.internal.KerberosTime,int[],sun.security.krb5.internal.HostAddresses,sun.security.krb5.internal.AuthorizationData,sun.security.krb5.internal.Ticket[],sun.security.krb5.EncryptionKey)>($r7, r1, $r3, null, null, null, null, null, r16, null, null, null);
+
+        $r9 = virtualinvoke $r8.<sun.security.krb5.KrbTgsReq: sun.security.krb5.Credentials sendAndGetCreds()>();
+
+        $r11 = virtualinvoke r0.<sun.security.krb5.KrbCred: sun.security.krb5.internal.KRBCred createMessage(sun.security.krb5.Credentials,sun.security.krb5.EncryptionKey)>($r9, r10);
+
+        r0.<sun.security.krb5.KrbCred: sun.security.krb5.internal.KRBCred credMessg> = $r11;
+
+        $r12 = r0.<sun.security.krb5.KrbCred: sun.security.krb5.internal.KRBCred credMessg>;
+
+        $r13 = virtualinvoke $r12.<sun.security.krb5.internal.KRBCred: byte[] asn1Encode()>();
+
+        r0.<sun.security.krb5.KrbCred: byte[] obuf> = $r13;
+
+        return;
+    }
+
+    sun.security.krb5.internal.KRBCred createMessage(sun.security.krb5.Credentials, sun.security.krb5.EncryptionKey) throws sun.security.krb5.KrbException, java.io.IOException
+    {
+        byte[] $r18;
+        sun.security.krb5.internal.KrbCredInfo $r4;
+        sun.security.krb5.PrincipalName $r2, $r3;
+        sun.security.krb5.internal.Ticket $r20;
+        sun.security.krb5.internal.HostAddresses $r5;
+        sun.security.krb5.internal.KerberosTime $r6, $r7, $r8, $r9, $r12, $r15;
+        sun.security.krb5.internal.Ticket[] $r19;
+        sun.security.krb5.internal.TicketFlags $r10;
+        sun.security.krb5.internal.EncKrbCredPart $r14;
+        sun.security.krb5.Credentials r0;
+        sun.security.krb5.EncryptionKey $r1, r17;
+        sun.security.krb5.internal.KrbCredInfo[] $r13;
+        sun.security.krb5.internal.KRBCred $r21, $r22;
+        sun.security.krb5.KrbCred r11;
+        sun.security.krb5.EncryptedData $r16;
+
+        r11 := @this: sun.security.krb5.KrbCred;
+
+        r0 := @parameter0: sun.security.krb5.Credentials;
+
+        r17 := @parameter1: sun.security.krb5.EncryptionKey;
+
+        $r1 = virtualinvoke r0.<sun.security.krb5.Credentials: sun.security.krb5.EncryptionKey getSessionKey()>();
+
+        $r2 = virtualinvoke r0.<sun.security.krb5.Credentials: sun.security.krb5.PrincipalName getClient()>();
+
+        virtualinvoke $r2.<sun.security.krb5.PrincipalName: sun.security.krb5.Realm getRealm()>();
+
+        $r3 = virtualinvoke r0.<sun.security.krb5.Credentials: sun.security.krb5.PrincipalName getServer()>();
+
+        $r4 = new sun.security.krb5.internal.KrbCredInfo;
+
+        $r10 = r0.<sun.security.krb5.Credentials: sun.security.krb5.internal.TicketFlags flags>;
+
+        $r9 = r0.<sun.security.krb5.Credentials: sun.security.krb5.internal.KerberosTime authTime>;
+
+        $r8 = r0.<sun.security.krb5.Credentials: sun.security.krb5.internal.KerberosTime startTime>;
+
+        $r7 = r0.<sun.security.krb5.Credentials: sun.security.krb5.internal.KerberosTime endTime>;
+
+        $r6 = r0.<sun.security.krb5.Credentials: sun.security.krb5.internal.KerberosTime renewTill>;
+
+        $r5 = r0.<sun.security.krb5.Credentials: sun.security.krb5.internal.HostAddresses cAddr>;
+
+        specialinvoke $r4.<sun.security.krb5.internal.KrbCredInfo: void <init>(sun.security.krb5.EncryptionKey,sun.security.krb5.PrincipalName,sun.security.krb5.internal.TicketFlags,sun.security.krb5.internal.KerberosTime,sun.security.krb5.internal.KerberosTime,sun.security.krb5.internal.KerberosTime,sun.security.krb5.internal.KerberosTime,sun.security.krb5.PrincipalName,sun.security.krb5.internal.HostAddresses)>($r1, $r2, $r10, $r9, $r8, $r7, $r6, $r3, $r5);
+
+        $r12 = staticinvoke <sun.security.krb5.internal.KerberosTime: sun.security.krb5.internal.KerberosTime now()>();
+
+        r11.<sun.security.krb5.KrbCred: sun.security.krb5.internal.KerberosTime timeStamp> = $r12;
+
+        $r13 = newarray (sun.security.krb5.internal.KrbCredInfo)[1];
+
+        $r13[0] = $r4;
+
+        $r14 = new sun.security.krb5.internal.EncKrbCredPart;
+
+        $r15 = r11.<sun.security.krb5.KrbCred: sun.security.krb5.internal.KerberosTime timeStamp>;
+
+        specialinvoke $r14.<sun.security.krb5.internal.EncKrbCredPart: void <init>(sun.security.krb5.internal.KrbCredInfo[],sun.security.krb5.internal.KerberosTime,java.lang.Integer,java.lang.Integer,sun.security.krb5.internal.HostAddress,sun.security.krb5.internal.HostAddresses)>($r13, $r15, null, null, null, null);
+
+        $r16 = new sun.security.krb5.EncryptedData;
+
+        $r18 = virtualinvoke $r14.<sun.security.krb5.internal.EncKrbCredPart: byte[] asn1Encode()>();
+
+        specialinvoke $r16.<sun.security.krb5.EncryptedData: void <init>(sun.security.krb5.EncryptionKey,byte[],int)>(r17, $r18, 14);
+
+        $r19 = newarray (sun.security.krb5.internal.Ticket)[1];
+
+        $r20 = r0.<sun.security.krb5.Credentials: sun.security.krb5.internal.Ticket ticket>;
+
+        $r19[0] = $r20;
+
+        $r21 = new sun.security.krb5.internal.KRBCred;
+
+        specialinvoke $r21.<sun.security.krb5.internal.KRBCred: void <init>(sun.security.krb5.internal.Ticket[],sun.security.krb5.EncryptedData)>($r19, $r16);
+
+        r11.<sun.security.krb5.KrbCred: sun.security.krb5.internal.KRBCred credMessg> = $r21;
+
+        $r22 = r11.<sun.security.krb5.KrbCred: sun.security.krb5.internal.KRBCred credMessg>;
+
+        return $r22;
+    }
+
+    public void <init>(byte[], sun.security.krb5.EncryptionKey) throws sun.security.krb5.KrbException, java.io.IOException
+    {
+        byte[] r2, $r10, $r13;
+        sun.security.krb5.internal.KrbCredInfo $r35;
+        sun.security.krb5.internal.TicketFlags $r38;
+        boolean $z0;
+        sun.security.util.DerValue $r14;
+        sun.security.krb5.Credentials $r18;
+        sun.security.krb5.EncryptionKey $r36, r45;
+        sun.security.krb5.internal.KrbCredInfo[] $r17;
+        sun.security.krb5.KrbCred r0;
+        java.lang.StringBuilder $r20, $r22, $r23, $r24, $r25, $r26, $r27, $r28, $r29, $r30, $r31, $r32, $r33;
+        sun.security.krb5.PrincipalName $r37, $r43;
+        sun.security.krb5.internal.Ticket $r5, $r19;
+        sun.security.krb5.internal.HostAddresses $r44;
+        sun.security.krb5.internal.KerberosTime $r16, $r39, $r40, $r41, $r42;
+        sun.security.krb5.internal.Ticket[] $r4;
+        int $i0;
+        java.lang.String $r34;
+        java.io.PrintStream $r21;
+        sun.security.krb5.internal.EncKrbCredPart $r15;
+        sun.security.krb5.internal.KRBCred $r1, $r3, $r6, $r8, $r11;
+        sun.security.krb5.EncryptedData $r7, $r9, $r12;
+
+        r0 := @this: sun.security.krb5.KrbCred;
+
+        r2 := @parameter0: byte[];
+
+        r45 := @parameter1: sun.security.krb5.EncryptionKey;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.krb5.KrbCred: byte[] obuf> = null;
+
+        r0.<sun.security.krb5.KrbCred: sun.security.krb5.internal.KRBCred credMessg> = null;
+
+        r0.<sun.security.krb5.KrbCred: sun.security.krb5.internal.Ticket ticket> = null;
+
+        r0.<sun.security.krb5.KrbCred: sun.security.krb5.internal.EncKrbCredPart encPart> = null;
+
+        r0.<sun.security.krb5.KrbCred: sun.security.krb5.Credentials creds> = null;
+
+        r0.<sun.security.krb5.KrbCred: sun.security.krb5.internal.KerberosTime timeStamp> = null;
+
+        $r1 = new sun.security.krb5.internal.KRBCred;
+
+        specialinvoke $r1.<sun.security.krb5.internal.KRBCred: void <init>(byte[])>(r2);
+
+        r0.<sun.security.krb5.KrbCred: sun.security.krb5.internal.KRBCred credMessg> = $r1;
+
+        $r3 = r0.<sun.security.krb5.KrbCred: sun.security.krb5.internal.KRBCred credMessg>;
+
+        $r4 = $r3.<sun.security.krb5.internal.KRBCred: sun.security.krb5.internal.Ticket[] tickets>;
+
+        $r5 = $r4[0];
+
+        r0.<sun.security.krb5.KrbCred: sun.security.krb5.internal.Ticket ticket> = $r5;
+
+        $r6 = r0.<sun.security.krb5.KrbCred: sun.security.krb5.internal.KRBCred credMessg>;
+
+        $r7 = $r6.<sun.security.krb5.internal.KRBCred: sun.security.krb5.EncryptedData encPart>;
+
+        $i0 = virtualinvoke $r7.<sun.security.krb5.EncryptedData: int getEType()>();
+
+        if $i0 != 0 goto label1;
+
+        r45 = <sun.security.krb5.EncryptionKey: sun.security.krb5.EncryptionKey NULL_KEY>;
+
+     label1:
+        $r8 = r0.<sun.security.krb5.KrbCred: sun.security.krb5.internal.KRBCred credMessg>;
+
+        $r9 = $r8.<sun.security.krb5.internal.KRBCred: sun.security.krb5.EncryptedData encPart>;
+
+        $r10 = virtualinvoke $r9.<sun.security.krb5.EncryptedData: byte[] decrypt(sun.security.krb5.EncryptionKey,int)>(r45, 14);
+
+        $r11 = r0.<sun.security.krb5.KrbCred: sun.security.krb5.internal.KRBCred credMessg>;
+
+        $r12 = $r11.<sun.security.krb5.internal.KRBCred: sun.security.krb5.EncryptedData encPart>;
+
+        $r13 = virtualinvoke $r12.<sun.security.krb5.EncryptedData: byte[] reset(byte[])>($r10);
+
+        $r14 = new sun.security.util.DerValue;
+
+        specialinvoke $r14.<sun.security.util.DerValue: void <init>(byte[])>($r13);
+
+        $r15 = new sun.security.krb5.internal.EncKrbCredPart;
+
+        specialinvoke $r15.<sun.security.krb5.internal.EncKrbCredPart: void <init>(sun.security.util.DerValue)>($r14);
+
+        $r16 = $r15.<sun.security.krb5.internal.EncKrbCredPart: sun.security.krb5.internal.KerberosTime timeStamp>;
+
+        r0.<sun.security.krb5.KrbCred: sun.security.krb5.internal.KerberosTime timeStamp> = $r16;
+
+        $r17 = $r15.<sun.security.krb5.internal.EncKrbCredPart: sun.security.krb5.internal.KrbCredInfo[] ticketInfo>;
+
+        $r35 = $r17[0];
+
+        $r36 = $r35.<sun.security.krb5.internal.KrbCredInfo: sun.security.krb5.EncryptionKey key>;
+
+        $r37 = $r35.<sun.security.krb5.internal.KrbCredInfo: sun.security.krb5.PrincipalName pname>;
+
+        $r38 = $r35.<sun.security.krb5.internal.KrbCredInfo: sun.security.krb5.internal.TicketFlags flags>;
+
+        $r39 = $r35.<sun.security.krb5.internal.KrbCredInfo: sun.security.krb5.internal.KerberosTime authtime>;
+
+        $r40 = $r35.<sun.security.krb5.internal.KrbCredInfo: sun.security.krb5.internal.KerberosTime starttime>;
+
+        $r41 = $r35.<sun.security.krb5.internal.KrbCredInfo: sun.security.krb5.internal.KerberosTime endtime>;
+
+        $r42 = $r35.<sun.security.krb5.internal.KrbCredInfo: sun.security.krb5.internal.KerberosTime renewTill>;
+
+        $r43 = $r35.<sun.security.krb5.internal.KrbCredInfo: sun.security.krb5.PrincipalName sname>;
+
+        $r44 = $r35.<sun.security.krb5.internal.KrbCredInfo: sun.security.krb5.internal.HostAddresses caddr>;
+
+        $z0 = <sun.security.krb5.KrbCred: boolean DEBUG>;
+
+        if $z0 == 0 goto label2;
+
+        $r21 = <java.lang.System: java.io.PrintStream out>;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">>>Delegated Creds have pname=");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r37);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" sname=");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r43);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" authtime=");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r39);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" starttime=");
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r40);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" endtime=");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r41);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("renewTill=");
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r42);
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r21.<java.io.PrintStream: void println(java.lang.String)>($r34);
+
+     label2:
+        $r18 = new sun.security.krb5.Credentials;
+
+        $r19 = r0.<sun.security.krb5.KrbCred: sun.security.krb5.internal.Ticket ticket>;
+
+        specialinvoke $r18.<sun.security.krb5.Credentials: void <init>(sun.security.krb5.internal.Ticket,sun.security.krb5.PrincipalName,sun.security.krb5.PrincipalName,sun.security.krb5.PrincipalName,sun.security.krb5.PrincipalName,sun.security.krb5.EncryptionKey,sun.security.krb5.internal.TicketFlags,sun.security.krb5.internal.KerberosTime,sun.security.krb5.internal.KerberosTime,sun.security.krb5.internal.KerberosTime,sun.security.krb5.internal.KerberosTime,sun.security.krb5.internal.HostAddresses)>($r19, $r37, null, $r43, null, $r36, $r38, $r39, $r40, $r41, $r42, $r44);
+
+        r0.<sun.security.krb5.KrbCred: sun.security.krb5.Credentials creds> = $r18;
+
+        return;
+    }
+
+    public sun.security.krb5.Credentials[] getDelegatedCreds()
+    {
+        sun.security.krb5.KrbCred r1;
+        sun.security.krb5.Credentials[] $r0;
+        sun.security.krb5.Credentials $r2;
+
+        r1 := @this: sun.security.krb5.KrbCred;
+
+        $r0 = newarray (sun.security.krb5.Credentials)[1];
+
+        $r2 = r1.<sun.security.krb5.KrbCred: sun.security.krb5.Credentials creds>;
+
+        $r0[0] = $r2;
+
+        return $r0;
+    }
+
+    public byte[] getMessage()
+    {
+        byte[] $r1;
+        sun.security.krb5.KrbCred r0;
+
+        r0 := @this: sun.security.krb5.KrbCred;
+
+        $r1 = r0.<sun.security.krb5.KrbCred: byte[] obuf>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        boolean $z0;
+
+        $z0 = <sun.security.krb5.internal.Krb5: boolean DEBUG>;
+
+        <sun.security.krb5.KrbCred: boolean DEBUG> = $z0;
+
+        return;
+    }
+}

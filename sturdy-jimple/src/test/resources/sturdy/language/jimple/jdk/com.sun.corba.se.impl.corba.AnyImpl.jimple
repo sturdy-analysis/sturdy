@@ -1,0 +1,3560 @@
+public class com.sun.corba.se.impl.corba.AnyImpl extends org.omg.CORBA.Any
+{
+    private com.sun.corba.se.impl.corba.TypeCodeImpl typeCode;
+    protected com.sun.corba.se.spi.orb.ORB orb;
+    private com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper;
+    private com.sun.corba.se.impl.encoding.CDRInputStream stream;
+    private long value;
+    private java.lang.Object object;
+    private boolean isInitialized;
+    private static final int DEFAULT_BUFFER_SIZE;
+    static boolean[] isStreamed;
+
+    static com.sun.corba.se.impl.corba.AnyImpl convertToNative(com.sun.corba.se.spi.orb.ORB, org.omg.CORBA.Any)
+    {
+        org.omg.CORBA.Any r0;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r3, $r4;
+        com.sun.corba.se.impl.corba.AnyImpl $r1, $r5;
+        com.sun.corba.se.spi.orb.ORB r2;
+        boolean $z0;
+
+        r2 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        r0 := @parameter1: org.omg.CORBA.Any;
+
+        $z0 = r0 instanceof com.sun.corba.se.impl.corba.AnyImpl;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = (com.sun.corba.se.impl.corba.AnyImpl) r0;
+
+        return $r5;
+
+     label1:
+        $r1 = new com.sun.corba.se.impl.corba.AnyImpl;
+
+        specialinvoke $r1.<com.sun.corba.se.impl.corba.AnyImpl: void <init>(com.sun.corba.se.spi.orb.ORB,org.omg.CORBA.Any)>(r2, r0);
+
+        $r3 = $r1.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode>;
+
+        $r4 = staticinvoke <com.sun.corba.se.impl.corba.TypeCodeImpl: com.sun.corba.se.impl.corba.TypeCodeImpl convertToNative(com.sun.corba.se.spi.orb.ORB,org.omg.CORBA.TypeCode)>(r2, $r3);
+
+        $r1.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r4;
+
+        return $r1;
+    }
+
+    public void <init>(com.sun.corba.se.spi.orb.ORB)
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r2;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r3;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        com.sun.corba.se.spi.orb.ORB r1;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        specialinvoke r0.<org.omg.CORBA.Any: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 0;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb> = r1;
+
+        $r2 = staticinvoke <com.sun.corba.se.impl.logging.ORBUtilSystemException: com.sun.corba.se.impl.logging.ORBUtilSystemException get(com.sun.corba.se.spi.orb.ORB,java.lang.String)>(r1, "rpc.presentation");
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper> = $r2;
+
+        $r3 = virtualinvoke r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.impl.corba.TypeCodeImpl get_primitive_tc(int)>(0);
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r3;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.encoding.CDRInputStream stream> = null;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object> = null;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: long value> = 0L;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+    }
+
+    public void <init>(com.sun.corba.se.spi.orb.ORB, org.omg.CORBA.Any)
+    {
+        org.omg.CORBA.Any r2;
+        long $l0;
+        com.sun.corba.se.impl.corba.AnyImpl r0, r5;
+        org.omg.CORBA.TypeCode $r4;
+        com.sun.corba.se.spi.orb.ORB r1;
+        org.omg.CORBA.portable.InputStream $r3;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r6;
+        java.lang.Object $r7;
+        boolean $z0, $z1;
+        com.sun.corba.se.impl.encoding.CDRInputStream $r8, $r9, $r10;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        r2 := @parameter1: org.omg.CORBA.Any;
+
+        specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: void <init>(com.sun.corba.se.spi.orb.ORB)>(r1);
+
+        $z0 = r2 instanceof com.sun.corba.se.impl.corba.AnyImpl;
+
+        if $z0 == 0 goto label2;
+
+        r5 = (com.sun.corba.se.impl.corba.AnyImpl) r2;
+
+        $r6 = r5.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode>;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r6;
+
+        $l0 = r5.<com.sun.corba.se.impl.corba.AnyImpl: long value>;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: long value> = $l0;
+
+        $r7 = r5.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object>;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object> = $r7;
+
+        $z1 = r5.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized>;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = $z1;
+
+        $r8 = r5.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.encoding.CDRInputStream stream>;
+
+        if $r8 == null goto label1;
+
+        $r9 = r5.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.encoding.CDRInputStream stream>;
+
+        $r10 = virtualinvoke $r9.<com.sun.corba.se.impl.encoding.CDRInputStream: com.sun.corba.se.impl.encoding.CDRInputStream dup()>();
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.encoding.CDRInputStream stream> = $r10;
+
+     label1:
+        goto label3;
+
+     label2:
+        $r3 = virtualinvoke r2.<org.omg.CORBA.Any: org.omg.CORBA.portable.InputStream create_input_stream()>();
+
+        $r4 = virtualinvoke r2.<org.omg.CORBA.Any: org.omg.CORBA.TypeCode type()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: void read_value(org.omg.CORBA.portable.InputStream,org.omg.CORBA.TypeCode)>($r3, $r4);
+
+     label3:
+        return;
+    }
+
+    public org.omg.CORBA.TypeCode type()
+    {
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r1;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode>;
+
+        return $r1;
+    }
+
+    private org.omg.CORBA.TypeCode realType()
+    {
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r1;
+        org.omg.CORBA.TypeCode $r2;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode>;
+
+        $r2 = specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: org.omg.CORBA.TypeCode realType(org.omg.CORBA.TypeCode)>($r1);
+
+        return $r2;
+    }
+
+    private org.omg.CORBA.TypeCode realType(org.omg.CORBA.TypeCode)
+    {
+        org.omg.CORBA.INTERNAL $r5;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r4;
+        org.omg.CORBA.TypeCode r0, r6;
+        com.sun.corba.se.impl.corba.AnyImpl r3;
+        org.omg.CORBA.TCKind $r1;
+        org.omg.CORBA.TypeCodePackage.BadKind $r2;
+        int $i0;
+
+        r3 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        r0 := @parameter0: org.omg.CORBA.TypeCode;
+
+        r6 = r0;
+
+     label1:
+        $r1 = virtualinvoke r6.<org.omg.CORBA.TypeCode: org.omg.CORBA.TCKind kind()>();
+
+        $i0 = virtualinvoke $r1.<org.omg.CORBA.TCKind: int value()>();
+
+        if $i0 != 21 goto label2;
+
+        r6 = virtualinvoke r6.<org.omg.CORBA.TypeCode: org.omg.CORBA.TypeCode content_type()>();
+
+        goto label1;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r4 = r3.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r5 = virtualinvoke $r4.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL badkindCannotOccur(java.lang.Throwable)>($r2);
+
+        throw $r5;
+
+     label4:
+        return r6;
+
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label1 to label2 with label3;
+    }
+
+    public void type(org.omg.CORBA.TypeCode)
+    {
+        org.omg.CORBA.TCKind $r4;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r3;
+        int $i0;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        org.omg.CORBA.TypeCode r1;
+        com.sun.corba.se.spi.orb.ORB $r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        r1 := @parameter0: org.omg.CORBA.TypeCode;
+
+        $r2 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r3 = staticinvoke <com.sun.corba.se.impl.corba.TypeCodeImpl: com.sun.corba.se.impl.corba.TypeCodeImpl convertToNative(com.sun.corba.se.spi.orb.ORB,org.omg.CORBA.TypeCode)>($r2, r1);
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r3;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.encoding.CDRInputStream stream> = null;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: long value> = 0L;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object> = null;
+
+        $r4 = virtualinvoke r1.<org.omg.CORBA.TypeCode: org.omg.CORBA.TCKind kind()>();
+
+        $i0 = virtualinvoke $r4.<org.omg.CORBA.TCKind: int value()>();
+
+        if $i0 != 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = $z0;
+
+        return;
+    }
+
+    public boolean equal(org.omg.CORBA.Any)
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r12, $r14, $r28;
+        java.math.BigDecimal $r8, $r9;
+        byte $b6, $b9, $b12, $b13, $b16, $b17;
+        java.io.Serializable $r6, $r7;
+        org.omg.CORBA.Any r0, $r26, $r27;
+        org.omg.CORBA.Principal $r22, $r23;
+        long $l4, $l5, $l7, $l8;
+        short $s20, $s21, $s24, $s25;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r2;
+        java.lang.String $r10, $r11, $r16, $r17;
+        org.omg.CORBA.TCKind $r5;
+        org.omg.CORBA.Object $r20, $r21;
+        org.omg.CORBA.INTERNAL $r13, $r15, $r29;
+        org.omg.CORBA.portable.InputStream $r18, $r19;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19, $z20, $z21, $z22, $z23, $z24;
+        com.sun.corba.se.impl.corba.AnyImpl r1;
+        float $f0, $f1;
+        org.omg.CORBA.TypeCode $r3, $r4, $r24, $r25;
+        int $i0, $i1, $i10, $i11, $i18, $i19, $i22, $i23, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35;
+        double $d0, $d1;
+        char $c2, $c3, $c14, $c15;
+
+        r1 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        r0 := @parameter0: org.omg.CORBA.Any;
+
+        if r0 != r1 goto label01;
+
+        return 1;
+
+     label01:
+        $r2 = r1.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode>;
+
+        $r3 = virtualinvoke r0.<org.omg.CORBA.Any: org.omg.CORBA.TypeCode type()>();
+
+        $z0 = virtualinvoke $r2.<com.sun.corba.se.impl.corba.TypeCodeImpl: boolean equal(org.omg.CORBA.TypeCode)>($r3);
+
+        if $z0 != 0 goto label02;
+
+        return 0;
+
+     label02:
+        $r4 = specialinvoke r1.<com.sun.corba.se.impl.corba.AnyImpl: org.omg.CORBA.TypeCode realType()>();
+
+        $r5 = virtualinvoke $r4.<org.omg.CORBA.TypeCode: org.omg.CORBA.TCKind kind()>();
+
+        $i0 = virtualinvoke $r5.<org.omg.CORBA.TCKind: int value()>();
+
+        tableswitch($i0)
+        {
+            case 0: goto label03;
+            case 1: goto label03;
+            case 2: goto label04;
+            case 3: goto label07;
+            case 4: goto label10;
+            case 5: goto label13;
+            case 6: goto label16;
+            case 7: goto label19;
+            case 8: goto label22;
+            case 9: goto label25;
+            case 10: goto label31;
+            case 11: goto label34;
+            case 12: goto label35;
+            case 13: goto label45;
+            case 14: goto label44;
+            case 15: goto label52;
+            case 16: goto label52;
+            case 17: goto label46;
+            case 18: goto label36;
+            case 19: goto label52;
+            case 20: goto label52;
+            case 21: goto label54;
+            case 22: goto label52;
+            case 23: goto label38;
+            case 24: goto label41;
+            case 25: goto label55;
+            case 26: goto label28;
+            case 27: goto label37;
+            case 28: goto label49;
+            case 29: goto label53;
+            case 30: goto label53;
+            default: goto label56;
+        };
+
+     label03:
+        return 1;
+
+     label04:
+        $s24 = virtualinvoke r1.<com.sun.corba.se.impl.corba.AnyImpl: short extract_short()>();
+
+        $s25 = virtualinvoke r0.<org.omg.CORBA.Any: short extract_short()>();
+
+        $i26 = (int) $s24;
+
+        $i27 = (int) $s25;
+
+        if $i26 != $i27 goto label05;
+
+        $z11 = 1;
+
+        goto label06;
+
+     label05:
+        $z11 = 0;
+
+     label06:
+        return $z11;
+
+     label07:
+        $i22 = virtualinvoke r1.<com.sun.corba.se.impl.corba.AnyImpl: int extract_long()>();
+
+        $i23 = virtualinvoke r0.<org.omg.CORBA.Any: int extract_long()>();
+
+        if $i22 != $i23 goto label08;
+
+        $z12 = 1;
+
+        goto label09;
+
+     label08:
+        $z12 = 0;
+
+     label09:
+        return $z12;
+
+     label10:
+        $s20 = virtualinvoke r1.<com.sun.corba.se.impl.corba.AnyImpl: short extract_ushort()>();
+
+        $s21 = virtualinvoke r0.<org.omg.CORBA.Any: short extract_ushort()>();
+
+        $i28 = (int) $s20;
+
+        $i29 = (int) $s21;
+
+        if $i28 != $i29 goto label11;
+
+        $z13 = 1;
+
+        goto label12;
+
+     label11:
+        $z13 = 0;
+
+     label12:
+        return $z13;
+
+     label13:
+        $i18 = virtualinvoke r1.<com.sun.corba.se.impl.corba.AnyImpl: int extract_ulong()>();
+
+        $i19 = virtualinvoke r0.<org.omg.CORBA.Any: int extract_ulong()>();
+
+        if $i18 != $i19 goto label14;
+
+        $z14 = 1;
+
+        goto label15;
+
+     label14:
+        $z14 = 0;
+
+     label15:
+        return $z14;
+
+     label16:
+        $f0 = virtualinvoke r1.<com.sun.corba.se.impl.corba.AnyImpl: float extract_float()>();
+
+        $f1 = virtualinvoke r0.<org.omg.CORBA.Any: float extract_float()>();
+
+        $b17 = $f0 cmpl $f1;
+
+        if $b17 != 0 goto label17;
+
+        $z15 = 1;
+
+        goto label18;
+
+     label17:
+        $z15 = 0;
+
+     label18:
+        return $z15;
+
+     label19:
+        $d0 = virtualinvoke r1.<com.sun.corba.se.impl.corba.AnyImpl: double extract_double()>();
+
+        $d1 = virtualinvoke r0.<org.omg.CORBA.Any: double extract_double()>();
+
+        $b16 = $d0 cmpl $d1;
+
+        if $b16 != 0 goto label20;
+
+        $z16 = 1;
+
+        goto label21;
+
+     label20:
+        $z16 = 0;
+
+     label21:
+        return $z16;
+
+     label22:
+        $z9 = virtualinvoke r1.<com.sun.corba.se.impl.corba.AnyImpl: boolean extract_boolean()>();
+
+        $z10 = virtualinvoke r0.<org.omg.CORBA.Any: boolean extract_boolean()>();
+
+        if $z9 != $z10 goto label23;
+
+        $z17 = 1;
+
+        goto label24;
+
+     label23:
+        $z17 = 0;
+
+     label24:
+        return $z17;
+
+     label25:
+        $c14 = virtualinvoke r1.<com.sun.corba.se.impl.corba.AnyImpl: char extract_char()>();
+
+        $c15 = virtualinvoke r0.<org.omg.CORBA.Any: char extract_char()>();
+
+        $i30 = (int) $c14;
+
+        $i31 = (int) $c15;
+
+        if $i30 != $i31 goto label26;
+
+        $z18 = 1;
+
+        goto label27;
+
+     label26:
+        $z18 = 0;
+
+     label27:
+        return $z18;
+
+     label28:
+        $c2 = virtualinvoke r1.<com.sun.corba.se.impl.corba.AnyImpl: char extract_wchar()>();
+
+        $c3 = virtualinvoke r0.<org.omg.CORBA.Any: char extract_wchar()>();
+
+        $i32 = (int) $c2;
+
+        $i33 = (int) $c3;
+
+        if $i32 != $i33 goto label29;
+
+        $z19 = 1;
+
+        goto label30;
+
+     label29:
+        $z19 = 0;
+
+     label30:
+        return $z19;
+
+     label31:
+        $b12 = virtualinvoke r1.<com.sun.corba.se.impl.corba.AnyImpl: byte extract_octet()>();
+
+        $b13 = virtualinvoke r0.<org.omg.CORBA.Any: byte extract_octet()>();
+
+        $i34 = (int) $b12;
+
+        $i35 = (int) $b13;
+
+        if $i34 != $i35 goto label32;
+
+        $z20 = 1;
+
+        goto label33;
+
+     label32:
+        $z20 = 0;
+
+     label33:
+        return $z20;
+
+     label34:
+        $r26 = virtualinvoke r1.<com.sun.corba.se.impl.corba.AnyImpl: org.omg.CORBA.Any extract_any()>();
+
+        $r27 = virtualinvoke r0.<org.omg.CORBA.Any: org.omg.CORBA.Any extract_any()>();
+
+        $z8 = virtualinvoke $r26.<org.omg.CORBA.Any: boolean equal(org.omg.CORBA.Any)>($r27);
+
+        return $z8;
+
+     label35:
+        $r24 = virtualinvoke r1.<com.sun.corba.se.impl.corba.AnyImpl: org.omg.CORBA.TypeCode extract_TypeCode()>();
+
+        $r25 = virtualinvoke r0.<org.omg.CORBA.Any: org.omg.CORBA.TypeCode extract_TypeCode()>();
+
+        $z7 = virtualinvoke $r24.<org.omg.CORBA.TypeCode: boolean equal(org.omg.CORBA.TypeCode)>($r25);
+
+        return $z7;
+
+     label36:
+        $r16 = virtualinvoke r1.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.String extract_string()>();
+
+        $r17 = virtualinvoke r0.<org.omg.CORBA.Any: java.lang.String extract_string()>();
+
+        $z3 = virtualinvoke $r16.<java.lang.String: boolean equals(java.lang.Object)>($r17);
+
+        return $z3;
+
+     label37:
+        $r10 = virtualinvoke r1.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.String extract_wstring()>();
+
+        $r11 = virtualinvoke r0.<org.omg.CORBA.Any: java.lang.String extract_wstring()>();
+
+        $z2 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>($r11);
+
+        return $z2;
+
+     label38:
+        $l7 = virtualinvoke r1.<com.sun.corba.se.impl.corba.AnyImpl: long extract_longlong()>();
+
+        $l8 = virtualinvoke r0.<org.omg.CORBA.Any: long extract_longlong()>();
+
+        $b9 = $l7 cmp $l8;
+
+        if $b9 != 0 goto label39;
+
+        $z21 = 1;
+
+        goto label40;
+
+     label39:
+        $z21 = 0;
+
+     label40:
+        return $z21;
+
+     label41:
+        $l4 = virtualinvoke r1.<com.sun.corba.se.impl.corba.AnyImpl: long extract_ulonglong()>();
+
+        $l5 = virtualinvoke r0.<org.omg.CORBA.Any: long extract_ulonglong()>();
+
+        $b6 = $l4 cmp $l5;
+
+        if $b6 != 0 goto label42;
+
+        $z22 = 1;
+
+        goto label43;
+
+     label42:
+        $z22 = 0;
+
+     label43:
+        return $z22;
+
+     label44:
+        $r20 = virtualinvoke r1.<com.sun.corba.se.impl.corba.AnyImpl: org.omg.CORBA.Object extract_Object()>();
+
+        $r21 = virtualinvoke r0.<org.omg.CORBA.Any: org.omg.CORBA.Object extract_Object()>();
+
+        $z5 = virtualinvoke $r20.<java.lang.Object: boolean equals(java.lang.Object)>($r21);
+
+        return $z5;
+
+     label45:
+        $r22 = virtualinvoke r1.<com.sun.corba.se.impl.corba.AnyImpl: org.omg.CORBA.Principal extract_Principal()>();
+
+        $r23 = virtualinvoke r0.<org.omg.CORBA.Any: org.omg.CORBA.Principal extract_Principal()>();
+
+        $z6 = virtualinvoke $r22.<java.lang.Object: boolean equals(java.lang.Object)>($r23);
+
+        return $z6;
+
+     label46:
+        $i10 = virtualinvoke r1.<com.sun.corba.se.impl.corba.AnyImpl: int extract_long()>();
+
+        $i11 = virtualinvoke r0.<org.omg.CORBA.Any: int extract_long()>();
+
+        if $i10 != $i11 goto label47;
+
+        $z23 = 1;
+
+        goto label48;
+
+     label47:
+        $z23 = 0;
+
+     label48:
+        return $z23;
+
+     label49:
+        $r8 = virtualinvoke r1.<com.sun.corba.se.impl.corba.AnyImpl: java.math.BigDecimal extract_fixed()>();
+
+        $r9 = virtualinvoke r0.<org.omg.CORBA.Any: java.math.BigDecimal extract_fixed()>();
+
+        $i1 = virtualinvoke $r8.<java.math.BigDecimal: int compareTo(java.math.BigDecimal)>($r9);
+
+        if $i1 != 0 goto label50;
+
+        $z24 = 1;
+
+        goto label51;
+
+     label50:
+        $z24 = 0;
+
+     label51:
+        return $z24;
+
+     label52:
+        $r18 = virtualinvoke r1.<com.sun.corba.se.impl.corba.AnyImpl: org.omg.CORBA.portable.InputStream create_input_stream()>();
+
+        $r19 = virtualinvoke r0.<org.omg.CORBA.Any: org.omg.CORBA.portable.InputStream create_input_stream()>();
+
+        $z4 = specialinvoke r1.<com.sun.corba.se.impl.corba.AnyImpl: boolean equalMember(org.omg.CORBA.TypeCode,org.omg.CORBA.portable.InputStream,org.omg.CORBA.portable.InputStream)>($r4, $r18, $r19);
+
+        return $z4;
+
+     label53:
+        $r6 = virtualinvoke r1.<com.sun.corba.se.impl.corba.AnyImpl: java.io.Serializable extract_Value()>();
+
+        $r7 = virtualinvoke r0.<org.omg.CORBA.Any: java.io.Serializable extract_Value()>();
+
+        $z1 = virtualinvoke $r6.<java.lang.Object: boolean equals(java.lang.Object)>($r7);
+
+        return $z1;
+
+     label54:
+        $r14 = r1.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r15 = virtualinvoke $r14.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL errorResolvingAlias()>();
+
+        throw $r15;
+
+     label55:
+        $r12 = r1.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r13 = virtualinvoke $r12.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL tkLongDoubleNotSupported()>();
+
+        throw $r13;
+
+     label56:
+        $r28 = r1.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r29 = virtualinvoke $r28.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL typecodeNotSupported()>();
+
+        throw $r29;
+    }
+
+    private boolean equalMember(org.omg.CORBA.TypeCode, org.omg.CORBA.portable.InputStream, org.omg.CORBA.portable.InputStream)
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r12, $r14, $r29, $r40, $r43, $r46;
+        org.omg.CORBA_2_3.portable.InputStream r48, r49;
+        java.math.BigDecimal $r8, $r9;
+        byte $b6, $b9, $b16, $b17, $b20, $b21;
+        java.io.Serializable $r6, $r7;
+        org.omg.CORBA.TypeCodePackage.Bounds $r42;
+        org.omg.CORBA.Any $r21, $r23, $r38, $r39;
+        org.omg.CORBA.MARSHAL $r30;
+        org.omg.CORBA.Principal $r34, $r35;
+        long $l4, $l5, $l7, $l8;
+        short $s24, $s25, $s28, $s29;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r27;
+        java.lang.String $r10, $r11, $r18, $r19;
+        com.sun.corba.se.spi.orb.ORB $r20, $r22, $r26;
+        org.omg.CORBA.TCKind $r3;
+        org.omg.CORBA.Object $r32, $r33;
+        org.omg.CORBA.INTERNAL $r13, $r15, $r41, $r44, $r47;
+        org.omg.CORBA.portable.InputStream r4, r5;
+        org.omg.CORBA.TypeCodePackage.BadKind $r45;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19, $z20, $z21, $z22, $z23, $z24, $z25, $z26, $z27;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        float $f0, $f1;
+        org.omg.CORBA.TypeCode r1, $r2, $r16, $r17, $r24, $r25, $r28, $r31, $r36, $r37;
+        int $i0, $i1, $i10, $i11, $i12, $i13, $i14, $i15, $i22, $i23, $i26, $i27, i30, i31, i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i44;
+        double $d0, $d1;
+        char $c2, $c3, $c18, $c19;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        r1 := @parameter0: org.omg.CORBA.TypeCode;
+
+        r4 := @parameter1: org.omg.CORBA.portable.InputStream;
+
+        r5 := @parameter2: org.omg.CORBA.portable.InputStream;
+
+        $r2 = specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: org.omg.CORBA.TypeCode realType(org.omg.CORBA.TypeCode)>(r1);
+
+     label01:
+        $r3 = virtualinvoke $r2.<org.omg.CORBA.TypeCode: org.omg.CORBA.TCKind kind()>();
+
+        $i0 = virtualinvoke $r3.<org.omg.CORBA.TCKind: int value()>();
+
+        tableswitch($i0)
+        {
+            case 0: goto label02;
+            case 1: goto label02;
+            case 2: goto label03;
+            case 3: goto label06;
+            case 4: goto label09;
+            case 5: goto label12;
+            case 6: goto label15;
+            case 7: goto label18;
+            case 8: goto label21;
+            case 9: goto label24;
+            case 10: goto label30;
+            case 11: goto label33;
+            case 12: goto label35;
+            case 13: goto label49;
+            case 14: goto label47;
+            case 15: goto label57;
+            case 16: goto label62;
+            case 17: goto label51;
+            case 18: goto label37;
+            case 19: goto label68;
+            case 20: goto label73;
+            case 21: goto label80;
+            case 22: goto label57;
+            case 23: goto label41;
+            case 24: goto label44;
+            case 25: goto label81;
+            case 26: goto label27;
+            case 27: goto label39;
+            case 28: goto label54;
+            case 29: goto label78;
+            case 30: goto label78;
+            default: goto label82;
+        };
+
+     label02:
+        return 1;
+
+     label03:
+        $s28 = virtualinvoke r4.<org.omg.CORBA.portable.InputStream: short read_short()>();
+
+        $s29 = virtualinvoke r5.<org.omg.CORBA.portable.InputStream: short read_short()>();
+
+        $i33 = (int) $s28;
+
+        $i34 = (int) $s29;
+
+        if $i33 != $i34 goto label04;
+
+        $z14 = 1;
+
+        goto label05;
+
+     label04:
+        $z14 = 0;
+
+     label05:
+        return $z14;
+
+     label06:
+        $i26 = virtualinvoke r4.<org.omg.CORBA.portable.InputStream: int read_long()>();
+
+        $i27 = virtualinvoke r5.<org.omg.CORBA.portable.InputStream: int read_long()>();
+
+        if $i26 != $i27 goto label07;
+
+        $z15 = 1;
+
+        goto label08;
+
+     label07:
+        $z15 = 0;
+
+     label08:
+        return $z15;
+
+     label09:
+        $s24 = virtualinvoke r4.<org.omg.CORBA.portable.InputStream: short read_ushort()>();
+
+        $s25 = virtualinvoke r5.<org.omg.CORBA.portable.InputStream: short read_ushort()>();
+
+        $i35 = (int) $s24;
+
+        $i36 = (int) $s25;
+
+        if $i35 != $i36 goto label10;
+
+        $z16 = 1;
+
+        goto label11;
+
+     label10:
+        $z16 = 0;
+
+     label11:
+        return $z16;
+
+     label12:
+        $i22 = virtualinvoke r4.<org.omg.CORBA.portable.InputStream: int read_ulong()>();
+
+        $i23 = virtualinvoke r5.<org.omg.CORBA.portable.InputStream: int read_ulong()>();
+
+        if $i22 != $i23 goto label13;
+
+        $z17 = 1;
+
+        goto label14;
+
+     label13:
+        $z17 = 0;
+
+     label14:
+        return $z17;
+
+     label15:
+        $f0 = virtualinvoke r4.<org.omg.CORBA.portable.InputStream: float read_float()>();
+
+        $f1 = virtualinvoke r5.<org.omg.CORBA.portable.InputStream: float read_float()>();
+
+        $b21 = $f0 cmpl $f1;
+
+        if $b21 != 0 goto label16;
+
+        $z18 = 1;
+
+        goto label17;
+
+     label16:
+        $z18 = 0;
+
+     label17:
+        return $z18;
+
+     label18:
+        $d0 = virtualinvoke r4.<org.omg.CORBA.portable.InputStream: double read_double()>();
+
+        $d1 = virtualinvoke r5.<org.omg.CORBA.portable.InputStream: double read_double()>();
+
+        $b20 = $d0 cmpl $d1;
+
+        if $b20 != 0 goto label19;
+
+        $z19 = 1;
+
+        goto label20;
+
+     label19:
+        $z19 = 0;
+
+     label20:
+        return $z19;
+
+     label21:
+        $z12 = virtualinvoke r4.<org.omg.CORBA.portable.InputStream: boolean read_boolean()>();
+
+        $z13 = virtualinvoke r5.<org.omg.CORBA.portable.InputStream: boolean read_boolean()>();
+
+        if $z12 != $z13 goto label22;
+
+        $z20 = 1;
+
+        goto label23;
+
+     label22:
+        $z20 = 0;
+
+     label23:
+        return $z20;
+
+     label24:
+        $c18 = virtualinvoke r4.<org.omg.CORBA.portable.InputStream: char read_char()>();
+
+        $c19 = virtualinvoke r5.<org.omg.CORBA.portable.InputStream: char read_char()>();
+
+        $i37 = (int) $c18;
+
+        $i38 = (int) $c19;
+
+        if $i37 != $i38 goto label25;
+
+        $z21 = 1;
+
+        goto label26;
+
+     label25:
+        $z21 = 0;
+
+     label26:
+        return $z21;
+
+     label27:
+        $c2 = virtualinvoke r4.<org.omg.CORBA.portable.InputStream: char read_wchar()>();
+
+        $c3 = virtualinvoke r5.<org.omg.CORBA.portable.InputStream: char read_wchar()>();
+
+        $i39 = (int) $c2;
+
+        $i40 = (int) $c3;
+
+        if $i39 != $i40 goto label28;
+
+        $z22 = 1;
+
+        goto label29;
+
+     label28:
+        $z22 = 0;
+
+     label29:
+        return $z22;
+
+     label30:
+        $b16 = virtualinvoke r4.<org.omg.CORBA.portable.InputStream: byte read_octet()>();
+
+        $b17 = virtualinvoke r5.<org.omg.CORBA.portable.InputStream: byte read_octet()>();
+
+        $i41 = (int) $b16;
+
+        $i42 = (int) $b17;
+
+        if $i41 != $i42 goto label31;
+
+        $z23 = 1;
+
+        goto label32;
+
+     label31:
+        $z23 = 0;
+
+     label32:
+        return $z23;
+
+     label33:
+        $r38 = virtualinvoke r4.<org.omg.CORBA.portable.InputStream: org.omg.CORBA.Any read_any()>();
+
+        $r39 = virtualinvoke r5.<org.omg.CORBA.portable.InputStream: org.omg.CORBA.Any read_any()>();
+
+        $z11 = virtualinvoke $r38.<org.omg.CORBA.Any: boolean equal(org.omg.CORBA.Any)>($r39);
+
+     label34:
+        return $z11;
+
+     label35:
+        $r36 = virtualinvoke r4.<org.omg.CORBA.portable.InputStream: org.omg.CORBA.TypeCode read_TypeCode()>();
+
+        $r37 = virtualinvoke r5.<org.omg.CORBA.portable.InputStream: org.omg.CORBA.TypeCode read_TypeCode()>();
+
+        $z10 = virtualinvoke $r36.<org.omg.CORBA.TypeCode: boolean equal(org.omg.CORBA.TypeCode)>($r37);
+
+     label36:
+        return $z10;
+
+     label37:
+        $r18 = virtualinvoke r4.<org.omg.CORBA.portable.InputStream: java.lang.String read_string()>();
+
+        $r19 = virtualinvoke r5.<org.omg.CORBA.portable.InputStream: java.lang.String read_string()>();
+
+        $z4 = virtualinvoke $r18.<java.lang.String: boolean equals(java.lang.Object)>($r19);
+
+     label38:
+        return $z4;
+
+     label39:
+        $r10 = virtualinvoke r4.<org.omg.CORBA.portable.InputStream: java.lang.String read_wstring()>();
+
+        $r11 = virtualinvoke r5.<org.omg.CORBA.portable.InputStream: java.lang.String read_wstring()>();
+
+        $z1 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>($r11);
+
+     label40:
+        return $z1;
+
+     label41:
+        $l7 = virtualinvoke r4.<org.omg.CORBA.portable.InputStream: long read_longlong()>();
+
+        $l8 = virtualinvoke r5.<org.omg.CORBA.portable.InputStream: long read_longlong()>();
+
+        $b9 = $l7 cmp $l8;
+
+        if $b9 != 0 goto label42;
+
+        $z24 = 1;
+
+        goto label43;
+
+     label42:
+        $z24 = 0;
+
+     label43:
+        return $z24;
+
+     label44:
+        $l4 = virtualinvoke r4.<org.omg.CORBA.portable.InputStream: long read_ulonglong()>();
+
+        $l5 = virtualinvoke r5.<org.omg.CORBA.portable.InputStream: long read_ulonglong()>();
+
+        $b6 = $l4 cmp $l5;
+
+        if $b6 != 0 goto label45;
+
+        $z25 = 1;
+
+        goto label46;
+
+     label45:
+        $z25 = 0;
+
+     label46:
+        return $z25;
+
+     label47:
+        $r32 = virtualinvoke r4.<org.omg.CORBA.portable.InputStream: org.omg.CORBA.Object read_Object()>();
+
+        $r33 = virtualinvoke r5.<org.omg.CORBA.portable.InputStream: org.omg.CORBA.Object read_Object()>();
+
+        $z8 = virtualinvoke $r32.<java.lang.Object: boolean equals(java.lang.Object)>($r33);
+
+     label48:
+        return $z8;
+
+     label49:
+        $r34 = virtualinvoke r4.<org.omg.CORBA.portable.InputStream: org.omg.CORBA.Principal read_Principal()>();
+
+        $r35 = virtualinvoke r5.<org.omg.CORBA.portable.InputStream: org.omg.CORBA.Principal read_Principal()>();
+
+        $z9 = virtualinvoke $r34.<java.lang.Object: boolean equals(java.lang.Object)>($r35);
+
+     label50:
+        return $z9;
+
+     label51:
+        $i12 = virtualinvoke r4.<org.omg.CORBA.portable.InputStream: int read_long()>();
+
+        $i13 = virtualinvoke r5.<org.omg.CORBA.portable.InputStream: int read_long()>();
+
+        if $i12 != $i13 goto label52;
+
+        $z26 = 1;
+
+        goto label53;
+
+     label52:
+        $z26 = 0;
+
+     label53:
+        return $z26;
+
+     label54:
+        $r8 = virtualinvoke r4.<org.omg.CORBA.portable.InputStream: java.math.BigDecimal read_fixed()>();
+
+        $r9 = virtualinvoke r5.<org.omg.CORBA.portable.InputStream: java.math.BigDecimal read_fixed()>();
+
+        $i1 = virtualinvoke $r8.<java.math.BigDecimal: int compareTo(java.math.BigDecimal)>($r9);
+
+        if $i1 != 0 goto label55;
+
+        $z27 = 1;
+
+        goto label56;
+
+     label55:
+        $z27 = 0;
+
+     label56:
+        return $z27;
+
+     label57:
+        $i15 = virtualinvoke $r2.<org.omg.CORBA.TypeCode: int member_count()>();
+
+        i30 = 0;
+
+     label58:
+        if i30 >= $i15 goto label61;
+
+        $r31 = virtualinvoke $r2.<org.omg.CORBA.TypeCode: org.omg.CORBA.TypeCode member_type(int)>(i30);
+
+        $z7 = specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean equalMember(org.omg.CORBA.TypeCode,org.omg.CORBA.portable.InputStream,org.omg.CORBA.portable.InputStream)>($r31, r4, r5);
+
+        if $z7 != 0 goto label60;
+
+     label59:
+        return 0;
+
+     label60:
+        i30 = i30 + 1;
+
+        goto label58;
+
+     label61:
+        return 1;
+
+     label62:
+        $r20 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r21 = virtualinvoke $r20.<com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.Any create_any()>();
+
+        $r22 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r23 = virtualinvoke $r22.<com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.Any create_any()>();
+
+        $r24 = virtualinvoke $r2.<org.omg.CORBA.TypeCode: org.omg.CORBA.TypeCode discriminator_type()>();
+
+        virtualinvoke $r21.<org.omg.CORBA.Any: void read_value(org.omg.CORBA.portable.InputStream,org.omg.CORBA.TypeCode)>(r4, $r24);
+
+        $r25 = virtualinvoke $r2.<org.omg.CORBA.TypeCode: org.omg.CORBA.TypeCode discriminator_type()>();
+
+        virtualinvoke $r23.<org.omg.CORBA.Any: void read_value(org.omg.CORBA.portable.InputStream,org.omg.CORBA.TypeCode)>(r5, $r25);
+
+        $z5 = virtualinvoke $r21.<org.omg.CORBA.Any: boolean equal(org.omg.CORBA.Any)>($r23);
+
+        if $z5 != 0 goto label64;
+
+     label63:
+        return 0;
+
+     label64:
+        $r26 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r27 = staticinvoke <com.sun.corba.se.impl.corba.TypeCodeImpl: com.sun.corba.se.impl.corba.TypeCodeImpl convertToNative(com.sun.corba.se.spi.orb.ORB,org.omg.CORBA.TypeCode)>($r26, $r2);
+
+        $i14 = virtualinvoke $r27.<com.sun.corba.se.impl.corba.TypeCodeImpl: int currentUnionMemberIndex(org.omg.CORBA.Any)>($r21);
+
+        $i44 = (int) -1;
+
+        if $i14 != $i44 goto label65;
+
+        $r29 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r30 = virtualinvoke $r29.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.MARSHAL unionDiscriminatorError()>();
+
+        throw $r30;
+
+     label65:
+        $r28 = virtualinvoke $r2.<org.omg.CORBA.TypeCode: org.omg.CORBA.TypeCode member_type(int)>($i14);
+
+        $z6 = specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean equalMember(org.omg.CORBA.TypeCode,org.omg.CORBA.portable.InputStream,org.omg.CORBA.portable.InputStream)>($r28, r4, r5);
+
+        if $z6 != 0 goto label67;
+
+     label66:
+        return 0;
+
+     label67:
+        return 1;
+
+     label68:
+        $i11 = virtualinvoke r4.<org.omg.CORBA.portable.InputStream: int read_long()>();
+
+        virtualinvoke r5.<org.omg.CORBA.portable.InputStream: int read_long()>();
+
+        i31 = 0;
+
+     label69:
+        if i31 >= $i11 goto label72;
+
+        $r17 = virtualinvoke $r2.<org.omg.CORBA.TypeCode: org.omg.CORBA.TypeCode content_type()>();
+
+        $z3 = specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean equalMember(org.omg.CORBA.TypeCode,org.omg.CORBA.portable.InputStream,org.omg.CORBA.portable.InputStream)>($r17, r4, r5);
+
+        if $z3 != 0 goto label71;
+
+     label70:
+        return 0;
+
+     label71:
+        i31 = i31 + 1;
+
+        goto label69;
+
+     label72:
+        return 1;
+
+     label73:
+        $i10 = virtualinvoke $r2.<org.omg.CORBA.TypeCode: int member_count()>();
+
+        i32 = 0;
+
+     label74:
+        if i32 >= $i10 goto label77;
+
+        $r16 = virtualinvoke $r2.<org.omg.CORBA.TypeCode: org.omg.CORBA.TypeCode content_type()>();
+
+        $z2 = specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean equalMember(org.omg.CORBA.TypeCode,org.omg.CORBA.portable.InputStream,org.omg.CORBA.portable.InputStream)>($r16, r4, r5);
+
+        if $z2 != 0 goto label76;
+
+     label75:
+        return 0;
+
+     label76:
+        i32 = i32 + 1;
+
+        goto label74;
+
+     label77:
+        return 1;
+
+     label78:
+        r48 = (org.omg.CORBA_2_3.portable.InputStream) r4;
+
+        r49 = (org.omg.CORBA_2_3.portable.InputStream) r5;
+
+        $r6 = virtualinvoke r48.<org.omg.CORBA_2_3.portable.InputStream: java.io.Serializable read_value()>();
+
+        $r7 = virtualinvoke r49.<org.omg.CORBA_2_3.portable.InputStream: java.io.Serializable read_value()>();
+
+        $z0 = virtualinvoke $r6.<java.lang.Object: boolean equals(java.lang.Object)>($r7);
+
+     label79:
+        return $z0;
+
+     label80:
+        $r14 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r15 = virtualinvoke $r14.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL errorResolvingAlias()>();
+
+        throw $r15;
+
+     label81:
+        $r12 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r13 = virtualinvoke $r12.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL tkLongDoubleNotSupported()>();
+
+        throw $r13;
+
+     label82:
+        $r40 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r41 = virtualinvoke $r40.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL typecodeNotSupported()>();
+
+        throw $r41;
+
+     label83:
+        $r45 := @caughtexception;
+
+        $r46 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r47 = virtualinvoke $r46.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL badkindCannotOccur()>();
+
+        throw $r47;
+
+     label84:
+        $r42 := @caughtexception;
+
+        $r43 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r44 = virtualinvoke $r43.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL boundsCannotOccur()>();
+
+        throw $r44;
+
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label01 to label02 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label03 to label05 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label06 to label08 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label09 to label11 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label12 to label14 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label15 to label17 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label18 to label20 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label21 to label23 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label24 to label26 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label27 to label29 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label30 to label32 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label33 to label34 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label35 to label36 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label37 to label38 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label39 to label40 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label41 to label43 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label44 to label46 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label47 to label48 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label49 to label50 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label51 to label53 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label54 to label56 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label57 to label59 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label60 to label61 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label62 to label63 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label64 to label66 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label68 to label70 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label71 to label72 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label73 to label75 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label76 to label77 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label78 to label79 with label83;
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label80 to label83 with label83;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label01 to label02 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label03 to label05 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label06 to label08 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label09 to label11 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label12 to label14 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label15 to label17 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label18 to label20 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label21 to label23 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label24 to label26 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label27 to label29 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label30 to label32 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label33 to label34 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label35 to label36 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label37 to label38 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label39 to label40 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label41 to label43 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label44 to label46 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label47 to label48 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label49 to label50 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label51 to label53 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label54 to label56 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label57 to label59 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label60 to label61 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label62 to label63 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label64 to label66 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label68 to label70 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label71 to label72 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label73 to label75 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label76 to label77 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label78 to label79 with label84;
+        catch org.omg.CORBA.TypeCodePackage.Bounds from label80 to label83 with label84;
+    }
+
+    public org.omg.CORBA.portable.OutputStream create_output_stream()
+    {
+        org.omg.CORBA.portable.OutputStream $r4;
+        com.sun.corba.se.impl.corba.AnyImpl$1 $r2;
+        java.lang.Object $r3;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        com.sun.corba.se.spi.orb.ORB r1;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r2 = new com.sun.corba.se.impl.corba.AnyImpl$1;
+
+        specialinvoke $r2.<com.sun.corba.se.impl.corba.AnyImpl$1: void <init>(com.sun.corba.se.impl.corba.AnyImpl,com.sun.corba.se.spi.orb.ORB)>(r0, r1);
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        $r4 = (org.omg.CORBA.portable.OutputStream) $r3;
+
+        return $r4;
+    }
+
+    public org.omg.CORBA.portable.InputStream create_input_stream()
+    {
+        boolean[] $r1;
+        long $l1;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        org.omg.CORBA.TypeCode $r2, $r6;
+        com.sun.corba.se.spi.orb.ORB $r4;
+        org.omg.CORBA.portable.InputStream $r8;
+        org.omg.CORBA.TCKind $r3;
+        org.omg.CORBA.portable.OutputStream $r5;
+        int $i0;
+        java.lang.Object $r7;
+        boolean $z0;
+        com.sun.corba.se.impl.encoding.CDRInputStream $r9, $r10;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        $r1 = <com.sun.corba.se.impl.corba.AnyImpl: boolean[] isStreamed>;
+
+        $r2 = specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: org.omg.CORBA.TypeCode realType()>();
+
+        $r3 = virtualinvoke $r2.<org.omg.CORBA.TypeCode: org.omg.CORBA.TCKind kind()>();
+
+        $i0 = virtualinvoke $r3.<org.omg.CORBA.TCKind: int value()>();
+
+        $z0 = $r1[$i0];
+
+        if $z0 == 0 goto label1;
+
+        $r9 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.encoding.CDRInputStream stream>;
+
+        $r10 = virtualinvoke $r9.<com.sun.corba.se.impl.encoding.CDRInputStream: com.sun.corba.se.impl.encoding.CDRInputStream dup()>();
+
+        return $r10;
+
+     label1:
+        $r4 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r5 = virtualinvoke $r4.<com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.portable.OutputStream create_output_stream()>();
+
+        $r6 = specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: org.omg.CORBA.TypeCode realType()>();
+
+        $l1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: long value>;
+
+        $r7 = r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object>;
+
+        staticinvoke <com.sun.corba.se.impl.corba.TCUtility: void marshalIn(org.omg.CORBA.portable.OutputStream,org.omg.CORBA.TypeCode,long,java.lang.Object)>($r5, $r6, $l1, $r7);
+
+        $r8 = virtualinvoke $r5.<org.omg.CORBA.portable.OutputStream: org.omg.CORBA.portable.InputStream create_input_stream()>();
+
+        return $r8;
+    }
+
+    public void read_value(org.omg.CORBA.portable.InputStream, org.omg.CORBA.TypeCode)
+    {
+        org.omg.CORBA.INTERNAL $r23;
+        java.lang.Object[] r25;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r21;
+        org.omg.CORBA_2_3.portable.InputStream $r15;
+        long $l2;
+        org.omg.CORBA.TypeCode r1, $r4, $r11;
+        java.lang.Integer $r20;
+        org.omg.CORBA.portable.InputStream r10, $r17;
+        org.omg.CORBA.CompletionStatus $r22;
+        long[] r9;
+        org.omg.CORBA.portable.OutputStream $r14;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r3, $r16;
+        int $i0, $i1;
+        boolean $z0, $z1;
+        boolean[] $r6, $r7;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        com.sun.corba.se.spi.orb.ORB $r2, $r13;
+        org.omg.CORBA.TCKind $r5;
+        org.omg.CORBA_2_3.portable.OutputStream r24;
+        java.lang.Object $r8, $r12;
+        com.sun.corba.se.impl.encoding.CDRInputStream $r18, $r19;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        r10 := @parameter0: org.omg.CORBA.portable.InputStream;
+
+        r1 := @parameter1: org.omg.CORBA.TypeCode;
+
+        $r2 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r3 = staticinvoke <com.sun.corba.se.impl.corba.TypeCodeImpl: com.sun.corba.se.impl.corba.TypeCodeImpl convertToNative(com.sun.corba.se.spi.orb.ORB,org.omg.CORBA.TypeCode)>($r2, r1);
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r3;
+
+        $r4 = specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: org.omg.CORBA.TypeCode realType()>();
+
+        $r5 = virtualinvoke $r4.<org.omg.CORBA.TypeCode: org.omg.CORBA.TCKind kind()>();
+
+        $i0 = virtualinvoke $r5.<org.omg.CORBA.TCKind: int value()>();
+
+        $r6 = <com.sun.corba.se.impl.corba.AnyImpl: boolean[] isStreamed>;
+
+        $i1 = lengthof $r6;
+
+        if $i0 < $i1 goto label1;
+
+        $r21 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r22 = <org.omg.CORBA.CompletionStatus: org.omg.CORBA.CompletionStatus COMPLETED_MAYBE>;
+
+        $r20 = new java.lang.Integer;
+
+        specialinvoke $r20.<java.lang.Integer: void <init>(int)>($i0);
+
+        $r23 = virtualinvoke $r21.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL invalidIsstreamedTckind(org.omg.CORBA.CompletionStatus,java.lang.Object)>($r22, $r20);
+
+        throw $r23;
+
+     label1:
+        $r7 = <com.sun.corba.se.impl.corba.AnyImpl: boolean[] isStreamed>;
+
+        $z0 = $r7[$i0];
+
+        if $z0 == 0 goto label3;
+
+        $z1 = r10 instanceof com.sun.corba.se.impl.corba.AnyImpl$AnyInputStream;
+
+        if $z1 == 0 goto label2;
+
+        $r19 = (com.sun.corba.se.impl.encoding.CDRInputStream) r10;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.encoding.CDRInputStream stream> = $r19;
+
+        goto label4;
+
+     label2:
+        $r13 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r14 = virtualinvoke $r13.<com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.portable.OutputStream create_output_stream()>();
+
+        r24 = (org.omg.CORBA_2_3.portable.OutputStream) $r14;
+
+        $r16 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode>;
+
+        $r15 = (org.omg.CORBA_2_3.portable.InputStream) r10;
+
+        virtualinvoke $r16.<com.sun.corba.se.impl.corba.TypeCodeImpl: void copy(org.omg.CORBA.portable.InputStream,org.omg.CORBA.portable.OutputStream)>($r15, r24);
+
+        $r17 = virtualinvoke r24.<org.omg.CORBA_2_3.portable.OutputStream: org.omg.CORBA.portable.InputStream create_input_stream()>();
+
+        $r18 = (com.sun.corba.se.impl.encoding.CDRInputStream) $r17;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.encoding.CDRInputStream stream> = $r18;
+
+        goto label4;
+
+     label3:
+        r25 = newarray (java.lang.Object)[1];
+
+        $r8 = r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object>;
+
+        r25[0] = $r8;
+
+        r9 = newarray (long)[1];
+
+        $r11 = specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: org.omg.CORBA.TypeCode realType()>();
+
+        staticinvoke <com.sun.corba.se.impl.corba.TCUtility: void unmarshalIn(org.omg.CORBA.portable.InputStream,org.omg.CORBA.TypeCode,long[],java.lang.Object[])>(r10, $r11, r9, r25);
+
+        $l2 = r9[0];
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: long value> = $l2;
+
+        $r12 = r25[0];
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object> = $r12;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.encoding.CDRInputStream stream> = null;
+
+     label4:
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+    }
+
+    public void write_value(org.omg.CORBA.portable.OutputStream)
+    {
+        boolean[] $r1;
+        long $l1;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        org.omg.CORBA.TypeCode $r2, $r5;
+        org.omg.CORBA.TCKind $r3;
+        org.omg.CORBA.portable.OutputStream r4;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r8;
+        int $i0;
+        java.lang.Object $r6;
+        boolean $z0;
+        com.sun.corba.se.impl.encoding.CDRInputStream $r7, $r9;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        r4 := @parameter0: org.omg.CORBA.portable.OutputStream;
+
+        $r1 = <com.sun.corba.se.impl.corba.AnyImpl: boolean[] isStreamed>;
+
+        $r2 = specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: org.omg.CORBA.TypeCode realType()>();
+
+        $r3 = virtualinvoke $r2.<org.omg.CORBA.TypeCode: org.omg.CORBA.TCKind kind()>();
+
+        $i0 = virtualinvoke $r3.<org.omg.CORBA.TCKind: int value()>();
+
+        $z0 = $r1[$i0];
+
+        if $z0 == 0 goto label1;
+
+        $r8 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode>;
+
+        $r7 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.encoding.CDRInputStream stream>;
+
+        $r9 = virtualinvoke $r7.<com.sun.corba.se.impl.encoding.CDRInputStream: com.sun.corba.se.impl.encoding.CDRInputStream dup()>();
+
+        virtualinvoke $r8.<com.sun.corba.se.impl.corba.TypeCodeImpl: void copy(org.omg.CORBA.portable.InputStream,org.omg.CORBA.portable.OutputStream)>($r9, r4);
+
+        goto label2;
+
+     label1:
+        $r5 = specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: org.omg.CORBA.TypeCode realType()>();
+
+        $l1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: long value>;
+
+        $r6 = r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object>;
+
+        staticinvoke <com.sun.corba.se.impl.corba.TCUtility: void marshalIn(org.omg.CORBA.portable.OutputStream,org.omg.CORBA.TypeCode,long,java.lang.Object)>(r4, $r5, $l1, $r6);
+
+     label2:
+        return;
+    }
+
+    public void insert_Streamable(org.omg.CORBA.portable.Streamable)
+    {
+        org.omg.CORBA.portable.Streamable r1;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r4;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        org.omg.CORBA.TypeCode $r3;
+        com.sun.corba.se.spi.orb.ORB $r2;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        r1 := @parameter0: org.omg.CORBA.portable.Streamable;
+
+        $r2 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r3 = interfaceinvoke r1.<org.omg.CORBA.portable.Streamable: org.omg.CORBA.TypeCode _type()>();
+
+        $r4 = staticinvoke <com.sun.corba.se.impl.corba.TypeCodeImpl: com.sun.corba.se.impl.corba.TypeCodeImpl convertToNative(com.sun.corba.se.spi.orb.ORB,org.omg.CORBA.TypeCode)>($r2, $r3);
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r4;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object> = r1;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+    }
+
+    public org.omg.CORBA.portable.Streamable extract_Streamable()
+    {
+        java.lang.Object $r1;
+        org.omg.CORBA.portable.Streamable $r2;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object>;
+
+        $r2 = (org.omg.CORBA.portable.Streamable) $r1;
+
+        return $r2;
+    }
+
+    public void insert_short(short)
+    {
+        short s0;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r2;
+        long $l1;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        com.sun.corba.se.spi.orb.ORB $r1;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        s0 := @parameter0: short;
+
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.impl.corba.TypeCodeImpl get_primitive_tc(int)>(2);
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r2;
+
+        $l1 = (long) s0;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: long value> = $l1;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+    }
+
+    private java.lang.String getTCKindName(int)
+    {
+        java.lang.String[] $r5, $r6;
+        com.sun.corba.se.impl.corba.AnyImpl r8;
+        int i0, $i1;
+        java.lang.StringBuilder $r0, $r1, $r2, $r3;
+        java.lang.String $r4, $r7;
+
+        r8 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        i0 := @parameter0: int;
+
+        if i0 < 0 goto label1;
+
+        $r5 = <com.sun.corba.se.impl.corba.TypeCodeImpl: java.lang.String[] kindNames>;
+
+        $i1 = lengthof $r5;
+
+        if i0 >= $i1 goto label1;
+
+        $r6 = <com.sun.corba.se.impl.corba.TypeCodeImpl: java.lang.String[] kindNames>;
+
+        $r7 = $r6[i0];
+
+        return $r7;
+
+     label1:
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("UNKNOWN(");
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r4;
+    }
+
+    private void checkExtractBadOperation(int)
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r5, $r7;
+        org.omg.CORBA.BAD_OPERATION $r6, $r8;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        org.omg.CORBA.TypeCode $r1;
+        org.omg.CORBA.TCKind $r2;
+        int $i0, i1;
+        java.lang.String $r3, $r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        i1 := @parameter0: int;
+
+        $z0 = r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized>;
+
+        if $z0 != 0 goto label1;
+
+        $r7 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r8 = virtualinvoke $r7.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.BAD_OPERATION extractNotInitialized()>();
+
+        throw $r8;
+
+     label1:
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: org.omg.CORBA.TypeCode realType()>();
+
+        $r2 = virtualinvoke $r1.<org.omg.CORBA.TypeCode: org.omg.CORBA.TCKind kind()>();
+
+        $i0 = virtualinvoke $r2.<org.omg.CORBA.TCKind: int value()>();
+
+        if $i0 == i1 goto label2;
+
+        $r3 = specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.String getTCKindName(int)>($i0);
+
+        $r4 = specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.String getTCKindName(int)>(i1);
+
+        $r5 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r6 = virtualinvoke $r5.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.BAD_OPERATION extractWrongType(java.lang.Object,java.lang.Object)>($r4, $r3);
+
+        throw $r6;
+
+     label2:
+        return;
+    }
+
+    private void checkExtractBadOperationList(int[])
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r6, $r9;
+        org.omg.CORBA.BAD_OPERATION $r7, $r10;
+        org.omg.CORBA.TypeCode $r1;
+        java.util.ArrayList $r4;
+        int[] r3;
+        int $i0, $i1, $i2, $i3, $i4, i5, i6;
+        java.lang.String $r5, $r8;
+        boolean $z0;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        org.omg.CORBA.TCKind $r2;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        r3 := @parameter0: int[];
+
+        $z0 = r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized>;
+
+        if $z0 != 0 goto label1;
+
+        $r9 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r10 = virtualinvoke $r9.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.BAD_OPERATION extractNotInitialized()>();
+
+        throw $r10;
+
+     label1:
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: org.omg.CORBA.TypeCode realType()>();
+
+        $r2 = virtualinvoke $r1.<org.omg.CORBA.TypeCode: org.omg.CORBA.TCKind kind()>();
+
+        $i0 = virtualinvoke $r2.<org.omg.CORBA.TCKind: int value()>();
+
+        i5 = 0;
+
+     label2:
+        $i1 = lengthof r3;
+
+        if i5 >= $i1 goto label4;
+
+        $i4 = r3[i5];
+
+        if $i0 != $i4 goto label3;
+
+        return;
+
+     label3:
+        i5 = i5 + 1;
+
+        goto label2;
+
+     label4:
+        $r4 = new java.util.ArrayList;
+
+        specialinvoke $r4.<java.util.ArrayList: void <init>()>();
+
+        i6 = 0;
+
+     label5:
+        $i2 = lengthof r3;
+
+        if i6 >= $i2 goto label6;
+
+        $i3 = r3[i6];
+
+        $r8 = specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.String getTCKindName(int)>($i3);
+
+        interfaceinvoke $r4.<java.util.List: boolean add(java.lang.Object)>($r8);
+
+        i6 = i6 + 1;
+
+        goto label5;
+
+     label6:
+        $r5 = specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.String getTCKindName(int)>($i0);
+
+        $r6 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r7 = virtualinvoke $r6.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.BAD_OPERATION extractWrongTypeList(java.lang.Object,java.lang.Object)>($r4, $r5);
+
+        throw $r7;
+    }
+
+    public short extract_short()
+    {
+        short $s2;
+        int $i1;
+        long $l0;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: void checkExtractBadOperation(int)>(2);
+
+        $l0 = r0.<com.sun.corba.se.impl.corba.AnyImpl: long value>;
+
+        $i1 = (int) $l0;
+
+        $s2 = (short) $i1;
+
+        return $s2;
+    }
+
+    public void insert_long(int)
+    {
+        long $l2;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        org.omg.CORBA.TypeCode $r1;
+        com.sun.corba.se.spi.orb.ORB $r3;
+        org.omg.CORBA.TCKind $r2;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r4;
+        int $i0, i1;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        i1 := @parameter0: int;
+
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: org.omg.CORBA.TypeCode realType()>();
+
+        $r2 = virtualinvoke $r1.<org.omg.CORBA.TypeCode: org.omg.CORBA.TCKind kind()>();
+
+        $i0 = virtualinvoke $r2.<org.omg.CORBA.TCKind: int value()>();
+
+        if $i0 == 3 goto label1;
+
+        if $i0 == 17 goto label1;
+
+        $r3 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r4 = virtualinvoke $r3.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.impl.corba.TypeCodeImpl get_primitive_tc(int)>(3);
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r4;
+
+     label1:
+        $l2 = (long) i1;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: long value> = $l2;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+    }
+
+    public int extract_long()
+    {
+        int[] $r1;
+        int $i1;
+        long $l0;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        $r1 = newarray (int)[2];
+
+        $r1[0] = 3;
+
+        $r1[1] = 17;
+
+        specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: void checkExtractBadOperationList(int[])>($r1);
+
+        $l0 = r0.<com.sun.corba.se.impl.corba.AnyImpl: long value>;
+
+        $i1 = (int) $l0;
+
+        return $i1;
+    }
+
+    public void insert_ushort(short)
+    {
+        short s0;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r2;
+        long $l1;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        com.sun.corba.se.spi.orb.ORB $r1;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        s0 := @parameter0: short;
+
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.impl.corba.TypeCodeImpl get_primitive_tc(int)>(4);
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r2;
+
+        $l1 = (long) s0;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: long value> = $l1;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+    }
+
+    public short extract_ushort()
+    {
+        short $s2;
+        int $i1;
+        long $l0;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: void checkExtractBadOperation(int)>(4);
+
+        $l0 = r0.<com.sun.corba.se.impl.corba.AnyImpl: long value>;
+
+        $i1 = (int) $l0;
+
+        $s2 = (short) $i1;
+
+        return $s2;
+    }
+
+    public void insert_ulong(int)
+    {
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r2;
+        int i0;
+        long $l1;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        com.sun.corba.se.spi.orb.ORB $r1;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.impl.corba.TypeCodeImpl get_primitive_tc(int)>(5);
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r2;
+
+        $l1 = (long) i0;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: long value> = $l1;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+    }
+
+    public int extract_ulong()
+    {
+        int $i1;
+        long $l0;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: void checkExtractBadOperation(int)>(5);
+
+        $l0 = r0.<com.sun.corba.se.impl.corba.AnyImpl: long value>;
+
+        $i1 = (int) $l0;
+
+        return $i1;
+    }
+
+    public void insert_float(float)
+    {
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r2;
+        int $i0;
+        float f0;
+        long $l1;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        com.sun.corba.se.spi.orb.ORB $r1;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        f0 := @parameter0: float;
+
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.impl.corba.TypeCodeImpl get_primitive_tc(int)>(6);
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r2;
+
+        $i0 = staticinvoke <java.lang.Float: int floatToIntBits(float)>(f0);
+
+        $l1 = (long) $i0;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: long value> = $l1;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+    }
+
+    public float extract_float()
+    {
+        int $i1;
+        float $f0;
+        long $l0;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: void checkExtractBadOperation(int)>(6);
+
+        $l0 = r0.<com.sun.corba.se.impl.corba.AnyImpl: long value>;
+
+        $i1 = (int) $l0;
+
+        $f0 = staticinvoke <java.lang.Float: float intBitsToFloat(int)>($i1);
+
+        return $f0;
+    }
+
+    public void insert_double(double)
+    {
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r2;
+        long $l0;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        com.sun.corba.se.spi.orb.ORB $r1;
+        double d0;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        d0 := @parameter0: double;
+
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.impl.corba.TypeCodeImpl get_primitive_tc(int)>(7);
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r2;
+
+        $l0 = staticinvoke <java.lang.Double: long doubleToLongBits(double)>(d0);
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: long value> = $l0;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+    }
+
+    public double extract_double()
+    {
+        long $l0;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        double $d0;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: void checkExtractBadOperation(int)>(7);
+
+        $l0 = r0.<com.sun.corba.se.impl.corba.AnyImpl: long value>;
+
+        $d0 = staticinvoke <java.lang.Double: double longBitsToDouble(long)>($l0);
+
+        return $d0;
+    }
+
+    public void insert_longlong(long)
+    {
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r2;
+        long l0;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        com.sun.corba.se.spi.orb.ORB $r1;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        l0 := @parameter0: long;
+
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.impl.corba.TypeCodeImpl get_primitive_tc(int)>(23);
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r2;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: long value> = l0;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+    }
+
+    public long extract_longlong()
+    {
+        long $l0;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: void checkExtractBadOperation(int)>(23);
+
+        $l0 = r0.<com.sun.corba.se.impl.corba.AnyImpl: long value>;
+
+        return $l0;
+    }
+
+    public void insert_ulonglong(long)
+    {
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r2;
+        long l0;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        com.sun.corba.se.spi.orb.ORB $r1;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        l0 := @parameter0: long;
+
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.impl.corba.TypeCodeImpl get_primitive_tc(int)>(24);
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r2;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: long value> = l0;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+    }
+
+    public long extract_ulonglong()
+    {
+        long $l0;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: void checkExtractBadOperation(int)>(24);
+
+        $l0 = r0.<com.sun.corba.se.impl.corba.AnyImpl: long value>;
+
+        return $l0;
+    }
+
+    public void insert_boolean(boolean)
+    {
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r2;
+        long $l0;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        com.sun.corba.se.spi.orb.ORB $r1;
+        boolean z0;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.impl.corba.TypeCodeImpl get_primitive_tc(int)>(8);
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r2;
+
+        if z0 == 0 goto label1;
+
+        $l0 = 1L;
+
+        goto label2;
+
+     label1:
+        $l0 = 0L;
+
+     label2:
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: long value> = $l0;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+    }
+
+    public boolean extract_boolean()
+    {
+        byte $b1;
+        long $l0;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: void checkExtractBadOperation(int)>(8);
+
+        $l0 = r0.<com.sun.corba.se.impl.corba.AnyImpl: long value>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        $z0 = 0;
+
+        goto label2;
+
+     label1:
+        $z0 = 1;
+
+     label2:
+        return $z0;
+    }
+
+    public void insert_char(char)
+    {
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r2;
+        char c0;
+        long $l1;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        com.sun.corba.se.spi.orb.ORB $r1;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        c0 := @parameter0: char;
+
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.impl.corba.TypeCodeImpl get_primitive_tc(int)>(9);
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r2;
+
+        $l1 = (long) c0;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: long value> = $l1;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+    }
+
+    public char extract_char()
+    {
+        int $i1;
+        long $l0;
+        char $c2;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: void checkExtractBadOperation(int)>(9);
+
+        $l0 = r0.<com.sun.corba.se.impl.corba.AnyImpl: long value>;
+
+        $i1 = (int) $l0;
+
+        $c2 = (char) $i1;
+
+        return $c2;
+    }
+
+    public void insert_wchar(char)
+    {
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r2;
+        char c0;
+        long $l1;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        com.sun.corba.se.spi.orb.ORB $r1;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        c0 := @parameter0: char;
+
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.impl.corba.TypeCodeImpl get_primitive_tc(int)>(26);
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r2;
+
+        $l1 = (long) c0;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: long value> = $l1;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+    }
+
+    public char extract_wchar()
+    {
+        int $i1;
+        long $l0;
+        char $c2;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: void checkExtractBadOperation(int)>(26);
+
+        $l0 = r0.<com.sun.corba.se.impl.corba.AnyImpl: long value>;
+
+        $i1 = (int) $l0;
+
+        $c2 = (char) $i1;
+
+        return $c2;
+    }
+
+    public void insert_octet(byte)
+    {
+        byte b0;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r2;
+        long $l1;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        com.sun.corba.se.spi.orb.ORB $r1;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        b0 := @parameter0: byte;
+
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.impl.corba.TypeCodeImpl get_primitive_tc(int)>(10);
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r2;
+
+        $l1 = (long) b0;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: long value> = $l1;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+    }
+
+    public byte extract_octet()
+    {
+        byte $b2;
+        int $i1;
+        long $l0;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: void checkExtractBadOperation(int)>(10);
+
+        $l0 = r0.<com.sun.corba.se.impl.corba.AnyImpl: long value>;
+
+        $i1 = (int) $l0;
+
+        $b2 = (byte) $i1;
+
+        return $b2;
+    }
+
+    public void insert_string(java.lang.String)
+    {
+        org.omg.CORBA.INTERNAL $r14;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r9, $r13;
+        org.omg.CORBA.BAD_OPERATION $r11;
+        java.lang.Integer $r8, $r10;
+        org.omg.CORBA.TypeCodePackage.BadKind $r12;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r1, $r5, $r7;
+        int $i0, $i1, $i2;
+        java.lang.String r6;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        com.sun.corba.se.spi.orb.ORB $r4;
+        org.omg.CORBA.TCKind $r2, $r3;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        r6 := @parameter0: java.lang.String;
+
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.corba.TypeCodeImpl: org.omg.CORBA.TCKind kind()>();
+
+        $r3 = <org.omg.CORBA.TCKind: org.omg.CORBA.TCKind tk_string>;
+
+        if $r2 != $r3 goto label6;
+
+     label1:
+        $r7 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode>;
+
+        $i0 = virtualinvoke $r7.<com.sun.corba.se.impl.corba.TypeCodeImpl: int length()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r12 := @caughtexception;
+
+        $r13 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r14 = virtualinvoke $r13.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL badkindCannotOccur()>();
+
+        throw $r14;
+
+     label4:
+        if $i0 == 0 goto label5;
+
+        if r6 == null goto label5;
+
+        $i1 = virtualinvoke r6.<java.lang.String: int length()>();
+
+        if $i1 <= $i0 goto label5;
+
+        $r9 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r8 = new java.lang.Integer;
+
+        $i2 = virtualinvoke r6.<java.lang.String: int length()>();
+
+        specialinvoke $r8.<java.lang.Integer: void <init>(int)>($i2);
+
+        $r10 = new java.lang.Integer;
+
+        specialinvoke $r10.<java.lang.Integer: void <init>(int)>($i0);
+
+        $r11 = virtualinvoke $r9.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.BAD_OPERATION badStringBounds(java.lang.Object,java.lang.Object)>($r8, $r10);
+
+        throw $r11;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r4 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r5 = virtualinvoke $r4.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.impl.corba.TypeCodeImpl get_primitive_tc(int)>(18);
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r5;
+
+     label7:
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object> = r6;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label1 to label2 with label3;
+    }
+
+    public java.lang.String extract_string()
+    {
+        java.lang.Object $r1;
+        java.lang.String $r2;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: void checkExtractBadOperation(int)>(18);
+
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object>;
+
+        $r2 = (java.lang.String) $r1;
+
+        return $r2;
+    }
+
+    public void insert_wstring(java.lang.String)
+    {
+        org.omg.CORBA.INTERNAL $r14;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r9, $r13;
+        org.omg.CORBA.BAD_OPERATION $r11;
+        java.lang.Integer $r8, $r10;
+        org.omg.CORBA.TypeCodePackage.BadKind $r12;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r1, $r5, $r7;
+        int $i0, $i1, $i2;
+        java.lang.String r6;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        com.sun.corba.se.spi.orb.ORB $r4;
+        org.omg.CORBA.TCKind $r2, $r3;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        r6 := @parameter0: java.lang.String;
+
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.corba.TypeCodeImpl: org.omg.CORBA.TCKind kind()>();
+
+        $r3 = <org.omg.CORBA.TCKind: org.omg.CORBA.TCKind tk_wstring>;
+
+        if $r2 != $r3 goto label6;
+
+     label1:
+        $r7 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode>;
+
+        $i0 = virtualinvoke $r7.<com.sun.corba.se.impl.corba.TypeCodeImpl: int length()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r12 := @caughtexception;
+
+        $r13 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r14 = virtualinvoke $r13.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL badkindCannotOccur()>();
+
+        throw $r14;
+
+     label4:
+        if $i0 == 0 goto label5;
+
+        if r6 == null goto label5;
+
+        $i1 = virtualinvoke r6.<java.lang.String: int length()>();
+
+        if $i1 <= $i0 goto label5;
+
+        $r9 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r8 = new java.lang.Integer;
+
+        $i2 = virtualinvoke r6.<java.lang.String: int length()>();
+
+        specialinvoke $r8.<java.lang.Integer: void <init>(int)>($i2);
+
+        $r10 = new java.lang.Integer;
+
+        specialinvoke $r10.<java.lang.Integer: void <init>(int)>($i0);
+
+        $r11 = virtualinvoke $r9.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.BAD_OPERATION badStringBounds(java.lang.Object,java.lang.Object)>($r8, $r10);
+
+        throw $r11;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r4 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r5 = virtualinvoke $r4.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.impl.corba.TypeCodeImpl get_primitive_tc(int)>(27);
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r5;
+
+     label7:
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object> = r6;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label1 to label2 with label3;
+    }
+
+    public java.lang.String extract_wstring()
+    {
+        java.lang.Object $r1;
+        java.lang.String $r2;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: void checkExtractBadOperation(int)>(27);
+
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object>;
+
+        $r2 = (java.lang.String) $r1;
+
+        return $r2;
+    }
+
+    public void insert_any(org.omg.CORBA.Any)
+    {
+        org.omg.CORBA.Any r3;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r2;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        com.sun.corba.se.spi.orb.ORB $r1;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        r3 := @parameter0: org.omg.CORBA.Any;
+
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.impl.corba.TypeCodeImpl get_primitive_tc(int)>(11);
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r2;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object> = r3;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.encoding.CDRInputStream stream> = null;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+    }
+
+    public org.omg.CORBA.Any extract_any()
+    {
+        java.lang.Object $r1;
+        org.omg.CORBA.Any $r2;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: void checkExtractBadOperation(int)>(11);
+
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object>;
+
+        $r2 = (org.omg.CORBA.Any) $r1;
+
+        return $r2;
+    }
+
+    public void insert_Object(org.omg.CORBA.Object)
+    {
+        org.omg.CORBA.MARSHAL $r6;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r2;
+        java.lang.String[] $r7;
+        com.sun.corba.se.impl.corba.AnyImpl r1;
+        com.sun.corba.se.spi.orb.ORB $r10, $r11;
+        org.omg.CORBA.CompletionStatus $r3;
+        org.omg.CORBA.Object r0;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r8, $r12;
+        java.lang.Class $r4;
+        java.lang.String $r5, $r9;
+        boolean $z0;
+
+        r1 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        r0 := @parameter0: org.omg.CORBA.Object;
+
+        if r0 != null goto label1;
+
+        $r11 = r1.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r12 = virtualinvoke $r11.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.impl.corba.TypeCodeImpl get_primitive_tc(int)>(14);
+
+        r1.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r12;
+
+        goto label3;
+
+     label1:
+        $z0 = staticinvoke <com.sun.corba.se.spi.presentation.rmi.StubAdapter: boolean isStub(java.lang.Object)>(r0);
+
+        if $z0 == 0 goto label2;
+
+        $r7 = staticinvoke <com.sun.corba.se.spi.presentation.rmi.StubAdapter: java.lang.String[] getTypeIds(java.lang.Object)>(r0);
+
+        $r8 = new com.sun.corba.se.impl.corba.TypeCodeImpl;
+
+        $r10 = r1.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r9 = $r7[0];
+
+        specialinvoke $r8.<com.sun.corba.se.impl.corba.TypeCodeImpl: void <init>(com.sun.corba.se.spi.orb.ORB,int,java.lang.String,java.lang.String)>($r10, 14, $r9, "");
+
+        r1.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r8;
+
+        goto label3;
+
+     label2:
+        $r2 = r1.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r3 = <org.omg.CORBA.CompletionStatus: org.omg.CORBA.CompletionStatus COMPLETED_MAYBE>;
+
+        $r4 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.Class: java.lang.String getName()>();
+
+        $r6 = virtualinvoke $r2.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.MARSHAL badInsertobjParam(org.omg.CORBA.CompletionStatus,java.lang.Object)>($r3, $r5);
+
+        throw $r6;
+
+     label3:
+        r1.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object> = r0;
+
+        r1.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+    }
+
+    public void insert_Object(org.omg.CORBA.Object, org.omg.CORBA.TypeCode)
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r7, $r10;
+        org.omg.CORBA.BAD_OPERATION $r8, $r11;
+        org.omg.CORBA.TypeCode r0;
+        com.sun.corba.se.impl.corba.AnyImpl r2;
+        com.sun.corba.se.spi.orb.ORB $r3;
+        java.lang.Exception $r9;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r4;
+        org.omg.CORBA.Object r5;
+        java.lang.String $r1, $r6;
+        boolean $z0, $z1;
+
+        r2 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        r5 := @parameter0: org.omg.CORBA.Object;
+
+        r0 := @parameter1: org.omg.CORBA.TypeCode;
+
+     label1:
+        $r1 = virtualinvoke r0.<org.omg.CORBA.TypeCode: java.lang.String id()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("IDL:omg.org/CORBA/Object:1.0");
+
+        if $z0 != 0 goto label2;
+
+        $r6 = virtualinvoke r0.<org.omg.CORBA.TypeCode: java.lang.String id()>();
+
+        $z1 = interfaceinvoke r5.<org.omg.CORBA.Object: boolean _is_a(java.lang.String)>($r6);
+
+        if $z1 == 0 goto label3;
+
+     label2:
+        $r3 = r2.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r4 = staticinvoke <com.sun.corba.se.impl.corba.TypeCodeImpl: com.sun.corba.se.impl.corba.TypeCodeImpl convertToNative(com.sun.corba.se.spi.orb.ORB,org.omg.CORBA.TypeCode)>($r3, r0);
+
+        r2.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r4;
+
+        r2.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object> = r5;
+
+        goto label4;
+
+     label3:
+        $r7 = r2.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r8 = virtualinvoke $r7.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.BAD_OPERATION insertObjectIncompatible()>();
+
+        throw $r8;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r9 := @caughtexception;
+
+        $r10 = r2.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r11 = virtualinvoke $r10.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.BAD_OPERATION insertObjectFailed(java.lang.Throwable)>($r9);
+
+        throw $r11;
+
+     label6:
+        r2.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+
+        catch java.lang.Exception from label1 to label4 with label5;
+    }
+
+    public org.omg.CORBA.Object extract_Object()
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r6, $r8, $r11;
+        org.omg.CORBA.BAD_OPERATION $r7, $r9, $r12;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r2, $r4;
+        java.lang.String $r3, $r5;
+        boolean $z0, $z1, $z2;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        java.lang.Exception $r10;
+        org.omg.CORBA.Object r13;
+        java.lang.Object $r1;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        $z0 = r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized>;
+
+        if $z0 != 0 goto label1;
+
+        $r8 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r9 = virtualinvoke $r8.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.BAD_OPERATION extractNotInitialized()>();
+
+        throw $r9;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object>;
+
+        r13 = (org.omg.CORBA.Object) $r1;
+
+        $r2 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode>;
+
+        $r3 = virtualinvoke $r2.<com.sun.corba.se.impl.corba.TypeCodeImpl: java.lang.String id()>();
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("IDL:omg.org/CORBA/Object:1.0");
+
+        if $z1 != 0 goto label2;
+
+        $r4 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode>;
+
+        $r5 = virtualinvoke $r4.<com.sun.corba.se.impl.corba.TypeCodeImpl: java.lang.String id()>();
+
+        $z2 = interfaceinvoke r13.<org.omg.CORBA.Object: boolean _is_a(java.lang.String)>($r5);
+
+        if $z2 == 0 goto label3;
+
+     label2:
+        return r13;
+
+     label3:
+        $r6 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r7 = virtualinvoke $r6.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.BAD_OPERATION extractObjectIncompatible()>();
+
+        throw $r7;
+
+     label4:
+        $r10 := @caughtexception;
+
+        $r11 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r12 = virtualinvoke $r11.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.BAD_OPERATION extractObjectFailed(java.lang.Throwable)>($r10);
+
+        throw $r12;
+
+        catch java.lang.Exception from label1 to label2 with label4;
+        catch java.lang.Exception from label3 to label4 with label4;
+    }
+
+    public void insert_TypeCode(org.omg.CORBA.TypeCode)
+    {
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r2;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        org.omg.CORBA.TypeCode r3;
+        com.sun.corba.se.spi.orb.ORB $r1;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        r3 := @parameter0: org.omg.CORBA.TypeCode;
+
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.impl.corba.TypeCodeImpl get_primitive_tc(int)>(12);
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r2;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object> = r3;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+    }
+
+    public org.omg.CORBA.TypeCode extract_TypeCode()
+    {
+        java.lang.Object $r1;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        org.omg.CORBA.TypeCode $r2;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: void checkExtractBadOperation(int)>(12);
+
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object>;
+
+        $r2 = (org.omg.CORBA.TypeCode) $r1;
+
+        return $r2;
+    }
+
+    public void insert_Principal(org.omg.CORBA.Principal)
+    {
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r2;
+        org.omg.CORBA.Principal r3;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        com.sun.corba.se.spi.orb.ORB $r1;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        r3 := @parameter0: org.omg.CORBA.Principal;
+
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.impl.corba.TypeCodeImpl get_primitive_tc(int)>(13);
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r2;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object> = r3;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+    }
+
+    public org.omg.CORBA.Principal extract_Principal()
+    {
+        java.lang.Object $r1;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        org.omg.CORBA.Principal $r2;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: void checkExtractBadOperation(int)>(13);
+
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object>;
+
+        $r2 = (org.omg.CORBA.Principal) $r1;
+
+        return $r2;
+    }
+
+    public java.io.Serializable extract_Value()
+    {
+        int[] $r1;
+        java.lang.Object $r2;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        java.io.Serializable $r3;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        $r1 = newarray (int)[3];
+
+        $r1[0] = 29;
+
+        $r1[1] = 30;
+
+        $r1[2] = 32;
+
+        specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: void checkExtractBadOperationList(int[])>($r1);
+
+        $r2 = r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object>;
+
+        $r3 = (java.io.Serializable) $r2;
+
+        return $r3;
+    }
+
+    public void insert_Value(java.io.Serializable)
+    {
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        org.omg.CORBA.TypeCode r9;
+        com.sun.corba.se.spi.orb.ORB $r4, $r5, $r8;
+        java.io.Serializable r1;
+        org.omg.CORBA.ORB $r3;
+        org.omg.CORBA.TCKind $r7;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r6;
+        java.lang.Class $r2;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        r1 := @parameter0: java.io.Serializable;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object> = r1;
+
+        if r1 != null goto label1;
+
+        $r8 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r7 = <org.omg.CORBA.TCKind: org.omg.CORBA.TCKind tk_value>;
+
+        r9 = virtualinvoke $r8.<com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.TypeCode get_primitive_tc(org.omg.CORBA.TCKind)>($r7);
+
+        goto label2;
+
+     label1:
+        $r2 = virtualinvoke r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = staticinvoke <com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.ORB init()>();
+
+        $r4 = (com.sun.corba.se.spi.orb.ORB) $r3;
+
+        r9 = virtualinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: org.omg.CORBA.TypeCode createTypeCodeForClass(java.lang.Class,com.sun.corba.se.spi.orb.ORB)>($r2, $r4);
+
+     label2:
+        $r5 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r6 = staticinvoke <com.sun.corba.se.impl.corba.TypeCodeImpl: com.sun.corba.se.impl.corba.TypeCodeImpl convertToNative(com.sun.corba.se.spi.orb.ORB,org.omg.CORBA.TypeCode)>($r5, r9);
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r6;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+    }
+
+    public void insert_Value(java.io.Serializable, org.omg.CORBA.TypeCode)
+    {
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r4;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        org.omg.CORBA.TypeCode r2;
+        com.sun.corba.se.spi.orb.ORB $r3;
+        java.io.Serializable r1;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        r1 := @parameter0: java.io.Serializable;
+
+        r2 := @parameter1: org.omg.CORBA.TypeCode;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object> = r1;
+
+        $r3 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r4 = staticinvoke <com.sun.corba.se.impl.corba.TypeCodeImpl: com.sun.corba.se.impl.corba.TypeCodeImpl convertToNative(com.sun.corba.se.spi.orb.ORB,org.omg.CORBA.TypeCode)>($r3, r2);
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r4;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+    }
+
+    public void insert_fixed(java.math.BigDecimal)
+    {
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        org.omg.CORBA.TypeCode $r4;
+        com.sun.corba.se.spi.orb.ORB $r2, $r3;
+        java.math.BigDecimal r1;
+        short $s0, $s1;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r5;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        r1 := @parameter0: java.math.BigDecimal;
+
+        $r2 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r3 = r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $s0 = staticinvoke <com.sun.corba.se.impl.corba.TypeCodeImpl: short digits(java.math.BigDecimal)>(r1);
+
+        $s1 = staticinvoke <com.sun.corba.se.impl.corba.TypeCodeImpl: short scale(java.math.BigDecimal)>(r1);
+
+        $r4 = virtualinvoke $r3.<com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.TypeCode create_fixed_tc(short,short)>($s0, $s1);
+
+        $r5 = staticinvoke <com.sun.corba.se.impl.corba.TypeCodeImpl: com.sun.corba.se.impl.corba.TypeCodeImpl convertToNative(com.sun.corba.se.spi.orb.ORB,org.omg.CORBA.TypeCode)>($r2, $r4);
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r5;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object> = r1;
+
+        r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+    }
+
+    public void insert_fixed(java.math.BigDecimal, org.omg.CORBA.TypeCode)
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r3, $r8;
+        org.omg.CORBA.BAD_OPERATION $r4, $r9;
+        org.omg.CORBA.TypeCode r1;
+        java.math.BigDecimal r0;
+        short $s0, $s1, $s2, $s3;
+        org.omg.CORBA.TypeCodePackage.BadKind $r7;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r6;
+        int $i4, $i5, $i6, $i7;
+        com.sun.corba.se.impl.corba.AnyImpl r2;
+        com.sun.corba.se.spi.orb.ORB $r5;
+
+        r2 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        r0 := @parameter0: java.math.BigDecimal;
+
+        r1 := @parameter1: org.omg.CORBA.TypeCode;
+
+     label1:
+        $s0 = staticinvoke <com.sun.corba.se.impl.corba.TypeCodeImpl: short digits(java.math.BigDecimal)>(r0);
+
+        $s1 = virtualinvoke r1.<org.omg.CORBA.TypeCode: short fixed_digits()>();
+
+        $i4 = (int) $s0;
+
+        $i5 = (int) $s1;
+
+        if $i4 > $i5 goto label2;
+
+        $s2 = staticinvoke <com.sun.corba.se.impl.corba.TypeCodeImpl: short scale(java.math.BigDecimal)>(r0);
+
+        $s3 = virtualinvoke r1.<org.omg.CORBA.TypeCode: short fixed_scale()>();
+
+        $i6 = (int) $s2;
+
+        $i7 = (int) $s3;
+
+        if $i6 <= $i7 goto label3;
+
+     label2:
+        $r3 = r2.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r4 = virtualinvoke $r3.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.BAD_OPERATION fixedNotMatch()>();
+
+        throw $r4;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r7 := @caughtexception;
+
+        $r8 = r2.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r9 = virtualinvoke $r8.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.BAD_OPERATION fixedBadTypecode(java.lang.Throwable)>($r7);
+
+        throw $r9;
+
+     label5:
+        $r5 = r2.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r6 = staticinvoke <com.sun.corba.se.impl.corba.TypeCodeImpl: com.sun.corba.se.impl.corba.TypeCodeImpl convertToNative(com.sun.corba.se.spi.orb.ORB,org.omg.CORBA.TypeCode)>($r5, r1);
+
+        r2.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.corba.TypeCodeImpl typeCode> = $r6;
+
+        r2.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object> = r0;
+
+        r2.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized> = 1;
+
+        return;
+
+        catch org.omg.CORBA.TypeCodePackage.BadKind from label1 to label3 with label4;
+    }
+
+    public java.math.BigDecimal extract_fixed()
+    {
+        java.math.BigDecimal $r2;
+        java.lang.Object $r1;
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        specialinvoke r0.<com.sun.corba.se.impl.corba.AnyImpl: void checkExtractBadOperation(int)>(28);
+
+        $r1 = r0.<com.sun.corba.se.impl.corba.AnyImpl: java.lang.Object object>;
+
+        $r2 = (java.math.BigDecimal) $r1;
+
+        return $r2;
+    }
+
+    public org.omg.CORBA.TypeCode createTypeCodeForClass(java.lang.Class, com.sun.corba.se.spi.orb.ORB)
+    {
+        org.omg.CORBA.TypeCode $r5, $r6, $r8, $r11, $r13, r14;
+        com.sun.corba.se.impl.orbutil.RepositoryIdStrings $r3;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r2, r15;
+        javax.rmi.CORBA.ValueHandler $r4;
+        java.lang.String $r7, $r12;
+        boolean $z0, $z1;
+        com.sun.corba.se.impl.corba.AnyImpl r10;
+        com.sun.corba.se.spi.orb.ORB r0;
+        java.lang.Class r1, $r9;
+
+        r10 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        r1 := @parameter0: java.lang.Class;
+
+        r0 := @parameter1: com.sun.corba.se.spi.orb.ORB;
+
+        $r2 = virtualinvoke r0.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.impl.corba.TypeCodeImpl getTypeCodeForClass(java.lang.Class)>(r1);
+
+        if $r2 == null goto label1;
+
+        return $r2;
+
+     label1:
+        $r3 = staticinvoke <com.sun.corba.se.impl.orbutil.RepositoryIdFactory: com.sun.corba.se.impl.orbutil.RepositoryIdStrings getRepIdStringsFactory()>();
+
+        $z0 = virtualinvoke r1.<java.lang.Class: boolean isArray()>();
+
+        if $z0 == 0 goto label4;
+
+        $r9 = virtualinvoke r1.<java.lang.Class: java.lang.Class getComponentType()>();
+
+        $z1 = virtualinvoke $r9.<java.lang.Class: boolean isPrimitive()>();
+
+        if $z1 == 0 goto label2;
+
+        r14 = specialinvoke r10.<com.sun.corba.se.impl.corba.AnyImpl: org.omg.CORBA.TypeCode getPrimitiveTypeCodeForClass(java.lang.Class,com.sun.corba.se.spi.orb.ORB)>($r9, r0);
+
+        goto label3;
+
+     label2:
+        r14 = virtualinvoke r10.<com.sun.corba.se.impl.corba.AnyImpl: org.omg.CORBA.TypeCode createTypeCodeForClass(java.lang.Class,com.sun.corba.se.spi.orb.ORB)>($r9, r0);
+
+     label3:
+        $r11 = virtualinvoke r0.<com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.TypeCode create_sequence_tc(int,org.omg.CORBA.TypeCode)>(0, r14);
+
+        $r12 = interfaceinvoke $r3.<com.sun.corba.se.impl.orbutil.RepositoryIdStrings: java.lang.String createForJavaType(java.lang.Class)>(r1);
+
+        $r13 = virtualinvoke r0.<com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.TypeCode create_value_box_tc(java.lang.String,java.lang.String,org.omg.CORBA.TypeCode)>($r12, "Sequence", $r11);
+
+        return $r13;
+
+     label4:
+        if r1 != class "Ljava/lang/String;" goto label5;
+
+        $r6 = virtualinvoke r0.<com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.TypeCode create_string_tc(int)>(0);
+
+        $r7 = interfaceinvoke $r3.<com.sun.corba.se.impl.orbutil.RepositoryIdStrings: java.lang.String createForJavaType(java.lang.Class)>(r1);
+
+        $r8 = virtualinvoke r0.<com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.TypeCode create_value_box_tc(java.lang.String,java.lang.String,org.omg.CORBA.TypeCode)>($r7, "StringValue", $r6);
+
+        return $r8;
+
+     label5:
+        $r4 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: javax.rmi.CORBA.ValueHandler createValueHandler()>();
+
+        $r5 = staticinvoke <com.sun.corba.se.impl.io.ValueUtility: org.omg.CORBA.TypeCode createTypeCodeForClass(org.omg.CORBA.ORB,java.lang.Class,javax.rmi.CORBA.ValueHandler)>(r0, r1, $r4);
+
+        r15 = (com.sun.corba.se.impl.corba.TypeCodeImpl) $r5;
+
+        virtualinvoke r15.<com.sun.corba.se.impl.corba.TypeCodeImpl: void setCaching(boolean)>(1);
+
+        virtualinvoke r0.<com.sun.corba.se.spi.orb.ORB: void setTypeCodeForClass(java.lang.Class,com.sun.corba.se.impl.corba.TypeCodeImpl)>(r1, r15);
+
+        return r15;
+    }
+
+    private org.omg.CORBA.TypeCode getPrimitiveTypeCodeForClass(java.lang.Class, com.sun.corba.se.spi.orb.ORB)
+    {
+        com.sun.corba.se.spi.orb.ORBVersion $r14, $r15, $r18, $r19;
+        com.sun.corba.se.impl.corba.AnyImpl r34;
+        org.omg.CORBA.TypeCode $r11, $r13, $r17, $r21, $r23, $r25, $r27, $r29, $r31, $r33;
+        int $i0, $i1;
+        com.sun.corba.se.spi.orb.ORB r9;
+        org.omg.CORBA.TCKind $r10, $r12, $r16, $r20, $r22, $r24, $r26, $r28, $r30, $r32;
+        java.lang.Class r0, $r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8;
+
+        r34 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        r0 := @parameter0: java.lang.Class;
+
+        r9 := @parameter1: com.sun.corba.se.spi.orb.ORB;
+
+        $r1 = <java.lang.Integer: java.lang.Class TYPE>;
+
+        if r0 != $r1 goto label01;
+
+        $r32 = <org.omg.CORBA.TCKind: org.omg.CORBA.TCKind tk_long>;
+
+        $r33 = virtualinvoke r9.<com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.TypeCode get_primitive_tc(org.omg.CORBA.TCKind)>($r32);
+
+        return $r33;
+
+     label01:
+        $r2 = <java.lang.Byte: java.lang.Class TYPE>;
+
+        if r0 != $r2 goto label02;
+
+        $r30 = <org.omg.CORBA.TCKind: org.omg.CORBA.TCKind tk_octet>;
+
+        $r31 = virtualinvoke r9.<com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.TypeCode get_primitive_tc(org.omg.CORBA.TCKind)>($r30);
+
+        return $r31;
+
+     label02:
+        $r3 = <java.lang.Long: java.lang.Class TYPE>;
+
+        if r0 != $r3 goto label03;
+
+        $r28 = <org.omg.CORBA.TCKind: org.omg.CORBA.TCKind tk_longlong>;
+
+        $r29 = virtualinvoke r9.<com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.TypeCode get_primitive_tc(org.omg.CORBA.TCKind)>($r28);
+
+        return $r29;
+
+     label03:
+        $r4 = <java.lang.Float: java.lang.Class TYPE>;
+
+        if r0 != $r4 goto label04;
+
+        $r26 = <org.omg.CORBA.TCKind: org.omg.CORBA.TCKind tk_float>;
+
+        $r27 = virtualinvoke r9.<com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.TypeCode get_primitive_tc(org.omg.CORBA.TCKind)>($r26);
+
+        return $r27;
+
+     label04:
+        $r5 = <java.lang.Double: java.lang.Class TYPE>;
+
+        if r0 != $r5 goto label05;
+
+        $r24 = <org.omg.CORBA.TCKind: org.omg.CORBA.TCKind tk_double>;
+
+        $r25 = virtualinvoke r9.<com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.TypeCode get_primitive_tc(org.omg.CORBA.TCKind)>($r24);
+
+        return $r25;
+
+     label05:
+        $r6 = <java.lang.Short: java.lang.Class TYPE>;
+
+        if r0 != $r6 goto label06;
+
+        $r22 = <org.omg.CORBA.TCKind: org.omg.CORBA.TCKind tk_short>;
+
+        $r23 = virtualinvoke r9.<com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.TypeCode get_primitive_tc(org.omg.CORBA.TCKind)>($r22);
+
+        return $r23;
+
+     label06:
+        $r7 = <java.lang.Character: java.lang.Class TYPE>;
+
+        if r0 != $r7 goto label09;
+
+        $r14 = staticinvoke <com.sun.corba.se.spi.orb.ORBVersionFactory: com.sun.corba.se.spi.orb.ORBVersion getFOREIGN()>();
+
+        $r15 = virtualinvoke r9.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBVersion getORBVersion()>();
+
+        $i0 = interfaceinvoke $r14.<com.sun.corba.se.spi.orb.ORBVersion: int compareTo(java.lang.Object)>($r15);
+
+        if $i0 == 0 goto label07;
+
+        $r18 = staticinvoke <com.sun.corba.se.spi.orb.ORBVersionFactory: com.sun.corba.se.spi.orb.ORBVersion getNEWER()>();
+
+        $r19 = virtualinvoke r9.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBVersion getORBVersion()>();
+
+        $i1 = interfaceinvoke $r18.<com.sun.corba.se.spi.orb.ORBVersion: int compareTo(java.lang.Object)>($r19);
+
+        if $i1 > 0 goto label08;
+
+     label07:
+        $r16 = <org.omg.CORBA.TCKind: org.omg.CORBA.TCKind tk_wchar>;
+
+        $r17 = virtualinvoke r9.<com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.TypeCode get_primitive_tc(org.omg.CORBA.TCKind)>($r16);
+
+        return $r17;
+
+     label08:
+        $r20 = <org.omg.CORBA.TCKind: org.omg.CORBA.TCKind tk_char>;
+
+        $r21 = virtualinvoke r9.<com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.TypeCode get_primitive_tc(org.omg.CORBA.TCKind)>($r20);
+
+        return $r21;
+
+     label09:
+        $r8 = <java.lang.Boolean: java.lang.Class TYPE>;
+
+        if r0 != $r8 goto label10;
+
+        $r12 = <org.omg.CORBA.TCKind: org.omg.CORBA.TCKind tk_boolean>;
+
+        $r13 = virtualinvoke r9.<com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.TypeCode get_primitive_tc(org.omg.CORBA.TCKind)>($r12);
+
+        return $r13;
+
+     label10:
+        $r10 = <org.omg.CORBA.TCKind: org.omg.CORBA.TCKind tk_any>;
+
+        $r11 = virtualinvoke r9.<com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.TypeCode get_primitive_tc(org.omg.CORBA.TCKind)>($r10);
+
+        return $r11;
+    }
+
+    public org.omg.CORBA.Any extractAny(org.omg.CORBA.TypeCode, com.sun.corba.se.spi.orb.ORB)
+    {
+        org.omg.CORBA.Any $r1;
+        org.omg.CORBA.TypeCode r3;
+        com.sun.corba.se.impl.corba.AnyImpl r5;
+        com.sun.corba.se.spi.orb.ORB r0;
+        org.omg.CORBA.portable.InputStream $r7;
+        org.omg.CORBA.portable.OutputStream $r2;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r4;
+        com.sun.corba.se.impl.encoding.CDRInputStream $r6;
+
+        r5 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        r3 := @parameter0: org.omg.CORBA.TypeCode;
+
+        r0 := @parameter1: com.sun.corba.se.spi.orb.ORB;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.Any create_any()>();
+
+        $r2 = virtualinvoke $r1.<org.omg.CORBA.Any: org.omg.CORBA.portable.OutputStream create_output_stream()>();
+
+        $r4 = staticinvoke <com.sun.corba.se.impl.corba.TypeCodeImpl: com.sun.corba.se.impl.corba.TypeCodeImpl convertToNative(com.sun.corba.se.spi.orb.ORB,org.omg.CORBA.TypeCode)>(r0, r3);
+
+        $r6 = r5.<com.sun.corba.se.impl.corba.AnyImpl: com.sun.corba.se.impl.encoding.CDRInputStream stream>;
+
+        virtualinvoke $r4.<com.sun.corba.se.impl.corba.TypeCodeImpl: void copy(org.omg.CORBA.portable.InputStream,org.omg.CORBA.portable.OutputStream)>($r6, $r2);
+
+        $r7 = virtualinvoke $r2.<org.omg.CORBA.portable.OutputStream: org.omg.CORBA.portable.InputStream create_input_stream()>();
+
+        virtualinvoke $r1.<org.omg.CORBA.Any: void read_value(org.omg.CORBA.portable.InputStream,org.omg.CORBA.TypeCode)>($r7, r3);
+
+        return $r1;
+    }
+
+    public static org.omg.CORBA.Any extractAnyFromStream(org.omg.CORBA.TypeCode, org.omg.CORBA.portable.InputStream, com.sun.corba.se.spi.orb.ORB)
+    {
+        org.omg.CORBA.Any $r1;
+        org.omg.CORBA.portable.OutputStream $r2;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r4;
+        org.omg.CORBA.TypeCode r3;
+        com.sun.corba.se.spi.orb.ORB r0;
+        org.omg.CORBA.portable.InputStream r5, $r6;
+
+        r3 := @parameter0: org.omg.CORBA.TypeCode;
+
+        r5 := @parameter1: org.omg.CORBA.portable.InputStream;
+
+        r0 := @parameter2: com.sun.corba.se.spi.orb.ORB;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.Any create_any()>();
+
+        $r2 = virtualinvoke $r1.<org.omg.CORBA.Any: org.omg.CORBA.portable.OutputStream create_output_stream()>();
+
+        $r4 = staticinvoke <com.sun.corba.se.impl.corba.TypeCodeImpl: com.sun.corba.se.impl.corba.TypeCodeImpl convertToNative(com.sun.corba.se.spi.orb.ORB,org.omg.CORBA.TypeCode)>(r0, r3);
+
+        virtualinvoke $r4.<com.sun.corba.se.impl.corba.TypeCodeImpl: void copy(org.omg.CORBA.portable.InputStream,org.omg.CORBA.portable.OutputStream)>(r5, $r2);
+
+        $r6 = virtualinvoke $r2.<org.omg.CORBA.portable.OutputStream: org.omg.CORBA.portable.InputStream create_input_stream()>();
+
+        virtualinvoke $r1.<org.omg.CORBA.Any: void read_value(org.omg.CORBA.portable.InputStream,org.omg.CORBA.TypeCode)>($r6, r3);
+
+        return $r1;
+    }
+
+    public boolean isInitialized()
+    {
+        com.sun.corba.se.impl.corba.AnyImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.corba.AnyImpl;
+
+        $z0 = r0.<com.sun.corba.se.impl.corba.AnyImpl: boolean isInitialized>;
+
+        return $z0;
+    }
+
+    static void <clinit>()
+    {
+        boolean[] $r0;
+
+        <com.sun.corba.se.impl.corba.AnyImpl: int DEFAULT_BUFFER_SIZE> = 32;
+
+        $r0 = newarray (boolean)[33];
+
+        $r0[0] = 0;
+
+        $r0[1] = 0;
+
+        $r0[2] = 0;
+
+        $r0[3] = 0;
+
+        $r0[4] = 0;
+
+        $r0[5] = 0;
+
+        $r0[6] = 0;
+
+        $r0[7] = 0;
+
+        $r0[8] = 0;
+
+        $r0[9] = 0;
+
+        $r0[10] = 0;
+
+        $r0[11] = 0;
+
+        $r0[12] = 0;
+
+        $r0[13] = 1;
+
+        $r0[14] = 0;
+
+        $r0[15] = 1;
+
+        $r0[16] = 1;
+
+        $r0[17] = 0;
+
+        $r0[18] = 0;
+
+        $r0[19] = 1;
+
+        $r0[20] = 1;
+
+        $r0[21] = 1;
+
+        $r0[22] = 1;
+
+        $r0[23] = 0;
+
+        $r0[24] = 0;
+
+        $r0[25] = 0;
+
+        $r0[26] = 0;
+
+        $r0[27] = 0;
+
+        $r0[28] = 0;
+
+        $r0[29] = 0;
+
+        $r0[30] = 0;
+
+        $r0[31] = 0;
+
+        $r0[32] = 0;
+
+        <com.sun.corba.se.impl.corba.AnyImpl: boolean[] isStreamed> = $r0;
+
+        return;
+    }
+}

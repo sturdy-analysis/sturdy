@@ -1,0 +1,125 @@
+public abstract class sun.rmi.server.WeakClassHashMap extends java.lang.Object
+{
+    private java.util.Map internalMap;
+
+    protected void <init>()
+    {
+        sun.rmi.server.WeakClassHashMap r0;
+        java.util.WeakHashMap $r1;
+
+        r0 := @this: sun.rmi.server.WeakClassHashMap;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.WeakHashMap;
+
+        specialinvoke $r1.<java.util.WeakHashMap: void <init>()>();
+
+        r0.<sun.rmi.server.WeakClassHashMap: java.util.Map internalMap> = $r1;
+
+        return;
+    }
+
+    public java.lang.Object get(java.lang.Class)
+    {
+        java.lang.Throwable $r11, $r12;
+        sun.rmi.server.WeakClassHashMap$ValueCell $r9, r13, r14;
+        java.util.Map $r1, $r3, $r10;
+        java.lang.ref.SoftReference $r7;
+        sun.rmi.server.WeakClassHashMap r0;
+        java.lang.ref.Reference $r5, $r8;
+        java.lang.Class r2;
+        java.lang.Object $r4, $r6, r15;
+
+        r0 := @this: sun.rmi.server.WeakClassHashMap;
+
+        r2 := @parameter0: java.lang.Class;
+
+        $r1 = r0.<sun.rmi.server.WeakClassHashMap: java.util.Map internalMap>;
+
+        entermonitor $r1;
+
+     label01:
+        $r3 = r0.<sun.rmi.server.WeakClassHashMap: java.util.Map internalMap>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>(r2);
+
+        r13 = (sun.rmi.server.WeakClassHashMap$ValueCell) $r4;
+
+        if r13 != null goto label02;
+
+        $r9 = new sun.rmi.server.WeakClassHashMap$ValueCell;
+
+        specialinvoke $r9.<sun.rmi.server.WeakClassHashMap$ValueCell: void <init>()>();
+
+        r13 = $r9;
+
+        $r10 = r0.<sun.rmi.server.WeakClassHashMap: java.util.Map internalMap>;
+
+        interfaceinvoke $r10.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r2, $r9);
+
+     label02:
+        exitmonitor $r1;
+
+     label03:
+        goto label06;
+
+     label04:
+        $r12 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label05:
+        throw $r12;
+
+     label06:
+        r14 = r13;
+
+        entermonitor r13;
+
+     label07:
+        r15 = null;
+
+        $r5 = r13.<sun.rmi.server.WeakClassHashMap$ValueCell: java.lang.ref.Reference ref>;
+
+        if $r5 == null goto label08;
+
+        $r8 = r13.<sun.rmi.server.WeakClassHashMap$ValueCell: java.lang.ref.Reference ref>;
+
+        r15 = virtualinvoke $r8.<java.lang.ref.Reference: java.lang.Object get()>();
+
+     label08:
+        if r15 != null goto label09;
+
+        $r6 = virtualinvoke r0.<sun.rmi.server.WeakClassHashMap: java.lang.Object computeValue(java.lang.Class)>(r2);
+
+        r15 = $r6;
+
+        $r7 = new java.lang.ref.SoftReference;
+
+        specialinvoke $r7.<java.lang.ref.SoftReference: void <init>(java.lang.Object)>($r6);
+
+        r13.<sun.rmi.server.WeakClassHashMap$ValueCell: java.lang.ref.Reference ref> = $r7;
+
+     label09:
+        exitmonitor r14;
+
+     label10:
+        return r15;
+
+     label11:
+        $r11 := @caughtexception;
+
+        exitmonitor r14;
+
+     label12:
+        throw $r11;
+
+        catch java.lang.Throwable from label01 to label03 with label04;
+        catch java.lang.Throwable from label04 to label05 with label04;
+        catch java.lang.Throwable from label07 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+    }
+
+    protected abstract java.lang.Object computeValue(java.lang.Class);
+}

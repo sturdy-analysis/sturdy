@@ -1,0 +1,2504 @@
+public class java.util.Hashtable extends java.util.Dictionary implements java.util.Map, java.lang.Cloneable, java.io.Serializable
+{
+    private transient java.util.Hashtable$Entry[] table;
+    private transient int count;
+    private int threshold;
+    private float loadFactor;
+    private transient int modCount;
+    private static final long serialVersionUID;
+    private static final int MAX_ARRAY_SIZE;
+    private transient volatile java.util.Set keySet;
+    private transient volatile java.util.Set entrySet;
+    private transient volatile java.util.Collection values;
+    private static final int KEYS;
+    private static final int VALUES;
+    private static final int ENTRIES;
+
+    public void <init>(int, float)
+    {
+        byte $b0;
+        int $i1, i2, $i3;
+        java.lang.String $r5, $r11;
+        java.util.Hashtable r0;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r13, $r15;
+        java.util.Hashtable$Entry[] $r6;
+        float f0, $f1, $f2, $f3;
+        java.lang.StringBuilder $r3, $r4, $r9, $r10, $r12, $r14;
+
+        r0 := @this: java.util.Hashtable;
+
+        i2 := @parameter0: int;
+
+        f0 := @parameter1: float;
+
+        specialinvoke r0.<java.util.Dictionary: void <init>()>();
+
+        r0.<java.util.Hashtable: int modCount> = 0;
+
+        if i2 >= 0 goto label1;
+
+        $r13 = new java.lang.IllegalArgumentException;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Illegal Capacity: ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i2);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r11);
+
+        throw $r13;
+
+     label1:
+        $b0 = f0 cmpg 0.0F;
+
+        $i3 = (int) $b0;
+
+        if $i3 <= 0 goto label2;
+
+        $z0 = staticinvoke <java.lang.Float: boolean isNaN(float)>(f0);
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        $r15 = new java.lang.IllegalArgumentException;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Illegal Load: ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(float)>(f0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r15.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r5);
+
+        throw $r15;
+
+     label3:
+        if i2 != 0 goto label4;
+
+        i2 = 1;
+
+     label4:
+        r0.<java.util.Hashtable: float loadFactor> = f0;
+
+        $r6 = newarray (java.util.Hashtable$Entry)[i2];
+
+        r0.<java.util.Hashtable: java.util.Hashtable$Entry[] table> = $r6;
+
+        $f1 = (float) i2;
+
+        $f2 = $f1 * f0;
+
+        $f3 = staticinvoke <java.lang.Math: float min(float,float)>($f2, 2.14748365E9F);
+
+        $i1 = (int) $f3;
+
+        r0.<java.util.Hashtable: int threshold> = $i1;
+
+        return;
+    }
+
+    public void <init>(int)
+    {
+        int i0;
+        java.util.Hashtable r0;
+
+        r0 := @this: java.util.Hashtable;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.util.Hashtable: void <init>(int,float)>(i0, 0.75F);
+
+        return;
+    }
+
+    public void <init>()
+    {
+        java.util.Hashtable r0;
+
+        r0 := @this: java.util.Hashtable;
+
+        specialinvoke r0.<java.util.Hashtable: void <init>(int,float)>(11, 0.75F);
+
+        return;
+    }
+
+    public void <init>(java.util.Map)
+    {
+        java.util.Map r1;
+        int $i0, $i1, $i2;
+        java.util.Hashtable r0;
+
+        r0 := @this: java.util.Hashtable;
+
+        r1 := @parameter0: java.util.Map;
+
+        $i0 = interfaceinvoke r1.<java.util.Map: int size()>();
+
+        $i1 = 2 * $i0;
+
+        $i2 = staticinvoke <java.lang.Math: int max(int,int)>($i1, 11);
+
+        specialinvoke r0.<java.util.Hashtable: void <init>(int,float)>($i2, 0.75F);
+
+        virtualinvoke r0.<java.util.Hashtable: void putAll(java.util.Map)>(r1);
+
+        return;
+    }
+
+    public synchronized int size()
+    {
+        int $i0;
+        java.util.Hashtable r0;
+
+        r0 := @this: java.util.Hashtable;
+
+        $i0 = r0.<java.util.Hashtable: int count>;
+
+        return $i0;
+    }
+
+    public synchronized boolean isEmpty()
+    {
+        int $i0;
+        java.util.Hashtable r0;
+        boolean $z0;
+
+        r0 := @this: java.util.Hashtable;
+
+        $i0 = r0.<java.util.Hashtable: int count>;
+
+        if $i0 != 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public synchronized java.util.Enumeration keys()
+    {
+        java.util.Enumeration $r1;
+        java.util.Hashtable r0;
+
+        r0 := @this: java.util.Hashtable;
+
+        $r1 = specialinvoke r0.<java.util.Hashtable: java.util.Enumeration getEnumeration(int)>(0);
+
+        return $r1;
+    }
+
+    public synchronized java.util.Enumeration elements()
+    {
+        java.util.Enumeration $r1;
+        java.util.Hashtable r0;
+
+        r0 := @this: java.util.Hashtable;
+
+        $r1 = specialinvoke r0.<java.util.Hashtable: java.util.Enumeration getEnumeration(int)>(1);
+
+        return $r1;
+    }
+
+    public synchronized boolean contains(java.lang.Object)
+    {
+        java.util.Hashtable$Entry r5;
+        java.lang.NullPointerException $r6;
+        java.util.Hashtable$Entry[] r2;
+        int $i0, i1, $i3;
+        java.lang.Object r0, $r3;
+        java.util.Hashtable r1;
+        boolean $z0;
+
+        r1 := @this: java.util.Hashtable;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        $r6 = new java.lang.NullPointerException;
+
+        specialinvoke $r6.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r6;
+
+     label1:
+        r2 = r1.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        i1 = lengthof r2;
+
+     label2:
+        $i0 = i1;
+
+        $i3 = (int) -1;
+
+        i1 = i1 + $i3;
+
+        if $i0 <= 0 goto label6;
+
+        r5 = r2[i1];
+
+     label3:
+        if r5 == null goto label5;
+
+        $r3 = r5.<java.util.Hashtable$Entry: java.lang.Object value>;
+
+        $z0 = virtualinvoke $r3.<java.lang.Object: boolean equals(java.lang.Object)>(r0);
+
+        if $z0 == 0 goto label4;
+
+        return 1;
+
+     label4:
+        r5 = r5.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        goto label3;
+
+     label5:
+        goto label2;
+
+     label6:
+        return 0;
+    }
+
+    public boolean containsValue(java.lang.Object)
+    {
+        java.lang.Object r1;
+        java.util.Hashtable r0;
+        boolean $z0;
+
+        r0 := @this: java.util.Hashtable;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $z0 = virtualinvoke r0.<java.util.Hashtable: boolean contains(java.lang.Object)>(r1);
+
+        return $z0;
+    }
+
+    public synchronized boolean containsKey(java.lang.Object)
+    {
+        java.util.Hashtable$Entry r4;
+        java.util.Hashtable$Entry[] r1;
+        int $i0, $i1, $i2, i3, $i4;
+        java.lang.Object r2, $r3;
+        java.util.Hashtable r0;
+        boolean $z0;
+
+        r0 := @this: java.util.Hashtable;
+
+        r2 := @parameter0: java.lang.Object;
+
+        r1 = r0.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        $i0 = virtualinvoke r2.<java.lang.Object: int hashCode()>();
+
+        $i2 = $i0 & 2147483647;
+
+        $i1 = lengthof r1;
+
+        i3 = $i2 % $i1;
+
+        r4 = r1[i3];
+
+     label1:
+        if r4 == null goto label3;
+
+        $i4 = r4.<java.util.Hashtable$Entry: int hash>;
+
+        if $i4 != $i0 goto label2;
+
+        $r3 = r4.<java.util.Hashtable$Entry: java.lang.Object key>;
+
+        $z0 = virtualinvoke $r3.<java.lang.Object: boolean equals(java.lang.Object)>(r2);
+
+        if $z0 == 0 goto label2;
+
+        return 1;
+
+     label2:
+        r4 = r4.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    public synchronized java.lang.Object get(java.lang.Object)
+    {
+        java.util.Hashtable$Entry r5;
+        java.util.Hashtable$Entry[] r1;
+        int $i0, $i1, $i2, i3, $i4;
+        java.lang.Object r2, $r3, $r4;
+        java.util.Hashtable r0;
+        boolean $z0;
+
+        r0 := @this: java.util.Hashtable;
+
+        r2 := @parameter0: java.lang.Object;
+
+        r1 = r0.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        $i0 = virtualinvoke r2.<java.lang.Object: int hashCode()>();
+
+        $i2 = $i0 & 2147483647;
+
+        $i1 = lengthof r1;
+
+        i3 = $i2 % $i1;
+
+        r5 = r1[i3];
+
+     label1:
+        if r5 == null goto label3;
+
+        $i4 = r5.<java.util.Hashtable$Entry: int hash>;
+
+        if $i4 != $i0 goto label2;
+
+        $r3 = r5.<java.util.Hashtable$Entry: java.lang.Object key>;
+
+        $z0 = virtualinvoke $r3.<java.lang.Object: boolean equals(java.lang.Object)>(r2);
+
+        if $z0 == 0 goto label2;
+
+        $r4 = r5.<java.util.Hashtable$Entry: java.lang.Object value>;
+
+        return $r4;
+
+     label2:
+        r5 = r5.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    protected void rehash()
+    {
+        java.util.Hashtable$Entry r3, $r4, r6;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, i8, i9, i10, $i11, $i13;
+        java.util.Hashtable r0;
+        java.util.Hashtable$Entry[] $r1, r2, $r5;
+        float $f0, $f1, $f2, $f3;
+
+        r0 := @this: java.util.Hashtable;
+
+        $r1 = r0.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        i0 = lengthof $r1;
+
+        r2 = r0.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        $i1 = i0 << 1;
+
+        i9 = $i1 + 1;
+
+        $i2 = i9 - 2147483639;
+
+        if $i2 <= 0 goto label2;
+
+        if i0 != 2147483639 goto label1;
+
+        return;
+
+     label1:
+        i9 = 2147483639;
+
+     label2:
+        $r5 = newarray (java.util.Hashtable$Entry)[i9];
+
+        $i3 = r0.<java.util.Hashtable: int modCount>;
+
+        $i4 = $i3 + 1;
+
+        r0.<java.util.Hashtable: int modCount> = $i4;
+
+        $f1 = (float) i9;
+
+        $f0 = r0.<java.util.Hashtable: float loadFactor>;
+
+        $f2 = $f1 * $f0;
+
+        $f3 = staticinvoke <java.lang.Math: float min(float,float)>($f2, 2.14748365E9F);
+
+        $i5 = (int) $f3;
+
+        r0.<java.util.Hashtable: int threshold> = $i5;
+
+        r0.<java.util.Hashtable: java.util.Hashtable$Entry[] table> = $r5;
+
+        i10 = i0;
+
+     label3:
+        $i11 = i10;
+
+        $i13 = (int) -1;
+
+        i10 = i10 + $i13;
+
+        if $i11 <= 0 goto label6;
+
+        r6 = r2[i10];
+
+     label4:
+        if r6 == null goto label5;
+
+        r3 = r6;
+
+        r6 = r6.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        $i6 = r3.<java.util.Hashtable$Entry: int hash>;
+
+        $i7 = $i6 & 2147483647;
+
+        i8 = $i7 % i9;
+
+        $r4 = $r5[i8];
+
+        r3.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next> = $r4;
+
+        $r5[i8] = r3;
+
+        goto label4;
+
+     label5:
+        goto label3;
+
+     label6:
+        return;
+    }
+
+    private void addEntry(int, java.lang.Object, java.lang.Object, int)
+    {
+        java.util.Hashtable$Entry $r1, $r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, i10;
+        java.util.Hashtable r0;
+        java.util.Hashtable$Entry[] r5;
+        java.lang.Object r2, r3;
+
+        r0 := @this: java.util.Hashtable;
+
+        i9 := @parameter0: int;
+
+        r2 := @parameter1: java.lang.Object;
+
+        r3 := @parameter2: java.lang.Object;
+
+        i10 := @parameter3: int;
+
+        $i0 = r0.<java.util.Hashtable: int modCount>;
+
+        $i1 = $i0 + 1;
+
+        r0.<java.util.Hashtable: int modCount> = $i1;
+
+        r5 = r0.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        $i3 = r0.<java.util.Hashtable: int count>;
+
+        $i2 = r0.<java.util.Hashtable: int threshold>;
+
+        if $i3 < $i2 goto label1;
+
+        virtualinvoke r0.<java.util.Hashtable: void rehash()>();
+
+        r5 = r0.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        $i6 = virtualinvoke r2.<java.lang.Object: int hashCode()>();
+
+        i9 = $i6;
+
+        $i8 = $i6 & 2147483647;
+
+        $i7 = lengthof r5;
+
+        i10 = $i8 % $i7;
+
+     label1:
+        $r4 = r5[i10];
+
+        $r1 = new java.util.Hashtable$Entry;
+
+        specialinvoke $r1.<java.util.Hashtable$Entry: void <init>(int,java.lang.Object,java.lang.Object,java.util.Hashtable$Entry)>(i9, r2, r3, $r4);
+
+        r5[i10] = $r1;
+
+        $i4 = r0.<java.util.Hashtable: int count>;
+
+        $i5 = $i4 + 1;
+
+        r0.<java.util.Hashtable: int count> = $i5;
+
+        return;
+    }
+
+    public synchronized java.lang.Object put(java.lang.Object, java.lang.Object)
+    {
+        java.util.Hashtable$Entry r7;
+        java.lang.NullPointerException $r6;
+        java.util.Hashtable$Entry[] r2;
+        int $i0, $i1, $i2, i3, $i4;
+        java.lang.Object r0, r3, $r4, r5;
+        java.util.Hashtable r1;
+        boolean $z0;
+
+        r1 := @this: java.util.Hashtable;
+
+        r3 := @parameter0: java.lang.Object;
+
+        r0 := @parameter1: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        $r6 = new java.lang.NullPointerException;
+
+        specialinvoke $r6.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r6;
+
+     label1:
+        r2 = r1.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        $i0 = virtualinvoke r3.<java.lang.Object: int hashCode()>();
+
+        $i2 = $i0 & 2147483647;
+
+        $i1 = lengthof r2;
+
+        i3 = $i2 % $i1;
+
+        r7 = r2[i3];
+
+     label2:
+        if r7 == null goto label4;
+
+        $i4 = r7.<java.util.Hashtable$Entry: int hash>;
+
+        if $i4 != $i0 goto label3;
+
+        $r4 = r7.<java.util.Hashtable$Entry: java.lang.Object key>;
+
+        $z0 = virtualinvoke $r4.<java.lang.Object: boolean equals(java.lang.Object)>(r3);
+
+        if $z0 == 0 goto label3;
+
+        r5 = r7.<java.util.Hashtable$Entry: java.lang.Object value>;
+
+        r7.<java.util.Hashtable$Entry: java.lang.Object value> = r0;
+
+        return r5;
+
+     label3:
+        r7 = r7.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        goto label2;
+
+     label4:
+        specialinvoke r1.<java.util.Hashtable: void addEntry(int,java.lang.Object,java.lang.Object,int)>($i0, r3, r0, i3);
+
+        return null;
+    }
+
+    public synchronized java.lang.Object remove(java.lang.Object)
+    {
+        java.util.Hashtable$Entry $r4, $r5, r7, r8;
+        int $i0, $i1, $i2, i3, $i4, $i5, $i6, $i7, $i8;
+        java.util.Hashtable r0;
+        boolean $z0;
+        java.util.Hashtable$Entry[] r1;
+        java.lang.Object r2, $r3, $r6;
+
+        r0 := @this: java.util.Hashtable;
+
+        r2 := @parameter0: java.lang.Object;
+
+        r1 = r0.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        $i0 = virtualinvoke r2.<java.lang.Object: int hashCode()>();
+
+        $i2 = $i0 & 2147483647;
+
+        $i1 = lengthof r1;
+
+        i3 = $i2 % $i1;
+
+        r7 = r1[i3];
+
+        r8 = null;
+
+     label1:
+        if r7 == null goto label5;
+
+        $i4 = r7.<java.util.Hashtable$Entry: int hash>;
+
+        if $i4 != $i0 goto label4;
+
+        $r3 = r7.<java.util.Hashtable$Entry: java.lang.Object key>;
+
+        $z0 = virtualinvoke $r3.<java.lang.Object: boolean equals(java.lang.Object)>(r2);
+
+        if $z0 == 0 goto label4;
+
+        $i5 = r0.<java.util.Hashtable: int modCount>;
+
+        $i6 = $i5 + 1;
+
+        r0.<java.util.Hashtable: int modCount> = $i6;
+
+        if r8 == null goto label2;
+
+        $r5 = r7.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        r8.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next> = $r5;
+
+        goto label3;
+
+     label2:
+        $r4 = r7.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        r1[i3] = $r4;
+
+     label3:
+        $i7 = r0.<java.util.Hashtable: int count>;
+
+        $i8 = $i7 - 1;
+
+        r0.<java.util.Hashtable: int count> = $i8;
+
+        $r6 = r7.<java.util.Hashtable$Entry: java.lang.Object value>;
+
+        r7.<java.util.Hashtable$Entry: java.lang.Object value> = null;
+
+        return $r6;
+
+     label4:
+        r8 = r7;
+
+        r7 = r7.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        goto label1;
+
+     label5:
+        return null;
+    }
+
+    public synchronized void putAll(java.util.Map)
+    {
+        java.util.Map$Entry r4;
+        java.util.Iterator $r2;
+        java.util.Set $r1;
+        java.util.Map r0;
+        java.lang.Object $r3, $r6, $r7;
+        java.util.Hashtable r5;
+        boolean $z0;
+
+        r5 := @this: java.util.Hashtable;
+
+        r0 := @parameter0: java.util.Map;
+
+        $r1 = interfaceinvoke r0.<java.util.Map: java.util.Set entrySet()>();
+
+        $r2 = interfaceinvoke $r1.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (java.util.Map$Entry) $r3;
+
+        $r6 = interfaceinvoke r4.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r7 = interfaceinvoke r4.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        virtualinvoke r5.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r6, $r7);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public synchronized void clear()
+    {
+        java.util.Hashtable$Entry[] r1;
+        int $i0, $i1, i2, $i4;
+        java.util.Hashtable r0;
+
+        r0 := @this: java.util.Hashtable;
+
+        r1 = r0.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        $i0 = r0.<java.util.Hashtable: int modCount>;
+
+        $i1 = $i0 + 1;
+
+        r0.<java.util.Hashtable: int modCount> = $i1;
+
+        i2 = lengthof r1;
+
+     label1:
+        $i4 = (int) -1;
+
+        i2 = i2 + $i4;
+
+        if i2 < 0 goto label2;
+
+        r1[i2] = null;
+
+        goto label1;
+
+     label2:
+        r0.<java.util.Hashtable: int count> = 0;
+
+        return;
+    }
+
+    public synchronized java.lang.Object clone()
+    {
+        java.util.Hashtable$Entry $r6, $r9, $r14;
+        java.lang.CloneNotSupportedException $r11;
+        int $i0, $i1, $i2, i3, $i5;
+        java.lang.InternalError $r15;
+        java.util.Hashtable r0, r13;
+        java.util.Hashtable$Entry[] $r2, $r3, $r4, $r5, $r7, $r8;
+        java.lang.Object $r1, $r10;
+
+        r0 := @this: java.util.Hashtable;
+
+     label1:
+        $r1 = specialinvoke r0.<java.lang.Object: java.lang.Object clone()>();
+
+        r13 = (java.util.Hashtable) $r1;
+
+        $r2 = r0.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        $i0 = lengthof $r2;
+
+        $r3 = newarray (java.util.Hashtable$Entry)[$i0];
+
+        r13.<java.util.Hashtable: java.util.Hashtable$Entry[] table> = $r3;
+
+        $r4 = r0.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        i3 = lengthof $r4;
+
+     label2:
+        $i1 = i3;
+
+        $i5 = (int) -1;
+
+        i3 = i3 + $i5;
+
+        if $i1 <= 0 goto label5;
+
+        $r7 = r13.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        $i2 = i3;
+
+        $r5 = r0.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        $r6 = $r5[i3];
+
+        if $r6 == null goto label3;
+
+        $r8 = r0.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        $r9 = $r8[i3];
+
+        $r10 = virtualinvoke $r9.<java.util.Hashtable$Entry: java.lang.Object clone()>();
+
+        $r14 = (java.util.Hashtable$Entry) $r10;
+
+        goto label4;
+
+     label3:
+        $r14 = null;
+
+     label4:
+        $r7[$i2] = $r14;
+
+        goto label2;
+
+     label5:
+        r13.<java.util.Hashtable: java.util.Set keySet> = null;
+
+        r13.<java.util.Hashtable: java.util.Set entrySet> = null;
+
+        r13.<java.util.Hashtable: java.util.Collection values> = null;
+
+        r13.<java.util.Hashtable: int modCount> = 0;
+
+     label6:
+        return r13;
+
+     label7:
+        $r11 := @caughtexception;
+
+        $r15 = new java.lang.InternalError;
+
+        specialinvoke $r15.<java.lang.InternalError: void <init>(java.lang.Throwable)>($r11);
+
+        throw $r15;
+
+        catch java.lang.CloneNotSupportedException from label1 to label6 with label7;
+    }
+
+    public synchronized java.lang.String toString()
+    {
+        int $i0, i1, i2, $i4;
+        java.lang.String $r9, $r10, $r11;
+        java.util.Hashtable r0;
+        java.util.Map$Entry $r7;
+        java.util.Iterator $r3;
+        java.util.Set $r2;
+        java.lang.Object $r4, $r5, $r6;
+        java.lang.StringBuilder $r8, $r12;
+
+        r0 := @this: java.util.Hashtable;
+
+        $i0 = virtualinvoke r0.<java.util.Hashtable: int size()>();
+
+        i1 = $i0 - 1;
+
+        $i4 = (int) -1;
+
+        if i1 != $i4 goto label1;
+
+        return "{}";
+
+     label1:
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke r0.<java.util.Hashtable: java.util.Set entrySet()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Set: java.util.Iterator iterator()>();
+
+        virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(123);
+
+        i2 = 0;
+
+     label2:
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        $r7 = (java.util.Map$Entry) $r4;
+
+        $r5 = interfaceinvoke $r7.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r6 = interfaceinvoke $r7.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        if $r5 != r0 goto label3;
+
+        $r10 = "(this Map)";
+
+        goto label4;
+
+     label3:
+        $r10 = virtualinvoke $r5.<java.lang.Object: java.lang.String toString()>();
+
+     label4:
+        virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(61);
+
+        if $r6 != r0 goto label5;
+
+        $r11 = "(this Map)";
+
+        goto label6;
+
+     label5:
+        $r11 = virtualinvoke $r6.<java.lang.Object: java.lang.String toString()>();
+
+     label6:
+        virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        if i2 != i1 goto label7;
+
+        $r8 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(125);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r9;
+
+     label7:
+        virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        i2 = i2 + 1;
+
+        goto label2;
+    }
+
+    private java.util.Enumeration getEnumeration(int)
+    {
+        java.util.Enumeration $r2;
+        int $i0, i1;
+        java.util.Hashtable$Enumerator $r1;
+        java.util.Hashtable r0;
+
+        r0 := @this: java.util.Hashtable;
+
+        i1 := @parameter0: int;
+
+        $i0 = r0.<java.util.Hashtable: int count>;
+
+        if $i0 != 0 goto label1;
+
+        $r2 = staticinvoke <java.util.Collections: java.util.Enumeration emptyEnumeration()>();
+
+        return $r2;
+
+     label1:
+        $r1 = new java.util.Hashtable$Enumerator;
+
+        specialinvoke $r1.<java.util.Hashtable$Enumerator: void <init>(java.util.Hashtable,int,boolean)>(r0, i1, 0);
+
+        return $r1;
+    }
+
+    private java.util.Iterator getIterator(int)
+    {
+        java.util.Iterator $r2;
+        int $i0, i1;
+        java.util.Hashtable$Enumerator $r1;
+        java.util.Hashtable r0;
+
+        r0 := @this: java.util.Hashtable;
+
+        i1 := @parameter0: int;
+
+        $i0 = r0.<java.util.Hashtable: int count>;
+
+        if $i0 != 0 goto label1;
+
+        $r2 = staticinvoke <java.util.Collections: java.util.Iterator emptyIterator()>();
+
+        return $r2;
+
+     label1:
+        $r1 = new java.util.Hashtable$Enumerator;
+
+        specialinvoke $r1.<java.util.Hashtable$Enumerator: void <init>(java.util.Hashtable,int,boolean)>(r0, i1, 1);
+
+        return $r1;
+    }
+
+    public java.util.Set keySet()
+    {
+        java.util.Hashtable$KeySet $r3;
+        java.util.Set $r1, $r2, $r4;
+        java.util.Hashtable r0;
+
+        r0 := @this: java.util.Hashtable;
+
+        $r1 = r0.<java.util.Hashtable: java.util.Set keySet>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.util.Hashtable$KeySet;
+
+        specialinvoke $r3.<java.util.Hashtable$KeySet: void <init>(java.util.Hashtable,java.util.Hashtable$1)>(r0, null);
+
+        $r4 = staticinvoke <java.util.Collections: java.util.Set synchronizedSet(java.util.Set,java.lang.Object)>($r3, r0);
+
+        r0.<java.util.Hashtable: java.util.Set keySet> = $r4;
+
+     label1:
+        $r2 = r0.<java.util.Hashtable: java.util.Set keySet>;
+
+        return $r2;
+    }
+
+    public java.util.Set entrySet()
+    {
+        java.util.Hashtable$EntrySet $r3;
+        java.util.Set $r1, $r2, $r4;
+        java.util.Hashtable r0;
+
+        r0 := @this: java.util.Hashtable;
+
+        $r1 = r0.<java.util.Hashtable: java.util.Set entrySet>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.util.Hashtable$EntrySet;
+
+        specialinvoke $r3.<java.util.Hashtable$EntrySet: void <init>(java.util.Hashtable,java.util.Hashtable$1)>(r0, null);
+
+        $r4 = staticinvoke <java.util.Collections: java.util.Set synchronizedSet(java.util.Set,java.lang.Object)>($r3, r0);
+
+        r0.<java.util.Hashtable: java.util.Set entrySet> = $r4;
+
+     label1:
+        $r2 = r0.<java.util.Hashtable: java.util.Set entrySet>;
+
+        return $r2;
+    }
+
+    public java.util.Collection values()
+    {
+        java.util.Hashtable$ValueCollection $r3;
+        java.util.Collection $r1, $r2, $r4;
+        java.util.Hashtable r0;
+
+        r0 := @this: java.util.Hashtable;
+
+        $r1 = r0.<java.util.Hashtable: java.util.Collection values>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.util.Hashtable$ValueCollection;
+
+        specialinvoke $r3.<java.util.Hashtable$ValueCollection: void <init>(java.util.Hashtable,java.util.Hashtable$1)>(r0, null);
+
+        $r4 = staticinvoke <java.util.Collections: java.util.Collection synchronizedCollection(java.util.Collection,java.lang.Object)>($r3, r0);
+
+        r0.<java.util.Hashtable: java.util.Collection values> = $r4;
+
+     label1:
+        $r2 = r0.<java.util.Hashtable: java.util.Collection values>;
+
+        return $r2;
+    }
+
+    public synchronized boolean equals(java.lang.Object)
+    {
+        java.lang.ClassCastException $r12;
+        java.lang.NullPointerException $r11;
+        java.util.Map r2;
+        int $i0, $i1;
+        java.util.Hashtable r1;
+        boolean $z0, $z1, $z2, $z3;
+        java.util.Map$Entry r6;
+        java.util.Iterator $r4;
+        java.util.Set $r3;
+        java.lang.Object r0, $r5, $r7, $r8, $r9, $r10;
+
+        r1 := @this: java.util.Hashtable;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label01;
+
+        return 1;
+
+     label01:
+        $z0 = r0 instanceof java.util.Map;
+
+        if $z0 != 0 goto label02;
+
+        return 0;
+
+     label02:
+        r2 = (java.util.Map) r0;
+
+        $i0 = interfaceinvoke r2.<java.util.Map: int size()>();
+
+        $i1 = virtualinvoke r1.<java.util.Hashtable: int size()>();
+
+        if $i0 == $i1 goto label03;
+
+        return 0;
+
+     label03:
+        $r3 = virtualinvoke r1.<java.util.Hashtable: java.util.Set entrySet()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.Set: java.util.Iterator iterator()>();
+
+     label04:
+        $z1 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label09;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (java.util.Map$Entry) $r5;
+
+        $r7 = interfaceinvoke r6.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r8 = interfaceinvoke r6.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        if $r8 != null goto label06;
+
+        $r10 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>($r7);
+
+        if $r10 != null goto label05;
+
+        $z3 = interfaceinvoke r2.<java.util.Map: boolean containsKey(java.lang.Object)>($r7);
+
+        if $z3 != 0 goto label08;
+
+     label05:
+        return 0;
+
+     label06:
+        $r9 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>($r7);
+
+        $z2 = virtualinvoke $r8.<java.lang.Object: boolean equals(java.lang.Object)>($r9);
+
+        if $z2 != 0 goto label08;
+
+     label07:
+        return 0;
+
+     label08:
+        goto label04;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r12 := @caughtexception;
+
+        return 0;
+
+     label11:
+        $r11 := @caughtexception;
+
+        return 0;
+
+     label12:
+        return 1;
+
+        catch java.lang.ClassCastException from label03 to label05 with label10;
+        catch java.lang.ClassCastException from label06 to label07 with label10;
+        catch java.lang.ClassCastException from label08 to label09 with label10;
+        catch java.lang.NullPointerException from label03 to label05 with label11;
+        catch java.lang.NullPointerException from label06 to label07 with label11;
+        catch java.lang.NullPointerException from label08 to label09 with label11;
+    }
+
+    public synchronized int hashCode()
+    {
+        java.util.Hashtable$Entry r2;
+        byte $b1;
+        java.util.Hashtable$Entry[] r1;
+        int $i0, i2, $i3, i4, i5, $i6;
+        float $f0, $f1, $f2, $f3, $f4;
+        java.util.Hashtable r0;
+
+        r0 := @this: java.util.Hashtable;
+
+        i4 = 0;
+
+        $i0 = r0.<java.util.Hashtable: int count>;
+
+        if $i0 == 0 goto label1;
+
+        $f0 = r0.<java.util.Hashtable: float loadFactor>;
+
+        $b1 = $f0 cmpg 0.0F;
+
+        $i6 = (int) $b1;
+
+        if $i6 >= 0 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $f1 = r0.<java.util.Hashtable: float loadFactor>;
+
+        $f2 = neg $f1;
+
+        r0.<java.util.Hashtable: float loadFactor> = $f2;
+
+        r1 = r0.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        i2 = lengthof r1;
+
+        i5 = 0;
+
+     label3:
+        if i5 >= i2 goto label6;
+
+        r2 = r1[i5];
+
+     label4:
+        if r2 == null goto label5;
+
+        $i3 = virtualinvoke r2.<java.util.Hashtable$Entry: int hashCode()>();
+
+        i4 = i4 + $i3;
+
+        r2 = r2.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        goto label4;
+
+     label5:
+        i5 = i5 + 1;
+
+        goto label3;
+
+     label6:
+        $f3 = r0.<java.util.Hashtable: float loadFactor>;
+
+        $f4 = neg $f3;
+
+        r0.<java.util.Hashtable: float loadFactor> = $f4;
+
+        return i4;
+    }
+
+    public synchronized java.lang.Object getOrDefault(java.lang.Object, java.lang.Object)
+    {
+        java.lang.Object r1, $r2, r3, $r4;
+        java.util.Hashtable r0;
+
+        r0 := @this: java.util.Hashtable;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r3 := @parameter1: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r1);
+
+        if null != $r2 goto label1;
+
+        $r4 = r3;
+
+        goto label2;
+
+     label1:
+        $r4 = $r2;
+
+     label2:
+        return $r4;
+    }
+
+    public synchronized void forEach(java.util.function.BiConsumer)
+    {
+        java.util.Hashtable$Entry r6;
+        java.util.Hashtable$Entry[] r2;
+        java.util.function.BiConsumer r0;
+        int i0, i1, $i2, i3;
+        java.lang.Object $r3, $r4;
+        java.util.ConcurrentModificationException $r5;
+        java.util.Hashtable r1;
+
+        r1 := @this: java.util.Hashtable;
+
+        r0 := @parameter0: java.util.function.BiConsumer;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r0);
+
+        i0 = r1.<java.util.Hashtable: int modCount>;
+
+        r2 = r1.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        i1 = lengthof r2;
+
+        i3 = 0;
+
+     label1:
+        if i3 >= i1 goto label4;
+
+        r6 = r2[i3];
+
+     label2:
+        if r6 == null goto label3;
+
+        $r4 = r6.<java.util.Hashtable$Entry: java.lang.Object key>;
+
+        $r3 = r6.<java.util.Hashtable$Entry: java.lang.Object value>;
+
+        interfaceinvoke r0.<java.util.function.BiConsumer: void accept(java.lang.Object,java.lang.Object)>($r4, $r3);
+
+        r6 = r6.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        $i2 = r1.<java.util.Hashtable: int modCount>;
+
+        if i0 == $i2 goto label2;
+
+        $r5 = new java.util.ConcurrentModificationException;
+
+        specialinvoke $r5.<java.util.ConcurrentModificationException: void <init>()>();
+
+        throw $r5;
+
+     label3:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    public synchronized void replaceAll(java.util.function.BiFunction)
+    {
+        java.util.Hashtable$Entry r9;
+        java.util.function.BiFunction r0;
+        java.util.Hashtable$Entry[] $r2, r3;
+        int i0, i1, $i2, i3;
+        java.lang.Object $r4, $r5, $r6, $r7;
+        java.util.ConcurrentModificationException $r8;
+        java.util.Hashtable r1;
+
+        r1 := @this: java.util.Hashtable;
+
+        r0 := @parameter0: java.util.function.BiFunction;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r0);
+
+        i0 = r1.<java.util.Hashtable: int modCount>;
+
+        $r2 = r1.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        r3 = (java.util.Hashtable$Entry[]) $r2;
+
+        i1 = lengthof r3;
+
+        i3 = 0;
+
+     label1:
+        if i3 >= i1 goto label4;
+
+        r9 = r3[i3];
+
+     label2:
+        if r9 == null goto label3;
+
+        $r5 = r9.<java.util.Hashtable$Entry: java.lang.Object key>;
+
+        $r4 = r9.<java.util.Hashtable$Entry: java.lang.Object value>;
+
+        $r6 = interfaceinvoke r0.<java.util.function.BiFunction: java.lang.Object apply(java.lang.Object,java.lang.Object)>($r5, $r4);
+
+        $r7 = staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>($r6);
+
+        r9.<java.util.Hashtable$Entry: java.lang.Object value> = $r7;
+
+        r9 = r9.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        $i2 = r1.<java.util.Hashtable: int modCount>;
+
+        if i0 == $i2 goto label2;
+
+        $r8 = new java.util.ConcurrentModificationException;
+
+        specialinvoke $r8.<java.util.ConcurrentModificationException: void <init>()>();
+
+        throw $r8;
+
+     label3:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    public synchronized java.lang.Object putIfAbsent(java.lang.Object, java.lang.Object)
+    {
+        java.util.Hashtable$Entry r6;
+        java.util.Hashtable$Entry[] r2;
+        int $i0, $i1, $i2, i3, $i4;
+        java.lang.Object r0, r3, $r4, r5;
+        java.util.Hashtable r1;
+        boolean $z0;
+
+        r1 := @this: java.util.Hashtable;
+
+        r3 := @parameter0: java.lang.Object;
+
+        r0 := @parameter1: java.lang.Object;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r0);
+
+        r2 = r1.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        $i0 = virtualinvoke r3.<java.lang.Object: int hashCode()>();
+
+        $i2 = $i0 & 2147483647;
+
+        $i1 = lengthof r2;
+
+        i3 = $i2 % $i1;
+
+        r6 = r2[i3];
+
+     label1:
+        if r6 == null goto label4;
+
+        $i4 = r6.<java.util.Hashtable$Entry: int hash>;
+
+        if $i4 != $i0 goto label3;
+
+        $r4 = r6.<java.util.Hashtable$Entry: java.lang.Object key>;
+
+        $z0 = virtualinvoke $r4.<java.lang.Object: boolean equals(java.lang.Object)>(r3);
+
+        if $z0 == 0 goto label3;
+
+        r5 = r6.<java.util.Hashtable$Entry: java.lang.Object value>;
+
+        if r5 != null goto label2;
+
+        r6.<java.util.Hashtable$Entry: java.lang.Object value> = r0;
+
+     label2:
+        return r5;
+
+     label3:
+        r6 = r6.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        goto label1;
+
+     label4:
+        specialinvoke r1.<java.util.Hashtable: void addEntry(int,java.lang.Object,java.lang.Object,int)>($i0, r3, r0, i3);
+
+        return null;
+    }
+
+    public synchronized boolean remove(java.lang.Object, java.lang.Object)
+    {
+        java.util.Hashtable$Entry $r6, $r7, r8, r9;
+        int $i0, $i1, $i2, i3, $i4, $i5, $i6, $i7, $i8;
+        java.util.Hashtable r1;
+        boolean $z0, $z1;
+        java.util.Hashtable$Entry[] r2;
+        java.lang.Object r0, r3, $r4, $r5;
+
+        r1 := @this: java.util.Hashtable;
+
+        r3 := @parameter0: java.lang.Object;
+
+        r0 := @parameter1: java.lang.Object;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r0);
+
+        r2 = r1.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        $i0 = virtualinvoke r3.<java.lang.Object: int hashCode()>();
+
+        $i2 = $i0 & 2147483647;
+
+        $i1 = lengthof r2;
+
+        i3 = $i2 % $i1;
+
+        r8 = r2[i3];
+
+        r9 = null;
+
+     label1:
+        if r8 == null goto label5;
+
+        $i4 = r8.<java.util.Hashtable$Entry: int hash>;
+
+        if $i4 != $i0 goto label4;
+
+        $r4 = r8.<java.util.Hashtable$Entry: java.lang.Object key>;
+
+        $z0 = virtualinvoke $r4.<java.lang.Object: boolean equals(java.lang.Object)>(r3);
+
+        if $z0 == 0 goto label4;
+
+        $r5 = r8.<java.util.Hashtable$Entry: java.lang.Object value>;
+
+        $z1 = virtualinvoke $r5.<java.lang.Object: boolean equals(java.lang.Object)>(r0);
+
+        if $z1 == 0 goto label4;
+
+        $i5 = r1.<java.util.Hashtable: int modCount>;
+
+        $i6 = $i5 + 1;
+
+        r1.<java.util.Hashtable: int modCount> = $i6;
+
+        if r9 == null goto label2;
+
+        $r7 = r8.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        r9.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next> = $r7;
+
+        goto label3;
+
+     label2:
+        $r6 = r8.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        r2[i3] = $r6;
+
+     label3:
+        $i7 = r1.<java.util.Hashtable: int count>;
+
+        $i8 = $i7 - 1;
+
+        r1.<java.util.Hashtable: int count> = $i8;
+
+        r8.<java.util.Hashtable$Entry: java.lang.Object value> = null;
+
+        return 1;
+
+     label4:
+        r9 = r8;
+
+        r8 = r8.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        goto label1;
+
+     label5:
+        return 0;
+    }
+
+    public synchronized boolean replace(java.lang.Object, java.lang.Object, java.lang.Object)
+    {
+        java.util.Hashtable$Entry r7;
+        java.util.Hashtable$Entry[] r3;
+        int $i0, $i1, $i2, i3, $i4;
+        java.lang.Object r0, r1, r4, $r5, $r6;
+        java.util.Hashtable r2;
+        boolean $z0, $z1;
+
+        r2 := @this: java.util.Hashtable;
+
+        r4 := @parameter0: java.lang.Object;
+
+        r0 := @parameter1: java.lang.Object;
+
+        r1 := @parameter2: java.lang.Object;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r0);
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r1);
+
+        r3 = r2.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        $i0 = virtualinvoke r4.<java.lang.Object: int hashCode()>();
+
+        $i2 = $i0 & 2147483647;
+
+        $i1 = lengthof r3;
+
+        i3 = $i2 % $i1;
+
+        r7 = r3[i3];
+
+     label1:
+        if r7 == null goto label4;
+
+        $i4 = r7.<java.util.Hashtable$Entry: int hash>;
+
+        if $i4 != $i0 goto label3;
+
+        $r5 = r7.<java.util.Hashtable$Entry: java.lang.Object key>;
+
+        $z0 = virtualinvoke $r5.<java.lang.Object: boolean equals(java.lang.Object)>(r4);
+
+        if $z0 == 0 goto label3;
+
+        $r6 = r7.<java.util.Hashtable$Entry: java.lang.Object value>;
+
+        $z1 = virtualinvoke $r6.<java.lang.Object: boolean equals(java.lang.Object)>(r0);
+
+        if $z1 == 0 goto label2;
+
+        r7.<java.util.Hashtable$Entry: java.lang.Object value> = r1;
+
+        return 1;
+
+     label2:
+        return 0;
+
+     label3:
+        r7 = r7.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        goto label1;
+
+     label4:
+        return 0;
+    }
+
+    public synchronized java.lang.Object replace(java.lang.Object, java.lang.Object)
+    {
+        java.util.Hashtable$Entry r6;
+        java.util.Hashtable$Entry[] r2;
+        int $i0, $i1, $i2, i3, $i4;
+        java.lang.Object r0, r3, $r4, r5;
+        java.util.Hashtable r1;
+        boolean $z0;
+
+        r1 := @this: java.util.Hashtable;
+
+        r3 := @parameter0: java.lang.Object;
+
+        r0 := @parameter1: java.lang.Object;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r0);
+
+        r2 = r1.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        $i0 = virtualinvoke r3.<java.lang.Object: int hashCode()>();
+
+        $i2 = $i0 & 2147483647;
+
+        $i1 = lengthof r2;
+
+        i3 = $i2 % $i1;
+
+        r6 = r2[i3];
+
+     label1:
+        if r6 == null goto label3;
+
+        $i4 = r6.<java.util.Hashtable$Entry: int hash>;
+
+        if $i4 != $i0 goto label2;
+
+        $r4 = r6.<java.util.Hashtable$Entry: java.lang.Object key>;
+
+        $z0 = virtualinvoke $r4.<java.lang.Object: boolean equals(java.lang.Object)>(r3);
+
+        if $z0 == 0 goto label2;
+
+        r5 = r6.<java.util.Hashtable$Entry: java.lang.Object value>;
+
+        r6.<java.util.Hashtable$Entry: java.lang.Object value> = r0;
+
+        return r5;
+
+     label2:
+        r6 = r6.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    public synchronized java.lang.Object computeIfAbsent(java.lang.Object, java.util.function.Function)
+    {
+        java.util.Hashtable$Entry r7;
+        java.util.function.Function r0;
+        java.util.Hashtable$Entry[] r2;
+        int $i0, $i1, $i2, i3, $i4;
+        java.lang.Object r3, $r4, $r5, $r6;
+        java.util.Hashtable r1;
+        boolean $z0;
+
+        r1 := @this: java.util.Hashtable;
+
+        r3 := @parameter0: java.lang.Object;
+
+        r0 := @parameter1: java.util.function.Function;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r0);
+
+        r2 = r1.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        $i0 = virtualinvoke r3.<java.lang.Object: int hashCode()>();
+
+        $i2 = $i0 & 2147483647;
+
+        $i1 = lengthof r2;
+
+        i3 = $i2 % $i1;
+
+        r7 = r2[i3];
+
+     label1:
+        if r7 == null goto label3;
+
+        $i4 = r7.<java.util.Hashtable$Entry: int hash>;
+
+        if $i4 != $i0 goto label2;
+
+        $r5 = r7.<java.util.Hashtable$Entry: java.lang.Object key>;
+
+        $z0 = virtualinvoke $r5.<java.lang.Object: boolean equals(java.lang.Object)>(r3);
+
+        if $z0 == 0 goto label2;
+
+        $r6 = r7.<java.util.Hashtable$Entry: java.lang.Object value>;
+
+        return $r6;
+
+     label2:
+        r7 = r7.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        goto label1;
+
+     label3:
+        $r4 = interfaceinvoke r0.<java.util.function.Function: java.lang.Object apply(java.lang.Object)>(r3);
+
+        if $r4 == null goto label4;
+
+        specialinvoke r1.<java.util.Hashtable: void addEntry(int,java.lang.Object,java.lang.Object,int)>($i0, r3, $r4, i3);
+
+     label4:
+        return $r4;
+    }
+
+    public synchronized java.lang.Object computeIfPresent(java.lang.Object, java.util.function.BiFunction)
+    {
+        java.util.Hashtable$Entry $r7, $r8, r9, r10;
+        java.util.function.BiFunction r0;
+        int $i0, $i1, $i2, i3, $i4, $i5, $i6, $i7, $i8;
+        java.util.Hashtable r1;
+        boolean $z0;
+        java.util.Hashtable$Entry[] r2;
+        java.lang.Object r3, $r4, $r5, $r6;
+
+        r1 := @this: java.util.Hashtable;
+
+        r3 := @parameter0: java.lang.Object;
+
+        r0 := @parameter1: java.util.function.BiFunction;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r0);
+
+        r2 = r1.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        $i0 = virtualinvoke r3.<java.lang.Object: int hashCode()>();
+
+        $i2 = $i0 & 2147483647;
+
+        $i1 = lengthof r2;
+
+        i3 = $i2 % $i1;
+
+        r9 = r2[i3];
+
+        r10 = null;
+
+     label1:
+        if r9 == null goto label7;
+
+        $i4 = r9.<java.util.Hashtable$Entry: int hash>;
+
+        if $i4 != $i0 goto label6;
+
+        $r4 = r9.<java.util.Hashtable$Entry: java.lang.Object key>;
+
+        $z0 = virtualinvoke $r4.<java.lang.Object: boolean equals(java.lang.Object)>(r3);
+
+        if $z0 == 0 goto label6;
+
+        $r5 = r9.<java.util.Hashtable$Entry: java.lang.Object value>;
+
+        $r6 = interfaceinvoke r0.<java.util.function.BiFunction: java.lang.Object apply(java.lang.Object,java.lang.Object)>(r3, $r5);
+
+        if $r6 != null goto label4;
+
+        $i5 = r1.<java.util.Hashtable: int modCount>;
+
+        $i6 = $i5 + 1;
+
+        r1.<java.util.Hashtable: int modCount> = $i6;
+
+        if r10 == null goto label2;
+
+        $r8 = r9.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        r10.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next> = $r8;
+
+        goto label3;
+
+     label2:
+        $r7 = r9.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        r2[i3] = $r7;
+
+     label3:
+        $i7 = r1.<java.util.Hashtable: int count>;
+
+        $i8 = $i7 - 1;
+
+        r1.<java.util.Hashtable: int count> = $i8;
+
+        goto label5;
+
+     label4:
+        r9.<java.util.Hashtable$Entry: java.lang.Object value> = $r6;
+
+     label5:
+        return $r6;
+
+     label6:
+        r10 = r9;
+
+        r9 = r9.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        goto label1;
+
+     label7:
+        return null;
+    }
+
+    public synchronized java.lang.Object compute(java.lang.Object, java.util.function.BiFunction)
+    {
+        java.util.Hashtable$Entry $r8, $r9, r10, r11;
+        java.util.function.BiFunction r0;
+        int $i0, $i1, $i2, i3, $i4, $i5, $i6, $i7, $i8;
+        java.util.Hashtable r1;
+        boolean $z0;
+        java.util.Hashtable$Entry[] r2;
+        java.lang.Object r3, $r4, $r5, $r6, $r7;
+
+        r1 := @this: java.util.Hashtable;
+
+        r3 := @parameter0: java.lang.Object;
+
+        r0 := @parameter1: java.util.function.BiFunction;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r0);
+
+        r2 = r1.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        $i0 = virtualinvoke r3.<java.lang.Object: int hashCode()>();
+
+        $i2 = $i0 & 2147483647;
+
+        $i1 = lengthof r2;
+
+        i3 = $i2 % $i1;
+
+        r10 = r2[i3];
+
+        r11 = null;
+
+     label1:
+        if r10 == null goto label7;
+
+        $i4 = r10.<java.util.Hashtable$Entry: int hash>;
+
+        if $i4 != $i0 goto label6;
+
+        $r5 = r10.<java.util.Hashtable$Entry: java.lang.Object key>;
+
+        $z0 = staticinvoke <java.util.Objects: boolean equals(java.lang.Object,java.lang.Object)>($r5, r3);
+
+        if $z0 == 0 goto label6;
+
+        $r6 = r10.<java.util.Hashtable$Entry: java.lang.Object value>;
+
+        $r7 = interfaceinvoke r0.<java.util.function.BiFunction: java.lang.Object apply(java.lang.Object,java.lang.Object)>(r3, $r6);
+
+        if $r7 != null goto label4;
+
+        $i5 = r1.<java.util.Hashtable: int modCount>;
+
+        $i6 = $i5 + 1;
+
+        r1.<java.util.Hashtable: int modCount> = $i6;
+
+        if r11 == null goto label2;
+
+        $r9 = r10.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        r11.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next> = $r9;
+
+        goto label3;
+
+     label2:
+        $r8 = r10.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        r2[i3] = $r8;
+
+     label3:
+        $i7 = r1.<java.util.Hashtable: int count>;
+
+        $i8 = $i7 - 1;
+
+        r1.<java.util.Hashtable: int count> = $i8;
+
+        goto label5;
+
+     label4:
+        r10.<java.util.Hashtable$Entry: java.lang.Object value> = $r7;
+
+     label5:
+        return $r7;
+
+     label6:
+        r11 = r10;
+
+        r10 = r10.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        goto label1;
+
+     label7:
+        $r4 = interfaceinvoke r0.<java.util.function.BiFunction: java.lang.Object apply(java.lang.Object,java.lang.Object)>(r3, null);
+
+        if $r4 == null goto label8;
+
+        specialinvoke r1.<java.util.Hashtable: void addEntry(int,java.lang.Object,java.lang.Object,int)>($i0, r3, $r4, i3);
+
+     label8:
+        return $r4;
+    }
+
+    public synchronized java.lang.Object merge(java.lang.Object, java.lang.Object, java.util.function.BiFunction)
+    {
+        java.util.Hashtable$Entry $r8, $r9, r10, r11;
+        java.util.function.BiFunction r0;
+        int $i0, $i1, $i2, i3, $i4, $i5, $i6, $i7, $i8;
+        java.util.Hashtable r1;
+        boolean $z0;
+        java.util.Hashtable$Entry[] r2;
+        java.lang.Object r3, r4, $r5, $r6, $r7;
+
+        r1 := @this: java.util.Hashtable;
+
+        r3 := @parameter0: java.lang.Object;
+
+        r4 := @parameter1: java.lang.Object;
+
+        r0 := @parameter2: java.util.function.BiFunction;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r0);
+
+        r2 = r1.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        $i0 = virtualinvoke r3.<java.lang.Object: int hashCode()>();
+
+        $i2 = $i0 & 2147483647;
+
+        $i1 = lengthof r2;
+
+        i3 = $i2 % $i1;
+
+        r10 = r2[i3];
+
+        r11 = null;
+
+     label1:
+        if r10 == null goto label7;
+
+        $i4 = r10.<java.util.Hashtable$Entry: int hash>;
+
+        if $i4 != $i0 goto label6;
+
+        $r5 = r10.<java.util.Hashtable$Entry: java.lang.Object key>;
+
+        $z0 = virtualinvoke $r5.<java.lang.Object: boolean equals(java.lang.Object)>(r3);
+
+        if $z0 == 0 goto label6;
+
+        $r6 = r10.<java.util.Hashtable$Entry: java.lang.Object value>;
+
+        $r7 = interfaceinvoke r0.<java.util.function.BiFunction: java.lang.Object apply(java.lang.Object,java.lang.Object)>($r6, r4);
+
+        if $r7 != null goto label4;
+
+        $i5 = r1.<java.util.Hashtable: int modCount>;
+
+        $i6 = $i5 + 1;
+
+        r1.<java.util.Hashtable: int modCount> = $i6;
+
+        if r11 == null goto label2;
+
+        $r9 = r10.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        r11.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next> = $r9;
+
+        goto label3;
+
+     label2:
+        $r8 = r10.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        r2[i3] = $r8;
+
+     label3:
+        $i7 = r1.<java.util.Hashtable: int count>;
+
+        $i8 = $i7 - 1;
+
+        r1.<java.util.Hashtable: int count> = $i8;
+
+        goto label5;
+
+     label4:
+        r10.<java.util.Hashtable$Entry: java.lang.Object value> = $r7;
+
+     label5:
+        return $r7;
+
+     label6:
+        r11 = r10;
+
+        r10 = r10.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        goto label1;
+
+     label7:
+        if r4 == null goto label8;
+
+        specialinvoke r1.<java.util.Hashtable: void addEntry(int,java.lang.Object,java.lang.Object,int)>($i0, r3, r4, i3);
+
+     label8:
+        return r4;
+    }
+
+    private void writeObject(java.io.ObjectOutputStream) throws java.io.IOException
+    {
+        java.lang.Throwable $r10;
+        java.util.Hashtable$Entry $r7, r11, r12;
+        int $i0, $i1, $i2, i3;
+        java.io.ObjectOutputStream r1;
+        java.util.Hashtable r0;
+        java.util.Hashtable$Entry[] $r2, $r3, $r6;
+        java.lang.Object $r4, $r5, $r8, $r9;
+
+        r0 := @this: java.util.Hashtable;
+
+        r1 := @parameter0: java.io.ObjectOutputStream;
+
+        r11 = null;
+
+        entermonitor r0;
+
+     label01:
+        virtualinvoke r1.<java.io.ObjectOutputStream: void defaultWriteObject()>();
+
+        $r2 = r0.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        $i0 = lengthof $r2;
+
+        virtualinvoke r1.<java.io.ObjectOutputStream: void writeInt(int)>($i0);
+
+        $i1 = r0.<java.util.Hashtable: int count>;
+
+        virtualinvoke r1.<java.io.ObjectOutputStream: void writeInt(int)>($i1);
+
+        i3 = 0;
+
+     label02:
+        $r3 = r0.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        $i2 = lengthof $r3;
+
+        if i3 >= $i2 goto label05;
+
+        $r6 = r0.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        r12 = $r6[i3];
+
+     label03:
+        if r12 == null goto label04;
+
+        $r7 = new java.util.Hashtable$Entry;
+
+        $r9 = r12.<java.util.Hashtable$Entry: java.lang.Object key>;
+
+        $r8 = r12.<java.util.Hashtable$Entry: java.lang.Object value>;
+
+        specialinvoke $r7.<java.util.Hashtable$Entry: void <init>(int,java.lang.Object,java.lang.Object,java.util.Hashtable$Entry)>(0, $r9, $r8, r11);
+
+        r11 = $r7;
+
+        r12 = r12.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        goto label03;
+
+     label04:
+        i3 = i3 + 1;
+
+        goto label02;
+
+     label05:
+        exitmonitor r0;
+
+     label06:
+        goto label09;
+
+     label07:
+        $r10 := @caughtexception;
+
+        exitmonitor r0;
+
+     label08:
+        throw $r10;
+
+     label09:
+        if r11 == null goto label10;
+
+        $r4 = r11.<java.util.Hashtable$Entry: java.lang.Object key>;
+
+        virtualinvoke r1.<java.io.ObjectOutputStream: void writeObject(java.lang.Object)>($r4);
+
+        $r5 = r11.<java.util.Hashtable$Entry: java.lang.Object value>;
+
+        virtualinvoke r1.<java.io.ObjectOutputStream: void writeObject(java.lang.Object)>($r5);
+
+        r11 = r11.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        goto label09;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label01 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.ObjectInputStream r0;
+        byte $b0;
+        boolean $z0;
+        java.io.StreamCorruptedException $r18, $r20;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $f10, $f11, $f12;
+        java.lang.StringBuilder $r4, $r5, $r14, $r15, $r17, $r19;
+        sun.misc.JavaOISAccess $r7;
+        int $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, i11, i12, $i13, i14, $i15, $i17, $i19;
+        java.lang.String $r6, $r16;
+        java.util.Hashtable r1;
+        java.util.Hashtable$Entry[] $r8, $r11;
+        java.lang.Object $r9, $r10;
+
+        r1 := @this: java.util.Hashtable;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        $f0 = r1.<java.util.Hashtable: float loadFactor>;
+
+        $b0 = $f0 cmpg 0.0F;
+
+        $i15 = (int) $b0;
+
+        if $i15 <= 0 goto label1;
+
+        $f2 = r1.<java.util.Hashtable: float loadFactor>;
+
+        $z0 = staticinvoke <java.lang.Float: boolean isNaN(float)>($f2);
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        $r18 = new java.io.StreamCorruptedException;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Illegal Load: ");
+
+        $f1 = r1.<java.util.Hashtable: float loadFactor>;
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(float)>($f1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r18.<java.io.StreamCorruptedException: void <init>(java.lang.String)>($r6);
+
+        throw $r18;
+
+     label2:
+        $i1 = virtualinvoke r0.<java.io.ObjectInputStream: int readInt()>();
+
+        $i2 = virtualinvoke r0.<java.io.ObjectInputStream: int readInt()>();
+
+        i11 = $i2;
+
+        if $i2 >= 0 goto label3;
+
+        $r20 = new java.io.StreamCorruptedException;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Illegal # of Elements: ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r20.<java.io.StreamCorruptedException: void <init>(java.lang.String)>($r16);
+
+        throw $r20;
+
+     label3:
+        $f4 = (float) $i2;
+
+        $f3 = r1.<java.util.Hashtable: float loadFactor>;
+
+        $f5 = $f4 / $f3;
+
+        $i3 = (int) $f5;
+
+        $i4 = $i3 + 1;
+
+        $i5 = staticinvoke <java.lang.Math: int max(int,int)>($i1, $i4);
+
+        $i6 = $i2 / 20;
+
+        $i7 = $i2 + $i6;
+
+        $f7 = (float) $i7;
+
+        $f6 = r1.<java.util.Hashtable: float loadFactor>;
+
+        $f8 = $f7 / $f6;
+
+        $i8 = (int) $f8;
+
+        i12 = $i8 + 3;
+
+        if i12 <= $i2 goto label4;
+
+        $i10 = i12 & 1;
+
+        if $i10 != 0 goto label4;
+
+        $i17 = (int) -1;
+
+        i12 = i12 + $i17;
+
+     label4:
+        $i13 = staticinvoke <java.lang.Math: int min(int,int)>(i12, $i5);
+
+        i14 = $i13;
+
+        if $i13 >= 0 goto label5;
+
+        i14 = $i5;
+
+     label5:
+        $r7 = staticinvoke <sun.misc.SharedSecrets: sun.misc.JavaOISAccess getJavaOISAccess()>();
+
+        interfaceinvoke $r7.<sun.misc.JavaOISAccess: void checkArray(java.io.ObjectInputStream,java.lang.Class,int)>(r0, class "[Ljava/util/Map$Entry;", i14);
+
+        $r8 = newarray (java.util.Hashtable$Entry)[i14];
+
+        r1.<java.util.Hashtable: java.util.Hashtable$Entry[] table> = $r8;
+
+        $f10 = (float) i14;
+
+        $f9 = r1.<java.util.Hashtable: float loadFactor>;
+
+        $f11 = $f10 * $f9;
+
+        $f12 = staticinvoke <java.lang.Math: float min(float,float)>($f11, 2.14748365E9F);
+
+        $i9 = (int) $f12;
+
+        r1.<java.util.Hashtable: int threshold> = $i9;
+
+        r1.<java.util.Hashtable: int count> = 0;
+
+     label6:
+        if i11 <= 0 goto label7;
+
+        $r9 = virtualinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        $r10 = virtualinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        $r11 = r1.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        specialinvoke r1.<java.util.Hashtable: void reconstitutionPut(java.util.Hashtable$Entry[],java.lang.Object,java.lang.Object)>($r11, $r9, $r10);
+
+        $i19 = (int) -1;
+
+        i11 = i11 + $i19;
+
+        goto label6;
+
+     label7:
+        return;
+    }
+
+    private void reconstitutionPut(java.util.Hashtable$Entry[], java.lang.Object, java.lang.Object) throws java.io.StreamCorruptedException
+    {
+        java.util.Hashtable$Entry $r3, r8, r9;
+        int $i0, $i1, $i2, i3, $i4, $i5, $i6;
+        java.util.Hashtable r4;
+        boolean $z0;
+        java.io.StreamCorruptedException $r6, $r7;
+        java.util.Hashtable$Entry[] r2;
+        java.lang.Object r0, r1, $r5;
+
+        r4 := @this: java.util.Hashtable;
+
+        r2 := @parameter0: java.util.Hashtable$Entry[];
+
+        r1 := @parameter1: java.lang.Object;
+
+        r0 := @parameter2: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        $r7 = new java.io.StreamCorruptedException;
+
+        specialinvoke $r7.<java.io.StreamCorruptedException: void <init>()>();
+
+        throw $r7;
+
+     label1:
+        $i0 = virtualinvoke r1.<java.lang.Object: int hashCode()>();
+
+        $i2 = $i0 & 2147483647;
+
+        $i1 = lengthof r2;
+
+        i3 = $i2 % $i1;
+
+        r8 = r2[i3];
+
+     label2:
+        if r8 == null goto label4;
+
+        $i6 = r8.<java.util.Hashtable$Entry: int hash>;
+
+        if $i6 != $i0 goto label3;
+
+        $r5 = r8.<java.util.Hashtable$Entry: java.lang.Object key>;
+
+        $z0 = virtualinvoke $r5.<java.lang.Object: boolean equals(java.lang.Object)>(r1);
+
+        if $z0 == 0 goto label3;
+
+        $r6 = new java.io.StreamCorruptedException;
+
+        specialinvoke $r6.<java.io.StreamCorruptedException: void <init>()>();
+
+        throw $r6;
+
+     label3:
+        r8 = r8.<java.util.Hashtable$Entry: java.util.Hashtable$Entry next>;
+
+        goto label2;
+
+     label4:
+        r9 = r2[i3];
+
+        $r3 = new java.util.Hashtable$Entry;
+
+        specialinvoke $r3.<java.util.Hashtable$Entry: void <init>(int,java.lang.Object,java.lang.Object,java.util.Hashtable$Entry)>($i0, r1, r0, r9);
+
+        r2[i3] = $r3;
+
+        $i4 = r4.<java.util.Hashtable: int count>;
+
+        $i5 = $i4 + 1;
+
+        r4.<java.util.Hashtable: int count> = $i5;
+
+        return;
+    }
+
+    static java.util.Iterator access$100(java.util.Hashtable, int)
+    {
+        int i0;
+        java.util.Iterator $r1;
+        java.util.Hashtable r0;
+
+        r0 := @parameter0: java.util.Hashtable;
+
+        i0 := @parameter1: int;
+
+        $r1 = specialinvoke r0.<java.util.Hashtable: java.util.Iterator getIterator(int)>(i0);
+
+        return $r1;
+    }
+
+    static int access$200(java.util.Hashtable)
+    {
+        int $i0;
+        java.util.Hashtable r0;
+
+        r0 := @parameter0: java.util.Hashtable;
+
+        $i0 = r0.<java.util.Hashtable: int count>;
+
+        return $i0;
+    }
+
+    static java.util.Hashtable$Entry[] access$400(java.util.Hashtable)
+    {
+        java.util.Hashtable$Entry[] $r1;
+        java.util.Hashtable r0;
+
+        r0 := @parameter0: java.util.Hashtable;
+
+        $r1 = r0.<java.util.Hashtable: java.util.Hashtable$Entry[] table>;
+
+        return $r1;
+    }
+
+    static int access$508(java.util.Hashtable)
+    {
+        int $i0, $i1;
+        java.util.Hashtable r0;
+
+        r0 := @parameter0: java.util.Hashtable;
+
+        $i0 = r0.<java.util.Hashtable: int modCount>;
+
+        $i1 = $i0 + 1;
+
+        r0.<java.util.Hashtable: int modCount> = $i1;
+
+        return $i0;
+    }
+
+    static int access$210(java.util.Hashtable)
+    {
+        int $i0, $i1;
+        java.util.Hashtable r0;
+
+        r0 := @parameter0: java.util.Hashtable;
+
+        $i0 = r0.<java.util.Hashtable: int count>;
+
+        $i1 = $i0 - 1;
+
+        r0.<java.util.Hashtable: int count> = $i1;
+
+        return $i0;
+    }
+
+    static int access$500(java.util.Hashtable)
+    {
+        int $i0;
+        java.util.Hashtable r0;
+
+        r0 := @parameter0: java.util.Hashtable;
+
+        $i0 = r0.<java.util.Hashtable: int modCount>;
+
+        return $i0;
+    }
+
+    public static void <clinit>()
+    {
+        <java.util.Hashtable: int ENTRIES> = 2;
+
+        <java.util.Hashtable: int VALUES> = 1;
+
+        <java.util.Hashtable: int KEYS> = 0;
+
+        <java.util.Hashtable: int MAX_ARRAY_SIZE> = 2147483639;
+
+        <java.util.Hashtable: long serialVersionUID> = 1421746759512286392L;
+
+        return;
+    }
+}

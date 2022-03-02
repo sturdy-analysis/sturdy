@@ -1,0 +1,2465 @@
+public class sun.awt.im.InputContext extends java.awt.im.InputContext implements java.awt.event.ComponentListener, java.awt.event.WindowListener
+{
+    private static final sun.util.logging.PlatformLogger log;
+    private sun.awt.im.InputMethodLocator inputMethodLocator;
+    private java.awt.im.spi.InputMethod inputMethod;
+    private boolean inputMethodCreationFailed;
+    private java.util.HashMap usedInputMethods;
+    private java.awt.Component currentClientComponent;
+    private java.awt.Component awtFocussedComponent;
+    private boolean isInputMethodActive;
+    private java.lang.Character$Subset[] characterSubsets;
+    private boolean compositionAreaHidden;
+    private static sun.awt.im.InputContext inputMethodWindowContext;
+    private static java.awt.im.spi.InputMethod previousInputMethod;
+    private boolean clientWindowNotificationEnabled;
+    private java.awt.Window clientWindowListened;
+    private java.awt.Rectangle clientWindowLocation;
+    private java.util.HashMap perInputMethodState;
+    private static java.awt.AWTKeyStroke inputMethodSelectionKey;
+    private static boolean inputMethodSelectionKeyInitialized;
+    private static final java.lang.String inputMethodSelectionKeyPath;
+    private static final java.lang.String inputMethodSelectionKeyCodeName;
+    private static final java.lang.String inputMethodSelectionKeyModifiersName;
+
+    protected void <init>()
+    {
+        java.lang.Throwable $r3;
+        java.util.Locale $r2;
+        sun.awt.im.InputContext r0;
+        sun.awt.im.InputMethodManager $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        specialinvoke r0.<java.awt.im.InputContext: void <init>()>();
+
+        r0.<sun.awt.im.InputContext: java.lang.Character$Subset[] characterSubsets> = null;
+
+        r0.<sun.awt.im.InputContext: boolean compositionAreaHidden> = 0;
+
+        r0.<sun.awt.im.InputContext: boolean clientWindowNotificationEnabled> = 0;
+
+        r0.<sun.awt.im.InputContext: java.awt.Rectangle clientWindowLocation> = null;
+
+        $r1 = staticinvoke <sun.awt.im.InputMethodManager: sun.awt.im.InputMethodManager getInstance()>();
+
+        entermonitor class "Lsun/awt/im/InputContext;";
+
+     label1:
+        $z0 = <sun.awt.im.InputContext: boolean inputMethodSelectionKeyInitialized>;
+
+        if $z0 != 0 goto label2;
+
+        <sun.awt.im.InputContext: boolean inputMethodSelectionKeyInitialized> = 1;
+
+        $z1 = virtualinvoke $r1.<sun.awt.im.InputMethodManager: boolean hasMultipleInputMethods()>();
+
+        if $z1 == 0 goto label2;
+
+        specialinvoke r0.<sun.awt.im.InputContext: void initializeInputMethodSelectionKey()>();
+
+     label2:
+        exitmonitor class "Lsun/awt/im/InputContext;";
+
+     label3:
+        goto label6;
+
+     label4:
+        $r3 := @caughtexception;
+
+        exitmonitor class "Lsun/awt/im/InputContext;";
+
+     label5:
+        throw $r3;
+
+     label6:
+        $r2 = virtualinvoke $r1.<sun.awt.im.InputMethodManager: java.util.Locale getDefaultKeyboardLocale()>();
+
+        virtualinvoke r0.<sun.awt.im.InputContext: boolean selectInputMethod(java.util.Locale)>($r2);
+
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public synchronized boolean selectInputMethod(java.util.Locale)
+    {
+        java.lang.NullPointerException $r13;
+        java.util.Locale r0;
+        sun.awt.im.InputContext r1;
+        sun.awt.im.InputMethodManager $r14;
+        boolean $z0, $z1, $z2;
+        sun.awt.im.InputMethodLocator $r3, $r5, $r9, $r10, $r11, $r15;
+        java.awt.im.spi.InputMethod $r2, $r4, $r6, $r7, $r8, $r12;
+
+        r1 := @this: sun.awt.im.InputContext;
+
+        r0 := @parameter0: java.util.Locale;
+
+        if r0 != null goto label1;
+
+        $r13 = new java.lang.NullPointerException;
+
+        specialinvoke $r13.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r13;
+
+     label1:
+        $r2 = r1.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r2 == null goto label2;
+
+        $r12 = r1.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $z2 = interfaceinvoke $r12.<java.awt.im.spi.InputMethod: boolean setLocale(java.util.Locale)>(r0);
+
+        if $z2 == 0 goto label3;
+
+        return 1;
+
+     label2:
+        $r3 = r1.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator>;
+
+        if $r3 == null goto label3;
+
+        $r9 = r1.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator>;
+
+        $z1 = virtualinvoke $r9.<sun.awt.im.InputMethodLocator: boolean isLocaleAvailable(java.util.Locale)>(r0);
+
+        if $z1 == 0 goto label3;
+
+        $r10 = r1.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator>;
+
+        $r11 = virtualinvoke $r10.<sun.awt.im.InputMethodLocator: sun.awt.im.InputMethodLocator deriveLocator(java.util.Locale)>(r0);
+
+        r1.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator> = $r11;
+
+        return 1;
+
+     label3:
+        $r14 = staticinvoke <sun.awt.im.InputMethodManager: sun.awt.im.InputMethodManager getInstance()>();
+
+        $r15 = virtualinvoke $r14.<sun.awt.im.InputMethodManager: sun.awt.im.InputMethodLocator findInputMethod(java.util.Locale)>(r0);
+
+        if $r15 == null goto label4;
+
+        virtualinvoke r1.<sun.awt.im.InputContext: void changeInputMethod(sun.awt.im.InputMethodLocator)>($r15);
+
+        return 1;
+
+     label4:
+        $r4 = r1.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r4 != null goto label5;
+
+        $r5 = r1.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator>;
+
+        if $r5 == null goto label5;
+
+        $r6 = specialinvoke r1.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod getInputMethod()>();
+
+        r1.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod> = $r6;
+
+        $r7 = r1.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r7 == null goto label5;
+
+        $r8 = r1.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $z0 = interfaceinvoke $r8.<java.awt.im.spi.InputMethod: boolean setLocale(java.util.Locale)>(r0);
+
+        return $z0;
+
+     label5:
+        return 0;
+    }
+
+    public java.util.Locale getLocale()
+    {
+        sun.awt.im.InputMethodLocator $r2, $r3;
+        java.util.Locale $r4, $r6;
+        sun.awt.im.InputContext r0;
+        java.awt.im.spi.InputMethod $r1, $r5;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        $r1 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r1 == null goto label1;
+
+        $r5 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $r6 = interfaceinvoke $r5.<java.awt.im.spi.InputMethod: java.util.Locale getLocale()>();
+
+        return $r6;
+
+     label1:
+        $r2 = r0.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator>;
+
+        if $r2 == null goto label2;
+
+        $r3 = r0.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator>;
+
+        $r4 = virtualinvoke $r3.<sun.awt.im.InputMethodLocator: java.util.Locale getLocale()>();
+
+        return $r4;
+
+     label2:
+        return null;
+    }
+
+    public void setCharacterSubsets(java.lang.Character$Subset[])
+    {
+        int $i0, $i1;
+        java.lang.Character$Subset[] r0, $r2, $r3, $r4;
+        sun.awt.im.InputContext r1;
+        java.awt.im.spi.InputMethod $r5, $r6;
+
+        r1 := @this: sun.awt.im.InputContext;
+
+        r0 := @parameter0: java.lang.Character$Subset[];
+
+        if r0 != null goto label1;
+
+        r1.<sun.awt.im.InputContext: java.lang.Character$Subset[] characterSubsets> = null;
+
+        goto label2;
+
+     label1:
+        $i0 = lengthof r0;
+
+        $r2 = newarray (java.lang.Character$Subset)[$i0];
+
+        r1.<sun.awt.im.InputContext: java.lang.Character$Subset[] characterSubsets> = $r2;
+
+        $r4 = r1.<sun.awt.im.InputContext: java.lang.Character$Subset[] characterSubsets>;
+
+        $r3 = r1.<sun.awt.im.InputContext: java.lang.Character$Subset[] characterSubsets>;
+
+        $i1 = lengthof $r3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, 0, $r4, 0, $i1);
+
+     label2:
+        $r5 = r1.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r5 == null goto label3;
+
+        $r6 = r1.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        interfaceinvoke $r6.<java.awt.im.spi.InputMethod: void setCharacterSubsets(java.lang.Character$Subset[])>(r0);
+
+     label3:
+        return;
+    }
+
+    public synchronized void reconvert()
+    {
+        java.lang.UnsupportedOperationException $r2;
+        sun.awt.im.InputContext r0;
+        java.awt.im.spi.InputMethod $r1;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        $r1 = specialinvoke r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod getInputMethod()>();
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r2.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        interfaceinvoke $r1.<java.awt.im.spi.InputMethod: void reconvert()>();
+
+        return;
+    }
+
+    public void dispatchEvent(java.awt.AWTEvent)
+    {
+        java.awt.im.InputContext $r14;
+        java.awt.AWTEvent r0;
+        int $i0;
+        sun.awt.im.InputContext r1;
+        sun.awt.im.InputMethodManager $r8;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.awt.Window $r13;
+        java.awt.event.KeyEvent $r7;
+        java.awt.Component $r4, $r6, $r10, $r12;
+        java.awt.event.FocusEvent $r3, $r11;
+        java.lang.Object $r2, $r5, $r9;
+        java.awt.im.spi.InputMethod $r15;
+
+        r1 := @this: sun.awt.im.InputContext;
+
+        r0 := @parameter0: java.awt.AWTEvent;
+
+        $z0 = r0 instanceof java.awt.event.InputMethodEvent;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $z1 = r0 instanceof java.awt.event.FocusEvent;
+
+        if $z1 == 0 goto label2;
+
+        $r11 = (java.awt.event.FocusEvent) r0;
+
+        $r12 = virtualinvoke $r11.<java.awt.event.FocusEvent: java.awt.Component getOppositeComponent()>();
+
+        if $r12 == null goto label2;
+
+        $r13 = staticinvoke <sun.awt.im.InputContext: java.awt.Window getComponentWindow(java.awt.Component)>($r12);
+
+        $z5 = $r13 instanceof sun.awt.im.InputMethodWindow;
+
+        if $z5 == 0 goto label2;
+
+        $r14 = virtualinvoke $r12.<java.awt.Component: java.awt.im.InputContext getInputContext()>();
+
+        if $r14 != r1 goto label2;
+
+        return;
+
+     label2:
+        $r15 = specialinvoke r1.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod getInputMethod()>();
+
+        $i0 = virtualinvoke r0.<java.awt.AWTEvent: int getID()>();
+
+        lookupswitch($i0)
+        {
+            case 401: goto label5;
+            case 1004: goto label3;
+            case 1005: goto label4;
+            default: goto label6;
+        };
+
+     label3:
+        $r5 = virtualinvoke r0.<java.awt.AWTEvent: java.lang.Object getSource()>();
+
+        $r6 = (java.awt.Component) $r5;
+
+        specialinvoke r1.<sun.awt.im.InputContext: void focusGained(java.awt.Component)>($r6);
+
+        goto label7;
+
+     label4:
+        $r2 = virtualinvoke r0.<java.awt.AWTEvent: java.lang.Object getSource()>();
+
+        $r4 = (java.awt.Component) $r2;
+
+        $r3 = (java.awt.event.FocusEvent) r0;
+
+        $z2 = virtualinvoke $r3.<java.awt.event.FocusEvent: boolean isTemporary()>();
+
+        specialinvoke r1.<sun.awt.im.InputContext: void focusLost(java.awt.Component,boolean)>($r4, $z2);
+
+        goto label7;
+
+     label5:
+        $r7 = (java.awt.event.KeyEvent) r0;
+
+        $z3 = specialinvoke r1.<sun.awt.im.InputContext: boolean checkInputMethodSelectionKey(java.awt.event.KeyEvent)>($r7);
+
+        if $z3 == 0 goto label6;
+
+        $r8 = staticinvoke <sun.awt.im.InputMethodManager: sun.awt.im.InputMethodManager getInstance()>();
+
+        $r9 = virtualinvoke r0.<java.awt.AWTEvent: java.lang.Object getSource()>();
+
+        $r10 = (java.awt.Component) $r9;
+
+        virtualinvoke $r8.<sun.awt.im.InputMethodManager: void notifyChangeRequestByHotKey(java.awt.Component)>($r10);
+
+        goto label7;
+
+     label6:
+        if $r15 == null goto label7;
+
+        $z4 = r0 instanceof java.awt.event.InputEvent;
+
+        if $z4 == 0 goto label7;
+
+        interfaceinvoke $r15.<java.awt.im.spi.InputMethod: void dispatchEvent(java.awt.AWTEvent)>(r0);
+
+     label7:
+        return;
+    }
+
+    private void focusGained(java.awt.Component)
+    {
+        java.lang.Throwable $r15, $r16;
+        java.awt.im.InputMethodRequests $r9;
+        sun.awt.im.InputMethodAdapter $r12;
+        sun.awt.im.InputContext r2;
+        java.lang.String $r3, $r5;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        java.awt.Window $r6;
+        java.awt.Component r0, $r13, $r14;
+        sun.awt.im.InputMethodContext $r8, $r10;
+        java.lang.Object $r1;
+        java.lang.Class $r4;
+        java.awt.im.spi.InputMethod $r7, $r11, $r17;
+
+        r2 := @this: sun.awt.im.InputContext;
+
+        r0 := @parameter0: java.awt.Component;
+
+        $r1 = virtualinvoke r0.<java.awt.Component: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label01:
+        entermonitor r2;
+
+     label02:
+        $r3 = "sun.awt.im.CompositionArea";
+
+        $r4 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.Class: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label03;
+
+        goto label10;
+
+     label03:
+        $r6 = staticinvoke <sun.awt.im.InputContext: java.awt.Window getComponentWindow(java.awt.Component)>(r0);
+
+        $z1 = $r6 instanceof sun.awt.im.InputMethodWindow;
+
+        if $z1 == 0 goto label04;
+
+        goto label10;
+
+     label04:
+        $z2 = virtualinvoke r0.<java.awt.Component: boolean isDisplayable()>();
+
+        if $z2 != 0 goto label07;
+
+        exitmonitor r2;
+
+     label05:
+        exitmonitor $r1;
+
+     label06:
+        return;
+
+     label07:
+        $r7 = r2.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r7 == null goto label09;
+
+        $r13 = r2.<sun.awt.im.InputContext: java.awt.Component currentClientComponent>;
+
+        if $r13 == null goto label09;
+
+        $r14 = r2.<sun.awt.im.InputContext: java.awt.Component currentClientComponent>;
+
+        if $r14 == r0 goto label09;
+
+        $z6 = r2.<sun.awt.im.InputContext: boolean isInputMethodActive>;
+
+        if $z6 != 0 goto label08;
+
+        specialinvoke r2.<sun.awt.im.InputContext: void activateInputMethod(boolean)>(0);
+
+     label08:
+        virtualinvoke r2.<sun.awt.im.InputContext: void endComposition()>();
+
+        specialinvoke r2.<sun.awt.im.InputContext: void deactivateInputMethod(boolean)>(0);
+
+     label09:
+        r2.<sun.awt.im.InputContext: java.awt.Component currentClientComponent> = r0;
+
+     label10:
+        r2.<sun.awt.im.InputContext: java.awt.Component awtFocussedComponent> = r0;
+
+        $r17 = r2.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $z7 = $r17 instanceof sun.awt.im.InputMethodAdapter;
+
+        if $z7 == 0 goto label11;
+
+        $r11 = r2.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $r12 = (sun.awt.im.InputMethodAdapter) $r11;
+
+        virtualinvoke $r12.<sun.awt.im.InputMethodAdapter: void setAWTFocussedComponent(java.awt.Component)>(r0);
+
+     label11:
+        $z3 = r2.<sun.awt.im.InputContext: boolean isInputMethodActive>;
+
+        if $z3 != 0 goto label12;
+
+        specialinvoke r2.<sun.awt.im.InputContext: void activateInputMethod(boolean)>(1);
+
+     label12:
+        $r10 = (sun.awt.im.InputMethodContext) r2;
+
+        $z4 = virtualinvoke $r10.<sun.awt.im.InputMethodContext: boolean isCompositionAreaVisible()>();
+
+        if $z4 != 0 goto label14;
+
+        $r9 = virtualinvoke r0.<java.awt.Component: java.awt.im.InputMethodRequests getInputMethodRequests()>();
+
+        if $r9 == null goto label13;
+
+        $z5 = virtualinvoke $r10.<sun.awt.im.InputMethodContext: boolean useBelowTheSpotInput()>();
+
+        if $z5 == 0 goto label13;
+
+        virtualinvoke $r10.<sun.awt.im.InputMethodContext: void setCompositionAreaUndecorated(boolean)>(1);
+
+        goto label14;
+
+     label13:
+        virtualinvoke $r10.<sun.awt.im.InputMethodContext: void setCompositionAreaUndecorated(boolean)>(0);
+
+     label14:
+        $z8 = r2.<sun.awt.im.InputContext: boolean compositionAreaHidden>;
+
+        if $z8 != 1 goto label15;
+
+        $r8 = (sun.awt.im.InputMethodContext) r2;
+
+        virtualinvoke $r8.<sun.awt.im.InputMethodContext: void setCompositionAreaVisible(boolean)>(1);
+
+        r2.<sun.awt.im.InputContext: boolean compositionAreaHidden> = 0;
+
+     label15:
+        exitmonitor r2;
+
+     label16:
+        goto label19;
+
+     label17:
+        $r16 := @caughtexception;
+
+        exitmonitor r2;
+
+     label18:
+        throw $r16;
+
+     label19:
+        exitmonitor $r1;
+
+     label20:
+        goto label23;
+
+     label21:
+        $r15 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label22:
+        throw $r15;
+
+     label23:
+        return;
+
+        catch java.lang.Throwable from label02 to label05 with label17;
+        catch java.lang.Throwable from label07 to label16 with label17;
+        catch java.lang.Throwable from label17 to label18 with label17;
+        catch java.lang.Throwable from label01 to label06 with label21;
+        catch java.lang.Throwable from label07 to label20 with label21;
+        catch java.lang.Throwable from label21 to label22 with label21;
+    }
+
+    private void activateInputMethod(boolean)
+    {
+        sun.awt.im.InputMethodAdapter $r14, $r23;
+        sun.awt.im.InputContext $r0, r1, $r24, $r25, $r27, $r30, $r32;
+        sun.awt.im.InputMethodManager $r39;
+        boolean z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        sun.awt.im.InputMethodLocator $r26, $r28, $r29;
+        sun.util.logging.PlatformLogger$Level $r37;
+        java.awt.Component $r13, $r18;
+        sun.awt.im.InputMethodContext $r40;
+        java.lang.StringBuilder $r15, $r17, $r19;
+        java.lang.Throwable $r34;
+        java.util.HashMap $r6, $r10;
+        java.lang.Boolean r38;
+        java.lang.String $r20;
+        sun.util.logging.PlatformLogger $r16, $r36;
+        java.awt.Window $r7, $r8;
+        java.lang.Object $r11;
+        java.awt.im.spi.InputMethod $r2, $r3, $r4, $r5, $r9, $r12, $r21, $r22, $r31, $r33, $r35;
+
+        r1 := @this: sun.awt.im.InputContext;
+
+        z0 := @parameter0: boolean;
+
+        $r0 = <sun.awt.im.InputContext: sun.awt.im.InputContext inputMethodWindowContext>;
+
+        if $r0 == null goto label01;
+
+        $r24 = <sun.awt.im.InputContext: sun.awt.im.InputContext inputMethodWindowContext>;
+
+        if $r24 == r1 goto label01;
+
+        $r25 = <sun.awt.im.InputContext: sun.awt.im.InputContext inputMethodWindowContext>;
+
+        $r26 = $r25.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator>;
+
+        if $r26 == null goto label01;
+
+        $r27 = <sun.awt.im.InputContext: sun.awt.im.InputContext inputMethodWindowContext>;
+
+        $r29 = $r27.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator>;
+
+        $r28 = r1.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator>;
+
+        $z6 = virtualinvoke $r29.<sun.awt.im.InputMethodLocator: boolean sameInputMethod(sun.awt.im.InputMethodLocator)>($r28);
+
+        if $z6 != 0 goto label01;
+
+        $r30 = <sun.awt.im.InputContext: sun.awt.im.InputContext inputMethodWindowContext>;
+
+        $r31 = $r30.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r31 == null goto label01;
+
+        $r32 = <sun.awt.im.InputContext: sun.awt.im.InputContext inputMethodWindowContext>;
+
+        $r33 = $r32.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        interfaceinvoke $r33.<java.awt.im.spi.InputMethod: void hideWindows()>();
+
+     label01:
+        <sun.awt.im.InputContext: sun.awt.im.InputContext inputMethodWindowContext> = r1;
+
+        $r35 = r1.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r35 == null goto label14;
+
+        $r3 = <sun.awt.im.InputContext: java.awt.im.spi.InputMethod previousInputMethod>;
+
+        $r2 = r1.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r3 == $r2 goto label02;
+
+        $r21 = <sun.awt.im.InputContext: java.awt.im.spi.InputMethod previousInputMethod>;
+
+        $z5 = $r21 instanceof sun.awt.im.InputMethodAdapter;
+
+        if $z5 == 0 goto label02;
+
+        $r22 = <sun.awt.im.InputContext: java.awt.im.spi.InputMethod previousInputMethod>;
+
+        $r23 = (sun.awt.im.InputMethodAdapter) $r22;
+
+        virtualinvoke $r23.<sun.awt.im.InputMethodAdapter: void stopListening()>();
+
+     label02:
+        <sun.awt.im.InputContext: java.awt.im.spi.InputMethod previousInputMethod> = null;
+
+        $r36 = <sun.awt.im.InputContext: sun.util.logging.PlatformLogger log>;
+
+        $r37 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINE>;
+
+        $z7 = virtualinvoke $r36.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r37);
+
+        if $z7 == 0 goto label03;
+
+        $r16 = <sun.awt.im.InputContext: sun.util.logging.PlatformLogger log>;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Current client component ");
+
+        $r18 = r1.<sun.awt.im.InputContext: java.awt.Component currentClientComponent>;
+
+        $r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r18);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r16.<sun.util.logging.PlatformLogger: void fine(java.lang.String)>($r20);
+
+     label03:
+        $r4 = r1.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $z1 = $r4 instanceof sun.awt.im.InputMethodAdapter;
+
+        if $z1 == 0 goto label04;
+
+        $r12 = r1.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $r14 = (sun.awt.im.InputMethodAdapter) $r12;
+
+        $r13 = r1.<sun.awt.im.InputContext: java.awt.Component currentClientComponent>;
+
+        virtualinvoke $r14.<sun.awt.im.InputMethodAdapter: void setClientComponent(java.awt.Component)>($r13);
+
+     label04:
+        $r5 = r1.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        interfaceinvoke $r5.<java.awt.im.spi.InputMethod: void activate()>();
+
+        r1.<sun.awt.im.InputContext: boolean isInputMethodActive> = 1;
+
+        $r6 = r1.<sun.awt.im.InputContext: java.util.HashMap perInputMethodState>;
+
+        if $r6 == null goto label05;
+
+        $r10 = r1.<sun.awt.im.InputContext: java.util.HashMap perInputMethodState>;
+
+        $r9 = r1.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $r11 = virtualinvoke $r10.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>($r9);
+
+        r38 = (java.lang.Boolean) $r11;
+
+        if r38 == null goto label05;
+
+        $z4 = virtualinvoke r38.<java.lang.Boolean: boolean booleanValue()>();
+
+        r1.<sun.awt.im.InputContext: boolean clientWindowNotificationEnabled> = $z4;
+
+     label05:
+        $z8 = r1.<sun.awt.im.InputContext: boolean clientWindowNotificationEnabled>;
+
+        if $z8 == 0 goto label13;
+
+        $z3 = specialinvoke r1.<sun.awt.im.InputContext: boolean addedClientWindowListeners()>();
+
+        if $z3 != 0 goto label06;
+
+        specialinvoke r1.<sun.awt.im.InputContext: void addClientWindowListeners()>();
+
+     label06:
+        entermonitor r1;
+
+     label07:
+        $r7 = r1.<sun.awt.im.InputContext: java.awt.Window clientWindowListened>;
+
+        if $r7 == null goto label08;
+
+        $r8 = r1.<sun.awt.im.InputContext: java.awt.Window clientWindowListened>;
+
+        specialinvoke r1.<sun.awt.im.InputContext: void notifyClientWindowChange(java.awt.Window)>($r8);
+
+     label08:
+        exitmonitor r1;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r34 := @caughtexception;
+
+        exitmonitor r1;
+
+     label11:
+        throw $r34;
+
+     label12:
+        goto label14;
+
+     label13:
+        $z2 = specialinvoke r1.<sun.awt.im.InputContext: boolean addedClientWindowListeners()>();
+
+        if $z2 == 0 goto label14;
+
+        specialinvoke r1.<sun.awt.im.InputContext: void removeClientWindowListeners()>();
+
+     label14:
+        $r39 = staticinvoke <sun.awt.im.InputMethodManager: sun.awt.im.InputMethodManager getInstance()>();
+
+        virtualinvoke $r39.<sun.awt.im.InputMethodManager: void setInputContext(sun.awt.im.InputContext)>(r1);
+
+        $r40 = (sun.awt.im.InputMethodContext) r1;
+
+        virtualinvoke $r40.<sun.awt.im.InputMethodContext: void grabCompositionArea(boolean)>(z0);
+
+        return;
+
+        catch java.lang.Throwable from label07 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    static java.awt.Window getComponentWindow(java.awt.Component)
+    {
+        java.awt.Component r1;
+        boolean $z0;
+        java.awt.Window $r0;
+
+        r1 := @parameter0: java.awt.Component;
+
+     label1:
+        if r1 != null goto label2;
+
+        return null;
+
+     label2:
+        $z0 = r1 instanceof java.awt.Window;
+
+        if $z0 == 0 goto label3;
+
+        $r0 = (java.awt.Window) r1;
+
+        return $r0;
+
+     label3:
+        r1 = virtualinvoke r1.<java.awt.Component: java.awt.Container getParent()>();
+
+        goto label1;
+    }
+
+    private void focusLost(java.awt.Component, boolean)
+    {
+        java.lang.Throwable $r7, $r8;
+        java.awt.Component r0;
+        sun.awt.im.InputMethodContext $r6;
+        sun.awt.im.InputMethodAdapter $r5;
+        java.lang.Object $r1;
+        sun.awt.im.InputContext r2;
+        boolean $z0, $z1, $z2, z3;
+        java.awt.im.spi.InputMethod $r3, $r4;
+
+        r2 := @this: sun.awt.im.InputContext;
+
+        r0 := @parameter0: java.awt.Component;
+
+        z3 := @parameter1: boolean;
+
+        $r1 = virtualinvoke r0.<java.awt.Component: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label01:
+        entermonitor r2;
+
+     label02:
+        $z0 = r2.<sun.awt.im.InputContext: boolean isInputMethodActive>;
+
+        if $z0 == 0 goto label03;
+
+        specialinvoke r2.<sun.awt.im.InputContext: void deactivateInputMethod(boolean)>(z3);
+
+     label03:
+        r2.<sun.awt.im.InputContext: java.awt.Component awtFocussedComponent> = null;
+
+        $r3 = r2.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $z1 = $r3 instanceof sun.awt.im.InputMethodAdapter;
+
+        if $z1 == 0 goto label04;
+
+        $r4 = r2.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $r5 = (sun.awt.im.InputMethodAdapter) $r4;
+
+        virtualinvoke $r5.<sun.awt.im.InputMethodAdapter: void setAWTFocussedComponent(java.awt.Component)>(null);
+
+     label04:
+        $r6 = (sun.awt.im.InputMethodContext) r2;
+
+        $z2 = virtualinvoke $r6.<sun.awt.im.InputMethodContext: boolean isCompositionAreaVisible()>();
+
+        if $z2 == 0 goto label05;
+
+        virtualinvoke $r6.<sun.awt.im.InputMethodContext: void setCompositionAreaVisible(boolean)>(0);
+
+        r2.<sun.awt.im.InputContext: boolean compositionAreaHidden> = 1;
+
+     label05:
+        exitmonitor r2;
+
+     label06:
+        goto label09;
+
+     label07:
+        $r8 := @caughtexception;
+
+        exitmonitor r2;
+
+     label08:
+        throw $r8;
+
+     label09:
+        exitmonitor $r1;
+
+     label10:
+        goto label13;
+
+     label11:
+        $r7 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label12:
+        throw $r7;
+
+     label13:
+        return;
+
+        catch java.lang.Throwable from label02 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+        catch java.lang.Throwable from label01 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+    }
+
+    private boolean checkInputMethodSelectionKey(java.awt.event.KeyEvent)
+    {
+        java.awt.AWTKeyStroke $r0, $r2, $r3;
+        sun.awt.im.InputContext r4;
+        java.awt.event.KeyEvent r1;
+        boolean $z0;
+
+        r4 := @this: sun.awt.im.InputContext;
+
+        r1 := @parameter0: java.awt.event.KeyEvent;
+
+        $r0 = <sun.awt.im.InputContext: java.awt.AWTKeyStroke inputMethodSelectionKey>;
+
+        if $r0 == null goto label1;
+
+        $r2 = staticinvoke <java.awt.AWTKeyStroke: java.awt.AWTKeyStroke getAWTKeyStrokeForEvent(java.awt.event.KeyEvent)>(r1);
+
+        $r3 = <sun.awt.im.InputContext: java.awt.AWTKeyStroke inputMethodSelectionKey>;
+
+        $z0 = virtualinvoke $r3.<java.awt.AWTKeyStroke: boolean equals(java.lang.Object)>($r2);
+
+        return $z0;
+
+     label1:
+        return 0;
+    }
+
+    private void deactivateInputMethod(boolean)
+    {
+        sun.awt.im.InputMethodManager $r0;
+        sun.awt.im.InputContext r1;
+        java.awt.im.spi.InputMethod $r2, $r3, $r4;
+        boolean z0;
+
+        r1 := @this: sun.awt.im.InputContext;
+
+        z0 := @parameter0: boolean;
+
+        $r0 = staticinvoke <sun.awt.im.InputMethodManager: sun.awt.im.InputMethodManager getInstance()>();
+
+        virtualinvoke $r0.<sun.awt.im.InputMethodManager: void setInputContext(sun.awt.im.InputContext)>(null);
+
+        $r2 = r1.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r2 == null goto label1;
+
+        r1.<sun.awt.im.InputContext: boolean isInputMethodActive> = 0;
+
+        $r3 = r1.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        interfaceinvoke $r3.<java.awt.im.spi.InputMethod: void deactivate(boolean)>(z0);
+
+        $r4 = r1.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        <sun.awt.im.InputContext: java.awt.im.spi.InputMethod previousInputMethod> = $r4;
+
+     label1:
+        return;
+    }
+
+    synchronized void changeInputMethod(sun.awt.im.InputMethodLocator)
+    {
+        java.util.Locale $r31, $r33, r39, $r42;
+        sun.awt.im.InputMethodAdapter $r12, $r30;
+        sun.awt.im.InputContext r0, $r24;
+        boolean $z0, z1, $z2, $z3, $z4, $z5, $z6, z7, z8;
+        sun.awt.im.InputMethodLocator $r1, $r2, $r3, $r16, $r18, $r32, r38;
+        java.awt.Component $r11, $r14;
+        java.util.HashMap $r15, $r17, $r20, $r26, $r27, $r41;
+        java.lang.Boolean $r22;
+        java.lang.UnsupportedOperationException $r36, $r37;
+        java.awt.im.spi.InputMethod $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r13, $r19, $r21, $r23, $r25, $r28, $r29, $r34, $r35, $r40;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        r38 := @parameter0: sun.awt.im.InputMethodLocator;
+
+        $r1 = r0.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator>;
+
+        if $r1 != null goto label01;
+
+        r0.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator> = r38;
+
+        r0.<sun.awt.im.InputContext: boolean inputMethodCreationFailed> = 0;
+
+        return;
+
+     label01:
+        $r2 = r0.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator>;
+
+        $z0 = virtualinvoke $r2.<sun.awt.im.InputMethodLocator: boolean sameInputMethod(sun.awt.im.InputMethodLocator)>(r38);
+
+        if $z0 == 0 goto label04;
+
+        $r31 = virtualinvoke r38.<sun.awt.im.InputMethodLocator: java.util.Locale getLocale()>();
+
+        if $r31 == null goto label03;
+
+        $r32 = r0.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator>;
+
+        $r33 = virtualinvoke $r32.<sun.awt.im.InputMethodLocator: java.util.Locale getLocale()>();
+
+        if $r33 == $r31 goto label03;
+
+        $r34 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r34 == null goto label02;
+
+        $r35 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        interfaceinvoke $r35.<java.awt.im.spi.InputMethod: boolean setLocale(java.util.Locale)>($r31);
+
+     label02:
+        r0.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator> = r38;
+
+     label03:
+        return;
+
+     label04:
+        $r3 = r0.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator>;
+
+        r39 = virtualinvoke $r3.<sun.awt.im.InputMethodLocator: java.util.Locale getLocale()>();
+
+        z1 = r0.<sun.awt.im.InputContext: boolean isInputMethodActive>;
+
+        z7 = 0;
+
+        z8 = 0;
+
+        $r4 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r4 == null goto label14;
+
+     label05:
+        $r13 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        z8 = interfaceinvoke $r13.<java.awt.im.spi.InputMethod: boolean isCompositionEnabled()>();
+
+        z7 = 1;
+
+     label06:
+        goto label08;
+
+     label07:
+        $r37 := @caughtexception;
+
+     label08:
+        $r14 = r0.<sun.awt.im.InputContext: java.awt.Component currentClientComponent>;
+
+        if $r14 == null goto label10;
+
+        $z5 = r0.<sun.awt.im.InputContext: boolean isInputMethodActive>;
+
+        if $z5 != 0 goto label09;
+
+        specialinvoke r0.<sun.awt.im.InputContext: void activateInputMethod(boolean)>(0);
+
+     label09:
+        virtualinvoke r0.<sun.awt.im.InputContext: void endComposition()>();
+
+        specialinvoke r0.<sun.awt.im.InputContext: void deactivateInputMethod(boolean)>(0);
+
+        $r28 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $z6 = $r28 instanceof sun.awt.im.InputMethodAdapter;
+
+        if $z6 == 0 goto label10;
+
+        $r29 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $r30 = (sun.awt.im.InputMethodAdapter) $r29;
+
+        virtualinvoke $r30.<sun.awt.im.InputMethodAdapter: void setClientComponent(java.awt.Component)>(null);
+
+     label10:
+        $r40 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        r39 = interfaceinvoke $r40.<java.awt.im.spi.InputMethod: java.util.Locale getLocale()>();
+
+        $r41 = r0.<sun.awt.im.InputContext: java.util.HashMap usedInputMethods>;
+
+        if $r41 != null goto label11;
+
+        $r27 = new java.util.HashMap;
+
+        specialinvoke $r27.<java.util.HashMap: void <init>(int)>(5);
+
+        r0.<sun.awt.im.InputContext: java.util.HashMap usedInputMethods> = $r27;
+
+     label11:
+        $r15 = r0.<sun.awt.im.InputContext: java.util.HashMap perInputMethodState>;
+
+        if $r15 != null goto label12;
+
+        $r26 = new java.util.HashMap;
+
+        specialinvoke $r26.<java.util.HashMap: void <init>(int)>(5);
+
+        r0.<sun.awt.im.InputContext: java.util.HashMap perInputMethodState> = $r26;
+
+     label12:
+        $r17 = r0.<sun.awt.im.InputContext: java.util.HashMap usedInputMethods>;
+
+        $r16 = r0.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator>;
+
+        $r18 = virtualinvoke $r16.<sun.awt.im.InputMethodLocator: sun.awt.im.InputMethodLocator deriveLocator(java.util.Locale)>(null);
+
+        $r19 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        virtualinvoke $r17.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r18, $r19);
+
+        $r20 = r0.<sun.awt.im.InputContext: java.util.HashMap perInputMethodState>;
+
+        $r21 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $z4 = r0.<sun.awt.im.InputContext: boolean clientWindowNotificationEnabled>;
+
+        $r22 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z4);
+
+        virtualinvoke $r20.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r21, $r22);
+
+        $r23 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        virtualinvoke r0.<sun.awt.im.InputContext: void enableClientWindowNotification(java.awt.im.spi.InputMethod,boolean)>($r23, 0);
+
+        $r24 = <sun.awt.im.InputContext: sun.awt.im.InputContext inputMethodWindowContext>;
+
+        if r0 != $r24 goto label13;
+
+        $r25 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        interfaceinvoke $r25.<java.awt.im.spi.InputMethod: void hideWindows()>();
+
+        <sun.awt.im.InputContext: sun.awt.im.InputContext inputMethodWindowContext> = null;
+
+     label13:
+        r0.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator> = null;
+
+        r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod> = null;
+
+        r0.<sun.awt.im.InputContext: boolean inputMethodCreationFailed> = 0;
+
+     label14:
+        $r42 = virtualinvoke r38.<sun.awt.im.InputMethodLocator: java.util.Locale getLocale()>();
+
+        if $r42 != null goto label15;
+
+        if r39 == null goto label15;
+
+        $z3 = virtualinvoke r38.<sun.awt.im.InputMethodLocator: boolean isLocaleAvailable(java.util.Locale)>(r39);
+
+        if $z3 == 0 goto label15;
+
+        r38 = virtualinvoke r38.<sun.awt.im.InputMethodLocator: sun.awt.im.InputMethodLocator deriveLocator(java.util.Locale)>(r39);
+
+     label15:
+        r0.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator> = r38;
+
+        r0.<sun.awt.im.InputContext: boolean inputMethodCreationFailed> = 0;
+
+        if z1 == 0 goto label17;
+
+        $r8 = specialinvoke r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod getInputMethodInstance()>();
+
+        r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod> = $r8;
+
+        $r9 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $z2 = $r9 instanceof sun.awt.im.InputMethodAdapter;
+
+        if $z2 == 0 goto label16;
+
+        $r10 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $r12 = (sun.awt.im.InputMethodAdapter) $r10;
+
+        $r11 = r0.<sun.awt.im.InputContext: java.awt.Component awtFocussedComponent>;
+
+        virtualinvoke $r12.<sun.awt.im.InputMethodAdapter: void setAWTFocussedComponent(java.awt.Component)>($r11);
+
+     label16:
+        specialinvoke r0.<sun.awt.im.InputContext: void activateInputMethod(boolean)>(1);
+
+     label17:
+        if z7 == 0 goto label21;
+
+        $r5 = specialinvoke r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod getInputMethod()>();
+
+        r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod> = $r5;
+
+        $r6 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r6 == null goto label21;
+
+     label18:
+        $r7 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        interfaceinvoke $r7.<java.awt.im.spi.InputMethod: void setCompositionEnabled(boolean)>(z8);
+
+     label19:
+        goto label21;
+
+     label20:
+        $r36 := @caughtexception;
+
+     label21:
+        return;
+
+        catch java.lang.UnsupportedOperationException from label05 to label06 with label07;
+        catch java.lang.UnsupportedOperationException from label18 to label19 with label20;
+    }
+
+    java.awt.Component getClientComponent()
+    {
+        sun.awt.im.InputContext r0;
+        java.awt.Component $r1;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        $r1 = r0.<sun.awt.im.InputContext: java.awt.Component currentClientComponent>;
+
+        return $r1;
+    }
+
+    public synchronized void removeNotify(java.awt.Component)
+    {
+        java.lang.NullPointerException $r11;
+        sun.awt.im.InputMethodAdapter $r9;
+        sun.awt.im.InputContext r1;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.awt.Component r0, $r3, $r4, $r10;
+        sun.awt.im.InputMethodContext $r7;
+        sun.awt.im.InputContext$1 $r6;
+        java.awt.im.spi.InputMethod $r2, $r5, $r8, $r12;
+
+        r1 := @this: sun.awt.im.InputContext;
+
+        r0 := @parameter0: java.awt.Component;
+
+        if r0 != null goto label1;
+
+        $r11 = new java.lang.NullPointerException;
+
+        specialinvoke $r11.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r11;
+
+     label1:
+        $r2 = r1.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r2 != null goto label3;
+
+        $r10 = r1.<sun.awt.im.InputContext: java.awt.Component currentClientComponent>;
+
+        if r0 != $r10 goto label2;
+
+        r1.<sun.awt.im.InputContext: java.awt.Component currentClientComponent> = null;
+
+     label2:
+        return;
+
+     label3:
+        $r3 = r1.<sun.awt.im.InputContext: java.awt.Component awtFocussedComponent>;
+
+        if r0 != $r3 goto label4;
+
+        specialinvoke r1.<sun.awt.im.InputContext: void focusLost(java.awt.Component,boolean)>(r0, 0);
+
+     label4:
+        $r4 = r1.<sun.awt.im.InputContext: java.awt.Component currentClientComponent>;
+
+        if r0 != $r4 goto label9;
+
+        $z0 = r1.<sun.awt.im.InputContext: boolean isInputMethodActive>;
+
+        if $z0 == 0 goto label5;
+
+        specialinvoke r1.<sun.awt.im.InputContext: void deactivateInputMethod(boolean)>(0);
+
+     label5:
+        $r5 = r1.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        interfaceinvoke $r5.<java.awt.im.spi.InputMethod: void removeNotify()>();
+
+        $z1 = r1.<sun.awt.im.InputContext: boolean clientWindowNotificationEnabled>;
+
+        if $z1 == 0 goto label6;
+
+        $z3 = specialinvoke r1.<sun.awt.im.InputContext: boolean addedClientWindowListeners()>();
+
+        if $z3 == 0 goto label6;
+
+        specialinvoke r1.<sun.awt.im.InputContext: void removeClientWindowListeners()>();
+
+     label6:
+        r1.<sun.awt.im.InputContext: java.awt.Component currentClientComponent> = null;
+
+        $r12 = r1.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $z4 = $r12 instanceof sun.awt.im.InputMethodAdapter;
+
+        if $z4 == 0 goto label7;
+
+        $r8 = r1.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $r9 = (sun.awt.im.InputMethodAdapter) $r8;
+
+        virtualinvoke $r9.<sun.awt.im.InputMethodAdapter: void setClientComponent(java.awt.Component)>(null);
+
+     label7:
+        $z2 = staticinvoke <java.awt.EventQueue: boolean isDispatchThread()>();
+
+        if $z2 == 0 goto label8;
+
+        $r7 = (sun.awt.im.InputMethodContext) r1;
+
+        virtualinvoke $r7.<sun.awt.im.InputMethodContext: void releaseCompositionArea()>();
+
+        goto label9;
+
+     label8:
+        $r6 = new sun.awt.im.InputContext$1;
+
+        specialinvoke $r6.<sun.awt.im.InputContext$1: void <init>(sun.awt.im.InputContext)>(r1);
+
+        staticinvoke <java.awt.EventQueue: void invokeLater(java.lang.Runnable)>($r6);
+
+     label9:
+        return;
+    }
+
+    public synchronized void dispose()
+    {
+        java.lang.IllegalStateException $r14;
+        java.util.HashMap $r3, $r4, $r16;
+        sun.awt.im.InputContext r0, $r9;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.util.Iterator $r6;
+        java.util.Collection $r5;
+        java.awt.Component $r1;
+        java.lang.Object $r7;
+        java.awt.im.spi.InputMethod $r2, $r8, $r10, $r11, $r12, $r13, $r15;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        $r1 = r0.<sun.awt.im.InputContext: java.awt.Component currentClientComponent>;
+
+        if $r1 == null goto label1;
+
+        $r14 = new java.lang.IllegalStateException;
+
+        specialinvoke $r14.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Can\'t dispose InputContext while it\'s active");
+
+        throw $r14;
+
+     label1:
+        $r2 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r2 == null goto label7;
+
+        $r9 = <sun.awt.im.InputContext: sun.awt.im.InputContext inputMethodWindowContext>;
+
+        if r0 != $r9 goto label2;
+
+        $r13 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        interfaceinvoke $r13.<java.awt.im.spi.InputMethod: void hideWindows()>();
+
+        <sun.awt.im.InputContext: sun.awt.im.InputContext inputMethodWindowContext> = null;
+
+     label2:
+        $r11 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $r10 = <sun.awt.im.InputContext: java.awt.im.spi.InputMethod previousInputMethod>;
+
+        if $r11 != $r10 goto label3;
+
+        <sun.awt.im.InputContext: java.awt.im.spi.InputMethod previousInputMethod> = null;
+
+     label3:
+        $z2 = r0.<sun.awt.im.InputContext: boolean clientWindowNotificationEnabled>;
+
+        if $z2 == 0 goto label5;
+
+        $z3 = specialinvoke r0.<sun.awt.im.InputContext: boolean addedClientWindowListeners()>();
+
+        if $z3 == 0 goto label4;
+
+        specialinvoke r0.<sun.awt.im.InputContext: void removeClientWindowListeners()>();
+
+     label4:
+        r0.<sun.awt.im.InputContext: boolean clientWindowNotificationEnabled> = 0;
+
+     label5:
+        $r15 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        interfaceinvoke $r15.<java.awt.im.spi.InputMethod: void dispose()>();
+
+        $z4 = r0.<sun.awt.im.InputContext: boolean clientWindowNotificationEnabled>;
+
+        if $z4 == 0 goto label6;
+
+        $r12 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        virtualinvoke r0.<sun.awt.im.InputContext: void enableClientWindowNotification(java.awt.im.spi.InputMethod,boolean)>($r12, 0);
+
+     label6:
+        r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod> = null;
+
+     label7:
+        r0.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator> = null;
+
+        $r16 = r0.<sun.awt.im.InputContext: java.util.HashMap usedInputMethods>;
+
+        if $r16 == null goto label9;
+
+        $r3 = r0.<sun.awt.im.InputContext: java.util.HashMap usedInputMethods>;
+
+        $z0 = virtualinvoke $r3.<java.util.HashMap: boolean isEmpty()>();
+
+        if $z0 != 0 goto label9;
+
+        $r4 = r0.<sun.awt.im.InputContext: java.util.HashMap usedInputMethods>;
+
+        $r5 = virtualinvoke $r4.<java.util.HashMap: java.util.Collection values()>();
+
+        $r6 = interfaceinvoke $r5.<java.util.Collection: java.util.Iterator iterator()>();
+
+        r0.<sun.awt.im.InputContext: java.util.HashMap usedInputMethods> = null;
+
+     label8:
+        $z1 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label9;
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        $r8 = (java.awt.im.spi.InputMethod) $r7;
+
+        interfaceinvoke $r8.<java.awt.im.spi.InputMethod: void dispose()>();
+
+        goto label8;
+
+     label9:
+        r0.<sun.awt.im.InputContext: boolean clientWindowNotificationEnabled> = 0;
+
+        r0.<sun.awt.im.InputContext: java.awt.Window clientWindowListened> = null;
+
+        r0.<sun.awt.im.InputContext: java.util.HashMap perInputMethodState> = null;
+
+        return;
+    }
+
+    public synchronized java.lang.Object getInputMethodControlObject()
+    {
+        sun.awt.im.InputContext r0;
+        java.lang.Object $r2;
+        java.awt.im.spi.InputMethod $r1;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        $r1 = specialinvoke r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod getInputMethod()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = interfaceinvoke $r1.<java.awt.im.spi.InputMethod: java.lang.Object getControlObject()>();
+
+        return $r2;
+
+     label1:
+        return null;
+    }
+
+    public void setCompositionEnabled(boolean)
+    {
+        java.lang.UnsupportedOperationException $r2;
+        sun.awt.im.InputContext r0;
+        java.awt.im.spi.InputMethod $r1;
+        boolean z0;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = specialinvoke r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod getInputMethod()>();
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r2.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        interfaceinvoke $r1.<java.awt.im.spi.InputMethod: void setCompositionEnabled(boolean)>(z0);
+
+        return;
+    }
+
+    public boolean isCompositionEnabled()
+    {
+        java.lang.UnsupportedOperationException $r2;
+        sun.awt.im.InputContext r0;
+        java.awt.im.spi.InputMethod $r1;
+        boolean $z0;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        $r1 = specialinvoke r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod getInputMethod()>();
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r2.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        $z0 = interfaceinvoke $r1.<java.awt.im.spi.InputMethod: boolean isCompositionEnabled()>();
+
+        return $z0;
+    }
+
+    public java.lang.String getInputMethodInfo()
+    {
+        java.awt.im.spi.InputMethodDescriptor $r12;
+        java.util.Locale $r6, $r13, $r14;
+        sun.awt.im.InputMethodAdapter $r15;
+        sun.awt.im.InputContext r0;
+        java.lang.String $r3, $r7, $r9, r17;
+        boolean $z0, $z1;
+        sun.awt.im.InputMethodLocator $r10, $r11;
+        java.lang.UnsupportedOperationException $r16;
+        java.lang.StringBuilder $r2, $r4, $r5, $r8;
+        java.awt.im.spi.InputMethod $r1;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        $r1 = specialinvoke r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod getInputMethod()>();
+
+        if $r1 != null goto label1;
+
+        $r16 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r16.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("Null input method");
+
+        throw $r16;
+
+     label1:
+        r17 = null;
+
+        $z0 = $r1 instanceof sun.awt.im.InputMethodAdapter;
+
+        if $z0 == 0 goto label2;
+
+        $r15 = (sun.awt.im.InputMethodAdapter) $r1;
+
+        r17 = virtualinvoke $r15.<sun.awt.im.InputMethodAdapter: java.lang.String getNativeInputMethodInfo()>();
+
+     label2:
+        if r17 != null goto label3;
+
+        $r10 = r0.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator>;
+
+        if $r10 == null goto label3;
+
+        $r11 = r0.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator>;
+
+        $r12 = virtualinvoke $r11.<sun.awt.im.InputMethodLocator: java.awt.im.spi.InputMethodDescriptor getDescriptor()>();
+
+        $r13 = virtualinvoke r0.<sun.awt.im.InputContext: java.util.Locale getLocale()>();
+
+        $r14 = staticinvoke <sun.awt.SunToolkit: java.util.Locale getStartupLocale()>();
+
+        r17 = interfaceinvoke $r12.<java.awt.im.spi.InputMethodDescriptor: java.lang.String getInputMethodDisplayName(java.util.Locale,java.util.Locale)>($r13, $r14);
+
+     label3:
+        if r17 == null goto label4;
+
+        $z1 = virtualinvoke r17.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z1 != 0 goto label4;
+
+        return r17;
+
+     label4:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r1.<java.lang.Object: java.lang.String toString()>();
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-");
+
+        $r6 = interfaceinvoke $r1.<java.awt.im.spi.InputMethod: java.util.Locale getLocale()>();
+
+        $r7 = virtualinvoke $r6.<java.util.Locale: java.lang.String toString()>();
+
+        $r8 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r9;
+    }
+
+    public void disableNativeIM()
+    {
+        sun.awt.im.InputMethodAdapter $r2;
+        sun.awt.im.InputContext r0;
+        java.awt.im.spi.InputMethod $r1;
+        boolean $z0;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        $r1 = specialinvoke r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod getInputMethod()>();
+
+        if $r1 == null goto label1;
+
+        $z0 = $r1 instanceof sun.awt.im.InputMethodAdapter;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = (sun.awt.im.InputMethodAdapter) $r1;
+
+        virtualinvoke $r2.<sun.awt.im.InputMethodAdapter: void stopListening()>();
+
+     label1:
+        return;
+    }
+
+    private synchronized java.awt.im.spi.InputMethod getInputMethod()
+    {
+        sun.awt.im.InputContext r0;
+        java.awt.im.spi.InputMethod $r1, $r2, $r3, $r4;
+        boolean $z0;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        $r1 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r1 == null goto label1;
+
+        $r4 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        return $r4;
+
+     label1:
+        $z0 = r0.<sun.awt.im.InputContext: boolean inputMethodCreationFailed>;
+
+        if $z0 == 0 goto label2;
+
+        return null;
+
+     label2:
+        $r2 = specialinvoke r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod getInputMethodInstance()>();
+
+        r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod> = $r2;
+
+        $r3 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        return $r3;
+    }
+
+    private java.awt.im.spi.InputMethod getInputMethodInstance()
+    {
+        java.util.HashMap $r3, $r10, $r14;
+        java.awt.im.spi.InputMethodDescriptor $r4;
+        java.util.Locale $r2;
+        sun.awt.im.InputMethodAdapter $r9, $r17;
+        java.lang.Character$Subset[] $r7, $r13;
+        java.lang.Boolean $r18;
+        sun.awt.im.InputContext r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        sun.awt.im.InputMethodLocator r1, $r11;
+        java.lang.LinkageError $r19;
+        java.lang.Exception $r20;
+        sun.awt.im.InputMethodContext $r6, $r8, $r16;
+        java.lang.Object $r12, $r15;
+        java.awt.im.spi.InputMethod $r5, r21;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        r1 = r0.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator>;
+
+        if r1 != null goto label01;
+
+        r0.<sun.awt.im.InputContext: boolean inputMethodCreationFailed> = 1;
+
+        return null;
+
+     label01:
+        $r2 = virtualinvoke r1.<sun.awt.im.InputMethodLocator: java.util.Locale getLocale()>();
+
+        r21 = null;
+
+        $r3 = r0.<sun.awt.im.InputContext: java.util.HashMap usedInputMethods>;
+
+        if $r3 == null goto label07;
+
+        $r10 = r0.<sun.awt.im.InputContext: java.util.HashMap usedInputMethods>;
+
+        $r11 = virtualinvoke r1.<sun.awt.im.InputMethodLocator: sun.awt.im.InputMethodLocator deriveLocator(java.util.Locale)>(null);
+
+        $r12 = virtualinvoke $r10.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>($r11);
+
+        r21 = (java.awt.im.spi.InputMethod) $r12;
+
+        if r21 == null goto label07;
+
+        if $r2 == null goto label02;
+
+        interfaceinvoke r21.<java.awt.im.spi.InputMethod: boolean setLocale(java.util.Locale)>($r2);
+
+     label02:
+        $r13 = r0.<sun.awt.im.InputContext: java.lang.Character$Subset[] characterSubsets>;
+
+        interfaceinvoke r21.<java.awt.im.spi.InputMethod: void setCharacterSubsets(java.lang.Character$Subset[])>($r13);
+
+        $r14 = r0.<sun.awt.im.InputContext: java.util.HashMap perInputMethodState>;
+
+        $r15 = virtualinvoke $r14.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>(r21);
+
+        $r18 = (java.lang.Boolean) $r15;
+
+        if $r18 == null goto label03;
+
+        $z3 = virtualinvoke $r18.<java.lang.Boolean: boolean booleanValue()>();
+
+        virtualinvoke r0.<sun.awt.im.InputContext: void enableClientWindowNotification(java.awt.im.spi.InputMethod,boolean)>(r21, $z3);
+
+     label03:
+        $r16 = (sun.awt.im.InputMethodContext) r0;
+
+        $z1 = r21 instanceof sun.awt.im.InputMethodAdapter;
+
+        if $z1 == 0 goto label04;
+
+        $r17 = (sun.awt.im.InputMethodAdapter) r21;
+
+        $z2 = virtualinvoke $r17.<sun.awt.im.InputMethodAdapter: boolean supportsBelowTheSpot()>();
+
+        if $z2 == 0 goto label05;
+
+     label04:
+        $z4 = 1;
+
+        goto label06;
+
+     label05:
+        $z4 = 0;
+
+     label06:
+        virtualinvoke $r16.<sun.awt.im.InputMethodContext: void setInputMethodSupportsBelowTheSpot(boolean)>($z4);
+
+        return r21;
+
+     label07:
+        $r4 = virtualinvoke r1.<sun.awt.im.InputMethodLocator: java.awt.im.spi.InputMethodDescriptor getDescriptor()>();
+
+        $r5 = interfaceinvoke $r4.<java.awt.im.spi.InputMethodDescriptor: java.awt.im.spi.InputMethod createInputMethod()>();
+
+        r21 = $r5;
+
+        if $r2 == null goto label08;
+
+        interfaceinvoke $r5.<java.awt.im.spi.InputMethod: boolean setLocale(java.util.Locale)>($r2);
+
+     label08:
+        $r6 = (sun.awt.im.InputMethodContext) r0;
+
+        interfaceinvoke $r5.<java.awt.im.spi.InputMethod: void setInputMethodContext(java.awt.im.spi.InputMethodContext)>($r6);
+
+        $r7 = r0.<sun.awt.im.InputContext: java.lang.Character$Subset[] characterSubsets>;
+
+        interfaceinvoke $r5.<java.awt.im.spi.InputMethod: void setCharacterSubsets(java.lang.Character$Subset[])>($r7);
+
+     label09:
+        goto label13;
+
+     label10:
+        $r20 := @caughtexception;
+
+        specialinvoke r0.<sun.awt.im.InputContext: void logCreationFailed(java.lang.Throwable)>($r20);
+
+        r0.<sun.awt.im.InputContext: boolean inputMethodCreationFailed> = 1;
+
+        if r21 == null goto label11;
+
+        r21 = null;
+
+     label11:
+        goto label13;
+
+     label12:
+        $r19 := @caughtexception;
+
+        specialinvoke r0.<sun.awt.im.InputContext: void logCreationFailed(java.lang.Throwable)>($r19);
+
+        r0.<sun.awt.im.InputContext: boolean inputMethodCreationFailed> = 1;
+
+     label13:
+        $r8 = (sun.awt.im.InputMethodContext) r0;
+
+        $z5 = r21 instanceof sun.awt.im.InputMethodAdapter;
+
+        if $z5 == 0 goto label14;
+
+        $r9 = (sun.awt.im.InputMethodAdapter) r21;
+
+        $z0 = virtualinvoke $r9.<sun.awt.im.InputMethodAdapter: boolean supportsBelowTheSpot()>();
+
+        if $z0 == 0 goto label15;
+
+     label14:
+        $z6 = 1;
+
+        goto label16;
+
+     label15:
+        $z6 = 0;
+
+     label16:
+        virtualinvoke $r8.<sun.awt.im.InputMethodContext: void setInputMethodSupportsBelowTheSpot(boolean)>($z6);
+
+        return r21;
+
+        catch java.lang.Exception from label07 to label09 with label10;
+        catch java.lang.LinkageError from label07 to label09 with label12;
+    }
+
+    private void logCreationFailed(java.lang.Throwable)
+    {
+        sun.awt.im.InputMethodLocator $r5;
+        java.lang.Throwable r9;
+        sun.util.logging.PlatformLogger$Level $r1;
+        sun.util.logging.PlatformLogger $r0;
+        java.lang.Object[] $r3;
+        java.awt.im.spi.InputMethodDescriptor $r6;
+        java.text.MessageFormat $r11;
+        java.util.Locale $r7;
+        sun.awt.im.InputContext r4;
+        java.lang.String $r2, $r8, $r10, $r12;
+        boolean $z0;
+
+        r4 := @this: sun.awt.im.InputContext;
+
+        r9 := @parameter0: java.lang.Throwable;
+
+        $r0 = staticinvoke <sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger getLogger(java.lang.String)>("sun.awt.im");
+
+        $r1 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level CONFIG>;
+
+        $z0 = virtualinvoke $r0.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        $r2 = staticinvoke <java.awt.Toolkit: java.lang.String getProperty(java.lang.String,java.lang.String)>("AWT.InputMethodCreationFailed", "Could not create {0}. Reason: {1}");
+
+        $r3 = newarray (java.lang.Object)[2];
+
+        $r5 = r4.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator>;
+
+        $r6 = virtualinvoke $r5.<sun.awt.im.InputMethodLocator: java.awt.im.spi.InputMethodDescriptor getDescriptor()>();
+
+        $r7 = staticinvoke <java.util.Locale: java.util.Locale getDefault()>();
+
+        $r8 = interfaceinvoke $r6.<java.awt.im.spi.InputMethodDescriptor: java.lang.String getInputMethodDisplayName(java.util.Locale,java.util.Locale)>(null, $r7);
+
+        $r3[0] = $r8;
+
+        $r10 = virtualinvoke r9.<java.lang.Throwable: java.lang.String getLocalizedMessage()>();
+
+        $r3[1] = $r10;
+
+        $r11 = new java.text.MessageFormat;
+
+        specialinvoke $r11.<java.text.MessageFormat: void <init>(java.lang.String)>($r2);
+
+        $r12 = virtualinvoke $r11.<java.text.MessageFormat: java.lang.String format(java.lang.Object)>($r3);
+
+        virtualinvoke $r0.<sun.util.logging.PlatformLogger: void config(java.lang.String)>($r12);
+
+     label1:
+        return;
+    }
+
+    sun.awt.im.InputMethodLocator getInputMethodLocator()
+    {
+        sun.awt.im.InputMethodLocator $r2, $r4, $r6;
+        java.util.Locale $r5;
+        sun.awt.im.InputContext r0;
+        java.awt.im.spi.InputMethod $r1, $r3;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        $r1 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r1 == null goto label1;
+
+        $r4 = r0.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator>;
+
+        $r3 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $r5 = interfaceinvoke $r3.<java.awt.im.spi.InputMethod: java.util.Locale getLocale()>();
+
+        $r6 = virtualinvoke $r4.<sun.awt.im.InputMethodLocator: sun.awt.im.InputMethodLocator deriveLocator(java.util.Locale)>($r5);
+
+        return $r6;
+
+     label1:
+        $r2 = r0.<sun.awt.im.InputContext: sun.awt.im.InputMethodLocator inputMethodLocator>;
+
+        return $r2;
+    }
+
+    public synchronized void endComposition()
+    {
+        sun.awt.im.InputContext r0;
+        java.awt.im.spi.InputMethod $r1, $r2;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        $r1 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        interfaceinvoke $r2.<java.awt.im.spi.InputMethod: void endComposition()>();
+
+     label1:
+        return;
+    }
+
+    synchronized void enableClientWindowNotification(java.awt.im.spi.InputMethod, boolean)
+    {
+        java.awt.Window $r3, $r4;
+        java.util.HashMap $r5, $r6, $r8;
+        java.lang.Boolean $r7;
+        sun.awt.im.InputContext r1;
+        java.awt.im.spi.InputMethod r0, $r2;
+        boolean z0, $z1, $z2, $z3, $z4;
+
+        r1 := @this: sun.awt.im.InputContext;
+
+        r0 := @parameter0: java.awt.im.spi.InputMethod;
+
+        z0 := @parameter1: boolean;
+
+        $r2 = r1.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if r0 == $r2 goto label2;
+
+        $r5 = r1.<sun.awt.im.InputContext: java.util.HashMap perInputMethodState>;
+
+        if $r5 != null goto label1;
+
+        $r8 = new java.util.HashMap;
+
+        specialinvoke $r8.<java.util.HashMap: void <init>(int)>(5);
+
+        r1.<sun.awt.im.InputContext: java.util.HashMap perInputMethodState> = $r8;
+
+     label1:
+        $r6 = r1.<sun.awt.im.InputContext: java.util.HashMap perInputMethodState>;
+
+        $r7 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(z0);
+
+        virtualinvoke $r6.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r0, $r7);
+
+        return;
+
+     label2:
+        $z1 = r1.<sun.awt.im.InputContext: boolean clientWindowNotificationEnabled>;
+
+        if $z1 == z0 goto label3;
+
+        r1.<sun.awt.im.InputContext: java.awt.Rectangle clientWindowLocation> = null;
+
+        r1.<sun.awt.im.InputContext: boolean clientWindowNotificationEnabled> = z0;
+
+     label3:
+        $z2 = r1.<sun.awt.im.InputContext: boolean clientWindowNotificationEnabled>;
+
+        if $z2 == 0 goto label5;
+
+        $z4 = specialinvoke r1.<sun.awt.im.InputContext: boolean addedClientWindowListeners()>();
+
+        if $z4 != 0 goto label4;
+
+        specialinvoke r1.<sun.awt.im.InputContext: void addClientWindowListeners()>();
+
+     label4:
+        $r3 = r1.<sun.awt.im.InputContext: java.awt.Window clientWindowListened>;
+
+        if $r3 == null goto label6;
+
+        r1.<sun.awt.im.InputContext: java.awt.Rectangle clientWindowLocation> = null;
+
+        $r4 = r1.<sun.awt.im.InputContext: java.awt.Window clientWindowListened>;
+
+        specialinvoke r1.<sun.awt.im.InputContext: void notifyClientWindowChange(java.awt.Window)>($r4);
+
+        goto label6;
+
+     label5:
+        $z3 = specialinvoke r1.<sun.awt.im.InputContext: boolean addedClientWindowListeners()>();
+
+        if $z3 == 0 goto label6;
+
+        specialinvoke r1.<sun.awt.im.InputContext: void removeClientWindowListeners()>();
+
+     label6:
+        return;
+    }
+
+    private synchronized void notifyClientWindowChange(java.awt.Window)
+    {
+        java.awt.Rectangle $r4, $r5, $r6, $r8;
+        java.awt.Frame $r9;
+        java.awt.Window r2;
+        int $i0;
+        sun.awt.im.InputContext r0;
+        java.awt.im.spi.InputMethod $r1, $r3, $r7;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        r2 := @parameter0: java.awt.Window;
+
+        $r1 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        $z0 = virtualinvoke r2.<java.awt.Window: boolean isVisible()>();
+
+        if $z0 == 0 goto label2;
+
+        $z1 = r2 instanceof java.awt.Frame;
+
+        if $z1 == 0 goto label3;
+
+        $r9 = (java.awt.Frame) r2;
+
+        $i0 = virtualinvoke $r9.<java.awt.Frame: int getState()>();
+
+        if $i0 != 1 goto label3;
+
+     label2:
+        r0.<sun.awt.im.InputContext: java.awt.Rectangle clientWindowLocation> = null;
+
+        $r3 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        interfaceinvoke $r3.<java.awt.im.spi.InputMethod: void notifyClientWindowChange(java.awt.Rectangle)>(null);
+
+        return;
+
+     label3:
+        $r4 = virtualinvoke r2.<java.awt.Window: java.awt.Rectangle getBounds()>();
+
+        $r5 = r0.<sun.awt.im.InputContext: java.awt.Rectangle clientWindowLocation>;
+
+        if $r5 == null goto label4;
+
+        $r8 = r0.<sun.awt.im.InputContext: java.awt.Rectangle clientWindowLocation>;
+
+        $z2 = virtualinvoke $r8.<java.awt.Rectangle: boolean equals(java.lang.Object)>($r4);
+
+        if $z2 != 0 goto label5;
+
+     label4:
+        r0.<sun.awt.im.InputContext: java.awt.Rectangle clientWindowLocation> = $r4;
+
+        $r7 = r0.<sun.awt.im.InputContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $r6 = r0.<sun.awt.im.InputContext: java.awt.Rectangle clientWindowLocation>;
+
+        interfaceinvoke $r7.<java.awt.im.spi.InputMethod: void notifyClientWindowChange(java.awt.Rectangle)>($r6);
+
+     label5:
+        return;
+    }
+
+    private synchronized void addClientWindowListeners()
+    {
+        sun.awt.im.InputContext r0;
+        java.awt.Component $r1;
+        java.awt.Window $r2;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        $r1 = virtualinvoke r0.<sun.awt.im.InputContext: java.awt.Component getClientComponent()>();
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = staticinvoke <sun.awt.im.InputContext: java.awt.Window getComponentWindow(java.awt.Component)>($r1);
+
+        if $r2 != null goto label2;
+
+        return;
+
+     label2:
+        virtualinvoke $r2.<java.awt.Window: void addComponentListener(java.awt.event.ComponentListener)>(r0);
+
+        virtualinvoke $r2.<java.awt.Window: void addWindowListener(java.awt.event.WindowListener)>(r0);
+
+        r0.<sun.awt.im.InputContext: java.awt.Window clientWindowListened> = $r2;
+
+        return;
+    }
+
+    private synchronized void removeClientWindowListeners()
+    {
+        sun.awt.im.InputContext r0;
+        java.awt.Window $r1, $r2;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        $r1 = r0.<sun.awt.im.InputContext: java.awt.Window clientWindowListened>;
+
+        virtualinvoke $r1.<java.awt.Window: void removeComponentListener(java.awt.event.ComponentListener)>(r0);
+
+        $r2 = r0.<sun.awt.im.InputContext: java.awt.Window clientWindowListened>;
+
+        virtualinvoke $r2.<java.awt.Window: void removeWindowListener(java.awt.event.WindowListener)>(r0);
+
+        r0.<sun.awt.im.InputContext: java.awt.Window clientWindowListened> = null;
+
+        return;
+    }
+
+    private boolean addedClientWindowListeners()
+    {
+        sun.awt.im.InputContext r0;
+        java.awt.Window $r1;
+        boolean $z0;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        $r1 = r0.<sun.awt.im.InputContext: java.awt.Window clientWindowListened>;
+
+        if $r1 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public void componentResized(java.awt.event.ComponentEvent)
+    {
+        java.awt.Window $r3;
+        sun.awt.im.InputContext r0;
+        java.awt.event.ComponentEvent r1;
+        java.awt.Component $r2;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        r1 := @parameter0: java.awt.event.ComponentEvent;
+
+        $r2 = virtualinvoke r1.<java.awt.event.ComponentEvent: java.awt.Component getComponent()>();
+
+        $r3 = (java.awt.Window) $r2;
+
+        specialinvoke r0.<sun.awt.im.InputContext: void notifyClientWindowChange(java.awt.Window)>($r3);
+
+        return;
+    }
+
+    public void componentMoved(java.awt.event.ComponentEvent)
+    {
+        java.awt.Window $r3;
+        sun.awt.im.InputContext r0;
+        java.awt.event.ComponentEvent r1;
+        java.awt.Component $r2;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        r1 := @parameter0: java.awt.event.ComponentEvent;
+
+        $r2 = virtualinvoke r1.<java.awt.event.ComponentEvent: java.awt.Component getComponent()>();
+
+        $r3 = (java.awt.Window) $r2;
+
+        specialinvoke r0.<sun.awt.im.InputContext: void notifyClientWindowChange(java.awt.Window)>($r3);
+
+        return;
+    }
+
+    public void componentShown(java.awt.event.ComponentEvent)
+    {
+        java.awt.Window $r3;
+        sun.awt.im.InputContext r0;
+        java.awt.event.ComponentEvent r1;
+        java.awt.Component $r2;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        r1 := @parameter0: java.awt.event.ComponentEvent;
+
+        $r2 = virtualinvoke r1.<java.awt.event.ComponentEvent: java.awt.Component getComponent()>();
+
+        $r3 = (java.awt.Window) $r2;
+
+        specialinvoke r0.<sun.awt.im.InputContext: void notifyClientWindowChange(java.awt.Window)>($r3);
+
+        return;
+    }
+
+    public void componentHidden(java.awt.event.ComponentEvent)
+    {
+        java.awt.Window $r3;
+        sun.awt.im.InputContext r0;
+        java.awt.event.ComponentEvent r1;
+        java.awt.Component $r2;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        r1 := @parameter0: java.awt.event.ComponentEvent;
+
+        $r2 = virtualinvoke r1.<java.awt.event.ComponentEvent: java.awt.Component getComponent()>();
+
+        $r3 = (java.awt.Window) $r2;
+
+        specialinvoke r0.<sun.awt.im.InputContext: void notifyClientWindowChange(java.awt.Window)>($r3);
+
+        return;
+    }
+
+    public void windowOpened(java.awt.event.WindowEvent)
+    {
+        sun.awt.im.InputContext r0;
+        java.awt.event.WindowEvent r1;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        r1 := @parameter0: java.awt.event.WindowEvent;
+
+        return;
+    }
+
+    public void windowClosing(java.awt.event.WindowEvent)
+    {
+        sun.awt.im.InputContext r0;
+        java.awt.event.WindowEvent r1;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        r1 := @parameter0: java.awt.event.WindowEvent;
+
+        return;
+    }
+
+    public void windowClosed(java.awt.event.WindowEvent)
+    {
+        sun.awt.im.InputContext r0;
+        java.awt.event.WindowEvent r1;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        r1 := @parameter0: java.awt.event.WindowEvent;
+
+        return;
+    }
+
+    public void windowIconified(java.awt.event.WindowEvent)
+    {
+        sun.awt.im.InputContext r0;
+        java.awt.event.WindowEvent r1;
+        java.awt.Window $r2;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        r1 := @parameter0: java.awt.event.WindowEvent;
+
+        $r2 = virtualinvoke r1.<java.awt.event.WindowEvent: java.awt.Window getWindow()>();
+
+        specialinvoke r0.<sun.awt.im.InputContext: void notifyClientWindowChange(java.awt.Window)>($r2);
+
+        return;
+    }
+
+    public void windowDeiconified(java.awt.event.WindowEvent)
+    {
+        sun.awt.im.InputContext r0;
+        java.awt.event.WindowEvent r1;
+        java.awt.Window $r2;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        r1 := @parameter0: java.awt.event.WindowEvent;
+
+        $r2 = virtualinvoke r1.<java.awt.event.WindowEvent: java.awt.Window getWindow()>();
+
+        specialinvoke r0.<sun.awt.im.InputContext: void notifyClientWindowChange(java.awt.Window)>($r2);
+
+        return;
+    }
+
+    public void windowActivated(java.awt.event.WindowEvent)
+    {
+        sun.awt.im.InputContext r0;
+        java.awt.event.WindowEvent r1;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        r1 := @parameter0: java.awt.event.WindowEvent;
+
+        return;
+    }
+
+    public void windowDeactivated(java.awt.event.WindowEvent)
+    {
+        sun.awt.im.InputContext r0;
+        java.awt.event.WindowEvent r1;
+
+        r0 := @this: sun.awt.im.InputContext;
+
+        r1 := @parameter0: java.awt.event.WindowEvent;
+
+        return;
+    }
+
+    private void initializeInputMethodSelectionKey()
+    {
+        sun.awt.im.InputContext$2 $r0;
+        sun.awt.im.InputContext r1;
+
+        r1 := @this: sun.awt.im.InputContext;
+
+        $r0 = new sun.awt.im.InputContext$2;
+
+        specialinvoke $r0.<sun.awt.im.InputContext$2: void <init>(sun.awt.im.InputContext)>(r1);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        return;
+    }
+
+    private java.awt.AWTKeyStroke getInputMethodSelectionKeyStroke(java.util.prefs.Preferences)
+    {
+        java.util.prefs.BackingStoreException $r3;
+        java.util.prefs.Preferences r0, $r1;
+        java.awt.AWTKeyStroke $r2;
+        int $i0, $i1;
+        sun.awt.im.InputContext r4;
+        boolean $z0;
+
+        r4 := @this: sun.awt.im.InputContext;
+
+        r0 := @parameter0: java.util.prefs.Preferences;
+
+     label1:
+        $z0 = virtualinvoke r0.<java.util.prefs.Preferences: boolean nodeExists(java.lang.String)>("/java/awt/im/selectionKey");
+
+        if $z0 == 0 goto label3;
+
+        $r1 = virtualinvoke r0.<java.util.prefs.Preferences: java.util.prefs.Preferences node(java.lang.String)>("/java/awt/im/selectionKey");
+
+        $i0 = virtualinvoke $r1.<java.util.prefs.Preferences: int getInt(java.lang.String,int)>("keyCode", 0);
+
+        if $i0 == 0 goto label3;
+
+        $i1 = virtualinvoke $r1.<java.util.prefs.Preferences: int getInt(java.lang.String,int)>("modifiers", 0);
+
+        $r2 = staticinvoke <java.awt.AWTKeyStroke: java.awt.AWTKeyStroke getAWTKeyStroke(int,int)>($i0, $i1);
+
+     label2:
+        return $r2;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r3 := @caughtexception;
+
+     label5:
+        return null;
+
+        catch java.util.prefs.BackingStoreException from label1 to label2 with label4;
+    }
+
+    static java.awt.AWTKeyStroke access$002(java.awt.AWTKeyStroke)
+    {
+        java.awt.AWTKeyStroke r0;
+
+        r0 := @parameter0: java.awt.AWTKeyStroke;
+
+        <sun.awt.im.InputContext: java.awt.AWTKeyStroke inputMethodSelectionKey> = r0;
+
+        return r0;
+    }
+
+    static java.awt.AWTKeyStroke access$100(sun.awt.im.InputContext, java.util.prefs.Preferences)
+    {
+        sun.awt.im.InputContext r0;
+        java.awt.AWTKeyStroke $r2;
+        java.util.prefs.Preferences r1;
+
+        r0 := @parameter0: sun.awt.im.InputContext;
+
+        r1 := @parameter1: java.util.prefs.Preferences;
+
+        $r2 = specialinvoke r0.<sun.awt.im.InputContext: java.awt.AWTKeyStroke getInputMethodSelectionKeyStroke(java.util.prefs.Preferences)>(r1);
+
+        return $r2;
+    }
+
+    static java.awt.AWTKeyStroke access$000()
+    {
+        java.awt.AWTKeyStroke $r0;
+
+        $r0 = <sun.awt.im.InputContext: java.awt.AWTKeyStroke inputMethodSelectionKey>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        sun.util.logging.PlatformLogger $r0;
+
+        <sun.awt.im.InputContext: java.lang.String inputMethodSelectionKeyModifiersName> = "modifiers";
+
+        <sun.awt.im.InputContext: java.lang.String inputMethodSelectionKeyCodeName> = "keyCode";
+
+        <sun.awt.im.InputContext: java.lang.String inputMethodSelectionKeyPath> = "/java/awt/im/selectionKey";
+
+        $r0 = staticinvoke <sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger getLogger(java.lang.String)>("sun.awt.im.InputContext");
+
+        <sun.awt.im.InputContext: sun.util.logging.PlatformLogger log> = $r0;
+
+        <sun.awt.im.InputContext: java.awt.im.spi.InputMethod previousInputMethod> = null;
+
+        <sun.awt.im.InputContext: boolean inputMethodSelectionKeyInitialized> = 0;
+
+        return;
+    }
+}

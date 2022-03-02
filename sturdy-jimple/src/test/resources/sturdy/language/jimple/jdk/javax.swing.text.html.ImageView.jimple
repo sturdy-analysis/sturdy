@@ -1,0 +1,2632 @@
+public class javax.swing.text.html.ImageView extends javax.swing.text.View
+{
+    private static boolean sIsInc;
+    private static int sIncRate;
+    private static final java.lang.String PENDING_IMAGE;
+    private static final java.lang.String MISSING_IMAGE;
+    private static final java.lang.String IMAGE_CACHE_PROPERTY;
+    private static final int DEFAULT_WIDTH;
+    private static final int DEFAULT_HEIGHT;
+    private static final int DEFAULT_BORDER;
+    private static final int LOADING_FLAG;
+    private static final int LINK_FLAG;
+    private static final int WIDTH_FLAG;
+    private static final int HEIGHT_FLAG;
+    private static final int RELOAD_FLAG;
+    private static final int RELOAD_IMAGE_FLAG;
+    private static final int SYNC_LOAD_FLAG;
+    private javax.swing.text.AttributeSet attr;
+    private java.awt.Image image;
+    private java.awt.Image disabledImage;
+    private int width;
+    private int height;
+    private int state;
+    private java.awt.Container container;
+    private java.awt.Rectangle fBounds;
+    private java.awt.Color borderColor;
+    private short borderSize;
+    private short leftInset;
+    private short rightInset;
+    private short topInset;
+    private short bottomInset;
+    private java.awt.image.ImageObserver imageObserver;
+    private javax.swing.text.View altView;
+    private float vAlign;
+
+    public void <init>(javax.swing.text.Element)
+    {
+        java.awt.Rectangle $r2;
+        javax.swing.text.html.ImageView$ImageHandler $r3;
+        javax.swing.text.html.ImageView r0;
+        javax.swing.text.Element r1;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        r1 := @parameter0: javax.swing.text.Element;
+
+        specialinvoke r0.<javax.swing.text.View: void <init>(javax.swing.text.Element)>(r1);
+
+        $r2 = new java.awt.Rectangle;
+
+        specialinvoke $r2.<java.awt.Rectangle: void <init>()>();
+
+        r0.<javax.swing.text.html.ImageView: java.awt.Rectangle fBounds> = $r2;
+
+        $r3 = new javax.swing.text.html.ImageView$ImageHandler;
+
+        specialinvoke $r3.<javax.swing.text.html.ImageView$ImageHandler: void <init>(javax.swing.text.html.ImageView,javax.swing.text.html.ImageView$1)>(r0, null);
+
+        r0.<javax.swing.text.html.ImageView: java.awt.image.ImageObserver imageObserver> = $r3;
+
+        r0.<javax.swing.text.html.ImageView: int state> = 48;
+
+        return;
+    }
+
+    public java.lang.String getAltText()
+    {
+        javax.swing.text.html.HTML$Attribute $r3;
+        java.lang.Object $r4;
+        java.lang.String $r5;
+        javax.swing.text.html.ImageView r0;
+        javax.swing.text.Element $r1;
+        javax.swing.text.AttributeSet $r2;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.html.ImageView: javax.swing.text.Element getElement()>();
+
+        $r2 = interfaceinvoke $r1.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $r3 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute ALT>;
+
+        $r4 = interfaceinvoke $r2.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r3);
+
+        $r5 = (java.lang.String) $r4;
+
+        return $r5;
+    }
+
+    public java.net.URL getImageURL()
+    {
+        java.net.MalformedURLException $r10;
+        java.net.URL $r8, $r9;
+        javax.swing.text.html.HTML$Attribute $r3;
+        javax.swing.text.html.HTMLDocument $r7;
+        java.lang.Object $r4;
+        java.lang.String r5;
+        javax.swing.text.Document $r6;
+        javax.swing.text.html.ImageView r0;
+        javax.swing.text.Element $r1;
+        javax.swing.text.AttributeSet $r2;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.html.ImageView: javax.swing.text.Element getElement()>();
+
+        $r2 = interfaceinvoke $r1.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $r3 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute SRC>;
+
+        $r4 = interfaceinvoke $r2.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r3);
+
+        r5 = (java.lang.String) $r4;
+
+        if r5 != null goto label1;
+
+        return null;
+
+     label1:
+        $r6 = virtualinvoke r0.<javax.swing.text.html.ImageView: javax.swing.text.Document getDocument()>();
+
+        $r7 = (javax.swing.text.html.HTMLDocument) $r6;
+
+        $r8 = virtualinvoke $r7.<javax.swing.text.html.HTMLDocument: java.net.URL getBase()>();
+
+     label2:
+        $r9 = new java.net.URL;
+
+        specialinvoke $r9.<java.net.URL: void <init>(java.net.URL,java.lang.String)>($r8, r5);
+
+     label3:
+        return $r9;
+
+     label4:
+        $r10 := @caughtexception;
+
+        return null;
+
+        catch java.net.MalformedURLException from label2 to label3 with label4;
+    }
+
+    public javax.swing.Icon getNoImageIcon()
+    {
+        javax.swing.UIDefaults $r0;
+        java.lang.Object $r1;
+        javax.swing.Icon $r2;
+        javax.swing.text.html.ImageView r3;
+
+        r3 := @this: javax.swing.text.html.ImageView;
+
+        $r0 = staticinvoke <javax.swing.UIManager: javax.swing.UIDefaults getLookAndFeelDefaults()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("html.missingImage");
+
+        $r2 = (javax.swing.Icon) $r1;
+
+        return $r2;
+    }
+
+    public javax.swing.Icon getLoadingImageIcon()
+    {
+        javax.swing.UIDefaults $r0;
+        java.lang.Object $r1;
+        javax.swing.Icon $r2;
+        javax.swing.text.html.ImageView r3;
+
+        r3 := @this: javax.swing.text.html.ImageView;
+
+        $r0 = staticinvoke <javax.swing.UIManager: javax.swing.UIDefaults getLookAndFeelDefaults()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.UIDefaults: java.lang.Object get(java.lang.Object)>("html.pendingImage");
+
+        $r2 = (javax.swing.Icon) $r1;
+
+        return $r2;
+    }
+
+    public java.awt.Image getImage()
+    {
+        javax.swing.text.html.ImageView r0;
+        java.awt.Image $r1;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        specialinvoke r0.<javax.swing.text.html.ImageView: void sync()>();
+
+        $r1 = r0.<javax.swing.text.html.ImageView: java.awt.Image image>;
+
+        return $r1;
+    }
+
+    private java.awt.Image getImage(boolean)
+    {
+        java.awt.Image $r1, $r2, $r3, r4;
+        javax.swing.text.html.ImageView r0;
+        boolean z0;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.html.ImageView: java.awt.Image getImage()>();
+
+        r4 = $r1;
+
+        if z0 != 0 goto label2;
+
+        $r2 = r0.<javax.swing.text.html.ImageView: java.awt.Image disabledImage>;
+
+        if $r2 != null goto label1;
+
+        $r3 = staticinvoke <javax.swing.GrayFilter: java.awt.Image createDisabledImage(java.awt.Image)>($r1);
+
+        r0.<javax.swing.text.html.ImageView: java.awt.Image disabledImage> = $r3;
+
+     label1:
+        r4 = r0.<javax.swing.text.html.ImageView: java.awt.Image disabledImage>;
+
+     label2:
+        return r4;
+    }
+
+    public void setLoadsSynchronously(boolean)
+    {
+        java.lang.Throwable $r1;
+        int $i0, $i1, $i2, $i3, $i4;
+        javax.swing.text.html.ImageView r0;
+        boolean z0;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        z0 := @parameter0: boolean;
+
+        entermonitor r0;
+
+     label1:
+        if z0 == 0 goto label2;
+
+        $i3 = r0.<javax.swing.text.html.ImageView: int state>;
+
+        $i4 = $i3 | 64;
+
+        r0.<javax.swing.text.html.ImageView: int state> = $i4;
+
+        goto label3;
+
+     label2:
+        $i0 = r0.<javax.swing.text.html.ImageView: int state>;
+
+        $i1 = $i0 | 64;
+
+        $i2 = $i1 ^ 64;
+
+        r0.<javax.swing.text.html.ImageView: int state> = $i2;
+
+     label3:
+        exitmonitor r0;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+     label6:
+        throw $r1;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public boolean getLoadsSynchronously()
+    {
+        int $i0, $i1;
+        javax.swing.text.html.ImageView r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        $i0 = r0.<javax.swing.text.html.ImageView: int state>;
+
+        $i1 = $i0 & 64;
+
+        if $i1 == 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    protected javax.swing.text.html.StyleSheet getStyleSheet()
+    {
+        javax.swing.text.html.HTMLDocument r2;
+        javax.swing.text.html.StyleSheet $r3;
+        javax.swing.text.Document $r1;
+        javax.swing.text.html.ImageView r0;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.html.ImageView: javax.swing.text.Document getDocument()>();
+
+        r2 = (javax.swing.text.html.HTMLDocument) $r1;
+
+        $r3 = virtualinvoke r2.<javax.swing.text.html.HTMLDocument: javax.swing.text.html.StyleSheet getStyleSheet()>();
+
+        return $r3;
+    }
+
+    public javax.swing.text.AttributeSet getAttributes()
+    {
+        javax.swing.text.html.ImageView r0;
+        javax.swing.text.AttributeSet $r1;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        specialinvoke r0.<javax.swing.text.html.ImageView: void sync()>();
+
+        $r1 = r0.<javax.swing.text.html.ImageView: javax.swing.text.AttributeSet attr>;
+
+        return $r1;
+    }
+
+    public java.lang.String getToolTipText(float, float, java.awt.Shape)
+    {
+        java.awt.Shape r2;
+        float f0, f1;
+        java.lang.String $r1;
+        javax.swing.text.html.ImageView r0;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        f0 := @parameter0: float;
+
+        f1 := @parameter1: float;
+
+        r2 := @parameter2: java.awt.Shape;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.html.ImageView: java.lang.String getAltText()>();
+
+        return $r1;
+    }
+
+    protected void setPropertiesFromAttributes()
+    {
+        java.awt.Color $r9;
+        javax.swing.text.html.StyleSheet $r1;
+        javax.swing.text.StyledDocument $r7;
+        byte $b15;
+        javax.swing.text.html.ImageView r0;
+        javax.swing.text.AttributeSet $r2, $r8, $r11, $r22;
+        boolean $z0, $z1, $z2, $z3;
+        javax.swing.text.html.HTML$Tag $r20;
+        javax.swing.text.Document $r6;
+        java.lang.Throwable $r18, $r19;
+        javax.swing.text.html.HTML$Attribute $r3, $r4, $r5, $r12, $r14;
+        short $s1, $s3, $s5, $s7, $s9;
+        int $i0, $i2, $i4, $i6, $i8, $i10, $i11, $i12, $i13, $i14, $i16, $i17;
+        java.lang.String $r15, $r16, $r17;
+        java.lang.Object $r13, $r21;
+        javax.swing.text.Element $r10;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.html.ImageView: javax.swing.text.html.StyleSheet getStyleSheet()>();
+
+        $r2 = virtualinvoke $r1.<javax.swing.text.html.StyleSheet: javax.swing.text.AttributeSet getViewAttributes(javax.swing.text.View)>(r0);
+
+        r0.<javax.swing.text.html.ImageView: javax.swing.text.AttributeSet attr> = $r2;
+
+        $r3 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute BORDER>;
+
+        $z0 = specialinvoke r0.<javax.swing.text.html.ImageView: boolean isLink()>();
+
+        if $z0 == 0 goto label01;
+
+        $b15 = 2;
+
+        goto label02;
+
+     label01:
+        $b15 = 0;
+
+     label02:
+        $i0 = specialinvoke r0.<javax.swing.text.html.ImageView: int getIntAttr(javax.swing.text.html.HTML$Attribute,int)>($r3, $b15);
+
+        $s1 = (short) $i0;
+
+        r0.<javax.swing.text.html.ImageView: short borderSize> = $s1;
+
+        $r4 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute HSPACE>;
+
+        $i2 = specialinvoke r0.<javax.swing.text.html.ImageView: int getIntAttr(javax.swing.text.html.HTML$Attribute,int)>($r4, 0);
+
+        $s3 = r0.<javax.swing.text.html.ImageView: short borderSize>;
+
+        $i16 = (int) $s3;
+
+        $i4 = $i2 + $i16;
+
+        $s5 = (short) $i4;
+
+        r0.<javax.swing.text.html.ImageView: short rightInset> = $s5;
+
+        r0.<javax.swing.text.html.ImageView: short leftInset> = $s5;
+
+        $r5 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute VSPACE>;
+
+        $i6 = specialinvoke r0.<javax.swing.text.html.ImageView: int getIntAttr(javax.swing.text.html.HTML$Attribute,int)>($r5, 0);
+
+        $s7 = r0.<javax.swing.text.html.ImageView: short borderSize>;
+
+        $i17 = (int) $s7;
+
+        $i8 = $i6 + $i17;
+
+        $s9 = (short) $i8;
+
+        r0.<javax.swing.text.html.ImageView: short bottomInset> = $s9;
+
+        r0.<javax.swing.text.html.ImageView: short topInset> = $s9;
+
+        $r6 = virtualinvoke r0.<javax.swing.text.html.ImageView: javax.swing.text.Document getDocument()>();
+
+        $r7 = (javax.swing.text.StyledDocument) $r6;
+
+        $r8 = virtualinvoke r0.<javax.swing.text.html.ImageView: javax.swing.text.AttributeSet getAttributes()>();
+
+        $r9 = interfaceinvoke $r7.<javax.swing.text.StyledDocument: java.awt.Color getForeground(javax.swing.text.AttributeSet)>($r8);
+
+        r0.<javax.swing.text.html.ImageView: java.awt.Color borderColor> = $r9;
+
+        $r10 = virtualinvoke r0.<javax.swing.text.html.ImageView: javax.swing.text.Element getElement()>();
+
+        $r11 = interfaceinvoke $r10.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $r12 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute ALIGN>;
+
+        $r13 = interfaceinvoke $r11.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r12);
+
+        r0.<javax.swing.text.html.ImageView: float vAlign> = 1.0F;
+
+        if $r13 == null goto label04;
+
+        $r15 = virtualinvoke $r13.<java.lang.Object: java.lang.String toString()>();
+
+        $r16 = "top";
+
+        $z2 = virtualinvoke $r16.<java.lang.String: boolean equals(java.lang.Object)>($r15);
+
+        if $z2 == 0 goto label03;
+
+        r0.<javax.swing.text.html.ImageView: float vAlign> = 0.0F;
+
+        goto label04;
+
+     label03:
+        $r17 = "middle";
+
+        $z3 = virtualinvoke $r17.<java.lang.String: boolean equals(java.lang.Object)>($r15);
+
+        if $z3 == 0 goto label04;
+
+        r0.<javax.swing.text.html.ImageView: float vAlign> = 0.5F;
+
+     label04:
+        $r20 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag A>;
+
+        $r21 = interfaceinvoke $r11.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r20);
+
+        $r22 = (javax.swing.text.AttributeSet) $r21;
+
+        if $r22 == null goto label10;
+
+        $r14 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute HREF>;
+
+        $z1 = interfaceinvoke $r22.<javax.swing.text.AttributeSet: boolean isDefined(java.lang.Object)>($r14);
+
+        if $z1 == 0 goto label10;
+
+        entermonitor r0;
+
+     label05:
+        $i13 = r0.<javax.swing.text.html.ImageView: int state>;
+
+        $i14 = $i13 | 2;
+
+        r0.<javax.swing.text.html.ImageView: int state> = $i14;
+
+        exitmonitor r0;
+
+     label06:
+        goto label09;
+
+     label07:
+        $r19 := @caughtexception;
+
+        exitmonitor r0;
+
+     label08:
+        throw $r19;
+
+     label09:
+        goto label15;
+
+     label10:
+        entermonitor r0;
+
+     label11:
+        $i10 = r0.<javax.swing.text.html.ImageView: int state>;
+
+        $i11 = $i10 | 2;
+
+        $i12 = $i11 ^ 2;
+
+        r0.<javax.swing.text.html.ImageView: int state> = $i12;
+
+        exitmonitor r0;
+
+     label12:
+        goto label15;
+
+     label13:
+        $r18 := @caughtexception;
+
+        exitmonitor r0;
+
+     label14:
+        throw $r18;
+
+     label15:
+        return;
+
+        catch java.lang.Throwable from label05 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+        catch java.lang.Throwable from label11 to label12 with label13;
+        catch java.lang.Throwable from label13 to label14 with label13;
+    }
+
+    public void setParent(javax.swing.text.View)
+    {
+        java.lang.Throwable $r3;
+        int $i0, $i1;
+        javax.swing.text.View $r1, r2;
+        java.awt.Container $r4;
+        javax.swing.text.html.ImageView r0;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        r2 := @parameter0: javax.swing.text.View;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.html.ImageView: javax.swing.text.View getParent()>();
+
+        specialinvoke r0.<javax.swing.text.View: void setParent(javax.swing.text.View)>(r2);
+
+        if r2 == null goto label1;
+
+        $r4 = virtualinvoke r0.<javax.swing.text.html.ImageView: java.awt.Container getContainer()>();
+
+        goto label2;
+
+     label1:
+        $r4 = null;
+
+     label2:
+        r0.<javax.swing.text.html.ImageView: java.awt.Container container> = $r4;
+
+        if $r1 == r2 goto label7;
+
+        entermonitor r0;
+
+     label3:
+        $i0 = r0.<javax.swing.text.html.ImageView: int state>;
+
+        $i1 = $i0 | 16;
+
+        r0.<javax.swing.text.html.ImageView: int state> = $i1;
+
+        exitmonitor r0;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+     label6:
+        throw $r3;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public void changedUpdate(javax.swing.event.DocumentEvent, java.awt.Shape, javax.swing.text.ViewFactory)
+    {
+        java.awt.Shape r2;
+        java.lang.Throwable $r4;
+        javax.swing.text.ViewFactory r3;
+        int $i0, $i1;
+        javax.swing.text.html.ImageView r0;
+        javax.swing.event.DocumentEvent r1;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        r1 := @parameter0: javax.swing.event.DocumentEvent;
+
+        r2 := @parameter1: java.awt.Shape;
+
+        r3 := @parameter2: javax.swing.text.ViewFactory;
+
+        specialinvoke r0.<javax.swing.text.View: void changedUpdate(javax.swing.event.DocumentEvent,java.awt.Shape,javax.swing.text.ViewFactory)>(r1, r2, r3);
+
+        entermonitor r0;
+
+     label1:
+        $i0 = r0.<javax.swing.text.html.ImageView: int state>;
+
+        $i1 = $i0 | 48;
+
+        r0.<javax.swing.text.html.ImageView: int state> = $i1;
+
+        exitmonitor r0;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r4;
+
+     label5:
+        virtualinvoke r0.<javax.swing.text.html.ImageView: void preferenceChanged(javax.swing.text.View,boolean,boolean)>(null, 1, 1);
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void paint(java.awt.Graphics, java.awt.Shape)
+    {
+        javax.swing.text.html.ImageView r0;
+        javax.swing.text.View $r9;
+        short $s6, $s9, $s11, $s13, $s16, $s18, $s25, $s27, $s31, $s33, $s39, $s41, $s45, $s47, $s49, $s51, $s53, $s55;
+        java.awt.Container $r6;
+        java.awt.image.ImageObserver $r11;
+        boolean $z0, $z1, $z2, $z3;
+        java.awt.Shape r1;
+        java.awt.Image $r7;
+        javax.swing.Icon $r8, $r12;
+        java.awt.Graphics r3;
+        java.awt.Rectangle r2, $r4, $r5, $r13, $r14;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i7, $i8, $i10, $i12, $i14, $i15, $i17, $i19, $i20, $i21, $i22, $i23, $i24, $i26, $i28, $i29, $i30, $i32, $i34, $i35, $i36, $i37, $i38, $i40, $i42, $i43, $i44, $i46, $i48, $i50, $i52, $i54, $i56, $i57, $i58, $i59, $i60, $i61, $i62, $i63, $i64, $i65, $i66, $i67, $i68, $i69, $i70, $i71, $i72, $i73, $i74, $i75, $i76, $i77, $i78;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        r3 := @parameter0: java.awt.Graphics;
+
+        r1 := @parameter1: java.awt.Shape;
+
+        specialinvoke r0.<javax.swing.text.html.ImageView: void sync()>();
+
+        $z0 = r1 instanceof java.awt.Rectangle;
+
+        if $z0 == 0 goto label01;
+
+        $r13 = (java.awt.Rectangle) r1;
+
+        goto label02;
+
+     label01:
+        $r13 = interfaceinvoke r1.<java.awt.Shape: java.awt.Rectangle getBounds()>();
+
+     label02:
+        r2 = $r13;
+
+        $r4 = virtualinvoke r3.<java.awt.Graphics: java.awt.Rectangle getClipBounds()>();
+
+        $r5 = r0.<javax.swing.text.html.ImageView: java.awt.Rectangle fBounds>;
+
+        virtualinvoke $r5.<java.awt.Rectangle: void setBounds(java.awt.Rectangle)>($r13);
+
+        specialinvoke r0.<javax.swing.text.html.ImageView: void paintHighlights(java.awt.Graphics,java.awt.Shape)>(r3, r1);
+
+        specialinvoke r0.<javax.swing.text.html.ImageView: void paintBorder(java.awt.Graphics,java.awt.Rectangle)>(r3, $r13);
+
+        if $r4 == null goto label03;
+
+        $i46 = $r13.<java.awt.Rectangle: int x>;
+
+        $s45 = r0.<javax.swing.text.html.ImageView: short leftInset>;
+
+        $i61 = (int) $s45;
+
+        $i60 = $i46 + $i61;
+
+        $i48 = $r13.<java.awt.Rectangle: int y>;
+
+        $s47 = r0.<javax.swing.text.html.ImageView: short topInset>;
+
+        $i62 = (int) $s47;
+
+        $i59 = $i48 + $i62;
+
+        $i50 = $r13.<java.awt.Rectangle: int width>;
+
+        $s49 = r0.<javax.swing.text.html.ImageView: short leftInset>;
+
+        $i63 = (int) $s49;
+
+        $i52 = $i50 - $i63;
+
+        $s51 = r0.<javax.swing.text.html.ImageView: short rightInset>;
+
+        $i64 = (int) $s51;
+
+        $i58 = $i52 - $i64;
+
+        $i54 = $r13.<java.awt.Rectangle: int height>;
+
+        $s53 = r0.<javax.swing.text.html.ImageView: short topInset>;
+
+        $i65 = (int) $s53;
+
+        $i56 = $i54 - $i65;
+
+        $s55 = r0.<javax.swing.text.html.ImageView: short bottomInset>;
+
+        $i66 = (int) $s55;
+
+        $i57 = $i56 - $i66;
+
+        virtualinvoke r3.<java.awt.Graphics: void clipRect(int,int,int,int)>($i60, $i59, $i58, $i57);
+
+     label03:
+        $r6 = virtualinvoke r0.<javax.swing.text.html.ImageView: java.awt.Container getContainer()>();
+
+        if $r6 == null goto label04;
+
+        $z2 = virtualinvoke $r6.<java.awt.Container: boolean isEnabled()>();
+
+        if $z2 == 0 goto label05;
+
+     label04:
+        $z3 = 1;
+
+        goto label06;
+
+     label05:
+        $z3 = 0;
+
+     label06:
+        $r7 = specialinvoke r0.<javax.swing.text.html.ImageView: java.awt.Image getImage(boolean)>($z3);
+
+        if $r7 == null goto label09;
+
+        $z1 = specialinvoke r0.<javax.swing.text.html.ImageView: boolean hasPixels(java.awt.Image)>($r7);
+
+        if $z1 != 0 goto label08;
+
+        $r12 = virtualinvoke r0.<javax.swing.text.html.ImageView: javax.swing.Icon getLoadingImageIcon()>();
+
+        if $r12 == null goto label07;
+
+        $i40 = r2.<java.awt.Rectangle: int x>;
+
+        $s39 = r0.<javax.swing.text.html.ImageView: short leftInset>;
+
+        $i67 = (int) $s39;
+
+        $i44 = $i40 + $i67;
+
+        $i42 = r2.<java.awt.Rectangle: int y>;
+
+        $s41 = r0.<javax.swing.text.html.ImageView: short topInset>;
+
+        $i68 = (int) $s41;
+
+        $i43 = $i42 + $i68;
+
+        interfaceinvoke $r12.<javax.swing.Icon: void paintIcon(java.awt.Component,java.awt.Graphics,int,int)>($r6, r3, $i44, $i43);
+
+     label07:
+        goto label12;
+
+     label08:
+        $i32 = r2.<java.awt.Rectangle: int x>;
+
+        $s31 = r0.<javax.swing.text.html.ImageView: short leftInset>;
+
+        $i69 = (int) $s31;
+
+        $i38 = $i32 + $i69;
+
+        $i34 = r2.<java.awt.Rectangle: int y>;
+
+        $s33 = r0.<javax.swing.text.html.ImageView: short topInset>;
+
+        $i70 = (int) $s33;
+
+        $i37 = $i34 + $i70;
+
+        $i36 = r0.<javax.swing.text.html.ImageView: int width>;
+
+        $i35 = r0.<javax.swing.text.html.ImageView: int height>;
+
+        $r11 = r0.<javax.swing.text.html.ImageView: java.awt.image.ImageObserver imageObserver>;
+
+        virtualinvoke r3.<java.awt.Graphics: boolean drawImage(java.awt.Image,int,int,int,int,java.awt.image.ImageObserver)>($r7, $i38, $i37, $i36, $i35, $r11);
+
+        goto label12;
+
+     label09:
+        $r8 = virtualinvoke r0.<javax.swing.text.html.ImageView: javax.swing.Icon getNoImageIcon()>();
+
+        if $r8 == null goto label10;
+
+        $i26 = r2.<java.awt.Rectangle: int x>;
+
+        $s25 = r0.<javax.swing.text.html.ImageView: short leftInset>;
+
+        $i71 = (int) $s25;
+
+        $i30 = $i26 + $i71;
+
+        $i28 = r2.<java.awt.Rectangle: int y>;
+
+        $s27 = r0.<javax.swing.text.html.ImageView: short topInset>;
+
+        $i72 = (int) $s27;
+
+        $i29 = $i28 + $i72;
+
+        interfaceinvoke $r8.<javax.swing.Icon: void paintIcon(java.awt.Component,java.awt.Graphics,int,int)>($r6, r3, $i30, $i29);
+
+     label10:
+        $r9 = specialinvoke r0.<javax.swing.text.html.ImageView: javax.swing.text.View getAltView()>();
+
+        if $r9 == null goto label12;
+
+        $i4 = r0.<javax.swing.text.html.ImageView: int state>;
+
+        $i5 = $i4 & 4;
+
+        if $i5 == 0 goto label11;
+
+        $i24 = r0.<javax.swing.text.html.ImageView: int width>;
+
+        if $i24 <= 38 goto label12;
+
+     label11:
+        $r14 = new java.awt.Rectangle;
+
+        $i7 = r2.<java.awt.Rectangle: int x>;
+
+        $s6 = r0.<javax.swing.text.html.ImageView: short leftInset>;
+
+        $i73 = (int) $s6;
+
+        $i8 = $i7 + $i73;
+
+        $i23 = $i8 + 38;
+
+        $i10 = r2.<java.awt.Rectangle: int y>;
+
+        $s9 = r0.<javax.swing.text.html.ImageView: short topInset>;
+
+        $i74 = (int) $s9;
+
+        $i22 = $i10 + $i74;
+
+        $i12 = r2.<java.awt.Rectangle: int width>;
+
+        $s11 = r0.<javax.swing.text.html.ImageView: short leftInset>;
+
+        $i75 = (int) $s11;
+
+        $i14 = $i12 - $i75;
+
+        $s13 = r0.<javax.swing.text.html.ImageView: short rightInset>;
+
+        $i76 = (int) $s13;
+
+        $i15 = $i14 - $i76;
+
+        $i21 = $i15 - 38;
+
+        $i17 = r2.<java.awt.Rectangle: int height>;
+
+        $s16 = r0.<javax.swing.text.html.ImageView: short topInset>;
+
+        $i77 = (int) $s16;
+
+        $i19 = $i17 - $i77;
+
+        $s18 = r0.<javax.swing.text.html.ImageView: short bottomInset>;
+
+        $i78 = (int) $s18;
+
+        $i20 = $i19 - $i78;
+
+        specialinvoke $r14.<java.awt.Rectangle: void <init>(int,int,int,int)>($i23, $i22, $i21, $i20);
+
+        virtualinvoke $r9.<javax.swing.text.View: void paint(java.awt.Graphics,java.awt.Shape)>(r3, $r14);
+
+     label12:
+        if $r4 == null goto label13;
+
+        $i3 = $r4.<java.awt.Rectangle: int x>;
+
+        $i2 = $r4.<java.awt.Rectangle: int y>;
+
+        $i1 = $r4.<java.awt.Rectangle: int width>;
+
+        $i0 = $r4.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r3.<java.awt.Graphics: void setClip(int,int,int,int)>($i3, $i2, $i1, $i0);
+
+     label13:
+        return;
+    }
+
+    private void paintHighlights(java.awt.Graphics, java.awt.Shape)
+    {
+        java.awt.Shape r7;
+        javax.swing.text.JTextComponent r3;
+        javax.swing.text.Highlighter $r4;
+        java.awt.Graphics r5;
+        int $i0, $i1;
+        java.awt.Container $r1, $r2;
+        javax.swing.text.html.ImageView r0;
+        javax.swing.text.LayeredHighlighter $r6;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        r5 := @parameter0: java.awt.Graphics;
+
+        r7 := @parameter1: java.awt.Shape;
+
+        $r1 = r0.<javax.swing.text.html.ImageView: java.awt.Container container>;
+
+        $z0 = $r1 instanceof javax.swing.text.JTextComponent;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = r0.<javax.swing.text.html.ImageView: java.awt.Container container>;
+
+        r3 = (javax.swing.text.JTextComponent) $r2;
+
+        $r4 = virtualinvoke r3.<javax.swing.text.JTextComponent: javax.swing.text.Highlighter getHighlighter()>();
+
+        $z1 = $r4 instanceof javax.swing.text.LayeredHighlighter;
+
+        if $z1 == 0 goto label1;
+
+        $r6 = (javax.swing.text.LayeredHighlighter) $r4;
+
+        $i0 = virtualinvoke r0.<javax.swing.text.html.ImageView: int getStartOffset()>();
+
+        $i1 = virtualinvoke r0.<javax.swing.text.html.ImageView: int getEndOffset()>();
+
+        virtualinvoke $r6.<javax.swing.text.LayeredHighlighter: void paintLayeredHighlights(java.awt.Graphics,int,int,java.awt.Shape,javax.swing.text.JTextComponent,javax.swing.text.View)>(r5, $i0, $i1, r7, r3, r0);
+
+     label1:
+        return;
+    }
+
+    private void paintBorder(java.awt.Graphics, java.awt.Rectangle)
+    {
+        java.awt.Color r1;
+        javax.swing.text.html.ImageView r0;
+        java.awt.Image $r3, $r5;
+        java.awt.Graphics r2;
+        java.awt.Rectangle r4;
+        short $s0, $s1, $s2, $s4, $s5, s7, $s26;
+        int i3, i6, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, i27, $i28, $i29, $i30, $i31, $i32;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        r2 := @parameter0: java.awt.Graphics;
+
+        r4 := @parameter1: java.awt.Rectangle;
+
+        r1 = r0.<javax.swing.text.html.ImageView: java.awt.Color borderColor>;
+
+        $s0 = r0.<javax.swing.text.html.ImageView: short borderSize>;
+
+        $i28 = (int) $s0;
+
+        if $i28 > 0 goto label1;
+
+        $r5 = r0.<javax.swing.text.html.ImageView: java.awt.Image image>;
+
+        if $r5 != null goto label5;
+
+     label1:
+        if r1 == null goto label5;
+
+        $s2 = r0.<javax.swing.text.html.ImageView: short leftInset>;
+
+        $s1 = r0.<javax.swing.text.html.ImageView: short borderSize>;
+
+        $i29 = (int) $s2;
+
+        $i30 = (int) $s1;
+
+        i3 = $i29 - $i30;
+
+        $s5 = r0.<javax.swing.text.html.ImageView: short topInset>;
+
+        $s4 = r0.<javax.swing.text.html.ImageView: short borderSize>;
+
+        $i31 = (int) $s5;
+
+        $i32 = (int) $s4;
+
+        i6 = $i31 - $i32;
+
+        virtualinvoke r2.<java.awt.Graphics: void setColor(java.awt.Color)>(r1);
+
+        $r3 = r0.<javax.swing.text.html.ImageView: java.awt.Image image>;
+
+        if $r3 != null goto label2;
+
+        $s26 = 1;
+
+        goto label3;
+
+     label2:
+        $s26 = r0.<javax.swing.text.html.ImageView: short borderSize>;
+
+     label3:
+        s7 = $s26;
+
+        i27 = 0;
+
+     label4:
+        if i27 >= s7 goto label5;
+
+        $i8 = r4.<java.awt.Rectangle: int x>;
+
+        $i9 = $i8 + i3;
+
+        $i25 = $i9 + i27;
+
+        $i10 = r4.<java.awt.Rectangle: int y>;
+
+        $i11 = $i10 + i6;
+
+        $i24 = $i11 + i27;
+
+        $i12 = r4.<java.awt.Rectangle: int width>;
+
+        $i13 = $i12 - i27;
+
+        $i14 = $i13 - i27;
+
+        $i15 = $i14 - i3;
+
+        $i16 = $i15 - i3;
+
+        $i23 = $i16 - 1;
+
+        $i17 = r4.<java.awt.Rectangle: int height>;
+
+        $i18 = $i17 - i27;
+
+        $i19 = $i18 - i27;
+
+        $i20 = $i19 - i6;
+
+        $i21 = $i20 - i6;
+
+        $i22 = $i21 - 1;
+
+        virtualinvoke r2.<java.awt.Graphics: void drawRect(int,int,int,int)>($i25, $i24, $i23, $i22);
+
+        i27 = i27 + 1;
+
+        goto label4;
+
+     label5:
+        return;
+    }
+
+    public float getPreferredSpan(int)
+    {
+        javax.swing.text.html.ImageView r0;
+        javax.swing.text.View $r2;
+        java.lang.StringBuilder $r5, $r6, $r10, $r11, $r13, $r15;
+        short $s1, $s3, $s6, $s8, $s11, $s13, $s16, $s18, $s23, $s25, $s30, $s32;
+        java.lang.String $r7, $r12;
+        java.awt.Image $r1;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, f8;
+        int i0, $i2, $i4, $i5, $i7, $i9, $i10, $i12, $i14, $i15, $i17, $i19, $i20, $i21, $i22, $i24, $i26, $i27, $i28, $i29, $i31, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46;
+        java.lang.IllegalArgumentException $r14, $r16;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<javax.swing.text.html.ImageView: void sync()>();
+
+        if i0 != 0 goto label01;
+
+        $i28 = r0.<javax.swing.text.html.ImageView: int state>;
+
+        $i29 = $i28 & 4;
+
+        if $i29 != 4 goto label01;
+
+        specialinvoke r0.<javax.swing.text.html.ImageView: float getPreferredSpanFromAltView(int)>(i0);
+
+        $i31 = r0.<javax.swing.text.html.ImageView: int width>;
+
+        $s30 = r0.<javax.swing.text.html.ImageView: short leftInset>;
+
+        $i35 = (int) $s30;
+
+        $i33 = $i31 + $i35;
+
+        $s32 = r0.<javax.swing.text.html.ImageView: short rightInset>;
+
+        $i36 = (int) $s32;
+
+        $i34 = $i33 + $i36;
+
+        $f7 = (float) $i34;
+
+        return $f7;
+
+     label01:
+        if i0 != 1 goto label02;
+
+        $i21 = r0.<javax.swing.text.html.ImageView: int state>;
+
+        $i22 = $i21 & 8;
+
+        if $i22 != 8 goto label02;
+
+        specialinvoke r0.<javax.swing.text.html.ImageView: float getPreferredSpanFromAltView(int)>(i0);
+
+        $i24 = r0.<javax.swing.text.html.ImageView: int height>;
+
+        $s23 = r0.<javax.swing.text.html.ImageView: short topInset>;
+
+        $i37 = (int) $s23;
+
+        $i26 = $i24 + $i37;
+
+        $s25 = r0.<javax.swing.text.html.ImageView: short bottomInset>;
+
+        $i38 = (int) $s25;
+
+        $i27 = $i26 + $i38;
+
+        $f6 = (float) $i27;
+
+        return $f6;
+
+     label02:
+        $r1 = virtualinvoke r0.<javax.swing.text.html.ImageView: java.awt.Image getImage()>();
+
+        if $r1 == null goto label06;
+
+        lookupswitch(i0)
+        {
+            case 0: goto label03;
+            case 1: goto label04;
+            default: goto label05;
+        };
+
+     label03:
+        $i17 = r0.<javax.swing.text.html.ImageView: int width>;
+
+        $s16 = r0.<javax.swing.text.html.ImageView: short leftInset>;
+
+        $i39 = (int) $s16;
+
+        $i19 = $i17 + $i39;
+
+        $s18 = r0.<javax.swing.text.html.ImageView: short rightInset>;
+
+        $i40 = (int) $s18;
+
+        $i20 = $i19 + $i40;
+
+        $f5 = (float) $i20;
+
+        return $f5;
+
+     label04:
+        $i12 = r0.<javax.swing.text.html.ImageView: int height>;
+
+        $s11 = r0.<javax.swing.text.html.ImageView: short topInset>;
+
+        $i41 = (int) $s11;
+
+        $i14 = $i12 + $i41;
+
+        $s13 = r0.<javax.swing.text.html.ImageView: short bottomInset>;
+
+        $i42 = (int) $s13;
+
+        $i15 = $i14 + $i42;
+
+        $f4 = (float) $i15;
+
+        return $f4;
+
+     label05:
+        $r14 = new java.lang.IllegalArgumentException;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid axis: ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r14.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r12);
+
+        throw $r14;
+
+     label06:
+        $r2 = specialinvoke r0.<javax.swing.text.html.ImageView: javax.swing.text.View getAltView()>();
+
+        f8 = 0.0F;
+
+        if $r2 == null goto label07;
+
+        f8 = virtualinvoke $r2.<javax.swing.text.View: float getPreferredSpan(int)>(i0);
+
+     label07:
+        lookupswitch(i0)
+        {
+            case 0: goto label08;
+            case 1: goto label09;
+            default: goto label10;
+        };
+
+     label08:
+        $i7 = r0.<javax.swing.text.html.ImageView: int width>;
+
+        $s6 = r0.<javax.swing.text.html.ImageView: short leftInset>;
+
+        $i43 = (int) $s6;
+
+        $i9 = $i7 + $i43;
+
+        $s8 = r0.<javax.swing.text.html.ImageView: short rightInset>;
+
+        $i44 = (int) $s8;
+
+        $i10 = $i9 + $i44;
+
+        $f2 = (float) $i10;
+
+        $f3 = f8 + $f2;
+
+        return $f3;
+
+     label09:
+        $i2 = r0.<javax.swing.text.html.ImageView: int height>;
+
+        $s1 = r0.<javax.swing.text.html.ImageView: short topInset>;
+
+        $i45 = (int) $s1;
+
+        $i4 = $i2 + $i45;
+
+        $s3 = r0.<javax.swing.text.html.ImageView: short bottomInset>;
+
+        $i46 = (int) $s3;
+
+        $i5 = $i4 + $i46;
+
+        $f0 = (float) $i5;
+
+        $f1 = f8 + $f0;
+
+        return $f1;
+
+     label10:
+        $r16 = new java.lang.IllegalArgumentException;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid axis: ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r16.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r7);
+
+        throw $r16;
+    }
+
+    public float getAlignment(int)
+    {
+        int i0;
+        float $f0, $f1;
+        javax.swing.text.html.ImageView r0;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        i0 := @parameter0: int;
+
+        lookupswitch(i0)
+        {
+            case 1: goto label1;
+            default: goto label2;
+        };
+
+     label1:
+        $f0 = r0.<javax.swing.text.html.ImageView: float vAlign>;
+
+        return $f0;
+
+     label2:
+        $f1 = specialinvoke r0.<javax.swing.text.View: float getAlignment(int)>(i0);
+
+        return $f1;
+    }
+
+    public java.awt.Shape modelToView(int, java.awt.Shape, javax.swing.text.Position$Bias) throws javax.swing.text.BadLocationException
+    {
+        java.awt.Shape r1;
+        java.awt.Rectangle $r2;
+        javax.swing.text.Position$Bias r3;
+        int $i0, $i1, i2, $i3, $i4, $i5;
+        javax.swing.text.html.ImageView r0;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        i2 := @parameter0: int;
+
+        r1 := @parameter1: java.awt.Shape;
+
+        r3 := @parameter2: javax.swing.text.Position$Bias;
+
+        $i0 = virtualinvoke r0.<javax.swing.text.html.ImageView: int getStartOffset()>();
+
+        $i1 = virtualinvoke r0.<javax.swing.text.html.ImageView: int getEndOffset()>();
+
+        if i2 < $i0 goto label2;
+
+        if i2 > $i1 goto label2;
+
+        $r2 = interfaceinvoke r1.<java.awt.Shape: java.awt.Rectangle getBounds()>();
+
+        if i2 != $i1 goto label1;
+
+        $i4 = $r2.<java.awt.Rectangle: int x>;
+
+        $i3 = $r2.<java.awt.Rectangle: int width>;
+
+        $i5 = $i4 + $i3;
+
+        $r2.<java.awt.Rectangle: int x> = $i5;
+
+     label1:
+        $r2.<java.awt.Rectangle: int width> = 0;
+
+        return $r2;
+
+     label2:
+        return null;
+    }
+
+    public int viewToModel(float, float, java.awt.Shape, javax.swing.text.Position$Bias[])
+    {
+        java.awt.Rectangle r1;
+        byte $b3;
+        javax.swing.text.Position$Bias $r3, $r5;
+        int $i0, $i1, $i2, $i4, $i5, $i6;
+        javax.swing.text.html.ImageView r4;
+        java.awt.Shape r0;
+        javax.swing.text.Position$Bias[] r2;
+        float f0, $f1, f2;
+
+        r4 := @this: javax.swing.text.html.ImageView;
+
+        f0 := @parameter0: float;
+
+        f2 := @parameter1: float;
+
+        r0 := @parameter2: java.awt.Shape;
+
+        r2 := @parameter3: javax.swing.text.Position$Bias[];
+
+        r1 = (java.awt.Rectangle) r0;
+
+        $i1 = r1.<java.awt.Rectangle: int x>;
+
+        $i0 = r1.<java.awt.Rectangle: int width>;
+
+        $i2 = $i1 + $i0;
+
+        $f1 = (float) $i2;
+
+        $b3 = f0 cmpg $f1;
+
+        $i6 = (int) $b3;
+
+        if $i6 >= 0 goto label1;
+
+        $r5 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Forward>;
+
+        r2[0] = $r5;
+
+        $i5 = virtualinvoke r4.<javax.swing.text.html.ImageView: int getStartOffset()>();
+
+        return $i5;
+
+     label1:
+        $r3 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Backward>;
+
+        r2[0] = $r3;
+
+        $i4 = virtualinvoke r4.<javax.swing.text.html.ImageView: int getEndOffset()>();
+
+        return $i4;
+    }
+
+    public void setSize(float, float)
+    {
+        short $s0, $s1, $s4, $s5;
+        int $i2, $i3, $i6, $i7, $i8, $i9, $i10;
+        javax.swing.text.html.ImageView r0;
+        java.awt.Image $r1;
+        javax.swing.text.View $r2;
+        float f0, $f1, $f2, $f3, f4, $f5, $f6, $f7;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        f0 := @parameter0: float;
+
+        f4 := @parameter1: float;
+
+        specialinvoke r0.<javax.swing.text.html.ImageView: void sync()>();
+
+        $r1 = virtualinvoke r0.<javax.swing.text.html.ImageView: java.awt.Image getImage()>();
+
+        if $r1 != null goto label1;
+
+        $r2 = specialinvoke r0.<javax.swing.text.html.ImageView: javax.swing.text.View getAltView()>();
+
+        if $r2 == null goto label1;
+
+        $s0 = r0.<javax.swing.text.html.ImageView: short leftInset>;
+
+        $i7 = (int) $s0;
+
+        $i2 = 38 + $i7;
+
+        $s1 = r0.<javax.swing.text.html.ImageView: short rightInset>;
+
+        $i8 = (int) $s1;
+
+        $i3 = $i2 + $i8;
+
+        $f1 = (float) $i3;
+
+        $f2 = f0 - $f1;
+
+        $f3 = staticinvoke <java.lang.Math: float max(float,float)>(0.0F, $f2);
+
+        $s5 = r0.<javax.swing.text.html.ImageView: short topInset>;
+
+        $s4 = r0.<javax.swing.text.html.ImageView: short bottomInset>;
+
+        $i9 = (int) $s5;
+
+        $i10 = (int) $s4;
+
+        $i6 = $i9 + $i10;
+
+        $f5 = (float) $i6;
+
+        $f6 = f4 - $f5;
+
+        $f7 = staticinvoke <java.lang.Math: float max(float,float)>(0.0F, $f6);
+
+        virtualinvoke $r2.<javax.swing.text.View: void setSize(float,float)>($f3, $f7);
+
+     label1:
+        return;
+    }
+
+    private boolean isLink()
+    {
+        int $i0, $i1;
+        javax.swing.text.html.ImageView r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        $i0 = r0.<javax.swing.text.html.ImageView: int state>;
+
+        $i1 = $i0 & 2;
+
+        if $i1 != 2 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private boolean hasPixels(java.awt.Image)
+    {
+        java.awt.Image r0;
+        int $i0, $i1;
+        javax.swing.text.html.ImageView r1;
+        java.awt.image.ImageObserver $r2, $r3;
+        boolean $z0;
+
+        r1 := @this: javax.swing.text.html.ImageView;
+
+        r0 := @parameter0: java.awt.Image;
+
+        if r0 == null goto label1;
+
+        $r2 = r1.<javax.swing.text.html.ImageView: java.awt.image.ImageObserver imageObserver>;
+
+        $i0 = virtualinvoke r0.<java.awt.Image: int getHeight(java.awt.image.ImageObserver)>($r2);
+
+        if $i0 <= 0 goto label1;
+
+        $r3 = r1.<javax.swing.text.html.ImageView: java.awt.image.ImageObserver imageObserver>;
+
+        $i1 = virtualinvoke r0.<java.awt.Image: int getWidth(java.awt.image.ImageObserver)>($r3);
+
+        if $i1 <= 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private float getPreferredSpanFromAltView(int)
+    {
+        java.awt.Image $r1;
+        int i0;
+        javax.swing.text.View $r2;
+        float $f0;
+        javax.swing.text.html.ImageView r0;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.html.ImageView: java.awt.Image getImage()>();
+
+        if $r1 != null goto label1;
+
+        $r2 = specialinvoke r0.<javax.swing.text.html.ImageView: javax.swing.text.View getAltView()>();
+
+        if $r2 == null goto label1;
+
+        $f0 = virtualinvoke $r2.<javax.swing.text.View: float getPreferredSpan(int)>(i0);
+
+        return $f0;
+
+     label1:
+        return 0.0F;
+    }
+
+    private void repaint(long)
+    {
+        java.awt.Rectangle $r2, $r3, $r4, $r5, $r6;
+        long l0;
+        int $i1, $i2, $i3, $i4;
+        java.awt.Container $r1, $r7;
+        javax.swing.text.html.ImageView r0;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        l0 := @parameter0: long;
+
+        $r1 = r0.<javax.swing.text.html.ImageView: java.awt.Container container>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<javax.swing.text.html.ImageView: java.awt.Rectangle fBounds>;
+
+        if $r2 == null goto label1;
+
+        $r7 = r0.<javax.swing.text.html.ImageView: java.awt.Container container>;
+
+        $r3 = r0.<javax.swing.text.html.ImageView: java.awt.Rectangle fBounds>;
+
+        $i4 = $r3.<java.awt.Rectangle: int x>;
+
+        $r4 = r0.<javax.swing.text.html.ImageView: java.awt.Rectangle fBounds>;
+
+        $i3 = $r4.<java.awt.Rectangle: int y>;
+
+        $r5 = r0.<javax.swing.text.html.ImageView: java.awt.Rectangle fBounds>;
+
+        $i2 = $r5.<java.awt.Rectangle: int width>;
+
+        $r6 = r0.<javax.swing.text.html.ImageView: java.awt.Rectangle fBounds>;
+
+        $i1 = $r6.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r7.<java.awt.Container: void repaint(long,int,int,int,int)>(l0, $i4, $i3, $i2, $i1);
+
+     label1:
+        return;
+    }
+
+    private int getIntAttr(javax.swing.text.html.HTML$Attribute, int)
+    {
+        java.lang.NumberFormatException $r6;
+        javax.swing.text.html.HTML$Attribute r3;
+        int i0, $i1, i2;
+        java.lang.Object $r4;
+        java.lang.String r5;
+        javax.swing.text.html.ImageView r0;
+        javax.swing.text.Element $r1;
+        javax.swing.text.AttributeSet $r2;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        r3 := @parameter0: javax.swing.text.html.HTML$Attribute;
+
+        i0 := @parameter1: int;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.html.ImageView: javax.swing.text.Element getElement()>();
+
+        $r2 = interfaceinvoke $r1.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $z0 = interfaceinvoke $r2.<javax.swing.text.AttributeSet: boolean isDefined(java.lang.Object)>(r3);
+
+        if $z0 == 0 goto label5;
+
+        $r4 = interfaceinvoke $r2.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>(r3);
+
+        r5 = (java.lang.String) $r4;
+
+        if r5 != null goto label1;
+
+        i2 = i0;
+
+        goto label4;
+
+     label1:
+        $i1 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>(r5);
+
+        i2 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        i2 = i0;
+
+     label4:
+        return i2;
+
+     label5:
+        return i0;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label3;
+    }
+
+    private void sync()
+    {
+        java.lang.Throwable $r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6;
+        javax.swing.text.html.ImageView r0;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        i6 = r0.<javax.swing.text.html.ImageView: int state>;
+
+        $i0 = i6 & 32;
+
+        if $i0 == 0 goto label1;
+
+        specialinvoke r0.<javax.swing.text.html.ImageView: void refreshImage()>();
+
+     label1:
+        $i5 = r0.<javax.swing.text.html.ImageView: int state>;
+
+        $i1 = $i5 & 16;
+
+        if $i1 == 0 goto label7;
+
+        entermonitor r0;
+
+     label2:
+        $i2 = r0.<javax.swing.text.html.ImageView: int state>;
+
+        $i3 = $i2 | 16;
+
+        $i4 = $i3 ^ 16;
+
+        r0.<javax.swing.text.html.ImageView: int state> = $i4;
+
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r1;
+
+     label6:
+        virtualinvoke r0.<javax.swing.text.html.ImageView: void setPropertiesFromAttributes()>();
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private void refreshImage()
+    {
+        java.lang.Throwable $r1, $r2, $r3, $r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11;
+        javax.swing.text.html.ImageView r0;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        entermonitor r0;
+
+     label01:
+        $i0 = r0.<javax.swing.text.html.ImageView: int state>;
+
+        $i1 = $i0 | 1;
+
+        $i2 = $i1 | 32;
+
+        $i3 = $i2 | 4;
+
+        $i4 = $i3 | 8;
+
+        $i5 = $i4 ^ 44;
+
+        r0.<javax.swing.text.html.ImageView: int state> = $i5;
+
+        r0.<javax.swing.text.html.ImageView: java.awt.Image image> = null;
+
+        r0.<javax.swing.text.html.ImageView: int height> = 0;
+
+        r0.<javax.swing.text.html.ImageView: int width> = 0;
+
+        exitmonitor r0;
+
+     label02:
+        goto label05;
+
+     label03:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+     label04:
+        throw $r4;
+
+     label05:
+        specialinvoke r0.<javax.swing.text.html.ImageView: void loadImage()>();
+
+        specialinvoke r0.<javax.swing.text.html.ImageView: void updateImageSize()>();
+
+     label06:
+        entermonitor r0;
+
+     label07:
+        $i6 = r0.<javax.swing.text.html.ImageView: int state>;
+
+        $i7 = $i6 | 1;
+
+        $i8 = $i7 ^ 1;
+
+        r0.<javax.swing.text.html.ImageView: int state> = $i8;
+
+        exitmonitor r0;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+     label10:
+        throw $r3;
+
+     label11:
+        goto label19;
+
+     label12:
+        $r2 := @caughtexception;
+
+     label13:
+        entermonitor r0;
+
+     label14:
+        $i9 = r0.<javax.swing.text.html.ImageView: int state>;
+
+        $i10 = $i9 | 1;
+
+        $i11 = $i10 ^ 1;
+
+        r0.<javax.swing.text.html.ImageView: int state> = $i11;
+
+        exitmonitor r0;
+
+     label15:
+        goto label18;
+
+     label16:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+     label17:
+        throw $r1;
+
+     label18:
+        throw $r2;
+
+     label19:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label03;
+        catch java.lang.Throwable from label03 to label04 with label03;
+        catch java.lang.Throwable from label07 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+        catch java.lang.Throwable from label05 to label06 with label12;
+        catch java.lang.Throwable from label14 to label15 with label16;
+        catch java.lang.Throwable from label16 to label17 with label16;
+        catch java.lang.Throwable from label12 to label13 with label12;
+    }
+
+    private void loadImage()
+    {
+        java.awt.Image $r6, r9;
+        java.net.URL $r1;
+        javax.swing.ImageIcon $r7;
+        java.lang.Object $r3, $r8;
+        javax.swing.text.Document $r2;
+        javax.swing.text.html.ImageView r0;
+        java.util.Dictionary r4;
+        java.awt.Toolkit $r5;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.html.ImageView: java.net.URL getImageURL()>();
+
+        r9 = null;
+
+        if $r1 == null goto label2;
+
+        $r2 = virtualinvoke r0.<javax.swing.text.html.ImageView: javax.swing.text.Document getDocument()>();
+
+        $r3 = interfaceinvoke $r2.<javax.swing.text.Document: java.lang.Object getProperty(java.lang.Object)>("imageCache");
+
+        r4 = (java.util.Dictionary) $r3;
+
+        if r4 == null goto label1;
+
+        $r8 = virtualinvoke r4.<java.util.Dictionary: java.lang.Object get(java.lang.Object)>($r1);
+
+        r9 = (java.awt.Image) $r8;
+
+        goto label2;
+
+     label1:
+        $r5 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r6 = virtualinvoke $r5.<java.awt.Toolkit: java.awt.Image createImage(java.net.URL)>($r1);
+
+        r9 = $r6;
+
+        if $r6 == null goto label2;
+
+        $z0 = virtualinvoke r0.<javax.swing.text.html.ImageView: boolean getLoadsSynchronously()>();
+
+        if $z0 == 0 goto label2;
+
+        $r7 = new javax.swing.ImageIcon;
+
+        specialinvoke $r7.<javax.swing.ImageIcon: void <init>()>();
+
+        virtualinvoke $r7.<javax.swing.ImageIcon: void setImage(java.awt.Image)>($r6);
+
+     label2:
+        r0.<javax.swing.text.html.ImageView: java.awt.Image image> = r9;
+
+        return;
+    }
+
+    private void updateImageSize()
+    {
+        java.awt.image.ImageObserver $r6, $r9, $r11, $r12;
+        byte $b2, $b3, $b4, $b5, b10, $b13;
+        javax.swing.text.html.ImageView r0;
+        boolean $z0, z1;
+        java.awt.Image $r1, $r7, $r13;
+        java.awt.Dimension $r10;
+        java.awt.Toolkit $r5, $r8;
+        java.lang.Throwable $r14, $r15;
+        javax.swing.text.html.HTML$Attribute $r3, $r4;
+        int $i0, $i1, $i6, $i7, $i8, $i9, i11, i12, $i14, $i15, $i16, $i17, $i18, $i20, $i22, $i24, $i26;
+        javax.swing.text.Element $r2;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        b10 = 0;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.html.ImageView: java.awt.Image getImage()>();
+
+        if $r1 == null goto label25;
+
+        $r2 = virtualinvoke r0.<javax.swing.text.html.ImageView: javax.swing.text.Element getElement()>();
+
+        interfaceinvoke $r2.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $r3 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute WIDTH>;
+
+        $i20 = (int) -1;
+
+        $i0 = specialinvoke r0.<javax.swing.text.html.ImageView: int getIntAttr(javax.swing.text.html.HTML$Attribute,int)>($r3, $i20);
+
+        i11 = $i0;
+
+        if $i0 <= 0 goto label01;
+
+        b10 = 4;
+
+     label01:
+        $r4 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute HEIGHT>;
+
+        $i22 = (int) -1;
+
+        $i1 = specialinvoke r0.<javax.swing.text.html.ImageView: int getIntAttr(javax.swing.text.html.HTML$Attribute,int)>($r4, $i22);
+
+        i12 = $i1;
+
+        if $i1 <= 0 goto label02;
+
+        b10 = b10 | 8;
+
+     label02:
+        entermonitor r0;
+
+     label03:
+        $r13 = r0.<javax.swing.text.html.ImageView: java.awt.Image image>;
+
+        exitmonitor r0;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r15 := @caughtexception;
+
+        exitmonitor r0;
+
+     label06:
+        throw $r15;
+
+     label07:
+        if $i0 > 0 goto label08;
+
+        $r12 = r0.<javax.swing.text.html.ImageView: java.awt.image.ImageObserver imageObserver>;
+
+        $i9 = virtualinvoke $r13.<java.awt.Image: int getWidth(java.awt.image.ImageObserver)>($r12);
+
+        i11 = $i9;
+
+        if $i9 > 0 goto label08;
+
+        i11 = 38;
+
+     label08:
+        if $i1 > 0 goto label09;
+
+        $r11 = r0.<javax.swing.text.html.ImageView: java.awt.image.ImageObserver imageObserver>;
+
+        $i8 = virtualinvoke $r13.<java.awt.Image: int getHeight(java.awt.image.ImageObserver)>($r11);
+
+        i12 = $i8;
+
+        if $i8 > 0 goto label09;
+
+        i12 = 38;
+
+     label09:
+        $z0 = virtualinvoke r0.<javax.swing.text.html.ImageView: boolean getLoadsSynchronously()>();
+
+        if $z0 == 0 goto label10;
+
+        $r10 = specialinvoke r0.<javax.swing.text.html.ImageView: java.awt.Dimension adjustWidthHeight(int,int)>(i11, i12);
+
+        i11 = $r10.<java.awt.Dimension: int width>;
+
+        i12 = $r10.<java.awt.Dimension: int height>;
+
+        b10 = b10 | 12;
+
+     label10:
+        $b2 = b10 & 12;
+
+        if $b2 == 0 goto label11;
+
+        $r8 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r9 = r0.<javax.swing.text.html.ImageView: java.awt.image.ImageObserver imageObserver>;
+
+        virtualinvoke $r8.<java.awt.Toolkit: boolean prepareImage(java.awt.Image,int,int,java.awt.image.ImageObserver)>($r1, i11, i12, $r9);
+
+        goto label12;
+
+     label11:
+        $r5 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r6 = r0.<javax.swing.text.html.ImageView: java.awt.image.ImageObserver imageObserver>;
+
+        $i24 = (int) -1;
+
+        $i26 = (int) -1;
+
+        virtualinvoke $r5.<java.awt.Toolkit: boolean prepareImage(java.awt.Image,int,int,java.awt.image.ImageObserver)>($r1, $i24, $i26, $r6);
+
+     label12:
+        z1 = 0;
+
+        entermonitor r0;
+
+     label13:
+        $r7 = r0.<javax.swing.text.html.ImageView: java.awt.Image image>;
+
+        if $r7 == null goto label17;
+
+        $b5 = b10 & 4;
+
+        if $b5 == 4 goto label14;
+
+        $i7 = r0.<javax.swing.text.html.ImageView: int width>;
+
+        if $i7 != 0 goto label15;
+
+     label14:
+        r0.<javax.swing.text.html.ImageView: int width> = i11;
+
+     label15:
+        $b13 = b10 & 8;
+
+        if $b13 == 8 goto label16;
+
+        $i6 = r0.<javax.swing.text.html.ImageView: int height>;
+
+        if $i6 != 0 goto label19;
+
+     label16:
+        r0.<javax.swing.text.html.ImageView: int height> = i12;
+
+        goto label19;
+
+     label17:
+        z1 = 1;
+
+        $b3 = b10 & 4;
+
+        if $b3 != 4 goto label18;
+
+        r0.<javax.swing.text.html.ImageView: int width> = i11;
+
+     label18:
+        $b4 = b10 & 8;
+
+        if $b4 != 8 goto label19;
+
+        r0.<javax.swing.text.html.ImageView: int height> = i12;
+
+     label19:
+        $i14 = r0.<javax.swing.text.html.ImageView: int state>;
+
+        $i15 = $i14 | b10;
+
+        r0.<javax.swing.text.html.ImageView: int state> = $i15;
+
+        $i16 = r0.<javax.swing.text.html.ImageView: int state>;
+
+        $i17 = $i16 | 1;
+
+        $i18 = $i17 ^ 1;
+
+        r0.<javax.swing.text.html.ImageView: int state> = $i18;
+
+        exitmonitor r0;
+
+     label20:
+        goto label23;
+
+     label21:
+        $r14 := @caughtexception;
+
+        exitmonitor r0;
+
+     label22:
+        throw $r14;
+
+     label23:
+        if z1 == 0 goto label24;
+
+        specialinvoke r0.<javax.swing.text.html.ImageView: void updateAltTextView()>();
+
+     label24:
+        goto label26;
+
+     label25:
+        r0.<javax.swing.text.html.ImageView: int height> = 38;
+
+        r0.<javax.swing.text.html.ImageView: int width> = 38;
+
+        specialinvoke r0.<javax.swing.text.html.ImageView: void updateAltTextView()>();
+
+     label26:
+        return;
+
+        catch java.lang.Throwable from label03 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.lang.Throwable from label13 to label20 with label21;
+        catch java.lang.Throwable from label21 to label22 with label21;
+    }
+
+    private void updateAltTextView()
+    {
+        javax.swing.text.html.ImageView$ImageLabelView $r2;
+        java.lang.Throwable $r4;
+        java.lang.String $r1;
+        javax.swing.text.html.ImageView r0;
+        javax.swing.text.Element $r3;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.html.ImageView: java.lang.String getAltText()>();
+
+        if $r1 == null goto label5;
+
+        $r2 = new javax.swing.text.html.ImageView$ImageLabelView;
+
+        $r3 = virtualinvoke r0.<javax.swing.text.html.ImageView: javax.swing.text.Element getElement()>();
+
+        specialinvoke $r2.<javax.swing.text.html.ImageView$ImageLabelView: void <init>(javax.swing.text.html.ImageView,javax.swing.text.Element,java.lang.String)>(r0, $r3, $r1);
+
+        entermonitor r0;
+
+     label1:
+        r0.<javax.swing.text.html.ImageView: javax.swing.text.View altView> = $r2;
+
+        exitmonitor r0;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r4;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private javax.swing.text.View getAltView()
+    {
+        java.lang.Throwable $r4;
+        javax.swing.text.View r1, $r2, $r3;
+        javax.swing.text.html.ImageView r0;
+
+        r0 := @this: javax.swing.text.html.ImageView;
+
+        entermonitor r0;
+
+     label1:
+        r1 = r0.<javax.swing.text.html.ImageView: javax.swing.text.View altView>;
+
+        exitmonitor r0;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r4;
+
+     label5:
+        if r1 == null goto label6;
+
+        $r2 = virtualinvoke r1.<javax.swing.text.View: javax.swing.text.View getParent()>();
+
+        if $r2 != null goto label6;
+
+        $r3 = virtualinvoke r0.<javax.swing.text.html.ImageView: javax.swing.text.View getParent()>();
+
+        virtualinvoke r1.<javax.swing.text.View: void setParent(javax.swing.text.View)>($r3);
+
+     label6:
+        return r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private void safePreferenceChanged()
+    {
+        javax.swing.text.AbstractDocument $r3, $r4;
+        javax.swing.text.html.ImageView$1 $r0;
+        javax.swing.text.Document $r2;
+        javax.swing.text.html.ImageView r1;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: javax.swing.text.html.ImageView;
+
+        $z0 = staticinvoke <javax.swing.SwingUtilities: boolean isEventDispatchThread()>();
+
+        if $z0 == 0 goto label3;
+
+        $r2 = virtualinvoke r1.<javax.swing.text.html.ImageView: javax.swing.text.Document getDocument()>();
+
+        $z1 = $r2 instanceof javax.swing.text.AbstractDocument;
+
+        if $z1 == 0 goto label1;
+
+        $r4 = (javax.swing.text.AbstractDocument) $r2;
+
+        virtualinvoke $r4.<javax.swing.text.AbstractDocument: void readLock()>();
+
+     label1:
+        virtualinvoke r1.<javax.swing.text.html.ImageView: void preferenceChanged(javax.swing.text.View,boolean,boolean)>(null, 1, 1);
+
+        $z2 = $r2 instanceof javax.swing.text.AbstractDocument;
+
+        if $z2 == 0 goto label2;
+
+        $r3 = (javax.swing.text.AbstractDocument) $r2;
+
+        virtualinvoke $r3.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r0 = new javax.swing.text.html.ImageView$1;
+
+        specialinvoke $r0.<javax.swing.text.html.ImageView$1: void <init>(javax.swing.text.html.ImageView)>(r1);
+
+        staticinvoke <javax.swing.SwingUtilities: void invokeLater(java.lang.Runnable)>($r0);
+
+     label4:
+        return;
+    }
+
+    private java.awt.Dimension adjustWidthHeight(int, int)
+    {
+        javax.swing.text.html.HTML$Attribute $r2, $r3;
+        int $i0, $i1, i2, i3, $i5, $i7, $i9, $i11, $i13, $i15;
+        javax.swing.text.html.ImageView r1;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, d8, d9;
+        boolean $z0, $z1, $z2;
+        java.awt.Dimension $r4;
+
+        r1 := @this: javax.swing.text.html.ImageView;
+
+        i2 := @parameter0: int;
+
+        i3 := @parameter1: int;
+
+        $r4 = new java.awt.Dimension;
+
+        specialinvoke $r4.<java.awt.Dimension: void <init>()>();
+
+        $r2 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute WIDTH>;
+
+        $i5 = (int) -1;
+
+        $i0 = specialinvoke r1.<javax.swing.text.html.ImageView: int getIntAttr(javax.swing.text.html.HTML$Attribute,int)>($r2, $i5);
+
+        $r3 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute HEIGHT>;
+
+        $i7 = (int) -1;
+
+        $i1 = specialinvoke r1.<javax.swing.text.html.ImageView: int getIntAttr(javax.swing.text.html.HTML$Attribute,int)>($r3, $i7);
+
+        $i9 = (int) -1;
+
+        if $i0 == $i9 goto label1;
+
+        $i11 = (int) -1;
+
+        if $i1 == $i11 goto label1;
+
+        i2 = $i0;
+
+        i3 = $i1;
+
+        goto label7;
+
+     label1:
+        $i13 = (int) -1;
+
+        if $i0 == $i13 goto label2;
+
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        $i15 = (int) -1;
+
+        if $i1 == $i15 goto label4;
+
+        $z1 = 1;
+
+        goto label5;
+
+     label4:
+        $z1 = 0;
+
+     label5:
+        $z2 = $z0 ^ $z1;
+
+        if $z2 == 0 goto label7;
+
+        if $i0 > 0 goto label6;
+
+        $d5 = (double) $i1;
+
+        $d4 = (double) i3;
+
+        d8 = $d5 / $d4;
+
+        $d6 = (double) i2;
+
+        $d7 = d8 * $d6;
+
+        i2 = (int) $d7;
+
+        i3 = $i1;
+
+     label6:
+        if $i1 > 0 goto label7;
+
+        $d1 = (double) $i0;
+
+        $d0 = (double) i2;
+
+        d9 = $d1 / $d0;
+
+        $d2 = (double) i3;
+
+        $d3 = d9 * $d2;
+
+        i3 = (int) $d3;
+
+        i2 = $i0;
+
+     label7:
+        $r4.<java.awt.Dimension: int width> = i2;
+
+        $r4.<java.awt.Dimension: int height> = i3;
+
+        return $r4;
+    }
+
+    static void access$100(javax.swing.text.html.ImageView)
+    {
+        javax.swing.text.html.ImageView r0;
+
+        r0 := @parameter0: javax.swing.text.html.ImageView;
+
+        specialinvoke r0.<javax.swing.text.html.ImageView: void safePreferenceChanged()>();
+
+        return;
+    }
+
+    static java.awt.Image access$200(javax.swing.text.html.ImageView)
+    {
+        javax.swing.text.html.ImageView r0;
+        java.awt.Image $r1;
+
+        r0 := @parameter0: javax.swing.text.html.ImageView;
+
+        $r1 = r0.<javax.swing.text.html.ImageView: java.awt.Image image>;
+
+        return $r1;
+    }
+
+    static java.awt.Image access$300(javax.swing.text.html.ImageView)
+    {
+        javax.swing.text.html.ImageView r0;
+        java.awt.Image $r1;
+
+        r0 := @parameter0: javax.swing.text.html.ImageView;
+
+        $r1 = r0.<javax.swing.text.html.ImageView: java.awt.Image disabledImage>;
+
+        return $r1;
+    }
+
+    static void access$400(javax.swing.text.html.ImageView, long)
+    {
+        long l0;
+        javax.swing.text.html.ImageView r0;
+
+        r0 := @parameter0: javax.swing.text.html.ImageView;
+
+        l0 := @parameter1: long;
+
+        specialinvoke r0.<javax.swing.text.html.ImageView: void repaint(long)>(l0);
+
+        return;
+    }
+
+    static java.awt.Image access$202(javax.swing.text.html.ImageView, java.awt.Image)
+    {
+        javax.swing.text.html.ImageView r0;
+        java.awt.Image r1;
+
+        r0 := @parameter0: javax.swing.text.html.ImageView;
+
+        r1 := @parameter1: java.awt.Image;
+
+        r0.<javax.swing.text.html.ImageView: java.awt.Image image> = r1;
+
+        return r1;
+    }
+
+    static int access$500(javax.swing.text.html.ImageView)
+    {
+        int $i0;
+        javax.swing.text.html.ImageView r0;
+
+        r0 := @parameter0: javax.swing.text.html.ImageView;
+
+        $i0 = r0.<javax.swing.text.html.ImageView: int state>;
+
+        return $i0;
+    }
+
+    static int access$602(javax.swing.text.html.ImageView, int)
+    {
+        int i0;
+        javax.swing.text.html.ImageView r0;
+
+        r0 := @parameter0: javax.swing.text.html.ImageView;
+
+        i0 := @parameter1: int;
+
+        r0.<javax.swing.text.html.ImageView: int width> = i0;
+
+        return i0;
+    }
+
+    static int access$702(javax.swing.text.html.ImageView, int)
+    {
+        int i0;
+        javax.swing.text.html.ImageView r0;
+
+        r0 := @parameter0: javax.swing.text.html.ImageView;
+
+        i0 := @parameter1: int;
+
+        r0.<javax.swing.text.html.ImageView: int height> = i0;
+
+        return i0;
+    }
+
+    static java.awt.Image access$302(javax.swing.text.html.ImageView, java.awt.Image)
+    {
+        javax.swing.text.html.ImageView r0;
+        java.awt.Image r1;
+
+        r0 := @parameter0: javax.swing.text.html.ImageView;
+
+        r1 := @parameter1: java.awt.Image;
+
+        r0.<javax.swing.text.html.ImageView: java.awt.Image disabledImage> = r1;
+
+        return r1;
+    }
+
+    static void access$800(javax.swing.text.html.ImageView)
+    {
+        javax.swing.text.html.ImageView r0;
+
+        r0 := @parameter0: javax.swing.text.html.ImageView;
+
+        specialinvoke r0.<javax.swing.text.html.ImageView: void updateAltTextView()>();
+
+        return;
+    }
+
+    static java.awt.Dimension access$900(javax.swing.text.html.ImageView, int, int)
+    {
+        java.awt.Dimension $r1;
+        int i0, i1;
+        javax.swing.text.html.ImageView r0;
+
+        r0 := @parameter0: javax.swing.text.html.ImageView;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r1 = specialinvoke r0.<javax.swing.text.html.ImageView: java.awt.Dimension adjustWidthHeight(int,int)>(i0, i1);
+
+        return $r1;
+    }
+
+    static boolean access$1000()
+    {
+        boolean $z0;
+
+        $z0 = <javax.swing.text.html.ImageView: boolean sIsInc>;
+
+        return $z0;
+    }
+
+    static int access$1100()
+    {
+        int $i0;
+
+        $i0 = <javax.swing.text.html.ImageView: int sIncRate>;
+
+        return $i0;
+    }
+
+    static void <clinit>()
+    {
+        <javax.swing.text.html.ImageView: int SYNC_LOAD_FLAG> = 64;
+
+        <javax.swing.text.html.ImageView: int RELOAD_IMAGE_FLAG> = 32;
+
+        <javax.swing.text.html.ImageView: int RELOAD_FLAG> = 16;
+
+        <javax.swing.text.html.ImageView: int HEIGHT_FLAG> = 8;
+
+        <javax.swing.text.html.ImageView: int WIDTH_FLAG> = 4;
+
+        <javax.swing.text.html.ImageView: int LINK_FLAG> = 2;
+
+        <javax.swing.text.html.ImageView: int LOADING_FLAG> = 1;
+
+        <javax.swing.text.html.ImageView: int DEFAULT_BORDER> = 2;
+
+        <javax.swing.text.html.ImageView: int DEFAULT_HEIGHT> = 38;
+
+        <javax.swing.text.html.ImageView: int DEFAULT_WIDTH> = 38;
+
+        <javax.swing.text.html.ImageView: java.lang.String IMAGE_CACHE_PROPERTY> = "imageCache";
+
+        <javax.swing.text.html.ImageView: java.lang.String MISSING_IMAGE> = "html.missingImage";
+
+        <javax.swing.text.html.ImageView: java.lang.String PENDING_IMAGE> = "html.pendingImage";
+
+        <javax.swing.text.html.ImageView: boolean sIsInc> = 0;
+
+        <javax.swing.text.html.ImageView: int sIncRate> = 100;
+
+        return;
+    }
+}

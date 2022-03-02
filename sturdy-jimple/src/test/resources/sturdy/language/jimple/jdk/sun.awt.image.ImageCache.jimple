@@ -1,0 +1,405 @@
+public final class sun.awt.image.ImageCache extends java.lang.Object
+{
+    private final java.util.LinkedHashMap map;
+    private final int maxPixelCount;
+    private int currentPixelCount;
+    private final java.util.concurrent.locks.ReadWriteLock lock;
+    private final java.lang.ref.ReferenceQueue referenceQueue;
+
+    public static sun.awt.image.ImageCache getInstance()
+    {
+        sun.awt.image.ImageCache $r2;
+        java.lang.Object $r1;
+        java.util.function.Supplier $r0;
+
+        $r0 = staticinvoke <sun.awt.image.ImageCache$lambda_getInstance_0__369: java.util.function.Supplier bootstrap$()>();
+
+        $r1 = staticinvoke <sun.awt.AppContext: java.lang.Object getSoftReferenceValue(java.lang.Object,java.util.function.Supplier)>(class "Lsun/awt/image/ImageCache;", $r0);
+
+        $r2 = (sun.awt.image.ImageCache) $r1;
+
+        return $r2;
+    }
+
+    void <init>(int)
+    {
+        java.util.LinkedHashMap $r1;
+        int i0;
+        sun.awt.image.ImageCache r0;
+        java.util.concurrent.locks.ReentrantReadWriteLock $r2;
+        java.lang.ref.ReferenceQueue $r3;
+
+        r0 := @this: sun.awt.image.ImageCache;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.LinkedHashMap;
+
+        specialinvoke $r1.<java.util.LinkedHashMap: void <init>(int,float,boolean)>(16, 0.75F, 1);
+
+        r0.<sun.awt.image.ImageCache: java.util.LinkedHashMap map> = $r1;
+
+        r0.<sun.awt.image.ImageCache: int currentPixelCount> = 0;
+
+        $r2 = new java.util.concurrent.locks.ReentrantReadWriteLock;
+
+        specialinvoke $r2.<java.util.concurrent.locks.ReentrantReadWriteLock: void <init>()>();
+
+        r0.<sun.awt.image.ImageCache: java.util.concurrent.locks.ReadWriteLock lock> = $r2;
+
+        $r3 = new java.lang.ref.ReferenceQueue;
+
+        specialinvoke $r3.<java.lang.ref.ReferenceQueue: void <init>()>();
+
+        r0.<sun.awt.image.ImageCache: java.lang.ref.ReferenceQueue referenceQueue> = $r3;
+
+        r0.<sun.awt.image.ImageCache: int maxPixelCount> = i0;
+
+        return;
+    }
+
+    void <init>()
+    {
+        sun.awt.image.ImageCache r0;
+
+        r0 := @this: sun.awt.image.ImageCache;
+
+        specialinvoke r0.<sun.awt.image.ImageCache: void <init>(int)>(2097152);
+
+        return;
+    }
+
+    public void flush()
+    {
+        java.lang.Throwable $r6;
+        sun.awt.image.ImageCache r0;
+        java.util.LinkedHashMap $r3;
+        java.util.concurrent.locks.Lock $r2, $r5, $r8;
+        java.util.concurrent.locks.ReadWriteLock $r1, $r4, $r7;
+
+        r0 := @this: sun.awt.image.ImageCache;
+
+        $r1 = r0.<sun.awt.image.ImageCache: java.util.concurrent.locks.ReadWriteLock lock>;
+
+        $r2 = interfaceinvoke $r1.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock writeLock()>();
+
+        interfaceinvoke $r2.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $r3 = r0.<sun.awt.image.ImageCache: java.util.LinkedHashMap map>;
+
+        virtualinvoke $r3.<java.util.LinkedHashMap: void clear()>();
+
+     label2:
+        $r4 = r0.<sun.awt.image.ImageCache: java.util.concurrent.locks.ReadWriteLock lock>;
+
+        $r5 = interfaceinvoke $r4.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock writeLock()>();
+
+        interfaceinvoke $r5.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = r0.<sun.awt.image.ImageCache: java.util.concurrent.locks.ReadWriteLock lock>;
+
+        $r8 = interfaceinvoke $r7.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock writeLock()>();
+
+        interfaceinvoke $r8.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r6;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public java.awt.Image getImage(sun.awt.image.ImageCache$PixelsKey)
+    {
+        java.lang.Throwable $r10;
+        java.awt.Image $r13;
+        sun.awt.image.ImageCache r0;
+        java.util.LinkedHashMap $r4;
+        java.util.concurrent.locks.Lock $r2, $r8, $r12;
+        java.lang.Object $r5, $r9;
+        sun.awt.image.ImageCache$ImageSoftReference r6;
+        sun.awt.image.ImageCache$PixelsKey r3;
+        java.util.concurrent.locks.ReadWriteLock $r1, $r7, $r11;
+
+        r0 := @this: sun.awt.image.ImageCache;
+
+        r3 := @parameter0: sun.awt.image.ImageCache$PixelsKey;
+
+        $r1 = r0.<sun.awt.image.ImageCache: java.util.concurrent.locks.ReadWriteLock lock>;
+
+        $r2 = interfaceinvoke $r1.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock readLock()>();
+
+        interfaceinvoke $r2.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $r4 = r0.<sun.awt.image.ImageCache: java.util.LinkedHashMap map>;
+
+        $r5 = virtualinvoke $r4.<java.util.LinkedHashMap: java.lang.Object get(java.lang.Object)>(r3);
+
+        r6 = (sun.awt.image.ImageCache$ImageSoftReference) $r5;
+
+     label2:
+        $r7 = r0.<sun.awt.image.ImageCache: java.util.concurrent.locks.ReadWriteLock lock>;
+
+        $r8 = interfaceinvoke $r7.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock readLock()>();
+
+        interfaceinvoke $r8.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label4;
+
+     label3:
+        $r10 := @caughtexception;
+
+        $r11 = r0.<sun.awt.image.ImageCache: java.util.concurrent.locks.ReadWriteLock lock>;
+
+        $r12 = interfaceinvoke $r11.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock readLock()>();
+
+        interfaceinvoke $r12.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r10;
+
+     label4:
+        if r6 != null goto label5;
+
+        $r13 = null;
+
+        goto label6;
+
+     label5:
+        $r9 = virtualinvoke r6.<sun.awt.image.ImageCache$ImageSoftReference: java.lang.Object get()>();
+
+        $r13 = (java.awt.Image) $r9;
+
+     label6:
+        return $r13;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public void setImage(sun.awt.image.ImageCache$PixelsKey, java.awt.Image)
+    {
+        sun.awt.image.ImageCache$ImageSoftReference $r13, $r17, $r21, r32, $r34;
+        java.util.concurrent.locks.ReadWriteLock $r1, $r27, $r30, $r36;
+        boolean $z0;
+        java.awt.Image r6, r15;
+        sun.awt.image.ImageCache r0;
+        java.util.Set $r8;
+        java.lang.ref.Reference $r20;
+        java.lang.Throwable $r29;
+        java.lang.ref.ReferenceQueue $r19, $r35;
+        java.util.LinkedHashMap $r4, $r7, $r23, $r26, $r33;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17;
+        sun.awt.image.ImageCache$PixelsKey r3, $r18, $r22, $r24;
+        java.util.Map$Entry r11;
+        java.util.Iterator $r9;
+        java.util.concurrent.locks.Lock $r2, $r28, $r31, $r37;
+        java.lang.Object $r5, $r10, $r12, $r14, $r16, $r25;
+
+        r0 := @this: sun.awt.image.ImageCache;
+
+        r3 := @parameter0: sun.awt.image.ImageCache$PixelsKey;
+
+        r6 := @parameter1: java.awt.Image;
+
+        $r1 = r0.<sun.awt.image.ImageCache: java.util.concurrent.locks.ReadWriteLock lock>;
+
+        $r2 = interfaceinvoke $r1.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock writeLock()>();
+
+        interfaceinvoke $r2.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label01:
+        $r4 = r0.<sun.awt.image.ImageCache: java.util.LinkedHashMap map>;
+
+        $r5 = virtualinvoke $r4.<java.util.LinkedHashMap: java.lang.Object get(java.lang.Object)>(r3);
+
+        r32 = (sun.awt.image.ImageCache$ImageSoftReference) $r5;
+
+        if r32 == null goto label04;
+
+        $r25 = virtualinvoke r32.<sun.awt.image.ImageCache$ImageSoftReference: java.lang.Object get()>();
+
+        if $r25 == null goto label03;
+
+     label02:
+        $r27 = r0.<sun.awt.image.ImageCache: java.util.concurrent.locks.ReadWriteLock lock>;
+
+        $r28 = interfaceinvoke $r27.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock writeLock()>();
+
+        interfaceinvoke $r28.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return;
+
+     label03:
+        $i15 = r0.<sun.awt.image.ImageCache: int currentPixelCount>;
+
+        $i16 = interfaceinvoke r3.<sun.awt.image.ImageCache$PixelsKey: int getPixelCount()>();
+
+        $i17 = $i15 - $i16;
+
+        r0.<sun.awt.image.ImageCache: int currentPixelCount> = $i17;
+
+        $r26 = r0.<sun.awt.image.ImageCache: java.util.LinkedHashMap map>;
+
+        virtualinvoke $r26.<java.util.LinkedHashMap: java.lang.Object remove(java.lang.Object)>(r3);
+
+     label04:
+        $i0 = interfaceinvoke r3.<sun.awt.image.ImageCache$PixelsKey: int getPixelCount()>();
+
+        $i1 = r0.<sun.awt.image.ImageCache: int currentPixelCount>;
+
+        $i2 = $i1 + $i0;
+
+        r0.<sun.awt.image.ImageCache: int currentPixelCount> = $i2;
+
+        $i4 = r0.<sun.awt.image.ImageCache: int currentPixelCount>;
+
+        $i3 = r0.<sun.awt.image.ImageCache: int maxPixelCount>;
+
+        if $i4 <= $i3 goto label06;
+
+     label05:
+        $r19 = r0.<sun.awt.image.ImageCache: java.lang.ref.ReferenceQueue referenceQueue>;
+
+        $r20 = virtualinvoke $r19.<java.lang.ref.ReferenceQueue: java.lang.ref.Reference poll()>();
+
+        $r21 = (sun.awt.image.ImageCache$ImageSoftReference) $r20;
+
+        if $r21 == null goto label06;
+
+        $r23 = r0.<sun.awt.image.ImageCache: java.util.LinkedHashMap map>;
+
+        $r22 = $r21.<sun.awt.image.ImageCache$ImageSoftReference: sun.awt.image.ImageCache$PixelsKey key>;
+
+        virtualinvoke $r23.<java.util.LinkedHashMap: java.lang.Object remove(java.lang.Object)>($r22);
+
+        $i12 = r0.<sun.awt.image.ImageCache: int currentPixelCount>;
+
+        $r24 = $r21.<sun.awt.image.ImageCache$ImageSoftReference: sun.awt.image.ImageCache$PixelsKey key>;
+
+        $i13 = interfaceinvoke $r24.<sun.awt.image.ImageCache$PixelsKey: int getPixelCount()>();
+
+        $i14 = $i12 - $i13;
+
+        r0.<sun.awt.image.ImageCache: int currentPixelCount> = $i14;
+
+        goto label05;
+
+     label06:
+        $i6 = r0.<sun.awt.image.ImageCache: int currentPixelCount>;
+
+        $i5 = r0.<sun.awt.image.ImageCache: int maxPixelCount>;
+
+        if $i6 <= $i5 goto label09;
+
+        $r7 = r0.<sun.awt.image.ImageCache: java.util.LinkedHashMap map>;
+
+        $r8 = virtualinvoke $r7.<java.util.LinkedHashMap: java.util.Set entrySet()>();
+
+        $r9 = interfaceinvoke $r8.<java.util.Set: java.util.Iterator iterator()>();
+
+     label07:
+        $i8 = r0.<sun.awt.image.ImageCache: int currentPixelCount>;
+
+        $i7 = r0.<sun.awt.image.ImageCache: int maxPixelCount>;
+
+        if $i8 <= $i7 goto label09;
+
+        $z0 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label09;
+
+        $r10 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        r11 = (java.util.Map$Entry) $r10;
+
+        interfaceinvoke $r9.<java.util.Iterator: void remove()>();
+
+        $r12 = interfaceinvoke r11.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r13 = (sun.awt.image.ImageCache$ImageSoftReference) $r12;
+
+        $r14 = virtualinvoke $r13.<sun.awt.image.ImageCache$ImageSoftReference: java.lang.Object get()>();
+
+        r15 = (java.awt.Image) $r14;
+
+        if r15 == null goto label08;
+
+        virtualinvoke r15.<java.awt.Image: void flush()>();
+
+     label08:
+        $i9 = r0.<sun.awt.image.ImageCache: int currentPixelCount>;
+
+        $r16 = interfaceinvoke r11.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r17 = (sun.awt.image.ImageCache$ImageSoftReference) $r16;
+
+        $r18 = $r17.<sun.awt.image.ImageCache$ImageSoftReference: sun.awt.image.ImageCache$PixelsKey key>;
+
+        $i10 = interfaceinvoke $r18.<sun.awt.image.ImageCache$PixelsKey: int getPixelCount()>();
+
+        $i11 = $i9 - $i10;
+
+        r0.<sun.awt.image.ImageCache: int currentPixelCount> = $i11;
+
+        goto label07;
+
+     label09:
+        $r33 = r0.<sun.awt.image.ImageCache: java.util.LinkedHashMap map>;
+
+        $r34 = new sun.awt.image.ImageCache$ImageSoftReference;
+
+        $r35 = r0.<sun.awt.image.ImageCache: java.lang.ref.ReferenceQueue referenceQueue>;
+
+        specialinvoke $r34.<sun.awt.image.ImageCache$ImageSoftReference: void <init>(sun.awt.image.ImageCache$PixelsKey,java.awt.Image,java.lang.ref.ReferenceQueue)>(r3, r6, $r35);
+
+        virtualinvoke $r33.<java.util.LinkedHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r3, $r34);
+
+     label10:
+        $r36 = r0.<sun.awt.image.ImageCache: java.util.concurrent.locks.ReadWriteLock lock>;
+
+        $r37 = interfaceinvoke $r36.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock writeLock()>();
+
+        interfaceinvoke $r37.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label13;
+
+     label11:
+        $r29 := @caughtexception;
+
+     label12:
+        $r30 = r0.<sun.awt.image.ImageCache: java.util.concurrent.locks.ReadWriteLock lock>;
+
+        $r31 = interfaceinvoke $r30.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock writeLock()>();
+
+        interfaceinvoke $r31.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r29;
+
+     label13:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label11;
+        catch java.lang.Throwable from label03 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+    }
+
+    public static sun.awt.image.ImageCache lambda$getInstance$0()
+    {
+        sun.awt.image.ImageCache $r0;
+
+        $r0 = new sun.awt.image.ImageCache;
+
+        specialinvoke $r0.<sun.awt.image.ImageCache: void <init>()>();
+
+        return $r0;
+    }
+}

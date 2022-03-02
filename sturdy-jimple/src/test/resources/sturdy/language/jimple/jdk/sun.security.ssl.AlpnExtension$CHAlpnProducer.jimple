@@ -1,0 +1,361 @@
+final class sun.security.ssl.AlpnExtension$CHAlpnProducer extends java.lang.Object implements sun.security.ssl.HandshakeProducer
+{
+    static final int MAX_AP_LENGTH;
+    static final int MAX_AP_LIST_LENGTH;
+
+    private void <init>()
+    {
+        sun.security.ssl.AlpnExtension$CHAlpnProducer r0;
+
+        r0 := @this: sun.security.ssl.AlpnExtension$CHAlpnProducer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public byte[] produce(sun.security.ssl.ConnectionContext, sun.security.ssl.SSLHandshake$HandshakeMessage) throws java.io.IOException
+    {
+        byte[] $r15, $r17, r71;
+        sun.security.ssl.SSLHandshake$HandshakeMessage r44;
+        sun.security.ssl.AlpnExtension$AlpnSpec $r77;
+        java.util.Map $r11;
+        sun.security.ssl.SSLConfiguration $r3, $r4, $r9;
+        javax.net.ssl.SSLException $r49, $r59, $r70;
+        java.lang.StringBuilder $r19, $r20, $r21, $r22, $r23, $r27, $r29, $r30, $r31, $r32, $r37, $r40, $r53, $r54, $r55, $r56, $r57, $r63, $r65, $r66, $r67, $r68, $r72, $r73, $r74, $r75, $r76;
+        java.lang.Object[] $r6, $r25, $r34, $r35, $r42;
+        sun.security.ssl.AlpnExtension$CHAlpnProducer r43;
+        sun.security.ssl.ConnectionContext r0;
+        java.lang.String r13, $r24, $r28, $r33, $r39, $r41, r46, $r58, $r64, $r69;
+        sun.security.ssl.TransportContext $r45, $r47, $r50, $r60;
+        sun.security.ssl.Alert $r48, $r51, $r61;
+        java.nio.ByteBuffer $r7;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10;
+        java.lang.String[] r5, $r10;
+        java.nio.charset.Charset $r14, $r16;
+        int $i0, $i1, $i2, i3, i4, i5, i6, i7, i8, $i10, $i12, $i14;
+        sun.security.ssl.ClientHandshakeContext r1;
+        sun.security.ssl.SSLExtension $r2, $r12, $r38;
+
+        r43 := @this: sun.security.ssl.AlpnExtension$CHAlpnProducer;
+
+        r0 := @parameter0: sun.security.ssl.ConnectionContext;
+
+        r44 := @parameter1: sun.security.ssl.SSLHandshake$HandshakeMessage;
+
+        r1 = (sun.security.ssl.ClientHandshakeContext) r0;
+
+        $r3 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $r2 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension CH_ALPN>;
+
+        $z0 = virtualinvoke $r3.<sun.security.ssl.SSLConfiguration: boolean isAvailable(sun.security.ssl.SSLExtension)>($r2);
+
+        if $z0 != 0 goto label02;
+
+        $z9 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z9 == 0 goto label01;
+
+        $z10 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z10 == 0 goto label01;
+
+        $r72 = new java.lang.StringBuilder;
+
+        specialinvoke $r72.<java.lang.StringBuilder: void <init>()>();
+
+        $r37 = virtualinvoke $r72.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignore client unavailable extension: ");
+
+        $r38 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension CH_ALPN>;
+
+        $r39 = $r38.<sun.security.ssl.SSLExtension: java.lang.String name>;
+
+        $r40 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r39);
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r42 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void info(java.lang.String,java.lang.Object[])>($r41, $r42);
+
+     label01:
+        r1.<sun.security.ssl.ClientHandshakeContext: java.lang.String applicationProtocol> = "";
+
+        $r45 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r45.<sun.security.ssl.TransportContext: java.lang.String applicationProtocol> = "";
+
+        return null;
+
+     label02:
+        $r4 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        r5 = $r4.<sun.security.ssl.SSLConfiguration: java.lang.String[] applicationProtocols>;
+
+        if r5 == null goto label03;
+
+        $i0 = lengthof r5;
+
+        if $i0 != 0 goto label05;
+
+     label03:
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label04;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z2 == 0 goto label04;
+
+        $r6 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void info(java.lang.String,java.lang.Object[])>("No available application protocols", $r6);
+
+     label04:
+        return null;
+
+     label05:
+        i3 = 0;
+
+        i4 = lengthof r5;
+
+        i5 = 0;
+
+     label06:
+        if i5 >= i4 goto label14;
+
+        r46 = r5[i5];
+
+        $r16 = <sun.security.ssl.AlpnExtension: java.nio.charset.Charset alpnCharset>;
+
+        $r17 = virtualinvoke r46.<java.lang.String: byte[] getBytes(java.nio.charset.Charset)>($r16);
+
+        i6 = lengthof $r17;
+
+        if i6 != 0 goto label08;
+
+        $z7 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z7 == 0 goto label07;
+
+        $z8 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z8 == 0 goto label07;
+
+        $r35 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void severe(java.lang.String,java.lang.Object[])>("Application protocol name cannot be empty", $r35);
+
+     label07:
+        $r47 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r48 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r49 = virtualinvoke $r47.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r48, "Application protocol name cannot be empty");
+
+        throw $r49;
+
+     label08:
+        if i6 > 255 goto label09;
+
+        $i2 = i6 + 1;
+
+        i3 = i3 + $i2;
+
+        goto label11;
+
+     label09:
+        $z3 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z3 == 0 goto label10;
+
+        $z4 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z4 == 0 goto label10;
+
+        $r73 = new java.lang.StringBuilder;
+
+        specialinvoke $r73.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r73.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Application protocol name (");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r46);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") exceeds the size limit (");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(255);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" bytes)");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r25 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void severe(java.lang.String,java.lang.Object[])>($r24, $r25);
+
+     label10:
+        $r50 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r51 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r74 = new java.lang.StringBuilder;
+
+        specialinvoke $r74.<java.lang.StringBuilder: void <init>()>();
+
+        $r53 = virtualinvoke $r74.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Application protocol name (");
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r46);
+
+        $r55 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") exceeds the size limit (");
+
+        $r56 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(255);
+
+        $r57 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" bytes)");
+
+        $r58 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r59 = virtualinvoke $r50.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r51, $r58);
+
+        throw $r59;
+
+     label11:
+        $i10 = (int) 65535;
+
+        if i3 <= $i10 goto label13;
+
+        $z5 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z5 == 0 goto label12;
+
+        $z6 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z6 == 0 goto label12;
+
+        $r75 = new java.lang.StringBuilder;
+
+        specialinvoke $r75.<java.lang.StringBuilder: void <init>()>();
+
+        $r27 = virtualinvoke $r75.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("The configured application protocols (");
+
+        $r28 = staticinvoke <java.util.Arrays: java.lang.String toString(java.lang.Object[])>(r5);
+
+        $r29 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r28);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") exceed the size limit (");
+
+        $i12 = (int) 65535;
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i12);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" bytes)");
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r34 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void severe(java.lang.String,java.lang.Object[])>($r33, $r34);
+
+     label12:
+        $r60 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r61 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r76 = new java.lang.StringBuilder;
+
+        specialinvoke $r76.<java.lang.StringBuilder: void <init>()>();
+
+        $r63 = virtualinvoke $r76.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("The configured application protocols (");
+
+        $r64 = staticinvoke <java.util.Arrays: java.lang.String toString(java.lang.Object[])>(r5);
+
+        $r65 = virtualinvoke $r63.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r64);
+
+        $r66 = virtualinvoke $r65.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") exceed the size limit (");
+
+        $i14 = (int) 65535;
+
+        $r67 = virtualinvoke $r66.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i14);
+
+        $r68 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" bytes)");
+
+        $r69 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r70 = virtualinvoke $r60.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r61, $r69);
+
+        throw $r70;
+
+     label13:
+        i5 = i5 + 1;
+
+        goto label06;
+
+     label14:
+        $i1 = i3 + 2;
+
+        r71 = newarray (byte)[$i1];
+
+        $r7 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>(r71);
+
+        staticinvoke <sun.security.ssl.Record: void putInt16(java.nio.ByteBuffer,int)>($r7, i3);
+
+        i7 = lengthof r5;
+
+        i8 = 0;
+
+     label15:
+        if i8 >= i7 goto label16;
+
+        r13 = r5[i8];
+
+        $r14 = <sun.security.ssl.AlpnExtension: java.nio.charset.Charset alpnCharset>;
+
+        $r15 = virtualinvoke r13.<java.lang.String: byte[] getBytes(java.nio.charset.Charset)>($r14);
+
+        staticinvoke <sun.security.ssl.Record: void putBytes8(java.nio.ByteBuffer,byte[])>($r7, $r15);
+
+        i8 = i8 + 1;
+
+        goto label15;
+
+     label16:
+        $r11 = r1.<sun.security.ssl.ClientHandshakeContext: java.util.Map handshakeExtensions>;
+
+        $r12 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension CH_ALPN>;
+
+        $r77 = new sun.security.ssl.AlpnExtension$AlpnSpec;
+
+        $r9 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $r10 = $r9.<sun.security.ssl.SSLConfiguration: java.lang.String[] applicationProtocols>;
+
+        specialinvoke $r77.<sun.security.ssl.AlpnExtension$AlpnSpec: void <init>(java.lang.String[],sun.security.ssl.AlpnExtension$1)>($r10, null);
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r12, $r77);
+
+        return r71;
+    }
+
+    void <init>(sun.security.ssl.AlpnExtension$1)
+    {
+        sun.security.ssl.AlpnExtension$CHAlpnProducer r0;
+        sun.security.ssl.AlpnExtension$1 r1;
+
+        r0 := @this: sun.security.ssl.AlpnExtension$CHAlpnProducer;
+
+        r1 := @parameter0: sun.security.ssl.AlpnExtension$1;
+
+        specialinvoke r0.<sun.security.ssl.AlpnExtension$CHAlpnProducer: void <init>()>();
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.security.ssl.AlpnExtension$CHAlpnProducer: int MAX_AP_LIST_LENGTH> = 65535;
+
+        <sun.security.ssl.AlpnExtension$CHAlpnProducer: int MAX_AP_LENGTH> = 255;
+
+        return;
+    }
+}

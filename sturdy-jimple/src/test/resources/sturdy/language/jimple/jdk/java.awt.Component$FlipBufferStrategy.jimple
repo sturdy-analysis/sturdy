@@ -1,0 +1,635 @@
+public class java.awt.Component$FlipBufferStrategy extends java.awt.image.BufferStrategy
+{
+    protected int numBuffers;
+    protected java.awt.BufferCapabilities caps;
+    protected java.awt.Image drawBuffer;
+    protected java.awt.image.VolatileImage drawVBuffer;
+    protected boolean validatedContents;
+    int width;
+    int height;
+    final java.awt.Component this$0;
+
+    protected void <init>(java.awt.Component, int, java.awt.BufferCapabilities) throws java.awt.AWTException
+    {
+        int i0;
+        java.awt.Component$FlipBufferStrategy r0;
+        java.awt.BufferCapabilities r2;
+        java.awt.Component r1;
+        java.lang.ClassCastException $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: java.awt.Component$FlipBufferStrategy;
+
+        r1 := @parameter0: java.awt.Component;
+
+        i0 := @parameter1: int;
+
+        r2 := @parameter2: java.awt.BufferCapabilities;
+
+        r0.<java.awt.Component$FlipBufferStrategy: java.awt.Component this$0> = r1;
+
+        specialinvoke r0.<java.awt.image.BufferStrategy: void <init>()>();
+
+        $z0 = r1 instanceof java.awt.Window;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = r1 instanceof java.awt.Canvas;
+
+        if $z1 != 0 goto label1;
+
+        $r3 = new java.lang.ClassCastException;
+
+        specialinvoke $r3.<java.lang.ClassCastException: void <init>(java.lang.String)>("Component must be a Canvas or Window");
+
+        throw $r3;
+
+     label1:
+        r0.<java.awt.Component$FlipBufferStrategy: int numBuffers> = i0;
+
+        r0.<java.awt.Component$FlipBufferStrategy: java.awt.BufferCapabilities caps> = r2;
+
+        virtualinvoke r0.<java.awt.Component$FlipBufferStrategy: void createBuffers(int,java.awt.BufferCapabilities)>(i0, r2);
+
+        return;
+    }
+
+    protected void createBuffers(int, java.awt.BufferCapabilities) throws java.awt.AWTException
+    {
+        java.lang.IllegalStateException $r11;
+        sun.java2d.pipe.hw.ExtendedBufferCapabilities r7;
+        int i0, $i1, $i2;
+        java.awt.Component$FlipBufferStrategy r0;
+        java.awt.BufferCapabilities r13;
+        boolean $z0, $z1, $z2;
+        java.awt.peer.ComponentPeer $r2, $r15;
+        java.awt.Image $r6;
+        java.lang.IllegalArgumentException $r3, $r12;
+        java.awt.Component $r1, $r4, $r5, $r14;
+        sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType $r8, $r9, $r10;
+
+        r0 := @this: java.awt.Component$FlipBufferStrategy;
+
+        i0 := @parameter0: int;
+
+        r13 := @parameter1: java.awt.BufferCapabilities;
+
+        if i0 >= 2 goto label1;
+
+        $r12 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r12.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Number of buffers cannot be less than two");
+
+        throw $r12;
+
+     label1:
+        $r1 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.Component this$0>;
+
+        $r2 = $r1.<java.awt.Component: java.awt.peer.ComponentPeer peer>;
+
+        if $r2 != null goto label2;
+
+        $r11 = new java.lang.IllegalStateException;
+
+        specialinvoke $r11.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Component must have a valid peer");
+
+        throw $r11;
+
+     label2:
+        if r13 == null goto label3;
+
+        $z0 = virtualinvoke r13.<java.awt.BufferCapabilities: boolean isPageFlipping()>();
+
+        if $z0 != 0 goto label4;
+
+     label3:
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Page flipping capabilities must be specified");
+
+        throw $r3;
+
+     label4:
+        $r4 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.Component this$0>;
+
+        $i1 = virtualinvoke $r4.<java.awt.Component: int getWidth()>();
+
+        r0.<java.awt.Component$FlipBufferStrategy: int width> = $i1;
+
+        $r5 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.Component this$0>;
+
+        $i2 = virtualinvoke $r5.<java.awt.Component: int getHeight()>();
+
+        r0.<java.awt.Component$FlipBufferStrategy: int height> = $i2;
+
+        $r6 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.Image drawBuffer>;
+
+        if $r6 == null goto label5;
+
+        r0.<java.awt.Component$FlipBufferStrategy: java.awt.Image drawBuffer> = null;
+
+        r0.<java.awt.Component$FlipBufferStrategy: java.awt.image.VolatileImage drawVBuffer> = null;
+
+        virtualinvoke r0.<java.awt.Component$FlipBufferStrategy: void destroyBuffers()>();
+
+     label5:
+        $z1 = r13 instanceof sun.java2d.pipe.hw.ExtendedBufferCapabilities;
+
+        if $z1 == 0 goto label6;
+
+        r7 = (sun.java2d.pipe.hw.ExtendedBufferCapabilities) r13;
+
+        $r8 = virtualinvoke r7.<sun.java2d.pipe.hw.ExtendedBufferCapabilities: sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType getVSync()>();
+
+        $r9 = <sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType: sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType VSYNC_ON>;
+
+        if $r8 != $r9 goto label6;
+
+        $z2 = staticinvoke <sun.awt.image.VSyncedBSManager: boolean vsyncAllowed(java.awt.image.BufferStrategy)>(r0);
+
+        if $z2 != 0 goto label6;
+
+        $r10 = <sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType: sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType VSYNC_DEFAULT>;
+
+        r13 = virtualinvoke r7.<sun.java2d.pipe.hw.ExtendedBufferCapabilities: sun.java2d.pipe.hw.ExtendedBufferCapabilities derive(sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType)>($r10);
+
+     label6:
+        $r14 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.Component this$0>;
+
+        $r15 = $r14.<java.awt.Component: java.awt.peer.ComponentPeer peer>;
+
+        interfaceinvoke $r15.<java.awt.peer.ComponentPeer: void createBuffers(int,java.awt.BufferCapabilities)>(i0, r13);
+
+        specialinvoke r0.<java.awt.Component$FlipBufferStrategy: void updateInternalBuffers()>();
+
+        return;
+    }
+
+    private void updateInternalBuffers()
+    {
+        java.awt.image.VolatileImage $r4;
+        java.awt.Image $r1, $r2, $r3;
+        java.awt.Component$FlipBufferStrategy r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.Component$FlipBufferStrategy;
+
+        $r1 = virtualinvoke r0.<java.awt.Component$FlipBufferStrategy: java.awt.Image getBackBuffer()>();
+
+        r0.<java.awt.Component$FlipBufferStrategy: java.awt.Image drawBuffer> = $r1;
+
+        $r2 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.Image drawBuffer>;
+
+        $z0 = $r2 instanceof java.awt.image.VolatileImage;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.Image drawBuffer>;
+
+        $r4 = (java.awt.image.VolatileImage) $r3;
+
+        r0.<java.awt.Component$FlipBufferStrategy: java.awt.image.VolatileImage drawVBuffer> = $r4;
+
+        goto label2;
+
+     label1:
+        r0.<java.awt.Component$FlipBufferStrategy: java.awt.image.VolatileImage drawVBuffer> = null;
+
+     label2:
+        return;
+    }
+
+    protected java.awt.Image getBackBuffer()
+    {
+        java.lang.IllegalStateException $r3;
+        java.awt.peer.ComponentPeer $r2, $r5;
+        java.awt.Image $r6;
+        java.awt.Component$FlipBufferStrategy r0;
+        java.awt.Component $r1, $r4;
+
+        r0 := @this: java.awt.Component$FlipBufferStrategy;
+
+        $r1 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.Component this$0>;
+
+        $r2 = $r1.<java.awt.Component: java.awt.peer.ComponentPeer peer>;
+
+        if $r2 == null goto label1;
+
+        $r4 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.Component this$0>;
+
+        $r5 = $r4.<java.awt.Component: java.awt.peer.ComponentPeer peer>;
+
+        $r6 = interfaceinvoke $r5.<java.awt.peer.ComponentPeer: java.awt.Image getBackBuffer()>();
+
+        return $r6;
+
+     label1:
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Component must have a valid peer");
+
+        throw $r3;
+    }
+
+    protected void flip(java.awt.BufferCapabilities$FlipContents)
+    {
+        java.lang.IllegalStateException $r3;
+        java.awt.peer.ComponentPeer $r2, $r6;
+        java.awt.Image $r4;
+        java.awt.BufferCapabilities$FlipContents r7;
+        java.awt.Component $r1, $r5;
+        int $i0, $i1;
+        java.awt.Component$FlipBufferStrategy r0;
+
+        r0 := @this: java.awt.Component$FlipBufferStrategy;
+
+        r7 := @parameter0: java.awt.BufferCapabilities$FlipContents;
+
+        $r1 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.Component this$0>;
+
+        $r2 = $r1.<java.awt.Component: java.awt.peer.ComponentPeer peer>;
+
+        if $r2 == null goto label2;
+
+        $r4 = virtualinvoke r0.<java.awt.Component$FlipBufferStrategy: java.awt.Image getBackBuffer()>();
+
+        if $r4 == null goto label1;
+
+        $r5 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.Component this$0>;
+
+        $r6 = $r5.<java.awt.Component: java.awt.peer.ComponentPeer peer>;
+
+        $i0 = virtualinvoke $r4.<java.awt.Image: int getWidth(java.awt.image.ImageObserver)>(null);
+
+        $i1 = virtualinvoke $r4.<java.awt.Image: int getHeight(java.awt.image.ImageObserver)>(null);
+
+        interfaceinvoke $r6.<java.awt.peer.ComponentPeer: void flip(int,int,int,int,java.awt.BufferCapabilities$FlipContents)>(0, 0, $i0, $i1, r7);
+
+     label1:
+        goto label3;
+
+     label2:
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Component must have a valid peer");
+
+        throw $r3;
+
+     label3:
+        return;
+    }
+
+    void flipSubRegion(int, int, int, int, java.awt.BufferCapabilities$FlipContents)
+    {
+        java.lang.IllegalStateException $r3;
+        java.awt.peer.ComponentPeer $r2, $r6;
+        java.awt.BufferCapabilities$FlipContents r5;
+        java.awt.Component $r1, $r4;
+        int i0, i1, i2, i3;
+        java.awt.Component$FlipBufferStrategy r0;
+
+        r0 := @this: java.awt.Component$FlipBufferStrategy;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        r5 := @parameter4: java.awt.BufferCapabilities$FlipContents;
+
+        $r1 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.Component this$0>;
+
+        $r2 = $r1.<java.awt.Component: java.awt.peer.ComponentPeer peer>;
+
+        if $r2 == null goto label1;
+
+        $r4 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.Component this$0>;
+
+        $r6 = $r4.<java.awt.Component: java.awt.peer.ComponentPeer peer>;
+
+        interfaceinvoke $r6.<java.awt.peer.ComponentPeer: void flip(int,int,int,int,java.awt.BufferCapabilities$FlipContents)>(i0, i1, i2, i3, r5);
+
+        goto label2;
+
+     label1:
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Component must have a valid peer");
+
+        throw $r3;
+
+     label2:
+        return;
+    }
+
+    protected void destroyBuffers()
+    {
+        java.lang.IllegalStateException $r3;
+        java.awt.peer.ComponentPeer $r2, $r5;
+        java.awt.Component$FlipBufferStrategy r0;
+        java.awt.Component $r1, $r4;
+
+        r0 := @this: java.awt.Component$FlipBufferStrategy;
+
+        staticinvoke <sun.awt.image.VSyncedBSManager: void releaseVsync(java.awt.image.BufferStrategy)>(r0);
+
+        $r1 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.Component this$0>;
+
+        $r2 = $r1.<java.awt.Component: java.awt.peer.ComponentPeer peer>;
+
+        if $r2 == null goto label1;
+
+        $r4 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.Component this$0>;
+
+        $r5 = $r4.<java.awt.Component: java.awt.peer.ComponentPeer peer>;
+
+        interfaceinvoke $r5.<java.awt.peer.ComponentPeer: void destroyBuffers()>();
+
+        goto label2;
+
+     label1:
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Component must have a valid peer");
+
+        throw $r3;
+
+     label2:
+        return;
+    }
+
+    public java.awt.BufferCapabilities getCapabilities()
+    {
+        java.awt.Component$FlipBufferStrategy r0;
+        java.awt.BufferCapabilities $r1, $r2, $r3, $r5;
+        java.awt.Component$ProxyCapabilities $r4;
+        boolean $z0;
+
+        r0 := @this: java.awt.Component$FlipBufferStrategy;
+
+        $r1 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.BufferCapabilities caps>;
+
+        $z0 = $r1 instanceof java.awt.Component$ProxyCapabilities;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.BufferCapabilities caps>;
+
+        $r4 = (java.awt.Component$ProxyCapabilities) $r3;
+
+        $r5 = staticinvoke <java.awt.Component$ProxyCapabilities: java.awt.BufferCapabilities access$300(java.awt.Component$ProxyCapabilities)>($r4);
+
+        return $r5;
+
+     label1:
+        $r2 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.BufferCapabilities caps>;
+
+        return $r2;
+    }
+
+    public java.awt.Graphics getDrawGraphics()
+    {
+        java.awt.Graphics $r2;
+        java.awt.Component$FlipBufferStrategy r0;
+        java.awt.Image $r1;
+
+        r0 := @this: java.awt.Component$FlipBufferStrategy;
+
+        virtualinvoke r0.<java.awt.Component$FlipBufferStrategy: void revalidate()>();
+
+        $r1 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.Image drawBuffer>;
+
+        $r2 = virtualinvoke $r1.<java.awt.Image: java.awt.Graphics getGraphics()>();
+
+        return $r2;
+    }
+
+    protected void revalidate()
+    {
+        java.awt.Component$FlipBufferStrategy r0;
+
+        r0 := @this: java.awt.Component$FlipBufferStrategy;
+
+        virtualinvoke r0.<java.awt.Component$FlipBufferStrategy: void revalidate(boolean)>(1);
+
+        return;
+    }
+
+    void revalidate(boolean)
+    {
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        java.awt.Component$FlipBufferStrategy r0;
+        java.awt.BufferCapabilities $r4, $r8;
+        boolean z0;
+        java.awt.GraphicsConfiguration $r2;
+        java.awt.Component $r1, $r7, $r9;
+        java.awt.image.VolatileImage $r3, $r5, $r6, $r12;
+        java.awt.AWTException $r10, $r11;
+
+        r0 := @this: java.awt.Component$FlipBufferStrategy;
+
+        z0 := @parameter0: boolean;
+
+        r0.<java.awt.Component$FlipBufferStrategy: boolean validatedContents> = 0;
+
+        if z0 == 0 goto label05;
+
+        $r7 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.Component this$0>;
+
+        $i2 = virtualinvoke $r7.<java.awt.Component: int getWidth()>();
+
+        $i3 = r0.<java.awt.Component$FlipBufferStrategy: int width>;
+
+        if $i2 != $i3 goto label01;
+
+        $r9 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.Component this$0>;
+
+        $i5 = virtualinvoke $r9.<java.awt.Component: int getHeight()>();
+
+        $i6 = r0.<java.awt.Component$FlipBufferStrategy: int height>;
+
+        if $i5 == $i6 goto label05;
+
+     label01:
+        $i4 = r0.<java.awt.Component$FlipBufferStrategy: int numBuffers>;
+
+        $r8 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.BufferCapabilities caps>;
+
+        virtualinvoke r0.<java.awt.Component$FlipBufferStrategy: void createBuffers(int,java.awt.BufferCapabilities)>($i4, $r8);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r11 := @caughtexception;
+
+     label04:
+        r0.<java.awt.Component$FlipBufferStrategy: boolean validatedContents> = 1;
+
+     label05:
+        specialinvoke r0.<java.awt.Component$FlipBufferStrategy: void updateInternalBuffers()>();
+
+        $r12 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.image.VolatileImage drawVBuffer>;
+
+        if $r12 == null goto label12;
+
+        $r1 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.Component this$0>;
+
+        $r2 = virtualinvoke $r1.<java.awt.Component: java.awt.GraphicsConfiguration getGraphicsConfiguration_NoClientCode()>();
+
+        $r3 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.image.VolatileImage drawVBuffer>;
+
+        $i0 = virtualinvoke $r3.<java.awt.image.VolatileImage: int validate(java.awt.GraphicsConfiguration)>($r2);
+
+        if $i0 != 2 goto label11;
+
+     label06:
+        $i1 = r0.<java.awt.Component$FlipBufferStrategy: int numBuffers>;
+
+        $r4 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.BufferCapabilities caps>;
+
+        virtualinvoke r0.<java.awt.Component$FlipBufferStrategy: void createBuffers(int,java.awt.BufferCapabilities)>($i1, $r4);
+
+     label07:
+        goto label09;
+
+     label08:
+        $r10 := @caughtexception;
+
+     label09:
+        $r5 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.image.VolatileImage drawVBuffer>;
+
+        if $r5 == null goto label10;
+
+        $r6 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.image.VolatileImage drawVBuffer>;
+
+        virtualinvoke $r6.<java.awt.image.VolatileImage: int validate(java.awt.GraphicsConfiguration)>($r2);
+
+     label10:
+        r0.<java.awt.Component$FlipBufferStrategy: boolean validatedContents> = 1;
+
+        goto label12;
+
+     label11:
+        if $i0 != 1 goto label12;
+
+        r0.<java.awt.Component$FlipBufferStrategy: boolean validatedContents> = 1;
+
+     label12:
+        return;
+
+        catch java.awt.AWTException from label01 to label02 with label03;
+        catch java.awt.AWTException from label06 to label07 with label08;
+    }
+
+    public boolean contentsLost()
+    {
+        java.awt.image.VolatileImage $r1, $r2;
+        java.awt.Component$FlipBufferStrategy r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.Component$FlipBufferStrategy;
+
+        $r1 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.image.VolatileImage drawVBuffer>;
+
+        if $r1 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r2 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.image.VolatileImage drawVBuffer>;
+
+        $z0 = virtualinvoke $r2.<java.awt.image.VolatileImage: boolean contentsLost()>();
+
+        return $z0;
+    }
+
+    public boolean contentsRestored()
+    {
+        java.awt.Component$FlipBufferStrategy r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.Component$FlipBufferStrategy;
+
+        $z0 = r0.<java.awt.Component$FlipBufferStrategy: boolean validatedContents>;
+
+        return $z0;
+    }
+
+    public void show()
+    {
+        java.awt.Component$FlipBufferStrategy r0;
+        java.awt.BufferCapabilities $r1;
+        java.awt.BufferCapabilities$FlipContents $r2;
+
+        r0 := @this: java.awt.Component$FlipBufferStrategy;
+
+        $r1 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.BufferCapabilities caps>;
+
+        $r2 = virtualinvoke $r1.<java.awt.BufferCapabilities: java.awt.BufferCapabilities$FlipContents getFlipContents()>();
+
+        virtualinvoke r0.<java.awt.Component$FlipBufferStrategy: void flip(java.awt.BufferCapabilities$FlipContents)>($r2);
+
+        return;
+    }
+
+    void showSubRegion(int, int, int, int)
+    {
+        java.awt.BufferCapabilities$FlipContents $r2;
+        int i0, i1, i2, i3;
+        java.awt.Component$FlipBufferStrategy r0;
+        java.awt.BufferCapabilities $r1;
+
+        r0 := @this: java.awt.Component$FlipBufferStrategy;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        $r1 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.BufferCapabilities caps>;
+
+        $r2 = virtualinvoke $r1.<java.awt.BufferCapabilities: java.awt.BufferCapabilities$FlipContents getFlipContents()>();
+
+        virtualinvoke r0.<java.awt.Component$FlipBufferStrategy: void flipSubRegion(int,int,int,int,java.awt.BufferCapabilities$FlipContents)>(i0, i1, i2, i3, $r2);
+
+        return;
+    }
+
+    public void dispose()
+    {
+        java.awt.peer.ComponentPeer $r5;
+        java.awt.Component$FlipBufferStrategy r0;
+        java.awt.Component $r1, $r3, $r4;
+        java.awt.image.BufferStrategy $r2;
+
+        r0 := @this: java.awt.Component$FlipBufferStrategy;
+
+        $r1 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.Component this$0>;
+
+        $r2 = $r1.<java.awt.Component: java.awt.image.BufferStrategy bufferStrategy>;
+
+        if $r2 != r0 goto label1;
+
+        $r3 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.Component this$0>;
+
+        $r3.<java.awt.Component: java.awt.image.BufferStrategy bufferStrategy> = null;
+
+        $r4 = r0.<java.awt.Component$FlipBufferStrategy: java.awt.Component this$0>;
+
+        $r5 = $r4.<java.awt.Component: java.awt.peer.ComponentPeer peer>;
+
+        if $r5 == null goto label1;
+
+        virtualinvoke r0.<java.awt.Component$FlipBufferStrategy: void destroyBuffers()>();
+
+     label1:
+        return;
+    }
+}

@@ -1,0 +1,275 @@
+public abstract class java.security.cert.X509CRL extends java.security.cert.CRL implements java.security.cert.X509Extension
+{
+    private transient javax.security.auth.x500.X500Principal issuerPrincipal;
+
+    protected void <init>()
+    {
+        java.security.cert.X509CRL r0;
+
+        r0 := @this: java.security.cert.X509CRL;
+
+        specialinvoke r0.<java.security.cert.CRL: void <init>(java.lang.String)>("X.509");
+
+        return;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        byte[] $r2, $r4;
+        java.security.cert.X509CRL r0, $r3;
+        java.lang.Object r1;
+        java.security.cert.CRLException $r5;
+        boolean $z0, $z1;
+
+        r0 := @this: java.security.cert.X509CRL;
+
+        r1 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        $z0 = r1 instanceof java.security.cert.X509CRL;
+
+        if $z0 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        $r2 = staticinvoke <sun.security.x509.X509CRLImpl: byte[] getEncodedInternal(java.security.cert.X509CRL)>(r0);
+
+        $r3 = (java.security.cert.X509CRL) r1;
+
+        $r4 = staticinvoke <sun.security.x509.X509CRLImpl: byte[] getEncodedInternal(java.security.cert.X509CRL)>($r3);
+
+        $z1 = staticinvoke <java.util.Arrays: boolean equals(byte[],byte[])>($r2, $r4);
+
+     label3:
+        return $z1;
+
+     label4:
+        $r5 := @caughtexception;
+
+        return 0;
+
+        catch java.security.cert.CRLException from label2 to label3 with label4;
+    }
+
+    public int hashCode()
+    {
+        byte[] $r1;
+        java.security.cert.X509CRL r0;
+        byte $b1;
+        int $i0, $i2, i3, i4, $i5;
+        java.security.cert.CRLException $r2;
+
+        r0 := @this: java.security.cert.X509CRL;
+
+        i3 = 0;
+
+     label1:
+        $r1 = staticinvoke <sun.security.x509.X509CRLImpl: byte[] getEncodedInternal(java.security.cert.X509CRL)>(r0);
+
+        i4 = 1;
+
+     label2:
+        $i0 = lengthof $r1;
+
+        if i4 >= $i0 goto label3;
+
+        $b1 = $r1[i4];
+
+        $i5 = (int) $b1;
+
+        $i2 = $i5 * i4;
+
+        i3 = i3 + $i2;
+
+        i4 = i4 + 1;
+
+        goto label2;
+
+     label3:
+        return i3;
+
+     label4:
+        $r2 := @caughtexception;
+
+        return 0;
+
+        catch java.security.cert.CRLException from label1 to label3 with label4;
+    }
+
+    public abstract byte[] getEncoded() throws java.security.cert.CRLException;
+
+    public abstract void verify(java.security.PublicKey) throws java.security.cert.CRLException, java.security.NoSuchAlgorithmException, java.security.InvalidKeyException, java.security.NoSuchProviderException, java.security.SignatureException;
+
+    public abstract void verify(java.security.PublicKey, java.lang.String) throws java.security.cert.CRLException, java.security.NoSuchAlgorithmException, java.security.InvalidKeyException, java.security.NoSuchProviderException, java.security.SignatureException;
+
+    public void verify(java.security.PublicKey, java.security.Provider) throws java.security.cert.CRLException, java.security.NoSuchAlgorithmException, java.security.InvalidKeyException, java.security.SignatureException
+    {
+        java.lang.Throwable $r14;
+        byte[] $r3, $r6, $r7;
+        java.security.cert.X509CRL r0;
+        java.security.InvalidAlgorithmParameterException $r9;
+        int $i0;
+        java.lang.String $r1, $r13;
+        java.security.spec.AlgorithmParameterSpec $r5;
+        boolean $z0;
+        java.security.SignatureException $r8;
+        java.security.Signature $r15;
+        java.security.ProviderException $r11;
+        java.security.PublicKey r4;
+        java.security.Provider r2;
+        java.security.cert.CRLException $r10, $r12;
+
+        r0 := @this: java.security.cert.X509CRL;
+
+        r4 := @parameter0: java.security.PublicKey;
+
+        r2 := @parameter1: java.security.Provider;
+
+        $r1 = virtualinvoke r0.<java.security.cert.X509CRL: java.lang.String getSigAlgName()>();
+
+        if r2 != null goto label1;
+
+        $r15 = staticinvoke <java.security.Signature: java.security.Signature getInstance(java.lang.String)>($r1);
+
+        goto label2;
+
+     label1:
+        $r15 = staticinvoke <java.security.Signature: java.security.Signature getInstance(java.lang.String,java.security.Provider)>($r1, r2);
+
+     label2:
+        $r3 = virtualinvoke r0.<java.security.cert.X509CRL: byte[] getSigAlgParams()>();
+
+        $r5 = staticinvoke <sun.security.util.SignatureUtil: java.security.spec.AlgorithmParameterSpec getParamSpec(java.lang.String,byte[])>($r1, $r3);
+
+        staticinvoke <sun.security.util.SignatureUtil: void initVerifyWithParam(java.security.Signature,java.security.PublicKey,java.security.spec.AlgorithmParameterSpec)>($r15, r4, $r5);
+
+     label3:
+        goto label6;
+
+     label4:
+        $r11 := @caughtexception;
+
+        $r12 = new java.security.cert.CRLException;
+
+        $r13 = virtualinvoke $r11.<java.security.ProviderException: java.lang.String getMessage()>();
+
+        $r14 = virtualinvoke $r11.<java.security.ProviderException: java.lang.Throwable getCause()>();
+
+        specialinvoke $r12.<java.security.cert.CRLException: void <init>(java.lang.String,java.lang.Throwable)>($r13, $r14);
+
+        throw $r12;
+
+     label5:
+        $r9 := @caughtexception;
+
+        $r10 = new java.security.cert.CRLException;
+
+        specialinvoke $r10.<java.security.cert.CRLException: void <init>(java.lang.Throwable)>($r9);
+
+        throw $r10;
+
+     label6:
+        $r6 = virtualinvoke r0.<java.security.cert.X509CRL: byte[] getTBSCertList()>();
+
+        $i0 = lengthof $r6;
+
+        virtualinvoke $r15.<java.security.Signature: void update(byte[],int,int)>($r6, 0, $i0);
+
+        $r7 = virtualinvoke r0.<java.security.cert.X509CRL: byte[] getSignature()>();
+
+        $z0 = virtualinvoke $r15.<java.security.Signature: boolean verify(byte[])>($r7);
+
+        if $z0 != 0 goto label7;
+
+        $r8 = new java.security.SignatureException;
+
+        specialinvoke $r8.<java.security.SignatureException: void <init>(java.lang.String)>("Signature does not match.");
+
+        throw $r8;
+
+     label7:
+        return;
+
+        catch java.security.ProviderException from label2 to label3 with label4;
+        catch java.security.InvalidAlgorithmParameterException from label2 to label3 with label5;
+    }
+
+    public abstract int getVersion();
+
+    public abstract java.security.Principal getIssuerDN();
+
+    public javax.security.auth.x500.X500Principal getIssuerX500Principal()
+    {
+        javax.security.auth.x500.X500Principal $r1, $r2, $r3;
+        java.security.cert.X509CRL r0;
+
+        r0 := @this: java.security.cert.X509CRL;
+
+        $r1 = r0.<java.security.cert.X509CRL: javax.security.auth.x500.X500Principal issuerPrincipal>;
+
+        if $r1 != null goto label1;
+
+        $r3 = staticinvoke <sun.security.x509.X509CRLImpl: javax.security.auth.x500.X500Principal getIssuerX500Principal(java.security.cert.X509CRL)>(r0);
+
+        r0.<java.security.cert.X509CRL: javax.security.auth.x500.X500Principal issuerPrincipal> = $r3;
+
+     label1:
+        $r2 = r0.<java.security.cert.X509CRL: javax.security.auth.x500.X500Principal issuerPrincipal>;
+
+        return $r2;
+    }
+
+    public abstract java.util.Date getThisUpdate();
+
+    public abstract java.util.Date getNextUpdate();
+
+    public abstract java.security.cert.X509CRLEntry getRevokedCertificate(java.math.BigInteger);
+
+    public java.security.cert.X509CRLEntry getRevokedCertificate(java.security.cert.X509Certificate)
+    {
+        java.security.cert.X509Certificate r0;
+        java.security.cert.X509CRLEntry $r5;
+        javax.security.auth.x500.X500Principal $r1, $r3;
+        java.security.cert.X509CRL r2;
+        java.math.BigInteger $r4;
+        boolean $z0;
+
+        r2 := @this: java.security.cert.X509CRL;
+
+        r0 := @parameter0: java.security.cert.X509Certificate;
+
+        $r1 = virtualinvoke r0.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getIssuerX500Principal()>();
+
+        $r3 = virtualinvoke r2.<java.security.cert.X509CRL: javax.security.auth.x500.X500Principal getIssuerX500Principal()>();
+
+        $z0 = virtualinvoke $r1.<javax.security.auth.x500.X500Principal: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r4 = virtualinvoke r0.<java.security.cert.X509Certificate: java.math.BigInteger getSerialNumber()>();
+
+        $r5 = virtualinvoke r2.<java.security.cert.X509CRL: java.security.cert.X509CRLEntry getRevokedCertificate(java.math.BigInteger)>($r4);
+
+        return $r5;
+    }
+
+    public abstract java.util.Set getRevokedCertificates();
+
+    public abstract byte[] getTBSCertList() throws java.security.cert.CRLException;
+
+    public abstract byte[] getSignature();
+
+    public abstract java.lang.String getSigAlgName();
+
+    public abstract java.lang.String getSigAlgOID();
+
+    public abstract byte[] getSigAlgParams();
+}

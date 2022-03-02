@@ -1,0 +1,256 @@
+public class com.sun.corba.se.impl.orbutil.concurrent.DebugMutex extends java.lang.Object implements com.sun.corba.se.impl.orbutil.concurrent.Sync
+{
+    protected boolean inuse_;
+    protected java.lang.Thread holder_;
+
+    public void <init>()
+    {
+        com.sun.corba.se.impl.orbutil.concurrent.DebugMutex r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.concurrent.DebugMutex;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.orbutil.concurrent.DebugMutex: boolean inuse_> = 0;
+
+        r0.<com.sun.corba.se.impl.orbutil.concurrent.DebugMutex: java.lang.Thread holder_> = null;
+
+        return;
+    }
+
+    public void acquire() throws java.lang.InterruptedException
+    {
+        org.omg.CORBA.INTERNAL $r4;
+        java.lang.Throwable $r6;
+        java.lang.InterruptedException $r5, $r7;
+        java.lang.Thread $r1, $r2, $r3;
+        com.sun.corba.se.impl.orbutil.concurrent.DebugMutex r0;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.concurrent.DebugMutex;
+
+        $z0 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z0 == 0 goto label01;
+
+        $r5 = new java.lang.InterruptedException;
+
+        specialinvoke $r5.<java.lang.InterruptedException: void <init>()>();
+
+        throw $r5;
+
+     label01:
+        entermonitor r0;
+
+     label02:
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = r0.<com.sun.corba.se.impl.orbutil.concurrent.DebugMutex: java.lang.Thread holder_>;
+
+        if $r2 != $r1 goto label03;
+
+        $r4 = new org.omg.CORBA.INTERNAL;
+
+        specialinvoke $r4.<org.omg.CORBA.INTERNAL: void <init>(java.lang.String)>("Attempt to acquire Mutex by thread holding the Mutex");
+
+        throw $r4;
+
+     label03:
+        $z1 = r0.<com.sun.corba.se.impl.orbutil.concurrent.DebugMutex: boolean inuse_>;
+
+        if $z1 == 0 goto label04;
+
+        virtualinvoke r0.<java.lang.Object: void wait()>();
+
+        goto label03;
+
+     label04:
+        r0.<com.sun.corba.se.impl.orbutil.concurrent.DebugMutex: boolean inuse_> = 1;
+
+        $r3 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        r0.<com.sun.corba.se.impl.orbutil.concurrent.DebugMutex: java.lang.Thread holder_> = $r3;
+
+     label05:
+        goto label07;
+
+     label06:
+        $r7 := @caughtexception;
+
+        virtualinvoke r0.<java.lang.Object: void notify()>();
+
+        throw $r7;
+
+     label07:
+        exitmonitor r0;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r6 := @caughtexception;
+
+        exitmonitor r0;
+
+     label10:
+        throw $r6;
+
+     label11:
+        return;
+
+        catch java.lang.InterruptedException from label03 to label05 with label06;
+        catch java.lang.Throwable from label02 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    public synchronized void release()
+    {
+        org.omg.CORBA.INTERNAL $r3;
+        java.lang.Thread $r0, $r2;
+        com.sun.corba.se.impl.orbutil.concurrent.DebugMutex r1;
+
+        r1 := @this: com.sun.corba.se.impl.orbutil.concurrent.DebugMutex;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = r1.<com.sun.corba.se.impl.orbutil.concurrent.DebugMutex: java.lang.Thread holder_>;
+
+        if $r0 == $r2 goto label1;
+
+        $r3 = new org.omg.CORBA.INTERNAL;
+
+        specialinvoke $r3.<org.omg.CORBA.INTERNAL: void <init>(java.lang.String)>("Attempt to release Mutex by thread not holding the Mutex");
+
+        throw $r3;
+
+     label1:
+        r1.<com.sun.corba.se.impl.orbutil.concurrent.DebugMutex: java.lang.Thread holder_> = null;
+
+        r1.<com.sun.corba.se.impl.orbutil.concurrent.DebugMutex: boolean inuse_> = 0;
+
+        virtualinvoke r1.<java.lang.Object: void notify()>();
+
+        return;
+    }
+
+    public boolean attempt(long) throws java.lang.InterruptedException
+    {
+        java.lang.Throwable $r3;
+        long l0, $l2, $l3, $l4, l6;
+        byte $b1, $b5;
+        java.lang.Thread $r1;
+        int $i7, $i8;
+        com.sun.corba.se.impl.orbutil.concurrent.DebugMutex r0;
+        boolean $z0, $z1, $z2;
+        java.lang.InterruptedException $r4, $r5;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.concurrent.DebugMutex;
+
+        l0 := @parameter0: long;
+
+        $z0 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z0 == 0 goto label01;
+
+        $r5 = new java.lang.InterruptedException;
+
+        specialinvoke $r5.<java.lang.InterruptedException: void <init>()>();
+
+        throw $r5;
+
+     label01:
+        entermonitor r0;
+
+     label02:
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $z1 = r0.<com.sun.corba.se.impl.orbutil.concurrent.DebugMutex: boolean inuse_>;
+
+        if $z1 != 0 goto label04;
+
+        r0.<com.sun.corba.se.impl.orbutil.concurrent.DebugMutex: boolean inuse_> = 1;
+
+        r0.<com.sun.corba.se.impl.orbutil.concurrent.DebugMutex: java.lang.Thread holder_> = $r1;
+
+        exitmonitor r0;
+
+     label03:
+        return 1;
+
+     label04:
+        $b1 = l0 cmp 0L;
+
+        $i7 = (int) $b1;
+
+        if $i7 > 0 goto label06;
+
+        exitmonitor r0;
+
+     label05:
+        return 0;
+
+     label06:
+        l6 = l0;
+
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+     label07:
+        virtualinvoke r0.<java.lang.Object: void wait(long)>(l6);
+
+        $z2 = r0.<com.sun.corba.se.impl.orbutil.concurrent.DebugMutex: boolean inuse_>;
+
+        if $z2 != 0 goto label10;
+
+        r0.<com.sun.corba.se.impl.orbutil.concurrent.DebugMutex: boolean inuse_> = 1;
+
+        r0.<com.sun.corba.se.impl.orbutil.concurrent.DebugMutex: java.lang.Thread holder_> = $r1;
+
+     label08:
+        exitmonitor r0;
+
+     label09:
+        return 1;
+
+     label10:
+        $l3 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l4 = $l3 - $l2;
+
+        l6 = l0 - $l4;
+
+        $b5 = l6 cmp 0L;
+
+        $i8 = (int) $b5;
+
+        if $i8 > 0 goto label07;
+
+     label11:
+        exitmonitor r0;
+
+     label12:
+        return 0;
+
+     label13:
+        $r4 := @caughtexception;
+
+        virtualinvoke r0.<java.lang.Object: void notify()>();
+
+        throw $r4;
+
+     label14:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+     label15:
+        throw $r3;
+
+        catch java.lang.InterruptedException from label07 to label08 with label13;
+        catch java.lang.InterruptedException from label10 to label11 with label13;
+        catch java.lang.Throwable from label02 to label03 with label14;
+        catch java.lang.Throwable from label04 to label05 with label14;
+        catch java.lang.Throwable from label06 to label09 with label14;
+        catch java.lang.Throwable from label10 to label12 with label14;
+        catch java.lang.Throwable from label13 to label15 with label14;
+    }
+}

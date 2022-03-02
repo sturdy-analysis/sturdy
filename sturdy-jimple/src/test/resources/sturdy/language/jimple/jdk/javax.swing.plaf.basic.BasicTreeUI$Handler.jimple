@@ -1,0 +1,2234 @@
+class javax.swing.plaf.basic.BasicTreeUI$Handler extends java.lang.Object implements javax.swing.event.CellEditorListener, java.awt.event.FocusListener, java.awt.event.KeyListener, java.awt.event.MouseListener, java.awt.event.MouseMotionListener, java.beans.PropertyChangeListener, javax.swing.event.TreeExpansionListener, javax.swing.event.TreeModelListener, javax.swing.event.TreeSelectionListener, javax.swing.plaf.basic.DragRecognitionSupport$BeforeDrag
+{
+    private java.lang.String prefix;
+    private java.lang.String typedString;
+    private long lastTime;
+    private boolean dragPressDidSelection;
+    private boolean dragStarted;
+    private javax.swing.tree.TreePath pressedPath;
+    private java.awt.event.MouseEvent pressedEvent;
+    private boolean valueChangedOnPress;
+    final javax.swing.plaf.basic.BasicTreeUI this$0;
+
+    private void <init>(javax.swing.plaf.basic.BasicTreeUI)
+    {
+        javax.swing.plaf.basic.BasicTreeUI r1;
+        javax.swing.plaf.basic.BasicTreeUI$Handler r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r1 := @parameter0: javax.swing.plaf.basic.BasicTreeUI;
+
+        r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0> = r1;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: java.lang.String prefix> = "";
+
+        r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: java.lang.String typedString> = "";
+
+        r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: long lastTime> = 0L;
+
+        return;
+    }
+
+    public void keyTyped(java.awt.event.KeyEvent)
+    {
+        byte $b7;
+        javax.swing.tree.TreePath $r22, $r49;
+        java.awt.event.KeyEvent r9;
+        java.lang.StringBuilder $r14, $r15, $r39, $r40, $r50, $r51;
+        long $l2, $l4, $l5, $l6;
+        javax.swing.plaf.basic.BasicTreeUI$Handler r0;
+        java.lang.String $r16, $r17, $r20, $r38, $r41, $r42, $r43, $r44, $r47;
+        javax.swing.plaf.basic.BasicTreeUI $r1, $r3, $r5, $r7, $r10, $r12, $r18, $r23, $r25, $r27, $r28, $r29, $r31, $r33, $r34, $r35, $r45;
+        javax.swing.text.Position$Bias $r19, $r48;
+        boolean $z0, $z1, $z2, $z3, $z4, z5;
+        int $i0, $i3, $i8, $i9, $i10, $i11, i13, $i14, $i15, $i16;
+        char $c1, $c12;
+        javax.swing.JTree $r2, $r4, $r6, $r8, $r11, $r21, $r24, $r26, $r30, $r32, $r36, $r46;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r9 := @parameter0: java.awt.event.KeyEvent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r2 = $r1.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        if $r2 == null goto label9;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r4 = $r3.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $i0 = virtualinvoke $r4.<javax.swing.JTree: int getRowCount()>();
+
+        if $i0 <= 0 goto label9;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r6 = $r5.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $z0 = virtualinvoke $r6.<javax.swing.JTree: boolean hasFocus()>();
+
+        if $z0 == 0 goto label9;
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r8 = $r7.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $z1 = virtualinvoke $r8.<javax.swing.JTree: boolean isEnabled()>();
+
+        if $z1 == 0 goto label9;
+
+        $z2 = virtualinvoke r9.<java.awt.event.KeyEvent: boolean isAltDown()>();
+
+        if $z2 != 0 goto label1;
+
+        $z3 = staticinvoke <javax.swing.plaf.basic.BasicGraphicsUtils: boolean isMenuShortcutKeyDown(java.awt.event.InputEvent)>(r9);
+
+        if $z3 != 0 goto label1;
+
+        $z4 = specialinvoke r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: boolean isNavigationKey(java.awt.event.KeyEvent)>(r9);
+
+        if $z4 == 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        z5 = 1;
+
+        $c1 = virtualinvoke r9.<java.awt.event.KeyEvent: char getKeyChar()>();
+
+        $l2 = virtualinvoke r9.<java.awt.event.KeyEvent: long getWhen()>();
+
+        $r10 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r11 = $r10.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $i3 = virtualinvoke $r11.<javax.swing.JTree: int getLeadSelectionRow()>();
+
+        i13 = $i3;
+
+        $l4 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: long lastTime>;
+
+        $l5 = $l2 - $l4;
+
+        $r12 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $l6 = staticinvoke <javax.swing.plaf.basic.BasicTreeUI: long access$900(javax.swing.plaf.basic.BasicTreeUI)>($r12);
+
+        $b7 = $l5 cmp $l6;
+
+        $i14 = (int) $b7;
+
+        if $i14 >= 0 goto label4;
+
+        $r50 = new java.lang.StringBuilder;
+
+        specialinvoke $r50.<java.lang.StringBuilder: void <init>()>();
+
+        $r38 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: java.lang.String typedString>;
+
+        $r39 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r38);
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c1);
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: java.lang.String typedString> = $r41;
+
+        $r42 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: java.lang.String prefix>;
+
+        $i11 = virtualinvoke $r42.<java.lang.String: int length()>();
+
+        if $i11 != 1 goto label3;
+
+        $r44 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: java.lang.String prefix>;
+
+        $c12 = virtualinvoke $r44.<java.lang.String: char charAt(int)>(0);
+
+        $i15 = (int) $c1;
+
+        $i16 = (int) $c12;
+
+        if $i15 != $i16 goto label3;
+
+        i13 = $i3 + 1;
+
+        goto label5;
+
+     label3:
+        $r43 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: java.lang.String typedString>;
+
+        r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: java.lang.String prefix> = $r43;
+
+        goto label5;
+
+     label4:
+        i13 = $i3 + 1;
+
+        $r51 = new java.lang.StringBuilder;
+
+        specialinvoke $r51.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c1);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: java.lang.String typedString> = $r16;
+
+        $r17 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: java.lang.String typedString>;
+
+        r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: java.lang.String prefix> = $r17;
+
+     label5:
+        r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: long lastTime> = $l2;
+
+        if i13 < 0 goto label6;
+
+        $r35 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r36 = $r35.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $i10 = virtualinvoke $r36.<javax.swing.JTree: int getRowCount()>();
+
+        if i13 < $i10 goto label7;
+
+     label6:
+        z5 = 0;
+
+        i13 = 0;
+
+     label7:
+        $r45 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r46 = $r45.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $r47 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: java.lang.String prefix>;
+
+        $r48 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Forward>;
+
+        $r49 = virtualinvoke $r46.<javax.swing.JTree: javax.swing.tree.TreePath getNextMatch(java.lang.String,int,javax.swing.text.Position$Bias)>($r47, i13, $r48);
+
+        if $r49 == null goto label8;
+
+        $r29 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r30 = $r29.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        virtualinvoke $r30.<javax.swing.JTree: void setSelectionPath(javax.swing.tree.TreePath)>($r49);
+
+        $r33 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r31 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r32 = $r31.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $i9 = virtualinvoke $r33.<javax.swing.plaf.basic.BasicTreeUI: int getRowForPath(javax.swing.JTree,javax.swing.tree.TreePath)>($r32, $r49);
+
+        $r34 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        virtualinvoke $r34.<javax.swing.plaf.basic.BasicTreeUI: void ensureRowsAreVisible(int,int)>($i9, $i9);
+
+        goto label9;
+
+     label8:
+        if z5 == 0 goto label9;
+
+        $r18 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r21 = $r18.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $r20 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: java.lang.String prefix>;
+
+        $r19 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Forward>;
+
+        $r22 = virtualinvoke $r21.<javax.swing.JTree: javax.swing.tree.TreePath getNextMatch(java.lang.String,int,javax.swing.text.Position$Bias)>($r20, 0, $r19);
+
+        if $r22 == null goto label9;
+
+        $r23 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r24 = $r23.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        virtualinvoke $r24.<javax.swing.JTree: void setSelectionPath(javax.swing.tree.TreePath)>($r22);
+
+        $r27 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r25 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r26 = $r25.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $i8 = virtualinvoke $r27.<javax.swing.plaf.basic.BasicTreeUI: int getRowForPath(javax.swing.JTree,javax.swing.tree.TreePath)>($r26, $r22);
+
+        $r28 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        virtualinvoke $r28.<javax.swing.plaf.basic.BasicTreeUI: void ensureRowsAreVisible(int,int)>($i8, $i8);
+
+     label9:
+        return;
+    }
+
+    public void keyPressed(java.awt.event.KeyEvent)
+    {
+        javax.swing.plaf.basic.BasicTreeUI $r1;
+        javax.swing.plaf.basic.BasicTreeUI$Handler r0;
+        javax.swing.JTree $r2;
+        java.awt.event.KeyEvent r3;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r3 := @parameter0: java.awt.event.KeyEvent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r2 = $r1.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        if $r2 == null goto label1;
+
+        $z0 = specialinvoke r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: boolean isNavigationKey(java.awt.event.KeyEvent)>(r3);
+
+        if $z0 == 0 goto label1;
+
+        r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: java.lang.String prefix> = "";
+
+        r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: java.lang.String typedString> = "";
+
+        r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: long lastTime> = 0L;
+
+     label1:
+        return;
+    }
+
+    public void keyReleased(java.awt.event.KeyEvent)
+    {
+        java.awt.event.KeyEvent r1;
+        javax.swing.plaf.basic.BasicTreeUI$Handler r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r1 := @parameter0: java.awt.event.KeyEvent;
+
+        return;
+    }
+
+    private boolean isNavigationKey(java.awt.event.KeyEvent)
+    {
+        javax.swing.KeyStroke $r5;
+        javax.swing.plaf.basic.BasicTreeUI $r1;
+        javax.swing.JTree $r2;
+        java.awt.event.KeyEvent r4;
+        javax.swing.plaf.basic.BasicTreeUI$Handler r0;
+        java.lang.Object $r6;
+        javax.swing.InputMap $r3;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r4 := @parameter0: java.awt.event.KeyEvent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r2 = $r1.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.JTree: javax.swing.InputMap getInputMap(int)>(1);
+
+        $r5 = staticinvoke <javax.swing.KeyStroke: javax.swing.KeyStroke getKeyStrokeForEvent(java.awt.event.KeyEvent)>(r4);
+
+        if $r3 == null goto label1;
+
+        $r6 = virtualinvoke $r3.<javax.swing.InputMap: java.lang.Object get(javax.swing.KeyStroke)>($r5);
+
+        if $r6 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public void propertyChange(java.beans.PropertyChangeEvent)
+    {
+        java.lang.Integer $r46;
+        javax.swing.tree.TreePath $r63, $r66, $r71, $r74;
+        javax.swing.plaf.basic.BasicTreeUI$Handler r2;
+        java.lang.String $r8;
+        javax.swing.plaf.basic.BasicTreeUI $r3, $r6, $r10, $r13, $r15, $r17, $r18, $r19, $r21, $r23, $r25, $r26, $r28, $r29, $r31, $r33, $r35, $r37, $r38, $r41, $r44, $r47, $r50, $r53, $r56, $r59, $r60, $r61, $r64, $r67, $r68, $r69, $r72, $r75;
+        javax.swing.tree.AbstractLayoutCache $r27, $r30;
+        javax.swing.tree.TreeSelectionModel $r4, $r34, $r76;
+        javax.swing.tree.TreeModel $r55;
+        javax.swing.JTree$DropLocation $r12, r77;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        javax.swing.tree.TreeCellRenderer $r58;
+        javax.swing.tree.TreeCellEditor $r43;
+        int $i0;
+        java.lang.Boolean $r40, $r49, $r52;
+        java.beans.PropertyChangeEvent r0;
+        javax.swing.JTree $r7, $r11, $r14, $r16, $r20, $r24, $r32, $r36;
+        java.lang.Object $r1, $r5, $r9, $r39, $r42, $r45, $r48, $r51, $r54, $r57, $r62, $r65, $r70, $r73;
+        javax.swing.InputMap $r22;
+
+        r2 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r0 := @parameter0: java.beans.PropertyChangeEvent;
+
+        $r1 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.Object getSource()>();
+
+        $r3 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r4 = $r3.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.TreeSelectionModel treeSelectionModel>;
+
+        if $r1 != $r4 goto label01;
+
+        $r75 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r76 = $r75.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.TreeSelectionModel treeSelectionModel>;
+
+        interfaceinvoke $r76.<javax.swing.tree.TreeSelectionModel: void resetRowSelection()>();
+
+        goto label16;
+
+     label01:
+        $r5 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.Object getSource()>();
+
+        $r6 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r7 = $r6.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        if $r5 != $r7 goto label16;
+
+        $r8 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.String getPropertyName()>();
+
+        if $r8 != "leadSelectionPath" goto label02;
+
+        $r67 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $z6 = staticinvoke <javax.swing.plaf.basic.BasicTreeUI: boolean access$1000(javax.swing.plaf.basic.BasicTreeUI)>($r67);
+
+        if $z6 != 0 goto label03;
+
+        $r68 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        virtualinvoke $r68.<javax.swing.plaf.basic.BasicTreeUI: void updateLeadSelectionRow()>();
+
+        $r69 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r70 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.Object getOldValue()>();
+
+        $r71 = (javax.swing.tree.TreePath) $r70;
+
+        staticinvoke <javax.swing.plaf.basic.BasicTreeUI: void access$1100(javax.swing.plaf.basic.BasicTreeUI,javax.swing.tree.TreePath)>($r69, $r71);
+
+        $r72 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r73 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.Object getNewValue()>();
+
+        $r74 = (javax.swing.tree.TreePath) $r73;
+
+        staticinvoke <javax.swing.plaf.basic.BasicTreeUI: void access$1100(javax.swing.plaf.basic.BasicTreeUI,javax.swing.tree.TreePath)>($r72, $r74);
+
+        goto label03;
+
+     label02:
+        if $r8 != "anchorSelectionPath" goto label03;
+
+        $r60 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $z5 = staticinvoke <javax.swing.plaf.basic.BasicTreeUI: boolean access$1000(javax.swing.plaf.basic.BasicTreeUI)>($r60);
+
+        if $z5 != 0 goto label03;
+
+        $r61 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r62 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.Object getOldValue()>();
+
+        $r63 = (javax.swing.tree.TreePath) $r62;
+
+        staticinvoke <javax.swing.plaf.basic.BasicTreeUI: void access$1100(javax.swing.plaf.basic.BasicTreeUI,javax.swing.tree.TreePath)>($r61, $r63);
+
+        $r64 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r65 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.Object getNewValue()>();
+
+        $r66 = (javax.swing.tree.TreePath) $r65;
+
+        staticinvoke <javax.swing.plaf.basic.BasicTreeUI: void access$1100(javax.swing.plaf.basic.BasicTreeUI,javax.swing.tree.TreePath)>($r64, $r66);
+
+     label03:
+        if $r8 != "cellRenderer" goto label04;
+
+        $r56 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r57 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.Object getNewValue()>();
+
+        $r58 = (javax.swing.tree.TreeCellRenderer) $r57;
+
+        virtualinvoke $r56.<javax.swing.plaf.basic.BasicTreeUI: void setCellRenderer(javax.swing.tree.TreeCellRenderer)>($r58);
+
+        $r59 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        staticinvoke <javax.swing.plaf.basic.BasicTreeUI: void access$1200(javax.swing.plaf.basic.BasicTreeUI)>($r59);
+
+        goto label16;
+
+     label04:
+        if $r8 != "model" goto label05;
+
+        $r53 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r54 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.Object getNewValue()>();
+
+        $r55 = (javax.swing.tree.TreeModel) $r54;
+
+        virtualinvoke $r53.<javax.swing.plaf.basic.BasicTreeUI: void setModel(javax.swing.tree.TreeModel)>($r55);
+
+        goto label16;
+
+     label05:
+        if $r8 != "rootVisible" goto label06;
+
+        $r50 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r51 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.Object getNewValue()>();
+
+        $r52 = (java.lang.Boolean) $r51;
+
+        $z4 = virtualinvoke $r52.<java.lang.Boolean: boolean booleanValue()>();
+
+        virtualinvoke $r50.<javax.swing.plaf.basic.BasicTreeUI: void setRootVisible(boolean)>($z4);
+
+        goto label16;
+
+     label06:
+        if $r8 != "showsRootHandles" goto label07;
+
+        $r47 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r48 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.Object getNewValue()>();
+
+        $r49 = (java.lang.Boolean) $r48;
+
+        $z3 = virtualinvoke $r49.<java.lang.Boolean: boolean booleanValue()>();
+
+        virtualinvoke $r47.<javax.swing.plaf.basic.BasicTreeUI: void setShowsRootHandles(boolean)>($z3);
+
+        goto label16;
+
+     label07:
+        if $r8 != "rowHeight" goto label08;
+
+        $r44 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r45 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.Object getNewValue()>();
+
+        $r46 = (java.lang.Integer) $r45;
+
+        $i0 = virtualinvoke $r46.<java.lang.Integer: int intValue()>();
+
+        virtualinvoke $r44.<javax.swing.plaf.basic.BasicTreeUI: void setRowHeight(int)>($i0);
+
+        goto label16;
+
+     label08:
+        if $r8 != "cellEditor" goto label09;
+
+        $r41 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r42 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.Object getNewValue()>();
+
+        $r43 = (javax.swing.tree.TreeCellEditor) $r42;
+
+        virtualinvoke $r41.<javax.swing.plaf.basic.BasicTreeUI: void setCellEditor(javax.swing.tree.TreeCellEditor)>($r43);
+
+        goto label16;
+
+     label09:
+        if $r8 != "editable" goto label10;
+
+        $r38 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r39 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.Object getNewValue()>();
+
+        $r40 = (java.lang.Boolean) $r39;
+
+        $z2 = virtualinvoke $r40.<java.lang.Boolean: boolean booleanValue()>();
+
+        virtualinvoke $r38.<javax.swing.plaf.basic.BasicTreeUI: void setEditable(boolean)>($z2);
+
+        goto label16;
+
+     label10:
+        if $r8 != "largeModel" goto label11;
+
+        $r37 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r35 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r36 = $r35.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $z1 = virtualinvoke $r36.<javax.swing.JTree: boolean isLargeModel()>();
+
+        virtualinvoke $r37.<javax.swing.plaf.basic.BasicTreeUI: void setLargeModel(boolean)>($z1);
+
+        goto label16;
+
+     label11:
+        if $r8 != "selectionModel" goto label12;
+
+        $r33 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r31 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r32 = $r31.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $r34 = virtualinvoke $r32.<javax.swing.JTree: javax.swing.tree.TreeSelectionModel getSelectionModel()>();
+
+        virtualinvoke $r33.<javax.swing.plaf.basic.BasicTreeUI: void setSelectionModel(javax.swing.tree.TreeSelectionModel)>($r34);
+
+        goto label16;
+
+     label12:
+        if $r8 != "font" goto label14;
+
+        $r25 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        virtualinvoke $r25.<javax.swing.plaf.basic.BasicTreeUI: void completeEditing()>();
+
+        $r26 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r27 = $r26.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.AbstractLayoutCache treeState>;
+
+        if $r27 == null goto label13;
+
+        $r29 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r30 = $r29.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.AbstractLayoutCache treeState>;
+
+        virtualinvoke $r30.<javax.swing.tree.AbstractLayoutCache: void invalidateSizes()>();
+
+     label13:
+        $r28 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        virtualinvoke $r28.<javax.swing.plaf.basic.BasicTreeUI: void updateSize()>();
+
+        goto label16;
+
+     label14:
+        if $r8 != "componentOrientation" goto label15;
+
+        $r13 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r14 = $r13.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        if $r14 == null goto label16;
+
+        $r17 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r15 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r16 = $r15.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $z0 = staticinvoke <javax.swing.plaf.basic.BasicGraphicsUtils: boolean isLeftToRight(java.awt.Component)>($r16);
+
+        staticinvoke <javax.swing.plaf.basic.BasicTreeUI: boolean access$1302(javax.swing.plaf.basic.BasicTreeUI,boolean)>($r17, $z0);
+
+        $r18 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        staticinvoke <javax.swing.plaf.basic.BasicTreeUI: void access$1200(javax.swing.plaf.basic.BasicTreeUI)>($r18);
+
+        $r19 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r20 = $r19.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        virtualinvoke $r20.<javax.swing.JTree: void treeDidChange()>();
+
+        $r21 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r22 = virtualinvoke $r21.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.InputMap getInputMap(int)>(0);
+
+        $r23 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r24 = $r23.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        staticinvoke <javax.swing.SwingUtilities: void replaceUIInputMap(javax.swing.JComponent,int,javax.swing.InputMap)>($r24, 0, $r22);
+
+        goto label16;
+
+     label15:
+        if "dropLocation" != $r8 goto label16;
+
+        $r9 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.Object getOldValue()>();
+
+        r77 = (javax.swing.JTree$DropLocation) $r9;
+
+        specialinvoke r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: void repaintDropLocation(javax.swing.JTree$DropLocation)>(r77);
+
+        $r10 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r11 = $r10.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $r12 = virtualinvoke $r11.<javax.swing.JTree: javax.swing.JTree$DropLocation getDropLocation()>();
+
+        specialinvoke r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: void repaintDropLocation(javax.swing.JTree$DropLocation)>($r12);
+
+     label16:
+        return;
+    }
+
+    private void repaintDropLocation(javax.swing.JTree$DropLocation)
+    {
+        java.awt.Rectangle r9;
+        javax.swing.plaf.basic.BasicTreeUI $r2, $r3, $r6, $r8;
+        javax.swing.tree.TreePath $r5;
+        javax.swing.JTree $r4, $r7;
+        javax.swing.JTree$DropLocation r0;
+        javax.swing.plaf.basic.BasicTreeUI$Handler r1;
+        boolean $z0;
+
+        r1 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r0 := @parameter0: javax.swing.JTree$DropLocation;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $z0 = virtualinvoke $r2.<javax.swing.plaf.basic.BasicTreeUI: boolean isDropLine(javax.swing.JTree$DropLocation)>(r0);
+
+        if $z0 == 0 goto label2;
+
+        $r8 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        r9 = virtualinvoke $r8.<javax.swing.plaf.basic.BasicTreeUI: java.awt.Rectangle getDropLineRect(javax.swing.JTree$DropLocation)>(r0);
+
+        goto label3;
+
+     label2:
+        $r3 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r4 = $r3.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $r5 = virtualinvoke r0.<javax.swing.JTree$DropLocation: javax.swing.tree.TreePath getPath()>();
+
+        r9 = virtualinvoke $r4.<javax.swing.JTree: java.awt.Rectangle getPathBounds(javax.swing.tree.TreePath)>($r5);
+
+     label3:
+        if r9 == null goto label4;
+
+        $r6 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r7 = $r6.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        virtualinvoke $r7.<javax.swing.JTree: void repaint(java.awt.Rectangle)>(r9);
+
+     label4:
+        return;
+    }
+
+    private boolean isActualPath(javax.swing.tree.TreePath, int, int)
+    {
+        java.awt.Rectangle $r5;
+        javax.swing.plaf.basic.BasicTreeUI$Handler r1;
+        int i0, $i1, $i2, $i3, i4, $i5, $i6, $i7, $i8;
+        boolean $z0;
+        javax.swing.plaf.basic.BasicTreeUI $r2, $r4;
+        javax.swing.tree.TreePath r0;
+        javax.swing.JTree $r3;
+
+        r1 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r0 := @parameter0: javax.swing.tree.TreePath;
+
+        i4 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        if r0 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r4 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r2 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r3 = $r2.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $r5 = virtualinvoke $r4.<javax.swing.plaf.basic.BasicTreeUI: java.awt.Rectangle getPathBounds(javax.swing.JTree,javax.swing.tree.TreePath)>($r3, r0);
+
+        if $r5 == null goto label2;
+
+        $i2 = $r5.<java.awt.Rectangle: int y>;
+
+        $i1 = $r5.<java.awt.Rectangle: int height>;
+
+        $i3 = $i2 + $i1;
+
+        if i0 <= $i3 goto label3;
+
+     label2:
+        return 0;
+
+     label3:
+        $i5 = $r5.<java.awt.Rectangle: int x>;
+
+        if i4 < $i5 goto label4;
+
+        $i7 = $r5.<java.awt.Rectangle: int x>;
+
+        $i6 = $r5.<java.awt.Rectangle: int width>;
+
+        $i8 = $i7 + $i6;
+
+        if i4 > $i8 goto label4;
+
+        $z0 = 1;
+
+        goto label5;
+
+     label4:
+        $z0 = 0;
+
+     label5:
+        return $z0;
+    }
+
+    public void mouseClicked(java.awt.event.MouseEvent)
+    {
+        javax.swing.plaf.basic.BasicTreeUI$Handler r0;
+        java.awt.event.MouseEvent r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r1 := @parameter0: java.awt.event.MouseEvent;
+
+        return;
+    }
+
+    public void mouseEntered(java.awt.event.MouseEvent)
+    {
+        javax.swing.plaf.basic.BasicTreeUI$Handler r0;
+        java.awt.event.MouseEvent r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r1 := @parameter0: java.awt.event.MouseEvent;
+
+        return;
+    }
+
+    public void mouseExited(java.awt.event.MouseEvent)
+    {
+        javax.swing.plaf.basic.BasicTreeUI$Handler r0;
+        java.awt.event.MouseEvent r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r1 := @parameter0: java.awt.event.MouseEvent;
+
+        return;
+    }
+
+    public void mousePressed(java.awt.event.MouseEvent)
+    {
+        javax.swing.plaf.basic.BasicTreeUI$Handler r1;
+        int $i0, $i1;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        javax.swing.plaf.basic.BasicTreeUI $r2, $r4, $r6, $r7, $r9, $r11, $r13, $r14, $r15, $r16, $r19;
+        javax.swing.tree.TreePath $r18;
+        javax.swing.JTree $r3, $r5, $r8, $r10, $r12, $r17, $r20;
+        java.awt.event.MouseEvent r0;
+
+        r1 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r0 := @parameter0: java.awt.event.MouseEvent;
+
+        $r2 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r3 = $r2.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $z0 = staticinvoke <sun.swing.SwingUtilities2: boolean shouldIgnore(java.awt.event.MouseEvent,javax.swing.JComponent)>(r0, $r3);
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r6 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r4 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r5 = $r4.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $z1 = virtualinvoke $r6.<javax.swing.plaf.basic.BasicTreeUI: boolean isEditing(javax.swing.JTree)>($r5);
+
+        if $z1 == 0 goto label2;
+
+        $r9 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r10 = $r9.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $z2 = virtualinvoke $r10.<javax.swing.JTree: boolean getInvokesStopCellEditing()>();
+
+        if $z2 == 0 goto label2;
+
+        $r13 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r11 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r12 = $r11.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $z3 = virtualinvoke $r13.<javax.swing.plaf.basic.BasicTreeUI: boolean stopEditing(javax.swing.JTree)>($r12);
+
+        if $z3 != 0 goto label2;
+
+        return;
+
+     label2:
+        $r14 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        virtualinvoke $r14.<javax.swing.plaf.basic.BasicTreeUI: void completeEditing()>();
+
+        $r15 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r16 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r17 = $r16.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $i0 = virtualinvoke r0.<java.awt.event.MouseEvent: int getX()>();
+
+        $i1 = virtualinvoke r0.<java.awt.event.MouseEvent: int getY()>();
+
+        $r18 = virtualinvoke $r15.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.TreePath getClosestPathForLocation(javax.swing.JTree,int,int)>($r17, $i0, $i1);
+
+        r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.tree.TreePath pressedPath> = $r18;
+
+        $r19 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r20 = $r19.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $z4 = virtualinvoke $r20.<javax.swing.JTree: boolean getDragEnabled()>();
+
+        if $z4 == 0 goto label3;
+
+        specialinvoke r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: void mousePressedDND(java.awt.event.MouseEvent)>(r0);
+
+        goto label4;
+
+     label3:
+        $r7 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r8 = $r7.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        staticinvoke <sun.swing.SwingUtilities2: void adjustFocus(javax.swing.JComponent)>($r8);
+
+        virtualinvoke r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: void handleSelection(java.awt.event.MouseEvent)>(r0);
+
+     label4:
+        return;
+    }
+
+    private void mousePressedDND(java.awt.event.MouseEvent)
+    {
+        javax.swing.plaf.basic.BasicTreeUI$Handler r0;
+        int $i0, $i1;
+        boolean $z0, $z1, $z2, $z3, $z4, z5;
+        javax.swing.plaf.basic.BasicTreeUI $r3, $r5, $r9, $r11;
+        javax.swing.tree.TreePath $r2, $r6, $r8, $r10;
+        javax.swing.JTree $r4, $r7;
+        java.awt.event.MouseEvent r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r1 := @parameter0: java.awt.event.MouseEvent;
+
+        r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: java.awt.event.MouseEvent pressedEvent> = r1;
+
+        z5 = 1;
+
+        r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: boolean dragStarted> = 0;
+
+        r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: boolean valueChangedOnPress> = 0;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.tree.TreePath pressedPath>;
+
+        $i0 = virtualinvoke r1.<java.awt.event.MouseEvent: int getX()>();
+
+        $i1 = virtualinvoke r1.<java.awt.event.MouseEvent: int getY()>();
+
+        $z0 = specialinvoke r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: boolean isActualPath(javax.swing.tree.TreePath,int,int)>($r2, $i0, $i1);
+
+        if $z0 == 0 goto label3;
+
+        $z1 = staticinvoke <javax.swing.plaf.basic.DragRecognitionSupport: boolean mousePressed(java.awt.event.MouseEvent)>(r1);
+
+        if $z1 == 0 goto label3;
+
+        r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: boolean dragPressDidSelection> = 0;
+
+        $z2 = staticinvoke <javax.swing.plaf.basic.BasicGraphicsUtils: boolean isMenuShortcutKeyDown(java.awt.event.InputEvent)>(r1);
+
+        if $z2 == 0 goto label1;
+
+        return;
+
+     label1:
+        $z3 = virtualinvoke r1.<java.awt.event.MouseEvent: boolean isShiftDown()>();
+
+        if $z3 != 0 goto label2;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r7 = $r5.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.tree.TreePath pressedPath>;
+
+        $z4 = virtualinvoke $r7.<javax.swing.JTree: boolean isPathSelected(javax.swing.tree.TreePath)>($r6);
+
+        if $z4 == 0 goto label2;
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r8 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.tree.TreePath pressedPath>;
+
+        staticinvoke <javax.swing.plaf.basic.BasicTreeUI: void access$1400(javax.swing.plaf.basic.BasicTreeUI,javax.swing.tree.TreePath)>($r9, $r8);
+
+        $r11 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r10 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.tree.TreePath pressedPath>;
+
+        staticinvoke <javax.swing.plaf.basic.BasicTreeUI: void access$1500(javax.swing.plaf.basic.BasicTreeUI,javax.swing.tree.TreePath,boolean)>($r11, $r10, 1);
+
+        return;
+
+     label2:
+        r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: boolean dragPressDidSelection> = 1;
+
+        z5 = 0;
+
+     label3:
+        if z5 == 0 goto label4;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r4 = $r3.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        staticinvoke <sun.swing.SwingUtilities2: void adjustFocus(javax.swing.JComponent)>($r4);
+
+     label4:
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: void handleSelection(java.awt.event.MouseEvent)>(r1);
+
+        return;
+    }
+
+    void handleSelection(java.awt.event.MouseEvent)
+    {
+        java.awt.Rectangle $r6;
+        javax.swing.plaf.basic.BasicTreeUI$Handler r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10;
+        boolean $z0, $z1, $z2;
+        javax.swing.plaf.basic.BasicTreeUI $r2, $r5, $r8, $r11, $r13, $r14;
+        javax.swing.tree.TreePath $r1, $r3, $r10, $r12, $r15;
+        javax.swing.JTree $r4, $r9;
+        java.awt.event.MouseEvent r7;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r7 := @parameter0: java.awt.event.MouseEvent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.tree.TreePath pressedPath>;
+
+        if $r1 == null goto label5;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r4 = $r2.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.tree.TreePath pressedPath>;
+
+        $r6 = virtualinvoke $r5.<javax.swing.plaf.basic.BasicTreeUI: java.awt.Rectangle getPathBounds(javax.swing.JTree,javax.swing.tree.TreePath)>($r4, $r3);
+
+        if $r6 == null goto label1;
+
+        $i0 = virtualinvoke r7.<java.awt.event.MouseEvent: int getY()>();
+
+        $i2 = $r6.<java.awt.Rectangle: int y>;
+
+        $i1 = $r6.<java.awt.Rectangle: int height>;
+
+        $i3 = $i2 + $i1;
+
+        if $i0 < $i3 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        $z0 = staticinvoke <javax.swing.SwingUtilities: boolean isLeftMouseButton(java.awt.event.MouseEvent)>(r7);
+
+        if $z0 == 0 goto label3;
+
+        $r14 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r15 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.tree.TreePath pressedPath>;
+
+        $i9 = virtualinvoke r7.<java.awt.event.MouseEvent: int getX()>();
+
+        $i10 = virtualinvoke r7.<java.awt.event.MouseEvent: int getY()>();
+
+        virtualinvoke $r14.<javax.swing.plaf.basic.BasicTreeUI: void checkForClickInExpandControl(javax.swing.tree.TreePath,int,int)>($r15, $i9, $i10);
+
+     label3:
+        $i4 = virtualinvoke r7.<java.awt.event.MouseEvent: int getX()>();
+
+        $i5 = $r6.<java.awt.Rectangle: int x>;
+
+        if $i4 < $i5 goto label5;
+
+        $i7 = $r6.<java.awt.Rectangle: int x>;
+
+        $i6 = $r6.<java.awt.Rectangle: int width>;
+
+        $i8 = $i7 + $i6;
+
+        if $i4 >= $i8 goto label5;
+
+        $r8 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r9 = $r8.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $z1 = virtualinvoke $r9.<javax.swing.JTree: boolean getDragEnabled()>();
+
+        if $z1 != 0 goto label4;
+
+        $r13 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r12 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.tree.TreePath pressedPath>;
+
+        $z2 = virtualinvoke $r13.<javax.swing.plaf.basic.BasicTreeUI: boolean startEditing(javax.swing.tree.TreePath,java.awt.event.MouseEvent)>($r12, r7);
+
+        if $z2 != 0 goto label5;
+
+     label4:
+        $r11 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r10 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.tree.TreePath pressedPath>;
+
+        virtualinvoke $r11.<javax.swing.plaf.basic.BasicTreeUI: void selectPathForEvent(javax.swing.tree.TreePath,java.awt.event.MouseEvent)>($r10, r7);
+
+     label5:
+        return;
+    }
+
+    public void dragStarting(java.awt.event.MouseEvent)
+    {
+        javax.swing.plaf.basic.BasicTreeUI $r2, $r6, $r8;
+        javax.swing.tree.TreePath $r3, $r5, $r7;
+        javax.swing.JTree $r4;
+        java.awt.event.MouseEvent r1;
+        javax.swing.plaf.basic.BasicTreeUI$Handler r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r1 := @parameter0: java.awt.event.MouseEvent;
+
+        r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: boolean dragStarted> = 1;
+
+        $z0 = staticinvoke <javax.swing.plaf.basic.BasicGraphicsUtils: boolean isMenuShortcutKeyDown(java.awt.event.InputEvent)>(r1);
+
+        if $z0 == 0 goto label1;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r4 = $r2.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.tree.TreePath pressedPath>;
+
+        virtualinvoke $r4.<javax.swing.JTree: void addSelectionPath(javax.swing.tree.TreePath)>($r3);
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.tree.TreePath pressedPath>;
+
+        staticinvoke <javax.swing.plaf.basic.BasicTreeUI: void access$1400(javax.swing.plaf.basic.BasicTreeUI,javax.swing.tree.TreePath)>($r6, $r5);
+
+        $r8 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.tree.TreePath pressedPath>;
+
+        staticinvoke <javax.swing.plaf.basic.BasicTreeUI: void access$1500(javax.swing.plaf.basic.BasicTreeUI,javax.swing.tree.TreePath,boolean)>($r8, $r7, 1);
+
+     label1:
+        r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: java.awt.event.MouseEvent pressedEvent> = null;
+
+        r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.tree.TreePath pressedPath> = null;
+
+        return;
+    }
+
+    public void mouseDragged(java.awt.event.MouseEvent)
+    {
+        javax.swing.plaf.basic.BasicTreeUI $r2, $r4;
+        javax.swing.JTree $r3, $r5;
+        java.awt.event.MouseEvent r0;
+        javax.swing.plaf.basic.BasicTreeUI$Handler r1;
+        boolean $z0, $z1;
+
+        r1 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r0 := @parameter0: java.awt.event.MouseEvent;
+
+        $r2 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r3 = $r2.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $z0 = staticinvoke <sun.swing.SwingUtilities2: boolean shouldIgnore(java.awt.event.MouseEvent,javax.swing.JComponent)>(r0, $r3);
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r4 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r5 = $r4.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $z1 = virtualinvoke $r5.<javax.swing.JTree: boolean getDragEnabled()>();
+
+        if $z1 == 0 goto label2;
+
+        staticinvoke <javax.swing.plaf.basic.DragRecognitionSupport: boolean mouseDragged(java.awt.event.MouseEvent,javax.swing.plaf.basic.DragRecognitionSupport$BeforeDrag)>(r0, r1);
+
+     label2:
+        return;
+    }
+
+    public void mouseMoved(java.awt.event.MouseEvent)
+    {
+        javax.swing.plaf.basic.BasicTreeUI$Handler r0;
+        java.awt.event.MouseEvent r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r1 := @parameter0: java.awt.event.MouseEvent;
+
+        return;
+    }
+
+    public void mouseReleased(java.awt.event.MouseEvent)
+    {
+        javax.swing.plaf.basic.BasicTreeUI $r2, $r4;
+        javax.swing.JTree $r3, $r5;
+        java.awt.event.MouseEvent r0;
+        javax.swing.plaf.basic.BasicTreeUI$Handler r1;
+        boolean $z0, $z1;
+
+        r1 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r0 := @parameter0: java.awt.event.MouseEvent;
+
+        $r2 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r3 = $r2.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $z0 = staticinvoke <sun.swing.SwingUtilities2: boolean shouldIgnore(java.awt.event.MouseEvent,javax.swing.JComponent)>(r0, $r3);
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r4 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r5 = $r4.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $z1 = virtualinvoke $r5.<javax.swing.JTree: boolean getDragEnabled()>();
+
+        if $z1 == 0 goto label2;
+
+        specialinvoke r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: void mouseReleasedDND(java.awt.event.MouseEvent)>(r0);
+
+     label2:
+        r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: java.awt.event.MouseEvent pressedEvent> = null;
+
+        r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.tree.TreePath pressedPath> = null;
+
+        return;
+    }
+
+    private void mouseReleasedDND(java.awt.event.MouseEvent)
+    {
+        javax.swing.plaf.basic.BasicTreeUI$Handler r2;
+        int $i0, $i1;
+        boolean $z0, $z1, $z2, $z3;
+        javax.swing.plaf.basic.BasicTreeUI $r9, $r10;
+        javax.swing.tree.TreePath $r3, $r5, $r8;
+        javax.swing.JTree $r11;
+        java.awt.event.MouseEvent r0, $r1, $r4, $r6, $r7;
+
+        r2 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r0 := @parameter0: java.awt.event.MouseEvent;
+
+        $r1 = staticinvoke <javax.swing.plaf.basic.DragRecognitionSupport: java.awt.event.MouseEvent mouseReleased(java.awt.event.MouseEvent)>(r0);
+
+        if $r1 == null goto label1;
+
+        $r10 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r11 = $r10.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        staticinvoke <sun.swing.SwingUtilities2: void adjustFocus(javax.swing.JComponent)>($r11);
+
+        $z2 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: boolean dragPressDidSelection>;
+
+        if $z2 != 0 goto label1;
+
+        virtualinvoke r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: void handleSelection(java.awt.event.MouseEvent)>($r1);
+
+     label1:
+        $z3 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: boolean dragStarted>;
+
+        if $z3 != 0 goto label2;
+
+        $r3 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.tree.TreePath pressedPath>;
+
+        if $r3 == null goto label2;
+
+        $z0 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: boolean valueChangedOnPress>;
+
+        if $z0 != 0 goto label2;
+
+        $r5 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.tree.TreePath pressedPath>;
+
+        $r4 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: java.awt.event.MouseEvent pressedEvent>;
+
+        $i0 = virtualinvoke $r4.<java.awt.event.MouseEvent: int getX()>();
+
+        $r6 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: java.awt.event.MouseEvent pressedEvent>;
+
+        $i1 = virtualinvoke $r6.<java.awt.event.MouseEvent: int getY()>();
+
+        $z1 = specialinvoke r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: boolean isActualPath(javax.swing.tree.TreePath,int,int)>($r5, $i0, $i1);
+
+        if $z1 == 0 goto label2;
+
+        $r9 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r8 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.tree.TreePath pressedPath>;
+
+        $r7 = r2.<javax.swing.plaf.basic.BasicTreeUI$Handler: java.awt.event.MouseEvent pressedEvent>;
+
+        staticinvoke <javax.swing.plaf.basic.BasicTreeUI: boolean access$1600(javax.swing.plaf.basic.BasicTreeUI,javax.swing.tree.TreePath,java.awt.event.MouseEvent,java.awt.event.MouseEvent)>($r9, $r8, $r7, r0);
+
+     label2:
+        return;
+    }
+
+    public void focusGained(java.awt.event.FocusEvent)
+    {
+        java.awt.Rectangle $r9, $r15, $r19, $r23;
+        javax.swing.plaf.basic.BasicTreeUI$Handler r0;
+        javax.swing.plaf.basic.BasicTreeUI $r1, $r3, $r4, $r6, $r10, $r11, $r12, $r16, $r17, $r20, $r21;
+        javax.swing.tree.TreePath $r8, $r14;
+        javax.swing.JTree $r2, $r5, $r7, $r13, $r18, $r22;
+        java.awt.event.FocusEvent r24;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r24 := @parameter0: java.awt.event.FocusEvent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r2 = $r1.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        if $r2 == null goto label2;
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r7 = $r3.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r5 = $r4.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $r8 = virtualinvoke $r5.<javax.swing.JTree: javax.swing.tree.TreePath getLeadSelectionPath()>();
+
+        $r9 = virtualinvoke $r6.<javax.swing.plaf.basic.BasicTreeUI: java.awt.Rectangle getPathBounds(javax.swing.JTree,javax.swing.tree.TreePath)>($r7, $r8);
+
+        if $r9 == null goto label1;
+
+        $r20 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r22 = $r20.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $r21 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r23 = staticinvoke <javax.swing.plaf.basic.BasicTreeUI: java.awt.Rectangle access$1700(javax.swing.plaf.basic.BasicTreeUI,java.awt.Rectangle)>($r21, $r9);
+
+        virtualinvoke $r22.<javax.swing.JTree: void repaint(java.awt.Rectangle)>($r23);
+
+     label1:
+        $r12 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r10 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r13 = $r10.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $r11 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r14 = staticinvoke <javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.TreePath access$1800(javax.swing.plaf.basic.BasicTreeUI)>($r11);
+
+        $r15 = virtualinvoke $r12.<javax.swing.plaf.basic.BasicTreeUI: java.awt.Rectangle getPathBounds(javax.swing.JTree,javax.swing.tree.TreePath)>($r13, $r14);
+
+        if $r15 == null goto label2;
+
+        $r16 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r18 = $r16.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $r17 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r19 = staticinvoke <javax.swing.plaf.basic.BasicTreeUI: java.awt.Rectangle access$1700(javax.swing.plaf.basic.BasicTreeUI,java.awt.Rectangle)>($r17, $r15);
+
+        virtualinvoke $r18.<javax.swing.JTree: void repaint(java.awt.Rectangle)>($r19);
+
+     label2:
+        return;
+    }
+
+    public void focusLost(java.awt.event.FocusEvent)
+    {
+        javax.swing.plaf.basic.BasicTreeUI$Handler r0;
+        java.awt.event.FocusEvent r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r1 := @parameter0: java.awt.event.FocusEvent;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: void focusGained(java.awt.event.FocusEvent)>(r1);
+
+        return;
+    }
+
+    public void editingStopped(javax.swing.event.ChangeEvent)
+    {
+        javax.swing.event.ChangeEvent r2;
+        javax.swing.plaf.basic.BasicTreeUI $r1;
+        javax.swing.plaf.basic.BasicTreeUI$Handler r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r2 := @parameter0: javax.swing.event.ChangeEvent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        virtualinvoke $r1.<javax.swing.plaf.basic.BasicTreeUI: void completeEditing(boolean,boolean,boolean)>(0, 0, 1);
+
+        return;
+    }
+
+    public void editingCanceled(javax.swing.event.ChangeEvent)
+    {
+        javax.swing.event.ChangeEvent r2;
+        javax.swing.plaf.basic.BasicTreeUI $r1;
+        javax.swing.plaf.basic.BasicTreeUI$Handler r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r2 := @parameter0: javax.swing.event.ChangeEvent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        virtualinvoke $r1.<javax.swing.plaf.basic.BasicTreeUI: void completeEditing(boolean,boolean,boolean)>(0, 0, 0);
+
+        return;
+    }
+
+    public void valueChanged(javax.swing.event.TreeSelectionEvent)
+    {
+        javax.swing.tree.TreePath[] $r26, $r46;
+        javax.swing.tree.TreePath $r14, $r27, $r29, r34, $r36, $r43;
+        javax.swing.plaf.basic.BasicTreeUI$Handler r0;
+        javax.swing.plaf.basic.BasicTreeUI $r1, $r2, $r5, $r7, $r9, $r11, $r13, $r16, $r18, $r20, $r22, $r24, $r28, $r31, $r35, $r37, $r38, $r40, $r44, $r45, $r47, $r50, $r52, $r53;
+        javax.swing.tree.TreeSelectionModel $r23, $r25, $r42;
+        javax.swing.tree.TreeModel $r32;
+        boolean $z0, $z1, $z2, $z3, $z4, z5, z6;
+        java.awt.Rectangle $r8, $r17, $r49, $r55;
+        javax.swing.event.TreeSelectionEvent r4;
+        int $i0, $i1, $i2, $i3, i4, $i5, $i6, $i7, i8, $i9, $i10, i11, $i13;
+        javax.swing.JTree $r3, $r6, $r10, $r12, $r15, $r19, $r21, $r30, $r39, $r41, $r48, $r51, $r54;
+        java.lang.Object $r33;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r4 := @parameter0: javax.swing.event.TreeSelectionEvent;
+
+        r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: boolean valueChangedOnPress> = 1;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        virtualinvoke $r1.<javax.swing.plaf.basic.BasicTreeUI: void completeEditing()>();
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r3 = $r2.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $z0 = virtualinvoke $r3.<javax.swing.JTree: boolean getExpandsSelectedPaths()>();
+
+        if $z0 == 0 goto label06;
+
+        $r22 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r23 = $r22.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.TreeSelectionModel treeSelectionModel>;
+
+        if $r23 == null goto label06;
+
+        $r24 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r25 = $r24.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.TreeSelectionModel treeSelectionModel>;
+
+        $r26 = interfaceinvoke $r25.<javax.swing.tree.TreeSelectionModel: javax.swing.tree.TreePath[] getSelectionPaths()>();
+
+        if $r26 == null goto label06;
+
+        $i7 = lengthof $r26;
+
+        i8 = $i7 - 1;
+
+     label01:
+        if i8 < 0 goto label06;
+
+        $r27 = $r26[i8];
+
+        r34 = virtualinvoke $r27.<javax.swing.tree.TreePath: javax.swing.tree.TreePath getParentPath()>();
+
+        z5 = 1;
+
+     label02:
+        if r34 == null goto label04;
+
+        $r31 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r32 = $r31.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.TreeModel treeModel>;
+
+        $r33 = virtualinvoke r34.<javax.swing.tree.TreePath: java.lang.Object getLastPathComponent()>();
+
+        $z4 = interfaceinvoke $r32.<javax.swing.tree.TreeModel: boolean isLeaf(java.lang.Object)>($r33);
+
+        if $z4 == 0 goto label03;
+
+        z5 = 0;
+
+        r34 = null;
+
+        goto label02;
+
+     label03:
+        r34 = virtualinvoke r34.<javax.swing.tree.TreePath: javax.swing.tree.TreePath getParentPath()>();
+
+        goto label02;
+
+     label04:
+        if z5 == 0 goto label05;
+
+        $r28 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r30 = $r28.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $r29 = $r26[i8];
+
+        virtualinvoke $r30.<javax.swing.JTree: void makeVisible(javax.swing.tree.TreePath)>($r29);
+
+     label05:
+        $i13 = (int) -1;
+
+        i8 = i8 + $i13;
+
+        goto label01;
+
+     label06:
+        $r35 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r36 = staticinvoke <javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.TreePath access$1800(javax.swing.plaf.basic.BasicTreeUI)>($r35);
+
+        $r37 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r38 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r39 = $r38.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $i9 = virtualinvoke $r39.<javax.swing.JTree: int getMinSelectionRow()>();
+
+        $r37.<javax.swing.plaf.basic.BasicTreeUI: int lastSelectedRow> = $i9;
+
+        $r40 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r41 = $r40.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $r42 = virtualinvoke $r41.<javax.swing.JTree: javax.swing.tree.TreeSelectionModel getSelectionModel()>();
+
+        $r43 = interfaceinvoke $r42.<javax.swing.tree.TreeSelectionModel: javax.swing.tree.TreePath getLeadSelectionPath()>();
+
+        $r44 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        staticinvoke <javax.swing.plaf.basic.BasicTreeUI: void access$1400(javax.swing.plaf.basic.BasicTreeUI,javax.swing.tree.TreePath)>($r44, $r43);
+
+        $r45 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        staticinvoke <javax.swing.plaf.basic.BasicTreeUI: void access$1900(javax.swing.plaf.basic.BasicTreeUI,javax.swing.tree.TreePath)>($r45, $r43);
+
+        $r46 = virtualinvoke r4.<javax.swing.event.TreeSelectionEvent: javax.swing.tree.TreePath[] getPaths()>();
+
+        $r47 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r48 = $r47.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $r49 = virtualinvoke $r48.<javax.swing.JTree: java.awt.Rectangle getVisibleRect()>();
+
+        z6 = 1;
+
+        $r50 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r51 = $r50.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $i10 = virtualinvoke $r51.<javax.swing.JTree: int getWidth()>();
+
+        if $r46 == null goto label10;
+
+        i4 = lengthof $r46;
+
+        if i4 <= 4 goto label07;
+
+        $r20 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r21 = $r20.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        virtualinvoke $r21.<javax.swing.JTree: void repaint()>();
+
+        z6 = 0;
+
+        goto label10;
+
+     label07:
+        i11 = 0;
+
+     label08:
+        if i11 >= i4 goto label10;
+
+        $r16 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r13 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r15 = $r13.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $r14 = $r46[i11];
+
+        $r17 = virtualinvoke $r16.<javax.swing.plaf.basic.BasicTreeUI: java.awt.Rectangle getPathBounds(javax.swing.JTree,javax.swing.tree.TreePath)>($r15, $r14);
+
+        if $r17 == null goto label09;
+
+        $z3 = virtualinvoke $r49.<java.awt.Rectangle: boolean intersects(java.awt.Rectangle)>($r17);
+
+        if $z3 == 0 goto label09;
+
+        $r18 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r19 = $r18.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $i6 = $r17.<java.awt.Rectangle: int y>;
+
+        $i5 = $r17.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r19.<javax.swing.JTree: void repaint(int,int,int,int)>(0, $i6, $i10, $i5);
+
+     label09:
+        i11 = i11 + 1;
+
+        goto label08;
+
+     label10:
+        if z6 == 0 goto label12;
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r6 = $r5.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $r8 = virtualinvoke $r7.<javax.swing.plaf.basic.BasicTreeUI: java.awt.Rectangle getPathBounds(javax.swing.JTree,javax.swing.tree.TreePath)>($r6, $r36);
+
+        if $r8 == null goto label11;
+
+        $z2 = virtualinvoke $r49.<java.awt.Rectangle: boolean intersects(java.awt.Rectangle)>($r8);
+
+        if $z2 == 0 goto label11;
+
+        $r11 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r12 = $r11.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $i3 = $r8.<java.awt.Rectangle: int y>;
+
+        $i2 = $r8.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r12.<javax.swing.JTree: void repaint(int,int,int,int)>(0, $i3, $i10, $i2);
+
+     label11:
+        $r52 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r53 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r54 = $r53.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $r55 = virtualinvoke $r52.<javax.swing.plaf.basic.BasicTreeUI: java.awt.Rectangle getPathBounds(javax.swing.JTree,javax.swing.tree.TreePath)>($r54, $r43);
+
+        if $r55 == null goto label12;
+
+        $z1 = virtualinvoke $r49.<java.awt.Rectangle: boolean intersects(java.awt.Rectangle)>($r55);
+
+        if $z1 == 0 goto label12;
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r10 = $r9.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $i1 = $r55.<java.awt.Rectangle: int y>;
+
+        $i0 = $r55.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r10.<javax.swing.JTree: void repaint(int,int,int,int)>(0, $i1, $i10, $i0);
+
+     label12:
+        return;
+    }
+
+    public void treeExpanded(javax.swing.event.TreeExpansionEvent)
+    {
+        javax.swing.event.TreeExpansionEvent r0;
+        javax.swing.plaf.basic.BasicTreeUI $r2, $r5;
+        javax.swing.tree.TreePath $r4;
+        javax.swing.plaf.basic.BasicTreeUI$Handler r1;
+        javax.swing.JTree $r3;
+
+        r1 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r0 := @parameter0: javax.swing.event.TreeExpansionEvent;
+
+        if r0 == null goto label1;
+
+        $r2 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r3 = $r2.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        if $r3 == null goto label1;
+
+        $r4 = virtualinvoke r0.<javax.swing.event.TreeExpansionEvent: javax.swing.tree.TreePath getPath()>();
+
+        $r5 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        virtualinvoke $r5.<javax.swing.plaf.basic.BasicTreeUI: void updateExpandedDescendants(javax.swing.tree.TreePath)>($r4);
+
+     label1:
+        return;
+    }
+
+    public void treeCollapsed(javax.swing.event.TreeExpansionEvent)
+    {
+        javax.swing.event.TreeExpansionEvent r0;
+        javax.swing.plaf.basic.BasicTreeUI $r2, $r5, $r6, $r8, $r10, $r11;
+        javax.swing.tree.AbstractLayoutCache $r9;
+        javax.swing.tree.TreePath $r4;
+        javax.swing.JTree $r3, $r7;
+        javax.swing.plaf.basic.BasicTreeUI$Handler r1;
+        boolean $z0;
+
+        r1 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r0 := @parameter0: javax.swing.event.TreeExpansionEvent;
+
+        if r0 == null goto label1;
+
+        $r2 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r3 = $r2.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        if $r3 == null goto label1;
+
+        $r4 = virtualinvoke r0.<javax.swing.event.TreeExpansionEvent: javax.swing.tree.TreePath getPath()>();
+
+        $r5 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        virtualinvoke $r5.<javax.swing.plaf.basic.BasicTreeUI: void completeEditing()>();
+
+        if $r4 == null goto label1;
+
+        $r6 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r7 = $r6.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $z0 = virtualinvoke $r7.<javax.swing.JTree: boolean isVisible(javax.swing.tree.TreePath)>($r4);
+
+        if $z0 == 0 goto label1;
+
+        $r8 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r9 = $r8.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.AbstractLayoutCache treeState>;
+
+        virtualinvoke $r9.<javax.swing.tree.AbstractLayoutCache: void setExpandedState(javax.swing.tree.TreePath,boolean)>($r4, 0);
+
+        $r10 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        virtualinvoke $r10.<javax.swing.plaf.basic.BasicTreeUI: void updateLeadSelectionRow()>();
+
+        $r11 = r1.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        virtualinvoke $r11.<javax.swing.plaf.basic.BasicTreeUI: void updateSize()>();
+
+     label1:
+        return;
+    }
+
+    public void treeNodesChanged(javax.swing.event.TreeModelEvent)
+    {
+        javax.swing.tree.TreeModel $r5, $r16;
+        int[] $r7;
+        boolean $z0;
+        javax.swing.tree.TreePath $r6, $r19;
+        java.awt.Rectangle $r23, $r30;
+        javax.swing.event.TreeModelEvent r3;
+        javax.swing.plaf.basic.BasicTreeUI$Handler r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, i14, i15, $i17;
+        javax.swing.plaf.basic.BasicTreeUI $r1, $r4, $r8, $r10, $r11, $r13, $r15, $r20, $r22, $r24, $r26, $r27, $r29, $r31, $r32, $r35, $r37, $r38;
+        javax.swing.tree.AbstractLayoutCache $r2, $r9, $r12, $r14, $r25;
+        javax.swing.JTree $r21, $r28, $r33, $r34, $r36, $r39, $r40;
+        java.lang.Object $r17, $r18;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r3 := @parameter0: javax.swing.event.TreeModelEvent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r2 = $r1.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.AbstractLayoutCache treeState>;
+
+        if $r2 == null goto label10;
+
+        if r3 == null goto label10;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r5 = virtualinvoke $r4.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.TreeModel getModel()>();
+
+        $r6 = staticinvoke <sun.swing.SwingUtilities2: javax.swing.tree.TreePath getTreePath(javax.swing.event.TreeModelEvent,javax.swing.tree.TreeModel)>(r3, $r5);
+
+        $r7 = virtualinvoke r3.<javax.swing.event.TreeModelEvent: int[] getChildIndices()>();
+
+        if $r7 == null goto label01;
+
+        $i0 = lengthof $r7;
+
+        if $i0 != 0 goto label02;
+
+     label01:
+        $r8 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r9 = $r8.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.AbstractLayoutCache treeState>;
+
+        virtualinvoke $r9.<javax.swing.tree.AbstractLayoutCache: void treeNodesChanged(javax.swing.event.TreeModelEvent)>(r3);
+
+        $r10 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        virtualinvoke $r10.<javax.swing.plaf.basic.BasicTreeUI: void updateSize()>();
+
+        goto label10;
+
+     label02:
+        $r11 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r12 = $r11.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.AbstractLayoutCache treeState>;
+
+        $z0 = virtualinvoke $r12.<javax.swing.tree.AbstractLayoutCache: boolean isExpanded(javax.swing.tree.TreePath)>($r6);
+
+        if $z0 == 0 goto label09;
+
+        i14 = $r7[0];
+
+        $i1 = lengthof $r7;
+
+        i15 = $i1 - 1;
+
+     label03:
+        if i15 <= 0 goto label04;
+
+        $i13 = $r7[i15];
+
+        i14 = staticinvoke <java.lang.Math: int min(int,int)>($i13, i14);
+
+        $i17 = (int) -1;
+
+        i15 = i15 + $i17;
+
+        goto label03;
+
+     label04:
+        $r15 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r16 = $r15.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.TreeModel treeModel>;
+
+        $r17 = virtualinvoke $r6.<javax.swing.tree.TreePath: java.lang.Object getLastPathComponent()>();
+
+        $r18 = interfaceinvoke $r16.<javax.swing.tree.TreeModel: java.lang.Object getChild(java.lang.Object,int)>($r17, i14);
+
+        $r19 = virtualinvoke $r6.<javax.swing.tree.TreePath: javax.swing.tree.TreePath pathByAddingChild(java.lang.Object)>($r18);
+
+        $r22 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r20 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r21 = $r20.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $r23 = virtualinvoke $r22.<javax.swing.plaf.basic.BasicTreeUI: java.awt.Rectangle getPathBounds(javax.swing.JTree,javax.swing.tree.TreePath)>($r21, $r19);
+
+        $r24 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r25 = $r24.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.AbstractLayoutCache treeState>;
+
+        virtualinvoke $r25.<javax.swing.tree.AbstractLayoutCache: void treeNodesChanged(javax.swing.event.TreeModelEvent)>(r3);
+
+        $r26 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        staticinvoke <javax.swing.plaf.basic.BasicTreeUI: void access$2000(javax.swing.plaf.basic.BasicTreeUI)>($r26);
+
+        $r29 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r27 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r28 = $r27.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $r30 = virtualinvoke $r29.<javax.swing.plaf.basic.BasicTreeUI: java.awt.Rectangle getPathBounds(javax.swing.JTree,javax.swing.tree.TreePath)>($r28, $r19);
+
+        if $r23 == null goto label05;
+
+        if $r30 != null goto label06;
+
+     label05:
+        return;
+
+     label06:
+        $i2 = lengthof $r7;
+
+        if $i2 != 1 goto label07;
+
+        $i9 = $r30.<java.awt.Rectangle: int height>;
+
+        $i8 = $r23.<java.awt.Rectangle: int height>;
+
+        if $i9 != $i8 goto label07;
+
+        $r37 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r40 = $r37.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $i10 = $r23.<java.awt.Rectangle: int y>;
+
+        $r38 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r39 = $r38.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $i11 = virtualinvoke $r39.<javax.swing.JTree: int getWidth()>();
+
+        $i12 = $r23.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r40.<javax.swing.JTree: void repaint(int,int,int,int)>(0, $i10, $i11, $i12);
+
+        goto label08;
+
+     label07:
+        $r31 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r34 = $r31.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $i3 = $r23.<java.awt.Rectangle: int y>;
+
+        $r32 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r33 = $r32.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $i4 = virtualinvoke $r33.<javax.swing.JTree: int getWidth()>();
+
+        $r35 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r36 = $r35.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.JTree tree>;
+
+        $i5 = virtualinvoke $r36.<javax.swing.JTree: int getHeight()>();
+
+        $i6 = $r23.<java.awt.Rectangle: int y>;
+
+        $i7 = $i5 - $i6;
+
+        virtualinvoke $r34.<javax.swing.JTree: void repaint(int,int,int,int)>(0, $i3, $i4, $i7);
+
+     label08:
+        goto label10;
+
+     label09:
+        $r13 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r14 = $r13.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.AbstractLayoutCache treeState>;
+
+        virtualinvoke $r14.<javax.swing.tree.AbstractLayoutCache: void treeNodesChanged(javax.swing.event.TreeModelEvent)>(r3);
+
+     label10:
+        return;
+    }
+
+    public void treeNodesInserted(javax.swing.event.TreeModelEvent)
+    {
+        javax.swing.event.TreeModelEvent r3;
+        javax.swing.tree.TreeModel $r8, $r14;
+        int[] $r12;
+        javax.swing.plaf.basic.BasicTreeUI$Handler r0;
+        int $i0, $i1, $i2;
+        boolean $z0;
+        javax.swing.plaf.basic.BasicTreeUI $r1, $r4, $r6, $r7, $r10, $r13, $r16, $r17;
+        javax.swing.tree.AbstractLayoutCache $r2, $r5, $r11;
+        javax.swing.tree.TreePath $r9;
+        java.lang.Object $r15;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r3 := @parameter0: javax.swing.event.TreeModelEvent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r2 = $r1.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.AbstractLayoutCache treeState>;
+
+        if $r2 == null goto label2;
+
+        if r3 == null goto label2;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r5 = $r4.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.AbstractLayoutCache treeState>;
+
+        virtualinvoke $r5.<javax.swing.tree.AbstractLayoutCache: void treeNodesInserted(javax.swing.event.TreeModelEvent)>(r3);
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        virtualinvoke $r6.<javax.swing.plaf.basic.BasicTreeUI: void updateLeadSelectionRow()>();
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r8 = virtualinvoke $r7.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.TreeModel getModel()>();
+
+        $r9 = staticinvoke <sun.swing.SwingUtilities2: javax.swing.tree.TreePath getTreePath(javax.swing.event.TreeModelEvent,javax.swing.tree.TreeModel)>(r3, $r8);
+
+        $r10 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r11 = $r10.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.AbstractLayoutCache treeState>;
+
+        $z0 = virtualinvoke $r11.<javax.swing.tree.AbstractLayoutCache: boolean isExpanded(javax.swing.tree.TreePath)>($r9);
+
+        if $z0 == 0 goto label1;
+
+        $r17 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        virtualinvoke $r17.<javax.swing.plaf.basic.BasicTreeUI: void updateSize()>();
+
+        goto label2;
+
+     label1:
+        $r12 = virtualinvoke r3.<javax.swing.event.TreeModelEvent: int[] getChildIndices()>();
+
+        $r13 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r14 = $r13.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.TreeModel treeModel>;
+
+        $r15 = virtualinvoke $r9.<javax.swing.tree.TreePath: java.lang.Object getLastPathComponent()>();
+
+        $i0 = interfaceinvoke $r14.<javax.swing.tree.TreeModel: int getChildCount(java.lang.Object)>($r15);
+
+        if $r12 == null goto label2;
+
+        $i1 = lengthof $r12;
+
+        $i2 = $i0 - $i1;
+
+        if $i2 != 0 goto label2;
+
+        $r16 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        virtualinvoke $r16.<javax.swing.plaf.basic.BasicTreeUI: void updateSize()>();
+
+     label2:
+        return;
+    }
+
+    public void treeNodesRemoved(javax.swing.event.TreeModelEvent)
+    {
+        javax.swing.event.TreeModelEvent r3;
+        javax.swing.tree.TreeModel $r8, $r14;
+        javax.swing.plaf.basic.BasicTreeUI$Handler r0;
+        int $i0;
+        boolean $z0;
+        javax.swing.plaf.basic.BasicTreeUI $r1, $r4, $r6, $r7, $r10, $r12, $r13;
+        javax.swing.tree.AbstractLayoutCache $r2, $r5, $r11;
+        javax.swing.tree.TreePath $r9;
+        java.lang.Object $r15;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r3 := @parameter0: javax.swing.event.TreeModelEvent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r2 = $r1.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.AbstractLayoutCache treeState>;
+
+        if $r2 == null goto label2;
+
+        if r3 == null goto label2;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r5 = $r4.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.AbstractLayoutCache treeState>;
+
+        virtualinvoke $r5.<javax.swing.tree.AbstractLayoutCache: void treeNodesRemoved(javax.swing.event.TreeModelEvent)>(r3);
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        virtualinvoke $r6.<javax.swing.plaf.basic.BasicTreeUI: void updateLeadSelectionRow()>();
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r8 = virtualinvoke $r7.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.TreeModel getModel()>();
+
+        $r9 = staticinvoke <sun.swing.SwingUtilities2: javax.swing.tree.TreePath getTreePath(javax.swing.event.TreeModelEvent,javax.swing.tree.TreeModel)>(r3, $r8);
+
+        $r10 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r11 = $r10.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.AbstractLayoutCache treeState>;
+
+        $z0 = virtualinvoke $r11.<javax.swing.tree.AbstractLayoutCache: boolean isExpanded(javax.swing.tree.TreePath)>($r9);
+
+        if $z0 != 0 goto label1;
+
+        $r13 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r14 = $r13.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.TreeModel treeModel>;
+
+        $r15 = virtualinvoke $r9.<javax.swing.tree.TreePath: java.lang.Object getLastPathComponent()>();
+
+        $i0 = interfaceinvoke $r14.<javax.swing.tree.TreeModel: int getChildCount(java.lang.Object)>($r15);
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        $r12 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        virtualinvoke $r12.<javax.swing.plaf.basic.BasicTreeUI: void updateSize()>();
+
+     label2:
+        return;
+    }
+
+    public void treeStructureChanged(javax.swing.event.TreeModelEvent)
+    {
+        javax.swing.event.TreeModelEvent r3;
+        javax.swing.plaf.basic.BasicTreeUI $r1, $r4, $r6, $r7, $r10, $r11;
+        javax.swing.tree.AbstractLayoutCache $r2, $r5, $r12;
+        javax.swing.tree.TreePath $r9, r13;
+        javax.swing.tree.TreeModel $r8;
+        javax.swing.plaf.basic.BasicTreeUI$Handler r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r3 := @parameter0: javax.swing.event.TreeModelEvent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r2 = $r1.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.AbstractLayoutCache treeState>;
+
+        if $r2 == null goto label3;
+
+        if r3 == null goto label3;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r5 = $r4.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.AbstractLayoutCache treeState>;
+
+        virtualinvoke $r5.<javax.swing.tree.AbstractLayoutCache: void treeStructureChanged(javax.swing.event.TreeModelEvent)>(r3);
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        virtualinvoke $r6.<javax.swing.plaf.basic.BasicTreeUI: void updateLeadSelectionRow()>();
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r8 = virtualinvoke $r7.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.TreeModel getModel()>();
+
+        $r9 = staticinvoke <sun.swing.SwingUtilities2: javax.swing.tree.TreePath getTreePath(javax.swing.event.TreeModelEvent,javax.swing.tree.TreeModel)>(r3, $r8);
+
+        r13 = $r9;
+
+        if $r9 == null goto label1;
+
+        r13 = virtualinvoke $r9.<javax.swing.tree.TreePath: javax.swing.tree.TreePath getParentPath()>();
+
+     label1:
+        if r13 == null goto label2;
+
+        $r11 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        $r12 = $r11.<javax.swing.plaf.basic.BasicTreeUI: javax.swing.tree.AbstractLayoutCache treeState>;
+
+        $z0 = virtualinvoke $r12.<javax.swing.tree.AbstractLayoutCache: boolean isExpanded(javax.swing.tree.TreePath)>(r13);
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        $r10 = r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: javax.swing.plaf.basic.BasicTreeUI this$0>;
+
+        virtualinvoke $r10.<javax.swing.plaf.basic.BasicTreeUI: void updateSize()>();
+
+     label3:
+        return;
+    }
+
+    void <init>(javax.swing.plaf.basic.BasicTreeUI, javax.swing.plaf.basic.BasicTreeUI$1)
+    {
+        javax.swing.plaf.basic.BasicTreeUI r1;
+        javax.swing.plaf.basic.BasicTreeUI$Handler r0;
+        javax.swing.plaf.basic.BasicTreeUI$1 r2;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTreeUI$Handler;
+
+        r1 := @parameter0: javax.swing.plaf.basic.BasicTreeUI;
+
+        r2 := @parameter1: javax.swing.plaf.basic.BasicTreeUI$1;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicTreeUI$Handler: void <init>(javax.swing.plaf.basic.BasicTreeUI)>(r1);
+
+        return;
+    }
+}

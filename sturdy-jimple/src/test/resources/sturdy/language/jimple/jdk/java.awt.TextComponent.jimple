@@ -1,0 +1,1129 @@
+public class java.awt.TextComponent extends java.awt.Component implements javax.accessibility.Accessible
+{
+    java.lang.String text;
+    boolean editable;
+    int selectionStart;
+    int selectionEnd;
+    boolean backgroundSetByClientCode;
+    protected transient java.awt.event.TextListener textListener;
+    private static final long serialVersionUID;
+    private int textComponentSerializedDataVersion;
+    private boolean checkForEnableIM;
+
+    void <init>(java.lang.String) throws java.awt.HeadlessException
+    {
+        java.awt.TextComponent r0;
+        java.awt.Cursor $r2;
+        java.lang.String r1, $r3;
+
+        r0 := @this: java.awt.TextComponent;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.awt.Component: void <init>()>();
+
+        r0.<java.awt.TextComponent: boolean editable> = 1;
+
+        r0.<java.awt.TextComponent: boolean backgroundSetByClientCode> = 0;
+
+        r0.<java.awt.TextComponent: int textComponentSerializedDataVersion> = 1;
+
+        r0.<java.awt.TextComponent: boolean checkForEnableIM> = 1;
+
+        staticinvoke <java.awt.GraphicsEnvironment: void checkHeadless()>();
+
+        if r1 == null goto label1;
+
+        $r3 = r1;
+
+        goto label2;
+
+     label1:
+        $r3 = "";
+
+     label2:
+        r0.<java.awt.TextComponent: java.lang.String text> = $r3;
+
+        $r2 = staticinvoke <java.awt.Cursor: java.awt.Cursor getPredefinedCursor(int)>(2);
+
+        virtualinvoke r0.<java.awt.TextComponent: void setCursor(java.awt.Cursor)>($r2);
+
+        return;
+    }
+
+    private void enableInputMethodsIfNecessary()
+    {
+        java.awt.TextComponent r0;
+        sun.awt.InputMethodSupport $r2;
+        java.lang.Exception $r3;
+        boolean $z0, $z1, z2;
+        java.awt.Toolkit $r1;
+
+        r0 := @this: java.awt.TextComponent;
+
+        $z0 = r0.<java.awt.TextComponent: boolean checkForEnableIM>;
+
+        if $z0 == 0 goto label5;
+
+        r0.<java.awt.TextComponent: boolean checkForEnableIM> = 0;
+
+     label1:
+        $r1 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        z2 = 0;
+
+        $z1 = $r1 instanceof sun.awt.InputMethodSupport;
+
+        if $z1 == 0 goto label2;
+
+        $r2 = (sun.awt.InputMethodSupport) $r1;
+
+        z2 = interfaceinvoke $r2.<sun.awt.InputMethodSupport: boolean enableInputMethodsForTextComponent()>();
+
+     label2:
+        virtualinvoke r0.<java.awt.TextComponent: void enableInputMethods(boolean)>(z2);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r3 := @caughtexception;
+
+     label5:
+        return;
+
+        catch java.lang.Exception from label1 to label3 with label4;
+    }
+
+    public void enableInputMethods(boolean)
+    {
+        java.awt.TextComponent r0;
+        boolean z0;
+
+        r0 := @this: java.awt.TextComponent;
+
+        z0 := @parameter0: boolean;
+
+        r0.<java.awt.TextComponent: boolean checkForEnableIM> = 0;
+
+        specialinvoke r0.<java.awt.Component: void enableInputMethods(boolean)>(z0);
+
+        return;
+    }
+
+    boolean areInputMethodsEnabled()
+    {
+        java.awt.TextComponent r0;
+        byte $b2;
+        long $l0, $l1;
+        boolean $z0, $z1;
+
+        r0 := @this: java.awt.TextComponent;
+
+        $z0 = r0.<java.awt.TextComponent: boolean checkForEnableIM>;
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<java.awt.TextComponent: void enableInputMethodsIfNecessary()>();
+
+     label1:
+        $l0 = r0.<java.awt.TextComponent: long eventMask>;
+
+        $l1 = $l0 & 4096L;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 == 0 goto label2;
+
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        return $z1;
+    }
+
+    public java.awt.im.InputMethodRequests getInputMethodRequests()
+    {
+        java.awt.peer.TextComponentPeer r2;
+        java.awt.TextComponent r0;
+        java.awt.peer.ComponentPeer $r1;
+        java.awt.im.InputMethodRequests $r3;
+
+        r0 := @this: java.awt.TextComponent;
+
+        $r1 = r0.<java.awt.TextComponent: java.awt.peer.ComponentPeer peer>;
+
+        r2 = (java.awt.peer.TextComponentPeer) $r1;
+
+        if r2 == null goto label1;
+
+        $r3 = interfaceinvoke r2.<java.awt.peer.TextComponentPeer: java.awt.im.InputMethodRequests getInputMethodRequests()>();
+
+        return $r3;
+
+     label1:
+        return null;
+    }
+
+    public void addNotify()
+    {
+        java.awt.TextComponent r0;
+
+        r0 := @this: java.awt.TextComponent;
+
+        specialinvoke r0.<java.awt.Component: void addNotify()>();
+
+        specialinvoke r0.<java.awt.TextComponent: void enableInputMethodsIfNecessary()>();
+
+        return;
+    }
+
+    public void removeNotify()
+    {
+        java.lang.Throwable $r5;
+        java.awt.TextComponent r0;
+        java.awt.peer.ComponentPeer $r2;
+        java.awt.peer.TextComponentPeer r3;
+        int $i0, $i1;
+        java.lang.Object $r1;
+        java.lang.String $r4;
+
+        r0 := @this: java.awt.TextComponent;
+
+        $r1 = virtualinvoke r0.<java.awt.TextComponent: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<java.awt.TextComponent: java.awt.peer.ComponentPeer peer>;
+
+        r3 = (java.awt.peer.TextComponentPeer) $r2;
+
+        if r3 == null goto label2;
+
+        $r4 = interfaceinvoke r3.<java.awt.peer.TextComponentPeer: java.lang.String getText()>();
+
+        r0.<java.awt.TextComponent: java.lang.String text> = $r4;
+
+        $i0 = interfaceinvoke r3.<java.awt.peer.TextComponentPeer: int getSelectionStart()>();
+
+        r0.<java.awt.TextComponent: int selectionStart> = $i0;
+
+        $i1 = interfaceinvoke r3.<java.awt.peer.TextComponentPeer: int getSelectionEnd()>();
+
+        r0.<java.awt.TextComponent: int selectionEnd> = $i1;
+
+     label2:
+        specialinvoke r0.<java.awt.Component: void removeNotify()>();
+
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r5;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public synchronized void setText(java.lang.String)
+    {
+        java.awt.TextComponent r0;
+        java.awt.peer.ComponentPeer $r3;
+        java.awt.peer.TextComponentPeer $r5;
+        java.lang.String $r1, r2, $r4, $r6, $r7;
+        boolean z0, $z1, $z2, $z3;
+
+        r0 := @this: java.awt.TextComponent;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = r0.<java.awt.TextComponent: java.lang.String text>;
+
+        if $r1 == null goto label1;
+
+        $r6 = r0.<java.awt.TextComponent: java.lang.String text>;
+
+        $z2 = virtualinvoke $r6.<java.lang.String: boolean isEmpty()>();
+
+        if $z2 == 0 goto label3;
+
+     label1:
+        if r2 == null goto label2;
+
+        $z1 = virtualinvoke r2.<java.lang.String: boolean isEmpty()>();
+
+        if $z1 == 0 goto label3;
+
+     label2:
+        $z3 = 1;
+
+        goto label4;
+
+     label3:
+        $z3 = 0;
+
+     label4:
+        z0 = $z3;
+
+        if r2 == null goto label5;
+
+        $r7 = r2;
+
+        goto label6;
+
+     label5:
+        $r7 = "";
+
+     label6:
+        r0.<java.awt.TextComponent: java.lang.String text> = $r7;
+
+        $r3 = r0.<java.awt.TextComponent: java.awt.peer.ComponentPeer peer>;
+
+        $r5 = (java.awt.peer.TextComponentPeer) $r3;
+
+        if $r5 == null goto label7;
+
+        if z0 != 0 goto label7;
+
+        $r4 = r0.<java.awt.TextComponent: java.lang.String text>;
+
+        interfaceinvoke $r5.<java.awt.peer.TextComponentPeer: void setText(java.lang.String)>($r4);
+
+     label7:
+        return;
+    }
+
+    public synchronized java.lang.String getText()
+    {
+        java.awt.peer.TextComponentPeer r2;
+        java.awt.TextComponent r0;
+        java.awt.peer.ComponentPeer $r1;
+        java.lang.String $r3, $r4;
+
+        r0 := @this: java.awt.TextComponent;
+
+        $r1 = r0.<java.awt.TextComponent: java.awt.peer.ComponentPeer peer>;
+
+        r2 = (java.awt.peer.TextComponentPeer) $r1;
+
+        if r2 == null goto label1;
+
+        $r4 = interfaceinvoke r2.<java.awt.peer.TextComponentPeer: java.lang.String getText()>();
+
+        r0.<java.awt.TextComponent: java.lang.String text> = $r4;
+
+     label1:
+        $r3 = r0.<java.awt.TextComponent: java.lang.String text>;
+
+        return $r3;
+    }
+
+    public synchronized java.lang.String getSelectedText()
+    {
+        java.awt.TextComponent r0;
+        int $i0, $i1;
+        java.lang.String $r1, $r2;
+
+        r0 := @this: java.awt.TextComponent;
+
+        $r1 = virtualinvoke r0.<java.awt.TextComponent: java.lang.String getText()>();
+
+        $i0 = virtualinvoke r0.<java.awt.TextComponent: int getSelectionStart()>();
+
+        $i1 = virtualinvoke r0.<java.awt.TextComponent: int getSelectionEnd()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>($i0, $i1);
+
+        return $r2;
+    }
+
+    public boolean isEditable()
+    {
+        java.awt.TextComponent r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.TextComponent;
+
+        $z0 = r0.<java.awt.TextComponent: boolean editable>;
+
+        return $z0;
+    }
+
+    public synchronized void setEditable(boolean)
+    {
+        java.awt.peer.TextComponentPeer r2;
+        java.awt.TextComponent r0;
+        java.awt.peer.ComponentPeer $r1;
+        boolean z0, $z1;
+
+        r0 := @this: java.awt.TextComponent;
+
+        z0 := @parameter0: boolean;
+
+        $z1 = r0.<java.awt.TextComponent: boolean editable>;
+
+        if $z1 != z0 goto label1;
+
+        return;
+
+     label1:
+        r0.<java.awt.TextComponent: boolean editable> = z0;
+
+        $r1 = r0.<java.awt.TextComponent: java.awt.peer.ComponentPeer peer>;
+
+        r2 = (java.awt.peer.TextComponentPeer) $r1;
+
+        if r2 == null goto label2;
+
+        interfaceinvoke r2.<java.awt.peer.TextComponentPeer: void setEditable(boolean)>(z0);
+
+     label2:
+        return;
+    }
+
+    public java.awt.Color getBackground()
+    {
+        java.awt.Color $r1;
+        java.awt.TextComponent r0;
+        java.awt.SystemColor $r2;
+        boolean $z0, $z1;
+
+        r0 := @this: java.awt.TextComponent;
+
+        $z0 = r0.<java.awt.TextComponent: boolean editable>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = r0.<java.awt.TextComponent: boolean backgroundSetByClientCode>;
+
+        if $z1 != 0 goto label1;
+
+        $r2 = <java.awt.SystemColor: java.awt.SystemColor control>;
+
+        return $r2;
+
+     label1:
+        $r1 = specialinvoke r0.<java.awt.Component: java.awt.Color getBackground()>();
+
+        return $r1;
+    }
+
+    public void setBackground(java.awt.Color)
+    {
+        java.awt.Color r1;
+        java.awt.TextComponent r0;
+
+        r0 := @this: java.awt.TextComponent;
+
+        r1 := @parameter0: java.awt.Color;
+
+        r0.<java.awt.TextComponent: boolean backgroundSetByClientCode> = 1;
+
+        specialinvoke r0.<java.awt.Component: void setBackground(java.awt.Color)>(r1);
+
+        return;
+    }
+
+    public synchronized int getSelectionStart()
+    {
+        java.awt.peer.TextComponentPeer r2;
+        java.awt.TextComponent r0;
+        java.awt.peer.ComponentPeer $r1;
+        int $i0, $i1;
+
+        r0 := @this: java.awt.TextComponent;
+
+        $r1 = r0.<java.awt.TextComponent: java.awt.peer.ComponentPeer peer>;
+
+        r2 = (java.awt.peer.TextComponentPeer) $r1;
+
+        if r2 == null goto label1;
+
+        $i1 = interfaceinvoke r2.<java.awt.peer.TextComponentPeer: int getSelectionStart()>();
+
+        r0.<java.awt.TextComponent: int selectionStart> = $i1;
+
+     label1:
+        $i0 = r0.<java.awt.TextComponent: int selectionStart>;
+
+        return $i0;
+    }
+
+    public synchronized void setSelectionStart(int)
+    {
+        int i0, $i1;
+        java.awt.TextComponent r0;
+
+        r0 := @this: java.awt.TextComponent;
+
+        i0 := @parameter0: int;
+
+        $i1 = virtualinvoke r0.<java.awt.TextComponent: int getSelectionEnd()>();
+
+        virtualinvoke r0.<java.awt.TextComponent: void select(int,int)>(i0, $i1);
+
+        return;
+    }
+
+    public synchronized int getSelectionEnd()
+    {
+        java.awt.peer.TextComponentPeer r2;
+        java.awt.TextComponent r0;
+        java.awt.peer.ComponentPeer $r1;
+        int $i0, $i1;
+
+        r0 := @this: java.awt.TextComponent;
+
+        $r1 = r0.<java.awt.TextComponent: java.awt.peer.ComponentPeer peer>;
+
+        r2 = (java.awt.peer.TextComponentPeer) $r1;
+
+        if r2 == null goto label1;
+
+        $i1 = interfaceinvoke r2.<java.awt.peer.TextComponentPeer: int getSelectionEnd()>();
+
+        r0.<java.awt.TextComponent: int selectionEnd> = $i1;
+
+     label1:
+        $i0 = r0.<java.awt.TextComponent: int selectionEnd>;
+
+        return $i0;
+    }
+
+    public synchronized void setSelectionEnd(int)
+    {
+        int $i0, i1;
+        java.awt.TextComponent r0;
+
+        r0 := @this: java.awt.TextComponent;
+
+        i1 := @parameter0: int;
+
+        $i0 = virtualinvoke r0.<java.awt.TextComponent: int getSelectionStart()>();
+
+        virtualinvoke r0.<java.awt.TextComponent: void select(int,int)>($i0, i1);
+
+        return;
+    }
+
+    public synchronized void select(int, int)
+    {
+        java.awt.TextComponent r0;
+        java.awt.peer.ComponentPeer $r2;
+        java.awt.peer.TextComponentPeer $r3;
+        int $i0, $i1, i2, i3;
+        java.lang.String $r1;
+
+        r0 := @this: java.awt.TextComponent;
+
+        i2 := @parameter0: int;
+
+        i3 := @parameter1: int;
+
+        $r1 = virtualinvoke r0.<java.awt.TextComponent: java.lang.String getText()>();
+
+        if i2 >= 0 goto label1;
+
+        i2 = 0;
+
+     label1:
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if i2 <= $i0 goto label2;
+
+        i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+     label2:
+        $i1 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if i3 <= $i1 goto label3;
+
+        i3 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+     label3:
+        if i3 >= i2 goto label4;
+
+        i3 = i2;
+
+     label4:
+        r0.<java.awt.TextComponent: int selectionStart> = i2;
+
+        r0.<java.awt.TextComponent: int selectionEnd> = i3;
+
+        $r2 = r0.<java.awt.TextComponent: java.awt.peer.ComponentPeer peer>;
+
+        $r3 = (java.awt.peer.TextComponentPeer) $r2;
+
+        if $r3 == null goto label5;
+
+        interfaceinvoke $r3.<java.awt.peer.TextComponentPeer: void select(int,int)>(i2, i3);
+
+     label5:
+        return;
+    }
+
+    public synchronized void selectAll()
+    {
+        java.awt.peer.TextComponentPeer r3;
+        java.awt.TextComponent r0;
+        java.awt.peer.ComponentPeer $r2;
+        int $i0, $i1, $i2;
+        java.lang.String $r1;
+
+        r0 := @this: java.awt.TextComponent;
+
+        r0.<java.awt.TextComponent: int selectionStart> = 0;
+
+        $r1 = virtualinvoke r0.<java.awt.TextComponent: java.lang.String getText()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        r0.<java.awt.TextComponent: int selectionEnd> = $i0;
+
+        $r2 = r0.<java.awt.TextComponent: java.awt.peer.ComponentPeer peer>;
+
+        r3 = (java.awt.peer.TextComponentPeer) $r2;
+
+        if r3 == null goto label1;
+
+        $i2 = r0.<java.awt.TextComponent: int selectionStart>;
+
+        $i1 = r0.<java.awt.TextComponent: int selectionEnd>;
+
+        interfaceinvoke r3.<java.awt.peer.TextComponentPeer: void select(int,int)>($i2, $i1);
+
+     label1:
+        return;
+    }
+
+    public synchronized void setCaretPosition(int)
+    {
+        java.awt.peer.TextComponentPeer $r3;
+        java.awt.TextComponent r0;
+        java.awt.peer.ComponentPeer $r2;
+        int $i0, i1;
+        java.lang.String $r1;
+        java.lang.IllegalArgumentException $r4;
+
+        r0 := @this: java.awt.TextComponent;
+
+        i1 := @parameter0: int;
+
+        if i1 >= 0 goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("position less than zero.");
+
+        throw $r4;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.awt.TextComponent: java.lang.String getText()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if i1 <= $i0 goto label2;
+
+        i1 = $i0;
+
+     label2:
+        $r2 = r0.<java.awt.TextComponent: java.awt.peer.ComponentPeer peer>;
+
+        $r3 = (java.awt.peer.TextComponentPeer) $r2;
+
+        if $r3 == null goto label3;
+
+        interfaceinvoke $r3.<java.awt.peer.TextComponentPeer: void setCaretPosition(int)>(i1);
+
+        goto label4;
+
+     label3:
+        virtualinvoke r0.<java.awt.TextComponent: void select(int,int)>(i1, i1);
+
+     label4:
+        return;
+    }
+
+    public synchronized int getCaretPosition()
+    {
+        java.awt.peer.TextComponentPeer r2;
+        java.awt.TextComponent r0;
+        java.awt.peer.ComponentPeer $r1;
+        int $i0, i1;
+        java.lang.String $r3;
+
+        r0 := @this: java.awt.TextComponent;
+
+        $r1 = r0.<java.awt.TextComponent: java.awt.peer.ComponentPeer peer>;
+
+        r2 = (java.awt.peer.TextComponentPeer) $r1;
+
+        if r2 == null goto label1;
+
+        i1 = interfaceinvoke r2.<java.awt.peer.TextComponentPeer: int getCaretPosition()>();
+
+        goto label2;
+
+     label1:
+        i1 = r0.<java.awt.TextComponent: int selectionStart>;
+
+     label2:
+        $r3 = virtualinvoke r0.<java.awt.TextComponent: java.lang.String getText()>();
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        if i1 <= $i0 goto label3;
+
+        i1 = $i0;
+
+     label3:
+        return i1;
+    }
+
+    public synchronized void addTextListener(java.awt.event.TextListener)
+    {
+        java.awt.TextComponent r1;
+        java.awt.event.TextListener r0, $r2, $r3;
+
+        r1 := @this: java.awt.TextComponent;
+
+        r0 := @parameter0: java.awt.event.TextListener;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = r1.<java.awt.TextComponent: java.awt.event.TextListener textListener>;
+
+        $r3 = staticinvoke <java.awt.AWTEventMulticaster: java.awt.event.TextListener add(java.awt.event.TextListener,java.awt.event.TextListener)>($r2, r0);
+
+        r1.<java.awt.TextComponent: java.awt.event.TextListener textListener> = $r3;
+
+        r1.<java.awt.TextComponent: boolean newEventsOnly> = 1;
+
+        return;
+    }
+
+    public synchronized void removeTextListener(java.awt.event.TextListener)
+    {
+        java.awt.TextComponent r1;
+        java.awt.event.TextListener r0, $r2, $r3;
+
+        r1 := @this: java.awt.TextComponent;
+
+        r0 := @parameter0: java.awt.event.TextListener;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = r1.<java.awt.TextComponent: java.awt.event.TextListener textListener>;
+
+        $r3 = staticinvoke <java.awt.AWTEventMulticaster: java.awt.event.TextListener remove(java.awt.event.TextListener,java.awt.event.TextListener)>($r2, r0);
+
+        r1.<java.awt.TextComponent: java.awt.event.TextListener textListener> = $r3;
+
+        return;
+    }
+
+    public synchronized java.awt.event.TextListener[] getTextListeners()
+    {
+        java.awt.TextComponent r0;
+        java.util.EventListener[] $r1;
+        java.awt.event.TextListener[] $r2;
+
+        r0 := @this: java.awt.TextComponent;
+
+        $r1 = virtualinvoke r0.<java.awt.TextComponent: java.util.EventListener[] getListeners(java.lang.Class)>(class "Ljava/awt/event/TextListener;");
+
+        $r2 = (java.awt.event.TextListener[]) $r1;
+
+        return $r2;
+    }
+
+    public java.util.EventListener[] getListeners(java.lang.Class)
+    {
+        java.awt.TextComponent r1;
+        java.util.EventListener[] $r2, $r3;
+        java.lang.Class r0;
+        java.awt.event.TextListener r4;
+
+        r1 := @this: java.awt.TextComponent;
+
+        r0 := @parameter0: java.lang.Class;
+
+        if r0 != class "Ljava/awt/event/TextListener;" goto label1;
+
+        r4 = r1.<java.awt.TextComponent: java.awt.event.TextListener textListener>;
+
+        goto label2;
+
+     label1:
+        $r2 = specialinvoke r1.<java.awt.Component: java.util.EventListener[] getListeners(java.lang.Class)>(r0);
+
+        return $r2;
+
+     label2:
+        $r3 = staticinvoke <java.awt.AWTEventMulticaster: java.util.EventListener[] getListeners(java.util.EventListener,java.lang.Class)>(r4, r0);
+
+        return $r3;
+    }
+
+    boolean eventEnabled(java.awt.AWTEvent)
+    {
+        java.awt.TextComponent r1;
+        long $l1, $l2;
+        java.awt.AWTEvent r0;
+        byte $b3;
+        int $i0;
+        java.awt.event.TextListener $r2;
+        boolean $z0;
+
+        r1 := @this: java.awt.TextComponent;
+
+        r0 := @parameter0: java.awt.AWTEvent;
+
+        $i0 = r0.<java.awt.AWTEvent: int id>;
+
+        if $i0 != 900 goto label3;
+
+        $l1 = r1.<java.awt.TextComponent: long eventMask>;
+
+        $l2 = $l1 & 1024L;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 != 0 goto label1;
+
+        $r2 = r1.<java.awt.TextComponent: java.awt.event.TextListener textListener>;
+
+        if $r2 == null goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+
+     label3:
+        $z0 = specialinvoke r1.<java.awt.Component: boolean eventEnabled(java.awt.AWTEvent)>(r0);
+
+        return $z0;
+    }
+
+    protected void processEvent(java.awt.AWTEvent)
+    {
+        java.awt.event.TextEvent $r2;
+        java.awt.AWTEvent r0;
+        java.awt.TextComponent r1;
+        boolean $z0;
+
+        r1 := @this: java.awt.TextComponent;
+
+        r0 := @parameter0: java.awt.AWTEvent;
+
+        $z0 = r0 instanceof java.awt.event.TextEvent;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = (java.awt.event.TextEvent) r0;
+
+        virtualinvoke r1.<java.awt.TextComponent: void processTextEvent(java.awt.event.TextEvent)>($r2);
+
+        return;
+
+     label1:
+        specialinvoke r1.<java.awt.Component: void processEvent(java.awt.AWTEvent)>(r0);
+
+        return;
+    }
+
+    protected void processTextEvent(java.awt.event.TextEvent)
+    {
+        java.awt.event.TextEvent r2;
+        java.awt.TextComponent r0;
+        int $i0;
+        java.awt.event.TextListener r1;
+
+        r0 := @this: java.awt.TextComponent;
+
+        r2 := @parameter0: java.awt.event.TextEvent;
+
+        r1 = r0.<java.awt.TextComponent: java.awt.event.TextListener textListener>;
+
+        if r1 == null goto label2;
+
+        $i0 = virtualinvoke r2.<java.awt.event.TextEvent: int getID()>();
+
+        lookupswitch($i0)
+        {
+            case 900: goto label1;
+            default: goto label2;
+        };
+
+     label1:
+        interfaceinvoke r1.<java.awt.event.TextListener: void textValueChanged(java.awt.event.TextEvent)>(r2);
+
+     label2:
+        return;
+    }
+
+    protected java.lang.String paramString()
+    {
+        java.awt.TextComponent r1;
+        int $i0, $i1;
+        java.lang.String $r2, $r5, $r7, $r14, r18;
+        boolean $z0;
+        java.lang.StringBuilder $r0, $r3, $r4, $r6, $r8, $r9, $r10, $r11, $r12, $r13, $r15, $r16, $r17;
+
+        r1 := @this: java.awt.TextComponent;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = specialinvoke r1.<java.awt.Component: java.lang.String paramString()>();
+
+        $r3 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",text=");
+
+        $r5 = virtualinvoke r1.<java.awt.TextComponent: java.lang.String getText()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r18 = $r7;
+
+        $z0 = r1.<java.awt.TextComponent: boolean editable>;
+
+        if $z0 == 0 goto label1;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",editable");
+
+        r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label1:
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r18);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",selection=");
+
+        $i0 = virtualinvoke r1.<java.awt.TextComponent: int getSelectionStart()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-");
+
+        $i1 = virtualinvoke r1.<java.awt.TextComponent: int getSelectionEnd()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r14;
+    }
+
+    private boolean canAccessClipboard()
+    {
+        java.awt.TextComponent r3;
+        java.security.Permission $r1;
+        java.lang.SecurityException $r2;
+        java.lang.SecurityManager $r0;
+
+        r3 := @this: java.awt.TextComponent;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 != null goto label1;
+
+        return 1;
+
+     label1:
+        $r1 = <sun.security.util.SecurityConstants$AWT: java.security.Permission ACCESS_CLIPBOARD_PERMISSION>;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r1);
+
+     label2:
+        return 1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        return 0;
+
+        catch java.lang.SecurityException from label1 to label2 with label3;
+    }
+
+    private void writeObject(java.io.ObjectOutputStream) throws java.io.IOException
+    {
+        java.awt.TextComponent r0;
+        java.awt.peer.ComponentPeer $r1;
+        java.awt.peer.TextComponentPeer r2;
+        int $i0, $i1;
+        java.io.ObjectOutputStream r3;
+        java.awt.event.TextListener $r4;
+        java.lang.String $r5;
+
+        r0 := @this: java.awt.TextComponent;
+
+        r3 := @parameter0: java.io.ObjectOutputStream;
+
+        $r1 = r0.<java.awt.TextComponent: java.awt.peer.ComponentPeer peer>;
+
+        r2 = (java.awt.peer.TextComponentPeer) $r1;
+
+        if r2 == null goto label1;
+
+        $r5 = interfaceinvoke r2.<java.awt.peer.TextComponentPeer: java.lang.String getText()>();
+
+        r0.<java.awt.TextComponent: java.lang.String text> = $r5;
+
+        $i0 = interfaceinvoke r2.<java.awt.peer.TextComponentPeer: int getSelectionStart()>();
+
+        r0.<java.awt.TextComponent: int selectionStart> = $i0;
+
+        $i1 = interfaceinvoke r2.<java.awt.peer.TextComponentPeer: int getSelectionEnd()>();
+
+        r0.<java.awt.TextComponent: int selectionEnd> = $i1;
+
+     label1:
+        virtualinvoke r3.<java.io.ObjectOutputStream: void defaultWriteObject()>();
+
+        $r4 = r0.<java.awt.TextComponent: java.awt.event.TextListener textListener>;
+
+        staticinvoke <java.awt.AWTEventMulticaster: void save(java.io.ObjectOutputStream,java.lang.String,java.util.EventListener)>(r3, "textL", $r4);
+
+        virtualinvoke r3.<java.io.ObjectOutputStream: void writeObject(java.lang.Object)>(null);
+
+        return;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.lang.ClassNotFoundException, java.io.IOException, java.awt.HeadlessException
+    {
+        java.awt.TextComponent r1;
+        java.io.ObjectInputStream r0;
+        int $i0, $i1;
+        java.lang.Object $r5, $r9;
+        java.lang.String $r2, $r3, $r4, $r8;
+        java.awt.event.TextListener $r6, $r7;
+
+        r1 := @this: java.awt.TextComponent;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        staticinvoke <java.awt.GraphicsEnvironment: void checkHeadless()>();
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        $r2 = r1.<java.awt.TextComponent: java.lang.String text>;
+
+        if $r2 == null goto label1;
+
+        $r8 = r1.<java.awt.TextComponent: java.lang.String text>;
+
+        goto label2;
+
+     label1:
+        $r8 = "";
+
+     label2:
+        r1.<java.awt.TextComponent: java.lang.String text> = $r8;
+
+        $i1 = r1.<java.awt.TextComponent: int selectionStart>;
+
+        $i0 = r1.<java.awt.TextComponent: int selectionEnd>;
+
+        virtualinvoke r1.<java.awt.TextComponent: void select(int,int)>($i1, $i0);
+
+     label3:
+        $r9 = virtualinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        if null == $r9 goto label6;
+
+        $r3 = (java.lang.String) $r9;
+
+        $r4 = virtualinvoke $r3.<java.lang.String: java.lang.String intern()>();
+
+        if "textL" != $r4 goto label4;
+
+        $r5 = virtualinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        $r6 = (java.awt.event.TextListener) $r5;
+
+        $r7 = (java.awt.event.TextListener) $r6;
+
+        virtualinvoke r1.<java.awt.TextComponent: void addTextListener(java.awt.event.TextListener)>($r7);
+
+        goto label5;
+
+     label4:
+        virtualinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+     label5:
+        goto label3;
+
+     label6:
+        specialinvoke r1.<java.awt.TextComponent: void enableInputMethodsIfNecessary()>();
+
+        return;
+    }
+
+    public javax.accessibility.AccessibleContext getAccessibleContext()
+    {
+        java.awt.TextComponent r0;
+        java.awt.TextComponent$AccessibleAWTTextComponent $r3;
+        javax.accessibility.AccessibleContext $r1, $r2;
+
+        r0 := @this: java.awt.TextComponent;
+
+        $r1 = r0.<java.awt.TextComponent: javax.accessibility.AccessibleContext accessibleContext>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.awt.TextComponent$AccessibleAWTTextComponent;
+
+        specialinvoke $r3.<java.awt.TextComponent$AccessibleAWTTextComponent: void <init>(java.awt.TextComponent)>(r0);
+
+        r0.<java.awt.TextComponent: javax.accessibility.AccessibleContext accessibleContext> = $r3;
+
+     label1:
+        $r2 = r0.<java.awt.TextComponent: javax.accessibility.AccessibleContext accessibleContext>;
+
+        return $r2;
+    }
+
+    public static void <clinit>()
+    {
+        <java.awt.TextComponent: long serialVersionUID> = -2214773872412987419L;
+
+        return;
+    }
+}

@@ -1,0 +1,294 @@
+final class jdk.internal.instrumentation.Inliner extends jdk.internal.org.objectweb.asm.ClassVisitor
+{
+    private final java.lang.String instrumentationClassName;
+    private final jdk.internal.instrumentation.Logger logger;
+    private final jdk.internal.org.objectweb.asm.tree.ClassNode targetClassNode;
+    private final java.util.List instrumentationMethods;
+    private final jdk.internal.instrumentation.MaxLocalsTracker maxLocalsTracker;
+
+    void <init>(int, jdk.internal.org.objectweb.asm.ClassVisitor, java.lang.String, jdk.internal.org.objectweb.asm.ClassReader, java.util.List, jdk.internal.instrumentation.MaxLocalsTracker, jdk.internal.instrumentation.Logger)
+    {
+        jdk.internal.org.objectweb.asm.ClassVisitor r1;
+        jdk.internal.org.objectweb.asm.tree.ClassNode $r6;
+        jdk.internal.instrumentation.MaxLocalsTracker r4;
+        jdk.internal.org.objectweb.asm.ClassReader r7;
+        jdk.internal.instrumentation.Inliner r0;
+        jdk.internal.instrumentation.Logger r5;
+        java.util.List r3;
+        int i0;
+        java.lang.String r2;
+
+        r0 := @this: jdk.internal.instrumentation.Inliner;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: jdk.internal.org.objectweb.asm.ClassVisitor;
+
+        r2 := @parameter2: java.lang.String;
+
+        r7 := @parameter3: jdk.internal.org.objectweb.asm.ClassReader;
+
+        r3 := @parameter4: java.util.List;
+
+        r4 := @parameter5: jdk.internal.instrumentation.MaxLocalsTracker;
+
+        r5 := @parameter6: jdk.internal.instrumentation.Logger;
+
+        specialinvoke r0.<jdk.internal.org.objectweb.asm.ClassVisitor: void <init>(int,jdk.internal.org.objectweb.asm.ClassVisitor)>(i0, r1);
+
+        r0.<jdk.internal.instrumentation.Inliner: java.lang.String instrumentationClassName> = r2;
+
+        r0.<jdk.internal.instrumentation.Inliner: java.util.List instrumentationMethods> = r3;
+
+        r0.<jdk.internal.instrumentation.Inliner: jdk.internal.instrumentation.MaxLocalsTracker maxLocalsTracker> = r4;
+
+        r0.<jdk.internal.instrumentation.Inliner: jdk.internal.instrumentation.Logger logger> = r5;
+
+        $r6 = new jdk.internal.org.objectweb.asm.tree.ClassNode;
+
+        specialinvoke $r6.<jdk.internal.org.objectweb.asm.tree.ClassNode: void <init>(int)>(327680);
+
+        virtualinvoke r7.<jdk.internal.org.objectweb.asm.ClassReader: void accept(jdk.internal.org.objectweb.asm.ClassVisitor,int)>($r6, 8);
+
+        r0.<jdk.internal.instrumentation.Inliner: jdk.internal.org.objectweb.asm.tree.ClassNode targetClassNode> = $r6;
+
+        return;
+    }
+
+    public jdk.internal.org.objectweb.asm.MethodVisitor visitMethod(int, java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
+    {
+        jdk.internal.instrumentation.MethodCallInliner $r13;
+        jdk.internal.instrumentation.Inliner r0;
+        boolean $z0;
+        jdk.internal.org.objectweb.asm.tree.ClassNode $r20;
+        java.lang.StringBuilder $r7, $r9, $r10, $r11, $r18, $r19, $r22, $r23, $r25, $r27;
+        jdk.internal.instrumentation.MaxLocalsTracker $r14;
+        java.lang.String[] r4;
+        int i0, $i1, $i2, $i3;
+        java.lang.String r1, r2, r3, $r12, $r15, $r21, $r24, $r26, $r28;
+        java.lang.IllegalArgumentException $r17, $r29;
+        jdk.internal.instrumentation.Logger $r8, $r16;
+        jdk.internal.org.objectweb.asm.MethodVisitor $r5;
+        jdk.internal.org.objectweb.asm.tree.MethodNode $r6;
+
+        r0 := @this: jdk.internal.instrumentation.Inliner;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: java.lang.String;
+
+        r4 := @parameter4: java.lang.String[];
+
+        $r5 = specialinvoke r0.<jdk.internal.org.objectweb.asm.ClassVisitor: jdk.internal.org.objectweb.asm.MethodVisitor visitMethod(int,java.lang.String,java.lang.String,java.lang.String,java.lang.String[])>(i0, r1, r2, r3, r4);
+
+        $z0 = specialinvoke r0.<jdk.internal.instrumentation.Inliner: boolean isInstrumentationMethod(java.lang.String,java.lang.String)>(r1, r2);
+
+        if $z0 == 0 goto label3;
+
+        $r6 = specialinvoke r0.<jdk.internal.instrumentation.Inliner: jdk.internal.org.objectweb.asm.tree.MethodNode findTargetMethodNode(java.lang.String,java.lang.String)>(r1, r2);
+
+        if $r6 != null goto label1;
+
+        $r29 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r29.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Could not find the method to instrument in the target class");
+
+        throw $r29;
+
+     label1:
+        $i1 = $r6.<jdk.internal.org.objectweb.asm.tree.MethodNode: int access>;
+
+        $i2 = $i1 & 256;
+
+        if $i2 != 1 goto label2;
+
+        $r17 = new java.lang.IllegalArgumentException;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot instrument native methods: ");
+
+        $r20 = r0.<jdk.internal.instrumentation.Inliner: jdk.internal.org.objectweb.asm.tree.ClassNode targetClassNode>;
+
+        $r21 = $r20.<jdk.internal.org.objectweb.asm.tree.ClassNode: java.lang.String name>;
+
+        $r22 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r21);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r24 = $r6.<jdk.internal.org.objectweb.asm.tree.MethodNode: java.lang.String name>;
+
+        $r25 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r24);
+
+        $r26 = $r6.<jdk.internal.org.objectweb.asm.tree.MethodNode: java.lang.String desc>;
+
+        $r27 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r26);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r17.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r28);
+
+        throw $r17;
+
+     label2:
+        $r8 = r0.<jdk.internal.instrumentation.Inliner: jdk.internal.instrumentation.Logger logger>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Inliner processing method ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r8.<jdk.internal.instrumentation.Logger: void trace(java.lang.String)>($r12);
+
+        $r13 = new jdk.internal.instrumentation.MethodCallInliner;
+
+        $r15 = r0.<jdk.internal.instrumentation.Inliner: java.lang.String instrumentationClassName>;
+
+        $r14 = r0.<jdk.internal.instrumentation.Inliner: jdk.internal.instrumentation.MaxLocalsTracker maxLocalsTracker>;
+
+        $i3 = virtualinvoke $r14.<jdk.internal.instrumentation.MaxLocalsTracker: int getMaxLocals(java.lang.String,java.lang.String)>(r1, r2);
+
+        $r16 = r0.<jdk.internal.instrumentation.Inliner: jdk.internal.instrumentation.Logger logger>;
+
+        specialinvoke $r13.<jdk.internal.instrumentation.MethodCallInliner: void <init>(int,java.lang.String,jdk.internal.org.objectweb.asm.MethodVisitor,jdk.internal.org.objectweb.asm.tree.MethodNode,java.lang.String,int,jdk.internal.instrumentation.Logger)>(i0, r2, $r5, $r6, $r15, $i3, $r16);
+
+        return $r13;
+
+     label3:
+        return $r5;
+    }
+
+    private boolean isInstrumentationMethod(java.lang.String, java.lang.String)
+    {
+        java.util.Iterator $r2;
+        jdk.internal.instrumentation.Inliner r0;
+        java.util.List $r1;
+        java.lang.Object $r3;
+        java.lang.String $r5, r6, $r7, r8;
+        java.lang.reflect.Method r4;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: jdk.internal.instrumentation.Inliner;
+
+        r6 := @parameter0: java.lang.String;
+
+        r8 := @parameter1: java.lang.String;
+
+        $r1 = r0.<jdk.internal.instrumentation.Inliner: java.util.List instrumentationMethods>;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (java.lang.reflect.Method) $r3;
+
+        $r5 = virtualinvoke r4.<java.lang.reflect.Method: java.lang.String getName()>();
+
+        $z1 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>(r6);
+
+        if $z1 == 0 goto label2;
+
+        $r7 = staticinvoke <jdk.internal.org.objectweb.asm.Type: java.lang.String getMethodDescriptor(java.lang.reflect.Method)>(r4);
+
+        $z2 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>(r8);
+
+        if $z2 == 0 goto label2;
+
+        return 1;
+
+     label2:
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    private jdk.internal.org.objectweb.asm.tree.MethodNode findTargetMethodNode(java.lang.String, java.lang.String)
+    {
+        jdk.internal.instrumentation.Inliner r0;
+        java.lang.String r7, r9, $r11, $r14, $r15;
+        boolean $z0, $z1, $z2;
+        jdk.internal.org.objectweb.asm.tree.ClassNode $r1;
+        java.util.Iterator $r3;
+        java.lang.IllegalArgumentException $r4;
+        java.util.List $r2;
+        java.lang.StringBuilder $r5, $r6, $r8, $r10;
+        java.lang.Object $r12;
+        jdk.internal.org.objectweb.asm.tree.MethodNode r13;
+
+        r0 := @this: jdk.internal.instrumentation.Inliner;
+
+        r7 := @parameter0: java.lang.String;
+
+        r9 := @parameter1: java.lang.String;
+
+        $r1 = r0.<jdk.internal.instrumentation.Inliner: jdk.internal.org.objectweb.asm.tree.ClassNode targetClassNode>;
+
+        $r2 = $r1.<jdk.internal.org.objectweb.asm.tree.ClassNode: java.util.List methods>;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r12 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r13 = (jdk.internal.org.objectweb.asm.tree.MethodNode) $r12;
+
+        $r14 = r13.<jdk.internal.org.objectweb.asm.tree.MethodNode: java.lang.String desc>;
+
+        $z1 = virtualinvoke $r14.<java.lang.String: boolean equals(java.lang.Object)>(r9);
+
+        if $z1 == 0 goto label2;
+
+        $r15 = r13.<jdk.internal.org.objectweb.asm.tree.MethodNode: java.lang.String name>;
+
+        $z2 = virtualinvoke $r15.<java.lang.String: boolean equals(java.lang.Object)>(r7);
+
+        if $z2 == 0 goto label2;
+
+        return r13;
+
+     label2:
+        goto label1;
+
+     label3:
+        $r4 = new java.lang.IllegalArgumentException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("could not find MethodNode for ");
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r7);
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r11);
+
+        throw $r4;
+    }
+}

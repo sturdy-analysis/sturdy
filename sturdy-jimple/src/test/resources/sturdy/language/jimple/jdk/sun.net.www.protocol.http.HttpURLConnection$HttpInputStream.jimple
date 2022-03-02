@@ -1,0 +1,505 @@
+class sun.net.www.protocol.http.HttpURLConnection$HttpInputStream extends java.io.FilterInputStream
+{
+    private java.net.CacheRequest cacheRequest;
+    private java.io.OutputStream outputStream;
+    private boolean marked;
+    private int inCache;
+    private int markCount;
+    private boolean closed;
+    private byte[] skipBuffer;
+    private static final int SKIP_BUFFER_SIZE;
+    final sun.net.www.protocol.http.HttpURLConnection this$0;
+
+    public void <init>(sun.net.www.protocol.http.HttpURLConnection, java.io.InputStream)
+    {
+        sun.net.www.protocol.http.HttpURLConnection r1;
+        sun.net.www.protocol.http.HttpURLConnection$HttpInputStream r0;
+        java.io.InputStream r2;
+
+        r0 := @this: sun.net.www.protocol.http.HttpURLConnection$HttpInputStream;
+
+        r1 := @parameter0: sun.net.www.protocol.http.HttpURLConnection;
+
+        r2 := @parameter1: java.io.InputStream;
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: sun.net.www.protocol.http.HttpURLConnection this$0> = r1;
+
+        specialinvoke r0.<java.io.FilterInputStream: void <init>(java.io.InputStream)>(r2);
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: boolean marked> = 0;
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: int inCache> = 0;
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: int markCount> = 0;
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: java.net.CacheRequest cacheRequest> = null;
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: java.io.OutputStream outputStream> = null;
+
+        return;
+    }
+
+    public void <init>(sun.net.www.protocol.http.HttpURLConnection, java.io.InputStream, java.net.CacheRequest)
+    {
+        java.io.OutputStream $r4;
+        sun.net.www.protocol.http.HttpURLConnection r1;
+        sun.net.www.protocol.http.HttpURLConnection$HttpInputStream r0;
+        java.net.CacheRequest r3, $r6;
+        java.io.IOException $r5;
+        java.io.InputStream r2;
+
+        r0 := @this: sun.net.www.protocol.http.HttpURLConnection$HttpInputStream;
+
+        r1 := @parameter0: sun.net.www.protocol.http.HttpURLConnection;
+
+        r2 := @parameter1: java.io.InputStream;
+
+        r3 := @parameter2: java.net.CacheRequest;
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: sun.net.www.protocol.http.HttpURLConnection this$0> = r1;
+
+        specialinvoke r0.<java.io.FilterInputStream: void <init>(java.io.InputStream)>(r2);
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: boolean marked> = 0;
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: int inCache> = 0;
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: int markCount> = 0;
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: java.net.CacheRequest cacheRequest> = r3;
+
+     label1:
+        $r4 = virtualinvoke r3.<java.net.CacheRequest: java.io.OutputStream getBody()>();
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: java.io.OutputStream outputStream> = $r4;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: java.net.CacheRequest cacheRequest>;
+
+        virtualinvoke $r6.<java.net.CacheRequest: void abort()>();
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: java.net.CacheRequest cacheRequest> = null;
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: java.io.OutputStream outputStream> = null;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public synchronized void mark(int)
+    {
+        int i0;
+        sun.net.www.protocol.http.HttpURLConnection$HttpInputStream r0;
+        java.net.CacheRequest $r1;
+
+        r0 := @this: sun.net.www.protocol.http.HttpURLConnection$HttpInputStream;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.io.FilterInputStream: void mark(int)>(i0);
+
+        $r1 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: java.net.CacheRequest cacheRequest>;
+
+        if $r1 == null goto label1;
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: boolean marked> = 1;
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: int markCount> = 0;
+
+     label1:
+        return;
+    }
+
+    public synchronized void reset() throws java.io.IOException
+    {
+        sun.net.www.protocol.http.HttpURLConnection$HttpInputStream r0;
+        java.net.CacheRequest $r1;
+        int $i0, $i1, $i2;
+
+        r0 := @this: sun.net.www.protocol.http.HttpURLConnection$HttpInputStream;
+
+        specialinvoke r0.<java.io.FilterInputStream: void reset()>();
+
+        $r1 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: java.net.CacheRequest cacheRequest>;
+
+        if $r1 == null goto label1;
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: boolean marked> = 0;
+
+        $i1 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: int inCache>;
+
+        $i0 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: int markCount>;
+
+        $i2 = $i1 + $i0;
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: int inCache> = $i2;
+
+     label1:
+        return;
+    }
+
+    private void ensureOpen() throws java.io.IOException
+    {
+        java.io.IOException $r1;
+        sun.net.www.protocol.http.HttpURLConnection$HttpInputStream r0;
+        boolean $z0;
+
+        r0 := @this: sun.net.www.protocol.http.HttpURLConnection$HttpInputStream;
+
+        $z0 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new java.io.IOException;
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>("stream is closed");
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        byte[] r4;
+        java.io.IOException $r1;
+        sun.net.www.protocol.http.HttpURLConnection$HttpInputStream r0;
+        byte $b1;
+        java.net.CacheRequest $r2, $r3;
+        int $i0, $i2, $i4, $i5;
+
+        r0 := @this: sun.net.www.protocol.http.HttpURLConnection$HttpInputStream;
+
+        specialinvoke r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: void ensureOpen()>();
+
+     label1:
+        r4 = newarray (byte)[1];
+
+        $i0 = virtualinvoke r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: int read(byte[])>(r4);
+
+        $i4 = (int) -1;
+
+        if $i0 != $i4 goto label2;
+
+        $i2 = $i0;
+
+        goto label3;
+
+     label2:
+        $b1 = r4[0];
+
+        $i5 = (int) $b1;
+
+        $i2 = $i5 & 255;
+
+     label3:
+        return $i2;
+
+     label4:
+        $r1 := @caughtexception;
+
+        $r2 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: java.net.CacheRequest cacheRequest>;
+
+        if $r2 == null goto label5;
+
+        $r3 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: java.net.CacheRequest cacheRequest>;
+
+        virtualinvoke $r3.<java.net.CacheRequest: void abort()>();
+
+     label5:
+        throw $r1;
+
+        catch java.io.IOException from label1 to label3 with label4;
+    }
+
+    public int read(byte[]) throws java.io.IOException
+    {
+        byte[] r1;
+        sun.net.www.protocol.http.HttpURLConnection$HttpInputStream r0;
+        int $i0, $i1;
+
+        r0 := @this: sun.net.www.protocol.http.HttpURLConnection$HttpInputStream;
+
+        r1 := @parameter0: byte[];
+
+        $i0 = lengthof r1;
+
+        $i1 = virtualinvoke r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: int read(byte[],int,int)>(r1, 0, $i0);
+
+        return $i1;
+    }
+
+    public int read(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r1;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, i12;
+        boolean $z0;
+        java.io.OutputStream $r2, $r3;
+        java.io.IOException $r4;
+        sun.net.www.protocol.http.HttpURLConnection$HttpInputStream r0;
+        java.net.CacheRequest $r5, $r6;
+
+        r0 := @this: sun.net.www.protocol.http.HttpURLConnection$HttpInputStream;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: void ensureOpen()>();
+
+     label1:
+        $i2 = specialinvoke r0.<java.io.FilterInputStream: int read(byte[],int,int)>(r1, i0, i1);
+
+        $i3 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: int inCache>;
+
+        if $i3 <= 0 goto label3;
+
+        $i8 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: int inCache>;
+
+        if $i8 < $i2 goto label2;
+
+        $i10 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: int inCache>;
+
+        $i11 = $i10 - $i2;
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: int inCache> = $i11;
+
+        i12 = 0;
+
+        goto label4;
+
+     label2:
+        $i9 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: int inCache>;
+
+        i12 = $i2 - $i9;
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: int inCache> = 0;
+
+        goto label4;
+
+     label3:
+        i12 = $i2;
+
+     label4:
+        if i12 <= 0 goto label5;
+
+        $r2 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: java.io.OutputStream outputStream>;
+
+        if $r2 == null goto label5;
+
+        $r3 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: java.io.OutputStream outputStream>;
+
+        $i6 = $i2 - i12;
+
+        $i7 = i0 + $i6;
+
+        virtualinvoke $r3.<java.io.OutputStream: void write(byte[],int,int)>(r1, $i7, i12);
+
+     label5:
+        $z0 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: boolean marked>;
+
+        if $z0 == 0 goto label6;
+
+        $i4 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: int markCount>;
+
+        $i5 = $i4 + $i2;
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: int markCount> = $i5;
+
+     label6:
+        return $i2;
+
+     label7:
+        $r4 := @caughtexception;
+
+        $r5 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: java.net.CacheRequest cacheRequest>;
+
+        if $r5 == null goto label8;
+
+        $r6 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: java.net.CacheRequest cacheRequest>;
+
+        virtualinvoke $r6.<java.net.CacheRequest: void abort()>();
+
+     label8:
+        throw $r4;
+
+        catch java.io.IOException from label1 to label6 with label7;
+    }
+
+    public long skip(long) throws java.io.IOException
+    {
+        byte[] $r1, $r2, $r3;
+        long l0, $l3, $l4, $l7, l8;
+        sun.net.www.protocol.http.HttpURLConnection$HttpInputStream r0;
+        byte $b1, $b2;
+        int $i5, $i6, $i9, $i10;
+
+        r0 := @this: sun.net.www.protocol.http.HttpURLConnection$HttpInputStream;
+
+        l0 := @parameter0: long;
+
+        specialinvoke r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: void ensureOpen()>();
+
+        l8 = l0;
+
+        $r1 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: byte[] skipBuffer>;
+
+        if $r1 != null goto label1;
+
+        $r2 = newarray (byte)[8096];
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: byte[] skipBuffer> = $r2;
+
+     label1:
+        $r3 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: byte[] skipBuffer>;
+
+        $b1 = l0 cmp 0L;
+
+        $i9 = (int) $b1;
+
+        if $i9 > 0 goto label2;
+
+        return 0L;
+
+     label2:
+        $b2 = l8 cmp 0L;
+
+        $i10 = (int) $b2;
+
+        if $i10 <= 0 goto label4;
+
+        $l4 = staticinvoke <java.lang.Math: long min(long,long)>(8096L, l8);
+
+        $i5 = (int) $l4;
+
+        $i6 = virtualinvoke r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: int read(byte[],int,int)>($r3, 0, $i5);
+
+        if $i6 >= 0 goto label3;
+
+        goto label4;
+
+     label3:
+        $l7 = (long) $i6;
+
+        l8 = l8 - $l7;
+
+        goto label2;
+
+     label4:
+        $l3 = l0 - l8;
+
+        return $l3;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        java.io.OutputStream $r1, $r2;
+        java.lang.Throwable $r4;
+        java.io.IOException $r7;
+        sun.net.www.protocol.http.HttpURLConnection $r5, $r6, $r10, $r11;
+        sun.net.www.protocol.http.HttpURLConnection$HttpInputStream r0;
+        java.net.CacheRequest $r3, $r8, $r9;
+        int $i0, $i2;
+        boolean $z0;
+
+        r0 := @this: sun.net.www.protocol.http.HttpURLConnection$HttpInputStream;
+
+        $z0 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: java.io.OutputStream outputStream>;
+
+        if $r1 == null goto label3;
+
+        $i0 = virtualinvoke r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: int read()>();
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label2;
+
+        $r3 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: java.net.CacheRequest cacheRequest>;
+
+        virtualinvoke $r3.<java.net.CacheRequest: void abort()>();
+
+        goto label3;
+
+     label2:
+        $r2 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: java.io.OutputStream outputStream>;
+
+        virtualinvoke $r2.<java.io.OutputStream: void close()>();
+
+     label3:
+        specialinvoke r0.<java.io.FilterInputStream: void close()>();
+
+     label4:
+        r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: boolean closed> = 1;
+
+        $r10 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: sun.net.www.protocol.http.HttpURLConnection this$0>;
+
+        $r10.<sun.net.www.protocol.http.HttpURLConnection: sun.net.www.http.HttpClient http> = null;
+
+        $r11 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: sun.net.www.protocol.http.HttpURLConnection this$0>;
+
+        staticinvoke <sun.net.www.protocol.http.HttpURLConnection: void access$400(sun.net.www.protocol.http.HttpURLConnection,boolean)>($r11, 1);
+
+        goto label9;
+
+     label5:
+        $r7 := @caughtexception;
+
+        $r8 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: java.net.CacheRequest cacheRequest>;
+
+        if $r8 == null goto label6;
+
+        $r9 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: java.net.CacheRequest cacheRequest>;
+
+        virtualinvoke $r9.<java.net.CacheRequest: void abort()>();
+
+     label6:
+        throw $r7;
+
+     label7:
+        $r4 := @caughtexception;
+
+     label8:
+        r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: boolean closed> = 1;
+
+        $r5 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: sun.net.www.protocol.http.HttpURLConnection this$0>;
+
+        $r5.<sun.net.www.protocol.http.HttpURLConnection: sun.net.www.http.HttpClient http> = null;
+
+        $r6 = r0.<sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: sun.net.www.protocol.http.HttpURLConnection this$0>;
+
+        staticinvoke <sun.net.www.protocol.http.HttpURLConnection: void access$400(sun.net.www.protocol.http.HttpURLConnection,boolean)>($r6, 1);
+
+        throw $r4;
+
+     label9:
+        return;
+
+        catch java.io.IOException from label1 to label4 with label5;
+        catch java.lang.Throwable from label1 to label4 with label7;
+        catch java.lang.Throwable from label5 to label8 with label7;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.net.www.protocol.http.HttpURLConnection$HttpInputStream: int SKIP_BUFFER_SIZE> = 8096;
+
+        return;
+    }
+}

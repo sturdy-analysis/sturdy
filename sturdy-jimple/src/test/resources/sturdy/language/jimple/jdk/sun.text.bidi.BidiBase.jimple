@@ -1,0 +1,7313 @@
+public class sun.text.bidi.BidiBase extends java.lang.Object
+{
+    public static final byte INTERNAL_LEVEL_DEFAULT_LTR;
+    public static final byte INTERNAL_LEVEL_DEFAULT_RTL;
+    public static final byte MAX_EXPLICIT_LEVEL;
+    public static final byte INTERNAL_LEVEL_OVERRIDE;
+    public static final int MAP_NOWHERE;
+    public static final byte MIXED;
+    public static final short DO_MIRRORING;
+    private static final short REORDER_DEFAULT;
+    private static final short REORDER_NUMBERS_SPECIAL;
+    private static final short REORDER_GROUP_NUMBERS_WITH_R;
+    private static final short REORDER_RUNS_ONLY;
+    private static final short REORDER_INVERSE_NUMBERS_AS_L;
+    private static final short REORDER_INVERSE_LIKE_DIRECT;
+    private static final short REORDER_INVERSE_FOR_NUMBERS_SPECIAL;
+    private static final short REORDER_LAST_LOGICAL_TO_VISUAL;
+    private static final int OPTION_INSERT_MARKS;
+    private static final int OPTION_REMOVE_CONTROLS;
+    private static final int OPTION_STREAMING;
+    private static final byte L;
+    private static final byte R;
+    private static final byte EN;
+    private static final byte ES;
+    private static final byte ET;
+    private static final byte AN;
+    private static final byte CS;
+    static final byte B;
+    private static final byte S;
+    private static final byte WS;
+    private static final byte ON;
+    private static final byte LRE;
+    private static final byte LRO;
+    private static final byte AL;
+    private static final byte RLE;
+    private static final byte RLO;
+    private static final byte PDF;
+    private static final byte NSM;
+    private static final byte BN;
+    private static final int MASK_R_AL;
+    private static final char CR;
+    private static final char LF;
+    static final int LRM_BEFORE;
+    static final int LRM_AFTER;
+    static final int RLM_BEFORE;
+    static final int RLM_AFTER;
+    sun.text.bidi.BidiBase paraBidi;
+    final sun.text.normalizer.UBiDiProps bdp;
+    char[] text;
+    int originalLength;
+    public int length;
+    int resultLength;
+    boolean mayAllocateText;
+    boolean mayAllocateRuns;
+    byte[] dirPropsMemory;
+    byte[] levelsMemory;
+    byte[] dirProps;
+    byte[] levels;
+    boolean orderParagraphsLTR;
+    byte paraLevel;
+    byte defaultParaLevel;
+    sun.text.bidi.BidiBase$ImpTabPair impTabPair;
+    byte direction;
+    int flags;
+    int lastArabicPos;
+    int trailingWSStart;
+    int paraCount;
+    int[] parasMemory;
+    int[] paras;
+    int[] simpleParas;
+    int runCount;
+    sun.text.bidi.BidiRun[] runsMemory;
+    sun.text.bidi.BidiRun[] runs;
+    sun.text.bidi.BidiRun[] simpleRuns;
+    int[] logicalToVisualRunsMap;
+    boolean isGoodLogicalToVisualRunsMap;
+    sun.text.bidi.BidiBase$InsertPoints insertPoints;
+    int controlCount;
+    static final byte CONTEXT_RTL_SHIFT;
+    static final byte CONTEXT_RTL;
+    static final int DirPropFlagMultiRuns;
+    static final int[] DirPropFlagLR;
+    static final int[] DirPropFlagE;
+    static final int[] DirPropFlagO;
+    static final int MASK_LTR;
+    static final int MASK_RTL;
+    private static final int MASK_LRX;
+    private static final int MASK_RLX;
+    private static final int MASK_EXPLICIT;
+    private static final int MASK_BN_EXPLICIT;
+    private static final int MASK_B_S;
+    static final int MASK_WS;
+    private static final int MASK_N;
+    private static final int MASK_POSSIBLE_N;
+    static final int MASK_EMBEDDING;
+    private static final int IMPTABPROPS_COLUMNS;
+    private static final int IMPTABPROPS_RES;
+    private static final short[] groupProp;
+    private static final short _L;
+    private static final short _R;
+    private static final short _EN;
+    private static final short _AN;
+    private static final short _ON;
+    private static final short _S;
+    private static final short _B;
+    private static final short[][] impTabProps;
+    private static final int IMPTABLEVELS_COLUMNS;
+    private static final int IMPTABLEVELS_RES;
+    private static final byte[][] impTabL_DEFAULT;
+    private static final byte[][] impTabR_DEFAULT;
+    private static final short[] impAct0;
+    private static final sun.text.bidi.BidiBase$ImpTabPair impTab_DEFAULT;
+    private static final byte[][] impTabL_NUMBERS_SPECIAL;
+    private static final sun.text.bidi.BidiBase$ImpTabPair impTab_NUMBERS_SPECIAL;
+    private static final byte[][] impTabL_GROUP_NUMBERS_WITH_R;
+    private static final byte[][] impTabR_GROUP_NUMBERS_WITH_R;
+    private static final sun.text.bidi.BidiBase$ImpTabPair impTab_GROUP_NUMBERS_WITH_R;
+    private static final byte[][] impTabL_INVERSE_NUMBERS_AS_L;
+    private static final byte[][] impTabR_INVERSE_NUMBERS_AS_L;
+    private static final sun.text.bidi.BidiBase$ImpTabPair impTab_INVERSE_NUMBERS_AS_L;
+    private static final byte[][] impTabR_INVERSE_LIKE_DIRECT;
+    private static final short[] impAct1;
+    private static final sun.text.bidi.BidiBase$ImpTabPair impTab_INVERSE_LIKE_DIRECT;
+    private static final byte[][] impTabL_INVERSE_LIKE_DIRECT_WITH_MARKS;
+    private static final byte[][] impTabR_INVERSE_LIKE_DIRECT_WITH_MARKS;
+    private static final short[] impAct2;
+    private static final sun.text.bidi.BidiBase$ImpTabPair impTab_INVERSE_LIKE_DIRECT_WITH_MARKS;
+    private static final sun.text.bidi.BidiBase$ImpTabPair impTab_INVERSE_FOR_NUMBERS_SPECIAL;
+    private static final byte[][] impTabL_INVERSE_FOR_NUMBERS_SPECIAL_WITH_MARKS;
+    private static final sun.text.bidi.BidiBase$ImpTabPair impTab_INVERSE_FOR_NUMBERS_SPECIAL_WITH_MARKS;
+    static final int FIRSTALLOC;
+    private static final int INTERNAL_DIRECTION_DEFAULT_LEFT_TO_RIGHT;
+    private static final int INTERMAL_DIRECTION_DEFAULT_RIGHT_TO_LEFT;
+
+    static int DirPropFlag(byte)
+    {
+        int $i1, $i2;
+        byte b0;
+
+        b0 := @parameter0: byte;
+
+        $i2 = (int) b0;
+
+        $i1 = 1 << $i2;
+
+        return $i1;
+    }
+
+    static byte NoContextRTL(byte)
+    {
+        byte b0, $b1, $b2;
+
+        b0 := @parameter0: byte;
+
+        $b1 = b0 & -65;
+
+        $b2 = (byte) $b1;
+
+        return $b2;
+    }
+
+    static int DirPropFlagNC(byte)
+    {
+        byte b0, $b1;
+        int $i2, $i3;
+
+        b0 := @parameter0: byte;
+
+        $b1 = b0 & -65;
+
+        $i3 = (int) $b1;
+
+        $i2 = 1 << $i3;
+
+        return $i2;
+    }
+
+    static final int DirPropFlagLR(byte)
+    {
+        byte b0, $b1;
+        int[] $r0;
+        int $i2, $i3;
+
+        b0 := @parameter0: byte;
+
+        $r0 = <sun.text.bidi.BidiBase: int[] DirPropFlagLR>;
+
+        $b1 = b0 & 1;
+
+        $i3 = (int) $b1;
+
+        $i2 = $r0[$i3];
+
+        return $i2;
+    }
+
+    static final int DirPropFlagE(byte)
+    {
+        byte b0, $b1;
+        int[] $r0;
+        int $i2, $i3;
+
+        b0 := @parameter0: byte;
+
+        $r0 = <sun.text.bidi.BidiBase: int[] DirPropFlagE>;
+
+        $b1 = b0 & 1;
+
+        $i3 = (int) $b1;
+
+        $i2 = $r0[$i3];
+
+        return $i2;
+    }
+
+    static final int DirPropFlagO(byte)
+    {
+        byte b0, $b1;
+        int[] $r0;
+        int $i2, $i3;
+
+        b0 := @parameter0: byte;
+
+        $r0 = <sun.text.bidi.BidiBase: int[] DirPropFlagO>;
+
+        $b1 = b0 & 1;
+
+        $i3 = (int) $b1;
+
+        $i2 = $r0[$i3];
+
+        return $i2;
+    }
+
+    private static byte GetLRFromLevel(byte)
+    {
+        byte b0, $b1, $b2;
+
+        b0 := @parameter0: byte;
+
+        $b1 = b0 & 1;
+
+        $b2 = (byte) $b1;
+
+        return $b2;
+    }
+
+    private static boolean IsDefaultLevel(byte)
+    {
+        byte b0, $b1;
+        int $i2;
+        boolean $z0;
+
+        b0 := @parameter0: byte;
+
+        $b1 = b0 & 126;
+
+        $i2 = (int) $b1;
+
+        if $i2 != 126 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    byte GetParaLevelAt(int)
+    {
+        byte[] $r1;
+        byte $b0, $b2, $b4;
+        sun.text.bidi.BidiBase r0;
+        int i1, $i3, $i5;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        i1 := @parameter0: int;
+
+        $b0 = r0.<sun.text.bidi.BidiBase: byte defaultParaLevel>;
+
+        if $b0 == 0 goto label1;
+
+        $r1 = r0.<sun.text.bidi.BidiBase: byte[] dirProps>;
+
+        $b2 = $r1[i1];
+
+        $i5 = (int) $b2;
+
+        $i3 = $i5 >> 6;
+
+        $b4 = (byte) $i3;
+
+        goto label2;
+
+     label1:
+        $b4 = r0.<sun.text.bidi.BidiBase: byte paraLevel>;
+
+     label2:
+        return $b4;
+    }
+
+    static boolean IsBidiControlChar(int)
+    {
+        int i0, $i1, $i3;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        $i3 = (int) -4;
+
+        $i1 = i0 & $i3;
+
+        if $i1 == 8204 goto label1;
+
+        if i0 < 8234 goto label2;
+
+        if i0 > 8238 goto label2;
+
+     label1:
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+    }
+
+    public void verifyValidPara()
+    {
+        java.lang.IllegalStateException $r2;
+        sun.text.bidi.BidiBase r0, $r1;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        $r1 = r0.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase paraBidi>;
+
+        if r0 == $r1 goto label1;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("");
+
+        throw $r2;
+
+     label1:
+        return;
+    }
+
+    public void verifyValidParaOrLine()
+    {
+        java.lang.IllegalStateException $r2;
+        sun.text.bidi.BidiBase r0, r1, $r3;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        r1 = r0.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase paraBidi>;
+
+        if r0 != r1 goto label1;
+
+        return;
+
+     label1:
+        if r1 == null goto label2;
+
+        $r3 = r1.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase paraBidi>;
+
+        if r1 == $r3 goto label3;
+
+     label2:
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>()>();
+
+        throw $r2;
+
+     label3:
+        return;
+    }
+
+    public void verifyRange(int, int, int)
+    {
+        java.lang.IllegalArgumentException $r0;
+        sun.text.bidi.BidiBase r9;
+        int i0, i1, i2;
+        java.lang.StringBuilder $r1, $r2, $r3, $r4, $r5, $r6, $r7;
+        java.lang.String $r8;
+
+        r9 := @this: sun.text.bidi.BidiBase;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        if i0 < i1 goto label1;
+
+        if i0 < i2 goto label2;
+
+     label1:
+        $r0 = new java.lang.IllegalArgumentException;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Value ");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is out of range ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" to ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i2);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r8);
+
+        throw $r0;
+
+     label2:
+        return;
+    }
+
+    public void verifyIndex(int, int, int)
+    {
+        java.lang.ArrayIndexOutOfBoundsException $r0;
+        sun.text.bidi.BidiBase r9;
+        int i0, i1, i2;
+        java.lang.StringBuilder $r1, $r2, $r3, $r4, $r5, $r6, $r7;
+        java.lang.String $r8;
+
+        r9 := @this: sun.text.bidi.BidiBase;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        if i0 < i1 goto label1;
+
+        if i0 < i2 goto label2;
+
+     label1:
+        $r0 = new java.lang.ArrayIndexOutOfBoundsException;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Index ");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is out of range ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" to ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i2);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<java.lang.ArrayIndexOutOfBoundsException: void <init>(java.lang.String)>($r8);
+
+        throw $r0;
+
+     label2:
+        return;
+    }
+
+    public void <init>(int, int)
+    {
+        byte[] $r1, $r2;
+        sun.text.bidi.BidiBase$InsertPoints $r8;
+        sun.text.normalizer.UBiDiProps $r10;
+        int[] $r3, $r4;
+        sun.text.bidi.BidiBase r0;
+        sun.text.bidi.BidiRun $r7;
+        int i0, i1;
+        java.lang.String $r13;
+        java.util.MissingResourceException $r12;
+        java.io.IOException $r11;
+        java.lang.IllegalArgumentException $r9;
+        sun.text.bidi.BidiRun[] $r5, $r6;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = newarray (byte)[1];
+
+        r0.<sun.text.bidi.BidiBase: byte[] dirPropsMemory> = $r1;
+
+        $r2 = newarray (byte)[1];
+
+        r0.<sun.text.bidi.BidiBase: byte[] levelsMemory> = $r2;
+
+        $r3 = newarray (int)[1];
+
+        r0.<sun.text.bidi.BidiBase: int[] parasMemory> = $r3;
+
+        $r4 = newarray (int)[1];
+
+        $r4[0] = 0;
+
+        r0.<sun.text.bidi.BidiBase: int[] simpleParas> = $r4;
+
+        $r5 = newarray (sun.text.bidi.BidiRun)[0];
+
+        r0.<sun.text.bidi.BidiBase: sun.text.bidi.BidiRun[] runsMemory> = $r5;
+
+        $r6 = newarray (sun.text.bidi.BidiRun)[1];
+
+        $r7 = new sun.text.bidi.BidiRun;
+
+        specialinvoke $r7.<sun.text.bidi.BidiRun: void <init>()>();
+
+        $r6[0] = $r7;
+
+        r0.<sun.text.bidi.BidiBase: sun.text.bidi.BidiRun[] simpleRuns> = $r6;
+
+        $r8 = new sun.text.bidi.BidiBase$InsertPoints;
+
+        specialinvoke $r8.<sun.text.bidi.BidiBase$InsertPoints: void <init>(sun.text.bidi.BidiBase)>(r0);
+
+        r0.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints> = $r8;
+
+        if i0 < 0 goto label1;
+
+        if i1 >= 0 goto label2;
+
+     label1:
+        $r9 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r9.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r9;
+
+     label2:
+        $r10 = staticinvoke <sun.text.normalizer.UBiDiProps: sun.text.normalizer.UBiDiProps getSingleton()>();
+
+        r0.<sun.text.bidi.BidiBase: sun.text.normalizer.UBiDiProps bdp> = $r10;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r11 := @caughtexception;
+
+        $r12 = new java.util.MissingResourceException;
+
+        $r13 = virtualinvoke $r11.<java.io.IOException: java.lang.String getMessage()>();
+
+        specialinvoke $r12.<java.util.MissingResourceException: void <init>(java.lang.String,java.lang.String,java.lang.String)>($r13, "(BidiProps)", "");
+
+        throw $r12;
+
+     label5:
+        if i0 <= 0 goto label6;
+
+        specialinvoke r0.<sun.text.bidi.BidiBase: void getInitialDirPropsMemory(int)>(i0);
+
+        specialinvoke r0.<sun.text.bidi.BidiBase: void getInitialLevelsMemory(int)>(i0);
+
+        goto label7;
+
+     label6:
+        r0.<sun.text.bidi.BidiBase: boolean mayAllocateText> = 1;
+
+     label7:
+        if i1 <= 0 goto label8;
+
+        if i1 <= 1 goto label9;
+
+        specialinvoke r0.<sun.text.bidi.BidiBase: void getInitialRunsMemory(int)>(i1);
+
+        goto label9;
+
+     label8:
+        r0.<sun.text.bidi.BidiBase: boolean mayAllocateRuns> = 1;
+
+     label9:
+        return;
+
+        catch java.io.IOException from label2 to label3 with label4;
+    }
+
+    private java.lang.Object getMemory(java.lang.String, java.lang.Object, java.lang.Class, boolean, int)
+    {
+        sun.text.bidi.BidiBase r15;
+        int $i0, i1;
+        java.lang.String r6, $r8, $r14;
+        boolean z0;
+        java.lang.Exception $r9;
+        java.lang.Object r0, $r2;
+        java.lang.Class r1;
+        java.lang.StringBuilder $r4, $r5, $r7, $r11, $r12, $r13;
+        java.lang.OutOfMemoryError $r3, $r10;
+
+        r15 := @this: sun.text.bidi.BidiBase;
+
+        r6 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.lang.Object;
+
+        r1 := @parameter2: java.lang.Class;
+
+        z0 := @parameter3: boolean;
+
+        i1 := @parameter4: int;
+
+        $i0 = staticinvoke <java.lang.reflect.Array: int getLength(java.lang.Object)>(r0);
+
+        if i1 != $i0 goto label1;
+
+        return r0;
+
+     label1:
+        if z0 != 0 goto label3;
+
+        if i1 > $i0 goto label2;
+
+        return r0;
+
+     label2:
+        $r3 = new java.lang.OutOfMemoryError;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to allocate memory for ");
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.OutOfMemoryError: void <init>(java.lang.String)>($r8);
+
+        throw $r3;
+
+     label3:
+        $r2 = staticinvoke <java.lang.reflect.Array: java.lang.Object newInstance(java.lang.Class,int)>(r1, i1);
+
+     label4:
+        return $r2;
+
+     label5:
+        $r9 := @caughtexception;
+
+        $r10 = new java.lang.OutOfMemoryError;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to allocate memory for ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r10.<java.lang.OutOfMemoryError: void <init>(java.lang.String)>($r14);
+
+        throw $r10;
+
+        catch java.lang.Exception from label3 to label4 with label5;
+    }
+
+    private void getDirPropsMemory(boolean, int)
+    {
+        byte[] $r2, $r4, $r5;
+        sun.text.bidi.BidiBase r0;
+        int i0;
+        java.lang.Class $r1;
+        java.lang.Object $r3;
+        boolean z0;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        z0 := @parameter0: boolean;
+
+        i0 := @parameter1: int;
+
+        $r2 = r0.<sun.text.bidi.BidiBase: byte[] dirPropsMemory>;
+
+        $r1 = <java.lang.Byte: java.lang.Class TYPE>;
+
+        $r3 = specialinvoke r0.<sun.text.bidi.BidiBase: java.lang.Object getMemory(java.lang.String,java.lang.Object,java.lang.Class,boolean,int)>("DirProps", $r2, $r1, z0, i0);
+
+        $r4 = (byte[]) $r3;
+
+        $r5 = (byte[]) $r4;
+
+        r0.<sun.text.bidi.BidiBase: byte[] dirPropsMemory> = $r5;
+
+        return;
+    }
+
+    void getDirPropsMemory(int)
+    {
+        int i0;
+        sun.text.bidi.BidiBase r0;
+        boolean $z0;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        i0 := @parameter0: int;
+
+        $z0 = r0.<sun.text.bidi.BidiBase: boolean mayAllocateText>;
+
+        specialinvoke r0.<sun.text.bidi.BidiBase: void getDirPropsMemory(boolean,int)>($z0, i0);
+
+        return;
+    }
+
+    private void getLevelsMemory(boolean, int)
+    {
+        byte[] $r2, $r4, $r5;
+        sun.text.bidi.BidiBase r0;
+        int i0;
+        java.lang.Class $r1;
+        java.lang.Object $r3;
+        boolean z0;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        z0 := @parameter0: boolean;
+
+        i0 := @parameter1: int;
+
+        $r2 = r0.<sun.text.bidi.BidiBase: byte[] levelsMemory>;
+
+        $r1 = <java.lang.Byte: java.lang.Class TYPE>;
+
+        $r3 = specialinvoke r0.<sun.text.bidi.BidiBase: java.lang.Object getMemory(java.lang.String,java.lang.Object,java.lang.Class,boolean,int)>("Levels", $r2, $r1, z0, i0);
+
+        $r4 = (byte[]) $r3;
+
+        $r5 = (byte[]) $r4;
+
+        r0.<sun.text.bidi.BidiBase: byte[] levelsMemory> = $r5;
+
+        return;
+    }
+
+    void getLevelsMemory(int)
+    {
+        int i0;
+        sun.text.bidi.BidiBase r0;
+        boolean $z0;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        i0 := @parameter0: int;
+
+        $z0 = r0.<sun.text.bidi.BidiBase: boolean mayAllocateText>;
+
+        specialinvoke r0.<sun.text.bidi.BidiBase: void getLevelsMemory(boolean,int)>($z0, i0);
+
+        return;
+    }
+
+    private void getRunsMemory(boolean, int)
+    {
+        sun.text.bidi.BidiBase r0;
+        int i0;
+        java.lang.Object $r2;
+        boolean z0;
+        sun.text.bidi.BidiRun[] $r1, $r3, $r4;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        z0 := @parameter0: boolean;
+
+        i0 := @parameter1: int;
+
+        $r1 = r0.<sun.text.bidi.BidiBase: sun.text.bidi.BidiRun[] runsMemory>;
+
+        $r2 = specialinvoke r0.<sun.text.bidi.BidiBase: java.lang.Object getMemory(java.lang.String,java.lang.Object,java.lang.Class,boolean,int)>("Runs", $r1, class "Lsun/text/bidi/BidiRun;", z0, i0);
+
+        $r3 = (sun.text.bidi.BidiRun[]) $r2;
+
+        $r4 = (sun.text.bidi.BidiRun[]) $r3;
+
+        r0.<sun.text.bidi.BidiBase: sun.text.bidi.BidiRun[] runsMemory> = $r4;
+
+        return;
+    }
+
+    void getRunsMemory(int)
+    {
+        int i0;
+        sun.text.bidi.BidiBase r0;
+        boolean $z0;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        i0 := @parameter0: int;
+
+        $z0 = r0.<sun.text.bidi.BidiBase: boolean mayAllocateRuns>;
+
+        specialinvoke r0.<sun.text.bidi.BidiBase: void getRunsMemory(boolean,int)>($z0, i0);
+
+        return;
+    }
+
+    private void getInitialDirPropsMemory(int)
+    {
+        int i0;
+        sun.text.bidi.BidiBase r0;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<sun.text.bidi.BidiBase: void getDirPropsMemory(boolean,int)>(1, i0);
+
+        return;
+    }
+
+    private void getInitialLevelsMemory(int)
+    {
+        int i0;
+        sun.text.bidi.BidiBase r0;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<sun.text.bidi.BidiBase: void getLevelsMemory(boolean,int)>(1, i0);
+
+        return;
+    }
+
+    private void getInitialParasMemory(int)
+    {
+        int[] $r2, $r4, $r5;
+        sun.text.bidi.BidiBase r0;
+        int i0;
+        java.lang.Class $r1;
+        java.lang.Object $r3;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        i0 := @parameter0: int;
+
+        $r2 = r0.<sun.text.bidi.BidiBase: int[] parasMemory>;
+
+        $r1 = <java.lang.Integer: java.lang.Class TYPE>;
+
+        $r3 = specialinvoke r0.<sun.text.bidi.BidiBase: java.lang.Object getMemory(java.lang.String,java.lang.Object,java.lang.Class,boolean,int)>("Paras", $r2, $r1, 1, i0);
+
+        $r4 = (int[]) $r3;
+
+        $r5 = (int[]) $r4;
+
+        r0.<sun.text.bidi.BidiBase: int[] parasMemory> = $r5;
+
+        return;
+    }
+
+    private void getInitialRunsMemory(int)
+    {
+        int i0;
+        sun.text.bidi.BidiBase r0;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<sun.text.bidi.BidiBase: void getRunsMemory(boolean,int)>(1, i0);
+
+        return;
+    }
+
+    private void getDirProps()
+    {
+        byte[] $r3, $r5, $r6, $r7;
+        byte $b0, $b1, $b11, b17, $b21, $b22, $b28, $b29, $b30, $b31, $b32, $b33, $b37, $b38, $b39, $b40, b41, b44, b45, $b51, $b52;
+        sun.text.bidi.BidiBase r0;
+        char[] $r1, $r4;
+        boolean $z0, $z1;
+        sun.text.normalizer.UBiDiProps $r2;
+        int $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, i12, $i13, $i14, $i15, $i16, $i18, $i19, $i20, $i23, $i24, $i25, $i27, $i34, $i35, $i36, i42, i46, $i47, i48, i49, i50, $i54, $i56, $i57, $i58, $i59, $i60;
+        char $c26;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        r0.<sun.text.bidi.BidiBase: int flags> = 0;
+
+        b41 = 0;
+
+        $b0 = r0.<sun.text.bidi.BidiBase: byte paraLevel>;
+
+        $z0 = staticinvoke <sun.text.bidi.BidiBase: boolean IsDefaultLevel(byte)>($b0);
+
+        $i54 = (int) -1;
+
+        r0.<sun.text.bidi.BidiBase: int lastArabicPos> = $i54;
+
+        r0.<sun.text.bidi.BidiBase: int controlCount> = 0;
+
+        i42 = 0;
+
+        if $z0 == 0 goto label03;
+
+        $b39 = r0.<sun.text.bidi.BidiBase: byte paraLevel>;
+
+        $b40 = $b39 & 1;
+
+        if $b40 == 0 goto label01;
+
+        $b52 = 64;
+
+        $b51 = 64;
+
+        goto label02;
+
+     label01:
+        $b52 = 0;
+
+        $b51 = 0;
+
+     label02:
+        b41 = $b52;
+
+        b44 = $b51;
+
+        b45 = 1;
+
+        goto label04;
+
+     label03:
+        b45 = 0;
+
+        b44 = 0;
+
+     label04:
+        i46 = 0;
+
+     label05:
+        $i47 = r0.<sun.text.bidi.BidiBase: int originalLength>;
+
+        if i46 >= $i47 goto label18;
+
+        i12 = i46;
+
+        $r1 = r0.<sun.text.bidi.BidiBase: char[] text>;
+
+        $i13 = r0.<sun.text.bidi.BidiBase: int originalLength>;
+
+        $i14 = staticinvoke <sun.text.normalizer.UTF16: int charAt(char[],int,int,int)>($r1, 0, $i13, i46);
+
+        $i15 = staticinvoke <java.lang.Character: int charCount(int)>($i14);
+
+        i46 = i46 + $i15;
+
+        i48 = i46 - 1;
+
+        $r2 = r0.<sun.text.bidi.BidiBase: sun.text.normalizer.UBiDiProps bdp>;
+
+        $i16 = virtualinvoke $r2.<sun.text.normalizer.UBiDiProps: int getClass(int)>($i14);
+
+        b17 = (byte) $i16;
+
+        $i18 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $i19 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(b17);
+
+        $i20 = $i18 | $i19;
+
+        r0.<sun.text.bidi.BidiBase: int flags> = $i20;
+
+        $r3 = r0.<sun.text.bidi.BidiBase: byte[] dirProps>;
+
+        $b21 = b17 | b44;
+
+        $b22 = (byte) $b21;
+
+        $r3[i48] = $b22;
+
+        if i48 <= i12 goto label07;
+
+        $i34 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $i35 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(18);
+
+        $i36 = $i34 | $i35;
+
+        r0.<sun.text.bidi.BidiBase: int flags> = $i36;
+
+     label06:
+        $r7 = r0.<sun.text.bidi.BidiBase: byte[] dirProps>;
+
+        $i56 = (int) -1;
+
+        i48 = i48 + $i56;
+
+        $b37 = 18 | b44;
+
+        $b38 = (byte) $b37;
+
+        $r7[i48] = $b38;
+
+        if i48 > i12 goto label06;
+
+     label07:
+        if b45 != 1 goto label12;
+
+        if b17 != 0 goto label09;
+
+        b45 = 2;
+
+        if b44 == 0 goto label05;
+
+        b44 = 0;
+
+        i49 = i42;
+
+     label08:
+        if i49 >= i46 goto label05;
+
+        $r6 = r0.<sun.text.bidi.BidiBase: byte[] dirProps>;
+
+        $b31 = $r6[i49];
+
+        $b32 = $b31 & -65;
+
+        $b33 = (byte) $b32;
+
+        $r6[i49] = $b33;
+
+        i49 = i49 + 1;
+
+        goto label08;
+
+     label09:
+        if b17 == 1 goto label10;
+
+        $i57 = (int) b17;
+
+        if $i57 != 13 goto label12;
+
+     label10:
+        b45 = 2;
+
+        if b44 != 0 goto label05;
+
+        b44 = 64;
+
+        i50 = i42;
+
+     label11:
+        if i50 >= i46 goto label05;
+
+        $r5 = r0.<sun.text.bidi.BidiBase: byte[] dirProps>;
+
+        $b28 = $r5[i50];
+
+        $b29 = $b28 | 64;
+
+        $b30 = (byte) $b29;
+
+        $r5[i50] = $b30;
+
+        i50 = i50 + 1;
+
+        goto label11;
+
+     label12:
+        if b17 != 0 goto label13;
+
+        goto label05;
+
+     label13:
+        if b17 != 1 goto label14;
+
+        goto label05;
+
+     label14:
+        $i58 = (int) b17;
+
+        if $i58 != 13 goto label15;
+
+        $i27 = i46 - 1;
+
+        r0.<sun.text.bidi.BidiBase: int lastArabicPos> = $i27;
+
+        goto label05;
+
+     label15:
+        $i59 = (int) b17;
+
+        if $i59 != 7 goto label05;
+
+        $i23 = r0.<sun.text.bidi.BidiBase: int originalLength>;
+
+        if i46 >= $i23 goto label05;
+
+        if $i14 != 13 goto label16;
+
+        $r4 = r0.<sun.text.bidi.BidiBase: char[] text>;
+
+        $c26 = $r4[i46];
+
+        $i60 = (int) $c26;
+
+        if $i60 == 10 goto label17;
+
+     label16:
+        $i24 = r0.<sun.text.bidi.BidiBase: int paraCount>;
+
+        $i25 = $i24 + 1;
+
+        r0.<sun.text.bidi.BidiBase: int paraCount> = $i25;
+
+     label17:
+        if $z0 == 0 goto label05;
+
+        b45 = 1;
+
+        i42 = i46;
+
+        b44 = b41;
+
+        goto label05;
+
+     label18:
+        if $z0 == 0 goto label19;
+
+        $b11 = virtualinvoke r0.<sun.text.bidi.BidiBase: byte GetParaLevelAt(int)>(0);
+
+        r0.<sun.text.bidi.BidiBase: byte paraLevel> = $b11;
+
+     label19:
+        $i2 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $b1 = r0.<sun.text.bidi.BidiBase: byte paraLevel>;
+
+        $i3 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlagLR(byte)>($b1);
+
+        $i4 = $i2 | $i3;
+
+        r0.<sun.text.bidi.BidiBase: int flags> = $i4;
+
+        $z1 = r0.<sun.text.bidi.BidiBase: boolean orderParagraphsLTR>;
+
+        if $z1 == 0 goto label20;
+
+        $i5 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $i6 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(7);
+
+        $i7 = $i5 & $i6;
+
+        if $i7 == 0 goto label20;
+
+        $i8 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $i9 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(0);
+
+        $i10 = $i8 | $i9;
+
+        r0.<sun.text.bidi.BidiBase: int flags> = $i10;
+
+     label20:
+        return;
+    }
+
+    private byte directionFromFlags()
+    {
+        sun.text.bidi.BidiBase r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        $i1 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $i0 = <sun.text.bidi.BidiBase: int MASK_RTL>;
+
+        $i2 = $i1 & $i0;
+
+        if $i2 != 0 goto label2;
+
+        $i6 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $i7 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(5);
+
+        $i8 = $i6 & $i7;
+
+        if $i8 == 0 goto label1;
+
+        $i10 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $i9 = <sun.text.bidi.BidiBase: int MASK_POSSIBLE_N>;
+
+        $i11 = $i10 & $i9;
+
+        if $i11 != 0 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $i4 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $i3 = <sun.text.bidi.BidiBase: int MASK_LTR>;
+
+        $i5 = $i4 & $i3;
+
+        if $i5 != 0 goto label3;
+
+        return 1;
+
+     label3:
+        return 2;
+    }
+
+    private byte resolveExplicitLevels()
+    {
+        byte[] $r1, $r5, $r6, $r7;
+        byte $b0, $b1, $b12, $b16, $b17, $b22, $b23, $b27, $b30, $b32, $b44, b60, b62, b64, b65, b70, b74, $b84;
+        sun.text.bidi.BidiBase r0;
+        char[] $r2, $r4;
+        int[] $r3;
+        boolean $z0;
+        int $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i13, $i14, $i15, $i18, $i19, $i20, $i21, $i24, $i25, $i26, $i28, $i29, $i31, $i33, $i34, $i35, $i37, $i38, $i39, $i41, $i42, $i43, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57, $i58, $i59, i61, i63, i66, i67, i68, $i69, $i71, $i72, $i73, $i75, $i76, $i77, $i78, $i79, $i80, $i81, $i82, $i83, $i85, $i86, $i87, $i88, $i89, $i90, $i91, $i92, $i93, $i95, $i96, $i98, $i99, $i100, $i101, $i102;
+        char $c36, $c40;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        $b0 = virtualinvoke r0.<sun.text.bidi.BidiBase: byte GetParaLevelAt(int)>(0);
+
+        b60 = $b0;
+
+        i61 = 0;
+
+        $b1 = specialinvoke r0.<sun.text.bidi.BidiBase: byte directionFromFlags()>();
+
+        b62 = $b1;
+
+        $i85 = (int) $b1;
+
+        if $i85 == 2 goto label01;
+
+        $i59 = r0.<sun.text.bidi.BidiBase: int paraCount>;
+
+        if $i59 != 1 goto label01;
+
+        goto label27;
+
+     label01:
+        $i2 = r0.<sun.text.bidi.BidiBase: int paraCount>;
+
+        if $i2 != 1 goto label03;
+
+        $i56 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $i55 = <sun.text.bidi.BidiBase: int MASK_EXPLICIT>;
+
+        $i57 = $i56 & $i55;
+
+        if $i57 != 0 goto label03;
+
+        i63 = 0;
+
+     label02:
+        $i58 = r0.<sun.text.bidi.BidiBase: int length>;
+
+        if i63 >= $i58 goto label27;
+
+        $r6 = r0.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $r6[i63] = $b0;
+
+        i63 = i63 + 1;
+
+        goto label02;
+
+     label03:
+        b64 = $b0;
+
+        b65 = 0;
+
+        $r5 = newarray (byte)[61];
+
+        i66 = 0;
+
+        i67 = 0;
+
+        r0.<sun.text.bidi.BidiBase: int flags> = 0;
+
+        i68 = 0;
+
+     label04:
+        $i69 = r0.<sun.text.bidi.BidiBase: int length>;
+
+        if i68 >= $i69 goto label24;
+
+        $r1 = r0.<sun.text.bidi.BidiBase: byte[] dirProps>;
+
+        $b16 = $r1[i68];
+
+        $b17 = staticinvoke <sun.text.bidi.BidiBase: byte NoContextRTL(byte)>($b16);
+
+        $i86 = (int) $b17;
+
+        tableswitch($i86)
+        {
+            case 7: goto label16;
+            case 8: goto label20;
+            case 9: goto label20;
+            case 10: goto label20;
+            case 11: goto label05;
+            case 12: goto label05;
+            case 13: goto label20;
+            case 14: goto label09;
+            case 15: goto label09;
+            case 16: goto label12;
+            case 17: goto label20;
+            case 18: goto label19;
+            default: goto label20;
+        };
+
+     label05:
+        $i87 = (int) b64;
+
+        $i28 = $i87 + 2;
+
+        $i29 = $i28 & 126;
+
+        b70 = (byte) $i29;
+
+        $i88 = (int) b70;
+
+        if $i88 > 61 goto label06;
+
+        $r5[b65] = b64;
+
+        $i31 = b65 + 1;
+
+        b65 = (byte) $i31;
+
+        b64 = b70;
+
+        $i89 = (int) $b17;
+
+        if $i89 != 12 goto label08;
+
+        $b32 = b70 | -128;
+
+        b64 = (byte) $b32;
+
+        goto label08;
+
+     label06:
+        $b30 = b64 & 127;
+
+        $i90 = (int) $b30;
+
+        if $i90 != 61 goto label07;
+
+        i67 = i67 + 1;
+
+        goto label08;
+
+     label07:
+        i66 = i66 + 1;
+
+     label08:
+        $i71 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $i72 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(18);
+
+        $i73 = $i71 | $i72;
+
+        r0.<sun.text.bidi.BidiBase: int flags> = $i73;
+
+        goto label23;
+
+     label09:
+        $b23 = b64 & 127;
+
+        $i91 = (int) $b23;
+
+        $i24 = $i91 + 1;
+
+        $i25 = $i24 | 1;
+
+        b74 = (byte) $i25;
+
+        $i92 = (int) b74;
+
+        if $i92 > 61 goto label10;
+
+        $r5[b65] = b64;
+
+        $i26 = b65 + 1;
+
+        b65 = (byte) $i26;
+
+        b64 = b74;
+
+        $i93 = (int) $b17;
+
+        if $i93 != 15 goto label11;
+
+        $b27 = b74 | -128;
+
+        b64 = (byte) $b27;
+
+        goto label11;
+
+     label10:
+        i67 = i67 + 1;
+
+     label11:
+        $i75 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $i76 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(18);
+
+        $i77 = $i75 | $i76;
+
+        r0.<sun.text.bidi.BidiBase: int flags> = $i77;
+
+        goto label23;
+
+     label12:
+        if i67 <= 0 goto label13;
+
+        $i95 = (int) -1;
+
+        i67 = i67 + $i95;
+
+        goto label15;
+
+     label13:
+        if i66 <= 0 goto label14;
+
+        $b22 = b64 & 127;
+
+        $i96 = (int) $b22;
+
+        if $i96 == 61 goto label14;
+
+        $i98 = (int) -1;
+
+        i66 = i66 + $i98;
+
+        goto label15;
+
+     label14:
+        if b65 <= 0 goto label15;
+
+        $i21 = b65 - 1;
+
+        b65 = (byte) $i21;
+
+        b64 = $r5[b65];
+
+     label15:
+        $i78 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $i79 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(18);
+
+        $i80 = $i78 | $i79;
+
+        r0.<sun.text.bidi.BidiBase: int flags> = $i80;
+
+        goto label23;
+
+     label16:
+        b65 = 0;
+
+        i66 = 0;
+
+        i67 = 0;
+
+        b60 = virtualinvoke r0.<sun.text.bidi.BidiBase: byte GetParaLevelAt(int)>(i68);
+
+        $i34 = i68 + 1;
+
+        $i33 = r0.<sun.text.bidi.BidiBase: int length>;
+
+        if $i34 >= $i33 goto label18;
+
+        $i35 = i68 + 1;
+
+        b64 = virtualinvoke r0.<sun.text.bidi.BidiBase: byte GetParaLevelAt(int)>($i35);
+
+        $r2 = r0.<sun.text.bidi.BidiBase: char[] text>;
+
+        $c36 = $r2[i68];
+
+        $i99 = (int) $c36;
+
+        if $i99 != 13 goto label17;
+
+        $r4 = r0.<sun.text.bidi.BidiBase: char[] text>;
+
+        $i39 = i68 + 1;
+
+        $c40 = $r4[$i39];
+
+        $i100 = (int) $c40;
+
+        if $i100 == 10 goto label18;
+
+     label17:
+        $r3 = r0.<sun.text.bidi.BidiBase: int[] paras>;
+
+        $i37 = i61;
+
+        i61 = i61 + 1;
+
+        $i38 = i68 + 1;
+
+        $r3[$i37] = $i38;
+
+     label18:
+        $i81 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $i82 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(7);
+
+        $i83 = $i81 | $i82;
+
+        r0.<sun.text.bidi.BidiBase: int flags> = $i83;
+
+        goto label23;
+
+     label19:
+        $i18 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $i19 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(18);
+
+        $i20 = $i18 | $i19;
+
+        r0.<sun.text.bidi.BidiBase: int flags> = $i20;
+
+        goto label23;
+
+     label20:
+        $i101 = (int) b60;
+
+        $i102 = (int) b64;
+
+        if $i101 == $i102 goto label22;
+
+        b60 = b64;
+
+        $b44 = b64 & -128;
+
+        if $b44 == 0 goto label21;
+
+        $i50 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $i51 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlagO(byte)>(b64);
+
+        $i52 = <sun.text.bidi.BidiBase: int DirPropFlagMultiRuns>;
+
+        $i53 = $i51 | $i52;
+
+        $i54 = $i50 | $i53;
+
+        r0.<sun.text.bidi.BidiBase: int flags> = $i54;
+
+        goto label22;
+
+     label21:
+        $i45 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $i46 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlagE(byte)>(b64);
+
+        $i47 = <sun.text.bidi.BidiBase: int DirPropFlagMultiRuns>;
+
+        $i48 = $i46 | $i47;
+
+        $i49 = $i45 | $i48;
+
+        r0.<sun.text.bidi.BidiBase: int flags> = $i49;
+
+     label22:
+        $b84 = b60 & -128;
+
+        if $b84 != 0 goto label23;
+
+        $i41 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $i42 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>($b17);
+
+        $i43 = $i41 | $i42;
+
+        r0.<sun.text.bidi.BidiBase: int flags> = $i43;
+
+     label23:
+        $r7 = r0.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $r7[i68] = b60;
+
+        i68 = i68 + 1;
+
+        goto label04;
+
+     label24:
+        $i4 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $i3 = <sun.text.bidi.BidiBase: int MASK_EMBEDDING>;
+
+        $i5 = $i4 & $i3;
+
+        if $i5 == 0 goto label25;
+
+        $i13 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $b12 = r0.<sun.text.bidi.BidiBase: byte paraLevel>;
+
+        $i14 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlagLR(byte)>($b12);
+
+        $i15 = $i13 | $i14;
+
+        r0.<sun.text.bidi.BidiBase: int flags> = $i15;
+
+     label25:
+        $z0 = r0.<sun.text.bidi.BidiBase: boolean orderParagraphsLTR>;
+
+        if $z0 == 0 goto label26;
+
+        $i6 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $i7 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(7);
+
+        $i8 = $i6 & $i7;
+
+        if $i8 == 0 goto label26;
+
+        $i9 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $i10 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(0);
+
+        $i11 = $i9 | $i10;
+
+        r0.<sun.text.bidi.BidiBase: int flags> = $i11;
+
+     label26:
+        b62 = specialinvoke r0.<sun.text.bidi.BidiBase: byte directionFromFlags()>();
+
+     label27:
+        return b62;
+    }
+
+    private byte checkExplicitLevels()
+    {
+        byte[] $r1, $r2, $r6, $r7, $r8, $r9, $r10, $r11;
+        byte $b4, $b5, $b9, $b10, $b11, $b17, $b25, $b29, $b30, $b31, $b32, $b33, $b34, $b35, $b38, b39, $b40, $b41, $b42;
+        sun.text.bidi.BidiBase r0;
+        java.lang.StringBuilder $r14, $r15, $r16, $r17, $r19;
+        java.lang.String $r18;
+        char[] $r3, $r5;
+        int[] $r4;
+        int $i0, $i1, $i2, $i3, $i6, $i7, $i8, $i12, $i13, $i14, $i15, $i16, $i18, $i19, $i21, $i22, $i23, $i26, $i27, $i28, i36, i37, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51;
+        char $c20, $c24;
+        java.lang.IllegalArgumentException $r20;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        r0.<sun.text.bidi.BidiBase: int flags> = 0;
+
+        i36 = 0;
+
+        i37 = 0;
+
+     label01:
+        $i0 = r0.<sun.text.bidi.BidiBase: int length>;
+
+        if i37 >= $i0 goto label12;
+
+        $r1 = r0.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $b9 = $r1[i37];
+
+        if $b9 != 0 goto label02;
+
+        $r9 = r0.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $b35 = r0.<sun.text.bidi.BidiBase: byte paraLevel>;
+
+        $r9[i37] = $b35;
+
+     label02:
+        $r2 = r0.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $b10 = $r2[i37];
+
+        $b11 = $b10 & 127;
+
+        $i43 = (int) $b11;
+
+        if 61 >= $i43 goto label04;
+
+        $r6 = r0.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $b29 = $r6[i37];
+
+        $b30 = $b29 & -128;
+
+        if $b30 == 0 goto label03;
+
+        $r8 = r0.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $b32 = r0.<sun.text.bidi.BidiBase: byte paraLevel>;
+
+        $b33 = $b32 | -128;
+
+        $b34 = (byte) $b33;
+
+        $r8[i37] = $b34;
+
+        goto label04;
+
+     label03:
+        $r7 = r0.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $b31 = r0.<sun.text.bidi.BidiBase: byte paraLevel>;
+
+        $r7[i37] = $b31;
+
+     label04:
+        $r10 = r0.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $b38 = $r10[i37];
+
+        b39 = $b38;
+
+        $r11 = r0.<sun.text.bidi.BidiBase: byte[] dirProps>;
+
+        $b40 = $r11[i37];
+
+        $b41 = staticinvoke <sun.text.bidi.BidiBase: byte NoContextRTL(byte)>($b40);
+
+        $b42 = $b38 & -128;
+
+        if $b42 == 0 goto label05;
+
+        $b25 = $b38 & 127;
+
+        b39 = (byte) $b25;
+
+        $i26 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $i27 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlagO(byte)>(b39);
+
+        $i28 = $i26 | $i27;
+
+        r0.<sun.text.bidi.BidiBase: int flags> = $i28;
+
+        goto label06;
+
+     label05:
+        $i12 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $i13 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlagE(byte)>($b38);
+
+        $i14 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>($b41);
+
+        $i15 = $i13 | $i14;
+
+        $i16 = $i12 | $i15;
+
+        r0.<sun.text.bidi.BidiBase: int flags> = $i16;
+
+     label06:
+        $b17 = virtualinvoke r0.<sun.text.bidi.BidiBase: byte GetParaLevelAt(int)>(i37);
+
+        $i44 = (int) b39;
+
+        $i45 = (int) $b17;
+
+        if $i44 >= $i45 goto label07;
+
+        if 0 != b39 goto label08;
+
+        $i46 = (int) $b41;
+
+        if $i46 != 7 goto label08;
+
+     label07:
+        $i47 = (int) b39;
+
+        if 61 >= $i47 goto label09;
+
+     label08:
+        $r20 = new java.lang.IllegalArgumentException;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("level ");
+
+        $i48 = (int) b39;
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i48);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" out of bounds at index ");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i37);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r20.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r18);
+
+        throw $r20;
+
+     label09:
+        $i49 = (int) $b41;
+
+        if $i49 != 7 goto label11;
+
+        $i19 = i37 + 1;
+
+        $i18 = r0.<sun.text.bidi.BidiBase: int length>;
+
+        if $i19 >= $i18 goto label11;
+
+        $r3 = r0.<sun.text.bidi.BidiBase: char[] text>;
+
+        $c20 = $r3[i37];
+
+        $i50 = (int) $c20;
+
+        if $i50 != 13 goto label10;
+
+        $r5 = r0.<sun.text.bidi.BidiBase: char[] text>;
+
+        $i23 = i37 + 1;
+
+        $c24 = $r5[$i23];
+
+        $i51 = (int) $c24;
+
+        if $i51 == 10 goto label11;
+
+     label10:
+        $r4 = r0.<sun.text.bidi.BidiBase: int[] paras>;
+
+        $i21 = i36;
+
+        i36 = i36 + 1;
+
+        $i22 = i37 + 1;
+
+        $r4[$i21] = $i22;
+
+     label11:
+        i37 = i37 + 1;
+
+        goto label01;
+
+     label12:
+        $i2 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $i1 = <sun.text.bidi.BidiBase: int MASK_EMBEDDING>;
+
+        $i3 = $i2 & $i1;
+
+        if $i3 == 0 goto label13;
+
+        $i6 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $b5 = r0.<sun.text.bidi.BidiBase: byte paraLevel>;
+
+        $i7 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlagLR(byte)>($b5);
+
+        $i8 = $i6 | $i7;
+
+        r0.<sun.text.bidi.BidiBase: int flags> = $i8;
+
+     label13:
+        $b4 = specialinvoke r0.<sun.text.bidi.BidiBase: byte directionFromFlags()>();
+
+        return $b4;
+    }
+
+    private static short GetStateProps(short)
+    {
+        short s0, $s1, $s2;
+
+        s0 := @parameter0: short;
+
+        $s1 = s0 & 31;
+
+        $s2 = (short) $s1;
+
+        return $s2;
+    }
+
+    private static short GetActionProps(short)
+    {
+        short s0, $s2;
+        int $i1, $i3;
+
+        s0 := @parameter0: short;
+
+        $i3 = (int) s0;
+
+        $i1 = $i3 >> 5;
+
+        $s2 = (short) $i1;
+
+        return $s2;
+    }
+
+    private static short GetState(byte)
+    {
+        short $s2;
+        byte b0, $b1;
+
+        b0 := @parameter0: byte;
+
+        $b1 = b0 & 15;
+
+        $s2 = (short) $b1;
+
+        return $s2;
+    }
+
+    private static short GetAction(byte)
+    {
+        short $s2;
+        byte b0;
+        int $i1, $i3;
+
+        b0 := @parameter0: byte;
+
+        $i3 = (int) b0;
+
+        $i1 = $i3 >> 4;
+
+        $s2 = (short) $i1;
+
+        return $s2;
+    }
+
+    private void addPoint(int, int)
+    {
+        sun.text.bidi.BidiBase$InsertPoints $r2, $r4, $r5, $r6, $r8, $r9, $r12, $r13, $r16;
+        sun.text.bidi.BidiBase r1;
+        int $i0, i1, i2, $i3, $i4, $i5, $i6, i7;
+        sun.text.bidi.BidiBase$Point[] $r3, $r7, r10, $r11, $r14, $r15;
+        sun.text.bidi.BidiBase$Point $r0;
+
+        r1 := @this: sun.text.bidi.BidiBase;
+
+        i1 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        $r0 = new sun.text.bidi.BidiBase$Point;
+
+        specialinvoke $r0.<sun.text.bidi.BidiBase$Point: void <init>(sun.text.bidi.BidiBase)>(r1);
+
+        $r2 = r1.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $r3 = $r2.<sun.text.bidi.BidiBase$InsertPoints: sun.text.bidi.BidiBase$Point[] points>;
+
+        i7 = lengthof $r3;
+
+        if i7 != 0 goto label1;
+
+        $r16 = r1.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $r15 = newarray (sun.text.bidi.BidiBase$Point)[10];
+
+        $r16.<sun.text.bidi.BidiBase$InsertPoints: sun.text.bidi.BidiBase$Point[] points> = $r15;
+
+        i7 = 10;
+
+     label1:
+        $r4 = r1.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $i0 = $r4.<sun.text.bidi.BidiBase$InsertPoints: int size>;
+
+        if $i0 < i7 goto label2;
+
+        $r9 = r1.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        r10 = $r9.<sun.text.bidi.BidiBase$InsertPoints: sun.text.bidi.BidiBase$Point[] points>;
+
+        $r12 = r1.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $i6 = i7 * 2;
+
+        $r11 = newarray (sun.text.bidi.BidiBase$Point)[$i6];
+
+        $r12.<sun.text.bidi.BidiBase$InsertPoints: sun.text.bidi.BidiBase$Point[] points> = $r11;
+
+        $r13 = r1.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $r14 = $r13.<sun.text.bidi.BidiBase$InsertPoints: sun.text.bidi.BidiBase$Point[] points>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r10, 0, $r14, 0, i7);
+
+     label2:
+        $r0.<sun.text.bidi.BidiBase$Point: int pos> = i1;
+
+        $r0.<sun.text.bidi.BidiBase$Point: int flag> = i2;
+
+        $r5 = r1.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $r7 = $r5.<sun.text.bidi.BidiBase$InsertPoints: sun.text.bidi.BidiBase$Point[] points>;
+
+        $r6 = r1.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $i3 = $r6.<sun.text.bidi.BidiBase$InsertPoints: int size>;
+
+        $r7[$i3] = $r0;
+
+        $r8 = r1.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $i4 = $r8.<sun.text.bidi.BidiBase$InsertPoints: int size>;
+
+        $i5 = $i4 + 1;
+
+        $r8.<sun.text.bidi.BidiBase$InsertPoints: int size> = $i5;
+
+        return;
+    }
+
+    private void processPropertySeq(sun.text.bidi.BidiBase$LevState, short, int, int)
+    {
+        byte[] $r3, $r4, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r18, $r19, $r26, $r27, $r34, $r43, $r44;
+        byte b3, b8, $b9, $b12, $b13, $b16, $b17, $b19, $b22, $b24, $b26, $b28, $b29, $b31, $b33, $b34, $b37, $b41, $b42, $b45, $b46, $b56, $b64, $b67, $b68, b73, b75, b77;
+        byte[][] r1;
+        short s1, s2, $s4, $s5, s6, $s7;
+        int i0, $i10, i11, $i14, $i15, $i18, $i20, $i21, $i23, $i25, $i27, $i30, $i32, $i35, $i36, $i38, $i39, $i40, $i43, $i44, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i57, $i58, $i59, $i60, $i61, $i62, $i63, $i65, $i66, $i69, i70, i71, i72, i74, i76, i78, i79, $i80, $i81, $i82, $i83, $i84, $i86, $i88, $i89, $i90, $i91, $i93, $i95, $i96, $i98, $i100, $i101, $i102, $i104, $i106, $i108, $i110, $i112, $i113, $i114, $i115, $i116, $i117, $i118, $i119, $i120, $i121, $i123, $i124, $i125, $i126, $i128, $i129, $i130, $i131, $i133, $i134, $i135, $i136, $i137, $i139, $i140, $i141;
+        sun.text.bidi.BidiBase$LevState r0;
+        sun.text.bidi.BidiBase$InsertPoints $r16, $r17, $r20, $r21, $r22, $r23, $r24, $r25, $r28, $r30, $r31, $r32, $r35, $r36, $r37, $r38, $r39, $r40, $r41, $r42;
+        sun.text.bidi.BidiBase r5;
+        java.lang.IllegalStateException $r46;
+        sun.text.bidi.BidiBase$Point[] $r29, $r33;
+        short[] r2;
+
+        r5 := @this: sun.text.bidi.BidiBase;
+
+        r0 := @parameter0: sun.text.bidi.BidiBase$LevState;
+
+        s2 := @parameter1: short;
+
+        i70 := @parameter2: int;
+
+        i11 := @parameter3: int;
+
+        r1 = r0.<sun.text.bidi.BidiBase$LevState: byte[][] impTab>;
+
+        r2 = r0.<sun.text.bidi.BidiBase$LevState: short[] impAct>;
+
+        i0 = i70;
+
+        s1 = r0.<sun.text.bidi.BidiBase$LevState: short state>;
+
+        $i80 = (int) s1;
+
+        $r3 = r1[$i80];
+
+        $i81 = (int) s2;
+
+        b3 = $r3[$i81];
+
+        $s4 = staticinvoke <sun.text.bidi.BidiBase: short GetState(byte)>(b3);
+
+        r0.<sun.text.bidi.BidiBase$LevState: short state> = $s4;
+
+        $s5 = staticinvoke <sun.text.bidi.BidiBase: short GetAction(byte)>(b3);
+
+        $i82 = (int) $s5;
+
+        s6 = r2[$i82];
+
+        $s7 = r0.<sun.text.bidi.BidiBase$LevState: short state>;
+
+        $i83 = (int) $s7;
+
+        $r4 = r1[$i83];
+
+        b8 = $r4[7];
+
+        if s6 == 0 goto label38;
+
+        $i84 = (int) s6;
+
+        tableswitch($i84)
+        {
+            case 1: goto label01;
+            case 2: goto label02;
+            case 3: goto label03;
+            case 4: goto label10;
+            case 5: goto label12;
+            case 6: goto label16;
+            case 7: goto label17;
+            case 8: goto label21;
+            case 9: goto label22;
+            case 10: goto label23;
+            case 11: goto label27;
+            case 12: goto label34;
+            default: goto label37;
+        };
+
+     label01:
+        r0.<sun.text.bidi.BidiBase$LevState: int startON> = i70;
+
+        goto label38;
+
+     label02:
+        i70 = r0.<sun.text.bidi.BidiBase$LevState: int startON>;
+
+        goto label38;
+
+     label03:
+        $i54 = r0.<sun.text.bidi.BidiBase$LevState: int startL2EN>;
+
+        if $i54 < 0 goto label04;
+
+        $i69 = r0.<sun.text.bidi.BidiBase$LevState: int startL2EN>;
+
+        specialinvoke r5.<sun.text.bidi.BidiBase: void addPoint(int,int)>($i69, 1);
+
+     label04:
+        $i86 = (int) -1;
+
+        r0.<sun.text.bidi.BidiBase$LevState: int startL2EN> = $i86;
+
+        $r32 = r5.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $r33 = $r32.<sun.text.bidi.BidiBase$InsertPoints: sun.text.bidi.BidiBase$Point[] points>;
+
+        $i55 = lengthof $r33;
+
+        if $i55 == 0 goto label05;
+
+        $r37 = r5.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $i60 = $r37.<sun.text.bidi.BidiBase$InsertPoints: int size>;
+
+        $r38 = r5.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $i59 = $r38.<sun.text.bidi.BidiBase$InsertPoints: int confirmed>;
+
+        if $i60 > $i59 goto label07;
+
+     label05:
+        $i88 = (int) -1;
+
+        r0.<sun.text.bidi.BidiBase$LevState: int lastStrongRTL> = $i88;
+
+        $i89 = (int) s1;
+
+        $r34 = r1[$i89];
+
+        $b68 = $r34[7];
+
+        $b56 = $b68 & 1;
+
+        if $b56 == 0 goto label06;
+
+        $i58 = r0.<sun.text.bidi.BidiBase$LevState: int startON>;
+
+        if $i58 <= 0 goto label06;
+
+        i70 = r0.<sun.text.bidi.BidiBase$LevState: int startON>;
+
+     label06:
+        $i90 = (int) s2;
+
+        if $i90 != 5 goto label38;
+
+        specialinvoke r5.<sun.text.bidi.BidiBase: void addPoint(int,int)>(i0, 1);
+
+        $r36 = r5.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $r35 = r5.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $i57 = $r35.<sun.text.bidi.BidiBase$InsertPoints: int size>;
+
+        $r36.<sun.text.bidi.BidiBase$InsertPoints: int confirmed> = $i57;
+
+        goto label38;
+
+     label07:
+        $i61 = r0.<sun.text.bidi.BidiBase$LevState: int lastStrongRTL>;
+
+        i71 = $i61 + 1;
+
+     label08:
+        if i71 >= i0 goto label09;
+
+        $r44 = r5.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $r43 = r5.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $b64 = $r43[i71];
+
+        $i91 = (int) $b64;
+
+        $i65 = $i91 - 2;
+
+        $i93 = (int) -2;
+
+        $i66 = $i65 & $i93;
+
+        $b67 = (byte) $i66;
+
+        $r44[i71] = $b67;
+
+        i71 = i71 + 1;
+
+        goto label08;
+
+     label09:
+        $r40 = r5.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $r39 = r5.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $i62 = $r39.<sun.text.bidi.BidiBase$InsertPoints: int size>;
+
+        $r40.<sun.text.bidi.BidiBase$InsertPoints: int confirmed> = $i62;
+
+        $i95 = (int) -1;
+
+        r0.<sun.text.bidi.BidiBase$LevState: int lastStrongRTL> = $i95;
+
+        $i96 = (int) s2;
+
+        if $i96 != 5 goto label38;
+
+        specialinvoke r5.<sun.text.bidi.BidiBase: void addPoint(int,int)>(i0, 1);
+
+        $r42 = r5.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $r41 = r5.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $i63 = $r41.<sun.text.bidi.BidiBase$InsertPoints: int size>;
+
+        $r42.<sun.text.bidi.BidiBase$InsertPoints: int confirmed> = $i63;
+
+        goto label38;
+
+     label10:
+        $r28 = r5.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $r29 = $r28.<sun.text.bidi.BidiBase$InsertPoints: sun.text.bidi.BidiBase$Point[] points>;
+
+        $i51 = lengthof $r29;
+
+        if $i51 <= 0 goto label11;
+
+        $r31 = r5.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $r30 = r5.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $i53 = $r30.<sun.text.bidi.BidiBase$InsertPoints: int confirmed>;
+
+        $r31.<sun.text.bidi.BidiBase$InsertPoints: int size> = $i53;
+
+     label11:
+        $i98 = (int) -1;
+
+        r0.<sun.text.bidi.BidiBase$LevState: int startON> = $i98;
+
+        $i100 = (int) -1;
+
+        r0.<sun.text.bidi.BidiBase$LevState: int startL2EN> = $i100;
+
+        $i52 = i11 - 1;
+
+        r0.<sun.text.bidi.BidiBase$LevState: int lastStrongRTL> = $i52;
+
+        goto label38;
+
+     label12:
+        $i101 = (int) s2;
+
+        if $i101 != 3 goto label15;
+
+        $r27 = r5.<sun.text.bidi.BidiBase: byte[] dirProps>;
+
+        $b45 = $r27[i70];
+
+        $b46 = staticinvoke <sun.text.bidi.BidiBase: byte NoContextRTL(byte)>($b45);
+
+        $i102 = (int) $b46;
+
+        if $i102 != 5 goto label15;
+
+        $i47 = r0.<sun.text.bidi.BidiBase$LevState: int startL2EN>;
+
+        $i104 = (int) -1;
+
+        if $i47 != $i104 goto label13;
+
+        $i50 = i11 - 1;
+
+        r0.<sun.text.bidi.BidiBase$LevState: int lastStrongRTL> = $i50;
+
+        goto label38;
+
+     label13:
+        $i48 = r0.<sun.text.bidi.BidiBase$LevState: int startL2EN>;
+
+        if $i48 < 0 goto label14;
+
+        $i49 = r0.<sun.text.bidi.BidiBase$LevState: int startL2EN>;
+
+        specialinvoke r5.<sun.text.bidi.BidiBase: void addPoint(int,int)>($i49, 1);
+
+        $i106 = (int) -2;
+
+        r0.<sun.text.bidi.BidiBase$LevState: int startL2EN> = $i106;
+
+     label14:
+        specialinvoke r5.<sun.text.bidi.BidiBase: void addPoint(int,int)>(i0, 1);
+
+        goto label38;
+
+     label15:
+        $i44 = r0.<sun.text.bidi.BidiBase$LevState: int startL2EN>;
+
+        $i108 = (int) -1;
+
+        if $i44 != $i108 goto label38;
+
+        r0.<sun.text.bidi.BidiBase$LevState: int startL2EN> = i0;
+
+        goto label38;
+
+     label16:
+        $i43 = i11 - 1;
+
+        r0.<sun.text.bidi.BidiBase$LevState: int lastStrongRTL> = $i43;
+
+        $i110 = (int) -1;
+
+        r0.<sun.text.bidi.BidiBase$LevState: int startON> = $i110;
+
+        goto label38;
+
+     label17:
+        i72 = i70 - 1;
+
+     label18:
+        if i72 < 0 goto label19;
+
+        $r26 = r5.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $b41 = $r26[i72];
+
+        $b42 = $b41 & 1;
+
+        if $b42 != 0 goto label19;
+
+        $i112 = (int) -1;
+
+        i72 = i72 + $i112;
+
+        goto label18;
+
+     label19:
+        if i72 < 0 goto label20;
+
+        specialinvoke r5.<sun.text.bidi.BidiBase: void addPoint(int,int)>(i72, 4);
+
+        $r25 = r5.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $r24 = r5.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $i40 = $r24.<sun.text.bidi.BidiBase$InsertPoints: int size>;
+
+        $r25.<sun.text.bidi.BidiBase$InsertPoints: int confirmed> = $i40;
+
+     label20:
+        r0.<sun.text.bidi.BidiBase$LevState: int startON> = i0;
+
+        goto label38;
+
+     label21:
+        specialinvoke r5.<sun.text.bidi.BidiBase: void addPoint(int,int)>(i70, 1);
+
+        specialinvoke r5.<sun.text.bidi.BidiBase: void addPoint(int,int)>(i70, 2);
+
+        goto label38;
+
+     label22:
+        $r21 = r5.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $r20 = r5.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $i38 = $r20.<sun.text.bidi.BidiBase$InsertPoints: int confirmed>;
+
+        $r21.<sun.text.bidi.BidiBase$InsertPoints: int size> = $i38;
+
+        $i113 = (int) s2;
+
+        if $i113 != 5 goto label38;
+
+        specialinvoke r5.<sun.text.bidi.BidiBase: void addPoint(int,int)>(i70, 4);
+
+        $r23 = r5.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $r22 = r5.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $i39 = $r22.<sun.text.bidi.BidiBase$InsertPoints: int size>;
+
+        $r23.<sun.text.bidi.BidiBase$InsertPoints: int confirmed> = $i39;
+
+        goto label38;
+
+     label23:
+        $b34 = r0.<sun.text.bidi.BidiBase$LevState: byte runLevel>;
+
+        $i114 = (int) $b34;
+
+        $i115 = (int) b8;
+
+        $i35 = $i114 + $i115;
+
+        b73 = (byte) $i35;
+
+        i74 = r0.<sun.text.bidi.BidiBase$LevState: int startON>;
+
+     label24:
+        if i74 >= i0 goto label26;
+
+        $r18 = r5.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $b37 = $r18[i74];
+
+        $i116 = (int) $b37;
+
+        $i117 = (int) b73;
+
+        if $i116 >= $i117 goto label25;
+
+        $r19 = r5.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $r19[i74] = b73;
+
+     label25:
+        i74 = i74 + 1;
+
+        goto label24;
+
+     label26:
+        $r17 = r5.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $r16 = r5.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $i36 = $r16.<sun.text.bidi.BidiBase$InsertPoints: int size>;
+
+        $r17.<sun.text.bidi.BidiBase$InsertPoints: int confirmed> = $i36;
+
+        r0.<sun.text.bidi.BidiBase$LevState: int startON> = i0;
+
+        goto label38;
+
+     label27:
+        b75 = r0.<sun.text.bidi.BidiBase$LevState: byte runLevel>;
+
+        i76 = i70 - 1;
+
+     label28:
+        $i20 = r0.<sun.text.bidi.BidiBase$LevState: int startON>;
+
+        if i76 < $i20 goto label38;
+
+        $r9 = r5.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $b22 = $r9[i76];
+
+        $i118 = (int) b75;
+
+        $i21 = $i118 + 3;
+
+        $i119 = (int) $b22;
+
+        if $i119 != $i21 goto label31;
+
+     label29:
+        $r13 = r5.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $b28 = $r13[i76];
+
+        $i120 = (int) b75;
+
+        $i27 = $i120 + 3;
+
+        $i121 = (int) $b28;
+
+        if $i121 != $i27 goto label30;
+
+        $r15 = r5.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $i30 = i76;
+
+        $i123 = (int) -1;
+
+        i76 = i76 + $i123;
+
+        $b31 = $r15[$i30];
+
+        $i124 = (int) $b31;
+
+        $i32 = $i124 - 2;
+
+        $b33 = (byte) $i32;
+
+        $r15[$i30] = $b33;
+
+        goto label29;
+
+     label30:
+        $r14 = r5.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $b29 = $r14[i76];
+
+        $i125 = (int) $b29;
+
+        $i126 = (int) b75;
+
+        if $i125 != $i126 goto label31;
+
+        $i128 = (int) -1;
+
+        i76 = i76 + $i128;
+
+        goto label30;
+
+     label31:
+        $r10 = r5.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $b24 = $r10[i76];
+
+        $i129 = (int) b75;
+
+        $i23 = $i129 + 2;
+
+        $i130 = (int) $b24;
+
+        if $i130 != $i23 goto label32;
+
+        $r12 = r5.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $r12[i76] = b75;
+
+        goto label33;
+
+     label32:
+        $r11 = r5.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $i131 = (int) b75;
+
+        $i25 = $i131 + 1;
+
+        $b26 = (byte) $i25;
+
+        $r11[i76] = $b26;
+
+     label33:
+        $i133 = (int) -1;
+
+        i76 = i76 + $i133;
+
+        goto label28;
+
+     label34:
+        $b13 = r0.<sun.text.bidi.BidiBase$LevState: byte runLevel>;
+
+        $i134 = (int) $b13;
+
+        $i14 = $i134 + 1;
+
+        b77 = (byte) $i14;
+
+        i78 = i70 - 1;
+
+     label35:
+        $i15 = r0.<sun.text.bidi.BidiBase$LevState: int startON>;
+
+        if i78 < $i15 goto label38;
+
+        $r7 = r5.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $b16 = $r7[i78];
+
+        $i135 = (int) $b16;
+
+        $i136 = (int) b77;
+
+        if $i135 <= $i136 goto label36;
+
+        $r8 = r5.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $b17 = $r8[i78];
+
+        $i137 = (int) $b17;
+
+        $i18 = $i137 - 2;
+
+        $b19 = (byte) $i18;
+
+        $r8[i78] = $b19;
+
+     label36:
+        $i139 = (int) -1;
+
+        i78 = i78 + $i139;
+
+        goto label35;
+
+     label37:
+        $r46 = new java.lang.IllegalStateException;
+
+        specialinvoke $r46.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Internal ICU error in processPropertySeq");
+
+        throw $r46;
+
+     label38:
+        if b8 != 0 goto label39;
+
+        if i70 >= i0 goto label41;
+
+     label39:
+        $b9 = r0.<sun.text.bidi.BidiBase$LevState: byte runLevel>;
+
+        $i140 = (int) $b9;
+
+        $i141 = (int) b8;
+
+        $i10 = $i140 + $i141;
+
+        $b12 = (byte) $i10;
+
+        i79 = i70;
+
+     label40:
+        if i79 >= i11 goto label41;
+
+        $r6 = r5.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $r6[i79] = $b12;
+
+        i79 = i79 + 1;
+
+        goto label40;
+
+     label41:
+        return;
+    }
+
+    private void resolveImplicitLevels(int, int, short, short)
+    {
+        byte[] $r2, $r9, $r10;
+        java.lang.IllegalStateException $r18;
+        short[][] $r7, $r12, $r14;
+        byte $b1, $b2, $b3, $b4, $b5, $b7, $b10, $b11;
+        sun.text.bidi.BidiBase r1;
+        byte[][][] $r4;
+        byte[][] $r5;
+        short[] $r8, $r11, $r13, $r15;
+        short s6, s9, s12, s13, $s14, s15, $s16, s18, s22, s23;
+        int i0, i8, $i17, i19, i20, i21, $i25, $i27, $i28, $i29, $i30, $i31, $i32, $i33;
+        sun.text.bidi.BidiBase$ImpTabPair $r3, $r6;
+        sun.text.bidi.BidiBase$LevState $r17;
+
+        r1 := @this: sun.text.bidi.BidiBase;
+
+        i0 := @parameter0: int;
+
+        i8 := @parameter1: int;
+
+        s6 := @parameter2: short;
+
+        s9 := @parameter3: short;
+
+        $r17 = new sun.text.bidi.BidiBase$LevState;
+
+        specialinvoke $r17.<sun.text.bidi.BidiBase$LevState: void <init>(sun.text.bidi.BidiBase,sun.text.bidi.BidiBase$1)>(r1, null);
+
+        $i25 = (int) -1;
+
+        $r17.<sun.text.bidi.BidiBase$LevState: int startL2EN> = $i25;
+
+        $i27 = (int) -1;
+
+        $r17.<sun.text.bidi.BidiBase$LevState: int lastStrongRTL> = $i27;
+
+        $r17.<sun.text.bidi.BidiBase$LevState: short state> = 0;
+
+        $r2 = r1.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $b1 = $r2[i0];
+
+        $r17.<sun.text.bidi.BidiBase$LevState: byte runLevel> = $b1;
+
+        $r3 = r1.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$ImpTabPair impTabPair>;
+
+        $r4 = $r3.<sun.text.bidi.BidiBase$ImpTabPair: byte[][][] imptab>;
+
+        $b2 = $r17.<sun.text.bidi.BidiBase$LevState: byte runLevel>;
+
+        $b3 = $b2 & 1;
+
+        $i28 = (int) $b3;
+
+        $r5 = $r4[$i28];
+
+        $r17.<sun.text.bidi.BidiBase$LevState: byte[][] impTab> = $r5;
+
+        $r6 = r1.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$ImpTabPair impTabPair>;
+
+        $r7 = $r6.<sun.text.bidi.BidiBase$ImpTabPair: short[][] impact>;
+
+        $b4 = $r17.<sun.text.bidi.BidiBase$LevState: byte runLevel>;
+
+        $b5 = $b4 & 1;
+
+        $i29 = (int) $b5;
+
+        $r8 = $r7[$i29];
+
+        $r17.<sun.text.bidi.BidiBase$LevState: short[] impAct> = $r8;
+
+        specialinvoke r1.<sun.text.bidi.BidiBase: void processPropertySeq(sun.text.bidi.BidiBase$LevState,short,int,int)>($r17, s6, i0, i0);
+
+        $r9 = r1.<sun.text.bidi.BidiBase: byte[] dirProps>;
+
+        $b7 = $r9[i0];
+
+        $i30 = (int) $b7;
+
+        if $i30 != 17 goto label01;
+
+        $i31 = (int) s6;
+
+        $i17 = 1 + $i31;
+
+        s18 = (short) $i17;
+
+        goto label02;
+
+     label01:
+        s18 = 0;
+
+     label02:
+        i19 = i0;
+
+        i20 = 0;
+
+        i21 = i0;
+
+     label03:
+        if i21 > i8 goto label13;
+
+        if i21 < i8 goto label04;
+
+        s22 = s9;
+
+        goto label05;
+
+     label04:
+        $r10 = r1.<sun.text.bidi.BidiBase: byte[] dirProps>;
+
+        $b10 = $r10[i21];
+
+        $b11 = staticinvoke <sun.text.bidi.BidiBase: byte NoContextRTL(byte)>($b10);
+
+        s12 = (short) $b11;
+
+        $r11 = <sun.text.bidi.BidiBase: short[] groupProp>;
+
+        $i32 = (int) s12;
+
+        s22 = $r11[$i32];
+
+     label05:
+        s13 = s18;
+
+        $r12 = <sun.text.bidi.BidiBase: short[][] impTabProps>;
+
+        $r13 = $r12[s18];
+
+        $i33 = (int) s22;
+
+        $s16 = $r13[$i33];
+
+        s18 = staticinvoke <sun.text.bidi.BidiBase: short GetStateProps(short)>($s16);
+
+        $s14 = staticinvoke <sun.text.bidi.BidiBase: short GetActionProps(short)>($s16);
+
+        s23 = $s14;
+
+        if i21 != i8 goto label06;
+
+        if $s14 != 0 goto label06;
+
+        s23 = 1;
+
+     label06:
+        if s23 == 0 goto label12;
+
+        $r14 = <sun.text.bidi.BidiBase: short[][] impTabProps>;
+
+        $r15 = $r14[s13];
+
+        s15 = $r15[13];
+
+        tableswitch(s23)
+        {
+            case 1: goto label07;
+            case 2: goto label08;
+            case 3: goto label09;
+            case 4: goto label10;
+            default: goto label11;
+        };
+
+     label07:
+        specialinvoke r1.<sun.text.bidi.BidiBase: void processPropertySeq(sun.text.bidi.BidiBase$LevState,short,int,int)>($r17, s15, i19, i21);
+
+        i19 = i21;
+
+        goto label12;
+
+     label08:
+        i20 = i21;
+
+        goto label12;
+
+     label09:
+        specialinvoke r1.<sun.text.bidi.BidiBase: void processPropertySeq(sun.text.bidi.BidiBase$LevState,short,int,int)>($r17, s15, i19, i20);
+
+        specialinvoke r1.<sun.text.bidi.BidiBase: void processPropertySeq(sun.text.bidi.BidiBase$LevState,short,int,int)>($r17, 4, i20, i21);
+
+        i19 = i21;
+
+        goto label12;
+
+     label10:
+        specialinvoke r1.<sun.text.bidi.BidiBase: void processPropertySeq(sun.text.bidi.BidiBase$LevState,short,int,int)>($r17, s15, i19, i20);
+
+        i19 = i20;
+
+        i20 = i21;
+
+        goto label12;
+
+     label11:
+        $r18 = new java.lang.IllegalStateException;
+
+        specialinvoke $r18.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Internal ICU error in resolveImplicitLevels");
+
+        throw $r18;
+
+     label12:
+        i21 = i21 + 1;
+
+        goto label03;
+
+     label13:
+        specialinvoke r1.<sun.text.bidi.BidiBase: void processPropertySeq(sun.text.bidi.BidiBase$LevState,short,int,int)>($r17, s9, i8, i8);
+
+        return;
+    }
+
+    private void adjustWSLevels()
+    {
+        byte[] $r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8;
+        byte $b3, $b9, $b13, $b14, $b18;
+        sun.text.bidi.BidiBase r0;
+        boolean $z0, $z1;
+        int $i0, $i1, $i2, $i4, $i5, $i6, $i7, $i8, $i10, $i11, $i12, $i15, $i16, $i17, $i19, $i20, i21, $i23, $i25;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        $i1 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $i0 = <sun.text.bidi.BidiBase: int MASK_WS>;
+
+        $i2 = $i1 & $i0;
+
+        if $i2 == 0 goto label7;
+
+        i21 = r0.<sun.text.bidi.BidiBase: int trailingWSStart>;
+
+     label1:
+        if i21 <= 0 goto label7;
+
+     label2:
+        if i21 <= 0 goto label4;
+
+        $r6 = r0.<sun.text.bidi.BidiBase: byte[] dirProps>;
+
+        $i23 = (int) -1;
+
+        i21 = i21 + $i23;
+
+        $b14 = $r6[i21];
+
+        $i15 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlagNC(byte)>($b14);
+
+        $i16 = <sun.text.bidi.BidiBase: int MASK_WS>;
+
+        $i17 = $i15 & $i16;
+
+        if $i17 == 0 goto label4;
+
+        $z1 = r0.<sun.text.bidi.BidiBase: boolean orderParagraphsLTR>;
+
+        if $z1 == 0 goto label3;
+
+        $i19 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(7);
+
+        $i20 = $i15 & $i19;
+
+        if $i20 == 0 goto label3;
+
+        $r8 = r0.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $r8[i21] = 0;
+
+        goto label2;
+
+     label3:
+        $r7 = r0.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $b18 = virtualinvoke r0.<sun.text.bidi.BidiBase: byte GetParaLevelAt(int)>(i21);
+
+        $r7[i21] = $b18;
+
+        goto label2;
+
+     label4:
+        if i21 <= 0 goto label1;
+
+        $r1 = r0.<sun.text.bidi.BidiBase: byte[] dirProps>;
+
+        $i25 = (int) -1;
+
+        i21 = i21 + $i25;
+
+        $b3 = $r1[i21];
+
+        $i4 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlagNC(byte)>($b3);
+
+        $i5 = <sun.text.bidi.BidiBase: int MASK_BN_EXPLICIT>;
+
+        $i6 = $i4 & $i5;
+
+        if $i6 == 0 goto label5;
+
+        $r5 = r0.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $r4 = r0.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $i12 = i21 + 1;
+
+        $b13 = $r4[$i12];
+
+        $r5[i21] = $b13;
+
+        goto label4;
+
+     label5:
+        $z0 = r0.<sun.text.bidi.BidiBase: boolean orderParagraphsLTR>;
+
+        if $z0 == 0 goto label6;
+
+        $i10 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(7);
+
+        $i11 = $i4 & $i10;
+
+        if $i11 == 0 goto label6;
+
+        $r3 = r0.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $r3[i21] = 0;
+
+        goto label1;
+
+     label6:
+        $i7 = <sun.text.bidi.BidiBase: int MASK_B_S>;
+
+        $i8 = $i4 & $i7;
+
+        if $i8 == 0 goto label4;
+
+        $r2 = r0.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $b9 = virtualinvoke r0.<sun.text.bidi.BidiBase: byte GetParaLevelAt(int)>(i21);
+
+        $r2[i21] = $b9;
+
+        goto label1;
+
+     label7:
+        return;
+    }
+
+    private int Bidi_Min(int, int)
+    {
+        sun.text.bidi.BidiBase r0;
+        int i0, i1, $i2;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        if i0 >= i1 goto label1;
+
+        $i2 = i0;
+
+        goto label2;
+
+     label1:
+        $i2 = i1;
+
+     label2:
+        return $i2;
+    }
+
+    private int Bidi_Abs(int)
+    {
+        int i0, $i1;
+        sun.text.bidi.BidiBase r0;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        i0 := @parameter0: int;
+
+        if i0 < 0 goto label1;
+
+        $i1 = i0;
+
+        goto label2;
+
+     label1:
+        $i1 = neg i0;
+
+     label2:
+        return $i1;
+    }
+
+    void setPara(java.lang.String, byte, byte[])
+    {
+        byte[] r3;
+        byte b0;
+        sun.text.bidi.BidiBase r1;
+        char[] $r2, $r4;
+        java.lang.String r0;
+
+        r1 := @this: sun.text.bidi.BidiBase;
+
+        r0 := @parameter0: java.lang.String;
+
+        b0 := @parameter1: byte;
+
+        r3 := @parameter2: byte[];
+
+        if r0 != null goto label1;
+
+        $r4 = newarray (char)[0];
+
+        virtualinvoke r1.<sun.text.bidi.BidiBase: void setPara(char[],byte,byte[])>($r4, b0, r3);
+
+        goto label2;
+
+     label1:
+        $r2 = virtualinvoke r0.<java.lang.String: char[] toCharArray()>();
+
+        virtualinvoke r1.<sun.text.bidi.BidiBase: void setPara(char[],byte,byte[])>($r2, b0, r3);
+
+     label2:
+        return;
+    }
+
+    public void setPara(char[], byte, byte[])
+    {
+        byte[] $r2, $r3, $r7, r10, $r12, $r13, $r14, $r15, $r16, $r20;
+        sun.text.bidi.BidiBase$InsertPoints $r5, $r6, $r21;
+        byte $b6, $b7, $b8, $b12, $b13, $b14, $b15, $b17, $b18, $b19, $b21, $b22, $b24, $b25, $b26, $b27, $b28, $b34, $b35, $b39, $b40, $b43, $b48, $b49, $b52, $b53, $b54, b55, $b57, $b58, b59, b62;
+        sun.text.bidi.BidiBase r0;
+        short $s38, $s41, s60, s63;
+        char[] $r1, r19;
+        int[] $r8, $r9, $r17, $r18;
+        boolean $z0, $z1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i9, $i10, $i11, $i16, $i20, $i23, $i29, $i30, $i31, $i32, $i33, $i36, $i37, $i42, $i44, $i45, $i46, $i47, $i50, $i51, i56, i61, $i64, $i65, $i66, $i67, $i68, $i69, $i71, $i72, $i73, $i74, $i75, $i76, $i77, $i78, $i79;
+        sun.text.bidi.BidiRun[] $r4;
+        sun.text.bidi.BidiBase$ImpTabPair $r11;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        r19 := @parameter0: char[];
+
+        b55 := @parameter1: byte;
+
+        r10 := @parameter2: byte[];
+
+        $i68 = (int) b55;
+
+        if $i68 >= 126 goto label01;
+
+        $i69 = (int) b55;
+
+        virtualinvoke r0.<sun.text.bidi.BidiBase: void verifyRange(int,int,int)>($i69, 0, 62);
+
+     label01:
+        if r19 != null goto label02;
+
+        r19 = newarray (char)[0];
+
+     label02:
+        r0.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase paraBidi> = null;
+
+        r0.<sun.text.bidi.BidiBase: char[] text> = r19;
+
+        $r1 = r0.<sun.text.bidi.BidiBase: char[] text>;
+
+        $i0 = lengthof $r1;
+
+        r0.<sun.text.bidi.BidiBase: int resultLength> = $i0;
+
+        r0.<sun.text.bidi.BidiBase: int originalLength> = $i0;
+
+        r0.<sun.text.bidi.BidiBase: int length> = $i0;
+
+        r0.<sun.text.bidi.BidiBase: byte paraLevel> = b55;
+
+        r0.<sun.text.bidi.BidiBase: byte direction> = 0;
+
+        r0.<sun.text.bidi.BidiBase: int paraCount> = 1;
+
+        $r2 = newarray (byte)[0];
+
+        r0.<sun.text.bidi.BidiBase: byte[] dirProps> = $r2;
+
+        $r3 = newarray (byte)[0];
+
+        r0.<sun.text.bidi.BidiBase: byte[] levels> = $r3;
+
+        $r4 = newarray (sun.text.bidi.BidiRun)[0];
+
+        r0.<sun.text.bidi.BidiBase: sun.text.bidi.BidiRun[] runs> = $r4;
+
+        r0.<sun.text.bidi.BidiBase: boolean isGoodLogicalToVisualRunsMap> = 0;
+
+        $r5 = r0.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $r5.<sun.text.bidi.BidiBase$InsertPoints: int size> = 0;
+
+        $r6 = r0.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $r6.<sun.text.bidi.BidiBase$InsertPoints: int confirmed> = 0;
+
+        $z0 = staticinvoke <sun.text.bidi.BidiBase: boolean IsDefaultLevel(byte)>(b55);
+
+        if $z0 == 0 goto label03;
+
+        r0.<sun.text.bidi.BidiBase: byte defaultParaLevel> = b55;
+
+        goto label04;
+
+     label03:
+        r0.<sun.text.bidi.BidiBase: byte defaultParaLevel> = 0;
+
+     label04:
+        $i1 = r0.<sun.text.bidi.BidiBase: int length>;
+
+        if $i1 != 0 goto label08;
+
+        $z1 = staticinvoke <sun.text.bidi.BidiBase: boolean IsDefaultLevel(byte)>(b55);
+
+        if $z1 == 0 goto label05;
+
+        $b52 = r0.<sun.text.bidi.BidiBase: byte paraLevel>;
+
+        $b53 = $b52 & 1;
+
+        $b54 = (byte) $b53;
+
+        r0.<sun.text.bidi.BidiBase: byte paraLevel> = $b54;
+
+        r0.<sun.text.bidi.BidiBase: byte defaultParaLevel> = 0;
+
+     label05:
+        $b48 = r0.<sun.text.bidi.BidiBase: byte paraLevel>;
+
+        $b49 = $b48 & 1;
+
+        if $b49 == 0 goto label06;
+
+        $i51 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(1);
+
+        r0.<sun.text.bidi.BidiBase: int flags> = $i51;
+
+        r0.<sun.text.bidi.BidiBase: byte direction> = 1;
+
+        goto label07;
+
+     label06:
+        $i50 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(0);
+
+        r0.<sun.text.bidi.BidiBase: int flags> = $i50;
+
+        r0.<sun.text.bidi.BidiBase: byte direction> = 0;
+
+     label07:
+        r0.<sun.text.bidi.BidiBase: int runCount> = 0;
+
+        r0.<sun.text.bidi.BidiBase: int paraCount> = 0;
+
+        r0.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase paraBidi> = r0;
+
+        return;
+
+     label08:
+        $i71 = (int) -1;
+
+        r0.<sun.text.bidi.BidiBase: int runCount> = $i71;
+
+        $i2 = r0.<sun.text.bidi.BidiBase: int length>;
+
+        virtualinvoke r0.<sun.text.bidi.BidiBase: void getDirPropsMemory(int)>($i2);
+
+        $r7 = r0.<sun.text.bidi.BidiBase: byte[] dirPropsMemory>;
+
+        r0.<sun.text.bidi.BidiBase: byte[] dirProps> = $r7;
+
+        specialinvoke r0.<sun.text.bidi.BidiBase: void getDirProps()>();
+
+        $i3 = r0.<sun.text.bidi.BidiBase: int length>;
+
+        r0.<sun.text.bidi.BidiBase: int trailingWSStart> = $i3;
+
+        $i4 = r0.<sun.text.bidi.BidiBase: int paraCount>;
+
+        if $i4 <= 1 goto label09;
+
+        $i44 = r0.<sun.text.bidi.BidiBase: int paraCount>;
+
+        specialinvoke r0.<sun.text.bidi.BidiBase: void getInitialParasMemory(int)>($i44);
+
+        $r17 = r0.<sun.text.bidi.BidiBase: int[] parasMemory>;
+
+        r0.<sun.text.bidi.BidiBase: int[] paras> = $r17;
+
+        $r18 = r0.<sun.text.bidi.BidiBase: int[] paras>;
+
+        $i45 = r0.<sun.text.bidi.BidiBase: int paraCount>;
+
+        $i47 = $i45 - 1;
+
+        $i46 = r0.<sun.text.bidi.BidiBase: int length>;
+
+        $r18[$i47] = $i46;
+
+        goto label10;
+
+     label09:
+        $r8 = r0.<sun.text.bidi.BidiBase: int[] simpleParas>;
+
+        r0.<sun.text.bidi.BidiBase: int[] paras> = $r8;
+
+        $r9 = r0.<sun.text.bidi.BidiBase: int[] simpleParas>;
+
+        $i5 = r0.<sun.text.bidi.BidiBase: int length>;
+
+        $r9[0] = $i5;
+
+     label10:
+        if r10 != null goto label11;
+
+        $i42 = r0.<sun.text.bidi.BidiBase: int length>;
+
+        virtualinvoke r0.<sun.text.bidi.BidiBase: void getLevelsMemory(int)>($i42);
+
+        $r16 = r0.<sun.text.bidi.BidiBase: byte[] levelsMemory>;
+
+        r0.<sun.text.bidi.BidiBase: byte[] levels> = $r16;
+
+        $b43 = specialinvoke r0.<sun.text.bidi.BidiBase: byte resolveExplicitLevels()>();
+
+        r0.<sun.text.bidi.BidiBase: byte direction> = $b43;
+
+        goto label12;
+
+     label11:
+        r0.<sun.text.bidi.BidiBase: byte[] levels> = r10;
+
+        $b6 = specialinvoke r0.<sun.text.bidi.BidiBase: byte checkExplicitLevels()>();
+
+        r0.<sun.text.bidi.BidiBase: byte direction> = $b6;
+
+     label12:
+        $b7 = r0.<sun.text.bidi.BidiBase: byte direction>;
+
+        $i72 = (int) $b7;
+
+        lookupswitch($i72)
+        {
+            case 0: goto label13;
+            case 1: goto label14;
+            default: goto label15;
+        };
+
+     label13:
+        r0.<sun.text.bidi.BidiBase: int trailingWSStart> = 0;
+
+        goto label29;
+
+     label14:
+        r0.<sun.text.bidi.BidiBase: int trailingWSStart> = 0;
+
+        goto label29;
+
+     label15:
+        $r11 = <sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$ImpTabPair impTab_DEFAULT>;
+
+        r0.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$ImpTabPair impTabPair> = $r11;
+
+        if r10 != null goto label16;
+
+        $i29 = r0.<sun.text.bidi.BidiBase: int paraCount>;
+
+        if $i29 > 1 goto label16;
+
+        $i31 = r0.<sun.text.bidi.BidiBase: int flags>;
+
+        $i30 = <sun.text.bidi.BidiBase: int DirPropFlagMultiRuns>;
+
+        $i32 = $i31 & $i30;
+
+        if $i32 != 0 goto label16;
+
+        $i33 = r0.<sun.text.bidi.BidiBase: int length>;
+
+        $b34 = virtualinvoke r0.<sun.text.bidi.BidiBase: byte GetParaLevelAt(int)>(0);
+
+        $b35 = staticinvoke <sun.text.bidi.BidiBase: byte GetLRFromLevel(byte)>($b34);
+
+        $s38 = (short) $b35;
+
+        $i36 = r0.<sun.text.bidi.BidiBase: int length>;
+
+        $i37 = $i36 - 1;
+
+        $b39 = virtualinvoke r0.<sun.text.bidi.BidiBase: byte GetParaLevelAt(int)>($i37);
+
+        $b40 = staticinvoke <sun.text.bidi.BidiBase: byte GetLRFromLevel(byte)>($b39);
+
+        $s41 = (short) $b40;
+
+        specialinvoke r0.<sun.text.bidi.BidiBase: void resolveImplicitLevels(int,int,short,short)>(0, $i33, $s38, $s41);
+
+        goto label28;
+
+     label16:
+        i56 = 0;
+
+        $b57 = virtualinvoke r0.<sun.text.bidi.BidiBase: byte GetParaLevelAt(int)>(0);
+
+        $r20 = r0.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $b58 = $r20[0];
+
+        b59 = $b58;
+
+        $i73 = (int) $b57;
+
+        $i74 = (int) $b58;
+
+        if $i73 >= $i74 goto label17;
+
+        $b28 = staticinvoke <sun.text.bidi.BidiBase: byte GetLRFromLevel(byte)>($b58);
+
+        s60 = (short) $b28;
+
+        goto label18;
+
+     label17:
+        $b8 = staticinvoke <sun.text.bidi.BidiBase: byte GetLRFromLevel(byte)>($b57);
+
+        s60 = (short) $b8;
+
+     label18:
+        i61 = i56;
+
+        b62 = b59;
+
+        if i56 <= 0 goto label19;
+
+        $r15 = r0.<sun.text.bidi.BidiBase: byte[] dirProps>;
+
+        $i23 = i56 - 1;
+
+        $b24 = $r15[$i23];
+
+        $b25 = staticinvoke <sun.text.bidi.BidiBase: byte NoContextRTL(byte)>($b24);
+
+        $i75 = (int) $b25;
+
+        if $i75 != 7 goto label19;
+
+        $b26 = virtualinvoke r0.<sun.text.bidi.BidiBase: byte GetParaLevelAt(int)>(i56);
+
+        $b27 = staticinvoke <sun.text.bidi.BidiBase: byte GetLRFromLevel(byte)>($b26);
+
+        s63 = (short) $b27;
+
+        goto label20;
+
+     label19:
+        s63 = s60;
+
+     label20:
+        i56 = i56 + 1;
+
+        $i64 = r0.<sun.text.bidi.BidiBase: int length>;
+
+        if i56 >= $i64 goto label21;
+
+        $r14 = r0.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $b22 = $r14[i56];
+
+        $i76 = (int) $b22;
+
+        $i77 = (int) b62;
+
+        if $i76 != $i77 goto label21;
+
+        goto label20;
+
+     label21:
+        $i9 = r0.<sun.text.bidi.BidiBase: int length>;
+
+        if i56 >= $i9 goto label22;
+
+        $r13 = r0.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        b59 = $r13[i56];
+
+        goto label23;
+
+     label22:
+        $i10 = r0.<sun.text.bidi.BidiBase: int length>;
+
+        $i11 = $i10 - 1;
+
+        b59 = virtualinvoke r0.<sun.text.bidi.BidiBase: byte GetParaLevelAt(int)>($i11);
+
+     label23:
+        $b13 = b62 & 127;
+
+        $b12 = b59 & 127;
+
+        $i78 = (int) $b13;
+
+        $i79 = (int) $b12;
+
+        if $i78 >= $i79 goto label24;
+
+        $b21 = staticinvoke <sun.text.bidi.BidiBase: byte GetLRFromLevel(byte)>(b59);
+
+        s60 = (short) $b21;
+
+        goto label25;
+
+     label24:
+        $b14 = staticinvoke <sun.text.bidi.BidiBase: byte GetLRFromLevel(byte)>(b62);
+
+        s60 = (short) $b14;
+
+     label25:
+        $b15 = b62 & -128;
+
+        if $b15 != 0 goto label26;
+
+        specialinvoke r0.<sun.text.bidi.BidiBase: void resolveImplicitLevels(int,int,short,short)>(i61, i56, s63, s60);
+
+        goto label27;
+
+     label26:
+        $r12 = r0.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $i16 = i61;
+
+        i61 = i61 + 1;
+
+        $b17 = $r12[$i16];
+
+        $b18 = $b17 & 127;
+
+        $b19 = (byte) $b18;
+
+        $r12[$i16] = $b19;
+
+        if i61 < i56 goto label26;
+
+     label27:
+        $i20 = r0.<sun.text.bidi.BidiBase: int length>;
+
+        if i56 < $i20 goto label18;
+
+     label28:
+        specialinvoke r0.<sun.text.bidi.BidiBase: void adjustWSLevels()>();
+
+     label29:
+        $i65 = r0.<sun.text.bidi.BidiBase: int resultLength>;
+
+        $r21 = r0.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$InsertPoints insertPoints>;
+
+        $i66 = $r21.<sun.text.bidi.BidiBase$InsertPoints: int size>;
+
+        $i67 = $i65 + $i66;
+
+        r0.<sun.text.bidi.BidiBase: int resultLength> = $i67;
+
+        r0.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase paraBidi> = r0;
+
+        return;
+    }
+
+    public void setPara(java.text.AttributedCharacterIterator)
+    {
+        byte[] r11, $r12;
+        java.lang.Integer r10;
+        java.text.AttributedCharacterIterator$Attribute $r1, $r4, $r8;
+        byte $b0, $b3, b5, $b6;
+        sun.text.bidi.BidiBase r7;
+        int $i1, $i2, $i7, $i8, $i9, i10, $i11, $i13, $i14, $i15, $i17;
+        java.lang.Boolean r3, $r6;
+        boolean $z0;
+        char c4;
+        java.text.AttributedCharacterIterator r0;
+        char[] $r13;
+        java.lang.Object $r2, $r5, $r9;
+
+        r7 := @this: sun.text.bidi.BidiBase;
+
+        r0 := @parameter0: java.text.AttributedCharacterIterator;
+
+        c4 = interfaceinvoke r0.<java.text.AttributedCharacterIterator: char first()>();
+
+        $r1 = <sun.text.bidi.BidiBase$TextAttributeConstants: java.text.AttributedCharacterIterator$Attribute RUN_DIRECTION>;
+
+        $r2 = interfaceinvoke r0.<java.text.AttributedCharacterIterator: java.lang.Object getAttribute(java.text.AttributedCharacterIterator$Attribute)>($r1);
+
+        r3 = (java.lang.Boolean) $r2;
+
+        $r4 = <sun.text.bidi.BidiBase$TextAttributeConstants: java.text.AttributedCharacterIterator$Attribute NUMERIC_SHAPING>;
+
+        $r5 = interfaceinvoke r0.<java.text.AttributedCharacterIterator: java.lang.Object getAttribute(java.text.AttributedCharacterIterator$Attribute)>($r4);
+
+        if r3 != null goto label01;
+
+        b5 = 126;
+
+        goto label04;
+
+     label01:
+        $r6 = <sun.text.bidi.BidiBase$TextAttributeConstants: java.lang.Boolean RUN_DIRECTION_LTR>;
+
+        $z0 = virtualinvoke r3.<java.lang.Boolean: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 == 0 goto label02;
+
+        $b6 = 0;
+
+        goto label03;
+
+     label02:
+        $b6 = 1;
+
+     label03:
+        b5 = $b6;
+
+     label04:
+        r11 = null;
+
+        $i7 = interfaceinvoke r0.<java.text.AttributedCharacterIterator: int getEndIndex()>();
+
+        $i8 = interfaceinvoke r0.<java.text.AttributedCharacterIterator: int getBeginIndex()>();
+
+        $i9 = $i7 - $i8;
+
+        $r12 = newarray (byte)[$i9];
+
+        $r13 = newarray (char)[$i9];
+
+        i10 = 0;
+
+     label05:
+        $i11 = (int) c4;
+
+        $i13 = (int) 65535;
+
+        if $i11 == $i13 goto label09;
+
+        $r13[i10] = c4;
+
+        $r8 = <sun.text.bidi.BidiBase$TextAttributeConstants: java.text.AttributedCharacterIterator$Attribute BIDI_EMBEDDING>;
+
+        $r9 = interfaceinvoke r0.<java.text.AttributedCharacterIterator: java.lang.Object getAttribute(java.text.AttributedCharacterIterator$Attribute)>($r8);
+
+        r10 = (java.lang.Integer) $r9;
+
+        if r10 == null goto label08;
+
+        $b0 = virtualinvoke r10.<java.lang.Integer: byte byteValue()>();
+
+        if $b0 != 0 goto label06;
+
+        goto label08;
+
+     label06:
+        $i14 = (int) $b0;
+
+        if $i14 >= 0 goto label07;
+
+        r11 = $r12;
+
+        $i15 = (int) $b0;
+
+        $i1 = 0 - $i15;
+
+        $i17 = (int) -128;
+
+        $i2 = $i1 | $i17;
+
+        $b3 = (byte) $i2;
+
+        $r12[i10] = $b3;
+
+        goto label08;
+
+     label07:
+        r11 = $r12;
+
+        $r12[i10] = $b0;
+
+     label08:
+        c4 = interfaceinvoke r0.<java.text.AttributedCharacterIterator: char next()>();
+
+        i10 = i10 + 1;
+
+        goto label05;
+
+     label09:
+        if $r5 == null goto label10;
+
+        staticinvoke <sun.text.bidi.BidiBase$NumericShapings: void shape(java.lang.Object,char[],int,int)>($r5, $r13, 0, $i9);
+
+     label10:
+        virtualinvoke r7.<sun.text.bidi.BidiBase: void setPara(char[],byte,byte[])>($r13, b5, r11);
+
+        return;
+    }
+
+    private void orderParagraphsLTR(boolean)
+    {
+        sun.text.bidi.BidiBase r0;
+        boolean z0;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        z0 := @parameter0: boolean;
+
+        r0.<sun.text.bidi.BidiBase: boolean orderParagraphsLTR> = z0;
+
+        return;
+    }
+
+    private byte getDirection()
+    {
+        byte $b0;
+        sun.text.bidi.BidiBase r0;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        virtualinvoke r0.<sun.text.bidi.BidiBase: void verifyValidParaOrLine()>();
+
+        $b0 = r0.<sun.text.bidi.BidiBase: byte direction>;
+
+        return $b0;
+    }
+
+    public int getLength()
+    {
+        int $i0;
+        sun.text.bidi.BidiBase r0;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        virtualinvoke r0.<sun.text.bidi.BidiBase: void verifyValidParaOrLine()>();
+
+        $i0 = r0.<sun.text.bidi.BidiBase: int originalLength>;
+
+        return $i0;
+    }
+
+    public byte getParaLevel()
+    {
+        byte $b0;
+        sun.text.bidi.BidiBase r0;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        virtualinvoke r0.<sun.text.bidi.BidiBase: void verifyValidParaOrLine()>();
+
+        $b0 = r0.<sun.text.bidi.BidiBase: byte paraLevel>;
+
+        return $b0;
+    }
+
+    public int getParagraphIndex(int)
+    {
+        int[] $r2;
+        sun.text.bidi.BidiBase r0, r1;
+        int i0, $i1, $i2, i3;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        i0 := @parameter0: int;
+
+        virtualinvoke r0.<sun.text.bidi.BidiBase: void verifyValidParaOrLine()>();
+
+        r1 = r0.<sun.text.bidi.BidiBase: sun.text.bidi.BidiBase paraBidi>;
+
+        $i1 = r1.<sun.text.bidi.BidiBase: int length>;
+
+        virtualinvoke r0.<sun.text.bidi.BidiBase: void verifyRange(int,int,int)>(i0, 0, $i1);
+
+        i3 = 0;
+
+     label1:
+        $r2 = r1.<sun.text.bidi.BidiBase: int[] paras>;
+
+        $i2 = $r2[i3];
+
+        if i0 < $i2 goto label2;
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label2:
+        return i3;
+    }
+
+    public java.text.Bidi setLine(java.text.Bidi, sun.text.bidi.BidiBase, java.text.Bidi, sun.text.bidi.BidiBase, int, int)
+    {
+        java.text.Bidi r1, r2, $r4;
+        sun.text.bidi.BidiBase r0, r3, r5;
+        int i0, i1, $i2, $i3;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        r1 := @parameter0: java.text.Bidi;
+
+        r5 := @parameter1: sun.text.bidi.BidiBase;
+
+        r2 := @parameter2: java.text.Bidi;
+
+        r3 := @parameter3: sun.text.bidi.BidiBase;
+
+        i0 := @parameter4: int;
+
+        i1 := @parameter5: int;
+
+        virtualinvoke r0.<sun.text.bidi.BidiBase: void verifyValidPara()>();
+
+        virtualinvoke r0.<sun.text.bidi.BidiBase: void verifyRange(int,int,int)>(i0, 0, i1);
+
+        $i2 = r0.<sun.text.bidi.BidiBase: int length>;
+
+        $i3 = $i2 + 1;
+
+        virtualinvoke r0.<sun.text.bidi.BidiBase: void verifyRange(int,int,int)>(i1, 0, $i3);
+
+        $r4 = staticinvoke <sun.text.bidi.BidiLine: java.text.Bidi setLine(java.text.Bidi,sun.text.bidi.BidiBase,java.text.Bidi,sun.text.bidi.BidiBase,int,int)>(r1, r0, r2, r3, i0, i1);
+
+        return $r4;
+    }
+
+    public byte getLevelAt(int)
+    {
+        byte $b2, $b5;
+        sun.text.bidi.BidiBase r0;
+        int i0, $i1, $i3, $i4;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        i0 := @parameter0: int;
+
+        if i0 < 0 goto label1;
+
+        $i3 = r0.<sun.text.bidi.BidiBase: int length>;
+
+        if i0 < $i3 goto label2;
+
+     label1:
+        $i1 = virtualinvoke r0.<sun.text.bidi.BidiBase: int getBaseLevel()>();
+
+        $b2 = (byte) $i1;
+
+        return $b2;
+
+     label2:
+        virtualinvoke r0.<sun.text.bidi.BidiBase: void verifyValidParaOrLine()>();
+
+        $i4 = r0.<sun.text.bidi.BidiBase: int length>;
+
+        virtualinvoke r0.<sun.text.bidi.BidiBase: void verifyRange(int,int,int)>(i0, 0, $i4);
+
+        $b5 = staticinvoke <sun.text.bidi.BidiLine: byte getLevelAt(sun.text.bidi.BidiBase,int)>(r0, i0);
+
+        return $b5;
+    }
+
+    private byte[] getLevels()
+    {
+        byte[] $r1, $r2;
+        sun.text.bidi.BidiBase r0;
+        int $i0;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        virtualinvoke r0.<sun.text.bidi.BidiBase: void verifyValidParaOrLine()>();
+
+        $i0 = r0.<sun.text.bidi.BidiBase: int length>;
+
+        if $i0 > 0 goto label1;
+
+        $r2 = newarray (byte)[0];
+
+        return $r2;
+
+     label1:
+        $r1 = staticinvoke <sun.text.bidi.BidiLine: byte[] getLevels(sun.text.bidi.BidiBase)>(r0);
+
+        return $r1;
+    }
+
+    public int countRuns()
+    {
+        int $i0;
+        sun.text.bidi.BidiBase r0;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        virtualinvoke r0.<sun.text.bidi.BidiBase: void verifyValidParaOrLine()>();
+
+        staticinvoke <sun.text.bidi.BidiLine: void getRuns(sun.text.bidi.BidiBase)>(r0);
+
+        $i0 = r0.<sun.text.bidi.BidiBase: int runCount>;
+
+        return $i0;
+    }
+
+    private int[] getVisualMap()
+    {
+        int[] $r1, $r2;
+        sun.text.bidi.BidiBase r0;
+        int $i0;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        virtualinvoke r0.<sun.text.bidi.BidiBase: int countRuns()>();
+
+        $i0 = r0.<sun.text.bidi.BidiBase: int resultLength>;
+
+        if $i0 > 0 goto label1;
+
+        $r2 = newarray (int)[0];
+
+        return $r2;
+
+     label1:
+        $r1 = staticinvoke <sun.text.bidi.BidiLine: int[] getVisualMap(sun.text.bidi.BidiBase)>(r0);
+
+        return $r1;
+    }
+
+    private static int[] reorderVisual(byte[])
+    {
+        byte[] r0;
+        int[] $r1;
+
+        r0 := @parameter0: byte[];
+
+        $r1 = staticinvoke <sun.text.bidi.BidiLine: int[] reorderVisual(byte[])>(r0);
+
+        return $r1;
+    }
+
+    public void <init>(char[], int, byte[], int, int, int)
+    {
+        byte[] r1, r3;
+        byte $b6, b9, b11, b12, b13, b14, b15, b16;
+        sun.text.bidi.BidiBase r0;
+        int i0, i1, i2, i3, $i4, $i5, $i7, $i8, i10, $i18;
+        char[] r2, $r4;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        r2 := @parameter0: char[];
+
+        i2 := @parameter1: int;
+
+        r1 := @parameter2: byte[];
+
+        i3 := @parameter3: int;
+
+        i1 := @parameter4: int;
+
+        i0 := @parameter5: int;
+
+        specialinvoke r0.<sun.text.bidi.BidiBase: void <init>(int,int)>(0, 0);
+
+        tableswitch(i0)
+        {
+            case -2: goto label03;
+            case -1: goto label04;
+            case 0: goto label01;
+            case 1: goto label02;
+            default: goto label01;
+        };
+
+     label01:
+        b9 = 0;
+
+        b16 = 0;
+
+        b15 = 0;
+
+        b14 = 0;
+
+        b13 = 0;
+
+        b12 = 0;
+
+        goto label05;
+
+     label02:
+        b9 = 1;
+
+        b16 = 1;
+
+        b15 = 1;
+
+        b14 = 1;
+
+        b13 = 1;
+
+        b12 = 1;
+
+        goto label05;
+
+     label03:
+        b9 = 126;
+
+        b16 = 126;
+
+        b15 = 126;
+
+        b14 = 126;
+
+        b13 = 126;
+
+        b12 = 126;
+
+        goto label05;
+
+     label04:
+        b9 = 127;
+
+        b16 = 127;
+
+        b15 = 127;
+
+        b14 = 127;
+
+        b13 = 127;
+
+        b12 = 127;
+
+     label05:
+        if r1 != null goto label06;
+
+        r3 = null;
+
+        goto label10;
+
+     label06:
+        r3 = newarray (byte)[i1];
+
+        i10 = 0;
+
+     label07:
+        if i10 >= i1 goto label10;
+
+        $i5 = i10 + i3;
+
+        b11 = r1[$i5];
+
+        if b11 >= 0 goto label08;
+
+        $i7 = neg b11;
+
+        $i18 = (int) -128;
+
+        $i8 = $i7 | $i18;
+
+        b11 = (byte) $i8;
+
+        goto label09;
+
+     label08:
+        if b11 != 0 goto label09;
+
+        b11 = b12;
+
+        if b14 <= 61 goto label09;
+
+        $b6 = b15 & 1;
+
+        b11 = (byte) $b6;
+
+     label09:
+        r3[i10] = b11;
+
+        i10 = i10 + 1;
+
+        goto label07;
+
+     label10:
+        if i2 != 0 goto label11;
+
+        if i3 != 0 goto label11;
+
+        $i4 = lengthof r2;
+
+        if i1 != $i4 goto label11;
+
+        virtualinvoke r0.<sun.text.bidi.BidiBase: void setPara(char[],byte,byte[])>(r2, b16, r3);
+
+        goto label12;
+
+     label11:
+        $r4 = newarray (char)[i1];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r2, i2, $r4, 0, i1);
+
+        virtualinvoke r0.<sun.text.bidi.BidiBase: void setPara(char[],byte,byte[])>($r4, b13, r3);
+
+     label12:
+        return;
+    }
+
+    public boolean isMixed()
+    {
+        sun.text.bidi.BidiBase r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        $z0 = virtualinvoke r0.<sun.text.bidi.BidiBase: boolean isLeftToRight()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = virtualinvoke r0.<sun.text.bidi.BidiBase: boolean isRightToLeft()>();
+
+        if $z1 != 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+    }
+
+    public boolean isLeftToRight()
+    {
+        byte $b0, $b1, $b2;
+        sun.text.bidi.BidiBase r0;
+        boolean $z0;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        $b0 = specialinvoke r0.<sun.text.bidi.BidiBase: byte getDirection()>();
+
+        if $b0 != 0 goto label1;
+
+        $b1 = r0.<sun.text.bidi.BidiBase: byte paraLevel>;
+
+        $b2 = $b1 & 1;
+
+        if $b2 != 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean isRightToLeft()
+    {
+        byte $b0, $b1, $b2;
+        sun.text.bidi.BidiBase r0;
+        boolean $z0;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        $b0 = specialinvoke r0.<sun.text.bidi.BidiBase: byte getDirection()>();
+
+        if $b0 != 1 goto label1;
+
+        $b1 = r0.<sun.text.bidi.BidiBase: byte paraLevel>;
+
+        $b2 = $b1 & 1;
+
+        if $b2 != 1 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean baseIsLeftToRight()
+    {
+        byte $b0;
+        sun.text.bidi.BidiBase r0;
+        boolean $z0;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        $b0 = virtualinvoke r0.<sun.text.bidi.BidiBase: byte getParaLevel()>();
+
+        if $b0 != 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public int getBaseLevel()
+    {
+        int $i1;
+        byte $b0;
+        sun.text.bidi.BidiBase r0;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        $b0 = virtualinvoke r0.<sun.text.bidi.BidiBase: byte getParaLevel()>();
+
+        $i1 = (int) $b0;
+
+        return $i1;
+    }
+
+    private void getLogicalToVisualRunsMap()
+    {
+        long $l1, $l2, $l5, $l6, $l7, $l8;
+        long[] $r7;
+        int[] $r1, $r2, $r3, $r6;
+        sun.text.bidi.BidiBase r0;
+        int $i0, $i3, $i4, $i9, i10, i11;
+        sun.text.bidi.BidiRun $r5;
+        boolean $z0;
+        sun.text.bidi.BidiRun[] $r4;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        $z0 = r0.<sun.text.bidi.BidiBase: boolean isGoodLogicalToVisualRunsMap>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $i0 = virtualinvoke r0.<sun.text.bidi.BidiBase: int countRuns()>();
+
+        $r1 = r0.<sun.text.bidi.BidiBase: int[] logicalToVisualRunsMap>;
+
+        if $r1 == null goto label2;
+
+        $r6 = r0.<sun.text.bidi.BidiBase: int[] logicalToVisualRunsMap>;
+
+        $i9 = lengthof $r6;
+
+        if $i9 >= $i0 goto label3;
+
+     label2:
+        $r2 = newarray (int)[$i0];
+
+        r0.<sun.text.bidi.BidiBase: int[] logicalToVisualRunsMap> = $r2;
+
+     label3:
+        $r7 = newarray (long)[$i0];
+
+        i10 = 0;
+
+     label4:
+        if i10 >= $i0 goto label5;
+
+        $r4 = r0.<sun.text.bidi.BidiBase: sun.text.bidi.BidiRun[] runs>;
+
+        $r5 = $r4[i10];
+
+        $i4 = $r5.<sun.text.bidi.BidiRun: int start>;
+
+        $l5 = (long) $i4;
+
+        $l7 = $l5 << 32;
+
+        $l6 = (long) i10;
+
+        $l8 = $l7 + $l6;
+
+        $r7[i10] = $l8;
+
+        i10 = i10 + 1;
+
+        goto label4;
+
+     label5:
+        staticinvoke <java.util.Arrays: void sort(long[])>($r7);
+
+        i11 = 0;
+
+     label6:
+        if i11 >= $i0 goto label7;
+
+        $r3 = r0.<sun.text.bidi.BidiBase: int[] logicalToVisualRunsMap>;
+
+        $l1 = $r7[i11];
+
+        $l2 = $l1 & -1L;
+
+        $i3 = (int) $l2;
+
+        $r3[i11] = $i3;
+
+        i11 = i11 + 1;
+
+        goto label6;
+
+     label7:
+        r0.<sun.text.bidi.BidiBase: boolean isGoodLogicalToVisualRunsMap> = 1;
+
+        return;
+    }
+
+    public int getRunLevel(int)
+    {
+        sun.text.bidi.BidiRun[] $r2;
+        byte $b1, $b4;
+        int[] $r1;
+        sun.text.bidi.BidiBase r0;
+        int i0, $i2, $i3, $i5, $i6;
+        sun.text.bidi.BidiRun $r3;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        i0 := @parameter0: int;
+
+        virtualinvoke r0.<sun.text.bidi.BidiBase: void verifyValidParaOrLine()>();
+
+        staticinvoke <sun.text.bidi.BidiLine: void getRuns(sun.text.bidi.BidiBase)>(r0);
+
+        if i0 < 0 goto label1;
+
+        $i2 = r0.<sun.text.bidi.BidiBase: int runCount>;
+
+        if i0 < $i2 goto label2;
+
+     label1:
+        $b1 = virtualinvoke r0.<sun.text.bidi.BidiBase: byte getParaLevel()>();
+
+        $i5 = (int) $b1;
+
+        return $i5;
+
+     label2:
+        specialinvoke r0.<sun.text.bidi.BidiBase: void getLogicalToVisualRunsMap()>();
+
+        $r2 = r0.<sun.text.bidi.BidiBase: sun.text.bidi.BidiRun[] runs>;
+
+        $r1 = r0.<sun.text.bidi.BidiBase: int[] logicalToVisualRunsMap>;
+
+        $i3 = $r1[i0];
+
+        $r3 = $r2[$i3];
+
+        $b4 = $r3.<sun.text.bidi.BidiRun: byte level>;
+
+        $i6 = (int) $b4;
+
+        return $i6;
+    }
+
+    public int getRunStart(int)
+    {
+        sun.text.bidi.BidiRun[] $r2;
+        int[] $r1;
+        sun.text.bidi.BidiBase r0;
+        int $i0, i1, $i2, $i3, $i4, $i5, $i6;
+        sun.text.bidi.BidiRun $r3;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        i1 := @parameter0: int;
+
+        virtualinvoke r0.<sun.text.bidi.BidiBase: void verifyValidParaOrLine()>();
+
+        staticinvoke <sun.text.bidi.BidiLine: void getRuns(sun.text.bidi.BidiBase)>(r0);
+
+        $i0 = r0.<sun.text.bidi.BidiBase: int runCount>;
+
+        if $i0 != 1 goto label1;
+
+        return 0;
+
+     label1:
+        $i2 = r0.<sun.text.bidi.BidiBase: int runCount>;
+
+        if i1 != $i2 goto label2;
+
+        $i6 = r0.<sun.text.bidi.BidiBase: int length>;
+
+        return $i6;
+
+     label2:
+        $i3 = r0.<sun.text.bidi.BidiBase: int runCount>;
+
+        virtualinvoke r0.<sun.text.bidi.BidiBase: void verifyIndex(int,int,int)>(i1, 0, $i3);
+
+        specialinvoke r0.<sun.text.bidi.BidiBase: void getLogicalToVisualRunsMap()>();
+
+        $r2 = r0.<sun.text.bidi.BidiBase: sun.text.bidi.BidiRun[] runs>;
+
+        $r1 = r0.<sun.text.bidi.BidiBase: int[] logicalToVisualRunsMap>;
+
+        $i4 = $r1[i1];
+
+        $r3 = $r2[$i4];
+
+        $i5 = $r3.<sun.text.bidi.BidiRun: int start>;
+
+        return $i5;
+    }
+
+    public int getRunLimit(int)
+    {
+        int[] $r1;
+        sun.text.bidi.BidiBase r0;
+        int $i0, i1, $i2, i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10;
+        sun.text.bidi.BidiRun $r3, $r5, $r7, $r9;
+        sun.text.bidi.BidiRun[] $r2, $r4, $r6, $r8;
+
+        r0 := @this: sun.text.bidi.BidiBase;
+
+        i1 := @parameter0: int;
+
+        virtualinvoke r0.<sun.text.bidi.BidiBase: void verifyValidParaOrLine()>();
+
+        staticinvoke <sun.text.bidi.BidiLine: void getRuns(sun.text.bidi.BidiBase)>(r0);
+
+        $i0 = r0.<sun.text.bidi.BidiBase: int runCount>;
+
+        if $i0 != 1 goto label1;
+
+        $i9 = r0.<sun.text.bidi.BidiBase: int length>;
+
+        return $i9;
+
+     label1:
+        $i2 = r0.<sun.text.bidi.BidiBase: int runCount>;
+
+        virtualinvoke r0.<sun.text.bidi.BidiBase: void verifyIndex(int,int,int)>(i1, 0, $i2);
+
+        specialinvoke r0.<sun.text.bidi.BidiBase: void getLogicalToVisualRunsMap()>();
+
+        $r1 = r0.<sun.text.bidi.BidiBase: int[] logicalToVisualRunsMap>;
+
+        i3 = $r1[i1];
+
+        if i3 != 0 goto label2;
+
+        $r8 = r0.<sun.text.bidi.BidiBase: sun.text.bidi.BidiRun[] runs>;
+
+        $r9 = $r8[i3];
+
+        $i10 = $r9.<sun.text.bidi.BidiRun: int limit>;
+
+        goto label3;
+
+     label2:
+        $r2 = r0.<sun.text.bidi.BidiBase: sun.text.bidi.BidiRun[] runs>;
+
+        $r3 = $r2[i3];
+
+        $i6 = $r3.<sun.text.bidi.BidiRun: int limit>;
+
+        $r4 = r0.<sun.text.bidi.BidiBase: sun.text.bidi.BidiRun[] runs>;
+
+        $i4 = i3 - 1;
+
+        $r5 = $r4[$i4];
+
+        $i5 = $r5.<sun.text.bidi.BidiRun: int limit>;
+
+        $i10 = $i6 - $i5;
+
+     label3:
+        $r6 = r0.<sun.text.bidi.BidiBase: sun.text.bidi.BidiRun[] runs>;
+
+        $r7 = $r6[i3];
+
+        $i7 = $r7.<sun.text.bidi.BidiRun: int start>;
+
+        $i8 = $i7 + $i10;
+
+        return $i8;
+    }
+
+    public static boolean requiresBidi(char[], int, int)
+    {
+        int i0, i1, $i2, $i4, $i5, $i7, $i8, $i9, $i10, i11, $i13, $i14, $i15, $i17, $i18, $i20;
+        java.lang.String $r7;
+        boolean $z0, $z1;
+        char $c3, $c6, $c12;
+        java.lang.IllegalArgumentException $r9;
+        char[] r0;
+        java.lang.StringBuilder $r3, $r4, $r5, $r6, $r8;
+
+        r0 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        if 0 > i0 goto label1;
+
+        if i0 > i1 goto label1;
+
+        $i2 = lengthof r0;
+
+        if i1 <= $i2 goto label2;
+
+     label1:
+        $r9 = new java.lang.IllegalArgumentException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Value start ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is out of range 0 to ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r7);
+
+        throw $r9;
+
+     label2:
+        i11 = i0;
+
+     label3:
+        if i11 >= i1 goto label6;
+
+        $c3 = r0[i11];
+
+        $z0 = staticinvoke <java.lang.Character: boolean isHighSurrogate(char)>($c3);
+
+        if $z0 == 0 goto label4;
+
+        $i4 = i1 - 1;
+
+        if i11 >= $i4 goto label4;
+
+        $i5 = i11 + 1;
+
+        $c6 = r0[$i5];
+
+        $z1 = staticinvoke <java.lang.Character: boolean isLowSurrogate(char)>($c6);
+
+        if $z1 == 0 goto label4;
+
+        $i7 = staticinvoke <java.lang.Character: int codePointAt(char[],int)>(r0, i11);
+
+        $i8 = staticinvoke <sun.text.normalizer.UCharacter: int getDirection(int)>($i7);
+
+        $i9 = 1 << $i8;
+
+        $i17 = (int) 57378;
+
+        $i10 = $i9 & $i17;
+
+        if $i10 == 0 goto label5;
+
+        return 1;
+
+     label4:
+        $c12 = r0[i11];
+
+        $i18 = (int) $c12;
+
+        $i13 = staticinvoke <sun.text.normalizer.UCharacter: int getDirection(int)>($i18);
+
+        $i14 = 1 << $i13;
+
+        $i20 = (int) 57378;
+
+        $i15 = $i14 & $i20;
+
+        if $i15 == 0 goto label5;
+
+        return 1;
+
+     label5:
+        i11 = i11 + 1;
+
+        goto label3;
+
+     label6:
+        return 0;
+    }
+
+    public static void reorderVisually(byte[], int, java.lang.Object[], int, int)
+    {
+        byte[] r5, r23;
+        int[] $r24;
+        java.lang.StringBuilder $r1, $r2, $r3, $r4, $r6, $r9, $r10, $r11, $r12, $r14, $r17, $r18, $r19, $r20, $r21;
+        java.lang.Object[] r13, r25;
+        int i0, $i1, $i2, $i3, i4, $i5, $i6, $i7, i8, $i9, $i10, $i11, $i12, $i13, $i14, i15;
+        java.lang.String $r7, $r15, $r22;
+        java.lang.IllegalArgumentException $r0, $r8, $r16;
+        java.lang.Object $r26;
+
+        r5 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        r13 := @parameter2: java.lang.Object[];
+
+        i4 := @parameter3: int;
+
+        i8 := @parameter4: int;
+
+        if 0 > i0 goto label1;
+
+        $i3 = lengthof r5;
+
+        if $i3 > i0 goto label2;
+
+     label1:
+        $r0 = new java.lang.IllegalArgumentException;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Value levelStart ");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is out of range 0 to ");
+
+        $i1 = lengthof r5;
+
+        $i2 = $i1 - 1;
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r7);
+
+        throw $r0;
+
+     label2:
+        if 0 > i4 goto label3;
+
+        $i7 = lengthof r13;
+
+        if $i7 > i4 goto label4;
+
+     label3:
+        $r8 = new java.lang.IllegalArgumentException;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Value objectStart ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is out of range 0 to ");
+
+        $i5 = lengthof r13;
+
+        $i6 = $i5 - 1;
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i6);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r15);
+
+        throw $r8;
+
+     label4:
+        if 0 > i8 goto label5;
+
+        $i12 = lengthof r13;
+
+        $i11 = i4 + i8;
+
+        if $i12 >= $i11 goto label6;
+
+     label5:
+        $r16 = new java.lang.IllegalArgumentException;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Value count ");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is out of range 0 to ");
+
+        $i9 = lengthof r13;
+
+        $i10 = $i9 - i4;
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i10);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r16.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r22);
+
+        throw $r16;
+
+     label6:
+        r23 = newarray (byte)[i8];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r5, i0, r23, 0, i8);
+
+        $r24 = staticinvoke <sun.text.bidi.BidiBase: int[] reorderVisual(byte[])>(r23);
+
+        r25 = newarray (java.lang.Object)[i8];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r13, i4, r25, 0, i8);
+
+        i15 = 0;
+
+     label7:
+        if i15 >= i8 goto label8;
+
+        $i14 = i4 + i15;
+
+        $i13 = $r24[i15];
+
+        $r26 = r25[$i13];
+
+        r13[$i14] = $r26;
+
+        i15 = i15 + 1;
+
+        goto label7;
+
+     label8:
+        return;
+    }
+
+    public java.lang.String toString()
+    {
+        byte[] $r4, $r5, $r6, $r12;
+        byte $b0, $b1, $b3, $b7;
+        sun.text.bidi.BidiBase r1;
+        int $i2, $i4, i8, i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16;
+        java.lang.String $r3, $r8, $r9, $r11;
+        char $c5, $c6;
+        char[] $r7, $r10, $r13;
+        java.lang.Class $r2;
+        java.lang.StringBuilder $r14;
+
+        r1 := @this: sun.text.bidi.BidiBase;
+
+        $r14 = new java.lang.StringBuilder;
+
+        $r2 = virtualinvoke r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>(java.lang.String)>($r3);
+
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[dir: ");
+
+        $b0 = r1.<sun.text.bidi.BidiBase: byte direction>;
+
+        $i11 = (int) $b0;
+
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i11);
+
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" baselevel: ");
+
+        $b1 = r1.<sun.text.bidi.BidiBase: byte paraLevel>;
+
+        $i12 = (int) $b1;
+
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i12);
+
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" length: ");
+
+        $i2 = r1.<sun.text.bidi.BidiBase: int length>;
+
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" runs: ");
+
+        $r4 = r1.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        if $r4 != null goto label1;
+
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("none");
+
+        goto label4;
+
+     label1:
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(91);
+
+        $r5 = r1.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $b3 = $r5[0];
+
+        $i13 = (int) $b3;
+
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i13);
+
+        i8 = 1;
+
+     label2:
+        $r6 = r1.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $i4 = lengthof $r6;
+
+        if i8 >= $i4 goto label3;
+
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(32);
+
+        $r12 = r1.<sun.text.bidi.BidiBase: byte[] levels>;
+
+        $b7 = $r12[i8];
+
+        $i14 = (int) $b7;
+
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i14);
+
+        i8 = i8 + 1;
+
+        goto label2;
+
+     label3:
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(93);
+
+     label4:
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" text: [0x");
+
+        $r7 = r1.<sun.text.bidi.BidiBase: char[] text>;
+
+        $c5 = $r7[0];
+
+        $i15 = (int) $c5;
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i15);
+
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        i9 = 1;
+
+     label5:
+        $r13 = r1.<sun.text.bidi.BidiBase: char[] text>;
+
+        $i10 = lengthof $r13;
+
+        if i9 >= $i10 goto label6;
+
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" 0x");
+
+        $r10 = r1.<sun.text.bidi.BidiBase: char[] text>;
+
+        $c6 = $r10[i9];
+
+        $i16 = (int) $c6;
+
+        $r11 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i16);
+
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        i9 = i9 + 1;
+
+        goto label5;
+
+     label6:
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]]");
+
+        $r9 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r9;
+    }
+
+    static void <clinit>()
+    {
+        byte[] $r24, $r25, $r26, $r27, $r28, $r29, $r31, $r32, $r33, $r34, $r35, $r36, $r44, $r45, $r46, $r47, $r48, $r55, $r56, $r57, $r58, $r59, $r60, $r62, $r63, $r64, $r65, $r66, $r73, $r74, $r75, $r76, $r77, $r78, $r80, $r81, $r82, $r83, $r84, $r85, $r92, $r93, $r94, $r95, $r96, $r97, $r98, $r106, $r107, $r108, $r109, $r110, $r111, $r112, $r114, $r115, $r116, $r117, $r118, $r119, $r120, $r133, $r134, $r135, $r136, $r137;
+        byte[][] $r23, $r30, $r41, $r42, $r43, $r52, $r53, $r54, $r61, $r70, $r71, $r72, $r79, $r89, $r90, $r91, $r103, $r104, $r105, $r113, $r125, $r126, $r130, $r131, $r132, $r141, $r142;
+        int[] $r0, $r1, $r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57;
+        sun.text.bidi.BidiBase$ImpTabPair $r38, $r49, $r67, $r86, $r100, $r122, $r127, $r138;
+        short[][] $r4;
+        short[] $r3, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r37, $r39, $r40, $r50, $r51, $r68, $r69, $r87, $r88, $r99, $r101, $r102, $r121, $r123, $r124, $r128, $r129, $r139, $r140;
+
+        <sun.text.bidi.BidiBase: int INTERMAL_DIRECTION_DEFAULT_RIGHT_TO_LEFT> = 127;
+
+        <sun.text.bidi.BidiBase: int INTERNAL_DIRECTION_DEFAULT_LEFT_TO_RIGHT> = 126;
+
+        <sun.text.bidi.BidiBase: int FIRSTALLOC> = 10;
+
+        <sun.text.bidi.BidiBase: int IMPTABLEVELS_RES> = 7;
+
+        <sun.text.bidi.BidiBase: int IMPTABLEVELS_COLUMNS> = 8;
+
+        <sun.text.bidi.BidiBase: short _B> = 6;
+
+        <sun.text.bidi.BidiBase: short _S> = 5;
+
+        <sun.text.bidi.BidiBase: short _ON> = 4;
+
+        <sun.text.bidi.BidiBase: short _AN> = 3;
+
+        <sun.text.bidi.BidiBase: short _EN> = 2;
+
+        <sun.text.bidi.BidiBase: short _R> = 1;
+
+        <sun.text.bidi.BidiBase: short _L> = 0;
+
+        <sun.text.bidi.BidiBase: int IMPTABPROPS_RES> = 13;
+
+        <sun.text.bidi.BidiBase: int IMPTABPROPS_COLUMNS> = 14;
+
+        <sun.text.bidi.BidiBase: byte CONTEXT_RTL> = 64;
+
+        <sun.text.bidi.BidiBase: byte CONTEXT_RTL_SHIFT> = 6;
+
+        <sun.text.bidi.BidiBase: int RLM_AFTER> = 8;
+
+        <sun.text.bidi.BidiBase: int RLM_BEFORE> = 4;
+
+        <sun.text.bidi.BidiBase: int LRM_AFTER> = 2;
+
+        <sun.text.bidi.BidiBase: int LRM_BEFORE> = 1;
+
+        <sun.text.bidi.BidiBase: char LF> = 10;
+
+        <sun.text.bidi.BidiBase: char CR> = 13;
+
+        <sun.text.bidi.BidiBase: int MASK_R_AL> = 8194;
+
+        <sun.text.bidi.BidiBase: byte BN> = 18;
+
+        <sun.text.bidi.BidiBase: byte NSM> = 17;
+
+        <sun.text.bidi.BidiBase: byte PDF> = 16;
+
+        <sun.text.bidi.BidiBase: byte RLO> = 15;
+
+        <sun.text.bidi.BidiBase: byte RLE> = 14;
+
+        <sun.text.bidi.BidiBase: byte AL> = 13;
+
+        <sun.text.bidi.BidiBase: byte LRO> = 12;
+
+        <sun.text.bidi.BidiBase: byte LRE> = 11;
+
+        <sun.text.bidi.BidiBase: byte ON> = 10;
+
+        <sun.text.bidi.BidiBase: byte WS> = 9;
+
+        <sun.text.bidi.BidiBase: byte S> = 8;
+
+        <sun.text.bidi.BidiBase: byte B> = 7;
+
+        <sun.text.bidi.BidiBase: byte CS> = 6;
+
+        <sun.text.bidi.BidiBase: byte AN> = 5;
+
+        <sun.text.bidi.BidiBase: byte ET> = 4;
+
+        <sun.text.bidi.BidiBase: byte ES> = 3;
+
+        <sun.text.bidi.BidiBase: byte EN> = 2;
+
+        <sun.text.bidi.BidiBase: byte R> = 1;
+
+        <sun.text.bidi.BidiBase: byte L> = 0;
+
+        <sun.text.bidi.BidiBase: int OPTION_STREAMING> = 4;
+
+        <sun.text.bidi.BidiBase: int OPTION_REMOVE_CONTROLS> = 2;
+
+        <sun.text.bidi.BidiBase: int OPTION_INSERT_MARKS> = 1;
+
+        <sun.text.bidi.BidiBase: short REORDER_LAST_LOGICAL_TO_VISUAL> = 1;
+
+        <sun.text.bidi.BidiBase: short REORDER_INVERSE_FOR_NUMBERS_SPECIAL> = 6;
+
+        <sun.text.bidi.BidiBase: short REORDER_INVERSE_LIKE_DIRECT> = 5;
+
+        <sun.text.bidi.BidiBase: short REORDER_INVERSE_NUMBERS_AS_L> = 4;
+
+        <sun.text.bidi.BidiBase: short REORDER_RUNS_ONLY> = 3;
+
+        <sun.text.bidi.BidiBase: short REORDER_GROUP_NUMBERS_WITH_R> = 2;
+
+        <sun.text.bidi.BidiBase: short REORDER_NUMBERS_SPECIAL> = 1;
+
+        <sun.text.bidi.BidiBase: short REORDER_DEFAULT> = 0;
+
+        <sun.text.bidi.BidiBase: short DO_MIRRORING> = 2;
+
+        <sun.text.bidi.BidiBase: byte MIXED> = 2;
+
+        <sun.text.bidi.BidiBase: int MAP_NOWHERE> = -1;
+
+        <sun.text.bidi.BidiBase: byte INTERNAL_LEVEL_OVERRIDE> = -128;
+
+        <sun.text.bidi.BidiBase: byte MAX_EXPLICIT_LEVEL> = 61;
+
+        <sun.text.bidi.BidiBase: byte INTERNAL_LEVEL_DEFAULT_RTL> = 127;
+
+        <sun.text.bidi.BidiBase: byte INTERNAL_LEVEL_DEFAULT_LTR> = 126;
+
+        $i0 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(31);
+
+        <sun.text.bidi.BidiBase: int DirPropFlagMultiRuns> = $i0;
+
+        $r0 = newarray (int)[2];
+
+        $i1 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(0);
+
+        $r0[0] = $i1;
+
+        $i2 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(1);
+
+        $r0[1] = $i2;
+
+        <sun.text.bidi.BidiBase: int[] DirPropFlagLR> = $r0;
+
+        $r1 = newarray (int)[2];
+
+        $i3 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(11);
+
+        $r1[0] = $i3;
+
+        $i4 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(14);
+
+        $r1[1] = $i4;
+
+        <sun.text.bidi.BidiBase: int[] DirPropFlagE> = $r1;
+
+        $r2 = newarray (int)[2];
+
+        $i5 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(12);
+
+        $r2[0] = $i5;
+
+        $i6 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(15);
+
+        $r2[1] = $i6;
+
+        <sun.text.bidi.BidiBase: int[] DirPropFlagO> = $r2;
+
+        $i7 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(0);
+
+        $i8 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(2);
+
+        $i9 = $i7 | $i8;
+
+        $i10 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(5);
+
+        $i11 = $i9 | $i10;
+
+        $i12 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(11);
+
+        $i13 = $i11 | $i12;
+
+        $i14 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(12);
+
+        $i15 = $i13 | $i14;
+
+        <sun.text.bidi.BidiBase: int MASK_LTR> = $i15;
+
+        $i16 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(1);
+
+        $i17 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(13);
+
+        $i18 = $i16 | $i17;
+
+        $i19 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(14);
+
+        $i20 = $i18 | $i19;
+
+        $i21 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(15);
+
+        $i22 = $i20 | $i21;
+
+        <sun.text.bidi.BidiBase: int MASK_RTL> = $i22;
+
+        $i23 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(11);
+
+        $i24 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(12);
+
+        $i25 = $i23 | $i24;
+
+        <sun.text.bidi.BidiBase: int MASK_LRX> = $i25;
+
+        $i26 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(14);
+
+        $i27 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(15);
+
+        $i28 = $i26 | $i27;
+
+        <sun.text.bidi.BidiBase: int MASK_RLX> = $i28;
+
+        $i30 = <sun.text.bidi.BidiBase: int MASK_LRX>;
+
+        $i29 = <sun.text.bidi.BidiBase: int MASK_RLX>;
+
+        $i31 = $i30 | $i29;
+
+        $i32 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(16);
+
+        $i33 = $i31 | $i32;
+
+        <sun.text.bidi.BidiBase: int MASK_EXPLICIT> = $i33;
+
+        $i34 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(18);
+
+        $i35 = <sun.text.bidi.BidiBase: int MASK_EXPLICIT>;
+
+        $i36 = $i34 | $i35;
+
+        <sun.text.bidi.BidiBase: int MASK_BN_EXPLICIT> = $i36;
+
+        $i37 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(7);
+
+        $i38 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(8);
+
+        $i39 = $i37 | $i38;
+
+        <sun.text.bidi.BidiBase: int MASK_B_S> = $i39;
+
+        $i40 = <sun.text.bidi.BidiBase: int MASK_B_S>;
+
+        $i41 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(9);
+
+        $i43 = $i40 | $i41;
+
+        $i42 = <sun.text.bidi.BidiBase: int MASK_BN_EXPLICIT>;
+
+        $i44 = $i43 | $i42;
+
+        <sun.text.bidi.BidiBase: int MASK_WS> = $i44;
+
+        $i45 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(10);
+
+        $i46 = <sun.text.bidi.BidiBase: int MASK_WS>;
+
+        $i47 = $i45 | $i46;
+
+        <sun.text.bidi.BidiBase: int MASK_N> = $i47;
+
+        $i48 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(6);
+
+        $i49 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(3);
+
+        $i50 = $i48 | $i49;
+
+        $i51 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(4);
+
+        $i53 = $i50 | $i51;
+
+        $i52 = <sun.text.bidi.BidiBase: int MASK_N>;
+
+        $i54 = $i53 | $i52;
+
+        <sun.text.bidi.BidiBase: int MASK_POSSIBLE_N> = $i54;
+
+        $i55 = staticinvoke <sun.text.bidi.BidiBase: int DirPropFlag(byte)>(17);
+
+        $i56 = <sun.text.bidi.BidiBase: int MASK_POSSIBLE_N>;
+
+        $i57 = $i55 | $i56;
+
+        <sun.text.bidi.BidiBase: int MASK_EMBEDDING> = $i57;
+
+        $r3 = newarray (short)[19];
+
+        $r3[0] = 0;
+
+        $r3[1] = 1;
+
+        $r3[2] = 2;
+
+        $r3[3] = 7;
+
+        $r3[4] = 8;
+
+        $r3[5] = 3;
+
+        $r3[6] = 9;
+
+        $r3[7] = 6;
+
+        $r3[8] = 5;
+
+        $r3[9] = 4;
+
+        $r3[10] = 4;
+
+        $r3[11] = 10;
+
+        $r3[12] = 10;
+
+        $r3[13] = 12;
+
+        $r3[14] = 10;
+
+        $r3[15] = 10;
+
+        $r3[16] = 10;
+
+        $r3[17] = 11;
+
+        $r3[18] = 10;
+
+        <sun.text.bidi.BidiBase: short[] groupProp> = $r3;
+
+        $r4 = newarray (short[])[18];
+
+        $r5 = newarray (short)[14];
+
+        $r5[0] = 1;
+
+        $r5[1] = 2;
+
+        $r5[2] = 4;
+
+        $r5[3] = 5;
+
+        $r5[4] = 7;
+
+        $r5[5] = 15;
+
+        $r5[6] = 17;
+
+        $r5[7] = 7;
+
+        $r5[8] = 9;
+
+        $r5[9] = 7;
+
+        $r5[10] = 0;
+
+        $r5[11] = 7;
+
+        $r5[12] = 3;
+
+        $r5[13] = 4;
+
+        $r4[0] = $r5;
+
+        $r6 = newarray (short)[14];
+
+        $r6[0] = 1;
+
+        $r6[1] = 34;
+
+        $r6[2] = 36;
+
+        $r6[3] = 37;
+
+        $r6[4] = 39;
+
+        $r6[5] = 47;
+
+        $r6[6] = 49;
+
+        $r6[7] = 39;
+
+        $r6[8] = 41;
+
+        $r6[9] = 39;
+
+        $r6[10] = 1;
+
+        $r6[11] = 1;
+
+        $r6[12] = 35;
+
+        $r6[13] = 0;
+
+        $r4[1] = $r6;
+
+        $r7 = newarray (short)[14];
+
+        $r7[0] = 33;
+
+        $r7[1] = 2;
+
+        $r7[2] = 36;
+
+        $r7[3] = 37;
+
+        $r7[4] = 39;
+
+        $r7[5] = 47;
+
+        $r7[6] = 49;
+
+        $r7[7] = 39;
+
+        $r7[8] = 41;
+
+        $r7[9] = 39;
+
+        $r7[10] = 2;
+
+        $r7[11] = 2;
+
+        $r7[12] = 35;
+
+        $r7[13] = 1;
+
+        $r4[2] = $r7;
+
+        $r8 = newarray (short)[14];
+
+        $r8[0] = 33;
+
+        $r8[1] = 34;
+
+        $r8[2] = 38;
+
+        $r8[3] = 38;
+
+        $r8[4] = 40;
+
+        $r8[5] = 48;
+
+        $r8[6] = 49;
+
+        $r8[7] = 40;
+
+        $r8[8] = 40;
+
+        $r8[9] = 40;
+
+        $r8[10] = 3;
+
+        $r8[11] = 3;
+
+        $r8[12] = 3;
+
+        $r8[13] = 1;
+
+        $r4[3] = $r8;
+
+        $r9 = newarray (short)[14];
+
+        $r9[0] = 33;
+
+        $r9[1] = 34;
+
+        $r9[2] = 4;
+
+        $r9[3] = 37;
+
+        $r9[4] = 39;
+
+        $r9[5] = 47;
+
+        $r9[6] = 49;
+
+        $r9[7] = 74;
+
+        $r9[8] = 11;
+
+        $r9[9] = 74;
+
+        $r9[10] = 4;
+
+        $r9[11] = 4;
+
+        $r9[12] = 35;
+
+        $r9[13] = 2;
+
+        $r4[4] = $r9;
+
+        $r10 = newarray (short)[14];
+
+        $r10[0] = 33;
+
+        $r10[1] = 34;
+
+        $r10[2] = 36;
+
+        $r10[3] = 5;
+
+        $r10[4] = 39;
+
+        $r10[5] = 47;
+
+        $r10[6] = 49;
+
+        $r10[7] = 39;
+
+        $r10[8] = 41;
+
+        $r10[9] = 76;
+
+        $r10[10] = 5;
+
+        $r10[11] = 5;
+
+        $r10[12] = 35;
+
+        $r10[13] = 3;
+
+        $r4[5] = $r10;
+
+        $r11 = newarray (short)[14];
+
+        $r11[0] = 33;
+
+        $r11[1] = 34;
+
+        $r11[2] = 6;
+
+        $r11[3] = 6;
+
+        $r11[4] = 40;
+
+        $r11[5] = 48;
+
+        $r11[6] = 49;
+
+        $r11[7] = 40;
+
+        $r11[8] = 40;
+
+        $r11[9] = 77;
+
+        $r11[10] = 6;
+
+        $r11[11] = 6;
+
+        $r11[12] = 35;
+
+        $r11[13] = 3;
+
+        $r4[6] = $r11;
+
+        $r12 = newarray (short)[14];
+
+        $r12[0] = 33;
+
+        $r12[1] = 34;
+
+        $r12[2] = 36;
+
+        $r12[3] = 37;
+
+        $r12[4] = 7;
+
+        $r12[5] = 47;
+
+        $r12[6] = 49;
+
+        $r12[7] = 7;
+
+        $r12[8] = 78;
+
+        $r12[9] = 7;
+
+        $r12[10] = 7;
+
+        $r12[11] = 7;
+
+        $r12[12] = 35;
+
+        $r12[13] = 4;
+
+        $r4[7] = $r12;
+
+        $r13 = newarray (short)[14];
+
+        $r13[0] = 33;
+
+        $r13[1] = 34;
+
+        $r13[2] = 38;
+
+        $r13[3] = 38;
+
+        $r13[4] = 8;
+
+        $r13[5] = 48;
+
+        $r13[6] = 49;
+
+        $r13[7] = 8;
+
+        $r13[8] = 8;
+
+        $r13[9] = 8;
+
+        $r13[10] = 8;
+
+        $r13[11] = 8;
+
+        $r13[12] = 35;
+
+        $r13[13] = 4;
+
+        $r4[8] = $r13;
+
+        $r14 = newarray (short)[14];
+
+        $r14[0] = 33;
+
+        $r14[1] = 34;
+
+        $r14[2] = 4;
+
+        $r14[3] = 37;
+
+        $r14[4] = 7;
+
+        $r14[5] = 47;
+
+        $r14[6] = 49;
+
+        $r14[7] = 7;
+
+        $r14[8] = 9;
+
+        $r14[9] = 7;
+
+        $r14[10] = 9;
+
+        $r14[11] = 9;
+
+        $r14[12] = 35;
+
+        $r14[13] = 4;
+
+        $r4[9] = $r14;
+
+        $r15 = newarray (short)[14];
+
+        $r15[0] = 97;
+
+        $r15[1] = 98;
+
+        $r15[2] = 4;
+
+        $r15[3] = 101;
+
+        $r15[4] = 135;
+
+        $r15[5] = 111;
+
+        $r15[6] = 113;
+
+        $r15[7] = 135;
+
+        $r15[8] = 142;
+
+        $r15[9] = 135;
+
+        $r15[10] = 10;
+
+        $r15[11] = 135;
+
+        $r15[12] = 99;
+
+        $r15[13] = 2;
+
+        $r4[10] = $r15;
+
+        $r16 = newarray (short)[14];
+
+        $r16[0] = 33;
+
+        $r16[1] = 34;
+
+        $r16[2] = 4;
+
+        $r16[3] = 37;
+
+        $r16[4] = 39;
+
+        $r16[5] = 47;
+
+        $r16[6] = 49;
+
+        $r16[7] = 39;
+
+        $r16[8] = 11;
+
+        $r16[9] = 39;
+
+        $r16[10] = 11;
+
+        $r16[11] = 11;
+
+        $r16[12] = 35;
+
+        $r16[13] = 2;
+
+        $r4[11] = $r16;
+
+        $r17 = newarray (short)[14];
+
+        $r17[0] = 97;
+
+        $r17[1] = 98;
+
+        $r17[2] = 100;
+
+        $r17[3] = 5;
+
+        $r17[4] = 135;
+
+        $r17[5] = 111;
+
+        $r17[6] = 113;
+
+        $r17[7] = 135;
+
+        $r17[8] = 142;
+
+        $r17[9] = 135;
+
+        $r17[10] = 12;
+
+        $r17[11] = 135;
+
+        $r17[12] = 99;
+
+        $r17[13] = 3;
+
+        $r4[12] = $r17;
+
+        $r18 = newarray (short)[14];
+
+        $r18[0] = 97;
+
+        $r18[1] = 98;
+
+        $r18[2] = 6;
+
+        $r18[3] = 6;
+
+        $r18[4] = 136;
+
+        $r18[5] = 112;
+
+        $r18[6] = 113;
+
+        $r18[7] = 136;
+
+        $r18[8] = 136;
+
+        $r18[9] = 136;
+
+        $r18[10] = 13;
+
+        $r18[11] = 136;
+
+        $r18[12] = 99;
+
+        $r18[13] = 3;
+
+        $r4[13] = $r18;
+
+        $r19 = newarray (short)[14];
+
+        $r19[0] = 33;
+
+        $r19[1] = 34;
+
+        $r19[2] = 132;
+
+        $r19[3] = 37;
+
+        $r19[4] = 7;
+
+        $r19[5] = 47;
+
+        $r19[6] = 49;
+
+        $r19[7] = 7;
+
+        $r19[8] = 14;
+
+        $r19[9] = 7;
+
+        $r19[10] = 14;
+
+        $r19[11] = 14;
+
+        $r19[12] = 35;
+
+        $r19[13] = 4;
+
+        $r4[14] = $r19;
+
+        $r20 = newarray (short)[14];
+
+        $r20[0] = 33;
+
+        $r20[1] = 34;
+
+        $r20[2] = 36;
+
+        $r20[3] = 37;
+
+        $r20[4] = 39;
+
+        $r20[5] = 15;
+
+        $r20[6] = 49;
+
+        $r20[7] = 39;
+
+        $r20[8] = 41;
+
+        $r20[9] = 39;
+
+        $r20[10] = 15;
+
+        $r20[11] = 39;
+
+        $r20[12] = 35;
+
+        $r20[13] = 5;
+
+        $r4[15] = $r20;
+
+        $r21 = newarray (short)[14];
+
+        $r21[0] = 33;
+
+        $r21[1] = 34;
+
+        $r21[2] = 38;
+
+        $r21[3] = 38;
+
+        $r21[4] = 40;
+
+        $r21[5] = 16;
+
+        $r21[6] = 49;
+
+        $r21[7] = 40;
+
+        $r21[8] = 40;
+
+        $r21[9] = 40;
+
+        $r21[10] = 16;
+
+        $r21[11] = 40;
+
+        $r21[12] = 35;
+
+        $r21[13] = 5;
+
+        $r4[16] = $r21;
+
+        $r22 = newarray (short)[14];
+
+        $r22[0] = 33;
+
+        $r22[1] = 34;
+
+        $r22[2] = 36;
+
+        $r22[3] = 37;
+
+        $r22[4] = 39;
+
+        $r22[5] = 47;
+
+        $r22[6] = 17;
+
+        $r22[7] = 39;
+
+        $r22[8] = 41;
+
+        $r22[9] = 39;
+
+        $r22[10] = 17;
+
+        $r22[11] = 39;
+
+        $r22[12] = 35;
+
+        $r22[13] = 6;
+
+        $r4[17] = $r22;
+
+        <sun.text.bidi.BidiBase: short[][] impTabProps> = $r4;
+
+        $r23 = newarray (byte[])[6];
+
+        $r24 = newarray (byte)[8];
+
+        $r24[0] = 0;
+
+        $r24[1] = 1;
+
+        $r24[2] = 0;
+
+        $r24[3] = 2;
+
+        $r24[4] = 0;
+
+        $r24[5] = 0;
+
+        $r24[6] = 0;
+
+        $r24[7] = 0;
+
+        $r23[0] = $r24;
+
+        $r25 = newarray (byte)[8];
+
+        $r25[0] = 0;
+
+        $r25[1] = 1;
+
+        $r25[2] = 3;
+
+        $r25[3] = 3;
+
+        $r25[4] = 20;
+
+        $r25[5] = 20;
+
+        $r25[6] = 0;
+
+        $r25[7] = 1;
+
+        $r23[1] = $r25;
+
+        $r26 = newarray (byte)[8];
+
+        $r26[0] = 0;
+
+        $r26[1] = 1;
+
+        $r26[2] = 0;
+
+        $r26[3] = 2;
+
+        $r26[4] = 21;
+
+        $r26[5] = 21;
+
+        $r26[6] = 0;
+
+        $r26[7] = 2;
+
+        $r23[2] = $r26;
+
+        $r27 = newarray (byte)[8];
+
+        $r27[0] = 0;
+
+        $r27[1] = 1;
+
+        $r27[2] = 3;
+
+        $r27[3] = 3;
+
+        $r27[4] = 20;
+
+        $r27[5] = 20;
+
+        $r27[6] = 0;
+
+        $r27[7] = 2;
+
+        $r23[3] = $r27;
+
+        $r28 = newarray (byte)[8];
+
+        $r28[0] = 32;
+
+        $r28[1] = 1;
+
+        $r28[2] = 3;
+
+        $r28[3] = 3;
+
+        $r28[4] = 4;
+
+        $r28[5] = 4;
+
+        $r28[6] = 32;
+
+        $r28[7] = 1;
+
+        $r23[4] = $r28;
+
+        $r29 = newarray (byte)[8];
+
+        $r29[0] = 32;
+
+        $r29[1] = 1;
+
+        $r29[2] = 32;
+
+        $r29[3] = 2;
+
+        $r29[4] = 5;
+
+        $r29[5] = 5;
+
+        $r29[6] = 32;
+
+        $r29[7] = 1;
+
+        $r23[5] = $r29;
+
+        <sun.text.bidi.BidiBase: byte[][] impTabL_DEFAULT> = $r23;
+
+        $r30 = newarray (byte[])[6];
+
+        $r31 = newarray (byte)[8];
+
+        $r31[0] = 1;
+
+        $r31[1] = 0;
+
+        $r31[2] = 2;
+
+        $r31[3] = 2;
+
+        $r31[4] = 0;
+
+        $r31[5] = 0;
+
+        $r31[6] = 0;
+
+        $r31[7] = 0;
+
+        $r30[0] = $r31;
+
+        $r32 = newarray (byte)[8];
+
+        $r32[0] = 1;
+
+        $r32[1] = 0;
+
+        $r32[2] = 1;
+
+        $r32[3] = 3;
+
+        $r32[4] = 20;
+
+        $r32[5] = 20;
+
+        $r32[6] = 0;
+
+        $r32[7] = 1;
+
+        $r30[1] = $r32;
+
+        $r33 = newarray (byte)[8];
+
+        $r33[0] = 1;
+
+        $r33[1] = 0;
+
+        $r33[2] = 2;
+
+        $r33[3] = 2;
+
+        $r33[4] = 0;
+
+        $r33[5] = 0;
+
+        $r33[6] = 0;
+
+        $r33[7] = 1;
+
+        $r30[2] = $r33;
+
+        $r34 = newarray (byte)[8];
+
+        $r34[0] = 1;
+
+        $r34[1] = 0;
+
+        $r34[2] = 1;
+
+        $r34[3] = 3;
+
+        $r34[4] = 5;
+
+        $r34[5] = 5;
+
+        $r34[6] = 0;
+
+        $r34[7] = 1;
+
+        $r30[3] = $r34;
+
+        $r35 = newarray (byte)[8];
+
+        $r35[0] = 33;
+
+        $r35[1] = 0;
+
+        $r35[2] = 33;
+
+        $r35[3] = 3;
+
+        $r35[4] = 4;
+
+        $r35[5] = 4;
+
+        $r35[6] = 0;
+
+        $r35[7] = 0;
+
+        $r30[4] = $r35;
+
+        $r36 = newarray (byte)[8];
+
+        $r36[0] = 1;
+
+        $r36[1] = 0;
+
+        $r36[2] = 1;
+
+        $r36[3] = 3;
+
+        $r36[4] = 5;
+
+        $r36[5] = 5;
+
+        $r36[6] = 0;
+
+        $r36[7] = 0;
+
+        $r30[5] = $r36;
+
+        <sun.text.bidi.BidiBase: byte[][] impTabR_DEFAULT> = $r30;
+
+        $r37 = newarray (short)[7];
+
+        $r37[0] = 0;
+
+        $r37[1] = 1;
+
+        $r37[2] = 2;
+
+        $r37[3] = 3;
+
+        $r37[4] = 4;
+
+        $r37[5] = 5;
+
+        $r37[6] = 6;
+
+        <sun.text.bidi.BidiBase: short[] impAct0> = $r37;
+
+        $r38 = new sun.text.bidi.BidiBase$ImpTabPair;
+
+        $r42 = <sun.text.bidi.BidiBase: byte[][] impTabL_DEFAULT>;
+
+        $r41 = <sun.text.bidi.BidiBase: byte[][] impTabR_DEFAULT>;
+
+        $r40 = <sun.text.bidi.BidiBase: short[] impAct0>;
+
+        $r39 = <sun.text.bidi.BidiBase: short[] impAct0>;
+
+        specialinvoke $r38.<sun.text.bidi.BidiBase$ImpTabPair: void <init>(byte[][],byte[][],short[],short[])>($r42, $r41, $r40, $r39);
+
+        <sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$ImpTabPair impTab_DEFAULT> = $r38;
+
+        $r43 = newarray (byte[])[5];
+
+        $r44 = newarray (byte)[8];
+
+        $r44[0] = 0;
+
+        $r44[1] = 2;
+
+        $r44[2] = 1;
+
+        $r44[3] = 1;
+
+        $r44[4] = 0;
+
+        $r44[5] = 0;
+
+        $r44[6] = 0;
+
+        $r44[7] = 0;
+
+        $r43[0] = $r44;
+
+        $r45 = newarray (byte)[8];
+
+        $r45[0] = 0;
+
+        $r45[1] = 2;
+
+        $r45[2] = 1;
+
+        $r45[3] = 1;
+
+        $r45[4] = 0;
+
+        $r45[5] = 0;
+
+        $r45[6] = 0;
+
+        $r45[7] = 2;
+
+        $r43[1] = $r45;
+
+        $r46 = newarray (byte)[8];
+
+        $r46[0] = 0;
+
+        $r46[1] = 2;
+
+        $r46[2] = 4;
+
+        $r46[3] = 4;
+
+        $r46[4] = 19;
+
+        $r46[5] = 0;
+
+        $r46[6] = 0;
+
+        $r46[7] = 1;
+
+        $r43[2] = $r46;
+
+        $r47 = newarray (byte)[8];
+
+        $r47[0] = 32;
+
+        $r47[1] = 2;
+
+        $r47[2] = 4;
+
+        $r47[3] = 4;
+
+        $r47[4] = 3;
+
+        $r47[5] = 3;
+
+        $r47[6] = 32;
+
+        $r47[7] = 1;
+
+        $r43[3] = $r47;
+
+        $r48 = newarray (byte)[8];
+
+        $r48[0] = 0;
+
+        $r48[1] = 2;
+
+        $r48[2] = 4;
+
+        $r48[3] = 4;
+
+        $r48[4] = 19;
+
+        $r48[5] = 19;
+
+        $r48[6] = 0;
+
+        $r48[7] = 2;
+
+        $r43[4] = $r48;
+
+        <sun.text.bidi.BidiBase: byte[][] impTabL_NUMBERS_SPECIAL> = $r43;
+
+        $r49 = new sun.text.bidi.BidiBase$ImpTabPair;
+
+        $r53 = <sun.text.bidi.BidiBase: byte[][] impTabL_NUMBERS_SPECIAL>;
+
+        $r52 = <sun.text.bidi.BidiBase: byte[][] impTabR_DEFAULT>;
+
+        $r51 = <sun.text.bidi.BidiBase: short[] impAct0>;
+
+        $r50 = <sun.text.bidi.BidiBase: short[] impAct0>;
+
+        specialinvoke $r49.<sun.text.bidi.BidiBase$ImpTabPair: void <init>(byte[][],byte[][],short[],short[])>($r53, $r52, $r51, $r50);
+
+        <sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$ImpTabPair impTab_NUMBERS_SPECIAL> = $r49;
+
+        $r54 = newarray (byte[])[6];
+
+        $r55 = newarray (byte)[8];
+
+        $r55[0] = 0;
+
+        $r55[1] = 3;
+
+        $r55[2] = 17;
+
+        $r55[3] = 17;
+
+        $r55[4] = 0;
+
+        $r55[5] = 0;
+
+        $r55[6] = 0;
+
+        $r55[7] = 0;
+
+        $r54[0] = $r55;
+
+        $r56 = newarray (byte)[8];
+
+        $r56[0] = 32;
+
+        $r56[1] = 3;
+
+        $r56[2] = 1;
+
+        $r56[3] = 1;
+
+        $r56[4] = 2;
+
+        $r56[5] = 32;
+
+        $r56[6] = 32;
+
+        $r56[7] = 2;
+
+        $r54[1] = $r56;
+
+        $r57 = newarray (byte)[8];
+
+        $r57[0] = 32;
+
+        $r57[1] = 3;
+
+        $r57[2] = 1;
+
+        $r57[3] = 1;
+
+        $r57[4] = 2;
+
+        $r57[5] = 32;
+
+        $r57[6] = 32;
+
+        $r57[7] = 1;
+
+        $r54[2] = $r57;
+
+        $r58 = newarray (byte)[8];
+
+        $r58[0] = 0;
+
+        $r58[1] = 3;
+
+        $r58[2] = 5;
+
+        $r58[3] = 5;
+
+        $r58[4] = 20;
+
+        $r58[5] = 0;
+
+        $r58[6] = 0;
+
+        $r58[7] = 1;
+
+        $r54[3] = $r58;
+
+        $r59 = newarray (byte)[8];
+
+        $r59[0] = 32;
+
+        $r59[1] = 3;
+
+        $r59[2] = 5;
+
+        $r59[3] = 5;
+
+        $r59[4] = 4;
+
+        $r59[5] = 32;
+
+        $r59[6] = 32;
+
+        $r59[7] = 1;
+
+        $r54[4] = $r59;
+
+        $r60 = newarray (byte)[8];
+
+        $r60[0] = 0;
+
+        $r60[1] = 3;
+
+        $r60[2] = 5;
+
+        $r60[3] = 5;
+
+        $r60[4] = 20;
+
+        $r60[5] = 0;
+
+        $r60[6] = 0;
+
+        $r60[7] = 2;
+
+        $r54[5] = $r60;
+
+        <sun.text.bidi.BidiBase: byte[][] impTabL_GROUP_NUMBERS_WITH_R> = $r54;
+
+        $r61 = newarray (byte[])[5];
+
+        $r62 = newarray (byte)[8];
+
+        $r62[0] = 2;
+
+        $r62[1] = 0;
+
+        $r62[2] = 1;
+
+        $r62[3] = 1;
+
+        $r62[4] = 0;
+
+        $r62[5] = 0;
+
+        $r62[6] = 0;
+
+        $r62[7] = 0;
+
+        $r61[0] = $r62;
+
+        $r63 = newarray (byte)[8];
+
+        $r63[0] = 2;
+
+        $r63[1] = 0;
+
+        $r63[2] = 1;
+
+        $r63[3] = 1;
+
+        $r63[4] = 0;
+
+        $r63[5] = 0;
+
+        $r63[6] = 0;
+
+        $r63[7] = 1;
+
+        $r61[1] = $r63;
+
+        $r64 = newarray (byte)[8];
+
+        $r64[0] = 2;
+
+        $r64[1] = 0;
+
+        $r64[2] = 20;
+
+        $r64[3] = 20;
+
+        $r64[4] = 19;
+
+        $r64[5] = 0;
+
+        $r64[6] = 0;
+
+        $r64[7] = 1;
+
+        $r61[2] = $r64;
+
+        $r65 = newarray (byte)[8];
+
+        $r65[0] = 34;
+
+        $r65[1] = 0;
+
+        $r65[2] = 4;
+
+        $r65[3] = 4;
+
+        $r65[4] = 3;
+
+        $r65[5] = 0;
+
+        $r65[6] = 0;
+
+        $r65[7] = 0;
+
+        $r61[3] = $r65;
+
+        $r66 = newarray (byte)[8];
+
+        $r66[0] = 34;
+
+        $r66[1] = 0;
+
+        $r66[2] = 4;
+
+        $r66[3] = 4;
+
+        $r66[4] = 3;
+
+        $r66[5] = 0;
+
+        $r66[6] = 0;
+
+        $r66[7] = 1;
+
+        $r61[4] = $r66;
+
+        <sun.text.bidi.BidiBase: byte[][] impTabR_GROUP_NUMBERS_WITH_R> = $r61;
+
+        $r67 = new sun.text.bidi.BidiBase$ImpTabPair;
+
+        $r71 = <sun.text.bidi.BidiBase: byte[][] impTabL_GROUP_NUMBERS_WITH_R>;
+
+        $r70 = <sun.text.bidi.BidiBase: byte[][] impTabR_GROUP_NUMBERS_WITH_R>;
+
+        $r69 = <sun.text.bidi.BidiBase: short[] impAct0>;
+
+        $r68 = <sun.text.bidi.BidiBase: short[] impAct0>;
+
+        specialinvoke $r67.<sun.text.bidi.BidiBase$ImpTabPair: void <init>(byte[][],byte[][],short[],short[])>($r71, $r70, $r69, $r68);
+
+        <sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$ImpTabPair impTab_GROUP_NUMBERS_WITH_R> = $r67;
+
+        $r72 = newarray (byte[])[6];
+
+        $r73 = newarray (byte)[8];
+
+        $r73[0] = 0;
+
+        $r73[1] = 1;
+
+        $r73[2] = 0;
+
+        $r73[3] = 0;
+
+        $r73[4] = 0;
+
+        $r73[5] = 0;
+
+        $r73[6] = 0;
+
+        $r73[7] = 0;
+
+        $r72[0] = $r73;
+
+        $r74 = newarray (byte)[8];
+
+        $r74[0] = 0;
+
+        $r74[1] = 1;
+
+        $r74[2] = 0;
+
+        $r74[3] = 0;
+
+        $r74[4] = 20;
+
+        $r74[5] = 20;
+
+        $r74[6] = 0;
+
+        $r74[7] = 1;
+
+        $r72[1] = $r74;
+
+        $r75 = newarray (byte)[8];
+
+        $r75[0] = 0;
+
+        $r75[1] = 1;
+
+        $r75[2] = 0;
+
+        $r75[3] = 0;
+
+        $r75[4] = 21;
+
+        $r75[5] = 21;
+
+        $r75[6] = 0;
+
+        $r75[7] = 2;
+
+        $r72[2] = $r75;
+
+        $r76 = newarray (byte)[8];
+
+        $r76[0] = 0;
+
+        $r76[1] = 1;
+
+        $r76[2] = 0;
+
+        $r76[3] = 0;
+
+        $r76[4] = 20;
+
+        $r76[5] = 20;
+
+        $r76[6] = 0;
+
+        $r76[7] = 2;
+
+        $r72[3] = $r76;
+
+        $r77 = newarray (byte)[8];
+
+        $r77[0] = 32;
+
+        $r77[1] = 1;
+
+        $r77[2] = 32;
+
+        $r77[3] = 32;
+
+        $r77[4] = 4;
+
+        $r77[5] = 4;
+
+        $r77[6] = 32;
+
+        $r77[7] = 1;
+
+        $r72[4] = $r77;
+
+        $r78 = newarray (byte)[8];
+
+        $r78[0] = 32;
+
+        $r78[1] = 1;
+
+        $r78[2] = 32;
+
+        $r78[3] = 32;
+
+        $r78[4] = 5;
+
+        $r78[5] = 5;
+
+        $r78[6] = 32;
+
+        $r78[7] = 1;
+
+        $r72[5] = $r78;
+
+        <sun.text.bidi.BidiBase: byte[][] impTabL_INVERSE_NUMBERS_AS_L> = $r72;
+
+        $r79 = newarray (byte[])[6];
+
+        $r80 = newarray (byte)[8];
+
+        $r80[0] = 1;
+
+        $r80[1] = 0;
+
+        $r80[2] = 1;
+
+        $r80[3] = 1;
+
+        $r80[4] = 0;
+
+        $r80[5] = 0;
+
+        $r80[6] = 0;
+
+        $r80[7] = 0;
+
+        $r79[0] = $r80;
+
+        $r81 = newarray (byte)[8];
+
+        $r81[0] = 1;
+
+        $r81[1] = 0;
+
+        $r81[2] = 1;
+
+        $r81[3] = 1;
+
+        $r81[4] = 20;
+
+        $r81[5] = 20;
+
+        $r81[6] = 0;
+
+        $r81[7] = 1;
+
+        $r79[1] = $r81;
+
+        $r82 = newarray (byte)[8];
+
+        $r82[0] = 1;
+
+        $r82[1] = 0;
+
+        $r82[2] = 1;
+
+        $r82[3] = 1;
+
+        $r82[4] = 0;
+
+        $r82[5] = 0;
+
+        $r82[6] = 0;
+
+        $r82[7] = 1;
+
+        $r79[2] = $r82;
+
+        $r83 = newarray (byte)[8];
+
+        $r83[0] = 1;
+
+        $r83[1] = 0;
+
+        $r83[2] = 1;
+
+        $r83[3] = 1;
+
+        $r83[4] = 5;
+
+        $r83[5] = 5;
+
+        $r83[6] = 0;
+
+        $r83[7] = 1;
+
+        $r79[3] = $r83;
+
+        $r84 = newarray (byte)[8];
+
+        $r84[0] = 33;
+
+        $r84[1] = 0;
+
+        $r84[2] = 33;
+
+        $r84[3] = 33;
+
+        $r84[4] = 4;
+
+        $r84[5] = 4;
+
+        $r84[6] = 0;
+
+        $r84[7] = 0;
+
+        $r79[4] = $r84;
+
+        $r85 = newarray (byte)[8];
+
+        $r85[0] = 1;
+
+        $r85[1] = 0;
+
+        $r85[2] = 1;
+
+        $r85[3] = 1;
+
+        $r85[4] = 5;
+
+        $r85[5] = 5;
+
+        $r85[6] = 0;
+
+        $r85[7] = 0;
+
+        $r79[5] = $r85;
+
+        <sun.text.bidi.BidiBase: byte[][] impTabR_INVERSE_NUMBERS_AS_L> = $r79;
+
+        $r86 = new sun.text.bidi.BidiBase$ImpTabPair;
+
+        $r90 = <sun.text.bidi.BidiBase: byte[][] impTabL_INVERSE_NUMBERS_AS_L>;
+
+        $r89 = <sun.text.bidi.BidiBase: byte[][] impTabR_INVERSE_NUMBERS_AS_L>;
+
+        $r88 = <sun.text.bidi.BidiBase: short[] impAct0>;
+
+        $r87 = <sun.text.bidi.BidiBase: short[] impAct0>;
+
+        specialinvoke $r86.<sun.text.bidi.BidiBase$ImpTabPair: void <init>(byte[][],byte[][],short[],short[])>($r90, $r89, $r88, $r87);
+
+        <sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$ImpTabPair impTab_INVERSE_NUMBERS_AS_L> = $r86;
+
+        $r91 = newarray (byte[])[7];
+
+        $r92 = newarray (byte)[8];
+
+        $r92[0] = 1;
+
+        $r92[1] = 0;
+
+        $r92[2] = 2;
+
+        $r92[3] = 2;
+
+        $r92[4] = 0;
+
+        $r92[5] = 0;
+
+        $r92[6] = 0;
+
+        $r92[7] = 0;
+
+        $r91[0] = $r92;
+
+        $r93 = newarray (byte)[8];
+
+        $r93[0] = 1;
+
+        $r93[1] = 0;
+
+        $r93[2] = 1;
+
+        $r93[3] = 2;
+
+        $r93[4] = 19;
+
+        $r93[5] = 19;
+
+        $r93[6] = 0;
+
+        $r93[7] = 1;
+
+        $r91[1] = $r93;
+
+        $r94 = newarray (byte)[8];
+
+        $r94[0] = 1;
+
+        $r94[1] = 0;
+
+        $r94[2] = 2;
+
+        $r94[3] = 2;
+
+        $r94[4] = 0;
+
+        $r94[5] = 0;
+
+        $r94[6] = 0;
+
+        $r94[7] = 1;
+
+        $r91[2] = $r94;
+
+        $r95 = newarray (byte)[8];
+
+        $r95[0] = 33;
+
+        $r95[1] = 48;
+
+        $r95[2] = 6;
+
+        $r95[3] = 4;
+
+        $r95[4] = 3;
+
+        $r95[5] = 3;
+
+        $r95[6] = 48;
+
+        $r95[7] = 0;
+
+        $r91[3] = $r95;
+
+        $r96 = newarray (byte)[8];
+
+        $r96[0] = 33;
+
+        $r96[1] = 48;
+
+        $r96[2] = 6;
+
+        $r96[3] = 4;
+
+        $r96[4] = 5;
+
+        $r96[5] = 5;
+
+        $r96[6] = 48;
+
+        $r96[7] = 3;
+
+        $r91[4] = $r96;
+
+        $r97 = newarray (byte)[8];
+
+        $r97[0] = 33;
+
+        $r97[1] = 48;
+
+        $r97[2] = 6;
+
+        $r97[3] = 4;
+
+        $r97[4] = 5;
+
+        $r97[5] = 5;
+
+        $r97[6] = 48;
+
+        $r97[7] = 2;
+
+        $r91[5] = $r97;
+
+        $r98 = newarray (byte)[8];
+
+        $r98[0] = 33;
+
+        $r98[1] = 48;
+
+        $r98[2] = 6;
+
+        $r98[3] = 4;
+
+        $r98[4] = 3;
+
+        $r98[5] = 3;
+
+        $r98[6] = 48;
+
+        $r98[7] = 1;
+
+        $r91[6] = $r98;
+
+        <sun.text.bidi.BidiBase: byte[][] impTabR_INVERSE_LIKE_DIRECT> = $r91;
+
+        $r99 = newarray (short)[4];
+
+        $r99[0] = 0;
+
+        $r99[1] = 1;
+
+        $r99[2] = 11;
+
+        $r99[3] = 12;
+
+        <sun.text.bidi.BidiBase: short[] impAct1> = $r99;
+
+        $r100 = new sun.text.bidi.BidiBase$ImpTabPair;
+
+        $r104 = <sun.text.bidi.BidiBase: byte[][] impTabL_DEFAULT>;
+
+        $r103 = <sun.text.bidi.BidiBase: byte[][] impTabR_INVERSE_LIKE_DIRECT>;
+
+        $r102 = <sun.text.bidi.BidiBase: short[] impAct0>;
+
+        $r101 = <sun.text.bidi.BidiBase: short[] impAct1>;
+
+        specialinvoke $r100.<sun.text.bidi.BidiBase$ImpTabPair: void <init>(byte[][],byte[][],short[],short[])>($r104, $r103, $r102, $r101);
+
+        <sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$ImpTabPair impTab_INVERSE_LIKE_DIRECT> = $r100;
+
+        $r105 = newarray (byte[])[7];
+
+        $r106 = newarray (byte)[8];
+
+        $r106[0] = 0;
+
+        $r106[1] = 99;
+
+        $r106[2] = 0;
+
+        $r106[3] = 1;
+
+        $r106[4] = 0;
+
+        $r106[5] = 0;
+
+        $r106[6] = 0;
+
+        $r106[7] = 0;
+
+        $r105[0] = $r106;
+
+        $r107 = newarray (byte)[8];
+
+        $r107[0] = 0;
+
+        $r107[1] = 99;
+
+        $r107[2] = 0;
+
+        $r107[3] = 1;
+
+        $r107[4] = 18;
+
+        $r107[5] = 48;
+
+        $r107[6] = 0;
+
+        $r107[7] = 4;
+
+        $r105[1] = $r107;
+
+        $r108 = newarray (byte)[8];
+
+        $r108[0] = 32;
+
+        $r108[1] = 99;
+
+        $r108[2] = 32;
+
+        $r108[3] = 1;
+
+        $r108[4] = 2;
+
+        $r108[5] = 48;
+
+        $r108[6] = 32;
+
+        $r108[7] = 3;
+
+        $r105[2] = $r108;
+
+        $r109 = newarray (byte)[8];
+
+        $r109[0] = 0;
+
+        $r109[1] = 99;
+
+        $r109[2] = 85;
+
+        $r109[3] = 86;
+
+        $r109[4] = 20;
+
+        $r109[5] = 48;
+
+        $r109[6] = 0;
+
+        $r109[7] = 3;
+
+        $r105[3] = $r109;
+
+        $r110 = newarray (byte)[8];
+
+        $r110[0] = 48;
+
+        $r110[1] = 67;
+
+        $r110[2] = 85;
+
+        $r110[3] = 86;
+
+        $r110[4] = 4;
+
+        $r110[5] = 48;
+
+        $r110[6] = 48;
+
+        $r110[7] = 3;
+
+        $r105[4] = $r110;
+
+        $r111 = newarray (byte)[8];
+
+        $r111[0] = 48;
+
+        $r111[1] = 67;
+
+        $r111[2] = 5;
+
+        $r111[3] = 86;
+
+        $r111[4] = 20;
+
+        $r111[5] = 48;
+
+        $r111[6] = 48;
+
+        $r111[7] = 4;
+
+        $r105[5] = $r111;
+
+        $r112 = newarray (byte)[8];
+
+        $r112[0] = 48;
+
+        $r112[1] = 67;
+
+        $r112[2] = 85;
+
+        $r112[3] = 6;
+
+        $r112[4] = 20;
+
+        $r112[5] = 48;
+
+        $r112[6] = 48;
+
+        $r112[7] = 4;
+
+        $r105[6] = $r112;
+
+        <sun.text.bidi.BidiBase: byte[][] impTabL_INVERSE_LIKE_DIRECT_WITH_MARKS> = $r105;
+
+        $r113 = newarray (byte[])[7];
+
+        $r114 = newarray (byte)[8];
+
+        $r114[0] = 19;
+
+        $r114[1] = 0;
+
+        $r114[2] = 1;
+
+        $r114[3] = 1;
+
+        $r114[4] = 0;
+
+        $r114[5] = 0;
+
+        $r114[6] = 0;
+
+        $r114[7] = 0;
+
+        $r113[0] = $r114;
+
+        $r115 = newarray (byte)[8];
+
+        $r115[0] = 35;
+
+        $r115[1] = 0;
+
+        $r115[2] = 1;
+
+        $r115[3] = 1;
+
+        $r115[4] = 2;
+
+        $r115[5] = 64;
+
+        $r115[6] = 0;
+
+        $r115[7] = 1;
+
+        $r113[1] = $r115;
+
+        $r116 = newarray (byte)[8];
+
+        $r116[0] = 35;
+
+        $r116[1] = 0;
+
+        $r116[2] = 1;
+
+        $r116[3] = 1;
+
+        $r116[4] = 2;
+
+        $r116[5] = 64;
+
+        $r116[6] = 0;
+
+        $r116[7] = 0;
+
+        $r113[2] = $r116;
+
+        $r117 = newarray (byte)[8];
+
+        $r117[0] = 3;
+
+        $r117[1] = 0;
+
+        $r117[2] = 3;
+
+        $r117[3] = 54;
+
+        $r117[4] = 20;
+
+        $r117[5] = 64;
+
+        $r117[6] = 0;
+
+        $r117[7] = 1;
+
+        $r113[3] = $r117;
+
+        $r118 = newarray (byte)[8];
+
+        $r118[0] = 83;
+
+        $r118[1] = 64;
+
+        $r118[2] = 5;
+
+        $r118[3] = 54;
+
+        $r118[4] = 4;
+
+        $r118[5] = 64;
+
+        $r118[6] = 64;
+
+        $r118[7] = 0;
+
+        $r113[4] = $r118;
+
+        $r119 = newarray (byte)[8];
+
+        $r119[0] = 83;
+
+        $r119[1] = 64;
+
+        $r119[2] = 5;
+
+        $r119[3] = 54;
+
+        $r119[4] = 4;
+
+        $r119[5] = 64;
+
+        $r119[6] = 64;
+
+        $r119[7] = 1;
+
+        $r113[5] = $r119;
+
+        $r120 = newarray (byte)[8];
+
+        $r120[0] = 83;
+
+        $r120[1] = 64;
+
+        $r120[2] = 6;
+
+        $r120[3] = 6;
+
+        $r120[4] = 4;
+
+        $r120[5] = 64;
+
+        $r120[6] = 64;
+
+        $r120[7] = 3;
+
+        $r113[6] = $r120;
+
+        <sun.text.bidi.BidiBase: byte[][] impTabR_INVERSE_LIKE_DIRECT_WITH_MARKS> = $r113;
+
+        $r121 = newarray (short)[6];
+
+        $r121[0] = 0;
+
+        $r121[1] = 1;
+
+        $r121[2] = 7;
+
+        $r121[3] = 8;
+
+        $r121[4] = 9;
+
+        $r121[5] = 10;
+
+        <sun.text.bidi.BidiBase: short[] impAct2> = $r121;
+
+        $r122 = new sun.text.bidi.BidiBase$ImpTabPair;
+
+        $r126 = <sun.text.bidi.BidiBase: byte[][] impTabL_INVERSE_LIKE_DIRECT_WITH_MARKS>;
+
+        $r125 = <sun.text.bidi.BidiBase: byte[][] impTabR_INVERSE_LIKE_DIRECT_WITH_MARKS>;
+
+        $r124 = <sun.text.bidi.BidiBase: short[] impAct0>;
+
+        $r123 = <sun.text.bidi.BidiBase: short[] impAct2>;
+
+        specialinvoke $r122.<sun.text.bidi.BidiBase$ImpTabPair: void <init>(byte[][],byte[][],short[],short[])>($r126, $r125, $r124, $r123);
+
+        <sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$ImpTabPair impTab_INVERSE_LIKE_DIRECT_WITH_MARKS> = $r122;
+
+        $r127 = new sun.text.bidi.BidiBase$ImpTabPair;
+
+        $r131 = <sun.text.bidi.BidiBase: byte[][] impTabL_NUMBERS_SPECIAL>;
+
+        $r130 = <sun.text.bidi.BidiBase: byte[][] impTabR_INVERSE_LIKE_DIRECT>;
+
+        $r129 = <sun.text.bidi.BidiBase: short[] impAct0>;
+
+        $r128 = <sun.text.bidi.BidiBase: short[] impAct1>;
+
+        specialinvoke $r127.<sun.text.bidi.BidiBase$ImpTabPair: void <init>(byte[][],byte[][],short[],short[])>($r131, $r130, $r129, $r128);
+
+        <sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$ImpTabPair impTab_INVERSE_FOR_NUMBERS_SPECIAL> = $r127;
+
+        $r132 = newarray (byte[])[5];
+
+        $r133 = newarray (byte)[8];
+
+        $r133[0] = 0;
+
+        $r133[1] = 98;
+
+        $r133[2] = 1;
+
+        $r133[3] = 1;
+
+        $r133[4] = 0;
+
+        $r133[5] = 0;
+
+        $r133[6] = 0;
+
+        $r133[7] = 0;
+
+        $r132[0] = $r133;
+
+        $r134 = newarray (byte)[8];
+
+        $r134[0] = 0;
+
+        $r134[1] = 98;
+
+        $r134[2] = 1;
+
+        $r134[3] = 1;
+
+        $r134[4] = 0;
+
+        $r134[5] = 48;
+
+        $r134[6] = 0;
+
+        $r134[7] = 4;
+
+        $r132[1] = $r134;
+
+        $r135 = newarray (byte)[8];
+
+        $r135[0] = 0;
+
+        $r135[1] = 98;
+
+        $r135[2] = 84;
+
+        $r135[3] = 84;
+
+        $r135[4] = 19;
+
+        $r135[5] = 48;
+
+        $r135[6] = 0;
+
+        $r135[7] = 3;
+
+        $r132[2] = $r135;
+
+        $r136 = newarray (byte)[8];
+
+        $r136[0] = 48;
+
+        $r136[1] = 66;
+
+        $r136[2] = 84;
+
+        $r136[3] = 84;
+
+        $r136[4] = 3;
+
+        $r136[5] = 48;
+
+        $r136[6] = 48;
+
+        $r136[7] = 3;
+
+        $r132[3] = $r136;
+
+        $r137 = newarray (byte)[8];
+
+        $r137[0] = 48;
+
+        $r137[1] = 66;
+
+        $r137[2] = 4;
+
+        $r137[3] = 4;
+
+        $r137[4] = 19;
+
+        $r137[5] = 48;
+
+        $r137[6] = 48;
+
+        $r137[7] = 4;
+
+        $r132[4] = $r137;
+
+        <sun.text.bidi.BidiBase: byte[][] impTabL_INVERSE_FOR_NUMBERS_SPECIAL_WITH_MARKS> = $r132;
+
+        $r138 = new sun.text.bidi.BidiBase$ImpTabPair;
+
+        $r142 = <sun.text.bidi.BidiBase: byte[][] impTabL_INVERSE_FOR_NUMBERS_SPECIAL_WITH_MARKS>;
+
+        $r141 = <sun.text.bidi.BidiBase: byte[][] impTabR_INVERSE_LIKE_DIRECT_WITH_MARKS>;
+
+        $r140 = <sun.text.bidi.BidiBase: short[] impAct0>;
+
+        $r139 = <sun.text.bidi.BidiBase: short[] impAct2>;
+
+        specialinvoke $r138.<sun.text.bidi.BidiBase$ImpTabPair: void <init>(byte[][],byte[][],short[],short[])>($r142, $r141, $r140, $r139);
+
+        <sun.text.bidi.BidiBase: sun.text.bidi.BidiBase$ImpTabPair impTab_INVERSE_FOR_NUMBERS_SPECIAL_WITH_MARKS> = $r138;
+
+        return;
+    }
+}

@@ -1,0 +1,571 @@
+public final class sun.awt.Win32FontManager extends sun.font.SunFontManager
+{
+    private static sun.font.TrueTypeFont eudcFont;
+    static java.lang.String fontsForPrinting;
+
+    private static native java.lang.String getEUDCFontFile();
+
+    public sun.font.TrueTypeFont getEUDCFont()
+    {
+        sun.font.TrueTypeFont $r0;
+        sun.awt.Win32FontManager r1;
+
+        r1 := @this: sun.awt.Win32FontManager;
+
+        $r0 = <sun.awt.Win32FontManager: sun.font.TrueTypeFont eudcFont>;
+
+        return $r0;
+    }
+
+    public void <init>()
+    {
+        sun.awt.Win32FontManager$2 $r1;
+        sun.awt.Win32FontManager r0;
+
+        r0 := @this: sun.awt.Win32FontManager;
+
+        specialinvoke r0.<sun.font.SunFontManager: void <init>()>();
+
+        $r1 = new sun.awt.Win32FontManager$2;
+
+        specialinvoke $r1.<sun.awt.Win32FontManager$2: void <init>(sun.awt.Win32FontManager)>(r0);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        return;
+    }
+
+    protected boolean useAbsoluteFontFileNames()
+    {
+        sun.awt.Win32FontManager r0;
+
+        r0 := @this: sun.awt.Win32FontManager;
+
+        return 0;
+    }
+
+    protected void registerFontFile(java.lang.String, java.lang.String[], int, boolean)
+    {
+        byte b1, b2;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, z6, $z7, z8, z9;
+        java.lang.StringBuilder $r7, $r9, $r11, $r13;
+        java.io.FilenameFilter $r4, $r5;
+        java.lang.String[] r21;
+        java.util.HashSet $r2, $r3;
+        java.util.StringTokenizer $r15;
+        int i0;
+        java.lang.String r1, $r6, $r8, $r10, $r12, $r14, $r16, $r17, $r18, $r20, $r22;
+        java.util.NoSuchElementException $r23;
+        java.io.PrintStream $r24;
+        sun.awt.Win32FontManager r0;
+        java.io.File $r19;
+
+        r0 := @this: sun.awt.Win32FontManager;
+
+        r1 := @parameter0: java.lang.String;
+
+        r21 := @parameter1: java.lang.String[];
+
+        i0 := @parameter2: int;
+
+        z6 := @parameter3: boolean;
+
+        $r2 = r0.<sun.awt.Win32FontManager: java.util.HashSet registeredFontFiles>;
+
+        $z0 = virtualinvoke $r2.<java.util.HashSet: boolean contains(java.lang.Object)>(r1);
+
+        if $z0 == 0 goto label01;
+
+        return;
+
+     label01:
+        $r3 = r0.<sun.awt.Win32FontManager: java.util.HashSet registeredFontFiles>;
+
+        virtualinvoke $r3.<java.util.HashSet: boolean add(java.lang.Object)>(r1);
+
+        $r4 = virtualinvoke r0.<sun.awt.Win32FontManager: java.io.FilenameFilter getTrueTypeFilter()>();
+
+        $z1 = interfaceinvoke $r4.<java.io.FilenameFilter: boolean accept(java.io.File,java.lang.String)>(null, r1);
+
+        if $z1 == 0 goto label02;
+
+        z8 = 0;
+
+        b2 = 0;
+
+        b1 = 0;
+
+        goto label04;
+
+     label02:
+        $r5 = virtualinvoke r0.<sun.awt.Win32FontManager: java.io.FilenameFilter getType1Filter()>();
+
+        $z2 = interfaceinvoke $r5.<java.io.FilenameFilter: boolean accept(java.io.File,java.lang.String)>(null, r1);
+
+        if $z2 == 0 goto label03;
+
+        z8 = 1;
+
+        b2 = 1;
+
+        b1 = 1;
+
+        goto label04;
+
+     label03:
+        return;
+
+     label04:
+        $r6 = r0.<sun.awt.Win32FontManager: java.lang.String fontPath>;
+
+        if $r6 != null goto label05;
+
+        $z7 = <sun.awt.Win32FontManager: boolean noType1Font>;
+
+        $r22 = virtualinvoke r0.<sun.awt.Win32FontManager: java.lang.String getPlatformFontPath(boolean)>($z7);
+
+        r0.<sun.awt.Win32FontManager: java.lang.String fontPath> = $r22;
+
+     label05:
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = <sun.awt.Win32FontManager: java.lang.String jreFontDirName>;
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = <java.io.File: java.lang.String pathSeparator>;
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = r0.<sun.awt.Win32FontManager: java.lang.String fontPath>;
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r15 = new java.util.StringTokenizer;
+
+        $r16 = <java.io.File: java.lang.String pathSeparator>;
+
+        specialinvoke $r15.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>($r14, $r16);
+
+        z9 = 0;
+
+     label06:
+        $z3 = virtualinvoke $r15.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z3 == 0 goto label09;
+
+        $r17 = virtualinvoke $r15.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $r18 = <sun.awt.Win32FontManager: java.lang.String jreFontDirName>;
+
+        $z4 = virtualinvoke $r17.<java.lang.String: boolean equals(java.lang.Object)>($r18);
+
+        $r19 = new java.io.File;
+
+        specialinvoke $r19.<java.io.File: void <init>(java.lang.String,java.lang.String)>($r17, r1);
+
+        $z5 = virtualinvoke $r19.<java.io.File: boolean canRead()>();
+
+        if $z5 == 0 goto label08;
+
+        z9 = 1;
+
+        $r20 = virtualinvoke $r19.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        if z6 == 0 goto label07;
+
+        virtualinvoke r0.<sun.awt.Win32FontManager: void registerDeferredFont(java.lang.String,java.lang.String,java.lang.String[],int,boolean,int)>(r1, $r20, r21, b1, $z4, i0);
+
+        goto label09;
+
+     label07:
+        virtualinvoke r0.<sun.awt.Win32FontManager: sun.font.PhysicalFont registerFontFile(java.lang.String,java.lang.String[],int,boolean,int)>($r20, r21, b2, $z4, i0);
+
+        goto label09;
+
+     label08:
+        goto label06;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r23 := @caughtexception;
+
+        $r24 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r24.<java.io.PrintStream: void println(java.lang.Object)>($r23);
+
+     label11:
+        if z9 != 0 goto label12;
+
+        virtualinvoke r0.<sun.awt.Win32FontManager: void addToMissingFontFileList(java.lang.String)>(r1);
+
+     label12:
+        return;
+
+        catch java.util.NoSuchElementException from label06 to label09 with label10;
+    }
+
+    protected sun.awt.FontConfiguration createFontConfiguration()
+    {
+        sun.awt.windows.WFontConfiguration $r0;
+        sun.awt.Win32FontManager r1;
+
+        r1 := @this: sun.awt.Win32FontManager;
+
+        $r0 = new sun.awt.windows.WFontConfiguration;
+
+        specialinvoke $r0.<sun.awt.windows.WFontConfiguration: void <init>(sun.font.SunFontManager)>(r1);
+
+        virtualinvoke $r0.<sun.awt.FontConfiguration: boolean init()>();
+
+        return $r0;
+    }
+
+    public sun.awt.FontConfiguration createFontConfiguration(boolean, boolean)
+    {
+        sun.awt.windows.WFontConfiguration $r0;
+        sun.awt.Win32FontManager r1;
+        boolean z0, z1;
+
+        r1 := @this: sun.awt.Win32FontManager;
+
+        z0 := @parameter0: boolean;
+
+        z1 := @parameter1: boolean;
+
+        $r0 = new sun.awt.windows.WFontConfiguration;
+
+        specialinvoke $r0.<sun.awt.windows.WFontConfiguration: void <init>(sun.font.SunFontManager,boolean,boolean)>(r1, z0, z1);
+
+        return $r0;
+    }
+
+    protected void populateFontFileNameMap(java.util.HashMap, java.util.HashMap, java.util.HashMap, java.util.Locale)
+    {
+        java.util.Locale r3;
+        sun.awt.Win32FontManager r4;
+        java.util.HashMap r0, r1, r2;
+
+        r4 := @this: sun.awt.Win32FontManager;
+
+        r0 := @parameter0: java.util.HashMap;
+
+        r1 := @parameter1: java.util.HashMap;
+
+        r2 := @parameter2: java.util.HashMap;
+
+        r3 := @parameter3: java.util.Locale;
+
+        staticinvoke <sun.awt.Win32FontManager: void populateFontFileNameMap0(java.util.HashMap,java.util.HashMap,java.util.HashMap,java.util.Locale)>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    private static native void populateFontFileNameMap0(java.util.HashMap, java.util.HashMap, java.util.HashMap, java.util.Locale);
+
+    protected synchronized native java.lang.String getFontPath(boolean);
+
+    protected java.lang.String[] getDefaultPlatformFont()
+    {
+        sun.awt.Win32FontManager r1;
+        java.lang.String[] r0, $r2;
+        sun.awt.Win32FontManager$3 $r11;
+        int $i0;
+        java.lang.StringBuilder $r4, $r6, $r8, $r9;
+        java.lang.Object $r12;
+        java.lang.String $r3, $r5, $r7, $r10, r13;
+
+        r1 := @this: sun.awt.Win32FontManager;
+
+        r0 = newarray (java.lang.String)[2];
+
+        r0[0] = "Arial";
+
+        r0[1] = "c:\\windows\\fonts";
+
+        $r2 = virtualinvoke r1.<sun.awt.Win32FontManager: java.lang.String[] getPlatformFontDirs(boolean)>(1);
+
+        $i0 = lengthof $r2;
+
+        if $i0 <= 1 goto label2;
+
+        $r11 = new sun.awt.Win32FontManager$3;
+
+        specialinvoke $r11.<sun.awt.Win32FontManager$3: void <init>(sun.awt.Win32FontManager,java.lang.String[])>(r1, $r2);
+
+        $r12 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r11);
+
+        r13 = (java.lang.String) $r12;
+
+        if r13 == null goto label1;
+
+        r0[1] = r13;
+
+     label1:
+        goto label3;
+
+     label2:
+        $r3 = $r2[0];
+
+        r0[1] = $r3;
+
+     label3:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = r0[1];
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = <java.io.File: java.lang.String separator>;
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("arial.ttf");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r0[1] = $r10;
+
+        return r0;
+    }
+
+    protected void registerJREFontsWithPlatform(java.lang.String)
+    {
+        java.lang.String r0;
+        sun.awt.Win32FontManager r1;
+
+        r1 := @this: sun.awt.Win32FontManager;
+
+        r0 := @parameter0: java.lang.String;
+
+        <sun.awt.Win32FontManager: java.lang.String fontsForPrinting> = r0;
+
+        return;
+    }
+
+    public static void registerJREFontsForPrinting()
+    {
+        java.lang.Throwable $r3;
+        sun.awt.Win32FontManager$4 $r2;
+        java.lang.String $r0, r1;
+
+        entermonitor class "Lsun/awt/Win32GraphicsEnvironment;";
+
+     label1:
+        staticinvoke <java.awt.GraphicsEnvironment: java.awt.GraphicsEnvironment getLocalGraphicsEnvironment()>();
+
+        $r0 = <sun.awt.Win32FontManager: java.lang.String fontsForPrinting>;
+
+        if $r0 != null goto label3;
+
+        exitmonitor class "Lsun/awt/Win32GraphicsEnvironment;";
+
+     label2:
+        return;
+
+     label3:
+        r1 = <sun.awt.Win32FontManager: java.lang.String fontsForPrinting>;
+
+        <sun.awt.Win32FontManager: java.lang.String fontsForPrinting> = null;
+
+        exitmonitor class "Lsun/awt/Win32GraphicsEnvironment;";
+
+     label4:
+        goto label7;
+
+     label5:
+        $r3 := @caughtexception;
+
+        exitmonitor class "Lsun/awt/Win32GraphicsEnvironment;";
+
+     label6:
+        throw $r3;
+
+     label7:
+        $r2 = new sun.awt.Win32FontManager$4;
+
+        specialinvoke $r2.<sun.awt.Win32FontManager$4: void <init>(java.lang.String)>(r1);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    protected static native void registerFontWithPlatform(java.lang.String);
+
+    protected static native void deRegisterFontWithPlatform(java.lang.String);
+
+    public java.util.HashMap populateHardcodedFileNameMap()
+    {
+        sun.awt.Win32FontManager r7;
+        java.util.HashMap $r0;
+        sun.font.SunFontManager$FamilyDescription $r1, $r2, $r3, $r4, $r5, $r6;
+
+        r7 := @this: sun.awt.Win32FontManager;
+
+        $r0 = new java.util.HashMap;
+
+        specialinvoke $r0.<java.util.HashMap: void <init>()>();
+
+        $r1 = new sun.font.SunFontManager$FamilyDescription;
+
+        specialinvoke $r1.<sun.font.SunFontManager$FamilyDescription: void <init>()>();
+
+        $r1.<sun.font.SunFontManager$FamilyDescription: java.lang.String familyName> = "Segoe UI";
+
+        $r1.<sun.font.SunFontManager$FamilyDescription: java.lang.String plainFullName> = "Segoe UI";
+
+        $r1.<sun.font.SunFontManager$FamilyDescription: java.lang.String plainFileName> = "segoeui.ttf";
+
+        $r1.<sun.font.SunFontManager$FamilyDescription: java.lang.String boldFullName> = "Segoe UI Bold";
+
+        $r1.<sun.font.SunFontManager$FamilyDescription: java.lang.String boldFileName> = "segoeuib.ttf";
+
+        $r1.<sun.font.SunFontManager$FamilyDescription: java.lang.String italicFullName> = "Segoe UI Italic";
+
+        $r1.<sun.font.SunFontManager$FamilyDescription: java.lang.String italicFileName> = "segoeuii.ttf";
+
+        $r1.<sun.font.SunFontManager$FamilyDescription: java.lang.String boldItalicFullName> = "Segoe UI Bold Italic";
+
+        $r1.<sun.font.SunFontManager$FamilyDescription: java.lang.String boldItalicFileName> = "segoeuiz.ttf";
+
+        virtualinvoke $r0.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("segoe", $r1);
+
+        $r2 = new sun.font.SunFontManager$FamilyDescription;
+
+        specialinvoke $r2.<sun.font.SunFontManager$FamilyDescription: void <init>()>();
+
+        $r2.<sun.font.SunFontManager$FamilyDescription: java.lang.String familyName> = "Tahoma";
+
+        $r2.<sun.font.SunFontManager$FamilyDescription: java.lang.String plainFullName> = "Tahoma";
+
+        $r2.<sun.font.SunFontManager$FamilyDescription: java.lang.String plainFileName> = "tahoma.ttf";
+
+        $r2.<sun.font.SunFontManager$FamilyDescription: java.lang.String boldFullName> = "Tahoma Bold";
+
+        $r2.<sun.font.SunFontManager$FamilyDescription: java.lang.String boldFileName> = "tahomabd.ttf";
+
+        virtualinvoke $r0.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("tahoma", $r2);
+
+        $r3 = new sun.font.SunFontManager$FamilyDescription;
+
+        specialinvoke $r3.<sun.font.SunFontManager$FamilyDescription: void <init>()>();
+
+        $r3.<sun.font.SunFontManager$FamilyDescription: java.lang.String familyName> = "Verdana";
+
+        $r3.<sun.font.SunFontManager$FamilyDescription: java.lang.String plainFullName> = "Verdana";
+
+        $r3.<sun.font.SunFontManager$FamilyDescription: java.lang.String plainFileName> = "verdana.TTF";
+
+        $r3.<sun.font.SunFontManager$FamilyDescription: java.lang.String boldFullName> = "Verdana Bold";
+
+        $r3.<sun.font.SunFontManager$FamilyDescription: java.lang.String boldFileName> = "verdanab.TTF";
+
+        $r3.<sun.font.SunFontManager$FamilyDescription: java.lang.String italicFullName> = "Verdana Italic";
+
+        $r3.<sun.font.SunFontManager$FamilyDescription: java.lang.String italicFileName> = "verdanai.TTF";
+
+        $r3.<sun.font.SunFontManager$FamilyDescription: java.lang.String boldItalicFullName> = "Verdana Bold Italic";
+
+        $r3.<sun.font.SunFontManager$FamilyDescription: java.lang.String boldItalicFileName> = "verdanaz.TTF";
+
+        virtualinvoke $r0.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("verdana", $r3);
+
+        $r4 = new sun.font.SunFontManager$FamilyDescription;
+
+        specialinvoke $r4.<sun.font.SunFontManager$FamilyDescription: void <init>()>();
+
+        $r4.<sun.font.SunFontManager$FamilyDescription: java.lang.String familyName> = "Arial";
+
+        $r4.<sun.font.SunFontManager$FamilyDescription: java.lang.String plainFullName> = "Arial";
+
+        $r4.<sun.font.SunFontManager$FamilyDescription: java.lang.String plainFileName> = "ARIAL.TTF";
+
+        $r4.<sun.font.SunFontManager$FamilyDescription: java.lang.String boldFullName> = "Arial Bold";
+
+        $r4.<sun.font.SunFontManager$FamilyDescription: java.lang.String boldFileName> = "ARIALBD.TTF";
+
+        $r4.<sun.font.SunFontManager$FamilyDescription: java.lang.String italicFullName> = "Arial Italic";
+
+        $r4.<sun.font.SunFontManager$FamilyDescription: java.lang.String italicFileName> = "ARIALI.TTF";
+
+        $r4.<sun.font.SunFontManager$FamilyDescription: java.lang.String boldItalicFullName> = "Arial Bold Italic";
+
+        $r4.<sun.font.SunFontManager$FamilyDescription: java.lang.String boldItalicFileName> = "ARIALBI.TTF";
+
+        virtualinvoke $r0.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("arial", $r4);
+
+        $r5 = new sun.font.SunFontManager$FamilyDescription;
+
+        specialinvoke $r5.<sun.font.SunFontManager$FamilyDescription: void <init>()>();
+
+        $r5.<sun.font.SunFontManager$FamilyDescription: java.lang.String familyName> = "Symbol";
+
+        $r5.<sun.font.SunFontManager$FamilyDescription: java.lang.String plainFullName> = "Symbol";
+
+        $r5.<sun.font.SunFontManager$FamilyDescription: java.lang.String plainFileName> = "Symbol.TTF";
+
+        virtualinvoke $r0.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("symbol", $r5);
+
+        $r6 = new sun.font.SunFontManager$FamilyDescription;
+
+        specialinvoke $r6.<sun.font.SunFontManager$FamilyDescription: void <init>()>();
+
+        $r6.<sun.font.SunFontManager$FamilyDescription: java.lang.String familyName> = "WingDings";
+
+        $r6.<sun.font.SunFontManager$FamilyDescription: java.lang.String plainFullName> = "WingDings";
+
+        $r6.<sun.font.SunFontManager$FamilyDescription: java.lang.String plainFileName> = "WINGDING.TTF";
+
+        virtualinvoke $r0.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("wingdings", $r6);
+
+        return $r0;
+    }
+
+    static java.lang.String access$000()
+    {
+        java.lang.String $r0;
+
+        $r0 = staticinvoke <sun.awt.Win32FontManager: java.lang.String getEUDCFontFile()>();
+
+        return $r0;
+    }
+
+    static sun.font.TrueTypeFont access$102(sun.font.TrueTypeFont)
+    {
+        sun.font.TrueTypeFont r0;
+
+        r0 := @parameter0: sun.font.TrueTypeFont;
+
+        <sun.awt.Win32FontManager: sun.font.TrueTypeFont eudcFont> = r0;
+
+        return r0;
+    }
+
+    static void <clinit>()
+    {
+        sun.awt.Win32FontManager$1 $r0;
+
+        $r0 = new sun.awt.Win32FontManager$1;
+
+        specialinvoke $r0.<sun.awt.Win32FontManager$1: void <init>()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        <sun.awt.Win32FontManager: java.lang.String fontsForPrinting> = null;
+
+        return;
+    }
+}

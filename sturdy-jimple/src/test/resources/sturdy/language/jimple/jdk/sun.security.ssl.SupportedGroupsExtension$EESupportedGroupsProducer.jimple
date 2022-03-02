@@ -1,0 +1,256 @@
+final class sun.security.ssl.SupportedGroupsExtension$EESupportedGroupsProducer extends sun.security.ssl.SupportedGroupsExtension$SupportedGroups implements sun.security.ssl.HandshakeProducer
+{
+
+    private void <init>()
+    {
+        sun.security.ssl.SupportedGroupsExtension$EESupportedGroupsProducer r0;
+
+        r0 := @this: sun.security.ssl.SupportedGroupsExtension$EESupportedGroupsProducer;
+
+        specialinvoke r0.<sun.security.ssl.SupportedGroupsExtension$SupportedGroups: void <init>()>();
+
+        return;
+    }
+
+    public byte[] produce(sun.security.ssl.ConnectionContext, sun.security.ssl.SSLHandshake$HandshakeMessage) throws java.io.IOException
+    {
+        byte[] r38;
+        sun.security.ssl.SSLHandshake$HandshakeMessage r35;
+        sun.security.ssl.SupportedGroupsExtension$NamedGroupType $r31, $r32;
+        java.nio.ByteBuffer $r6;
+        java.util.Map $r12, $r27;
+        sun.security.ssl.SSLConfiguration $r3;
+        java.util.EnumSet $r26;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12;
+        sun.security.ssl.ServerHandshakeContext r1;
+        java.security.CryptoPrimitive $r24;
+        sun.security.ssl.SupportedGroupsExtension$NamedGroup[] $r5, r36;
+        java.util.List $r9, $r16, $r23;
+        java.lang.StringBuilder $r17, $r18, $r20;
+        sun.security.ssl.SupportedGroupsExtension$NamedGroup r14, r37;
+        sun.security.ssl.SupportedGroupsExtension$EESupportedGroupsProducer r34;
+        sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec $r10;
+        java.lang.Object[] $r15, $r22, $r33;
+        java.util.ArrayList $r4;
+        sun.security.ssl.ConnectionContext r0;
+        int $i0, $i1, $i2, $i3, i4, i5, i6;
+        java.lang.String $r19, $r21, $r28;
+        java.util.Iterator $r7;
+        sun.security.ssl.SSLExtension $r2, $r11;
+        sun.security.ssl.TransportContext $r8;
+        java.security.AlgorithmParameters $r30;
+        java.security.AlgorithmConstraints $r25;
+        java.lang.Object $r13, $r29;
+
+        r34 := @this: sun.security.ssl.SupportedGroupsExtension$EESupportedGroupsProducer;
+
+        r0 := @parameter0: sun.security.ssl.ConnectionContext;
+
+        r35 := @parameter1: sun.security.ssl.SSLHandshake$HandshakeMessage;
+
+        r1 = (sun.security.ssl.ServerHandshakeContext) r0;
+
+        $r3 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $r2 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension EE_SUPPORTED_GROUPS>;
+
+        $z0 = virtualinvoke $r3.<sun.security.ssl.SSLConfiguration: boolean isAvailable(sun.security.ssl.SSLExtension)>($r2);
+
+        if $z0 != 0 goto label02;
+
+        $z10 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z10 == 0 goto label01;
+
+        $z11 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z11 == 0 goto label01;
+
+        $r33 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Ignore unavailable supported_groups extension", $r33);
+
+     label01:
+        return null;
+
+     label02:
+        $r4 = new java.util.ArrayList;
+
+        $r5 = <sun.security.ssl.SupportedGroupsExtension$SupportedGroups: sun.security.ssl.SupportedGroupsExtension$NamedGroup[] supportedNamedGroups>;
+
+        $i0 = lengthof $r5;
+
+        specialinvoke $r4.<java.util.ArrayList: void <init>(int)>($i0);
+
+        r36 = <sun.security.ssl.SupportedGroupsExtension$SupportedGroups: sun.security.ssl.SupportedGroupsExtension$NamedGroup[] supportedNamedGroups>;
+
+        i4 = lengthof r36;
+
+        i5 = 0;
+
+     label03:
+        if i5 >= i4 goto label07;
+
+        r37 = r36[i5];
+
+        $z5 = <sun.security.ssl.SupportedGroupsExtension$SupportedGroups: boolean enableFFDHE>;
+
+        if $z5 != 0 goto label04;
+
+        $r32 = r37.<sun.security.ssl.SupportedGroupsExtension$NamedGroup: sun.security.ssl.SupportedGroupsExtension$NamedGroupType type>;
+
+        $r31 = <sun.security.ssl.SupportedGroupsExtension$NamedGroupType: sun.security.ssl.SupportedGroupsExtension$NamedGroupType NAMED_GROUP_FFDHE>;
+
+        if $r32 != $r31 goto label04;
+
+        goto label06;
+
+     label04:
+        $r16 = r1.<sun.security.ssl.ServerHandshakeContext: java.util.List activeProtocols>;
+
+        $z6 = virtualinvoke r37.<sun.security.ssl.SupportedGroupsExtension$NamedGroup: boolean isAvailable(java.util.List)>($r16);
+
+        if $z6 == 0 goto label05;
+
+        $r23 = r1.<sun.security.ssl.ServerHandshakeContext: java.util.List activeCipherSuites>;
+
+        $z8 = virtualinvoke r37.<sun.security.ssl.SupportedGroupsExtension$NamedGroup: boolean isSupported(java.util.List)>($r23);
+
+        if $z8 == 0 goto label05;
+
+        $r25 = r1.<sun.security.ssl.ServerHandshakeContext: java.security.AlgorithmConstraints algorithmConstraints>;
+
+        $r24 = <java.security.CryptoPrimitive: java.security.CryptoPrimitive KEY_AGREEMENT>;
+
+        $r26 = staticinvoke <java.util.EnumSet: java.util.EnumSet of(java.lang.Enum)>($r24);
+
+        $r28 = r37.<sun.security.ssl.SupportedGroupsExtension$NamedGroup: java.lang.String algorithm>;
+
+        $r27 = <sun.security.ssl.SupportedGroupsExtension$EESupportedGroupsProducer: java.util.Map namedGroupParams>;
+
+        $r29 = interfaceinvoke $r27.<java.util.Map: java.lang.Object get(java.lang.Object)>(r37);
+
+        $r30 = (java.security.AlgorithmParameters) $r29;
+
+        $z9 = interfaceinvoke $r25.<java.security.AlgorithmConstraints: boolean permits(java.util.Set,java.lang.String,java.security.AlgorithmParameters)>($r26, $r28, $r30);
+
+        if $z9 == 0 goto label05;
+
+        virtualinvoke $r4.<java.util.ArrayList: boolean add(java.lang.Object)>(r37);
+
+        goto label06;
+
+     label05:
+        $z12 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z12 == 0 goto label06;
+
+        $z7 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z7 == 0 goto label06;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignore inactive or disabled named group: ");
+
+        $r19 = r37.<sun.security.ssl.SupportedGroupsExtension$NamedGroup: java.lang.String name>;
+
+        $r20 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r22 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r21, $r22);
+
+     label06:
+        i5 = i5 + 1;
+
+        goto label03;
+
+     label07:
+        $z1 = virtualinvoke $r4.<java.util.ArrayList: boolean isEmpty()>();
+
+        if $z1 == 0 goto label09;
+
+        $z3 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z3 == 0 goto label08;
+
+        $z4 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z4 == 0 goto label08;
+
+        $r15 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void warning(java.lang.String,java.lang.Object[])>("no available named group", $r15);
+
+     label08:
+        return null;
+
+     label09:
+        $i1 = virtualinvoke $r4.<java.util.ArrayList: int size()>();
+
+        i6 = $i1 << 1;
+
+        $i2 = i6 + 2;
+
+        r38 = newarray (byte)[$i2];
+
+        $r6 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>(r38);
+
+        staticinvoke <sun.security.ssl.Record: void putInt16(java.nio.ByteBuffer,int)>($r6, i6);
+
+        $r7 = virtualinvoke $r4.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label10:
+        $z2 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label11;
+
+        $r13 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r14 = (sun.security.ssl.SupportedGroupsExtension$NamedGroup) $r13;
+
+        $i3 = r14.<sun.security.ssl.SupportedGroupsExtension$NamedGroup: int id>;
+
+        staticinvoke <sun.security.ssl.Record: void putInt16(java.nio.ByteBuffer,int)>($r6, $i3);
+
+        goto label10;
+
+     label11:
+        $r8 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r9 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r4);
+
+        $r8.<sun.security.ssl.TransportContext: java.util.List serverRequestedNamedGroups> = $r9;
+
+        $r10 = new sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec;
+
+        specialinvoke $r10.<sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec: void <init>(java.util.List,sun.security.ssl.SupportedGroupsExtension$1)>($r4, null);
+
+        $r12 = r1.<sun.security.ssl.ServerHandshakeContext: java.util.Map handshakeExtensions>;
+
+        $r11 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension EE_SUPPORTED_GROUPS>;
+
+        interfaceinvoke $r12.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r11, $r10);
+
+        return r38;
+    }
+
+    void <init>(sun.security.ssl.SupportedGroupsExtension$1)
+    {
+        sun.security.ssl.SupportedGroupsExtension$EESupportedGroupsProducer r0;
+        sun.security.ssl.SupportedGroupsExtension$1 r1;
+
+        r0 := @this: sun.security.ssl.SupportedGroupsExtension$EESupportedGroupsProducer;
+
+        r1 := @parameter0: sun.security.ssl.SupportedGroupsExtension$1;
+
+        specialinvoke r0.<sun.security.ssl.SupportedGroupsExtension$EESupportedGroupsProducer: void <init>()>();
+
+        return;
+    }
+}

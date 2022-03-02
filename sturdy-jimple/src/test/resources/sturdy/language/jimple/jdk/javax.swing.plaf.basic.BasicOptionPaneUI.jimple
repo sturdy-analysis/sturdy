@@ -1,0 +1,2142 @@
+public class javax.swing.plaf.basic.BasicOptionPaneUI extends javax.swing.plaf.OptionPaneUI
+{
+    public static final int MinimumWidth;
+    public static final int MinimumHeight;
+    private static java.lang.String newline;
+    protected javax.swing.JOptionPane optionPane;
+    protected java.awt.Dimension minimumSize;
+    protected javax.swing.JComponent inputComponent;
+    protected java.awt.Component initialFocusComponent;
+    protected boolean hasCustomComponents;
+    protected java.beans.PropertyChangeListener propertyChangeListener;
+    private javax.swing.plaf.basic.BasicOptionPaneUI$Handler handler;
+
+    public void <init>()
+    {
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        specialinvoke r0.<javax.swing.plaf.OptionPaneUI: void <init>()>();
+
+        return;
+    }
+
+    static void loadActionMap(javax.swing.plaf.basic.LazyActionMap)
+    {
+        javax.swing.plaf.basic.LazyActionMap r0;
+        javax.swing.plaf.basic.BasicOptionPaneUI$Actions $r1;
+
+        r0 := @parameter0: javax.swing.plaf.basic.LazyActionMap;
+
+        $r1 = new javax.swing.plaf.basic.BasicOptionPaneUI$Actions;
+
+        specialinvoke $r1.<javax.swing.plaf.basic.BasicOptionPaneUI$Actions: void <init>(java.lang.String)>("close");
+
+        virtualinvoke r0.<javax.swing.plaf.basic.LazyActionMap: void put(javax.swing.Action)>($r1);
+
+        staticinvoke <javax.swing.plaf.basic.BasicLookAndFeel: void installAudioActionMap(javax.swing.ActionMap)>(r0);
+
+        return;
+    }
+
+    public static javax.swing.plaf.ComponentUI createUI(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r1;
+        javax.swing.plaf.basic.BasicOptionPaneUI $r0;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        $r0 = new javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        specialinvoke $r0.<javax.swing.plaf.basic.BasicOptionPaneUI: void <init>()>();
+
+        return $r0;
+    }
+
+    public void installUI(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r1;
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+        javax.swing.JOptionPane $r2, $r3;
+        java.awt.LayoutManager $r4;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        $r2 = (javax.swing.JOptionPane) r1;
+
+        r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane> = $r2;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: void installDefaults()>();
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r4 = virtualinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: java.awt.LayoutManager createLayoutManager()>();
+
+        virtualinvoke $r3.<javax.swing.JOptionPane: void setLayout(java.awt.LayoutManager)>($r4);
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: void installComponents()>();
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: void installListeners()>();
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: void installKeyboardActions()>();
+
+        return;
+    }
+
+    public void uninstallUI(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r2;
+        javax.swing.JOptionPane $r1;
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        r2 := @parameter0: javax.swing.JComponent;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: void uninstallComponents()>();
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        virtualinvoke $r1.<javax.swing.JOptionPane: void setLayout(java.awt.LayoutManager)>(null);
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: void uninstallKeyboardActions()>();
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: void uninstallListeners()>();
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: void uninstallDefaults()>();
+
+        r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane> = null;
+
+        return;
+    }
+
+    protected void installDefaults()
+    {
+        java.awt.Dimension $r3;
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+        java.lang.Boolean $r4;
+        javax.swing.JOptionPane $r1, $r2, $r5;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        staticinvoke <javax.swing.LookAndFeel: void installColorsAndFont(javax.swing.JComponent,java.lang.String,java.lang.String,java.lang.String)>($r1, "OptionPane.background", "OptionPane.foreground", "OptionPane.font");
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        staticinvoke <javax.swing.LookAndFeel: void installBorder(javax.swing.JComponent,java.lang.String)>($r2, "OptionPane.border");
+
+        $r3 = staticinvoke <javax.swing.UIManager: java.awt.Dimension getDimension(java.lang.Object)>("OptionPane.minimumSize");
+
+        r0.<javax.swing.plaf.basic.BasicOptionPaneUI: java.awt.Dimension minimumSize> = $r3;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r4 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        staticinvoke <javax.swing.LookAndFeel: void installProperty(javax.swing.JComponent,java.lang.String,java.lang.Object)>($r5, "opaque", $r4);
+
+        return;
+    }
+
+    protected void uninstallDefaults()
+    {
+        javax.swing.JOptionPane $r1;
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        staticinvoke <javax.swing.LookAndFeel: void uninstallBorder(javax.swing.JComponent)>($r1);
+
+        return;
+    }
+
+    protected void installComponents()
+    {
+        javax.swing.JOptionPane $r1, $r4, $r6, $r7, $r9;
+        java.awt.ComponentOrientation $r8;
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+        java.awt.Container $r2, $r3, $r5;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r2 = virtualinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: java.awt.Container createMessageArea()>();
+
+        virtualinvoke $r1.<javax.swing.JOptionPane: java.awt.Component add(java.awt.Component)>($r2);
+
+        $r3 = virtualinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: java.awt.Container createSeparator()>();
+
+        if $r3 == null goto label1;
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        virtualinvoke $r9.<javax.swing.JOptionPane: java.awt.Component add(java.awt.Component)>($r3);
+
+     label1:
+        $r4 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r5 = virtualinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: java.awt.Container createButtonArea()>();
+
+        virtualinvoke $r4.<javax.swing.JOptionPane: java.awt.Component add(java.awt.Component)>($r5);
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r8 = virtualinvoke $r6.<javax.swing.JOptionPane: java.awt.ComponentOrientation getComponentOrientation()>();
+
+        virtualinvoke $r7.<javax.swing.JOptionPane: void applyComponentOrientation(java.awt.ComponentOrientation)>($r8);
+
+        return;
+    }
+
+    protected void uninstallComponents()
+    {
+        javax.swing.JOptionPane $r1;
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        r0.<javax.swing.plaf.basic.BasicOptionPaneUI: boolean hasCustomComponents> = 0;
+
+        r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JComponent inputComponent> = null;
+
+        r0.<javax.swing.plaf.basic.BasicOptionPaneUI: java.awt.Component initialFocusComponent> = null;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        virtualinvoke $r1.<javax.swing.JOptionPane: void removeAll()>();
+
+        return;
+    }
+
+    protected java.awt.LayoutManager createLayoutManager()
+    {
+        javax.swing.JOptionPane $r2;
+        javax.swing.plaf.basic.BasicOptionPaneUI r1;
+        javax.swing.BoxLayout $r0;
+
+        r1 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        $r0 = new javax.swing.BoxLayout;
+
+        $r2 = r1.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        specialinvoke $r0.<javax.swing.BoxLayout: void <init>(java.awt.Container,int)>($r2, 1);
+
+        return $r0;
+    }
+
+    protected void installListeners()
+    {
+        java.beans.PropertyChangeListener $r1, $r2;
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+        javax.swing.JOptionPane $r3;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        $r1 = virtualinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: java.beans.PropertyChangeListener createPropertyChangeListener()>();
+
+        r0.<javax.swing.plaf.basic.BasicOptionPaneUI: java.beans.PropertyChangeListener propertyChangeListener> = $r1;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: java.beans.PropertyChangeListener propertyChangeListener>;
+
+        virtualinvoke $r3.<javax.swing.JOptionPane: void addPropertyChangeListener(java.beans.PropertyChangeListener)>($r2);
+
+     label1:
+        return;
+    }
+
+    protected void uninstallListeners()
+    {
+        java.beans.PropertyChangeListener $r1, $r2;
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+        javax.swing.JOptionPane $r3;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: java.beans.PropertyChangeListener propertyChangeListener>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: java.beans.PropertyChangeListener propertyChangeListener>;
+
+        virtualinvoke $r3.<javax.swing.JOptionPane: void removePropertyChangeListener(java.beans.PropertyChangeListener)>($r2);
+
+        r0.<javax.swing.plaf.basic.BasicOptionPaneUI: java.beans.PropertyChangeListener propertyChangeListener> = null;
+
+     label1:
+        r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.plaf.basic.BasicOptionPaneUI$Handler handler> = null;
+
+        return;
+    }
+
+    protected java.beans.PropertyChangeListener createPropertyChangeListener()
+    {
+        javax.swing.plaf.basic.BasicOptionPaneUI$Handler $r1;
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.plaf.basic.BasicOptionPaneUI$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    private javax.swing.plaf.basic.BasicOptionPaneUI$Handler getHandler()
+    {
+        javax.swing.plaf.basic.BasicOptionPaneUI$Handler $r1, $r2, $r3;
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.plaf.basic.BasicOptionPaneUI$Handler handler>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new javax.swing.plaf.basic.BasicOptionPaneUI$Handler;
+
+        specialinvoke $r3.<javax.swing.plaf.basic.BasicOptionPaneUI$Handler: void <init>(javax.swing.plaf.basic.BasicOptionPaneUI,javax.swing.plaf.basic.BasicOptionPaneUI$1)>(r0, null);
+
+        r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.plaf.basic.BasicOptionPaneUI$Handler handler> = $r3;
+
+     label1:
+        $r2 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.plaf.basic.BasicOptionPaneUI$Handler handler>;
+
+        return $r2;
+    }
+
+    protected void installKeyboardActions()
+    {
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+        javax.swing.InputMap $r1;
+        javax.swing.JOptionPane $r2, $r3;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        $r1 = virtualinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.InputMap getInputMap(int)>(2);
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        staticinvoke <javax.swing.SwingUtilities: void replaceUIInputMap(javax.swing.JComponent,int,javax.swing.InputMap)>($r2, 2, $r1);
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        staticinvoke <javax.swing.plaf.basic.LazyActionMap: void installLazyActionMap(javax.swing.JComponent,java.lang.Class,java.lang.String)>($r3, class "Ljavax/swing/plaf/basic/BasicOptionPaneUI;", "OptionPane.actionMap");
+
+        return;
+    }
+
+    protected void uninstallKeyboardActions()
+    {
+        javax.swing.JOptionPane $r1, $r2;
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        staticinvoke <javax.swing.SwingUtilities: void replaceUIInputMap(javax.swing.JComponent,int,javax.swing.InputMap)>($r1, 2, null);
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        staticinvoke <javax.swing.SwingUtilities: void replaceUIActionMap(javax.swing.JComponent,javax.swing.ActionMap)>($r2, null);
+
+        return;
+    }
+
+    javax.swing.InputMap getInputMap(int)
+    {
+        java.lang.Object[] $r3, r4;
+        javax.swing.JOptionPane $r1, $r5;
+        javax.swing.ComponentInputMap $r6;
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+        int i0;
+        java.lang.Object $r2;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        i0 := @parameter0: int;
+
+        if i0 != 2 goto label1;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r2 = staticinvoke <sun.swing.DefaultLookup: java.lang.Object get(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String)>($r1, r0, "OptionPane.windowBindings");
+
+        $r3 = (java.lang.Object[]) $r2;
+
+        r4 = (java.lang.Object[]) $r3;
+
+        if r4 == null goto label1;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r6 = staticinvoke <javax.swing.LookAndFeel: javax.swing.ComponentInputMap makeComponentInputMap(javax.swing.JComponent,java.lang.Object[])>($r5, r4);
+
+        return $r6;
+
+     label1:
+        return null;
+    }
+
+    public java.awt.Dimension getMinimumOptionPaneSize()
+    {
+        java.awt.Dimension $r1, $r2, $r3, $r4, $r5;
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+        int $i0, $i1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: java.awt.Dimension minimumSize>;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.awt.Dimension;
+
+        specialinvoke $r5.<java.awt.Dimension: void <init>(int,int)>(262, 90);
+
+        return $r5;
+
+     label1:
+        $r2 = new java.awt.Dimension;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: java.awt.Dimension minimumSize>;
+
+        $i1 = $r3.<java.awt.Dimension: int width>;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: java.awt.Dimension minimumSize>;
+
+        $i0 = $r4.<java.awt.Dimension: int height>;
+
+        specialinvoke $r2.<java.awt.Dimension: void <init>(int,int)>($i1, $i0);
+
+        return $r2;
+    }
+
+    public java.awt.Dimension getPreferredSize(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r0;
+        javax.swing.JOptionPane $r2;
+        java.awt.Dimension $r3, $r5, $r6;
+        javax.swing.plaf.basic.BasicOptionPaneUI r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.awt.LayoutManager $r4;
+
+        r1 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        r0 := @parameter0: javax.swing.JComponent;
+
+        $r2 = r1.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        if r0 != $r2 goto label3;
+
+        $r3 = virtualinvoke r1.<javax.swing.plaf.basic.BasicOptionPaneUI: java.awt.Dimension getMinimumOptionPaneSize()>();
+
+        $r4 = virtualinvoke r0.<javax.swing.JComponent: java.awt.LayoutManager getLayout()>();
+
+        if $r4 == null goto label2;
+
+        $r5 = interfaceinvoke $r4.<java.awt.LayoutManager: java.awt.Dimension preferredLayoutSize(java.awt.Container)>(r0);
+
+        if $r3 == null goto label1;
+
+        $r6 = new java.awt.Dimension;
+
+        $i1 = $r5.<java.awt.Dimension: int width>;
+
+        $i0 = $r3.<java.awt.Dimension: int width>;
+
+        $i2 = staticinvoke <java.lang.Math: int max(int,int)>($i1, $i0);
+
+        $i4 = $r5.<java.awt.Dimension: int height>;
+
+        $i3 = $r3.<java.awt.Dimension: int height>;
+
+        $i5 = staticinvoke <java.lang.Math: int max(int,int)>($i4, $i3);
+
+        specialinvoke $r6.<java.awt.Dimension: void <init>(int,int)>($i2, $i5);
+
+        return $r6;
+
+     label1:
+        return $r5;
+
+     label2:
+        return $r3;
+
+     label3:
+        return null;
+    }
+
+    protected java.awt.Container createMessageArea()
+    {
+        java.awt.Insets $r13;
+        javax.swing.border.Border r4;
+        javax.swing.plaf.basic.BasicOptionPaneUI r1;
+        int $i0, $i1;
+        java.awt.BorderLayout $r5, $r9;
+        javax.swing.Icon $r10;
+        javax.swing.JOptionPane $r2, $r12;
+        java.awt.GridBagConstraints $r11;
+        java.awt.Dimension $r16;
+        java.lang.Object $r3, $r14;
+        java.awt.GridBagLayout $r7;
+        javax.swing.JPanel $r0, $r6, $r8, $r15;
+
+        r1 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        $r0 = new javax.swing.JPanel;
+
+        specialinvoke $r0.<javax.swing.JPanel: void <init>()>();
+
+        $r2 = r1.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r3 = staticinvoke <sun.swing.DefaultLookup: java.lang.Object get(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String)>($r2, r1, "OptionPane.messageAreaBorder");
+
+        r4 = (javax.swing.border.Border) $r3;
+
+        if r4 == null goto label1;
+
+        virtualinvoke $r0.<javax.swing.JPanel: void setBorder(javax.swing.border.Border)>(r4);
+
+     label1:
+        $r5 = new java.awt.BorderLayout;
+
+        specialinvoke $r5.<java.awt.BorderLayout: void <init>()>();
+
+        virtualinvoke $r0.<javax.swing.JPanel: void setLayout(java.awt.LayoutManager)>($r5);
+
+        $r6 = new javax.swing.JPanel;
+
+        $r7 = new java.awt.GridBagLayout;
+
+        specialinvoke $r7.<java.awt.GridBagLayout: void <init>()>();
+
+        specialinvoke $r6.<javax.swing.JPanel: void <init>(java.awt.LayoutManager)>($r7);
+
+        $r8 = new javax.swing.JPanel;
+
+        $r9 = new java.awt.BorderLayout;
+
+        specialinvoke $r9.<java.awt.BorderLayout: void <init>()>();
+
+        specialinvoke $r8.<javax.swing.JPanel: void <init>(java.awt.LayoutManager)>($r9);
+
+        virtualinvoke $r6.<java.awt.Container: void setName(java.lang.String)>("OptionPane.body");
+
+        virtualinvoke $r8.<java.awt.Container: void setName(java.lang.String)>("OptionPane.realBody");
+
+        $r10 = virtualinvoke r1.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.Icon getIcon()>();
+
+        if $r10 == null goto label2;
+
+        $r15 = new javax.swing.JPanel;
+
+        specialinvoke $r15.<javax.swing.JPanel: void <init>()>();
+
+        virtualinvoke $r15.<javax.swing.JPanel: void setName(java.lang.String)>("OptionPane.separator");
+
+        $r16 = new java.awt.Dimension;
+
+        specialinvoke $r16.<java.awt.Dimension: void <init>(int,int)>(15, 1);
+
+        virtualinvoke $r15.<javax.swing.JPanel: void setPreferredSize(java.awt.Dimension)>($r16);
+
+        virtualinvoke $r8.<java.awt.Container: void add(java.awt.Component,java.lang.Object)>($r15, "Before");
+
+     label2:
+        virtualinvoke $r8.<java.awt.Container: void add(java.awt.Component,java.lang.Object)>($r6, "Center");
+
+        $r11 = new java.awt.GridBagConstraints;
+
+        specialinvoke $r11.<java.awt.GridBagConstraints: void <init>()>();
+
+        $r11.<java.awt.GridBagConstraints: int gridy> = 0;
+
+        $r11.<java.awt.GridBagConstraints: int gridx> = 0;
+
+        $r11.<java.awt.GridBagConstraints: int gridwidth> = 0;
+
+        $r11.<java.awt.GridBagConstraints: int gridheight> = 1;
+
+        $r12 = r1.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $i0 = staticinvoke <sun.swing.DefaultLookup: int getInt(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String,int)>($r12, r1, "OptionPane.messageAnchor", 10);
+
+        $r11.<java.awt.GridBagConstraints: int anchor> = $i0;
+
+        $r13 = new java.awt.Insets;
+
+        specialinvoke $r13.<java.awt.Insets: void <init>(int,int,int,int)>(0, 0, 3, 0);
+
+        $r11.<java.awt.GridBagConstraints: java.awt.Insets insets> = $r13;
+
+        $r14 = virtualinvoke r1.<javax.swing.plaf.basic.BasicOptionPaneUI: java.lang.Object getMessage()>();
+
+        $i1 = virtualinvoke r1.<javax.swing.plaf.basic.BasicOptionPaneUI: int getMaxCharactersPerLineCount()>();
+
+        virtualinvoke r1.<javax.swing.plaf.basic.BasicOptionPaneUI: void addMessageComponents(java.awt.Container,java.awt.GridBagConstraints,java.lang.Object,int,boolean)>($r6, $r11, $r14, $i1, 0);
+
+        virtualinvoke $r0.<javax.swing.JPanel: void add(java.awt.Component,java.lang.Object)>($r8, "Center");
+
+        virtualinvoke r1.<javax.swing.plaf.basic.BasicOptionPaneUI: void addIcon(java.awt.Container)>($r0);
+
+        return $r0;
+    }
+
+    protected void addMessageComponents(java.awt.Container, java.awt.GridBagConstraints, java.lang.Object, int, boolean)
+    {
+        javax.swing.plaf.basic.BasicOptionPaneUI r4;
+        boolean $z0, $z1, $z2, $z3, z4, $z5;
+        javax.swing.Icon $r13;
+        java.awt.GridBagConstraints r6;
+        java.awt.Component $r15;
+        javax.swing.Box $r7;
+        java.lang.Object[] $r14, r16;
+        javax.swing.plaf.basic.BasicOptionPaneUI$1 $r10;
+        int $i0, $i1, $i2, $i3, i4, $i5, $i6, $i7, i8, i9, i10, i11;
+        java.lang.String $r1, $r2, $r8, $r9, $r11;
+        java.awt.Container r5;
+        javax.swing.JLabel $r3, $r12;
+        java.lang.Object r0, r17;
+
+        r4 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        r5 := @parameter0: java.awt.Container;
+
+        r6 := @parameter1: java.awt.GridBagConstraints;
+
+        r0 := @parameter2: java.lang.Object;
+
+        i4 := @parameter3: int;
+
+        z4 := @parameter4: boolean;
+
+        if r0 != null goto label01;
+
+        return;
+
+     label01:
+        $z0 = r0 instanceof java.awt.Component;
+
+        if $z0 == 0 goto label05;
+
+        $z3 = r0 instanceof javax.swing.JScrollPane;
+
+        if $z3 != 0 goto label02;
+
+        $z5 = r0 instanceof javax.swing.JPanel;
+
+        if $z5 == 0 goto label03;
+
+     label02:
+        r6.<java.awt.GridBagConstraints: int fill> = 1;
+
+        r6.<java.awt.GridBagConstraints: double weighty> = 1.0;
+
+        goto label04;
+
+     label03:
+        r6.<java.awt.GridBagConstraints: int fill> = 2;
+
+     label04:
+        r6.<java.awt.GridBagConstraints: double weightx> = 1.0;
+
+        $r15 = (java.awt.Component) r0;
+
+        virtualinvoke r5.<java.awt.Container: void add(java.awt.Component,java.lang.Object)>($r15, r6);
+
+        r6.<java.awt.GridBagConstraints: double weightx> = 0.0;
+
+        r6.<java.awt.GridBagConstraints: double weighty> = 0.0;
+
+        r6.<java.awt.GridBagConstraints: int fill> = 0;
+
+        $i6 = r6.<java.awt.GridBagConstraints: int gridy>;
+
+        $i7 = $i6 + 1;
+
+        r6.<java.awt.GridBagConstraints: int gridy> = $i7;
+
+        if z4 != 0 goto label18;
+
+        r4.<javax.swing.plaf.basic.BasicOptionPaneUI: boolean hasCustomComponents> = 1;
+
+        goto label18;
+
+     label05:
+        $z1 = r0 instanceof java.lang.Object[];
+
+        if $z1 == 0 goto label08;
+
+        $r14 = (java.lang.Object[]) r0;
+
+        r16 = (java.lang.Object[]) $r14;
+
+        i8 = lengthof r16;
+
+        i9 = 0;
+
+     label06:
+        if i9 >= i8 goto label07;
+
+        r17 = r16[i9];
+
+        virtualinvoke r4.<javax.swing.plaf.basic.BasicOptionPaneUI: void addMessageComponents(java.awt.Container,java.awt.GridBagConstraints,java.lang.Object,int,boolean)>(r5, r6, r17, i4, 0);
+
+        i9 = i9 + 1;
+
+        goto label06;
+
+     label07:
+        goto label18;
+
+     label08:
+        $z2 = r0 instanceof javax.swing.Icon;
+
+        if $z2 == 0 goto label09;
+
+        $r12 = new javax.swing.JLabel;
+
+        $r13 = (javax.swing.Icon) r0;
+
+        specialinvoke $r12.<javax.swing.JLabel: void <init>(javax.swing.Icon,int)>($r13, 0);
+
+        specialinvoke r4.<javax.swing.plaf.basic.BasicOptionPaneUI: void configureMessageLabel(javax.swing.JLabel)>($r12);
+
+        virtualinvoke r4.<javax.swing.plaf.basic.BasicOptionPaneUI: void addMessageComponents(java.awt.Container,java.awt.GridBagConstraints,java.lang.Object,int,boolean)>(r5, r6, $r12, i4, 1);
+
+        goto label18;
+
+     label09:
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.String toString()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 > 0 goto label10;
+
+        return;
+
+     label10:
+        i10 = 0;
+
+        $r2 = <javax.swing.plaf.basic.BasicOptionPaneUI: java.lang.String newline>;
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int indexOf(java.lang.String)>($r2);
+
+        i11 = $i1;
+
+        if $i1 < 0 goto label11;
+
+        $r11 = <javax.swing.plaf.basic.BasicOptionPaneUI: java.lang.String newline>;
+
+        i10 = virtualinvoke $r11.<java.lang.String: int length()>();
+
+        goto label13;
+
+     label11:
+        $i2 = virtualinvoke $r1.<java.lang.String: int indexOf(java.lang.String)>("\r\n");
+
+        i11 = $i2;
+
+        if $i2 < 0 goto label12;
+
+        i10 = 2;
+
+        goto label13;
+
+     label12:
+        $i3 = virtualinvoke $r1.<java.lang.String: int indexOf(int)>(10);
+
+        i11 = $i3;
+
+        if $i3 < 0 goto label13;
+
+        i10 = 1;
+
+     label13:
+        if i11 < 0 goto label16;
+
+        if i11 != 0 goto label14;
+
+        $r10 = new javax.swing.plaf.basic.BasicOptionPaneUI$1;
+
+        specialinvoke $r10.<javax.swing.plaf.basic.BasicOptionPaneUI$1: void <init>(javax.swing.plaf.basic.BasicOptionPaneUI)>(r4);
+
+        virtualinvoke $r10.<javax.swing.JPanel: void setName(java.lang.String)>("OptionPane.break");
+
+        virtualinvoke r4.<javax.swing.plaf.basic.BasicOptionPaneUI: void addMessageComponents(java.awt.Container,java.awt.GridBagConstraints,java.lang.Object,int,boolean)>(r5, r6, $r10, i4, 1);
+
+        goto label15;
+
+     label14:
+        $r8 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(0, i11);
+
+        virtualinvoke r4.<javax.swing.plaf.basic.BasicOptionPaneUI: void addMessageComponents(java.awt.Container,java.awt.GridBagConstraints,java.lang.Object,int,boolean)>(r5, r6, $r8, i4, 0);
+
+     label15:
+        $i5 = i11 + i10;
+
+        $r9 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>($i5);
+
+        virtualinvoke r4.<javax.swing.plaf.basic.BasicOptionPaneUI: void addMessageComponents(java.awt.Container,java.awt.GridBagConstraints,java.lang.Object,int,boolean)>(r5, r6, $r9, i4, 0);
+
+        goto label18;
+
+     label16:
+        if $i0 <= i4 goto label17;
+
+        $r7 = staticinvoke <javax.swing.Box: javax.swing.Box createVerticalBox()>();
+
+        virtualinvoke $r7.<java.awt.Container: void setName(java.lang.String)>("OptionPane.verticalBox");
+
+        virtualinvoke r4.<javax.swing.plaf.basic.BasicOptionPaneUI: void burstStringInto(java.awt.Container,java.lang.String,int)>($r7, $r1, i4);
+
+        virtualinvoke r4.<javax.swing.plaf.basic.BasicOptionPaneUI: void addMessageComponents(java.awt.Container,java.awt.GridBagConstraints,java.lang.Object,int,boolean)>(r5, r6, $r7, i4, 1);
+
+        goto label18;
+
+     label17:
+        $r3 = new javax.swing.JLabel;
+
+        specialinvoke $r3.<javax.swing.JLabel: void <init>(java.lang.String,int)>($r1, 10);
+
+        virtualinvoke $r3.<javax.swing.JLabel: void setName(java.lang.String)>("OptionPane.label");
+
+        specialinvoke r4.<javax.swing.plaf.basic.BasicOptionPaneUI: void configureMessageLabel(javax.swing.JLabel)>($r3);
+
+        virtualinvoke r4.<javax.swing.plaf.basic.BasicOptionPaneUI: void addMessageComponents(java.awt.Container,java.awt.GridBagConstraints,java.lang.Object,int,boolean)>(r5, r6, $r3, i4, 1);
+
+     label18:
+        return;
+    }
+
+    protected java.lang.Object getMessage()
+    {
+        java.lang.Object[] $r8, r22;
+        javax.swing.KeyStroke[] $r12;
+        javax.swing.plaf.basic.BasicOptionPaneUI$Handler $r14, $r18;
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+        int $i0, $i1, i2, i3;
+        java.lang.String $r15;
+        javax.swing.JComboBox $r19;
+        boolean $z0;
+        javax.swing.KeyStroke $r13;
+        javax.swing.JList $r16;
+        javax.swing.plaf.basic.BasicOptionPaneUI$MultiplexingTextField $r11;
+        javax.accessibility.Accessible r21;
+        javax.swing.JOptionPane $r1, $r2, $r3, $r5, $r7, $r9;
+        javax.swing.JScrollPane $r17;
+        java.lang.Object $r4, $r6, $r10, $r20;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JComponent inputComponent> = null;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        if $r1 == null goto label12;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $z0 = virtualinvoke $r2.<javax.swing.JOptionPane: boolean getWantsInput()>();
+
+        if $z0 == 0 goto label11;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r6 = virtualinvoke $r5.<javax.swing.JOptionPane: java.lang.Object getMessage()>();
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r8 = virtualinvoke $r7.<javax.swing.JOptionPane: java.lang.Object[] getSelectionValues()>();
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r10 = virtualinvoke $r9.<javax.swing.JOptionPane: java.lang.Object getInitialSelectionValue()>();
+
+        if $r8 == null goto label06;
+
+        $i1 = lengthof $r8;
+
+        if $i1 >= 20 goto label04;
+
+        $r19 = new javax.swing.JComboBox;
+
+        specialinvoke $r19.<javax.swing.JComboBox: void <init>()>();
+
+        virtualinvoke $r19.<javax.swing.JComboBox: void setName(java.lang.String)>("OptionPane.comboBox");
+
+        i3 = 0;
+
+        i2 = lengthof $r8;
+
+     label01:
+        if i3 >= i2 goto label02;
+
+        $r20 = $r8[i3];
+
+        virtualinvoke $r19.<javax.swing.JComboBox: void addItem(java.lang.Object)>($r20);
+
+        i3 = i3 + 1;
+
+        goto label01;
+
+     label02:
+        if $r10 == null goto label03;
+
+        virtualinvoke $r19.<javax.swing.JComboBox: void setSelectedItem(java.lang.Object)>($r10);
+
+     label03:
+        r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JComponent inputComponent> = $r19;
+
+        r21 = $r19;
+
+        goto label08;
+
+     label04:
+        $r16 = new javax.swing.JList;
+
+        specialinvoke $r16.<javax.swing.JList: void <init>(java.lang.Object[])>($r8);
+
+        $r17 = new javax.swing.JScrollPane;
+
+        specialinvoke $r17.<javax.swing.JScrollPane: void <init>(java.awt.Component)>($r16);
+
+        virtualinvoke $r17.<javax.swing.JScrollPane: void setName(java.lang.String)>("OptionPane.scrollPane");
+
+        virtualinvoke $r16.<javax.swing.JList: void setName(java.lang.String)>("OptionPane.list");
+
+        virtualinvoke $r16.<javax.swing.JList: void setVisibleRowCount(int)>(10);
+
+        virtualinvoke $r16.<javax.swing.JList: void setSelectionMode(int)>(0);
+
+        if $r10 == null goto label05;
+
+        virtualinvoke $r16.<javax.swing.JList: void setSelectedValue(java.lang.Object,boolean)>($r10, 1);
+
+     label05:
+        $r18 = specialinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.plaf.basic.BasicOptionPaneUI$Handler getHandler()>();
+
+        virtualinvoke $r16.<javax.swing.JList: void addMouseListener(java.awt.event.MouseListener)>($r18);
+
+        r21 = $r17;
+
+        r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JComponent inputComponent> = $r16;
+
+        goto label08;
+
+     label06:
+        $r11 = new javax.swing.plaf.basic.BasicOptionPaneUI$MultiplexingTextField;
+
+        specialinvoke $r11.<javax.swing.plaf.basic.BasicOptionPaneUI$MultiplexingTextField: void <init>(int)>(20);
+
+        virtualinvoke $r11.<javax.swing.plaf.basic.BasicOptionPaneUI$MultiplexingTextField: void setName(java.lang.String)>("OptionPane.textField");
+
+        $r12 = newarray (javax.swing.KeyStroke)[1];
+
+        $r13 = staticinvoke <javax.swing.KeyStroke: javax.swing.KeyStroke getKeyStroke(java.lang.String)>("ENTER");
+
+        $r12[0] = $r13;
+
+        virtualinvoke $r11.<javax.swing.plaf.basic.BasicOptionPaneUI$MultiplexingTextField: void setKeyStrokes(javax.swing.KeyStroke[])>($r12);
+
+        if $r10 == null goto label07;
+
+        $r15 = virtualinvoke $r10.<java.lang.Object: java.lang.String toString()>();
+
+        virtualinvoke $r11.<javax.swing.plaf.basic.BasicOptionPaneUI$MultiplexingTextField: void setText(java.lang.String)>($r15);
+
+        virtualinvoke $r11.<javax.swing.plaf.basic.BasicOptionPaneUI$MultiplexingTextField: void setSelectionStart(int)>(0);
+
+        $i0 = virtualinvoke $r15.<java.lang.String: int length()>();
+
+        virtualinvoke $r11.<javax.swing.plaf.basic.BasicOptionPaneUI$MultiplexingTextField: void setSelectionEnd(int)>($i0);
+
+     label07:
+        $r14 = specialinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.plaf.basic.BasicOptionPaneUI$Handler getHandler()>();
+
+        virtualinvoke $r11.<javax.swing.plaf.basic.BasicOptionPaneUI$MultiplexingTextField: void addActionListener(java.awt.event.ActionListener)>($r14);
+
+        r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JComponent inputComponent> = $r11;
+
+        r21 = $r11;
+
+     label08:
+        if $r6 != null goto label09;
+
+        r22 = newarray (java.lang.Object)[1];
+
+        r22[0] = r21;
+
+        goto label10;
+
+     label09:
+        r22 = newarray (java.lang.Object)[2];
+
+        r22[0] = $r6;
+
+        r22[1] = r21;
+
+     label10:
+        return r22;
+
+     label11:
+        $r3 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r4 = virtualinvoke $r3.<javax.swing.JOptionPane: java.lang.Object getMessage()>();
+
+        return $r4;
+
+     label12:
+        return null;
+    }
+
+    protected void addIcon(java.awt.Container)
+    {
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+        javax.swing.JLabel $r2;
+        javax.swing.Icon $r1;
+        java.awt.Container r3;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        r3 := @parameter0: java.awt.Container;
+
+        $r1 = virtualinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.Icon getIcon()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = new javax.swing.JLabel;
+
+        specialinvoke $r2.<javax.swing.JLabel: void <init>(javax.swing.Icon)>($r1);
+
+        virtualinvoke $r2.<javax.swing.JLabel: void setName(java.lang.String)>("OptionPane.iconLabel");
+
+        virtualinvoke $r2.<javax.swing.JLabel: void setVerticalAlignment(int)>(1);
+
+        virtualinvoke r3.<java.awt.Container: void add(java.awt.Component,java.lang.Object)>($r2, "Before");
+
+     label1:
+        return;
+    }
+
+    protected javax.swing.Icon getIcon()
+    {
+        javax.swing.Icon $r5, r6;
+        javax.swing.JOptionPane $r1, $r2, $r3, $r4;
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+        int $i0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        if $r1 != null goto label1;
+
+        $r5 = null;
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r5 = virtualinvoke $r2.<javax.swing.JOptionPane: javax.swing.Icon getIcon()>();
+
+     label2:
+        r6 = $r5;
+
+        if $r5 != null goto label3;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        if $r3 == null goto label3;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $i0 = virtualinvoke $r4.<javax.swing.JOptionPane: int getMessageType()>();
+
+        r6 = virtualinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.Icon getIconForType(int)>($i0);
+
+     label3:
+        return r6;
+    }
+
+    protected javax.swing.Icon getIconForType(int)
+    {
+        javax.swing.Icon $r3;
+        javax.swing.JOptionPane $r1;
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+        int i0;
+        java.lang.Object $r2;
+        java.lang.String r4, r5, r6;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        i0 := @parameter0: int;
+
+        if i0 < 0 goto label1;
+
+        if i0 <= 3 goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        r4 = null;
+
+        r6 = null;
+
+        r5 = null;
+
+        tableswitch(i0)
+        {
+            case 0: goto label3;
+            case 1: goto label4;
+            case 2: goto label5;
+            case 3: goto label6;
+            default: goto label7;
+        };
+
+     label3:
+        r4 = "OptionPane.errorIcon";
+
+        r6 = "OptionPane.errorIcon";
+
+        r5 = "OptionPane.errorIcon";
+
+        goto label7;
+
+     label4:
+        r4 = "OptionPane.informationIcon";
+
+        r6 = "OptionPane.informationIcon";
+
+        r5 = "OptionPane.informationIcon";
+
+        goto label7;
+
+     label5:
+        r4 = "OptionPane.warningIcon";
+
+        r6 = "OptionPane.warningIcon";
+
+        r5 = "OptionPane.warningIcon";
+
+        goto label7;
+
+     label6:
+        r4 = "OptionPane.questionIcon";
+
+        r6 = "OptionPane.questionIcon";
+
+        r5 = "OptionPane.questionIcon";
+
+     label7:
+        if r6 == null goto label8;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r2 = staticinvoke <sun.swing.DefaultLookup: java.lang.Object get(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String)>($r1, r0, r5);
+
+        $r3 = (javax.swing.Icon) $r2;
+
+        return $r3;
+
+     label8:
+        return null;
+    }
+
+    protected int getMaxCharactersPerLineCount()
+    {
+        int $i0;
+        javax.swing.JOptionPane $r1;
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $i0 = virtualinvoke $r1.<javax.swing.JOptionPane: int getMaxCharactersPerLineCount()>();
+
+        return $i0;
+    }
+
+    protected void burstStringInto(java.awt.Container, java.lang.String, int)
+    {
+        javax.swing.plaf.basic.BasicOptionPaneUI r1;
+        javax.swing.JLabel $r5;
+        int $i0, i1, $i2, $i3, i4;
+        java.lang.String r0, $r3, $r4;
+        java.awt.Container r2;
+
+        r1 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        r2 := @parameter0: java.awt.Container;
+
+        r0 := @parameter1: java.lang.String;
+
+        i1 := @parameter2: int;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i0 > 0 goto label1;
+
+        return;
+
+     label1:
+        if $i0 <= i1 goto label3;
+
+        $i2 = virtualinvoke r0.<java.lang.String: int lastIndexOf(int,int)>(32, i1);
+
+        i4 = $i2;
+
+        if $i2 > 0 goto label2;
+
+        i4 = virtualinvoke r0.<java.lang.String: int indexOf(int,int)>(32, i1);
+
+     label2:
+        if i4 <= 0 goto label3;
+
+        if i4 >= $i0 goto label3;
+
+        $r3 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, i4);
+
+        virtualinvoke r1.<javax.swing.plaf.basic.BasicOptionPaneUI: void burstStringInto(java.awt.Container,java.lang.String,int)>(r2, $r3, i1);
+
+        $i3 = i4 + 1;
+
+        $r4 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>($i3);
+
+        virtualinvoke r1.<javax.swing.plaf.basic.BasicOptionPaneUI: void burstStringInto(java.awt.Container,java.lang.String,int)>(r2, $r4, i1);
+
+        return;
+
+     label3:
+        $r5 = new javax.swing.JLabel;
+
+        specialinvoke $r5.<javax.swing.JLabel: void <init>(java.lang.String,int)>(r0, 2);
+
+        virtualinvoke $r5.<javax.swing.JLabel: void setName(java.lang.String)>("OptionPane.label");
+
+        specialinvoke r1.<javax.swing.plaf.basic.BasicOptionPaneUI: void configureMessageLabel(javax.swing.JLabel)>($r5);
+
+        virtualinvoke r2.<java.awt.Container: java.awt.Component add(java.awt.Component)>($r5);
+
+        return;
+    }
+
+    protected java.awt.Container createSeparator()
+    {
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        return null;
+    }
+
+    protected java.awt.Container createButtonArea()
+    {
+        java.lang.Object[] $r10;
+        javax.swing.plaf.basic.BasicOptionPaneUI$ButtonAreaLayout $r5;
+        javax.swing.border.Border r4;
+        javax.swing.plaf.basic.BasicOptionPaneUI r1;
+        int $i0, $i1, $i2;
+        boolean $z0, $z1;
+        javax.swing.JOptionPane $r2, $r6, $r7, $r8, $r9;
+        java.lang.Object $r3;
+        javax.swing.JPanel $r0;
+
+        r1 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        $r0 = new javax.swing.JPanel;
+
+        specialinvoke $r0.<javax.swing.JPanel: void <init>()>();
+
+        $r2 = r1.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r3 = staticinvoke <sun.swing.DefaultLookup: java.lang.Object get(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String)>($r2, r1, "OptionPane.buttonAreaBorder");
+
+        r4 = (javax.swing.border.Border) $r3;
+
+        virtualinvoke $r0.<javax.swing.JPanel: void setName(java.lang.String)>("OptionPane.buttonArea");
+
+        if r4 == null goto label1;
+
+        virtualinvoke $r0.<javax.swing.JPanel: void setBorder(javax.swing.border.Border)>(r4);
+
+     label1:
+        $r5 = new javax.swing.plaf.basic.BasicOptionPaneUI$ButtonAreaLayout;
+
+        $r6 = r1.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $z0 = staticinvoke <sun.swing.DefaultLookup: boolean getBoolean(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String,boolean)>($r6, r1, "OptionPane.sameSizeButtons", 1);
+
+        $r7 = r1.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $i0 = staticinvoke <sun.swing.DefaultLookup: int getInt(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String,int)>($r7, r1, "OptionPane.buttonPadding", 6);
+
+        $r8 = r1.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $i1 = staticinvoke <sun.swing.DefaultLookup: int getInt(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String,int)>($r8, r1, "OptionPane.buttonOrientation", 0);
+
+        $r9 = r1.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $z1 = staticinvoke <sun.swing.DefaultLookup: boolean getBoolean(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String,boolean)>($r9, r1, "OptionPane.isYesLast", 0);
+
+        specialinvoke $r5.<javax.swing.plaf.basic.BasicOptionPaneUI$ButtonAreaLayout: void <init>(boolean,int,int,boolean)>($z0, $i0, $i1, $z1);
+
+        virtualinvoke $r0.<javax.swing.JPanel: void setLayout(java.awt.LayoutManager)>($r5);
+
+        $r10 = virtualinvoke r1.<javax.swing.plaf.basic.BasicOptionPaneUI: java.lang.Object[] getButtons()>();
+
+        $i2 = virtualinvoke r1.<javax.swing.plaf.basic.BasicOptionPaneUI: int getInitialValueIndex()>();
+
+        virtualinvoke r1.<javax.swing.plaf.basic.BasicOptionPaneUI: void addButtonComponents(java.awt.Container,java.lang.Object[],int)>($r0, $r10, $i2);
+
+        return $r0;
+    }
+
+    protected void addButtonComponents(java.awt.Container, java.lang.Object[], int)
+    {
+        byte $b8, b9;
+        javax.swing.plaf.basic.BasicOptionPaneUI r1;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, z6, $z7, $z8, z9, z10, z11;
+        javax.swing.Icon $r13;
+        java.awt.Component $r7, $r8, r17;
+        java.awt.Dimension $r11;
+        javax.swing.plaf.basic.BasicOptionPaneUI$2 $r9;
+        java.awt.Insets $r4;
+        javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory $r14;
+        java.lang.Object[] r0;
+        java.awt.event.ActionListener $r20;
+        long $l7;
+        javax.swing.plaf.basic.BasicOptionPaneUI$ButtonAreaLayout $r22;
+        int $i0, i1, i2, $i3, i4, i5, $i6, i10;
+        java.awt.Container r2;
+        java.lang.String $r6;
+        java.awt.LayoutManager $r3;
+        javax.swing.JButton $r5, $r10, $r12, r18, r21, r24;
+        javax.swing.JOptionPane $r19, $r23;
+        javax.swing.JButton[] r15;
+        java.lang.Object r16;
+
+        r1 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        r2 := @parameter0: java.awt.Container;
+
+        r0 := @parameter1: java.lang.Object[];
+
+        i2 := @parameter2: int;
+
+        if r0 == null goto label17;
+
+        $i0 = lengthof r0;
+
+        if $i0 <= 0 goto label17;
+
+        $z0 = virtualinvoke r1.<javax.swing.plaf.basic.BasicOptionPaneUI: boolean getSizeButtonsToSameWidth()>();
+
+        z6 = 1;
+
+        z11 = 1;
+
+        z10 = 1;
+
+        z9 = 1;
+
+        i1 = lengthof r0;
+
+        r15 = null;
+
+        i4 = 0;
+
+        if $z0 == 0 goto label01;
+
+        r15 = newarray (javax.swing.JButton)[i1];
+
+     label01:
+        i5 = 0;
+
+     label02:
+        if i5 >= i1 goto label11;
+
+        r16 = r0[i5];
+
+        $z1 = r16 instanceof java.awt.Component;
+
+        if $z1 == 0 goto label03;
+
+        z6 = 0;
+
+        z11 = 0;
+
+        z10 = 0;
+
+        z9 = 0;
+
+        r17 = (java.awt.Component) r16;
+
+        virtualinvoke r2.<java.awt.Container: java.awt.Component add(java.awt.Component)>(r17);
+
+        r1.<javax.swing.plaf.basic.BasicOptionPaneUI: boolean hasCustomComponents> = 1;
+
+        goto label08;
+
+     label03:
+        $z2 = r16 instanceof javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory;
+
+        if $z2 == 0 goto label04;
+
+        $r14 = (javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory) r16;
+
+        r18 = virtualinvoke $r14.<javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory: javax.swing.JButton createButton()>();
+
+        goto label06;
+
+     label04:
+        $z3 = r16 instanceof javax.swing.Icon;
+
+        if $z3 == 0 goto label05;
+
+        $r12 = new javax.swing.JButton;
+
+        $r13 = (javax.swing.Icon) r16;
+
+        specialinvoke $r12.<javax.swing.JButton: void <init>(javax.swing.Icon)>($r13);
+
+        r18 = $r12;
+
+        goto label06;
+
+     label05:
+        $r5 = new javax.swing.JButton;
+
+        $r6 = virtualinvoke r16.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r5.<javax.swing.JButton: void <init>(java.lang.String)>($r6);
+
+        r18 = $r5;
+
+     label06:
+        virtualinvoke r18.<javax.swing.JButton: void setName(java.lang.String)>("OptionPane.button");
+
+        $r19 = r1.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $i6 = staticinvoke <sun.swing.DefaultLookup: int getInt(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String,int)>($r19, r1, "OptionPane.buttonClickThreshhold", 0);
+
+        $l7 = (long) $i6;
+
+        virtualinvoke r18.<javax.swing.JButton: void setMultiClickThreshhold(long)>($l7);
+
+        specialinvoke r1.<javax.swing.plaf.basic.BasicOptionPaneUI: void configureButton(javax.swing.JButton)>(r18);
+
+        virtualinvoke r2.<java.awt.Container: java.awt.Component add(java.awt.Component)>(r18);
+
+        $r20 = virtualinvoke r1.<javax.swing.plaf.basic.BasicOptionPaneUI: java.awt.event.ActionListener createButtonActionListener(int)>(i5);
+
+        if $r20 == null goto label07;
+
+        virtualinvoke r18.<javax.swing.JButton: void addActionListener(java.awt.event.ActionListener)>($r20);
+
+     label07:
+        r17 = r18;
+
+     label08:
+        if $z0 == 0 goto label09;
+
+        if z11 == 0 goto label09;
+
+        $z5 = r17 instanceof javax.swing.JButton;
+
+        if $z5 == 0 goto label09;
+
+        $r10 = (javax.swing.JButton) r17;
+
+        r15[i5] = $r10;
+
+        $r11 = virtualinvoke r17.<java.awt.Component: java.awt.Dimension getMinimumSize()>();
+
+        $i3 = $r11.<java.awt.Dimension: int width>;
+
+        i4 = staticinvoke <java.lang.Math: int max(int,int)>(i4, $i3);
+
+     label09:
+        if i5 != i2 goto label10;
+
+        r1.<javax.swing.plaf.basic.BasicOptionPaneUI: java.awt.Component initialFocusComponent> = r17;
+
+        $r7 = r1.<javax.swing.plaf.basic.BasicOptionPaneUI: java.awt.Component initialFocusComponent>;
+
+        $z4 = $r7 instanceof javax.swing.JButton;
+
+        if $z4 == 0 goto label10;
+
+        $r8 = r1.<javax.swing.plaf.basic.BasicOptionPaneUI: java.awt.Component initialFocusComponent>;
+
+        r21 = (javax.swing.JButton) $r8;
+
+        $r9 = new javax.swing.plaf.basic.BasicOptionPaneUI$2;
+
+        specialinvoke $r9.<javax.swing.plaf.basic.BasicOptionPaneUI$2: void <init>(javax.swing.plaf.basic.BasicOptionPaneUI)>(r1);
+
+        virtualinvoke r21.<javax.swing.JButton: void addHierarchyListener(java.awt.event.HierarchyListener)>($r9);
+
+     label10:
+        i5 = i5 + 1;
+
+        goto label02;
+
+     label11:
+        $r3 = virtualinvoke r2.<java.awt.Container: java.awt.LayoutManager getLayout()>();
+
+        $r22 = (javax.swing.plaf.basic.BasicOptionPaneUI$ButtonAreaLayout) $r3;
+
+        if $z0 == 0 goto label12;
+
+        if z9 == 0 goto label12;
+
+        $z7 = 1;
+
+        goto label13;
+
+     label12:
+        $z7 = 0;
+
+     label13:
+        virtualinvoke $r22.<javax.swing.plaf.basic.BasicOptionPaneUI$ButtonAreaLayout: void setSyncAllWidths(boolean)>($z7);
+
+        $r23 = r1.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $z8 = staticinvoke <sun.swing.DefaultLookup: boolean getBoolean(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String,boolean)>($r23, r1, "OptionPane.setButtonMargin", 1);
+
+        if $z8 == 0 goto label17;
+
+        if $z0 == 0 goto label17;
+
+        if z10 == 0 goto label17;
+
+        if i1 > 2 goto label14;
+
+        $b8 = 8;
+
+        goto label15;
+
+     label14:
+        $b8 = 4;
+
+     label15:
+        b9 = $b8;
+
+        i10 = 0;
+
+     label16:
+        if i10 >= i1 goto label17;
+
+        r24 = r15[i10];
+
+        $r4 = new java.awt.Insets;
+
+        specialinvoke $r4.<java.awt.Insets: void <init>(int,int,int,int)>(2, b9, 2, b9);
+
+        virtualinvoke r24.<javax.swing.JButton: void setMargin(java.awt.Insets)>($r4);
+
+        i10 = i10 + 1;
+
+        goto label16;
+
+     label17:
+        return;
+    }
+
+    protected java.awt.event.ActionListener createButtonActionListener(int)
+    {
+        int i0;
+        javax.swing.plaf.basic.BasicOptionPaneUI r1;
+        javax.swing.plaf.basic.BasicOptionPaneUI$ButtonActionListener $r0;
+
+        r1 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        i0 := @parameter0: int;
+
+        $r0 = new javax.swing.plaf.basic.BasicOptionPaneUI$ButtonActionListener;
+
+        specialinvoke $r0.<javax.swing.plaf.basic.BasicOptionPaneUI$ButtonActionListener: void <init>(javax.swing.plaf.basic.BasicOptionPaneUI,int)>(r1, i0);
+
+        return $r0;
+    }
+
+    protected java.lang.Object[] getButtons()
+    {
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+        java.util.Locale $r6;
+        javax.swing.Icon $r12, $r17, $r22, $r27, $r32, $r37, $r42, $r47;
+        javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory $r49, $r50, $r51, $r52, $r53, $r54, $r55, $r56;
+        java.lang.Object[] $r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i11;
+        java.lang.String $r9, $r14, $r19, $r24, $r29, $r34, $r39, $r44;
+        javax.swing.JOptionPane $r1, $r2, $r4, $r5, $r7, $r10, $r15, $r20, $r25, $r30, $r35, $r40, $r45;
+        javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory[] r48;
+        java.lang.Object $r11, $r16, $r21, $r26, $r31, $r36, $r41, $r46;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        if $r1 == null goto label6;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.JOptionPane: java.lang.Object[] getOptions()>();
+
+        if $r3 != null goto label5;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $i0 = virtualinvoke $r4.<javax.swing.JOptionPane: int getOptionType()>();
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r6 = virtualinvoke $r5.<javax.swing.JOptionPane: java.util.Locale getLocale()>();
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $i11 = (int) -1;
+
+        $i1 = staticinvoke <sun.swing.DefaultLookup: int getInt(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String,int)>($r7, r0, "OptionPane.buttonMinimumWidth", $i11);
+
+        if $i0 != 0 goto label1;
+
+        r48 = newarray (javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory)[2];
+
+        $r49 = new javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory;
+
+        $r39 = staticinvoke <javax.swing.UIManager: java.lang.String getString(java.lang.Object,java.util.Locale)>("OptionPane.yesButtonText", $r6);
+
+        $i8 = specialinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: int getMnemonic(java.lang.String,java.util.Locale)>("OptionPane.yesButtonMnemonic", $r6);
+
+        $r40 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r41 = staticinvoke <sun.swing.DefaultLookup: java.lang.Object get(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String)>($r40, r0, "OptionPane.yesIcon");
+
+        $r42 = (javax.swing.Icon) $r41;
+
+        specialinvoke $r49.<javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory: void <init>(java.lang.String,int,javax.swing.Icon,int)>($r39, $i8, $r42, $i1);
+
+        r48[0] = $r49;
+
+        $r50 = new javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory;
+
+        $r44 = staticinvoke <javax.swing.UIManager: java.lang.String getString(java.lang.Object,java.util.Locale)>("OptionPane.noButtonText", $r6);
+
+        $i9 = specialinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: int getMnemonic(java.lang.String,java.util.Locale)>("OptionPane.noButtonMnemonic", $r6);
+
+        $r45 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r46 = staticinvoke <sun.swing.DefaultLookup: java.lang.Object get(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String)>($r45, r0, "OptionPane.noIcon");
+
+        $r47 = (javax.swing.Icon) $r46;
+
+        specialinvoke $r50.<javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory: void <init>(java.lang.String,int,javax.swing.Icon,int)>($r44, $i9, $r47, $i1);
+
+        r48[1] = $r50;
+
+        goto label4;
+
+     label1:
+        if $i0 != 1 goto label2;
+
+        r48 = newarray (javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory)[3];
+
+        $r51 = new javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory;
+
+        $r24 = staticinvoke <javax.swing.UIManager: java.lang.String getString(java.lang.Object,java.util.Locale)>("OptionPane.yesButtonText", $r6);
+
+        $i5 = specialinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: int getMnemonic(java.lang.String,java.util.Locale)>("OptionPane.yesButtonMnemonic", $r6);
+
+        $r25 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r26 = staticinvoke <sun.swing.DefaultLookup: java.lang.Object get(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String)>($r25, r0, "OptionPane.yesIcon");
+
+        $r27 = (javax.swing.Icon) $r26;
+
+        specialinvoke $r51.<javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory: void <init>(java.lang.String,int,javax.swing.Icon,int)>($r24, $i5, $r27, $i1);
+
+        r48[0] = $r51;
+
+        $r52 = new javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory;
+
+        $r29 = staticinvoke <javax.swing.UIManager: java.lang.String getString(java.lang.Object,java.util.Locale)>("OptionPane.noButtonText", $r6);
+
+        $i6 = specialinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: int getMnemonic(java.lang.String,java.util.Locale)>("OptionPane.noButtonMnemonic", $r6);
+
+        $r30 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r31 = staticinvoke <sun.swing.DefaultLookup: java.lang.Object get(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String)>($r30, r0, "OptionPane.noIcon");
+
+        $r32 = (javax.swing.Icon) $r31;
+
+        specialinvoke $r52.<javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory: void <init>(java.lang.String,int,javax.swing.Icon,int)>($r29, $i6, $r32, $i1);
+
+        r48[1] = $r52;
+
+        $r53 = new javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory;
+
+        $r34 = staticinvoke <javax.swing.UIManager: java.lang.String getString(java.lang.Object,java.util.Locale)>("OptionPane.cancelButtonText", $r6);
+
+        $i7 = specialinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: int getMnemonic(java.lang.String,java.util.Locale)>("OptionPane.cancelButtonMnemonic", $r6);
+
+        $r35 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r36 = staticinvoke <sun.swing.DefaultLookup: java.lang.Object get(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String)>($r35, r0, "OptionPane.cancelIcon");
+
+        $r37 = (javax.swing.Icon) $r36;
+
+        specialinvoke $r53.<javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory: void <init>(java.lang.String,int,javax.swing.Icon,int)>($r34, $i7, $r37, $i1);
+
+        r48[2] = $r53;
+
+        goto label4;
+
+     label2:
+        if $i0 != 2 goto label3;
+
+        r48 = newarray (javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory)[2];
+
+        $r54 = new javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory;
+
+        $r14 = staticinvoke <javax.swing.UIManager: java.lang.String getString(java.lang.Object,java.util.Locale)>("OptionPane.okButtonText", $r6);
+
+        $i3 = specialinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: int getMnemonic(java.lang.String,java.util.Locale)>("OptionPane.okButtonMnemonic", $r6);
+
+        $r15 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r16 = staticinvoke <sun.swing.DefaultLookup: java.lang.Object get(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String)>($r15, r0, "OptionPane.okIcon");
+
+        $r17 = (javax.swing.Icon) $r16;
+
+        specialinvoke $r54.<javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory: void <init>(java.lang.String,int,javax.swing.Icon,int)>($r14, $i3, $r17, $i1);
+
+        r48[0] = $r54;
+
+        $r55 = new javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory;
+
+        $r19 = staticinvoke <javax.swing.UIManager: java.lang.String getString(java.lang.Object,java.util.Locale)>("OptionPane.cancelButtonText", $r6);
+
+        $i4 = specialinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: int getMnemonic(java.lang.String,java.util.Locale)>("OptionPane.cancelButtonMnemonic", $r6);
+
+        $r20 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r21 = staticinvoke <sun.swing.DefaultLookup: java.lang.Object get(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String)>($r20, r0, "OptionPane.cancelIcon");
+
+        $r22 = (javax.swing.Icon) $r21;
+
+        specialinvoke $r55.<javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory: void <init>(java.lang.String,int,javax.swing.Icon,int)>($r19, $i4, $r22, $i1);
+
+        r48[1] = $r55;
+
+        goto label4;
+
+     label3:
+        r48 = newarray (javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory)[1];
+
+        $r56 = new javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory;
+
+        $r9 = staticinvoke <javax.swing.UIManager: java.lang.String getString(java.lang.Object,java.util.Locale)>("OptionPane.okButtonText", $r6);
+
+        $i2 = specialinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: int getMnemonic(java.lang.String,java.util.Locale)>("OptionPane.okButtonMnemonic", $r6);
+
+        $r10 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r11 = staticinvoke <sun.swing.DefaultLookup: java.lang.Object get(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String)>($r10, r0, "OptionPane.okIcon");
+
+        $r12 = (javax.swing.Icon) $r11;
+
+        specialinvoke $r56.<javax.swing.plaf.basic.BasicOptionPaneUI$ButtonFactory: void <init>(java.lang.String,int,javax.swing.Icon,int)>($r9, $i2, $r12, $i1);
+
+        r48[0] = $r56;
+
+     label4:
+        return r48;
+
+     label5:
+        return $r3;
+
+     label6:
+        return null;
+    }
+
+    private int getMnemonic(java.lang.String, java.util.Locale)
+    {
+        javax.swing.plaf.basic.BasicOptionPaneUI r5;
+        java.util.Locale r1;
+        int $i0;
+        java.lang.Object $r2;
+        java.lang.NumberFormatException $r4;
+        java.lang.String r0, r3;
+
+        r5 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.util.Locale;
+
+        $r2 = staticinvoke <javax.swing.UIManager: java.lang.Object get(java.lang.Object,java.util.Locale)>(r0, r1);
+
+        r3 = (java.lang.String) $r2;
+
+        if r3 != null goto label1;
+
+        return 0;
+
+     label1:
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>(r3);
+
+     label2:
+        return $i0;
+
+     label3:
+        $r4 := @caughtexception;
+
+        return 0;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label3;
+    }
+
+    protected boolean getSizeButtonsToSameWidth()
+    {
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        return 1;
+    }
+
+    protected int getInitialValueIndex()
+    {
+        java.lang.Object[] $r5;
+        javax.swing.JOptionPane $r1, $r2, $r4;
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+        int $i0, i1, $i3, $i5;
+        java.lang.Object $r3, $r6;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        if $r1 == null goto label4;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.JOptionPane: java.lang.Object getInitialValue()>();
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r5 = virtualinvoke $r4.<javax.swing.JOptionPane: java.lang.Object[] getOptions()>();
+
+        if $r5 != null goto label1;
+
+        return 0;
+
+     label1:
+        if $r3 == null goto label4;
+
+        $i0 = lengthof $r5;
+
+        i1 = $i0 - 1;
+
+     label2:
+        if i1 < 0 goto label4;
+
+        $r6 = $r5[i1];
+
+        $z0 = virtualinvoke $r6.<java.lang.Object: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label3;
+
+        return i1;
+
+     label3:
+        $i3 = (int) -1;
+
+        i1 = i1 + $i3;
+
+        goto label2;
+
+     label4:
+        $i5 = (int) -1;
+
+        return $i5;
+    }
+
+    protected void resetInputValue()
+    {
+        javax.swing.JTextField $r15;
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+        java.lang.String $r17;
+        javax.swing.JComboBox $r10;
+        boolean $z0, $z1;
+        javax.swing.JComponent $r1, $r2, $r3, $r4, $r8, $r9, $r13, $r14;
+        javax.swing.JList $r5;
+        javax.swing.JOptionPane $r6, $r11, $r16;
+        java.lang.Object $r7, $r12;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JComponent inputComponent>;
+
+        if $r1 == null goto label1;
+
+        $r13 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JComponent inputComponent>;
+
+        $z1 = $r13 instanceof javax.swing.JTextField;
+
+        if $z1 == 0 goto label1;
+
+        $r16 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r14 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JComponent inputComponent>;
+
+        $r15 = (javax.swing.JTextField) $r14;
+
+        $r17 = virtualinvoke $r15.<javax.swing.JTextField: java.lang.String getText()>();
+
+        virtualinvoke $r16.<javax.swing.JOptionPane: void setInputValue(java.lang.Object)>($r17);
+
+        goto label3;
+
+     label1:
+        $r2 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JComponent inputComponent>;
+
+        if $r2 == null goto label2;
+
+        $r8 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JComponent inputComponent>;
+
+        $z0 = $r8 instanceof javax.swing.JComboBox;
+
+        if $z0 == 0 goto label2;
+
+        $r11 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JComponent inputComponent>;
+
+        $r10 = (javax.swing.JComboBox) $r9;
+
+        $r12 = virtualinvoke $r10.<javax.swing.JComboBox: java.lang.Object getSelectedItem()>();
+
+        virtualinvoke $r11.<javax.swing.JOptionPane: void setInputValue(java.lang.Object)>($r12);
+
+        goto label3;
+
+     label2:
+        $r3 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JComponent inputComponent>;
+
+        if $r3 == null goto label3;
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JComponent inputComponent>;
+
+        $r5 = (javax.swing.JList) $r4;
+
+        $r7 = virtualinvoke $r5.<javax.swing.JList: java.lang.Object getSelectedValue()>();
+
+        virtualinvoke $r6.<javax.swing.JOptionPane: void setInputValue(java.lang.Object)>($r7);
+
+     label3:
+        return;
+    }
+
+    public void selectInitialValue(javax.swing.JOptionPane)
+    {
+        javax.swing.JComponent $r1, $r9;
+        javax.swing.JRootPane $r5;
+        javax.swing.JButton $r7;
+        javax.swing.JOptionPane r10;
+        java.awt.Component $r2, $r3, $r4, $r6, $r8;
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        r10 := @parameter0: javax.swing.JOptionPane;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JComponent inputComponent>;
+
+        if $r1 == null goto label1;
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JComponent inputComponent>;
+
+        virtualinvoke $r9.<javax.swing.JComponent: void requestFocus()>();
+
+        goto label3;
+
+     label1:
+        $r2 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: java.awt.Component initialFocusComponent>;
+
+        if $r2 == null goto label2;
+
+        $r8 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: java.awt.Component initialFocusComponent>;
+
+        virtualinvoke $r8.<java.awt.Component: void requestFocus()>();
+
+     label2:
+        $r3 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: java.awt.Component initialFocusComponent>;
+
+        $z0 = $r3 instanceof javax.swing.JButton;
+
+        if $z0 == 0 goto label3;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: java.awt.Component initialFocusComponent>;
+
+        $r5 = staticinvoke <javax.swing.SwingUtilities: javax.swing.JRootPane getRootPane(java.awt.Component)>($r4);
+
+        if $r5 == null goto label3;
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: java.awt.Component initialFocusComponent>;
+
+        $r7 = (javax.swing.JButton) $r6;
+
+        virtualinvoke $r5.<javax.swing.JRootPane: void setDefaultButton(javax.swing.JButton)>($r7);
+
+     label3:
+        return;
+    }
+
+    public boolean containsCustomComponents(javax.swing.JOptionPane)
+    {
+        javax.swing.JOptionPane r1;
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        r1 := @parameter0: javax.swing.JOptionPane;
+
+        $z0 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: boolean hasCustomComponents>;
+
+        return $z0;
+    }
+
+    private void configureMessageLabel(javax.swing.JLabel)
+    {
+        java.awt.Color r3;
+        java.awt.Font $r7;
+        javax.swing.JOptionPane $r1, $r4;
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+        javax.swing.JLabel r6;
+        java.lang.Object $r2, $r5;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        r6 := @parameter0: javax.swing.JLabel;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r2 = staticinvoke <sun.swing.DefaultLookup: java.lang.Object get(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String)>($r1, r0, "OptionPane.messageForeground");
+
+        r3 = (java.awt.Color) $r2;
+
+        if r3 == null goto label1;
+
+        virtualinvoke r6.<javax.swing.JLabel: void setForeground(java.awt.Color)>(r3);
+
+     label1:
+        $r4 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r5 = staticinvoke <sun.swing.DefaultLookup: java.lang.Object get(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String)>($r4, r0, "OptionPane.messageFont");
+
+        $r7 = (java.awt.Font) $r5;
+
+        if $r7 == null goto label2;
+
+        virtualinvoke r6.<javax.swing.JLabel: void setFont(java.awt.Font)>($r7);
+
+     label2:
+        return;
+    }
+
+    private void configureButton(javax.swing.JButton)
+    {
+        javax.swing.JButton r4;
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+        java.awt.Font r3;
+        java.lang.Object $r2;
+        javax.swing.JOptionPane $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        r4 := @parameter0: javax.swing.JButton;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.JOptionPane optionPane>;
+
+        $r2 = staticinvoke <sun.swing.DefaultLookup: java.lang.Object get(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String)>($r1, r0, "OptionPane.buttonFont");
+
+        r3 = (java.awt.Font) $r2;
+
+        if r3 == null goto label1;
+
+        virtualinvoke r4.<javax.swing.JButton: void setFont(java.awt.Font)>(r3);
+
+     label1:
+        return;
+    }
+
+    static javax.swing.plaf.basic.BasicOptionPaneUI$Handler access$100(javax.swing.plaf.basic.BasicOptionPaneUI)
+    {
+        javax.swing.plaf.basic.BasicOptionPaneUI$Handler $r1;
+        javax.swing.plaf.basic.BasicOptionPaneUI r0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicOptionPaneUI;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicOptionPaneUI: javax.swing.plaf.basic.BasicOptionPaneUI$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Object $r1;
+        java.lang.String $r2, $r3;
+        sun.security.action.GetPropertyAction $r0;
+
+        <javax.swing.plaf.basic.BasicOptionPaneUI: int MinimumHeight> = 90;
+
+        <javax.swing.plaf.basic.BasicOptionPaneUI: int MinimumWidth> = 262;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("line.separator");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r2 = (java.lang.String) $r1;
+
+        <javax.swing.plaf.basic.BasicOptionPaneUI: java.lang.String newline> = $r2;
+
+        $r3 = <javax.swing.plaf.basic.BasicOptionPaneUI: java.lang.String newline>;
+
+        if $r3 != null goto label1;
+
+        <javax.swing.plaf.basic.BasicOptionPaneUI: java.lang.String newline> = "\n";
+
+     label1:
+        return;
+    }
+}

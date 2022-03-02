@@ -1,0 +1,4359 @@
+public class java.awt.Font extends java.lang.Object implements java.io.Serializable
+{
+    private java.util.Hashtable fRequestedAttributes;
+    public static final java.lang.String DIALOG;
+    public static final java.lang.String DIALOG_INPUT;
+    public static final java.lang.String SANS_SERIF;
+    public static final java.lang.String SERIF;
+    public static final java.lang.String MONOSPACED;
+    public static final int PLAIN;
+    public static final int BOLD;
+    public static final int ITALIC;
+    public static final int ROMAN_BASELINE;
+    public static final int CENTER_BASELINE;
+    public static final int HANGING_BASELINE;
+    public static final int TRUETYPE_FONT;
+    public static final int TYPE1_FONT;
+    protected java.lang.String name;
+    protected int style;
+    protected int size;
+    protected float pointSize;
+    private transient java.awt.peer.FontPeer peer;
+    private transient long pData;
+    private transient sun.font.Font2DHandle font2DHandle;
+    private transient sun.font.AttributeValues values;
+    private transient boolean hasLayoutAttributes;
+    private transient boolean createdFont;
+    private transient boolean nonIdentityTx;
+    private static final java.awt.geom.AffineTransform identityTx;
+    private static final long serialVersionUID;
+    private static final int RECOGNIZED_MASK;
+    private static final int PRIMARY_MASK;
+    private static final int SECONDARY_MASK;
+    private static final int LAYOUT_MASK;
+    private static final int EXTRA_MASK;
+    private static final float[] ssinfo;
+    transient int hash;
+    private int fontSerializedDataVersion;
+    private transient java.lang.ref.SoftReference flmref;
+    public static final int LAYOUT_LEFT_TO_RIGHT;
+    public static final int LAYOUT_RIGHT_TO_LEFT;
+    public static final int LAYOUT_NO_START_CONTEXT;
+    public static final int LAYOUT_NO_LIMIT_CONTEXT;
+
+    public java.awt.peer.FontPeer getPeer()
+    {
+        java.awt.peer.FontPeer $r1;
+        java.awt.Font r0;
+
+        r0 := @this: java.awt.Font;
+
+        $r1 = virtualinvoke r0.<java.awt.Font: java.awt.peer.FontPeer getPeer_NoClientCode()>();
+
+        return $r1;
+    }
+
+    final java.awt.peer.FontPeer getPeer_NoClientCode()
+    {
+        java.awt.Font r0;
+        int $i0;
+        java.awt.peer.FontPeer $r1, $r2, $r5;
+        java.lang.String $r4;
+        java.awt.Toolkit $r3;
+
+        r0 := @this: java.awt.Font;
+
+        $r1 = r0.<java.awt.Font: java.awt.peer.FontPeer peer>;
+
+        if $r1 != null goto label1;
+
+        $r3 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r4 = r0.<java.awt.Font: java.lang.String name>;
+
+        $i0 = r0.<java.awt.Font: int style>;
+
+        $r5 = virtualinvoke $r3.<java.awt.Toolkit: java.awt.peer.FontPeer getFontPeer(java.lang.String,int)>($r4, $i0);
+
+        r0.<java.awt.Font: java.awt.peer.FontPeer peer> = $r5;
+
+     label1:
+        $r2 = r0.<java.awt.Font: java.awt.peer.FontPeer peer>;
+
+        return $r2;
+    }
+
+    private sun.font.AttributeValues getAttributeValues()
+    {
+        java.awt.Font r0;
+        sun.font.AttributeValues $r1, $r2, $r4;
+        int $i0, $i1, $i2, $i3, $i4;
+        float $f0;
+        java.lang.String $r3;
+
+        r0 := @this: java.awt.Font;
+
+        $r1 = r0.<java.awt.Font: sun.font.AttributeValues values>;
+
+        if $r1 != null goto label3;
+
+        $r2 = new sun.font.AttributeValues;
+
+        specialinvoke $r2.<sun.font.AttributeValues: void <init>()>();
+
+        $r3 = r0.<java.awt.Font: java.lang.String name>;
+
+        virtualinvoke $r2.<sun.font.AttributeValues: void setFamily(java.lang.String)>($r3);
+
+        $f0 = r0.<java.awt.Font: float pointSize>;
+
+        virtualinvoke $r2.<sun.font.AttributeValues: void setSize(float)>($f0);
+
+        $i0 = r0.<java.awt.Font: int style>;
+
+        $i1 = $i0 & 1;
+
+        if $i1 == 0 goto label1;
+
+        virtualinvoke $r2.<sun.font.AttributeValues: void setWeight(float)>(2.0F);
+
+     label1:
+        $i2 = r0.<java.awt.Font: int style>;
+
+        $i3 = $i2 & 2;
+
+        if $i3 == 0 goto label2;
+
+        virtualinvoke $r2.<sun.font.AttributeValues: void setPosture(float)>(0.2F);
+
+     label2:
+        $i4 = <java.awt.Font: int PRIMARY_MASK>;
+
+        virtualinvoke $r2.<sun.font.AttributeValues: void defineAll(int)>($i4);
+
+        r0.<java.awt.Font: sun.font.AttributeValues values> = $r2;
+
+     label3:
+        $r4 = r0.<java.awt.Font: sun.font.AttributeValues values>;
+
+        return $r4;
+    }
+
+    private sun.font.Font2D getFont2D()
+    {
+        sun.font.CompositeFont $r12, $r13;
+        sun.font.Font2DHandle $r2, $r6, $r7, $r8, $r10, $r16;
+        int $i0, $i1;
+        java.lang.String $r4, $r14;
+        boolean $z0, $z1, $z2;
+        java.awt.Font r1;
+        sun.font.Font2D $r3, $r5, $r9, $r11, $r15;
+        sun.font.FontManager $r0;
+
+        r1 := @this: java.awt.Font;
+
+        $r0 = staticinvoke <sun.font.FontManagerFactory: sun.font.FontManager getInstance()>();
+
+        $z0 = interfaceinvoke $r0.<sun.font.FontManager: boolean usingPerAppContextComposites()>();
+
+        if $z0 == 0 goto label1;
+
+        $r7 = r1.<java.awt.Font: sun.font.Font2DHandle font2DHandle>;
+
+        if $r7 == null goto label1;
+
+        $r8 = r1.<java.awt.Font: sun.font.Font2DHandle font2DHandle>;
+
+        $r9 = $r8.<sun.font.Font2DHandle: sun.font.Font2D font2D>;
+
+        $z1 = $r9 instanceof sun.font.CompositeFont;
+
+        if $z1 == 0 goto label1;
+
+        $r10 = r1.<java.awt.Font: sun.font.Font2DHandle font2DHandle>;
+
+        $r11 = $r10.<sun.font.Font2DHandle: sun.font.Font2D font2D>;
+
+        $r12 = (sun.font.CompositeFont) $r11;
+
+        $r13 = (sun.font.CompositeFont) $r12;
+
+        $z2 = virtualinvoke $r13.<sun.font.CompositeFont: boolean isStdComposite()>();
+
+        if $z2 == 0 goto label1;
+
+        $r14 = r1.<java.awt.Font: java.lang.String name>;
+
+        $i1 = r1.<java.awt.Font: int style>;
+
+        $r15 = interfaceinvoke $r0.<sun.font.FontManager: sun.font.Font2D findFont2D(java.lang.String,int,int)>($r14, $i1, 2);
+
+        return $r15;
+
+     label1:
+        $r16 = r1.<java.awt.Font: sun.font.Font2DHandle font2DHandle>;
+
+        if $r16 != null goto label2;
+
+        $r4 = r1.<java.awt.Font: java.lang.String name>;
+
+        $i0 = r1.<java.awt.Font: int style>;
+
+        $r5 = interfaceinvoke $r0.<sun.font.FontManager: sun.font.Font2D findFont2D(java.lang.String,int,int)>($r4, $i0, 2);
+
+        $r6 = $r5.<sun.font.Font2D: sun.font.Font2DHandle handle>;
+
+        r1.<java.awt.Font: sun.font.Font2DHandle font2DHandle> = $r6;
+
+     label2:
+        $r2 = r1.<java.awt.Font: sun.font.Font2DHandle font2DHandle>;
+
+        $r3 = $r2.<sun.font.Font2DHandle: sun.font.Font2D font2D>;
+
+        return $r3;
+    }
+
+    public void <init>(java.lang.String, int, int)
+    {
+        java.awt.Font r0;
+        int i0, $i1, i2, $i3, $i5;
+        float $f0;
+        java.lang.String r1, $r2;
+
+        r0 := @this: java.awt.Font;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.awt.Font: boolean createdFont> = 0;
+
+        r0.<java.awt.Font: int fontSerializedDataVersion> = 1;
+
+        if r1 == null goto label1;
+
+        $r2 = r1;
+
+        goto label2;
+
+     label1:
+        $r2 = "Default";
+
+     label2:
+        r0.<java.awt.Font: java.lang.String name> = $r2;
+
+        $i5 = (int) -4;
+
+        $i1 = i0 & $i5;
+
+        if $i1 != 0 goto label3;
+
+        $i3 = i0;
+
+        goto label4;
+
+     label3:
+        $i3 = 0;
+
+     label4:
+        r0.<java.awt.Font: int style> = $i3;
+
+        r0.<java.awt.Font: int size> = i2;
+
+        $f0 = (float) i2;
+
+        r0.<java.awt.Font: float pointSize> = $f0;
+
+        return;
+    }
+
+    private void <init>(java.lang.String, int, float)
+    {
+        java.awt.Font r0;
+        int i0, $i1, $i2, $i3, $i5;
+        float f0;
+        java.lang.String r1, $r2;
+        double $d0, $d1;
+
+        r0 := @this: java.awt.Font;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        f0 := @parameter2: float;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.awt.Font: boolean createdFont> = 0;
+
+        r0.<java.awt.Font: int fontSerializedDataVersion> = 1;
+
+        if r1 == null goto label1;
+
+        $r2 = r1;
+
+        goto label2;
+
+     label1:
+        $r2 = "Default";
+
+     label2:
+        r0.<java.awt.Font: java.lang.String name> = $r2;
+
+        $i5 = (int) -4;
+
+        $i1 = i0 & $i5;
+
+        if $i1 != 0 goto label3;
+
+        $i3 = i0;
+
+        goto label4;
+
+     label3:
+        $i3 = 0;
+
+     label4:
+        r0.<java.awt.Font: int style> = $i3;
+
+        $d0 = (double) f0;
+
+        $d1 = $d0 + 0.5;
+
+        $i2 = (int) $d1;
+
+        r0.<java.awt.Font: int size> = $i2;
+
+        r0.<java.awt.Font: float pointSize> = f0;
+
+        return;
+    }
+
+    private void <init>(java.lang.String, int, float, boolean, sun.font.Font2DHandle)
+    {
+        java.awt.Font r0;
+        sun.font.Font2D $r3, $r4;
+        sun.font.FontManager $r5;
+        sun.font.Font2DHandle r2, $r6;
+        int i0, $i1;
+        float f0;
+        java.lang.String r1;
+        boolean z0, $z1;
+
+        r0 := @this: java.awt.Font;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        f0 := @parameter2: float;
+
+        z0 := @parameter3: boolean;
+
+        r2 := @parameter4: sun.font.Font2DHandle;
+
+        specialinvoke r0.<java.awt.Font: void <init>(java.lang.String,int,float)>(r1, i0, f0);
+
+        r0.<java.awt.Font: boolean createdFont> = z0;
+
+        if z0 == 0 goto label2;
+
+        $r3 = r2.<sun.font.Font2DHandle: sun.font.Font2D font2D>;
+
+        $z1 = $r3 instanceof sun.font.CompositeFont;
+
+        if $z1 == 0 goto label1;
+
+        $r4 = r2.<sun.font.Font2DHandle: sun.font.Font2D font2D>;
+
+        $i1 = virtualinvoke $r4.<sun.font.Font2D: int getStyle()>();
+
+        if $i1 == i0 goto label1;
+
+        $r5 = staticinvoke <sun.font.FontManagerFactory: sun.font.FontManager getInstance()>();
+
+        $r6 = interfaceinvoke $r5.<sun.font.FontManager: sun.font.Font2DHandle getNewComposite(java.lang.String,int,sun.font.Font2DHandle)>(null, i0, r2);
+
+        r0.<java.awt.Font: sun.font.Font2DHandle font2DHandle> = $r6;
+
+        goto label2;
+
+     label1:
+        r0.<java.awt.Font: sun.font.Font2DHandle font2DHandle> = r2;
+
+     label2:
+        return;
+    }
+
+    private void <init>(java.io.File, int, boolean, sun.font.CreatedFontTracker) throws java.awt.FontFormatException
+    {
+        java.awt.Font r0;
+        sun.font.CreatedFontTracker r3;
+        java.io.File r2;
+        sun.font.Font2D $r4, $r7;
+        sun.font.FontManager $r1;
+        java.util.Locale $r8;
+        sun.font.Font2DHandle $r5, $r6;
+        int i0;
+        java.lang.String $r9;
+        boolean z0;
+
+        r0 := @this: java.awt.Font;
+
+        r2 := @parameter0: java.io.File;
+
+        i0 := @parameter1: int;
+
+        z0 := @parameter2: boolean;
+
+        r3 := @parameter3: sun.font.CreatedFontTracker;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.awt.Font: boolean createdFont> = 0;
+
+        r0.<java.awt.Font: int fontSerializedDataVersion> = 1;
+
+        r0.<java.awt.Font: boolean createdFont> = 1;
+
+        $r1 = staticinvoke <sun.font.FontManagerFactory: sun.font.FontManager getInstance()>();
+
+        $r4 = interfaceinvoke $r1.<sun.font.FontManager: sun.font.Font2D createFont2D(java.io.File,int,boolean,sun.font.CreatedFontTracker)>(r2, i0, z0, r3);
+
+        $r5 = $r4.<sun.font.Font2D: sun.font.Font2DHandle handle>;
+
+        r0.<java.awt.Font: sun.font.Font2DHandle font2DHandle> = $r5;
+
+        $r6 = r0.<java.awt.Font: sun.font.Font2DHandle font2DHandle>;
+
+        $r7 = $r6.<sun.font.Font2DHandle: sun.font.Font2D font2D>;
+
+        $r8 = staticinvoke <java.util.Locale: java.util.Locale getDefault()>();
+
+        $r9 = virtualinvoke $r7.<sun.font.Font2D: java.lang.String getFontName(java.util.Locale)>($r8);
+
+        r0.<java.awt.Font: java.lang.String name> = $r9;
+
+        r0.<java.awt.Font: int style> = 0;
+
+        r0.<java.awt.Font: int size> = 1;
+
+        r0.<java.awt.Font: float pointSize> = 1.0F;
+
+        return;
+    }
+
+    private void <init>(sun.font.AttributeValues, java.lang.String, int, boolean, sun.font.Font2DHandle)
+    {
+        sun.font.AttributeValues r1;
+        byte $b1, $b2, b3;
+        sun.font.Font2DHandle r2, $r5;
+        int i0, $i5, $i6, $i7, $i9;
+        java.lang.String r3, $r6, r7;
+        boolean z0, $z1, $z2;
+        java.awt.Font r0;
+        sun.font.Font2D $r8;
+        sun.font.FontManager $r4;
+        float $f0, $f1;
+
+        r0 := @this: java.awt.Font;
+
+        r1 := @parameter0: sun.font.AttributeValues;
+
+        r3 := @parameter1: java.lang.String;
+
+        i0 := @parameter2: int;
+
+        z0 := @parameter3: boolean;
+
+        r2 := @parameter4: sun.font.Font2DHandle;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.awt.Font: boolean createdFont> = 0;
+
+        r0.<java.awt.Font: int fontSerializedDataVersion> = 1;
+
+        r0.<java.awt.Font: boolean createdFont> = z0;
+
+        if z0 == 0 goto label8;
+
+        r0.<java.awt.Font: sun.font.Font2DHandle font2DHandle> = r2;
+
+        r7 = null;
+
+        if r3 == null goto label1;
+
+        $r6 = virtualinvoke r1.<sun.font.AttributeValues: java.lang.String getFamily()>();
+
+        r7 = $r6;
+
+        $z1 = virtualinvoke r3.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+        if $z1 == 0 goto label1;
+
+        r7 = null;
+
+     label1:
+        b3 = 0;
+
+        $i5 = (int) -1;
+
+        if i0 != $i5 goto label2;
+
+        b3 = -1;
+
+        goto label5;
+
+     label2:
+        $f0 = virtualinvoke r1.<sun.font.AttributeValues: float getWeight()>();
+
+        $b1 = $f0 cmpl 2.0F;
+
+        $i6 = (int) $b1;
+
+        if $i6 < 0 goto label3;
+
+        b3 = 1;
+
+     label3:
+        $f1 = virtualinvoke r1.<sun.font.AttributeValues: float getPosture()>();
+
+        $b2 = $f1 cmpl 0.2F;
+
+        $i7 = (int) $b2;
+
+        if $i7 < 0 goto label4;
+
+        b3 = b3 | 2;
+
+     label4:
+        if i0 != b3 goto label5;
+
+        b3 = -1;
+
+     label5:
+        $r8 = r2.<sun.font.Font2DHandle: sun.font.Font2D font2D>;
+
+        $z2 = $r8 instanceof sun.font.CompositeFont;
+
+        if $z2 == 0 goto label7;
+
+        $i9 = (int) -1;
+
+        if b3 != $i9 goto label6;
+
+        if r7 == null goto label8;
+
+     label6:
+        $r4 = staticinvoke <sun.font.FontManagerFactory: sun.font.FontManager getInstance()>();
+
+        $r5 = interfaceinvoke $r4.<sun.font.FontManager: sun.font.Font2DHandle getNewComposite(java.lang.String,int,sun.font.Font2DHandle)>(r7, b3, r2);
+
+        r0.<java.awt.Font: sun.font.Font2DHandle font2DHandle> = $r5;
+
+        goto label8;
+
+     label7:
+        if r7 == null goto label8;
+
+        r0.<java.awt.Font: boolean createdFont> = 0;
+
+        r0.<java.awt.Font: sun.font.Font2DHandle font2DHandle> = null;
+
+     label8:
+        specialinvoke r0.<java.awt.Font: void initFromValues(sun.font.AttributeValues)>(r1);
+
+        return;
+    }
+
+    public void <init>(java.util.Map)
+    {
+        sun.font.AttributeValues $r2;
+        java.awt.Font r0;
+        java.util.Map r1;
+        int $i0;
+
+        r0 := @this: java.awt.Font;
+
+        r1 := @parameter0: java.util.Map;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.awt.Font: boolean createdFont> = 0;
+
+        r0.<java.awt.Font: int fontSerializedDataVersion> = 1;
+
+        $i0 = <java.awt.Font: int RECOGNIZED_MASK>;
+
+        $r2 = staticinvoke <sun.font.AttributeValues: sun.font.AttributeValues fromMap(java.util.Map,int)>(r1, $i0);
+
+        specialinvoke r0.<java.awt.Font: void initFromValues(sun.font.AttributeValues)>($r2);
+
+        return;
+    }
+
+    protected void <init>(java.awt.Font)
+    {
+        java.awt.Font r0, r1;
+        sun.font.AttributeValues $r2, $r5, $r6;
+        sun.font.Font2DHandle $r4;
+        int $i0, $i1;
+        float $f0;
+        java.lang.String $r3;
+        boolean $z0;
+
+        r0 := @this: java.awt.Font;
+
+        r1 := @parameter0: java.awt.Font;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.awt.Font: boolean createdFont> = 0;
+
+        r0.<java.awt.Font: int fontSerializedDataVersion> = 1;
+
+        $r2 = r1.<java.awt.Font: sun.font.AttributeValues values>;
+
+        if $r2 == null goto label1;
+
+        $r5 = specialinvoke r1.<java.awt.Font: sun.font.AttributeValues getAttributeValues()>();
+
+        $r6 = virtualinvoke $r5.<sun.font.AttributeValues: sun.font.AttributeValues clone()>();
+
+        specialinvoke r0.<java.awt.Font: void initFromValues(sun.font.AttributeValues)>($r6);
+
+        goto label2;
+
+     label1:
+        $r3 = r1.<java.awt.Font: java.lang.String name>;
+
+        r0.<java.awt.Font: java.lang.String name> = $r3;
+
+        $i0 = r1.<java.awt.Font: int style>;
+
+        r0.<java.awt.Font: int style> = $i0;
+
+        $i1 = r1.<java.awt.Font: int size>;
+
+        r0.<java.awt.Font: int size> = $i1;
+
+        $f0 = r1.<java.awt.Font: float pointSize>;
+
+        r0.<java.awt.Font: float pointSize> = $f0;
+
+     label2:
+        $r4 = r1.<java.awt.Font: sun.font.Font2DHandle font2DHandle>;
+
+        r0.<java.awt.Font: sun.font.Font2DHandle font2DHandle> = $r4;
+
+        $z0 = r1.<java.awt.Font: boolean createdFont>;
+
+        r0.<java.awt.Font: boolean createdFont> = $z0;
+
+        return;
+    }
+
+    private void initFromValues(sun.font.AttributeValues)
+    {
+        sun.font.AttributeValues r1;
+        byte $b2, $b3;
+        int $i0, $i1, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11;
+        java.lang.String $r2;
+        double $d0, $d1;
+        boolean $z0, $z1;
+        java.awt.Font r0;
+        float $f0, $f1, $f2, $f3;
+
+        r0 := @this: java.awt.Font;
+
+        r1 := @parameter0: sun.font.AttributeValues;
+
+        r0.<java.awt.Font: sun.font.AttributeValues values> = r1;
+
+        $i0 = <java.awt.Font: int PRIMARY_MASK>;
+
+        virtualinvoke r1.<sun.font.AttributeValues: void defineAll(int)>($i0);
+
+        $r2 = virtualinvoke r1.<sun.font.AttributeValues: java.lang.String getFamily()>();
+
+        r0.<java.awt.Font: java.lang.String name> = $r2;
+
+        $f0 = virtualinvoke r1.<sun.font.AttributeValues: float getSize()>();
+
+        r0.<java.awt.Font: float pointSize> = $f0;
+
+        $f1 = virtualinvoke r1.<sun.font.AttributeValues: float getSize()>();
+
+        $d0 = (double) $f1;
+
+        $d1 = $d0 + 0.5;
+
+        $i1 = (int) $d1;
+
+        r0.<java.awt.Font: int size> = $i1;
+
+        $f2 = virtualinvoke r1.<sun.font.AttributeValues: float getWeight()>();
+
+        $b2 = $f2 cmpl 2.0F;
+
+        $i10 = (int) $b2;
+
+        if $i10 < 0 goto label1;
+
+        $i8 = r0.<java.awt.Font: int style>;
+
+        $i9 = $i8 | 1;
+
+        r0.<java.awt.Font: int style> = $i9;
+
+     label1:
+        $f3 = virtualinvoke r1.<sun.font.AttributeValues: float getPosture()>();
+
+        $b3 = $f3 cmpl 0.2F;
+
+        $i11 = (int) $b3;
+
+        if $i11 < 0 goto label2;
+
+        $i6 = r0.<java.awt.Font: int style>;
+
+        $i7 = $i6 | 2;
+
+        r0.<java.awt.Font: int style> = $i7;
+
+     label2:
+        $i4 = <java.awt.Font: int EXTRA_MASK>;
+
+        $z0 = virtualinvoke r1.<sun.font.AttributeValues: boolean anyNonDefault(int)>($i4);
+
+        r0.<java.awt.Font: boolean nonIdentityTx> = $z0;
+
+        $i5 = <java.awt.Font: int LAYOUT_MASK>;
+
+        $z1 = virtualinvoke r1.<sun.font.AttributeValues: boolean anyNonDefault(int)>($i5);
+
+        r0.<java.awt.Font: boolean hasLayoutAttributes> = $z1;
+
+        return;
+    }
+
+    public static java.awt.Font getFont(java.util.Map)
+    {
+        sun.font.AttributeValues $r4, $r5, $r10, $r13, $r17, $r18;
+        java.util.Map r0;
+        sun.font.Font2DHandle $r7, $r20;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.awt.Font $r3, $r6, $r11, $r15, $r16, $r19;
+        java.awt.font.TextAttribute $r1;
+        sun.font.AttributeMap $r9, $r12;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.lang.String $r8, $r21;
+        sun.font.EAttribute $r14;
+        java.lang.Object $r2;
+
+        r0 := @parameter0: java.util.Map;
+
+        $z0 = r0 instanceof sun.font.AttributeMap;
+
+        if $z0 == 0 goto label3;
+
+        $r9 = (sun.font.AttributeMap) r0;
+
+        $r10 = virtualinvoke $r9.<sun.font.AttributeMap: sun.font.AttributeValues getValues()>();
+
+        if $r10 == null goto label3;
+
+        $r12 = (sun.font.AttributeMap) r0;
+
+        $r13 = virtualinvoke $r12.<sun.font.AttributeMap: sun.font.AttributeValues getValues()>();
+
+        $r14 = <sun.font.EAttribute: sun.font.EAttribute EFONT>;
+
+        $z2 = virtualinvoke $r13.<sun.font.AttributeValues: boolean isNonDefault(sun.font.EAttribute)>($r14);
+
+        if $z2 == 0 goto label2;
+
+        $r16 = virtualinvoke $r13.<sun.font.AttributeValues: java.awt.Font getFont()>();
+
+        $i3 = <java.awt.Font: int SECONDARY_MASK>;
+
+        $z3 = virtualinvoke $r13.<sun.font.AttributeValues: boolean anyDefined(int)>($i3);
+
+        if $z3 != 0 goto label1;
+
+        return $r16;
+
+     label1:
+        $r17 = specialinvoke $r16.<java.awt.Font: sun.font.AttributeValues getAttributeValues()>();
+
+        $r18 = virtualinvoke $r17.<sun.font.AttributeValues: sun.font.AttributeValues clone()>();
+
+        $i4 = <java.awt.Font: int SECONDARY_MASK>;
+
+        virtualinvoke $r18.<sun.font.AttributeValues: sun.font.AttributeValues merge(java.util.Map,int)>(r0, $i4);
+
+        $r19 = new java.awt.Font;
+
+        $r21 = $r16.<java.awt.Font: java.lang.String name>;
+
+        $i5 = $r16.<java.awt.Font: int style>;
+
+        $z4 = $r16.<java.awt.Font: boolean createdFont>;
+
+        $r20 = $r16.<java.awt.Font: sun.font.Font2DHandle font2DHandle>;
+
+        specialinvoke $r19.<java.awt.Font: void <init>(sun.font.AttributeValues,java.lang.String,int,boolean,sun.font.Font2DHandle)>($r18, $r21, $i5, $z4, $r20);
+
+        return $r19;
+
+     label2:
+        $r15 = new java.awt.Font;
+
+        specialinvoke $r15.<java.awt.Font: void <init>(java.util.Map)>(r0);
+
+        return $r15;
+
+     label3:
+        $r1 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute FONT>;
+
+        $r2 = interfaceinvoke r0.<java.util.Map: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r11 = (java.awt.Font) $r2;
+
+        if $r11 == null goto label5;
+
+        $i0 = interfaceinvoke r0.<java.util.Map: int size()>();
+
+        if $i0 <= 1 goto label4;
+
+        $r4 = specialinvoke $r11.<java.awt.Font: sun.font.AttributeValues getAttributeValues()>();
+
+        $r5 = virtualinvoke $r4.<sun.font.AttributeValues: sun.font.AttributeValues clone()>();
+
+        $i1 = <java.awt.Font: int SECONDARY_MASK>;
+
+        virtualinvoke $r5.<sun.font.AttributeValues: sun.font.AttributeValues merge(java.util.Map,int)>(r0, $i1);
+
+        $r6 = new java.awt.Font;
+
+        $r8 = $r11.<java.awt.Font: java.lang.String name>;
+
+        $i2 = $r11.<java.awt.Font: int style>;
+
+        $z1 = $r11.<java.awt.Font: boolean createdFont>;
+
+        $r7 = $r11.<java.awt.Font: sun.font.Font2DHandle font2DHandle>;
+
+        specialinvoke $r6.<java.awt.Font: void <init>(sun.font.AttributeValues,java.lang.String,int,boolean,sun.font.Font2DHandle)>($r5, $r8, $i2, $z1, $r7);
+
+        return $r6;
+
+     label4:
+        return $r11;
+
+     label5:
+        $r3 = new java.awt.Font;
+
+        specialinvoke $r3.<java.awt.Font: void <init>(java.util.Map)>(r0);
+
+        return $r3;
+    }
+
+    private static boolean hasTempPermission()
+    {
+        java.lang.Throwable $r4;
+        java.nio.file.attribute.FileAttribute[] $r1;
+        java.nio.file.Path $r2;
+        java.lang.SecurityManager $r0;
+        java.io.File $r3;
+        boolean z0;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 != null goto label1;
+
+        return 1;
+
+     label1:
+        z0 = 0;
+
+     label2:
+        $r1 = newarray (java.nio.file.attribute.FileAttribute)[0];
+
+        $r2 = staticinvoke <java.nio.file.Files: java.nio.file.Path createTempFile(java.lang.String,java.lang.String,java.nio.file.attribute.FileAttribute[])>("+~JT", ".tmp", $r1);
+
+        $r3 = interfaceinvoke $r2.<java.nio.file.Path: java.io.File toFile()>();
+
+        virtualinvoke $r3.<java.io.File: boolean delete()>();
+
+        z0 = 1;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r4 := @caughtexception;
+
+     label5:
+        return z0;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+    }
+
+    public static java.awt.Font createFont(int, java.io.InputStream) throws java.awt.FontFormatException, java.io.IOException
+    {
+        java.lang.Throwable $r5;
+        java.awt.Font $r2, $r4;
+        sun.font.CreatedFontTracker $r0;
+        java.io.IOException $r3, $r7;
+        java.lang.InterruptedException $r6;
+        int i0;
+        boolean $z0, $z1, z2;
+        java.io.InputStream r1;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.io.InputStream;
+
+        $z0 = staticinvoke <java.awt.Font: boolean hasTempPermission()>();
+
+        if $z0 == 0 goto label1;
+
+        $r4 = staticinvoke <java.awt.Font: java.awt.Font createFont0(int,java.io.InputStream,sun.font.CreatedFontTracker)>(i0, r1, null);
+
+        return $r4;
+
+     label1:
+        $r0 = staticinvoke <sun.font.CreatedFontTracker: sun.font.CreatedFontTracker getTracker()>();
+
+        z2 = 0;
+
+     label2:
+        $z1 = virtualinvoke $r0.<sun.font.CreatedFontTracker: boolean acquirePermit()>();
+
+        z2 = $z1;
+
+        if $z1 != 0 goto label3;
+
+        $r3 = new java.io.IOException;
+
+        specialinvoke $r3.<java.io.IOException: void <init>(java.lang.String)>("Timed out waiting for resources.");
+
+        throw $r3;
+
+     label3:
+        $r2 = staticinvoke <java.awt.Font: java.awt.Font createFont0(int,java.io.InputStream,sun.font.CreatedFontTracker)>(i0, r1, $r0);
+
+     label4:
+        if $z1 == 0 goto label5;
+
+        virtualinvoke $r0.<sun.font.CreatedFontTracker: void releasePermit()>();
+
+     label5:
+        return $r2;
+
+     label6:
+        $r6 := @caughtexception;
+
+        $r7 = new java.io.IOException;
+
+        specialinvoke $r7.<java.io.IOException: void <init>(java.lang.String)>("Problem reading font data.");
+
+        throw $r7;
+
+     label7:
+        $r5 := @caughtexception;
+
+     label8:
+        if z2 == 0 goto label9;
+
+        virtualinvoke $r0.<sun.font.CreatedFontTracker: void releasePermit()>();
+
+     label9:
+        throw $r5;
+
+        catch java.lang.InterruptedException from label2 to label4 with label6;
+        catch java.lang.Throwable from label2 to label4 with label7;
+        catch java.lang.Throwable from label6 to label8 with label7;
+    }
+
+    private static java.awt.Font createFont0(int, java.io.InputStream, sun.font.CreatedFontTracker) throws java.awt.FontFormatException, java.io.IOException
+    {
+        byte[] $r10;
+        java.awt.Font$2 $r3;
+        java.awt.Font$1 $r0;
+        java.awt.Font$3 $r21;
+        boolean $z0, $z1, $z2, z3;
+        java.awt.Font $r8;
+        java.lang.Throwable $r14, $r15, $r20, $r22;
+        java.awt.FontFormatException $r17, $r19;
+        int i0, $i1, $i2, $i3, i4, $i5;
+        java.io.OutputStream $r11;
+        sun.font.CreatedFontTracker r2;
+        java.io.IOException $r6, $r7, $r16, $r18;
+        java.lang.IllegalArgumentException $r13;
+        java.io.File $r12;
+        java.lang.Object $r1, $r4;
+        java.io.InputStream r5;
+
+        i0 := @parameter0: int;
+
+        r5 := @parameter1: java.io.InputStream;
+
+        r2 := @parameter2: sun.font.CreatedFontTracker;
+
+        if i0 == 0 goto label01;
+
+        if i0 == 1 goto label01;
+
+        $r13 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r13.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("font format not recognized");
+
+        throw $r13;
+
+     label01:
+        z3 = 0;
+
+     label02:
+        $r0 = new java.awt.Font$1;
+
+        specialinvoke $r0.<java.awt.Font$1: void <init>()>();
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r0);
+
+        $r12 = (java.io.File) $r1;
+
+        if r2 == null goto label03;
+
+        virtualinvoke r2.<sun.font.CreatedFontTracker: void add(java.io.File)>($r12);
+
+     label03:
+        i4 = 0;
+
+     label04:
+        $r3 = new java.awt.Font$2;
+
+        specialinvoke $r3.<java.awt.Font$2: void <init>(java.io.File)>($r12);
+
+        $r4 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r3);
+
+        $r11 = (java.io.OutputStream) $r4;
+
+        if r2 == null goto label05;
+
+        virtualinvoke r2.<sun.font.CreatedFontTracker: void set(java.io.File,java.io.OutputStream)>($r12, $r11);
+
+     label05:
+        $r10 = newarray (byte)[8192];
+
+     label06:
+        $i5 = virtualinvoke r5.<java.io.InputStream: int read(byte[])>($r10);
+
+        if $i5 >= 0 goto label07;
+
+        goto label11;
+
+     label07:
+        if r2 == null goto label10;
+
+        $i1 = i4 + $i5;
+
+        if $i1 <= 33554432 goto label08;
+
+        $r7 = new java.io.IOException;
+
+        specialinvoke $r7.<java.io.IOException: void <init>(java.lang.String)>("File too big.");
+
+        throw $r7;
+
+     label08:
+        $i2 = virtualinvoke r2.<sun.font.CreatedFontTracker: int getNumBytes()>();
+
+        $i3 = i4 + $i2;
+
+        if $i3 <= 335544320 goto label09;
+
+        $r6 = new java.io.IOException;
+
+        specialinvoke $r6.<java.io.IOException: void <init>(java.lang.String)>("Total files too big.");
+
+        throw $r6;
+
+     label09:
+        i4 = i4 + $i5;
+
+        virtualinvoke r2.<sun.font.CreatedFontTracker: void addBytes(int)>($i5);
+
+     label10:
+        virtualinvoke $r11.<java.io.OutputStream: void write(byte[],int,int)>($r10, 0, $i5);
+
+        goto label06;
+
+     label11:
+        virtualinvoke $r11.<java.io.OutputStream: void close()>();
+
+        goto label14;
+
+     label12:
+        $r22 := @caughtexception;
+
+     label13:
+        virtualinvoke $r11.<java.io.OutputStream: void close()>();
+
+        throw $r22;
+
+     label14:
+        z3 = 1;
+
+        $r8 = new java.awt.Font;
+
+        specialinvoke $r8.<java.awt.Font: void <init>(java.io.File,int,boolean,sun.font.CreatedFontTracker)>($r12, i0, 1, r2);
+
+     label15:
+        if r2 == null goto label16;
+
+        virtualinvoke r2.<sun.font.CreatedFontTracker: void remove(java.io.File)>($r12);
+
+     label16:
+        goto label17;
+
+     label17:
+        return $r8;
+
+     label18:
+        $r20 := @caughtexception;
+
+     label19:
+        if r2 == null goto label20;
+
+        virtualinvoke r2.<sun.font.CreatedFontTracker: void remove(java.io.File)>($r12);
+
+     label20:
+        if z3 != 0 goto label22;
+
+        if r2 == null goto label21;
+
+        virtualinvoke r2.<sun.font.CreatedFontTracker: void subBytes(int)>(i4);
+
+     label21:
+        $r21 = new java.awt.Font$3;
+
+        specialinvoke $r21.<java.awt.Font$3: void <init>(java.io.File)>($r12);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r21);
+
+     label22:
+        throw $r20;
+
+     label23:
+        $r14 := @caughtexception;
+
+        $z0 = $r14 instanceof java.awt.FontFormatException;
+
+        if $z0 == 0 goto label24;
+
+        $r19 = (java.awt.FontFormatException) $r14;
+
+        throw $r19;
+
+     label24:
+        $z1 = $r14 instanceof java.io.IOException;
+
+        if $z1 == 0 goto label25;
+
+        $r18 = (java.io.IOException) $r14;
+
+        throw $r18;
+
+     label25:
+        $r15 = virtualinvoke $r14.<java.lang.Throwable: java.lang.Throwable getCause()>();
+
+        $z2 = $r15 instanceof java.awt.FontFormatException;
+
+        if $z2 == 0 goto label26;
+
+        $r17 = (java.awt.FontFormatException) $r15;
+
+        throw $r17;
+
+     label26:
+        $r16 = new java.io.IOException;
+
+        specialinvoke $r16.<java.io.IOException: void <init>(java.lang.String)>("Problem reading font data.");
+
+        throw $r16;
+
+        catch java.lang.Throwable from label05 to label11 with label12;
+        catch java.lang.Throwable from label12 to label13 with label12;
+        catch java.lang.Throwable from label04 to label15 with label18;
+        catch java.lang.Throwable from label18 to label19 with label18;
+        catch java.lang.Throwable from label02 to label17 with label23;
+        catch java.lang.Throwable from label18 to label23 with label23;
+    }
+
+    public static java.awt.Font createFont(int, java.io.File) throws java.awt.FontFormatException, java.io.IOException
+    {
+        java.awt.Font $r3;
+        java.io.IOException $r4;
+        java.lang.IllegalArgumentException $r11;
+        java.io.File $r0, r12;
+        java.lang.SecurityManager $r2;
+        java.io.FilePermission $r9;
+        int i0;
+        java.lang.StringBuilder $r5, $r6, $r7;
+        java.lang.String $r1, $r8, $r10;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        r12 := @parameter1: java.io.File;
+
+        $r0 = new java.io.File;
+
+        $r1 = virtualinvoke r12.<java.io.File: java.lang.String getPath()>();
+
+        specialinvoke $r0.<java.io.File: void <init>(java.lang.String)>($r1);
+
+        if i0 == 0 goto label1;
+
+        if i0 == 1 goto label1;
+
+        $r11 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r11.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("font format not recognized");
+
+        throw $r11;
+
+     label1:
+        $r2 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r2 == null goto label2;
+
+        $r9 = new java.io.FilePermission;
+
+        $r10 = virtualinvoke $r0.<java.io.File: java.lang.String getPath()>();
+
+        specialinvoke $r9.<java.io.FilePermission: void <init>(java.lang.String,java.lang.String)>($r10, "read");
+
+        virtualinvoke $r2.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r9);
+
+     label2:
+        $z0 = virtualinvoke $r0.<java.io.File: boolean canRead()>();
+
+        if $z0 != 0 goto label3;
+
+        $r4 = new java.io.IOException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Can\'t read ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.io.IOException: void <init>(java.lang.String)>($r8);
+
+        throw $r4;
+
+     label3:
+        $r3 = new java.awt.Font;
+
+        specialinvoke $r3.<java.awt.Font: void <init>(java.io.File,int,boolean,sun.font.CreatedFontTracker)>($r0, i0, 0, null);
+
+        return $r3;
+    }
+
+    public java.awt.geom.AffineTransform getTransform()
+    {
+        sun.font.AttributeValues $r2;
+        byte $b3;
+        boolean $z0, $z1, $z2, z3, $z5, $z6;
+        java.awt.Font r0;
+        java.awt.geom.AffineTransform $r1, r4, $r6, $r9, $r10;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6;
+        float[] $r7, $r8;
+        int $i0, $i1, i2, i4, $i5, i6, $i7, i8;
+        sun.font.EAttribute $r3, $r5;
+        double $d0, $d1, $d2, $d3, $d4, d5, d6;
+
+        r0 := @this: java.awt.Font;
+
+        $z0 = r0.<java.awt.Font: boolean nonIdentityTx>;
+
+        if $z0 == 0 goto label13;
+
+        $r2 = specialinvoke r0.<java.awt.Font: sun.font.AttributeValues getAttributeValues()>();
+
+        $r3 = <sun.font.EAttribute: sun.font.EAttribute ETRANSFORM>;
+
+        $z1 = virtualinvoke $r2.<sun.font.AttributeValues: boolean isNonDefault(sun.font.EAttribute)>($r3);
+
+        if $z1 == 0 goto label01;
+
+        $r10 = new java.awt.geom.AffineTransform;
+
+        $r9 = virtualinvoke $r2.<sun.font.AttributeValues: java.awt.geom.AffineTransform getTransform()>();
+
+        specialinvoke $r10.<java.awt.geom.AffineTransform: void <init>(java.awt.geom.AffineTransform)>($r9);
+
+        goto label02;
+
+     label01:
+        $r10 = new java.awt.geom.AffineTransform;
+
+        specialinvoke $r10.<java.awt.geom.AffineTransform: void <init>()>();
+
+     label02:
+        r4 = $r10;
+
+        $i0 = virtualinvoke $r2.<sun.font.AttributeValues: int getSuperscript()>();
+
+        if $i0 == 0 goto label11;
+
+        $i1 = virtualinvoke $r2.<sun.font.AttributeValues: int getSuperscript()>();
+
+        d5 = 0.0;
+
+        i2 = 0;
+
+        if $i1 <= 0 goto label03;
+
+        $z6 = 1;
+
+        $z5 = 1;
+
+        goto label04;
+
+     label03:
+        $z6 = 0;
+
+        $z5 = 0;
+
+     label04:
+        z3 = $z5;
+
+        if $z6 == 0 goto label05;
+
+        $b3 = -1;
+
+        goto label06;
+
+     label05:
+        $b3 = 1;
+
+     label06:
+        i4 = $b3;
+
+        if z3 == 0 goto label07;
+
+        $i5 = $i1;
+
+        goto label08;
+
+     label07:
+        $i5 = neg $i1;
+
+     label08:
+        i6 = $i5;
+
+     label09:
+        $i7 = i6 & 7;
+
+        if $i7 <= i2 goto label10;
+
+        i8 = i6 & 7;
+
+        $f5 = (float) i4;
+
+        $r7 = <java.awt.Font: float[] ssinfo>;
+
+        $f3 = $r7[i8];
+
+        $r8 = <java.awt.Font: float[] ssinfo>;
+
+        $f2 = $r8[i2];
+
+        $f4 = $f3 - $f2;
+
+        $f6 = $f5 * $f4;
+
+        $d4 = (double) $f6;
+
+        d5 = d5 + $d4;
+
+        i6 = i6 >> 3;
+
+        i4 = neg i4;
+
+        i2 = i8;
+
+        goto label09;
+
+     label10:
+        $f1 = r0.<java.awt.Font: float pointSize>;
+
+        $d1 = (double) $f1;
+
+        d6 = d5 * $d1;
+
+        $d2 = (double) i2;
+
+        $d3 = staticinvoke <java.lang.Math: double pow(double,double)>(0.6666666666666666, $d2);
+
+        $r6 = staticinvoke <java.awt.geom.AffineTransform: java.awt.geom.AffineTransform getTranslateInstance(double,double)>(0.0, d6);
+
+        virtualinvoke r4.<java.awt.geom.AffineTransform: void preConcatenate(java.awt.geom.AffineTransform)>($r6);
+
+        virtualinvoke r4.<java.awt.geom.AffineTransform: void scale(double,double)>($d3, $d3);
+
+     label11:
+        $r5 = <sun.font.EAttribute: sun.font.EAttribute EWIDTH>;
+
+        $z2 = virtualinvoke $r2.<sun.font.AttributeValues: boolean isNonDefault(sun.font.EAttribute)>($r5);
+
+        if $z2 == 0 goto label12;
+
+        $f0 = virtualinvoke $r2.<sun.font.AttributeValues: float getWidth()>();
+
+        $d0 = (double) $f0;
+
+        virtualinvoke r4.<java.awt.geom.AffineTransform: void scale(double,double)>($d0, 1.0);
+
+     label12:
+        return r4;
+
+     label13:
+        $r1 = new java.awt.geom.AffineTransform;
+
+        specialinvoke $r1.<java.awt.geom.AffineTransform: void <init>()>();
+
+        return $r1;
+    }
+
+    public java.lang.String getFamily()
+    {
+        java.lang.String $r1;
+        java.awt.Font r0;
+
+        r0 := @this: java.awt.Font;
+
+        $r1 = virtualinvoke r0.<java.awt.Font: java.lang.String getFamily_NoClientCode()>();
+
+        return $r1;
+    }
+
+    final java.lang.String getFamily_NoClientCode()
+    {
+        java.lang.String $r2;
+        java.awt.Font r0;
+        java.util.Locale $r1;
+
+        r0 := @this: java.awt.Font;
+
+        $r1 = staticinvoke <java.util.Locale: java.util.Locale getDefault()>();
+
+        $r2 = virtualinvoke r0.<java.awt.Font: java.lang.String getFamily(java.util.Locale)>($r1);
+
+        return $r2;
+    }
+
+    public java.lang.String getFamily(java.util.Locale)
+    {
+        sun.font.Font2D $r2;
+        java.util.Locale r0;
+        java.awt.Font r1;
+        java.lang.String $r3;
+        java.lang.NullPointerException $r4;
+
+        r1 := @this: java.awt.Font;
+
+        r0 := @parameter0: java.util.Locale;
+
+        if r0 != null goto label1;
+
+        $r4 = new java.lang.NullPointerException;
+
+        specialinvoke $r4.<java.lang.NullPointerException: void <init>(java.lang.String)>("null locale doesn\'t mean default");
+
+        throw $r4;
+
+     label1:
+        $r2 = specialinvoke r1.<java.awt.Font: sun.font.Font2D getFont2D()>();
+
+        $r3 = virtualinvoke $r2.<sun.font.Font2D: java.lang.String getFamilyName(java.util.Locale)>(r0);
+
+        return $r3;
+    }
+
+    public java.lang.String getPSName()
+    {
+        sun.font.Font2D $r1;
+        java.lang.String $r2;
+        java.awt.Font r0;
+
+        r0 := @this: java.awt.Font;
+
+        $r1 = specialinvoke r0.<java.awt.Font: sun.font.Font2D getFont2D()>();
+
+        $r2 = virtualinvoke $r1.<sun.font.Font2D: java.lang.String getPostscriptName()>();
+
+        return $r2;
+    }
+
+    public java.lang.String getName()
+    {
+        java.lang.String $r1;
+        java.awt.Font r0;
+
+        r0 := @this: java.awt.Font;
+
+        $r1 = r0.<java.awt.Font: java.lang.String name>;
+
+        return $r1;
+    }
+
+    public java.lang.String getFontName()
+    {
+        java.lang.String $r2;
+        java.awt.Font r0;
+        java.util.Locale $r1;
+
+        r0 := @this: java.awt.Font;
+
+        $r1 = staticinvoke <java.util.Locale: java.util.Locale getDefault()>();
+
+        $r2 = virtualinvoke r0.<java.awt.Font: java.lang.String getFontName(java.util.Locale)>($r1);
+
+        return $r2;
+    }
+
+    public java.lang.String getFontName(java.util.Locale)
+    {
+        sun.font.Font2D $r2;
+        java.util.Locale r0;
+        java.awt.Font r1;
+        java.lang.String $r3;
+        java.lang.NullPointerException $r4;
+
+        r1 := @this: java.awt.Font;
+
+        r0 := @parameter0: java.util.Locale;
+
+        if r0 != null goto label1;
+
+        $r4 = new java.lang.NullPointerException;
+
+        specialinvoke $r4.<java.lang.NullPointerException: void <init>(java.lang.String)>("null locale doesn\'t mean default");
+
+        throw $r4;
+
+     label1:
+        $r2 = specialinvoke r1.<java.awt.Font: sun.font.Font2D getFont2D()>();
+
+        $r3 = virtualinvoke $r2.<sun.font.Font2D: java.lang.String getFontName(java.util.Locale)>(r0);
+
+        return $r3;
+    }
+
+    public int getStyle()
+    {
+        int $i0;
+        java.awt.Font r0;
+
+        r0 := @this: java.awt.Font;
+
+        $i0 = r0.<java.awt.Font: int style>;
+
+        return $i0;
+    }
+
+    public int getSize()
+    {
+        int $i0;
+        java.awt.Font r0;
+
+        r0 := @this: java.awt.Font;
+
+        $i0 = r0.<java.awt.Font: int size>;
+
+        return $i0;
+    }
+
+    public float getSize2D()
+    {
+        float $f0;
+        java.awt.Font r0;
+
+        r0 := @this: java.awt.Font;
+
+        $f0 = r0.<java.awt.Font: float pointSize>;
+
+        return $f0;
+    }
+
+    public boolean isPlain()
+    {
+        int $i0;
+        java.awt.Font r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.Font;
+
+        $i0 = r0.<java.awt.Font: int style>;
+
+        if $i0 != 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean isBold()
+    {
+        java.awt.Font r0;
+        int $i0, $i1;
+        boolean $z0;
+
+        r0 := @this: java.awt.Font;
+
+        $i0 = r0.<java.awt.Font: int style>;
+
+        $i1 = $i0 & 1;
+
+        if $i1 == 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean isItalic()
+    {
+        java.awt.Font r0;
+        int $i0, $i1;
+        boolean $z0;
+
+        r0 := @this: java.awt.Font;
+
+        $i0 = r0.<java.awt.Font: int style>;
+
+        $i1 = $i0 & 2;
+
+        if $i1 == 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean isTransformed()
+    {
+        java.awt.Font r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.Font;
+
+        $z0 = r0.<java.awt.Font: boolean nonIdentityTx>;
+
+        return $z0;
+    }
+
+    public boolean hasLayoutAttributes()
+    {
+        java.awt.Font r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.Font;
+
+        $z0 = r0.<java.awt.Font: boolean hasLayoutAttributes>;
+
+        return $z0;
+    }
+
+    public static java.awt.Font getFont(java.lang.String)
+    {
+        java.lang.String r0;
+        java.awt.Font $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <java.awt.Font: java.awt.Font getFont(java.lang.String,java.awt.Font)>(r0, null);
+
+        return $r1;
+    }
+
+    public static java.awt.Font decode(java.lang.String)
+    {
+        java.lang.Integer $r5;
+        byte b2, b18, $b23, $b24, $b25;
+        java.util.Locale $r2;
+        boolean $z0, $z1, $z2, $z3;
+        java.awt.Font $r10, $r11;
+        int $i0, $i1, $i3, $i4, $i5, $i6, $i8, $i9, $i10, $i12, $i13, $i14, $i15, i17, i20, i21, i22, $i26, $i28, $i29, $i31, $i32, $i34;
+        java.lang.String r0, $r1, $r3, $r4, r8;
+        char $c7, $c11, $c16;
+        java.lang.NumberFormatException $r7;
+
+        r0 := @parameter0: java.lang.String;
+
+        i17 = 12;
+
+        b18 = 0;
+
+        if r0 != null goto label01;
+
+        $r10 = new java.awt.Font;
+
+        specialinvoke $r10.<java.awt.Font: void <init>(java.lang.String,int,int)>("Dialog", 0, 12);
+
+        return $r10;
+
+     label01:
+        $i0 = virtualinvoke r0.<java.lang.String: int lastIndexOf(int)>(45);
+
+        $i1 = virtualinvoke r0.<java.lang.String: int lastIndexOf(int)>(32);
+
+        if $i0 <= $i1 goto label02;
+
+        $b25 = 45;
+
+        $b24 = 45;
+
+        $b23 = 45;
+
+        goto label03;
+
+     label02:
+        $b25 = 32;
+
+        $b24 = 32;
+
+        $b23 = 32;
+
+     label03:
+        b2 = $b23;
+
+        $i3 = virtualinvoke r0.<java.lang.String: int lastIndexOf(int)>($b24);
+
+        i20 = $i3;
+
+        $i4 = $i3 - 1;
+
+        i21 = virtualinvoke r0.<java.lang.String: int lastIndexOf(int,int)>($b25, $i4);
+
+        $i5 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i3 <= 0 goto label07;
+
+        $i12 = $i3 + 1;
+
+        if $i12 >= $i5 goto label07;
+
+     label04:
+        $i13 = $i3 + 1;
+
+        $r4 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>($i13);
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(java.lang.String)>($r4);
+
+        $i14 = virtualinvoke $r5.<java.lang.Integer: int intValue()>();
+
+        i17 = $i14;
+
+        if $i14 > 0 goto label05;
+
+        i17 = 12;
+
+     label05:
+        goto label07;
+
+     label06:
+        $r7 := @caughtexception;
+
+        i21 = $i3;
+
+        i20 = $i5;
+
+        $i15 = $i5 - 1;
+
+        $c16 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i15);
+
+        $i26 = (int) $c16;
+
+        if $i26 != b2 goto label07;
+
+        $i28 = (int) -1;
+
+        i20 = $i5 + $i28;
+
+     label07:
+        if i21 < 0 goto label13;
+
+        $i8 = i21 + 1;
+
+        if $i8 >= $i5 goto label13;
+
+        $i9 = i21 + 1;
+
+        $r1 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>($i9, i20);
+
+        $r2 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r3 = virtualinvoke $r1.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r2);
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("bolditalic");
+
+        if $z0 == 0 goto label08;
+
+        b18 = 3;
+
+        goto label12;
+
+     label08:
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("italic");
+
+        if $z1 == 0 goto label09;
+
+        b18 = 2;
+
+        goto label12;
+
+     label09:
+        $z2 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("bold");
+
+        if $z2 == 0 goto label10;
+
+        b18 = 1;
+
+        goto label12;
+
+     label10:
+        $z3 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("plain");
+
+        if $z3 == 0 goto label11;
+
+        b18 = 0;
+
+        goto label12;
+
+     label11:
+        i21 = i20;
+
+        $i10 = i20 - 1;
+
+        $c11 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i10);
+
+        $i29 = (int) $c11;
+
+        if $i29 != b2 goto label12;
+
+        $i31 = (int) -1;
+
+        i21 = i20 + $i31;
+
+     label12:
+        r8 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, i21);
+
+        goto label17;
+
+     label13:
+        i22 = $i5;
+
+        if i21 <= 0 goto label14;
+
+        i22 = i21;
+
+        goto label15;
+
+     label14:
+        if i20 <= 0 goto label15;
+
+        i22 = i20;
+
+     label15:
+        if i22 <= 0 goto label16;
+
+        $i6 = i22 - 1;
+
+        $c7 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i6);
+
+        $i32 = (int) $c7;
+
+        if $i32 != b2 goto label16;
+
+        $i34 = (int) -1;
+
+        i22 = i22 + $i34;
+
+     label16:
+        r8 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, i22);
+
+     label17:
+        $r11 = new java.awt.Font;
+
+        specialinvoke $r11.<java.awt.Font: void <init>(java.lang.String,int,int)>(r8, b18, i17);
+
+        return $r11;
+
+        catch java.lang.NumberFormatException from label04 to label05 with label06;
+    }
+
+    public static java.awt.Font getFont(java.lang.String, java.awt.Font)
+    {
+        java.awt.Font $r1, r2;
+        java.lang.SecurityException $r3;
+        java.lang.String r0, r4;
+
+        r0 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.awt.Font;
+
+        r4 = null;
+
+     label1:
+        r4 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>(r0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+     label4:
+        if r4 != null goto label5;
+
+        return r2;
+
+     label5:
+        $r1 = staticinvoke <java.awt.Font: java.awt.Font decode(java.lang.String)>(r4);
+
+        return $r1;
+
+        catch java.lang.SecurityException from label1 to label2 with label3;
+    }
+
+    public int hashCode()
+    {
+        sun.font.AttributeValues $r2, $r3, $r5;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9;
+        java.lang.String $r1;
+        boolean $z0;
+        java.awt.Font r0;
+        java.awt.geom.AffineTransform $r4, $r6;
+
+        r0 := @this: java.awt.Font;
+
+        $i0 = r0.<java.awt.Font: int hash>;
+
+        if $i0 != 0 goto label1;
+
+        $r1 = r0.<java.awt.Font: java.lang.String name>;
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int hashCode()>();
+
+        $i2 = r0.<java.awt.Font: int style>;
+
+        $i4 = $i1 ^ $i2;
+
+        $i3 = r0.<java.awt.Font: int size>;
+
+        $i5 = $i4 ^ $i3;
+
+        r0.<java.awt.Font: int hash> = $i5;
+
+        $z0 = r0.<java.awt.Font: boolean nonIdentityTx>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = r0.<java.awt.Font: sun.font.AttributeValues values>;
+
+        if $r2 == null goto label1;
+
+        $r3 = r0.<java.awt.Font: sun.font.AttributeValues values>;
+
+        $r4 = virtualinvoke $r3.<sun.font.AttributeValues: java.awt.geom.AffineTransform getTransform()>();
+
+        if $r4 == null goto label1;
+
+        $i6 = r0.<java.awt.Font: int hash>;
+
+        $r5 = r0.<java.awt.Font: sun.font.AttributeValues values>;
+
+        $r6 = virtualinvoke $r5.<sun.font.AttributeValues: java.awt.geom.AffineTransform getTransform()>();
+
+        $i7 = virtualinvoke $r6.<java.awt.geom.AffineTransform: int hashCode()>();
+
+        $i8 = $i6 ^ $i7;
+
+        r0.<java.awt.Font: int hash> = $i8;
+
+     label1:
+        $i9 = r0.<java.awt.Font: int hash>;
+
+        return $i9;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        java.lang.ClassCastException $r10;
+        sun.font.AttributeValues $r4, $r5, $r6, $r7, $r8, $r9;
+        byte $b4;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String $r2, $r3;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.awt.Font r1, r11;
+        float $f0, $f1;
+        java.lang.Object r0;
+
+        r1 := @this: java.awt.Font;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label01;
+
+        return 1;
+
+     label01:
+        if r0 == null goto label10;
+
+     label02:
+        r11 = (java.awt.Font) r0;
+
+        $i1 = r1.<java.awt.Font: int size>;
+
+        $i0 = r11.<java.awt.Font: int size>;
+
+        if $i1 != $i0 goto label08;
+
+        $i3 = r1.<java.awt.Font: int style>;
+
+        $i2 = r11.<java.awt.Font: int style>;
+
+        if $i3 != $i2 goto label08;
+
+        $z1 = r1.<java.awt.Font: boolean nonIdentityTx>;
+
+        $z0 = r11.<java.awt.Font: boolean nonIdentityTx>;
+
+        if $z1 != $z0 goto label08;
+
+        $z3 = r1.<java.awt.Font: boolean hasLayoutAttributes>;
+
+        $z2 = r11.<java.awt.Font: boolean hasLayoutAttributes>;
+
+        if $z3 != $z2 goto label08;
+
+        $f1 = r1.<java.awt.Font: float pointSize>;
+
+        $f0 = r11.<java.awt.Font: float pointSize>;
+
+        $b4 = $f1 cmpl $f0;
+
+        if $b4 != 0 goto label08;
+
+        $r3 = r1.<java.awt.Font: java.lang.String name>;
+
+        $r2 = r11.<java.awt.Font: java.lang.String name>;
+
+        $z4 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z4 == 0 goto label08;
+
+        $r4 = r1.<java.awt.Font: sun.font.AttributeValues values>;
+
+        if $r4 != null goto label06;
+
+        $r7 = r11.<java.awt.Font: sun.font.AttributeValues values>;
+
+        if $r7 != null goto label04;
+
+     label03:
+        return 1;
+
+     label04:
+        $r8 = specialinvoke r1.<java.awt.Font: sun.font.AttributeValues getAttributeValues()>();
+
+        $r9 = r11.<java.awt.Font: sun.font.AttributeValues values>;
+
+        $z6 = virtualinvoke $r8.<sun.font.AttributeValues: boolean equals(sun.font.AttributeValues)>($r9);
+
+     label05:
+        return $z6;
+
+     label06:
+        $r5 = r1.<java.awt.Font: sun.font.AttributeValues values>;
+
+        $r6 = specialinvoke r11.<java.awt.Font: sun.font.AttributeValues getAttributeValues()>();
+
+        $z5 = virtualinvoke $r5.<sun.font.AttributeValues: boolean equals(sun.font.AttributeValues)>($r6);
+
+     label07:
+        return $z5;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r10 := @caughtexception;
+
+     label10:
+        return 0;
+
+        catch java.lang.ClassCastException from label02 to label03 with label09;
+        catch java.lang.ClassCastException from label04 to label05 with label09;
+        catch java.lang.ClassCastException from label06 to label07 with label09;
+    }
+
+    public java.lang.String toString()
+    {
+        int $i0;
+        java.lang.String $r1, r2, $r3, $r6, $r9, $r12, $r19;
+        boolean $z0, $z1, $z2;
+        java.awt.Font r0;
+        java.lang.StringBuilder $r4, $r7, $r8, $r10, $r11, $r13, $r14, $r15, $r16, $r17, $r18;
+        java.lang.Class $r5;
+
+        r0 := @this: java.awt.Font;
+
+        $z0 = virtualinvoke r0.<java.awt.Font: boolean isBold()>();
+
+        if $z0 == 0 goto label3;
+
+        $z2 = virtualinvoke r0.<java.awt.Font: boolean isItalic()>();
+
+        if $z2 == 0 goto label1;
+
+        $r1 = "bolditalic";
+
+        goto label2;
+
+     label1:
+        $r1 = "bold";
+
+     label2:
+        r2 = $r1;
+
+        goto label6;
+
+     label3:
+        $z1 = virtualinvoke r0.<java.awt.Font: boolean isItalic()>();
+
+        if $z1 == 0 goto label4;
+
+        $r3 = "italic";
+
+        goto label5;
+
+     label4:
+        $r3 = "plain";
+
+     label5:
+        r2 = $r3;
+
+     label6:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.Class: java.lang.String getName()>();
+
+        $r7 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[family=");
+
+        $r9 = virtualinvoke r0.<java.awt.Font: java.lang.String getFamily()>();
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",name=");
+
+        $r12 = r0.<java.awt.Font: java.lang.String name>;
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",style=");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",size=");
+
+        $i0 = r0.<java.awt.Font: int size>;
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r19;
+    }
+
+    private void writeObject(java.io.ObjectOutputStream) throws java.lang.ClassNotFoundException, java.io.IOException
+    {
+        java.lang.Throwable $r6;
+        sun.font.AttributeValues $r1, $r3, $r4;
+        java.awt.Font r0;
+        java.io.ObjectOutputStream r2;
+        java.util.Hashtable $r5;
+
+        r0 := @this: java.awt.Font;
+
+        r2 := @parameter0: java.io.ObjectOutputStream;
+
+        $r1 = r0.<java.awt.Font: sun.font.AttributeValues values>;
+
+        if $r1 == null goto label6;
+
+        $r3 = r0.<java.awt.Font: sun.font.AttributeValues values>;
+
+        entermonitor $r3;
+
+     label1:
+        $r4 = r0.<java.awt.Font: sun.font.AttributeValues values>;
+
+        $r5 = virtualinvoke $r4.<sun.font.AttributeValues: java.util.Hashtable toSerializableHashtable()>();
+
+        r0.<java.awt.Font: java.util.Hashtable fRequestedAttributes> = $r5;
+
+        virtualinvoke r2.<java.io.ObjectOutputStream: void defaultWriteObject()>();
+
+        r0.<java.awt.Font: java.util.Hashtable fRequestedAttributes> = null;
+
+        exitmonitor $r3;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r6 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label4:
+        throw $r6;
+
+     label5:
+        goto label7;
+
+     label6:
+        virtualinvoke r2.<java.io.ObjectOutputStream: void defaultWriteObject()>();
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.lang.ClassNotFoundException, java.io.IOException
+    {
+        java.lang.Throwable $r11, $r12;
+        java.io.ObjectInputStream r0;
+        sun.font.AttributeValues $r3, $r5, $r7, $r8, $r9, $r10;
+        byte $b0;
+        int $i1, $i2, $i3;
+        java.util.Hashtable $r2, $r4, $r6;
+        boolean $z0, $z1, $z2;
+        java.awt.Font r1;
+        java.io.IOException $r13;
+        float $f0, $f1;
+
+        r1 := @this: java.awt.Font;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        $f0 = r1.<java.awt.Font: float pointSize>;
+
+        $b0 = $f0 cmpl 0.0F;
+
+        if $b0 != 0 goto label1;
+
+        $i3 = r1.<java.awt.Font: int size>;
+
+        $f1 = (float) $i3;
+
+        r1.<java.awt.Font: float pointSize> = $f1;
+
+     label1:
+        $r2 = r1.<java.awt.Font: java.util.Hashtable fRequestedAttributes>;
+
+        if $r2 == null goto label8;
+
+     label2:
+        $r3 = specialinvoke r1.<java.awt.Font: sun.font.AttributeValues getAttributeValues()>();
+
+        r1.<java.awt.Font: sun.font.AttributeValues values> = $r3;
+
+        $r4 = r1.<java.awt.Font: java.util.Hashtable fRequestedAttributes>;
+
+        $r5 = staticinvoke <sun.font.AttributeValues: sun.font.AttributeValues fromSerializableHashtable(java.util.Hashtable)>($r4);
+
+        $r6 = r1.<java.awt.Font: java.util.Hashtable fRequestedAttributes>;
+
+        $z0 = staticinvoke <sun.font.AttributeValues: boolean is16Hashtable(java.util.Hashtable)>($r6);
+
+        if $z0 != 0 goto label3;
+
+        virtualinvoke $r5.<sun.font.AttributeValues: void unsetDefault()>();
+
+     label3:
+        $r7 = specialinvoke r1.<java.awt.Font: sun.font.AttributeValues getAttributeValues()>();
+
+        $r8 = virtualinvoke $r7.<sun.font.AttributeValues: sun.font.AttributeValues merge(sun.font.AttributeValues)>($r5);
+
+        r1.<java.awt.Font: sun.font.AttributeValues values> = $r8;
+
+        $r9 = r1.<java.awt.Font: sun.font.AttributeValues values>;
+
+        $i1 = <java.awt.Font: int EXTRA_MASK>;
+
+        $z1 = virtualinvoke $r9.<sun.font.AttributeValues: boolean anyNonDefault(int)>($i1);
+
+        r1.<java.awt.Font: boolean nonIdentityTx> = $z1;
+
+        $r10 = r1.<java.awt.Font: sun.font.AttributeValues values>;
+
+        $i2 = <java.awt.Font: int LAYOUT_MASK>;
+
+        $z2 = virtualinvoke $r10.<sun.font.AttributeValues: boolean anyNonDefault(int)>($i2);
+
+        r1.<java.awt.Font: boolean hasLayoutAttributes> = $z2;
+
+     label4:
+        r1.<java.awt.Font: java.util.Hashtable fRequestedAttributes> = null;
+
+        goto label8;
+
+     label5:
+        $r12 := @caughtexception;
+
+        $r13 = new java.io.IOException;
+
+        specialinvoke $r13.<java.io.IOException: void <init>(java.lang.Throwable)>($r12);
+
+        throw $r13;
+
+     label6:
+        $r11 := @caughtexception;
+
+     label7:
+        r1.<java.awt.Font: java.util.Hashtable fRequestedAttributes> = null;
+
+        throw $r11;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label2 to label4 with label5;
+        catch java.lang.Throwable from label5 to label7 with label6;
+    }
+
+    public int getNumGlyphs()
+    {
+        int $i0;
+        sun.font.Font2D $r1;
+        java.awt.Font r0;
+
+        r0 := @this: java.awt.Font;
+
+        $r1 = specialinvoke r0.<java.awt.Font: sun.font.Font2D getFont2D()>();
+
+        $i0 = virtualinvoke $r1.<sun.font.Font2D: int getNumGlyphs()>();
+
+        return $i0;
+    }
+
+    public int getMissingGlyphCode()
+    {
+        int $i0;
+        sun.font.Font2D $r1;
+        java.awt.Font r0;
+
+        r0 := @this: java.awt.Font;
+
+        $r1 = specialinvoke r0.<java.awt.Font: sun.font.Font2D getFont2D()>();
+
+        $i0 = virtualinvoke $r1.<sun.font.Font2D: int getMissingGlyphCode()>();
+
+        return $i0;
+    }
+
+    public byte getBaselineFor(char)
+    {
+        sun.font.Font2D $r1;
+        byte $b1;
+        java.awt.Font r0;
+        char c0;
+
+        r0 := @this: java.awt.Font;
+
+        c0 := @parameter0: char;
+
+        $r1 = specialinvoke r0.<java.awt.Font: sun.font.Font2D getFont2D()>();
+
+        $b1 = virtualinvoke $r1.<sun.font.Font2D: byte getBaselineFor(char)>(c0);
+
+        return $b1;
+    }
+
+    public java.util.Map getAttributes()
+    {
+        sun.font.AttributeMap $r0;
+        sun.font.AttributeValues $r2;
+        java.awt.Font r1;
+
+        r1 := @this: java.awt.Font;
+
+        $r0 = new sun.font.AttributeMap;
+
+        $r2 = specialinvoke r1.<java.awt.Font: sun.font.AttributeValues getAttributeValues()>();
+
+        specialinvoke $r0.<sun.font.AttributeMap: void <init>(sun.font.AttributeValues)>($r2);
+
+        return $r0;
+    }
+
+    public java.text.AttributedCharacterIterator$Attribute[] getAvailableAttributes()
+    {
+        java.awt.font.TextAttribute $r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22;
+        java.awt.Font r23;
+        java.text.AttributedCharacterIterator$Attribute[] $r0;
+
+        r23 := @this: java.awt.Font;
+
+        $r0 = newarray (java.text.AttributedCharacterIterator$Attribute)[22];
+
+        $r1 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute FAMILY>;
+
+        $r0[0] = $r1;
+
+        $r2 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute WEIGHT>;
+
+        $r0[1] = $r2;
+
+        $r3 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute WIDTH>;
+
+        $r0[2] = $r3;
+
+        $r4 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute POSTURE>;
+
+        $r0[3] = $r4;
+
+        $r5 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute SIZE>;
+
+        $r0[4] = $r5;
+
+        $r6 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute TRANSFORM>;
+
+        $r0[5] = $r6;
+
+        $r7 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute SUPERSCRIPT>;
+
+        $r0[6] = $r7;
+
+        $r8 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute CHAR_REPLACEMENT>;
+
+        $r0[7] = $r8;
+
+        $r9 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute FOREGROUND>;
+
+        $r0[8] = $r9;
+
+        $r10 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute BACKGROUND>;
+
+        $r0[9] = $r10;
+
+        $r11 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute UNDERLINE>;
+
+        $r0[10] = $r11;
+
+        $r12 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute STRIKETHROUGH>;
+
+        $r0[11] = $r12;
+
+        $r13 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute RUN_DIRECTION>;
+
+        $r0[12] = $r13;
+
+        $r14 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute BIDI_EMBEDDING>;
+
+        $r0[13] = $r14;
+
+        $r15 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute JUSTIFICATION>;
+
+        $r0[14] = $r15;
+
+        $r16 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute INPUT_METHOD_HIGHLIGHT>;
+
+        $r0[15] = $r16;
+
+        $r17 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute INPUT_METHOD_UNDERLINE>;
+
+        $r0[16] = $r17;
+
+        $r18 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute SWAP_COLORS>;
+
+        $r0[17] = $r18;
+
+        $r19 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute NUMERIC_SHAPING>;
+
+        $r0[18] = $r19;
+
+        $r20 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute KERNING>;
+
+        $r0[19] = $r20;
+
+        $r21 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute LIGATURES>;
+
+        $r0[20] = $r21;
+
+        $r22 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute TRACKING>;
+
+        $r0[21] = $r22;
+
+        return $r0;
+    }
+
+    public java.awt.Font deriveFont(int, float)
+    {
+        sun.font.AttributeValues $r1, $r2, $r3;
+        sun.font.Font2DHandle $r5, $r7;
+        int i0, $i1, $i2, $i4;
+        java.lang.String $r8;
+        boolean $z0, $z1;
+        java.awt.Font r0, $r9, $r10;
+        float f0;
+
+        r0 := @this: java.awt.Font;
+
+        i0 := @parameter0: int;
+
+        f0 := @parameter1: float;
+
+        $r1 = r0.<java.awt.Font: sun.font.AttributeValues values>;
+
+        if $r1 != null goto label1;
+
+        $r9 = new java.awt.Font;
+
+        $r8 = r0.<java.awt.Font: java.lang.String name>;
+
+        $z1 = r0.<java.awt.Font: boolean createdFont>;
+
+        $r7 = r0.<java.awt.Font: sun.font.Font2DHandle font2DHandle>;
+
+        specialinvoke $r9.<java.awt.Font: void <init>(java.lang.String,int,float,boolean,sun.font.Font2DHandle)>($r8, i0, f0, $z1, $r7);
+
+        return $r9;
+
+     label1:
+        $r2 = specialinvoke r0.<java.awt.Font: sun.font.AttributeValues getAttributeValues()>();
+
+        $r3 = virtualinvoke $r2.<sun.font.AttributeValues: sun.font.AttributeValues clone()>();
+
+        $i1 = r0.<java.awt.Font: int style>;
+
+        if $i1 == i0 goto label2;
+
+        $i2 = r0.<java.awt.Font: int style>;
+
+        goto label3;
+
+     label2:
+        $i4 = (int) -1;
+
+        $i2 = $i4;
+
+     label3:
+        staticinvoke <java.awt.Font: void applyStyle(int,sun.font.AttributeValues)>(i0, $r3);
+
+        virtualinvoke $r3.<sun.font.AttributeValues: void setSize(float)>(f0);
+
+        $r10 = new java.awt.Font;
+
+        $z0 = r0.<java.awt.Font: boolean createdFont>;
+
+        $r5 = r0.<java.awt.Font: sun.font.Font2DHandle font2DHandle>;
+
+        specialinvoke $r10.<java.awt.Font: void <init>(sun.font.AttributeValues,java.lang.String,int,boolean,sun.font.Font2DHandle)>($r3, null, $i2, $z0, $r5);
+
+        return $r10;
+    }
+
+    public java.awt.Font deriveFont(int, java.awt.geom.AffineTransform)
+    {
+        java.awt.Font r0, $r6;
+        java.awt.geom.AffineTransform r3;
+        sun.font.AttributeValues $r1, $r2;
+        sun.font.Font2DHandle $r5;
+        int i0, $i1, $i2, $i4;
+        boolean $z0;
+
+        r0 := @this: java.awt.Font;
+
+        i0 := @parameter0: int;
+
+        r3 := @parameter1: java.awt.geom.AffineTransform;
+
+        $r1 = specialinvoke r0.<java.awt.Font: sun.font.AttributeValues getAttributeValues()>();
+
+        $r2 = virtualinvoke $r1.<sun.font.AttributeValues: sun.font.AttributeValues clone()>();
+
+        $i1 = r0.<java.awt.Font: int style>;
+
+        if $i1 == i0 goto label1;
+
+        $i2 = r0.<java.awt.Font: int style>;
+
+        goto label2;
+
+     label1:
+        $i4 = (int) -1;
+
+        $i2 = $i4;
+
+     label2:
+        staticinvoke <java.awt.Font: void applyStyle(int,sun.font.AttributeValues)>(i0, $r2);
+
+        staticinvoke <java.awt.Font: void applyTransform(java.awt.geom.AffineTransform,sun.font.AttributeValues)>(r3, $r2);
+
+        $r6 = new java.awt.Font;
+
+        $z0 = r0.<java.awt.Font: boolean createdFont>;
+
+        $r5 = r0.<java.awt.Font: sun.font.Font2DHandle font2DHandle>;
+
+        specialinvoke $r6.<java.awt.Font: void <init>(sun.font.AttributeValues,java.lang.String,int,boolean,sun.font.Font2DHandle)>($r2, null, $i2, $z0, $r5);
+
+        return $r6;
+    }
+
+    public java.awt.Font deriveFont(float)
+    {
+        java.awt.Font r0, $r9, $r10;
+        sun.font.AttributeValues $r1, $r2, $r3;
+        sun.font.Font2DHandle $r5, $r7;
+        int $i0, $i2;
+        float f0;
+        java.lang.String $r8;
+        boolean $z0, $z1;
+
+        r0 := @this: java.awt.Font;
+
+        f0 := @parameter0: float;
+
+        $r1 = r0.<java.awt.Font: sun.font.AttributeValues values>;
+
+        if $r1 != null goto label1;
+
+        $r9 = new java.awt.Font;
+
+        $r8 = r0.<java.awt.Font: java.lang.String name>;
+
+        $i0 = r0.<java.awt.Font: int style>;
+
+        $z1 = r0.<java.awt.Font: boolean createdFont>;
+
+        $r7 = r0.<java.awt.Font: sun.font.Font2DHandle font2DHandle>;
+
+        specialinvoke $r9.<java.awt.Font: void <init>(java.lang.String,int,float,boolean,sun.font.Font2DHandle)>($r8, $i0, f0, $z1, $r7);
+
+        return $r9;
+
+     label1:
+        $r2 = specialinvoke r0.<java.awt.Font: sun.font.AttributeValues getAttributeValues()>();
+
+        $r3 = virtualinvoke $r2.<sun.font.AttributeValues: sun.font.AttributeValues clone()>();
+
+        virtualinvoke $r3.<sun.font.AttributeValues: void setSize(float)>(f0);
+
+        $r10 = new java.awt.Font;
+
+        $z0 = r0.<java.awt.Font: boolean createdFont>;
+
+        $r5 = r0.<java.awt.Font: sun.font.Font2DHandle font2DHandle>;
+
+        $i2 = (int) -1;
+
+        specialinvoke $r10.<java.awt.Font: void <init>(sun.font.AttributeValues,java.lang.String,int,boolean,sun.font.Font2DHandle)>($r3, null, $i2, $z0, $r5);
+
+        return $r10;
+    }
+
+    public java.awt.Font deriveFont(java.awt.geom.AffineTransform)
+    {
+        java.awt.Font r0, $r6;
+        java.awt.geom.AffineTransform r3;
+        sun.font.AttributeValues $r1, $r2;
+        sun.font.Font2DHandle $r5;
+        int $i1;
+        boolean $z0;
+
+        r0 := @this: java.awt.Font;
+
+        r3 := @parameter0: java.awt.geom.AffineTransform;
+
+        $r1 = specialinvoke r0.<java.awt.Font: sun.font.AttributeValues getAttributeValues()>();
+
+        $r2 = virtualinvoke $r1.<sun.font.AttributeValues: sun.font.AttributeValues clone()>();
+
+        staticinvoke <java.awt.Font: void applyTransform(java.awt.geom.AffineTransform,sun.font.AttributeValues)>(r3, $r2);
+
+        $r6 = new java.awt.Font;
+
+        $z0 = r0.<java.awt.Font: boolean createdFont>;
+
+        $r5 = r0.<java.awt.Font: sun.font.Font2DHandle font2DHandle>;
+
+        $i1 = (int) -1;
+
+        specialinvoke $r6.<java.awt.Font: void <init>(sun.font.AttributeValues,java.lang.String,int,boolean,sun.font.Font2DHandle)>($r2, null, $i1, $z0, $r5);
+
+        return $r6;
+    }
+
+    public java.awt.Font deriveFont(int)
+    {
+        sun.font.AttributeValues $r1, $r2, $r3;
+        sun.font.Font2DHandle $r5, $r7;
+        int i0, $i1, $i2, $i3, $i5;
+        java.lang.String $r8;
+        boolean $z0, $z1;
+        java.awt.Font r0, $r9, $r10;
+        float $f0;
+
+        r0 := @this: java.awt.Font;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.awt.Font: sun.font.AttributeValues values>;
+
+        if $r1 != null goto label1;
+
+        $r9 = new java.awt.Font;
+
+        $r8 = r0.<java.awt.Font: java.lang.String name>;
+
+        $i2 = r0.<java.awt.Font: int size>;
+
+        $f0 = (float) $i2;
+
+        $z1 = r0.<java.awt.Font: boolean createdFont>;
+
+        $r7 = r0.<java.awt.Font: sun.font.Font2DHandle font2DHandle>;
+
+        specialinvoke $r9.<java.awt.Font: void <init>(java.lang.String,int,float,boolean,sun.font.Font2DHandle)>($r8, i0, $f0, $z1, $r7);
+
+        return $r9;
+
+     label1:
+        $r2 = specialinvoke r0.<java.awt.Font: sun.font.AttributeValues getAttributeValues()>();
+
+        $r3 = virtualinvoke $r2.<sun.font.AttributeValues: sun.font.AttributeValues clone()>();
+
+        $i1 = r0.<java.awt.Font: int style>;
+
+        if $i1 == i0 goto label2;
+
+        $i3 = r0.<java.awt.Font: int style>;
+
+        goto label3;
+
+     label2:
+        $i5 = (int) -1;
+
+        $i3 = $i5;
+
+     label3:
+        staticinvoke <java.awt.Font: void applyStyle(int,sun.font.AttributeValues)>(i0, $r3);
+
+        $r10 = new java.awt.Font;
+
+        $z0 = r0.<java.awt.Font: boolean createdFont>;
+
+        $r5 = r0.<java.awt.Font: sun.font.Font2DHandle font2DHandle>;
+
+        specialinvoke $r10.<java.awt.Font: void <init>(sun.font.AttributeValues,java.lang.String,int,boolean,sun.font.Font2DHandle)>($r3, null, $i3, $z0, $r5);
+
+        return $r10;
+    }
+
+    public java.awt.Font deriveFont(java.util.Map)
+    {
+        java.awt.Font r1, $r4;
+        sun.font.AttributeValues $r2, $r3;
+        java.util.Map r0;
+        sun.font.Font2DHandle $r5;
+        int $i0, $i1;
+        java.lang.String $r6;
+        boolean $z0;
+
+        r1 := @this: java.awt.Font;
+
+        r0 := @parameter0: java.util.Map;
+
+        if r0 != null goto label1;
+
+        return r1;
+
+     label1:
+        $r2 = specialinvoke r1.<java.awt.Font: sun.font.AttributeValues getAttributeValues()>();
+
+        $r3 = virtualinvoke $r2.<sun.font.AttributeValues: sun.font.AttributeValues clone()>();
+
+        $i0 = <java.awt.Font: int RECOGNIZED_MASK>;
+
+        virtualinvoke $r3.<sun.font.AttributeValues: sun.font.AttributeValues merge(java.util.Map,int)>(r0, $i0);
+
+        $r4 = new java.awt.Font;
+
+        $r6 = r1.<java.awt.Font: java.lang.String name>;
+
+        $i1 = r1.<java.awt.Font: int style>;
+
+        $z0 = r1.<java.awt.Font: boolean createdFont>;
+
+        $r5 = r1.<java.awt.Font: sun.font.Font2DHandle font2DHandle>;
+
+        specialinvoke $r4.<java.awt.Font: void <init>(sun.font.AttributeValues,java.lang.String,int,boolean,sun.font.Font2DHandle)>($r3, $r6, $i1, $z0, $r5);
+
+        return $r4;
+    }
+
+    public boolean canDisplay(char)
+    {
+        sun.font.Font2D $r1;
+        java.awt.Font r0;
+        char c0;
+        boolean $z0;
+
+        r0 := @this: java.awt.Font;
+
+        c0 := @parameter0: char;
+
+        $r1 = specialinvoke r0.<java.awt.Font: sun.font.Font2D getFont2D()>();
+
+        $z0 = virtualinvoke $r1.<sun.font.Font2D: boolean canDisplay(char)>(c0);
+
+        return $z0;
+    }
+
+    public boolean canDisplay(int)
+    {
+        java.awt.Font r0;
+        java.lang.IllegalArgumentException $r2;
+        sun.font.Font2D $r1;
+        int i0;
+        java.lang.StringBuilder $r3, $r4, $r6;
+        java.lang.String $r5, $r7;
+        boolean $z0, $z1;
+
+        r0 := @this: java.awt.Font;
+
+        i0 := @parameter0: int;
+
+        $z0 = staticinvoke <java.lang.Character: boolean isValidCodePoint(int)>(i0);
+
+        if $z0 != 0 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("invalid code point: ");
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>(i0);
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r7);
+
+        throw $r2;
+
+     label1:
+        $r1 = specialinvoke r0.<java.awt.Font: sun.font.Font2D getFont2D()>();
+
+        $z1 = virtualinvoke $r1.<sun.font.Font2D: boolean canDisplay(int)>(i0);
+
+        return $z1;
+    }
+
+    public int canDisplayUpTo(java.lang.String)
+    {
+        java.awt.Font r0;
+        char $c1;
+        sun.font.Font2D $r1;
+        int $i0, $i2, i3, $i5;
+        java.lang.String r2;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.awt.Font;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = specialinvoke r0.<java.awt.Font: sun.font.Font2D getFont2D()>();
+
+        $i0 = virtualinvoke r2.<java.lang.String: int length()>();
+
+        i3 = 0;
+
+     label1:
+        if i3 >= $i0 goto label6;
+
+        $c1 = virtualinvoke r2.<java.lang.String: char charAt(int)>(i3);
+
+        $z0 = virtualinvoke $r1.<sun.font.Font2D: boolean canDisplay(char)>($c1);
+
+        if $z0 == 0 goto label2;
+
+        goto label5;
+
+     label2:
+        $z1 = staticinvoke <java.lang.Character: boolean isHighSurrogate(char)>($c1);
+
+        if $z1 != 0 goto label3;
+
+        return i3;
+
+     label3:
+        $i2 = virtualinvoke r2.<java.lang.String: int codePointAt(int)>(i3);
+
+        $z2 = virtualinvoke $r1.<sun.font.Font2D: boolean canDisplay(int)>($i2);
+
+        if $z2 != 0 goto label4;
+
+        return i3;
+
+     label4:
+        i3 = i3 + 1;
+
+     label5:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label6:
+        $i5 = (int) -1;
+
+        return $i5;
+    }
+
+    public int canDisplayUpTo(char[], int, int)
+    {
+        java.awt.Font r0;
+        char c2;
+        sun.font.Font2D $r1;
+        int i0, i1, $i3, i4, $i6;
+        char[] r2;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.awt.Font;
+
+        r2 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r1 = specialinvoke r0.<java.awt.Font: sun.font.Font2D getFont2D()>();
+
+        i4 = i0;
+
+     label1:
+        if i4 >= i1 goto label6;
+
+        c2 = r2[i4];
+
+        $z0 = virtualinvoke $r1.<sun.font.Font2D: boolean canDisplay(char)>(c2);
+
+        if $z0 == 0 goto label2;
+
+        goto label5;
+
+     label2:
+        $z1 = staticinvoke <java.lang.Character: boolean isHighSurrogate(char)>(c2);
+
+        if $z1 != 0 goto label3;
+
+        return i4;
+
+     label3:
+        $i3 = staticinvoke <java.lang.Character: int codePointAt(char[],int,int)>(r2, i4, i1);
+
+        $z2 = virtualinvoke $r1.<sun.font.Font2D: boolean canDisplay(int)>($i3);
+
+        if $z2 != 0 goto label4;
+
+        return i4;
+
+     label4:
+        i4 = i4 + 1;
+
+     label5:
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label6:
+        $i6 = (int) -1;
+
+        return $i6;
+    }
+
+    public int canDisplayUpTo(java.text.CharacterIterator, int, int)
+    {
+        java.text.CharacterIterator r2;
+        java.awt.Font r0;
+        char $c2, c4;
+        sun.font.Font2D $r1;
+        int i0, i1, $i3, i5, $i7;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: java.awt.Font;
+
+        r2 := @parameter0: java.text.CharacterIterator;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r1 = specialinvoke r0.<java.awt.Font: sun.font.Font2D getFont2D()>();
+
+        c4 = interfaceinvoke r2.<java.text.CharacterIterator: char setIndex(int)>(i0);
+
+        i5 = i0;
+
+     label1:
+        if i5 >= i1 goto label7;
+
+        $z0 = virtualinvoke $r1.<sun.font.Font2D: boolean canDisplay(char)>(c4);
+
+        if $z0 == 0 goto label2;
+
+        goto label6;
+
+     label2:
+        $z1 = staticinvoke <java.lang.Character: boolean isHighSurrogate(char)>(c4);
+
+        if $z1 != 0 goto label3;
+
+        return i5;
+
+     label3:
+        $c2 = interfaceinvoke r2.<java.text.CharacterIterator: char next()>();
+
+        $z2 = staticinvoke <java.lang.Character: boolean isLowSurrogate(char)>($c2);
+
+        if $z2 != 0 goto label4;
+
+        return i5;
+
+     label4:
+        $i3 = staticinvoke <java.lang.Character: int toCodePoint(char,char)>(c4, $c2);
+
+        $z3 = virtualinvoke $r1.<sun.font.Font2D: boolean canDisplay(int)>($i3);
+
+        if $z3 != 0 goto label5;
+
+        return i5;
+
+     label5:
+        i5 = i5 + 1;
+
+     label6:
+        i5 = i5 + 1;
+
+        c4 = interfaceinvoke r2.<java.text.CharacterIterator: char next()>();
+
+        goto label1;
+
+     label7:
+        $i7 = (int) -1;
+
+        return $i7;
+    }
+
+    public float getItalicAngle()
+    {
+        float $f0;
+        java.awt.Font r0;
+
+        r0 := @this: java.awt.Font;
+
+        $f0 = specialinvoke r0.<java.awt.Font: float getItalicAngle(java.awt.font.FontRenderContext)>(null);
+
+        return $f0;
+    }
+
+    private float getItalicAngle(java.awt.font.FontRenderContext)
+    {
+        sun.font.Font2D $r2;
+        java.awt.font.FontRenderContext r0;
+        java.awt.Font r1;
+        float $f0;
+        java.lang.Object r4, r5;
+        java.awt.geom.AffineTransform $r3;
+
+        r1 := @this: java.awt.Font;
+
+        r0 := @parameter0: java.awt.font.FontRenderContext;
+
+        if r0 != null goto label1;
+
+        r4 = <java.awt.RenderingHints: java.lang.Object VALUE_TEXT_ANTIALIAS_OFF>;
+
+        r5 = <java.awt.RenderingHints: java.lang.Object VALUE_FRACTIONALMETRICS_OFF>;
+
+        goto label2;
+
+     label1:
+        r4 = virtualinvoke r0.<java.awt.font.FontRenderContext: java.lang.Object getAntiAliasingHint()>();
+
+        r5 = virtualinvoke r0.<java.awt.font.FontRenderContext: java.lang.Object getFractionalMetricsHint()>();
+
+     label2:
+        $r2 = specialinvoke r1.<java.awt.Font: sun.font.Font2D getFont2D()>();
+
+        $r3 = <java.awt.Font: java.awt.geom.AffineTransform identityTx>;
+
+        $f0 = virtualinvoke $r2.<sun.font.Font2D: float getItalicAngle(java.awt.Font,java.awt.geom.AffineTransform,java.lang.Object,java.lang.Object)>(r1, $r3, r4, r5);
+
+        return $f0;
+    }
+
+    public boolean hasUniformLineMetrics()
+    {
+        java.awt.Font r0;
+
+        r0 := @this: java.awt.Font;
+
+        return 0;
+    }
+
+    private sun.font.FontLineMetrics defaultLineMetrics(java.awt.font.FontRenderContext)
+    {
+        sun.font.AttributeValues $r3, $r6, $r18;
+        sun.font.CoreMetrics $r20;
+        boolean $z0, $z1;
+        java.awt.Font r0;
+        java.awt.geom.AffineTransform $r4, $r7, $r15;
+        float $f0, f1, $f2, f3, $f4, f5, $f6, $f7, $f8, $f9, $f10, $f11, $f12, f13, $f14, f15, $f16, f17, $f18, f19, $f20, $f21, $f22;
+        float[] $r13, $r19;
+        int $i0;
+        java.lang.ref.SoftReference $r1, $r8, $r22;
+        double $d0;
+        sun.font.FontLineMetrics $r10, r12, $r21, $r24;
+        sun.font.Font2D $r14;
+        java.awt.font.FontRenderContext r2, $r11;
+        java.awt.geom.Point2D$Float $r5;
+        java.lang.Object $r9, $r16, $r17, $r23;
+
+        r0 := @this: java.awt.Font;
+
+        r2 := @parameter0: java.awt.font.FontRenderContext;
+
+        $r1 = r0.<java.awt.Font: java.lang.ref.SoftReference flmref>;
+
+        if $r1 == null goto label1;
+
+        $r8 = r0.<java.awt.Font: java.lang.ref.SoftReference flmref>;
+
+        $r9 = virtualinvoke $r8.<java.lang.ref.SoftReference: java.lang.Object get()>();
+
+        $r10 = (sun.font.FontLineMetrics) $r9;
+
+        r12 = $r10;
+
+        if $r10 == null goto label1;
+
+        $r11 = $r10.<sun.font.FontLineMetrics: java.awt.font.FontRenderContext frc>;
+
+        $z0 = virtualinvoke $r11.<java.awt.font.FontRenderContext: boolean equals(java.awt.font.FontRenderContext)>(r2);
+
+        if $z0 != 0 goto label4;
+
+     label1:
+        $r13 = newarray (float)[8];
+
+        $r14 = specialinvoke r0.<java.awt.Font: sun.font.Font2D getFont2D()>();
+
+        $r15 = <java.awt.Font: java.awt.geom.AffineTransform identityTx>;
+
+        $r16 = virtualinvoke r2.<java.awt.font.FontRenderContext: java.lang.Object getAntiAliasingHint()>();
+
+        $r17 = virtualinvoke r2.<java.awt.font.FontRenderContext: java.lang.Object getFractionalMetricsHint()>();
+
+        virtualinvoke $r14.<sun.font.Font2D: void getFontMetrics(java.awt.Font,java.awt.geom.AffineTransform,java.lang.Object,java.lang.Object,float[])>(r0, $r15, $r16, $r17, $r13);
+
+        $f0 = $r13[0];
+
+        f1 = $f0;
+
+        $f2 = $r13[1];
+
+        f3 = $f2;
+
+        $f4 = $r13[2];
+
+        f5 = 0.0F;
+
+        $r18 = r0.<java.awt.Font: sun.font.AttributeValues values>;
+
+        if $r18 == null goto label2;
+
+        $r6 = r0.<java.awt.Font: sun.font.AttributeValues values>;
+
+        $i0 = virtualinvoke $r6.<sun.font.AttributeValues: int getSuperscript()>();
+
+        if $i0 == 0 goto label2;
+
+        $r7 = virtualinvoke r0.<java.awt.Font: java.awt.geom.AffineTransform getTransform()>();
+
+        $d0 = virtualinvoke $r7.<java.awt.geom.AffineTransform: double getTranslateY()>();
+
+        f5 = (float) $d0;
+
+        f1 = $f0 - f5;
+
+        f3 = $f2 + f5;
+
+     label2:
+        $f6 = f1 + f3;
+
+        $f7 = $f6 + $f4;
+
+        $r19 = newarray (float)[3];
+
+        $r19[0] = 0.0F;
+
+        $f8 = f3 / 2.0F;
+
+        $f9 = $f8 - f1;
+
+        $f10 = $f9 / 2.0F;
+
+        $r19[1] = $f10;
+
+        $f11 = neg f1;
+
+        $r19[2] = $f11;
+
+        $f12 = $r13[4];
+
+        f13 = $f12;
+
+        $f14 = $r13[5];
+
+        f15 = $f14;
+
+        $f16 = $r13[6];
+
+        f17 = $f16;
+
+        $f18 = $r13[7];
+
+        f19 = $f18;
+
+        $f20 = specialinvoke r0.<java.awt.Font: float getItalicAngle(java.awt.font.FontRenderContext)>(r2);
+
+        $z1 = virtualinvoke r0.<java.awt.Font: boolean isTransformed()>();
+
+        if $z1 == 0 goto label3;
+
+        $r3 = r0.<java.awt.Font: sun.font.AttributeValues values>;
+
+        $r4 = virtualinvoke $r3.<sun.font.AttributeValues: java.awt.geom.AffineTransform getCharTransform()>();
+
+        if $r4 == null goto label3;
+
+        $r5 = new java.awt.geom.Point2D$Float;
+
+        specialinvoke $r5.<java.awt.geom.Point2D$Float: void <init>()>();
+
+        virtualinvoke $r5.<java.awt.geom.Point2D$Float: void setLocation(float,float)>(0.0F, $f12);
+
+        virtualinvoke $r4.<java.awt.geom.AffineTransform: java.awt.geom.Point2D deltaTransform(java.awt.geom.Point2D,java.awt.geom.Point2D)>($r5, $r5);
+
+        f13 = $r5.<java.awt.geom.Point2D$Float: float y>;
+
+        virtualinvoke $r5.<java.awt.geom.Point2D$Float: void setLocation(float,float)>(0.0F, $f14);
+
+        virtualinvoke $r4.<java.awt.geom.AffineTransform: java.awt.geom.Point2D deltaTransform(java.awt.geom.Point2D,java.awt.geom.Point2D)>($r5, $r5);
+
+        f15 = $r5.<java.awt.geom.Point2D$Float: float y>;
+
+        virtualinvoke $r5.<java.awt.geom.Point2D$Float: void setLocation(float,float)>(0.0F, $f16);
+
+        virtualinvoke $r4.<java.awt.geom.AffineTransform: java.awt.geom.Point2D deltaTransform(java.awt.geom.Point2D,java.awt.geom.Point2D)>($r5, $r5);
+
+        f17 = $r5.<java.awt.geom.Point2D$Float: float y>;
+
+        virtualinvoke $r5.<java.awt.geom.Point2D$Float: void setLocation(float,float)>(0.0F, $f18);
+
+        virtualinvoke $r4.<java.awt.geom.AffineTransform: java.awt.geom.Point2D deltaTransform(java.awt.geom.Point2D,java.awt.geom.Point2D)>($r5, $r5);
+
+        f19 = $r5.<java.awt.geom.Point2D$Float: float y>;
+
+     label3:
+        $f21 = f13 + f5;
+
+        $f22 = f17 + f5;
+
+        $r20 = new sun.font.CoreMetrics;
+
+        specialinvoke $r20.<sun.font.CoreMetrics: void <init>(float,float,float,float,int,float[],float,float,float,float,float,float)>(f1, f3, $f4, $f7, 0, $r19, $f21, f15, $f22, f19, f5, $f20);
+
+        $r21 = new sun.font.FontLineMetrics;
+
+        specialinvoke $r21.<sun.font.FontLineMetrics: void <init>(int,sun.font.CoreMetrics,java.awt.font.FontRenderContext)>(0, $r20, r2);
+
+        r12 = $r21;
+
+        $r22 = new java.lang.ref.SoftReference;
+
+        specialinvoke $r22.<java.lang.ref.SoftReference: void <init>(java.lang.Object)>($r21);
+
+        r0.<java.awt.Font: java.lang.ref.SoftReference flmref> = $r22;
+
+     label4:
+        $r23 = virtualinvoke r12.<sun.font.FontLineMetrics: java.lang.Object clone()>();
+
+        $r24 = (sun.font.FontLineMetrics) $r23;
+
+        return $r24;
+    }
+
+    public java.awt.font.LineMetrics getLineMetrics(java.lang.String, java.awt.font.FontRenderContext)
+    {
+        sun.font.FontLineMetrics $r2;
+        java.awt.font.FontRenderContext r1;
+        java.awt.Font r0;
+        int $i0;
+        java.lang.String r3;
+
+        r0 := @this: java.awt.Font;
+
+        r3 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.awt.font.FontRenderContext;
+
+        $r2 = specialinvoke r0.<java.awt.Font: sun.font.FontLineMetrics defaultLineMetrics(java.awt.font.FontRenderContext)>(r1);
+
+        $i0 = virtualinvoke r3.<java.lang.String: int length()>();
+
+        $r2.<sun.font.FontLineMetrics: int numchars> = $i0;
+
+        return $r2;
+    }
+
+    public java.awt.font.LineMetrics getLineMetrics(java.lang.String, int, int, java.awt.font.FontRenderContext)
+    {
+        java.awt.Font r0;
+        sun.font.FontLineMetrics $r2;
+        java.awt.font.FontRenderContext r1;
+        int i0, i1, i2, $i3;
+        java.lang.String r3;
+
+        r0 := @this: java.awt.Font;
+
+        r3 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        r1 := @parameter3: java.awt.font.FontRenderContext;
+
+        $r2 = specialinvoke r0.<java.awt.Font: sun.font.FontLineMetrics defaultLineMetrics(java.awt.font.FontRenderContext)>(r1);
+
+        i2 = i0 - i1;
+
+        if i2 >= 0 goto label1;
+
+        $i3 = 0;
+
+        goto label2;
+
+     label1:
+        $i3 = i2;
+
+     label2:
+        $r2.<sun.font.FontLineMetrics: int numchars> = $i3;
+
+        return $r2;
+    }
+
+    public java.awt.font.LineMetrics getLineMetrics(char[], int, int, java.awt.font.FontRenderContext)
+    {
+        java.awt.Font r0;
+        sun.font.FontLineMetrics $r2;
+        java.awt.font.FontRenderContext r1;
+        int i0, i1, i2, $i3;
+        char[] r3;
+
+        r0 := @this: java.awt.Font;
+
+        r3 := @parameter0: char[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        r1 := @parameter3: java.awt.font.FontRenderContext;
+
+        $r2 = specialinvoke r0.<java.awt.Font: sun.font.FontLineMetrics defaultLineMetrics(java.awt.font.FontRenderContext)>(r1);
+
+        i2 = i0 - i1;
+
+        if i2 >= 0 goto label1;
+
+        $i3 = 0;
+
+        goto label2;
+
+     label1:
+        $i3 = i2;
+
+     label2:
+        $r2.<sun.font.FontLineMetrics: int numchars> = $i3;
+
+        return $r2;
+    }
+
+    public java.awt.font.LineMetrics getLineMetrics(java.text.CharacterIterator, int, int, java.awt.font.FontRenderContext)
+    {
+        java.text.CharacterIterator r3;
+        java.awt.Font r0;
+        sun.font.FontLineMetrics $r2;
+        java.awt.font.FontRenderContext r1;
+        int i0, i1, i2, $i3;
+
+        r0 := @this: java.awt.Font;
+
+        r3 := @parameter0: java.text.CharacterIterator;
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        r1 := @parameter3: java.awt.font.FontRenderContext;
+
+        $r2 = specialinvoke r0.<java.awt.Font: sun.font.FontLineMetrics defaultLineMetrics(java.awt.font.FontRenderContext)>(r1);
+
+        i2 = i0 - i1;
+
+        if i2 >= 0 goto label1;
+
+        $i3 = 0;
+
+        goto label2;
+
+     label1:
+        $i3 = i2;
+
+     label2:
+        $r2.<sun.font.FontLineMetrics: int numchars> = $i3;
+
+        return $r2;
+    }
+
+    public java.awt.geom.Rectangle2D getStringBounds(java.lang.String, java.awt.font.FontRenderContext)
+    {
+        java.awt.font.FontRenderContext r3;
+        java.awt.Font r2;
+        java.awt.geom.Rectangle2D $r4;
+        int $i0;
+        char[] $r1;
+        java.lang.String r0;
+
+        r2 := @this: java.awt.Font;
+
+        r0 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.awt.font.FontRenderContext;
+
+        $r1 = virtualinvoke r0.<java.lang.String: char[] toCharArray()>();
+
+        $i0 = lengthof $r1;
+
+        $r4 = virtualinvoke r2.<java.awt.Font: java.awt.geom.Rectangle2D getStringBounds(char[],int,int,java.awt.font.FontRenderContext)>($r1, 0, $i0, r3);
+
+        return $r4;
+    }
+
+    public java.awt.geom.Rectangle2D getStringBounds(java.lang.String, int, int, java.awt.font.FontRenderContext)
+    {
+        java.awt.font.FontRenderContext r3;
+        java.awt.Font r2;
+        java.awt.geom.Rectangle2D $r4;
+        int i0, i1;
+        java.lang.String r0, $r1;
+
+        r2 := @this: java.awt.Font;
+
+        r0 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r3 := @parameter3: java.awt.font.FontRenderContext;
+
+        $r1 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(i0, i1);
+
+        $r4 = virtualinvoke r2.<java.awt.Font: java.awt.geom.Rectangle2D getStringBounds(java.lang.String,java.awt.font.FontRenderContext)>($r1, r3);
+
+        return $r4;
+    }
+
+    public java.awt.geom.Rectangle2D getStringBounds(char[], int, int, java.awt.font.FontRenderContext)
+    {
+        java.lang.IndexOutOfBoundsException $r13, $r18, $r23;
+        java.awt.geom.Rectangle2D $r8;
+        java.awt.geom.Rectangle2D$Float $r6;
+        sun.font.AttributeValues $r2, $r9, $r10, $r11;
+        sun.font.StandardGlyphVector $r7;
+        boolean $z0, z2, $z3, $z4, $z5;
+        java.awt.Font r1;
+        java.awt.geom.AffineTransform $r12;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7;
+        java.lang.StringBuilder $r14, $r15, $r16, $r19, $r20, $r21, $r24, $r25, $r26;
+        java.awt.font.TextLayout $r4;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, $i7;
+        java.lang.String $r3, $r17, $r22, $r27;
+        java.awt.font.FontRenderContext r5;
+        char[] r0;
+
+        r1 := @this: java.awt.Font;
+
+        r0 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r5 := @parameter3: java.awt.font.FontRenderContext;
+
+        if i0 >= 0 goto label01;
+
+        $r23 = new java.lang.IndexOutOfBoundsException;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("beginIndex: ");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r23.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>($r27);
+
+        throw $r23;
+
+     label01:
+        $i2 = lengthof r0;
+
+        if i1 <= $i2 goto label02;
+
+        $r18 = new java.lang.IndexOutOfBoundsException;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("limit: ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r18.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>($r22);
+
+        throw $r18;
+
+     label02:
+        if i0 <= i1 goto label03;
+
+        $r13 = new java.lang.IndexOutOfBoundsException;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("range length: ");
+
+        $i7 = i1 - i0;
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i7);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>($r17);
+
+        throw $r13;
+
+     label03:
+        $r2 = r1.<java.awt.Font: sun.font.AttributeValues values>;
+
+        if $r2 == null goto label04;
+
+        $r9 = r1.<java.awt.Font: sun.font.AttributeValues values>;
+
+        $i5 = virtualinvoke $r9.<sun.font.AttributeValues: int getKerning()>();
+
+        if $i5 != 0 goto label05;
+
+        $r10 = r1.<java.awt.Font: sun.font.AttributeValues values>;
+
+        $i6 = virtualinvoke $r10.<sun.font.AttributeValues: int getLigatures()>();
+
+        if $i6 != 0 goto label05;
+
+        $r11 = r1.<java.awt.Font: sun.font.AttributeValues values>;
+
+        $r12 = virtualinvoke $r11.<sun.font.AttributeValues: java.awt.geom.AffineTransform getBaselineTransform()>();
+
+        if $r12 != null goto label05;
+
+     label04:
+        $z5 = 1;
+
+        $z4 = 1;
+
+        goto label06;
+
+     label05:
+        $z5 = 0;
+
+        $z4 = 0;
+
+     label06:
+        z2 = $z5;
+
+        if $z4 == 0 goto label09;
+
+        $z0 = staticinvoke <sun.font.FontUtilities: boolean isComplexText(char[],int,int)>(r0, i0, i1);
+
+        if $z0 != 0 goto label07;
+
+        $z3 = 1;
+
+        goto label08;
+
+     label07:
+        $z3 = 0;
+
+     label08:
+        z2 = $z3;
+
+     label09:
+        if z2 == 0 goto label10;
+
+        $r7 = new sun.font.StandardGlyphVector;
+
+        $i4 = i1 - i0;
+
+        specialinvoke $r7.<sun.font.StandardGlyphVector: void <init>(java.awt.Font,char[],int,int,java.awt.font.FontRenderContext)>(r1, r0, i0, $i4, r5);
+
+        $r8 = virtualinvoke $r7.<java.awt.font.GlyphVector: java.awt.geom.Rectangle2D getLogicalBounds()>();
+
+        return $r8;
+
+     label10:
+        $r3 = new java.lang.String;
+
+        $i3 = i1 - i0;
+
+        specialinvoke $r3.<java.lang.String: void <init>(char[],int,int)>(r0, i0, $i3);
+
+        $r4 = new java.awt.font.TextLayout;
+
+        specialinvoke $r4.<java.awt.font.TextLayout: void <init>(java.lang.String,java.awt.Font,java.awt.font.FontRenderContext)>($r3, r1, r5);
+
+        $r6 = new java.awt.geom.Rectangle2D$Float;
+
+        $f0 = virtualinvoke $r4.<java.awt.font.TextLayout: float getAscent()>();
+
+        $f1 = neg $f0;
+
+        $f2 = virtualinvoke $r4.<java.awt.font.TextLayout: float getAdvance()>();
+
+        $f3 = virtualinvoke $r4.<java.awt.font.TextLayout: float getAscent()>();
+
+        $f4 = virtualinvoke $r4.<java.awt.font.TextLayout: float getDescent()>();
+
+        $f5 = $f3 + $f4;
+
+        $f6 = virtualinvoke $r4.<java.awt.font.TextLayout: float getLeading()>();
+
+        $f7 = $f5 + $f6;
+
+        specialinvoke $r6.<java.awt.geom.Rectangle2D$Float: void <init>(float,float,float,float)>(0.0F, $f1, $f2, $f7);
+
+        return $r6;
+    }
+
+    public java.awt.geom.Rectangle2D getStringBounds(java.text.CharacterIterator, int, int, java.awt.font.FontRenderContext)
+    {
+        java.lang.IndexOutOfBoundsException $r5, $r10, $r15;
+        java.awt.geom.Rectangle2D $r4;
+        int $i0, $i1, i2, i3, $i4, $i5, $i6, $i8, i9;
+        java.lang.String $r9, $r14, $r19;
+        java.text.CharacterIterator r0;
+        java.awt.Font r2;
+        char $c7;
+        java.awt.font.FontRenderContext r3;
+        char[] r1;
+        java.lang.StringBuilder $r6, $r7, $r8, $r11, $r12, $r13, $r16, $r17, $r18;
+
+        r2 := @this: java.awt.Font;
+
+        r0 := @parameter0: java.text.CharacterIterator;
+
+        i2 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        r3 := @parameter3: java.awt.font.FontRenderContext;
+
+        $i0 = interfaceinvoke r0.<java.text.CharacterIterator: int getBeginIndex()>();
+
+        $i1 = interfaceinvoke r0.<java.text.CharacterIterator: int getEndIndex()>();
+
+        if i2 >= $i0 goto label1;
+
+        $r15 = new java.lang.IndexOutOfBoundsException;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("beginIndex: ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i2);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r15.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>($r19);
+
+        throw $r15;
+
+     label1:
+        if i3 <= $i1 goto label2;
+
+        $r10 = new java.lang.IndexOutOfBoundsException;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("limit: ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i3);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r10.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>($r14);
+
+        throw $r10;
+
+     label2:
+        if i2 <= i3 goto label3;
+
+        $r5 = new java.lang.IndexOutOfBoundsException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("range length: ");
+
+        $i8 = i3 - i2;
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i8);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>($r9);
+
+        throw $r5;
+
+     label3:
+        $i4 = i3 - i2;
+
+        r1 = newarray (char)[$i4];
+
+        interfaceinvoke r0.<java.text.CharacterIterator: char setIndex(int)>(i2);
+
+        i9 = 0;
+
+     label4:
+        $i5 = lengthof r1;
+
+        if i9 >= $i5 goto label5;
+
+        $c7 = interfaceinvoke r0.<java.text.CharacterIterator: char current()>();
+
+        r1[i9] = $c7;
+
+        interfaceinvoke r0.<java.text.CharacterIterator: char next()>();
+
+        i9 = i9 + 1;
+
+        goto label4;
+
+     label5:
+        $i6 = lengthof r1;
+
+        $r4 = virtualinvoke r2.<java.awt.Font: java.awt.geom.Rectangle2D getStringBounds(char[],int,int,java.awt.font.FontRenderContext)>(r1, 0, $i6, r3);
+
+        return $r4;
+    }
+
+    public java.awt.geom.Rectangle2D getMaxCharBounds(java.awt.font.FontRenderContext)
+    {
+        java.awt.Font r1;
+        float[] r0;
+        java.awt.geom.Rectangle2D$Float $r4;
+        sun.font.Font2D $r2;
+        java.awt.font.FontRenderContext r3;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7;
+
+        r1 := @this: java.awt.Font;
+
+        r3 := @parameter0: java.awt.font.FontRenderContext;
+
+        r0 = newarray (float)[4];
+
+        $r2 = specialinvoke r1.<java.awt.Font: sun.font.Font2D getFont2D()>();
+
+        virtualinvoke $r2.<sun.font.Font2D: void getFontMetrics(java.awt.Font,java.awt.font.FontRenderContext,float[])>(r1, r3, r0);
+
+        $r4 = new java.awt.geom.Rectangle2D$Float;
+
+        $f0 = r0[0];
+
+        $f7 = neg $f0;
+
+        $f6 = r0[3];
+
+        $f2 = r0[0];
+
+        $f1 = r0[1];
+
+        $f4 = $f2 + $f1;
+
+        $f3 = r0[2];
+
+        $f5 = $f4 + $f3;
+
+        specialinvoke $r4.<java.awt.geom.Rectangle2D$Float: void <init>(float,float,float,float)>(0.0F, $f7, $f6, $f5);
+
+        return $r4;
+    }
+
+    public java.awt.font.GlyphVector createGlyphVector(java.awt.font.FontRenderContext, java.lang.String)
+    {
+        java.awt.font.FontRenderContext r3;
+        java.awt.Font r1;
+        java.lang.String r2;
+        sun.font.StandardGlyphVector $r0;
+
+        r1 := @this: java.awt.Font;
+
+        r3 := @parameter0: java.awt.font.FontRenderContext;
+
+        r2 := @parameter1: java.lang.String;
+
+        $r0 = new sun.font.StandardGlyphVector;
+
+        specialinvoke $r0.<sun.font.StandardGlyphVector: void <init>(java.awt.Font,java.lang.String,java.awt.font.FontRenderContext)>(r1, r2, r3);
+
+        return $r0;
+    }
+
+    public java.awt.font.GlyphVector createGlyphVector(java.awt.font.FontRenderContext, char[])
+    {
+        java.awt.font.FontRenderContext r3;
+        java.awt.Font r1;
+        char[] r2;
+        sun.font.StandardGlyphVector $r0;
+
+        r1 := @this: java.awt.Font;
+
+        r3 := @parameter0: java.awt.font.FontRenderContext;
+
+        r2 := @parameter1: char[];
+
+        $r0 = new sun.font.StandardGlyphVector;
+
+        specialinvoke $r0.<sun.font.StandardGlyphVector: void <init>(java.awt.Font,char[],java.awt.font.FontRenderContext)>(r1, r2, r3);
+
+        return $r0;
+    }
+
+    public java.awt.font.GlyphVector createGlyphVector(java.awt.font.FontRenderContext, java.text.CharacterIterator)
+    {
+        java.awt.font.FontRenderContext r3;
+        java.text.CharacterIterator r2;
+        java.awt.Font r1;
+        sun.font.StandardGlyphVector $r0;
+
+        r1 := @this: java.awt.Font;
+
+        r3 := @parameter0: java.awt.font.FontRenderContext;
+
+        r2 := @parameter1: java.text.CharacterIterator;
+
+        $r0 = new sun.font.StandardGlyphVector;
+
+        specialinvoke $r0.<sun.font.StandardGlyphVector: void <init>(java.awt.Font,java.text.CharacterIterator,java.awt.font.FontRenderContext)>(r1, r2, r3);
+
+        return $r0;
+    }
+
+    public java.awt.font.GlyphVector createGlyphVector(java.awt.font.FontRenderContext, int[])
+    {
+        java.awt.font.FontRenderContext r3;
+        int[] r2;
+        java.awt.Font r1;
+        sun.font.StandardGlyphVector $r0;
+
+        r1 := @this: java.awt.Font;
+
+        r3 := @parameter0: java.awt.font.FontRenderContext;
+
+        r2 := @parameter1: int[];
+
+        $r0 = new sun.font.StandardGlyphVector;
+
+        specialinvoke $r0.<sun.font.StandardGlyphVector: void <init>(java.awt.Font,int[],java.awt.font.FontRenderContext)>(r1, r2, r3);
+
+        return $r0;
+    }
+
+    public java.awt.font.GlyphVector layoutGlyphVector(java.awt.font.FontRenderContext, char[], int, int, int)
+    {
+        java.awt.Font r1;
+        java.awt.font.FontRenderContext r2;
+        sun.font.GlyphLayout $r0;
+        int i0, i1, i2, $i3;
+        char[] r3;
+        sun.font.StandardGlyphVector $r4;
+
+        r1 := @this: java.awt.Font;
+
+        r2 := @parameter0: java.awt.font.FontRenderContext;
+
+        r3 := @parameter1: char[];
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        i2 := @parameter4: int;
+
+        $r0 = staticinvoke <sun.font.GlyphLayout: sun.font.GlyphLayout get(sun.font.GlyphLayout$LayoutEngineFactory)>(null);
+
+        $i3 = i1 - i0;
+
+        $r4 = virtualinvoke $r0.<sun.font.GlyphLayout: sun.font.StandardGlyphVector layout(java.awt.Font,java.awt.font.FontRenderContext,char[],int,int,int,sun.font.StandardGlyphVector)>(r1, r2, r3, i0, $i3, i2, null);
+
+        staticinvoke <sun.font.GlyphLayout: void done(sun.font.GlyphLayout)>($r0);
+
+        return $r4;
+    }
+
+    private static void applyTransform(java.awt.geom.AffineTransform, sun.font.AttributeValues)
+    {
+        sun.font.AttributeValues r1;
+        java.awt.geom.AffineTransform r0;
+        java.lang.IllegalArgumentException $r2;
+
+        r0 := @parameter0: java.awt.geom.AffineTransform;
+
+        r1 := @parameter1: sun.font.AttributeValues;
+
+        if r0 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("transform must not be null");
+
+        throw $r2;
+
+     label1:
+        virtualinvoke r1.<sun.font.AttributeValues: void setTransform(java.awt.geom.AffineTransform)>(r0);
+
+        return;
+    }
+
+    private static void applyStyle(int, sun.font.AttributeValues)
+    {
+        sun.font.AttributeValues r0;
+        int i0, $i1, $i2;
+        float $f0, $f1;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: sun.font.AttributeValues;
+
+        $i1 = i0 & 1;
+
+        if $i1 == 0 goto label1;
+
+        $f0 = 2.0F;
+
+        goto label2;
+
+     label1:
+        $f0 = 1.0F;
+
+     label2:
+        virtualinvoke r0.<sun.font.AttributeValues: void setWeight(float)>($f0);
+
+        $i2 = i0 & 2;
+
+        if $i2 == 0 goto label3;
+
+        $f1 = 0.2F;
+
+        goto label4;
+
+     label3:
+        $f1 = 0.0F;
+
+     label4:
+        virtualinvoke r0.<sun.font.AttributeValues: void setPosture(float)>($f1);
+
+        return;
+    }
+
+    private static native void initIDs();
+
+    static sun.font.Font2D access$000(java.awt.Font)
+    {
+        sun.font.Font2D $r1;
+        java.awt.Font r0;
+
+        r0 := @parameter0: java.awt.Font;
+
+        $r1 = specialinvoke r0.<java.awt.Font: sun.font.Font2D getFont2D()>();
+
+        return $r1;
+    }
+
+    static sun.font.Font2DHandle access$102(java.awt.Font, sun.font.Font2DHandle)
+    {
+        java.awt.Font r0;
+        sun.font.Font2DHandle r1;
+
+        r0 := @parameter0: java.awt.Font;
+
+        r1 := @parameter1: sun.font.Font2DHandle;
+
+        r0.<java.awt.Font: sun.font.Font2DHandle font2DHandle> = r1;
+
+        return r1;
+    }
+
+    static boolean access$202(java.awt.Font, boolean)
+    {
+        java.awt.Font r0;
+        boolean z0;
+
+        r0 := @parameter0: java.awt.Font;
+
+        z0 := @parameter1: boolean;
+
+        r0.<java.awt.Font: boolean createdFont> = z0;
+
+        return z0;
+    }
+
+    static boolean access$200(java.awt.Font)
+    {
+        java.awt.Font r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.Font;
+
+        $z0 = r0.<java.awt.Font: boolean createdFont>;
+
+        return $z0;
+    }
+
+    static void <clinit>()
+    {
+        java.awt.geom.AffineTransform $r35;
+        java.awt.Font$FontAccessImpl $r34;
+        float[] $r33;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i12, $i14;
+        sun.font.EAttribute $r2, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26, $r27, $r28, $r30, $r31, $r32;
+        sun.font.EAttribute[] $r3, $r12, $r29;
+
+        <java.awt.Font: int LAYOUT_NO_LIMIT_CONTEXT> = 4;
+
+        <java.awt.Font: int LAYOUT_NO_START_CONTEXT> = 2;
+
+        <java.awt.Font: int LAYOUT_RIGHT_TO_LEFT> = 1;
+
+        <java.awt.Font: int LAYOUT_LEFT_TO_RIGHT> = 0;
+
+        <java.awt.Font: long serialVersionUID> = -4206021311591459213L;
+
+        <java.awt.Font: int TYPE1_FONT> = 1;
+
+        <java.awt.Font: int TRUETYPE_FONT> = 0;
+
+        <java.awt.Font: int HANGING_BASELINE> = 2;
+
+        <java.awt.Font: int CENTER_BASELINE> = 1;
+
+        <java.awt.Font: int ROMAN_BASELINE> = 0;
+
+        <java.awt.Font: int ITALIC> = 2;
+
+        <java.awt.Font: int BOLD> = 1;
+
+        <java.awt.Font: int PLAIN> = 0;
+
+        <java.awt.Font: java.lang.String MONOSPACED> = "Monospaced";
+
+        <java.awt.Font: java.lang.String SERIF> = "Serif";
+
+        <java.awt.Font: java.lang.String SANS_SERIF> = "SansSerif";
+
+        <java.awt.Font: java.lang.String DIALOG_INPUT> = "DialogInput";
+
+        <java.awt.Font: java.lang.String DIALOG> = "Dialog";
+
+        staticinvoke <java.awt.Toolkit: void loadLibraries()>();
+
+        staticinvoke <java.awt.Font: void initIDs()>();
+
+        $r34 = new java.awt.Font$FontAccessImpl;
+
+        specialinvoke $r34.<java.awt.Font$FontAccessImpl: void <init>(java.awt.Font$1)>(null);
+
+        staticinvoke <sun.font.FontAccess: void setFontAccess(sun.font.FontAccess)>($r34);
+
+        $r35 = new java.awt.geom.AffineTransform;
+
+        specialinvoke $r35.<java.awt.geom.AffineTransform: void <init>()>();
+
+        <java.awt.Font: java.awt.geom.AffineTransform identityTx> = $r35;
+
+        $i0 = <sun.font.AttributeValues: int MASK_ALL>;
+
+        $r2 = <sun.font.EAttribute: sun.font.EAttribute EFONT>;
+
+        $i1 = staticinvoke <sun.font.AttributeValues: int getMask(sun.font.EAttribute)>($r2);
+
+        $i12 = (int) -1;
+
+        $i2 = $i1 ^ $i12;
+
+        $i3 = $i0 & $i2;
+
+        <java.awt.Font: int RECOGNIZED_MASK> = $i3;
+
+        $r3 = newarray (sun.font.EAttribute)[8];
+
+        $r4 = <sun.font.EAttribute: sun.font.EAttribute EFAMILY>;
+
+        $r3[0] = $r4;
+
+        $r5 = <sun.font.EAttribute: sun.font.EAttribute EWEIGHT>;
+
+        $r3[1] = $r5;
+
+        $r6 = <sun.font.EAttribute: sun.font.EAttribute EWIDTH>;
+
+        $r3[2] = $r6;
+
+        $r7 = <sun.font.EAttribute: sun.font.EAttribute EPOSTURE>;
+
+        $r3[3] = $r7;
+
+        $r8 = <sun.font.EAttribute: sun.font.EAttribute ESIZE>;
+
+        $r3[4] = $r8;
+
+        $r9 = <sun.font.EAttribute: sun.font.EAttribute ETRANSFORM>;
+
+        $r3[5] = $r9;
+
+        $r10 = <sun.font.EAttribute: sun.font.EAttribute ESUPERSCRIPT>;
+
+        $r3[6] = $r10;
+
+        $r11 = <sun.font.EAttribute: sun.font.EAttribute ETRACKING>;
+
+        $r3[7] = $r11;
+
+        $i4 = staticinvoke <sun.font.AttributeValues: int getMask(sun.font.EAttribute[])>($r3);
+
+        <java.awt.Font: int PRIMARY_MASK> = $i4;
+
+        $i7 = <java.awt.Font: int RECOGNIZED_MASK>;
+
+        $i5 = <java.awt.Font: int PRIMARY_MASK>;
+
+        $i14 = (int) -1;
+
+        $i6 = $i5 ^ $i14;
+
+        $i8 = $i7 & $i6;
+
+        <java.awt.Font: int SECONDARY_MASK> = $i8;
+
+        $r12 = newarray (sun.font.EAttribute)[16];
+
+        $r13 = <sun.font.EAttribute: sun.font.EAttribute ECHAR_REPLACEMENT>;
+
+        $r12[0] = $r13;
+
+        $r14 = <sun.font.EAttribute: sun.font.EAttribute EFOREGROUND>;
+
+        $r12[1] = $r14;
+
+        $r15 = <sun.font.EAttribute: sun.font.EAttribute EBACKGROUND>;
+
+        $r12[2] = $r15;
+
+        $r16 = <sun.font.EAttribute: sun.font.EAttribute EUNDERLINE>;
+
+        $r12[3] = $r16;
+
+        $r17 = <sun.font.EAttribute: sun.font.EAttribute ESTRIKETHROUGH>;
+
+        $r12[4] = $r17;
+
+        $r18 = <sun.font.EAttribute: sun.font.EAttribute ERUN_DIRECTION>;
+
+        $r12[5] = $r18;
+
+        $r19 = <sun.font.EAttribute: sun.font.EAttribute EBIDI_EMBEDDING>;
+
+        $r12[6] = $r19;
+
+        $r20 = <sun.font.EAttribute: sun.font.EAttribute EJUSTIFICATION>;
+
+        $r12[7] = $r20;
+
+        $r21 = <sun.font.EAttribute: sun.font.EAttribute EINPUT_METHOD_HIGHLIGHT>;
+
+        $r12[8] = $r21;
+
+        $r22 = <sun.font.EAttribute: sun.font.EAttribute EINPUT_METHOD_UNDERLINE>;
+
+        $r12[9] = $r22;
+
+        $r23 = <sun.font.EAttribute: sun.font.EAttribute ESWAP_COLORS>;
+
+        $r12[10] = $r23;
+
+        $r24 = <sun.font.EAttribute: sun.font.EAttribute ENUMERIC_SHAPING>;
+
+        $r12[11] = $r24;
+
+        $r25 = <sun.font.EAttribute: sun.font.EAttribute EKERNING>;
+
+        $r12[12] = $r25;
+
+        $r26 = <sun.font.EAttribute: sun.font.EAttribute ELIGATURES>;
+
+        $r12[13] = $r26;
+
+        $r27 = <sun.font.EAttribute: sun.font.EAttribute ETRACKING>;
+
+        $r12[14] = $r27;
+
+        $r28 = <sun.font.EAttribute: sun.font.EAttribute ESUPERSCRIPT>;
+
+        $r12[15] = $r28;
+
+        $i9 = staticinvoke <sun.font.AttributeValues: int getMask(sun.font.EAttribute[])>($r12);
+
+        <java.awt.Font: int LAYOUT_MASK> = $i9;
+
+        $r29 = newarray (sun.font.EAttribute)[3];
+
+        $r30 = <sun.font.EAttribute: sun.font.EAttribute ETRANSFORM>;
+
+        $r29[0] = $r30;
+
+        $r31 = <sun.font.EAttribute: sun.font.EAttribute ESUPERSCRIPT>;
+
+        $r29[1] = $r31;
+
+        $r32 = <sun.font.EAttribute: sun.font.EAttribute EWIDTH>;
+
+        $r29[2] = $r32;
+
+        $i10 = staticinvoke <sun.font.AttributeValues: int getMask(sun.font.EAttribute[])>($r29);
+
+        <java.awt.Font: int EXTRA_MASK> = $i10;
+
+        $r33 = newarray (float)[8];
+
+        $r33[0] = 0.0F;
+
+        $r33[1] = 0.375F;
+
+        $r33[2] = 0.625F;
+
+        $r33[3] = 0.7916667F;
+
+        $r33[4] = 0.9027778F;
+
+        $r33[5] = 0.9768519F;
+
+        $r33[6] = 1.0262346F;
+
+        $r33[7] = 1.0591564F;
+
+        <java.awt.Font: float[] ssinfo> = $r33;
+
+        return;
+    }
+}

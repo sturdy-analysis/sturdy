@@ -1,0 +1,1229 @@
+class java.awt.LightweightDispatcher extends java.lang.Object implements java.io.Serializable, java.awt.event.AWTEventListener
+{
+    private static final long serialVersionUID;
+    private static final int LWD_MOUSE_DRAGGED_OVER;
+    private static final sun.util.logging.PlatformLogger eventLog;
+    private static final int BUTTONS_DOWN_MASK;
+    private java.awt.Container nativeContainer;
+    private java.awt.Component focus;
+    private transient java.lang.ref.WeakReference mouseEventTarget;
+    private transient java.lang.ref.WeakReference targetLastEntered;
+    private transient java.lang.ref.WeakReference targetLastEnteredDT;
+    private transient boolean isMouseInNativeContainer;
+    private transient boolean isMouseDTInNativeContainer;
+    private java.awt.Cursor nativeCursor;
+    private long eventMask;
+    private static final long PROXY_EVENT_MASK;
+    private static final long MOUSE_MASK;
+    static final boolean $assertionsDisabled;
+
+    void <init>(java.awt.Container)
+    {
+        java.awt.Container r1;
+        java.lang.ref.WeakReference $r2, $r3, $r4;
+        java.awt.LightweightDispatcher r0;
+
+        r0 := @this: java.awt.LightweightDispatcher;
+
+        r1 := @parameter0: java.awt.Container;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.awt.LightweightDispatcher: boolean isMouseInNativeContainer> = 0;
+
+        r0.<java.awt.LightweightDispatcher: boolean isMouseDTInNativeContainer> = 0;
+
+        r0.<java.awt.LightweightDispatcher: java.awt.Container nativeContainer> = r1;
+
+        $r2 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r2.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>(null);
+
+        r0.<java.awt.LightweightDispatcher: java.lang.ref.WeakReference mouseEventTarget> = $r2;
+
+        $r3 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r3.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>(null);
+
+        r0.<java.awt.LightweightDispatcher: java.lang.ref.WeakReference targetLastEntered> = $r3;
+
+        $r4 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r4.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>(null);
+
+        r0.<java.awt.LightweightDispatcher: java.lang.ref.WeakReference targetLastEnteredDT> = $r4;
+
+        r0.<java.awt.LightweightDispatcher: long eventMask> = 0L;
+
+        return;
+    }
+
+    void dispose()
+    {
+        java.lang.ref.WeakReference $r1, $r2, $r3;
+        java.awt.LightweightDispatcher r0;
+
+        r0 := @this: java.awt.LightweightDispatcher;
+
+        specialinvoke r0.<java.awt.LightweightDispatcher: void stopListeningForOtherDrags()>();
+
+        $r1 = r0.<java.awt.LightweightDispatcher: java.lang.ref.WeakReference mouseEventTarget>;
+
+        virtualinvoke $r1.<java.lang.ref.WeakReference: void clear()>();
+
+        $r2 = r0.<java.awt.LightweightDispatcher: java.lang.ref.WeakReference targetLastEntered>;
+
+        virtualinvoke $r2.<java.lang.ref.WeakReference: void clear()>();
+
+        $r3 = r0.<java.awt.LightweightDispatcher: java.lang.ref.WeakReference targetLastEnteredDT>;
+
+        virtualinvoke $r3.<java.lang.ref.WeakReference: void clear()>();
+
+        return;
+    }
+
+    void enableEvents(long)
+    {
+        long l0, $l1, $l2;
+        java.awt.LightweightDispatcher r0;
+
+        r0 := @this: java.awt.LightweightDispatcher;
+
+        l0 := @parameter0: long;
+
+        $l1 = r0.<java.awt.LightweightDispatcher: long eventMask>;
+
+        $l2 = $l1 | l0;
+
+        r0.<java.awt.LightweightDispatcher: long eventMask> = $l2;
+
+        return;
+    }
+
+    boolean dispatchEvent(java.awt.AWTEvent)
+    {
+        long $l0, $l1;
+        sun.awt.dnd.SunDropTargetEvent r3;
+        java.awt.event.MouseEvent r4;
+        java.awt.AWTEvent r0;
+        byte $b2;
+        int $i3;
+        java.awt.Container $r2;
+        java.awt.LightweightDispatcher r1;
+        boolean $z0, $z1, z2;
+
+        r1 := @this: java.awt.LightweightDispatcher;
+
+        r0 := @parameter0: java.awt.AWTEvent;
+
+        z2 = 0;
+
+        $z0 = r0 instanceof sun.awt.dnd.SunDropTargetEvent;
+
+        if $z0 == 0 goto label1;
+
+        r3 = (sun.awt.dnd.SunDropTargetEvent) r0;
+
+        z2 = specialinvoke r1.<java.awt.LightweightDispatcher: boolean processDropTargetEvent(sun.awt.dnd.SunDropTargetEvent)>(r3);
+
+        goto label3;
+
+     label1:
+        $z1 = r0 instanceof java.awt.event.MouseEvent;
+
+        if $z1 == 0 goto label2;
+
+        $l0 = r1.<java.awt.LightweightDispatcher: long eventMask>;
+
+        $l1 = $l0 & 131120L;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 == 0 goto label2;
+
+        r4 = (java.awt.event.MouseEvent) r0;
+
+        z2 = specialinvoke r1.<java.awt.LightweightDispatcher: boolean processMouseEvent(java.awt.event.MouseEvent)>(r4);
+
+     label2:
+        $i3 = virtualinvoke r0.<java.awt.AWTEvent: int getID()>();
+
+        if $i3 != 503 goto label3;
+
+        $r2 = r1.<java.awt.LightweightDispatcher: java.awt.Container nativeContainer>;
+
+        virtualinvoke $r2.<java.awt.Container: void updateCursorImmediately()>();
+
+     label3:
+        return z2;
+    }
+
+    private boolean isMouseGrab(java.awt.event.MouseEvent)
+    {
+        java.awt.event.MouseEvent r0;
+        int $i0, $i1, $i2, $i3, $i4, i5, $i6, $i7;
+        java.awt.LightweightDispatcher r1;
+        boolean $z0;
+
+        r1 := @this: java.awt.LightweightDispatcher;
+
+        r0 := @parameter0: java.awt.event.MouseEvent;
+
+        $i0 = virtualinvoke r0.<java.awt.event.MouseEvent: int getModifiersEx()>();
+
+        i5 = $i0;
+
+        $i1 = virtualinvoke r0.<java.awt.event.MouseEvent: int getID()>();
+
+        if $i1 == 501 goto label1;
+
+        $i4 = virtualinvoke r0.<java.awt.event.MouseEvent: int getID()>();
+
+        if $i4 != 502 goto label2;
+
+     label1:
+        $i2 = virtualinvoke r0.<java.awt.event.MouseEvent: int getButton()>();
+
+        $i3 = staticinvoke <java.awt.event.InputEvent: int getMaskForButton(int)>($i2);
+
+        i5 = $i0 ^ $i3;
+
+     label2:
+        $i6 = <java.awt.LightweightDispatcher: int BUTTONS_DOWN_MASK>;
+
+        $i7 = i5 & $i6;
+
+        if $i7 == 0 goto label3;
+
+        $z0 = 1;
+
+        goto label4;
+
+     label3:
+        $z0 = 0;
+
+     label4:
+        return $z0;
+    }
+
+    private boolean processMouseEvent(java.awt.event.MouseEvent)
+    {
+        int $i0, $i1, $i2;
+        java.awt.Container $r2, $r17;
+        java.lang.String $r11, $r16;
+        java.lang.ref.WeakReference $r4, $r18;
+        java.awt.LightweightDispatcher r1;
+        boolean $z0, $z1, $z2, $z3;
+        sun.util.logging.PlatformLogger$Level $r6;
+        sun.util.logging.PlatformLogger $r7, $r9;
+        java.awt.Component $r3, r19, $r20;
+        java.awt.event.MouseEvent r0;
+        java.lang.Object $r5;
+        java.lang.StringBuilder $r8, $r10, $r12, $r13, $r15;
+        java.lang.Class $r14;
+
+        r1 := @this: java.awt.LightweightDispatcher;
+
+        r0 := @parameter0: java.awt.event.MouseEvent;
+
+        $i0 = virtualinvoke r0.<java.awt.event.MouseEvent: int getID()>();
+
+        $r2 = r1.<java.awt.LightweightDispatcher: java.awt.Container nativeContainer>;
+
+        $i1 = virtualinvoke r0.<java.awt.event.MouseEvent: int getX()>();
+
+        $i2 = virtualinvoke r0.<java.awt.event.MouseEvent: int getY()>();
+
+        $r3 = virtualinvoke $r2.<java.awt.Container: java.awt.Component getMouseEventTarget(int,int,boolean)>($i1, $i2, 1);
+
+        specialinvoke r1.<java.awt.LightweightDispatcher: void trackMouseEnterExit(java.awt.Component,java.awt.event.MouseEvent)>($r3, r0);
+
+        $r4 = r1.<java.awt.LightweightDispatcher: java.lang.ref.WeakReference mouseEventTarget>;
+
+        $r5 = virtualinvoke $r4.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        r19 = (java.awt.Component) $r5;
+
+        $z0 = specialinvoke r1.<java.awt.LightweightDispatcher: boolean isMouseGrab(java.awt.event.MouseEvent)>(r0);
+
+        if $z0 != 0 goto label03;
+
+        if $i0 == 500 goto label03;
+
+        $r17 = r1.<java.awt.LightweightDispatcher: java.awt.Container nativeContainer>;
+
+        if $r3 == $r17 goto label01;
+
+        $r20 = $r3;
+
+        goto label02;
+
+     label01:
+        $r20 = null;
+
+     label02:
+        r19 = $r20;
+
+        $r18 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r18.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>($r20);
+
+        r1.<java.awt.LightweightDispatcher: java.lang.ref.WeakReference mouseEventTarget> = $r18;
+
+     label03:
+        if r19 == null goto label13;
+
+        tableswitch($i0)
+        {
+            case 500: goto label07;
+            case 501: goto label05;
+            case 502: goto label06;
+            case 503: goto label08;
+            case 504: goto label04;
+            case 505: goto label04;
+            case 506: goto label09;
+            case 507: goto label10;
+            default: goto label12;
+        };
+
+     label04:
+        goto label12;
+
+     label05:
+        virtualinvoke r1.<java.awt.LightweightDispatcher: void retargetMouseEvent(java.awt.Component,int,java.awt.event.MouseEvent)>(r19, $i0, r0);
+
+        goto label12;
+
+     label06:
+        virtualinvoke r1.<java.awt.LightweightDispatcher: void retargetMouseEvent(java.awt.Component,int,java.awt.event.MouseEvent)>(r19, $i0, r0);
+
+        goto label12;
+
+     label07:
+        if $r3 != r19 goto label12;
+
+        virtualinvoke r1.<java.awt.LightweightDispatcher: void retargetMouseEvent(java.awt.Component,int,java.awt.event.MouseEvent)>($r3, $i0, r0);
+
+        goto label12;
+
+     label08:
+        virtualinvoke r1.<java.awt.LightweightDispatcher: void retargetMouseEvent(java.awt.Component,int,java.awt.event.MouseEvent)>(r19, $i0, r0);
+
+        goto label12;
+
+     label09:
+        $z2 = specialinvoke r1.<java.awt.LightweightDispatcher: boolean isMouseGrab(java.awt.event.MouseEvent)>(r0);
+
+        if $z2 == 0 goto label12;
+
+        virtualinvoke r1.<java.awt.LightweightDispatcher: void retargetMouseEvent(java.awt.Component,int,java.awt.event.MouseEvent)>(r19, $i0, r0);
+
+        goto label12;
+
+     label10:
+        $r7 = <java.awt.LightweightDispatcher: sun.util.logging.PlatformLogger eventLog>;
+
+        $r6 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINEST>;
+
+        $z1 = virtualinvoke $r7.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r6);
+
+        if $z1 == 0 goto label11;
+
+        if $r3 == null goto label11;
+
+        $r9 = <java.awt.LightweightDispatcher: sun.util.logging.PlatformLogger eventLog>;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("retargeting mouse wheel to ");
+
+        $r11 = virtualinvoke $r3.<java.awt.Component: java.lang.String getName()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $r14 = virtualinvoke $r3.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r9.<sun.util.logging.PlatformLogger: void finest(java.lang.String)>($r16);
+
+     label11:
+        virtualinvoke r1.<java.awt.LightweightDispatcher: void retargetMouseEvent(java.awt.Component,int,java.awt.event.MouseEvent)>($r3, $i0, r0);
+
+     label12:
+        if $i0 == 507 goto label13;
+
+        virtualinvoke r0.<java.awt.event.MouseEvent: void consume()>();
+
+     label13:
+        $z3 = virtualinvoke r0.<java.awt.event.MouseEvent: boolean isConsumed()>();
+
+        return $z3;
+    }
+
+    private boolean processDropTargetEvent(sun.awt.dnd.SunDropTargetEvent)
+    {
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, i7, $i8;
+        java.awt.Container $r2, $r3, $r5, $r7;
+        java.awt.LightweightDispatcher r1;
+        boolean $z0, $z1;
+        sun.awt.dnd.SunDropTargetEvent r0;
+        java.awt.Component $r6;
+        java.awt.Dimension $r4;
+
+        r1 := @this: java.awt.LightweightDispatcher;
+
+        r0 := @parameter0: sun.awt.dnd.SunDropTargetEvent;
+
+        $i0 = virtualinvoke r0.<sun.awt.dnd.SunDropTargetEvent: int getID()>();
+
+        $i1 = virtualinvoke r0.<sun.awt.dnd.SunDropTargetEvent: int getX()>();
+
+        i6 = $i1;
+
+        $i2 = virtualinvoke r0.<sun.awt.dnd.SunDropTargetEvent: int getY()>();
+
+        i7 = $i2;
+
+        $r2 = r1.<java.awt.LightweightDispatcher: java.awt.Container nativeContainer>;
+
+        $z0 = virtualinvoke $r2.<java.awt.Container: boolean contains(int,int)>($i1, $i2);
+
+        if $z0 != 0 goto label4;
+
+        $r3 = r1.<java.awt.LightweightDispatcher: java.awt.Container nativeContainer>;
+
+        $r4 = virtualinvoke $r3.<java.awt.Container: java.awt.Dimension getSize()>();
+
+        $i3 = $r4.<java.awt.Dimension: int width>;
+
+        if $i3 > $i1 goto label1;
+
+        $i5 = $r4.<java.awt.Dimension: int width>;
+
+        i6 = $i5 - 1;
+
+        goto label2;
+
+     label1:
+        if $i1 >= 0 goto label2;
+
+        i6 = 0;
+
+     label2:
+        $i8 = $r4.<java.awt.Dimension: int height>;
+
+        if $i8 > $i2 goto label3;
+
+        $i4 = $r4.<java.awt.Dimension: int height>;
+
+        i7 = $i4 - 1;
+
+        goto label4;
+
+     label3:
+        if $i2 >= 0 goto label4;
+
+        i7 = 0;
+
+     label4:
+        $r5 = r1.<java.awt.LightweightDispatcher: java.awt.Container nativeContainer>;
+
+        $r6 = virtualinvoke $r5.<java.awt.Container: java.awt.Component getDropTargetEventTarget(int,int,boolean)>(i6, i7, 1);
+
+        specialinvoke r1.<java.awt.LightweightDispatcher: void trackMouseEnterExit(java.awt.Component,java.awt.event.MouseEvent)>($r6, r0);
+
+        $r7 = r1.<java.awt.LightweightDispatcher: java.awt.Container nativeContainer>;
+
+        if $r6 == $r7 goto label7;
+
+        if $r6 == null goto label7;
+
+        lookupswitch($i0)
+        {
+            case 504: goto label5;
+            case 505: goto label5;
+            default: goto label6;
+        };
+
+     label5:
+        goto label7;
+
+     label6:
+        virtualinvoke r1.<java.awt.LightweightDispatcher: void retargetMouseEvent(java.awt.Component,int,java.awt.event.MouseEvent)>($r6, $i0, r0);
+
+        virtualinvoke r0.<sun.awt.dnd.SunDropTargetEvent: void consume()>();
+
+     label7:
+        $z1 = virtualinvoke r0.<sun.awt.dnd.SunDropTargetEvent: boolean isConsumed()>();
+
+        return $z1;
+    }
+
+    private void trackDropTargetEnterExit(java.awt.Component, java.awt.event.MouseEvent)
+    {
+        java.awt.Component r2, $r6, $r7;
+        java.awt.event.MouseEvent r0;
+        int $i0;
+        java.lang.Object $r5;
+        java.lang.ref.WeakReference $r3, $r4, $r8;
+        java.awt.LightweightDispatcher r1;
+        boolean $z0, $z1;
+
+        r1 := @this: java.awt.LightweightDispatcher;
+
+        r2 := @parameter0: java.awt.Component;
+
+        r0 := @parameter1: java.awt.event.MouseEvent;
+
+        $i0 = virtualinvoke r0.<java.awt.event.MouseEvent: int getID()>();
+
+        if $i0 != 504 goto label1;
+
+        $z0 = r1.<java.awt.LightweightDispatcher: boolean isMouseDTInNativeContainer>;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = r1.<java.awt.LightweightDispatcher: java.lang.ref.WeakReference targetLastEnteredDT>;
+
+        virtualinvoke $r3.<java.lang.ref.WeakReference: void clear()>();
+
+        goto label3;
+
+     label1:
+        if $i0 != 504 goto label2;
+
+        r1.<java.awt.LightweightDispatcher: boolean isMouseDTInNativeContainer> = 1;
+
+        goto label3;
+
+     label2:
+        if $i0 != 505 goto label3;
+
+        r1.<java.awt.LightweightDispatcher: boolean isMouseDTInNativeContainer> = 0;
+
+     label3:
+        $r4 = r1.<java.awt.LightweightDispatcher: java.lang.ref.WeakReference targetLastEnteredDT>;
+
+        $r5 = virtualinvoke $r4.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        $r6 = (java.awt.Component) $r5;
+
+        $z1 = r1.<java.awt.LightweightDispatcher: boolean isMouseDTInNativeContainer>;
+
+        $r7 = specialinvoke r1.<java.awt.LightweightDispatcher: java.awt.Component retargetMouseEnterExit(java.awt.Component,java.awt.event.MouseEvent,java.awt.Component,boolean)>(r2, r0, $r6, $z1);
+
+        $r8 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r8.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>($r7);
+
+        r1.<java.awt.LightweightDispatcher: java.lang.ref.WeakReference targetLastEnteredDT> = $r8;
+
+        return;
+    }
+
+    private void trackMouseEnterExit(java.awt.Component, java.awt.event.MouseEvent)
+    {
+        java.awt.Component r2, $r5, $r6;
+        java.awt.event.MouseEvent r0;
+        int $i0;
+        java.lang.Object $r4;
+        java.lang.ref.WeakReference $r3, $r7;
+        java.awt.LightweightDispatcher r1;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: java.awt.LightweightDispatcher;
+
+        r2 := @parameter0: java.awt.Component;
+
+        r0 := @parameter1: java.awt.event.MouseEvent;
+
+        $z0 = r0 instanceof sun.awt.dnd.SunDropTargetEvent;
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r1.<java.awt.LightweightDispatcher: void trackDropTargetEnterExit(java.awt.Component,java.awt.event.MouseEvent)>(r2, r0);
+
+        return;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.awt.event.MouseEvent: int getID()>();
+
+        if $i0 == 505 goto label2;
+
+        if $i0 == 506 goto label2;
+
+        if $i0 == 1500 goto label2;
+
+        $z1 = r1.<java.awt.LightweightDispatcher: boolean isMouseInNativeContainer>;
+
+        if $z1 != 0 goto label2;
+
+        r1.<java.awt.LightweightDispatcher: boolean isMouseInNativeContainer> = 1;
+
+        specialinvoke r1.<java.awt.LightweightDispatcher: void startListeningForOtherDrags()>();
+
+        goto label3;
+
+     label2:
+        if $i0 != 505 goto label3;
+
+        r1.<java.awt.LightweightDispatcher: boolean isMouseInNativeContainer> = 0;
+
+        specialinvoke r1.<java.awt.LightweightDispatcher: void stopListeningForOtherDrags()>();
+
+     label3:
+        $r3 = r1.<java.awt.LightweightDispatcher: java.lang.ref.WeakReference targetLastEntered>;
+
+        $r4 = virtualinvoke $r3.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        $r5 = (java.awt.Component) $r4;
+
+        $z2 = r1.<java.awt.LightweightDispatcher: boolean isMouseInNativeContainer>;
+
+        $r6 = specialinvoke r1.<java.awt.LightweightDispatcher: java.awt.Component retargetMouseEnterExit(java.awt.Component,java.awt.event.MouseEvent,java.awt.Component,boolean)>(r2, r0, $r5, $z2);
+
+        $r7 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r7.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>($r6);
+
+        r1.<java.awt.LightweightDispatcher: java.lang.ref.WeakReference targetLastEntered> = $r7;
+
+        return;
+    }
+
+    private java.awt.Component retargetMouseEnterExit(java.awt.Component, java.awt.event.MouseEvent, java.awt.Component, boolean)
+    {
+        java.awt.Component r1, r2, r4, $r5;
+        java.awt.event.MouseEvent r0;
+        int $i0;
+        java.awt.LightweightDispatcher r3;
+        boolean z0;
+
+        r3 := @this: java.awt.LightweightDispatcher;
+
+        r4 := @parameter0: java.awt.Component;
+
+        r0 := @parameter1: java.awt.event.MouseEvent;
+
+        r2 := @parameter2: java.awt.Component;
+
+        z0 := @parameter3: boolean;
+
+        $i0 = virtualinvoke r0.<java.awt.event.MouseEvent: int getID()>();
+
+        if z0 == 0 goto label1;
+
+        $r5 = r4;
+
+        goto label2;
+
+     label1:
+        $r5 = null;
+
+     label2:
+        r1 = $r5;
+
+        if r2 == $r5 goto label6;
+
+        if r2 == null goto label3;
+
+        virtualinvoke r3.<java.awt.LightweightDispatcher: void retargetMouseEvent(java.awt.Component,int,java.awt.event.MouseEvent)>(r2, 505, r0);
+
+     label3:
+        if $i0 != 505 goto label4;
+
+        virtualinvoke r0.<java.awt.event.MouseEvent: void consume()>();
+
+     label4:
+        if r1 == null goto label5;
+
+        virtualinvoke r3.<java.awt.LightweightDispatcher: void retargetMouseEvent(java.awt.Component,int,java.awt.event.MouseEvent)>(r1, 504, r0);
+
+     label5:
+        if $i0 != 504 goto label6;
+
+        virtualinvoke r0.<java.awt.event.MouseEvent: void consume()>();
+
+     label6:
+        return r1;
+    }
+
+    private void startListeningForOtherDrags()
+    {
+        java.awt.LightweightDispatcher$1 $r0;
+        java.awt.LightweightDispatcher r1;
+
+        r1 := @this: java.awt.LightweightDispatcher;
+
+        $r0 = new java.awt.LightweightDispatcher$1;
+
+        specialinvoke $r0.<java.awt.LightweightDispatcher$1: void <init>(java.awt.LightweightDispatcher)>(r1);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        return;
+    }
+
+    private void stopListeningForOtherDrags()
+    {
+        java.awt.LightweightDispatcher$2 $r0;
+        java.awt.LightweightDispatcher r1;
+
+        r1 := @this: java.awt.LightweightDispatcher;
+
+        $r0 = new java.awt.LightweightDispatcher$2;
+
+        specialinvoke $r0.<java.awt.LightweightDispatcher$2: void <init>(java.awt.LightweightDispatcher)>(r1);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        return;
+    }
+
+    public void eventDispatched(java.awt.AWTEvent)
+    {
+        java.awt.Point $r10, $r16;
+        sun.awt.AppContext $r11, $r13;
+        java.awt.LightweightDispatcher r2;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        java.awt.Component $r5, $r18;
+        java.awt.LightweightDispatcher$3 $r19;
+        java.lang.Throwable $r23;
+        long $l0;
+        java.awt.AWTEvent r0;
+        int $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18;
+        java.awt.Container $r3, $r8, $r12, $r14, $r15, $r17, $r20, $r22, r24;
+        sun.awt.AWTAccessor$MouseEventAccessor $r9;
+        java.awt.Window $r6;
+        java.awt.event.MouseEvent r1, $r7;
+        java.lang.Object $r4, $r21;
+
+        r2 := @this: java.awt.LightweightDispatcher;
+
+        r0 := @parameter0: java.awt.AWTEvent;
+
+        $z0 = r0 instanceof java.awt.event.MouseEvent;
+
+        if $z0 == 0 goto label01;
+
+        $z7 = r0 instanceof sun.awt.dnd.SunDropTargetEvent;
+
+        if $z7 != 0 goto label01;
+
+        $i18 = r0.<java.awt.AWTEvent: int id>;
+
+        if $i18 != 506 goto label01;
+
+        $r21 = virtualinvoke r0.<java.awt.AWTEvent: java.lang.Object getSource()>();
+
+        $r22 = r2.<java.awt.LightweightDispatcher: java.awt.Container nativeContainer>;
+
+        if $r21 == $r22 goto label01;
+
+        $z8 = 1;
+
+        goto label02;
+
+     label01:
+        $z8 = 0;
+
+     label02:
+        if $z8 != 0 goto label03;
+
+        return;
+
+     label03:
+        r1 = (java.awt.event.MouseEvent) r0;
+
+        $r3 = r2.<java.awt.LightweightDispatcher: java.awt.Container nativeContainer>;
+
+        $r4 = virtualinvoke $r3.<java.awt.Container: java.lang.Object getTreeLock()>();
+
+        entermonitor $r4;
+
+     label04:
+        $r5 = virtualinvoke r1.<java.awt.event.MouseEvent: java.awt.Component getComponent()>();
+
+        $z1 = virtualinvoke $r5.<java.awt.Component: boolean isShowing()>();
+
+        if $z1 != 0 goto label06;
+
+        exitmonitor $r4;
+
+     label05:
+        return;
+
+     label06:
+        r24 = r2.<java.awt.LightweightDispatcher: java.awt.Container nativeContainer>;
+
+     label07:
+        if r24 == null goto label08;
+
+        $z6 = r24 instanceof java.awt.Window;
+
+        if $z6 != 0 goto label08;
+
+        r24 = virtualinvoke r24.<java.awt.Component: java.awt.Container getParent_NoClientCode()>();
+
+        goto label07;
+
+     label08:
+        if r24 == null goto label09;
+
+        $r6 = (java.awt.Window) r24;
+
+        $z2 = virtualinvoke $r6.<java.awt.Window: boolean isModalBlocked()>();
+
+        if $z2 == 0 goto label11;
+
+     label09:
+        exitmonitor $r4;
+
+     label10:
+        return;
+
+     label11:
+        $r7 = new java.awt.event.MouseEvent;
+
+        $r8 = r2.<java.awt.LightweightDispatcher: java.awt.Container nativeContainer>;
+
+        $l0 = virtualinvoke r1.<java.awt.event.MouseEvent: long getWhen()>();
+
+        $i1 = virtualinvoke r1.<java.awt.event.MouseEvent: int getModifiersEx()>();
+
+        $i2 = virtualinvoke r1.<java.awt.event.MouseEvent: int getModifiers()>();
+
+        $i3 = $i1 | $i2;
+
+        $i4 = virtualinvoke r1.<java.awt.event.MouseEvent: int getX()>();
+
+        $i5 = virtualinvoke r1.<java.awt.event.MouseEvent: int getY()>();
+
+        $i6 = virtualinvoke r1.<java.awt.event.MouseEvent: int getXOnScreen()>();
+
+        $i7 = virtualinvoke r1.<java.awt.event.MouseEvent: int getYOnScreen()>();
+
+        $i8 = virtualinvoke r1.<java.awt.event.MouseEvent: int getClickCount()>();
+
+        $z3 = virtualinvoke r1.<java.awt.event.MouseEvent: boolean isPopupTrigger()>();
+
+        $i9 = virtualinvoke r1.<java.awt.event.MouseEvent: int getButton()>();
+
+        specialinvoke $r7.<java.awt.event.MouseEvent: void <init>(java.awt.Component,int,long,int,int,int,int,int,int,boolean,int)>($r8, 1500, $l0, $i3, $i4, $i5, $i6, $i7, $i8, $z3, $i9);
+
+        $r9 = staticinvoke <sun.awt.AWTAccessor: sun.awt.AWTAccessor$MouseEventAccessor getMouseEventAccessor()>();
+
+        $z4 = interfaceinvoke $r9.<sun.awt.AWTAccessor$MouseEventAccessor: boolean isCausedByTouchEvent(java.awt.event.MouseEvent)>(r1);
+
+        interfaceinvoke $r9.<sun.awt.AWTAccessor$MouseEventAccessor: void setCausedByTouchEvent(java.awt.event.MouseEvent,boolean)>($r7, $z4);
+
+        virtualinvoke r1.<java.awt.AWTEvent: void copyPrivateDataInto(java.awt.AWTEvent)>($r7);
+
+        $r10 = virtualinvoke $r5.<java.awt.Component: java.awt.Point getLocationOnScreen()>();
+
+        $r11 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r12 = r2.<java.awt.LightweightDispatcher: java.awt.Container nativeContainer>;
+
+        $r13 = $r12.<java.awt.Container: sun.awt.AppContext appContext>;
+
+        if $r11 == $r13 goto label13;
+
+        $r19 = new java.awt.LightweightDispatcher$3;
+
+        specialinvoke $r19.<java.awt.LightweightDispatcher$3: void <init>(java.awt.LightweightDispatcher,java.awt.event.MouseEvent,java.awt.Point)>(r2, $r7, $r10);
+
+        $r20 = r2.<java.awt.LightweightDispatcher: java.awt.Container nativeContainer>;
+
+        staticinvoke <sun.awt.SunToolkit: void executeOnEventHandlerThread(java.lang.Object,java.lang.Runnable)>($r20, $r19);
+
+        exitmonitor $r4;
+
+     label12:
+        return;
+
+     label13:
+        $r14 = r2.<java.awt.LightweightDispatcher: java.awt.Container nativeContainer>;
+
+        $z5 = virtualinvoke $r14.<java.awt.Container: boolean isShowing()>();
+
+        if $z5 != 0 goto label15;
+
+        exitmonitor $r4;
+
+     label14:
+        return;
+
+     label15:
+        $r15 = r2.<java.awt.LightweightDispatcher: java.awt.Container nativeContainer>;
+
+        $r16 = virtualinvoke $r15.<java.awt.Container: java.awt.Point getLocationOnScreen()>();
+
+        $i11 = $r10.<java.awt.Point: int x>;
+
+        $i10 = $r16.<java.awt.Point: int x>;
+
+        $i15 = $i11 - $i10;
+
+        $i13 = $r10.<java.awt.Point: int y>;
+
+        $i12 = $r16.<java.awt.Point: int y>;
+
+        $i14 = $i13 - $i12;
+
+        virtualinvoke $r7.<java.awt.event.MouseEvent: void translatePoint(int,int)>($i15, $i14);
+
+        exitmonitor $r4;
+
+     label16:
+        goto label19;
+
+     label17:
+        $r23 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label18:
+        throw $r23;
+
+     label19:
+        $r17 = r2.<java.awt.LightweightDispatcher: java.awt.Container nativeContainer>;
+
+        $i16 = virtualinvoke $r7.<java.awt.event.MouseEvent: int getX()>();
+
+        $i17 = virtualinvoke $r7.<java.awt.event.MouseEvent: int getY()>();
+
+        $r18 = virtualinvoke $r17.<java.awt.Container: java.awt.Component getMouseEventTarget(int,int,boolean)>($i16, $i17, 1);
+
+        specialinvoke r2.<java.awt.LightweightDispatcher: void trackMouseEnterExit(java.awt.Component,java.awt.event.MouseEvent)>($r18, $r7);
+
+        return;
+
+        catch java.lang.Throwable from label04 to label05 with label17;
+        catch java.lang.Throwable from label06 to label10 with label17;
+        catch java.lang.Throwable from label11 to label12 with label17;
+        catch java.lang.Throwable from label13 to label14 with label17;
+        catch java.lang.Throwable from label15 to label16 with label17;
+        catch java.lang.Throwable from label17 to label18 with label17;
+    }
+
+    void retargetMouseEvent(java.awt.Component, int, java.awt.event.MouseEvent)
+    {
+        sun.awt.dnd.SunDropTargetContextPeer$EventDispatcher $r21;
+        java.awt.event.MouseWheelEvent $r14, $r15, $r16, $r17, $r18;
+        sun.awt.AppContext $r10, $r11;
+        java.awt.LightweightDispatcher r4;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.awt.Component r0, $r6, $r8, r23;
+        long $l1, $l9;
+        java.lang.AssertionError $r12;
+        int i0, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, i21, i22;
+        java.awt.Container $r5, $r7, $r9, $r13, $r22, $r25;
+        sun.awt.AWTAccessor$MouseEventAccessor $r3;
+        double $d0;
+        sun.awt.dnd.SunDropTargetEvent $r19, $r20;
+        java.awt.event.MouseEvent r1, $r2, r24;
+
+        r4 := @this: java.awt.LightweightDispatcher;
+
+        r0 := @parameter0: java.awt.Component;
+
+        i0 := @parameter1: int;
+
+        r1 := @parameter2: java.awt.event.MouseEvent;
+
+        if r0 != null goto label01;
+
+        return;
+
+     label01:
+        i21 = virtualinvoke r1.<java.awt.event.MouseEvent: int getX()>();
+
+        i22 = virtualinvoke r1.<java.awt.event.MouseEvent: int getY()>();
+
+        r23 = r0;
+
+     label02:
+        if r23 == null goto label03;
+
+        $r22 = r4.<java.awt.LightweightDispatcher: java.awt.Container nativeContainer>;
+
+        if r23 == $r22 goto label03;
+
+        $i19 = r23.<java.awt.Component: int x>;
+
+        i21 = i21 - $i19;
+
+        $i20 = r23.<java.awt.Component: int y>;
+
+        i22 = i22 - $i20;
+
+        r23 = virtualinvoke r23.<java.awt.Component: java.awt.Container getParent()>();
+
+        goto label02;
+
+     label03:
+        if r23 == null goto label12;
+
+        $z0 = r1 instanceof sun.awt.dnd.SunDropTargetEvent;
+
+        if $z0 == 0 goto label04;
+
+        $r19 = new sun.awt.dnd.SunDropTargetEvent;
+
+        $r20 = (sun.awt.dnd.SunDropTargetEvent) r1;
+
+        $r21 = virtualinvoke $r20.<sun.awt.dnd.SunDropTargetEvent: sun.awt.dnd.SunDropTargetContextPeer$EventDispatcher getDispatcher()>();
+
+        specialinvoke $r19.<sun.awt.dnd.SunDropTargetEvent: void <init>(java.awt.Component,int,int,int,sun.awt.dnd.SunDropTargetContextPeer$EventDispatcher)>(r0, i0, i21, i22, $r21);
+
+        r24 = $r19;
+
+        goto label06;
+
+     label04:
+        if i0 != 507 goto label05;
+
+        $r14 = new java.awt.event.MouseWheelEvent;
+
+        $l9 = virtualinvoke r1.<java.awt.event.MouseEvent: long getWhen()>();
+
+        $i10 = virtualinvoke r1.<java.awt.event.MouseEvent: int getModifiersEx()>();
+
+        $i11 = virtualinvoke r1.<java.awt.event.MouseEvent: int getModifiers()>();
+
+        $i12 = $i10 | $i11;
+
+        $i13 = virtualinvoke r1.<java.awt.event.MouseEvent: int getXOnScreen()>();
+
+        $i14 = virtualinvoke r1.<java.awt.event.MouseEvent: int getYOnScreen()>();
+
+        $i15 = virtualinvoke r1.<java.awt.event.MouseEvent: int getClickCount()>();
+
+        $z6 = virtualinvoke r1.<java.awt.event.MouseEvent: boolean isPopupTrigger()>();
+
+        $r15 = (java.awt.event.MouseWheelEvent) r1;
+
+        $i16 = virtualinvoke $r15.<java.awt.event.MouseWheelEvent: int getScrollType()>();
+
+        $r16 = (java.awt.event.MouseWheelEvent) r1;
+
+        $i17 = virtualinvoke $r16.<java.awt.event.MouseWheelEvent: int getScrollAmount()>();
+
+        $r17 = (java.awt.event.MouseWheelEvent) r1;
+
+        $i18 = virtualinvoke $r17.<java.awt.event.MouseWheelEvent: int getWheelRotation()>();
+
+        $r18 = (java.awt.event.MouseWheelEvent) r1;
+
+        $d0 = virtualinvoke $r18.<java.awt.event.MouseWheelEvent: double getPreciseWheelRotation()>();
+
+        specialinvoke $r14.<java.awt.event.MouseWheelEvent: void <init>(java.awt.Component,int,long,int,int,int,int,int,int,boolean,int,int,int,double)>(r0, i0, $l9, $i12, i21, i22, $i13, $i14, $i15, $z6, $i16, $i17, $i18, $d0);
+
+        r24 = $r14;
+
+        goto label06;
+
+     label05:
+        $r2 = new java.awt.event.MouseEvent;
+
+        $l1 = virtualinvoke r1.<java.awt.event.MouseEvent: long getWhen()>();
+
+        $i2 = virtualinvoke r1.<java.awt.event.MouseEvent: int getModifiersEx()>();
+
+        $i3 = virtualinvoke r1.<java.awt.event.MouseEvent: int getModifiers()>();
+
+        $i4 = $i2 | $i3;
+
+        $i5 = virtualinvoke r1.<java.awt.event.MouseEvent: int getXOnScreen()>();
+
+        $i6 = virtualinvoke r1.<java.awt.event.MouseEvent: int getYOnScreen()>();
+
+        $i7 = virtualinvoke r1.<java.awt.event.MouseEvent: int getClickCount()>();
+
+        $z1 = virtualinvoke r1.<java.awt.event.MouseEvent: boolean isPopupTrigger()>();
+
+        $i8 = virtualinvoke r1.<java.awt.event.MouseEvent: int getButton()>();
+
+        specialinvoke $r2.<java.awt.event.MouseEvent: void <init>(java.awt.Component,int,long,int,int,int,int,int,int,boolean,int)>(r0, i0, $l1, $i4, i21, i22, $i5, $i6, $i7, $z1, $i8);
+
+        r24 = $r2;
+
+        $r3 = staticinvoke <sun.awt.AWTAccessor: sun.awt.AWTAccessor$MouseEventAccessor getMouseEventAccessor()>();
+
+        $z2 = interfaceinvoke $r3.<sun.awt.AWTAccessor$MouseEventAccessor: boolean isCausedByTouchEvent(java.awt.event.MouseEvent)>(r1);
+
+        interfaceinvoke $r3.<sun.awt.AWTAccessor$MouseEventAccessor: void setCausedByTouchEvent(java.awt.event.MouseEvent,boolean)>($r2, $z2);
+
+     label06:
+        virtualinvoke r1.<java.awt.AWTEvent: void copyPrivateDataInto(java.awt.AWTEvent)>(r24);
+
+        $r25 = r4.<java.awt.LightweightDispatcher: java.awt.Container nativeContainer>;
+
+        if r0 != $r25 goto label07;
+
+        $r13 = (java.awt.Container) r0;
+
+        virtualinvoke $r13.<java.awt.Container: void dispatchEventToSelf(java.awt.AWTEvent)>(r24);
+
+        goto label11;
+
+     label07:
+        $z3 = <java.awt.LightweightDispatcher: boolean $assertionsDisabled>;
+
+        if $z3 != 0 goto label08;
+
+        $r10 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r11 = r0.<java.awt.Component: sun.awt.AppContext appContext>;
+
+        if $r10 == $r11 goto label08;
+
+        $r12 = new java.lang.AssertionError;
+
+        specialinvoke $r12.<java.lang.AssertionError: void <init>()>();
+
+        throw $r12;
+
+     label08:
+        $r5 = r4.<java.awt.LightweightDispatcher: java.awt.Container nativeContainer>;
+
+        $r6 = $r5.<java.awt.Container: java.awt.Component modalComp>;
+
+        if $r6 == null goto label10;
+
+        $r7 = r4.<java.awt.LightweightDispatcher: java.awt.Container nativeContainer>;
+
+        $r8 = $r7.<java.awt.Container: java.awt.Component modalComp>;
+
+        $r9 = (java.awt.Container) $r8;
+
+        $z5 = virtualinvoke $r9.<java.awt.Container: boolean isAncestorOf(java.awt.Component)>(r0);
+
+        if $z5 == 0 goto label09;
+
+        virtualinvoke r0.<java.awt.Component: void dispatchEvent(java.awt.AWTEvent)>(r24);
+
+        goto label11;
+
+     label09:
+        virtualinvoke r1.<java.awt.event.MouseEvent: void consume()>();
+
+        goto label11;
+
+     label10:
+        virtualinvoke r0.<java.awt.Component: void dispatchEvent(java.awt.AWTEvent)>(r24);
+
+     label11:
+        if i0 != 507 goto label12;
+
+        $z4 = virtualinvoke r24.<java.awt.event.MouseEvent: boolean isConsumed()>();
+
+        if $z4 == 0 goto label12;
+
+        virtualinvoke r1.<java.awt.event.MouseEvent: void consume()>();
+
+     label12:
+        return;
+    }
+
+    static java.awt.Container access$000(java.awt.LightweightDispatcher)
+    {
+        java.awt.Container $r1;
+        java.awt.LightweightDispatcher r0;
+
+        r0 := @parameter0: java.awt.LightweightDispatcher;
+
+        $r1 = r0.<java.awt.LightweightDispatcher: java.awt.Container nativeContainer>;
+
+        return $r1;
+    }
+
+    static void access$100(java.awt.LightweightDispatcher, java.awt.Component, java.awt.event.MouseEvent)
+    {
+        java.awt.LightweightDispatcher r0;
+        java.awt.Component r1;
+        java.awt.event.MouseEvent r2;
+
+        r0 := @parameter0: java.awt.LightweightDispatcher;
+
+        r1 := @parameter1: java.awt.Component;
+
+        r2 := @parameter2: java.awt.event.MouseEvent;
+
+        specialinvoke r0.<java.awt.LightweightDispatcher: void trackMouseEnterExit(java.awt.Component,java.awt.event.MouseEvent)>(r1, r2);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        sun.util.logging.PlatformLogger $r1;
+        sun.awt.AWTAccessor$InputEventAccessor $r2;
+        int[] $r3;
+        int i0, $i1, i2, i3;
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        <java.awt.LightweightDispatcher: long MOUSE_MASK> = 131120L;
+
+        <java.awt.LightweightDispatcher: long PROXY_EVENT_MASK> = 131132L;
+
+        <java.awt.LightweightDispatcher: int LWD_MOUSE_DRAGGED_OVER> = 1500;
+
+        <java.awt.LightweightDispatcher: long serialVersionUID> = 5184291520170872969L;
+
+        $r0 = class "Ljava/awt/LightweightDispatcher;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <java.awt.LightweightDispatcher: boolean $assertionsDisabled> = $z1;
+
+        $r1 = staticinvoke <sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger getLogger(java.lang.String)>("java.awt.event.LightweightDispatcher");
+
+        <java.awt.LightweightDispatcher: sun.util.logging.PlatformLogger eventLog> = $r1;
+
+        $r2 = staticinvoke <sun.awt.AWTAccessor: sun.awt.AWTAccessor$InputEventAccessor getInputEventAccessor()>();
+
+        $r3 = interfaceinvoke $r2.<sun.awt.AWTAccessor$InputEventAccessor: int[] getButtonDownMasks()>();
+
+        i2 = 0;
+
+        $i1 = lengthof $r3;
+
+        i3 = 0;
+
+     label3:
+        if i3 >= $i1 goto label4;
+
+        i0 = $r3[i3];
+
+        i2 = i2 | i0;
+
+        i3 = i3 + 1;
+
+        goto label3;
+
+     label4:
+        <java.awt.LightweightDispatcher: int BUTTONS_DOWN_MASK> = i2;
+
+        return;
+    }
+}

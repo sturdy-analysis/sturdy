@@ -1,0 +1,1282 @@
+public abstract class com.sun.jmx.remote.internal.ClientNotifForwarder extends java.lang.Object
+{
+    private final java.security.AccessControlContext acc;
+    private static int threadId;
+    private final java.lang.ClassLoader defaultClassLoader;
+    private final java.util.concurrent.Executor executor;
+    private final java.util.Map infoList;
+    private long clientSequenceNumber;
+    private final int maxNotifications;
+    private final long timeout;
+    private java.lang.Integer mbeanRemovedNotifID;
+    private java.lang.Thread currentFetchThread;
+    private static final int STARTING;
+    private static final int STARTED;
+    private static final int STOPPING;
+    private static final int STOPPED;
+    private static final int TERMINATED;
+    private int state;
+    private boolean beingReconnected;
+    private static final com.sun.jmx.remote.util.ClassLogger logger;
+
+    public void <init>(java.util.Map)
+    {
+        com.sun.jmx.remote.internal.ClientNotifForwarder r0;
+        java.util.Map r1;
+
+        r0 := @this: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+        r1 := @parameter0: java.util.Map;
+
+        specialinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: void <init>(java.lang.ClassLoader,java.util.Map)>(null, r1);
+
+        return;
+    }
+
+    public void <init>(java.lang.ClassLoader, java.util.Map)
+    {
+        java.security.AccessControlContext $r13;
+        java.util.HashMap $r1;
+        long $l1;
+        com.sun.jmx.remote.internal.ClientNotifForwarder r0;
+        com.sun.jmx.remote.internal.ClientNotifForwarder$LinearExecutor $r11;
+        java.util.Map r2;
+        int $i0;
+        com.sun.jmx.remote.util.ClassLogger $r4, $r7;
+        java.lang.String $r10;
+        boolean $z0;
+        java.util.concurrent.Executor r12;
+        java.lang.Object $r3;
+        java.lang.StringBuilder $r6, $r8, $r9;
+        java.lang.ClassLoader r5;
+
+        r0 := @this: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+        r5 := @parameter0: java.lang.ClassLoader;
+
+        r2 := @parameter1: java.util.Map;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.util.Map infoList> = $r1;
+
+        r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: long clientSequenceNumber> = -1L;
+
+        r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.lang.Integer mbeanRemovedNotifID> = null;
+
+        r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: int state> = 3;
+
+        r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: boolean beingReconnected> = 0;
+
+        $i0 = staticinvoke <com.sun.jmx.remote.util.EnvHelp: int getMaxFetchNotifNumber(java.util.Map)>(r2);
+
+        r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: int maxNotifications> = $i0;
+
+        $l1 = staticinvoke <com.sun.jmx.remote.util.EnvHelp: long getFetchTimeout(java.util.Map)>(r2);
+
+        r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: long timeout> = $l1;
+
+        $r3 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>("jmx.remote.x.fetch.notifications.executor");
+
+        r12 = (java.util.concurrent.Executor) $r3;
+
+        if r12 != null goto label1;
+
+        $r11 = new com.sun.jmx.remote.internal.ClientNotifForwarder$LinearExecutor;
+
+        specialinvoke $r11.<com.sun.jmx.remote.internal.ClientNotifForwarder$LinearExecutor: void <init>(com.sun.jmx.remote.internal.ClientNotifForwarder$1)>(null);
+
+        r12 = $r11;
+
+        goto label2;
+
+     label1:
+        $r4 = <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $z0 = virtualinvoke $r4.<com.sun.jmx.remote.util.ClassLogger: boolean traceOn()>();
+
+        if $z0 == 0 goto label2;
+
+        $r7 = <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("executor is ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r12);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("ClientNotifForwarder", $r10);
+
+     label2:
+        r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.lang.ClassLoader defaultClassLoader> = r5;
+
+        r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.util.concurrent.Executor executor> = r12;
+
+        $r13 = staticinvoke <java.security.AccessController: java.security.AccessControlContext getContext()>();
+
+        r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.security.AccessControlContext acc> = $r13;
+
+        return;
+    }
+
+    protected abstract javax.management.remote.NotificationResult fetchNotifs(long, int, long) throws java.io.IOException, java.lang.ClassNotFoundException;
+
+    protected abstract java.lang.Integer addListenerForMBeanRemovedNotif() throws java.io.IOException, javax.management.InstanceNotFoundException;
+
+    protected abstract void removeListenerForMBeanRemovedNotif(java.lang.Integer) throws java.io.IOException, javax.management.InstanceNotFoundException, javax.management.ListenerNotFoundException;
+
+    protected abstract void lostNotifs(java.lang.String, long);
+
+    public synchronized void addNotificationListener(java.lang.Integer, javax.management.ObjectName, javax.management.NotificationListener, javax.management.NotificationFilter, java.lang.Object, javax.security.auth.Subject) throws java.io.IOException, javax.management.InstanceNotFoundException
+    {
+        javax.management.NotificationListener r5;
+        com.sun.jmx.remote.internal.ClientListenerInfo $r3;
+        java.lang.Integer r2;
+        com.sun.jmx.remote.internal.ClientNotifForwarder r1;
+        java.util.Map $r9;
+        com.sun.jmx.remote.util.ClassLogger $r0, $r11;
+        java.lang.String $r16;
+        boolean $z0;
+        javax.management.ObjectName r4;
+        javax.security.auth.Subject r8;
+        javax.management.NotificationFilter r6;
+        java.lang.Object r7;
+        java.lang.StringBuilder $r10, $r12, $r13, $r14, $r15;
+
+        r1 := @this: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+        r2 := @parameter0: java.lang.Integer;
+
+        r4 := @parameter1: javax.management.ObjectName;
+
+        r5 := @parameter2: javax.management.NotificationListener;
+
+        r6 := @parameter3: javax.management.NotificationFilter;
+
+        r7 := @parameter4: java.lang.Object;
+
+        r8 := @parameter5: javax.security.auth.Subject;
+
+        $r0 = <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $z0 = virtualinvoke $r0.<com.sun.jmx.remote.util.ClassLogger: boolean traceOn()>();
+
+        if $z0 == 0 goto label1;
+
+        $r11 = <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Add the listener ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r5);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r4);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r11.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("addNotificationListener", $r16);
+
+     label1:
+        $r9 = r1.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.util.Map infoList>;
+
+        $r3 = new com.sun.jmx.remote.internal.ClientListenerInfo;
+
+        specialinvoke $r3.<com.sun.jmx.remote.internal.ClientListenerInfo: void <init>(java.lang.Integer,javax.management.ObjectName,javax.management.NotificationListener,javax.management.NotificationFilter,java.lang.Object,javax.security.auth.Subject)>(r2, r4, r5, r6, r7, r8);
+
+        interfaceinvoke $r9.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r2, $r3);
+
+        specialinvoke r1.<com.sun.jmx.remote.internal.ClientNotifForwarder: void init(boolean)>(0);
+
+        return;
+    }
+
+    public synchronized java.lang.Integer[] removeNotificationListener(javax.management.ObjectName, javax.management.NotificationListener) throws javax.management.ListenerNotFoundException, java.io.IOException
+    {
+        javax.management.NotificationListener r13;
+        java.lang.Object[] $r7;
+        com.sun.jmx.remote.internal.ClientListenerInfo r11;
+        java.lang.Integer $r14, $r16;
+        com.sun.jmx.remote.internal.ClientNotifForwarder r0;
+        java.util.ArrayList $r25, $r26;
+        java.util.Map $r4, $r15;
+        int $i0, i1, $i3;
+        com.sun.jmx.remote.util.ClassLogger $r1, $r18;
+        java.lang.String $r23;
+        boolean $z0, $z1, $z2;
+        java.util.Collection $r5;
+        javax.management.ObjectName r12;
+        javax.management.ListenerNotFoundException $r27;
+        java.lang.Object $r10;
+        java.lang.StringBuilder $r19, $r20, $r21, $r22, $r24;
+        java.lang.Integer[] $r6, $r8;
+
+        r0 := @this: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+        r12 := @parameter0: javax.management.ObjectName;
+
+        r13 := @parameter1: javax.management.NotificationListener;
+
+        specialinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: void beforeRemove()>();
+
+        $r1 = <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $z0 = virtualinvoke $r1.<com.sun.jmx.remote.util.ClassLogger: boolean traceOn()>();
+
+        if $z0 == 0 goto label1;
+
+        $r18 = <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Remove the listener ");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r13);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" from ");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r12);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r18.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("removeNotificationListener", $r23);
+
+     label1:
+        $r25 = new java.util.ArrayList;
+
+        specialinvoke $r25.<java.util.ArrayList: void <init>()>();
+
+        $r26 = new java.util.ArrayList;
+
+        $r4 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.util.Map infoList>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Map: java.util.Collection values()>();
+
+        specialinvoke $r26.<java.util.ArrayList: void <init>(java.util.Collection)>($r5);
+
+        $i0 = interfaceinvoke $r26.<java.util.List: int size()>();
+
+        i1 = $i0 - 1;
+
+     label2:
+        if i1 < 0 goto label4;
+
+        $r10 = interfaceinvoke $r26.<java.util.List: java.lang.Object get(int)>(i1);
+
+        r11 = (com.sun.jmx.remote.internal.ClientListenerInfo) $r10;
+
+        $z2 = virtualinvoke r11.<com.sun.jmx.remote.internal.ClientListenerInfo: boolean sameAs(javax.management.ObjectName,javax.management.NotificationListener)>(r12, r13);
+
+        if $z2 == 0 goto label3;
+
+        $r14 = virtualinvoke r11.<com.sun.jmx.remote.internal.ClientListenerInfo: java.lang.Integer getListenerID()>();
+
+        interfaceinvoke $r25.<java.util.List: boolean add(java.lang.Object)>($r14);
+
+        $r15 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.util.Map infoList>;
+
+        $r16 = virtualinvoke r11.<com.sun.jmx.remote.internal.ClientListenerInfo: java.lang.Integer getListenerID()>();
+
+        interfaceinvoke $r15.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r16);
+
+     label3:
+        $i3 = (int) -1;
+
+        i1 = i1 + $i3;
+
+        goto label2;
+
+     label4:
+        $z1 = interfaceinvoke $r25.<java.util.List: boolean isEmpty()>();
+
+        if $z1 == 0 goto label5;
+
+        $r27 = new javax.management.ListenerNotFoundException;
+
+        specialinvoke $r27.<javax.management.ListenerNotFoundException: void <init>(java.lang.String)>("Listener not found");
+
+        throw $r27;
+
+     label5:
+        $r6 = newarray (java.lang.Integer)[0];
+
+        $r7 = interfaceinvoke $r25.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r6);
+
+        $r8 = (java.lang.Integer[]) $r7;
+
+        return $r8;
+    }
+
+    public synchronized java.lang.Integer removeNotificationListener(javax.management.ObjectName, javax.management.NotificationListener, javax.management.NotificationFilter, java.lang.Object) throws javax.management.ListenerNotFoundException, java.io.IOException
+    {
+        javax.management.NotificationListener r9;
+        com.sun.jmx.remote.internal.ClientListenerInfo r7;
+        java.lang.Integer $r12, r21;
+        com.sun.jmx.remote.internal.ClientNotifForwarder r1;
+        java.util.ArrayList $r23;
+        java.util.Map $r3, $r13;
+        int $i0, i1, $i3;
+        com.sun.jmx.remote.util.ClassLogger $r0, $r15;
+        java.lang.String $r20;
+        boolean $z0, $z1;
+        java.util.Collection $r4;
+        javax.management.ObjectName r8;
+        javax.management.NotificationFilter r10;
+        javax.management.ListenerNotFoundException $r24;
+        java.lang.Object $r6, r11;
+        java.lang.StringBuilder $r16, $r17, $r18, $r19, $r22;
+
+        r1 := @this: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+        r8 := @parameter0: javax.management.ObjectName;
+
+        r9 := @parameter1: javax.management.NotificationListener;
+
+        r10 := @parameter2: javax.management.NotificationFilter;
+
+        r11 := @parameter3: java.lang.Object;
+
+        $r0 = <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $z0 = virtualinvoke $r0.<com.sun.jmx.remote.util.ClassLogger: boolean traceOn()>();
+
+        if $z0 == 0 goto label1;
+
+        $r15 = <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Remove the listener ");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r9);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" from ");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r8);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r15.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("removeNotificationListener", $r20);
+
+     label1:
+        specialinvoke r1.<com.sun.jmx.remote.internal.ClientNotifForwarder: void beforeRemove()>();
+
+        r21 = null;
+
+        $r23 = new java.util.ArrayList;
+
+        $r3 = r1.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.util.Map infoList>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.util.Collection values()>();
+
+        specialinvoke $r23.<java.util.ArrayList: void <init>(java.util.Collection)>($r4);
+
+        $i0 = interfaceinvoke $r23.<java.util.List: int size()>();
+
+        i1 = $i0 - 1;
+
+     label2:
+        if i1 < 0 goto label4;
+
+        $r6 = interfaceinvoke $r23.<java.util.List: java.lang.Object get(int)>(i1);
+
+        r7 = (com.sun.jmx.remote.internal.ClientListenerInfo) $r6;
+
+        $z1 = virtualinvoke r7.<com.sun.jmx.remote.internal.ClientListenerInfo: boolean sameAs(javax.management.ObjectName,javax.management.NotificationListener,javax.management.NotificationFilter,java.lang.Object)>(r8, r9, r10, r11);
+
+        if $z1 == 0 goto label3;
+
+        $r12 = virtualinvoke r7.<com.sun.jmx.remote.internal.ClientListenerInfo: java.lang.Integer getListenerID()>();
+
+        r21 = $r12;
+
+        $r13 = r1.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.util.Map infoList>;
+
+        interfaceinvoke $r13.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r12);
+
+        goto label4;
+
+     label3:
+        $i3 = (int) -1;
+
+        i1 = i1 + $i3;
+
+        goto label2;
+
+     label4:
+        if r21 != null goto label5;
+
+        $r24 = new javax.management.ListenerNotFoundException;
+
+        specialinvoke $r24.<javax.management.ListenerNotFoundException: void <init>(java.lang.String)>("Listener not found");
+
+        throw $r24;
+
+     label5:
+        return r21;
+    }
+
+    public synchronized java.lang.Integer[] removeNotificationListener(javax.management.ObjectName)
+    {
+        java.lang.Object[] $r7;
+        com.sun.jmx.remote.internal.ClientListenerInfo r10;
+        java.lang.Integer $r12, $r14;
+        com.sun.jmx.remote.internal.ClientNotifForwarder r3;
+        java.util.ArrayList $r21, $r22;
+        java.util.Map $r4, $r13;
+        int $i0, i1, $i3;
+        com.sun.jmx.remote.util.ClassLogger $r0, $r16;
+        java.lang.String $r19;
+        boolean $z0, $z1;
+        java.util.Collection $r5;
+        javax.management.ObjectName r11;
+        java.lang.Object $r9;
+        java.lang.StringBuilder $r17, $r18, $r20;
+        java.lang.Integer[] $r6, $r8;
+
+        r3 := @this: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+        r11 := @parameter0: javax.management.ObjectName;
+
+        $r0 = <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $z0 = virtualinvoke $r0.<com.sun.jmx.remote.util.ClassLogger: boolean traceOn()>();
+
+        if $z0 == 0 goto label1;
+
+        $r16 = <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Remove all listeners registered at ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r11);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r16.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("removeNotificationListener", $r19);
+
+     label1:
+        $r21 = new java.util.ArrayList;
+
+        specialinvoke $r21.<java.util.ArrayList: void <init>()>();
+
+        $r22 = new java.util.ArrayList;
+
+        $r4 = r3.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.util.Map infoList>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Map: java.util.Collection values()>();
+
+        specialinvoke $r22.<java.util.ArrayList: void <init>(java.util.Collection)>($r5);
+
+        $i0 = interfaceinvoke $r22.<java.util.List: int size()>();
+
+        i1 = $i0 - 1;
+
+     label2:
+        if i1 < 0 goto label4;
+
+        $r9 = interfaceinvoke $r22.<java.util.List: java.lang.Object get(int)>(i1);
+
+        r10 = (com.sun.jmx.remote.internal.ClientListenerInfo) $r9;
+
+        $z1 = virtualinvoke r10.<com.sun.jmx.remote.internal.ClientListenerInfo: boolean sameAs(javax.management.ObjectName)>(r11);
+
+        if $z1 == 0 goto label3;
+
+        $r12 = virtualinvoke r10.<com.sun.jmx.remote.internal.ClientListenerInfo: java.lang.Integer getListenerID()>();
+
+        interfaceinvoke $r21.<java.util.List: boolean add(java.lang.Object)>($r12);
+
+        $r13 = r3.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.util.Map infoList>;
+
+        $r14 = virtualinvoke r10.<com.sun.jmx.remote.internal.ClientListenerInfo: java.lang.Integer getListenerID()>();
+
+        interfaceinvoke $r13.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r14);
+
+     label3:
+        $i3 = (int) -1;
+
+        i1 = i1 + $i3;
+
+        goto label2;
+
+     label4:
+        $r6 = newarray (java.lang.Integer)[0];
+
+        $r7 = interfaceinvoke $r21.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r6);
+
+        $r8 = (java.lang.Integer[]) $r7;
+
+        return $r8;
+    }
+
+    public synchronized com.sun.jmx.remote.internal.ClientListenerInfo[] preReconnection() throws java.io.IOException
+    {
+        java.lang.Object[] $r5;
+        java.util.Collection $r3;
+        java.io.IOException $r1;
+        com.sun.jmx.remote.internal.ClientNotifForwarder r0;
+        com.sun.jmx.remote.internal.ClientListenerInfo[] $r4, r6;
+        java.util.Map $r2, $r7;
+        int $i0;
+        boolean $z0;
+
+        r0 := @this: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+        $i0 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: int state>;
+
+        if $i0 == 4 goto label1;
+
+        $z0 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: boolean beingReconnected>;
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        $r1 = new java.io.IOException;
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>("Illegal state.");
+
+        throw $r1;
+
+     label2:
+        $r2 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.util.Map infoList>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.util.Collection values()>();
+
+        $r4 = newarray (com.sun.jmx.remote.internal.ClientListenerInfo)[0];
+
+        $r5 = interfaceinvoke $r3.<java.util.Collection: java.lang.Object[] toArray(java.lang.Object[])>($r4);
+
+        r6 = (com.sun.jmx.remote.internal.ClientListenerInfo[]) $r5;
+
+        r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: boolean beingReconnected> = 1;
+
+        $r7 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.util.Map infoList>;
+
+        interfaceinvoke $r7.<java.util.Map: void clear()>();
+
+        return r6;
+    }
+
+    public synchronized void postReconnection(com.sun.jmx.remote.internal.ClientListenerInfo[]) throws java.io.IOException
+    {
+        java.lang.Integer $r8, $r14, $r26;
+        java.lang.Thread $r3, $r4;
+        java.util.Map $r5, $r7;
+        boolean $z0, $z1;
+        java.lang.Exception $r20;
+        java.lang.StringBuilder $r10, $r12, $r15;
+        com.sun.jmx.remote.internal.ClientListenerInfo $r6, $r9, $r13;
+        com.sun.jmx.remote.internal.ClientNotifForwarder r0;
+        com.sun.jmx.remote.internal.ClientListenerInfo[] r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, i7, i8;
+        com.sun.jmx.remote.util.ClassLogger $r1, $r11, $r21, $r22;
+        java.lang.String $r16, $r19, $r25;
+        java.io.IOException $r18, $r24;
+        java.lang.InterruptedException $r17, $r23;
+
+        r0 := @this: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+        r2 := @parameter0: com.sun.jmx.remote.internal.ClientListenerInfo[];
+
+        $i0 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: int state>;
+
+        if $i0 != 4 goto label01;
+
+        return;
+
+     label01:
+        $i1 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: int state>;
+
+        if $i1 != 2 goto label05;
+
+     label02:
+        virtualinvoke r0.<java.lang.Object: void wait()>();
+
+     label03:
+        goto label01;
+
+     label04:
+        $r23 := @caughtexception;
+
+        $r24 = new java.io.IOException;
+
+        $r25 = virtualinvoke $r23.<java.lang.InterruptedException: java.lang.String toString()>();
+
+        specialinvoke $r24.<java.io.IOException: void <init>(java.lang.String)>($r25);
+
+        staticinvoke <com.sun.jmx.remote.util.EnvHelp: java.lang.Throwable initCause(java.lang.Throwable,java.lang.Throwable)>($r24, $r23);
+
+        throw $r24;
+
+     label05:
+        $r1 = <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $z0 = virtualinvoke $r1.<com.sun.jmx.remote.util.ClassLogger: boolean traceOn()>();
+
+        i7 = lengthof r2;
+
+        i8 = 0;
+
+     label06:
+        if i8 >= i7 goto label08;
+
+        if $z0 == 0 goto label07;
+
+        $r11 = <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Add a listener at ");
+
+        $r13 = r2[i8];
+
+        $r14 = virtualinvoke $r13.<com.sun.jmx.remote.internal.ClientListenerInfo: java.lang.Integer getListenerID()>();
+
+        $r15 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r11.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("addNotificationListeners", $r16);
+
+     label07:
+        $r7 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.util.Map infoList>;
+
+        $r6 = r2[i8];
+
+        $r8 = virtualinvoke $r6.<com.sun.jmx.remote.internal.ClientListenerInfo: java.lang.Integer getListenerID()>();
+
+        $r9 = r2[i8];
+
+        interfaceinvoke $r7.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r8, $r9);
+
+        i8 = i8 + 1;
+
+        goto label06;
+
+     label08:
+        r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: boolean beingReconnected> = 0;
+
+        virtualinvoke r0.<java.lang.Object: void notifyAll()>();
+
+        $r3 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.lang.Thread currentFetchThread>;
+
+        $r4 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        if $r3 == $r4 goto label09;
+
+        $i2 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: int state>;
+
+        if $i2 == 0 goto label09;
+
+        $i3 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: int state>;
+
+        if $i3 != 1 goto label13;
+
+     label09:
+        $r26 = virtualinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.lang.Integer addListenerForMBeanRemovedNotif()>();
+
+        r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.lang.Integer mbeanRemovedNotifID> = $r26;
+
+     label10:
+        goto label19;
+
+     label11:
+        $r20 := @caughtexception;
+
+        $r21 = <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $z1 = virtualinvoke $r21.<com.sun.jmx.remote.util.ClassLogger: boolean traceOn()>();
+
+        if $z1 == 0 goto label12;
+
+        $r22 = <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r22.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String,java.lang.Throwable)>("init", "Failed to register a listener to the mbean server: the client will not do clean when an MBean is unregistered", $r20);
+
+     label12:
+        goto label19;
+
+     label13:
+        $i4 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: int state>;
+
+        if $i4 != 2 goto label17;
+
+     label14:
+        virtualinvoke r0.<java.lang.Object: void wait()>();
+
+     label15:
+        goto label13;
+
+     label16:
+        $r17 := @caughtexception;
+
+        $r18 = new java.io.IOException;
+
+        $r19 = virtualinvoke $r17.<java.lang.InterruptedException: java.lang.String toString()>();
+
+        specialinvoke $r18.<java.io.IOException: void <init>(java.lang.String)>($r19);
+
+        staticinvoke <com.sun.jmx.remote.util.EnvHelp: java.lang.Throwable initCause(java.lang.Throwable,java.lang.Throwable)>($r18, $r17);
+
+        throw $r18;
+
+     label17:
+        $i5 = lengthof r2;
+
+        if $i5 <= 0 goto label18;
+
+        specialinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: void init(boolean)>(1);
+
+        goto label19;
+
+     label18:
+        $r5 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.util.Map infoList>;
+
+        $i6 = interfaceinvoke $r5.<java.util.Map: int size()>();
+
+        if $i6 <= 0 goto label19;
+
+        specialinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: void init(boolean)>(0);
+
+     label19:
+        return;
+
+        catch java.lang.InterruptedException from label02 to label03 with label04;
+        catch java.lang.Exception from label09 to label10 with label11;
+        catch java.lang.InterruptedException from label14 to label15 with label16;
+    }
+
+    public synchronized void terminate()
+    {
+        java.util.Map $r2;
+        int $i0, $i1;
+        com.sun.jmx.remote.util.ClassLogger $r1, $r3;
+        com.sun.jmx.remote.internal.ClientNotifForwarder r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+        $i0 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: int state>;
+
+        if $i0 != 4 goto label1;
+
+        return;
+
+     label1:
+        $r1 = <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $z0 = virtualinvoke $r1.<com.sun.jmx.remote.util.ClassLogger: boolean traceOn()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r3.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("terminate", "Terminating...");
+
+     label2:
+        $i1 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: int state>;
+
+        if $i1 != 1 goto label3;
+
+        $r2 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.util.Map infoList>;
+
+        interfaceinvoke $r2.<java.util.Map: void clear()>();
+
+     label3:
+        specialinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: void setState(int)>(4);
+
+        return;
+    }
+
+    private synchronized void setState(int)
+    {
+        int $i0, i1;
+        com.sun.jmx.remote.internal.ClientNotifForwarder r0;
+
+        r0 := @this: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+        i1 := @parameter0: int;
+
+        $i0 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: int state>;
+
+        if $i0 != 4 goto label1;
+
+        return;
+
+     label1:
+        r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: int state> = i1;
+
+        virtualinvoke r0.<java.lang.Object: void notifyAll()>();
+
+        return;
+    }
+
+    private synchronized void init(boolean) throws java.io.IOException
+    {
+        long $l2;
+        java.lang.Integer $r19;
+        com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher $r21;
+        com.sun.jmx.remote.internal.ClientNotifForwarder r0;
+        int $i0, $i1, $i3;
+        com.sun.jmx.remote.util.ClassLogger $r2, $r4, $r7, $r8, $r11, $r15;
+        java.lang.String $r14, $r18;
+        boolean $z0, $z1, z2, $z3, $z4;
+        javax.management.remote.NotificationResult $r3;
+        java.util.concurrent.Executor $r20;
+        java.io.IOException $r1, $r5, $r17;
+        java.lang.Exception $r6;
+        java.lang.InterruptedException $r16;
+        java.lang.ClassNotFoundException $r9;
+        java.lang.StringBuilder $r10, $r12, $r13;
+
+        r0 := @this: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+        z2 := @parameter0: boolean;
+
+        $i0 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: int state>;
+
+        tableswitch($i0)
+        {
+            case 0: goto label02;
+            case 1: goto label01;
+            case 2: goto label04;
+            case 3: goto label10;
+            case 4: goto label03;
+            default: goto label22;
+        };
+
+     label01:
+        return;
+
+     label02:
+        return;
+
+     label03:
+        $r1 = new java.io.IOException;
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>("The ClientNotifForwarder has been terminated.");
+
+        throw $r1;
+
+     label04:
+        $z3 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: boolean beingReconnected>;
+
+        if $z3 != 1 goto label05;
+
+        return;
+
+     label05:
+        $i3 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: int state>;
+
+        if $i3 != 2 goto label09;
+
+     label06:
+        virtualinvoke r0.<java.lang.Object: void wait()>();
+
+     label07:
+        goto label05;
+
+     label08:
+        $r16 := @caughtexception;
+
+        $r17 = new java.io.IOException;
+
+        $r18 = virtualinvoke $r16.<java.lang.InterruptedException: java.lang.String toString()>();
+
+        specialinvoke $r17.<java.io.IOException: void <init>(java.lang.String)>($r18);
+
+        staticinvoke <com.sun.jmx.remote.util.EnvHelp: java.lang.Throwable initCause(java.lang.Throwable,java.lang.Throwable)>($r17, $r16);
+
+        throw $r17;
+
+     label09:
+        specialinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: void init(boolean)>(z2);
+
+        return;
+
+     label10:
+        $z0 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: boolean beingReconnected>;
+
+        if $z0 != 1 goto label11;
+
+        return;
+
+     label11:
+        $r2 = <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $z1 = virtualinvoke $r2.<com.sun.jmx.remote.util.ClassLogger: boolean traceOn()>();
+
+        if $z1 == 0 goto label12;
+
+        $r4 = <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r4.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("init", "Initializing...");
+
+     label12:
+        if z2 != 0 goto label18;
+
+     label13:
+        $r3 = virtualinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: javax.management.remote.NotificationResult fetchNotifs(long,int,long)>(-1L, 0, 0L);
+
+        $i1 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: int state>;
+
+        if $i1 == 3 goto label15;
+
+     label14:
+        return;
+
+     label15:
+        $l2 = virtualinvoke $r3.<javax.management.remote.NotificationResult: long getNextSequenceNumber()>();
+
+        r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: long clientSequenceNumber> = $l2;
+
+     label16:
+        goto label18;
+
+     label17:
+        $r9 := @caughtexception;
+
+        $r11 = <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Impossible exception: ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r11.<com.sun.jmx.remote.util.ClassLogger: void warning(java.lang.String,java.lang.String)>("init", $r14);
+
+        $r15 = <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r15.<com.sun.jmx.remote.util.ClassLogger: void debug(java.lang.String,java.lang.Throwable)>("init", $r9);
+
+     label18:
+        $r19 = virtualinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.lang.Integer addListenerForMBeanRemovedNotif()>();
+
+        r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.lang.Integer mbeanRemovedNotifID> = $r19;
+
+     label19:
+        goto label21;
+
+     label20:
+        $r6 := @caughtexception;
+
+        $r7 = <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $z4 = virtualinvoke $r7.<com.sun.jmx.remote.util.ClassLogger: boolean traceOn()>();
+
+        if $z4 == 0 goto label21;
+
+        $r8 = <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r8.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String,java.lang.Throwable)>("init", "Failed to register a listener to the mbean server: the client will not do clean when an MBean is unregistered", $r6);
+
+     label21:
+        specialinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: void setState(int)>(0);
+
+        $r20 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.util.concurrent.Executor executor>;
+
+        $r21 = new com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher;
+
+        specialinvoke $r21.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: void <init>(com.sun.jmx.remote.internal.ClientNotifForwarder,com.sun.jmx.remote.internal.ClientNotifForwarder$1)>(r0, null);
+
+        interfaceinvoke $r20.<java.util.concurrent.Executor: void execute(java.lang.Runnable)>($r21);
+
+        return;
+
+     label22:
+        $r5 = new java.io.IOException;
+
+        specialinvoke $r5.<java.io.IOException: void <init>(java.lang.String)>("Unknown state.");
+
+        throw $r5;
+
+        catch java.lang.InterruptedException from label06 to label07 with label08;
+        catch java.lang.ClassNotFoundException from label13 to label14 with label17;
+        catch java.lang.ClassNotFoundException from label15 to label16 with label17;
+        catch java.lang.Exception from label18 to label19 with label20;
+    }
+
+    private synchronized void beforeRemove() throws java.io.IOException
+    {
+        java.io.IOException $r1, $r2, $r4;
+        com.sun.jmx.remote.internal.ClientNotifForwarder r0;
+        java.lang.InterruptedException $r3;
+        int $i0, $i1;
+        java.lang.String $r5;
+        boolean $z0;
+
+        r0 := @this: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+     label1:
+        $z0 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: boolean beingReconnected>;
+
+        if $z0 == 0 goto label5;
+
+        $i1 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: int state>;
+
+        if $i1 != 4 goto label2;
+
+        $r2 = new java.io.IOException;
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>("Terminated.");
+
+        throw $r2;
+
+     label2:
+        virtualinvoke r0.<java.lang.Object: void wait()>();
+
+     label3:
+        goto label1;
+
+     label4:
+        $r3 := @caughtexception;
+
+        $r4 = new java.io.IOException;
+
+        $r5 = virtualinvoke $r3.<java.lang.InterruptedException: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.io.IOException: void <init>(java.lang.String)>($r5);
+
+        staticinvoke <com.sun.jmx.remote.util.EnvHelp: java.lang.Throwable initCause(java.lang.Throwable,java.lang.Throwable)>($r4, $r3);
+
+        throw $r4;
+
+     label5:
+        $i0 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: int state>;
+
+        if $i0 != 4 goto label6;
+
+        $r1 = new java.io.IOException;
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>("Terminated.");
+
+        throw $r1;
+
+     label6:
+        return;
+
+        catch java.lang.InterruptedException from label2 to label3 with label4;
+    }
+
+    static int access$204()
+    {
+        int $i0, $i1;
+
+        $i0 = <com.sun.jmx.remote.internal.ClientNotifForwarder: int threadId>;
+
+        $i1 = $i0 + 1;
+
+        <com.sun.jmx.remote.internal.ClientNotifForwarder: int threadId> = $i1;
+
+        return $i1;
+    }
+
+    static com.sun.jmx.remote.util.ClassLogger access$400()
+    {
+        com.sun.jmx.remote.util.ClassLogger $r0;
+
+        $r0 = <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        return $r0;
+    }
+
+    static java.security.AccessControlContext access$500(com.sun.jmx.remote.internal.ClientNotifForwarder)
+    {
+        java.security.AccessControlContext $r1;
+        com.sun.jmx.remote.internal.ClientNotifForwarder r0;
+
+        r0 := @parameter0: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+        $r1 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.security.AccessControlContext acc>;
+
+        return $r1;
+    }
+
+    static java.lang.ClassLoader access$700(com.sun.jmx.remote.internal.ClientNotifForwarder)
+    {
+        java.lang.ClassLoader $r1;
+        com.sun.jmx.remote.internal.ClientNotifForwarder r0;
+
+        r0 := @parameter0: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+        $r1 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.lang.ClassLoader defaultClassLoader>;
+
+        return $r1;
+    }
+
+    static java.lang.Thread access$802(com.sun.jmx.remote.internal.ClientNotifForwarder, java.lang.Thread)
+    {
+        com.sun.jmx.remote.internal.ClientNotifForwarder r0;
+        java.lang.Thread r1;
+
+        r0 := @parameter0: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+        r1 := @parameter1: java.lang.Thread;
+
+        r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.lang.Thread currentFetchThread> = r1;
+
+        return r1;
+    }
+
+    static int access$900(com.sun.jmx.remote.internal.ClientNotifForwarder)
+    {
+        int $i0;
+        com.sun.jmx.remote.internal.ClientNotifForwarder r0;
+
+        r0 := @parameter0: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+        $i0 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: int state>;
+
+        return $i0;
+    }
+
+    static void access$1000(com.sun.jmx.remote.internal.ClientNotifForwarder, int)
+    {
+        int i0;
+        com.sun.jmx.remote.internal.ClientNotifForwarder r0;
+
+        r0 := @parameter0: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: void setState(int)>(i0);
+
+        return;
+    }
+
+    static long access$1100(com.sun.jmx.remote.internal.ClientNotifForwarder)
+    {
+        long $l0;
+        com.sun.jmx.remote.internal.ClientNotifForwarder r0;
+
+        r0 := @parameter0: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+        $l0 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: long clientSequenceNumber>;
+
+        return $l0;
+    }
+
+    static long access$1102(com.sun.jmx.remote.internal.ClientNotifForwarder, long)
+    {
+        long l0;
+        com.sun.jmx.remote.internal.ClientNotifForwarder r0;
+
+        r0 := @parameter0: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+        l0 := @parameter1: long;
+
+        r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: long clientSequenceNumber> = l0;
+
+        return l0;
+    }
+
+    static java.lang.Integer access$1200(com.sun.jmx.remote.internal.ClientNotifForwarder)
+    {
+        java.lang.Integer $r1;
+        com.sun.jmx.remote.internal.ClientNotifForwarder r0;
+
+        r0 := @parameter0: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+        $r1 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.lang.Integer mbeanRemovedNotifID>;
+
+        return $r1;
+    }
+
+    static java.util.Map access$1300(com.sun.jmx.remote.internal.ClientNotifForwarder)
+    {
+        com.sun.jmx.remote.internal.ClientNotifForwarder r0;
+        java.util.Map $r1;
+
+        r0 := @parameter0: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+        $r1 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.util.Map infoList>;
+
+        return $r1;
+    }
+
+    static java.util.concurrent.Executor access$1400(com.sun.jmx.remote.internal.ClientNotifForwarder)
+    {
+        java.util.concurrent.Executor $r1;
+        com.sun.jmx.remote.internal.ClientNotifForwarder r0;
+
+        r0 := @parameter0: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+        $r1 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.util.concurrent.Executor executor>;
+
+        return $r1;
+    }
+
+    static int access$1500(com.sun.jmx.remote.internal.ClientNotifForwarder)
+    {
+        int $i0;
+        com.sun.jmx.remote.internal.ClientNotifForwarder r0;
+
+        r0 := @parameter0: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+        $i0 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: int maxNotifications>;
+
+        return $i0;
+    }
+
+    static long access$1600(com.sun.jmx.remote.internal.ClientNotifForwarder)
+    {
+        long $l0;
+        com.sun.jmx.remote.internal.ClientNotifForwarder r0;
+
+        r0 := @parameter0: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+        $l0 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder: long timeout>;
+
+        return $l0;
+    }
+
+    static void <clinit>()
+    {
+        com.sun.jmx.remote.util.ClassLogger $r0;
+
+        <com.sun.jmx.remote.internal.ClientNotifForwarder: int TERMINATED> = 4;
+
+        <com.sun.jmx.remote.internal.ClientNotifForwarder: int STOPPED> = 3;
+
+        <com.sun.jmx.remote.internal.ClientNotifForwarder: int STOPPING> = 2;
+
+        <com.sun.jmx.remote.internal.ClientNotifForwarder: int STARTED> = 1;
+
+        <com.sun.jmx.remote.internal.ClientNotifForwarder: int STARTING> = 0;
+
+        $r0 = new com.sun.jmx.remote.util.ClassLogger;
+
+        specialinvoke $r0.<com.sun.jmx.remote.util.ClassLogger: void <init>(java.lang.String,java.lang.String)>("javax.management.remote.misc", "ClientNotifForwarder");
+
+        <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger logger> = $r0;
+
+        return;
+    }
+}

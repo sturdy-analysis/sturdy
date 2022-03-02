@@ -1,0 +1,1628 @@
+public final class java.io.FilePermission extends java.security.Permission implements java.io.Serializable
+{
+    private static final int EXECUTE;
+    private static final int WRITE;
+    private static final int READ;
+    private static final int DELETE;
+    private static final int READLINK;
+    private static final int ALL;
+    private static final int NONE;
+    private transient int mask;
+    private transient boolean directory;
+    private transient boolean recursive;
+    private java.lang.String actions;
+    private transient java.lang.String cpath;
+    private transient boolean invalid;
+    private transient boolean allFiles;
+    private static final char RECURSIVE_CHAR;
+    private static final char WILD_CHAR;
+    private static final long serialVersionUID;
+
+    private void init(int)
+    {
+        java.lang.NullPointerException $r19;
+        java.io.FilePermission r0;
+        boolean $z0, $z1;
+        java.io.FilePermission$1 $r20;
+        int i0, $i1, $i2, i3, $i4, $i7, $i10, $i11, i12, i13, $i14, $i15, $i17, $i18, $i19, $i21;
+        java.lang.String $r1, $r2, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13;
+        char $c5, $c6, $c8, $c9;
+        java.lang.IllegalArgumentException $r17, $r18;
+        java.lang.Object $r4;
+
+        r0 := @this: java.io.FilePermission;
+
+        i0 := @parameter0: int;
+
+        $i1 = i0 & 31;
+
+        if $i1 == i0 goto label1;
+
+        $r17 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r17.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("invalid actions mask");
+
+        throw $r17;
+
+     label1:
+        if i0 != 0 goto label2;
+
+        $r18 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r18.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("invalid actions mask");
+
+        throw $r18;
+
+     label2:
+        $r1 = virtualinvoke r0.<java.io.FilePermission: java.lang.String getName()>();
+
+        r0.<java.io.FilePermission: java.lang.String cpath> = $r1;
+
+        if $r1 != null goto label3;
+
+        $r19 = new java.lang.NullPointerException;
+
+        specialinvoke $r19.<java.lang.NullPointerException: void <init>(java.lang.String)>("name can\'t be null");
+
+        throw $r19;
+
+     label3:
+        r0.<java.io.FilePermission: int mask> = i0;
+
+        $r2 = r0.<java.io.FilePermission: java.lang.String cpath>;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("<<ALL FILES>>");
+
+        if $z0 == 0 goto label4;
+
+        r0.<java.io.FilePermission: boolean allFiles> = 1;
+
+        r0.<java.io.FilePermission: boolean directory> = 1;
+
+        r0.<java.io.FilePermission: boolean recursive> = 1;
+
+        r0.<java.io.FilePermission: java.lang.String cpath> = "";
+
+        return;
+
+     label4:
+        $z1 = specialinvoke r0.<java.io.FilePermission: boolean isPathInvalid()>();
+
+        if $z1 == 0 goto label5;
+
+        r0.<java.io.FilePermission: boolean invalid> = 1;
+
+        return;
+
+     label5:
+        $r20 = new java.io.FilePermission$1;
+
+        specialinvoke $r20.<java.io.FilePermission$1: void <init>(java.io.FilePermission)>(r0);
+
+        $r4 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r20);
+
+        $r5 = (java.lang.String) $r4;
+
+        r0.<java.io.FilePermission: java.lang.String cpath> = $r5;
+
+        $r6 = r0.<java.io.FilePermission: java.lang.String cpath>;
+
+        $i2 = virtualinvoke $r6.<java.lang.String: int length()>();
+
+        if $i2 <= 0 goto label6;
+
+        $r13 = r0.<java.io.FilePermission: java.lang.String cpath>;
+
+        $i10 = $i2 - 1;
+
+        $i11 = virtualinvoke $r13.<java.lang.String: char charAt(int)>($i10);
+
+        goto label7;
+
+     label6:
+        $i11 = 0;
+
+     label7:
+        i3 = $i11;
+
+        if $i11 != 45 goto label8;
+
+        $r10 = r0.<java.io.FilePermission: java.lang.String cpath>;
+
+        $i7 = $i2 - 2;
+
+        $c8 = virtualinvoke $r10.<java.lang.String: char charAt(int)>($i7);
+
+        $c9 = <java.io.File: char separatorChar>;
+
+        $i14 = (int) $c8;
+
+        $i15 = (int) $c9;
+
+        if $i14 != $i15 goto label8;
+
+        r0.<java.io.FilePermission: boolean directory> = 1;
+
+        r0.<java.io.FilePermission: boolean recursive> = 1;
+
+        $r11 = r0.<java.io.FilePermission: java.lang.String cpath>;
+
+        $i17 = (int) -1;
+
+        i12 = $i2 + $i17;
+
+        $r12 = virtualinvoke $r11.<java.lang.String: java.lang.String substring(int,int)>(0, i12);
+
+        r0.<java.io.FilePermission: java.lang.String cpath> = $r12;
+
+        goto label9;
+
+     label8:
+        if i3 != 42 goto label9;
+
+        $r7 = r0.<java.io.FilePermission: java.lang.String cpath>;
+
+        $i4 = $i2 - 2;
+
+        $c5 = virtualinvoke $r7.<java.lang.String: char charAt(int)>($i4);
+
+        $c6 = <java.io.File: char separatorChar>;
+
+        $i18 = (int) $c5;
+
+        $i19 = (int) $c6;
+
+        if $i18 != $i19 goto label9;
+
+        r0.<java.io.FilePermission: boolean directory> = 1;
+
+        $r8 = r0.<java.io.FilePermission: java.lang.String cpath>;
+
+        $i21 = (int) -1;
+
+        i13 = $i2 + $i21;
+
+        $r9 = virtualinvoke $r8.<java.lang.String: java.lang.String substring(int,int)>(0, i13);
+
+        r0.<java.io.FilePermission: java.lang.String cpath> = $r9;
+
+     label9:
+        return;
+    }
+
+    private boolean isPathInvalid()
+    {
+        java.nio.file.InvalidPathException $r10;
+        java.io.FilePermission r0;
+        int $i0, $i1, $i2, $i4;
+        java.lang.String $r1, $r2, $r5, $r6, $r7, $r11;
+        boolean $z0;
+        java.io.File $r13;
+        java.lang.StringBuilder $r8, $r9, $r12;
+
+        r0 := @this: java.io.FilePermission;
+
+        $r1 = r0.<java.io.FilePermission: java.lang.String cpath>;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int indexOf(java.lang.String)>(". ");
+
+        $i4 = (int) -1;
+
+        if $i0 == $i4 goto label6;
+
+     label1:
+        $r2 = r0.<java.io.FilePermission: java.lang.String cpath>;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean endsWith(java.lang.String)>("*");
+
+        if $z0 == 0 goto label2;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = r0.<java.io.FilePermission: java.lang.String cpath>;
+
+        $r5 = r0.<java.io.FilePermission: java.lang.String cpath>;
+
+        $i1 = virtualinvoke $r5.<java.lang.String: int length()>();
+
+        $i2 = $i1 - 1;
+
+        $r7 = virtualinvoke $r6.<java.lang.String: java.lang.String substring(int,int)>(0, $i2);
+
+        $r8 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-");
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label3;
+
+     label2:
+        $r11 = r0.<java.io.FilePermission: java.lang.String cpath>;
+
+     label3:
+        $r13 = new java.io.File;
+
+        specialinvoke $r13.<java.io.File: void <init>(java.lang.String)>($r11);
+
+        virtualinvoke $r13.<java.io.File: java.nio.file.Path toPath()>();
+
+     label4:
+        goto label6;
+
+     label5:
+        $r10 := @caughtexception;
+
+        return 1;
+
+     label6:
+        return 0;
+
+        catch java.nio.file.InvalidPathException from label1 to label4 with label5;
+    }
+
+    public void <init>(java.lang.String, java.lang.String)
+    {
+        java.io.FilePermission r0;
+        int $i0;
+        java.lang.String r1, r2;
+
+        r0 := @this: java.io.FilePermission;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<java.security.Permission: void <init>(java.lang.String)>(r1);
+
+        $i0 = staticinvoke <java.io.FilePermission: int getMask(java.lang.String)>(r2);
+
+        specialinvoke r0.<java.io.FilePermission: void init(int)>($i0);
+
+        return;
+    }
+
+    void <init>(java.lang.String, int)
+    {
+        int i0;
+        java.lang.String r1;
+        java.io.FilePermission r0;
+
+        r0 := @this: java.io.FilePermission;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<java.security.Permission: void <init>(java.lang.String)>(r1);
+
+        specialinvoke r0.<java.io.FilePermission: void init(int)>(i0);
+
+        return;
+    }
+
+    public boolean implies(java.security.Permission)
+    {
+        java.security.Permission r0;
+        java.io.FilePermission r1, r2;
+        int $i0, $i1, $i2, $i3;
+        boolean $z0, $z1, $z2;
+
+        r2 := @this: java.io.FilePermission;
+
+        r0 := @parameter0: java.security.Permission;
+
+        $z0 = r0 instanceof java.io.FilePermission;
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        r1 = (java.io.FilePermission) r0;
+
+        $i1 = r2.<java.io.FilePermission: int mask>;
+
+        $i0 = r1.<java.io.FilePermission: int mask>;
+
+        $i3 = $i1 & $i0;
+
+        $i2 = r1.<java.io.FilePermission: int mask>;
+
+        if $i3 != $i2 goto label2;
+
+        $z1 = virtualinvoke r2.<java.io.FilePermission: boolean impliesIgnoreMask(java.io.FilePermission)>(r1);
+
+        if $z1 == 0 goto label2;
+
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+    }
+
+    boolean impliesIgnoreMask(java.io.FilePermission)
+    {
+        java.io.FilePermission r0, r1;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17;
+        int $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i11;
+        java.lang.String $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17;
+        char $c0;
+
+        r0 := @this: java.io.FilePermission;
+
+        r1 := @parameter0: java.io.FilePermission;
+
+        if r0 != r1 goto label01;
+
+        return 1;
+
+     label01:
+        $z0 = r0.<java.io.FilePermission: boolean allFiles>;
+
+        if $z0 == 0 goto label02;
+
+        return 1;
+
+     label02:
+        $z1 = r0.<java.io.FilePermission: boolean invalid>;
+
+        if $z1 != 0 goto label03;
+
+        $z2 = r1.<java.io.FilePermission: boolean invalid>;
+
+        if $z2 == 0 goto label04;
+
+     label03:
+        return 0;
+
+     label04:
+        $z3 = r1.<java.io.FilePermission: boolean allFiles>;
+
+        if $z3 == 0 goto label05;
+
+        return 0;
+
+     label05:
+        $z4 = r0.<java.io.FilePermission: boolean directory>;
+
+        if $z4 == 0 goto label17;
+
+        $z7 = r0.<java.io.FilePermission: boolean recursive>;
+
+        if $z7 == 0 goto label11;
+
+        $z12 = r1.<java.io.FilePermission: boolean directory>;
+
+        if $z12 == 0 goto label08;
+
+        $r14 = r1.<java.io.FilePermission: java.lang.String cpath>;
+
+        $i7 = virtualinvoke $r14.<java.lang.String: int length()>();
+
+        $r15 = r0.<java.io.FilePermission: java.lang.String cpath>;
+
+        $i8 = virtualinvoke $r15.<java.lang.String: int length()>();
+
+        if $i7 < $i8 goto label06;
+
+        $r17 = r1.<java.io.FilePermission: java.lang.String cpath>;
+
+        $r16 = r0.<java.io.FilePermission: java.lang.String cpath>;
+
+        $z14 = virtualinvoke $r17.<java.lang.String: boolean startsWith(java.lang.String)>($r16);
+
+        if $z14 == 0 goto label06;
+
+        $z15 = 1;
+
+        goto label07;
+
+     label06:
+        $z15 = 0;
+
+     label07:
+        return $z15;
+
+     label08:
+        $r10 = r1.<java.io.FilePermission: java.lang.String cpath>;
+
+        $i5 = virtualinvoke $r10.<java.lang.String: int length()>();
+
+        $r11 = r0.<java.io.FilePermission: java.lang.String cpath>;
+
+        $i6 = virtualinvoke $r11.<java.lang.String: int length()>();
+
+        if $i5 <= $i6 goto label09;
+
+        $r13 = r1.<java.io.FilePermission: java.lang.String cpath>;
+
+        $r12 = r0.<java.io.FilePermission: java.lang.String cpath>;
+
+        $z13 = virtualinvoke $r13.<java.lang.String: boolean startsWith(java.lang.String)>($r12);
+
+        if $z13 == 0 goto label09;
+
+        $z16 = 1;
+
+        goto label10;
+
+     label09:
+        $z16 = 0;
+
+     label10:
+        return $z16;
+
+     label11:
+        $z8 = r1.<java.io.FilePermission: boolean directory>;
+
+        if $z8 == 0 goto label13;
+
+        $z10 = r1.<java.io.FilePermission: boolean recursive>;
+
+        if $z10 == 0 goto label12;
+
+        return 0;
+
+     label12:
+        $r9 = r0.<java.io.FilePermission: java.lang.String cpath>;
+
+        $r8 = r1.<java.io.FilePermission: java.lang.String cpath>;
+
+        $z11 = virtualinvoke $r9.<java.lang.String: boolean equals(java.lang.Object)>($r8);
+
+        return $z11;
+
+     label13:
+        $r4 = r1.<java.io.FilePermission: java.lang.String cpath>;
+
+        $c0 = <java.io.File: char separatorChar>;
+
+        $i9 = (int) $c0;
+
+        $i1 = virtualinvoke $r4.<java.lang.String: int lastIndexOf(int)>($i9);
+
+        $i11 = (int) -1;
+
+        if $i1 != $i11 goto label14;
+
+        return 0;
+
+     label14:
+        $r5 = r0.<java.io.FilePermission: java.lang.String cpath>;
+
+        $i2 = virtualinvoke $r5.<java.lang.String: int length()>();
+
+        $i3 = $i1 + 1;
+
+        if $i2 != $i3 goto label15;
+
+        $r7 = r0.<java.io.FilePermission: java.lang.String cpath>;
+
+        $r6 = r1.<java.io.FilePermission: java.lang.String cpath>;
+
+        $i4 = $i1 + 1;
+
+        $z9 = virtualinvoke $r7.<java.lang.String: boolean regionMatches(int,java.lang.String,int,int)>(0, $r6, 0, $i4);
+
+        if $z9 == 0 goto label15;
+
+        $z17 = 1;
+
+        goto label16;
+
+     label15:
+        $z17 = 0;
+
+     label16:
+        return $z17;
+
+     label17:
+        $z5 = r1.<java.io.FilePermission: boolean directory>;
+
+        if $z5 == 0 goto label18;
+
+        return 0;
+
+     label18:
+        $r3 = r0.<java.io.FilePermission: java.lang.String cpath>;
+
+        $r2 = r1.<java.io.FilePermission: java.lang.String cpath>;
+
+        $z6 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        return $z6;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        java.io.FilePermission r1, r2;
+        int $i0, $i1;
+        java.lang.String $r3, $r4;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10;
+        java.lang.Object r0;
+
+        r1 := @this: java.io.FilePermission;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        $z0 = r0 instanceof java.io.FilePermission;
+
+        if $z0 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        r2 = (java.io.FilePermission) r0;
+
+        $z1 = r1.<java.io.FilePermission: boolean invalid>;
+
+        if $z1 != 0 goto label3;
+
+        $z2 = r2.<java.io.FilePermission: boolean invalid>;
+
+        if $z2 == 0 goto label4;
+
+     label3:
+        return 0;
+
+     label4:
+        $i1 = r1.<java.io.FilePermission: int mask>;
+
+        $i0 = r2.<java.io.FilePermission: int mask>;
+
+        if $i1 != $i0 goto label5;
+
+        $z4 = r1.<java.io.FilePermission: boolean allFiles>;
+
+        $z3 = r2.<java.io.FilePermission: boolean allFiles>;
+
+        if $z4 != $z3 goto label5;
+
+        $r4 = r1.<java.io.FilePermission: java.lang.String cpath>;
+
+        $r3 = r2.<java.io.FilePermission: java.lang.String cpath>;
+
+        $z5 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z5 == 0 goto label5;
+
+        $z7 = r1.<java.io.FilePermission: boolean directory>;
+
+        $z6 = r2.<java.io.FilePermission: boolean directory>;
+
+        if $z7 != $z6 goto label5;
+
+        $z9 = r1.<java.io.FilePermission: boolean recursive>;
+
+        $z8 = r2.<java.io.FilePermission: boolean recursive>;
+
+        if $z9 != $z8 goto label5;
+
+        $z10 = 1;
+
+        goto label6;
+
+     label5:
+        $z10 = 0;
+
+     label6:
+        return $z10;
+    }
+
+    public int hashCode()
+    {
+        java.io.FilePermission r0;
+
+        r0 := @this: java.io.FilePermission;
+
+        return 0;
+    }
+
+    private static int getMask(java.lang.String)
+    {
+        byte b114, b116, b117, b118, b119;
+        java.lang.StringBuilder $r4, $r5, $r9, $r10, $r12, $r14;
+        int $i0, $i1, $i3, $i5, $i7, $i9, $i11, $i13, $i16, $i19, $i21, $i23, $i25, $i27, $i29, $i31, $i33, $i35, $i37, $i39, $i41, $i45, $i47, $i49, $i51, $i53, $i55, $i57, $i59, $i61, $i63, $i65, $i69, $i71, $i73, $i75, $i77, $i79, $i81, $i83, $i85, $i87, $i91, $i93, $i95, $i97, $i99, $i101, $i103, $i107, $i109, $i111, i115, $i121, $i123, $i124, $i125, $i126, $i127, $i128, $i130, $i131, $i132, $i133, $i134, $i135, $i136, $i137, $i138, $i139, $i140, $i141, $i142, $i143, $i144, $i145, $i146, $i147, $i148, $i149, $i150, $i151, $i152, $i153, $i154, $i155, $i156, $i157, $i158, $i159, $i160, $i161, $i162, $i163, $i164, $i165, $i166, $i167, $i168, $i169, $i170, $i171, $i172, $i173, $i174, $i175, $i176, $i177, $i178, $i179, $i180, $i181, $i182, $i183, $i184, $i185, $i186, $i187, $i188, $i189, $i190, $i191, $i193;
+        java.lang.String r0, $r6, $r11;
+        char[] $r1;
+        boolean z0;
+        char $c2, $c4, $c6, $c8, $c10, $c12, $c14, $c15, $c17, $c18, $c20, $c22, $c24, $c26, $c28, $c30, $c32, $c34, $c36, $c38, $c40, $c42, $c43, $c44, $c46, $c48, $c50, $c52, $c54, $c56, $c58, $c60, $c62, $c64, $c66, $c67, $c68, $c70, $c72, $c74, $c76, $c78, $c80, $c82, $c84, $c86, $c88, $c89, $c90, $c92, $c94, $c96, $c98, $c100, $c102, $c104, $c105, $c106, $c108, $c110, $c112, $c113;
+        java.lang.IllegalArgumentException $r13, $r15;
+
+        r0 := @parameter0: java.lang.String;
+
+        b114 = 0;
+
+        if r0 != null goto label01;
+
+        return 0;
+
+     label01:
+        if r0 != "read" goto label02;
+
+        return 4;
+
+     label02:
+        if r0 != "write" goto label03;
+
+        return 2;
+
+     label03:
+        if r0 != "execute" goto label04;
+
+        return 1;
+
+     label04:
+        if r0 != "delete" goto label05;
+
+        return 8;
+
+     label05:
+        if r0 != "readlink" goto label06;
+
+        return 16;
+
+     label06:
+        $r1 = virtualinvoke r0.<java.lang.String: char[] toCharArray()>();
+
+        $i0 = lengthof $r1;
+
+        i115 = $i0 - 1;
+
+        if i115 >= 0 goto label07;
+
+        return 0;
+
+     label07:
+        $i121 = (int) -1;
+
+        if i115 == $i121 goto label53;
+
+     label08:
+        $i123 = (int) -1;
+
+        if i115 == $i123 goto label10;
+
+        $c113 = $r1[i115];
+
+        $i124 = (int) $c113;
+
+        if $i124 == 32 goto label09;
+
+        $i125 = (int) $c113;
+
+        if $i125 == 13 goto label09;
+
+        $i126 = (int) $c113;
+
+        if $i126 == 10 goto label09;
+
+        $i127 = (int) $c113;
+
+        if $i127 == 12 goto label09;
+
+        $i128 = (int) $c113;
+
+        if $i128 != 9 goto label10;
+
+     label09:
+        $i130 = (int) -1;
+
+        i115 = i115 + $i130;
+
+        goto label08;
+
+     label10:
+        if i115 < 3 goto label15;
+
+        $i99 = i115 - 3;
+
+        $c100 = $r1[$i99];
+
+        $i131 = (int) $c100;
+
+        if $i131 == 114 goto label11;
+
+        $i111 = i115 - 3;
+
+        $c112 = $r1[$i111];
+
+        $i132 = (int) $c112;
+
+        if $i132 != 82 goto label15;
+
+     label11:
+        $i101 = i115 - 2;
+
+        $c102 = $r1[$i101];
+
+        $i133 = (int) $c102;
+
+        if $i133 == 101 goto label12;
+
+        $i109 = i115 - 2;
+
+        $c110 = $r1[$i109];
+
+        $i134 = (int) $c110;
+
+        if $i134 != 69 goto label15;
+
+     label12:
+        $i103 = i115 - 1;
+
+        $c104 = $r1[$i103];
+
+        $i135 = (int) $c104;
+
+        if $i135 == 97 goto label13;
+
+        $i107 = i115 - 1;
+
+        $c108 = $r1[$i107];
+
+        $i136 = (int) $c108;
+
+        if $i136 != 65 goto label15;
+
+     label13:
+        $c105 = $r1[i115];
+
+        $i137 = (int) $c105;
+
+        if $i137 == 100 goto label14;
+
+        $c106 = $r1[i115];
+
+        $i138 = (int) $c106;
+
+        if $i138 != 68 goto label15;
+
+     label14:
+        b116 = 4;
+
+        b119 = 4;
+
+        b118 = 4;
+
+        b117 = 4;
+
+        b114 = b114 | 4;
+
+        goto label46;
+
+     label15:
+        if i115 < 4 goto label21;
+
+        $i81 = i115 - 4;
+
+        $c82 = $r1[$i81];
+
+        $i139 = (int) $c82;
+
+        if $i139 == 119 goto label16;
+
+        $i97 = i115 - 4;
+
+        $c98 = $r1[$i97];
+
+        $i140 = (int) $c98;
+
+        if $i140 != 87 goto label21;
+
+     label16:
+        $i83 = i115 - 3;
+
+        $c84 = $r1[$i83];
+
+        $i141 = (int) $c84;
+
+        if $i141 == 114 goto label17;
+
+        $i95 = i115 - 3;
+
+        $c96 = $r1[$i95];
+
+        $i142 = (int) $c96;
+
+        if $i142 != 82 goto label21;
+
+     label17:
+        $i85 = i115 - 2;
+
+        $c86 = $r1[$i85];
+
+        $i143 = (int) $c86;
+
+        if $i143 == 105 goto label18;
+
+        $i93 = i115 - 2;
+
+        $c94 = $r1[$i93];
+
+        $i144 = (int) $c94;
+
+        if $i144 != 73 goto label21;
+
+     label18:
+        $i87 = i115 - 1;
+
+        $c88 = $r1[$i87];
+
+        $i145 = (int) $c88;
+
+        if $i145 == 116 goto label19;
+
+        $i91 = i115 - 1;
+
+        $c92 = $r1[$i91];
+
+        $i146 = (int) $c92;
+
+        if $i146 != 84 goto label21;
+
+     label19:
+        $c89 = $r1[i115];
+
+        $i147 = (int) $c89;
+
+        if $i147 == 101 goto label20;
+
+        $c90 = $r1[i115];
+
+        $i148 = (int) $c90;
+
+        if $i148 != 69 goto label21;
+
+     label20:
+        b116 = 5;
+
+        b119 = 5;
+
+        b118 = 5;
+
+        b117 = 5;
+
+        b114 = b114 | 2;
+
+        goto label46;
+
+     label21:
+        if i115 < 6 goto label29;
+
+        $i55 = i115 - 6;
+
+        $c56 = $r1[$i55];
+
+        $i149 = (int) $c56;
+
+        if $i149 == 101 goto label22;
+
+        $i79 = i115 - 6;
+
+        $c80 = $r1[$i79];
+
+        $i150 = (int) $c80;
+
+        if $i150 != 69 goto label29;
+
+     label22:
+        $i57 = i115 - 5;
+
+        $c58 = $r1[$i57];
+
+        $i151 = (int) $c58;
+
+        if $i151 == 120 goto label23;
+
+        $i77 = i115 - 5;
+
+        $c78 = $r1[$i77];
+
+        $i152 = (int) $c78;
+
+        if $i152 != 88 goto label29;
+
+     label23:
+        $i59 = i115 - 4;
+
+        $c60 = $r1[$i59];
+
+        $i153 = (int) $c60;
+
+        if $i153 == 101 goto label24;
+
+        $i75 = i115 - 4;
+
+        $c76 = $r1[$i75];
+
+        $i154 = (int) $c76;
+
+        if $i154 != 69 goto label29;
+
+     label24:
+        $i61 = i115 - 3;
+
+        $c62 = $r1[$i61];
+
+        $i155 = (int) $c62;
+
+        if $i155 == 99 goto label25;
+
+        $i73 = i115 - 3;
+
+        $c74 = $r1[$i73];
+
+        $i156 = (int) $c74;
+
+        if $i156 != 67 goto label29;
+
+     label25:
+        $i63 = i115 - 2;
+
+        $c64 = $r1[$i63];
+
+        $i157 = (int) $c64;
+
+        if $i157 == 117 goto label26;
+
+        $i71 = i115 - 2;
+
+        $c72 = $r1[$i71];
+
+        $i158 = (int) $c72;
+
+        if $i158 != 85 goto label29;
+
+     label26:
+        $i65 = i115 - 1;
+
+        $c66 = $r1[$i65];
+
+        $i159 = (int) $c66;
+
+        if $i159 == 116 goto label27;
+
+        $i69 = i115 - 1;
+
+        $c70 = $r1[$i69];
+
+        $i160 = (int) $c70;
+
+        if $i160 != 84 goto label29;
+
+     label27:
+        $c67 = $r1[i115];
+
+        $i161 = (int) $c67;
+
+        if $i161 == 101 goto label28;
+
+        $c68 = $r1[i115];
+
+        $i162 = (int) $c68;
+
+        if $i162 != 69 goto label29;
+
+     label28:
+        b116 = 7;
+
+        b119 = 7;
+
+        b118 = 7;
+
+        b117 = 7;
+
+        b114 = b114 | 1;
+
+        goto label46;
+
+     label29:
+        if i115 < 5 goto label36;
+
+        $i33 = i115 - 5;
+
+        $c34 = $r1[$i33];
+
+        $i163 = (int) $c34;
+
+        if $i163 == 100 goto label30;
+
+        $i53 = i115 - 5;
+
+        $c54 = $r1[$i53];
+
+        $i164 = (int) $c54;
+
+        if $i164 != 68 goto label36;
+
+     label30:
+        $i35 = i115 - 4;
+
+        $c36 = $r1[$i35];
+
+        $i165 = (int) $c36;
+
+        if $i165 == 101 goto label31;
+
+        $i51 = i115 - 4;
+
+        $c52 = $r1[$i51];
+
+        $i166 = (int) $c52;
+
+        if $i166 != 69 goto label36;
+
+     label31:
+        $i37 = i115 - 3;
+
+        $c38 = $r1[$i37];
+
+        $i167 = (int) $c38;
+
+        if $i167 == 108 goto label32;
+
+        $i49 = i115 - 3;
+
+        $c50 = $r1[$i49];
+
+        $i168 = (int) $c50;
+
+        if $i168 != 76 goto label36;
+
+     label32:
+        $i39 = i115 - 2;
+
+        $c40 = $r1[$i39];
+
+        $i169 = (int) $c40;
+
+        if $i169 == 101 goto label33;
+
+        $i47 = i115 - 2;
+
+        $c48 = $r1[$i47];
+
+        $i170 = (int) $c48;
+
+        if $i170 != 69 goto label36;
+
+     label33:
+        $i41 = i115 - 1;
+
+        $c42 = $r1[$i41];
+
+        $i171 = (int) $c42;
+
+        if $i171 == 116 goto label34;
+
+        $i45 = i115 - 1;
+
+        $c46 = $r1[$i45];
+
+        $i172 = (int) $c46;
+
+        if $i172 != 84 goto label36;
+
+     label34:
+        $c43 = $r1[i115];
+
+        $i173 = (int) $c43;
+
+        if $i173 == 101 goto label35;
+
+        $c44 = $r1[i115];
+
+        $i174 = (int) $c44;
+
+        if $i174 != 69 goto label36;
+
+     label35:
+        b116 = 6;
+
+        b119 = 6;
+
+        b118 = 6;
+
+        b117 = 6;
+
+        b114 = b114 | 8;
+
+        goto label46;
+
+     label36:
+        if i115 < 7 goto label45;
+
+        $i1 = i115 - 7;
+
+        $c2 = $r1[$i1];
+
+        $i175 = (int) $c2;
+
+        if $i175 == 114 goto label37;
+
+        $i31 = i115 - 7;
+
+        $c32 = $r1[$i31];
+
+        $i176 = (int) $c32;
+
+        if $i176 != 82 goto label45;
+
+     label37:
+        $i3 = i115 - 6;
+
+        $c4 = $r1[$i3];
+
+        $i177 = (int) $c4;
+
+        if $i177 == 101 goto label38;
+
+        $i29 = i115 - 6;
+
+        $c30 = $r1[$i29];
+
+        $i178 = (int) $c30;
+
+        if $i178 != 69 goto label45;
+
+     label38:
+        $i5 = i115 - 5;
+
+        $c6 = $r1[$i5];
+
+        $i179 = (int) $c6;
+
+        if $i179 == 97 goto label39;
+
+        $i27 = i115 - 5;
+
+        $c28 = $r1[$i27];
+
+        $i180 = (int) $c28;
+
+        if $i180 != 65 goto label45;
+
+     label39:
+        $i7 = i115 - 4;
+
+        $c8 = $r1[$i7];
+
+        $i181 = (int) $c8;
+
+        if $i181 == 100 goto label40;
+
+        $i25 = i115 - 4;
+
+        $c26 = $r1[$i25];
+
+        $i182 = (int) $c26;
+
+        if $i182 != 68 goto label45;
+
+     label40:
+        $i9 = i115 - 3;
+
+        $c10 = $r1[$i9];
+
+        $i183 = (int) $c10;
+
+        if $i183 == 108 goto label41;
+
+        $i23 = i115 - 3;
+
+        $c24 = $r1[$i23];
+
+        $i184 = (int) $c24;
+
+        if $i184 != 76 goto label45;
+
+     label41:
+        $i11 = i115 - 2;
+
+        $c12 = $r1[$i11];
+
+        $i185 = (int) $c12;
+
+        if $i185 == 105 goto label42;
+
+        $i21 = i115 - 2;
+
+        $c22 = $r1[$i21];
+
+        $i186 = (int) $c22;
+
+        if $i186 != 73 goto label45;
+
+     label42:
+        $i13 = i115 - 1;
+
+        $c14 = $r1[$i13];
+
+        $i187 = (int) $c14;
+
+        if $i187 == 110 goto label43;
+
+        $i19 = i115 - 1;
+
+        $c20 = $r1[$i19];
+
+        $i188 = (int) $c20;
+
+        if $i188 != 78 goto label45;
+
+     label43:
+        $c15 = $r1[i115];
+
+        $i189 = (int) $c15;
+
+        if $i189 == 107 goto label44;
+
+        $c18 = $r1[i115];
+
+        $i190 = (int) $c18;
+
+        if $i190 != 75 goto label45;
+
+     label44:
+        b116 = 8;
+
+        b119 = 8;
+
+        b118 = 8;
+
+        b117 = 8;
+
+        b114 = b114 | 16;
+
+        goto label46;
+
+     label45:
+        $r13 = new java.lang.IllegalArgumentException;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("invalid permission: ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r11);
+
+        throw $r13;
+
+     label46:
+        z0 = 0;
+
+     label47:
+        if i115 < b117 goto label52;
+
+        if z0 != 0 goto label52;
+
+        $i16 = i115 - b119;
+
+        $c17 = $r1[$i16];
+
+        $i191 = (int) $c17;
+
+        lookupswitch($i191)
+        {
+            case 9: goto label49;
+            case 10: goto label49;
+            case 12: goto label49;
+            case 13: goto label49;
+            case 32: goto label49;
+            case 44: goto label48;
+            default: goto label50;
+        };
+
+     label48:
+        z0 = 1;
+
+        goto label51;
+
+     label49:
+        goto label51;
+
+     label50:
+        $r15 = new java.lang.IllegalArgumentException;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("invalid permission: ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r15.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r6);
+
+        throw $r15;
+
+     label51:
+        $i193 = (int) -1;
+
+        i115 = i115 + $i193;
+
+        goto label47;
+
+     label52:
+        i115 = i115 - b118;
+
+        goto label07;
+
+     label53:
+        return b114;
+    }
+
+    int getMask()
+    {
+        int $i0;
+        java.io.FilePermission r0;
+
+        r0 := @this: java.io.FilePermission;
+
+        $i0 = r0.<java.io.FilePermission: int mask>;
+
+        return $i0;
+    }
+
+    private static java.lang.String getActions(int)
+    {
+        int i0, $i1, $i2, $i3, $i4, $i5;
+        java.lang.StringBuilder $r0;
+        java.lang.String $r1;
+        boolean z0, z1, z2, z3, z4;
+
+        i0 := @parameter0: int;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        z0 = 0;
+
+        z4 = 0;
+
+        z3 = 0;
+
+        z2 = 0;
+
+        z1 = 0;
+
+        $i1 = i0 & 4;
+
+        if $i1 != 4 goto label01;
+
+        z0 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+        z2 = 1;
+
+        z1 = 1;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("read");
+
+     label01:
+        $i2 = i0 & 2;
+
+        if $i2 != 2 goto label04;
+
+        if z2 == 0 goto label02;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        goto label03;
+
+     label02:
+        z0 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+        z1 = 1;
+
+     label03:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("write");
+
+     label04:
+        $i3 = i0 & 1;
+
+        if $i3 != 1 goto label07;
+
+        if z3 == 0 goto label05;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        goto label06;
+
+     label05:
+        z0 = 1;
+
+        z4 = 1;
+
+        z1 = 1;
+
+     label06:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("execute");
+
+     label07:
+        $i4 = i0 & 8;
+
+        if $i4 != 8 goto label10;
+
+        if z1 == 0 goto label08;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        goto label09;
+
+     label08:
+        z0 = 1;
+
+        z4 = 1;
+
+     label09:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("delete");
+
+     label10:
+        $i5 = i0 & 16;
+
+        if $i5 != 16 goto label12;
+
+        if z4 == 0 goto label11;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        goto label11;
+
+     label11:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("readlink");
+
+     label12:
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r1;
+    }
+
+    public java.lang.String getActions()
+    {
+        java.io.FilePermission r0;
+        int $i0;
+        java.lang.String $r1, $r2, $r3;
+
+        r0 := @this: java.io.FilePermission;
+
+        $r1 = r0.<java.io.FilePermission: java.lang.String actions>;
+
+        if $r1 != null goto label1;
+
+        $i0 = r0.<java.io.FilePermission: int mask>;
+
+        $r3 = staticinvoke <java.io.FilePermission: java.lang.String getActions(int)>($i0);
+
+        r0.<java.io.FilePermission: java.lang.String actions> = $r3;
+
+     label1:
+        $r2 = r0.<java.io.FilePermission: java.lang.String actions>;
+
+        return $r2;
+    }
+
+    public java.security.PermissionCollection newPermissionCollection()
+    {
+        java.io.FilePermissionCollection $r0;
+        java.io.FilePermission r1;
+
+        r1 := @this: java.io.FilePermission;
+
+        $r0 = new java.io.FilePermissionCollection;
+
+        specialinvoke $r0.<java.io.FilePermissionCollection: void <init>()>();
+
+        return $r0;
+    }
+
+    private void writeObject(java.io.ObjectOutputStream) throws java.io.IOException
+    {
+        java.io.ObjectOutputStream r2;
+        java.lang.String $r1;
+        java.io.FilePermission r0;
+
+        r0 := @this: java.io.FilePermission;
+
+        r2 := @parameter0: java.io.ObjectOutputStream;
+
+        $r1 = r0.<java.io.FilePermission: java.lang.String actions>;
+
+        if $r1 != null goto label1;
+
+        virtualinvoke r0.<java.io.FilePermission: java.lang.String getActions()>();
+
+     label1:
+        virtualinvoke r2.<java.io.ObjectOutputStream: void defaultWriteObject()>();
+
+        return;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.FilePermission r1;
+        java.io.ObjectInputStream r0;
+        int $i0;
+        java.lang.String $r2;
+
+        r1 := @this: java.io.FilePermission;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        $r2 = r1.<java.io.FilePermission: java.lang.String actions>;
+
+        $i0 = staticinvoke <java.io.FilePermission: int getMask(java.lang.String)>($r2);
+
+        specialinvoke r1.<java.io.FilePermission: void init(int)>($i0);
+
+        return;
+    }
+
+    static java.lang.String access$000(java.io.FilePermission)
+    {
+        java.lang.String $r1;
+        java.io.FilePermission r0;
+
+        r0 := @parameter0: java.io.FilePermission;
+
+        $r1 = r0.<java.io.FilePermission: java.lang.String cpath>;
+
+        return $r1;
+    }
+
+    public static void <clinit>()
+    {
+        <java.io.FilePermission: long serialVersionUID> = 7930732926638008763L;
+
+        <java.io.FilePermission: char WILD_CHAR> = 42;
+
+        <java.io.FilePermission: char RECURSIVE_CHAR> = 45;
+
+        <java.io.FilePermission: int NONE> = 0;
+
+        <java.io.FilePermission: int ALL> = 31;
+
+        <java.io.FilePermission: int READLINK> = 16;
+
+        <java.io.FilePermission: int DELETE> = 8;
+
+        <java.io.FilePermission: int READ> = 4;
+
+        <java.io.FilePermission: int WRITE> = 2;
+
+        <java.io.FilePermission: int EXECUTE> = 1;
+
+        return;
+    }
+}

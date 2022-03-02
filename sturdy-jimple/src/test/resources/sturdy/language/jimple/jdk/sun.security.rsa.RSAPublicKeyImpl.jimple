@@ -1,0 +1,461 @@
+public final class sun.security.rsa.RSAPublicKeyImpl extends sun.security.x509.X509Key implements java.security.interfaces.RSAPublicKey
+{
+    private static final long serialVersionUID;
+    private static final java.math.BigInteger THREE;
+    private java.math.BigInteger n;
+    private java.math.BigInteger e;
+    private java.security.spec.AlgorithmParameterSpec keyParams;
+
+    public static java.security.interfaces.RSAPublicKey newKey(byte[]) throws java.security.InvalidKeyException
+    {
+        byte[] r1;
+        sun.security.rsa.RSAPublicKeyImpl $r0;
+
+        r1 := @parameter0: byte[];
+
+        $r0 = new sun.security.rsa.RSAPublicKeyImpl;
+
+        specialinvoke $r0.<sun.security.rsa.RSAPublicKeyImpl: void <init>(byte[])>(r1);
+
+        return $r0;
+    }
+
+    public static java.security.interfaces.RSAPublicKey newKey(sun.security.rsa.RSAUtil$KeyType, java.security.spec.AlgorithmParameterSpec, java.math.BigInteger, java.math.BigInteger) throws java.security.InvalidKeyException
+    {
+        sun.security.rsa.RSAPublicKeyImpl $r3;
+        java.math.BigInteger r4, r5;
+        java.security.spec.AlgorithmParameterSpec r1;
+        sun.security.rsa.RSAUtil$KeyType r0;
+        sun.security.x509.AlgorithmId $r2;
+
+        r0 := @parameter0: sun.security.rsa.RSAUtil$KeyType;
+
+        r1 := @parameter1: java.security.spec.AlgorithmParameterSpec;
+
+        r4 := @parameter2: java.math.BigInteger;
+
+        r5 := @parameter3: java.math.BigInteger;
+
+        $r2 = staticinvoke <sun.security.rsa.RSAUtil: sun.security.x509.AlgorithmId createAlgorithmId(sun.security.rsa.RSAUtil$KeyType,java.security.spec.AlgorithmParameterSpec)>(r0, r1);
+
+        $r3 = new sun.security.rsa.RSAPublicKeyImpl;
+
+        specialinvoke $r3.<sun.security.rsa.RSAPublicKeyImpl: void <init>(sun.security.x509.AlgorithmId,java.math.BigInteger,java.math.BigInteger)>($r2, r4, r5);
+
+        return $r3;
+    }
+
+    void <init>(sun.security.x509.AlgorithmId, java.math.BigInteger, java.math.BigInteger) throws java.security.InvalidKeyException
+    {
+        sun.security.util.DerValue $r6;
+        byte[] $r7, $r8;
+        sun.security.rsa.RSAPublicKeyImpl r0;
+        java.io.IOException $r10;
+        sun.security.util.BitArray $r9;
+        sun.security.util.DerOutputStream $r5;
+        int $i0, $i1, $i2;
+        java.math.BigInteger r1, r2;
+        java.security.InvalidKeyException $r11;
+        java.security.spec.AlgorithmParameterSpec $r4;
+        sun.security.x509.AlgorithmId r3;
+
+        r0 := @this: sun.security.rsa.RSAPublicKeyImpl;
+
+        r3 := @parameter0: sun.security.x509.AlgorithmId;
+
+        r1 := @parameter1: java.math.BigInteger;
+
+        r2 := @parameter2: java.math.BigInteger;
+
+        specialinvoke r0.<sun.security.x509.X509Key: void <init>()>();
+
+        $i0 = virtualinvoke r1.<java.math.BigInteger: int bitLength()>();
+
+        staticinvoke <sun.security.rsa.RSAKeyFactory: void checkRSAProviderKeyLengths(int,java.math.BigInteger)>($i0, r2);
+
+        staticinvoke <sun.security.rsa.RSAPublicKeyImpl: void checkExponentRange(java.math.BigInteger,java.math.BigInteger)>(r1, r2);
+
+        r0.<sun.security.rsa.RSAPublicKeyImpl: java.math.BigInteger n> = r1;
+
+        r0.<sun.security.rsa.RSAPublicKeyImpl: java.math.BigInteger e> = r2;
+
+        $r4 = staticinvoke <sun.security.rsa.RSAUtil: java.security.spec.AlgorithmParameterSpec getParamSpec(sun.security.x509.AlgorithmId)>(r3);
+
+        r0.<sun.security.rsa.RSAPublicKeyImpl: java.security.spec.AlgorithmParameterSpec keyParams> = $r4;
+
+        r0.<sun.security.rsa.RSAPublicKeyImpl: sun.security.x509.AlgorithmId algid> = r3;
+
+     label1:
+        $r5 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r5.<sun.security.util.DerOutputStream: void <init>()>();
+
+        virtualinvoke $r5.<sun.security.util.DerOutputStream: void putInteger(java.math.BigInteger)>(r1);
+
+        virtualinvoke $r5.<sun.security.util.DerOutputStream: void putInteger(java.math.BigInteger)>(r2);
+
+        $r6 = new sun.security.util.DerValue;
+
+        $r7 = virtualinvoke $r5.<sun.security.util.DerOutputStream: byte[] toByteArray()>();
+
+        specialinvoke $r6.<sun.security.util.DerValue: void <init>(byte,byte[])>(48, $r7);
+
+        $r8 = virtualinvoke $r6.<sun.security.util.DerValue: byte[] toByteArray()>();
+
+        $r9 = new sun.security.util.BitArray;
+
+        $i1 = lengthof $r8;
+
+        $i2 = $i1 * 8;
+
+        specialinvoke $r9.<sun.security.util.BitArray: void <init>(int,byte[])>($i2, $r8);
+
+        virtualinvoke r0.<sun.security.rsa.RSAPublicKeyImpl: void setKey(sun.security.util.BitArray)>($r9);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r10 := @caughtexception;
+
+        $r11 = new java.security.InvalidKeyException;
+
+        specialinvoke $r11.<java.security.InvalidKeyException: void <init>(java.lang.Throwable)>($r10);
+
+        throw $r11;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    void <init>(byte[]) throws java.security.InvalidKeyException
+    {
+        byte[] r1;
+        java.security.ProviderException $r9;
+        sun.security.rsa.RSAPublicKeyImpl r0;
+        int $i0, $i1;
+        java.security.InvalidKeyException $r2, $r10;
+        java.math.BigInteger $r3, $r4, $r5, $r6;
+        java.security.spec.AlgorithmParameterSpec $r8;
+        sun.security.x509.AlgorithmId $r7;
+
+        r0 := @this: sun.security.rsa.RSAPublicKeyImpl;
+
+        r1 := @parameter0: byte[];
+
+        specialinvoke r0.<sun.security.x509.X509Key: void <init>()>();
+
+        if r1 == null goto label1;
+
+        $i0 = lengthof r1;
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        $r2 = new java.security.InvalidKeyException;
+
+        specialinvoke $r2.<java.security.InvalidKeyException: void <init>(java.lang.String)>("Missing key encoding");
+
+        throw $r2;
+
+     label2:
+        virtualinvoke r0.<sun.security.rsa.RSAPublicKeyImpl: void decode(byte[])>(r1);
+
+        $r3 = r0.<sun.security.rsa.RSAPublicKeyImpl: java.math.BigInteger n>;
+
+        $i1 = virtualinvoke $r3.<java.math.BigInteger: int bitLength()>();
+
+        $r4 = r0.<sun.security.rsa.RSAPublicKeyImpl: java.math.BigInteger e>;
+
+        staticinvoke <sun.security.rsa.RSAKeyFactory: void checkRSAProviderKeyLengths(int,java.math.BigInteger)>($i1, $r4);
+
+        $r6 = r0.<sun.security.rsa.RSAPublicKeyImpl: java.math.BigInteger n>;
+
+        $r5 = r0.<sun.security.rsa.RSAPublicKeyImpl: java.math.BigInteger e>;
+
+        staticinvoke <sun.security.rsa.RSAPublicKeyImpl: void checkExponentRange(java.math.BigInteger,java.math.BigInteger)>($r6, $r5);
+
+     label3:
+        $r7 = r0.<sun.security.rsa.RSAPublicKeyImpl: sun.security.x509.AlgorithmId algid>;
+
+        $r8 = staticinvoke <sun.security.rsa.RSAUtil: java.security.spec.AlgorithmParameterSpec getParamSpec(sun.security.x509.AlgorithmId)>($r7);
+
+        r0.<sun.security.rsa.RSAPublicKeyImpl: java.security.spec.AlgorithmParameterSpec keyParams> = $r8;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r9 := @caughtexception;
+
+        $r10 = new java.security.InvalidKeyException;
+
+        specialinvoke $r10.<java.security.InvalidKeyException: void <init>(java.lang.Throwable)>($r9);
+
+        throw $r10;
+
+     label6:
+        return;
+
+        catch java.security.ProviderException from label3 to label4 with label5;
+    }
+
+    static void checkExponentRange(java.math.BigInteger, java.math.BigInteger) throws java.security.InvalidKeyException
+    {
+        int $i0, $i1;
+        java.math.BigInteger r0, r1, $r2;
+        java.security.InvalidKeyException $r3, $r4;
+
+        r1 := @parameter0: java.math.BigInteger;
+
+        r0 := @parameter1: java.math.BigInteger;
+
+        $i0 = virtualinvoke r0.<java.math.BigInteger: int compareTo(java.math.BigInteger)>(r1);
+
+        if $i0 < 0 goto label1;
+
+        $r4 = new java.security.InvalidKeyException;
+
+        specialinvoke $r4.<java.security.InvalidKeyException: void <init>(java.lang.String)>("exponent is larger than modulus");
+
+        throw $r4;
+
+     label1:
+        $r2 = <sun.security.rsa.RSAPublicKeyImpl: java.math.BigInteger THREE>;
+
+        $i1 = virtualinvoke r0.<java.math.BigInteger: int compareTo(java.math.BigInteger)>($r2);
+
+        if $i1 >= 0 goto label2;
+
+        $r3 = new java.security.InvalidKeyException;
+
+        specialinvoke $r3.<java.security.InvalidKeyException: void <init>(java.lang.String)>("exponent is smaller than 3");
+
+        throw $r3;
+
+     label2:
+        return;
+    }
+
+    public java.lang.String getAlgorithm()
+    {
+        sun.security.rsa.RSAPublicKeyImpl r0;
+        java.lang.String $r2;
+        sun.security.x509.AlgorithmId $r1;
+
+        r0 := @this: sun.security.rsa.RSAPublicKeyImpl;
+
+        $r1 = r0.<sun.security.rsa.RSAPublicKeyImpl: sun.security.x509.AlgorithmId algid>;
+
+        $r2 = virtualinvoke $r1.<sun.security.x509.AlgorithmId: java.lang.String getName()>();
+
+        return $r2;
+    }
+
+    public java.math.BigInteger getModulus()
+    {
+        sun.security.rsa.RSAPublicKeyImpl r0;
+        java.math.BigInteger $r1;
+
+        r0 := @this: sun.security.rsa.RSAPublicKeyImpl;
+
+        $r1 = r0.<sun.security.rsa.RSAPublicKeyImpl: java.math.BigInteger n>;
+
+        return $r1;
+    }
+
+    public java.math.BigInteger getPublicExponent()
+    {
+        sun.security.rsa.RSAPublicKeyImpl r0;
+        java.math.BigInteger $r1;
+
+        r0 := @this: sun.security.rsa.RSAPublicKeyImpl;
+
+        $r1 = r0.<sun.security.rsa.RSAPublicKeyImpl: java.math.BigInteger e>;
+
+        return $r1;
+    }
+
+    public java.security.spec.AlgorithmParameterSpec getParams()
+    {
+        sun.security.rsa.RSAPublicKeyImpl r0;
+        java.security.spec.AlgorithmParameterSpec $r1;
+
+        r0 := @this: sun.security.rsa.RSAPublicKeyImpl;
+
+        $r1 = r0.<sun.security.rsa.RSAPublicKeyImpl: java.security.spec.AlgorithmParameterSpec keyParams>;
+
+        return $r1;
+    }
+
+    protected void parseKeyBits() throws java.security.InvalidKeyException
+    {
+        byte[] $r3;
+        sun.security.util.DerInputStream r5, $r8, $r13;
+        byte $b0;
+        int $i1, $i2;
+        java.math.BigInteger $r6, $r7;
+        sun.security.util.DerValue $r4;
+        sun.security.rsa.RSAPublicKeyImpl r1;
+        java.io.IOException $r11, $r14, $r15;
+        sun.security.util.BitArray $r2;
+        java.security.InvalidKeyException $r16;
+
+        r1 := @this: sun.security.rsa.RSAPublicKeyImpl;
+
+     label1:
+        $r13 = new sun.security.util.DerInputStream;
+
+        $r2 = virtualinvoke r1.<sun.security.rsa.RSAPublicKeyImpl: sun.security.util.BitArray getKey()>();
+
+        $r3 = virtualinvoke $r2.<sun.security.util.BitArray: byte[] toByteArray()>();
+
+        specialinvoke $r13.<sun.security.util.DerInputStream: void <init>(byte[])>($r3);
+
+        $r4 = virtualinvoke $r13.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+        $b0 = $r4.<sun.security.util.DerValue: byte tag>;
+
+        $i2 = (int) $b0;
+
+        if $i2 == 48 goto label2;
+
+        $r14 = new java.io.IOException;
+
+        specialinvoke $r14.<java.io.IOException: void <init>(java.lang.String)>("Not a SEQUENCE");
+
+        throw $r14;
+
+     label2:
+        r5 = $r4.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $r6 = virtualinvoke r5.<sun.security.util.DerInputStream: java.math.BigInteger getPositiveBigInteger()>();
+
+        r1.<sun.security.rsa.RSAPublicKeyImpl: java.math.BigInteger n> = $r6;
+
+        $r7 = virtualinvoke r5.<sun.security.util.DerInputStream: java.math.BigInteger getPositiveBigInteger()>();
+
+        r1.<sun.security.rsa.RSAPublicKeyImpl: java.math.BigInteger e> = $r7;
+
+        $r8 = $r4.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $i1 = virtualinvoke $r8.<sun.security.util.DerInputStream: int available()>();
+
+        if $i1 == 0 goto label3;
+
+        $r15 = new java.io.IOException;
+
+        specialinvoke $r15.<java.io.IOException: void <init>(java.lang.String)>("Extra data available");
+
+        throw $r15;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r11 := @caughtexception;
+
+        $r16 = new java.security.InvalidKeyException;
+
+        specialinvoke $r16.<java.security.InvalidKeyException: void <init>(java.lang.String,java.lang.Throwable)>("Invalid RSA public key", $r11);
+
+        throw $r16;
+
+     label5:
+        return;
+
+        catch java.io.IOException from label1 to label3 with label4;
+    }
+
+    public java.lang.String toString()
+    {
+        int $i0;
+        java.math.BigInteger $r6, $r12, $r15;
+        java.lang.String $r3, $r17;
+        java.security.spec.AlgorithmParameterSpec $r9;
+        sun.security.rsa.RSAPublicKeyImpl r2;
+        java.lang.StringBuilder $r0, $r1, $r4, $r5, $r7, $r8, $r10, $r11, $r13, $r14, $r16;
+
+        r2 := @this: sun.security.rsa.RSAPublicKeyImpl;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Sun ");
+
+        $r3 = virtualinvoke r2.<sun.security.rsa.RSAPublicKeyImpl: java.lang.String getAlgorithm()>();
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" public key, ");
+
+        $r6 = r2.<sun.security.rsa.RSAPublicKeyImpl: java.math.BigInteger n>;
+
+        $i0 = virtualinvoke $r6.<java.math.BigInteger: int bitLength()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" bits\n  params: ");
+
+        $r9 = r2.<sun.security.rsa.RSAPublicKeyImpl: java.security.spec.AlgorithmParameterSpec keyParams>;
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n  modulus: ");
+
+        $r12 = r2.<sun.security.rsa.RSAPublicKeyImpl: java.math.BigInteger n>;
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n  public exponent: ");
+
+        $r15 = r2.<sun.security.rsa.RSAPublicKeyImpl: java.math.BigInteger e>;
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r17;
+    }
+
+    protected java.lang.Object writeReplace() throws java.io.ObjectStreamException
+    {
+        byte[] $r5;
+        java.security.KeyRep$Type $r2;
+        java.security.KeyRep $r0;
+        sun.security.rsa.RSAPublicKeyImpl r1;
+        java.lang.String $r3, $r4;
+
+        r1 := @this: sun.security.rsa.RSAPublicKeyImpl;
+
+        $r0 = new java.security.KeyRep;
+
+        $r2 = <java.security.KeyRep$Type: java.security.KeyRep$Type PUBLIC>;
+
+        $r3 = virtualinvoke r1.<sun.security.rsa.RSAPublicKeyImpl: java.lang.String getAlgorithm()>();
+
+        $r4 = virtualinvoke r1.<sun.security.rsa.RSAPublicKeyImpl: java.lang.String getFormat()>();
+
+        $r5 = virtualinvoke r1.<sun.security.rsa.RSAPublicKeyImpl: byte[] getEncoded()>();
+
+        specialinvoke $r0.<java.security.KeyRep: void <init>(java.security.KeyRep$Type,java.lang.String,java.lang.String,byte[])>($r2, $r3, $r4, $r5);
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.math.BigInteger $r0;
+
+        <sun.security.rsa.RSAPublicKeyImpl: long serialVersionUID> = 2644735423591199609L;
+
+        $r0 = staticinvoke <java.math.BigInteger: java.math.BigInteger valueOf(long)>(3L);
+
+        <sun.security.rsa.RSAPublicKeyImpl: java.math.BigInteger THREE> = $r0;
+
+        return;
+    }
+}

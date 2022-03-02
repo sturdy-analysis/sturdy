@@ -1,0 +1,1112 @@
+public class sun.security.rsa.RSAKeyFactory extends java.security.KeyFactorySpi
+{
+    private static final java.lang.Class RSA_PUB_KEYSPEC_CLS;
+    private static final java.lang.Class RSA_PRIV_KEYSPEC_CLS;
+    private static final java.lang.Class RSA_PRIVCRT_KEYSPEC_CLS;
+    private static final java.lang.Class X509_KEYSPEC_CLS;
+    private static final java.lang.Class PKCS8_KEYSPEC_CLS;
+    public static final int MIN_MODLEN;
+    public static final int MAX_MODLEN;
+    private final sun.security.rsa.RSAUtil$KeyType type;
+    public static final int MAX_MODLEN_RESTRICT_EXP;
+    public static final int MAX_RESTRICTED_EXPLEN;
+    private static final boolean restrictExpLen;
+
+    static sun.security.rsa.RSAKeyFactory getInstance(sun.security.rsa.RSAUtil$KeyType)
+    {
+        sun.security.rsa.RSAKeyFactory $r0;
+        sun.security.rsa.RSAUtil$KeyType r1;
+
+        r1 := @parameter0: sun.security.rsa.RSAUtil$KeyType;
+
+        $r0 = new sun.security.rsa.RSAKeyFactory;
+
+        specialinvoke $r0.<sun.security.rsa.RSAKeyFactory: void <init>(sun.security.rsa.RSAUtil$KeyType)>(r1);
+
+        return $r0;
+    }
+
+    private static void checkKeyAlgo(java.security.Key, java.lang.String) throws java.security.InvalidKeyException
+    {
+        java.security.Key r0;
+        java.security.InvalidKeyException $r2;
+        java.lang.StringBuilder $r3, $r4, $r6, $r7, $r8;
+        java.lang.String $r1, r5, $r9;
+        boolean $z0;
+
+        r0 := @parameter0: java.security.Key;
+
+        r5 := @parameter1: java.lang.String;
+
+        $r1 = interfaceinvoke r0.<java.security.Key: java.lang.String getAlgorithm()>();
+
+        if $r1 == null goto label1;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r5);
+
+        if $z0 != 0 goto label2;
+
+     label1:
+        $r2 = new java.security.InvalidKeyException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected a ");
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" key, but got ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.security.InvalidKeyException: void <init>(java.lang.String)>($r9);
+
+        throw $r2;
+
+     label2:
+        return;
+    }
+
+    public static java.security.interfaces.RSAKey toRSAKey(java.security.Key) throws java.security.InvalidKeyException
+    {
+        java.security.interfaces.RSAKey $r5, $r9;
+        java.security.ProviderException $r7;
+        sun.security.rsa.RSAUtil$KeyType $r2;
+        java.security.Key r0, $r4;
+        sun.security.rsa.RSAKeyFactory $r3;
+        java.security.InvalidKeyException $r6, $r8;
+        java.lang.String $r1;
+        boolean $z0, $z1, $z2;
+
+        r0 := @parameter0: java.security.Key;
+
+        if r0 != null goto label1;
+
+        $r6 = new java.security.InvalidKeyException;
+
+        specialinvoke $r6.<java.security.InvalidKeyException: void <init>(java.lang.String)>("Key must not be null");
+
+        throw $r6;
+
+     label1:
+        $z0 = r0 instanceof sun.security.rsa.RSAPrivateKeyImpl;
+
+        if $z0 != 0 goto label2;
+
+        $z1 = r0 instanceof sun.security.rsa.RSAPrivateCrtKeyImpl;
+
+        if $z1 != 0 goto label2;
+
+        $z2 = r0 instanceof sun.security.rsa.RSAPublicKeyImpl;
+
+        if $z2 == 0 goto label3;
+
+     label2:
+        $r9 = (java.security.interfaces.RSAKey) r0;
+
+        return $r9;
+
+     label3:
+        $r1 = interfaceinvoke r0.<java.security.Key: java.lang.String getAlgorithm()>();
+
+        $r2 = staticinvoke <sun.security.rsa.RSAUtil$KeyType: sun.security.rsa.RSAUtil$KeyType lookup(java.lang.String)>($r1);
+
+        $r3 = staticinvoke <sun.security.rsa.RSAKeyFactory: sun.security.rsa.RSAKeyFactory getInstance(sun.security.rsa.RSAUtil$KeyType)>($r2);
+
+        $r4 = virtualinvoke $r3.<sun.security.rsa.RSAKeyFactory: java.security.Key engineTranslateKey(java.security.Key)>(r0);
+
+        $r5 = (java.security.interfaces.RSAKey) $r4;
+
+     label4:
+        return $r5;
+
+     label5:
+        $r7 := @caughtexception;
+
+        $r8 = new java.security.InvalidKeyException;
+
+        specialinvoke $r8.<java.security.InvalidKeyException: void <init>(java.lang.Throwable)>($r7);
+
+        throw $r8;
+
+        catch java.security.ProviderException from label3 to label4 with label5;
+    }
+
+    static void checkRSAProviderKeyLengths(int, java.math.BigInteger) throws java.security.InvalidKeyException
+    {
+        int i0, $i1, $i2, $i4;
+        java.math.BigInteger r0;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: java.math.BigInteger;
+
+        $i1 = i0 + 7;
+
+        $i4 = (int) -8;
+
+        $i2 = $i1 & $i4;
+
+        staticinvoke <sun.security.rsa.RSAKeyFactory: void checkKeyLengths(int,java.math.BigInteger,int,int)>($i2, r0, 512, 2147483647);
+
+        return;
+    }
+
+    public static void checkKeyLengths(int, java.math.BigInteger, int, int) throws java.security.InvalidKeyException
+    {
+        int i0, i1, $i2, i3, $i4;
+        java.math.BigInteger r0;
+        java.lang.String $r7, $r13;
+        boolean $z0;
+        java.security.InvalidKeyException $r1, $r2, $r8;
+        java.lang.StringBuilder $r3, $r4, $r5, $r6, $r9, $r10, $r11, $r12;
+
+        i3 := @parameter0: int;
+
+        r0 := @parameter1: java.math.BigInteger;
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        if i0 <= 0 goto label1;
+
+        if i3 >= i0 goto label1;
+
+        $r8 = new java.security.InvalidKeyException;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("RSA keys must be at least ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" bits long");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<java.security.InvalidKeyException: void <init>(java.lang.String)>($r13);
+
+        throw $r8;
+
+     label1:
+        $i2 = staticinvoke <java.lang.Math: int min(int,int)>(i1, 16384);
+
+        if i3 <= $i2 goto label2;
+
+        $r2 = new java.security.InvalidKeyException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("RSA keys must be no longer than ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" bits");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.security.InvalidKeyException: void <init>(java.lang.String)>($r7);
+
+        throw $r2;
+
+     label2:
+        $z0 = <sun.security.rsa.RSAKeyFactory: boolean restrictExpLen>;
+
+        if $z0 == 0 goto label3;
+
+        if r0 == null goto label3;
+
+        if i3 <= 3072 goto label3;
+
+        $i4 = virtualinvoke r0.<java.math.BigInteger: int bitLength()>();
+
+        if $i4 <= 64 goto label3;
+
+        $r1 = new java.security.InvalidKeyException;
+
+        specialinvoke $r1.<java.security.InvalidKeyException: void <init>(java.lang.String)>("RSA exponents can be no longer than 64 bits  if modulus is greater than 3072 bits");
+
+        throw $r1;
+
+     label3:
+        return;
+    }
+
+    private void <init>()
+    {
+        sun.security.rsa.RSAKeyFactory r0;
+        sun.security.rsa.RSAUtil$KeyType $r1;
+
+        r0 := @this: sun.security.rsa.RSAKeyFactory;
+
+        specialinvoke r0.<java.security.KeyFactorySpi: void <init>()>();
+
+        $r1 = <sun.security.rsa.RSAUtil$KeyType: sun.security.rsa.RSAUtil$KeyType RSA>;
+
+        r0.<sun.security.rsa.RSAKeyFactory: sun.security.rsa.RSAUtil$KeyType type> = $r1;
+
+        return;
+    }
+
+    public void <init>(sun.security.rsa.RSAUtil$KeyType)
+    {
+        sun.security.rsa.RSAKeyFactory r0;
+        sun.security.rsa.RSAUtil$KeyType r1;
+
+        r0 := @this: sun.security.rsa.RSAKeyFactory;
+
+        r1 := @parameter0: sun.security.rsa.RSAUtil$KeyType;
+
+        specialinvoke r0.<java.security.KeyFactorySpi: void <init>()>();
+
+        r0.<sun.security.rsa.RSAKeyFactory: sun.security.rsa.RSAUtil$KeyType type> = r1;
+
+        return;
+    }
+
+    protected java.security.Key engineTranslateKey(java.security.Key) throws java.security.InvalidKeyException
+    {
+        java.security.PublicKey $r7, $r8;
+        sun.security.rsa.RSAUtil$KeyType $r2;
+        java.security.Key r0;
+        java.security.PrivateKey $r5, $r6;
+        sun.security.rsa.RSAKeyFactory r1;
+        java.security.InvalidKeyException $r4, $r9;
+        java.lang.String $r3;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        r1 := @this: sun.security.rsa.RSAKeyFactory;
+
+        r0 := @parameter0: java.security.Key;
+
+        if r0 != null goto label1;
+
+        $r9 = new java.security.InvalidKeyException;
+
+        specialinvoke $r9.<java.security.InvalidKeyException: void <init>(java.lang.String)>("Key must not be null");
+
+        throw $r9;
+
+     label1:
+        $r2 = r1.<sun.security.rsa.RSAKeyFactory: sun.security.rsa.RSAUtil$KeyType type>;
+
+        $r3 = virtualinvoke $r2.<sun.security.rsa.RSAUtil$KeyType: java.lang.String keyAlgo()>();
+
+        staticinvoke <sun.security.rsa.RSAKeyFactory: void checkKeyAlgo(java.security.Key,java.lang.String)>(r0, $r3);
+
+        $z0 = r0 instanceof sun.security.rsa.RSAPrivateKeyImpl;
+
+        if $z0 != 0 goto label2;
+
+        $z1 = r0 instanceof sun.security.rsa.RSAPrivateCrtKeyImpl;
+
+        if $z1 != 0 goto label2;
+
+        $z2 = r0 instanceof sun.security.rsa.RSAPublicKeyImpl;
+
+        if $z2 == 0 goto label3;
+
+     label2:
+        return r0;
+
+     label3:
+        $z3 = r0 instanceof java.security.PublicKey;
+
+        if $z3 == 0 goto label4;
+
+        $r7 = (java.security.PublicKey) r0;
+
+        $r8 = specialinvoke r1.<sun.security.rsa.RSAKeyFactory: java.security.PublicKey translatePublicKey(java.security.PublicKey)>($r7);
+
+        return $r8;
+
+     label4:
+        $z4 = r0 instanceof java.security.PrivateKey;
+
+        if $z4 == 0 goto label5;
+
+        $r5 = (java.security.PrivateKey) r0;
+
+        $r6 = specialinvoke r1.<sun.security.rsa.RSAKeyFactory: java.security.PrivateKey translatePrivateKey(java.security.PrivateKey)>($r5);
+
+        return $r6;
+
+     label5:
+        $r4 = new java.security.InvalidKeyException;
+
+        specialinvoke $r4.<java.security.InvalidKeyException: void <init>(java.lang.String)>("Neither a public nor a private key");
+
+        throw $r4;
+    }
+
+    protected java.security.PublicKey engineGeneratePublic(java.security.spec.KeySpec) throws java.security.spec.InvalidKeySpecException
+    {
+        java.security.spec.KeySpec r1;
+        java.security.GeneralSecurityException $r3;
+        java.security.spec.InvalidKeySpecException $r4, $r5;
+        sun.security.rsa.RSAKeyFactory r0;
+        java.security.PublicKey $r2;
+
+        r0 := @this: sun.security.rsa.RSAKeyFactory;
+
+        r1 := @parameter0: java.security.spec.KeySpec;
+
+     label1:
+        $r2 = specialinvoke r0.<sun.security.rsa.RSAKeyFactory: java.security.PublicKey generatePublic(java.security.spec.KeySpec)>(r1);
+
+     label2:
+        return $r2;
+
+     label3:
+        $r5 := @caughtexception;
+
+        throw $r5;
+
+     label4:
+        $r3 := @caughtexception;
+
+        $r4 = new java.security.spec.InvalidKeySpecException;
+
+        specialinvoke $r4.<java.security.spec.InvalidKeySpecException: void <init>(java.lang.Throwable)>($r3);
+
+        throw $r4;
+
+        catch java.security.spec.InvalidKeySpecException from label1 to label2 with label3;
+        catch java.security.GeneralSecurityException from label1 to label2 with label4;
+    }
+
+    protected java.security.PrivateKey engineGeneratePrivate(java.security.spec.KeySpec) throws java.security.spec.InvalidKeySpecException
+    {
+        java.security.spec.KeySpec r1;
+        java.security.GeneralSecurityException $r3;
+        java.security.PrivateKey $r2;
+        java.security.spec.InvalidKeySpecException $r4, $r5;
+        sun.security.rsa.RSAKeyFactory r0;
+
+        r0 := @this: sun.security.rsa.RSAKeyFactory;
+
+        r1 := @parameter0: java.security.spec.KeySpec;
+
+     label1:
+        $r2 = specialinvoke r0.<sun.security.rsa.RSAKeyFactory: java.security.PrivateKey generatePrivate(java.security.spec.KeySpec)>(r1);
+
+     label2:
+        return $r2;
+
+     label3:
+        $r5 := @caughtexception;
+
+        throw $r5;
+
+     label4:
+        $r3 := @caughtexception;
+
+        $r4 = new java.security.spec.InvalidKeySpecException;
+
+        specialinvoke $r4.<java.security.spec.InvalidKeySpecException: void <init>(java.lang.Throwable)>($r3);
+
+        throw $r4;
+
+        catch java.security.spec.InvalidKeySpecException from label1 to label2 with label3;
+        catch java.security.GeneralSecurityException from label1 to label2 with label4;
+    }
+
+    private java.security.PublicKey translatePublicKey(java.security.PublicKey) throws java.security.InvalidKeyException
+    {
+        byte[] $r5;
+        sun.security.rsa.RSAUtil$KeyType $r7, $r10;
+        java.security.interfaces.RSAPublicKey r17;
+        sun.security.rsa.RSAKeyFactory r6;
+        java.math.BigInteger $r13, $r14;
+        java.lang.String $r1, $r2, $r8;
+        java.security.spec.AlgorithmParameterSpec $r11;
+        boolean $z0, $z1;
+        java.security.ProviderException $r15;
+        java.security.PublicKey r0;
+        sun.security.rsa.RSAPublicKeyImpl $r4, $r9;
+        java.security.InvalidKeyException $r3, $r16;
+        sun.security.x509.AlgorithmId $r12;
+
+        r6 := @this: sun.security.rsa.RSAKeyFactory;
+
+        r0 := @parameter0: java.security.PublicKey;
+
+        $z0 = r0 instanceof java.security.interfaces.RSAPublicKey;
+
+        if $z0 == 0 goto label4;
+
+        r17 = (java.security.interfaces.RSAPublicKey) r0;
+
+     label1:
+        $r9 = new sun.security.rsa.RSAPublicKeyImpl;
+
+        $r10 = r6.<sun.security.rsa.RSAKeyFactory: sun.security.rsa.RSAUtil$KeyType type>;
+
+        $r11 = interfaceinvoke r17.<java.security.interfaces.RSAPublicKey: java.security.spec.AlgorithmParameterSpec getParams()>();
+
+        $r12 = staticinvoke <sun.security.rsa.RSAUtil: sun.security.x509.AlgorithmId createAlgorithmId(sun.security.rsa.RSAUtil$KeyType,java.security.spec.AlgorithmParameterSpec)>($r10, $r11);
+
+        $r13 = interfaceinvoke r17.<java.security.interfaces.RSAPublicKey: java.math.BigInteger getModulus()>();
+
+        $r14 = interfaceinvoke r17.<java.security.interfaces.RSAPublicKey: java.math.BigInteger getPublicExponent()>();
+
+        specialinvoke $r9.<sun.security.rsa.RSAPublicKeyImpl: void <init>(sun.security.x509.AlgorithmId,java.math.BigInteger,java.math.BigInteger)>($r12, $r13, $r14);
+
+     label2:
+        return $r9;
+
+     label3:
+        $r15 := @caughtexception;
+
+        $r16 = new java.security.InvalidKeyException;
+
+        specialinvoke $r16.<java.security.InvalidKeyException: void <init>(java.lang.String,java.lang.Throwable)>("Invalid key", $r15);
+
+        throw $r16;
+
+     label4:
+        $r1 = "X.509";
+
+        $r2 = interfaceinvoke r0.<java.security.PublicKey: java.lang.String getFormat()>();
+
+        $z1 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z1 == 0 goto label5;
+
+        $r4 = new sun.security.rsa.RSAPublicKeyImpl;
+
+        $r5 = interfaceinvoke r0.<java.security.PublicKey: byte[] getEncoded()>();
+
+        specialinvoke $r4.<sun.security.rsa.RSAPublicKeyImpl: void <init>(byte[])>($r5);
+
+        $r7 = r6.<sun.security.rsa.RSAKeyFactory: sun.security.rsa.RSAUtil$KeyType type>;
+
+        $r8 = virtualinvoke $r7.<sun.security.rsa.RSAUtil$KeyType: java.lang.String keyAlgo()>();
+
+        staticinvoke <sun.security.rsa.RSAKeyFactory: void checkKeyAlgo(java.security.Key,java.lang.String)>($r4, $r8);
+
+        return $r4;
+
+     label5:
+        $r3 = new java.security.InvalidKeyException;
+
+        specialinvoke $r3.<java.security.InvalidKeyException: void <init>(java.lang.String)>("Public keys must be instance of RSAPublicKey or have X.509 encoding");
+
+        throw $r3;
+
+        catch java.security.ProviderException from label1 to label2 with label3;
+    }
+
+    private java.security.PrivateKey translatePrivateKey(java.security.PrivateKey) throws java.security.InvalidKeyException
+    {
+        byte[] $r4;
+        java.math.BigInteger $r13, $r14, $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26;
+        java.security.spec.AlgorithmParameterSpec $r11, $r17;
+        boolean $z0, $z1, $z2;
+        java.security.interfaces.RSAPrivateKey $r5, r32;
+        java.security.ProviderException $r27, $r29;
+        java.security.PrivateKey r0;
+        java.security.InvalidKeyException $r3, $r28, $r30;
+        java.security.interfaces.RSAPrivateCrtKey r31;
+        sun.security.rsa.RSAPrivateKeyImpl $r9;
+        sun.security.x509.AlgorithmId $r12, $r18;
+        sun.security.rsa.RSAUtil$KeyType $r7, $r10, $r16;
+        sun.security.rsa.RSAKeyFactory r6;
+        java.lang.String $r1, $r2, $r8;
+        sun.security.rsa.RSAPrivateCrtKeyImpl $r15;
+
+        r6 := @this: sun.security.rsa.RSAKeyFactory;
+
+        r0 := @parameter0: java.security.PrivateKey;
+
+        $z0 = r0 instanceof java.security.interfaces.RSAPrivateCrtKey;
+
+        if $z0 == 0 goto label4;
+
+        r31 = (java.security.interfaces.RSAPrivateCrtKey) r0;
+
+     label1:
+        $r15 = new sun.security.rsa.RSAPrivateCrtKeyImpl;
+
+        $r16 = r6.<sun.security.rsa.RSAKeyFactory: sun.security.rsa.RSAUtil$KeyType type>;
+
+        $r17 = interfaceinvoke r31.<java.security.interfaces.RSAPrivateCrtKey: java.security.spec.AlgorithmParameterSpec getParams()>();
+
+        $r18 = staticinvoke <sun.security.rsa.RSAUtil: sun.security.x509.AlgorithmId createAlgorithmId(sun.security.rsa.RSAUtil$KeyType,java.security.spec.AlgorithmParameterSpec)>($r16, $r17);
+
+        $r19 = interfaceinvoke r31.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getModulus()>();
+
+        $r20 = interfaceinvoke r31.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getPublicExponent()>();
+
+        $r21 = interfaceinvoke r31.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getPrivateExponent()>();
+
+        $r22 = interfaceinvoke r31.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getPrimeP()>();
+
+        $r23 = interfaceinvoke r31.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getPrimeQ()>();
+
+        $r24 = interfaceinvoke r31.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getPrimeExponentP()>();
+
+        $r25 = interfaceinvoke r31.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getPrimeExponentQ()>();
+
+        $r26 = interfaceinvoke r31.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getCrtCoefficient()>();
+
+        specialinvoke $r15.<sun.security.rsa.RSAPrivateCrtKeyImpl: void <init>(sun.security.x509.AlgorithmId,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger)>($r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26);
+
+     label2:
+        return $r15;
+
+     label3:
+        $r29 := @caughtexception;
+
+        $r30 = new java.security.InvalidKeyException;
+
+        specialinvoke $r30.<java.security.InvalidKeyException: void <init>(java.lang.String,java.lang.Throwable)>("Invalid key", $r29);
+
+        throw $r30;
+
+     label4:
+        $z1 = r0 instanceof java.security.interfaces.RSAPrivateKey;
+
+        if $z1 == 0 goto label8;
+
+        r32 = (java.security.interfaces.RSAPrivateKey) r0;
+
+     label5:
+        $r9 = new sun.security.rsa.RSAPrivateKeyImpl;
+
+        $r10 = r6.<sun.security.rsa.RSAKeyFactory: sun.security.rsa.RSAUtil$KeyType type>;
+
+        $r11 = interfaceinvoke r32.<java.security.interfaces.RSAPrivateKey: java.security.spec.AlgorithmParameterSpec getParams()>();
+
+        $r12 = staticinvoke <sun.security.rsa.RSAUtil: sun.security.x509.AlgorithmId createAlgorithmId(sun.security.rsa.RSAUtil$KeyType,java.security.spec.AlgorithmParameterSpec)>($r10, $r11);
+
+        $r13 = interfaceinvoke r32.<java.security.interfaces.RSAPrivateKey: java.math.BigInteger getModulus()>();
+
+        $r14 = interfaceinvoke r32.<java.security.interfaces.RSAPrivateKey: java.math.BigInteger getPrivateExponent()>();
+
+        specialinvoke $r9.<sun.security.rsa.RSAPrivateKeyImpl: void <init>(sun.security.x509.AlgorithmId,java.math.BigInteger,java.math.BigInteger)>($r12, $r13, $r14);
+
+     label6:
+        return $r9;
+
+     label7:
+        $r27 := @caughtexception;
+
+        $r28 = new java.security.InvalidKeyException;
+
+        specialinvoke $r28.<java.security.InvalidKeyException: void <init>(java.lang.String,java.lang.Throwable)>("Invalid key", $r27);
+
+        throw $r28;
+
+     label8:
+        $r1 = "PKCS#8";
+
+        $r2 = interfaceinvoke r0.<java.security.PrivateKey: java.lang.String getFormat()>();
+
+        $z2 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z2 == 0 goto label9;
+
+        $r4 = interfaceinvoke r0.<java.security.PrivateKey: byte[] getEncoded()>();
+
+        $r5 = staticinvoke <sun.security.rsa.RSAPrivateCrtKeyImpl: java.security.interfaces.RSAPrivateKey newKey(byte[])>($r4);
+
+        $r7 = r6.<sun.security.rsa.RSAKeyFactory: sun.security.rsa.RSAUtil$KeyType type>;
+
+        $r8 = virtualinvoke $r7.<sun.security.rsa.RSAUtil$KeyType: java.lang.String keyAlgo()>();
+
+        staticinvoke <sun.security.rsa.RSAKeyFactory: void checkKeyAlgo(java.security.Key,java.lang.String)>($r5, $r8);
+
+        return $r5;
+
+     label9:
+        $r3 = new java.security.InvalidKeyException;
+
+        specialinvoke $r3.<java.security.InvalidKeyException: void <init>(java.lang.String)>("Private keys must be instance of RSAPrivate(Crt)Key or have PKCS#8 encoding");
+
+        throw $r3;
+
+        catch java.security.ProviderException from label1 to label2 with label3;
+        catch java.security.ProviderException from label5 to label6 with label7;
+    }
+
+    private java.security.PublicKey generatePublic(java.security.spec.KeySpec) throws java.security.GeneralSecurityException
+    {
+        byte[] $r10;
+        java.security.spec.InvalidKeySpecException $r1, $r14;
+        sun.security.rsa.RSAUtil$KeyType $r4, $r11;
+        java.security.spec.KeySpec r0;
+        sun.security.rsa.RSAKeyFactory r3;
+        java.security.spec.RSAPublicKeySpec r16;
+        java.math.BigInteger $r7, $r8;
+        java.security.spec.AlgorithmParameterSpec $r5;
+        java.lang.String $r12;
+        boolean $z0, $z1;
+        java.security.ProviderException $r13;
+        sun.security.rsa.RSAPublicKeyImpl $r2, $r9;
+        java.security.spec.X509EncodedKeySpec r15;
+        sun.security.x509.AlgorithmId $r6;
+
+        r3 := @this: sun.security.rsa.RSAKeyFactory;
+
+        r0 := @parameter0: java.security.spec.KeySpec;
+
+        $z0 = r0 instanceof java.security.spec.X509EncodedKeySpec;
+
+        if $z0 == 0 goto label1;
+
+        r15 = (java.security.spec.X509EncodedKeySpec) r0;
+
+        $r9 = new sun.security.rsa.RSAPublicKeyImpl;
+
+        $r10 = virtualinvoke r15.<java.security.spec.X509EncodedKeySpec: byte[] getEncoded()>();
+
+        specialinvoke $r9.<sun.security.rsa.RSAPublicKeyImpl: void <init>(byte[])>($r10);
+
+        $r11 = r3.<sun.security.rsa.RSAKeyFactory: sun.security.rsa.RSAUtil$KeyType type>;
+
+        $r12 = virtualinvoke $r11.<sun.security.rsa.RSAUtil$KeyType: java.lang.String keyAlgo()>();
+
+        staticinvoke <sun.security.rsa.RSAKeyFactory: void checkKeyAlgo(java.security.Key,java.lang.String)>($r9, $r12);
+
+        return $r9;
+
+     label1:
+        $z1 = r0 instanceof java.security.spec.RSAPublicKeySpec;
+
+        if $z1 == 0 goto label5;
+
+        r16 = (java.security.spec.RSAPublicKeySpec) r0;
+
+     label2:
+        $r2 = new sun.security.rsa.RSAPublicKeyImpl;
+
+        $r4 = r3.<sun.security.rsa.RSAKeyFactory: sun.security.rsa.RSAUtil$KeyType type>;
+
+        $r5 = virtualinvoke r16.<java.security.spec.RSAPublicKeySpec: java.security.spec.AlgorithmParameterSpec getParams()>();
+
+        $r6 = staticinvoke <sun.security.rsa.RSAUtil: sun.security.x509.AlgorithmId createAlgorithmId(sun.security.rsa.RSAUtil$KeyType,java.security.spec.AlgorithmParameterSpec)>($r4, $r5);
+
+        $r7 = virtualinvoke r16.<java.security.spec.RSAPublicKeySpec: java.math.BigInteger getModulus()>();
+
+        $r8 = virtualinvoke r16.<java.security.spec.RSAPublicKeySpec: java.math.BigInteger getPublicExponent()>();
+
+        specialinvoke $r2.<sun.security.rsa.RSAPublicKeyImpl: void <init>(sun.security.x509.AlgorithmId,java.math.BigInteger,java.math.BigInteger)>($r6, $r7, $r8);
+
+     label3:
+        return $r2;
+
+     label4:
+        $r13 := @caughtexception;
+
+        $r14 = new java.security.spec.InvalidKeySpecException;
+
+        specialinvoke $r14.<java.security.spec.InvalidKeySpecException: void <init>(java.lang.Throwable)>($r13);
+
+        throw $r14;
+
+     label5:
+        $r1 = new java.security.spec.InvalidKeySpecException;
+
+        specialinvoke $r1.<java.security.spec.InvalidKeySpecException: void <init>(java.lang.String)>("Only RSAPublicKeySpec and X509EncodedKeySpec supported for RSA public keys");
+
+        throw $r1;
+
+        catch java.security.ProviderException from label2 to label3 with label4;
+    }
+
+    private java.security.PrivateKey generatePrivate(java.security.spec.KeySpec) throws java.security.GeneralSecurityException
+    {
+        byte[] $r21;
+        java.security.spec.KeySpec r0;
+        java.math.BigInteger $r7, $r8, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20;
+        java.security.spec.AlgorithmParameterSpec $r5, $r11;
+        boolean $z0, $z1, $z2;
+        java.security.interfaces.RSAPrivateKey $r22;
+        java.security.ProviderException $r25, $r27;
+        sun.security.rsa.RSAPrivateKeyImpl $r2;
+        sun.security.x509.AlgorithmId $r6, $r12;
+        java.security.spec.InvalidKeySpecException $r1, $r26, $r28;
+        java.security.spec.RSAPrivateCrtKeySpec r30;
+        sun.security.rsa.RSAUtil$KeyType $r4, $r10, $r23;
+        sun.security.rsa.RSAKeyFactory r3;
+        java.lang.String $r24;
+        java.security.spec.PKCS8EncodedKeySpec r29;
+        java.security.spec.RSAPrivateKeySpec r31;
+        sun.security.rsa.RSAPrivateCrtKeyImpl $r9;
+
+        r3 := @this: sun.security.rsa.RSAKeyFactory;
+
+        r0 := @parameter0: java.security.spec.KeySpec;
+
+        $z0 = r0 instanceof java.security.spec.PKCS8EncodedKeySpec;
+
+        if $z0 == 0 goto label1;
+
+        r29 = (java.security.spec.PKCS8EncodedKeySpec) r0;
+
+        $r21 = virtualinvoke r29.<java.security.spec.PKCS8EncodedKeySpec: byte[] getEncoded()>();
+
+        $r22 = staticinvoke <sun.security.rsa.RSAPrivateCrtKeyImpl: java.security.interfaces.RSAPrivateKey newKey(byte[])>($r21);
+
+        $r23 = r3.<sun.security.rsa.RSAKeyFactory: sun.security.rsa.RSAUtil$KeyType type>;
+
+        $r24 = virtualinvoke $r23.<sun.security.rsa.RSAUtil$KeyType: java.lang.String keyAlgo()>();
+
+        staticinvoke <sun.security.rsa.RSAKeyFactory: void checkKeyAlgo(java.security.Key,java.lang.String)>($r22, $r24);
+
+        return $r22;
+
+     label1:
+        $z1 = r0 instanceof java.security.spec.RSAPrivateCrtKeySpec;
+
+        if $z1 == 0 goto label5;
+
+        r30 = (java.security.spec.RSAPrivateCrtKeySpec) r0;
+
+     label2:
+        $r9 = new sun.security.rsa.RSAPrivateCrtKeyImpl;
+
+        $r10 = r3.<sun.security.rsa.RSAKeyFactory: sun.security.rsa.RSAUtil$KeyType type>;
+
+        $r11 = virtualinvoke r30.<java.security.spec.RSAPrivateCrtKeySpec: java.security.spec.AlgorithmParameterSpec getParams()>();
+
+        $r12 = staticinvoke <sun.security.rsa.RSAUtil: sun.security.x509.AlgorithmId createAlgorithmId(sun.security.rsa.RSAUtil$KeyType,java.security.spec.AlgorithmParameterSpec)>($r10, $r11);
+
+        $r13 = virtualinvoke r30.<java.security.spec.RSAPrivateCrtKeySpec: java.math.BigInteger getModulus()>();
+
+        $r14 = virtualinvoke r30.<java.security.spec.RSAPrivateCrtKeySpec: java.math.BigInteger getPublicExponent()>();
+
+        $r15 = virtualinvoke r30.<java.security.spec.RSAPrivateCrtKeySpec: java.math.BigInteger getPrivateExponent()>();
+
+        $r16 = virtualinvoke r30.<java.security.spec.RSAPrivateCrtKeySpec: java.math.BigInteger getPrimeP()>();
+
+        $r17 = virtualinvoke r30.<java.security.spec.RSAPrivateCrtKeySpec: java.math.BigInteger getPrimeQ()>();
+
+        $r18 = virtualinvoke r30.<java.security.spec.RSAPrivateCrtKeySpec: java.math.BigInteger getPrimeExponentP()>();
+
+        $r19 = virtualinvoke r30.<java.security.spec.RSAPrivateCrtKeySpec: java.math.BigInteger getPrimeExponentQ()>();
+
+        $r20 = virtualinvoke r30.<java.security.spec.RSAPrivateCrtKeySpec: java.math.BigInteger getCrtCoefficient()>();
+
+        specialinvoke $r9.<sun.security.rsa.RSAPrivateCrtKeyImpl: void <init>(sun.security.x509.AlgorithmId,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger)>($r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20);
+
+     label3:
+        return $r9;
+
+     label4:
+        $r27 := @caughtexception;
+
+        $r28 = new java.security.spec.InvalidKeySpecException;
+
+        specialinvoke $r28.<java.security.spec.InvalidKeySpecException: void <init>(java.lang.Throwable)>($r27);
+
+        throw $r28;
+
+     label5:
+        $z2 = r0 instanceof java.security.spec.RSAPrivateKeySpec;
+
+        if $z2 == 0 goto label9;
+
+        r31 = (java.security.spec.RSAPrivateKeySpec) r0;
+
+     label6:
+        $r2 = new sun.security.rsa.RSAPrivateKeyImpl;
+
+        $r4 = r3.<sun.security.rsa.RSAKeyFactory: sun.security.rsa.RSAUtil$KeyType type>;
+
+        $r5 = virtualinvoke r31.<java.security.spec.RSAPrivateKeySpec: java.security.spec.AlgorithmParameterSpec getParams()>();
+
+        $r6 = staticinvoke <sun.security.rsa.RSAUtil: sun.security.x509.AlgorithmId createAlgorithmId(sun.security.rsa.RSAUtil$KeyType,java.security.spec.AlgorithmParameterSpec)>($r4, $r5);
+
+        $r7 = virtualinvoke r31.<java.security.spec.RSAPrivateKeySpec: java.math.BigInteger getModulus()>();
+
+        $r8 = virtualinvoke r31.<java.security.spec.RSAPrivateKeySpec: java.math.BigInteger getPrivateExponent()>();
+
+        specialinvoke $r2.<sun.security.rsa.RSAPrivateKeyImpl: void <init>(sun.security.x509.AlgorithmId,java.math.BigInteger,java.math.BigInteger)>($r6, $r7, $r8);
+
+     label7:
+        return $r2;
+
+     label8:
+        $r25 := @caughtexception;
+
+        $r26 = new java.security.spec.InvalidKeySpecException;
+
+        specialinvoke $r26.<java.security.spec.InvalidKeySpecException: void <init>(java.lang.Throwable)>($r25);
+
+        throw $r26;
+
+     label9:
+        $r1 = new java.security.spec.InvalidKeySpecException;
+
+        specialinvoke $r1.<java.security.spec.InvalidKeySpecException: void <init>(java.lang.String)>("Only RSAPrivate(Crt)KeySpec and PKCS8EncodedKeySpec supported for RSA private keys");
+
+        throw $r1;
+
+        catch java.security.ProviderException from label2 to label3 with label4;
+        catch java.security.ProviderException from label6 to label7 with label8;
+    }
+
+    protected java.security.spec.KeySpec engineGetKeySpec(java.security.Key, java.lang.Class) throws java.security.spec.InvalidKeySpecException
+    {
+        byte[] $r28, $r35;
+        java.security.spec.KeySpec $r13, $r26, $r30, $r37, $r43;
+        java.security.interfaces.RSAPublicKey r47;
+        java.security.spec.RSAPublicKeySpec $r38;
+        java.math.BigInteger $r9, $r10, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r39, $r40;
+        java.security.spec.AlgorithmParameterSpec $r11, $r24, $r41;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        java.security.interfaces.RSAPrivateKey r49;
+        java.security.spec.X509EncodedKeySpec $r34;
+        java.security.Key $r1, r46;
+        java.security.InvalidKeyException $r44;
+        java.security.interfaces.RSAPrivateCrtKey r48;
+        java.security.spec.InvalidKeySpecException $r2, $r7, $r14, $r33, $r45;
+        java.security.spec.RSAPrivateCrtKeySpec $r15;
+        sun.security.rsa.RSAKeyFactory r0;
+        java.security.spec.PKCS8EncodedKeySpec $r27;
+        java.security.spec.RSAPrivateKeySpec $r8;
+        java.lang.Class r3, $r4, $r5, $r6, $r31, $r32;
+        java.lang.Object $r12, $r25, $r29, $r36, $r42;
+
+        r0 := @this: sun.security.rsa.RSAKeyFactory;
+
+        r46 := @parameter0: java.security.Key;
+
+        r3 := @parameter1: java.lang.Class;
+
+     label01:
+        $r1 = virtualinvoke r0.<sun.security.rsa.RSAKeyFactory: java.security.Key engineTranslateKey(java.security.Key)>(r46);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r44 := @caughtexception;
+
+        $r45 = new java.security.spec.InvalidKeySpecException;
+
+        specialinvoke $r45.<java.security.spec.InvalidKeySpecException: void <init>(java.lang.Throwable)>($r44);
+
+        throw $r45;
+
+     label04:
+        $z0 = $r1 instanceof java.security.interfaces.RSAPublicKey;
+
+        if $z0 == 0 goto label07;
+
+        r47 = (java.security.interfaces.RSAPublicKey) $r1;
+
+        $r31 = <sun.security.rsa.RSAKeyFactory: java.lang.Class RSA_PUB_KEYSPEC_CLS>;
+
+        $z6 = virtualinvoke $r31.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(r3);
+
+        if $z6 == 0 goto label05;
+
+        $r38 = new java.security.spec.RSAPublicKeySpec;
+
+        $r39 = interfaceinvoke r47.<java.security.interfaces.RSAPublicKey: java.math.BigInteger getModulus()>();
+
+        $r40 = interfaceinvoke r47.<java.security.interfaces.RSAPublicKey: java.math.BigInteger getPublicExponent()>();
+
+        $r41 = interfaceinvoke r47.<java.security.interfaces.RSAPublicKey: java.security.spec.AlgorithmParameterSpec getParams()>();
+
+        specialinvoke $r38.<java.security.spec.RSAPublicKeySpec: void <init>(java.math.BigInteger,java.math.BigInteger,java.security.spec.AlgorithmParameterSpec)>($r39, $r40, $r41);
+
+        $r42 = virtualinvoke r3.<java.lang.Class: java.lang.Object cast(java.lang.Object)>($r38);
+
+        $r43 = (java.security.spec.KeySpec) $r42;
+
+        return $r43;
+
+     label05:
+        $r32 = <sun.security.rsa.RSAKeyFactory: java.lang.Class X509_KEYSPEC_CLS>;
+
+        $z7 = virtualinvoke $r32.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(r3);
+
+        if $z7 == 0 goto label06;
+
+        $r34 = new java.security.spec.X509EncodedKeySpec;
+
+        $r35 = interfaceinvoke $r1.<java.security.Key: byte[] getEncoded()>();
+
+        specialinvoke $r34.<java.security.spec.X509EncodedKeySpec: void <init>(byte[])>($r35);
+
+        $r36 = virtualinvoke r3.<java.lang.Class: java.lang.Object cast(java.lang.Object)>($r34);
+
+        $r37 = (java.security.spec.KeySpec) $r36;
+
+        return $r37;
+
+     label06:
+        $r33 = new java.security.spec.InvalidKeySpecException;
+
+        specialinvoke $r33.<java.security.spec.InvalidKeySpecException: void <init>(java.lang.String)>("KeySpec must be RSAPublicKeySpec or X509EncodedKeySpec for RSA public keys");
+
+        throw $r33;
+
+     label07:
+        $z1 = $r1 instanceof java.security.interfaces.RSAPrivateKey;
+
+        if $z1 == 0 goto label12;
+
+        $r4 = <sun.security.rsa.RSAKeyFactory: java.lang.Class PKCS8_KEYSPEC_CLS>;
+
+        $z2 = virtualinvoke $r4.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(r3);
+
+        if $z2 == 0 goto label08;
+
+        $r27 = new java.security.spec.PKCS8EncodedKeySpec;
+
+        $r28 = interfaceinvoke $r1.<java.security.Key: byte[] getEncoded()>();
+
+        specialinvoke $r27.<java.security.spec.PKCS8EncodedKeySpec: void <init>(byte[])>($r28);
+
+        $r29 = virtualinvoke r3.<java.lang.Class: java.lang.Object cast(java.lang.Object)>($r27);
+
+        $r30 = (java.security.spec.KeySpec) $r29;
+
+        return $r30;
+
+     label08:
+        $r5 = <sun.security.rsa.RSAKeyFactory: java.lang.Class RSA_PRIVCRT_KEYSPEC_CLS>;
+
+        $z3 = virtualinvoke $r5.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(r3);
+
+        if $z3 == 0 goto label10;
+
+        $z5 = $r1 instanceof java.security.interfaces.RSAPrivateCrtKey;
+
+        if $z5 == 0 goto label09;
+
+        r48 = (java.security.interfaces.RSAPrivateCrtKey) $r1;
+
+        $r15 = new java.security.spec.RSAPrivateCrtKeySpec;
+
+        $r16 = interfaceinvoke r48.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getModulus()>();
+
+        $r17 = interfaceinvoke r48.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getPublicExponent()>();
+
+        $r18 = interfaceinvoke r48.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getPrivateExponent()>();
+
+        $r19 = interfaceinvoke r48.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getPrimeP()>();
+
+        $r20 = interfaceinvoke r48.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getPrimeQ()>();
+
+        $r21 = interfaceinvoke r48.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getPrimeExponentP()>();
+
+        $r22 = interfaceinvoke r48.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getPrimeExponentQ()>();
+
+        $r23 = interfaceinvoke r48.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getCrtCoefficient()>();
+
+        $r24 = interfaceinvoke r48.<java.security.interfaces.RSAPrivateCrtKey: java.security.spec.AlgorithmParameterSpec getParams()>();
+
+        specialinvoke $r15.<java.security.spec.RSAPrivateCrtKeySpec: void <init>(java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.security.spec.AlgorithmParameterSpec)>($r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24);
+
+        $r25 = virtualinvoke r3.<java.lang.Class: java.lang.Object cast(java.lang.Object)>($r15);
+
+        $r26 = (java.security.spec.KeySpec) $r25;
+
+        return $r26;
+
+     label09:
+        $r14 = new java.security.spec.InvalidKeySpecException;
+
+        specialinvoke $r14.<java.security.spec.InvalidKeySpecException: void <init>(java.lang.String)>("RSAPrivateCrtKeySpec can only be used with CRT keys");
+
+        throw $r14;
+
+     label10:
+        $r6 = <sun.security.rsa.RSAKeyFactory: java.lang.Class RSA_PRIV_KEYSPEC_CLS>;
+
+        $z4 = virtualinvoke $r6.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(r3);
+
+        if $z4 == 0 goto label11;
+
+        r49 = (java.security.interfaces.RSAPrivateKey) $r1;
+
+        $r8 = new java.security.spec.RSAPrivateKeySpec;
+
+        $r9 = interfaceinvoke r49.<java.security.interfaces.RSAPrivateKey: java.math.BigInteger getModulus()>();
+
+        $r10 = interfaceinvoke r49.<java.security.interfaces.RSAPrivateKey: java.math.BigInteger getPrivateExponent()>();
+
+        $r11 = interfaceinvoke r49.<java.security.interfaces.RSAPrivateKey: java.security.spec.AlgorithmParameterSpec getParams()>();
+
+        specialinvoke $r8.<java.security.spec.RSAPrivateKeySpec: void <init>(java.math.BigInteger,java.math.BigInteger,java.security.spec.AlgorithmParameterSpec)>($r9, $r10, $r11);
+
+        $r12 = virtualinvoke r3.<java.lang.Class: java.lang.Object cast(java.lang.Object)>($r8);
+
+        $r13 = (java.security.spec.KeySpec) $r12;
+
+        return $r13;
+
+     label11:
+        $r7 = new java.security.spec.InvalidKeySpecException;
+
+        specialinvoke $r7.<java.security.spec.InvalidKeySpecException: void <init>(java.lang.String)>("KeySpec must be RSAPrivate(Crt)KeySpec or PKCS8EncodedKeySpec for RSA private keys");
+
+        throw $r7;
+
+     label12:
+        $r2 = new java.security.spec.InvalidKeySpecException;
+
+        specialinvoke $r2.<java.security.spec.InvalidKeySpecException: void <init>(java.lang.String)>("Neither public nor private key");
+
+        throw $r2;
+
+        catch java.security.InvalidKeyException from label01 to label02 with label03;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Object $r2;
+        java.lang.String $r1, $r3;
+        sun.security.action.GetPropertyAction $r0;
+        boolean $z0;
+
+        <sun.security.rsa.RSAKeyFactory: int MAX_RESTRICTED_EXPLEN> = 64;
+
+        <sun.security.rsa.RSAKeyFactory: int MAX_MODLEN_RESTRICT_EXP> = 3072;
+
+        <sun.security.rsa.RSAKeyFactory: int MAX_MODLEN> = 16384;
+
+        <sun.security.rsa.RSAKeyFactory: int MIN_MODLEN> = 512;
+
+        <sun.security.rsa.RSAKeyFactory: java.lang.Class RSA_PUB_KEYSPEC_CLS> = class "Ljava/security/spec/RSAPublicKeySpec;";
+
+        <sun.security.rsa.RSAKeyFactory: java.lang.Class RSA_PRIV_KEYSPEC_CLS> = class "Ljava/security/spec/RSAPrivateKeySpec;";
+
+        <sun.security.rsa.RSAKeyFactory: java.lang.Class RSA_PRIVCRT_KEYSPEC_CLS> = class "Ljava/security/spec/RSAPrivateCrtKeySpec;";
+
+        <sun.security.rsa.RSAKeyFactory: java.lang.Class X509_KEYSPEC_CLS> = class "Ljava/security/spec/X509EncodedKeySpec;";
+
+        <sun.security.rsa.RSAKeyFactory: java.lang.Class PKCS8_KEYSPEC_CLS> = class "Ljava/security/spec/PKCS8EncodedKeySpec;";
+
+        $r1 = "true";
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String,java.lang.String)>("sun.security.rsa.restrictRSAExponent", "true");
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r3 = (java.lang.String) $r2;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r3);
+
+        <sun.security.rsa.RSAKeyFactory: boolean restrictExpLen> = $z0;
+
+        return;
+    }
+}

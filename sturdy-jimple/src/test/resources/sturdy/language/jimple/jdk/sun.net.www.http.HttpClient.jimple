@@ -1,0 +1,2800 @@
+public class sun.net.www.http.HttpClient extends sun.net.NetworkClient
+{
+    protected boolean cachedHttpClient;
+    protected boolean inCache;
+    sun.net.www.MessageHeader requests;
+    sun.net.www.http.PosterOutputStream poster;
+    boolean streaming;
+    boolean failedOnce;
+    private boolean ignoreContinue;
+    private static final int HTTP_CONTINUE;
+    static final int httpPortNumber;
+    protected boolean proxyDisabled;
+    public boolean usingProxy;
+    protected java.lang.String host;
+    protected int port;
+    protected static sun.net.www.http.KeepAliveCache kac;
+    private static boolean keepAliveProp;
+    private static boolean retryPostProp;
+    private static final boolean cacheNTLMProp;
+    private static final boolean cacheSPNEGOProp;
+    volatile boolean keepingAlive;
+    volatile boolean disableKeepAlive;
+    int keepAliveConnections;
+    int keepAliveTimeout;
+    private java.net.CacheRequest cacheRequest;
+    protected java.net.URL url;
+    public boolean reuse;
+    private sun.net.www.http.HttpCapture capture;
+    private static final sun.util.logging.PlatformLogger logger;
+    static final boolean $assertionsDisabled;
+
+    protected int getDefaultPort()
+    {
+        sun.net.www.http.HttpClient r0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        return 80;
+    }
+
+    private static int getDefaultPort(java.lang.String)
+    {
+        int $i1;
+        java.lang.String r0, $r1, $r2;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = "http";
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r0);
+
+        if $z0 == 0 goto label1;
+
+        return 80;
+
+     label1:
+        $r2 = "https";
+
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r0);
+
+        if $z1 == 0 goto label2;
+
+        return 443;
+
+     label2:
+        $i1 = (int) -1;
+
+        return $i1;
+    }
+
+    private static void logFinest(java.lang.String)
+    {
+        sun.util.logging.PlatformLogger$Level $r0;
+        sun.util.logging.PlatformLogger $r1, $r3;
+        java.lang.String r2;
+        boolean $z0;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = <sun.net.www.http.HttpClient: sun.util.logging.PlatformLogger logger>;
+
+        $r0 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINEST>;
+
+        $z0 = virtualinvoke $r1.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r0);
+
+        if $z0 == 0 goto label1;
+
+        $r3 = <sun.net.www.http.HttpClient: sun.util.logging.PlatformLogger logger>;
+
+        virtualinvoke $r3.<sun.util.logging.PlatformLogger: void finest(java.lang.String)>(r2);
+
+     label1:
+        return;
+    }
+
+    public static synchronized void resetProperties()
+    {
+        return;
+    }
+
+    int getKeepAliveTimeout()
+    {
+        int $i0;
+        sun.net.www.http.HttpClient r0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        $i0 = r0.<sun.net.www.http.HttpClient: int keepAliveTimeout>;
+
+        return $i0;
+    }
+
+    public boolean getHttpKeepAliveSet()
+    {
+        sun.net.www.http.HttpClient r0;
+        boolean $z0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        $z0 = <sun.net.www.http.HttpClient: boolean keepAliveProp>;
+
+        return $z0;
+    }
+
+    protected void <init>()
+    {
+        int $i1;
+        sun.net.www.http.HttpClient r0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        specialinvoke r0.<sun.net.NetworkClient: void <init>()>();
+
+        r0.<sun.net.www.http.HttpClient: boolean cachedHttpClient> = 0;
+
+        r0.<sun.net.www.http.HttpClient: sun.net.www.http.PosterOutputStream poster> = null;
+
+        r0.<sun.net.www.http.HttpClient: boolean failedOnce> = 0;
+
+        r0.<sun.net.www.http.HttpClient: boolean ignoreContinue> = 1;
+
+        r0.<sun.net.www.http.HttpClient: boolean usingProxy> = 0;
+
+        r0.<sun.net.www.http.HttpClient: boolean keepingAlive> = 0;
+
+        $i1 = (int) -1;
+
+        r0.<sun.net.www.http.HttpClient: int keepAliveConnections> = $i1;
+
+        r0.<sun.net.www.http.HttpClient: int keepAliveTimeout> = 0;
+
+        r0.<sun.net.www.http.HttpClient: java.net.CacheRequest cacheRequest> = null;
+
+        r0.<sun.net.www.http.HttpClient: boolean reuse> = 0;
+
+        r0.<sun.net.www.http.HttpClient: sun.net.www.http.HttpCapture capture> = null;
+
+        return;
+    }
+
+    private void <init>(java.net.URL) throws java.io.IOException
+    {
+        int $i1;
+        sun.net.www.http.HttpClient r0;
+        java.net.URL r1;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        r1 := @parameter0: java.net.URL;
+
+        $i1 = (int) -1;
+
+        specialinvoke r0.<sun.net.www.http.HttpClient: void <init>(java.net.URL,java.lang.String,int,boolean)>(r1, null, $i1, 0);
+
+        return;
+    }
+
+    protected void <init>(java.net.URL, boolean) throws java.io.IOException
+    {
+        java.net.URL r1;
+        int $i1;
+        sun.net.www.http.HttpClient r0;
+        boolean z0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        r1 := @parameter0: java.net.URL;
+
+        z0 := @parameter1: boolean;
+
+        $i1 = (int) -1;
+
+        specialinvoke r0.<sun.net.www.http.HttpClient: void <init>(java.net.URL,java.lang.String,int,boolean)>(r1, null, $i1, z0);
+
+        return;
+    }
+
+    public void <init>(java.net.URL, java.lang.String, int) throws java.io.IOException
+    {
+        java.net.URL r1;
+        int i0;
+        java.lang.String r2;
+        sun.net.www.http.HttpClient r0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        r1 := @parameter0: java.net.URL;
+
+        r2 := @parameter1: java.lang.String;
+
+        i0 := @parameter2: int;
+
+        specialinvoke r0.<sun.net.www.http.HttpClient: void <init>(java.net.URL,java.lang.String,int,boolean)>(r1, r2, i0, 0);
+
+        return;
+    }
+
+    protected void <init>(java.net.URL, java.net.Proxy, int) throws java.io.IOException
+    {
+        java.net.URL r2;
+        sun.net.www.http.HttpClient r0;
+        sun.net.www.http.HttpCapture $r4;
+        java.net.Proxy r1, $r5;
+        int $i0, $i1, i2, $i3, $i5, $i7;
+        java.lang.String $r3;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        r2 := @parameter0: java.net.URL;
+
+        r1 := @parameter1: java.net.Proxy;
+
+        i2 := @parameter2: int;
+
+        specialinvoke r0.<sun.net.NetworkClient: void <init>()>();
+
+        r0.<sun.net.www.http.HttpClient: boolean cachedHttpClient> = 0;
+
+        r0.<sun.net.www.http.HttpClient: sun.net.www.http.PosterOutputStream poster> = null;
+
+        r0.<sun.net.www.http.HttpClient: boolean failedOnce> = 0;
+
+        r0.<sun.net.www.http.HttpClient: boolean ignoreContinue> = 1;
+
+        r0.<sun.net.www.http.HttpClient: boolean usingProxy> = 0;
+
+        r0.<sun.net.www.http.HttpClient: boolean keepingAlive> = 0;
+
+        $i5 = (int) -1;
+
+        r0.<sun.net.www.http.HttpClient: int keepAliveConnections> = $i5;
+
+        r0.<sun.net.www.http.HttpClient: int keepAliveTimeout> = 0;
+
+        r0.<sun.net.www.http.HttpClient: java.net.CacheRequest cacheRequest> = null;
+
+        r0.<sun.net.www.http.HttpClient: boolean reuse> = 0;
+
+        r0.<sun.net.www.http.HttpClient: sun.net.www.http.HttpCapture capture> = null;
+
+        if r1 != null goto label1;
+
+        $r5 = <java.net.Proxy: java.net.Proxy NO_PROXY>;
+
+        goto label2;
+
+     label1:
+        $r5 = r1;
+
+     label2:
+        r0.<sun.net.www.http.HttpClient: java.net.Proxy proxy> = $r5;
+
+        $r3 = virtualinvoke r2.<java.net.URL: java.lang.String getHost()>();
+
+        r0.<sun.net.www.http.HttpClient: java.lang.String host> = $r3;
+
+        r0.<sun.net.www.http.HttpClient: java.net.URL url> = r2;
+
+        $i0 = virtualinvoke r2.<java.net.URL: int getPort()>();
+
+        r0.<sun.net.www.http.HttpClient: int port> = $i0;
+
+        $i1 = r0.<sun.net.www.http.HttpClient: int port>;
+
+        $i7 = (int) -1;
+
+        if $i1 != $i7 goto label3;
+
+        $i3 = virtualinvoke r0.<sun.net.www.http.HttpClient: int getDefaultPort()>();
+
+        r0.<sun.net.www.http.HttpClient: int port> = $i3;
+
+     label3:
+        virtualinvoke r0.<sun.net.www.http.HttpClient: void setConnectTimeout(int)>(i2);
+
+        $r4 = staticinvoke <sun.net.www.http.HttpCapture: sun.net.www.http.HttpCapture getCapture(java.net.URL)>(r2);
+
+        r0.<sun.net.www.http.HttpClient: sun.net.www.http.HttpCapture capture> = $r4;
+
+        virtualinvoke r0.<sun.net.www.http.HttpClient: void openServer()>();
+
+        return;
+    }
+
+    protected static java.net.Proxy newHttpProxy(java.lang.String, int, java.lang.String)
+    {
+        java.net.InetSocketAddress $r3;
+        java.net.Proxy$Type $r5;
+        java.net.Proxy $r1, $r4;
+        int i0, $i1;
+        java.lang.String r0, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        r2 := @parameter2: java.lang.String;
+
+        if r0 == null goto label1;
+
+        if r2 != null goto label2;
+
+     label1:
+        $r1 = <java.net.Proxy: java.net.Proxy NO_PROXY>;
+
+        return $r1;
+
+     label2:
+        if i0 >= 0 goto label3;
+
+        $i1 = staticinvoke <sun.net.www.http.HttpClient: int getDefaultPort(java.lang.String)>(r2);
+
+        goto label4;
+
+     label3:
+        $i1 = i0;
+
+     label4:
+        $r3 = staticinvoke <java.net.InetSocketAddress: java.net.InetSocketAddress createUnresolved(java.lang.String,int)>(r0, $i1);
+
+        $r4 = new java.net.Proxy;
+
+        $r5 = <java.net.Proxy$Type: java.net.Proxy$Type HTTP>;
+
+        specialinvoke $r4.<java.net.Proxy: void <init>(java.net.Proxy$Type,java.net.SocketAddress)>($r5, $r3);
+
+        return $r4;
+    }
+
+    private void <init>(java.net.URL, java.lang.String, int, boolean) throws java.io.IOException
+    {
+        java.net.Proxy $r3;
+        java.net.URL r1;
+        int i0, $i2;
+        java.lang.String r2;
+        sun.net.www.http.HttpClient r0;
+        boolean z0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        r1 := @parameter0: java.net.URL;
+
+        r2 := @parameter1: java.lang.String;
+
+        i0 := @parameter2: int;
+
+        z0 := @parameter3: boolean;
+
+        if z0 == 0 goto label1;
+
+        $r3 = <java.net.Proxy: java.net.Proxy NO_PROXY>;
+
+        goto label2;
+
+     label1:
+        $r3 = staticinvoke <sun.net.www.http.HttpClient: java.net.Proxy newHttpProxy(java.lang.String,int,java.lang.String)>(r2, i0, "http");
+
+     label2:
+        $i2 = (int) -1;
+
+        specialinvoke r0.<sun.net.www.http.HttpClient: void <init>(java.net.URL,java.net.Proxy,int)>(r1, $r3, $i2);
+
+        return;
+    }
+
+    public void <init>(java.net.URL, java.lang.String, int, boolean, int) throws java.io.IOException
+    {
+        java.net.Proxy $r3;
+        java.net.URL r1;
+        int i0, i1;
+        java.lang.String r2;
+        sun.net.www.http.HttpClient r0;
+        boolean z0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        r1 := @parameter0: java.net.URL;
+
+        r2 := @parameter1: java.lang.String;
+
+        i0 := @parameter2: int;
+
+        z0 := @parameter3: boolean;
+
+        i1 := @parameter4: int;
+
+        if z0 == 0 goto label1;
+
+        $r3 = <java.net.Proxy: java.net.Proxy NO_PROXY>;
+
+        goto label2;
+
+     label1:
+        $r3 = staticinvoke <sun.net.www.http.HttpClient: java.net.Proxy newHttpProxy(java.lang.String,int,java.lang.String)>(r2, i0, "http");
+
+     label2:
+        specialinvoke r0.<sun.net.www.http.HttpClient: void <init>(java.net.URL,java.net.Proxy,int)>(r1, $r3, i1);
+
+        return;
+    }
+
+    public static sun.net.www.http.HttpClient New(java.net.URL) throws java.io.IOException
+    {
+        java.net.Proxy $r1;
+        java.net.URL r0;
+        int $i1;
+        sun.net.www.http.HttpClient $r2;
+
+        r0 := @parameter0: java.net.URL;
+
+        $r1 = <java.net.Proxy: java.net.Proxy NO_PROXY>;
+
+        $i1 = (int) -1;
+
+        $r2 = staticinvoke <sun.net.www.http.HttpClient: sun.net.www.http.HttpClient New(java.net.URL,java.net.Proxy,int,boolean,sun.net.www.protocol.http.HttpURLConnection)>(r0, $r1, $i1, 1, null);
+
+        return $r2;
+    }
+
+    public static sun.net.www.http.HttpClient New(java.net.URL, boolean) throws java.io.IOException
+    {
+        java.net.Proxy $r1;
+        java.net.URL r0;
+        int $i1;
+        sun.net.www.http.HttpClient $r2;
+        boolean z0;
+
+        r0 := @parameter0: java.net.URL;
+
+        z0 := @parameter1: boolean;
+
+        $r1 = <java.net.Proxy: java.net.Proxy NO_PROXY>;
+
+        $i1 = (int) -1;
+
+        $r2 = staticinvoke <sun.net.www.http.HttpClient: sun.net.www.http.HttpClient New(java.net.URL,java.net.Proxy,int,boolean,sun.net.www.protocol.http.HttpURLConnection)>(r0, $r1, $i1, z0, null);
+
+        return $r2;
+    }
+
+    public static sun.net.www.http.HttpClient New(java.net.URL, java.net.Proxy, int, boolean, sun.net.www.protocol.http.HttpURLConnection) throws java.io.IOException
+    {
+        sun.net.www.http.KeepAliveCache $r10;
+        java.net.URL r1;
+        java.net.InetAddress $r5;
+        java.net.Proxy $r2, $r3, $r7, $r12, $r13, $r17, r21;
+        boolean z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        sun.net.www.protocol.http.HttpURLConnection r14;
+        java.lang.StringBuilder $r24, $r25, $r26;
+        java.lang.Throwable $r19, $r20;
+        java.lang.AssertionError $r16;
+        sun.net.www.http.HttpClient $r9, $r11, r22, r23, r28;
+        sun.net.www.protocol.http.HttpURLConnection$TunnelState $r15;
+        int $i0, $i1, i2;
+        java.lang.String $r4, $r6, $r8, $r18, $r27;
+        java.lang.SecurityManager $r0;
+
+        r1 := @parameter0: java.net.URL;
+
+        r21 := @parameter1: java.net.Proxy;
+
+        i2 := @parameter2: int;
+
+        z0 := @parameter3: boolean;
+
+        r14 := @parameter4: sun.net.www.protocol.http.HttpURLConnection;
+
+        if r21 != null goto label01;
+
+        r21 = <java.net.Proxy: java.net.Proxy NO_PROXY>;
+
+     label01:
+        r22 = null;
+
+        if z0 == 0 goto label18;
+
+        $r10 = <sun.net.www.http.HttpClient: sun.net.www.http.KeepAliveCache kac>;
+
+        $r11 = virtualinvoke $r10.<sun.net.www.http.KeepAliveCache: sun.net.www.http.HttpClient get(java.net.URL,java.lang.Object)>(r1, null);
+
+        r22 = $r11;
+
+        if $r11 == null goto label02;
+
+        if r14 == null goto label02;
+
+        $z5 = virtualinvoke r14.<sun.net.www.protocol.http.HttpURLConnection: boolean streaming()>();
+
+        if $z5 == 0 goto label02;
+
+        $r18 = virtualinvoke r14.<sun.net.www.protocol.http.HttpURLConnection: java.lang.String getRequestMethod()>();
+
+        if $r18 != "POST" goto label02;
+
+        $z6 = virtualinvoke $r11.<sun.net.www.http.HttpClient: boolean available()>();
+
+        if $z6 != 0 goto label02;
+
+        $r11.<sun.net.www.http.HttpClient: boolean inCache> = 0;
+
+        virtualinvoke $r11.<sun.net.www.http.HttpClient: void closeServer()>();
+
+        r22 = null;
+
+     label02:
+        if r22 == null goto label18;
+
+        $r12 = r22.<sun.net.www.http.HttpClient: java.net.Proxy proxy>;
+
+        if $r12 == null goto label03;
+
+        $r17 = r22.<sun.net.www.http.HttpClient: java.net.Proxy proxy>;
+
+        $z4 = virtualinvoke $r17.<java.net.Proxy: boolean equals(java.lang.Object)>(r21);
+
+        if $z4 != 0 goto label04;
+
+     label03:
+        $r13 = r22.<sun.net.www.http.HttpClient: java.net.Proxy proxy>;
+
+        if $r13 != null goto label12;
+
+        if r21 != null goto label12;
+
+     label04:
+        r23 = r22;
+
+        entermonitor r22;
+
+     label05:
+        r22.<sun.net.www.http.HttpClient: boolean cachedHttpClient> = 1;
+
+        $z1 = <sun.net.www.http.HttpClient: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label06;
+
+        $z3 = r22.<sun.net.www.http.HttpClient: boolean inCache>;
+
+        if $z3 != 0 goto label06;
+
+        $r16 = new java.lang.AssertionError;
+
+        specialinvoke $r16.<java.lang.AssertionError: void <init>()>();
+
+        throw $r16;
+
+     label06:
+        r22.<sun.net.www.http.HttpClient: boolean inCache> = 0;
+
+        if r14 == null goto label07;
+
+        $z2 = virtualinvoke r22.<sun.net.www.http.HttpClient: boolean needsTunneling()>();
+
+        if $z2 == 0 goto label07;
+
+        $r15 = <sun.net.www.protocol.http.HttpURLConnection$TunnelState: sun.net.www.protocol.http.HttpURLConnection$TunnelState TUNNELING>;
+
+        virtualinvoke r14.<sun.net.www.protocol.http.HttpURLConnection: void setTunnelState(sun.net.www.protocol.http.HttpURLConnection$TunnelState)>($r15);
+
+     label07:
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("KeepAlive stream retrieved from the cache, ");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r22);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.net.www.http.HttpClient: void logFinest(java.lang.String)>($r27);
+
+        exitmonitor r23;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r20 := @caughtexception;
+
+        exitmonitor r23;
+
+     label10:
+        throw $r20;
+
+     label11:
+        goto label18;
+
+     label12:
+        r28 = r22;
+
+        entermonitor r22;
+
+     label13:
+        r22.<sun.net.www.http.HttpClient: boolean inCache> = 0;
+
+        virtualinvoke r22.<sun.net.www.http.HttpClient: void closeServer()>();
+
+        exitmonitor r22;
+
+     label14:
+        goto label17;
+
+     label15:
+        $r19 := @caughtexception;
+
+        exitmonitor r28;
+
+     label16:
+        throw $r19;
+
+     label17:
+        r22 = null;
+
+     label18:
+        if r22 != null goto label19;
+
+        $r9 = new sun.net.www.http.HttpClient;
+
+        specialinvoke $r9.<sun.net.www.http.HttpClient: void <init>(java.net.URL,java.net.Proxy,int)>(r1, r21, i2);
+
+        r22 = $r9;
+
+        goto label23;
+
+     label19:
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label22;
+
+        $r3 = r22.<sun.net.www.http.HttpClient: java.net.Proxy proxy>;
+
+        $r2 = <java.net.Proxy: java.net.Proxy NO_PROXY>;
+
+        if $r3 == $r2 goto label20;
+
+        $r7 = r22.<sun.net.www.http.HttpClient: java.net.Proxy proxy>;
+
+        if $r7 != null goto label21;
+
+     label20:
+        $r4 = virtualinvoke r1.<java.net.URL: java.lang.String getHost()>();
+
+        $r5 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByName(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+        $i0 = virtualinvoke r1.<java.net.URL: int getPort()>();
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkConnect(java.lang.String,int)>($r6, $i0);
+
+        goto label22;
+
+     label21:
+        $r8 = virtualinvoke r1.<java.net.URL: java.lang.String getHost()>();
+
+        $i1 = virtualinvoke r1.<java.net.URL: int getPort()>();
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkConnect(java.lang.String,int)>($r8, $i1);
+
+     label22:
+        r22.<sun.net.www.http.HttpClient: java.net.URL url> = r1;
+
+     label23:
+        return r22;
+
+        catch java.lang.Throwable from label05 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+        catch java.lang.Throwable from label13 to label14 with label15;
+        catch java.lang.Throwable from label15 to label16 with label15;
+    }
+
+    public static sun.net.www.http.HttpClient New(java.net.URL, java.net.Proxy, int, sun.net.www.protocol.http.HttpURLConnection) throws java.io.IOException
+    {
+        sun.net.www.protocol.http.HttpURLConnection r2;
+        java.net.Proxy r1;
+        java.net.URL r0;
+        int i0;
+        sun.net.www.http.HttpClient $r3;
+
+        r0 := @parameter0: java.net.URL;
+
+        r1 := @parameter1: java.net.Proxy;
+
+        i0 := @parameter2: int;
+
+        r2 := @parameter3: sun.net.www.protocol.http.HttpURLConnection;
+
+        $r3 = staticinvoke <sun.net.www.http.HttpClient: sun.net.www.http.HttpClient New(java.net.URL,java.net.Proxy,int,boolean,sun.net.www.protocol.http.HttpURLConnection)>(r0, r1, i0, 1, r2);
+
+        return $r3;
+    }
+
+    public static sun.net.www.http.HttpClient New(java.net.URL, java.lang.String, int, boolean) throws java.io.IOException
+    {
+        java.net.Proxy $r2;
+        java.net.URL r0;
+        int i0, $i2;
+        java.lang.String r1;
+        sun.net.www.http.HttpClient $r3;
+        boolean z0;
+
+        r0 := @parameter0: java.net.URL;
+
+        r1 := @parameter1: java.lang.String;
+
+        i0 := @parameter2: int;
+
+        z0 := @parameter3: boolean;
+
+        $r2 = staticinvoke <sun.net.www.http.HttpClient: java.net.Proxy newHttpProxy(java.lang.String,int,java.lang.String)>(r1, i0, "http");
+
+        $i2 = (int) -1;
+
+        $r3 = staticinvoke <sun.net.www.http.HttpClient: sun.net.www.http.HttpClient New(java.net.URL,java.net.Proxy,int,boolean,sun.net.www.protocol.http.HttpURLConnection)>(r0, $r2, $i2, z0, null);
+
+        return $r3;
+    }
+
+    public static sun.net.www.http.HttpClient New(java.net.URL, java.lang.String, int, boolean, int, sun.net.www.protocol.http.HttpURLConnection) throws java.io.IOException
+    {
+        java.net.URL r0;
+        sun.net.www.http.HttpClient $r4;
+        sun.net.www.protocol.http.HttpURLConnection r3;
+        java.net.Proxy $r2;
+        int i0, i1;
+        java.lang.String r1;
+        boolean z0;
+
+        r0 := @parameter0: java.net.URL;
+
+        r1 := @parameter1: java.lang.String;
+
+        i0 := @parameter2: int;
+
+        z0 := @parameter3: boolean;
+
+        i1 := @parameter4: int;
+
+        r3 := @parameter5: sun.net.www.protocol.http.HttpURLConnection;
+
+        $r2 = staticinvoke <sun.net.www.http.HttpClient: java.net.Proxy newHttpProxy(java.lang.String,int,java.lang.String)>(r1, i0, "http");
+
+        $r4 = staticinvoke <sun.net.www.http.HttpClient: sun.net.www.http.HttpClient New(java.net.URL,java.net.Proxy,int,boolean,sun.net.www.protocol.http.HttpURLConnection)>(r0, $r2, i1, z0, r3);
+
+        return $r4;
+    }
+
+    public void finished()
+    {
+        java.io.PrintStream $r1;
+        sun.net.www.http.HttpClient r0;
+        int $i0, $i1, $i2;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        $z0 = r0.<sun.net.www.http.HttpClient: boolean reuse>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $i0 = r0.<sun.net.www.http.HttpClient: int keepAliveConnections>;
+
+        $i1 = $i0 - 1;
+
+        r0.<sun.net.www.http.HttpClient: int keepAliveConnections> = $i1;
+
+        r0.<sun.net.www.http.HttpClient: sun.net.www.http.PosterOutputStream poster> = null;
+
+        $i2 = r0.<sun.net.www.http.HttpClient: int keepAliveConnections>;
+
+        if $i2 <= 0 goto label2;
+
+        $z1 = virtualinvoke r0.<sun.net.www.http.HttpClient: boolean isKeepingAlive()>();
+
+        if $z1 == 0 goto label2;
+
+        $r1 = r0.<sun.net.www.http.HttpClient: java.io.PrintStream serverOutput>;
+
+        $z2 = virtualinvoke $r1.<java.io.PrintStream: boolean checkError()>();
+
+        if $z2 != 0 goto label2;
+
+        virtualinvoke r0.<sun.net.www.http.HttpClient: void putInKeepAliveCache()>();
+
+        goto label3;
+
+     label2:
+        virtualinvoke r0.<sun.net.www.http.HttpClient: void closeServer()>();
+
+     label3:
+        return;
+    }
+
+    protected synchronized boolean available()
+    {
+        java.lang.Throwable $r8;
+        java.net.Socket $r1, $r2, $r4, $r6, $r9, $r11;
+        java.io.BufferedInputStream $r12;
+        sun.net.www.http.HttpClient r0;
+        java.net.SocketTimeoutException $r10;
+        int $i0, $i1, i2, $i4, $i6, $i8, $i10, $i12;
+        boolean z0;
+        java.io.IOException $r7;
+        java.io.InputStream $r5;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        z0 = 1;
+
+        $i4 = (int) -1;
+
+        i2 = $i4;
+
+     label01:
+        $r1 = r0.<sun.net.www.http.HttpClient: java.net.Socket serverSocket>;
+
+        $i0 = virtualinvoke $r1.<java.net.Socket: int getSoTimeout()>();
+
+        i2 = $i0;
+
+        $r2 = r0.<sun.net.www.http.HttpClient: java.net.Socket serverSocket>;
+
+        virtualinvoke $r2.<java.net.Socket: void setSoTimeout(int)>(1);
+
+        $r12 = new java.io.BufferedInputStream;
+
+        $r4 = r0.<sun.net.www.http.HttpClient: java.net.Socket serverSocket>;
+
+        $r5 = virtualinvoke $r4.<java.net.Socket: java.io.InputStream getInputStream()>();
+
+        specialinvoke $r12.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>($r5);
+
+        $i1 = virtualinvoke $r12.<java.io.BufferedInputStream: int read()>();
+
+        $i6 = (int) -1;
+
+        if $i1 != $i6 goto label02;
+
+        staticinvoke <sun.net.www.http.HttpClient: void logFinest(java.lang.String)>("HttpClient.available(): read returned -1: not available");
+
+        z0 = 0;
+
+     label02:
+        $i8 = (int) -1;
+
+        if $i0 == $i8 goto label08;
+
+        $r6 = r0.<sun.net.www.http.HttpClient: java.net.Socket serverSocket>;
+
+        virtualinvoke $r6.<java.net.Socket: void setSoTimeout(int)>($i0);
+
+        goto label08;
+
+     label03:
+        $r10 := @caughtexception;
+
+        staticinvoke <sun.net.www.http.HttpClient: void logFinest(java.lang.String)>("HttpClient.available(): SocketTimeout: its available");
+
+     label04:
+        $i10 = (int) -1;
+
+        if i2 == $i10 goto label08;
+
+        $r11 = r0.<sun.net.www.http.HttpClient: java.net.Socket serverSocket>;
+
+        virtualinvoke $r11.<java.net.Socket: void setSoTimeout(int)>(i2);
+
+        goto label08;
+
+     label05:
+        $r8 := @caughtexception;
+
+     label06:
+        $i12 = (int) -1;
+
+        if i2 == $i12 goto label07;
+
+        $r9 = r0.<sun.net.www.http.HttpClient: java.net.Socket serverSocket>;
+
+        virtualinvoke $r9.<java.net.Socket: void setSoTimeout(int)>(i2);
+
+     label07:
+        throw $r8;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r7 := @caughtexception;
+
+        staticinvoke <sun.net.www.http.HttpClient: void logFinest(java.lang.String)>("HttpClient.available(): SocketException: not available");
+
+        z0 = 0;
+
+     label10:
+        return z0;
+
+        catch java.net.SocketTimeoutException from label01 to label02 with label03;
+        catch java.lang.Throwable from label01 to label02 with label05;
+        catch java.lang.Throwable from label03 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.io.IOException from label01 to label08 with label09;
+    }
+
+    protected synchronized void putInKeepAliveCache()
+    {
+        sun.net.www.http.KeepAliveCache $r2;
+        java.net.URL $r1;
+        java.lang.AssertionError $r3;
+        sun.net.www.http.HttpClient r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        $z0 = r0.<sun.net.www.http.HttpClient: boolean inCache>;
+
+        if $z0 == 0 goto label2;
+
+        $z1 = <sun.net.www.http.HttpClient: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label1;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>(java.lang.Object)>("Duplicate put to keep alive cache");
+
+        throw $r3;
+
+     label1:
+        return;
+
+     label2:
+        r0.<sun.net.www.http.HttpClient: boolean inCache> = 1;
+
+        $r2 = <sun.net.www.http.HttpClient: sun.net.www.http.KeepAliveCache kac>;
+
+        $r1 = r0.<sun.net.www.http.HttpClient: java.net.URL url>;
+
+        virtualinvoke $r2.<sun.net.www.http.KeepAliveCache: void put(java.net.URL,java.lang.Object,sun.net.www.http.HttpClient)>($r1, null, r0);
+
+        return;
+    }
+
+    protected synchronized boolean isInKeepAliveCache()
+    {
+        sun.net.www.http.HttpClient r0;
+        boolean $z0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        $z0 = r0.<sun.net.www.http.HttpClient: boolean inCache>;
+
+        return $z0;
+    }
+
+    public void closeIdleConnection()
+    {
+        sun.net.www.http.KeepAliveCache $r2;
+        java.net.URL $r1;
+        sun.net.www.http.HttpClient r0, $r3;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        $r2 = <sun.net.www.http.HttpClient: sun.net.www.http.KeepAliveCache kac>;
+
+        $r1 = r0.<sun.net.www.http.HttpClient: java.net.URL url>;
+
+        $r3 = virtualinvoke $r2.<sun.net.www.http.KeepAliveCache: sun.net.www.http.HttpClient get(java.net.URL,java.lang.Object)>($r1, null);
+
+        if $r3 == null goto label1;
+
+        virtualinvoke $r3.<sun.net.www.http.HttpClient: void closeServer()>();
+
+     label1:
+        return;
+    }
+
+    public void openServer(java.lang.String, int) throws java.io.IOException
+    {
+        java.net.Socket $r2, $r3, $r9;
+        sun.net.www.http.HttpCaptureOutputStream $r10;
+        sun.net.www.http.HttpClient r0;
+        java.io.BufferedOutputStream $r7;
+        int i0;
+        java.lang.InternalError $r13;
+        java.lang.String r1, $r8, $r15, $r18;
+        java.io.OutputStream $r4, r19;
+        java.io.PrintStream $r6;
+        sun.net.www.http.HttpCapture $r5, $r11;
+        java.lang.StringBuilder $r14, $r16, $r17;
+        java.io.UnsupportedEncodingException $r12;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $r2 = virtualinvoke r0.<sun.net.www.http.HttpClient: java.net.Socket doConnect(java.lang.String,int)>(r1, i0);
+
+        r0.<sun.net.www.http.HttpClient: java.net.Socket serverSocket> = $r2;
+
+     label1:
+        $r3 = r0.<sun.net.www.http.HttpClient: java.net.Socket serverSocket>;
+
+        $r4 = virtualinvoke $r3.<java.net.Socket: java.io.OutputStream getOutputStream()>();
+
+        r19 = $r4;
+
+        $r5 = r0.<sun.net.www.http.HttpClient: sun.net.www.http.HttpCapture capture>;
+
+        if $r5 == null goto label2;
+
+        $r10 = new sun.net.www.http.HttpCaptureOutputStream;
+
+        $r11 = r0.<sun.net.www.http.HttpClient: sun.net.www.http.HttpCapture capture>;
+
+        specialinvoke $r10.<sun.net.www.http.HttpCaptureOutputStream: void <init>(java.io.OutputStream,sun.net.www.http.HttpCapture)>($r4, $r11);
+
+        r19 = $r10;
+
+     label2:
+        $r6 = new java.io.PrintStream;
+
+        $r7 = new java.io.BufferedOutputStream;
+
+        specialinvoke $r7.<java.io.BufferedOutputStream: void <init>(java.io.OutputStream)>(r19);
+
+        $r8 = <sun.net.www.http.HttpClient: java.lang.String encoding>;
+
+        specialinvoke $r6.<java.io.PrintStream: void <init>(java.io.OutputStream,boolean,java.lang.String)>($r7, 0, $r8);
+
+        r0.<sun.net.www.http.HttpClient: java.io.PrintStream serverOutput> = $r6;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r12 := @caughtexception;
+
+        $r13 = new java.lang.InternalError;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = <sun.net.www.http.HttpClient: java.lang.String encoding>;
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" encoding not found");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<java.lang.InternalError: void <init>(java.lang.String,java.lang.Throwable)>($r18, $r12);
+
+        throw $r13;
+
+     label5:
+        $r9 = r0.<sun.net.www.http.HttpClient: java.net.Socket serverSocket>;
+
+        virtualinvoke $r9.<java.net.Socket: void setTcpNoDelay(boolean)>(1);
+
+        return;
+
+        catch java.io.UnsupportedEncodingException from label1 to label3 with label4;
+    }
+
+    public boolean needsTunneling()
+    {
+        sun.net.www.http.HttpClient r0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        return 0;
+    }
+
+    public synchronized boolean isCachedConnection()
+    {
+        sun.net.www.http.HttpClient r0;
+        boolean $z0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        $z0 = r0.<sun.net.www.http.HttpClient: boolean cachedHttpClient>;
+
+        return $z0;
+    }
+
+    public void afterConnect() throws java.io.IOException, java.net.UnknownHostException
+    {
+        sun.net.www.http.HttpClient r0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        return;
+    }
+
+    private synchronized void privilegedOpenServer(java.net.InetSocketAddress) throws java.io.IOException
+    {
+        java.security.PrivilegedActionException $r3;
+        sun.net.www.http.HttpClient$1 $r0;
+        java.io.IOException $r5;
+        sun.net.www.http.HttpClient r1;
+        java.net.InetSocketAddress r2;
+        java.lang.Exception $r4;
+
+        r1 := @this: sun.net.www.http.HttpClient;
+
+        r2 := @parameter0: java.net.InetSocketAddress;
+
+     label1:
+        $r0 = new sun.net.www.http.HttpClient$1;
+
+        specialinvoke $r0.<sun.net.www.http.HttpClient$1: void <init>(sun.net.www.http.HttpClient,java.net.InetSocketAddress)>(r1, r2);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = virtualinvoke $r3.<java.security.PrivilegedActionException: java.lang.Exception getException()>();
+
+        $r5 = (java.io.IOException) $r4;
+
+        throw $r5;
+
+     label4:
+        return;
+
+        catch java.security.PrivilegedActionException from label1 to label2 with label3;
+    }
+
+    private void superOpenServer(java.lang.String, int) throws java.io.IOException, java.net.UnknownHostException
+    {
+        int i0;
+        java.lang.String r1;
+        sun.net.www.http.HttpClient r0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<sun.net.NetworkClient: void openServer(java.lang.String,int)>(r1, i0);
+
+        return;
+    }
+
+    protected synchronized void openServer() throws java.io.IOException
+    {
+        java.net.SocketAddress $r11, $r22;
+        java.net.URL $r2, $r13;
+        sun.net.www.http.HttpClient r1;
+        java.net.Proxy$Type $r7, $r8, $r18, $r19;
+        java.net.Proxy $r4, $r6, $r10, $r15, $r17, $r21;
+        int $i0, $i1, $i2;
+        java.lang.String $r3, $r5, $r9, $r14, $r16, $r20, $r24;
+        boolean $z0, $z1, $z2;
+        java.net.InetSocketAddress $r12, $r23;
+        java.lang.SecurityManager $r0;
+
+        r1 := @this: sun.net.www.http.HttpClient;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r24 = r1.<sun.net.www.http.HttpClient: java.lang.String host>;
+
+        $i2 = r1.<sun.net.www.http.HttpClient: int port>;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkConnect(java.lang.String,int)>($r24, $i2);
+
+     label1:
+        $z0 = r1.<sun.net.www.http.HttpClient: boolean keepingAlive>;
+
+        if $z0 == 0 goto label2;
+
+        return;
+
+     label2:
+        $r2 = r1.<sun.net.www.http.HttpClient: java.net.URL url>;
+
+        $r3 = virtualinvoke $r2.<java.net.URL: java.lang.String getProtocol()>();
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("http");
+
+        if $z1 != 0 goto label3;
+
+        $r13 = r1.<sun.net.www.http.HttpClient: java.net.URL url>;
+
+        $r14 = virtualinvoke $r13.<java.net.URL: java.lang.String getProtocol()>();
+
+        $z2 = virtualinvoke $r14.<java.lang.String: boolean equals(java.lang.Object)>("https");
+
+        if $z2 == 0 goto label5;
+
+     label3:
+        $r4 = r1.<sun.net.www.http.HttpClient: java.net.Proxy proxy>;
+
+        if $r4 == null goto label4;
+
+        $r6 = r1.<sun.net.www.http.HttpClient: java.net.Proxy proxy>;
+
+        $r7 = virtualinvoke $r6.<java.net.Proxy: java.net.Proxy$Type type()>();
+
+        $r8 = <java.net.Proxy$Type: java.net.Proxy$Type HTTP>;
+
+        if $r7 != $r8 goto label4;
+
+        $r9 = r1.<sun.net.www.http.HttpClient: java.lang.String host>;
+
+        staticinvoke <sun.net.www.URLConnection: void setProxiedHost(java.lang.String)>($r9);
+
+        $r10 = r1.<sun.net.www.http.HttpClient: java.net.Proxy proxy>;
+
+        $r11 = virtualinvoke $r10.<java.net.Proxy: java.net.SocketAddress address()>();
+
+        $r12 = (java.net.InetSocketAddress) $r11;
+
+        specialinvoke r1.<sun.net.www.http.HttpClient: void privilegedOpenServer(java.net.InetSocketAddress)>($r12);
+
+        r1.<sun.net.www.http.HttpClient: boolean usingProxy> = 1;
+
+        return;
+
+     label4:
+        $r5 = r1.<sun.net.www.http.HttpClient: java.lang.String host>;
+
+        $i0 = r1.<sun.net.www.http.HttpClient: int port>;
+
+        virtualinvoke r1.<sun.net.www.http.HttpClient: void openServer(java.lang.String,int)>($r5, $i0);
+
+        r1.<sun.net.www.http.HttpClient: boolean usingProxy> = 0;
+
+        return;
+
+     label5:
+        $r15 = r1.<sun.net.www.http.HttpClient: java.net.Proxy proxy>;
+
+        if $r15 == null goto label6;
+
+        $r17 = r1.<sun.net.www.http.HttpClient: java.net.Proxy proxy>;
+
+        $r18 = virtualinvoke $r17.<java.net.Proxy: java.net.Proxy$Type type()>();
+
+        $r19 = <java.net.Proxy$Type: java.net.Proxy$Type HTTP>;
+
+        if $r18 != $r19 goto label6;
+
+        $r20 = r1.<sun.net.www.http.HttpClient: java.lang.String host>;
+
+        staticinvoke <sun.net.www.URLConnection: void setProxiedHost(java.lang.String)>($r20);
+
+        $r21 = r1.<sun.net.www.http.HttpClient: java.net.Proxy proxy>;
+
+        $r22 = virtualinvoke $r21.<java.net.Proxy: java.net.SocketAddress address()>();
+
+        $r23 = (java.net.InetSocketAddress) $r22;
+
+        specialinvoke r1.<sun.net.www.http.HttpClient: void privilegedOpenServer(java.net.InetSocketAddress)>($r23);
+
+        r1.<sun.net.www.http.HttpClient: boolean usingProxy> = 1;
+
+        return;
+
+     label6:
+        $r16 = r1.<sun.net.www.http.HttpClient: java.lang.String host>;
+
+        $i1 = r1.<sun.net.www.http.HttpClient: int port>;
+
+        specialinvoke r1.<sun.net.NetworkClient: void openServer(java.lang.String,int)>($r16, $i1);
+
+        r1.<sun.net.www.http.HttpClient: boolean usingProxy> = 0;
+
+        return;
+    }
+
+    public java.lang.String getURLFile() throws java.io.IOException
+    {
+        java.net.URL $r1, $r8, $r10, $r12, $r14, $r16, $r18, $r20, $r22;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.StringBuilder $r5, $r6, $r26;
+        sun.net.www.http.HttpClient r0;
+        java.lang.StringBuffer $r25;
+        int $i1, $i2, $i4;
+        java.lang.String $r2, $r9, $r11, $r13, $r15, $r17, $r19, $r21, $r23, r24;
+        java.net.MalformedURLException $r27;
+        char $c0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        $z0 = r0.<sun.net.www.http.HttpClient: boolean usingProxy>;
+
+        if $z0 == 0 goto label4;
+
+        $z2 = r0.<sun.net.www.http.HttpClient: boolean proxyDisabled>;
+
+        if $z2 != 0 goto label4;
+
+        $r25 = new java.lang.StringBuffer;
+
+        specialinvoke $r25.<java.lang.StringBuffer: void <init>(int)>(128);
+
+        $r8 = r0.<sun.net.www.http.HttpClient: java.net.URL url>;
+
+        $r9 = virtualinvoke $r8.<java.net.URL: java.lang.String getProtocol()>();
+
+        virtualinvoke $r25.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r9);
+
+        virtualinvoke $r25.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>(":");
+
+        $r10 = r0.<sun.net.www.http.HttpClient: java.net.URL url>;
+
+        $r11 = virtualinvoke $r10.<java.net.URL: java.lang.String getAuthority()>();
+
+        if $r11 == null goto label1;
+
+        $r18 = r0.<sun.net.www.http.HttpClient: java.net.URL url>;
+
+        $r19 = virtualinvoke $r18.<java.net.URL: java.lang.String getAuthority()>();
+
+        $z3 = virtualinvoke $r19.<java.lang.String: boolean isEmpty()>();
+
+        if $z3 != 0 goto label1;
+
+        virtualinvoke $r25.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("//");
+
+        $r20 = r0.<sun.net.www.http.HttpClient: java.net.URL url>;
+
+        $r21 = virtualinvoke $r20.<java.net.URL: java.lang.String getAuthority()>();
+
+        virtualinvoke $r25.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r21);
+
+     label1:
+        $r22 = r0.<sun.net.www.http.HttpClient: java.net.URL url>;
+
+        $r23 = virtualinvoke $r22.<java.net.URL: java.lang.String getPath()>();
+
+        if $r23 == null goto label2;
+
+        $r16 = r0.<sun.net.www.http.HttpClient: java.net.URL url>;
+
+        $r17 = virtualinvoke $r16.<java.net.URL: java.lang.String getPath()>();
+
+        virtualinvoke $r25.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r17);
+
+     label2:
+        $r12 = r0.<sun.net.www.http.HttpClient: java.net.URL url>;
+
+        $r13 = virtualinvoke $r12.<java.net.URL: java.lang.String getQuery()>();
+
+        if $r13 == null goto label3;
+
+        virtualinvoke $r25.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(63);
+
+        $r14 = r0.<sun.net.www.http.HttpClient: java.net.URL url>;
+
+        $r15 = virtualinvoke $r14.<java.net.URL: java.lang.String getQuery()>();
+
+        virtualinvoke $r25.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r15);
+
+     label3:
+        r24 = virtualinvoke $r25.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        goto label7;
+
+     label4:
+        $r1 = r0.<sun.net.www.http.HttpClient: java.net.URL url>;
+
+        $r2 = virtualinvoke $r1.<java.net.URL: java.lang.String getFile()>();
+
+        r24 = $r2;
+
+        if $r2 == null goto label5;
+
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean isEmpty()>();
+
+        if $z1 == 0 goto label6;
+
+     label5:
+        r24 = "/";
+
+        goto label7;
+
+     label6:
+        $c0 = virtualinvoke $r2.<java.lang.String: char charAt(int)>(0);
+
+        $i2 = (int) $c0;
+
+        if $i2 != 63 goto label7;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        r24 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label7:
+        $i1 = virtualinvoke r24.<java.lang.String: int indexOf(int)>(10);
+
+        $i4 = (int) -1;
+
+        if $i1 != $i4 goto label8;
+
+        return r24;
+
+     label8:
+        $r27 = new java.net.MalformedURLException;
+
+        specialinvoke $r27.<java.net.MalformedURLException: void <init>(java.lang.String)>("Illegal character in URL");
+
+        throw $r27;
+    }
+
+    public void writeRequests(sun.net.www.MessageHeader)
+    {
+        sun.net.www.MessageHeader r1, $r3;
+        java.io.PrintStream $r2, $r4;
+        sun.net.www.http.HttpClient r0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        r1 := @parameter0: sun.net.www.MessageHeader;
+
+        r0.<sun.net.www.http.HttpClient: sun.net.www.MessageHeader requests> = r1;
+
+        $r3 = r0.<sun.net.www.http.HttpClient: sun.net.www.MessageHeader requests>;
+
+        $r2 = r0.<sun.net.www.http.HttpClient: java.io.PrintStream serverOutput>;
+
+        virtualinvoke $r3.<sun.net.www.MessageHeader: void print(java.io.PrintStream)>($r2);
+
+        $r4 = r0.<sun.net.www.http.HttpClient: java.io.PrintStream serverOutput>;
+
+        virtualinvoke $r4.<java.io.PrintStream: void flush()>();
+
+        return;
+    }
+
+    public void writeRequests(sun.net.www.MessageHeader, sun.net.www.http.PosterOutputStream) throws java.io.IOException
+    {
+        sun.net.www.MessageHeader r1, $r3;
+        java.io.PrintStream $r2, $r6, $r7;
+        sun.net.www.http.PosterOutputStream r4, $r5, $r8;
+        sun.net.www.http.HttpClient r0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        r1 := @parameter0: sun.net.www.MessageHeader;
+
+        r4 := @parameter1: sun.net.www.http.PosterOutputStream;
+
+        r0.<sun.net.www.http.HttpClient: sun.net.www.MessageHeader requests> = r1;
+
+        $r3 = r0.<sun.net.www.http.HttpClient: sun.net.www.MessageHeader requests>;
+
+        $r2 = r0.<sun.net.www.http.HttpClient: java.io.PrintStream serverOutput>;
+
+        virtualinvoke $r3.<sun.net.www.MessageHeader: void print(java.io.PrintStream)>($r2);
+
+        r0.<sun.net.www.http.HttpClient: sun.net.www.http.PosterOutputStream poster> = r4;
+
+        $r5 = r0.<sun.net.www.http.HttpClient: sun.net.www.http.PosterOutputStream poster>;
+
+        if $r5 == null goto label1;
+
+        $r8 = r0.<sun.net.www.http.HttpClient: sun.net.www.http.PosterOutputStream poster>;
+
+        $r7 = r0.<sun.net.www.http.HttpClient: java.io.PrintStream serverOutput>;
+
+        virtualinvoke $r8.<sun.net.www.http.PosterOutputStream: void writeTo(java.io.OutputStream)>($r7);
+
+     label1:
+        $r6 = r0.<sun.net.www.http.HttpClient: java.io.PrintStream serverOutput>;
+
+        virtualinvoke $r6.<java.io.PrintStream: void flush()>();
+
+        return;
+    }
+
+    public void writeRequests(sun.net.www.MessageHeader, sun.net.www.http.PosterOutputStream, boolean) throws java.io.IOException
+    {
+        sun.net.www.MessageHeader r1;
+        sun.net.www.http.PosterOutputStream r2;
+        sun.net.www.http.HttpClient r0;
+        boolean z0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        r1 := @parameter0: sun.net.www.MessageHeader;
+
+        r2 := @parameter1: sun.net.www.http.PosterOutputStream;
+
+        z0 := @parameter2: boolean;
+
+        r0.<sun.net.www.http.HttpClient: boolean streaming> = z0;
+
+        virtualinvoke r0.<sun.net.www.http.HttpClient: void writeRequests(sun.net.www.MessageHeader,sun.net.www.http.PosterOutputStream)>(r1, r2);
+
+        return;
+    }
+
+    public boolean parseHTTP(sun.net.www.MessageHeader, sun.net.ProgressSource, sun.net.www.protocol.http.HttpURLConnection) throws java.io.IOException
+    {
+        sun.net.www.MessageHeader r6, $r13, $r17, r18;
+        java.net.Socket $r1;
+        java.io.BufferedInputStream $r4;
+        sun.net.www.http.HttpClient r0;
+        sun.net.ProgressSource r7;
+        java.net.SocketTimeoutException $r19;
+        java.lang.String $r14, $r15;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        sun.net.www.http.PosterOutputStream $r16;
+        java.io.IOException $r12;
+        sun.net.www.http.HttpCapture $r3, $r10;
+        sun.net.www.protocol.http.HttpURLConnection r8;
+        sun.net.www.http.HttpCaptureInputStream $r9;
+        java.io.InputStream $r2, $r5, $r11;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        r6 := @parameter0: sun.net.www.MessageHeader;
+
+        r7 := @parameter1: sun.net.ProgressSource;
+
+        r8 := @parameter2: sun.net.www.protocol.http.HttpURLConnection;
+
+     label1:
+        $r1 = r0.<sun.net.www.http.HttpClient: java.net.Socket serverSocket>;
+
+        $r2 = virtualinvoke $r1.<java.net.Socket: java.io.InputStream getInputStream()>();
+
+        r0.<sun.net.www.http.HttpClient: java.io.InputStream serverInput> = $r2;
+
+        $r3 = r0.<sun.net.www.http.HttpClient: sun.net.www.http.HttpCapture capture>;
+
+        if $r3 == null goto label2;
+
+        $r9 = new sun.net.www.http.HttpCaptureInputStream;
+
+        $r11 = r0.<sun.net.www.http.HttpClient: java.io.InputStream serverInput>;
+
+        $r10 = r0.<sun.net.www.http.HttpClient: sun.net.www.http.HttpCapture capture>;
+
+        specialinvoke $r9.<sun.net.www.http.HttpCaptureInputStream: void <init>(java.io.InputStream,sun.net.www.http.HttpCapture)>($r11, $r10);
+
+        r0.<sun.net.www.http.HttpClient: java.io.InputStream serverInput> = $r9;
+
+     label2:
+        $r4 = new java.io.BufferedInputStream;
+
+        $r5 = r0.<sun.net.www.http.HttpClient: java.io.InputStream serverInput>;
+
+        specialinvoke $r4.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>($r5);
+
+        r0.<sun.net.www.http.HttpClient: java.io.InputStream serverInput> = $r4;
+
+        $z0 = specialinvoke r0.<sun.net.www.http.HttpClient: boolean parseHTTPHeader(sun.net.www.MessageHeader,sun.net.ProgressSource,sun.net.www.protocol.http.HttpURLConnection)>(r6, r7, r8);
+
+     label3:
+        return $z0;
+
+     label4:
+        $r19 := @caughtexception;
+
+        $z8 = r0.<sun.net.www.http.HttpClient: boolean ignoreContinue>;
+
+        if $z8 == 0 goto label5;
+
+        virtualinvoke r0.<sun.net.www.http.HttpClient: void closeServer()>();
+
+     label5:
+        throw $r19;
+
+     label6:
+        $r12 := @caughtexception;
+
+        virtualinvoke r0.<sun.net.www.http.HttpClient: void closeServer()>();
+
+        r0.<sun.net.www.http.HttpClient: boolean cachedHttpClient> = 0;
+
+        $z1 = r0.<sun.net.www.http.HttpClient: boolean failedOnce>;
+
+        if $z1 != 0 goto label9;
+
+        $r13 = r0.<sun.net.www.http.HttpClient: sun.net.www.MessageHeader requests>;
+
+        if $r13 == null goto label9;
+
+        r0.<sun.net.www.http.HttpClient: boolean failedOnce> = 1;
+
+        $r14 = virtualinvoke r0.<sun.net.www.http.HttpClient: java.lang.String getRequestMethod()>();
+
+        $z2 = virtualinvoke $r14.<java.lang.String: boolean equals(java.lang.Object)>("CONNECT");
+
+        if $z2 != 0 goto label9;
+
+        $z3 = r0.<sun.net.www.http.HttpClient: boolean streaming>;
+
+        if $z3 != 0 goto label9;
+
+        $r15 = virtualinvoke r8.<sun.net.www.protocol.http.HttpURLConnection: java.lang.String getRequestMethod()>();
+
+        $z4 = virtualinvoke $r15.<java.lang.String: boolean equals(java.lang.Object)>("POST");
+
+        if $z4 == 0 goto label7;
+
+        $z7 = <sun.net.www.http.HttpClient: boolean retryPostProp>;
+
+        if $z7 != 0 goto label7;
+
+        goto label9;
+
+     label7:
+        virtualinvoke r0.<sun.net.www.http.HttpClient: void openServer()>();
+
+        $z5 = virtualinvoke r0.<sun.net.www.http.HttpClient: boolean needsTunneling()>();
+
+        if $z5 == 0 goto label8;
+
+        r18 = r0.<sun.net.www.http.HttpClient: sun.net.www.MessageHeader requests>;
+
+        virtualinvoke r8.<sun.net.www.protocol.http.HttpURLConnection: void doTunneling()>();
+
+        r0.<sun.net.www.http.HttpClient: sun.net.www.MessageHeader requests> = r18;
+
+     label8:
+        virtualinvoke r0.<sun.net.www.http.HttpClient: void afterConnect()>();
+
+        $r17 = r0.<sun.net.www.http.HttpClient: sun.net.www.MessageHeader requests>;
+
+        $r16 = r0.<sun.net.www.http.HttpClient: sun.net.www.http.PosterOutputStream poster>;
+
+        virtualinvoke r0.<sun.net.www.http.HttpClient: void writeRequests(sun.net.www.MessageHeader,sun.net.www.http.PosterOutputStream)>($r17, $r16);
+
+        $z6 = virtualinvoke r0.<sun.net.www.http.HttpClient: boolean parseHTTP(sun.net.www.MessageHeader,sun.net.ProgressSource,sun.net.www.protocol.http.HttpURLConnection)>(r6, r7, r8);
+
+        return $z6;
+
+     label9:
+        throw $r12;
+
+        catch java.net.SocketTimeoutException from label1 to label3 with label4;
+        catch java.io.IOException from label1 to label3 with label6;
+    }
+
+    private boolean parseHTTPHeader(sun.net.www.MessageHeader, sun.net.ProgressSource, sun.net.www.protocol.http.HttpURLConnection) throws java.io.IOException
+    {
+        byte[] r1;
+        byte $b0, $b3, $b4, $b6, $b9, $b10, $b11, $b12, $b13, $b14, $b18, $b19, $b24;
+        java.util.Map $r40;
+        java.lang.StringBuilder $r15, $r17, $r55;
+        long l22;
+        sun.net.ProgressSource r8;
+        sun.net.www.http.PosterOutputStream $r28;
+        java.io.IOException $r44;
+        sun.net.www.MessageHeader r3, $r25, $r29, r48, $r50;
+        java.util.Locale $r32, $r36;
+        sun.net.www.http.HttpClient r0;
+        int $i2, $i5, $i7, $i8, $i15, $i16, i17, i20, i21, $i23, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i36, $i37, $i38, $i39;
+        sun.net.www.MeteredStream $r57, $r58;
+        java.lang.Exception $r43;
+        sun.net.www.protocol.http.HttpURLConnection r24;
+        java.net.SocketException $r53;
+        sun.net.www.http.KeepAliveStream $r56;
+        java.lang.String $r4, $r5, $r6, $r7, $r9, $r18, $r21, $r26, $r27, $r33, $r35, $r37, r45, r46, $r51;
+        java.lang.NumberFormatException $r42;
+        java.net.URL $r16, $r38;
+        java.net.URI $r39;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19, $z20, $z21, $z22, $z23, $z24, $z25, $z26, $z27, $z28, $z29, $z30, $z31, z33, $z34, z36, $z37, $z38, $z39, $z40, $z41, $z42, $z43, $z44, $z45, $z46, $z47, $z48, $z49;
+        sun.net.www.http.ChunkedInputStream $r54;
+        java.net.CookieHandler $r31;
+        sun.net.www.HeaderParser $r52;
+        char $c1;
+        java.io.InputStream $r2, $r11, $r13, $r20, $r23, $r30, $r41, $r47;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        r3 := @parameter0: sun.net.www.MessageHeader;
+
+        r8 := @parameter1: sun.net.ProgressSource;
+
+        r24 := @parameter2: sun.net.www.protocol.http.HttpURLConnection;
+
+        $i26 = (int) -1;
+
+        r0.<sun.net.www.http.HttpClient: int keepAliveConnections> = $i26;
+
+        r0.<sun.net.www.http.HttpClient: int keepAliveTimeout> = 0;
+
+        r1 = newarray (byte)[8];
+
+     label01:
+        i17 = 0;
+
+        $r2 = r0.<sun.net.www.http.HttpClient: java.io.InputStream serverInput>;
+
+        virtualinvoke $r2.<java.io.InputStream: void mark(int)>(10);
+
+     label02:
+        if i17 >= 8 goto label04;
+
+        $r41 = r0.<sun.net.www.http.HttpClient: java.io.InputStream serverInput>;
+
+        $i15 = 8 - i17;
+
+        $i16 = virtualinvoke $r41.<java.io.InputStream: int read(byte[],int,int)>(r1, i17, $i15);
+
+        if $i16 >= 0 goto label03;
+
+        goto label04;
+
+     label03:
+        i17 = i17 + $i16;
+
+        goto label02;
+
+     label04:
+        r45 = null;
+
+        r46 = null;
+
+        $b0 = r1[0];
+
+        $i27 = (int) $b0;
+
+        if $i27 != 72 goto label05;
+
+        $b9 = r1[1];
+
+        $i28 = (int) $b9;
+
+        if $i28 != 84 goto label05;
+
+        $b10 = r1[2];
+
+        $i29 = (int) $b10;
+
+        if $i29 != 84 goto label05;
+
+        $b11 = r1[3];
+
+        $i30 = (int) $b11;
+
+        if $i30 != 80 goto label05;
+
+        $b12 = r1[4];
+
+        $i31 = (int) $b12;
+
+        if $i31 != 47 goto label05;
+
+        $b13 = r1[5];
+
+        $i32 = (int) $b13;
+
+        if $i32 != 49 goto label05;
+
+        $b14 = r1[6];
+
+        $i33 = (int) $b14;
+
+        if $i33 != 46 goto label05;
+
+        $z49 = 1;
+
+        $z48 = 1;
+
+        goto label06;
+
+     label05:
+        $z49 = 0;
+
+        $z48 = 0;
+
+     label06:
+        z33 = $z49;
+
+        $r47 = r0.<sun.net.www.http.HttpClient: java.io.InputStream serverInput>;
+
+        virtualinvoke $r47.<java.io.InputStream: void reset()>();
+
+        if $z48 == 0 goto label32;
+
+        $r30 = r0.<sun.net.www.http.HttpClient: java.io.InputStream serverInput>;
+
+        virtualinvoke r3.<sun.net.www.MessageHeader: void parseHeader(java.io.InputStream)>($r30);
+
+        $r31 = virtualinvoke r24.<sun.net.www.protocol.http.HttpURLConnection: java.net.CookieHandler getCookieHandler()>();
+
+        if $r31 == null goto label07;
+
+        $r38 = r0.<sun.net.www.http.HttpClient: java.net.URL url>;
+
+        $r39 = staticinvoke <sun.net.www.ParseUtil: java.net.URI toURI(java.net.URL)>($r38);
+
+        if $r39 == null goto label07;
+
+        $r40 = virtualinvoke r3.<sun.net.www.MessageHeader: java.util.Map getHeaders()>();
+
+        virtualinvoke $r31.<java.net.CookieHandler: void put(java.net.URI,java.util.Map)>($r39, $r40);
+
+     label07:
+        $z34 = r0.<sun.net.www.http.HttpClient: boolean usingProxy>;
+
+        if $z34 == 0 goto label08;
+
+        r45 = virtualinvoke r3.<sun.net.www.MessageHeader: java.lang.String findValue(java.lang.String)>("Proxy-Connection");
+
+        r46 = virtualinvoke r3.<sun.net.www.MessageHeader: java.lang.String findValue(java.lang.String)>("Proxy-Authenticate");
+
+     label08:
+        if r45 != null goto label09;
+
+        r45 = virtualinvoke r3.<sun.net.www.MessageHeader: java.lang.String findValue(java.lang.String)>("Connection");
+
+        r46 = virtualinvoke r3.<sun.net.www.MessageHeader: java.lang.String findValue(java.lang.String)>("WWW-Authenticate");
+
+     label09:
+        $z15 = r0.<sun.net.www.http.HttpClient: boolean disableKeepAlive>;
+
+        if $z15 != 0 goto label10;
+
+        $z47 = 1;
+
+        $z46 = 1;
+
+        goto label11;
+
+     label10:
+        $z47 = 0;
+
+        $z46 = 0;
+
+     label11:
+        z36 = $z46;
+
+        if $z47 == 0 goto label20;
+
+        $z23 = <sun.net.www.http.HttpClient: boolean cacheNTLMProp>;
+
+        if $z23 == 0 goto label12;
+
+        $z31 = <sun.net.www.http.HttpClient: boolean cacheSPNEGOProp>;
+
+        if $z31 != 0 goto label20;
+
+     label12:
+        if r46 == null goto label20;
+
+        $r36 = <java.util.Locale: java.util.Locale US>;
+
+        $r37 = virtualinvoke r46.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r36);
+
+        $z24 = <sun.net.www.http.HttpClient: boolean cacheNTLMProp>;
+
+        if $z24 != 0 goto label15;
+
+        $z30 = z36;
+
+        $z29 = virtualinvoke $r37.<java.lang.String: boolean startsWith(java.lang.String)>("ntlm ");
+
+        if $z29 != 0 goto label13;
+
+        $z37 = 1;
+
+        goto label14;
+
+     label13:
+        $z37 = 0;
+
+     label14:
+        z36 = $z30 & $z37;
+
+     label15:
+        $z38 = <sun.net.www.http.HttpClient: boolean cacheSPNEGOProp>;
+
+        if $z38 != 0 goto label20;
+
+        $z27 = z36;
+
+        $z25 = virtualinvoke $r37.<java.lang.String: boolean startsWith(java.lang.String)>("negotiate ");
+
+        if $z25 != 0 goto label16;
+
+        $z39 = 1;
+
+        goto label17;
+
+     label16:
+        $z39 = 0;
+
+     label17:
+        $z28 = $z27 & $z39;
+
+        $z26 = virtualinvoke $r37.<java.lang.String: boolean startsWith(java.lang.String)>("kerberos ");
+
+        if $z26 != 0 goto label18;
+
+        $z40 = 1;
+
+        goto label19;
+
+     label18:
+        $z40 = 0;
+
+     label19:
+        z36 = $z28 & $z40;
+
+     label20:
+        $z16 = r0.<sun.net.www.http.HttpClient: boolean disableKeepAlive>;
+
+        if z36 != 0 goto label21;
+
+        $z41 = 1;
+
+        goto label22;
+
+     label21:
+        $z41 = 0;
+
+     label22:
+        $z17 = $z16 | $z41;
+
+        r0.<sun.net.www.http.HttpClient: boolean disableKeepAlive> = $z17;
+
+        if r45 == null goto label28;
+
+        $r32 = <java.util.Locale: java.util.Locale US>;
+
+        $r33 = virtualinvoke r45.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r32);
+
+        $z19 = virtualinvoke $r33.<java.lang.String: boolean equals(java.lang.Object)>("keep-alive");
+
+        if $z19 == 0 goto label28;
+
+        $z20 = r0.<sun.net.www.http.HttpClient: boolean disableKeepAlive>;
+
+        if $z20 == 0 goto label23;
+
+        r0.<sun.net.www.http.HttpClient: int keepAliveConnections> = 1;
+
+        goto label31;
+
+     label23:
+        $r52 = new sun.net.www.HeaderParser;
+
+        $r35 = virtualinvoke r3.<sun.net.www.MessageHeader: java.lang.String findValue(java.lang.String)>("Keep-Alive");
+
+        specialinvoke $r52.<sun.net.www.HeaderParser: void <init>(java.lang.String)>($r35);
+
+        $z21 = r0.<sun.net.www.http.HttpClient: boolean usingProxy>;
+
+        if $z21 == 0 goto label24;
+
+        $b18 = 50;
+
+        goto label25;
+
+     label24:
+        $b18 = 5;
+
+     label25:
+        $i7 = virtualinvoke $r52.<sun.net.www.HeaderParser: int findInt(java.lang.String,int)>("max", $b18);
+
+        r0.<sun.net.www.http.HttpClient: int keepAliveConnections> = $i7;
+
+        $z22 = r0.<sun.net.www.http.HttpClient: boolean usingProxy>;
+
+        if $z22 == 0 goto label26;
+
+        $b19 = 60;
+
+        goto label27;
+
+     label26:
+        $b19 = 5;
+
+     label27:
+        $i8 = virtualinvoke $r52.<sun.net.www.HeaderParser: int findInt(java.lang.String,int)>("timeout", $b19);
+
+        r0.<sun.net.www.http.HttpClient: int keepAliveTimeout> = $i8;
+
+        goto label31;
+
+     label28:
+        $b6 = r1[7];
+
+        $i34 = (int) $b6;
+
+        if $i34 == 48 goto label31;
+
+        if r45 != null goto label29;
+
+        $z18 = r0.<sun.net.www.http.HttpClient: boolean disableKeepAlive>;
+
+        if $z18 == 0 goto label30;
+
+     label29:
+        r0.<sun.net.www.http.HttpClient: int keepAliveConnections> = 1;
+
+        goto label31;
+
+     label30:
+        r0.<sun.net.www.http.HttpClient: int keepAliveConnections> = 5;
+
+     label31:
+        goto label38;
+
+     label32:
+        if i17 == 8 goto label37;
+
+        $z8 = r0.<sun.net.www.http.HttpClient: boolean failedOnce>;
+
+        if $z8 != 0 goto label36;
+
+        $r25 = r0.<sun.net.www.http.HttpClient: sun.net.www.MessageHeader requests>;
+
+        if $r25 == null goto label36;
+
+        r0.<sun.net.www.http.HttpClient: boolean failedOnce> = 1;
+
+        $r26 = virtualinvoke r0.<sun.net.www.http.HttpClient: java.lang.String getRequestMethod()>();
+
+        $z9 = virtualinvoke $r26.<java.lang.String: boolean equals(java.lang.Object)>("CONNECT");
+
+        if $z9 != 0 goto label36;
+
+        $z10 = r0.<sun.net.www.http.HttpClient: boolean streaming>;
+
+        if $z10 != 0 goto label36;
+
+        $r27 = virtualinvoke r24.<sun.net.www.protocol.http.HttpURLConnection: java.lang.String getRequestMethod()>();
+
+        $z11 = virtualinvoke $r27.<java.lang.String: boolean equals(java.lang.Object)>("POST");
+
+        if $z11 == 0 goto label33;
+
+        $z14 = <sun.net.www.http.HttpClient: boolean retryPostProp>;
+
+        if $z14 != 0 goto label33;
+
+        goto label36;
+
+     label33:
+        virtualinvoke r0.<sun.net.www.http.HttpClient: void closeServer()>();
+
+        r0.<sun.net.www.http.HttpClient: boolean cachedHttpClient> = 0;
+
+        virtualinvoke r0.<sun.net.www.http.HttpClient: void openServer()>();
+
+        $z12 = virtualinvoke r0.<sun.net.www.http.HttpClient: boolean needsTunneling()>();
+
+        if $z12 == 0 goto label34;
+
+        r48 = r0.<sun.net.www.http.HttpClient: sun.net.www.MessageHeader requests>;
+
+        virtualinvoke r24.<sun.net.www.protocol.http.HttpURLConnection: void doTunneling()>();
+
+        r0.<sun.net.www.http.HttpClient: sun.net.www.MessageHeader requests> = r48;
+
+     label34:
+        virtualinvoke r0.<sun.net.www.http.HttpClient: void afterConnect()>();
+
+        $r29 = r0.<sun.net.www.http.HttpClient: sun.net.www.MessageHeader requests>;
+
+        $r28 = r0.<sun.net.www.http.HttpClient: sun.net.www.http.PosterOutputStream poster>;
+
+        virtualinvoke r0.<sun.net.www.http.HttpClient: void writeRequests(sun.net.www.MessageHeader,sun.net.www.http.PosterOutputStream)>($r29, $r28);
+
+        $z13 = virtualinvoke r0.<sun.net.www.http.HttpClient: boolean parseHTTP(sun.net.www.MessageHeader,sun.net.ProgressSource,sun.net.www.protocol.http.HttpURLConnection)>(r3, r8, r24);
+
+     label35:
+        return $z13;
+
+     label36:
+        $r53 = new java.net.SocketException;
+
+        specialinvoke $r53.<java.net.SocketException: void <init>(java.lang.String)>("Unexpected end of file from server");
+
+        throw $r53;
+
+     label37:
+        virtualinvoke r3.<sun.net.www.MessageHeader: void set(java.lang.String,java.lang.String)>("Content-type", "unknown/unknown");
+
+     label38:
+        goto label40;
+
+     label39:
+        $r44 := @caughtexception;
+
+        throw $r44;
+
+     label40:
+        $i36 = (int) -1;
+
+        i20 = $i36;
+
+     label41:
+        $r4 = virtualinvoke r3.<sun.net.www.MessageHeader: java.lang.String getValue(int)>(0);
+
+        i21 = virtualinvoke $r4.<java.lang.String: int indexOf(int)>(32);
+
+     label42:
+        $c1 = virtualinvoke $r4.<java.lang.String: char charAt(int)>(i21);
+
+        $i37 = (int) $c1;
+
+        if $i37 != 32 goto label43;
+
+        i21 = i21 + 1;
+
+        goto label42;
+
+     label43:
+        $i2 = i21 + 3;
+
+        $r5 = virtualinvoke $r4.<java.lang.String: java.lang.String substring(int,int)>(i21, $i2);
+
+        i20 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r5);
+
+     label44:
+        goto label46;
+
+     label45:
+        $r43 := @caughtexception;
+
+     label46:
+        if i20 != 100 goto label47;
+
+        $z6 = r0.<sun.net.www.http.HttpClient: boolean ignoreContinue>;
+
+        if $z6 == 0 goto label47;
+
+        virtualinvoke r3.<sun.net.www.MessageHeader: void reset()>();
+
+        $z7 = specialinvoke r0.<sun.net.www.http.HttpClient: boolean parseHTTPHeader(sun.net.www.MessageHeader,sun.net.ProgressSource,sun.net.www.protocol.http.HttpURLConnection)>(r3, r8, r24);
+
+        return $z7;
+
+     label47:
+        l22 = -1L;
+
+        $r6 = virtualinvoke r3.<sun.net.www.MessageHeader: java.lang.String findValue(java.lang.String)>("Transfer-Encoding");
+
+        if $r6 == null goto label52;
+
+        $z4 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("chunked");
+
+        if $z4 == 0 goto label52;
+
+        $r54 = new sun.net.www.http.ChunkedInputStream;
+
+        $r23 = r0.<sun.net.www.http.HttpClient: java.io.InputStream serverInput>;
+
+        specialinvoke $r54.<sun.net.www.http.ChunkedInputStream: void <init>(java.io.InputStream,sun.net.www.http.HttpClient,sun.net.www.MessageHeader)>($r23, r0, r3);
+
+        r0.<sun.net.www.http.HttpClient: java.io.InputStream serverInput> = $r54;
+
+        $i5 = r0.<sun.net.www.http.HttpClient: int keepAliveConnections>;
+
+        if $i5 > 1 goto label48;
+
+        r0.<sun.net.www.http.HttpClient: int keepAliveConnections> = 1;
+
+        r0.<sun.net.www.http.HttpClient: boolean keepingAlive> = 0;
+
+        goto label51;
+
+     label48:
+        $z5 = r0.<sun.net.www.http.HttpClient: boolean disableKeepAlive>;
+
+        if $z5 != 0 goto label49;
+
+        $z42 = 1;
+
+        goto label50;
+
+     label49:
+        $z42 = 0;
+
+     label50:
+        r0.<sun.net.www.http.HttpClient: boolean keepingAlive> = $z42;
+
+     label51:
+        r0.<sun.net.www.http.HttpClient: boolean failedOnce> = 0;
+
+        goto label64;
+
+     label52:
+        $r7 = virtualinvoke r3.<sun.net.www.MessageHeader: java.lang.String findValue(java.lang.String)>("content-length");
+
+        if $r7 == null goto label56;
+
+     label53:
+        l22 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>($r7);
+
+     label54:
+        goto label56;
+
+     label55:
+        $r42 := @caughtexception;
+
+        l22 = -1L;
+
+     label56:
+        $r50 = r0.<sun.net.www.http.HttpClient: sun.net.www.MessageHeader requests>;
+
+        $r51 = virtualinvoke $r50.<sun.net.www.MessageHeader: java.lang.String getKey(int)>(0);
+
+        if $r51 == null goto label57;
+
+        $z3 = virtualinvoke $r51.<java.lang.String: boolean startsWith(java.lang.String)>("HEAD");
+
+        if $z3 != 0 goto label58;
+
+     label57:
+        if i20 == 304 goto label58;
+
+        if i20 != 204 goto label59;
+
+     label58:
+        l22 = 0L;
+
+     label59:
+        $i23 = r0.<sun.net.www.http.HttpClient: int keepAliveConnections>;
+
+        if $i23 <= 1 goto label63;
+
+        $b4 = l22 cmp 0L;
+
+        $i38 = (int) $b4;
+
+        if $i38 >= 0 goto label60;
+
+        if i20 == 304 goto label60;
+
+        if i20 != 204 goto label63;
+
+     label60:
+        $z43 = r0.<sun.net.www.http.HttpClient: boolean disableKeepAlive>;
+
+        if $z43 != 0 goto label61;
+
+        $z44 = 1;
+
+        goto label62;
+
+     label61:
+        $z44 = 0;
+
+     label62:
+        r0.<sun.net.www.http.HttpClient: boolean keepingAlive> = $z44;
+
+        r0.<sun.net.www.http.HttpClient: boolean failedOnce> = 0;
+
+        goto label64;
+
+     label63:
+        $z0 = r0.<sun.net.www.http.HttpClient: boolean keepingAlive>;
+
+        if $z0 == 0 goto label64;
+
+        r0.<sun.net.www.http.HttpClient: boolean keepingAlive> = 0;
+
+     label64:
+        $b24 = l22 cmp 0L;
+
+        $i39 = (int) $b24;
+
+        if $i39 <= 0 goto label71;
+
+        if r8 == null goto label65;
+
+        $r21 = virtualinvoke r3.<sun.net.www.MessageHeader: java.lang.String findValue(java.lang.String)>("content-type");
+
+        virtualinvoke r8.<sun.net.ProgressSource: void setContentType(java.lang.String)>($r21);
+
+     label65:
+        $z1 = virtualinvoke r0.<sun.net.www.http.HttpClient: boolean isKeepingAlive()>();
+
+        if $z1 != 0 goto label66;
+
+        $z2 = r0.<sun.net.www.http.HttpClient: boolean disableKeepAlive>;
+
+        if $z2 == 0 goto label67;
+
+     label66:
+        $z45 = 1;
+
+        goto label68;
+
+     label67:
+        $z45 = 0;
+
+     label68:
+        if $z45 == 0 goto label69;
+
+        $r55 = new java.lang.StringBuilder;
+
+        specialinvoke $r55.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("KeepAlive stream used: ");
+
+        $r16 = r0.<sun.net.www.http.HttpClient: java.net.URL url>;
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r16);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.net.www.http.HttpClient: void logFinest(java.lang.String)>($r18);
+
+        $r56 = new sun.net.www.http.KeepAliveStream;
+
+        $r20 = r0.<sun.net.www.http.HttpClient: java.io.InputStream serverInput>;
+
+        specialinvoke $r56.<sun.net.www.http.KeepAliveStream: void <init>(java.io.InputStream,sun.net.ProgressSource,long,sun.net.www.http.HttpClient)>($r20, r8, l22, r0);
+
+        r0.<sun.net.www.http.HttpClient: java.io.InputStream serverInput> = $r56;
+
+        r0.<sun.net.www.http.HttpClient: boolean failedOnce> = 0;
+
+        goto label70;
+
+     label69:
+        $r57 = new sun.net.www.MeteredStream;
+
+        $r13 = r0.<sun.net.www.http.HttpClient: java.io.InputStream serverInput>;
+
+        specialinvoke $r57.<sun.net.www.MeteredStream: void <init>(java.io.InputStream,sun.net.ProgressSource,long)>($r13, r8, l22);
+
+        r0.<sun.net.www.http.HttpClient: java.io.InputStream serverInput> = $r57;
+
+     label70:
+        goto label73;
+
+     label71:
+        $b3 = l22 cmp -1L;
+
+        if $b3 != 0 goto label72;
+
+        if r8 == null goto label73;
+
+        $r9 = virtualinvoke r3.<sun.net.www.MessageHeader: java.lang.String findValue(java.lang.String)>("content-type");
+
+        virtualinvoke r8.<sun.net.ProgressSource: void setContentType(java.lang.String)>($r9);
+
+        $r58 = new sun.net.www.MeteredStream;
+
+        $r11 = r0.<sun.net.www.http.HttpClient: java.io.InputStream serverInput>;
+
+        specialinvoke $r58.<sun.net.www.MeteredStream: void <init>(java.io.InputStream,sun.net.ProgressSource,long)>($r11, r8, l22);
+
+        r0.<sun.net.www.http.HttpClient: java.io.InputStream serverInput> = $r58;
+
+        goto label73;
+
+     label72:
+        if r8 == null goto label73;
+
+        virtualinvoke r8.<sun.net.ProgressSource: void finishTracking()>();
+
+     label73:
+        return z33;
+
+        catch java.io.IOException from label01 to label35 with label39;
+        catch java.io.IOException from label36 to label38 with label39;
+        catch java.lang.Exception from label41 to label44 with label45;
+        catch java.lang.NumberFormatException from label53 to label54 with label55;
+    }
+
+    public synchronized java.io.InputStream getInputStream()
+    {
+        sun.net.www.http.HttpClient r0;
+        java.io.InputStream $r1;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        $r1 = r0.<sun.net.www.http.HttpClient: java.io.InputStream serverInput>;
+
+        return $r1;
+    }
+
+    public java.io.OutputStream getOutputStream()
+    {
+        java.io.PrintStream $r1;
+        sun.net.www.http.HttpClient r0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        $r1 = r0.<sun.net.www.http.HttpClient: java.io.PrintStream serverOutput>;
+
+        return $r1;
+    }
+
+    public java.lang.String toString()
+    {
+        java.net.URL $r6;
+        sun.net.www.http.HttpClient r1;
+        java.lang.StringBuilder $r0, $r4, $r5, $r7, $r8;
+        java.lang.Class $r2;
+        java.lang.String $r3, $r9;
+
+        r1 := @this: sun.net.www.http.HttpClient;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        $r4 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(");
+
+        $r6 = r1.<sun.net.www.http.HttpClient: java.net.URL url>;
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r9;
+    }
+
+    public final boolean isKeepingAlive()
+    {
+        sun.net.www.http.HttpClient r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        $z0 = virtualinvoke r0.<sun.net.www.http.HttpClient: boolean getHttpKeepAliveSet()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = r0.<sun.net.www.http.HttpClient: boolean keepingAlive>;
+
+        if $z1 == 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+    }
+
+    public void setCacheRequest(java.net.CacheRequest)
+    {
+        java.net.CacheRequest r1;
+        sun.net.www.http.HttpClient r0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        r1 := @parameter0: java.net.CacheRequest;
+
+        r0.<sun.net.www.http.HttpClient: java.net.CacheRequest cacheRequest> = r1;
+
+        return;
+    }
+
+    java.net.CacheRequest getCacheRequest()
+    {
+        java.net.CacheRequest $r1;
+        sun.net.www.http.HttpClient r0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        $r1 = r0.<sun.net.www.http.HttpClient: java.net.CacheRequest cacheRequest>;
+
+        return $r1;
+    }
+
+    java.lang.String getRequestMethod()
+    {
+        sun.net.www.MessageHeader $r1, $r2;
+        java.lang.String[] $r4;
+        java.lang.String $r3, $r5;
+        sun.net.www.http.HttpClient r0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        $r1 = r0.<sun.net.www.http.HttpClient: sun.net.www.MessageHeader requests>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.net.www.http.HttpClient: sun.net.www.MessageHeader requests>;
+
+        $r3 = virtualinvoke $r2.<sun.net.www.MessageHeader: java.lang.String getKey(int)>(0);
+
+        if $r3 == null goto label1;
+
+        $r4 = virtualinvoke $r3.<java.lang.String: java.lang.String[] split(java.lang.String)>("\\s+");
+
+        $r5 = $r4[0];
+
+        return $r5;
+
+     label1:
+        return "";
+    }
+
+    protected void finalize() throws java.lang.Throwable
+    {
+        sun.net.www.http.HttpClient r0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        return;
+    }
+
+    public void setDoNotRetry(boolean)
+    {
+        sun.net.www.http.HttpClient r0;
+        boolean z0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        z0 := @parameter0: boolean;
+
+        r0.<sun.net.www.http.HttpClient: boolean failedOnce> = z0;
+
+        return;
+    }
+
+    public void setIgnoreContinue(boolean)
+    {
+        sun.net.www.http.HttpClient r0;
+        boolean z0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        z0 := @parameter0: boolean;
+
+        r0.<sun.net.www.http.HttpClient: boolean ignoreContinue> = z0;
+
+        return;
+    }
+
+    public void closeServer()
+    {
+        java.net.Socket $r1;
+        sun.net.www.http.HttpClient r0;
+        java.lang.Exception $r2;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+     label1:
+        r0.<sun.net.www.http.HttpClient: boolean keepingAlive> = 0;
+
+        $r1 = r0.<sun.net.www.http.HttpClient: java.net.Socket serverSocket>;
+
+        virtualinvoke $r1.<java.net.Socket: void close()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public java.lang.String getProxyHostUsed()
+    {
+        java.net.SocketAddress $r2;
+        java.net.Proxy $r1;
+        java.lang.String $r4;
+        sun.net.www.http.HttpClient r0;
+        java.net.InetSocketAddress $r3;
+        boolean $z0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        $z0 = r0.<sun.net.www.http.HttpClient: boolean usingProxy>;
+
+        if $z0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r1 = r0.<sun.net.www.http.HttpClient: java.net.Proxy proxy>;
+
+        $r2 = virtualinvoke $r1.<java.net.Proxy: java.net.SocketAddress address()>();
+
+        $r3 = (java.net.InetSocketAddress) $r2;
+
+        $r4 = virtualinvoke $r3.<java.net.InetSocketAddress: java.lang.String getHostString()>();
+
+        return $r4;
+    }
+
+    public int getProxyPortUsed()
+    {
+        java.net.SocketAddress $r2;
+        java.net.Proxy $r1;
+        int $i0, $i2;
+        sun.net.www.http.HttpClient r0;
+        java.net.InetSocketAddress $r3;
+        boolean $z0;
+
+        r0 := @this: sun.net.www.http.HttpClient;
+
+        $z0 = r0.<sun.net.www.http.HttpClient: boolean usingProxy>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = r0.<sun.net.www.http.HttpClient: java.net.Proxy proxy>;
+
+        $r2 = virtualinvoke $r1.<java.net.Proxy: java.net.SocketAddress address()>();
+
+        $r3 = (java.net.InetSocketAddress) $r2;
+
+        $i0 = virtualinvoke $r3.<java.net.InetSocketAddress: int getPort()>();
+
+        return $i0;
+
+     label1:
+        $i2 = (int) -1;
+
+        return $i2;
+    }
+
+    static void <clinit>()
+    {
+        sun.net.www.http.KeepAliveCache $r1;
+        sun.security.action.GetPropertyAction $r3, $r5, $r7, $r9;
+        java.lang.Boolean $r11, $r12;
+        java.lang.String $r13, $r14, $r15, $r16;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        sun.util.logging.PlatformLogger $r2;
+        java.lang.Class $r0;
+        java.lang.Object $r4, $r6, $r8, $r10;
+
+        <sun.net.www.http.HttpClient: int httpPortNumber> = 80;
+
+        <sun.net.www.http.HttpClient: int HTTP_CONTINUE> = 100;
+
+        $r0 = class "Lsun/net/www/http/HttpClient;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label01;
+
+        $z5 = 1;
+
+        goto label02;
+
+     label01:
+        $z5 = 0;
+
+     label02:
+        <sun.net.www.http.HttpClient: boolean $assertionsDisabled> = $z5;
+
+        $r1 = new sun.net.www.http.KeepAliveCache;
+
+        specialinvoke $r1.<sun.net.www.http.KeepAliveCache: void <init>()>();
+
+        <sun.net.www.http.HttpClient: sun.net.www.http.KeepAliveCache kac> = $r1;
+
+        <sun.net.www.http.HttpClient: boolean keepAliveProp> = 1;
+
+        <sun.net.www.http.HttpClient: boolean retryPostProp> = 1;
+
+        $r2 = staticinvoke <sun.net.www.protocol.http.HttpURLConnection: sun.util.logging.PlatformLogger getHttpLogger()>();
+
+        <sun.net.www.http.HttpClient: sun.util.logging.PlatformLogger logger> = $r2;
+
+        $r3 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r3.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("http.keepAlive");
+
+        $r4 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r3);
+
+        $r13 = (java.lang.String) $r4;
+
+        $r5 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r5.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("sun.net.http.retryPost");
+
+        $r6 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r5);
+
+        $r14 = (java.lang.String) $r6;
+
+        $r7 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r7.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("jdk.ntlm.cache");
+
+        $r8 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r7);
+
+        $r15 = (java.lang.String) $r8;
+
+        $r9 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r9.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("jdk.spnego.cache");
+
+        $r10 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r9);
+
+        $r16 = (java.lang.String) $r10;
+
+        if $r13 == null goto label03;
+
+        $r12 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(java.lang.String)>($r13);
+
+        $z4 = virtualinvoke $r12.<java.lang.Boolean: boolean booleanValue()>();
+
+        <sun.net.www.http.HttpClient: boolean keepAliveProp> = $z4;
+
+        goto label04;
+
+     label03:
+        <sun.net.www.http.HttpClient: boolean keepAliveProp> = 1;
+
+     label04:
+        if $r14 == null goto label05;
+
+        $r11 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(java.lang.String)>($r14);
+
+        $z3 = virtualinvoke $r11.<java.lang.Boolean: boolean booleanValue()>();
+
+        <sun.net.www.http.HttpClient: boolean retryPostProp> = $z3;
+
+        goto label06;
+
+     label05:
+        <sun.net.www.http.HttpClient: boolean retryPostProp> = 1;
+
+     label06:
+        if $r15 == null goto label07;
+
+        $z2 = staticinvoke <java.lang.Boolean: boolean parseBoolean(java.lang.String)>($r15);
+
+        <sun.net.www.http.HttpClient: boolean cacheNTLMProp> = $z2;
+
+        goto label08;
+
+     label07:
+        <sun.net.www.http.HttpClient: boolean cacheNTLMProp> = 1;
+
+     label08:
+        if $r16 == null goto label09;
+
+        $z1 = staticinvoke <java.lang.Boolean: boolean parseBoolean(java.lang.String)>($r16);
+
+        <sun.net.www.http.HttpClient: boolean cacheSPNEGOProp> = $z1;
+
+        goto label10;
+
+     label09:
+        <sun.net.www.http.HttpClient: boolean cacheSPNEGOProp> = 1;
+
+     label10:
+        return;
+    }
+}

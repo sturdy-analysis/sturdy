@@ -1,0 +1,413 @@
+public class java.util.concurrent.atomic.DoubleAccumulator extends java.util.concurrent.atomic.Striped64 implements java.io.Serializable
+{
+    private static final long serialVersionUID;
+    private final java.util.function.DoubleBinaryOperator function;
+    private final long identity;
+
+    public void <init>(java.util.function.DoubleBinaryOperator, double)
+    {
+        java.util.function.DoubleBinaryOperator r1;
+        long $l0;
+        java.util.concurrent.atomic.DoubleAccumulator r0;
+        double d0;
+
+        r0 := @this: java.util.concurrent.atomic.DoubleAccumulator;
+
+        r1 := @parameter0: java.util.function.DoubleBinaryOperator;
+
+        d0 := @parameter1: double;
+
+        specialinvoke r0.<java.util.concurrent.atomic.Striped64: void <init>()>();
+
+        r0.<java.util.concurrent.atomic.DoubleAccumulator: java.util.function.DoubleBinaryOperator function> = r1;
+
+        $l0 = staticinvoke <java.lang.Double: long doubleToRawLongBits(double)>(d0);
+
+        r0.<java.util.concurrent.atomic.DoubleAccumulator: long identity> = $l0;
+
+        r0.<java.util.concurrent.atomic.DoubleAccumulator: long base> = $l0;
+
+        return;
+    }
+
+    public void accumulate(double)
+    {
+        java.util.concurrent.atomic.Striped64$Cell[] $r1;
+        long $l4, $l5, $l7, $l8;
+        java.util.function.DoubleBinaryOperator $r3, $r4, $r5;
+        byte $b6, $b9;
+        int $i0, $i1, $i2, $i3;
+        java.util.concurrent.atomic.DoubleAccumulator r0;
+        double d0, $d1, $d2, $d3, $d4;
+        boolean $z0, $z1, z2, $z4, $z5;
+        java.util.concurrent.atomic.Striped64$Cell $r2;
+
+        r0 := @this: java.util.concurrent.atomic.DoubleAccumulator;
+
+        d0 := @parameter0: double;
+
+        $r1 = r0.<java.util.concurrent.atomic.DoubleAccumulator: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        if $r1 != null goto label1;
+
+        $r4 = r0.<java.util.concurrent.atomic.DoubleAccumulator: java.util.function.DoubleBinaryOperator function>;
+
+        $l7 = r0.<java.util.concurrent.atomic.DoubleAccumulator: long base>;
+
+        $d3 = staticinvoke <java.lang.Double: double longBitsToDouble(long)>($l7);
+
+        $d4 = interfaceinvoke $r4.<java.util.function.DoubleBinaryOperator: double applyAsDouble(double,double)>($d3, d0);
+
+        $l8 = staticinvoke <java.lang.Double: long doubleToRawLongBits(double)>($d4);
+
+        $b9 = $l8 cmp $l7;
+
+        if $b9 == 0 goto label6;
+
+        $z1 = virtualinvoke r0.<java.util.concurrent.atomic.DoubleAccumulator: boolean casBase(long,long)>($l7, $l8);
+
+        if $z1 != 0 goto label6;
+
+     label1:
+        z2 = 1;
+
+        if $r1 == null goto label5;
+
+        $i0 = lengthof $r1;
+
+        $i1 = $i0 - 1;
+
+        if $i1 < 0 goto label5;
+
+        $i2 = staticinvoke <java.util.concurrent.atomic.DoubleAccumulator: int getProbe()>();
+
+        $i3 = $i2 & $i1;
+
+        $r2 = $r1[$i3];
+
+        if $r2 == null goto label5;
+
+        $r3 = r0.<java.util.concurrent.atomic.DoubleAccumulator: java.util.function.DoubleBinaryOperator function>;
+
+        $l4 = $r2.<java.util.concurrent.atomic.Striped64$Cell: long value>;
+
+        $d1 = staticinvoke <java.lang.Double: double longBitsToDouble(long)>($l4);
+
+        $d2 = interfaceinvoke $r3.<java.util.function.DoubleBinaryOperator: double applyAsDouble(double,double)>($d1, d0);
+
+        $l5 = staticinvoke <java.lang.Double: long doubleToRawLongBits(double)>($d2);
+
+        $b6 = $l5 cmp $l4;
+
+        if $b6 == 0 goto label2;
+
+        $z0 = virtualinvoke $r2.<java.util.concurrent.atomic.Striped64$Cell: boolean cas(long,long)>($l4, $l5);
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        $z5 = 1;
+
+        $z4 = 1;
+
+        goto label4;
+
+     label3:
+        $z5 = 0;
+
+        $z4 = 0;
+
+     label4:
+        z2 = $z4;
+
+        if $z5 != 0 goto label6;
+
+     label5:
+        $r5 = r0.<java.util.concurrent.atomic.DoubleAccumulator: java.util.function.DoubleBinaryOperator function>;
+
+        virtualinvoke r0.<java.util.concurrent.atomic.DoubleAccumulator: void doubleAccumulate(double,java.util.function.DoubleBinaryOperator,boolean)>(d0, $r5, z2);
+
+     label6:
+        return;
+    }
+
+    public double get()
+    {
+        java.util.concurrent.atomic.Striped64$Cell[] r1;
+        long $l0, $l2;
+        java.util.concurrent.atomic.Striped64$Cell $r2;
+        java.util.function.DoubleBinaryOperator $r3;
+        int $i1, i3;
+        java.util.concurrent.atomic.DoubleAccumulator r0;
+        double $d0, d1;
+
+        r0 := @this: java.util.concurrent.atomic.DoubleAccumulator;
+
+        r1 = r0.<java.util.concurrent.atomic.DoubleAccumulator: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        $l0 = r0.<java.util.concurrent.atomic.DoubleAccumulator: long base>;
+
+        d1 = staticinvoke <java.lang.Double: double longBitsToDouble(long)>($l0);
+
+        if r1 == null goto label3;
+
+        i3 = 0;
+
+     label1:
+        $i1 = lengthof r1;
+
+        if i3 >= $i1 goto label3;
+
+        $r2 = r1[i3];
+
+        if $r2 == null goto label2;
+
+        $r3 = r0.<java.util.concurrent.atomic.DoubleAccumulator: java.util.function.DoubleBinaryOperator function>;
+
+        $l2 = $r2.<java.util.concurrent.atomic.Striped64$Cell: long value>;
+
+        $d0 = staticinvoke <java.lang.Double: double longBitsToDouble(long)>($l2);
+
+        d1 = interfaceinvoke $r3.<java.util.function.DoubleBinaryOperator: double applyAsDouble(double,double)>(d1, $d0);
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        return d1;
+    }
+
+    public void reset()
+    {
+        java.util.concurrent.atomic.Striped64$Cell[] r1;
+        int $i1, i3;
+        long $l0, $l2;
+        java.util.concurrent.atomic.DoubleAccumulator r0;
+        java.util.concurrent.atomic.Striped64$Cell $r2;
+
+        r0 := @this: java.util.concurrent.atomic.DoubleAccumulator;
+
+        r1 = r0.<java.util.concurrent.atomic.DoubleAccumulator: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        $l0 = r0.<java.util.concurrent.atomic.DoubleAccumulator: long identity>;
+
+        r0.<java.util.concurrent.atomic.DoubleAccumulator: long base> = $l0;
+
+        if r1 == null goto label3;
+
+        i3 = 0;
+
+     label1:
+        $i1 = lengthof r1;
+
+        if i3 >= $i1 goto label3;
+
+        $r2 = r1[i3];
+
+        if $r2 == null goto label2;
+
+        $l2 = r0.<java.util.concurrent.atomic.DoubleAccumulator: long identity>;
+
+        $r2.<java.util.concurrent.atomic.Striped64$Cell: long value> = $l2;
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    public double getThenReset()
+    {
+        java.util.concurrent.atomic.Striped64$Cell[] r1;
+        long $l0, $l1, $l3, $l4;
+        java.util.concurrent.atomic.Striped64$Cell $r2;
+        java.util.function.DoubleBinaryOperator $r3;
+        int $i2, i5;
+        java.util.concurrent.atomic.DoubleAccumulator r0;
+        double $d0, d1;
+
+        r0 := @this: java.util.concurrent.atomic.DoubleAccumulator;
+
+        r1 = r0.<java.util.concurrent.atomic.DoubleAccumulator: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        $l0 = r0.<java.util.concurrent.atomic.DoubleAccumulator: long base>;
+
+        d1 = staticinvoke <java.lang.Double: double longBitsToDouble(long)>($l0);
+
+        $l1 = r0.<java.util.concurrent.atomic.DoubleAccumulator: long identity>;
+
+        r0.<java.util.concurrent.atomic.DoubleAccumulator: long base> = $l1;
+
+        if r1 == null goto label3;
+
+        i5 = 0;
+
+     label1:
+        $i2 = lengthof r1;
+
+        if i5 >= $i2 goto label3;
+
+        $r2 = r1[i5];
+
+        if $r2 == null goto label2;
+
+        $l3 = $r2.<java.util.concurrent.atomic.Striped64$Cell: long value>;
+
+        $d0 = staticinvoke <java.lang.Double: double longBitsToDouble(long)>($l3);
+
+        $l4 = r0.<java.util.concurrent.atomic.DoubleAccumulator: long identity>;
+
+        $r2.<java.util.concurrent.atomic.Striped64$Cell: long value> = $l4;
+
+        $r3 = r0.<java.util.concurrent.atomic.DoubleAccumulator: java.util.function.DoubleBinaryOperator function>;
+
+        d1 = interfaceinvoke $r3.<java.util.function.DoubleBinaryOperator: double applyAsDouble(double,double)>(d1, $d0);
+
+     label2:
+        i5 = i5 + 1;
+
+        goto label1;
+
+     label3:
+        return d1;
+    }
+
+    public java.lang.String toString()
+    {
+        java.lang.String $r1;
+        java.util.concurrent.atomic.DoubleAccumulator r0;
+        double $d0;
+
+        r0 := @this: java.util.concurrent.atomic.DoubleAccumulator;
+
+        $d0 = virtualinvoke r0.<java.util.concurrent.atomic.DoubleAccumulator: double get()>();
+
+        $r1 = staticinvoke <java.lang.Double: java.lang.String toString(double)>($d0);
+
+        return $r1;
+    }
+
+    public double doubleValue()
+    {
+        java.util.concurrent.atomic.DoubleAccumulator r0;
+        double $d0;
+
+        r0 := @this: java.util.concurrent.atomic.DoubleAccumulator;
+
+        $d0 = virtualinvoke r0.<java.util.concurrent.atomic.DoubleAccumulator: double get()>();
+
+        return $d0;
+    }
+
+    public long longValue()
+    {
+        long $l0;
+        java.util.concurrent.atomic.DoubleAccumulator r0;
+        double $d0;
+
+        r0 := @this: java.util.concurrent.atomic.DoubleAccumulator;
+
+        $d0 = virtualinvoke r0.<java.util.concurrent.atomic.DoubleAccumulator: double get()>();
+
+        $l0 = (long) $d0;
+
+        return $l0;
+    }
+
+    public int intValue()
+    {
+        int $i0;
+        java.util.concurrent.atomic.DoubleAccumulator r0;
+        double $d0;
+
+        r0 := @this: java.util.concurrent.atomic.DoubleAccumulator;
+
+        $d0 = virtualinvoke r0.<java.util.concurrent.atomic.DoubleAccumulator: double get()>();
+
+        $i0 = (int) $d0;
+
+        return $i0;
+    }
+
+    public float floatValue()
+    {
+        float $f0;
+        java.util.concurrent.atomic.DoubleAccumulator r0;
+        double $d0;
+
+        r0 := @this: java.util.concurrent.atomic.DoubleAccumulator;
+
+        $d0 = virtualinvoke r0.<java.util.concurrent.atomic.DoubleAccumulator: double get()>();
+
+        $f0 = (float) $d0;
+
+        return $f0;
+    }
+
+    private java.lang.Object writeReplace()
+    {
+        java.util.concurrent.atomic.DoubleAccumulator$SerializationProxy $r0;
+        java.util.concurrent.atomic.DoubleAccumulator r1;
+
+        r1 := @this: java.util.concurrent.atomic.DoubleAccumulator;
+
+        $r0 = new java.util.concurrent.atomic.DoubleAccumulator$SerializationProxy;
+
+        specialinvoke $r0.<java.util.concurrent.atomic.DoubleAccumulator$SerializationProxy: void <init>(java.util.concurrent.atomic.DoubleAccumulator)>(r1);
+
+        return $r0;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.InvalidObjectException
+    {
+        java.io.ObjectInputStream r2;
+        java.io.InvalidObjectException $r0;
+        java.util.concurrent.atomic.DoubleAccumulator r1;
+
+        r1 := @this: java.util.concurrent.atomic.DoubleAccumulator;
+
+        r2 := @parameter0: java.io.ObjectInputStream;
+
+        $r0 = new java.io.InvalidObjectException;
+
+        specialinvoke $r0.<java.io.InvalidObjectException: void <init>(java.lang.String)>("Proxy required");
+
+        throw $r0;
+    }
+
+    static java.util.function.DoubleBinaryOperator access$000(java.util.concurrent.atomic.DoubleAccumulator)
+    {
+        java.util.function.DoubleBinaryOperator $r1;
+        java.util.concurrent.atomic.DoubleAccumulator r0;
+
+        r0 := @parameter0: java.util.concurrent.atomic.DoubleAccumulator;
+
+        $r1 = r0.<java.util.concurrent.atomic.DoubleAccumulator: java.util.function.DoubleBinaryOperator function>;
+
+        return $r1;
+    }
+
+    static long access$100(java.util.concurrent.atomic.DoubleAccumulator)
+    {
+        long $l0;
+        java.util.concurrent.atomic.DoubleAccumulator r0;
+
+        r0 := @parameter0: java.util.concurrent.atomic.DoubleAccumulator;
+
+        $l0 = r0.<java.util.concurrent.atomic.DoubleAccumulator: long identity>;
+
+        return $l0;
+    }
+
+    public static void <clinit>()
+    {
+        <java.util.concurrent.atomic.DoubleAccumulator: long serialVersionUID> = 7249069246863182397L;
+
+        return;
+    }
+}

@@ -1,0 +1,806 @@
+public class com.sun.xml.internal.ws.transport.http.client.HttpClientTransport extends java.lang.Object
+{
+    private static final byte[] THROW_AWAY_BUFFER;
+    int statusCode;
+    java.lang.String statusMessage;
+    int contentLength;
+    private final java.util.Map reqHeaders;
+    private java.util.Map respHeaders;
+    private java.io.OutputStream outputStream;
+    private boolean https;
+    private java.net.HttpURLConnection httpConnection;
+    private final com.sun.xml.internal.ws.api.EndpointAddress endpoint;
+    private final com.sun.xml.internal.ws.api.message.Packet context;
+    private final java.lang.Integer chunkSize;
+
+    public void <init>(com.sun.xml.internal.ws.api.message.Packet, java.util.Map)
+    {
+        com.sun.xml.internal.ws.api.EndpointAddress $r2;
+        java.lang.Integer $r7;
+        java.util.Map r3, $r5;
+        com.sun.xml.internal.ws.api.message.Packet r1, $r4;
+        java.lang.Object $r6;
+        com.sun.xml.internal.ws.transport.http.client.HttpClientTransport r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.client.HttpClientTransport;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.api.message.Packet;
+
+        r3 := @parameter1: java.util.Map;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.util.Map respHeaders> = null;
+
+        r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection> = null;
+
+        $r2 = r1.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.api.EndpointAddress endpointAddress>;
+
+        r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: com.sun.xml.internal.ws.api.EndpointAddress endpoint> = $r2;
+
+        r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: com.sun.xml.internal.ws.api.message.Packet context> = r1;
+
+        r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.util.Map reqHeaders> = r3;
+
+        $r4 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: com.sun.xml.internal.ws.api.message.Packet context>;
+
+        $r5 = $r4.<com.sun.xml.internal.ws.api.message.Packet: java.util.Map invocationProperties>;
+
+        $r6 = interfaceinvoke $r5.<java.util.Map: java.lang.Object get(java.lang.Object)>("com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size");
+
+        $r7 = (java.lang.Integer) $r6;
+
+        r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.lang.Integer chunkSize> = $r7;
+
+        return;
+    }
+
+    java.io.OutputStream getOutput()
+    {
+        java.net.HttpURLConnection $r2, $r18;
+        com.sun.xml.internal.ws.transport.http.client.HttpClientTransport$WSChunkedOuputStream $r11;
+        com.sun.istack.internal.localization.Localizable $r17;
+        java.lang.Integer $r4, $r12;
+        java.util.Map $r5;
+        int $i0;
+        java.lang.String $r8;
+        boolean $z0, $z1;
+        java.io.OutputStream $r1, $r3, $r10, $r13;
+        java.lang.Exception $r15;
+        java.util.List $r14;
+        com.sun.xml.internal.ws.client.ClientTransportException $r16;
+        java.lang.Object $r6, $r7;
+        java.util.zip.GZIPOutputStream $r9;
+        com.sun.xml.internal.ws.transport.http.client.HttpClientTransport r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.client.HttpClientTransport;
+
+     label1:
+        specialinvoke r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: void createHttpConnection()>();
+
+        $z0 = specialinvoke r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: boolean requiresOutputStream()>();
+
+        if $z0 == 0 goto label3;
+
+        $r2 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection>;
+
+        $r3 = virtualinvoke $r2.<java.net.HttpURLConnection: java.io.OutputStream getOutputStream()>();
+
+        r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.io.OutputStream outputStream> = $r3;
+
+        $r4 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.lang.Integer chunkSize>;
+
+        if $r4 == null goto label2;
+
+        $r11 = new com.sun.xml.internal.ws.transport.http.client.HttpClientTransport$WSChunkedOuputStream;
+
+        $r13 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.io.OutputStream outputStream>;
+
+        $r12 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.lang.Integer chunkSize>;
+
+        $i0 = virtualinvoke $r12.<java.lang.Integer: int intValue()>();
+
+        specialinvoke $r11.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport$WSChunkedOuputStream: void <init>(java.io.OutputStream,int)>($r13, $i0);
+
+        r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.io.OutputStream outputStream> = $r11;
+
+     label2:
+        $r5 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.util.Map reqHeaders>;
+
+        $r6 = interfaceinvoke $r5.<java.util.Map: java.lang.Object get(java.lang.Object)>("Content-Encoding");
+
+        $r14 = (java.util.List) $r6;
+
+        if $r14 == null goto label3;
+
+        $r7 = interfaceinvoke $r14.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r8 = (java.lang.String) $r7;
+
+        $z1 = virtualinvoke $r8.<java.lang.String: boolean contains(java.lang.CharSequence)>("gzip");
+
+        if $z1 == 0 goto label3;
+
+        $r9 = new java.util.zip.GZIPOutputStream;
+
+        $r10 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.io.OutputStream outputStream>;
+
+        specialinvoke $r9.<java.util.zip.GZIPOutputStream: void <init>(java.io.OutputStream)>($r10);
+
+        r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.io.OutputStream outputStream> = $r9;
+
+     label3:
+        $r18 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection>;
+
+        virtualinvoke $r18.<java.net.HttpURLConnection: void connect()>();
+
+     label4:
+        goto label6;
+
+     label5:
+        $r15 := @caughtexception;
+
+        $r16 = new com.sun.xml.internal.ws.client.ClientTransportException;
+
+        $r17 = staticinvoke <com.sun.xml.internal.ws.resources.ClientMessages: com.sun.istack.internal.localization.Localizable localizableHTTP_CLIENT_FAILED(java.lang.Object)>($r15);
+
+        specialinvoke $r16.<com.sun.xml.internal.ws.client.ClientTransportException: void <init>(com.sun.istack.internal.localization.Localizable,java.lang.Throwable)>($r17, $r15);
+
+        throw $r16;
+
+     label6:
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.io.OutputStream outputStream>;
+
+        return $r1;
+
+        catch java.lang.Exception from label1 to label4 with label5;
+    }
+
+    void closeOutput() throws java.io.IOException
+    {
+        java.io.OutputStream $r1, $r2;
+        com.sun.xml.internal.ws.transport.http.client.HttpClientTransport r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.client.HttpClientTransport;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.io.OutputStream outputStream>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.io.OutputStream outputStream>;
+
+        virtualinvoke $r2.<java.io.OutputStream: void close()>();
+
+        r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.io.OutputStream outputStream> = null;
+
+     label1:
+        return;
+    }
+
+    java.io.InputStream getInput()
+    {
+        java.net.HttpURLConnection $r2;
+        java.util.zip.GZIPInputStream $r4;
+        java.io.IOException $r5;
+        com.sun.istack.internal.localization.Localizable $r9;
+        java.lang.Integer $r7;
+        int $i0;
+        com.sun.xml.internal.ws.client.ClientTransportException $r6;
+        java.lang.String $r3, $r8;
+        com.sun.xml.internal.ws.transport.http.client.HttpClientTransport r0;
+        java.io.InputStream $r1, r10;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.client.HttpClientTransport;
+
+     label1:
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.io.InputStream readResponse()>();
+
+        r10 = $r1;
+
+        if $r1 == null goto label2;
+
+        $r2 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection>;
+
+        $r3 = virtualinvoke $r2.<java.net.HttpURLConnection: java.lang.String getContentEncoding()>();
+
+        if $r3 == null goto label2;
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean contains(java.lang.CharSequence)>("gzip");
+
+        if $z0 == 0 goto label2;
+
+        $r4 = new java.util.zip.GZIPInputStream;
+
+        specialinvoke $r4.<java.util.zip.GZIPInputStream: void <init>(java.io.InputStream)>($r1);
+
+        r10 = $r4;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new com.sun.xml.internal.ws.client.ClientTransportException;
+
+        $i0 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: int statusCode>;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r8 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.lang.String statusMessage>;
+
+        $r9 = staticinvoke <com.sun.xml.internal.ws.resources.ClientMessages: com.sun.istack.internal.localization.Localizable localizableHTTP_STATUS_CODE(java.lang.Object,java.lang.Object)>($r7, $r8);
+
+        specialinvoke $r6.<com.sun.xml.internal.ws.client.ClientTransportException: void <init>(com.sun.istack.internal.localization.Localizable,java.lang.Throwable)>($r9, $r5);
+
+        throw $r6;
+
+     label4:
+        return r10;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public java.util.Map getHeaders()
+    {
+        java.net.HttpURLConnection $r3;
+        java.util.Map $r1, $r4, $r5, $r6, $r7;
+        com.sun.xml.internal.ws.transport.Headers $r2;
+        com.sun.xml.internal.ws.transport.http.client.HttpClientTransport r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.client.HttpClientTransport;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.util.Map respHeaders>;
+
+        if $r1 == null goto label1;
+
+        $r7 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.util.Map respHeaders>;
+
+        return $r7;
+
+     label1:
+        $r2 = new com.sun.xml.internal.ws.transport.Headers;
+
+        specialinvoke $r2.<com.sun.xml.internal.ws.transport.Headers: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.util.Map respHeaders> = $r2;
+
+        $r4 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.util.Map respHeaders>;
+
+        $r3 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection>;
+
+        $r5 = virtualinvoke $r3.<java.net.HttpURLConnection: java.util.Map getHeaderFields()>();
+
+        interfaceinvoke $r4.<java.util.Map: void putAll(java.util.Map)>($r5);
+
+        $r6 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.util.Map respHeaders>;
+
+        return $r6;
+    }
+
+    protected java.io.InputStream readResponse()
+    {
+        java.net.HttpURLConnection $r1, $r4;
+        java.io.IOException $r3;
+        com.sun.xml.internal.ws.transport.http.client.HttpClientTransport r0;
+        com.sun.xml.internal.ws.transport.http.client.HttpClientTransport$1 $r2;
+        java.io.InputStream r5;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.client.HttpClientTransport;
+
+     label1:
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection>;
+
+        r5 = virtualinvoke $r1.<java.net.HttpURLConnection: java.io.InputStream getInputStream()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection>;
+
+        r5 = virtualinvoke $r4.<java.net.HttpURLConnection: java.io.InputStream getErrorStream()>();
+
+     label4:
+        if r5 != null goto label5;
+
+        return r5;
+
+     label5:
+        $r2 = new com.sun.xml.internal.ws.transport.http.client.HttpClientTransport$1;
+
+        specialinvoke $r2.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport$1: void <init>(com.sun.xml.internal.ws.transport.http.client.HttpClientTransport,java.io.InputStream,java.io.InputStream)>(r0, r5, r5);
+
+        return $r2;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    protected void readResponseCodeAndMessage()
+    {
+        java.net.HttpURLConnection $r1, $r2, $r4;
+        java.io.IOException $r5;
+        javax.xml.ws.WebServiceException $r6;
+        int $i0, $i1;
+        java.lang.String $r3;
+        com.sun.xml.internal.ws.transport.http.client.HttpClientTransport r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.client.HttpClientTransport;
+
+     label1:
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection>;
+
+        $i0 = virtualinvoke $r1.<java.net.HttpURLConnection: int getResponseCode()>();
+
+        r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: int statusCode> = $i0;
+
+        $r2 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection>;
+
+        $r3 = virtualinvoke $r2.<java.net.HttpURLConnection: java.lang.String getResponseMessage()>();
+
+        r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.lang.String statusMessage> = $r3;
+
+        $r4 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection>;
+
+        $i1 = virtualinvoke $r4.<java.net.HttpURLConnection: int getContentLength()>();
+
+        r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: int contentLength> = $i1;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new javax.xml.ws.WebServiceException;
+
+        specialinvoke $r6.<javax.xml.ws.WebServiceException: void <init>(java.lang.Throwable)>($r5);
+
+        throw $r6;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    protected java.net.HttpURLConnection openConnection(com.sun.xml.internal.ws.api.message.Packet)
+    {
+        com.sun.xml.internal.ws.api.message.Packet r1;
+        com.sun.xml.internal.ws.transport.http.client.HttpClientTransport r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.client.HttpClientTransport;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.api.message.Packet;
+
+        return null;
+    }
+
+    protected boolean checkHTTPS(java.net.HttpURLConnection)
+    {
+        java.net.HttpURLConnection r0;
+        com.sun.xml.internal.ws.transport.http.client.HttpClientTransport$HttpClientVerifier $r12;
+        java.util.Map $r3, $r7, $r15;
+        com.sun.xml.internal.ws.api.message.Packet $r2, $r6, $r14;
+        java.lang.String r5;
+        javax.net.ssl.HostnameVerifier $r17;
+        boolean $z0, $z1;
+        javax.net.ssl.HttpsURLConnection $r9, $r10, $r13;
+        javax.net.ssl.SSLSocketFactory $r11;
+        java.lang.Object $r4, $r8, $r16;
+        com.sun.xml.internal.ws.transport.http.client.HttpClientTransport r1;
+
+        r1 := @this: com.sun.xml.internal.ws.transport.http.client.HttpClientTransport;
+
+        r0 := @parameter0: java.net.HttpURLConnection;
+
+        $z0 = r0 instanceof javax.net.ssl.HttpsURLConnection;
+
+        if $z0 == 0 goto label4;
+
+        $r2 = r1.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: com.sun.xml.internal.ws.api.message.Packet context>;
+
+        $r3 = $r2.<com.sun.xml.internal.ws.api.message.Packet: java.util.Map invocationProperties>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>("com.sun.xml.internal.ws.client.http.HostnameVerificationProperty");
+
+        r5 = (java.lang.String) $r4;
+
+        if r5 == null goto label1;
+
+        $z1 = virtualinvoke r5.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("true");
+
+        if $z1 == 0 goto label1;
+
+        $r13 = (javax.net.ssl.HttpsURLConnection) r0;
+
+        $r12 = new com.sun.xml.internal.ws.transport.http.client.HttpClientTransport$HttpClientVerifier;
+
+        specialinvoke $r12.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport$HttpClientVerifier: void <init>(com.sun.xml.internal.ws.transport.http.client.HttpClientTransport$1)>(null);
+
+        virtualinvoke $r13.<javax.net.ssl.HttpsURLConnection: void setHostnameVerifier(javax.net.ssl.HostnameVerifier)>($r12);
+
+     label1:
+        $r14 = r1.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: com.sun.xml.internal.ws.api.message.Packet context>;
+
+        $r15 = $r14.<com.sun.xml.internal.ws.api.message.Packet: java.util.Map invocationProperties>;
+
+        $r16 = interfaceinvoke $r15.<java.util.Map: java.lang.Object get(java.lang.Object)>("com.sun.xml.internal.ws.transport.https.client.hostname.verifier");
+
+        $r17 = (javax.net.ssl.HostnameVerifier) $r16;
+
+        if $r17 == null goto label2;
+
+        $r10 = (javax.net.ssl.HttpsURLConnection) r0;
+
+        virtualinvoke $r10.<javax.net.ssl.HttpsURLConnection: void setHostnameVerifier(javax.net.ssl.HostnameVerifier)>($r17);
+
+     label2:
+        $r6 = r1.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: com.sun.xml.internal.ws.api.message.Packet context>;
+
+        $r7 = $r6.<com.sun.xml.internal.ws.api.message.Packet: java.util.Map invocationProperties>;
+
+        $r8 = interfaceinvoke $r7.<java.util.Map: java.lang.Object get(java.lang.Object)>("com.sun.xml.internal.ws.transport.https.client.SSLSocketFactory");
+
+        $r11 = (javax.net.ssl.SSLSocketFactory) $r8;
+
+        if $r11 == null goto label3;
+
+        $r9 = (javax.net.ssl.HttpsURLConnection) r0;
+
+        virtualinvoke $r9.<javax.net.ssl.HttpsURLConnection: void setSSLSocketFactory(javax.net.ssl.SSLSocketFactory)>($r11);
+
+     label3:
+        return 1;
+
+     label4:
+        return 0;
+    }
+
+    private void createHttpConnection() throws java.io.IOException
+    {
+        java.net.HttpURLConnection $r2, $r3, $r7, $r8, $r9, $r10, $r14, $r36, $r39, $r40, $r42, $r48;
+        com.sun.xml.internal.ws.api.EndpointAddress $r4, $r46;
+        java.lang.Integer $r41, $r43, $r44;
+        java.util.Map $r12, $r16, $r19, $r22, $r24;
+        com.sun.xml.internal.ws.api.message.Packet $r1, $r11, $r15, $r18, $r21;
+        java.net.URI $r5;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.util.Set $r25;
+        java.util.List $r32;
+        com.sun.xml.internal.ws.transport.http.client.HttpClientTransport r0;
+        java.net.URLConnection $r47;
+        int $i0, $i1, $i2;
+        java.lang.String $r6, $r29, r35, $r38, $r45, $r49;
+        java.util.Map$Entry r28;
+        java.util.Iterator $r26, $r33;
+        java.lang.Object $r13, $r17, $r20, $r23, $r27, $r30, $r31, $r34, $r37;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.client.HttpClientTransport;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: com.sun.xml.internal.ws.api.message.Packet context>;
+
+        $r2 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection openConnection(com.sun.xml.internal.ws.api.message.Packet)>($r1);
+
+        r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection> = $r2;
+
+        $r3 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection>;
+
+        if $r3 != null goto label01;
+
+        $r46 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: com.sun.xml.internal.ws.api.EndpointAddress endpoint>;
+
+        $r47 = virtualinvoke $r46.<com.sun.xml.internal.ws.api.EndpointAddress: java.net.URLConnection openConnection()>();
+
+        $r48 = (java.net.HttpURLConnection) $r47;
+
+        r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection> = $r48;
+
+     label01:
+        $r4 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: com.sun.xml.internal.ws.api.EndpointAddress endpoint>;
+
+        $r5 = virtualinvoke $r4.<com.sun.xml.internal.ws.api.EndpointAddress: java.net.URI getURI()>();
+
+        $r6 = virtualinvoke $r5.<java.net.URI: java.lang.String getScheme()>();
+
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>("https");
+
+        if $z0 == 0 goto label02;
+
+        r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: boolean https> = 1;
+
+     label02:
+        $r7 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection>;
+
+        $z1 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: boolean checkHTTPS(java.net.HttpURLConnection)>($r7);
+
+        if $z1 == 0 goto label03;
+
+        r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: boolean https> = 1;
+
+     label03:
+        $r8 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection>;
+
+        virtualinvoke $r8.<java.net.HttpURLConnection: void setAllowUserInteraction(boolean)>(1);
+
+        $r9 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection>;
+
+        virtualinvoke $r9.<java.net.HttpURLConnection: void setDoOutput(boolean)>(1);
+
+        $r10 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection>;
+
+        virtualinvoke $r10.<java.net.HttpURLConnection: void setDoInput(boolean)>(1);
+
+        $r11 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: com.sun.xml.internal.ws.api.message.Packet context>;
+
+        $r12 = $r11.<com.sun.xml.internal.ws.api.message.Packet: java.util.Map invocationProperties>;
+
+        $r13 = interfaceinvoke $r12.<java.util.Map: java.lang.Object get(java.lang.Object)>("javax.xml.ws.http.request.method");
+
+        $r45 = (java.lang.String) $r13;
+
+        if $r45 == null goto label04;
+
+        $r49 = $r45;
+
+        goto label05;
+
+     label04:
+        $r49 = "POST";
+
+     label05:
+        $r14 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection>;
+
+        virtualinvoke $r14.<java.net.HttpURLConnection: void setRequestMethod(java.lang.String)>($r49);
+
+        $r15 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: com.sun.xml.internal.ws.api.message.Packet context>;
+
+        $r16 = $r15.<com.sun.xml.internal.ws.api.message.Packet: java.util.Map invocationProperties>;
+
+        $r17 = interfaceinvoke $r16.<java.util.Map: java.lang.Object get(java.lang.Object)>("com.sun.xml.internal.ws.request.timeout");
+
+        $r44 = (java.lang.Integer) $r17;
+
+        if $r44 == null goto label06;
+
+        $r42 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection>;
+
+        $i2 = virtualinvoke $r44.<java.lang.Integer: int intValue()>();
+
+        virtualinvoke $r42.<java.net.HttpURLConnection: void setReadTimeout(int)>($i2);
+
+     label06:
+        $r18 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: com.sun.xml.internal.ws.api.message.Packet context>;
+
+        $r19 = $r18.<com.sun.xml.internal.ws.api.message.Packet: java.util.Map invocationProperties>;
+
+        $r20 = interfaceinvoke $r19.<java.util.Map: java.lang.Object get(java.lang.Object)>("com.sun.xml.internal.ws.connect.timeout");
+
+        $r43 = (java.lang.Integer) $r20;
+
+        if $r43 == null goto label07;
+
+        $r40 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection>;
+
+        $i1 = virtualinvoke $r43.<java.lang.Integer: int intValue()>();
+
+        virtualinvoke $r40.<java.net.HttpURLConnection: void setConnectTimeout(int)>($i1);
+
+     label07:
+        $r21 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: com.sun.xml.internal.ws.api.message.Packet context>;
+
+        $r22 = $r21.<com.sun.xml.internal.ws.api.message.Packet: java.util.Map invocationProperties>;
+
+        $r23 = interfaceinvoke $r22.<java.util.Map: java.lang.Object get(java.lang.Object)>("com.sun.xml.internal.ws.transport.http.client.streaming.chunk.size");
+
+        $r41 = (java.lang.Integer) $r23;
+
+        if $r41 == null goto label08;
+
+        $r39 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection>;
+
+        $i0 = virtualinvoke $r41.<java.lang.Integer: int intValue()>();
+
+        virtualinvoke $r39.<java.net.HttpURLConnection: void setChunkedStreamingMode(int)>($i0);
+
+     label08:
+        $r24 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.util.Map reqHeaders>;
+
+        $r25 = interfaceinvoke $r24.<java.util.Map: java.util.Set entrySet()>();
+
+        $r26 = interfaceinvoke $r25.<java.util.Set: java.util.Iterator iterator()>();
+
+     label09:
+        $z4 = interfaceinvoke $r26.<java.util.Iterator: boolean hasNext()>();
+
+        if $z4 == 0 goto label13;
+
+        $r27 = interfaceinvoke $r26.<java.util.Iterator: java.lang.Object next()>();
+
+        r28 = (java.util.Map$Entry) $r27;
+
+        $r29 = "Content-Length";
+
+        $r30 = interfaceinvoke r28.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $z2 = virtualinvoke $r29.<java.lang.String: boolean equals(java.lang.Object)>($r30);
+
+        if $z2 == 0 goto label10;
+
+        goto label09;
+
+     label10:
+        $r31 = interfaceinvoke r28.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r32 = (java.util.List) $r31;
+
+        $r33 = interfaceinvoke $r32.<java.util.List: java.util.Iterator iterator()>();
+
+     label11:
+        $z3 = interfaceinvoke $r33.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label12;
+
+        $r34 = interfaceinvoke $r33.<java.util.Iterator: java.lang.Object next()>();
+
+        r35 = (java.lang.String) $r34;
+
+        $r36 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection>;
+
+        $r37 = interfaceinvoke r28.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r38 = (java.lang.String) $r37;
+
+        virtualinvoke $r36.<java.net.HttpURLConnection: void addRequestProperty(java.lang.String,java.lang.String)>($r38, r35);
+
+        goto label11;
+
+     label12:
+        goto label09;
+
+     label13:
+        return;
+    }
+
+    boolean isSecure()
+    {
+        com.sun.xml.internal.ws.transport.http.client.HttpClientTransport r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.client.HttpClientTransport;
+
+        $z0 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: boolean https>;
+
+        return $z0;
+    }
+
+    protected void setStatusCode(int)
+    {
+        int i0;
+        com.sun.xml.internal.ws.transport.http.client.HttpClientTransport r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.client.HttpClientTransport;
+
+        i0 := @parameter0: int;
+
+        r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: int statusCode> = i0;
+
+        return;
+    }
+
+    private boolean requiresOutputStream()
+    {
+        java.net.HttpURLConnection $r1, $r3, $r5;
+        java.lang.String $r2, $r4, $r6;
+        com.sun.xml.internal.ws.transport.http.client.HttpClientTransport r0;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.client.HttpClientTransport;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection>;
+
+        $r2 = virtualinvoke $r1.<java.net.HttpURLConnection: java.lang.String getRequestMethod()>();
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("GET");
+
+        if $z0 != 0 goto label1;
+
+        $r3 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection>;
+
+        $r4 = virtualinvoke $r3.<java.net.HttpURLConnection: java.lang.String getRequestMethod()>();
+
+        $z1 = virtualinvoke $r4.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("HEAD");
+
+        if $z1 != 0 goto label1;
+
+        $r5 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection>;
+
+        $r6 = virtualinvoke $r5.<java.net.HttpURLConnection: java.lang.String getRequestMethod()>();
+
+        $z2 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("DELETE");
+
+        if $z2 != 0 goto label1;
+
+        $z3 = 1;
+
+        goto label2;
+
+     label1:
+        $z3 = 0;
+
+     label2:
+        return $z3;
+    }
+
+    java.lang.String getContentType()
+    {
+        java.net.HttpURLConnection $r1;
+        java.lang.String $r2;
+        com.sun.xml.internal.ws.transport.http.client.HttpClientTransport r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.client.HttpClientTransport;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection>;
+
+        $r2 = virtualinvoke $r1.<java.net.HttpURLConnection: java.lang.String getContentType()>();
+
+        return $r2;
+    }
+
+    public int getContentLength()
+    {
+        java.net.HttpURLConnection $r1;
+        int $i0;
+        com.sun.xml.internal.ws.transport.http.client.HttpClientTransport r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.client.HttpClientTransport;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: java.net.HttpURLConnection httpConnection>;
+
+        $i0 = virtualinvoke $r1.<java.net.HttpURLConnection: int getContentLength()>();
+
+        return $i0;
+    }
+
+    static byte[] access$000()
+    {
+        byte[] $r0;
+
+        $r0 = <com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: byte[] THROW_AWAY_BUFFER>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        byte[] $r0;
+        java.lang.Class[] $r1;
+        javax.xml.bind.JAXBException $r3;
+        javax.xml.bind.JAXBContext $r2;
+
+        $r0 = newarray (byte)[8192];
+
+        <com.sun.xml.internal.ws.transport.http.client.HttpClientTransport: byte[] THROW_AWAY_BUFFER> = $r0;
+
+     label1:
+        $r1 = newarray (java.lang.Class)[0];
+
+        $r2 = staticinvoke <javax.xml.bind.JAXBContext: javax.xml.bind.JAXBContext newInstance(java.lang.Class[])>($r1);
+
+        virtualinvoke $r2.<javax.xml.bind.JAXBContext: javax.xml.bind.Unmarshaller createUnmarshaller()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+     label4:
+        return;
+
+        catch javax.xml.bind.JAXBException from label1 to label2 with label3;
+    }
+}

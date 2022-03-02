@@ -1,0 +1,724 @@
+class sun.nio.ch.SharedFileLockTable extends sun.nio.ch.FileLockTable
+{
+    private static java.util.concurrent.ConcurrentHashMap lockMap;
+    private static java.lang.ref.ReferenceQueue queue;
+    private final java.nio.channels.Channel channel;
+    private final sun.nio.ch.FileKey fileKey;
+    static final boolean $assertionsDisabled;
+
+    void <init>(java.nio.channels.Channel, java.io.FileDescriptor) throws java.io.IOException
+    {
+        java.io.FileDescriptor r2;
+        sun.nio.ch.FileKey $r3;
+        sun.nio.ch.SharedFileLockTable r0;
+        java.nio.channels.Channel r1;
+
+        r0 := @this: sun.nio.ch.SharedFileLockTable;
+
+        r1 := @parameter0: java.nio.channels.Channel;
+
+        r2 := @parameter1: java.io.FileDescriptor;
+
+        specialinvoke r0.<sun.nio.ch.FileLockTable: void <init>()>();
+
+        r0.<sun.nio.ch.SharedFileLockTable: java.nio.channels.Channel channel> = r1;
+
+        $r3 = staticinvoke <sun.nio.ch.FileKey: sun.nio.ch.FileKey create(java.io.FileDescriptor)>(r2);
+
+        r0.<sun.nio.ch.SharedFileLockTable: sun.nio.ch.FileKey fileKey> = $r3;
+
+        return;
+    }
+
+    public void add(java.nio.channels.FileLock) throws java.nio.channels.OverlappingFileLockException
+    {
+        java.lang.Throwable $r19, $r20;
+        long $l0, $l1;
+        sun.nio.ch.FileKey $r1, $r4, $r9, $r12, $r17;
+        java.lang.ref.ReferenceQueue $r10, $r18;
+        sun.nio.ch.SharedFileLockTable r0;
+        java.nio.channels.FileLock r7;
+        java.util.ArrayList $r11;
+        sun.nio.ch.SharedFileLockTable$FileLockReference $r8, $r16;
+        java.util.concurrent.ConcurrentHashMap $r2, $r5, $r13;
+        java.util.List $r15, r21, r22, r23;
+        java.lang.Object $r3, $r6, $r14;
+
+        r0 := @this: sun.nio.ch.SharedFileLockTable;
+
+        r7 := @parameter0: java.nio.channels.FileLock;
+
+        $r2 = <sun.nio.ch.SharedFileLockTable: java.util.concurrent.ConcurrentHashMap lockMap>;
+
+        $r1 = r0.<sun.nio.ch.SharedFileLockTable: sun.nio.ch.FileKey fileKey>;
+
+        $r3 = virtualinvoke $r2.<java.util.concurrent.ConcurrentHashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        r21 = (java.util.List) $r3;
+
+     label01:
+        if r21 != null goto label09;
+
+        $r11 = new java.util.ArrayList;
+
+        specialinvoke $r11.<java.util.ArrayList: void <init>(int)>(2);
+
+        entermonitor $r11;
+
+     label02:
+        $r13 = <sun.nio.ch.SharedFileLockTable: java.util.concurrent.ConcurrentHashMap lockMap>;
+
+        $r12 = r0.<sun.nio.ch.SharedFileLockTable: sun.nio.ch.FileKey fileKey>;
+
+        $r14 = virtualinvoke $r13.<java.util.concurrent.ConcurrentHashMap: java.lang.Object putIfAbsent(java.lang.Object,java.lang.Object)>($r12, $r11);
+
+        r22 = (java.util.List) $r14;
+
+        if r22 != null goto label04;
+
+        $r16 = new sun.nio.ch.SharedFileLockTable$FileLockReference;
+
+        $r18 = <sun.nio.ch.SharedFileLockTable: java.lang.ref.ReferenceQueue queue>;
+
+        $r17 = r0.<sun.nio.ch.SharedFileLockTable: sun.nio.ch.FileKey fileKey>;
+
+        specialinvoke $r16.<sun.nio.ch.SharedFileLockTable$FileLockReference: void <init>(java.nio.channels.FileLock,java.lang.ref.ReferenceQueue,sun.nio.ch.FileKey)>(r7, $r18, $r17);
+
+        interfaceinvoke $r11.<java.util.List: boolean add(java.lang.Object)>($r16);
+
+        exitmonitor $r11;
+
+     label03:
+        goto label17;
+
+     label04:
+        exitmonitor $r11;
+
+     label05:
+        goto label08;
+
+     label06:
+        $r20 := @caughtexception;
+
+        exitmonitor $r11;
+
+     label07:
+        throw $r20;
+
+     label08:
+        r21 = r22;
+
+     label09:
+        r23 = r21;
+
+        entermonitor r21;
+
+     label10:
+        $r5 = <sun.nio.ch.SharedFileLockTable: java.util.concurrent.ConcurrentHashMap lockMap>;
+
+        $r4 = r0.<sun.nio.ch.SharedFileLockTable: sun.nio.ch.FileKey fileKey>;
+
+        $r6 = virtualinvoke $r5.<java.util.concurrent.ConcurrentHashMap: java.lang.Object get(java.lang.Object)>($r4);
+
+        $r15 = (java.util.List) $r6;
+
+        if r21 != $r15 goto label12;
+
+        $l0 = virtualinvoke r7.<java.nio.channels.FileLock: long position()>();
+
+        $l1 = virtualinvoke r7.<java.nio.channels.FileLock: long size()>();
+
+        specialinvoke r0.<sun.nio.ch.SharedFileLockTable: void checkList(java.util.List,long,long)>(r21, $l0, $l1);
+
+        $r8 = new sun.nio.ch.SharedFileLockTable$FileLockReference;
+
+        $r10 = <sun.nio.ch.SharedFileLockTable: java.lang.ref.ReferenceQueue queue>;
+
+        $r9 = r0.<sun.nio.ch.SharedFileLockTable: sun.nio.ch.FileKey fileKey>;
+
+        specialinvoke $r8.<sun.nio.ch.SharedFileLockTable$FileLockReference: void <init>(java.nio.channels.FileLock,java.lang.ref.ReferenceQueue,sun.nio.ch.FileKey)>(r7, $r10, $r9);
+
+        interfaceinvoke r21.<java.util.List: boolean add(java.lang.Object)>($r8);
+
+        exitmonitor r21;
+
+     label11:
+        goto label17;
+
+     label12:
+        r21 = $r15;
+
+        exitmonitor r23;
+
+     label13:
+        goto label16;
+
+     label14:
+        $r19 := @caughtexception;
+
+        exitmonitor r23;
+
+     label15:
+        throw $r19;
+
+     label16:
+        goto label01;
+
+     label17:
+        specialinvoke r0.<sun.nio.ch.SharedFileLockTable: void removeStaleEntries()>();
+
+        return;
+
+        catch java.lang.Throwable from label02 to label03 with label06;
+        catch java.lang.Throwable from label04 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+        catch java.lang.Throwable from label10 to label11 with label14;
+        catch java.lang.Throwable from label12 to label13 with label14;
+        catch java.lang.Throwable from label14 to label15 with label14;
+    }
+
+    private void removeKeyIfEmpty(sun.nio.ch.FileKey, java.util.List)
+    {
+        java.util.concurrent.ConcurrentHashMap $r2, $r3;
+        java.lang.AssertionError $r5, $r6;
+        sun.nio.ch.FileKey r1;
+        sun.nio.ch.SharedFileLockTable r7;
+        java.util.List r0;
+        java.lang.Object $r4;
+        boolean $z0, $z1, $z2, $z3;
+
+        r7 := @this: sun.nio.ch.SharedFileLockTable;
+
+        r1 := @parameter0: sun.nio.ch.FileKey;
+
+        r0 := @parameter1: java.util.List;
+
+        $z0 = <sun.nio.ch.SharedFileLockTable: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $z3 = staticinvoke <java.lang.Thread: boolean holdsLock(java.lang.Object)>(r0);
+
+        if $z3 != 0 goto label1;
+
+        $r6 = new java.lang.AssertionError;
+
+        specialinvoke $r6.<java.lang.AssertionError: void <init>()>();
+
+        throw $r6;
+
+     label1:
+        $z1 = <sun.nio.ch.SharedFileLockTable: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label2;
+
+        $r3 = <sun.nio.ch.SharedFileLockTable: java.util.concurrent.ConcurrentHashMap lockMap>;
+
+        $r4 = virtualinvoke $r3.<java.util.concurrent.ConcurrentHashMap: java.lang.Object get(java.lang.Object)>(r1);
+
+        if $r4 == r0 goto label2;
+
+        $r5 = new java.lang.AssertionError;
+
+        specialinvoke $r5.<java.lang.AssertionError: void <init>()>();
+
+        throw $r5;
+
+     label2:
+        $z2 = interfaceinvoke r0.<java.util.List: boolean isEmpty()>();
+
+        if $z2 == 0 goto label3;
+
+        $r2 = <sun.nio.ch.SharedFileLockTable: java.util.concurrent.ConcurrentHashMap lockMap>;
+
+        virtualinvoke $r2.<java.util.concurrent.ConcurrentHashMap: java.lang.Object remove(java.lang.Object)>(r1);
+
+     label3:
+        return;
+    }
+
+    public void remove(java.nio.channels.FileLock)
+    {
+        java.lang.Throwable $r14;
+        java.lang.AssertionError $r9, $r13;
+        sun.nio.ch.FileKey $r1;
+        sun.nio.ch.SharedFileLockTable r0;
+        java.nio.channels.FileLock r7, r8;
+        int $i0, i1;
+        boolean $z0, $z1;
+        java.nio.channels.Channel $r10, $r11;
+        sun.nio.ch.SharedFileLockTable$FileLockReference r5;
+        java.util.concurrent.ConcurrentHashMap $r2;
+        java.util.List $r12;
+        java.lang.Object $r3, $r4, $r6;
+
+        r0 := @this: sun.nio.ch.SharedFileLockTable;
+
+        r8 := @parameter0: java.nio.channels.FileLock;
+
+        $z0 = <sun.nio.ch.SharedFileLockTable: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label01;
+
+        if r8 != null goto label01;
+
+        $r13 = new java.lang.AssertionError;
+
+        specialinvoke $r13.<java.lang.AssertionError: void <init>()>();
+
+        throw $r13;
+
+     label01:
+        $r2 = <sun.nio.ch.SharedFileLockTable: java.util.concurrent.ConcurrentHashMap lockMap>;
+
+        $r1 = r0.<sun.nio.ch.SharedFileLockTable: sun.nio.ch.FileKey fileKey>;
+
+        $r3 = virtualinvoke $r2.<java.util.concurrent.ConcurrentHashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r12 = (java.util.List) $r3;
+
+        if $r12 != null goto label02;
+
+        return;
+
+     label02:
+        entermonitor $r12;
+
+     label03:
+        i1 = 0;
+
+     label04:
+        $i0 = interfaceinvoke $r12.<java.util.List: int size()>();
+
+        if i1 >= $i0 goto label08;
+
+        $r4 = interfaceinvoke $r12.<java.util.List: java.lang.Object get(int)>(i1);
+
+        r5 = (sun.nio.ch.SharedFileLockTable$FileLockReference) $r4;
+
+        $r6 = virtualinvoke r5.<sun.nio.ch.SharedFileLockTable$FileLockReference: java.lang.Object get()>();
+
+        r7 = (java.nio.channels.FileLock) $r6;
+
+        if r7 != r8 goto label07;
+
+        $z1 = <sun.nio.ch.SharedFileLockTable: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label06;
+
+        if r7 == null goto label05;
+
+        $r10 = virtualinvoke r7.<java.nio.channels.FileLock: java.nio.channels.Channel acquiredBy()>();
+
+        $r11 = r0.<sun.nio.ch.SharedFileLockTable: java.nio.channels.Channel channel>;
+
+        if $r10 == $r11 goto label06;
+
+     label05:
+        $r9 = new java.lang.AssertionError;
+
+        specialinvoke $r9.<java.lang.AssertionError: void <init>()>();
+
+        throw $r9;
+
+     label06:
+        virtualinvoke r5.<sun.nio.ch.SharedFileLockTable$FileLockReference: void clear()>();
+
+        interfaceinvoke $r12.<java.util.List: java.lang.Object remove(int)>(i1);
+
+        goto label08;
+
+     label07:
+        i1 = i1 + 1;
+
+        goto label04;
+
+     label08:
+        exitmonitor $r12;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r14 := @caughtexception;
+
+        exitmonitor $r12;
+
+     label11:
+        throw $r14;
+
+     label12:
+        return;
+
+        catch java.lang.Throwable from label03 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    public java.util.List removeAll()
+    {
+        java.lang.Throwable $r13;
+        sun.nio.ch.FileKey $r2, $r6;
+        java.util.ArrayList $r0;
+        sun.nio.ch.SharedFileLockTable r1;
+        java.nio.channels.FileLock r10;
+        int $i0, i1;
+        java.nio.channels.Channel $r11, $r12;
+        sun.nio.ch.SharedFileLockTable$FileLockReference r8;
+        java.util.concurrent.ConcurrentHashMap $r3;
+        java.util.List r5;
+        java.lang.Object $r4, $r7, $r9;
+
+        r1 := @this: sun.nio.ch.SharedFileLockTable;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+        $r3 = <sun.nio.ch.SharedFileLockTable: java.util.concurrent.ConcurrentHashMap lockMap>;
+
+        $r2 = r1.<sun.nio.ch.SharedFileLockTable: sun.nio.ch.FileKey fileKey>;
+
+        $r4 = virtualinvoke $r3.<java.util.concurrent.ConcurrentHashMap: java.lang.Object get(java.lang.Object)>($r2);
+
+        r5 = (java.util.List) $r4;
+
+        if r5 == null goto label9;
+
+        entermonitor r5;
+
+     label1:
+        i1 = 0;
+
+     label2:
+        $i0 = interfaceinvoke r5.<java.util.List: int size()>();
+
+        if i1 >= $i0 goto label5;
+
+        $r7 = interfaceinvoke r5.<java.util.List: java.lang.Object get(int)>(i1);
+
+        r8 = (sun.nio.ch.SharedFileLockTable$FileLockReference) $r7;
+
+        $r9 = virtualinvoke r8.<sun.nio.ch.SharedFileLockTable$FileLockReference: java.lang.Object get()>();
+
+        r10 = (java.nio.channels.FileLock) $r9;
+
+        if r10 == null goto label3;
+
+        $r11 = virtualinvoke r10.<java.nio.channels.FileLock: java.nio.channels.Channel acquiredBy()>();
+
+        $r12 = r1.<sun.nio.ch.SharedFileLockTable: java.nio.channels.Channel channel>;
+
+        if $r11 != $r12 goto label3;
+
+        virtualinvoke r8.<sun.nio.ch.SharedFileLockTable$FileLockReference: void clear()>();
+
+        interfaceinvoke r5.<java.util.List: java.lang.Object remove(int)>(i1);
+
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>(r10);
+
+        goto label4;
+
+     label3:
+        i1 = i1 + 1;
+
+     label4:
+        goto label2;
+
+     label5:
+        $r6 = r1.<sun.nio.ch.SharedFileLockTable: sun.nio.ch.FileKey fileKey>;
+
+        specialinvoke r1.<sun.nio.ch.SharedFileLockTable: void removeKeyIfEmpty(sun.nio.ch.FileKey,java.util.List)>($r6, r5);
+
+        exitmonitor r5;
+
+     label6:
+        goto label9;
+
+     label7:
+        $r13 := @caughtexception;
+
+        exitmonitor r5;
+
+     label8:
+        throw $r13;
+
+     label9:
+        return $r0;
+
+        catch java.lang.Throwable from label1 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public void replace(java.nio.channels.FileLock, java.nio.channels.FileLock)
+    {
+        java.lang.Throwable $r15;
+        java.lang.AssertionError $r14;
+        sun.nio.ch.FileKey $r1, $r12;
+        java.lang.ref.ReferenceQueue $r13;
+        sun.nio.ch.SharedFileLockTable r0;
+        java.nio.channels.FileLock r8, r9, r11;
+        int i0, $i1;
+        boolean $z0;
+        sun.nio.ch.SharedFileLockTable$FileLockReference r6, $r10;
+        java.util.concurrent.ConcurrentHashMap $r2;
+        java.util.List r4;
+        java.lang.Object $r3, $r5, $r7;
+
+        r0 := @this: sun.nio.ch.SharedFileLockTable;
+
+        r9 := @parameter0: java.nio.channels.FileLock;
+
+        r11 := @parameter1: java.nio.channels.FileLock;
+
+        $r2 = <sun.nio.ch.SharedFileLockTable: java.util.concurrent.ConcurrentHashMap lockMap>;
+
+        $r1 = r0.<sun.nio.ch.SharedFileLockTable: sun.nio.ch.FileKey fileKey>;
+
+        $r3 = virtualinvoke $r2.<java.util.concurrent.ConcurrentHashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        r4 = (java.util.List) $r3;
+
+        $z0 = <sun.nio.ch.SharedFileLockTable: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        if r4 != null goto label1;
+
+        $r14 = new java.lang.AssertionError;
+
+        specialinvoke $r14.<java.lang.AssertionError: void <init>()>();
+
+        throw $r14;
+
+     label1:
+        entermonitor r4;
+
+     label2:
+        i0 = 0;
+
+     label3:
+        $i1 = interfaceinvoke r4.<java.util.List: int size()>();
+
+        if i0 >= $i1 goto label5;
+
+        $r5 = interfaceinvoke r4.<java.util.List: java.lang.Object get(int)>(i0);
+
+        r6 = (sun.nio.ch.SharedFileLockTable$FileLockReference) $r5;
+
+        $r7 = virtualinvoke r6.<sun.nio.ch.SharedFileLockTable$FileLockReference: java.lang.Object get()>();
+
+        r8 = (java.nio.channels.FileLock) $r7;
+
+        if r8 != r9 goto label4;
+
+        virtualinvoke r6.<sun.nio.ch.SharedFileLockTable$FileLockReference: void clear()>();
+
+        $r10 = new sun.nio.ch.SharedFileLockTable$FileLockReference;
+
+        $r13 = <sun.nio.ch.SharedFileLockTable: java.lang.ref.ReferenceQueue queue>;
+
+        $r12 = r0.<sun.nio.ch.SharedFileLockTable: sun.nio.ch.FileKey fileKey>;
+
+        specialinvoke $r10.<sun.nio.ch.SharedFileLockTable$FileLockReference: void <init>(java.nio.channels.FileLock,java.lang.ref.ReferenceQueue,sun.nio.ch.FileKey)>(r11, $r13, $r12);
+
+        interfaceinvoke r4.<java.util.List: java.lang.Object set(int,java.lang.Object)>(i0, $r10);
+
+        goto label5;
+
+     label4:
+        i0 = i0 + 1;
+
+        goto label3;
+
+     label5:
+        exitmonitor r4;
+
+     label6:
+        goto label9;
+
+     label7:
+        $r15 := @caughtexception;
+
+        exitmonitor r4;
+
+     label8:
+        throw $r15;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label2 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    private void checkList(java.util.List, long, long) throws java.nio.channels.OverlappingFileLockException
+    {
+        sun.nio.ch.SharedFileLockTable$FileLockReference r3;
+        java.nio.channels.OverlappingFileLockException $r6;
+        java.util.Iterator $r1;
+        long l0, l1;
+        java.lang.AssertionError $r7;
+        java.nio.channels.FileLock r5;
+        sun.nio.ch.SharedFileLockTable r8;
+        java.util.List r0;
+        java.lang.Object $r2, $r4;
+        boolean $z0, $z1, $z2, $z3;
+
+        r8 := @this: sun.nio.ch.SharedFileLockTable;
+
+        r0 := @parameter0: java.util.List;
+
+        l0 := @parameter1: long;
+
+        l1 := @parameter2: long;
+
+        $z0 = <sun.nio.ch.SharedFileLockTable: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $z2 = staticinvoke <java.lang.Thread: boolean holdsLock(java.lang.Object)>(r0);
+
+        if $z2 != 0 goto label1;
+
+        $r7 = new java.lang.AssertionError;
+
+        specialinvoke $r7.<java.lang.AssertionError: void <init>()>();
+
+        throw $r7;
+
+     label1:
+        $r1 = interfaceinvoke r0.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z3 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label4;
+
+        $r2 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        r3 = (sun.nio.ch.SharedFileLockTable$FileLockReference) $r2;
+
+        $r4 = virtualinvoke r3.<sun.nio.ch.SharedFileLockTable$FileLockReference: java.lang.Object get()>();
+
+        r5 = (java.nio.channels.FileLock) $r4;
+
+        if r5 == null goto label3;
+
+        $z1 = virtualinvoke r5.<java.nio.channels.FileLock: boolean overlaps(long,long)>(l0, l1);
+
+        if $z1 == 0 goto label3;
+
+        $r6 = new java.nio.channels.OverlappingFileLockException;
+
+        specialinvoke $r6.<java.nio.channels.OverlappingFileLockException: void <init>()>();
+
+        throw $r6;
+
+     label3:
+        goto label2;
+
+     label4:
+        return;
+    }
+
+    private void removeStaleEntries()
+    {
+        sun.nio.ch.SharedFileLockTable$FileLockReference $r2;
+        java.lang.Throwable $r8;
+        java.util.concurrent.ConcurrentHashMap $r4;
+        sun.nio.ch.FileKey $r3;
+        java.lang.ref.ReferenceQueue $r0;
+        sun.nio.ch.SharedFileLockTable r7;
+        java.lang.ref.Reference $r1;
+        java.util.List r6;
+        java.lang.Object $r5;
+
+        r7 := @this: sun.nio.ch.SharedFileLockTable;
+
+     label1:
+        $r0 = <sun.nio.ch.SharedFileLockTable: java.lang.ref.ReferenceQueue queue>;
+
+        $r1 = virtualinvoke $r0.<java.lang.ref.ReferenceQueue: java.lang.ref.Reference poll()>();
+
+        $r2 = (sun.nio.ch.SharedFileLockTable$FileLockReference) $r1;
+
+        if $r2 == null goto label7;
+
+        $r3 = virtualinvoke $r2.<sun.nio.ch.SharedFileLockTable$FileLockReference: sun.nio.ch.FileKey fileKey()>();
+
+        $r4 = <sun.nio.ch.SharedFileLockTable: java.util.concurrent.ConcurrentHashMap lockMap>;
+
+        $r5 = virtualinvoke $r4.<java.util.concurrent.ConcurrentHashMap: java.lang.Object get(java.lang.Object)>($r3);
+
+        r6 = (java.util.List) $r5;
+
+        if r6 == null goto label6;
+
+        entermonitor r6;
+
+     label2:
+        interfaceinvoke r6.<java.util.List: boolean remove(java.lang.Object)>($r2);
+
+        specialinvoke r7.<sun.nio.ch.SharedFileLockTable: void removeKeyIfEmpty(sun.nio.ch.FileKey,java.util.List)>($r3, r6);
+
+        exitmonitor r6;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r8 := @caughtexception;
+
+        exitmonitor r6;
+
+     label5:
+        throw $r8;
+
+     label6:
+        goto label1;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    static void <clinit>()
+    {
+        java.util.concurrent.ConcurrentHashMap $r1;
+        java.lang.Class $r0;
+        java.lang.ref.ReferenceQueue $r2;
+        boolean $z0, $z1;
+
+        $r0 = class "Lsun/nio/ch/SharedFileLockTable;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.nio.ch.SharedFileLockTable: boolean $assertionsDisabled> = $z1;
+
+        $r1 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r1.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        <sun.nio.ch.SharedFileLockTable: java.util.concurrent.ConcurrentHashMap lockMap> = $r1;
+
+        $r2 = new java.lang.ref.ReferenceQueue;
+
+        specialinvoke $r2.<java.lang.ref.ReferenceQueue: void <init>()>();
+
+        <sun.nio.ch.SharedFileLockTable: java.lang.ref.ReferenceQueue queue> = $r2;
+
+        return;
+    }
+}

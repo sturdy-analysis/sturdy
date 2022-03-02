@@ -1,0 +1,867 @@
+public final class sun.security.krb5.KrbAsReqBuilder extends java.lang.Object
+{
+    private sun.security.krb5.internal.KDCOptions options;
+    private sun.security.krb5.PrincipalName cname;
+    private sun.security.krb5.PrincipalName refCname;
+    private sun.security.krb5.PrincipalName sname;
+    private sun.security.krb5.internal.KerberosTime 'from';
+    private sun.security.krb5.internal.KerberosTime till;
+    private sun.security.krb5.internal.KerberosTime rtime;
+    private sun.security.krb5.internal.HostAddresses addresses;
+    private final char[] password;
+    private final javax.security.auth.kerberos.KeyTab ktab;
+    private sun.security.krb5.internal.PAData[] paList;
+    private sun.security.krb5.KrbAsReq req;
+    private sun.security.krb5.KrbAsRep rep;
+    private sun.security.krb5.KrbAsReqBuilder$State state;
+
+    private void init(sun.security.krb5.PrincipalName) throws sun.security.krb5.KrbException
+    {
+        sun.security.krb5.KrbAsReqBuilder r0;
+        sun.security.krb5.PrincipalName r1;
+        sun.security.krb5.KrbAsReqBuilder$State $r2;
+
+        r0 := @this: sun.security.krb5.KrbAsReqBuilder;
+
+        r1 := @parameter0: sun.security.krb5.PrincipalName;
+
+        r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.PrincipalName cname> = r1;
+
+        r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.PrincipalName refCname> = r1;
+
+        $r2 = <sun.security.krb5.KrbAsReqBuilder$State: sun.security.krb5.KrbAsReqBuilder$State INIT>;
+
+        r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.KrbAsReqBuilder$State state> = $r2;
+
+        return;
+    }
+
+    public void <init>(sun.security.krb5.PrincipalName, javax.security.auth.kerberos.KeyTab) throws sun.security.krb5.KrbException
+    {
+        sun.security.krb5.KrbAsReqBuilder r0;
+        sun.security.krb5.PrincipalName r1;
+        javax.security.auth.kerberos.KeyTab r2;
+
+        r0 := @this: sun.security.krb5.KrbAsReqBuilder;
+
+        r1 := @parameter0: sun.security.krb5.PrincipalName;
+
+        r2 := @parameter1: javax.security.auth.kerberos.KeyTab;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        specialinvoke r0.<sun.security.krb5.KrbAsReqBuilder: void init(sun.security.krb5.PrincipalName)>(r1);
+
+        r0.<sun.security.krb5.KrbAsReqBuilder: javax.security.auth.kerberos.KeyTab ktab> = r2;
+
+        r0.<sun.security.krb5.KrbAsReqBuilder: char[] password> = null;
+
+        return;
+    }
+
+    public void <init>(sun.security.krb5.PrincipalName, char[]) throws sun.security.krb5.KrbException
+    {
+        sun.security.krb5.PrincipalName r1;
+        char[] r2, $r4;
+        java.lang.Object $r3;
+        sun.security.krb5.KrbAsReqBuilder r0;
+
+        r0 := @this: sun.security.krb5.KrbAsReqBuilder;
+
+        r1 := @parameter0: sun.security.krb5.PrincipalName;
+
+        r2 := @parameter1: char[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        specialinvoke r0.<sun.security.krb5.KrbAsReqBuilder: void init(sun.security.krb5.PrincipalName)>(r1);
+
+        $r3 = virtualinvoke r2.<java.lang.Object: java.lang.Object clone()>();
+
+        $r4 = (char[]) $r3;
+
+        r0.<sun.security.krb5.KrbAsReqBuilder: char[] password> = $r4;
+
+        r0.<sun.security.krb5.KrbAsReqBuilder: javax.security.auth.kerberos.KeyTab ktab> = null;
+
+        return;
+    }
+
+    public sun.security.krb5.EncryptionKey[] getKeys(boolean) throws sun.security.krb5.KrbException
+    {
+        java.lang.IllegalStateException $r2;
+        sun.security.krb5.PrincipalName $r8, $r16;
+        sun.security.krb5.KrbException $r13;
+        int[] $r3;
+        sun.security.krb5.internal.PAData[] $r9;
+        int $i0, $i1, $i2, $i3, $i4, i5, $i6, i7, $i8;
+        java.lang.String $r11, r15;
+        sun.security.krb5.internal.PAData$SaltAndParams $r10;
+        boolean z0;
+        sun.security.krb5.KrbAsReqBuilder$State $r14;
+        java.io.IOException $r12;
+        sun.security.krb5.KrbAsReqBuilder r0;
+        sun.security.krb5.EncryptionKey $r5, $r7, $r18;
+        char[] $r1, $r6, $r17;
+        sun.security.krb5.EncryptionKey[] r4;
+
+        r0 := @this: sun.security.krb5.KrbAsReqBuilder;
+
+        z0 := @parameter0: boolean;
+
+        if z0 == 0 goto label01;
+
+        $r14 = <sun.security.krb5.KrbAsReqBuilder$State: sun.security.krb5.KrbAsReqBuilder$State REQ_OK>;
+
+        goto label02;
+
+     label01:
+        $r14 = <sun.security.krb5.KrbAsReqBuilder$State: sun.security.krb5.KrbAsReqBuilder$State INIT>;
+
+     label02:
+        specialinvoke r0.<sun.security.krb5.KrbAsReqBuilder: void checkState(sun.security.krb5.KrbAsReqBuilder$State,java.lang.String)>($r14, "Cannot get keys");
+
+        $r1 = r0.<sun.security.krb5.KrbAsReqBuilder: char[] password>;
+
+        if $r1 == null goto label14;
+
+        $r3 = staticinvoke <sun.security.krb5.internal.crypto.EType: int[] getDefaults(java.lang.String)>("default_tkt_enctypes");
+
+        $i0 = lengthof $r3;
+
+        r4 = newarray (sun.security.krb5.EncryptionKey)[$i0];
+
+        r15 = null;
+
+     label03:
+        i5 = 0;
+
+     label04:
+        $i1 = lengthof $r3;
+
+        if i5 >= $i1 goto label07;
+
+        $i3 = $r3[i5];
+
+        $r9 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.internal.PAData[] paList>;
+
+        $r10 = staticinvoke <sun.security.krb5.internal.PAData: sun.security.krb5.internal.PAData$SaltAndParams getSaltAndParams(int,sun.security.krb5.internal.PAData[])>($i3, $r9);
+
+        if $r10 == null goto label06;
+
+        $i4 = $r3[i5];
+
+        if $i4 == 23 goto label05;
+
+        $r11 = $r10.<sun.security.krb5.internal.PAData$SaltAndParams: java.lang.String salt>;
+
+        if $r11 == null goto label05;
+
+        r15 = $r10.<sun.security.krb5.internal.PAData$SaltAndParams: java.lang.String salt>;
+
+     label05:
+        $r16 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.PrincipalName cname>;
+
+        $r17 = r0.<sun.security.krb5.KrbAsReqBuilder: char[] password>;
+
+        $i6 = $r3[i5];
+
+        $r18 = staticinvoke <sun.security.krb5.EncryptionKey: sun.security.krb5.EncryptionKey acquireSecretKey(sun.security.krb5.PrincipalName,char[],int,sun.security.krb5.internal.PAData$SaltAndParams)>($r16, $r17, $i6, $r10);
+
+        r4[i5] = $r18;
+
+     label06:
+        i5 = i5 + 1;
+
+        goto label04;
+
+     label07:
+        if r15 != null goto label08;
+
+        $r8 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.PrincipalName cname>;
+
+        r15 = virtualinvoke $r8.<sun.security.krb5.PrincipalName: java.lang.String getSalt()>();
+
+     label08:
+        i7 = 0;
+
+     label09:
+        $i8 = lengthof $r3;
+
+        if i7 >= $i8 goto label11;
+
+        $r5 = r4[i7];
+
+        if $r5 != null goto label10;
+
+        $r6 = r0.<sun.security.krb5.KrbAsReqBuilder: char[] password>;
+
+        $i2 = $r3[i7];
+
+        $r7 = staticinvoke <sun.security.krb5.EncryptionKey: sun.security.krb5.EncryptionKey acquireSecretKey(char[],java.lang.String,int,byte[])>($r6, r15, $i2, null);
+
+        r4[i7] = $r7;
+
+     label10:
+        i7 = i7 + 1;
+
+        goto label09;
+
+     label11:
+        goto label13;
+
+     label12:
+        $r12 := @caughtexception;
+
+        $r13 = new sun.security.krb5.KrbException;
+
+        specialinvoke $r13.<sun.security.krb5.KrbException: void <init>(int)>(909);
+
+        virtualinvoke $r13.<sun.security.krb5.KrbException: java.lang.Throwable initCause(java.lang.Throwable)>($r12);
+
+        throw $r13;
+
+     label13:
+        return r4;
+
+     label14:
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Required password not provided");
+
+        throw $r2;
+
+        catch java.io.IOException from label03 to label11 with label12;
+    }
+
+    public void setOptions(sun.security.krb5.internal.KDCOptions)
+    {
+        sun.security.krb5.internal.KDCOptions r2;
+        sun.security.krb5.KrbAsReqBuilder r0;
+        sun.security.krb5.KrbAsReqBuilder$State $r1;
+
+        r0 := @this: sun.security.krb5.KrbAsReqBuilder;
+
+        r2 := @parameter0: sun.security.krb5.internal.KDCOptions;
+
+        $r1 = <sun.security.krb5.KrbAsReqBuilder$State: sun.security.krb5.KrbAsReqBuilder$State INIT>;
+
+        specialinvoke r0.<sun.security.krb5.KrbAsReqBuilder: void checkState(sun.security.krb5.KrbAsReqBuilder$State,java.lang.String)>($r1, "Cannot specify options");
+
+        r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.internal.KDCOptions options> = r2;
+
+        return;
+    }
+
+    public void setTarget(sun.security.krb5.PrincipalName)
+    {
+        sun.security.krb5.KrbAsReqBuilder r0;
+        sun.security.krb5.KrbAsReqBuilder$State $r1;
+        sun.security.krb5.PrincipalName r2;
+
+        r0 := @this: sun.security.krb5.KrbAsReqBuilder;
+
+        r2 := @parameter0: sun.security.krb5.PrincipalName;
+
+        $r1 = <sun.security.krb5.KrbAsReqBuilder$State: sun.security.krb5.KrbAsReqBuilder$State INIT>;
+
+        specialinvoke r0.<sun.security.krb5.KrbAsReqBuilder: void checkState(sun.security.krb5.KrbAsReqBuilder$State,java.lang.String)>($r1, "Cannot specify target");
+
+        r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.PrincipalName sname> = r2;
+
+        return;
+    }
+
+    public void setAddresses(sun.security.krb5.internal.HostAddresses)
+    {
+        sun.security.krb5.internal.HostAddresses r2;
+        sun.security.krb5.KrbAsReqBuilder r0;
+        sun.security.krb5.KrbAsReqBuilder$State $r1;
+
+        r0 := @this: sun.security.krb5.KrbAsReqBuilder;
+
+        r2 := @parameter0: sun.security.krb5.internal.HostAddresses;
+
+        $r1 = <sun.security.krb5.KrbAsReqBuilder$State: sun.security.krb5.KrbAsReqBuilder$State INIT>;
+
+        specialinvoke r0.<sun.security.krb5.KrbAsReqBuilder: void checkState(sun.security.krb5.KrbAsReqBuilder$State,java.lang.String)>($r1, "Cannot specify addresses");
+
+        r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.internal.HostAddresses addresses> = r2;
+
+        return;
+    }
+
+    private sun.security.krb5.KrbAsReq build(sun.security.krb5.EncryptionKey, sun.security.krb5.KrbAsReqBuilder$ReferralsState) throws sun.security.krb5.KrbException, java.io.IOException
+    {
+        byte[] $r19;
+        sun.security.krb5.PrincipalName $r2, $r14, $r15;
+        sun.security.krb5.internal.HostAddresses $r10;
+        sun.security.krb5.internal.KerberosTime $r11, $r12, $r13;
+        sun.security.krb5.internal.KDCOptions $r5, $r7, $r16, $r20, $r24;
+        int[] r23;
+        sun.security.krb5.internal.PAData[] $r17, r22;
+        int i0, i1;
+        sun.security.krb5.KrbAsReq $r8;
+        boolean $z0, $z1;
+        sun.security.krb5.internal.PAData $r18;
+        sun.security.krb5.KrbAsReqBuilder r0;
+        sun.security.krb5.EncryptionKey r9, r21;
+        javax.security.auth.kerberos.KeyTab $r3;
+        sun.security.krb5.KrbAsReqBuilder$ReferralsState r6;
+        char[] $r1;
+        sun.security.krb5.EncryptionKey[] $r4;
+
+        r0 := @this: sun.security.krb5.KrbAsReqBuilder;
+
+        r9 := @parameter0: sun.security.krb5.EncryptionKey;
+
+        r6 := @parameter1: sun.security.krb5.KrbAsReqBuilder$ReferralsState;
+
+        r22 = null;
+
+        $r1 = r0.<sun.security.krb5.KrbAsReqBuilder: char[] password>;
+
+        if $r1 == null goto label1;
+
+        r23 = staticinvoke <sun.security.krb5.internal.crypto.EType: int[] getDefaults(java.lang.String)>("default_tkt_enctypes");
+
+        goto label3;
+
+     label1:
+        $r3 = r0.<sun.security.krb5.KrbAsReqBuilder: javax.security.auth.kerberos.KeyTab ktab>;
+
+        $r2 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.PrincipalName cname>;
+
+        $r4 = staticinvoke <sun.security.jgss.krb5.Krb5Util: sun.security.krb5.EncryptionKey[] keysFromJavaxKeyTab(javax.security.auth.kerberos.KeyTab,sun.security.krb5.PrincipalName)>($r3, $r2);
+
+        r23 = staticinvoke <sun.security.krb5.internal.crypto.EType: int[] getDefaults(java.lang.String,sun.security.krb5.EncryptionKey[])>("default_tkt_enctypes", $r4);
+
+        i0 = lengthof $r4;
+
+        i1 = 0;
+
+     label2:
+        if i1 >= i0 goto label3;
+
+        r21 = $r4[i1];
+
+        virtualinvoke r21.<sun.security.krb5.EncryptionKey: void destroy()>();
+
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label3:
+        $r5 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.internal.KDCOptions options>;
+
+        if $r5 != null goto label4;
+
+        $r24 = new sun.security.krb5.internal.KDCOptions;
+
+        specialinvoke $r24.<sun.security.krb5.internal.KDCOptions: void <init>()>();
+
+        goto label5;
+
+     label4:
+        $r24 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.internal.KDCOptions options>;
+
+     label5:
+        r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.internal.KDCOptions options> = $r24;
+
+        $z0 = virtualinvoke r6.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: boolean isEnabled()>();
+
+        if $z0 == 0 goto label7;
+
+        $z1 = virtualinvoke r6.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: boolean sendCanonicalize()>();
+
+        if $z1 == 0 goto label6;
+
+        $r20 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.internal.KDCOptions options>;
+
+        virtualinvoke $r20.<sun.security.krb5.internal.KDCOptions: void set(int,boolean)>(15, 1);
+
+     label6:
+        $r17 = newarray (sun.security.krb5.internal.PAData)[1];
+
+        $r18 = new sun.security.krb5.internal.PAData;
+
+        $r19 = newarray (byte)[0];
+
+        specialinvoke $r18.<sun.security.krb5.internal.PAData: void <init>(int,byte[])>(149, $r19);
+
+        $r17[0] = $r18;
+
+        r22 = $r17;
+
+        goto label8;
+
+     label7:
+        $r7 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.internal.KDCOptions options>;
+
+        virtualinvoke $r7.<sun.security.krb5.internal.KDCOptions: void set(int,boolean)>(15, 0);
+
+     label8:
+        $r8 = new sun.security.krb5.KrbAsReq;
+
+        $r16 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.internal.KDCOptions options>;
+
+        $r15 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.PrincipalName refCname>;
+
+        $r14 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.PrincipalName sname>;
+
+        $r13 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.internal.KerberosTime 'from'>;
+
+        $r12 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.internal.KerberosTime till>;
+
+        $r11 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.internal.KerberosTime rtime>;
+
+        $r10 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.internal.HostAddresses addresses>;
+
+        specialinvoke $r8.<sun.security.krb5.KrbAsReq: void <init>(sun.security.krb5.EncryptionKey,sun.security.krb5.internal.KDCOptions,sun.security.krb5.PrincipalName,sun.security.krb5.PrincipalName,sun.security.krb5.internal.KerberosTime,sun.security.krb5.internal.KerberosTime,sun.security.krb5.internal.KerberosTime,int[],sun.security.krb5.internal.HostAddresses,sun.security.krb5.internal.PAData[])>(r9, $r16, $r15, $r14, $r13, $r12, $r11, r23, $r10, r22);
+
+        return $r8;
+    }
+
+    private sun.security.krb5.KrbAsReqBuilder resolve() throws sun.security.krb5.KrbException, sun.security.krb5.Asn1Exception, java.io.IOException
+    {
+        java.lang.Object[] $r17;
+        sun.security.krb5.PrincipalName $r2, $r22;
+        sun.security.krb5.internal.PAData[] $r7, $r8, $r10, $r11, $r13, $r14, $r15, $r16, $r18, $r20, $r21;
+        int $i0, i1, i2, $i3, $i4;
+        sun.security.krb5.KrbAsRep $r5, $r6, $r9, $r12, $r19, $r25;
+        sun.security.krb5.KrbAsReq $r3, $r23;
+        sun.security.krb5.KrbAsReqBuilder r0;
+        javax.security.auth.kerberos.KeyTab $r1, $r24;
+        char[] $r4;
+
+        r0 := @this: sun.security.krb5.KrbAsReqBuilder;
+
+        $r1 = r0.<sun.security.krb5.KrbAsReqBuilder: javax.security.auth.kerberos.KeyTab ktab>;
+
+        if $r1 == null goto label1;
+
+        $r25 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.KrbAsRep rep>;
+
+        $r24 = r0.<sun.security.krb5.KrbAsReqBuilder: javax.security.auth.kerberos.KeyTab ktab>;
+
+        $r23 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.KrbAsReq req>;
+
+        $r22 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.PrincipalName cname>;
+
+        virtualinvoke $r25.<sun.security.krb5.KrbAsRep: void decryptUsingKeyTab(javax.security.auth.kerberos.KeyTab,sun.security.krb5.KrbAsReq,sun.security.krb5.PrincipalName)>($r24, $r23, $r22);
+
+        goto label2;
+
+     label1:
+        $r5 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.KrbAsRep rep>;
+
+        $r4 = r0.<sun.security.krb5.KrbAsReqBuilder: char[] password>;
+
+        $r3 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.KrbAsReq req>;
+
+        $r2 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.PrincipalName cname>;
+
+        virtualinvoke $r5.<sun.security.krb5.KrbAsRep: void decryptUsingPassword(char[],sun.security.krb5.KrbAsReq,sun.security.krb5.PrincipalName)>($r4, $r3, $r2);
+
+     label2:
+        $r6 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.KrbAsRep rep>;
+
+        $r7 = virtualinvoke $r6.<sun.security.krb5.KrbAsRep: sun.security.krb5.internal.PAData[] getPA()>();
+
+        if $r7 == null goto label5;
+
+        $r8 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.internal.PAData[] paList>;
+
+        if $r8 == null goto label3;
+
+        $r11 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.internal.PAData[] paList>;
+
+        $i0 = lengthof $r11;
+
+        if $i0 != 0 goto label4;
+
+     label3:
+        $r9 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.KrbAsRep rep>;
+
+        $r10 = virtualinvoke $r9.<sun.security.krb5.KrbAsRep: sun.security.krb5.internal.PAData[] getPA()>();
+
+        r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.internal.PAData[] paList> = $r10;
+
+        goto label5;
+
+     label4:
+        $r12 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.KrbAsRep rep>;
+
+        $r13 = virtualinvoke $r12.<sun.security.krb5.KrbAsRep: sun.security.krb5.internal.PAData[] getPA()>();
+
+        i1 = lengthof $r13;
+
+        if i1 <= 0 goto label5;
+
+        $r14 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.internal.PAData[] paList>;
+
+        i2 = lengthof $r14;
+
+        $r16 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.internal.PAData[] paList>;
+
+        $r15 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.internal.PAData[] paList>;
+
+        $i3 = lengthof $r15;
+
+        $i4 = $i3 + i1;
+
+        $r17 = staticinvoke <java.util.Arrays: java.lang.Object[] copyOf(java.lang.Object[],int)>($r16, $i4);
+
+        $r18 = (sun.security.krb5.internal.PAData[]) $r17;
+
+        r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.internal.PAData[] paList> = $r18;
+
+        $r19 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.KrbAsRep rep>;
+
+        $r20 = virtualinvoke $r19.<sun.security.krb5.KrbAsRep: sun.security.krb5.internal.PAData[] getPA()>();
+
+        $r21 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.internal.PAData[] paList>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r20, 0, $r21, i2, i1);
+
+     label5:
+        return r0;
+    }
+
+    private sun.security.krb5.KrbAsReqBuilder send() throws sun.security.krb5.KrbException, java.io.IOException
+    {
+        byte[] $r5, $r6;
+        int[] $r13;
+        sun.security.krb5.internal.PAData[] $r12, $r17, $r19;
+        sun.security.krb5.KrbAsRep $r3;
+        sun.security.krb5.KrbAsReq $r2, $r4;
+        boolean $z0, $z1, z2, $z3;
+        sun.security.krb5.EncryptionKey $r23, r24, r28;
+        sun.security.krb5.EncryptionKey[] $r22;
+        sun.security.krb5.PrincipalName $r8, $r15, $r20;
+        sun.security.krb5.KrbException $r10;
+        int $i0, $i1, $i2, $i3, $i4, i5;
+        java.lang.String $r9;
+        sun.security.krb5.internal.PAData$SaltAndParams $r18;
+        java.io.PrintStream $r26;
+        sun.security.krb5.internal.KRBError $r11;
+        sun.security.krb5.KdcComm $r7, r27;
+        sun.security.krb5.KrbAsReqBuilder r1;
+        javax.security.auth.kerberos.KeyTab $r21;
+        sun.security.krb5.KrbAsReqBuilder$ReferralsState $r0;
+        char[] $r14, $r16;
+        java.lang.Object $r25;
+
+        r1 := @this: sun.security.krb5.KrbAsReqBuilder;
+
+        z2 = 0;
+
+        r27 = null;
+
+        r28 = null;
+
+        $r0 = new sun.security.krb5.KrbAsReqBuilder$ReferralsState;
+
+        specialinvoke $r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: void <init>(sun.security.krb5.KrbAsReqBuilder)>(r1);
+
+     label01:
+        $z3 = virtualinvoke $r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: boolean refreshComm()>();
+
+        if $z3 == 0 goto label02;
+
+        $r7 = new sun.security.krb5.KdcComm;
+
+        $r8 = r1.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.PrincipalName refCname>;
+
+        $r9 = virtualinvoke $r8.<sun.security.krb5.PrincipalName: java.lang.String getRealmAsString()>();
+
+        specialinvoke $r7.<sun.security.krb5.KdcComm: void <init>(java.lang.String)>($r9);
+
+        r27 = $r7;
+
+     label02:
+        $r2 = specialinvoke r1.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.KrbAsReq build(sun.security.krb5.EncryptionKey,sun.security.krb5.KrbAsReqBuilder$ReferralsState)>(r28, $r0);
+
+        r1.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.KrbAsReq req> = $r2;
+
+        $r3 = new sun.security.krb5.KrbAsRep;
+
+        $r4 = r1.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.KrbAsReq req>;
+
+        $r5 = virtualinvoke $r4.<sun.security.krb5.KrbAsReq: byte[] encoding()>();
+
+        $r6 = virtualinvoke r27.<sun.security.krb5.KdcComm: byte[] send(byte[])>($r5);
+
+        specialinvoke $r3.<sun.security.krb5.KrbAsRep: void <init>(byte[])>($r6);
+
+        r1.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.KrbAsRep rep> = $r3;
+
+     label03:
+        return r1;
+
+     label04:
+        $r10 := @caughtexception;
+
+        if z2 != 0 goto label12;
+
+        $i0 = virtualinvoke $r10.<sun.security.krb5.KrbException: int returnCode()>();
+
+        if $i0 == 24 goto label05;
+
+        $i4 = virtualinvoke $r10.<sun.security.krb5.KrbException: int returnCode()>();
+
+        if $i4 != 25 goto label12;
+
+     label05:
+        $z1 = <sun.security.krb5.internal.Krb5: boolean DEBUG>;
+
+        if $z1 == 0 goto label06;
+
+        $r26 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r26.<java.io.PrintStream: void println(java.lang.String)>("KrbAsReqBuilder: PREAUTH FAILED/REQ, re-send AS-REQ");
+
+     label06:
+        z2 = 1;
+
+        $r11 = virtualinvoke $r10.<sun.security.krb5.KrbException: sun.security.krb5.internal.KRBError getError()>();
+
+        $r12 = virtualinvoke $r11.<sun.security.krb5.internal.KRBError: sun.security.krb5.internal.PAData[] getPA()>();
+
+        $r13 = staticinvoke <sun.security.krb5.internal.crypto.EType: int[] getDefaults(java.lang.String)>("default_tkt_enctypes");
+
+        $i1 = $r13[0];
+
+        $i2 = staticinvoke <sun.security.krb5.internal.PAData: int getPreferredEType(sun.security.krb5.internal.PAData[],int)>($r12, $i1);
+
+        $r14 = r1.<sun.security.krb5.KrbAsReqBuilder: char[] password>;
+
+        if $r14 != null goto label10;
+
+        $r21 = r1.<sun.security.krb5.KrbAsReqBuilder: javax.security.auth.kerberos.KeyTab ktab>;
+
+        $r20 = r1.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.PrincipalName cname>;
+
+        $r22 = staticinvoke <sun.security.jgss.krb5.Krb5Util: sun.security.krb5.EncryptionKey[] keysFromJavaxKeyTab(javax.security.auth.kerberos.KeyTab,sun.security.krb5.PrincipalName)>($r21, $r20);
+
+        $r23 = staticinvoke <sun.security.krb5.EncryptionKey: sun.security.krb5.EncryptionKey findKey(int,sun.security.krb5.EncryptionKey[])>($i2, $r22);
+
+        r28 = $r23;
+
+        if $r23 == null goto label07;
+
+        $r25 = virtualinvoke $r23.<sun.security.krb5.EncryptionKey: java.lang.Object clone()>();
+
+        r28 = (sun.security.krb5.EncryptionKey) $r25;
+
+     label07:
+        $i3 = lengthof $r22;
+
+        i5 = 0;
+
+     label08:
+        if i5 >= $i3 goto label09;
+
+        r24 = $r22[i5];
+
+        virtualinvoke r24.<sun.security.krb5.EncryptionKey: void destroy()>();
+
+        i5 = i5 + 1;
+
+        goto label08;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r15 = r1.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.PrincipalName cname>;
+
+        $r16 = r1.<sun.security.krb5.KrbAsReqBuilder: char[] password>;
+
+        $r17 = virtualinvoke $r11.<sun.security.krb5.internal.KRBError: sun.security.krb5.internal.PAData[] getPA()>();
+
+        $r18 = staticinvoke <sun.security.krb5.internal.PAData: sun.security.krb5.internal.PAData$SaltAndParams getSaltAndParams(int,sun.security.krb5.internal.PAData[])>($i2, $r17);
+
+        r28 = staticinvoke <sun.security.krb5.EncryptionKey: sun.security.krb5.EncryptionKey acquireSecretKey(sun.security.krb5.PrincipalName,char[],int,sun.security.krb5.internal.PAData$SaltAndParams)>($r15, $r16, $i2, $r18);
+
+     label11:
+        $r19 = virtualinvoke $r11.<sun.security.krb5.internal.KRBError: sun.security.krb5.internal.PAData[] getPA()>();
+
+        r1.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.internal.PAData[] paList> = $r19;
+
+        goto label14;
+
+     label12:
+        $z0 = virtualinvoke $r0.<sun.security.krb5.KrbAsReqBuilder$ReferralsState: boolean handleError(sun.security.krb5.KrbException)>($r10);
+
+        if $z0 == 0 goto label13;
+
+        r28 = null;
+
+        z2 = 0;
+
+        goto label01;
+
+     label13:
+        throw $r10;
+
+     label14:
+        goto label01;
+
+        catch sun.security.krb5.KrbException from label02 to label03 with label04;
+    }
+
+    public sun.security.krb5.KrbAsReqBuilder action() throws sun.security.krb5.KrbException, sun.security.krb5.Asn1Exception, java.io.IOException
+    {
+        sun.security.krb5.KrbAsReqBuilder$State $r1, $r2;
+        sun.security.krb5.KrbAsReqBuilder r0, $r3, $r4;
+
+        r0 := @this: sun.security.krb5.KrbAsReqBuilder;
+
+        $r1 = <sun.security.krb5.KrbAsReqBuilder$State: sun.security.krb5.KrbAsReqBuilder$State INIT>;
+
+        specialinvoke r0.<sun.security.krb5.KrbAsReqBuilder: void checkState(sun.security.krb5.KrbAsReqBuilder$State,java.lang.String)>($r1, "Cannot call action");
+
+        $r2 = <sun.security.krb5.KrbAsReqBuilder$State: sun.security.krb5.KrbAsReqBuilder$State REQ_OK>;
+
+        r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.KrbAsReqBuilder$State state> = $r2;
+
+        $r3 = specialinvoke r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.KrbAsReqBuilder send()>();
+
+        $r4 = specialinvoke $r3.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.KrbAsReqBuilder resolve()>();
+
+        return $r4;
+    }
+
+    public sun.security.krb5.Credentials getCreds()
+    {
+        sun.security.krb5.KrbAsReqBuilder$State $r1;
+        sun.security.krb5.KrbAsRep $r2;
+        sun.security.krb5.KrbAsReqBuilder r0;
+        sun.security.krb5.Credentials $r3;
+
+        r0 := @this: sun.security.krb5.KrbAsReqBuilder;
+
+        $r1 = <sun.security.krb5.KrbAsReqBuilder$State: sun.security.krb5.KrbAsReqBuilder$State REQ_OK>;
+
+        specialinvoke r0.<sun.security.krb5.KrbAsReqBuilder: void checkState(sun.security.krb5.KrbAsReqBuilder$State,java.lang.String)>($r1, "Cannot retrieve creds");
+
+        $r2 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.KrbAsRep rep>;
+
+        $r3 = virtualinvoke $r2.<sun.security.krb5.KrbAsRep: sun.security.krb5.Credentials getCreds()>();
+
+        return $r3;
+    }
+
+    public sun.security.krb5.internal.ccache.Credentials getCCreds()
+    {
+        sun.security.krb5.internal.ccache.Credentials $r3;
+        sun.security.krb5.KrbAsReqBuilder$State $r1;
+        sun.security.krb5.KrbAsRep $r2;
+        sun.security.krb5.KrbAsReqBuilder r0;
+
+        r0 := @this: sun.security.krb5.KrbAsReqBuilder;
+
+        $r1 = <sun.security.krb5.KrbAsReqBuilder$State: sun.security.krb5.KrbAsReqBuilder$State REQ_OK>;
+
+        specialinvoke r0.<sun.security.krb5.KrbAsReqBuilder: void checkState(sun.security.krb5.KrbAsReqBuilder$State,java.lang.String)>($r1, "Cannot retrieve CCreds");
+
+        $r2 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.KrbAsRep rep>;
+
+        $r3 = virtualinvoke $r2.<sun.security.krb5.KrbAsRep: sun.security.krb5.internal.ccache.Credentials getCCreds()>();
+
+        return $r3;
+    }
+
+    public void destroy()
+    {
+        sun.security.krb5.KrbAsReqBuilder$State $r1;
+        char[] $r2, $r3;
+        sun.security.krb5.KrbAsReqBuilder r0;
+
+        r0 := @this: sun.security.krb5.KrbAsReqBuilder;
+
+        $r1 = <sun.security.krb5.KrbAsReqBuilder$State: sun.security.krb5.KrbAsReqBuilder$State DESTROYED>;
+
+        r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.KrbAsReqBuilder$State state> = $r1;
+
+        $r2 = r0.<sun.security.krb5.KrbAsReqBuilder: char[] password>;
+
+        if $r2 == null goto label1;
+
+        $r3 = r0.<sun.security.krb5.KrbAsReqBuilder: char[] password>;
+
+        staticinvoke <java.util.Arrays: void fill(char[],char)>($r3, 0);
+
+     label1:
+        return;
+    }
+
+    private void checkState(sun.security.krb5.KrbAsReqBuilder$State, java.lang.String)
+    {
+        java.lang.IllegalStateException $r3;
+        sun.security.krb5.KrbAsReqBuilder$State r1, $r2;
+        sun.security.krb5.KrbAsReqBuilder r0;
+        java.lang.StringBuilder $r4, $r6, $r7, $r8, $r9;
+        java.lang.String r5, $r10;
+
+        r0 := @this: sun.security.krb5.KrbAsReqBuilder;
+
+        r1 := @parameter0: sun.security.krb5.KrbAsReqBuilder$State;
+
+        r5 := @parameter1: java.lang.String;
+
+        $r2 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.KrbAsReqBuilder$State state>;
+
+        if $r2 == r1 goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" state");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r10);
+
+        throw $r3;
+
+     label1:
+        return;
+    }
+
+    static sun.security.krb5.PrincipalName access$000(sun.security.krb5.KrbAsReqBuilder)
+    {
+        sun.security.krb5.KrbAsReqBuilder r0;
+        sun.security.krb5.PrincipalName $r1;
+
+        r0 := @parameter0: sun.security.krb5.KrbAsReqBuilder;
+
+        $r1 = r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.PrincipalName refCname>;
+
+        return $r1;
+    }
+
+    static sun.security.krb5.PrincipalName access$002(sun.security.krb5.KrbAsReqBuilder, sun.security.krb5.PrincipalName)
+    {
+        sun.security.krb5.KrbAsReqBuilder r0;
+        sun.security.krb5.PrincipalName r1;
+
+        r0 := @parameter0: sun.security.krb5.KrbAsReqBuilder;
+
+        r1 := @parameter1: sun.security.krb5.PrincipalName;
+
+        r0.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.PrincipalName refCname> = r1;
+
+        return r1;
+    }
+}

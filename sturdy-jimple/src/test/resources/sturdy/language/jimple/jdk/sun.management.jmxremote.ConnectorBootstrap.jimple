@@ -1,0 +1,1639 @@
+public final class sun.management.jmxremote.ConnectorBootstrap extends java.lang.Object
+{
+    private static java.rmi.registry.Registry registry;
+    private static final com.sun.jmx.remote.util.ClassLogger log;
+
+    public static void unexportRegistry()
+    {
+        java.rmi.NoSuchObjectException $r2;
+        java.rmi.registry.Registry $r0, $r1;
+
+     label1:
+        $r0 = <sun.management.jmxremote.ConnectorBootstrap: java.rmi.registry.Registry registry>;
+
+        if $r0 == null goto label2;
+
+        $r1 = <sun.management.jmxremote.ConnectorBootstrap: java.rmi.registry.Registry registry>;
+
+        staticinvoke <java.rmi.server.UnicastRemoteObject: boolean unexportObject(java.rmi.Remote,boolean)>($r1, 1);
+
+        <sun.management.jmxremote.ConnectorBootstrap: java.rmi.registry.Registry registry> = null;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+     label4:
+        return;
+
+        catch java.rmi.NoSuchObjectException from label1 to label2 with label3;
+    }
+
+    public static synchronized javax.management.remote.JMXConnectorServer initialize()
+    {
+        java.util.Properties $r0;
+        java.lang.String $r1;
+        javax.management.remote.JMXConnectorServer $r2;
+
+        $r0 = staticinvoke <sun.management.Agent: java.util.Properties loadManagementProperties()>();
+
+        if $r0 != null goto label1;
+
+        return null;
+
+     label1:
+        $r1 = virtualinvoke $r0.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("com.sun.management.jmxremote.port");
+
+        $r2 = staticinvoke <sun.management.jmxremote.ConnectorBootstrap: javax.management.remote.JMXConnectorServer startRemoteConnectorServer(java.lang.String,java.util.Properties)>($r1, $r0);
+
+        return $r2;
+    }
+
+    public static synchronized javax.management.remote.JMXConnectorServer initialize(java.lang.String, java.util.Properties)
+    {
+        java.lang.String r0;
+        java.util.Properties r1;
+        javax.management.remote.JMXConnectorServer $r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.util.Properties;
+
+        $r2 = staticinvoke <sun.management.jmxremote.ConnectorBootstrap: javax.management.remote.JMXConnectorServer startRemoteConnectorServer(java.lang.String,java.util.Properties)>(r0, r1);
+
+        return $r2;
+    }
+
+    public static synchronized javax.management.remote.JMXConnectorServer startRemoteConnectorServer(java.lang.String, java.util.Properties)
+    {
+        javax.management.remote.JMXConnectorServer $r114;
+        javax.management.remote.JMXServiceURL $r115;
+        java.lang.StringBuilder $r16, $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26, $r27, $r28, $r29, $r30, $r31, $r32, $r33, $r34, $r35, $r36, $r37, $r38, $r39, $r40, $r41, $r42, $r43, $r44, $r45, $r46, $r47, $r48, $r49, $r50, $r51, $r52, $r53, $r54, $r55, $r56, $r57, $r58, $r59, $r60, $r62, $r63, $r64, $r65, $r67, $r68, $r69, $r70, $r71, $r72, $r73, $r74, $r75, $r109;
+        java.util.StringTokenizer $r81, $r83;
+        sun.management.jmxremote.ConnectorBootstrap$JMXConnectorServerData $r113;
+        javax.management.MBeanServer $r112;
+        int $i0, $i1, $i2, i3, i4, i5;
+        java.lang.Boolean $r4, $r6, $r8, $r12;
+        sun.management.AgentConfigurationError $r85, $r87, $r92, $r96, $r99;
+        java.lang.Exception $r89, $r91;
+        java.lang.String r0, $r2, $r3, $r5, $r7, $r9, $r10, $r11, $r13, $r15, $r18, $r61, $r66, $r76, $r77, $r78, $r79, $r80, $r82, $r84, $r94, r103, r104, r105, $r106, $r108, $r110, $r111, $r118, $r119;
+        java.util.Properties r1;
+        java.lang.NumberFormatException $r95, $r98;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.util.HashMap $r14;
+        java.lang.String[] $r86, $r88, $r93, $r97, $r100, r101, r102, $r117;
+        com.sun.jmx.remote.util.ClassLogger $r17, $r90, $r107, $r116;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.util.Properties;
+
+     label01:
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>(r0);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r98 := @caughtexception;
+
+        $r99 = new sun.management.AgentConfigurationError;
+
+        $r100 = newarray (java.lang.String)[1];
+
+        $r100[0] = r0;
+
+        specialinvoke $r99.<sun.management.AgentConfigurationError: void <init>(java.lang.String,java.lang.Throwable,java.lang.String[])>("agent.err.invalid.jmxremote.port", $r98, $r100);
+
+        throw $r99;
+
+     label04:
+        if $i0 >= 0 goto label05;
+
+        $r87 = new sun.management.AgentConfigurationError;
+
+        $r88 = newarray (java.lang.String)[1];
+
+        $r88[0] = r0;
+
+        specialinvoke $r87.<sun.management.AgentConfigurationError: void <init>(java.lang.String,java.lang.String[])>("agent.err.invalid.jmxremote.port", $r88);
+
+        throw $r87;
+
+     label05:
+        i3 = 0;
+
+        $r2 = virtualinvoke r1.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("com.sun.management.jmxremote.rmi.port");
+
+     label06:
+        if $r2 == null goto label07;
+
+        i3 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r2);
+
+     label07:
+        goto label09;
+
+     label08:
+        $r95 := @caughtexception;
+
+        $r96 = new sun.management.AgentConfigurationError;
+
+        $r97 = newarray (java.lang.String)[1];
+
+        $r97[0] = $r2;
+
+        specialinvoke $r96.<sun.management.AgentConfigurationError: void <init>(java.lang.String,java.lang.Throwable,java.lang.String[])>("agent.err.invalid.jmxremote.rmi.port", $r95, $r97);
+
+        throw $r96;
+
+     label09:
+        if i3 >= 0 goto label10;
+
+        $r85 = new sun.management.AgentConfigurationError;
+
+        $r86 = newarray (java.lang.String)[1];
+
+        $r86[0] = $r2;
+
+        specialinvoke $r85.<sun.management.AgentConfigurationError: void <init>(java.lang.String,java.lang.String[])>("agent.err.invalid.jmxremote.rmi.port", $r86);
+
+        throw $r85;
+
+     label10:
+        $r3 = virtualinvoke r1.<java.util.Properties: java.lang.String getProperty(java.lang.String,java.lang.String)>("com.sun.management.jmxremote.authenticate", "true");
+
+        $r4 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(java.lang.String)>($r3);
+
+        $z0 = virtualinvoke $r4.<java.lang.Boolean: boolean booleanValue()>();
+
+        $r5 = virtualinvoke r1.<java.util.Properties: java.lang.String getProperty(java.lang.String,java.lang.String)>("com.sun.management.jmxremote.ssl", "true");
+
+        $r6 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(java.lang.String)>($r5);
+
+        $z1 = virtualinvoke $r6.<java.lang.Boolean: boolean booleanValue()>();
+
+        $r7 = virtualinvoke r1.<java.util.Properties: java.lang.String getProperty(java.lang.String,java.lang.String)>("com.sun.management.jmxremote.registry.ssl", "false");
+
+        $r8 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(java.lang.String)>($r7);
+
+        $z2 = virtualinvoke $r8.<java.lang.Boolean: boolean booleanValue()>();
+
+        $r9 = virtualinvoke r1.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("com.sun.management.jmxremote.ssl.enabled.cipher.suites");
+
+        r101 = null;
+
+        if $r9 == null goto label12;
+
+        $r83 = new java.util.StringTokenizer;
+
+        specialinvoke $r83.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>($r9, ",");
+
+        $i2 = virtualinvoke $r83.<java.util.StringTokenizer: int countTokens()>();
+
+        r101 = newarray (java.lang.String)[$i2];
+
+        i4 = 0;
+
+     label11:
+        if i4 >= $i2 goto label12;
+
+        $r84 = virtualinvoke $r83.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        r101[i4] = $r84;
+
+        i4 = i4 + 1;
+
+        goto label11;
+
+     label12:
+        $r10 = virtualinvoke r1.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("com.sun.management.jmxremote.ssl.enabled.protocols");
+
+        r102 = null;
+
+        if $r10 == null goto label14;
+
+        $r81 = new java.util.StringTokenizer;
+
+        specialinvoke $r81.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>($r10, ",");
+
+        $i1 = virtualinvoke $r81.<java.util.StringTokenizer: int countTokens()>();
+
+        r102 = newarray (java.lang.String)[$i1];
+
+        i5 = 0;
+
+     label13:
+        if i5 >= $i1 goto label14;
+
+        $r82 = virtualinvoke $r81.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        r102[i5] = $r82;
+
+        i5 = i5 + 1;
+
+        goto label13;
+
+     label14:
+        $r11 = virtualinvoke r1.<java.util.Properties: java.lang.String getProperty(java.lang.String,java.lang.String)>("com.sun.management.jmxremote.ssl.need.client.auth", "false");
+
+        $r12 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(java.lang.String)>($r11);
+
+        $z3 = virtualinvoke $r12.<java.lang.Boolean: boolean booleanValue()>();
+
+        $r13 = virtualinvoke r1.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("com.sun.management.jmxremote.ssl.config.file");
+
+        r103 = null;
+
+        r104 = null;
+
+        r105 = null;
+
+        if $z0 == 0 goto label16;
+
+        $r76 = virtualinvoke r1.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("com.sun.management.jmxremote.login.config");
+
+        r103 = $r76;
+
+        if $r76 != null goto label15;
+
+        $r79 = staticinvoke <sun.management.jmxremote.ConnectorBootstrap: java.lang.String getDefaultFileName(java.lang.String)>("jmxremote.password");
+
+        $r80 = virtualinvoke r1.<java.util.Properties: java.lang.String getProperty(java.lang.String,java.lang.String)>("com.sun.management.jmxremote.password.file", $r79);
+
+        r104 = $r80;
+
+        staticinvoke <sun.management.jmxremote.ConnectorBootstrap: void checkPasswordFile(java.lang.String)>($r80);
+
+     label15:
+        $r77 = staticinvoke <sun.management.jmxremote.ConnectorBootstrap: java.lang.String getDefaultFileName(java.lang.String)>("jmxremote.access");
+
+        $r78 = virtualinvoke r1.<java.util.Properties: java.lang.String getProperty(java.lang.String,java.lang.String)>("com.sun.management.jmxremote.access.file", $r77);
+
+        r105 = $r78;
+
+        staticinvoke <sun.management.jmxremote.ConnectorBootstrap: void checkAccessFile(java.lang.String)>($r78);
+
+     label16:
+        $r106 = virtualinvoke r1.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("com.sun.management.jmxremote.host");
+
+        $r107 = <sun.management.jmxremote.ConnectorBootstrap: com.sun.jmx.remote.util.ClassLogger log>;
+
+        $z4 = virtualinvoke $r107.<com.sun.jmx.remote.util.ClassLogger: boolean debugOn()>();
+
+        if $z4 == 0 goto label24;
+
+        $r17 = <sun.management.jmxremote.ConnectorBootstrap: com.sun.jmx.remote.util.ClassLogger log>;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = staticinvoke <sun.management.Agent: java.lang.String getText(java.lang.String)>("jmxremote.ConnectorBootstrap.starting");
+
+        $r19 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n\t");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("com.sun.management.jmxremote.port");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("=");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        if $r106 != null goto label17;
+
+        $r108 = "";
+
+        goto label18;
+
+     label17:
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n\tcom.sun.management.jmxremote.host=");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r106);
+
+        $r108 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label18:
+        $r27 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r108);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n\t");
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("com.sun.management.jmxremote.rmi.port");
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("=");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i3);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n\t");
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("com.sun.management.jmxremote.ssl");
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("=");
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z1);
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n\t");
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("com.sun.management.jmxremote.registry.ssl");
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("=");
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z2);
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n\t");
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("com.sun.management.jmxremote.ssl.config.file");
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("=");
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n\t");
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("com.sun.management.jmxremote.ssl.enabled.cipher.suites");
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("=");
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n\t");
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("com.sun.management.jmxremote.ssl.enabled.protocols");
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("=");
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n\t");
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("com.sun.management.jmxremote.ssl.need.client.auth");
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("=");
+
+        $r55 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z3);
+
+        $r56 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n\t");
+
+        $r57 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("com.sun.management.jmxremote.authenticate");
+
+        $r58 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("=");
+
+        $r109 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        if $z0 == 0 goto label20;
+
+        if r103 != null goto label19;
+
+        $r73 = new java.lang.StringBuilder;
+
+        specialinvoke $r73.<java.lang.StringBuilder: void <init>()>();
+
+        $r74 = virtualinvoke $r73.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n\tcom.sun.management.jmxremote.password.file=");
+
+        $r75 = virtualinvoke $r74.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r104);
+
+        $r110 = virtualinvoke $r75.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label21;
+
+     label19:
+        $r70 = new java.lang.StringBuilder;
+
+        specialinvoke $r70.<java.lang.StringBuilder: void <init>()>();
+
+        $r71 = virtualinvoke $r70.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n\tcom.sun.management.jmxremote.login.config=");
+
+        $r72 = virtualinvoke $r71.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r103);
+
+        $r110 = virtualinvoke $r72.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label21;
+
+     label20:
+        $r59 = new java.lang.StringBuilder;
+
+        specialinvoke $r59.<java.lang.StringBuilder: void <init>()>();
+
+        $r60 = virtualinvoke $r59.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n\t");
+
+        $r61 = staticinvoke <sun.management.Agent: java.lang.String getText(java.lang.String)>("jmxremote.ConnectorBootstrap.noAuthentication");
+
+        $r62 = virtualinvoke $r60.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r61);
+
+        $r110 = virtualinvoke $r62.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label21:
+        $r63 = virtualinvoke $r109.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r110);
+
+        if $z0 == 0 goto label22;
+
+        $r67 = new java.lang.StringBuilder;
+
+        specialinvoke $r67.<java.lang.StringBuilder: void <init>()>();
+
+        $r68 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n\tcom.sun.management.jmxremote.access.file=");
+
+        $r69 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r105);
+
+        $r111 = virtualinvoke $r69.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label23;
+
+     label22:
+        $r111 = "";
+
+     label23:
+        $r64 = virtualinvoke $r63.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r111);
+
+        $r65 = virtualinvoke $r64.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r66 = virtualinvoke $r65.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r17.<com.sun.jmx.remote.util.ClassLogger: void debug(java.lang.String,java.lang.String)>("startRemoteConnectorServer", $r66);
+
+     label24:
+        $r112 = staticinvoke <java.lang.management.ManagementFactory: javax.management.MBeanServer getPlatformMBeanServer()>();
+
+     label25:
+        $r113 = staticinvoke <sun.management.jmxremote.ConnectorBootstrap: sun.management.jmxremote.ConnectorBootstrap$JMXConnectorServerData exportMBeanServer(javax.management.MBeanServer,int,int,boolean,boolean,java.lang.String,java.lang.String[],java.lang.String[],boolean,boolean,java.lang.String,java.lang.String,java.lang.String,java.lang.String)>($r112, $i0, i3, $z1, $z2, $r13, r101, r102, $z3, $z0, r103, r104, r105, $r106);
+
+        $r114 = $r113.<sun.management.jmxremote.ConnectorBootstrap$JMXConnectorServerData: javax.management.remote.JMXConnectorServer jmxConnectorServer>;
+
+        $r115 = $r113.<sun.management.jmxremote.ConnectorBootstrap$JMXConnectorServerData: javax.management.remote.JMXServiceURL jmxRemoteURL>;
+
+        $r116 = <sun.management.jmxremote.ConnectorBootstrap: com.sun.jmx.remote.util.ClassLogger log>;
+
+        $r117 = newarray (java.lang.String)[1];
+
+        $r118 = virtualinvoke $r115.<javax.management.remote.JMXServiceURL: java.lang.String toString()>();
+
+        $r117[0] = $r118;
+
+        $r119 = staticinvoke <sun.management.Agent: java.lang.String getText(java.lang.String,java.lang.String[])>("jmxremote.ConnectorBootstrap.ready", $r117);
+
+        virtualinvoke $r116.<com.sun.jmx.remote.util.ClassLogger: void config(java.lang.String,java.lang.String)>("startRemoteConnectorServer", $r119);
+
+     label26:
+        goto label28;
+
+     label27:
+        $r91 := @caughtexception;
+
+        $r92 = new sun.management.AgentConfigurationError;
+
+        $r93 = newarray (java.lang.String)[1];
+
+        $r94 = virtualinvoke $r91.<java.lang.Exception: java.lang.String toString()>();
+
+        $r93[0] = $r94;
+
+        specialinvoke $r92.<sun.management.AgentConfigurationError: void <init>(java.lang.String,java.lang.Throwable,java.lang.String[])>("agent.err.exception", $r91, $r93);
+
+        throw $r92;
+
+     label28:
+        $r14 = new java.util.HashMap;
+
+        specialinvoke $r14.<java.util.HashMap: void <init>()>();
+
+        $r15 = virtualinvoke $r115.<javax.management.remote.JMXServiceURL: java.lang.String toString()>();
+
+        interfaceinvoke $r14.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("remoteAddress", $r15);
+
+        interfaceinvoke $r14.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("authenticate", $r3);
+
+        interfaceinvoke $r14.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("ssl", $r5);
+
+        interfaceinvoke $r14.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("sslRegistry", $r7);
+
+        interfaceinvoke $r14.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("sslNeedClientAuth", $r11);
+
+        staticinvoke <sun.management.ConnectorAddressLink: void exportRemote(java.util.Map)>($r14);
+
+     label29:
+        goto label31;
+
+     label30:
+        $r89 := @caughtexception;
+
+        $r90 = <sun.management.jmxremote.ConnectorBootstrap: com.sun.jmx.remote.util.ClassLogger log>;
+
+        virtualinvoke $r90.<com.sun.jmx.remote.util.ClassLogger: void debug(java.lang.String,java.lang.Throwable)>("startRemoteConnectorServer", $r89);
+
+     label31:
+        return $r114;
+
+        catch java.lang.NumberFormatException from label01 to label02 with label03;
+        catch java.lang.NumberFormatException from label06 to label07 with label08;
+        catch java.lang.Exception from label25 to label26 with label27;
+        catch java.lang.Exception from label28 to label29 with label30;
+    }
+
+    public static javax.management.remote.JMXConnectorServer startLocalConnectorServer()
+    {
+        sun.management.jmxremote.ConnectorBootstrap$PermanentExporter $r1;
+        java.util.HashMap $r0;
+        java.lang.String[] $r2, $r15;
+        java.net.InetAddress $r7, r19;
+        javax.management.MBeanServer $r20;
+        java.lang.Boolean $r9;
+        java.lang.String $r4, $r6, $r8, $r16, r18;
+        javax.management.remote.JMXConnectorServer $r10;
+        boolean $z0, $z1;
+        sun.management.jmxremote.LocalRMIServerSocketFactory $r11;
+        java.util.Properties $r12, $r22, r23;
+        sun.management.AgentConfigurationError $r14;
+        javax.management.remote.JMXServiceURL $r21;
+        java.net.UnknownHostException $r17;
+        java.lang.Exception $r13;
+        java.lang.Class $r3, $r5;
+
+        staticinvoke <java.lang.System: java.lang.String setProperty(java.lang.String,java.lang.String)>("java.rmi.server.randomIDs", "true");
+
+        $r0 = new java.util.HashMap;
+
+        specialinvoke $r0.<java.util.HashMap: void <init>()>();
+
+        $r1 = new sun.management.jmxremote.ConnectorBootstrap$PermanentExporter;
+
+        specialinvoke $r1.<sun.management.jmxremote.ConnectorBootstrap$PermanentExporter: void <init>(sun.management.jmxremote.ConnectorBootstrap$1)>(null);
+
+        interfaceinvoke $r0.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("com.sun.jmx.remote.rmi.exporter", $r1);
+
+        $r2 = newarray (java.lang.String)[2];
+
+        $r3 = class "[Ljava/lang/String;";
+
+        $r4 = virtualinvoke $r3.<java.lang.Class: java.lang.String getName()>();
+
+        $r2[0] = $r4;
+
+        $r5 = class "Ljava/lang/String;";
+
+        $r6 = virtualinvoke $r5.<java.lang.Class: java.lang.String getName()>();
+
+        $r2[1] = $r6;
+
+        interfaceinvoke $r0.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("jmx.remote.rmi.server.credential.types", $r2);
+
+        r18 = "localhost";
+
+        r19 = null;
+
+     label01:
+        $r7 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByName(java.lang.String)>("localhost");
+
+        r19 = $r7;
+
+        r18 = virtualinvoke $r7.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+     label02:
+        goto label04;
+
+     label03:
+        $r17 := @caughtexception;
+
+     label04:
+        if r19 == null goto label05;
+
+        $z1 = virtualinvoke r19.<java.net.InetAddress: boolean isLoopbackAddress()>();
+
+        if $z1 != 0 goto label06;
+
+     label05:
+        r18 = "127.0.0.1";
+
+     label06:
+        $r20 = staticinvoke <java.lang.management.ManagementFactory: javax.management.MBeanServer getPlatformMBeanServer()>();
+
+     label07:
+        $r21 = new javax.management.remote.JMXServiceURL;
+
+        specialinvoke $r21.<javax.management.remote.JMXServiceURL: void <init>(java.lang.String,java.lang.String,int)>("rmi", r18, 0);
+
+        $r22 = staticinvoke <sun.management.Agent: java.util.Properties getManagementProperties()>();
+
+        r23 = $r22;
+
+        if $r22 != null goto label08;
+
+        $r12 = new java.util.Properties;
+
+        specialinvoke $r12.<java.util.Properties: void <init>()>();
+
+        r23 = $r12;
+
+     label08:
+        $r8 = virtualinvoke r23.<java.util.Properties: java.lang.String getProperty(java.lang.String,java.lang.String)>("com.sun.management.jmxremote.local.only", "true");
+
+        $r9 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(java.lang.String)>($r8);
+
+        $z0 = virtualinvoke $r9.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z0 == 0 goto label09;
+
+        $r11 = new sun.management.jmxremote.LocalRMIServerSocketFactory;
+
+        specialinvoke $r11.<sun.management.jmxremote.LocalRMIServerSocketFactory: void <init>()>();
+
+        interfaceinvoke $r0.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("jmx.remote.rmi.server.socket.factory", $r11);
+
+     label09:
+        $r10 = staticinvoke <javax.management.remote.JMXConnectorServerFactory: javax.management.remote.JMXConnectorServer newJMXConnectorServer(javax.management.remote.JMXServiceURL,java.util.Map,javax.management.MBeanServer)>($r21, $r0, $r20);
+
+        virtualinvoke $r10.<javax.management.remote.JMXConnectorServer: void start()>();
+
+     label10:
+        return $r10;
+
+     label11:
+        $r13 := @caughtexception;
+
+        $r14 = new sun.management.AgentConfigurationError;
+
+        $r15 = newarray (java.lang.String)[1];
+
+        $r16 = virtualinvoke $r13.<java.lang.Exception: java.lang.String toString()>();
+
+        $r15[0] = $r16;
+
+        specialinvoke $r14.<sun.management.AgentConfigurationError: void <init>(java.lang.String,java.lang.Throwable,java.lang.String[])>("agent.err.exception", $r13, $r15);
+
+        throw $r14;
+
+        catch java.net.UnknownHostException from label01 to label02 with label03;
+        catch java.lang.Exception from label07 to label10 with label11;
+    }
+
+    private static void checkPasswordFile(java.lang.String)
+    {
+        java.lang.String[] $r4, $r8, $r10, $r12, $r15;
+        int $i0;
+        java.lang.String r0, $r5;
+        com.sun.jmx.remote.util.ClassLogger $r6;
+        boolean $z0, $z1, $z2, $z3;
+        sun.management.AgentConfigurationError $r1, $r7, $r9, $r11, $r14;
+        java.io.IOException $r13;
+        java.io.File $r2;
+        sun.management.FileSystem $r3;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 == null goto label1;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        $r1 = new sun.management.AgentConfigurationError;
+
+        specialinvoke $r1.<sun.management.AgentConfigurationError: void <init>(java.lang.String)>("agent.err.password.file.notset");
+
+        throw $r1;
+
+     label2:
+        $r2 = new java.io.File;
+
+        specialinvoke $r2.<java.io.File: void <init>(java.lang.String)>(r0);
+
+        $z0 = virtualinvoke $r2.<java.io.File: boolean exists()>();
+
+        if $z0 != 0 goto label3;
+
+        $r11 = new sun.management.AgentConfigurationError;
+
+        $r12 = newarray (java.lang.String)[1];
+
+        $r12[0] = r0;
+
+        specialinvoke $r11.<sun.management.AgentConfigurationError: void <init>(java.lang.String,java.lang.String[])>("agent.err.password.file.notfound", $r12);
+
+        throw $r11;
+
+     label3:
+        $z1 = virtualinvoke $r2.<java.io.File: boolean canRead()>();
+
+        if $z1 != 0 goto label4;
+
+        $r9 = new sun.management.AgentConfigurationError;
+
+        $r10 = newarray (java.lang.String)[1];
+
+        $r10[0] = r0;
+
+        specialinvoke $r9.<sun.management.AgentConfigurationError: void <init>(java.lang.String,java.lang.String[])>("agent.err.password.file.not.readable", $r10);
+
+        throw $r9;
+
+     label4:
+        $r3 = staticinvoke <sun.management.FileSystem: sun.management.FileSystem open()>();
+
+     label5:
+        $z2 = virtualinvoke $r3.<sun.management.FileSystem: boolean supportsFileSecurity(java.io.File)>($r2);
+
+        if $z2 == 0 goto label6;
+
+        $z3 = virtualinvoke $r3.<sun.management.FileSystem: boolean isAccessUserOnly(java.io.File)>($r2);
+
+        if $z3 != 0 goto label6;
+
+        $r4 = newarray (java.lang.String)[1];
+
+        $r4[0] = r0;
+
+        $r5 = staticinvoke <sun.management.Agent: java.lang.String getText(java.lang.String,java.lang.String[])>("jmxremote.ConnectorBootstrap.password.readonly", $r4);
+
+        $r6 = <sun.management.jmxremote.ConnectorBootstrap: com.sun.jmx.remote.util.ClassLogger log>;
+
+        virtualinvoke $r6.<com.sun.jmx.remote.util.ClassLogger: void config(java.lang.String,java.lang.String)>("startRemoteConnectorServer", $r5);
+
+        $r7 = new sun.management.AgentConfigurationError;
+
+        $r8 = newarray (java.lang.String)[1];
+
+        $r8[0] = r0;
+
+        specialinvoke $r7.<sun.management.AgentConfigurationError: void <init>(java.lang.String,java.lang.String[])>("agent.err.password.file.access.notrestricted", $r8);
+
+        throw $r7;
+
+     label6:
+        goto label8;
+
+     label7:
+        $r13 := @caughtexception;
+
+        $r14 = new sun.management.AgentConfigurationError;
+
+        $r15 = newarray (java.lang.String)[1];
+
+        $r15[0] = r0;
+
+        specialinvoke $r14.<sun.management.AgentConfigurationError: void <init>(java.lang.String,java.lang.Throwable,java.lang.String[])>("agent.err.password.file.read.failed", $r13, $r15);
+
+        throw $r14;
+
+     label8:
+        return;
+
+        catch java.io.IOException from label5 to label6 with label7;
+    }
+
+    private static void checkAccessFile(java.lang.String)
+    {
+        sun.management.AgentConfigurationError $r1, $r3, $r5;
+        java.lang.String[] $r4, $r6;
+        java.io.File $r2;
+        int $i0;
+        java.lang.String r0;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 == null goto label1;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        $r1 = new sun.management.AgentConfigurationError;
+
+        specialinvoke $r1.<sun.management.AgentConfigurationError: void <init>(java.lang.String)>("agent.err.access.file.notset");
+
+        throw $r1;
+
+     label2:
+        $r2 = new java.io.File;
+
+        specialinvoke $r2.<java.io.File: void <init>(java.lang.String)>(r0);
+
+        $z0 = virtualinvoke $r2.<java.io.File: boolean exists()>();
+
+        if $z0 != 0 goto label3;
+
+        $r5 = new sun.management.AgentConfigurationError;
+
+        $r6 = newarray (java.lang.String)[1];
+
+        $r6[0] = r0;
+
+        specialinvoke $r5.<sun.management.AgentConfigurationError: void <init>(java.lang.String,java.lang.String[])>("agent.err.access.file.notfound", $r6);
+
+        throw $r5;
+
+     label3:
+        $z1 = virtualinvoke $r2.<java.io.File: boolean canRead()>();
+
+        if $z1 != 0 goto label4;
+
+        $r3 = new sun.management.AgentConfigurationError;
+
+        $r4 = newarray (java.lang.String)[1];
+
+        $r4[0] = r0;
+
+        specialinvoke $r3.<sun.management.AgentConfigurationError: void <init>(java.lang.String,java.lang.String[])>("agent.err.access.file.not.readable", $r4);
+
+        throw $r3;
+
+     label4:
+        return;
+    }
+
+    private static void checkRestrictedFile(java.lang.String)
+    {
+        java.lang.String[] $r4, $r8, $r10, $r12, $r15;
+        int $i0;
+        java.lang.String r0, $r5;
+        com.sun.jmx.remote.util.ClassLogger $r6;
+        boolean $z0, $z1, $z2, $z3;
+        sun.management.AgentConfigurationError $r1, $r7, $r9, $r11, $r14;
+        java.io.IOException $r13;
+        java.io.File $r2;
+        sun.management.FileSystem $r3;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 == null goto label1;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        $r1 = new sun.management.AgentConfigurationError;
+
+        specialinvoke $r1.<sun.management.AgentConfigurationError: void <init>(java.lang.String)>("agent.err.file.not.set");
+
+        throw $r1;
+
+     label2:
+        $r2 = new java.io.File;
+
+        specialinvoke $r2.<java.io.File: void <init>(java.lang.String)>(r0);
+
+        $z0 = virtualinvoke $r2.<java.io.File: boolean exists()>();
+
+        if $z0 != 0 goto label3;
+
+        $r11 = new sun.management.AgentConfigurationError;
+
+        $r12 = newarray (java.lang.String)[1];
+
+        $r12[0] = r0;
+
+        specialinvoke $r11.<sun.management.AgentConfigurationError: void <init>(java.lang.String,java.lang.String[])>("agent.err.file.not.found", $r12);
+
+        throw $r11;
+
+     label3:
+        $z1 = virtualinvoke $r2.<java.io.File: boolean canRead()>();
+
+        if $z1 != 0 goto label4;
+
+        $r9 = new sun.management.AgentConfigurationError;
+
+        $r10 = newarray (java.lang.String)[1];
+
+        $r10[0] = r0;
+
+        specialinvoke $r9.<sun.management.AgentConfigurationError: void <init>(java.lang.String,java.lang.String[])>("agent.err.file.not.readable", $r10);
+
+        throw $r9;
+
+     label4:
+        $r3 = staticinvoke <sun.management.FileSystem: sun.management.FileSystem open()>();
+
+     label5:
+        $z2 = virtualinvoke $r3.<sun.management.FileSystem: boolean supportsFileSecurity(java.io.File)>($r2);
+
+        if $z2 == 0 goto label6;
+
+        $z3 = virtualinvoke $r3.<sun.management.FileSystem: boolean isAccessUserOnly(java.io.File)>($r2);
+
+        if $z3 != 0 goto label6;
+
+        $r4 = newarray (java.lang.String)[1];
+
+        $r4[0] = r0;
+
+        $r5 = staticinvoke <sun.management.Agent: java.lang.String getText(java.lang.String,java.lang.String[])>("jmxremote.ConnectorBootstrap.file.readonly", $r4);
+
+        $r6 = <sun.management.jmxremote.ConnectorBootstrap: com.sun.jmx.remote.util.ClassLogger log>;
+
+        virtualinvoke $r6.<com.sun.jmx.remote.util.ClassLogger: void config(java.lang.String,java.lang.String)>("startRemoteConnectorServer", $r5);
+
+        $r7 = new sun.management.AgentConfigurationError;
+
+        $r8 = newarray (java.lang.String)[1];
+
+        $r8[0] = r0;
+
+        specialinvoke $r7.<sun.management.AgentConfigurationError: void <init>(java.lang.String,java.lang.String[])>("agent.err.file.access.not.restricted", $r8);
+
+        throw $r7;
+
+     label6:
+        goto label8;
+
+     label7:
+        $r13 := @caughtexception;
+
+        $r14 = new sun.management.AgentConfigurationError;
+
+        $r15 = newarray (java.lang.String)[1];
+
+        $r15[0] = r0;
+
+        specialinvoke $r14.<sun.management.AgentConfigurationError: void <init>(java.lang.String,java.lang.Throwable,java.lang.String[])>("agent.err.file.read.failed", $r13, $r15);
+
+        throw $r14;
+
+     label8:
+        return;
+
+        catch java.io.IOException from label5 to label6 with label7;
+    }
+
+    private static java.lang.String getDefaultFileName(java.lang.String)
+    {
+        java.lang.StringBuilder $r1, $r3, $r4, $r5, $r6, $r7, $r8, $r10;
+        java.lang.String r0, $r2, r9, $r11;
+
+        r9 := @parameter0: java.lang.String;
+
+        r0 = <java.io.File: java.lang.String separator>;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.home");
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("lib");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("management");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r11;
+    }
+
+    private static javax.rmi.ssl.SslRMIServerSocketFactory createSslRMIServerSocketFactory(java.lang.String, java.lang.String[], java.lang.String[], boolean, java.lang.String)
+    {
+        javax.net.ssl.SSLContext $r45;
+        java.io.BufferedInputStream $r3;
+        sun.management.jmxremote.ConnectorBootstrap$HostAwareSslSocketFactory $r13, $r48;
+        boolean z0;
+        javax.net.ssl.TrustManagerFactory $r44;
+        sun.management.AgentConfigurationError $r15;
+        java.security.KeyStore $r8, $r11, r37, r41;
+        java.lang.Exception $r14;
+        java.lang.Throwable $r18, $r19, $r20, $r22, $r23, $r24, $r26, $r27, $r28, r30, r38, r42;
+        java.lang.String[] r4, r5, $r16;
+        int $i0, $i1;
+        java.lang.String r0, r6, $r7, $r10, $r17, $r31, $r32, $r33, $r34, $r39, $r43;
+        java.util.Properties $r1;
+        javax.net.ssl.KeyManagerFactory $r40;
+        java.io.FileInputStream $r2, $r9, $r12;
+        javax.net.ssl.TrustManager[] $r47;
+        char[] r35, r36;
+        javax.net.ssl.KeyManager[] $r46;
+
+        r0 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.lang.String[];
+
+        r5 := @parameter2: java.lang.String[];
+
+        z0 := @parameter3: boolean;
+
+        r6 := @parameter4: java.lang.String;
+
+        if r0 != null goto label01;
+
+        $r13 = new sun.management.jmxremote.ConnectorBootstrap$HostAwareSslSocketFactory;
+
+        specialinvoke $r13.<sun.management.jmxremote.ConnectorBootstrap$HostAwareSslSocketFactory: void <init>(java.lang.String[],java.lang.String[],boolean,java.lang.String,sun.management.jmxremote.ConnectorBootstrap$1)>(r4, r5, z0, r6, null);
+
+        return $r13;
+
+     label01:
+        staticinvoke <sun.management.jmxremote.ConnectorBootstrap: void checkRestrictedFile(java.lang.String)>(r0);
+
+     label02:
+        $r1 = new java.util.Properties;
+
+        specialinvoke $r1.<java.util.Properties: void <init>()>();
+
+        $r2 = new java.io.FileInputStream;
+
+        specialinvoke $r2.<java.io.FileInputStream: void <init>(java.lang.String)>(r0);
+
+        r30 = null;
+
+     label03:
+        $r3 = new java.io.BufferedInputStream;
+
+        specialinvoke $r3.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>($r2);
+
+        virtualinvoke $r1.<java.util.Properties: void load(java.io.InputStream)>($r3);
+
+     label04:
+        if $r2 == null goto label14;
+
+        goto label05;
+
+     label05:
+        virtualinvoke $r2.<java.io.InputStream: void close()>();
+
+        goto label14;
+
+     label06:
+        $r28 := @caughtexception;
+
+        r30 = $r28;
+
+        throw $r28;
+
+     label07:
+        $r27 := @caughtexception;
+
+     label08:
+        if $r2 == null goto label13;
+
+        if r30 == null goto label12;
+
+     label09:
+        virtualinvoke $r2.<java.io.InputStream: void close()>();
+
+     label10:
+        goto label13;
+
+     label11:
+        $r26 := @caughtexception;
+
+        virtualinvoke r30.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r26);
+
+        goto label13;
+
+     label12:
+        virtualinvoke $r2.<java.io.InputStream: void close()>();
+
+     label13:
+        throw $r27;
+
+     label14:
+        $r31 = virtualinvoke $r1.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("javax.net.ssl.keyStore");
+
+        $r32 = virtualinvoke $r1.<java.util.Properties: java.lang.String getProperty(java.lang.String,java.lang.String)>("javax.net.ssl.keyStorePassword", "");
+
+        $r33 = virtualinvoke $r1.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("javax.net.ssl.trustStore");
+
+        $r34 = virtualinvoke $r1.<java.util.Properties: java.lang.String getProperty(java.lang.String,java.lang.String)>("javax.net.ssl.trustStorePassword", "");
+
+        r35 = null;
+
+        $i1 = virtualinvoke $r32.<java.lang.String: int length()>();
+
+        if $i1 == 0 goto label15;
+
+        r35 = virtualinvoke $r32.<java.lang.String: char[] toCharArray()>();
+
+     label15:
+        r36 = null;
+
+        $i0 = virtualinvoke $r34.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label16;
+
+        r36 = virtualinvoke $r34.<java.lang.String: char[] toCharArray()>();
+
+     label16:
+        r37 = null;
+
+        if $r31 == null goto label28;
+
+        $r10 = staticinvoke <java.security.KeyStore: java.lang.String getDefaultType()>();
+
+        $r11 = staticinvoke <java.security.KeyStore: java.security.KeyStore getInstance(java.lang.String)>($r10);
+
+        r37 = $r11;
+
+        $r12 = new java.io.FileInputStream;
+
+        specialinvoke $r12.<java.io.FileInputStream: void <init>(java.lang.String)>($r31);
+
+        r38 = null;
+
+     label17:
+        virtualinvoke $r11.<java.security.KeyStore: void load(java.io.InputStream,char[])>($r12, r35);
+
+     label18:
+        if $r12 == null goto label28;
+
+        goto label19;
+
+     label19:
+        virtualinvoke $r12.<java.io.FileInputStream: void close()>();
+
+        goto label28;
+
+     label20:
+        $r24 := @caughtexception;
+
+        r38 = $r24;
+
+        throw $r24;
+
+     label21:
+        $r23 := @caughtexception;
+
+     label22:
+        if $r12 == null goto label27;
+
+        if r38 == null goto label26;
+
+     label23:
+        virtualinvoke $r12.<java.io.FileInputStream: void close()>();
+
+     label24:
+        goto label27;
+
+     label25:
+        $r22 := @caughtexception;
+
+        virtualinvoke r38.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r22);
+
+        goto label27;
+
+     label26:
+        virtualinvoke $r12.<java.io.FileInputStream: void close()>();
+
+     label27:
+        throw $r23;
+
+     label28:
+        $r39 = staticinvoke <javax.net.ssl.KeyManagerFactory: java.lang.String getDefaultAlgorithm()>();
+
+        $r40 = staticinvoke <javax.net.ssl.KeyManagerFactory: javax.net.ssl.KeyManagerFactory getInstance(java.lang.String)>($r39);
+
+        virtualinvoke $r40.<javax.net.ssl.KeyManagerFactory: void init(java.security.KeyStore,char[])>(r37, r35);
+
+        r41 = null;
+
+        if $r33 == null goto label40;
+
+        $r7 = staticinvoke <java.security.KeyStore: java.lang.String getDefaultType()>();
+
+        $r8 = staticinvoke <java.security.KeyStore: java.security.KeyStore getInstance(java.lang.String)>($r7);
+
+        r41 = $r8;
+
+        $r9 = new java.io.FileInputStream;
+
+        specialinvoke $r9.<java.io.FileInputStream: void <init>(java.lang.String)>($r33);
+
+        r42 = null;
+
+     label29:
+        virtualinvoke $r8.<java.security.KeyStore: void load(java.io.InputStream,char[])>($r9, r36);
+
+     label30:
+        if $r9 == null goto label40;
+
+        goto label31;
+
+     label31:
+        virtualinvoke $r9.<java.io.FileInputStream: void close()>();
+
+        goto label40;
+
+     label32:
+        $r20 := @caughtexception;
+
+        r42 = $r20;
+
+        throw $r20;
+
+     label33:
+        $r19 := @caughtexception;
+
+     label34:
+        if $r9 == null goto label39;
+
+        if r42 == null goto label38;
+
+     label35:
+        virtualinvoke $r9.<java.io.FileInputStream: void close()>();
+
+     label36:
+        goto label39;
+
+     label37:
+        $r18 := @caughtexception;
+
+        virtualinvoke r42.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r18);
+
+        goto label39;
+
+     label38:
+        virtualinvoke $r9.<java.io.FileInputStream: void close()>();
+
+     label39:
+        throw $r19;
+
+     label40:
+        $r43 = staticinvoke <javax.net.ssl.TrustManagerFactory: java.lang.String getDefaultAlgorithm()>();
+
+        $r44 = staticinvoke <javax.net.ssl.TrustManagerFactory: javax.net.ssl.TrustManagerFactory getInstance(java.lang.String)>($r43);
+
+        virtualinvoke $r44.<javax.net.ssl.TrustManagerFactory: void init(java.security.KeyStore)>(r41);
+
+        $r45 = staticinvoke <javax.net.ssl.SSLContext: javax.net.ssl.SSLContext getInstance(java.lang.String)>("SSL");
+
+        $r46 = virtualinvoke $r40.<javax.net.ssl.KeyManagerFactory: javax.net.ssl.KeyManager[] getKeyManagers()>();
+
+        $r47 = virtualinvoke $r44.<javax.net.ssl.TrustManagerFactory: javax.net.ssl.TrustManager[] getTrustManagers()>();
+
+        virtualinvoke $r45.<javax.net.ssl.SSLContext: void init(javax.net.ssl.KeyManager[],javax.net.ssl.TrustManager[],java.security.SecureRandom)>($r46, $r47, null);
+
+        $r48 = new sun.management.jmxremote.ConnectorBootstrap$HostAwareSslSocketFactory;
+
+        specialinvoke $r48.<sun.management.jmxremote.ConnectorBootstrap$HostAwareSslSocketFactory: void <init>(javax.net.ssl.SSLContext,java.lang.String[],java.lang.String[],boolean,java.lang.String,sun.management.jmxremote.ConnectorBootstrap$1)>($r45, r4, r5, z0, r6, null);
+
+     label41:
+        return $r48;
+
+     label42:
+        $r14 := @caughtexception;
+
+        $r15 = new sun.management.AgentConfigurationError;
+
+        $r16 = newarray (java.lang.String)[1];
+
+        $r17 = virtualinvoke $r14.<java.lang.Exception: java.lang.String toString()>();
+
+        $r16[0] = $r17;
+
+        specialinvoke $r15.<sun.management.AgentConfigurationError: void <init>(java.lang.String,java.lang.Throwable,java.lang.String[])>("agent.err.exception", $r14, $r16);
+
+        throw $r15;
+
+        catch java.lang.Throwable from label03 to label04 with label06;
+        catch java.lang.Throwable from label09 to label10 with label11;
+        catch java.lang.Throwable from label06 to label08 with label07;
+        catch java.lang.Throwable from label17 to label18 with label20;
+        catch java.lang.Throwable from label23 to label24 with label25;
+        catch java.lang.Throwable from label20 to label22 with label21;
+        catch java.lang.Throwable from label29 to label30 with label32;
+        catch java.lang.Throwable from label35 to label36 with label37;
+        catch java.lang.Throwable from label32 to label34 with label33;
+        catch java.lang.Exception from label02 to label41 with label42;
+    }
+
+    private static sun.management.jmxremote.ConnectorBootstrap$JMXConnectorServerData exportMBeanServer(javax.management.MBeanServer, int, int, boolean, boolean, java.lang.String, java.lang.String[], java.lang.String[], boolean, boolean, java.lang.String, java.lang.String, java.lang.String, java.lang.String) throws java.io.IOException, java.net.MalformedURLException
+    {
+        sun.management.jmxremote.ConnectorBootstrap$AccessFileCheckerAuthenticator $r26;
+        java.rmi.registry.Registry $r40;
+        java.lang.Integer $r47;
+        javax.management.remote.JMXConnectorServer $r14, r39;
+        boolean z0, z1, z2, z3, z4, $z5;
+        javax.rmi.ssl.SslRMIClientSocketFactory $r9, r37;
+        sun.management.jmxremote.ConnectorBootstrap$HostAwareSocketFactory $r21;
+        sun.management.AgentConfigurationError $r29, $r33;
+        javax.management.remote.JMXServiceURL $r0, $r32, $r35, $r49;
+        sun.management.jmxremote.SingleEntryRegistry $r15, $r17, $r19;
+        java.rmi.server.RemoteRef $r42;
+        sun.management.jmxremote.ConnectorBootstrap$PermanentExporter $r3;
+        sun.rmi.server.UnicastRef $r43;
+        java.lang.Object[] $r45;
+        java.util.HashMap $r2;
+        java.lang.String[] $r4, r11, r12, $r30, $r34;
+        javax.management.MBeanServer r13;
+        int i0, i1, $i2;
+        sun.management.jmxremote.ConnectorBootstrap$JMXConnectorServerData $r50;
+        java.rmi.server.RMIServerSocketFactory r38;
+        java.lang.String r1, $r6, $r8, r10, r22, r23, r24, $r31, $r36, $r46, $r48;
+        java.rmi.Remote $r16, $r18, $r20;
+        java.rmi.server.RemoteObject $r41;
+        java.io.IOException $r28;
+        java.lang.Class $r5, $r7;
+        java.lang.Object $r25, $r27;
+        sun.rmi.transport.LiveRef $r44;
+
+        r13 := @parameter0: javax.management.MBeanServer;
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        z2 := @parameter3: boolean;
+
+        z4 := @parameter4: boolean;
+
+        r10 := @parameter5: java.lang.String;
+
+        r11 := @parameter6: java.lang.String[];
+
+        r12 := @parameter7: java.lang.String[];
+
+        z3 := @parameter8: boolean;
+
+        z1 := @parameter9: boolean;
+
+        r22 := @parameter10: java.lang.String;
+
+        r23 := @parameter11: java.lang.String;
+
+        r24 := @parameter12: java.lang.String;
+
+        r1 := @parameter13: java.lang.String;
+
+        staticinvoke <java.lang.System: java.lang.String setProperty(java.lang.String,java.lang.String)>("java.rmi.server.randomIDs", "true");
+
+        $r0 = new javax.management.remote.JMXServiceURL;
+
+        specialinvoke $r0.<javax.management.remote.JMXServiceURL: void <init>(java.lang.String,java.lang.String,int)>("rmi", r1, i0);
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        $r3 = new sun.management.jmxremote.ConnectorBootstrap$PermanentExporter;
+
+        specialinvoke $r3.<sun.management.jmxremote.ConnectorBootstrap$PermanentExporter: void <init>(sun.management.jmxremote.ConnectorBootstrap$1)>(null);
+
+        interfaceinvoke $r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("com.sun.jmx.remote.rmi.exporter", $r3);
+
+        $r4 = newarray (java.lang.String)[2];
+
+        $r5 = class "[Ljava/lang/String;";
+
+        $r6 = virtualinvoke $r5.<java.lang.Class: java.lang.String getName()>();
+
+        $r4[0] = $r6;
+
+        $r7 = class "Ljava/lang/String;";
+
+        $r8 = virtualinvoke $r7.<java.lang.Class: java.lang.String getName()>();
+
+        $r4[1] = $r8;
+
+        interfaceinvoke $r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("jmx.remote.rmi.server.credential.types", $r4);
+
+        if r1 == null goto label01;
+
+        if z2 != 0 goto label01;
+
+        $z5 = 1;
+
+        goto label02;
+
+     label01:
+        $z5 = 0;
+
+     label02:
+        z0 = $z5;
+
+        if z1 == 0 goto label06;
+
+        if r22 == null goto label03;
+
+        interfaceinvoke $r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("jmx.remote.x.login.config", r22);
+
+     label03:
+        if r23 == null goto label04;
+
+        interfaceinvoke $r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("jmx.remote.x.password.file", r23);
+
+     label04:
+        interfaceinvoke $r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("jmx.remote.x.access.file", r24);
+
+        $r25 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>("jmx.remote.x.password.file");
+
+        if $r25 != null goto label05;
+
+        $r27 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>("jmx.remote.x.login.config");
+
+        if $r27 == null goto label06;
+
+     label05:
+        $r26 = new sun.management.jmxremote.ConnectorBootstrap$AccessFileCheckerAuthenticator;
+
+        specialinvoke $r26.<sun.management.jmxremote.ConnectorBootstrap$AccessFileCheckerAuthenticator: void <init>(java.util.Map)>($r2);
+
+        interfaceinvoke $r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("jmx.remote.authenticator", $r26);
+
+     label06:
+        r37 = null;
+
+        r38 = null;
+
+        if z2 != 0 goto label07;
+
+        if z4 == 0 goto label08;
+
+     label07:
+        $r9 = new javax.rmi.ssl.SslRMIClientSocketFactory;
+
+        specialinvoke $r9.<javax.rmi.ssl.SslRMIClientSocketFactory: void <init>()>();
+
+        r37 = $r9;
+
+        r38 = staticinvoke <sun.management.jmxremote.ConnectorBootstrap: javax.rmi.ssl.SslRMIServerSocketFactory createSslRMIServerSocketFactory(java.lang.String,java.lang.String[],java.lang.String[],boolean,java.lang.String)>(r10, r11, r12, z3, r1);
+
+     label08:
+        if z2 == 0 goto label09;
+
+        interfaceinvoke $r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("jmx.remote.rmi.client.socket.factory", r37);
+
+        interfaceinvoke $r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("jmx.remote.rmi.server.socket.factory", r38);
+
+     label09:
+        if z0 == 0 goto label10;
+
+        $r21 = new sun.management.jmxremote.ConnectorBootstrap$HostAwareSocketFactory;
+
+        specialinvoke $r21.<sun.management.jmxremote.ConnectorBootstrap$HostAwareSocketFactory: void <init>(java.lang.String,sun.management.jmxremote.ConnectorBootstrap$1)>(r1, null);
+
+        r38 = $r21;
+
+        interfaceinvoke $r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("jmx.remote.rmi.server.socket.factory", $r21);
+
+     label10:
+        r39 = null;
+
+     label11:
+        $r14 = staticinvoke <javax.management.remote.JMXConnectorServerFactory: javax.management.remote.JMXConnectorServer newJMXConnectorServer(javax.management.remote.JMXServiceURL,java.util.Map,javax.management.MBeanServer)>($r0, $r2, r13);
+
+        r39 = $r14;
+
+        virtualinvoke $r14.<javax.management.remote.JMXConnectorServer: void start()>();
+
+     label12:
+        goto label16;
+
+     label13:
+        $r28 := @caughtexception;
+
+        if r39 == null goto label14;
+
+        $r32 = virtualinvoke r39.<javax.management.remote.JMXConnectorServer: javax.management.remote.JMXServiceURL getAddress()>();
+
+        if $r32 != null goto label15;
+
+     label14:
+        $r29 = new sun.management.AgentConfigurationError;
+
+        $r30 = newarray (java.lang.String)[1];
+
+        $r31 = virtualinvoke $r0.<javax.management.remote.JMXServiceURL: java.lang.String toString()>();
+
+        $r30[0] = $r31;
+
+        specialinvoke $r29.<sun.management.AgentConfigurationError: void <init>(java.lang.String,java.lang.Throwable,java.lang.String[])>("agent.err.connector.server.io.error", $r28, $r30);
+
+        throw $r29;
+
+     label15:
+        $r33 = new sun.management.AgentConfigurationError;
+
+        $r34 = newarray (java.lang.String)[1];
+
+        $r35 = virtualinvoke r39.<javax.management.remote.JMXConnectorServer: javax.management.remote.JMXServiceURL getAddress()>();
+
+        $r36 = virtualinvoke $r35.<javax.management.remote.JMXServiceURL: java.lang.String toString()>();
+
+        $r34[0] = $r36;
+
+        specialinvoke $r33.<sun.management.AgentConfigurationError: void <init>(java.lang.String,java.lang.Throwable,java.lang.String[])>("agent.err.connector.server.io.error", $r28, $r34);
+
+        throw $r33;
+
+     label16:
+        if z4 == 0 goto label17;
+
+        $r19 = new sun.management.jmxremote.SingleEntryRegistry;
+
+        $r20 = $r3.<sun.management.jmxremote.ConnectorBootstrap$PermanentExporter: java.rmi.Remote firstExported>;
+
+        specialinvoke $r19.<sun.management.jmxremote.SingleEntryRegistry: void <init>(int,java.rmi.server.RMIClientSocketFactory,java.rmi.server.RMIServerSocketFactory,java.lang.String,java.rmi.Remote)>(i1, r37, r38, "jmxrmi", $r20);
+
+        <sun.management.jmxremote.ConnectorBootstrap: java.rmi.registry.Registry registry> = $r19;
+
+        goto label19;
+
+     label17:
+        if z0 == 0 goto label18;
+
+        $r17 = new sun.management.jmxremote.SingleEntryRegistry;
+
+        $r18 = $r3.<sun.management.jmxremote.ConnectorBootstrap$PermanentExporter: java.rmi.Remote firstExported>;
+
+        specialinvoke $r17.<sun.management.jmxremote.SingleEntryRegistry: void <init>(int,java.rmi.server.RMIClientSocketFactory,java.rmi.server.RMIServerSocketFactory,java.lang.String,java.rmi.Remote)>(i1, r37, r38, "jmxrmi", $r18);
+
+        <sun.management.jmxremote.ConnectorBootstrap: java.rmi.registry.Registry registry> = $r17;
+
+        goto label19;
+
+     label18:
+        $r15 = new sun.management.jmxremote.SingleEntryRegistry;
+
+        $r16 = $r3.<sun.management.jmxremote.ConnectorBootstrap$PermanentExporter: java.rmi.Remote firstExported>;
+
+        specialinvoke $r15.<sun.management.jmxremote.SingleEntryRegistry: void <init>(int,java.lang.String,java.rmi.Remote)>(i1, "jmxrmi", $r16);
+
+        <sun.management.jmxremote.ConnectorBootstrap: java.rmi.registry.Registry registry> = $r15;
+
+     label19:
+        $r40 = <sun.management.jmxremote.ConnectorBootstrap: java.rmi.registry.Registry registry>;
+
+        $r41 = (java.rmi.server.RemoteObject) $r40;
+
+        $r42 = virtualinvoke $r41.<java.rmi.server.RemoteObject: java.rmi.server.RemoteRef getRef()>();
+
+        $r43 = (sun.rmi.server.UnicastRef) $r42;
+
+        $r44 = virtualinvoke $r43.<sun.rmi.server.UnicastRef: sun.rmi.transport.LiveRef getLiveRef()>();
+
+        $i2 = virtualinvoke $r44.<sun.rmi.transport.LiveRef: int getPort()>();
+
+        $r45 = newarray (java.lang.Object)[2];
+
+        $r46 = virtualinvoke $r0.<javax.management.remote.JMXServiceURL: java.lang.String getHost()>();
+
+        $r45[0] = $r46;
+
+        $r47 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r45[1] = $r47;
+
+        $r48 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("service:jmx:rmi:///jndi/rmi://%s:%d/jmxrmi", $r45);
+
+        $r49 = new javax.management.remote.JMXServiceURL;
+
+        specialinvoke $r49.<javax.management.remote.JMXServiceURL: void <init>(java.lang.String)>($r48);
+
+        $r50 = new sun.management.jmxremote.ConnectorBootstrap$JMXConnectorServerData;
+
+        specialinvoke $r50.<sun.management.jmxremote.ConnectorBootstrap$JMXConnectorServerData: void <init>(javax.management.remote.JMXConnectorServer,javax.management.remote.JMXServiceURL)>($r14, $r49);
+
+        return $r50;
+
+        catch java.io.IOException from label11 to label12 with label13;
+    }
+
+    private void <init>()
+    {
+        sun.management.jmxremote.ConnectorBootstrap r0;
+
+        r0 := @this: sun.management.jmxremote.ConnectorBootstrap;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Package $r2;
+        java.lang.Class $r1;
+        com.sun.jmx.remote.util.ClassLogger $r0;
+        java.lang.String $r3;
+
+        <sun.management.jmxremote.ConnectorBootstrap: java.rmi.registry.Registry registry> = null;
+
+        $r0 = new com.sun.jmx.remote.util.ClassLogger;
+
+        $r1 = class "Lsun/management/jmxremote/ConnectorBootstrap;";
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.Package getPackage()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Package: java.lang.String getName()>();
+
+        specialinvoke $r0.<com.sun.jmx.remote.util.ClassLogger: void <init>(java.lang.String,java.lang.String)>($r3, "ConnectorBootstrap");
+
+        <sun.management.jmxremote.ConnectorBootstrap: com.sun.jmx.remote.util.ClassLogger log> = $r0;
+
+        return;
+    }
+}

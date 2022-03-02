@@ -1,0 +1,416 @@
+public class com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXSLT extends com.sun.org.apache.xml.internal.security.transforms.TransformSpi
+{
+    static final java.lang.String XSLTSpecNS;
+    static final java.lang.String defaultXSLTSpecNSprefix;
+    static final java.lang.String XSLTSTYLESHEET;
+    private static final com.sun.org.slf4j.internal.Logger LOG;
+
+    public void <init>()
+    {
+        com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXSLT r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXSLT;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.security.transforms.TransformSpi: void <init>()>();
+
+        return;
+    }
+
+    protected java.lang.String engineGetURI()
+    {
+        com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXSLT r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXSLT;
+
+        return "http://www.w3.org/TR/1999/REC-xslt-19991116";
+    }
+
+    protected com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput enginePerformTransform(com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput, java.io.OutputStream, org.w3c.dom.Element, java.lang.String, boolean) throws java.io.IOException, com.sun.org.apache.xml.internal.security.transforms.TransformationException
+    {
+        byte[] $r7, $r14, $r51, $r56;
+        javax.xml.transform.Transformer $r46, $r52;
+        javax.xml.transform.stream.StreamResult $r10, $r12, $r48;
+        java.io.ByteArrayInputStream $r5, $r50;
+        com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput r6, $r13, $r55;
+        boolean $z0, z1;
+        java.lang.Exception $r18, $r29;
+        java.lang.StringBuilder $r30, $r32, $r34;
+        com.sun.org.slf4j.internal.Logger $r31;
+        com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXSLT r41;
+        java.lang.Throwable $r20, $r21, $r22, $r24, $r25, $r26, $r36, $r37, $r38, r45, r53, r54;
+        javax.xml.transform.dom.DOMSource $r47;
+        java.lang.Object[] $r15;
+        java.io.ByteArrayOutputStream $r11, $r44;
+        javax.xml.transform.stream.StreamSource $r8, $r49;
+        org.w3c.dom.Node $r1, $r17;
+        java.lang.Boolean $r4;
+        java.lang.String $r33, $r35, r42;
+        java.io.OutputStream r9;
+        java.lang.IllegalArgumentException $r40;
+        org.w3c.dom.Element r0, $r2, r43;
+        com.sun.org.apache.xml.internal.security.transforms.TransformationException $r16, $r19;
+        javax.xml.transform.TransformerFactory $r3;
+
+        r41 := @this: com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXSLT;
+
+        r6 := @parameter0: com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput;
+
+        r9 := @parameter1: java.io.OutputStream;
+
+        r0 := @parameter2: org.w3c.dom.Element;
+
+        r42 := @parameter3: java.lang.String;
+
+        z1 := @parameter4: boolean;
+
+     label01:
+        $r1 = interfaceinvoke r0.<org.w3c.dom.Element: org.w3c.dom.Node getFirstChild()>();
+
+        $r2 = staticinvoke <com.sun.org.apache.xml.internal.security.utils.XMLUtils: org.w3c.dom.Element selectNode(org.w3c.dom.Node,java.lang.String,java.lang.String,int)>($r1, "http://www.w3.org/1999/XSL/Transform", "stylesheet", 0);
+
+        r43 = $r2;
+
+        if $r2 != null goto label02;
+
+        $r17 = interfaceinvoke r0.<org.w3c.dom.Element: org.w3c.dom.Node getFirstChild()>();
+
+        r43 = staticinvoke <com.sun.org.apache.xml.internal.security.utils.XMLUtils: org.w3c.dom.Element selectNode(org.w3c.dom.Node,java.lang.String,java.lang.String,int)>($r17, "http://www.w3.org/1999/XSL/Transform", "transform", 0);
+
+     label02:
+        if r43 != null goto label03;
+
+        $r15 = newarray (java.lang.Object)[2];
+
+        $r15[0] = "xslt:stylesheet";
+
+        $r15[1] = "Transform";
+
+        $r16 = new com.sun.org.apache.xml.internal.security.transforms.TransformationException;
+
+        specialinvoke $r16.<com.sun.org.apache.xml.internal.security.transforms.TransformationException: void <init>(java.lang.String,java.lang.Object[])>("xml.WrongContent", $r15);
+
+        throw $r16;
+
+     label03:
+        $r3 = staticinvoke <javax.xml.transform.TransformerFactory: javax.xml.transform.TransformerFactory newInstance()>();
+
+        $r4 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $z0 = virtualinvoke $r4.<java.lang.Boolean: boolean booleanValue()>();
+
+        virtualinvoke $r3.<javax.xml.transform.TransformerFactory: void setFeature(java.lang.String,boolean)>("http://javax.xml.XMLConstants/feature/secure-processing", $z0);
+
+        if z1 == 0 goto label07;
+
+     label04:
+        virtualinvoke $r3.<javax.xml.transform.TransformerFactory: void setAttribute(java.lang.String,java.lang.Object)>("http://javax.xml.XMLConstants/property/accessExternalDTD", "");
+
+        virtualinvoke $r3.<javax.xml.transform.TransformerFactory: void setAttribute(java.lang.String,java.lang.Object)>("http://javax.xml.XMLConstants/property/accessExternalStylesheet", "");
+
+     label05:
+        goto label07;
+
+     label06:
+        $r40 := @caughtexception;
+
+     label07:
+        $r44 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r44.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        r45 = null;
+
+     label08:
+        $r46 = virtualinvoke $r3.<javax.xml.transform.TransformerFactory: javax.xml.transform.Transformer newTransformer()>();
+
+        $r47 = new javax.xml.transform.dom.DOMSource;
+
+        specialinvoke $r47.<javax.xml.transform.dom.DOMSource: void <init>(org.w3c.dom.Node)>(r43);
+
+        $r48 = new javax.xml.transform.stream.StreamResult;
+
+        specialinvoke $r48.<javax.xml.transform.stream.StreamResult: void <init>(java.io.OutputStream)>($r44);
+
+        virtualinvoke $r46.<javax.xml.transform.Transformer: void transform(javax.xml.transform.Source,javax.xml.transform.Result)>($r47, $r48);
+
+        $r49 = new javax.xml.transform.stream.StreamSource;
+
+        $r50 = new java.io.ByteArrayInputStream;
+
+        $r51 = virtualinvoke $r44.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        specialinvoke $r50.<java.io.ByteArrayInputStream: void <init>(byte[])>($r51);
+
+        specialinvoke $r49.<javax.xml.transform.stream.StreamSource: void <init>(java.io.InputStream)>($r50);
+
+     label09:
+        if $r44 == null goto label19;
+
+        goto label10;
+
+     label10:
+        virtualinvoke $r44.<java.io.ByteArrayOutputStream: void close()>();
+
+        goto label19;
+
+     label11:
+        $r38 := @caughtexception;
+
+        r45 = $r38;
+
+        throw $r38;
+
+     label12:
+        $r37 := @caughtexception;
+
+     label13:
+        if $r44 == null goto label18;
+
+        if r45 == null goto label17;
+
+     label14:
+        virtualinvoke $r44.<java.io.ByteArrayOutputStream: void close()>();
+
+     label15:
+        goto label18;
+
+     label16:
+        $r36 := @caughtexception;
+
+        virtualinvoke r45.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r36);
+
+        goto label18;
+
+     label17:
+        virtualinvoke $r44.<java.io.ByteArrayOutputStream: void close()>();
+
+     label18:
+        throw $r37;
+
+     label19:
+        $r52 = virtualinvoke $r3.<javax.xml.transform.TransformerFactory: javax.xml.transform.Transformer newTransformer(javax.xml.transform.Source)>($r49);
+
+     label20:
+        virtualinvoke $r52.<javax.xml.transform.Transformer: void setOutputProperty(java.lang.String,java.lang.String)>("{http://xml.apache.org/xalan}line-separator", "\n");
+
+     label21:
+        goto label23;
+
+     label22:
+        $r29 := @caughtexception;
+
+        $r31 = <com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXSLT: com.sun.org.slf4j.internal.Logger LOG>;
+
+        $r30 = new java.lang.StringBuilder;
+
+        specialinvoke $r30.<java.lang.StringBuilder: void <init>()>();
+
+        $r32 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to set Xalan line-separator property: ");
+
+        $r33 = virtualinvoke $r29.<java.lang.Exception: java.lang.String getMessage()>();
+
+        $r34 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r33);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r31.<com.sun.org.slf4j.internal.Logger: void warn(java.lang.String)>($r35);
+
+     label23:
+        $r5 = new java.io.ByteArrayInputStream;
+
+        $r7 = virtualinvoke r6.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput: byte[] getBytes()>();
+
+        specialinvoke $r5.<java.io.ByteArrayInputStream: void <init>(byte[])>($r7);
+
+        r53 = null;
+
+     label24:
+        $r8 = new javax.xml.transform.stream.StreamSource;
+
+        specialinvoke $r8.<javax.xml.transform.stream.StreamSource: void <init>(java.io.InputStream)>($r5);
+
+        if r9 != null goto label39;
+
+        $r11 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r11.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        r54 = null;
+
+     label25:
+        $r12 = new javax.xml.transform.stream.StreamResult;
+
+        specialinvoke $r12.<javax.xml.transform.stream.StreamResult: void <init>(java.io.OutputStream)>($r11);
+
+        virtualinvoke $r52.<javax.xml.transform.Transformer: void transform(javax.xml.transform.Source,javax.xml.transform.Result)>($r8, $r12);
+
+        $r13 = new com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput;
+
+        $r14 = virtualinvoke $r11.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        specialinvoke $r13.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput: void <init>(byte[])>($r14);
+
+        virtualinvoke $r13.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput: void setSecureValidation(boolean)>(z1);
+
+     label26:
+        if $r11 == null goto label28;
+
+        goto label27;
+
+     label27:
+        virtualinvoke $r11.<java.io.ByteArrayOutputStream: void close()>();
+
+     label28:
+        if $r5 == null goto label30;
+
+        goto label29;
+
+     label29:
+        virtualinvoke $r5.<java.io.InputStream: void close()>();
+
+     label30:
+        return $r13;
+
+     label31:
+        $r26 := @caughtexception;
+
+        r54 = $r26;
+
+        throw $r26;
+
+     label32:
+        $r25 := @caughtexception;
+
+     label33:
+        if $r11 == null goto label38;
+
+        if r54 == null goto label37;
+
+     label34:
+        virtualinvoke $r11.<java.io.ByteArrayOutputStream: void close()>();
+
+     label35:
+        goto label38;
+
+     label36:
+        $r24 := @caughtexception;
+
+        virtualinvoke r54.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r24);
+
+        goto label38;
+
+     label37:
+        virtualinvoke $r11.<java.io.ByteArrayOutputStream: void close()>();
+
+     label38:
+        throw $r25;
+
+     label39:
+        $r10 = new javax.xml.transform.stream.StreamResult;
+
+        specialinvoke $r10.<javax.xml.transform.stream.StreamResult: void <init>(java.io.OutputStream)>(r9);
+
+        virtualinvoke $r52.<javax.xml.transform.Transformer: void transform(javax.xml.transform.Source,javax.xml.transform.Result)>($r8, $r10);
+
+     label40:
+        if $r5 == null goto label50;
+
+        goto label41;
+
+     label41:
+        virtualinvoke $r5.<java.io.InputStream: void close()>();
+
+        goto label50;
+
+     label42:
+        $r22 := @caughtexception;
+
+        r53 = $r22;
+
+        throw $r22;
+
+     label43:
+        $r21 := @caughtexception;
+
+     label44:
+        if $r5 == null goto label49;
+
+        if r53 == null goto label48;
+
+     label45:
+        virtualinvoke $r5.<java.io.InputStream: void close()>();
+
+     label46:
+        goto label49;
+
+     label47:
+        $r20 := @caughtexception;
+
+        virtualinvoke r53.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r20);
+
+        goto label49;
+
+     label48:
+        virtualinvoke $r5.<java.io.InputStream: void close()>();
+
+     label49:
+        throw $r21;
+
+     label50:
+        $r55 = new com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput;
+
+        $r56 = (byte[]) null;
+
+        specialinvoke $r55.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput: void <init>(byte[])>($r56);
+
+        virtualinvoke $r55.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput: void setSecureValidation(boolean)>(z1);
+
+        virtualinvoke $r55.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput: void setOutputStream(java.io.OutputStream)>(r9);
+
+     label51:
+        return $r55;
+
+     label52:
+        $r18 := @caughtexception;
+
+        $r19 = new com.sun.org.apache.xml.internal.security.transforms.TransformationException;
+
+        specialinvoke $r19.<com.sun.org.apache.xml.internal.security.transforms.TransformationException: void <init>(java.lang.Exception)>($r18);
+
+        throw $r19;
+
+        catch java.lang.IllegalArgumentException from label04 to label05 with label06;
+        catch java.lang.Throwable from label08 to label09 with label11;
+        catch java.lang.Throwable from label14 to label15 with label16;
+        catch java.lang.Throwable from label11 to label13 with label12;
+        catch java.lang.Exception from label20 to label21 with label22;
+        catch java.lang.Throwable from label25 to label26 with label31;
+        catch java.lang.Throwable from label34 to label35 with label36;
+        catch java.lang.Throwable from label31 to label33 with label32;
+        catch java.lang.Throwable from label24 to label28 with label42;
+        catch java.lang.Throwable from label31 to label40 with label42;
+        catch java.lang.Throwable from label45 to label46 with label47;
+        catch java.lang.Throwable from label42 to label44 with label43;
+        catch com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException from label01 to label30 with label52;
+        catch javax.xml.transform.TransformerException from label01 to label30 with label52;
+        catch com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException from label31 to label51 with label52;
+        catch javax.xml.transform.TransformerException from label31 to label51 with label52;
+    }
+
+    static void <clinit>()
+    {
+        com.sun.org.slf4j.internal.Logger $r0;
+
+        <com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXSLT: java.lang.String XSLTSTYLESHEET> = "stylesheet";
+
+        <com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXSLT: java.lang.String defaultXSLTSpecNSprefix> = "xslt";
+
+        <com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXSLT: java.lang.String XSLTSpecNS> = "http://www.w3.org/1999/XSL/Transform";
+
+        $r0 = staticinvoke <com.sun.org.slf4j.internal.LoggerFactory: com.sun.org.slf4j.internal.Logger getLogger(java.lang.Class)>(class "Lcom/sun/org/apache/xml/internal/security/transforms/implementations/TransformXSLT;");
+
+        <com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXSLT: com.sun.org.slf4j.internal.Logger LOG> = $r0;
+
+        return;
+    }
+}

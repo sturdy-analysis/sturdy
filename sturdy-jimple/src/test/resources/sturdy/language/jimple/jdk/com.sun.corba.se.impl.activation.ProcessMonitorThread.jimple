@@ -1,0 +1,203 @@
+public class com.sun.corba.se.impl.activation.ProcessMonitorThread extends java.lang.Thread
+{
+    private java.util.HashMap serverTable;
+    private int sleepTime;
+    private static com.sun.corba.se.impl.activation.ProcessMonitorThread instance;
+
+    private void <init>(java.util.HashMap, int)
+    {
+        int i0;
+        java.util.HashMap r1;
+        com.sun.corba.se.impl.activation.ProcessMonitorThread r0;
+
+        r0 := @this: com.sun.corba.se.impl.activation.ProcessMonitorThread;
+
+        r1 := @parameter0: java.util.HashMap;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<java.lang.Thread: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.activation.ProcessMonitorThread: java.util.HashMap serverTable> = r1;
+
+        r0.<com.sun.corba.se.impl.activation.ProcessMonitorThread: int sleepTime> = i0;
+
+        return;
+    }
+
+    public void run()
+    {
+        java.lang.Throwable $r6;
+        java.util.Iterator $r4;
+        java.util.Collection $r3;
+        long $l1;
+        java.util.HashMap $r1, $r2;
+        com.sun.corba.se.impl.activation.ProcessMonitorThread r0;
+        java.lang.InterruptedException $r7;
+        int $i0;
+        java.util.ConcurrentModificationException $r5;
+
+        r0 := @this: com.sun.corba.se.impl.activation.ProcessMonitorThread;
+
+     label01:
+        $i0 = r0.<com.sun.corba.se.impl.activation.ProcessMonitorThread: int sleepTime>;
+
+        $l1 = (long) $i0;
+
+        staticinvoke <java.lang.Thread: void sleep(long)>($l1);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r7 := @caughtexception;
+
+        goto label13;
+
+     label04:
+        $r1 = r0.<com.sun.corba.se.impl.activation.ProcessMonitorThread: java.util.HashMap serverTable>;
+
+        entermonitor $r1;
+
+     label05:
+        $r2 = r0.<com.sun.corba.se.impl.activation.ProcessMonitorThread: java.util.HashMap serverTable>;
+
+        $r3 = virtualinvoke $r2.<java.util.HashMap: java.util.Collection values()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.Collection: java.util.Iterator iterator()>();
+
+        exitmonitor $r1;
+
+     label06:
+        goto label09;
+
+     label07:
+        $r6 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label08:
+        throw $r6;
+
+     label09:
+        specialinvoke r0.<com.sun.corba.se.impl.activation.ProcessMonitorThread: void checkServerHealth(java.util.Iterator)>($r4);
+
+     label10:
+        goto label12;
+
+     label11:
+        $r5 := @caughtexception;
+
+        goto label13;
+
+     label12:
+        goto label01;
+
+     label13:
+        return;
+
+        catch java.lang.InterruptedException from label01 to label02 with label03;
+        catch java.lang.Throwable from label05 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+        catch java.util.ConcurrentModificationException from label09 to label10 with label11;
+    }
+
+    private void checkServerHealth(java.util.Iterator)
+    {
+        java.util.Iterator r0;
+        com.sun.corba.se.impl.activation.ProcessMonitorThread r3;
+        com.sun.corba.se.impl.activation.ServerTableEntry r2;
+        java.lang.Object $r1;
+        boolean $z0;
+
+        r3 := @this: com.sun.corba.se.impl.activation.ProcessMonitorThread;
+
+        r0 := @parameter0: java.util.Iterator;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $z0 = interfaceinvoke r0.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r1 = interfaceinvoke r0.<java.util.Iterator: java.lang.Object next()>();
+
+        r2 = (com.sun.corba.se.impl.activation.ServerTableEntry) $r1;
+
+        virtualinvoke r2.<com.sun.corba.se.impl.activation.ServerTableEntry: void checkProcessHealth()>();
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    static void start(java.util.HashMap)
+    {
+        java.util.Properties $r0;
+        java.util.HashMap r2;
+        java.lang.Exception $r3;
+        com.sun.corba.se.impl.activation.ProcessMonitorThread $r4, $r5, $r6;
+        int i0;
+        java.lang.String $r1;
+
+        r2 := @parameter0: java.util.HashMap;
+
+        i0 = 1000;
+
+        $r0 = staticinvoke <java.lang.System: java.util.Properties getProperties()>();
+
+        $r1 = virtualinvoke $r0.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("com.sun.CORBA.activation.ServerPollingTime");
+
+        if $r1 == null goto label4;
+
+     label1:
+        i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+     label4:
+        $r4 = new com.sun.corba.se.impl.activation.ProcessMonitorThread;
+
+        specialinvoke $r4.<com.sun.corba.se.impl.activation.ProcessMonitorThread: void <init>(java.util.HashMap,int)>(r2, i0);
+
+        <com.sun.corba.se.impl.activation.ProcessMonitorThread: com.sun.corba.se.impl.activation.ProcessMonitorThread instance> = $r4;
+
+        $r5 = <com.sun.corba.se.impl.activation.ProcessMonitorThread: com.sun.corba.se.impl.activation.ProcessMonitorThread instance>;
+
+        virtualinvoke $r5.<com.sun.corba.se.impl.activation.ProcessMonitorThread: void setDaemon(boolean)>(1);
+
+        $r6 = <com.sun.corba.se.impl.activation.ProcessMonitorThread: com.sun.corba.se.impl.activation.ProcessMonitorThread instance>;
+
+        virtualinvoke $r6.<com.sun.corba.se.impl.activation.ProcessMonitorThread: void start()>();
+
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    static void interruptThread()
+    {
+        com.sun.corba.se.impl.activation.ProcessMonitorThread $r0;
+
+        $r0 = <com.sun.corba.se.impl.activation.ProcessMonitorThread: com.sun.corba.se.impl.activation.ProcessMonitorThread instance>;
+
+        virtualinvoke $r0.<com.sun.corba.se.impl.activation.ProcessMonitorThread: void interrupt()>();
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        <com.sun.corba.se.impl.activation.ProcessMonitorThread: com.sun.corba.se.impl.activation.ProcessMonitorThread instance> = null;
+
+        return;
+    }
+}

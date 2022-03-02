@@ -1,0 +1,590 @@
+public final class sun.security.provider.SunEntries extends java.lang.Object
+{
+    public static final java.lang.String DEF_SECURE_RANDOM_ALGO;
+    private java.util.LinkedHashSet services;
+    private static final java.lang.String PROP_EGD;
+    private static final java.lang.String PROP_RNDSOURCE;
+    private static final boolean useLegacyDSA;
+    static final java.lang.String URL_DEV_RANDOM;
+    static final java.lang.String URL_DEV_URANDOM;
+    private static final java.lang.String seedSource;
+
+    public static transient java.util.List createAliases(java.lang.String[])
+    {
+        java.lang.String[] r0;
+        java.util.List $r1;
+
+        r0 := @parameter0: java.lang.String[];
+
+        $r1 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>(r0);
+
+        return $r1;
+    }
+
+    public static transient java.util.List createAliasesWithOid(java.lang.String[])
+    {
+        java.lang.Object[] $r1;
+        java.lang.String[] r0, r2;
+        java.util.List $r8;
+        int $i0, $i1, $i2, $i3;
+        java.lang.StringBuilder $r3, $r4, $r6;
+        java.lang.String $r5, $r7;
+
+        r0 := @parameter0: java.lang.String[];
+
+        $i0 = lengthof r0;
+
+        $i1 = $i0 + 1;
+
+        $r1 = staticinvoke <java.util.Arrays: java.lang.Object[] copyOf(java.lang.Object[],int)>(r0, $i1);
+
+        r2 = (java.lang.String[]) $r1;
+
+        $i2 = lengthof r2;
+
+        $i3 = $i2 - 1;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("OID.");
+
+        $r5 = r0[0];
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r2[$i3] = $r7;
+
+        $r8 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>(r2);
+
+        return $r8;
+    }
+
+    void <init>(java.security.Provider)
+    {
+        boolean $z0, $z1, $z2, $z3;
+        sun.security.provider.SunEntries r0;
+        java.security.Provider r3;
+        java.util.List $r5, $r7, $r9, $r11, $r13, $r19, $r25, $r31, $r37, $r43, $r49, $r55, $r57;
+        java.lang.StringBuilder $r14, $r15, $r16, $r21, $r22, $r23, $r27, $r28, $r29, $r33, $r34, $r35, $r39, $r40, $r41, $r45, $r46, $r47, $r51, $r52, $r53;
+        java.util.HashMap $r2;
+        java.lang.String[] $r4, $r6, $r8, $r10, $r12, $r18, $r20, $r26, $r32, $r38, $r44, $r50, $r56;
+        java.lang.String $r17, $r24, $r30, $r36, $r42, $r48, $r54, $r58;
+        java.util.LinkedHashSet $r1;
+
+        r0 := @this: sun.security.provider.SunEntries;
+
+        r3 := @parameter0: java.security.Provider;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.LinkedHashSet;
+
+        specialinvoke $r1.<java.util.LinkedHashSet: void <init>(int,float)>(50, 0.9F);
+
+        r0.<sun.security.provider.SunEntries: java.util.LinkedHashSet services> = $r1;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>(int)>(3);
+
+        virtualinvoke $r2.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("ThreadSafe", "true");
+
+        $z0 = staticinvoke <sun.security.provider.NativePRNG: boolean isAvailable()>();
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "SecureRandom", "NativePRNG", "sun.security.provider.NativePRNG", null, $r2);
+
+     label1:
+        $z1 = staticinvoke <sun.security.provider.NativePRNG$Blocking: boolean isAvailable()>();
+
+        if $z1 == 0 goto label2;
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "SecureRandom", "NativePRNGBlocking", "sun.security.provider.NativePRNG$Blocking", null, $r2);
+
+     label2:
+        $z2 = staticinvoke <sun.security.provider.NativePRNG$NonBlocking: boolean isAvailable()>();
+
+        if $z2 == 0 goto label3;
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "SecureRandom", "NativePRNGNonBlocking", "sun.security.provider.NativePRNG$NonBlocking", null, $r2);
+
+     label3:
+        virtualinvoke $r2.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("ImplementedIn", "Software");
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "SecureRandom", "SHA1PRNG", "sun.security.provider.SecureRandom", null, $r2);
+
+        virtualinvoke $r2.<java.util.HashMap: void clear()>();
+
+        virtualinvoke $r2.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("SupportedKeyClasses", "java.security.interfaces.DSAPublicKey|java.security.interfaces.DSAPrivateKey");
+
+        virtualinvoke $r2.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("ImplementedIn", "Software");
+
+        virtualinvoke $r2.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("KeySize", "1024");
+
+        $r4 = newarray (java.lang.String)[10];
+
+        $r4[0] = "1.2.840.10040.4.3";
+
+        $r4[1] = "DSA";
+
+        $r4[2] = "DSS";
+
+        $r4[3] = "SHA/DSA";
+
+        $r4[4] = "SHA-1/DSA";
+
+        $r4[5] = "SHA1/DSA";
+
+        $r4[6] = "SHAwithDSA";
+
+        $r4[7] = "DSAWithSHA1";
+
+        $r4[8] = "1.3.14.3.2.13";
+
+        $r4[9] = "1.3.14.3.2.27";
+
+        $r5 = staticinvoke <sun.security.provider.SunEntries: java.util.List createAliasesWithOid(java.lang.String[])>($r4);
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "Signature", "SHA1withDSA", "sun.security.provider.DSA$SHA1withDSA", $r5, $r2);
+
+        $r6 = newarray (java.lang.String)[1];
+
+        $r6[0] = "RawDSA";
+
+        $r7 = staticinvoke <sun.security.provider.SunEntries: java.util.List createAliases(java.lang.String[])>($r6);
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "Signature", "NONEwithDSA", "sun.security.provider.DSA$RawDSA", $r7, $r2);
+
+        virtualinvoke $r2.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("KeySize", "2048");
+
+        $r8 = newarray (java.lang.String)[1];
+
+        $r8[0] = "2.16.840.1.101.3.4.3.1";
+
+        $r9 = staticinvoke <sun.security.provider.SunEntries: java.util.List createAliasesWithOid(java.lang.String[])>($r8);
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "Signature", "SHA224withDSA", "sun.security.provider.DSA$SHA224withDSA", $r9, $r2);
+
+        $r10 = newarray (java.lang.String)[1];
+
+        $r10[0] = "2.16.840.1.101.3.4.3.2";
+
+        $r11 = staticinvoke <sun.security.provider.SunEntries: java.util.List createAliasesWithOid(java.lang.String[])>($r10);
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "Signature", "SHA256withDSA", "sun.security.provider.DSA$SHA256withDSA", $r11, $r2);
+
+        virtualinvoke $r2.<java.util.HashMap: void clear()>();
+
+        virtualinvoke $r2.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("ImplementedIn", "Software");
+
+        virtualinvoke $r2.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("KeySize", "2048");
+
+        $r12 = newarray (java.lang.String)[2];
+
+        $r12[0] = "1.2.840.10040.4.1";
+
+        $r12[1] = "1.3.14.3.2.12";
+
+        $r13 = staticinvoke <sun.security.provider.SunEntries: java.util.List createAliasesWithOid(java.lang.String[])>($r12);
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("sun.security.provider.DSAKeyPairGenerator$");
+
+        $z3 = <sun.security.provider.SunEntries: boolean useLegacyDSA>;
+
+        if $z3 == 0 goto label4;
+
+        $r58 = "Legacy";
+
+        goto label5;
+
+     label4:
+        $r58 = "Current";
+
+     label5:
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r58);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "KeyPairGenerator", "DSA", $r17, $r13, $r2);
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "AlgorithmParameterGenerator", "DSA", "sun.security.provider.DSAParameterGenerator", $r13, $r2);
+
+        virtualinvoke $r2.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>("KeySize");
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "AlgorithmParameters", "DSA", "sun.security.provider.DSAParameters", $r13, $r2);
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "KeyFactory", "DSA", "sun.security.provider.DSAKeyFactory", $r13, $r2);
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "MessageDigest", "MD2", "sun.security.provider.MD2", null, $r2);
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "MessageDigest", "MD5", "sun.security.provider.MD5", null, $r2);
+
+        $r18 = newarray (java.lang.String)[3];
+
+        $r18[0] = "1.3.14.3.2.26";
+
+        $r18[1] = "SHA-1";
+
+        $r18[2] = "SHA1";
+
+        $r19 = staticinvoke <sun.security.provider.SunEntries: java.util.List createAliasesWithOid(java.lang.String[])>($r18);
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "MessageDigest", "SHA", "sun.security.provider.SHA", $r19, $r2);
+
+        $r20 = newarray (java.lang.String)[1];
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("2.16.840.1.101.3.4.2");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".4");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r20[0] = $r24;
+
+        $r25 = staticinvoke <sun.security.provider.SunEntries: java.util.List createAliasesWithOid(java.lang.String[])>($r20);
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "MessageDigest", "SHA-224", "sun.security.provider.SHA2$SHA224", $r25, $r2);
+
+        $r26 = newarray (java.lang.String)[1];
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("2.16.840.1.101.3.4.2");
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".1");
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r26[0] = $r30;
+
+        $r31 = staticinvoke <sun.security.provider.SunEntries: java.util.List createAliasesWithOid(java.lang.String[])>($r26);
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "MessageDigest", "SHA-256", "sun.security.provider.SHA2$SHA256", $r31, $r2);
+
+        $r32 = newarray (java.lang.String)[1];
+
+        $r33 = new java.lang.StringBuilder;
+
+        specialinvoke $r33.<java.lang.StringBuilder: void <init>()>();
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("2.16.840.1.101.3.4.2");
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".2");
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r32[0] = $r36;
+
+        $r37 = staticinvoke <sun.security.provider.SunEntries: java.util.List createAliasesWithOid(java.lang.String[])>($r32);
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "MessageDigest", "SHA-384", "sun.security.provider.SHA5$SHA384", $r37, $r2);
+
+        $r38 = newarray (java.lang.String)[1];
+
+        $r39 = new java.lang.StringBuilder;
+
+        specialinvoke $r39.<java.lang.StringBuilder: void <init>()>();
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("2.16.840.1.101.3.4.2");
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".3");
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r38[0] = $r42;
+
+        $r43 = staticinvoke <sun.security.provider.SunEntries: java.util.List createAliasesWithOid(java.lang.String[])>($r38);
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "MessageDigest", "SHA-512", "sun.security.provider.SHA5$SHA512", $r43, $r2);
+
+        $r44 = newarray (java.lang.String)[1];
+
+        $r45 = new java.lang.StringBuilder;
+
+        specialinvoke $r45.<java.lang.StringBuilder: void <init>()>();
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("2.16.840.1.101.3.4.2");
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".5");
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r44[0] = $r48;
+
+        $r49 = staticinvoke <sun.security.provider.SunEntries: java.util.List createAliasesWithOid(java.lang.String[])>($r44);
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "MessageDigest", "SHA-512/224", "sun.security.provider.SHA5$SHA512_224", $r49, $r2);
+
+        $r50 = newarray (java.lang.String)[1];
+
+        $r51 = new java.lang.StringBuilder;
+
+        specialinvoke $r51.<java.lang.StringBuilder: void <init>()>();
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("2.16.840.1.101.3.4.2");
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".6");
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r50[0] = $r54;
+
+        $r55 = staticinvoke <sun.security.provider.SunEntries: java.util.List createAliasesWithOid(java.lang.String[])>($r50);
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "MessageDigest", "SHA-512/256", "sun.security.provider.SHA5$SHA512_256", $r55, $r2);
+
+        $r56 = newarray (java.lang.String)[1];
+
+        $r56[0] = "X509";
+
+        $r57 = staticinvoke <sun.security.provider.SunEntries: java.util.List createAliases(java.lang.String[])>($r56);
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "CertificateFactory", "X.509", "sun.security.provider.X509Factory", $r57, $r2);
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "KeyStore", "JKS", "sun.security.provider.JavaKeyStore$DualFormatJKS", null, $r2);
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "KeyStore", "CaseExactJKS", "sun.security.provider.JavaKeyStore$CaseExactJKS", null, $r2);
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "KeyStore", "DKS", "sun.security.provider.DomainKeyStore$DKS", null, $r2);
+
+        virtualinvoke $r2.<java.util.HashMap: void clear()>();
+
+        virtualinvoke $r2.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("LDAPSchema", "RFC2587");
+
+        virtualinvoke $r2.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("ImplementedIn", "Software");
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "CertStore", "LDAP", "sun.security.provider.certpath.ldap.LDAPCertStore", null, $r2);
+
+        virtualinvoke $r2.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>("LDAPSchema");
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "CertStore", "Collection", "sun.security.provider.certpath.CollectionCertStore", null, $r2);
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "CertStore", "com.sun.security.IndexedCollection", "sun.security.provider.certpath.IndexedCollectionCertStore", null, $r2);
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "Policy", "JavaPolicy", "sun.security.provider.PolicySpiFile", null, null);
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "Configuration", "JavaLoginConfig", "sun.security.provider.ConfigFile$Spi", null, null);
+
+        virtualinvoke $r2.<java.util.HashMap: void clear()>();
+
+        virtualinvoke $r2.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("ValidationAlgorithm", "RFC5280");
+
+        virtualinvoke $r2.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("ImplementedIn", "Software");
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "CertPathBuilder", "PKIX", "sun.security.provider.certpath.SunCertPathBuilder", null, $r2);
+
+        specialinvoke r0.<sun.security.provider.SunEntries: void add(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>(r3, "CertPathValidator", "PKIX", "sun.security.provider.certpath.PKIXCertPathValidator", null, $r2);
+
+        return;
+    }
+
+    java.util.Iterator iterator()
+    {
+        sun.security.provider.SunEntries r0;
+        java.util.Iterator $r2;
+        java.util.LinkedHashSet $r1;
+
+        r0 := @this: sun.security.provider.SunEntries;
+
+        $r1 = r0.<sun.security.provider.SunEntries: java.util.LinkedHashSet services>;
+
+        $r2 = virtualinvoke $r1.<java.util.LinkedHashSet: java.util.Iterator iterator()>();
+
+        return $r2;
+    }
+
+    private void add(java.security.Provider, java.lang.String, java.lang.String, java.lang.String, java.util.List, java.util.HashMap)
+    {
+        java.util.HashMap r7;
+        sun.security.provider.SunEntries r0;
+        java.security.Provider r2;
+        java.util.List r6;
+        java.security.Provider$Service $r1;
+        java.lang.String r3, r4, r5;
+        java.util.LinkedHashSet $r8;
+
+        r0 := @this: sun.security.provider.SunEntries;
+
+        r2 := @parameter0: java.security.Provider;
+
+        r3 := @parameter1: java.lang.String;
+
+        r4 := @parameter2: java.lang.String;
+
+        r5 := @parameter3: java.lang.String;
+
+        r6 := @parameter4: java.util.List;
+
+        r7 := @parameter5: java.util.HashMap;
+
+        $r8 = r0.<sun.security.provider.SunEntries: java.util.LinkedHashSet services>;
+
+        $r1 = new java.security.Provider$Service;
+
+        specialinvoke $r1.<java.security.Provider$Service: void <init>(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.Map)>(r2, r3, r4, r5, r6, r7);
+
+        virtualinvoke $r8.<java.util.LinkedHashSet: boolean add(java.lang.Object)>($r1);
+
+        return;
+    }
+
+    static java.lang.String getSeedSource()
+    {
+        java.lang.String $r0;
+
+        $r0 = <sun.security.provider.SunEntries: java.lang.String seedSource>;
+
+        return $r0;
+    }
+
+    static java.io.File getDeviceFile(java.net.URL) throws java.io.IOException
+    {
+        java.net.URL r0;
+        java.net.URISyntaxException $r15;
+        java.net.URI $r1, $r5, $r14;
+        java.lang.String $r4, $r7, $r9, $r10, $r12, $r17;
+        boolean $z0;
+        java.io.File $r2, $r3, $r13, $r16;
+        java.lang.StringBuilder $r6, $r8, $r11;
+
+        r0 := @parameter0: java.net.URL;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.net.URL: java.net.URI toURI()>();
+
+        $z0 = virtualinvoke $r1.<java.net.URI: boolean isOpaque()>();
+
+        if $z0 == 0 goto label3;
+
+        $r3 = new java.io.File;
+
+        $r4 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("user.dir");
+
+        specialinvoke $r3.<java.io.File: void <init>(java.lang.String)>($r4);
+
+        $r5 = virtualinvoke $r3.<java.io.File: java.net.URI toURI()>();
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r5.<java.net.URI: java.lang.String toString()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r1.<java.net.URI: java.lang.String toString()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.String: java.lang.String substring(int)>(5);
+
+        $r11 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r13 = new java.io.File;
+
+        $r14 = staticinvoke <java.net.URI: java.net.URI create(java.lang.String)>($r12);
+
+        specialinvoke $r13.<java.io.File: void <init>(java.net.URI)>($r14);
+
+     label2:
+        return $r13;
+
+     label3:
+        $r2 = new java.io.File;
+
+        specialinvoke $r2.<java.io.File: void <init>(java.net.URI)>($r1);
+
+     label4:
+        return $r2;
+
+     label5:
+        $r15 := @caughtexception;
+
+        $r16 = new java.io.File;
+
+        $r17 = virtualinvoke r0.<java.net.URL: java.lang.String getPath()>();
+
+        specialinvoke $r16.<java.io.File: void <init>(java.lang.String)>($r17);
+
+        return $r16;
+
+        catch java.net.URISyntaxException from label1 to label2 with label5;
+        catch java.net.URISyntaxException from label3 to label4 with label5;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Object $r2;
+        java.lang.String $r0, $r3, $r4, $r5, $r6;
+        sun.security.provider.SunEntries$1 $r1;
+        boolean $z0, $z1, $z2, $z3;
+
+        <sun.security.provider.SunEntries: java.lang.String URL_DEV_URANDOM> = "file:/dev/urandom";
+
+        <sun.security.provider.SunEntries: java.lang.String URL_DEV_RANDOM> = "file:/dev/random";
+
+        <sun.security.provider.SunEntries: java.lang.String PROP_RNDSOURCE> = "securerandom.source";
+
+        <sun.security.provider.SunEntries: java.lang.String PROP_EGD> = "java.security.egd";
+
+        $r0 = staticinvoke <sun.security.action.GetPropertyAction: java.lang.String privilegedGetProperty(java.lang.String)>("jdk.security.legacyDSAKeyPairGenerator");
+
+        $z0 = staticinvoke <java.lang.Boolean: boolean parseBoolean(java.lang.String)>($r0);
+
+        <sun.security.provider.SunEntries: boolean useLegacyDSA> = $z0;
+
+        $r1 = new sun.security.provider.SunEntries$1;
+
+        specialinvoke $r1.<sun.security.provider.SunEntries$1: void <init>()>();
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        $r3 = (java.lang.String) $r2;
+
+        <sun.security.provider.SunEntries: java.lang.String seedSource> = $r3;
+
+        $z1 = staticinvoke <sun.security.provider.NativePRNG: boolean isAvailable()>();
+
+        if $z1 == 0 goto label2;
+
+        $r4 = <sun.security.provider.SunEntries: java.lang.String seedSource>;
+
+        $z2 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("file:/dev/urandom");
+
+        if $z2 != 0 goto label1;
+
+        $r5 = <sun.security.provider.SunEntries: java.lang.String seedSource>;
+
+        $z3 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("file:/dev/random");
+
+        if $z3 == 0 goto label2;
+
+     label1:
+        $r6 = "NativePRNG";
+
+        goto label3;
+
+     label2:
+        $r6 = "SHA1PRNG";
+
+     label3:
+        <sun.security.provider.SunEntries: java.lang.String DEF_SECURE_RANDOM_ALGO> = $r6;
+
+        return;
+    }
+}

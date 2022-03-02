@@ -1,0 +1,2080 @@
+public class sun.rmi.server.Activation extends java.lang.Object implements java.io.Serializable
+{
+    private static final long serialVersionUID;
+    private static final byte MAJOR_VERSION;
+    private static final byte MINOR_VERSION;
+    private static java.lang.Object execPolicy;
+    private static java.lang.reflect.Method execPolicyMethod;
+    private static boolean debugExec;
+    private java.util.Map idTable;
+    private java.util.Map groupTable;
+    private byte majorVersion;
+    private byte minorVersion;
+    private transient int groupSemaphore;
+    private transient int groupCounter;
+    private transient sun.rmi.log.ReliableLog log;
+    private transient int numUpdates;
+    private transient java.lang.String[] command;
+    private static final long groupTimeout;
+    private static final int snapshotInterval;
+    private static final long execTimeout;
+    private static final java.lang.Object initLock;
+    private static boolean initDone;
+    private transient java.rmi.activation.Activator activator;
+    private transient java.rmi.activation.Activator activatorStub;
+    private transient java.rmi.activation.ActivationSystem system;
+    private transient java.rmi.activation.ActivationSystem systemStub;
+    private transient java.rmi.activation.ActivationMonitor monitor;
+    private transient java.rmi.registry.Registry registry;
+    private transient volatile boolean shuttingDown;
+    private transient volatile java.lang.Object startupLock;
+    private transient java.lang.Thread shutdownHook;
+    private static java.util.ResourceBundle resources;
+
+    private static int getInt(java.lang.String, int)
+    {
+        sun.security.action.GetIntegerAction $r0;
+        int i0, $i1;
+        java.lang.Object $r2;
+        java.lang.String r1;
+        java.lang.Integer $r3;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $r0 = new sun.security.action.GetIntegerAction;
+
+        specialinvoke $r0.<sun.security.action.GetIntegerAction: void <init>(java.lang.String,int)>(r1, i0);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r3 = (java.lang.Integer) $r2;
+
+        $i1 = virtualinvoke $r3.<java.lang.Integer: int intValue()>();
+
+        return $i1;
+    }
+
+    private void <init>()
+    {
+        java.util.concurrent.ConcurrentHashMap $r1, $r2;
+        sun.rmi.server.Activation r0;
+
+        r0 := @this: sun.rmi.server.Activation;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r1.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r0.<sun.rmi.server.Activation: java.util.Map idTable> = $r1;
+
+        $r2 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r2.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r0.<sun.rmi.server.Activation: java.util.Map groupTable> = $r2;
+
+        r0.<sun.rmi.server.Activation: byte majorVersion> = 1;
+
+        r0.<sun.rmi.server.Activation: byte minorVersion> = 0;
+
+        r0.<sun.rmi.server.Activation: boolean shuttingDown> = 0;
+
+        return;
+    }
+
+    private static void startActivation(int, java.rmi.server.RMIServerSocketFactory, java.lang.String, java.lang.String[]) throws java.lang.Exception
+    {
+        java.lang.String[] r6;
+        sun.rmi.log.ReliableLog $r0;
+        sun.rmi.server.Activation r4;
+        int i0;
+        sun.rmi.server.Activation$ActLogHandler $r2;
+        java.lang.Object $r3;
+        java.rmi.server.RMIServerSocketFactory r5;
+        java.lang.String r1;
+
+        i0 := @parameter0: int;
+
+        r5 := @parameter1: java.rmi.server.RMIServerSocketFactory;
+
+        r1 := @parameter2: java.lang.String;
+
+        r6 := @parameter3: java.lang.String[];
+
+        $r0 = new sun.rmi.log.ReliableLog;
+
+        $r2 = new sun.rmi.server.Activation$ActLogHandler;
+
+        specialinvoke $r2.<sun.rmi.server.Activation$ActLogHandler: void <init>()>();
+
+        specialinvoke $r0.<sun.rmi.log.ReliableLog: void <init>(java.lang.String,sun.rmi.log.LogHandler)>(r1, $r2);
+
+        $r3 = virtualinvoke $r0.<sun.rmi.log.ReliableLog: java.lang.Object recover()>();
+
+        r4 = (sun.rmi.server.Activation) $r3;
+
+        specialinvoke r4.<sun.rmi.server.Activation: void init(int,java.rmi.server.RMIServerSocketFactory,sun.rmi.log.ReliableLog,java.lang.String[])>(i0, r5, $r0, r6);
+
+        return;
+    }
+
+    private void init(int, java.rmi.server.RMIServerSocketFactory, sun.rmi.log.ReliableLog, java.lang.String[]) throws java.lang.Exception
+    {
+        sun.rmi.server.Activation$GroupEntry $r25;
+        java.rmi.activation.UnknownGroupException $r28;
+        java.lang.Thread $r4;
+        java.util.Map $r5;
+        java.rmi.activation.ActivationGroupID $r24;
+        sun.rmi.server.Activation$ActivatorImpl $r35;
+        java.lang.Runtime $r3;
+        java.util.Set $r6;
+        sun.rmi.log.ReliableLog r1;
+        sun.rmi.server.Activation$SystemRegistryImpl $r38;
+        java.rmi.activation.ActivationGroupID[] $r7, r9;
+        sun.rmi.server.Activation r0;
+        java.rmi.activation.ActivationSystem $r17, $r19, $r23;
+        sun.rmi.server.Activation$ActivationSystemImpl $r36;
+        java.rmi.activation.Activator $r13, $r15;
+        java.lang.Throwable $r31, $r32;
+        java.lang.Object[] $r8;
+        java.lang.String[] r21;
+        sun.rmi.server.Activation$ShutdownHook $r33;
+        int $i0, i1, i2, $i4;
+        java.rmi.server.RMIServerSocketFactory r12;
+        java.lang.String $r30;
+        java.io.PrintStream $r29;
+        java.rmi.Remote $r14, $r18;
+        sun.rmi.server.Activation$ActivationMonitorImpl $r37;
+        java.lang.Object $r26, $r27, $r34;
+
+        r0 := @this: sun.rmi.server.Activation;
+
+        i1 := @parameter0: int;
+
+        r12 := @parameter1: java.rmi.server.RMIServerSocketFactory;
+
+        r1 := @parameter2: sun.rmi.log.ReliableLog;
+
+        r21 := @parameter3: java.lang.String[];
+
+        r0.<sun.rmi.server.Activation: sun.rmi.log.ReliableLog log> = r1;
+
+        r0.<sun.rmi.server.Activation: int numUpdates> = 0;
+
+        $r33 = new sun.rmi.server.Activation$ShutdownHook;
+
+        specialinvoke $r33.<sun.rmi.server.Activation$ShutdownHook: void <init>(sun.rmi.server.Activation)>(r0);
+
+        r0.<sun.rmi.server.Activation: java.lang.Thread shutdownHook> = $r33;
+
+        $i0 = staticinvoke <sun.rmi.server.Activation: int getInt(java.lang.String,int)>("sun.rmi.activation.groupThrottle", 3);
+
+        r0.<sun.rmi.server.Activation: int groupSemaphore> = $i0;
+
+        r0.<sun.rmi.server.Activation: int groupCounter> = 0;
+
+        $r3 = staticinvoke <java.lang.Runtime: java.lang.Runtime getRuntime()>();
+
+        $r4 = r0.<sun.rmi.server.Activation: java.lang.Thread shutdownHook>;
+
+        virtualinvoke $r3.<java.lang.Runtime: void addShutdownHook(java.lang.Thread)>($r4);
+
+        $r5 = r0.<sun.rmi.server.Activation: java.util.Map groupTable>;
+
+        $r6 = interfaceinvoke $r5.<java.util.Map: java.util.Set keySet()>();
+
+        $r7 = newarray (java.rmi.activation.ActivationGroupID)[0];
+
+        $r8 = interfaceinvoke $r6.<java.util.Set: java.lang.Object[] toArray(java.lang.Object[])>($r7);
+
+        r9 = (java.rmi.activation.ActivationGroupID[]) $r8;
+
+        $r34 = new java.lang.Object;
+
+        specialinvoke $r34.<java.lang.Object: void <init>()>();
+
+        r0.<sun.rmi.server.Activation: java.lang.Object startupLock> = $r34;
+
+        entermonitor $r34;
+
+     label01:
+        $r35 = new sun.rmi.server.Activation$ActivatorImpl;
+
+        specialinvoke $r35.<sun.rmi.server.Activation$ActivatorImpl: void <init>(sun.rmi.server.Activation,int,java.rmi.server.RMIServerSocketFactory)>(r0, i1, r12);
+
+        r0.<sun.rmi.server.Activation: java.rmi.activation.Activator activator> = $r35;
+
+        $r13 = r0.<sun.rmi.server.Activation: java.rmi.activation.Activator activator>;
+
+        $r14 = staticinvoke <java.rmi.server.RemoteObject: java.rmi.Remote toStub(java.rmi.Remote)>($r13);
+
+        $r15 = (java.rmi.activation.Activator) $r14;
+
+        r0.<sun.rmi.server.Activation: java.rmi.activation.Activator activatorStub> = $r15;
+
+        $r36 = new sun.rmi.server.Activation$ActivationSystemImpl;
+
+        specialinvoke $r36.<sun.rmi.server.Activation$ActivationSystemImpl: void <init>(sun.rmi.server.Activation,int,java.rmi.server.RMIServerSocketFactory)>(r0, i1, r12);
+
+        r0.<sun.rmi.server.Activation: java.rmi.activation.ActivationSystem system> = $r36;
+
+        $r17 = r0.<sun.rmi.server.Activation: java.rmi.activation.ActivationSystem system>;
+
+        $r18 = staticinvoke <java.rmi.server.RemoteObject: java.rmi.Remote toStub(java.rmi.Remote)>($r17);
+
+        $r19 = (java.rmi.activation.ActivationSystem) $r18;
+
+        r0.<sun.rmi.server.Activation: java.rmi.activation.ActivationSystem systemStub> = $r19;
+
+        $r37 = new sun.rmi.server.Activation$ActivationMonitorImpl;
+
+        specialinvoke $r37.<sun.rmi.server.Activation$ActivationMonitorImpl: void <init>(sun.rmi.server.Activation,int,java.rmi.server.RMIServerSocketFactory)>(r0, i1, r12);
+
+        r0.<sun.rmi.server.Activation: java.rmi.activation.ActivationMonitor monitor> = $r37;
+
+        specialinvoke r0.<sun.rmi.server.Activation: void initCommand(java.lang.String[])>(r21);
+
+        $r38 = new sun.rmi.server.Activation$SystemRegistryImpl;
+
+        $r23 = r0.<sun.rmi.server.Activation: java.rmi.activation.ActivationSystem systemStub>;
+
+        specialinvoke $r38.<sun.rmi.server.Activation$SystemRegistryImpl: void <init>(int,java.rmi.server.RMIClientSocketFactory,java.rmi.server.RMIServerSocketFactory,java.rmi.activation.ActivationSystem)>(i1, null, r12, $r23);
+
+        r0.<sun.rmi.server.Activation: java.rmi.registry.Registry registry> = $r38;
+
+        if r12 == null goto label06;
+
+        $r26 = <sun.rmi.server.Activation: java.lang.Object initLock>;
+
+        entermonitor $r26;
+
+     label02:
+        <sun.rmi.server.Activation: boolean initDone> = 1;
+
+        $r27 = <sun.rmi.server.Activation: java.lang.Object initLock>;
+
+        virtualinvoke $r27.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor $r26;
+
+     label03:
+        goto label06;
+
+     label04:
+        $r32 := @caughtexception;
+
+        exitmonitor $r26;
+
+     label05:
+        throw $r32;
+
+     label06:
+        exitmonitor $r34;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r31 := @caughtexception;
+
+        exitmonitor $r34;
+
+     label09:
+        throw $r31;
+
+     label10:
+        r0.<sun.rmi.server.Activation: java.lang.Object startupLock> = null;
+
+        i2 = lengthof r9;
+
+     label11:
+        $i4 = (int) -1;
+
+        i2 = i2 + $i4;
+
+        if i2 < 0 goto label15;
+
+     label12:
+        $r24 = r9[i2];
+
+        $r25 = specialinvoke r0.<sun.rmi.server.Activation: sun.rmi.server.Activation$GroupEntry getGroupEntry(java.rmi.activation.ActivationGroupID)>($r24);
+
+        virtualinvoke $r25.<sun.rmi.server.Activation$GroupEntry: void restartServices()>();
+
+     label13:
+        goto label11;
+
+     label14:
+        $r28 := @caughtexception;
+
+        $r29 = <java.lang.System: java.io.PrintStream err>;
+
+        $r30 = staticinvoke <sun.rmi.server.Activation: java.lang.String getTextResource(java.lang.String)>("rmid.restart.group.warning");
+
+        virtualinvoke $r29.<java.io.PrintStream: void println(java.lang.String)>($r30);
+
+        virtualinvoke $r28.<java.rmi.activation.UnknownGroupException: void printStackTrace()>();
+
+        goto label11;
+
+     label15:
+        return;
+
+        catch java.lang.Throwable from label02 to label03 with label04;
+        catch java.lang.Throwable from label04 to label05 with label04;
+        catch java.lang.Throwable from label01 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+        catch java.rmi.activation.UnknownGroupException from label12 to label13 with label14;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.ObjectInputStream r0;
+        java.util.concurrent.ConcurrentHashMap $r4, $r6;
+        sun.rmi.server.Activation r1;
+        java.util.Map $r2, $r3, $r5, $r7;
+        boolean $z0, $z1;
+
+        r1 := @this: sun.rmi.server.Activation;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        $r2 = r1.<sun.rmi.server.Activation: java.util.Map groupTable>;
+
+        $z0 = $r2 instanceof java.util.concurrent.ConcurrentHashMap;
+
+        if $z0 != 0 goto label1;
+
+        $r6 = new java.util.concurrent.ConcurrentHashMap;
+
+        $r7 = r1.<sun.rmi.server.Activation: java.util.Map groupTable>;
+
+        specialinvoke $r6.<java.util.concurrent.ConcurrentHashMap: void <init>(java.util.Map)>($r7);
+
+        r1.<sun.rmi.server.Activation: java.util.Map groupTable> = $r6;
+
+     label1:
+        $r3 = r1.<sun.rmi.server.Activation: java.util.Map idTable>;
+
+        $z1 = $r3 instanceof java.util.concurrent.ConcurrentHashMap;
+
+        if $z1 != 0 goto label2;
+
+        $r4 = new java.util.concurrent.ConcurrentHashMap;
+
+        $r5 = r1.<sun.rmi.server.Activation: java.util.Map idTable>;
+
+        specialinvoke $r4.<java.util.concurrent.ConcurrentHashMap: void <init>(java.util.Map)>($r5);
+
+        r1.<sun.rmi.server.Activation: java.util.Map idTable> = $r4;
+
+     label2:
+        return;
+    }
+
+    private void checkShutdown() throws java.rmi.activation.ActivationException
+    {
+        java.lang.Throwable $r3;
+        sun.rmi.server.Activation r0;
+        java.rmi.activation.ActivationException $r2;
+        java.lang.Object r1;
+        boolean $z0;
+
+        r0 := @this: sun.rmi.server.Activation;
+
+        r1 = r0.<sun.rmi.server.Activation: java.lang.Object startupLock>;
+
+        if r1 == null goto label5;
+
+        entermonitor r1;
+
+     label1:
+        exitmonitor r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor r1;
+
+     label4:
+        throw $r3;
+
+     label5:
+        $z0 = r0.<sun.rmi.server.Activation: boolean shuttingDown>;
+
+        if $z0 != 1 goto label6;
+
+        $r2 = new java.rmi.activation.ActivationException;
+
+        specialinvoke $r2.<java.rmi.activation.ActivationException: void <init>(java.lang.String)>("activation system shutting down");
+
+        throw $r2;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private static void unexport(java.rmi.Remote)
+    {
+        java.rmi.Remote r0;
+        java.lang.Exception $r1;
+        boolean $z0;
+
+        r0 := @parameter0: java.rmi.Remote;
+
+     label1:
+        $z0 = staticinvoke <java.rmi.server.UnicastRemoteObject: boolean unexportObject(java.rmi.Remote,boolean)>(r0, 0);
+
+        if $z0 != 1 goto label3;
+
+     label2:
+        goto label6;
+
+     label3:
+        staticinvoke <java.lang.Thread: void sleep(long)>(100L);
+
+     label4:
+        goto label1;
+
+     label5:
+        $r1 := @caughtexception;
+
+        goto label1;
+
+     label6:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label5;
+        catch java.lang.Exception from label3 to label4 with label5;
+    }
+
+    private java.rmi.activation.ActivationGroupID getGroupID(java.rmi.activation.ActivationID) throws java.rmi.activation.UnknownObjectException
+    {
+        java.rmi.activation.ActivationGroupID r4;
+        java.rmi.activation.ActivationID r1;
+        sun.rmi.server.Activation r0;
+        java.util.Map $r2;
+        java.lang.Object $r3;
+        java.lang.StringBuilder $r6, $r7, $r8;
+        java.lang.String $r9;
+        java.rmi.activation.UnknownObjectException $r5;
+
+        r0 := @this: sun.rmi.server.Activation;
+
+        r1 := @parameter0: java.rmi.activation.ActivationID;
+
+        $r2 = r0.<sun.rmi.server.Activation: java.util.Map idTable>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r4 = (java.rmi.activation.ActivationGroupID) $r3;
+
+        if r4 == null goto label1;
+
+        return r4;
+
+     label1:
+        $r5 = new java.rmi.activation.UnknownObjectException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unknown object: ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.rmi.activation.UnknownObjectException: void <init>(java.lang.String)>($r9);
+
+        throw $r5;
+    }
+
+    private sun.rmi.server.Activation$GroupEntry getGroupEntry(java.rmi.activation.ActivationGroupID, boolean) throws java.rmi.activation.UnknownGroupException
+    {
+        sun.rmi.server.Activation$GroupEntry r7;
+        java.rmi.activation.ActivationGroupID r0;
+        java.rmi.activation.UnknownGroupException $r8;
+        sun.rmi.server.Activation r2;
+        java.util.Map $r3, $r5;
+        java.lang.Class $r1;
+        java.lang.Object $r4, $r6;
+        boolean z0, $z1;
+
+        r2 := @this: sun.rmi.server.Activation;
+
+        r0 := @parameter0: java.rmi.activation.ActivationGroupID;
+
+        z0 := @parameter1: boolean;
+
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        if $r1 != class "Ljava/rmi/activation/ActivationGroupID;" goto label3;
+
+        if z0 == 0 goto label1;
+
+        $r5 = r2.<sun.rmi.server.Activation: java.util.Map groupTable>;
+
+        $r6 = interfaceinvoke $r5.<java.util.Map: java.lang.Object remove(java.lang.Object)>(r0);
+
+        r7 = (sun.rmi.server.Activation$GroupEntry) $r6;
+
+        goto label2;
+
+     label1:
+        $r3 = r2.<sun.rmi.server.Activation: java.util.Map groupTable>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>(r0);
+
+        r7 = (sun.rmi.server.Activation$GroupEntry) $r4;
+
+     label2:
+        if r7 == null goto label3;
+
+        $z1 = r7.<sun.rmi.server.Activation$GroupEntry: boolean removed>;
+
+        if $z1 != 0 goto label3;
+
+        return r7;
+
+     label3:
+        $r8 = new java.rmi.activation.UnknownGroupException;
+
+        specialinvoke $r8.<java.rmi.activation.UnknownGroupException: void <init>(java.lang.String)>("group unknown");
+
+        throw $r8;
+    }
+
+    private sun.rmi.server.Activation$GroupEntry getGroupEntry(java.rmi.activation.ActivationGroupID) throws java.rmi.activation.UnknownGroupException
+    {
+        sun.rmi.server.Activation$GroupEntry $r2;
+        sun.rmi.server.Activation r0;
+        java.rmi.activation.ActivationGroupID r1;
+
+        r0 := @this: sun.rmi.server.Activation;
+
+        r1 := @parameter0: java.rmi.activation.ActivationGroupID;
+
+        $r2 = specialinvoke r0.<sun.rmi.server.Activation: sun.rmi.server.Activation$GroupEntry getGroupEntry(java.rmi.activation.ActivationGroupID,boolean)>(r1, 0);
+
+        return $r2;
+    }
+
+    private sun.rmi.server.Activation$GroupEntry removeGroupEntry(java.rmi.activation.ActivationGroupID) throws java.rmi.activation.UnknownGroupException
+    {
+        sun.rmi.server.Activation$GroupEntry $r2;
+        sun.rmi.server.Activation r0;
+        java.rmi.activation.ActivationGroupID r1;
+
+        r0 := @this: sun.rmi.server.Activation;
+
+        r1 := @parameter0: java.rmi.activation.ActivationGroupID;
+
+        $r2 = specialinvoke r0.<sun.rmi.server.Activation: sun.rmi.server.Activation$GroupEntry getGroupEntry(java.rmi.activation.ActivationGroupID,boolean)>(r1, 1);
+
+        return $r2;
+    }
+
+    private sun.rmi.server.Activation$GroupEntry getGroupEntry(java.rmi.activation.ActivationID) throws java.rmi.activation.UnknownObjectException
+    {
+        sun.rmi.server.Activation$GroupEntry r5;
+        java.rmi.activation.ActivationGroupID $r2;
+        java.rmi.activation.ActivationID r1;
+        sun.rmi.server.Activation r0;
+        java.util.Map $r3;
+        java.lang.Object $r4;
+        java.rmi.activation.UnknownObjectException $r6;
+        boolean $z0;
+
+        r0 := @this: sun.rmi.server.Activation;
+
+        r1 := @parameter0: java.rmi.activation.ActivationID;
+
+        $r2 = specialinvoke r0.<sun.rmi.server.Activation: java.rmi.activation.ActivationGroupID getGroupID(java.rmi.activation.ActivationID)>(r1);
+
+        $r3 = r0.<sun.rmi.server.Activation: java.util.Map groupTable>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>($r2);
+
+        r5 = (sun.rmi.server.Activation$GroupEntry) $r4;
+
+        if r5 == null goto label1;
+
+        $z0 = r5.<sun.rmi.server.Activation$GroupEntry: boolean removed>;
+
+        if $z0 != 0 goto label1;
+
+        return r5;
+
+     label1:
+        $r6 = new java.rmi.activation.UnknownObjectException;
+
+        specialinvoke $r6.<java.rmi.activation.UnknownObjectException: void <init>(java.lang.String)>("object\'s group removed");
+
+        throw $r6;
+    }
+
+    private java.lang.String[] activationArgs(java.rmi.activation.ActivationGroupDesc)
+    {
+        java.lang.Object[] $r5;
+        java.util.Enumeration $r8;
+        java.lang.String[] $r4, $r6, $r18, $r19, $r24, r25;
+        java.util.ArrayList $r2;
+        java.rmi.activation.ActivationGroupDesc$CommandEnvironment $r1;
+        int $i0, $i1, i2, $i3;
+        java.lang.String $r7, r10, $r15, $r17, $r21, $r22;
+        boolean $z0;
+        java.rmi.activation.ActivationGroupDesc r0;
+        java.util.Properties $r23;
+        java.util.List $r20;
+        sun.rmi.server.Activation r3;
+        java.lang.Object $r9;
+        java.lang.StringBuilder $r11, $r12, $r13, $r14, $r16;
+
+        r3 := @this: sun.rmi.server.Activation;
+
+        r0 := @parameter0: java.rmi.activation.ActivationGroupDesc;
+
+        $r1 = virtualinvoke r0.<java.rmi.activation.ActivationGroupDesc: java.rmi.activation.ActivationGroupDesc$CommandEnvironment getCommandEnvironment()>();
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        if $r1 == null goto label1;
+
+        $r21 = virtualinvoke $r1.<java.rmi.activation.ActivationGroupDesc$CommandEnvironment: java.lang.String getCommandPath()>();
+
+        if $r21 == null goto label1;
+
+        $r22 = virtualinvoke $r1.<java.rmi.activation.ActivationGroupDesc$CommandEnvironment: java.lang.String getCommandPath()>();
+
+        goto label2;
+
+     label1:
+        $r4 = r3.<sun.rmi.server.Activation: java.lang.String[] command>;
+
+        $r22 = $r4[0];
+
+     label2:
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>($r22);
+
+        if $r1 == null goto label3;
+
+        $r18 = virtualinvoke $r1.<java.rmi.activation.ActivationGroupDesc$CommandEnvironment: java.lang.String[] getCommandOptions()>();
+
+        if $r18 == null goto label3;
+
+        $r19 = virtualinvoke $r1.<java.rmi.activation.ActivationGroupDesc$CommandEnvironment: java.lang.String[] getCommandOptions()>();
+
+        $r20 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r19);
+
+        interfaceinvoke $r2.<java.util.List: boolean addAll(java.util.Collection)>($r20);
+
+     label3:
+        $r23 = virtualinvoke r0.<java.rmi.activation.ActivationGroupDesc: java.util.Properties getPropertyOverrides()>();
+
+        if $r23 == null goto label5;
+
+        $r8 = virtualinvoke $r23.<java.util.Properties: java.util.Enumeration propertyNames()>();
+
+     label4:
+        $z0 = interfaceinvoke $r8.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label5;
+
+        $r9 = interfaceinvoke $r8.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r10 = (java.lang.String) $r9;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-D");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r10);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("=");
+
+        $r15 = virtualinvoke $r23.<java.util.Properties: java.lang.String getProperty(java.lang.String)>(r10);
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>($r17);
+
+        goto label4;
+
+     label5:
+        i2 = 1;
+
+     label6:
+        $r24 = r3.<sun.rmi.server.Activation: java.lang.String[] command>;
+
+        $i3 = lengthof $r24;
+
+        if i2 >= $i3 goto label7;
+
+        $r6 = r3.<sun.rmi.server.Activation: java.lang.String[] command>;
+
+        $r7 = $r6[i2];
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>($r7);
+
+        i2 = i2 + 1;
+
+        goto label6;
+
+     label7:
+        $i0 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        r25 = newarray (java.lang.String)[$i0];
+
+        $r5 = interfaceinvoke $r2.<java.util.List: java.lang.Object[] toArray()>();
+
+        $i1 = lengthof r25;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r5, 0, r25, 0, $i1);
+
+        return r25;
+    }
+
+    private void checkArgs(java.rmi.activation.ActivationGroupDesc, java.lang.String[]) throws java.lang.SecurityException, java.rmi.activation.ActivationException
+    {
+        java.lang.Throwable $r15;
+        java.lang.Object[] $r1;
+        java.rmi.activation.ActivationException $r7, $r16;
+        java.lang.String[] r24;
+        java.lang.SecurityException $r23;
+        java.lang.String $r10, $r13, $r19, $r22;
+        java.lang.reflect.Method $r0, $r4, $r9, $r18;
+        boolean $z0;
+        java.rmi.activation.ActivationGroupDesc r2;
+        java.lang.Exception $r6;
+        java.lang.reflect.InvocationTargetException $r14;
+        sun.rmi.server.Activation r5;
+        java.lang.Object $r3;
+        java.lang.StringBuilder $r8, $r11, $r12, $r17, $r20, $r21;
+
+        r5 := @this: sun.rmi.server.Activation;
+
+        r2 := @parameter0: java.rmi.activation.ActivationGroupDesc;
+
+        r24 := @parameter1: java.lang.String[];
+
+        $r0 = <sun.rmi.server.Activation: java.lang.reflect.Method execPolicyMethod>;
+
+        if $r0 == null goto label6;
+
+        if r24 != null goto label1;
+
+        r24 = specialinvoke r5.<sun.rmi.server.Activation: java.lang.String[] activationArgs(java.rmi.activation.ActivationGroupDesc)>(r2);
+
+     label1:
+        $r4 = <sun.rmi.server.Activation: java.lang.reflect.Method execPolicyMethod>;
+
+        $r3 = <sun.rmi.server.Activation: java.lang.Object execPolicy>;
+
+        $r1 = newarray (java.lang.Object)[2];
+
+        $r1[0] = r2;
+
+        $r1[1] = r24;
+
+        virtualinvoke $r4.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>($r3, $r1);
+
+     label2:
+        goto label6;
+
+     label3:
+        $r14 := @caughtexception;
+
+        $r15 = virtualinvoke $r14.<java.lang.reflect.InvocationTargetException: java.lang.Throwable getTargetException()>();
+
+        $z0 = $r15 instanceof java.lang.SecurityException;
+
+        if $z0 == 0 goto label4;
+
+        $r23 = (java.lang.SecurityException) $r15;
+
+        throw $r23;
+
+     label4:
+        $r16 = new java.rmi.activation.ActivationException;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = <sun.rmi.server.Activation: java.lang.reflect.Method execPolicyMethod>;
+
+        $r19 = virtualinvoke $r18.<java.lang.reflect.Method: java.lang.String getName()>();
+
+        $r20 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": unexpected exception");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r16.<java.rmi.activation.ActivationException: void <init>(java.lang.String,java.lang.Throwable)>($r22, $r14);
+
+        throw $r16;
+
+     label5:
+        $r6 := @caughtexception;
+
+        $r7 = new java.rmi.activation.ActivationException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = <sun.rmi.server.Activation: java.lang.reflect.Method execPolicyMethod>;
+
+        $r10 = virtualinvoke $r9.<java.lang.reflect.Method: java.lang.String getName()>();
+
+        $r11 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": unexpected exception");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.rmi.activation.ActivationException: void <init>(java.lang.String,java.lang.Throwable)>($r13, $r6);
+
+        throw $r7;
+
+     label6:
+        return;
+
+        catch java.lang.reflect.InvocationTargetException from label1 to label2 with label3;
+        catch java.lang.Exception from label1 to label2 with label5;
+    }
+
+    private void addLogRecord(sun.rmi.server.Activation$LogRecord) throws java.rmi.activation.ActivationException
+    {
+        java.lang.Throwable $r5;
+        java.rmi.activation.ActivationException $r7;
+        sun.rmi.server.Activation$LogRecord r2;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String $r10, $r14;
+        java.io.PrintStream $r9, $r13;
+        java.lang.Exception $r8, $r12;
+        java.rmi.RemoteException $r6;
+        sun.rmi.log.ReliableLog $r1, $r3, $r4;
+        sun.rmi.server.Activation r0;
+        java.rmi.activation.ActivationSystem $r11;
+
+        r0 := @this: sun.rmi.server.Activation;
+
+        r2 := @parameter0: sun.rmi.server.Activation$LogRecord;
+
+        $r1 = r0.<sun.rmi.server.Activation: sun.rmi.log.ReliableLog log>;
+
+        entermonitor $r1;
+
+     label01:
+        specialinvoke r0.<sun.rmi.server.Activation: void checkShutdown()>();
+
+     label02:
+        $r3 = r0.<sun.rmi.server.Activation: sun.rmi.log.ReliableLog log>;
+
+        virtualinvoke $r3.<sun.rmi.log.ReliableLog: void update(java.lang.Object,boolean)>(r2, 1);
+
+     label03:
+        goto label05;
+
+     label04:
+        $r12 := @caughtexception;
+
+        $i3 = <sun.rmi.server.Activation: int snapshotInterval>;
+
+        r0.<sun.rmi.server.Activation: int numUpdates> = $i3;
+
+        $r13 = <java.lang.System: java.io.PrintStream err>;
+
+        $r14 = staticinvoke <sun.rmi.server.Activation: java.lang.String getTextResource(java.lang.String)>("rmid.log.update.warning");
+
+        virtualinvoke $r13.<java.io.PrintStream: void println(java.lang.String)>($r14);
+
+        virtualinvoke $r12.<java.lang.Exception: void printStackTrace()>();
+
+     label05:
+        $i0 = r0.<sun.rmi.server.Activation: int numUpdates>;
+
+        $i1 = $i0 + 1;
+
+        r0.<sun.rmi.server.Activation: int numUpdates> = $i1;
+
+        $i2 = <sun.rmi.server.Activation: int snapshotInterval>;
+
+        if $i1 >= $i2 goto label07;
+
+        exitmonitor $r1;
+
+     label06:
+        return;
+
+     label07:
+        $r4 = r0.<sun.rmi.server.Activation: sun.rmi.log.ReliableLog log>;
+
+        virtualinvoke $r4.<sun.rmi.log.ReliableLog: void snapshot(java.lang.Object)>(r0);
+
+        r0.<sun.rmi.server.Activation: int numUpdates> = 0;
+
+     label08:
+        goto label14;
+
+     label09:
+        $r8 := @caughtexception;
+
+        $r9 = <java.lang.System: java.io.PrintStream err>;
+
+        $r10 = staticinvoke <sun.rmi.server.Activation: java.lang.String getTextResource(java.lang.String)>("rmid.log.snapshot.warning");
+
+        virtualinvoke $r9.<java.io.PrintStream: void println(java.lang.String)>($r10);
+
+        virtualinvoke $r8.<java.lang.Exception: void printStackTrace()>();
+
+     label10:
+        $r11 = r0.<sun.rmi.server.Activation: java.rmi.activation.ActivationSystem system>;
+
+        interfaceinvoke $r11.<java.rmi.activation.ActivationSystem: void shutdown()>();
+
+     label11:
+        goto label13;
+
+     label12:
+        $r6 := @caughtexception;
+
+     label13:
+        $r7 = new java.rmi.activation.ActivationException;
+
+        specialinvoke $r7.<java.rmi.activation.ActivationException: void <init>(java.lang.String,java.lang.Throwable)>("log snapshot failed", $r8);
+
+        throw $r7;
+
+     label14:
+        exitmonitor $r1;
+
+     label15:
+        goto label18;
+
+     label16:
+        $r5 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label17:
+        throw $r5;
+
+     label18:
+        return;
+
+        catch java.lang.Exception from label02 to label03 with label04;
+        catch java.lang.Exception from label07 to label08 with label09;
+        catch java.rmi.RemoteException from label10 to label11 with label12;
+        catch java.lang.Throwable from label01 to label06 with label16;
+        catch java.lang.Throwable from label07 to label15 with label16;
+        catch java.lang.Throwable from label16 to label17 with label16;
+    }
+
+    private void initCommand(java.lang.String[])
+    {
+        java.lang.String[] r1, $r2, $r4, $r5, $r6;
+        sun.rmi.server.Activation r0;
+        int $i0, $i1, $i2, $i3, $i4;
+        sun.rmi.server.Activation$1 $r3;
+
+        r0 := @this: sun.rmi.server.Activation;
+
+        r1 := @parameter0: java.lang.String[];
+
+        $i0 = lengthof r1;
+
+        $i1 = $i0 + 2;
+
+        $r2 = newarray (java.lang.String)[$i1];
+
+        r0.<sun.rmi.server.Activation: java.lang.String[] command> = $r2;
+
+        $r3 = new sun.rmi.server.Activation$1;
+
+        specialinvoke $r3.<sun.rmi.server.Activation$1: void <init>(sun.rmi.server.Activation)>(r0);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r3);
+
+        $r4 = r0.<sun.rmi.server.Activation: java.lang.String[] command>;
+
+        $i2 = lengthof r1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, 0, $r4, 1, $i2);
+
+        $r6 = r0.<sun.rmi.server.Activation: java.lang.String[] command>;
+
+        $r5 = r0.<sun.rmi.server.Activation: java.lang.String[] command>;
+
+        $i3 = lengthof $r5;
+
+        $i4 = $i3 - 1;
+
+        $r6[$i4] = "sun.rmi.server.ActivationGroupInit";
+
+        return;
+    }
+
+    private static void bomb(java.lang.String)
+    {
+        java.io.PrintStream $r1, $r6;
+        java.lang.Object[] $r8;
+        java.lang.StringBuilder $r0, $r2, $r4;
+        java.lang.String r3, $r5, $r7, $r9;
+
+        r3 := @parameter0: java.lang.String;
+
+        $r1 = <java.lang.System: java.io.PrintStream err>;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("rmid: ");
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>($r5);
+
+        $r6 = <java.lang.System: java.io.PrintStream err>;
+
+        $r7 = staticinvoke <sun.rmi.server.Activation: java.lang.String getTextResource(java.lang.String)>("rmid.usage");
+
+        $r8 = newarray (java.lang.Object)[1];
+
+        $r8[0] = "rmid";
+
+        $r9 = staticinvoke <java.text.MessageFormat: java.lang.String format(java.lang.String,java.lang.Object[])>($r7, $r8);
+
+        virtualinvoke $r6.<java.io.PrintStream: void println(java.lang.String)>($r9);
+
+        staticinvoke <java.lang.System: void exit(int)>(1);
+
+        return;
+    }
+
+    public static void main(java.lang.String[])
+    {
+        java.net.ServerSocket $r27;
+        java.nio.channels.Channel $r39;
+        java.lang.Exception $r40, $r46;
+        java.rmi.activation.ActivationSystem $r8;
+        java.lang.StringBuilder $r31, $r34, $r35, $r36;
+        java.lang.Object[] $r5, $r16, $r43;
+        java.util.ArrayList $r54;
+        java.lang.String $r10, $r11, $r12, $r13, $r14, $r15, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r33, $r37, $r42, $r44, $r47, $r49, $r51, r53, $r60, r61;
+        sun.rmi.server.Activation$2 $r1;
+        sun.rmi.server.Activation$4 $r7;
+        sun.rmi.server.Activation$3 $r25;
+        java.lang.Class[] $r64;
+        java.lang.NumberFormatException $r50;
+        sun.security.action.GetBooleanAction $r55;
+        sun.rmi.server.Activation$ActivationServerSocketFactory $r28, r52;
+        java.util.Date $r29;
+        sun.security.action.GetPropertyAction $r58;
+        java.lang.reflect.Method $r65;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, z8, $z9, $z10, z11, z12;
+        java.lang.String[] r3, $r4, $r6;
+        int $i0, $i1, $i2, $i3, $i4, i5, i6, $i7;
+        java.lang.Boolean $r57;
+        java.io.PrintStream $r30, $r32, $r41, $r48;
+        java.lang.SecurityManager $r0, $r38;
+        java.nio.channels.ServerSocketChannel $r26;
+        java.lang.InterruptedException $r45;
+        java.lang.Object $r2, $r56, $r59, $r63;
+        java.lang.Class $r9, $r62;
+
+        r3 := @parameter0: java.lang.String[];
+
+        z8 = 0;
+
+        z12 = 0;
+
+        z11 = 0;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 != null goto label01;
+
+        $r38 = new java.lang.SecurityManager;
+
+        specialinvoke $r38.<java.lang.SecurityManager: void <init>()>();
+
+        staticinvoke <java.lang.System: void setSecurityManager(java.lang.SecurityManager)>($r38);
+
+     label01:
+        i5 = 1098;
+
+        r52 = null;
+
+        $r1 = new sun.rmi.server.Activation$2;
+
+        specialinvoke $r1.<sun.rmi.server.Activation$2: void <init>()>();
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r1);
+
+        $r39 = (java.nio.channels.Channel) $r2;
+
+        if $r39 == null goto label02;
+
+        $z6 = $r39 instanceof java.nio.channels.ServerSocketChannel;
+
+        if $z6 == 0 goto label02;
+
+        $r25 = new sun.rmi.server.Activation$3;
+
+        specialinvoke $r25.<sun.rmi.server.Activation$3: void <init>()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r25);
+
+        $r26 = (java.nio.channels.ServerSocketChannel) $r39;
+
+        $r27 = virtualinvoke $r26.<java.nio.channels.ServerSocketChannel: java.net.ServerSocket socket()>();
+
+        i5 = virtualinvoke $r27.<java.net.ServerSocket: int getLocalPort()>();
+
+        $r28 = new sun.rmi.server.Activation$ActivationServerSocketFactory;
+
+        specialinvoke $r28.<sun.rmi.server.Activation$ActivationServerSocketFactory: void <init>(java.net.ServerSocket)>($r27);
+
+        r52 = $r28;
+
+        $r30 = <java.lang.System: java.io.PrintStream err>;
+
+        $r29 = new java.util.Date;
+
+        specialinvoke $r29.<java.util.Date: void <init>()>();
+
+        virtualinvoke $r30.<java.io.PrintStream: void println(java.lang.Object)>($r29);
+
+        $r32 = <java.lang.System: java.io.PrintStream err>;
+
+        $r31 = new java.lang.StringBuilder;
+
+        specialinvoke $r31.<java.lang.StringBuilder: void <init>()>();
+
+        $r33 = staticinvoke <sun.rmi.server.Activation: java.lang.String getTextResource(java.lang.String)>("rmid.inherited.channel.info");
+
+        $r34 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r33);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r39);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r32.<java.io.PrintStream: void println(java.lang.String)>($r37);
+
+     label02:
+        r53 = null;
+
+        $r54 = new java.util.ArrayList;
+
+        specialinvoke $r54.<java.util.ArrayList: void <init>()>();
+
+        i6 = 0;
+
+     label03:
+        $i7 = lengthof r3;
+
+        if i6 >= $i7 goto label15;
+
+        $r11 = r3[i6];
+
+        $z2 = virtualinvoke $r11.<java.lang.String: boolean equals(java.lang.Object)>("-port");
+
+        if $z2 == 0 goto label09;
+
+        if r52 == null goto label04;
+
+        $r24 = staticinvoke <sun.rmi.server.Activation: java.lang.String getTextResource(java.lang.String)>("rmid.syntax.port.badarg");
+
+        staticinvoke <sun.rmi.server.Activation: void bomb(java.lang.String)>($r24);
+
+     label04:
+        $i4 = i6 + 1;
+
+        $i3 = lengthof r3;
+
+        if $i4 >= $i3 goto label08;
+
+     label05:
+        i6 = i6 + 1;
+
+        $r23 = r3[i6];
+
+        i5 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r23);
+
+     label06:
+        goto label14;
+
+     label07:
+        $r50 := @caughtexception;
+
+        $r51 = staticinvoke <sun.rmi.server.Activation: java.lang.String getTextResource(java.lang.String)>("rmid.syntax.port.badnumber");
+
+        staticinvoke <sun.rmi.server.Activation: void bomb(java.lang.String)>($r51);
+
+        goto label14;
+
+     label08:
+        $r22 = staticinvoke <sun.rmi.server.Activation: java.lang.String getTextResource(java.lang.String)>("rmid.syntax.port.missing");
+
+        staticinvoke <sun.rmi.server.Activation: void bomb(java.lang.String)>($r22);
+
+        goto label14;
+
+     label09:
+        $r12 = r3[i6];
+
+        $z3 = virtualinvoke $r12.<java.lang.String: boolean equals(java.lang.Object)>("-log");
+
+        if $z3 == 0 goto label11;
+
+        $i2 = i6 + 1;
+
+        $i1 = lengthof r3;
+
+        if $i2 >= $i1 goto label10;
+
+        i6 = i6 + 1;
+
+        r53 = r3[i6];
+
+        goto label14;
+
+     label10:
+        $r21 = staticinvoke <sun.rmi.server.Activation: java.lang.String getTextResource(java.lang.String)>("rmid.syntax.log.missing");
+
+        staticinvoke <sun.rmi.server.Activation: void bomb(java.lang.String)>($r21);
+
+        goto label14;
+
+     label11:
+        $r13 = r3[i6];
+
+        $z4 = virtualinvoke $r13.<java.lang.String: boolean equals(java.lang.Object)>("-stop");
+
+        if $z4 == 0 goto label12;
+
+        z8 = 1;
+
+        z12 = 1;
+
+        z11 = 1;
+
+        goto label14;
+
+     label12:
+        $r14 = r3[i6];
+
+        $z5 = virtualinvoke $r14.<java.lang.String: boolean startsWith(java.lang.String)>("-C");
+
+        if $z5 == 0 goto label13;
+
+        $r19 = r3[i6];
+
+        $r20 = virtualinvoke $r19.<java.lang.String: java.lang.String substring(int)>(2);
+
+        interfaceinvoke $r54.<java.util.List: boolean add(java.lang.Object)>($r20);
+
+        goto label14;
+
+     label13:
+        $r15 = staticinvoke <sun.rmi.server.Activation: java.lang.String getTextResource(java.lang.String)>("rmid.syntax.illegal.option");
+
+        $r16 = newarray (java.lang.Object)[1];
+
+        $r17 = r3[i6];
+
+        $r16[0] = $r17;
+
+        $r18 = staticinvoke <java.text.MessageFormat: java.lang.String format(java.lang.String,java.lang.Object[])>($r15, $r16);
+
+        staticinvoke <sun.rmi.server.Activation: void bomb(java.lang.String)>($r18);
+
+     label14:
+        i6 = i6 + 1;
+
+        goto label03;
+
+     label15:
+        if r53 != null goto label17;
+
+        if r52 == null goto label16;
+
+        $r10 = staticinvoke <sun.rmi.server.Activation: java.lang.String getTextResource(java.lang.String)>("rmid.syntax.log.required");
+
+        staticinvoke <sun.rmi.server.Activation: void bomb(java.lang.String)>($r10);
+
+        goto label17;
+
+     label16:
+        r53 = "log";
+
+     label17:
+        $r55 = new sun.security.action.GetBooleanAction;
+
+        specialinvoke $r55.<sun.security.action.GetBooleanAction: void <init>(java.lang.String)>("sun.rmi.server.activation.debugExec");
+
+        $r56 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r55);
+
+        $r57 = (java.lang.Boolean) $r56;
+
+        $z9 = virtualinvoke $r57.<java.lang.Boolean: boolean booleanValue()>();
+
+        <sun.rmi.server.Activation: boolean debugExec> = $z9;
+
+        $r58 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r58.<sun.security.action.GetPropertyAction: void <init>(java.lang.String,java.lang.String)>("sun.rmi.activation.execPolicy", null);
+
+        $r59 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r58);
+
+        $r60 = (java.lang.String) $r59;
+
+        r61 = $r60;
+
+        if $r60 != null goto label19;
+
+        if z11 != 0 goto label18;
+
+        staticinvoke <sun.rmi.server.Activation$DefaultExecPolicy: void checkConfiguration()>();
+
+     label18:
+        r61 = "default";
+
+     label19:
+        $z10 = virtualinvoke r61.<java.lang.String: boolean equals(java.lang.Object)>("none");
+
+        if $z10 != 0 goto label25;
+
+        $z0 = virtualinvoke r61.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z0 != 0 goto label20;
+
+        $z1 = virtualinvoke r61.<java.lang.String: boolean equals(java.lang.Object)>("default");
+
+        if $z1 == 0 goto label21;
+
+     label20:
+        $r9 = class "Lsun/rmi/server/Activation$DefaultExecPolicy;";
+
+        r61 = virtualinvoke $r9.<java.lang.Class: java.lang.String getName()>();
+
+     label21:
+        $r62 = staticinvoke <sun.rmi.server.Activation: java.lang.Class getRMIClass(java.lang.String)>(r61);
+
+        $r63 = virtualinvoke $r62.<java.lang.Class: java.lang.Object newInstance()>();
+
+        <sun.rmi.server.Activation: java.lang.Object execPolicy> = $r63;
+
+        $r64 = newarray (java.lang.Class)[2];
+
+        $r64[0] = class "Ljava/rmi/activation/ActivationGroupDesc;";
+
+        $r64[1] = class "[Ljava/lang/String;";
+
+        $r65 = virtualinvoke $r62.<java.lang.Class: java.lang.reflect.Method getMethod(java.lang.String,java.lang.Class[])>("checkExecCommand", $r64);
+
+        <sun.rmi.server.Activation: java.lang.reflect.Method execPolicyMethod> = $r65;
+
+     label22:
+        goto label25;
+
+     label23:
+        $r46 := @caughtexception;
+
+        $z7 = <sun.rmi.server.Activation: boolean debugExec>;
+
+        if $z7 == 0 goto label24;
+
+        $r48 = <java.lang.System: java.io.PrintStream err>;
+
+        $r49 = staticinvoke <sun.rmi.server.Activation: java.lang.String getTextResource(java.lang.String)>("rmid.exec.policy.exception");
+
+        virtualinvoke $r48.<java.io.PrintStream: void println(java.lang.String)>($r49);
+
+        virtualinvoke $r46.<java.lang.Exception: void printStackTrace()>();
+
+     label24:
+        $r47 = staticinvoke <sun.rmi.server.Activation: java.lang.String getTextResource(java.lang.String)>("rmid.exec.policy.invalid");
+
+        staticinvoke <sun.rmi.server.Activation: void bomb(java.lang.String)>($r47);
+
+     label25:
+        if z12 != 1 goto label26;
+
+        $r7 = new sun.rmi.server.Activation$4;
+
+        specialinvoke $r7.<sun.rmi.server.Activation$4: void <init>(int)>(i5);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r7);
+
+        $r8 = staticinvoke <java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationSystem getSystem()>();
+
+        interfaceinvoke $r8.<java.rmi.activation.ActivationSystem: void shutdown()>();
+
+        staticinvoke <java.lang.System: void exit(int)>(0);
+
+     label26:
+        $i0 = interfaceinvoke $r54.<java.util.List: int size()>();
+
+        $r4 = newarray (java.lang.String)[$i0];
+
+        $r5 = interfaceinvoke $r54.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r4);
+
+        $r6 = (java.lang.String[]) $r5;
+
+        staticinvoke <sun.rmi.server.Activation: void startActivation(int,java.rmi.server.RMIServerSocketFactory,java.lang.String,java.lang.String[])>(i5, r52, r53, $r6);
+
+     label27:
+        staticinvoke <java.lang.Thread: void sleep(long)>(9223372036854775807L);
+
+     label28:
+        goto label27;
+
+     label29:
+        $r45 := @caughtexception;
+
+        goto label27;
+
+     label30:
+        $r40 := @caughtexception;
+
+        $r41 = <java.lang.System: java.io.PrintStream err>;
+
+        $r42 = staticinvoke <sun.rmi.server.Activation: java.lang.String getTextResource(java.lang.String)>("rmid.unexpected.exception");
+
+        $r43 = newarray (java.lang.Object)[1];
+
+        $r43[0] = $r40;
+
+        $r44 = staticinvoke <java.text.MessageFormat: java.lang.String format(java.lang.String,java.lang.Object[])>($r42, $r43);
+
+        virtualinvoke $r41.<java.io.PrintStream: void println(java.lang.String)>($r44);
+
+        virtualinvoke $r40.<java.lang.Exception: void printStackTrace()>();
+
+        staticinvoke <java.lang.System: void exit(int)>(1);
+
+        return;
+
+        catch java.lang.NumberFormatException from label05 to label06 with label07;
+        catch java.lang.Exception from label21 to label22 with label23;
+        catch java.lang.InterruptedException from label27 to label28 with label29;
+        catch java.lang.Exception from label01 to label30 with label30;
+    }
+
+    private static java.lang.String getTextResource(java.lang.String)
+    {
+        java.util.ResourceBundle $r0, $r2, $r8, $r9;
+        java.lang.String r1, $r7, $r14, r17;
+        java.util.MissingResourceException $r15, $r16;
+        java.lang.StringBuilder $r3, $r4, $r5, $r6, $r10, $r11, $r12, $r13;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = <sun.rmi.server.Activation: java.util.ResourceBundle resources>;
+
+        if $r0 != null goto label05;
+
+     label01:
+        $r8 = staticinvoke <java.util.ResourceBundle: java.util.ResourceBundle getBundle(java.lang.String)>("sun.rmi.server.resources.rmid");
+
+        <sun.rmi.server.Activation: java.util.ResourceBundle resources> = $r8;
+
+     label02:
+        goto label04;
+
+     label03:
+        $r16 := @caughtexception;
+
+     label04:
+        $r9 = <sun.rmi.server.Activation: java.util.ResourceBundle resources>;
+
+        if $r9 != null goto label05;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[missing resource file: ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r14;
+
+     label05:
+        r17 = null;
+
+     label06:
+        $r2 = <sun.rmi.server.Activation: java.util.ResourceBundle resources>;
+
+        r17 = virtualinvoke $r2.<java.util.ResourceBundle: java.lang.String getString(java.lang.String)>(r1);
+
+     label07:
+        goto label09;
+
+     label08:
+        $r15 := @caughtexception;
+
+     label09:
+        if r17 != null goto label10;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[missing resource: ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r7;
+
+     label10:
+        return r17;
+
+        catch java.util.MissingResourceException from label01 to label02 with label03;
+        catch java.util.MissingResourceException from label06 to label07 with label08;
+    }
+
+    private static java.lang.Class getRMIClass(java.lang.String) throws java.lang.Exception
+    {
+        java.lang.Class $r1;
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <java.rmi.server.RMIClassLoader: java.lang.Class loadClass(java.lang.String)>(r0);
+
+        return $r1;
+    }
+
+    private synchronized java.lang.String Pstartgroup() throws java.rmi.activation.ActivationException
+    {
+        sun.rmi.server.Activation r0;
+        java.lang.InterruptedException $r5;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.lang.StringBuilder $r1, $r2, $r3;
+        java.lang.String $r4;
+
+        r0 := @this: sun.rmi.server.Activation;
+
+     label1:
+        specialinvoke r0.<sun.rmi.server.Activation: void checkShutdown()>();
+
+        $i4 = r0.<sun.rmi.server.Activation: int groupSemaphore>;
+
+        if $i4 <= 0 goto label2;
+
+        $i0 = r0.<sun.rmi.server.Activation: int groupSemaphore>;
+
+        $i1 = $i0 - 1;
+
+        r0.<sun.rmi.server.Activation: int groupSemaphore> = $i1;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Group-");
+
+        $i2 = r0.<sun.rmi.server.Activation: int groupCounter>;
+
+        $i3 = $i2 + 1;
+
+        r0.<sun.rmi.server.Activation: int groupCounter> = $i3;
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r4;
+
+     label2:
+        virtualinvoke r0.<java.lang.Object: void wait()>();
+
+     label3:
+        goto label1;
+
+     label4:
+        $r5 := @caughtexception;
+
+        goto label1;
+
+        catch java.lang.InterruptedException from label2 to label3 with label4;
+    }
+
+    private synchronized void Vstartgroup()
+    {
+        int $i0, $i1;
+        sun.rmi.server.Activation r0;
+
+        r0 := @this: sun.rmi.server.Activation;
+
+        $i0 = r0.<sun.rmi.server.Activation: int groupSemaphore>;
+
+        $i1 = $i0 + 1;
+
+        r0.<sun.rmi.server.Activation: int groupSemaphore> = $i1;
+
+        virtualinvoke r0.<java.lang.Object: void notifyAll()>();
+
+        return;
+    }
+
+    static void access$000(sun.rmi.server.Activation) throws java.rmi.activation.ActivationException
+    {
+        sun.rmi.server.Activation r0;
+
+        r0 := @parameter0: sun.rmi.server.Activation;
+
+        specialinvoke r0.<sun.rmi.server.Activation: void checkShutdown()>();
+
+        return;
+    }
+
+    static sun.rmi.server.Activation$GroupEntry access$100(sun.rmi.server.Activation, java.rmi.activation.ActivationID) throws java.rmi.activation.UnknownObjectException
+    {
+        java.rmi.activation.ActivationID r1;
+        sun.rmi.server.Activation$GroupEntry $r2;
+        sun.rmi.server.Activation r0;
+
+        r0 := @parameter0: sun.rmi.server.Activation;
+
+        r1 := @parameter1: java.rmi.activation.ActivationID;
+
+        $r2 = specialinvoke r0.<sun.rmi.server.Activation: sun.rmi.server.Activation$GroupEntry getGroupEntry(java.rmi.activation.ActivationID)>(r1);
+
+        return $r2;
+    }
+
+    static sun.rmi.server.Activation$GroupEntry access$200(sun.rmi.server.Activation, java.rmi.activation.ActivationGroupID) throws java.rmi.activation.UnknownGroupException
+    {
+        sun.rmi.server.Activation$GroupEntry $r2;
+        sun.rmi.server.Activation r0;
+        java.rmi.activation.ActivationGroupID r1;
+
+        r0 := @parameter0: sun.rmi.server.Activation;
+
+        r1 := @parameter1: java.rmi.activation.ActivationGroupID;
+
+        $r2 = specialinvoke r0.<sun.rmi.server.Activation: sun.rmi.server.Activation$GroupEntry getGroupEntry(java.rmi.activation.ActivationGroupID)>(r1);
+
+        return $r2;
+    }
+
+    static java.rmi.activation.Activator access$300(sun.rmi.server.Activation)
+    {
+        java.rmi.activation.Activator $r1;
+        sun.rmi.server.Activation r0;
+
+        r0 := @parameter0: sun.rmi.server.Activation;
+
+        $r1 = r0.<sun.rmi.server.Activation: java.rmi.activation.Activator activatorStub>;
+
+        return $r1;
+    }
+
+    static void access$400(sun.rmi.server.Activation, java.rmi.activation.ActivationGroupDesc, java.lang.String[]) throws java.lang.SecurityException, java.rmi.activation.ActivationException
+    {
+        java.rmi.activation.ActivationGroupDesc r1;
+        java.lang.String[] r2;
+        sun.rmi.server.Activation r0;
+
+        r0 := @parameter0: sun.rmi.server.Activation;
+
+        r1 := @parameter1: java.rmi.activation.ActivationGroupDesc;
+
+        r2 := @parameter2: java.lang.String[];
+
+        specialinvoke r0.<sun.rmi.server.Activation: void checkArgs(java.rmi.activation.ActivationGroupDesc,java.lang.String[])>(r1, r2);
+
+        return;
+    }
+
+    static java.rmi.activation.ActivationSystem access$500(sun.rmi.server.Activation)
+    {
+        java.rmi.activation.ActivationSystem $r1;
+        sun.rmi.server.Activation r0;
+
+        r0 := @parameter0: sun.rmi.server.Activation;
+
+        $r1 = r0.<sun.rmi.server.Activation: java.rmi.activation.ActivationSystem systemStub>;
+
+        return $r1;
+    }
+
+    static java.util.Map access$600(sun.rmi.server.Activation)
+    {
+        sun.rmi.server.Activation r0;
+        java.util.Map $r1;
+
+        r0 := @parameter0: sun.rmi.server.Activation;
+
+        $r1 = r0.<sun.rmi.server.Activation: java.util.Map groupTable>;
+
+        return $r1;
+    }
+
+    static void access$700(sun.rmi.server.Activation, sun.rmi.server.Activation$LogRecord) throws java.rmi.activation.ActivationException
+    {
+        sun.rmi.server.Activation r0;
+        sun.rmi.server.Activation$LogRecord r1;
+
+        r0 := @parameter0: sun.rmi.server.Activation;
+
+        r1 := @parameter1: sun.rmi.server.Activation$LogRecord;
+
+        specialinvoke r0.<sun.rmi.server.Activation: void addLogRecord(sun.rmi.server.Activation$LogRecord)>(r1);
+
+        return;
+    }
+
+    static java.rmi.activation.ActivationMonitor access$800(sun.rmi.server.Activation)
+    {
+        sun.rmi.server.Activation r0;
+        java.rmi.activation.ActivationMonitor $r1;
+
+        r0 := @parameter0: sun.rmi.server.Activation;
+
+        $r1 = r0.<sun.rmi.server.Activation: java.rmi.activation.ActivationMonitor monitor>;
+
+        return $r1;
+    }
+
+    static sun.rmi.server.Activation$GroupEntry access$900(sun.rmi.server.Activation, java.rmi.activation.ActivationGroupID) throws java.rmi.activation.UnknownGroupException
+    {
+        sun.rmi.server.Activation$GroupEntry $r2;
+        sun.rmi.server.Activation r0;
+        java.rmi.activation.ActivationGroupID r1;
+
+        r0 := @parameter0: sun.rmi.server.Activation;
+
+        r1 := @parameter1: java.rmi.activation.ActivationGroupID;
+
+        $r2 = specialinvoke r0.<sun.rmi.server.Activation: sun.rmi.server.Activation$GroupEntry removeGroupEntry(java.rmi.activation.ActivationGroupID)>(r1);
+
+        return $r2;
+    }
+
+    static java.rmi.activation.ActivationGroupID access$1000(sun.rmi.server.Activation, java.rmi.activation.ActivationID) throws java.rmi.activation.UnknownObjectException
+    {
+        java.rmi.activation.ActivationID r1;
+        sun.rmi.server.Activation r0;
+        java.rmi.activation.ActivationGroupID $r2;
+
+        r0 := @parameter0: sun.rmi.server.Activation;
+
+        r1 := @parameter1: java.rmi.activation.ActivationID;
+
+        $r2 = specialinvoke r0.<sun.rmi.server.Activation: java.rmi.activation.ActivationGroupID getGroupID(java.rmi.activation.ActivationID)>(r1);
+
+        return $r2;
+    }
+
+    static java.lang.Object access$1100(sun.rmi.server.Activation)
+    {
+        java.lang.Object $r1;
+        sun.rmi.server.Activation r0;
+
+        r0 := @parameter0: sun.rmi.server.Activation;
+
+        $r1 = r0.<sun.rmi.server.Activation: java.lang.Object startupLock>;
+
+        return $r1;
+    }
+
+    static boolean access$1200(sun.rmi.server.Activation)
+    {
+        sun.rmi.server.Activation r0;
+        boolean $z0;
+
+        r0 := @parameter0: sun.rmi.server.Activation;
+
+        $z0 = r0.<sun.rmi.server.Activation: boolean shuttingDown>;
+
+        return $z0;
+    }
+
+    static boolean access$1202(sun.rmi.server.Activation, boolean)
+    {
+        sun.rmi.server.Activation r0;
+        boolean z0;
+
+        r0 := @parameter0: sun.rmi.server.Activation;
+
+        z0 := @parameter1: boolean;
+
+        r0.<sun.rmi.server.Activation: boolean shuttingDown> = z0;
+
+        return z0;
+    }
+
+    static java.rmi.activation.Activator access$1300(sun.rmi.server.Activation)
+    {
+        java.rmi.activation.Activator $r1;
+        sun.rmi.server.Activation r0;
+
+        r0 := @parameter0: sun.rmi.server.Activation;
+
+        $r1 = r0.<sun.rmi.server.Activation: java.rmi.activation.Activator activator>;
+
+        return $r1;
+    }
+
+    static void access$1400(java.rmi.Remote)
+    {
+        java.rmi.Remote r0;
+
+        r0 := @parameter0: java.rmi.Remote;
+
+        staticinvoke <sun.rmi.server.Activation: void unexport(java.rmi.Remote)>(r0);
+
+        return;
+    }
+
+    static java.rmi.activation.ActivationSystem access$1500(sun.rmi.server.Activation)
+    {
+        java.rmi.activation.ActivationSystem $r1;
+        sun.rmi.server.Activation r0;
+
+        r0 := @parameter0: sun.rmi.server.Activation;
+
+        $r1 = r0.<sun.rmi.server.Activation: java.rmi.activation.ActivationSystem system>;
+
+        return $r1;
+    }
+
+    static java.lang.Thread access$1600(sun.rmi.server.Activation)
+    {
+        sun.rmi.server.Activation r0;
+        java.lang.Thread $r1;
+
+        r0 := @parameter0: sun.rmi.server.Activation;
+
+        $r1 = r0.<sun.rmi.server.Activation: java.lang.Thread shutdownHook>;
+
+        return $r1;
+    }
+
+    static sun.rmi.log.ReliableLog access$1700(sun.rmi.server.Activation)
+    {
+        sun.rmi.log.ReliableLog $r1;
+        sun.rmi.server.Activation r0;
+
+        r0 := @parameter0: sun.rmi.server.Activation;
+
+        $r1 = r0.<sun.rmi.server.Activation: sun.rmi.log.ReliableLog log>;
+
+        return $r1;
+    }
+
+    static java.lang.String access$1800(java.lang.String)
+    {
+        java.lang.String r0, $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <sun.rmi.server.Activation: java.lang.String getTextResource(java.lang.String)>(r0);
+
+        return $r1;
+    }
+
+    static java.util.Map access$1900(sun.rmi.server.Activation)
+    {
+        sun.rmi.server.Activation r0;
+        java.util.Map $r1;
+
+        r0 := @parameter0: sun.rmi.server.Activation;
+
+        $r1 = r0.<sun.rmi.server.Activation: java.util.Map idTable>;
+
+        return $r1;
+    }
+
+    static long access$2000()
+    {
+        long $l0;
+
+        $l0 = <sun.rmi.server.Activation: long groupTimeout>;
+
+        return $l0;
+    }
+
+    static java.lang.String access$2100(sun.rmi.server.Activation) throws java.rmi.activation.ActivationException
+    {
+        java.lang.String $r1;
+        sun.rmi.server.Activation r0;
+
+        r0 := @parameter0: sun.rmi.server.Activation;
+
+        $r1 = specialinvoke r0.<sun.rmi.server.Activation: java.lang.String Pstartgroup()>();
+
+        return $r1;
+    }
+
+    static java.lang.String[] access$2200(sun.rmi.server.Activation, java.rmi.activation.ActivationGroupDesc)
+    {
+        java.rmi.activation.ActivationGroupDesc r1;
+        java.lang.String[] $r2;
+        sun.rmi.server.Activation r0;
+
+        r0 := @parameter0: sun.rmi.server.Activation;
+
+        r1 := @parameter1: java.rmi.activation.ActivationGroupDesc;
+
+        $r2 = specialinvoke r0.<sun.rmi.server.Activation: java.lang.String[] activationArgs(java.rmi.activation.ActivationGroupDesc)>(r1);
+
+        return $r2;
+    }
+
+    static boolean access$2300()
+    {
+        boolean $z0;
+
+        $z0 = <sun.rmi.server.Activation: boolean debugExec>;
+
+        return $z0;
+    }
+
+    static long access$2400()
+    {
+        long $l0;
+
+        $l0 = <sun.rmi.server.Activation: long execTimeout>;
+
+        return $l0;
+    }
+
+    static void access$2500(sun.rmi.server.Activation)
+    {
+        sun.rmi.server.Activation r0;
+
+        r0 := @parameter0: sun.rmi.server.Activation;
+
+        specialinvoke r0.<sun.rmi.server.Activation: void Vstartgroup()>();
+
+        return;
+    }
+
+    void <init>(sun.rmi.server.Activation$1)
+    {
+        sun.rmi.server.Activation r0;
+        sun.rmi.server.Activation$1 r1;
+
+        r0 := @this: sun.rmi.server.Activation;
+
+        r1 := @parameter0: sun.rmi.server.Activation$1;
+
+        specialinvoke r0.<sun.rmi.server.Activation: void <init>()>();
+
+        return;
+    }
+
+    static java.lang.String[] access$3000(sun.rmi.server.Activation)
+    {
+        java.lang.String[] $r1;
+        sun.rmi.server.Activation r0;
+
+        r0 := @parameter0: sun.rmi.server.Activation;
+
+        $r1 = r0.<sun.rmi.server.Activation: java.lang.String[] command>;
+
+        return $r1;
+    }
+
+    static java.lang.Object access$3200()
+    {
+        java.lang.Object $r0;
+
+        $r0 = <sun.rmi.server.Activation: java.lang.Object initLock>;
+
+        return $r0;
+    }
+
+    static boolean access$3300()
+    {
+        boolean $z0;
+
+        $z0 = <sun.rmi.server.Activation: boolean initDone>;
+
+        return $z0;
+    }
+
+    static void <clinit>()
+    {
+        int $i0, $i2, $i3, $i6;
+        long $l1, $l4;
+        java.lang.Object $r1;
+
+        <sun.rmi.server.Activation: byte MINOR_VERSION> = 0;
+
+        <sun.rmi.server.Activation: byte MAJOR_VERSION> = 1;
+
+        <sun.rmi.server.Activation: long serialVersionUID> = 2921265612698155191L;
+
+        $i6 = (int) 60000;
+
+        $i0 = staticinvoke <sun.rmi.server.Activation: int getInt(java.lang.String,int)>("sun.rmi.activation.groupTimeout", $i6);
+
+        $l1 = (long) $i0;
+
+        <sun.rmi.server.Activation: long groupTimeout> = $l1;
+
+        $i2 = staticinvoke <sun.rmi.server.Activation: int getInt(java.lang.String,int)>("sun.rmi.activation.snapshotInterval", 200);
+
+        <sun.rmi.server.Activation: int snapshotInterval> = $i2;
+
+        $i3 = staticinvoke <sun.rmi.server.Activation: int getInt(java.lang.String,int)>("sun.rmi.activation.execTimeout", 30000);
+
+        $l4 = (long) $i3;
+
+        <sun.rmi.server.Activation: long execTimeout> = $l4;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        <sun.rmi.server.Activation: java.lang.Object initLock> = $r1;
+
+        <sun.rmi.server.Activation: boolean initDone> = 0;
+
+        <sun.rmi.server.Activation: java.util.ResourceBundle resources> = null;
+
+        return;
+    }
+}

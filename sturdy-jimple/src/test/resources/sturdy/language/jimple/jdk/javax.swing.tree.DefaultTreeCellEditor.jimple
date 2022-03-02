@@ -1,0 +1,1141 @@
+public class javax.swing.tree.DefaultTreeCellEditor extends java.lang.Object implements java.awt.event.ActionListener, javax.swing.tree.TreeCellEditor, javax.swing.event.TreeSelectionListener
+{
+    protected javax.swing.tree.TreeCellEditor realEditor;
+    protected javax.swing.tree.DefaultTreeCellRenderer renderer;
+    protected java.awt.Container editingContainer;
+    protected transient java.awt.Component editingComponent;
+    protected boolean canEdit;
+    protected transient int offset;
+    protected transient javax.swing.JTree tree;
+    protected transient javax.swing.tree.TreePath lastPath;
+    protected transient javax.swing.Timer timer;
+    protected transient int lastRow;
+    protected java.awt.Color borderSelectionColor;
+    protected transient javax.swing.Icon editingIcon;
+    protected java.awt.Font font;
+
+    public void <init>(javax.swing.JTree, javax.swing.tree.DefaultTreeCellRenderer)
+    {
+        javax.swing.JTree r1;
+        javax.swing.tree.DefaultTreeCellEditor r0;
+        javax.swing.tree.DefaultTreeCellRenderer r2;
+
+        r0 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        r1 := @parameter0: javax.swing.JTree;
+
+        r2 := @parameter1: javax.swing.tree.DefaultTreeCellRenderer;
+
+        specialinvoke r0.<javax.swing.tree.DefaultTreeCellEditor: void <init>(javax.swing.JTree,javax.swing.tree.DefaultTreeCellRenderer,javax.swing.tree.TreeCellEditor)>(r1, r2, null);
+
+        return;
+    }
+
+    public void <init>(javax.swing.JTree, javax.swing.tree.DefaultTreeCellRenderer, javax.swing.tree.TreeCellEditor)
+    {
+        java.awt.Color $r6;
+        javax.swing.tree.TreeCellEditor r2, $r3, $r7;
+        javax.swing.JTree r5;
+        javax.swing.tree.DefaultTreeCellEditor r0;
+        java.awt.Container $r4;
+        javax.swing.tree.DefaultTreeCellRenderer r1;
+
+        r0 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        r5 := @parameter0: javax.swing.JTree;
+
+        r1 := @parameter1: javax.swing.tree.DefaultTreeCellRenderer;
+
+        r2 := @parameter2: javax.swing.tree.TreeCellEditor;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.DefaultTreeCellRenderer renderer> = r1;
+
+        r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.TreeCellEditor realEditor> = r2;
+
+        $r3 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.TreeCellEditor realEditor>;
+
+        if $r3 != null goto label1;
+
+        $r7 = virtualinvoke r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.TreeCellEditor createTreeCellEditor()>();
+
+        r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.TreeCellEditor realEditor> = $r7;
+
+     label1:
+        $r4 = virtualinvoke r0.<javax.swing.tree.DefaultTreeCellEditor: java.awt.Container createContainer()>();
+
+        r0.<javax.swing.tree.DefaultTreeCellEditor: java.awt.Container editingContainer> = $r4;
+
+        virtualinvoke r0.<javax.swing.tree.DefaultTreeCellEditor: void setTree(javax.swing.JTree)>(r5);
+
+        $r6 = staticinvoke <javax.swing.UIManager: java.awt.Color getColor(java.lang.Object)>("Tree.editorBorderSelectionColor");
+
+        virtualinvoke r0.<javax.swing.tree.DefaultTreeCellEditor: void setBorderSelectionColor(java.awt.Color)>($r6);
+
+        return;
+    }
+
+    public void setBorderSelectionColor(java.awt.Color)
+    {
+        java.awt.Color r1;
+        javax.swing.tree.DefaultTreeCellEditor r0;
+
+        r0 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        r1 := @parameter0: java.awt.Color;
+
+        r0.<javax.swing.tree.DefaultTreeCellEditor: java.awt.Color borderSelectionColor> = r1;
+
+        return;
+    }
+
+    public java.awt.Color getBorderSelectionColor()
+    {
+        java.awt.Color $r1;
+        javax.swing.tree.DefaultTreeCellEditor r0;
+
+        r0 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        $r1 = r0.<javax.swing.tree.DefaultTreeCellEditor: java.awt.Color borderSelectionColor>;
+
+        return $r1;
+    }
+
+    public void setFont(java.awt.Font)
+    {
+        javax.swing.tree.DefaultTreeCellEditor r0;
+        java.awt.Font r1;
+
+        r0 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        r1 := @parameter0: java.awt.Font;
+
+        r0.<javax.swing.tree.DefaultTreeCellEditor: java.awt.Font font> = r1;
+
+        return;
+    }
+
+    public java.awt.Font getFont()
+    {
+        javax.swing.tree.DefaultTreeCellEditor r0;
+        java.awt.Font $r1;
+
+        r0 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        $r1 = r0.<javax.swing.tree.DefaultTreeCellEditor: java.awt.Font font>;
+
+        return $r1;
+    }
+
+    public java.awt.Component getTreeCellEditorComponent(javax.swing.JTree, java.lang.Object, boolean, boolean, boolean, int)
+    {
+        javax.swing.tree.TreeCellEditor $r4;
+        int i0;
+        java.awt.Container $r12, $r15, $r16;
+        boolean z0, z1, z2, $z3, $z4;
+        javax.swing.tree.DefaultTreeCellRenderer $r8, $r9;
+        javax.swing.tree.TreePath $r6, $r7, $r10;
+        java.awt.Font $r13, r14;
+        javax.swing.JTree r1;
+        java.awt.Component $r3, $r5, $r11;
+        javax.swing.tree.DefaultTreeCellEditor r0;
+        java.lang.Object r2;
+
+        r0 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        r1 := @parameter0: javax.swing.JTree;
+
+        r2 := @parameter1: java.lang.Object;
+
+        z0 := @parameter2: boolean;
+
+        z1 := @parameter3: boolean;
+
+        z2 := @parameter4: boolean;
+
+        i0 := @parameter5: int;
+
+        virtualinvoke r0.<javax.swing.tree.DefaultTreeCellEditor: void setTree(javax.swing.JTree)>(r1);
+
+        r0.<javax.swing.tree.DefaultTreeCellEditor: int lastRow> = i0;
+
+        virtualinvoke r0.<javax.swing.tree.DefaultTreeCellEditor: void determineOffset(javax.swing.JTree,java.lang.Object,boolean,boolean,boolean,int)>(r1, r2, z0, z1, z2, i0);
+
+        $r3 = r0.<javax.swing.tree.DefaultTreeCellEditor: java.awt.Component editingComponent>;
+
+        if $r3 == null goto label1;
+
+        $r12 = r0.<javax.swing.tree.DefaultTreeCellEditor: java.awt.Container editingContainer>;
+
+        $r11 = r0.<javax.swing.tree.DefaultTreeCellEditor: java.awt.Component editingComponent>;
+
+        virtualinvoke $r12.<java.awt.Container: void remove(java.awt.Component)>($r11);
+
+     label1:
+        $r4 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.TreeCellEditor realEditor>;
+
+        $r5 = interfaceinvoke $r4.<javax.swing.tree.TreeCellEditor: java.awt.Component getTreeCellEditorComponent(javax.swing.JTree,java.lang.Object,boolean,boolean,boolean,int)>(r1, r2, z0, z1, z2, i0);
+
+        r0.<javax.swing.tree.DefaultTreeCellEditor: java.awt.Component editingComponent> = $r5;
+
+        $r6 = virtualinvoke r1.<javax.swing.JTree: javax.swing.tree.TreePath getPathForRow(int)>(i0);
+
+        $r7 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.TreePath lastPath>;
+
+        if $r7 == null goto label2;
+
+        if $r6 == null goto label2;
+
+        $r10 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.TreePath lastPath>;
+
+        $z3 = virtualinvoke $r10.<javax.swing.tree.TreePath: boolean equals(java.lang.Object)>($r6);
+
+        if $z3 == 0 goto label2;
+
+        $z4 = 1;
+
+        goto label3;
+
+     label2:
+        $z4 = 0;
+
+     label3:
+        r0.<javax.swing.tree.DefaultTreeCellEditor: boolean canEdit> = $z4;
+
+        $r13 = virtualinvoke r0.<javax.swing.tree.DefaultTreeCellEditor: java.awt.Font getFont()>();
+
+        r14 = $r13;
+
+        if $r13 != null goto label5;
+
+        $r8 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.DefaultTreeCellRenderer renderer>;
+
+        if $r8 == null goto label4;
+
+        $r9 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.DefaultTreeCellRenderer renderer>;
+
+        r14 = virtualinvoke $r9.<javax.swing.tree.DefaultTreeCellRenderer: java.awt.Font getFont()>();
+
+     label4:
+        if r14 != null goto label5;
+
+        r14 = virtualinvoke r1.<javax.swing.JTree: java.awt.Font getFont()>();
+
+     label5:
+        $r15 = r0.<javax.swing.tree.DefaultTreeCellEditor: java.awt.Container editingContainer>;
+
+        virtualinvoke $r15.<java.awt.Container: void setFont(java.awt.Font)>(r14);
+
+        virtualinvoke r0.<javax.swing.tree.DefaultTreeCellEditor: void prepareForEditing()>();
+
+        $r16 = r0.<javax.swing.tree.DefaultTreeCellEditor: java.awt.Container editingContainer>;
+
+        return $r16;
+    }
+
+    public java.lang.Object getCellEditorValue()
+    {
+        javax.swing.tree.TreeCellEditor $r1;
+        java.lang.Object $r2;
+        javax.swing.tree.DefaultTreeCellEditor r0;
+
+        r0 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        $r1 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.TreeCellEditor realEditor>;
+
+        $r2 = interfaceinvoke $r1.<javax.swing.tree.TreeCellEditor: java.lang.Object getCellEditorValue()>();
+
+        return $r2;
+    }
+
+    public boolean isCellEditable(java.util.EventObject)
+    {
+        javax.swing.tree.TreeModel $r18;
+        java.util.EventObject r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, z9, z10, $z11, $z12, z13, z14;
+        javax.swing.Timer $r2, $r3, $r4;
+        javax.swing.tree.TreePath $r11, $r12, $r20;
+        javax.swing.tree.DefaultTreeCellEditor r1;
+        javax.swing.tree.TreeCellEditor $r21;
+        int $i0, $i1, $i2, $i3, $i4;
+        javax.swing.JTree $r7, $r9, $r13, $r15, $r16, $r17, $r19;
+        java.awt.event.MouseEvent $r8, $r10;
+        java.lang.Object $r5, $r6, $r14;
+
+        r1 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        r0 := @parameter0: java.util.EventObject;
+
+        z9 = 0;
+
+        z14 = 0;
+
+        z13 = 0;
+
+        z10 = 0;
+
+        if r0 == null goto label3;
+
+        $r5 = virtualinvoke r0.<java.util.EventObject: java.lang.Object getSource()>();
+
+        $z3 = $r5 instanceof javax.swing.JTree;
+
+        if $z3 == 0 goto label3;
+
+        $r6 = virtualinvoke r0.<java.util.EventObject: java.lang.Object getSource()>();
+
+        $r7 = (javax.swing.JTree) $r6;
+
+        virtualinvoke r1.<javax.swing.tree.DefaultTreeCellEditor: void setTree(javax.swing.JTree)>($r7);
+
+        $z4 = r0 instanceof java.awt.event.MouseEvent;
+
+        if $z4 == 0 goto label3;
+
+        $r9 = r1.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.JTree tree>;
+
+        $r8 = (java.awt.event.MouseEvent) r0;
+
+        $i0 = virtualinvoke $r8.<java.awt.event.MouseEvent: int getX()>();
+
+        $r10 = (java.awt.event.MouseEvent) r0;
+
+        $i1 = virtualinvoke $r10.<java.awt.event.MouseEvent: int getY()>();
+
+        $r11 = virtualinvoke $r9.<javax.swing.JTree: javax.swing.tree.TreePath getPathForLocation(int,int)>($i0, $i1);
+
+        $r12 = r1.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.TreePath lastPath>;
+
+        if $r12 == null goto label1;
+
+        if $r11 == null goto label1;
+
+        $r20 = r1.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.TreePath lastPath>;
+
+        $z8 = virtualinvoke $r20.<javax.swing.tree.TreePath: boolean equals(java.lang.Object)>($r11);
+
+        if $z8 == 0 goto label1;
+
+        $z11 = 1;
+
+        goto label2;
+
+     label1:
+        $z11 = 0;
+
+     label2:
+        z10 = $z11;
+
+        if $r11 == null goto label3;
+
+        $r13 = r1.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.JTree tree>;
+
+        $i2 = virtualinvoke $r13.<javax.swing.JTree: int getRowForPath(javax.swing.tree.TreePath)>($r11);
+
+        r1.<javax.swing.tree.DefaultTreeCellEditor: int lastRow> = $i2;
+
+        $r14 = virtualinvoke $r11.<javax.swing.tree.TreePath: java.lang.Object getLastPathComponent()>();
+
+        $r15 = r1.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.JTree tree>;
+
+        $i3 = r1.<javax.swing.tree.DefaultTreeCellEditor: int lastRow>;
+
+        $z5 = virtualinvoke $r15.<javax.swing.JTree: boolean isRowSelected(int)>($i3);
+
+        $r16 = r1.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.JTree tree>;
+
+        $z6 = virtualinvoke $r16.<javax.swing.JTree: boolean isExpanded(javax.swing.tree.TreePath)>($r11);
+
+        $r17 = r1.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.JTree tree>;
+
+        $r18 = virtualinvoke $r17.<javax.swing.JTree: javax.swing.tree.TreeModel getModel()>();
+
+        $z7 = interfaceinvoke $r18.<javax.swing.tree.TreeModel: boolean isLeaf(java.lang.Object)>($r14);
+
+        $r19 = r1.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.JTree tree>;
+
+        $i4 = r1.<javax.swing.tree.DefaultTreeCellEditor: int lastRow>;
+
+        virtualinvoke r1.<javax.swing.tree.DefaultTreeCellEditor: void determineOffset(javax.swing.JTree,java.lang.Object,boolean,boolean,boolean,int)>($r19, $r14, $z5, $z6, $z7, $i4);
+
+     label3:
+        $r21 = r1.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.TreeCellEditor realEditor>;
+
+        $z12 = interfaceinvoke $r21.<javax.swing.tree.TreeCellEditor: boolean isCellEditable(java.util.EventObject)>(r0);
+
+        if $z12 != 0 goto label4;
+
+        return 0;
+
+     label4:
+        $z0 = virtualinvoke r1.<javax.swing.tree.DefaultTreeCellEditor: boolean canEditImmediately(java.util.EventObject)>(r0);
+
+        if $z0 == 0 goto label5;
+
+        z9 = 1;
+
+        z14 = 1;
+
+        z13 = 1;
+
+        goto label7;
+
+     label5:
+        if z10 == 0 goto label6;
+
+        $z2 = virtualinvoke r1.<javax.swing.tree.DefaultTreeCellEditor: boolean shouldStartEditingTimer(java.util.EventObject)>(r0);
+
+        if $z2 == 0 goto label6;
+
+        virtualinvoke r1.<javax.swing.tree.DefaultTreeCellEditor: void startEditingTimer()>();
+
+        goto label7;
+
+     label6:
+        $r2 = r1.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.Timer timer>;
+
+        if $r2 == null goto label7;
+
+        $r3 = r1.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.Timer timer>;
+
+        $z1 = virtualinvoke $r3.<javax.swing.Timer: boolean isRunning()>();
+
+        if $z1 == 0 goto label7;
+
+        $r4 = r1.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.Timer timer>;
+
+        virtualinvoke $r4.<javax.swing.Timer: void stop()>();
+
+     label7:
+        if z13 == 0 goto label8;
+
+        virtualinvoke r1.<javax.swing.tree.DefaultTreeCellEditor: void prepareForEditing()>();
+
+     label8:
+        return z14;
+    }
+
+    public boolean shouldSelectCell(java.util.EventObject)
+    {
+        javax.swing.tree.DefaultTreeCellEditor r0;
+        javax.swing.tree.TreeCellEditor $r2;
+        java.util.EventObject r1;
+        boolean $z0;
+
+        r0 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        r1 := @parameter0: java.util.EventObject;
+
+        $r2 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.TreeCellEditor realEditor>;
+
+        $z0 = interfaceinvoke $r2.<javax.swing.tree.TreeCellEditor: boolean shouldSelectCell(java.util.EventObject)>(r1);
+
+        return $z0;
+    }
+
+    public boolean stopCellEditing()
+    {
+        javax.swing.tree.TreeCellEditor $r1;
+        javax.swing.tree.DefaultTreeCellEditor r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        $r1 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.TreeCellEditor realEditor>;
+
+        $z0 = interfaceinvoke $r1.<javax.swing.tree.TreeCellEditor: boolean stopCellEditing()>();
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<javax.swing.tree.DefaultTreeCellEditor: void cleanupAfterEditing()>();
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    public void cancelCellEditing()
+    {
+        javax.swing.tree.TreeCellEditor $r1;
+        javax.swing.tree.DefaultTreeCellEditor r0;
+
+        r0 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        $r1 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.TreeCellEditor realEditor>;
+
+        interfaceinvoke $r1.<javax.swing.tree.TreeCellEditor: void cancelCellEditing()>();
+
+        specialinvoke r0.<javax.swing.tree.DefaultTreeCellEditor: void cleanupAfterEditing()>();
+
+        return;
+    }
+
+    public void addCellEditorListener(javax.swing.event.CellEditorListener)
+    {
+        javax.swing.tree.TreeCellEditor $r2;
+        javax.swing.tree.DefaultTreeCellEditor r0;
+        javax.swing.event.CellEditorListener r1;
+
+        r0 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        r1 := @parameter0: javax.swing.event.CellEditorListener;
+
+        $r2 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.TreeCellEditor realEditor>;
+
+        interfaceinvoke $r2.<javax.swing.tree.TreeCellEditor: void addCellEditorListener(javax.swing.event.CellEditorListener)>(r1);
+
+        return;
+    }
+
+    public void removeCellEditorListener(javax.swing.event.CellEditorListener)
+    {
+        javax.swing.tree.TreeCellEditor $r2;
+        javax.swing.tree.DefaultTreeCellEditor r0;
+        javax.swing.event.CellEditorListener r1;
+
+        r0 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        r1 := @parameter0: javax.swing.event.CellEditorListener;
+
+        $r2 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.TreeCellEditor realEditor>;
+
+        interfaceinvoke $r2.<javax.swing.tree.TreeCellEditor: void removeCellEditorListener(javax.swing.event.CellEditorListener)>(r1);
+
+        return;
+    }
+
+    public javax.swing.event.CellEditorListener[] getCellEditorListeners()
+    {
+        javax.swing.tree.DefaultTreeCellEditor r0;
+        javax.swing.event.CellEditorListener[] $r3;
+        javax.swing.tree.TreeCellEditor $r1;
+        javax.swing.DefaultCellEditor $r2;
+
+        r0 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        $r1 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.TreeCellEditor realEditor>;
+
+        $r2 = (javax.swing.DefaultCellEditor) $r1;
+
+        $r3 = virtualinvoke $r2.<javax.swing.DefaultCellEditor: javax.swing.event.CellEditorListener[] getCellEditorListeners()>();
+
+        return $r3;
+    }
+
+    public void valueChanged(javax.swing.event.TreeSelectionEvent)
+    {
+        javax.swing.tree.TreePath $r5;
+        javax.swing.JTree $r1, $r3, $r4;
+        javax.swing.event.TreeSelectionEvent r6;
+        javax.swing.tree.DefaultTreeCellEditor r0;
+        int $i0;
+        javax.swing.Timer $r2, $r7;
+
+        r0 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        r6 := @parameter0: javax.swing.event.TreeSelectionEvent;
+
+        $r1 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.JTree tree>;
+
+        if $r1 == null goto label2;
+
+        $r3 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.JTree tree>;
+
+        $i0 = virtualinvoke $r3.<javax.swing.JTree: int getSelectionCount()>();
+
+        if $i0 != 1 goto label1;
+
+        $r4 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.JTree tree>;
+
+        $r5 = virtualinvoke $r4.<javax.swing.JTree: javax.swing.tree.TreePath getSelectionPath()>();
+
+        r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.TreePath lastPath> = $r5;
+
+        goto label2;
+
+     label1:
+        r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.TreePath lastPath> = null;
+
+     label2:
+        $r7 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.Timer timer>;
+
+        if $r7 == null goto label3;
+
+        $r2 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.Timer timer>;
+
+        virtualinvoke $r2.<javax.swing.Timer: void stop()>();
+
+     label3:
+        return;
+    }
+
+    public void actionPerformed(java.awt.event.ActionEvent)
+    {
+        javax.swing.tree.DefaultTreeCellEditor r0;
+        javax.swing.tree.TreePath $r2, $r3;
+        javax.swing.JTree $r1, $r4;
+        java.awt.event.ActionEvent r5;
+
+        r0 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        r5 := @parameter0: java.awt.event.ActionEvent;
+
+        $r1 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.JTree tree>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.TreePath lastPath>;
+
+        if $r2 == null goto label1;
+
+        $r4 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.JTree tree>;
+
+        $r3 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.TreePath lastPath>;
+
+        virtualinvoke $r4.<javax.swing.JTree: void startEditingAtPath(javax.swing.tree.TreePath)>($r3);
+
+     label1:
+        return;
+    }
+
+    protected void setTree(javax.swing.JTree)
+    {
+        javax.swing.JTree r1, $r2, $r3, $r4, $r7, $r8;
+        javax.swing.tree.DefaultTreeCellEditor r0;
+        javax.swing.Timer $r5, $r6;
+
+        r0 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        r1 := @parameter0: javax.swing.JTree;
+
+        $r2 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.JTree tree>;
+
+        if $r2 == r1 goto label3;
+
+        $r3 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.JTree tree>;
+
+        if $r3 == null goto label1;
+
+        $r8 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.JTree tree>;
+
+        virtualinvoke $r8.<javax.swing.JTree: void removeTreeSelectionListener(javax.swing.event.TreeSelectionListener)>(r0);
+
+     label1:
+        r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.JTree tree> = r1;
+
+        $r4 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.JTree tree>;
+
+        if $r4 == null goto label2;
+
+        $r7 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.JTree tree>;
+
+        virtualinvoke $r7.<javax.swing.JTree: void addTreeSelectionListener(javax.swing.event.TreeSelectionListener)>(r0);
+
+     label2:
+        $r5 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.Timer timer>;
+
+        if $r5 == null goto label3;
+
+        $r6 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.Timer timer>;
+
+        virtualinvoke $r6.<javax.swing.Timer: void stop()>();
+
+     label3:
+        return;
+    }
+
+    protected boolean shouldStartEditingTimer(java.util.EventObject)
+    {
+        java.awt.event.MouseEvent $r1, r2;
+        java.util.EventObject r0;
+        javax.swing.tree.DefaultTreeCellEditor r3;
+        int $i0, $i1, $i2;
+        boolean $z0, $z1, $z2, $z3;
+
+        r3 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        r0 := @parameter0: java.util.EventObject;
+
+        $z0 = r0 instanceof java.awt.event.MouseEvent;
+
+        if $z0 == 0 goto label3;
+
+        $r1 = (java.awt.event.MouseEvent) r0;
+
+        $z1 = staticinvoke <javax.swing.SwingUtilities: boolean isLeftMouseButton(java.awt.event.MouseEvent)>($r1);
+
+        if $z1 == 0 goto label3;
+
+        r2 = (java.awt.event.MouseEvent) r0;
+
+        $i0 = virtualinvoke r2.<java.awt.event.MouseEvent: int getClickCount()>();
+
+        if $i0 != 1 goto label1;
+
+        $i1 = virtualinvoke r2.<java.awt.event.MouseEvent: int getX()>();
+
+        $i2 = virtualinvoke r2.<java.awt.event.MouseEvent: int getY()>();
+
+        $z2 = virtualinvoke r3.<javax.swing.tree.DefaultTreeCellEditor: boolean inHitRegion(int,int)>($i1, $i2);
+
+        if $z2 == 0 goto label1;
+
+        $z3 = 1;
+
+        goto label2;
+
+     label1:
+        $z3 = 0;
+
+     label2:
+        return $z3;
+
+     label3:
+        return 0;
+    }
+
+    protected void startEditingTimer()
+    {
+        javax.swing.tree.DefaultTreeCellEditor r0;
+        javax.swing.Timer $r1, $r2, $r3, $r4;
+
+        r0 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        $r1 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.Timer timer>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new javax.swing.Timer;
+
+        specialinvoke $r3.<javax.swing.Timer: void <init>(int,java.awt.event.ActionListener)>(1200, r0);
+
+        r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.Timer timer> = $r3;
+
+        $r4 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.Timer timer>;
+
+        virtualinvoke $r4.<javax.swing.Timer: void setRepeats(boolean)>(0);
+
+     label1:
+        $r2 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.Timer timer>;
+
+        virtualinvoke $r2.<javax.swing.Timer: void start()>();
+
+        return;
+    }
+
+    protected boolean canEditImmediately(java.util.EventObject)
+    {
+        java.awt.event.MouseEvent $r1, r2;
+        java.util.EventObject r0;
+        javax.swing.tree.DefaultTreeCellEditor r3;
+        int $i0, $i1, $i2;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        r3 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        r0 := @parameter0: java.util.EventObject;
+
+        $z0 = r0 instanceof java.awt.event.MouseEvent;
+
+        if $z0 == 0 goto label3;
+
+        $r1 = (java.awt.event.MouseEvent) r0;
+
+        $z1 = staticinvoke <javax.swing.SwingUtilities: boolean isLeftMouseButton(java.awt.event.MouseEvent)>($r1);
+
+        if $z1 == 0 goto label3;
+
+        r2 = (java.awt.event.MouseEvent) r0;
+
+        $i0 = virtualinvoke r2.<java.awt.event.MouseEvent: int getClickCount()>();
+
+        if $i0 <= 2 goto label1;
+
+        $i1 = virtualinvoke r2.<java.awt.event.MouseEvent: int getX()>();
+
+        $i2 = virtualinvoke r2.<java.awt.event.MouseEvent: int getY()>();
+
+        $z2 = virtualinvoke r3.<javax.swing.tree.DefaultTreeCellEditor: boolean inHitRegion(int,int)>($i1, $i2);
+
+        if $z2 == 0 goto label1;
+
+        $z3 = 1;
+
+        goto label2;
+
+     label1:
+        $z3 = 0;
+
+     label2:
+        return $z3;
+
+     label3:
+        if r0 != null goto label4;
+
+        $z4 = 1;
+
+        goto label5;
+
+     label4:
+        $z4 = 0;
+
+     label5:
+        return $z4;
+    }
+
+    protected boolean inHitRegion(int, int)
+    {
+        java.awt.Rectangle $r3;
+        int $i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, i20, $i22;
+        boolean $z0;
+        javax.swing.JTree $r1, $r2, $r4;
+        java.awt.ComponentOrientation $r5;
+        javax.swing.tree.DefaultTreeCellEditor r0;
+
+        r0 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        i2 := @parameter0: int;
+
+        i20 := @parameter1: int;
+
+        $i0 = r0.<javax.swing.tree.DefaultTreeCellEditor: int lastRow>;
+
+        $i22 = (int) -1;
+
+        if $i0 == $i22 goto label3;
+
+        $r1 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.JTree tree>;
+
+        if $r1 == null goto label3;
+
+        $r2 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.JTree tree>;
+
+        $i1 = r0.<javax.swing.tree.DefaultTreeCellEditor: int lastRow>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.JTree: java.awt.Rectangle getRowBounds(int)>($i1);
+
+        $r4 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.JTree tree>;
+
+        $r5 = virtualinvoke $r4.<javax.swing.JTree: java.awt.ComponentOrientation getComponentOrientation()>();
+
+        $z0 = virtualinvoke $r5.<java.awt.ComponentOrientation: boolean isLeftToRight()>();
+
+        if $z0 == 0 goto label1;
+
+        if $r3 == null goto label3;
+
+        $i15 = $r3.<java.awt.Rectangle: int x>;
+
+        $i14 = r0.<javax.swing.tree.DefaultTreeCellEditor: int offset>;
+
+        $i16 = $i15 + $i14;
+
+        if i2 > $i16 goto label3;
+
+        $i19 = r0.<javax.swing.tree.DefaultTreeCellEditor: int offset>;
+
+        $i17 = $r3.<java.awt.Rectangle: int width>;
+
+        $i18 = $i17 - 5;
+
+        if $i19 >= $i18 goto label3;
+
+        return 0;
+
+     label1:
+        if $r3 == null goto label3;
+
+        $i4 = $r3.<java.awt.Rectangle: int x>;
+
+        $i3 = $r3.<java.awt.Rectangle: int width>;
+
+        $i6 = $i4 + $i3;
+
+        $i5 = r0.<javax.swing.tree.DefaultTreeCellEditor: int offset>;
+
+        $i7 = $i6 - $i5;
+
+        $i8 = $i7 + 5;
+
+        if i2 >= $i8 goto label2;
+
+        $i12 = $r3.<java.awt.Rectangle: int x>;
+
+        $i13 = $i12 + 5;
+
+        if i2 > $i13 goto label3;
+
+     label2:
+        $i11 = r0.<javax.swing.tree.DefaultTreeCellEditor: int offset>;
+
+        $i9 = $r3.<java.awt.Rectangle: int width>;
+
+        $i10 = $i9 - 5;
+
+        if $i11 >= $i10 goto label3;
+
+        return 0;
+
+     label3:
+        return 1;
+    }
+
+    protected void determineOffset(javax.swing.JTree, java.lang.Object, boolean, boolean, boolean, int)
+    {
+        int $i0, $i1, $i2, $i3, i4;
+        javax.swing.tree.DefaultTreeCellRenderer $r1, $r2, $r4, $r5, $r7, $r9;
+        boolean z0, z1, z2;
+        javax.swing.Icon $r3, $r6, $r8, $r10, $r13;
+        javax.swing.JTree r11;
+        javax.swing.tree.DefaultTreeCellEditor r0;
+        java.lang.Object r12;
+
+        r0 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        r11 := @parameter0: javax.swing.JTree;
+
+        r12 := @parameter1: java.lang.Object;
+
+        z2 := @parameter2: boolean;
+
+        z1 := @parameter3: boolean;
+
+        z0 := @parameter4: boolean;
+
+        i4 := @parameter5: int;
+
+        $r1 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.DefaultTreeCellRenderer renderer>;
+
+        if $r1 == null goto label5;
+
+        if z0 == 0 goto label1;
+
+        $r9 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.DefaultTreeCellRenderer renderer>;
+
+        $r10 = virtualinvoke $r9.<javax.swing.tree.DefaultTreeCellRenderer: javax.swing.Icon getLeafIcon()>();
+
+        r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.Icon editingIcon> = $r10;
+
+        goto label3;
+
+     label1:
+        if z1 == 0 goto label2;
+
+        $r7 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.DefaultTreeCellRenderer renderer>;
+
+        $r8 = virtualinvoke $r7.<javax.swing.tree.DefaultTreeCellRenderer: javax.swing.Icon getOpenIcon()>();
+
+        r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.Icon editingIcon> = $r8;
+
+        goto label3;
+
+     label2:
+        $r2 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.DefaultTreeCellRenderer renderer>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.tree.DefaultTreeCellRenderer: javax.swing.Icon getClosedIcon()>();
+
+        r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.Icon editingIcon> = $r3;
+
+     label3:
+        $r13 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.Icon editingIcon>;
+
+        if $r13 == null goto label4;
+
+        $r5 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.DefaultTreeCellRenderer renderer>;
+
+        $i1 = virtualinvoke $r5.<javax.swing.tree.DefaultTreeCellRenderer: int getIconTextGap()>();
+
+        $r6 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.Icon editingIcon>;
+
+        $i2 = interfaceinvoke $r6.<javax.swing.Icon: int getIconWidth()>();
+
+        $i3 = $i1 + $i2;
+
+        r0.<javax.swing.tree.DefaultTreeCellEditor: int offset> = $i3;
+
+        goto label6;
+
+     label4:
+        $r4 = r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.DefaultTreeCellRenderer renderer>;
+
+        $i0 = virtualinvoke $r4.<javax.swing.tree.DefaultTreeCellRenderer: int getIconTextGap()>();
+
+        r0.<javax.swing.tree.DefaultTreeCellEditor: int offset> = $i0;
+
+        goto label6;
+
+     label5:
+        r0.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.Icon editingIcon> = null;
+
+        r0.<javax.swing.tree.DefaultTreeCellEditor: int offset> = 0;
+
+     label6:
+        return;
+    }
+
+    protected void prepareForEditing()
+    {
+        javax.swing.tree.DefaultTreeCellEditor r0;
+        java.awt.Container $r3;
+        java.awt.Component $r1, $r2;
+
+        r0 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        $r1 = r0.<javax.swing.tree.DefaultTreeCellEditor: java.awt.Component editingComponent>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<javax.swing.tree.DefaultTreeCellEditor: java.awt.Container editingContainer>;
+
+        $r2 = r0.<javax.swing.tree.DefaultTreeCellEditor: java.awt.Component editingComponent>;
+
+        virtualinvoke $r3.<java.awt.Container: java.awt.Component add(java.awt.Component)>($r2);
+
+     label1:
+        return;
+    }
+
+    protected java.awt.Container createContainer()
+    {
+        javax.swing.tree.DefaultTreeCellEditor$EditorContainer $r0;
+        javax.swing.tree.DefaultTreeCellEditor r1;
+
+        r1 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        $r0 = new javax.swing.tree.DefaultTreeCellEditor$EditorContainer;
+
+        specialinvoke $r0.<javax.swing.tree.DefaultTreeCellEditor$EditorContainer: void <init>(javax.swing.tree.DefaultTreeCellEditor)>(r1);
+
+        return $r0;
+    }
+
+    protected javax.swing.tree.TreeCellEditor createTreeCellEditor()
+    {
+        javax.swing.tree.DefaultTreeCellEditor r2;
+        javax.swing.tree.DefaultTreeCellEditor$1 $r1;
+        javax.swing.tree.DefaultTreeCellEditor$DefaultTextField $r3;
+        javax.swing.border.Border $r0;
+
+        r2 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        $r0 = staticinvoke <javax.swing.UIManager: javax.swing.border.Border getBorder(java.lang.Object)>("Tree.editorBorder");
+
+        $r1 = new javax.swing.tree.DefaultTreeCellEditor$1;
+
+        $r3 = new javax.swing.tree.DefaultTreeCellEditor$DefaultTextField;
+
+        specialinvoke $r3.<javax.swing.tree.DefaultTreeCellEditor$DefaultTextField: void <init>(javax.swing.tree.DefaultTreeCellEditor,javax.swing.border.Border)>(r2, $r0);
+
+        specialinvoke $r1.<javax.swing.tree.DefaultTreeCellEditor$1: void <init>(javax.swing.tree.DefaultTreeCellEditor,javax.swing.JTextField)>(r2, $r3);
+
+        virtualinvoke $r1.<javax.swing.DefaultCellEditor: void setClickCountToStart(int)>(1);
+
+        return $r1;
+    }
+
+    private void cleanupAfterEditing()
+    {
+        javax.swing.tree.DefaultTreeCellEditor r0;
+        java.awt.Container $r3;
+        java.awt.Component $r1, $r2;
+
+        r0 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        $r1 = r0.<javax.swing.tree.DefaultTreeCellEditor: java.awt.Component editingComponent>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<javax.swing.tree.DefaultTreeCellEditor: java.awt.Container editingContainer>;
+
+        $r2 = r0.<javax.swing.tree.DefaultTreeCellEditor: java.awt.Component editingComponent>;
+
+        virtualinvoke $r3.<java.awt.Container: void remove(java.awt.Component)>($r2);
+
+     label1:
+        r0.<javax.swing.tree.DefaultTreeCellEditor: java.awt.Component editingComponent> = null;
+
+        return;
+    }
+
+    private void writeObject(java.io.ObjectOutputStream) throws java.io.IOException
+    {
+        java.util.Vector $r0;
+        javax.swing.tree.DefaultTreeCellEditor r2;
+        java.io.ObjectOutputStream r1;
+        javax.swing.tree.TreeCellEditor $r3, $r4, $r5;
+        boolean $z0;
+
+        r2 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        r1 := @parameter0: java.io.ObjectOutputStream;
+
+        $r0 = new java.util.Vector;
+
+        specialinvoke $r0.<java.util.Vector: void <init>()>();
+
+        virtualinvoke r1.<java.io.ObjectOutputStream: void defaultWriteObject()>();
+
+        $r3 = r2.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.TreeCellEditor realEditor>;
+
+        if $r3 == null goto label1;
+
+        $r4 = r2.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.TreeCellEditor realEditor>;
+
+        $z0 = $r4 instanceof java.io.Serializable;
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke $r0.<java.util.Vector: void addElement(java.lang.Object)>("realEditor");
+
+        $r5 = r2.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.TreeCellEditor realEditor>;
+
+        virtualinvoke $r0.<java.util.Vector: void addElement(java.lang.Object)>($r5);
+
+     label1:
+        virtualinvoke r1.<java.io.ObjectOutputStream: void writeObject(java.lang.Object)>($r0);
+
+        return;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.ObjectInputStream r0;
+        javax.swing.tree.TreeCellEditor $r6;
+        java.util.Vector r2;
+        javax.swing.tree.DefaultTreeCellEditor r4;
+        int $i0;
+        java.lang.Object $r1, $r3, $r5;
+        boolean $z0;
+
+        r4 := @this: javax.swing.tree.DefaultTreeCellEditor;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        $r1 = virtualinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        r2 = (java.util.Vector) $r1;
+
+        $i0 = virtualinvoke r2.<java.util.Vector: int size()>();
+
+        if 0 >= $i0 goto label1;
+
+        $r3 = virtualinvoke r2.<java.util.Vector: java.lang.Object elementAt(int)>(0);
+
+        $z0 = virtualinvoke $r3.<java.lang.Object: boolean equals(java.lang.Object)>("realEditor");
+
+        if $z0 == 0 goto label1;
+
+        $r5 = virtualinvoke r2.<java.util.Vector: java.lang.Object elementAt(int)>(1);
+
+        $r6 = (javax.swing.tree.TreeCellEditor) $r5;
+
+        r4.<javax.swing.tree.DefaultTreeCellEditor: javax.swing.tree.TreeCellEditor realEditor> = $r6;
+
+     label1:
+        return;
+    }
+}

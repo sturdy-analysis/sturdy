@@ -1,0 +1,1812 @@
+public class com.sun.xml.internal.ws.server.WSEndpointImpl extends com.sun.xml.internal.ws.api.server.WSEndpoint implements com.sun.xml.internal.ws.api.server.LazyMOMProvider$WSEndpointScopeChangeListener
+{
+    private static final java.util.logging.Logger logger;
+    private final javax.xml.namespace.QName serviceName;
+    private final javax.xml.namespace.QName portName;
+    protected final com.sun.xml.internal.ws.api.WSBinding binding;
+    private final com.sun.xml.internal.ws.api.model.SEIModel seiModel;
+    private final com.sun.xml.internal.ws.api.server.Container container;
+    private final com.sun.xml.internal.ws.api.model.wsdl.WSDLPort port;
+    protected final com.sun.xml.internal.ws.api.pipe.Tube masterTubeline;
+    private final com.sun.xml.internal.ws.server.ServiceDefinitionImpl serviceDef;
+    private final com.sun.xml.internal.ws.api.SOAPVersion soapVersion;
+    private final com.sun.xml.internal.ws.api.pipe.Engine engine;
+    private final com.sun.xml.internal.ws.api.pipe.Codec masterCodec;
+    private final com.sun.xml.internal.ws.policy.PolicyMap endpointPolicy;
+    private final com.sun.xml.internal.ws.util.Pool tubePool;
+    private final com.sun.xml.internal.ws.wsdl.OperationDispatcher operationDispatcher;
+    private com.sun.org.glassfish.gmbal.ManagedObjectManager managedObjectManager;
+    private boolean managedObjectManagerClosed;
+    private final java.lang.Object managedObjectManagerLock;
+    private com.sun.xml.internal.ws.api.server.LazyMOMProvider$Scope lazyMOMProviderScope;
+    private final com.sun.xml.internal.ws.api.pipe.ServerTubeAssemblerContext context;
+    private java.util.Map endpointReferenceExtensions;
+    private boolean disposed;
+    private final java.lang.Class implementationClass;
+    private final com.sun.xml.internal.ws.model.wsdl.WSDLProperties wsdlProperties;
+    private final java.util.Set componentRegistry;
+    private static final java.util.logging.Logger monitoringLogger;
+    static final boolean $assertionsDisabled;
+
+    protected void <init>(javax.xml.namespace.QName, javax.xml.namespace.QName, com.sun.xml.internal.ws.api.WSBinding, com.sun.xml.internal.ws.api.server.Container, com.sun.xml.internal.ws.api.model.SEIModel, com.sun.xml.internal.ws.api.model.wsdl.WSDLPort, java.lang.Class, com.sun.xml.internal.ws.server.ServiceDefinitionImpl, com.sun.xml.internal.ws.server.EndpointAwareTube, boolean, com.sun.xml.internal.ws.policy.PolicyMap)
+    {
+        com.sun.xml.internal.ws.addressing.EPRSDDocumentFilter $r101;
+        java.lang.Thread $r17;
+        java.util.Map $r36;
+        javax.xml.stream.XMLStreamException $r74;
+        com.sun.xml.internal.ws.api.pipe.TubelineAssembler $r20;
+        java.util.Set $r61, $r63, $r68, $r70;
+        java.util.concurrent.CopyOnWriteArraySet $r89;
+        com.sun.xml.internal.ws.wsdl.OperationDispatcher $r79, $r93;
+        com.sun.xml.internal.ws.policy.PolicyMap r14;
+        com.sun.xml.internal.ws.api.pipe.ServerTubeAssemblerContext $r22, $r23, $r25;
+        com.sun.xml.internal.ws.api.ComponentFeature $r73, r78;
+        javax.xml.namespace.QName r5, r6, $r37, $r41, $r43, $r47, $r52;
+        java.lang.ClassLoader $r18;
+        com.sun.xml.internal.ws.api.addressing.WSEndpointReference$EPRExtension r45, $r46, r82, r86;
+        com.sun.xml.internal.ws.addressing.WSEPRExtension $r99;
+        java.lang.Object[] $r84;
+        com.sun.xml.internal.ws.api.SOAPVersion $r8;
+        java.lang.AssertionError $r92;
+        com.sun.xml.internal.ws.api.ComponentFeature$Target $r60, $r67;
+        java.lang.String $r30;
+        com.sun.xml.internal.ws.api.server.Container r9;
+        javax.xml.ws.WebServiceException $r100;
+        com.sun.xml.internal.ws.api.ComponentsFeature $r77;
+        com.sun.xml.internal.ws.util.Pool$TubePool $r94;
+        com.sun.xml.internal.ws.api.pipe.Tube $r24, $r28;
+        com.sun.xml.internal.ws.api.server.EndpointReferenceExtensionContributor[] $r85;
+        com.sun.xml.internal.ws.api.pipe.Engine $r95;
+        com.sun.xml.internal.ws.model.wsdl.WSDLDirectProperties $r96;
+        com.sun.xml.internal.stream.buffer.XMLStreamBuffer $r40;
+        javax.xml.stream.XMLStreamReader $r39;
+        int[] $r59, $r66;
+        com.sun.xml.internal.ws.api.server.EndpointReferenceExtensionContributor r42;
+        com.sun.xml.internal.ws.api.server.EndpointAwareCodec $r54;
+        com.sun.xml.internal.ws.api.server.LazyMOMProvider$Scope $r2;
+        boolean $z0, z1, $z2, $z3, $z4, $z5, $z6;
+        java.util.Collection $r32, $r49;
+        com.sun.xml.internal.ws.api.BindingID $r19;
+        com.sun.xml.internal.ws.api.pipe.Codec $r26, $r53, r80;
+        java.util.List $r56;
+        com.sun.xml.internal.ws.model.wsdl.WSDLProperties $r81;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLPort r10;
+        com.sun.xml.internal.ws.api.server.LazyMOMProvider $r15;
+        com.sun.xml.internal.ws.api.Component $r62, $r64, $r69, $r71;
+        com.sun.xml.internal.ws.server.EndpointAwareTube r21;
+        java.util.HashMap $r88, $r98;
+        com.sun.xml.internal.ws.api.addressing.WSEndpointReference $r48;
+        int $i0, $i1, $i2, $i3, $i4, i5;
+        javax.xml.ws.WebServiceFeature $r16, $r76;
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        com.sun.xml.internal.ws.model.wsdl.WSDLPortProperties $r97;
+        com.sun.xml.internal.ws.server.ServiceDefinitionImpl r12;
+        java.util.Iterator $r33, $r50, $r57;
+        java.lang.IllegalArgumentException $r90, $r91;
+        com.sun.xml.internal.ws.api.WSBinding r7;
+        com.sun.xml.internal.ws.util.ServiceFinder $r83;
+        com.sun.xml.internal.ws.api.model.SEIModel r13;
+        java.lang.Class r11;
+        java.lang.Object $r35, $r44, $r51, $r58, $r87;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        r5 := @parameter0: javax.xml.namespace.QName;
+
+        r6 := @parameter1: javax.xml.namespace.QName;
+
+        r7 := @parameter2: com.sun.xml.internal.ws.api.WSBinding;
+
+        r9 := @parameter3: com.sun.xml.internal.ws.api.server.Container;
+
+        r13 := @parameter4: com.sun.xml.internal.ws.api.model.SEIModel;
+
+        r10 := @parameter5: com.sun.xml.internal.ws.api.model.wsdl.WSDLPort;
+
+        r11 := @parameter6: java.lang.Class;
+
+        r12 := @parameter7: com.sun.xml.internal.ws.server.ServiceDefinitionImpl;
+
+        r21 := @parameter8: com.sun.xml.internal.ws.server.EndpointAwareTube;
+
+        z1 := @parameter9: boolean;
+
+        r14 := @parameter10: com.sun.xml.internal.ws.policy.PolicyMap;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.api.server.WSEndpoint: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: boolean managedObjectManagerClosed> = 0;
+
+        $r87 = new java.lang.Object;
+
+        specialinvoke $r87.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: java.lang.Object managedObjectManagerLock> = $r87;
+
+        $r2 = <com.sun.xml.internal.ws.api.server.LazyMOMProvider$Scope: com.sun.xml.internal.ws.api.server.LazyMOMProvider$Scope STANDALONE>;
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.server.LazyMOMProvider$Scope lazyMOMProviderScope> = $r2;
+
+        $r88 = new java.util.HashMap;
+
+        specialinvoke $r88.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: java.util.Map endpointReferenceExtensions> = $r88;
+
+        $r89 = new java.util.concurrent.CopyOnWriteArraySet;
+
+        specialinvoke $r89.<java.util.concurrent.CopyOnWriteArraySet: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: java.util.Set componentRegistry> = $r89;
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: javax.xml.namespace.QName serviceName> = r5;
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: javax.xml.namespace.QName portName> = r6;
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.WSBinding binding> = r7;
+
+        $r8 = interfaceinvoke r7.<com.sun.xml.internal.ws.api.WSBinding: com.sun.xml.internal.ws.api.SOAPVersion getSOAPVersion()>();
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.SOAPVersion soapVersion> = $r8;
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.server.Container container> = r9;
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.model.wsdl.WSDLPort port> = r10;
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: java.lang.Class implementationClass> = r11;
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.server.ServiceDefinitionImpl serviceDef> = r12;
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.model.SEIModel seiModel> = r13;
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.policy.PolicyMap endpointPolicy> = r14;
+
+        $r15 = <com.sun.xml.internal.ws.api.server.LazyMOMProvider: com.sun.xml.internal.ws.api.server.LazyMOMProvider INSTANCE>;
+
+        virtualinvoke $r15.<com.sun.xml.internal.ws.api.server.LazyMOMProvider: void registerEndpoint(com.sun.xml.internal.ws.api.server.LazyMOMProvider$WSEndpointScopeChangeListener)>(r0);
+
+        specialinvoke r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: void initManagedObjectManager()>();
+
+        if r12 == null goto label01;
+
+        virtualinvoke r12.<com.sun.xml.internal.ws.server.ServiceDefinitionImpl: void setOwner(com.sun.xml.internal.ws.server.WSEndpointImpl)>(r0);
+
+     label01:
+        $r16 = interfaceinvoke r7.<com.sun.xml.internal.ws.api.WSBinding: javax.xml.ws.WebServiceFeature getFeature(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/api/ComponentFeature;");
+
+        $r73 = (com.sun.xml.internal.ws.api.ComponentFeature) $r16;
+
+        if $r73 == null goto label05;
+
+        $r66 = <com.sun.xml.internal.ws.server.WSEndpointImpl$3: int[] $SwitchMap$com$sun$xml$internal$ws$api$ComponentFeature$Target>;
+
+        $r67 = virtualinvoke $r73.<com.sun.xml.internal.ws.api.ComponentFeature: com.sun.xml.internal.ws.api.ComponentFeature$Target getTarget()>();
+
+        $i2 = virtualinvoke $r67.<com.sun.xml.internal.ws.api.ComponentFeature$Target: int ordinal()>();
+
+        $i3 = $r66[$i2];
+
+        lookupswitch($i3)
+        {
+            case 1: goto label02;
+            case 2: goto label03;
+            default: goto label04;
+        };
+
+     label02:
+        $r70 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: java.util.Set componentRegistry>;
+
+        $r71 = virtualinvoke $r73.<com.sun.xml.internal.ws.api.ComponentFeature: com.sun.xml.internal.ws.api.Component getComponent()>();
+
+        interfaceinvoke $r70.<java.util.Set: boolean add(java.lang.Object)>($r71);
+
+        goto label05;
+
+     label03:
+        $r68 = virtualinvoke r9.<com.sun.xml.internal.ws.api.server.Container: java.util.Set getComponents()>();
+
+        $r69 = virtualinvoke $r73.<com.sun.xml.internal.ws.api.ComponentFeature: com.sun.xml.internal.ws.api.Component getComponent()>();
+
+        interfaceinvoke $r68.<java.util.Set: boolean add(java.lang.Object)>($r69);
+
+        goto label05;
+
+     label04:
+        $r90 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r90.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r90;
+
+     label05:
+        $r76 = interfaceinvoke r7.<com.sun.xml.internal.ws.api.WSBinding: javax.xml.ws.WebServiceFeature getFeature(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/api/ComponentsFeature;");
+
+        $r77 = (com.sun.xml.internal.ws.api.ComponentsFeature) $r76;
+
+        if $r77 == null goto label11;
+
+        $r56 = virtualinvoke $r77.<com.sun.xml.internal.ws.api.ComponentsFeature: java.util.List getComponentFeatures()>();
+
+        $r57 = interfaceinvoke $r56.<java.util.List: java.util.Iterator iterator()>();
+
+     label06:
+        $z6 = interfaceinvoke $r57.<java.util.Iterator: boolean hasNext()>();
+
+        if $z6 == 0 goto label11;
+
+        $r58 = interfaceinvoke $r57.<java.util.Iterator: java.lang.Object next()>();
+
+        r78 = (com.sun.xml.internal.ws.api.ComponentFeature) $r58;
+
+        $r59 = <com.sun.xml.internal.ws.server.WSEndpointImpl$3: int[] $SwitchMap$com$sun$xml$internal$ws$api$ComponentFeature$Target>;
+
+        $r60 = virtualinvoke r78.<com.sun.xml.internal.ws.api.ComponentFeature: com.sun.xml.internal.ws.api.ComponentFeature$Target getTarget()>();
+
+        $i0 = virtualinvoke $r60.<com.sun.xml.internal.ws.api.ComponentFeature$Target: int ordinal()>();
+
+        $i1 = $r59[$i0];
+
+        lookupswitch($i1)
+        {
+            case 1: goto label07;
+            case 2: goto label08;
+            default: goto label09;
+        };
+
+     label07:
+        $r63 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: java.util.Set componentRegistry>;
+
+        $r64 = virtualinvoke r78.<com.sun.xml.internal.ws.api.ComponentFeature: com.sun.xml.internal.ws.api.Component getComponent()>();
+
+        interfaceinvoke $r63.<java.util.Set: boolean add(java.lang.Object)>($r64);
+
+        goto label10;
+
+     label08:
+        $r61 = virtualinvoke r9.<com.sun.xml.internal.ws.api.server.Container: java.util.Set getComponents()>();
+
+        $r62 = virtualinvoke r78.<com.sun.xml.internal.ws.api.ComponentFeature: com.sun.xml.internal.ws.api.Component getComponent()>();
+
+        interfaceinvoke $r61.<java.util.Set: boolean add(java.lang.Object)>($r62);
+
+        goto label10;
+
+     label09:
+        $r91 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r91.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r91;
+
+     label10:
+        goto label06;
+
+     label11:
+        $r17 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.Thread: java.lang.ClassLoader getContextClassLoader()>();
+
+        $r19 = interfaceinvoke r7.<com.sun.xml.internal.ws.api.WSBinding: com.sun.xml.internal.ws.api.BindingID getBindingId()>();
+
+        $r20 = staticinvoke <com.sun.xml.internal.ws.api.pipe.TubelineAssemblerFactory: com.sun.xml.internal.ws.api.pipe.TubelineAssembler create(java.lang.ClassLoader,com.sun.xml.internal.ws.api.BindingID,com.sun.xml.internal.ws.api.server.Container)>($r18, $r19, r9);
+
+        $z0 = <com.sun.xml.internal.ws.server.WSEndpointImpl: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label12;
+
+        if $r20 != null goto label12;
+
+        $r92 = new java.lang.AssertionError;
+
+        specialinvoke $r92.<java.lang.AssertionError: void <init>()>();
+
+        throw $r92;
+
+     label12:
+        if r10 != null goto label13;
+
+        $r79 = null;
+
+        goto label14;
+
+     label13:
+        $r93 = new com.sun.xml.internal.ws.wsdl.OperationDispatcher;
+
+        $r79 = $r93;
+
+        specialinvoke $r93.<com.sun.xml.internal.ws.wsdl.OperationDispatcher: void <init>(com.sun.xml.internal.ws.api.model.wsdl.WSDLPort,com.sun.xml.internal.ws.api.WSBinding,com.sun.xml.internal.ws.api.model.SEIModel)>(r10, r7, r13);
+
+     label14:
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.wsdl.OperationDispatcher operationDispatcher> = $r79;
+
+        $r22 = virtualinvoke r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.pipe.ServerTubeAssemblerContext createServerTubeAssemblerContext(com.sun.xml.internal.ws.server.EndpointAwareTube,boolean)>(r21, z1);
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.pipe.ServerTubeAssemblerContext context> = $r22;
+
+        $r23 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.pipe.ServerTubeAssemblerContext context>;
+
+        $r24 = interfaceinvoke $r20.<com.sun.xml.internal.ws.api.pipe.TubelineAssembler: com.sun.xml.internal.ws.api.pipe.Tube createServer(com.sun.xml.internal.ws.api.pipe.ServerTubeAssemblerContext)>($r23);
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.pipe.Tube masterTubeline> = $r24;
+
+        $r25 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.pipe.ServerTubeAssemblerContext context>;
+
+        $r26 = virtualinvoke $r25.<com.sun.xml.internal.ws.api.pipe.ServerTubeAssemblerContext: com.sun.xml.internal.ws.api.pipe.Codec getCodec()>();
+
+        r80 = $r26;
+
+        $z2 = $r26 instanceof com.sun.xml.internal.ws.api.server.EndpointAwareCodec;
+
+        if $z2 == 0 goto label15;
+
+        $r53 = interfaceinvoke $r26.<com.sun.xml.internal.ws.api.pipe.Codec: com.sun.xml.internal.ws.api.pipe.Codec copy()>();
+
+        r80 = $r53;
+
+        $r54 = (com.sun.xml.internal.ws.api.server.EndpointAwareCodec) $r53;
+
+        interfaceinvoke $r54.<com.sun.xml.internal.ws.api.server.EndpointAwareCodec: void setEndpoint(com.sun.xml.internal.ws.api.server.WSEndpoint)>(r0);
+
+     label15:
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.pipe.Codec masterCodec> = r80;
+
+        $r94 = new com.sun.xml.internal.ws.util.Pool$TubePool;
+
+        $r28 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.pipe.Tube masterTubeline>;
+
+        specialinvoke $r94.<com.sun.xml.internal.ws.util.Pool$TubePool: void <init>(com.sun.xml.internal.ws.api.pipe.Tube)>($r28);
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.util.Pool tubePool> = $r94;
+
+        interfaceinvoke r21.<com.sun.xml.internal.ws.server.EndpointAwareTube: void setEndpoint(com.sun.xml.internal.ws.api.server.WSEndpoint)>(r0);
+
+        $r95 = new com.sun.xml.internal.ws.api.pipe.Engine;
+
+        $r30 = virtualinvoke r0.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r95.<com.sun.xml.internal.ws.api.pipe.Engine: void <init>(java.lang.String,com.sun.xml.internal.ws.api.server.Container)>($r30, r9);
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.pipe.Engine engine> = $r95;
+
+        if r10 != null goto label16;
+
+        $r96 = new com.sun.xml.internal.ws.model.wsdl.WSDLDirectProperties;
+
+        $r81 = $r96;
+
+        specialinvoke $r96.<com.sun.xml.internal.ws.model.wsdl.WSDLDirectProperties: void <init>(javax.xml.namespace.QName,javax.xml.namespace.QName,com.sun.xml.internal.ws.api.model.SEIModel)>(r5, r6, r13);
+
+        goto label17;
+
+     label16:
+        $r97 = new com.sun.xml.internal.ws.model.wsdl.WSDLPortProperties;
+
+        $r81 = $r97;
+
+        specialinvoke $r97.<com.sun.xml.internal.ws.model.wsdl.WSDLPortProperties: void <init>(com.sun.xml.internal.ws.api.model.wsdl.WSDLPort,com.sun.xml.internal.ws.api.model.SEIModel)>(r10, r13);
+
+     label17:
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.model.wsdl.WSDLProperties wsdlProperties> = $r81;
+
+        $r98 = new java.util.HashMap;
+
+        specialinvoke $r98.<java.util.HashMap: void <init>()>();
+
+     label18:
+        if r10 == null goto label20;
+
+        $r48 = interfaceinvoke r10.<com.sun.xml.internal.ws.api.model.wsdl.WSDLPort: com.sun.xml.internal.ws.api.addressing.WSEndpointReference getEPR()>();
+
+        if $r48 == null goto label20;
+
+        $r49 = virtualinvoke $r48.<com.sun.xml.internal.ws.api.addressing.WSEndpointReference: java.util.Collection getEPRExtensions()>();
+
+        $r50 = interfaceinvoke $r49.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label19:
+        $z5 = interfaceinvoke $r50.<java.util.Iterator: boolean hasNext()>();
+
+        if $z5 == 0 goto label20;
+
+        $r51 = interfaceinvoke $r50.<java.util.Iterator: java.lang.Object next()>();
+
+        r82 = (com.sun.xml.internal.ws.api.addressing.WSEndpointReference$EPRExtension) $r51;
+
+        $r52 = virtualinvoke r82.<com.sun.xml.internal.ws.api.addressing.WSEndpointReference$EPRExtension: javax.xml.namespace.QName getQName()>();
+
+        interfaceinvoke $r98.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r52, r82);
+
+        goto label19;
+
+     label20:
+        $r83 = staticinvoke <com.sun.xml.internal.ws.util.ServiceFinder: com.sun.xml.internal.ws.util.ServiceFinder find(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/api/server/EndpointReferenceExtensionContributor;");
+
+        $r84 = virtualinvoke $r83.<com.sun.xml.internal.ws.util.ServiceFinder: java.lang.Object[] toArray()>();
+
+        $r85 = (com.sun.xml.internal.ws.api.server.EndpointReferenceExtensionContributor[]) $r84;
+
+        $i4 = lengthof $r85;
+
+        i5 = 0;
+
+     label21:
+        if i5 >= $i4 goto label23;
+
+        r42 = $r85[i5];
+
+        $r43 = virtualinvoke r42.<com.sun.xml.internal.ws.api.server.EndpointReferenceExtensionContributor: javax.xml.namespace.QName getQName()>();
+
+        $r44 = interfaceinvoke $r98.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r43);
+
+        r45 = (com.sun.xml.internal.ws.api.addressing.WSEndpointReference$EPRExtension) $r44;
+
+        $r46 = virtualinvoke r42.<com.sun.xml.internal.ws.api.server.EndpointReferenceExtensionContributor: com.sun.xml.internal.ws.api.addressing.WSEndpointReference$EPRExtension getEPRExtension(com.sun.xml.internal.ws.api.server.WSEndpoint,com.sun.xml.internal.ws.api.addressing.WSEndpointReference$EPRExtension)>(r0, r45);
+
+        if $r46 == null goto label22;
+
+        $r47 = virtualinvoke $r46.<com.sun.xml.internal.ws.api.addressing.WSEndpointReference$EPRExtension: javax.xml.namespace.QName getQName()>();
+
+        interfaceinvoke $r98.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r47, $r46);
+
+     label22:
+        i5 = i5 + 1;
+
+        goto label21;
+
+     label23:
+        $r32 = interfaceinvoke $r98.<java.util.Map: java.util.Collection values()>();
+
+        $r33 = interfaceinvoke $r32.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label24:
+        $z3 = interfaceinvoke $r33.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label25;
+
+        $r35 = interfaceinvoke $r33.<java.util.Iterator: java.lang.Object next()>();
+
+        r86 = (com.sun.xml.internal.ws.api.addressing.WSEndpointReference$EPRExtension) $r35;
+
+        $r36 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: java.util.Map endpointReferenceExtensions>;
+
+        $r37 = virtualinvoke r86.<com.sun.xml.internal.ws.api.addressing.WSEndpointReference$EPRExtension: javax.xml.namespace.QName getQName()>();
+
+        $r99 = new com.sun.xml.internal.ws.addressing.WSEPRExtension;
+
+        $r39 = virtualinvoke r86.<com.sun.xml.internal.ws.api.addressing.WSEndpointReference$EPRExtension: javax.xml.stream.XMLStreamReader readAsXMLStreamReader()>();
+
+        $r40 = staticinvoke <com.sun.xml.internal.stream.buffer.XMLStreamBuffer: com.sun.xml.internal.stream.buffer.XMLStreamBuffer createNewBufferFromXMLStreamReader(javax.xml.stream.XMLStreamReader)>($r39);
+
+        $r41 = virtualinvoke r86.<com.sun.xml.internal.ws.api.addressing.WSEndpointReference$EPRExtension: javax.xml.namespace.QName getQName()>();
+
+        specialinvoke $r99.<com.sun.xml.internal.ws.addressing.WSEPRExtension: void <init>(com.sun.xml.internal.stream.buffer.XMLStreamBuffer,javax.xml.namespace.QName)>($r40, $r41);
+
+        interfaceinvoke $r36.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r37, $r99);
+
+        goto label24;
+
+     label25:
+        goto label27;
+
+     label26:
+        $r74 := @caughtexception;
+
+        $r100 = new javax.xml.ws.WebServiceException;
+
+        specialinvoke $r100.<javax.xml.ws.WebServiceException: void <init>(java.lang.Throwable)>($r74);
+
+        throw $r100;
+
+     label27:
+        $z4 = interfaceinvoke $r98.<java.util.Map: boolean isEmpty()>();
+
+        if $z4 != 0 goto label28;
+
+        $r101 = new com.sun.xml.internal.ws.addressing.EPRSDDocumentFilter;
+
+        specialinvoke $r101.<com.sun.xml.internal.ws.addressing.EPRSDDocumentFilter: void <init>(com.sun.xml.internal.ws.server.WSEndpointImpl)>(r0);
+
+        virtualinvoke r12.<com.sun.xml.internal.ws.server.ServiceDefinitionImpl: void addFilter(com.sun.xml.internal.ws.api.server.SDDocumentFilter)>($r101);
+
+     label28:
+        return;
+
+        catch javax.xml.stream.XMLStreamException from label18 to label25 with label26;
+    }
+
+    protected com.sun.xml.internal.ws.api.pipe.ServerTubeAssemblerContext createServerTubeAssemblerContext(com.sun.xml.internal.ws.server.EndpointAwareTube, boolean)
+    {
+        com.sun.xml.internal.ws.server.EndpointAwareTube r2;
+        com.sun.xml.internal.ws.api.pipe.ServerPipeAssemblerContext $r0;
+        com.sun.xml.internal.ws.api.model.SEIModel $r4;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLPort $r3;
+        com.sun.xml.internal.ws.server.WSEndpointImpl r1;
+        boolean z0;
+
+        r1 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        r2 := @parameter0: com.sun.xml.internal.ws.server.EndpointAwareTube;
+
+        z0 := @parameter1: boolean;
+
+        $r0 = new com.sun.xml.internal.ws.api.pipe.ServerPipeAssemblerContext;
+
+        $r4 = r1.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.model.SEIModel seiModel>;
+
+        $r3 = r1.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.model.wsdl.WSDLPort port>;
+
+        specialinvoke $r0.<com.sun.xml.internal.ws.api.pipe.ServerPipeAssemblerContext: void <init>(com.sun.xml.internal.ws.api.model.SEIModel,com.sun.xml.internal.ws.api.model.wsdl.WSDLPort,com.sun.xml.internal.ws.api.server.WSEndpoint,com.sun.xml.internal.ws.api.pipe.Tube,boolean)>($r4, $r3, r1, r2, z0);
+
+        return $r0;
+    }
+
+    protected void <init>(javax.xml.namespace.QName, javax.xml.namespace.QName, com.sun.xml.internal.ws.api.WSBinding, com.sun.xml.internal.ws.api.server.Container, com.sun.xml.internal.ws.api.model.SEIModel, com.sun.xml.internal.ws.api.model.wsdl.WSDLPort, com.sun.xml.internal.ws.api.pipe.Tube)
+    {
+        com.sun.xml.internal.ws.util.Pool$TubePool $r28;
+        com.sun.xml.internal.ws.api.pipe.Tube r12;
+        com.sun.xml.internal.ws.api.SOAPVersion $r8;
+        java.util.HashMap $r24;
+        com.sun.xml.internal.ws.api.pipe.Engine $r29;
+        com.sun.xml.internal.ws.model.wsdl.WSDLDirectProperties $r30;
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        java.lang.String $r20;
+        com.sun.xml.internal.ws.api.server.LazyMOMProvider$Scope $r2;
+        com.sun.xml.internal.ws.model.wsdl.WSDLPortProperties $r31;
+        com.sun.xml.internal.ws.api.server.Container r9;
+        com.sun.xml.internal.ws.api.pipe.ServerPipeAssemblerContext $r27;
+        com.sun.xml.internal.ws.binding.BindingImpl $r14;
+        java.util.concurrent.CopyOnWriteArraySet $r25;
+        com.sun.xml.internal.ws.api.WSBinding r7, $r13;
+        com.sun.xml.internal.ws.api.pipe.Codec $r15;
+        com.sun.xml.internal.ws.wsdl.OperationDispatcher $r21, $r26;
+        com.sun.xml.internal.ws.model.wsdl.WSDLProperties $r22;
+        com.sun.xml.internal.ws.api.model.SEIModel r11;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLPort r10;
+        java.lang.Object $r23;
+        javax.xml.namespace.QName r5, r6;
+        com.sun.xml.internal.ws.api.server.LazyMOMProvider $r16;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        r5 := @parameter0: javax.xml.namespace.QName;
+
+        r6 := @parameter1: javax.xml.namespace.QName;
+
+        r7 := @parameter2: com.sun.xml.internal.ws.api.WSBinding;
+
+        r9 := @parameter3: com.sun.xml.internal.ws.api.server.Container;
+
+        r11 := @parameter4: com.sun.xml.internal.ws.api.model.SEIModel;
+
+        r10 := @parameter5: com.sun.xml.internal.ws.api.model.wsdl.WSDLPort;
+
+        r12 := @parameter6: com.sun.xml.internal.ws.api.pipe.Tube;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.api.server.WSEndpoint: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: boolean managedObjectManagerClosed> = 0;
+
+        $r23 = new java.lang.Object;
+
+        specialinvoke $r23.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: java.lang.Object managedObjectManagerLock> = $r23;
+
+        $r2 = <com.sun.xml.internal.ws.api.server.LazyMOMProvider$Scope: com.sun.xml.internal.ws.api.server.LazyMOMProvider$Scope STANDALONE>;
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.server.LazyMOMProvider$Scope lazyMOMProviderScope> = $r2;
+
+        $r24 = new java.util.HashMap;
+
+        specialinvoke $r24.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: java.util.Map endpointReferenceExtensions> = $r24;
+
+        $r25 = new java.util.concurrent.CopyOnWriteArraySet;
+
+        specialinvoke $r25.<java.util.concurrent.CopyOnWriteArraySet: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: java.util.Set componentRegistry> = $r25;
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: javax.xml.namespace.QName serviceName> = r5;
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: javax.xml.namespace.QName portName> = r6;
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.WSBinding binding> = r7;
+
+        $r8 = interfaceinvoke r7.<com.sun.xml.internal.ws.api.WSBinding: com.sun.xml.internal.ws.api.SOAPVersion getSOAPVersion()>();
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.SOAPVersion soapVersion> = $r8;
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.server.Container container> = r9;
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.policy.PolicyMap endpointPolicy> = null;
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.model.wsdl.WSDLPort port> = r10;
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.model.SEIModel seiModel> = r11;
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.server.ServiceDefinitionImpl serviceDef> = null;
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: java.lang.Class implementationClass> = null;
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.pipe.Tube masterTubeline> = r12;
+
+        $r13 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.WSBinding binding>;
+
+        $r14 = (com.sun.xml.internal.ws.binding.BindingImpl) $r13;
+
+        $r15 = virtualinvoke $r14.<com.sun.xml.internal.ws.binding.BindingImpl: com.sun.xml.internal.ws.api.pipe.Codec createCodec()>();
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.pipe.Codec masterCodec> = $r15;
+
+        $r16 = <com.sun.xml.internal.ws.api.server.LazyMOMProvider: com.sun.xml.internal.ws.api.server.LazyMOMProvider INSTANCE>;
+
+        virtualinvoke $r16.<com.sun.xml.internal.ws.api.server.LazyMOMProvider: void registerEndpoint(com.sun.xml.internal.ws.api.server.LazyMOMProvider$WSEndpointScopeChangeListener)>(r0);
+
+        specialinvoke r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: void initManagedObjectManager()>();
+
+        if r10 != null goto label1;
+
+        $r21 = null;
+
+        goto label2;
+
+     label1:
+        $r26 = new com.sun.xml.internal.ws.wsdl.OperationDispatcher;
+
+        $r21 = $r26;
+
+        specialinvoke $r26.<com.sun.xml.internal.ws.wsdl.OperationDispatcher: void <init>(com.sun.xml.internal.ws.api.model.wsdl.WSDLPort,com.sun.xml.internal.ws.api.WSBinding,com.sun.xml.internal.ws.api.model.SEIModel)>(r10, r7, r11);
+
+     label2:
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.wsdl.OperationDispatcher operationDispatcher> = $r21;
+
+        $r27 = new com.sun.xml.internal.ws.api.pipe.ServerPipeAssemblerContext;
+
+        specialinvoke $r27.<com.sun.xml.internal.ws.api.pipe.ServerPipeAssemblerContext: void <init>(com.sun.xml.internal.ws.api.model.SEIModel,com.sun.xml.internal.ws.api.model.wsdl.WSDLPort,com.sun.xml.internal.ws.api.server.WSEndpoint,com.sun.xml.internal.ws.api.pipe.Tube,boolean)>(r11, r10, r0, null, 0);
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.pipe.ServerTubeAssemblerContext context> = $r27;
+
+        $r28 = new com.sun.xml.internal.ws.util.Pool$TubePool;
+
+        specialinvoke $r28.<com.sun.xml.internal.ws.util.Pool$TubePool: void <init>(com.sun.xml.internal.ws.api.pipe.Tube)>(r12);
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.util.Pool tubePool> = $r28;
+
+        $r29 = new com.sun.xml.internal.ws.api.pipe.Engine;
+
+        $r20 = virtualinvoke r0.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r29.<com.sun.xml.internal.ws.api.pipe.Engine: void <init>(java.lang.String,com.sun.xml.internal.ws.api.server.Container)>($r20, r9);
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.pipe.Engine engine> = $r29;
+
+        if r10 != null goto label3;
+
+        $r30 = new com.sun.xml.internal.ws.model.wsdl.WSDLDirectProperties;
+
+        $r22 = $r30;
+
+        specialinvoke $r30.<com.sun.xml.internal.ws.model.wsdl.WSDLDirectProperties: void <init>(javax.xml.namespace.QName,javax.xml.namespace.QName,com.sun.xml.internal.ws.api.model.SEIModel)>(r5, r6, r11);
+
+        goto label4;
+
+     label3:
+        $r31 = new com.sun.xml.internal.ws.model.wsdl.WSDLPortProperties;
+
+        $r22 = $r31;
+
+        specialinvoke $r31.<com.sun.xml.internal.ws.model.wsdl.WSDLPortProperties: void <init>(com.sun.xml.internal.ws.api.model.wsdl.WSDLPort,com.sun.xml.internal.ws.api.model.SEIModel)>(r10, r11);
+
+     label4:
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.model.wsdl.WSDLProperties wsdlProperties> = $r22;
+
+        return;
+    }
+
+    public java.util.Collection getEndpointReferenceExtensions()
+    {
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        java.util.Map $r1;
+        java.util.Collection $r2;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: java.util.Map endpointReferenceExtensions>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.util.Collection values()>();
+
+        return $r2;
+    }
+
+    public com.sun.xml.internal.ws.wsdl.OperationDispatcher getOperationDispatcher()
+    {
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        com.sun.xml.internal.ws.wsdl.OperationDispatcher $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.wsdl.OperationDispatcher operationDispatcher>;
+
+        return $r1;
+    }
+
+    public com.sun.xml.internal.ws.policy.PolicyMap getPolicyMap()
+    {
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        com.sun.xml.internal.ws.policy.PolicyMap $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.policy.PolicyMap endpointPolicy>;
+
+        return $r1;
+    }
+
+    public java.lang.Class getImplementationClass()
+    {
+        java.lang.Class $r1;
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: java.lang.Class implementationClass>;
+
+        return $r1;
+    }
+
+    public com.sun.xml.internal.ws.api.WSBinding getBinding()
+    {
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        com.sun.xml.internal.ws.api.WSBinding $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.WSBinding binding>;
+
+        return $r1;
+    }
+
+    public com.sun.xml.internal.ws.api.server.Container getContainer()
+    {
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        com.sun.xml.internal.ws.api.server.Container $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.server.Container container>;
+
+        return $r1;
+    }
+
+    public com.sun.xml.internal.ws.api.model.wsdl.WSDLPort getPort()
+    {
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLPort $r1;
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.model.wsdl.WSDLPort port>;
+
+        return $r1;
+    }
+
+    public com.sun.xml.internal.ws.api.model.SEIModel getSEIModel()
+    {
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        com.sun.xml.internal.ws.api.model.SEIModel $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.model.SEIModel seiModel>;
+
+        return $r1;
+    }
+
+    public void setExecutor(java.util.concurrent.Executor)
+    {
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        com.sun.xml.internal.ws.api.pipe.Engine $r2;
+        java.util.concurrent.Executor r1;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        r1 := @parameter0: java.util.concurrent.Executor;
+
+        $r2 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.pipe.Engine engine>;
+
+        virtualinvoke $r2.<com.sun.xml.internal.ws.api.pipe.Engine: void setExecutor(java.util.concurrent.Executor)>(r1);
+
+        return;
+    }
+
+    public com.sun.xml.internal.ws.api.pipe.Engine getEngine()
+    {
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        com.sun.xml.internal.ws.api.pipe.Engine $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.pipe.Engine engine>;
+
+        return $r1;
+    }
+
+    public void schedule(com.sun.xml.internal.ws.api.message.Packet, com.sun.xml.internal.ws.api.server.WSEndpoint$CompletionCallback, com.sun.xml.internal.ws.api.pipe.FiberContextSwitchInterceptor)
+    {
+        com.sun.xml.internal.ws.api.server.WSEndpoint$CompletionCallback r2;
+        com.sun.xml.internal.ws.api.message.Packet r1;
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        com.sun.xml.internal.ws.api.pipe.FiberContextSwitchInterceptor r3;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.api.message.Packet;
+
+        r2 := @parameter1: com.sun.xml.internal.ws.api.server.WSEndpoint$CompletionCallback;
+
+        r3 := @parameter2: com.sun.xml.internal.ws.api.pipe.FiberContextSwitchInterceptor;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: void processAsync(com.sun.xml.internal.ws.api.message.Packet,com.sun.xml.internal.ws.api.server.WSEndpoint$CompletionCallback,com.sun.xml.internal.ws.api.pipe.FiberContextSwitchInterceptor,boolean)>(r1, r2, r3, 1);
+
+        return;
+    }
+
+    private void processAsync(com.sun.xml.internal.ws.api.message.Packet, com.sun.xml.internal.ws.api.server.WSEndpoint$CompletionCallback, com.sun.xml.internal.ws.api.pipe.FiberContextSwitchInterceptor, boolean)
+    {
+        java.lang.Throwable $r16;
+        com.sun.xml.internal.ws.api.pipe.Tube $r15;
+        com.sun.xml.internal.ws.api.pipe.Fiber $r7;
+        com.sun.xml.internal.ws.api.pipe.Engine $r6;
+        com.sun.xml.internal.ws.server.WSEndpointImpl$1 $r11;
+        com.sun.xml.internal.ws.api.message.Packet r4;
+        com.sun.xml.internal.ws.server.WSEndpointImpl r1;
+        com.sun.xml.internal.ws.api.pipe.FiberContextSwitchInterceptor r8;
+        boolean $z0, z1, $z2;
+        com.sun.xml.internal.ws.util.Pool $r9;
+        com.sun.xml.internal.ws.api.server.Container $r2, $r3;
+        com.sun.xml.internal.ws.api.server.ThreadLocalContainerResolver $r0, $r14, $r17;
+        com.sun.xml.internal.ws.api.WSBinding $r13;
+        com.sun.xml.internal.ws.model.wsdl.WSDLProperties $r5;
+        com.sun.xml.internal.ws.api.server.WSEndpoint$CompletionCallback r12;
+        java.lang.Object $r10;
+
+        r1 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        r4 := @parameter0: com.sun.xml.internal.ws.api.message.Packet;
+
+        r12 := @parameter1: com.sun.xml.internal.ws.api.server.WSEndpoint$CompletionCallback;
+
+        r8 := @parameter2: com.sun.xml.internal.ws.api.pipe.FiberContextSwitchInterceptor;
+
+        z1 := @parameter3: boolean;
+
+        $r0 = staticinvoke <com.sun.xml.internal.ws.api.server.ContainerResolver: com.sun.xml.internal.ws.api.server.ThreadLocalContainerResolver getDefault()>();
+
+        $r2 = r1.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.server.Container container>;
+
+        $r3 = virtualinvoke $r0.<com.sun.xml.internal.ws.api.server.ThreadLocalContainerResolver: com.sun.xml.internal.ws.api.server.Container enterContainer(com.sun.xml.internal.ws.api.server.Container)>($r2);
+
+     label1:
+        r4.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.api.server.WSEndpoint endpoint> = r1;
+
+        $r5 = r1.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.model.wsdl.WSDLProperties wsdlProperties>;
+
+        virtualinvoke r4.<com.sun.xml.internal.ws.api.message.Packet: void addSatellite(com.oracle.webservices.internal.api.message.PropertySet)>($r5);
+
+        $r6 = r1.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.pipe.Engine engine>;
+
+        $r7 = virtualinvoke $r6.<com.sun.xml.internal.ws.api.pipe.Engine: com.sun.xml.internal.ws.api.pipe.Fiber createFiber()>();
+
+        virtualinvoke $r7.<com.sun.xml.internal.ws.api.pipe.Fiber: void setDeliverThrowableInPacket(boolean)>(1);
+
+        if r8 == null goto label2;
+
+        virtualinvoke $r7.<com.sun.xml.internal.ws.api.pipe.Fiber: void addInterceptor(com.sun.xml.internal.ws.api.pipe.FiberContextSwitchInterceptor)>(r8);
+
+     label2:
+        $r9 = r1.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.util.Pool tubePool>;
+
+        $r10 = virtualinvoke $r9.<com.sun.xml.internal.ws.util.Pool: java.lang.Object take()>();
+
+        $r15 = (com.sun.xml.internal.ws.api.pipe.Tube) $r10;
+
+        $r11 = new com.sun.xml.internal.ws.server.WSEndpointImpl$1;
+
+        specialinvoke $r11.<com.sun.xml.internal.ws.server.WSEndpointImpl$1: void <init>(com.sun.xml.internal.ws.server.WSEndpointImpl,com.sun.xml.internal.ws.api.pipe.Tube,com.sun.xml.internal.ws.api.server.WSEndpoint$CompletionCallback,com.sun.xml.internal.ws.api.message.Packet)>(r1, $r15, r12, r4);
+
+        $r13 = r1.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.WSBinding binding>;
+
+        $z0 = interfaceinvoke $r13.<com.sun.xml.internal.ws.api.WSBinding: boolean isFeatureEnabled(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/api/pipe/SyncStartForAsyncFeature;");
+
+        if $z0 != 0 goto label3;
+
+        if z1 != 0 goto label4;
+
+     label3:
+        $z2 = 1;
+
+        goto label5;
+
+     label4:
+        $z2 = 0;
+
+     label5:
+        virtualinvoke $r7.<com.sun.xml.internal.ws.api.pipe.Fiber: void start(com.sun.xml.internal.ws.api.pipe.Tube,com.sun.xml.internal.ws.api.message.Packet,com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback,boolean)>($r15, r4, $r11, $z2);
+
+     label6:
+        $r14 = staticinvoke <com.sun.xml.internal.ws.api.server.ContainerResolver: com.sun.xml.internal.ws.api.server.ThreadLocalContainerResolver getDefault()>();
+
+        virtualinvoke $r14.<com.sun.xml.internal.ws.api.server.ThreadLocalContainerResolver: void exitContainer(com.sun.xml.internal.ws.api.server.Container)>($r3);
+
+        goto label9;
+
+     label7:
+        $r16 := @caughtexception;
+
+     label8:
+        $r17 = staticinvoke <com.sun.xml.internal.ws.api.server.ContainerResolver: com.sun.xml.internal.ws.api.server.ThreadLocalContainerResolver getDefault()>();
+
+        virtualinvoke $r17.<com.sun.xml.internal.ws.api.server.ThreadLocalContainerResolver: void exitContainer(com.sun.xml.internal.ws.api.server.Container)>($r3);
+
+        throw $r16;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public com.sun.xml.internal.ws.api.message.Packet createServiceResponseForException(com.sun.xml.internal.ws.api.pipe.ThrowableContainerPropertySet, com.sun.xml.internal.ws.api.message.Packet, com.sun.xml.internal.ws.api.SOAPVersion, com.sun.xml.internal.ws.api.model.wsdl.WSDLPort, com.sun.xml.internal.ws.api.model.SEIModel, com.sun.xml.internal.ws.api.WSBinding)
+    {
+        java.lang.Throwable $r2;
+        com.sun.xml.internal.ws.api.SOAPVersion r1;
+        com.sun.xml.internal.ws.api.message.Message $r3;
+        com.sun.xml.internal.ws.api.WSBinding r7;
+        com.sun.xml.internal.ws.api.model.SEIModel r6;
+        com.sun.xml.internal.ws.api.pipe.ThrowableContainerPropertySet r0;
+        com.sun.xml.internal.ws.api.message.Packet r4, $r8;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLPort r5;
+        com.sun.xml.internal.ws.server.WSEndpointImpl r9;
+        boolean $z0;
+
+        r9 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.api.pipe.ThrowableContainerPropertySet;
+
+        r4 := @parameter1: com.sun.xml.internal.ws.api.message.Packet;
+
+        r1 := @parameter2: com.sun.xml.internal.ws.api.SOAPVersion;
+
+        r5 := @parameter3: com.sun.xml.internal.ws.api.model.wsdl.WSDLPort;
+
+        r6 := @parameter4: com.sun.xml.internal.ws.api.model.SEIModel;
+
+        r7 := @parameter5: com.sun.xml.internal.ws.api.WSBinding;
+
+        $z0 = virtualinvoke r0.<com.sun.xml.internal.ws.api.pipe.ThrowableContainerPropertySet: boolean isFaultCreated()>();
+
+        if $z0 == 0 goto label1;
+
+        return r4;
+
+     label1:
+        $r2 = virtualinvoke r0.<com.sun.xml.internal.ws.api.pipe.ThrowableContainerPropertySet: java.lang.Throwable getThrowable()>();
+
+        $r3 = staticinvoke <com.sun.xml.internal.ws.fault.SOAPFaultBuilder: com.sun.xml.internal.ws.api.message.Message createSOAPFaultMessage(com.sun.xml.internal.ws.api.SOAPVersion,com.sun.xml.internal.ws.model.CheckedExceptionImpl,java.lang.Throwable)>(r1, null, $r2);
+
+        $r8 = virtualinvoke r4.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.api.message.Packet createServerResponse(com.sun.xml.internal.ws.api.message.Message,com.sun.xml.internal.ws.api.model.wsdl.WSDLPort,com.sun.xml.internal.ws.api.model.SEIModel,com.sun.xml.internal.ws.api.WSBinding)>($r3, r5, r6, r7);
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.api.pipe.ThrowableContainerPropertySet: void setFaultMessage(com.sun.xml.internal.ws.api.message.Message)>($r3);
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.api.pipe.ThrowableContainerPropertySet: void setResponsePacket(com.sun.xml.internal.ws.api.message.Packet)>(r4);
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.api.pipe.ThrowableContainerPropertySet: void setFaultCreated(boolean)>(1);
+
+        return $r8;
+    }
+
+    public void process(com.sun.xml.internal.ws.api.message.Packet, com.sun.xml.internal.ws.api.server.WSEndpoint$CompletionCallback, com.sun.xml.internal.ws.api.pipe.FiberContextSwitchInterceptor)
+    {
+        com.sun.xml.internal.ws.api.server.WSEndpoint$CompletionCallback r2;
+        com.sun.xml.internal.ws.api.message.Packet r1;
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        com.sun.xml.internal.ws.api.pipe.FiberContextSwitchInterceptor r3;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.api.message.Packet;
+
+        r2 := @parameter1: com.sun.xml.internal.ws.api.server.WSEndpoint$CompletionCallback;
+
+        r3 := @parameter2: com.sun.xml.internal.ws.api.pipe.FiberContextSwitchInterceptor;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: void processAsync(com.sun.xml.internal.ws.api.message.Packet,com.sun.xml.internal.ws.api.server.WSEndpoint$CompletionCallback,com.sun.xml.internal.ws.api.pipe.FiberContextSwitchInterceptor,boolean)>(r1, r2, r3, 0);
+
+        return;
+    }
+
+    public com.sun.xml.internal.ws.api.server.WSEndpoint$PipeHead createPipeHead()
+    {
+        com.sun.xml.internal.ws.server.WSEndpointImpl$2 $r0;
+        com.sun.xml.internal.ws.server.WSEndpointImpl r1;
+
+        r1 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r0 = new com.sun.xml.internal.ws.server.WSEndpointImpl$2;
+
+        specialinvoke $r0.<com.sun.xml.internal.ws.server.WSEndpointImpl$2: void <init>(com.sun.xml.internal.ws.server.WSEndpointImpl)>(r1);
+
+        return $r0;
+    }
+
+    public synchronized void dispose()
+    {
+        com.sun.xml.internal.ws.api.pipe.Tube $r1;
+        java.lang.Object[] $r12;
+        java.lang.reflect.Method[] $r9;
+        java.util.logging.Level $r15;
+        int i0, i1;
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        java.lang.String $r16, $r17;
+        java.lang.reflect.Method r10;
+        boolean $z0, $z1;
+        java.util.Iterator $r4;
+        java.util.logging.Logger $r14;
+        com.sun.xml.internal.ws.api.WSBinding $r2;
+        java.lang.Exception $r13;
+        java.util.List $r3;
+        javax.xml.ws.handler.Handler r7;
+        java.lang.'annotation'.Annotation $r11;
+        java.lang.Object $r6;
+        java.lang.Class $r8;
+        com.sun.xml.internal.ws.api.server.LazyMOMProvider $r5;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $z0 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: boolean disposed>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: boolean disposed> = 1;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.pipe.Tube masterTubeline>;
+
+        interfaceinvoke $r1.<com.sun.xml.internal.ws.api.pipe.Tube: void preDestroy()>();
+
+        $r2 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.WSBinding binding>;
+
+        $r3 = interfaceinvoke $r2.<com.sun.xml.internal.ws.api.WSBinding: java.util.List getHandlerChain()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z1 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label9;
+
+        $r6 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (javax.xml.ws.handler.Handler) $r6;
+
+        $r8 = virtualinvoke r7.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.Class: java.lang.reflect.Method[] getMethods()>();
+
+        i0 = lengthof $r9;
+
+        i1 = 0;
+
+     label3:
+        if i1 >= i0 goto label8;
+
+        r10 = $r9[i1];
+
+        $r11 = virtualinvoke r10.<java.lang.reflect.Method: java.lang.'annotation'.Annotation getAnnotation(java.lang.Class)>(class "Ljavax/annotation/PreDestroy;");
+
+        if $r11 != null goto label4;
+
+        goto label7;
+
+     label4:
+        $r12 = newarray (java.lang.Object)[0];
+
+        virtualinvoke r10.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>(r7, $r12);
+
+     label5:
+        goto label8;
+
+     label6:
+        $r13 := @caughtexception;
+
+        $r14 = <com.sun.xml.internal.ws.server.WSEndpointImpl: java.util.logging.Logger logger>;
+
+        $r15 = <java.util.logging.Level: java.util.logging.Level WARNING>;
+
+        $r16 = virtualinvoke $r13.<java.lang.Exception: java.lang.String getMessage()>();
+
+        $r17 = staticinvoke <com.sun.xml.internal.ws.resources.HandlerMessages: java.lang.String HANDLER_PREDESTROY_IGNORE(java.lang.Object)>($r16);
+
+        virtualinvoke $r14.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r15, $r17, $r13);
+
+        goto label8;
+
+     label7:
+        i1 = i1 + 1;
+
+        goto label3;
+
+     label8:
+        goto label2;
+
+     label9:
+        virtualinvoke r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: void closeManagedObjectManager()>();
+
+        $r5 = <com.sun.xml.internal.ws.api.server.LazyMOMProvider: com.sun.xml.internal.ws.api.server.LazyMOMProvider INSTANCE>;
+
+        virtualinvoke $r5.<com.sun.xml.internal.ws.api.server.LazyMOMProvider: void unregisterEndpoint(com.sun.xml.internal.ws.api.server.LazyMOMProvider$WSEndpointScopeChangeListener)>(r0);
+
+        return;
+
+        catch java.lang.Exception from label4 to label5 with label6;
+    }
+
+    public com.sun.xml.internal.ws.server.ServiceDefinitionImpl getServiceDefinition()
+    {
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        com.sun.xml.internal.ws.server.ServiceDefinitionImpl $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.server.ServiceDefinitionImpl serviceDef>;
+
+        return $r1;
+    }
+
+    public java.util.Set getComponentRegistry()
+    {
+        com.sun.xml.internal.ws.server.WSEndpointImpl$EndpointComponentSet $r8;
+        java.util.Iterator $r3;
+        com.sun.xml.internal.ws.server.WSEndpointImpl$EndpointComponentWrapper $r6;
+        com.sun.xml.internal.ws.server.WSEndpointImpl$ComponentWrapper $r9;
+        java.util.Set $r2;
+        com.sun.xml.internal.ws.api.server.EndpointComponent $r7;
+        java.lang.Object $r4;
+        com.sun.xml.internal.ws.server.WSEndpointImpl r1;
+        com.sun.xml.internal.ws.api.Component r5;
+        boolean $z0, $z1;
+
+        r1 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r8 = new com.sun.xml.internal.ws.server.WSEndpointImpl$EndpointComponentSet;
+
+        specialinvoke $r8.<com.sun.xml.internal.ws.server.WSEndpointImpl$EndpointComponentSet: void <init>(com.sun.xml.internal.ws.server.WSEndpointImpl,com.sun.xml.internal.ws.server.WSEndpointImpl$1)>(r1, null);
+
+        $r2 = r1.<com.sun.xml.internal.ws.server.WSEndpointImpl: java.util.Set componentRegistry>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (com.sun.xml.internal.ws.api.Component) $r4;
+
+        $z1 = r5 instanceof com.sun.xml.internal.ws.server.WSEndpointImpl$EndpointComponentWrapper;
+
+        if $z1 == 0 goto label2;
+
+        $r6 = (com.sun.xml.internal.ws.server.WSEndpointImpl$EndpointComponentWrapper) r5;
+
+        $r7 = staticinvoke <com.sun.xml.internal.ws.server.WSEndpointImpl$EndpointComponentWrapper: com.sun.xml.internal.ws.api.server.EndpointComponent access$600(com.sun.xml.internal.ws.server.WSEndpointImpl$EndpointComponentWrapper)>($r6);
+
+        goto label3;
+
+     label2:
+        $r9 = new com.sun.xml.internal.ws.server.WSEndpointImpl$ComponentWrapper;
+
+        $r7 = $r9;
+
+        specialinvoke $r9.<com.sun.xml.internal.ws.server.WSEndpointImpl$ComponentWrapper: void <init>(com.sun.xml.internal.ws.api.Component)>(r5);
+
+     label3:
+        interfaceinvoke $r8.<java.util.Set: boolean add(java.lang.Object)>($r7);
+
+        goto label1;
+
+     label4:
+        return $r8;
+    }
+
+    public java.util.Set getComponents()
+    {
+        java.util.Set $r1;
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: java.util.Set componentRegistry>;
+
+        return $r1;
+    }
+
+    public transient javax.xml.ws.EndpointReference getEndpointReference(java.lang.Class, java.lang.String, java.lang.String, org.w3c.dom.Element[])
+    {
+        java.util.List r6;
+        javax.xml.ws.EndpointReference $r5;
+        org.w3c.dom.Element[] r0;
+        java.lang.Class r2;
+        com.sun.xml.internal.ws.server.WSEndpointImpl r1;
+        java.lang.String r3, r4;
+
+        r1 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        r2 := @parameter0: java.lang.Class;
+
+        r3 := @parameter1: java.lang.String;
+
+        r4 := @parameter2: java.lang.String;
+
+        r0 := @parameter3: org.w3c.dom.Element[];
+
+        r6 = null;
+
+        if r0 == null goto label1;
+
+        r6 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>(r0);
+
+     label1:
+        $r5 = virtualinvoke r1.<com.sun.xml.internal.ws.server.WSEndpointImpl: javax.xml.ws.EndpointReference getEndpointReference(java.lang.Class,java.lang.String,java.lang.String,java.util.List,java.util.List)>(r2, r3, r4, null, r6);
+
+        return $r5;
+    }
+
+    public javax.xml.ws.EndpointReference getEndpointReference(java.lang.Class, java.lang.String, java.lang.String, java.util.List, java.util.List)
+    {
+        javax.xml.ws.EndpointReference $r13;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLBoundPortType $r15;
+        com.sun.xml.internal.ws.api.addressing.WSEndpointReference $r4;
+        java.util.Map $r9;
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        java.lang.String r5, r7;
+        java.util.Collection $r12;
+        java.util.List r6, r8;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLPort $r1, $r14;
+        java.lang.Class r2;
+        javax.xml.namespace.QName $r10, $r11, r16;
+        com.sun.xml.internal.ws.api.addressing.AddressingVersion $r3;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        r2 := @parameter0: java.lang.Class;
+
+        r5 := @parameter1: java.lang.String;
+
+        r7 := @parameter2: java.lang.String;
+
+        r6 := @parameter3: java.util.List;
+
+        r8 := @parameter4: java.util.List;
+
+        r16 = null;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.model.wsdl.WSDLPort port>;
+
+        if $r1 == null goto label1;
+
+        $r14 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.model.wsdl.WSDLPort port>;
+
+        $r15 = interfaceinvoke $r14.<com.sun.xml.internal.ws.api.model.wsdl.WSDLPort: com.sun.xml.internal.ws.api.model.wsdl.WSDLBoundPortType getBinding()>();
+
+        r16 = interfaceinvoke $r15.<com.sun.xml.internal.ws.api.model.wsdl.WSDLBoundPortType: javax.xml.namespace.QName getPortTypeName()>();
+
+     label1:
+        $r3 = staticinvoke <com.sun.xml.internal.ws.api.addressing.AddressingVersion: com.sun.xml.internal.ws.api.addressing.AddressingVersion fromSpecClass(java.lang.Class)>(r2);
+
+        $r4 = new com.sun.xml.internal.ws.api.addressing.WSEndpointReference;
+
+        $r10 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: javax.xml.namespace.QName serviceName>;
+
+        $r11 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: javax.xml.namespace.QName portName>;
+
+        $r9 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: java.util.Map endpointReferenceExtensions>;
+
+        $r12 = interfaceinvoke $r9.<java.util.Map: java.util.Collection values()>();
+
+        specialinvoke $r4.<com.sun.xml.internal.ws.api.addressing.WSEndpointReference: void <init>(com.sun.xml.internal.ws.api.addressing.AddressingVersion,java.lang.String,javax.xml.namespace.QName,javax.xml.namespace.QName,javax.xml.namespace.QName,java.util.List,java.lang.String,java.util.List,java.util.Collection,java.util.Map)>($r3, r5, $r10, $r11, r16, r6, r7, r8, $r12, null);
+
+        $r13 = virtualinvoke $r4.<com.sun.xml.internal.ws.api.addressing.WSEndpointReference: javax.xml.ws.EndpointReference toSpec(java.lang.Class)>(r2);
+
+        return $r13;
+    }
+
+    public javax.xml.namespace.QName getPortName()
+    {
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        javax.xml.namespace.QName $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: javax.xml.namespace.QName portName>;
+
+        return $r1;
+    }
+
+    public com.sun.xml.internal.ws.api.pipe.Codec createCodec()
+    {
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        com.sun.xml.internal.ws.api.pipe.Codec $r1, $r2;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.pipe.Codec masterCodec>;
+
+        $r2 = interfaceinvoke $r1.<com.sun.xml.internal.ws.api.pipe.Codec: com.sun.xml.internal.ws.api.pipe.Codec copy()>();
+
+        return $r2;
+    }
+
+    public javax.xml.namespace.QName getServiceName()
+    {
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        javax.xml.namespace.QName $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: javax.xml.namespace.QName serviceName>;
+
+        return $r1;
+    }
+
+    private void initManagedObjectManager()
+    {
+        java.lang.Throwable $r7;
+        com.sun.xml.internal.ws.server.WSEndpointMOMProxy $r5;
+        int[] $r4;
+        int $i0, $i1;
+        java.lang.Object $r1;
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        com.sun.org.glassfish.gmbal.ManagedObjectManager $r2, $r6;
+        com.sun.xml.internal.ws.api.server.LazyMOMProvider$Scope $r3;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: java.lang.Object managedObjectManagerLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.org.glassfish.gmbal.ManagedObjectManager managedObjectManager>;
+
+        if $r2 != null goto label4;
+
+        $r4 = <com.sun.xml.internal.ws.server.WSEndpointImpl$3: int[] $SwitchMap$com$sun$xml$internal$ws$api$server$LazyMOMProvider$Scope>;
+
+        $r3 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.server.LazyMOMProvider$Scope lazyMOMProviderScope>;
+
+        $i0 = virtualinvoke $r3.<com.sun.xml.internal.ws.api.server.LazyMOMProvider$Scope: int ordinal()>();
+
+        $i1 = $r4[$i0];
+
+        lookupswitch($i1)
+        {
+            case 1: goto label2;
+            default: goto label3;
+        };
+
+     label2:
+        $r5 = new com.sun.xml.internal.ws.server.WSEndpointMOMProxy;
+
+        specialinvoke $r5.<com.sun.xml.internal.ws.server.WSEndpointMOMProxy: void <init>(com.sun.xml.internal.ws.server.WSEndpointImpl)>(r0);
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.org.glassfish.gmbal.ManagedObjectManager managedObjectManager> = $r5;
+
+        goto label4;
+
+     label3:
+        $r6 = virtualinvoke r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.org.glassfish.gmbal.ManagedObjectManager obtainManagedObjectManager()>();
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.org.glassfish.gmbal.ManagedObjectManager managedObjectManager> = $r6;
+
+     label4:
+        exitmonitor $r1;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r7 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label7:
+        throw $r7;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public com.sun.org.glassfish.gmbal.ManagedObjectManager getManagedObjectManager()
+    {
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        com.sun.org.glassfish.gmbal.ManagedObjectManager $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.org.glassfish.gmbal.ManagedObjectManager managedObjectManager>;
+
+        return $r1;
+    }
+
+    com.sun.org.glassfish.gmbal.ManagedObjectManager obtainManagedObjectManager()
+    {
+        com.sun.xml.internal.ws.server.MonitorRootService $r0;
+        com.sun.xml.internal.ws.server.WSEndpointImpl r1;
+        com.sun.org.glassfish.gmbal.ManagedObjectManager $r2;
+
+        r1 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r0 = new com.sun.xml.internal.ws.server.MonitorRootService;
+
+        specialinvoke $r0.<com.sun.xml.internal.ws.server.MonitorRootService: void <init>(com.sun.xml.internal.ws.api.server.WSEndpoint)>(r1);
+
+        $r2 = virtualinvoke $r0.<com.sun.xml.internal.ws.server.MonitorRootService: com.sun.org.glassfish.gmbal.ManagedObjectManager createManagedObjectManager(com.sun.xml.internal.ws.api.server.WSEndpoint)>(r1);
+
+        interfaceinvoke $r2.<com.sun.org.glassfish.gmbal.ManagedObjectManager: void resumeJMXRegistration()>();
+
+        return $r2;
+    }
+
+    public void scopeChanged(com.sun.xml.internal.ws.api.server.LazyMOMProvider$Scope)
+    {
+        java.lang.Throwable $r13;
+        com.sun.xml.internal.ws.server.WSEndpointMOMProxy $r6, $r8, $r11;
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        boolean $z0, $z1, $z2;
+        com.sun.xml.internal.ws.api.server.LazyMOMProvider$Scope r2, $r10;
+        java.lang.Object $r1;
+        com.sun.org.glassfish.gmbal.ManagedObjectManager $r3, $r4, $r5, $r7, $r9, $r12;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        r2 := @parameter0: com.sun.xml.internal.ws.api.server.LazyMOMProvider$Scope;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: java.lang.Object managedObjectManagerLock>;
+
+        entermonitor $r1;
+
+     label01:
+        $z0 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: boolean managedObjectManagerClosed>;
+
+        if $z0 == 0 goto label03;
+
+        exitmonitor $r1;
+
+     label02:
+        return;
+
+     label03:
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.server.LazyMOMProvider$Scope lazyMOMProviderScope> = r2;
+
+        $r3 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.org.glassfish.gmbal.ManagedObjectManager managedObjectManager>;
+
+        if $r3 != null goto label05;
+
+        $r10 = <com.sun.xml.internal.ws.api.server.LazyMOMProvider$Scope: com.sun.xml.internal.ws.api.server.LazyMOMProvider$Scope GLASSFISH_NO_JMX>;
+
+        if r2 == $r10 goto label04;
+
+        $r12 = virtualinvoke r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.org.glassfish.gmbal.ManagedObjectManager obtainManagedObjectManager()>();
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.org.glassfish.gmbal.ManagedObjectManager managedObjectManager> = $r12;
+
+        goto label06;
+
+     label04:
+        $r11 = new com.sun.xml.internal.ws.server.WSEndpointMOMProxy;
+
+        specialinvoke $r11.<com.sun.xml.internal.ws.server.WSEndpointMOMProxy: void <init>(com.sun.xml.internal.ws.server.WSEndpointImpl)>(r0);
+
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.org.glassfish.gmbal.ManagedObjectManager managedObjectManager> = $r11;
+
+        goto label06;
+
+     label05:
+        $r4 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.org.glassfish.gmbal.ManagedObjectManager managedObjectManager>;
+
+        $z1 = $r4 instanceof com.sun.xml.internal.ws.server.WSEndpointMOMProxy;
+
+        if $z1 == 0 goto label06;
+
+        $r5 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.org.glassfish.gmbal.ManagedObjectManager managedObjectManager>;
+
+        $r6 = (com.sun.xml.internal.ws.server.WSEndpointMOMProxy) $r5;
+
+        $z2 = virtualinvoke $r6.<com.sun.xml.internal.ws.server.WSEndpointMOMProxy: boolean isInitialized()>();
+
+        if $z2 != 0 goto label06;
+
+        $r7 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.org.glassfish.gmbal.ManagedObjectManager managedObjectManager>;
+
+        $r8 = (com.sun.xml.internal.ws.server.WSEndpointMOMProxy) $r7;
+
+        $r9 = virtualinvoke r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.org.glassfish.gmbal.ManagedObjectManager obtainManagedObjectManager()>();
+
+        virtualinvoke $r8.<com.sun.xml.internal.ws.server.WSEndpointMOMProxy: void setManagedObjectManager(com.sun.org.glassfish.gmbal.ManagedObjectManager)>($r9);
+
+     label06:
+        exitmonitor $r1;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r13 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label09:
+        throw $r13;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label08;
+        catch java.lang.Throwable from label03 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    public void closeManagedObjectManager()
+    {
+        java.lang.Throwable $r13;
+        com.sun.xml.internal.ws.server.WSEndpointMOMProxy $r12;
+        java.util.logging.Level $r9, $r15;
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        boolean $z0, $z1, $z2, z3;
+        java.io.IOException $r14;
+        javax.management.ObjectName $r7;
+        java.util.logging.Logger $r10, $r16;
+        java.lang.Object $r1, $r6;
+        com.sun.org.glassfish.gmbal.ManagedObjectManager $r2, $r3, $r4, $r5, $r8, $r11;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: java.lang.Object managedObjectManagerLock>;
+
+        entermonitor $r1;
+
+     label01:
+        $z0 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: boolean managedObjectManagerClosed>;
+
+        if $z0 != 1 goto label03;
+
+        exitmonitor $r1;
+
+     label02:
+        return;
+
+     label03:
+        $r2 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.org.glassfish.gmbal.ManagedObjectManager managedObjectManager>;
+
+        if $r2 == null goto label09;
+
+        z3 = 1;
+
+        $r3 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.org.glassfish.gmbal.ManagedObjectManager managedObjectManager>;
+
+        $z1 = $r3 instanceof com.sun.xml.internal.ws.server.WSEndpointMOMProxy;
+
+        if $z1 == 0 goto label04;
+
+        $r11 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.org.glassfish.gmbal.ManagedObjectManager managedObjectManager>;
+
+        $r12 = (com.sun.xml.internal.ws.server.WSEndpointMOMProxy) $r11;
+
+        $z2 = virtualinvoke $r12.<com.sun.xml.internal.ws.server.WSEndpointMOMProxy: boolean isInitialized()>();
+
+        if $z2 != 0 goto label04;
+
+        z3 = 0;
+
+     label04:
+        if z3 == 0 goto label09;
+
+     label05:
+        $r5 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.org.glassfish.gmbal.ManagedObjectManager managedObjectManager>;
+
+        $r4 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.org.glassfish.gmbal.ManagedObjectManager managedObjectManager>;
+
+        $r6 = interfaceinvoke $r4.<com.sun.org.glassfish.gmbal.ManagedObjectManager: java.lang.Object getRoot()>();
+
+        $r7 = interfaceinvoke $r5.<com.sun.org.glassfish.gmbal.ManagedObjectManager: javax.management.ObjectName getObjectName(java.lang.Object)>($r6);
+
+        if $r7 == null goto label06;
+
+        $r10 = <com.sun.xml.internal.ws.server.WSEndpointImpl: java.util.logging.Logger monitoringLogger>;
+
+        $r9 = <java.util.logging.Level: java.util.logging.Level INFO>;
+
+        virtualinvoke $r10.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r9, "Closing Metro monitoring root: {0}", $r7);
+
+     label06:
+        $r8 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.org.glassfish.gmbal.ManagedObjectManager managedObjectManager>;
+
+        interfaceinvoke $r8.<com.sun.org.glassfish.gmbal.ManagedObjectManager: void close()>();
+
+     label07:
+        goto label09;
+
+     label08:
+        $r14 := @caughtexception;
+
+        $r16 = <com.sun.xml.internal.ws.server.WSEndpointImpl: java.util.logging.Logger monitoringLogger>;
+
+        $r15 = <java.util.logging.Level: java.util.logging.Level WARNING>;
+
+        virtualinvoke $r16.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r15, "Ignoring error when closing Managed Object Manager", $r14);
+
+     label09:
+        r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: boolean managedObjectManagerClosed> = 1;
+
+        exitmonitor $r1;
+
+     label10:
+        goto label13;
+
+     label11:
+        $r13 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label12:
+        throw $r13;
+
+     label13:
+        return;
+
+        catch java.io.IOException from label05 to label07 with label08;
+        catch java.lang.Throwable from label01 to label02 with label11;
+        catch java.lang.Throwable from label03 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+    }
+
+    public com.sun.xml.internal.ws.api.pipe.ServerTubeAssemblerContext getAssemblerContext()
+    {
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        com.sun.xml.internal.ws.api.pipe.ServerTubeAssemblerContext $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.pipe.ServerTubeAssemblerContext context>;
+
+        return $r1;
+    }
+
+    public volatile com.sun.xml.internal.ws.api.server.ServiceDefinition getServiceDefinition()
+    {
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        com.sun.xml.internal.ws.server.ServiceDefinitionImpl $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.server.ServiceDefinitionImpl getServiceDefinition()>();
+
+        return $r1;
+    }
+
+    static com.sun.xml.internal.ws.util.Pool access$000(com.sun.xml.internal.ws.server.WSEndpointImpl)
+    {
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        com.sun.xml.internal.ws.util.Pool $r1;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.util.Pool tubePool>;
+
+        return $r1;
+    }
+
+    static com.sun.xml.internal.ws.api.SOAPVersion access$100(com.sun.xml.internal.ws.server.WSEndpointImpl)
+    {
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        com.sun.xml.internal.ws.api.SOAPVersion $r1;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.SOAPVersion soapVersion>;
+
+        return $r1;
+    }
+
+    static com.sun.xml.internal.ws.api.server.Container access$200(com.sun.xml.internal.ws.server.WSEndpointImpl)
+    {
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        com.sun.xml.internal.ws.api.server.Container $r1;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.server.Container container>;
+
+        return $r1;
+    }
+
+    static com.sun.xml.internal.ws.model.wsdl.WSDLProperties access$300(com.sun.xml.internal.ws.server.WSEndpointImpl)
+    {
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        com.sun.xml.internal.ws.model.wsdl.WSDLProperties $r1;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.model.wsdl.WSDLProperties wsdlProperties>;
+
+        return $r1;
+    }
+
+    static com.sun.xml.internal.ws.api.pipe.Engine access$400(com.sun.xml.internal.ws.server.WSEndpointImpl)
+    {
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+        com.sun.xml.internal.ws.api.pipe.Engine $r1;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: com.sun.xml.internal.ws.api.pipe.Engine engine>;
+
+        return $r1;
+    }
+
+    static java.util.Set access$800(com.sun.xml.internal.ws.server.WSEndpointImpl)
+    {
+        java.util.Set $r1;
+        com.sun.xml.internal.ws.server.WSEndpointImpl r0;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.server.WSEndpointImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.server.WSEndpointImpl: java.util.Set componentRegistry>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        java.util.logging.Logger $r1, $r2;
+        boolean $z0, $z1;
+
+        $r0 = class "Lcom/sun/xml/internal/ws/server/WSEndpointImpl;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <com.sun.xml.internal.ws.server.WSEndpointImpl: boolean $assertionsDisabled> = $z1;
+
+        $r1 = staticinvoke <java.util.logging.Logger: java.util.logging.Logger getLogger(java.lang.String)>("com.sun.xml.internal.ws.server.endpoint");
+
+        <com.sun.xml.internal.ws.server.WSEndpointImpl: java.util.logging.Logger logger> = $r1;
+
+        $r2 = staticinvoke <java.util.logging.Logger: java.util.logging.Logger getLogger(java.lang.String)>("com.sun.xml.internal.ws.monitoring");
+
+        <com.sun.xml.internal.ws.server.WSEndpointImpl: java.util.logging.Logger monitoringLogger> = $r2;
+
+        return;
+    }
+}

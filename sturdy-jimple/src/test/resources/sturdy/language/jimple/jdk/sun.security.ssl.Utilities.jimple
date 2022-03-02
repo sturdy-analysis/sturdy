@@ -1,0 +1,647 @@
+public final class sun.security.ssl.Utilities extends java.lang.Object
+{
+    static final char[] hexDigits;
+    private static final java.lang.String indent;
+    private static final java.util.regex.Pattern lineBreakPatern;
+
+    public void <init>()
+    {
+        sun.security.ssl.Utilities r0;
+
+        r0 := @this: sun.security.ssl.Utilities;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    static java.util.List addToSNIServerNameList(java.util.List, java.lang.String)
+    {
+        javax.net.ssl.SNIHostName $r1;
+        java.lang.Object[] $r14;
+        javax.net.ssl.SNIServerName r6;
+        java.util.ArrayList r3, $r15;
+        int $i0, $i1, i2;
+        java.lang.String r0, $r13;
+        boolean $z0, $z1, z2;
+        java.util.List r2, $r4;
+        java.lang.Object $r5;
+        java.lang.StringBuilder $r7, $r8, $r9, $r10, $r11, $r12;
+
+        r2 := @parameter0: java.util.List;
+
+        r0 := @parameter1: java.lang.String;
+
+        $r1 = staticinvoke <sun.security.ssl.Utilities: javax.net.ssl.SNIHostName rawToSNIHostName(java.lang.String)>(r0);
+
+        if $r1 != null goto label1;
+
+        return r2;
+
+     label1:
+        $i0 = interfaceinvoke r2.<java.util.List: int size()>();
+
+        if $i0 == 0 goto label2;
+
+        $r15 = new java.util.ArrayList;
+
+        specialinvoke $r15.<java.util.ArrayList: void <init>(java.util.Collection)>(r2);
+
+        goto label3;
+
+     label2:
+        $r15 = new java.util.ArrayList;
+
+        specialinvoke $r15.<java.util.ArrayList: void <init>(int)>(1);
+
+     label3:
+        r3 = $r15;
+
+        z2 = 0;
+
+        i2 = 0;
+
+     label4:
+        if i2 >= $i0 goto label7;
+
+        $r5 = interfaceinvoke r3.<java.util.List: java.lang.Object get(int)>(i2);
+
+        r6 = (javax.net.ssl.SNIServerName) $r5;
+
+        $i1 = virtualinvoke r6.<javax.net.ssl.SNIServerName: int getType()>();
+
+        if $i1 != 0 goto label6;
+
+        interfaceinvoke r3.<java.util.List: java.lang.Object set(int,java.lang.Object)>(i2, $r1);
+
+        $z0 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z0 == 0 goto label5;
+
+        $z1 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl");
+
+        if $z1 == 0 goto label5;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("the previous server name in SNI (");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r6);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") was replaced with (");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r14 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r13, $r14);
+
+     label5:
+        z2 = 1;
+
+        goto label7;
+
+     label6:
+        i2 = i2 + 1;
+
+        goto label4;
+
+     label7:
+        if z2 != 0 goto label8;
+
+        interfaceinvoke r3.<java.util.List: boolean add(java.lang.Object)>($r1);
+
+     label8:
+        $r4 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>(r3);
+
+        return $r4;
+    }
+
+    private static javax.net.ssl.SNIHostName rawToSNIHostName(java.lang.String)
+    {
+        javax.net.ssl.SNIHostName $r1, r8;
+        java.lang.Object[] $r7;
+        java.lang.IllegalArgumentException $r2;
+        int $i0;
+        java.lang.StringBuilder $r3, $r4, $r5;
+        java.lang.String r0, $r6;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        r0 := @parameter0: java.lang.String;
+
+        r8 = null;
+
+        if r0 == null goto label4;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int indexOf(int)>(46);
+
+        if $i0 <= 0 goto label4;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>(".");
+
+        if $z0 != 0 goto label4;
+
+        $z1 = staticinvoke <sun.net.util.IPAddressUtil: boolean isIPv4LiteralAddress(java.lang.String)>(r0);
+
+        if $z1 != 0 goto label4;
+
+        $z2 = staticinvoke <sun.net.util.IPAddressUtil: boolean isIPv6LiteralAddress(java.lang.String)>(r0);
+
+        if $z2 != 0 goto label4;
+
+     label1:
+        $r1 = new javax.net.ssl.SNIHostName;
+
+        specialinvoke $r1.<javax.net.ssl.SNIHostName: void <init>(java.lang.String)>(r0);
+
+        r8 = $r1;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $z3 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z3 == 0 goto label4;
+
+        $z4 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl");
+
+        if $z4 == 0 goto label4;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\" is not a legal HostName for  server name indication");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r7 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r6, $r7);
+
+     label4:
+        return r8;
+
+        catch java.lang.IllegalArgumentException from label1 to label2 with label3;
+    }
+
+    static boolean getBooleanProperty(java.lang.String, boolean)
+    {
+        java.lang.RuntimeException $r2;
+        java.lang.StringBuilder $r3, $r4, $r5, $r6;
+        java.lang.String r0, $r1, $r7;
+        boolean $z0, $z1, z2;
+
+        r0 := @parameter0: java.lang.String;
+
+        z2 := @parameter1: boolean;
+
+        $r1 = staticinvoke <sun.security.action.GetPropertyAction: java.lang.String privilegedGetProperty(java.lang.String)>(r0);
+
+        if $r1 != null goto label1;
+
+        return z2;
+
+     label1:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("false");
+
+        if $z0 == 0 goto label2;
+
+        return 0;
+
+     label2:
+        $z1 = virtualinvoke $r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("true");
+
+        if $z1 == 0 goto label3;
+
+        return 1;
+
+     label3:
+        $r2 = new java.lang.RuntimeException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Value of ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" must either be \'true\' or \'false\'");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.RuntimeException: void <init>(java.lang.String)>($r7);
+
+        throw $r2;
+    }
+
+    static java.lang.String indent(java.lang.String)
+    {
+        java.lang.String r0, $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <sun.security.ssl.Utilities: java.lang.String indent(java.lang.String,java.lang.String)>(r0, "  ");
+
+        return $r1;
+    }
+
+    public static java.lang.String indent(java.lang.String, java.lang.String)
+    {
+        java.lang.String[] $r3;
+        int i0, i1;
+        java.lang.String r1, $r4, r5, r6, $r12;
+        boolean z0;
+        java.lang.StringBuilder $r0, $r7, $r8, $r9, $r10, $r11;
+        java.util.regex.Pattern $r2;
+
+        r1 := @parameter0: java.lang.String;
+
+        r6 := @parameter1: java.lang.String;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        if r1 != null goto label1;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<blank message>");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        goto label5;
+
+     label1:
+        $r2 = <sun.security.ssl.Utilities: java.util.regex.Pattern lineBreakPatern>;
+
+        $r3 = virtualinvoke $r2.<java.util.regex.Pattern: java.lang.String[] split(java.lang.CharSequence)>(r1);
+
+        z0 = 1;
+
+        i0 = lengthof $r3;
+
+        i1 = 0;
+
+     label2:
+        if i1 >= i0 goto label5;
+
+        r5 = $r3[i1];
+
+        if z0 == 0 goto label3;
+
+        z0 = 0;
+
+        goto label4;
+
+     label3:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+     label4:
+        $r7 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label5:
+        $r4 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r4;
+    }
+
+    static java.lang.String toHexString(byte)
+    {
+        byte b0, $b4;
+        int $i1, $i2, $i6, $i7;
+        java.lang.String $r2, $r5, $r7;
+        char $c3, $c5;
+        char[] $r1, $r4;
+        java.lang.StringBuilder $r3, $r6, $r8;
+
+        b0 := @parameter0: byte;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = <sun.security.ssl.Utilities: char[] hexDigits>;
+
+        $i6 = (int) b0;
+
+        $i1 = $i6 >> 4;
+
+        $i2 = $i1 & 15;
+
+        $c3 = $r1[$i2];
+
+        $r2 = staticinvoke <java.lang.String: java.lang.String valueOf(char)>($c3);
+
+        $r3 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = <sun.security.ssl.Utilities: char[] hexDigits>;
+
+        $b4 = b0 & 15;
+
+        $i7 = (int) $b4;
+
+        $c5 = $r4[$i7];
+
+        $r5 = staticinvoke <java.lang.String: java.lang.String valueOf(char)>($c5);
+
+        $r6 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r7;
+    }
+
+    static java.lang.String byte16HexString(int)
+    {
+        int i0, $i1, $i2, $i4, $i5, $i7, $i8, $i10;
+        java.lang.String $r10;
+        char $c3, $c6, $c9, $c11;
+        char[] $r2, $r4, $r6, $r8;
+        java.lang.StringBuilder $r0, $r1, $r3, $r5, $r7, $r9;
+
+        i0 := @parameter0: int;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("0x");
+
+        $r2 = <sun.security.ssl.Utilities: char[] hexDigits>;
+
+        $i1 = i0 >> 12;
+
+        $i2 = $i1 & 15;
+
+        $c3 = $r2[$i2];
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c3);
+
+        $r4 = <sun.security.ssl.Utilities: char[] hexDigits>;
+
+        $i4 = i0 >> 8;
+
+        $i5 = $i4 & 15;
+
+        $c6 = $r4[$i5];
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c6);
+
+        $r6 = <sun.security.ssl.Utilities: char[] hexDigits>;
+
+        $i7 = i0 >> 4;
+
+        $i8 = $i7 & 15;
+
+        $c9 = $r6[$i8];
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c9);
+
+        $r8 = <sun.security.ssl.Utilities: char[] hexDigits>;
+
+        $i10 = i0 & 15;
+
+        $c11 = $r8[$i10];
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c11);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r10;
+    }
+
+    static java.lang.String toHexString(byte[])
+    {
+        byte[] r0;
+        byte b4, $b8;
+        int $i0, $i1, $i2, i3, $i5, $i6, i10, $i11, $i12;
+        java.lang.String $r2;
+        boolean z0;
+        char $c7, $c9;
+        char[] $r3, $r4;
+        java.lang.StringBuilder $r5;
+
+        r0 := @parameter0: byte[];
+
+        if r0 == null goto label1;
+
+        $i0 = lengthof r0;
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        return "";
+
+     label2:
+        $r5 = new java.lang.StringBuilder;
+
+        $i1 = lengthof r0;
+
+        $i2 = $i1 * 3;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>(int)>($i2);
+
+        z0 = 1;
+
+        i3 = lengthof r0;
+
+        i10 = 0;
+
+     label3:
+        if i10 >= i3 goto label6;
+
+        b4 = r0[i10];
+
+        if z0 == 0 goto label4;
+
+        z0 = 0;
+
+        goto label5;
+
+     label4:
+        virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(32);
+
+     label5:
+        $r3 = <sun.security.ssl.Utilities: char[] hexDigits>;
+
+        $i11 = (int) b4;
+
+        $i5 = $i11 >> 4;
+
+        $i6 = $i5 & 15;
+
+        $c7 = $r3[$i6];
+
+        virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c7);
+
+        $r4 = <sun.security.ssl.Utilities: char[] hexDigits>;
+
+        $b8 = b4 & 15;
+
+        $i12 = (int) $b8;
+
+        $c9 = $r4[$i12];
+
+        virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c9);
+
+        i10 = i10 + 1;
+
+        goto label3;
+
+     label6:
+        $r2 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r2;
+    }
+
+    static java.lang.String toHexString(long)
+    {
+        long $l0, $l3, $l7, $l8, l9;
+        char $c2, $c5;
+        byte $b6;
+        int $i1, $i4;
+        char[] $r1, $r2;
+        java.lang.StringBuilder $r0;
+        java.lang.String $r3;
+        boolean z0;
+
+        l9 := @parameter0: long;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>(int)>(128);
+
+        z0 = 1;
+
+     label1:
+        if z0 == 0 goto label2;
+
+        z0 = 0;
+
+        goto label3;
+
+     label2:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(32);
+
+     label3:
+        $r1 = <sun.security.ssl.Utilities: char[] hexDigits>;
+
+        $l0 = l9 & 15L;
+
+        $i1 = (int) $l0;
+
+        $c2 = $r1[$i1];
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c2);
+
+        $l7 = l9 >>> 4;
+
+        $r2 = <sun.security.ssl.Utilities: char[] hexDigits>;
+
+        $l3 = $l7 & 15L;
+
+        $i4 = (int) $l3;
+
+        $c5 = $r2[$i4];
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c5);
+
+        $l8 = $l7 >>> 4;
+
+        l9 = $l8;
+
+        $b6 = $l8 cmp 0L;
+
+        if $b6 != 0 goto label1;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder reverse()>();
+
+        $r3 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+    }
+
+    static byte[] toByteArray(java.math.BigInteger)
+    {
+        byte[] $r1, r2, r3;
+        byte $b1;
+        int $i0, $i2, i3;
+        java.math.BigInteger r0;
+
+        r0 := @parameter0: java.math.BigInteger;
+
+        $r1 = virtualinvoke r0.<java.math.BigInteger: byte[] toByteArray()>();
+
+        r3 = $r1;
+
+        $i0 = lengthof $r1;
+
+        if $i0 <= 1 goto label1;
+
+        $b1 = $r1[0];
+
+        if $b1 != 0 goto label1;
+
+        $i2 = lengthof $r1;
+
+        i3 = $i2 - 1;
+
+        r2 = newarray (byte)[i3];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, 1, r2, 0, i3);
+
+        r3 = r2;
+
+     label1:
+        return r3;
+    }
+
+    static void <clinit>()
+    {
+        char[] $r1;
+        java.lang.String $r0;
+        java.util.regex.Pattern $r2;
+
+        <sun.security.ssl.Utilities: java.lang.String indent> = "  ";
+
+        $r0 = "0123456789ABCDEF";
+
+        $r1 = virtualinvoke $r0.<java.lang.String: char[] toCharArray()>();
+
+        <sun.security.ssl.Utilities: char[] hexDigits> = $r1;
+
+        $r2 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("\\r\\n|\\n|\\r");
+
+        <sun.security.ssl.Utilities: java.util.regex.Pattern lineBreakPatern> = $r2;
+
+        return;
+    }
+}

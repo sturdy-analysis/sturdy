@@ -1,0 +1,465 @@
+public class com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV extends com.sun.org.apache.xerces.internal.impl.dv.xs.TypeValidator
+{
+    private static final com.sun.org.apache.xerces.internal.util.URI BASE_URI;
+    private static boolean[] gNeedEscaping;
+    private static char[] gAfterEscaping1;
+    private static char[] gAfterEscaping2;
+    private static char[] gHexChs;
+
+    public void <init>()
+    {
+        com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.dv.xs.TypeValidator: void <init>()>();
+
+        return;
+    }
+
+    public short getAllowedFacets()
+    {
+        com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV;
+
+        return 2079;
+    }
+
+    public java.lang.Object getActualValue(java.lang.String, com.sun.org.apache.xerces.internal.impl.dv.ValidationContext) throws com.sun.org.apache.xerces.internal.impl.dv.InvalidDatatypeValueException
+    {
+        com.sun.org.apache.xerces.internal.impl.dv.InvalidDatatypeValueException $r5;
+        com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV r7;
+        java.lang.Object[] $r6;
+        com.sun.org.apache.xerces.internal.util.URI$MalformedURIException $r4;
+        int $i0;
+        java.lang.String r0, $r1;
+        com.sun.org.apache.xerces.internal.impl.dv.ValidationContext r8;
+        com.sun.org.apache.xerces.internal.util.URI $r2, $r3;
+
+        r7 := @this: com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV;
+
+        r0 := @parameter0: java.lang.String;
+
+        r8 := @parameter1: com.sun.org.apache.xerces.internal.impl.dv.ValidationContext;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label2;
+
+        $r1 = staticinvoke <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: java.lang.String encode(java.lang.String)>(r0);
+
+        $r2 = new com.sun.org.apache.xerces.internal.util.URI;
+
+        $r3 = <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: com.sun.org.apache.xerces.internal.util.URI BASE_URI>;
+
+        specialinvoke $r2.<com.sun.org.apache.xerces.internal.util.URI: void <init>(com.sun.org.apache.xerces.internal.util.URI,java.lang.String)>($r3, $r1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = new com.sun.org.apache.xerces.internal.impl.dv.InvalidDatatypeValueException;
+
+        $r6 = newarray (java.lang.Object)[2];
+
+        $r6[0] = r0;
+
+        $r6[1] = "anyURI";
+
+        specialinvoke $r5.<com.sun.org.apache.xerces.internal.impl.dv.InvalidDatatypeValueException: void <init>(java.lang.String,java.lang.Object[])>("cvc-datatype-valid.1.2.1", $r6);
+
+        throw $r5;
+
+     label4:
+        return r0;
+
+        catch com.sun.org.apache.xerces.internal.util.URI$MalformedURIException from label1 to label2 with label3;
+    }
+
+    private static java.lang.String encode(java.lang.String)
+    {
+        byte[] $r4;
+        byte b3;
+        boolean $z0, $z1;
+        java.io.UnsupportedEncodingException $r13;
+        java.lang.StringBuffer $r14;
+        int $i0, $i1, $i2, $i7, $i9, i15, i16, i17, i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27;
+        java.lang.String r0, $r2, $r3;
+        boolean[] $r5, $r10;
+        char $c4, $c5, $c6, $c8, $c10, $c11, $c12, $c13, $c14;
+        char[] $r6, $r7, $r8, $r9, $r11, $r12;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        i15 = $i0;
+
+        $r14 = new java.lang.StringBuffer;
+
+        $i1 = $i0 * 3;
+
+        specialinvoke $r14.<java.lang.StringBuffer: void <init>(int)>($i1);
+
+        i16 = 0;
+
+     label01:
+        if i16 >= $i0 goto label05;
+
+        $c11 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i16);
+
+        $i19 = (int) $c11;
+
+        if $i19 < 128 goto label02;
+
+        goto label05;
+
+     label02:
+        $r10 = <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: boolean[] gNeedEscaping>;
+
+        $i20 = (int) $c11;
+
+        $z1 = $r10[$i20];
+
+        if $z1 == 0 goto label03;
+
+        virtualinvoke $r14.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(37);
+
+        $r11 = <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: char[] gAfterEscaping1>;
+
+        $i21 = (int) $c11;
+
+        $c13 = $r11[$i21];
+
+        virtualinvoke $r14.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c13);
+
+        $r12 = <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: char[] gAfterEscaping2>;
+
+        $i22 = (int) $c11;
+
+        $c14 = $r12[$i22];
+
+        virtualinvoke $r14.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c14);
+
+        goto label04;
+
+     label03:
+        $c12 = (char) $c11;
+
+        virtualinvoke $r14.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c12);
+
+     label04:
+        i16 = i16 + 1;
+
+        goto label01;
+
+     label05:
+        if i16 >= $i0 goto label14;
+
+     label06:
+        $r3 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>(i16);
+
+        $r4 = virtualinvoke $r3.<java.lang.String: byte[] getBytes(java.lang.String)>("UTF-8");
+
+     label07:
+        goto label09;
+
+     label08:
+        $r13 := @caughtexception;
+
+        return r0;
+
+     label09:
+        i15 = lengthof $r4;
+
+        i17 = 0;
+
+     label10:
+        if i17 >= i15 goto label14;
+
+        b3 = $r4[i17];
+
+        $i23 = (int) b3;
+
+        if $i23 >= 0 goto label11;
+
+        $i24 = (int) b3;
+
+        i18 = $i24 + 256;
+
+        virtualinvoke $r14.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(37);
+
+        $r8 = <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: char[] gHexChs>;
+
+        $i7 = i18 >> 4;
+
+        $c8 = $r8[$i7];
+
+        virtualinvoke $r14.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c8);
+
+        $r9 = <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: char[] gHexChs>;
+
+        $i9 = i18 & 15;
+
+        $c10 = $r9[$i9];
+
+        virtualinvoke $r14.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c10);
+
+        goto label13;
+
+     label11:
+        $r5 = <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: boolean[] gNeedEscaping>;
+
+        $i25 = (int) b3;
+
+        $z0 = $r5[$i25];
+
+        if $z0 == 0 goto label12;
+
+        virtualinvoke $r14.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(37);
+
+        $r6 = <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: char[] gAfterEscaping1>;
+
+        $i26 = (int) b3;
+
+        $c5 = $r6[$i26];
+
+        virtualinvoke $r14.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c5);
+
+        $r7 = <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: char[] gAfterEscaping2>;
+
+        $i27 = (int) b3;
+
+        $c6 = $r7[$i27];
+
+        virtualinvoke $r14.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c6);
+
+        goto label13;
+
+     label12:
+        $c4 = (char) b3;
+
+        virtualinvoke $r14.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c4);
+
+     label13:
+        i17 = i17 + 1;
+
+        goto label10;
+
+     label14:
+        $i2 = virtualinvoke $r14.<java.lang.StringBuffer: int length()>();
+
+        if $i2 == i15 goto label15;
+
+        $r2 = virtualinvoke $r14.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r2;
+
+     label15:
+        return r0;
+
+        catch java.io.UnsupportedEncodingException from label06 to label07 with label08;
+    }
+
+    static void <clinit>()
+    {
+        com.sun.org.apache.xerces.internal.util.URI$MalformedURIException $r19;
+        com.sun.org.apache.xerces.internal.util.URI r20, $r21;
+        int $i1, $i5, $i7, i9, i10, i11, $i12, $i13, $i14, $i15, $i16;
+        boolean[] $r1, $r5, $r9, $r14;
+        char c0, $c2, $c3, $c4, $c6, $c8;
+        char[] $r2, $r3, $r4, $r6, $r7, $r8, $r10, $r11, $r12, $r13, $r15, $r16, $r17, $r18;
+
+        r20 = null;
+
+     label1:
+        $r21 = new com.sun.org.apache.xerces.internal.util.URI;
+
+        specialinvoke $r21.<com.sun.org.apache.xerces.internal.util.URI: void <init>(java.lang.String)>("abc://def.ghi.jkl");
+
+        r20 = $r21;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r19 := @caughtexception;
+
+     label4:
+        <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: com.sun.org.apache.xerces.internal.util.URI BASE_URI> = r20;
+
+        $r1 = newarray (boolean)[128];
+
+        <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: boolean[] gNeedEscaping> = $r1;
+
+        $r2 = newarray (char)[128];
+
+        <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: char[] gAfterEscaping1> = $r2;
+
+        $r3 = newarray (char)[128];
+
+        <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: char[] gAfterEscaping2> = $r3;
+
+        $r4 = newarray (char)[16];
+
+        $r4[0] = 48;
+
+        $r4[1] = 49;
+
+        $r4[2] = 50;
+
+        $r4[3] = 51;
+
+        $r4[4] = 52;
+
+        $r4[5] = 53;
+
+        $r4[6] = 54;
+
+        $r4[7] = 55;
+
+        $r4[8] = 56;
+
+        $r4[9] = 57;
+
+        $r4[10] = 65;
+
+        $r4[11] = 66;
+
+        $r4[12] = 67;
+
+        $r4[13] = 68;
+
+        $r4[14] = 69;
+
+        $r4[15] = 70;
+
+        <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: char[] gHexChs> = $r4;
+
+        i9 = 0;
+
+     label5:
+        if i9 > 31 goto label6;
+
+        $r14 = <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: boolean[] gNeedEscaping>;
+
+        $r14[i9] = 1;
+
+        $r16 = <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: char[] gAfterEscaping1>;
+
+        $r15 = <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: char[] gHexChs>;
+
+        $i5 = i9 >> 4;
+
+        $c6 = $r15[$i5];
+
+        $r16[i9] = $c6;
+
+        $r18 = <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: char[] gAfterEscaping2>;
+
+        $r17 = <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: char[] gHexChs>;
+
+        $i7 = i9 & 15;
+
+        $c8 = $r17[$i7];
+
+        $r18[i9] = $c8;
+
+        i9 = i9 + 1;
+
+        goto label5;
+
+     label6:
+        $r5 = <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: boolean[] gNeedEscaping>;
+
+        $r5[127] = 1;
+
+        $r6 = <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: char[] gAfterEscaping1>;
+
+        $r6[127] = 55;
+
+        $r7 = <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: char[] gAfterEscaping2>;
+
+        $r7[127] = 70;
+
+        $r8 = newarray (char)[11];
+
+        $r8[0] = 32;
+
+        $r8[1] = 60;
+
+        $r8[2] = 62;
+
+        $r8[3] = 34;
+
+        $r8[4] = 123;
+
+        $r8[5] = 125;
+
+        $r8[6] = 124;
+
+        $r8[7] = 92;
+
+        $r8[8] = 94;
+
+        $r8[9] = 126;
+
+        $r8[10] = 96;
+
+        i10 = lengthof $r8;
+
+        i11 = 0;
+
+     label7:
+        if i11 >= i10 goto label8;
+
+        c0 = $r8[i11];
+
+        $r9 = <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: boolean[] gNeedEscaping>;
+
+        $i12 = (int) c0;
+
+        $r9[$i12] = 1;
+
+        $r11 = <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: char[] gAfterEscaping1>;
+
+        $r10 = <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: char[] gHexChs>;
+
+        $i13 = (int) c0;
+
+        $i1 = $i13 >> 4;
+
+        $c2 = $r10[$i1];
+
+        $i14 = (int) c0;
+
+        $r11[$i14] = $c2;
+
+        $r13 = <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: char[] gAfterEscaping2>;
+
+        $r12 = <com.sun.org.apache.xerces.internal.impl.dv.xs.AnyURIDV: char[] gHexChs>;
+
+        $c3 = c0 & 15;
+
+        $i15 = (int) $c3;
+
+        $c4 = $r12[$i15];
+
+        $i16 = (int) c0;
+
+        $r13[$i16] = $c4;
+
+        i11 = i11 + 1;
+
+        goto label7;
+
+     label8:
+        return;
+
+        catch com.sun.org.apache.xerces.internal.util.URI$MalformedURIException from label1 to label2 with label3;
+    }
+}

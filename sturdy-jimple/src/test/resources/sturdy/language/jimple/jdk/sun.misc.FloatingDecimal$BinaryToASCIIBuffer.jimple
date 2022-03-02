@@ -1,0 +1,2264 @@
+class sun.misc.FloatingDecimal$BinaryToASCIIBuffer extends java.lang.Object implements sun.misc.FloatingDecimal$BinaryToASCIIConverter
+{
+    private boolean isNegative;
+    private int decExponent;
+    private int firstDigitIndex;
+    private int nDigits;
+    private final char[] digits;
+    private final char[] buffer;
+    private boolean exactDecimalConversion;
+    private boolean decimalDigitsRoundedUp;
+    private static int[] insignificantDigitsNumber;
+    private static final int[] N_5_BITS;
+    static final boolean $assertionsDisabled;
+
+    void <init>()
+    {
+        char[] $r1, $r2;
+        sun.misc.FloatingDecimal$BinaryToASCIIBuffer r0;
+
+        r0 := @this: sun.misc.FloatingDecimal$BinaryToASCIIBuffer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = newarray (char)[26];
+
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] buffer> = $r1;
+
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean exactDecimalConversion> = 0;
+
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean decimalDigitsRoundedUp> = 0;
+
+        $r2 = newarray (char)[20];
+
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits> = $r2;
+
+        return;
+    }
+
+    void <init>(boolean, char[])
+    {
+        int $i0;
+        char[] $r1, r2;
+        sun.misc.FloatingDecimal$BinaryToASCIIBuffer r0;
+        boolean z0;
+
+        r0 := @this: sun.misc.FloatingDecimal$BinaryToASCIIBuffer;
+
+        z0 := @parameter0: boolean;
+
+        r2 := @parameter1: char[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = newarray (char)[26];
+
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] buffer> = $r1;
+
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean exactDecimalConversion> = 0;
+
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean decimalDigitsRoundedUp> = 0;
+
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean isNegative> = z0;
+
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int decExponent> = 0;
+
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits> = r2;
+
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int firstDigitIndex> = 0;
+
+        $i0 = lengthof r2;
+
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int nDigits> = $i0;
+
+        return;
+    }
+
+    public java.lang.String toJavaFormatString()
+    {
+        int $i0;
+        char[] $r1, $r3;
+        java.lang.String $r2;
+        sun.misc.FloatingDecimal$BinaryToASCIIBuffer r0;
+
+        r0 := @this: sun.misc.FloatingDecimal$BinaryToASCIIBuffer;
+
+        $r1 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] buffer>;
+
+        $i0 = specialinvoke r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int getChars(char[])>($r1);
+
+        $r2 = new java.lang.String;
+
+        $r3 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] buffer>;
+
+        specialinvoke $r2.<java.lang.String: void <init>(char[],int,int)>($r3, 0, $i0);
+
+        return $r2;
+    }
+
+    public void appendTo(java.lang.Appendable)
+    {
+        java.lang.Appendable r2;
+        java.lang.AssertionError $r3;
+        java.lang.StringBuffer $r5;
+        int $i0;
+        char[] $r1, $r4, $r6;
+        java.lang.StringBuilder $r7;
+        sun.misc.FloatingDecimal$BinaryToASCIIBuffer r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.misc.FloatingDecimal$BinaryToASCIIBuffer;
+
+        r2 := @parameter0: java.lang.Appendable;
+
+        $r1 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] buffer>;
+
+        $i0 = specialinvoke r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int getChars(char[])>($r1);
+
+        $z0 = r2 instanceof java.lang.StringBuilder;
+
+        if $z0 == 0 goto label1;
+
+        $r7 = (java.lang.StringBuilder) r2;
+
+        $r6 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] buffer>;
+
+        virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(char[],int,int)>($r6, 0, $i0);
+
+        goto label3;
+
+     label1:
+        $z1 = r2 instanceof java.lang.StringBuffer;
+
+        if $z1 == 0 goto label2;
+
+        $r5 = (java.lang.StringBuffer) r2;
+
+        $r4 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] buffer>;
+
+        virtualinvoke $r5.<java.lang.StringBuffer: java.lang.StringBuffer append(char[],int,int)>($r4, 0, $i0);
+
+        goto label3;
+
+     label2:
+        $z2 = <sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label3;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>()>();
+
+        throw $r3;
+
+     label3:
+        return;
+    }
+
+    public int getDecimalExponent()
+    {
+        int $i0;
+        sun.misc.FloatingDecimal$BinaryToASCIIBuffer r0;
+
+        r0 := @this: sun.misc.FloatingDecimal$BinaryToASCIIBuffer;
+
+        $i0 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int decExponent>;
+
+        return $i0;
+    }
+
+    public int getDigits(char[])
+    {
+        int $i0, $i1, $i2;
+        char[] r1, $r2;
+        sun.misc.FloatingDecimal$BinaryToASCIIBuffer r0;
+
+        r0 := @this: sun.misc.FloatingDecimal$BinaryToASCIIBuffer;
+
+        r1 := @parameter0: char[];
+
+        $r2 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits>;
+
+        $i1 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int firstDigitIndex>;
+
+        $i0 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int nDigits>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, $i1, r1, 0, $i0);
+
+        $i2 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int nDigits>;
+
+        return $i2;
+    }
+
+    public boolean isNegative()
+    {
+        sun.misc.FloatingDecimal$BinaryToASCIIBuffer r0;
+        boolean $z0;
+
+        r0 := @this: sun.misc.FloatingDecimal$BinaryToASCIIBuffer;
+
+        $z0 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean isNegative>;
+
+        return $z0;
+    }
+
+    public boolean isExceptional()
+    {
+        sun.misc.FloatingDecimal$BinaryToASCIIBuffer r0;
+
+        r0 := @this: sun.misc.FloatingDecimal$BinaryToASCIIBuffer;
+
+        return 0;
+    }
+
+    public boolean digitsRoundedUp()
+    {
+        sun.misc.FloatingDecimal$BinaryToASCIIBuffer r0;
+        boolean $z0;
+
+        r0 := @this: sun.misc.FloatingDecimal$BinaryToASCIIBuffer;
+
+        $z0 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean decimalDigitsRoundedUp>;
+
+        return $z0;
+    }
+
+    public boolean decimalDigitsExact()
+    {
+        sun.misc.FloatingDecimal$BinaryToASCIIBuffer r0;
+        boolean $z0;
+
+        r0 := @this: sun.misc.FloatingDecimal$BinaryToASCIIBuffer;
+
+        $z0 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean exactDecimalConversion>;
+
+        return $z0;
+    }
+
+    private void setSign(boolean)
+    {
+        sun.misc.FloatingDecimal$BinaryToASCIIBuffer r0;
+        boolean z0;
+
+        r0 := @this: sun.misc.FloatingDecimal$BinaryToASCIIBuffer;
+
+        z0 := @parameter0: boolean;
+
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean isNegative> = z0;
+
+        return;
+    }
+
+    private void developLongDigits(int, long, int)
+    {
+        byte $b2, $b18, $b22, $b29;
+        sun.misc.FloatingDecimal$BinaryToASCIIBuffer r0;
+        boolean $z0;
+        long $l1, $l11, $l12, $l20, $l21, l24, l25, l26, l33;
+        java.lang.AssertionError $r9;
+        long[] $r7;
+        int i0, $i3, $i5, $i6, $i7, $i8, $i9, $i13, $i15, $i16, $i19, i23, $i27, i28, i30, i31, i32, $i34, $i35, $i36, $i38, $i40;
+        char $c4, $c10, $c14, $c17;
+        char[] $r1, $r2, $r3, $r4, $r5, $r8;
+
+        r0 := @this: sun.misc.FloatingDecimal$BinaryToASCIIBuffer;
+
+        i23 := @parameter0: int;
+
+        l24 := @parameter1: long;
+
+        i0 := @parameter2: int;
+
+        if i0 == 0 goto label01;
+
+        $r7 = <sun.misc.FDBigInteger: long[] LONG_5_POW>;
+
+        $l20 = $r7[i0];
+
+        l25 = $l20 << i0;
+
+        l26 = l24 % l25;
+
+        l24 = l24 / l25;
+
+        i23 = i23 + i0;
+
+        $l21 = l25 >> 1;
+
+        $b22 = l26 cmp $l21;
+
+        $i34 = (int) $b22;
+
+        if $i34 < 0 goto label01;
+
+        l24 = l24 + 1L;
+
+     label01:
+        $r8 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits>;
+
+        $i27 = lengthof $r8;
+
+        i28 = $i27 - 1;
+
+        $b29 = l24 cmp 2147483647L;
+
+        $i35 = (int) $b29;
+
+        if $i35 > 0 goto label06;
+
+        $z0 = <sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label02;
+
+        $b18 = l24 cmp 0L;
+
+        $i36 = (int) $b18;
+
+        if $i36 > 0 goto label02;
+
+        $r9 = new java.lang.AssertionError;
+
+        specialinvoke $r9.<java.lang.AssertionError: void <init>(long)>(l24);
+
+        throw $r9;
+
+     label02:
+        $i19 = (int) l24;
+
+        i30 = $i19 % 10;
+
+        i31 = $i19 / 10;
+
+     label03:
+        if i30 != 0 goto label04;
+
+        i23 = i23 + 1;
+
+        i30 = i31 % 10;
+
+        i31 = i31 / 10;
+
+        goto label03;
+
+     label04:
+        if i31 == 0 goto label05;
+
+        $r5 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits>;
+
+        $i15 = i28;
+
+        $i38 = (int) -1;
+
+        i28 = i28 + $i38;
+
+        $i16 = i30 + 48;
+
+        $c17 = (char) $i16;
+
+        $r5[$i15] = $c17;
+
+        i23 = i23 + 1;
+
+        i30 = i31 % 10;
+
+        i31 = i31 / 10;
+
+        goto label04;
+
+     label05:
+        $r4 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits>;
+
+        $i13 = i30 + 48;
+
+        $c14 = (char) $i13;
+
+        $r4[i28] = $c14;
+
+        goto label10;
+
+     label06:
+        $l1 = l24 % 10L;
+
+        i32 = (int) $l1;
+
+        l33 = l24 / 10L;
+
+     label07:
+        if i32 != 0 goto label08;
+
+        i23 = i23 + 1;
+
+        $l12 = l33 % 10L;
+
+        i32 = (int) $l12;
+
+        l33 = l33 / 10L;
+
+        goto label07;
+
+     label08:
+        $b2 = l33 cmp 0L;
+
+        if $b2 == 0 goto label09;
+
+        $r3 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits>;
+
+        $i8 = i28;
+
+        $i40 = (int) -1;
+
+        i28 = i28 + $i40;
+
+        $i9 = i32 + 48;
+
+        $c10 = (char) $i9;
+
+        $r3[$i8] = $c10;
+
+        i23 = i23 + 1;
+
+        $l11 = l33 % 10L;
+
+        i32 = (int) $l11;
+
+        l33 = l33 / 10L;
+
+        goto label08;
+
+     label09:
+        $r1 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits>;
+
+        $i3 = i32 + 48;
+
+        $c4 = (char) $i3;
+
+        $r1[i28] = $c4;
+
+     label10:
+        $i5 = i23 + 1;
+
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int decExponent> = $i5;
+
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int firstDigitIndex> = i28;
+
+        $r2 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits>;
+
+        $i6 = lengthof $r2;
+
+        $i7 = $i6 - i28;
+
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int nDigits> = $i7;
+
+        return;
+    }
+
+    private void dtoa(int, long, int, boolean)
+    {
+        byte $b25, $b26, $b46, $b48, $b52, $b55, $b59, $b61, $b82, $b98, $b100;
+        sun.misc.FloatingDecimal$BinaryToASCIIBuffer r0;
+        long $l40, $l41, $l42, $l43, $l44, $l45, $l47, $l51, $l53, $l54, $l60, $l62, $l63, $l64, $l65, $l67, $l68, $l81, $l97, l101, l103, $l113, l134, l135, l136;
+        int[] $r1, $r2, $r22, $r23, $r24, $r29, $r30, $r32;
+        long[] $r15, $r16, $r17, $r31;
+        int $i0, i1, $i2, $i3, $i4, i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i27, $i28, $i29, $i30, $i33, $i34, $i35, $i36, $i37, $i38, $i49, $i56, $i57, $i66, $i69, $i70, $i71, $i72, $i73, $i74, $i75, $i76, $i78, $i79, $i80, $i83, $i84, $i86, $i87, $i88, $i89, $i90, $i91, $i92, $i93, $i94, $i95, $i96, $i99, i102, $i104, i105, $i106, $i107, $i108, $i109, $i110, $i111, $i112, $i114, $i115, $i116, $i117, i118, $i119, i120, $i121, i122, $i123, $i124, i125, i126, i127, i128, i129, i130, i131, i132, i133, i137, $i138, $i139, $i140, $i142, $i144, $i146, $i148, $i149, $i150, $i151, $i153, $i155, $i156, $i157, $i158, $i160, $i162, $i163;
+        java.lang.AssertionError $r38, $r39, $r40, $r41, $r42, $r43, $r44, $r45;
+        char[] $r8, $r9, $r12, $r18, $r19, $r25, $r26;
+        boolean $z0, $z1, $z2, z3, $z4, $z5, $z6, $z7, $z8, $z9, z10, $z11, z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19, $z20, $z21, $z22, $z23, $z24, $z25;
+        sun.misc.FDBigInteger $r3, $r4, $r5, $r6, $r7, $r10, $r11, r35, r36, $r37;
+        char $c24, $c31, $c32, $c39, $c50, $c58, $c77, $c85;
+
+        r0 := @this: sun.misc.FloatingDecimal$BinaryToASCIIBuffer;
+
+        i1 := @parameter0: int;
+
+        l101 := @parameter1: long;
+
+        i5 := @parameter2: int;
+
+        z3 := @parameter3: boolean;
+
+        $z0 = <sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label01;
+
+        $b100 = l101 cmp 0L;
+
+        $i140 = (int) $b100;
+
+        if $i140 > 0 goto label01;
+
+        $r38 = new java.lang.AssertionError;
+
+        specialinvoke $r38.<java.lang.AssertionError: void <init>()>();
+
+        throw $r38;
+
+     label01:
+        $z1 = <sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label02;
+
+        $l97 = l101 & 4503599627370496L;
+
+        $b98 = $l97 cmp 0L;
+
+        if $b98 != 0 goto label02;
+
+        $r39 = new java.lang.AssertionError;
+
+        specialinvoke $r39.<java.lang.AssertionError: void <init>()>();
+
+        throw $r39;
+
+     label02:
+        $i0 = staticinvoke <java.lang.Long: int numberOfTrailingZeros(long)>(l101);
+
+        $i99 = 53 - $i0;
+
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean decimalDigitsRoundedUp> = 0;
+
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean exactDecimalConversion> = 0;
+
+        $i2 = $i99 - i1;
+
+        $i3 = $i2 - 1;
+
+        $i4 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i3);
+
+        if i1 > 62 goto label07;
+
+        $i142 = (int) -21;
+
+        if i1 < $i142 goto label07;
+
+        $r31 = <sun.misc.FDBigInteger: long[] LONG_5_POW>;
+
+        $i90 = lengthof $r31;
+
+        if $i4 >= $i90 goto label07;
+
+        $r32 = <sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int[] N_5_BITS>;
+
+        $i91 = $r32[$i4];
+
+        $i92 = $i99 + $i91;
+
+        if $i92 >= 64 goto label07;
+
+        if $i4 != 0 goto label07;
+
+        if i1 <= i5 goto label03;
+
+        $i95 = i1 - i5;
+
+        $i96 = $i95 - 1;
+
+        i102 = staticinvoke <sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int insignificantDigitsForPow2(int)>($i96);
+
+        goto label04;
+
+     label03:
+        i102 = 0;
+
+     label04:
+        if i1 < 52 goto label05;
+
+        $i94 = i1 - 52;
+
+        l103 = l101 << $i94;
+
+        goto label06;
+
+     label05:
+        $i93 = 52 - i1;
+
+        l103 = l101 >>> $i93;
+
+     label06:
+        specialinvoke r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: void developLongDigits(int,long,int)>(0, l103, i102);
+
+        return;
+
+     label07:
+        $i104 = staticinvoke <sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int estimateDecExp(long,int)>(l101, i1);
+
+        i105 = $i104;
+
+        $i106 = neg $i104;
+
+        $i107 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i106);
+
+        $i108 = $i107 + $i4;
+
+        $i109 = $i108 + i1;
+
+        $i110 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i104);
+
+        $i111 = $i110 + $i4;
+
+        $i112 = $i109 - i5;
+
+        $l113 = l101 >>> $i0;
+
+        $i114 = $i99 - 1;
+
+        $i115 = $i109 - $i114;
+
+        $i116 = staticinvoke <java.lang.Math: int min(int,int)>($i115, $i111);
+
+        $i117 = $i115 - $i116;
+
+        i118 = $i117;
+
+        $i119 = $i111 - $i116;
+
+        i120 = $i119;
+
+        $i121 = $i112 - $i116;
+
+        i122 = $i121;
+
+        if $i99 != 1 goto label08;
+
+        $i144 = (int) -1;
+
+        i122 = $i121 + $i144;
+
+     label08:
+        if i122 >= 0 goto label09;
+
+        i118 = $i117 - i122;
+
+        i120 = $i119 - i122;
+
+        i122 = 0;
+
+     label09:
+        $i7 = $i99 + i118;
+
+        $r1 = <sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int[] N_5_BITS>;
+
+        $i6 = lengthof $r1;
+
+        if $i107 >= $i6 goto label10;
+
+        $r30 = <sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int[] N_5_BITS>;
+
+        $i123 = $r30[$i107];
+
+        goto label11;
+
+     label10:
+        $i123 = $i107 * 3;
+
+     label11:
+        $i89 = $i7 + $i123;
+
+        $i11 = i120 + 1;
+
+        $i9 = $i110 + 1;
+
+        $r2 = <sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int[] N_5_BITS>;
+
+        $i8 = lengthof $r2;
+
+        if $i9 >= $i8 goto label12;
+
+        $r29 = <sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int[] N_5_BITS>;
+
+        $i87 = $i110 + 1;
+
+        $i124 = $r29[$i87];
+
+        goto label13;
+
+     label12:
+        $i10 = $i110 + 1;
+
+        $i124 = $i10 * 3;
+
+     label13:
+        $i88 = $i11 + $i124;
+
+        if $i89 >= 64 goto label53;
+
+        if $i88 >= 64 goto label53;
+
+        if $i89 >= 32 goto label33;
+
+        if $i88 >= 32 goto label33;
+
+        $i70 = (int) $l113;
+
+        $r22 = <sun.misc.FDBigInteger: int[] SMALL_5_POW>;
+
+        $i69 = $r22[$i107];
+
+        $i71 = $i70 * $i69;
+
+        i125 = $i71 << i118;
+
+        $r23 = <sun.misc.FDBigInteger: int[] SMALL_5_POW>;
+
+        $i72 = $r23[$i110];
+
+        i126 = $i72 << i120;
+
+        $r24 = <sun.misc.FDBigInteger: int[] SMALL_5_POW>;
+
+        $i73 = $r24[$i107];
+
+        i127 = $i73 << i122;
+
+        i128 = i126 * 10;
+
+        i129 = 0;
+
+        i130 = i125 / i126;
+
+        $i74 = i125 % i126;
+
+        i131 = 10 * $i74;
+
+        i132 = i127 * 10;
+
+        if i131 >= i132 goto label14;
+
+        $z9 = 1;
+
+        goto label15;
+
+     label14:
+        $z9 = 0;
+
+     label15:
+        z10 = $z9;
+
+        $i75 = i131 + i132;
+
+        if $i75 <= i128 goto label16;
+
+        $z11 = 1;
+
+        goto label17;
+
+     label16:
+        $z11 = 0;
+
+     label17:
+        z12 = $z11;
+
+        $z7 = <sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean $assertionsDisabled>;
+
+        if $z7 != 0 goto label18;
+
+        if i130 < 10 goto label18;
+
+        $r40 = new java.lang.AssertionError;
+
+        specialinvoke $r40.<java.lang.AssertionError: void <init>(int)>(i130);
+
+        throw $r40;
+
+     label18:
+        if i130 != 0 goto label19;
+
+        if z12 != 0 goto label19;
+
+        $i146 = (int) -1;
+
+        i105 = $i104 + $i146;
+
+        goto label20;
+
+     label19:
+        $r25 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits>;
+
+        i129 = 1;
+
+        $i76 = 48 + i130;
+
+        $c77 = (char) $i76;
+
+        $r25[0] = $c77;
+
+     label20:
+        if z3 == 0 goto label21;
+
+        $i148 = (int) -3;
+
+        if i105 < $i148 goto label21;
+
+        if i105 < 8 goto label22;
+
+     label21:
+        z10 = 0;
+
+        z12 = 0;
+
+     label22:
+        if z10 != 0 goto label30;
+
+        if z12 != 0 goto label30;
+
+        i133 = i131 / i126;
+
+        $i80 = i131 % i126;
+
+        i131 = 10 * $i80;
+
+        i132 = i132 * 10;
+
+        $z8 = <sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean $assertionsDisabled>;
+
+        if $z8 != 0 goto label23;
+
+        if i133 < 10 goto label23;
+
+        $r41 = new java.lang.AssertionError;
+
+        specialinvoke $r41.<java.lang.AssertionError: void <init>(int)>(i133);
+
+        throw $r41;
+
+     label23:
+        $l81 = (long) i132;
+
+        $b82 = $l81 cmp 0L;
+
+        $i149 = (int) $b82;
+
+        if $i149 <= 0 goto label28;
+
+        if i131 >= i132 goto label24;
+
+        $z13 = 1;
+
+        goto label25;
+
+     label24:
+        $z13 = 0;
+
+     label25:
+        z10 = $z13;
+
+        $i86 = i131 + i132;
+
+        if $i86 <= i128 goto label26;
+
+        $z14 = 1;
+
+        goto label27;
+
+     label26:
+        $z14 = 0;
+
+     label27:
+        z12 = $z14;
+
+        goto label29;
+
+     label28:
+        z10 = 1;
+
+        z12 = 1;
+
+     label29:
+        $r26 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits>;
+
+        $i83 = i129;
+
+        i129 = i129 + 1;
+
+        $i84 = 48 + i133;
+
+        $c85 = (char) $i84;
+
+        $r26[$i83] = $c85;
+
+        goto label22;
+
+     label30:
+        $i78 = i131 << 1;
+
+        $i79 = $i78 - i128;
+
+        l134 = (long) $i79;
+
+        if i131 != 0 goto label31;
+
+        $z15 = 1;
+
+        goto label32;
+
+     label31:
+        $z15 = 0;
+
+     label32:
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean exactDecimalConversion> = $z15;
+
+        goto label73;
+
+     label33:
+        $r15 = <sun.misc.FDBigInteger: long[] LONG_5_POW>;
+
+        $l40 = $r15[$i107];
+
+        $l41 = $l113 * $l40;
+
+        $l62 = $l41 << i118;
+
+        $r16 = <sun.misc.FDBigInteger: long[] LONG_5_POW>;
+
+        $l42 = $r16[$i110];
+
+        $l63 = $l42 << i120;
+
+        $r17 = <sun.misc.FDBigInteger: long[] LONG_5_POW>;
+
+        $l43 = $r17[$i107];
+
+        $l64 = $l43 << i122;
+
+        $l65 = $l63 * 10L;
+
+        i129 = 0;
+
+        $l44 = $l62 / $l63;
+
+        $i66 = (int) $l44;
+
+        $l45 = $l62 % $l63;
+
+        $l67 = 10L * $l45;
+
+        l135 = $l67;
+
+        $l68 = $l64 * 10L;
+
+        l136 = $l68;
+
+        $b46 = $l67 cmp $l68;
+
+        $i150 = (int) $b46;
+
+        if $i150 >= 0 goto label34;
+
+        $z16 = 1;
+
+        goto label35;
+
+     label34:
+        $z16 = 0;
+
+     label35:
+        z10 = $z16;
+
+        $l47 = $l67 + $l68;
+
+        $b48 = $l47 cmp $l65;
+
+        $i151 = (int) $b48;
+
+        if $i151 <= 0 goto label36;
+
+        $z17 = 1;
+
+        goto label37;
+
+     label36:
+        $z17 = 0;
+
+     label37:
+        z12 = $z17;
+
+        $z5 = <sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean $assertionsDisabled>;
+
+        if $z5 != 0 goto label38;
+
+        if $i66 < 10 goto label38;
+
+        $r42 = new java.lang.AssertionError;
+
+        specialinvoke $r42.<java.lang.AssertionError: void <init>(int)>($i66);
+
+        throw $r42;
+
+     label38:
+        if $i66 != 0 goto label39;
+
+        if z12 != 0 goto label39;
+
+        $i153 = (int) -1;
+
+        i105 = $i104 + $i153;
+
+        goto label40;
+
+     label39:
+        $r18 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits>;
+
+        i129 = 1;
+
+        $i49 = 48 + $i66;
+
+        $c50 = (char) $i49;
+
+        $r18[0] = $c50;
+
+     label40:
+        if z3 == 0 goto label41;
+
+        $i155 = (int) -3;
+
+        if i105 < $i155 goto label41;
+
+        if i105 < 8 goto label42;
+
+     label41:
+        z10 = 0;
+
+        z12 = 0;
+
+     label42:
+        if z10 != 0 goto label50;
+
+        if z12 != 0 goto label50;
+
+        $l53 = l135 / $l63;
+
+        i137 = (int) $l53;
+
+        $l54 = l135 % $l63;
+
+        l135 = 10L * $l54;
+
+        l136 = l136 * 10L;
+
+        $z6 = <sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean $assertionsDisabled>;
+
+        if $z6 != 0 goto label43;
+
+        if i137 < 10 goto label43;
+
+        $r43 = new java.lang.AssertionError;
+
+        specialinvoke $r43.<java.lang.AssertionError: void <init>(int)>(i137);
+
+        throw $r43;
+
+     label43:
+        $b55 = l136 cmp 0L;
+
+        $i156 = (int) $b55;
+
+        if $i156 <= 0 goto label48;
+
+        $b59 = l135 cmp l136;
+
+        $i157 = (int) $b59;
+
+        if $i157 >= 0 goto label44;
+
+        $z18 = 1;
+
+        goto label45;
+
+     label44:
+        $z18 = 0;
+
+     label45:
+        z10 = $z18;
+
+        $l60 = l135 + l136;
+
+        $b61 = $l60 cmp $l65;
+
+        $i158 = (int) $b61;
+
+        if $i158 <= 0 goto label46;
+
+        $z19 = 1;
+
+        goto label47;
+
+     label46:
+        $z19 = 0;
+
+     label47:
+        z12 = $z19;
+
+        goto label49;
+
+     label48:
+        z10 = 1;
+
+        z12 = 1;
+
+     label49:
+        $r19 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits>;
+
+        $i56 = i129;
+
+        i129 = i129 + 1;
+
+        $i57 = 48 + i137;
+
+        $c58 = (char) $i57;
+
+        $r19[$i56] = $c58;
+
+        goto label42;
+
+     label50:
+        $l51 = l135 << 1;
+
+        l134 = $l51 - $l65;
+
+        $b52 = l135 cmp 0L;
+
+        if $b52 != 0 goto label51;
+
+        $z20 = 1;
+
+        goto label52;
+
+     label51:
+        $z20 = 0;
+
+     label52:
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean exactDecimalConversion> = $z20;
+
+        goto label73;
+
+     label53:
+        $r3 = staticinvoke <sun.misc.FDBigInteger: sun.misc.FDBigInteger valueOfPow52(int,int)>($i110, i120);
+
+        $i12 = virtualinvoke $r3.<sun.misc.FDBigInteger: int getNormalizationBias()>();
+
+        $r4 = virtualinvoke $r3.<sun.misc.FDBigInteger: sun.misc.FDBigInteger leftShift(int)>($i12);
+
+        $i13 = i118 + $i12;
+
+        $r5 = staticinvoke <sun.misc.FDBigInteger: sun.misc.FDBigInteger valueOfMulPow52(long,int,int)>($l113, $i107, $i13);
+
+        r35 = $r5;
+
+        $i16 = $i107 + 1;
+
+        $i14 = i122 + $i12;
+
+        $i15 = $i14 + 1;
+
+        $r6 = staticinvoke <sun.misc.FDBigInteger: sun.misc.FDBigInteger valueOfPow52(int,int)>($i16, $i15);
+
+        r36 = $r6;
+
+        $i19 = $i110 + 1;
+
+        $i17 = i120 + $i12;
+
+        $i18 = $i17 + 1;
+
+        $r7 = staticinvoke <sun.misc.FDBigInteger: sun.misc.FDBigInteger valueOfPow52(int,int)>($i19, $i18);
+
+        i129 = 0;
+
+        $i20 = virtualinvoke $r5.<sun.misc.FDBigInteger: int quoRemIteration(sun.misc.FDBigInteger)>($r4);
+
+        $i21 = virtualinvoke $r5.<sun.misc.FDBigInteger: int 'cmp'(sun.misc.FDBigInteger)>($r6);
+
+        if $i21 >= 0 goto label54;
+
+        $z21 = 1;
+
+        goto label55;
+
+     label54:
+        $z21 = 0;
+
+     label55:
+        z10 = $z21;
+
+        $i22 = virtualinvoke $r7.<sun.misc.FDBigInteger: int addAndCmp(sun.misc.FDBigInteger,sun.misc.FDBigInteger)>($r5, $r6);
+
+        if $i22 > 0 goto label56;
+
+        $z22 = 1;
+
+        goto label57;
+
+     label56:
+        $z22 = 0;
+
+     label57:
+        z12 = $z22;
+
+        $z2 = <sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label58;
+
+        if $i20 < 10 goto label58;
+
+        $r44 = new java.lang.AssertionError;
+
+        specialinvoke $r44.<java.lang.AssertionError: void <init>(int)>($i20);
+
+        throw $r44;
+
+     label58:
+        if $i20 != 0 goto label59;
+
+        if z12 != 0 goto label59;
+
+        $i160 = (int) -1;
+
+        i105 = $i104 + $i160;
+
+        goto label60;
+
+     label59:
+        $r8 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits>;
+
+        i129 = 1;
+
+        $i23 = 48 + $i20;
+
+        $c24 = (char) $i23;
+
+        $r8[0] = $c24;
+
+     label60:
+        if z3 == 0 goto label61;
+
+        $i162 = (int) -3;
+
+        if i105 < $i162 goto label61;
+
+        if i105 < 8 goto label62;
+
+     label61:
+        z10 = 0;
+
+        z12 = 0;
+
+     label62:
+        if z10 != 0 goto label68;
+
+        if z12 != 0 goto label68;
+
+        $i34 = virtualinvoke $r5.<sun.misc.FDBigInteger: int quoRemIteration(sun.misc.FDBigInteger)>($r4);
+
+        $z4 = <sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean $assertionsDisabled>;
+
+        if $z4 != 0 goto label63;
+
+        if $i34 < 10 goto label63;
+
+        $r45 = new java.lang.AssertionError;
+
+        specialinvoke $r45.<java.lang.AssertionError: void <init>(int)>($i34);
+
+        throw $r45;
+
+     label63:
+        $r11 = virtualinvoke r36.<sun.misc.FDBigInteger: sun.misc.FDBigInteger multBy10()>();
+
+        r36 = $r11;
+
+        $i35 = virtualinvoke $r5.<sun.misc.FDBigInteger: int 'cmp'(sun.misc.FDBigInteger)>($r11);
+
+        if $i35 >= 0 goto label64;
+
+        $z23 = 1;
+
+        goto label65;
+
+     label64:
+        $z23 = 0;
+
+     label65:
+        z10 = $z23;
+
+        $i36 = virtualinvoke $r7.<sun.misc.FDBigInteger: int addAndCmp(sun.misc.FDBigInteger,sun.misc.FDBigInteger)>($r5, $r11);
+
+        if $i36 > 0 goto label66;
+
+        $z24 = 1;
+
+        goto label67;
+
+     label66:
+        $z24 = 0;
+
+     label67:
+        z12 = $z24;
+
+        $r12 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits>;
+
+        $i37 = i129;
+
+        i129 = i129 + 1;
+
+        $i38 = 48 + $i34;
+
+        $c39 = (char) $i38;
+
+        $r12[$i37] = $c39;
+
+        goto label62;
+
+     label68:
+        if z12 == 0 goto label69;
+
+        if z10 == 0 goto label69;
+
+        $r10 = virtualinvoke $r5.<sun.misc.FDBigInteger: sun.misc.FDBigInteger leftShift(int)>(1);
+
+        r35 = $r10;
+
+        $i33 = virtualinvoke $r10.<sun.misc.FDBigInteger: int 'cmp'(sun.misc.FDBigInteger)>($r7);
+
+        l134 = (long) $i33;
+
+        goto label70;
+
+     label69:
+        l134 = 0L;
+
+     label70:
+        $r37 = <sun.misc.FDBigInteger: sun.misc.FDBigInteger ZERO>;
+
+        $i138 = virtualinvoke r35.<sun.misc.FDBigInteger: int 'cmp'(sun.misc.FDBigInteger)>($r37);
+
+        if $i138 != 0 goto label71;
+
+        $z25 = 1;
+
+        goto label72;
+
+     label71:
+        $z25 = 0;
+
+     label72:
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean exactDecimalConversion> = $z25;
+
+     label73:
+        $i139 = i105 + 1;
+
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int decExponent> = $i139;
+
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int firstDigitIndex> = 0;
+
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int nDigits> = i129;
+
+        if z12 == 0 goto label76;
+
+        if z10 == 0 goto label75;
+
+        $b25 = l134 cmp 0L;
+
+        if $b25 != 0 goto label74;
+
+        $r9 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits>;
+
+        $i28 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int firstDigitIndex>;
+
+        $i27 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int nDigits>;
+
+        $i29 = $i28 + $i27;
+
+        $i30 = $i29 - 1;
+
+        $c31 = $r9[$i30];
+
+        $c32 = $c31 & 1;
+
+        if $c32 == 0 goto label76;
+
+        specialinvoke r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: void roundup()>();
+
+        goto label76;
+
+     label74:
+        $b26 = l134 cmp 0L;
+
+        $i163 = (int) $b26;
+
+        if $i163 <= 0 goto label76;
+
+        specialinvoke r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: void roundup()>();
+
+        goto label76;
+
+     label75:
+        specialinvoke r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: void roundup()>();
+
+     label76:
+        return;
+    }
+
+    private void roundup()
+    {
+        int $i0, $i1, $i2, $i3, $i5, $i6, $i7, $i8, i9, $i11, $i12, $i14, $i15, $i16;
+        sun.misc.FloatingDecimal$BinaryToASCIIBuffer r0;
+        char $c4, c10;
+        char[] $r1, $r2, $r3, $r4, $r5;
+
+        r0 := @this: sun.misc.FloatingDecimal$BinaryToASCIIBuffer;
+
+        $i1 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int firstDigitIndex>;
+
+        $i0 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int nDigits>;
+
+        $i2 = $i1 + $i0;
+
+        i9 = $i2 - 1;
+
+        $r1 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits>;
+
+        c10 = $r1[i9];
+
+        $i11 = (int) c10;
+
+        if $i11 != 57 goto label3;
+
+     label1:
+        $i12 = (int) c10;
+
+        if $i12 != 57 goto label2;
+
+        $i8 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int firstDigitIndex>;
+
+        if i9 <= $i8 goto label2;
+
+        $r4 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits>;
+
+        $r4[i9] = 48;
+
+        $r5 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits>;
+
+        $i14 = (int) -1;
+
+        i9 = i9 + $i14;
+
+        c10 = $r5[i9];
+
+        goto label1;
+
+     label2:
+        $i15 = (int) c10;
+
+        if $i15 != 57 goto label3;
+
+        $i5 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int decExponent>;
+
+        $i6 = $i5 + 1;
+
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int decExponent> = $i6;
+
+        $r3 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits>;
+
+        $i7 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int firstDigitIndex>;
+
+        $r3[$i7] = 49;
+
+        return;
+
+     label3:
+        $r2 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits>;
+
+        $i16 = (int) c10;
+
+        $i3 = $i16 + 1;
+
+        $c4 = (char) $i3;
+
+        $r2[i9] = $c4;
+
+        r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean decimalDigitsRoundedUp> = 1;
+
+        return;
+    }
+
+    static int estimateDecExp(long, int)
+    {
+        byte $b10, $b13, $b21, $b24;
+        boolean z0, $z2, $z3;
+        long l0, $l1, $l2, $l4, $l5, $l6, $l9, $l12, l14, $l15, $l17, $l18, $l20;
+        int i3, $i7, i8, $i11, $i16, i19, $i22, $i23;
+        double $d0, $d1, $d2, $d3, $d4, $d5, d6;
+
+        l0 := @parameter0: long;
+
+        i3 := @parameter1: int;
+
+        $l1 = l0 & 4503599627370495L;
+
+        $l2 = 4607182418800017408L | $l1;
+
+        $d0 = staticinvoke <java.lang.Double: double longBitsToDouble(long)>($l2);
+
+        $d1 = $d0 - 1.5;
+
+        $d2 = $d1 * 0.289529654;
+
+        $d5 = $d2 + 0.176091259;
+
+        $d3 = (double) i3;
+
+        $d4 = $d3 * 0.301029995663981;
+
+        d6 = $d5 + $d4;
+
+        $l4 = staticinvoke <java.lang.Double: long doubleToRawLongBits(double)>(d6);
+
+        $l5 = $l4 & 9218868437227405312L;
+
+        $l6 = $l5 >> 52;
+
+        $i7 = (int) $l6;
+
+        i8 = $i7 - 1023;
+
+        $l9 = $l4 & -9223372036854775808L;
+
+        $b10 = $l9 cmp 0L;
+
+        if $b10 == 0 goto label01;
+
+        $z3 = 1;
+
+        $z2 = 1;
+
+        goto label02;
+
+     label01:
+        $z3 = 0;
+
+        $z2 = 0;
+
+     label02:
+        z0 = $z2;
+
+        if i8 < 0 goto label06;
+
+        if i8 >= 52 goto label06;
+
+        l14 = 4503599627370495L >> i8;
+
+        $l15 = $l4 & 4503599627370495L;
+
+        $l17 = $l15 | 4503599627370496L;
+
+        $i16 = 52 - i8;
+
+        $l18 = $l17 >> $i16;
+
+        i19 = (int) $l18;
+
+        if $z3 == 0 goto label04;
+
+        $l20 = l14 & $l4;
+
+        $b21 = $l20 cmp 0L;
+
+        if $b21 != 0 goto label03;
+
+        $i23 = neg i19;
+
+        goto label05;
+
+     label03:
+        $i22 = neg i19;
+
+        $i23 = $i22 - 1;
+
+        goto label05;
+
+     label04:
+        $i23 = i19;
+
+     label05:
+        return $i23;
+
+     label06:
+        if i8 >= 0 goto label10;
+
+        $l12 = $l4 & 9223372036854775807L;
+
+        $b13 = $l12 cmp 0L;
+
+        if $b13 != 0 goto label07;
+
+        $b24 = 0;
+
+        goto label09;
+
+     label07:
+        if z0 == 0 goto label08;
+
+        $b24 = -1;
+
+        goto label09;
+
+     label08:
+        $b24 = 0;
+
+     label09:
+        return $b24;
+
+     label10:
+        $i11 = (int) d6;
+
+        return $i11;
+    }
+
+    private static int insignificantDigits(int)
+    {
+        byte $b1;
+        int i4, i5, $i6;
+        long $l0, $l2, $l3;
+
+        i4 := @parameter0: int;
+
+        i5 = 0;
+
+     label1:
+        $l0 = (long) i4;
+
+        $b1 = $l0 cmp 10L;
+
+        $i6 = (int) $b1;
+
+        if $i6 < 0 goto label2;
+
+        $l2 = (long) i4;
+
+        $l3 = $l2 / 10L;
+
+        i4 = (int) $l3;
+
+        i5 = i5 + 1;
+
+        goto label1;
+
+     label2:
+        return i5;
+    }
+
+    private static int insignificantDigitsForPow2(int)
+    {
+        int[] $r0, $r1;
+        int i0, $i1, $i2;
+
+        i0 := @parameter0: int;
+
+        if i0 <= 1 goto label1;
+
+        $r0 = <sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int[] insignificantDigitsNumber>;
+
+        $i1 = lengthof $r0;
+
+        if i0 >= $i1 goto label1;
+
+        $r1 = <sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int[] insignificantDigitsNumber>;
+
+        $i2 = $r1[i0];
+
+        return $i2;
+
+     label1:
+        return 0;
+    }
+
+    private int getChars(char[])
+    {
+        byte b73, b74, b75;
+        sun.misc.FloatingDecimal$BinaryToASCIIBuffer r0;
+        java.lang.AssertionError $r8;
+        char[] r1, $r2, $r3, $r4, $r5, $r6;
+        boolean $z0, $z1, z2, z3, z4, z5;
+        int $i0, $i1, $i2, $i4, $i5, $i6, $i7, $i8, $i10, $i11, $i13, $i14, $i16, $i17, $i19, $i20, $i22, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, i49, $i50, $i51, $i52, $i53, $i54, $i55, i56, i57, i58, i59, i60, i61, i62, i63, i64, i65, i66, i67, i68, i69, i70, i71, i72, $i77;
+        char $c3, $c9, $c12, $c15, $c18, $c21, $c23;
+
+        r0 := @this: sun.misc.FloatingDecimal$BinaryToASCIIBuffer;
+
+        r1 := @parameter0: char[];
+
+        $z0 = <sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label01;
+
+        $i54 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int nDigits>;
+
+        if $i54 <= 19 goto label01;
+
+        $r8 = new java.lang.AssertionError;
+
+        $i55 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int nDigits>;
+
+        specialinvoke $r8.<java.lang.AssertionError: void <init>(int)>($i55);
+
+        throw $r8;
+
+     label01:
+        z2 = 0;
+
+        b75 = 0;
+
+        b74 = 0;
+
+        z5 = 0;
+
+        b73 = 0;
+
+        z4 = 0;
+
+        z3 = 0;
+
+        $z1 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean isNegative>;
+
+        if $z1 == 0 goto label02;
+
+        r1[0] = 45;
+
+        z2 = 1;
+
+        b75 = 1;
+
+        b74 = 1;
+
+        z5 = 1;
+
+        b73 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+     label02:
+        $i0 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int decExponent>;
+
+        if $i0 <= 0 goto label06;
+
+        $i41 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int decExponent>;
+
+        if $i41 >= 8 goto label06;
+
+        $i43 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int nDigits>;
+
+        $i42 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int decExponent>;
+
+        $i44 = staticinvoke <java.lang.Math: int min(int,int)>($i43, $i42);
+
+        $r5 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits>;
+
+        $i45 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int firstDigitIndex>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r5, $i45, r1, b74, $i44);
+
+        i56 = z5 + $i44;
+
+        $i46 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int decExponent>;
+
+        if $i44 >= $i46 goto label03;
+
+        $i52 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int decExponent>;
+
+        i57 = $i52 - $i44;
+
+        $i53 = i56 + i57;
+
+        staticinvoke <java.util.Arrays: void fill(char[],int,int,char)>(r1, i56, $i53, 48);
+
+        i58 = i56 + i57;
+
+        i59 = i58 + 1;
+
+        r1[i58] = 46;
+
+        i60 = i59 + 1;
+
+        r1[i59] = 48;
+
+        goto label05;
+
+     label03:
+        i61 = i56 + 1;
+
+        r1[i56] = 46;
+
+        $i47 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int nDigits>;
+
+        if $i44 >= $i47 goto label04;
+
+        $i48 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int nDigits>;
+
+        i49 = $i48 - $i44;
+
+        $r6 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits>;
+
+        $i50 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int firstDigitIndex>;
+
+        $i51 = $i50 + $i44;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r6, $i51, r1, i61, i49);
+
+        i60 = i61 + i49;
+
+        goto label05;
+
+     label04:
+        i60 = i61 + 1;
+
+        r1[i61] = 48;
+
+     label05:
+        goto label15;
+
+     label06:
+        $i1 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int decExponent>;
+
+        if $i1 > 0 goto label08;
+
+        $i33 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int decExponent>;
+
+        $i77 = (int) -3;
+
+        if $i33 <= $i77 goto label08;
+
+        i62 = z4 + 1;
+
+        r1[b75] = 48;
+
+        i63 = i62 + 1;
+
+        r1[i62] = 46;
+
+        $i34 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int decExponent>;
+
+        if $i34 == 0 goto label07;
+
+        $i38 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int decExponent>;
+
+        $i39 = i63 - $i38;
+
+        staticinvoke <java.util.Arrays: void fill(char[],int,int,char)>(r1, i63, $i39, 48);
+
+        $i40 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int decExponent>;
+
+        i63 = i63 - $i40;
+
+     label07:
+        $r4 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits>;
+
+        $i36 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int firstDigitIndex>;
+
+        $i35 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int nDigits>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, $i36, r1, i63, $i35);
+
+        $i37 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int nDigits>;
+
+        i60 = i63 + $i37;
+
+        goto label15;
+
+     label08:
+        i64 = z3 + 1;
+
+        $r2 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits>;
+
+        $i2 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int firstDigitIndex>;
+
+        $c3 = $r2[$i2];
+
+        r1[b73] = $c3;
+
+        i65 = i64 + 1;
+
+        r1[i64] = 46;
+
+        $i4 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int nDigits>;
+
+        if $i4 <= 1 goto label09;
+
+        $r3 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: char[] digits>;
+
+        $i27 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int firstDigitIndex>;
+
+        $i30 = $i27 + 1;
+
+        $i28 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int nDigits>;
+
+        $i29 = $i28 - 1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, $i30, r1, i65, $i29);
+
+        $i31 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int nDigits>;
+
+        $i32 = $i31 - 1;
+
+        i66 = i65 + $i32;
+
+        goto label10;
+
+     label09:
+        i66 = i65 + 1;
+
+        r1[i65] = 48;
+
+     label10:
+        i67 = i66 + 1;
+
+        r1[i66] = 69;
+
+        $i5 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int decExponent>;
+
+        if $i5 > 0 goto label11;
+
+        $i24 = i67;
+
+        i67 = i67 + 1;
+
+        r1[$i24] = 45;
+
+        $i25 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int decExponent>;
+
+        $i26 = neg $i25;
+
+        i68 = $i26 + 1;
+
+        goto label12;
+
+     label11:
+        $i6 = r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int decExponent>;
+
+        i68 = $i6 - 1;
+
+     label12:
+        if i68 > 9 goto label13;
+
+        i60 = i67 + 1;
+
+        $i22 = i68 + 48;
+
+        $c23 = (char) $i22;
+
+        r1[i67] = $c23;
+
+        goto label15;
+
+     label13:
+        if i68 > 99 goto label14;
+
+        i69 = i67 + 1;
+
+        $i16 = i68 / 10;
+
+        $i17 = $i16 + 48;
+
+        $c18 = (char) $i17;
+
+        r1[i67] = $c18;
+
+        i60 = i69 + 1;
+
+        $i19 = i68 % 10;
+
+        $i20 = $i19 + 48;
+
+        $c21 = (char) $i20;
+
+        r1[i69] = $c21;
+
+        goto label15;
+
+     label14:
+        i70 = i67 + 1;
+
+        $i7 = i68 / 100;
+
+        $i8 = $i7 + 48;
+
+        $c9 = (char) $i8;
+
+        r1[i67] = $c9;
+
+        i71 = i68 % 100;
+
+        i72 = i70 + 1;
+
+        $i10 = i71 / 10;
+
+        $i11 = $i10 + 48;
+
+        $c12 = (char) $i11;
+
+        r1[i70] = $c12;
+
+        i60 = i72 + 1;
+
+        $i13 = i71 % 10;
+
+        $i14 = $i13 + 48;
+
+        $c15 = (char) $i14;
+
+        r1[i72] = $c15;
+
+     label15:
+        return i60;
+    }
+
+    static void access$000(sun.misc.FloatingDecimal$BinaryToASCIIBuffer, boolean)
+    {
+        sun.misc.FloatingDecimal$BinaryToASCIIBuffer r0;
+        boolean z0;
+
+        r0 := @parameter0: sun.misc.FloatingDecimal$BinaryToASCIIBuffer;
+
+        z0 := @parameter1: boolean;
+
+        specialinvoke r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: void setSign(boolean)>(z0);
+
+        return;
+    }
+
+    static void access$100(sun.misc.FloatingDecimal$BinaryToASCIIBuffer, int, long, int, boolean)
+    {
+        int i0, i2;
+        long l1;
+        sun.misc.FloatingDecimal$BinaryToASCIIBuffer r0;
+        boolean z0;
+
+        r0 := @parameter0: sun.misc.FloatingDecimal$BinaryToASCIIBuffer;
+
+        i0 := @parameter1: int;
+
+        l1 := @parameter2: long;
+
+        i2 := @parameter3: int;
+
+        z0 := @parameter4: boolean;
+
+        specialinvoke r0.<sun.misc.FloatingDecimal$BinaryToASCIIBuffer: void dtoa(int,long,int,boolean)>(i0, l1, i2, z0);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        int[] $r1, $r2;
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        $r0 = class "Lsun/misc/FloatingDecimal;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.misc.FloatingDecimal$BinaryToASCIIBuffer: boolean $assertionsDisabled> = $z1;
+
+        $r1 = newarray (int)[64];
+
+        $r1[0] = 0;
+
+        $r1[1] = 0;
+
+        $r1[2] = 0;
+
+        $r1[3] = 0;
+
+        $r1[4] = 1;
+
+        $r1[5] = 1;
+
+        $r1[6] = 1;
+
+        $r1[7] = 2;
+
+        $r1[8] = 2;
+
+        $r1[9] = 2;
+
+        $r1[10] = 3;
+
+        $r1[11] = 3;
+
+        $r1[12] = 3;
+
+        $r1[13] = 3;
+
+        $r1[14] = 4;
+
+        $r1[15] = 4;
+
+        $r1[16] = 4;
+
+        $r1[17] = 5;
+
+        $r1[18] = 5;
+
+        $r1[19] = 5;
+
+        $r1[20] = 6;
+
+        $r1[21] = 6;
+
+        $r1[22] = 6;
+
+        $r1[23] = 6;
+
+        $r1[24] = 7;
+
+        $r1[25] = 7;
+
+        $r1[26] = 7;
+
+        $r1[27] = 8;
+
+        $r1[28] = 8;
+
+        $r1[29] = 8;
+
+        $r1[30] = 9;
+
+        $r1[31] = 9;
+
+        $r1[32] = 9;
+
+        $r1[33] = 9;
+
+        $r1[34] = 10;
+
+        $r1[35] = 10;
+
+        $r1[36] = 10;
+
+        $r1[37] = 11;
+
+        $r1[38] = 11;
+
+        $r1[39] = 11;
+
+        $r1[40] = 12;
+
+        $r1[41] = 12;
+
+        $r1[42] = 12;
+
+        $r1[43] = 12;
+
+        $r1[44] = 13;
+
+        $r1[45] = 13;
+
+        $r1[46] = 13;
+
+        $r1[47] = 14;
+
+        $r1[48] = 14;
+
+        $r1[49] = 14;
+
+        $r1[50] = 15;
+
+        $r1[51] = 15;
+
+        $r1[52] = 15;
+
+        $r1[53] = 15;
+
+        $r1[54] = 16;
+
+        $r1[55] = 16;
+
+        $r1[56] = 16;
+
+        $r1[57] = 17;
+
+        $r1[58] = 17;
+
+        $r1[59] = 17;
+
+        $r1[60] = 18;
+
+        $r1[61] = 18;
+
+        $r1[62] = 18;
+
+        $r1[63] = 19;
+
+        <sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int[] insignificantDigitsNumber> = $r1;
+
+        $r2 = newarray (int)[27];
+
+        $r2[0] = 0;
+
+        $r2[1] = 3;
+
+        $r2[2] = 5;
+
+        $r2[3] = 7;
+
+        $r2[4] = 10;
+
+        $r2[5] = 12;
+
+        $r2[6] = 14;
+
+        $r2[7] = 17;
+
+        $r2[8] = 19;
+
+        $r2[9] = 21;
+
+        $r2[10] = 24;
+
+        $r2[11] = 26;
+
+        $r2[12] = 28;
+
+        $r2[13] = 31;
+
+        $r2[14] = 33;
+
+        $r2[15] = 35;
+
+        $r2[16] = 38;
+
+        $r2[17] = 40;
+
+        $r2[18] = 42;
+
+        $r2[19] = 45;
+
+        $r2[20] = 47;
+
+        $r2[21] = 49;
+
+        $r2[22] = 52;
+
+        $r2[23] = 54;
+
+        $r2[24] = 56;
+
+        $r2[25] = 59;
+
+        $r2[26] = 61;
+
+        <sun.misc.FloatingDecimal$BinaryToASCIIBuffer: int[] N_5_BITS> = $r2;
+
+        return;
+    }
+}

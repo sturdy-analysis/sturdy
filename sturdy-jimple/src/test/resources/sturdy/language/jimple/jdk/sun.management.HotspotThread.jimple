@@ -1,0 +1,112 @@
+class sun.management.HotspotThread extends java.lang.Object implements sun.management.HotspotThreadMBean
+{
+    private sun.management.VMManagement jvm;
+    private static final java.lang.String JAVA_THREADS;
+    private static final java.lang.String COM_SUN_THREADS;
+    private static final java.lang.String SUN_THREADS;
+    private static final java.lang.String THREADS_COUNTER_NAME_PATTERN;
+
+    void <init>(sun.management.VMManagement)
+    {
+        sun.management.HotspotThread r0;
+        sun.management.VMManagement r1;
+
+        r0 := @this: sun.management.HotspotThread;
+
+        r1 := @parameter0: sun.management.VMManagement;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.management.HotspotThread: sun.management.VMManagement jvm> = r1;
+
+        return;
+    }
+
+    public native int getInternalThreadCount();
+
+    public java.util.Map getInternalThreadCpuTimes()
+    {
+        sun.management.HotspotThread r0;
+        java.lang.String[] r1;
+        java.util.HashMap $r3;
+        long $l2;
+        long[] r2;
+        java.lang.Long $r4;
+        java.util.Map $r6;
+        int $i0, $i1, i3;
+        java.lang.String $r5;
+
+        r0 := @this: sun.management.HotspotThread;
+
+        $i0 = virtualinvoke r0.<sun.management.HotspotThread: int getInternalThreadCount()>();
+
+        if $i0 != 0 goto label1;
+
+        $r6 = staticinvoke <java.util.Collections: java.util.Map emptyMap()>();
+
+        return $r6;
+
+     label1:
+        r1 = newarray (java.lang.String)[$i0];
+
+        r2 = newarray (long)[$i0];
+
+        $i1 = virtualinvoke r0.<sun.management.HotspotThread: int getInternalThreadTimes0(java.lang.String[],long[])>(r1, r2);
+
+        $r3 = new java.util.HashMap;
+
+        specialinvoke $r3.<java.util.HashMap: void <init>(int)>($i1);
+
+        i3 = 0;
+
+     label2:
+        if i3 >= $i1 goto label3;
+
+        $r5 = r1[i3];
+
+        $r4 = new java.lang.Long;
+
+        $l2 = r2[i3];
+
+        specialinvoke $r4.<java.lang.Long: void <init>(long)>($l2);
+
+        interfaceinvoke $r3.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r5, $r4);
+
+        i3 = i3 + 1;
+
+        goto label2;
+
+     label3:
+        return $r3;
+    }
+
+    public native int getInternalThreadTimes0(java.lang.String[], long[]);
+
+    public java.util.List getInternalThreadingCounters()
+    {
+        sun.management.HotspotThread r0;
+        sun.management.VMManagement $r1;
+        java.util.List $r2;
+
+        r0 := @this: sun.management.HotspotThread;
+
+        $r1 = r0.<sun.management.HotspotThread: sun.management.VMManagement jvm>;
+
+        $r2 = interfaceinvoke $r1.<sun.management.VMManagement: java.util.List getInternalCounters(java.lang.String)>("java.threads.|com.sun.threads.|sun.threads.");
+
+        return $r2;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.management.HotspotThread: java.lang.String THREADS_COUNTER_NAME_PATTERN> = "java.threads.|com.sun.threads.|sun.threads.";
+
+        <sun.management.HotspotThread: java.lang.String SUN_THREADS> = "sun.threads.";
+
+        <sun.management.HotspotThread: java.lang.String COM_SUN_THREADS> = "com.sun.threads.";
+
+        <sun.management.HotspotThread: java.lang.String JAVA_THREADS> = "java.threads.";
+
+        return;
+    }
+}

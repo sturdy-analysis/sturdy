@@ -1,0 +1,681 @@
+public final class com.sun.jndi.ldap.pool.Pool extends java.lang.Object
+{
+    static final boolean debug;
+    private static final java.lang.ref.ReferenceQueue queue;
+    private static final java.util.Collection weakRefs;
+    private final int maxSize;
+    private final int prefSize;
+    private final int initSize;
+    private final java.util.Map map;
+
+    public void <init>(int, int, int)
+    {
+        com.sun.jndi.ldap.pool.Pool r0;
+        int i0, i1, i2;
+        java.util.WeakHashMap $r1;
+
+        r0 := @this: com.sun.jndi.ldap.pool.Pool;
+
+        i2 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.WeakHashMap;
+
+        specialinvoke $r1.<java.util.WeakHashMap: void <init>()>();
+
+        r0.<com.sun.jndi.ldap.pool.Pool: java.util.Map map> = $r1;
+
+        r0.<com.sun.jndi.ldap.pool.Pool: int prefSize> = i0;
+
+        r0.<com.sun.jndi.ldap.pool.Pool: int maxSize> = i1;
+
+        r0.<com.sun.jndi.ldap.pool.Pool: int initSize> = i2;
+
+        return;
+    }
+
+    public com.sun.jndi.ldap.pool.PooledConnection getPooledConnection(java.lang.Object, long, com.sun.jndi.ldap.pool.PooledConnectionFactory) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r15, $r16;
+        com.sun.jndi.ldap.pool.ConnectionsRef $r8;
+        com.sun.jndi.ldap.pool.ConnectionsWeakRef $r10;
+        long l1;
+        java.lang.ref.ReferenceQueue $r11;
+        com.sun.jndi.ldap.pool.Pool r0;
+        java.util.Map $r2, $r4, $r9, $r13, $r14;
+        int $i0, $i2, $i3, $i4, $i5;
+        com.sun.jndi.ldap.pool.Connections $r3, $r7, r17;
+        boolean $z0;
+        java.util.Collection $r12;
+        com.sun.jndi.ldap.pool.PooledConnection $r6;
+        java.lang.Object r1;
+        com.sun.jndi.ldap.pool.PooledConnectionFactory r5;
+
+        r0 := @this: com.sun.jndi.ldap.pool.Pool;
+
+        r1 := @parameter0: java.lang.Object;
+
+        l1 := @parameter1: long;
+
+        r5 := @parameter2: com.sun.jndi.ldap.pool.PooledConnectionFactory;
+
+        specialinvoke r0.<com.sun.jndi.ldap.pool.Pool: void d(java.lang.String,java.lang.Object)>("get(): ", r1);
+
+        $z0 = <com.sun.jndi.ldap.pool.Pool: boolean debug>;
+
+        if $z0 == 0 goto label05;
+
+        $r13 = r0.<com.sun.jndi.ldap.pool.Pool: java.util.Map map>;
+
+        entermonitor $r13;
+
+     label01:
+        $r14 = r0.<com.sun.jndi.ldap.pool.Pool: java.util.Map map>;
+
+        $i5 = interfaceinvoke $r14.<java.util.Map: int size()>();
+
+        specialinvoke r0.<com.sun.jndi.ldap.pool.Pool: void d(java.lang.String,int)>("size: ", $i5);
+
+        exitmonitor $r13;
+
+     label02:
+        goto label05;
+
+     label03:
+        $r16 := @caughtexception;
+
+        exitmonitor $r13;
+
+     label04:
+        throw $r16;
+
+     label05:
+        staticinvoke <com.sun.jndi.ldap.pool.Pool: void expungeStaleConnections()>();
+
+        $r2 = r0.<com.sun.jndi.ldap.pool.Pool: java.util.Map map>;
+
+        entermonitor $r2;
+
+     label06:
+        $r3 = specialinvoke r0.<com.sun.jndi.ldap.pool.Pool: com.sun.jndi.ldap.pool.Connections getConnections(java.lang.Object)>(r1);
+
+        r17 = $r3;
+
+        if $r3 != null goto label07;
+
+        specialinvoke r0.<com.sun.jndi.ldap.pool.Pool: void d(java.lang.String,java.lang.Object)>("get(): creating new connections list for ", r1);
+
+        $r7 = new com.sun.jndi.ldap.pool.Connections;
+
+        $i4 = r0.<com.sun.jndi.ldap.pool.Pool: int initSize>;
+
+        $i3 = r0.<com.sun.jndi.ldap.pool.Pool: int prefSize>;
+
+        $i2 = r0.<com.sun.jndi.ldap.pool.Pool: int maxSize>;
+
+        specialinvoke $r7.<com.sun.jndi.ldap.pool.Connections: void <init>(java.lang.Object,int,int,int,com.sun.jndi.ldap.pool.PooledConnectionFactory)>(r1, $i4, $i3, $i2, r5);
+
+        r17 = $r7;
+
+        $r8 = new com.sun.jndi.ldap.pool.ConnectionsRef;
+
+        specialinvoke $r8.<com.sun.jndi.ldap.pool.ConnectionsRef: void <init>(com.sun.jndi.ldap.pool.Connections)>($r7);
+
+        $r9 = r0.<com.sun.jndi.ldap.pool.Pool: java.util.Map map>;
+
+        interfaceinvoke $r9.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r8);
+
+        $r10 = new com.sun.jndi.ldap.pool.ConnectionsWeakRef;
+
+        $r11 = <com.sun.jndi.ldap.pool.Pool: java.lang.ref.ReferenceQueue queue>;
+
+        specialinvoke $r10.<com.sun.jndi.ldap.pool.ConnectionsWeakRef: void <init>(com.sun.jndi.ldap.pool.ConnectionsRef,java.lang.ref.ReferenceQueue)>($r8, $r11);
+
+        $r12 = <com.sun.jndi.ldap.pool.Pool: java.util.Collection weakRefs>;
+
+        interfaceinvoke $r12.<java.util.Collection: boolean add(java.lang.Object)>($r10);
+
+     label07:
+        $r4 = r0.<com.sun.jndi.ldap.pool.Pool: java.util.Map map>;
+
+        $i0 = interfaceinvoke $r4.<java.util.Map: int size()>();
+
+        specialinvoke r0.<com.sun.jndi.ldap.pool.Pool: void d(java.lang.String,int)>("get(): size after: ", $i0);
+
+        exitmonitor $r2;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r15 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label10:
+        throw $r15;
+
+     label11:
+        $r6 = virtualinvoke r17.<com.sun.jndi.ldap.pool.Connections: com.sun.jndi.ldap.pool.PooledConnection get(long,com.sun.jndi.ldap.pool.PooledConnectionFactory)>(l1, r5);
+
+        return $r6;
+
+        catch java.lang.Throwable from label01 to label02 with label03;
+        catch java.lang.Throwable from label03 to label04 with label03;
+        catch java.lang.Throwable from label06 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    private com.sun.jndi.ldap.pool.Connections getConnections(java.lang.Object)
+    {
+        com.sun.jndi.ldap.pool.ConnectionsRef r4;
+        com.sun.jndi.ldap.pool.Pool r0;
+        java.util.Map $r2;
+        java.lang.Object r1, $r3;
+        com.sun.jndi.ldap.pool.Connections $r5;
+
+        r0 := @this: com.sun.jndi.ldap.pool.Pool;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = r0.<com.sun.jndi.ldap.pool.Pool: java.util.Map map>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r4 = (com.sun.jndi.ldap.pool.ConnectionsRef) $r3;
+
+        if r4 == null goto label1;
+
+        $r5 = virtualinvoke r4.<com.sun.jndi.ldap.pool.ConnectionsRef: com.sun.jndi.ldap.pool.Connections getConnections()>();
+
+        goto label2;
+
+     label1:
+        $r5 = null;
+
+     label2:
+        return $r5;
+    }
+
+    public void expire(long)
+    {
+        java.lang.Throwable $r13, $r14;
+        com.sun.jndi.ldap.pool.ConnectionsRef r11;
+        long l0;
+        java.util.ArrayList $r2, $r5;
+        com.sun.jndi.ldap.pool.Pool r0;
+        java.util.Map $r1, $r3, $r7, $r8;
+        com.sun.jndi.ldap.pool.Connections $r12;
+        boolean $z0, $z1;
+        java.util.Iterator $r6;
+        java.util.Collection $r4, $r9;
+        java.lang.Object $r10;
+
+        r0 := @this: com.sun.jndi.ldap.pool.Pool;
+
+        l0 := @parameter0: long;
+
+        $r1 = r0.<com.sun.jndi.ldap.pool.Pool: java.util.Map map>;
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = new java.util.ArrayList;
+
+        $r3 = r0.<com.sun.jndi.ldap.pool.Pool: java.util.Map map>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.util.Collection values()>();
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>(java.util.Collection)>($r4);
+
+        exitmonitor $r1;
+
+     label02:
+        goto label05;
+
+     label03:
+        $r14 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label04:
+        throw $r14;
+
+     label05:
+        $r5 = new java.util.ArrayList;
+
+        specialinvoke $r5.<java.util.ArrayList: void <init>()>();
+
+        $r6 = interfaceinvoke $r2.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label06:
+        $z0 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label08;
+
+        $r10 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r11 = (com.sun.jndi.ldap.pool.ConnectionsRef) $r10;
+
+        $r12 = virtualinvoke r11.<com.sun.jndi.ldap.pool.ConnectionsRef: com.sun.jndi.ldap.pool.Connections getConnections()>();
+
+        $z1 = virtualinvoke $r12.<com.sun.jndi.ldap.pool.Connections: boolean expire(long)>(l0);
+
+        if $z1 == 0 goto label07;
+
+        specialinvoke r0.<com.sun.jndi.ldap.pool.Pool: void d(java.lang.String,java.lang.Object)>("expire(): removing ", $r12);
+
+        virtualinvoke $r5.<java.util.ArrayList: boolean add(java.lang.Object)>(r11);
+
+     label07:
+        goto label06;
+
+     label08:
+        $r7 = r0.<com.sun.jndi.ldap.pool.Pool: java.util.Map map>;
+
+        entermonitor $r7;
+
+     label09:
+        $r8 = r0.<com.sun.jndi.ldap.pool.Pool: java.util.Map map>;
+
+        $r9 = interfaceinvoke $r8.<java.util.Map: java.util.Collection values()>();
+
+        interfaceinvoke $r9.<java.util.Collection: boolean removeAll(java.util.Collection)>($r5);
+
+        exitmonitor $r7;
+
+     label10:
+        goto label13;
+
+     label11:
+        $r13 := @caughtexception;
+
+        exitmonitor $r7;
+
+     label12:
+        throw $r13;
+
+     label13:
+        staticinvoke <com.sun.jndi.ldap.pool.Pool: void expungeStaleConnections()>();
+
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label03;
+        catch java.lang.Throwable from label03 to label04 with label03;
+        catch java.lang.Throwable from label09 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+    }
+
+    private static void expungeStaleConnections()
+    {
+        java.io.PrintStream $r6;
+        com.sun.jndi.ldap.pool.ConnectionsWeakRef $r2;
+        java.util.Collection $r4;
+        java.lang.ref.ReferenceQueue $r0;
+        java.lang.ref.Reference $r1;
+        java.lang.StringBuilder $r5, $r7, $r8;
+        com.sun.jndi.ldap.pool.Connections $r3;
+        java.lang.String $r9;
+        boolean $z0;
+
+     label1:
+        $r0 = <com.sun.jndi.ldap.pool.Pool: java.lang.ref.ReferenceQueue queue>;
+
+        $r1 = virtualinvoke $r0.<java.lang.ref.ReferenceQueue: java.lang.ref.Reference poll()>();
+
+        $r2 = (com.sun.jndi.ldap.pool.ConnectionsWeakRef) $r1;
+
+        if $r2 == null goto label3;
+
+        $r3 = virtualinvoke $r2.<com.sun.jndi.ldap.pool.ConnectionsWeakRef: com.sun.jndi.ldap.pool.Connections getConnections()>();
+
+        $z0 = <com.sun.jndi.ldap.pool.Pool: boolean debug>;
+
+        if $z0 == 0 goto label2;
+
+        $r6 = <java.lang.System: java.io.PrintStream err>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("weak reference cleanup: Closing Connections:");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r3);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<java.io.PrintStream: void println(java.lang.String)>($r9);
+
+     label2:
+        virtualinvoke $r3.<com.sun.jndi.ldap.pool.Connections: void close()>();
+
+        $r4 = <com.sun.jndi.ldap.pool.Pool: java.util.Collection weakRefs>;
+
+        interfaceinvoke $r4.<java.util.Collection: boolean remove(java.lang.Object)>($r2);
+
+        virtualinvoke $r2.<com.sun.jndi.ldap.pool.ConnectionsWeakRef: void clear()>();
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    public void showStats(java.io.PrintStream)
+    {
+        java.util.Map $r14, $r17, $r20;
+        boolean $z0;
+        java.util.Set $r21;
+        java.lang.StringBuilder $r1, $r2, $r4, $r6, $r7, $r8, $r10, $r11, $r12, $r15, $r16, $r18, $r29, $r30, $r31, $r32, $r34;
+        java.lang.Throwable $r36;
+        com.sun.jndi.ldap.pool.ConnectionsRef $r27;
+        com.sun.jndi.ldap.pool.Pool r3;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String $r5, $r9, $r13, $r19, $r33, $r35;
+        com.sun.jndi.ldap.pool.Connections $r28;
+        java.io.PrintStream r0;
+        java.util.Map$Entry r24;
+        java.util.Iterator $r22;
+        java.lang.Object $r23, $r25, $r26;
+
+        r3 := @this: com.sun.jndi.ldap.pool.Pool;
+
+        r0 := @parameter0: java.io.PrintStream;
+
+        virtualinvoke r0.<java.io.PrintStream: void println(java.lang.String)>("===== Pool start ======================");
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("maximum pool size: ");
+
+        $i0 = r3.<com.sun.jndi.ldap.pool.Pool: int maxSize>;
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<java.io.PrintStream: void println(java.lang.String)>($r5);
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("preferred pool size: ");
+
+        $i1 = r3.<com.sun.jndi.ldap.pool.Pool: int prefSize>;
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<java.io.PrintStream: void println(java.lang.String)>($r9);
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("initial pool size: ");
+
+        $i2 = r3.<com.sun.jndi.ldap.pool.Pool: int initSize>;
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<java.io.PrintStream: void println(java.lang.String)>($r13);
+
+        $r14 = r3.<com.sun.jndi.ldap.pool.Pool: java.util.Map map>;
+
+        entermonitor $r14;
+
+     label1:
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("current pool size: ");
+
+        $r17 = r3.<com.sun.jndi.ldap.pool.Pool: java.util.Map map>;
+
+        $i3 = interfaceinvoke $r17.<java.util.Map: int size()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<java.io.PrintStream: void println(java.lang.String)>($r19);
+
+        $r20 = r3.<com.sun.jndi.ldap.pool.Pool: java.util.Map map>;
+
+        $r21 = interfaceinvoke $r20.<java.util.Map: java.util.Set entrySet()>();
+
+        $r22 = interfaceinvoke $r21.<java.util.Set: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r22.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r23 = interfaceinvoke $r22.<java.util.Iterator: java.lang.Object next()>();
+
+        r24 = (java.util.Map$Entry) $r23;
+
+        $r25 = interfaceinvoke r24.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r26 = interfaceinvoke r24.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r27 = (com.sun.jndi.ldap.pool.ConnectionsRef) $r26;
+
+        $r28 = virtualinvoke $r27.<com.sun.jndi.ldap.pool.ConnectionsRef: com.sun.jndi.ldap.pool.Connections getConnections()>();
+
+        $r29 = new java.lang.StringBuilder;
+
+        specialinvoke $r29.<java.lang.StringBuilder: void <init>()>();
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("   ");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r25);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r33 = virtualinvoke $r28.<com.sun.jndi.ldap.pool.Connections: java.lang.String getStats()>();
+
+        $r34 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r33);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<java.io.PrintStream: void println(java.lang.String)>($r35);
+
+        goto label2;
+
+     label3:
+        exitmonitor $r14;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r36 := @caughtexception;
+
+        exitmonitor $r14;
+
+     label6:
+        throw $r36;
+
+     label7:
+        virtualinvoke r0.<java.io.PrintStream: void println(java.lang.String)>("====== Pool end =====================");
+
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public java.lang.String toString()
+    {
+        java.lang.Throwable $r10;
+        com.sun.jndi.ldap.pool.Pool r0;
+        java.util.Map $r1, $r6;
+        java.lang.StringBuilder $r2, $r4, $r5, $r8;
+        java.lang.String $r3, $r7, $r9;
+
+        r0 := @this: com.sun.jndi.ldap.pool.Pool;
+
+        $r1 = r0.<com.sun.jndi.ldap.pool.Pool: java.util.Map map>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = specialinvoke r0.<java.lang.Object: java.lang.String toString()>();
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r6 = r0.<com.sun.jndi.ldap.pool.Pool: java.util.Map map>;
+
+        $r7 = virtualinvoke $r6.<java.lang.Object: java.lang.String toString()>();
+
+        $r8 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        exitmonitor $r1;
+
+     label2:
+        return $r9;
+
+     label3:
+        $r10 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r10;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private void d(java.lang.String, int)
+    {
+        java.io.PrintStream $r1;
+        com.sun.jndi.ldap.pool.Pool r2;
+        int i0;
+        java.lang.StringBuilder $r0, $r3, $r4, $r6, $r7;
+        java.lang.String r5, $r8;
+        boolean $z0;
+
+        r2 := @this: com.sun.jndi.ldap.pool.Pool;
+
+        r5 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $z0 = <com.sun.jndi.ldap.pool.Pool: boolean debug>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = <java.lang.System: java.io.PrintStream err>;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>($r8);
+
+     label1:
+        return;
+    }
+
+    private void d(java.lang.String, java.lang.Object)
+    {
+        java.io.PrintStream $r1;
+        com.sun.jndi.ldap.pool.Pool r2;
+        java.lang.StringBuilder $r0, $r3, $r4, $r6, $r8;
+        java.lang.Object r7;
+        java.lang.String r5, $r9;
+        boolean $z0;
+
+        r2 := @this: com.sun.jndi.ldap.pool.Pool;
+
+        r5 := @parameter0: java.lang.String;
+
+        r7 := @parameter1: java.lang.Object;
+
+        $z0 = <com.sun.jndi.ldap.pool.Pool: boolean debug>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = <java.lang.System: java.io.PrintStream err>;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>($r9);
+
+     label1:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.util.List $r2;
+        java.util.LinkedList $r1;
+        java.lang.ref.ReferenceQueue $r0;
+        boolean $z0;
+
+        $z0 = <com.sun.jndi.ldap.LdapPoolManager: boolean debug>;
+
+        <com.sun.jndi.ldap.pool.Pool: boolean debug> = $z0;
+
+        $r0 = new java.lang.ref.ReferenceQueue;
+
+        specialinvoke $r0.<java.lang.ref.ReferenceQueue: void <init>()>();
+
+        <com.sun.jndi.ldap.pool.Pool: java.lang.ref.ReferenceQueue queue> = $r0;
+
+        $r1 = new java.util.LinkedList;
+
+        specialinvoke $r1.<java.util.LinkedList: void <init>()>();
+
+        $r2 = staticinvoke <java.util.Collections: java.util.List synchronizedList(java.util.List)>($r1);
+
+        <com.sun.jndi.ldap.pool.Pool: java.util.Collection weakRefs> = $r2;
+
+        return;
+    }
+}

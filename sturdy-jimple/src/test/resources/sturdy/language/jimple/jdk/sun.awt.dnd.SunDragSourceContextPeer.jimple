@@ -1,0 +1,857 @@
+public abstract class sun.awt.dnd.SunDragSourceContextPeer extends java.lang.Object implements java.awt.dnd.peer.DragSourceContextPeer
+{
+    private java.awt.dnd.DragGestureEvent trigger;
+    private java.awt.Component component;
+    private java.awt.Cursor cursor;
+    private java.awt.Image dragImage;
+    private java.awt.Point dragImageOffset;
+    private long nativeCtxt;
+    private java.awt.dnd.DragSourceContext dragSourceContext;
+    private int sourceActions;
+    private static volatile boolean dragDropInProgress;
+    private static boolean discardingMouseEvents;
+    protected static final int DISPATCH_ENTER;
+    protected static final int DISPATCH_MOTION;
+    protected static final int DISPATCH_CHANGED;
+    protected static final int DISPATCH_EXIT;
+    protected static final int DISPATCH_FINISH;
+    protected static final int DISPATCH_MOUSE_MOVED;
+
+    public void <init>(java.awt.dnd.DragGestureEvent)
+    {
+        sun.awt.dnd.SunDragSourceContextPeer r0;
+        java.awt.dnd.DragGestureEvent r1, $r2, $r3;
+        java.awt.Component $r4;
+
+        r0 := @this: sun.awt.dnd.SunDragSourceContextPeer;
+
+        r1 := @parameter0: java.awt.dnd.DragGestureEvent;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.dnd.DragGestureEvent trigger> = r1;
+
+        $r2 = r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.dnd.DragGestureEvent trigger>;
+
+        if $r2 == null goto label1;
+
+        $r3 = r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.dnd.DragGestureEvent trigger>;
+
+        $r4 = virtualinvoke $r3.<java.awt.dnd.DragGestureEvent: java.awt.Component getComponent()>();
+
+        r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.Component component> = $r4;
+
+        goto label2;
+
+     label1:
+        r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.Component component> = null;
+
+     label2:
+        return;
+    }
+
+    public void startSecondaryEventLoop()
+    {
+        sun.awt.dnd.SunDragSourceContextPeer r0;
+
+        r0 := @this: sun.awt.dnd.SunDragSourceContextPeer;
+
+        return;
+    }
+
+    public void quitSecondaryEventLoop()
+    {
+        sun.awt.dnd.SunDragSourceContextPeer r0;
+
+        r0 := @this: sun.awt.dnd.SunDragSourceContextPeer;
+
+        return;
+    }
+
+    public void startDrag(java.awt.dnd.DragSourceContext, java.awt.Cursor, java.awt.Image, java.awt.Point) throws java.awt.dnd.InvalidDnDOperationException
+    {
+        java.awt.event.InputEvent $r2;
+        java.awt.Cursor r4;
+        java.awt.datatransfer.Transferable $r9;
+        sun.awt.datatransfer.DataTransferer $r10;
+        java.awt.Point r7;
+        java.awt.dnd.DragGestureEvent $r1, $r11;
+        long[] $r16;
+        java.awt.datatransfer.FlavorTable $r14;
+        int $i0;
+        sun.awt.dnd.SunDragSourceContextPeer r0;
+        java.awt.Image r6;
+        java.awt.dnd.DragSource $r12;
+        java.awt.datatransfer.FlavorMap $r13;
+        java.awt.dnd.DragSourceContext r3, $r5, $r8;
+        sun.awt.dnd.SunDragSourceContextPeer$1 $r17;
+        java.awt.dnd.InvalidDnDOperationException $r18;
+        java.util.SortedMap $r15;
+
+        r0 := @this: sun.awt.dnd.SunDragSourceContextPeer;
+
+        r3 := @parameter0: java.awt.dnd.DragSourceContext;
+
+        r4 := @parameter1: java.awt.Cursor;
+
+        r6 := @parameter2: java.awt.Image;
+
+        r7 := @parameter3: java.awt.Point;
+
+        $r1 = virtualinvoke r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.dnd.DragGestureEvent getTrigger()>();
+
+        $r2 = virtualinvoke $r1.<java.awt.dnd.DragGestureEvent: java.awt.event.InputEvent getTriggerEvent()>();
+
+        if $r2 != null goto label1;
+
+        $r18 = new java.awt.dnd.InvalidDnDOperationException;
+
+        specialinvoke $r18.<java.awt.dnd.InvalidDnDOperationException: void <init>(java.lang.String)>("DragGestureEvent has a null trigger");
+
+        throw $r18;
+
+     label1:
+        r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.dnd.DragSourceContext dragSourceContext> = r3;
+
+        r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.Cursor cursor> = r4;
+
+        $r5 = virtualinvoke r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.dnd.DragSourceContext getDragSourceContext()>();
+
+        $i0 = virtualinvoke $r5.<java.awt.dnd.DragSourceContext: int getSourceActions()>();
+
+        r0.<sun.awt.dnd.SunDragSourceContextPeer: int sourceActions> = $i0;
+
+        r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.Image dragImage> = r6;
+
+        r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.Point dragImageOffset> = r7;
+
+        $r8 = virtualinvoke r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.dnd.DragSourceContext getDragSourceContext()>();
+
+        $r9 = virtualinvoke $r8.<java.awt.dnd.DragSourceContext: java.awt.datatransfer.Transferable getTransferable()>();
+
+        $r10 = staticinvoke <sun.awt.datatransfer.DataTransferer: sun.awt.datatransfer.DataTransferer getInstance()>();
+
+        $r11 = virtualinvoke r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.dnd.DragGestureEvent getTrigger()>();
+
+        $r12 = virtualinvoke $r11.<java.awt.dnd.DragGestureEvent: java.awt.dnd.DragSource getDragSource()>();
+
+        $r13 = virtualinvoke $r12.<java.awt.dnd.DragSource: java.awt.datatransfer.FlavorMap getFlavorMap()>();
+
+        $r14 = staticinvoke <sun.awt.datatransfer.DataTransferer: java.awt.datatransfer.FlavorTable adaptFlavorMap(java.awt.datatransfer.FlavorMap)>($r13);
+
+        $r15 = virtualinvoke $r10.<sun.awt.datatransfer.DataTransferer: java.util.SortedMap getFormatsForTransferable(java.awt.datatransfer.Transferable,java.awt.datatransfer.FlavorTable)>($r9, $r14);
+
+        staticinvoke <sun.awt.datatransfer.DataTransferer: sun.awt.datatransfer.DataTransferer getInstance()>();
+
+        $r16 = staticinvoke <sun.awt.datatransfer.DataTransferer: long[] keysToLongArray(java.util.SortedMap)>($r15);
+
+        virtualinvoke r0.<sun.awt.dnd.SunDragSourceContextPeer: void startDrag(java.awt.datatransfer.Transferable,long[],java.util.Map)>($r9, $r16, $r15);
+
+        <sun.awt.dnd.SunDragSourceContextPeer: boolean discardingMouseEvents> = 1;
+
+        $r17 = new sun.awt.dnd.SunDragSourceContextPeer$1;
+
+        specialinvoke $r17.<sun.awt.dnd.SunDragSourceContextPeer$1: void <init>(sun.awt.dnd.SunDragSourceContextPeer)>(r0);
+
+        staticinvoke <java.awt.EventQueue: void invokeLater(java.lang.Runnable)>($r17);
+
+        return;
+    }
+
+    protected abstract void startDrag(java.awt.datatransfer.Transferable, long[], java.util.Map);
+
+    public void setCursor(java.awt.Cursor) throws java.awt.dnd.InvalidDnDOperationException
+    {
+        java.lang.Throwable $r4;
+        java.awt.Cursor $r1, r2, $r3;
+        long $l0;
+        int $i1;
+        sun.awt.dnd.SunDragSourceContextPeer r0;
+        boolean $z0;
+
+        r0 := @this: sun.awt.dnd.SunDragSourceContextPeer;
+
+        r2 := @parameter0: java.awt.Cursor;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.Cursor cursor>;
+
+        if $r1 == null goto label2;
+
+        $r3 = r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.Cursor cursor>;
+
+        $z0 = virtualinvoke $r3.<java.lang.Object: boolean equals(java.lang.Object)>(r2);
+
+        if $z0 != 0 goto label5;
+
+     label2:
+        r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.Cursor cursor> = r2;
+
+        $l0 = virtualinvoke r0.<sun.awt.dnd.SunDragSourceContextPeer: long getNativeContext()>();
+
+        if r2 == null goto label3;
+
+        $i1 = virtualinvoke r2.<java.awt.Cursor: int getType()>();
+
+        goto label4;
+
+     label3:
+        $i1 = 0;
+
+     label4:
+        virtualinvoke r0.<sun.awt.dnd.SunDragSourceContextPeer: void setNativeCursor(long,java.awt.Cursor,int)>($l0, r2, $i1);
+
+     label5:
+        exitmonitor r0;
+
+     label6:
+        goto label9;
+
+     label7:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+     label8:
+        throw $r4;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public java.awt.Cursor getCursor()
+    {
+        sun.awt.dnd.SunDragSourceContextPeer r0;
+        java.awt.Cursor $r1;
+
+        r0 := @this: sun.awt.dnd.SunDragSourceContextPeer;
+
+        $r1 = r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.Cursor cursor>;
+
+        return $r1;
+    }
+
+    public java.awt.Image getDragImage()
+    {
+        sun.awt.dnd.SunDragSourceContextPeer r0;
+        java.awt.Image $r1;
+
+        r0 := @this: sun.awt.dnd.SunDragSourceContextPeer;
+
+        $r1 = r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.Image dragImage>;
+
+        return $r1;
+    }
+
+    public java.awt.Point getDragImageOffset()
+    {
+        java.awt.Point $r1, $r2, $r3, $r4;
+        sun.awt.dnd.SunDragSourceContextPeer r0;
+
+        r0 := @this: sun.awt.dnd.SunDragSourceContextPeer;
+
+        $r1 = r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.Point dragImageOffset>;
+
+        if $r1 != null goto label1;
+
+        $r4 = new java.awt.Point;
+
+        specialinvoke $r4.<java.awt.Point: void <init>(int,int)>(0, 0);
+
+        return $r4;
+
+     label1:
+        $r2 = new java.awt.Point;
+
+        $r3 = r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.Point dragImageOffset>;
+
+        specialinvoke $r2.<java.awt.Point: void <init>(java.awt.Point)>($r3);
+
+        return $r2;
+    }
+
+    protected abstract void setNativeCursor(long, java.awt.Cursor, int);
+
+    protected synchronized void setTrigger(java.awt.dnd.DragGestureEvent)
+    {
+        sun.awt.dnd.SunDragSourceContextPeer r0;
+        java.awt.dnd.DragGestureEvent r1, $r2, $r3;
+        java.awt.Component $r4;
+
+        r0 := @this: sun.awt.dnd.SunDragSourceContextPeer;
+
+        r1 := @parameter0: java.awt.dnd.DragGestureEvent;
+
+        r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.dnd.DragGestureEvent trigger> = r1;
+
+        $r2 = r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.dnd.DragGestureEvent trigger>;
+
+        if $r2 == null goto label1;
+
+        $r3 = r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.dnd.DragGestureEvent trigger>;
+
+        $r4 = virtualinvoke $r3.<java.awt.dnd.DragGestureEvent: java.awt.Component getComponent()>();
+
+        r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.Component component> = $r4;
+
+        goto label2;
+
+     label1:
+        r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.Component component> = null;
+
+     label2:
+        return;
+    }
+
+    protected java.awt.dnd.DragGestureEvent getTrigger()
+    {
+        sun.awt.dnd.SunDragSourceContextPeer r0;
+        java.awt.dnd.DragGestureEvent $r1;
+
+        r0 := @this: sun.awt.dnd.SunDragSourceContextPeer;
+
+        $r1 = r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.dnd.DragGestureEvent trigger>;
+
+        return $r1;
+    }
+
+    protected java.awt.Component getComponent()
+    {
+        sun.awt.dnd.SunDragSourceContextPeer r0;
+        java.awt.Component $r1;
+
+        r0 := @this: sun.awt.dnd.SunDragSourceContextPeer;
+
+        $r1 = r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.Component component>;
+
+        return $r1;
+    }
+
+    protected synchronized void setNativeContext(long)
+    {
+        long l0;
+        sun.awt.dnd.SunDragSourceContextPeer r0;
+
+        r0 := @this: sun.awt.dnd.SunDragSourceContextPeer;
+
+        l0 := @parameter0: long;
+
+        r0.<sun.awt.dnd.SunDragSourceContextPeer: long nativeCtxt> = l0;
+
+        return;
+    }
+
+    protected synchronized long getNativeContext()
+    {
+        long $l0;
+        sun.awt.dnd.SunDragSourceContextPeer r0;
+
+        r0 := @this: sun.awt.dnd.SunDragSourceContextPeer;
+
+        $l0 = r0.<sun.awt.dnd.SunDragSourceContextPeer: long nativeCtxt>;
+
+        return $l0;
+    }
+
+    protected java.awt.dnd.DragSourceContext getDragSourceContext()
+    {
+        sun.awt.dnd.SunDragSourceContextPeer r0;
+        java.awt.dnd.DragSourceContext $r1;
+
+        r0 := @this: sun.awt.dnd.SunDragSourceContextPeer;
+
+        $r1 = r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.dnd.DragSourceContext dragSourceContext>;
+
+        return $r1;
+    }
+
+    public void transferablesFlavorsChanged()
+    {
+        sun.awt.dnd.SunDragSourceContextPeer r0;
+
+        r0 := @this: sun.awt.dnd.SunDragSourceContextPeer;
+
+        return;
+    }
+
+    protected final void postDragSourceDragEvent(int, int, int, int, int)
+    {
+        sun.awt.dnd.SunDragSourceContextPeer$EventDispatcher $r3;
+        java.awt.Component $r4;
+        java.awt.dnd.DragSourceContext $r2;
+        sun.awt.AppContext $r5;
+        int i0, $i1, $i2, i3, $i4, i5, i6, $i7, i8;
+        java.awt.dnd.DragSourceDragEvent $r1;
+        sun.awt.dnd.SunDragSourceContextPeer r0;
+
+        r0 := @this: sun.awt.dnd.SunDragSourceContextPeer;
+
+        i3 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        i5 := @parameter2: int;
+
+        i6 := @parameter3: int;
+
+        i8 := @parameter4: int;
+
+        $i1 = r0.<sun.awt.dnd.SunDragSourceContextPeer: int sourceActions>;
+
+        $i2 = staticinvoke <sun.awt.dnd.SunDragSourceContextPeer: int convertModifiersToDropAction(int,int)>(i0, $i1);
+
+        $r1 = new java.awt.dnd.DragSourceDragEvent;
+
+        $r2 = virtualinvoke r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.dnd.DragSourceContext getDragSourceContext()>();
+
+        $i4 = r0.<sun.awt.dnd.SunDragSourceContextPeer: int sourceActions>;
+
+        $i7 = i3 & $i4;
+
+        specialinvoke $r1.<java.awt.dnd.DragSourceDragEvent: void <init>(java.awt.dnd.DragSourceContext,int,int,int,int,int)>($r2, $i2, $i7, i0, i5, i6);
+
+        $r3 = new sun.awt.dnd.SunDragSourceContextPeer$EventDispatcher;
+
+        specialinvoke $r3.<sun.awt.dnd.SunDragSourceContextPeer$EventDispatcher: void <init>(sun.awt.dnd.SunDragSourceContextPeer,int,java.awt.dnd.DragSourceEvent)>(r0, i8, $r1);
+
+        $r4 = virtualinvoke r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.Component getComponent()>();
+
+        $r5 = staticinvoke <sun.awt.SunToolkit: sun.awt.AppContext targetToAppContext(java.lang.Object)>($r4);
+
+        staticinvoke <sun.awt.SunToolkit: void invokeLaterOnAppContext(sun.awt.AppContext,java.lang.Runnable)>($r5, $r3);
+
+        virtualinvoke r0.<sun.awt.dnd.SunDragSourceContextPeer: void startSecondaryEventLoop()>();
+
+        return;
+    }
+
+    protected void dragEnter(int, int, int, int)
+    {
+        int i0, i1, i2, i3;
+        sun.awt.dnd.SunDragSourceContextPeer r0;
+
+        r0 := @this: sun.awt.dnd.SunDragSourceContextPeer;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        virtualinvoke r0.<sun.awt.dnd.SunDragSourceContextPeer: void postDragSourceDragEvent(int,int,int,int,int)>(i0, i1, i2, i3, 1);
+
+        return;
+    }
+
+    private void dragMotion(int, int, int, int)
+    {
+        int i0, i1, i2, i3;
+        sun.awt.dnd.SunDragSourceContextPeer r0;
+
+        r0 := @this: sun.awt.dnd.SunDragSourceContextPeer;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        virtualinvoke r0.<sun.awt.dnd.SunDragSourceContextPeer: void postDragSourceDragEvent(int,int,int,int,int)>(i0, i1, i2, i3, 2);
+
+        return;
+    }
+
+    private void operationChanged(int, int, int, int)
+    {
+        int i0, i1, i2, i3;
+        sun.awt.dnd.SunDragSourceContextPeer r0;
+
+        r0 := @this: sun.awt.dnd.SunDragSourceContextPeer;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        virtualinvoke r0.<sun.awt.dnd.SunDragSourceContextPeer: void postDragSourceDragEvent(int,int,int,int,int)>(i0, i1, i2, i3, 3);
+
+        return;
+    }
+
+    protected final void dragExit(int, int)
+    {
+        sun.awt.dnd.SunDragSourceContextPeer$EventDispatcher $r3;
+        java.awt.Component $r4;
+        java.awt.dnd.DragSourceContext $r2;
+        sun.awt.AppContext $r5;
+        int i0, i1;
+        java.awt.dnd.DragSourceEvent $r0;
+        sun.awt.dnd.SunDragSourceContextPeer r1;
+
+        r1 := @this: sun.awt.dnd.SunDragSourceContextPeer;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r0 = new java.awt.dnd.DragSourceEvent;
+
+        $r2 = virtualinvoke r1.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.dnd.DragSourceContext getDragSourceContext()>();
+
+        specialinvoke $r0.<java.awt.dnd.DragSourceEvent: void <init>(java.awt.dnd.DragSourceContext,int,int)>($r2, i0, i1);
+
+        $r3 = new sun.awt.dnd.SunDragSourceContextPeer$EventDispatcher;
+
+        specialinvoke $r3.<sun.awt.dnd.SunDragSourceContextPeer$EventDispatcher: void <init>(sun.awt.dnd.SunDragSourceContextPeer,int,java.awt.dnd.DragSourceEvent)>(r1, 4, $r0);
+
+        $r4 = virtualinvoke r1.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.Component getComponent()>();
+
+        $r5 = staticinvoke <sun.awt.SunToolkit: sun.awt.AppContext targetToAppContext(java.lang.Object)>($r4);
+
+        staticinvoke <sun.awt.SunToolkit: void invokeLaterOnAppContext(sun.awt.AppContext,java.lang.Runnable)>($r5, $r3);
+
+        virtualinvoke r1.<sun.awt.dnd.SunDragSourceContextPeer: void startSecondaryEventLoop()>();
+
+        return;
+    }
+
+    private void dragMouseMoved(int, int, int, int)
+    {
+        int i0, i1, i2, i3;
+        sun.awt.dnd.SunDragSourceContextPeer r0;
+
+        r0 := @this: sun.awt.dnd.SunDragSourceContextPeer;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        virtualinvoke r0.<sun.awt.dnd.SunDragSourceContextPeer: void postDragSourceDragEvent(int,int,int,int,int)>(i0, i1, i2, i3, 6);
+
+        return;
+    }
+
+    protected final void dragDropFinished(boolean, int, int, int)
+    {
+        sun.awt.dnd.SunDragSourceContextPeer$EventDispatcher $r3;
+        java.awt.Component $r4;
+        java.awt.dnd.DragSourceContext $r2;
+        sun.awt.AppContext $r5;
+        int i0, $i1, i2, i3, $i4;
+        sun.awt.dnd.SunDragSourceContextPeer r1;
+        java.awt.dnd.DragSourceDropEvent $r0;
+        boolean z0;
+
+        r1 := @this: sun.awt.dnd.SunDragSourceContextPeer;
+
+        z0 := @parameter0: boolean;
+
+        i0 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        $r0 = new java.awt.dnd.DragSourceDropEvent;
+
+        $r2 = virtualinvoke r1.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.dnd.DragSourceContext getDragSourceContext()>();
+
+        $i1 = r1.<sun.awt.dnd.SunDragSourceContextPeer: int sourceActions>;
+
+        $i4 = i0 & $i1;
+
+        specialinvoke $r0.<java.awt.dnd.DragSourceDropEvent: void <init>(java.awt.dnd.DragSourceContext,int,boolean,int,int)>($r2, $i4, z0, i2, i3);
+
+        $r3 = new sun.awt.dnd.SunDragSourceContextPeer$EventDispatcher;
+
+        specialinvoke $r3.<sun.awt.dnd.SunDragSourceContextPeer$EventDispatcher: void <init>(sun.awt.dnd.SunDragSourceContextPeer,int,java.awt.dnd.DragSourceEvent)>(r1, 5, $r0);
+
+        $r4 = virtualinvoke r1.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.Component getComponent()>();
+
+        $r5 = staticinvoke <sun.awt.SunToolkit: sun.awt.AppContext targetToAppContext(java.lang.Object)>($r4);
+
+        staticinvoke <sun.awt.SunToolkit: void invokeLaterOnAppContext(sun.awt.AppContext,java.lang.Runnable)>($r5, $r3);
+
+        virtualinvoke r1.<sun.awt.dnd.SunDragSourceContextPeer: void startSecondaryEventLoop()>();
+
+        virtualinvoke r1.<sun.awt.dnd.SunDragSourceContextPeer: void setNativeContext(long)>(0L);
+
+        r1.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.Image dragImage> = null;
+
+        r1.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.Point dragImageOffset> = null;
+
+        return;
+    }
+
+    public static void setDragDropInProgress(boolean) throws java.awt.dnd.InvalidDnDOperationException
+    {
+        java.lang.Throwable $r2;
+        java.lang.String $r1;
+        java.awt.dnd.InvalidDnDOperationException $r0;
+        boolean z0, $z1;
+
+        z0 := @parameter0: boolean;
+
+        entermonitor class "Lsun/awt/dnd/SunDragSourceContextPeer;";
+
+     label1:
+        $z1 = <sun.awt.dnd.SunDragSourceContextPeer: boolean dragDropInProgress>;
+
+        if $z1 != z0 goto label2;
+
+        $r0 = new java.awt.dnd.InvalidDnDOperationException;
+
+        $r1 = staticinvoke <sun.awt.dnd.SunDragSourceContextPeer: java.lang.String getExceptionMessage(boolean)>(z0);
+
+        specialinvoke $r0.<java.awt.dnd.InvalidDnDOperationException: void <init>(java.lang.String)>($r1);
+
+        throw $r0;
+
+     label2:
+        <sun.awt.dnd.SunDragSourceContextPeer: boolean dragDropInProgress> = z0;
+
+        exitmonitor class "Lsun/awt/dnd/SunDragSourceContextPeer;";
+
+     label3:
+        goto label6;
+
+     label4:
+        $r2 := @caughtexception;
+
+        exitmonitor class "Lsun/awt/dnd/SunDragSourceContextPeer;";
+
+     label5:
+        throw $r2;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public static boolean checkEvent(java.awt.AWTEvent)
+    {
+        java.awt.AWTEvent r0;
+        java.awt.event.MouseEvent r1;
+        boolean $z0, $z1, $z2;
+
+        r0 := @parameter0: java.awt.AWTEvent;
+
+        $z0 = <sun.awt.dnd.SunDragSourceContextPeer: boolean discardingMouseEvents>;
+
+        if $z0 == 0 goto label1;
+
+        $z1 = r0 instanceof java.awt.event.MouseEvent;
+
+        if $z1 == 0 goto label1;
+
+        r1 = (java.awt.event.MouseEvent) r0;
+
+        $z2 = r1 instanceof sun.awt.dnd.SunDropTargetEvent;
+
+        if $z2 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        return 1;
+    }
+
+    public static void checkDragDropInProgress() throws java.awt.dnd.InvalidDnDOperationException
+    {
+        java.lang.String $r1;
+        java.awt.dnd.InvalidDnDOperationException $r0;
+        boolean $z0;
+
+        $z0 = <sun.awt.dnd.SunDragSourceContextPeer: boolean dragDropInProgress>;
+
+        if $z0 == 0 goto label1;
+
+        $r0 = new java.awt.dnd.InvalidDnDOperationException;
+
+        $r1 = staticinvoke <sun.awt.dnd.SunDragSourceContextPeer: java.lang.String getExceptionMessage(boolean)>(1);
+
+        specialinvoke $r0.<java.awt.dnd.InvalidDnDOperationException: void <init>(java.lang.String)>($r1);
+
+        throw $r0;
+
+     label1:
+        return;
+    }
+
+    public static boolean isDragDropInProgress()
+    {
+        boolean $z0;
+
+        $z0 = <sun.awt.dnd.SunDragSourceContextPeer: boolean dragDropInProgress>;
+
+        return $z0;
+    }
+
+    private static java.lang.String getExceptionMessage(boolean)
+    {
+        java.lang.String $r0;
+        boolean z0;
+
+        z0 := @parameter0: boolean;
+
+        if z0 == 0 goto label1;
+
+        $r0 = "Drag and drop in progress";
+
+        goto label2;
+
+     label1:
+        $r0 = "No drag in progress";
+
+     label2:
+        return $r0;
+    }
+
+    public static int convertModifiersToDropAction(int, int)
+    {
+        int i0, $i1, i2, $i3, $i4, $i5, i6, $i7;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        i6 = 0;
+
+        $i1 = i0 & 192;
+
+        lookupswitch($i1)
+        {
+            case 64: goto label3;
+            case 128: goto label2;
+            case 192: goto label1;
+            default: goto label4;
+        };
+
+     label1:
+        i6 = 1073741824;
+
+        goto label7;
+
+     label2:
+        i6 = 1;
+
+        goto label7;
+
+     label3:
+        i6 = 2;
+
+        goto label7;
+
+     label4:
+        $i3 = i2 & 2;
+
+        if $i3 == 0 goto label5;
+
+        i6 = 2;
+
+        goto label7;
+
+     label5:
+        $i4 = i2 & 1;
+
+        if $i4 == 0 goto label6;
+
+        i6 = 1;
+
+        goto label7;
+
+     label6:
+        $i5 = i2 & 1073741824;
+
+        if $i5 == 0 goto label7;
+
+        i6 = 1073741824;
+
+     label7:
+        $i7 = i6 & i2;
+
+        return $i7;
+    }
+
+    private void cleanup()
+    {
+        sun.awt.dnd.SunDragSourceContextPeer r0;
+
+        r0 := @this: sun.awt.dnd.SunDragSourceContextPeer;
+
+        r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.dnd.DragGestureEvent trigger> = null;
+
+        r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.Component component> = null;
+
+        r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.Cursor cursor> = null;
+
+        r0.<sun.awt.dnd.SunDragSourceContextPeer: java.awt.dnd.DragSourceContext dragSourceContext> = null;
+
+        staticinvoke <sun.awt.dnd.SunDropTargetContextPeer: void setCurrentJVMLocalSourceTransferable(java.awt.datatransfer.Transferable)>(null);
+
+        staticinvoke <sun.awt.dnd.SunDragSourceContextPeer: void setDragDropInProgress(boolean)>(0);
+
+        return;
+    }
+
+    static boolean access$002(boolean)
+    {
+        boolean z0;
+
+        z0 := @parameter0: boolean;
+
+        <sun.awt.dnd.SunDragSourceContextPeer: boolean discardingMouseEvents> = z0;
+
+        return z0;
+    }
+
+    static void access$100(sun.awt.dnd.SunDragSourceContextPeer)
+    {
+        sun.awt.dnd.SunDragSourceContextPeer r0;
+
+        r0 := @parameter0: sun.awt.dnd.SunDragSourceContextPeer;
+
+        specialinvoke r0.<sun.awt.dnd.SunDragSourceContextPeer: void cleanup()>();
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        <sun.awt.dnd.SunDragSourceContextPeer: int DISPATCH_MOUSE_MOVED> = 6;
+
+        <sun.awt.dnd.SunDragSourceContextPeer: int DISPATCH_FINISH> = 5;
+
+        <sun.awt.dnd.SunDragSourceContextPeer: int DISPATCH_EXIT> = 4;
+
+        <sun.awt.dnd.SunDragSourceContextPeer: int DISPATCH_CHANGED> = 3;
+
+        <sun.awt.dnd.SunDragSourceContextPeer: int DISPATCH_MOTION> = 2;
+
+        <sun.awt.dnd.SunDragSourceContextPeer: int DISPATCH_ENTER> = 1;
+
+        <sun.awt.dnd.SunDragSourceContextPeer: boolean dragDropInProgress> = 0;
+
+        <sun.awt.dnd.SunDragSourceContextPeer: boolean discardingMouseEvents> = 0;
+
+        return;
+    }
+}

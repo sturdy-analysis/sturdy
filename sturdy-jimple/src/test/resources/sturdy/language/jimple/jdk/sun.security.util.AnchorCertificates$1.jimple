@@ -1,0 +1,180 @@
+final class sun.security.util.AnchorCertificates$1 extends java.lang.Object implements java.security.PrivilegedAction
+{
+
+    void <init>()
+    {
+        sun.security.util.AnchorCertificates$1 r0;
+
+        r0 := @this: sun.security.util.AnchorCertificates$1;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public java.lang.Void run()
+    {
+        java.security.cert.X509Certificate r10;
+        java.lang.Throwable $r18, $r19, $r20, r23;
+        javax.security.auth.x500.X500Principal $r14;
+        java.util.Enumeration $r6;
+        java.util.HashSet $r4, $r5;
+        java.lang.String $r1, r8, $r12;
+        boolean $z0, $z1;
+        java.util.Set $r11, $r13;
+        java.security.KeyStore $r2;
+        java.io.FileInputStream $r3;
+        sun.security.util.Debug $r16, $r17;
+        java.io.File $r0;
+        java.lang.Exception $r15;
+        java.security.cert.Certificate $r9;
+        sun.security.util.AnchorCertificates$1 r22;
+        java.lang.Object $r7;
+
+        r22 := @this: sun.security.util.AnchorCertificates$1;
+
+        $r0 = new java.io.File;
+
+        $r1 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.home");
+
+        specialinvoke $r0.<java.io.File: void <init>(java.lang.String,java.lang.String)>($r1, "lib/security/cacerts");
+
+     label01:
+        $r2 = staticinvoke <java.security.KeyStore: java.security.KeyStore getInstance(java.lang.String)>("JKS");
+
+        $r3 = new java.io.FileInputStream;
+
+        specialinvoke $r3.<java.io.FileInputStream: void <init>(java.io.File)>($r0);
+
+        r23 = null;
+
+     label02:
+        virtualinvoke $r2.<java.security.KeyStore: void load(java.io.InputStream,char[])>($r3, null);
+
+        $r4 = new java.util.HashSet;
+
+        specialinvoke $r4.<java.util.HashSet: void <init>()>();
+
+        staticinvoke <sun.security.util.AnchorCertificates: java.util.Set access$002(java.util.Set)>($r4);
+
+        $r5 = new java.util.HashSet;
+
+        specialinvoke $r5.<java.util.HashSet: void <init>()>();
+
+        staticinvoke <sun.security.util.AnchorCertificates: java.util.Set access$102(java.util.Set)>($r5);
+
+        $r6 = virtualinvoke $r2.<java.security.KeyStore: java.util.Enumeration aliases()>();
+
+     label03:
+        $z0 = interfaceinvoke $r6.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label05;
+
+        $r7 = interfaceinvoke $r6.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r8 = (java.lang.String) $r7;
+
+        $z1 = virtualinvoke r8.<java.lang.String: boolean contains(java.lang.CharSequence)>(" [jdk");
+
+        if $z1 == 0 goto label04;
+
+        $r9 = virtualinvoke $r2.<java.security.KeyStore: java.security.cert.Certificate getCertificate(java.lang.String)>(r8);
+
+        r10 = (java.security.cert.X509Certificate) $r9;
+
+        $r11 = staticinvoke <sun.security.util.AnchorCertificates: java.util.Set access$000()>();
+
+        $r12 = staticinvoke <sun.security.x509.X509CertImpl: java.lang.String getFingerprint(java.lang.String,java.security.cert.X509Certificate)>("SHA-256", r10);
+
+        interfaceinvoke $r11.<java.util.Set: boolean add(java.lang.Object)>($r12);
+
+        $r13 = staticinvoke <sun.security.util.AnchorCertificates: java.util.Set access$100()>();
+
+        $r14 = virtualinvoke r10.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        interfaceinvoke $r13.<java.util.Set: boolean add(java.lang.Object)>($r14);
+
+     label04:
+        goto label03;
+
+     label05:
+        if $r3 == null goto label15;
+
+        goto label06;
+
+     label06:
+        virtualinvoke $r3.<java.io.FileInputStream: void close()>();
+
+        goto label15;
+
+     label07:
+        $r20 := @caughtexception;
+
+        r23 = $r20;
+
+        throw $r20;
+
+     label08:
+        $r19 := @caughtexception;
+
+     label09:
+        if $r3 == null goto label14;
+
+        if r23 == null goto label13;
+
+     label10:
+        virtualinvoke $r3.<java.io.FileInputStream: void close()>();
+
+     label11:
+        goto label14;
+
+     label12:
+        $r18 := @caughtexception;
+
+        virtualinvoke r23.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r18);
+
+        goto label14;
+
+     label13:
+        virtualinvoke $r3.<java.io.FileInputStream: void close()>();
+
+     label14:
+        throw $r19;
+
+     label15:
+        goto label17;
+
+     label16:
+        $r15 := @caughtexception;
+
+        $r16 = staticinvoke <sun.security.util.AnchorCertificates: sun.security.util.Debug access$200()>();
+
+        if $r16 == null goto label17;
+
+        $r17 = staticinvoke <sun.security.util.AnchorCertificates: sun.security.util.Debug access$200()>();
+
+        virtualinvoke $r17.<sun.security.util.Debug: void println(java.lang.String)>("Error parsing cacerts");
+
+        virtualinvoke $r15.<java.lang.Exception: void printStackTrace()>();
+
+     label17:
+        return null;
+
+        catch java.lang.Throwable from label02 to label05 with label07;
+        catch java.lang.Throwable from label10 to label11 with label12;
+        catch java.lang.Throwable from label07 to label09 with label08;
+        catch java.lang.Exception from label01 to label15 with label16;
+    }
+
+    public volatile java.lang.Object run()
+    {
+        java.lang.Void $r1;
+        sun.security.util.AnchorCertificates$1 r0;
+
+        r0 := @this: sun.security.util.AnchorCertificates$1;
+
+        $r1 = virtualinvoke r0.<sun.security.util.AnchorCertificates$1: java.lang.Void run()>();
+
+        return $r1;
+    }
+}

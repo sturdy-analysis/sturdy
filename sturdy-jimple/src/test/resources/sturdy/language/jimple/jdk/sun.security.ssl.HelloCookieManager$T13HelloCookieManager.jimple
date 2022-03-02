@@ -1,0 +1,403 @@
+final class sun.security.ssl.HelloCookieManager$T13HelloCookieManager extends sun.security.ssl.HelloCookieManager
+{
+    final java.security.SecureRandom secureRandom;
+    private int cookieVersion;
+    private final byte[] cookieSecret;
+    private final byte[] legacySecret;
+
+    void <init>(java.security.SecureRandom)
+    {
+        byte[] $r2, $r3, $r4, $r5, $r6;
+        sun.security.ssl.HelloCookieManager$T13HelloCookieManager r0;
+        java.security.SecureRandom r1;
+        int $i0;
+
+        r0 := @this: sun.security.ssl.HelloCookieManager$T13HelloCookieManager;
+
+        r1 := @parameter0: java.security.SecureRandom;
+
+        specialinvoke r0.<sun.security.ssl.HelloCookieManager: void <init>()>();
+
+        r0.<sun.security.ssl.HelloCookieManager$T13HelloCookieManager: java.security.SecureRandom secureRandom> = r1;
+
+        $i0 = virtualinvoke r1.<java.security.SecureRandom: int nextInt()>();
+
+        r0.<sun.security.ssl.HelloCookieManager$T13HelloCookieManager: int cookieVersion> = $i0;
+
+        $r2 = newarray (byte)[64];
+
+        r0.<sun.security.ssl.HelloCookieManager$T13HelloCookieManager: byte[] cookieSecret> = $r2;
+
+        $r3 = newarray (byte)[64];
+
+        r0.<sun.security.ssl.HelloCookieManager$T13HelloCookieManager: byte[] legacySecret> = $r3;
+
+        $r4 = r0.<sun.security.ssl.HelloCookieManager$T13HelloCookieManager: byte[] cookieSecret>;
+
+        virtualinvoke r1.<java.security.SecureRandom: void nextBytes(byte[])>($r4);
+
+        $r6 = r0.<sun.security.ssl.HelloCookieManager$T13HelloCookieManager: byte[] cookieSecret>;
+
+        $r5 = r0.<sun.security.ssl.HelloCookieManager$T13HelloCookieManager: byte[] legacySecret>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r6, 0, $r5, 0, 64);
+
+        return;
+    }
+
+    byte[] createCookie(sun.security.ssl.ServerHandshakeContext, sun.security.ssl.ClientHello$ClientHelloMessage) throws java.io.IOException
+    {
+        byte[] r1, $r8, $r9, $r12, $r13, $r16, $r17, $r18, $r19;
+        java.security.SecureRandom $r20;
+        byte $b8, $b11, $b14;
+        sun.security.ssl.ServerHandshakeContext r2;
+        sun.security.ssl.ClientHello$ClientHelloMessage r7;
+        sun.security.ssl.HandshakeHash $r10, $r11;
+        sun.security.ssl.CipherSuite $r3, $r14, $r15;
+        java.lang.Throwable $r21;
+        sun.security.ssl.HelloCookieManager$T13HelloCookieManager r0;
+        java.security.MessageDigest $r6;
+        sun.security.ssl.CipherSuite$HashAlg $r4;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i9, $i10, $i12, $i13, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25;
+        java.lang.String $r5;
+
+        r0 := @this: sun.security.ssl.HelloCookieManager$T13HelloCookieManager;
+
+        r2 := @parameter0: sun.security.ssl.ServerHandshakeContext;
+
+        r7 := @parameter1: sun.security.ssl.ClientHello$ClientHelloMessage;
+
+        entermonitor r0;
+
+     label1:
+        i0 = r0.<sun.security.ssl.HelloCookieManager$T13HelloCookieManager: int cookieVersion>;
+
+        r1 = r0.<sun.security.ssl.HelloCookieManager$T13HelloCookieManager: byte[] cookieSecret>;
+
+        $i1 = r0.<sun.security.ssl.HelloCookieManager$T13HelloCookieManager: int cookieVersion>;
+
+        $i2 = $i1 & 16777215;
+
+        if $i2 != 0 goto label2;
+
+        $r18 = r0.<sun.security.ssl.HelloCookieManager$T13HelloCookieManager: byte[] cookieSecret>;
+
+        $r17 = r0.<sun.security.ssl.HelloCookieManager$T13HelloCookieManager: byte[] legacySecret>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r18, 0, $r17, 0, 64);
+
+        $r20 = r0.<sun.security.ssl.HelloCookieManager$T13HelloCookieManager: java.security.SecureRandom secureRandom>;
+
+        $r19 = r0.<sun.security.ssl.HelloCookieManager$T13HelloCookieManager: byte[] cookieSecret>;
+
+        virtualinvoke $r20.<java.security.SecureRandom: void nextBytes(byte[])>($r19);
+
+     label2:
+        $i3 = r0.<sun.security.ssl.HelloCookieManager$T13HelloCookieManager: int cookieVersion>;
+
+        $i4 = $i3 + 1;
+
+        r0.<sun.security.ssl.HelloCookieManager$T13HelloCookieManager: int cookieVersion> = $i4;
+
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r21 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r21;
+
+     label6:
+        $r3 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.CipherSuite negotiatedCipherSuite>;
+
+        $r4 = $r3.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$HashAlg hashAlg>;
+
+        $r5 = $r4.<sun.security.ssl.CipherSuite$HashAlg: java.lang.String name>;
+
+        $r6 = staticinvoke <sun.security.ssl.JsseJce: java.security.MessageDigest getMessageDigest(java.lang.String)>($r5);
+
+        $r8 = virtualinvoke r7.<sun.security.ssl.ClientHello$ClientHelloMessage: byte[] getHeaderBytes()>();
+
+        virtualinvoke $r6.<java.security.MessageDigest: void update(byte[])>($r8);
+
+        $r9 = virtualinvoke $r6.<java.security.MessageDigest: byte[] digest(byte[])>(r1);
+
+        $r10 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.HandshakeHash handshakeHash>;
+
+        virtualinvoke $r10.<sun.security.ssl.HandshakeHash: void update()>();
+
+        $r11 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.HandshakeHash handshakeHash>;
+
+        $r12 = virtualinvoke $r11.<sun.security.ssl.HandshakeHash: byte[] digest()>();
+
+        $r13 = newarray (byte)[3];
+
+        $r14 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.CipherSuite negotiatedCipherSuite>;
+
+        $i5 = $r14.<sun.security.ssl.CipherSuite: int id>;
+
+        $i6 = $i5 >> 8;
+
+        $i7 = $i6 & 255;
+
+        $b8 = (byte) $i7;
+
+        $r13[0] = $b8;
+
+        $r15 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.CipherSuite negotiatedCipherSuite>;
+
+        $i9 = $r15.<sun.security.ssl.CipherSuite: int id>;
+
+        $i10 = $i9 & 255;
+
+        $b11 = (byte) $i10;
+
+        $r13[1] = $b11;
+
+        $i12 = i0 >> 24;
+
+        $i13 = $i12 & 255;
+
+        $b14 = (byte) $i13;
+
+        $r13[2] = $b14;
+
+        $i16 = lengthof $r13;
+
+        $i15 = lengthof $r9;
+
+        $i18 = $i16 + $i15;
+
+        $i17 = lengthof $r12;
+
+        $i19 = $i18 + $i17;
+
+        $r16 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>($r13, $i19);
+
+        $i21 = lengthof $r13;
+
+        $i20 = lengthof $r9;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r9, 0, $r16, $i21, $i20);
+
+        $i23 = lengthof $r13;
+
+        $i22 = lengthof $r9;
+
+        $i25 = $i23 + $i22;
+
+        $i24 = lengthof $r12;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r12, 0, $r16, $i25, $i24);
+
+        return $r16;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    boolean isCookieValid(sun.security.ssl.ServerHandshakeContext, sun.security.ssl.ClientHello$ClientHelloMessage, byte[]) throws java.io.IOException
+    {
+        byte[] r0, $r5, $r6, $r12, $r13, $r16, r18, r22;
+        byte $b1, $b3, $b18, $b19, $b21, $b23;
+        boolean $z0;
+        sun.security.ssl.ServerHandshakeContext r14;
+        sun.security.ssl.SSLHandshake $r19;
+        sun.security.ssl.ClientHello$ClientHelloMessage r11;
+        sun.security.ssl.HandshakeHash $r17, $r20;
+        sun.security.ssl.CipherSuite $r1;
+        java.lang.Throwable $r21;
+        sun.security.ssl.HelloCookieManager$T13HelloCookieManager r7;
+        java.security.MessageDigest $r10;
+        short $s2, $s4, $s24, $s26;
+        sun.security.ssl.HandshakeProducer $r15;
+        sun.security.ssl.CipherSuite$HashAlg $r2, $r3, $r4, $r8;
+        int $i0, $i5, i6, $i7, i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i20, $i22, $i25, $i27, $i28, $i29;
+        java.lang.String $r9;
+
+        r7 := @this: sun.security.ssl.HelloCookieManager$T13HelloCookieManager;
+
+        r14 := @parameter0: sun.security.ssl.ServerHandshakeContext;
+
+        r11 := @parameter1: sun.security.ssl.ClientHello$ClientHelloMessage;
+
+        r0 := @parameter2: byte[];
+
+        if r0 == null goto label01;
+
+        $i0 = lengthof r0;
+
+        if $i0 > 32 goto label02;
+
+     label01:
+        return 0;
+
+     label02:
+        $b1 = r0[0];
+
+        $s24 = (short) $b1;
+
+        $s2 = $s24 & 255;
+
+        $i25 = (int) $s2;
+
+        $i5 = $i25 << 8;
+
+        $b3 = r0[1];
+
+        $s26 = (short) $b3;
+
+        $s4 = $s26 & 255;
+
+        $i27 = (int) $s4;
+
+        i6 = $i5 | $i27;
+
+        $r1 = staticinvoke <sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite valueOf(int)>(i6);
+
+        if $r1 == null goto label03;
+
+        $r2 = $r1.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$HashAlg hashAlg>;
+
+        if $r2 == null goto label03;
+
+        $r3 = $r1.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$HashAlg hashAlg>;
+
+        $i7 = $r3.<sun.security.ssl.CipherSuite$HashAlg: int hashLength>;
+
+        if $i7 != 0 goto label04;
+
+     label03:
+        return 0;
+
+     label04:
+        $r4 = $r1.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$HashAlg hashAlg>;
+
+        i8 = $r4.<sun.security.ssl.CipherSuite$HashAlg: int hashLength>;
+
+        $i11 = lengthof r0;
+
+        $i9 = i8 * 2;
+
+        $i10 = 3 + $i9;
+
+        if $i11 == $i10 goto label05;
+
+        return 0;
+
+     label05:
+        $i12 = 3 + i8;
+
+        $r5 = staticinvoke <java.util.Arrays: byte[] copyOfRange(byte[],int,int)>(r0, 3, $i12);
+
+        $i14 = 3 + i8;
+
+        $i13 = lengthof r0;
+
+        $r6 = staticinvoke <java.util.Arrays: byte[] copyOfRange(byte[],int,int)>(r0, $i14, $i13);
+
+        entermonitor r7;
+
+     label06:
+        $i15 = r7.<sun.security.ssl.HelloCookieManager$T13HelloCookieManager: int cookieVersion>;
+
+        $i16 = $i15 >> 24;
+
+        $i17 = $i16 & 255;
+
+        $b19 = (byte) $i17;
+
+        $b18 = r0[2];
+
+        $i28 = (int) $b19;
+
+        $i29 = (int) $b18;
+
+        if $i28 != $i29 goto label07;
+
+        r22 = r7.<sun.security.ssl.HelloCookieManager$T13HelloCookieManager: byte[] cookieSecret>;
+
+        goto label08;
+
+     label07:
+        r22 = r7.<sun.security.ssl.HelloCookieManager$T13HelloCookieManager: byte[] legacySecret>;
+
+     label08:
+        exitmonitor r7;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r21 := @caughtexception;
+
+        exitmonitor r7;
+
+     label11:
+        throw $r21;
+
+     label12:
+        $r8 = $r1.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$HashAlg hashAlg>;
+
+        $r9 = $r8.<sun.security.ssl.CipherSuite$HashAlg: java.lang.String name>;
+
+        $r10 = staticinvoke <sun.security.ssl.JsseJce: java.security.MessageDigest getMessageDigest(java.lang.String)>($r9);
+
+        $r12 = virtualinvoke r11.<sun.security.ssl.ClientHello$ClientHelloMessage: byte[] getHeaderBytes()>();
+
+        virtualinvoke $r10.<java.security.MessageDigest: void update(byte[])>($r12);
+
+        $r13 = virtualinvoke $r10.<java.security.MessageDigest: byte[] digest(byte[])>(r22);
+
+        $z0 = staticinvoke <java.security.MessageDigest: boolean isEqual(byte[],byte[])>($r13, $r5);
+
+        if $z0 != 0 goto label13;
+
+        return 0;
+
+     label13:
+        $r15 = <sun.security.ssl.ServerHello: sun.security.ssl.HandshakeProducer hrrReproducer>;
+
+        $r16 = interfaceinvoke $r15.<sun.security.ssl.HandshakeProducer: byte[] produce(sun.security.ssl.ConnectionContext,sun.security.ssl.SSLHandshake$HandshakeMessage)>(r14, r11);
+
+        $r17 = r14.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.HandshakeHash handshakeHash>;
+
+        virtualinvoke $r17.<sun.security.ssl.HandshakeHash: void push(byte[])>($r16);
+
+        $i20 = 4 + i8;
+
+        r18 = newarray (byte)[$i20];
+
+        $r19 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake MESSAGE_HASH>;
+
+        $b21 = $r19.<sun.security.ssl.SSLHandshake: byte id>;
+
+        r18[0] = $b21;
+
+        r18[1] = 0;
+
+        r18[2] = 0;
+
+        $i22 = i8 & 255;
+
+        $b23 = (byte) $i22;
+
+        r18[3] = $b23;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r6, 0, r18, 4, i8);
+
+        $r20 = r14.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.HandshakeHash handshakeHash>;
+
+        virtualinvoke $r20.<sun.security.ssl.HandshakeHash: void push(byte[])>(r18);
+
+        return 1;
+
+        catch java.lang.Throwable from label06 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+}

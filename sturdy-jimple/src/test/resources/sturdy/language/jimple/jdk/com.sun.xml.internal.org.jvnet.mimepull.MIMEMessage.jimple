@@ -1,0 +1,698 @@
+public class com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage extends java.lang.Object
+{
+    private static final java.util.logging.Logger LOGGER;
+    com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig config;
+    private final java.io.InputStream in;
+    private final java.util.List partsList;
+    private final java.util.Map partsMap;
+    private final java.util.Iterator it;
+    private boolean parsed;
+    private com.sun.xml.internal.org.jvnet.mimepull.MIMEPart currentPart;
+    private int currentIndex;
+
+    public void <init>(java.io.InputStream, java.lang.String)
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig $r3;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage r0;
+        java.lang.String r2;
+        java.io.InputStream r1;
+
+        r0 := @this: com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        r2 := @parameter1: java.lang.String;
+
+        $r3 = new com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig;
+
+        specialinvoke $r3.<com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig: void <init>()>();
+
+        specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: void <init>(java.io.InputStream,java.lang.String,com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig)>(r1, r2, $r3);
+
+        return;
+    }
+
+    public void <init>(java.io.InputStream, java.lang.String, com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig)
+    {
+        java.util.Iterator $r5;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage r0;
+        java.util.HashMap $r7;
+        java.util.ArrayList $r6;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig r2;
+        java.lang.String r4;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser $r3;
+        java.io.InputStream r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        r4 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.io.InputStream in> = r1;
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig config> = r2;
+
+        $r3 = new com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+        specialinvoke $r3.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: void <init>(java.io.InputStream,java.lang.String,com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig)>(r1, r4, r2);
+
+        $r5 = virtualinvoke $r3.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.util.Iterator iterator()>();
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.Iterator it> = $r5;
+
+        $r6 = new java.util.ArrayList;
+
+        specialinvoke $r6.<java.util.ArrayList: void <init>()>();
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.List partsList> = $r6;
+
+        $r7 = new java.util.HashMap;
+
+        specialinvoke $r7.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.Map partsMap> = $r7;
+
+        $z0 = virtualinvoke r2.<com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig: boolean isParseEagerly()>();
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: void parseAll()>();
+
+     label1:
+        return;
+    }
+
+    public java.util.List getAttachments()
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage r0;
+        java.util.List $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage;
+
+        $z0 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: boolean parsed>;
+
+        if $z0 != 0 goto label1;
+
+        virtualinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: void parseAll()>();
+
+     label1:
+        $r1 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.List partsList>;
+
+        return $r1;
+    }
+
+    public com.sun.xml.internal.org.jvnet.mimepull.MIMEPart getPart(int)
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException $r11;
+        java.lang.Object[] $r5;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage r3;
+        java.lang.Integer $r2, $r8;
+        java.util.logging.Level $r1, $r7;
+        int i0, $i1;
+        java.lang.String $r16;
+        boolean $z0;
+        java.util.logging.Logger $r0, $r6;
+        java.util.List $r4, $r10, $r17;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEPart $r9, $r19, r20;
+        java.lang.StringBuilder $r12, $r13, $r14, $r15;
+        java.lang.Object $r18;
+
+        r3 := @this: com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage;
+
+        i0 := @parameter0: int;
+
+        $r0 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.logging.Logger LOGGER>;
+
+        $r1 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        virtualinvoke $r0.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r1, "index={0}", $r2);
+
+        $r4 = r3.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.List partsList>;
+
+        $i1 = interfaceinvoke $r4.<java.util.List: int size()>();
+
+        if i0 >= $i1 goto label1;
+
+        $r17 = r3.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.List partsList>;
+
+        $r18 = interfaceinvoke $r17.<java.util.List: java.lang.Object get(int)>(i0);
+
+        $r19 = (com.sun.xml.internal.org.jvnet.mimepull.MIMEPart) $r18;
+
+        goto label2;
+
+     label1:
+        $r19 = null;
+
+     label2:
+        r20 = $r19;
+
+        $z0 = r3.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: boolean parsed>;
+
+        if $z0 == 0 goto label3;
+
+        if $r19 != null goto label3;
+
+        $r11 = new com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("There is no ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" attachment part ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r11.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException: void <init>(java.lang.String)>($r16);
+
+        throw $r11;
+
+     label3:
+        if r20 != null goto label4;
+
+        $r9 = new com.sun.xml.internal.org.jvnet.mimepull.MIMEPart;
+
+        specialinvoke $r9.<com.sun.xml.internal.org.jvnet.mimepull.MIMEPart: void <init>(com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage)>(r3);
+
+        r20 = $r9;
+
+        $r10 = r3.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.List partsList>;
+
+        interfaceinvoke $r10.<java.util.List: void add(int,java.lang.Object)>(i0, $r9);
+
+     label4:
+        $r6 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.logging.Logger LOGGER>;
+
+        $r7 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r5 = newarray (java.lang.Object)[2];
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        $r5[0] = $r8;
+
+        $r5[1] = r20;
+
+        virtualinvoke $r6.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r7, "Got attachment at index={0} attachment={1}", $r5);
+
+        return r20;
+    }
+
+    public com.sun.xml.internal.org.jvnet.mimepull.MIMEPart getPart(java.lang.String)
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException $r10;
+        java.lang.Object[] $r5;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage r3;
+        java.util.logging.Level $r1, $r6;
+        java.util.Map $r9;
+        java.lang.String r0, $r14;
+        boolean $z0;
+        java.util.logging.Logger $r2, $r7;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEPart $r4, $r8, r15;
+        java.lang.StringBuilder $r11, $r12, $r13;
+
+        r3 := @this: com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r2 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.logging.Logger LOGGER>;
+
+        $r1 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        virtualinvoke $r2.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r1, "Content-ID={0}", r0);
+
+        $r4 = specialinvoke r3.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart getDecodedCidPart(java.lang.String)>(r0);
+
+        r15 = $r4;
+
+        $z0 = r3.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: boolean parsed>;
+
+        if $z0 == 0 goto label1;
+
+        if $r4 != null goto label1;
+
+        $r10 = new com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("There is no attachment part with Content-ID = ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r10.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException: void <init>(java.lang.String)>($r14);
+
+        throw $r10;
+
+     label1:
+        if $r4 != null goto label2;
+
+        $r8 = new com.sun.xml.internal.org.jvnet.mimepull.MIMEPart;
+
+        specialinvoke $r8.<com.sun.xml.internal.org.jvnet.mimepull.MIMEPart: void <init>(com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage,java.lang.String)>(r3, r0);
+
+        r15 = $r8;
+
+        $r9 = r3.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.Map partsMap>;
+
+        interfaceinvoke $r9.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r0, $r8);
+
+     label2:
+        $r7 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.logging.Logger LOGGER>;
+
+        $r6 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r5 = newarray (java.lang.Object)[2];
+
+        $r5[0] = r0;
+
+        $r5[1] = r15;
+
+        virtualinvoke $r7.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r6, "Got attachment for Content-ID={0} attachment={1}", $r5);
+
+        return r15;
+    }
+
+    private com.sun.xml.internal.org.jvnet.mimepull.MIMEPart getDecodedCidPart(java.lang.String)
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage r0;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEPart r8;
+        java.util.Map $r2, $r5;
+        int $i0, $i2;
+        java.lang.Object $r3, $r6;
+        java.lang.String r1, $r4;
+        java.io.UnsupportedEncodingException $r7;
+
+        r0 := @this: com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.Map partsMap>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r8 = (com.sun.xml.internal.org.jvnet.mimepull.MIMEPart) $r3;
+
+        if r8 != null goto label4;
+
+        $i0 = virtualinvoke r1.<java.lang.String: int indexOf(int)>(37);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label4;
+
+     label1:
+        $r4 = staticinvoke <java.net.URLDecoder: java.lang.String decode(java.lang.String,java.lang.String)>(r1, "utf-8");
+
+        $r5 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.Map partsMap>;
+
+        $r6 = interfaceinvoke $r5.<java.util.Map: java.lang.Object get(java.lang.Object)>($r4);
+
+        r8 = (com.sun.xml.internal.org.jvnet.mimepull.MIMEPart) $r6;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+     label4:
+        return r8;
+
+        catch java.io.UnsupportedEncodingException from label1 to label2 with label3;
+    }
+
+    public final void parseAll()
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage;
+
+     label1:
+        $z0 = virtualinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: boolean makeProgress()>();
+
+        if $z0 == 0 goto label2;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public synchronized boolean makeProgress()
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent$Headers r24;
+        java.util.Map $r35;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEPart $r14, $r20, r30, $r31, $r33, $r34, $r37, $r38, $r60, $r61;
+        java.lang.StringBuilder $r28, $r29, $r51, $r53, $r62, $r65;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage r0;
+        com.sun.xml.internal.org.jvnet.mimepull.InternetHeaders $r25;
+        java.lang.String $r54, $r57, r58;
+        java.io.IOException $r55;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException $r63, $r64, $r66;
+        java.nio.ByteBuffer $r19;
+        int[] $r5;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent$Content r18;
+        boolean $z0;
+        java.util.logging.Logger $r9, $r13, $r17, $r23, $r45, $r48;
+        java.util.List $r26, $r36, $r39, $r40, $r59;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent$EVENT_TYPE $r6, $r7, $r11, $r15, $r21, $r43, $r46, $r52;
+        java.util.logging.Level $r8, $r12, $r16, $r22, $r44, $r47;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i10, $i11, $i12, $i13, $i14;
+        java.util.Iterator $r1, $r2;
+        char $c9;
+        java.lang.Object $r3, $r41, $r42;
+        java.io.InputStream $r10;
+
+        r0 := @this: com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage;
+
+        $r1 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.Iterator it>;
+
+        $z0 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 != 0 goto label01;
+
+        return 0;
+
+     label01:
+        $r2 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.Iterator it>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent) $r3;
+
+        $r5 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage$1: int[] $SwitchMap$com$sun$xml$internal$org$jvnet$mimepull$MIMEEvent$EVENT_TYPE>;
+
+        $r6 = virtualinvoke r4.<com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent: com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent$EVENT_TYPE getEventType()>();
+
+        $i0 = virtualinvoke $r6.<com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent$EVENT_TYPE: int ordinal()>();
+
+        $i1 = $r5[$i0];
+
+        tableswitch($i1)
+        {
+            case 1: goto label02;
+            case 2: goto label03;
+            case 3: goto label04;
+            case 4: goto label14;
+            case 5: goto label15;
+            case 6: goto label16;
+            default: goto label20;
+        };
+
+     label02:
+        $r48 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.logging.Logger LOGGER>;
+
+        $r47 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r46 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent$EVENT_TYPE: com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent$EVENT_TYPE START_MESSAGE>;
+
+        virtualinvoke $r48.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r47, "MIMEEvent={0}", $r46);
+
+        goto label21;
+
+     label03:
+        $r45 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.logging.Logger LOGGER>;
+
+        $r44 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r43 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent$EVENT_TYPE: com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent$EVENT_TYPE START_PART>;
+
+        virtualinvoke $r45.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r44, "MIMEEvent={0}", $r43);
+
+        goto label21;
+
+     label04:
+        $r23 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.logging.Logger LOGGER>;
+
+        $r22 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r21 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent$EVENT_TYPE: com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent$EVENT_TYPE HEADERS>;
+
+        virtualinvoke $r23.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r22, "MIMEEvent={0}", $r21);
+
+        r24 = (com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent$Headers) r4;
+
+        $r25 = virtualinvoke r24.<com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent$Headers: com.sun.xml.internal.org.jvnet.mimepull.InternetHeaders getHeaders()>();
+
+        $r26 = virtualinvoke $r25.<com.sun.xml.internal.org.jvnet.mimepull.InternetHeaders: java.util.List getHeader(java.lang.String)>("content-id");
+
+        if $r26 == null goto label05;
+
+        $r42 = interfaceinvoke $r26.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r57 = (java.lang.String) $r42;
+
+        goto label06;
+
+     label05:
+        $r62 = new java.lang.StringBuilder;
+
+        specialinvoke $r62.<java.lang.StringBuilder: void <init>()>();
+
+        $i4 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: int currentIndex>;
+
+        $r28 = virtualinvoke $r62.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r57 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label06:
+        r58 = $r57;
+
+        $i5 = virtualinvoke $r57.<java.lang.String: int length()>();
+
+        if $i5 <= 2 goto label07;
+
+        $c9 = virtualinvoke $r57.<java.lang.String: char charAt(int)>(0);
+
+        $i14 = (int) $c9;
+
+        if $i14 != 60 goto label07;
+
+        $i10 = virtualinvoke $r57.<java.lang.String: int length()>();
+
+        $i11 = $i10 - 1;
+
+        r58 = virtualinvoke $r57.<java.lang.String: java.lang.String substring(int,int)>(1, $i11);
+
+     label07:
+        $i12 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: int currentIndex>;
+
+        $r59 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.List partsList>;
+
+        $i13 = interfaceinvoke $r59.<java.util.List: int size()>();
+
+        if $i12 >= $i13 goto label08;
+
+        $r40 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.List partsList>;
+
+        $i8 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: int currentIndex>;
+
+        $r41 = interfaceinvoke $r40.<java.util.List: java.lang.Object get(int)>($i8);
+
+        $r60 = (com.sun.xml.internal.org.jvnet.mimepull.MIMEPart) $r41;
+
+        goto label09;
+
+     label08:
+        $r60 = null;
+
+     label09:
+        r30 = $r60;
+
+        $r31 = specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart getDecodedCidPart(java.lang.String)>(r58);
+
+        if $r60 != null goto label10;
+
+        if $r31 != null goto label10;
+
+        $r37 = virtualinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart getPart(java.lang.String)>(r58);
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart currentPart> = $r37;
+
+        $r39 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.List partsList>;
+
+        $i7 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: int currentIndex>;
+
+        $r38 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart currentPart>;
+
+        interfaceinvoke $r39.<java.util.List: void add(int,java.lang.Object)>($i7, $r38);
+
+        goto label13;
+
+     label10:
+        if r30 != null goto label11;
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart currentPart> = $r31;
+
+        $r36 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.List partsList>;
+
+        $i6 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: int currentIndex>;
+
+        interfaceinvoke $r36.<java.util.List: void add(int,java.lang.Object)>($i6, $r31);
+
+        goto label13;
+
+     label11:
+        if $r31 != null goto label12;
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart currentPart> = r30;
+
+        $r33 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart currentPart>;
+
+        virtualinvoke $r33.<com.sun.xml.internal.org.jvnet.mimepull.MIMEPart: void setContentId(java.lang.String)>(r58);
+
+        $r35 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.Map partsMap>;
+
+        $r34 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart currentPart>;
+
+        interfaceinvoke $r35.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r58, $r34);
+
+        goto label13;
+
+     label12:
+        if r30 == $r31 goto label13;
+
+        $r63 = new com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException;
+
+        specialinvoke $r63.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException: void <init>(java.lang.String)>("Created two different attachments using Content-ID and index");
+
+        throw $r63;
+
+     label13:
+        $r61 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart currentPart>;
+
+        virtualinvoke $r61.<com.sun.xml.internal.org.jvnet.mimepull.MIMEPart: void setHeaders(com.sun.xml.internal.org.jvnet.mimepull.InternetHeaders)>($r25);
+
+        goto label21;
+
+     label14:
+        $r17 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.logging.Logger LOGGER>;
+
+        $r16 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r15 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent$EVENT_TYPE: com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent$EVENT_TYPE CONTENT>;
+
+        virtualinvoke $r17.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r16, "MIMEEvent={0}", $r15);
+
+        r18 = (com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent$Content) r4;
+
+        $r19 = virtualinvoke r18.<com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent$Content: java.nio.ByteBuffer getData()>();
+
+        $r20 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart currentPart>;
+
+        virtualinvoke $r20.<com.sun.xml.internal.org.jvnet.mimepull.MIMEPart: void addBody(java.nio.ByteBuffer)>($r19);
+
+        goto label21;
+
+     label15:
+        $r13 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.logging.Logger LOGGER>;
+
+        $r12 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r11 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent$EVENT_TYPE: com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent$EVENT_TYPE END_PART>;
+
+        virtualinvoke $r13.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r12, "MIMEEvent={0}", $r11);
+
+        $r14 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart currentPart>;
+
+        virtualinvoke $r14.<com.sun.xml.internal.org.jvnet.mimepull.MIMEPart: void doneParsing()>();
+
+        $i2 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: int currentIndex>;
+
+        $i3 = $i2 + 1;
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: int currentIndex> = $i3;
+
+        goto label21;
+
+     label16:
+        $r9 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.logging.Logger LOGGER>;
+
+        $r8 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r7 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent$EVENT_TYPE: com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent$EVENT_TYPE END_MESSAGE>;
+
+        virtualinvoke $r9.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r8, "MIMEEvent={0}", $r7);
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: boolean parsed> = 1;
+
+     label17:
+        $r10 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.io.InputStream in>;
+
+        virtualinvoke $r10.<java.io.InputStream: void close()>();
+
+     label18:
+        goto label21;
+
+     label19:
+        $r55 := @caughtexception;
+
+        $r64 = new com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException;
+
+        specialinvoke $r64.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException: void <init>(java.lang.Throwable)>($r55);
+
+        throw $r64;
+
+     label20:
+        $r66 = new com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException;
+
+        $r65 = new java.lang.StringBuilder;
+
+        specialinvoke $r65.<java.lang.StringBuilder: void <init>()>();
+
+        $r51 = virtualinvoke $r65.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown Parser state = ");
+
+        $r52 = virtualinvoke r4.<com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent: com.sun.xml.internal.org.jvnet.mimepull.MIMEEvent$EVENT_TYPE getEventType()>();
+
+        $r53 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r52);
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r66.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException: void <init>(java.lang.String)>($r54);
+
+        throw $r66;
+
+     label21:
+        return 1;
+
+        catch java.io.IOException from label17 to label18 with label19;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        java.lang.String $r1;
+        java.util.logging.Logger $r2;
+
+        $r0 = class "Lcom/sun/xml/internal/org/jvnet/mimepull/MIMEMessage;";
+
+        $r1 = virtualinvoke $r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r2 = staticinvoke <java.util.logging.Logger: java.util.logging.Logger getLogger(java.lang.String)>($r1);
+
+        <com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: java.util.logging.Logger LOGGER> = $r2;
+
+        return;
+    }
+}

@@ -1,0 +1,177 @@
+public abstract class javax.net.ssl.SSLServerSocketFactory extends javax.net.ServerSocketFactory
+{
+    private static javax.net.ssl.SSLServerSocketFactory theFactory;
+    private static boolean propertyChecked;
+
+    private static void log(java.lang.String)
+    {
+        java.io.PrintStream $r1;
+        java.lang.String r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = <javax.net.ssl.SSLSocketFactory: boolean DEBUG>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>(r0);
+
+     label1:
+        return;
+    }
+
+    protected void <init>()
+    {
+        javax.net.ssl.SSLServerSocketFactory r0;
+
+        r0 := @this: javax.net.ssl.SSLServerSocketFactory;
+
+        specialinvoke r0.<javax.net.ServerSocketFactory: void <init>()>();
+
+        return;
+    }
+
+    public static synchronized javax.net.ServerSocketFactory getDefault()
+    {
+        javax.net.ssl.SSLContext $r1;
+        javax.net.ssl.DefaultSSLServerSocketFactory $r6, $r12;
+        java.lang.String $r3, $r11, $r21, $r27;
+        boolean $z0;
+        javax.net.ssl.SSLServerSocketFactory $r0, $r2, $r4, $r13, $r23;
+        java.lang.Exception $r7;
+        java.security.NoSuchAlgorithmException $r5;
+        java.lang.StringBuilder $r8, $r9, $r10, $r17, $r18, $r19, $r20, $r24, $r25, $r26;
+        java.lang.ClassNotFoundException $r14;
+        java.lang.Class r16;
+        java.lang.Object $r22;
+        java.lang.ClassLoader $r15;
+
+        $r0 = <javax.net.ssl.SSLServerSocketFactory: javax.net.ssl.SSLServerSocketFactory theFactory>;
+
+        if $r0 == null goto label01;
+
+        $r4 = <javax.net.ssl.SSLServerSocketFactory: javax.net.ssl.SSLServerSocketFactory theFactory>;
+
+        return $r4;
+
+     label01:
+        $z0 = <javax.net.ssl.SSLServerSocketFactory: boolean propertyChecked>;
+
+        if $z0 != 0 goto label09;
+
+        <javax.net.ssl.SSLServerSocketFactory: boolean propertyChecked> = 1;
+
+        $r3 = staticinvoke <javax.net.ssl.SSLSocketFactory: java.lang.String getSecurityProperty(java.lang.String)>("ssl.ServerSocketFactory.provider");
+
+        if $r3 == null goto label09;
+
+        staticinvoke <javax.net.ssl.SSLServerSocketFactory: void log(java.lang.String)>("setting up default SSLServerSocketFactory");
+
+     label02:
+        r16 = null;
+
+     label03:
+        r16 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String)>($r3);
+
+     label04:
+        goto label06;
+
+     label05:
+        $r14 := @caughtexception;
+
+        $r15 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getSystemClassLoader()>();
+
+        if $r15 == null goto label06;
+
+        r16 = virtualinvoke $r15.<java.lang.ClassLoader: java.lang.Class loadClass(java.lang.String)>($r3);
+
+     label06:
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("class ");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is loaded");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <javax.net.ssl.SSLServerSocketFactory: void log(java.lang.String)>($r21);
+
+        $r22 = virtualinvoke r16.<java.lang.Class: java.lang.Object newInstance()>();
+
+        $r23 = (javax.net.ssl.SSLServerSocketFactory) $r22;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("instantiated an instance of class ");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <javax.net.ssl.SSLServerSocketFactory: void log(java.lang.String)>($r27);
+
+        <javax.net.ssl.SSLServerSocketFactory: javax.net.ssl.SSLServerSocketFactory theFactory> = $r23;
+
+     label07:
+        return $r23;
+
+     label08:
+        $r7 := @caughtexception;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SSLServerSocketFactory instantiation failed: ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r7);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <javax.net.ssl.SSLServerSocketFactory: void log(java.lang.String)>($r11);
+
+        $r12 = new javax.net.ssl.DefaultSSLServerSocketFactory;
+
+        specialinvoke $r12.<javax.net.ssl.DefaultSSLServerSocketFactory: void <init>(java.lang.Exception)>($r7);
+
+        <javax.net.ssl.SSLServerSocketFactory: javax.net.ssl.SSLServerSocketFactory theFactory> = $r12;
+
+        $r13 = <javax.net.ssl.SSLServerSocketFactory: javax.net.ssl.SSLServerSocketFactory theFactory>;
+
+        return $r13;
+
+     label09:
+        $r1 = staticinvoke <javax.net.ssl.SSLContext: javax.net.ssl.SSLContext getDefault()>();
+
+        $r2 = virtualinvoke $r1.<javax.net.ssl.SSLContext: javax.net.ssl.SSLServerSocketFactory getServerSocketFactory()>();
+
+     label10:
+        return $r2;
+
+     label11:
+        $r5 := @caughtexception;
+
+        $r6 = new javax.net.ssl.DefaultSSLServerSocketFactory;
+
+        specialinvoke $r6.<javax.net.ssl.DefaultSSLServerSocketFactory: void <init>(java.lang.Exception)>($r5);
+
+        return $r6;
+
+        catch java.lang.ClassNotFoundException from label03 to label04 with label05;
+        catch java.lang.Exception from label02 to label07 with label08;
+        catch java.security.NoSuchAlgorithmException from label09 to label10 with label11;
+    }
+
+    public abstract java.lang.String[] getDefaultCipherSuites();
+
+    public abstract java.lang.String[] getSupportedCipherSuites();
+}

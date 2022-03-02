@@ -1,0 +1,150 @@
+final class sun.security.ssl.SSLTrafficKeyDerivation$T13TrafficKeyDerivation extends java.lang.Object implements sun.security.ssl.SSLKeyDerivation
+{
+    private final sun.security.ssl.CipherSuite cs;
+    private final javax.crypto.SecretKey secret;
+
+    void <init>(sun.security.ssl.HandshakeContext, javax.crypto.SecretKey)
+    {
+        sun.security.ssl.SSLTrafficKeyDerivation$T13TrafficKeyDerivation r0;
+        javax.crypto.SecretKey r1;
+        sun.security.ssl.CipherSuite $r3;
+        sun.security.ssl.HandshakeContext r2;
+
+        r0 := @this: sun.security.ssl.SSLTrafficKeyDerivation$T13TrafficKeyDerivation;
+
+        r2 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        r1 := @parameter1: javax.crypto.SecretKey;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.ssl.SSLTrafficKeyDerivation$T13TrafficKeyDerivation: javax.crypto.SecretKey secret> = r1;
+
+        $r3 = r2.<sun.security.ssl.HandshakeContext: sun.security.ssl.CipherSuite negotiatedCipherSuite>;
+
+        r0.<sun.security.ssl.SSLTrafficKeyDerivation$T13TrafficKeyDerivation: sun.security.ssl.CipherSuite cs> = $r3;
+
+        return;
+    }
+
+    public javax.crypto.SecretKey deriveKey(java.lang.String, java.security.spec.AlgorithmParameterSpec) throws java.io.IOException
+    {
+        java.lang.Throwable $r17;
+        byte[] $r7, $r9;
+        sun.security.ssl.SSLTrafficKeyDerivation$KeySchedule $r1;
+        sun.security.ssl.CipherSuite$HashAlg $r5;
+        java.security.GeneralSecurityException $r15;
+        int $i0, $i1;
+        java.lang.String r0, $r6, $r13;
+        java.security.spec.AlgorithmParameterSpec r20;
+        javax.net.ssl.SSLHandshakeException $r16, $r18, $r19;
+        sun.security.ssl.SSLTrafficKeyDerivation$T13TrafficKeyDerivation r3;
+        sun.security.ssl.CipherSuite $r4, $r8, $r10, $r12;
+        javax.crypto.SecretKey $r11, $r14;
+        sun.security.ssl.HKDF $r2;
+
+        r3 := @this: sun.security.ssl.SSLTrafficKeyDerivation$T13TrafficKeyDerivation;
+
+        r0 := @parameter0: java.lang.String;
+
+        r20 := @parameter1: java.security.spec.AlgorithmParameterSpec;
+
+        $r1 = staticinvoke <sun.security.ssl.SSLTrafficKeyDerivation$KeySchedule: sun.security.ssl.SSLTrafficKeyDerivation$KeySchedule valueOf(java.lang.String)>(r0);
+
+     label1:
+        $r2 = new sun.security.ssl.HKDF;
+
+        $r4 = r3.<sun.security.ssl.SSLTrafficKeyDerivation$T13TrafficKeyDerivation: sun.security.ssl.CipherSuite cs>;
+
+        $r5 = $r4.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$HashAlg hashAlg>;
+
+        $r6 = $r5.<sun.security.ssl.CipherSuite$HashAlg: java.lang.String name>;
+
+        specialinvoke $r2.<sun.security.ssl.HKDF: void <init>(java.lang.String)>($r6);
+
+        $r7 = staticinvoke <sun.security.ssl.SSLTrafficKeyDerivation$KeySchedule: byte[] access$400(sun.security.ssl.SSLTrafficKeyDerivation$KeySchedule)>($r1);
+
+        $r8 = r3.<sun.security.ssl.SSLTrafficKeyDerivation$T13TrafficKeyDerivation: sun.security.ssl.CipherSuite cs>;
+
+        $i0 = virtualinvoke $r1.<sun.security.ssl.SSLTrafficKeyDerivation$KeySchedule: int getKeyLength(sun.security.ssl.CipherSuite)>($r8);
+
+        $r9 = staticinvoke <sun.security.ssl.SSLTrafficKeyDerivation$T13TrafficKeyDerivation: byte[] createHkdfInfo(byte[],int)>($r7, $i0);
+
+        $r11 = r3.<sun.security.ssl.SSLTrafficKeyDerivation$T13TrafficKeyDerivation: javax.crypto.SecretKey secret>;
+
+        $r10 = r3.<sun.security.ssl.SSLTrafficKeyDerivation$T13TrafficKeyDerivation: sun.security.ssl.CipherSuite cs>;
+
+        $i1 = virtualinvoke $r1.<sun.security.ssl.SSLTrafficKeyDerivation$KeySchedule: int getKeyLength(sun.security.ssl.CipherSuite)>($r10);
+
+        $r12 = r3.<sun.security.ssl.SSLTrafficKeyDerivation$T13TrafficKeyDerivation: sun.security.ssl.CipherSuite cs>;
+
+        $r13 = virtualinvoke $r1.<sun.security.ssl.SSLTrafficKeyDerivation$KeySchedule: java.lang.String getAlgorithm(sun.security.ssl.CipherSuite,java.lang.String)>($r12, r0);
+
+        $r14 = virtualinvoke $r2.<sun.security.ssl.HKDF: javax.crypto.SecretKey expand(javax.crypto.SecretKey,byte[],int,java.lang.String)>($r11, $r9, $i1, $r13);
+
+     label2:
+        return $r14;
+
+     label3:
+        $r15 := @caughtexception;
+
+        $r16 = new javax.net.ssl.SSLHandshakeException;
+
+        specialinvoke $r16.<javax.net.ssl.SSLHandshakeException: void <init>(java.lang.String)>("Could not generate secret");
+
+        $r17 = virtualinvoke $r16.<javax.net.ssl.SSLHandshakeException: java.lang.Throwable initCause(java.lang.Throwable)>($r15);
+
+        $r18 = (javax.net.ssl.SSLHandshakeException) $r17;
+
+        $r19 = (javax.net.ssl.SSLHandshakeException) $r18;
+
+        throw $r19;
+
+        catch java.security.GeneralSecurityException from label1 to label2 with label3;
+    }
+
+    private static byte[] createHkdfInfo(byte[], int) throws java.io.IOException
+    {
+        byte[] r0, r1;
+        java.io.IOException $r3;
+        java.lang.RuntimeException $r4;
+        java.nio.ByteBuffer $r2;
+        int $i0, $i1, i2;
+
+        r0 := @parameter0: byte[];
+
+        i2 := @parameter1: int;
+
+        $i0 = lengthof r0;
+
+        $i1 = 4 + $i0;
+
+        r1 = newarray (byte)[$i1];
+
+        $r2 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>(r1);
+
+     label1:
+        staticinvoke <sun.security.ssl.Record: void putInt16(java.nio.ByteBuffer,int)>($r2, i2);
+
+        staticinvoke <sun.security.ssl.Record: void putBytes8(java.nio.ByteBuffer,byte[])>($r2, r0);
+
+        staticinvoke <sun.security.ssl.Record: void putInt8(java.nio.ByteBuffer,int)>($r2, 0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.lang.RuntimeException;
+
+        specialinvoke $r4.<java.lang.RuntimeException: void <init>(java.lang.String,java.lang.Throwable)>("Unexpected exception", $r3);
+
+        throw $r4;
+
+     label4:
+        return r1;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+}

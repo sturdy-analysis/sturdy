@@ -1,0 +1,924 @@
+class sun.nio.fs.WindowsUserDefinedFileAttributeView extends sun.nio.fs.AbstractUserDefinedFileAttributeView
+{
+    private static final sun.misc.Unsafe unsafe;
+    private final sun.nio.fs.WindowsPath file;
+    private final boolean followLinks;
+
+    private java.lang.String join(java.lang.String, java.lang.String)
+    {
+        sun.nio.fs.WindowsUserDefinedFileAttributeView r8;
+        java.lang.NullPointerException $r7;
+        java.lang.StringBuilder $r1, $r3, $r4, $r5;
+        java.lang.String r0, r2, $r6;
+
+        r8 := @this: sun.nio.fs.WindowsUserDefinedFileAttributeView;
+
+        r2 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.lang.String;
+
+        if r0 != null goto label1;
+
+        $r7 = new java.lang.NullPointerException;
+
+        specialinvoke $r7.<java.lang.NullPointerException: void <init>(java.lang.String)>("\'name\' is null");
+
+        throw $r7;
+
+     label1:
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r6;
+    }
+
+    private java.lang.String join(sun.nio.fs.WindowsPath, java.lang.String) throws sun.nio.fs.WindowsException
+    {
+        sun.nio.fs.WindowsUserDefinedFileAttributeView r0;
+        sun.nio.fs.WindowsPath r1;
+        java.lang.String $r2, r3, $r4;
+
+        r0 := @this: sun.nio.fs.WindowsUserDefinedFileAttributeView;
+
+        r1 := @parameter0: sun.nio.fs.WindowsPath;
+
+        r3 := @parameter1: java.lang.String;
+
+        $r2 = virtualinvoke r1.<sun.nio.fs.WindowsPath: java.lang.String getPathForWin32Calls()>();
+
+        $r4 = specialinvoke r0.<sun.nio.fs.WindowsUserDefinedFileAttributeView: java.lang.String join(java.lang.String,java.lang.String)>($r2, r3);
+
+        return $r4;
+    }
+
+    void <init>(sun.nio.fs.WindowsPath, boolean)
+    {
+        sun.nio.fs.WindowsUserDefinedFileAttributeView r0;
+        sun.nio.fs.WindowsPath r1;
+        boolean z0;
+
+        r0 := @this: sun.nio.fs.WindowsUserDefinedFileAttributeView;
+
+        r1 := @parameter0: sun.nio.fs.WindowsPath;
+
+        z0 := @parameter1: boolean;
+
+        specialinvoke r0.<sun.nio.fs.AbstractUserDefinedFileAttributeView: void <init>()>();
+
+        r0.<sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.nio.fs.WindowsPath file> = r1;
+
+        r0.<sun.nio.fs.WindowsUserDefinedFileAttributeView: boolean followLinks> = z0;
+
+        return;
+    }
+
+    private java.util.List listUsingStreamEnumeration() throws java.io.IOException
+    {
+        sun.nio.fs.WindowsNativeDispatcher$FirstStream $r4;
+        java.lang.Throwable $r13;
+        sun.nio.fs.WindowsUserDefinedFileAttributeView r1;
+        long $l0;
+        java.lang.String[] $r7, $r9;
+        java.util.ArrayList $r0;
+        sun.nio.fs.WindowsException $r11;
+        java.lang.String $r3, $r6, $r8, $r10, $r14;
+        boolean $z0;
+        sun.nio.fs.WindowsPath $r2, $r12;
+        java.util.List $r5;
+
+        r1 := @this: sun.nio.fs.WindowsUserDefinedFileAttributeView;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+     label1:
+        $r2 = r1.<sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.nio.fs.WindowsPath file>;
+
+        $r3 = virtualinvoke $r2.<sun.nio.fs.WindowsPath: java.lang.String getPathForWin32Calls()>();
+
+        $r4 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: sun.nio.fs.WindowsNativeDispatcher$FirstStream FindFirstStream(java.lang.String)>($r3);
+
+        if $r4 == null goto label7;
+
+        $l0 = virtualinvoke $r4.<sun.nio.fs.WindowsNativeDispatcher$FirstStream: long handle()>();
+
+     label2:
+        $r6 = virtualinvoke $r4.<sun.nio.fs.WindowsNativeDispatcher$FirstStream: java.lang.String name()>();
+
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>("::$DATA");
+
+        if $z0 != 0 goto label3;
+
+        $r9 = virtualinvoke $r6.<java.lang.String: java.lang.String[] split(java.lang.String)>(":");
+
+        $r10 = $r9[1];
+
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>($r10);
+
+     label3:
+        $r14 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: java.lang.String FindNextStream(long)>($l0);
+
+        if $r14 == null goto label4;
+
+        $r7 = virtualinvoke $r14.<java.lang.String: java.lang.String[] split(java.lang.String)>(":");
+
+        $r8 = $r7[1];
+
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>($r8);
+
+        goto label3;
+
+     label4:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void FindClose(long)>($l0);
+
+        goto label7;
+
+     label5:
+        $r13 := @caughtexception;
+
+     label6:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void FindClose(long)>($l0);
+
+        throw $r13;
+
+     label7:
+        goto label9;
+
+     label8:
+        $r11 := @caughtexception;
+
+        $r12 = r1.<sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.nio.fs.WindowsPath file>;
+
+        virtualinvoke $r11.<sun.nio.fs.WindowsException: void rethrowAsIOException(sun.nio.fs.WindowsPath)>($r12);
+
+     label9:
+        $r5 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r0);
+
+        return $r5;
+
+        catch java.lang.Throwable from label2 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+        catch sun.nio.fs.WindowsException from label1 to label7 with label8;
+    }
+
+    private java.util.List listUsingBackupRead() throws java.io.IOException
+    {
+        byte $b7, $b14, $b15;
+        boolean $z0, $z1;
+        java.util.List $r13;
+        sun.misc.Unsafe $r3, $r4, $r5, $r8;
+        java.lang.Throwable $r16, $r18;
+        sun.nio.fs.WindowsUserDefinedFileAttributeView r0;
+        long $l0, $l1, $l3, $l4, $l5, $l10, $l11, l16, l18, $l19;
+        java.lang.String[] $r10;
+        java.util.ArrayList $r29;
+        int $i2, $i6, $i8, $i9, $i12, $i13, i17, $i20, $i21;
+        sun.nio.fs.WindowsException $r17, $r19, $r22, $r23;
+        java.lang.String $r11, $r21, $r26, $r30;
+        sun.nio.fs.WindowsPath $r14, $r24, $r25;
+        sun.nio.fs.WindowsFileSystem $r15;
+        java.io.IOException $r31, $r32;
+        sun.nio.fs.NativeBuffer $r2, r27;
+        sun.nio.fs.WindowsNativeDispatcher$BackupResult $r12, $r28;
+        char[] r7;
+
+        r0 := @this: sun.nio.fs.WindowsUserDefinedFileAttributeView;
+
+        l16 = -1L;
+
+     label01:
+        i17 = 33554432;
+
+        $z0 = r0.<sun.nio.fs.WindowsUserDefinedFileAttributeView: boolean followLinks>;
+
+        if $z0 != 0 goto label02;
+
+        $r14 = r0.<sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.nio.fs.WindowsPath file>;
+
+        $r15 = virtualinvoke $r14.<sun.nio.fs.WindowsPath: sun.nio.fs.WindowsFileSystem getFileSystem()>();
+
+        $z1 = virtualinvoke $r15.<sun.nio.fs.WindowsFileSystem: boolean supportsLinks()>();
+
+        if $z1 == 0 goto label02;
+
+        i17 = 35651584;
+
+     label02:
+        $r25 = r0.<sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.nio.fs.WindowsPath file>;
+
+        $r26 = virtualinvoke $r25.<sun.nio.fs.WindowsPath: java.lang.String getPathForWin32Calls()>();
+
+        l16 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: long CreateFile(java.lang.String,int,int,int,int)>($r26, -2147483648, 1, 3, i17);
+
+     label03:
+        goto label05;
+
+     label04:
+        $r23 := @caughtexception;
+
+        $r24 = r0.<sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.nio.fs.WindowsPath file>;
+
+        virtualinvoke $r23.<sun.nio.fs.WindowsException: void rethrowAsIOException(sun.nio.fs.WindowsPath)>($r24);
+
+     label05:
+        r27 = null;
+
+        $r29 = new java.util.ArrayList;
+
+        specialinvoke $r29.<java.util.ArrayList: void <init>()>();
+
+     label06:
+        $r2 = staticinvoke <sun.nio.fs.NativeBuffers: sun.nio.fs.NativeBuffer getNativeBuffer(int)>(4096);
+
+        r27 = $r2;
+
+        $l0 = virtualinvoke $r2.<sun.nio.fs.NativeBuffer: long address()>();
+
+        l18 = 0L;
+
+     label07:
+        $r28 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: sun.nio.fs.WindowsNativeDispatcher$BackupResult BackupRead(long,long,int,boolean,long)>(l16, $l0, 20, 0, l18);
+
+        $l19 = virtualinvoke $r28.<sun.nio.fs.WindowsNativeDispatcher$BackupResult: long context()>();
+
+        l18 = $l19;
+
+        $i20 = virtualinvoke $r28.<sun.nio.fs.WindowsNativeDispatcher$BackupResult: int bytesTransferred()>();
+
+        if $i20 != 0 goto label08;
+
+        goto label13;
+
+     label08:
+        $r3 = <sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.misc.Unsafe unsafe>;
+
+        $l1 = $l0 + 0L;
+
+        $i2 = virtualinvoke $r3.<sun.misc.Unsafe: int getInt(long)>($l1);
+
+        $r4 = <sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.misc.Unsafe unsafe>;
+
+        $l3 = $l0 + 8L;
+
+        $l4 = virtualinvoke $r4.<sun.misc.Unsafe: long getLong(long)>($l3);
+
+        $r5 = <sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.misc.Unsafe unsafe>;
+
+        $l5 = $l0 + 16L;
+
+        $i6 = virtualinvoke $r5.<sun.misc.Unsafe: int getInt(long)>($l5);
+
+        if $i6 <= 0 goto label09;
+
+        $r12 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: sun.nio.fs.WindowsNativeDispatcher$BackupResult BackupRead(long,long,int,boolean,long)>(l16, $l0, $i6, 0, $l19);
+
+        $i13 = virtualinvoke $r12.<sun.nio.fs.WindowsNativeDispatcher$BackupResult: int bytesTransferred()>();
+
+        if $i13 == $i6 goto label09;
+
+        goto label13;
+
+     label09:
+        if $i2 != 4 goto label10;
+
+        $i8 = $i6 / 2;
+
+        r7 = newarray (char)[$i8];
+
+        $r8 = <sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.misc.Unsafe unsafe>;
+
+        $i9 = <sun.misc.Unsafe: int ARRAY_CHAR_BASE_OFFSET>;
+
+        $l11 = (long) $i9;
+
+        $l10 = (long) $i6;
+
+        virtualinvoke $r8.<sun.misc.Unsafe: void copyMemory(java.lang.Object,long,java.lang.Object,long,long)>(null, $l0, r7, $l11, $l10);
+
+        $r30 = new java.lang.String;
+
+        specialinvoke $r30.<java.lang.String: void <init>(char[])>(r7);
+
+        $r10 = virtualinvoke $r30.<java.lang.String: java.lang.String[] split(java.lang.String)>(":");
+
+        $i12 = lengthof $r10;
+
+        if $i12 != 3 goto label10;
+
+        $r11 = $r10[1];
+
+        interfaceinvoke $r29.<java.util.List: boolean add(java.lang.Object)>($r11);
+
+     label10:
+        if $i2 != 9 goto label11;
+
+        $r31 = new java.io.IOException;
+
+        specialinvoke $r31.<java.io.IOException: void <init>(java.lang.String)>("Spare blocks not handled");
+
+        throw $r31;
+
+     label11:
+        $b7 = $l4 cmp 0L;
+
+        $i21 = (int) $b7;
+
+        if $i21 <= 0 goto label12;
+
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void BackupSeek(long,long,long)>(l16, $l4, $l19);
+
+     label12:
+        goto label07;
+
+     label13:
+        $b14 = $l19 cmp 0L;
+
+        if $b14 == 0 goto label24;
+
+     label14:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: sun.nio.fs.WindowsNativeDispatcher$BackupResult BackupRead(long,long,int,boolean,long)>(l16, 0L, 0, 1, $l19);
+
+     label15:
+        goto label24;
+
+     label16:
+        $r22 := @caughtexception;
+
+        goto label24;
+
+     label17:
+        $r19 := @caughtexception;
+
+        $r32 = new java.io.IOException;
+
+        $r21 = virtualinvoke $r19.<sun.nio.fs.WindowsException: java.lang.String errorString()>();
+
+        specialinvoke $r32.<java.io.IOException: void <init>(java.lang.String)>($r21);
+
+        throw $r32;
+
+     label18:
+        $r18 := @caughtexception;
+
+     label19:
+        $b15 = l18 cmp 0L;
+
+        if $b15 == 0 goto label23;
+
+     label20:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: sun.nio.fs.WindowsNativeDispatcher$BackupResult BackupRead(long,long,int,boolean,long)>(l16, 0L, 0, 1, l18);
+
+     label21:
+        goto label23;
+
+     label22:
+        $r17 := @caughtexception;
+
+     label23:
+        throw $r18;
+
+     label24:
+        if $r2 == null goto label25;
+
+        virtualinvoke $r2.<sun.nio.fs.NativeBuffer: void release()>();
+
+     label25:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CloseHandle(long)>(l16);
+
+        goto label29;
+
+     label26:
+        $r16 := @caughtexception;
+
+     label27:
+        if r27 == null goto label28;
+
+        virtualinvoke r27.<sun.nio.fs.NativeBuffer: void release()>();
+
+     label28:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CloseHandle(long)>(l16);
+
+        throw $r16;
+
+     label29:
+        $r13 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r29);
+
+        return $r13;
+
+        catch sun.nio.fs.WindowsException from label01 to label03 with label04;
+        catch sun.nio.fs.WindowsException from label14 to label15 with label16;
+        catch sun.nio.fs.WindowsException from label07 to label13 with label17;
+        catch java.lang.Throwable from label07 to label13 with label18;
+        catch sun.nio.fs.WindowsException from label20 to label21 with label22;
+        catch java.lang.Throwable from label17 to label19 with label18;
+        catch java.lang.Throwable from label06 to label24 with label26;
+        catch java.lang.Throwable from label26 to label27 with label26;
+    }
+
+    public java.util.List list() throws java.io.IOException
+    {
+        sun.nio.fs.WindowsUserDefinedFileAttributeView r1;
+        sun.nio.fs.WindowsPath $r2, $r6;
+        sun.nio.fs.WindowsFileSystem $r3;
+        java.lang.SecurityManager $r0;
+        java.util.List $r4, $r5;
+        java.lang.String $r7;
+        boolean $z0;
+
+        r1 := @this: sun.nio.fs.WindowsUserDefinedFileAttributeView;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r6 = r1.<sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.nio.fs.WindowsPath file>;
+
+        $r7 = virtualinvoke $r6.<sun.nio.fs.WindowsPath: java.lang.String getPathForPermissionCheck()>();
+
+        virtualinvoke r1.<sun.nio.fs.WindowsUserDefinedFileAttributeView: void checkAccess(java.lang.String,boolean,boolean)>($r7, 1, 0);
+
+     label1:
+        $r2 = r1.<sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.nio.fs.WindowsPath file>;
+
+        $r3 = virtualinvoke $r2.<sun.nio.fs.WindowsPath: sun.nio.fs.WindowsFileSystem getFileSystem()>();
+
+        $z0 = virtualinvoke $r3.<sun.nio.fs.WindowsFileSystem: boolean supportsStreamEnumeration()>();
+
+        if $z0 == 0 goto label2;
+
+        $r5 = specialinvoke r1.<sun.nio.fs.WindowsUserDefinedFileAttributeView: java.util.List listUsingStreamEnumeration()>();
+
+        return $r5;
+
+     label2:
+        $r4 = specialinvoke r1.<sun.nio.fs.WindowsUserDefinedFileAttributeView: java.util.List listUsingBackupRead()>();
+
+        return $r4;
+    }
+
+    public int size(java.lang.String) throws java.io.IOException
+    {
+        java.lang.Throwable $r11;
+        sun.nio.fs.WindowsUserDefinedFileAttributeView r3;
+        long $l0;
+        java.util.HashSet $r17;
+        byte $b1;
+        int i2, $i3;
+        sun.nio.fs.WindowsException $r12;
+        java.lang.ArithmeticException $r18;
+        java.lang.String r4, $r6, $r10, $r14, $r15;
+        boolean $z0;
+        java.nio.file.OpenOption $r8;
+        sun.nio.fs.WindowsPath $r5, $r9, $r13;
+        java.nio.file.StandardOpenOption $r2;
+        java.lang.SecurityManager $r0;
+        java.nio.channels.FileChannel r16;
+
+        r3 := @this: sun.nio.fs.WindowsUserDefinedFileAttributeView;
+
+        r4 := @parameter0: java.lang.String;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label01;
+
+        $r9 = r3.<sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.nio.fs.WindowsPath file>;
+
+        $r10 = virtualinvoke $r9.<sun.nio.fs.WindowsPath: java.lang.String getPathForPermissionCheck()>();
+
+        virtualinvoke r3.<sun.nio.fs.WindowsUserDefinedFileAttributeView: void checkAccess(java.lang.String,boolean,boolean)>($r10, 1, 0);
+
+     label01:
+        r16 = null;
+
+     label02:
+        $r17 = new java.util.HashSet;
+
+        specialinvoke $r17.<java.util.HashSet: void <init>()>();
+
+        $r2 = <java.nio.file.StandardOpenOption: java.nio.file.StandardOpenOption READ>;
+
+        interfaceinvoke $r17.<java.util.Set: boolean add(java.lang.Object)>($r2);
+
+        $z0 = r3.<sun.nio.fs.WindowsUserDefinedFileAttributeView: boolean followLinks>;
+
+        if $z0 != 0 goto label03;
+
+        $r8 = <sun.nio.fs.WindowsChannelFactory: java.nio.file.OpenOption OPEN_REPARSE_POINT>;
+
+        interfaceinvoke $r17.<java.util.Set: boolean add(java.lang.Object)>($r8);
+
+     label03:
+        $r5 = r3.<sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.nio.fs.WindowsPath file>;
+
+        $r6 = specialinvoke r3.<sun.nio.fs.WindowsUserDefinedFileAttributeView: java.lang.String join(sun.nio.fs.WindowsPath,java.lang.String)>($r5, r4);
+
+        r16 = staticinvoke <sun.nio.fs.WindowsChannelFactory: java.nio.channels.FileChannel newFileChannel(java.lang.String,java.lang.String,java.util.Set,long)>($r6, null, $r17, 0L);
+
+     label04:
+        goto label06;
+
+     label05:
+        $r12 := @caughtexception;
+
+        $r13 = r3.<sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.nio.fs.WindowsPath file>;
+
+        $r14 = virtualinvoke $r13.<sun.nio.fs.WindowsPath: java.lang.String getPathForPermissionCheck()>();
+
+        $r15 = specialinvoke r3.<sun.nio.fs.WindowsUserDefinedFileAttributeView: java.lang.String join(java.lang.String,java.lang.String)>($r14, r4);
+
+        virtualinvoke $r12.<sun.nio.fs.WindowsException: void rethrowAsIOException(java.lang.String)>($r15);
+
+     label06:
+        $l0 = virtualinvoke r16.<java.nio.channels.FileChannel: long size()>();
+
+        $b1 = $l0 cmp 2147483647L;
+
+        $i3 = (int) $b1;
+
+        if $i3 <= 0 goto label07;
+
+        $r18 = new java.lang.ArithmeticException;
+
+        specialinvoke $r18.<java.lang.ArithmeticException: void <init>(java.lang.String)>("Stream too large");
+
+        throw $r18;
+
+     label07:
+        i2 = (int) $l0;
+
+     label08:
+        virtualinvoke r16.<java.nio.channels.FileChannel: void close()>();
+
+        return i2;
+
+     label09:
+        $r11 := @caughtexception;
+
+     label10:
+        virtualinvoke r16.<java.nio.channels.FileChannel: void close()>();
+
+        throw $r11;
+
+        catch sun.nio.fs.WindowsException from label02 to label04 with label05;
+        catch java.lang.Throwable from label06 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    public int read(java.lang.String, java.nio.ByteBuffer) throws java.io.IOException
+    {
+        java.lang.Throwable $r12;
+        sun.nio.fs.WindowsUserDefinedFileAttributeView r3;
+        long $l0, $l2;
+        java.nio.ByteBuffer r7;
+        java.util.HashSet $r18;
+        byte $b3;
+        int $i1, $i4, i5, $i6;
+        sun.nio.fs.WindowsException $r13;
+        java.lang.String r4, $r6, $r11, $r15, $r16;
+        boolean $z0, $z1;
+        java.nio.file.OpenOption $r9;
+        sun.nio.fs.WindowsPath $r5, $r10, $r14;
+        java.nio.file.StandardOpenOption $r2;
+        java.io.IOException $r19;
+        java.lang.SecurityManager $r0;
+        java.nio.channels.FileChannel r17;
+
+        r3 := @this: sun.nio.fs.WindowsUserDefinedFileAttributeView;
+
+        r4 := @parameter0: java.lang.String;
+
+        r7 := @parameter1: java.nio.ByteBuffer;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label01;
+
+        $r10 = r3.<sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.nio.fs.WindowsPath file>;
+
+        $r11 = virtualinvoke $r10.<sun.nio.fs.WindowsPath: java.lang.String getPathForPermissionCheck()>();
+
+        virtualinvoke r3.<sun.nio.fs.WindowsUserDefinedFileAttributeView: void checkAccess(java.lang.String,boolean,boolean)>($r11, 1, 0);
+
+     label01:
+        r17 = null;
+
+     label02:
+        $r18 = new java.util.HashSet;
+
+        specialinvoke $r18.<java.util.HashSet: void <init>()>();
+
+        $r2 = <java.nio.file.StandardOpenOption: java.nio.file.StandardOpenOption READ>;
+
+        interfaceinvoke $r18.<java.util.Set: boolean add(java.lang.Object)>($r2);
+
+        $z0 = r3.<sun.nio.fs.WindowsUserDefinedFileAttributeView: boolean followLinks>;
+
+        if $z0 != 0 goto label03;
+
+        $r9 = <sun.nio.fs.WindowsChannelFactory: java.nio.file.OpenOption OPEN_REPARSE_POINT>;
+
+        interfaceinvoke $r18.<java.util.Set: boolean add(java.lang.Object)>($r9);
+
+     label03:
+        $r5 = r3.<sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.nio.fs.WindowsPath file>;
+
+        $r6 = specialinvoke r3.<sun.nio.fs.WindowsUserDefinedFileAttributeView: java.lang.String join(sun.nio.fs.WindowsPath,java.lang.String)>($r5, r4);
+
+        r17 = staticinvoke <sun.nio.fs.WindowsChannelFactory: java.nio.channels.FileChannel newFileChannel(java.lang.String,java.lang.String,java.util.Set,long)>($r6, null, $r18, 0L);
+
+     label04:
+        goto label06;
+
+     label05:
+        $r13 := @caughtexception;
+
+        $r14 = r3.<sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.nio.fs.WindowsPath file>;
+
+        $r15 = virtualinvoke $r14.<sun.nio.fs.WindowsPath: java.lang.String getPathForPermissionCheck()>();
+
+        $r16 = specialinvoke r3.<sun.nio.fs.WindowsUserDefinedFileAttributeView: java.lang.String join(java.lang.String,java.lang.String)>($r15, r4);
+
+        virtualinvoke $r13.<sun.nio.fs.WindowsException: void rethrowAsIOException(java.lang.String)>($r16);
+
+     label06:
+        $l0 = virtualinvoke r17.<java.nio.channels.FileChannel: long size()>();
+
+        $i1 = virtualinvoke r7.<java.nio.ByteBuffer: int remaining()>();
+
+        $l2 = (long) $i1;
+
+        $b3 = $l0 cmp $l2;
+
+        $i6 = (int) $b3;
+
+        if $i6 <= 0 goto label07;
+
+        $r19 = new java.io.IOException;
+
+        specialinvoke $r19.<java.io.IOException: void <init>(java.lang.String)>("Stream too large");
+
+        throw $r19;
+
+     label07:
+        i5 = 0;
+
+     label08:
+        $z1 = virtualinvoke r7.<java.nio.ByteBuffer: boolean hasRemaining()>();
+
+        if $z1 == 0 goto label10;
+
+        $i4 = virtualinvoke r17.<java.nio.channels.FileChannel: int read(java.nio.ByteBuffer)>(r7);
+
+        if $i4 >= 0 goto label09;
+
+        goto label10;
+
+     label09:
+        i5 = i5 + $i4;
+
+        goto label08;
+
+     label10:
+        virtualinvoke r17.<java.nio.channels.FileChannel: void close()>();
+
+        return i5;
+
+     label11:
+        $r12 := @caughtexception;
+
+     label12:
+        virtualinvoke r17.<java.nio.channels.FileChannel: void close()>();
+
+        throw $r12;
+
+        catch sun.nio.fs.WindowsException from label02 to label04 with label05;
+        catch java.lang.Throwable from label06 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+    }
+
+    public int write(java.lang.String, java.nio.ByteBuffer) throws java.io.IOException
+    {
+        java.lang.Throwable $r15, $r16;
+        sun.nio.fs.WindowsUserDefinedFileAttributeView r1;
+        long l1;
+        java.nio.ByteBuffer r11;
+        java.util.HashSet $r4;
+        int $i0, i2;
+        sun.nio.fs.WindowsException $r17, $r21;
+        java.lang.String $r3, r8, $r10, $r14, $r19, $r20;
+        boolean $z0, $z1, $z2;
+        java.nio.file.OpenOption $r12;
+        sun.nio.fs.WindowsPath $r2, $r9, $r13, $r18, $r22;
+        java.nio.file.StandardOpenOption $r5, $r6, $r7;
+        java.lang.SecurityManager $r0;
+        java.nio.channels.FileChannel r23;
+
+        r1 := @this: sun.nio.fs.WindowsUserDefinedFileAttributeView;
+
+        r8 := @parameter0: java.lang.String;
+
+        r11 := @parameter1: java.nio.ByteBuffer;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label01;
+
+        $r13 = r1.<sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.nio.fs.WindowsPath file>;
+
+        $r14 = virtualinvoke $r13.<sun.nio.fs.WindowsPath: java.lang.String getPathForPermissionCheck()>();
+
+        virtualinvoke r1.<sun.nio.fs.WindowsUserDefinedFileAttributeView: void checkAccess(java.lang.String,boolean,boolean)>($r14, 0, 1);
+
+     label01:
+        l1 = -1L;
+
+     label02:
+        i2 = 33554432;
+
+        $z0 = r1.<sun.nio.fs.WindowsUserDefinedFileAttributeView: boolean followLinks>;
+
+        if $z0 != 0 goto label03;
+
+        i2 = 35651584;
+
+     label03:
+        $r2 = r1.<sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.nio.fs.WindowsPath file>;
+
+        $r3 = virtualinvoke $r2.<sun.nio.fs.WindowsPath: java.lang.String getPathForWin32Calls()>();
+
+        l1 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: long CreateFile(java.lang.String,int,int,int,int)>($r3, -2147483648, 7, 3, i2);
+
+     label04:
+        goto label06;
+
+     label05:
+        $r21 := @caughtexception;
+
+        $r22 = r1.<sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.nio.fs.WindowsPath file>;
+
+        virtualinvoke $r21.<sun.nio.fs.WindowsException: void rethrowAsIOException(sun.nio.fs.WindowsPath)>($r22);
+
+     label06:
+        $r4 = new java.util.HashSet;
+
+        specialinvoke $r4.<java.util.HashSet: void <init>()>();
+
+        $z1 = r1.<sun.nio.fs.WindowsUserDefinedFileAttributeView: boolean followLinks>;
+
+        if $z1 != 0 goto label07;
+
+        $r12 = <sun.nio.fs.WindowsChannelFactory: java.nio.file.OpenOption OPEN_REPARSE_POINT>;
+
+        interfaceinvoke $r4.<java.util.Set: boolean add(java.lang.Object)>($r12);
+
+     label07:
+        $r5 = <java.nio.file.StandardOpenOption: java.nio.file.StandardOpenOption CREATE>;
+
+        interfaceinvoke $r4.<java.util.Set: boolean add(java.lang.Object)>($r5);
+
+        $r6 = <java.nio.file.StandardOpenOption: java.nio.file.StandardOpenOption WRITE>;
+
+        interfaceinvoke $r4.<java.util.Set: boolean add(java.lang.Object)>($r6);
+
+        $r7 = <java.nio.file.StandardOpenOption: java.nio.file.StandardOpenOption TRUNCATE_EXISTING>;
+
+        interfaceinvoke $r4.<java.util.Set: boolean add(java.lang.Object)>($r7);
+
+        r23 = null;
+
+     label08:
+        $r9 = r1.<sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.nio.fs.WindowsPath file>;
+
+        $r10 = specialinvoke r1.<sun.nio.fs.WindowsUserDefinedFileAttributeView: java.lang.String join(sun.nio.fs.WindowsPath,java.lang.String)>($r9, r8);
+
+        r23 = staticinvoke <sun.nio.fs.WindowsChannelFactory: java.nio.channels.FileChannel newFileChannel(java.lang.String,java.lang.String,java.util.Set,long)>($r10, null, $r4, 0L);
+
+     label09:
+        goto label11;
+
+     label10:
+        $r17 := @caughtexception;
+
+        $r18 = r1.<sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.nio.fs.WindowsPath file>;
+
+        $r19 = virtualinvoke $r18.<sun.nio.fs.WindowsPath: java.lang.String getPathForPermissionCheck()>();
+
+        $r20 = specialinvoke r1.<sun.nio.fs.WindowsUserDefinedFileAttributeView: java.lang.String join(java.lang.String,java.lang.String)>($r19, r8);
+
+        virtualinvoke $r17.<sun.nio.fs.WindowsException: void rethrowAsIOException(java.lang.String)>($r20);
+
+     label11:
+        $i0 = virtualinvoke r11.<java.nio.ByteBuffer: int remaining()>();
+
+     label12:
+        $z2 = virtualinvoke r11.<java.nio.ByteBuffer: boolean hasRemaining()>();
+
+        if $z2 == 0 goto label13;
+
+        virtualinvoke r23.<java.nio.channels.FileChannel: int write(java.nio.ByteBuffer)>(r11);
+
+        goto label12;
+
+     label13:
+        virtualinvoke r23.<java.nio.channels.FileChannel: void close()>();
+
+     label14:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CloseHandle(long)>(l1);
+
+        return $i0;
+
+     label15:
+        $r16 := @caughtexception;
+
+     label16:
+        virtualinvoke r23.<java.nio.channels.FileChannel: void close()>();
+
+        throw $r16;
+
+     label17:
+        $r15 := @caughtexception;
+
+     label18:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CloseHandle(long)>(l1);
+
+        throw $r15;
+
+        catch sun.nio.fs.WindowsException from label02 to label04 with label05;
+        catch sun.nio.fs.WindowsException from label08 to label09 with label10;
+        catch java.lang.Throwable from label11 to label13 with label15;
+        catch java.lang.Throwable from label15 to label16 with label15;
+        catch java.lang.Throwable from label06 to label14 with label17;
+        catch java.lang.Throwable from label15 to label18 with label17;
+    }
+
+    public void delete(java.lang.String) throws java.io.IOException
+    {
+        sun.nio.fs.WindowsUserDefinedFileAttributeView r1;
+        sun.nio.fs.WindowsPath $r2, $r6;
+        java.lang.SecurityManager $r0;
+        sun.nio.fs.WindowsException $r8;
+        java.lang.String $r3, r4, $r5, $r7;
+        boolean $z0;
+
+        r1 := @this: sun.nio.fs.WindowsUserDefinedFileAttributeView;
+
+        r4 := @parameter0: java.lang.String;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r6 = r1.<sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.nio.fs.WindowsPath file>;
+
+        $r7 = virtualinvoke $r6.<sun.nio.fs.WindowsPath: java.lang.String getPathForPermissionCheck()>();
+
+        virtualinvoke r1.<sun.nio.fs.WindowsUserDefinedFileAttributeView: void checkAccess(java.lang.String,boolean,boolean)>($r7, 0, 1);
+
+     label1:
+        $r2 = r1.<sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.nio.fs.WindowsPath file>;
+
+        $z0 = r1.<sun.nio.fs.WindowsUserDefinedFileAttributeView: boolean followLinks>;
+
+        $r3 = staticinvoke <sun.nio.fs.WindowsLinkSupport: java.lang.String getFinalPath(sun.nio.fs.WindowsPath,boolean)>($r2, $z0);
+
+        $r5 = specialinvoke r1.<sun.nio.fs.WindowsUserDefinedFileAttributeView: java.lang.String join(java.lang.String,java.lang.String)>($r3, r4);
+
+     label2:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void DeleteFile(java.lang.String)>($r5);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r8 := @caughtexception;
+
+        virtualinvoke $r8.<sun.nio.fs.WindowsException: void rethrowAsIOException(java.lang.String)>($r5);
+
+     label5:
+        return;
+
+        catch sun.nio.fs.WindowsException from label2 to label3 with label4;
+    }
+
+    static void <clinit>()
+    {
+        sun.misc.Unsafe $r0;
+
+        $r0 = staticinvoke <sun.misc.Unsafe: sun.misc.Unsafe getUnsafe()>();
+
+        <sun.nio.fs.WindowsUserDefinedFileAttributeView: sun.misc.Unsafe unsafe> = $r0;
+
+        return;
+    }
+}

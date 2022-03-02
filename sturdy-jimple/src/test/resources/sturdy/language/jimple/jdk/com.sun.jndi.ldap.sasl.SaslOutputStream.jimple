@@ -1,0 +1,258 @@
+class com.sun.jndi.ldap.sasl.SaslOutputStream extends java.io.FilterOutputStream
+{
+    private static final boolean debug;
+    private byte[] lenBuf;
+    private int rawSendSize;
+    private javax.security.sasl.SaslClient sc;
+
+    void <init>(javax.security.sasl.SaslClient, java.io.OutputStream) throws javax.security.sasl.SaslException
+    {
+        java.io.OutputStream r1;
+        byte[] $r2;
+        com.sun.jndi.ldap.sasl.SaslOutputStream r0;
+        java.lang.NumberFormatException $r6;
+        javax.security.sasl.SaslException $r7;
+        javax.security.sasl.SaslClient r3;
+        int $i0;
+        java.lang.Object $r4;
+        java.lang.StringBuilder $r8, $r9, $r10;
+        java.lang.String r5, $r11;
+
+        r0 := @this: com.sun.jndi.ldap.sasl.SaslOutputStream;
+
+        r3 := @parameter0: javax.security.sasl.SaslClient;
+
+        r1 := @parameter1: java.io.OutputStream;
+
+        specialinvoke r0.<java.io.FilterOutputStream: void <init>(java.io.OutputStream)>(r1);
+
+        $r2 = newarray (byte)[4];
+
+        r0.<com.sun.jndi.ldap.sasl.SaslOutputStream: byte[] lenBuf> = $r2;
+
+        r0.<com.sun.jndi.ldap.sasl.SaslOutputStream: int rawSendSize> = 65536;
+
+        r0.<com.sun.jndi.ldap.sasl.SaslOutputStream: javax.security.sasl.SaslClient sc> = r3;
+
+        $r4 = interfaceinvoke r3.<javax.security.sasl.SaslClient: java.lang.Object getNegotiatedProperty(java.lang.String)>("javax.security.sasl.rawsendsize");
+
+        r5 = (java.lang.String) $r4;
+
+        if r5 == null goto label4;
+
+     label1:
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>(r5);
+
+        r0.<com.sun.jndi.ldap.sasl.SaslOutputStream: int rawSendSize> = $i0;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = new javax.security.sasl.SaslException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("javax.security.sasl.rawsendsize property must be numeric string: ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<javax.security.sasl.SaslException: void <init>(java.lang.String)>($r11);
+
+        throw $r7;
+
+     label4:
+        return;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label3;
+    }
+
+    public void write(int) throws java.io.IOException
+    {
+        byte[] r0;
+        byte $b1;
+        com.sun.jndi.ldap.sasl.SaslOutputStream r1;
+        int i0;
+
+        r1 := @this: com.sun.jndi.ldap.sasl.SaslOutputStream;
+
+        i0 := @parameter0: int;
+
+        r0 = newarray (byte)[1];
+
+        $b1 = (byte) i0;
+
+        r0[0] = $b1;
+
+        virtualinvoke r1.<com.sun.jndi.ldap.sasl.SaslOutputStream: void write(byte[],int,int)>(r0, 0, 1);
+
+        return;
+    }
+
+    public void write(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r1, $r3, $r4, $r5;
+        javax.security.sasl.SaslClient $r2;
+        int i0, $i1, $i2, i3, $i4, $i5, $i6, $i7, i8, $i9;
+        java.io.OutputStream $r6, $r7;
+        com.sun.jndi.ldap.sasl.SaslOutputStream r0;
+
+        r0 := @this: com.sun.jndi.ldap.sasl.SaslOutputStream;
+
+        r1 := @parameter0: byte[];
+
+        i3 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i8 = 0;
+
+     label1:
+        if i8 >= i0 goto label4;
+
+        $i2 = i0 - i8;
+
+        $i1 = r0.<com.sun.jndi.ldap.sasl.SaslOutputStream: int rawSendSize>;
+
+        if $i2 >= $i1 goto label2;
+
+        $i9 = i0 - i8;
+
+        goto label3;
+
+     label2:
+        $i9 = r0.<com.sun.jndi.ldap.sasl.SaslOutputStream: int rawSendSize>;
+
+     label3:
+        $r2 = r0.<com.sun.jndi.ldap.sasl.SaslOutputStream: javax.security.sasl.SaslClient sc>;
+
+        $i4 = i3 + i8;
+
+        $r3 = interfaceinvoke $r2.<javax.security.sasl.SaslClient: byte[] wrap(byte[],int,int)>(r1, $i4, $i9);
+
+        $i5 = lengthof $r3;
+
+        $r4 = r0.<com.sun.jndi.ldap.sasl.SaslOutputStream: byte[] lenBuf>;
+
+        staticinvoke <com.sun.jndi.ldap.sasl.SaslOutputStream: void intToNetworkByteOrder(int,byte[],int,int)>($i5, $r4, 0, 4);
+
+        $r6 = r0.<com.sun.jndi.ldap.sasl.SaslOutputStream: java.io.OutputStream out>;
+
+        $r5 = r0.<com.sun.jndi.ldap.sasl.SaslOutputStream: byte[] lenBuf>;
+
+        virtualinvoke $r6.<java.io.OutputStream: void write(byte[],int,int)>($r5, 0, 4);
+
+        $r7 = r0.<com.sun.jndi.ldap.sasl.SaslOutputStream: java.io.OutputStream out>;
+
+        $i6 = lengthof $r3;
+
+        virtualinvoke $r7.<java.io.OutputStream: void write(byte[],int,int)>($r3, 0, $i6);
+
+        $i7 = r0.<com.sun.jndi.ldap.sasl.SaslOutputStream: int rawSendSize>;
+
+        i8 = i8 + $i7;
+
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        javax.security.sasl.SaslClient $r1;
+        com.sun.jndi.ldap.sasl.SaslOutputStream r0;
+        javax.security.sasl.SaslException $r2, r3;
+
+        r0 := @this: com.sun.jndi.ldap.sasl.SaslOutputStream;
+
+        r3 = null;
+
+     label1:
+        $r1 = r0.<com.sun.jndi.ldap.sasl.SaslOutputStream: javax.security.sasl.SaslClient sc>;
+
+        interfaceinvoke $r1.<javax.security.sasl.SaslClient: void dispose()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        r3 = $r2;
+
+     label4:
+        specialinvoke r0.<java.io.FilterOutputStream: void close()>();
+
+        if r3 == null goto label5;
+
+        throw r3;
+
+     label5:
+        return;
+
+        catch javax.security.sasl.SaslException from label1 to label2 with label3;
+    }
+
+    private static void intToNetworkByteOrder(int, byte[], int, int)
+    {
+        byte[] r0;
+        java.lang.IllegalArgumentException $r2;
+        byte $b3;
+        int i0, i1, $i2, $i4, i5, i6, $i8;
+
+        i5 := @parameter0: int;
+
+        r0 := @parameter1: byte[];
+
+        i1 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        if i0 <= 4 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Cannot handle more than 4 bytes");
+
+        throw $r2;
+
+     label1:
+        i6 = i0 - 1;
+
+     label2:
+        if i6 < 0 goto label3;
+
+        $i4 = i1 + i6;
+
+        $i2 = i5 & 255;
+
+        $b3 = (byte) $i2;
+
+        r0[$i4] = $b3;
+
+        i5 = i5 >>> 8;
+
+        $i8 = (int) -1;
+
+        i6 = i6 + $i8;
+
+        goto label2;
+
+     label3:
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.jndi.ldap.sasl.SaslOutputStream: boolean debug> = 0;
+
+        return;
+    }
+}

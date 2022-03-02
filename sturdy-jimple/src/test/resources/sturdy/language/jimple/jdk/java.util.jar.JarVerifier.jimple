@@ -1,0 +1,1670 @@
+class java.util.jar.JarVerifier extends java.lang.Object
+{
+    static final sun.security.util.Debug debug;
+    private java.util.Hashtable verifiedSigners;
+    private java.util.Hashtable sigFileSigners;
+    private java.util.Hashtable sigFileData;
+    private java.util.ArrayList pendingBlocks;
+    private java.util.ArrayList signerCache;
+    private boolean parsingBlockOrSF;
+    private boolean parsingMeta;
+    private boolean anyToVerify;
+    private java.io.ByteArrayOutputStream baos;
+    private volatile sun.security.util.ManifestDigester manDig;
+    byte[] manifestRawBytes;
+    final java.lang.String manifestName;
+    boolean eagerValidation;
+    private java.lang.Object csdomain;
+    private java.util.List manifestDigests;
+    private java.util.Map urlToCodeSourceMap;
+    private java.util.Map signerToCodeSource;
+    private java.net.URL lastURL;
+    private java.util.Map lastURLMap;
+    private java.security.CodeSigner[] emptySigner;
+    private java.util.Map signerMap;
+    private java.util.Enumeration emptyEnumeration;
+    private java.util.List jarCodeSigners;
+
+    public void <init>(java.lang.String, byte[])
+    {
+        byte[] r7;
+        java.io.ByteArrayOutputStream $r12;
+        java.util.jar.JarVerifier$3 $r5;
+        java.util.HashMap $r2, $r3;
+        java.util.ArrayList $r11, $r13;
+        java.util.jar.JarVerifier r0;
+        java.lang.Object $r1;
+        java.lang.String r6;
+        java.security.CodeSigner[] $r4;
+        java.util.Hashtable $r8, $r9, $r10;
+
+        r0 := @this: java.util.jar.JarVerifier;
+
+        r6 := @parameter0: java.lang.String;
+
+        r7 := @parameter1: byte[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.util.jar.JarVerifier: boolean parsingBlockOrSF> = 0;
+
+        r0.<java.util.jar.JarVerifier: boolean parsingMeta> = 1;
+
+        r0.<java.util.jar.JarVerifier: boolean anyToVerify> = 1;
+
+        r0.<java.util.jar.JarVerifier: byte[] manifestRawBytes> = null;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<java.util.jar.JarVerifier: java.lang.Object csdomain> = $r1;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        r0.<java.util.jar.JarVerifier: java.util.Map urlToCodeSourceMap> = $r2;
+
+        $r3 = new java.util.HashMap;
+
+        specialinvoke $r3.<java.util.HashMap: void <init>()>();
+
+        r0.<java.util.jar.JarVerifier: java.util.Map signerToCodeSource> = $r3;
+
+        $r4 = newarray (java.security.CodeSigner)[0];
+
+        r0.<java.util.jar.JarVerifier: java.security.CodeSigner[] emptySigner> = $r4;
+
+        $r5 = new java.util.jar.JarVerifier$3;
+
+        specialinvoke $r5.<java.util.jar.JarVerifier$3: void <init>(java.util.jar.JarVerifier)>(r0);
+
+        r0.<java.util.jar.JarVerifier: java.util.Enumeration emptyEnumeration> = $r5;
+
+        r0.<java.util.jar.JarVerifier: java.lang.String manifestName> = r6;
+
+        r0.<java.util.jar.JarVerifier: byte[] manifestRawBytes> = r7;
+
+        $r8 = new java.util.Hashtable;
+
+        specialinvoke $r8.<java.util.Hashtable: void <init>()>();
+
+        r0.<java.util.jar.JarVerifier: java.util.Hashtable sigFileSigners> = $r8;
+
+        $r9 = new java.util.Hashtable;
+
+        specialinvoke $r9.<java.util.Hashtable: void <init>()>();
+
+        r0.<java.util.jar.JarVerifier: java.util.Hashtable verifiedSigners> = $r9;
+
+        $r10 = new java.util.Hashtable;
+
+        specialinvoke $r10.<java.util.Hashtable: void <init>(int)>(11);
+
+        r0.<java.util.jar.JarVerifier: java.util.Hashtable sigFileData> = $r10;
+
+        $r11 = new java.util.ArrayList;
+
+        specialinvoke $r11.<java.util.ArrayList: void <init>()>();
+
+        r0.<java.util.jar.JarVerifier: java.util.ArrayList pendingBlocks> = $r11;
+
+        $r12 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r12.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        r0.<java.util.jar.JarVerifier: java.io.ByteArrayOutputStream baos> = $r12;
+
+        $r13 = new java.util.ArrayList;
+
+        specialinvoke $r13.<java.util.ArrayList: void <init>()>();
+
+        r0.<java.util.jar.JarVerifier: java.util.List manifestDigests> = $r13;
+
+        return;
+    }
+
+    public void beginEntry(java.util.jar.JarEntry, sun.security.util.ManifestEntryVerifier) throws java.io.IOException
+    {
+        java.io.ByteArrayOutputStream $r11;
+        java.util.jar.JarEntry r0;
+        java.util.Locale $r9;
+        java.lang.String $r2, $r10, $r15, $r17, r18;
+        java.util.Hashtable $r5, $r7;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11;
+        sun.security.util.ManifestEntryVerifier r4;
+        sun.security.util.Debug $r1, $r13;
+        java.util.jar.JarVerifier r3;
+        java.lang.Object $r6, $r8;
+        java.lang.StringBuilder $r12, $r14, $r16;
+
+        r3 := @this: java.util.jar.JarVerifier;
+
+        r0 := @parameter0: java.util.jar.JarEntry;
+
+        r4 := @parameter1: sun.security.util.ManifestEntryVerifier;
+
+        if r0 != null goto label01;
+
+        return;
+
+     label01:
+        $r1 = <java.util.jar.JarVerifier: sun.security.util.Debug debug>;
+
+        if $r1 == null goto label02;
+
+        $r13 = <java.util.jar.JarVerifier: sun.security.util.Debug debug>;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("beginEntry ");
+
+        $r15 = virtualinvoke r0.<java.util.jar.JarEntry: java.lang.String getName()>();
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r13.<sun.security.util.Debug: void println(java.lang.String)>($r17);
+
+     label02:
+        $r2 = virtualinvoke r0.<java.util.jar.JarEntry: java.lang.String getName()>();
+
+        r18 = $r2;
+
+        $z0 = r3.<java.util.jar.JarVerifier: boolean parsingMeta>;
+
+        if $z0 == 0 goto label07;
+
+        $r9 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r10 = virtualinvoke $r2.<java.lang.String: java.lang.String toUpperCase(java.util.Locale)>($r9);
+
+        $z5 = virtualinvoke $r10.<java.lang.String: boolean startsWith(java.lang.String)>("META-INF/");
+
+        if $z5 != 0 goto label03;
+
+        $z10 = virtualinvoke $r10.<java.lang.String: boolean startsWith(java.lang.String)>("/META-INF/");
+
+        if $z10 == 0 goto label07;
+
+     label03:
+        $z6 = virtualinvoke r0.<java.util.jar.JarEntry: boolean isDirectory()>();
+
+        if $z6 == 0 goto label04;
+
+        virtualinvoke r4.<sun.security.util.ManifestEntryVerifier: void setEntry(java.lang.String,java.util.jar.JarEntry)>(null, r0);
+
+        return;
+
+     label04:
+        $z7 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>("META-INF/MANIFEST.MF");
+
+        if $z7 != 0 goto label05;
+
+        $z8 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>("META-INF/INDEX.LIST");
+
+        if $z8 == 0 goto label06;
+
+     label05:
+        return;
+
+     label06:
+        $z9 = staticinvoke <sun.security.util.SignatureFileVerifier: boolean isBlockOrSF(java.lang.String)>($r10);
+
+        if $z9 == 0 goto label07;
+
+        r3.<java.util.jar.JarVerifier: boolean parsingBlockOrSF> = 1;
+
+        $r11 = r3.<java.util.jar.JarVerifier: java.io.ByteArrayOutputStream baos>;
+
+        virtualinvoke $r11.<java.io.ByteArrayOutputStream: void reset()>();
+
+        virtualinvoke r4.<sun.security.util.ManifestEntryVerifier: void setEntry(java.lang.String,java.util.jar.JarEntry)>(null, r0);
+
+        return;
+
+     label07:
+        $z11 = r3.<java.util.jar.JarVerifier: boolean parsingMeta>;
+
+        if $z11 == 0 goto label08;
+
+        virtualinvoke r3.<java.util.jar.JarVerifier: void doneWithMeta()>();
+
+     label08:
+        $z1 = virtualinvoke r0.<java.util.jar.JarEntry: boolean isDirectory()>();
+
+        if $z1 == 0 goto label09;
+
+        virtualinvoke r4.<sun.security.util.ManifestEntryVerifier: void setEntry(java.lang.String,java.util.jar.JarEntry)>(null, r0);
+
+        return;
+
+     label09:
+        $z2 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>("./");
+
+        if $z2 == 0 goto label10;
+
+        r18 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int)>(2);
+
+     label10:
+        $z3 = virtualinvoke r18.<java.lang.String: boolean startsWith(java.lang.String)>("/");
+
+        if $z3 == 0 goto label11;
+
+        r18 = virtualinvoke r18.<java.lang.String: java.lang.String substring(int)>(1);
+
+     label11:
+        $z4 = virtualinvoke r18.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("META-INF/MANIFEST.MF");
+
+        if $z4 != 0 goto label13;
+
+        $r5 = r3.<java.util.jar.JarVerifier: java.util.Hashtable sigFileSigners>;
+
+        $r6 = virtualinvoke $r5.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r18);
+
+        if $r6 != null goto label12;
+
+        $r7 = r3.<java.util.jar.JarVerifier: java.util.Hashtable verifiedSigners>;
+
+        $r8 = virtualinvoke $r7.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r18);
+
+        if $r8 == null goto label13;
+
+     label12:
+        virtualinvoke r4.<sun.security.util.ManifestEntryVerifier: void setEntry(java.lang.String,java.util.jar.JarEntry)>(r18, r0);
+
+        return;
+
+     label13:
+        virtualinvoke r4.<sun.security.util.ManifestEntryVerifier: void setEntry(java.lang.String,java.util.jar.JarEntry)>(null, r0);
+
+        return;
+    }
+
+    public void update(int, sun.security.util.ManifestEntryVerifier) throws java.io.IOException
+    {
+        byte $b1;
+        java.io.ByteArrayOutputStream $r2;
+        sun.security.util.ManifestEntryVerifier r1;
+        int i0, $i3;
+        java.util.jar.JarVerifier r0;
+        boolean $z0;
+
+        r0 := @this: java.util.jar.JarVerifier;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: sun.security.util.ManifestEntryVerifier;
+
+        $i3 = (int) -1;
+
+        if i0 == $i3 goto label2;
+
+        $z0 = r0.<java.util.jar.JarVerifier: boolean parsingBlockOrSF>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = r0.<java.util.jar.JarVerifier: java.io.ByteArrayOutputStream baos>;
+
+        virtualinvoke $r2.<java.io.ByteArrayOutputStream: void write(int)>(i0);
+
+        goto label3;
+
+     label1:
+        $b1 = (byte) i0;
+
+        virtualinvoke r1.<sun.security.util.ManifestEntryVerifier: void update(byte)>($b1);
+
+        goto label3;
+
+     label2:
+        specialinvoke r0.<java.util.jar.JarVerifier: void processEntry(sun.security.util.ManifestEntryVerifier)>(r1);
+
+     label3:
+        return;
+    }
+
+    public void update(int, byte[], int, int, sun.security.util.ManifestEntryVerifier) throws java.io.IOException
+    {
+        byte[] r2;
+        java.io.ByteArrayOutputStream $r3;
+        sun.security.util.ManifestEntryVerifier r1;
+        int i0, i1, i2, $i4;
+        java.util.jar.JarVerifier r0;
+        boolean $z0;
+
+        r0 := @this: java.util.jar.JarVerifier;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: byte[];
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        r1 := @parameter4: sun.security.util.ManifestEntryVerifier;
+
+        $i4 = (int) -1;
+
+        if i0 == $i4 goto label2;
+
+        $z0 = r0.<java.util.jar.JarVerifier: boolean parsingBlockOrSF>;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = r0.<java.util.jar.JarVerifier: java.io.ByteArrayOutputStream baos>;
+
+        virtualinvoke $r3.<java.io.ByteArrayOutputStream: void write(byte[],int,int)>(r2, i1, i0);
+
+        goto label3;
+
+     label1:
+        virtualinvoke r1.<sun.security.util.ManifestEntryVerifier: void update(byte[],int,int)>(r2, i1, i0);
+
+        goto label3;
+
+     label2:
+        specialinvoke r0.<java.util.jar.JarVerifier: void processEntry(sun.security.util.ManifestEntryVerifier)>(r1);
+
+     label3:
+        return;
+    }
+
+    private void processEntry(sun.security.util.ManifestEntryVerifier) throws java.io.IOException
+    {
+        byte[] $r14, $r23, $r26, $r30, r78;
+        sun.security.util.Debug $r1, $r20, $r22, $r36, $r40, $r41, $r50, $r52, $r57, $r59, $r64, $r66, $r71, $r73;
+        sun.security.util.ManifestDigester $r9, $r13, $r24, $r25;
+        java.security.NoSuchAlgorithmException $r56;
+        java.lang.StringBuilder $r51, $r53, $r54, $r58, $r60, $r61, $r65, $r67, $r68, $r72, $r74, $r75;
+        java.lang.Throwable $r77;
+        java.io.ByteArrayOutputStream $r11, $r29;
+        java.util.ArrayList $r8, $r12, $r21, $r27, $r32;
+        java.lang.String $r4, $r6, $r7, $r15, $r28, $r37, $r55, $r62, $r69, $r76;
+        java.security.CodeSigner[] $r43, $r46, $r47;
+        java.io.IOException $r70;
+        java.util.Locale $r5;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.security.SignatureException $r63;
+        sun.security.util.SignatureFileVerifier $r10, r35;
+        java.util.List $r16, $r38;
+        java.security.cert.Certificate[] $r48;
+        java.util.jar.JarEntry $r3, $r42;
+        int $i0, $i1, $i2;
+        java.util.Hashtable $r17, $r18, $r31, $r39, $r44, $r45;
+        java.util.Iterator $r33;
+        sun.security.util.ManifestEntryVerifier r2;
+        java.security.cert.CertificateException $r49;
+        java.util.jar.JarVerifier r0;
+        java.lang.Object $r19, $r34;
+
+        r0 := @this: java.util.jar.JarVerifier;
+
+        r2 := @parameter0: sun.security.util.ManifestEntryVerifier;
+
+        $z0 = r0.<java.util.jar.JarVerifier: boolean parsingBlockOrSF>;
+
+        if $z0 != 0 goto label02;
+
+        $r42 = virtualinvoke r2.<sun.security.util.ManifestEntryVerifier: java.util.jar.JarEntry getEntry()>();
+
+        if $r42 == null goto label01;
+
+        $r43 = $r42.<java.util.jar.JarEntry: java.security.CodeSigner[] signers>;
+
+        if $r43 != null goto label01;
+
+        $r45 = r0.<java.util.jar.JarVerifier: java.util.Hashtable verifiedSigners>;
+
+        $r44 = r0.<java.util.jar.JarVerifier: java.util.Hashtable sigFileSigners>;
+
+        $r46 = virtualinvoke r2.<sun.security.util.ManifestEntryVerifier: java.security.CodeSigner[] verify(java.util.Hashtable,java.util.Hashtable)>($r45, $r44);
+
+        $r42.<java.util.jar.JarEntry: java.security.CodeSigner[] signers> = $r46;
+
+        $r47 = $r42.<java.util.jar.JarEntry: java.security.CodeSigner[] signers>;
+
+        $r48 = staticinvoke <java.util.jar.JarVerifier: java.security.cert.Certificate[] mapSignersToCertArray(java.security.CodeSigner[])>($r47);
+
+        $r42.<java.util.jar.JarEntry: java.security.cert.Certificate[] certs> = $r48;
+
+     label01:
+        goto label28;
+
+     label02:
+        r0.<java.util.jar.JarVerifier: boolean parsingBlockOrSF> = 0;
+
+        $r1 = <java.util.jar.JarVerifier: sun.security.util.Debug debug>;
+
+        if $r1 == null goto label03;
+
+        $r41 = <java.util.jar.JarVerifier: sun.security.util.Debug debug>;
+
+        virtualinvoke $r41.<sun.security.util.Debug: void println(java.lang.String)>("processEntry: processing block");
+
+     label03:
+        $r3 = virtualinvoke r2.<sun.security.util.ManifestEntryVerifier: java.util.jar.JarEntry getEntry()>();
+
+        $r4 = virtualinvoke $r3.<java.util.jar.JarEntry: java.lang.String getName()>();
+
+        $r5 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r6 = virtualinvoke $r4.<java.lang.String: java.lang.String toUpperCase(java.util.Locale)>($r5);
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean endsWith(java.lang.String)>(".SF");
+
+        if $z1 == 0 goto label08;
+
+        $i1 = virtualinvoke $r6.<java.lang.String: int length()>();
+
+        $i2 = $i1 - 3;
+
+        $r28 = virtualinvoke $r6.<java.lang.String: java.lang.String substring(int,int)>(0, $i2);
+
+        $r29 = r0.<java.util.jar.JarVerifier: java.io.ByteArrayOutputStream baos>;
+
+        $r30 = virtualinvoke $r29.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        $r31 = r0.<java.util.jar.JarVerifier: java.util.Hashtable sigFileData>;
+
+        virtualinvoke $r31.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r28, $r30);
+
+        $r32 = r0.<java.util.jar.JarVerifier: java.util.ArrayList pendingBlocks>;
+
+        $r33 = virtualinvoke $r32.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label04:
+        $z3 = interfaceinvoke $r33.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label07;
+
+        $r34 = interfaceinvoke $r33.<java.util.Iterator: java.lang.Object next()>();
+
+        r35 = (sun.security.util.SignatureFileVerifier) $r34;
+
+        $z4 = virtualinvoke r35.<sun.security.util.SignatureFileVerifier: boolean needSignatureFile(java.lang.String)>($r28);
+
+        if $z4 == 0 goto label06;
+
+        $r36 = <java.util.jar.JarVerifier: sun.security.util.Debug debug>;
+
+        if $r36 == null goto label05;
+
+        $r40 = <java.util.jar.JarVerifier: sun.security.util.Debug debug>;
+
+        virtualinvoke $r40.<sun.security.util.Debug: void println(java.lang.String)>("processEntry: processing pending block");
+
+     label05:
+        virtualinvoke r35.<sun.security.util.SignatureFileVerifier: void setSignatureFile(byte[])>($r30);
+
+        $r39 = r0.<java.util.jar.JarVerifier: java.util.Hashtable sigFileSigners>;
+
+        $r38 = r0.<java.util.jar.JarVerifier: java.util.List manifestDigests>;
+
+        $r37 = r0.<java.util.jar.JarVerifier: java.lang.String manifestName>;
+
+        virtualinvoke r35.<sun.security.util.SignatureFileVerifier: void process(java.util.Hashtable,java.util.List,java.lang.String)>($r39, $r38, $r37);
+
+     label06:
+        goto label04;
+
+     label07:
+        return;
+
+     label08:
+        $i0 = virtualinvoke $r6.<java.lang.String: int lastIndexOf(java.lang.String)>(".");
+
+        $r7 = virtualinvoke $r6.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $r8 = r0.<java.util.jar.JarVerifier: java.util.ArrayList signerCache>;
+
+        if $r8 != null goto label09;
+
+        $r27 = new java.util.ArrayList;
+
+        specialinvoke $r27.<java.util.ArrayList: void <init>()>();
+
+        r0.<java.util.jar.JarVerifier: java.util.ArrayList signerCache> = $r27;
+
+     label09:
+        $r9 = r0.<java.util.jar.JarVerifier: sun.security.util.ManifestDigester manDig>;
+
+        if $r9 != null goto label15;
+
+        $r23 = r0.<java.util.jar.JarVerifier: byte[] manifestRawBytes>;
+
+        entermonitor $r23;
+
+     label10:
+        $r24 = r0.<java.util.jar.JarVerifier: sun.security.util.ManifestDigester manDig>;
+
+        if $r24 != null goto label11;
+
+        $r25 = new sun.security.util.ManifestDigester;
+
+        $r26 = r0.<java.util.jar.JarVerifier: byte[] manifestRawBytes>;
+
+        specialinvoke $r25.<sun.security.util.ManifestDigester: void <init>(byte[])>($r26);
+
+        r0.<java.util.jar.JarVerifier: sun.security.util.ManifestDigester manDig> = $r25;
+
+        r0.<java.util.jar.JarVerifier: byte[] manifestRawBytes> = null;
+
+     label11:
+        exitmonitor $r23;
+
+     label12:
+        goto label15;
+
+     label13:
+        $r77 := @caughtexception;
+
+        exitmonitor $r23;
+
+     label14:
+        throw $r77;
+
+     label15:
+        $r10 = new sun.security.util.SignatureFileVerifier;
+
+        $r12 = r0.<java.util.jar.JarVerifier: java.util.ArrayList signerCache>;
+
+        $r13 = r0.<java.util.jar.JarVerifier: sun.security.util.ManifestDigester manDig>;
+
+        $r11 = r0.<java.util.jar.JarVerifier: java.io.ByteArrayOutputStream baos>;
+
+        $r14 = virtualinvoke $r11.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        specialinvoke $r10.<sun.security.util.SignatureFileVerifier: void <init>(java.util.ArrayList,sun.security.util.ManifestDigester,java.lang.String,byte[])>($r12, $r13, $r6, $r14);
+
+        $z2 = virtualinvoke $r10.<sun.security.util.SignatureFileVerifier: boolean needSignatureFileBytes()>();
+
+        if $z2 == 0 goto label19;
+
+        $r18 = r0.<java.util.jar.JarVerifier: java.util.Hashtable sigFileData>;
+
+        $r19 = virtualinvoke $r18.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r7);
+
+        r78 = (byte[]) $r19;
+
+        if r78 != null goto label18;
+
+        $r20 = <java.util.jar.JarVerifier: sun.security.util.Debug debug>;
+
+        if $r20 == null goto label16;
+
+        $r22 = <java.util.jar.JarVerifier: sun.security.util.Debug debug>;
+
+        virtualinvoke $r22.<sun.security.util.Debug: void println(java.lang.String)>("adding pending block");
+
+     label16:
+        $r21 = r0.<java.util.jar.JarVerifier: java.util.ArrayList pendingBlocks>;
+
+        virtualinvoke $r21.<java.util.ArrayList: boolean add(java.lang.Object)>($r10);
+
+     label17:
+        return;
+
+     label18:
+        virtualinvoke $r10.<sun.security.util.SignatureFileVerifier: void setSignatureFile(byte[])>(r78);
+
+     label19:
+        $r17 = r0.<java.util.jar.JarVerifier: java.util.Hashtable sigFileSigners>;
+
+        $r16 = r0.<java.util.jar.JarVerifier: java.util.List manifestDigests>;
+
+        $r15 = r0.<java.util.jar.JarVerifier: java.lang.String manifestName>;
+
+        virtualinvoke $r10.<sun.security.util.SignatureFileVerifier: void process(java.util.Hashtable,java.util.List,java.lang.String)>($r17, $r16, $r15);
+
+     label20:
+        goto label28;
+
+     label21:
+        $r70 := @caughtexception;
+
+        $r71 = <java.util.jar.JarVerifier: sun.security.util.Debug debug>;
+
+        if $r71 == null goto label22;
+
+        $r73 = <java.util.jar.JarVerifier: sun.security.util.Debug debug>;
+
+        $r72 = new java.lang.StringBuilder;
+
+        specialinvoke $r72.<java.lang.StringBuilder: void <init>()>();
+
+        $r74 = virtualinvoke $r72.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("processEntry caught: ");
+
+        $r75 = virtualinvoke $r74.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r70);
+
+        $r76 = virtualinvoke $r75.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r73.<sun.security.util.Debug: void println(java.lang.String)>($r76);
+
+     label22:
+        goto label28;
+
+     label23:
+        $r63 := @caughtexception;
+
+        $r64 = <java.util.jar.JarVerifier: sun.security.util.Debug debug>;
+
+        if $r64 == null goto label24;
+
+        $r66 = <java.util.jar.JarVerifier: sun.security.util.Debug debug>;
+
+        $r65 = new java.lang.StringBuilder;
+
+        specialinvoke $r65.<java.lang.StringBuilder: void <init>()>();
+
+        $r67 = virtualinvoke $r65.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("processEntry caught: ");
+
+        $r68 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r63);
+
+        $r69 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r66.<sun.security.util.Debug: void println(java.lang.String)>($r69);
+
+     label24:
+        goto label28;
+
+     label25:
+        $r56 := @caughtexception;
+
+        $r57 = <java.util.jar.JarVerifier: sun.security.util.Debug debug>;
+
+        if $r57 == null goto label26;
+
+        $r59 = <java.util.jar.JarVerifier: sun.security.util.Debug debug>;
+
+        $r58 = new java.lang.StringBuilder;
+
+        specialinvoke $r58.<java.lang.StringBuilder: void <init>()>();
+
+        $r60 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("processEntry caught: ");
+
+        $r61 = virtualinvoke $r60.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r56);
+
+        $r62 = virtualinvoke $r61.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r59.<sun.security.util.Debug: void println(java.lang.String)>($r62);
+
+     label26:
+        goto label28;
+
+     label27:
+        $r49 := @caughtexception;
+
+        $r50 = <java.util.jar.JarVerifier: sun.security.util.Debug debug>;
+
+        if $r50 == null goto label28;
+
+        $r52 = <java.util.jar.JarVerifier: sun.security.util.Debug debug>;
+
+        $r51 = new java.lang.StringBuilder;
+
+        specialinvoke $r51.<java.lang.StringBuilder: void <init>()>();
+
+        $r53 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("processEntry caught: ");
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r49);
+
+        $r55 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r52.<sun.security.util.Debug: void println(java.lang.String)>($r55);
+
+     label28:
+        return;
+
+        catch java.lang.Throwable from label10 to label12 with label13;
+        catch java.lang.Throwable from label13 to label14 with label13;
+        catch java.io.IOException from label02 to label07 with label21;
+        catch java.io.IOException from label08 to label17 with label21;
+        catch java.io.IOException from label18 to label20 with label21;
+        catch java.security.SignatureException from label02 to label07 with label23;
+        catch java.security.SignatureException from label08 to label17 with label23;
+        catch java.security.SignatureException from label18 to label20 with label23;
+        catch java.security.NoSuchAlgorithmException from label02 to label07 with label25;
+        catch java.security.NoSuchAlgorithmException from label08 to label17 with label25;
+        catch java.security.NoSuchAlgorithmException from label18 to label20 with label25;
+        catch java.security.cert.CertificateException from label02 to label07 with label27;
+        catch java.security.cert.CertificateException from label08 to label17 with label27;
+        catch java.security.cert.CertificateException from label18 to label20 with label27;
+    }
+
+    public java.security.cert.Certificate[] getCerts(java.lang.String)
+    {
+        java.util.jar.JarVerifier r0;
+        java.security.cert.Certificate[] $r3;
+        java.lang.String r1;
+        java.security.CodeSigner[] $r2;
+
+        r0 := @this: java.util.jar.JarVerifier;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = virtualinvoke r0.<java.util.jar.JarVerifier: java.security.CodeSigner[] getCodeSigners(java.lang.String)>(r1);
+
+        $r3 = staticinvoke <java.util.jar.JarVerifier: java.security.cert.Certificate[] mapSignersToCertArray(java.security.CodeSigner[])>($r2);
+
+        return $r3;
+    }
+
+    public java.security.cert.Certificate[] getCerts(java.util.jar.JarFile, java.util.jar.JarEntry)
+    {
+        java.util.jar.JarEntry r2;
+        java.util.jar.JarVerifier r0;
+        java.util.jar.JarFile r1;
+        java.security.cert.Certificate[] $r4;
+        java.security.CodeSigner[] $r3;
+
+        r0 := @this: java.util.jar.JarVerifier;
+
+        r1 := @parameter0: java.util.jar.JarFile;
+
+        r2 := @parameter1: java.util.jar.JarEntry;
+
+        $r3 = virtualinvoke r0.<java.util.jar.JarVerifier: java.security.CodeSigner[] getCodeSigners(java.util.jar.JarFile,java.util.jar.JarEntry)>(r1, r2);
+
+        $r4 = staticinvoke <java.util.jar.JarVerifier: java.security.cert.Certificate[] mapSignersToCertArray(java.security.CodeSigner[])>($r3);
+
+        return $r4;
+    }
+
+    public java.security.CodeSigner[] getCodeSigners(java.lang.String)
+    {
+        java.util.jar.JarVerifier r0;
+        java.lang.Object $r3;
+        java.lang.String r1;
+        java.util.Hashtable $r2;
+        java.security.CodeSigner[] $r4;
+
+        r0 := @this: java.util.jar.JarVerifier;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<java.util.jar.JarVerifier: java.util.Hashtable verifiedSigners>;
+
+        $r3 = virtualinvoke $r2.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r1);
+
+        $r4 = (java.security.CodeSigner[]) $r3;
+
+        return $r4;
+    }
+
+    public java.security.CodeSigner[] getCodeSigners(java.util.jar.JarFile, java.util.jar.JarEntry)
+    {
+        byte[] r7;
+        java.util.jar.JarFile r5;
+        java.io.IOException $r8;
+        java.util.jar.JarEntry r0;
+        int $i0, i1, $i3;
+        java.util.jar.JarVerifier r2;
+        java.lang.Object $r4;
+        java.lang.String $r1;
+        java.util.Hashtable $r3;
+        java.security.CodeSigner[] $r9;
+        boolean $z0;
+        java.io.InputStream $r6;
+
+        r2 := @this: java.util.jar.JarVerifier;
+
+        r5 := @parameter0: java.util.jar.JarFile;
+
+        r0 := @parameter1: java.util.jar.JarEntry;
+
+        $r1 = virtualinvoke r0.<java.util.jar.JarEntry: java.lang.String getName()>();
+
+        $z0 = r2.<java.util.jar.JarVerifier: boolean eagerValidation>;
+
+        if $z0 == 0 goto label6;
+
+        $r3 = r2.<java.util.jar.JarVerifier: java.util.Hashtable sigFileSigners>;
+
+        $r4 = virtualinvoke $r3.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r1);
+
+        if $r4 == null goto label6;
+
+     label1:
+        $r6 = virtualinvoke r5.<java.util.jar.JarFile: java.io.InputStream getInputStream(java.util.zip.ZipEntry)>(r0);
+
+        r7 = newarray (byte)[1024];
+
+        i1 = lengthof r7;
+
+     label2:
+        $i3 = (int) -1;
+
+        if i1 == $i3 goto label3;
+
+        $i0 = lengthof r7;
+
+        i1 = virtualinvoke $r6.<java.io.InputStream: int read(byte[],int,int)>(r7, 0, $i0);
+
+        goto label2;
+
+     label3:
+        virtualinvoke $r6.<java.io.InputStream: void close()>();
+
+     label4:
+        goto label6;
+
+     label5:
+        $r8 := @caughtexception;
+
+     label6:
+        $r9 = virtualinvoke r2.<java.util.jar.JarVerifier: java.security.CodeSigner[] getCodeSigners(java.lang.String)>($r1);
+
+        return $r9;
+
+        catch java.io.IOException from label1 to label4 with label5;
+    }
+
+    private static java.security.cert.Certificate[] mapSignersToCertArray(java.security.CodeSigner[])
+    {
+        java.lang.Object[] $r3;
+        java.security.cert.CertPath $r6;
+        java.util.ArrayList $r1;
+        java.security.CodeSigner $r5;
+        java.util.List $r7;
+        int $i0, $i1, i2;
+        java.security.cert.Certificate[] $r2, $r4;
+        java.security.CodeSigner[] r0;
+
+        r0 := @parameter0: java.security.CodeSigner[];
+
+        if r0 == null goto label3;
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        i2 = 0;
+
+     label1:
+        $i0 = lengthof r0;
+
+        if i2 >= $i0 goto label2;
+
+        $r5 = r0[i2];
+
+        $r6 = virtualinvoke $r5.<java.security.CodeSigner: java.security.cert.CertPath getSignerCertPath()>();
+
+        $r7 = virtualinvoke $r6.<java.security.cert.CertPath: java.util.List getCertificates()>();
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean addAll(java.util.Collection)>($r7);
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        $i1 = virtualinvoke $r1.<java.util.ArrayList: int size()>();
+
+        $r2 = newarray (java.security.cert.Certificate)[$i1];
+
+        $r3 = virtualinvoke $r1.<java.util.ArrayList: java.lang.Object[] toArray(java.lang.Object[])>($r2);
+
+        $r4 = (java.security.cert.Certificate[]) $r3;
+
+        return $r4;
+
+     label3:
+        return null;
+    }
+
+    boolean nothingToVerify()
+    {
+        java.util.jar.JarVerifier r0;
+        boolean $z0, $z1;
+
+        r0 := @this: java.util.jar.JarVerifier;
+
+        $z0 = r0.<java.util.jar.JarVerifier: boolean anyToVerify>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    void doneWithMeta()
+    {
+        java.util.jar.JarVerifier r0;
+        java.lang.Object $r6;
+        java.lang.String $r2, $r4, $r8;
+        java.util.Hashtable $r1, $r3, $r5, $r9;
+        java.security.CodeSigner[] r7;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.util.jar.JarVerifier;
+
+        r0.<java.util.jar.JarVerifier: boolean parsingMeta> = 0;
+
+        $r1 = r0.<java.util.jar.JarVerifier: java.util.Hashtable sigFileSigners>;
+
+        $z0 = virtualinvoke $r1.<java.util.Hashtable: boolean isEmpty()>();
+
+        if $z0 != 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        r0.<java.util.jar.JarVerifier: boolean anyToVerify> = $z2;
+
+        r0.<java.util.jar.JarVerifier: java.io.ByteArrayOutputStream baos> = null;
+
+        r0.<java.util.jar.JarVerifier: java.util.Hashtable sigFileData> = null;
+
+        r0.<java.util.jar.JarVerifier: java.util.ArrayList pendingBlocks> = null;
+
+        r0.<java.util.jar.JarVerifier: java.util.ArrayList signerCache> = null;
+
+        r0.<java.util.jar.JarVerifier: sun.security.util.ManifestDigester manDig> = null;
+
+        $r3 = r0.<java.util.jar.JarVerifier: java.util.Hashtable sigFileSigners>;
+
+        $r2 = r0.<java.util.jar.JarVerifier: java.lang.String manifestName>;
+
+        $z1 = virtualinvoke $r3.<java.util.Hashtable: boolean containsKey(java.lang.Object)>($r2);
+
+        if $z1 == 0 goto label3;
+
+        $r5 = r0.<java.util.jar.JarVerifier: java.util.Hashtable sigFileSigners>;
+
+        $r4 = r0.<java.util.jar.JarVerifier: java.lang.String manifestName>;
+
+        $r6 = virtualinvoke $r5.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>($r4);
+
+        r7 = (java.security.CodeSigner[]) $r6;
+
+        $r9 = r0.<java.util.jar.JarVerifier: java.util.Hashtable verifiedSigners>;
+
+        $r8 = r0.<java.util.jar.JarVerifier: java.lang.String manifestName>;
+
+        virtualinvoke $r9.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r8, r7);
+
+     label3:
+        return;
+    }
+
+    private synchronized java.security.CodeSource mapSignersToCodeSource(java.net.URL, java.security.CodeSigner[])
+    {
+        java.net.URL r0, $r2;
+        java.util.HashMap $r9;
+        java.util.Map $r3, $r8, $r10, r11;
+        java.util.jar.JarVerifier r1;
+        java.lang.Object $r4, $r7, $r12;
+        java.security.CodeSource $r13, r14;
+        java.util.jar.JarVerifier$VerifierCodeSource $r6;
+        java.security.CodeSigner[] r5;
+
+        r1 := @this: java.util.jar.JarVerifier;
+
+        r0 := @parameter0: java.net.URL;
+
+        r5 := @parameter1: java.security.CodeSigner[];
+
+        $r2 = r1.<java.util.jar.JarVerifier: java.net.URL lastURL>;
+
+        if r0 != $r2 goto label1;
+
+        r11 = r1.<java.util.jar.JarVerifier: java.util.Map lastURLMap>;
+
+        goto label3;
+
+     label1:
+        $r3 = r1.<java.util.jar.JarVerifier: java.util.Map urlToCodeSourceMap>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>(r0);
+
+        r11 = (java.util.Map) $r4;
+
+        if r11 != null goto label2;
+
+        $r9 = new java.util.HashMap;
+
+        specialinvoke $r9.<java.util.HashMap: void <init>()>();
+
+        r11 = $r9;
+
+        $r10 = r1.<java.util.jar.JarVerifier: java.util.Map urlToCodeSourceMap>;
+
+        interfaceinvoke $r10.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r0, $r9);
+
+     label2:
+        r1.<java.util.jar.JarVerifier: java.util.Map lastURLMap> = r11;
+
+        r1.<java.util.jar.JarVerifier: java.net.URL lastURL> = r0;
+
+     label3:
+        $r12 = interfaceinvoke r11.<java.util.Map: java.lang.Object get(java.lang.Object)>(r5);
+
+        $r13 = (java.security.CodeSource) $r12;
+
+        r14 = $r13;
+
+        if $r13 != null goto label4;
+
+        $r6 = new java.util.jar.JarVerifier$VerifierCodeSource;
+
+        $r7 = r1.<java.util.jar.JarVerifier: java.lang.Object csdomain>;
+
+        specialinvoke $r6.<java.util.jar.JarVerifier$VerifierCodeSource: void <init>(java.lang.Object,java.net.URL,java.security.CodeSigner[])>($r7, r0, r5);
+
+        r14 = $r6;
+
+        $r8 = r1.<java.util.jar.JarVerifier: java.util.Map signerToCodeSource>;
+
+        interfaceinvoke $r8.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r5, $r6);
+
+     label4:
+        return r14;
+    }
+
+    private java.security.CodeSource[] mapSignersToCodeSources(java.net.URL, java.util.List, boolean)
+    {
+        java.lang.Object[] $r3;
+        java.net.URL r6;
+        java.util.ArrayList $r0;
+        java.util.List r1;
+        java.security.CodeSource[] $r2, $r4;
+        int $i0, $i1, i2;
+        java.util.jar.JarVerifier r5;
+        java.lang.Object $r8;
+        java.security.CodeSource $r7, $r10;
+        java.security.CodeSigner[] $r9;
+        boolean z0;
+
+        r5 := @this: java.util.jar.JarVerifier;
+
+        r6 := @parameter0: java.net.URL;
+
+        r1 := @parameter1: java.util.List;
+
+        z0 := @parameter2: boolean;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+        i2 = 0;
+
+     label1:
+        $i0 = interfaceinvoke r1.<java.util.List: int size()>();
+
+        if i2 >= $i0 goto label2;
+
+        $r8 = interfaceinvoke r1.<java.util.List: java.lang.Object get(int)>(i2);
+
+        $r9 = (java.security.CodeSigner[]) $r8;
+
+        $r10 = specialinvoke r5.<java.util.jar.JarVerifier: java.security.CodeSource mapSignersToCodeSource(java.net.URL,java.security.CodeSigner[])>(r6, $r9);
+
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>($r10);
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        if z0 == 0 goto label3;
+
+        $r7 = specialinvoke r5.<java.util.jar.JarVerifier: java.security.CodeSource mapSignersToCodeSource(java.net.URL,java.security.CodeSigner[])>(r6, null);
+
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>($r7);
+
+     label3:
+        $i1 = interfaceinvoke $r0.<java.util.List: int size()>();
+
+        $r2 = newarray (java.security.CodeSource)[$i1];
+
+        $r3 = interfaceinvoke $r0.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r2);
+
+        $r4 = (java.security.CodeSource[]) $r3;
+
+        return $r4;
+    }
+
+    private java.security.CodeSigner[] findMatchingSigners(java.security.CodeSource)
+    {
+        java.net.URL $r2;
+        java.util.ArrayList $r15;
+        java.security.CodeSource[] $r4;
+        int $i0, i1, $i2, $i4;
+        java.util.jar.JarVerifier$VerifierCodeSource $r7, $r11, r13;
+        java.security.CodeSigner[] $r8, $r12, r14;
+        boolean $z0, $z1;
+        java.util.List $r3;
+        java.util.jar.JarVerifier r1;
+        java.lang.Object $r6, $r10;
+        java.security.CodeSource r0, $r9;
+
+        r1 := @this: java.util.jar.JarVerifier;
+
+        r0 := @parameter0: java.security.CodeSource;
+
+        $z0 = r0 instanceof java.util.jar.JarVerifier$VerifierCodeSource;
+
+        if $z0 == 0 goto label1;
+
+        r13 = (java.util.jar.JarVerifier$VerifierCodeSource) r0;
+
+        $r10 = r1.<java.util.jar.JarVerifier: java.lang.Object csdomain>;
+
+        $z1 = virtualinvoke r13.<java.util.jar.JarVerifier$VerifierCodeSource: boolean isSameDomain(java.lang.Object)>($r10);
+
+        if $z1 == 0 goto label1;
+
+        $r11 = (java.util.jar.JarVerifier$VerifierCodeSource) r0;
+
+        $r12 = staticinvoke <java.util.jar.JarVerifier$VerifierCodeSource: java.security.CodeSigner[] access$000(java.util.jar.JarVerifier$VerifierCodeSource)>($r11);
+
+        return $r12;
+
+     label1:
+        $r2 = virtualinvoke r0.<java.security.CodeSource: java.net.URL getLocation()>();
+
+        $r3 = specialinvoke r1.<java.util.jar.JarVerifier: java.util.List getJarCodeSigners()>();
+
+        $r4 = specialinvoke r1.<java.util.jar.JarVerifier: java.security.CodeSource[] mapSignersToCodeSources(java.net.URL,java.util.List,boolean)>($r2, $r3, 1);
+
+        $r15 = new java.util.ArrayList;
+
+        specialinvoke $r15.<java.util.ArrayList: void <init>()>();
+
+        i1 = 0;
+
+     label2:
+        $i2 = lengthof $r4;
+
+        if i1 >= $i2 goto label3;
+
+        $r9 = $r4[i1];
+
+        interfaceinvoke $r15.<java.util.List: boolean add(java.lang.Object)>($r9);
+
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label3:
+        $i0 = interfaceinvoke $r15.<java.util.List: int indexOf(java.lang.Object)>(r0);
+
+        $i4 = (int) -1;
+
+        if $i0 == $i4 goto label5;
+
+        $r6 = interfaceinvoke $r15.<java.util.List: java.lang.Object get(int)>($i0);
+
+        $r7 = (java.util.jar.JarVerifier$VerifierCodeSource) $r6;
+
+        $r8 = staticinvoke <java.util.jar.JarVerifier$VerifierCodeSource: java.security.CodeSigner[] access$000(java.util.jar.JarVerifier$VerifierCodeSource)>($r7);
+
+        r14 = $r8;
+
+        if $r8 != null goto label4;
+
+        r14 = r1.<java.util.jar.JarVerifier: java.security.CodeSigner[] emptySigner>;
+
+     label4:
+        return r14;
+
+     label5:
+        return null;
+    }
+
+    private synchronized java.util.Map signerMap()
+    {
+        java.util.HashMap $r3;
+        java.util.Map $r1, $r2, $r7, $r9;
+        int $i0, $i1, $i2;
+        java.util.jar.JarVerifier r0;
+        java.util.Hashtable $r4, $r5, $r6, $r8;
+
+        r0 := @this: java.util.jar.JarVerifier;
+
+        $r1 = r0.<java.util.jar.JarVerifier: java.util.Map signerMap>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.util.HashMap;
+
+        $r4 = r0.<java.util.jar.JarVerifier: java.util.Hashtable verifiedSigners>;
+
+        $i0 = virtualinvoke $r4.<java.util.Hashtable: int size()>();
+
+        $r5 = r0.<java.util.jar.JarVerifier: java.util.Hashtable sigFileSigners>;
+
+        $i1 = virtualinvoke $r5.<java.util.Hashtable: int size()>();
+
+        $i2 = $i0 + $i1;
+
+        specialinvoke $r3.<java.util.HashMap: void <init>(int)>($i2);
+
+        r0.<java.util.jar.JarVerifier: java.util.Map signerMap> = $r3;
+
+        $r7 = r0.<java.util.jar.JarVerifier: java.util.Map signerMap>;
+
+        $r6 = r0.<java.util.jar.JarVerifier: java.util.Hashtable verifiedSigners>;
+
+        interfaceinvoke $r7.<java.util.Map: void putAll(java.util.Map)>($r6);
+
+        $r9 = r0.<java.util.jar.JarVerifier: java.util.Map signerMap>;
+
+        $r8 = r0.<java.util.jar.JarVerifier: java.util.Hashtable sigFileSigners>;
+
+        interfaceinvoke $r9.<java.util.Map: void putAll(java.util.Map)>($r8);
+
+     label1:
+        $r2 = r0.<java.util.jar.JarVerifier: java.util.Map signerMap>;
+
+        return $r2;
+    }
+
+    public synchronized java.util.Enumeration entryNames(java.util.jar.JarFile, java.security.CodeSource[])
+    {
+        java.util.Enumeration $r10;
+        java.util.jar.JarFile r7;
+        java.util.ArrayList $r4;
+        java.security.CodeSource[] r5;
+        java.util.Map $r1;
+        int $i0, $i1, $i2, i3;
+        java.security.CodeSigner[] $r9;
+        boolean z0;
+        java.util.jar.JarVerifier$1 $r6;
+        java.util.Iterator $r3;
+        java.util.Set $r2;
+        java.util.jar.JarVerifier r0;
+        java.security.CodeSource $r8;
+
+        r0 := @this: java.util.jar.JarVerifier;
+
+        r7 := @parameter0: java.util.jar.JarFile;
+
+        r5 := @parameter1: java.security.CodeSource[];
+
+        $r1 = specialinvoke r0.<java.util.jar.JarVerifier: java.util.Map signerMap()>();
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.util.Set entrySet()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Set: java.util.Iterator iterator()>();
+
+        z0 = 0;
+
+        $r4 = new java.util.ArrayList;
+
+        $i0 = lengthof r5;
+
+        specialinvoke $r4.<java.util.ArrayList: void <init>(int)>($i0);
+
+        i3 = 0;
+
+     label1:
+        $i1 = lengthof r5;
+
+        if i3 >= $i1 goto label5;
+
+        $r8 = r5[i3];
+
+        $r9 = specialinvoke r0.<java.util.jar.JarVerifier: java.security.CodeSigner[] findMatchingSigners(java.security.CodeSource)>($r8);
+
+        if $r9 == null goto label3;
+
+        $i2 = lengthof $r9;
+
+        if $i2 <= 0 goto label2;
+
+        interfaceinvoke $r4.<java.util.List: boolean add(java.lang.Object)>($r9);
+
+        goto label4;
+
+     label2:
+        z0 = 1;
+
+        goto label4;
+
+     label3:
+        z0 = 1;
+
+     label4:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label5:
+        if z0 == 0 goto label6;
+
+        $r10 = specialinvoke r0.<java.util.jar.JarVerifier: java.util.Enumeration unsignedEntryNames(java.util.jar.JarFile)>(r7);
+
+        goto label7;
+
+     label6:
+        $r10 = r0.<java.util.jar.JarVerifier: java.util.Enumeration emptyEnumeration>;
+
+     label7:
+        $r6 = new java.util.jar.JarVerifier$1;
+
+        specialinvoke $r6.<java.util.jar.JarVerifier$1: void <init>(java.util.jar.JarVerifier,java.util.Iterator,java.util.List,java.util.Enumeration)>(r0, $r3, $r4, $r10);
+
+        return $r6;
+    }
+
+    public java.util.Enumeration entries2(java.util.jar.JarFile, java.util.Enumeration)
+    {
+        java.util.Enumeration r3;
+        java.util.Map $r2;
+        java.util.jar.JarVerifier$2 $r4;
+        java.util.jar.JarVerifier r1;
+        java.util.HashMap $r0;
+        java.util.jar.JarFile r5;
+
+        r1 := @this: java.util.jar.JarVerifier;
+
+        r5 := @parameter0: java.util.jar.JarFile;
+
+        r3 := @parameter1: java.util.Enumeration;
+
+        $r0 = new java.util.HashMap;
+
+        specialinvoke $r0.<java.util.HashMap: void <init>()>();
+
+        $r2 = specialinvoke r1.<java.util.jar.JarVerifier: java.util.Map signerMap()>();
+
+        interfaceinvoke $r0.<java.util.Map: void putAll(java.util.Map)>($r2);
+
+        $r4 = new java.util.jar.JarVerifier$2;
+
+        specialinvoke $r4.<java.util.jar.JarVerifier$2: void <init>(java.util.jar.JarVerifier,java.util.Enumeration,java.util.jar.JarFile,java.util.Map)>(r1, r3, r5, $r0);
+
+        return $r4;
+    }
+
+    static boolean isSigningRelated(java.lang.String)
+    {
+        java.lang.String r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = staticinvoke <sun.security.util.SignatureFileVerifier: boolean isSigningRelated(java.lang.String)>(r0);
+
+        return $z0;
+    }
+
+    private java.util.Enumeration unsignedEntryNames(java.util.jar.JarFile)
+    {
+        java.util.Enumeration $r3;
+        java.util.jar.JarVerifier$4 $r4;
+        java.util.Map $r1;
+        java.util.jar.JarVerifier r0;
+        java.util.jar.JarFile r2;
+
+        r0 := @this: java.util.jar.JarVerifier;
+
+        r2 := @parameter0: java.util.jar.JarFile;
+
+        $r1 = specialinvoke r0.<java.util.jar.JarVerifier: java.util.Map signerMap()>();
+
+        $r3 = virtualinvoke r2.<java.util.jar.JarFile: java.util.Enumeration entries()>();
+
+        $r4 = new java.util.jar.JarVerifier$4;
+
+        specialinvoke $r4.<java.util.jar.JarVerifier$4: void <init>(java.util.jar.JarVerifier,java.util.Enumeration,java.util.Map)>(r0, $r3, $r1);
+
+        return $r4;
+    }
+
+    private synchronized java.util.List getJarCodeSigners()
+    {
+        java.util.Collection $r5;
+        java.util.ArrayList $r6;
+        java.util.HashSet $r3;
+        java.util.List $r1, $r2, $r7;
+        java.util.Map $r4;
+        java.util.jar.JarVerifier r0;
+
+        r0 := @this: java.util.jar.JarVerifier;
+
+        $r1 = r0.<java.util.jar.JarVerifier: java.util.List jarCodeSigners>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.util.HashSet;
+
+        specialinvoke $r3.<java.util.HashSet: void <init>()>();
+
+        $r4 = specialinvoke r0.<java.util.jar.JarVerifier: java.util.Map signerMap()>();
+
+        $r5 = interfaceinvoke $r4.<java.util.Map: java.util.Collection values()>();
+
+        virtualinvoke $r3.<java.util.HashSet: boolean addAll(java.util.Collection)>($r5);
+
+        $r6 = new java.util.ArrayList;
+
+        specialinvoke $r6.<java.util.ArrayList: void <init>()>();
+
+        r0.<java.util.jar.JarVerifier: java.util.List jarCodeSigners> = $r6;
+
+        $r7 = r0.<java.util.jar.JarVerifier: java.util.List jarCodeSigners>;
+
+        interfaceinvoke $r7.<java.util.List: boolean addAll(java.util.Collection)>($r3);
+
+     label1:
+        $r2 = r0.<java.util.jar.JarVerifier: java.util.List jarCodeSigners>;
+
+        return $r2;
+    }
+
+    public synchronized java.security.CodeSource[] getCodeSources(java.util.jar.JarFile, java.net.URL)
+    {
+        java.util.List $r4;
+        java.security.CodeSource[] $r5;
+        java.util.Enumeration $r2;
+        java.net.URL r3;
+        java.util.jar.JarVerifier r0;
+        java.util.jar.JarFile r1;
+        boolean $z0;
+
+        r0 := @this: java.util.jar.JarVerifier;
+
+        r1 := @parameter0: java.util.jar.JarFile;
+
+        r3 := @parameter1: java.net.URL;
+
+        $r2 = specialinvoke r0.<java.util.jar.JarVerifier: java.util.Enumeration unsignedEntryNames(java.util.jar.JarFile)>(r1);
+
+        $z0 = interfaceinvoke $r2.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        $r4 = specialinvoke r0.<java.util.jar.JarVerifier: java.util.List getJarCodeSigners()>();
+
+        $r5 = specialinvoke r0.<java.util.jar.JarVerifier: java.security.CodeSource[] mapSignersToCodeSources(java.net.URL,java.util.List,boolean)>(r3, $r4, $z0);
+
+        return $r5;
+    }
+
+    public java.security.CodeSource getCodeSource(java.net.URL, java.lang.String)
+    {
+        java.net.URL r5;
+        java.util.Map $r1;
+        java.util.jar.JarVerifier r0;
+        java.lang.Object $r3;
+        java.lang.String r2;
+        java.security.CodeSource $r6;
+        java.security.CodeSigner[] r4;
+
+        r0 := @this: java.util.jar.JarVerifier;
+
+        r5 := @parameter0: java.net.URL;
+
+        r2 := @parameter1: java.lang.String;
+
+        $r1 = specialinvoke r0.<java.util.jar.JarVerifier: java.util.Map signerMap()>();
+
+        $r3 = interfaceinvoke $r1.<java.util.Map: java.lang.Object get(java.lang.Object)>(r2);
+
+        r4 = (java.security.CodeSigner[]) $r3;
+
+        $r6 = specialinvoke r0.<java.util.jar.JarVerifier: java.security.CodeSource mapSignersToCodeSource(java.net.URL,java.security.CodeSigner[])>(r5, r4);
+
+        return $r6;
+    }
+
+    public java.security.CodeSource getCodeSource(java.net.URL, java.util.jar.JarFile, java.util.jar.JarEntry)
+    {
+        java.util.jar.JarEntry r3;
+        java.net.URL r1;
+        java.util.jar.JarVerifier r0;
+        java.util.jar.JarFile r2;
+        java.security.CodeSource $r5;
+        java.security.CodeSigner[] $r4;
+
+        r0 := @this: java.util.jar.JarVerifier;
+
+        r1 := @parameter0: java.net.URL;
+
+        r2 := @parameter1: java.util.jar.JarFile;
+
+        r3 := @parameter2: java.util.jar.JarEntry;
+
+        $r4 = virtualinvoke r0.<java.util.jar.JarVerifier: java.security.CodeSigner[] getCodeSigners(java.util.jar.JarFile,java.util.jar.JarEntry)>(r2, r3);
+
+        $r5 = specialinvoke r0.<java.util.jar.JarVerifier: java.security.CodeSource mapSignersToCodeSource(java.net.URL,java.security.CodeSigner[])>(r1, $r4);
+
+        return $r5;
+    }
+
+    public void setEagerValidation(boolean)
+    {
+        java.util.jar.JarVerifier r0;
+        boolean z0;
+
+        r0 := @this: java.util.jar.JarVerifier;
+
+        z0 := @parameter0: boolean;
+
+        r0.<java.util.jar.JarVerifier: boolean eagerValidation> = z0;
+
+        return;
+    }
+
+    public synchronized java.util.List getManifestDigests()
+    {
+        java.util.jar.JarVerifier r0;
+        java.util.List $r1, $r2;
+
+        r0 := @this: java.util.jar.JarVerifier;
+
+        $r1 = r0.<java.util.jar.JarVerifier: java.util.List manifestDigests>;
+
+        $r2 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r1);
+
+        return $r2;
+    }
+
+    static java.security.CodeSource getUnsignedCS(java.net.URL)
+    {
+        java.security.cert.Certificate[] $r2;
+        java.util.jar.JarVerifier$VerifierCodeSource $r0;
+        java.net.URL r1;
+
+        r1 := @parameter0: java.net.URL;
+
+        $r0 = new java.util.jar.JarVerifier$VerifierCodeSource;
+
+        $r2 = (java.security.cert.Certificate[]) null;
+
+        specialinvoke $r0.<java.util.jar.JarVerifier$VerifierCodeSource: void <init>(java.lang.Object,java.net.URL,java.security.cert.Certificate[])>(null, r1, $r2);
+
+        return $r0;
+    }
+
+    boolean isTrustedManifestEntry(java.lang.String)
+    {
+        int $i0, $i1;
+        java.util.jar.JarVerifier r0;
+        java.lang.Object $r3, $r7, $r9;
+        java.lang.String $r1, r5;
+        java.util.Hashtable $r2, $r6, $r8;
+        java.security.CodeSigner[] r4, r10;
+        boolean $z0;
+
+        r0 := @this: java.util.jar.JarVerifier;
+
+        r5 := @parameter0: java.lang.String;
+
+        $r2 = r0.<java.util.jar.JarVerifier: java.util.Hashtable verifiedSigners>;
+
+        $r1 = r0.<java.util.jar.JarVerifier: java.lang.String manifestName>;
+
+        $r3 = virtualinvoke $r2.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r1);
+
+        r4 = (java.security.CodeSigner[]) $r3;
+
+        if r4 != null goto label1;
+
+        return 1;
+
+     label1:
+        $r6 = r0.<java.util.jar.JarVerifier: java.util.Hashtable sigFileSigners>;
+
+        $r7 = virtualinvoke $r6.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r5);
+
+        r10 = (java.security.CodeSigner[]) $r7;
+
+        if r10 != null goto label2;
+
+        $r8 = r0.<java.util.jar.JarVerifier: java.util.Hashtable verifiedSigners>;
+
+        $r9 = virtualinvoke $r8.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r5);
+
+        r10 = (java.security.CodeSigner[]) $r9;
+
+     label2:
+        if r10 == null goto label3;
+
+        $i1 = lengthof r10;
+
+        $i0 = lengthof r4;
+
+        if $i1 != $i0 goto label3;
+
+        $z0 = 1;
+
+        goto label4;
+
+     label3:
+        $z0 = 0;
+
+     label4:
+        return $z0;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.util.Debug $r0;
+
+        $r0 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String)>("jar");
+
+        <java.util.jar.JarVerifier: sun.security.util.Debug debug> = $r0;
+
+        return;
+    }
+}

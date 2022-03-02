@@ -1,0 +1,193 @@
+final class sun.security.ssl.CertificateAuthoritiesExtension$CHCertificateAuthoritiesProducer extends java.lang.Object implements sun.security.ssl.HandshakeProducer
+{
+
+    private void <init>()
+    {
+        sun.security.ssl.CertificateAuthoritiesExtension$CHCertificateAuthoritiesProducer r0;
+
+        r0 := @this: sun.security.ssl.CertificateAuthoritiesExtension$CHCertificateAuthoritiesProducer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public byte[] produce(sun.security.ssl.ConnectionContext, sun.security.ssl.SSLHandshake$HandshakeMessage) throws java.io.IOException
+    {
+        byte[] r17, r24, r25;
+        sun.security.ssl.SSLHandshake$HandshakeMessage r23;
+        java.nio.ByteBuffer $r11;
+        java.util.Map $r15;
+        sun.security.ssl.SSLConfiguration $r3;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec $r8;
+        sun.security.ssl.SSLContextImpl $r4;
+        java.util.List $r7, $r9, $r12;
+        java.security.cert.X509Certificate[] $r6;
+        java.lang.Object[] $r19, $r20, $r21;
+        sun.security.ssl.ConnectionContext r0;
+        int $i0, $i1, $i2, $i3, i4;
+        sun.security.ssl.CertificateAuthoritiesExtension$CHCertificateAuthoritiesProducer r22;
+        java.util.Iterator $r10, $r13;
+        sun.security.ssl.ClientHandshakeContext r1;
+        sun.security.ssl.SSLExtension $r2, $r14;
+        javax.net.ssl.X509TrustManager $r5;
+        java.lang.Object $r16, $r18;
+
+        r22 := @this: sun.security.ssl.CertificateAuthoritiesExtension$CHCertificateAuthoritiesProducer;
+
+        r0 := @parameter0: sun.security.ssl.ConnectionContext;
+
+        r23 := @parameter1: sun.security.ssl.SSLHandshake$HandshakeMessage;
+
+        r1 = (sun.security.ssl.ClientHandshakeContext) r0;
+
+        $r3 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $r2 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension CH_CERTIFICATE_AUTHORITIES>;
+
+        $z0 = virtualinvoke $r3.<sun.security.ssl.SSLConfiguration: boolean isAvailable(sun.security.ssl.SSLExtension)>($r2);
+
+        if $z0 != 0 goto label02;
+
+        $z8 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z8 == 0 goto label01;
+
+        $z9 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z9 == 0 goto label01;
+
+        $r21 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Ignore unavailable certificate_authorities extension", $r21);
+
+     label01:
+        return null;
+
+     label02:
+        $r4 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLContextImpl sslContext>;
+
+        $r5 = virtualinvoke $r4.<sun.security.ssl.SSLContextImpl: javax.net.ssl.X509TrustManager getX509TrustManager()>();
+
+        $r6 = interfaceinvoke $r5.<javax.net.ssl.X509TrustManager: java.security.cert.X509Certificate[] getAcceptedIssuers()>();
+
+        $i0 = lengthof $r6;
+
+        if $i0 != 0 goto label04;
+
+        $z6 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z6 == 0 goto label03;
+
+        $z7 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z7 == 0 goto label03;
+
+        $r20 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("No available certificate authorities", $r20);
+
+     label03:
+        return null;
+
+     label04:
+        $r7 = staticinvoke <sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec: java.util.List access$600(java.security.cert.X509Certificate[])>($r6);
+
+        $z1 = interfaceinvoke $r7.<java.util.List: boolean isEmpty()>();
+
+        if $z1 == 0 goto label06;
+
+        $z4 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z4 == 0 goto label05;
+
+        $z5 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z5 == 0 goto label05;
+
+        $r19 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void warning(java.lang.String,java.lang.Object[])>("The number of CAs exceeds the maximum sizeof the certificate_authorities extension", $r19);
+
+     label05:
+        return null;
+
+     label06:
+        $r8 = new sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec;
+
+        specialinvoke $r8.<sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec: void <init>(java.util.List,sun.security.ssl.CertificateAuthoritiesExtension$1)>($r7, null);
+
+        i4 = 0;
+
+        $r9 = $r8.<sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec: java.util.List authorities>;
+
+        $r10 = interfaceinvoke $r9.<java.util.List: java.util.Iterator iterator()>();
+
+     label07:
+        $z2 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label08;
+
+        $r18 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        r24 = (byte[]) $r18;
+
+        $i2 = lengthof r24;
+
+        $i3 = $i2 + 2;
+
+        i4 = i4 + $i3;
+
+        goto label07;
+
+     label08:
+        $i1 = i4 + 2;
+
+        r25 = newarray (byte)[$i1];
+
+        $r11 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>(r25);
+
+        staticinvoke <sun.security.ssl.Record: void putInt16(java.nio.ByteBuffer,int)>($r11, i4);
+
+        $r12 = $r8.<sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec: java.util.List authorities>;
+
+        $r13 = interfaceinvoke $r12.<java.util.List: java.util.Iterator iterator()>();
+
+     label09:
+        $z3 = interfaceinvoke $r13.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label10;
+
+        $r16 = interfaceinvoke $r13.<java.util.Iterator: java.lang.Object next()>();
+
+        r17 = (byte[]) $r16;
+
+        staticinvoke <sun.security.ssl.Record: void putBytes16(java.nio.ByteBuffer,byte[])>($r11, r17);
+
+        goto label09;
+
+     label10:
+        $r15 = r1.<sun.security.ssl.ClientHandshakeContext: java.util.Map handshakeExtensions>;
+
+        $r14 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension CH_CERTIFICATE_AUTHORITIES>;
+
+        interfaceinvoke $r15.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r14, $r8);
+
+        return r25;
+    }
+
+    void <init>(sun.security.ssl.CertificateAuthoritiesExtension$1)
+    {
+        sun.security.ssl.CertificateAuthoritiesExtension$1 r1;
+        sun.security.ssl.CertificateAuthoritiesExtension$CHCertificateAuthoritiesProducer r0;
+
+        r0 := @this: sun.security.ssl.CertificateAuthoritiesExtension$CHCertificateAuthoritiesProducer;
+
+        r1 := @parameter0: sun.security.ssl.CertificateAuthoritiesExtension$1;
+
+        specialinvoke r0.<sun.security.ssl.CertificateAuthoritiesExtension$CHCertificateAuthoritiesProducer: void <init>()>();
+
+        return;
+    }
+}

@@ -1,0 +1,1202 @@
+class com.sun.org.apache.xpath.internal.compiler.Lexer extends java.lang.Object
+{
+    private com.sun.org.apache.xpath.internal.compiler.Compiler m_compiler;
+    com.sun.org.apache.xml.internal.utils.PrefixResolver m_namespaceContext;
+    com.sun.org.apache.xpath.internal.compiler.XPathParser m_processor;
+    static final int TARGETEXTRA;
+    private int[] m_patternMap;
+    private int m_patternMapSize;
+
+    void <init>(com.sun.org.apache.xpath.internal.compiler.Compiler, com.sun.org.apache.xml.internal.utils.PrefixResolver, com.sun.org.apache.xpath.internal.compiler.XPathParser)
+    {
+        int[] $r1;
+        com.sun.org.apache.xpath.internal.compiler.Compiler r2;
+        com.sun.org.apache.xpath.internal.compiler.XPathParser r4;
+        com.sun.org.apache.xml.internal.utils.PrefixResolver r3;
+        com.sun.org.apache.xpath.internal.compiler.Lexer r0;
+
+        r0 := @this: com.sun.org.apache.xpath.internal.compiler.Lexer;
+
+        r2 := @parameter0: com.sun.org.apache.xpath.internal.compiler.Compiler;
+
+        r3 := @parameter1: com.sun.org.apache.xml.internal.utils.PrefixResolver;
+
+        r4 := @parameter2: com.sun.org.apache.xpath.internal.compiler.XPathParser;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = newarray (int)[100];
+
+        r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: int[] m_patternMap> = $r1;
+
+        r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.Compiler m_compiler> = r2;
+
+        r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xml.internal.utils.PrefixResolver m_namespaceContext> = r3;
+
+        r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.XPathParser m_processor> = r4;
+
+        return;
+    }
+
+    void tokenize(java.lang.String) throws javax.xml.transform.TransformerException
+    {
+        java.lang.String r1;
+        com.sun.org.apache.xpath.internal.compiler.Lexer r0;
+
+        r0 := @this: com.sun.org.apache.xpath.internal.compiler.Lexer;
+
+        r1 := @parameter0: java.lang.String;
+
+        virtualinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: void tokenize(java.lang.String,java.util.Vector)>(r1, null);
+
+        return;
+    }
+
+    void tokenize(java.lang.String, java.util.Vector) throws javax.xml.transform.TransformerException
+    {
+        java.util.Vector r5;
+        com.sun.org.apache.xml.internal.utils.PrefixResolver $r7, $r9;
+        java.lang.String r1, $r8, $r10, $r11, $r13, $r14, $r16, $r17, $r18, $r19, $r20;
+        com.sun.org.apache.xpath.internal.compiler.OpMapVector $r23;
+        boolean $z0, z1, z2, z3, z4, z5, z6, z7, z8, z9, z10;
+        com.sun.org.apache.xpath.internal.compiler.XPathParser $r6, $r12, $r15, $r22;
+        com.sun.org.apache.xpath.internal.compiler.Compiler $r2, $r4, $r21;
+        int $i0, $i2, $i3, $i4, $i5, $i7, i9, i10, i11, i12, $i14, $i15, $i16, $i17, $i19, $i21, $i22, $i24, $i26, $i27, $i28, $i30, $i32, $i34, $i35, $i36, $i38, $i40, $i42, $i44, $i45, $i47, $i49, $i51, $i53, $i54, $i55, $i56, $i57, $i58, $i60, $i61, $i62, $i64, $i66, $i68, $i70, $i72, $i74;
+        char $c1, $c6, $c8, c13;
+        com.sun.org.apache.xpath.internal.compiler.Lexer r0;
+
+        r0 := @this: com.sun.org.apache.xpath.internal.compiler.Lexer;
+
+        r1 := @parameter0: java.lang.String;
+
+        r5 := @parameter1: java.util.Vector;
+
+        $r2 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.Compiler m_compiler>;
+
+        $r2.<com.sun.org.apache.xpath.internal.compiler.Compiler: java.lang.String m_currentPattern> = r1;
+
+        r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: int m_patternMapSize> = 0;
+
+        $r4 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.Compiler m_compiler>;
+
+        $r23 = new com.sun.org.apache.xpath.internal.compiler.OpMapVector;
+
+        specialinvoke $r23.<com.sun.org.apache.xpath.internal.compiler.OpMapVector: void <init>(int,int,int)>(2500, 2500, 1);
+
+        $r4.<com.sun.org.apache.xpath.internal.compiler.Compiler: com.sun.org.apache.xpath.internal.compiler.OpMapVector m_opMap> = $r23;
+
+        $i0 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        $i19 = (int) -1;
+
+        i9 = $i19;
+
+        $i21 = (int) -1;
+
+        i10 = $i21;
+
+        z1 = 1;
+
+        z2 = 0;
+
+        z10 = 0;
+
+        z9 = 0;
+
+        z8 = 0;
+
+        z7 = 0;
+
+        z6 = 0;
+
+        z5 = 0;
+
+        z4 = 0;
+
+        z3 = 0;
+
+        i11 = 0;
+
+        i12 = 0;
+
+     label01:
+        if i12 >= $i0 goto label38;
+
+        $c1 = virtualinvoke r1.<java.lang.String: char charAt(int)>(i12);
+
+        c13 = $c1;
+
+        $i22 = (int) $c1;
+
+        lookupswitch($i22)
+        {
+            case 9: goto label14;
+            case 10: goto label14;
+            case 13: goto label14;
+            case 32: goto label14;
+            case 33: goto label20;
+            case 34: goto label02;
+            case 36: goto label20;
+            case 39: goto label08;
+            case 40: goto label20;
+            case 41: goto label20;
+            case 42: goto label20;
+            case 43: goto label20;
+            case 44: goto label20;
+            case 45: goto label18;
+            case 47: goto label20;
+            case 58: goto label32;
+            case 60: goto label20;
+            case 61: goto label20;
+            case 62: goto label20;
+            case 64: goto label17;
+            case 91: goto label20;
+            case 92: goto label20;
+            case 93: goto label20;
+            case 94: goto label20;
+            case 124: goto label20;
+            default: goto label35;
+        };
+
+     label02:
+        $i24 = (int) -1;
+
+        if i9 == $i24 goto label04;
+
+        z3 = 0;
+
+        z1 = specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: boolean mapPatternElemPos(int,boolean,boolean)>(i11, z1, z10);
+
+        z2 = 0;
+
+        z10 = 0;
+
+        z9 = 0;
+
+        z8 = 0;
+
+        z7 = 0;
+
+        z6 = 0;
+
+        z5 = 0;
+
+        z4 = 0;
+
+        $i26 = (int) -1;
+
+        if $i26 == i10 goto label03;
+
+        i10 = specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: int mapNSTokens(java.lang.String,int,int,int)>(r1, i9, i10, i12);
+
+        goto label04;
+
+     label03:
+        $r17 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int,int)>(i9, i12);
+
+        specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: void addToTokenQueue(java.lang.String)>($r17);
+
+     label04:
+        i9 = i12;
+
+        i12 = i12 + 1;
+
+     label05:
+        if i12 >= $i0 goto label06;
+
+        $c8 = virtualinvoke r1.<java.lang.String: char charAt(int)>(i12);
+
+        c13 = $c8;
+
+        $i27 = (int) $c8;
+
+        if $i27 == 34 goto label06;
+
+        i12 = i12 + 1;
+
+        goto label05;
+
+     label06:
+        $i28 = (int) c13;
+
+        if $i28 != 34 goto label07;
+
+        if i12 >= $i0 goto label07;
+
+        $i7 = i12 + 1;
+
+        $r16 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int,int)>(i9, $i7);
+
+        specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: void addToTokenQueue(java.lang.String)>($r16);
+
+        $i30 = (int) -1;
+
+        i9 = $i30;
+
+        goto label37;
+
+     label07:
+        $r15 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.XPathParser m_processor>;
+
+        virtualinvoke $r15.<com.sun.org.apache.xpath.internal.compiler.XPathParser: void error(java.lang.String,java.lang.Object[])>("ER_EXPECTED_DOUBLE_QUOTE", null);
+
+        goto label37;
+
+     label08:
+        $i32 = (int) -1;
+
+        if i9 == $i32 goto label10;
+
+        z3 = 0;
+
+        z1 = specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: boolean mapPatternElemPos(int,boolean,boolean)>(i11, z1, z6);
+
+        z2 = 0;
+
+        z10 = 0;
+
+        z9 = 0;
+
+        z8 = 0;
+
+        z7 = 0;
+
+        z6 = 0;
+
+        z5 = 0;
+
+        z4 = 0;
+
+        $i34 = (int) -1;
+
+        if $i34 == i10 goto label09;
+
+        i10 = specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: int mapNSTokens(java.lang.String,int,int,int)>(r1, i9, i10, i12);
+
+        goto label10;
+
+     label09:
+        $r14 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int,int)>(i9, i12);
+
+        specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: void addToTokenQueue(java.lang.String)>($r14);
+
+     label10:
+        i9 = i12;
+
+        i12 = i12 + 1;
+
+     label11:
+        if i12 >= $i0 goto label12;
+
+        $c6 = virtualinvoke r1.<java.lang.String: char charAt(int)>(i12);
+
+        c13 = $c6;
+
+        $i35 = (int) $c6;
+
+        if $i35 == 39 goto label12;
+
+        i12 = i12 + 1;
+
+        goto label11;
+
+     label12:
+        $i36 = (int) c13;
+
+        if $i36 != 39 goto label13;
+
+        if i12 >= $i0 goto label13;
+
+        $i5 = i12 + 1;
+
+        $r13 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int,int)>(i9, $i5);
+
+        specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: void addToTokenQueue(java.lang.String)>($r13);
+
+        $i38 = (int) -1;
+
+        i9 = $i38;
+
+        goto label37;
+
+     label13:
+        $r12 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.XPathParser m_processor>;
+
+        virtualinvoke $r12.<com.sun.org.apache.xpath.internal.compiler.XPathParser: void error(java.lang.String,java.lang.Object[])>("ER_EXPECTED_SINGLE_QUOTE", null);
+
+        goto label37;
+
+     label14:
+        $i40 = (int) -1;
+
+        if i9 == $i40 goto label37;
+
+        z3 = 0;
+
+        z1 = specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: boolean mapPatternElemPos(int,boolean,boolean)>(i11, z1, z7);
+
+        z2 = 0;
+
+        z10 = 0;
+
+        z9 = 0;
+
+        z8 = 0;
+
+        z7 = 0;
+
+        z6 = 0;
+
+        z5 = 0;
+
+        z4 = 0;
+
+        $i42 = (int) -1;
+
+        if $i42 == i10 goto label15;
+
+        i10 = specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: int mapNSTokens(java.lang.String,int,int,int)>(r1, i9, i10, i12);
+
+        goto label16;
+
+     label15:
+        $r18 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int,int)>(i9, i12);
+
+        specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: void addToTokenQueue(java.lang.String)>($r18);
+
+     label16:
+        $i44 = (int) -1;
+
+        i9 = $i44;
+
+        goto label37;
+
+     label17:
+        z2 = 1;
+
+        z10 = 1;
+
+        z9 = 1;
+
+        z8 = 1;
+
+        z7 = 1;
+
+        z6 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+     label18:
+        $i45 = (int) $c1;
+
+        if 45 != $i45 goto label20;
+
+        if z3 != 0 goto label19;
+
+        $i47 = (int) -1;
+
+        if i9 == $i47 goto label19;
+
+        goto label37;
+
+     label19:
+        z3 = 0;
+
+     label20:
+        $i49 = (int) -1;
+
+        if i9 == $i49 goto label23;
+
+        z3 = 0;
+
+        z1 = specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: boolean mapPatternElemPos(int,boolean,boolean)>(i11, z1, z4);
+
+        z2 = 0;
+
+        z10 = 0;
+
+        z9 = 0;
+
+        z8 = 0;
+
+        z7 = 0;
+
+        z6 = 0;
+
+        z5 = 0;
+
+        z4 = 0;
+
+        $i51 = (int) -1;
+
+        if $i51 == i10 goto label21;
+
+        i10 = specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: int mapNSTokens(java.lang.String,int,int,int)>(r1, i9, i10, i12);
+
+        goto label22;
+
+     label21:
+        $r10 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int,int)>(i9, i12);
+
+        specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: void addToTokenQueue(java.lang.String)>($r10);
+
+     label22:
+        $i53 = (int) -1;
+
+        i9 = $i53;
+
+        goto label25;
+
+     label23:
+        $i54 = (int) $c1;
+
+        if 47 != $i54 goto label24;
+
+        if z1 == 0 goto label24;
+
+        z1 = specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: boolean mapPatternElemPos(int,boolean,boolean)>(i11, z1, z5);
+
+        goto label25;
+
+     label24:
+        $i55 = (int) $c1;
+
+        if 42 != $i55 goto label25;
+
+        z1 = specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: boolean mapPatternElemPos(int,boolean,boolean)>(i11, z1, z9);
+
+        z2 = 0;
+
+        z10 = 0;
+
+        z9 = 0;
+
+        z8 = 0;
+
+        z7 = 0;
+
+        z6 = 0;
+
+        z5 = 0;
+
+        z4 = 0;
+
+     label25:
+        if 0 != i11 goto label27;
+
+        $i56 = (int) $c1;
+
+        if 124 != $i56 goto label27;
+
+        if null == r5 goto label26;
+
+        specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: void recordTokenString(java.util.Vector)>(r5);
+
+     label26:
+        z1 = 1;
+
+     label27:
+        $i57 = (int) $c1;
+
+        if 41 == $i57 goto label28;
+
+        $i58 = (int) $c1;
+
+        if 93 != $i58 goto label29;
+
+     label28:
+        $i60 = (int) -1;
+
+        i11 = i11 + $i60;
+
+        goto label31;
+
+     label29:
+        $i61 = (int) $c1;
+
+        if 40 == $i61 goto label30;
+
+        $i62 = (int) $c1;
+
+        if 91 != $i62 goto label31;
+
+     label30:
+        i11 = i11 + 1;
+
+     label31:
+        $i14 = i12 + 1;
+
+        $r19 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int,int)>(i12, $i14);
+
+        specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: void addToTokenQueue(java.lang.String)>($r19);
+
+        goto label37;
+
+     label32:
+        if i12 <= 0 goto label35;
+
+        $i2 = i12 - 1;
+
+        if i10 != $i2 goto label34;
+
+        $i64 = (int) -1;
+
+        if i9 == $i64 goto label33;
+
+        $i3 = i12 - 1;
+
+        if i9 >= $i3 goto label33;
+
+        $i4 = i12 - 1;
+
+        $r11 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int,int)>(i9, $i4);
+
+        specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: void addToTokenQueue(java.lang.String)>($r11);
+
+     label33:
+        z3 = 0;
+
+        z2 = 0;
+
+        z10 = 0;
+
+        z9 = 0;
+
+        z8 = 0;
+
+        z7 = 0;
+
+        z6 = 0;
+
+        z5 = 0;
+
+        z4 = 0;
+
+        $i66 = (int) -1;
+
+        i9 = $i66;
+
+        $i68 = (int) -1;
+
+        i10 = $i68;
+
+        $i15 = i12 - 1;
+
+        $i16 = i12 + 1;
+
+        $r20 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int,int)>($i15, $i16);
+
+        specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: void addToTokenQueue(java.lang.String)>($r20);
+
+        goto label37;
+
+     label34:
+        i10 = i12;
+
+     label35:
+        $i70 = (int) -1;
+
+        if $i70 != i9 goto label36;
+
+        i9 = i12;
+
+        z3 = staticinvoke <java.lang.Character: boolean isDigit(char)>($c1);
+
+        goto label37;
+
+     label36:
+        if z3 == 0 goto label37;
+
+        z3 = staticinvoke <java.lang.Character: boolean isDigit(char)>($c1);
+
+     label37:
+        i12 = i12 + 1;
+
+        goto label01;
+
+     label38:
+        $i72 = (int) -1;
+
+        if i9 == $i72 goto label41;
+
+        specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: boolean mapPatternElemPos(int,boolean,boolean)>(i11, z1, z8);
+
+        $i74 = (int) -1;
+
+        if $i74 != i10 goto label39;
+
+        $r7 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xml.internal.utils.PrefixResolver m_namespaceContext>;
+
+        if $r7 == null goto label40;
+
+        $r9 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xml.internal.utils.PrefixResolver m_namespaceContext>;
+
+        $z0 = interfaceinvoke $r9.<com.sun.org.apache.xml.internal.utils.PrefixResolver: boolean handlesNullPrefixes()>();
+
+        if $z0 == 0 goto label40;
+
+     label39:
+        specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: int mapNSTokens(java.lang.String,int,int,int)>(r1, i9, i10, $i0);
+
+        goto label41;
+
+     label40:
+        $r8 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int,int)>(i9, $i0);
+
+        specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: void addToTokenQueue(java.lang.String)>($r8);
+
+     label41:
+        $r21 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.Compiler m_compiler>;
+
+        $i17 = virtualinvoke $r21.<com.sun.org.apache.xpath.internal.compiler.Compiler: int getTokenQueueSize()>();
+
+        if 0 != $i17 goto label42;
+
+        $r6 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.XPathParser m_processor>;
+
+        virtualinvoke $r6.<com.sun.org.apache.xpath.internal.compiler.XPathParser: void error(java.lang.String,java.lang.Object[])>("ER_EMPTY_EXPRESSION", null);
+
+        goto label43;
+
+     label42:
+        if null == r5 goto label43;
+
+        specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: void recordTokenString(java.util.Vector)>(r5);
+
+     label43:
+        $r22 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.XPathParser m_processor>;
+
+        $r22.<com.sun.org.apache.xpath.internal.compiler.XPathParser: int m_queueMark> = 0;
+
+        return;
+    }
+
+    private boolean mapPatternElemPos(int, boolean, boolean)
+    {
+        com.sun.org.apache.xpath.internal.compiler.Compiler $r2;
+        int[] $r1, $r3, $r4, r5, $r6, $r7, $r8;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, i13, $i14, $i15;
+        boolean z0, z1, $z2;
+        com.sun.org.apache.xpath.internal.compiler.Lexer r0;
+
+        r0 := @this: com.sun.org.apache.xpath.internal.compiler.Lexer;
+
+        i0 := @parameter0: int;
+
+        z1 := @parameter1: boolean;
+
+        z0 := @parameter2: boolean;
+
+        if 0 != i0 goto label5;
+
+        $i2 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: int m_patternMapSize>;
+
+        $r1 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: int[] m_patternMap>;
+
+        $i1 = lengthof $r1;
+
+        if $i2 < $i1 goto label1;
+
+        r5 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: int[] m_patternMap>;
+
+        $r6 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: int[] m_patternMap>;
+
+        i13 = lengthof $r6;
+
+        $i14 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: int m_patternMapSize>;
+
+        $i15 = $i14 + 100;
+
+        $r7 = newarray (int)[$i15];
+
+        r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: int[] m_patternMap> = $r7;
+
+        $r8 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: int[] m_patternMap>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r5, 0, $r8, 0, i13);
+
+     label1:
+        if z1 != 0 goto label2;
+
+        $r4 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: int[] m_patternMap>;
+
+        $i9 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: int m_patternMapSize>;
+
+        $i10 = $i9 - 1;
+
+        $i11 = $r4[$i10];
+
+        $i12 = $i11 - 10000;
+
+        $r4[$i10] = $i12;
+
+     label2:
+        $r3 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: int[] m_patternMap>;
+
+        $i3 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: int m_patternMapSize>;
+
+        $r2 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.Compiler m_compiler>;
+
+        $i4 = virtualinvoke $r2.<com.sun.org.apache.xpath.internal.compiler.Compiler: int getTokenQueueSize()>();
+
+        if z0 == 0 goto label3;
+
+        $z2 = 1;
+
+        goto label4;
+
+     label3:
+        $z2 = 0;
+
+     label4:
+        $i5 = $i4 - $z2;
+
+        $i6 = $i5 + 10000;
+
+        $r3[$i3] = $i6;
+
+        $i7 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: int m_patternMapSize>;
+
+        $i8 = $i7 + 1;
+
+        r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: int m_patternMapSize> = $i8;
+
+        z1 = 0;
+
+     label5:
+        return z1;
+    }
+
+    private int getTokenQueuePosFromMap(int)
+    {
+        int[] $r1;
+        int i0, i1, $i2;
+        com.sun.org.apache.xpath.internal.compiler.Lexer r0;
+
+        r0 := @this: com.sun.org.apache.xpath.internal.compiler.Lexer;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: int[] m_patternMap>;
+
+        i1 = $r1[i0];
+
+        if i1 < 10000 goto label1;
+
+        $i2 = i1 - 10000;
+
+        goto label2;
+
+     label1:
+        $i2 = i1;
+
+     label2:
+        return $i2;
+    }
+
+    private final void resetTokenMark(int)
+    {
+        com.sun.org.apache.xml.internal.utils.ObjectVector $r6;
+        com.sun.org.apache.xpath.internal.compiler.Compiler $r1, $r4;
+        int $i0, i1, $i2, $i3, $i5, $i6;
+        java.lang.String $r9, $r11;
+        com.sun.org.apache.xpath.internal.compiler.XPathParser $r2, $r3, $r5, $r7, $r10, $r12, $r13, $r14;
+        char $c4;
+        com.sun.org.apache.xpath.internal.compiler.Lexer r0;
+        java.lang.Object $r8;
+
+        r0 := @this: com.sun.org.apache.xpath.internal.compiler.Lexer;
+
+        i1 := @parameter0: int;
+
+        $r1 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.Compiler m_compiler>;
+
+        $i0 = virtualinvoke $r1.<com.sun.org.apache.xpath.internal.compiler.Compiler: int getTokenQueueSize()>();
+
+        $r13 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.XPathParser m_processor>;
+
+        if i1 <= 0 goto label2;
+
+        if i1 > $i0 goto label1;
+
+        $i5 = i1 - 1;
+
+        goto label3;
+
+     label1:
+        $i5 = i1;
+
+        goto label3;
+
+     label2:
+        $i5 = 0;
+
+     label3:
+        $r13.<com.sun.org.apache.xpath.internal.compiler.XPathParser: int m_queueMark> = $i5;
+
+        $r14 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.XPathParser m_processor>;
+
+        $i6 = $r14.<com.sun.org.apache.xpath.internal.compiler.XPathParser: int m_queueMark>;
+
+        if $i6 >= $i0 goto label4;
+
+        $r5 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.XPathParser m_processor>;
+
+        $r4 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.Compiler m_compiler>;
+
+        $r6 = virtualinvoke $r4.<com.sun.org.apache.xpath.internal.compiler.Compiler: com.sun.org.apache.xml.internal.utils.ObjectVector getTokenQueue()>();
+
+        $r7 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.XPathParser m_processor>;
+
+        $i2 = $r7.<com.sun.org.apache.xpath.internal.compiler.XPathParser: int m_queueMark>;
+
+        $i3 = $i2 + 1;
+
+        $r7.<com.sun.org.apache.xpath.internal.compiler.XPathParser: int m_queueMark> = $i3;
+
+        $r8 = virtualinvoke $r6.<com.sun.org.apache.xml.internal.utils.ObjectVector: java.lang.Object elementAt(int)>($i2);
+
+        $r9 = (java.lang.String) $r8;
+
+        $r5.<com.sun.org.apache.xpath.internal.compiler.XPathParser: java.lang.String m_token> = $r9;
+
+        $r12 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.XPathParser m_processor>;
+
+        $r10 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.XPathParser m_processor>;
+
+        $r11 = $r10.<com.sun.org.apache.xpath.internal.compiler.XPathParser: java.lang.String m_token>;
+
+        $c4 = virtualinvoke $r11.<java.lang.String: char charAt(int)>(0);
+
+        $r12.<com.sun.org.apache.xpath.internal.compiler.XPathParser: char m_tokenChar> = $c4;
+
+        goto label5;
+
+     label4:
+        $r2 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.XPathParser m_processor>;
+
+        $r2.<com.sun.org.apache.xpath.internal.compiler.XPathParser: java.lang.String m_token> = null;
+
+        $r3 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.XPathParser m_processor>;
+
+        $r3.<com.sun.org.apache.xpath.internal.compiler.XPathParser: char m_tokenChar> = 0;
+
+     label5:
+        return;
+    }
+
+    final int getKeywordToken(java.lang.String)
+    {
+        int $i0, i1;
+        java.lang.String r0;
+        java.lang.Integer $r1;
+        java.lang.ClassCastException $r2;
+        java.lang.NullPointerException $r3;
+        com.sun.org.apache.xpath.internal.compiler.Lexer r4;
+
+        r4 := @this: com.sun.org.apache.xpath.internal.compiler.Lexer;
+
+        r0 := @parameter0: java.lang.String;
+
+     label1:
+        $r1 = staticinvoke <com.sun.org.apache.xpath.internal.compiler.Keywords: java.lang.Integer getKeyWord(java.lang.String)>(r0);
+
+        if null == $r1 goto label2;
+
+        $i0 = virtualinvoke $r1.<java.lang.Integer: int intValue()>();
+
+        goto label3;
+
+     label2:
+        $i0 = 0;
+
+     label3:
+        i1 = $i0;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r3 := @caughtexception;
+
+        i1 = 0;
+
+        goto label7;
+
+     label6:
+        $r2 := @caughtexception;
+
+        i1 = 0;
+
+     label7:
+        return i1;
+
+        catch java.lang.NullPointerException from label1 to label4 with label5;
+        catch java.lang.ClassCastException from label1 to label4 with label6;
+    }
+
+    private void recordTokenString(java.util.Vector)
+    {
+        com.sun.org.apache.xml.internal.utils.ObjectVector $r6;
+        com.sun.org.apache.xpath.internal.compiler.Compiler $r5;
+        java.util.Vector r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6;
+        java.lang.String $r9;
+        boolean $z0, $z1, $z2;
+        com.sun.org.apache.xpath.internal.compiler.XPathParser $r1, $r2, $r3, $r8;
+        com.sun.org.apache.xpath.internal.compiler.Lexer r0;
+        java.lang.Object $r7;
+
+        r0 := @this: com.sun.org.apache.xpath.internal.compiler.Lexer;
+
+        r4 := @parameter0: java.util.Vector;
+
+        $i0 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: int m_patternMapSize>;
+
+        $i1 = $i0 - 1;
+
+        $i2 = specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: int getTokenQueuePosFromMap(int)>($i1);
+
+        i6 = $i2;
+
+        $i3 = $i2 + 1;
+
+        specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: void resetTokenMark(int)>($i3);
+
+        $r1 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.XPathParser m_processor>;
+
+        $z0 = virtualinvoke $r1.<com.sun.org.apache.xpath.internal.compiler.XPathParser: boolean lookahead(char,int)>(40, 1);
+
+        if $z0 == 0 goto label09;
+
+        $r8 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.XPathParser m_processor>;
+
+        $r9 = $r8.<com.sun.org.apache.xpath.internal.compiler.XPathParser: java.lang.String m_token>;
+
+        $i5 = virtualinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: int getKeywordToken(java.lang.String)>($r9);
+
+        lookupswitch($i5)
+        {
+            case 35: goto label04;
+            case 36: goto label05;
+            case 1030: goto label01;
+            case 1031: goto label02;
+            case 1032: goto label06;
+            case 1033: goto label03;
+            default: goto label07;
+        };
+
+     label01:
+        virtualinvoke r4.<java.util.Vector: void addElement(java.lang.Object)>("#comment");
+
+        goto label08;
+
+     label02:
+        virtualinvoke r4.<java.util.Vector: void addElement(java.lang.Object)>("#text");
+
+        goto label08;
+
+     label03:
+        virtualinvoke r4.<java.util.Vector: void addElement(java.lang.Object)>("*");
+
+        goto label08;
+
+     label04:
+        virtualinvoke r4.<java.util.Vector: void addElement(java.lang.Object)>("/");
+
+        goto label08;
+
+     label05:
+        virtualinvoke r4.<java.util.Vector: void addElement(java.lang.Object)>("*");
+
+        goto label08;
+
+     label06:
+        virtualinvoke r4.<java.util.Vector: void addElement(java.lang.Object)>("*");
+
+        goto label08;
+
+     label07:
+        virtualinvoke r4.<java.util.Vector: void addElement(java.lang.Object)>("*");
+
+     label08:
+        goto label12;
+
+     label09:
+        $r2 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.XPathParser m_processor>;
+
+        $z1 = virtualinvoke $r2.<com.sun.org.apache.xpath.internal.compiler.XPathParser: boolean tokenIs(char)>(64);
+
+        if $z1 == 0 goto label10;
+
+        i6 = $i2 + 1;
+
+        $i4 = i6 + 1;
+
+        specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: void resetTokenMark(int)>($i4);
+
+     label10:
+        $r3 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.XPathParser m_processor>;
+
+        $z2 = virtualinvoke $r3.<com.sun.org.apache.xpath.internal.compiler.XPathParser: boolean lookahead(char,int)>(58, 1);
+
+        if $z2 == 0 goto label11;
+
+        i6 = i6 + 2;
+
+     label11:
+        $r5 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.Compiler m_compiler>;
+
+        $r6 = virtualinvoke $r5.<com.sun.org.apache.xpath.internal.compiler.Compiler: com.sun.org.apache.xml.internal.utils.ObjectVector getTokenQueue()>();
+
+        $r7 = virtualinvoke $r6.<com.sun.org.apache.xml.internal.utils.ObjectVector: java.lang.Object elementAt(int)>(i6);
+
+        virtualinvoke r4.<java.util.Vector: void addElement(java.lang.Object)>($r7);
+
+     label12:
+        return;
+    }
+
+    private final void addToTokenQueue(java.lang.String)
+    {
+        com.sun.org.apache.xml.internal.utils.ObjectVector $r2;
+        com.sun.org.apache.xpath.internal.compiler.Compiler $r1;
+        java.lang.String r3;
+        com.sun.org.apache.xpath.internal.compiler.Lexer r0;
+
+        r0 := @this: com.sun.org.apache.xpath.internal.compiler.Lexer;
+
+        r3 := @parameter0: java.lang.String;
+
+        $r1 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.Compiler m_compiler>;
+
+        $r2 = virtualinvoke $r1.<com.sun.org.apache.xpath.internal.compiler.Compiler: com.sun.org.apache.xml.internal.utils.ObjectVector getTokenQueue()>();
+
+        virtualinvoke $r2.<com.sun.org.apache.xml.internal.utils.ObjectVector: void addElement(java.lang.Object)>(r3);
+
+        return;
+    }
+
+    private int mapNSTokens(java.lang.String, int, int, int) throws javax.xml.transform.TransformerException
+    {
+        java.lang.String[] $r1;
+        java.lang.ClassCastException $r7;
+        int i0, $i1, i2, i3, $i4, $i5, $i6, $i8;
+        java.lang.String r3, $r4, r9, r11;
+        boolean $z0, $z1;
+        com.sun.org.apache.xpath.internal.compiler.XPathParser $r2;
+        com.sun.org.apache.xpath.internal.compiler.Lexer r0;
+        com.sun.org.apache.xml.internal.utils.PrefixResolver $r5, $r6, $r8, $r10;
+
+        r0 := @this: com.sun.org.apache.xpath.internal.compiler.Lexer;
+
+        r3 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        r9 = "";
+
+        if i0 < 0 goto label01;
+
+        if i2 < 0 goto label01;
+
+        r9 = virtualinvoke r3.<java.lang.String: java.lang.String substring(int,int)>(i0, i2);
+
+     label01:
+        $r10 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xml.internal.utils.PrefixResolver m_namespaceContext>;
+
+        if null == $r10 goto label06;
+
+        $z0 = virtualinvoke r9.<java.lang.String: boolean equals(java.lang.Object)>("*");
+
+        if $z0 != 0 goto label06;
+
+        $z1 = virtualinvoke r9.<java.lang.String: boolean equals(java.lang.Object)>("xmlns");
+
+        if $z1 != 0 goto label06;
+
+     label02:
+        $i6 = virtualinvoke r9.<java.lang.String: int length()>();
+
+        if $i6 <= 0 goto label03;
+
+        $r6 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xml.internal.utils.PrefixResolver m_namespaceContext>;
+
+        r11 = interfaceinvoke $r6.<com.sun.org.apache.xml.internal.utils.PrefixResolver: java.lang.String getNamespaceForPrefix(java.lang.String)>(r9);
+
+        goto label04;
+
+     label03:
+        $r5 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xml.internal.utils.PrefixResolver m_namespaceContext>;
+
+        r11 = interfaceinvoke $r5.<com.sun.org.apache.xml.internal.utils.PrefixResolver: java.lang.String getNamespaceForPrefix(java.lang.String)>(r9);
+
+     label04:
+        goto label07;
+
+     label05:
+        $r7 := @caughtexception;
+
+        $r8 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xml.internal.utils.PrefixResolver m_namespaceContext>;
+
+        r11 = interfaceinvoke $r8.<com.sun.org.apache.xml.internal.utils.PrefixResolver: java.lang.String getNamespaceForPrefix(java.lang.String)>(r9);
+
+        goto label07;
+
+     label06:
+        r11 = r9;
+
+     label07:
+        if null == r11 goto label09;
+
+        $i1 = virtualinvoke r11.<java.lang.String: int length()>();
+
+        if $i1 <= 0 goto label09;
+
+        specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: void addToTokenQueue(java.lang.String)>(r11);
+
+        specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: void addToTokenQueue(java.lang.String)>(":");
+
+        $i4 = i2 + 1;
+
+        $r4 = virtualinvoke r3.<java.lang.String: java.lang.String substring(int,int)>($i4, i3);
+
+        $i5 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        if $i5 <= 0 goto label08;
+
+        specialinvoke r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: void addToTokenQueue(java.lang.String)>($r4);
+
+     label08:
+        goto label10;
+
+     label09:
+        $r2 = r0.<com.sun.org.apache.xpath.internal.compiler.Lexer: com.sun.org.apache.xpath.internal.compiler.XPathParser m_processor>;
+
+        $r1 = newarray (java.lang.String)[1];
+
+        $r1[0] = r9;
+
+        virtualinvoke $r2.<com.sun.org.apache.xpath.internal.compiler.XPathParser: void errorForDOM3(java.lang.String,java.lang.Object[])>("ER_PREFIX_MUST_RESOLVE", $r1);
+
+     label10:
+        $i8 = (int) -1;
+
+        return $i8;
+
+        catch java.lang.ClassCastException from label02 to label04 with label05;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.org.apache.xpath.internal.compiler.Lexer: int TARGETEXTRA> = 10000;
+
+        return;
+    }
+}

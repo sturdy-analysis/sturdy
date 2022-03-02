@@ -1,0 +1,1629 @@
+public class sun.misc.URLClassPath extends java.lang.Object
+{
+    static final java.lang.String USER_AGENT_JAVA_VERSION;
+    static final java.lang.String JAVA_VERSION;
+    private static final boolean DEBUG;
+    private static final boolean DEBUG_LOOKUP_CACHE;
+    private static final boolean DISABLE_JAR_CHECKING;
+    private static final boolean DISABLE_ACC_CHECKING;
+    private static final boolean DISABLE_CP_URL_CHECK;
+    private static final boolean DEBUG_CP_URL_CHECK;
+    private java.util.ArrayList path;
+    java.util.Stack urls;
+    java.util.ArrayList loaders;
+    java.util.HashMap lmap;
+    private java.net.URLStreamHandler jarHandler;
+    private boolean closed;
+    private final java.security.AccessControlContext acc;
+    private static volatile boolean lookupCacheEnabled;
+    private java.net.URL[] lookupCacheURLs;
+    private java.lang.ClassLoader lookupCacheLoader;
+
+    public void <init>(java.net.URL[], java.net.URLStreamHandlerFactory, java.security.AccessControlContext)
+    {
+        java.security.AccessControlContext r7;
+        java.net.URL $r9;
+        sun.misc.URLClassPath r0;
+        java.util.HashMap $r4;
+        java.net.URLStreamHandlerFactory r6;
+        java.util.Stack $r2;
+        java.util.ArrayList $r1, $r3, $r10;
+        java.net.URL[] r5;
+        java.net.URLStreamHandler $r8;
+        int $i0, i1;
+        boolean $z0;
+
+        r0 := @this: sun.misc.URLClassPath;
+
+        r5 := @parameter0: java.net.URL[];
+
+        r6 := @parameter1: java.net.URLStreamHandlerFactory;
+
+        r7 := @parameter2: java.security.AccessControlContext;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        r0.<sun.misc.URLClassPath: java.util.ArrayList path> = $r1;
+
+        $r2 = new java.util.Stack;
+
+        specialinvoke $r2.<java.util.Stack: void <init>()>();
+
+        r0.<sun.misc.URLClassPath: java.util.Stack urls> = $r2;
+
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>()>();
+
+        r0.<sun.misc.URLClassPath: java.util.ArrayList loaders> = $r3;
+
+        $r4 = new java.util.HashMap;
+
+        specialinvoke $r4.<java.util.HashMap: void <init>()>();
+
+        r0.<sun.misc.URLClassPath: java.util.HashMap lmap> = $r4;
+
+        r0.<sun.misc.URLClassPath: boolean closed> = 0;
+
+        i1 = 0;
+
+     label1:
+        $i0 = lengthof r5;
+
+        if i1 >= $i0 goto label2;
+
+        $r10 = r0.<sun.misc.URLClassPath: java.util.ArrayList path>;
+
+        $r9 = r5[i1];
+
+        virtualinvoke $r10.<java.util.ArrayList: boolean add(java.lang.Object)>($r9);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        specialinvoke r0.<sun.misc.URLClassPath: void push(java.net.URL[])>(r5);
+
+        if r6 == null goto label3;
+
+        $r8 = interfaceinvoke r6.<java.net.URLStreamHandlerFactory: java.net.URLStreamHandler createURLStreamHandler(java.lang.String)>("jar");
+
+        r0.<sun.misc.URLClassPath: java.net.URLStreamHandler jarHandler> = $r8;
+
+     label3:
+        $z0 = <sun.misc.URLClassPath: boolean DISABLE_ACC_CHECKING>;
+
+        if $z0 == 0 goto label4;
+
+        r0.<sun.misc.URLClassPath: java.security.AccessControlContext acc> = null;
+
+        goto label5;
+
+     label4:
+        r0.<sun.misc.URLClassPath: java.security.AccessControlContext acc> = r7;
+
+     label5:
+        return;
+    }
+
+    public void <init>(java.net.URL[])
+    {
+        java.net.URL[] r1;
+        sun.misc.URLClassPath r0;
+
+        r0 := @this: sun.misc.URLClassPath;
+
+        r1 := @parameter0: java.net.URL[];
+
+        specialinvoke r0.<sun.misc.URLClassPath: void <init>(java.net.URL[],java.net.URLStreamHandlerFactory,java.security.AccessControlContext)>(r1, null, null);
+
+        return;
+    }
+
+    public void <init>(java.net.URL[], java.security.AccessControlContext)
+    {
+        java.security.AccessControlContext r2;
+        java.net.URL[] r1;
+        sun.misc.URLClassPath r0;
+
+        r0 := @this: sun.misc.URLClassPath;
+
+        r1 := @parameter0: java.net.URL[];
+
+        r2 := @parameter1: java.security.AccessControlContext;
+
+        specialinvoke r0.<sun.misc.URLClassPath: void <init>(java.net.URL[],java.net.URLStreamHandlerFactory,java.security.AccessControlContext)>(r1, null, r2);
+
+        return;
+    }
+
+    public synchronized java.util.List closeLoaders()
+    {
+        java.util.Iterator $r3;
+        sun.misc.URLClassPath r0;
+        sun.misc.URLClassPath$Loader r5;
+        java.io.IOException $r7;
+        java.util.ArrayList $r2;
+        java.util.List $r6;
+        java.lang.Object $r4;
+        java.util.LinkedList $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.misc.URLClassPath;
+
+        $z0 = r0.<sun.misc.URLClassPath: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+        return $r6;
+
+     label1:
+        $r1 = new java.util.LinkedList;
+
+        specialinvoke $r1.<java.util.LinkedList: void <init>()>();
+
+        $r2 = r0.<sun.misc.URLClassPath: java.util.ArrayList loaders>;
+
+        $r3 = virtualinvoke $r2.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label2:
+        $z1 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label7;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (sun.misc.URLClassPath$Loader) $r4;
+
+     label3:
+        virtualinvoke r5.<sun.misc.URLClassPath$Loader: void close()>();
+
+     label4:
+        goto label6;
+
+     label5:
+        $r7 := @caughtexception;
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>($r7);
+
+     label6:
+        goto label2;
+
+     label7:
+        r0.<sun.misc.URLClassPath: boolean closed> = 1;
+
+        return $r1;
+
+        catch java.io.IOException from label3 to label4 with label5;
+    }
+
+    public synchronized void addURL(java.net.URL)
+    {
+        java.lang.Throwable $r7;
+        java.net.URL r2;
+        sun.misc.URLClassPath r0;
+        java.util.Stack $r1, $r4;
+        java.util.ArrayList $r3, $r5;
+        java.net.URL[] $r6;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.misc.URLClassPath;
+
+        r2 := @parameter0: java.net.URL;
+
+        $z0 = r0.<sun.misc.URLClassPath: boolean closed>;
+
+        if $z0 == 0 goto label01;
+
+        return;
+
+     label01:
+        $r1 = r0.<sun.misc.URLClassPath: java.util.Stack urls>;
+
+        entermonitor $r1;
+
+     label02:
+        if r2 == null goto label03;
+
+        $r3 = r0.<sun.misc.URLClassPath: java.util.ArrayList path>;
+
+        $z1 = virtualinvoke $r3.<java.util.ArrayList: boolean contains(java.lang.Object)>(r2);
+
+        if $z1 == 0 goto label05;
+
+     label03:
+        exitmonitor $r1;
+
+     label04:
+        return;
+
+     label05:
+        $r4 = r0.<sun.misc.URLClassPath: java.util.Stack urls>;
+
+        virtualinvoke $r4.<java.util.Stack: void add(int,java.lang.Object)>(0, r2);
+
+        $r5 = r0.<sun.misc.URLClassPath: java.util.ArrayList path>;
+
+        virtualinvoke $r5.<java.util.ArrayList: boolean add(java.lang.Object)>(r2);
+
+        $r6 = r0.<sun.misc.URLClassPath: java.net.URL[] lookupCacheURLs>;
+
+        if $r6 == null goto label06;
+
+        staticinvoke <sun.misc.URLClassPath: void disableAllLookupCaches()>();
+
+     label06:
+        exitmonitor $r1;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r7 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label09:
+        throw $r7;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label02 to label04 with label08;
+        catch java.lang.Throwable from label05 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    public java.net.URL[] getURLs()
+    {
+        java.lang.Throwable $r7;
+        java.lang.Object[] $r5;
+        sun.misc.URLClassPath r0;
+        java.util.Stack $r1;
+        java.util.ArrayList $r2, $r3;
+        java.net.URL[] $r4, $r6;
+        int $i0;
+
+        r0 := @this: sun.misc.URLClassPath;
+
+        $r1 = r0.<sun.misc.URLClassPath: java.util.Stack urls>;
+
+        entermonitor $r1;
+
+     label1:
+        $r3 = r0.<sun.misc.URLClassPath: java.util.ArrayList path>;
+
+        $r2 = r0.<sun.misc.URLClassPath: java.util.ArrayList path>;
+
+        $i0 = virtualinvoke $r2.<java.util.ArrayList: int size()>();
+
+        $r4 = newarray (java.net.URL)[$i0];
+
+        $r5 = virtualinvoke $r3.<java.util.ArrayList: java.lang.Object[] toArray(java.lang.Object[])>($r4);
+
+        $r6 = (java.net.URL[]) $r5;
+
+        exitmonitor $r1;
+
+     label2:
+        return $r6;
+
+     label3:
+        $r7 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public java.net.URL findResource(java.lang.String, boolean)
+    {
+        int[] $r2;
+        java.net.URL $r4;
+        sun.misc.URLClassPath r0;
+        int i0;
+        sun.misc.URLClassPath$Loader $r3;
+        java.lang.String r1;
+        boolean z0;
+
+        r0 := @this: sun.misc.URLClassPath;
+
+        r1 := @parameter0: java.lang.String;
+
+        z0 := @parameter1: boolean;
+
+        $r2 = specialinvoke r0.<sun.misc.URLClassPath: int[] getLookupCache(java.lang.String)>(r1);
+
+        i0 = 0;
+
+     label1:
+        $r3 = specialinvoke r0.<sun.misc.URLClassPath: sun.misc.URLClassPath$Loader getNextLoader(int[],int)>($r2, i0);
+
+        if $r3 == null goto label3;
+
+        $r4 = virtualinvoke $r3.<sun.misc.URLClassPath$Loader: java.net.URL findResource(java.lang.String,boolean)>(r1, z0);
+
+        if $r4 == null goto label2;
+
+        return $r4;
+
+     label2:
+        i0 = i0 + 1;
+
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    public sun.misc.Resource getResource(java.lang.String, boolean)
+    {
+        java.io.PrintStream $r5;
+        sun.misc.URLClassPath r0;
+        sun.misc.URLClassPath$Loader $r10;
+        int[] $r2;
+        sun.misc.Resource $r3;
+        int i0;
+        java.lang.StringBuilder $r4, $r6, $r7, $r8;
+        java.lang.String r1, $r9;
+        boolean $z0, z1;
+
+        r0 := @this: sun.misc.URLClassPath;
+
+        r1 := @parameter0: java.lang.String;
+
+        z1 := @parameter1: boolean;
+
+        $z0 = <sun.misc.URLClassPath: boolean DEBUG>;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = <java.lang.System: java.io.PrintStream err>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("URLClassPath.getResource(\"");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\")");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>($r9);
+
+     label1:
+        $r2 = specialinvoke r0.<sun.misc.URLClassPath: int[] getLookupCache(java.lang.String)>(r1);
+
+        i0 = 0;
+
+     label2:
+        $r10 = specialinvoke r0.<sun.misc.URLClassPath: sun.misc.URLClassPath$Loader getNextLoader(int[],int)>($r2, i0);
+
+        if $r10 == null goto label4;
+
+        $r3 = virtualinvoke $r10.<sun.misc.URLClassPath$Loader: sun.misc.Resource getResource(java.lang.String,boolean)>(r1, z1);
+
+        if $r3 == null goto label3;
+
+        return $r3;
+
+     label3:
+        i0 = i0 + 1;
+
+        goto label2;
+
+     label4:
+        return null;
+    }
+
+    public java.util.Enumeration findResources(java.lang.String, boolean)
+    {
+        sun.misc.URLClassPath$1 $r0;
+        sun.misc.URLClassPath r1;
+        java.lang.String r2;
+        boolean z0;
+
+        r1 := @this: sun.misc.URLClassPath;
+
+        r2 := @parameter0: java.lang.String;
+
+        z0 := @parameter1: boolean;
+
+        $r0 = new sun.misc.URLClassPath$1;
+
+        specialinvoke $r0.<sun.misc.URLClassPath$1: void <init>(sun.misc.URLClassPath,java.lang.String,boolean)>(r1, r2, z0);
+
+        return $r0;
+    }
+
+    public sun.misc.Resource getResource(java.lang.String)
+    {
+        sun.misc.Resource $r2;
+        java.lang.String r1;
+        sun.misc.URLClassPath r0;
+
+        r0 := @this: sun.misc.URLClassPath;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = virtualinvoke r0.<sun.misc.URLClassPath: sun.misc.Resource getResource(java.lang.String,boolean)>(r1, 1);
+
+        return $r2;
+    }
+
+    public java.util.Enumeration getResources(java.lang.String, boolean)
+    {
+        sun.misc.URLClassPath$2 $r0;
+        sun.misc.URLClassPath r1;
+        java.lang.String r2;
+        boolean z0;
+
+        r1 := @this: sun.misc.URLClassPath;
+
+        r2 := @parameter0: java.lang.String;
+
+        z0 := @parameter1: boolean;
+
+        $r0 = new sun.misc.URLClassPath$2;
+
+        specialinvoke $r0.<sun.misc.URLClassPath$2: void <init>(sun.misc.URLClassPath,java.lang.String,boolean)>(r1, r2, z0);
+
+        return $r0;
+    }
+
+    public java.util.Enumeration getResources(java.lang.String)
+    {
+        java.lang.String r1;
+        java.util.Enumeration $r2;
+        sun.misc.URLClassPath r0;
+
+        r0 := @this: sun.misc.URLClassPath;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = virtualinvoke r0.<sun.misc.URLClassPath: java.util.Enumeration getResources(java.lang.String,boolean)>(r1, 1);
+
+        return $r2;
+    }
+
+    synchronized void initLookupCache(java.lang.ClassLoader)
+    {
+        java.net.URL[] $r2;
+        java.lang.ClassLoader r1;
+        sun.misc.URLClassPath r0;
+
+        r0 := @this: sun.misc.URLClassPath;
+
+        r1 := @parameter0: java.lang.ClassLoader;
+
+        $r2 = staticinvoke <sun.misc.URLClassPath: java.net.URL[] getLookupCacheURLs(java.lang.ClassLoader)>(r1);
+
+        r0.<sun.misc.URLClassPath: java.net.URL[] lookupCacheURLs> = $r2;
+
+        if $r2 == null goto label1;
+
+        r0.<sun.misc.URLClassPath: java.lang.ClassLoader lookupCacheLoader> = r1;
+
+        goto label2;
+
+     label1:
+        staticinvoke <sun.misc.URLClassPath: void disableAllLookupCaches()>();
+
+     label2:
+        return;
+    }
+
+    static void disableAllLookupCaches()
+    {
+        <sun.misc.URLClassPath: boolean lookupCacheEnabled> = 0;
+
+        return;
+    }
+
+    private static native java.net.URL[] getLookupCacheURLs(java.lang.ClassLoader);
+
+    private static native int[] getLookupCacheForClassLoader(java.lang.ClassLoader, java.lang.String);
+
+    private static native boolean knownToNotExist0(java.lang.ClassLoader, java.lang.String);
+
+    synchronized boolean knownToNotExist(java.lang.String)
+    {
+        java.net.URL[] $r1;
+        sun.misc.URLClassPath r0;
+        java.lang.String r2;
+        java.lang.ClassLoader $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.misc.URLClassPath;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = r0.<sun.misc.URLClassPath: java.net.URL[] lookupCacheURLs>;
+
+        if $r1 == null goto label1;
+
+        $z0 = <sun.misc.URLClassPath: boolean lookupCacheEnabled>;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = r0.<sun.misc.URLClassPath: java.lang.ClassLoader lookupCacheLoader>;
+
+        $z1 = staticinvoke <sun.misc.URLClassPath: boolean knownToNotExist0(java.lang.ClassLoader,java.lang.String)>($r3, r2);
+
+        return $z1;
+
+     label1:
+        return 0;
+    }
+
+    private synchronized int[] getLookupCache(java.lang.String)
+    {
+        sun.misc.URLClassPath r0;
+        java.util.ArrayList $r8;
+        java.net.URL[] $r1;
+        int[] $r4;
+        int $i0, $i1, $i2, i3, $i4;
+        java.lang.String r2, $r12;
+        boolean $z0, $z1, $z2;
+        java.io.PrintStream $r6;
+        java.lang.StringBuilder $r5, $r7, $r9, $r10, $r11;
+        java.lang.ClassLoader $r3;
+
+        r0 := @this: sun.misc.URLClassPath;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = r0.<sun.misc.URLClassPath: java.net.URL[] lookupCacheURLs>;
+
+        if $r1 == null goto label1;
+
+        $z0 = <sun.misc.URLClassPath: boolean lookupCacheEnabled>;
+
+        if $z0 != 0 goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r3 = r0.<sun.misc.URLClassPath: java.lang.ClassLoader lookupCacheLoader>;
+
+        $r4 = staticinvoke <sun.misc.URLClassPath: int[] getLookupCacheForClassLoader(java.lang.ClassLoader,java.lang.String)>($r3, r2);
+
+        if $r4 == null goto label4;
+
+        $i0 = lengthof $r4;
+
+        if $i0 <= 0 goto label4;
+
+        $i1 = lengthof $r4;
+
+        $i2 = $i1 - 1;
+
+        i3 = $r4[$i2];
+
+        $z1 = specialinvoke r0.<sun.misc.URLClassPath: boolean ensureLoaderOpened(int)>(i3);
+
+        if $z1 != 0 goto label4;
+
+        $z2 = <sun.misc.URLClassPath: boolean DEBUG_LOOKUP_CACHE>;
+
+        if $z2 == 0 goto label3;
+
+        $r6 = <java.lang.System: java.io.PrintStream out>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expanded loaders FAILED ");
+
+        $r8 = r0.<sun.misc.URLClassPath: java.util.ArrayList loaders>;
+
+        $i4 = virtualinvoke $r8.<java.util.ArrayList: int size()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" for maxindex=");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i3);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<java.io.PrintStream: void println(java.lang.String)>($r12);
+
+     label3:
+        return null;
+
+     label4:
+        return $r4;
+    }
+
+    private boolean ensureLoaderOpened(int)
+    {
+        sun.misc.URLClassPath r0;
+        java.util.ArrayList $r1, $r6;
+        int $i0, i1, $i2;
+        java.lang.String $r10;
+        boolean $z0, $z1;
+        java.io.PrintStream $r4;
+        sun.misc.URLClassPath$Loader $r2;
+        java.lang.StringBuilder $r3, $r5, $r7, $r8, $r9;
+
+        r0 := @this: sun.misc.URLClassPath;
+
+        i1 := @parameter0: int;
+
+        $r1 = r0.<sun.misc.URLClassPath: java.util.ArrayList loaders>;
+
+        $i0 = virtualinvoke $r1.<java.util.ArrayList: int size()>();
+
+        if $i0 > i1 goto label3;
+
+        $r2 = specialinvoke r0.<sun.misc.URLClassPath: sun.misc.URLClassPath$Loader getLoader(int)>(i1);
+
+        if $r2 != null goto label1;
+
+        return 0;
+
+     label1:
+        $z0 = <sun.misc.URLClassPath: boolean lookupCacheEnabled>;
+
+        if $z0 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        $z1 = <sun.misc.URLClassPath: boolean DEBUG_LOOKUP_CACHE>;
+
+        if $z1 == 0 goto label3;
+
+        $r4 = <java.lang.System: java.io.PrintStream out>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expanded loaders ");
+
+        $r6 = r0.<sun.misc.URLClassPath: java.util.ArrayList loaders>;
+
+        $i2 = virtualinvoke $r6.<java.util.ArrayList: int size()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" to index=");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<java.io.PrintStream: void println(java.lang.String)>($r10);
+
+     label3:
+        return 1;
+    }
+
+    private synchronized void validateLookupCache(int, java.lang.String)
+    {
+        java.net.URL $r10;
+        sun.misc.URLClassPath r0;
+        java.net.URL[] $r1, $r2, $r9;
+        int i0, $i1;
+        java.lang.String $r7, r8, $r11;
+        boolean $z0, $z1, $z2, $z3;
+        java.io.PrintStream $r4;
+        java.lang.StringBuilder $r3, $r5, $r6;
+
+        r0 := @this: sun.misc.URLClassPath;
+
+        i0 := @parameter0: int;
+
+        r8 := @parameter1: java.lang.String;
+
+        $r1 = r0.<sun.misc.URLClassPath: java.net.URL[] lookupCacheURLs>;
+
+        if $r1 == null goto label4;
+
+        $z0 = <sun.misc.URLClassPath: boolean lookupCacheEnabled>;
+
+        if $z0 == 0 goto label4;
+
+        $r2 = r0.<sun.misc.URLClassPath: java.net.URL[] lookupCacheURLs>;
+
+        $i1 = lengthof $r2;
+
+        if i0 >= $i1 goto label1;
+
+        $r9 = r0.<sun.misc.URLClassPath: java.net.URL[] lookupCacheURLs>;
+
+        $r10 = $r9[i0];
+
+        $r11 = staticinvoke <sun.net.util.URLUtil: java.lang.String urlNoFragString(java.net.URL)>($r10);
+
+        $z3 = virtualinvoke r8.<java.lang.String: boolean equals(java.lang.Object)>($r11);
+
+        if $z3 == 0 goto label1;
+
+        return;
+
+     label1:
+        $z1 = <sun.misc.URLClassPath: boolean DEBUG>;
+
+        if $z1 != 0 goto label2;
+
+        $z2 = <sun.misc.URLClassPath: boolean DEBUG_LOOKUP_CACHE>;
+
+        if $z2 == 0 goto label3;
+
+     label2:
+        $r4 = <java.lang.System: java.io.PrintStream out>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("WARNING: resource lookup cache invalidated for lookupCacheLoader at ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<java.io.PrintStream: void println(java.lang.String)>($r7);
+
+     label3:
+        staticinvoke <sun.misc.URLClassPath: void disableAllLookupCaches()>();
+
+     label4:
+        return;
+    }
+
+    private synchronized sun.misc.URLClassPath$Loader getNextLoader(int[], int)
+    {
+        java.net.URL $r11;
+        sun.misc.URLClassPath r0;
+        java.util.ArrayList $r3;
+        int[] r1;
+        int i0, $i1, $i2, $i3;
+        java.lang.String $r13;
+        boolean $z0, $z1;
+        java.io.PrintStream $r7;
+        sun.misc.URLClassPath$Loader $r2, r5;
+        java.lang.Object $r4;
+        java.lang.StringBuilder $r6, $r8, $r9, $r10, $r12;
+
+        r0 := @this: sun.misc.URLClassPath;
+
+        r1 := @parameter0: int[];
+
+        i0 := @parameter1: int;
+
+        $z0 = r0.<sun.misc.URLClassPath: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        return null;
+
+     label1:
+        if r1 == null goto label4;
+
+        $i1 = lengthof r1;
+
+        if i0 >= $i1 goto label3;
+
+        $r3 = r0.<sun.misc.URLClassPath: java.util.ArrayList loaders>;
+
+        $i2 = r1[i0];
+
+        $r4 = virtualinvoke $r3.<java.util.ArrayList: java.lang.Object get(int)>($i2);
+
+        r5 = (sun.misc.URLClassPath$Loader) $r4;
+
+        $z1 = <sun.misc.URLClassPath: boolean DEBUG_LOOKUP_CACHE>;
+
+        if $z1 == 0 goto label2;
+
+        $r7 = <java.lang.System: java.io.PrintStream out>;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("HASCACHE: Loading from : ");
+
+        $i3 = r1[i0];
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" = ");
+
+        $r11 = virtualinvoke r5.<sun.misc.URLClassPath$Loader: java.net.URL getBaseURL()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<java.io.PrintStream: void println(java.lang.String)>($r13);
+
+     label2:
+        return r5;
+
+     label3:
+        return null;
+
+     label4:
+        $r2 = specialinvoke r0.<sun.misc.URLClassPath: sun.misc.URLClassPath$Loader getLoader(int)>(i0);
+
+        return $r2;
+    }
+
+    private synchronized sun.misc.URLClassPath$Loader getLoader(int)
+    {
+        java.net.URL r13;
+        java.net.URL[] $r17;
+        java.lang.SecurityException $r21;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.lang.StringBuilder $r4, $r6, $r7, $r22, $r24, $r25, $r26, $r27;
+        java.lang.Throwable $r30;
+        sun.misc.URLClassPath r0;
+        java.util.HashMap $r15, $r20;
+        java.util.Stack $r9, $r10, $r11;
+        java.util.ArrayList $r1, $r18, $r19, $r31;
+        int i0, $i1, $i2, $i3;
+        java.lang.String $r8, $r14, $r28;
+        java.io.PrintStream $r5, $r23;
+        sun.misc.URLClassPath$Loader $r3, $r16;
+        java.io.IOException $r29;
+        java.lang.Object $r2, $r12;
+
+        r0 := @this: sun.misc.URLClassPath;
+
+        i0 := @parameter0: int;
+
+        $z0 = r0.<sun.misc.URLClassPath: boolean closed>;
+
+        if $z0 == 0 goto label01;
+
+        return null;
+
+     label01:
+        $r31 = r0.<sun.misc.URLClassPath: java.util.ArrayList loaders>;
+
+        $i2 = virtualinvoke $r31.<java.util.ArrayList: int size()>();
+
+        $i3 = i0 + 1;
+
+        if $i2 >= $i3 goto label15;
+
+        $r9 = r0.<sun.misc.URLClassPath: java.util.Stack urls>;
+
+        entermonitor $r9;
+
+     label02:
+        $r10 = r0.<sun.misc.URLClassPath: java.util.Stack urls>;
+
+        $z2 = virtualinvoke $r10.<java.util.Stack: boolean empty()>();
+
+        if $z2 == 0 goto label04;
+
+        exitmonitor $r9;
+
+     label03:
+        return null;
+
+     label04:
+        $r11 = r0.<sun.misc.URLClassPath: java.util.Stack urls>;
+
+        $r12 = virtualinvoke $r11.<java.util.Stack: java.lang.Object pop()>();
+
+        r13 = (java.net.URL) $r12;
+
+        exitmonitor $r9;
+
+     label05:
+        goto label08;
+
+     label06:
+        $r30 := @caughtexception;
+
+        exitmonitor $r9;
+
+     label07:
+        throw $r30;
+
+     label08:
+        $r14 = staticinvoke <sun.net.util.URLUtil: java.lang.String urlNoFragString(java.net.URL)>(r13);
+
+        $r15 = r0.<sun.misc.URLClassPath: java.util.HashMap lmap>;
+
+        $z3 = virtualinvoke $r15.<java.util.HashMap: boolean containsKey(java.lang.Object)>($r14);
+
+        if $z3 == 0 goto label09;
+
+        goto label01;
+
+     label09:
+        $r16 = specialinvoke r0.<sun.misc.URLClassPath: sun.misc.URLClassPath$Loader getLoader(java.net.URL)>(r13);
+
+        $r17 = virtualinvoke $r16.<sun.misc.URLClassPath$Loader: java.net.URL[] getClassPath()>();
+
+        if $r17 == null goto label10;
+
+        specialinvoke r0.<sun.misc.URLClassPath: void push(java.net.URL[])>($r17);
+
+     label10:
+        goto label14;
+
+     label11:
+        $r29 := @caughtexception;
+
+        goto label01;
+
+     label12:
+        $r21 := @caughtexception;
+
+        $z4 = <sun.misc.URLClassPath: boolean DEBUG>;
+
+        if $z4 == 0 goto label13;
+
+        $r23 = <java.lang.System: java.io.PrintStream err>;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to access ");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r13);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r21);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r23.<java.io.PrintStream: void println(java.lang.String)>($r28);
+
+     label13:
+        goto label01;
+
+     label14:
+        $r18 = r0.<sun.misc.URLClassPath: java.util.ArrayList loaders>;
+
+        $i1 = virtualinvoke $r18.<java.util.ArrayList: int size()>();
+
+        specialinvoke r0.<sun.misc.URLClassPath: void validateLookupCache(int,java.lang.String)>($i1, $r14);
+
+        $r19 = r0.<sun.misc.URLClassPath: java.util.ArrayList loaders>;
+
+        virtualinvoke $r19.<java.util.ArrayList: boolean add(java.lang.Object)>($r16);
+
+        $r20 = r0.<sun.misc.URLClassPath: java.util.HashMap lmap>;
+
+        virtualinvoke $r20.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r14, $r16);
+
+        goto label01;
+
+     label15:
+        $z1 = <sun.misc.URLClassPath: boolean DEBUG_LOOKUP_CACHE>;
+
+        if $z1 == 0 goto label16;
+
+        $r5 = <java.lang.System: java.io.PrintStream out>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("NOCACHE: Loading from : ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>($r8);
+
+     label16:
+        $r1 = r0.<sun.misc.URLClassPath: java.util.ArrayList loaders>;
+
+        $r2 = virtualinvoke $r1.<java.util.ArrayList: java.lang.Object get(int)>(i0);
+
+        $r3 = (sun.misc.URLClassPath$Loader) $r2;
+
+        return $r3;
+
+        catch java.lang.Throwable from label02 to label03 with label06;
+        catch java.lang.Throwable from label04 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+        catch java.io.IOException from label09 to label10 with label11;
+        catch java.lang.SecurityException from label09 to label10 with label12;
+    }
+
+    private sun.misc.URLClassPath$Loader getLoader(java.net.URL) throws java.io.IOException
+    {
+        java.security.AccessControlContext $r3;
+        sun.misc.URLClassPath$3 $r0;
+        java.security.PrivilegedActionException $r6;
+        java.net.URL r2;
+        sun.misc.URLClassPath r1;
+        sun.misc.URLClassPath$Loader $r5;
+        java.io.IOException $r8;
+        java.lang.Exception $r7;
+        java.lang.Object $r4;
+
+        r1 := @this: sun.misc.URLClassPath;
+
+        r2 := @parameter0: java.net.URL;
+
+     label1:
+        $r0 = new sun.misc.URLClassPath$3;
+
+        specialinvoke $r0.<sun.misc.URLClassPath$3: void <init>(sun.misc.URLClassPath,java.net.URL)>(r1, r2);
+
+        $r3 = r1.<sun.misc.URLClassPath: java.security.AccessControlContext acc>;
+
+        $r4 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction,java.security.AccessControlContext)>($r0, $r3);
+
+        $r5 = (sun.misc.URLClassPath$Loader) $r4;
+
+     label2:
+        return $r5;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = virtualinvoke $r6.<java.security.PrivilegedActionException: java.lang.Exception getException()>();
+
+        $r8 = (java.io.IOException) $r7;
+
+        throw $r8;
+
+        catch java.security.PrivilegedActionException from label1 to label2 with label3;
+    }
+
+    private void push(java.net.URL[])
+    {
+        java.lang.Throwable $r5;
+        java.net.URL $r3;
+        sun.misc.URLClassPath r0;
+        java.util.Stack $r1, $r4;
+        java.net.URL[] r2;
+        int $i0, i1, $i3;
+
+        r0 := @this: sun.misc.URLClassPath;
+
+        r2 := @parameter0: java.net.URL[];
+
+        $r1 = r0.<sun.misc.URLClassPath: java.util.Stack urls>;
+
+        entermonitor $r1;
+
+     label1:
+        $i0 = lengthof r2;
+
+        i1 = $i0 - 1;
+
+     label2:
+        if i1 < 0 goto label3;
+
+        $r4 = r0.<sun.misc.URLClassPath: java.util.Stack urls>;
+
+        $r3 = r2[i1];
+
+        virtualinvoke $r4.<java.util.Stack: java.lang.Object push(java.lang.Object)>($r3);
+
+        $i3 = (int) -1;
+
+        i1 = i1 + $i3;
+
+        goto label2;
+
+     label3:
+        exitmonitor $r1;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r5 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r5;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public static java.net.URL[] pathToURLs(java.lang.String)
+    {
+        java.net.URL $r7;
+        java.net.URL[] r10, r12;
+        java.util.StringTokenizer $r0;
+        int $i0, $i1, $i2, i3;
+        java.lang.String r1, $r2, $r4, $r6;
+        boolean $z0;
+        java.io.IOException $r8, $r9;
+        java.io.File $r3, $r5, r11;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = new java.util.StringTokenizer;
+
+        $r2 = <java.io.File: java.lang.String pathSeparator>;
+
+        specialinvoke $r0.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>(r1, $r2);
+
+        $i0 = virtualinvoke $r0.<java.util.StringTokenizer: int countTokens()>();
+
+        r10 = newarray (java.net.URL)[$i0];
+
+        i3 = 0;
+
+     label01:
+        $z0 = virtualinvoke $r0.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label09;
+
+        $r3 = new java.io.File;
+
+        $r4 = virtualinvoke $r0.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        specialinvoke $r3.<java.io.File: void <init>(java.lang.String)>($r4);
+
+        r11 = $r3;
+
+     label02:
+        $r5 = new java.io.File;
+
+        $r6 = virtualinvoke $r3.<java.io.File: java.lang.String getCanonicalPath()>();
+
+        specialinvoke $r5.<java.io.File: void <init>(java.lang.String)>($r6);
+
+        r11 = $r5;
+
+     label03:
+        goto label05;
+
+     label04:
+        $r9 := @caughtexception;
+
+     label05:
+        $i2 = i3;
+
+        i3 = i3 + 1;
+
+        $r7 = staticinvoke <sun.net.www.ParseUtil: java.net.URL fileToEncodedURL(java.io.File)>(r11);
+
+        r10[$i2] = $r7;
+
+     label06:
+        goto label08;
+
+     label07:
+        $r8 := @caughtexception;
+
+     label08:
+        goto label01;
+
+     label09:
+        $i1 = lengthof r10;
+
+        if $i1 == i3 goto label10;
+
+        r12 = newarray (java.net.URL)[i3];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r10, 0, r12, 0, i3);
+
+        r10 = r12;
+
+     label10:
+        return r10;
+
+        catch java.io.IOException from label02 to label03 with label04;
+        catch java.io.IOException from label05 to label06 with label07;
+    }
+
+    public java.net.URL checkURL(java.net.URL)
+    {
+        java.net.URL r0;
+        java.lang.Exception $r1;
+        sun.misc.URLClassPath r2;
+
+        r2 := @this: sun.misc.URLClassPath;
+
+        r0 := @parameter0: java.net.URL;
+
+     label1:
+        staticinvoke <sun.misc.URLClassPath: void check(java.net.URL)>(r0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r1 := @caughtexception;
+
+        return null;
+
+     label4:
+        return r0;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    static void check(java.net.URL) throws java.io.IOException
+    {
+        java.net.URL r1, r10;
+        java.net.URLConnection $r2;
+        int $i0, $i1, $i2, $i4, $i6;
+        java.lang.SecurityException $r4;
+        java.lang.String $r5, $r6, $r8, $r9;
+        java.net.JarURLConnection $r7;
+        boolean $z0, $z1, $z2;
+        java.lang.SecurityManager $r0;
+        java.security.Permission $r3;
+
+        r1 := @parameter0: java.net.URL;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label7;
+
+        $r2 = virtualinvoke r1.<java.net.URL: java.net.URLConnection openConnection()>();
+
+        $r3 = virtualinvoke $r2.<java.net.URLConnection: java.security.Permission getPermission()>();
+
+        if $r3 == null goto label7;
+
+     label1:
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r3);
+
+     label2:
+        goto label7;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $z0 = $r3 instanceof java.io.FilePermission;
+
+        if $z0 == 0 goto label4;
+
+        $r8 = virtualinvoke $r3.<java.security.Permission: java.lang.String getActions()>();
+
+        $i2 = virtualinvoke $r8.<java.lang.String: int indexOf(java.lang.String)>("read");
+
+        $i4 = (int) -1;
+
+        if $i2 == $i4 goto label4;
+
+        $r9 = virtualinvoke $r3.<java.security.Permission: java.lang.String getName()>();
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkRead(java.lang.String)>($r9);
+
+        goto label7;
+
+     label4:
+        $z1 = $r3 instanceof java.net.SocketPermission;
+
+        if $z1 == 0 goto label6;
+
+        $r5 = virtualinvoke $r3.<java.security.Permission: java.lang.String getActions()>();
+
+        $i0 = virtualinvoke $r5.<java.lang.String: int indexOf(java.lang.String)>("connect");
+
+        $i6 = (int) -1;
+
+        if $i0 == $i6 goto label6;
+
+        r10 = r1;
+
+        $z2 = $r2 instanceof java.net.JarURLConnection;
+
+        if $z2 == 0 goto label5;
+
+        $r7 = (java.net.JarURLConnection) $r2;
+
+        r10 = virtualinvoke $r7.<java.net.JarURLConnection: java.net.URL getJarFileURL()>();
+
+     label5:
+        $r6 = virtualinvoke r10.<java.net.URL: java.lang.String getHost()>();
+
+        $i1 = virtualinvoke r10.<java.net.URL: int getPort()>();
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkConnect(java.lang.String,int)>($r6, $i1);
+
+        goto label7;
+
+     label6:
+        throw $r4;
+
+     label7:
+        return;
+
+        catch java.lang.SecurityException from label1 to label2 with label3;
+    }
+
+    static int[] access$000(sun.misc.URLClassPath, java.lang.String)
+    {
+        java.lang.String r1;
+        int[] $r2;
+        sun.misc.URLClassPath r0;
+
+        r0 := @parameter0: sun.misc.URLClassPath;
+
+        r1 := @parameter1: java.lang.String;
+
+        $r2 = specialinvoke r0.<sun.misc.URLClassPath: int[] getLookupCache(java.lang.String)>(r1);
+
+        return $r2;
+    }
+
+    static sun.misc.URLClassPath$Loader access$100(sun.misc.URLClassPath, int[], int)
+    {
+        int[] r1;
+        sun.misc.URLClassPath r0;
+        int i0;
+        sun.misc.URLClassPath$Loader $r2;
+
+        r0 := @parameter0: sun.misc.URLClassPath;
+
+        r1 := @parameter1: int[];
+
+        i0 := @parameter2: int;
+
+        $r2 = specialinvoke r0.<sun.misc.URLClassPath: sun.misc.URLClassPath$Loader getNextLoader(int[],int)>(r1, i0);
+
+        return $r2;
+    }
+
+    static java.net.URLStreamHandler access$200(sun.misc.URLClassPath)
+    {
+        java.net.URLStreamHandler $r1;
+        sun.misc.URLClassPath r0;
+
+        r0 := @parameter0: sun.misc.URLClassPath;
+
+        $r1 = r0.<sun.misc.URLClassPath: java.net.URLStreamHandler jarHandler>;
+
+        return $r1;
+    }
+
+    static java.security.AccessControlContext access$300(sun.misc.URLClassPath)
+    {
+        java.security.AccessControlContext $r1;
+        sun.misc.URLClassPath r0;
+
+        r0 := @parameter0: sun.misc.URLClassPath;
+
+        $r1 = r0.<sun.misc.URLClassPath: java.security.AccessControlContext acc>;
+
+        return $r1;
+    }
+
+    static boolean access$500()
+    {
+        boolean $z0;
+
+        $z0 = <sun.misc.URLClassPath: boolean DEBUG>;
+
+        return $z0;
+    }
+
+    static boolean access$1200()
+    {
+        boolean $z0;
+
+        $z0 = <sun.misc.URLClassPath: boolean DISABLE_JAR_CHECKING>;
+
+        return $z0;
+    }
+
+    static boolean access$1500()
+    {
+        boolean $z0;
+
+        $z0 = <sun.misc.URLClassPath: boolean DISABLE_CP_URL_CHECK>;
+
+        return $z0;
+    }
+
+    static boolean access$1600()
+    {
+        boolean $z0;
+
+        $z0 = <sun.misc.URLClassPath: boolean DEBUG_CP_URL_CHECK>;
+
+        return $z0;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.action.GetPropertyAction $r0, $r3, $r5, $r7, $r10, $r13;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12;
+        java.lang.String $r2, $r9, $r12, $r15, $r16, $r17, $r18;
+        java.lang.Object $r1, $r4, $r6, $r8, $r11, $r14;
+
+        <sun.misc.URLClassPath: java.lang.String USER_AGENT_JAVA_VERSION> = "UA-Java-Version";
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("java.version");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r2 = (java.lang.String) $r1;
+
+        <sun.misc.URLClassPath: java.lang.String JAVA_VERSION> = $r2;
+
+        $r3 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r3.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("sun.misc.URLClassPath.debug");
+
+        $r4 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r3);
+
+        if $r4 == null goto label01;
+
+        $z6 = 1;
+
+        goto label02;
+
+     label01:
+        $z6 = 0;
+
+     label02:
+        <sun.misc.URLClassPath: boolean DEBUG> = $z6;
+
+        $r5 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r5.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("sun.misc.URLClassPath.debugLookupCache");
+
+        $r6 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r5);
+
+        if $r6 == null goto label03;
+
+        $z7 = 1;
+
+        goto label04;
+
+     label03:
+        $z7 = 0;
+
+     label04:
+        <sun.misc.URLClassPath: boolean DEBUG_LOOKUP_CACHE> = $z7;
+
+        $r7 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r7.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("sun.misc.URLClassPath.disableJarChecking");
+
+        $r8 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r7);
+
+        $r9 = (java.lang.String) $r8;
+
+        if $r9 == null goto label07;
+
+        $z4 = virtualinvoke $r9.<java.lang.String: boolean equals(java.lang.Object)>("true");
+
+        if $z4 != 0 goto label05;
+
+        $z5 = virtualinvoke $r9.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z5 == 0 goto label06;
+
+     label05:
+        $z8 = 1;
+
+        goto label08;
+
+     label06:
+        $z8 = 0;
+
+        goto label08;
+
+     label07:
+        $z8 = 0;
+
+     label08:
+        <sun.misc.URLClassPath: boolean DISABLE_JAR_CHECKING> = $z8;
+
+        $r10 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r10.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("jdk.net.URLClassPath.disableRestrictedPermissions");
+
+        $r11 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r10);
+
+        $r12 = (java.lang.String) $r11;
+
+        if $r12 == null goto label11;
+
+        $z2 = virtualinvoke $r12.<java.lang.String: boolean equals(java.lang.Object)>("true");
+
+        if $z2 != 0 goto label09;
+
+        $z3 = virtualinvoke $r12.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z3 == 0 goto label10;
+
+     label09:
+        $z9 = 1;
+
+        goto label12;
+
+     label10:
+        $z9 = 0;
+
+        goto label12;
+
+     label11:
+        $z9 = 0;
+
+     label12:
+        <sun.misc.URLClassPath: boolean DISABLE_ACC_CHECKING> = $z9;
+
+        $r13 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r13.<sun.security.action.GetPropertyAction: void <init>(java.lang.String,java.lang.String)>("jdk.net.URLClassPath.disableClassPathURLCheck", "true");
+
+        $r14 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r13);
+
+        $r15 = (java.lang.String) $r14;
+
+        if $r15 == null goto label15;
+
+        $z0 = virtualinvoke $r15.<java.lang.String: boolean equals(java.lang.Object)>("true");
+
+        if $z0 != 0 goto label13;
+
+        $z1 = virtualinvoke $r15.<java.lang.String: boolean isEmpty()>();
+
+        if $z1 == 0 goto label14;
+
+     label13:
+        $z10 = 1;
+
+        goto label16;
+
+     label14:
+        $z10 = 0;
+
+        goto label16;
+
+     label15:
+        $z10 = 0;
+
+     label16:
+        <sun.misc.URLClassPath: boolean DISABLE_CP_URL_CHECK> = $z10;
+
+        $r16 = "debug";
+
+        $z11 = virtualinvoke $r16.<java.lang.String: boolean equals(java.lang.Object)>($r15);
+
+        <sun.misc.URLClassPath: boolean DEBUG_CP_URL_CHECK> = $z11;
+
+        $r17 = "true";
+
+        $r18 = staticinvoke <sun.misc.VM: java.lang.String getSavedProperty(java.lang.String)>("sun.cds.enableSharedLookupCache");
+
+        $z12 = virtualinvoke $r17.<java.lang.String: boolean equals(java.lang.Object)>($r18);
+
+        <sun.misc.URLClassPath: boolean lookupCacheEnabled> = $z12;
+
+        return;
+    }
+}

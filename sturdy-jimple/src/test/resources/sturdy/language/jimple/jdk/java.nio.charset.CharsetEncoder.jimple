@@ -1,0 +1,1087 @@
+public abstract class java.nio.charset.CharsetEncoder extends java.lang.Object
+{
+    private final java.nio.charset.Charset charset;
+    private final float averageBytesPerChar;
+    private final float maxBytesPerChar;
+    private byte[] replacement;
+    private java.nio.charset.CodingErrorAction malformedInputAction;
+    private java.nio.charset.CodingErrorAction unmappableCharacterAction;
+    private static final int ST_RESET;
+    private static final int ST_CODING;
+    private static final int ST_END;
+    private static final int ST_FLUSHED;
+    private int state;
+    private static java.lang.String[] stateNames;
+    private java.lang.ref.WeakReference cachedDecoder;
+    static final boolean $assertionsDisabled;
+
+    protected void <init>(java.nio.charset.Charset, float, float, byte[])
+    {
+        byte[] r4;
+        java.nio.charset.Charset r3;
+        byte $b0, $b1, $b2;
+        java.nio.charset.CodingErrorAction $r1, $r2;
+        int $i3, $i4, $i5;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r8, $r9, $r10;
+        java.nio.charset.CharsetEncoder r0;
+        float f0, f1;
+
+        r0 := @this: java.nio.charset.CharsetEncoder;
+
+        r3 := @parameter0: java.nio.charset.Charset;
+
+        f0 := @parameter1: float;
+
+        f1 := @parameter2: float;
+
+        r4 := @parameter3: byte[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPORT>;
+
+        r0.<java.nio.charset.CharsetEncoder: java.nio.charset.CodingErrorAction malformedInputAction> = $r1;
+
+        $r2 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPORT>;
+
+        r0.<java.nio.charset.CharsetEncoder: java.nio.charset.CodingErrorAction unmappableCharacterAction> = $r2;
+
+        r0.<java.nio.charset.CharsetEncoder: int state> = 0;
+
+        r0.<java.nio.charset.CharsetEncoder: java.lang.ref.WeakReference cachedDecoder> = null;
+
+        r0.<java.nio.charset.CharsetEncoder: java.nio.charset.Charset charset> = r3;
+
+        $b0 = f0 cmpg 0.0F;
+
+        $i3 = (int) $b0;
+
+        if $i3 > 0 goto label1;
+
+        $r8 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Non-positive averageBytesPerChar");
+
+        throw $r8;
+
+     label1:
+        $b1 = f1 cmpg 0.0F;
+
+        $i4 = (int) $b1;
+
+        if $i4 > 0 goto label2;
+
+        $r9 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r9.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Non-positive maxBytesPerChar");
+
+        throw $r9;
+
+     label2:
+        $z0 = staticinvoke <java.nio.charset.Charset: boolean atBugLevel(java.lang.String)>("1.4");
+
+        if $z0 != 0 goto label3;
+
+        $b2 = f0 cmpl f1;
+
+        $i5 = (int) $b2;
+
+        if $i5 <= 0 goto label3;
+
+        $r10 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r10.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("averageBytesPerChar exceeds maxBytesPerChar");
+
+        throw $r10;
+
+     label3:
+        r0.<java.nio.charset.CharsetEncoder: byte[] replacement> = r4;
+
+        r0.<java.nio.charset.CharsetEncoder: float averageBytesPerChar> = f0;
+
+        r0.<java.nio.charset.CharsetEncoder: float maxBytesPerChar> = f1;
+
+        virtualinvoke r0.<java.nio.charset.CharsetEncoder: java.nio.charset.CharsetEncoder replaceWith(byte[])>(r4);
+
+        return;
+    }
+
+    protected void <init>(java.nio.charset.Charset, float, float)
+    {
+        byte[] $r2;
+        java.nio.charset.Charset r1;
+        java.nio.charset.CharsetEncoder r0;
+        float f0, f1;
+
+        r0 := @this: java.nio.charset.CharsetEncoder;
+
+        r1 := @parameter0: java.nio.charset.Charset;
+
+        f0 := @parameter1: float;
+
+        f1 := @parameter2: float;
+
+        $r2 = newarray (byte)[1];
+
+        $r2[0] = 63;
+
+        specialinvoke r0.<java.nio.charset.CharsetEncoder: void <init>(java.nio.charset.Charset,float,float,byte[])>(r1, f0, f1, $r2);
+
+        return;
+    }
+
+    public final java.nio.charset.Charset charset()
+    {
+        java.nio.charset.Charset $r1;
+        java.nio.charset.CharsetEncoder r0;
+
+        r0 := @this: java.nio.charset.CharsetEncoder;
+
+        $r1 = r0.<java.nio.charset.CharsetEncoder: java.nio.charset.Charset charset>;
+
+        return $r1;
+    }
+
+    public final byte[] replacement()
+    {
+        byte[] $r1, $r2, $r3;
+        java.nio.charset.CharsetEncoder r0;
+        int $i0;
+
+        r0 := @this: java.nio.charset.CharsetEncoder;
+
+        $r2 = r0.<java.nio.charset.CharsetEncoder: byte[] replacement>;
+
+        $r1 = r0.<java.nio.charset.CharsetEncoder: byte[] replacement>;
+
+        $i0 = lengthof $r1;
+
+        $r3 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>($r2, $i0);
+
+        return $r3;
+    }
+
+    public final java.nio.charset.CharsetEncoder replaceWith(byte[])
+    {
+        byte[] r0, $r2, $r3;
+        java.lang.IllegalArgumentException $r8, $r9, $r10, $r11;
+        byte $b1;
+        java.nio.charset.CharsetEncoder r1;
+        int i0, $i2, $i3;
+        float $f0, $f1;
+        boolean $z0;
+
+        r1 := @this: java.nio.charset.CharsetEncoder;
+
+        r0 := @parameter0: byte[];
+
+        if r0 != null goto label1;
+
+        $r8 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Null replacement");
+
+        throw $r8;
+
+     label1:
+        i0 = lengthof r0;
+
+        if i0 != 0 goto label2;
+
+        $r9 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r9.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Empty replacement");
+
+        throw $r9;
+
+     label2:
+        $f1 = (float) i0;
+
+        $f0 = r1.<java.nio.charset.CharsetEncoder: float maxBytesPerChar>;
+
+        $b1 = $f1 cmpl $f0;
+
+        $i3 = (int) $b1;
+
+        if $i3 <= 0 goto label3;
+
+        $r10 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r10.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Replacement too long");
+
+        throw $r10;
+
+     label3:
+        $z0 = virtualinvoke r1.<java.nio.charset.CharsetEncoder: boolean isLegalReplacement(byte[])>(r0);
+
+        if $z0 != 0 goto label4;
+
+        $r11 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r11.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Illegal replacement");
+
+        throw $r11;
+
+     label4:
+        $i2 = lengthof r0;
+
+        $r2 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>(r0, $i2);
+
+        r1.<java.nio.charset.CharsetEncoder: byte[] replacement> = $r2;
+
+        $r3 = r1.<java.nio.charset.CharsetEncoder: byte[] replacement>;
+
+        virtualinvoke r1.<java.nio.charset.CharsetEncoder: void implReplaceWith(byte[])>($r3);
+
+        return r1;
+    }
+
+    protected void implReplaceWith(byte[])
+    {
+        byte[] r1;
+        java.nio.charset.CharsetEncoder r0;
+
+        r0 := @this: java.nio.charset.CharsetEncoder;
+
+        r1 := @parameter0: byte[];
+
+        return;
+    }
+
+    public boolean isLegalReplacement(byte[])
+    {
+        byte[] r7;
+        java.nio.ByteBuffer $r8;
+        java.nio.charset.CoderResult $r10;
+        java.nio.charset.Charset $r2;
+        java.nio.charset.CodingErrorAction $r4, $r5;
+        int $i0, $i1;
+        java.lang.ref.WeakReference r1, $r6;
+        boolean $z0, $z1;
+        java.nio.CharBuffer $r9;
+        java.nio.charset.CharsetDecoder $r3, $r12, r13;
+        java.nio.charset.CharsetEncoder r0;
+        float $f0, $f1, $f2;
+        java.lang.Object $r11;
+
+        r0 := @this: java.nio.charset.CharsetEncoder;
+
+        r7 := @parameter0: byte[];
+
+        r1 = r0.<java.nio.charset.CharsetEncoder: java.lang.ref.WeakReference cachedDecoder>;
+
+        if r1 == null goto label1;
+
+        $r11 = virtualinvoke r1.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        $r12 = (java.nio.charset.CharsetDecoder) $r11;
+
+        r13 = $r12;
+
+        if $r12 != null goto label2;
+
+     label1:
+        $r2 = virtualinvoke r0.<java.nio.charset.CharsetEncoder: java.nio.charset.Charset charset()>();
+
+        $r3 = virtualinvoke $r2.<java.nio.charset.Charset: java.nio.charset.CharsetDecoder newDecoder()>();
+
+        r13 = $r3;
+
+        $r4 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPORT>;
+
+        virtualinvoke $r3.<java.nio.charset.CharsetDecoder: java.nio.charset.CharsetDecoder onMalformedInput(java.nio.charset.CodingErrorAction)>($r4);
+
+        $r5 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPORT>;
+
+        virtualinvoke $r3.<java.nio.charset.CharsetDecoder: java.nio.charset.CharsetDecoder onUnmappableCharacter(java.nio.charset.CodingErrorAction)>($r5);
+
+        $r6 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r6.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>($r3);
+
+        r0.<java.nio.charset.CharsetEncoder: java.lang.ref.WeakReference cachedDecoder> = $r6;
+
+        goto label3;
+
+     label2:
+        virtualinvoke $r12.<java.nio.charset.CharsetDecoder: java.nio.charset.CharsetDecoder reset()>();
+
+     label3:
+        $r8 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>(r7);
+
+        $i0 = virtualinvoke $r8.<java.nio.ByteBuffer: int remaining()>();
+
+        $f0 = (float) $i0;
+
+        $f1 = virtualinvoke r13.<java.nio.charset.CharsetDecoder: float maxCharsPerByte()>();
+
+        $f2 = $f0 * $f1;
+
+        $i1 = (int) $f2;
+
+        $r9 = staticinvoke <java.nio.CharBuffer: java.nio.CharBuffer allocate(int)>($i1);
+
+        $r10 = virtualinvoke r13.<java.nio.charset.CharsetDecoder: java.nio.charset.CoderResult decode(java.nio.ByteBuffer,java.nio.CharBuffer,boolean)>($r8, $r9, 1);
+
+        $z0 = virtualinvoke $r10.<java.nio.charset.CoderResult: boolean isError()>();
+
+        if $z0 != 0 goto label4;
+
+        $z1 = 1;
+
+        goto label5;
+
+     label4:
+        $z1 = 0;
+
+     label5:
+        return $z1;
+    }
+
+    public java.nio.charset.CodingErrorAction malformedInputAction()
+    {
+        java.nio.charset.CharsetEncoder r0;
+        java.nio.charset.CodingErrorAction $r1;
+
+        r0 := @this: java.nio.charset.CharsetEncoder;
+
+        $r1 = r0.<java.nio.charset.CharsetEncoder: java.nio.charset.CodingErrorAction malformedInputAction>;
+
+        return $r1;
+    }
+
+    public final java.nio.charset.CharsetEncoder onMalformedInput(java.nio.charset.CodingErrorAction)
+    {
+        java.lang.IllegalArgumentException $r2;
+        java.nio.charset.CharsetEncoder r1;
+        java.nio.charset.CodingErrorAction r0;
+
+        r1 := @this: java.nio.charset.CharsetEncoder;
+
+        r0 := @parameter0: java.nio.charset.CodingErrorAction;
+
+        if r0 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Null action");
+
+        throw $r2;
+
+     label1:
+        r1.<java.nio.charset.CharsetEncoder: java.nio.charset.CodingErrorAction malformedInputAction> = r0;
+
+        virtualinvoke r1.<java.nio.charset.CharsetEncoder: void implOnMalformedInput(java.nio.charset.CodingErrorAction)>(r0);
+
+        return r1;
+    }
+
+    protected void implOnMalformedInput(java.nio.charset.CodingErrorAction)
+    {
+        java.nio.charset.CharsetEncoder r0;
+        java.nio.charset.CodingErrorAction r1;
+
+        r0 := @this: java.nio.charset.CharsetEncoder;
+
+        r1 := @parameter0: java.nio.charset.CodingErrorAction;
+
+        return;
+    }
+
+    public java.nio.charset.CodingErrorAction unmappableCharacterAction()
+    {
+        java.nio.charset.CharsetEncoder r0;
+        java.nio.charset.CodingErrorAction $r1;
+
+        r0 := @this: java.nio.charset.CharsetEncoder;
+
+        $r1 = r0.<java.nio.charset.CharsetEncoder: java.nio.charset.CodingErrorAction unmappableCharacterAction>;
+
+        return $r1;
+    }
+
+    public final java.nio.charset.CharsetEncoder onUnmappableCharacter(java.nio.charset.CodingErrorAction)
+    {
+        java.lang.IllegalArgumentException $r2;
+        java.nio.charset.CharsetEncoder r1;
+        java.nio.charset.CodingErrorAction r0;
+
+        r1 := @this: java.nio.charset.CharsetEncoder;
+
+        r0 := @parameter0: java.nio.charset.CodingErrorAction;
+
+        if r0 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Null action");
+
+        throw $r2;
+
+     label1:
+        r1.<java.nio.charset.CharsetEncoder: java.nio.charset.CodingErrorAction unmappableCharacterAction> = r0;
+
+        virtualinvoke r1.<java.nio.charset.CharsetEncoder: void implOnUnmappableCharacter(java.nio.charset.CodingErrorAction)>(r0);
+
+        return r1;
+    }
+
+    protected void implOnUnmappableCharacter(java.nio.charset.CodingErrorAction)
+    {
+        java.nio.charset.CharsetEncoder r0;
+        java.nio.charset.CodingErrorAction r1;
+
+        r0 := @this: java.nio.charset.CharsetEncoder;
+
+        r1 := @parameter0: java.nio.charset.CodingErrorAction;
+
+        return;
+    }
+
+    public final float averageBytesPerChar()
+    {
+        float $f0;
+        java.nio.charset.CharsetEncoder r0;
+
+        r0 := @this: java.nio.charset.CharsetEncoder;
+
+        $f0 = r0.<java.nio.charset.CharsetEncoder: float averageBytesPerChar>;
+
+        return $f0;
+    }
+
+    public final float maxBytesPerChar()
+    {
+        float $f0;
+        java.nio.charset.CharsetEncoder r0;
+
+        r0 := @this: java.nio.charset.CharsetEncoder;
+
+        $f0 = r0.<java.nio.charset.CharsetEncoder: float maxBytesPerChar>;
+
+        return $f0;
+    }
+
+    public final java.nio.charset.CoderResult encode(java.nio.CharBuffer, java.nio.ByteBuffer, boolean)
+    {
+        byte[] $r7, $r8;
+        java.nio.ByteBuffer r2;
+        byte b0, $b11;
+        boolean z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        java.nio.CharBuffer r1;
+        java.nio.charset.CharsetEncoder r0;
+        java.nio.BufferOverflowException $r12;
+        java.lang.AssertionError $r6, $r10;
+        java.nio.charset.CoderMalfunctionError $r13, $r15;
+        java.nio.charset.CoderResult $r9, $r16, r17;
+        java.nio.charset.CodingErrorAction $r3, $r4, $r5, r18, $r19;
+        int $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10;
+        java.lang.String $r11;
+        java.nio.BufferUnderflowException $r14;
+
+        r0 := @this: java.nio.charset.CharsetEncoder;
+
+        r1 := @parameter0: java.nio.CharBuffer;
+
+        r2 := @parameter1: java.nio.ByteBuffer;
+
+        z0 := @parameter2: boolean;
+
+        if z0 == 0 goto label01;
+
+        $b11 = 2;
+
+        goto label02;
+
+     label01:
+        $b11 = 1;
+
+     label02:
+        b0 = $b11;
+
+        $i1 = r0.<java.nio.charset.CharsetEncoder: int state>;
+
+        if $i1 == 0 goto label04;
+
+        $i8 = r0.<java.nio.charset.CharsetEncoder: int state>;
+
+        if $i8 == 1 goto label04;
+
+        if z0 == 0 goto label03;
+
+        $i10 = r0.<java.nio.charset.CharsetEncoder: int state>;
+
+        if $i10 == 2 goto label04;
+
+     label03:
+        $i9 = r0.<java.nio.charset.CharsetEncoder: int state>;
+
+        specialinvoke r0.<java.nio.charset.CharsetEncoder: void throwIllegalStateException(int,int)>($i9, b0);
+
+     label04:
+        r0.<java.nio.charset.CharsetEncoder: int state> = b0;
+
+     label05:
+        $r16 = virtualinvoke r0.<java.nio.charset.CharsetEncoder: java.nio.charset.CoderResult encodeLoop(java.nio.CharBuffer,java.nio.ByteBuffer)>(r1, r2);
+
+        r17 = $r16;
+
+     label06:
+        goto label09;
+
+     label07:
+        $r14 := @caughtexception;
+
+        $r15 = new java.nio.charset.CoderMalfunctionError;
+
+        specialinvoke $r15.<java.nio.charset.CoderMalfunctionError: void <init>(java.lang.Exception)>($r14);
+
+        throw $r15;
+
+     label08:
+        $r12 := @caughtexception;
+
+        $r13 = new java.nio.charset.CoderMalfunctionError;
+
+        specialinvoke $r13.<java.nio.charset.CoderMalfunctionError: void <init>(java.lang.Exception)>($r12);
+
+        throw $r13;
+
+     label09:
+        $z1 = virtualinvoke $r16.<java.nio.charset.CoderResult: boolean isOverflow()>();
+
+        if $z1 == 0 goto label10;
+
+        return $r16;
+
+     label10:
+        $z2 = virtualinvoke $r16.<java.nio.charset.CoderResult: boolean isUnderflow()>();
+
+        if $z2 == 0 goto label12;
+
+        if z0 == 0 goto label11;
+
+        $z7 = virtualinvoke r1.<java.nio.CharBuffer: boolean hasRemaining()>();
+
+        if $z7 == 0 goto label11;
+
+        $i7 = virtualinvoke r1.<java.nio.CharBuffer: int remaining()>();
+
+        r17 = staticinvoke <java.nio.charset.CoderResult: java.nio.charset.CoderResult malformedForLength(int)>($i7);
+
+        goto label12;
+
+     label11:
+        return $r16;
+
+     label12:
+        r18 = null;
+
+        $z3 = virtualinvoke r17.<java.nio.charset.CoderResult: boolean isMalformed()>();
+
+        if $z3 == 0 goto label13;
+
+        r18 = r0.<java.nio.charset.CharsetEncoder: java.nio.charset.CodingErrorAction malformedInputAction>;
+
+        goto label15;
+
+     label13:
+        $z4 = virtualinvoke r17.<java.nio.charset.CoderResult: boolean isUnmappable()>();
+
+        if $z4 == 0 goto label14;
+
+        r18 = r0.<java.nio.charset.CharsetEncoder: java.nio.charset.CodingErrorAction unmappableCharacterAction>;
+
+        goto label15;
+
+     label14:
+        $z5 = <java.nio.charset.CharsetEncoder: boolean $assertionsDisabled>;
+
+        if $z5 != 0 goto label15;
+
+        $r10 = new java.lang.AssertionError;
+
+        $r11 = virtualinvoke r17.<java.nio.charset.CoderResult: java.lang.String toString()>();
+
+        specialinvoke $r10.<java.lang.AssertionError: void <init>(java.lang.Object)>($r11);
+
+        throw $r10;
+
+     label15:
+        $r19 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPORT>;
+
+        if r18 != $r19 goto label16;
+
+        return r17;
+
+     label16:
+        $r3 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPLACE>;
+
+        if r18 != $r3 goto label18;
+
+        $i5 = virtualinvoke r2.<java.nio.ByteBuffer: int remaining()>();
+
+        $r7 = r0.<java.nio.charset.CharsetEncoder: byte[] replacement>;
+
+        $i6 = lengthof $r7;
+
+        if $i5 >= $i6 goto label17;
+
+        $r9 = <java.nio.charset.CoderResult: java.nio.charset.CoderResult OVERFLOW>;
+
+        return $r9;
+
+     label17:
+        $r8 = r0.<java.nio.charset.CharsetEncoder: byte[] replacement>;
+
+        virtualinvoke r2.<java.nio.ByteBuffer: java.nio.ByteBuffer put(byte[])>($r8);
+
+     label18:
+        $r4 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction IGNORE>;
+
+        if r18 == $r4 goto label19;
+
+        $r5 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPLACE>;
+
+        if r18 != $r5 goto label20;
+
+     label19:
+        $i2 = virtualinvoke r1.<java.nio.CharBuffer: int position()>();
+
+        $i3 = virtualinvoke r17.<java.nio.charset.CoderResult: int length()>();
+
+        $i4 = $i2 + $i3;
+
+        virtualinvoke r1.<java.nio.CharBuffer: java.nio.Buffer position(int)>($i4);
+
+        goto label05;
+
+     label20:
+        $z6 = <java.nio.charset.CharsetEncoder: boolean $assertionsDisabled>;
+
+        if $z6 != 0 goto label21;
+
+        $r6 = new java.lang.AssertionError;
+
+        specialinvoke $r6.<java.lang.AssertionError: void <init>()>();
+
+        throw $r6;
+
+     label21:
+        goto label05;
+
+        catch java.nio.BufferUnderflowException from label05 to label06 with label07;
+        catch java.nio.BufferOverflowException from label05 to label06 with label08;
+    }
+
+    public final java.nio.charset.CoderResult flush(java.nio.ByteBuffer)
+    {
+        java.nio.ByteBuffer r2;
+        java.nio.charset.CoderResult $r1, $r3;
+        java.nio.charset.CharsetEncoder r0;
+        int $i0, $i1, $i2;
+        boolean $z0;
+
+        r0 := @this: java.nio.charset.CharsetEncoder;
+
+        r2 := @parameter0: java.nio.ByteBuffer;
+
+        $i0 = r0.<java.nio.charset.CharsetEncoder: int state>;
+
+        if $i0 != 2 goto label2;
+
+        $r3 = virtualinvoke r0.<java.nio.charset.CharsetEncoder: java.nio.charset.CoderResult implFlush(java.nio.ByteBuffer)>(r2);
+
+        $z0 = virtualinvoke $r3.<java.nio.charset.CoderResult: boolean isUnderflow()>();
+
+        if $z0 == 0 goto label1;
+
+        r0.<java.nio.charset.CharsetEncoder: int state> = 3;
+
+     label1:
+        return $r3;
+
+     label2:
+        $i1 = r0.<java.nio.charset.CharsetEncoder: int state>;
+
+        if $i1 == 3 goto label3;
+
+        $i2 = r0.<java.nio.charset.CharsetEncoder: int state>;
+
+        specialinvoke r0.<java.nio.charset.CharsetEncoder: void throwIllegalStateException(int,int)>($i2, 3);
+
+     label3:
+        $r1 = <java.nio.charset.CoderResult: java.nio.charset.CoderResult UNDERFLOW>;
+
+        return $r1;
+    }
+
+    protected java.nio.charset.CoderResult implFlush(java.nio.ByteBuffer)
+    {
+        java.nio.charset.CoderResult $r0;
+        java.nio.charset.CharsetEncoder r1;
+        java.nio.ByteBuffer r2;
+
+        r1 := @this: java.nio.charset.CharsetEncoder;
+
+        r2 := @parameter0: java.nio.ByteBuffer;
+
+        $r0 = <java.nio.charset.CoderResult: java.nio.charset.CoderResult UNDERFLOW>;
+
+        return $r0;
+    }
+
+    public final java.nio.charset.CharsetEncoder reset()
+    {
+        java.nio.charset.CharsetEncoder r0;
+
+        r0 := @this: java.nio.charset.CharsetEncoder;
+
+        virtualinvoke r0.<java.nio.charset.CharsetEncoder: void implReset()>();
+
+        r0.<java.nio.charset.CharsetEncoder: int state> = 0;
+
+        return r0;
+    }
+
+    protected void implReset()
+    {
+        java.nio.charset.CharsetEncoder r0;
+
+        r0 := @this: java.nio.charset.CharsetEncoder;
+
+        return;
+    }
+
+    protected abstract java.nio.charset.CoderResult encodeLoop(java.nio.CharBuffer, java.nio.ByteBuffer);
+
+    public final java.nio.ByteBuffer encode(java.nio.CharBuffer) throws java.nio.charset.CharacterCodingException
+    {
+        java.nio.ByteBuffer $r2, $r3, r4;
+        java.nio.charset.CoderResult $r5, r6;
+        int $i0, $i1, $i2, i3;
+        boolean $z0, $z1, $z2, $z3;
+        java.nio.CharBuffer r0;
+        java.nio.charset.CharsetEncoder r1;
+        float $f0, $f1, $f2;
+
+        r1 := @this: java.nio.charset.CharsetEncoder;
+
+        r0 := @parameter0: java.nio.CharBuffer;
+
+        $i0 = virtualinvoke r0.<java.nio.CharBuffer: int remaining()>();
+
+        $f0 = (float) $i0;
+
+        $f1 = virtualinvoke r1.<java.nio.charset.CharsetEncoder: float averageBytesPerChar()>();
+
+        $f2 = $f0 * $f1;
+
+        i3 = (int) $f2;
+
+        $r2 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer allocate(int)>(i3);
+
+        r4 = $r2;
+
+        if i3 != 0 goto label1;
+
+        $i2 = virtualinvoke r0.<java.nio.CharBuffer: int remaining()>();
+
+        if $i2 != 0 goto label1;
+
+        return $r2;
+
+     label1:
+        virtualinvoke r1.<java.nio.charset.CharsetEncoder: java.nio.charset.CharsetEncoder reset()>();
+
+     label2:
+        $z3 = virtualinvoke r0.<java.nio.CharBuffer: boolean hasRemaining()>();
+
+        if $z3 == 0 goto label3;
+
+        $r5 = virtualinvoke r1.<java.nio.charset.CharsetEncoder: java.nio.charset.CoderResult encode(java.nio.CharBuffer,java.nio.ByteBuffer,boolean)>(r0, r4, 1);
+
+        goto label4;
+
+     label3:
+        $r5 = <java.nio.charset.CoderResult: java.nio.charset.CoderResult UNDERFLOW>;
+
+     label4:
+        r6 = $r5;
+
+        $z0 = virtualinvoke $r5.<java.nio.charset.CoderResult: boolean isUnderflow()>();
+
+        if $z0 == 0 goto label5;
+
+        r6 = virtualinvoke r1.<java.nio.charset.CharsetEncoder: java.nio.charset.CoderResult flush(java.nio.ByteBuffer)>(r4);
+
+     label5:
+        $z1 = virtualinvoke r6.<java.nio.charset.CoderResult: boolean isUnderflow()>();
+
+        if $z1 == 0 goto label6;
+
+        goto label8;
+
+     label6:
+        $z2 = virtualinvoke r6.<java.nio.charset.CoderResult: boolean isOverflow()>();
+
+        if $z2 == 0 goto label7;
+
+        $i1 = 2 * i3;
+
+        i3 = $i1 + 1;
+
+        $r3 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer allocate(int)>(i3);
+
+        virtualinvoke r4.<java.nio.ByteBuffer: java.nio.Buffer flip()>();
+
+        virtualinvoke $r3.<java.nio.ByteBuffer: java.nio.ByteBuffer put(java.nio.ByteBuffer)>(r4);
+
+        r4 = $r3;
+
+        goto label2;
+
+     label7:
+        virtualinvoke r6.<java.nio.charset.CoderResult: void throwException()>();
+
+        goto label2;
+
+     label8:
+        virtualinvoke r4.<java.nio.ByteBuffer: java.nio.Buffer flip()>();
+
+        return r4;
+    }
+
+    private boolean canEncode(java.nio.CharBuffer)
+    {
+        java.lang.Throwable $r2;
+        java.nio.charset.CharacterCodingException $r3;
+        java.nio.CharBuffer r1;
+        java.nio.charset.CharsetEncoder r0;
+        java.nio.charset.CodingErrorAction $r4, $r5, $r6, $r7;
+        int $i0, $i1, $i2;
+
+        r0 := @this: java.nio.charset.CharsetEncoder;
+
+        r1 := @parameter0: java.nio.CharBuffer;
+
+        $i0 = r0.<java.nio.charset.CharsetEncoder: int state>;
+
+        if $i0 != 3 goto label1;
+
+        virtualinvoke r0.<java.nio.charset.CharsetEncoder: java.nio.charset.CharsetEncoder reset()>();
+
+        goto label2;
+
+     label1:
+        $i1 = r0.<java.nio.charset.CharsetEncoder: int state>;
+
+        if $i1 == 0 goto label2;
+
+        $i2 = r0.<java.nio.charset.CharsetEncoder: int state>;
+
+        specialinvoke r0.<java.nio.charset.CharsetEncoder: void throwIllegalStateException(int,int)>($i2, 1);
+
+     label2:
+        $r4 = virtualinvoke r0.<java.nio.charset.CharsetEncoder: java.nio.charset.CodingErrorAction malformedInputAction()>();
+
+        $r5 = virtualinvoke r0.<java.nio.charset.CharsetEncoder: java.nio.charset.CodingErrorAction unmappableCharacterAction()>();
+
+     label3:
+        $r6 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPORT>;
+
+        virtualinvoke r0.<java.nio.charset.CharsetEncoder: java.nio.charset.CharsetEncoder onMalformedInput(java.nio.charset.CodingErrorAction)>($r6);
+
+        $r7 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPORT>;
+
+        virtualinvoke r0.<java.nio.charset.CharsetEncoder: java.nio.charset.CharsetEncoder onUnmappableCharacter(java.nio.charset.CodingErrorAction)>($r7);
+
+        virtualinvoke r0.<java.nio.charset.CharsetEncoder: java.nio.ByteBuffer encode(java.nio.CharBuffer)>(r1);
+
+     label4:
+        virtualinvoke r0.<java.nio.charset.CharsetEncoder: java.nio.charset.CharsetEncoder onMalformedInput(java.nio.charset.CodingErrorAction)>($r4);
+
+        virtualinvoke r0.<java.nio.charset.CharsetEncoder: java.nio.charset.CharsetEncoder onUnmappableCharacter(java.nio.charset.CodingErrorAction)>($r5);
+
+        virtualinvoke r0.<java.nio.charset.CharsetEncoder: java.nio.charset.CharsetEncoder reset()>();
+
+        goto label9;
+
+     label5:
+        $r3 := @caughtexception;
+
+     label6:
+        virtualinvoke r0.<java.nio.charset.CharsetEncoder: java.nio.charset.CharsetEncoder onMalformedInput(java.nio.charset.CodingErrorAction)>($r4);
+
+        virtualinvoke r0.<java.nio.charset.CharsetEncoder: java.nio.charset.CharsetEncoder onUnmappableCharacter(java.nio.charset.CodingErrorAction)>($r5);
+
+        virtualinvoke r0.<java.nio.charset.CharsetEncoder: java.nio.charset.CharsetEncoder reset()>();
+
+        return 0;
+
+     label7:
+        $r2 := @caughtexception;
+
+     label8:
+        virtualinvoke r0.<java.nio.charset.CharsetEncoder: java.nio.charset.CharsetEncoder onMalformedInput(java.nio.charset.CodingErrorAction)>($r4);
+
+        virtualinvoke r0.<java.nio.charset.CharsetEncoder: java.nio.charset.CharsetEncoder onUnmappableCharacter(java.nio.charset.CodingErrorAction)>($r5);
+
+        virtualinvoke r0.<java.nio.charset.CharsetEncoder: java.nio.charset.CharsetEncoder reset()>();
+
+        throw $r2;
+
+     label9:
+        return 1;
+
+        catch java.nio.charset.CharacterCodingException from label3 to label4 with label5;
+        catch java.lang.Throwable from label3 to label4 with label7;
+        catch java.lang.Throwable from label5 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public boolean canEncode(char)
+    {
+        java.nio.CharBuffer $r0;
+        java.nio.charset.CharsetEncoder r1;
+        char c0;
+        boolean $z0;
+
+        r1 := @this: java.nio.charset.CharsetEncoder;
+
+        c0 := @parameter0: char;
+
+        $r0 = staticinvoke <java.nio.CharBuffer: java.nio.CharBuffer allocate(int)>(1);
+
+        virtualinvoke $r0.<java.nio.CharBuffer: java.nio.CharBuffer put(char)>(c0);
+
+        virtualinvoke $r0.<java.nio.CharBuffer: java.nio.Buffer flip()>();
+
+        $z0 = specialinvoke r1.<java.nio.charset.CharsetEncoder: boolean canEncode(java.nio.CharBuffer)>($r0);
+
+        return $z0;
+    }
+
+    public boolean canEncode(java.lang.CharSequence)
+    {
+        java.lang.CharSequence r0;
+        java.nio.charset.CharsetEncoder r2;
+        java.nio.CharBuffer $r3, r4;
+        java.lang.String $r1;
+        boolean $z0, $z1;
+
+        r2 := @this: java.nio.charset.CharsetEncoder;
+
+        r0 := @parameter0: java.lang.CharSequence;
+
+        $z0 = r0 instanceof java.nio.CharBuffer;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = (java.nio.CharBuffer) r0;
+
+        r4 = virtualinvoke $r3.<java.nio.CharBuffer: java.nio.CharBuffer duplicate()>();
+
+        goto label2;
+
+     label1:
+        $r1 = interfaceinvoke r0.<java.lang.CharSequence: java.lang.String toString()>();
+
+        r4 = staticinvoke <java.nio.CharBuffer: java.nio.CharBuffer wrap(java.lang.CharSequence)>($r1);
+
+     label2:
+        $z1 = specialinvoke r2.<java.nio.charset.CharsetEncoder: boolean canEncode(java.nio.CharBuffer)>(r4);
+
+        return $z1;
+    }
+
+    private void throwIllegalStateException(int, int)
+    {
+        java.lang.IllegalStateException $r0;
+        java.lang.String[] $r3, $r7;
+        java.nio.charset.CharsetEncoder r11;
+        int i0, i1;
+        java.lang.StringBuilder $r1, $r2, $r5, $r6, $r9;
+        java.lang.String $r4, $r8, $r10;
+
+        r11 := @this: java.nio.charset.CharsetEncoder;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r0 = new java.lang.IllegalStateException;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Current state = ");
+
+        $r3 = <java.nio.charset.CharsetEncoder: java.lang.String[] stateNames>;
+
+        $r4 = $r3[i0];
+
+        $r5 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", new state = ");
+
+        $r7 = <java.nio.charset.CharsetEncoder: java.lang.String[] stateNames>;
+
+        $r8 = $r7[i1];
+
+        $r9 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r10);
+
+        throw $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        java.lang.String[] $r1;
+        boolean $z0, $z1;
+
+        <java.nio.charset.CharsetEncoder: int ST_FLUSHED> = 3;
+
+        <java.nio.charset.CharsetEncoder: int ST_END> = 2;
+
+        <java.nio.charset.CharsetEncoder: int ST_CODING> = 1;
+
+        <java.nio.charset.CharsetEncoder: int ST_RESET> = 0;
+
+        $r0 = class "Ljava/nio/charset/CharsetEncoder;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <java.nio.charset.CharsetEncoder: boolean $assertionsDisabled> = $z1;
+
+        $r1 = newarray (java.lang.String)[4];
+
+        $r1[0] = "RESET";
+
+        $r1[1] = "CODING";
+
+        $r1[2] = "CODING_END";
+
+        $r1[3] = "FLUSHED";
+
+        <java.nio.charset.CharsetEncoder: java.lang.String[] stateNames> = $r1;
+
+        return;
+    }
+}

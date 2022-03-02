@@ -1,0 +1,815 @@
+abstract class java.util.concurrent.atomic.Striped64 extends java.lang.Number
+{
+    static final int NCPU;
+    transient volatile java.util.concurrent.atomic.Striped64$Cell[] cells;
+    transient volatile long base;
+    transient volatile int cellsBusy;
+    private static final sun.misc.Unsafe UNSAFE;
+    private static final long BASE;
+    private static final long CELLSBUSY;
+    private static final long PROBE;
+
+    void <init>()
+    {
+        java.util.concurrent.atomic.Striped64 r0;
+
+        r0 := @this: java.util.concurrent.atomic.Striped64;
+
+        specialinvoke r0.<java.lang.Number: void <init>()>();
+
+        return;
+    }
+
+    final boolean casBase(long, long)
+    {
+        sun.misc.Unsafe $r1;
+        long l0, l1, $l2;
+        java.util.concurrent.atomic.Striped64 r0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.atomic.Striped64;
+
+        l0 := @parameter0: long;
+
+        l1 := @parameter1: long;
+
+        $r1 = <java.util.concurrent.atomic.Striped64: sun.misc.Unsafe UNSAFE>;
+
+        $l2 = <java.util.concurrent.atomic.Striped64: long BASE>;
+
+        $z0 = virtualinvoke $r1.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l2, l0, l1);
+
+        return $z0;
+    }
+
+    final boolean casCellsBusy()
+    {
+        sun.misc.Unsafe $r1;
+        long $l0;
+        java.util.concurrent.atomic.Striped64 r0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.atomic.Striped64;
+
+        $r1 = <java.util.concurrent.atomic.Striped64: sun.misc.Unsafe UNSAFE>;
+
+        $l0 = <java.util.concurrent.atomic.Striped64: long CELLSBUSY>;
+
+        $z0 = virtualinvoke $r1.<sun.misc.Unsafe: boolean compareAndSwapInt(java.lang.Object,long,int,int)>(r0, $l0, 0, 1);
+
+        return $z0;
+    }
+
+    static final int getProbe()
+    {
+        sun.misc.Unsafe $r0;
+        java.lang.Thread $r1;
+        int $i1;
+        long $l0;
+
+        $r0 = <java.util.concurrent.atomic.Striped64: sun.misc.Unsafe UNSAFE>;
+
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $l0 = <java.util.concurrent.atomic.Striped64: long PROBE>;
+
+        $i1 = virtualinvoke $r0.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>($r1, $l0);
+
+        return $i1;
+    }
+
+    static final int advanceProbe(int)
+    {
+        sun.misc.Unsafe $r0;
+        long $l3;
+        java.lang.Thread $r1;
+        int $i0, $i1, $i2, i4, i5, i6, i7;
+
+        i4 := @parameter0: int;
+
+        $i0 = i4 << 13;
+
+        i5 = i4 ^ $i0;
+
+        $i1 = i5 >>> 17;
+
+        i6 = i5 ^ $i1;
+
+        $i2 = i6 << 5;
+
+        i7 = i6 ^ $i2;
+
+        $r0 = <java.util.concurrent.atomic.Striped64: sun.misc.Unsafe UNSAFE>;
+
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $l3 = <java.util.concurrent.atomic.Striped64: long PROBE>;
+
+        virtualinvoke $r0.<sun.misc.Unsafe: void putInt(java.lang.Object,long,int)>($r1, $l3, i7);
+
+        return i7;
+    }
+
+    final void longAccumulate(long, java.util.function.LongBinaryOperator, boolean)
+    {
+        boolean $z0, $z1, $z2, $z3, $z4, z5, z6, z7, z8;
+        java.util.concurrent.atomic.Striped64$Cell $r4, $r5, $r8, $r9, $r11;
+        java.util.concurrent.atomic.Striped64$Cell[] $r2, $r3, $r6, $r7, $r10, $r15, r16, r17;
+        java.lang.Throwable $r12, $r13, $r14;
+        java.util.function.LongBinaryOperator r1;
+        long l2, $l7, $l17, $l19, $l20;
+        int $i0, $i1, $i3, $i4, $i5, $i6, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, i16, i18;
+        java.util.concurrent.atomic.Striped64 r0;
+
+        r0 := @this: java.util.concurrent.atomic.Striped64;
+
+        l2 := @parameter0: long;
+
+        r1 := @parameter1: java.util.function.LongBinaryOperator;
+
+        z5 := @parameter2: boolean;
+
+        $i0 = staticinvoke <java.util.concurrent.atomic.Striped64: int getProbe()>();
+
+        i16 = $i0;
+
+        if $i0 != 0 goto label01;
+
+        staticinvoke <java.util.concurrent.ThreadLocalRandom: java.util.concurrent.ThreadLocalRandom current()>();
+
+        i16 = staticinvoke <java.util.concurrent.atomic.Striped64: int getProbe()>();
+
+        z5 = 1;
+
+     label01:
+        z6 = 0;
+
+     label02:
+        $r15 = r0.<java.util.concurrent.atomic.Striped64: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        if $r15 == null goto label25;
+
+        $i4 = lengthof $r15;
+
+        if $i4 <= 0 goto label25;
+
+        $i5 = $i4 - 1;
+
+        $i6 = $i5 & i16;
+
+        $r5 = $r15[$i6];
+
+        if $r5 != null goto label09;
+
+        $i11 = r0.<java.util.concurrent.atomic.Striped64: int cellsBusy>;
+
+        if $i11 != 0 goto label08;
+
+        $r9 = new java.util.concurrent.atomic.Striped64$Cell;
+
+        specialinvoke $r9.<java.util.concurrent.atomic.Striped64$Cell: void <init>(long)>(l2);
+
+        $i12 = r0.<java.util.concurrent.atomic.Striped64: int cellsBusy>;
+
+        if $i12 != 0 goto label08;
+
+        $z4 = virtualinvoke r0.<java.util.concurrent.atomic.Striped64: boolean casCellsBusy()>();
+
+        if $z4 == 0 goto label08;
+
+        z7 = 0;
+
+     label03:
+        $r10 = r0.<java.util.concurrent.atomic.Striped64: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        if $r10 == null goto label04;
+
+        $i13 = lengthof $r10;
+
+        if $i13 <= 0 goto label04;
+
+        $i14 = $i13 - 1;
+
+        $i15 = $i14 & i16;
+
+        $r11 = $r10[$i15];
+
+        if $r11 != null goto label04;
+
+        $r10[$i15] = $r9;
+
+        z7 = 1;
+
+     label04:
+        r0.<java.util.concurrent.atomic.Striped64: int cellsBusy> = 0;
+
+        goto label07;
+
+     label05:
+        $r14 := @caughtexception;
+
+     label06:
+        r0.<java.util.concurrent.atomic.Striped64: int cellsBusy> = 0;
+
+        throw $r14;
+
+     label07:
+        if z7 == 0 goto label02;
+
+        goto label36;
+
+     label08:
+        z6 = 0;
+
+        goto label24;
+
+     label09:
+        if z5 != 0 goto label10;
+
+        z5 = 1;
+
+        goto label24;
+
+     label10:
+        $l7 = $r5.<java.util.concurrent.atomic.Striped64$Cell: long value>;
+
+        if r1 != null goto label11;
+
+        $l17 = $l7 + l2;
+
+        goto label12;
+
+     label11:
+        $l17 = interfaceinvoke r1.<java.util.function.LongBinaryOperator: long applyAsLong(long,long)>($l7, l2);
+
+     label12:
+        $z2 = virtualinvoke $r5.<java.util.concurrent.atomic.Striped64$Cell: boolean cas(long,long)>($l7, $l17);
+
+        if $z2 == 0 goto label13;
+
+        goto label36;
+
+     label13:
+        $i8 = <java.util.concurrent.atomic.Striped64: int NCPU>;
+
+        if $i4 >= $i8 goto label14;
+
+        $r6 = r0.<java.util.concurrent.atomic.Striped64: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        if $r6 == $r15 goto label15;
+
+     label14:
+        z6 = 0;
+
+        goto label24;
+
+     label15:
+        if z6 != 0 goto label16;
+
+        z6 = 1;
+
+        goto label24;
+
+     label16:
+        $i9 = r0.<java.util.concurrent.atomic.Striped64: int cellsBusy>;
+
+        if $i9 != 0 goto label24;
+
+        $z3 = virtualinvoke r0.<java.util.concurrent.atomic.Striped64: boolean casCellsBusy()>();
+
+        if $z3 == 0 goto label24;
+
+     label17:
+        $r7 = r0.<java.util.concurrent.atomic.Striped64: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        if $r7 != $r15 goto label20;
+
+        $i10 = $i4 << 1;
+
+        r16 = newarray (java.util.concurrent.atomic.Striped64$Cell)[$i10];
+
+        i18 = 0;
+
+     label18:
+        if i18 >= $i4 goto label19;
+
+        $r8 = $r15[i18];
+
+        r16[i18] = $r8;
+
+        i18 = i18 + 1;
+
+        goto label18;
+
+     label19:
+        r0.<java.util.concurrent.atomic.Striped64: java.util.concurrent.atomic.Striped64$Cell[] cells> = r16;
+
+     label20:
+        r0.<java.util.concurrent.atomic.Striped64: int cellsBusy> = 0;
+
+        goto label23;
+
+     label21:
+        $r13 := @caughtexception;
+
+     label22:
+        r0.<java.util.concurrent.atomic.Striped64: int cellsBusy> = 0;
+
+        throw $r13;
+
+     label23:
+        z6 = 0;
+
+        goto label02;
+
+     label24:
+        i16 = staticinvoke <java.util.concurrent.atomic.Striped64: int advanceProbe(int)>(i16);
+
+        goto label35;
+
+     label25:
+        $i1 = r0.<java.util.concurrent.atomic.Striped64: int cellsBusy>;
+
+        if $i1 != 0 goto label32;
+
+        $r2 = r0.<java.util.concurrent.atomic.Striped64: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        if $r2 != $r15 goto label32;
+
+        $z1 = virtualinvoke r0.<java.util.concurrent.atomic.Striped64: boolean casCellsBusy()>();
+
+        if $z1 == 0 goto label32;
+
+        z8 = 0;
+
+     label26:
+        $r3 = r0.<java.util.concurrent.atomic.Striped64: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        if $r3 != $r15 goto label27;
+
+        r17 = newarray (java.util.concurrent.atomic.Striped64$Cell)[2];
+
+        $i3 = i16 & 1;
+
+        $r4 = new java.util.concurrent.atomic.Striped64$Cell;
+
+        specialinvoke $r4.<java.util.concurrent.atomic.Striped64$Cell: void <init>(long)>(l2);
+
+        r17[$i3] = $r4;
+
+        r0.<java.util.concurrent.atomic.Striped64: java.util.concurrent.atomic.Striped64$Cell[] cells> = r17;
+
+        z8 = 1;
+
+     label27:
+        r0.<java.util.concurrent.atomic.Striped64: int cellsBusy> = 0;
+
+        goto label30;
+
+     label28:
+        $r12 := @caughtexception;
+
+     label29:
+        r0.<java.util.concurrent.atomic.Striped64: int cellsBusy> = 0;
+
+        throw $r12;
+
+     label30:
+        if z8 == 0 goto label31;
+
+        goto label36;
+
+     label31:
+        goto label35;
+
+     label32:
+        $l19 = r0.<java.util.concurrent.atomic.Striped64: long base>;
+
+        if r1 != null goto label33;
+
+        $l20 = $l19 + l2;
+
+        goto label34;
+
+     label33:
+        $l20 = interfaceinvoke r1.<java.util.function.LongBinaryOperator: long applyAsLong(long,long)>($l19, l2);
+
+     label34:
+        $z0 = virtualinvoke r0.<java.util.concurrent.atomic.Striped64: boolean casBase(long,long)>($l19, $l20);
+
+        if $z0 == 0 goto label35;
+
+        goto label36;
+
+     label35:
+        goto label02;
+
+     label36:
+        return;
+
+        catch java.lang.Throwable from label03 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.lang.Throwable from label17 to label20 with label21;
+        catch java.lang.Throwable from label21 to label22 with label21;
+        catch java.lang.Throwable from label26 to label27 with label28;
+        catch java.lang.Throwable from label28 to label29 with label28;
+    }
+
+    final void doubleAccumulate(double, java.util.function.DoubleBinaryOperator, boolean)
+    {
+        boolean $z0, $z1, $z2, $z3, $z4, z5, z6, z7, z8;
+        java.util.concurrent.atomic.Striped64$Cell $r4, $r5, $r8, $r9, $r11;
+        java.util.concurrent.atomic.Striped64$Cell[] $r2, $r3, $r6, $r7, $r10, $r15, r16, r17;
+        java.lang.Throwable $r12, $r13, $r14;
+        long $l3, $l7, $l12, $l18, $l20, $l21;
+        java.util.function.DoubleBinaryOperator r1;
+        int $i0, $i1, $i2, $i4, $i5, $i6, $i8, $i9, $i10, $i11, $i13, $i14, $i15, $i16, i17, i19;
+        double $d0, d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8;
+        java.util.concurrent.atomic.Striped64 r0;
+
+        r0 := @this: java.util.concurrent.atomic.Striped64;
+
+        d1 := @parameter0: double;
+
+        r1 := @parameter1: java.util.function.DoubleBinaryOperator;
+
+        z5 := @parameter2: boolean;
+
+        $i0 = staticinvoke <java.util.concurrent.atomic.Striped64: int getProbe()>();
+
+        i17 = $i0;
+
+        if $i0 != 0 goto label01;
+
+        staticinvoke <java.util.concurrent.ThreadLocalRandom: java.util.concurrent.ThreadLocalRandom current()>();
+
+        i17 = staticinvoke <java.util.concurrent.atomic.Striped64: int getProbe()>();
+
+        z5 = 1;
+
+     label01:
+        z6 = 0;
+
+     label02:
+        $r15 = r0.<java.util.concurrent.atomic.Striped64: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        if $r15 == null goto label25;
+
+        $i4 = lengthof $r15;
+
+        if $i4 <= 0 goto label25;
+
+        $i5 = $i4 - 1;
+
+        $i6 = $i5 & i17;
+
+        $r5 = $r15[$i6];
+
+        if $r5 != null goto label09;
+
+        $i11 = r0.<java.util.concurrent.atomic.Striped64: int cellsBusy>;
+
+        if $i11 != 0 goto label08;
+
+        $r9 = new java.util.concurrent.atomic.Striped64$Cell;
+
+        $l12 = staticinvoke <java.lang.Double: long doubleToRawLongBits(double)>(d1);
+
+        specialinvoke $r9.<java.util.concurrent.atomic.Striped64$Cell: void <init>(long)>($l12);
+
+        $i13 = r0.<java.util.concurrent.atomic.Striped64: int cellsBusy>;
+
+        if $i13 != 0 goto label08;
+
+        $z4 = virtualinvoke r0.<java.util.concurrent.atomic.Striped64: boolean casCellsBusy()>();
+
+        if $z4 == 0 goto label08;
+
+        z7 = 0;
+
+     label03:
+        $r10 = r0.<java.util.concurrent.atomic.Striped64: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        if $r10 == null goto label04;
+
+        $i14 = lengthof $r10;
+
+        if $i14 <= 0 goto label04;
+
+        $i15 = $i14 - 1;
+
+        $i16 = $i15 & i17;
+
+        $r11 = $r10[$i16];
+
+        if $r11 != null goto label04;
+
+        $r10[$i16] = $r9;
+
+        z7 = 1;
+
+     label04:
+        r0.<java.util.concurrent.atomic.Striped64: int cellsBusy> = 0;
+
+        goto label07;
+
+     label05:
+        $r14 := @caughtexception;
+
+     label06:
+        r0.<java.util.concurrent.atomic.Striped64: int cellsBusy> = 0;
+
+        throw $r14;
+
+     label07:
+        if z7 == 0 goto label02;
+
+        goto label36;
+
+     label08:
+        z6 = 0;
+
+        goto label24;
+
+     label09:
+        if z5 != 0 goto label10;
+
+        z5 = 1;
+
+        goto label24;
+
+     label10:
+        $l7 = $r5.<java.util.concurrent.atomic.Striped64$Cell: long value>;
+
+        if r1 != null goto label11;
+
+        $d7 = staticinvoke <java.lang.Double: double longBitsToDouble(long)>($l7);
+
+        $d8 = $d7 + d1;
+
+        $l18 = staticinvoke <java.lang.Double: long doubleToRawLongBits(double)>($d8);
+
+        goto label12;
+
+     label11:
+        $d5 = staticinvoke <java.lang.Double: double longBitsToDouble(long)>($l7);
+
+        $d6 = interfaceinvoke r1.<java.util.function.DoubleBinaryOperator: double applyAsDouble(double,double)>($d5, d1);
+
+        $l18 = staticinvoke <java.lang.Double: long doubleToRawLongBits(double)>($d6);
+
+     label12:
+        $z2 = virtualinvoke $r5.<java.util.concurrent.atomic.Striped64$Cell: boolean cas(long,long)>($l7, $l18);
+
+        if $z2 == 0 goto label13;
+
+        goto label36;
+
+     label13:
+        $i8 = <java.util.concurrent.atomic.Striped64: int NCPU>;
+
+        if $i4 >= $i8 goto label14;
+
+        $r6 = r0.<java.util.concurrent.atomic.Striped64: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        if $r6 == $r15 goto label15;
+
+     label14:
+        z6 = 0;
+
+        goto label24;
+
+     label15:
+        if z6 != 0 goto label16;
+
+        z6 = 1;
+
+        goto label24;
+
+     label16:
+        $i9 = r0.<java.util.concurrent.atomic.Striped64: int cellsBusy>;
+
+        if $i9 != 0 goto label24;
+
+        $z3 = virtualinvoke r0.<java.util.concurrent.atomic.Striped64: boolean casCellsBusy()>();
+
+        if $z3 == 0 goto label24;
+
+     label17:
+        $r7 = r0.<java.util.concurrent.atomic.Striped64: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        if $r7 != $r15 goto label20;
+
+        $i10 = $i4 << 1;
+
+        r16 = newarray (java.util.concurrent.atomic.Striped64$Cell)[$i10];
+
+        i19 = 0;
+
+     label18:
+        if i19 >= $i4 goto label19;
+
+        $r8 = $r15[i19];
+
+        r16[i19] = $r8;
+
+        i19 = i19 + 1;
+
+        goto label18;
+
+     label19:
+        r0.<java.util.concurrent.atomic.Striped64: java.util.concurrent.atomic.Striped64$Cell[] cells> = r16;
+
+     label20:
+        r0.<java.util.concurrent.atomic.Striped64: int cellsBusy> = 0;
+
+        goto label23;
+
+     label21:
+        $r13 := @caughtexception;
+
+     label22:
+        r0.<java.util.concurrent.atomic.Striped64: int cellsBusy> = 0;
+
+        throw $r13;
+
+     label23:
+        z6 = 0;
+
+        goto label02;
+
+     label24:
+        i17 = staticinvoke <java.util.concurrent.atomic.Striped64: int advanceProbe(int)>(i17);
+
+        goto label35;
+
+     label25:
+        $i1 = r0.<java.util.concurrent.atomic.Striped64: int cellsBusy>;
+
+        if $i1 != 0 goto label32;
+
+        $r2 = r0.<java.util.concurrent.atomic.Striped64: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        if $r2 != $r15 goto label32;
+
+        $z1 = virtualinvoke r0.<java.util.concurrent.atomic.Striped64: boolean casCellsBusy()>();
+
+        if $z1 == 0 goto label32;
+
+        z8 = 0;
+
+     label26:
+        $r3 = r0.<java.util.concurrent.atomic.Striped64: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        if $r3 != $r15 goto label27;
+
+        r17 = newarray (java.util.concurrent.atomic.Striped64$Cell)[2];
+
+        $i2 = i17 & 1;
+
+        $r4 = new java.util.concurrent.atomic.Striped64$Cell;
+
+        $l3 = staticinvoke <java.lang.Double: long doubleToRawLongBits(double)>(d1);
+
+        specialinvoke $r4.<java.util.concurrent.atomic.Striped64$Cell: void <init>(long)>($l3);
+
+        r17[$i2] = $r4;
+
+        r0.<java.util.concurrent.atomic.Striped64: java.util.concurrent.atomic.Striped64$Cell[] cells> = r17;
+
+        z8 = 1;
+
+     label27:
+        r0.<java.util.concurrent.atomic.Striped64: int cellsBusy> = 0;
+
+        goto label30;
+
+     label28:
+        $r12 := @caughtexception;
+
+     label29:
+        r0.<java.util.concurrent.atomic.Striped64: int cellsBusy> = 0;
+
+        throw $r12;
+
+     label30:
+        if z8 == 0 goto label31;
+
+        goto label36;
+
+     label31:
+        goto label35;
+
+     label32:
+        $l20 = r0.<java.util.concurrent.atomic.Striped64: long base>;
+
+        if r1 != null goto label33;
+
+        $d3 = staticinvoke <java.lang.Double: double longBitsToDouble(long)>($l20);
+
+        $d4 = $d3 + d1;
+
+        $l21 = staticinvoke <java.lang.Double: long doubleToRawLongBits(double)>($d4);
+
+        goto label34;
+
+     label33:
+        $d0 = staticinvoke <java.lang.Double: double longBitsToDouble(long)>($l20);
+
+        $d2 = interfaceinvoke r1.<java.util.function.DoubleBinaryOperator: double applyAsDouble(double,double)>($d0, d1);
+
+        $l21 = staticinvoke <java.lang.Double: long doubleToRawLongBits(double)>($d2);
+
+     label34:
+        $z0 = virtualinvoke r0.<java.util.concurrent.atomic.Striped64: boolean casBase(long,long)>($l20, $l21);
+
+        if $z0 == 0 goto label35;
+
+        goto label36;
+
+     label35:
+        goto label02;
+
+     label36:
+        return;
+
+        catch java.lang.Throwable from label03 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.lang.Throwable from label17 to label20 with label21;
+        catch java.lang.Throwable from label21 to label22 with label21;
+        catch java.lang.Throwable from label26 to label27 with label28;
+        catch java.lang.Throwable from label28 to label29 with label28;
+    }
+
+    static void <clinit>()
+    {
+        sun.misc.Unsafe $r1, $r2, $r4, $r7;
+        java.lang.Error $r10;
+        long $l1, $l2, $l3;
+        int $i0;
+        java.lang.Runtime $r0;
+        java.lang.reflect.Field $r3, $r5, $r8;
+        java.lang.Exception $r9;
+        java.lang.Class r6, r11, r12, r13;
+
+        $r0 = staticinvoke <java.lang.Runtime: java.lang.Runtime getRuntime()>();
+
+        $i0 = virtualinvoke $r0.<java.lang.Runtime: int availableProcessors()>();
+
+        <java.util.concurrent.atomic.Striped64: int NCPU> = $i0;
+
+     label1:
+        $r1 = staticinvoke <sun.misc.Unsafe: sun.misc.Unsafe getUnsafe()>();
+
+        <java.util.concurrent.atomic.Striped64: sun.misc.Unsafe UNSAFE> = $r1;
+
+        r11 = class "Ljava/util/concurrent/atomic/Striped64;";
+
+        r13 = class "Ljava/util/concurrent/atomic/Striped64;";
+
+        r12 = class "Ljava/util/concurrent/atomic/Striped64;";
+
+        $r2 = <java.util.concurrent.atomic.Striped64: sun.misc.Unsafe UNSAFE>;
+
+        $r3 = virtualinvoke r12.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("base");
+
+        $l1 = virtualinvoke $r2.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r3);
+
+        <java.util.concurrent.atomic.Striped64: long BASE> = $l1;
+
+        $r4 = <java.util.concurrent.atomic.Striped64: sun.misc.Unsafe UNSAFE>;
+
+        $r5 = virtualinvoke r13.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("cellsBusy");
+
+        $l2 = virtualinvoke $r4.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r5);
+
+        <java.util.concurrent.atomic.Striped64: long CELLSBUSY> = $l2;
+
+        r6 = class "Ljava/lang/Thread;";
+
+        $r7 = <java.util.concurrent.atomic.Striped64: sun.misc.Unsafe UNSAFE>;
+
+        $r8 = virtualinvoke r6.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("threadLocalRandomProbe");
+
+        $l3 = virtualinvoke $r7.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r8);
+
+        <java.util.concurrent.atomic.Striped64: long PROBE> = $l3;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r9 := @caughtexception;
+
+        $r10 = new java.lang.Error;
+
+        specialinvoke $r10.<java.lang.Error: void <init>(java.lang.Throwable)>($r9);
+
+        throw $r10;
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+}

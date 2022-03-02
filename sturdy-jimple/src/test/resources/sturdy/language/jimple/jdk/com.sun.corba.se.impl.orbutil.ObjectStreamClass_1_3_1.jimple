@@ -1,0 +1,2110 @@
+public class com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 extends java.lang.Object implements java.io.Serializable
+{
+    public static final long kDefaultUID;
+    private static java.lang.Object[] noArgsList;
+    private static java.lang.Class[] noTypesList;
+    private static java.util.Hashtable translatedFields;
+    private static com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry[] descriptorFor;
+    private java.lang.String name;
+    private com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 superclass;
+    private boolean serializable;
+    private boolean externalizable;
+    private com.sun.corba.se.impl.orbutil.ObjectStreamField[] fields;
+    private java.lang.Class ofClass;
+    boolean forProxyClass;
+    private long suid;
+    private java.lang.String suidStr;
+    private long actualSuid;
+    private java.lang.String actualSuidStr;
+    int primBytes;
+    int objFields;
+    private java.lang.Object lock;
+    private boolean hasWriteObjectMethod;
+    private boolean hasExternalizableBlockData;
+    java.lang.reflect.Method writeObjectMethod;
+    java.lang.reflect.Method readObjectMethod;
+    private transient java.lang.reflect.Method writeReplaceObjectMethod;
+    private transient java.lang.reflect.Method readResolveObjectMethod;
+    private com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 localClassDesc;
+    private static final long serialVersionUID;
+    public static final com.sun.corba.se.impl.orbutil.ObjectStreamField[] NO_FIELDS;
+    private static java.util.Comparator compareClassByName;
+    private static java.util.Comparator compareMemberByName;
+
+    static final com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 lookup(java.lang.Class)
+    {
+        java.lang.Class r0;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 $r1;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.Class;
+
+        $r1 = staticinvoke <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 lookupInternal(java.lang.Class)>(r0);
+
+        $z0 = virtualinvoke $r1.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: boolean isSerializable()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = virtualinvoke $r1.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: boolean isExternalizable()>();
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        return $r1;
+
+     label2:
+        return null;
+    }
+
+    static com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 lookupInternal(java.lang.Class)
+    {
+        java.lang.Throwable $r6;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry[] $r0;
+        boolean $z0, $z1, $z2, z3, z4, $z6, $z7;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 $r2, r7, $r8;
+        java.lang.Class r1, $r3, $r4, $r5;
+
+        r1 := @parameter0: java.lang.Class;
+
+        $r0 = <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry[] descriptorFor>;
+
+        entermonitor $r0;
+
+     label01:
+        $r2 = staticinvoke <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 findDescriptorFor(java.lang.Class)>(r1);
+
+        if $r2 == null goto label03;
+
+        exitmonitor $r0;
+
+     label02:
+        return $r2;
+
+     label03:
+        $r3 = class "Ljava/io/Serializable;";
+
+        $z0 = virtualinvoke $r3.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(r1);
+
+        z3 = $z0;
+
+        r7 = null;
+
+        if $z0 == 0 goto label04;
+
+        $r5 = virtualinvoke r1.<java.lang.Class: java.lang.Class getSuperclass()>();
+
+        if $r5 == null goto label04;
+
+        r7 = staticinvoke <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 lookup(java.lang.Class)>($r5);
+
+     label04:
+        z4 = 0;
+
+        if $z0 == 0 goto label09;
+
+        if r7 == null goto label05;
+
+        $z2 = virtualinvoke r7.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: boolean isExternalizable()>();
+
+        if $z2 != 0 goto label06;
+
+     label05:
+        $r4 = class "Ljava/io/Externalizable;";
+
+        $z1 = virtualinvoke $r4.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(r1);
+
+        if $z1 == 0 goto label07;
+
+     label06:
+        $z7 = 1;
+
+        $z6 = 1;
+
+        goto label08;
+
+     label07:
+        $z7 = 0;
+
+        $z6 = 0;
+
+     label08:
+        z4 = $z6;
+
+        if $z7 == 0 goto label09;
+
+        z3 = 0;
+
+     label09:
+        $r8 = new com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        specialinvoke $r8.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: void <init>(java.lang.Class,com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1,boolean,boolean)>(r1, r7, z3, z4);
+
+        exitmonitor $r0;
+
+     label10:
+        goto label13;
+
+     label11:
+        $r6 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label12:
+        throw $r6;
+
+     label13:
+        specialinvoke $r8.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: void init()>();
+
+        return $r8;
+
+        catch java.lang.Throwable from label01 to label02 with label11;
+        catch java.lang.Throwable from label03 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+    }
+
+    public final java.lang.String getName()
+    {
+        java.lang.String $r1;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.String name>;
+
+        return $r1;
+    }
+
+    public static final long getSerialVersionUID(java.lang.Class)
+    {
+        java.lang.Class r0;
+        long $l0;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 $r1;
+
+        r0 := @parameter0: java.lang.Class;
+
+        $r1 = staticinvoke <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 lookup(java.lang.Class)>(r0);
+
+        if $r1 == null goto label1;
+
+        $l0 = virtualinvoke $r1.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: long getSerialVersionUID()>();
+
+        return $l0;
+
+     label1:
+        return 0L;
+    }
+
+    public final long getSerialVersionUID()
+    {
+        long $l0;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        $l0 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: long suid>;
+
+        return $l0;
+    }
+
+    public final java.lang.String getSerialVersionUIDStr()
+    {
+        long $l0;
+        java.lang.String $r1, $r2, $r3, $r4;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.String suidStr>;
+
+        if $r1 != null goto label1;
+
+        $l0 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: long suid>;
+
+        $r3 = staticinvoke <java.lang.Long: java.lang.String toHexString(long)>($l0);
+
+        $r4 = virtualinvoke $r3.<java.lang.String: java.lang.String toUpperCase()>();
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.String suidStr> = $r4;
+
+     label1:
+        $r2 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.String suidStr>;
+
+        return $r2;
+    }
+
+    public static final long getActualSerialVersionUID(java.lang.Class)
+    {
+        java.lang.Class r0;
+        long $l0;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 $r1;
+
+        r0 := @parameter0: java.lang.Class;
+
+        $r1 = staticinvoke <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 lookup(java.lang.Class)>(r0);
+
+        if $r1 == null goto label1;
+
+        $l0 = virtualinvoke $r1.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: long getActualSerialVersionUID()>();
+
+        return $l0;
+
+     label1:
+        return 0L;
+    }
+
+    public final long getActualSerialVersionUID()
+    {
+        long $l0;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        $l0 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: long actualSuid>;
+
+        return $l0;
+    }
+
+    public final java.lang.String getActualSerialVersionUIDStr()
+    {
+        long $l0;
+        java.lang.String $r1, $r2, $r3, $r4;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.String actualSuidStr>;
+
+        if $r1 != null goto label1;
+
+        $l0 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: long actualSuid>;
+
+        $r3 = staticinvoke <java.lang.Long: java.lang.String toHexString(long)>($l0);
+
+        $r4 = virtualinvoke $r3.<java.lang.String: java.lang.String toUpperCase()>();
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.String actualSuidStr> = $r4;
+
+     label1:
+        $r2 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.String actualSuidStr>;
+
+        return $r2;
+    }
+
+    public final java.lang.Class forClass()
+    {
+        java.lang.Class $r1;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.Class ofClass>;
+
+        return $r1;
+    }
+
+    public com.sun.corba.se.impl.orbutil.ObjectStreamField[] getFields()
+    {
+        com.sun.corba.se.impl.orbutil.ObjectStreamField[] $r1, $r2, $r3, r4, $r5, $r6;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+        int $i0, $i1, $i2;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamField[] fields>;
+
+        $i0 = lengthof $r1;
+
+        if $i0 <= 0 goto label1;
+
+        $r3 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamField[] fields>;
+
+        $i1 = lengthof $r3;
+
+        r4 = newarray (com.sun.corba.se.impl.orbutil.ObjectStreamField)[$i1];
+
+        $r6 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamField[] fields>;
+
+        $r5 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamField[] fields>;
+
+        $i2 = lengthof $r5;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r6, 0, r4, 0, $i2);
+
+        return r4;
+
+     label1:
+        $r2 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamField[] fields>;
+
+        return $r2;
+    }
+
+    public boolean hasField(org.omg.CORBA.ValueMember)
+    {
+        java.lang.Throwable $r11;
+        int $i0, i1;
+        java.lang.String $r4, $r6, $r9, $r10;
+        boolean $z0, $z1;
+        com.sun.corba.se.impl.orbutil.ObjectStreamField[] $r1, $r2, $r7;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+        com.sun.corba.se.impl.orbutil.ObjectStreamField $r3, $r8;
+        org.omg.CORBA.ValueMember r5;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        r5 := @parameter0: org.omg.CORBA.ValueMember;
+
+        i1 = 0;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamField[] fields>;
+
+        $i0 = lengthof $r1;
+
+        if i1 >= $i0 goto label7;
+
+     label2:
+        $r2 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamField[] fields>;
+
+        $r3 = $r2[i1];
+
+        $r4 = virtualinvoke $r3.<com.sun.corba.se.impl.orbutil.ObjectStreamField: java.lang.String getName()>();
+
+        $r6 = r5.<org.omg.CORBA.ValueMember: java.lang.String name>;
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 == 0 goto label4;
+
+        $r7 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamField[] fields>;
+
+        $r8 = $r7[i1];
+
+        $r9 = virtualinvoke $r8.<com.sun.corba.se.impl.orbutil.ObjectStreamField: java.lang.String getSignature()>();
+
+        $r10 = staticinvoke <com.sun.corba.se.impl.io.ValueUtility: java.lang.String getSignature(org.omg.CORBA.ValueMember)>(r5);
+
+        $z1 = virtualinvoke $r9.<java.lang.String: boolean equals(java.lang.Object)>($r10);
+
+        if $z1 == 0 goto label4;
+
+     label3:
+        return 1;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r11 := @caughtexception;
+
+     label6:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label7:
+        return 0;
+
+        catch java.lang.Throwable from label2 to label3 with label5;
+    }
+
+    final com.sun.corba.se.impl.orbutil.ObjectStreamField[] getFieldsNoCopy()
+    {
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+        com.sun.corba.se.impl.orbutil.ObjectStreamField[] $r1;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamField[] fields>;
+
+        return $r1;
+    }
+
+    public final com.sun.corba.se.impl.orbutil.ObjectStreamField getField(java.lang.String)
+    {
+        com.sun.corba.se.impl.orbutil.ObjectStreamField[] $r1, $r3, $r6;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+        com.sun.corba.se.impl.orbutil.ObjectStreamField $r4, $r7;
+        int $i0, i1, $i3;
+        java.lang.String r2, $r5;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamField[] fields>;
+
+        $i0 = lengthof $r1;
+
+        i1 = $i0 - 1;
+
+     label1:
+        if i1 < 0 goto label3;
+
+        $r3 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamField[] fields>;
+
+        $r4 = $r3[i1];
+
+        $r5 = virtualinvoke $r4.<com.sun.corba.se.impl.orbutil.ObjectStreamField: java.lang.String getName()>();
+
+        $z0 = virtualinvoke r2.<java.lang.String: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label2;
+
+        $r6 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamField[] fields>;
+
+        $r7 = $r6[i1];
+
+        return $r7;
+
+     label2:
+        $i3 = (int) -1;
+
+        i1 = i1 + $i3;
+
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    public java.io.Serializable writeReplace(java.io.Serializable)
+    {
+        java.lang.Throwable $r7;
+        java.lang.Object[] $r3;
+        java.lang.RuntimeException $r8;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+        java.io.Serializable r2, $r6;
+        java.lang.Object $r5;
+        java.lang.String $r9;
+        java.lang.reflect.Method $r1, $r4;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        r2 := @parameter0: java.io.Serializable;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.reflect.Method writeReplaceObjectMethod>;
+
+        if $r1 == null goto label4;
+
+     label1:
+        $r4 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.reflect.Method writeReplaceObjectMethod>;
+
+        $r3 = <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.Object[] noArgsList>;
+
+        $r5 = virtualinvoke $r4.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>(r2, $r3);
+
+        $r6 = (java.io.Serializable) $r5;
+
+     label2:
+        return $r6;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $r8 = new java.lang.RuntimeException;
+
+        $r9 = virtualinvoke $r7.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        specialinvoke $r8.<java.lang.RuntimeException: void <init>(java.lang.String)>($r9);
+
+        throw $r8;
+
+     label4:
+        return r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public java.lang.Object readResolve(java.lang.Object)
+    {
+        java.lang.Throwable $r6;
+        java.lang.Object[] $r3;
+        java.lang.RuntimeException $r7;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+        java.lang.Object r2, $r5;
+        java.lang.String $r8;
+        java.lang.reflect.Method $r1, $r4;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        r2 := @parameter0: java.lang.Object;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.reflect.Method readResolveObjectMethod>;
+
+        if $r1 == null goto label4;
+
+     label1:
+        $r4 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.reflect.Method readResolveObjectMethod>;
+
+        $r3 = <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.Object[] noArgsList>;
+
+        $r5 = virtualinvoke $r4.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>(r2, $r3);
+
+     label2:
+        return $r5;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = new java.lang.RuntimeException;
+
+        $r8 = virtualinvoke $r6.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        specialinvoke $r7.<java.lang.RuntimeException: void <init>(java.lang.String)>($r8);
+
+        throw $r7;
+
+     label4:
+        return r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public final java.lang.String toString()
+    {
+        java.lang.StringBuffer $r0;
+        long $l0;
+        java.lang.String $r2, $r3, $r4;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r1;
+
+        r1 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        $r0 = new java.lang.StringBuffer;
+
+        specialinvoke $r0.<java.lang.StringBuffer: void <init>()>();
+
+        $r2 = r1.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.String name>;
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r2);
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>(": static final long serialVersionUID = ");
+
+        $l0 = r1.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: long suid>;
+
+        $r3 = staticinvoke <java.lang.Long: java.lang.String toString(long)>($l0);
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r3);
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("L;");
+
+        $r4 = virtualinvoke $r0.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r4;
+    }
+
+    private void <init>(java.lang.Class, com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1, boolean, boolean)
+    {
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0, r4;
+        java.lang.Object $r1;
+        java.lang.Class r2;
+        java.lang.String $r3;
+        boolean $z0, z1, $z2, z3;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        r2 := @parameter0: java.lang.Class;
+
+        r4 := @parameter1: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        z1 := @parameter2: boolean;
+
+        z3 := @parameter3: boolean;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: long suid> = -1L;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.String suidStr> = null;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: long actualSuid> = -1L;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.String actualSuidStr> = null;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.Object lock> = $r1;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.Class ofClass> = r2;
+
+        $z0 = staticinvoke <java.lang.reflect.Proxy: boolean isProxyClass(java.lang.Class)>(r2);
+
+        if $z0 == 0 goto label1;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: boolean forProxyClass> = 1;
+
+     label1:
+        $r3 = virtualinvoke r2.<java.lang.Class: java.lang.String getName()>();
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.String name> = $r3;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 superclass> = r4;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: boolean serializable> = z1;
+
+        $z2 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: boolean forProxyClass>;
+
+        if $z2 != 0 goto label2;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: boolean externalizable> = z3;
+
+     label2:
+        staticinvoke <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: void insertDescriptorFor(com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1)>(r0);
+
+        return;
+    }
+
+    private void init()
+    {
+        java.lang.Throwable $r9;
+        long $l0;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$1 $r6;
+        int $i1;
+        java.lang.String $r5;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$2 $r4;
+        com.sun.corba.se.impl.orbutil.ObjectStreamField[] $r3, $r7, $r8, $r10;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+        java.lang.Object $r1;
+        java.lang.Class r2;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label01:
+        r2 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.Class ofClass>;
+
+        $r3 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamField[] fields>;
+
+        if $r3 == null goto label03;
+
+        exitmonitor $r1;
+
+     label02:
+        return;
+
+     label03:
+        $z0 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: boolean serializable>;
+
+        if $z0 == 0 goto label04;
+
+        $z1 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: boolean externalizable>;
+
+        if $z1 != 0 goto label04;
+
+        $z2 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: boolean forProxyClass>;
+
+        if $z2 != 0 goto label04;
+
+        $r5 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.String name>;
+
+        $z3 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("java.lang.String");
+
+        if $z3 == 0 goto label05;
+
+     label04:
+        $r10 = <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamField[] NO_FIELDS>;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamField[] fields> = $r10;
+
+        goto label07;
+
+     label05:
+        $z4 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: boolean serializable>;
+
+        if $z4 == 0 goto label07;
+
+        $r6 = new com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$1;
+
+        specialinvoke $r6.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$1: void <init>(com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1,java.lang.Class)>(r0, r2);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r6);
+
+        $r7 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamField[] fields>;
+
+        $i1 = lengthof $r7;
+
+        if $i1 <= 1 goto label06;
+
+        $r8 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamField[] fields>;
+
+        staticinvoke <java.util.Arrays: void sort(java.lang.Object[])>($r8);
+
+     label06:
+        specialinvoke r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: void computeFieldInfo()>();
+
+     label07:
+        $z5 = virtualinvoke r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: boolean isNonSerializable()>();
+
+        if $z5 == 0 goto label08;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: long suid> = 0L;
+
+        goto label09;
+
+     label08:
+        $r4 = new com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$2;
+
+        specialinvoke $r4.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$2: void <init>(com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1,java.lang.Class)>(r0, r2);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r4);
+
+     label09:
+        $l0 = staticinvoke <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: long computeStructuralUID(com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1,java.lang.Class)>(r0, r2);
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: long actualSuid> = $l0;
+
+        exitmonitor $r1;
+
+     label10:
+        goto label13;
+
+     label11:
+        $r9 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label12:
+        throw $r9;
+
+     label13:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label11;
+        catch java.lang.Throwable from label03 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+    }
+
+    void <init>(java.lang.String, long)
+    {
+        java.lang.Object $r1;
+        long l0;
+        java.lang.String r2;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        r2 := @parameter0: java.lang.String;
+
+        l0 := @parameter1: long;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: long suid> = -1L;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.String suidStr> = null;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: long actualSuid> = -1L;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.String actualSuidStr> = null;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.Object lock> = $r1;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.String name> = r2;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: long suid> = l0;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 superclass> = null;
+
+        return;
+    }
+
+    private static java.lang.Object[] translateFields(java.lang.Object[]) throws java.lang.NoSuchFieldException
+    {
+        java.lang.Throwable $r21;
+        java.lang.Object[] r0, $r5, $r8, r9, $r13, $r20, r24;
+        java.lang.reflect.Constructor $r11;
+        java.io.ObjectStreamField[] $r1, r23;
+        java.lang.NoSuchFieldException $r26;
+        int $i0, $i1, i2, $i4;
+        java.lang.String $r15;
+        java.util.Hashtable $r2, $r3, $r12, $r25;
+        java.io.ObjectStreamField $r14, $r16;
+        java.lang.Class[] $r10;
+        java.lang.Object $r4, $r7, $r18;
+        java.lang.Class r6, $r17;
+
+        r0 := @parameter0: java.lang.Object[];
+
+     label1:
+        $r1 = (java.io.ObjectStreamField[]) r0;
+
+        r23 = (java.io.ObjectStreamField[]) $r1;
+
+        $r2 = <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.util.Hashtable translatedFields>;
+
+        if $r2 != null goto label2;
+
+        $r25 = new java.util.Hashtable;
+
+        specialinvoke $r25.<java.util.Hashtable: void <init>()>();
+
+        <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.util.Hashtable translatedFields> = $r25;
+
+     label2:
+        $r3 = <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.util.Hashtable translatedFields>;
+
+        $r4 = virtualinvoke $r3.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r23);
+
+        $r5 = (java.lang.Object[]) $r4;
+
+        $r20 = (java.lang.Object[]) $r5;
+
+        if $r20 == null goto label4;
+
+     label3:
+        return $r20;
+
+     label4:
+        r6 = class "Lcom/sun/corba/se/impl/orbutil/ObjectStreamField;";
+
+        $i0 = lengthof r0;
+
+        $r7 = staticinvoke <java.lang.reflect.Array: java.lang.Object newInstance(java.lang.Class,int)>(class "Lcom/sun/corba/se/impl/orbutil/ObjectStreamField;", $i0);
+
+        $r8 = (java.lang.Object[]) $r7;
+
+        r24 = (java.lang.Object[]) $r8;
+
+        r9 = newarray (java.lang.Object)[2];
+
+        $r10 = newarray (java.lang.Class)[2];
+
+        $r10[0] = class "Ljava/lang/String;";
+
+        $r10[1] = class "Ljava/lang/Class;";
+
+        $r11 = virtualinvoke r6.<java.lang.Class: java.lang.reflect.Constructor getDeclaredConstructor(java.lang.Class[])>($r10);
+
+        $i1 = lengthof r23;
+
+        i2 = $i1 - 1;
+
+     label5:
+        if i2 < 0 goto label6;
+
+        $r14 = r23[i2];
+
+        $r15 = virtualinvoke $r14.<java.io.ObjectStreamField: java.lang.String getName()>();
+
+        r9[0] = $r15;
+
+        $r16 = r23[i2];
+
+        $r17 = virtualinvoke $r16.<java.io.ObjectStreamField: java.lang.Class getType()>();
+
+        r9[1] = $r17;
+
+        $r18 = virtualinvoke $r11.<java.lang.reflect.Constructor: java.lang.Object newInstance(java.lang.Object[])>(r9);
+
+        r24[i2] = $r18;
+
+        $i4 = (int) -1;
+
+        i2 = i2 + $i4;
+
+        goto label5;
+
+     label6:
+        $r12 = <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.util.Hashtable translatedFields>;
+
+        virtualinvoke $r12.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>(r23, r24);
+
+        $r13 = (java.lang.Object[]) r24;
+
+     label7:
+        return $r13;
+
+     label8:
+        $r21 := @caughtexception;
+
+        $r26 = new java.lang.NoSuchFieldException;
+
+        specialinvoke $r26.<java.lang.NoSuchFieldException: void <init>()>();
+
+        throw $r26;
+
+        catch java.lang.Throwable from label1 to label3 with label8;
+        catch java.lang.Throwable from label4 to label7 with label8;
+    }
+
+    static boolean compareClassNames(java.lang.String, java.lang.String, char)
+    {
+        char c0;
+        int $i1, $i2, $i3, $i4, i5, i6, $i7, $i8;
+        java.lang.String r0, r1;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        c0 := @parameter2: char;
+
+        $i7 = (int) c0;
+
+        $i1 = virtualinvoke r0.<java.lang.String: int lastIndexOf(int)>($i7);
+
+        i5 = $i1;
+
+        if $i1 >= 0 goto label1;
+
+        i5 = 0;
+
+     label1:
+        $i8 = (int) c0;
+
+        $i2 = virtualinvoke r1.<java.lang.String: int lastIndexOf(int)>($i8);
+
+        i6 = $i2;
+
+        if $i2 >= 0 goto label2;
+
+        i6 = 0;
+
+     label2:
+        $i3 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $i4 = $i3 - i5;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean regionMatches(boolean,int,java.lang.String,int,int)>(0, i5, r1, i6, $i4);
+
+        return $z0;
+    }
+
+    final boolean typeEquals(com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1)
+    {
+        long $l0, $l1;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0, r1;
+        byte $b2;
+        java.lang.String $r2, $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        r1 := @parameter0: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        $l1 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: long suid>;
+
+        $l0 = r1.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: long suid>;
+
+        $b2 = $l1 cmp $l0;
+
+        if $b2 != 0 goto label1;
+
+        $r3 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.String name>;
+
+        $r2 = r1.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.String name>;
+
+        $z0 = staticinvoke <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: boolean compareClassNames(java.lang.String,java.lang.String,char)>($r3, $r2, 46);
+
+        if $z0 == 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    final void setSuperclass(com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1)
+    {
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0, r1;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        r1 := @parameter0: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 superclass> = r1;
+
+        return;
+    }
+
+    final com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 getSuperclass()
+    {
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0, $r1;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 superclass>;
+
+        return $r1;
+    }
+
+    final boolean hasWriteObject()
+    {
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        $z0 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: boolean hasWriteObjectMethod>;
+
+        return $z0;
+    }
+
+    final boolean isCustomMarshaled()
+    {
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        $z0 = virtualinvoke r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: boolean hasWriteObject()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = virtualinvoke r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: boolean isExternalizable()>();
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+    }
+
+    boolean hasExternalizableBlockDataMode()
+    {
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        $z0 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: boolean hasExternalizableBlockData>;
+
+        return $z0;
+    }
+
+    final com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 localClassDescriptor()
+    {
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0, $r1;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 localClassDesc>;
+
+        return $r1;
+    }
+
+    boolean isSerializable()
+    {
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        $z0 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: boolean serializable>;
+
+        return $z0;
+    }
+
+    boolean isExternalizable()
+    {
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        $z0 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: boolean externalizable>;
+
+        return $z0;
+    }
+
+    boolean isNonSerializable()
+    {
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        $z0 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: boolean externalizable>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: boolean serializable>;
+
+        if $z1 != 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+    }
+
+    private void computeFieldInfo()
+    {
+        int $i0, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, i12, $i13;
+        com.sun.corba.se.impl.orbutil.ObjectStreamField[] $r1, $r2;
+        char $c1;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+        com.sun.corba.se.impl.orbutil.ObjectStreamField $r3;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: int primBytes> = 0;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: int objFields> = 0;
+
+        i12 = 0;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamField[] fields>;
+
+        $i0 = lengthof $r1;
+
+        if i12 >= $i0 goto label8;
+
+        $r2 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamField[] fields>;
+
+        $r3 = $r2[i12];
+
+        $c1 = virtualinvoke $r3.<com.sun.corba.se.impl.orbutil.ObjectStreamField: char getTypeCode()>();
+
+        $i13 = (int) $c1;
+
+        tableswitch($i13)
+        {
+            case 66: goto label2;
+            case 67: goto label3;
+            case 68: goto label5;
+            case 69: goto label7;
+            case 70: goto label4;
+            case 71: goto label7;
+            case 72: goto label7;
+            case 73: goto label4;
+            case 74: goto label5;
+            case 75: goto label7;
+            case 76: goto label6;
+            case 77: goto label7;
+            case 78: goto label7;
+            case 79: goto label7;
+            case 80: goto label7;
+            case 81: goto label7;
+            case 82: goto label7;
+            case 83: goto label3;
+            case 84: goto label7;
+            case 85: goto label7;
+            case 86: goto label7;
+            case 87: goto label7;
+            case 88: goto label7;
+            case 89: goto label7;
+            case 90: goto label2;
+            case 91: goto label6;
+            default: goto label7;
+        };
+
+     label2:
+        $i10 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: int primBytes>;
+
+        $i11 = $i10 + 1;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: int primBytes> = $i11;
+
+        goto label7;
+
+     label3:
+        $i8 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: int primBytes>;
+
+        $i9 = $i8 + 2;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: int primBytes> = $i9;
+
+        goto label7;
+
+     label4:
+        $i4 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: int primBytes>;
+
+        $i5 = $i4 + 4;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: int primBytes> = $i5;
+
+        goto label7;
+
+     label5:
+        $i6 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: int primBytes>;
+
+        $i7 = $i6 + 8;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: int primBytes> = $i7;
+
+        goto label7;
+
+     label6:
+        $i2 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: int objFields>;
+
+        $i3 = $i2 + 1;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: int objFields> = $i3;
+
+     label7:
+        i12 = i12 + 1;
+
+        goto label1;
+
+     label8:
+        return;
+    }
+
+    private static long computeStructuralUID(com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1, java.lang.Class)
+    {
+        byte[] $r10;
+        byte $b4;
+        java.io.DataOutputStream $r30;
+        java.lang.SecurityException $r31;
+        boolean $z0, $z1, $z2, $z3;
+        java.security.DigestOutputStream $r29;
+        java.security.NoSuchAlgorithmException $r22;
+        java.io.ByteArrayOutputStream $r28;
+        java.security.MessageDigest $r4;
+        long $l7, $l8, $l10, l11;
+        short $s5, $s20;
+        int $i0, $i1, $i2, $i3, $i6, $i9, i12, i13, $i14, i15, i16, i17, $i18, i19;
+        java.lang.String $r11, $r13, $r24;
+        com.sun.corba.se.impl.orbutil.ObjectStreamField[] $r9;
+        java.io.IOException $r25;
+        java.lang.reflect.Field $r16, $r18, $r20, r27;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r8, $r21;
+        com.sun.corba.se.impl.orbutil.ObjectStreamField $r15, $r17, $r19;
+        java.lang.reflect.Field[] r26;
+        java.lang.Class r1, $r2, $r3, $r7, $r12;
+        java.util.Comparator $r14;
+
+        r8 := @parameter0: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        r1 := @parameter1: java.lang.Class;
+
+        $r28 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r28.<java.io.ByteArrayOutputStream: void <init>(int)>(512);
+
+        l11 = 0L;
+
+     label01:
+        $r2 = class "Ljava/io/Serializable;";
+
+        $z0 = virtualinvoke $r2.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(r1);
+
+        if $z0 == 0 goto label02;
+
+        $z1 = virtualinvoke r1.<java.lang.Class: boolean isInterface()>();
+
+        if $z1 == 0 goto label03;
+
+     label02:
+        return 0L;
+
+     label03:
+        $r3 = class "Ljava/io/Externalizable;";
+
+        $z2 = virtualinvoke $r3.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(r1);
+
+        if $z2 == 0 goto label05;
+
+     label04:
+        return 1L;
+
+     label05:
+        $r4 = staticinvoke <java.security.MessageDigest: java.security.MessageDigest getInstance(java.lang.String)>("SHA");
+
+        $r29 = new java.security.DigestOutputStream;
+
+        specialinvoke $r29.<java.security.DigestOutputStream: void <init>(java.io.OutputStream,java.security.MessageDigest)>($r28, $r4);
+
+        $r30 = new java.io.DataOutputStream;
+
+        specialinvoke $r30.<java.io.DataOutputStream: void <init>(java.io.OutputStream)>($r29);
+
+        $r7 = virtualinvoke r1.<java.lang.Class: java.lang.Class getSuperclass()>();
+
+        if $r7 == null goto label06;
+
+        $r21 = staticinvoke <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 lookup(java.lang.Class)>($r7);
+
+        $l10 = staticinvoke <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: long computeStructuralUID(com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1,java.lang.Class)>($r21, $r7);
+
+        virtualinvoke $r30.<java.io.DataOutputStream: void writeLong(long)>($l10);
+
+     label06:
+        $z3 = virtualinvoke r8.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: boolean hasWriteObject()>();
+
+        if $z3 == 0 goto label07;
+
+        virtualinvoke $r30.<java.io.DataOutputStream: void writeInt(int)>(2);
+
+        goto label08;
+
+     label07:
+        virtualinvoke $r30.<java.io.DataOutputStream: void writeInt(int)>(1);
+
+     label08:
+        $r9 = virtualinvoke r8.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamField[] getFields()>();
+
+        i12 = 0;
+
+        i13 = 0;
+
+     label09:
+        $i14 = lengthof $r9;
+
+        if i13 >= $i14 goto label11;
+
+        $r19 = $r9[i13];
+
+        $r20 = virtualinvoke $r19.<com.sun.corba.se.impl.orbutil.ObjectStreamField: java.lang.reflect.Field getField()>();
+
+        if $r20 == null goto label10;
+
+        i12 = i12 + 1;
+
+     label10:
+        i13 = i13 + 1;
+
+        goto label09;
+
+     label11:
+        r26 = newarray (java.lang.reflect.Field)[i12];
+
+        i15 = 0;
+
+        i16 = 0;
+
+     label12:
+        $i0 = lengthof $r9;
+
+        if i15 >= $i0 goto label14;
+
+        $r15 = $r9[i15];
+
+        $r16 = virtualinvoke $r15.<com.sun.corba.se.impl.orbutil.ObjectStreamField: java.lang.reflect.Field getField()>();
+
+        if $r16 == null goto label13;
+
+        $i9 = i16;
+
+        i16 = i16 + 1;
+
+        $r17 = $r9[i15];
+
+        $r18 = virtualinvoke $r17.<com.sun.corba.se.impl.orbutil.ObjectStreamField: java.lang.reflect.Field getField()>();
+
+        r26[$i9] = $r18;
+
+     label13:
+        i15 = i15 + 1;
+
+        goto label12;
+
+     label14:
+        $i1 = lengthof r26;
+
+        if $i1 <= 1 goto label15;
+
+        $r14 = <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.util.Comparator compareMemberByName>;
+
+        staticinvoke <java.util.Arrays: void sort(java.lang.Object[],java.util.Comparator)>(r26, $r14);
+
+     label15:
+        i17 = 0;
+
+     label16:
+        $i18 = lengthof r26;
+
+        if i17 >= $i18 goto label17;
+
+        r27 = r26[i17];
+
+        virtualinvoke r27.<java.lang.reflect.Field: int getModifiers()>();
+
+        $r11 = virtualinvoke r27.<java.lang.reflect.Field: java.lang.String getName()>();
+
+        virtualinvoke $r30.<java.io.DataOutputStream: void writeUTF(java.lang.String)>($r11);
+
+        $r12 = virtualinvoke r27.<java.lang.reflect.Field: java.lang.Class getType()>();
+
+        $r13 = staticinvoke <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.String getSignature(java.lang.Class)>($r12);
+
+        virtualinvoke $r30.<java.io.DataOutputStream: void writeUTF(java.lang.String)>($r13);
+
+        i17 = i17 + 1;
+
+        goto label16;
+
+     label17:
+        virtualinvoke $r30.<java.io.DataOutputStream: void flush()>();
+
+        $r10 = virtualinvoke $r4.<java.security.MessageDigest: byte[] digest()>();
+
+        i19 = 0;
+
+     label18:
+        $i2 = lengthof $r10;
+
+        $i3 = staticinvoke <java.lang.Math: int min(int,int)>(8, $i2);
+
+        if i19 >= $i3 goto label19;
+
+        $b4 = $r10[i19];
+
+        $s20 = (short) $b4;
+
+        $s5 = $s20 & 255;
+
+        $l7 = (long) $s5;
+
+        $i6 = i19 * 8;
+
+        $l8 = $l7 << $i6;
+
+        l11 = l11 + $l8;
+
+        i19 = i19 + 1;
+
+        goto label18;
+
+     label19:
+        goto label22;
+
+     label20:
+        $r25 := @caughtexception;
+
+        l11 = -1L;
+
+        goto label22;
+
+     label21:
+        $r22 := @caughtexception;
+
+        $r31 = new java.lang.SecurityException;
+
+        $r24 = virtualinvoke $r22.<java.security.NoSuchAlgorithmException: java.lang.String getMessage()>();
+
+        specialinvoke $r31.<java.lang.SecurityException: void <init>(java.lang.String)>($r24);
+
+        throw $r31;
+
+     label22:
+        return l11;
+
+        catch java.io.IOException from label01 to label02 with label20;
+        catch java.io.IOException from label03 to label04 with label20;
+        catch java.io.IOException from label05 to label19 with label20;
+        catch java.security.NoSuchAlgorithmException from label01 to label02 with label21;
+        catch java.security.NoSuchAlgorithmException from label03 to label04 with label21;
+        catch java.security.NoSuchAlgorithmException from label05 to label19 with label21;
+    }
+
+    static java.lang.String getSignature(java.lang.Class)
+    {
+        java.lang.StringBuffer $r16;
+        int i0, i1;
+        java.lang.String $r3, $r4, $r17, r18;
+        boolean $z0, $z1, $z2;
+        java.lang.Class r0, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, r19;
+        java.lang.StringBuilder $r1, $r2, $r5, $r6;
+
+        r0 := @parameter0: java.lang.Class;
+
+        r18 = null;
+
+        $z0 = virtualinvoke r0.<java.lang.Class: boolean isArray()>();
+
+        if $z0 == 0 goto label05;
+
+        r19 = r0;
+
+        i0 = 0;
+
+     label01:
+        $z2 = virtualinvoke r19.<java.lang.Class: boolean isArray()>();
+
+        if $z2 == 0 goto label02;
+
+        i0 = i0 + 1;
+
+        r19 = virtualinvoke r19.<java.lang.Class: java.lang.Class getComponentType()>();
+
+        goto label01;
+
+     label02:
+        $r16 = new java.lang.StringBuffer;
+
+        specialinvoke $r16.<java.lang.StringBuffer: void <init>()>();
+
+        i1 = 0;
+
+     label03:
+        if i1 >= i0 goto label04;
+
+        virtualinvoke $r16.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("[");
+
+        i1 = i1 + 1;
+
+        goto label03;
+
+     label04:
+        $r17 = staticinvoke <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.String getSignature(java.lang.Class)>(r19);
+
+        virtualinvoke $r16.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r17);
+
+        r18 = virtualinvoke $r16.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        goto label15;
+
+     label05:
+        $z1 = virtualinvoke r0.<java.lang.Class: boolean isPrimitive()>();
+
+        if $z1 == 0 goto label14;
+
+        $r7 = <java.lang.Integer: java.lang.Class TYPE>;
+
+        if r0 != $r7 goto label06;
+
+        r18 = "I";
+
+        goto label15;
+
+     label06:
+        $r8 = <java.lang.Byte: java.lang.Class TYPE>;
+
+        if r0 != $r8 goto label07;
+
+        r18 = "B";
+
+        goto label15;
+
+     label07:
+        $r9 = <java.lang.Long: java.lang.Class TYPE>;
+
+        if r0 != $r9 goto label08;
+
+        r18 = "J";
+
+        goto label15;
+
+     label08:
+        $r10 = <java.lang.Float: java.lang.Class TYPE>;
+
+        if r0 != $r10 goto label09;
+
+        r18 = "F";
+
+        goto label15;
+
+     label09:
+        $r11 = <java.lang.Double: java.lang.Class TYPE>;
+
+        if r0 != $r11 goto label10;
+
+        r18 = "D";
+
+        goto label15;
+
+     label10:
+        $r12 = <java.lang.Short: java.lang.Class TYPE>;
+
+        if r0 != $r12 goto label11;
+
+        r18 = "S";
+
+        goto label15;
+
+     label11:
+        $r13 = <java.lang.Character: java.lang.Class TYPE>;
+
+        if r0 != $r13 goto label12;
+
+        r18 = "C";
+
+        goto label15;
+
+     label12:
+        $r14 = <java.lang.Boolean: java.lang.Class TYPE>;
+
+        if r0 != $r14 goto label13;
+
+        r18 = "Z";
+
+        goto label15;
+
+     label13:
+        $r15 = <java.lang.Void: java.lang.Class TYPE>;
+
+        if r0 != $r15 goto label15;
+
+        r18 = "V";
+
+        goto label15;
+
+     label14:
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("L");
+
+        $r3 = virtualinvoke r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.String: java.lang.String replace(char,char)>(46, 47);
+
+        $r5 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(";");
+
+        r18 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label15:
+        return r18;
+    }
+
+    static java.lang.String getSignature(java.lang.reflect.Method)
+    {
+        java.lang.Class[] $r2;
+        java.lang.StringBuffer $r0;
+        int $i0, i1;
+        java.lang.Class $r3, $r6;
+        java.lang.String $r4, $r5, $r7;
+        java.lang.reflect.Method r1;
+
+        r1 := @parameter0: java.lang.reflect.Method;
+
+        $r0 = new java.lang.StringBuffer;
+
+        specialinvoke $r0.<java.lang.StringBuffer: void <init>()>();
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("(");
+
+        $r2 = virtualinvoke r1.<java.lang.reflect.Method: java.lang.Class[] getParameterTypes()>();
+
+        i1 = 0;
+
+     label1:
+        $i0 = lengthof $r2;
+
+        if i1 >= $i0 goto label2;
+
+        $r6 = $r2[i1];
+
+        $r7 = staticinvoke <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.String getSignature(java.lang.Class)>($r6);
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r7);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>(")");
+
+        $r3 = virtualinvoke r1.<java.lang.reflect.Method: java.lang.Class getReturnType()>();
+
+        $r4 = staticinvoke <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.String getSignature(java.lang.Class)>($r3);
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r4);
+
+        $r5 = virtualinvoke $r0.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r5;
+    }
+
+    static java.lang.String getSignature(java.lang.reflect.Constructor)
+    {
+        java.lang.Class[] $r2;
+        java.lang.reflect.Constructor r1;
+        java.lang.StringBuffer $r0;
+        int $i0, i1;
+        java.lang.Class $r4;
+        java.lang.String $r3, $r5;
+
+        r1 := @parameter0: java.lang.reflect.Constructor;
+
+        $r0 = new java.lang.StringBuffer;
+
+        specialinvoke $r0.<java.lang.StringBuffer: void <init>()>();
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("(");
+
+        $r2 = virtualinvoke r1.<java.lang.reflect.Constructor: java.lang.Class[] getParameterTypes()>();
+
+        i1 = 0;
+
+     label1:
+        $i0 = lengthof $r2;
+
+        if i1 >= $i0 goto label2;
+
+        $r4 = $r2[i1];
+
+        $r5 = staticinvoke <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.String getSignature(java.lang.Class)>($r4);
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r5);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>(")V");
+
+        $r3 = virtualinvoke $r0.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r3;
+    }
+
+    private static com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 findDescriptorFor(java.lang.Class)
+    {
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry[] $r1, $r2, $r11;
+        int $i0, $i1, $i2, i3;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry $r3, $r8, $r10, r12, r13;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 $r5, r6;
+        java.lang.Class r0, $r7;
+        java.lang.Object $r4, $r9;
+
+        r0 := @parameter0: java.lang.Class;
+
+        $i0 = virtualinvoke r0.<java.lang.Object: int hashCode()>();
+
+        $i2 = $i0 & 2147483647;
+
+        $r1 = <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry[] descriptorFor>;
+
+        $i1 = lengthof $r1;
+
+        i3 = $i2 % $i1;
+
+     label1:
+        $r2 = <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry[] descriptorFor>;
+
+        $r3 = $r2[i3];
+
+        r12 = $r3;
+
+        if $r3 == null goto label2;
+
+        $r9 = virtualinvoke $r3.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry: java.lang.Object get()>();
+
+        if $r9 != null goto label2;
+
+        $r11 = <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry[] descriptorFor>;
+
+        $r10 = $r3.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry next>;
+
+        $r11[i3] = $r10;
+
+        goto label1;
+
+     label2:
+        r13 = $r3;
+
+     label3:
+        if r12 == null goto label7;
+
+        $r4 = virtualinvoke r12.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry: java.lang.Object get()>();
+
+        $r5 = (com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1) $r4;
+
+        r6 = (com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1) $r5;
+
+        if r6 != null goto label4;
+
+        $r8 = r12.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry next>;
+
+        r13.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry next> = $r8;
+
+        goto label6;
+
+     label4:
+        $r7 = r6.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.Class ofClass>;
+
+        if $r7 != r0 goto label5;
+
+        return r6;
+
+     label5:
+        r13 = r12;
+
+     label6:
+        r12 = r12.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry next>;
+
+        goto label3;
+
+     label7:
+        return null;
+    }
+
+    private static void insertDescriptorFor(com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1)
+    {
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry $r5, $r7;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0, $r2;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry[] $r4, $r6, $r8;
+        int $i0, $i1, $i2, i3;
+        java.lang.Class $r1, $r3;
+
+        r0 := @parameter0: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.Class ofClass>;
+
+        $r2 = staticinvoke <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 findDescriptorFor(java.lang.Class)>($r1);
+
+        if $r2 == null goto label1;
+
+        return;
+
+     label1:
+        $r3 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.Class ofClass>;
+
+        $i0 = virtualinvoke $r3.<java.lang.Object: int hashCode()>();
+
+        $i2 = $i0 & 2147483647;
+
+        $r4 = <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry[] descriptorFor>;
+
+        $i1 = lengthof $r4;
+
+        i3 = $i2 % $i1;
+
+        $r5 = new com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry;
+
+        specialinvoke $r5.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry: void <init>(com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1)>(r0);
+
+        $r6 = <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry[] descriptorFor>;
+
+        $r7 = $r6[i3];
+
+        $r5.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry next> = $r7;
+
+        $r8 = <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry[] descriptorFor>;
+
+        $r8[i3] = $r5;
+
+        return;
+    }
+
+    private static java.lang.reflect.Field[] getDeclaredFields(java.lang.Class)
+    {
+        java.lang.reflect.Field[] $r3, $r4;
+        java.lang.Class r1;
+        java.lang.Object $r2;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$3 $r0;
+
+        r1 := @parameter0: java.lang.Class;
+
+        $r0 = new com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$3;
+
+        specialinvoke $r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$3: void <init>(java.lang.Class)>(r1);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r3 = (java.lang.reflect.Field[]) $r2;
+
+        $r4 = (java.lang.reflect.Field[]) $r3;
+
+        return $r4;
+    }
+
+    static com.sun.corba.se.impl.orbutil.ObjectStreamField[] access$002(com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1, com.sun.corba.se.impl.orbutil.ObjectStreamField[])
+    {
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+        com.sun.corba.se.impl.orbutil.ObjectStreamField[] r1;
+
+        r0 := @parameter0: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        r1 := @parameter1: com.sun.corba.se.impl.orbutil.ObjectStreamField[];
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamField[] fields> = r1;
+
+        return r1;
+    }
+
+    static java.lang.Object[] access$100(java.lang.Object[]) throws java.lang.NoSuchFieldException
+    {
+        java.lang.Object[] r0, $r1;
+
+        r0 := @parameter0: java.lang.Object[];
+
+        $r1 = staticinvoke <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.Object[] translateFields(java.lang.Object[])>(r0);
+
+        return $r1;
+    }
+
+    static com.sun.corba.se.impl.orbutil.ObjectStreamField[] access$000(com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1)
+    {
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+        com.sun.corba.se.impl.orbutil.ObjectStreamField[] $r1;
+
+        r0 := @parameter0: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamField[] fields>;
+
+        return $r1;
+    }
+
+    static long access$202(com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1, long)
+    {
+        long l0;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+
+        r0 := @parameter0: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        l0 := @parameter1: long;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: long suid> = l0;
+
+        return l0;
+    }
+
+    static java.lang.reflect.Method access$302(com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1, java.lang.reflect.Method)
+    {
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+        java.lang.reflect.Method r1;
+
+        r0 := @parameter0: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        r1 := @parameter1: java.lang.reflect.Method;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.reflect.Method writeReplaceObjectMethod> = r1;
+
+        return r1;
+    }
+
+    static java.lang.Class[] access$400()
+    {
+        java.lang.Class[] $r0;
+
+        $r0 = <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.Class[] noTypesList>;
+
+        return $r0;
+    }
+
+    static java.lang.reflect.Method access$300(com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1)
+    {
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+        java.lang.reflect.Method $r1;
+
+        r0 := @parameter0: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.reflect.Method writeReplaceObjectMethod>;
+
+        return $r1;
+    }
+
+    static java.lang.reflect.Method access$502(com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1, java.lang.reflect.Method)
+    {
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+        java.lang.reflect.Method r1;
+
+        r0 := @parameter0: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        r1 := @parameter1: java.lang.reflect.Method;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.reflect.Method readResolveObjectMethod> = r1;
+
+        return r1;
+    }
+
+    static java.lang.reflect.Method access$500(com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1)
+    {
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+        java.lang.reflect.Method $r1;
+
+        r0 := @parameter0: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.reflect.Method readResolveObjectMethod>;
+
+        return $r1;
+    }
+
+    static boolean access$600(com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1)
+    {
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+        boolean $z0;
+
+        r0 := @parameter0: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        $z0 = r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: boolean serializable>;
+
+        return $z0;
+    }
+
+    static boolean access$702(com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1, boolean)
+    {
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1 r0;
+        boolean z0;
+
+        r0 := @parameter0: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1;
+
+        z0 := @parameter1: boolean;
+
+        r0.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: boolean hasWriteObjectMethod> = z0;
+
+        return z0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Object[] $r0;
+        com.sun.corba.se.impl.orbutil.ObjectStreamField[] $r3;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry[] $r2;
+        java.lang.Class[] $r1;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$CompareMemberByName $r5;
+        com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$CompareClassByName $r4;
+
+        <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: long serialVersionUID> = -6120832682080437368L;
+
+        <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: long kDefaultUID> = -1L;
+
+        $r0 = newarray (java.lang.Object)[0];
+
+        <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.Object[] noArgsList> = $r0;
+
+        $r1 = newarray (java.lang.Class)[0];
+
+        <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.lang.Class[] noTypesList> = $r1;
+
+        $r2 = newarray (com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry)[61];
+
+        <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$ObjectStreamClassEntry[] descriptorFor> = $r2;
+
+        $r3 = newarray (com.sun.corba.se.impl.orbutil.ObjectStreamField)[0];
+
+        <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: com.sun.corba.se.impl.orbutil.ObjectStreamField[] NO_FIELDS> = $r3;
+
+        $r4 = new com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$CompareClassByName;
+
+        specialinvoke $r4.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$CompareClassByName: void <init>(com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$1)>(null);
+
+        <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.util.Comparator compareClassByName> = $r4;
+
+        $r5 = new com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$CompareMemberByName;
+
+        specialinvoke $r5.<com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$CompareMemberByName: void <init>(com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1$1)>(null);
+
+        <com.sun.corba.se.impl.orbutil.ObjectStreamClass_1_3_1: java.util.Comparator compareMemberByName> = $r5;
+
+        return;
+    }
+}

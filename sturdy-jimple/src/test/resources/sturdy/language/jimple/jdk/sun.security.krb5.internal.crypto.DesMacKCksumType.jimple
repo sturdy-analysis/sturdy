@@ -1,0 +1,153 @@
+public class sun.security.krb5.internal.crypto.DesMacKCksumType extends sun.security.krb5.internal.crypto.CksumType
+{
+
+    public void <init>()
+    {
+        sun.security.krb5.internal.crypto.DesMacKCksumType r0;
+
+        r0 := @this: sun.security.krb5.internal.crypto.DesMacKCksumType;
+
+        specialinvoke r0.<sun.security.krb5.internal.crypto.CksumType: void <init>()>();
+
+        return;
+    }
+
+    public int confounderSize()
+    {
+        sun.security.krb5.internal.crypto.DesMacKCksumType r0;
+
+        r0 := @this: sun.security.krb5.internal.crypto.DesMacKCksumType;
+
+        return 0;
+    }
+
+    public int cksumType()
+    {
+        sun.security.krb5.internal.crypto.DesMacKCksumType r0;
+
+        r0 := @this: sun.security.krb5.internal.crypto.DesMacKCksumType;
+
+        return 5;
+    }
+
+    public boolean isKeyed()
+    {
+        sun.security.krb5.internal.crypto.DesMacKCksumType r0;
+
+        r0 := @this: sun.security.krb5.internal.crypto.DesMacKCksumType;
+
+        return 1;
+    }
+
+    public int cksumSize()
+    {
+        sun.security.krb5.internal.crypto.DesMacKCksumType r0;
+
+        r0 := @this: sun.security.krb5.internal.crypto.DesMacKCksumType;
+
+        return 16;
+    }
+
+    public int keyType()
+    {
+        sun.security.krb5.internal.crypto.DesMacKCksumType r0;
+
+        r0 := @this: sun.security.krb5.internal.crypto.DesMacKCksumType;
+
+        return 1;
+    }
+
+    public int keySize()
+    {
+        sun.security.krb5.internal.crypto.DesMacKCksumType r0;
+
+        r0 := @this: sun.security.krb5.internal.crypto.DesMacKCksumType;
+
+        return 8;
+    }
+
+    public byte[] calculateChecksum(byte[], int, byte[], int) throws sun.security.krb5.KrbCryptoException
+    {
+        byte[] r0, r1, $r2, $r4;
+        sun.security.krb5.internal.crypto.DesMacKCksumType r5;
+        short $s3, $s7;
+        byte $b2, $b4;
+        int $i0, $i1, i5, i6;
+        java.security.InvalidKeyException $r3;
+        boolean $z0;
+
+        r5 := @this: sun.security.krb5.internal.crypto.DesMacKCksumType;
+
+        r1 := @parameter0: byte[];
+
+        i5 := @parameter1: int;
+
+        r0 := @parameter2: byte[];
+
+        i6 := @parameter3: int;
+
+     label1:
+        $z0 = staticinvoke <javax.crypto.spec.DESKeySpec: boolean isWeak(byte[],int)>(r0, 0);
+
+        if $z0 == 0 goto label2;
+
+        $b2 = r0[7];
+
+        $s7 = (short) $b2;
+
+        $s3 = $s7 ^ 240;
+
+        $b4 = (byte) $s3;
+
+        r0[7] = $b4;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+     label4:
+        $i0 = lengthof r0;
+
+        $r4 = newarray (byte)[$i0];
+
+        $i1 = lengthof r0;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, 0, $r4, 0, $i1);
+
+        $r2 = staticinvoke <sun.security.krb5.internal.crypto.Des: byte[] des_cksum(byte[],byte[],byte[])>($r4, r1, r0);
+
+        return $r2;
+
+        catch java.security.InvalidKeyException from label1 to label2 with label3;
+    }
+
+    public boolean verifyChecksum(byte[], int, byte[], byte[], int) throws sun.security.krb5.KrbCryptoException
+    {
+        byte[] r1, r2, $r3, r4;
+        sun.security.krb5.internal.crypto.DesMacKCksumType r0;
+        int i0, $i1, i2;
+        boolean $z0;
+
+        r0 := @this: sun.security.krb5.internal.crypto.DesMacKCksumType;
+
+        r1 := @parameter0: byte[];
+
+        i2 := @parameter1: int;
+
+        r2 := @parameter2: byte[];
+
+        r4 := @parameter3: byte[];
+
+        i0 := @parameter4: int;
+
+        $i1 = lengthof r1;
+
+        $r3 = virtualinvoke r0.<sun.security.krb5.internal.crypto.DesMacKCksumType: byte[] calculateChecksum(byte[],int,byte[],int)>(r1, $i1, r2, i0);
+
+        $z0 = staticinvoke <sun.security.krb5.internal.crypto.DesMacKCksumType: boolean isChecksumEqual(byte[],byte[])>(r4, $r3);
+
+        return $z0;
+    }
+}

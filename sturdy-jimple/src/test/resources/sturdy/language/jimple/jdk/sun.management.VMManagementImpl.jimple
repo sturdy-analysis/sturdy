@@ -1,0 +1,649 @@
+class sun.management.VMManagementImpl extends java.lang.Object implements sun.management.VMManagement
+{
+    private static java.lang.String version;
+    private static boolean compTimeMonitoringSupport;
+    private static boolean threadContentionMonitoringSupport;
+    private static boolean currentThreadCpuTimeSupport;
+    private static boolean otherThreadCpuTimeSupport;
+    private static boolean bootClassPathSupport;
+    private static boolean objectMonitorUsageSupport;
+    private static boolean synchronizerUsageSupport;
+    private static boolean threadAllocatedMemorySupport;
+    private static boolean gcNotificationSupport;
+    private static boolean remoteDiagnosticCommandsSupport;
+    private java.util.List vmArgs;
+    private sun.management.counter.perf.PerfInstrumentation perfInstr;
+    private boolean noPerfData;
+
+    void <init>()
+    {
+        sun.management.VMManagementImpl r0;
+
+        r0 := @this: sun.management.VMManagementImpl;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.management.VMManagementImpl: java.util.List vmArgs> = null;
+
+        r0.<sun.management.VMManagementImpl: sun.management.counter.perf.PerfInstrumentation perfInstr> = null;
+
+        r0.<sun.management.VMManagementImpl: boolean noPerfData> = 0;
+
+        return;
+    }
+
+    private static native java.lang.String getVersion0();
+
+    private static native void initOptionalSupportFields();
+
+    public boolean isCompilationTimeMonitoringSupported()
+    {
+        sun.management.VMManagementImpl r0;
+        boolean $z0;
+
+        r0 := @this: sun.management.VMManagementImpl;
+
+        $z0 = <sun.management.VMManagementImpl: boolean compTimeMonitoringSupport>;
+
+        return $z0;
+    }
+
+    public boolean isThreadContentionMonitoringSupported()
+    {
+        sun.management.VMManagementImpl r0;
+        boolean $z0;
+
+        r0 := @this: sun.management.VMManagementImpl;
+
+        $z0 = <sun.management.VMManagementImpl: boolean threadContentionMonitoringSupport>;
+
+        return $z0;
+    }
+
+    public boolean isCurrentThreadCpuTimeSupported()
+    {
+        sun.management.VMManagementImpl r0;
+        boolean $z0;
+
+        r0 := @this: sun.management.VMManagementImpl;
+
+        $z0 = <sun.management.VMManagementImpl: boolean currentThreadCpuTimeSupport>;
+
+        return $z0;
+    }
+
+    public boolean isOtherThreadCpuTimeSupported()
+    {
+        sun.management.VMManagementImpl r0;
+        boolean $z0;
+
+        r0 := @this: sun.management.VMManagementImpl;
+
+        $z0 = <sun.management.VMManagementImpl: boolean otherThreadCpuTimeSupport>;
+
+        return $z0;
+    }
+
+    public boolean isBootClassPathSupported()
+    {
+        sun.management.VMManagementImpl r0;
+        boolean $z0;
+
+        r0 := @this: sun.management.VMManagementImpl;
+
+        $z0 = <sun.management.VMManagementImpl: boolean bootClassPathSupport>;
+
+        return $z0;
+    }
+
+    public boolean isObjectMonitorUsageSupported()
+    {
+        sun.management.VMManagementImpl r0;
+        boolean $z0;
+
+        r0 := @this: sun.management.VMManagementImpl;
+
+        $z0 = <sun.management.VMManagementImpl: boolean objectMonitorUsageSupport>;
+
+        return $z0;
+    }
+
+    public boolean isSynchronizerUsageSupported()
+    {
+        sun.management.VMManagementImpl r0;
+        boolean $z0;
+
+        r0 := @this: sun.management.VMManagementImpl;
+
+        $z0 = <sun.management.VMManagementImpl: boolean synchronizerUsageSupport>;
+
+        return $z0;
+    }
+
+    public boolean isThreadAllocatedMemorySupported()
+    {
+        sun.management.VMManagementImpl r0;
+        boolean $z0;
+
+        r0 := @this: sun.management.VMManagementImpl;
+
+        $z0 = <sun.management.VMManagementImpl: boolean threadAllocatedMemorySupport>;
+
+        return $z0;
+    }
+
+    public boolean isGcNotificationSupported()
+    {
+        sun.management.VMManagementImpl r0;
+        boolean $z0;
+
+        r0 := @this: sun.management.VMManagementImpl;
+
+        $z0 = <sun.management.VMManagementImpl: boolean gcNotificationSupport>;
+
+        return $z0;
+    }
+
+    public boolean isRemoteDiagnosticCommandsSupported()
+    {
+        sun.management.VMManagementImpl r0;
+        boolean $z0;
+
+        r0 := @this: sun.management.VMManagementImpl;
+
+        $z0 = <sun.management.VMManagementImpl: boolean remoteDiagnosticCommandsSupport>;
+
+        return $z0;
+    }
+
+    public native boolean isThreadContentionMonitoringEnabled();
+
+    public native boolean isThreadCpuTimeEnabled();
+
+    public native boolean isThreadAllocatedMemoryEnabled();
+
+    public int getLoadedClassCount()
+    {
+        sun.management.VMManagementImpl r0;
+        int $i3;
+        long $l0, $l1, l2;
+
+        r0 := @this: sun.management.VMManagementImpl;
+
+        $l0 = virtualinvoke r0.<sun.management.VMManagementImpl: long getTotalClassCount()>();
+
+        $l1 = virtualinvoke r0.<sun.management.VMManagementImpl: long getUnloadedClassCount()>();
+
+        l2 = $l0 - $l1;
+
+        $i3 = (int) l2;
+
+        return $i3;
+    }
+
+    public native long getTotalClassCount();
+
+    public native long getUnloadedClassCount();
+
+    public native boolean getVerboseClass();
+
+    public native boolean getVerboseGC();
+
+    public java.lang.String getManagementVersion()
+    {
+        java.lang.String $r0;
+        sun.management.VMManagementImpl r1;
+
+        r1 := @this: sun.management.VMManagementImpl;
+
+        $r0 = <sun.management.VMManagementImpl: java.lang.String version>;
+
+        return $r0;
+    }
+
+    public java.lang.String getVmId()
+    {
+        java.net.UnknownHostException $r7;
+        java.net.InetAddress $r1;
+        sun.management.VMManagementImpl r0;
+        int $i0;
+        java.lang.StringBuilder $r2, $r3, $r4, $r5;
+        java.lang.String $r6, r8;
+
+        r0 := @this: sun.management.VMManagementImpl;
+
+        $i0 = specialinvoke r0.<sun.management.VMManagementImpl: int getProcessId()>();
+
+        r8 = "localhost";
+
+     label1:
+        $r1 = staticinvoke <java.net.InetAddress: java.net.InetAddress getLocalHost()>();
+
+        r8 = virtualinvoke $r1.<java.net.InetAddress: java.lang.String getHostName()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+     label4:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("@");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r8);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r6;
+
+        catch java.net.UnknownHostException from label1 to label2 with label3;
+    }
+
+    private native int getProcessId();
+
+    public java.lang.String getVmName()
+    {
+        java.lang.String $r0;
+        sun.management.VMManagementImpl r1;
+
+        r1 := @this: sun.management.VMManagementImpl;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.vm.name");
+
+        return $r0;
+    }
+
+    public java.lang.String getVmVendor()
+    {
+        java.lang.String $r0;
+        sun.management.VMManagementImpl r1;
+
+        r1 := @this: sun.management.VMManagementImpl;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.vm.vendor");
+
+        return $r0;
+    }
+
+    public java.lang.String getVmVersion()
+    {
+        java.lang.String $r0;
+        sun.management.VMManagementImpl r1;
+
+        r1 := @this: sun.management.VMManagementImpl;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.vm.version");
+
+        return $r0;
+    }
+
+    public java.lang.String getVmSpecName()
+    {
+        java.lang.String $r0;
+        sun.management.VMManagementImpl r1;
+
+        r1 := @this: sun.management.VMManagementImpl;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.vm.specification.name");
+
+        return $r0;
+    }
+
+    public java.lang.String getVmSpecVendor()
+    {
+        java.lang.String $r0;
+        sun.management.VMManagementImpl r1;
+
+        r1 := @this: sun.management.VMManagementImpl;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.vm.specification.vendor");
+
+        return $r0;
+    }
+
+    public java.lang.String getVmSpecVersion()
+    {
+        java.lang.String $r0;
+        sun.management.VMManagementImpl r1;
+
+        r1 := @this: sun.management.VMManagementImpl;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.vm.specification.version");
+
+        return $r0;
+    }
+
+    public java.lang.String getClassPath()
+    {
+        java.lang.String $r0;
+        sun.management.VMManagementImpl r1;
+
+        r1 := @this: sun.management.VMManagementImpl;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.class.path");
+
+        return $r0;
+    }
+
+    public java.lang.String getLibraryPath()
+    {
+        java.lang.String $r0;
+        sun.management.VMManagementImpl r1;
+
+        r1 := @this: sun.management.VMManagementImpl;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.library.path");
+
+        return $r0;
+    }
+
+    public java.lang.String getBootClassPath()
+    {
+        sun.management.VMManagementImpl r3;
+        java.lang.Object $r1;
+        java.lang.String r2;
+        sun.security.action.GetPropertyAction $r0;
+
+        r3 := @this: sun.management.VMManagementImpl;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("sun.boot.class.path");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r2 = (java.lang.String) $r1;
+
+        return r2;
+    }
+
+    public long getUptime()
+    {
+        long $l0;
+        sun.management.VMManagementImpl r0;
+
+        r0 := @this: sun.management.VMManagementImpl;
+
+        $l0 = specialinvoke r0.<sun.management.VMManagementImpl: long getUptime0()>();
+
+        return $l0;
+    }
+
+    public synchronized java.util.List getVmArguments()
+    {
+        java.util.List $r1, $r3, $r4, $r5;
+        sun.management.VMManagementImpl r0;
+        int $i0;
+        java.lang.String[] $r2;
+
+        r0 := @this: sun.management.VMManagementImpl;
+
+        $r1 = r0.<sun.management.VMManagementImpl: java.util.List vmArgs>;
+
+        if $r1 != null goto label3;
+
+        $r2 = virtualinvoke r0.<sun.management.VMManagementImpl: java.lang.String[] getVmArguments0()>();
+
+        if $r2 == null goto label1;
+
+        $i0 = lengthof $r2;
+
+        if $i0 == 0 goto label1;
+
+        $r3 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r2);
+
+        goto label2;
+
+     label1:
+        $r3 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+     label2:
+        $r4 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r3);
+
+        r0.<sun.management.VMManagementImpl: java.util.List vmArgs> = $r4;
+
+     label3:
+        $r5 = r0.<sun.management.VMManagementImpl: java.util.List vmArgs>;
+
+        return $r5;
+    }
+
+    public native java.lang.String[] getVmArguments0();
+
+    public native long getStartupTime();
+
+    private native long getUptime0();
+
+    public native int getAvailableProcessors();
+
+    public java.lang.String getCompilerName()
+    {
+        sun.management.VMManagementImpl r1;
+        sun.management.VMManagementImpl$1 $r0;
+        java.lang.Object $r2;
+        java.lang.String r3;
+
+        r1 := @this: sun.management.VMManagementImpl;
+
+        $r0 = new sun.management.VMManagementImpl$1;
+
+        specialinvoke $r0.<sun.management.VMManagementImpl$1: void <init>(sun.management.VMManagementImpl)>(r1);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r3 = (java.lang.String) $r2;
+
+        return r3;
+    }
+
+    public native long getTotalCompileTime();
+
+    public native long getTotalThreadCount();
+
+    public native int getLiveThreadCount();
+
+    public native int getPeakThreadCount();
+
+    public native int getDaemonThreadCount();
+
+    public java.lang.String getOsName()
+    {
+        java.lang.String $r0;
+        sun.management.VMManagementImpl r1;
+
+        r1 := @this: sun.management.VMManagementImpl;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("os.name");
+
+        return $r0;
+    }
+
+    public java.lang.String getOsArch()
+    {
+        java.lang.String $r0;
+        sun.management.VMManagementImpl r1;
+
+        r1 := @this: sun.management.VMManagementImpl;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("os.arch");
+
+        return $r0;
+    }
+
+    public java.lang.String getOsVersion()
+    {
+        java.lang.String $r0;
+        sun.management.VMManagementImpl r1;
+
+        r1 := @this: sun.management.VMManagementImpl;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("os.version");
+
+        return $r0;
+    }
+
+    public native long getSafepointCount();
+
+    public native long getTotalSafepointTime();
+
+    public native long getSafepointSyncTime();
+
+    public native long getTotalApplicationNonStoppedTime();
+
+    public native long getLoadedClassSize();
+
+    public native long getUnloadedClassSize();
+
+    public native long getClassLoadingTime();
+
+    public native long getMethodDataSize();
+
+    public native long getInitializedClassCount();
+
+    public native long getClassInitializationTime();
+
+    public native long getClassVerificationTime();
+
+    private synchronized sun.management.counter.perf.PerfInstrumentation getPerfInstrumentation()
+    {
+        sun.misc.Perf r5;
+        java.io.IOException $r9;
+        java.lang.AssertionError $r10;
+        java.lang.IllegalArgumentException $r11;
+        java.nio.ByteBuffer $r6;
+        sun.misc.Perf$GetPerfAction $r3;
+        sun.management.VMManagementImpl r0;
+        int $i0;
+        java.lang.Object $r4;
+        sun.management.counter.perf.PerfInstrumentation $r1, $r2, $r7, $r8;
+        boolean $z0;
+
+        r0 := @this: sun.management.VMManagementImpl;
+
+        $z0 = r0.<sun.management.VMManagementImpl: boolean noPerfData>;
+
+        if $z0 != 0 goto label1;
+
+        $r2 = r0.<sun.management.VMManagementImpl: sun.management.counter.perf.PerfInstrumentation perfInstr>;
+
+        if $r2 == null goto label2;
+
+     label1:
+        $r1 = r0.<sun.management.VMManagementImpl: sun.management.counter.perf.PerfInstrumentation perfInstr>;
+
+        return $r1;
+
+     label2:
+        $r3 = new sun.misc.Perf$GetPerfAction;
+
+        specialinvoke $r3.<sun.misc.Perf$GetPerfAction: void <init>()>();
+
+        $r4 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r3);
+
+        r5 = (sun.misc.Perf) $r4;
+
+     label3:
+        $r6 = virtualinvoke r5.<sun.misc.Perf: java.nio.ByteBuffer attach(int,java.lang.String)>(0, "r");
+
+        $i0 = virtualinvoke $r6.<java.nio.ByteBuffer: int capacity()>();
+
+        if $i0 != 0 goto label5;
+
+        r0.<sun.management.VMManagementImpl: boolean noPerfData> = 1;
+
+     label4:
+        return null;
+
+     label5:
+        $r7 = new sun.management.counter.perf.PerfInstrumentation;
+
+        specialinvoke $r7.<sun.management.counter.perf.PerfInstrumentation: void <init>(java.nio.ByteBuffer)>($r6);
+
+        r0.<sun.management.VMManagementImpl: sun.management.counter.perf.PerfInstrumentation perfInstr> = $r7;
+
+     label6:
+        goto label9;
+
+     label7:
+        $r11 := @caughtexception;
+
+        r0.<sun.management.VMManagementImpl: boolean noPerfData> = 1;
+
+        goto label9;
+
+     label8:
+        $r9 := @caughtexception;
+
+        $r10 = new java.lang.AssertionError;
+
+        specialinvoke $r10.<java.lang.AssertionError: void <init>(java.lang.Object)>($r9);
+
+        throw $r10;
+
+     label9:
+        $r8 = r0.<sun.management.VMManagementImpl: sun.management.counter.perf.PerfInstrumentation perfInstr>;
+
+        return $r8;
+
+        catch java.lang.IllegalArgumentException from label3 to label4 with label7;
+        catch java.lang.IllegalArgumentException from label5 to label6 with label7;
+        catch java.io.IOException from label3 to label4 with label8;
+        catch java.io.IOException from label5 to label6 with label8;
+    }
+
+    public java.util.List getInternalCounters(java.lang.String)
+    {
+        java.util.List $r2, $r4;
+        sun.management.VMManagementImpl r0;
+        java.lang.String r3;
+        sun.management.counter.perf.PerfInstrumentation $r1;
+
+        r0 := @this: sun.management.VMManagementImpl;
+
+        r3 := @parameter0: java.lang.String;
+
+        $r1 = specialinvoke r0.<sun.management.VMManagementImpl: sun.management.counter.perf.PerfInstrumentation getPerfInstrumentation()>();
+
+        if $r1 == null goto label1;
+
+        $r4 = virtualinvoke $r1.<sun.management.counter.perf.PerfInstrumentation: java.util.List findByPattern(java.lang.String)>(r3);
+
+        return $r4;
+
+     label1:
+        $r2 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+        return $r2;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.String $r0, $r1;
+        java.lang.AssertionError $r2;
+
+        $r0 = staticinvoke <sun.management.VMManagementImpl: java.lang.String getVersion0()>();
+
+        <sun.management.VMManagementImpl: java.lang.String version> = $r0;
+
+        $r1 = <sun.management.VMManagementImpl: java.lang.String version>;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.AssertionError;
+
+        specialinvoke $r2.<java.lang.AssertionError: void <init>(java.lang.Object)>("Invalid Management Version");
+
+        throw $r2;
+
+     label1:
+        staticinvoke <sun.management.VMManagementImpl: void initOptionalSupportFields()>();
+
+        return;
+    }
+}

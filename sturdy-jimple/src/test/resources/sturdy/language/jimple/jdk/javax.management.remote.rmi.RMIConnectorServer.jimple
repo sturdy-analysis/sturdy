@@ -1,0 +1,1873 @@
+public class javax.management.remote.rmi.RMIConnectorServer extends javax.management.remote.JMXConnectorServer
+{
+    public static final java.lang.String JNDI_REBIND_ATTRIBUTE;
+    public static final java.lang.String RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE;
+    public static final java.lang.String RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE;
+    private static final char[] intToAlpha;
+    private static com.sun.jmx.remote.util.ClassLogger logger;
+    private javax.management.remote.JMXServiceURL address;
+    private javax.management.remote.rmi.RMIServerImpl rmiServerImpl;
+    private final java.util.Map attributes;
+    private java.lang.ClassLoader defaultClassLoader;
+    private java.lang.String boundJndiUrl;
+    private static final int CREATED;
+    private static final int STARTED;
+    private static final int STOPPED;
+    private int state;
+    private static final java.util.Set openedServers;
+
+    public void <init>(javax.management.remote.JMXServiceURL, java.util.Map) throws java.io.IOException
+    {
+        javax.management.remote.rmi.RMIConnectorServer r0;
+        javax.management.remote.JMXServiceURL r1;
+        java.util.Map r2;
+
+        r0 := @this: javax.management.remote.rmi.RMIConnectorServer;
+
+        r1 := @parameter0: javax.management.remote.JMXServiceURL;
+
+        r2 := @parameter1: java.util.Map;
+
+        specialinvoke r0.<javax.management.remote.rmi.RMIConnectorServer: void <init>(javax.management.remote.JMXServiceURL,java.util.Map,javax.management.MBeanServer)>(r1, r2, null);
+
+        return;
+    }
+
+    public void <init>(javax.management.remote.JMXServiceURL, java.util.Map, javax.management.MBeanServer) throws java.io.IOException
+    {
+        javax.management.remote.rmi.RMIConnectorServer r0;
+        java.util.Map r2;
+        javax.management.MBeanServer r3;
+        javax.management.remote.JMXServiceURL r1;
+
+        r0 := @this: javax.management.remote.rmi.RMIConnectorServer;
+
+        r1 := @parameter0: javax.management.remote.JMXServiceURL;
+
+        r2 := @parameter1: java.util.Map;
+
+        r3 := @parameter2: javax.management.MBeanServer;
+
+        specialinvoke r0.<javax.management.remote.rmi.RMIConnectorServer: void <init>(javax.management.remote.JMXServiceURL,java.util.Map,javax.management.remote.rmi.RMIServerImpl,javax.management.MBeanServer)>(r1, r2, null, r3);
+
+        return;
+    }
+
+    public void <init>(javax.management.remote.JMXServiceURL, java.util.Map, javax.management.remote.rmi.RMIServerImpl, javax.management.MBeanServer) throws java.io.IOException
+    {
+        javax.management.remote.rmi.RMIServerImpl r3;
+        javax.management.MBeanServer r1;
+        java.util.Map r4, $r5, $r6;
+        java.lang.String $r7, $r11, $r13;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.net.MalformedURLException $r12, $r14;
+        javax.management.remote.JMXServiceURL r2;
+        java.lang.IllegalArgumentException $r15;
+        javax.management.remote.rmi.RMIConnectorServer r0;
+        java.lang.StringBuilder $r8, $r9, $r10;
+
+        r0 := @this: javax.management.remote.rmi.RMIConnectorServer;
+
+        r2 := @parameter0: javax.management.remote.JMXServiceURL;
+
+        r4 := @parameter1: java.util.Map;
+
+        r3 := @parameter2: javax.management.remote.rmi.RMIServerImpl;
+
+        r1 := @parameter3: javax.management.MBeanServer;
+
+        specialinvoke r0.<javax.management.remote.JMXConnectorServer: void <init>(javax.management.MBeanServer)>(r1);
+
+        r0.<javax.management.remote.rmi.RMIConnectorServer: java.lang.ClassLoader defaultClassLoader> = null;
+
+        r0.<javax.management.remote.rmi.RMIConnectorServer: int state> = 0;
+
+        if r2 != null goto label1;
+
+        $r15 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r15.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Null JMXServiceURL");
+
+        throw $r15;
+
+     label1:
+        if r3 != null goto label4;
+
+        $r7 = virtualinvoke r2.<javax.management.remote.JMXServiceURL: java.lang.String getProtocol()>();
+
+        if $r7 == null goto label2;
+
+        $z0 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>("rmi");
+
+        if $z0 != 0 goto label3;
+
+        $z4 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>("iiop");
+
+        if $z4 != 0 goto label3;
+
+     label2:
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid protocol type: ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r12 = new java.net.MalformedURLException;
+
+        specialinvoke $r12.<java.net.MalformedURLException: void <init>(java.lang.String)>($r11);
+
+        throw $r12;
+
+     label3:
+        $r13 = virtualinvoke r2.<javax.management.remote.JMXServiceURL: java.lang.String getURLPath()>();
+
+        $z1 = virtualinvoke $r13.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z1 != 0 goto label4;
+
+        $z2 = virtualinvoke $r13.<java.lang.String: boolean equals(java.lang.Object)>("/");
+
+        if $z2 != 0 goto label4;
+
+        $z3 = virtualinvoke $r13.<java.lang.String: boolean startsWith(java.lang.String)>("/jndi/");
+
+        if $z3 != 0 goto label4;
+
+        $r14 = new java.net.MalformedURLException;
+
+        specialinvoke $r14.<java.net.MalformedURLException: void <init>(java.lang.String)>("URL path must be empty or start with /jndi/");
+
+        throw $r14;
+
+     label4:
+        if r4 != null goto label5;
+
+        $r6 = staticinvoke <java.util.Collections: java.util.Map emptyMap()>();
+
+        r0.<javax.management.remote.rmi.RMIConnectorServer: java.util.Map attributes> = $r6;
+
+        goto label6;
+
+     label5:
+        staticinvoke <com.sun.jmx.remote.util.EnvHelp: void checkAttributes(java.util.Map)>(r4);
+
+        $r5 = staticinvoke <java.util.Collections: java.util.Map unmodifiableMap(java.util.Map)>(r4);
+
+        r0.<javax.management.remote.rmi.RMIConnectorServer: java.util.Map attributes> = $r5;
+
+     label6:
+        r0.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.JMXServiceURL address> = r2;
+
+        r0.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.rmi.RMIServerImpl rmiServerImpl> = r3;
+
+        return;
+    }
+
+    public javax.management.remote.JMXConnector toJMXConnector(java.util.Map) throws java.io.IOException
+    {
+        java.lang.IllegalStateException $r9;
+        java.rmi.Remote $r6;
+        javax.management.remote.rmi.RMIServerImpl $r5;
+        javax.management.remote.rmi.RMIConnector $r7;
+        java.util.HashMap $r1;
+        javax.management.remote.rmi.RMIServer $r8;
+        javax.management.remote.rmi.RMIConnectorServer r0;
+        java.util.Map $r2, r3, $r4, $r10;
+        boolean $z0;
+
+        r0 := @this: javax.management.remote.rmi.RMIConnectorServer;
+
+        r3 := @parameter0: java.util.Map;
+
+        $z0 = virtualinvoke r0.<javax.management.remote.rmi.RMIConnectorServer: boolean isActive()>();
+
+        if $z0 != 0 goto label1;
+
+        $r9 = new java.lang.IllegalStateException;
+
+        specialinvoke $r9.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Connector is not active");
+
+        throw $r9;
+
+     label1:
+        $r1 = new java.util.HashMap;
+
+        $r2 = r0.<javax.management.remote.rmi.RMIConnectorServer: java.util.Map attributes>;
+
+        if $r2 != null goto label2;
+
+        $r10 = staticinvoke <java.util.Collections: java.util.Map emptyMap()>();
+
+        goto label3;
+
+     label2:
+        $r10 = r0.<javax.management.remote.rmi.RMIConnectorServer: java.util.Map attributes>;
+
+     label3:
+        specialinvoke $r1.<java.util.HashMap: void <init>(java.util.Map)>($r10);
+
+        if r3 == null goto label4;
+
+        staticinvoke <com.sun.jmx.remote.util.EnvHelp: void checkAttributes(java.util.Map)>(r3);
+
+        interfaceinvoke $r1.<java.util.Map: void putAll(java.util.Map)>(r3);
+
+     label4:
+        $r4 = staticinvoke <com.sun.jmx.remote.util.EnvHelp: java.util.Map filterAttributes(java.util.Map)>($r1);
+
+        $r5 = r0.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.rmi.RMIServerImpl rmiServerImpl>;
+
+        $r6 = virtualinvoke $r5.<javax.management.remote.rmi.RMIServerImpl: java.rmi.Remote toStub()>();
+
+        $r8 = (javax.management.remote.rmi.RMIServer) $r6;
+
+        $r7 = new javax.management.remote.rmi.RMIConnector;
+
+        specialinvoke $r7.<javax.management.remote.rmi.RMIConnector: void <init>(javax.management.remote.rmi.RMIServer,java.util.Map)>($r8, $r4);
+
+        return $r7;
+    }
+
+    public synchronized void start() throws java.io.IOException
+    {
+        java.util.Map $r3, $r4, $r10, $r13, $r35, $r37, $r58;
+        java.util.Set $r14, $r15;
+        javax.management.remote.JMXServiceURL $r12, $r19, $r26, $r30, $r32;
+        java.lang.Exception $r66, $r74;
+        java.lang.StringBuilder $r16, $r18, $r20, $r23, $r25, $r27, $r39, $r41, $r42, $r44, $r46, $r47, $r49, $r51, $r52, $r67, $r68, $r69, $r76, $r77, $r78, $r79, $r80, $r85, $r86, $r87;
+        java.lang.ClassLoader $r6, $r9;
+        java.lang.Throwable $r65, $r89, $r94;
+        java.lang.String $r21, $r28, $r31, $r33, $r34, $r43, $r48, $r53, $r54, $r70, $r81, $r88, $r93, r96;
+        java.io.IOException $r62, $r71, $r72, $r82, $r91;
+        java.lang.RuntimeException $r73;
+        java.lang.IllegalStateException $r61;
+        javax.management.remote.rmi.RMIServerImpl $r7, r97;
+        javax.naming.NamingException $r75;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        javax.management.remote.rmi.RMIConnectorServer r1;
+        com.sun.jmx.remote.security.MBeanServerFileAccessController $r60;
+        javax.management.remote.rmi.RMIServer $r11;
+        javax.management.MBeanServer $r2, $r5, $r8;
+        int $i0, $i1;
+        com.sun.jmx.remote.util.ClassLogger $r0, $r17, $r22, $r24, $r29, $r40, $r45, $r50, $r55, $r56, $r57, $r63, $r64;
+        javax.management.InstanceNotFoundException $r83;
+        java.util.Hashtable $r38;
+        java.lang.IllegalArgumentException $r84, $r90, $r92, $r95;
+        java.lang.Object $r36, $r59;
+
+        r1 := @this: javax.management.remote.rmi.RMIConnectorServer;
+
+        $r0 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $z0 = virtualinvoke $r0.<com.sun.jmx.remote.util.ClassLogger: boolean traceOn()>();
+
+        $i0 = r1.<javax.management.remote.rmi.RMIConnectorServer: int state>;
+
+        if $i0 != 1 goto label02;
+
+        if $z0 == 0 goto label01;
+
+        $r64 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r64.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("start", "already started");
+
+     label01:
+        return;
+
+     label02:
+        $i1 = r1.<javax.management.remote.rmi.RMIConnectorServer: int state>;
+
+        if $i1 != 2 goto label04;
+
+        if $z0 == 0 goto label03;
+
+        $r63 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r63.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("start", "already stopped");
+
+     label03:
+        $r62 = new java.io.IOException;
+
+        specialinvoke $r62.<java.io.IOException: void <init>(java.lang.String)>("The server has been stopped.");
+
+        throw $r62;
+
+     label04:
+        $r2 = virtualinvoke r1.<javax.management.remote.rmi.RMIConnectorServer: javax.management.MBeanServer getMBeanServer()>();
+
+        if $r2 != null goto label05;
+
+        $r61 = new java.lang.IllegalStateException;
+
+        specialinvoke $r61.<java.lang.IllegalStateException: void <init>(java.lang.String)>("This connector server is not attached to an MBean server");
+
+        throw $r61;
+
+     label05:
+        $r3 = r1.<javax.management.remote.rmi.RMIConnectorServer: java.util.Map attributes>;
+
+        if $r3 == null goto label10;
+
+        $r58 = r1.<javax.management.remote.rmi.RMIConnectorServer: java.util.Map attributes>;
+
+        $r59 = interfaceinvoke $r58.<java.util.Map: java.lang.Object get(java.lang.Object)>("jmx.remote.x.access.file");
+
+        r96 = (java.lang.String) $r59;
+
+        if r96 == null goto label10;
+
+     label06:
+        $r60 = new com.sun.jmx.remote.security.MBeanServerFileAccessController;
+
+        specialinvoke $r60.<com.sun.jmx.remote.security.MBeanServerFileAccessController: void <init>(java.lang.String)>(r96);
+
+     label07:
+        goto label09;
+
+     label08:
+        $r91 := @caughtexception;
+
+        $r92 = new java.lang.IllegalArgumentException;
+
+        $r93 = virtualinvoke $r91.<java.io.IOException: java.lang.String getMessage()>();
+
+        specialinvoke $r92.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r93);
+
+        $r94 = staticinvoke <com.sun.jmx.remote.util.EnvHelp: java.lang.Throwable initCause(java.lang.Throwable,java.lang.Throwable)>($r92, $r91);
+
+        $r95 = (java.lang.IllegalArgumentException) $r94;
+
+        throw $r95;
+
+     label09:
+        virtualinvoke r1.<javax.management.remote.rmi.RMIConnectorServer: void setMBeanServerForwarder(javax.management.remote.MBeanServerForwarder)>($r60);
+
+     label10:
+        if $z0 == 0 goto label11;
+
+        $r57 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r57.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("start", "setting default class loader");
+
+     label11:
+        $r4 = r1.<javax.management.remote.rmi.RMIConnectorServer: java.util.Map attributes>;
+
+        $r5 = virtualinvoke r1.<javax.management.remote.rmi.RMIConnectorServer: javax.management.MBeanServer getMBeanServer()>();
+
+        $r6 = staticinvoke <com.sun.jmx.remote.util.EnvHelp: java.lang.ClassLoader resolveServerClassLoader(java.util.Map,javax.management.MBeanServer)>($r4, $r5);
+
+        r1.<javax.management.remote.rmi.RMIConnectorServer: java.lang.ClassLoader defaultClassLoader> = $r6;
+
+     label12:
+        goto label14;
+
+     label13:
+        $r83 := @caughtexception;
+
+        $r84 = new java.lang.IllegalArgumentException;
+
+        $r85 = new java.lang.StringBuilder;
+
+        specialinvoke $r85.<java.lang.StringBuilder: void <init>()>();
+
+        $r86 = virtualinvoke $r85.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ClassLoader not found: ");
+
+        $r87 = virtualinvoke $r86.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r83);
+
+        $r88 = virtualinvoke $r87.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r84.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r88);
+
+        $r89 = staticinvoke <com.sun.jmx.remote.util.EnvHelp: java.lang.Throwable initCause(java.lang.Throwable,java.lang.Throwable)>($r84, $r83);
+
+        $r90 = (java.lang.IllegalArgumentException) $r89;
+
+        throw $r90;
+
+     label14:
+        if $z0 == 0 goto label15;
+
+        $r56 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r56.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("start", "setting RMIServer object");
+
+     label15:
+        $r7 = r1.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.rmi.RMIServerImpl rmiServerImpl>;
+
+        if $r7 == null goto label16;
+
+        r97 = r1.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.rmi.RMIServerImpl rmiServerImpl>;
+
+        goto label17;
+
+     label16:
+        r97 = virtualinvoke r1.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.rmi.RMIServerImpl newServer()>();
+
+     label17:
+        $r8 = virtualinvoke r1.<javax.management.remote.rmi.RMIConnectorServer: javax.management.MBeanServer getMBeanServer()>();
+
+        virtualinvoke r97.<javax.management.remote.rmi.RMIServerImpl: void setMBeanServer(javax.management.MBeanServer)>($r8);
+
+        $r9 = r1.<javax.management.remote.rmi.RMIConnectorServer: java.lang.ClassLoader defaultClassLoader>;
+
+        virtualinvoke r97.<javax.management.remote.rmi.RMIServerImpl: void setDefaultClassLoader(java.lang.ClassLoader)>($r9);
+
+        virtualinvoke r97.<javax.management.remote.rmi.RMIServerImpl: void setRMIConnectorServer(javax.management.remote.rmi.RMIConnectorServer)>(r1);
+
+        virtualinvoke r97.<javax.management.remote.rmi.RMIServerImpl: void export()>();
+
+     label18:
+        if $z0 == 0 goto label19;
+
+        $r55 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r55.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("start", "getting RMIServer object to export");
+
+     label19:
+        $r10 = r1.<javax.management.remote.rmi.RMIConnectorServer: java.util.Map attributes>;
+
+        $r11 = staticinvoke <javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.rmi.RMIServer objectToBind(javax.management.remote.rmi.RMIServerImpl,java.util.Map)>(r97, $r10);
+
+        $r12 = r1.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.JMXServiceURL address>;
+
+        if $r12 == null goto label26;
+
+        $r30 = r1.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.JMXServiceURL address>;
+
+        $r31 = virtualinvoke $r30.<javax.management.remote.JMXServiceURL: java.lang.String getURLPath()>();
+
+        $z1 = virtualinvoke $r31.<java.lang.String: boolean startsWith(java.lang.String)>("/jndi/");
+
+        if $z1 == 0 goto label26;
+
+        $r32 = r1.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.JMXServiceURL address>;
+
+        $r33 = virtualinvoke $r32.<javax.management.remote.JMXServiceURL: java.lang.String getURLPath()>();
+
+        $r34 = virtualinvoke $r33.<java.lang.String: java.lang.String substring(int)>(6);
+
+        if $z0 == 0 goto label20;
+
+        $r50 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $r49 = new java.lang.StringBuilder;
+
+        specialinvoke $r49.<java.lang.StringBuilder: void <init>()>();
+
+        $r51 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Using external directory: ");
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r34);
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r50.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("start", $r53);
+
+     label20:
+        $r35 = r1.<javax.management.remote.rmi.RMIConnectorServer: java.util.Map attributes>;
+
+        $r36 = interfaceinvoke $r35.<java.util.Map: java.lang.Object get(java.lang.Object)>("jmx.remote.jndi.rebind");
+
+        $r54 = (java.lang.String) $r36;
+
+        $z2 = staticinvoke <com.sun.jmx.remote.util.EnvHelp: boolean computeBooleanFromString(java.lang.String)>($r54);
+
+        if $z0 == 0 goto label21;
+
+        $r45 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $r44 = new java.lang.StringBuilder;
+
+        specialinvoke $r44.<java.lang.StringBuilder: void <init>()>();
+
+        $r46 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("jmx.remote.jndi.rebind=");
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z2);
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r45.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("start", $r48);
+
+     label21:
+        if $z0 == 0 goto label22;
+
+        $r40 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $r39 = new java.lang.StringBuilder;
+
+        specialinvoke $r39.<java.lang.StringBuilder: void <init>()>();
+
+        $r41 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("binding to ");
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r34);
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r40.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("start", $r43);
+
+     label22:
+        $r37 = r1.<javax.management.remote.rmi.RMIConnectorServer: java.util.Map attributes>;
+
+        $r38 = staticinvoke <com.sun.jmx.remote.util.EnvHelp: java.util.Hashtable mapToHashtable(java.util.Map)>($r37);
+
+        virtualinvoke r1.<javax.management.remote.rmi.RMIConnectorServer: void bind(java.lang.String,java.util.Hashtable,javax.management.remote.rmi.RMIServer,boolean)>($r34, $r38, $r11, $z2);
+
+        r1.<javax.management.remote.rmi.RMIConnectorServer: java.lang.String boundJndiUrl> = $r34;
+
+     label23:
+        goto label25;
+
+     label24:
+        $r75 := @caughtexception;
+
+        $r76 = new java.lang.StringBuilder;
+
+        specialinvoke $r76.<java.lang.StringBuilder: void <init>()>();
+
+        $r77 = virtualinvoke $r76.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot bind to URL [");
+
+        $r78 = virtualinvoke $r77.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r34);
+
+        $r79 = virtualinvoke $r78.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]: ");
+
+        $r80 = virtualinvoke $r79.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r75);
+
+        $r81 = virtualinvoke $r80.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r82 = staticinvoke <javax.management.remote.rmi.RMIConnectorServer: java.io.IOException newIOException(java.lang.String,java.lang.Throwable)>($r81, $r75);
+
+        throw $r82;
+
+     label25:
+        goto label28;
+
+     label26:
+        if $z0 == 0 goto label27;
+
+        $r29 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r29.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("start", "Encoding URL");
+
+     label27:
+        $r13 = r1.<javax.management.remote.rmi.RMIConnectorServer: java.util.Map attributes>;
+
+        specialinvoke r1.<javax.management.remote.rmi.RMIConnectorServer: void encodeStubInAddress(javax.management.remote.rmi.RMIServer,java.util.Map)>($r11, $r13);
+
+        if $z0 == 0 goto label28;
+
+        $r24 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Encoded URL: ");
+
+        $r26 = r1.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.JMXServiceURL address>;
+
+        $r27 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r26);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r24.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("start", $r28);
+
+     label28:
+        goto label36;
+
+     label29:
+        $r74 := @caughtexception;
+
+     label30:
+        virtualinvoke r97.<javax.management.remote.rmi.RMIServerImpl: void close()>();
+
+     label31:
+        goto label33;
+
+     label32:
+        $r66 := @caughtexception;
+
+     label33:
+        $z3 = $r74 instanceof java.lang.RuntimeException;
+
+        if $z3 == 0 goto label34;
+
+        $r73 = (java.lang.RuntimeException) $r74;
+
+        throw $r73;
+
+     label34:
+        $z4 = $r74 instanceof java.io.IOException;
+
+        if $z4 == 0 goto label35;
+
+        $r72 = (java.io.IOException) $r74;
+
+        throw $r72;
+
+     label35:
+        $r67 = new java.lang.StringBuilder;
+
+        specialinvoke $r67.<java.lang.StringBuilder: void <init>()>();
+
+        $r68 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Got unexpected exception while starting the connector server: ");
+
+        $r69 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r74);
+
+        $r70 = virtualinvoke $r69.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r71 = staticinvoke <javax.management.remote.rmi.RMIConnectorServer: java.io.IOException newIOException(java.lang.String,java.lang.Throwable)>($r70, $r74);
+
+        throw $r71;
+
+     label36:
+        r1.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.rmi.RMIServerImpl rmiServerImpl> = r97;
+
+        $r14 = <javax.management.remote.rmi.RMIConnectorServer: java.util.Set openedServers>;
+
+        entermonitor $r14;
+
+     label37:
+        $r15 = <javax.management.remote.rmi.RMIConnectorServer: java.util.Set openedServers>;
+
+        interfaceinvoke $r15.<java.util.Set: boolean add(java.lang.Object)>(r1);
+
+        exitmonitor $r14;
+
+     label38:
+        goto label41;
+
+     label39:
+        $r65 := @caughtexception;
+
+        exitmonitor $r14;
+
+     label40:
+        throw $r65;
+
+     label41:
+        r1.<javax.management.remote.rmi.RMIConnectorServer: int state> = 1;
+
+        if $z0 == 0 goto label42;
+
+        $r17 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Connector Server Address = ");
+
+        $r19 = r1.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.JMXServiceURL address>;
+
+        $r20 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r17.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("start", $r21);
+
+        $r22 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r22.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("start", "started.");
+
+     label42:
+        return;
+
+        catch java.io.IOException from label06 to label07 with label08;
+        catch javax.management.InstanceNotFoundException from label10 to label12 with label13;
+        catch javax.naming.NamingException from label21 to label23 with label24;
+        catch java.lang.Exception from label18 to label28 with label29;
+        catch java.lang.Exception from label30 to label31 with label32;
+        catch java.lang.Throwable from label37 to label38 with label39;
+        catch java.lang.Throwable from label39 to label40 with label39;
+    }
+
+    public void stop() throws java.io.IOException
+    {
+        javax.management.remote.rmi.RMIServerImpl $r4, $r16;
+        javax.naming.NamingException $r21;
+        java.util.Map $r6;
+        boolean $z0, $z1, $z2;
+        javax.naming.InitialContext $r8;
+        java.util.Set $r2, $r3;
+        javax.management.remote.rmi.RMIConnectorServer r1;
+        java.lang.StringBuilder $r10, $r12, $r14, $r23, $r24, $r25, $r28, $r30, $r31, $r36, $r38, $r39;
+        java.lang.Throwable $r41, $r42;
+        int $i0, $i1;
+        com.sun.jmx.remote.util.ClassLogger $r0, $r5, $r11, $r17, $r18, $r19, $r20, $r22, $r27, $r29, $r34, $r35, $r37;
+        java.lang.String $r9, $r13, $r15, $r26, $r32, $r40, $r44;
+        java.util.Hashtable $r7;
+        java.io.IOException $r33, r43;
+
+        r1 := @this: javax.management.remote.rmi.RMIConnectorServer;
+
+        $r0 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $z0 = virtualinvoke $r0.<com.sun.jmx.remote.util.ClassLogger: boolean traceOn()>();
+
+        entermonitor r1;
+
+     label01:
+        $i0 = r1.<javax.management.remote.rmi.RMIConnectorServer: int state>;
+
+        if $i0 != 2 goto label04;
+
+        if $z0 == 0 goto label02;
+
+        $r20 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r20.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("stop", "already stopped.");
+
+     label02:
+        exitmonitor r1;
+
+     label03:
+        return;
+
+     label04:
+        $i1 = r1.<javax.management.remote.rmi.RMIConnectorServer: int state>;
+
+        if $i1 != 0 goto label05;
+
+        if $z0 == 0 goto label05;
+
+        $r19 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r19.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("stop", "not started yet.");
+
+     label05:
+        if $z0 == 0 goto label06;
+
+        $r18 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r18.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("stop", "stopping.");
+
+     label06:
+        r1.<javax.management.remote.rmi.RMIConnectorServer: int state> = 2;
+
+        exitmonitor r1;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r42 := @caughtexception;
+
+        exitmonitor r1;
+
+     label09:
+        throw $r42;
+
+     label10:
+        $r2 = <javax.management.remote.rmi.RMIConnectorServer: java.util.Set openedServers>;
+
+        entermonitor $r2;
+
+     label11:
+        $r3 = <javax.management.remote.rmi.RMIConnectorServer: java.util.Set openedServers>;
+
+        interfaceinvoke $r3.<java.util.Set: boolean remove(java.lang.Object)>(r1);
+
+        exitmonitor $r2;
+
+     label12:
+        goto label15;
+
+     label13:
+        $r41 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label14:
+        throw $r41;
+
+     label15:
+        r43 = null;
+
+        $r4 = r1.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.rmi.RMIServerImpl rmiServerImpl>;
+
+        if $r4 == null goto label22;
+
+     label16:
+        if $z0 == 0 goto label17;
+
+        $r17 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r17.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("stop", "closing RMI server.");
+
+     label17:
+        $r16 = r1.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.rmi.RMIServerImpl rmiServerImpl>;
+
+        virtualinvoke $r16.<javax.management.remote.rmi.RMIServerImpl: void close()>();
+
+     label18:
+        goto label22;
+
+     label19:
+        $r33 := @caughtexception;
+
+        if $z0 == 0 goto label20;
+
+        $r37 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $r36 = new java.lang.StringBuilder;
+
+        specialinvoke $r36.<java.lang.StringBuilder: void <init>()>();
+
+        $r38 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("failed to close RMI server: ");
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r33);
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r37.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("stop", $r40);
+
+     label20:
+        $r34 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $z2 = virtualinvoke $r34.<com.sun.jmx.remote.util.ClassLogger: boolean debugOn()>();
+
+        if $z2 == 0 goto label21;
+
+        $r35 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r35.<com.sun.jmx.remote.util.ClassLogger: void debug(java.lang.String,java.lang.Throwable)>("stop", $r33);
+
+     label21:
+        r43 = $r33;
+
+     label22:
+        $r44 = r1.<javax.management.remote.rmi.RMIConnectorServer: java.lang.String boundJndiUrl>;
+
+        if $r44 == null goto label29;
+
+     label23:
+        if $z0 == 0 goto label24;
+
+        $r11 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unbind from external directory: ");
+
+        $r13 = r1.<javax.management.remote.rmi.RMIConnectorServer: java.lang.String boundJndiUrl>;
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r11.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("stop", $r15);
+
+     label24:
+        $r6 = r1.<javax.management.remote.rmi.RMIConnectorServer: java.util.Map attributes>;
+
+        $r7 = staticinvoke <com.sun.jmx.remote.util.EnvHelp: java.util.Hashtable mapToHashtable(java.util.Map)>($r6);
+
+        $r8 = new javax.naming.InitialContext;
+
+        specialinvoke $r8.<javax.naming.InitialContext: void <init>(java.util.Hashtable)>($r7);
+
+        $r9 = r1.<javax.management.remote.rmi.RMIConnectorServer: java.lang.String boundJndiUrl>;
+
+        virtualinvoke $r8.<javax.naming.InitialContext: void unbind(java.lang.String)>($r9);
+
+        virtualinvoke $r8.<javax.naming.InitialContext: void close()>();
+
+     label25:
+        goto label29;
+
+     label26:
+        $r21 := @caughtexception;
+
+        if $z0 == 0 goto label27;
+
+        $r29 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $r28 = new java.lang.StringBuilder;
+
+        specialinvoke $r28.<java.lang.StringBuilder: void <init>()>();
+
+        $r30 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("failed to unbind RMI server: ");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r21);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r29.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("stop", $r32);
+
+     label27:
+        $r22 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        $z1 = virtualinvoke $r22.<com.sun.jmx.remote.util.ClassLogger: boolean debugOn()>();
+
+        if $z1 == 0 goto label28;
+
+        $r27 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r27.<com.sun.jmx.remote.util.ClassLogger: void debug(java.lang.String,java.lang.Throwable)>("stop", $r21);
+
+     label28:
+        if r43 != null goto label29;
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot bind to URL: ");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r21);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r43 = staticinvoke <javax.management.remote.rmi.RMIConnectorServer: java.io.IOException newIOException(java.lang.String,java.lang.Throwable)>($r26, $r21);
+
+     label29:
+        if r43 == null goto label30;
+
+        throw r43;
+
+     label30:
+        if $z0 == 0 goto label31;
+
+        $r5 = <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger>;
+
+        virtualinvoke $r5.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("stop", "stopped");
+
+     label31:
+        return;
+
+        catch java.lang.Throwable from label01 to label03 with label08;
+        catch java.lang.Throwable from label04 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+        catch java.lang.Throwable from label11 to label12 with label13;
+        catch java.lang.Throwable from label13 to label14 with label13;
+        catch java.io.IOException from label16 to label18 with label19;
+        catch javax.naming.NamingException from label23 to label25 with label26;
+    }
+
+    public synchronized boolean isActive()
+    {
+        int $i0;
+        javax.management.remote.rmi.RMIConnectorServer r0;
+        boolean $z0;
+
+        r0 := @this: javax.management.remote.rmi.RMIConnectorServer;
+
+        $i0 = r0.<javax.management.remote.rmi.RMIConnectorServer: int state>;
+
+        if $i0 != 1 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public javax.management.remote.JMXServiceURL getAddress()
+    {
+        javax.management.remote.rmi.RMIConnectorServer r0;
+        javax.management.remote.JMXServiceURL $r1;
+        boolean $z0;
+
+        r0 := @this: javax.management.remote.rmi.RMIConnectorServer;
+
+        $z0 = virtualinvoke r0.<javax.management.remote.rmi.RMIConnectorServer: boolean isActive()>();
+
+        if $z0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r1 = r0.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.JMXServiceURL address>;
+
+        return $r1;
+    }
+
+    public java.util.Map getAttributes()
+    {
+        javax.management.remote.rmi.RMIConnectorServer r0;
+        java.util.Map $r1, $r2, $r3;
+
+        r0 := @this: javax.management.remote.rmi.RMIConnectorServer;
+
+        $r1 = r0.<javax.management.remote.rmi.RMIConnectorServer: java.util.Map attributes>;
+
+        $r2 = staticinvoke <com.sun.jmx.remote.util.EnvHelp: java.util.Map filterAttributes(java.util.Map)>($r1);
+
+        $r3 = staticinvoke <java.util.Collections: java.util.Map unmodifiableMap(java.util.Map)>($r2);
+
+        return $r3;
+    }
+
+    public synchronized void setMBeanServerForwarder(javax.management.remote.MBeanServerForwarder)
+    {
+        javax.management.remote.rmi.RMIConnectorServer r0;
+        javax.management.remote.rmi.RMIServerImpl $r2, $r3;
+        javax.management.MBeanServer $r4;
+        javax.management.remote.MBeanServerForwarder r1;
+
+        r0 := @this: javax.management.remote.rmi.RMIConnectorServer;
+
+        r1 := @parameter0: javax.management.remote.MBeanServerForwarder;
+
+        specialinvoke r0.<javax.management.remote.JMXConnectorServer: void setMBeanServerForwarder(javax.management.remote.MBeanServerForwarder)>(r1);
+
+        $r2 = r0.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.rmi.RMIServerImpl rmiServerImpl>;
+
+        if $r2 == null goto label1;
+
+        $r3 = r0.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.rmi.RMIServerImpl rmiServerImpl>;
+
+        $r4 = virtualinvoke r0.<javax.management.remote.rmi.RMIConnectorServer: javax.management.MBeanServer getMBeanServer()>();
+
+        virtualinvoke $r3.<javax.management.remote.rmi.RMIServerImpl: void setMBeanServer(javax.management.MBeanServer)>($r4);
+
+     label1:
+        return;
+    }
+
+    protected void connectionOpened(java.lang.String, java.lang.String, java.lang.Object)
+    {
+        javax.management.remote.rmi.RMIConnectorServer r0;
+        java.lang.Object r3;
+        java.lang.String r1, r2;
+
+        r0 := @this: javax.management.remote.rmi.RMIConnectorServer;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.Object;
+
+        specialinvoke r0.<javax.management.remote.JMXConnectorServer: void connectionOpened(java.lang.String,java.lang.String,java.lang.Object)>(r1, r2, r3);
+
+        return;
+    }
+
+    protected void connectionClosed(java.lang.String, java.lang.String, java.lang.Object)
+    {
+        javax.management.remote.rmi.RMIConnectorServer r0;
+        java.lang.Object r3;
+        java.lang.String r1, r2;
+
+        r0 := @this: javax.management.remote.rmi.RMIConnectorServer;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.Object;
+
+        specialinvoke r0.<javax.management.remote.JMXConnectorServer: void connectionClosed(java.lang.String,java.lang.String,java.lang.Object)>(r1, r2, r3);
+
+        return;
+    }
+
+    protected void connectionFailed(java.lang.String, java.lang.String, java.lang.Object)
+    {
+        javax.management.remote.rmi.RMIConnectorServer r0;
+        java.lang.Object r3;
+        java.lang.String r1, r2;
+
+        r0 := @this: javax.management.remote.rmi.RMIConnectorServer;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.Object;
+
+        specialinvoke r0.<javax.management.remote.JMXConnectorServer: void connectionFailed(java.lang.String,java.lang.String,java.lang.Object)>(r1, r2, r3);
+
+        return;
+    }
+
+    void bind(java.lang.String, java.util.Hashtable, javax.management.remote.rmi.RMIServer, boolean) throws javax.naming.NamingException, java.net.MalformedURLException
+    {
+        javax.naming.InitialContext $r0;
+        javax.management.remote.rmi.RMIConnectorServer r4;
+        java.lang.String r2;
+        javax.management.remote.rmi.RMIServer r3;
+        java.util.Hashtable r1;
+        boolean z0;
+
+        r4 := @this: javax.management.remote.rmi.RMIConnectorServer;
+
+        r2 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.util.Hashtable;
+
+        r3 := @parameter2: javax.management.remote.rmi.RMIServer;
+
+        z0 := @parameter3: boolean;
+
+        $r0 = new javax.naming.InitialContext;
+
+        specialinvoke $r0.<javax.naming.InitialContext: void <init>(java.util.Hashtable)>(r1);
+
+        if z0 == 0 goto label1;
+
+        virtualinvoke $r0.<javax.naming.InitialContext: void rebind(java.lang.String,java.lang.Object)>(r2, r3);
+
+        goto label2;
+
+     label1:
+        virtualinvoke $r0.<javax.naming.InitialContext: void bind(java.lang.String,java.lang.Object)>(r2, r3);
+
+     label2:
+        virtualinvoke $r0.<javax.naming.InitialContext: void close()>();
+
+        return;
+    }
+
+    javax.management.remote.rmi.RMIServerImpl newServer() throws java.io.IOException
+    {
+        javax.management.remote.rmi.RMIServerImpl $r5, $r7;
+        javax.management.remote.JMXServiceURL $r1, $r2, $r3;
+        javax.management.remote.rmi.RMIConnectorServer r0;
+        java.util.Map $r4, $r6;
+        int i0;
+        boolean $z0;
+
+        r0 := @this: javax.management.remote.rmi.RMIConnectorServer;
+
+        $r1 = r0.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.JMXServiceURL address>;
+
+        $z0 = staticinvoke <javax.management.remote.rmi.RMIConnectorServer: boolean isIiopURL(javax.management.remote.JMXServiceURL,boolean)>($r1, 1);
+
+        $r2 = r0.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.JMXServiceURL address>;
+
+        if $r2 != null goto label1;
+
+        i0 = 0;
+
+        goto label2;
+
+     label1:
+        $r3 = r0.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.JMXServiceURL address>;
+
+        i0 = virtualinvoke $r3.<javax.management.remote.JMXServiceURL: int getPort()>();
+
+     label2:
+        if $z0 == 0 goto label3;
+
+        $r6 = r0.<javax.management.remote.rmi.RMIConnectorServer: java.util.Map attributes>;
+
+        $r7 = staticinvoke <javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.rmi.RMIServerImpl newIIOPServer(java.util.Map)>($r6);
+
+        return $r7;
+
+     label3:
+        $r4 = r0.<javax.management.remote.rmi.RMIConnectorServer: java.util.Map attributes>;
+
+        $r5 = staticinvoke <javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.rmi.RMIServerImpl newJRMPServer(java.util.Map,int)>($r4, i0);
+
+        return $r5;
+    }
+
+    private void encodeStubInAddress(javax.management.remote.rmi.RMIServer, java.util.Map) throws java.io.IOException
+    {
+        javax.management.remote.rmi.RMIServer r7;
+        java.util.Map r8;
+        int i0;
+        java.lang.String $r4, r9, r10, $r11, $r12;
+        boolean $z0, $z1;
+        javax.management.remote.JMXServiceURL $r1, $r2, $r3, $r5, $r6, $r13;
+        javax.management.remote.rmi.RMIConnectorServer r0;
+
+        r0 := @this: javax.management.remote.rmi.RMIConnectorServer;
+
+        r7 := @parameter0: javax.management.remote.rmi.RMIServer;
+
+        r8 := @parameter1: java.util.Map;
+
+        $r1 = r0.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.JMXServiceURL address>;
+
+        if $r1 != null goto label3;
+
+        $z1 = staticinvoke <com.sun.jmx.remote.internal.IIOPHelper: boolean isStub(java.lang.Object)>(r7);
+
+        if $z1 == 0 goto label1;
+
+        r9 = "iiop";
+
+        goto label2;
+
+     label1:
+        r9 = "rmi";
+
+     label2:
+        r10 = null;
+
+        i0 = 0;
+
+        goto label6;
+
+     label3:
+        $r2 = r0.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.JMXServiceURL address>;
+
+        r9 = virtualinvoke $r2.<javax.management.remote.JMXServiceURL: java.lang.String getProtocol()>();
+
+        $r3 = r0.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.JMXServiceURL address>;
+
+        $r4 = virtualinvoke $r3.<javax.management.remote.JMXServiceURL: java.lang.String getHost()>();
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z0 == 0 goto label4;
+
+        $r11 = null;
+
+        goto label5;
+
+     label4:
+        $r5 = r0.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.JMXServiceURL address>;
+
+        $r11 = virtualinvoke $r5.<javax.management.remote.JMXServiceURL: java.lang.String getHost()>();
+
+     label5:
+        r10 = $r11;
+
+        $r6 = r0.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.JMXServiceURL address>;
+
+        i0 = virtualinvoke $r6.<javax.management.remote.JMXServiceURL: int getPort()>();
+
+     label6:
+        $r12 = staticinvoke <javax.management.remote.rmi.RMIConnectorServer: java.lang.String encodeStub(javax.management.remote.rmi.RMIServer,java.util.Map)>(r7, r8);
+
+        $r13 = new javax.management.remote.JMXServiceURL;
+
+        specialinvoke $r13.<javax.management.remote.JMXServiceURL: void <init>(java.lang.String,java.lang.String,int,java.lang.String)>(r9, r10, i0, $r12);
+
+        r0.<javax.management.remote.rmi.RMIConnectorServer: javax.management.remote.JMXServiceURL address> = $r13;
+
+        return;
+    }
+
+    static boolean isIiopURL(javax.management.remote.JMXServiceURL, boolean) throws java.net.MalformedURLException
+    {
+        java.net.MalformedURLException $r2;
+        javax.management.remote.JMXServiceURL r0;
+        java.lang.StringBuilder $r3, $r4, $r5, $r6;
+        java.lang.String $r1, $r7;
+        boolean $z0, $z1, z2;
+
+        r0 := @parameter0: javax.management.remote.JMXServiceURL;
+
+        z2 := @parameter1: boolean;
+
+        $r1 = virtualinvoke r0.<javax.management.remote.JMXServiceURL: java.lang.String getProtocol()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("rmi");
+
+        if $z0 == 0 goto label1;
+
+        return 0;
+
+     label1:
+        $z1 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("iiop");
+
+        if $z1 == 0 goto label2;
+
+        return 1;
+
+     label2:
+        if z2 == 0 goto label3;
+
+        $r2 = new java.net.MalformedURLException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("URL must have protocol \"rmi\" or \"iiop\": \"");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.net.MalformedURLException: void <init>(java.lang.String)>($r7);
+
+        throw $r2;
+
+     label3:
+        return 0;
+    }
+
+    static java.lang.String encodeStub(javax.management.remote.rmi.RMIServer, java.util.Map) throws java.io.IOException
+    {
+        javax.management.remote.rmi.RMIServer r0;
+        java.util.Map r3;
+        java.lang.StringBuilder $r1, $r2, $r5, $r7, $r8, $r10;
+        java.lang.String $r4, $r6, $r9, $r11;
+        boolean $z0;
+
+        r0 := @parameter0: javax.management.remote.rmi.RMIServer;
+
+        r3 := @parameter1: java.util.Map;
+
+        $z0 = staticinvoke <com.sun.jmx.remote.internal.IIOPHelper: boolean isStub(java.lang.Object)>(r0);
+
+        if $z0 == 0 goto label1;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/ior/");
+
+        $r9 = staticinvoke <javax.management.remote.rmi.RMIConnectorServer: java.lang.String encodeIIOPStub(javax.management.remote.rmi.RMIServer,java.util.Map)>(r0, r3);
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r11;
+
+     label1:
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/stub/");
+
+        $r4 = staticinvoke <javax.management.remote.rmi.RMIConnectorServer: java.lang.String encodeJRMPStub(javax.management.remote.rmi.RMIServer,java.util.Map)>(r0, r3);
+
+        $r5 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r6;
+    }
+
+    static java.lang.String encodeJRMPStub(javax.management.remote.rmi.RMIServer, java.util.Map) throws java.io.IOException
+    {
+        byte[] $r3;
+        java.io.ByteArrayOutputStream $r0;
+        java.util.Map r5;
+        java.io.ObjectOutputStream $r1;
+        java.lang.String $r4;
+        javax.management.remote.rmi.RMIServer r2;
+
+        r2 := @parameter0: javax.management.remote.rmi.RMIServer;
+
+        r5 := @parameter1: java.util.Map;
+
+        $r0 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r0.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $r1 = new java.io.ObjectOutputStream;
+
+        specialinvoke $r1.<java.io.ObjectOutputStream: void <init>(java.io.OutputStream)>($r0);
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream: void writeObject(java.lang.Object)>(r2);
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream: void close()>();
+
+        $r3 = virtualinvoke $r0.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        $r4 = staticinvoke <javax.management.remote.rmi.RMIConnectorServer: java.lang.String byteArrayToBase64(byte[])>($r3);
+
+        return $r4;
+    }
+
+    static java.lang.String encodeIIOPStub(javax.management.remote.rmi.RMIServer, java.util.Map) throws java.io.IOException
+    {
+        java.util.Map r6;
+        java.lang.Object $r1;
+        java.io.IOException $r5;
+        java.lang.String $r2, $r4;
+        java.lang.RuntimeException $r3;
+        javax.management.remote.rmi.RMIServer r0;
+
+        r0 := @parameter0: javax.management.remote.rmi.RMIServer;
+
+        r6 := @parameter1: java.util.Map;
+
+     label1:
+        $r1 = staticinvoke <com.sun.jmx.remote.internal.IIOPHelper: java.lang.Object getOrb(java.lang.Object)>(r0);
+
+        $r2 = staticinvoke <com.sun.jmx.remote.internal.IIOPHelper: java.lang.String objectToString(java.lang.Object,java.lang.Object)>($r1, r0);
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = virtualinvoke $r3.<java.lang.RuntimeException: java.lang.String getMessage()>();
+
+        $r5 = staticinvoke <javax.management.remote.rmi.RMIConnectorServer: java.io.IOException newIOException(java.lang.String,java.lang.Throwable)>($r4, $r3);
+
+        throw $r5;
+
+        catch java.lang.RuntimeException from label1 to label2 with label3;
+    }
+
+    private static javax.management.remote.rmi.RMIServer objectToBind(javax.management.remote.rmi.RMIServerImpl, java.util.Map) throws java.io.IOException
+    {
+        java.rmi.Remote $r1;
+        javax.management.remote.rmi.RMIServerImpl r0;
+        java.util.Map r2;
+        javax.management.remote.rmi.RMIServer $r3, $r4;
+
+        r0 := @parameter0: javax.management.remote.rmi.RMIServerImpl;
+
+        r2 := @parameter1: java.util.Map;
+
+        $r1 = virtualinvoke r0.<javax.management.remote.rmi.RMIServerImpl: java.rmi.Remote toStub()>();
+
+        $r3 = (javax.management.remote.rmi.RMIServer) $r1;
+
+        $r4 = staticinvoke <javax.management.remote.rmi.RMIConnector: javax.management.remote.rmi.RMIServer connectStub(javax.management.remote.rmi.RMIServer,java.util.Map)>($r3, r2);
+
+        return $r4;
+    }
+
+    private static javax.management.remote.rmi.RMIServerImpl newJRMPServer(java.util.Map, int) throws java.io.IOException
+    {
+        javax.management.remote.rmi.RMIJRMPServerImpl $r5;
+        java.util.Map r0;
+        int i0;
+        java.lang.Object $r1, $r3;
+        java.rmi.server.RMIServerSocketFactory r4;
+        java.rmi.server.RMIClientSocketFactory r2;
+
+        r0 := @parameter0: java.util.Map;
+
+        i0 := @parameter1: int;
+
+        $r1 = interfaceinvoke r0.<java.util.Map: java.lang.Object get(java.lang.Object)>("jmx.remote.rmi.client.socket.factory");
+
+        r2 = (java.rmi.server.RMIClientSocketFactory) $r1;
+
+        $r3 = interfaceinvoke r0.<java.util.Map: java.lang.Object get(java.lang.Object)>("jmx.remote.rmi.server.socket.factory");
+
+        r4 = (java.rmi.server.RMIServerSocketFactory) $r3;
+
+        $r5 = new javax.management.remote.rmi.RMIJRMPServerImpl;
+
+        specialinvoke $r5.<javax.management.remote.rmi.RMIJRMPServerImpl: void <init>(int,java.rmi.server.RMIClientSocketFactory,java.rmi.server.RMIServerSocketFactory,java.util.Map)>(i0, r2, r4, r0);
+
+        return $r5;
+    }
+
+    private static javax.management.remote.rmi.RMIServerImpl newIIOPServer(java.util.Map) throws java.io.IOException
+    {
+        javax.management.remote.rmi.RMIIIOPServerImpl $r0;
+        java.util.Map r1;
+
+        r1 := @parameter0: java.util.Map;
+
+        $r0 = new javax.management.remote.rmi.RMIIIOPServerImpl;
+
+        specialinvoke $r0.<javax.management.remote.rmi.RMIIIOPServerImpl: void <init>(java.util.Map)>(r1);
+
+        return $r0;
+    }
+
+    private static java.lang.String byteArrayToBase64(byte[])
+    {
+        byte[] r0;
+        byte $b7, $b10, $b22, $b23, $b25;
+        java.lang.StringBuilder $r11;
+        short s24, s26, $s39, s44, s47, s48, $s49, $s50, $s51, $s58, $s61;
+        java.lang.String $r10;
+        char[] $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9;
+        int i0, i1, $i2, i3, $i4, $i5, i6, $i8, $i11, $i12, $i13, $i14, $i16, $i17, $i19, $i20, $i27, $i29, $i30, $i31, $i32, $i34, $i35, $i36, $i37, i41, i42, i43, i45, i46, $i52, $i53, $i54, $i55, $i56, $i57, $i59, $i60, $i62, $i63, $i64;
+        char $c9, $c15, $c18, $c21, $c28, $c33, $c38, $c40;
+
+        r0 := @parameter0: byte[];
+
+        i0 = lengthof r0;
+
+        i1 = i0 / 3;
+
+        $i2 = 3 * i1;
+
+        i3 = i0 - $i2;
+
+        $i4 = i0 + 2;
+
+        $i5 = $i4 / 3;
+
+        i6 = 4 * $i5;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>(int)>(i6);
+
+        i41 = 0;
+
+        i42 = 0;
+
+     label1:
+        if i42 >= i1 goto label2;
+
+        i43 = i41 + 1;
+
+        $b22 = r0[i41];
+
+        $s49 = (short) $b22;
+
+        s44 = $s49 & 255;
+
+        i45 = i43 + 1;
+
+        $b23 = r0[i43];
+
+        $s50 = (short) $b23;
+
+        s24 = $s50 & 255;
+
+        i41 = i45 + 1;
+
+        $b25 = r0[i45];
+
+        $s51 = (short) $b25;
+
+        s26 = $s51 & 255;
+
+        $r6 = <javax.management.remote.rmi.RMIConnectorServer: char[] intToAlpha>;
+
+        $i52 = (int) s44;
+
+        $i27 = $i52 >> 2;
+
+        $c28 = $r6[$i27];
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c28);
+
+        $r7 = <javax.management.remote.rmi.RMIConnectorServer: char[] intToAlpha>;
+
+        $i53 = (int) s44;
+
+        $i29 = $i53 << 4;
+
+        $i31 = $i29 & 63;
+
+        $i54 = (int) s24;
+
+        $i30 = $i54 >> 4;
+
+        $i32 = $i31 | $i30;
+
+        $c33 = $r7[$i32];
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c33);
+
+        $r8 = <javax.management.remote.rmi.RMIConnectorServer: char[] intToAlpha>;
+
+        $i55 = (int) s24;
+
+        $i34 = $i55 << 2;
+
+        $i36 = $i34 & 63;
+
+        $i56 = (int) s26;
+
+        $i35 = $i56 >> 6;
+
+        $i37 = $i36 | $i35;
+
+        $c38 = $r8[$i37];
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c38);
+
+        $r9 = <javax.management.remote.rmi.RMIConnectorServer: char[] intToAlpha>;
+
+        $s39 = s26 & 63;
+
+        $i57 = (int) $s39;
+
+        $c40 = $r9[$i57];
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c40);
+
+        i42 = i42 + 1;
+
+        goto label1;
+
+     label2:
+        if i3 == 0 goto label4;
+
+        i46 = i41 + 1;
+
+        $b7 = r0[i41];
+
+        $s58 = (short) $b7;
+
+        s47 = $s58 & 255;
+
+        $r2 = <javax.management.remote.rmi.RMIConnectorServer: char[] intToAlpha>;
+
+        $i59 = (int) s47;
+
+        $i8 = $i59 >> 2;
+
+        $c9 = $r2[$i8];
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c9);
+
+        if i3 != 1 goto label3;
+
+        $r5 = <javax.management.remote.rmi.RMIConnectorServer: char[] intToAlpha>;
+
+        $i60 = (int) s47;
+
+        $i19 = $i60 << 4;
+
+        $i20 = $i19 & 63;
+
+        $c21 = $r5[$i20];
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c21);
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("==");
+
+        goto label4;
+
+     label3:
+        $b10 = r0[i46];
+
+        $s61 = (short) $b10;
+
+        s48 = $s61 & 255;
+
+        $r3 = <javax.management.remote.rmi.RMIConnectorServer: char[] intToAlpha>;
+
+        $i62 = (int) s47;
+
+        $i11 = $i62 << 4;
+
+        $i13 = $i11 & 63;
+
+        $i63 = (int) s48;
+
+        $i12 = $i63 >> 4;
+
+        $i14 = $i13 | $i12;
+
+        $c15 = $r3[$i14];
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c15);
+
+        $r4 = <javax.management.remote.rmi.RMIConnectorServer: char[] intToAlpha>;
+
+        $i64 = (int) s48;
+
+        $i16 = $i64 << 2;
+
+        $i17 = $i16 & 63;
+
+        $c18 = $r4[$i17];
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c18);
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(61);
+
+     label4:
+        $r10 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r10;
+    }
+
+    private static java.io.IOException newIOException(java.lang.String, java.lang.Throwable)
+    {
+        java.lang.Throwable r2, $r3;
+        java.io.IOException $r0, $r4;
+        java.lang.String r1;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Throwable;
+
+        $r0 = new java.io.IOException;
+
+        specialinvoke $r0.<java.io.IOException: void <init>(java.lang.String)>(r1);
+
+        $r3 = staticinvoke <com.sun.jmx.remote.util.EnvHelp: java.lang.Throwable initCause(java.lang.Throwable,java.lang.Throwable)>($r0, r2);
+
+        $r4 = (java.io.IOException) $r3;
+
+        return $r4;
+    }
+
+    static void <clinit>()
+    {
+        java.util.HashSet $r2;
+        char[] $r0;
+        com.sun.jmx.remote.util.ClassLogger $r1;
+
+        <javax.management.remote.rmi.RMIConnectorServer: int STOPPED> = 2;
+
+        <javax.management.remote.rmi.RMIConnectorServer: int STARTED> = 1;
+
+        <javax.management.remote.rmi.RMIConnectorServer: int CREATED> = 0;
+
+        <javax.management.remote.rmi.RMIConnectorServer: java.lang.String RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE> = "jmx.remote.rmi.server.socket.factory";
+
+        <javax.management.remote.rmi.RMIConnectorServer: java.lang.String RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE> = "jmx.remote.rmi.client.socket.factory";
+
+        <javax.management.remote.rmi.RMIConnectorServer: java.lang.String JNDI_REBIND_ATTRIBUTE> = "jmx.remote.jndi.rebind";
+
+        $r0 = newarray (char)[64];
+
+        $r0[0] = 65;
+
+        $r0[1] = 66;
+
+        $r0[2] = 67;
+
+        $r0[3] = 68;
+
+        $r0[4] = 69;
+
+        $r0[5] = 70;
+
+        $r0[6] = 71;
+
+        $r0[7] = 72;
+
+        $r0[8] = 73;
+
+        $r0[9] = 74;
+
+        $r0[10] = 75;
+
+        $r0[11] = 76;
+
+        $r0[12] = 77;
+
+        $r0[13] = 78;
+
+        $r0[14] = 79;
+
+        $r0[15] = 80;
+
+        $r0[16] = 81;
+
+        $r0[17] = 82;
+
+        $r0[18] = 83;
+
+        $r0[19] = 84;
+
+        $r0[20] = 85;
+
+        $r0[21] = 86;
+
+        $r0[22] = 87;
+
+        $r0[23] = 88;
+
+        $r0[24] = 89;
+
+        $r0[25] = 90;
+
+        $r0[26] = 97;
+
+        $r0[27] = 98;
+
+        $r0[28] = 99;
+
+        $r0[29] = 100;
+
+        $r0[30] = 101;
+
+        $r0[31] = 102;
+
+        $r0[32] = 103;
+
+        $r0[33] = 104;
+
+        $r0[34] = 105;
+
+        $r0[35] = 106;
+
+        $r0[36] = 107;
+
+        $r0[37] = 108;
+
+        $r0[38] = 109;
+
+        $r0[39] = 110;
+
+        $r0[40] = 111;
+
+        $r0[41] = 112;
+
+        $r0[42] = 113;
+
+        $r0[43] = 114;
+
+        $r0[44] = 115;
+
+        $r0[45] = 116;
+
+        $r0[46] = 117;
+
+        $r0[47] = 118;
+
+        $r0[48] = 119;
+
+        $r0[49] = 120;
+
+        $r0[50] = 121;
+
+        $r0[51] = 122;
+
+        $r0[52] = 48;
+
+        $r0[53] = 49;
+
+        $r0[54] = 50;
+
+        $r0[55] = 51;
+
+        $r0[56] = 52;
+
+        $r0[57] = 53;
+
+        $r0[58] = 54;
+
+        $r0[59] = 55;
+
+        $r0[60] = 56;
+
+        $r0[61] = 57;
+
+        $r0[62] = 43;
+
+        $r0[63] = 47;
+
+        <javax.management.remote.rmi.RMIConnectorServer: char[] intToAlpha> = $r0;
+
+        $r1 = new com.sun.jmx.remote.util.ClassLogger;
+
+        specialinvoke $r1.<com.sun.jmx.remote.util.ClassLogger: void <init>(java.lang.String,java.lang.String)>("javax.management.remote.rmi", "RMIConnectorServer");
+
+        <javax.management.remote.rmi.RMIConnectorServer: com.sun.jmx.remote.util.ClassLogger logger> = $r1;
+
+        $r2 = new java.util.HashSet;
+
+        specialinvoke $r2.<java.util.HashSet: void <init>()>();
+
+        <javax.management.remote.rmi.RMIConnectorServer: java.util.Set openedServers> = $r2;
+
+        return;
+    }
+}

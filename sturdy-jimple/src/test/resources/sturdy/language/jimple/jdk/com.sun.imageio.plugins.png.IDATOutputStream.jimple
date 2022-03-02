@@ -1,0 +1,405 @@
+final class com.sun.imageio.plugins.png.IDATOutputStream extends javax.imageio.stream.ImageOutputStreamImpl
+{
+    private static byte[] chunkType;
+    private javax.imageio.stream.ImageOutputStream stream;
+    private int chunkLength;
+    private long startPos;
+    private com.sun.imageio.plugins.png.CRC crc;
+    java.util.zip.Deflater def;
+    byte[] buf;
+    private int bytesRemaining;
+
+    public void <init>(javax.imageio.stream.ImageOutputStream, int) throws java.io.IOException
+    {
+        byte[] $r3;
+        com.sun.imageio.plugins.png.IDATOutputStream r0;
+        int i0;
+        com.sun.imageio.plugins.png.CRC $r1;
+        java.util.zip.Deflater $r2;
+        javax.imageio.stream.ImageOutputStream r4;
+
+        r0 := @this: com.sun.imageio.plugins.png.IDATOutputStream;
+
+        r4 := @parameter0: javax.imageio.stream.ImageOutputStream;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<javax.imageio.stream.ImageOutputStreamImpl: void <init>()>();
+
+        $r1 = new com.sun.imageio.plugins.png.CRC;
+
+        specialinvoke $r1.<com.sun.imageio.plugins.png.CRC: void <init>()>();
+
+        r0.<com.sun.imageio.plugins.png.IDATOutputStream: com.sun.imageio.plugins.png.CRC crc> = $r1;
+
+        $r2 = new java.util.zip.Deflater;
+
+        specialinvoke $r2.<java.util.zip.Deflater: void <init>(int)>(9);
+
+        r0.<com.sun.imageio.plugins.png.IDATOutputStream: java.util.zip.Deflater def> = $r2;
+
+        $r3 = newarray (byte)[512];
+
+        r0.<com.sun.imageio.plugins.png.IDATOutputStream: byte[] buf> = $r3;
+
+        r0.<com.sun.imageio.plugins.png.IDATOutputStream: javax.imageio.stream.ImageOutputStream stream> = r4;
+
+        r0.<com.sun.imageio.plugins.png.IDATOutputStream: int chunkLength> = i0;
+
+        specialinvoke r0.<com.sun.imageio.plugins.png.IDATOutputStream: void startChunk()>();
+
+        return;
+    }
+
+    private void startChunk() throws java.io.IOException
+    {
+        byte[] $r4, $r6;
+        com.sun.imageio.plugins.png.IDATOutputStream r0;
+        com.sun.imageio.plugins.png.CRC $r1, $r5;
+        long $l0;
+        javax.imageio.stream.ImageOutputStream $r2, $r3, $r7;
+        int $i1, $i3;
+
+        r0 := @this: com.sun.imageio.plugins.png.IDATOutputStream;
+
+        $r1 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: com.sun.imageio.plugins.png.CRC crc>;
+
+        virtualinvoke $r1.<com.sun.imageio.plugins.png.CRC: void reset()>();
+
+        $r2 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: javax.imageio.stream.ImageOutputStream stream>;
+
+        $l0 = interfaceinvoke $r2.<javax.imageio.stream.ImageOutputStream: long getStreamPosition()>();
+
+        r0.<com.sun.imageio.plugins.png.IDATOutputStream: long startPos> = $l0;
+
+        $r3 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: javax.imageio.stream.ImageOutputStream stream>;
+
+        $i3 = (int) -1;
+
+        interfaceinvoke $r3.<javax.imageio.stream.ImageOutputStream: void writeInt(int)>($i3);
+
+        $r5 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: com.sun.imageio.plugins.png.CRC crc>;
+
+        $r4 = <com.sun.imageio.plugins.png.IDATOutputStream: byte[] chunkType>;
+
+        virtualinvoke $r5.<com.sun.imageio.plugins.png.CRC: void update(byte[],int,int)>($r4, 0, 4);
+
+        $r7 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: javax.imageio.stream.ImageOutputStream stream>;
+
+        $r6 = <com.sun.imageio.plugins.png.IDATOutputStream: byte[] chunkType>;
+
+        interfaceinvoke $r7.<javax.imageio.stream.ImageOutputStream: void write(byte[],int,int)>($r6, 0, 4);
+
+        $i1 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: int chunkLength>;
+
+        r0.<com.sun.imageio.plugins.png.IDATOutputStream: int bytesRemaining> = $i1;
+
+        return;
+    }
+
+    private void finishChunk() throws java.io.IOException
+    {
+        com.sun.imageio.plugins.png.IDATOutputStream r0;
+        com.sun.imageio.plugins.png.CRC $r1;
+        long $l1, $l2, $l3, $l4;
+        javax.imageio.stream.ImageOutputStream $r2, $r3, $r4, $r5, $r6, $r7;
+        int $i0, $i5, $i6;
+
+        r0 := @this: com.sun.imageio.plugins.png.IDATOutputStream;
+
+        $r2 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: javax.imageio.stream.ImageOutputStream stream>;
+
+        $r1 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: com.sun.imageio.plugins.png.CRC crc>;
+
+        $i0 = virtualinvoke $r1.<com.sun.imageio.plugins.png.CRC: int getValue()>();
+
+        interfaceinvoke $r2.<javax.imageio.stream.ImageOutputStream: void writeInt(int)>($i0);
+
+        $r3 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: javax.imageio.stream.ImageOutputStream stream>;
+
+        $l1 = interfaceinvoke $r3.<javax.imageio.stream.ImageOutputStream: long getStreamPosition()>();
+
+        $r4 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: javax.imageio.stream.ImageOutputStream stream>;
+
+        $l2 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: long startPos>;
+
+        interfaceinvoke $r4.<javax.imageio.stream.ImageOutputStream: void seek(long)>($l2);
+
+        $r5 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: javax.imageio.stream.ImageOutputStream stream>;
+
+        $l3 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: long startPos>;
+
+        $l4 = $l1 - $l3;
+
+        $i5 = (int) $l4;
+
+        $i6 = $i5 - 12;
+
+        interfaceinvoke $r5.<javax.imageio.stream.ImageOutputStream: void writeInt(int)>($i6);
+
+        $r6 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r6.<javax.imageio.stream.ImageOutputStream: void seek(long)>($l1);
+
+        $r7 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r7.<javax.imageio.stream.ImageOutputStream: void flushBefore(long)>($l1);
+
+        return;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        com.sun.imageio.plugins.png.IDATOutputStream r1;
+        java.lang.RuntimeException $r0;
+
+        r1 := @this: com.sun.imageio.plugins.png.IDATOutputStream;
+
+        $r0 = new java.lang.RuntimeException;
+
+        specialinvoke $r0.<java.lang.RuntimeException: void <init>(java.lang.String)>("Method not available");
+
+        throw $r0;
+    }
+
+    public int read(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r2;
+        com.sun.imageio.plugins.png.IDATOutputStream r1;
+        int i0, i1;
+        java.lang.RuntimeException $r0;
+
+        r1 := @this: com.sun.imageio.plugins.png.IDATOutputStream;
+
+        r2 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r0 = new java.lang.RuntimeException;
+
+        specialinvoke $r0.<java.lang.RuntimeException: void <init>(java.lang.String)>("Method not available");
+
+        throw $r0;
+    }
+
+    public void write(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r2;
+        com.sun.imageio.plugins.png.IDATOutputStream r0;
+        java.util.zip.Deflater $r1, $r3, $r4;
+        int i0, i1;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.imageio.plugins.png.IDATOutputStream;
+
+        r2 := @parameter0: byte[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        if i0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: java.util.zip.Deflater def>;
+
+        $z0 = virtualinvoke $r1.<java.util.zip.Deflater: boolean finished()>();
+
+        if $z0 != 0 goto label3;
+
+        $r3 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: java.util.zip.Deflater def>;
+
+        virtualinvoke $r3.<java.util.zip.Deflater: void setInput(byte[],int,int)>(r2, i1, i0);
+
+     label2:
+        $r4 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: java.util.zip.Deflater def>;
+
+        $z1 = virtualinvoke $r4.<java.util.zip.Deflater: boolean needsInput()>();
+
+        if $z1 != 0 goto label3;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.png.IDATOutputStream: void deflate()>();
+
+        goto label2;
+
+     label3:
+        return;
+    }
+
+    public void deflate() throws java.io.IOException
+    {
+        byte[] $r1, $r2, $r4, $r6;
+        com.sun.imageio.plugins.png.CRC $r5;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, i7;
+        com.sun.imageio.plugins.png.IDATOutputStream r0;
+        java.util.zip.Deflater $r3;
+        javax.imageio.stream.ImageOutputStream $r7;
+
+        r0 := @this: com.sun.imageio.plugins.png.IDATOutputStream;
+
+        $r3 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: java.util.zip.Deflater def>;
+
+        $r2 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: byte[] buf>;
+
+        $r1 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: byte[] buf>;
+
+        $i0 = lengthof $r1;
+
+        i6 = virtualinvoke $r3.<java.util.zip.Deflater: int deflate(byte[],int,int)>($r2, 0, $i0);
+
+        i7 = 0;
+
+     label1:
+        if i6 <= 0 goto label3;
+
+        $i1 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: int bytesRemaining>;
+
+        if $i1 != 0 goto label2;
+
+        specialinvoke r0.<com.sun.imageio.plugins.png.IDATOutputStream: void finishChunk()>();
+
+        specialinvoke r0.<com.sun.imageio.plugins.png.IDATOutputStream: void startChunk()>();
+
+     label2:
+        $i2 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: int bytesRemaining>;
+
+        $i3 = staticinvoke <java.lang.Math: int min(int,int)>(i6, $i2);
+
+        $r5 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: com.sun.imageio.plugins.png.CRC crc>;
+
+        $r4 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: byte[] buf>;
+
+        virtualinvoke $r5.<com.sun.imageio.plugins.png.CRC: void update(byte[],int,int)>($r4, i7, $i3);
+
+        $r7 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: javax.imageio.stream.ImageOutputStream stream>;
+
+        $r6 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: byte[] buf>;
+
+        interfaceinvoke $r7.<javax.imageio.stream.ImageOutputStream: void write(byte[],int,int)>($r6, i7, $i3);
+
+        i7 = i7 + $i3;
+
+        i6 = i6 - $i3;
+
+        $i4 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: int bytesRemaining>;
+
+        $i5 = $i4 - $i3;
+
+        r0.<com.sun.imageio.plugins.png.IDATOutputStream: int bytesRemaining> = $i5;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    public void write(int) throws java.io.IOException
+    {
+        byte[] r0;
+        com.sun.imageio.plugins.png.IDATOutputStream r1;
+        byte $b1;
+        int i0;
+
+        r1 := @this: com.sun.imageio.plugins.png.IDATOutputStream;
+
+        i0 := @parameter0: int;
+
+        r0 = newarray (byte)[1];
+
+        $b1 = (byte) i0;
+
+        r0[0] = $b1;
+
+        virtualinvoke r1.<com.sun.imageio.plugins.png.IDATOutputStream: void write(byte[],int,int)>(r0, 0, 1);
+
+        return;
+    }
+
+    public void finish() throws java.io.IOException
+    {
+        java.lang.Throwable $r5;
+        com.sun.imageio.plugins.png.IDATOutputStream r0;
+        java.util.zip.Deflater $r1, $r2, $r3, $r4, $r6;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.imageio.plugins.png.IDATOutputStream;
+
+     label1:
+        $r1 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: java.util.zip.Deflater def>;
+
+        $z0 = virtualinvoke $r1.<java.util.zip.Deflater: boolean finished()>();
+
+        if $z0 != 0 goto label3;
+
+        $r3 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: java.util.zip.Deflater def>;
+
+        virtualinvoke $r3.<java.util.zip.Deflater: void finish()>();
+
+     label2:
+        $r4 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: java.util.zip.Deflater def>;
+
+        $z1 = virtualinvoke $r4.<java.util.zip.Deflater: boolean finished()>();
+
+        if $z1 != 0 goto label3;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.png.IDATOutputStream: void deflate()>();
+
+        goto label2;
+
+     label3:
+        specialinvoke r0.<com.sun.imageio.plugins.png.IDATOutputStream: void finishChunk()>();
+
+     label4:
+        $r2 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: java.util.zip.Deflater def>;
+
+        virtualinvoke $r2.<java.util.zip.Deflater: void end()>();
+
+        goto label6;
+
+     label5:
+        $r5 := @caughtexception;
+
+        $r6 = r0.<com.sun.imageio.plugins.png.IDATOutputStream: java.util.zip.Deflater def>;
+
+        virtualinvoke $r6.<java.util.zip.Deflater: void end()>();
+
+        throw $r5;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+    }
+
+    protected void finalize() throws java.lang.Throwable
+    {
+        com.sun.imageio.plugins.png.IDATOutputStream r0;
+
+        r0 := @this: com.sun.imageio.plugins.png.IDATOutputStream;
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        byte[] $r0;
+
+        $r0 = newarray (byte)[4];
+
+        $r0[0] = 73;
+
+        $r0[1] = 68;
+
+        $r0[2] = 65;
+
+        $r0[3] = 84;
+
+        <com.sun.imageio.plugins.png.IDATOutputStream: byte[] chunkType> = $r0;
+
+        return;
+    }
+}

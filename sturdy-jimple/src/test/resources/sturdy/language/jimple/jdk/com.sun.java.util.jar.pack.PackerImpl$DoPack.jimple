@@ -1,0 +1,1918 @@
+class com.sun.java.util.jar.pack.PackerImpl$DoPack extends java.lang.Object
+{
+    final int verbose;
+    final com.sun.java.util.jar.pack.Package pkg;
+    final java.lang.String unknownAttrCommand;
+    final java.lang.String classFormatCommand;
+    final java.util.Map attrDefs;
+    final java.util.Map attrCommands;
+    final boolean keepFileOrder;
+    final boolean keepClassOrder;
+    final boolean keepModtime;
+    final boolean latestModtime;
+    final boolean keepDeflateHint;
+    long totalOutputSize;
+    int segmentCount;
+    long segmentTotalSize;
+    long segmentSize;
+    final long segmentLimit;
+    final java.util.List passFiles;
+    private int nread;
+    static final boolean $assertionsDisabled;
+    final com.sun.java.util.jar.pack.PackerImpl this$0;
+
+    private void <init>(com.sun.java.util.jar.pack.PackerImpl)
+    {
+        byte $b4;
+        java.lang.StringBuilder $r51, $r53, $r55, $r82, $r84, $r87, $r88, $r89, $r90, $r91, $r96, $r97, $r98, $r103, $r104, $r105;
+        long $l2, $l3, l20, l21;
+        java.util.ListIterator $r47;
+        com.sun.java.util.jar.pack.Utils$Pack200Logger $r52, $r83, $r109;
+        int[] $r24;
+        com.sun.java.util.jar.pack.Attribute$Layout $r77;
+        com.sun.java.util.jar.pack.PackerImpl$DoPack r0;
+        com.sun.java.util.jar.pack.PropMap $r3, $r5, $r8, $r11, $r14, $r17, $r26, $r28, $r30, $r34, $r38, $r42, $r44, $r49, $r60, $r63, $r67, $r75, $r108, $r113, $r120;
+        int $i0, $i1, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, i18, $i19;
+        java.lang.Object $r57, $r71;
+        java.util.Set $r69;
+        com.sun.java.util.jar.pack.PackerImpl r1, $r2, $r4, $r7, $r10, $r13, $r16, $r25, $r27, $r29, $r33, $r37, $r41, $r43, $r48, $r59, $r62, $r66, $r74, $r107, $r112, $r119;
+        com.sun.java.util.jar.pack.Package$Version $r9, $r12, $r15;
+        java.lang.AssertionError $r81, $r93;
+        java.lang.String $r18, $r19, $r20, $r31, $r32, $r35, $r36, $r39, $r40, $r56, $r58, r65, r72, $r73, $r76, $r78, $r79, $r80, $r86, $r92, $r94, $r99, $r100, $r101, $r106, $r110, $r111, $r114, $r115, $r116, $r121, r122, r123;
+        java.lang.RuntimeException $r95, $r102;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19, $z20, $z21, $z22, $z23, $z24, $z25, $z26;
+        com.sun.java.util.jar.pack.Package $r6, $r50, $r61, $r64;
+        java.util.List $r45, $r46, $r54;
+        java.util.SortedMap $r68;
+        java.util.HashMap $r21, $r22, $r117, $r118;
+        java.lang.String[] $r23, $r85;
+        java.util.Iterator $r70;
+
+        r0 := @this: com.sun.java.util.jar.pack.PackerImpl$DoPack;
+
+        r1 := @parameter0: com.sun.java.util.jar.pack.PackerImpl;
+
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0> = r1;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r2 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r3 = $r2.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        $i0 = virtualinvoke $r3.<com.sun.java.util.jar.pack.PropMap: int getInteger(java.lang.String)>("com.sun.java.util.jar.pack.verbose");
+
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int verbose> = $i0;
+
+        $r4 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r5 = $r4.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        virtualinvoke $r5.<com.sun.java.util.jar.pack.PropMap: int setInteger(java.lang.String,int)>("pack.progress", 0);
+
+        $i1 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int verbose>;
+
+        if $i1 <= 0 goto label01;
+
+        $r109 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r107 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r108 = $r107.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        $r110 = virtualinvoke $r108.<java.lang.Object: java.lang.String toString()>();
+
+        virtualinvoke $r109.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r110);
+
+     label01:
+        $r6 = new com.sun.java.util.jar.pack.Package;
+
+        $r7 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r8 = $r7.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        $r9 = staticinvoke <com.sun.java.util.jar.pack.Package$Version: com.sun.java.util.jar.pack.Package$Version makeVersion(com.sun.java.util.jar.pack.PropMap,java.lang.String)>($r8, "min.class");
+
+        $r10 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r11 = $r10.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        $r12 = staticinvoke <com.sun.java.util.jar.pack.Package$Version: com.sun.java.util.jar.pack.Package$Version makeVersion(com.sun.java.util.jar.pack.PropMap,java.lang.String)>($r11, "max.class");
+
+        $r13 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r14 = $r13.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        $r15 = staticinvoke <com.sun.java.util.jar.pack.Package$Version: com.sun.java.util.jar.pack.Package$Version makeVersion(com.sun.java.util.jar.pack.PropMap,java.lang.String)>($r14, "package");
+
+        specialinvoke $r6.<com.sun.java.util.jar.pack.Package: void <init>(com.sun.java.util.jar.pack.Package$Version,com.sun.java.util.jar.pack.Package$Version,com.sun.java.util.jar.pack.Package$Version)>($r9, $r12, $r15);
+
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg> = $r6;
+
+        $r16 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r17 = $r16.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        $r18 = virtualinvoke $r17.<com.sun.java.util.jar.pack.PropMap: java.lang.String getProperty(java.lang.String,java.lang.String)>("pack.unknown.attribute", "pass");
+
+        $r19 = "strip";
+
+        $z0 = virtualinvoke $r19.<java.lang.String: boolean equals(java.lang.Object)>($r18);
+
+        if $z0 != 0 goto label02;
+
+        $r100 = "pass";
+
+        $z21 = virtualinvoke $r100.<java.lang.String: boolean equals(java.lang.Object)>($r18);
+
+        if $z21 != 0 goto label02;
+
+        $r101 = "error";
+
+        $z22 = virtualinvoke $r101.<java.lang.String: boolean equals(java.lang.Object)>($r18);
+
+        if $z22 != 0 goto label02;
+
+        $r102 = new java.lang.RuntimeException;
+
+        $r103 = new java.lang.StringBuilder;
+
+        specialinvoke $r103.<java.lang.StringBuilder: void <init>()>();
+
+        $r104 = virtualinvoke $r103.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Bad option: pack.unknown.attribute = ");
+
+        $r105 = virtualinvoke $r104.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        $r106 = virtualinvoke $r105.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r102.<java.lang.RuntimeException: void <init>(java.lang.String)>($r106);
+
+        throw $r102;
+
+     label02:
+        $r111 = virtualinvoke $r18.<java.lang.String: java.lang.String intern()>();
+
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: java.lang.String unknownAttrCommand> = $r111;
+
+        $r112 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r113 = $r112.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        $r114 = virtualinvoke $r113.<com.sun.java.util.jar.pack.PropMap: java.lang.String getProperty(java.lang.String,java.lang.String)>("com.sun.java.util.jar.pack.class.format.error", "pass");
+
+        $r115 = "pass";
+
+        $z23 = virtualinvoke $r115.<java.lang.String: boolean equals(java.lang.Object)>($r114);
+
+        if $z23 != 0 goto label03;
+
+        $r94 = "error";
+
+        $z20 = virtualinvoke $r94.<java.lang.String: boolean equals(java.lang.Object)>($r114);
+
+        if $z20 != 0 goto label03;
+
+        $r95 = new java.lang.RuntimeException;
+
+        $r96 = new java.lang.StringBuilder;
+
+        specialinvoke $r96.<java.lang.StringBuilder: void <init>()>();
+
+        $r97 = virtualinvoke $r96.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Bad option: com.sun.java.util.jar.pack.class.format.error = ");
+
+        $r98 = virtualinvoke $r97.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r114);
+
+        $r99 = virtualinvoke $r98.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r95.<java.lang.RuntimeException: void <init>(java.lang.String)>($r99);
+
+        throw $r95;
+
+     label03:
+        $r20 = virtualinvoke $r114.<java.lang.String: java.lang.String intern()>();
+
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: java.lang.String classFormatCommand> = $r20;
+
+        $r21 = new java.util.HashMap;
+
+        specialinvoke $r21.<java.util.HashMap: void <init>()>();
+
+        $r22 = new java.util.HashMap;
+
+        specialinvoke $r22.<java.util.HashMap: void <init>()>();
+
+        $r23 = newarray (java.lang.String)[4];
+
+        $r23[0] = "pack.class.attribute.";
+
+        $r23[1] = "pack.field.attribute.";
+
+        $r23[2] = "pack.method.attribute.";
+
+        $r23[3] = "pack.code.attribute.";
+
+        $r24 = newarray (int)[4];
+
+        $r24[0] = 0;
+
+        $r24[1] = 1;
+
+        $r24[2] = 2;
+
+        $r24[3] = 3;
+
+        i18 = 0;
+
+     label04:
+        $i19 = lengthof $r24;
+
+        if i18 >= $i19 goto label12;
+
+        r65 = $r23[i18];
+
+        $r66 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r67 = $r66.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        $r68 = virtualinvoke $r67.<com.sun.java.util.jar.pack.PropMap: java.util.SortedMap prefixMap(java.lang.String)>(r65);
+
+        $r69 = interfaceinvoke $r68.<java.util.Map: java.util.Set keySet()>();
+
+        $r70 = interfaceinvoke $r69.<java.util.Set: java.util.Iterator iterator()>();
+
+     label05:
+        $z12 = interfaceinvoke $r70.<java.util.Iterator: boolean hasNext()>();
+
+        if $z12 == 0 goto label11;
+
+        $r71 = interfaceinvoke $r70.<java.util.Iterator: java.lang.Object next()>();
+
+        r72 = (java.lang.String) $r71;
+
+        $z13 = <com.sun.java.util.jar.pack.PackerImpl$DoPack: boolean $assertionsDisabled>;
+
+        if $z13 != 0 goto label06;
+
+        $z19 = virtualinvoke r72.<java.lang.String: boolean startsWith(java.lang.String)>(r65);
+
+        if $z19 != 0 goto label06;
+
+        $r93 = new java.lang.AssertionError;
+
+        specialinvoke $r93.<java.lang.AssertionError: void <init>()>();
+
+        throw $r93;
+
+     label06:
+        $i14 = virtualinvoke r65.<java.lang.String: int length()>();
+
+        $r73 = virtualinvoke r72.<java.lang.String: java.lang.String substring(int)>($i14);
+
+        $r74 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r75 = $r74.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        $r76 = virtualinvoke $r75.<com.sun.java.util.jar.pack.PropMap: java.lang.String getProperty(java.lang.String)>(r72);
+
+        $i15 = $r24[i18];
+
+        $r77 = staticinvoke <com.sun.java.util.jar.pack.Attribute: com.sun.java.util.jar.pack.Attribute$Layout keyForLookup(int,java.lang.String)>($i15, $r73);
+
+        $r78 = "strip";
+
+        $z14 = virtualinvoke $r78.<java.lang.String: boolean equals(java.lang.Object)>($r76);
+
+        if $z14 != 0 goto label07;
+
+        $r79 = "pass";
+
+        $z15 = virtualinvoke $r79.<java.lang.String: boolean equals(java.lang.Object)>($r76);
+
+        if $z15 != 0 goto label07;
+
+        $r80 = "error";
+
+        $z16 = virtualinvoke $r80.<java.lang.String: boolean equals(java.lang.Object)>($r76);
+
+        if $z16 == 0 goto label08;
+
+     label07:
+        $r116 = virtualinvoke $r76.<java.lang.String: java.lang.String intern()>();
+
+        interfaceinvoke $r22.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r77, $r116);
+
+        goto label10;
+
+     label08:
+        $i16 = $r24[i18];
+
+        staticinvoke <com.sun.java.util.jar.pack.Attribute: com.sun.java.util.jar.pack.Attribute define(java.util.Map,int,java.lang.String,java.lang.String)>($r21, $i16, $r73, $r76);
+
+        $i17 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int verbose>;
+
+        if $i17 <= 1 goto label09;
+
+        $r83 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r82 = new java.lang.StringBuilder;
+
+        specialinvoke $r82.<java.lang.StringBuilder: void <init>()>();
+
+        $r84 = virtualinvoke $r82.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Added layout for ");
+
+        $r85 = <com.sun.java.util.jar.pack.Constants: java.lang.String[] ATTR_CONTEXT_NAME>;
+
+        $r86 = $r85[i18];
+
+        $r87 = virtualinvoke $r84.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r86);
+
+        $r88 = virtualinvoke $r87.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" attribute ");
+
+        $r89 = virtualinvoke $r88.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r73);
+
+        $r90 = virtualinvoke $r89.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" = ");
+
+        $r91 = virtualinvoke $r90.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r76);
+
+        $r92 = virtualinvoke $r91.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r83.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void fine(java.lang.String)>($r92);
+
+     label09:
+        $z17 = <com.sun.java.util.jar.pack.PackerImpl$DoPack: boolean $assertionsDisabled>;
+
+        if $z17 != 0 goto label10;
+
+        $z18 = interfaceinvoke $r21.<java.util.Map: boolean containsKey(java.lang.Object)>($r77);
+
+        if $z18 != 0 goto label10;
+
+        $r81 = new java.lang.AssertionError;
+
+        specialinvoke $r81.<java.lang.AssertionError: void <init>()>();
+
+        throw $r81;
+
+     label10:
+        goto label05;
+
+     label11:
+        i18 = i18 + 1;
+
+        goto label04;
+
+     label12:
+        $z1 = interfaceinvoke $r21.<java.util.Map: boolean isEmpty()>();
+
+        if $z1 == 0 goto label13;
+
+        $r117 = null;
+
+        goto label14;
+
+     label13:
+        $r117 = $r21;
+
+     label14:
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: java.util.Map attrDefs> = $r117;
+
+        $z2 = interfaceinvoke $r22.<java.util.Map: boolean isEmpty()>();
+
+        if $z2 == 0 goto label15;
+
+        $r118 = null;
+
+        goto label16;
+
+     label15:
+        $r118 = $r22;
+
+     label16:
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: java.util.Map attrCommands> = $r118;
+
+        $r25 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r26 = $r25.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        $z3 = virtualinvoke $r26.<com.sun.java.util.jar.pack.PropMap: boolean getBoolean(java.lang.String)>("pack.keep.file.order");
+
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: boolean keepFileOrder> = $z3;
+
+        $r27 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r28 = $r27.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        $z4 = virtualinvoke $r28.<com.sun.java.util.jar.pack.PropMap: boolean getBoolean(java.lang.String)>("com.sun.java.util.jar.pack.keep.class.order");
+
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: boolean keepClassOrder> = $z4;
+
+        $r31 = "keep";
+
+        $r29 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r30 = $r29.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        $r32 = virtualinvoke $r30.<com.sun.java.util.jar.pack.PropMap: java.lang.String getProperty(java.lang.String)>("pack.modification.time");
+
+        $z5 = virtualinvoke $r31.<java.lang.String: boolean equals(java.lang.Object)>($r32);
+
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: boolean keepModtime> = $z5;
+
+        $r35 = "latest";
+
+        $r33 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r34 = $r33.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        $r36 = virtualinvoke $r34.<com.sun.java.util.jar.pack.PropMap: java.lang.String getProperty(java.lang.String)>("pack.modification.time");
+
+        $z6 = virtualinvoke $r35.<java.lang.String: boolean equals(java.lang.Object)>($r36);
+
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: boolean latestModtime> = $z6;
+
+        $r39 = "keep";
+
+        $r37 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r38 = $r37.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        $r40 = virtualinvoke $r38.<com.sun.java.util.jar.pack.PropMap: java.lang.String getProperty(java.lang.String)>("pack.deflate.hint");
+
+        $z7 = virtualinvoke $r39.<java.lang.String: boolean equals(java.lang.Object)>($r40);
+
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: boolean keepDeflateHint> = $z7;
+
+        $z8 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: boolean keepModtime>;
+
+        if $z8 != 0 goto label17;
+
+        $z11 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: boolean latestModtime>;
+
+        if $z11 != 0 goto label17;
+
+        $r62 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r63 = $r62.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        $i13 = virtualinvoke $r63.<com.sun.java.util.jar.pack.PropMap: int getTime(java.lang.String)>("pack.modification.time");
+
+        if $i13 == 0 goto label17;
+
+        $r64 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        $r64.<com.sun.java.util.jar.pack.Package: int default_modtime> = $i13;
+
+     label17:
+        $z24 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: boolean keepDeflateHint>;
+
+        if $z24 != 0 goto label18;
+
+        $r59 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r60 = $r59.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        $z10 = virtualinvoke $r60.<com.sun.java.util.jar.pack.PropMap: boolean getBoolean(java.lang.String)>("pack.deflate.hint");
+
+        if $z10 == 0 goto label18;
+
+        $r61 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        $i11 = $r61.<com.sun.java.util.jar.pack.Package: int default_options>;
+
+        $i12 = $i11 | 32;
+
+        $r61.<com.sun.java.util.jar.pack.Package: int default_options> = $i12;
+
+     label18:
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long totalOutputSize> = 0L;
+
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int segmentCount> = 0;
+
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long segmentTotalSize> = 0L;
+
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long segmentSize> = 0L;
+
+        $r119 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r120 = $r119.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        $r121 = virtualinvoke $r120.<com.sun.java.util.jar.pack.PropMap: java.lang.String getProperty(java.lang.String,java.lang.String)>("pack.segment.limit", "");
+
+        $z25 = virtualinvoke $r121.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z25 == 0 goto label19;
+
+        l20 = -1L;
+
+        goto label20;
+
+     label19:
+        $r41 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r42 = $r41.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        l20 = virtualinvoke $r42.<com.sun.java.util.jar.pack.PropMap: long getLong(java.lang.String)>("pack.segment.limit");
+
+     label20:
+        $l2 = staticinvoke <java.lang.Math: long min(long,long)>(2147483647L, l20);
+
+        $l3 = staticinvoke <java.lang.Math: long max(long,long)>(-1L, $l2);
+
+        l21 = $l3;
+
+        $b4 = $l3 cmp -1L;
+
+        if $b4 != 0 goto label21;
+
+        l21 = 9223372036854775807L;
+
+     label21:
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long segmentLimit> = l21;
+
+        $r43 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r44 = $r43.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        $r45 = virtualinvoke $r44.<com.sun.java.util.jar.pack.PropMap: java.util.List getProperties(java.lang.String)>("pack.pass.file.");
+
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: java.util.List passFiles> = $r45;
+
+        $r46 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: java.util.List passFiles>;
+
+        $r47 = interfaceinvoke $r46.<java.util.List: java.util.ListIterator listIterator()>();
+
+     label22:
+        $z26 = interfaceinvoke $r47.<java.util.ListIterator: boolean hasNext()>();
+
+        if $z26 == 0 goto label25;
+
+        $r57 = interfaceinvoke $r47.<java.util.ListIterator: java.lang.Object next()>();
+
+        r122 = (java.lang.String) $r57;
+
+        if r122 != null goto label23;
+
+        interfaceinvoke $r47.<java.util.ListIterator: void remove()>();
+
+        goto label22;
+
+     label23:
+        $r58 = staticinvoke <com.sun.java.util.jar.pack.Utils: java.lang.String getJarEntryName(java.lang.String)>(r122);
+
+        r123 = $r58;
+
+        $z9 = virtualinvoke $r58.<java.lang.String: boolean endsWith(java.lang.String)>("/");
+
+        if $z9 == 0 goto label24;
+
+        $i9 = virtualinvoke $r58.<java.lang.String: int length()>();
+
+        $i10 = $i9 - 1;
+
+        r123 = virtualinvoke $r58.<java.lang.String: java.lang.String substring(int,int)>(0, $i10);
+
+     label24:
+        interfaceinvoke $r47.<java.util.ListIterator: void set(java.lang.Object)>(r123);
+
+        goto label22;
+
+     label25:
+        $i5 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int verbose>;
+
+        if $i5 <= 0 goto label26;
+
+        $r52 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r51 = new java.lang.StringBuilder;
+
+        specialinvoke $r51.<java.lang.StringBuilder: void <init>()>();
+
+        $r53 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("passFiles = ");
+
+        $r54 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: java.util.List passFiles>;
+
+        $r55 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r54);
+
+        $r56 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r52.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r56);
+
+     label26:
+        $r48 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r49 = $r48.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        $i6 = virtualinvoke $r49.<com.sun.java.util.jar.pack.PropMap: int getInteger(java.lang.String)>("com.sun.java.util.jar.pack.archive.options");
+
+        if $i6 == 0 goto label27;
+
+        $r50 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        $i7 = $r50.<com.sun.java.util.jar.pack.Package: int default_options>;
+
+        $i8 = $i7 | $i6;
+
+        $r50.<com.sun.java.util.jar.pack.Package: int default_options> = $i8;
+
+     label27:
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int nread> = 0;
+
+        return;
+    }
+
+    boolean isClassFile(java.lang.String)
+    {
+        java.util.List $r2;
+        int $i0;
+        java.lang.String r0, r3;
+        com.sun.java.util.jar.pack.PackerImpl$DoPack r1;
+        boolean $z0, $z1;
+
+        r1 := @this: com.sun.java.util.jar.pack.PackerImpl$DoPack;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>(".class");
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        r3 = r0;
+
+     label2:
+        $r2 = r1.<com.sun.java.util.jar.pack.PackerImpl$DoPack: java.util.List passFiles>;
+
+        $z1 = interfaceinvoke $r2.<java.util.List: boolean contains(java.lang.Object)>(r3);
+
+        if $z1 == 0 goto label3;
+
+        return 0;
+
+     label3:
+        $i0 = virtualinvoke r3.<java.lang.String: int lastIndexOf(int)>(47);
+
+        if $i0 >= 0 goto label4;
+
+        goto label5;
+
+     label4:
+        r3 = virtualinvoke r3.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        goto label2;
+
+     label5:
+        return 1;
+    }
+
+    boolean isMetaInfFile(java.lang.String)
+    {
+        java.lang.String r0;
+        com.sun.java.util.jar.pack.PackerImpl$DoPack r1;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: com.sun.java.util.jar.pack.PackerImpl$DoPack;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("/META-INF");
+
+        if $z0 != 0 goto label1;
+
+        $z1 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("META-INF");
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+    }
+
+    private void makeNextPackage()
+    {
+        com.sun.java.util.jar.pack.Package $r1;
+        com.sun.java.util.jar.pack.PackerImpl$DoPack r0;
+
+        r0 := @this: com.sun.java.util.jar.pack.PackerImpl$DoPack;
+
+        $r1 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        virtualinvoke $r1.<com.sun.java.util.jar.pack.Package: void reset()>();
+
+        return;
+    }
+
+    private void noteRead(com.sun.java.util.jar.pack.PackerImpl$DoPack$InFile)
+    {
+        com.sun.java.util.jar.pack.Utils$Pack200Logger $r2, $r8;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        java.lang.String $r6, $r11, $r13;
+        com.sun.java.util.jar.pack.PackerImpl$DoPack r0;
+        com.sun.java.util.jar.pack.PackerImpl$DoPack$InFile r10;
+        java.lang.StringBuilder $r1, $r3, $r4, $r5, $r7, $r9, $r12;
+
+        r0 := @this: com.sun.java.util.jar.pack.PackerImpl$DoPack;
+
+        r10 := @parameter0: com.sun.java.util.jar.pack.PackerImpl$DoPack$InFile;
+
+        $i0 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int nread>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int nread> = $i1;
+
+        $i2 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int verbose>;
+
+        if $i2 <= 2 goto label1;
+
+        $r8 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("...read ");
+
+        $r11 = r10.<com.sun.java.util.jar.pack.PackerImpl$DoPack$InFile: java.lang.String name>;
+
+        $r12 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r8.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void fine(java.lang.String)>($r13);
+
+     label1:
+        $i3 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int verbose>;
+
+        if $i3 <= 0 goto label2;
+
+        $i4 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int nread>;
+
+        $i5 = $i4 % 1000;
+
+        if $i5 != 0 goto label2;
+
+        $r2 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Have read ");
+
+        $i6 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int nread>;
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i6);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" files...");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r6);
+
+     label2:
+        return;
+    }
+
+    void run(java.util.jar.JarInputStream, java.io.OutputStream) throws java.io.IOException
+    {
+        java.util.jar.Manifest $r1, $r16;
+        byte[] $r18;
+        com.sun.java.util.jar.pack.Utils$Pack200Logger $r11;
+        byte $b3;
+        java.io.ByteArrayInputStream $r24;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        com.sun.java.util.jar.pack.Package $r7, $r19;
+        com.sun.java.util.jar.pack.PackerImpl$DoPack r2;
+        com.sun.java.util.jar.pack.Package$File $r6, $r20, r22;
+        com.sun.java.util.jar.pack.PackerImpl$DoPack$InFile $r25;
+        java.lang.StringBuilder $r12, $r13, $r26;
+        java.io.ByteArrayOutputStream $r23;
+        long $l0, $l1, $l2, $l5, $l6, $l7;
+        java.lang.AssertionError $r27;
+        java.util.jar.JarEntry $r21;
+        java.util.jar.JarInputStream r0;
+        int $i4, $i8, $i10;
+        java.lang.String r5, $r14;
+        java.io.OutputStream r3;
+        java.io.InputStream $r8;
+
+        r2 := @this: com.sun.java.util.jar.pack.PackerImpl$DoPack;
+
+        r0 := @parameter0: java.util.jar.JarInputStream;
+
+        r3 := @parameter1: java.io.OutputStream;
+
+        $r1 = virtualinvoke r0.<java.util.jar.JarInputStream: java.util.jar.Manifest getManifest()>();
+
+        if $r1 == null goto label1;
+
+        $r23 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r23.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $r16 = virtualinvoke r0.<java.util.jar.JarInputStream: java.util.jar.Manifest getManifest()>();
+
+        virtualinvoke $r16.<java.util.jar.Manifest: void write(java.io.OutputStream)>($r23);
+
+        $r24 = new java.io.ByteArrayInputStream;
+
+        $r18 = virtualinvoke $r23.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        specialinvoke $r24.<java.io.ByteArrayInputStream: void <init>(byte[])>($r18);
+
+        $r19 = r2.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        $r20 = virtualinvoke r2.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package$File readFile(java.lang.String,java.io.InputStream)>("META-INF/MANIFEST.MF", $r24);
+
+        virtualinvoke $r19.<com.sun.java.util.jar.pack.Package: void addFile(com.sun.java.util.jar.pack.Package$File)>($r20);
+
+     label1:
+        $r21 = virtualinvoke r0.<java.util.jar.JarInputStream: java.util.jar.JarEntry getNextJarEntry()>();
+
+        if $r21 == null goto label9;
+
+        $r25 = new com.sun.java.util.jar.pack.PackerImpl$DoPack$InFile;
+
+        specialinvoke $r25.<com.sun.java.util.jar.pack.PackerImpl$DoPack$InFile: void <init>(com.sun.java.util.jar.pack.PackerImpl$DoPack,java.util.jar.JarEntry)>(r2, $r21);
+
+        r5 = $r25.<com.sun.java.util.jar.pack.PackerImpl$DoPack$InFile: java.lang.String name>;
+
+        $r6 = virtualinvoke r2.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package$File readFile(java.lang.String,java.io.InputStream)>(r5, r0);
+
+        r22 = null;
+
+        $z0 = virtualinvoke r2.<com.sun.java.util.jar.pack.PackerImpl$DoPack: boolean isMetaInfFile(java.lang.String)>(r5);
+
+        if $z0 == 0 goto label2;
+
+        $l7 = 0L;
+
+        goto label3;
+
+     label2:
+        $l7 = virtualinvoke $r25.<com.sun.java.util.jar.pack.PackerImpl$DoPack$InFile: long getInputLength()>();
+
+     label3:
+        $l0 = r2.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long segmentSize>;
+
+        $l1 = $l0 + $l7;
+
+        r2.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long segmentSize> = $l1;
+
+        $l2 = r2.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long segmentLimit>;
+
+        $b3 = $l1 cmp $l2;
+
+        $i8 = (int) $b3;
+
+        if $i8 <= 0 goto label4;
+
+        $l5 = r2.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long segmentSize>;
+
+        $l6 = $l5 - $l7;
+
+        r2.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long segmentSize> = $l6;
+
+        $i10 = (int) -1;
+
+        virtualinvoke r2.<com.sun.java.util.jar.pack.PackerImpl$DoPack: void flushPartial(java.io.OutputStream,int)>(r3, $i10);
+
+     label4:
+        $i4 = r2.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int verbose>;
+
+        if $i4 <= 1 goto label5;
+
+        $r11 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Reading ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r11.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void fine(java.lang.String)>($r14);
+
+     label5:
+        $z1 = <com.sun.java.util.jar.pack.PackerImpl$DoPack: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label6;
+
+        $z3 = virtualinvoke $r21.<java.util.jar.JarEntry: boolean isDirectory()>();
+
+        $z4 = virtualinvoke r5.<java.lang.String: boolean endsWith(java.lang.String)>("/");
+
+        if $z3 == $z4 goto label6;
+
+        $r27 = new java.lang.AssertionError;
+
+        specialinvoke $r27.<java.lang.AssertionError: void <init>()>();
+
+        throw $r27;
+
+     label6:
+        $z2 = virtualinvoke r2.<com.sun.java.util.jar.pack.PackerImpl$DoPack: boolean isClassFile(java.lang.String)>(r5);
+
+        if $z2 == 0 goto label7;
+
+        $r8 = virtualinvoke $r6.<com.sun.java.util.jar.pack.Package$File: java.io.InputStream getInputStream()>();
+
+        r22 = virtualinvoke r2.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package$File readClass(java.lang.String,java.io.InputStream)>(r5, $r8);
+
+     label7:
+        if r22 != null goto label8;
+
+        r22 = $r6;
+
+        $r7 = r2.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        virtualinvoke $r7.<com.sun.java.util.jar.pack.Package: void addFile(com.sun.java.util.jar.pack.Package$File)>($r6);
+
+     label8:
+        virtualinvoke $r25.<com.sun.java.util.jar.pack.PackerImpl$DoPack$InFile: void copyTo(com.sun.java.util.jar.pack.Package$File)>(r22);
+
+        specialinvoke r2.<com.sun.java.util.jar.pack.PackerImpl$DoPack: void noteRead(com.sun.java.util.jar.pack.PackerImpl$DoPack$InFile)>($r25);
+
+        goto label1;
+
+     label9:
+        virtualinvoke r2.<com.sun.java.util.jar.pack.PackerImpl$DoPack: void flushAll(java.io.OutputStream)>(r3);
+
+        return;
+    }
+
+    void run(java.util.jar.JarFile, java.io.OutputStream) throws java.io.IOException
+    {
+        java.util.jar.JarFile r1;
+        com.sun.java.util.jar.pack.Utils$Pack200Logger $r12, $r17, $r22;
+        byte $b4;
+        boolean $z0, $z1, $z2;
+        com.sun.java.util.jar.pack.Package $r9;
+        com.sun.java.util.jar.pack.PackerImpl$DoPack r0;
+        com.sun.java.util.jar.pack.Package$File $r8, $r10, r29;
+        java.util.List $r2;
+        com.sun.java.util.jar.pack.PackerImpl$DoPack$InFile r6;
+        float $f0, f1, $f2, f3, f4, f5;
+        java.lang.StringBuilder $r13, $r14, $r18, $r19, $r23, $r24, $r25, $r30, $r31, $r32;
+        long $l1, $l2, $l3, $l5, $l6, $l15;
+        int $i0, $i7, $i8, $i9, $i10, $i11, $i12, $i13, i14, $i16, $i17;
+        java.lang.String r7, $r15, $r20, $r26;
+        double $d0, $d1;
+        java.io.OutputStream r4;
+        java.util.Iterator $r3;
+        java.lang.Object $r5;
+        java.io.InputStream $r27, r28;
+
+        r0 := @this: com.sun.java.util.jar.pack.PackerImpl$DoPack;
+
+        r1 := @parameter0: java.util.jar.JarFile;
+
+        r4 := @parameter1: java.io.OutputStream;
+
+        $r2 = virtualinvoke r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: java.util.List scanJar(java.util.jar.JarFile)>(r1);
+
+        $i0 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int verbose>;
+
+        if $i0 <= 0 goto label01;
+
+        $r22 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r30 = new java.lang.StringBuilder;
+
+        specialinvoke $r30.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Reading ");
+
+        $i13 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i13);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" files...");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r22.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r26);
+
+     label01:
+        i14 = 0;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label02:
+        $z2 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label10;
+
+        $r5 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (com.sun.java.util.jar.pack.PackerImpl$DoPack$InFile) $r5;
+
+        r7 = r6.<com.sun.java.util.jar.pack.PackerImpl$DoPack$InFile: java.lang.String name>;
+
+        $z0 = virtualinvoke r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: boolean isMetaInfFile(java.lang.String)>(r7);
+
+        if $z0 == 0 goto label03;
+
+        $l15 = 0L;
+
+        goto label04;
+
+     label03:
+        $l15 = virtualinvoke r6.<com.sun.java.util.jar.pack.PackerImpl$DoPack$InFile: long getInputLength()>();
+
+     label04:
+        $l1 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long segmentSize>;
+
+        $l2 = $l1 + $l15;
+
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long segmentSize> = $l2;
+
+        $l3 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long segmentLimit>;
+
+        $b4 = $l2 cmp $l3;
+
+        $i17 = (int) $b4;
+
+        if $i17 <= 0 goto label06;
+
+        $l5 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long segmentSize>;
+
+        $l6 = $l5 - $l15;
+
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long segmentSize> = $l6;
+
+        $i7 = i14 + 1;
+
+        f4 = (float) $i7;
+
+        $i8 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int segmentCount>;
+
+        $i9 = $i8 + 1;
+
+        f5 = (float) $i9;
+
+        $i10 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        $f0 = (float) $i10;
+
+        f1 = $f0 - f4;
+
+        $f2 = f5 / f4;
+
+        f3 = f1 * $f2;
+
+        $i11 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int verbose>;
+
+        if $i11 <= 1 goto label05;
+
+        $r17 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r31 = new java.lang.StringBuilder;
+
+        specialinvoke $r31.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Estimated segments to do: ");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(float)>(f3);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r17.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void fine(java.lang.String)>($r20);
+
+     label05:
+        $d0 = (double) f3;
+
+        $d1 = staticinvoke <java.lang.Math: double ceil(double)>($d0);
+
+        $i12 = (int) $d1;
+
+        virtualinvoke r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: void flushPartial(java.io.OutputStream,int)>(r4, $i12);
+
+     label06:
+        $r27 = virtualinvoke r6.<com.sun.java.util.jar.pack.PackerImpl$DoPack$InFile: java.io.InputStream getInputStream()>();
+
+        r28 = $r27;
+
+        $i16 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int verbose>;
+
+        if $i16 <= 1 goto label07;
+
+        $r12 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r32 = new java.lang.StringBuilder;
+
+        specialinvoke $r32.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Reading ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r7);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r12.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void fine(java.lang.String)>($r15);
+
+     label07:
+        r29 = null;
+
+        $z1 = virtualinvoke r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: boolean isClassFile(java.lang.String)>(r7);
+
+        if $z1 == 0 goto label08;
+
+        $r10 = virtualinvoke r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package$File readClass(java.lang.String,java.io.InputStream)>(r7, $r27);
+
+        r29 = $r10;
+
+        if $r10 != null goto label08;
+
+        virtualinvoke $r27.<java.io.InputStream: void close()>();
+
+        r28 = virtualinvoke r6.<com.sun.java.util.jar.pack.PackerImpl$DoPack$InFile: java.io.InputStream getInputStream()>();
+
+     label08:
+        if r29 != null goto label09;
+
+        $r8 = virtualinvoke r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package$File readFile(java.lang.String,java.io.InputStream)>(r7, r28);
+
+        r29 = $r8;
+
+        $r9 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        virtualinvoke $r9.<com.sun.java.util.jar.pack.Package: void addFile(com.sun.java.util.jar.pack.Package$File)>($r8);
+
+     label09:
+        virtualinvoke r6.<com.sun.java.util.jar.pack.PackerImpl$DoPack$InFile: void copyTo(com.sun.java.util.jar.pack.Package$File)>(r29);
+
+        virtualinvoke r28.<java.io.InputStream: void close()>();
+
+        specialinvoke r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: void noteRead(com.sun.java.util.jar.pack.PackerImpl$DoPack$InFile)>(r6);
+
+        i14 = i14 + 1;
+
+        goto label02;
+
+     label10:
+        virtualinvoke r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: void flushAll(java.io.OutputStream)>(r4);
+
+        return;
+    }
+
+    com.sun.java.util.jar.pack.Package$File readClass(java.lang.String, java.io.InputStream) throws java.io.IOException
+    {
+        java.io.BufferedInputStream $r4;
+        com.sun.java.util.jar.pack.Attribute$FormatException r31;
+        com.sun.java.util.jar.pack.ClassReader $r5;
+        com.sun.java.util.jar.pack.Utils$Pack200Logger $r13, $r16, $r22, $r25;
+        java.util.Map $r6, $r7;
+        boolean $z0, $z1, $z2, $z3;
+        com.sun.java.util.jar.pack.Package $r2, $r9;
+        com.sun.java.util.jar.pack.PackerImpl$DoPack r1;
+        com.sun.java.util.jar.pack.ClassReader$ClassFormatException r32;
+        com.sun.java.util.jar.pack.Package$File $r10;
+        com.sun.java.util.jar.pack.Package$Class $r0;
+        java.lang.StringBuilder $r15, $r17, $r18, $r19, $r24, $r26, $r27, $r28;
+        java.lang.String r3, $r8, $r12, $r14, $r20, $r21, $r23, $r29;
+        java.io.IOException $r11;
+        java.io.InputStream r30;
+
+        r1 := @this: com.sun.java.util.jar.pack.PackerImpl$DoPack;
+
+        r3 := @parameter0: java.lang.String;
+
+        r30 := @parameter1: java.io.InputStream;
+
+        $r0 = new com.sun.java.util.jar.pack.Package$Class;
+
+        $r2 = r1.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        virtualinvoke $r2.<java.lang.Object: java.lang.Class getClass()>();
+
+        specialinvoke $r0.<com.sun.java.util.jar.pack.Package$Class: void <init>(com.sun.java.util.jar.pack.Package,java.lang.String)>($r2, r3);
+
+        $r4 = new java.io.BufferedInputStream;
+
+        specialinvoke $r4.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>(r30);
+
+        $r5 = new com.sun.java.util.jar.pack.ClassReader;
+
+        specialinvoke $r5.<com.sun.java.util.jar.pack.ClassReader: void <init>(com.sun.java.util.jar.pack.Package$Class,java.io.InputStream)>($r0, $r4);
+
+        $r6 = r1.<com.sun.java.util.jar.pack.PackerImpl$DoPack: java.util.Map attrDefs>;
+
+        virtualinvoke $r5.<com.sun.java.util.jar.pack.ClassReader: void setAttrDefs(java.util.Map)>($r6);
+
+        $r7 = r1.<com.sun.java.util.jar.pack.PackerImpl$DoPack: java.util.Map attrCommands>;
+
+        virtualinvoke $r5.<com.sun.java.util.jar.pack.ClassReader: void setAttrCommands(java.util.Map)>($r7);
+
+        $r8 = r1.<com.sun.java.util.jar.pack.PackerImpl$DoPack: java.lang.String unknownAttrCommand>;
+
+        $r5.<com.sun.java.util.jar.pack.ClassReader: java.lang.String unknownAttrCommand> = $r8;
+
+     label1:
+        virtualinvoke $r5.<com.sun.java.util.jar.pack.ClassReader: void read()>();
+
+     label2:
+        goto label7;
+
+     label3:
+        $r11 := @caughtexception;
+
+        $z0 = $r11 instanceof com.sun.java.util.jar.pack.Attribute$FormatException;
+
+        if $z0 == 0 goto label5;
+
+        r31 = (com.sun.java.util.jar.pack.Attribute$FormatException) $r11;
+
+        $r21 = r31.<com.sun.java.util.jar.pack.Attribute$FormatException: java.lang.String layout>;
+
+        $z3 = virtualinvoke $r21.<java.lang.String: boolean equals(java.lang.Object)>("pass");
+
+        if $z3 == 0 goto label4;
+
+        $r22 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r23 = virtualinvoke r31.<com.sun.java.util.jar.pack.Attribute$FormatException: java.lang.String toString()>();
+
+        virtualinvoke $r22.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r23);
+
+        $r25 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Passing class file uncompressed due to");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" unrecognized attribute: ");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r25.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void warning(java.lang.String)>($r29);
+
+        return null;
+
+     label4:
+        goto label6;
+
+     label5:
+        $z1 = $r11 instanceof com.sun.java.util.jar.pack.ClassReader$ClassFormatException;
+
+        if $z1 == 0 goto label6;
+
+        r32 = (com.sun.java.util.jar.pack.ClassReader$ClassFormatException) $r11;
+
+        $r12 = r1.<com.sun.java.util.jar.pack.PackerImpl$DoPack: java.lang.String classFormatCommand>;
+
+        $z2 = virtualinvoke $r12.<java.lang.String: boolean equals(java.lang.Object)>("pass");
+
+        if $z2 == 0 goto label6;
+
+        $r13 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r14 = virtualinvoke r32.<com.sun.java.util.jar.pack.ClassReader$ClassFormatException: java.lang.String toString()>();
+
+        virtualinvoke $r13.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r14);
+
+        $r16 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Passing class file uncompressed due to");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" unknown class format: ");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r16.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void warning(java.lang.String)>($r20);
+
+        return null;
+
+     label6:
+        throw $r11;
+
+     label7:
+        $r9 = r1.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        virtualinvoke $r9.<com.sun.java.util.jar.pack.Package: void addClass(com.sun.java.util.jar.pack.Package$Class)>($r0);
+
+        $r10 = $r0.<com.sun.java.util.jar.pack.Package$Class: com.sun.java.util.jar.pack.Package$File file>;
+
+        return $r10;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    com.sun.java.util.jar.pack.Package$File readFile(java.lang.String, java.io.InputStream) throws java.io.IOException
+    {
+        com.sun.java.util.jar.pack.Package $r2;
+        long $l0;
+        com.sun.java.util.jar.pack.PackerImpl$DoPack r1;
+        java.lang.IllegalArgumentException $r5;
+        java.io.File $r8;
+        com.sun.java.util.jar.pack.Package$File $r0;
+        byte $b1;
+        java.lang.StringBuilder $r6, $r7, $r9;
+        java.lang.String r3, $r10;
+        java.io.InputStream r4;
+        boolean $z0;
+
+        r1 := @this: com.sun.java.util.jar.pack.PackerImpl$DoPack;
+
+        r3 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.io.InputStream;
+
+        $r0 = new com.sun.java.util.jar.pack.Package$File;
+
+        $r2 = r1.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        virtualinvoke $r2.<java.lang.Object: java.lang.Class getClass()>();
+
+        specialinvoke $r0.<com.sun.java.util.jar.pack.Package$File: void <init>(com.sun.java.util.jar.pack.Package,java.lang.String)>($r2, r3);
+
+        virtualinvoke $r0.<com.sun.java.util.jar.pack.Package$File: void readFrom(java.io.InputStream)>(r4);
+
+        $z0 = virtualinvoke $r0.<com.sun.java.util.jar.pack.Package$File: boolean isDirectory()>();
+
+        if $z0 == 0 goto label1;
+
+        $l0 = virtualinvoke $r0.<com.sun.java.util.jar.pack.Package$File: long getFileLength()>();
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 == 0 goto label1;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Non-empty directory: ");
+
+        $r8 = virtualinvoke $r0.<com.sun.java.util.jar.pack.Package$File: java.io.File getFileName()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r10);
+
+        throw $r5;
+
+     label1:
+        return $r0;
+    }
+
+    void flushPartial(java.io.OutputStream, int) throws java.io.IOException
+    {
+        com.sun.java.util.jar.pack.PackerImpl $r4;
+        long $l4, $l5, $l6;
+        java.util.ArrayList $r2, $r7;
+        int i0, $i1, $i2, $i3;
+        boolean $z0, $z1;
+        java.io.OutputStream r3;
+        com.sun.java.util.jar.pack.Package $r1, $r6;
+        com.sun.java.util.jar.pack.PackerImpl$DoPack r0;
+        com.sun.java.util.jar.pack.PropMap $r5;
+
+        r0 := @this: com.sun.java.util.jar.pack.PackerImpl$DoPack;
+
+        r3 := @parameter0: java.io.OutputStream;
+
+        i0 := @parameter1: int;
+
+        $r1 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        $r2 = $r1.<com.sun.java.util.jar.pack.Package: java.util.ArrayList files>;
+
+        $z0 = virtualinvoke $r2.<java.util.ArrayList: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        $r6 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        $r7 = $r6.<com.sun.java.util.jar.pack.Package: java.util.ArrayList classes>;
+
+        $z1 = virtualinvoke $r7.<java.util.ArrayList: boolean isEmpty()>();
+
+        if $z1 == 0 goto label1;
+
+        return;
+
+     label1:
+        $i1 = staticinvoke <java.lang.Math: int max(int,int)>(1, i0);
+
+        virtualinvoke r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: void flushPackage(java.io.OutputStream,int)>(r3, $i1);
+
+        $r4 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r5 = $r4.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        virtualinvoke $r5.<com.sun.java.util.jar.pack.PropMap: int setInteger(java.lang.String,int)>("pack.progress", 25);
+
+        specialinvoke r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: void makeNextPackage()>();
+
+        $i2 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int segmentCount>;
+
+        $i3 = $i2 + 1;
+
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int segmentCount> = $i3;
+
+        $l5 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long segmentTotalSize>;
+
+        $l4 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long segmentSize>;
+
+        $l6 = $l5 + $l4;
+
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long segmentTotalSize> = $l6;
+
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long segmentSize> = 0L;
+
+        return;
+    }
+
+    void flushAll(java.io.OutputStream) throws java.io.IOException
+    {
+        com.sun.java.util.jar.pack.PackerImpl $r1, $r4;
+        long $l2, $l3, $l4, $l7, $l9;
+        com.sun.java.util.jar.pack.Utils$Pack200Logger $r7;
+        int $i0, $i1, $i5, $i6, $i8;
+        java.lang.String $r15;
+        java.io.OutputStream r3;
+        com.sun.java.util.jar.pack.PackerImpl$DoPack r0;
+        com.sun.java.util.jar.pack.PropMap $r2, $r5;
+        java.lang.StringBuilder $r6, $r8, $r9, $r10, $r11, $r12, $r13, $r14;
+
+        r0 := @this: com.sun.java.util.jar.pack.PackerImpl$DoPack;
+
+        r3 := @parameter0: java.io.OutputStream;
+
+        $r1 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r2 = $r1.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        virtualinvoke $r2.<com.sun.java.util.jar.pack.PropMap: int setInteger(java.lang.String,int)>("pack.progress", 50);
+
+        virtualinvoke r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: void flushPackage(java.io.OutputStream,int)>(r3, 0);
+
+        virtualinvoke r3.<java.io.OutputStream: void flush()>();
+
+        $r4 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r5 = $r4.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        virtualinvoke $r5.<com.sun.java.util.jar.pack.PropMap: int setInteger(java.lang.String,int)>("pack.progress", 100);
+
+        $i0 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int segmentCount>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int segmentCount> = $i1;
+
+        $l3 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long segmentTotalSize>;
+
+        $l2 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long segmentSize>;
+
+        $l4 = $l3 + $l2;
+
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long segmentTotalSize> = $l4;
+
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long segmentSize> = 0L;
+
+        $i5 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int verbose>;
+
+        if $i5 <= 0 goto label1;
+
+        $i6 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int segmentCount>;
+
+        if $i6 <= 1 goto label1;
+
+        $r7 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Transmitted ");
+
+        $l7 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long segmentTotalSize>;
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l7);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" input bytes in ");
+
+        $i8 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int segmentCount>;
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i8);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" segments totaling ");
+
+        $l9 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long totalOutputSize>;
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l9);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" bytes");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r15);
+
+     label1:
+        return;
+    }
+
+    void flushPackage(java.io.OutputStream, int) throws java.io.IOException
+    {
+        java.lang.StringBuilder $r15, $r17, $r18, $r19, $r20, $r21, $r22, $r23;
+        com.sun.java.util.jar.pack.PackerImpl $r4, $r6, $r8, $r10, $r47;
+        long $l3, $l4, l5, $l6, $l7, l8;
+        java.lang.AssertionError $r32, $r42;
+        java.util.ArrayList $r2, $r33, $r35, $r40, r45;
+        java.lang.String $r24;
+        com.sun.java.util.jar.pack.Utils$Pack200Logger $r16, $r44;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12;
+        com.sun.java.util.jar.pack.Package $r1, $r3, $r14, $r25, $r26, $r27, $r28, $r29, $r30, $r34, $r36, $r38, $r39, $r43, $r46;
+        com.sun.java.util.jar.pack.PackerImpl$DoPack r0;
+        com.sun.java.util.jar.pack.PropMap $r5, $r7, $r9, $r11, $r48;
+        java.util.List $r31, $r37, $r41;
+        com.sun.java.util.jar.pack.PackageWriter $r12;
+        int $i0, i1, $i2, $i9;
+        java.io.OutputStream r13;
+
+        r0 := @this: com.sun.java.util.jar.pack.PackerImpl$DoPack;
+
+        r13 := @parameter0: java.io.OutputStream;
+
+        i1 := @parameter1: int;
+
+        $r1 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        $r2 = $r1.<com.sun.java.util.jar.pack.Package: java.util.ArrayList files>;
+
+        $i0 = virtualinvoke $r2.<java.util.ArrayList: int size()>();
+
+        $z0 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: boolean keepFileOrder>;
+
+        if $z0 != 0 goto label02;
+
+        $i9 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int verbose>;
+
+        if $i9 <= 1 goto label01;
+
+        $r44 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        virtualinvoke $r44.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void fine(java.lang.String)>("Reordering files.");
+
+     label01:
+        $r43 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        $z11 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: boolean keepClassOrder>;
+
+        virtualinvoke $r43.<com.sun.java.util.jar.pack.Package: void reorderFiles(boolean,boolean)>($z11, 1);
+
+        goto label05;
+
+     label02:
+        $z1 = <com.sun.java.util.jar.pack.PackerImpl$DoPack: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label03;
+
+        $r38 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        $r40 = $r38.<com.sun.java.util.jar.pack.Package: java.util.ArrayList files>;
+
+        $r39 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        $r41 = virtualinvoke $r39.<com.sun.java.util.jar.pack.Package: java.util.List getClassStubs()>();
+
+        $z10 = virtualinvoke $r40.<java.util.ArrayList: boolean containsAll(java.util.Collection)>($r41);
+
+        if $z10 != 0 goto label03;
+
+        $r42 = new java.lang.AssertionError;
+
+        specialinvoke $r42.<java.lang.AssertionError: void <init>()>();
+
+        throw $r42;
+
+     label03:
+        $r3 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        r45 = $r3.<com.sun.java.util.jar.pack.Package: java.util.ArrayList files>;
+
+        $z2 = <com.sun.java.util.jar.pack.PackerImpl$DoPack: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label04;
+
+        $r33 = new java.util.ArrayList;
+
+        $r34 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        $r35 = $r34.<com.sun.java.util.jar.pack.Package: java.util.ArrayList files>;
+
+        specialinvoke $r33.<java.util.ArrayList: void <init>(java.util.Collection)>($r35);
+
+        r45 = $r33;
+
+        $r36 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        $r37 = virtualinvoke $r36.<com.sun.java.util.jar.pack.Package: java.util.List getClassStubs()>();
+
+        $z9 = interfaceinvoke $r33.<java.util.List: boolean retainAll(java.util.Collection)>($r37);
+
+        if $z9 != 0 goto label04;
+
+     label04:
+        $z3 = <com.sun.java.util.jar.pack.PackerImpl$DoPack: boolean $assertionsDisabled>;
+
+        if $z3 != 0 goto label05;
+
+        $r30 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        $r31 = virtualinvoke $r30.<com.sun.java.util.jar.pack.Package: java.util.List getClassStubs()>();
+
+        $z8 = interfaceinvoke r45.<java.util.List: boolean equals(java.lang.Object)>($r31);
+
+        if $z8 != 0 goto label05;
+
+        $r32 = new java.lang.AssertionError;
+
+        specialinvoke $r32.<java.lang.AssertionError: void <init>()>();
+
+        throw $r32;
+
+     label05:
+        $r46 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        virtualinvoke $r46.<com.sun.java.util.jar.pack.Package: void trimStubs()>();
+
+        $r47 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r48 = $r47.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        $z12 = virtualinvoke $r48.<com.sun.java.util.jar.pack.PropMap: boolean getBoolean(java.lang.String)>("com.sun.java.util.jar.pack.strip.debug");
+
+        if $z12 == 0 goto label06;
+
+        $r29 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        virtualinvoke $r29.<com.sun.java.util.jar.pack.Package: void stripAttributeKind(java.lang.String)>("Debug");
+
+     label06:
+        $r4 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r5 = $r4.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        $z4 = virtualinvoke $r5.<com.sun.java.util.jar.pack.PropMap: boolean getBoolean(java.lang.String)>("com.sun.java.util.jar.pack.strip.compile");
+
+        if $z4 == 0 goto label07;
+
+        $r28 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        virtualinvoke $r28.<com.sun.java.util.jar.pack.Package: void stripAttributeKind(java.lang.String)>("Compile");
+
+     label07:
+        $r6 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r7 = $r6.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        $z5 = virtualinvoke $r7.<com.sun.java.util.jar.pack.PropMap: boolean getBoolean(java.lang.String)>("com.sun.java.util.jar.pack.strip.constants");
+
+        if $z5 == 0 goto label08;
+
+        $r27 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        virtualinvoke $r27.<com.sun.java.util.jar.pack.Package: void stripAttributeKind(java.lang.String)>("Constant");
+
+     label08:
+        $r8 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r9 = $r8.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        $z6 = virtualinvoke $r9.<com.sun.java.util.jar.pack.PropMap: boolean getBoolean(java.lang.String)>("com.sun.java.util.jar.pack.strip.exceptions");
+
+        if $z6 == 0 goto label09;
+
+        $r26 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        virtualinvoke $r26.<com.sun.java.util.jar.pack.Package: void stripAttributeKind(java.lang.String)>("Exceptions");
+
+     label09:
+        $r10 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.PackerImpl this$0>;
+
+        $r11 = $r10.<com.sun.java.util.jar.pack.PackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        $z7 = virtualinvoke $r11.<com.sun.java.util.jar.pack.PropMap: boolean getBoolean(java.lang.String)>("com.sun.java.util.jar.pack.strip.innerclasses");
+
+        if $z7 == 0 goto label10;
+
+        $r25 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        virtualinvoke $r25.<com.sun.java.util.jar.pack.Package: void stripAttributeKind(java.lang.String)>("InnerClasses");
+
+     label10:
+        $r12 = new com.sun.java.util.jar.pack.PackageWriter;
+
+        $r14 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: com.sun.java.util.jar.pack.Package pkg>;
+
+        specialinvoke $r12.<com.sun.java.util.jar.pack.PackageWriter: void <init>(com.sun.java.util.jar.pack.Package,java.io.OutputStream)>($r14, r13);
+
+        $r12.<com.sun.java.util.jar.pack.PackageWriter: int archiveNextCount> = i1;
+
+        virtualinvoke $r12.<com.sun.java.util.jar.pack.PackageWriter: void write()>();
+
+        virtualinvoke r13.<java.io.OutputStream: void flush()>();
+
+        $i2 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: int verbose>;
+
+        if $i2 <= 0 goto label11;
+
+        $l4 = $r12.<com.sun.java.util.jar.pack.PackageWriter: long archiveSize0>;
+
+        $l3 = $r12.<com.sun.java.util.jar.pack.PackageWriter: long archiveSize1>;
+
+        l5 = $l4 + $l3;
+
+        $l6 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long totalOutputSize>;
+
+        $l7 = $l6 + l5;
+
+        r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long totalOutputSize> = $l7;
+
+        l8 = r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: long segmentSize>;
+
+        $r16 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Transmitted ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" files of ");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>(l8);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" input bytes in a segment of ");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>(l5);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" bytes");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r16.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r24);
+
+     label11:
+        return;
+    }
+
+    java.util.List scanJar(java.util.jar.JarFile) throws java.io.IOException
+    {
+        java.lang.IllegalStateException $r11;
+        java.util.Enumeration $r2;
+        java.util.jar.JarFile r1;
+        java.lang.AssertionError $r10;
+        java.util.ArrayList $r0, $r3;
+        java.util.jar.JarEntry r6;
+        java.lang.String $r9, $r13;
+        boolean $z0, $z1, $z2, $z3;
+        java.util.Iterator $r4;
+        java.io.IOException $r12;
+        com.sun.java.util.jar.pack.PackerImpl$DoPack r8;
+        com.sun.java.util.jar.pack.PackerImpl$DoPack$InFile $r7;
+        java.lang.Object $r5;
+
+        r8 := @this: com.sun.java.util.jar.pack.PackerImpl$DoPack;
+
+        r1 := @parameter0: java.util.jar.JarFile;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+     label1:
+        $r2 = virtualinvoke r1.<java.util.jar.JarFile: java.util.Enumeration entries()>();
+
+        $r3 = staticinvoke <java.util.Collections: java.util.ArrayList list(java.util.Enumeration)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (java.util.jar.JarEntry) $r5;
+
+        $r7 = new com.sun.java.util.jar.pack.PackerImpl$DoPack$InFile;
+
+        specialinvoke $r7.<com.sun.java.util.jar.pack.PackerImpl$DoPack$InFile: void <init>(com.sun.java.util.jar.pack.PackerImpl$DoPack,java.util.jar.JarFile,java.util.jar.JarEntry)>(r8, r1, r6);
+
+        $z1 = <com.sun.java.util.jar.pack.PackerImpl$DoPack: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label3;
+
+        $z2 = virtualinvoke r6.<java.util.jar.JarEntry: boolean isDirectory()>();
+
+        $r9 = $r7.<com.sun.java.util.jar.pack.PackerImpl$DoPack$InFile: java.lang.String name>;
+
+        $z3 = virtualinvoke $r9.<java.lang.String: boolean endsWith(java.lang.String)>("/");
+
+        if $z2 == $z3 goto label3;
+
+        $r10 = new java.lang.AssertionError;
+
+        specialinvoke $r10.<java.lang.AssertionError: void <init>()>();
+
+        throw $r10;
+
+     label3:
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>($r7);
+
+        goto label2;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r11 := @caughtexception;
+
+        $r12 = new java.io.IOException;
+
+        $r13 = virtualinvoke $r11.<java.lang.IllegalStateException: java.lang.String getLocalizedMessage()>();
+
+        specialinvoke $r12.<java.io.IOException: void <init>(java.lang.String,java.lang.Throwable)>($r13, $r11);
+
+        throw $r12;
+
+     label6:
+        return $r0;
+
+        catch java.lang.IllegalStateException from label1 to label4 with label5;
+    }
+
+    void <init>(com.sun.java.util.jar.pack.PackerImpl, com.sun.java.util.jar.pack.PackerImpl$1)
+    {
+        com.sun.java.util.jar.pack.PackerImpl r1;
+        com.sun.java.util.jar.pack.PackerImpl$1 r2;
+        com.sun.java.util.jar.pack.PackerImpl$DoPack r0;
+
+        r0 := @this: com.sun.java.util.jar.pack.PackerImpl$DoPack;
+
+        r1 := @parameter0: com.sun.java.util.jar.pack.PackerImpl;
+
+        r2 := @parameter1: com.sun.java.util.jar.pack.PackerImpl$1;
+
+        specialinvoke r0.<com.sun.java.util.jar.pack.PackerImpl$DoPack: void <init>(com.sun.java.util.jar.pack.PackerImpl)>(r1);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        $r0 = class "Lcom/sun/java/util/jar/pack/PackerImpl;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <com.sun.java.util.jar.pack.PackerImpl$DoPack: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

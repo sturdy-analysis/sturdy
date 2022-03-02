@@ -1,0 +1,2517 @@
+final class sun.security.ssl.SSLSessionImpl extends javax.net.ssl.ExtendedSSLSession
+{
+    private final sun.security.ssl.ProtocolVersion protocolVersion;
+    private final sun.security.ssl.SessionId sessionId;
+    private java.security.cert.X509Certificate[] peerCerts;
+    private sun.security.ssl.CipherSuite cipherSuite;
+    private javax.crypto.SecretKey masterSecret;
+    final boolean useExtendedMasterSecret;
+    private final long creationTime;
+    private long lastUsedTime;
+    private final java.lang.String host;
+    private final int port;
+    private sun.security.ssl.SSLSessionContextImpl context;
+    private boolean invalidated;
+    private java.security.cert.X509Certificate[] localCerts;
+    private java.security.PrivateKey localPrivateKey;
+    private final java.util.Collection localSupportedSignAlgs;
+    private java.lang.String[] peerSupportedSignAlgs;
+    private boolean useDefaultPeerSignAlgs;
+    private java.util.List statusResponses;
+    private javax.crypto.SecretKey resumptionMasterSecret;
+    private javax.crypto.SecretKey preSharedKey;
+    private byte[] pskIdentity;
+    private final long ticketCreationTime;
+    private int ticketAgeAdd;
+    private int negotiatedMaxFragLen;
+    private int maximumPacketSize;
+    private final java.util.Queue childSessions;
+    private boolean isSessionResumption;
+    private static boolean defaultRejoinable;
+    final javax.net.ssl.SNIServerName serverNameIndication;
+    private final java.util.List requestedServerNames;
+    private java.math.BigInteger ticketNonceCounter;
+    private final java.lang.String identificationProtocol;
+    private java.security.Principal peerPrincipal;
+    private java.security.Principal localPrincipal;
+    private final java.util.concurrent.ConcurrentHashMap boundValues;
+    private boolean acceptLargeFragments;
+
+    void <init>()
+    {
+        java.util.concurrent.ConcurrentHashMap $r11;
+        java.util.Set $r6;
+        long $l0, $l1;
+        sun.security.ssl.ProtocolVersion $r3;
+        java.util.List $r7;
+        sun.security.ssl.SessionId $r10;
+        int $i3, $i5;
+        java.math.BigInteger $r2;
+        sun.security.ssl.SSLSessionImpl r0;
+        sun.security.ssl.CipherSuite $r4;
+        boolean $z0;
+        java.util.concurrent.ConcurrentLinkedQueue $r9;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        specialinvoke r0.<javax.net.ssl.ExtendedSSLSession: void <init>()>();
+
+        r0.<sun.security.ssl.SSLSessionImpl: long lastUsedTime> = 0L;
+
+        r0.<sun.security.ssl.SSLSessionImpl: boolean useDefaultPeerSignAlgs> = 0;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        r0.<sun.security.ssl.SSLSessionImpl: long ticketCreationTime> = $l0;
+
+        $i3 = (int) -1;
+
+        r0.<sun.security.ssl.SSLSessionImpl: int negotiatedMaxFragLen> = $i3;
+
+        $r9 = new java.util.concurrent.ConcurrentLinkedQueue;
+
+        specialinvoke $r9.<java.util.concurrent.ConcurrentLinkedQueue: void <init>()>();
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.util.Queue childSessions> = $r9;
+
+        r0.<sun.security.ssl.SSLSessionImpl: boolean isSessionResumption> = 0;
+
+        $r2 = <java.math.BigInteger: java.math.BigInteger ONE>;
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.math.BigInteger ticketNonceCounter> = $r2;
+
+        $z0 = staticinvoke <sun.security.ssl.Utilities: boolean getBooleanProperty(java.lang.String,boolean)>("jsse.SSLEngine.acceptLargeFragments", 0);
+
+        r0.<sun.security.ssl.SSLSessionImpl: boolean acceptLargeFragments> = $z0;
+
+        $r3 = <sun.security.ssl.ProtocolVersion: sun.security.ssl.ProtocolVersion NONE>;
+
+        r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.ProtocolVersion protocolVersion> = $r3;
+
+        $r4 = <sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite C_NULL>;
+
+        r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.CipherSuite cipherSuite> = $r4;
+
+        $r10 = new sun.security.ssl.SessionId;
+
+        specialinvoke $r10.<sun.security.ssl.SessionId: void <init>(boolean,java.security.SecureRandom)>(0, null);
+
+        r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.SessionId sessionId> = $r10;
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.lang.String host> = null;
+
+        $i5 = (int) -1;
+
+        r0.<sun.security.ssl.SSLSessionImpl: int port> = $i5;
+
+        $r6 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.util.Collection localSupportedSignAlgs> = $r6;
+
+        r0.<sun.security.ssl.SSLSessionImpl: javax.net.ssl.SNIServerName serverNameIndication> = null;
+
+        $r7 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.util.List requestedServerNames> = $r7;
+
+        r0.<sun.security.ssl.SSLSessionImpl: boolean useExtendedMasterSecret> = 0;
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        r0.<sun.security.ssl.SSLSessionImpl: long creationTime> = $l1;
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.lang.String identificationProtocol> = null;
+
+        $r11 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r11.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.util.concurrent.ConcurrentHashMap boundValues> = $r11;
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.security.Principal peerPrincipal> = null;
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.security.Principal localPrincipal> = null;
+
+        return;
+    }
+
+    void <init>(sun.security.ssl.HandshakeContext, sun.security.ssl.CipherSuite)
+    {
+        java.security.SecureRandom $r5;
+        sun.security.ssl.SessionId $r3;
+        sun.security.ssl.SSLContextImpl $r4;
+        sun.security.ssl.SSLSessionImpl r0;
+        sun.security.ssl.CipherSuite r2;
+        sun.security.ssl.HandshakeContext r1;
+        boolean $z0;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        r1 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        r2 := @parameter1: sun.security.ssl.CipherSuite;
+
+        $r3 = new sun.security.ssl.SessionId;
+
+        $z0 = <sun.security.ssl.SSLSessionImpl: boolean defaultRejoinable>;
+
+        $r4 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.SSLContextImpl sslContext>;
+
+        $r5 = virtualinvoke $r4.<sun.security.ssl.SSLContextImpl: java.security.SecureRandom getSecureRandom()>();
+
+        specialinvoke $r3.<sun.security.ssl.SessionId: void <init>(boolean,java.security.SecureRandom)>($z0, $r5);
+
+        specialinvoke r0.<sun.security.ssl.SSLSessionImpl: void <init>(sun.security.ssl.HandshakeContext,sun.security.ssl.CipherSuite,sun.security.ssl.SessionId)>(r1, r2, $r3);
+
+        return;
+    }
+
+    void <init>(sun.security.ssl.HandshakeContext, sun.security.ssl.CipherSuite, sun.security.ssl.SessionId)
+    {
+        sun.security.ssl.SessionId r3;
+        long $l0;
+        sun.security.ssl.SSLSessionImpl r0;
+        sun.security.ssl.CipherSuite r2;
+        sun.security.ssl.HandshakeContext r1;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        r1 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        r2 := @parameter1: sun.security.ssl.CipherSuite;
+
+        r3 := @parameter2: sun.security.ssl.SessionId;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        specialinvoke r0.<sun.security.ssl.SSLSessionImpl: void <init>(sun.security.ssl.HandshakeContext,sun.security.ssl.CipherSuite,sun.security.ssl.SessionId,long)>(r1, r2, r3, $l0);
+
+        return;
+    }
+
+    void <init>(sun.security.ssl.HandshakeContext, sun.security.ssl.CipherSuite, sun.security.ssl.SessionId, long)
+    {
+        sun.security.ssl.SSLTransport $r8, $r11;
+        javax.net.ssl.SNIServerName $r15;
+        java.util.Map $r21, $r30, $r33;
+        java.math.BigInteger $r2;
+        sun.security.ssl.SSLConfiguration $r19, $r36;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.util.Collection $r35;
+        java.util.concurrent.ConcurrentHashMap $r42;
+        java.util.List $r12, $r14, $r17, $r18;
+        java.lang.StringBuilder $r24, $r25, $r43;
+        sun.security.ssl.CipherSuite r5;
+        java.util.concurrent.ConcurrentLinkedQueue $r39;
+        java.lang.Object[] $r27;
+        long $l0, l2;
+        sun.security.ssl.ProtocolVersion $r4, $r28;
+        java.util.ArrayList $r40, $r41;
+        int $i1, $i4;
+        java.lang.String $r9, $r26, $r37;
+        sun.security.ssl.SSLExtension $r20, $r29, $r32;
+        sun.security.ssl.TransportContext $r7, $r10;
+        sun.security.ssl.SessionId r6;
+        java.lang.Object $r22, $r31, $r34;
+        sun.security.ssl.SSLSessionImpl r0;
+        sun.security.ssl.HandshakeContext r3;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        r3 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        r5 := @parameter1: sun.security.ssl.CipherSuite;
+
+        r6 := @parameter2: sun.security.ssl.SessionId;
+
+        l2 := @parameter3: long;
+
+        specialinvoke r0.<javax.net.ssl.ExtendedSSLSession: void <init>()>();
+
+        r0.<sun.security.ssl.SSLSessionImpl: long lastUsedTime> = 0L;
+
+        r0.<sun.security.ssl.SSLSessionImpl: boolean useDefaultPeerSignAlgs> = 0;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        r0.<sun.security.ssl.SSLSessionImpl: long ticketCreationTime> = $l0;
+
+        $i4 = (int) -1;
+
+        r0.<sun.security.ssl.SSLSessionImpl: int negotiatedMaxFragLen> = $i4;
+
+        $r39 = new java.util.concurrent.ConcurrentLinkedQueue;
+
+        specialinvoke $r39.<java.util.concurrent.ConcurrentLinkedQueue: void <init>()>();
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.util.Queue childSessions> = $r39;
+
+        r0.<sun.security.ssl.SSLSessionImpl: boolean isSessionResumption> = 0;
+
+        $r2 = <java.math.BigInteger: java.math.BigInteger ONE>;
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.math.BigInteger ticketNonceCounter> = $r2;
+
+        $z0 = staticinvoke <sun.security.ssl.Utilities: boolean getBooleanProperty(java.lang.String,boolean)>("jsse.SSLEngine.acceptLargeFragments", 0);
+
+        r0.<sun.security.ssl.SSLSessionImpl: boolean acceptLargeFragments> = $z0;
+
+        $r4 = r3.<sun.security.ssl.HandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.ProtocolVersion protocolVersion> = $r4;
+
+        r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.CipherSuite cipherSuite> = r5;
+
+        r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.SessionId sessionId> = r6;
+
+        $r7 = r3.<sun.security.ssl.HandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r8 = $r7.<sun.security.ssl.TransportContext: sun.security.ssl.SSLTransport transport>;
+
+        $r9 = interfaceinvoke $r8.<sun.security.ssl.SSLTransport: java.lang.String getPeerHost()>();
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.lang.String host> = $r9;
+
+        $r10 = r3.<sun.security.ssl.HandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r11 = $r10.<sun.security.ssl.TransportContext: sun.security.ssl.SSLTransport transport>;
+
+        $i1 = interfaceinvoke $r11.<sun.security.ssl.SSLTransport: int getPeerPort()>();
+
+        r0.<sun.security.ssl.SSLSessionImpl: int port> = $i1;
+
+        $r12 = r3.<sun.security.ssl.HandshakeContext: java.util.List localSupportedSignAlgs>;
+
+        if $r12 != null goto label1;
+
+        $r35 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+        goto label2;
+
+     label1:
+        $r40 = new java.util.ArrayList;
+
+        $r14 = r3.<sun.security.ssl.HandshakeContext: java.util.List localSupportedSignAlgs>;
+
+        specialinvoke $r40.<java.util.ArrayList: void <init>(java.util.Collection)>($r14);
+
+        $r35 = staticinvoke <java.util.Collections: java.util.Collection unmodifiableCollection(java.util.Collection)>($r40);
+
+     label2:
+        r0.<sun.security.ssl.SSLSessionImpl: java.util.Collection localSupportedSignAlgs> = $r35;
+
+        $r15 = r3.<sun.security.ssl.HandshakeContext: javax.net.ssl.SNIServerName negotiatedServerName>;
+
+        r0.<sun.security.ssl.SSLSessionImpl: javax.net.ssl.SNIServerName serverNameIndication> = $r15;
+
+        $r41 = new java.util.ArrayList;
+
+        $r17 = virtualinvoke r3.<sun.security.ssl.HandshakeContext: java.util.List getRequestedServerNames()>();
+
+        specialinvoke $r41.<java.util.ArrayList: void <init>(java.util.Collection)>($r17);
+
+        $r18 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r41);
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.util.List requestedServerNames> = $r18;
+
+        $r19 = r3.<sun.security.ssl.HandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $z1 = $r19.<sun.security.ssl.SSLConfiguration: boolean isClientMode>;
+
+        if $z1 == 0 goto label5;
+
+        $r30 = r3.<sun.security.ssl.HandshakeContext: java.util.Map handshakeExtensions>;
+
+        $r29 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension CH_EXTENDED_MASTER_SECRET>;
+
+        $r31 = interfaceinvoke $r30.<java.util.Map: java.lang.Object get(java.lang.Object)>($r29);
+
+        if $r31 == null goto label3;
+
+        $r33 = r3.<sun.security.ssl.HandshakeContext: java.util.Map handshakeExtensions>;
+
+        $r32 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension SH_EXTENDED_MASTER_SECRET>;
+
+        $r34 = interfaceinvoke $r33.<java.util.Map: java.lang.Object get(java.lang.Object)>($r32);
+
+        if $r34 == null goto label3;
+
+        $z4 = 1;
+
+        goto label4;
+
+     label3:
+        $z4 = 0;
+
+     label4:
+        r0.<sun.security.ssl.SSLSessionImpl: boolean useExtendedMasterSecret> = $z4;
+
+        goto label8;
+
+     label5:
+        $r21 = r3.<sun.security.ssl.HandshakeContext: java.util.Map handshakeExtensions>;
+
+        $r20 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension CH_EXTENDED_MASTER_SECRET>;
+
+        $r22 = interfaceinvoke $r21.<java.util.Map: java.lang.Object get(java.lang.Object)>($r20);
+
+        if $r22 == null goto label6;
+
+        $r28 = r3.<sun.security.ssl.HandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $z3 = virtualinvoke $r28.<sun.security.ssl.ProtocolVersion: boolean useTLS13PlusSpec()>();
+
+        if $z3 != 0 goto label6;
+
+        $z5 = 1;
+
+        goto label7;
+
+     label6:
+        $z5 = 0;
+
+     label7:
+        r0.<sun.security.ssl.SSLSessionImpl: boolean useExtendedMasterSecret> = $z5;
+
+     label8:
+        r0.<sun.security.ssl.SSLSessionImpl: long creationTime> = l2;
+
+        $r36 = r3.<sun.security.ssl.HandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $r37 = $r36.<sun.security.ssl.SSLConfiguration: java.lang.String identificationProtocol>;
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.lang.String identificationProtocol> = $r37;
+
+        $r42 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r42.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.util.concurrent.ConcurrentHashMap boundValues> = $r42;
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.security.Principal peerPrincipal> = null;
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.security.Principal localPrincipal> = null;
+
+        $z6 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z6 == 0 goto label9;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("session");
+
+        if $z2 == 0 goto label9;
+
+        $r43 = new java.lang.StringBuilder;
+
+        specialinvoke $r43.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Session initialized:  ");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r27 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>($r26, $r27);
+
+     label9:
+        return;
+    }
+
+    void <init>(sun.security.ssl.SSLSessionImpl, sun.security.ssl.SessionId)
+    {
+        javax.net.ssl.SNIServerName $r10;
+        java.math.BigInteger $r2;
+        boolean $z0, $z1, $z2, $z3;
+        java.util.Collection $r8, $r27;
+        java.util.concurrent.ConcurrentHashMap $r19;
+        java.util.List $r11, $r16;
+        java.security.Principal $r20, $r21;
+        sun.security.ssl.SSLSessionContextImpl $r18;
+        java.lang.StringBuilder $r23, $r24, $r29;
+        sun.security.ssl.CipherSuite $r5;
+        javax.crypto.SecretKey $r12, $r17;
+        java.security.cert.X509Certificate[] $r14, $r15;
+        java.util.concurrent.ConcurrentLinkedQueue $r28;
+        java.lang.Object[] $r26;
+        long $l0, $l2, $l3;
+        java.lang.String[] $r9;
+        sun.security.ssl.ProtocolVersion $r4;
+        int $i1, $i4, $i5, $i7;
+        java.lang.String $r7, $r13, $r25;
+        sun.security.ssl.SessionId r6;
+        sun.security.ssl.SSLSessionImpl r0, r3;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        r3 := @parameter0: sun.security.ssl.SSLSessionImpl;
+
+        r6 := @parameter1: sun.security.ssl.SessionId;
+
+        specialinvoke r0.<javax.net.ssl.ExtendedSSLSession: void <init>()>();
+
+        r0.<sun.security.ssl.SSLSessionImpl: long lastUsedTime> = 0L;
+
+        r0.<sun.security.ssl.SSLSessionImpl: boolean useDefaultPeerSignAlgs> = 0;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        r0.<sun.security.ssl.SSLSessionImpl: long ticketCreationTime> = $l0;
+
+        $i7 = (int) -1;
+
+        r0.<sun.security.ssl.SSLSessionImpl: int negotiatedMaxFragLen> = $i7;
+
+        $r28 = new java.util.concurrent.ConcurrentLinkedQueue;
+
+        specialinvoke $r28.<java.util.concurrent.ConcurrentLinkedQueue: void <init>()>();
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.util.Queue childSessions> = $r28;
+
+        r0.<sun.security.ssl.SSLSessionImpl: boolean isSessionResumption> = 0;
+
+        $r2 = <java.math.BigInteger: java.math.BigInteger ONE>;
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.math.BigInteger ticketNonceCounter> = $r2;
+
+        $z0 = staticinvoke <sun.security.ssl.Utilities: boolean getBooleanProperty(java.lang.String,boolean)>("jsse.SSLEngine.acceptLargeFragments", 0);
+
+        r0.<sun.security.ssl.SSLSessionImpl: boolean acceptLargeFragments> = $z0;
+
+        $r4 = virtualinvoke r3.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.ProtocolVersion getProtocolVersion()>();
+
+        r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.ProtocolVersion protocolVersion> = $r4;
+
+        $r5 = r3.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.CipherSuite cipherSuite>;
+
+        r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.CipherSuite cipherSuite> = $r5;
+
+        r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.SessionId sessionId> = r6;
+
+        $r7 = virtualinvoke r3.<sun.security.ssl.SSLSessionImpl: java.lang.String getPeerHost()>();
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.lang.String host> = $r7;
+
+        $i1 = virtualinvoke r3.<sun.security.ssl.SSLSessionImpl: int getPeerPort()>();
+
+        r0.<sun.security.ssl.SSLSessionImpl: int port> = $i1;
+
+        $r8 = r3.<sun.security.ssl.SSLSessionImpl: java.util.Collection localSupportedSignAlgs>;
+
+        if $r8 != null goto label1;
+
+        $r27 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+        goto label2;
+
+     label1:
+        $r27 = r3.<sun.security.ssl.SSLSessionImpl: java.util.Collection localSupportedSignAlgs>;
+
+     label2:
+        r0.<sun.security.ssl.SSLSessionImpl: java.util.Collection localSupportedSignAlgs> = $r27;
+
+        $r9 = virtualinvoke r3.<sun.security.ssl.SSLSessionImpl: java.lang.String[] getPeerSupportedSignatureAlgorithms()>();
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.lang.String[] peerSupportedSignAlgs> = $r9;
+
+        $r10 = r3.<sun.security.ssl.SSLSessionImpl: javax.net.ssl.SNIServerName serverNameIndication>;
+
+        r0.<sun.security.ssl.SSLSessionImpl: javax.net.ssl.SNIServerName serverNameIndication> = $r10;
+
+        $r11 = virtualinvoke r3.<sun.security.ssl.SSLSessionImpl: java.util.List getRequestedServerNames()>();
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.util.List requestedServerNames> = $r11;
+
+        $r12 = virtualinvoke r3.<sun.security.ssl.SSLSessionImpl: javax.crypto.SecretKey getMasterSecret()>();
+
+        r0.<sun.security.ssl.SSLSessionImpl: javax.crypto.SecretKey masterSecret> = $r12;
+
+        $z1 = r3.<sun.security.ssl.SSLSessionImpl: boolean useExtendedMasterSecret>;
+
+        r0.<sun.security.ssl.SSLSessionImpl: boolean useExtendedMasterSecret> = $z1;
+
+        $l2 = virtualinvoke r3.<sun.security.ssl.SSLSessionImpl: long getCreationTime()>();
+
+        r0.<sun.security.ssl.SSLSessionImpl: long creationTime> = $l2;
+
+        $l3 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        r0.<sun.security.ssl.SSLSessionImpl: long lastUsedTime> = $l3;
+
+        $r13 = virtualinvoke r3.<sun.security.ssl.SSLSessionImpl: java.lang.String getIdentificationProtocol()>();
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.lang.String identificationProtocol> = $r13;
+
+        $r14 = r3.<sun.security.ssl.SSLSessionImpl: java.security.cert.X509Certificate[] localCerts>;
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.security.cert.X509Certificate[] localCerts> = $r14;
+
+        $r15 = r3.<sun.security.ssl.SSLSessionImpl: java.security.cert.X509Certificate[] peerCerts>;
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.security.cert.X509Certificate[] peerCerts> = $r15;
+
+        $r16 = r3.<sun.security.ssl.SSLSessionImpl: java.util.List statusResponses>;
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.util.List statusResponses> = $r16;
+
+        $r17 = r3.<sun.security.ssl.SSLSessionImpl: javax.crypto.SecretKey resumptionMasterSecret>;
+
+        r0.<sun.security.ssl.SSLSessionImpl: javax.crypto.SecretKey resumptionMasterSecret> = $r17;
+
+        $r18 = r3.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.SSLSessionContextImpl context>;
+
+        r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.SSLSessionContextImpl context> = $r18;
+
+        $i4 = r3.<sun.security.ssl.SSLSessionImpl: int negotiatedMaxFragLen>;
+
+        r0.<sun.security.ssl.SSLSessionImpl: int negotiatedMaxFragLen> = $i4;
+
+        $i5 = r3.<sun.security.ssl.SSLSessionImpl: int maximumPacketSize>;
+
+        r0.<sun.security.ssl.SSLSessionImpl: int maximumPacketSize> = $i5;
+
+        $r19 = r3.<sun.security.ssl.SSLSessionImpl: java.util.concurrent.ConcurrentHashMap boundValues>;
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.util.concurrent.ConcurrentHashMap boundValues> = $r19;
+
+        $r20 = r3.<sun.security.ssl.SSLSessionImpl: java.security.Principal peerPrincipal>;
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.security.Principal peerPrincipal> = $r20;
+
+        $r21 = r3.<sun.security.ssl.SSLSessionImpl: java.security.Principal localPrincipal>;
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.security.Principal localPrincipal> = $r21;
+
+        $z2 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z2 == 0 goto label3;
+
+        $z3 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("session");
+
+        if $z3 == 0 goto label3;
+
+        $r29 = new java.lang.StringBuilder;
+
+        specialinvoke $r29.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Session initialized:  ");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r26 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>($r25, $r26);
+
+     label3:
+        return;
+    }
+
+    void setMasterSecret(javax.crypto.SecretKey)
+    {
+        sun.security.ssl.SSLSessionImpl r0;
+        javax.crypto.SecretKey r1;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        r1 := @parameter0: javax.crypto.SecretKey;
+
+        r0.<sun.security.ssl.SSLSessionImpl: javax.crypto.SecretKey masterSecret> = r1;
+
+        return;
+    }
+
+    void setResumptionMasterSecret(javax.crypto.SecretKey)
+    {
+        sun.security.ssl.SSLSessionImpl r0;
+        javax.crypto.SecretKey r1;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        r1 := @parameter0: javax.crypto.SecretKey;
+
+        r0.<sun.security.ssl.SSLSessionImpl: javax.crypto.SecretKey resumptionMasterSecret> = r1;
+
+        return;
+    }
+
+    void setPreSharedKey(javax.crypto.SecretKey)
+    {
+        sun.security.ssl.SSLSessionImpl r0;
+        javax.crypto.SecretKey r1;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        r1 := @parameter0: javax.crypto.SecretKey;
+
+        r0.<sun.security.ssl.SSLSessionImpl: javax.crypto.SecretKey preSharedKey> = r1;
+
+        return;
+    }
+
+    void addChild(sun.security.ssl.SSLSessionImpl)
+    {
+        sun.security.ssl.SSLSessionImpl r0, r1;
+        java.util.Queue $r2;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        r1 := @parameter0: sun.security.ssl.SSLSessionImpl;
+
+        $r2 = r0.<sun.security.ssl.SSLSessionImpl: java.util.Queue childSessions>;
+
+        interfaceinvoke $r2.<java.util.Queue: boolean add(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    void setTicketAgeAdd(int)
+    {
+        int i0;
+        sun.security.ssl.SSLSessionImpl r0;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        i0 := @parameter0: int;
+
+        r0.<sun.security.ssl.SSLSessionImpl: int ticketAgeAdd> = i0;
+
+        return;
+    }
+
+    void setPskIdentity(byte[])
+    {
+        byte[] r1;
+        sun.security.ssl.SSLSessionImpl r0;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        r1 := @parameter0: byte[];
+
+        r0.<sun.security.ssl.SSLSessionImpl: byte[] pskIdentity> = r1;
+
+        return;
+    }
+
+    java.math.BigInteger incrTicketNonceCounter()
+    {
+        java.math.BigInteger r1, $r2, $r3, $r4;
+        sun.security.ssl.SSLSessionImpl r0;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        r1 = r0.<sun.security.ssl.SSLSessionImpl: java.math.BigInteger ticketNonceCounter>;
+
+        $r2 = r0.<sun.security.ssl.SSLSessionImpl: java.math.BigInteger ticketNonceCounter>;
+
+        $r3 = staticinvoke <java.math.BigInteger: java.math.BigInteger valueOf(long)>(1L);
+
+        $r4 = virtualinvoke $r2.<java.math.BigInteger: java.math.BigInteger add(java.math.BigInteger)>($r3);
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.math.BigInteger ticketNonceCounter> = $r4;
+
+        return r1;
+    }
+
+    javax.crypto.SecretKey getMasterSecret()
+    {
+        sun.security.ssl.SSLSessionImpl r0;
+        javax.crypto.SecretKey $r1;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: javax.crypto.SecretKey masterSecret>;
+
+        return $r1;
+    }
+
+    javax.crypto.SecretKey getResumptionMasterSecret()
+    {
+        sun.security.ssl.SSLSessionImpl r0;
+        javax.crypto.SecretKey $r1;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: javax.crypto.SecretKey resumptionMasterSecret>;
+
+        return $r1;
+    }
+
+    synchronized javax.crypto.SecretKey getPreSharedKey()
+    {
+        sun.security.ssl.SSLSessionImpl r0;
+        javax.crypto.SecretKey $r1;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: javax.crypto.SecretKey preSharedKey>;
+
+        return $r1;
+    }
+
+    synchronized javax.crypto.SecretKey consumePreSharedKey()
+    {
+        java.lang.Throwable $r2;
+        sun.security.ssl.SSLSessionImpl r0;
+        javax.crypto.SecretKey r1;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+     label1:
+        r1 = r0.<sun.security.ssl.SSLSessionImpl: javax.crypto.SecretKey preSharedKey>;
+
+     label2:
+        r0.<sun.security.ssl.SSLSessionImpl: javax.crypto.SecretKey preSharedKey> = null;
+
+        return r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        r0.<sun.security.ssl.SSLSessionImpl: javax.crypto.SecretKey preSharedKey> = null;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    int getTicketAgeAdd()
+    {
+        int $i0;
+        sun.security.ssl.SSLSessionImpl r0;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $i0 = r0.<sun.security.ssl.SSLSessionImpl: int ticketAgeAdd>;
+
+        return $i0;
+    }
+
+    java.lang.String getIdentificationProtocol()
+    {
+        sun.security.ssl.SSLSessionImpl r0;
+        java.lang.String $r1;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: java.lang.String identificationProtocol>;
+
+        return $r1;
+    }
+
+    synchronized byte[] consumePskIdentity()
+    {
+        java.lang.Throwable $r2;
+        byte[] r1;
+        sun.security.ssl.SSLSessionImpl r0;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+     label1:
+        r1 = r0.<sun.security.ssl.SSLSessionImpl: byte[] pskIdentity>;
+
+     label2:
+        r0.<sun.security.ssl.SSLSessionImpl: byte[] pskIdentity> = null;
+
+        return r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        r0.<sun.security.ssl.SSLSessionImpl: byte[] pskIdentity> = null;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    void setPeerCertificates(java.security.cert.X509Certificate[])
+    {
+        sun.security.ssl.SSLSessionImpl r0;
+        java.security.cert.X509Certificate[] $r1, r2;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        r2 := @parameter0: java.security.cert.X509Certificate[];
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: java.security.cert.X509Certificate[] peerCerts>;
+
+        if $r1 != null goto label1;
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.security.cert.X509Certificate[] peerCerts> = r2;
+
+     label1:
+        return;
+    }
+
+    void setLocalCertificates(java.security.cert.X509Certificate[])
+    {
+        sun.security.ssl.SSLSessionImpl r0;
+        java.security.cert.X509Certificate[] r1;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        r1 := @parameter0: java.security.cert.X509Certificate[];
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.security.cert.X509Certificate[] localCerts> = r1;
+
+        return;
+    }
+
+    void setLocalPrivateKey(java.security.PrivateKey)
+    {
+        sun.security.ssl.SSLSessionImpl r0;
+        java.security.PrivateKey r1;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        r1 := @parameter0: java.security.PrivateKey;
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.security.PrivateKey localPrivateKey> = r1;
+
+        return;
+    }
+
+    void setPeerSupportedSignatureAlgorithms(java.util.Collection)
+    {
+        java.lang.String[] $r2;
+        sun.security.ssl.SSLSessionImpl r0;
+        java.util.Collection r1;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        r1 := @parameter0: java.util.Collection;
+
+        $r2 = staticinvoke <sun.security.ssl.SignatureScheme: java.lang.String[] getAlgorithmNames(java.util.Collection)>(r1);
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.lang.String[] peerSupportedSignAlgs> = $r2;
+
+        return;
+    }
+
+    void setUseDefaultPeerSignAlgs()
+    {
+        java.lang.String[] $r1;
+        sun.security.ssl.SSLSessionImpl r0;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        r0.<sun.security.ssl.SSLSessionImpl: boolean useDefaultPeerSignAlgs> = 1;
+
+        $r1 = newarray (java.lang.String)[3];
+
+        $r1[0] = "SHA1withRSA";
+
+        $r1[1] = "SHA1withDSA";
+
+        $r1[2] = "SHA1withECDSA";
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.lang.String[] peerSupportedSignAlgs> = $r1;
+
+        return;
+    }
+
+    sun.security.ssl.SSLSessionImpl finish()
+    {
+        java.lang.String[] $r1;
+        sun.security.ssl.SSLSessionImpl r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $z0 = r0.<sun.security.ssl.SSLSessionImpl: boolean useDefaultPeerSignAlgs>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = newarray (java.lang.String)[0];
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.lang.String[] peerSupportedSignAlgs> = $r1;
+
+     label1:
+        return r0;
+    }
+
+    void setStatusResponses(java.util.List)
+    {
+        java.util.List r0, $r2;
+        sun.security.ssl.SSLSessionImpl r1;
+        boolean $z0;
+
+        r1 := @this: sun.security.ssl.SSLSessionImpl;
+
+        r0 := @parameter0: java.util.List;
+
+        if r0 == null goto label1;
+
+        $z0 = interfaceinvoke r0.<java.util.List: boolean isEmpty()>();
+
+        if $z0 != 0 goto label1;
+
+        r1.<sun.security.ssl.SSLSessionImpl: java.util.List statusResponses> = r0;
+
+        goto label2;
+
+     label1:
+        $r2 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+        r1.<sun.security.ssl.SSLSessionImpl: java.util.List statusResponses> = $r2;
+
+     label2:
+        return;
+    }
+
+    boolean isRejoinable()
+    {
+        sun.security.ssl.SessionId $r1, $r2;
+        int $i0;
+        sun.security.ssl.SSLSessionImpl r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.SessionId sessionId>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.SessionId sessionId>;
+
+        $i0 = virtualinvoke $r2.<sun.security.ssl.SessionId: int length()>();
+
+        if $i0 == 0 goto label1;
+
+        $z0 = r0.<sun.security.ssl.SSLSessionImpl: boolean invalidated>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = specialinvoke r0.<sun.security.ssl.SSLSessionImpl: boolean isLocalAuthenticationValid()>();
+
+        if $z1 == 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+    }
+
+    public synchronized boolean isValid()
+    {
+        sun.security.ssl.SSLSessionImpl r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $z0 = virtualinvoke r0.<sun.security.ssl.SSLSessionImpl: boolean isRejoinable()>();
+
+        return $z0;
+    }
+
+    private boolean isLocalAuthenticationValid()
+    {
+        java.security.PrivateKey $r1, $r2;
+        sun.security.ssl.SSLSessionImpl r0;
+        java.lang.Exception $r3;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: java.security.PrivateKey localPrivateKey>;
+
+        if $r1 == null goto label4;
+
+     label1:
+        $r2 = r0.<sun.security.ssl.SSLSessionImpl: java.security.PrivateKey localPrivateKey>;
+
+        interfaceinvoke $r2.<java.security.PrivateKey: java.lang.String getAlgorithm()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        virtualinvoke r0.<sun.security.ssl.SSLSessionImpl: void invalidate()>();
+
+        return 0;
+
+     label4:
+        return 1;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public byte[] getId()
+    {
+        byte[] $r2;
+        sun.security.ssl.SSLSessionImpl r0;
+        sun.security.ssl.SessionId $r1;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.SessionId sessionId>;
+
+        $r2 = virtualinvoke $r1.<sun.security.ssl.SessionId: byte[] getId()>();
+
+        return $r2;
+    }
+
+    public javax.net.ssl.SSLSessionContext getSessionContext()
+    {
+        sun.security.ssl.SSLSessionContextImpl $r2;
+        javax.net.ssl.SSLPermission $r3;
+        sun.security.ssl.SSLSessionImpl r1;
+        java.lang.SecurityManager $r0;
+
+        r1 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r3 = new javax.net.ssl.SSLPermission;
+
+        specialinvoke $r3.<javax.net.ssl.SSLPermission: void <init>(java.lang.String)>("getSSLSessionContext");
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r3);
+
+     label1:
+        $r2 = r1.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.SSLSessionContextImpl context>;
+
+        return $r2;
+    }
+
+    sun.security.ssl.SessionId getSessionId()
+    {
+        sun.security.ssl.SSLSessionImpl r0;
+        sun.security.ssl.SessionId $r1;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.SessionId sessionId>;
+
+        return $r1;
+    }
+
+    sun.security.ssl.CipherSuite getSuite()
+    {
+        sun.security.ssl.SSLSessionImpl r0;
+        sun.security.ssl.CipherSuite $r1;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.CipherSuite cipherSuite>;
+
+        return $r1;
+    }
+
+    void setSuite(sun.security.ssl.CipherSuite)
+    {
+        java.lang.Object[] $r6;
+        java.lang.StringBuilder $r2, $r3, $r4;
+        sun.security.ssl.SSLSessionImpl r0;
+        sun.security.ssl.CipherSuite r1;
+        java.lang.String $r5;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        r1 := @parameter0: sun.security.ssl.CipherSuite;
+
+        r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.CipherSuite cipherSuite> = r1;
+
+        $z0 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z0 == 0 goto label1;
+
+        $z1 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("session");
+
+        if $z1 == 0 goto label1;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Negotiating session:  ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>($r5, $r6);
+
+     label1:
+        return;
+    }
+
+    boolean isSessionResumption()
+    {
+        sun.security.ssl.SSLSessionImpl r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $z0 = r0.<sun.security.ssl.SSLSessionImpl: boolean isSessionResumption>;
+
+        return $z0;
+    }
+
+    void setAsSessionResumption(boolean)
+    {
+        sun.security.ssl.SSLSessionImpl r0;
+        boolean z0;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        z0 := @parameter0: boolean;
+
+        r0.<sun.security.ssl.SSLSessionImpl: boolean isSessionResumption> = z0;
+
+        return;
+    }
+
+    public java.lang.String getCipherSuite()
+    {
+        sun.security.ssl.SSLSessionImpl r0;
+        sun.security.ssl.CipherSuite $r1;
+        java.lang.String $r2;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = virtualinvoke r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.CipherSuite getSuite()>();
+
+        $r2 = $r1.<sun.security.ssl.CipherSuite: java.lang.String name>;
+
+        return $r2;
+    }
+
+    sun.security.ssl.ProtocolVersion getProtocolVersion()
+    {
+        sun.security.ssl.SSLSessionImpl r0;
+        sun.security.ssl.ProtocolVersion $r1;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.ProtocolVersion protocolVersion>;
+
+        return $r1;
+    }
+
+    public java.lang.String getProtocol()
+    {
+        sun.security.ssl.SSLSessionImpl r0;
+        java.lang.String $r2;
+        sun.security.ssl.ProtocolVersion $r1;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = virtualinvoke r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.ProtocolVersion getProtocolVersion()>();
+
+        $r2 = $r1.<sun.security.ssl.ProtocolVersion: java.lang.String name>;
+
+        return $r2;
+    }
+
+    public int hashCode()
+    {
+        int $i0;
+        sun.security.ssl.SSLSessionImpl r0;
+        sun.security.ssl.SessionId $r1;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.SessionId sessionId>;
+
+        $i0 = virtualinvoke $r1.<sun.security.ssl.SessionId: int hashCode()>();
+
+        return $i0;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        sun.security.ssl.SessionId $r3, $r4, $r5;
+        java.lang.Object r0;
+        sun.security.ssl.SSLSessionImpl r1, r2;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: sun.security.ssl.SSLSessionImpl;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        $z0 = r0 instanceof sun.security.ssl.SSLSessionImpl;
+
+        if $z0 == 0 goto label4;
+
+        r2 = (sun.security.ssl.SSLSessionImpl) r0;
+
+        $r3 = r1.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.SessionId sessionId>;
+
+        if $r3 == null goto label2;
+
+        $r4 = r1.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.SessionId sessionId>;
+
+        $r5 = virtualinvoke r2.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.SessionId getSessionId()>();
+
+        $z1 = virtualinvoke $r4.<sun.security.ssl.SessionId: boolean equals(java.lang.Object)>($r5);
+
+        if $z1 == 0 goto label2;
+
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+
+     label4:
+        return 0;
+    }
+
+    public java.security.cert.Certificate[] getPeerCertificates() throws javax.net.ssl.SSLPeerUnverifiedException
+    {
+        sun.security.ssl.CipherSuite$KeyExchange $r2, $r3, $r6, $r7;
+        java.lang.Object $r10;
+        java.security.cert.Certificate[] $r11, $r12;
+        sun.security.ssl.SSLSessionImpl r0;
+        sun.security.ssl.CipherSuite $r1, $r5;
+        java.security.cert.X509Certificate[] $r8, $r9;
+        javax.net.ssl.SSLPeerUnverifiedException $r4, $r13;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.CipherSuite cipherSuite>;
+
+        $r3 = $r1.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$KeyExchange keyExchange>;
+
+        $r2 = <sun.security.ssl.CipherSuite$KeyExchange: sun.security.ssl.CipherSuite$KeyExchange K_KRB5>;
+
+        if $r3 == $r2 goto label1;
+
+        $r5 = r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.CipherSuite cipherSuite>;
+
+        $r7 = $r5.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$KeyExchange keyExchange>;
+
+        $r6 = <sun.security.ssl.CipherSuite$KeyExchange: sun.security.ssl.CipherSuite$KeyExchange K_KRB5_EXPORT>;
+
+        if $r7 != $r6 goto label2;
+
+     label1:
+        $r4 = new javax.net.ssl.SSLPeerUnverifiedException;
+
+        specialinvoke $r4.<javax.net.ssl.SSLPeerUnverifiedException: void <init>(java.lang.String)>("no certificates expected for Kerberos cipher suites");
+
+        throw $r4;
+
+     label2:
+        $r8 = r0.<sun.security.ssl.SSLSessionImpl: java.security.cert.X509Certificate[] peerCerts>;
+
+        if $r8 != null goto label3;
+
+        $r13 = new javax.net.ssl.SSLPeerUnverifiedException;
+
+        specialinvoke $r13.<javax.net.ssl.SSLPeerUnverifiedException: void <init>(java.lang.String)>("peer not authenticated");
+
+        throw $r13;
+
+     label3:
+        $r9 = r0.<sun.security.ssl.SSLSessionImpl: java.security.cert.X509Certificate[] peerCerts>;
+
+        $r10 = virtualinvoke $r9.<java.lang.Object: java.lang.Object clone()>();
+
+        $r11 = (java.security.cert.Certificate[]) $r10;
+
+        $r12 = (java.security.cert.Certificate[]) $r11;
+
+        return $r12;
+    }
+
+    public java.security.cert.Certificate[] getLocalCertificates()
+    {
+        java.lang.Object $r3;
+        java.security.cert.Certificate[] $r4, $r5;
+        sun.security.ssl.SSLSessionImpl r0;
+        java.security.cert.X509Certificate[] $r1, $r2;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: java.security.cert.X509Certificate[] localCerts>;
+
+        if $r1 != null goto label1;
+
+        $r5 = null;
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<sun.security.ssl.SSLSessionImpl: java.security.cert.X509Certificate[] localCerts>;
+
+        $r3 = virtualinvoke $r2.<java.lang.Object: java.lang.Object clone()>();
+
+        $r4 = (java.security.cert.Certificate[]) $r3;
+
+        $r5 = (java.security.cert.Certificate[]) $r4;
+
+     label2:
+        return $r5;
+    }
+
+    public javax.security.cert.X509Certificate[] getPeerCertificateChain() throws javax.net.ssl.SSLPeerUnverifiedException
+    {
+        java.security.cert.X509Certificate $r13;
+        javax.security.cert.X509Certificate[] r10;
+        byte[] $r14;
+        sun.security.ssl.CipherSuite$KeyExchange $r2, $r3, $r6, $r7;
+        int $i0, $i1, i2;
+        java.lang.String $r19, $r22;
+        javax.security.cert.X509Certificate $r15;
+        javax.security.cert.CertificateException $r17;
+        sun.security.ssl.SSLSessionImpl r0;
+        sun.security.ssl.CipherSuite $r1, $r5;
+        java.security.cert.X509Certificate[] $r8, $r9, $r11, $r12;
+        javax.net.ssl.SSLPeerUnverifiedException $r4, $r16, $r18, $r21;
+        java.security.cert.CertificateEncodingException $r20;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.CipherSuite cipherSuite>;
+
+        $r3 = $r1.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$KeyExchange keyExchange>;
+
+        $r2 = <sun.security.ssl.CipherSuite$KeyExchange: sun.security.ssl.CipherSuite$KeyExchange K_KRB5>;
+
+        if $r3 == $r2 goto label01;
+
+        $r5 = r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.CipherSuite cipherSuite>;
+
+        $r7 = $r5.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$KeyExchange keyExchange>;
+
+        $r6 = <sun.security.ssl.CipherSuite$KeyExchange: sun.security.ssl.CipherSuite$KeyExchange K_KRB5_EXPORT>;
+
+        if $r7 != $r6 goto label02;
+
+     label01:
+        $r4 = new javax.net.ssl.SSLPeerUnverifiedException;
+
+        specialinvoke $r4.<javax.net.ssl.SSLPeerUnverifiedException: void <init>(java.lang.String)>("no certificates expected for Kerberos cipher suites");
+
+        throw $r4;
+
+     label02:
+        $r8 = r0.<sun.security.ssl.SSLSessionImpl: java.security.cert.X509Certificate[] peerCerts>;
+
+        if $r8 != null goto label03;
+
+        $r16 = new javax.net.ssl.SSLPeerUnverifiedException;
+
+        specialinvoke $r16.<javax.net.ssl.SSLPeerUnverifiedException: void <init>(java.lang.String)>("peer not authenticated");
+
+        throw $r16;
+
+     label03:
+        $r9 = r0.<sun.security.ssl.SSLSessionImpl: java.security.cert.X509Certificate[] peerCerts>;
+
+        $i0 = lengthof $r9;
+
+        r10 = newarray (javax.security.cert.X509Certificate)[$i0];
+
+        i2 = 0;
+
+     label04:
+        $r11 = r0.<sun.security.ssl.SSLSessionImpl: java.security.cert.X509Certificate[] peerCerts>;
+
+        $i1 = lengthof $r11;
+
+        if i2 >= $i1 goto label10;
+
+     label05:
+        $r12 = r0.<sun.security.ssl.SSLSessionImpl: java.security.cert.X509Certificate[] peerCerts>;
+
+        $r13 = $r12[i2];
+
+        $r14 = virtualinvoke $r13.<java.security.cert.X509Certificate: byte[] getEncoded()>();
+
+        $r15 = staticinvoke <javax.security.cert.X509Certificate: javax.security.cert.X509Certificate getInstance(byte[])>($r14);
+
+        r10[i2] = $r15;
+
+     label06:
+        goto label09;
+
+     label07:
+        $r20 := @caughtexception;
+
+        $r21 = new javax.net.ssl.SSLPeerUnverifiedException;
+
+        $r22 = virtualinvoke $r20.<java.security.cert.CertificateEncodingException: java.lang.String getMessage()>();
+
+        specialinvoke $r21.<javax.net.ssl.SSLPeerUnverifiedException: void <init>(java.lang.String)>($r22);
+
+        throw $r21;
+
+     label08:
+        $r17 := @caughtexception;
+
+        $r18 = new javax.net.ssl.SSLPeerUnverifiedException;
+
+        $r19 = virtualinvoke $r17.<javax.security.cert.CertificateException: java.lang.String getMessage()>();
+
+        specialinvoke $r18.<javax.net.ssl.SSLPeerUnverifiedException: void <init>(java.lang.String)>($r19);
+
+        throw $r18;
+
+     label09:
+        i2 = i2 + 1;
+
+        goto label04;
+
+     label10:
+        return r10;
+
+        catch java.security.cert.CertificateEncodingException from label05 to label06 with label07;
+        catch javax.security.cert.CertificateException from label05 to label06 with label08;
+    }
+
+    public java.security.cert.X509Certificate[] getCertificateChain() throws javax.net.ssl.SSLPeerUnverifiedException
+    {
+        sun.security.ssl.CipherSuite$KeyExchange $r2, $r3, $r6, $r7;
+        java.lang.Object $r11;
+        sun.security.ssl.SSLSessionImpl r0;
+        sun.security.ssl.CipherSuite $r1, $r5;
+        java.security.cert.X509Certificate[] $r8, $r10, $r12;
+        javax.net.ssl.SSLPeerUnverifiedException $r4, $r9;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.CipherSuite cipherSuite>;
+
+        $r3 = $r1.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$KeyExchange keyExchange>;
+
+        $r2 = <sun.security.ssl.CipherSuite$KeyExchange: sun.security.ssl.CipherSuite$KeyExchange K_KRB5>;
+
+        if $r3 == $r2 goto label1;
+
+        $r5 = r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.CipherSuite cipherSuite>;
+
+        $r7 = $r5.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$KeyExchange keyExchange>;
+
+        $r6 = <sun.security.ssl.CipherSuite$KeyExchange: sun.security.ssl.CipherSuite$KeyExchange K_KRB5_EXPORT>;
+
+        if $r7 != $r6 goto label2;
+
+     label1:
+        $r4 = new javax.net.ssl.SSLPeerUnverifiedException;
+
+        specialinvoke $r4.<javax.net.ssl.SSLPeerUnverifiedException: void <init>(java.lang.String)>("no certificates expected for Kerberos cipher suites");
+
+        throw $r4;
+
+     label2:
+        $r8 = r0.<sun.security.ssl.SSLSessionImpl: java.security.cert.X509Certificate[] peerCerts>;
+
+        if $r8 == null goto label3;
+
+        $r10 = r0.<sun.security.ssl.SSLSessionImpl: java.security.cert.X509Certificate[] peerCerts>;
+
+        $r11 = virtualinvoke $r10.<java.lang.Object: java.lang.Object clone()>();
+
+        $r12 = (java.security.cert.X509Certificate[]) $r11;
+
+        return $r12;
+
+     label3:
+        $r9 = new javax.net.ssl.SSLPeerUnverifiedException;
+
+        specialinvoke $r9.<javax.net.ssl.SSLPeerUnverifiedException: void <init>(java.lang.String)>("peer not authenticated");
+
+        throw $r9;
+    }
+
+    public java.util.List getStatusResponses()
+    {
+        byte[] r10;
+        java.util.Iterator $r7;
+        java.util.ArrayList $r4;
+        java.util.List $r1, $r2, $r3, $r5, $r6, $r8;
+        int $i0;
+        java.lang.Object $r9, $r11;
+        sun.security.ssl.SSLSessionImpl r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: java.util.List statusResponses>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<sun.security.ssl.SSLSessionImpl: java.util.List statusResponses>;
+
+        $z0 = interfaceinvoke $r3.<java.util.List: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        $r2 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+        return $r2;
+
+     label2:
+        $r4 = new java.util.ArrayList;
+
+        $r5 = r0.<sun.security.ssl.SSLSessionImpl: java.util.List statusResponses>;
+
+        $i0 = interfaceinvoke $r5.<java.util.List: int size()>();
+
+        specialinvoke $r4.<java.util.ArrayList: void <init>(int)>($i0);
+
+        $r6 = r0.<sun.security.ssl.SSLSessionImpl: java.util.List statusResponses>;
+
+        $r7 = interfaceinvoke $r6.<java.util.List: java.util.Iterator iterator()>();
+
+     label3:
+        $z1 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label4;
+
+        $r9 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r10 = (byte[]) $r9;
+
+        $r11 = virtualinvoke r10.<java.lang.Object: java.lang.Object clone()>();
+
+        interfaceinvoke $r4.<java.util.List: boolean add(java.lang.Object)>($r11);
+
+        goto label3;
+
+     label4:
+        $r8 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r4);
+
+        return $r8;
+    }
+
+    void setPeerPrincipal(java.security.Principal)
+    {
+        sun.security.ssl.SSLSessionImpl r0;
+        java.security.Principal $r1, r2;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        r2 := @parameter0: java.security.Principal;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: java.security.Principal peerPrincipal>;
+
+        if $r1 != null goto label1;
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.security.Principal peerPrincipal> = r2;
+
+     label1:
+        return;
+    }
+
+    void setLocalPrincipal(java.security.Principal)
+    {
+        sun.security.ssl.SSLSessionImpl r0;
+        java.security.Principal r1;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        r1 := @parameter0: java.security.Principal;
+
+        r0.<sun.security.ssl.SSLSessionImpl: java.security.Principal localPrincipal> = r1;
+
+        return;
+    }
+
+    public java.security.Principal getPeerPrincipal() throws javax.net.ssl.SSLPeerUnverifiedException
+    {
+        java.security.cert.X509Certificate $r12;
+        javax.security.auth.x500.X500Principal $r13;
+        sun.security.ssl.CipherSuite$KeyExchange $r2, $r3, $r8, $r9;
+        java.security.Principal $r4, $r5;
+        sun.security.ssl.SSLSessionImpl r0;
+        sun.security.ssl.CipherSuite $r1, $r7;
+        java.security.cert.X509Certificate[] $r10, $r11;
+        javax.net.ssl.SSLPeerUnverifiedException $r6, $r14;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.CipherSuite cipherSuite>;
+
+        $r3 = $r1.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$KeyExchange keyExchange>;
+
+        $r2 = <sun.security.ssl.CipherSuite$KeyExchange: sun.security.ssl.CipherSuite$KeyExchange K_KRB5>;
+
+        if $r3 == $r2 goto label1;
+
+        $r7 = r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.CipherSuite cipherSuite>;
+
+        $r9 = $r7.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$KeyExchange keyExchange>;
+
+        $r8 = <sun.security.ssl.CipherSuite$KeyExchange: sun.security.ssl.CipherSuite$KeyExchange K_KRB5_EXPORT>;
+
+        if $r9 != $r8 goto label3;
+
+     label1:
+        $r4 = r0.<sun.security.ssl.SSLSessionImpl: java.security.Principal peerPrincipal>;
+
+        if $r4 != null goto label2;
+
+        $r6 = new javax.net.ssl.SSLPeerUnverifiedException;
+
+        specialinvoke $r6.<javax.net.ssl.SSLPeerUnverifiedException: void <init>(java.lang.String)>("peer not authenticated");
+
+        throw $r6;
+
+     label2:
+        $r5 = r0.<sun.security.ssl.SSLSessionImpl: java.security.Principal peerPrincipal>;
+
+        return $r5;
+
+     label3:
+        $r10 = r0.<sun.security.ssl.SSLSessionImpl: java.security.cert.X509Certificate[] peerCerts>;
+
+        if $r10 != null goto label4;
+
+        $r14 = new javax.net.ssl.SSLPeerUnverifiedException;
+
+        specialinvoke $r14.<javax.net.ssl.SSLPeerUnverifiedException: void <init>(java.lang.String)>("peer not authenticated");
+
+        throw $r14;
+
+     label4:
+        $r11 = r0.<sun.security.ssl.SSLSessionImpl: java.security.cert.X509Certificate[] peerCerts>;
+
+        $r12 = $r11[0];
+
+        $r13 = virtualinvoke $r12.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        return $r13;
+    }
+
+    public java.security.Principal getLocalPrincipal()
+    {
+        java.security.cert.X509Certificate $r11;
+        javax.security.auth.x500.X500Principal $r13;
+        sun.security.ssl.CipherSuite$KeyExchange $r2, $r3, $r6, $r7;
+        java.security.Principal $r4, $r12;
+        int $i0;
+        sun.security.ssl.SSLSessionImpl r0;
+        sun.security.ssl.CipherSuite $r1, $r5;
+        java.security.cert.X509Certificate[] $r8, $r9, $r10;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.CipherSuite cipherSuite>;
+
+        $r3 = $r1.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$KeyExchange keyExchange>;
+
+        $r2 = <sun.security.ssl.CipherSuite$KeyExchange: sun.security.ssl.CipherSuite$KeyExchange K_KRB5>;
+
+        if $r3 == $r2 goto label1;
+
+        $r5 = r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.CipherSuite cipherSuite>;
+
+        $r7 = $r5.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$KeyExchange keyExchange>;
+
+        $r6 = <sun.security.ssl.CipherSuite$KeyExchange: sun.security.ssl.CipherSuite$KeyExchange K_KRB5_EXPORT>;
+
+        if $r7 != $r6 goto label4;
+
+     label1:
+        $r4 = r0.<sun.security.ssl.SSLSessionImpl: java.security.Principal localPrincipal>;
+
+        if $r4 != null goto label2;
+
+        $r12 = null;
+
+        goto label3;
+
+     label2:
+        $r12 = r0.<sun.security.ssl.SSLSessionImpl: java.security.Principal localPrincipal>;
+
+     label3:
+        return $r12;
+
+     label4:
+        $r8 = r0.<sun.security.ssl.SSLSessionImpl: java.security.cert.X509Certificate[] localCerts>;
+
+        if $r8 == null goto label5;
+
+        $r9 = r0.<sun.security.ssl.SSLSessionImpl: java.security.cert.X509Certificate[] localCerts>;
+
+        $i0 = lengthof $r9;
+
+        if $i0 != 0 goto label6;
+
+     label5:
+        $r13 = null;
+
+        goto label7;
+
+     label6:
+        $r10 = r0.<sun.security.ssl.SSLSessionImpl: java.security.cert.X509Certificate[] localCerts>;
+
+        $r11 = $r10[0];
+
+        $r13 = virtualinvoke $r11.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+     label7:
+        return $r13;
+    }
+
+    public long getTicketCreationTime()
+    {
+        long $l0;
+        sun.security.ssl.SSLSessionImpl r0;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $l0 = r0.<sun.security.ssl.SSLSessionImpl: long ticketCreationTime>;
+
+        return $l0;
+    }
+
+    public long getCreationTime()
+    {
+        long $l0;
+        sun.security.ssl.SSLSessionImpl r0;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $l0 = r0.<sun.security.ssl.SSLSessionImpl: long creationTime>;
+
+        return $l0;
+    }
+
+    public long getLastAccessedTime()
+    {
+        byte $b1;
+        long $l0, $l2;
+        sun.security.ssl.SSLSessionImpl r0;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $l0 = r0.<sun.security.ssl.SSLSessionImpl: long lastUsedTime>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 == 0 goto label1;
+
+        $l2 = r0.<sun.security.ssl.SSLSessionImpl: long lastUsedTime>;
+
+        goto label2;
+
+     label1:
+        $l2 = r0.<sun.security.ssl.SSLSessionImpl: long creationTime>;
+
+     label2:
+        return $l2;
+    }
+
+    void setLastAccessedTime(long)
+    {
+        long l0;
+        sun.security.ssl.SSLSessionImpl r0;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        l0 := @parameter0: long;
+
+        r0.<sun.security.ssl.SSLSessionImpl: long lastUsedTime> = l0;
+
+        return;
+    }
+
+    public java.net.InetAddress getPeerAddress()
+    {
+        java.net.InetAddress $r2;
+        sun.security.ssl.SSLSessionImpl r0;
+        java.lang.String $r1;
+        java.net.UnknownHostException $r3;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+     label1:
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: java.lang.String host>;
+
+        $r2 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByName(java.lang.String)>($r1);
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        return null;
+
+        catch java.net.UnknownHostException from label1 to label2 with label3;
+    }
+
+    public java.lang.String getPeerHost()
+    {
+        sun.security.ssl.SSLSessionImpl r0;
+        java.lang.String $r1;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: java.lang.String host>;
+
+        return $r1;
+    }
+
+    public int getPeerPort()
+    {
+        int $i0;
+        sun.security.ssl.SSLSessionImpl r0;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $i0 = r0.<sun.security.ssl.SSLSessionImpl: int port>;
+
+        return $i0;
+    }
+
+    void setContext(sun.security.ssl.SSLSessionContextImpl)
+    {
+        sun.security.ssl.SSLSessionImpl r0;
+        sun.security.ssl.SSLSessionContextImpl $r1, r2;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        r2 := @parameter0: sun.security.ssl.SSLSessionContextImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.SSLSessionContextImpl context>;
+
+        if $r1 != null goto label1;
+
+        r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.SSLSessionContextImpl context> = r2;
+
+     label1:
+        return;
+    }
+
+    public synchronized void invalidate()
+    {
+        java.lang.Object[] $r8;
+        java.lang.String $r7;
+        boolean $z0, $z1, $z2, $z3;
+        java.util.Iterator $r12;
+        sun.security.ssl.SessionId $r9;
+        sun.security.ssl.SSLSessionContextImpl $r1, $r10;
+        java.lang.Object $r2;
+        java.lang.StringBuilder $r4, $r5, $r6;
+        sun.security.ssl.SSLSessionImpl r0, r3;
+        java.util.Queue $r11;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.SSLSessionContextImpl context>;
+
+        if $r1 == null goto label1;
+
+        $r10 = r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.SSLSessionContextImpl context>;
+
+        $r9 = r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.SessionId sessionId>;
+
+        virtualinvoke $r10.<sun.security.ssl.SSLSessionContextImpl: void remove(sun.security.ssl.SessionId)>($r9);
+
+        r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.SSLSessionContextImpl context> = null;
+
+     label1:
+        $z0 = r0.<sun.security.ssl.SSLSessionImpl: boolean invalidated>;
+
+        if $z0 == 0 goto label2;
+
+        return;
+
+     label2:
+        r0.<sun.security.ssl.SSLSessionImpl: boolean invalidated> = 1;
+
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label3;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("session");
+
+        if $z2 == 0 goto label3;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalidated session:  ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r8 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>($r7, $r8);
+
+     label3:
+        $r11 = r0.<sun.security.ssl.SSLSessionImpl: java.util.Queue childSessions>;
+
+        $r12 = interfaceinvoke $r11.<java.util.Queue: java.util.Iterator iterator()>();
+
+     label4:
+        $z3 = interfaceinvoke $r12.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label5;
+
+        $r2 = interfaceinvoke $r12.<java.util.Iterator: java.lang.Object next()>();
+
+        r3 = (sun.security.ssl.SSLSessionImpl) $r2;
+
+        virtualinvoke r3.<sun.security.ssl.SSLSessionImpl: void invalidate()>();
+
+        goto label4;
+
+     label5:
+        return;
+    }
+
+    public void putValue(java.lang.String, java.lang.Object)
+    {
+        javax.net.ssl.SSLSessionBindingEvent $r7, $r9;
+        java.util.concurrent.ConcurrentHashMap $r5;
+        java.lang.IllegalArgumentException $r1;
+        sun.security.ssl.SecureKey $r3;
+        javax.net.ssl.SSLSessionBindingListener $r8, $r10;
+        java.lang.Object r2, $r6;
+        java.lang.String r0;
+        sun.security.ssl.SSLSessionImpl r4;
+        boolean $z0, $z1;
+
+        r4 := @this: sun.security.ssl.SSLSessionImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Object;
+
+        if r0 == null goto label1;
+
+        if r2 != null goto label2;
+
+     label1:
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("arguments can not be null");
+
+        throw $r1;
+
+     label2:
+        $r3 = new sun.security.ssl.SecureKey;
+
+        specialinvoke $r3.<sun.security.ssl.SecureKey: void <init>(java.lang.Object)>(r0);
+
+        $r5 = r4.<sun.security.ssl.SSLSessionImpl: java.util.concurrent.ConcurrentHashMap boundValues>;
+
+        $r6 = virtualinvoke $r5.<java.util.concurrent.ConcurrentHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, r2);
+
+        $z0 = $r6 instanceof javax.net.ssl.SSLSessionBindingListener;
+
+        if $z0 == 0 goto label3;
+
+        $r9 = new javax.net.ssl.SSLSessionBindingEvent;
+
+        specialinvoke $r9.<javax.net.ssl.SSLSessionBindingEvent: void <init>(javax.net.ssl.SSLSession,java.lang.String)>(r4, r0);
+
+        $r10 = (javax.net.ssl.SSLSessionBindingListener) $r6;
+
+        interfaceinvoke $r10.<javax.net.ssl.SSLSessionBindingListener: void valueUnbound(javax.net.ssl.SSLSessionBindingEvent)>($r9);
+
+     label3:
+        $z1 = r2 instanceof javax.net.ssl.SSLSessionBindingListener;
+
+        if $z1 == 0 goto label4;
+
+        $r7 = new javax.net.ssl.SSLSessionBindingEvent;
+
+        specialinvoke $r7.<javax.net.ssl.SSLSessionBindingEvent: void <init>(javax.net.ssl.SSLSession,java.lang.String)>(r4, r0);
+
+        $r8 = (javax.net.ssl.SSLSessionBindingListener) r2;
+
+        interfaceinvoke $r8.<javax.net.ssl.SSLSessionBindingListener: void valueBound(javax.net.ssl.SSLSessionBindingEvent)>($r7);
+
+     label4:
+        return;
+    }
+
+    public java.lang.Object getValue(java.lang.String)
+    {
+        java.util.concurrent.ConcurrentHashMap $r3;
+        java.lang.Object $r4;
+        java.lang.String r0;
+        sun.security.ssl.SSLSessionImpl r2;
+        sun.security.ssl.SecureKey $r1;
+        java.lang.IllegalArgumentException $r5;
+
+        r2 := @this: sun.security.ssl.SSLSessionImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("argument can not be null");
+
+        throw $r5;
+
+     label1:
+        $r1 = new sun.security.ssl.SecureKey;
+
+        specialinvoke $r1.<sun.security.ssl.SecureKey: void <init>(java.lang.Object)>(r0);
+
+        $r3 = r2.<sun.security.ssl.SSLSessionImpl: java.util.concurrent.ConcurrentHashMap boundValues>;
+
+        $r4 = virtualinvoke $r3.<java.util.concurrent.ConcurrentHashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        return $r4;
+    }
+
+    public void removeValue(java.lang.String)
+    {
+        javax.net.ssl.SSLSessionBindingEvent $r5;
+        java.util.concurrent.ConcurrentHashMap $r3;
+        sun.security.ssl.SecureKey $r1;
+        java.lang.IllegalArgumentException $r7;
+        javax.net.ssl.SSLSessionBindingListener $r6;
+        java.lang.Object $r4;
+        java.lang.String r0;
+        sun.security.ssl.SSLSessionImpl r2;
+        boolean $z0;
+
+        r2 := @this: sun.security.ssl.SSLSessionImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        $r7 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r7.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("argument can not be null");
+
+        throw $r7;
+
+     label1:
+        $r1 = new sun.security.ssl.SecureKey;
+
+        specialinvoke $r1.<sun.security.ssl.SecureKey: void <init>(java.lang.Object)>(r0);
+
+        $r3 = r2.<sun.security.ssl.SSLSessionImpl: java.util.concurrent.ConcurrentHashMap boundValues>;
+
+        $r4 = virtualinvoke $r3.<java.util.concurrent.ConcurrentHashMap: java.lang.Object remove(java.lang.Object)>($r1);
+
+        $z0 = $r4 instanceof javax.net.ssl.SSLSessionBindingListener;
+
+        if $z0 == 0 goto label2;
+
+        $r5 = new javax.net.ssl.SSLSessionBindingEvent;
+
+        specialinvoke $r5.<javax.net.ssl.SSLSessionBindingEvent: void <init>(javax.net.ssl.SSLSession,java.lang.String)>(r2, r0);
+
+        $r6 = (javax.net.ssl.SSLSessionBindingListener) $r4;
+
+        interfaceinvoke $r6.<javax.net.ssl.SSLSessionBindingListener: void valueUnbound(javax.net.ssl.SSLSessionBindingEvent)>($r5);
+
+     label2:
+        return;
+    }
+
+    public java.lang.String[] getValueNames()
+    {
+        java.lang.Object[] $r6;
+        java.util.Enumeration $r4;
+        java.util.concurrent.ConcurrentHashMap $r3;
+        java.lang.String[] $r5, $r7;
+        sun.security.ssl.SecureKey r9;
+        java.util.ArrayList $r0;
+        java.lang.Object $r1, $r8, $r10, $r11;
+        sun.security.ssl.SSLSessionImpl r2;
+        boolean $z0, $z1;
+
+        r2 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+        $r1 = staticinvoke <sun.security.ssl.SecureKey: java.lang.Object getCurrentSecurityContext()>();
+
+        $r3 = r2.<sun.security.ssl.SSLSessionImpl: java.util.concurrent.ConcurrentHashMap boundValues>;
+
+        $r4 = virtualinvoke $r3.<java.util.concurrent.ConcurrentHashMap: java.util.Enumeration keys()>();
+
+     label1:
+        $z0 = interfaceinvoke $r4.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label3;
+
+        $r8 = interfaceinvoke $r4.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r9 = (sun.security.ssl.SecureKey) $r8;
+
+        $r10 = virtualinvoke r9.<sun.security.ssl.SecureKey: java.lang.Object getSecurityContext()>();
+
+        $z1 = virtualinvoke $r1.<java.lang.Object: boolean equals(java.lang.Object)>($r10);
+
+        if $z1 == 0 goto label2;
+
+        $r11 = virtualinvoke r9.<sun.security.ssl.SecureKey: java.lang.Object getAppKey()>();
+
+        virtualinvoke $r0.<java.util.ArrayList: boolean add(java.lang.Object)>($r11);
+
+     label2:
+        goto label1;
+
+     label3:
+        $r5 = newarray (java.lang.String)[0];
+
+        $r6 = virtualinvoke $r0.<java.util.ArrayList: java.lang.Object[] toArray(java.lang.Object[])>($r5);
+
+        $r7 = (java.lang.String[]) $r6;
+
+        return $r7;
+    }
+
+    protected synchronized void expandBufferSizes()
+    {
+        sun.security.ssl.SSLSessionImpl r0;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        r0.<sun.security.ssl.SSLSessionImpl: boolean acceptLargeFragments> = 1;
+
+        return;
+    }
+
+    public synchronized int getPacketBufferSize()
+    {
+        sun.security.ssl.ProtocolVersion $r1;
+        int $i0, $i1, $i2, $i3, i4, $i5, $i6;
+        sun.security.ssl.SSLSessionImpl r0;
+        sun.security.ssl.CipherSuite $r2;
+        boolean $z0;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        i4 = 0;
+
+        $i0 = r0.<sun.security.ssl.SSLSessionImpl: int negotiatedMaxFragLen>;
+
+        if $i0 <= 0 goto label1;
+
+        $r2 = r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.CipherSuite cipherSuite>;
+
+        $i3 = r0.<sun.security.ssl.SSLSessionImpl: int negotiatedMaxFragLen>;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.ProtocolVersion protocolVersion>;
+
+        i4 = virtualinvoke $r2.<sun.security.ssl.CipherSuite: int calculatePacketSize(int,sun.security.ssl.ProtocolVersion)>($i3, $r1);
+
+     label1:
+        $i1 = r0.<sun.security.ssl.SSLSessionImpl: int maximumPacketSize>;
+
+        if $i1 <= 0 goto label4;
+
+        $i2 = r0.<sun.security.ssl.SSLSessionImpl: int maximumPacketSize>;
+
+        if $i2 <= i4 goto label2;
+
+        $i5 = r0.<sun.security.ssl.SSLSessionImpl: int maximumPacketSize>;
+
+        goto label3;
+
+     label2:
+        $i5 = i4;
+
+     label3:
+        return $i5;
+
+     label4:
+        if i4 == 0 goto label5;
+
+        return i4;
+
+     label5:
+        $z0 = r0.<sun.security.ssl.SSLSessionImpl: boolean acceptLargeFragments>;
+
+        if $z0 == 0 goto label6;
+
+        $i6 = 33093;
+
+        goto label7;
+
+     label6:
+        $i6 = 16709;
+
+     label7:
+        return $i6;
+    }
+
+    public synchronized int getApplicationBufferSize()
+    {
+        sun.security.ssl.ProtocolVersion $r1;
+        int $i0, $i1, $i2, $i3, $i4, i5, $i6, $i7;
+        sun.security.ssl.SSLSessionImpl r0;
+        sun.security.ssl.CipherSuite $r2;
+        boolean $z0;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        i5 = 0;
+
+        $i0 = r0.<sun.security.ssl.SSLSessionImpl: int maximumPacketSize>;
+
+        if $i0 <= 0 goto label1;
+
+        $r2 = r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.CipherSuite cipherSuite>;
+
+        $i4 = r0.<sun.security.ssl.SSLSessionImpl: int maximumPacketSize>;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.ProtocolVersion protocolVersion>;
+
+        i5 = virtualinvoke $r2.<sun.security.ssl.CipherSuite: int calculateFragSize(int,sun.security.ssl.ProtocolVersion)>($i4, $r1);
+
+     label1:
+        $i1 = r0.<sun.security.ssl.SSLSessionImpl: int negotiatedMaxFragLen>;
+
+        if $i1 <= 0 goto label4;
+
+        $i3 = r0.<sun.security.ssl.SSLSessionImpl: int negotiatedMaxFragLen>;
+
+        if $i3 <= i5 goto label2;
+
+        $i6 = r0.<sun.security.ssl.SSLSessionImpl: int negotiatedMaxFragLen>;
+
+        goto label3;
+
+     label2:
+        $i6 = i5;
+
+     label3:
+        return $i6;
+
+     label4:
+        if i5 == 0 goto label5;
+
+        return i5;
+
+     label5:
+        $z0 = r0.<sun.security.ssl.SSLSessionImpl: boolean acceptLargeFragments>;
+
+        if $z0 == 0 goto label6;
+
+        $i7 = 33093;
+
+        goto label7;
+
+     label6:
+        $i7 = 16709;
+
+     label7:
+        $i2 = $i7 - 5;
+
+        return $i2;
+    }
+
+    synchronized void setNegotiatedMaxFragSize(int)
+    {
+        int i0;
+        sun.security.ssl.SSLSessionImpl r0;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        i0 := @parameter0: int;
+
+        r0.<sun.security.ssl.SSLSessionImpl: int negotiatedMaxFragLen> = i0;
+
+        return;
+    }
+
+    synchronized int getNegotiatedMaxFragSize()
+    {
+        int $i0;
+        sun.security.ssl.SSLSessionImpl r0;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $i0 = r0.<sun.security.ssl.SSLSessionImpl: int negotiatedMaxFragLen>;
+
+        return $i0;
+    }
+
+    synchronized void setMaximumPacketSize(int)
+    {
+        int i0;
+        sun.security.ssl.SSLSessionImpl r0;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        i0 := @parameter0: int;
+
+        r0.<sun.security.ssl.SSLSessionImpl: int maximumPacketSize> = i0;
+
+        return;
+    }
+
+    synchronized int getMaximumPacketSize()
+    {
+        int $i0;
+        sun.security.ssl.SSLSessionImpl r0;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $i0 = r0.<sun.security.ssl.SSLSessionImpl: int maximumPacketSize>;
+
+        return $i0;
+    }
+
+    public java.lang.String[] getLocalSupportedSignatureAlgorithms()
+    {
+        java.lang.String[] $r2;
+        sun.security.ssl.SSLSessionImpl r0;
+        java.util.Collection $r1;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: java.util.Collection localSupportedSignAlgs>;
+
+        $r2 = staticinvoke <sun.security.ssl.SignatureScheme: java.lang.String[] getAlgorithmNames(java.util.Collection)>($r1);
+
+        return $r2;
+    }
+
+    public java.util.Collection getLocalSupportedSignatureSchemes()
+    {
+        sun.security.ssl.SSLSessionImpl r0;
+        java.util.Collection $r1;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: java.util.Collection localSupportedSignAlgs>;
+
+        return $r1;
+    }
+
+    public java.lang.String[] getPeerSupportedSignatureAlgorithms()
+    {
+        java.lang.String[] $r1, $r2, $r3, $r5;
+        java.lang.Object $r4;
+        sun.security.ssl.SSLSessionImpl r0;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: java.lang.String[] peerSupportedSignAlgs>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<sun.security.ssl.SSLSessionImpl: java.lang.String[] peerSupportedSignAlgs>;
+
+        $r4 = virtualinvoke $r3.<java.lang.Object: java.lang.Object clone()>();
+
+        $r5 = (java.lang.String[]) $r4;
+
+        return $r5;
+
+     label1:
+        $r2 = newarray (java.lang.String)[0];
+
+        return $r2;
+    }
+
+    public java.util.List getRequestedServerNames()
+    {
+        java.util.List $r1;
+        sun.security.ssl.SSLSessionImpl r0;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionImpl: java.util.List requestedServerNames>;
+
+        return $r1;
+    }
+
+    public java.lang.String toString()
+    {
+        long $l0;
+        java.lang.StringBuilder $r0, $r1, $r3, $r4, $r6, $r7;
+        sun.security.ssl.SSLSessionImpl r2;
+        java.lang.String $r5, $r8;
+
+        r2 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Session(");
+
+        $l0 = r2.<sun.security.ssl.SSLSessionImpl: long creationTime>;
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("|");
+
+        $r5 = virtualinvoke r2.<sun.security.ssl.SSLSessionImpl: java.lang.String getCipherSuite()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r8;
+    }
+
+    protected void finalize() throws java.lang.Throwable
+    {
+        int $i0, i1;
+        java.lang.String[] $r1;
+        sun.security.ssl.SSLSessionImpl r0;
+        java.lang.String $r2;
+
+        r0 := @this: sun.security.ssl.SSLSessionImpl;
+
+        $r1 = virtualinvoke r0.<sun.security.ssl.SSLSessionImpl: java.lang.String[] getValueNames()>();
+
+        i1 = 0;
+
+     label1:
+        $i0 = lengthof $r1;
+
+        if i1 >= $i0 goto label2;
+
+        $r2 = $r1[i1];
+
+        virtualinvoke r0.<sun.security.ssl.SSLSessionImpl: void removeValue(java.lang.String)>($r2);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        <sun.security.ssl.SSLSessionImpl: boolean defaultRejoinable> = 1;
+
+        return;
+    }
+}

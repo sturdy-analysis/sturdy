@@ -1,0 +1,521 @@
+public class sun.applet.AppletSecurity extends sun.awt.AWTSecurityManager
+{
+    private static java.lang.reflect.Field facc;
+    private static java.lang.reflect.Field fcontext;
+    private java.util.HashSet restrictedPackages;
+    private boolean inThreadGroupCheck;
+
+    public void <init>()
+    {
+        java.util.HashSet $r1;
+        sun.applet.AppletSecurity r0;
+
+        r0 := @this: sun.applet.AppletSecurity;
+
+        specialinvoke r0.<sun.awt.AWTSecurityManager: void <init>()>();
+
+        $r1 = new java.util.HashSet;
+
+        specialinvoke $r1.<java.util.HashSet: void <init>()>();
+
+        r0.<sun.applet.AppletSecurity: java.util.HashSet restrictedPackages> = $r1;
+
+        r0.<sun.applet.AppletSecurity: boolean inThreadGroupCheck> = 0;
+
+        virtualinvoke r0.<sun.applet.AppletSecurity: void reset()>();
+
+        return;
+    }
+
+    public void reset()
+    {
+        java.util.HashSet $r1;
+        sun.applet.AppletSecurity$1 $r2;
+        sun.applet.AppletSecurity r0;
+
+        r0 := @this: sun.applet.AppletSecurity;
+
+        $r1 = r0.<sun.applet.AppletSecurity: java.util.HashSet restrictedPackages>;
+
+        virtualinvoke $r1.<java.util.HashSet: void clear()>();
+
+        $r2 = new sun.applet.AppletSecurity$1;
+
+        specialinvoke $r2.<sun.applet.AppletSecurity$1: void <init>(sun.applet.AppletSecurity)>(r0);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        return;
+    }
+
+    private sun.applet.AppletClassLoader currentAppletClassLoader()
+    {
+        sun.applet.AppletClassLoader $r2, $r6, $r11, $r14;
+        sun.applet.AppletSecurity$2 $r9;
+        java.lang.Thread $r4;
+        int $i0, $i1, i2, i3;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.Class[] $r3;
+        sun.applet.AppletSecurity r0;
+        java.lang.Class $r7, $r12;
+        java.lang.Object $r10;
+        java.lang.ClassLoader $r1, $r5, $r8, $r13, r15;
+
+        r0 := @this: sun.applet.AppletSecurity;
+
+        $r1 = virtualinvoke r0.<sun.applet.AppletSecurity: java.lang.ClassLoader currentClassLoader()>();
+
+        if $r1 == null goto label1;
+
+        $z0 = $r1 instanceof sun.applet.AppletClassLoader;
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        $r2 = (sun.applet.AppletClassLoader) $r1;
+
+        return $r2;
+
+     label2:
+        $r3 = virtualinvoke r0.<sun.applet.AppletSecurity: java.lang.Class[] getClassContext()>();
+
+        i2 = 0;
+
+     label3:
+        $i0 = lengthof $r3;
+
+        if i2 >= $i0 goto label5;
+
+        $r12 = $r3[i2];
+
+        $r13 = virtualinvoke $r12.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $z3 = $r13 instanceof sun.applet.AppletClassLoader;
+
+        if $z3 == 0 goto label4;
+
+        $r14 = (sun.applet.AppletClassLoader) $r13;
+
+        return $r14;
+
+     label4:
+        i2 = i2 + 1;
+
+        goto label3;
+
+     label5:
+        i3 = 0;
+
+     label6:
+        $i1 = lengthof $r3;
+
+        if i3 >= $i1 goto label8;
+
+        $r7 = $r3[i3];
+
+        $r8 = virtualinvoke $r7.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $z2 = $r8 instanceof java.net.URLClassLoader;
+
+        if $z2 == 0 goto label7;
+
+        $r9 = new sun.applet.AppletSecurity$2;
+
+        specialinvoke $r9.<sun.applet.AppletSecurity$2: void <init>(sun.applet.AppletSecurity,java.lang.ClassLoader)>(r0, $r8);
+
+        $r10 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r9);
+
+        r15 = (java.lang.ClassLoader) $r10;
+
+        if r15 == null goto label7;
+
+        $r11 = (sun.applet.AppletClassLoader) r15;
+
+        return $r11;
+
+     label7:
+        i3 = i3 + 1;
+
+        goto label6;
+
+     label8:
+        $r4 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.Thread: java.lang.ClassLoader getContextClassLoader()>();
+
+        $z1 = $r5 instanceof sun.applet.AppletClassLoader;
+
+        if $z1 == 0 goto label9;
+
+        $r6 = (sun.applet.AppletClassLoader) $r5;
+
+        return $r6;
+
+     label9:
+        return null;
+    }
+
+    protected boolean inThreadGroup(java.lang.ThreadGroup)
+    {
+        sun.applet.AppletClassLoader $r1;
+        java.lang.ThreadGroup $r2, r3;
+        sun.applet.AppletSecurity r0;
+        boolean $z0;
+
+        r0 := @this: sun.applet.AppletSecurity;
+
+        r3 := @parameter0: java.lang.ThreadGroup;
+
+        $r1 = specialinvoke r0.<sun.applet.AppletSecurity: sun.applet.AppletClassLoader currentAppletClassLoader()>();
+
+        if $r1 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r2 = virtualinvoke r0.<sun.applet.AppletSecurity: java.lang.ThreadGroup getThreadGroup()>();
+
+        $z0 = virtualinvoke $r2.<java.lang.ThreadGroup: boolean parentOf(java.lang.ThreadGroup)>(r3);
+
+        return $z0;
+    }
+
+    protected boolean inThreadGroup(java.lang.Thread)
+    {
+        java.lang.Thread r1;
+        java.lang.ThreadGroup $r2;
+        sun.applet.AppletSecurity r0;
+        boolean $z0;
+
+        r0 := @this: sun.applet.AppletSecurity;
+
+        r1 := @parameter0: java.lang.Thread;
+
+        $r2 = virtualinvoke r1.<java.lang.Thread: java.lang.ThreadGroup getThreadGroup()>();
+
+        $z0 = virtualinvoke r0.<sun.applet.AppletSecurity: boolean inThreadGroup(java.lang.ThreadGroup)>($r2);
+
+        return $z0;
+    }
+
+    public void checkAccess(java.lang.Thread)
+    {
+        java.lang.Thread$State $r1, $r2;
+        java.lang.Thread r0;
+        java.lang.RuntimePermission $r4;
+        sun.applet.AppletSecurity r3;
+        boolean $z0;
+
+        r3 := @this: sun.applet.AppletSecurity;
+
+        r0 := @parameter0: java.lang.Thread;
+
+        $r1 = virtualinvoke r0.<java.lang.Thread: java.lang.Thread$State getState()>();
+
+        $r2 = <java.lang.Thread$State: java.lang.Thread$State TERMINATED>;
+
+        if $r1 == $r2 goto label1;
+
+        $z0 = virtualinvoke r3.<sun.applet.AppletSecurity: boolean inThreadGroup(java.lang.Thread)>(r0);
+
+        if $z0 != 0 goto label1;
+
+        $r4 = <sun.security.util.SecurityConstants: java.lang.RuntimePermission MODIFY_THREAD_PERMISSION>;
+
+        virtualinvoke r3.<sun.applet.AppletSecurity: void checkPermission(java.security.Permission)>($r4);
+
+     label1:
+        return;
+    }
+
+    public synchronized void checkAccess(java.lang.ThreadGroup)
+    {
+        java.lang.Throwable $r4;
+        java.lang.RuntimePermission $r2, $r3;
+        java.lang.ThreadGroup r1;
+        sun.applet.AppletSecurity r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.applet.AppletSecurity;
+
+        r1 := @parameter0: java.lang.ThreadGroup;
+
+        $z0 = r0.<sun.applet.AppletSecurity: boolean inThreadGroupCheck>;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = <sun.security.util.SecurityConstants: java.lang.RuntimePermission MODIFY_THREADGROUP_PERMISSION>;
+
+        virtualinvoke r0.<sun.applet.AppletSecurity: void checkPermission(java.security.Permission)>($r3);
+
+        goto label4;
+
+     label1:
+        r0.<sun.applet.AppletSecurity: boolean inThreadGroupCheck> = 1;
+
+        $z1 = virtualinvoke r0.<sun.applet.AppletSecurity: boolean inThreadGroup(java.lang.ThreadGroup)>(r1);
+
+        if $z1 != 0 goto label2;
+
+        $r2 = <sun.security.util.SecurityConstants: java.lang.RuntimePermission MODIFY_THREADGROUP_PERMISSION>;
+
+        virtualinvoke r0.<sun.applet.AppletSecurity: void checkPermission(java.security.Permission)>($r2);
+
+     label2:
+        r0.<sun.applet.AppletSecurity: boolean inThreadGroupCheck> = 0;
+
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        r0.<sun.applet.AppletSecurity: boolean inThreadGroupCheck> = 0;
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public void checkPackageAccess(java.lang.String)
+    {
+        java.util.HashSet $r2;
+        java.lang.String r1, r5, $r10, $r14;
+        boolean $z0, $z1, $z2;
+        java.util.Iterator $r3;
+        sun.applet.AppletSecurity r0;
+        java.lang.Object $r4;
+        java.lang.RuntimePermission $r6;
+        java.lang.StringBuilder $r7, $r8, $r9, $r11, $r12, $r13;
+
+        r0 := @this: sun.applet.AppletSecurity;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<sun.awt.AWTSecurityManager: void checkPackageAccess(java.lang.String)>(r1);
+
+        $r2 = r0.<sun.applet.AppletSecurity: java.util.HashSet restrictedPackages>;
+
+        $r3 = virtualinvoke $r2.<java.util.HashSet: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (java.lang.String) $r4;
+
+        $z1 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>(r5);
+
+        if $z1 != 0 goto label2;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $z2 = virtualinvoke r1.<java.lang.String: boolean startsWith(java.lang.String)>($r14);
+
+        if $z2 == 0 goto label3;
+
+     label2:
+        $r6 = new java.lang.RuntimePermission;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("accessClassInPackage.");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.lang.RuntimePermission: void <init>(java.lang.String)>($r10);
+
+        virtualinvoke r0.<sun.applet.AppletSecurity: void checkPermission(java.security.Permission)>($r6);
+
+     label3:
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    public void checkAwtEventQueueAccess()
+    {
+        sun.applet.AppletClassLoader $r2;
+        java.security.Permission $r3;
+        sun.awt.AppContext $r0;
+        sun.applet.AppletSecurity r1;
+        boolean $z0;
+
+        r1 := @this: sun.applet.AppletSecurity;
+
+        $r0 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r2 = specialinvoke r1.<sun.applet.AppletSecurity: sun.applet.AppletClassLoader currentAppletClassLoader()>();
+
+        $z0 = staticinvoke <sun.awt.AppContext: boolean isMainContext(sun.awt.AppContext)>($r0);
+
+        if $z0 == 0 goto label1;
+
+        if $r2 == null goto label1;
+
+        $r3 = <sun.security.util.SecurityConstants$AWT: java.security.Permission CHECK_AWT_EVENTQUEUE_PERMISSION>;
+
+        specialinvoke r1.<sun.awt.AWTSecurityManager: void checkPermission(java.security.Permission)>($r3);
+
+     label1:
+        return;
+    }
+
+    public java.lang.ThreadGroup getThreadGroup()
+    {
+        sun.applet.AppletClassLoader $r1;
+        java.lang.ThreadGroup $r2, $r3;
+        sun.applet.AppletSecurity r0;
+
+        r0 := @this: sun.applet.AppletSecurity;
+
+        $r1 = specialinvoke r0.<sun.applet.AppletSecurity: sun.applet.AppletClassLoader currentAppletClassLoader()>();
+
+        if $r1 != null goto label1;
+
+        $r3 = null;
+
+        goto label2;
+
+     label1:
+        $r3 = virtualinvoke $r1.<sun.applet.AppletClassLoader: java.lang.ThreadGroup getThreadGroup()>();
+
+     label2:
+        if $r3 == null goto label3;
+
+        return $r3;
+
+     label3:
+        $r2 = specialinvoke r0.<sun.awt.AWTSecurityManager: java.lang.ThreadGroup getThreadGroup()>();
+
+        return $r2;
+    }
+
+    public sun.awt.AppContext getAppContext()
+    {
+        sun.applet.AppletClassLoader $r1;
+        sun.awt.AppContext $r2;
+        java.lang.SecurityException $r3;
+        sun.applet.AppletSecurity r0;
+
+        r0 := @this: sun.applet.AppletSecurity;
+
+        $r1 = specialinvoke r0.<sun.applet.AppletSecurity: sun.applet.AppletClassLoader currentAppletClassLoader()>();
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = virtualinvoke $r1.<sun.applet.AppletClassLoader: sun.awt.AppContext getAppContext()>();
+
+        if $r2 != null goto label2;
+
+        $r3 = new java.lang.SecurityException;
+
+        specialinvoke $r3.<java.lang.SecurityException: void <init>(java.lang.String)>("Applet classloader has invalid AppContext");
+
+        throw $r3;
+
+     label2:
+        return $r2;
+    }
+
+    static java.util.HashSet access$000(sun.applet.AppletSecurity)
+    {
+        java.util.HashSet $r1;
+        sun.applet.AppletSecurity r0;
+
+        r0 := @parameter0: sun.applet.AppletSecurity;
+
+        $r1 = r0.<sun.applet.AppletSecurity: java.util.HashSet restrictedPackages>;
+
+        return $r1;
+    }
+
+    static java.lang.reflect.Field access$100()
+    {
+        java.lang.reflect.Field $r0;
+
+        $r0 = <sun.applet.AppletSecurity: java.lang.reflect.Field facc>;
+
+        return $r0;
+    }
+
+    static java.lang.reflect.Field access$200()
+    {
+        java.lang.reflect.Field $r0;
+
+        $r0 = <sun.applet.AppletSecurity: java.lang.reflect.Field fcontext>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.UnsupportedOperationException $r7;
+        java.lang.reflect.Field $r1, $r2, $r4, $r5;
+        java.lang.NoSuchFieldException $r6;
+        java.lang.Class $r0, $r3;
+
+        <sun.applet.AppletSecurity: java.lang.reflect.Field facc> = null;
+
+        <sun.applet.AppletSecurity: java.lang.reflect.Field fcontext> = null;
+
+     label1:
+        $r0 = class "Ljava/net/URLClassLoader;";
+
+        $r1 = virtualinvoke $r0.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("acc");
+
+        <sun.applet.AppletSecurity: java.lang.reflect.Field facc> = $r1;
+
+        $r2 = <sun.applet.AppletSecurity: java.lang.reflect.Field facc>;
+
+        virtualinvoke $r2.<java.lang.reflect.Field: void setAccessible(boolean)>(1);
+
+        $r3 = class "Ljava/security/AccessControlContext;";
+
+        $r4 = virtualinvoke $r3.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("context");
+
+        <sun.applet.AppletSecurity: java.lang.reflect.Field fcontext> = $r4;
+
+        $r5 = <sun.applet.AppletSecurity: java.lang.reflect.Field fcontext>;
+
+        virtualinvoke $r5.<java.lang.reflect.Field: void setAccessible(boolean)>(1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r7.<java.lang.UnsupportedOperationException: void <init>(java.lang.Throwable)>($r6);
+
+        throw $r7;
+
+     label4:
+        return;
+
+        catch java.lang.NoSuchFieldException from label1 to label2 with label3;
+    }
+}

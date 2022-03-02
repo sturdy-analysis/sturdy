@@ -1,0 +1,487 @@
+public class java.io.LineNumberReader extends java.io.BufferedReader
+{
+    private int lineNumber;
+    private int markedLineNumber;
+    private boolean skipLF;
+    private boolean markedSkipLF;
+    private static final int maxSkipBufferSize;
+    private char[] skipBuffer;
+
+    public void <init>(java.io.Reader)
+    {
+        java.io.LineNumberReader r0;
+        java.io.Reader r1;
+
+        r0 := @this: java.io.LineNumberReader;
+
+        r1 := @parameter0: java.io.Reader;
+
+        specialinvoke r0.<java.io.BufferedReader: void <init>(java.io.Reader)>(r1);
+
+        r0.<java.io.LineNumberReader: int lineNumber> = 0;
+
+        r0.<java.io.LineNumberReader: char[] skipBuffer> = null;
+
+        return;
+    }
+
+    public void <init>(java.io.Reader, int)
+    {
+        int i0;
+        java.io.LineNumberReader r0;
+        java.io.Reader r1;
+
+        r0 := @this: java.io.LineNumberReader;
+
+        r1 := @parameter0: java.io.Reader;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<java.io.BufferedReader: void <init>(java.io.Reader,int)>(r1, i0);
+
+        r0.<java.io.LineNumberReader: int lineNumber> = 0;
+
+        r0.<java.io.LineNumberReader: char[] skipBuffer> = null;
+
+        return;
+    }
+
+    public void setLineNumber(int)
+    {
+        int i0;
+        java.io.LineNumberReader r0;
+
+        r0 := @this: java.io.LineNumberReader;
+
+        i0 := @parameter0: int;
+
+        r0.<java.io.LineNumberReader: int lineNumber> = i0;
+
+        return;
+    }
+
+    public int getLineNumber()
+    {
+        int $i0;
+        java.io.LineNumberReader r0;
+
+        r0 := @this: java.io.LineNumberReader;
+
+        $i0 = r0.<java.io.LineNumberReader: int lineNumber>;
+
+        return $i0;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        java.lang.Throwable $r2;
+        java.io.LineNumberReader r0;
+        int $i0, $i1, $i2, i3;
+        java.lang.Object $r1;
+        boolean $z0;
+
+        r0 := @this: java.io.LineNumberReader;
+
+        $r1 = r0.<java.io.LineNumberReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label01:
+        $i0 = specialinvoke r0.<java.io.BufferedReader: int read()>();
+
+        i3 = $i0;
+
+        $z0 = r0.<java.io.LineNumberReader: boolean skipLF>;
+
+        if $z0 == 0 goto label03;
+
+        if $i0 != 10 goto label02;
+
+        i3 = specialinvoke r0.<java.io.BufferedReader: int read()>();
+
+     label02:
+        r0.<java.io.LineNumberReader: boolean skipLF> = 0;
+
+     label03:
+        lookupswitch(i3)
+        {
+            case 10: goto label05;
+            case 13: goto label04;
+            default: goto label07;
+        };
+
+     label04:
+        r0.<java.io.LineNumberReader: boolean skipLF> = 1;
+
+     label05:
+        $i1 = r0.<java.io.LineNumberReader: int lineNumber>;
+
+        $i2 = $i1 + 1;
+
+        r0.<java.io.LineNumberReader: int lineNumber> = $i2;
+
+        exitmonitor $r1;
+
+     label06:
+        return 10;
+
+     label07:
+        exitmonitor $r1;
+
+     label08:
+        return i3;
+
+     label09:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label10:
+        throw $r2;
+
+        catch java.lang.Throwable from label01 to label06 with label09;
+        catch java.lang.Throwable from label07 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    public int read(char[], int, int) throws java.io.IOException
+    {
+        java.lang.Throwable $r3;
+        java.io.LineNumberReader r0;
+        char c4;
+        int i0, i1, $i2, $i3, $i5, $i6, i7, $i8, $i9;
+        char[] r2;
+        java.lang.Object $r1;
+        boolean $z0;
+
+        r0 := @this: java.io.LineNumberReader;
+
+        r2 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r1 = r0.<java.io.LineNumberReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label01:
+        $i2 = specialinvoke r0.<java.io.BufferedReader: int read(char[],int,int)>(r2, i0, i1);
+
+        i7 = i0;
+
+     label02:
+        $i3 = i0 + $i2;
+
+        if i7 >= $i3 goto label07;
+
+        c4 = r2[i7];
+
+        $z0 = r0.<java.io.LineNumberReader: boolean skipLF>;
+
+        if $z0 == 0 goto label03;
+
+        r0.<java.io.LineNumberReader: boolean skipLF> = 0;
+
+        $i8 = (int) c4;
+
+        if $i8 != 10 goto label03;
+
+        goto label06;
+
+     label03:
+        $i9 = (int) c4;
+
+        lookupswitch($i9)
+        {
+            case 10: goto label05;
+            case 13: goto label04;
+            default: goto label06;
+        };
+
+     label04:
+        r0.<java.io.LineNumberReader: boolean skipLF> = 1;
+
+     label05:
+        $i5 = r0.<java.io.LineNumberReader: int lineNumber>;
+
+        $i6 = $i5 + 1;
+
+        r0.<java.io.LineNumberReader: int lineNumber> = $i6;
+
+     label06:
+        i7 = i7 + 1;
+
+        goto label02;
+
+     label07:
+        exitmonitor $r1;
+
+     label08:
+        return $i2;
+
+     label09:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label10:
+        throw $r3;
+
+        catch java.lang.Throwable from label01 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    public java.lang.String readLine() throws java.io.IOException
+    {
+        java.lang.Throwable $r3;
+        int $i0, $i1;
+        java.io.LineNumberReader r0;
+        java.lang.Object $r1;
+        java.lang.String $r2;
+        boolean $z0;
+
+        r0 := @this: java.io.LineNumberReader;
+
+        $r1 = r0.<java.io.LineNumberReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = r0.<java.io.LineNumberReader: boolean skipLF>;
+
+        $r2 = specialinvoke r0.<java.io.BufferedReader: java.lang.String readLine(boolean)>($z0);
+
+        r0.<java.io.LineNumberReader: boolean skipLF> = 0;
+
+        if $r2 == null goto label2;
+
+        $i0 = r0.<java.io.LineNumberReader: int lineNumber>;
+
+        $i1 = $i0 + 1;
+
+        r0.<java.io.LineNumberReader: int lineNumber> = $i1;
+
+     label2:
+        exitmonitor $r1;
+
+     label3:
+        return $r2;
+
+     label4:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public long skip(long) throws java.io.IOException
+    {
+        java.lang.Throwable $r7;
+        long l0, $l2, $l4, $l5, $l6, $l9, l11;
+        byte $b1, $b12;
+        int i3, $i7, $i8, $i10, $i13, $i14, $i16;
+        java.io.LineNumberReader r0;
+        java.lang.IllegalArgumentException $r8;
+        char[] $r2, $r3, $r4, $r5;
+        java.lang.Object $r1;
+
+        r0 := @this: java.io.LineNumberReader;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        $i13 = (int) $b1;
+
+        if $i13 >= 0 goto label01;
+
+        $r8 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("skip() value is negative");
+
+        throw $r8;
+
+     label01:
+        $l2 = staticinvoke <java.lang.Math: long min(long,long)>(l0, 8192L);
+
+        i3 = (int) $l2;
+
+        $r1 = r0.<java.io.LineNumberReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label02:
+        $r2 = r0.<java.io.LineNumberReader: char[] skipBuffer>;
+
+        if $r2 == null goto label03;
+
+        $r5 = r0.<java.io.LineNumberReader: char[] skipBuffer>;
+
+        $i10 = lengthof $r5;
+
+        if $i10 >= i3 goto label04;
+
+     label03:
+        $r3 = newarray (char)[i3];
+
+        r0.<java.io.LineNumberReader: char[] skipBuffer> = $r3;
+
+     label04:
+        l11 = l0;
+
+     label05:
+        $b12 = l11 cmp 0L;
+
+        $i14 = (int) $b12;
+
+        if $i14 <= 0 goto label07;
+
+        $r4 = r0.<java.io.LineNumberReader: char[] skipBuffer>;
+
+        $l5 = (long) i3;
+
+        $l6 = staticinvoke <java.lang.Math: long min(long,long)>(l11, $l5);
+
+        $i7 = (int) $l6;
+
+        $i8 = virtualinvoke r0.<java.io.LineNumberReader: int read(char[],int,int)>($r4, 0, $i7);
+
+        $i16 = (int) -1;
+
+        if $i8 != $i16 goto label06;
+
+        goto label07;
+
+     label06:
+        $l9 = (long) $i8;
+
+        l11 = l11 - $l9;
+
+        goto label05;
+
+     label07:
+        $l4 = l0 - l11;
+
+        exitmonitor $r1;
+
+     label08:
+        return $l4;
+
+     label09:
+        $r7 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label10:
+        throw $r7;
+
+        catch java.lang.Throwable from label02 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    public void mark(int) throws java.io.IOException
+    {
+        java.lang.Throwable $r2;
+        int i0, $i1;
+        java.io.LineNumberReader r0;
+        java.lang.Object $r1;
+        boolean $z0;
+
+        r0 := @this: java.io.LineNumberReader;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.io.LineNumberReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label1:
+        specialinvoke r0.<java.io.BufferedReader: void mark(int)>(i0);
+
+        $i1 = r0.<java.io.LineNumberReader: int lineNumber>;
+
+        r0.<java.io.LineNumberReader: int markedLineNumber> = $i1;
+
+        $z0 = r0.<java.io.LineNumberReader: boolean skipLF>;
+
+        r0.<java.io.LineNumberReader: boolean markedSkipLF> = $z0;
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void reset() throws java.io.IOException
+    {
+        java.lang.Throwable $r2;
+        int $i0;
+        java.io.LineNumberReader r0;
+        java.lang.Object $r1;
+        boolean $z0;
+
+        r0 := @this: java.io.LineNumberReader;
+
+        $r1 = r0.<java.io.LineNumberReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label1:
+        specialinvoke r0.<java.io.BufferedReader: void reset()>();
+
+        $i0 = r0.<java.io.LineNumberReader: int markedLineNumber>;
+
+        r0.<java.io.LineNumberReader: int lineNumber> = $i0;
+
+        $z0 = r0.<java.io.LineNumberReader: boolean markedSkipLF>;
+
+        r0.<java.io.LineNumberReader: boolean skipLF> = $z0;
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public static void <clinit>()
+    {
+        <java.io.LineNumberReader: int maxSkipBufferSize> = 8192;
+
+        return;
+    }
+}

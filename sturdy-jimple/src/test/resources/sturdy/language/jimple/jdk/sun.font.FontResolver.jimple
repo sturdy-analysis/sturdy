@@ -1,0 +1,471 @@
+public final class sun.font.FontResolver extends java.lang.Object
+{
+    private java.awt.Font[] allFonts;
+    private java.awt.Font[] supplementaryFonts;
+    private int[] supplementaryIndices;
+    private static final int DEFAULT_SIZE;
+    private java.awt.Font defaultFont;
+    private static final int SHIFT;
+    private static final int BLOCKSIZE;
+    private static final int MASK;
+    private int[][] blocks;
+    private static sun.font.FontResolver INSTANCE;
+
+    private void <init>()
+    {
+        int[][] $r2;
+        sun.font.FontResolver r0;
+        java.awt.Font $r1;
+
+        r0 := @this: sun.font.FontResolver;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.awt.Font;
+
+        specialinvoke $r1.<java.awt.Font: void <init>(java.lang.String,int,int)>("Dialog", 0, 12);
+
+        r0.<sun.font.FontResolver: java.awt.Font defaultFont> = $r1;
+
+        $r2 = newarray (int[])[512];
+
+        r0.<sun.font.FontResolver: int[][] blocks> = $r2;
+
+        return;
+    }
+
+    private java.awt.Font[] getAllFonts()
+    {
+        java.awt.Font $r7, $r9;
+        java.awt.GraphicsEnvironment $r3;
+        java.awt.Font[] $r1, $r2, $r4, $r5, $r6, $r8;
+        int $i0, i1;
+        sun.font.FontResolver r0;
+
+        r0 := @this: sun.font.FontResolver;
+
+        $r1 = r0.<sun.font.FontResolver: java.awt.Font[] allFonts>;
+
+        if $r1 != null goto label2;
+
+        $r3 = staticinvoke <java.awt.GraphicsEnvironment: java.awt.GraphicsEnvironment getLocalGraphicsEnvironment()>();
+
+        $r4 = virtualinvoke $r3.<java.awt.GraphicsEnvironment: java.awt.Font[] getAllFonts()>();
+
+        r0.<sun.font.FontResolver: java.awt.Font[] allFonts> = $r4;
+
+        i1 = 0;
+
+     label1:
+        $r5 = r0.<sun.font.FontResolver: java.awt.Font[] allFonts>;
+
+        $i0 = lengthof $r5;
+
+        if i1 >= $i0 goto label2;
+
+        $r8 = r0.<sun.font.FontResolver: java.awt.Font[] allFonts>;
+
+        $r6 = r0.<sun.font.FontResolver: java.awt.Font[] allFonts>;
+
+        $r7 = $r6[i1];
+
+        $r9 = virtualinvoke $r7.<java.awt.Font: java.awt.Font deriveFont(float)>(12.0F);
+
+        $r8[i1] = $r9;
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        $r2 = r0.<sun.font.FontResolver: java.awt.Font[] allFonts>;
+
+        return $r2;
+    }
+
+    private int getIndexFor(char)
+    {
+        java.awt.Font $r1, $r4;
+        char c0;
+        java.awt.Font[] $r2, $r3;
+        int $i1, $i2, i3;
+        sun.font.FontResolver r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.font.FontResolver;
+
+        c0 := @parameter0: char;
+
+        $r1 = r0.<sun.font.FontResolver: java.awt.Font defaultFont>;
+
+        $z0 = virtualinvoke $r1.<java.awt.Font: boolean canDisplay(char)>(c0);
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        i3 = 0;
+
+     label2:
+        $r2 = specialinvoke r0.<sun.font.FontResolver: java.awt.Font[] getAllFonts()>();
+
+        $i1 = lengthof $r2;
+
+        if i3 >= $i1 goto label4;
+
+        $r3 = r0.<sun.font.FontResolver: java.awt.Font[] allFonts>;
+
+        $r4 = $r3[i3];
+
+        $z1 = virtualinvoke $r4.<java.awt.Font: boolean canDisplay(char)>(c0);
+
+        if $z1 == 0 goto label3;
+
+        $i2 = i3 + 2;
+
+        return $i2;
+
+     label3:
+        i3 = i3 + 1;
+
+        goto label2;
+
+     label4:
+        return 1;
+    }
+
+    private java.awt.Font[] getAllSCFonts()
+    {
+        java.lang.Object[] $r8;
+        java.lang.Integer $r12, $r15;
+        java.util.ArrayList $r3, $r4;
+        int[] $r6, $r10;
+        java.awt.Font[] $r1, $r2, $r5, $r7, $r9, $r13;
+        int $i0, $i1, $i2, i3, i4;
+        sun.font.FontResolver r0;
+        boolean $z0;
+        java.awt.Font r16;
+        sun.font.Font2D $r14;
+        java.lang.Object $r11;
+
+        r0 := @this: sun.font.FontResolver;
+
+        $r1 = r0.<sun.font.FontResolver: java.awt.Font[] supplementaryFonts>;
+
+        if $r1 != null goto label6;
+
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>()>();
+
+        $r4 = new java.util.ArrayList;
+
+        specialinvoke $r4.<java.util.ArrayList: void <init>()>();
+
+        i3 = 0;
+
+     label1:
+        $r5 = specialinvoke r0.<sun.font.FontResolver: java.awt.Font[] getAllFonts()>();
+
+        $i0 = lengthof $r5;
+
+        if i3 >= $i0 goto label3;
+
+        $r13 = r0.<sun.font.FontResolver: java.awt.Font[] allFonts>;
+
+        r16 = $r13[i3];
+
+        $r14 = staticinvoke <sun.font.FontUtilities: sun.font.Font2D getFont2D(java.awt.Font)>(r16);
+
+        $z0 = virtualinvoke $r14.<sun.font.Font2D: boolean hasSupplementaryChars()>();
+
+        if $z0 == 0 goto label2;
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>(r16);
+
+        $r15 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i3);
+
+        virtualinvoke $r4.<java.util.ArrayList: boolean add(java.lang.Object)>($r15);
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        $i1 = virtualinvoke $r3.<java.util.ArrayList: int size()>();
+
+        $r6 = newarray (int)[$i1];
+
+        r0.<sun.font.FontResolver: int[] supplementaryIndices> = $r6;
+
+        i4 = 0;
+
+     label4:
+        if i4 >= $i1 goto label5;
+
+        $r10 = r0.<sun.font.FontResolver: int[] supplementaryIndices>;
+
+        $r11 = virtualinvoke $r4.<java.util.ArrayList: java.lang.Object get(int)>(i4);
+
+        $r12 = (java.lang.Integer) $r11;
+
+        $i2 = virtualinvoke $r12.<java.lang.Integer: int intValue()>();
+
+        $r10[i4] = $i2;
+
+        i4 = i4 + 1;
+
+        goto label4;
+
+     label5:
+        $r7 = newarray (java.awt.Font)[$i1];
+
+        $r8 = virtualinvoke $r3.<java.util.ArrayList: java.lang.Object[] toArray(java.lang.Object[])>($r7);
+
+        $r9 = (java.awt.Font[]) $r8;
+
+        r0.<sun.font.FontResolver: java.awt.Font[] supplementaryFonts> = $r9;
+
+     label6:
+        $r2 = r0.<sun.font.FontResolver: java.awt.Font[] supplementaryFonts>;
+
+        return $r2;
+    }
+
+    private int getIndexFor(int)
+    {
+        java.awt.Font $r1, $r4;
+        int[] $r5;
+        java.awt.Font[] $r2, $r3;
+        int i0, $i1, $i2, $i3, i4;
+        sun.font.FontResolver r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.font.FontResolver;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.font.FontResolver: java.awt.Font defaultFont>;
+
+        $z0 = virtualinvoke $r1.<java.awt.Font: boolean canDisplay(int)>(i0);
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        i4 = 0;
+
+     label2:
+        $r2 = specialinvoke r0.<sun.font.FontResolver: java.awt.Font[] getAllSCFonts()>();
+
+        $i1 = lengthof $r2;
+
+        if i4 >= $i1 goto label4;
+
+        $r3 = r0.<sun.font.FontResolver: java.awt.Font[] supplementaryFonts>;
+
+        $r4 = $r3[i4];
+
+        $z1 = virtualinvoke $r4.<java.awt.Font: boolean canDisplay(int)>(i0);
+
+        if $z1 == 0 goto label3;
+
+        $r5 = r0.<sun.font.FontResolver: int[] supplementaryIndices>;
+
+        $i2 = $r5[i4];
+
+        $i3 = $i2 + 2;
+
+        return $i3;
+
+     label3:
+        i4 = i4 + 1;
+
+        goto label2;
+
+     label4:
+        return 1;
+    }
+
+    public int getFontIndex(char)
+    {
+        int[][] $r1, $r2;
+        char c0, $c5;
+        int[] r3;
+        int i1, $i2, $i3, $i4, $i6, $i7, $i8, $i9;
+        sun.font.FontResolver r0;
+
+        r0 := @this: sun.font.FontResolver;
+
+        c0 := @parameter0: char;
+
+        $i6 = (int) c0;
+
+        i1 = $i6 >> 9;
+
+        $r1 = r0.<sun.font.FontResolver: int[][] blocks>;
+
+        r3 = $r1[i1];
+
+        if r3 != null goto label1;
+
+        r3 = newarray (int)[128];
+
+        $r2 = r0.<sun.font.FontResolver: int[][] blocks>;
+
+        $r2[i1] = r3;
+
+     label1:
+        $c5 = c0 & 127;
+
+        $i7 = (int) $c5;
+
+        $i2 = r3[$i7];
+
+        if $i2 != 0 goto label2;
+
+        $i4 = specialinvoke r0.<sun.font.FontResolver: int getIndexFor(char)>(c0);
+
+        $i8 = (int) $c5;
+
+        r3[$i8] = $i4;
+
+     label2:
+        $i9 = (int) $c5;
+
+        $i3 = r3[$i9];
+
+        return $i3;
+    }
+
+    public int getFontIndex(int)
+    {
+        int i0, $i1, $i3;
+        char $c2;
+        sun.font.FontResolver r0;
+
+        r0 := @this: sun.font.FontResolver;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 65536 goto label1;
+
+        $c2 = (char) i0;
+
+        $i3 = virtualinvoke r0.<sun.font.FontResolver: int getFontIndex(char)>($c2);
+
+        return $i3;
+
+     label1:
+        $i1 = specialinvoke r0.<sun.font.FontResolver: int getIndexFor(int)>(i0);
+
+        return $i1;
+    }
+
+    public int nextFontRunIndex(sun.text.CodePointIterator)
+    {
+        sun.text.CodePointIterator r0;
+        int $i0, $i1, $i2, $i3, i4, $i6, $i8;
+        sun.font.FontResolver r1;
+
+        r1 := @this: sun.font.FontResolver;
+
+        r0 := @parameter0: sun.text.CodePointIterator;
+
+        $i0 = virtualinvoke r0.<sun.text.CodePointIterator: int next()>();
+
+        i4 = 1;
+
+        $i6 = (int) -1;
+
+        if $i0 == $i6 goto label2;
+
+        $i1 = virtualinvoke r1.<sun.font.FontResolver: int getFontIndex(int)>($i0);
+
+        i4 = $i1;
+
+     label1:
+        $i2 = virtualinvoke r0.<sun.text.CodePointIterator: int next()>();
+
+        $i8 = (int) -1;
+
+        if $i2 == $i8 goto label2;
+
+        $i3 = virtualinvoke r1.<sun.font.FontResolver: int getFontIndex(int)>($i2);
+
+        if $i3 == $i1 goto label1;
+
+        virtualinvoke r0.<sun.text.CodePointIterator: int prev()>();
+
+        goto label2;
+
+     label2:
+        return i4;
+    }
+
+    public java.awt.Font getFont(int, java.util.Map)
+    {
+        java.awt.Font $r2, r4;
+        java.util.Map r1;
+        java.awt.Font[] $r3;
+        int i0, $i1;
+        sun.font.FontResolver r0;
+
+        r0 := @this: sun.font.FontResolver;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.util.Map;
+
+        r4 = r0.<sun.font.FontResolver: java.awt.Font defaultFont>;
+
+        if i0 < 2 goto label1;
+
+        $r3 = r0.<sun.font.FontResolver: java.awt.Font[] allFonts>;
+
+        $i1 = i0 - 2;
+
+        r4 = $r3[$i1];
+
+     label1:
+        $r2 = virtualinvoke r4.<java.awt.Font: java.awt.Font deriveFont(java.util.Map)>(r1);
+
+        return $r2;
+    }
+
+    public static sun.font.FontResolver getInstance()
+    {
+        sun.font.FontResolver $r0, $r1, $r2;
+
+        $r0 = <sun.font.FontResolver: sun.font.FontResolver INSTANCE>;
+
+        if $r0 != null goto label1;
+
+        $r2 = new sun.font.FontResolver;
+
+        specialinvoke $r2.<sun.font.FontResolver: void <init>()>();
+
+        <sun.font.FontResolver: sun.font.FontResolver INSTANCE> = $r2;
+
+     label1:
+        $r1 = <sun.font.FontResolver: sun.font.FontResolver INSTANCE>;
+
+        return $r1;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.font.FontResolver: int MASK> = 127;
+
+        <sun.font.FontResolver: int BLOCKSIZE> = 128;
+
+        <sun.font.FontResolver: int SHIFT> = 9;
+
+        <sun.font.FontResolver: int DEFAULT_SIZE> = 12;
+
+        return;
+    }
+}

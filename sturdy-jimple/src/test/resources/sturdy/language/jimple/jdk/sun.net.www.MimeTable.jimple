@@ -1,0 +1,1062 @@
+public class sun.net.www.MimeTable extends java.lang.Object implements java.net.FileNameMap
+{
+    private java.util.Hashtable entries;
+    private java.util.Hashtable extensionMap;
+    private static java.lang.String tempFileTemplate;
+    private static final java.lang.String filePreamble;
+    private static final java.lang.String fileMagic;
+    protected static java.lang.String[] mailcapLocations;
+
+    void <init>()
+    {
+        sun.net.www.MimeTable r0;
+        java.util.Hashtable $r1, $r2;
+
+        r0 := @this: sun.net.www.MimeTable;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.Hashtable;
+
+        specialinvoke $r1.<java.util.Hashtable: void <init>()>();
+
+        r0.<sun.net.www.MimeTable: java.util.Hashtable entries> = $r1;
+
+        $r2 = new java.util.Hashtable;
+
+        specialinvoke $r2.<java.util.Hashtable: void <init>()>();
+
+        r0.<sun.net.www.MimeTable: java.util.Hashtable extensionMap> = $r2;
+
+        virtualinvoke r0.<sun.net.www.MimeTable: void load()>();
+
+        return;
+    }
+
+    public static sun.net.www.MimeTable getDefaultTable()
+    {
+        sun.net.www.MimeTable $r0;
+
+        $r0 = <sun.net.www.MimeTable$DefaultInstanceHolder: sun.net.www.MimeTable defaultInstance>;
+
+        return $r0;
+    }
+
+    public static java.net.FileNameMap loadTable()
+    {
+        sun.net.www.MimeTable $r0;
+
+        $r0 = staticinvoke <sun.net.www.MimeTable: sun.net.www.MimeTable getDefaultTable()>();
+
+        return $r0;
+    }
+
+    public synchronized int getSize()
+    {
+        int $i0;
+        sun.net.www.MimeTable r0;
+        java.util.Hashtable $r1;
+
+        r0 := @this: sun.net.www.MimeTable;
+
+        $r1 = r0.<sun.net.www.MimeTable: java.util.Hashtable entries>;
+
+        $i0 = virtualinvoke $r1.<java.util.Hashtable: int size()>();
+
+        return $i0;
+    }
+
+    public synchronized java.lang.String getContentTypeFor(java.lang.String)
+    {
+        sun.net.www.MimeTable r0;
+        java.lang.String r1, $r3;
+        sun.net.www.MimeEntry $r2;
+
+        r0 := @this: sun.net.www.MimeTable;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = virtualinvoke r0.<sun.net.www.MimeTable: sun.net.www.MimeEntry findByFileName(java.lang.String)>(r1);
+
+        if $r2 == null goto label1;
+
+        $r3 = virtualinvoke $r2.<sun.net.www.MimeEntry: java.lang.String getType()>();
+
+        return $r3;
+
+     label1:
+        return null;
+    }
+
+    public synchronized void add(sun.net.www.MimeEntry)
+    {
+        java.lang.String[] $r4;
+        sun.net.www.MimeEntry r1;
+        sun.net.www.MimeTable r0;
+        int $i0, i1;
+        java.lang.String $r3, $r5;
+        java.util.Hashtable $r2, $r6;
+
+        r0 := @this: sun.net.www.MimeTable;
+
+        r1 := @parameter0: sun.net.www.MimeEntry;
+
+        $r2 = r0.<sun.net.www.MimeTable: java.util.Hashtable entries>;
+
+        $r3 = virtualinvoke r1.<sun.net.www.MimeEntry: java.lang.String getType()>();
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, r1);
+
+        $r4 = virtualinvoke r1.<sun.net.www.MimeEntry: java.lang.String[] getExtensions()>();
+
+        if $r4 != null goto label1;
+
+        return;
+
+     label1:
+        i1 = 0;
+
+     label2:
+        $i0 = lengthof $r4;
+
+        if i1 >= $i0 goto label3;
+
+        $r6 = r0.<sun.net.www.MimeTable: java.util.Hashtable extensionMap>;
+
+        $r5 = $r4[i1];
+
+        virtualinvoke $r6.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r5, r1);
+
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label3:
+        return;
+    }
+
+    public synchronized sun.net.www.MimeEntry remove(java.lang.String)
+    {
+        sun.net.www.MimeTable r0;
+        java.lang.Object $r3;
+        java.lang.String r1;
+        sun.net.www.MimeEntry r4, $r5;
+        java.util.Hashtable $r2;
+
+        r0 := @this: sun.net.www.MimeTable;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<sun.net.www.MimeTable: java.util.Hashtable entries>;
+
+        $r3 = virtualinvoke $r2.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r1);
+
+        r4 = (sun.net.www.MimeEntry) $r3;
+
+        $r5 = virtualinvoke r0.<sun.net.www.MimeTable: sun.net.www.MimeEntry remove(sun.net.www.MimeEntry)>(r4);
+
+        return $r5;
+    }
+
+    public synchronized sun.net.www.MimeEntry remove(sun.net.www.MimeEntry)
+    {
+        java.lang.String[] $r1;
+        sun.net.www.MimeEntry r0, $r6;
+        sun.net.www.MimeTable r2;
+        int $i0, i1;
+        java.lang.Object $r5;
+        java.lang.String $r4, $r7;
+        java.util.Hashtable $r3, $r8;
+
+        r2 := @this: sun.net.www.MimeTable;
+
+        r0 := @parameter0: sun.net.www.MimeEntry;
+
+        $r1 = virtualinvoke r0.<sun.net.www.MimeEntry: java.lang.String[] getExtensions()>();
+
+        if $r1 == null goto label2;
+
+        i1 = 0;
+
+     label1:
+        $i0 = lengthof $r1;
+
+        if i1 >= $i0 goto label2;
+
+        $r8 = r2.<sun.net.www.MimeTable: java.util.Hashtable extensionMap>;
+
+        $r7 = $r1[i1];
+
+        virtualinvoke $r8.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>($r7);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        $r3 = r2.<sun.net.www.MimeTable: java.util.Hashtable entries>;
+
+        $r4 = virtualinvoke r0.<sun.net.www.MimeEntry: java.lang.String getType()>();
+
+        $r5 = virtualinvoke $r3.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>($r4);
+
+        $r6 = (sun.net.www.MimeEntry) $r5;
+
+        return $r6;
+    }
+
+    public synchronized sun.net.www.MimeEntry find(java.lang.String)
+    {
+        java.util.Enumeration $r6;
+        sun.net.www.MimeEntry r4, r8;
+        sun.net.www.MimeTable r0;
+        java.lang.Object $r3, $r7;
+        java.lang.String r1;
+        java.util.Hashtable $r2, $r5;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.net.www.MimeTable;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<sun.net.www.MimeTable: java.util.Hashtable entries>;
+
+        $r3 = virtualinvoke $r2.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r1);
+
+        r4 = (sun.net.www.MimeEntry) $r3;
+
+        if r4 != null goto label3;
+
+        $r5 = r0.<sun.net.www.MimeTable: java.util.Hashtable entries>;
+
+        $r6 = virtualinvoke $r5.<java.util.Hashtable: java.util.Enumeration elements()>();
+
+     label1:
+        $z0 = interfaceinvoke $r6.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label3;
+
+        $r7 = interfaceinvoke $r6.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r8 = (sun.net.www.MimeEntry) $r7;
+
+        $z1 = virtualinvoke r8.<sun.net.www.MimeEntry: boolean matches(java.lang.String)>(r1);
+
+        if $z1 == 0 goto label2;
+
+        return r8;
+
+     label2:
+        goto label1;
+
+     label3:
+        return r4;
+    }
+
+    public sun.net.www.MimeEntry findByFileName(java.lang.String)
+    {
+        char $c6;
+        sun.net.www.MimeEntry $r4;
+        sun.net.www.MimeTable r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i7, $i9, $i10;
+        java.lang.String $r1, r2, r3;
+
+        r0 := @this: sun.net.www.MimeTable;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 = "";
+
+        $i0 = virtualinvoke r2.<java.lang.String: int lastIndexOf(int)>(35);
+
+        if $i0 <= 0 goto label1;
+
+        $i7 = $i0 - 1;
+
+        r2 = virtualinvoke r2.<java.lang.String: java.lang.String substring(int,int)>(0, $i7);
+
+     label1:
+        $i1 = virtualinvoke r2.<java.lang.String: int lastIndexOf(int)>(46);
+
+        $i2 = virtualinvoke r2.<java.lang.String: int lastIndexOf(int)>(47);
+
+        $i3 = staticinvoke <java.lang.Math: int max(int,int)>($i1, $i2);
+
+        $i4 = virtualinvoke r2.<java.lang.String: int lastIndexOf(int)>(63);
+
+        $i5 = staticinvoke <java.lang.Math: int max(int,int)>($i3, $i4);
+
+        $i9 = (int) -1;
+
+        if $i5 == $i9 goto label2;
+
+        $c6 = virtualinvoke r2.<java.lang.String: char charAt(int)>($i5);
+
+        $i10 = (int) $c6;
+
+        if $i10 != 46 goto label2;
+
+        $r1 = virtualinvoke r2.<java.lang.String: java.lang.String substring(int)>($i5);
+
+        r3 = virtualinvoke $r1.<java.lang.String: java.lang.String toLowerCase()>();
+
+     label2:
+        $r4 = virtualinvoke r0.<sun.net.www.MimeTable: sun.net.www.MimeEntry findByExt(java.lang.String)>(r3);
+
+        return $r4;
+    }
+
+    public synchronized sun.net.www.MimeEntry findByExt(java.lang.String)
+    {
+        sun.net.www.MimeTable r0;
+        java.lang.Object $r3;
+        java.lang.String r1;
+        sun.net.www.MimeEntry $r4;
+        java.util.Hashtable $r2;
+
+        r0 := @this: sun.net.www.MimeTable;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<sun.net.www.MimeTable: java.util.Hashtable extensionMap>;
+
+        $r3 = virtualinvoke $r2.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r1);
+
+        $r4 = (sun.net.www.MimeEntry) $r3;
+
+        return $r4;
+    }
+
+    public synchronized sun.net.www.MimeEntry findByDescription(java.lang.String)
+    {
+        java.util.Enumeration $r1;
+        sun.net.www.MimeEntry $r3, r5;
+        sun.net.www.MimeTable r0;
+        java.lang.Object $r4;
+        java.lang.String r2, $r6;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.net.www.MimeTable;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = virtualinvoke r0.<sun.net.www.MimeTable: java.util.Enumeration elements()>();
+
+     label1:
+        $z0 = interfaceinvoke $r1.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label3;
+
+        $r4 = interfaceinvoke $r1.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r5 = (sun.net.www.MimeEntry) $r4;
+
+        $r6 = virtualinvoke r5.<sun.net.www.MimeEntry: java.lang.String getDescription()>();
+
+        $z1 = virtualinvoke r2.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+        if $z1 == 0 goto label2;
+
+        return r5;
+
+     label2:
+        goto label1;
+
+     label3:
+        $r3 = virtualinvoke r0.<sun.net.www.MimeTable: sun.net.www.MimeEntry find(java.lang.String)>(r2);
+
+        return $r3;
+    }
+
+    java.lang.String getTempFileTemplate()
+    {
+        java.lang.String $r0;
+        sun.net.www.MimeTable r1;
+
+        r1 := @this: sun.net.www.MimeTable;
+
+        $r0 = <sun.net.www.MimeTable: java.lang.String tempFileTemplate>;
+
+        return $r0;
+    }
+
+    public synchronized java.util.Enumeration elements()
+    {
+        java.util.Enumeration $r2;
+        sun.net.www.MimeTable r0;
+        java.util.Hashtable $r1;
+
+        r0 := @this: sun.net.www.MimeTable;
+
+        $r1 = r0.<sun.net.www.MimeTable: java.util.Hashtable entries>;
+
+        $r2 = virtualinvoke $r1.<java.util.Hashtable: java.util.Enumeration elements()>();
+
+        return $r2;
+    }
+
+    public synchronized void load()
+    {
+        java.io.BufferedInputStream $r34;
+        sun.net.www.MimeTable r13;
+        boolean $z0;
+        java.lang.StringBuilder $r3, $r5, $r7, $r8, $r10, $r11, $r16, $r18, $r20, $r21, $r23, $r24, $r27, $r29, $r31;
+        java.lang.String $r1, $r4, $r6, $r9, $r12, $r17, $r19, $r22, $r25, $r30, $r32;
+        java.io.PrintStream $r28;
+        java.util.Properties $r0;
+        java.io.IOException $r26;
+        java.io.FileInputStream $r35;
+        java.io.File $r2, $r14, $r15, r33;
+
+        r13 := @this: sun.net.www.MimeTable;
+
+        $r0 = new java.util.Properties;
+
+        specialinvoke $r0.<java.util.Properties: void <init>()>();
+
+        r33 = null;
+
+     label1:
+        $r1 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("content.types.user.table");
+
+        if $r1 == null goto label2;
+
+        $r14 = new java.io.File;
+
+        specialinvoke $r14.<java.io.File: void <init>(java.lang.String)>($r1);
+
+        r33 = $r14;
+
+        $z0 = virtualinvoke $r14.<java.io.File: boolean exists()>();
+
+        if $z0 != 0 goto label3;
+
+        $r15 = new java.io.File;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.home");
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = <java.io.File: java.lang.String separator>;
+
+        $r20 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("lib");
+
+        $r22 = <java.io.File: java.lang.String separator>;
+
+        $r23 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("content-types.properties");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r15.<java.io.File: void <init>(java.lang.String)>($r25);
+
+        r33 = $r15;
+
+        goto label3;
+
+     label2:
+        $r2 = new java.io.File;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.home");
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = <java.io.File: java.lang.String separator>;
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("lib");
+
+        $r9 = <java.io.File: java.lang.String separator>;
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("content-types.properties");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.io.File: void <init>(java.lang.String)>($r12);
+
+        r33 = $r2;
+
+     label3:
+        $r34 = new java.io.BufferedInputStream;
+
+        $r35 = new java.io.FileInputStream;
+
+        specialinvoke $r35.<java.io.FileInputStream: void <init>(java.io.File)>(r33);
+
+        specialinvoke $r34.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>($r35);
+
+        virtualinvoke $r0.<java.util.Properties: void load(java.io.InputStream)>($r34);
+
+        virtualinvoke $r34.<java.io.InputStream: void close()>();
+
+     label4:
+        goto label6;
+
+     label5:
+        $r26 := @caughtexception;
+
+        $r28 = <java.lang.System: java.io.PrintStream err>;
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r29 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Warning: default mime table not found: ");
+
+        $r30 = virtualinvoke r33.<java.io.File: java.lang.String getPath()>();
+
+        $r31 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r30);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r28.<java.io.PrintStream: void println(java.lang.String)>($r32);
+
+        return;
+
+     label6:
+        virtualinvoke r13.<sun.net.www.MimeTable: void parse(java.util.Properties)>($r0);
+
+        return;
+
+        catch java.io.IOException from label1 to label4 with label5;
+    }
+
+    void parse(java.util.Properties)
+    {
+        java.util.Properties r0;
+        java.util.Enumeration $r3;
+        sun.net.www.MimeTable r7;
+        java.lang.Object $r1, $r4;
+        java.lang.String r2, r5, $r6;
+        boolean $z0;
+
+        r7 := @this: sun.net.www.MimeTable;
+
+        r0 := @parameter0: java.util.Properties;
+
+        $r1 = virtualinvoke r0.<java.util.Properties: java.lang.Object get(java.lang.Object)>("temp.file.template");
+
+        r2 = (java.lang.String) $r1;
+
+        if r2 == null goto label1;
+
+        virtualinvoke r0.<java.util.Properties: java.lang.Object remove(java.lang.Object)>("temp.file.template");
+
+        <sun.net.www.MimeTable: java.lang.String tempFileTemplate> = r2;
+
+     label1:
+        $r3 = virtualinvoke r0.<java.util.Properties: java.util.Enumeration propertyNames()>();
+
+     label2:
+        $z0 = interfaceinvoke $r3.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label3;
+
+        $r4 = interfaceinvoke $r3.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r5 = (java.lang.String) $r4;
+
+        $r6 = virtualinvoke r0.<java.util.Properties: java.lang.String getProperty(java.lang.String)>(r5);
+
+        virtualinvoke r7.<sun.net.www.MimeTable: void parse(java.lang.String,java.lang.String)>(r5, $r6);
+
+        goto label2;
+
+     label3:
+        return;
+    }
+
+    void parse(java.lang.String, java.lang.String)
+    {
+        java.util.StringTokenizer $r2;
+        sun.net.www.MimeTable r4;
+        java.lang.String r1, r3, $r5;
+        sun.net.www.MimeEntry $r0;
+        boolean $z0;
+
+        r4 := @this: sun.net.www.MimeTable;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        $r0 = new sun.net.www.MimeEntry;
+
+        specialinvoke $r0.<sun.net.www.MimeEntry: void <init>(java.lang.String)>(r1);
+
+        $r2 = new java.util.StringTokenizer;
+
+        specialinvoke $r2.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>(r3, ";");
+
+     label1:
+        $z0 = virtualinvoke $r2.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label2;
+
+        $r5 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        virtualinvoke r4.<sun.net.www.MimeTable: void parse(java.lang.String,sun.net.www.MimeEntry)>($r5, $r0);
+
+        goto label1;
+
+     label2:
+        virtualinvoke r4.<sun.net.www.MimeTable: void add(sun.net.www.MimeEntry)>($r0);
+
+        return;
+    }
+
+    void parse(java.lang.String, sun.net.www.MimeEntry)
+    {
+        sun.net.www.MimeEntry r3;
+        java.util.StringTokenizer $r0;
+        sun.net.www.MimeTable r2;
+        java.lang.String r1, $r4, $r5, r6, r7;
+        boolean z0, $z1;
+
+        r2 := @this: sun.net.www.MimeTable;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: sun.net.www.MimeEntry;
+
+        r6 = null;
+
+        r7 = null;
+
+        z0 = 0;
+
+        $r0 = new java.util.StringTokenizer;
+
+        specialinvoke $r0.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>(r1, "=");
+
+     label1:
+        $z1 = virtualinvoke $r0.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z1 == 0 goto label3;
+
+        if z0 == 0 goto label2;
+
+        $r5 = virtualinvoke $r0.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        r7 = virtualinvoke $r5.<java.lang.String: java.lang.String trim()>();
+
+        goto label1;
+
+     label2:
+        $r4 = virtualinvoke $r0.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        r6 = virtualinvoke $r4.<java.lang.String: java.lang.String trim()>();
+
+        z0 = 1;
+
+        goto label1;
+
+     label3:
+        virtualinvoke r2.<sun.net.www.MimeTable: void fill(sun.net.www.MimeEntry,java.lang.String,java.lang.String)>(r3, r6, r7);
+
+        return;
+    }
+
+    void fill(sun.net.www.MimeEntry, java.lang.String, java.lang.String)
+    {
+        sun.net.www.MimeEntry r6;
+        sun.net.www.MimeTable r8;
+        int $i0;
+        java.lang.String r0, $r1, $r2, $r3, $r4, $r5, r7;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        r8 := @this: sun.net.www.MimeTable;
+
+        r6 := @parameter0: sun.net.www.MimeEntry;
+
+        r0 := @parameter1: java.lang.String;
+
+        r7 := @parameter2: java.lang.String;
+
+        $r1 = "description";
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r0);
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r6.<sun.net.www.MimeEntry: void setDescription(java.lang.String)>(r7);
+
+        goto label5;
+
+     label1:
+        $r2 = "action";
+
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r0);
+
+        if $z1 == 0 goto label2;
+
+        $i0 = virtualinvoke r8.<sun.net.www.MimeTable: int getActionCode(java.lang.String)>(r7);
+
+        virtualinvoke r6.<sun.net.www.MimeEntry: void setAction(int)>($i0);
+
+        goto label5;
+
+     label2:
+        $r3 = "application";
+
+        $z2 = virtualinvoke $r3.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r0);
+
+        if $z2 == 0 goto label3;
+
+        virtualinvoke r6.<sun.net.www.MimeEntry: void setCommand(java.lang.String)>(r7);
+
+        goto label5;
+
+     label3:
+        $r4 = "icon";
+
+        $z3 = virtualinvoke $r4.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r0);
+
+        if $z3 == 0 goto label4;
+
+        virtualinvoke r6.<sun.net.www.MimeEntry: void setImageFileName(java.lang.String)>(r7);
+
+        goto label5;
+
+     label4:
+        $r5 = "file_extensions";
+
+        $z4 = virtualinvoke $r5.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r0);
+
+        if $z4 == 0 goto label5;
+
+        virtualinvoke r6.<sun.net.www.MimeEntry: void setExtensions(java.lang.String)>(r7);
+
+     label5:
+        return;
+    }
+
+    java.lang.String[] getExtensions(java.lang.String)
+    {
+        java.util.StringTokenizer $r0;
+        sun.net.www.MimeTable r4;
+        int $i0, i1;
+        java.lang.String[] r2;
+        java.lang.String r1, $r3;
+
+        r4 := @this: sun.net.www.MimeTable;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = new java.util.StringTokenizer;
+
+        specialinvoke $r0.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>(r1, ",");
+
+        $i0 = virtualinvoke $r0.<java.util.StringTokenizer: int countTokens()>();
+
+        r2 = newarray (java.lang.String)[$i0];
+
+        i1 = 0;
+
+     label1:
+        if i1 >= $i0 goto label2;
+
+        $r3 = virtualinvoke $r0.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        r2[i1] = $r3;
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return r2;
+    }
+
+    int getActionCode(java.lang.String)
+    {
+        java.lang.String[] $r0, $r2;
+        sun.net.www.MimeTable r4;
+        int $i0, i1;
+        java.lang.String r1, $r3;
+        boolean $z0;
+
+        r4 := @this: sun.net.www.MimeTable;
+
+        r1 := @parameter0: java.lang.String;
+
+        i1 = 0;
+
+     label1:
+        $r0 = <sun.net.www.MimeEntry: java.lang.String[] actionKeywords>;
+
+        $i0 = lengthof $r0;
+
+        if i1 >= $i0 goto label3;
+
+        $r2 = <sun.net.www.MimeEntry: java.lang.String[] actionKeywords>;
+
+        $r3 = $r2[i1];
+
+        $z0 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r3);
+
+        if $z0 == 0 goto label2;
+
+        return i1;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    public synchronized boolean save(java.lang.String)
+    {
+        java.io.File $r1;
+        sun.net.www.MimeTable r0;
+        java.lang.StringBuilder $r2, $r3, $r5, $r6, $r8, $r9;
+        java.lang.String $r4, $r7, $r10, r11;
+        boolean $z0;
+
+        r0 := @this: sun.net.www.MimeTable;
+
+        r11 := @parameter0: java.lang.String;
+
+        if r11 != null goto label1;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("user.home");
+
+        $r4 = <java.io.File: java.lang.String separator>;
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("lib");
+
+        $r7 = <java.io.File: java.lang.String separator>;
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("content-types.properties");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r11 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>($r10);
+
+     label1:
+        $r1 = new java.io.File;
+
+        specialinvoke $r1.<java.io.File: void <init>(java.lang.String)>(r11);
+
+        $z0 = virtualinvoke r0.<sun.net.www.MimeTable: boolean saveAsProperties(java.io.File)>($r1);
+
+        return $z0;
+    }
+
+    public java.util.Properties getAsProperties()
+    {
+        java.util.Properties $r0;
+        java.util.Enumeration $r2;
+        sun.net.www.MimeEntry r4;
+        sun.net.www.MimeTable r1;
+        java.lang.Object $r3;
+        java.lang.String $r5, $r6;
+        boolean $z0;
+
+        r1 := @this: sun.net.www.MimeTable;
+
+        $r0 = new java.util.Properties;
+
+        specialinvoke $r0.<java.util.Properties: void <init>()>();
+
+        $r2 = virtualinvoke r1.<sun.net.www.MimeTable: java.util.Enumeration elements()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = interfaceinvoke $r2.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r4 = (sun.net.www.MimeEntry) $r3;
+
+        $r5 = virtualinvoke r4.<sun.net.www.MimeEntry: java.lang.String getType()>();
+
+        $r6 = virtualinvoke r4.<sun.net.www.MimeEntry: java.lang.String toProperty()>();
+
+        virtualinvoke $r0.<java.util.Properties: java.lang.Object put(java.lang.Object,java.lang.Object)>($r5, $r6);
+
+        goto label1;
+
+     label2:
+        return $r0;
+    }
+
+    protected boolean saveAsProperties(java.io.File)
+    {
+        java.lang.Throwable $r15;
+        sun.net.www.MimeTable r2;
+        java.lang.String $r4, $r5, $r9, $r13;
+        java.util.Properties $r3;
+        java.io.FileOutputStream $r0, r19;
+        java.io.IOException $r14, $r16, $r17, $r18;
+        java.io.File r1;
+        java.lang.StringBuilder $r6, $r7, $r8, $r10, $r11, $r12;
+
+        r2 := @this: sun.net.www.MimeTable;
+
+        r1 := @parameter0: java.io.File;
+
+        r19 = null;
+
+     label01:
+        $r0 = new java.io.FileOutputStream;
+
+        specialinvoke $r0.<java.io.FileOutputStream: void <init>(java.io.File)>(r1);
+
+        r19 = $r0;
+
+        $r3 = virtualinvoke r2.<sun.net.www.MimeTable: java.util.Properties getAsProperties()>();
+
+        $r4 = <sun.net.www.MimeTable: java.lang.String tempFileTemplate>;
+
+        virtualinvoke $r3.<java.util.Properties: java.lang.Object put(java.lang.Object,java.lang.Object)>("temp.file.template", $r4);
+
+        $r5 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("user.name");
+
+        if $r5 == null goto label02;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("; customized for ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("sun.net.www MIME content-types table");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r3.<java.util.Properties: void store(java.io.OutputStream,java.lang.String)>($r0, $r13);
+
+        goto label03;
+
+     label02:
+        virtualinvoke $r3.<java.util.Properties: void store(java.io.OutputStream,java.lang.String)>($r0, "sun.net.www MIME content-types table");
+
+     label03:
+        if $r0 == null goto label19;
+
+     label04:
+        virtualinvoke $r0.<java.io.FileOutputStream: void close()>();
+
+     label05:
+        goto label19;
+
+     label06:
+        $r18 := @caughtexception;
+
+        goto label19;
+
+     label07:
+        $r17 := @caughtexception;
+
+        virtualinvoke $r17.<java.io.IOException: void printStackTrace()>();
+
+     label08:
+        if r19 == null goto label12;
+
+     label09:
+        virtualinvoke r19.<java.io.FileOutputStream: void close()>();
+
+     label10:
+        goto label12;
+
+     label11:
+        $r16 := @caughtexception;
+
+     label12:
+        return 0;
+
+     label13:
+        $r15 := @caughtexception;
+
+     label14:
+        if r19 == null goto label18;
+
+     label15:
+        virtualinvoke r19.<java.io.FileOutputStream: void close()>();
+
+     label16:
+        goto label18;
+
+     label17:
+        $r14 := @caughtexception;
+
+     label18:
+        throw $r15;
+
+     label19:
+        return 1;
+
+        catch java.io.IOException from label04 to label05 with label06;
+        catch java.io.IOException from label01 to label03 with label07;
+        catch java.io.IOException from label09 to label10 with label11;
+        catch java.lang.Throwable from label01 to label03 with label13;
+        catch java.lang.Throwable from label07 to label08 with label13;
+        catch java.io.IOException from label15 to label16 with label17;
+        catch java.lang.Throwable from label13 to label14 with label13;
+    }
+
+    static java.lang.String access$002(java.lang.String)
+    {
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        <sun.net.www.MimeTable: java.lang.String tempFileTemplate> = r0;
+
+        return r0;
+    }
+
+    static void <clinit>()
+    {
+        sun.net.www.MimeTable$1 $r0;
+
+        <sun.net.www.MimeTable: java.lang.String fileMagic> = "#sun.net.www MIME content-types table";
+
+        <sun.net.www.MimeTable: java.lang.String filePreamble> = "sun.net.www MIME content-types table";
+
+        $r0 = new sun.net.www.MimeTable$1;
+
+        specialinvoke $r0.<sun.net.www.MimeTable$1: void <init>()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        return;
+    }
+}

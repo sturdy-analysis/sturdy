@@ -1,0 +1,1041 @@
+abstract class com.sun.media.sound.AbstractMixer extends com.sun.media.sound.AbstractLine implements javax.sound.sampled.Mixer
+{
+    protected static final int PCM;
+    protected static final int ULAW;
+    protected static final int ALAW;
+    private final javax.sound.sampled.Mixer$Info mixerInfo;
+    protected javax.sound.sampled.Line$Info[] sourceLineInfo;
+    protected javax.sound.sampled.Line$Info[] targetLineInfo;
+    private boolean started;
+    private boolean manuallyOpened;
+    private final java.util.Vector sourceLines;
+    private final java.util.Vector targetLines;
+
+    protected void <init>(javax.sound.sampled.Mixer$Info, javax.sound.sampled.Control[], javax.sound.sampled.Line$Info[], javax.sound.sampled.Line$Info[])
+    {
+        javax.sound.sampled.Mixer$Info r4;
+        javax.sound.sampled.Line$Info[] r5, r6;
+        com.sun.media.sound.AbstractMixer r0;
+        java.util.Vector $r2, $r3;
+        javax.sound.sampled.Line$Info $r1;
+        javax.sound.sampled.Control[] r7, r8;
+
+        r0 := @this: com.sun.media.sound.AbstractMixer;
+
+        r4 := @parameter0: javax.sound.sampled.Mixer$Info;
+
+        r7 := @parameter1: javax.sound.sampled.Control[];
+
+        r5 := @parameter2: javax.sound.sampled.Line$Info[];
+
+        r6 := @parameter3: javax.sound.sampled.Line$Info[];
+
+        $r1 = new javax.sound.sampled.Line$Info;
+
+        specialinvoke $r1.<javax.sound.sampled.Line$Info: void <init>(java.lang.Class)>(class "Ljavax/sound/sampled/Mixer;");
+
+        specialinvoke r0.<com.sun.media.sound.AbstractLine: void <init>(javax.sound.sampled.Line$Info,com.sun.media.sound.AbstractMixer,javax.sound.sampled.Control[])>($r1, null, r7);
+
+        r0.<com.sun.media.sound.AbstractMixer: boolean started> = 0;
+
+        r0.<com.sun.media.sound.AbstractMixer: boolean manuallyOpened> = 0;
+
+        $r2 = new java.util.Vector;
+
+        specialinvoke $r2.<java.util.Vector: void <init>()>();
+
+        r0.<com.sun.media.sound.AbstractMixer: java.util.Vector sourceLines> = $r2;
+
+        $r3 = new java.util.Vector;
+
+        specialinvoke $r3.<java.util.Vector: void <init>()>();
+
+        r0.<com.sun.media.sound.AbstractMixer: java.util.Vector targetLines> = $r3;
+
+        r0.<com.sun.media.sound.AbstractMixer: com.sun.media.sound.AbstractMixer mixer> = r0;
+
+        if r7 != null goto label1;
+
+        r8 = newarray (javax.sound.sampled.Control)[0];
+
+     label1:
+        r0.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Mixer$Info mixerInfo> = r4;
+
+        r0.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] sourceLineInfo> = r5;
+
+        r0.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] targetLineInfo> = r6;
+
+        return;
+    }
+
+    public final javax.sound.sampled.Mixer$Info getMixerInfo()
+    {
+        javax.sound.sampled.Mixer$Info $r1;
+        com.sun.media.sound.AbstractMixer r0;
+
+        r0 := @this: com.sun.media.sound.AbstractMixer;
+
+        $r1 = r0.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Mixer$Info mixerInfo>;
+
+        return $r1;
+    }
+
+    public final javax.sound.sampled.Line$Info[] getSourceLineInfo()
+    {
+        javax.sound.sampled.Line$Info[] $r1, r2, $r3, $r4;
+        int $i0, $i1;
+        com.sun.media.sound.AbstractMixer r0;
+
+        r0 := @this: com.sun.media.sound.AbstractMixer;
+
+        $r1 = r0.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] sourceLineInfo>;
+
+        $i0 = lengthof $r1;
+
+        r2 = newarray (javax.sound.sampled.Line$Info)[$i0];
+
+        $r4 = r0.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] sourceLineInfo>;
+
+        $r3 = r0.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] sourceLineInfo>;
+
+        $i1 = lengthof $r3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, r2, 0, $i1);
+
+        return r2;
+    }
+
+    public final javax.sound.sampled.Line$Info[] getTargetLineInfo()
+    {
+        javax.sound.sampled.Line$Info[] $r1, r2, $r3, $r4;
+        int $i0, $i1;
+        com.sun.media.sound.AbstractMixer r0;
+
+        r0 := @this: com.sun.media.sound.AbstractMixer;
+
+        $r1 = r0.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] targetLineInfo>;
+
+        $i0 = lengthof $r1;
+
+        r2 = newarray (javax.sound.sampled.Line$Info)[$i0];
+
+        $r4 = r0.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] targetLineInfo>;
+
+        $r3 = r0.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] targetLineInfo>;
+
+        $i1 = lengthof $r3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, r2, 0, $i1);
+
+        return r2;
+    }
+
+    public final javax.sound.sampled.Line$Info[] getSourceLineInfo(javax.sound.sampled.Line$Info)
+    {
+        com.sun.media.sound.AbstractMixer r1;
+        java.util.Vector $r0;
+        javax.sound.sampled.Line$Info $r5, r6, $r8, $r10;
+        int $i0, $i1, $i2, i3, i4;
+        boolean $z0;
+        javax.sound.sampled.Line$Info[] $r2, r3, $r7, $r9;
+        java.lang.Object $r4;
+
+        r1 := @this: com.sun.media.sound.AbstractMixer;
+
+        r6 := @parameter0: javax.sound.sampled.Line$Info;
+
+        $r0 = new java.util.Vector;
+
+        specialinvoke $r0.<java.util.Vector: void <init>()>();
+
+        i3 = 0;
+
+     label1:
+        $r2 = r1.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] sourceLineInfo>;
+
+        $i0 = lengthof $r2;
+
+        if i3 >= $i0 goto label3;
+
+        $r7 = r1.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] sourceLineInfo>;
+
+        $r8 = $r7[i3];
+
+        $z0 = virtualinvoke r6.<javax.sound.sampled.Line$Info: boolean matches(javax.sound.sampled.Line$Info)>($r8);
+
+        if $z0 == 0 goto label2;
+
+        $r9 = r1.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] sourceLineInfo>;
+
+        $r10 = $r9[i3];
+
+        virtualinvoke $r0.<java.util.Vector: void addElement(java.lang.Object)>($r10);
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        $i1 = virtualinvoke $r0.<java.util.Vector: int size()>();
+
+        r3 = newarray (javax.sound.sampled.Line$Info)[$i1];
+
+        i4 = 0;
+
+     label4:
+        $i2 = lengthof r3;
+
+        if i4 >= $i2 goto label5;
+
+        $r4 = virtualinvoke $r0.<java.util.Vector: java.lang.Object elementAt(int)>(i4);
+
+        $r5 = (javax.sound.sampled.Line$Info) $r4;
+
+        r3[i4] = $r5;
+
+        i4 = i4 + 1;
+
+        goto label4;
+
+     label5:
+        return r3;
+    }
+
+    public final javax.sound.sampled.Line$Info[] getTargetLineInfo(javax.sound.sampled.Line$Info)
+    {
+        com.sun.media.sound.AbstractMixer r1;
+        java.util.Vector $r0;
+        javax.sound.sampled.Line$Info $r5, r6, $r8, $r10;
+        int $i0, $i1, $i2, i3, i4;
+        boolean $z0;
+        javax.sound.sampled.Line$Info[] $r2, r3, $r7, $r9;
+        java.lang.Object $r4;
+
+        r1 := @this: com.sun.media.sound.AbstractMixer;
+
+        r6 := @parameter0: javax.sound.sampled.Line$Info;
+
+        $r0 = new java.util.Vector;
+
+        specialinvoke $r0.<java.util.Vector: void <init>()>();
+
+        i3 = 0;
+
+     label1:
+        $r2 = r1.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] targetLineInfo>;
+
+        $i0 = lengthof $r2;
+
+        if i3 >= $i0 goto label3;
+
+        $r7 = r1.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] targetLineInfo>;
+
+        $r8 = $r7[i3];
+
+        $z0 = virtualinvoke r6.<javax.sound.sampled.Line$Info: boolean matches(javax.sound.sampled.Line$Info)>($r8);
+
+        if $z0 == 0 goto label2;
+
+        $r9 = r1.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] targetLineInfo>;
+
+        $r10 = $r9[i3];
+
+        virtualinvoke $r0.<java.util.Vector: void addElement(java.lang.Object)>($r10);
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        $i1 = virtualinvoke $r0.<java.util.Vector: int size()>();
+
+        r3 = newarray (javax.sound.sampled.Line$Info)[$i1];
+
+        i4 = 0;
+
+     label4:
+        $i2 = lengthof r3;
+
+        if i4 >= $i2 goto label5;
+
+        $r4 = virtualinvoke $r0.<java.util.Vector: java.lang.Object elementAt(int)>(i4);
+
+        $r5 = (javax.sound.sampled.Line$Info) $r4;
+
+        r3[i4] = $r5;
+
+        i4 = i4 + 1;
+
+        goto label4;
+
+     label5:
+        return r3;
+    }
+
+    public final boolean isLineSupported(javax.sound.sampled.Line$Info)
+    {
+        javax.sound.sampled.Line$Info[] $r1, $r2, $r4, $r6;
+        com.sun.media.sound.AbstractMixer r0;
+        javax.sound.sampled.Line$Info r3, $r5, $r7;
+        int $i0, $i1, i2, i3;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.media.sound.AbstractMixer;
+
+        r3 := @parameter0: javax.sound.sampled.Line$Info;
+
+        i2 = 0;
+
+     label1:
+        $r1 = r0.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] sourceLineInfo>;
+
+        $i0 = lengthof $r1;
+
+        if i2 >= $i0 goto label3;
+
+        $r6 = r0.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] sourceLineInfo>;
+
+        $r7 = $r6[i2];
+
+        $z1 = virtualinvoke r3.<javax.sound.sampled.Line$Info: boolean matches(javax.sound.sampled.Line$Info)>($r7);
+
+        if $z1 == 0 goto label2;
+
+        return 1;
+
+     label2:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label3:
+        i3 = 0;
+
+     label4:
+        $r2 = r0.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] targetLineInfo>;
+
+        $i1 = lengthof $r2;
+
+        if i3 >= $i1 goto label6;
+
+        $r4 = r0.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] targetLineInfo>;
+
+        $r5 = $r4[i3];
+
+        $z0 = virtualinvoke r3.<javax.sound.sampled.Line$Info: boolean matches(javax.sound.sampled.Line$Info)>($r5);
+
+        if $z0 == 0 goto label5;
+
+        return 1;
+
+     label5:
+        i3 = i3 + 1;
+
+        goto label4;
+
+     label6:
+        return 0;
+    }
+
+    public abstract javax.sound.sampled.Line getLine(javax.sound.sampled.Line$Info) throws javax.sound.sampled.LineUnavailableException;
+
+    public abstract int getMaxLines(javax.sound.sampled.Line$Info);
+
+    protected abstract void implOpen() throws javax.sound.sampled.LineUnavailableException;
+
+    protected abstract void implStart();
+
+    protected abstract void implStop();
+
+    protected abstract void implClose();
+
+    public final javax.sound.sampled.Line[] getSourceLines()
+    {
+        java.lang.Throwable $r7;
+        com.sun.media.sound.AbstractMixer r0;
+        javax.sound.sampled.Line[] r3;
+        java.util.Vector $r1, $r2, $r4;
+        int $i0, $i1, i2;
+        java.lang.Object $r5;
+        javax.sound.sampled.Line $r6;
+
+        r0 := @this: com.sun.media.sound.AbstractMixer;
+
+        $r1 = r0.<com.sun.media.sound.AbstractMixer: java.util.Vector sourceLines>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<com.sun.media.sound.AbstractMixer: java.util.Vector sourceLines>;
+
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        r3 = newarray (javax.sound.sampled.Line)[$i0];
+
+        i2 = 0;
+
+     label2:
+        $i1 = lengthof r3;
+
+        if i2 >= $i1 goto label3;
+
+        $r4 = r0.<com.sun.media.sound.AbstractMixer: java.util.Vector sourceLines>;
+
+        $r5 = virtualinvoke $r4.<java.util.Vector: java.lang.Object elementAt(int)>(i2);
+
+        $r6 = (javax.sound.sampled.Line) $r5;
+
+        r3[i2] = $r6;
+
+        i2 = i2 + 1;
+
+        goto label2;
+
+     label3:
+        exitmonitor $r1;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r7 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r7;
+
+     label7:
+        return r3;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public final javax.sound.sampled.Line[] getTargetLines()
+    {
+        java.lang.Throwable $r7;
+        com.sun.media.sound.AbstractMixer r0;
+        javax.sound.sampled.Line[] r3;
+        java.util.Vector $r1, $r2, $r4;
+        int $i0, $i1, i2;
+        java.lang.Object $r5;
+        javax.sound.sampled.Line $r6;
+
+        r0 := @this: com.sun.media.sound.AbstractMixer;
+
+        $r1 = r0.<com.sun.media.sound.AbstractMixer: java.util.Vector targetLines>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<com.sun.media.sound.AbstractMixer: java.util.Vector targetLines>;
+
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        r3 = newarray (javax.sound.sampled.Line)[$i0];
+
+        i2 = 0;
+
+     label2:
+        $i1 = lengthof r3;
+
+        if i2 >= $i1 goto label3;
+
+        $r4 = r0.<com.sun.media.sound.AbstractMixer: java.util.Vector targetLines>;
+
+        $r5 = virtualinvoke $r4.<java.util.Vector: java.lang.Object elementAt(int)>(i2);
+
+        $r6 = (javax.sound.sampled.Line) $r5;
+
+        r3[i2] = $r6;
+
+        i2 = i2 + 1;
+
+        goto label2;
+
+     label3:
+        exitmonitor $r1;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r7 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r7;
+
+     label7:
+        return r3;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public final void synchronize(javax.sound.sampled.Line[], boolean)
+    {
+        javax.sound.sampled.Line[] r2;
+        com.sun.media.sound.AbstractMixer r1;
+        java.lang.IllegalArgumentException $r0;
+        boolean z0;
+
+        r1 := @this: com.sun.media.sound.AbstractMixer;
+
+        r2 := @parameter0: javax.sound.sampled.Line[];
+
+        z0 := @parameter1: boolean;
+
+        $r0 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r0.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Synchronization not supported by this mixer.");
+
+        throw $r0;
+    }
+
+    public final void unsynchronize(javax.sound.sampled.Line[])
+    {
+        javax.sound.sampled.Line[] r2;
+        com.sun.media.sound.AbstractMixer r1;
+        java.lang.IllegalArgumentException $r0;
+
+        r1 := @this: com.sun.media.sound.AbstractMixer;
+
+        r2 := @parameter0: javax.sound.sampled.Line[];
+
+        $r0 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r0.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Synchronization not supported by this mixer.");
+
+        throw $r0;
+    }
+
+    public final boolean isSynchronizationSupported(javax.sound.sampled.Line[], boolean)
+    {
+        javax.sound.sampled.Line[] r1;
+        com.sun.media.sound.AbstractMixer r0;
+        boolean z0;
+
+        r0 := @this: com.sun.media.sound.AbstractMixer;
+
+        r1 := @parameter0: javax.sound.sampled.Line[];
+
+        z0 := @parameter1: boolean;
+
+        return 0;
+    }
+
+    public final synchronized void open() throws javax.sound.sampled.LineUnavailableException
+    {
+        com.sun.media.sound.AbstractMixer r0;
+
+        r0 := @this: com.sun.media.sound.AbstractMixer;
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractMixer: void open(boolean)>(1);
+
+        return;
+    }
+
+    final synchronized void open(boolean) throws javax.sound.sampled.LineUnavailableException
+    {
+        com.sun.media.sound.AbstractMixer r0;
+        boolean $z0, z1;
+
+        r0 := @this: com.sun.media.sound.AbstractMixer;
+
+        z1 := @parameter0: boolean;
+
+        $z0 = virtualinvoke r0.<com.sun.media.sound.AbstractMixer: boolean isOpen()>();
+
+        if $z0 != 0 goto label1;
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractMixer: void implOpen()>();
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractMixer: void setOpen(boolean)>(1);
+
+        if z1 == 0 goto label1;
+
+        r0.<com.sun.media.sound.AbstractMixer: boolean manuallyOpened> = 1;
+
+     label1:
+        return;
+    }
+
+    final synchronized void open(javax.sound.sampled.Line) throws javax.sound.sampled.LineUnavailableException
+    {
+        com.sun.media.sound.AbstractMixer r0;
+        java.util.Vector $r4, $r5, $r6, $r7;
+        javax.sound.sampled.Line$Info $r2, $r3;
+        javax.sound.sampled.Line r1;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        r0 := @this: com.sun.media.sound.AbstractMixer;
+
+        r1 := @parameter0: javax.sound.sampled.Line;
+
+        $z0 = virtualinvoke r0.<java.lang.Object: boolean equals(java.lang.Object)>(r1);
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r2 = interfaceinvoke r1.<javax.sound.sampled.Line: javax.sound.sampled.Line$Info getLineInfo()>();
+
+        $z1 = virtualinvoke r0.<com.sun.media.sound.AbstractMixer: boolean isSourceLine(javax.sound.sampled.Line$Info)>($r2);
+
+        if $z1 == 0 goto label2;
+
+        $r6 = r0.<com.sun.media.sound.AbstractMixer: java.util.Vector sourceLines>;
+
+        $z4 = virtualinvoke $r6.<java.util.Vector: boolean contains(java.lang.Object)>(r1);
+
+        if $z4 != 0 goto label3;
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractMixer: void open(boolean)>(0);
+
+        $r7 = r0.<com.sun.media.sound.AbstractMixer: java.util.Vector sourceLines>;
+
+        virtualinvoke $r7.<java.util.Vector: void addElement(java.lang.Object)>(r1);
+
+        goto label3;
+
+     label2:
+        $r3 = interfaceinvoke r1.<javax.sound.sampled.Line: javax.sound.sampled.Line$Info getLineInfo()>();
+
+        $z2 = virtualinvoke r0.<com.sun.media.sound.AbstractMixer: boolean isTargetLine(javax.sound.sampled.Line$Info)>($r3);
+
+        if $z2 == 0 goto label3;
+
+        $r4 = r0.<com.sun.media.sound.AbstractMixer: java.util.Vector targetLines>;
+
+        $z3 = virtualinvoke $r4.<java.util.Vector: boolean contains(java.lang.Object)>(r1);
+
+        if $z3 != 0 goto label3;
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractMixer: void open(boolean)>(0);
+
+        $r5 = r0.<com.sun.media.sound.AbstractMixer: java.util.Vector targetLines>;
+
+        virtualinvoke $r5.<java.util.Vector: void addElement(java.lang.Object)>(r1);
+
+     label3:
+        return;
+    }
+
+    final synchronized void close(javax.sound.sampled.Line)
+    {
+        com.sun.media.sound.AbstractMixer r0;
+        java.util.Vector $r2, $r3, $r4, $r5;
+        javax.sound.sampled.Line r1;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: com.sun.media.sound.AbstractMixer;
+
+        r1 := @parameter0: javax.sound.sampled.Line;
+
+        $z0 = virtualinvoke r0.<java.lang.Object: boolean equals(java.lang.Object)>(r1);
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r2 = r0.<com.sun.media.sound.AbstractMixer: java.util.Vector sourceLines>;
+
+        virtualinvoke $r2.<java.util.Vector: boolean removeElement(java.lang.Object)>(r1);
+
+        $r3 = r0.<com.sun.media.sound.AbstractMixer: java.util.Vector targetLines>;
+
+        virtualinvoke $r3.<java.util.Vector: boolean removeElement(java.lang.Object)>(r1);
+
+        $r4 = r0.<com.sun.media.sound.AbstractMixer: java.util.Vector sourceLines>;
+
+        $z1 = virtualinvoke $r4.<java.util.Vector: boolean isEmpty()>();
+
+        if $z1 == 0 goto label2;
+
+        $r5 = r0.<com.sun.media.sound.AbstractMixer: java.util.Vector targetLines>;
+
+        $z2 = virtualinvoke $r5.<java.util.Vector: boolean isEmpty()>();
+
+        if $z2 == 0 goto label2;
+
+        $z3 = r0.<com.sun.media.sound.AbstractMixer: boolean manuallyOpened>;
+
+        if $z3 != 0 goto label2;
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractMixer: void close()>();
+
+     label2:
+        return;
+    }
+
+    public final synchronized void close()
+    {
+        com.sun.media.sound.AbstractMixer r0;
+        javax.sound.sampled.Line[] $r1, $r2;
+        int $i0, $i1, i2, i3;
+        javax.sound.sampled.Line $r3, $r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.AbstractMixer;
+
+        $z0 = virtualinvoke r0.<com.sun.media.sound.AbstractMixer: boolean isOpen()>();
+
+        if $z0 == 0 goto label5;
+
+        $r1 = virtualinvoke r0.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line[] getSourceLines()>();
+
+        i2 = 0;
+
+     label1:
+        $i0 = lengthof $r1;
+
+        if i2 >= $i0 goto label2;
+
+        $r4 = $r1[i2];
+
+        interfaceinvoke $r4.<javax.sound.sampled.Line: void close()>();
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        $r2 = virtualinvoke r0.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line[] getTargetLines()>();
+
+        i3 = 0;
+
+     label3:
+        $i1 = lengthof $r2;
+
+        if i3 >= $i1 goto label4;
+
+        $r3 = $r2[i3];
+
+        interfaceinvoke $r3.<javax.sound.sampled.Line: void close()>();
+
+        i3 = i3 + 1;
+
+        goto label3;
+
+     label4:
+        virtualinvoke r0.<com.sun.media.sound.AbstractMixer: void implClose()>();
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractMixer: void setOpen(boolean)>(0);
+
+     label5:
+        r0.<com.sun.media.sound.AbstractMixer: boolean manuallyOpened> = 0;
+
+        return;
+    }
+
+    final synchronized void start(javax.sound.sampled.Line)
+    {
+        com.sun.media.sound.AbstractMixer r0;
+        javax.sound.sampled.Line r1;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.media.sound.AbstractMixer;
+
+        r1 := @parameter0: javax.sound.sampled.Line;
+
+        $z0 = virtualinvoke r0.<java.lang.Object: boolean equals(java.lang.Object)>(r1);
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $z1 = r0.<com.sun.media.sound.AbstractMixer: boolean started>;
+
+        if $z1 != 0 goto label2;
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractMixer: void implStart()>();
+
+        r0.<com.sun.media.sound.AbstractMixer: boolean started> = 1;
+
+     label2:
+        return;
+    }
+
+    final synchronized void stop(javax.sound.sampled.Line)
+    {
+        com.sun.media.sound.AbstractMixer r0;
+        com.sun.media.sound.AbstractDataLine r9, r12;
+        java.util.Vector $r2, r4, $r5, r13;
+        int $i0, $i1, i2, i3;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.lang.Object $r3, $r6, $r7, $r8, $r10, $r11;
+        javax.sound.sampled.Line r1;
+
+        r0 := @this: com.sun.media.sound.AbstractMixer;
+
+        r1 := @parameter0: javax.sound.sampled.Line;
+
+        $z0 = virtualinvoke r0.<java.lang.Object: boolean equals(java.lang.Object)>(r1);
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r2 = r0.<com.sun.media.sound.AbstractMixer: java.util.Vector sourceLines>;
+
+        $r3 = virtualinvoke $r2.<java.util.Vector: java.lang.Object clone()>();
+
+        r4 = (java.util.Vector) $r3;
+
+        i2 = 0;
+
+     label2:
+        $i0 = virtualinvoke r4.<java.util.Vector: int size()>();
+
+        if i2 >= $i0 goto label4;
+
+        $r10 = virtualinvoke r4.<java.util.Vector: java.lang.Object elementAt(int)>(i2);
+
+        $z4 = $r10 instanceof com.sun.media.sound.AbstractDataLine;
+
+        if $z4 == 0 goto label3;
+
+        $r11 = virtualinvoke r4.<java.util.Vector: java.lang.Object elementAt(int)>(i2);
+
+        r12 = (com.sun.media.sound.AbstractDataLine) $r11;
+
+        $z5 = virtualinvoke r12.<com.sun.media.sound.AbstractDataLine: boolean isStartedRunning()>();
+
+        if $z5 == 0 goto label3;
+
+        $z6 = virtualinvoke r12.<java.lang.Object: boolean equals(java.lang.Object)>(r1);
+
+        if $z6 != 0 goto label3;
+
+        return;
+
+     label3:
+        i2 = i2 + 1;
+
+        goto label2;
+
+     label4:
+        $r5 = r0.<com.sun.media.sound.AbstractMixer: java.util.Vector targetLines>;
+
+        $r6 = virtualinvoke $r5.<java.util.Vector: java.lang.Object clone()>();
+
+        r13 = (java.util.Vector) $r6;
+
+        i3 = 0;
+
+     label5:
+        $i1 = virtualinvoke r13.<java.util.Vector: int size()>();
+
+        if i3 >= $i1 goto label7;
+
+        $r7 = virtualinvoke r13.<java.util.Vector: java.lang.Object elementAt(int)>(i3);
+
+        $z1 = $r7 instanceof com.sun.media.sound.AbstractDataLine;
+
+        if $z1 == 0 goto label6;
+
+        $r8 = virtualinvoke r13.<java.util.Vector: java.lang.Object elementAt(int)>(i3);
+
+        r9 = (com.sun.media.sound.AbstractDataLine) $r8;
+
+        $z2 = virtualinvoke r9.<com.sun.media.sound.AbstractDataLine: boolean isStartedRunning()>();
+
+        if $z2 == 0 goto label6;
+
+        $z3 = virtualinvoke r9.<java.lang.Object: boolean equals(java.lang.Object)>(r1);
+
+        if $z3 != 0 goto label6;
+
+        return;
+
+     label6:
+        i3 = i3 + 1;
+
+        goto label5;
+
+     label7:
+        r0.<com.sun.media.sound.AbstractMixer: boolean started> = 0;
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractMixer: void implStop()>();
+
+        return;
+    }
+
+    final boolean isSourceLine(javax.sound.sampled.Line$Info)
+    {
+        javax.sound.sampled.Line$Info[] $r1, $r3;
+        com.sun.media.sound.AbstractMixer r0;
+        javax.sound.sampled.Line$Info r2, $r4;
+        int $i0, i1;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.AbstractMixer;
+
+        r2 := @parameter0: javax.sound.sampled.Line$Info;
+
+        i1 = 0;
+
+     label1:
+        $r1 = r0.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] sourceLineInfo>;
+
+        $i0 = lengthof $r1;
+
+        if i1 >= $i0 goto label3;
+
+        $r3 = r0.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] sourceLineInfo>;
+
+        $r4 = $r3[i1];
+
+        $z0 = virtualinvoke r2.<javax.sound.sampled.Line$Info: boolean matches(javax.sound.sampled.Line$Info)>($r4);
+
+        if $z0 == 0 goto label2;
+
+        return 1;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    final boolean isTargetLine(javax.sound.sampled.Line$Info)
+    {
+        javax.sound.sampled.Line$Info[] $r1, $r3;
+        com.sun.media.sound.AbstractMixer r0;
+        javax.sound.sampled.Line$Info r2, $r4;
+        int $i0, i1;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.AbstractMixer;
+
+        r2 := @parameter0: javax.sound.sampled.Line$Info;
+
+        i1 = 0;
+
+     label1:
+        $r1 = r0.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] targetLineInfo>;
+
+        $i0 = lengthof $r1;
+
+        if i1 >= $i0 goto label3;
+
+        $r3 = r0.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] targetLineInfo>;
+
+        $r4 = $r3[i1];
+
+        $z0 = virtualinvoke r2.<javax.sound.sampled.Line$Info: boolean matches(javax.sound.sampled.Line$Info)>($r4);
+
+        if $z0 == 0 goto label2;
+
+        return 1;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    final javax.sound.sampled.Line$Info getLineInfo(javax.sound.sampled.Line$Info)
+    {
+        com.sun.media.sound.AbstractMixer r1;
+        javax.sound.sampled.Line$Info r0, $r5, $r7, $r9, $r11;
+        int $i0, $i1, i2, i3;
+        boolean $z0, $z1;
+        javax.sound.sampled.Line$Info[] $r2, $r3, $r4, $r6, $r8, $r10;
+
+        r1 := @this: com.sun.media.sound.AbstractMixer;
+
+        r0 := @parameter0: javax.sound.sampled.Line$Info;
+
+        if r0 != null goto label1;
+
+        return null;
+
+     label1:
+        i2 = 0;
+
+     label2:
+        $r2 = r1.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] sourceLineInfo>;
+
+        $i0 = lengthof $r2;
+
+        if i2 >= $i0 goto label4;
+
+        $r8 = r1.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] sourceLineInfo>;
+
+        $r9 = $r8[i2];
+
+        $z1 = virtualinvoke r0.<javax.sound.sampled.Line$Info: boolean matches(javax.sound.sampled.Line$Info)>($r9);
+
+        if $z1 == 0 goto label3;
+
+        $r10 = r1.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] sourceLineInfo>;
+
+        $r11 = $r10[i2];
+
+        return $r11;
+
+     label3:
+        i2 = i2 + 1;
+
+        goto label2;
+
+     label4:
+        i3 = 0;
+
+     label5:
+        $r3 = r1.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] targetLineInfo>;
+
+        $i1 = lengthof $r3;
+
+        if i3 >= $i1 goto label7;
+
+        $r4 = r1.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] targetLineInfo>;
+
+        $r5 = $r4[i3];
+
+        $z0 = virtualinvoke r0.<javax.sound.sampled.Line$Info: boolean matches(javax.sound.sampled.Line$Info)>($r5);
+
+        if $z0 == 0 goto label6;
+
+        $r6 = r1.<com.sun.media.sound.AbstractMixer: javax.sound.sampled.Line$Info[] targetLineInfo>;
+
+        $r7 = $r6[i3];
+
+        return $r7;
+
+     label6:
+        i3 = i3 + 1;
+
+        goto label5;
+
+     label7:
+        return null;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.media.sound.AbstractMixer: int ALAW> = 2;
+
+        <com.sun.media.sound.AbstractMixer: int ULAW> = 1;
+
+        <com.sun.media.sound.AbstractMixer: int PCM> = 0;
+
+        return;
+    }
+}

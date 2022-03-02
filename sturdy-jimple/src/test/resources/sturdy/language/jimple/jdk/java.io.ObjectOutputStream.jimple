@@ -1,0 +1,2993 @@
+public class java.io.ObjectOutputStream extends java.io.OutputStream implements java.io.ObjectOutput, java.io.ObjectStreamConstants
+{
+    private final java.io.ObjectOutputStream$BlockDataOutputStream bout;
+    private final java.io.ObjectOutputStream$HandleTable handles;
+    private final java.io.ObjectOutputStream$ReplaceTable subs;
+    private int protocol;
+    private int depth;
+    private byte[] primVals;
+    private final boolean enableOverride;
+    private boolean enableReplace;
+    private java.io.SerialCallbackContext curContext;
+    private java.io.ObjectOutputStream$PutFieldImpl curPut;
+    private final java.io.ObjectOutputStream$DebugTraceInfoStack debugInfoStack;
+    private static final boolean extendedDebugInfo;
+
+    public void <init>(java.io.OutputStream) throws java.io.IOException
+    {
+        java.io.OutputStream r2;
+        java.io.ObjectOutputStream$ReplaceTable $r4;
+        java.io.ObjectOutputStream$DebugTraceInfoStack $r6;
+        java.io.ObjectOutputStream$HandleTable $r3;
+        java.io.ObjectOutputStream$BlockDataOutputStream $r1, $r5;
+        java.io.ObjectOutputStream r0;
+        boolean $z0;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        r2 := @parameter0: java.io.OutputStream;
+
+        specialinvoke r0.<java.io.OutputStream: void <init>()>();
+
+        r0.<java.io.ObjectOutputStream: int protocol> = 2;
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void verifySubclass()>();
+
+        $r1 = new java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        specialinvoke $r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void <init>(java.io.OutputStream)>(r2);
+
+        r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout> = $r1;
+
+        $r3 = new java.io.ObjectOutputStream$HandleTable;
+
+        specialinvoke $r3.<java.io.ObjectOutputStream$HandleTable: void <init>(int,float)>(10, 3.0F);
+
+        r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$HandleTable handles> = $r3;
+
+        $r4 = new java.io.ObjectOutputStream$ReplaceTable;
+
+        specialinvoke $r4.<java.io.ObjectOutputStream$ReplaceTable: void <init>(int,float)>(10, 3.0F);
+
+        r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$ReplaceTable subs> = $r4;
+
+        r0.<java.io.ObjectOutputStream: boolean enableOverride> = 0;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeStreamHeader()>();
+
+        $r5 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r5.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>(1);
+
+        $z0 = <java.io.ObjectOutputStream: boolean extendedDebugInfo>;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = new java.io.ObjectOutputStream$DebugTraceInfoStack;
+
+        specialinvoke $r6.<java.io.ObjectOutputStream$DebugTraceInfoStack: void <init>()>();
+
+        r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$DebugTraceInfoStack debugInfoStack> = $r6;
+
+        goto label2;
+
+     label1:
+        r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$DebugTraceInfoStack debugInfoStack> = null;
+
+     label2:
+        return;
+    }
+
+    protected void <init>() throws java.io.IOException, java.lang.SecurityException
+    {
+        java.io.SerializablePermission $r2;
+        java.io.ObjectOutputStream r0;
+        java.lang.SecurityManager $r1;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        specialinvoke r0.<java.io.OutputStream: void <init>()>();
+
+        r0.<java.io.ObjectOutputStream: int protocol> = 2;
+
+        $r1 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = <java.io.ObjectOutputStream: java.io.SerializablePermission SUBCLASS_IMPLEMENTATION_PERMISSION>;
+
+        virtualinvoke $r1.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r2);
+
+     label1:
+        r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout> = null;
+
+        r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$HandleTable handles> = null;
+
+        r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$ReplaceTable subs> = null;
+
+        r0.<java.io.ObjectOutputStream: boolean enableOverride> = 1;
+
+        r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$DebugTraceInfoStack debugInfoStack> = null;
+
+        return;
+    }
+
+    public void useProtocolVersion(int) throws java.io.IOException
+    {
+        java.lang.IllegalStateException $r7;
+        java.lang.IllegalArgumentException $r2;
+        java.io.ObjectOutputStream$HandleTable $r1;
+        int $i0, i1;
+        java.io.ObjectOutputStream r0;
+        java.lang.StringBuilder $r3, $r4, $r5;
+        java.lang.String $r6;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        i1 := @parameter0: int;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$HandleTable handles>;
+
+        $i0 = virtualinvoke $r1.<java.io.ObjectOutputStream$HandleTable: int size()>();
+
+        if $i0 == 0 goto label1;
+
+        $r7 = new java.lang.IllegalStateException;
+
+        specialinvoke $r7.<java.lang.IllegalStateException: void <init>(java.lang.String)>("stream non-empty");
+
+        throw $r7;
+
+     label1:
+        lookupswitch(i1)
+        {
+            case 1: goto label2;
+            case 2: goto label2;
+            default: goto label3;
+        };
+
+     label2:
+        r0.<java.io.ObjectOutputStream: int protocol> = i1;
+
+        goto label4;
+
+     label3:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unknown version: ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r6);
+
+        throw $r2;
+
+     label4:
+        return;
+    }
+
+    public final void writeObject(java.lang.Object) throws java.io.IOException
+    {
+        int $i0;
+        java.io.ObjectOutputStream r0;
+        java.lang.Object r1;
+        java.io.IOException $r2;
+        boolean $z0;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $z0 = r0.<java.io.ObjectOutputStream: boolean enableOverride>;
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeObjectOverride(java.lang.Object)>(r1);
+
+        return;
+
+     label1:
+        specialinvoke r0.<java.io.ObjectOutputStream: void writeObject0(java.lang.Object,boolean)>(r1, 0);
+
+     label2:
+        goto label5;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $i0 = r0.<java.io.ObjectOutputStream: int depth>;
+
+        if $i0 != 0 goto label4;
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void writeFatalException(java.io.IOException)>($r2);
+
+     label4:
+        throw $r2;
+
+     label5:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    protected void writeObjectOverride(java.lang.Object) throws java.io.IOException
+    {
+        java.io.ObjectOutputStream r0;
+        java.lang.Object r1;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        r1 := @parameter0: java.lang.Object;
+
+        return;
+    }
+
+    public void writeUnshared(java.lang.Object) throws java.io.IOException
+    {
+        int $i0;
+        java.io.ObjectOutputStream r0;
+        java.lang.Object r1;
+        java.io.IOException $r2;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        r1 := @parameter0: java.lang.Object;
+
+     label1:
+        specialinvoke r0.<java.io.ObjectOutputStream: void writeObject0(java.lang.Object,boolean)>(r1, 1);
+
+     label2:
+        goto label5;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $i0 = r0.<java.io.ObjectOutputStream: int depth>;
+
+        if $i0 != 0 goto label4;
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void writeFatalException(java.io.IOException)>($r2);
+
+     label4:
+        throw $r2;
+
+     label5:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public void defaultWriteObject() throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream $r4, $r5;
+        java.io.SerialCallbackContext r1;
+        java.io.ObjectOutputStream r0;
+        java.lang.Object $r2;
+        java.io.ObjectStreamClass $r3;
+        java.io.NotActiveException $r6;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        r1 = r0.<java.io.ObjectOutputStream: java.io.SerialCallbackContext curContext>;
+
+        if r1 != null goto label1;
+
+        $r6 = new java.io.NotActiveException;
+
+        specialinvoke $r6.<java.io.NotActiveException: void <init>(java.lang.String)>("not in call to writeObject");
+
+        throw $r6;
+
+     label1:
+        $r2 = virtualinvoke r1.<java.io.SerialCallbackContext: java.lang.Object getObj()>();
+
+        $r3 = virtualinvoke r1.<java.io.SerialCallbackContext: java.io.ObjectStreamClass getDesc()>();
+
+        $r4 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r4.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>(0);
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void defaultWriteFields(java.lang.Object,java.io.ObjectStreamClass)>($r2, $r3);
+
+        $r5 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r5.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>(1);
+
+        return;
+    }
+
+    public java.io.ObjectOutputStream$PutField putFields() throws java.io.IOException
+    {
+        java.io.SerialCallbackContext r3;
+        java.io.ObjectOutputStream r0;
+        java.io.ObjectStreamClass $r4;
+        java.io.ObjectOutputStream$PutFieldImpl $r1, $r2, $r5;
+        java.io.NotActiveException $r6;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$PutFieldImpl curPut>;
+
+        if $r1 != null goto label2;
+
+        r3 = r0.<java.io.ObjectOutputStream: java.io.SerialCallbackContext curContext>;
+
+        if r3 != null goto label1;
+
+        $r6 = new java.io.NotActiveException;
+
+        specialinvoke $r6.<java.io.NotActiveException: void <init>(java.lang.String)>("not in call to writeObject");
+
+        throw $r6;
+
+     label1:
+        virtualinvoke r3.<java.io.SerialCallbackContext: java.lang.Object getObj()>();
+
+        $r4 = virtualinvoke r3.<java.io.SerialCallbackContext: java.io.ObjectStreamClass getDesc()>();
+
+        $r5 = new java.io.ObjectOutputStream$PutFieldImpl;
+
+        specialinvoke $r5.<java.io.ObjectOutputStream$PutFieldImpl: void <init>(java.io.ObjectOutputStream,java.io.ObjectStreamClass)>(r0, $r4);
+
+        r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$PutFieldImpl curPut> = $r5;
+
+     label2:
+        $r2 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$PutFieldImpl curPut>;
+
+        return $r2;
+    }
+
+    public void writeFields() throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream $r2, $r4;
+        java.io.ObjectOutputStream r0;
+        java.io.ObjectOutputStream$PutFieldImpl $r1, $r3;
+        java.io.NotActiveException $r5;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$PutFieldImpl curPut>;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.io.NotActiveException;
+
+        specialinvoke $r5.<java.io.NotActiveException: void <init>(java.lang.String)>("no current PutField object");
+
+        throw $r5;
+
+     label1:
+        $r2 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r2.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>(0);
+
+        $r3 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$PutFieldImpl curPut>;
+
+        virtualinvoke $r3.<java.io.ObjectOutputStream$PutFieldImpl: void writeFields()>();
+
+        $r4 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r4.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>(1);
+
+        return;
+    }
+
+    public void reset() throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream $r1, $r2, $r3;
+        int $i0;
+        java.io.ObjectOutputStream r0;
+        java.io.IOException $r4;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        $i0 = r0.<java.io.ObjectOutputStream: int depth>;
+
+        if $i0 == 0 goto label1;
+
+        $r4 = new java.io.IOException;
+
+        specialinvoke $r4.<java.io.IOException: void <init>(java.lang.String)>("stream active");
+
+        throw $r4;
+
+     label1:
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>(0);
+
+        $r2 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r2.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeByte(int)>(121);
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void clear()>();
+
+        $r3 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r3.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>(1);
+
+        return;
+    }
+
+    protected void annotateClass(java.lang.Class) throws java.io.IOException
+    {
+        java.io.ObjectOutputStream r0;
+        java.lang.Class r1;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        r1 := @parameter0: java.lang.Class;
+
+        return;
+    }
+
+    protected void annotateProxyClass(java.lang.Class) throws java.io.IOException
+    {
+        java.io.ObjectOutputStream r0;
+        java.lang.Class r1;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        r1 := @parameter0: java.lang.Class;
+
+        return;
+    }
+
+    protected java.lang.Object replaceObject(java.lang.Object) throws java.io.IOException
+    {
+        java.lang.Object r0;
+        java.io.ObjectOutputStream r1;
+
+        r1 := @this: java.io.ObjectOutputStream;
+
+        r0 := @parameter0: java.lang.Object;
+
+        return r0;
+    }
+
+    protected boolean enableReplaceObject(boolean) throws java.lang.SecurityException
+    {
+        java.io.SerializablePermission $r2;
+        java.io.ObjectOutputStream r0;
+        java.lang.SecurityManager $r1;
+        boolean z0, $z1, $z2, $z3;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        z0 := @parameter0: boolean;
+
+        $z1 = r0.<java.io.ObjectOutputStream: boolean enableReplace>;
+
+        if z0 != $z1 goto label1;
+
+        return z0;
+
+     label1:
+        if z0 == 0 goto label2;
+
+        $r1 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r1 == null goto label2;
+
+        $r2 = <java.io.ObjectOutputStream: java.io.SerializablePermission SUBSTITUTION_PERMISSION>;
+
+        virtualinvoke $r1.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r2);
+
+     label2:
+        r0.<java.io.ObjectOutputStream: boolean enableReplace> = z0;
+
+        $z2 = r0.<java.io.ObjectOutputStream: boolean enableReplace>;
+
+        if $z2 != 0 goto label3;
+
+        $z3 = 1;
+
+        goto label4;
+
+     label3:
+        $z3 = 0;
+
+     label4:
+        return $z3;
+    }
+
+    protected void writeStreamHeader() throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream $r1, $r2;
+        int $i1;
+        java.io.ObjectOutputStream r0;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        $i1 = (int) -21267;
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeShort(int)>($i1);
+
+        $r2 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r2.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeShort(int)>(5);
+
+        return;
+    }
+
+    protected void writeClassDescriptor(java.io.ObjectStreamClass) throws java.io.IOException
+    {
+        java.io.ObjectStreamClass r0;
+        java.io.ObjectOutputStream r1;
+
+        r1 := @this: java.io.ObjectOutputStream;
+
+        r0 := @parameter0: java.io.ObjectStreamClass;
+
+        virtualinvoke r0.<java.io.ObjectStreamClass: void writeNonProxy(java.io.ObjectOutputStream)>(r1);
+
+        return;
+    }
+
+    public void write(int) throws java.io.IOException
+    {
+        int i0;
+        java.io.ObjectOutputStream$BlockDataOutputStream $r1;
+        java.io.ObjectOutputStream r0;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void write(int)>(i0);
+
+        return;
+    }
+
+    public void write(byte[]) throws java.io.IOException
+    {
+        byte[] r1;
+        java.io.ObjectOutputStream$BlockDataOutputStream $r2;
+        int $i0;
+        java.io.ObjectOutputStream r0;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        r1 := @parameter0: byte[];
+
+        $r2 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        $i0 = lengthof r1;
+
+        virtualinvoke $r2.<java.io.ObjectOutputStream$BlockDataOutputStream: void write(byte[],int,int,boolean)>(r1, 0, $i0, 0);
+
+        return;
+    }
+
+    public void write(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r0;
+        java.lang.IndexOutOfBoundsException $r4;
+        java.lang.NullPointerException $r3;
+        java.io.ObjectOutputStream$BlockDataOutputStream $r2;
+        int i0, i1, i2, $i3;
+        java.io.ObjectOutputStream r1;
+
+        r1 := @this: java.io.ObjectOutputStream;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        if r0 != null goto label1;
+
+        $r3 = new java.lang.NullPointerException;
+
+        specialinvoke $r3.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        i2 = i0 + i1;
+
+        if i0 < 0 goto label2;
+
+        if i1 < 0 goto label2;
+
+        $i3 = lengthof r0;
+
+        if i2 > $i3 goto label2;
+
+        if i2 >= 0 goto label3;
+
+     label2:
+        $r4 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r4.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r4;
+
+     label3:
+        $r2 = r1.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r2.<java.io.ObjectOutputStream$BlockDataOutputStream: void write(byte[],int,int,boolean)>(r0, i0, i1, 0);
+
+        return;
+    }
+
+    public void flush() throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream $r1;
+        java.io.ObjectOutputStream r0;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void flush()>();
+
+        return;
+    }
+
+    protected void drain() throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream $r1;
+        java.io.ObjectOutputStream r0;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void drain()>();
+
+        return;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream $r1;
+        java.io.ObjectOutputStream r0;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void flush()>();
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void clear()>();
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void close()>();
+
+        return;
+    }
+
+    public void writeBoolean(boolean) throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream $r1;
+        java.io.ObjectOutputStream r0;
+        boolean z0;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeBoolean(boolean)>(z0);
+
+        return;
+    }
+
+    public void writeByte(int) throws java.io.IOException
+    {
+        int i0;
+        java.io.ObjectOutputStream$BlockDataOutputStream $r1;
+        java.io.ObjectOutputStream r0;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeByte(int)>(i0);
+
+        return;
+    }
+
+    public void writeShort(int) throws java.io.IOException
+    {
+        int i0;
+        java.io.ObjectOutputStream$BlockDataOutputStream $r1;
+        java.io.ObjectOutputStream r0;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeShort(int)>(i0);
+
+        return;
+    }
+
+    public void writeChar(int) throws java.io.IOException
+    {
+        int i0;
+        java.io.ObjectOutputStream$BlockDataOutputStream $r1;
+        java.io.ObjectOutputStream r0;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeChar(int)>(i0);
+
+        return;
+    }
+
+    public void writeInt(int) throws java.io.IOException
+    {
+        int i0;
+        java.io.ObjectOutputStream$BlockDataOutputStream $r1;
+        java.io.ObjectOutputStream r0;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeInt(int)>(i0);
+
+        return;
+    }
+
+    public void writeLong(long) throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream $r1;
+        java.io.ObjectOutputStream r0;
+        long l0;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        l0 := @parameter0: long;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeLong(long)>(l0);
+
+        return;
+    }
+
+    public void writeFloat(float) throws java.io.IOException
+    {
+        float f0;
+        java.io.ObjectOutputStream$BlockDataOutputStream $r1;
+        java.io.ObjectOutputStream r0;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        f0 := @parameter0: float;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeFloat(float)>(f0);
+
+        return;
+    }
+
+    public void writeDouble(double) throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream $r1;
+        java.io.ObjectOutputStream r0;
+        double d0;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        d0 := @parameter0: double;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeDouble(double)>(d0);
+
+        return;
+    }
+
+    public void writeBytes(java.lang.String) throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream $r2;
+        java.io.ObjectOutputStream r0;
+        java.lang.String r1;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r2.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeBytes(java.lang.String)>(r1);
+
+        return;
+    }
+
+    public void writeChars(java.lang.String) throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream $r2;
+        java.io.ObjectOutputStream r0;
+        java.lang.String r1;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r2.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeChars(java.lang.String)>(r1);
+
+        return;
+    }
+
+    public void writeUTF(java.lang.String) throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream $r2;
+        java.io.ObjectOutputStream r0;
+        java.lang.String r1;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r2.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeUTF(java.lang.String)>(r1);
+
+        return;
+    }
+
+    int getProtocolVersion()
+    {
+        int $i0;
+        java.io.ObjectOutputStream r0;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        $i0 = r0.<java.io.ObjectOutputStream: int protocol>;
+
+        return $i0;
+    }
+
+    void writeTypeString(java.lang.String) throws java.io.IOException
+    {
+        int $i0, $i2;
+        java.io.ObjectOutputStream r1;
+        java.lang.String r0;
+        java.io.ObjectOutputStream$HandleTable $r2;
+
+        r1 := @this: java.io.ObjectOutputStream;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        specialinvoke r1.<java.io.ObjectOutputStream: void writeNull()>();
+
+        goto label3;
+
+     label1:
+        $r2 = r1.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$HandleTable handles>;
+
+        $i0 = virtualinvoke $r2.<java.io.ObjectOutputStream$HandleTable: int lookup(java.lang.Object)>(r0);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label2;
+
+        specialinvoke r1.<java.io.ObjectOutputStream: void writeHandle(int)>($i0);
+
+        goto label3;
+
+     label2:
+        specialinvoke r1.<java.io.ObjectOutputStream: void writeString(java.lang.String,boolean)>(r0, 0);
+
+     label3:
+        return;
+    }
+
+    private void verifySubclass()
+    {
+        java.lang.SecurityManager $r2;
+        java.lang.ref.ReferenceQueue $r4, $r6;
+        java.util.concurrent.ConcurrentMap $r3, $r7, $r11;
+        java.io.SerializablePermission $r9;
+        java.lang.Boolean $r10, r12;
+        java.io.ObjectOutputStream r0;
+        java.lang.Class $r1;
+        java.lang.Object $r8;
+        java.io.ObjectStreamClass$WeakClassKey $r5;
+        boolean $z0, $z1;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        if $r1 != class "Ljava/io/ObjectOutputStream;" goto label1;
+
+        return;
+
+     label1:
+        $r2 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r2 != null goto label2;
+
+        return;
+
+     label2:
+        $r4 = <java.io.ObjectOutputStream$Caches: java.lang.ref.ReferenceQueue subclassAuditsQueue>;
+
+        $r3 = <java.io.ObjectOutputStream$Caches: java.util.concurrent.ConcurrentMap subclassAudits>;
+
+        staticinvoke <java.io.ObjectStreamClass: void processQueue(java.lang.ref.ReferenceQueue,java.util.concurrent.ConcurrentMap)>($r4, $r3);
+
+        $r5 = new java.io.ObjectStreamClass$WeakClassKey;
+
+        $r6 = <java.io.ObjectOutputStream$Caches: java.lang.ref.ReferenceQueue subclassAuditsQueue>;
+
+        specialinvoke $r5.<java.io.ObjectStreamClass$WeakClassKey: void <init>(java.lang.Class,java.lang.ref.ReferenceQueue)>($r1, $r6);
+
+        $r7 = <java.io.ObjectOutputStream$Caches: java.util.concurrent.ConcurrentMap subclassAudits>;
+
+        $r8 = interfaceinvoke $r7.<java.util.concurrent.ConcurrentMap: java.lang.Object get(java.lang.Object)>($r5);
+
+        r12 = (java.lang.Boolean) $r8;
+
+        if r12 != null goto label3;
+
+        $z1 = staticinvoke <java.io.ObjectOutputStream: boolean auditSubclass(java.lang.Class)>($r1);
+
+        $r10 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z1);
+
+        r12 = $r10;
+
+        $r11 = <java.io.ObjectOutputStream$Caches: java.util.concurrent.ConcurrentMap subclassAudits>;
+
+        interfaceinvoke $r11.<java.util.concurrent.ConcurrentMap: java.lang.Object putIfAbsent(java.lang.Object,java.lang.Object)>($r5, $r10);
+
+     label3:
+        $z0 = virtualinvoke r12.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z0 == 0 goto label4;
+
+        return;
+
+     label4:
+        $r9 = <java.io.ObjectOutputStream: java.io.SerializablePermission SUBCLASS_IMPLEMENTATION_PERMISSION>;
+
+        virtualinvoke $r2.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r9);
+
+        return;
+    }
+
+    private static boolean auditSubclass(java.lang.Class)
+    {
+        java.io.ObjectOutputStream$1 $r0;
+        java.lang.Boolean r3;
+        java.lang.Class r1;
+        java.lang.Object $r2;
+        boolean $z0;
+
+        r1 := @parameter0: java.lang.Class;
+
+        $r0 = new java.io.ObjectOutputStream$1;
+
+        specialinvoke $r0.<java.io.ObjectOutputStream$1: void <init>(java.lang.Class)>(r1);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r3 = (java.lang.Boolean) $r2;
+
+        $z0 = virtualinvoke r3.<java.lang.Boolean: boolean booleanValue()>();
+
+        return $z0;
+    }
+
+    private void clear()
+    {
+        java.io.ObjectOutputStream r0;
+        java.io.ObjectOutputStream$HandleTable $r2;
+        java.io.ObjectOutputStream$ReplaceTable $r1;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$ReplaceTable subs>;
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream$ReplaceTable: void clear()>();
+
+        $r2 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$HandleTable handles>;
+
+        virtualinvoke $r2.<java.io.ObjectOutputStream$HandleTable: void clear()>();
+
+        return;
+    }
+
+    private void writeObject0(java.lang.Object, boolean) throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$HandleTable $r23, $r34;
+        java.lang.StringBuilder $r10, $r11, $r14, $r44;
+        java.lang.Throwable $r37;
+        java.io.ObjectOutputStream r0;
+        java.lang.String $r6, $r9, $r13, $r15, $r17;
+        java.io.ObjectOutputStream$DebugTraceInfoStack $r12;
+        java.io.ObjectOutputStream$BlockDataOutputStream $r1, $r20, $r22, $r24, $r25, $r31, $r33, $r35, $r36, $r38, $r43;
+        java.lang.Enum $r16;
+        boolean $z0, z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12;
+        java.io.ObjectStreamClass $r4, $r19, $r30, r42;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i25, $i27;
+        java.io.ObjectOutputStream$ReplaceTable $r2, $r18;
+        java.io.NotSerializableException $r45, $r46;
+        java.lang.Object $r3, $r26, $r28, r39, r40;
+        java.lang.Class $r21, $r27, $r29, $r32, r41;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        r39 := @parameter0: java.lang.Object;
+
+        z1 := @parameter1: boolean;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        $z0 = virtualinvoke $r1.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>(0);
+
+        $i0 = r0.<java.io.ObjectOutputStream: int depth>;
+
+        $i1 = $i0 + 1;
+
+        r0.<java.io.ObjectOutputStream: int depth> = $i1;
+
+     label01:
+        $r2 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$ReplaceTable subs>;
+
+        $r3 = virtualinvoke $r2.<java.io.ObjectOutputStream$ReplaceTable: java.lang.Object lookup(java.lang.Object)>(r39);
+
+        r40 = $r3;
+
+        if $r3 != null goto label03;
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void writeNull()>();
+
+     label02:
+        $i18 = r0.<java.io.ObjectOutputStream: int depth>;
+
+        $i19 = $i18 - 1;
+
+        r0.<java.io.ObjectOutputStream: int depth> = $i19;
+
+        $r36 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r36.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>($z0);
+
+        return;
+
+     label03:
+        if z1 != 0 goto label05;
+
+        $r34 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$HandleTable handles>;
+
+        $i15 = virtualinvoke $r34.<java.io.ObjectOutputStream$HandleTable: int lookup(java.lang.Object)>($r3);
+
+        $i25 = (int) -1;
+
+        if $i15 == $i25 goto label05;
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void writeHandle(int)>($i15);
+
+     label04:
+        $i16 = r0.<java.io.ObjectOutputStream: int depth>;
+
+        $i17 = $i16 - 1;
+
+        r0.<java.io.ObjectOutputStream: int depth> = $i17;
+
+        $r35 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r35.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>($z0);
+
+        return;
+
+     label05:
+        $z2 = $r3 instanceof java.lang.Class;
+
+        if $z2 == 0 goto label07;
+
+        $r32 = (java.lang.Class) $r3;
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void writeClass(java.lang.Class,boolean)>($r32, z1);
+
+     label06:
+        $i13 = r0.<java.io.ObjectOutputStream: int depth>;
+
+        $i14 = $i13 - 1;
+
+        r0.<java.io.ObjectOutputStream: int depth> = $i14;
+
+        $r33 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r33.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>($z0);
+
+        return;
+
+     label07:
+        $z3 = $r3 instanceof java.io.ObjectStreamClass;
+
+        if $z3 == 0 goto label09;
+
+        $r30 = (java.io.ObjectStreamClass) $r3;
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void writeClassDesc(java.io.ObjectStreamClass,boolean)>($r30, z1);
+
+     label08:
+        $i11 = r0.<java.io.ObjectOutputStream: int depth>;
+
+        $i12 = $i11 - 1;
+
+        r0.<java.io.ObjectOutputStream: int depth> = $i12;
+
+        $r31 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r31.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>($z0);
+
+        return;
+
+     label09:
+        r41 = virtualinvoke $r3.<java.lang.Object: java.lang.Class getClass()>();
+
+     label10:
+        $r4 = staticinvoke <java.io.ObjectStreamClass: java.io.ObjectStreamClass lookup(java.lang.Class,boolean)>(r41, 1);
+
+        r42 = $r4;
+
+        $z4 = virtualinvoke $r4.<java.io.ObjectStreamClass: boolean hasWriteReplaceMethod()>();
+
+        if $z4 == 0 goto label12;
+
+        $r28 = virtualinvoke $r4.<java.io.ObjectStreamClass: java.lang.Object invokeWriteReplace(java.lang.Object)>(r40);
+
+        r40 = $r28;
+
+        if $r28 == null goto label12;
+
+        $r29 = virtualinvoke $r28.<java.lang.Object: java.lang.Class getClass()>();
+
+        if $r29 != r41 goto label11;
+
+        goto label12;
+
+     label11:
+        r41 = $r29;
+
+        goto label10;
+
+     label12:
+        $z12 = r0.<java.io.ObjectOutputStream: boolean enableReplace>;
+
+        if $z12 == 0 goto label14;
+
+        $r26 = virtualinvoke r0.<java.io.ObjectOutputStream: java.lang.Object replaceObject(java.lang.Object)>(r40);
+
+        if $r26 == r40 goto label13;
+
+        if $r26 == null goto label13;
+
+        $r27 = virtualinvoke $r26.<java.lang.Object: java.lang.Class getClass()>();
+
+        r41 = $r27;
+
+        r42 = staticinvoke <java.io.ObjectStreamClass: java.io.ObjectStreamClass lookup(java.lang.Class,boolean)>($r27, 1);
+
+     label13:
+        r40 = $r26;
+
+     label14:
+        if r40 == $r3 goto label22;
+
+        $r18 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$ReplaceTable subs>;
+
+        virtualinvoke $r18.<java.io.ObjectOutputStream$ReplaceTable: void assign(java.lang.Object,java.lang.Object)>($r3, r40);
+
+        if r40 != null goto label16;
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void writeNull()>();
+
+     label15:
+        $i9 = r0.<java.io.ObjectOutputStream: int depth>;
+
+        $i10 = $i9 - 1;
+
+        r0.<java.io.ObjectOutputStream: int depth> = $i10;
+
+        $r25 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r25.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>($z0);
+
+        return;
+
+     label16:
+        if z1 != 0 goto label18;
+
+        $r23 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$HandleTable handles>;
+
+        $i6 = virtualinvoke $r23.<java.io.ObjectOutputStream$HandleTable: int lookup(java.lang.Object)>(r40);
+
+        $i27 = (int) -1;
+
+        if $i6 == $i27 goto label18;
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void writeHandle(int)>($i6);
+
+     label17:
+        $i7 = r0.<java.io.ObjectOutputStream: int depth>;
+
+        $i8 = $i7 - 1;
+
+        r0.<java.io.ObjectOutputStream: int depth> = $i8;
+
+        $r24 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r24.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>($z0);
+
+        return;
+
+     label18:
+        $z10 = r40 instanceof java.lang.Class;
+
+        if $z10 == 0 goto label20;
+
+        $r21 = (java.lang.Class) r40;
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void writeClass(java.lang.Class,boolean)>($r21, z1);
+
+     label19:
+        $i4 = r0.<java.io.ObjectOutputStream: int depth>;
+
+        $i5 = $i4 - 1;
+
+        r0.<java.io.ObjectOutputStream: int depth> = $i5;
+
+        $r22 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r22.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>($z0);
+
+        return;
+
+     label20:
+        $z11 = r40 instanceof java.io.ObjectStreamClass;
+
+        if $z11 == 0 goto label22;
+
+        $r19 = (java.io.ObjectStreamClass) r40;
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void writeClassDesc(java.io.ObjectStreamClass,boolean)>($r19, z1);
+
+     label21:
+        $i2 = r0.<java.io.ObjectOutputStream: int depth>;
+
+        $i3 = $i2 - 1;
+
+        r0.<java.io.ObjectOutputStream: int depth> = $i3;
+
+        $r20 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r20.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>($z0);
+
+        return;
+
+     label22:
+        $z5 = r40 instanceof java.lang.String;
+
+        if $z5 == 0 goto label23;
+
+        $r17 = (java.lang.String) r40;
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void writeString(java.lang.String,boolean)>($r17, z1);
+
+        goto label28;
+
+     label23:
+        $z6 = virtualinvoke r41.<java.lang.Class: boolean isArray()>();
+
+        if $z6 == 0 goto label24;
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void writeArray(java.lang.Object,java.io.ObjectStreamClass,boolean)>(r40, r42, z1);
+
+        goto label28;
+
+     label24:
+        $z7 = r40 instanceof java.lang.Enum;
+
+        if $z7 == 0 goto label25;
+
+        $r16 = (java.lang.Enum) r40;
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void writeEnum(java.lang.Enum,java.io.ObjectStreamClass,boolean)>($r16, r42, z1);
+
+        goto label28;
+
+     label25:
+        $z8 = r40 instanceof java.io.Serializable;
+
+        if $z8 == 0 goto label26;
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void writeOrdinaryObject(java.lang.Object,java.io.ObjectStreamClass,boolean)>(r40, r42, z1);
+
+        goto label28;
+
+     label26:
+        $z9 = <java.io.ObjectOutputStream: boolean extendedDebugInfo>;
+
+        if $z9 == 0 goto label27;
+
+        $r45 = new java.io.NotSerializableException;
+
+        $r44 = new java.lang.StringBuilder;
+
+        specialinvoke $r44.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke r41.<java.lang.Class: java.lang.String getName()>();
+
+        $r10 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r12 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$DebugTraceInfoStack debugInfoStack>;
+
+        $r13 = virtualinvoke $r12.<java.io.ObjectOutputStream$DebugTraceInfoStack: java.lang.String toString()>();
+
+        $r14 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r45.<java.io.NotSerializableException: void <init>(java.lang.String)>($r15);
+
+        throw $r45;
+
+     label27:
+        $r46 = new java.io.NotSerializableException;
+
+        $r6 = virtualinvoke r41.<java.lang.Class: java.lang.String getName()>();
+
+        specialinvoke $r46.<java.io.NotSerializableException: void <init>(java.lang.String)>($r6);
+
+        throw $r46;
+
+     label28:
+        $i22 = r0.<java.io.ObjectOutputStream: int depth>;
+
+        $i23 = $i22 - 1;
+
+        r0.<java.io.ObjectOutputStream: int depth> = $i23;
+
+        $r43 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r43.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>($z0);
+
+        goto label31;
+
+     label29:
+        $r37 := @caughtexception;
+
+     label30:
+        $i20 = r0.<java.io.ObjectOutputStream: int depth>;
+
+        $i21 = $i20 - 1;
+
+        r0.<java.io.ObjectOutputStream: int depth> = $i21;
+
+        $r38 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r38.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>($z0);
+
+        throw $r37;
+
+     label31:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label29;
+        catch java.lang.Throwable from label03 to label04 with label29;
+        catch java.lang.Throwable from label05 to label06 with label29;
+        catch java.lang.Throwable from label07 to label08 with label29;
+        catch java.lang.Throwable from label09 to label15 with label29;
+        catch java.lang.Throwable from label16 to label17 with label29;
+        catch java.lang.Throwable from label18 to label19 with label29;
+        catch java.lang.Throwable from label20 to label21 with label29;
+        catch java.lang.Throwable from label22 to label28 with label29;
+        catch java.lang.Throwable from label29 to label30 with label29;
+    }
+
+    private void writeNull() throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream $r1;
+        java.io.ObjectOutputStream r0;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeByte(int)>(112);
+
+        return;
+    }
+
+    private void writeHandle(int) throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream $r1, $r2;
+        int i0, $i1;
+        java.io.ObjectOutputStream r0;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeByte(int)>(113);
+
+        $r2 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        $i1 = 8257536 + i0;
+
+        virtualinvoke $r2.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeInt(int)>($i1);
+
+        return;
+    }
+
+    private void writeClass(java.lang.Class, boolean) throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream $r1;
+        java.io.ObjectOutputStream r0;
+        java.lang.Class r2, $r5;
+        java.io.ObjectStreamClass $r3;
+        java.io.ObjectOutputStream$HandleTable $r4;
+        boolean z0;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        r2 := @parameter0: java.lang.Class;
+
+        z0 := @parameter1: boolean;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeByte(int)>(118);
+
+        $r3 = staticinvoke <java.io.ObjectStreamClass: java.io.ObjectStreamClass lookup(java.lang.Class,boolean)>(r2, 1);
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void writeClassDesc(java.io.ObjectStreamClass,boolean)>($r3, 0);
+
+        $r4 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$HandleTable handles>;
+
+        if z0 == 0 goto label1;
+
+        $r5 = null;
+
+        goto label2;
+
+     label1:
+        $r5 = r2;
+
+     label2:
+        virtualinvoke $r4.<java.io.ObjectOutputStream$HandleTable: int assign(java.lang.Object)>($r5);
+
+        return;
+    }
+
+    private void writeClassDesc(java.io.ObjectStreamClass, boolean) throws java.io.IOException
+    {
+        int $i0, $i2;
+        java.io.ObjectStreamClass r0;
+        java.io.ObjectOutputStream r1;
+        java.io.ObjectOutputStream$HandleTable $r2;
+        boolean z0, $z1;
+
+        r1 := @this: java.io.ObjectOutputStream;
+
+        r0 := @parameter0: java.io.ObjectStreamClass;
+
+        z0 := @parameter1: boolean;
+
+        if r0 != null goto label1;
+
+        specialinvoke r1.<java.io.ObjectOutputStream: void writeNull()>();
+
+        goto label4;
+
+     label1:
+        if z0 != 0 goto label2;
+
+        $r2 = r1.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$HandleTable handles>;
+
+        $i0 = virtualinvoke $r2.<java.io.ObjectOutputStream$HandleTable: int lookup(java.lang.Object)>(r0);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label2;
+
+        specialinvoke r1.<java.io.ObjectOutputStream: void writeHandle(int)>($i0);
+
+        goto label4;
+
+     label2:
+        $z1 = virtualinvoke r0.<java.io.ObjectStreamClass: boolean isProxy()>();
+
+        if $z1 == 0 goto label3;
+
+        specialinvoke r1.<java.io.ObjectOutputStream: void writeProxyDesc(java.io.ObjectStreamClass,boolean)>(r0, z0);
+
+        goto label4;
+
+     label3:
+        specialinvoke r1.<java.io.ObjectOutputStream: void writeNonProxyDesc(java.io.ObjectStreamClass,boolean)>(r0, z0);
+
+     label4:
+        return;
+    }
+
+    private boolean isCustomSubclass()
+    {
+        java.io.ObjectOutputStream r0;
+        java.lang.Class $r1, $r3;
+        java.lang.ClassLoader $r2, $r4;
+        boolean $z0;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $r3 = class "Ljava/io/ObjectOutputStream;";
+
+        $r4 = virtualinvoke $r3.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        if $r2 == $r4 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private void writeProxyDesc(java.io.ObjectStreamClass, boolean) throws java.io.IOException
+    {
+        java.io.ObjectStreamClass r2, $r11, $r14;
+        java.io.ObjectOutputStream$HandleTable $r3;
+        int $i0, i1, $i2;
+        java.io.ObjectOutputStream r0;
+        java.lang.String $r10;
+        boolean z0, $z1;
+        java.lang.Class[] $r5;
+        java.io.ObjectOutputStream$BlockDataOutputStream $r1, $r6, $r7, $r9, $r12, $r13;
+        java.lang.Class $r4, $r8;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        r2 := @parameter0: java.io.ObjectStreamClass;
+
+        z0 := @parameter1: boolean;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeByte(int)>(125);
+
+        $r3 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$HandleTable handles>;
+
+        if z0 == 0 goto label1;
+
+        $r11 = null;
+
+        goto label2;
+
+     label1:
+        $r11 = r2;
+
+     label2:
+        virtualinvoke $r3.<java.io.ObjectOutputStream$HandleTable: int assign(java.lang.Object)>($r11);
+
+        $r4 = virtualinvoke r2.<java.io.ObjectStreamClass: java.lang.Class forClass()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.Class: java.lang.Class[] getInterfaces()>();
+
+        $r6 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        $i0 = lengthof $r5;
+
+        virtualinvoke $r6.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeInt(int)>($i0);
+
+        i1 = 0;
+
+     label3:
+        $i2 = lengthof $r5;
+
+        if i1 >= $i2 goto label4;
+
+        $r9 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        $r8 = $r5[i1];
+
+        $r10 = virtualinvoke $r8.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r9.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeUTF(java.lang.String)>($r10);
+
+        i1 = i1 + 1;
+
+        goto label3;
+
+     label4:
+        $r7 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r7.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>(1);
+
+        if $r4 == null goto label5;
+
+        $z1 = specialinvoke r0.<java.io.ObjectOutputStream: boolean isCustomSubclass()>();
+
+        if $z1 == 0 goto label5;
+
+        staticinvoke <sun.reflect.misc.ReflectUtil: void checkPackageAccess(java.lang.Class)>($r4);
+
+     label5:
+        virtualinvoke r0.<java.io.ObjectOutputStream: void annotateProxyClass(java.lang.Class)>($r4);
+
+        $r12 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r12.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>(0);
+
+        $r13 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r13.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeByte(int)>(120);
+
+        $r14 = virtualinvoke r2.<java.io.ObjectStreamClass: java.io.ObjectStreamClass getSuperDesc()>();
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void writeClassDesc(java.io.ObjectStreamClass,boolean)>($r14, 0);
+
+        return;
+    }
+
+    private void writeNonProxyDesc(java.io.ObjectStreamClass, boolean) throws java.io.IOException
+    {
+        java.io.ObjectStreamClass r2, $r6, $r9;
+        java.io.ObjectOutputStream$HandleTable $r3;
+        java.io.ObjectOutputStream$BlockDataOutputStream $r1, $r5, $r7, $r8;
+        int $i0;
+        java.io.ObjectOutputStream r0;
+        java.lang.Class $r4;
+        boolean z0, $z1;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        r2 := @parameter0: java.io.ObjectStreamClass;
+
+        z0 := @parameter1: boolean;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeByte(int)>(114);
+
+        $r3 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$HandleTable handles>;
+
+        if z0 == 0 goto label1;
+
+        $r6 = null;
+
+        goto label2;
+
+     label1:
+        $r6 = r2;
+
+     label2:
+        virtualinvoke $r3.<java.io.ObjectOutputStream$HandleTable: int assign(java.lang.Object)>($r6);
+
+        $i0 = r0.<java.io.ObjectOutputStream: int protocol>;
+
+        if $i0 != 1 goto label3;
+
+        virtualinvoke r2.<java.io.ObjectStreamClass: void writeNonProxy(java.io.ObjectOutputStream)>(r0);
+
+        goto label4;
+
+     label3:
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeClassDescriptor(java.io.ObjectStreamClass)>(r2);
+
+     label4:
+        $r4 = virtualinvoke r2.<java.io.ObjectStreamClass: java.lang.Class forClass()>();
+
+        $r5 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r5.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>(1);
+
+        if $r4 == null goto label5;
+
+        $z1 = specialinvoke r0.<java.io.ObjectOutputStream: boolean isCustomSubclass()>();
+
+        if $z1 == 0 goto label5;
+
+        staticinvoke <sun.reflect.misc.ReflectUtil: void checkPackageAccess(java.lang.Class)>($r4);
+
+     label5:
+        virtualinvoke r0.<java.io.ObjectOutputStream: void annotateClass(java.lang.Class)>($r4);
+
+        $r7 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r7.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>(0);
+
+        $r8 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r8.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeByte(int)>(120);
+
+        $r9 = virtualinvoke r2.<java.io.ObjectStreamClass: java.io.ObjectStreamClass getSuperDesc()>();
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void writeClassDesc(java.io.ObjectStreamClass,boolean)>($r9, 0);
+
+        return;
+    }
+
+    private void writeString(java.lang.String, boolean) throws java.io.IOException
+    {
+        long $l0;
+        java.io.ObjectOutputStream$HandleTable $r2;
+        java.io.ObjectOutputStream$BlockDataOutputStream $r3, $r4, $r5, $r6, $r7;
+        byte $b1;
+        int $i2;
+        java.io.ObjectOutputStream r0;
+        java.lang.String r1, $r8;
+        boolean z0;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        r1 := @parameter0: java.lang.String;
+
+        z0 := @parameter1: boolean;
+
+        $r2 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$HandleTable handles>;
+
+        if z0 == 0 goto label1;
+
+        $r8 = null;
+
+        goto label2;
+
+     label1:
+        $r8 = r1;
+
+     label2:
+        virtualinvoke $r2.<java.io.ObjectOutputStream$HandleTable: int assign(java.lang.Object)>($r8);
+
+        $r3 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        $l0 = virtualinvoke $r3.<java.io.ObjectOutputStream$BlockDataOutputStream: long getUTFLength(java.lang.String)>(r1);
+
+        $b1 = $l0 cmp 65535L;
+
+        $i2 = (int) $b1;
+
+        if $i2 > 0 goto label3;
+
+        $r6 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r6.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeByte(int)>(116);
+
+        $r7 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r7.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeUTF(java.lang.String,long)>(r1, $l0);
+
+        goto label4;
+
+     label3:
+        $r4 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r4.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeByte(int)>(124);
+
+        $r5 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r5.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeLongUTF(java.lang.String,long)>(r1, $l0);
+
+     label4:
+        return;
+    }
+
+    private void writeArray(java.lang.Object, java.io.ObjectStreamClass, boolean) throws java.io.IOException
+    {
+        byte[] $r55, r67;
+        java.io.ObjectOutputStream$HandleTable $r4;
+        java.lang.InternalError $r36;
+        java.lang.StringBuilder $r12, $r14, $r15, $r16, $r18, $r20, $r23, $r24, $r25, $r26;
+        java.lang.Throwable $r61, $r63;
+        java.lang.Object[] $r7, r74;
+        double[] $r46, r70;
+        float[] $r49, r69;
+        java.io.ObjectOutputStream r0;
+        java.lang.String $r17, $r22, $r27;
+        boolean[] $r37, r73;
+        java.io.ObjectOutputStream$DebugTraceInfoStack $r9, $r11, $r13, $r19, $r62, $r64;
+        java.io.ObjectOutputStream$BlockDataOutputStream $r1, $r8, $r38, $r39, $r41, $r42, $r44, $r45, $r47, $r48, $r50, $r51, $r53, $r54, $r56, $r57, $r59, $r60;
+        char[] $r40, r72;
+        int[] $r58, r66;
+        boolean z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        short[] $r43, r71;
+        java.io.ObjectStreamClass r2;
+        long[] $r52, r68;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, i17;
+        java.lang.Object r3, $r10, $r65;
+        java.lang.Class $r5, $r6, $r21, $r28, $r29, $r30, $r31, $r32, $r33, $r34, $r35;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        r3 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.io.ObjectStreamClass;
+
+        z0 := @parameter2: boolean;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeByte(int)>(117);
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void writeClassDesc(java.io.ObjectStreamClass,boolean)>(r2, 0);
+
+        $r4 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$HandleTable handles>;
+
+        if z0 == 0 goto label01;
+
+        $r65 = null;
+
+        goto label02;
+
+     label01:
+        $r65 = r3;
+
+     label02:
+        virtualinvoke $r4.<java.io.ObjectOutputStream$HandleTable: int assign(java.lang.Object)>($r65);
+
+        $r5 = virtualinvoke r2.<java.io.ObjectStreamClass: java.lang.Class forClass()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.Class: java.lang.Class getComponentType()>();
+
+        $z1 = virtualinvoke $r6.<java.lang.Class: boolean isPrimitive()>();
+
+        if $z1 == 0 goto label11;
+
+        $r28 = <java.lang.Integer: java.lang.Class TYPE>;
+
+        if $r6 != $r28 goto label03;
+
+        $r58 = (int[]) r3;
+
+        r66 = (int[]) $r58;
+
+        $r59 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        $i15 = lengthof r66;
+
+        virtualinvoke $r59.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeInt(int)>($i15);
+
+        $r60 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        $i16 = lengthof r66;
+
+        virtualinvoke $r60.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeInts(int[],int,int)>(r66, 0, $i16);
+
+        goto label24;
+
+     label03:
+        $r29 = <java.lang.Byte: java.lang.Class TYPE>;
+
+        if $r6 != $r29 goto label04;
+
+        $r55 = (byte[]) r3;
+
+        r67 = (byte[]) $r55;
+
+        $r56 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        $i13 = lengthof r67;
+
+        virtualinvoke $r56.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeInt(int)>($i13);
+
+        $r57 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        $i14 = lengthof r67;
+
+        virtualinvoke $r57.<java.io.ObjectOutputStream$BlockDataOutputStream: void write(byte[],int,int,boolean)>(r67, 0, $i14, 1);
+
+        goto label24;
+
+     label04:
+        $r30 = <java.lang.Long: java.lang.Class TYPE>;
+
+        if $r6 != $r30 goto label05;
+
+        $r52 = (long[]) r3;
+
+        r68 = (long[]) $r52;
+
+        $r53 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        $i11 = lengthof r68;
+
+        virtualinvoke $r53.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeInt(int)>($i11);
+
+        $r54 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        $i12 = lengthof r68;
+
+        virtualinvoke $r54.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeLongs(long[],int,int)>(r68, 0, $i12);
+
+        goto label24;
+
+     label05:
+        $r31 = <java.lang.Float: java.lang.Class TYPE>;
+
+        if $r6 != $r31 goto label06;
+
+        $r49 = (float[]) r3;
+
+        r69 = (float[]) $r49;
+
+        $r50 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        $i9 = lengthof r69;
+
+        virtualinvoke $r50.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeInt(int)>($i9);
+
+        $r51 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        $i10 = lengthof r69;
+
+        virtualinvoke $r51.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeFloats(float[],int,int)>(r69, 0, $i10);
+
+        goto label24;
+
+     label06:
+        $r32 = <java.lang.Double: java.lang.Class TYPE>;
+
+        if $r6 != $r32 goto label07;
+
+        $r46 = (double[]) r3;
+
+        r70 = (double[]) $r46;
+
+        $r47 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        $i7 = lengthof r70;
+
+        virtualinvoke $r47.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeInt(int)>($i7);
+
+        $r48 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        $i8 = lengthof r70;
+
+        virtualinvoke $r48.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeDoubles(double[],int,int)>(r70, 0, $i8);
+
+        goto label24;
+
+     label07:
+        $r33 = <java.lang.Short: java.lang.Class TYPE>;
+
+        if $r6 != $r33 goto label08;
+
+        $r43 = (short[]) r3;
+
+        r71 = (short[]) $r43;
+
+        $r44 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        $i5 = lengthof r71;
+
+        virtualinvoke $r44.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeInt(int)>($i5);
+
+        $r45 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        $i6 = lengthof r71;
+
+        virtualinvoke $r45.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeShorts(short[],int,int)>(r71, 0, $i6);
+
+        goto label24;
+
+     label08:
+        $r34 = <java.lang.Character: java.lang.Class TYPE>;
+
+        if $r6 != $r34 goto label09;
+
+        $r40 = (char[]) r3;
+
+        r72 = (char[]) $r40;
+
+        $r41 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        $i3 = lengthof r72;
+
+        virtualinvoke $r41.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeInt(int)>($i3);
+
+        $r42 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        $i4 = lengthof r72;
+
+        virtualinvoke $r42.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeChars(char[],int,int)>(r72, 0, $i4);
+
+        goto label24;
+
+     label09:
+        $r35 = <java.lang.Boolean: java.lang.Class TYPE>;
+
+        if $r6 != $r35 goto label10;
+
+        $r37 = (boolean[]) r3;
+
+        r73 = (boolean[]) $r37;
+
+        $r38 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        $i1 = lengthof r73;
+
+        virtualinvoke $r38.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeInt(int)>($i1);
+
+        $r39 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        $i2 = lengthof r73;
+
+        virtualinvoke $r39.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeBooleans(boolean[],int,int)>(r73, 0, $i2);
+
+        goto label24;
+
+     label10:
+        $r36 = new java.lang.InternalError;
+
+        specialinvoke $r36.<java.lang.InternalError: void <init>()>();
+
+        throw $r36;
+
+     label11:
+        $r7 = (java.lang.Object[]) r3;
+
+        r74 = (java.lang.Object[]) $r7;
+
+        i0 = lengthof r74;
+
+        $r8 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r8.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeInt(int)>(i0);
+
+        $z2 = <java.io.ObjectOutputStream: boolean extendedDebugInfo>;
+
+        if $z2 == 0 goto label12;
+
+        $r19 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$DebugTraceInfoStack debugInfoStack>;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("array (class \"");
+
+        $r21 = virtualinvoke r3.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r22 = virtualinvoke $r21.<java.lang.Class: java.lang.String getName()>();
+
+        $r23 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\", size: ");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r19.<java.io.ObjectOutputStream$DebugTraceInfoStack: void push(java.lang.String)>($r27);
+
+     label12:
+        i17 = 0;
+
+     label13:
+        if i17 >= i0 goto label20;
+
+        $z4 = <java.io.ObjectOutputStream: boolean extendedDebugInfo>;
+
+        if $z4 == 0 goto label14;
+
+        $r13 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$DebugTraceInfoStack debugInfoStack>;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("element of array (index: ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i17);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r13.<java.io.ObjectOutputStream$DebugTraceInfoStack: void push(java.lang.String)>($r17);
+
+     label14:
+        $r10 = r74[i17];
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void writeObject0(java.lang.Object,boolean)>($r10, 0);
+
+     label15:
+        $z5 = <java.io.ObjectOutputStream: boolean extendedDebugInfo>;
+
+        if $z5 == 0 goto label19;
+
+        $r11 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$DebugTraceInfoStack debugInfoStack>;
+
+        virtualinvoke $r11.<java.io.ObjectOutputStream$DebugTraceInfoStack: void pop()>();
+
+        goto label19;
+
+     label16:
+        $r63 := @caughtexception;
+
+     label17:
+        $z7 = <java.io.ObjectOutputStream: boolean extendedDebugInfo>;
+
+        if $z7 == 0 goto label18;
+
+        $r64 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$DebugTraceInfoStack debugInfoStack>;
+
+        virtualinvoke $r64.<java.io.ObjectOutputStream$DebugTraceInfoStack: void pop()>();
+
+     label18:
+        throw $r63;
+
+     label19:
+        i17 = i17 + 1;
+
+        goto label13;
+
+     label20:
+        $z3 = <java.io.ObjectOutputStream: boolean extendedDebugInfo>;
+
+        if $z3 == 0 goto label24;
+
+        $r9 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$DebugTraceInfoStack debugInfoStack>;
+
+        virtualinvoke $r9.<java.io.ObjectOutputStream$DebugTraceInfoStack: void pop()>();
+
+        goto label24;
+
+     label21:
+        $r61 := @caughtexception;
+
+     label22:
+        $z6 = <java.io.ObjectOutputStream: boolean extendedDebugInfo>;
+
+        if $z6 == 0 goto label23;
+
+        $r62 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$DebugTraceInfoStack debugInfoStack>;
+
+        virtualinvoke $r62.<java.io.ObjectOutputStream$DebugTraceInfoStack: void pop()>();
+
+     label23:
+        throw $r61;
+
+     label24:
+        return;
+
+        catch java.lang.Throwable from label14 to label15 with label16;
+        catch java.lang.Throwable from label16 to label17 with label16;
+        catch java.lang.Throwable from label12 to label20 with label21;
+        catch java.lang.Throwable from label21 to label22 with label21;
+    }
+
+    private void writeEnum(java.lang.Enum, java.io.ObjectStreamClass, boolean) throws java.io.IOException
+    {
+        java.io.ObjectStreamClass r2, $r3, $r8;
+        java.io.ObjectOutputStream$HandleTable $r6;
+        java.io.ObjectOutputStream$BlockDataOutputStream $r1;
+        java.lang.Enum r5, $r9;
+        java.io.ObjectOutputStream r0;
+        java.lang.Class $r4;
+        java.lang.String $r7;
+        boolean z0;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        r5 := @parameter0: java.lang.Enum;
+
+        r2 := @parameter1: java.io.ObjectStreamClass;
+
+        z0 := @parameter2: boolean;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeByte(int)>(126);
+
+        $r3 = virtualinvoke r2.<java.io.ObjectStreamClass: java.io.ObjectStreamClass getSuperDesc()>();
+
+        $r4 = virtualinvoke $r3.<java.io.ObjectStreamClass: java.lang.Class forClass()>();
+
+        if $r4 != class "Ljava/lang/Enum;" goto label1;
+
+        $r8 = r2;
+
+        goto label2;
+
+     label1:
+        $r8 = $r3;
+
+     label2:
+        specialinvoke r0.<java.io.ObjectOutputStream: void writeClassDesc(java.io.ObjectStreamClass,boolean)>($r8, 0);
+
+        $r6 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$HandleTable handles>;
+
+        if z0 == 0 goto label3;
+
+        $r9 = null;
+
+        goto label4;
+
+     label3:
+        $r9 = r5;
+
+     label4:
+        virtualinvoke $r6.<java.io.ObjectOutputStream$HandleTable: int assign(java.lang.Object)>($r9);
+
+        $r7 = virtualinvoke r5.<java.lang.Enum: java.lang.String name()>();
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void writeString(java.lang.String,boolean)>($r7, 0);
+
+        return;
+    }
+
+    private void writeOrdinaryObject(java.lang.Object, java.io.ObjectStreamClass, boolean) throws java.io.IOException
+    {
+        java.lang.Throwable $r18;
+        java.io.ObjectStreamClass r0;
+        java.io.ObjectOutputStream$HandleTable $r3;
+        int $i0;
+        java.io.ObjectOutputStream r1;
+        java.lang.String $r11, $r14, $r17, $r20;
+        boolean $z0, z1, $z2, $z3, $z4, $z5;
+        java.io.Externalizable $r5;
+        java.io.ObjectOutputStream$DebugTraceInfoStack $r4, $r7, $r19;
+        java.io.ObjectOutputStream$BlockDataOutputStream $r21;
+        java.lang.Object r2, $r22;
+        java.lang.StringBuilder $r6, $r8, $r9, $r12, $r13, $r15, $r16;
+        java.lang.Class $r10;
+
+        r1 := @this: java.io.ObjectOutputStream;
+
+        r2 := @parameter0: java.lang.Object;
+
+        r0 := @parameter1: java.io.ObjectStreamClass;
+
+        z1 := @parameter2: boolean;
+
+        $z0 = <java.io.ObjectOutputStream: boolean extendedDebugInfo>;
+
+        if $z0 == 0 goto label03;
+
+        $r7 = r1.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$DebugTraceInfoStack debugInfoStack>;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $i0 = r1.<java.io.ObjectOutputStream: int depth>;
+
+        if $i0 != 1 goto label01;
+
+        $r20 = "root ";
+
+        goto label02;
+
+     label01:
+        $r20 = "";
+
+     label02:
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("object (class \"");
+
+        $r10 = virtualinvoke r2.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.Class: java.lang.String getName()>();
+
+        $r12 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\", ");
+
+        $r14 = virtualinvoke r2.<java.lang.Object: java.lang.String toString()>();
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<java.io.ObjectOutputStream$DebugTraceInfoStack: void push(java.lang.String)>($r17);
+
+     label03:
+        virtualinvoke r0.<java.io.ObjectStreamClass: void checkSerialize()>();
+
+        $r21 = r1.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r21.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeByte(int)>(115);
+
+        specialinvoke r1.<java.io.ObjectOutputStream: void writeClassDesc(java.io.ObjectStreamClass,boolean)>(r0, 0);
+
+        $r3 = r1.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$HandleTable handles>;
+
+        if z1 == 0 goto label04;
+
+        $r22 = null;
+
+        goto label05;
+
+     label04:
+        $r22 = r2;
+
+     label05:
+        virtualinvoke $r3.<java.io.ObjectOutputStream$HandleTable: int assign(java.lang.Object)>($r22);
+
+        $z2 = virtualinvoke r0.<java.io.ObjectStreamClass: boolean isExternalizable()>();
+
+        if $z2 == 0 goto label06;
+
+        $z3 = virtualinvoke r0.<java.io.ObjectStreamClass: boolean isProxy()>();
+
+        if $z3 != 0 goto label06;
+
+        $r5 = (java.io.Externalizable) r2;
+
+        specialinvoke r1.<java.io.ObjectOutputStream: void writeExternalData(java.io.Externalizable)>($r5);
+
+        goto label07;
+
+     label06:
+        specialinvoke r1.<java.io.ObjectOutputStream: void writeSerialData(java.lang.Object,java.io.ObjectStreamClass)>(r2, r0);
+
+     label07:
+        $z5 = <java.io.ObjectOutputStream: boolean extendedDebugInfo>;
+
+        if $z5 == 0 goto label11;
+
+        $r4 = r1.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$DebugTraceInfoStack debugInfoStack>;
+
+        virtualinvoke $r4.<java.io.ObjectOutputStream$DebugTraceInfoStack: void pop()>();
+
+        goto label11;
+
+     label08:
+        $r18 := @caughtexception;
+
+     label09:
+        $z4 = <java.io.ObjectOutputStream: boolean extendedDebugInfo>;
+
+        if $z4 == 0 goto label10;
+
+        $r19 = r1.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$DebugTraceInfoStack debugInfoStack>;
+
+        virtualinvoke $r19.<java.io.ObjectOutputStream$DebugTraceInfoStack: void pop()>();
+
+     label10:
+        throw $r18;
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label03 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    private void writeExternalData(java.io.Externalizable) throws java.io.IOException
+    {
+        java.lang.Throwable $r9;
+        java.io.SerialCallbackContext $r8;
+        java.io.Externalizable r3;
+        java.io.ObjectOutputStream$DebugTraceInfoStack $r6, $r7, $r10;
+        java.io.ObjectOutputStream$BlockDataOutputStream $r2, $r4, $r5;
+        int $i0;
+        java.io.ObjectOutputStream r0;
+        java.io.ObjectOutputStream$PutFieldImpl r1;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        r3 := @parameter0: java.io.Externalizable;
+
+        r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$PutFieldImpl curPut>;
+
+        r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$PutFieldImpl curPut> = null;
+
+        $z0 = <java.io.ObjectOutputStream: boolean extendedDebugInfo>;
+
+        if $z0 == 0 goto label1;
+
+        $r7 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$DebugTraceInfoStack debugInfoStack>;
+
+        virtualinvoke $r7.<java.io.ObjectOutputStream$DebugTraceInfoStack: void push(java.lang.String)>("writeExternal data");
+
+     label1:
+        $r8 = r0.<java.io.ObjectOutputStream: java.io.SerialCallbackContext curContext>;
+
+     label2:
+        r0.<java.io.ObjectOutputStream: java.io.SerialCallbackContext curContext> = null;
+
+        $i0 = r0.<java.io.ObjectOutputStream: int protocol>;
+
+        if $i0 != 1 goto label3;
+
+        interfaceinvoke r3.<java.io.Externalizable: void writeExternal(java.io.ObjectOutput)>(r0);
+
+        goto label4;
+
+     label3:
+        $r2 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r2.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>(1);
+
+        interfaceinvoke r3.<java.io.Externalizable: void writeExternal(java.io.ObjectOutput)>(r0);
+
+        $r4 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r4.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>(0);
+
+        $r5 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r5.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeByte(int)>(120);
+
+     label4:
+        r0.<java.io.ObjectOutputStream: java.io.SerialCallbackContext curContext> = $r8;
+
+        $z1 = <java.io.ObjectOutputStream: boolean extendedDebugInfo>;
+
+        if $z1 == 0 goto label8;
+
+        $r6 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$DebugTraceInfoStack debugInfoStack>;
+
+        virtualinvoke $r6.<java.io.ObjectOutputStream$DebugTraceInfoStack: void pop()>();
+
+        goto label8;
+
+     label5:
+        $r9 := @caughtexception;
+
+     label6:
+        r0.<java.io.ObjectOutputStream: java.io.SerialCallbackContext curContext> = $r8;
+
+        $z2 = <java.io.ObjectOutputStream: boolean extendedDebugInfo>;
+
+        if $z2 == 0 goto label7;
+
+        $r10 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$DebugTraceInfoStack debugInfoStack>;
+
+        virtualinvoke $r10.<java.io.ObjectOutputStream$DebugTraceInfoStack: void pop()>();
+
+     label7:
+        throw $r9;
+
+     label8:
+        r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$PutFieldImpl curPut> = r1;
+
+        return;
+
+        catch java.lang.Throwable from label2 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    private void writeSerialData(java.lang.Object, java.io.ObjectStreamClass) throws java.io.IOException
+    {
+        java.lang.Throwable $r21;
+        java.io.SerialCallbackContext r7, $r8, $r12, $r22;
+        java.io.ObjectStreamClass r0, r3;
+        int $i0, i1;
+        java.io.ObjectOutputStream r4;
+        java.io.ObjectOutputStream$PutFieldImpl r6;
+        java.lang.String $r17, $r20;
+        boolean $z0, $z1, $z2, $z3;
+        java.io.ObjectStreamClass$ClassDataSlot $r2;
+        java.io.ObjectOutputStream$DebugTraceInfoStack $r13, $r15, $r23;
+        java.io.ObjectOutputStream$BlockDataOutputStream $r9, $r10, $r11;
+        java.io.ObjectStreamClass$ClassDataSlot[] $r1;
+        java.lang.Object r5;
+        java.lang.StringBuilder $r14, $r16, $r18, $r19;
+
+        r4 := @this: java.io.ObjectOutputStream;
+
+        r5 := @parameter0: java.lang.Object;
+
+        r0 := @parameter1: java.io.ObjectStreamClass;
+
+        $r1 = virtualinvoke r0.<java.io.ObjectStreamClass: java.io.ObjectStreamClass$ClassDataSlot[] getClassDataLayout()>();
+
+        i1 = 0;
+
+     label01:
+        $i0 = lengthof $r1;
+
+        if i1 >= $i0 goto label10;
+
+        $r2 = $r1[i1];
+
+        r3 = $r2.<java.io.ObjectStreamClass$ClassDataSlot: java.io.ObjectStreamClass desc>;
+
+        $z0 = virtualinvoke r3.<java.io.ObjectStreamClass: boolean hasWriteObjectMethod()>();
+
+        if $z0 == 0 goto label08;
+
+        r6 = r4.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$PutFieldImpl curPut>;
+
+        r4.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$PutFieldImpl curPut> = null;
+
+        r7 = r4.<java.io.ObjectOutputStream: java.io.SerialCallbackContext curContext>;
+
+        $z1 = <java.io.ObjectOutputStream: boolean extendedDebugInfo>;
+
+        if $z1 == 0 goto label02;
+
+        $r15 = r4.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$DebugTraceInfoStack debugInfoStack>;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("custom writeObject data (class \"");
+
+        $r17 = virtualinvoke r3.<java.io.ObjectStreamClass: java.lang.String getName()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\")");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r15.<java.io.ObjectOutputStream$DebugTraceInfoStack: void push(java.lang.String)>($r20);
+
+     label02:
+        $r8 = new java.io.SerialCallbackContext;
+
+        specialinvoke $r8.<java.io.SerialCallbackContext: void <init>(java.lang.Object,java.io.ObjectStreamClass)>(r5, r3);
+
+        r4.<java.io.ObjectOutputStream: java.io.SerialCallbackContext curContext> = $r8;
+
+        $r9 = r4.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r9.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>(1);
+
+        virtualinvoke r3.<java.io.ObjectStreamClass: void invokeWriteObject(java.lang.Object,java.io.ObjectOutputStream)>(r5, r4);
+
+        $r10 = r4.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r10.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>(0);
+
+        $r11 = r4.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r11.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeByte(int)>(120);
+
+     label03:
+        $r12 = r4.<java.io.ObjectOutputStream: java.io.SerialCallbackContext curContext>;
+
+        virtualinvoke $r12.<java.io.SerialCallbackContext: void setUsed()>();
+
+        r4.<java.io.ObjectOutputStream: java.io.SerialCallbackContext curContext> = r7;
+
+        $z2 = <java.io.ObjectOutputStream: boolean extendedDebugInfo>;
+
+        if $z2 == 0 goto label07;
+
+        $r13 = r4.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$DebugTraceInfoStack debugInfoStack>;
+
+        virtualinvoke $r13.<java.io.ObjectOutputStream$DebugTraceInfoStack: void pop()>();
+
+        goto label07;
+
+     label04:
+        $r21 := @caughtexception;
+
+     label05:
+        $r22 = r4.<java.io.ObjectOutputStream: java.io.SerialCallbackContext curContext>;
+
+        virtualinvoke $r22.<java.io.SerialCallbackContext: void setUsed()>();
+
+        r4.<java.io.ObjectOutputStream: java.io.SerialCallbackContext curContext> = r7;
+
+        $z3 = <java.io.ObjectOutputStream: boolean extendedDebugInfo>;
+
+        if $z3 == 0 goto label06;
+
+        $r23 = r4.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$DebugTraceInfoStack debugInfoStack>;
+
+        virtualinvoke $r23.<java.io.ObjectOutputStream$DebugTraceInfoStack: void pop()>();
+
+     label06:
+        throw $r21;
+
+     label07:
+        r4.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$PutFieldImpl curPut> = r6;
+
+        goto label09;
+
+     label08:
+        specialinvoke r4.<java.io.ObjectOutputStream: void defaultWriteFields(java.lang.Object,java.io.ObjectStreamClass)>(r5, r3);
+
+     label09:
+        i1 = i1 + 1;
+
+        goto label01;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label02 to label03 with label04;
+        catch java.lang.Throwable from label04 to label05 with label04;
+    }
+
+    private void defaultWriteFields(java.lang.Object, java.io.ObjectStreamClass) throws java.io.IOException
+    {
+        byte[] $r3, $r23, $r27, $r28, $r30;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.io.ObjectStreamField $r5, $r14, $r18;
+        java.lang.StringBuilder $r8, $r10, $r12, $r13, $r16, $r17, $r20, $r21;
+        java.lang.Throwable $r25;
+        java.lang.Object[] $r32;
+        java.io.ObjectStreamClass r0;
+        java.lang.ClassCastException $r24;
+        java.io.ObjectStreamField[] $r31;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, $i10;
+        java.io.ObjectOutputStream r2;
+        java.lang.String $r11, $r15, $r22;
+        java.io.ObjectOutputStream$DebugTraceInfoStack $r7, $r9, $r26;
+        java.io.ObjectOutputStream$BlockDataOutputStream $r29;
+        java.lang.Class $r1, $r19;
+        java.lang.Object r4, $r6;
+
+        r2 := @this: java.io.ObjectOutputStream;
+
+        r4 := @parameter0: java.lang.Object;
+
+        r0 := @parameter1: java.io.ObjectStreamClass;
+
+        $r1 = virtualinvoke r0.<java.io.ObjectStreamClass: java.lang.Class forClass()>();
+
+        if $r1 == null goto label01;
+
+        if r4 == null goto label01;
+
+        $z3 = virtualinvoke $r1.<java.lang.Class: boolean isInstance(java.lang.Object)>(r4);
+
+        if $z3 != 0 goto label01;
+
+        $r24 = new java.lang.ClassCastException;
+
+        specialinvoke $r24.<java.lang.ClassCastException: void <init>()>();
+
+        throw $r24;
+
+     label01:
+        virtualinvoke r0.<java.io.ObjectStreamClass: void checkDefaultSerialize()>();
+
+        $i4 = virtualinvoke r0.<java.io.ObjectStreamClass: int getPrimDataSize()>();
+
+        $r27 = r2.<java.io.ObjectOutputStream: byte[] primVals>;
+
+        if $r27 == null goto label02;
+
+        $r23 = r2.<java.io.ObjectOutputStream: byte[] primVals>;
+
+        $i3 = lengthof $r23;
+
+        if $i3 >= $i4 goto label03;
+
+     label02:
+        $r3 = newarray (byte)[$i4];
+
+        r2.<java.io.ObjectOutputStream: byte[] primVals> = $r3;
+
+     label03:
+        $r28 = r2.<java.io.ObjectOutputStream: byte[] primVals>;
+
+        virtualinvoke r0.<java.io.ObjectStreamClass: void getPrimFieldValues(java.lang.Object,byte[])>(r4, $r28);
+
+        $r29 = r2.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        $r30 = r2.<java.io.ObjectOutputStream: byte[] primVals>;
+
+        virtualinvoke $r29.<java.io.ObjectOutputStream$BlockDataOutputStream: void write(byte[],int,int,boolean)>($r30, 0, $i4, 0);
+
+        $r31 = virtualinvoke r0.<java.io.ObjectStreamClass: java.io.ObjectStreamField[] getFields(boolean)>(0);
+
+        $i5 = virtualinvoke r0.<java.io.ObjectStreamClass: int getNumObjFields()>();
+
+        $r32 = newarray (java.lang.Object)[$i5];
+
+        $i6 = lengthof $r31;
+
+        $i7 = lengthof $r32;
+
+        $i8 = $i6 - $i7;
+
+        virtualinvoke r0.<java.io.ObjectStreamClass: void getObjFieldValues(java.lang.Object,java.lang.Object[])>(r4, $r32);
+
+        i9 = 0;
+
+     label04:
+        $i10 = lengthof $r32;
+
+        if i9 >= $i10 goto label11;
+
+        $z0 = <java.io.ObjectOutputStream: boolean extendedDebugInfo>;
+
+        if $z0 == 0 goto label05;
+
+        $r9 = r2.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$DebugTraceInfoStack debugInfoStack>;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("field (class \"");
+
+        $r11 = virtualinvoke r0.<java.io.ObjectStreamClass: java.lang.String getName()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\", name: \"");
+
+        $i1 = $i8 + i9;
+
+        $r14 = $r31[$i1];
+
+        $r15 = virtualinvoke $r14.<java.io.ObjectStreamField: java.lang.String getName()>();
+
+        $r16 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\", type: \"");
+
+        $i2 = $i8 + i9;
+
+        $r18 = $r31[$i2];
+
+        $r19 = virtualinvoke $r18.<java.io.ObjectStreamField: java.lang.Class getType()>();
+
+        $r20 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\")");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r9.<java.io.ObjectOutputStream$DebugTraceInfoStack: void push(java.lang.String)>($r22);
+
+     label05:
+        $r6 = $r32[i9];
+
+        $i0 = $i8 + i9;
+
+        $r5 = $r31[$i0];
+
+        $z1 = virtualinvoke $r5.<java.io.ObjectStreamField: boolean isUnshared()>();
+
+        specialinvoke r2.<java.io.ObjectOutputStream: void writeObject0(java.lang.Object,boolean)>($r6, $z1);
+
+     label06:
+        $z2 = <java.io.ObjectOutputStream: boolean extendedDebugInfo>;
+
+        if $z2 == 0 goto label10;
+
+        $r7 = r2.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$DebugTraceInfoStack debugInfoStack>;
+
+        virtualinvoke $r7.<java.io.ObjectOutputStream$DebugTraceInfoStack: void pop()>();
+
+        goto label10;
+
+     label07:
+        $r25 := @caughtexception;
+
+     label08:
+        $z4 = <java.io.ObjectOutputStream: boolean extendedDebugInfo>;
+
+        if $z4 == 0 goto label09;
+
+        $r26 = r2.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$DebugTraceInfoStack debugInfoStack>;
+
+        virtualinvoke $r26.<java.io.ObjectOutputStream$DebugTraceInfoStack: void pop()>();
+
+     label09:
+        throw $r25;
+
+     label10:
+        i9 = i9 + 1;
+
+        goto label04;
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label05 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+    }
+
+    private void writeFatalException(java.io.IOException) throws java.io.IOException
+    {
+        java.lang.Throwable $r5;
+        java.io.IOException r3;
+        java.io.ObjectOutputStream$BlockDataOutputStream $r1, $r2, $r4, $r6;
+        java.io.ObjectOutputStream r0;
+        boolean $z0;
+
+        r0 := @this: java.io.ObjectOutputStream;
+
+        r3 := @parameter0: java.io.IOException;
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void clear()>();
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        $z0 = virtualinvoke $r1.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>(0);
+
+     label1:
+        $r2 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r2.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeByte(int)>(123);
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void writeObject0(java.lang.Object,boolean)>(r3, 0);
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void clear()>();
+
+     label2:
+        $r4 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r4.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>($z0);
+
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        virtualinvoke $r6.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean setBlockDataMode(boolean)>($z0);
+
+        throw $r5;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private static native void floatsToBytes(float[], int, byte[], int, int);
+
+    private static native void doublesToBytes(double[], int, byte[], int, int);
+
+    static java.io.ObjectOutputStream$BlockDataOutputStream access$000(java.io.ObjectOutputStream)
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream $r1;
+        java.io.ObjectOutputStream r0;
+
+        r0 := @parameter0: java.io.ObjectOutputStream;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$BlockDataOutputStream bout>;
+
+        return $r1;
+    }
+
+    static boolean access$100()
+    {
+        boolean $z0;
+
+        $z0 = <java.io.ObjectOutputStream: boolean extendedDebugInfo>;
+
+        return $z0;
+    }
+
+    static java.io.ObjectOutputStream$DebugTraceInfoStack access$200(java.io.ObjectOutputStream)
+    {
+        java.io.ObjectOutputStream r0;
+        java.io.ObjectOutputStream$DebugTraceInfoStack $r1;
+
+        r0 := @parameter0: java.io.ObjectOutputStream;
+
+        $r1 = r0.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$DebugTraceInfoStack debugInfoStack>;
+
+        return $r1;
+    }
+
+    static void access$300(java.io.ObjectOutputStream, java.lang.Object, boolean) throws java.io.IOException
+    {
+        java.io.ObjectOutputStream r0;
+        java.lang.Object r1;
+        boolean z0;
+
+        r0 := @parameter0: java.io.ObjectOutputStream;
+
+        r1 := @parameter1: java.lang.Object;
+
+        z0 := @parameter2: boolean;
+
+        specialinvoke r0.<java.io.ObjectOutputStream: void writeObject0(java.lang.Object,boolean)>(r1, z0);
+
+        return;
+    }
+
+    static void access$400(float[], int, byte[], int, int)
+    {
+        byte[] r1;
+        int i0, i1, i2;
+        float[] r0;
+
+        r0 := @parameter0: float[];
+
+        i0 := @parameter1: int;
+
+        r1 := @parameter2: byte[];
+
+        i1 := @parameter3: int;
+
+        i2 := @parameter4: int;
+
+        staticinvoke <java.io.ObjectOutputStream: void floatsToBytes(float[],int,byte[],int,int)>(r0, i0, r1, i1, i2);
+
+        return;
+    }
+
+    static void access$500(double[], int, byte[], int, int)
+    {
+        byte[] r1;
+        double[] r0;
+        int i0, i1, i2;
+
+        r0 := @parameter0: double[];
+
+        i0 := @parameter1: int;
+
+        r1 := @parameter2: byte[];
+
+        i1 := @parameter3: int;
+
+        i2 := @parameter4: int;
+
+        staticinvoke <java.io.ObjectOutputStream: void doublesToBytes(double[],int,byte[],int,int)>(r0, i0, r1, i1, i2);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.action.GetBooleanAction $r0;
+        java.lang.Boolean $r2;
+        java.lang.Object $r1;
+        boolean $z0;
+
+        $r0 = new sun.security.action.GetBooleanAction;
+
+        specialinvoke $r0.<sun.security.action.GetBooleanAction: void <init>(java.lang.String)>("sun.io.serialization.extendedDebugInfo");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r2 = (java.lang.Boolean) $r1;
+
+        $z0 = virtualinvoke $r2.<java.lang.Boolean: boolean booleanValue()>();
+
+        <java.io.ObjectOutputStream: boolean extendedDebugInfo> = $z0;
+
+        return;
+    }
+}

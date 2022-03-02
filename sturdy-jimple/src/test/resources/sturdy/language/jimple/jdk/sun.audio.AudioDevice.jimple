@@ -1,0 +1,719 @@
+public final class sun.audio.AudioDevice extends java.lang.Object
+{
+    private boolean DEBUG;
+    private java.util.Hashtable clipStreams;
+    private java.util.Vector infos;
+    private boolean playing;
+    private javax.sound.sampled.Mixer mixer;
+    public static final sun.audio.AudioDevice device;
+
+    private void <init>()
+    {
+        java.util.Vector $r2;
+        sun.audio.AudioDevice r0;
+        java.util.Hashtable $r1;
+
+        r0 := @this: sun.audio.AudioDevice;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.audio.AudioDevice: boolean DEBUG> = 0;
+
+        r0.<sun.audio.AudioDevice: boolean playing> = 0;
+
+        r0.<sun.audio.AudioDevice: javax.sound.sampled.Mixer mixer> = null;
+
+        $r1 = new java.util.Hashtable;
+
+        specialinvoke $r1.<java.util.Hashtable: void <init>()>();
+
+        r0.<sun.audio.AudioDevice: java.util.Hashtable clipStreams> = $r1;
+
+        $r2 = new java.util.Vector;
+
+        specialinvoke $r2.<java.util.Vector: void <init>()>();
+
+        r0.<sun.audio.AudioDevice: java.util.Vector infos> = $r2;
+
+        return;
+    }
+
+    private synchronized void startSampled(javax.sound.sampled.AudioInputStream, java.io.InputStream) throws javax.sound.sampled.UnsupportedAudioFileException, javax.sound.sampled.LineUnavailableException
+    {
+        javax.sound.sampled.AudioFormat $r2;
+        com.sun.media.sound.DataPusher $r4;
+        java.util.Vector $r8;
+        sun.audio.AudioDevice r6;
+        sun.audio.AudioDevice$Info $r5;
+        javax.sound.sampled.AudioInputStream $r0, r9;
+        javax.sound.sampled.Line $r3;
+        javax.sound.sampled.DataLine$Info $r1;
+        boolean $z0;
+        java.io.InputStream r7;
+        javax.sound.sampled.SourceDataLine r10;
+
+        r6 := @this: sun.audio.AudioDevice;
+
+        r9 := @parameter0: javax.sound.sampled.AudioInputStream;
+
+        r7 := @parameter1: java.io.InputStream;
+
+        $r0 = staticinvoke <com.sun.media.sound.Toolkit: javax.sound.sampled.AudioInputStream getPCMConvertedAudioInputStream(javax.sound.sampled.AudioInputStream)>(r9);
+
+        if $r0 != null goto label1;
+
+        return;
+
+     label1:
+        $r1 = new javax.sound.sampled.DataLine$Info;
+
+        $r2 = virtualinvoke $r0.<javax.sound.sampled.AudioInputStream: javax.sound.sampled.AudioFormat getFormat()>();
+
+        specialinvoke $r1.<javax.sound.sampled.DataLine$Info: void <init>(java.lang.Class,javax.sound.sampled.AudioFormat)>(class "Ljavax/sound/sampled/SourceDataLine;", $r2);
+
+        $z0 = staticinvoke <javax.sound.sampled.AudioSystem: boolean isLineSupported(javax.sound.sampled.Line$Info)>($r1);
+
+        if $z0 != 0 goto label2;
+
+        return;
+
+     label2:
+        $r3 = staticinvoke <javax.sound.sampled.AudioSystem: javax.sound.sampled.Line getLine(javax.sound.sampled.Line$Info)>($r1);
+
+        r10 = (javax.sound.sampled.SourceDataLine) $r3;
+
+        $r4 = new com.sun.media.sound.DataPusher;
+
+        specialinvoke $r4.<com.sun.media.sound.DataPusher: void <init>(javax.sound.sampled.SourceDataLine,javax.sound.sampled.AudioInputStream)>(r10, $r0);
+
+        $r5 = new sun.audio.AudioDevice$Info;
+
+        specialinvoke $r5.<sun.audio.AudioDevice$Info: void <init>(sun.audio.AudioDevice,javax.sound.midi.Sequencer,java.io.InputStream,com.sun.media.sound.DataPusher)>(r6, null, r7, $r4);
+
+        $r8 = r6.<sun.audio.AudioDevice: java.util.Vector infos>;
+
+        virtualinvoke $r8.<java.util.Vector: void addElement(java.lang.Object)>($r5);
+
+        virtualinvoke $r4.<com.sun.media.sound.DataPusher: void start()>();
+
+        return;
+    }
+
+    private synchronized void startMidi(java.io.InputStream, java.io.InputStream) throws javax.sound.midi.InvalidMidiDataException, javax.sound.midi.MidiUnavailableException
+    {
+        javax.sound.midi.Sequencer $r0;
+        javax.sound.midi.InvalidMidiDataException $r7;
+        java.io.IOException $r6;
+        java.util.Vector $r5;
+        sun.audio.AudioDevice r3;
+        sun.audio.AudioDevice$Info $r2;
+        java.lang.String $r8;
+        java.io.InputStream r1, r4;
+
+        r3 := @this: sun.audio.AudioDevice;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        r4 := @parameter1: java.io.InputStream;
+
+        $r0 = staticinvoke <javax.sound.midi.MidiSystem: javax.sound.midi.Sequencer getSequencer()>();
+
+        interfaceinvoke $r0.<javax.sound.midi.Sequencer: void open()>();
+
+     label1:
+        interfaceinvoke $r0.<javax.sound.midi.Sequencer: void setSequence(java.io.InputStream)>(r1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = new javax.sound.midi.InvalidMidiDataException;
+
+        $r8 = virtualinvoke $r6.<java.io.IOException: java.lang.String getMessage()>();
+
+        specialinvoke $r7.<javax.sound.midi.InvalidMidiDataException: void <init>(java.lang.String)>($r8);
+
+        throw $r7;
+
+     label4:
+        $r2 = new sun.audio.AudioDevice$Info;
+
+        specialinvoke $r2.<sun.audio.AudioDevice$Info: void <init>(sun.audio.AudioDevice,javax.sound.midi.Sequencer,java.io.InputStream,com.sun.media.sound.DataPusher)>(r3, $r0, r4, null);
+
+        $r5 = r3.<sun.audio.AudioDevice: java.util.Vector infos>;
+
+        virtualinvoke $r5.<java.util.Vector: void addElement(java.lang.Object)>($r2);
+
+        interfaceinvoke $r0.<javax.sound.midi.Sequencer: boolean addMetaEventListener(javax.sound.midi.MetaEventListener)>($r2);
+
+        interfaceinvoke $r0.<javax.sound.midi.Sequencer: void start()>();
+
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public synchronized void openChannel(java.io.InputStream)
+    {
+        byte[] $r10;
+        java.io.BufferedInputStream $r2;
+        javax.sound.sampled.AudioFormat $r8, $r14, $r37;
+        java.util.Vector $r23, $r47;
+        sun.audio.AudioDevice r0;
+        javax.sound.sampled.AudioInputStream $r3, $r4, $r11, $r18, $r20, $r39;
+        boolean $z0, $z1, $z2, $z3;
+        javax.sound.sampled.UnsupportedAudioFileException $r35, $r41;
+        java.lang.Exception $r43, $r44, $r45, $r46;
+        sun.audio.AudioData $r6, $r9, $r13;
+        java.lang.StringBuilder $r27, $r29, $r30;
+        sun.audio.AudioDataStream $r5, $r7, $r12;
+        javax.sound.midi.InvalidMidiDataException $r36;
+        long $l1;
+        sun.audio.AudioStream $r15, $r17, $r19, $r21;
+        sun.audio.AudioDevice$Info r48;
+        int $i0, i2, $i3;
+        java.lang.String $r31;
+        java.io.PrintStream $r26, $r28;
+        javax.sound.sampled.LineUnavailableException $r32, $r34;
+        java.io.IOException $r40, $r42;
+        javax.sound.midi.MidiUnavailableException $r33;
+        javax.sound.sampled.AudioFormat$Encoding $r38;
+        javax.sound.midi.MidiFileFormat $r16;
+        java.lang.Object $r24;
+        java.io.InputStream r1, $r22, $r25;
+
+        r0 := @this: sun.audio.AudioDevice;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        $z0 = r0.<sun.audio.AudioDevice: boolean DEBUG>;
+
+        if $z0 == 0 goto label01;
+
+        $r26 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r26.<java.io.PrintStream: void println(java.lang.String)>("AudioDevice: openChannel");
+
+        $r28 = <java.lang.System: java.io.PrintStream out>;
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r29 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("input stream =");
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r28.<java.io.PrintStream: void println(java.lang.String)>($r31);
+
+     label01:
+        i2 = 0;
+
+     label02:
+        $r47 = r0.<sun.audio.AudioDevice: java.util.Vector infos>;
+
+        $i3 = virtualinvoke $r47.<java.util.Vector: int size()>();
+
+        if i2 >= $i3 goto label04;
+
+        $r23 = r0.<sun.audio.AudioDevice: java.util.Vector infos>;
+
+        $r24 = virtualinvoke $r23.<java.util.Vector: java.lang.Object elementAt(int)>(i2);
+
+        r48 = (sun.audio.AudioDevice$Info) $r24;
+
+        $r25 = r48.<sun.audio.AudioDevice$Info: java.io.InputStream in>;
+
+        if $r25 != r1 goto label03;
+
+        return;
+
+     label03:
+        i2 = i2 + 1;
+
+        goto label02;
+
+     label04:
+        $z1 = r1 instanceof sun.audio.AudioStream;
+
+        if $z1 == 0 goto label12;
+
+        $r15 = (sun.audio.AudioStream) r1;
+
+        $r16 = $r15.<sun.audio.AudioStream: javax.sound.midi.MidiFileFormat midiformat>;
+
+        if $r16 == null goto label08;
+
+     label05:
+        $r21 = (sun.audio.AudioStream) r1;
+
+        $r22 = $r21.<sun.audio.AudioStream: java.io.InputStream stream>;
+
+        specialinvoke r0.<sun.audio.AudioDevice: void startMidi(java.io.InputStream,java.io.InputStream)>($r22, r1);
+
+     label06:
+        goto label42;
+
+     label07:
+        $r46 := @caughtexception;
+
+        return;
+
+     label08:
+        $r17 = (sun.audio.AudioStream) r1;
+
+        $r18 = $r17.<sun.audio.AudioStream: javax.sound.sampled.AudioInputStream ais>;
+
+        if $r18 == null goto label42;
+
+     label09:
+        $r19 = (sun.audio.AudioStream) r1;
+
+        $r20 = $r19.<sun.audio.AudioStream: javax.sound.sampled.AudioInputStream ais>;
+
+        specialinvoke r0.<sun.audio.AudioDevice: void startSampled(javax.sound.sampled.AudioInputStream,java.io.InputStream)>($r20, r1);
+
+     label10:
+        goto label42;
+
+     label11:
+        $r45 := @caughtexception;
+
+        return;
+
+     label12:
+        $z2 = r1 instanceof sun.audio.AudioDataStream;
+
+        if $z2 == 0 goto label19;
+
+        $z3 = r1 instanceof sun.audio.ContinuousAudioDataStream;
+
+        if $z3 == 0 goto label16;
+
+     label13:
+        $r11 = new javax.sound.sampled.AudioInputStream;
+
+        $r12 = (sun.audio.AudioDataStream) r1;
+
+        $r13 = virtualinvoke $r12.<sun.audio.AudioDataStream: sun.audio.AudioData getAudioData()>();
+
+        $r14 = $r13.<sun.audio.AudioData: javax.sound.sampled.AudioFormat format>;
+
+        specialinvoke $r11.<javax.sound.sampled.AudioInputStream: void <init>(java.io.InputStream,javax.sound.sampled.AudioFormat,long)>(r1, $r14, -1L);
+
+        specialinvoke r0.<sun.audio.AudioDevice: void startSampled(javax.sound.sampled.AudioInputStream,java.io.InputStream)>($r11, r1);
+
+     label14:
+        goto label42;
+
+     label15:
+        $r44 := @caughtexception;
+
+        return;
+
+     label16:
+        $r4 = new javax.sound.sampled.AudioInputStream;
+
+        $r5 = (sun.audio.AudioDataStream) r1;
+
+        $r6 = virtualinvoke $r5.<sun.audio.AudioDataStream: sun.audio.AudioData getAudioData()>();
+
+        $r8 = $r6.<sun.audio.AudioData: javax.sound.sampled.AudioFormat format>;
+
+        $r7 = (sun.audio.AudioDataStream) r1;
+
+        $r9 = virtualinvoke $r7.<sun.audio.AudioDataStream: sun.audio.AudioData getAudioData()>();
+
+        $r10 = $r9.<sun.audio.AudioData: byte[] buffer>;
+
+        $i0 = lengthof $r10;
+
+        $l1 = (long) $i0;
+
+        specialinvoke $r4.<javax.sound.sampled.AudioInputStream: void <init>(java.io.InputStream,javax.sound.sampled.AudioFormat,long)>(r1, $r8, $l1);
+
+        specialinvoke r0.<sun.audio.AudioDevice: void startSampled(javax.sound.sampled.AudioInputStream,java.io.InputStream)>($r4, r1);
+
+     label17:
+        goto label42;
+
+     label18:
+        $r43 := @caughtexception;
+
+        return;
+
+     label19:
+        $r2 = new java.io.BufferedInputStream;
+
+        specialinvoke $r2.<java.io.BufferedInputStream: void <init>(java.io.InputStream,int)>(r1, 1024);
+
+     label20:
+        $r3 = staticinvoke <javax.sound.sampled.AudioSystem: javax.sound.sampled.AudioInputStream getAudioInputStream(java.io.InputStream)>($r2);
+
+     label21:
+        goto label24;
+
+     label22:
+        $r42 := @caughtexception;
+
+     label23:
+        return;
+
+     label24:
+        specialinvoke r0.<sun.audio.AudioDevice: void startSampled(javax.sound.sampled.AudioInputStream,java.io.InputStream)>($r3, r1);
+
+     label25:
+        goto label42;
+
+     label26:
+        $r41 := @caughtexception;
+
+     label27:
+        staticinvoke <javax.sound.midi.MidiSystem: javax.sound.midi.MidiFileFormat getMidiFileFormat(java.io.InputStream)>($r2);
+
+     label28:
+        goto label31;
+
+     label29:
+        $r40 := @caughtexception;
+
+     label30:
+        return;
+
+     label31:
+        specialinvoke r0.<sun.audio.AudioDevice: void startMidi(java.io.InputStream,java.io.InputStream)>($r2, r1);
+
+     label32:
+        goto label40;
+
+     label33:
+        $r36 := @caughtexception;
+
+        $r37 = new javax.sound.sampled.AudioFormat;
+
+        $r38 = <javax.sound.sampled.AudioFormat$Encoding: javax.sound.sampled.AudioFormat$Encoding ULAW>;
+
+        specialinvoke $r37.<javax.sound.sampled.AudioFormat: void <init>(javax.sound.sampled.AudioFormat$Encoding,float,int,int,int,float,boolean)>($r38, 8000.0F, 8, 1, 1, 8000.0F, 1);
+
+     label34:
+        $r39 = new javax.sound.sampled.AudioInputStream;
+
+        specialinvoke $r39.<javax.sound.sampled.AudioInputStream: void <init>(java.io.InputStream,javax.sound.sampled.AudioFormat,long)>($r2, $r37, -1L);
+
+        specialinvoke r0.<sun.audio.AudioDevice: void startSampled(javax.sound.sampled.AudioInputStream,java.io.InputStream)>($r39, r1);
+
+     label35:
+        goto label38;
+
+     label36:
+        $r35 := @caughtexception;
+
+        return;
+
+     label37:
+        $r34 := @caughtexception;
+
+        return;
+
+     label38:
+        goto label40;
+
+     label39:
+        $r33 := @caughtexception;
+
+        return;
+
+     label40:
+        goto label42;
+
+     label41:
+        $r32 := @caughtexception;
+
+        return;
+
+     label42:
+        virtualinvoke r0.<java.lang.Object: void notify()>();
+
+        return;
+
+        catch java.lang.Exception from label05 to label06 with label07;
+        catch java.lang.Exception from label09 to label10 with label11;
+        catch java.lang.Exception from label13 to label14 with label15;
+        catch java.lang.Exception from label16 to label17 with label18;
+        catch java.io.IOException from label20 to label21 with label22;
+        catch javax.sound.sampled.UnsupportedAudioFileException from label20 to label23 with label26;
+        catch javax.sound.sampled.UnsupportedAudioFileException from label24 to label25 with label26;
+        catch java.io.IOException from label27 to label28 with label29;
+        catch javax.sound.midi.InvalidMidiDataException from label27 to label30 with label33;
+        catch javax.sound.midi.InvalidMidiDataException from label31 to label32 with label33;
+        catch javax.sound.sampled.UnsupportedAudioFileException from label34 to label35 with label36;
+        catch javax.sound.sampled.LineUnavailableException from label34 to label35 with label37;
+        catch javax.sound.midi.MidiUnavailableException from label27 to label30 with label39;
+        catch javax.sound.midi.MidiUnavailableException from label31 to label32 with label39;
+        catch javax.sound.sampled.LineUnavailableException from label20 to label23 with label41;
+        catch javax.sound.sampled.LineUnavailableException from label24 to label25 with label41;
+    }
+
+    public synchronized void closeChannel(java.io.InputStream)
+    {
+        javax.sound.midi.Sequencer $r7, $r11;
+        com.sun.media.sound.DataPusher $r8, $r9;
+        java.util.Vector $r2, $r3, $r10, $r12;
+        sun.audio.AudioDevice r0;
+        sun.audio.AudioDevice$Info r5;
+        int $i0, i1;
+        boolean $z0;
+        java.io.PrintStream $r13;
+        java.lang.Object $r4;
+        java.io.InputStream r1, $r6;
+
+        r0 := @this: sun.audio.AudioDevice;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        $z0 = r0.<sun.audio.AudioDevice: boolean DEBUG>;
+
+        if $z0 == 0 goto label1;
+
+        $r13 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r13.<java.io.PrintStream: void println(java.lang.String)>("AudioDevice.closeChannel");
+
+     label1:
+        if r1 != null goto label2;
+
+        return;
+
+     label2:
+        i1 = 0;
+
+     label3:
+        $r2 = r0.<sun.audio.AudioDevice: java.util.Vector infos>;
+
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        if i1 >= $i0 goto label6;
+
+        $r3 = r0.<sun.audio.AudioDevice: java.util.Vector infos>;
+
+        $r4 = virtualinvoke $r3.<java.util.Vector: java.lang.Object elementAt(int)>(i1);
+
+        r5 = (sun.audio.AudioDevice$Info) $r4;
+
+        $r6 = r5.<sun.audio.AudioDevice$Info: java.io.InputStream in>;
+
+        if $r6 != r1 goto label5;
+
+        $r7 = r5.<sun.audio.AudioDevice$Info: javax.sound.midi.Sequencer sequencer>;
+
+        if $r7 == null goto label4;
+
+        $r11 = r5.<sun.audio.AudioDevice$Info: javax.sound.midi.Sequencer sequencer>;
+
+        interfaceinvoke $r11.<javax.sound.midi.Sequencer: void stop()>();
+
+        $r12 = r0.<sun.audio.AudioDevice: java.util.Vector infos>;
+
+        virtualinvoke $r12.<java.util.Vector: boolean removeElement(java.lang.Object)>(r5);
+
+        goto label5;
+
+     label4:
+        $r8 = r5.<sun.audio.AudioDevice$Info: com.sun.media.sound.DataPusher datapusher>;
+
+        if $r8 == null goto label5;
+
+        $r9 = r5.<sun.audio.AudioDevice$Info: com.sun.media.sound.DataPusher datapusher>;
+
+        virtualinvoke $r9.<com.sun.media.sound.DataPusher: void stop()>();
+
+        $r10 = r0.<sun.audio.AudioDevice: java.util.Vector infos>;
+
+        virtualinvoke $r10.<java.util.Vector: boolean removeElement(java.lang.Object)>(r5);
+
+     label5:
+        i1 = i1 + 1;
+
+        goto label3;
+
+     label6:
+        virtualinvoke r0.<java.lang.Object: void notify()>();
+
+        return;
+    }
+
+    public synchronized void open()
+    {
+        sun.audio.AudioDevice r0;
+
+        r0 := @this: sun.audio.AudioDevice;
+
+        return;
+    }
+
+    public synchronized void close()
+    {
+        sun.audio.AudioDevice r0;
+
+        r0 := @this: sun.audio.AudioDevice;
+
+        return;
+    }
+
+    public void play()
+    {
+        java.io.PrintStream $r1;
+        sun.audio.AudioDevice r0;
+        boolean $z0;
+
+        r0 := @this: sun.audio.AudioDevice;
+
+        $z0 = r0.<sun.audio.AudioDevice: boolean DEBUG>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>("exiting play()");
+
+     label1:
+        return;
+    }
+
+    public synchronized void closeStreams()
+    {
+        javax.sound.midi.Sequencer $r8, $r12, $r13;
+        com.sun.media.sound.DataPusher $r9, $r10;
+        java.util.Vector $r1, $r3, $r5, $r11, $r14;
+        sun.audio.AudioDevice r0;
+        sun.audio.AudioDevice$Info r7;
+        int $i0, i1;
+        java.util.Hashtable $r2;
+        boolean $z0;
+        java.io.PrintStream $r4;
+        java.lang.Object $r6;
+
+        r0 := @this: sun.audio.AudioDevice;
+
+        i1 = 0;
+
+     label1:
+        $r1 = r0.<sun.audio.AudioDevice: java.util.Vector infos>;
+
+        $i0 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        if i1 >= $i0 goto label4;
+
+        $r5 = r0.<sun.audio.AudioDevice: java.util.Vector infos>;
+
+        $r6 = virtualinvoke $r5.<java.util.Vector: java.lang.Object elementAt(int)>(i1);
+
+        r7 = (sun.audio.AudioDevice$Info) $r6;
+
+        $r8 = r7.<sun.audio.AudioDevice$Info: javax.sound.midi.Sequencer sequencer>;
+
+        if $r8 == null goto label2;
+
+        $r12 = r7.<sun.audio.AudioDevice$Info: javax.sound.midi.Sequencer sequencer>;
+
+        interfaceinvoke $r12.<javax.sound.midi.Sequencer: void stop()>();
+
+        $r13 = r7.<sun.audio.AudioDevice$Info: javax.sound.midi.Sequencer sequencer>;
+
+        interfaceinvoke $r13.<javax.sound.midi.Sequencer: void close()>();
+
+        $r14 = r0.<sun.audio.AudioDevice: java.util.Vector infos>;
+
+        virtualinvoke $r14.<java.util.Vector: boolean removeElement(java.lang.Object)>(r7);
+
+        goto label3;
+
+     label2:
+        $r9 = r7.<sun.audio.AudioDevice$Info: com.sun.media.sound.DataPusher datapusher>;
+
+        if $r9 == null goto label3;
+
+        $r10 = r7.<sun.audio.AudioDevice$Info: com.sun.media.sound.DataPusher datapusher>;
+
+        virtualinvoke $r10.<com.sun.media.sound.DataPusher: void stop()>();
+
+        $r11 = r0.<sun.audio.AudioDevice: java.util.Vector infos>;
+
+        virtualinvoke $r11.<java.util.Vector: boolean removeElement(java.lang.Object)>(r7);
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label4:
+        $z0 = r0.<sun.audio.AudioDevice: boolean DEBUG>;
+
+        if $z0 == 0 goto label5;
+
+        $r4 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r4.<java.io.PrintStream: void println(java.lang.String)>("Audio Device: Streams all closed.");
+
+     label5:
+        $r2 = new java.util.Hashtable;
+
+        specialinvoke $r2.<java.util.Hashtable: void <init>()>();
+
+        r0.<sun.audio.AudioDevice: java.util.Hashtable clipStreams> = $r2;
+
+        $r3 = new java.util.Vector;
+
+        specialinvoke $r3.<java.util.Vector: void <init>()>();
+
+        r0.<sun.audio.AudioDevice: java.util.Vector infos> = $r3;
+
+        return;
+    }
+
+    public int openChannels()
+    {
+        int $i0;
+        java.util.Vector $r1;
+        sun.audio.AudioDevice r0;
+
+        r0 := @this: sun.audio.AudioDevice;
+
+        $r1 = r0.<sun.audio.AudioDevice: java.util.Vector infos>;
+
+        $i0 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        return $i0;
+    }
+
+    void setVerbose(boolean)
+    {
+        sun.audio.AudioDevice r0;
+        boolean z0;
+
+        r0 := @this: sun.audio.AudioDevice;
+
+        z0 := @parameter0: boolean;
+
+        r0.<sun.audio.AudioDevice: boolean DEBUG> = z0;
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        sun.audio.AudioDevice $r0;
+
+        $r0 = new sun.audio.AudioDevice;
+
+        specialinvoke $r0.<sun.audio.AudioDevice: void <init>()>();
+
+        <sun.audio.AudioDevice: sun.audio.AudioDevice device> = $r0;
+
+        return;
+    }
+}

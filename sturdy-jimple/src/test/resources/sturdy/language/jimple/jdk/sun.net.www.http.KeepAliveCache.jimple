@@ -1,0 +1,483 @@
+public class sun.net.www.http.KeepAliveCache extends java.util.HashMap implements java.lang.Runnable
+{
+    private static final long serialVersionUID;
+    static final int MAX_CONNECTIONS;
+    static int result;
+    static final int LIFETIME;
+    private java.lang.Thread keepAliveTimer;
+
+    static int getMaxConnections()
+    {
+        sun.security.action.GetIntegerAction $r3;
+        java.lang.Integer $r2;
+        int $i0, $i1, $i2, $i3, $i5;
+        java.lang.Object $r1;
+
+        $i0 = <sun.net.www.http.KeepAliveCache: int result>;
+
+        $i5 = (int) -1;
+
+        if $i0 != $i5 goto label1;
+
+        $r3 = new sun.security.action.GetIntegerAction;
+
+        specialinvoke $r3.<sun.security.action.GetIntegerAction: void <init>(java.lang.String,int)>("http.maxConnections", 5);
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r3);
+
+        $r2 = (java.lang.Integer) $r1;
+
+        $i1 = virtualinvoke $r2.<java.lang.Integer: int intValue()>();
+
+        <sun.net.www.http.KeepAliveCache: int result> = $i1;
+
+        $i2 = <sun.net.www.http.KeepAliveCache: int result>;
+
+        if $i2 > 0 goto label1;
+
+        <sun.net.www.http.KeepAliveCache: int result> = 5;
+
+     label1:
+        $i3 = <sun.net.www.http.KeepAliveCache: int result>;
+
+        return $i3;
+    }
+
+    public void <init>()
+    {
+        sun.net.www.http.KeepAliveCache r0;
+
+        r0 := @this: sun.net.www.http.KeepAliveCache;
+
+        specialinvoke r0.<java.util.HashMap: void <init>()>();
+
+        r0.<sun.net.www.http.KeepAliveCache: java.lang.Thread keepAliveTimer> = null;
+
+        return;
+    }
+
+    public synchronized void put(java.net.URL, java.lang.Object, sun.net.www.http.HttpClient)
+    {
+        sun.net.www.http.KeepAliveCache r0;
+        java.net.URL r3;
+        sun.net.www.http.HttpClient r6;
+        java.lang.Thread $r1, $r10;
+        int $i0, $i1;
+        sun.net.www.http.ClientVector $r7, $r9;
+        boolean $z0, z2, $z3, $z4;
+        sun.net.www.http.KeepAliveCache$1 $r8;
+        sun.net.www.http.KeepAliveKey $r2;
+        java.lang.Object r4, $r5;
+
+        r0 := @this: sun.net.www.http.KeepAliveCache;
+
+        r3 := @parameter0: java.net.URL;
+
+        r4 := @parameter1: java.lang.Object;
+
+        r6 := @parameter2: sun.net.www.http.HttpClient;
+
+        $r1 = r0.<sun.net.www.http.KeepAliveCache: java.lang.Thread keepAliveTimer>;
+
+        if $r1 != null goto label1;
+
+        $z4 = 1;
+
+        $z3 = 1;
+
+        goto label2;
+
+     label1:
+        $z4 = 0;
+
+        $z3 = 0;
+
+     label2:
+        z2 = $z3;
+
+        if $z4 != 0 goto label3;
+
+        $r10 = r0.<sun.net.www.http.KeepAliveCache: java.lang.Thread keepAliveTimer>;
+
+        $z0 = virtualinvoke $r10.<java.lang.Thread: boolean isAlive()>();
+
+        if $z0 != 0 goto label3;
+
+        z2 = 1;
+
+     label3:
+        if z2 == 0 goto label4;
+
+        virtualinvoke r0.<sun.net.www.http.KeepAliveCache: void clear()>();
+
+        $r8 = new sun.net.www.http.KeepAliveCache$1;
+
+        specialinvoke $r8.<sun.net.www.http.KeepAliveCache$1: void <init>(sun.net.www.http.KeepAliveCache,sun.net.www.http.KeepAliveCache)>(r0, r0);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r8);
+
+     label4:
+        $r2 = new sun.net.www.http.KeepAliveKey;
+
+        specialinvoke $r2.<sun.net.www.http.KeepAliveKey: void <init>(java.net.URL,java.lang.Object)>(r3, r4);
+
+        $r5 = specialinvoke r0.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r2);
+
+        $r9 = (sun.net.www.http.ClientVector) $r5;
+
+        if $r9 != null goto label7;
+
+        $i0 = virtualinvoke r6.<sun.net.www.http.HttpClient: int getKeepAliveTimeout()>();
+
+        $r7 = new sun.net.www.http.ClientVector;
+
+        if $i0 <= 0 goto label5;
+
+        $i1 = $i0 * 1000;
+
+        goto label6;
+
+     label5:
+        $i1 = 5000;
+
+     label6:
+        specialinvoke $r7.<sun.net.www.http.ClientVector: void <init>(int)>($i1);
+
+        virtualinvoke $r7.<sun.net.www.http.ClientVector: void put(sun.net.www.http.HttpClient)>(r6);
+
+        specialinvoke r0.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, $r7);
+
+        goto label8;
+
+     label7:
+        virtualinvoke $r9.<sun.net.www.http.ClientVector: void put(sun.net.www.http.HttpClient)>(r6);
+
+     label8:
+        return;
+    }
+
+    public synchronized void remove(sun.net.www.http.HttpClient, java.lang.Object)
+    {
+        sun.net.www.http.KeepAliveCache r4;
+        java.net.URL $r3;
+        sun.net.www.http.KeepAliveKey $r0;
+        sun.net.www.http.HttpClient r1;
+        sun.net.www.http.ClientVector r6;
+        java.lang.Object r2, $r5;
+        boolean $z0;
+
+        r4 := @this: sun.net.www.http.KeepAliveCache;
+
+        r1 := @parameter0: sun.net.www.http.HttpClient;
+
+        r2 := @parameter1: java.lang.Object;
+
+        $r0 = new sun.net.www.http.KeepAliveKey;
+
+        $r3 = r1.<sun.net.www.http.HttpClient: java.net.URL url>;
+
+        specialinvoke $r0.<sun.net.www.http.KeepAliveKey: void <init>(java.net.URL,java.lang.Object)>($r3, r2);
+
+        $r5 = specialinvoke r4.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r0);
+
+        r6 = (sun.net.www.http.ClientVector) $r5;
+
+        if r6 == null goto label1;
+
+        virtualinvoke r6.<sun.net.www.http.ClientVector: boolean remove(java.lang.Object)>(r1);
+
+        $z0 = virtualinvoke r6.<sun.net.www.http.ClientVector: boolean empty()>();
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r4.<sun.net.www.http.KeepAliveCache: void removeVector(sun.net.www.http.KeepAliveKey)>($r0);
+
+     label1:
+        return;
+    }
+
+    synchronized void removeVector(sun.net.www.http.KeepAliveKey)
+    {
+        sun.net.www.http.KeepAliveCache r0;
+        sun.net.www.http.KeepAliveKey r1;
+
+        r0 := @this: sun.net.www.http.KeepAliveCache;
+
+        r1 := @parameter0: sun.net.www.http.KeepAliveKey;
+
+        specialinvoke r0.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    public synchronized sun.net.www.http.HttpClient get(java.net.URL, java.lang.Object)
+    {
+        sun.net.www.http.KeepAliveCache r3;
+        java.net.URL r1;
+        sun.net.www.http.ClientVector r5;
+        java.lang.Object r2, $r4;
+        sun.net.www.http.KeepAliveKey $r0;
+        sun.net.www.http.HttpClient $r6;
+
+        r3 := @this: sun.net.www.http.KeepAliveCache;
+
+        r1 := @parameter0: java.net.URL;
+
+        r2 := @parameter1: java.lang.Object;
+
+        $r0 = new sun.net.www.http.KeepAliveKey;
+
+        specialinvoke $r0.<sun.net.www.http.KeepAliveKey: void <init>(java.net.URL,java.lang.Object)>(r1, r2);
+
+        $r4 = specialinvoke r3.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r0);
+
+        r5 = (sun.net.www.http.ClientVector) $r4;
+
+        if r5 != null goto label1;
+
+        return null;
+
+     label1:
+        $r6 = virtualinvoke r5.<sun.net.www.http.ClientVector: sun.net.www.http.HttpClient get()>();
+
+        return $r6;
+    }
+
+    public void run()
+    {
+        java.lang.Throwable $r13, $r14;
+        sun.net.www.http.KeepAliveCache r0;
+        long $l0, $l4, $l6, $l7;
+        sun.net.www.http.HttpClient r12;
+        java.util.ArrayList $r18;
+        byte $b8;
+        int $i1, $i2, $i3, $i5, i9, $i10;
+        sun.net.www.http.ClientVector r8;
+        boolean $z0, $z1;
+        java.util.Iterator $r3, $r4;
+        java.util.Set $r2;
+        sun.net.www.http.KeepAliveKey r16, r17;
+        java.util.List $r9;
+        sun.net.www.http.KeepAliveEntry r11;
+        java.lang.InterruptedException $r15;
+        java.lang.Object $r5, $r6, $r7, $r10;
+
+        r0 := @this: sun.net.www.http.KeepAliveCache;
+
+     label01:
+        staticinvoke <java.lang.Thread: void sleep(long)>(5000L);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r15 := @caughtexception;
+
+     label04:
+        entermonitor r0;
+
+     label05:
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r18 = new java.util.ArrayList;
+
+        specialinvoke $r18.<java.util.ArrayList: void <init>()>();
+
+        $r2 = virtualinvoke r0.<sun.net.www.http.KeepAliveCache: java.util.Set keySet()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Set: java.util.Iterator iterator()>();
+
+     label06:
+        $z1 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label15;
+
+        $r6 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r16 = (sun.net.www.http.KeepAliveKey) $r6;
+
+        $r7 = virtualinvoke r0.<sun.net.www.http.KeepAliveCache: java.lang.Object get(java.lang.Object)>(r16);
+
+        r8 = (sun.net.www.http.ClientVector) $r7;
+
+        entermonitor r8;
+
+     label07:
+        i9 = 0;
+
+     label08:
+        $i2 = virtualinvoke r8.<sun.net.www.http.ClientVector: int size()>();
+
+        if i9 >= $i2 goto label09;
+
+        $r10 = virtualinvoke r8.<sun.net.www.http.ClientVector: java.lang.Object elementAt(int)>(i9);
+
+        r11 = (sun.net.www.http.KeepAliveEntry) $r10;
+
+        $l4 = r11.<sun.net.www.http.KeepAliveEntry: long idleStartTime>;
+
+        $l7 = $l0 - $l4;
+
+        $i5 = r8.<sun.net.www.http.ClientVector: int nap>;
+
+        $l6 = (long) $i5;
+
+        $b8 = $l7 cmp $l6;
+
+        $i10 = (int) $b8;
+
+        if $i10 <= 0 goto label09;
+
+        r12 = r11.<sun.net.www.http.KeepAliveEntry: sun.net.www.http.HttpClient hc>;
+
+        virtualinvoke r12.<sun.net.www.http.HttpClient: void closeServer()>();
+
+        i9 = i9 + 1;
+
+        goto label08;
+
+     label09:
+        $r9 = virtualinvoke r8.<sun.net.www.http.ClientVector: java.util.List subList(int,int)>(0, i9);
+
+        interfaceinvoke $r9.<java.util.List: void clear()>();
+
+        $i3 = virtualinvoke r8.<sun.net.www.http.ClientVector: int size()>();
+
+        if $i3 != 0 goto label10;
+
+        virtualinvoke $r18.<java.util.ArrayList: boolean add(java.lang.Object)>(r16);
+
+     label10:
+        exitmonitor r8;
+
+     label11:
+        goto label14;
+
+     label12:
+        $r14 := @caughtexception;
+
+        exitmonitor r8;
+
+     label13:
+        throw $r14;
+
+     label14:
+        goto label06;
+
+     label15:
+        $r4 = virtualinvoke $r18.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label16:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label17;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r17 = (sun.net.www.http.KeepAliveKey) $r5;
+
+        virtualinvoke r0.<sun.net.www.http.KeepAliveCache: void removeVector(sun.net.www.http.KeepAliveKey)>(r17);
+
+        goto label16;
+
+     label17:
+        exitmonitor r0;
+
+     label18:
+        goto label21;
+
+     label19:
+        $r13 := @caughtexception;
+
+        exitmonitor r0;
+
+     label20:
+        throw $r13;
+
+     label21:
+        $i1 = virtualinvoke r0.<sun.net.www.http.KeepAliveCache: int size()>();
+
+        if $i1 > 0 goto label01;
+
+        return;
+
+        catch java.lang.InterruptedException from label01 to label02 with label03;
+        catch java.lang.Throwable from label07 to label11 with label12;
+        catch java.lang.Throwable from label12 to label13 with label12;
+        catch java.lang.Throwable from label05 to label18 with label19;
+        catch java.lang.Throwable from label19 to label20 with label19;
+    }
+
+    private void writeObject(java.io.ObjectOutputStream) throws java.io.IOException
+    {
+        java.io.ObjectOutputStream r2;
+        java.io.NotSerializableException $r0;
+        sun.net.www.http.KeepAliveCache r1;
+
+        r1 := @this: sun.net.www.http.KeepAliveCache;
+
+        r2 := @parameter0: java.io.ObjectOutputStream;
+
+        $r0 = new java.io.NotSerializableException;
+
+        specialinvoke $r0.<java.io.NotSerializableException: void <init>()>();
+
+        throw $r0;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.ObjectInputStream r2;
+        java.io.NotSerializableException $r0;
+        sun.net.www.http.KeepAliveCache r1;
+
+        r1 := @this: sun.net.www.http.KeepAliveCache;
+
+        r2 := @parameter0: java.io.ObjectInputStream;
+
+        $r0 = new java.io.NotSerializableException;
+
+        specialinvoke $r0.<java.io.NotSerializableException: void <init>()>();
+
+        throw $r0;
+    }
+
+    static java.lang.Thread access$002(sun.net.www.http.KeepAliveCache, java.lang.Thread)
+    {
+        sun.net.www.http.KeepAliveCache r0;
+        java.lang.Thread r1;
+
+        r0 := @parameter0: sun.net.www.http.KeepAliveCache;
+
+        r1 := @parameter1: java.lang.Thread;
+
+        r0.<sun.net.www.http.KeepAliveCache: java.lang.Thread keepAliveTimer> = r1;
+
+        return r1;
+    }
+
+    static java.lang.Thread access$000(sun.net.www.http.KeepAliveCache)
+    {
+        sun.net.www.http.KeepAliveCache r0;
+        java.lang.Thread $r1;
+
+        r0 := @parameter0: sun.net.www.http.KeepAliveCache;
+
+        $r1 = r0.<sun.net.www.http.KeepAliveCache: java.lang.Thread keepAliveTimer>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        <sun.net.www.http.KeepAliveCache: int LIFETIME> = 5000;
+
+        <sun.net.www.http.KeepAliveCache: int MAX_CONNECTIONS> = 5;
+
+        <sun.net.www.http.KeepAliveCache: long serialVersionUID> = -2937172892064557949L;
+
+        <sun.net.www.http.KeepAliveCache: int result> = -1;
+
+        return;
+    }
+}

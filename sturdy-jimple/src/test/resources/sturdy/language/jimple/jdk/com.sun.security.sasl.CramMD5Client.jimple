@@ -1,0 +1,165 @@
+final class com.sun.security.sasl.CramMD5Client extends com.sun.security.sasl.CramMD5Base implements javax.security.sasl.SaslClient
+{
+    private java.lang.String username;
+
+    void <init>(java.lang.String, byte[]) throws javax.security.sasl.SaslException
+    {
+        byte[] r3;
+        java.lang.String r1;
+        javax.security.sasl.SaslException $r2;
+        com.sun.security.sasl.CramMD5Client r0;
+
+        r0 := @this: com.sun.security.sasl.CramMD5Client;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: byte[];
+
+        specialinvoke r0.<com.sun.security.sasl.CramMD5Base: void <init>()>();
+
+        if r1 == null goto label1;
+
+        if r3 != null goto label2;
+
+     label1:
+        $r2 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r2.<javax.security.sasl.SaslException: void <init>(java.lang.String)>("CRAM-MD5: authentication ID and password must be specified");
+
+        throw $r2;
+
+     label2:
+        r0.<com.sun.security.sasl.CramMD5Client: java.lang.String username> = r1;
+
+        r0.<com.sun.security.sasl.CramMD5Client: byte[] pw> = r3;
+
+        return;
+    }
+
+    public boolean hasInitialResponse()
+    {
+        com.sun.security.sasl.CramMD5Client r0;
+
+        r0 := @this: com.sun.security.sasl.CramMD5Client;
+
+        return 0;
+    }
+
+    public byte[] evaluateChallenge(byte[]) throws javax.security.sasl.SaslException
+    {
+        byte[] r3, $r4, $r14;
+        java.lang.IllegalStateException $r18, $r19;
+        javax.security.sasl.SaslException $r21, $r23;
+        java.util.logging.Level $r1, $r12, $r17;
+        java.lang.String $r5, $r7, $r11, $r15;
+        boolean $z0, $z1, $z2;
+        java.util.logging.Logger $r2, $r13, $r16;
+        java.security.NoSuchAlgorithmException $r22;
+        java.lang.StringBuilder $r6, $r8, $r9, $r10;
+        java.io.UnsupportedEncodingException $r20;
+        com.sun.security.sasl.CramMD5Client r0;
+
+        r0 := @this: com.sun.security.sasl.CramMD5Client;
+
+        r3 := @parameter0: byte[];
+
+        $z0 = r0.<com.sun.security.sasl.CramMD5Client: boolean completed>;
+
+        if $z0 == 0 goto label1;
+
+        $r19 = new java.lang.IllegalStateException;
+
+        specialinvoke $r19.<java.lang.IllegalStateException: void <init>(java.lang.String)>("CRAM-MD5 authentication already completed");
+
+        throw $r19;
+
+     label1:
+        $z1 = r0.<com.sun.security.sasl.CramMD5Client: boolean aborted>;
+
+        if $z1 == 0 goto label2;
+
+        $r18 = new java.lang.IllegalStateException;
+
+        specialinvoke $r18.<java.lang.IllegalStateException: void <init>(java.lang.String)>("CRAM-MD5 authentication previously aborted due to error");
+
+        throw $r18;
+
+     label2:
+        $r2 = <com.sun.security.sasl.CramMD5Client: java.util.logging.Logger logger>;
+
+        $r1 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $z2 = virtualinvoke $r2.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r1);
+
+        if $z2 == 0 goto label3;
+
+        $r16 = <com.sun.security.sasl.CramMD5Client: java.util.logging.Logger logger>;
+
+        $r17 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r15 = new java.lang.String;
+
+        specialinvoke $r15.<java.lang.String: void <init>(byte[],java.lang.String)>(r3, "UTF8");
+
+        virtualinvoke $r16.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r17, "CRAMCLNT01:Received challenge: {0}", $r15);
+
+     label3:
+        $r4 = r0.<com.sun.security.sasl.CramMD5Client: byte[] pw>;
+
+        $r5 = staticinvoke <com.sun.security.sasl.CramMD5Client: java.lang.String HMAC_MD5(byte[],byte[])>($r4, r3);
+
+        virtualinvoke r0.<com.sun.security.sasl.CramMD5Client: void clearPassword()>();
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = r0.<com.sun.security.sasl.CramMD5Client: java.lang.String username>;
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r13 = <com.sun.security.sasl.CramMD5Client: java.util.logging.Logger logger>;
+
+        $r12 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        virtualinvoke $r13.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r12, "CRAMCLNT02:Sending response: {0}", $r11);
+
+        r0.<com.sun.security.sasl.CramMD5Client: boolean completed> = 1;
+
+        $r14 = virtualinvoke $r11.<java.lang.String: byte[] getBytes(java.lang.String)>("UTF8");
+
+     label4:
+        return $r14;
+
+     label5:
+        $r22 := @caughtexception;
+
+        r0.<com.sun.security.sasl.CramMD5Client: boolean aborted> = 1;
+
+        $r23 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r23.<javax.security.sasl.SaslException: void <init>(java.lang.String,java.lang.Throwable)>("MD5 algorithm not available on platform", $r22);
+
+        throw $r23;
+
+     label6:
+        $r20 := @caughtexception;
+
+        r0.<com.sun.security.sasl.CramMD5Client: boolean aborted> = 1;
+
+        $r21 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r21.<javax.security.sasl.SaslException: void <init>(java.lang.String,java.lang.Throwable)>("UTF8 not available on platform", $r20);
+
+        throw $r21;
+
+        catch java.security.NoSuchAlgorithmException from label2 to label4 with label5;
+        catch java.io.UnsupportedEncodingException from label2 to label4 with label6;
+    }
+}

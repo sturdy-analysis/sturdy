@@ -1,0 +1,219 @@
+public class javax.swing.text.html.parser.ParserDelegator extends javax.swing.text.html.HTMLEditorKit$Parser implements java.io.Serializable
+{
+    private static final java.lang.Object DTD_KEY;
+
+    protected static void setDefaultDTD()
+    {
+        staticinvoke <javax.swing.text.html.parser.ParserDelegator: javax.swing.text.html.parser.DTD getDefaultDTD()>();
+
+        return;
+    }
+
+    private static synchronized javax.swing.text.html.parser.DTD getDefaultDTD()
+    {
+        java.io.PrintStream $r7;
+        java.io.IOException $r5;
+        sun.awt.AppContext $r0;
+        java.lang.Object $r1, $r2, $r4;
+        javax.swing.text.html.parser.DTD $r3, r11, r12;
+        java.lang.StringBuilder $r6, $r8, $r9;
+        java.lang.String $r10;
+
+        $r0 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r1 = <javax.swing.text.html.parser.ParserDelegator: java.lang.Object DTD_KEY>;
+
+        $r2 = virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>($r1);
+
+        r11 = (javax.swing.text.html.parser.DTD) $r2;
+
+        if r11 != null goto label5;
+
+        r12 = null;
+
+     label1:
+        r12 = staticinvoke <javax.swing.text.html.parser.DTD: javax.swing.text.html.parser.DTD getDTD(java.lang.String)>("html32");
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r7 = <java.lang.System: java.io.PrintStream out>;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Throw an exception: could not get default dtd: ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("html32");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<java.io.PrintStream: void println(java.lang.String)>($r10);
+
+     label4:
+        $r3 = staticinvoke <javax.swing.text.html.parser.ParserDelegator: javax.swing.text.html.parser.DTD createDTD(javax.swing.text.html.parser.DTD,java.lang.String)>(r12, "html32");
+
+        r11 = $r3;
+
+        $r4 = <javax.swing.text.html.parser.ParserDelegator: java.lang.Object DTD_KEY>;
+
+        virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>($r4, $r3);
+
+     label5:
+        return r11;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    protected static javax.swing.text.html.parser.DTD createDTD(javax.swing.text.html.parser.DTD, java.lang.String)
+    {
+        java.io.PrintStream $r10;
+        java.io.DataInputStream $r7;
+        java.io.BufferedInputStream $r8;
+        java.lang.Exception $r9;
+        java.lang.StringBuilder $r0, $r2, $r3;
+        javax.swing.text.html.parser.DTD r6;
+        java.lang.String r1, $r4;
+        java.io.InputStream $r5;
+
+        r6 := @parameter0: javax.swing.text.html.parser.DTD;
+
+        r1 := @parameter1: java.lang.String;
+
+     label1:
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".bdtd");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r5 = staticinvoke <javax.swing.text.html.parser.ParserDelegator: java.io.InputStream getResourceAsStream(java.lang.String)>($r4);
+
+        if $r5 == null goto label2;
+
+        $r7 = new java.io.DataInputStream;
+
+        $r8 = new java.io.BufferedInputStream;
+
+        specialinvoke $r8.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>($r5);
+
+        specialinvoke $r7.<java.io.DataInputStream: void <init>(java.io.InputStream)>($r8);
+
+        virtualinvoke r6.<javax.swing.text.html.parser.DTD: void read(java.io.DataInputStream)>($r7);
+
+        staticinvoke <javax.swing.text.html.parser.DTD: void putDTDHash(java.lang.String,javax.swing.text.html.parser.DTD)>(r1, r6);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r9 := @caughtexception;
+
+        $r10 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r10.<java.io.PrintStream: void println(java.lang.Object)>($r9);
+
+     label4:
+        return r6;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public void <init>()
+    {
+        javax.swing.text.html.parser.ParserDelegator r0;
+
+        r0 := @this: javax.swing.text.html.parser.ParserDelegator;
+
+        specialinvoke r0.<javax.swing.text.html.HTMLEditorKit$Parser: void <init>()>();
+
+        staticinvoke <javax.swing.text.html.parser.ParserDelegator: void setDefaultDTD()>();
+
+        return;
+    }
+
+    public void parse(java.io.Reader, javax.swing.text.html.HTMLEditorKit$ParserCallback, boolean) throws java.io.IOException
+    {
+        javax.swing.text.html.parser.DocumentParser $r0;
+        javax.swing.text.html.parser.ParserDelegator r4;
+        javax.swing.text.html.parser.DTD $r1;
+        java.io.Reader r2;
+        javax.swing.text.html.HTMLEditorKit$ParserCallback r3;
+        boolean z0;
+
+        r4 := @this: javax.swing.text.html.parser.ParserDelegator;
+
+        r2 := @parameter0: java.io.Reader;
+
+        r3 := @parameter1: javax.swing.text.html.HTMLEditorKit$ParserCallback;
+
+        z0 := @parameter2: boolean;
+
+        $r0 = new javax.swing.text.html.parser.DocumentParser;
+
+        $r1 = staticinvoke <javax.swing.text.html.parser.ParserDelegator: javax.swing.text.html.parser.DTD getDefaultDTD()>();
+
+        specialinvoke $r0.<javax.swing.text.html.parser.DocumentParser: void <init>(javax.swing.text.html.parser.DTD)>($r1);
+
+        virtualinvoke $r0.<javax.swing.text.html.parser.DocumentParser: void parse(java.io.Reader,javax.swing.text.html.HTMLEditorKit$ParserCallback,boolean)>(r2, r3, z0);
+
+        return;
+    }
+
+    static java.io.InputStream getResourceAsStream(java.lang.String)
+    {
+        javax.swing.text.html.parser.ParserDelegator$1 $r0;
+        java.lang.Object $r2;
+        java.lang.String r1;
+        java.io.InputStream $r3;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = new javax.swing.text.html.parser.ParserDelegator$1;
+
+        specialinvoke $r0.<javax.swing.text.html.parser.ParserDelegator$1: void <init>(java.lang.String)>(r1);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r3 = (java.io.InputStream) $r2;
+
+        return $r3;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.lang.ClassNotFoundException, java.io.IOException
+    {
+        java.io.ObjectInputStream r0;
+        javax.swing.text.html.parser.ParserDelegator r1;
+
+        r1 := @this: javax.swing.text.html.parser.ParserDelegator;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        staticinvoke <javax.swing.text.html.parser.ParserDelegator: void setDefaultDTD()>();
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Object $r0;
+
+        $r0 = new java.lang.Object;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        <javax.swing.text.html.parser.ParserDelegator: java.lang.Object DTD_KEY> = $r0;
+
+        return;
+    }
+}

@@ -1,0 +1,1813 @@
+public final class com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl extends com.sun.corba.se.impl.interceptors.RequestInfoImpl implements org.omg.PortableInterceptor.ClientRequestInfo
+{
+    static final int CALL_SEND_REQUEST;
+    static final int CALL_SEND_POLL;
+    static final int CALL_RECEIVE_REPLY;
+    static final int CALL_RECEIVE_EXCEPTION;
+    static final int CALL_RECEIVE_OTHER;
+    private com.sun.corba.se.spi.protocol.RetryType retryRequest;
+    private int entryCount;
+    private org.omg.CORBA.Request request;
+    private boolean diiInitiate;
+    private com.sun.corba.se.spi.protocol.CorbaMessageMediator messageMediator;
+    private org.omg.CORBA.Object cachedTargetObject;
+    private org.omg.CORBA.Object cachedEffectiveTargetObject;
+    private org.omg.Dynamic.Parameter[] cachedArguments;
+    private org.omg.CORBA.TypeCode[] cachedExceptions;
+    private java.lang.String[] cachedContexts;
+    private java.lang.String[] cachedOperationContext;
+    private java.lang.String cachedReceivedExceptionId;
+    private org.omg.CORBA.Any cachedResult;
+    private org.omg.CORBA.Any cachedReceivedException;
+    private org.omg.IOP.TaggedProfile cachedEffectiveProfile;
+    private java.util.HashMap cachedRequestServiceContexts;
+    private java.util.HashMap cachedReplyServiceContexts;
+    private java.util.HashMap cachedEffectiveComponents;
+    protected boolean piCurrentPushed;
+    protected static final int MID_TARGET;
+    protected static final int MID_EFFECTIVE_TARGET;
+    protected static final int MID_EFFECTIVE_PROFILE;
+    protected static final int MID_RECEIVED_EXCEPTION;
+    protected static final int MID_RECEIVED_EXCEPTION_ID;
+    protected static final int MID_GET_EFFECTIVE_COMPONENT;
+    protected static final int MID_GET_EFFECTIVE_COMPONENTS;
+    protected static final int MID_GET_REQUEST_POLICY;
+    protected static final int MID_ADD_REQUEST_SERVICE_CONTEXT;
+    private static final boolean[][] validCall;
+
+    void reset()
+    {
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        com.sun.corba.se.spi.protocol.RetryType $r1;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        specialinvoke r0.<com.sun.corba.se.impl.interceptors.RequestInfoImpl: void reset()>();
+
+        $r1 = <com.sun.corba.se.spi.protocol.RetryType: com.sun.corba.se.spi.protocol.RetryType NONE>;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.spi.protocol.RetryType retryRequest> = $r1;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Request request> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: boolean diiInitiate> = 0;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator messageMediator> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Object cachedTargetObject> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Object cachedEffectiveTargetObject> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.Dynamic.Parameter[] cachedArguments> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.TypeCode[] cachedExceptions> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.lang.String[] cachedContexts> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.lang.String[] cachedOperationContext> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.lang.String cachedReceivedExceptionId> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Any cachedResult> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Any cachedReceivedException> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.IOP.TaggedProfile cachedEffectiveProfile> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.util.HashMap cachedRequestServiceContexts> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.util.HashMap cachedReplyServiceContexts> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.util.HashMap cachedEffectiveComponents> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: boolean piCurrentPushed> = 0;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int startingPointCall> = 0;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int endingPointCall> = 0;
+
+        return;
+    }
+
+    protected void <init>(com.sun.corba.se.spi.orb.ORB)
+    {
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        com.sun.corba.se.spi.orb.ORB r1;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        specialinvoke r0.<com.sun.corba.se.impl.interceptors.RequestInfoImpl: void <init>(com.sun.corba.se.spi.orb.ORB)>(r1);
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int entryCount> = 0;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int startingPointCall> = 0;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int endingPointCall> = 0;
+
+        return;
+    }
+
+    public org.omg.CORBA.Object target()
+    {
+        com.sun.corba.se.spi.ior.IOR $r6;
+        com.sun.corba.se.spi.transport.CorbaContactInfo r5;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator $r3;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        org.omg.CORBA.Object $r1, $r2, $r7;
+        com.sun.corba.se.pept.transport.ContactInfo $r4;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Object cachedTargetObject>;
+
+        if $r1 != null goto label1;
+
+        $r3 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator messageMediator>;
+
+        $r4 = interfaceinvoke $r3.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.transport.ContactInfo getContactInfo()>();
+
+        r5 = (com.sun.corba.se.spi.transport.CorbaContactInfo) $r4;
+
+        $r6 = interfaceinvoke r5.<com.sun.corba.se.spi.transport.CorbaContactInfo: com.sun.corba.se.spi.ior.IOR getTargetIOR()>();
+
+        $r7 = virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Object iorToObject(com.sun.corba.se.spi.ior.IOR)>($r6);
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Object cachedTargetObject> = $r7;
+
+     label1:
+        $r2 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Object cachedTargetObject>;
+
+        return $r2;
+    }
+
+    public org.omg.CORBA.Object effective_target()
+    {
+        com.sun.corba.se.spi.ior.IOR $r6;
+        com.sun.corba.se.spi.transport.CorbaContactInfo r5;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator $r3;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        org.omg.CORBA.Object $r1, $r2, $r7;
+        com.sun.corba.se.pept.transport.ContactInfo $r4;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Object cachedEffectiveTargetObject>;
+
+        if $r1 != null goto label1;
+
+        $r3 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator messageMediator>;
+
+        $r4 = interfaceinvoke $r3.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.transport.ContactInfo getContactInfo()>();
+
+        r5 = (com.sun.corba.se.spi.transport.CorbaContactInfo) $r4;
+
+        $r6 = interfaceinvoke r5.<com.sun.corba.se.spi.transport.CorbaContactInfo: com.sun.corba.se.spi.ior.IOR getEffectiveTargetIOR()>();
+
+        $r7 = virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Object iorToObject(com.sun.corba.se.spi.ior.IOR)>($r6);
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Object cachedEffectiveTargetObject> = $r7;
+
+     label1:
+        $r2 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Object cachedEffectiveTargetObject>;
+
+        return $r2;
+    }
+
+    public org.omg.IOP.TaggedProfile effective_profile()
+    {
+        com.sun.corba.se.spi.transport.CorbaContactInfo r5;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator $r3;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        com.sun.corba.se.pept.transport.ContactInfo $r4;
+        com.sun.corba.se.spi.ior.iiop.IIOPProfile $r6;
+        org.omg.IOP.TaggedProfile $r1, $r2, $r7;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.IOP.TaggedProfile cachedEffectiveProfile>;
+
+        if $r1 != null goto label1;
+
+        $r3 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator messageMediator>;
+
+        $r4 = interfaceinvoke $r3.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.transport.ContactInfo getContactInfo()>();
+
+        r5 = (com.sun.corba.se.spi.transport.CorbaContactInfo) $r4;
+
+        $r6 = interfaceinvoke r5.<com.sun.corba.se.spi.transport.CorbaContactInfo: com.sun.corba.se.spi.ior.iiop.IIOPProfile getEffectiveProfile()>();
+
+        $r7 = interfaceinvoke $r6.<com.sun.corba.se.spi.ior.iiop.IIOPProfile: org.omg.IOP.TaggedProfile getIOPProfile()>();
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.IOP.TaggedProfile cachedEffectiveProfile> = $r7;
+
+     label1:
+        $r2 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.IOP.TaggedProfile cachedEffectiveProfile>;
+
+        return $r2;
+    }
+
+    public org.omg.CORBA.Any received_exception()
+    {
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        org.omg.CORBA.Any $r1, $r2, $r4;
+        java.lang.Exception $r3;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void checkAccess(int)>(17);
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Any cachedReceivedException>;
+
+        if $r1 != null goto label1;
+
+        $r3 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.lang.Exception exception>;
+
+        $r4 = virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Any exceptionToAny(java.lang.Exception)>($r3);
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Any cachedReceivedException> = $r4;
+
+     label1:
+        $r2 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Any cachedReceivedException>;
+
+        return $r2;
+    }
+
+    public java.lang.String received_exception_id()
+    {
+        org.omg.CORBA.INTERNAL $r11;
+        org.omg.CORBA.portable.ApplicationException $r6;
+        com.sun.corba.se.impl.logging.InterceptorsSystemException $r10;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        java.lang.String $r1, $r9, r12, $r13;
+        boolean $z0, $z1;
+        java.lang.Exception $r2, $r3, $r4, $r5, $r7;
+        java.lang.Class $r8;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void checkAccess(int)>(18);
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.lang.String cachedReceivedExceptionId>;
+
+        if $r1 != null goto label4;
+
+        r12 = null;
+
+        $r2 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.lang.Exception exception>;
+
+        if $r2 != null goto label1;
+
+        $r10 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.impl.logging.InterceptorsSystemException wrapper>;
+
+        $r11 = virtualinvoke $r10.<com.sun.corba.se.impl.logging.InterceptorsSystemException: org.omg.CORBA.INTERNAL exceptionWasNull()>();
+
+        throw $r11;
+
+     label1:
+        $r3 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.lang.Exception exception>;
+
+        $z0 = $r3 instanceof org.omg.CORBA.SystemException;
+
+        if $z0 == 0 goto label2;
+
+        $r7 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.lang.Exception exception>;
+
+        $r8 = virtualinvoke $r7.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.Class: java.lang.String getName()>();
+
+        r12 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: java.lang.String repositoryIdOf(java.lang.String)>($r9);
+
+        goto label3;
+
+     label2:
+        $r4 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.lang.Exception exception>;
+
+        $z1 = $r4 instanceof org.omg.CORBA.portable.ApplicationException;
+
+        if $z1 == 0 goto label3;
+
+        $r5 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.lang.Exception exception>;
+
+        $r6 = (org.omg.CORBA.portable.ApplicationException) $r5;
+
+        r12 = virtualinvoke $r6.<org.omg.CORBA.portable.ApplicationException: java.lang.String getId()>();
+
+     label3:
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.lang.String cachedReceivedExceptionId> = r12;
+
+     label4:
+        $r13 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.lang.String cachedReceivedExceptionId>;
+
+        return $r13;
+    }
+
+    public org.omg.IOP.TaggedComponent get_effective_component(int)
+    {
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        org.omg.IOP.TaggedComponent[] $r1;
+        int i0;
+        org.omg.IOP.TaggedComponent $r2;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        i0 := @parameter0: int;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void checkAccess(int)>(19);
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.IOP.TaggedComponent[] get_effective_components(int)>(i0);
+
+        $r2 = $r1[0];
+
+        return $r2;
+    }
+
+    public org.omg.IOP.TaggedComponent[] get_effective_components(int)
+    {
+        com.sun.corba.se.impl.logging.OMGSystemException $r6;
+        com.sun.corba.se.spi.ior.TaggedProfileTemplate $r11;
+        java.util.HashMap $r2, $r3, $r14, $r15, $r18;
+        com.sun.corba.se.spi.transport.CorbaContactInfo $r16;
+        java.lang.Integer $r1;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        int i0, $i1;
+        boolean $z0, z1;
+        org.omg.CORBA.BAD_PARAM $r7;
+        com.sun.corba.se.spi.orb.ORB $r12;
+        com.sun.corba.se.spi.ior.iiop.IIOPProfileTemplate $r17;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator $r8;
+        org.omg.IOP.TaggedComponent[] $r5, $r13, r19;
+        com.sun.corba.se.pept.transport.ContactInfo $r9;
+        com.sun.corba.se.spi.ior.iiop.IIOPProfile $r10;
+        java.lang.Object $r4;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        i0 := @parameter0: int;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void checkAccess(int)>(20);
+
+        $r1 = new java.lang.Integer;
+
+        specialinvoke $r1.<java.lang.Integer: void <init>(int)>(i0);
+
+        r19 = null;
+
+        z1 = 0;
+
+        $r2 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.util.HashMap cachedEffectiveComponents>;
+
+        if $r2 != null goto label1;
+
+        $r18 = new java.util.HashMap;
+
+        specialinvoke $r18.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.util.HashMap cachedEffectiveComponents> = $r18;
+
+        z1 = 1;
+
+        goto label2;
+
+     label1:
+        $r3 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.util.HashMap cachedEffectiveComponents>;
+
+        $r4 = virtualinvoke $r3.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r5 = (org.omg.IOP.TaggedComponent[]) $r4;
+
+        r19 = (org.omg.IOP.TaggedComponent[]) $r5;
+
+     label2:
+        if r19 != null goto label4;
+
+        if z1 != 0 goto label3;
+
+        $r15 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.util.HashMap cachedEffectiveComponents>;
+
+        $z0 = virtualinvoke $r15.<java.util.HashMap: boolean containsKey(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label4;
+
+     label3:
+        $r8 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator messageMediator>;
+
+        $r9 = interfaceinvoke $r8.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.transport.ContactInfo getContactInfo()>();
+
+        $r16 = (com.sun.corba.se.spi.transport.CorbaContactInfo) $r9;
+
+        $r10 = interfaceinvoke $r16.<com.sun.corba.se.spi.transport.CorbaContactInfo: com.sun.corba.se.spi.ior.iiop.IIOPProfile getEffectiveProfile()>();
+
+        $r11 = interfaceinvoke $r10.<com.sun.corba.se.spi.ior.iiop.IIOPProfile: com.sun.corba.se.spi.ior.TaggedProfileTemplate getTaggedProfileTemplate()>();
+
+        $r17 = (com.sun.corba.se.spi.ior.iiop.IIOPProfileTemplate) $r11;
+
+        $r12 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.spi.orb.ORB myORB>;
+
+        $r13 = interfaceinvoke $r17.<com.sun.corba.se.spi.ior.iiop.IIOPProfileTemplate: org.omg.IOP.TaggedComponent[] getIOPComponents(com.sun.corba.se.spi.orb.ORB,int)>($r12, i0);
+
+        r19 = $r13;
+
+        $r14 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.util.HashMap cachedEffectiveComponents>;
+
+        virtualinvoke $r14.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r13);
+
+     label4:
+        if r19 == null goto label5;
+
+        $i1 = lengthof r19;
+
+        if $i1 != 0 goto label6;
+
+     label5:
+        $r6 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.impl.logging.OMGSystemException stdWrapper>;
+
+        $r7 = virtualinvoke $r6.<com.sun.corba.se.impl.logging.OMGSystemException: org.omg.CORBA.BAD_PARAM invalidComponentId(java.lang.Object)>($r1);
+
+        throw $r7;
+
+     label6:
+        return r19;
+    }
+
+    public org.omg.CORBA.Policy get_request_policy(int)
+    {
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        int i0;
+        org.omg.CORBA.NO_IMPLEMENT $r2;
+        com.sun.corba.se.impl.logging.InterceptorsSystemException $r1;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        i0 := @parameter0: int;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void checkAccess(int)>(21);
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.impl.logging.InterceptorsSystemException wrapper>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.logging.InterceptorsSystemException: org.omg.CORBA.NO_IMPLEMENT piOrbNotPolicyBased()>();
+
+        throw $r2;
+    }
+
+    public void add_request_service_context(org.omg.IOP.ServiceContext, boolean)
+    {
+        java.util.HashMap $r1, $r3, $r6;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator $r2;
+        org.omg.IOP.ServiceContext r5;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        com.sun.corba.se.spi.servicecontext.ServiceContexts $r4;
+        boolean z0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        r5 := @parameter0: org.omg.IOP.ServiceContext;
+
+        z0 := @parameter1: boolean;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void checkAccess(int)>(22);
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.util.HashMap cachedRequestServiceContexts>;
+
+        if $r1 != null goto label1;
+
+        $r6 = new java.util.HashMap;
+
+        specialinvoke $r6.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.util.HashMap cachedRequestServiceContexts> = $r6;
+
+     label1:
+        $r3 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.util.HashMap cachedRequestServiceContexts>;
+
+        $r2 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator messageMediator>;
+
+        $r4 = interfaceinvoke $r2.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.spi.servicecontext.ServiceContexts getRequestServiceContexts()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void addServiceContext(java.util.HashMap,com.sun.corba.se.spi.servicecontext.ServiceContexts,org.omg.IOP.ServiceContext,boolean)>($r3, $r4, r5, z0);
+
+        return;
+    }
+
+    public int request_id()
+    {
+        int $i0;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator $r1;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator messageMediator>;
+
+        $i0 = interfaceinvoke $r1.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: int getRequestId()>();
+
+        return $i0;
+    }
+
+    public java.lang.String operation()
+    {
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        java.lang.String $r2;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator $r1;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator messageMediator>;
+
+        $r2 = interfaceinvoke $r1.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: java.lang.String getOperationName()>();
+
+        return $r2;
+    }
+
+    public org.omg.Dynamic.Parameter[] arguments()
+    {
+        org.omg.CORBA.Request $r3, $r4;
+        org.omg.Dynamic.Parameter[] $r1, $r2, $r6;
+        com.sun.corba.se.impl.logging.OMGSystemException $r7;
+        org.omg.CORBA.NO_RESOURCES $r8;
+        org.omg.CORBA.NVList $r5;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void checkAccess(int)>(2);
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.Dynamic.Parameter[] cachedArguments>;
+
+        if $r1 != null goto label2;
+
+        $r3 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Request request>;
+
+        if $r3 != null goto label1;
+
+        $r7 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.impl.logging.OMGSystemException stdWrapper>;
+
+        $r8 = virtualinvoke $r7.<com.sun.corba.se.impl.logging.OMGSystemException: org.omg.CORBA.NO_RESOURCES piOperationNotSupported1()>();
+
+        throw $r8;
+
+     label1:
+        $r4 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Request request>;
+
+        $r5 = virtualinvoke $r4.<org.omg.CORBA.Request: org.omg.CORBA.NVList arguments()>();
+
+        $r6 = virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.Dynamic.Parameter[] nvListToParameterArray(org.omg.CORBA.NVList)>($r5);
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.Dynamic.Parameter[] cachedArguments> = $r6;
+
+     label2:
+        $r2 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.Dynamic.Parameter[] cachedArguments>;
+
+        return $r2;
+    }
+
+    public org.omg.CORBA.TypeCode[] exceptions()
+    {
+        org.omg.CORBA.TypeCode[] $r1, $r2, r6;
+        org.omg.CORBA.Request $r3, $r4;
+        org.omg.CORBA.INTERNAL $r12;
+        com.sun.corba.se.impl.logging.OMGSystemException $r8;
+        org.omg.CORBA.NO_RESOURCES $r9;
+        com.sun.corba.se.impl.logging.InterceptorsSystemException $r11;
+        org.omg.CORBA.TypeCode $r7;
+        java.lang.Exception $r10;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        int $i0, i1;
+        org.omg.CORBA.ExceptionList $r5;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void checkAccess(int)>(3);
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.TypeCode[] cachedExceptions>;
+
+        if $r1 != null goto label7;
+
+        $r3 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Request request>;
+
+        if $r3 != null goto label1;
+
+        $r8 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.impl.logging.OMGSystemException stdWrapper>;
+
+        $r9 = virtualinvoke $r8.<com.sun.corba.se.impl.logging.OMGSystemException: org.omg.CORBA.NO_RESOURCES piOperationNotSupported2()>();
+
+        throw $r9;
+
+     label1:
+        $r4 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Request request>;
+
+        $r5 = virtualinvoke $r4.<org.omg.CORBA.Request: org.omg.CORBA.ExceptionList exceptions()>();
+
+        $i0 = virtualinvoke $r5.<org.omg.CORBA.ExceptionList: int count()>();
+
+        r6 = newarray (org.omg.CORBA.TypeCode)[$i0];
+
+     label2:
+        i1 = 0;
+
+     label3:
+        if i1 >= $i0 goto label4;
+
+        $r7 = virtualinvoke $r5.<org.omg.CORBA.ExceptionList: org.omg.CORBA.TypeCode item(int)>(i1);
+
+        r6[i1] = $r7;
+
+        i1 = i1 + 1;
+
+        goto label3;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r10 := @caughtexception;
+
+        $r11 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.impl.logging.InterceptorsSystemException wrapper>;
+
+        $r12 = virtualinvoke $r11.<com.sun.corba.se.impl.logging.InterceptorsSystemException: org.omg.CORBA.INTERNAL exceptionInExceptions(java.lang.Throwable)>($r10);
+
+        throw $r12;
+
+     label6:
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.TypeCode[] cachedExceptions> = r6;
+
+     label7:
+        $r2 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.TypeCode[] cachedExceptions>;
+
+        return $r2;
+
+        catch java.lang.Exception from label2 to label4 with label5;
+    }
+
+    public java.lang.String[] contexts()
+    {
+        org.omg.CORBA.Request $r3, $r4;
+        org.omg.CORBA.INTERNAL $r12;
+        com.sun.corba.se.impl.logging.OMGSystemException $r8;
+        org.omg.CORBA.NO_RESOURCES $r9;
+        java.lang.String[] $r1, $r2, r6;
+        com.sun.corba.se.impl.logging.InterceptorsSystemException $r11;
+        java.lang.Exception $r10;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        org.omg.CORBA.ContextList $r5;
+        int $i0, i1;
+        java.lang.String $r7;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void checkAccess(int)>(4);
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.lang.String[] cachedContexts>;
+
+        if $r1 != null goto label7;
+
+        $r3 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Request request>;
+
+        if $r3 != null goto label1;
+
+        $r8 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.impl.logging.OMGSystemException stdWrapper>;
+
+        $r9 = virtualinvoke $r8.<com.sun.corba.se.impl.logging.OMGSystemException: org.omg.CORBA.NO_RESOURCES piOperationNotSupported3()>();
+
+        throw $r9;
+
+     label1:
+        $r4 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Request request>;
+
+        $r5 = virtualinvoke $r4.<org.omg.CORBA.Request: org.omg.CORBA.ContextList contexts()>();
+
+        $i0 = virtualinvoke $r5.<org.omg.CORBA.ContextList: int count()>();
+
+        r6 = newarray (java.lang.String)[$i0];
+
+     label2:
+        i1 = 0;
+
+     label3:
+        if i1 >= $i0 goto label4;
+
+        $r7 = virtualinvoke $r5.<org.omg.CORBA.ContextList: java.lang.String item(int)>(i1);
+
+        r6[i1] = $r7;
+
+        i1 = i1 + 1;
+
+        goto label3;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r10 := @caughtexception;
+
+        $r11 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.impl.logging.InterceptorsSystemException wrapper>;
+
+        $r12 = virtualinvoke $r11.<com.sun.corba.se.impl.logging.InterceptorsSystemException: org.omg.CORBA.INTERNAL exceptionInContexts(java.lang.Throwable)>($r10);
+
+        throw $r12;
+
+     label6:
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.lang.String[] cachedContexts> = r6;
+
+     label7:
+        $r2 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.lang.String[] cachedContexts>;
+
+        return $r2;
+
+        catch java.lang.Exception from label2 to label4 with label5;
+    }
+
+    public java.lang.String[] operation_context()
+    {
+        org.omg.CORBA.Request $r2, $r3;
+        org.omg.CORBA.Any $r9;
+        com.sun.corba.se.impl.logging.OMGSystemException $r11;
+        org.omg.CORBA.Context $r4;
+        org.omg.CORBA.NO_RESOURCES $r12;
+        org.omg.CORBA.NVList $r5;
+        java.lang.String[] $r1, r6, $r14, $r15;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        int $i0, $i1, $i2, $i3, i4, i5, i6;
+        java.lang.String $r8, $r10;
+        org.omg.CORBA.NamedValue $r7;
+        java.lang.Exception $r13;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void checkAccess(int)>(5);
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.lang.String[] cachedOperationContext>;
+
+        if $r1 != null goto label8;
+
+        $r2 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Request request>;
+
+        if $r2 != null goto label1;
+
+        $r11 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.impl.logging.OMGSystemException stdWrapper>;
+
+        $r12 = virtualinvoke $r11.<com.sun.corba.se.impl.logging.OMGSystemException: org.omg.CORBA.NO_RESOURCES piOperationNotSupported4()>();
+
+        throw $r12;
+
+     label1:
+        $r3 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Request request>;
+
+        $r4 = virtualinvoke $r3.<org.omg.CORBA.Request: org.omg.CORBA.Context ctx()>();
+
+        $r5 = virtualinvoke $r4.<org.omg.CORBA.Context: org.omg.CORBA.NVList get_values(java.lang.String,int,java.lang.String)>("", 15, "*");
+
+        $i0 = virtualinvoke $r5.<org.omg.CORBA.NVList: int count()>();
+
+        $i1 = $i0 * 2;
+
+        r6 = newarray (java.lang.String)[$i1];
+
+        if $r5 == null goto label7;
+
+        $i2 = virtualinvoke $r5.<org.omg.CORBA.NVList: int count()>();
+
+        if $i2 == 0 goto label7;
+
+        i4 = 0;
+
+        i5 = 0;
+
+     label2:
+        $i3 = virtualinvoke $r5.<org.omg.CORBA.NVList: int count()>();
+
+        if i5 >= $i3 goto label7;
+
+     label3:
+        $r7 = virtualinvoke $r5.<org.omg.CORBA.NVList: org.omg.CORBA.NamedValue item(int)>(i5);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r13 := @caughtexception;
+
+        $r14 = (java.lang.String[]) null;
+
+        return $r14;
+
+     label6:
+        $r8 = virtualinvoke $r7.<org.omg.CORBA.NamedValue: java.lang.String name()>();
+
+        r6[i4] = $r8;
+
+        i6 = i4 + 1;
+
+        $r9 = virtualinvoke $r7.<org.omg.CORBA.NamedValue: org.omg.CORBA.Any value()>();
+
+        $r10 = virtualinvoke $r9.<org.omg.CORBA.Any: java.lang.String extract_string()>();
+
+        r6[i6] = $r10;
+
+        i4 = i6 + 1;
+
+        i5 = i5 + 1;
+
+        goto label2;
+
+     label7:
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.lang.String[] cachedOperationContext> = r6;
+
+     label8:
+        $r15 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.lang.String[] cachedOperationContext>;
+
+        return $r15;
+
+        catch java.lang.Exception from label3 to label4 with label5;
+    }
+
+    public org.omg.CORBA.Any result()
+    {
+        org.omg.CORBA.Request $r3, $r4;
+        org.omg.CORBA.INTERNAL $r8;
+        org.omg.CORBA.Any $r1, $r2, $r6;
+        com.sun.corba.se.impl.logging.OMGSystemException $r9;
+        org.omg.CORBA.NamedValue $r5;
+        org.omg.CORBA.NO_RESOURCES $r10;
+        com.sun.corba.se.impl.logging.InterceptorsSystemException $r7;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void checkAccess(int)>(6);
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Any cachedResult>;
+
+        if $r1 != null goto label3;
+
+        $r3 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Request request>;
+
+        if $r3 != null goto label1;
+
+        $r9 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.impl.logging.OMGSystemException stdWrapper>;
+
+        $r10 = virtualinvoke $r9.<com.sun.corba.se.impl.logging.OMGSystemException: org.omg.CORBA.NO_RESOURCES piOperationNotSupported5()>();
+
+        throw $r10;
+
+     label1:
+        $r4 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Request request>;
+
+        $r5 = virtualinvoke $r4.<org.omg.CORBA.Request: org.omg.CORBA.NamedValue result()>();
+
+        if $r5 != null goto label2;
+
+        $r7 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.impl.logging.InterceptorsSystemException wrapper>;
+
+        $r8 = virtualinvoke $r7.<com.sun.corba.se.impl.logging.InterceptorsSystemException: org.omg.CORBA.INTERNAL piDiiResultIsNull()>();
+
+        throw $r8;
+
+     label2:
+        $r6 = virtualinvoke $r5.<org.omg.CORBA.NamedValue: org.omg.CORBA.Any value()>();
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Any cachedResult> = $r6;
+
+     label3:
+        $r2 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Any cachedResult>;
+
+        return $r2;
+    }
+
+    public boolean response_expected()
+    {
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator messageMediator>;
+
+        $z0 = interfaceinvoke $r1.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: boolean isOneWay()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public org.omg.CORBA.Object forward_reference()
+    {
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        short $s0;
+        org.omg.CORBA.BAD_INV_ORDER $r4;
+        com.sun.corba.se.spi.ior.IOR $r1;
+        org.omg.CORBA.Object $r2;
+        com.sun.corba.se.impl.logging.OMGSystemException $r3;
+        int $i1;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void checkAccess(int)>(10);
+
+        $s0 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: short replyStatus>;
+
+        $i1 = (int) $s0;
+
+        if $i1 == 3 goto label1;
+
+        $r3 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.impl.logging.OMGSystemException stdWrapper>;
+
+        $r4 = virtualinvoke $r3.<com.sun.corba.se.impl.logging.OMGSystemException: org.omg.CORBA.BAD_INV_ORDER invalidPiCall1()>();
+
+        throw $r4;
+
+     label1:
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.spi.ior.IOR getLocatedIOR()>();
+
+        $r2 = virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Object iorToObject(com.sun.corba.se.spi.ior.IOR)>($r1);
+
+        return $r2;
+    }
+
+    private com.sun.corba.se.spi.ior.IOR getLocatedIOR()
+    {
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        com.sun.corba.se.spi.transport.CorbaContactInfoList r4;
+        com.sun.corba.se.pept.transport.ContactInfo $r2;
+        com.sun.corba.se.spi.ior.IOR $r5;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator $r1;
+        com.sun.corba.se.pept.transport.ContactInfoList $r3;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator messageMediator>;
+
+        $r2 = interfaceinvoke $r1.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.transport.ContactInfo getContactInfo()>();
+
+        $r3 = interfaceinvoke $r2.<com.sun.corba.se.pept.transport.ContactInfo: com.sun.corba.se.pept.transport.ContactInfoList getContactInfoList()>();
+
+        r4 = (com.sun.corba.se.spi.transport.CorbaContactInfoList) $r3;
+
+        $r5 = interfaceinvoke r4.<com.sun.corba.se.spi.transport.CorbaContactInfoList: com.sun.corba.se.spi.ior.IOR getEffectiveTargetIOR()>();
+
+        return $r5;
+    }
+
+    protected void setLocatedIOR(com.sun.corba.se.spi.ior.IOR)
+    {
+        com.sun.corba.se.pept.protocol.ClientInvocationInfo $r4;
+        java.util.Iterator $r6;
+        com.sun.corba.se.spi.ior.IOR r10;
+        com.sun.corba.se.pept.broker.Broker $r2;
+        com.sun.corba.se.spi.transport.CorbaContactInfoListIterator r7;
+        com.sun.corba.se.spi.transport.CorbaContactInfo $r11;
+        com.sun.corba.se.spi.orb.ORB r3;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator $r1, $r8;
+        com.sun.corba.se.impl.protocol.CorbaInvocationInfo $r5;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        com.sun.corba.se.pept.transport.ContactInfo $r9;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        r10 := @parameter0: com.sun.corba.se.spi.ior.IOR;
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator messageMediator>;
+
+        $r2 = interfaceinvoke $r1.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.broker.Broker getBroker()>();
+
+        r3 = (com.sun.corba.se.spi.orb.ORB) $r2;
+
+        $r4 = virtualinvoke r3.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.pept.protocol.ClientInvocationInfo getInvocationInfo()>();
+
+        $r5 = (com.sun.corba.se.impl.protocol.CorbaInvocationInfo) $r4;
+
+        $r6 = virtualinvoke $r5.<com.sun.corba.se.impl.protocol.CorbaInvocationInfo: java.util.Iterator getContactInfoListIterator()>();
+
+        r7 = (com.sun.corba.se.spi.transport.CorbaContactInfoListIterator) $r6;
+
+        $r8 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator messageMediator>;
+
+        $r9 = interfaceinvoke $r8.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.transport.ContactInfo getContactInfo()>();
+
+        $r11 = (com.sun.corba.se.spi.transport.CorbaContactInfo) $r9;
+
+        interfaceinvoke r7.<com.sun.corba.se.spi.transport.CorbaContactInfoListIterator: void reportRedirect(com.sun.corba.se.spi.transport.CorbaContactInfo,com.sun.corba.se.spi.ior.IOR)>($r11, r10);
+
+        return;
+    }
+
+    public org.omg.IOP.ServiceContext get_request_service_context(int)
+    {
+        java.util.HashMap $r1, $r3, $r6;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator $r2;
+        org.omg.IOP.ServiceContext $r5;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        com.sun.corba.se.spi.servicecontext.ServiceContexts $r4;
+        int i0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        i0 := @parameter0: int;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void checkAccess(int)>(12);
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.util.HashMap cachedRequestServiceContexts>;
+
+        if $r1 != null goto label1;
+
+        $r6 = new java.util.HashMap;
+
+        specialinvoke $r6.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.util.HashMap cachedRequestServiceContexts> = $r6;
+
+     label1:
+        $r3 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.util.HashMap cachedRequestServiceContexts>;
+
+        $r2 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator messageMediator>;
+
+        $r4 = interfaceinvoke $r2.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.spi.servicecontext.ServiceContexts getRequestServiceContexts()>();
+
+        $r5 = virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.IOP.ServiceContext getServiceContext(java.util.HashMap,com.sun.corba.se.spi.servicecontext.ServiceContexts,int)>($r3, $r4, i0);
+
+        return $r5;
+    }
+
+    public org.omg.IOP.ServiceContext get_reply_service_context(int)
+    {
+        org.omg.CORBA.BAD_PARAM $r10;
+        com.sun.corba.se.impl.logging.OMGSystemException $r9;
+        java.util.HashMap $r1, $r4, $r7;
+        java.lang.NullPointerException $r6, $r8;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator $r2;
+        org.omg.IOP.ServiceContext $r5;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        com.sun.corba.se.spi.servicecontext.ServiceContexts $r3;
+        int i0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        i0 := @parameter0: int;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: void checkAccess(int)>(13);
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.util.HashMap cachedReplyServiceContexts>;
+
+        if $r1 != null goto label1;
+
+        $r7 = new java.util.HashMap;
+
+        specialinvoke $r7.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.util.HashMap cachedReplyServiceContexts> = $r7;
+
+     label1:
+        $r2 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator messageMediator>;
+
+        $r3 = interfaceinvoke $r2.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.spi.servicecontext.ServiceContexts getReplyServiceContexts()>();
+
+        if $r3 != null goto label2;
+
+        $r6 = new java.lang.NullPointerException;
+
+        specialinvoke $r6.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r6;
+
+     label2:
+        $r4 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.util.HashMap cachedReplyServiceContexts>;
+
+        $r5 = virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.IOP.ServiceContext getServiceContext(java.util.HashMap,com.sun.corba.se.spi.servicecontext.ServiceContexts,int)>($r4, $r3, i0);
+
+     label3:
+        return $r5;
+
+     label4:
+        $r8 := @caughtexception;
+
+        $r9 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.impl.logging.OMGSystemException stdWrapper>;
+
+        $r10 = virtualinvoke $r9.<com.sun.corba.se.impl.logging.OMGSystemException: org.omg.CORBA.BAD_PARAM invalidServiceContextId(java.lang.Throwable)>($r8);
+
+        throw $r10;
+
+        catch java.lang.NullPointerException from label1 to label3 with label4;
+    }
+
+    public com.sun.corba.se.spi.legacy.connection.Connection connection()
+    {
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        com.sun.corba.se.pept.transport.Connection $r2;
+        com.sun.corba.se.spi.legacy.connection.Connection $r3;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator $r1;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator messageMediator>;
+
+        $r2 = interfaceinvoke $r1.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.transport.Connection getConnection()>();
+
+        $r3 = (com.sun.corba.se.spi.legacy.connection.Connection) $r2;
+
+        return $r3;
+    }
+
+    protected void setInfo(com.sun.corba.se.pept.protocol.MessageMediator)
+    {
+        org.omg.CORBA.Request $r3;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        com.sun.corba.se.pept.protocol.MessageMediator r1;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator $r2, $r4;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        r1 := @parameter0: com.sun.corba.se.pept.protocol.MessageMediator;
+
+        $r2 = (com.sun.corba.se.spi.protocol.CorbaMessageMediator) r1;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator messageMediator> = $r2;
+
+        $r4 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator messageMediator>;
+
+        $r3 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Request request>;
+
+        interfaceinvoke $r4.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: void setDIIInfo(org.omg.CORBA.Request)>($r3);
+
+        return;
+    }
+
+    void setRetryRequest(com.sun.corba.se.spi.protocol.RetryType)
+    {
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        com.sun.corba.se.spi.protocol.RetryType r1;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        r1 := @parameter0: com.sun.corba.se.spi.protocol.RetryType;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.spi.protocol.RetryType retryRequest> = r1;
+
+        return;
+    }
+
+    com.sun.corba.se.spi.protocol.RetryType getRetryRequest()
+    {
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        com.sun.corba.se.spi.protocol.RetryType $r1;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.spi.protocol.RetryType retryRequest>;
+
+        return $r1;
+    }
+
+    void incrementEntryCount()
+    {
+        int $i0, $i1;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        $i0 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int entryCount>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int entryCount> = $i1;
+
+        return;
+    }
+
+    void decrementEntryCount()
+    {
+        int $i0, $i1;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        $i0 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int entryCount>;
+
+        $i1 = $i0 - 1;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int entryCount> = $i1;
+
+        return;
+    }
+
+    int getEntryCount()
+    {
+        int $i0;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        $i0 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int entryCount>;
+
+        return $i0;
+    }
+
+    protected void setReplyStatus(short)
+    {
+        int $i1;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        short s0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        s0 := @parameter0: short;
+
+        specialinvoke r0.<com.sun.corba.se.impl.interceptors.RequestInfoImpl: void setReplyStatus(short)>(s0);
+
+        $i1 = (int) s0;
+
+        tableswitch($i1)
+        {
+            case 0: goto label1;
+            case 1: goto label2;
+            case 2: goto label2;
+            case 3: goto label3;
+            case 4: goto label3;
+            default: goto label4;
+        };
+
+     label1:
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int endingPointCall> = 0;
+
+        goto label4;
+
+     label2:
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int endingPointCall> = 1;
+
+        goto label4;
+
+     label3:
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int endingPointCall> = 2;
+
+     label4:
+        return;
+    }
+
+    protected void setDIIRequest(org.omg.CORBA.Request)
+    {
+        org.omg.CORBA.Request r1;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        r1 := @parameter0: org.omg.CORBA.Request;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Request request> = r1;
+
+        return;
+    }
+
+    protected void setDIIInitiate(boolean)
+    {
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        boolean z0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        z0 := @parameter0: boolean;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: boolean diiInitiate> = z0;
+
+        return;
+    }
+
+    protected boolean isDIIInitiate()
+    {
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        $z0 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: boolean diiInitiate>;
+
+        return $z0;
+    }
+
+    protected void setPICurrentPushed(boolean)
+    {
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        boolean z0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        z0 := @parameter0: boolean;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: boolean piCurrentPushed> = z0;
+
+        return;
+    }
+
+    protected boolean isPICurrentPushed()
+    {
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        $z0 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: boolean piCurrentPushed>;
+
+        return $z0;
+    }
+
+    protected void setException(java.lang.Exception)
+    {
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        java.lang.Exception r1;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        r1 := @parameter0: java.lang.Exception;
+
+        specialinvoke r0.<com.sun.corba.se.impl.interceptors.RequestInfoImpl: void setException(java.lang.Exception)>(r1);
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: org.omg.CORBA.Any cachedReceivedException> = null;
+
+        r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: java.lang.String cachedReceivedExceptionId> = null;
+
+        return;
+    }
+
+    protected boolean getIsOneWay()
+    {
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        $z0 = virtualinvoke r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: boolean response_expected()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    protected void checkAccess(int) throws org.omg.CORBA.BAD_INV_ORDER
+    {
+        com.sun.corba.se.impl.logging.OMGSystemException $r1;
+        boolean[] $r4;
+        com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl r0;
+        org.omg.CORBA.BAD_INV_ORDER $r2;
+        byte b4;
+        int $i0, $i1, i2, $i3;
+        boolean[][] $r3;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl;
+
+        i2 := @parameter0: int;
+
+        b4 = 0;
+
+        $i0 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int currentExecutionPoint>;
+
+        lookupswitch($i0)
+        {
+            case 0: goto label01;
+            case 2: goto label05;
+            default: goto label09;
+        };
+
+     label01:
+        $i3 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int startingPointCall>;
+
+        lookupswitch($i3)
+        {
+            case 0: goto label02;
+            case 1: goto label03;
+            default: goto label04;
+        };
+
+     label02:
+        b4 = 0;
+
+        goto label04;
+
+     label03:
+        b4 = 1;
+
+     label04:
+        goto label09;
+
+     label05:
+        $i1 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int endingPointCall>;
+
+        tableswitch($i1)
+        {
+            case 0: goto label06;
+            case 1: goto label07;
+            case 2: goto label08;
+            default: goto label09;
+        };
+
+     label06:
+        b4 = 2;
+
+        goto label09;
+
+     label07:
+        b4 = 3;
+
+        goto label09;
+
+     label08:
+        b4 = 4;
+
+     label09:
+        $r3 = <com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: boolean[][] validCall>;
+
+        $r4 = $r3[i2];
+
+        $z0 = $r4[b4];
+
+        if $z0 != 0 goto label10;
+
+        $r1 = r0.<com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: com.sun.corba.se.impl.logging.OMGSystemException stdWrapper>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.logging.OMGSystemException: org.omg.CORBA.BAD_INV_ORDER invalidPiCall2()>();
+
+        throw $r2;
+
+     label10:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        boolean[] $r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23;
+        boolean[][] $r0;
+
+        <com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int MID_ADD_REQUEST_SERVICE_CONTEXT> = 22;
+
+        <com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int MID_GET_REQUEST_POLICY> = 21;
+
+        <com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int MID_GET_EFFECTIVE_COMPONENTS> = 20;
+
+        <com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int MID_GET_EFFECTIVE_COMPONENT> = 19;
+
+        <com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int MID_RECEIVED_EXCEPTION_ID> = 18;
+
+        <com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int MID_RECEIVED_EXCEPTION> = 17;
+
+        <com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int MID_EFFECTIVE_PROFILE> = 16;
+
+        <com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int MID_EFFECTIVE_TARGET> = 15;
+
+        <com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int MID_TARGET> = 14;
+
+        <com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int CALL_RECEIVE_OTHER> = 2;
+
+        <com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int CALL_RECEIVE_EXCEPTION> = 1;
+
+        <com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int CALL_RECEIVE_REPLY> = 0;
+
+        <com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int CALL_SEND_POLL> = 1;
+
+        <com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: int CALL_SEND_REQUEST> = 0;
+
+        $r0 = newarray (boolean[])[23];
+
+        $r1 = newarray (boolean)[5];
+
+        $r1[0] = 1;
+
+        $r1[1] = 1;
+
+        $r1[2] = 1;
+
+        $r1[3] = 1;
+
+        $r1[4] = 1;
+
+        $r0[0] = $r1;
+
+        $r2 = newarray (boolean)[5];
+
+        $r2[0] = 1;
+
+        $r2[1] = 1;
+
+        $r2[2] = 1;
+
+        $r2[3] = 1;
+
+        $r2[4] = 1;
+
+        $r0[1] = $r2;
+
+        $r3 = newarray (boolean)[5];
+
+        $r3[0] = 1;
+
+        $r3[1] = 0;
+
+        $r3[2] = 1;
+
+        $r3[3] = 0;
+
+        $r3[4] = 0;
+
+        $r0[2] = $r3;
+
+        $r4 = newarray (boolean)[5];
+
+        $r4[0] = 1;
+
+        $r4[1] = 0;
+
+        $r4[2] = 1;
+
+        $r4[3] = 1;
+
+        $r4[4] = 1;
+
+        $r0[3] = $r4;
+
+        $r5 = newarray (boolean)[5];
+
+        $r5[0] = 1;
+
+        $r5[1] = 0;
+
+        $r5[2] = 1;
+
+        $r5[3] = 1;
+
+        $r5[4] = 1;
+
+        $r0[4] = $r5;
+
+        $r6 = newarray (boolean)[5];
+
+        $r6[0] = 1;
+
+        $r6[1] = 0;
+
+        $r6[2] = 1;
+
+        $r6[3] = 1;
+
+        $r6[4] = 1;
+
+        $r0[5] = $r6;
+
+        $r7 = newarray (boolean)[5];
+
+        $r7[0] = 0;
+
+        $r7[1] = 0;
+
+        $r7[2] = 1;
+
+        $r7[3] = 0;
+
+        $r7[4] = 0;
+
+        $r0[6] = $r7;
+
+        $r8 = newarray (boolean)[5];
+
+        $r8[0] = 1;
+
+        $r8[1] = 1;
+
+        $r8[2] = 1;
+
+        $r8[3] = 1;
+
+        $r8[4] = 1;
+
+        $r0[7] = $r8;
+
+        $r9 = newarray (boolean)[5];
+
+        $r9[0] = 1;
+
+        $r9[1] = 0;
+
+        $r9[2] = 1;
+
+        $r9[3] = 1;
+
+        $r9[4] = 1;
+
+        $r0[8] = $r9;
+
+        $r10 = newarray (boolean)[5];
+
+        $r10[0] = 0;
+
+        $r10[1] = 0;
+
+        $r10[2] = 1;
+
+        $r10[3] = 1;
+
+        $r10[4] = 1;
+
+        $r0[9] = $r10;
+
+        $r11 = newarray (boolean)[5];
+
+        $r11[0] = 0;
+
+        $r11[1] = 0;
+
+        $r11[2] = 0;
+
+        $r11[3] = 0;
+
+        $r11[4] = 1;
+
+        $r0[10] = $r11;
+
+        $r12 = newarray (boolean)[5];
+
+        $r12[0] = 1;
+
+        $r12[1] = 1;
+
+        $r12[2] = 1;
+
+        $r12[3] = 1;
+
+        $r12[4] = 1;
+
+        $r0[11] = $r12;
+
+        $r13 = newarray (boolean)[5];
+
+        $r13[0] = 1;
+
+        $r13[1] = 0;
+
+        $r13[2] = 1;
+
+        $r13[3] = 1;
+
+        $r13[4] = 1;
+
+        $r0[12] = $r13;
+
+        $r14 = newarray (boolean)[5];
+
+        $r14[0] = 0;
+
+        $r14[1] = 0;
+
+        $r14[2] = 1;
+
+        $r14[3] = 1;
+
+        $r14[4] = 1;
+
+        $r0[13] = $r14;
+
+        $r15 = newarray (boolean)[5];
+
+        $r15[0] = 1;
+
+        $r15[1] = 1;
+
+        $r15[2] = 1;
+
+        $r15[3] = 1;
+
+        $r15[4] = 1;
+
+        $r0[14] = $r15;
+
+        $r16 = newarray (boolean)[5];
+
+        $r16[0] = 1;
+
+        $r16[1] = 1;
+
+        $r16[2] = 1;
+
+        $r16[3] = 1;
+
+        $r16[4] = 1;
+
+        $r0[15] = $r16;
+
+        $r17 = newarray (boolean)[5];
+
+        $r17[0] = 1;
+
+        $r17[1] = 1;
+
+        $r17[2] = 1;
+
+        $r17[3] = 1;
+
+        $r17[4] = 1;
+
+        $r0[16] = $r17;
+
+        $r18 = newarray (boolean)[5];
+
+        $r18[0] = 0;
+
+        $r18[1] = 0;
+
+        $r18[2] = 0;
+
+        $r18[3] = 1;
+
+        $r18[4] = 0;
+
+        $r0[17] = $r18;
+
+        $r19 = newarray (boolean)[5];
+
+        $r19[0] = 0;
+
+        $r19[1] = 0;
+
+        $r19[2] = 0;
+
+        $r19[3] = 1;
+
+        $r19[4] = 0;
+
+        $r0[18] = $r19;
+
+        $r20 = newarray (boolean)[5];
+
+        $r20[0] = 1;
+
+        $r20[1] = 0;
+
+        $r20[2] = 1;
+
+        $r20[3] = 1;
+
+        $r20[4] = 1;
+
+        $r0[19] = $r20;
+
+        $r21 = newarray (boolean)[5];
+
+        $r21[0] = 1;
+
+        $r21[1] = 0;
+
+        $r21[2] = 1;
+
+        $r21[3] = 1;
+
+        $r21[4] = 1;
+
+        $r0[20] = $r21;
+
+        $r22 = newarray (boolean)[5];
+
+        $r22[0] = 1;
+
+        $r22[1] = 0;
+
+        $r22[2] = 1;
+
+        $r22[3] = 1;
+
+        $r22[4] = 1;
+
+        $r0[21] = $r22;
+
+        $r23 = newarray (boolean)[5];
+
+        $r23[0] = 1;
+
+        $r23[1] = 0;
+
+        $r23[2] = 0;
+
+        $r23[3] = 0;
+
+        $r23[4] = 0;
+
+        $r0[22] = $r23;
+
+        <com.sun.corba.se.impl.interceptors.ClientRequestInfoImpl: boolean[][] validCall> = $r0;
+
+        return;
+    }
+}

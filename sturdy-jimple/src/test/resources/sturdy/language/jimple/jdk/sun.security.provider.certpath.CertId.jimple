@@ -1,0 +1,523 @@
+public class sun.security.provider.certpath.CertId extends java.lang.Object
+{
+    private static final boolean debug;
+    private static final sun.security.x509.AlgorithmId SHA1_ALGID;
+    private final sun.security.x509.AlgorithmId hashAlgId;
+    private final byte[] issuerNameHash;
+    private final byte[] issuerKeyHash;
+    private final sun.security.x509.SerialNumber certSerialNumber;
+    private int myhash;
+
+    public void <init>(java.security.cert.X509Certificate, sun.security.x509.SerialNumber) throws java.io.IOException
+    {
+        java.security.cert.X509Certificate r1;
+        javax.security.auth.x500.X500Principal $r2;
+        sun.security.provider.certpath.CertId r0;
+        java.security.PublicKey $r3;
+        sun.security.x509.SerialNumber r4;
+
+        r0 := @this: sun.security.provider.certpath.CertId;
+
+        r1 := @parameter0: java.security.cert.X509Certificate;
+
+        r4 := @parameter1: sun.security.x509.SerialNumber;
+
+        $r2 = virtualinvoke r1.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        $r3 = virtualinvoke r1.<java.security.cert.X509Certificate: java.security.PublicKey getPublicKey()>();
+
+        specialinvoke r0.<sun.security.provider.certpath.CertId: void <init>(javax.security.auth.x500.X500Principal,java.security.PublicKey,sun.security.x509.SerialNumber)>($r2, $r3, r4);
+
+        return;
+    }
+
+    public void <init>(javax.security.auth.x500.X500Principal, java.security.PublicKey, sun.security.x509.SerialNumber) throws java.io.IOException
+    {
+        byte[] $r4, $r5, $r7, $r15, $r16;
+        javax.security.auth.x500.X500Principal r3;
+        sun.security.provider.certpath.CertId r0;
+        java.security.MessageDigest $r1;
+        sun.security.util.DerInputStream $r10, $r12;
+        sun.security.util.DerValue[] r9;
+        int $i1;
+        sun.security.util.DerValue $r11, $r13, $r14, $r21;
+        java.security.PublicKey r6;
+        java.io.IOException $r20;
+        sun.security.x509.SerialNumber r17;
+        java.security.NoSuchAlgorithmException $r18;
+        sun.security.x509.AlgorithmId $r2;
+
+        r0 := @this: sun.security.provider.certpath.CertId;
+
+        r3 := @parameter0: javax.security.auth.x500.X500Principal;
+
+        r6 := @parameter1: java.security.PublicKey;
+
+        r17 := @parameter2: sun.security.x509.SerialNumber;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $i1 = (int) -1;
+
+        r0.<sun.security.provider.certpath.CertId: int myhash> = $i1;
+
+     label1:
+        $r1 = staticinvoke <java.security.MessageDigest: java.security.MessageDigest getInstance(java.lang.String)>("SHA1");
+
+     label2:
+        goto label4;
+
+     label3:
+        $r18 := @caughtexception;
+
+        $r20 = new java.io.IOException;
+
+        specialinvoke $r20.<java.io.IOException: void <init>(java.lang.String,java.lang.Throwable)>("Unable to create CertId", $r18);
+
+        throw $r20;
+
+     label4:
+        $r2 = <sun.security.provider.certpath.CertId: sun.security.x509.AlgorithmId SHA1_ALGID>;
+
+        r0.<sun.security.provider.certpath.CertId: sun.security.x509.AlgorithmId hashAlgId> = $r2;
+
+        $r4 = virtualinvoke r3.<javax.security.auth.x500.X500Principal: byte[] getEncoded()>();
+
+        virtualinvoke $r1.<java.security.MessageDigest: void update(byte[])>($r4);
+
+        $r5 = virtualinvoke $r1.<java.security.MessageDigest: byte[] digest()>();
+
+        r0.<sun.security.provider.certpath.CertId: byte[] issuerNameHash> = $r5;
+
+        $r7 = interfaceinvoke r6.<java.security.PublicKey: byte[] getEncoded()>();
+
+        $r21 = new sun.security.util.DerValue;
+
+        specialinvoke $r21.<sun.security.util.DerValue: void <init>(byte[])>($r7);
+
+        r9 = newarray (sun.security.util.DerValue)[2];
+
+        $r10 = $r21.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $r11 = virtualinvoke $r10.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+        r9[0] = $r11;
+
+        $r12 = $r21.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $r13 = virtualinvoke $r12.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+        r9[1] = $r13;
+
+        $r14 = r9[1];
+
+        $r15 = virtualinvoke $r14.<sun.security.util.DerValue: byte[] getBitString()>();
+
+        virtualinvoke $r1.<java.security.MessageDigest: void update(byte[])>($r15);
+
+        $r16 = virtualinvoke $r1.<java.security.MessageDigest: byte[] digest()>();
+
+        r0.<sun.security.provider.certpath.CertId: byte[] issuerKeyHash> = $r16;
+
+        r0.<sun.security.provider.certpath.CertId: sun.security.x509.SerialNumber certSerialNumber> = r17;
+
+        return;
+
+        catch java.security.NoSuchAlgorithmException from label1 to label2 with label3;
+    }
+
+    public void <init>(sun.security.util.DerInputStream) throws java.io.IOException
+    {
+        sun.security.util.DerValue $r2;
+        byte[] $r4, $r5;
+        sun.security.provider.certpath.CertId r0;
+        sun.security.util.DerInputStream r1;
+        sun.security.x509.SerialNumber $r7;
+        int $i1;
+        sun.security.x509.AlgorithmId $r3;
+
+        r0 := @this: sun.security.provider.certpath.CertId;
+
+        r1 := @parameter0: sun.security.util.DerInputStream;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $i1 = (int) -1;
+
+        r0.<sun.security.provider.certpath.CertId: int myhash> = $i1;
+
+        $r2 = virtualinvoke r1.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+        $r3 = staticinvoke <sun.security.x509.AlgorithmId: sun.security.x509.AlgorithmId parse(sun.security.util.DerValue)>($r2);
+
+        r0.<sun.security.provider.certpath.CertId: sun.security.x509.AlgorithmId hashAlgId> = $r3;
+
+        $r4 = virtualinvoke r1.<sun.security.util.DerInputStream: byte[] getOctetString()>();
+
+        r0.<sun.security.provider.certpath.CertId: byte[] issuerNameHash> = $r4;
+
+        $r5 = virtualinvoke r1.<sun.security.util.DerInputStream: byte[] getOctetString()>();
+
+        r0.<sun.security.provider.certpath.CertId: byte[] issuerKeyHash> = $r5;
+
+        $r7 = new sun.security.x509.SerialNumber;
+
+        specialinvoke $r7.<sun.security.x509.SerialNumber: void <init>(sun.security.util.DerInputStream)>(r1);
+
+        r0.<sun.security.provider.certpath.CertId: sun.security.x509.SerialNumber certSerialNumber> = $r7;
+
+        return;
+    }
+
+    public sun.security.x509.AlgorithmId getHashAlgorithm()
+    {
+        sun.security.provider.certpath.CertId r0;
+        sun.security.x509.AlgorithmId $r1;
+
+        r0 := @this: sun.security.provider.certpath.CertId;
+
+        $r1 = r0.<sun.security.provider.certpath.CertId: sun.security.x509.AlgorithmId hashAlgId>;
+
+        return $r1;
+    }
+
+    public byte[] getIssuerNameHash()
+    {
+        byte[] $r1;
+        sun.security.provider.certpath.CertId r0;
+
+        r0 := @this: sun.security.provider.certpath.CertId;
+
+        $r1 = r0.<sun.security.provider.certpath.CertId: byte[] issuerNameHash>;
+
+        return $r1;
+    }
+
+    public byte[] getIssuerKeyHash()
+    {
+        byte[] $r1;
+        sun.security.provider.certpath.CertId r0;
+
+        r0 := @this: sun.security.provider.certpath.CertId;
+
+        $r1 = r0.<sun.security.provider.certpath.CertId: byte[] issuerKeyHash>;
+
+        return $r1;
+    }
+
+    public java.math.BigInteger getSerialNumber()
+    {
+        java.math.BigInteger $r2;
+        sun.security.provider.certpath.CertId r0;
+        sun.security.x509.SerialNumber $r1;
+
+        r0 := @this: sun.security.provider.certpath.CertId;
+
+        $r1 = r0.<sun.security.provider.certpath.CertId: sun.security.x509.SerialNumber certSerialNumber>;
+
+        $r2 = virtualinvoke $r1.<sun.security.x509.SerialNumber: java.math.BigInteger getNumber()>();
+
+        return $r2;
+    }
+
+    public void encode(sun.security.util.DerOutputStream) throws java.io.IOException
+    {
+        byte[] $r3, $r4;
+        sun.security.provider.certpath.CertId r1;
+        sun.security.util.DerOutputStream $r0, r6;
+        sun.security.x509.AlgorithmId $r2;
+        sun.security.x509.SerialNumber $r5;
+
+        r1 := @this: sun.security.provider.certpath.CertId;
+
+        r6 := @parameter0: sun.security.util.DerOutputStream;
+
+        $r0 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r0.<sun.security.util.DerOutputStream: void <init>()>();
+
+        $r2 = r1.<sun.security.provider.certpath.CertId: sun.security.x509.AlgorithmId hashAlgId>;
+
+        virtualinvoke $r2.<sun.security.x509.AlgorithmId: void encode(sun.security.util.DerOutputStream)>($r0);
+
+        $r3 = r1.<sun.security.provider.certpath.CertId: byte[] issuerNameHash>;
+
+        virtualinvoke $r0.<sun.security.util.DerOutputStream: void putOctetString(byte[])>($r3);
+
+        $r4 = r1.<sun.security.provider.certpath.CertId: byte[] issuerKeyHash>;
+
+        virtualinvoke $r0.<sun.security.util.DerOutputStream: void putOctetString(byte[])>($r4);
+
+        $r5 = r1.<sun.security.provider.certpath.CertId: sun.security.x509.SerialNumber certSerialNumber>;
+
+        virtualinvoke $r5.<sun.security.x509.SerialNumber: void encode(sun.security.util.DerOutputStream)>($r0);
+
+        virtualinvoke r6.<sun.security.util.DerOutputStream: void write(byte,sun.security.util.DerOutputStream)>(48, $r0);
+
+        return;
+    }
+
+    public int hashCode()
+    {
+        byte[] $r2, $r3, $r6, $r7;
+        sun.security.provider.certpath.CertId r0;
+        byte $b8, $b12;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i9, $i10, $i11, $i13, $i14, $i15, i16, i17, $i19, $i20, $i21;
+        java.math.BigInteger $r5;
+        sun.security.x509.SerialNumber $r4;
+        sun.security.x509.AlgorithmId $r1;
+
+        r0 := @this: sun.security.provider.certpath.CertId;
+
+        $i0 = r0.<sun.security.provider.certpath.CertId: int myhash>;
+
+        $i19 = (int) -1;
+
+        if $i0 != $i19 goto label5;
+
+        $r1 = r0.<sun.security.provider.certpath.CertId: sun.security.x509.AlgorithmId hashAlgId>;
+
+        $i2 = virtualinvoke $r1.<sun.security.x509.AlgorithmId: int hashCode()>();
+
+        r0.<sun.security.provider.certpath.CertId: int myhash> = $i2;
+
+        i16 = 0;
+
+     label1:
+        $r2 = r0.<sun.security.provider.certpath.CertId: byte[] issuerNameHash>;
+
+        $i3 = lengthof $r2;
+
+        if i16 >= $i3 goto label2;
+
+        $i14 = r0.<sun.security.provider.certpath.CertId: int myhash>;
+
+        $r7 = r0.<sun.security.provider.certpath.CertId: byte[] issuerNameHash>;
+
+        $b12 = $r7[i16];
+
+        $i20 = (int) $b12;
+
+        $i13 = $i20 * i16;
+
+        $i15 = $i14 + $i13;
+
+        r0.<sun.security.provider.certpath.CertId: int myhash> = $i15;
+
+        i16 = i16 + 1;
+
+        goto label1;
+
+     label2:
+        i17 = 0;
+
+     label3:
+        $r3 = r0.<sun.security.provider.certpath.CertId: byte[] issuerKeyHash>;
+
+        $i4 = lengthof $r3;
+
+        if i17 >= $i4 goto label4;
+
+        $i10 = r0.<sun.security.provider.certpath.CertId: int myhash>;
+
+        $r6 = r0.<sun.security.provider.certpath.CertId: byte[] issuerKeyHash>;
+
+        $b8 = $r6[i17];
+
+        $i21 = (int) $b8;
+
+        $i9 = $i21 * i17;
+
+        $i11 = $i10 + $i9;
+
+        r0.<sun.security.provider.certpath.CertId: int myhash> = $i11;
+
+        i17 = i17 + 1;
+
+        goto label3;
+
+     label4:
+        $i5 = r0.<sun.security.provider.certpath.CertId: int myhash>;
+
+        $r4 = r0.<sun.security.provider.certpath.CertId: sun.security.x509.SerialNumber certSerialNumber>;
+
+        $r5 = virtualinvoke $r4.<sun.security.x509.SerialNumber: java.math.BigInteger getNumber()>();
+
+        $i6 = virtualinvoke $r5.<java.math.BigInteger: int hashCode()>();
+
+        $i7 = $i5 + $i6;
+
+        r0.<sun.security.provider.certpath.CertId: int myhash> = $i7;
+
+     label5:
+        $i1 = r0.<sun.security.provider.certpath.CertId: int myhash>;
+
+        return $i1;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        byte[] $r5, $r6, $r7, $r8;
+        sun.security.provider.certpath.CertId r0, r2;
+        java.math.BigInteger $r10, $r11;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        sun.security.x509.SerialNumber $r9;
+        java.lang.Object r1;
+        sun.security.x509.AlgorithmId $r3, $r4;
+
+        r0 := @this: sun.security.provider.certpath.CertId;
+
+        r1 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        if r1 == null goto label2;
+
+        $z0 = r1 instanceof sun.security.provider.certpath.CertId;
+
+        if $z0 != 0 goto label3;
+
+     label2:
+        return 0;
+
+     label3:
+        r2 = (sun.security.provider.certpath.CertId) r1;
+
+        $r3 = r0.<sun.security.provider.certpath.CertId: sun.security.x509.AlgorithmId hashAlgId>;
+
+        $r4 = virtualinvoke r2.<sun.security.provider.certpath.CertId: sun.security.x509.AlgorithmId getHashAlgorithm()>();
+
+        $z1 = virtualinvoke $r3.<sun.security.x509.AlgorithmId: boolean equals(sun.security.x509.AlgorithmId)>($r4);
+
+        if $z1 == 0 goto label4;
+
+        $r5 = r0.<sun.security.provider.certpath.CertId: byte[] issuerNameHash>;
+
+        $r6 = virtualinvoke r2.<sun.security.provider.certpath.CertId: byte[] getIssuerNameHash()>();
+
+        $z2 = staticinvoke <java.util.Arrays: boolean equals(byte[],byte[])>($r5, $r6);
+
+        if $z2 == 0 goto label4;
+
+        $r7 = r0.<sun.security.provider.certpath.CertId: byte[] issuerKeyHash>;
+
+        $r8 = virtualinvoke r2.<sun.security.provider.certpath.CertId: byte[] getIssuerKeyHash()>();
+
+        $z3 = staticinvoke <java.util.Arrays: boolean equals(byte[],byte[])>($r7, $r8);
+
+        if $z3 == 0 goto label4;
+
+        $r9 = r0.<sun.security.provider.certpath.CertId: sun.security.x509.SerialNumber certSerialNumber>;
+
+        $r10 = virtualinvoke $r9.<sun.security.x509.SerialNumber: java.math.BigInteger getNumber()>();
+
+        $r11 = virtualinvoke r2.<sun.security.provider.certpath.CertId: java.math.BigInteger getSerialNumber()>();
+
+        $z4 = virtualinvoke $r10.<java.math.BigInteger: boolean equals(java.lang.Object)>($r11);
+
+        if $z4 == 0 goto label4;
+
+        return 1;
+
+     label4:
+        return 0;
+    }
+
+    public java.lang.String toString()
+    {
+        byte[] $r10, $r12;
+        sun.security.provider.certpath.CertId r3;
+        java.lang.String $r5, $r8, $r11, $r13, $r17, $r19, $r20;
+        sun.misc.HexDumpEncoder $r9;
+        sun.security.x509.SerialNumber $r16;
+        java.lang.StringBuilder $r0, $r1, $r2, $r6, $r7, $r14, $r15, $r18;
+        sun.security.x509.AlgorithmId $r4;
+
+        r3 := @this: sun.security.provider.certpath.CertId;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("CertId \n");
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Algorithm: ");
+
+        $r4 = r3.<sun.security.provider.certpath.CertId: sun.security.x509.AlgorithmId hashAlgId>;
+
+        $r5 = virtualinvoke $r4.<sun.security.x509.AlgorithmId: java.lang.String toString()>();
+
+        $r6 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("issuerNameHash \n");
+
+        $r9 = new sun.misc.HexDumpEncoder;
+
+        specialinvoke $r9.<sun.misc.HexDumpEncoder: void <init>()>();
+
+        $r10 = r3.<sun.security.provider.certpath.CertId: byte[] issuerNameHash>;
+
+        $r11 = virtualinvoke $r9.<sun.misc.HexDumpEncoder: java.lang.String encode(byte[])>($r10);
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\nissuerKeyHash: \n");
+
+        $r12 = r3.<sun.security.provider.certpath.CertId: byte[] issuerKeyHash>;
+
+        $r13 = virtualinvoke $r9.<sun.misc.HexDumpEncoder: java.lang.String encode(byte[])>($r12);
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r16 = r3.<sun.security.provider.certpath.CertId: sun.security.x509.SerialNumber certSerialNumber>;
+
+        $r17 = virtualinvoke $r16.<sun.security.x509.SerialNumber: java.lang.String toString()>();
+
+        $r18 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r20 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r20;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.util.ObjectIdentifier $r1;
+        sun.security.x509.AlgorithmId $r0;
+
+        <sun.security.provider.certpath.CertId: boolean debug> = 0;
+
+        $r0 = new sun.security.x509.AlgorithmId;
+
+        $r1 = <sun.security.x509.AlgorithmId: sun.security.util.ObjectIdentifier SHA_oid>;
+
+        specialinvoke $r0.<sun.security.x509.AlgorithmId: void <init>(sun.security.util.ObjectIdentifier)>($r1);
+
+        <sun.security.provider.certpath.CertId: sun.security.x509.AlgorithmId SHA1_ALGID> = $r0;
+
+        return;
+    }
+}

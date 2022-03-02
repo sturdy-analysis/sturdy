@@ -1,0 +1,4808 @@
+public class java.io.ObjectInputStream extends java.io.InputStream implements java.io.ObjectInput, java.io.ObjectStreamConstants
+{
+    private static final int NULL_HANDLE;
+    private static final java.lang.Object unsharedMarker;
+    private static final java.util.HashMap primClasses;
+    private final java.io.ObjectInputStream$BlockDataInputStream bin;
+    private final java.io.ObjectInputStream$ValidationList vlist;
+    private long depth;
+    private long totalObjectRefs;
+    private boolean closed;
+    private final java.io.ObjectInputStream$HandleTable handles;
+    private int passHandle;
+    private boolean defaultDataEnd;
+    private byte[] primVals;
+    private final boolean enableOverride;
+    private boolean enableResolve;
+    private java.io.SerialCallbackContext curContext;
+    private sun.misc.ObjectInputFilter serialFilter;
+    private boolean streamFilterSet;
+    private volatile sun.misc.ObjectStreamClassValidator validator;
+
+    public void <init>(java.io.InputStream) throws java.io.IOException
+    {
+        java.io.ObjectInputStream$BlockDataInputStream $r9, $r10;
+        java.io.ObjectInputStream r0;
+        sun.misc.ObjectInputFilter $r6, $r8;
+        java.io.ObjectInputStream$HandleTable $r11;
+        java.util.function.BinaryOperator $r5;
+        java.io.ObjectInputStream$ValidationList $r12;
+        int $i1;
+        java.lang.Object $r7;
+        java.io.InputStream r2;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        r2 := @parameter0: java.io.InputStream;
+
+        specialinvoke r0.<java.io.InputStream: void <init>()>();
+
+        $i1 = (int) -1;
+
+        r0.<java.io.ObjectInputStream: int passHandle> = $i1;
+
+        r0.<java.io.ObjectInputStream: boolean defaultDataEnd> = 0;
+
+        specialinvoke r0.<java.io.ObjectInputStream: void verifySubclass()>();
+
+        $r10 = new java.io.ObjectInputStream$BlockDataInputStream;
+
+        specialinvoke $r10.<java.io.ObjectInputStream$BlockDataInputStream: void <init>(java.io.ObjectInputStream,java.io.InputStream)>(r0, r2);
+
+        r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin> = $r10;
+
+        $r11 = new java.io.ObjectInputStream$HandleTable;
+
+        specialinvoke $r11.<java.io.ObjectInputStream$HandleTable: void <init>(int)>(10);
+
+        r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles> = $r11;
+
+        $r12 = new java.io.ObjectInputStream$ValidationList;
+
+        specialinvoke $r12.<java.io.ObjectInputStream$ValidationList: void <init>()>();
+
+        r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$ValidationList vlist> = $r12;
+
+        $r5 = staticinvoke <sun.misc.ObjectInputFilter$Config: java.util.function.BinaryOperator getSerialFilterFactorySingleton()>();
+
+        $r6 = staticinvoke <sun.misc.ObjectInputFilter$Config: sun.misc.ObjectInputFilter getSerialFilter()>();
+
+        $r7 = interfaceinvoke $r5.<java.util.function.BinaryOperator: java.lang.Object apply(java.lang.Object,java.lang.Object)>(null, $r6);
+
+        $r8 = (sun.misc.ObjectInputFilter) $r7;
+
+        r0.<java.io.ObjectInputStream: sun.misc.ObjectInputFilter serialFilter> = $r8;
+
+        r0.<java.io.ObjectInputStream: boolean enableOverride> = 0;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void readStreamHeader()>();
+
+        $r9 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r9.<java.io.ObjectInputStream$BlockDataInputStream: boolean setBlockDataMode(boolean)>(1);
+
+        return;
+    }
+
+    protected void <init>() throws java.io.IOException, java.lang.SecurityException
+    {
+        java.io.ObjectInputStream r0;
+        sun.misc.ObjectInputFilter $r3, $r5;
+        java.lang.SecurityManager $r1;
+        java.util.function.BinaryOperator $r2;
+        java.io.SerializablePermission $r6;
+        int $i1;
+        java.lang.Object $r4;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        specialinvoke r0.<java.io.InputStream: void <init>()>();
+
+        $i1 = (int) -1;
+
+        r0.<java.io.ObjectInputStream: int passHandle> = $i1;
+
+        r0.<java.io.ObjectInputStream: boolean defaultDataEnd> = 0;
+
+        $r1 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r1 == null goto label1;
+
+        $r6 = <java.io.ObjectInputStream: java.io.SerializablePermission SUBCLASS_IMPLEMENTATION_PERMISSION>;
+
+        virtualinvoke $r1.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r6);
+
+     label1:
+        r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin> = null;
+
+        r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles> = null;
+
+        r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$ValidationList vlist> = null;
+
+        $r2 = staticinvoke <sun.misc.ObjectInputFilter$Config: java.util.function.BinaryOperator getSerialFilterFactorySingleton()>();
+
+        $r3 = staticinvoke <sun.misc.ObjectInputFilter$Config: sun.misc.ObjectInputFilter getSerialFilter()>();
+
+        $r4 = interfaceinvoke $r2.<java.util.function.BinaryOperator: java.lang.Object apply(java.lang.Object,java.lang.Object)>(null, $r3);
+
+        $r5 = (sun.misc.ObjectInputFilter) $r4;
+
+        r0.<java.io.ObjectInputStream: sun.misc.ObjectInputFilter serialFilter> = $r5;
+
+        r0.<java.io.ObjectInputStream: boolean enableOverride> = 1;
+
+        return;
+    }
+
+    public final java.lang.Object readObject() throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.ObjectInputStream r0;
+        java.lang.Object $r1;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        $r1 = specialinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject(java.lang.Class)>(class "Ljava/lang/Object;");
+
+        return $r1;
+    }
+
+    public java.lang.String readString() throws java.io.IOException
+    {
+        java.lang.IllegalStateException $r4;
+        java.io.ObjectInputStream r0;
+        java.lang.Object $r1;
+        java.lang.ClassNotFoundException $r3;
+        java.lang.String $r2;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+     label1:
+        $r1 = specialinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject(java.lang.Class)>(class "Ljava/lang/String;");
+
+        $r2 = (java.lang.String) $r1;
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.Throwable)>($r3);
+
+        throw $r4;
+
+        catch java.lang.ClassNotFoundException from label1 to label2 with label3;
+    }
+
+    private final java.lang.Object readObject(java.lang.Class) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.lang.Throwable $r9;
+        java.io.ObjectInputStream r0;
+        long $l2, $l4, $l7;
+        java.io.ObjectInputStream$HandleTable $r3, $r4;
+        java.lang.AssertionError $r7;
+        java.io.ObjectInputStream$ValidationList $r6;
+        byte $b3, $b5, $b8;
+        int $i0, $i1, $i6;
+        boolean $z0, $z1, $z2;
+        java.lang.Class r1;
+        java.lang.Object $r2, $r8;
+        java.lang.ClassNotFoundException $r5;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        r1 := @parameter0: java.lang.Class;
+
+        $z0 = r0.<java.io.ObjectInputStream: boolean enableOverride>;
+
+        if $z0 == 0 goto label1;
+
+        $r8 = virtualinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObjectOverride()>();
+
+        return $r8;
+
+     label1:
+        if r1 == class "Ljava/lang/Object;" goto label2;
+
+        if r1 == class "Ljava/lang/String;" goto label2;
+
+        $r7 = new java.lang.AssertionError;
+
+        specialinvoke $r7.<java.lang.AssertionError: void <init>(java.lang.Object)>("internal error");
+
+        throw $r7;
+
+     label2:
+        $i6 = r0.<java.io.ObjectInputStream: int passHandle>;
+
+     label3:
+        $r2 = specialinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject0(java.lang.Class,boolean)>(r1, 0);
+
+        $r3 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        $i0 = r0.<java.io.ObjectInputStream: int passHandle>;
+
+        virtualinvoke $r3.<java.io.ObjectInputStream$HandleTable: void markDependency(int,int)>($i6, $i0);
+
+        $r4 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        $i1 = r0.<java.io.ObjectInputStream: int passHandle>;
+
+        $r5 = virtualinvoke $r4.<java.io.ObjectInputStream$HandleTable: java.lang.ClassNotFoundException lookupException(int)>($i1);
+
+        if $r5 == null goto label4;
+
+        throw $r5;
+
+     label4:
+        $l2 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 != 0 goto label5;
+
+        $r6 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$ValidationList vlist>;
+
+        virtualinvoke $r6.<java.io.ObjectInputStream$ValidationList: void doCallbacks()>();
+
+     label5:
+        r0.<java.io.ObjectInputStream: int passHandle> = $i6;
+
+        $z1 = r0.<java.io.ObjectInputStream: boolean closed>;
+
+        if $z1 == 0 goto label6;
+
+        $l4 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $b5 = $l4 cmp 0L;
+
+        if $b5 != 0 goto label6;
+
+        specialinvoke r0.<java.io.ObjectInputStream: void clear()>();
+
+     label6:
+        return $r2;
+
+     label7:
+        $r9 := @caughtexception;
+
+     label8:
+        r0.<java.io.ObjectInputStream: int passHandle> = $i6;
+
+        $z2 = r0.<java.io.ObjectInputStream: boolean closed>;
+
+        if $z2 == 0 goto label9;
+
+        $l7 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $b8 = $l7 cmp 0L;
+
+        if $b8 != 0 goto label9;
+
+        specialinvoke r0.<java.io.ObjectInputStream: void clear()>();
+
+     label9:
+        throw $r9;
+
+        catch java.lang.Throwable from label3 to label5 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    protected java.lang.Object readObjectOverride() throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.ObjectInputStream r0;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        return null;
+    }
+
+    public java.lang.Object readUnshared() throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.lang.Throwable $r6;
+        java.io.ObjectInputStream r0;
+        long $l3, $l5, $l7;
+        java.io.ObjectInputStream$HandleTable $r2, $r3;
+        java.io.ObjectInputStream$ValidationList $r5;
+        byte $b4, $b6, $b8;
+        int i0, $i1, $i2;
+        boolean $z0, $z1;
+        java.lang.Object $r1;
+        java.lang.ClassNotFoundException $r4;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        i0 = r0.<java.io.ObjectInputStream: int passHandle>;
+
+     label1:
+        $r1 = specialinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject0(java.lang.Class,boolean)>(class "Ljava/lang/Object;", 1);
+
+        $r2 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        $i1 = r0.<java.io.ObjectInputStream: int passHandle>;
+
+        virtualinvoke $r2.<java.io.ObjectInputStream$HandleTable: void markDependency(int,int)>(i0, $i1);
+
+        $r3 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        $i2 = r0.<java.io.ObjectInputStream: int passHandle>;
+
+        $r4 = virtualinvoke $r3.<java.io.ObjectInputStream$HandleTable: java.lang.ClassNotFoundException lookupException(int)>($i2);
+
+        if $r4 == null goto label2;
+
+        throw $r4;
+
+     label2:
+        $l3 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $b4 = $l3 cmp 0L;
+
+        if $b4 != 0 goto label3;
+
+        $r5 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$ValidationList vlist>;
+
+        virtualinvoke $r5.<java.io.ObjectInputStream$ValidationList: void doCallbacks()>();
+
+     label3:
+        r0.<java.io.ObjectInputStream: int passHandle> = i0;
+
+        $z0 = r0.<java.io.ObjectInputStream: boolean closed>;
+
+        if $z0 == 0 goto label4;
+
+        $l5 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $b6 = $l5 cmp 0L;
+
+        if $b6 != 0 goto label4;
+
+        specialinvoke r0.<java.io.ObjectInputStream: void clear()>();
+
+     label4:
+        return $r1;
+
+     label5:
+        $r6 := @caughtexception;
+
+     label6:
+        r0.<java.io.ObjectInputStream: int passHandle> = i0;
+
+        $z1 = r0.<java.io.ObjectInputStream: boolean closed>;
+
+        if $z1 == 0 goto label7;
+
+        $l7 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $b8 = $l7 cmp 0L;
+
+        if $b8 != 0 goto label7;
+
+        specialinvoke r0.<java.io.ObjectInputStream: void clear()>();
+
+     label7:
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label3 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public void defaultReadObject() throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.SerialCallbackContext r1;
+        java.io.ObjectInputStream$BlockDataInputStream $r4, $r5;
+        java.io.ObjectInputStream r0;
+        java.io.ObjectStreamClass $r3;
+        java.io.ObjectInputStream$HandleTable $r6;
+        int $i0;
+        java.lang.Object $r2;
+        java.lang.ClassNotFoundException $r7;
+        java.io.NotActiveException $r8;
+        boolean $z0;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        r1 = r0.<java.io.ObjectInputStream: java.io.SerialCallbackContext curContext>;
+
+        if r1 != null goto label1;
+
+        $r8 = new java.io.NotActiveException;
+
+        specialinvoke $r8.<java.io.NotActiveException: void <init>(java.lang.String)>("not in call to readObject");
+
+        throw $r8;
+
+     label1:
+        $r2 = virtualinvoke r1.<java.io.SerialCallbackContext: java.lang.Object getObj()>();
+
+        $r3 = virtualinvoke r1.<java.io.SerialCallbackContext: java.io.ObjectStreamClass getDesc()>();
+
+        $r4 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r4.<java.io.ObjectInputStream$BlockDataInputStream: boolean setBlockDataMode(boolean)>(0);
+
+        specialinvoke r0.<java.io.ObjectInputStream: void defaultReadFields(java.lang.Object,java.io.ObjectStreamClass)>($r2, $r3);
+
+        $r5 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r5.<java.io.ObjectInputStream$BlockDataInputStream: boolean setBlockDataMode(boolean)>(1);
+
+        $z0 = virtualinvoke $r3.<java.io.ObjectStreamClass: boolean hasWriteObjectData()>();
+
+        if $z0 != 0 goto label2;
+
+        r0.<java.io.ObjectInputStream: boolean defaultDataEnd> = 1;
+
+     label2:
+        $r6 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        $i0 = r0.<java.io.ObjectInputStream: int passHandle>;
+
+        $r7 = virtualinvoke $r6.<java.io.ObjectInputStream$HandleTable: java.lang.ClassNotFoundException lookupException(int)>($i0);
+
+        if $r7 == null goto label3;
+
+        throw $r7;
+
+     label3:
+        return;
+    }
+
+    public java.io.ObjectInputStream$GetField readFields() throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.SerialCallbackContext r1;
+        java.io.ObjectInputStream$GetFieldImpl $r4;
+        java.io.ObjectInputStream$BlockDataInputStream $r3, $r5;
+        java.io.ObjectInputStream r0;
+        java.io.ObjectStreamClass $r2;
+        java.io.NotActiveException $r6;
+        boolean $z0;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        r1 = r0.<java.io.ObjectInputStream: java.io.SerialCallbackContext curContext>;
+
+        if r1 != null goto label1;
+
+        $r6 = new java.io.NotActiveException;
+
+        specialinvoke $r6.<java.io.NotActiveException: void <init>(java.lang.String)>("not in call to readObject");
+
+        throw $r6;
+
+     label1:
+        virtualinvoke r1.<java.io.SerialCallbackContext: java.lang.Object getObj()>();
+
+        $r2 = virtualinvoke r1.<java.io.SerialCallbackContext: java.io.ObjectStreamClass getDesc()>();
+
+        $r3 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r3.<java.io.ObjectInputStream$BlockDataInputStream: boolean setBlockDataMode(boolean)>(0);
+
+        $r4 = new java.io.ObjectInputStream$GetFieldImpl;
+
+        specialinvoke $r4.<java.io.ObjectInputStream$GetFieldImpl: void <init>(java.io.ObjectInputStream,java.io.ObjectStreamClass)>(r0, $r2);
+
+        virtualinvoke $r4.<java.io.ObjectInputStream$GetFieldImpl: void readFields()>();
+
+        $r5 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r5.<java.io.ObjectInputStream$BlockDataInputStream: boolean setBlockDataMode(boolean)>(1);
+
+        $z0 = virtualinvoke $r2.<java.io.ObjectStreamClass: boolean hasWriteObjectData()>();
+
+        if $z0 != 0 goto label2;
+
+        r0.<java.io.ObjectInputStream: boolean defaultDataEnd> = 1;
+
+     label2:
+        return $r4;
+    }
+
+    public void registerValidation(java.io.ObjectInputValidation, int) throws java.io.NotActiveException, java.io.InvalidObjectException
+    {
+        byte $b1;
+        java.io.ObjectInputStream r0;
+        java.io.ObjectInputValidation r1;
+        int i2;
+        long $l0;
+        java.io.NotActiveException $r3;
+        java.io.ObjectInputStream$ValidationList $r2;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        r1 := @parameter0: java.io.ObjectInputValidation;
+
+        i2 := @parameter1: int;
+
+        $l0 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        $r3 = new java.io.NotActiveException;
+
+        specialinvoke $r3.<java.io.NotActiveException: void <init>(java.lang.String)>("stream inactive");
+
+        throw $r3;
+
+     label1:
+        $r2 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$ValidationList vlist>;
+
+        virtualinvoke $r2.<java.io.ObjectInputStream$ValidationList: void register(java.io.ObjectInputValidation,int)>(r1, i2);
+
+        return;
+    }
+
+    protected java.lang.Class resolveClass(java.io.ObjectStreamClass) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.ObjectInputStream r8;
+        java.io.ObjectStreamClass r0;
+        java.util.HashMap $r5;
+        java.lang.Class $r3, r7;
+        java.lang.ClassNotFoundException $r4;
+        java.lang.Object $r6;
+        java.lang.String $r1;
+        java.lang.ClassLoader $r2;
+
+        r8 := @this: java.io.ObjectInputStream;
+
+        r0 := @parameter0: java.io.ObjectStreamClass;
+
+        $r1 = virtualinvoke r0.<java.io.ObjectStreamClass: java.lang.String getName()>();
+
+     label1:
+        $r2 = staticinvoke <java.io.ObjectInputStream: java.lang.ClassLoader latestUserDefinedLoader()>();
+
+        $r3 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>($r1, 0, $r2);
+
+     label2:
+        return $r3;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = <java.io.ObjectInputStream: java.util.HashMap primClasses>;
+
+        $r6 = virtualinvoke $r5.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        r7 = (java.lang.Class) $r6;
+
+        if r7 == null goto label4;
+
+        return r7;
+
+     label4:
+        throw $r4;
+
+        catch java.lang.ClassNotFoundException from label1 to label2 with label3;
+    }
+
+    protected java.lang.Class resolveProxyClass(java.lang.String[]) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.ObjectInputStream r10;
+        java.lang.String[] r1;
+        int $i0, $i1, $i2, $i3, i4;
+        java.lang.String $r4;
+        boolean z0, z1, z2;
+        java.lang.Class[] r2;
+        java.lang.IllegalArgumentException $r8;
+        java.lang.IllegalAccessError $r7;
+        java.lang.Class $r3, $r5;
+        java.lang.ClassNotFoundException $r9;
+        java.lang.ClassLoader $r0, $r6, r11, $r12;
+
+        r10 := @this: java.io.ObjectInputStream;
+
+        r1 := @parameter0: java.lang.String[];
+
+        $r0 = staticinvoke <java.io.ObjectInputStream: java.lang.ClassLoader latestUserDefinedLoader()>();
+
+        r11 = null;
+
+        z0 = 0;
+
+        z2 = 0;
+
+        z1 = 0;
+
+        $i0 = lengthof r1;
+
+        r2 = newarray (java.lang.Class)[$i0];
+
+        i4 = 0;
+
+     label1:
+        $i1 = lengthof r1;
+
+        if i4 >= $i1 goto label4;
+
+        $r4 = r1[i4];
+
+        $r5 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>($r4, 0, $r0);
+
+        $i2 = virtualinvoke $r5.<java.lang.Class: int getModifiers()>();
+
+        $i3 = $i2 & 1;
+
+        if $i3 != 0 goto label3;
+
+        if z2 == 0 goto label2;
+
+        $r6 = virtualinvoke $r5.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        if r11 == $r6 goto label3;
+
+        $r7 = new java.lang.IllegalAccessError;
+
+        specialinvoke $r7.<java.lang.IllegalAccessError: void <init>(java.lang.String)>("conflicting non-public interface class loaders");
+
+        throw $r7;
+
+     label2:
+        r11 = virtualinvoke $r5.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        z0 = 1;
+
+        z2 = 1;
+
+        z1 = 1;
+
+     label3:
+        r2[i4] = $r5;
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label4:
+        if z1 == 0 goto label5;
+
+        $r12 = r11;
+
+        goto label6;
+
+     label5:
+        $r12 = $r0;
+
+     label6:
+        $r3 = staticinvoke <java.lang.reflect.Proxy: java.lang.Class getProxyClass(java.lang.ClassLoader,java.lang.Class[])>($r12, r2);
+
+     label7:
+        return $r3;
+
+     label8:
+        $r8 := @caughtexception;
+
+        $r9 = new java.lang.ClassNotFoundException;
+
+        specialinvoke $r9.<java.lang.ClassNotFoundException: void <init>(java.lang.String,java.lang.Throwable)>(null, $r8);
+
+        throw $r9;
+
+        catch java.lang.IllegalArgumentException from label4 to label7 with label8;
+    }
+
+    protected java.lang.Object resolveObject(java.lang.Object) throws java.io.IOException
+    {
+        java.io.ObjectInputStream r1;
+        java.lang.Object r0;
+
+        r1 := @this: java.io.ObjectInputStream;
+
+        r0 := @parameter0: java.lang.Object;
+
+        return r0;
+    }
+
+    protected boolean enableResolveObject(boolean) throws java.lang.SecurityException
+    {
+        java.io.SerializablePermission $r2;
+        java.io.ObjectInputStream r0;
+        java.lang.SecurityManager $r1;
+        boolean z0, $z1, $z2, $z3;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        z0 := @parameter0: boolean;
+
+        $z1 = r0.<java.io.ObjectInputStream: boolean enableResolve>;
+
+        if z0 != $z1 goto label1;
+
+        return z0;
+
+     label1:
+        if z0 == 0 goto label2;
+
+        $r1 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r1 == null goto label2;
+
+        $r2 = <java.io.ObjectInputStream: java.io.SerializablePermission SUBSTITUTION_PERMISSION>;
+
+        virtualinvoke $r1.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r2);
+
+     label2:
+        r0.<java.io.ObjectInputStream: boolean enableResolve> = z0;
+
+        $z2 = r0.<java.io.ObjectInputStream: boolean enableResolve>;
+
+        if $z2 != 0 goto label3;
+
+        $z3 = 1;
+
+        goto label4;
+
+     label3:
+        $z3 = 0;
+
+     label4:
+        return $z3;
+    }
+
+    protected void readStreamHeader() throws java.io.IOException, java.io.StreamCorruptedException
+    {
+        java.lang.Object[] $r4;
+        java.io.StreamCorruptedException $r8;
+        java.io.ObjectInputStream$BlockDataInputStream $r1, $r2;
+        java.io.ObjectInputStream r0;
+        short $s0, $s1;
+        java.lang.Short $r5, $r6;
+        int $i2, $i4, $i5;
+        java.lang.String $r7;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $s0 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: short readShort()>();
+
+        $r2 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $s1 = virtualinvoke $r2.<java.io.ObjectInputStream$BlockDataInputStream: short readShort()>();
+
+        $i2 = (int) $s0;
+
+        $i4 = (int) -21267;
+
+        if $i2 != $i4 goto label1;
+
+        $i5 = (int) $s1;
+
+        if $i5 == 5 goto label2;
+
+     label1:
+        $r8 = new java.io.StreamCorruptedException;
+
+        $r4 = newarray (java.lang.Object)[2];
+
+        $r5 = staticinvoke <java.lang.Short: java.lang.Short valueOf(short)>($s0);
+
+        $r4[0] = $r5;
+
+        $r6 = staticinvoke <java.lang.Short: java.lang.Short valueOf(short)>($s1);
+
+        $r4[1] = $r6;
+
+        $r7 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("invalid stream header: %04X%04X", $r4);
+
+        specialinvoke $r8.<java.io.StreamCorruptedException: void <init>(java.lang.String)>($r7);
+
+        throw $r8;
+
+     label2:
+        return;
+    }
+
+    protected java.io.ObjectStreamClass readClassDescriptor() throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.ObjectInputStream r1;
+        java.io.ObjectStreamClass $r0;
+
+        r1 := @this: java.io.ObjectInputStream;
+
+        $r0 = new java.io.ObjectStreamClass;
+
+        specialinvoke $r0.<java.io.ObjectStreamClass: void <init>()>();
+
+        virtualinvoke $r0.<java.io.ObjectStreamClass: void readNonProxy(java.io.ObjectInputStream)>(r1);
+
+        return $r0;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        java.io.ObjectInputStream r0;
+        int $i0;
+        java.io.ObjectInputStream$BlockDataInputStream $r1;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $i0 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: int read()>();
+
+        return $i0;
+    }
+
+    public int read(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r0;
+        java.lang.IndexOutOfBoundsException $r4;
+        java.io.ObjectInputStream$BlockDataInputStream $r2;
+        java.io.ObjectInputStream r1;
+        java.lang.NullPointerException $r3;
+        int i0, i1, i2, $i3, $i4;
+
+        r1 := @this: java.io.ObjectInputStream;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        if r0 != null goto label1;
+
+        $r3 = new java.lang.NullPointerException;
+
+        specialinvoke $r3.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        i2 = i0 + i1;
+
+        if i0 < 0 goto label2;
+
+        if i1 < 0 goto label2;
+
+        $i3 = lengthof r0;
+
+        if i2 > $i3 goto label2;
+
+        if i2 >= 0 goto label3;
+
+     label2:
+        $r4 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r4.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r4;
+
+     label3:
+        $r2 = r1.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $i4 = virtualinvoke $r2.<java.io.ObjectInputStream$BlockDataInputStream: int read(byte[],int,int,boolean)>(r0, i0, i1, 0);
+
+        return $i4;
+    }
+
+    public int available() throws java.io.IOException
+    {
+        java.io.ObjectInputStream r0;
+        int $i0;
+        java.io.ObjectInputStream$BlockDataInputStream $r1;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $i0 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: int available()>();
+
+        return $i0;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        byte $b1;
+        java.io.ObjectInputStream$BlockDataInputStream $r1;
+        java.io.ObjectInputStream r0;
+        long $l0;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        r0.<java.io.ObjectInputStream: boolean closed> = 1;
+
+        $l0 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        specialinvoke r0.<java.io.ObjectInputStream: void clear()>();
+
+     label1:
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: void close()>();
+
+        return;
+    }
+
+    public boolean readBoolean() throws java.io.IOException
+    {
+        java.io.ObjectInputStream r0;
+        java.io.ObjectInputStream$BlockDataInputStream $r1;
+        boolean $z0;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $z0 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: boolean readBoolean()>();
+
+        return $z0;
+    }
+
+    public byte readByte() throws java.io.IOException
+    {
+        java.io.ObjectInputStream r0;
+        byte $b0;
+        java.io.ObjectInputStream$BlockDataInputStream $r1;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $b0 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: byte readByte()>();
+
+        return $b0;
+    }
+
+    public int readUnsignedByte() throws java.io.IOException
+    {
+        java.io.ObjectInputStream r0;
+        int $i0;
+        java.io.ObjectInputStream$BlockDataInputStream $r1;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $i0 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: int readUnsignedByte()>();
+
+        return $i0;
+    }
+
+    public char readChar() throws java.io.IOException
+    {
+        java.io.ObjectInputStream r0;
+        char $c0;
+        java.io.ObjectInputStream$BlockDataInputStream $r1;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $c0 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: char readChar()>();
+
+        return $c0;
+    }
+
+    public short readShort() throws java.io.IOException
+    {
+        java.io.ObjectInputStream r0;
+        short $s0;
+        java.io.ObjectInputStream$BlockDataInputStream $r1;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $s0 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: short readShort()>();
+
+        return $s0;
+    }
+
+    public int readUnsignedShort() throws java.io.IOException
+    {
+        java.io.ObjectInputStream r0;
+        int $i0;
+        java.io.ObjectInputStream$BlockDataInputStream $r1;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $i0 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: int readUnsignedShort()>();
+
+        return $i0;
+    }
+
+    public int readInt() throws java.io.IOException
+    {
+        java.io.ObjectInputStream r0;
+        int $i0;
+        java.io.ObjectInputStream$BlockDataInputStream $r1;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $i0 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: int readInt()>();
+
+        return $i0;
+    }
+
+    public long readLong() throws java.io.IOException
+    {
+        java.io.ObjectInputStream r0;
+        long $l0;
+        java.io.ObjectInputStream$BlockDataInputStream $r1;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $l0 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: long readLong()>();
+
+        return $l0;
+    }
+
+    public float readFloat() throws java.io.IOException
+    {
+        java.io.ObjectInputStream r0;
+        float $f0;
+        java.io.ObjectInputStream$BlockDataInputStream $r1;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $f0 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: float readFloat()>();
+
+        return $f0;
+    }
+
+    public double readDouble() throws java.io.IOException
+    {
+        java.io.ObjectInputStream r0;
+        java.io.ObjectInputStream$BlockDataInputStream $r1;
+        double $d0;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $d0 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: double readDouble()>();
+
+        return $d0;
+    }
+
+    public void readFully(byte[]) throws java.io.IOException
+    {
+        byte[] r1;
+        java.io.ObjectInputStream$BlockDataInputStream $r2;
+        java.io.ObjectInputStream r0;
+        int $i0;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        r1 := @parameter0: byte[];
+
+        $r2 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $i0 = lengthof r1;
+
+        virtualinvoke $r2.<java.io.ObjectInputStream$BlockDataInputStream: void readFully(byte[],int,int,boolean)>(r1, 0, $i0, 0);
+
+        return;
+    }
+
+    public void readFully(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r0;
+        java.lang.IndexOutOfBoundsException $r3;
+        java.io.ObjectInputStream$BlockDataInputStream $r2;
+        java.io.ObjectInputStream r1;
+        int i0, i1, i2, $i3;
+
+        r1 := @this: java.io.ObjectInputStream;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 = i0 + i1;
+
+        if i0 < 0 goto label1;
+
+        if i1 < 0 goto label1;
+
+        $i3 = lengthof r0;
+
+        if i2 > $i3 goto label1;
+
+        if i2 >= 0 goto label2;
+
+     label1:
+        $r3 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r3.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r3;
+
+     label2:
+        $r2 = r1.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r2.<java.io.ObjectInputStream$BlockDataInputStream: void readFully(byte[],int,int,boolean)>(r0, i0, i1, 0);
+
+        return;
+    }
+
+    public int skipBytes(int) throws java.io.IOException
+    {
+        java.io.ObjectInputStream$BlockDataInputStream $r1;
+        java.io.ObjectInputStream r0;
+        int i0, $i1;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $i1 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: int skipBytes(int)>(i0);
+
+        return $i1;
+    }
+
+    public java.lang.String readLine() throws java.io.IOException
+    {
+        java.io.ObjectInputStream r0;
+        java.lang.String $r2;
+        java.io.ObjectInputStream$BlockDataInputStream $r1;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $r2 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: java.lang.String readLine()>();
+
+        return $r2;
+    }
+
+    public java.lang.String readUTF() throws java.io.IOException
+    {
+        java.io.ObjectInputStream r0;
+        java.lang.String $r2;
+        java.io.ObjectInputStream$BlockDataInputStream $r1;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $r2 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: java.lang.String readUTF()>();
+
+        return $r2;
+    }
+
+    private final sun.misc.ObjectInputFilter getInternalObjectInputFilter()
+    {
+        java.io.ObjectInputStream r0;
+        sun.misc.ObjectInputFilter $r1;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        $r1 = r0.<java.io.ObjectInputStream: sun.misc.ObjectInputFilter serialFilter>;
+
+        return $r1;
+    }
+
+    private final void setInternalObjectInputFilter(sun.misc.ObjectInputFilter)
+    {
+        java.lang.IllegalStateException $r13, $r14, $r15;
+        java.io.ObjectInputStream r1;
+        sun.misc.ObjectInputFilter r3, $r4, $r6, $r8;
+        long $l0;
+        java.io.SerializablePermission $r12;
+        byte $b1;
+        int $i2;
+        boolean $z0, $z1;
+        java.lang.SecurityManager $r0;
+        java.util.function.BinaryOperator $r2;
+        java.lang.Object $r5;
+
+        r1 := @this: java.io.ObjectInputStream;
+
+        r3 := @parameter0: sun.misc.ObjectInputFilter;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r12 = new java.io.SerializablePermission;
+
+        specialinvoke $r12.<java.io.SerializablePermission: void <init>(java.lang.String)>("serialFilter");
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r12);
+
+     label1:
+        $z0 = r1.<java.io.ObjectInputStream: boolean streamFilterSet>;
+
+        if $z0 == 0 goto label2;
+
+        $r13 = new java.lang.IllegalStateException;
+
+        specialinvoke $r13.<java.lang.IllegalStateException: void <init>(java.lang.String)>("filter can not be set more than once");
+
+        throw $r13;
+
+     label2:
+        $l0 = r1.<java.io.ObjectInputStream: long totalObjectRefs>;
+
+        $b1 = $l0 cmp 0L;
+
+        $i2 = (int) $b1;
+
+        if $i2 <= 0 goto label3;
+
+        $z1 = <java.io.ObjectInputStream$Caches: boolean SET_FILTER_AFTER_READ>;
+
+        if $z1 != 0 goto label3;
+
+        $r14 = new java.lang.IllegalStateException;
+
+        specialinvoke $r14.<java.lang.IllegalStateException: void <init>(java.lang.String)>("filter can not be set after an object has been read");
+
+        throw $r14;
+
+     label3:
+        r1.<java.io.ObjectInputStream: boolean streamFilterSet> = 1;
+
+        $r2 = staticinvoke <sun.misc.ObjectInputFilter$Config: java.util.function.BinaryOperator getSerialFilterFactorySingleton()>();
+
+        $r4 = r1.<java.io.ObjectInputStream: sun.misc.ObjectInputFilter serialFilter>;
+
+        $r5 = interfaceinvoke $r2.<java.util.function.BinaryOperator: java.lang.Object apply(java.lang.Object,java.lang.Object)>($r4, r3);
+
+        $r8 = (sun.misc.ObjectInputFilter) $r5;
+
+        $r6 = r1.<java.io.ObjectInputStream: sun.misc.ObjectInputFilter serialFilter>;
+
+        if $r6 == null goto label4;
+
+        if $r8 != null goto label4;
+
+        $r15 = new java.lang.IllegalStateException;
+
+        specialinvoke $r15.<java.lang.IllegalStateException: void <init>(java.lang.String)>("filter can not be replaced with null filter");
+
+        throw $r15;
+
+     label4:
+        r1.<java.io.ObjectInputStream: sun.misc.ObjectInputFilter serialFilter> = $r8;
+
+        return;
+    }
+
+    private void filterCheck(java.lang.Class, int) throws java.io.InvalidClassException
+    {
+        java.io.ObjectInputStream r0;
+        sun.misc.ObjectInputFilter $r1, $r6;
+        java.lang.Integer $r15, $r24;
+        java.lang.Long $r16, $r17, $r18, $r25, $r26, $r27;
+        java.io.ObjectInputStream$BlockDataInputStream $r2, $r3;
+        java.io.ObjectInputStream$FilterValues $r4;
+        sun.misc.ObjectInputFilter$Status $r20, r31;
+        java.lang.StringBuilder $r9, $r10, $r11;
+        java.lang.Object[] $r14, $r23;
+        long l0, $l2, $l3, $l4, $l5, $l6, $l7, $l8, $l9;
+        java.io.InvalidClassException $r8;
+        int i1;
+        java.lang.String $r12, $r19, $r28;
+        sun.util.logging.PlatformLogger $r7, $r13, $r21, $r22;
+        java.lang.RuntimeException $r29, r30;
+        java.lang.Class r5;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        r5 := @parameter0: java.lang.Class;
+
+        i1 := @parameter1: int;
+
+        $r1 = r0.<java.io.ObjectInputStream: sun.misc.ObjectInputFilter serialFilter>;
+
+        if $r1 == null goto label10;
+
+        r30 = null;
+
+        $r2 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        if $r2 != null goto label01;
+
+        $l9 = 0L;
+
+        goto label02;
+
+     label01:
+        $r3 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $l9 = virtualinvoke $r3.<java.io.ObjectInputStream$BlockDataInputStream: long getBytesRead()>();
+
+     label02:
+        l0 = $l9;
+
+     label03:
+        $r6 = r0.<java.io.ObjectInputStream: sun.misc.ObjectInputFilter serialFilter>;
+
+        $r4 = new java.io.ObjectInputStream$FilterValues;
+
+        $l4 = (long) i1;
+
+        $l3 = r0.<java.io.ObjectInputStream: long totalObjectRefs>;
+
+        $l2 = r0.<java.io.ObjectInputStream: long depth>;
+
+        specialinvoke $r4.<java.io.ObjectInputStream$FilterValues: void <init>(java.lang.Class,long,long,long,long)>(r5, $l4, $l3, $l2, $l9);
+
+        r31 = interfaceinvoke $r6.<sun.misc.ObjectInputFilter: sun.misc.ObjectInputFilter$Status checkInput(sun.misc.ObjectInputFilter$FilterInfo)>($r4);
+
+     label04:
+        goto label06;
+
+     label05:
+        $r29 := @caughtexception;
+
+        r31 = <sun.misc.ObjectInputFilter$Status: sun.misc.ObjectInputFilter$Status REJECTED>;
+
+        r30 = $r29;
+
+     label06:
+        if r31 == null goto label07;
+
+        $r20 = <sun.misc.ObjectInputFilter$Status: sun.misc.ObjectInputFilter$Status REJECTED>;
+
+        if r31 != $r20 goto label09;
+
+     label07:
+        $r7 = staticinvoke <java.io.ObjectInputStream$Logging: sun.util.logging.PlatformLogger access$300()>();
+
+        if $r7 == null goto label08;
+
+        $r13 = staticinvoke <java.io.ObjectInputStream$Logging: sun.util.logging.PlatformLogger access$300()>();
+
+        $r14 = newarray (java.lang.Object)[7];
+
+        $r14[0] = r31;
+
+        $r14[1] = r5;
+
+        $r15 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i1);
+
+        $r14[2] = $r15;
+
+        $l5 = r0.<java.io.ObjectInputStream: long totalObjectRefs>;
+
+        $r16 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l5);
+
+        $r14[3] = $r16;
+
+        $l6 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $r17 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l6);
+
+        $r14[4] = $r17;
+
+        $r18 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>(l0);
+
+        $r14[5] = $r18;
+
+        $r19 = staticinvoke <java.util.Objects: java.lang.String toString(java.lang.Object,java.lang.String)>(r30, "n/a");
+
+        $r14[6] = $r19;
+
+        virtualinvoke $r13.<sun.util.logging.PlatformLogger: void info(java.lang.String,java.lang.Object[])>("ObjectInputFilter {0}: {1}, array length: {2}, nRefs: {3}, depth: {4}, bytes: {5}, ex: {6}", $r14);
+
+     label08:
+        $r8 = new java.io.InvalidClassException;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("filter status: ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r31);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<java.io.InvalidClassException: void <init>(java.lang.String)>($r12);
+
+        virtualinvoke $r8.<java.io.InvalidClassException: java.lang.Throwable initCause(java.lang.Throwable)>(r30);
+
+        throw $r8;
+
+     label09:
+        $r21 = staticinvoke <java.io.ObjectInputStream$Logging: sun.util.logging.PlatformLogger access$400()>();
+
+        if $r21 == null goto label10;
+
+        $r22 = staticinvoke <java.io.ObjectInputStream$Logging: sun.util.logging.PlatformLogger access$400()>();
+
+        $r23 = newarray (java.lang.Object)[7];
+
+        $r23[0] = r31;
+
+        $r23[1] = r5;
+
+        $r24 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i1);
+
+        $r23[2] = $r24;
+
+        $l7 = r0.<java.io.ObjectInputStream: long totalObjectRefs>;
+
+        $r25 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l7);
+
+        $r23[3] = $r25;
+
+        $l8 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $r26 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l8);
+
+        $r23[4] = $r26;
+
+        $r27 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>(l0);
+
+        $r23[5] = $r27;
+
+        $r28 = staticinvoke <java.util.Objects: java.lang.String toString(java.lang.Object,java.lang.String)>(r30, "n/a");
+
+        $r23[6] = $r28;
+
+        virtualinvoke $r22.<sun.util.logging.PlatformLogger: void finer(java.lang.String,java.lang.Object[])>("ObjectInputFilter {0}: {1}, array length: {2}, nRefs: {3}, depth: {4}, bytes: {5}, ex: {6}", $r23);
+
+     label10:
+        return;
+
+        catch java.lang.RuntimeException from label03 to label04 with label05;
+    }
+
+    private void checkArray(java.lang.Class, int) throws java.io.InvalidClassException
+    {
+        int i0;
+        java.io.ObjectInputStream r1;
+        java.lang.Class r0;
+        java.lang.IllegalArgumentException $r3;
+        boolean $z0;
+        java.lang.NegativeArraySizeException $r2;
+
+        r1 := @this: java.io.ObjectInputStream;
+
+        r0 := @parameter0: java.lang.Class;
+
+        i0 := @parameter1: int;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r0);
+
+        $z0 = virtualinvoke r0.<java.lang.Class: boolean isArray()>();
+
+        if $z0 != 0 goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("not an array type");
+
+        throw $r3;
+
+     label1:
+        if i0 >= 0 goto label2;
+
+        $r2 = new java.lang.NegativeArraySizeException;
+
+        specialinvoke $r2.<java.lang.NegativeArraySizeException: void <init>()>();
+
+        throw $r2;
+
+     label2:
+        specialinvoke r1.<java.io.ObjectInputStream: void filterCheck(java.lang.Class,int)>(r0, i0);
+
+        return;
+    }
+
+    private void verifySubclass()
+    {
+        java.io.ObjectInputStream r0;
+        java.lang.SecurityManager $r2;
+        java.lang.ref.ReferenceQueue $r4, $r6;
+        java.util.concurrent.ConcurrentMap $r3, $r7, $r11;
+        java.io.SerializablePermission $r9;
+        java.lang.Boolean $r10, r12;
+        java.lang.Class $r1;
+        java.lang.Object $r8;
+        java.io.ObjectStreamClass$WeakClassKey $r5;
+        boolean $z0, $z1;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        if $r1 != class "Ljava/io/ObjectInputStream;" goto label1;
+
+        return;
+
+     label1:
+        $r2 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r2 != null goto label2;
+
+        return;
+
+     label2:
+        $r4 = <java.io.ObjectInputStream$Caches: java.lang.ref.ReferenceQueue subclassAuditsQueue>;
+
+        $r3 = <java.io.ObjectInputStream$Caches: java.util.concurrent.ConcurrentMap subclassAudits>;
+
+        staticinvoke <java.io.ObjectStreamClass: void processQueue(java.lang.ref.ReferenceQueue,java.util.concurrent.ConcurrentMap)>($r4, $r3);
+
+        $r5 = new java.io.ObjectStreamClass$WeakClassKey;
+
+        $r6 = <java.io.ObjectInputStream$Caches: java.lang.ref.ReferenceQueue subclassAuditsQueue>;
+
+        specialinvoke $r5.<java.io.ObjectStreamClass$WeakClassKey: void <init>(java.lang.Class,java.lang.ref.ReferenceQueue)>($r1, $r6);
+
+        $r7 = <java.io.ObjectInputStream$Caches: java.util.concurrent.ConcurrentMap subclassAudits>;
+
+        $r8 = interfaceinvoke $r7.<java.util.concurrent.ConcurrentMap: java.lang.Object get(java.lang.Object)>($r5);
+
+        r12 = (java.lang.Boolean) $r8;
+
+        if r12 != null goto label3;
+
+        $z1 = staticinvoke <java.io.ObjectInputStream: boolean auditSubclass(java.lang.Class)>($r1);
+
+        $r10 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z1);
+
+        r12 = $r10;
+
+        $r11 = <java.io.ObjectInputStream$Caches: java.util.concurrent.ConcurrentMap subclassAudits>;
+
+        interfaceinvoke $r11.<java.util.concurrent.ConcurrentMap: java.lang.Object putIfAbsent(java.lang.Object,java.lang.Object)>($r5, $r10);
+
+     label3:
+        $z0 = virtualinvoke r12.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z0 == 0 goto label4;
+
+        return;
+
+     label4:
+        $r9 = <java.io.ObjectInputStream: java.io.SerializablePermission SUBCLASS_IMPLEMENTATION_PERMISSION>;
+
+        virtualinvoke $r2.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r9);
+
+        return;
+    }
+
+    private static boolean auditSubclass(java.lang.Class)
+    {
+        java.lang.Boolean r3;
+        java.lang.Class r1;
+        java.lang.Object $r2;
+        java.io.ObjectInputStream$2 $r0;
+        boolean $z0;
+
+        r1 := @parameter0: java.lang.Class;
+
+        $r0 = new java.io.ObjectInputStream$2;
+
+        specialinvoke $r0.<java.io.ObjectInputStream$2: void <init>(java.lang.Class)>(r1);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r3 = (java.lang.Boolean) $r2;
+
+        $z0 = virtualinvoke r3.<java.lang.Boolean: boolean booleanValue()>();
+
+        return $z0;
+    }
+
+    private void clear()
+    {
+        java.io.ObjectInputStream r0;
+        java.io.ObjectInputStream$HandleTable $r1;
+        java.io.ObjectInputStream$ValidationList $r2;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        virtualinvoke $r1.<java.io.ObjectInputStream$HandleTable: void clear()>();
+
+        $r2 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$ValidationList vlist>;
+
+        virtualinvoke $r2.<java.io.ObjectInputStream$ValidationList: void clear()>();
+
+        return;
+    }
+
+    private java.lang.Object readObject0(java.lang.Class, boolean) throws java.io.IOException
+    {
+        byte $b24;
+        java.io.StreamCorruptedException $r61, $r63, $r64;
+        java.io.WriteAbortedException $r59;
+        java.lang.Throwable $r48;
+        java.lang.Object[] $r40;
+        long $l0, $l1, $l2, $l3, $l4, $l5, $l7, $l8, $l9, $l10, $l11, $l12, $l13, $l14, $l15, $l16, $l17, $l18, $l19, $l20, $l22, $l23;
+        java.lang.ClassCastException $r53, $r54, $r55, $r56, $r57, $r58;
+        java.lang.String $r24, $r42;
+        java.io.IOException $r7;
+        java.io.ObjectInputStream r0;
+        java.lang.Enum $r3;
+        java.lang.Byte $r41;
+        boolean $z0, z1, $z2;
+        java.io.ObjectInputStream$BlockDataInputStream $r1, $r5, $r13, $r14, $r16, $r18, $r22, $r26, $r29, $r32, $r36, $r38, $r43, $r44, $r45, $r49, $r50;
+        java.io.ObjectStreamClass $r31;
+        int $i6, $i21, $i25, $i26;
+        java.io.OptionalDataException $r51, $r52, $r60, $r62;
+        java.lang.Class r2, $r17;
+        java.lang.Object $r4, $r20, $r21, $r25, $r27, $r28, $r34, $r35, $r37;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        r2 := @parameter0: java.lang.Class;
+
+        z1 := @parameter1: boolean;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $z0 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: boolean getBlockDataMode()>();
+
+        if $z0 == 0 goto label03;
+
+        $r44 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $i21 = virtualinvoke $r44.<java.io.ObjectInputStream$BlockDataInputStream: int currentBlockRemaining()>();
+
+        if $i21 <= 0 goto label01;
+
+        $r51 = new java.io.OptionalDataException;
+
+        specialinvoke $r51.<java.io.OptionalDataException: void <init>(int)>($i21);
+
+        throw $r51;
+
+     label01:
+        $z2 = r0.<java.io.ObjectInputStream: boolean defaultDataEnd>;
+
+        if $z2 == 0 goto label02;
+
+        $r52 = new java.io.OptionalDataException;
+
+        specialinvoke $r52.<java.io.OptionalDataException: void <init>(boolean)>(1);
+
+        throw $r52;
+
+     label02:
+        $r45 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r45.<java.io.ObjectInputStream$BlockDataInputStream: boolean setBlockDataMode(boolean)>(0);
+
+     label03:
+        $r50 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $b24 = virtualinvoke $r50.<java.io.ObjectInputStream$BlockDataInputStream: byte peekByte()>();
+
+        $i25 = (int) $b24;
+
+        if $i25 != 121 goto label04;
+
+        $r43 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r43.<java.io.ObjectInputStream$BlockDataInputStream: byte readByte()>();
+
+        specialinvoke r0.<java.io.ObjectInputStream: void handleReset()>();
+
+        goto label03;
+
+     label04:
+        $l0 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $l1 = $l0 + 1L;
+
+        r0.<java.io.ObjectInputStream: long depth> = $l1;
+
+        $l2 = r0.<java.io.ObjectInputStream: long totalObjectRefs>;
+
+        $l3 = $l2 + 1L;
+
+        r0.<java.io.ObjectInputStream: long totalObjectRefs> = $l3;
+
+     label05:
+        $i26 = (int) $b24;
+
+        tableswitch($i26)
+        {
+            case 112: goto label06;
+            case 113: goto label08;
+            case 114: goto label13;
+            case 115: goto label24;
+            case 116: goto label16;
+            case 117: goto label18;
+            case 118: goto label10;
+            case 119: goto label29;
+            case 120: goto label31;
+            case 121: goto label33;
+            case 122: goto label29;
+            case 123: goto label27;
+            case 124: goto label16;
+            case 125: goto label13;
+            case 126: goto label21;
+            default: goto label33;
+        };
+
+     label06:
+        $r37 = specialinvoke r0.<java.io.ObjectInputStream: java.lang.Object readNull()>();
+
+     label07:
+        $l19 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $l20 = $l19 - 1L;
+
+        r0.<java.io.ObjectInputStream: long depth> = $l20;
+
+        $r38 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r38.<java.io.ObjectInputStream$BlockDataInputStream: boolean setBlockDataMode(boolean)>($z0);
+
+        return $r37;
+
+     label08:
+        $r34 = specialinvoke r0.<java.io.ObjectInputStream: java.lang.Object readHandle(boolean)>(z1);
+
+        $r35 = virtualinvoke r2.<java.lang.Class: java.lang.Object cast(java.lang.Object)>($r34);
+
+     label09:
+        $l17 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $l18 = $l17 - 1L;
+
+        r0.<java.io.ObjectInputStream: long depth> = $l18;
+
+        $r36 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r36.<java.io.ObjectInputStream$BlockDataInputStream: boolean setBlockDataMode(boolean)>($z0);
+
+        return $r35;
+
+     label10:
+        if r2 != class "Ljava/lang/String;" goto label11;
+
+        $r53 = new java.lang.ClassCastException;
+
+        specialinvoke $r53.<java.lang.ClassCastException: void <init>(java.lang.String)>("Cannot cast a class to java.lang.String");
+
+        throw $r53;
+
+     label11:
+        $r17 = specialinvoke r0.<java.io.ObjectInputStream: java.lang.Class readClass(boolean)>(z1);
+
+     label12:
+        $l7 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $l8 = $l7 - 1L;
+
+        r0.<java.io.ObjectInputStream: long depth> = $l8;
+
+        $r18 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r18.<java.io.ObjectInputStream$BlockDataInputStream: boolean setBlockDataMode(boolean)>($z0);
+
+        return $r17;
+
+     label13:
+        if r2 != class "Ljava/lang/String;" goto label14;
+
+        $r54 = new java.lang.ClassCastException;
+
+        specialinvoke $r54.<java.lang.ClassCastException: void <init>(java.lang.String)>("Cannot cast a class to java.lang.String");
+
+        throw $r54;
+
+     label14:
+        $r31 = specialinvoke r0.<java.io.ObjectInputStream: java.io.ObjectStreamClass readClassDesc(boolean)>(z1);
+
+     label15:
+        $l15 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $l16 = $l15 - 1L;
+
+        r0.<java.io.ObjectInputStream: long depth> = $l16;
+
+        $r32 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r32.<java.io.ObjectInputStream$BlockDataInputStream: boolean setBlockDataMode(boolean)>($z0);
+
+        return $r31;
+
+     label16:
+        $r24 = specialinvoke r0.<java.io.ObjectInputStream: java.lang.String readString(boolean)>(z1);
+
+        $r25 = specialinvoke r0.<java.io.ObjectInputStream: java.lang.Object checkResolve(java.lang.Object)>($r24);
+
+     label17:
+        $l11 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $l12 = $l11 - 1L;
+
+        r0.<java.io.ObjectInputStream: long depth> = $l12;
+
+        $r26 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r26.<java.io.ObjectInputStream$BlockDataInputStream: boolean setBlockDataMode(boolean)>($z0);
+
+        return $r25;
+
+     label18:
+        if r2 != class "Ljava/lang/String;" goto label19;
+
+        $r55 = new java.lang.ClassCastException;
+
+        specialinvoke $r55.<java.lang.ClassCastException: void <init>(java.lang.String)>("Cannot cast an array to java.lang.String");
+
+        throw $r55;
+
+     label19:
+        $r20 = specialinvoke r0.<java.io.ObjectInputStream: java.lang.Object readArray(boolean)>(z1);
+
+        $r21 = specialinvoke r0.<java.io.ObjectInputStream: java.lang.Object checkResolve(java.lang.Object)>($r20);
+
+     label20:
+        $l9 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $l10 = $l9 - 1L;
+
+        r0.<java.io.ObjectInputStream: long depth> = $l10;
+
+        $r22 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r22.<java.io.ObjectInputStream$BlockDataInputStream: boolean setBlockDataMode(boolean)>($z0);
+
+        return $r21;
+
+     label21:
+        if r2 != class "Ljava/lang/String;" goto label22;
+
+        $r56 = new java.lang.ClassCastException;
+
+        specialinvoke $r56.<java.lang.ClassCastException: void <init>(java.lang.String)>("Cannot cast an enum to java.lang.String");
+
+        throw $r56;
+
+     label22:
+        $r3 = specialinvoke r0.<java.io.ObjectInputStream: java.lang.Enum readEnum(boolean)>(z1);
+
+        $r4 = specialinvoke r0.<java.io.ObjectInputStream: java.lang.Object checkResolve(java.lang.Object)>($r3);
+
+     label23:
+        $l4 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $l5 = $l4 - 1L;
+
+        r0.<java.io.ObjectInputStream: long depth> = $l5;
+
+        $r5 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r5.<java.io.ObjectInputStream$BlockDataInputStream: boolean setBlockDataMode(boolean)>($z0);
+
+        return $r4;
+
+     label24:
+        if r2 != class "Ljava/lang/String;" goto label25;
+
+        $r57 = new java.lang.ClassCastException;
+
+        specialinvoke $r57.<java.lang.ClassCastException: void <init>(java.lang.String)>("Cannot cast an object to java.lang.String");
+
+        throw $r57;
+
+     label25:
+        $r27 = specialinvoke r0.<java.io.ObjectInputStream: java.lang.Object readOrdinaryObject(boolean)>(z1);
+
+        $r28 = specialinvoke r0.<java.io.ObjectInputStream: java.lang.Object checkResolve(java.lang.Object)>($r27);
+
+     label26:
+        $l13 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $l14 = $l13 - 1L;
+
+        r0.<java.io.ObjectInputStream: long depth> = $l14;
+
+        $r29 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r29.<java.io.ObjectInputStream$BlockDataInputStream: boolean setBlockDataMode(boolean)>($z0);
+
+        return $r28;
+
+     label27:
+        if r2 != class "Ljava/lang/String;" goto label28;
+
+        $r58 = new java.lang.ClassCastException;
+
+        specialinvoke $r58.<java.lang.ClassCastException: void <init>(java.lang.String)>("Cannot cast an exception to java.lang.String");
+
+        throw $r58;
+
+     label28:
+        $r7 = specialinvoke r0.<java.io.ObjectInputStream: java.io.IOException readFatalException()>();
+
+        $r59 = new java.io.WriteAbortedException;
+
+        specialinvoke $r59.<java.io.WriteAbortedException: void <init>(java.lang.String,java.lang.Exception)>("writing aborted", $r7);
+
+        throw $r59;
+
+     label29:
+        if $z0 == 0 goto label30;
+
+        $r13 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r13.<java.io.ObjectInputStream$BlockDataInputStream: boolean setBlockDataMode(boolean)>(1);
+
+        $r14 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r14.<java.io.ObjectInputStream$BlockDataInputStream: int peek()>();
+
+        $r60 = new java.io.OptionalDataException;
+
+        $r16 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $i6 = virtualinvoke $r16.<java.io.ObjectInputStream$BlockDataInputStream: int currentBlockRemaining()>();
+
+        specialinvoke $r60.<java.io.OptionalDataException: void <init>(int)>($i6);
+
+        throw $r60;
+
+     label30:
+        $r61 = new java.io.StreamCorruptedException;
+
+        specialinvoke $r61.<java.io.StreamCorruptedException: void <init>(java.lang.String)>("unexpected block data");
+
+        throw $r61;
+
+     label31:
+        if $z0 == 0 goto label32;
+
+        $r62 = new java.io.OptionalDataException;
+
+        specialinvoke $r62.<java.io.OptionalDataException: void <init>(boolean)>(1);
+
+        throw $r62;
+
+     label32:
+        $r63 = new java.io.StreamCorruptedException;
+
+        specialinvoke $r63.<java.io.StreamCorruptedException: void <init>(java.lang.String)>("unexpected end of block data");
+
+        throw $r63;
+
+     label33:
+        $r64 = new java.io.StreamCorruptedException;
+
+        $r40 = newarray (java.lang.Object)[1];
+
+        $r41 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b24);
+
+        $r40[0] = $r41;
+
+        $r42 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("invalid type code: %02X", $r40);
+
+        specialinvoke $r64.<java.io.StreamCorruptedException: void <init>(java.lang.String)>($r42);
+
+        throw $r64;
+
+     label34:
+        $r48 := @caughtexception;
+
+     label35:
+        $l22 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $l23 = $l22 - 1L;
+
+        r0.<java.io.ObjectInputStream: long depth> = $l23;
+
+        $r49 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r49.<java.io.ObjectInputStream$BlockDataInputStream: boolean setBlockDataMode(boolean)>($z0);
+
+        throw $r48;
+
+        catch java.lang.Throwable from label05 to label07 with label34;
+        catch java.lang.Throwable from label08 to label09 with label34;
+        catch java.lang.Throwable from label10 to label12 with label34;
+        catch java.lang.Throwable from label13 to label15 with label34;
+        catch java.lang.Throwable from label16 to label17 with label34;
+        catch java.lang.Throwable from label18 to label20 with label34;
+        catch java.lang.Throwable from label21 to label23 with label34;
+        catch java.lang.Throwable from label24 to label26 with label34;
+        catch java.lang.Throwable from label27 to label35 with label34;
+    }
+
+    private java.lang.Object checkResolve(java.lang.Object) throws java.io.IOException
+    {
+        java.io.ObjectInputStream r0;
+        java.io.ObjectInputStream$HandleTable $r2, $r8;
+        int $i0, $i1, $i2, $i4;
+        java.lang.Object r1, $r4;
+        java.lang.ClassNotFoundException $r3;
+        java.lang.Class $r5, $r6, $r7;
+        boolean $z0, $z1;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $z0 = r0.<java.io.ObjectInputStream: boolean enableResolve>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        $i0 = r0.<java.io.ObjectInputStream: int passHandle>;
+
+        $r3 = virtualinvoke $r2.<java.io.ObjectInputStream$HandleTable: java.lang.ClassNotFoundException lookupException(int)>($i0);
+
+        if $r3 == null goto label2;
+
+     label1:
+        return r1;
+
+     label2:
+        $r4 = virtualinvoke r0.<java.io.ObjectInputStream: java.lang.Object resolveObject(java.lang.Object)>(r1);
+
+        if $r4 == r1 goto label5;
+
+        if $r4 == null goto label4;
+
+        $r5 = virtualinvoke $r4.<java.lang.Object: java.lang.Class getClass()>();
+
+        $z1 = virtualinvoke $r5.<java.lang.Class: boolean isArray()>();
+
+        if $z1 == 0 goto label3;
+
+        $r7 = virtualinvoke $r4.<java.lang.Object: java.lang.Class getClass()>();
+
+        $i1 = staticinvoke <java.lang.reflect.Array: int getLength(java.lang.Object)>($r4);
+
+        specialinvoke r0.<java.io.ObjectInputStream: void filterCheck(java.lang.Class,int)>($r7, $i1);
+
+        goto label4;
+
+     label3:
+        $r6 = virtualinvoke $r4.<java.lang.Object: java.lang.Class getClass()>();
+
+        $i4 = (int) -1;
+
+        specialinvoke r0.<java.io.ObjectInputStream: void filterCheck(java.lang.Class,int)>($r6, $i4);
+
+     label4:
+        $r8 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        $i2 = r0.<java.io.ObjectInputStream: int passHandle>;
+
+        virtualinvoke $r8.<java.io.ObjectInputStream$HandleTable: void setObject(int,java.lang.Object)>($i2, $r4);
+
+     label5:
+        return $r4;
+    }
+
+    java.lang.String readTypeString() throws java.io.IOException
+    {
+        java.lang.Throwable $r9;
+        java.lang.Object[] $r6;
+        java.io.StreamCorruptedException $r12;
+        java.io.ObjectInputStream$BlockDataInputStream $r1;
+        java.io.ObjectInputStream r0;
+        byte $b1;
+        int i0, $i2;
+        java.lang.Object $r3, $r4;
+        java.lang.String $r2, $r8, r10, r11;
+        java.lang.Byte $r7;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        i0 = r0.<java.io.ObjectInputStream: int passHandle>;
+
+     label01:
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $b1 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: byte peekByte()>();
+
+        $i2 = (int) $b1;
+
+        lookupswitch($i2)
+        {
+            case 112: goto label02;
+            case 113: goto label04;
+            case 116: goto label06;
+            case 124: goto label06;
+            default: goto label08;
+        };
+
+     label02:
+        $r4 = specialinvoke r0.<java.io.ObjectInputStream: java.lang.Object readNull()>();
+
+        r10 = (java.lang.String) $r4;
+
+     label03:
+        r0.<java.io.ObjectInputStream: int passHandle> = i0;
+
+        return r10;
+
+     label04:
+        $r3 = specialinvoke r0.<java.io.ObjectInputStream: java.lang.Object readHandle(boolean)>(0);
+
+        r11 = (java.lang.String) $r3;
+
+     label05:
+        r0.<java.io.ObjectInputStream: int passHandle> = i0;
+
+        return r11;
+
+     label06:
+        $r2 = specialinvoke r0.<java.io.ObjectInputStream: java.lang.String readString(boolean)>(0);
+
+     label07:
+        r0.<java.io.ObjectInputStream: int passHandle> = i0;
+
+        return $r2;
+
+     label08:
+        $r12 = new java.io.StreamCorruptedException;
+
+        $r6 = newarray (java.lang.Object)[1];
+
+        $r7 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b1);
+
+        $r6[0] = $r7;
+
+        $r8 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("invalid type code: %02X", $r6);
+
+        specialinvoke $r12.<java.io.StreamCorruptedException: void <init>(java.lang.String)>($r8);
+
+        throw $r12;
+
+     label09:
+        $r9 := @caughtexception;
+
+     label10:
+        r0.<java.io.ObjectInputStream: int passHandle> = i0;
+
+        throw $r9;
+
+        catch java.lang.Throwable from label01 to label03 with label09;
+        catch java.lang.Throwable from label04 to label05 with label09;
+        catch java.lang.Throwable from label06 to label07 with label09;
+        catch java.lang.Throwable from label08 to label10 with label09;
+    }
+
+    private java.lang.Object readNull() throws java.io.IOException
+    {
+        byte $b0;
+        java.io.ObjectInputStream$BlockDataInputStream $r1;
+        java.io.ObjectInputStream r0;
+        int $i1, $i3;
+        java.lang.InternalError $r3;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $b0 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: byte readByte()>();
+
+        $i1 = (int) $b0;
+
+        if $i1 == 112 goto label1;
+
+        $r3 = new java.lang.InternalError;
+
+        specialinvoke $r3.<java.lang.InternalError: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $i3 = (int) -1;
+
+        r0.<java.io.ObjectInputStream: int passHandle> = $i3;
+
+        return null;
+    }
+
+    private java.lang.Object readHandle(boolean) throws java.io.IOException
+    {
+        java.lang.Object[] $r4;
+        java.io.ObjectInputStream r0;
+        java.io.ObjectInputStream$HandleTable $r7, $r8;
+        java.lang.Integer $r5;
+        byte $b0;
+        int $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i11;
+        java.lang.InternalError $r14;
+        java.io.InvalidObjectException $r16, $r17;
+        java.lang.String $r6;
+        boolean z0;
+        java.io.StreamCorruptedException $r15;
+        java.io.ObjectInputStream$BlockDataInputStream $r1, $r2;
+        java.lang.Object $r9, $r10;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $b0 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: byte readByte()>();
+
+        $i9 = (int) $b0;
+
+        if $i9 == 113 goto label1;
+
+        $r14 = new java.lang.InternalError;
+
+        specialinvoke $r14.<java.lang.InternalError: void <init>()>();
+
+        throw $r14;
+
+     label1:
+        $r2 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $i1 = virtualinvoke $r2.<java.io.ObjectInputStream$BlockDataInputStream: int readInt()>();
+
+        $i2 = $i1 - 8257536;
+
+        r0.<java.io.ObjectInputStream: int passHandle> = $i2;
+
+        $i3 = r0.<java.io.ObjectInputStream: int passHandle>;
+
+        if $i3 < 0 goto label2;
+
+        $i6 = r0.<java.io.ObjectInputStream: int passHandle>;
+
+        $r7 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        $i7 = virtualinvoke $r7.<java.io.ObjectInputStream$HandleTable: int size()>();
+
+        if $i6 < $i7 goto label3;
+
+     label2:
+        $r15 = new java.io.StreamCorruptedException;
+
+        $r4 = newarray (java.lang.Object)[1];
+
+        $i4 = r0.<java.io.ObjectInputStream: int passHandle>;
+
+        $i5 = $i4 + 8257536;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i5);
+
+        $r4[0] = $r5;
+
+        $r6 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("invalid handle value: %08X", $r4);
+
+        specialinvoke $r15.<java.io.StreamCorruptedException: void <init>(java.lang.String)>($r6);
+
+        throw $r15;
+
+     label3:
+        if z0 == 0 goto label4;
+
+        $r16 = new java.io.InvalidObjectException;
+
+        specialinvoke $r16.<java.io.InvalidObjectException: void <init>(java.lang.String)>("cannot read back reference as unshared");
+
+        throw $r16;
+
+     label4:
+        $r8 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        $i8 = r0.<java.io.ObjectInputStream: int passHandle>;
+
+        $r9 = virtualinvoke $r8.<java.io.ObjectInputStream$HandleTable: java.lang.Object lookupObject(int)>($i8);
+
+        $r10 = <java.io.ObjectInputStream: java.lang.Object unsharedMarker>;
+
+        if $r9 != $r10 goto label5;
+
+        $r17 = new java.io.InvalidObjectException;
+
+        specialinvoke $r17.<java.io.InvalidObjectException: void <init>(java.lang.String)>("cannot read back reference to unshared object");
+
+        throw $r17;
+
+     label5:
+        $i11 = (int) -1;
+
+        specialinvoke r0.<java.io.ObjectInputStream: void filterCheck(java.lang.Class,int)>(null, $i11);
+
+        return $r9;
+    }
+
+    private java.lang.Class readClass(boolean) throws java.io.IOException
+    {
+        java.io.ObjectInputStream r0;
+        java.io.ObjectStreamClass $r2;
+        java.io.ObjectInputStream$HandleTable $r4, $r6, $r7;
+        byte $b0;
+        int $i1, $i2, $i3, $i4;
+        java.lang.InternalError $r10;
+        boolean z0;
+        java.io.ObjectInputStream$BlockDataInputStream $r1;
+        java.lang.Class $r3;
+        java.lang.ClassNotFoundException $r5;
+        java.lang.Object $r9;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $b0 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: byte readByte()>();
+
+        $i4 = (int) $b0;
+
+        if $i4 == 118 goto label1;
+
+        $r10 = new java.lang.InternalError;
+
+        specialinvoke $r10.<java.lang.InternalError: void <init>()>();
+
+        throw $r10;
+
+     label1:
+        $r2 = specialinvoke r0.<java.io.ObjectInputStream: java.io.ObjectStreamClass readClassDesc(boolean)>(0);
+
+        $r3 = virtualinvoke $r2.<java.io.ObjectStreamClass: java.lang.Class forClass()>();
+
+        $r4 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        if z0 == 0 goto label2;
+
+        $r9 = <java.io.ObjectInputStream: java.lang.Object unsharedMarker>;
+
+        goto label3;
+
+     label2:
+        $r9 = $r3;
+
+     label3:
+        $i1 = virtualinvoke $r4.<java.io.ObjectInputStream$HandleTable: int assign(java.lang.Object)>($r9);
+
+        r0.<java.io.ObjectInputStream: int passHandle> = $i1;
+
+        $r5 = virtualinvoke $r2.<java.io.ObjectStreamClass: java.lang.ClassNotFoundException getResolveException()>();
+
+        if $r5 == null goto label4;
+
+        $r7 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        $i3 = r0.<java.io.ObjectInputStream: int passHandle>;
+
+        virtualinvoke $r7.<java.io.ObjectInputStream$HandleTable: void markException(int,java.lang.ClassNotFoundException)>($i3, $r5);
+
+     label4:
+        $r6 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        $i2 = r0.<java.io.ObjectInputStream: int passHandle>;
+
+        virtualinvoke $r6.<java.io.ObjectInputStream$HandleTable: void finish(int)>($i2);
+
+        return $r3;
+    }
+
+    private java.io.ObjectStreamClass readClassDesc(boolean) throws java.io.IOException
+    {
+        java.lang.Object[] $r5;
+        java.io.StreamCorruptedException $r9;
+        java.io.ObjectInputStream$BlockDataInputStream $r1;
+        java.io.ObjectInputStream r0;
+        java.io.ObjectStreamClass r8;
+        byte $b0;
+        int $i1;
+        java.lang.Object $r2, $r3;
+        java.lang.String $r7;
+        java.lang.Byte $r6;
+        boolean z0;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $b0 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: byte peekByte()>();
+
+        $i1 = (int) $b0;
+
+        lookupswitch($i1)
+        {
+            case 112: goto label1;
+            case 113: goto label2;
+            case 114: goto label4;
+            case 125: goto label3;
+            default: goto label5;
+        };
+
+     label1:
+        $r3 = specialinvoke r0.<java.io.ObjectInputStream: java.lang.Object readNull()>();
+
+        r8 = (java.io.ObjectStreamClass) $r3;
+
+        goto label6;
+
+     label2:
+        $r2 = specialinvoke r0.<java.io.ObjectInputStream: java.lang.Object readHandle(boolean)>(z0);
+
+        r8 = (java.io.ObjectStreamClass) $r2;
+
+        virtualinvoke r8.<java.io.ObjectStreamClass: void checkInitialized()>();
+
+        goto label6;
+
+     label3:
+        r8 = specialinvoke r0.<java.io.ObjectInputStream: java.io.ObjectStreamClass readProxyDesc(boolean)>(z0);
+
+        goto label6;
+
+     label4:
+        r8 = specialinvoke r0.<java.io.ObjectInputStream: java.io.ObjectStreamClass readNonProxyDesc(boolean)>(z0);
+
+        goto label6;
+
+     label5:
+        $r9 = new java.io.StreamCorruptedException;
+
+        $r5 = newarray (java.lang.Object)[1];
+
+        $r6 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b0);
+
+        $r5[0] = $r6;
+
+        $r7 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("invalid type code: %02X", $r5);
+
+        specialinvoke $r9.<java.io.StreamCorruptedException: void <init>(java.lang.String)>($r7);
+
+        throw $r9;
+
+     label6:
+        if r8 == null goto label7;
+
+        specialinvoke r0.<java.io.ObjectInputStream: void validateDescriptor(java.io.ObjectStreamClass)>(r8);
+
+     label7:
+        return r8;
+    }
+
+    private boolean isCustomSubclass()
+    {
+        java.io.ObjectInputStream r0;
+        java.lang.Class $r1, $r3;
+        java.lang.ClassLoader $r2, $r4;
+        boolean $z0;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $r3 = class "Ljava/io/ObjectInputStream;";
+
+        $r4 = virtualinvoke $r3.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        if $r2 == $r4 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private java.io.ObjectStreamClass readProxyDesc(boolean) throws java.io.IOException
+    {
+        byte $b0;
+        java.lang.InternalError $r56;
+        java.io.InvalidObjectException $r59, $r61, $r65, $r67;
+        java.lang.StringBuilder $r19, $r20, $r21, $r22, $r23, $r25, $r31, $r32, $r33, $r34, $r41, $r43, $r48, $r50, $r58, $r60, $r64, $r66;
+        java.lang.ClassLoader $r9;
+        java.lang.Throwable $r37;
+        long $l4, $l5, $l6, $l7, $l8, $l9, $l12, $l13;
+        java.lang.String $r24, $r26, $r28, $r35, $r42, $r44, $r49, $r51;
+        java.lang.Class[] $r10, $r11;
+        java.lang.ClassNotFoundException $r52, r55, $r62;
+        java.lang.OutOfMemoryError $r38, $r45;
+        java.io.ObjectInputStream r0;
+        java.io.ObjectInputStream$HandleTable $r3, $r13;
+        boolean z0, $z1;
+        java.io.ObjectInputStream$BlockDataInputStream $r1, $r4, $r6, $r27;
+        java.lang.String[] r5;
+        java.io.ObjectStreamClass $r12, $r57;
+        java.io.InvalidClassException $r63;
+        int $i1, $i2, $i3, $i10, $i11, i14, i15, i16, $i17, $i19, $i21, $i23, $i25;
+        java.lang.Class $r7, $r8, r14, r54;
+        java.lang.Object $r53;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $b0 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: byte readByte()>();
+
+        $i17 = (int) $b0;
+
+        if $i17 == 125 goto label01;
+
+        $r56 = new java.lang.InternalError;
+
+        specialinvoke $r56.<java.lang.InternalError: void <init>()>();
+
+        throw $r56;
+
+     label01:
+        $r57 = new java.io.ObjectStreamClass;
+
+        specialinvoke $r57.<java.io.ObjectStreamClass: void <init>()>();
+
+        $r3 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        if z0 == 0 goto label02;
+
+        $r53 = <java.io.ObjectInputStream: java.lang.Object unsharedMarker>;
+
+        goto label03;
+
+     label02:
+        $r53 = $r57;
+
+     label03:
+        $i1 = virtualinvoke $r3.<java.io.ObjectInputStream$HandleTable: int assign(java.lang.Object)>($r53);
+
+        $i19 = (int) -1;
+
+        r0.<java.io.ObjectInputStream: int passHandle> = $i19;
+
+        $r4 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $i2 = virtualinvoke $r4.<java.io.ObjectInputStream$BlockDataInputStream: int readInt()>();
+
+        $i21 = (int) 65535;
+
+        if $i2 <= $i21 goto label04;
+
+        $r59 = new java.io.InvalidObjectException;
+
+        $r58 = new java.lang.StringBuilder;
+
+        specialinvoke $r58.<java.lang.StringBuilder: void <init>()>();
+
+        $r31 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("interface limit exceeded: ");
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", limit: ");
+
+        $i11 = <java.io.ObjectInputStream$Caches: int PROXY_INTERFACE_LIMIT>;
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i11);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r59.<java.io.InvalidObjectException: void <init>(java.lang.String)>($r35);
+
+        throw $r59;
+
+     label04:
+        r5 = newarray (java.lang.String)[$i2];
+
+        i14 = 0;
+
+     label05:
+        if i14 >= $i2 goto label06;
+
+        $r27 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $r28 = virtualinvoke $r27.<java.io.ObjectInputStream$BlockDataInputStream: java.lang.String readUTF()>();
+
+        r5[i14] = $r28;
+
+        i14 = i14 + 1;
+
+        goto label05;
+
+     label06:
+        $i3 = <java.io.ObjectInputStream$Caches: int PROXY_INTERFACE_LIMIT>;
+
+        if $i2 <= $i3 goto label07;
+
+        $r61 = new java.io.InvalidObjectException;
+
+        $r60 = new java.lang.StringBuilder;
+
+        specialinvoke $r60.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r60.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("interface limit exceeded: ");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", limit: ");
+
+        $i10 = <java.io.ObjectInputStream$Caches: int PROXY_INTERFACE_LIMIT>;
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i10);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("; ");
+
+        $r24 = staticinvoke <java.util.Arrays: java.lang.String toString(java.lang.Object[])>(r5);
+
+        $r25 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r24);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r61.<java.io.InvalidObjectException: void <init>(java.lang.String)>($r26);
+
+        throw $r61;
+
+     label07:
+        r54 = null;
+
+        r55 = null;
+
+        $r6 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r6.<java.io.ObjectInputStream$BlockDataInputStream: boolean setBlockDataMode(boolean)>(1);
+
+     label08:
+        $r7 = virtualinvoke r0.<java.io.ObjectInputStream: java.lang.Class resolveProxyClass(java.lang.String[])>(r5);
+
+        r54 = $r7;
+
+        if $r7 != null goto label09;
+
+        $r62 = new java.lang.ClassNotFoundException;
+
+        specialinvoke $r62.<java.lang.ClassNotFoundException: void <init>(java.lang.String)>("null class");
+
+        r55 = $r62;
+
+        goto label12;
+
+     label09:
+        $z1 = staticinvoke <java.lang.reflect.Proxy: boolean isProxyClass(java.lang.Class)>($r7);
+
+        if $z1 != 0 goto label10;
+
+        $r63 = new java.io.InvalidClassException;
+
+        specialinvoke $r63.<java.io.InvalidClassException: void <init>(java.lang.String)>("Not a proxy");
+
+        throw $r63;
+
+     label10:
+        $r8 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $r10 = virtualinvoke $r7.<java.lang.Class: java.lang.Class[] getInterfaces()>();
+
+        staticinvoke <sun.reflect.misc.ReflectUtil: void checkProxyPackageAccess(java.lang.ClassLoader,java.lang.Class[])>($r9, $r10);
+
+        $r11 = virtualinvoke $r7.<java.lang.Class: java.lang.Class[] getInterfaces()>();
+
+        i15 = lengthof $r11;
+
+        i16 = 0;
+
+     label11:
+        if i16 >= i15 goto label12;
+
+        r14 = $r11[i16];
+
+        $i23 = (int) -1;
+
+        specialinvoke r0.<java.io.ObjectInputStream: void filterCheck(java.lang.Class,int)>(r14, $i23);
+
+        i16 = i16 + 1;
+
+        goto label11;
+
+     label12:
+        goto label15;
+
+     label13:
+        $r52 := @caughtexception;
+
+        r55 = $r52;
+
+        goto label15;
+
+     label14:
+        $r45 := @caughtexception;
+
+        $r65 = new java.io.InvalidObjectException;
+
+        $r64 = new java.lang.StringBuilder;
+
+        specialinvoke $r64.<java.lang.StringBuilder: void <init>()>();
+
+        $r48 = virtualinvoke $r64.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Proxy interface limit exceeded: ");
+
+        $r49 = staticinvoke <java.util.Arrays: java.lang.String toString(java.lang.Object[])>(r5);
+
+        $r50 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r49);
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r65.<java.io.InvalidObjectException: void <init>(java.lang.String)>($r51);
+
+        virtualinvoke $r65.<java.io.IOException: java.lang.Throwable initCause(java.lang.Throwable)>($r45);
+
+        throw $r65;
+
+     label15:
+        $i25 = (int) -1;
+
+        specialinvoke r0.<java.io.ObjectInputStream: void filterCheck(java.lang.Class,int)>(r54, $i25);
+
+        specialinvoke r0.<java.io.ObjectInputStream: void skipCustomData()>();
+
+     label16:
+        $l4 = r0.<java.io.ObjectInputStream: long totalObjectRefs>;
+
+        $l5 = $l4 + 1L;
+
+        r0.<java.io.ObjectInputStream: long totalObjectRefs> = $l5;
+
+        $l6 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $l7 = $l6 + 1L;
+
+        r0.<java.io.ObjectInputStream: long depth> = $l7;
+
+        $r12 = specialinvoke r0.<java.io.ObjectInputStream: java.io.ObjectStreamClass readClassDesc(boolean)>(0);
+
+        virtualinvoke $r57.<java.io.ObjectStreamClass: void initProxy(java.lang.Class,java.lang.ClassNotFoundException,java.io.ObjectStreamClass)>(r54, r55, $r12);
+
+     label17:
+        $l8 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $l9 = $l8 - 1L;
+
+        r0.<java.io.ObjectInputStream: long depth> = $l9;
+
+        goto label21;
+
+     label18:
+        $r38 := @caughtexception;
+
+        $r67 = new java.io.InvalidObjectException;
+
+        $r66 = new java.lang.StringBuilder;
+
+        specialinvoke $r66.<java.lang.StringBuilder: void <init>()>();
+
+        $r41 = virtualinvoke $r66.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Proxy interface limit exceeded: ");
+
+        $r42 = staticinvoke <java.util.Arrays: java.lang.String toString(java.lang.Object[])>(r5);
+
+        $r43 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r42);
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r67.<java.io.InvalidObjectException: void <init>(java.lang.String)>($r44);
+
+        virtualinvoke $r67.<java.io.IOException: java.lang.Throwable initCause(java.lang.Throwable)>($r38);
+
+        throw $r67;
+
+     label19:
+        $r37 := @caughtexception;
+
+     label20:
+        $l12 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $l13 = $l12 - 1L;
+
+        r0.<java.io.ObjectInputStream: long depth> = $l13;
+
+        throw $r37;
+
+     label21:
+        $r13 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        virtualinvoke $r13.<java.io.ObjectInputStream$HandleTable: void finish(int)>($i1);
+
+        r0.<java.io.ObjectInputStream: int passHandle> = $i1;
+
+        return $r57;
+
+        catch java.lang.ClassNotFoundException from label08 to label12 with label13;
+        catch java.lang.OutOfMemoryError from label08 to label12 with label14;
+        catch java.lang.OutOfMemoryError from label16 to label17 with label18;
+        catch java.lang.Throwable from label16 to label17 with label19;
+        catch java.lang.Throwable from label18 to label20 with label19;
+    }
+
+    private java.io.ObjectStreamClass readNonProxyDesc(boolean) throws java.io.IOException
+    {
+        java.io.ObjectInputStream r0;
+        java.io.ObjectInputStream$HandleTable $r3, $r8;
+        byte $b0;
+        java.lang.InternalError $r20;
+        boolean z0, $z1;
+        java.io.ObjectInputStream$BlockDataInputStream $r1, $r5;
+        java.lang.Throwable $r11, $r15;
+        java.io.ObjectStreamClass $r4, $r7, $r21;
+        long $l2, $l3, $l4, $l5, $l6, $l7, $l8, $l9;
+        java.io.InvalidClassException $r22;
+        int $i1, $i10, $i12, $i14;
+        java.io.IOException $r16;
+        java.lang.Class $r6, r18;
+        java.lang.ClassNotFoundException $r12, $r13, r19, $r23;
+        java.lang.Object $r17;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $b0 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: byte readByte()>();
+
+        $i10 = (int) $b0;
+
+        if $i10 == 114 goto label01;
+
+        $r20 = new java.lang.InternalError;
+
+        specialinvoke $r20.<java.lang.InternalError: void <init>()>();
+
+        throw $r20;
+
+     label01:
+        $r21 = new java.io.ObjectStreamClass;
+
+        specialinvoke $r21.<java.io.ObjectStreamClass: void <init>()>();
+
+        $r3 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        if z0 == 0 goto label02;
+
+        $r17 = <java.io.ObjectInputStream: java.lang.Object unsharedMarker>;
+
+        goto label03;
+
+     label02:
+        $r17 = $r21;
+
+     label03:
+        $i1 = virtualinvoke $r3.<java.io.ObjectInputStream$HandleTable: int assign(java.lang.Object)>($r17);
+
+        $i12 = (int) -1;
+
+        r0.<java.io.ObjectInputStream: int passHandle> = $i12;
+
+     label04:
+        $r4 = virtualinvoke r0.<java.io.ObjectInputStream: java.io.ObjectStreamClass readClassDescriptor()>();
+
+     label05:
+        goto label07;
+
+     label06:
+        $r13 := @caughtexception;
+
+        $r22 = new java.io.InvalidClassException;
+
+        specialinvoke $r22.<java.io.InvalidClassException: void <init>(java.lang.String)>("failed to read class descriptor");
+
+        $r15 = virtualinvoke $r22.<java.io.InvalidClassException: java.lang.Throwable initCause(java.lang.Throwable)>($r13);
+
+        $r16 = (java.io.IOException) $r15;
+
+        throw $r16;
+
+     label07:
+        r18 = null;
+
+        r19 = null;
+
+        $r5 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r5.<java.io.ObjectInputStream$BlockDataInputStream: boolean setBlockDataMode(boolean)>(1);
+
+        $z1 = specialinvoke r0.<java.io.ObjectInputStream: boolean isCustomSubclass()>();
+
+     label08:
+        $r6 = virtualinvoke r0.<java.io.ObjectInputStream: java.lang.Class resolveClass(java.io.ObjectStreamClass)>($r4);
+
+        r18 = $r6;
+
+        if $r6 != null goto label09;
+
+        $r23 = new java.lang.ClassNotFoundException;
+
+        specialinvoke $r23.<java.lang.ClassNotFoundException: void <init>(java.lang.String)>("null class");
+
+        r19 = $r23;
+
+        goto label10;
+
+     label09:
+        if $z1 == 0 goto label10;
+
+        staticinvoke <sun.reflect.misc.ReflectUtil: void checkPackageAccess(java.lang.Class)>($r6);
+
+     label10:
+        goto label12;
+
+     label11:
+        $r12 := @caughtexception;
+
+        r19 = $r12;
+
+     label12:
+        $i14 = (int) -1;
+
+        specialinvoke r0.<java.io.ObjectInputStream: void filterCheck(java.lang.Class,int)>(r18, $i14);
+
+        specialinvoke r0.<java.io.ObjectInputStream: void skipCustomData()>();
+
+     label13:
+        $l2 = r0.<java.io.ObjectInputStream: long totalObjectRefs>;
+
+        $l3 = $l2 + 1L;
+
+        r0.<java.io.ObjectInputStream: long totalObjectRefs> = $l3;
+
+        $l4 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $l5 = $l4 + 1L;
+
+        r0.<java.io.ObjectInputStream: long depth> = $l5;
+
+        $r7 = specialinvoke r0.<java.io.ObjectInputStream: java.io.ObjectStreamClass readClassDesc(boolean)>(0);
+
+        virtualinvoke $r21.<java.io.ObjectStreamClass: void initNonProxy(java.io.ObjectStreamClass,java.lang.Class,java.lang.ClassNotFoundException,java.io.ObjectStreamClass)>($r4, r18, r19, $r7);
+
+     label14:
+        $l6 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $l7 = $l6 - 1L;
+
+        r0.<java.io.ObjectInputStream: long depth> = $l7;
+
+        goto label17;
+
+     label15:
+        $r11 := @caughtexception;
+
+     label16:
+        $l8 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $l9 = $l8 - 1L;
+
+        r0.<java.io.ObjectInputStream: long depth> = $l9;
+
+        throw $r11;
+
+     label17:
+        $r8 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        virtualinvoke $r8.<java.io.ObjectInputStream$HandleTable: void finish(int)>($i1);
+
+        r0.<java.io.ObjectInputStream: int passHandle> = $i1;
+
+        return $r21;
+
+        catch java.lang.ClassNotFoundException from label04 to label05 with label06;
+        catch java.lang.ClassNotFoundException from label08 to label10 with label11;
+        catch java.lang.Throwable from label13 to label14 with label15;
+        catch java.lang.Throwable from label15 to label16 with label15;
+    }
+
+    private java.lang.String readString(boolean) throws java.io.IOException
+    {
+        java.lang.Object[] $r7;
+        java.io.ObjectInputStream r0;
+        java.io.ObjectInputStream$HandleTable $r3, $r4;
+        byte $b0;
+        int $i1, $i2, $i3;
+        java.lang.String $r9, r10;
+        java.lang.Byte $r8;
+        boolean z0;
+        java.io.StreamCorruptedException $r12;
+        java.io.ObjectInputStream$BlockDataInputStream $r1, $r2, $r5;
+        java.lang.Object $r11;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $b0 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: byte readByte()>();
+
+        $i3 = (int) $b0;
+
+        lookupswitch($i3)
+        {
+            case 116: goto label1;
+            case 124: goto label2;
+            default: goto label3;
+        };
+
+     label1:
+        $r5 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        r10 = virtualinvoke $r5.<java.io.ObjectInputStream$BlockDataInputStream: java.lang.String readUTF()>();
+
+        goto label4;
+
+     label2:
+        $r2 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        r10 = virtualinvoke $r2.<java.io.ObjectInputStream$BlockDataInputStream: java.lang.String readLongUTF()>();
+
+        goto label4;
+
+     label3:
+        $r12 = new java.io.StreamCorruptedException;
+
+        $r7 = newarray (java.lang.Object)[1];
+
+        $r8 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b0);
+
+        $r7[0] = $r8;
+
+        $r9 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("invalid type code: %02X", $r7);
+
+        specialinvoke $r12.<java.io.StreamCorruptedException: void <init>(java.lang.String)>($r9);
+
+        throw $r12;
+
+     label4:
+        $r3 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        if z0 == 0 goto label5;
+
+        $r11 = <java.io.ObjectInputStream: java.lang.Object unsharedMarker>;
+
+        goto label6;
+
+     label5:
+        $r11 = r10;
+
+     label6:
+        $i1 = virtualinvoke $r3.<java.io.ObjectInputStream$HandleTable: int assign(java.lang.Object)>($r11);
+
+        r0.<java.io.ObjectInputStream: int passHandle> = $i1;
+
+        $r4 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        $i2 = r0.<java.io.ObjectInputStream: int passHandle>;
+
+        virtualinvoke $r4.<java.io.ObjectInputStream$HandleTable: void finish(int)>($i2);
+
+        return r10;
+    }
+
+    private java.lang.Object readArray(boolean) throws java.io.IOException
+    {
+        byte[] $r38, $r39;
+        java.io.ObjectInputStream r0;
+        java.io.ObjectInputStream$HandleTable $r6, $r10, $r44, $r51;
+        byte $b0;
+        int[] $r41, $r42;
+        java.lang.InternalError $r52, $r53;
+        boolean z0, $z1;
+        java.io.ObjectInputStream$BlockDataInputStream $r1, $r3, $r22, $r25, $r28, $r31, $r34, $r37, $r40, $r43;
+        short[] $r26, $r27;
+        java.lang.Object[] $r8, r50;
+        double[] $r29, $r30;
+        java.io.ObjectStreamClass $r2;
+        float[] $r32, $r33;
+        long[] $r35, $r36;
+        int $i1, $i2, $i3, i4, i5, $i6;
+        boolean[] $r20, $r21;
+        char[] $r23, $r24;
+        java.lang.Class $r4, $r5, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r45, r48;
+        java.lang.ClassNotFoundException $r7;
+        java.lang.Object $r9, r47, $r49;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $b0 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: byte readByte()>();
+
+        $i6 = (int) $b0;
+
+        if $i6 == 117 goto label01;
+
+        $r52 = new java.lang.InternalError;
+
+        specialinvoke $r52.<java.lang.InternalError: void <init>()>();
+
+        throw $r52;
+
+     label01:
+        $r2 = specialinvoke r0.<java.io.ObjectInputStream: java.io.ObjectStreamClass readClassDesc(boolean)>(0);
+
+        $r3 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $i1 = virtualinvoke $r3.<java.io.ObjectInputStream$BlockDataInputStream: int readInt()>();
+
+        $r4 = virtualinvoke $r2.<java.io.ObjectStreamClass: java.lang.Class forClass()>();
+
+        specialinvoke r0.<java.io.ObjectInputStream: void filterCheck(java.lang.Class,int)>($r4, $i1);
+
+        r47 = null;
+
+        r48 = null;
+
+        $r5 = virtualinvoke $r2.<java.io.ObjectStreamClass: java.lang.Class forClass()>();
+
+        if $r5 == null goto label02;
+
+        $r45 = virtualinvoke $r5.<java.lang.Class: java.lang.Class getComponentType()>();
+
+        r48 = $r45;
+
+        r47 = staticinvoke <java.lang.reflect.Array: java.lang.Object newInstance(java.lang.Class,int)>($r45, $i1);
+
+     label02:
+        $r6 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        if z0 == 0 goto label03;
+
+        $r49 = <java.io.ObjectInputStream: java.lang.Object unsharedMarker>;
+
+        goto label04;
+
+     label03:
+        $r49 = r47;
+
+     label04:
+        $i2 = virtualinvoke $r6.<java.io.ObjectInputStream$HandleTable: int assign(java.lang.Object)>($r49);
+
+        $r7 = virtualinvoke $r2.<java.io.ObjectStreamClass: java.lang.ClassNotFoundException getResolveException()>();
+
+        if $r7 == null goto label05;
+
+        $r44 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        virtualinvoke $r44.<java.io.ObjectInputStream$HandleTable: void markException(int,java.lang.ClassNotFoundException)>($i2, $r7);
+
+     label05:
+        if r48 != null goto label08;
+
+        i4 = 0;
+
+     label06:
+        if i4 >= $i1 goto label07;
+
+        specialinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject0(java.lang.Class,boolean)>(class "Ljava/lang/Object;", 0);
+
+        i4 = i4 + 1;
+
+        goto label06;
+
+     label07:
+        goto label19;
+
+     label08:
+        $z1 = virtualinvoke r48.<java.lang.Class: boolean isPrimitive()>();
+
+        if $z1 == 0 goto label17;
+
+        $r11 = <java.lang.Integer: java.lang.Class TYPE>;
+
+        if r48 != $r11 goto label09;
+
+        $r43 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $r41 = (int[]) r47;
+
+        $r42 = (int[]) $r41;
+
+        virtualinvoke $r43.<java.io.ObjectInputStream$BlockDataInputStream: void readInts(int[],int,int)>($r42, 0, $i1);
+
+        goto label19;
+
+     label09:
+        $r12 = <java.lang.Byte: java.lang.Class TYPE>;
+
+        if r48 != $r12 goto label10;
+
+        $r40 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $r38 = (byte[]) r47;
+
+        $r39 = (byte[]) $r38;
+
+        virtualinvoke $r40.<java.io.ObjectInputStream$BlockDataInputStream: void readFully(byte[],int,int,boolean)>($r39, 0, $i1, 1);
+
+        goto label19;
+
+     label10:
+        $r13 = <java.lang.Long: java.lang.Class TYPE>;
+
+        if r48 != $r13 goto label11;
+
+        $r37 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $r35 = (long[]) r47;
+
+        $r36 = (long[]) $r35;
+
+        virtualinvoke $r37.<java.io.ObjectInputStream$BlockDataInputStream: void readLongs(long[],int,int)>($r36, 0, $i1);
+
+        goto label19;
+
+     label11:
+        $r14 = <java.lang.Float: java.lang.Class TYPE>;
+
+        if r48 != $r14 goto label12;
+
+        $r34 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $r32 = (float[]) r47;
+
+        $r33 = (float[]) $r32;
+
+        virtualinvoke $r34.<java.io.ObjectInputStream$BlockDataInputStream: void readFloats(float[],int,int)>($r33, 0, $i1);
+
+        goto label19;
+
+     label12:
+        $r15 = <java.lang.Double: java.lang.Class TYPE>;
+
+        if r48 != $r15 goto label13;
+
+        $r31 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $r29 = (double[]) r47;
+
+        $r30 = (double[]) $r29;
+
+        virtualinvoke $r31.<java.io.ObjectInputStream$BlockDataInputStream: void readDoubles(double[],int,int)>($r30, 0, $i1);
+
+        goto label19;
+
+     label13:
+        $r16 = <java.lang.Short: java.lang.Class TYPE>;
+
+        if r48 != $r16 goto label14;
+
+        $r28 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $r26 = (short[]) r47;
+
+        $r27 = (short[]) $r26;
+
+        virtualinvoke $r28.<java.io.ObjectInputStream$BlockDataInputStream: void readShorts(short[],int,int)>($r27, 0, $i1);
+
+        goto label19;
+
+     label14:
+        $r17 = <java.lang.Character: java.lang.Class TYPE>;
+
+        if r48 != $r17 goto label15;
+
+        $r25 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $r23 = (char[]) r47;
+
+        $r24 = (char[]) $r23;
+
+        virtualinvoke $r25.<java.io.ObjectInputStream$BlockDataInputStream: void readChars(char[],int,int)>($r24, 0, $i1);
+
+        goto label19;
+
+     label15:
+        $r18 = <java.lang.Boolean: java.lang.Class TYPE>;
+
+        if r48 != $r18 goto label16;
+
+        $r22 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $r20 = (boolean[]) r47;
+
+        $r21 = (boolean[]) $r20;
+
+        virtualinvoke $r22.<java.io.ObjectInputStream$BlockDataInputStream: void readBooleans(boolean[],int,int)>($r21, 0, $i1);
+
+        goto label19;
+
+     label16:
+        $r53 = new java.lang.InternalError;
+
+        specialinvoke $r53.<java.lang.InternalError: void <init>()>();
+
+        throw $r53;
+
+     label17:
+        $r8 = (java.lang.Object[]) r47;
+
+        r50 = (java.lang.Object[]) $r8;
+
+        i5 = 0;
+
+     label18:
+        if i5 >= $i1 goto label19;
+
+        $r9 = specialinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject0(java.lang.Class,boolean)>(class "Ljava/lang/Object;", 0);
+
+        r50[i5] = $r9;
+
+        $r10 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        $i3 = r0.<java.io.ObjectInputStream: int passHandle>;
+
+        virtualinvoke $r10.<java.io.ObjectInputStream$HandleTable: void markDependency(int,int)>($i2, $i3);
+
+        i5 = i5 + 1;
+
+        goto label18;
+
+     label19:
+        $r51 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        virtualinvoke $r51.<java.io.ObjectInputStream$HandleTable: void finish(int)>($i2);
+
+        r0.<java.io.ObjectInputStream: int passHandle> = $i2;
+
+        return r47;
+    }
+
+    private java.lang.Enum readEnum(boolean) throws java.io.IOException
+    {
+        java.io.ObjectInputStream r0;
+        java.io.ObjectInputStream$HandleTable $r3, $r8, $r9, $r28;
+        byte $b0;
+        java.lang.Enum $r7, r27;
+        java.lang.InternalError $r29;
+        java.io.InvalidObjectException $r33;
+        boolean $z0, z1;
+        java.io.ObjectInputStream$BlockDataInputStream $r1;
+        java.lang.StringBuilder $r12, $r13, $r19, $r20, $r21, $r22, $r30, $r32;
+        java.lang.Throwable $r24;
+        java.io.ObjectStreamClass $r2;
+        java.io.InvalidClassException $r31;
+        int $i1, $i2;
+        java.lang.String $r5, $r14, $r23;
+        java.io.IOException $r25;
+        java.lang.IllegalArgumentException $r16;
+        java.lang.ClassNotFoundException $r4;
+        java.lang.Class $r6;
+        java.lang.Object $r26;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        z1 := @parameter0: boolean;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $b0 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: byte readByte()>();
+
+        $i2 = (int) $b0;
+
+        if $i2 == 126 goto label01;
+
+        $r29 = new java.lang.InternalError;
+
+        specialinvoke $r29.<java.lang.InternalError: void <init>()>();
+
+        throw $r29;
+
+     label01:
+        $r2 = specialinvoke r0.<java.io.ObjectInputStream: java.io.ObjectStreamClass readClassDesc(boolean)>(0);
+
+        $z0 = virtualinvoke $r2.<java.io.ObjectStreamClass: boolean isEnum()>();
+
+        if $z0 != 0 goto label02;
+
+        $r31 = new java.io.InvalidClassException;
+
+        $r30 = new java.lang.StringBuilder;
+
+        specialinvoke $r30.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("non-enum class: ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r31.<java.io.InvalidClassException: void <init>(java.lang.String)>($r14);
+
+        throw $r31;
+
+     label02:
+        $r3 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        if z1 == 0 goto label03;
+
+        $r26 = <java.io.ObjectInputStream: java.lang.Object unsharedMarker>;
+
+        goto label04;
+
+     label03:
+        $r26 = null;
+
+     label04:
+        $i1 = virtualinvoke $r3.<java.io.ObjectInputStream$HandleTable: int assign(java.lang.Object)>($r26);
+
+        $r4 = virtualinvoke $r2.<java.io.ObjectStreamClass: java.lang.ClassNotFoundException getResolveException()>();
+
+        if $r4 == null goto label05;
+
+        $r9 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        virtualinvoke $r9.<java.io.ObjectInputStream$HandleTable: void markException(int,java.lang.ClassNotFoundException)>($i1, $r4);
+
+     label05:
+        $r5 = specialinvoke r0.<java.io.ObjectInputStream: java.lang.String readString(boolean)>(0);
+
+        r27 = null;
+
+        $r6 = virtualinvoke $r2.<java.io.ObjectStreamClass: java.lang.Class forClass()>();
+
+        if $r6 == null goto label10;
+
+     label06:
+        $r7 = staticinvoke <java.lang.Enum: java.lang.Enum valueOf(java.lang.Class,java.lang.String)>($r6, $r5);
+
+        r27 = $r7;
+
+     label07:
+        goto label09;
+
+     label08:
+        $r16 := @caughtexception;
+
+        $r33 = new java.io.InvalidObjectException;
+
+        $r32 = new java.lang.StringBuilder;
+
+        specialinvoke $r32.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("enum constant ");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" does not exist in ");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r33.<java.io.InvalidObjectException: void <init>(java.lang.String)>($r23);
+
+        $r24 = virtualinvoke $r33.<java.io.InvalidObjectException: java.lang.Throwable initCause(java.lang.Throwable)>($r16);
+
+        $r25 = (java.io.IOException) $r24;
+
+        throw $r25;
+
+     label09:
+        if z1 != 0 goto label10;
+
+        $r8 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        virtualinvoke $r8.<java.io.ObjectInputStream$HandleTable: void setObject(int,java.lang.Object)>($i1, $r7);
+
+     label10:
+        $r28 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        virtualinvoke $r28.<java.io.ObjectInputStream$HandleTable: void finish(int)>($i1);
+
+        r0.<java.io.ObjectInputStream: int passHandle> = $i1;
+
+        return r27;
+
+        catch java.lang.IllegalArgumentException from label06 to label07 with label08;
+    }
+
+    private java.lang.Object readOrdinaryObject(boolean) throws java.io.IOException
+    {
+        java.io.ObjectInputStream r0;
+        java.io.ObjectInputStream$HandleTable $r4, $r6, $r7, $r15, $r28;
+        byte $b0;
+        java.lang.InternalError $r29;
+        boolean $z0, z1, $z2, $z3, $z4, $z5;
+        java.io.Externalizable $r14;
+        java.io.ObjectInputStream$BlockDataInputStream $r1;
+        java.lang.Exception $r17;
+        java.lang.Throwable $r21;
+        java.io.ObjectStreamClass $r2;
+        java.io.InvalidClassException $r30, $r31;
+        int $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i9;
+        java.lang.String $r20;
+        java.io.IOException $r22;
+        java.lang.Class $r3, $r10, $r11, $r12, $r13, $r19;
+        java.lang.ClassNotFoundException $r5, $r8;
+        java.lang.Object $r9, $r24, r25, $r26, r27;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        z1 := @parameter0: boolean;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $b0 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: byte readByte()>();
+
+        $i7 = (int) $b0;
+
+        if $i7 == 115 goto label01;
+
+        $r29 = new java.lang.InternalError;
+
+        specialinvoke $r29.<java.lang.InternalError: void <init>()>();
+
+        throw $r29;
+
+     label01:
+        $r2 = specialinvoke r0.<java.io.ObjectInputStream: java.io.ObjectStreamClass readClassDesc(boolean)>(0);
+
+        virtualinvoke $r2.<java.io.ObjectStreamClass: void checkDeserialize()>();
+
+        $r3 = virtualinvoke $r2.<java.io.ObjectStreamClass: java.lang.Class forClass()>();
+
+        if $r3 == class "Ljava/lang/String;" goto label02;
+
+        if $r3 == class "Ljava/lang/Class;" goto label02;
+
+        if $r3 != class "Ljava/io/ObjectStreamClass;" goto label03;
+
+     label02:
+        $r30 = new java.io.InvalidClassException;
+
+        specialinvoke $r30.<java.io.InvalidClassException: void <init>(java.lang.String)>("invalid class descriptor");
+
+        throw $r30;
+
+     label03:
+        $z0 = virtualinvoke $r2.<java.io.ObjectStreamClass: boolean isInstantiable()>();
+
+        if $z0 == 0 goto label04;
+
+        $r24 = virtualinvoke $r2.<java.io.ObjectStreamClass: java.lang.Object newInstance()>();
+
+        goto label05;
+
+     label04:
+        $r24 = null;
+
+     label05:
+        r25 = $r24;
+
+     label06:
+        goto label08;
+
+     label07:
+        $r17 := @caughtexception;
+
+        $r31 = new java.io.InvalidClassException;
+
+        $r19 = virtualinvoke $r2.<java.io.ObjectStreamClass: java.lang.Class forClass()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.Class: java.lang.String getName()>();
+
+        specialinvoke $r31.<java.io.InvalidClassException: void <init>(java.lang.String,java.lang.String)>($r20, "unable to create instance");
+
+        $r21 = virtualinvoke $r31.<java.io.InvalidClassException: java.lang.Throwable initCause(java.lang.Throwable)>($r17);
+
+        $r22 = (java.io.IOException) $r21;
+
+        throw $r22;
+
+     label08:
+        $r4 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        if z1 == 0 goto label09;
+
+        $r26 = <java.io.ObjectInputStream: java.lang.Object unsharedMarker>;
+
+        goto label10;
+
+     label09:
+        $r26 = $r24;
+
+     label10:
+        $i1 = virtualinvoke $r4.<java.io.ObjectInputStream$HandleTable: int assign(java.lang.Object)>($r26);
+
+        r0.<java.io.ObjectInputStream: int passHandle> = $i1;
+
+        $r5 = virtualinvoke $r2.<java.io.ObjectStreamClass: java.lang.ClassNotFoundException getResolveException()>();
+
+        if $r5 == null goto label11;
+
+        $r15 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        $i5 = r0.<java.io.ObjectInputStream: int passHandle>;
+
+        virtualinvoke $r15.<java.io.ObjectInputStream$HandleTable: void markException(int,java.lang.ClassNotFoundException)>($i5, $r5);
+
+     label11:
+        $z2 = virtualinvoke $r2.<java.io.ObjectStreamClass: boolean isExternalizable()>();
+
+        if $z2 == 0 goto label12;
+
+        $r14 = (java.io.Externalizable) r25;
+
+        specialinvoke r0.<java.io.ObjectInputStream: void readExternalData(java.io.Externalizable,java.io.ObjectStreamClass)>($r14, $r2);
+
+        goto label13;
+
+     label12:
+        specialinvoke r0.<java.io.ObjectInputStream: void readSerialData(java.lang.Object,java.io.ObjectStreamClass)>(r25, $r2);
+
+     label13:
+        $r6 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        $i2 = r0.<java.io.ObjectInputStream: int passHandle>;
+
+        virtualinvoke $r6.<java.io.ObjectInputStream$HandleTable: void finish(int)>($i2);
+
+        if r25 == null goto label17;
+
+        $r7 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        $i3 = r0.<java.io.ObjectInputStream: int passHandle>;
+
+        $r8 = virtualinvoke $r7.<java.io.ObjectInputStream$HandleTable: java.lang.ClassNotFoundException lookupException(int)>($i3);
+
+        if $r8 != null goto label17;
+
+        $z3 = virtualinvoke $r2.<java.io.ObjectStreamClass: boolean hasReadResolveMethod()>();
+
+        if $z3 == 0 goto label17;
+
+        $r9 = virtualinvoke $r2.<java.io.ObjectStreamClass: java.lang.Object invokeReadResolve(java.lang.Object)>(r25);
+
+        r27 = $r9;
+
+        if z1 == 0 goto label14;
+
+        $r13 = virtualinvoke $r9.<java.lang.Object: java.lang.Class getClass()>();
+
+        $z5 = virtualinvoke $r13.<java.lang.Class: boolean isArray()>();
+
+        if $z5 == 0 goto label14;
+
+        r27 = staticinvoke <java.io.ObjectInputStream: java.lang.Object cloneArray(java.lang.Object)>($r9);
+
+     label14:
+        if r27 == r25 goto label17;
+
+        if r27 == null goto label16;
+
+        $r10 = virtualinvoke r27.<java.lang.Object: java.lang.Class getClass()>();
+
+        $z4 = virtualinvoke $r10.<java.lang.Class: boolean isArray()>();
+
+        if $z4 == 0 goto label15;
+
+        $r12 = virtualinvoke r27.<java.lang.Object: java.lang.Class getClass()>();
+
+        $i4 = staticinvoke <java.lang.reflect.Array: int getLength(java.lang.Object)>(r27);
+
+        specialinvoke r0.<java.io.ObjectInputStream: void filterCheck(java.lang.Class,int)>($r12, $i4);
+
+        goto label16;
+
+     label15:
+        $r11 = virtualinvoke r27.<java.lang.Object: java.lang.Class getClass()>();
+
+        $i9 = (int) -1;
+
+        specialinvoke r0.<java.io.ObjectInputStream: void filterCheck(java.lang.Class,int)>($r11, $i9);
+
+     label16:
+        $r28 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        $i6 = r0.<java.io.ObjectInputStream: int passHandle>;
+
+        r25 = r27;
+
+        virtualinvoke $r28.<java.io.ObjectInputStream$HandleTable: void setObject(int,java.lang.Object)>($i6, r27);
+
+     label17:
+        return r25;
+
+        catch java.lang.Exception from label03 to label06 with label07;
+    }
+
+    private void readExternalData(java.io.Externalizable, java.io.ObjectStreamClass) throws java.io.IOException
+    {
+        java.lang.Throwable $r5;
+        java.io.SerialCallbackContext r1;
+        java.io.Externalizable r3;
+        java.io.ObjectInputStream$BlockDataInputStream $r4;
+        java.io.ObjectInputStream r0;
+        java.io.ObjectStreamClass r2;
+        java.io.ObjectInputStream$HandleTable $r7;
+        int $i0;
+        java.lang.ClassNotFoundException $r6;
+        boolean $z0;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        r3 := @parameter0: java.io.Externalizable;
+
+        r2 := @parameter1: java.io.ObjectStreamClass;
+
+        r1 = r0.<java.io.ObjectInputStream: java.io.SerialCallbackContext curContext>;
+
+        if r1 == null goto label01;
+
+        virtualinvoke r1.<java.io.SerialCallbackContext: void check()>();
+
+     label01:
+        r0.<java.io.ObjectInputStream: java.io.SerialCallbackContext curContext> = null;
+
+     label02:
+        $z0 = virtualinvoke r2.<java.io.ObjectStreamClass: boolean hasBlockExternalData()>();
+
+        if $z0 == 0 goto label03;
+
+        $r4 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r4.<java.io.ObjectInputStream$BlockDataInputStream: boolean setBlockDataMode(boolean)>(1);
+
+     label03:
+        if r3 == null goto label07;
+
+     label04:
+        interfaceinvoke r3.<java.io.Externalizable: void readExternal(java.io.ObjectInput)>(r0);
+
+     label05:
+        goto label07;
+
+     label06:
+        $r6 := @caughtexception;
+
+        $r7 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        $i0 = r0.<java.io.ObjectInputStream: int passHandle>;
+
+        virtualinvoke $r7.<java.io.ObjectInputStream$HandleTable: void markException(int,java.lang.ClassNotFoundException)>($i0, $r6);
+
+     label07:
+        if $z0 == 0 goto label08;
+
+        specialinvoke r0.<java.io.ObjectInputStream: void skipCustomData()>();
+
+     label08:
+        if r1 == null goto label09;
+
+        virtualinvoke r1.<java.io.SerialCallbackContext: void check()>();
+
+     label09:
+        r0.<java.io.ObjectInputStream: java.io.SerialCallbackContext curContext> = r1;
+
+        goto label13;
+
+     label10:
+        $r5 := @caughtexception;
+
+     label11:
+        if r1 == null goto label12;
+
+        virtualinvoke r1.<java.io.SerialCallbackContext: void check()>();
+
+     label12:
+        r0.<java.io.ObjectInputStream: java.io.SerialCallbackContext curContext> = r1;
+
+        throw $r5;
+
+     label13:
+        return;
+
+        catch java.lang.ClassNotFoundException from label04 to label05 with label06;
+        catch java.lang.Throwable from label02 to label08 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    private void readSerialData(java.lang.Object, java.io.ObjectStreamClass) throws java.io.IOException
+    {
+        java.io.SerialCallbackContext r12, $r13, $r16, $r19, $r24;
+        java.io.ObjectInputStream r6;
+        java.io.ObjectInputStream$HandleTable $r7, $r10, $r21;
+        boolean $z0, $z1, $z2, z3, $z4, z5, z6, z7;
+        java.io.ObjectStreamClass$ClassDataSlot $r2, $r4;
+        java.io.ObjectInputStream$BlockDataInputStream $r9, $r14;
+        java.lang.ThreadDeath $r15, $r18, $r22, r23;
+        java.io.ObjectStreamClass$ClassDataSlot[] $r1;
+        java.lang.Throwable $r17;
+        java.io.ObjectStreamClass r0, r3;
+        int $i0, $i1, $i2, $i3, i4;
+        java.lang.Object r5;
+        java.lang.ClassNotFoundException $r8, $r11, $r20;
+
+        r6 := @this: java.io.ObjectInputStream;
+
+        r5 := @parameter0: java.lang.Object;
+
+        r0 := @parameter1: java.io.ObjectStreamClass;
+
+        $r1 = virtualinvoke r0.<java.io.ObjectStreamClass: java.io.ObjectStreamClass$ClassDataSlot[] getClassDataLayout()>();
+
+        i4 = 0;
+
+     label01:
+        $i0 = lengthof $r1;
+
+        if i4 >= $i0 goto label29;
+
+        $r2 = $r1[i4];
+
+        r3 = $r2.<java.io.ObjectStreamClass$ClassDataSlot: java.io.ObjectStreamClass desc>;
+
+        $r4 = $r1[i4];
+
+        $z0 = $r4.<java.io.ObjectStreamClass$ClassDataSlot: boolean hasData>;
+
+        if $z0 == 0 goto label27;
+
+        if r5 == null goto label02;
+
+        $r10 = r6.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        $i2 = r6.<java.io.ObjectInputStream: int passHandle>;
+
+        $r11 = virtualinvoke $r10.<java.io.ObjectInputStream$HandleTable: java.lang.ClassNotFoundException lookupException(int)>($i2);
+
+        if $r11 == null goto label03;
+
+     label02:
+        specialinvoke r6.<java.io.ObjectInputStream: void defaultReadFields(java.lang.Object,java.io.ObjectStreamClass)>(null, r3);
+
+        goto label25;
+
+     label03:
+        $z2 = virtualinvoke r3.<java.io.ObjectStreamClass: boolean hasReadObjectMethod()>();
+
+        if $z2 == 0 goto label24;
+
+        r23 = null;
+
+        z3 = 0;
+
+        z7 = 0;
+
+        z6 = 0;
+
+        z5 = 0;
+
+        r12 = r6.<java.io.ObjectInputStream: java.io.SerialCallbackContext curContext>;
+
+        if r12 == null goto label04;
+
+        virtualinvoke r12.<java.io.SerialCallbackContext: void check()>();
+
+     label04:
+        $r13 = new java.io.SerialCallbackContext;
+
+        specialinvoke $r13.<java.io.SerialCallbackContext: void <init>(java.lang.Object,java.io.ObjectStreamClass)>(r5, r3);
+
+        r6.<java.io.ObjectInputStream: java.io.SerialCallbackContext curContext> = $r13;
+
+        $r14 = r6.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r14.<java.io.ObjectInputStream$BlockDataInputStream: boolean setBlockDataMode(boolean)>(1);
+
+        virtualinvoke r3.<java.io.ObjectStreamClass: void invokeReadObject(java.lang.Object,java.io.ObjectInputStream)>(r5, r6);
+
+     label05:
+        $r24 = r6.<java.io.ObjectInputStream: java.io.SerialCallbackContext curContext>;
+
+        virtualinvoke $r24.<java.io.SerialCallbackContext: void setUsed()>();
+
+        if r12 == null goto label06;
+
+        virtualinvoke r12.<java.io.SerialCallbackContext: void check()>();
+
+     label06:
+        r6.<java.io.ObjectInputStream: java.io.SerialCallbackContext curContext> = r12;
+
+        z3 = 1;
+
+        z6 = 1;
+
+     label07:
+        goto label09;
+
+     label08:
+        $r22 := @caughtexception;
+
+        r23 = $r22;
+
+     label09:
+        if z6 == 0 goto label05;
+
+        if r23 == null goto label23;
+
+        throw r23;
+
+     label10:
+        $r20 := @caughtexception;
+
+        $r21 = r6.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        $i3 = r6.<java.io.ObjectInputStream: int passHandle>;
+
+        virtualinvoke $r21.<java.io.ObjectInputStream$HandleTable: void markException(int,java.lang.ClassNotFoundException)>($i3, $r20);
+
+     label11:
+        $r19 = r6.<java.io.ObjectInputStream: java.io.SerialCallbackContext curContext>;
+
+        virtualinvoke $r19.<java.io.SerialCallbackContext: void setUsed()>();
+
+        if r12 == null goto label12;
+
+        virtualinvoke r12.<java.io.SerialCallbackContext: void check()>();
+
+     label12:
+        r6.<java.io.ObjectInputStream: java.io.SerialCallbackContext curContext> = r12;
+
+        z3 = 1;
+
+        z7 = 1;
+
+     label13:
+        goto label15;
+
+     label14:
+        $r18 := @caughtexception;
+
+        r23 = $r18;
+
+     label15:
+        if z7 == 0 goto label11;
+
+        if r23 == null goto label23;
+
+        throw r23;
+
+     label16:
+        $r17 := @caughtexception;
+
+     label17:
+        $r16 = r6.<java.io.ObjectInputStream: java.io.SerialCallbackContext curContext>;
+
+        virtualinvoke $r16.<java.io.SerialCallbackContext: void setUsed()>();
+
+        if r12 == null goto label18;
+
+        virtualinvoke r12.<java.io.SerialCallbackContext: void check()>();
+
+     label18:
+        r6.<java.io.ObjectInputStream: java.io.SerialCallbackContext curContext> = r12;
+
+        z3 = 1;
+
+        z5 = 1;
+
+     label19:
+        goto label21;
+
+     label20:
+        $r15 := @caughtexception;
+
+        r23 = $r15;
+
+     label21:
+        if z5 == 0 goto label17;
+
+        if r23 == null goto label22;
+
+        throw r23;
+
+     label22:
+        throw $r17;
+
+     label23:
+        r6.<java.io.ObjectInputStream: boolean defaultDataEnd> = 0;
+
+        goto label25;
+
+     label24:
+        specialinvoke r6.<java.io.ObjectInputStream: void defaultReadFields(java.lang.Object,java.io.ObjectStreamClass)>(r5, r3);
+
+     label25:
+        $z4 = virtualinvoke r3.<java.io.ObjectStreamClass: boolean hasWriteObjectData()>();
+
+        if $z4 == 0 goto label26;
+
+        specialinvoke r6.<java.io.ObjectInputStream: void skipCustomData()>();
+
+        goto label28;
+
+     label26:
+        $r9 = r6.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r9.<java.io.ObjectInputStream$BlockDataInputStream: boolean setBlockDataMode(boolean)>(0);
+
+        goto label28;
+
+     label27:
+        if r5 == null goto label28;
+
+        $z1 = virtualinvoke r3.<java.io.ObjectStreamClass: boolean hasReadObjectNoDataMethod()>();
+
+        if $z1 == 0 goto label28;
+
+        $r7 = r6.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        $i1 = r6.<java.io.ObjectInputStream: int passHandle>;
+
+        $r8 = virtualinvoke $r7.<java.io.ObjectInputStream$HandleTable: java.lang.ClassNotFoundException lookupException(int)>($i1);
+
+        if $r8 != null goto label28;
+
+        virtualinvoke r3.<java.io.ObjectStreamClass: void invokeReadObjectNoData(java.lang.Object)>(r5);
+
+     label28:
+        i4 = i4 + 1;
+
+        goto label01;
+
+     label29:
+        return;
+
+        catch java.lang.ThreadDeath from label05 to label07 with label08;
+        catch java.lang.ClassNotFoundException from label04 to label05 with label10;
+        catch java.lang.ThreadDeath from label11 to label13 with label14;
+        catch java.lang.Throwable from label04 to label05 with label16;
+        catch java.lang.Throwable from label10 to label11 with label16;
+        catch java.lang.ThreadDeath from label17 to label19 with label20;
+        catch java.lang.Throwable from label16 to label17 with label16;
+    }
+
+    private void skipCustomData() throws java.io.IOException
+    {
+        java.io.ObjectInputStream$BlockDataInputStream $r1, $r2, $r3, $r4, $r5, $r6;
+        java.io.ObjectInputStream r0;
+        byte $b1;
+        int i0, $i2;
+        boolean $z0;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        i0 = r0.<java.io.ObjectInputStream: int passHandle>;
+
+     label1:
+        $r6 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $z0 = virtualinvoke $r6.<java.io.ObjectInputStream$BlockDataInputStream: boolean getBlockDataMode()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r4.<java.io.ObjectInputStream$BlockDataInputStream: void skipBlockData()>();
+
+        $r5 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r5.<java.io.ObjectInputStream$BlockDataInputStream: boolean setBlockDataMode(boolean)>(0);
+
+     label2:
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $b1 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: byte peekByte()>();
+
+        $i2 = (int) $b1;
+
+        tableswitch($i2)
+        {
+            case 119: goto label3;
+            case 120: goto label4;
+            case 121: goto label5;
+            case 122: goto label3;
+            default: goto label5;
+        };
+
+     label3:
+        $r3 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r3.<java.io.ObjectInputStream$BlockDataInputStream: boolean setBlockDataMode(boolean)>(1);
+
+        goto label1;
+
+     label4:
+        $r2 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        virtualinvoke $r2.<java.io.ObjectInputStream$BlockDataInputStream: byte readByte()>();
+
+        r0.<java.io.ObjectInputStream: int passHandle> = i0;
+
+        return;
+
+     label5:
+        specialinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject0(java.lang.Class,boolean)>(class "Ljava/lang/Object;", 0);
+
+        goto label1;
+    }
+
+    private void defaultReadFields(java.lang.Object, java.io.ObjectStreamClass) throws java.io.IOException
+    {
+        byte[] $r3, $r10, $r12, $r14, $r16;
+        java.lang.Object[] $r11;
+        java.io.ObjectInputStream r2;
+        java.io.ObjectStreamClass r0;
+        java.io.ObjectInputStream$HandleTable $r9;
+        java.lang.ClassCastException $r13;
+        java.io.ObjectStreamField[] $r5;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, $i10;
+        java.io.ObjectStreamField r6;
+        boolean $z0, $z1;
+        java.io.ObjectInputStream$BlockDataInputStream $r15;
+        java.lang.reflect.Field $r8;
+        java.lang.Class $r1;
+        java.lang.Object r4, $r7;
+
+        r2 := @this: java.io.ObjectInputStream;
+
+        r4 := @parameter0: java.lang.Object;
+
+        r0 := @parameter1: java.io.ObjectStreamClass;
+
+        $r1 = virtualinvoke r0.<java.io.ObjectStreamClass: java.lang.Class forClass()>();
+
+        if $r1 == null goto label1;
+
+        if r4 == null goto label1;
+
+        $z1 = virtualinvoke $r1.<java.lang.Class: boolean isInstance(java.lang.Object)>(r4);
+
+        if $z1 != 0 goto label1;
+
+        $r13 = new java.lang.ClassCastException;
+
+        specialinvoke $r13.<java.lang.ClassCastException: void <init>()>();
+
+        throw $r13;
+
+     label1:
+        $i8 = virtualinvoke r0.<java.io.ObjectStreamClass: int getPrimDataSize()>();
+
+        $r14 = r2.<java.io.ObjectInputStream: byte[] primVals>;
+
+        if $r14 == null goto label2;
+
+        $r12 = r2.<java.io.ObjectInputStream: byte[] primVals>;
+
+        $i7 = lengthof $r12;
+
+        if $i7 >= $i8 goto label3;
+
+     label2:
+        $r3 = newarray (byte)[$i8];
+
+        r2.<java.io.ObjectInputStream: byte[] primVals> = $r3;
+
+     label3:
+        $r15 = r2.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $r16 = r2.<java.io.ObjectInputStream: byte[] primVals>;
+
+        virtualinvoke $r15.<java.io.ObjectInputStream$BlockDataInputStream: void readFully(byte[],int,int,boolean)>($r16, 0, $i8, 0);
+
+        if r4 == null goto label4;
+
+        $r10 = r2.<java.io.ObjectInputStream: byte[] primVals>;
+
+        virtualinvoke r0.<java.io.ObjectStreamClass: void setPrimFieldValues(java.lang.Object,byte[])>(r4, $r10);
+
+     label4:
+        $i5 = r2.<java.io.ObjectInputStream: int passHandle>;
+
+        $r5 = virtualinvoke r0.<java.io.ObjectStreamClass: java.io.ObjectStreamField[] getFields(boolean)>(0);
+
+        $i0 = virtualinvoke r0.<java.io.ObjectStreamClass: int getNumObjFields()>();
+
+        $r11 = newarray (java.lang.Object)[$i0];
+
+        $i2 = lengthof $r5;
+
+        $i1 = lengthof $r11;
+
+        $i6 = $i2 - $i1;
+
+        i9 = 0;
+
+     label5:
+        $i10 = lengthof $r11;
+
+        if i9 >= $i10 goto label7;
+
+        $i3 = $i6 + i9;
+
+        r6 = $r5[$i3];
+
+        $z0 = virtualinvoke r6.<java.io.ObjectStreamField: boolean isUnshared()>();
+
+        $r7 = specialinvoke r2.<java.io.ObjectInputStream: java.lang.Object readObject0(java.lang.Class,boolean)>(class "Ljava/lang/Object;", $z0);
+
+        $r11[i9] = $r7;
+
+        $r8 = virtualinvoke r6.<java.io.ObjectStreamField: java.lang.reflect.Field getField()>();
+
+        if $r8 == null goto label6;
+
+        $r9 = r2.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        $i4 = r2.<java.io.ObjectInputStream: int passHandle>;
+
+        virtualinvoke $r9.<java.io.ObjectInputStream$HandleTable: void markDependency(int,int)>($i5, $i4);
+
+     label6:
+        i9 = i9 + 1;
+
+        goto label5;
+
+     label7:
+        if r4 == null goto label8;
+
+        virtualinvoke r0.<java.io.ObjectStreamClass: void setObjFieldValues(java.lang.Object,java.lang.Object[])>(r4, $r11);
+
+     label8:
+        r2.<java.io.ObjectInputStream: int passHandle> = $i5;
+
+        return;
+    }
+
+    private java.io.IOException readFatalException() throws java.io.IOException
+    {
+        byte $b0;
+        java.io.ObjectInputStream$BlockDataInputStream $r1;
+        java.io.ObjectInputStream r0;
+        int $i1;
+        java.lang.InternalError $r5;
+        java.lang.Object $r2;
+        java.io.IOException $r3;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        $b0 = virtualinvoke $r1.<java.io.ObjectInputStream$BlockDataInputStream: byte readByte()>();
+
+        $i1 = (int) $b0;
+
+        if $i1 == 123 goto label1;
+
+        $r5 = new java.lang.InternalError;
+
+        specialinvoke $r5.<java.lang.InternalError: void <init>()>();
+
+        throw $r5;
+
+     label1:
+        specialinvoke r0.<java.io.ObjectInputStream: void clear()>();
+
+        $r2 = specialinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject0(java.lang.Class,boolean)>(class "Ljava/lang/Object;", 0);
+
+        $r3 = (java.io.IOException) $r2;
+
+        return $r3;
+    }
+
+    private void handleReset() throws java.io.StreamCorruptedException
+    {
+        java.io.StreamCorruptedException $r7;
+        java.io.ObjectInputStream r0;
+        long $l0, $l2;
+        byte $b1;
+        int $i3;
+        java.lang.StringBuilder $r3, $r4, $r6;
+        java.lang.String $r5;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        $l0 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $b1 = $l0 cmp 0L;
+
+        $i3 = (int) $b1;
+
+        if $i3 <= 0 goto label1;
+
+        $r7 = new java.io.StreamCorruptedException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unexpected reset; recursion depth: ");
+
+        $l2 = r0.<java.io.ObjectInputStream: long depth>;
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l2);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.io.StreamCorruptedException: void <init>(java.lang.String)>($r5);
+
+        throw $r7;
+
+     label1:
+        specialinvoke r0.<java.io.ObjectInputStream: void clear()>();
+
+        return;
+    }
+
+    private static native void bytesToFloats(byte[], int, float[], int, int);
+
+    private static native void bytesToDoubles(byte[], int, double[], int, int);
+
+    private static java.lang.ClassLoader latestUserDefinedLoader()
+    {
+        java.lang.ClassLoader $r0;
+
+        $r0 = staticinvoke <sun.misc.VM: java.lang.ClassLoader latestUserDefinedLoader()>();
+
+        return $r0;
+    }
+
+    private static java.lang.Object cloneArray(java.lang.Object)
+    {
+        byte[] $r20, $r21;
+        int[] $r8, $r9;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        short[] $r2, $r3;
+        java.lang.Object[] $r26, $r27;
+        double[] $r14, $r15;
+        float[] $r11, $r12;
+        java.lang.AssertionError $r1;
+        long[] $r5, $r6;
+        boolean[] $r23, $r24;
+        char[] $r17, $r18;
+        java.lang.Object r0, $r4, $r7, $r10, $r13, $r16, $r19, $r22, $r25, $r28;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $z0 = r0 instanceof java.lang.Object[];
+
+        if $z0 == 0 goto label1;
+
+        $r26 = (java.lang.Object[]) r0;
+
+        $r27 = (java.lang.Object[]) $r26;
+
+        $r28 = virtualinvoke $r27.<java.lang.Object: java.lang.Object clone()>();
+
+        return $r28;
+
+     label1:
+        $z1 = r0 instanceof boolean[];
+
+        if $z1 == 0 goto label2;
+
+        $r23 = (boolean[]) r0;
+
+        $r24 = (boolean[]) $r23;
+
+        $r25 = virtualinvoke $r24.<java.lang.Object: java.lang.Object clone()>();
+
+        return $r25;
+
+     label2:
+        $z2 = r0 instanceof byte[];
+
+        if $z2 == 0 goto label3;
+
+        $r20 = (byte[]) r0;
+
+        $r21 = (byte[]) $r20;
+
+        $r22 = virtualinvoke $r21.<java.lang.Object: java.lang.Object clone()>();
+
+        return $r22;
+
+     label3:
+        $z3 = r0 instanceof char[];
+
+        if $z3 == 0 goto label4;
+
+        $r17 = (char[]) r0;
+
+        $r18 = (char[]) $r17;
+
+        $r19 = virtualinvoke $r18.<java.lang.Object: java.lang.Object clone()>();
+
+        return $r19;
+
+     label4:
+        $z4 = r0 instanceof double[];
+
+        if $z4 == 0 goto label5;
+
+        $r14 = (double[]) r0;
+
+        $r15 = (double[]) $r14;
+
+        $r16 = virtualinvoke $r15.<java.lang.Object: java.lang.Object clone()>();
+
+        return $r16;
+
+     label5:
+        $z5 = r0 instanceof float[];
+
+        if $z5 == 0 goto label6;
+
+        $r11 = (float[]) r0;
+
+        $r12 = (float[]) $r11;
+
+        $r13 = virtualinvoke $r12.<java.lang.Object: java.lang.Object clone()>();
+
+        return $r13;
+
+     label6:
+        $z6 = r0 instanceof int[];
+
+        if $z6 == 0 goto label7;
+
+        $r8 = (int[]) r0;
+
+        $r9 = (int[]) $r8;
+
+        $r10 = virtualinvoke $r9.<java.lang.Object: java.lang.Object clone()>();
+
+        return $r10;
+
+     label7:
+        $z7 = r0 instanceof long[];
+
+        if $z7 == 0 goto label8;
+
+        $r5 = (long[]) r0;
+
+        $r6 = (long[]) $r5;
+
+        $r7 = virtualinvoke $r6.<java.lang.Object: java.lang.Object clone()>();
+
+        return $r7;
+
+     label8:
+        $z8 = r0 instanceof short[];
+
+        if $z8 == 0 goto label9;
+
+        $r2 = (short[]) r0;
+
+        $r3 = (short[]) $r2;
+
+        $r4 = virtualinvoke $r3.<java.lang.Object: java.lang.Object clone()>();
+
+        return $r4;
+
+     label9:
+        $r1 = new java.lang.AssertionError;
+
+        specialinvoke $r1.<java.lang.AssertionError: void <init>()>();
+
+        throw $r1;
+    }
+
+    private void validateDescriptor(java.io.ObjectStreamClass)
+    {
+        java.io.ObjectInputStream r0;
+        sun.misc.ObjectStreamClassValidator r1;
+        java.io.ObjectStreamClass r2;
+
+        r0 := @this: java.io.ObjectInputStream;
+
+        r2 := @parameter0: java.io.ObjectStreamClass;
+
+        r1 = r0.<java.io.ObjectInputStream: sun.misc.ObjectStreamClassValidator validator>;
+
+        if r1 == null goto label1;
+
+        interfaceinvoke r1.<sun.misc.ObjectStreamClassValidator: void validateDescriptor(java.io.ObjectStreamClass)>(r2);
+
+     label1:
+        return;
+    }
+
+    public static void setValidator(java.io.ObjectInputStream, sun.misc.ObjectStreamClassValidator)
+    {
+        java.io.ObjectInputStream r0;
+        sun.misc.ObjectStreamClassValidator r1;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        r1 := @parameter1: sun.misc.ObjectStreamClassValidator;
+
+        r0.<java.io.ObjectInputStream: sun.misc.ObjectStreamClassValidator validator> = r1;
+
+        return;
+    }
+
+    static void access$000(java.io.ObjectInputStream, sun.misc.ObjectInputFilter)
+    {
+        java.io.ObjectInputStream r0;
+        sun.misc.ObjectInputFilter r1;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        r1 := @parameter1: sun.misc.ObjectInputFilter;
+
+        specialinvoke r0.<java.io.ObjectInputStream: void setInternalObjectInputFilter(sun.misc.ObjectInputFilter)>(r1);
+
+        return;
+    }
+
+    static sun.misc.ObjectInputFilter access$100(java.io.ObjectInputStream)
+    {
+        java.io.ObjectInputStream r0;
+        sun.misc.ObjectInputFilter $r1;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        $r1 = specialinvoke r0.<java.io.ObjectInputStream: sun.misc.ObjectInputFilter getInternalObjectInputFilter()>();
+
+        return $r1;
+    }
+
+    static void access$200(java.io.ObjectInputStream, java.lang.Class, int) throws java.io.InvalidClassException
+    {
+        java.io.ObjectInputStream r0;
+        int i0;
+        java.lang.Class r1;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        r1 := @parameter1: java.lang.Class;
+
+        i0 := @parameter2: int;
+
+        specialinvoke r0.<java.io.ObjectInputStream: void checkArray(java.lang.Class,int)>(r1, i0);
+
+        return;
+    }
+
+    static int access$500(java.io.ObjectInputStream)
+    {
+        java.io.ObjectInputStream r0;
+        int $i0;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        $i0 = r0.<java.io.ObjectInputStream: int passHandle>;
+
+        return $i0;
+    }
+
+    static java.io.ObjectInputStream$HandleTable access$600(java.io.ObjectInputStream)
+    {
+        java.io.ObjectInputStream r0;
+        java.io.ObjectInputStream$HandleTable $r1;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$HandleTable handles>;
+
+        return $r1;
+    }
+
+    static java.io.ObjectInputStream$BlockDataInputStream access$700(java.io.ObjectInputStream)
+    {
+        java.io.ObjectInputStream r0;
+        java.io.ObjectInputStream$BlockDataInputStream $r1;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        $r1 = r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$BlockDataInputStream bin>;
+
+        return $r1;
+    }
+
+    static java.lang.Object access$800(java.io.ObjectInputStream, java.lang.Class, boolean) throws java.io.IOException
+    {
+        java.io.ObjectInputStream r0;
+        java.lang.Class r1;
+        java.lang.Object $r2;
+        boolean z0;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        r1 := @parameter1: java.lang.Class;
+
+        z0 := @parameter2: boolean;
+
+        $r2 = specialinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject0(java.lang.Class,boolean)>(r1, z0);
+
+        return $r2;
+    }
+
+    static int access$502(java.io.ObjectInputStream, int)
+    {
+        java.io.ObjectInputStream r0;
+        int i0;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        i0 := @parameter1: int;
+
+        r0.<java.io.ObjectInputStream: int passHandle> = i0;
+
+        return i0;
+    }
+
+    static boolean access$1000(java.io.ObjectInputStream)
+    {
+        java.io.ObjectInputStream r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        $z0 = r0.<java.io.ObjectInputStream: boolean defaultDataEnd>;
+
+        return $z0;
+    }
+
+    static void access$1100(java.io.ObjectInputStream) throws java.io.StreamCorruptedException
+    {
+        java.io.ObjectInputStream r0;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        specialinvoke r0.<java.io.ObjectInputStream: void handleReset()>();
+
+        return;
+    }
+
+    static void access$1200(byte[], int, float[], int, int)
+    {
+        byte[] r0;
+        int i0, i1, i2;
+        float[] r1;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        r1 := @parameter2: float[];
+
+        i1 := @parameter3: int;
+
+        i2 := @parameter4: int;
+
+        staticinvoke <java.io.ObjectInputStream: void bytesToFloats(byte[],int,float[],int,int)>(r0, i0, r1, i1, i2);
+
+        return;
+    }
+
+    static void access$1300(byte[], int, double[], int, int)
+    {
+        byte[] r0;
+        int i0, i1, i2;
+        double[] r1;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        r1 := @parameter2: double[];
+
+        i1 := @parameter3: int;
+
+        i2 := @parameter4: int;
+
+        staticinvoke <java.io.ObjectInputStream: void bytesToDoubles(byte[],int,double[],int,int)>(r0, i0, r1, i1, i2);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.util.HashMap $r1, $r3, $r5, $r7, $r9, $r11, $r13, $r15, $r17, $r19;
+        sun.misc.JavaObjectInputStreamAccess $r21;
+        sun.misc.JavaObjectInputStreamReadString $r22;
+        java.io.ObjectInputStream$1 $r20;
+        java.lang.Object $r0;
+        java.lang.Class $r2, $r4, $r6, $r8, $r10, $r12, $r14, $r16, $r18;
+
+        <java.io.ObjectInputStream: int NULL_HANDLE> = -1;
+
+        $r0 = new java.lang.Object;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        <java.io.ObjectInputStream: java.lang.Object unsharedMarker> = $r0;
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>(int,float)>(8, 1.0F);
+
+        <java.io.ObjectInputStream: java.util.HashMap primClasses> = $r1;
+
+        $r3 = <java.io.ObjectInputStream: java.util.HashMap primClasses>;
+
+        $r2 = <java.lang.Boolean: java.lang.Class TYPE>;
+
+        virtualinvoke $r3.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("boolean", $r2);
+
+        $r5 = <java.io.ObjectInputStream: java.util.HashMap primClasses>;
+
+        $r4 = <java.lang.Byte: java.lang.Class TYPE>;
+
+        virtualinvoke $r5.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("byte", $r4);
+
+        $r7 = <java.io.ObjectInputStream: java.util.HashMap primClasses>;
+
+        $r6 = <java.lang.Character: java.lang.Class TYPE>;
+
+        virtualinvoke $r7.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("char", $r6);
+
+        $r9 = <java.io.ObjectInputStream: java.util.HashMap primClasses>;
+
+        $r8 = <java.lang.Short: java.lang.Class TYPE>;
+
+        virtualinvoke $r9.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("short", $r8);
+
+        $r11 = <java.io.ObjectInputStream: java.util.HashMap primClasses>;
+
+        $r10 = <java.lang.Integer: java.lang.Class TYPE>;
+
+        virtualinvoke $r11.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("int", $r10);
+
+        $r13 = <java.io.ObjectInputStream: java.util.HashMap primClasses>;
+
+        $r12 = <java.lang.Long: java.lang.Class TYPE>;
+
+        virtualinvoke $r13.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("long", $r12);
+
+        $r15 = <java.io.ObjectInputStream: java.util.HashMap primClasses>;
+
+        $r14 = <java.lang.Float: java.lang.Class TYPE>;
+
+        virtualinvoke $r15.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("float", $r14);
+
+        $r17 = <java.io.ObjectInputStream: java.util.HashMap primClasses>;
+
+        $r16 = <java.lang.Double: java.lang.Class TYPE>;
+
+        virtualinvoke $r17.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("double", $r16);
+
+        $r19 = <java.io.ObjectInputStream: java.util.HashMap primClasses>;
+
+        $r18 = <java.lang.Void: java.lang.Class TYPE>;
+
+        virtualinvoke $r19.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("void", $r18);
+
+        $r20 = new java.io.ObjectInputStream$1;
+
+        specialinvoke $r20.<java.io.ObjectInputStream$1: void <init>()>();
+
+        staticinvoke <sun.misc.SharedSecrets: void setJavaOISAccess(sun.misc.JavaOISAccess)>($r20);
+
+        $r21 = staticinvoke <java.io.ObjectInputStream$setValidator__441: sun.misc.JavaObjectInputStreamAccess bootstrap$()>();
+
+        staticinvoke <sun.misc.SharedSecrets: void setJavaObjectInputStreamAccess(sun.misc.JavaObjectInputStreamAccess)>($r21);
+
+        $r22 = staticinvoke <java.io.ObjectInputStream$readString__442: sun.misc.JavaObjectInputStreamReadString bootstrap$()>();
+
+        staticinvoke <sun.misc.SharedSecrets: void setJavaObjectInputStreamReadString(sun.misc.JavaObjectInputStreamReadString)>($r22);
+
+        return;
+    }
+}

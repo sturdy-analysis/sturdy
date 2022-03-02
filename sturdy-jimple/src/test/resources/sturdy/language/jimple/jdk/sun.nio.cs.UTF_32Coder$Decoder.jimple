@@ -1,0 +1,364 @@
+public class sun.nio.cs.UTF_32Coder$Decoder extends java.nio.charset.CharsetDecoder
+{
+    private int currentBO;
+    private int expectedBO;
+
+    protected void <init>(java.nio.charset.Charset, int)
+    {
+        int i0;
+        java.nio.charset.Charset r1;
+        sun.nio.cs.UTF_32Coder$Decoder r0;
+
+        r0 := @this: sun.nio.cs.UTF_32Coder$Decoder;
+
+        r1 := @parameter0: java.nio.charset.Charset;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<java.nio.charset.CharsetDecoder: void <init>(java.nio.charset.Charset,float,float)>(r1, 0.25F, 1.0F);
+
+        r0.<sun.nio.cs.UTF_32Coder$Decoder: int expectedBO> = i0;
+
+        r0.<sun.nio.cs.UTF_32Coder$Decoder: int currentBO> = 0;
+
+        return;
+    }
+
+    private int getCP(java.nio.ByteBuffer)
+    {
+        java.nio.ByteBuffer r1;
+        byte $b1, $b3, $b7, $b11, $b14, $b17, $b21, $b25;
+        short $s2, $s4, $s8, $s12, $s15, $s18, $s22, $s26, $s28, $s30, $s32, $s34, $s36, $s37, $s40, $s42;
+        int $i0, $i5, $i6, $i9, $i10, $i13, $i16, $i19, $i20, $i23, $i24, $i27, $i29, $i31, $i33, $i35, $i38, $i39, $i41, $i43;
+        sun.nio.cs.UTF_32Coder$Decoder r0;
+
+        r0 := @this: sun.nio.cs.UTF_32Coder$Decoder;
+
+        r1 := @parameter0: java.nio.ByteBuffer;
+
+        $i0 = r0.<sun.nio.cs.UTF_32Coder$Decoder: int currentBO>;
+
+        if $i0 != 1 goto label1;
+
+        $b14 = virtualinvoke r1.<java.nio.ByteBuffer: byte get()>();
+
+        $s28 = (short) $b14;
+
+        $s15 = $s28 & 255;
+
+        $i29 = (int) $s15;
+
+        $i16 = $i29 << 24;
+
+        $b17 = virtualinvoke r1.<java.nio.ByteBuffer: byte get()>();
+
+        $s30 = (short) $b17;
+
+        $s18 = $s30 & 255;
+
+        $i31 = (int) $s18;
+
+        $i19 = $i31 << 16;
+
+        $i20 = $i16 | $i19;
+
+        $b21 = virtualinvoke r1.<java.nio.ByteBuffer: byte get()>();
+
+        $s32 = (short) $b21;
+
+        $s22 = $s32 & 255;
+
+        $i33 = (int) $s22;
+
+        $i23 = $i33 << 8;
+
+        $i24 = $i20 | $i23;
+
+        $b25 = virtualinvoke r1.<java.nio.ByteBuffer: byte get()>();
+
+        $s34 = (short) $b25;
+
+        $s26 = $s34 & 255;
+
+        $i35 = (int) $s26;
+
+        $i27 = $i24 | $i35;
+
+        goto label2;
+
+     label1:
+        $b1 = virtualinvoke r1.<java.nio.ByteBuffer: byte get()>();
+
+        $s36 = (short) $b1;
+
+        $s2 = $s36 & 255;
+
+        $b3 = virtualinvoke r1.<java.nio.ByteBuffer: byte get()>();
+
+        $s37 = (short) $b3;
+
+        $s4 = $s37 & 255;
+
+        $i38 = (int) $s4;
+
+        $i5 = $i38 << 8;
+
+        $i39 = (int) $s2;
+
+        $i6 = $i39 | $i5;
+
+        $b7 = virtualinvoke r1.<java.nio.ByteBuffer: byte get()>();
+
+        $s40 = (short) $b7;
+
+        $s8 = $s40 & 255;
+
+        $i41 = (int) $s8;
+
+        $i9 = $i41 << 16;
+
+        $i10 = $i6 | $i9;
+
+        $b11 = virtualinvoke r1.<java.nio.ByteBuffer: byte get()>();
+
+        $s42 = (short) $b11;
+
+        $s12 = $s42 & 255;
+
+        $i43 = (int) $s12;
+
+        $i13 = $i43 << 24;
+
+        $i27 = $i10 | $i13;
+
+     label2:
+        return $i27;
+    }
+
+    protected java.nio.charset.CoderResult decodeLoop(java.nio.ByteBuffer, java.nio.CharBuffer)
+    {
+        java.nio.ByteBuffer r0;
+        byte $b8, $b11, $b15, $b19;
+        boolean $z0, $z1, $z2;
+        java.nio.CharBuffer r3;
+        java.lang.Throwable $r5;
+        short $s9, $s12, $s16, $s20, $s28, $s30, $s32, $s34;
+        java.nio.charset.CoderResult $r2, $r4, r6, r7, r8;
+        int $i0, $i1, $i2, $i3, $i4, $i10, $i13, $i14, $i17, $i18, $i21, $i22, $i23, $i24, i25, i26, $i27, $i29, $i31, $i33, $i35, $i37;
+        char $c5, $c6, $c7;
+        sun.nio.cs.UTF_32Coder$Decoder r1;
+
+        r1 := @this: sun.nio.cs.UTF_32Coder$Decoder;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        r3 := @parameter1: java.nio.CharBuffer;
+
+        $i0 = virtualinvoke r0.<java.nio.ByteBuffer: int remaining()>();
+
+        if $i0 >= 4 goto label01;
+
+        $r4 = <java.nio.charset.CoderResult: java.nio.charset.CoderResult UNDERFLOW>;
+
+        return $r4;
+
+     label01:
+        $i1 = virtualinvoke r0.<java.nio.ByteBuffer: int position()>();
+
+        i25 = $i1;
+
+     label02:
+        $i2 = r1.<sun.nio.cs.UTF_32Coder$Decoder: int currentBO>;
+
+        if $i2 != 0 goto label07;
+
+        $b8 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $s28 = (short) $b8;
+
+        $s9 = $s28 & 255;
+
+        $i29 = (int) $s9;
+
+        $i10 = $i29 << 24;
+
+        $b11 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $s30 = (short) $b11;
+
+        $s12 = $s30 & 255;
+
+        $i31 = (int) $s12;
+
+        $i13 = $i31 << 16;
+
+        $i14 = $i10 | $i13;
+
+        $b15 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $s32 = (short) $b15;
+
+        $s16 = $s32 & 255;
+
+        $i33 = (int) $s16;
+
+        $i17 = $i33 << 8;
+
+        $i18 = $i14 | $i17;
+
+        $b19 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $s34 = (short) $b19;
+
+        $s20 = $s34 & 255;
+
+        $i35 = (int) $s20;
+
+        i26 = $i18 | $i35;
+
+        $i37 = (int) 65279;
+
+        if i26 != $i37 goto label03;
+
+        $i24 = r1.<sun.nio.cs.UTF_32Coder$Decoder: int expectedBO>;
+
+        if $i24 == 2 goto label03;
+
+        r1.<sun.nio.cs.UTF_32Coder$Decoder: int currentBO> = 1;
+
+        i25 = $i1 + 4;
+
+        goto label07;
+
+     label03:
+        if i26 != -131072 goto label04;
+
+        $i23 = r1.<sun.nio.cs.UTF_32Coder$Decoder: int expectedBO>;
+
+        if $i23 == 1 goto label04;
+
+        r1.<sun.nio.cs.UTF_32Coder$Decoder: int currentBO> = 2;
+
+        i25 = $i1 + 4;
+
+        goto label07;
+
+     label04:
+        $i21 = r1.<sun.nio.cs.UTF_32Coder$Decoder: int expectedBO>;
+
+        if $i21 != 0 goto label05;
+
+        r1.<sun.nio.cs.UTF_32Coder$Decoder: int currentBO> = 1;
+
+        goto label06;
+
+     label05:
+        $i22 = r1.<sun.nio.cs.UTF_32Coder$Decoder: int expectedBO>;
+
+        r1.<sun.nio.cs.UTF_32Coder$Decoder: int currentBO> = $i22;
+
+     label06:
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i1);
+
+     label07:
+        $i27 = virtualinvoke r0.<java.nio.ByteBuffer: int remaining()>();
+
+        if $i27 < 4 goto label15;
+
+        $i3 = specialinvoke r1.<sun.nio.cs.UTF_32Coder$Decoder: int getCP(java.nio.ByteBuffer)>(r0);
+
+        $z0 = staticinvoke <java.lang.Character: boolean isBmpCodePoint(int)>($i3);
+
+        if $z0 == 0 goto label10;
+
+        $z2 = virtualinvoke r3.<java.nio.CharBuffer: boolean hasRemaining()>();
+
+        if $z2 != 0 goto label09;
+
+        r6 = <java.nio.charset.CoderResult: java.nio.charset.CoderResult OVERFLOW>;
+
+     label08:
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i25);
+
+        return r6;
+
+     label09:
+        i25 = i25 + 4;
+
+        $c7 = (char) $i3;
+
+        virtualinvoke r3.<java.nio.CharBuffer: java.nio.CharBuffer put(char)>($c7);
+
+        goto label07;
+
+     label10:
+        $z1 = staticinvoke <java.lang.Character: boolean isValidCodePoint(int)>($i3);
+
+        if $z1 == 0 goto label13;
+
+        $i4 = virtualinvoke r3.<java.nio.CharBuffer: int remaining()>();
+
+        if $i4 >= 2 goto label12;
+
+        r7 = <java.nio.charset.CoderResult: java.nio.charset.CoderResult OVERFLOW>;
+
+     label11:
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i25);
+
+        return r7;
+
+     label12:
+        i25 = i25 + 4;
+
+        $c5 = staticinvoke <java.lang.Character: char highSurrogate(int)>($i3);
+
+        virtualinvoke r3.<java.nio.CharBuffer: java.nio.CharBuffer put(char)>($c5);
+
+        $c6 = staticinvoke <java.lang.Character: char lowSurrogate(int)>($i3);
+
+        virtualinvoke r3.<java.nio.CharBuffer: java.nio.CharBuffer put(char)>($c6);
+
+        goto label07;
+
+     label13:
+        $r2 = staticinvoke <java.nio.charset.CoderResult: java.nio.charset.CoderResult malformedForLength(int)>(4);
+
+     label14:
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i25);
+
+        return $r2;
+
+     label15:
+        r8 = <java.nio.charset.CoderResult: java.nio.charset.CoderResult UNDERFLOW>;
+
+     label16:
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i25);
+
+        return r8;
+
+     label17:
+        $r5 := @caughtexception;
+
+     label18:
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i25);
+
+        throw $r5;
+
+        catch java.lang.Throwable from label02 to label08 with label17;
+        catch java.lang.Throwable from label09 to label11 with label17;
+        catch java.lang.Throwable from label12 to label14 with label17;
+        catch java.lang.Throwable from label15 to label16 with label17;
+        catch java.lang.Throwable from label17 to label18 with label17;
+    }
+
+    protected void implReset()
+    {
+        sun.nio.cs.UTF_32Coder$Decoder r0;
+
+        r0 := @this: sun.nio.cs.UTF_32Coder$Decoder;
+
+        r0.<sun.nio.cs.UTF_32Coder$Decoder: int currentBO> = 0;
+
+        return;
+    }
+}

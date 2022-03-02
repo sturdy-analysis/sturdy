@@ -1,0 +1,91 @@
+public abstract class com.sun.xml.internal.ws.util.Pool extends java.lang.Object
+{
+    private volatile java.lang.ref.WeakReference queue;
+
+    public void <init>()
+    {
+        com.sun.xml.internal.ws.util.Pool r0;
+
+        r0 := @this: com.sun.xml.internal.ws.util.Pool;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public final java.lang.Object take()
+    {
+        com.sun.xml.internal.ws.util.Pool r0;
+        java.lang.Object $r2, $r3;
+        java.util.concurrent.ConcurrentLinkedQueue $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.util.Pool;
+
+        $r1 = specialinvoke r0.<com.sun.xml.internal.ws.util.Pool: java.util.concurrent.ConcurrentLinkedQueue getQueue()>();
+
+        $r2 = virtualinvoke $r1.<java.util.concurrent.ConcurrentLinkedQueue: java.lang.Object poll()>();
+
+        if $r2 != null goto label1;
+
+        $r3 = virtualinvoke r0.<com.sun.xml.internal.ws.util.Pool: java.lang.Object create()>();
+
+        return $r3;
+
+     label1:
+        return $r2;
+    }
+
+    private java.util.concurrent.ConcurrentLinkedQueue getQueue()
+    {
+        com.sun.xml.internal.ws.util.Pool r0;
+        java.lang.Object $r4;
+        java.lang.ref.WeakReference r1, $r3;
+        java.util.concurrent.ConcurrentLinkedQueue $r2, r5;
+
+        r0 := @this: com.sun.xml.internal.ws.util.Pool;
+
+        r1 = r0.<com.sun.xml.internal.ws.util.Pool: java.lang.ref.WeakReference queue>;
+
+        if r1 == null goto label1;
+
+        $r4 = virtualinvoke r1.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        r5 = (java.util.concurrent.ConcurrentLinkedQueue) $r4;
+
+        if r5 == null goto label1;
+
+        return r5;
+
+     label1:
+        $r2 = new java.util.concurrent.ConcurrentLinkedQueue;
+
+        specialinvoke $r2.<java.util.concurrent.ConcurrentLinkedQueue: void <init>()>();
+
+        $r3 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r3.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>($r2);
+
+        r0.<com.sun.xml.internal.ws.util.Pool: java.lang.ref.WeakReference queue> = $r3;
+
+        return $r2;
+    }
+
+    public final void recycle(java.lang.Object)
+    {
+        java.lang.Object r2;
+        com.sun.xml.internal.ws.util.Pool r0;
+        java.util.concurrent.ConcurrentLinkedQueue $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.util.Pool;
+
+        r2 := @parameter0: java.lang.Object;
+
+        $r1 = specialinvoke r0.<com.sun.xml.internal.ws.util.Pool: java.util.concurrent.ConcurrentLinkedQueue getQueue()>();
+
+        virtualinvoke $r1.<java.util.concurrent.ConcurrentLinkedQueue: boolean offer(java.lang.Object)>(r2);
+
+        return;
+    }
+
+    protected abstract java.lang.Object create();
+}

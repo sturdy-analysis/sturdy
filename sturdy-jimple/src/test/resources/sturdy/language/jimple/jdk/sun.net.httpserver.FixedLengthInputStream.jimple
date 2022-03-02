@@ -1,0 +1,217 @@
+class sun.net.httpserver.FixedLengthInputStream extends sun.net.httpserver.LeftOverInputStream
+{
+    private long remaining;
+
+    void <init>(sun.net.httpserver.ExchangeImpl, java.io.InputStream, long)
+    {
+        sun.net.httpserver.ExchangeImpl r1;
+        sun.net.httpserver.FixedLengthInputStream r0;
+        long l0;
+        java.io.InputStream r2;
+
+        r0 := @this: sun.net.httpserver.FixedLengthInputStream;
+
+        r1 := @parameter0: sun.net.httpserver.ExchangeImpl;
+
+        r2 := @parameter1: java.io.InputStream;
+
+        l0 := @parameter2: long;
+
+        specialinvoke r0.<sun.net.httpserver.LeftOverInputStream: void <init>(sun.net.httpserver.ExchangeImpl,java.io.InputStream)>(r1, r2);
+
+        r0.<sun.net.httpserver.FixedLengthInputStream: long remaining> = l0;
+
+        return;
+    }
+
+    protected int readImpl(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r1;
+        sun.net.httpserver.ExchangeImpl $r4, $r6;
+        sun.net.httpserver.FixedLengthInputStream r0;
+        long $l0, $l2, $l3, $l7, $l8, $l9, $l10, $l12;
+        byte $b1, $b4, $b11;
+        int i5, $i6, i13, $i15, $i16, $i18;
+        boolean $z0, $z1, $z2;
+        sun.net.httpserver.ServerImpl $r5;
+        sun.net.httpserver.HttpConnection $r7;
+        java.io.IOException $r8;
+        java.io.InputStream $r2;
+
+        r0 := @this: sun.net.httpserver.FixedLengthInputStream;
+
+        r1 := @parameter0: byte[];
+
+        i5 := @parameter1: int;
+
+        i13 := @parameter2: int;
+
+        $l0 = r0.<sun.net.httpserver.FixedLengthInputStream: long remaining>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        r0.<sun.net.httpserver.FixedLengthInputStream: boolean eof> = $z2;
+
+        $z0 = r0.<sun.net.httpserver.FixedLengthInputStream: boolean eof>;
+
+        if $z0 == 0 goto label3;
+
+        $i15 = (int) -1;
+
+        return $i15;
+
+     label3:
+        $l3 = (long) i13;
+
+        $l2 = r0.<sun.net.httpserver.FixedLengthInputStream: long remaining>;
+
+        $b4 = $l3 cmp $l2;
+
+        $i16 = (int) $b4;
+
+        if $i16 <= 0 goto label4;
+
+        $l12 = r0.<sun.net.httpserver.FixedLengthInputStream: long remaining>;
+
+        i13 = (int) $l12;
+
+     label4:
+        $r2 = r0.<sun.net.httpserver.FixedLengthInputStream: java.io.InputStream in>;
+
+        $i6 = virtualinvoke $r2.<java.io.InputStream: int read(byte[],int,int)>(r1, i5, i13);
+
+        $i18 = (int) -1;
+
+        if $i6 <= $i18 goto label5;
+
+        $l8 = r0.<sun.net.httpserver.FixedLengthInputStream: long remaining>;
+
+        $l7 = (long) $i6;
+
+        $l9 = $l8 - $l7;
+
+        r0.<sun.net.httpserver.FixedLengthInputStream: long remaining> = $l9;
+
+        $l10 = r0.<sun.net.httpserver.FixedLengthInputStream: long remaining>;
+
+        $b11 = $l10 cmp 0L;
+
+        if $b11 != 0 goto label5;
+
+        $r4 = r0.<sun.net.httpserver.FixedLengthInputStream: sun.net.httpserver.ExchangeImpl t>;
+
+        $r5 = virtualinvoke $r4.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.ServerImpl getServerImpl()>();
+
+        $r6 = r0.<sun.net.httpserver.FixedLengthInputStream: sun.net.httpserver.ExchangeImpl t>;
+
+        $r7 = virtualinvoke $r6.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.HttpConnection getConnection()>();
+
+        virtualinvoke $r5.<sun.net.httpserver.ServerImpl: void requestCompleted(sun.net.httpserver.HttpConnection)>($r7);
+
+     label5:
+        if $i6 >= 0 goto label6;
+
+        $z1 = r0.<sun.net.httpserver.FixedLengthInputStream: boolean eof>;
+
+        if $z1 != 0 goto label6;
+
+        $r8 = new java.io.IOException;
+
+        specialinvoke $r8.<java.io.IOException: void <init>(java.lang.String)>("connection closed before all data received");
+
+        throw $r8;
+
+     label6:
+        return $i6;
+    }
+
+    public int available() throws java.io.IOException
+    {
+        sun.net.httpserver.FixedLengthInputStream r0;
+        long $l1, $l2, $l4;
+        byte $b3;
+        int $i0, $i5, $i6;
+        boolean $z0;
+        java.io.InputStream $r1;
+
+        r0 := @this: sun.net.httpserver.FixedLengthInputStream;
+
+        $z0 = r0.<sun.net.httpserver.FixedLengthInputStream: boolean eof>;
+
+        if $z0 == 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r1 = r0.<sun.net.httpserver.FixedLengthInputStream: java.io.InputStream in>;
+
+        $i0 = virtualinvoke $r1.<java.io.InputStream: int available()>();
+
+        $l2 = (long) $i0;
+
+        $l1 = r0.<sun.net.httpserver.FixedLengthInputStream: long remaining>;
+
+        $b3 = $l2 cmp $l1;
+
+        $i6 = (int) $b3;
+
+        if $i6 >= 0 goto label2;
+
+        $i5 = $i0;
+
+        goto label3;
+
+     label2:
+        $l4 = r0.<sun.net.httpserver.FixedLengthInputStream: long remaining>;
+
+        $i5 = (int) $l4;
+
+     label3:
+        return $i5;
+    }
+
+    public boolean markSupported()
+    {
+        sun.net.httpserver.FixedLengthInputStream r0;
+
+        r0 := @this: sun.net.httpserver.FixedLengthInputStream;
+
+        return 0;
+    }
+
+    public void mark(int)
+    {
+        int i0;
+        sun.net.httpserver.FixedLengthInputStream r0;
+
+        r0 := @this: sun.net.httpserver.FixedLengthInputStream;
+
+        i0 := @parameter0: int;
+
+        return;
+    }
+
+    public void reset() throws java.io.IOException
+    {
+        java.io.IOException $r0;
+        sun.net.httpserver.FixedLengthInputStream r1;
+
+        r1 := @this: sun.net.httpserver.FixedLengthInputStream;
+
+        $r0 = new java.io.IOException;
+
+        specialinvoke $r0.<java.io.IOException: void <init>(java.lang.String)>("mark/reset not supported");
+
+        throw $r0;
+    }
+}

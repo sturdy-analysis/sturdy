@@ -1,0 +1,231 @@
+class java.lang.ApplicationShutdownHooks extends java.lang.Object
+{
+    private static java.util.IdentityHashMap hooks;
+
+    private void <init>()
+    {
+        java.lang.ApplicationShutdownHooks r0;
+
+        r0 := @this: java.lang.ApplicationShutdownHooks;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    static synchronized void add(java.lang.Thread)
+    {
+        java.lang.IllegalStateException $r6;
+        java.util.IdentityHashMap $r0, $r2, $r3;
+        java.lang.IllegalArgumentException $r4, $r5;
+        java.lang.Thread r1;
+        boolean $z0, $z1;
+
+        r1 := @parameter0: java.lang.Thread;
+
+        $r0 = <java.lang.ApplicationShutdownHooks: java.util.IdentityHashMap hooks>;
+
+        if $r0 != null goto label1;
+
+        $r6 = new java.lang.IllegalStateException;
+
+        specialinvoke $r6.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Shutdown in progress");
+
+        throw $r6;
+
+     label1:
+        $z0 = virtualinvoke r1.<java.lang.Thread: boolean isAlive()>();
+
+        if $z0 == 0 goto label2;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Hook already running");
+
+        throw $r5;
+
+     label2:
+        $r2 = <java.lang.ApplicationShutdownHooks: java.util.IdentityHashMap hooks>;
+
+        $z1 = virtualinvoke $r2.<java.util.IdentityHashMap: boolean containsKey(java.lang.Object)>(r1);
+
+        if $z1 == 0 goto label3;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Hook previously registered");
+
+        throw $r4;
+
+     label3:
+        $r3 = <java.lang.ApplicationShutdownHooks: java.util.IdentityHashMap hooks>;
+
+        virtualinvoke $r3.<java.util.IdentityHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, r1);
+
+        return;
+    }
+
+    static synchronized boolean remove(java.lang.Thread)
+    {
+        java.lang.IllegalStateException $r5;
+        java.util.IdentityHashMap $r0, $r2;
+        java.lang.Thread r1;
+        java.lang.Object $r3;
+        java.lang.NullPointerException $r4;
+        boolean $z0;
+
+        r1 := @parameter0: java.lang.Thread;
+
+        $r0 = <java.lang.ApplicationShutdownHooks: java.util.IdentityHashMap hooks>;
+
+        if $r0 != null goto label1;
+
+        $r5 = new java.lang.IllegalStateException;
+
+        specialinvoke $r5.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Shutdown in progress");
+
+        throw $r5;
+
+     label1:
+        if r1 != null goto label2;
+
+        $r4 = new java.lang.NullPointerException;
+
+        specialinvoke $r4.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r4;
+
+     label2:
+        $r2 = <java.lang.ApplicationShutdownHooks: java.util.IdentityHashMap hooks>;
+
+        $r3 = virtualinvoke $r2.<java.util.IdentityHashMap: java.lang.Object remove(java.lang.Object)>(r1);
+
+        if $r3 == null goto label3;
+
+        $z0 = 1;
+
+        goto label4;
+
+     label3:
+        $z0 = 0;
+
+     label4:
+        return $z0;
+    }
+
+    static void runHooks()
+    {
+        java.lang.Throwable $r7;
+        java.util.IdentityHashMap $r0;
+        java.util.Iterator $r2, $r3;
+        java.util.Set $r1;
+        java.lang.InterruptedException $r6;
+        java.lang.Thread r8, r9;
+        java.lang.Object $r4, $r5;
+        boolean $z0, $z1;
+
+        entermonitor class "Ljava/lang/ApplicationShutdownHooks;";
+
+     label01:
+        $r0 = <java.lang.ApplicationShutdownHooks: java.util.IdentityHashMap hooks>;
+
+        $r1 = virtualinvoke $r0.<java.util.IdentityHashMap: java.util.Set keySet()>();
+
+        <java.lang.ApplicationShutdownHooks: java.util.IdentityHashMap hooks> = null;
+
+        exitmonitor class "Ljava/lang/ApplicationShutdownHooks;";
+
+     label02:
+        goto label05;
+
+     label03:
+        $r7 := @caughtexception;
+
+        exitmonitor class "Ljava/lang/ApplicationShutdownHooks;";
+
+     label04:
+        throw $r7;
+
+     label05:
+        $r2 = interfaceinvoke $r1.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label06:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label07;
+
+        $r5 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r8 = (java.lang.Thread) $r5;
+
+        virtualinvoke r8.<java.lang.Thread: void start()>();
+
+        goto label06;
+
+     label07:
+        $r3 = interfaceinvoke $r1.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label08:
+        $z1 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label13;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (java.lang.Thread) $r4;
+
+     label09:
+        virtualinvoke r9.<java.lang.Thread: void join()>();
+
+     label10:
+        goto label12;
+
+     label11:
+        $r6 := @caughtexception;
+
+        goto label09;
+
+     label12:
+        goto label08;
+
+     label13:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label03;
+        catch java.lang.Throwable from label03 to label04 with label03;
+        catch java.lang.InterruptedException from label09 to label10 with label11;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.IllegalStateException $r2;
+        java.util.IdentityHashMap $r1;
+        java.lang.ApplicationShutdownHooks$1 $r0;
+
+     label1:
+        $r0 = new java.lang.ApplicationShutdownHooks$1;
+
+        specialinvoke $r0.<java.lang.ApplicationShutdownHooks$1: void <init>()>();
+
+        staticinvoke <java.lang.Shutdown: void add(int,boolean,java.lang.Runnable)>(1, 0, $r0);
+
+        $r1 = new java.util.IdentityHashMap;
+
+        specialinvoke $r1.<java.util.IdentityHashMap: void <init>()>();
+
+        <java.lang.ApplicationShutdownHooks: java.util.IdentityHashMap hooks> = $r1;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        <java.lang.ApplicationShutdownHooks: java.util.IdentityHashMap hooks> = null;
+
+     label4:
+        return;
+
+        catch java.lang.IllegalStateException from label1 to label2 with label3;
+    }
+}

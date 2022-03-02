@@ -1,0 +1,689 @@
+class java.awt.geom.RoundRectIterator extends java.lang.Object implements java.awt.geom.PathIterator
+{
+    double x;
+    double y;
+    double w;
+    double h;
+    double aw;
+    double ah;
+    java.awt.geom.AffineTransform affine;
+    int index;
+    private static final double angle;
+    private static final double a;
+    private static final double b;
+    private static final double c;
+    private static final double cv;
+    private static final double acv;
+    private static double[][] ctrlpts;
+    private static int[] types;
+
+    void <init>(java.awt.geom.RoundRectangle2D, java.awt.geom.AffineTransform)
+    {
+        byte $b0, $b2;
+        int $i1, $i3, $i4;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11, $d12, $d13;
+        java.awt.geom.AffineTransform r2;
+        java.awt.geom.RoundRectangle2D r1;
+        java.awt.geom.RoundRectIterator r0;
+        double[][] $r3;
+
+        r0 := @this: java.awt.geom.RoundRectIterator;
+
+        r1 := @parameter0: java.awt.geom.RoundRectangle2D;
+
+        r2 := @parameter1: java.awt.geom.AffineTransform;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $d0 = virtualinvoke r1.<java.awt.geom.RoundRectangle2D: double getX()>();
+
+        r0.<java.awt.geom.RoundRectIterator: double x> = $d0;
+
+        $d1 = virtualinvoke r1.<java.awt.geom.RoundRectangle2D: double getY()>();
+
+        r0.<java.awt.geom.RoundRectIterator: double y> = $d1;
+
+        $d2 = virtualinvoke r1.<java.awt.geom.RoundRectangle2D: double getWidth()>();
+
+        r0.<java.awt.geom.RoundRectIterator: double w> = $d2;
+
+        $d3 = virtualinvoke r1.<java.awt.geom.RoundRectangle2D: double getHeight()>();
+
+        r0.<java.awt.geom.RoundRectIterator: double h> = $d3;
+
+        $d4 = r0.<java.awt.geom.RoundRectIterator: double w>;
+
+        $d5 = virtualinvoke r1.<java.awt.geom.RoundRectangle2D: double getArcWidth()>();
+
+        $d6 = staticinvoke <java.lang.Math: double abs(double)>($d5);
+
+        $d7 = staticinvoke <java.lang.Math: double min(double,double)>($d4, $d6);
+
+        r0.<java.awt.geom.RoundRectIterator: double aw> = $d7;
+
+        $d8 = r0.<java.awt.geom.RoundRectIterator: double h>;
+
+        $d9 = virtualinvoke r1.<java.awt.geom.RoundRectangle2D: double getArcHeight()>();
+
+        $d10 = staticinvoke <java.lang.Math: double abs(double)>($d9);
+
+        $d11 = staticinvoke <java.lang.Math: double min(double,double)>($d8, $d10);
+
+        r0.<java.awt.geom.RoundRectIterator: double ah> = $d11;
+
+        r0.<java.awt.geom.RoundRectIterator: java.awt.geom.AffineTransform affine> = r2;
+
+        $d12 = r0.<java.awt.geom.RoundRectIterator: double aw>;
+
+        $b0 = $d12 cmpg 0.0;
+
+        $i3 = (int) $b0;
+
+        if $i3 < 0 goto label1;
+
+        $d13 = r0.<java.awt.geom.RoundRectIterator: double ah>;
+
+        $b2 = $d13 cmpg 0.0;
+
+        $i4 = (int) $b2;
+
+        if $i4 >= 0 goto label2;
+
+     label1:
+        $r3 = <java.awt.geom.RoundRectIterator: double[][] ctrlpts>;
+
+        $i1 = lengthof $r3;
+
+        r0.<java.awt.geom.RoundRectIterator: int index> = $i1;
+
+     label2:
+        return;
+    }
+
+    public int getWindingRule()
+    {
+        java.awt.geom.RoundRectIterator r0;
+
+        r0 := @this: java.awt.geom.RoundRectIterator;
+
+        return 1;
+    }
+
+    public boolean isDone()
+    {
+        int $i0, $i1;
+        java.awt.geom.RoundRectIterator r0;
+        double[][] $r1;
+        boolean $z0;
+
+        r0 := @this: java.awt.geom.RoundRectIterator;
+
+        $i1 = r0.<java.awt.geom.RoundRectIterator: int index>;
+
+        $r1 = <java.awt.geom.RoundRectIterator: double[][] ctrlpts>;
+
+        $i0 = lengthof $r1;
+
+        if $i1 < $i0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public void next()
+    {
+        int $i0, $i1;
+        java.awt.geom.RoundRectIterator r0;
+
+        r0 := @this: java.awt.geom.RoundRectIterator;
+
+        $i0 = r0.<java.awt.geom.RoundRectIterator: int index>;
+
+        $i1 = $i0 + 1;
+
+        r0.<java.awt.geom.RoundRectIterator: int index> = $i1;
+
+        return;
+    }
+
+    public int currentSegment(float[])
+    {
+        int[] $r4;
+        boolean $z0;
+        java.awt.geom.AffineTransform $r3, $r6;
+        java.awt.geom.RoundRectIterator r0;
+        float $f0, $f1;
+        double[][] $r1;
+        double[] r2;
+        float[] r5;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, i10, i11;
+        java.util.NoSuchElementException $r7;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15, $d16, $d17;
+
+        r0 := @this: java.awt.geom.RoundRectIterator;
+
+        r5 := @parameter0: float[];
+
+        $z0 = virtualinvoke r0.<java.awt.geom.RoundRectIterator: boolean isDone()>();
+
+        if $z0 == 0 goto label1;
+
+        $r7 = new java.util.NoSuchElementException;
+
+        specialinvoke $r7.<java.util.NoSuchElementException: void <init>(java.lang.String)>("roundrect iterator out of bounds");
+
+        throw $r7;
+
+     label1:
+        $r1 = <java.awt.geom.RoundRectIterator: double[][] ctrlpts>;
+
+        $i0 = r0.<java.awt.geom.RoundRectIterator: int index>;
+
+        r2 = $r1[$i0];
+
+        i9 = 0;
+
+        i10 = 0;
+
+     label2:
+        $i1 = lengthof r2;
+
+        if i10 >= $i1 goto label3;
+
+        i11 = i9 + 1;
+
+        $d3 = r0.<java.awt.geom.RoundRectIterator: double x>;
+
+        $i5 = i10 + 0;
+
+        $d1 = r2[$i5];
+
+        $d0 = r0.<java.awt.geom.RoundRectIterator: double w>;
+
+        $d2 = $d1 * $d0;
+
+        $d7 = $d3 + $d2;
+
+        $i6 = i10 + 1;
+
+        $d5 = r2[$i6];
+
+        $d4 = r0.<java.awt.geom.RoundRectIterator: double aw>;
+
+        $d6 = $d5 * $d4;
+
+        $d8 = $d7 + $d6;
+
+        $f0 = (float) $d8;
+
+        r5[i9] = $f0;
+
+        i9 = i11 + 1;
+
+        $d12 = r0.<java.awt.geom.RoundRectIterator: double y>;
+
+        $i7 = i10 + 2;
+
+        $d10 = r2[$i7];
+
+        $d9 = r0.<java.awt.geom.RoundRectIterator: double h>;
+
+        $d11 = $d10 * $d9;
+
+        $d16 = $d12 + $d11;
+
+        $i8 = i10 + 3;
+
+        $d14 = r2[$i8];
+
+        $d13 = r0.<java.awt.geom.RoundRectIterator: double ah>;
+
+        $d15 = $d14 * $d13;
+
+        $d17 = $d16 + $d15;
+
+        $f1 = (float) $d17;
+
+        r5[i11] = $f1;
+
+        i10 = i10 + 4;
+
+        goto label2;
+
+     label3:
+        $r3 = r0.<java.awt.geom.RoundRectIterator: java.awt.geom.AffineTransform affine>;
+
+        if $r3 == null goto label4;
+
+        $r6 = r0.<java.awt.geom.RoundRectIterator: java.awt.geom.AffineTransform affine>;
+
+        $i4 = i9 / 2;
+
+        virtualinvoke $r6.<java.awt.geom.AffineTransform: void transform(float[],int,float[],int,int)>(r5, 0, r5, 0, $i4);
+
+     label4:
+        $r4 = <java.awt.geom.RoundRectIterator: int[] types>;
+
+        $i2 = r0.<java.awt.geom.RoundRectIterator: int index>;
+
+        $i3 = $r4[$i2];
+
+        return $i3;
+    }
+
+    public int currentSegment(double[])
+    {
+        int[] $r4;
+        boolean $z0;
+        java.awt.geom.AffineTransform $r3, $r6;
+        java.awt.geom.RoundRectIterator r0;
+        double[][] $r1;
+        double[] r2, r5;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, i10, i11;
+        java.util.NoSuchElementException $r7;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15, $d16, $d17;
+
+        r0 := @this: java.awt.geom.RoundRectIterator;
+
+        r5 := @parameter0: double[];
+
+        $z0 = virtualinvoke r0.<java.awt.geom.RoundRectIterator: boolean isDone()>();
+
+        if $z0 == 0 goto label1;
+
+        $r7 = new java.util.NoSuchElementException;
+
+        specialinvoke $r7.<java.util.NoSuchElementException: void <init>(java.lang.String)>("roundrect iterator out of bounds");
+
+        throw $r7;
+
+     label1:
+        $r1 = <java.awt.geom.RoundRectIterator: double[][] ctrlpts>;
+
+        $i0 = r0.<java.awt.geom.RoundRectIterator: int index>;
+
+        r2 = $r1[$i0];
+
+        i9 = 0;
+
+        i10 = 0;
+
+     label2:
+        $i1 = lengthof r2;
+
+        if i10 >= $i1 goto label3;
+
+        i11 = i9 + 1;
+
+        $d3 = r0.<java.awt.geom.RoundRectIterator: double x>;
+
+        $i5 = i10 + 0;
+
+        $d1 = r2[$i5];
+
+        $d0 = r0.<java.awt.geom.RoundRectIterator: double w>;
+
+        $d2 = $d1 * $d0;
+
+        $d7 = $d3 + $d2;
+
+        $i6 = i10 + 1;
+
+        $d5 = r2[$i6];
+
+        $d4 = r0.<java.awt.geom.RoundRectIterator: double aw>;
+
+        $d6 = $d5 * $d4;
+
+        $d8 = $d7 + $d6;
+
+        r5[i9] = $d8;
+
+        i9 = i11 + 1;
+
+        $d12 = r0.<java.awt.geom.RoundRectIterator: double y>;
+
+        $i7 = i10 + 2;
+
+        $d10 = r2[$i7];
+
+        $d9 = r0.<java.awt.geom.RoundRectIterator: double h>;
+
+        $d11 = $d10 * $d9;
+
+        $d16 = $d12 + $d11;
+
+        $i8 = i10 + 3;
+
+        $d14 = r2[$i8];
+
+        $d13 = r0.<java.awt.geom.RoundRectIterator: double ah>;
+
+        $d15 = $d14 * $d13;
+
+        $d17 = $d16 + $d15;
+
+        r5[i11] = $d17;
+
+        i10 = i10 + 4;
+
+        goto label2;
+
+     label3:
+        $r3 = r0.<java.awt.geom.RoundRectIterator: java.awt.geom.AffineTransform affine>;
+
+        if $r3 == null goto label4;
+
+        $r6 = r0.<java.awt.geom.RoundRectIterator: java.awt.geom.AffineTransform affine>;
+
+        $i4 = i9 / 2;
+
+        virtualinvoke $r6.<java.awt.geom.AffineTransform: void transform(double[],int,double[],int,int)>(r5, 0, r5, 0, $i4);
+
+     label4:
+        $r4 = <java.awt.geom.RoundRectIterator: int[] types>;
+
+        $i2 = r0.<java.awt.geom.RoundRectIterator: int index>;
+
+        $i3 = $r4[$i2];
+
+        return $i3;
+    }
+
+    static void <clinit>()
+    {
+        int[] $r11;
+        double[][] $r0;
+        double[] $r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15, $d16, $d17, $d18, $d19, $d20, $d21, $d22, $d23, $d24, $d25, $d26, $d27, $d28, $d29, $d30, $d31;
+
+        <java.awt.geom.RoundRectIterator: double angle> = 0.7853981633974483;
+
+        $d0 = staticinvoke <java.lang.Math: double cos(double)>(0.7853981633974483);
+
+        $d1 = 1.0 - $d0;
+
+        <java.awt.geom.RoundRectIterator: double a> = $d1;
+
+        $d2 = staticinvoke <java.lang.Math: double tan(double)>(0.7853981633974483);
+
+        <java.awt.geom.RoundRectIterator: double b> = $d2;
+
+        $d4 = <java.awt.geom.RoundRectIterator: double b>;
+
+        $d3 = <java.awt.geom.RoundRectIterator: double b>;
+
+        $d5 = $d4 * $d3;
+
+        $d6 = 1.0 + $d5;
+
+        $d7 = staticinvoke <java.lang.Math: double sqrt(double)>($d6);
+
+        $d9 = $d7 - 1.0;
+
+        $d8 = <java.awt.geom.RoundRectIterator: double a>;
+
+        $d10 = $d9 + $d8;
+
+        <java.awt.geom.RoundRectIterator: double c> = $d10;
+
+        $d11 = <java.awt.geom.RoundRectIterator: double a>;
+
+        $d13 = 1.3333333333333333 * $d11;
+
+        $d12 = <java.awt.geom.RoundRectIterator: double b>;
+
+        $d15 = $d13 * $d12;
+
+        $d14 = <java.awt.geom.RoundRectIterator: double c>;
+
+        $d16 = $d15 / $d14;
+
+        <java.awt.geom.RoundRectIterator: double cv> = $d16;
+
+        $d17 = <java.awt.geom.RoundRectIterator: double cv>;
+
+        $d18 = 1.0 - $d17;
+
+        $d19 = $d18 / 2.0;
+
+        <java.awt.geom.RoundRectIterator: double acv> = $d19;
+
+        $r0 = newarray (double[])[10];
+
+        $r1 = newarray (double)[4];
+
+        $r1[0] = 0.0;
+
+        $r1[1] = 0.0;
+
+        $r1[2] = 0.0;
+
+        $r1[3] = 0.5;
+
+        $r0[0] = $r1;
+
+        $r2 = newarray (double)[4];
+
+        $r2[0] = 0.0;
+
+        $r2[1] = 0.0;
+
+        $r2[2] = 1.0;
+
+        $r2[3] = -0.5;
+
+        $r0[1] = $r2;
+
+        $r3 = newarray (double)[12];
+
+        $r3[0] = 0.0;
+
+        $r3[1] = 0.0;
+
+        $r3[2] = 1.0;
+
+        $d20 = <java.awt.geom.RoundRectIterator: double acv>;
+
+        $d21 = neg $d20;
+
+        $r3[3] = $d21;
+
+        $r3[4] = 0.0;
+
+        $d22 = <java.awt.geom.RoundRectIterator: double acv>;
+
+        $r3[5] = $d22;
+
+        $r3[6] = 1.0;
+
+        $r3[7] = 0.0;
+
+        $r3[8] = 0.0;
+
+        $r3[9] = 0.5;
+
+        $r3[10] = 1.0;
+
+        $r3[11] = 0.0;
+
+        $r0[2] = $r3;
+
+        $r4 = newarray (double)[4];
+
+        $r4[0] = 1.0;
+
+        $r4[1] = -0.5;
+
+        $r4[2] = 1.0;
+
+        $r4[3] = 0.0;
+
+        $r0[3] = $r4;
+
+        $r5 = newarray (double)[12];
+
+        $r5[0] = 1.0;
+
+        $d23 = <java.awt.geom.RoundRectIterator: double acv>;
+
+        $d24 = neg $d23;
+
+        $r5[1] = $d24;
+
+        $r5[2] = 1.0;
+
+        $r5[3] = 0.0;
+
+        $r5[4] = 1.0;
+
+        $r5[5] = 0.0;
+
+        $r5[6] = 1.0;
+
+        $d25 = <java.awt.geom.RoundRectIterator: double acv>;
+
+        $d26 = neg $d25;
+
+        $r5[7] = $d26;
+
+        $r5[8] = 1.0;
+
+        $r5[9] = 0.0;
+
+        $r5[10] = 1.0;
+
+        $r5[11] = -0.5;
+
+        $r0[4] = $r5;
+
+        $r6 = newarray (double)[4];
+
+        $r6[0] = 1.0;
+
+        $r6[1] = 0.0;
+
+        $r6[2] = 0.0;
+
+        $r6[3] = 0.5;
+
+        $r0[5] = $r6;
+
+        $r7 = newarray (double)[12];
+
+        $r7[0] = 1.0;
+
+        $r7[1] = 0.0;
+
+        $r7[2] = 0.0;
+
+        $d27 = <java.awt.geom.RoundRectIterator: double acv>;
+
+        $r7[3] = $d27;
+
+        $r7[4] = 1.0;
+
+        $d28 = <java.awt.geom.RoundRectIterator: double acv>;
+
+        $d29 = neg $d28;
+
+        $r7[5] = $d29;
+
+        $r7[6] = 0.0;
+
+        $r7[7] = 0.0;
+
+        $r7[8] = 1.0;
+
+        $r7[9] = -0.5;
+
+        $r7[10] = 0.0;
+
+        $r7[11] = 0.0;
+
+        $r0[6] = $r7;
+
+        $r8 = newarray (double)[4];
+
+        $r8[0] = 0.0;
+
+        $r8[1] = 0.5;
+
+        $r8[2] = 0.0;
+
+        $r8[3] = 0.0;
+
+        $r0[7] = $r8;
+
+        $r9 = newarray (double)[12];
+
+        $r9[0] = 0.0;
+
+        $d30 = <java.awt.geom.RoundRectIterator: double acv>;
+
+        $r9[1] = $d30;
+
+        $r9[2] = 0.0;
+
+        $r9[3] = 0.0;
+
+        $r9[4] = 0.0;
+
+        $r9[5] = 0.0;
+
+        $r9[6] = 0.0;
+
+        $d31 = <java.awt.geom.RoundRectIterator: double acv>;
+
+        $r9[7] = $d31;
+
+        $r9[8] = 0.0;
+
+        $r9[9] = 0.0;
+
+        $r9[10] = 0.0;
+
+        $r9[11] = 0.5;
+
+        $r0[8] = $r9;
+
+        $r10 = newarray (double)[0];
+
+        $r0[9] = $r10;
+
+        <java.awt.geom.RoundRectIterator: double[][] ctrlpts> = $r0;
+
+        $r11 = newarray (int)[10];
+
+        $r11[0] = 0;
+
+        $r11[1] = 1;
+
+        $r11[2] = 3;
+
+        $r11[3] = 1;
+
+        $r11[4] = 3;
+
+        $r11[5] = 1;
+
+        $r11[6] = 3;
+
+        $r11[7] = 1;
+
+        $r11[8] = 3;
+
+        $r11[9] = 4;
+
+        <java.awt.geom.RoundRectIterator: int[] types> = $r11;
+
+        return;
+    }
+}

@@ -1,0 +1,1177 @@
+class com.sun.security.ntlm.NTLM extends java.lang.Object
+{
+    private final javax.crypto.SecretKeyFactory fac;
+    private final javax.crypto.Cipher cipher;
+    private final java.security.MessageDigest md4;
+    private final javax.crypto.Mac hmac;
+    private final java.security.MessageDigest md5;
+    private static final boolean DEBUG;
+    final com.sun.security.ntlm.Version v;
+    final boolean writeLM;
+    final boolean writeNTLM;
+    static final boolean $assertionsDisabled;
+
+    protected void <init>(java.lang.String) throws com.sun.security.ntlm.NTLMException
+    {
+        com.sun.security.ntlm.NTLMException $r8;
+        byte b1;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        javax.crypto.Mac $r21;
+        com.sun.security.ntlm.NTLM r0;
+        java.security.NoSuchAlgorithmException $r13;
+        java.lang.StringBuilder $r9, $r10, $r11;
+        com.sun.security.ntlm.Version $r1, $r2, $r3, $r4, $r5, $r6, $r7;
+        java.security.MessageDigest $r20, $r22;
+        java.lang.AssertionError $r14, $r16;
+        javax.crypto.Cipher $r19;
+        javax.crypto.SecretKeyFactory $r18;
+        javax.crypto.NoSuchPaddingException $r15;
+        int $i0;
+        java.lang.String $r12, r17;
+
+        r0 := @this: com.sun.security.ntlm.NTLM;
+
+        r17 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        if r17 != null goto label01;
+
+        r17 = "LMv2/NTLMv2";
+
+     label01:
+        b1 = -1;
+
+        $i0 = virtualinvoke r17.<java.lang.String: int hashCode()>();
+
+        lookupswitch($i0)
+        {
+            case -1981975933: goto label07;
+            case -1885054699: goto label08;
+            case 2433: goto label02;
+            case 2341821: goto label06;
+            case 2406855: goto label03;
+            case 74612555: goto label05;
+            case 981059989: goto label04;
+            default: goto label09;
+        };
+
+     label02:
+        $z4 = virtualinvoke r17.<java.lang.String: boolean equals(java.lang.Object)>("LM");
+
+        if $z4 == 0 goto label09;
+
+        b1 = 0;
+
+        goto label09;
+
+     label03:
+        $z2 = virtualinvoke r17.<java.lang.String: boolean equals(java.lang.Object)>("NTLM");
+
+        if $z2 == 0 goto label09;
+
+        b1 = 1;
+
+        goto label09;
+
+     label04:
+        $z0 = virtualinvoke r17.<java.lang.String: boolean equals(java.lang.Object)>("LM/NTLM");
+
+        if $z0 == 0 goto label09;
+
+        b1 = 2;
+
+        goto label09;
+
+     label05:
+        $z1 = virtualinvoke r17.<java.lang.String: boolean equals(java.lang.Object)>("NTLM2");
+
+        if $z1 == 0 goto label09;
+
+        b1 = 3;
+
+        goto label09;
+
+     label06:
+        $z3 = virtualinvoke r17.<java.lang.String: boolean equals(java.lang.Object)>("LMv2");
+
+        if $z3 == 0 goto label09;
+
+        b1 = 4;
+
+        goto label09;
+
+     label07:
+        $z6 = virtualinvoke r17.<java.lang.String: boolean equals(java.lang.Object)>("NTLMv2");
+
+        if $z6 == 0 goto label09;
+
+        b1 = 5;
+
+        goto label09;
+
+     label08:
+        $z5 = virtualinvoke r17.<java.lang.String: boolean equals(java.lang.Object)>("LMv2/NTLMv2");
+
+        if $z5 == 0 goto label09;
+
+        b1 = 6;
+
+     label09:
+        tableswitch(b1)
+        {
+            case 0: goto label10;
+            case 1: goto label11;
+            case 2: goto label12;
+            case 3: goto label13;
+            case 4: goto label14;
+            case 5: goto label15;
+            case 6: goto label16;
+            default: goto label17;
+        };
+
+     label10:
+        $r7 = <com.sun.security.ntlm.Version: com.sun.security.ntlm.Version NTLM>;
+
+        r0.<com.sun.security.ntlm.NTLM: com.sun.security.ntlm.Version v> = $r7;
+
+        r0.<com.sun.security.ntlm.NTLM: boolean writeLM> = 1;
+
+        r0.<com.sun.security.ntlm.NTLM: boolean writeNTLM> = 0;
+
+        goto label18;
+
+     label11:
+        $r6 = <com.sun.security.ntlm.Version: com.sun.security.ntlm.Version NTLM>;
+
+        r0.<com.sun.security.ntlm.NTLM: com.sun.security.ntlm.Version v> = $r6;
+
+        r0.<com.sun.security.ntlm.NTLM: boolean writeLM> = 0;
+
+        r0.<com.sun.security.ntlm.NTLM: boolean writeNTLM> = 1;
+
+        goto label18;
+
+     label12:
+        $r5 = <com.sun.security.ntlm.Version: com.sun.security.ntlm.Version NTLM>;
+
+        r0.<com.sun.security.ntlm.NTLM: com.sun.security.ntlm.Version v> = $r5;
+
+        r0.<com.sun.security.ntlm.NTLM: boolean writeNTLM> = 1;
+
+        r0.<com.sun.security.ntlm.NTLM: boolean writeLM> = 1;
+
+        goto label18;
+
+     label13:
+        $r4 = <com.sun.security.ntlm.Version: com.sun.security.ntlm.Version NTLM2>;
+
+        r0.<com.sun.security.ntlm.NTLM: com.sun.security.ntlm.Version v> = $r4;
+
+        r0.<com.sun.security.ntlm.NTLM: boolean writeNTLM> = 1;
+
+        r0.<com.sun.security.ntlm.NTLM: boolean writeLM> = 1;
+
+        goto label18;
+
+     label14:
+        $r3 = <com.sun.security.ntlm.Version: com.sun.security.ntlm.Version NTLMv2>;
+
+        r0.<com.sun.security.ntlm.NTLM: com.sun.security.ntlm.Version v> = $r3;
+
+        r0.<com.sun.security.ntlm.NTLM: boolean writeLM> = 1;
+
+        r0.<com.sun.security.ntlm.NTLM: boolean writeNTLM> = 0;
+
+        goto label18;
+
+     label15:
+        $r2 = <com.sun.security.ntlm.Version: com.sun.security.ntlm.Version NTLMv2>;
+
+        r0.<com.sun.security.ntlm.NTLM: com.sun.security.ntlm.Version v> = $r2;
+
+        r0.<com.sun.security.ntlm.NTLM: boolean writeLM> = 0;
+
+        r0.<com.sun.security.ntlm.NTLM: boolean writeNTLM> = 1;
+
+        goto label18;
+
+     label16:
+        $r1 = <com.sun.security.ntlm.Version: com.sun.security.ntlm.Version NTLMv2>;
+
+        r0.<com.sun.security.ntlm.NTLM: com.sun.security.ntlm.Version v> = $r1;
+
+        r0.<com.sun.security.ntlm.NTLM: boolean writeNTLM> = 1;
+
+        r0.<com.sun.security.ntlm.NTLM: boolean writeLM> = 1;
+
+        goto label18;
+
+     label17:
+        $r8 = new com.sun.security.ntlm.NTLMException;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown version ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r17);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<com.sun.security.ntlm.NTLMException: void <init>(int,java.lang.String)>(5, $r12);
+
+        throw $r8;
+
+     label18:
+        $r18 = staticinvoke <javax.crypto.SecretKeyFactory: javax.crypto.SecretKeyFactory getInstance(java.lang.String)>("DES");
+
+        r0.<com.sun.security.ntlm.NTLM: javax.crypto.SecretKeyFactory fac> = $r18;
+
+        $r19 = staticinvoke <javax.crypto.Cipher: javax.crypto.Cipher getInstance(java.lang.String)>("DES/ECB/NoPadding");
+
+        r0.<com.sun.security.ntlm.NTLM: javax.crypto.Cipher cipher> = $r19;
+
+        $r20 = staticinvoke <sun.security.provider.MD4: java.security.MessageDigest getInstance()>();
+
+        r0.<com.sun.security.ntlm.NTLM: java.security.MessageDigest md4> = $r20;
+
+        $r21 = staticinvoke <javax.crypto.Mac: javax.crypto.Mac getInstance(java.lang.String)>("HmacMD5");
+
+        r0.<com.sun.security.ntlm.NTLM: javax.crypto.Mac hmac> = $r21;
+
+        $r22 = staticinvoke <java.security.MessageDigest: java.security.MessageDigest getInstance(java.lang.String)>("MD5");
+
+        r0.<com.sun.security.ntlm.NTLM: java.security.MessageDigest md5> = $r22;
+
+     label19:
+        goto label22;
+
+     label20:
+        $r15 := @caughtexception;
+
+        $r16 = new java.lang.AssertionError;
+
+        specialinvoke $r16.<java.lang.AssertionError: void <init>()>();
+
+        throw $r16;
+
+     label21:
+        $r13 := @caughtexception;
+
+        $r14 = new java.lang.AssertionError;
+
+        specialinvoke $r14.<java.lang.AssertionError: void <init>()>();
+
+        throw $r14;
+
+     label22:
+        return;
+
+        catch javax.crypto.NoSuchPaddingException from label18 to label19 with label20;
+        catch java.security.NoSuchAlgorithmException from label18 to label19 with label21;
+    }
+
+    public transient void debug(java.lang.String, java.lang.Object[])
+    {
+        java.io.PrintStream $r2;
+        java.lang.Object[] r1;
+        com.sun.security.ntlm.NTLM r3;
+        java.lang.String r0;
+        boolean $z0;
+
+        r3 := @this: com.sun.security.ntlm.NTLM;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.Object[];
+
+        $z0 = <com.sun.security.ntlm.NTLM: boolean DEBUG>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r2.<java.io.PrintStream: java.io.PrintStream printf(java.lang.String,java.lang.Object[])>(r0, r1);
+
+     label1:
+        return;
+    }
+
+    public void debug(byte[])
+    {
+        java.io.PrintStream $r2;
+        byte[] r1;
+        com.sun.security.ntlm.NTLM r4;
+        java.io.IOException $r3;
+        sun.misc.HexDumpEncoder $r0;
+        boolean $z0;
+
+        r4 := @this: com.sun.security.ntlm.NTLM;
+
+        r1 := @parameter0: byte[];
+
+        $z0 = <com.sun.security.ntlm.NTLM: boolean DEBUG>;
+
+        if $z0 == 0 goto label4;
+
+     label1:
+        $r0 = new sun.misc.HexDumpEncoder;
+
+        specialinvoke $r0.<sun.misc.HexDumpEncoder: void <init>()>();
+
+        $r2 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r0.<sun.misc.HexDumpEncoder: void encodeBuffer(byte[],java.io.OutputStream)>(r1, $r2);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    byte[] makeDesKey(byte[], int)
+    {
+        byte[] r0, r3;
+        byte $b5, $b14, $b23, $b32, $b41, $b50, $b59, $b64, $b65, $b66;
+        com.sun.security.ntlm.NTLM r2;
+        int[] r1;
+        int $i0, $i1, i2, $i3, $i4, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i51, $i52, $i53, $i54, $i55, $i56, $i57, $i58, $i60, $i61, $i62, $i63, $i67, i68, $i69, $i70, $i71;
+
+        r2 := @this: com.sun.security.ntlm.NTLM;
+
+        r0 := @parameter0: byte[];
+
+        i2 := @parameter1: int;
+
+        $i0 = lengthof r0;
+
+        r1 = newarray (int)[$i0];
+
+        i68 = 0;
+
+     label1:
+        $i1 = lengthof r1;
+
+        if i68 >= $i1 goto label4;
+
+        $i67 = i68;
+
+        $b65 = r0[i68];
+
+        $i70 = (int) $b65;
+
+        if $i70 >= 0 goto label2;
+
+        $b66 = r0[i68];
+
+        $i71 = (int) $b66;
+
+        $i69 = $i71 + 256;
+
+        goto label3;
+
+     label2:
+        $i69 = r0[i68];
+
+     label3:
+        r1[$i67] = $i69;
+
+        i68 = i68 + 1;
+
+        goto label1;
+
+     label4:
+        r3 = newarray (byte)[8];
+
+        $i3 = i2 + 0;
+
+        $i4 = r1[$i3];
+
+        $b5 = (byte) $i4;
+
+        r3[0] = $b5;
+
+        $i6 = i2 + 0;
+
+        $i7 = r1[$i6];
+
+        $i8 = $i7 << 7;
+
+        $i12 = $i8 & 255;
+
+        $i9 = i2 + 1;
+
+        $i10 = r1[$i9];
+
+        $i11 = $i10 >> 1;
+
+        $i13 = $i12 | $i11;
+
+        $b14 = (byte) $i13;
+
+        r3[1] = $b14;
+
+        $i15 = i2 + 1;
+
+        $i16 = r1[$i15];
+
+        $i17 = $i16 << 6;
+
+        $i21 = $i17 & 255;
+
+        $i18 = i2 + 2;
+
+        $i19 = r1[$i18];
+
+        $i20 = $i19 >> 2;
+
+        $i22 = $i21 | $i20;
+
+        $b23 = (byte) $i22;
+
+        r3[2] = $b23;
+
+        $i24 = i2 + 2;
+
+        $i25 = r1[$i24];
+
+        $i26 = $i25 << 5;
+
+        $i30 = $i26 & 255;
+
+        $i27 = i2 + 3;
+
+        $i28 = r1[$i27];
+
+        $i29 = $i28 >> 3;
+
+        $i31 = $i30 | $i29;
+
+        $b32 = (byte) $i31;
+
+        r3[3] = $b32;
+
+        $i33 = i2 + 3;
+
+        $i34 = r1[$i33];
+
+        $i35 = $i34 << 4;
+
+        $i39 = $i35 & 255;
+
+        $i36 = i2 + 4;
+
+        $i37 = r1[$i36];
+
+        $i38 = $i37 >> 4;
+
+        $i40 = $i39 | $i38;
+
+        $b41 = (byte) $i40;
+
+        r3[4] = $b41;
+
+        $i42 = i2 + 4;
+
+        $i43 = r1[$i42];
+
+        $i44 = $i43 << 3;
+
+        $i48 = $i44 & 255;
+
+        $i45 = i2 + 5;
+
+        $i46 = r1[$i45];
+
+        $i47 = $i46 >> 5;
+
+        $i49 = $i48 | $i47;
+
+        $b50 = (byte) $i49;
+
+        r3[5] = $b50;
+
+        $i51 = i2 + 5;
+
+        $i52 = r1[$i51];
+
+        $i53 = $i52 << 2;
+
+        $i57 = $i53 & 255;
+
+        $i54 = i2 + 6;
+
+        $i55 = r1[$i54];
+
+        $i56 = $i55 >> 6;
+
+        $i58 = $i57 | $i56;
+
+        $b59 = (byte) $i58;
+
+        r3[6] = $b59;
+
+        $i60 = i2 + 6;
+
+        $i61 = r1[$i60];
+
+        $i62 = $i61 << 1;
+
+        $i63 = $i62 & 255;
+
+        $b64 = (byte) $i63;
+
+        r3[7] = $b64;
+
+        return r3;
+    }
+
+    byte[] calcLMHash(byte[])
+    {
+        byte[] $r0, r1, r2, $r5, $r7, $r14, $r17, $r18;
+        boolean $z0, $z1, $z2, $z3;
+        javax.crypto.IllegalBlockSizeException $r21;
+        com.sun.security.ntlm.NTLM r4;
+        java.security.InvalidKeyException $r25;
+        javax.crypto.SecretKey $r9, $r11;
+        java.security.spec.InvalidKeySpecException $r23;
+        javax.crypto.spec.DESKeySpec $r3, $r6;
+        java.lang.AssertionError $r20, $r22, $r24, $r26;
+        javax.crypto.Cipher $r12, $r13, $r15, $r16;
+        javax.crypto.SecretKeyFactory $r8, $r10;
+        int i0;
+        javax.crypto.BadPaddingException $r19;
+
+        r4 := @this: com.sun.security.ntlm.NTLM;
+
+        r2 := @parameter0: byte[];
+
+        $r0 = newarray (byte)[8];
+
+        $r0[0] = 75;
+
+        $r0[1] = 71;
+
+        $r0[2] = 83;
+
+        $r0[3] = 33;
+
+        $r0[4] = 64;
+
+        $r0[5] = 35;
+
+        $r0[6] = 36;
+
+        $r0[7] = 37;
+
+        r1 = newarray (byte)[14];
+
+        i0 = lengthof r2;
+
+        if i0 <= 14 goto label01;
+
+        i0 = 14;
+
+     label01:
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r2, 0, r1, 0, i0);
+
+     label02:
+        $r3 = new javax.crypto.spec.DESKeySpec;
+
+        $r5 = virtualinvoke r4.<com.sun.security.ntlm.NTLM: byte[] makeDesKey(byte[],int)>(r1, 0);
+
+        specialinvoke $r3.<javax.crypto.spec.DESKeySpec: void <init>(byte[])>($r5);
+
+        $r6 = new javax.crypto.spec.DESKeySpec;
+
+        $r7 = virtualinvoke r4.<com.sun.security.ntlm.NTLM: byte[] makeDesKey(byte[],int)>(r1, 7);
+
+        specialinvoke $r6.<javax.crypto.spec.DESKeySpec: void <init>(byte[])>($r7);
+
+        $r8 = r4.<com.sun.security.ntlm.NTLM: javax.crypto.SecretKeyFactory fac>;
+
+        $r9 = virtualinvoke $r8.<javax.crypto.SecretKeyFactory: javax.crypto.SecretKey generateSecret(java.security.spec.KeySpec)>($r3);
+
+        $r10 = r4.<com.sun.security.ntlm.NTLM: javax.crypto.SecretKeyFactory fac>;
+
+        $r11 = virtualinvoke $r10.<javax.crypto.SecretKeyFactory: javax.crypto.SecretKey generateSecret(java.security.spec.KeySpec)>($r6);
+
+        $r12 = r4.<com.sun.security.ntlm.NTLM: javax.crypto.Cipher cipher>;
+
+        virtualinvoke $r12.<javax.crypto.Cipher: void init(int,java.security.Key)>(1, $r9);
+
+        $r13 = r4.<com.sun.security.ntlm.NTLM: javax.crypto.Cipher cipher>;
+
+        $r14 = virtualinvoke $r13.<javax.crypto.Cipher: byte[] doFinal(byte[],int,int)>($r0, 0, 8);
+
+        $r15 = r4.<com.sun.security.ntlm.NTLM: javax.crypto.Cipher cipher>;
+
+        virtualinvoke $r15.<javax.crypto.Cipher: void init(int,java.security.Key)>(1, $r11);
+
+        $r16 = r4.<com.sun.security.ntlm.NTLM: javax.crypto.Cipher cipher>;
+
+        $r17 = virtualinvoke $r16.<javax.crypto.Cipher: byte[] doFinal(byte[],int,int)>($r0, 0, 8);
+
+        $r18 = newarray (byte)[21];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r14, 0, $r18, 0, 8);
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r17, 0, $r18, 8, 8);
+
+     label03:
+        return $r18;
+
+     label04:
+        $r25 := @caughtexception;
+
+        $z3 = <com.sun.security.ntlm.NTLM: boolean $assertionsDisabled>;
+
+        if $z3 != 0 goto label05;
+
+        $r26 = new java.lang.AssertionError;
+
+        specialinvoke $r26.<java.lang.AssertionError: void <init>()>();
+
+        throw $r26;
+
+     label05:
+        goto label11;
+
+     label06:
+        $r23 := @caughtexception;
+
+        $z2 = <com.sun.security.ntlm.NTLM: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label07;
+
+        $r24 = new java.lang.AssertionError;
+
+        specialinvoke $r24.<java.lang.AssertionError: void <init>()>();
+
+        throw $r24;
+
+     label07:
+        goto label11;
+
+     label08:
+        $r21 := @caughtexception;
+
+        $z1 = <com.sun.security.ntlm.NTLM: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label09;
+
+        $r22 = new java.lang.AssertionError;
+
+        specialinvoke $r22.<java.lang.AssertionError: void <init>()>();
+
+        throw $r22;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r19 := @caughtexception;
+
+        $z0 = <com.sun.security.ntlm.NTLM: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label11;
+
+        $r20 = new java.lang.AssertionError;
+
+        specialinvoke $r20.<java.lang.AssertionError: void <init>()>();
+
+        throw $r20;
+
+     label11:
+        return null;
+
+        catch java.security.InvalidKeyException from label02 to label03 with label04;
+        catch java.security.spec.InvalidKeySpecException from label02 to label03 with label06;
+        catch javax.crypto.IllegalBlockSizeException from label02 to label03 with label08;
+        catch javax.crypto.BadPaddingException from label02 to label03 with label10;
+    }
+
+    byte[] calcNTHash(byte[])
+    {
+        byte[] r1, $r3, r4;
+        com.sun.security.ntlm.NTLM r0;
+        java.security.MessageDigest $r2;
+
+        r0 := @this: com.sun.security.ntlm.NTLM;
+
+        r1 := @parameter0: byte[];
+
+        $r2 = r0.<com.sun.security.ntlm.NTLM: java.security.MessageDigest md4>;
+
+        $r3 = virtualinvoke $r2.<java.security.MessageDigest: byte[] digest(byte[])>(r1);
+
+        r4 = newarray (byte)[21];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, 0, r4, 0, 16);
+
+        return r4;
+    }
+
+    byte[] calcResponse(byte[], byte[])
+    {
+        byte[] r2, $r3, $r5, $r7, r15, $r17, $r20, $r23, $r24;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        javax.crypto.IllegalBlockSizeException $r32;
+        com.sun.security.ntlm.NTLM r1;
+        java.security.InvalidKeyException $r26;
+        javax.crypto.SecretKey $r9, $r11, $r13;
+        java.security.spec.InvalidKeySpecException $r28;
+        javax.crypto.spec.DESKeySpec $r0, $r4, $r6;
+        java.lang.AssertionError $r25, $r27, $r29, $r31, $r33;
+        javax.crypto.Cipher $r14, $r16, $r18, $r19, $r21, $r22;
+        javax.crypto.SecretKeyFactory $r8, $r10, $r12;
+        int $i0;
+        javax.crypto.BadPaddingException $r30;
+
+        r1 := @this: com.sun.security.ntlm.NTLM;
+
+        r2 := @parameter0: byte[];
+
+        r15 := @parameter1: byte[];
+
+     label01:
+        $z0 = <com.sun.security.ntlm.NTLM: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label02;
+
+        $i0 = lengthof r2;
+
+        if $i0 == 21 goto label02;
+
+        $r25 = new java.lang.AssertionError;
+
+        specialinvoke $r25.<java.lang.AssertionError: void <init>()>();
+
+        throw $r25;
+
+     label02:
+        $r0 = new javax.crypto.spec.DESKeySpec;
+
+        $r3 = virtualinvoke r1.<com.sun.security.ntlm.NTLM: byte[] makeDesKey(byte[],int)>(r2, 0);
+
+        specialinvoke $r0.<javax.crypto.spec.DESKeySpec: void <init>(byte[])>($r3);
+
+        $r4 = new javax.crypto.spec.DESKeySpec;
+
+        $r5 = virtualinvoke r1.<com.sun.security.ntlm.NTLM: byte[] makeDesKey(byte[],int)>(r2, 7);
+
+        specialinvoke $r4.<javax.crypto.spec.DESKeySpec: void <init>(byte[])>($r5);
+
+        $r6 = new javax.crypto.spec.DESKeySpec;
+
+        $r7 = virtualinvoke r1.<com.sun.security.ntlm.NTLM: byte[] makeDesKey(byte[],int)>(r2, 14);
+
+        specialinvoke $r6.<javax.crypto.spec.DESKeySpec: void <init>(byte[])>($r7);
+
+        $r8 = r1.<com.sun.security.ntlm.NTLM: javax.crypto.SecretKeyFactory fac>;
+
+        $r9 = virtualinvoke $r8.<javax.crypto.SecretKeyFactory: javax.crypto.SecretKey generateSecret(java.security.spec.KeySpec)>($r0);
+
+        $r10 = r1.<com.sun.security.ntlm.NTLM: javax.crypto.SecretKeyFactory fac>;
+
+        $r11 = virtualinvoke $r10.<javax.crypto.SecretKeyFactory: javax.crypto.SecretKey generateSecret(java.security.spec.KeySpec)>($r4);
+
+        $r12 = r1.<com.sun.security.ntlm.NTLM: javax.crypto.SecretKeyFactory fac>;
+
+        $r13 = virtualinvoke $r12.<javax.crypto.SecretKeyFactory: javax.crypto.SecretKey generateSecret(java.security.spec.KeySpec)>($r6);
+
+        $r14 = r1.<com.sun.security.ntlm.NTLM: javax.crypto.Cipher cipher>;
+
+        virtualinvoke $r14.<javax.crypto.Cipher: void init(int,java.security.Key)>(1, $r9);
+
+        $r16 = r1.<com.sun.security.ntlm.NTLM: javax.crypto.Cipher cipher>;
+
+        $r17 = virtualinvoke $r16.<javax.crypto.Cipher: byte[] doFinal(byte[],int,int)>(r15, 0, 8);
+
+        $r18 = r1.<com.sun.security.ntlm.NTLM: javax.crypto.Cipher cipher>;
+
+        virtualinvoke $r18.<javax.crypto.Cipher: void init(int,java.security.Key)>(1, $r11);
+
+        $r19 = r1.<com.sun.security.ntlm.NTLM: javax.crypto.Cipher cipher>;
+
+        $r20 = virtualinvoke $r19.<javax.crypto.Cipher: byte[] doFinal(byte[],int,int)>(r15, 0, 8);
+
+        $r21 = r1.<com.sun.security.ntlm.NTLM: javax.crypto.Cipher cipher>;
+
+        virtualinvoke $r21.<javax.crypto.Cipher: void init(int,java.security.Key)>(1, $r13);
+
+        $r22 = r1.<com.sun.security.ntlm.NTLM: javax.crypto.Cipher cipher>;
+
+        $r23 = virtualinvoke $r22.<javax.crypto.Cipher: byte[] doFinal(byte[],int,int)>(r15, 0, 8);
+
+        $r24 = newarray (byte)[24];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r17, 0, $r24, 0, 8);
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r20, 0, $r24, 8, 8);
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r23, 0, $r24, 16, 8);
+
+     label03:
+        return $r24;
+
+     label04:
+        $r32 := @caughtexception;
+
+        $z4 = <com.sun.security.ntlm.NTLM: boolean $assertionsDisabled>;
+
+        if $z4 != 0 goto label05;
+
+        $r33 = new java.lang.AssertionError;
+
+        specialinvoke $r33.<java.lang.AssertionError: void <init>()>();
+
+        throw $r33;
+
+     label05:
+        goto label11;
+
+     label06:
+        $r30 := @caughtexception;
+
+        $z3 = <com.sun.security.ntlm.NTLM: boolean $assertionsDisabled>;
+
+        if $z3 != 0 goto label07;
+
+        $r31 = new java.lang.AssertionError;
+
+        specialinvoke $r31.<java.lang.AssertionError: void <init>()>();
+
+        throw $r31;
+
+     label07:
+        goto label11;
+
+     label08:
+        $r28 := @caughtexception;
+
+        $z2 = <com.sun.security.ntlm.NTLM: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label09;
+
+        $r29 = new java.lang.AssertionError;
+
+        specialinvoke $r29.<java.lang.AssertionError: void <init>()>();
+
+        throw $r29;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r26 := @caughtexception;
+
+        $z1 = <com.sun.security.ntlm.NTLM: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label11;
+
+        $r27 = new java.lang.AssertionError;
+
+        specialinvoke $r27.<java.lang.AssertionError: void <init>()>();
+
+        throw $r27;
+
+     label11:
+        return null;
+
+        catch javax.crypto.IllegalBlockSizeException from label01 to label03 with label04;
+        catch javax.crypto.BadPaddingException from label01 to label03 with label06;
+        catch java.security.spec.InvalidKeySpecException from label01 to label03 with label08;
+        catch java.security.InvalidKeyException from label01 to label03 with label10;
+    }
+
+    byte[] hmacMD5(byte[], byte[])
+    {
+        byte[] r1, $r2, r5, $r7;
+        javax.crypto.spec.SecretKeySpec $r0;
+        javax.crypto.Mac $r4, $r6;
+        java.lang.RuntimeException $r8;
+        java.lang.AssertionError $r9, $r11;
+        com.sun.security.ntlm.NTLM r3;
+        java.security.InvalidKeyException $r10;
+        boolean $z0, $z1;
+
+        r3 := @this: com.sun.security.ntlm.NTLM;
+
+        r1 := @parameter0: byte[];
+
+        r5 := @parameter1: byte[];
+
+     label1:
+        $r0 = new javax.crypto.spec.SecretKeySpec;
+
+        $r2 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>(r1, 16);
+
+        specialinvoke $r0.<javax.crypto.spec.SecretKeySpec: void <init>(byte[],java.lang.String)>($r2, "HmacMD5");
+
+        $r4 = r3.<com.sun.security.ntlm.NTLM: javax.crypto.Mac hmac>;
+
+        virtualinvoke $r4.<javax.crypto.Mac: void init(java.security.Key)>($r0);
+
+        $r6 = r3.<com.sun.security.ntlm.NTLM: javax.crypto.Mac hmac>;
+
+        $r7 = virtualinvoke $r6.<javax.crypto.Mac: byte[] doFinal(byte[])>(r5);
+
+     label2:
+        return $r7;
+
+     label3:
+        $r10 := @caughtexception;
+
+        $z1 = <com.sun.security.ntlm.NTLM: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label4;
+
+        $r11 = new java.lang.AssertionError;
+
+        specialinvoke $r11.<java.lang.AssertionError: void <init>()>();
+
+        throw $r11;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r8 := @caughtexception;
+
+        $z0 = <com.sun.security.ntlm.NTLM: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label6;
+
+        $r9 = new java.lang.AssertionError;
+
+        specialinvoke $r9.<java.lang.AssertionError: void <init>()>();
+
+        throw $r9;
+
+     label6:
+        return null;
+
+        catch java.security.InvalidKeyException from label1 to label2 with label3;
+        catch java.lang.RuntimeException from label1 to label2 with label5;
+    }
+
+    byte[] calcV2(byte[], java.lang.String, byte[], byte[])
+    {
+        byte[] r1, $r3, $r4, r5, r6, r7, r8, $r9;
+        java.lang.AssertionError $r11;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.lang.String r2;
+        boolean $z0;
+        com.sun.security.ntlm.NTLM r0;
+        java.io.UnsupportedEncodingException $r10;
+
+        r0 := @this: com.sun.security.ntlm.NTLM;
+
+        r1 := @parameter0: byte[];
+
+        r2 := @parameter1: java.lang.String;
+
+        r5 := @parameter2: byte[];
+
+        r7 := @parameter3: byte[];
+
+     label1:
+        $r3 = virtualinvoke r2.<java.lang.String: byte[] getBytes(java.lang.String)>("UnicodeLittleUnmarked");
+
+        $r4 = virtualinvoke r0.<com.sun.security.ntlm.NTLM: byte[] hmacMD5(byte[],byte[])>(r1, $r3);
+
+        $i0 = lengthof r5;
+
+        $i1 = $i0 + 8;
+
+        r6 = newarray (byte)[$i1];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r7, 0, r6, 0, 8);
+
+        $i2 = lengthof r5;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r5, 0, r6, 8, $i2);
+
+        $i3 = lengthof r5;
+
+        $i4 = 16 + $i3;
+
+        r8 = newarray (byte)[$i4];
+
+        $r9 = virtualinvoke r0.<com.sun.security.ntlm.NTLM: byte[] hmacMD5(byte[],byte[])>($r4, r6);
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r9, 0, r8, 0, 16);
+
+        $i5 = lengthof r5;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r5, 0, r8, 16, $i5);
+
+     label2:
+        return r8;
+
+     label3:
+        $r10 := @caughtexception;
+
+        $z0 = <com.sun.security.ntlm.NTLM: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label4;
+
+        $r11 = new java.lang.AssertionError;
+
+        specialinvoke $r11.<java.lang.AssertionError: void <init>()>();
+
+        throw $r11;
+
+     label4:
+        return null;
+
+        catch java.io.UnsupportedEncodingException from label1 to label2 with label3;
+    }
+
+    static byte[] ntlm2LM(byte[])
+    {
+        byte[] r0, $r1;
+
+        r0 := @parameter0: byte[];
+
+        $r1 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>(r0, 24);
+
+        return $r1;
+    }
+
+    byte[] ntlm2NTLM(byte[], byte[], byte[])
+    {
+        byte[] r0, $r1, r2, $r5, $r6, r7, $r8;
+        java.security.MessageDigest $r4;
+        com.sun.security.ntlm.NTLM r3;
+
+        r3 := @this: com.sun.security.ntlm.NTLM;
+
+        r7 := @parameter0: byte[];
+
+        r2 := @parameter1: byte[];
+
+        r0 := @parameter2: byte[];
+
+        $r1 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>(r0, 16);
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r2, 0, $r1, 8, 8);
+
+        $r4 = r3.<com.sun.security.ntlm.NTLM: java.security.MessageDigest md5>;
+
+        $r5 = virtualinvoke $r4.<java.security.MessageDigest: byte[] digest(byte[])>($r1);
+
+        $r6 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>($r5, 8);
+
+        $r8 = virtualinvoke r3.<com.sun.security.ntlm.NTLM: byte[] calcResponse(byte[],byte[])>(r7, $r6);
+
+        return $r8;
+    }
+
+    static byte[] getP1(char[])
+    {
+        byte[] $r4;
+        java.util.Locale $r2;
+        char[] r1;
+        java.lang.String $r0, $r3;
+        java.io.UnsupportedEncodingException $r5;
+
+        r1 := @parameter0: char[];
+
+     label1:
+        $r0 = new java.lang.String;
+
+        specialinvoke $r0.<java.lang.String: void <init>(char[])>(r1);
+
+        $r2 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r3 = virtualinvoke $r0.<java.lang.String: java.lang.String toUpperCase(java.util.Locale)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.String: byte[] getBytes(java.lang.String)>("ISO8859_1");
+
+     label2:
+        return $r4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        return null;
+
+        catch java.io.UnsupportedEncodingException from label1 to label2 with label3;
+    }
+
+    static byte[] getP2(char[])
+    {
+        byte[] $r2;
+        char[] r1;
+        java.lang.String $r0;
+        java.io.UnsupportedEncodingException $r3;
+
+        r1 := @parameter0: char[];
+
+     label1:
+        $r0 = new java.lang.String;
+
+        specialinvoke $r0.<java.lang.String: void <init>(char[])>(r1);
+
+        $r2 = virtualinvoke $r0.<java.lang.String: byte[] getBytes(java.lang.String)>("UnicodeLittleUnmarked");
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        return null;
+
+        catch java.io.UnsupportedEncodingException from label1 to label2 with label3;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        java.lang.String $r1;
+        boolean $z0, $z1, $z2;
+
+        $r0 = class "Lcom/sun/security/ntlm/NTLM;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <com.sun.security.ntlm.NTLM: boolean $assertionsDisabled> = $z1;
+
+        $r1 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("ntlm.debug");
+
+        if $r1 == null goto label3;
+
+        $z2 = 1;
+
+        goto label4;
+
+     label3:
+        $z2 = 0;
+
+     label4:
+        <com.sun.security.ntlm.NTLM: boolean DEBUG> = $z2;
+
+        return;
+    }
+}

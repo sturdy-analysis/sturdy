@@ -1,0 +1,717 @@
+public class com.sun.jmx.snmp.SnmpMessage extends com.sun.jmx.snmp.SnmpMsg implements com.sun.jmx.snmp.SnmpDefinitions
+{
+    public byte[] community;
+
+    public void <init>()
+    {
+        com.sun.jmx.snmp.SnmpMessage r0;
+
+        r0 := @this: com.sun.jmx.snmp.SnmpMessage;
+
+        specialinvoke r0.<com.sun.jmx.snmp.SnmpMsg: void <init>()>();
+
+        return;
+    }
+
+    public int encodeMessage(byte[]) throws com.sun.jmx.snmp.SnmpTooBigException
+    {
+        byte[] $r1, r3, $r4, $r5, $r9;
+        com.sun.jmx.snmp.BerEncoder $r2;
+        com.sun.jmx.snmp.SnmpTooBigException $r8;
+        java.lang.ArrayIndexOutOfBoundsException $r7;
+        java.lang.IllegalArgumentException $r6;
+        com.sun.jmx.snmp.SnmpMessage r0;
+        int $i0, $i1, $i2;
+
+        r0 := @this: com.sun.jmx.snmp.SnmpMessage;
+
+        r3 := @parameter0: byte[];
+
+        $r1 = r0.<com.sun.jmx.snmp.SnmpMessage: byte[] data>;
+
+        if $r1 != null goto label1;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Data field is null");
+
+        throw $r6;
+
+     label1:
+        $r2 = new com.sun.jmx.snmp.BerEncoder;
+
+        specialinvoke $r2.<com.sun.jmx.snmp.BerEncoder: void <init>(byte[])>(r3);
+
+        virtualinvoke $r2.<com.sun.jmx.snmp.BerEncoder: void openSequence()>();
+
+        $r4 = r0.<com.sun.jmx.snmp.SnmpMessage: byte[] data>;
+
+        $i0 = r0.<com.sun.jmx.snmp.SnmpMessage: int dataLength>;
+
+        virtualinvoke $r2.<com.sun.jmx.snmp.BerEncoder: void putAny(byte[],int)>($r4, $i0);
+
+        $r5 = r0.<com.sun.jmx.snmp.SnmpMessage: byte[] community>;
+
+        if $r5 == null goto label2;
+
+        $r9 = r0.<com.sun.jmx.snmp.SnmpMessage: byte[] community>;
+
+        goto label3;
+
+     label2:
+        $r9 = newarray (byte)[0];
+
+     label3:
+        virtualinvoke $r2.<com.sun.jmx.snmp.BerEncoder: void putOctetString(byte[])>($r9);
+
+        $i1 = r0.<com.sun.jmx.snmp.SnmpMessage: int version>;
+
+        virtualinvoke $r2.<com.sun.jmx.snmp.BerEncoder: void putInteger(int)>($i1);
+
+        virtualinvoke $r2.<com.sun.jmx.snmp.BerEncoder: void closeSequence()>();
+
+        $i2 = virtualinvoke $r2.<com.sun.jmx.snmp.BerEncoder: int trim()>();
+
+     label4:
+        goto label6;
+
+     label5:
+        $r7 := @caughtexception;
+
+        $r8 = new com.sun.jmx.snmp.SnmpTooBigException;
+
+        specialinvoke $r8.<com.sun.jmx.snmp.SnmpTooBigException: void <init>()>();
+
+        throw $r8;
+
+     label6:
+        return $i2;
+
+        catch java.lang.ArrayIndexOutOfBoundsException from label1 to label4 with label5;
+    }
+
+    public int getRequestId(byte[]) throws com.sun.jmx.snmp.SnmpStatusException
+    {
+        byte[] r1, $r2;
+        com.sun.jmx.snmp.BerDecoder $r0, $r3;
+        com.sun.jmx.snmp.BerException $r4, $r5, $r6;
+        com.sun.jmx.snmp.SnmpMessage r8;
+        com.sun.jmx.snmp.SnmpStatusException $r7;
+        int $i0, $i1;
+
+        r8 := @this: com.sun.jmx.snmp.SnmpMessage;
+
+        r1 := @parameter0: byte[];
+
+     label01:
+        $r0 = new com.sun.jmx.snmp.BerDecoder;
+
+        specialinvoke $r0.<com.sun.jmx.snmp.BerDecoder: void <init>(byte[])>(r1);
+
+        virtualinvoke $r0.<com.sun.jmx.snmp.BerDecoder: void openSequence()>();
+
+        virtualinvoke $r0.<com.sun.jmx.snmp.BerDecoder: int fetchInteger()>();
+
+        virtualinvoke $r0.<com.sun.jmx.snmp.BerDecoder: byte[] fetchOctetString()>();
+
+        $r2 = virtualinvoke $r0.<com.sun.jmx.snmp.BerDecoder: byte[] fetchAny()>();
+
+        $r3 = new com.sun.jmx.snmp.BerDecoder;
+
+        specialinvoke $r3.<com.sun.jmx.snmp.BerDecoder: void <init>(byte[])>($r2);
+
+        $i0 = virtualinvoke $r3.<com.sun.jmx.snmp.BerDecoder: int getTag()>();
+
+        virtualinvoke $r3.<com.sun.jmx.snmp.BerDecoder: void openSequence(int)>($i0);
+
+        $i1 = virtualinvoke $r3.<com.sun.jmx.snmp.BerDecoder: int fetchInteger()>();
+
+     label02:
+        goto label04;
+
+     label03:
+        $r6 := @caughtexception;
+
+        $r7 = new com.sun.jmx.snmp.SnmpStatusException;
+
+        specialinvoke $r7.<com.sun.jmx.snmp.SnmpStatusException: void <init>(java.lang.String)>("Invalid encoding");
+
+        throw $r7;
+
+     label04:
+        virtualinvoke $r0.<com.sun.jmx.snmp.BerDecoder: void closeSequence()>();
+
+     label05:
+        goto label07;
+
+     label06:
+        $r5 := @caughtexception;
+
+     label07:
+        virtualinvoke $r3.<com.sun.jmx.snmp.BerDecoder: void closeSequence()>();
+
+     label08:
+        goto label10;
+
+     label09:
+        $r4 := @caughtexception;
+
+     label10:
+        return $i1;
+
+        catch com.sun.jmx.snmp.BerException from label01 to label02 with label03;
+        catch com.sun.jmx.snmp.BerException from label04 to label05 with label06;
+        catch com.sun.jmx.snmp.BerException from label07 to label08 with label09;
+    }
+
+    public void decodeMessage(byte[], int) throws com.sun.jmx.snmp.SnmpStatusException
+    {
+        byte[] r1, $r3, $r4, $r5;
+        com.sun.jmx.snmp.BerDecoder $r0;
+        com.sun.jmx.snmp.BerException $r6;
+        com.sun.jmx.snmp.SnmpMessage r2;
+        com.sun.jmx.snmp.SnmpStatusException $r7;
+        int $i0, $i1, i2;
+
+        r2 := @this: com.sun.jmx.snmp.SnmpMessage;
+
+        r1 := @parameter0: byte[];
+
+        i2 := @parameter1: int;
+
+     label1:
+        $r0 = new com.sun.jmx.snmp.BerDecoder;
+
+        specialinvoke $r0.<com.sun.jmx.snmp.BerDecoder: void <init>(byte[])>(r1);
+
+        virtualinvoke $r0.<com.sun.jmx.snmp.BerDecoder: void openSequence()>();
+
+        $i0 = virtualinvoke $r0.<com.sun.jmx.snmp.BerDecoder: int fetchInteger()>();
+
+        r2.<com.sun.jmx.snmp.SnmpMessage: int version> = $i0;
+
+        $r3 = virtualinvoke $r0.<com.sun.jmx.snmp.BerDecoder: byte[] fetchOctetString()>();
+
+        r2.<com.sun.jmx.snmp.SnmpMessage: byte[] community> = $r3;
+
+        $r4 = virtualinvoke $r0.<com.sun.jmx.snmp.BerDecoder: byte[] fetchAny()>();
+
+        r2.<com.sun.jmx.snmp.SnmpMessage: byte[] data> = $r4;
+
+        $r5 = r2.<com.sun.jmx.snmp.SnmpMessage: byte[] data>;
+
+        $i1 = lengthof $r5;
+
+        r2.<com.sun.jmx.snmp.SnmpMessage: int dataLength> = $i1;
+
+        virtualinvoke $r0.<com.sun.jmx.snmp.BerDecoder: void closeSequence()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = new com.sun.jmx.snmp.SnmpStatusException;
+
+        specialinvoke $r7.<com.sun.jmx.snmp.SnmpStatusException: void <init>(java.lang.String)>("Invalid encoding");
+
+        throw $r7;
+
+     label4:
+        return;
+
+        catch com.sun.jmx.snmp.BerException from label1 to label2 with label3;
+    }
+
+    public void encodeSnmpPdu(com.sun.jmx.snmp.SnmpPdu, int) throws com.sun.jmx.snmp.SnmpStatusException, com.sun.jmx.snmp.SnmpTooBigException
+    {
+        byte[] $r3, $r5, $r7, $r12, $r16;
+        java.net.InetAddress $r4;
+        com.sun.jmx.snmp.SnmpPdu r0;
+        com.sun.jmx.snmp.SnmpIpAddress $r11, $r15;
+        com.sun.jmx.snmp.SnmpOid $r13;
+        java.lang.StringBuilder $r19, $r20, $r22;
+        com.sun.jmx.snmp.BerEncoder $r6;
+        com.sun.jmx.snmp.SnmpPduRequest r17;
+        com.sun.jmx.snmp.SnmpTooBigException $r25;
+        com.sun.jmx.snmp.SnmpPduPacket r1;
+        com.sun.jmx.snmp.SnmpPduTrap r10;
+        long $l7;
+        long[] $r14;
+        int $i0, $i1, i2, $i3, $i4, $i5, $i6, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15;
+        com.sun.jmx.snmp.SnmpPduBulk r9;
+        java.lang.String $r21, $r23;
+        java.lang.ArrayIndexOutOfBoundsException $r24;
+        com.sun.jmx.snmp.SnmpMessage r2;
+        com.sun.jmx.snmp.SnmpStatusException $r18;
+        com.sun.jmx.snmp.SnmpVarBind[] $r8;
+
+        r2 := @this: com.sun.jmx.snmp.SnmpMessage;
+
+        r0 := @parameter0: com.sun.jmx.snmp.SnmpPdu;
+
+        i2 := @parameter1: int;
+
+        r1 = (com.sun.jmx.snmp.SnmpPduPacket) r0;
+
+        $i0 = r1.<com.sun.jmx.snmp.SnmpPduPacket: int version>;
+
+        r2.<com.sun.jmx.snmp.SnmpMessage: int version> = $i0;
+
+        $r3 = r1.<com.sun.jmx.snmp.SnmpPduPacket: byte[] community>;
+
+        r2.<com.sun.jmx.snmp.SnmpMessage: byte[] community> = $r3;
+
+        $r4 = r1.<com.sun.jmx.snmp.SnmpPduPacket: java.net.InetAddress address>;
+
+        r2.<com.sun.jmx.snmp.SnmpMessage: java.net.InetAddress address> = $r4;
+
+        $i1 = r1.<com.sun.jmx.snmp.SnmpPduPacket: int port>;
+
+        r2.<com.sun.jmx.snmp.SnmpMessage: int port> = $i1;
+
+        $r5 = newarray (byte)[i2];
+
+        r2.<com.sun.jmx.snmp.SnmpMessage: byte[] data> = $r5;
+
+     label01:
+        $r6 = new com.sun.jmx.snmp.BerEncoder;
+
+        $r7 = r2.<com.sun.jmx.snmp.SnmpMessage: byte[] data>;
+
+        specialinvoke $r6.<com.sun.jmx.snmp.BerEncoder: void <init>(byte[])>($r7);
+
+        virtualinvoke $r6.<com.sun.jmx.snmp.BerEncoder: void openSequence()>();
+
+        $r8 = r1.<com.sun.jmx.snmp.SnmpPduPacket: com.sun.jmx.snmp.SnmpVarBind[] varBindList>;
+
+        virtualinvoke r2.<com.sun.jmx.snmp.SnmpMessage: void encodeVarBindList(com.sun.jmx.snmp.BerEncoder,com.sun.jmx.snmp.SnmpVarBind[])>($r6, $r8);
+
+        $i3 = r1.<com.sun.jmx.snmp.SnmpPduPacket: int type>;
+
+        tableswitch($i3)
+        {
+            case 160: goto label02;
+            case 161: goto label02;
+            case 162: goto label02;
+            case 163: goto label02;
+            case 164: goto label04;
+            case 165: goto label03;
+            case 166: goto label02;
+            case 167: goto label02;
+            case 168: goto label02;
+            default: goto label07;
+        };
+
+     label02:
+        r17 = (com.sun.jmx.snmp.SnmpPduRequest) r1;
+
+        $i10 = r17.<com.sun.jmx.snmp.SnmpPduRequest: int errorIndex>;
+
+        virtualinvoke $r6.<com.sun.jmx.snmp.BerEncoder: void putInteger(int)>($i10);
+
+        $i11 = r17.<com.sun.jmx.snmp.SnmpPduRequest: int errorStatus>;
+
+        virtualinvoke $r6.<com.sun.jmx.snmp.BerEncoder: void putInteger(int)>($i11);
+
+        $i12 = r17.<com.sun.jmx.snmp.SnmpPduRequest: int requestId>;
+
+        virtualinvoke $r6.<com.sun.jmx.snmp.BerEncoder: void putInteger(int)>($i12);
+
+        goto label08;
+
+     label03:
+        r9 = (com.sun.jmx.snmp.SnmpPduBulk) r1;
+
+        $i4 = r9.<com.sun.jmx.snmp.SnmpPduBulk: int maxRepetitions>;
+
+        virtualinvoke $r6.<com.sun.jmx.snmp.BerEncoder: void putInteger(int)>($i4);
+
+        $i5 = r9.<com.sun.jmx.snmp.SnmpPduBulk: int nonRepeaters>;
+
+        virtualinvoke $r6.<com.sun.jmx.snmp.BerEncoder: void putInteger(int)>($i5);
+
+        $i6 = r9.<com.sun.jmx.snmp.SnmpPduBulk: int requestId>;
+
+        virtualinvoke $r6.<com.sun.jmx.snmp.BerEncoder: void putInteger(int)>($i6);
+
+        goto label08;
+
+     label04:
+        r10 = (com.sun.jmx.snmp.SnmpPduTrap) r1;
+
+        $l7 = r10.<com.sun.jmx.snmp.SnmpPduTrap: long timeStamp>;
+
+        virtualinvoke $r6.<com.sun.jmx.snmp.BerEncoder: void putInteger(long,int)>($l7, 67);
+
+        $i8 = r10.<com.sun.jmx.snmp.SnmpPduTrap: int specificTrap>;
+
+        virtualinvoke $r6.<com.sun.jmx.snmp.BerEncoder: void putInteger(int)>($i8);
+
+        $i9 = r10.<com.sun.jmx.snmp.SnmpPduTrap: int genericTrap>;
+
+        virtualinvoke $r6.<com.sun.jmx.snmp.BerEncoder: void putInteger(int)>($i9);
+
+        $r11 = r10.<com.sun.jmx.snmp.SnmpPduTrap: com.sun.jmx.snmp.SnmpIpAddress agentAddr>;
+
+        if $r11 == null goto label05;
+
+        $r15 = r10.<com.sun.jmx.snmp.SnmpPduTrap: com.sun.jmx.snmp.SnmpIpAddress agentAddr>;
+
+        $r16 = virtualinvoke $r15.<com.sun.jmx.snmp.SnmpIpAddress: byte[] byteValue()>();
+
+        virtualinvoke $r6.<com.sun.jmx.snmp.BerEncoder: void putOctetString(byte[],int)>($r16, 64);
+
+        goto label06;
+
+     label05:
+        $r12 = newarray (byte)[0];
+
+        virtualinvoke $r6.<com.sun.jmx.snmp.BerEncoder: void putOctetString(byte[],int)>($r12, 64);
+
+     label06:
+        $r13 = r10.<com.sun.jmx.snmp.SnmpPduTrap: com.sun.jmx.snmp.SnmpOid enterprise>;
+
+        $r14 = virtualinvoke $r13.<com.sun.jmx.snmp.SnmpOid: long[] longValue()>();
+
+        virtualinvoke $r6.<com.sun.jmx.snmp.BerEncoder: void putOid(long[])>($r14);
+
+        goto label08;
+
+     label07:
+        $r18 = new com.sun.jmx.snmp.SnmpStatusException;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid pdu type ");
+
+        $i13 = r1.<com.sun.jmx.snmp.SnmpPduPacket: int type>;
+
+        $r21 = staticinvoke <java.lang.String: java.lang.String valueOf(int)>($i13);
+
+        $r22 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r21);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r18.<com.sun.jmx.snmp.SnmpStatusException: void <init>(java.lang.String)>($r23);
+
+        throw $r18;
+
+     label08:
+        $i14 = r1.<com.sun.jmx.snmp.SnmpPduPacket: int type>;
+
+        virtualinvoke $r6.<com.sun.jmx.snmp.BerEncoder: void closeSequence(int)>($i14);
+
+        $i15 = virtualinvoke $r6.<com.sun.jmx.snmp.BerEncoder: int trim()>();
+
+        r2.<com.sun.jmx.snmp.SnmpMessage: int dataLength> = $i15;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r24 := @caughtexception;
+
+        $r25 = new com.sun.jmx.snmp.SnmpTooBigException;
+
+        specialinvoke $r25.<com.sun.jmx.snmp.SnmpTooBigException: void <init>()>();
+
+        throw $r25;
+
+     label11:
+        return;
+
+        catch java.lang.ArrayIndexOutOfBoundsException from label01 to label09 with label10;
+    }
+
+    public com.sun.jmx.snmp.SnmpPdu decodeSnmpPdu() throws com.sun.jmx.snmp.SnmpStatusException
+    {
+        byte[] $r2, $r4, $r9;
+        java.net.InetAddress $r5;
+        boolean $z0, $z1;
+        com.sun.jmx.snmp.SnmpIpAddress $r10;
+        com.sun.jmx.snmp.SnmpOid $r7;
+        java.util.logging.Logger $r15, $r18, $r23, $r26;
+        com.sun.jmx.snmp.SnmpPduRequest $r11;
+        com.sun.jmx.snmp.SnmpPduPacket r29;
+        com.sun.jmx.snmp.SnmpPduTrap $r6;
+        long $l10;
+        com.sun.jmx.snmp.BerException $r21;
+        java.util.logging.Level $r14, $r19, $r22, $r27;
+        long[] $r8;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i11, $i12, $i13;
+        com.sun.jmx.snmp.SnmpPduBulk $r3;
+        java.lang.String $r20, $r28;
+        com.sun.jmx.snmp.BerDecoder $r0;
+        java.lang.IllegalArgumentException $r13;
+        com.sun.jmx.snmp.SnmpMessage r1;
+        com.sun.jmx.snmp.SnmpStatusException $r12, $r16, $r24;
+        java.lang.Class $r17, $r25;
+        com.sun.jmx.snmp.SnmpVarBind[] $r30;
+
+        r1 := @this: com.sun.jmx.snmp.SnmpMessage;
+
+        $r0 = new com.sun.jmx.snmp.BerDecoder;
+
+        $r2 = r1.<com.sun.jmx.snmp.SnmpMessage: byte[] data>;
+
+        specialinvoke $r0.<com.sun.jmx.snmp.BerDecoder: void <init>(byte[])>($r2);
+
+     label01:
+        $i0 = virtualinvoke $r0.<com.sun.jmx.snmp.BerDecoder: int getTag()>();
+
+        virtualinvoke $r0.<com.sun.jmx.snmp.BerDecoder: void openSequence(int)>($i0);
+
+        tableswitch($i0)
+        {
+            case 160: goto label02;
+            case 161: goto label02;
+            case 162: goto label02;
+            case 163: goto label02;
+            case 164: goto label04;
+            case 165: goto label03;
+            case 166: goto label02;
+            case 167: goto label02;
+            case 168: goto label02;
+            default: goto label07;
+        };
+
+     label02:
+        $r11 = new com.sun.jmx.snmp.SnmpPduRequest;
+
+        specialinvoke $r11.<com.sun.jmx.snmp.SnmpPduRequest: void <init>()>();
+
+        $i11 = virtualinvoke $r0.<com.sun.jmx.snmp.BerDecoder: int fetchInteger()>();
+
+        $r11.<com.sun.jmx.snmp.SnmpPduRequest: int requestId> = $i11;
+
+        $i12 = virtualinvoke $r0.<com.sun.jmx.snmp.BerDecoder: int fetchInteger()>();
+
+        $r11.<com.sun.jmx.snmp.SnmpPduRequest: int errorStatus> = $i12;
+
+        $i13 = virtualinvoke $r0.<com.sun.jmx.snmp.BerDecoder: int fetchInteger()>();
+
+        $r11.<com.sun.jmx.snmp.SnmpPduRequest: int errorIndex> = $i13;
+
+        r29 = $r11;
+
+        goto label08;
+
+     label03:
+        $r3 = new com.sun.jmx.snmp.SnmpPduBulk;
+
+        specialinvoke $r3.<com.sun.jmx.snmp.SnmpPduBulk: void <init>()>();
+
+        $i1 = virtualinvoke $r0.<com.sun.jmx.snmp.BerDecoder: int fetchInteger()>();
+
+        $r3.<com.sun.jmx.snmp.SnmpPduBulk: int requestId> = $i1;
+
+        $i2 = virtualinvoke $r0.<com.sun.jmx.snmp.BerDecoder: int fetchInteger()>();
+
+        $r3.<com.sun.jmx.snmp.SnmpPduBulk: int nonRepeaters> = $i2;
+
+        $i3 = virtualinvoke $r0.<com.sun.jmx.snmp.BerDecoder: int fetchInteger()>();
+
+        $r3.<com.sun.jmx.snmp.SnmpPduBulk: int maxRepetitions> = $i3;
+
+        r29 = $r3;
+
+        goto label08;
+
+     label04:
+        $r6 = new com.sun.jmx.snmp.SnmpPduTrap;
+
+        specialinvoke $r6.<com.sun.jmx.snmp.SnmpPduTrap: void <init>()>();
+
+        $r7 = new com.sun.jmx.snmp.SnmpOid;
+
+        $r8 = virtualinvoke $r0.<com.sun.jmx.snmp.BerDecoder: long[] fetchOid()>();
+
+        specialinvoke $r7.<com.sun.jmx.snmp.SnmpOid: void <init>(long[])>($r8);
+
+        $r6.<com.sun.jmx.snmp.SnmpPduTrap: com.sun.jmx.snmp.SnmpOid enterprise> = $r7;
+
+        $r9 = virtualinvoke $r0.<com.sun.jmx.snmp.BerDecoder: byte[] fetchOctetString(int)>(64);
+
+        $i6 = lengthof $r9;
+
+        if $i6 == 0 goto label05;
+
+        $r10 = new com.sun.jmx.snmp.SnmpIpAddress;
+
+        specialinvoke $r10.<com.sun.jmx.snmp.SnmpIpAddress: void <init>(byte[])>($r9);
+
+        $r6.<com.sun.jmx.snmp.SnmpPduTrap: com.sun.jmx.snmp.SnmpIpAddress agentAddr> = $r10;
+
+        goto label06;
+
+     label05:
+        $r6.<com.sun.jmx.snmp.SnmpPduTrap: com.sun.jmx.snmp.SnmpIpAddress agentAddr> = null;
+
+     label06:
+        $i7 = virtualinvoke $r0.<com.sun.jmx.snmp.BerDecoder: int fetchInteger()>();
+
+        $r6.<com.sun.jmx.snmp.SnmpPduTrap: int genericTrap> = $i7;
+
+        $i8 = virtualinvoke $r0.<com.sun.jmx.snmp.BerDecoder: int fetchInteger()>();
+
+        $r6.<com.sun.jmx.snmp.SnmpPduTrap: int specificTrap> = $i8;
+
+        $i9 = virtualinvoke $r0.<com.sun.jmx.snmp.BerDecoder: int fetchInteger(int)>(67);
+
+        $l10 = (long) $i9;
+
+        $r6.<com.sun.jmx.snmp.SnmpPduTrap: long timeStamp> = $l10;
+
+        r29 = $r6;
+
+        goto label08;
+
+     label07:
+        $r12 = new com.sun.jmx.snmp.SnmpStatusException;
+
+        specialinvoke $r12.<com.sun.jmx.snmp.SnmpStatusException: void <init>(int)>(9);
+
+        throw $r12;
+
+     label08:
+        r29.<com.sun.jmx.snmp.SnmpPduPacket: int type> = $i0;
+
+        $r30 = virtualinvoke r1.<com.sun.jmx.snmp.SnmpMessage: com.sun.jmx.snmp.SnmpVarBind[] decodeVarBindList(com.sun.jmx.snmp.BerDecoder)>($r0);
+
+        r29.<com.sun.jmx.snmp.SnmpPduPacket: com.sun.jmx.snmp.SnmpVarBind[] varBindList> = $r30;
+
+        virtualinvoke $r0.<com.sun.jmx.snmp.BerDecoder: void closeSequence()>();
+
+     label09:
+        goto label14;
+
+     label10:
+        $r21 := @caughtexception;
+
+        $r23 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_LOGGER>;
+
+        $r22 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z1 = virtualinvoke $r23.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r22);
+
+        if $z1 == 0 goto label11;
+
+        $r26 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_LOGGER>;
+
+        $r27 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r25 = class "Lcom/sun/jmx/snmp/SnmpMessage;";
+
+        $r28 = virtualinvoke $r25.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r26.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Throwable)>($r27, $r28, "decodeSnmpPdu", "BerException", $r21);
+
+     label11:
+        $r24 = new com.sun.jmx.snmp.SnmpStatusException;
+
+        specialinvoke $r24.<com.sun.jmx.snmp.SnmpStatusException: void <init>(int)>(9);
+
+        throw $r24;
+
+     label12:
+        $r13 := @caughtexception;
+
+        $r15 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_LOGGER>;
+
+        $r14 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z0 = virtualinvoke $r15.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r14);
+
+        if $z0 == 0 goto label13;
+
+        $r18 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger SNMP_LOGGER>;
+
+        $r19 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r17 = class "Lcom/sun/jmx/snmp/SnmpMessage;";
+
+        $r20 = virtualinvoke $r17.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r18.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Throwable)>($r19, $r20, "decodeSnmpPdu", "IllegalArgumentException", $r13);
+
+     label13:
+        $r16 = new com.sun.jmx.snmp.SnmpStatusException;
+
+        specialinvoke $r16.<com.sun.jmx.snmp.SnmpStatusException: void <init>(int)>(9);
+
+        throw $r16;
+
+     label14:
+        $i4 = r1.<com.sun.jmx.snmp.SnmpMessage: int version>;
+
+        r29.<com.sun.jmx.snmp.SnmpPduPacket: int version> = $i4;
+
+        $r4 = r1.<com.sun.jmx.snmp.SnmpMessage: byte[] community>;
+
+        r29.<com.sun.jmx.snmp.SnmpPduPacket: byte[] community> = $r4;
+
+        $r5 = r1.<com.sun.jmx.snmp.SnmpMessage: java.net.InetAddress address>;
+
+        r29.<com.sun.jmx.snmp.SnmpPduPacket: java.net.InetAddress address> = $r5;
+
+        $i5 = r1.<com.sun.jmx.snmp.SnmpMessage: int port>;
+
+        r29.<com.sun.jmx.snmp.SnmpPduPacket: int port> = $i5;
+
+        return r29;
+
+        catch com.sun.jmx.snmp.BerException from label01 to label09 with label10;
+        catch java.lang.IllegalArgumentException from label01 to label09 with label12;
+    }
+
+    public java.lang.String printMessage()
+    {
+        byte[] $r2, $r3, $r4;
+        com.sun.jmx.snmp.SnmpMessage r1;
+        java.lang.StringBuffer $r0, $r7;
+        int $i0;
+        java.lang.String $r5, $r6, $r8;
+
+        r1 := @this: com.sun.jmx.snmp.SnmpMessage;
+
+        $r0 = new java.lang.StringBuffer;
+
+        specialinvoke $r0.<java.lang.StringBuffer: void <init>()>();
+
+        $r2 = r1.<com.sun.jmx.snmp.SnmpMessage: byte[] community>;
+
+        if $r2 != null goto label1;
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("Community: null");
+
+        goto label2;
+
+     label1:
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("Community: {\n");
+
+        $r4 = r1.<com.sun.jmx.snmp.SnmpMessage: byte[] community>;
+
+        $r3 = r1.<com.sun.jmx.snmp.SnmpMessage: byte[] community>;
+
+        $i0 = lengthof $r3;
+
+        $r5 = staticinvoke <com.sun.jmx.snmp.SnmpMessage: java.lang.String dumpHexBuffer(byte[],int,int)>($r4, 0, $i0);
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r5);
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("\n}\n");
+
+     label2:
+        $r6 = specialinvoke r1.<com.sun.jmx.snmp.SnmpMsg: java.lang.String printMessage()>();
+
+        $r7 = virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r8;
+    }
+}

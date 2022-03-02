@@ -1,0 +1,1553 @@
+public final class java.time.Period extends java.lang.Object implements java.time.chrono.ChronoPeriod, java.io.Serializable
+{
+    public static final java.time.Period ZERO;
+    private static final long serialVersionUID;
+    private static final java.util.regex.Pattern PATTERN;
+    private static final java.util.List SUPPORTED_UNITS;
+    private final int years;
+    private final int months;
+    private final int days;
+
+    public static java.time.Period ofYears(int)
+    {
+        int i0;
+        java.time.Period $r0;
+
+        i0 := @parameter0: int;
+
+        $r0 = staticinvoke <java.time.Period: java.time.Period create(int,int,int)>(i0, 0, 0);
+
+        return $r0;
+    }
+
+    public static java.time.Period ofMonths(int)
+    {
+        int i0;
+        java.time.Period $r0;
+
+        i0 := @parameter0: int;
+
+        $r0 = staticinvoke <java.time.Period: java.time.Period create(int,int,int)>(0, i0, 0);
+
+        return $r0;
+    }
+
+    public static java.time.Period ofWeeks(int)
+    {
+        int i0, $i1;
+        java.time.Period $r0;
+
+        i0 := @parameter0: int;
+
+        $i1 = staticinvoke <java.lang.Math: int multiplyExact(int,int)>(i0, 7);
+
+        $r0 = staticinvoke <java.time.Period: java.time.Period create(int,int,int)>(0, 0, $i1);
+
+        return $r0;
+    }
+
+    public static java.time.Period ofDays(int)
+    {
+        int i0;
+        java.time.Period $r0;
+
+        i0 := @parameter0: int;
+
+        $r0 = staticinvoke <java.time.Period: java.time.Period create(int,int,int)>(0, 0, i0);
+
+        return $r0;
+    }
+
+    public static java.time.Period of(int, int, int)
+    {
+        java.time.Period $r0;
+        int i0, i1, i2;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $r0 = staticinvoke <java.time.Period: java.time.Period create(int,int,int)>(i0, i1, i2);
+
+        return $r0;
+    }
+
+    public static java.time.Period 'from'(java.time.temporal.TemporalAmount)
+    {
+        java.time.temporal.TemporalUnit r5;
+        long $l0;
+        java.time.chrono.IsoChronology $r15;
+        int i1, i2, i3;
+        java.time.temporal.TemporalAmount r0;
+        java.lang.String $r13, $r21;
+        java.time.DateTimeException $r9, $r17;
+        boolean $z0, $z1, $z2, $z3;
+        java.time.Period $r3, $r22;
+        java.util.Iterator $r2;
+        java.util.List $r1;
+        java.time.chrono.Chronology $r16;
+        java.time.temporal.ChronoUnit $r6, $r7, $r8;
+        java.lang.Object $r4;
+        java.lang.StringBuilder $r10, $r11, $r12, $r18, $r19, $r20;
+        java.time.chrono.ChronoPeriod $r14;
+
+        r0 := @parameter0: java.time.temporal.TemporalAmount;
+
+        $z0 = r0 instanceof java.time.Period;
+
+        if $z0 == 0 goto label1;
+
+        $r22 = (java.time.Period) r0;
+
+        return $r22;
+
+     label1:
+        $z1 = r0 instanceof java.time.chrono.ChronoPeriod;
+
+        if $z1 == 0 goto label2;
+
+        $r15 = <java.time.chrono.IsoChronology: java.time.chrono.IsoChronology INSTANCE>;
+
+        $r14 = (java.time.chrono.ChronoPeriod) r0;
+
+        $r16 = interfaceinvoke $r14.<java.time.chrono.ChronoPeriod: java.time.chrono.Chronology getChronology()>();
+
+        $z2 = virtualinvoke $r15.<java.time.chrono.IsoChronology: boolean equals(java.lang.Object)>($r16);
+
+        if $z2 != 0 goto label2;
+
+        $r17 = new java.time.DateTimeException;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Period requires ISO chronology: ");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r17.<java.time.DateTimeException: void <init>(java.lang.String)>($r21);
+
+        throw $r17;
+
+     label2:
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "amount");
+
+        i1 = 0;
+
+        i2 = 0;
+
+        i3 = 0;
+
+        $r1 = interfaceinvoke r0.<java.time.temporal.TemporalAmount: java.util.List getUnits()>();
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label3:
+        $z3 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label8;
+
+        $r4 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (java.time.temporal.TemporalUnit) $r4;
+
+        $l0 = interfaceinvoke r0.<java.time.temporal.TemporalAmount: long get(java.time.temporal.TemporalUnit)>(r5);
+
+        $r6 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit YEARS>;
+
+        if r5 != $r6 goto label4;
+
+        i1 = staticinvoke <java.lang.Math: int toIntExact(long)>($l0);
+
+        goto label7;
+
+     label4:
+        $r7 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit MONTHS>;
+
+        if r5 != $r7 goto label5;
+
+        i2 = staticinvoke <java.lang.Math: int toIntExact(long)>($l0);
+
+        goto label7;
+
+     label5:
+        $r8 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit DAYS>;
+
+        if r5 != $r8 goto label6;
+
+        i3 = staticinvoke <java.lang.Math: int toIntExact(long)>($l0);
+
+        goto label7;
+
+     label6:
+        $r9 = new java.time.DateTimeException;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unit must be Years, Months or Days, but was ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r5);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<java.time.DateTimeException: void <init>(java.lang.String)>($r13);
+
+        throw $r9;
+
+     label7:
+        goto label3;
+
+     label8:
+        $r3 = staticinvoke <java.time.Period: java.time.Period create(int,int,int)>(i1, i2, i3);
+
+        return $r3;
+    }
+
+    public static java.time.Period parse(java.lang.CharSequence)
+    {
+        java.util.regex.Matcher $r2;
+        byte b0, $b1;
+        int $i2, $i3, $i4, $i5, $i6, $i7;
+        java.lang.String $r4, $r5, $r6, $r7, $r8, $r9;
+        boolean $z0, $z1;
+        java.time.Period $r12;
+        java.lang.CharSequence r0;
+        java.lang.NumberFormatException $r10;
+        java.time.format.DateTimeParseException $r3, $r11;
+        java.util.regex.Pattern $r1;
+
+        r0 := @parameter0: java.lang.CharSequence;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "text");
+
+        $r1 = <java.time.Period: java.util.regex.Pattern PATTERN>;
+
+        $r2 = virtualinvoke $r1.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>(r0);
+
+        $z0 = virtualinvoke $r2.<java.util.regex.Matcher: boolean matches()>();
+
+        if $z0 == 0 goto label6;
+
+        $r4 = "-";
+
+        $r5 = virtualinvoke $r2.<java.util.regex.Matcher: java.lang.String group(int)>(1);
+
+        $z1 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>($r5);
+
+        if $z1 == 0 goto label1;
+
+        $b1 = -1;
+
+        goto label2;
+
+     label1:
+        $b1 = 1;
+
+     label2:
+        b0 = $b1;
+
+        $r6 = virtualinvoke $r2.<java.util.regex.Matcher: java.lang.String group(int)>(2);
+
+        $r7 = virtualinvoke $r2.<java.util.regex.Matcher: java.lang.String group(int)>(3);
+
+        $r8 = virtualinvoke $r2.<java.util.regex.Matcher: java.lang.String group(int)>(4);
+
+        $r9 = virtualinvoke $r2.<java.util.regex.Matcher: java.lang.String group(int)>(5);
+
+        if $r6 != null goto label3;
+
+        if $r7 != null goto label3;
+
+        if $r9 != null goto label3;
+
+        if $r8 == null goto label6;
+
+     label3:
+        $i2 = staticinvoke <java.time.Period: int parseNumber(java.lang.CharSequence,java.lang.String,int)>(r0, $r6, b0);
+
+        $i3 = staticinvoke <java.time.Period: int parseNumber(java.lang.CharSequence,java.lang.String,int)>(r0, $r7, b0);
+
+        $i4 = staticinvoke <java.time.Period: int parseNumber(java.lang.CharSequence,java.lang.String,int)>(r0, $r8, b0);
+
+        $i5 = staticinvoke <java.time.Period: int parseNumber(java.lang.CharSequence,java.lang.String,int)>(r0, $r9, b0);
+
+        $i6 = staticinvoke <java.lang.Math: int multiplyExact(int,int)>($i4, 7);
+
+        $i7 = staticinvoke <java.lang.Math: int addExact(int,int)>($i5, $i6);
+
+        $r12 = staticinvoke <java.time.Period: java.time.Period create(int,int,int)>($i2, $i3, $i7);
+
+     label4:
+        return $r12;
+
+     label5:
+        $r10 := @caughtexception;
+
+        $r11 = new java.time.format.DateTimeParseException;
+
+        specialinvoke $r11.<java.time.format.DateTimeParseException: void <init>(java.lang.String,java.lang.CharSequence,int,java.lang.Throwable)>("Text cannot be parsed to a Period", r0, 0, $r10);
+
+        throw $r11;
+
+     label6:
+        $r3 = new java.time.format.DateTimeParseException;
+
+        specialinvoke $r3.<java.time.format.DateTimeParseException: void <init>(java.lang.String,java.lang.CharSequence,int)>("Text cannot be parsed to a Period", r0, 0);
+
+        throw $r3;
+
+        catch java.lang.NumberFormatException from label3 to label4 with label5;
+    }
+
+    private static int parseNumber(java.lang.CharSequence, java.lang.String, int)
+    {
+        java.time.format.DateTimeParseException $r2;
+        java.lang.CharSequence r3;
+        int $i0, i1, $i2;
+        java.lang.ArithmeticException $r1;
+        java.lang.String r0;
+
+        r3 := @parameter0: java.lang.CharSequence;
+
+        r0 := @parameter1: java.lang.String;
+
+        i1 := @parameter2: int;
+
+        if r0 != null goto label1;
+
+        return 0;
+
+     label1:
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>(r0);
+
+     label2:
+        $i2 = staticinvoke <java.lang.Math: int multiplyExact(int,int)>($i0, i1);
+
+     label3:
+        return $i2;
+
+     label4:
+        $r1 := @caughtexception;
+
+        $r2 = new java.time.format.DateTimeParseException;
+
+        specialinvoke $r2.<java.time.format.DateTimeParseException: void <init>(java.lang.String,java.lang.CharSequence,int,java.lang.Throwable)>("Text cannot be parsed to a Period", r3, 0, $r1);
+
+        throw $r2;
+
+        catch java.lang.ArithmeticException from label2 to label3 with label4;
+    }
+
+    public static java.time.Period between(java.time.LocalDate, java.time.LocalDate)
+    {
+        java.time.Period $r2;
+        java.time.LocalDate r0, r1;
+
+        r0 := @parameter0: java.time.LocalDate;
+
+        r1 := @parameter1: java.time.LocalDate;
+
+        $r2 = virtualinvoke r0.<java.time.LocalDate: java.time.Period until(java.time.chrono.ChronoLocalDate)>(r1);
+
+        return $r2;
+    }
+
+    private static java.time.Period create(int, int, int)
+    {
+        java.time.Period $r0, $r1;
+        int i0, i1, i2, $i3, $i4;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $i3 = i0 | i1;
+
+        $i4 = $i3 | i2;
+
+        if $i4 != 0 goto label1;
+
+        $r1 = <java.time.Period: java.time.Period ZERO>;
+
+        return $r1;
+
+     label1:
+        $r0 = new java.time.Period;
+
+        specialinvoke $r0.<java.time.Period: void <init>(int,int,int)>(i0, i1, i2);
+
+        return $r0;
+    }
+
+    private void <init>(int, int, int)
+    {
+        java.time.Period r0;
+        int i0, i1, i2;
+
+        r0 := @this: java.time.Period;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.time.Period: int years> = i0;
+
+        r0.<java.time.Period: int months> = i1;
+
+        r0.<java.time.Period: int days> = i2;
+
+        return;
+    }
+
+    public long get(java.time.temporal.TemporalUnit)
+    {
+        java.time.temporal.TemporalUnit r0;
+        long $l1, $l3, $l5;
+        int $i0, $i2, $i4;
+        java.lang.String $r8;
+        java.time.Period r9;
+        java.time.temporal.UnsupportedTemporalTypeException $r4;
+        java.time.temporal.ChronoUnit $r1, $r2, $r3;
+        java.lang.StringBuilder $r5, $r6, $r7;
+
+        r9 := @this: java.time.Period;
+
+        r0 := @parameter0: java.time.temporal.TemporalUnit;
+
+        $r1 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit YEARS>;
+
+        if r0 != $r1 goto label1;
+
+        $i4 = virtualinvoke r9.<java.time.Period: int getYears()>();
+
+        $l5 = (long) $i4;
+
+        return $l5;
+
+     label1:
+        $r2 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit MONTHS>;
+
+        if r0 != $r2 goto label2;
+
+        $i2 = virtualinvoke r9.<java.time.Period: int getMonths()>();
+
+        $l3 = (long) $i2;
+
+        return $l3;
+
+     label2:
+        $r3 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit DAYS>;
+
+        if r0 != $r3 goto label3;
+
+        $i0 = virtualinvoke r9.<java.time.Period: int getDays()>();
+
+        $l1 = (long) $i0;
+
+        return $l1;
+
+     label3:
+        $r4 = new java.time.temporal.UnsupportedTemporalTypeException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported unit: ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.time.temporal.UnsupportedTemporalTypeException: void <init>(java.lang.String)>($r8);
+
+        throw $r4;
+    }
+
+    public java.util.List getUnits()
+    {
+        java.time.Period r1;
+        java.util.List $r0;
+
+        r1 := @this: java.time.Period;
+
+        $r0 = <java.time.Period: java.util.List SUPPORTED_UNITS>;
+
+        return $r0;
+    }
+
+    public java.time.chrono.IsoChronology getChronology()
+    {
+        java.time.Period r1;
+        java.time.chrono.IsoChronology $r0;
+
+        r1 := @this: java.time.Period;
+
+        $r0 = <java.time.chrono.IsoChronology: java.time.chrono.IsoChronology INSTANCE>;
+
+        return $r0;
+    }
+
+    public boolean isZero()
+    {
+        java.time.Period r0, $r1;
+        boolean $z0;
+
+        r0 := @this: java.time.Period;
+
+        $r1 = <java.time.Period: java.time.Period ZERO>;
+
+        if r0 != $r1 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean isNegative()
+    {
+        java.time.Period r0;
+        int $i0, $i1, $i2;
+        boolean $z0;
+
+        r0 := @this: java.time.Period;
+
+        $i0 = r0.<java.time.Period: int years>;
+
+        if $i0 < 0 goto label1;
+
+        $i1 = r0.<java.time.Period: int months>;
+
+        if $i1 < 0 goto label1;
+
+        $i2 = r0.<java.time.Period: int days>;
+
+        if $i2 >= 0 goto label2;
+
+     label1:
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+    }
+
+    public int getYears()
+    {
+        java.time.Period r0;
+        int $i0;
+
+        r0 := @this: java.time.Period;
+
+        $i0 = r0.<java.time.Period: int years>;
+
+        return $i0;
+    }
+
+    public int getMonths()
+    {
+        java.time.Period r0;
+        int $i0;
+
+        r0 := @this: java.time.Period;
+
+        $i0 = r0.<java.time.Period: int months>;
+
+        return $i0;
+    }
+
+    public int getDays()
+    {
+        java.time.Period r0;
+        int $i0;
+
+        r0 := @this: java.time.Period;
+
+        $i0 = r0.<java.time.Period: int days>;
+
+        return $i0;
+    }
+
+    public java.time.Period withYears(int)
+    {
+        java.time.Period r0, $r1;
+        int i0, $i1, $i2, $i3;
+
+        r0 := @this: java.time.Period;
+
+        i0 := @parameter0: int;
+
+        $i1 = r0.<java.time.Period: int years>;
+
+        if i0 != $i1 goto label1;
+
+        return r0;
+
+     label1:
+        $i3 = r0.<java.time.Period: int months>;
+
+        $i2 = r0.<java.time.Period: int days>;
+
+        $r1 = staticinvoke <java.time.Period: java.time.Period create(int,int,int)>(i0, $i3, $i2);
+
+        return $r1;
+    }
+
+    public java.time.Period withMonths(int)
+    {
+        java.time.Period r0, $r1;
+        int i0, $i1, $i2, $i3;
+
+        r0 := @this: java.time.Period;
+
+        i0 := @parameter0: int;
+
+        $i1 = r0.<java.time.Period: int months>;
+
+        if i0 != $i1 goto label1;
+
+        return r0;
+
+     label1:
+        $i3 = r0.<java.time.Period: int years>;
+
+        $i2 = r0.<java.time.Period: int days>;
+
+        $r1 = staticinvoke <java.time.Period: java.time.Period create(int,int,int)>($i3, i0, $i2);
+
+        return $r1;
+    }
+
+    public java.time.Period withDays(int)
+    {
+        java.time.Period r0, $r1;
+        int i0, $i1, $i2, $i3;
+
+        r0 := @this: java.time.Period;
+
+        i0 := @parameter0: int;
+
+        $i1 = r0.<java.time.Period: int days>;
+
+        if i0 != $i1 goto label1;
+
+        return r0;
+
+     label1:
+        $i3 = r0.<java.time.Period: int years>;
+
+        $i2 = r0.<java.time.Period: int months>;
+
+        $r1 = staticinvoke <java.time.Period: java.time.Period create(int,int,int)>($i3, $i2, i0);
+
+        return $r1;
+    }
+
+    public java.time.Period plus(java.time.temporal.TemporalAmount)
+    {
+        java.time.Period $r1, r2, $r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        java.time.temporal.TemporalAmount r0;
+
+        r2 := @this: java.time.Period;
+
+        r0 := @parameter0: java.time.temporal.TemporalAmount;
+
+        $r1 = staticinvoke <java.time.Period: java.time.Period 'from'(java.time.temporal.TemporalAmount)>(r0);
+
+        $i1 = r2.<java.time.Period: int years>;
+
+        $i0 = $r1.<java.time.Period: int years>;
+
+        $i2 = staticinvoke <java.lang.Math: int addExact(int,int)>($i1, $i0);
+
+        $i4 = r2.<java.time.Period: int months>;
+
+        $i3 = $r1.<java.time.Period: int months>;
+
+        $i5 = staticinvoke <java.lang.Math: int addExact(int,int)>($i4, $i3);
+
+        $i7 = r2.<java.time.Period: int days>;
+
+        $i6 = $r1.<java.time.Period: int days>;
+
+        $i8 = staticinvoke <java.lang.Math: int addExact(int,int)>($i7, $i6);
+
+        $r3 = staticinvoke <java.time.Period: java.time.Period create(int,int,int)>($i2, $i5, $i8);
+
+        return $r3;
+    }
+
+    public java.time.Period plusYears(long)
+    {
+        java.time.Period r0, $r1;
+        long l0, $l3, $l4;
+        byte $b1;
+        int $i2, $i5, $i6, $i7;
+
+        r0 := @this: java.time.Period;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        return r0;
+
+     label1:
+        $i2 = r0.<java.time.Period: int years>;
+
+        $l3 = (long) $i2;
+
+        $l4 = staticinvoke <java.lang.Math: long addExact(long,long)>($l3, l0);
+
+        $i5 = staticinvoke <java.lang.Math: int toIntExact(long)>($l4);
+
+        $i7 = r0.<java.time.Period: int months>;
+
+        $i6 = r0.<java.time.Period: int days>;
+
+        $r1 = staticinvoke <java.time.Period: java.time.Period create(int,int,int)>($i5, $i7, $i6);
+
+        return $r1;
+    }
+
+    public java.time.Period plusMonths(long)
+    {
+        java.time.Period r0, $r1;
+        long l0, $l3, $l5;
+        byte $b1;
+        int $i2, $i4, $i6, $i7;
+
+        r0 := @this: java.time.Period;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        return r0;
+
+     label1:
+        $i4 = r0.<java.time.Period: int years>;
+
+        $i2 = r0.<java.time.Period: int months>;
+
+        $l3 = (long) $i2;
+
+        $l5 = staticinvoke <java.lang.Math: long addExact(long,long)>($l3, l0);
+
+        $i6 = staticinvoke <java.lang.Math: int toIntExact(long)>($l5);
+
+        $i7 = r0.<java.time.Period: int days>;
+
+        $r1 = staticinvoke <java.time.Period: java.time.Period create(int,int,int)>($i4, $i6, $i7);
+
+        return $r1;
+    }
+
+    public java.time.Period plusDays(long)
+    {
+        java.time.Period r0, $r1;
+        long l0, $l3, $l6;
+        byte $b1;
+        int $i2, $i4, $i5, $i7;
+
+        r0 := @this: java.time.Period;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        return r0;
+
+     label1:
+        $i4 = r0.<java.time.Period: int years>;
+
+        $i5 = r0.<java.time.Period: int months>;
+
+        $i2 = r0.<java.time.Period: int days>;
+
+        $l3 = (long) $i2;
+
+        $l6 = staticinvoke <java.lang.Math: long addExact(long,long)>($l3, l0);
+
+        $i7 = staticinvoke <java.lang.Math: int toIntExact(long)>($l6);
+
+        $r1 = staticinvoke <java.time.Period: java.time.Period create(int,int,int)>($i4, $i5, $i7);
+
+        return $r1;
+    }
+
+    public java.time.Period minus(java.time.temporal.TemporalAmount)
+    {
+        java.time.Period $r1, r2, $r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        java.time.temporal.TemporalAmount r0;
+
+        r2 := @this: java.time.Period;
+
+        r0 := @parameter0: java.time.temporal.TemporalAmount;
+
+        $r1 = staticinvoke <java.time.Period: java.time.Period 'from'(java.time.temporal.TemporalAmount)>(r0);
+
+        $i1 = r2.<java.time.Period: int years>;
+
+        $i0 = $r1.<java.time.Period: int years>;
+
+        $i2 = staticinvoke <java.lang.Math: int subtractExact(int,int)>($i1, $i0);
+
+        $i4 = r2.<java.time.Period: int months>;
+
+        $i3 = $r1.<java.time.Period: int months>;
+
+        $i5 = staticinvoke <java.lang.Math: int subtractExact(int,int)>($i4, $i3);
+
+        $i7 = r2.<java.time.Period: int days>;
+
+        $i6 = $r1.<java.time.Period: int days>;
+
+        $i8 = staticinvoke <java.lang.Math: int subtractExact(int,int)>($i7, $i6);
+
+        $r3 = staticinvoke <java.time.Period: java.time.Period create(int,int,int)>($i2, $i5, $i8);
+
+        return $r3;
+    }
+
+    public java.time.Period minusYears(long)
+    {
+        java.time.Period r0, $r1, $r2;
+        byte $b1;
+        long l0, $l2;
+
+        r0 := @this: java.time.Period;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp -9223372036854775808L;
+
+        if $b1 != 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.time.Period: java.time.Period plusYears(long)>(9223372036854775807L);
+
+        $r2 = virtualinvoke $r1.<java.time.Period: java.time.Period plusYears(long)>(1L);
+
+        goto label2;
+
+     label1:
+        $l2 = neg l0;
+
+        $r2 = virtualinvoke r0.<java.time.Period: java.time.Period plusYears(long)>($l2);
+
+     label2:
+        return $r2;
+    }
+
+    public java.time.Period minusMonths(long)
+    {
+        java.time.Period r0, $r1, $r2;
+        byte $b1;
+        long l0, $l2;
+
+        r0 := @this: java.time.Period;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp -9223372036854775808L;
+
+        if $b1 != 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.time.Period: java.time.Period plusMonths(long)>(9223372036854775807L);
+
+        $r2 = virtualinvoke $r1.<java.time.Period: java.time.Period plusMonths(long)>(1L);
+
+        goto label2;
+
+     label1:
+        $l2 = neg l0;
+
+        $r2 = virtualinvoke r0.<java.time.Period: java.time.Period plusMonths(long)>($l2);
+
+     label2:
+        return $r2;
+    }
+
+    public java.time.Period minusDays(long)
+    {
+        java.time.Period r0, $r1, $r2;
+        byte $b1;
+        long l0, $l2;
+
+        r0 := @this: java.time.Period;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp -9223372036854775808L;
+
+        if $b1 != 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.time.Period: java.time.Period plusDays(long)>(9223372036854775807L);
+
+        $r2 = virtualinvoke $r1.<java.time.Period: java.time.Period plusDays(long)>(1L);
+
+        goto label2;
+
+     label1:
+        $l2 = neg l0;
+
+        $r2 = virtualinvoke r0.<java.time.Period: java.time.Period plusDays(long)>($l2);
+
+     label2:
+        return $r2;
+    }
+
+    public java.time.Period multipliedBy(int)
+    {
+        java.time.Period r0, $r1, $r2;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6;
+
+        r0 := @this: java.time.Period;
+
+        i0 := @parameter0: int;
+
+        $r1 = <java.time.Period: java.time.Period ZERO>;
+
+        if r0 == $r1 goto label1;
+
+        if i0 != 1 goto label2;
+
+     label1:
+        return r0;
+
+     label2:
+        $i1 = r0.<java.time.Period: int years>;
+
+        $i2 = staticinvoke <java.lang.Math: int multiplyExact(int,int)>($i1, i0);
+
+        $i3 = r0.<java.time.Period: int months>;
+
+        $i4 = staticinvoke <java.lang.Math: int multiplyExact(int,int)>($i3, i0);
+
+        $i5 = r0.<java.time.Period: int days>;
+
+        $i6 = staticinvoke <java.lang.Math: int multiplyExact(int,int)>($i5, i0);
+
+        $r2 = staticinvoke <java.time.Period: java.time.Period create(int,int,int)>($i2, $i4, $i6);
+
+        return $r2;
+    }
+
+    public java.time.Period negated()
+    {
+        java.time.Period r0, $r1;
+        int $i1;
+
+        r0 := @this: java.time.Period;
+
+        $i1 = (int) -1;
+
+        $r1 = virtualinvoke r0.<java.time.Period: java.time.Period multipliedBy(int)>($i1);
+
+        return $r1;
+    }
+
+    public java.time.Period normalized()
+    {
+        java.time.Period r0, $r1;
+        long $l0, l1, $l2, $l5;
+        byte $b6;
+        int i3, $i4, $i7, $i8, $i9;
+
+        r0 := @this: java.time.Period;
+
+        $l0 = virtualinvoke r0.<java.time.Period: long toTotalMonths()>();
+
+        l1 = $l0 / 12L;
+
+        $l2 = $l0 % 12L;
+
+        i3 = (int) $l2;
+
+        $i4 = r0.<java.time.Period: int years>;
+
+        $l5 = (long) $i4;
+
+        $b6 = l1 cmp $l5;
+
+        if $b6 != 0 goto label1;
+
+        $i9 = r0.<java.time.Period: int months>;
+
+        if i3 != $i9 goto label1;
+
+        return r0;
+
+     label1:
+        $i7 = staticinvoke <java.lang.Math: int toIntExact(long)>(l1);
+
+        $i8 = r0.<java.time.Period: int days>;
+
+        $r1 = staticinvoke <java.time.Period: java.time.Period create(int,int,int)>($i7, i3, $i8);
+
+        return $r1;
+    }
+
+    public long toTotalMonths()
+    {
+        java.time.Period r0;
+        int $i0, $i2;
+        long $l1, $l3, $l4, $l5;
+
+        r0 := @this: java.time.Period;
+
+        $i0 = r0.<java.time.Period: int years>;
+
+        $l1 = (long) $i0;
+
+        $l4 = $l1 * 12L;
+
+        $i2 = r0.<java.time.Period: int months>;
+
+        $l3 = (long) $i2;
+
+        $l5 = $l4 + $l3;
+
+        return $l5;
+    }
+
+    public java.time.temporal.Temporal addTo(java.time.temporal.Temporal)
+    {
+        java.time.Period r0;
+        long $l1, $l4, $l7;
+        java.time.temporal.ChronoUnit $r1, $r2, $r3;
+        byte $b2;
+        int $i0, $i3, $i5, $i6, $i8;
+        java.time.temporal.Temporal r4;
+
+        r0 := @this: java.time.Period;
+
+        r4 := @parameter0: java.time.temporal.Temporal;
+
+        specialinvoke r0.<java.time.Period: void validateChrono(java.time.temporal.TemporalAccessor)>(r4);
+
+        $i0 = r0.<java.time.Period: int months>;
+
+        if $i0 != 0 goto label1;
+
+        $i5 = r0.<java.time.Period: int years>;
+
+        if $i5 == 0 goto label2;
+
+        $i6 = r0.<java.time.Period: int years>;
+
+        $l7 = (long) $i6;
+
+        $r3 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit YEARS>;
+
+        r4 = interfaceinvoke r4.<java.time.temporal.Temporal: java.time.temporal.Temporal plus(long,java.time.temporal.TemporalUnit)>($l7, $r3);
+
+        goto label2;
+
+     label1:
+        $l1 = virtualinvoke r0.<java.time.Period: long toTotalMonths()>();
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 == 0 goto label2;
+
+        $r2 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit MONTHS>;
+
+        r4 = interfaceinvoke r4.<java.time.temporal.Temporal: java.time.temporal.Temporal plus(long,java.time.temporal.TemporalUnit)>($l1, $r2);
+
+     label2:
+        $i8 = r0.<java.time.Period: int days>;
+
+        if $i8 == 0 goto label3;
+
+        $i3 = r0.<java.time.Period: int days>;
+
+        $l4 = (long) $i3;
+
+        $r1 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit DAYS>;
+
+        r4 = interfaceinvoke r4.<java.time.temporal.Temporal: java.time.temporal.Temporal plus(long,java.time.temporal.TemporalUnit)>($l4, $r1);
+
+     label3:
+        return r4;
+    }
+
+    public java.time.temporal.Temporal subtractFrom(java.time.temporal.Temporal)
+    {
+        java.time.Period r0;
+        long $l1, $l4, $l7;
+        java.time.temporal.ChronoUnit $r1, $r2, $r3;
+        byte $b2;
+        int $i0, $i3, $i5, $i6, $i8;
+        java.time.temporal.Temporal r4;
+
+        r0 := @this: java.time.Period;
+
+        r4 := @parameter0: java.time.temporal.Temporal;
+
+        specialinvoke r0.<java.time.Period: void validateChrono(java.time.temporal.TemporalAccessor)>(r4);
+
+        $i0 = r0.<java.time.Period: int months>;
+
+        if $i0 != 0 goto label1;
+
+        $i5 = r0.<java.time.Period: int years>;
+
+        if $i5 == 0 goto label2;
+
+        $i6 = r0.<java.time.Period: int years>;
+
+        $l7 = (long) $i6;
+
+        $r3 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit YEARS>;
+
+        r4 = interfaceinvoke r4.<java.time.temporal.Temporal: java.time.temporal.Temporal minus(long,java.time.temporal.TemporalUnit)>($l7, $r3);
+
+        goto label2;
+
+     label1:
+        $l1 = virtualinvoke r0.<java.time.Period: long toTotalMonths()>();
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 == 0 goto label2;
+
+        $r2 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit MONTHS>;
+
+        r4 = interfaceinvoke r4.<java.time.temporal.Temporal: java.time.temporal.Temporal minus(long,java.time.temporal.TemporalUnit)>($l1, $r2);
+
+     label2:
+        $i8 = r0.<java.time.Period: int days>;
+
+        if $i8 == 0 goto label3;
+
+        $i3 = r0.<java.time.Period: int days>;
+
+        $l4 = (long) $i3;
+
+        $r1 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit DAYS>;
+
+        r4 = interfaceinvoke r4.<java.time.temporal.Temporal: java.time.temporal.Temporal minus(long,java.time.temporal.TemporalUnit)>($l4, $r1);
+
+     label3:
+        return r4;
+    }
+
+    private void validateChrono(java.time.temporal.TemporalAccessor)
+    {
+        java.time.Period r11;
+        java.time.temporal.TemporalQuery $r1;
+        java.time.temporal.TemporalAccessor r0;
+        java.time.chrono.Chronology r3;
+        java.time.chrono.IsoChronology $r4;
+        java.lang.Object $r2;
+        java.lang.StringBuilder $r6, $r7, $r9;
+        java.lang.String $r8, $r10;
+        java.time.DateTimeException $r5;
+        boolean $z0;
+
+        r11 := @this: java.time.Period;
+
+        r0 := @parameter0: java.time.temporal.TemporalAccessor;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "temporal");
+
+        $r1 = staticinvoke <java.time.temporal.TemporalQueries: java.time.temporal.TemporalQuery chronology()>();
+
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalAccessor: java.lang.Object query(java.time.temporal.TemporalQuery)>($r1);
+
+        r3 = (java.time.chrono.Chronology) $r2;
+
+        if r3 == null goto label1;
+
+        $r4 = <java.time.chrono.IsoChronology: java.time.chrono.IsoChronology INSTANCE>;
+
+        $z0 = virtualinvoke $r4.<java.time.chrono.IsoChronology: boolean equals(java.lang.Object)>(r3);
+
+        if $z0 != 0 goto label1;
+
+        $r5 = new java.time.DateTimeException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Chronology mismatch, expected: ISO, actual: ");
+
+        $r8 = interfaceinvoke r3.<java.time.chrono.Chronology: java.lang.String getId()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.time.DateTimeException: void <init>(java.lang.String)>($r10);
+
+        throw $r5;
+
+     label1:
+        return;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        java.time.Period r0, r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.lang.Object r1;
+        boolean $z0, $z1;
+
+        r0 := @this: java.time.Period;
+
+        r1 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        $z0 = r1 instanceof java.time.Period;
+
+        if $z0 == 0 goto label4;
+
+        r2 = (java.time.Period) r1;
+
+        $i1 = r0.<java.time.Period: int years>;
+
+        $i0 = r2.<java.time.Period: int years>;
+
+        if $i1 != $i0 goto label2;
+
+        $i3 = r0.<java.time.Period: int months>;
+
+        $i2 = r2.<java.time.Period: int months>;
+
+        if $i3 != $i2 goto label2;
+
+        $i5 = r0.<java.time.Period: int days>;
+
+        $i4 = r2.<java.time.Period: int days>;
+
+        if $i5 != $i4 goto label2;
+
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        return $z1;
+
+     label4:
+        return 0;
+    }
+
+    public int hashCode()
+    {
+        java.time.Period r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6;
+
+        r0 := @this: java.time.Period;
+
+        $i1 = r0.<java.time.Period: int years>;
+
+        $i0 = r0.<java.time.Period: int months>;
+
+        $i2 = staticinvoke <java.lang.Integer: int rotateLeft(int,int)>($i0, 8);
+
+        $i4 = $i1 + $i2;
+
+        $i3 = r0.<java.time.Period: int days>;
+
+        $i5 = staticinvoke <java.lang.Integer: int rotateLeft(int,int)>($i3, 16);
+
+        $i6 = $i4 + $i5;
+
+        return $i6;
+    }
+
+    public java.lang.String toString()
+    {
+        java.time.Period r0, $r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.lang.StringBuilder $r2, $r4, $r5, $r6;
+        java.lang.String $r3;
+
+        r0 := @this: java.time.Period;
+
+        $r1 = <java.time.Period: java.time.Period ZERO>;
+
+        if r0 != $r1 goto label1;
+
+        return "P0D";
+
+     label1:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(80);
+
+        $i0 = r0.<java.time.Period: int years>;
+
+        if $i0 == 0 goto label2;
+
+        $i5 = r0.<java.time.Period: int years>;
+
+        $r6 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(89);
+
+     label2:
+        $i1 = r0.<java.time.Period: int months>;
+
+        if $i1 == 0 goto label3;
+
+        $i4 = r0.<java.time.Period: int months>;
+
+        $r5 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(77);
+
+     label3:
+        $i2 = r0.<java.time.Period: int days>;
+
+        if $i2 == 0 goto label4;
+
+        $i3 = r0.<java.time.Period: int days>;
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(68);
+
+     label4:
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+    }
+
+    private java.lang.Object writeReplace()
+    {
+        java.time.Period r1;
+        java.time.Ser $r0;
+
+        r1 := @this: java.time.Period;
+
+        $r0 = new java.time.Ser;
+
+        specialinvoke $r0.<java.time.Ser: void <init>(byte,java.lang.Object)>(14, r1);
+
+        return $r0;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.InvalidObjectException
+    {
+        java.time.Period r1;
+        java.io.ObjectInputStream r2;
+        java.io.InvalidObjectException $r0;
+
+        r1 := @this: java.time.Period;
+
+        r2 := @parameter0: java.io.ObjectInputStream;
+
+        $r0 = new java.io.InvalidObjectException;
+
+        specialinvoke $r0.<java.io.InvalidObjectException: void <init>(java.lang.String)>("Deserialization via serialization delegate");
+
+        throw $r0;
+    }
+
+    void writeExternal(java.io.DataOutput) throws java.io.IOException
+    {
+        java.time.Period r1;
+        java.io.DataOutput r0;
+        int $i0, $i1, $i2;
+
+        r1 := @this: java.time.Period;
+
+        r0 := @parameter0: java.io.DataOutput;
+
+        $i0 = r1.<java.time.Period: int years>;
+
+        interfaceinvoke r0.<java.io.DataOutput: void writeInt(int)>($i0);
+
+        $i1 = r1.<java.time.Period: int months>;
+
+        interfaceinvoke r0.<java.io.DataOutput: void writeInt(int)>($i1);
+
+        $i2 = r1.<java.time.Period: int days>;
+
+        interfaceinvoke r0.<java.io.DataOutput: void writeInt(int)>($i2);
+
+        return;
+    }
+
+    static java.time.Period readExternal(java.io.DataInput) throws java.io.IOException
+    {
+        java.time.Period $r1;
+        java.io.DataInput r0;
+        int $i0, $i1, $i2;
+
+        r0 := @parameter0: java.io.DataInput;
+
+        $i0 = interfaceinvoke r0.<java.io.DataInput: int readInt()>();
+
+        $i1 = interfaceinvoke r0.<java.io.DataInput: int readInt()>();
+
+        $i2 = interfaceinvoke r0.<java.io.DataInput: int readInt()>();
+
+        $r1 = staticinvoke <java.time.Period: java.time.Period of(int,int,int)>($i0, $i1, $i2);
+
+        return $r1;
+    }
+
+    public volatile java.time.chrono.ChronoPeriod normalized()
+    {
+        java.time.Period r0, $r1;
+
+        r0 := @this: java.time.Period;
+
+        $r1 = virtualinvoke r0.<java.time.Period: java.time.Period normalized()>();
+
+        return $r1;
+    }
+
+    public volatile java.time.chrono.ChronoPeriod negated()
+    {
+        java.time.Period r0, $r1;
+
+        r0 := @this: java.time.Period;
+
+        $r1 = virtualinvoke r0.<java.time.Period: java.time.Period negated()>();
+
+        return $r1;
+    }
+
+    public volatile java.time.chrono.ChronoPeriod multipliedBy(int)
+    {
+        java.time.Period r0, $r1;
+        int i0;
+
+        r0 := @this: java.time.Period;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<java.time.Period: java.time.Period multipliedBy(int)>(i0);
+
+        return $r1;
+    }
+
+    public volatile java.time.chrono.ChronoPeriod minus(java.time.temporal.TemporalAmount)
+    {
+        java.time.Period r0, $r2;
+        java.time.temporal.TemporalAmount r1;
+
+        r0 := @this: java.time.Period;
+
+        r1 := @parameter0: java.time.temporal.TemporalAmount;
+
+        $r2 = virtualinvoke r0.<java.time.Period: java.time.Period minus(java.time.temporal.TemporalAmount)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.chrono.ChronoPeriod plus(java.time.temporal.TemporalAmount)
+    {
+        java.time.Period r0, $r2;
+        java.time.temporal.TemporalAmount r1;
+
+        r0 := @this: java.time.Period;
+
+        r1 := @parameter0: java.time.temporal.TemporalAmount;
+
+        $r2 = virtualinvoke r0.<java.time.Period: java.time.Period plus(java.time.temporal.TemporalAmount)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.chrono.Chronology getChronology()
+    {
+        java.time.Period r0;
+        java.time.chrono.IsoChronology $r1;
+
+        r0 := @this: java.time.Period;
+
+        $r1 = virtualinvoke r0.<java.time.Period: java.time.chrono.IsoChronology getChronology()>();
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        java.time.Period $r0;
+        java.util.List $r6, $r7;
+        java.time.temporal.ChronoUnit $r3, $r4, $r5;
+        java.time.temporal.TemporalUnit[] $r2;
+        java.util.regex.Pattern $r1;
+
+        <java.time.Period: long serialVersionUID> = -3587258372562876L;
+
+        $r0 = new java.time.Period;
+
+        specialinvoke $r0.<java.time.Period: void <init>(int,int,int)>(0, 0, 0);
+
+        <java.time.Period: java.time.Period ZERO> = $r0;
+
+        $r1 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String,int)>("([-+]?)P(?:([-+]?[0-9]+)Y)?(?:([-+]?[0-9]+)M)?(?:([-+]?[0-9]+)W)?(?:([-+]?[0-9]+)D)?", 2);
+
+        <java.time.Period: java.util.regex.Pattern PATTERN> = $r1;
+
+        $r2 = newarray (java.time.temporal.TemporalUnit)[3];
+
+        $r3 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit YEARS>;
+
+        $r2[0] = $r3;
+
+        $r4 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit MONTHS>;
+
+        $r2[1] = $r4;
+
+        $r5 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit DAYS>;
+
+        $r2[2] = $r5;
+
+        $r6 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r2);
+
+        $r7 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r6);
+
+        <java.time.Period: java.util.List SUPPORTED_UNITS> = $r7;
+
+        return;
+    }
+}

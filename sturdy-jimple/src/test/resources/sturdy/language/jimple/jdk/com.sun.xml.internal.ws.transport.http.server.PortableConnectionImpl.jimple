@@ -1,0 +1,775 @@
+final class com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl extends com.sun.xml.internal.ws.transport.http.WSHTTPConnection implements com.sun.xml.internal.ws.api.server.WebServiceContextDelegate
+{
+    private final javax.xml.ws.spi.http.HttpExchange httpExchange;
+    private int status;
+    private final com.sun.xml.internal.ws.transport.http.HttpAdapter adapter;
+    private boolean outputWritten;
+    private static final com.oracle.webservices.internal.api.message.BasePropertySet$PropertyMap model;
+    static final boolean $assertionsDisabled;
+
+    public void <init>(com.sun.xml.internal.ws.transport.http.HttpAdapter, javax.xml.ws.spi.http.HttpExchange)
+    {
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r1;
+        javax.xml.ws.spi.http.HttpExchange r2;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        r2 := @parameter1: javax.xml.ws.spi.http.HttpExchange;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: com.sun.xml.internal.ws.transport.http.HttpAdapter adapter> = r1;
+
+        r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange> = r2;
+
+        return;
+    }
+
+    public java.util.Map getRequestHeaders()
+    {
+        javax.xml.ws.spi.http.HttpExchange $r1;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+        java.util.Map $r2;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<javax.xml.ws.spi.http.HttpExchange: java.util.Map getRequestHeaders()>();
+
+        return $r2;
+    }
+
+    public java.lang.String getRequestHeader(java.lang.String)
+    {
+        java.lang.String r1, $r3;
+        javax.xml.ws.spi.http.HttpExchange $r2;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r3 = virtualinvoke $r2.<javax.xml.ws.spi.http.HttpExchange: java.lang.String getRequestHeader(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    public void setResponseHeaders(java.util.Map)
+    {
+        javax.xml.ws.spi.http.HttpExchange $r1;
+        java.util.ArrayList $r12;
+        java.util.Map $r2, r3;
+        java.lang.String r9;
+        boolean $z0, $z1, $z2;
+        java.util.Map$Entry r7;
+        java.util.Iterator $r5;
+        java.util.Set $r4;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+        java.util.List r11;
+        java.lang.Object $r6, $r8, $r10;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        r3 := @parameter0: java.util.Map;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<javax.xml.ws.spi.http.HttpExchange: java.util.Map getResponseHeaders()>();
+
+        interfaceinvoke $r2.<java.util.Map: void clear()>();
+
+        $r4 = interfaceinvoke r3.<java.util.Map: java.util.Set entrySet()>();
+
+        $r5 = interfaceinvoke $r4.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (java.util.Map$Entry) $r6;
+
+        $r8 = interfaceinvoke r7.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        r9 = (java.lang.String) $r8;
+
+        $r10 = interfaceinvoke r7.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        r11 = (java.util.List) $r10;
+
+        $z1 = virtualinvoke r9.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("Content-Length");
+
+        if $z1 != 0 goto label2;
+
+        $z2 = virtualinvoke r9.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("Content-Type");
+
+        if $z2 != 0 goto label2;
+
+        $r12 = new java.util.ArrayList;
+
+        specialinvoke $r12.<java.util.ArrayList: void <init>(java.util.Collection)>(r11);
+
+        interfaceinvoke $r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r9, $r12);
+
+     label2:
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    public void setResponseHeader(java.lang.String, java.util.List)
+    {
+        java.util.List r4;
+        java.util.Map $r2;
+        java.lang.String r3;
+        javax.xml.ws.spi.http.HttpExchange $r1;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        r3 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.util.List;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<javax.xml.ws.spi.http.HttpExchange: java.util.Map getResponseHeaders()>();
+
+        interfaceinvoke $r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r3, r4);
+
+        return;
+    }
+
+    public java.util.Set getRequestHeaderNames()
+    {
+        java.util.Map $r2;
+        java.util.Set $r3;
+        javax.xml.ws.spi.http.HttpExchange $r1;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<javax.xml.ws.spi.http.HttpExchange: java.util.Map getRequestHeaders()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.util.Set keySet()>();
+
+        return $r3;
+    }
+
+    public java.util.List getRequestHeaderValues(java.lang.String)
+    {
+        java.util.List $r5;
+        java.util.Map $r2;
+        java.lang.Object $r4;
+        java.lang.String r3;
+        javax.xml.ws.spi.http.HttpExchange $r1;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        r3 := @parameter0: java.lang.String;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<javax.xml.ws.spi.http.HttpExchange: java.util.Map getRequestHeaders()>();
+
+        $r4 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r3);
+
+        $r5 = (java.util.List) $r4;
+
+        return $r5;
+    }
+
+    public java.util.Map getResponseHeaders()
+    {
+        javax.xml.ws.spi.http.HttpExchange $r1;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+        java.util.Map $r2;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<javax.xml.ws.spi.http.HttpExchange: java.util.Map getResponseHeaders()>();
+
+        return $r2;
+    }
+
+    public void setContentTypeResponseHeader(java.lang.String)
+    {
+        java.lang.String r1;
+        javax.xml.ws.spi.http.HttpExchange $r2;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        virtualinvoke $r2.<javax.xml.ws.spi.http.HttpExchange: void addResponseHeader(java.lang.String,java.lang.String)>("Content-Type", r1);
+
+        return;
+    }
+
+    public void setStatus(int)
+    {
+        int i0;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        i0 := @parameter0: int;
+
+        r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: int status> = i0;
+
+        return;
+    }
+
+    public int getStatus()
+    {
+        int $i0;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        $i0 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: int status>;
+
+        return $i0;
+    }
+
+    public java.io.InputStream getInput() throws java.io.IOException
+    {
+        javax.xml.ws.spi.http.HttpExchange $r1;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+        java.io.InputStream $r2;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<javax.xml.ws.spi.http.HttpExchange: java.io.InputStream getRequestBody()>();
+
+        return $r2;
+    }
+
+    public java.io.OutputStream getOutput() throws java.io.IOException
+    {
+        java.io.OutputStream $r3;
+        java.lang.AssertionError $r4;
+        javax.xml.ws.spi.http.HttpExchange $r1, $r2;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+        int $i0;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        $z0 = <com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: boolean outputWritten>;
+
+        if $z1 == 0 goto label1;
+
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>()>();
+
+        throw $r4;
+
+     label1:
+        r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: boolean outputWritten> = 1;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $i0 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: int getStatus()>();
+
+        virtualinvoke $r1.<javax.xml.ws.spi.http.HttpExchange: void setStatus(int)>($i0);
+
+        $r2 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r3 = virtualinvoke $r2.<javax.xml.ws.spi.http.HttpExchange: java.io.OutputStream getResponseBody()>();
+
+        return $r3;
+    }
+
+    public com.sun.xml.internal.ws.api.server.WebServiceContextDelegate getWebServiceContextDelegate()
+    {
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        return r0;
+    }
+
+    public java.security.Principal getUserPrincipal(com.sun.xml.internal.ws.api.message.Packet)
+    {
+        java.security.Principal $r2;
+        com.sun.xml.internal.ws.api.message.Packet r3;
+        javax.xml.ws.spi.http.HttpExchange $r1;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        r3 := @parameter0: com.sun.xml.internal.ws.api.message.Packet;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<javax.xml.ws.spi.http.HttpExchange: java.security.Principal getUserPrincipal()>();
+
+        return $r2;
+    }
+
+    public boolean isUserInRole(com.sun.xml.internal.ws.api.message.Packet, java.lang.String)
+    {
+        com.sun.xml.internal.ws.api.message.Packet r3;
+        java.lang.String r1;
+        javax.xml.ws.spi.http.HttpExchange $r2;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        r3 := @parameter0: com.sun.xml.internal.ws.api.message.Packet;
+
+        r1 := @parameter1: java.lang.String;
+
+        $r2 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $z0 = virtualinvoke $r2.<javax.xml.ws.spi.http.HttpExchange: boolean isUserInRole(java.lang.String)>(r1);
+
+        return $z0;
+    }
+
+    public java.lang.String getEPRAddress(com.sun.xml.internal.ws.api.message.Packet, com.sun.xml.internal.ws.api.server.WSEndpoint)
+    {
+        com.sun.xml.internal.ws.api.server.WSEndpoint r4;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+        com.sun.xml.internal.ws.transport.http.HttpAdapterList $r2;
+        javax.xml.ws.WebServiceException $r11;
+        com.sun.xml.internal.ws.api.message.Packet r14;
+        com.sun.xml.internal.ws.api.server.PortAddressResolver $r6;
+        java.lang.Class $r5;
+        java.lang.String $r3, $r9, $r10, $r13;
+        javax.xml.namespace.QName $r7, $r8, $r12;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        r14 := @parameter0: com.sun.xml.internal.ws.api.message.Packet;
+
+        r4 := @parameter1: com.sun.xml.internal.ws.api.server.WSEndpoint;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: com.sun.xml.internal.ws.transport.http.HttpAdapter adapter>;
+
+        $r2 = $r1.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.transport.http.HttpAdapterList owner>;
+
+        $r3 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: java.lang.String getBaseAddress()>();
+
+        $r5 = virtualinvoke r4.<com.sun.xml.internal.ws.api.server.WSEndpoint: java.lang.Class getImplementationClass()>();
+
+        $r6 = virtualinvoke $r2.<com.sun.xml.internal.ws.transport.http.HttpAdapterList: com.sun.xml.internal.ws.api.server.PortAddressResolver createPortAddressResolver(java.lang.String,java.lang.Class)>($r3, $r5);
+
+        $r7 = virtualinvoke r4.<com.sun.xml.internal.ws.api.server.WSEndpoint: javax.xml.namespace.QName getServiceName()>();
+
+        $r8 = virtualinvoke r4.<com.sun.xml.internal.ws.api.server.WSEndpoint: javax.xml.namespace.QName getPortName()>();
+
+        $r9 = virtualinvoke $r8.<javax.xml.namespace.QName: java.lang.String getLocalPart()>();
+
+        $r10 = virtualinvoke $r6.<com.sun.xml.internal.ws.api.server.PortAddressResolver: java.lang.String getAddressFor(javax.xml.namespace.QName,java.lang.String)>($r7, $r9);
+
+        if $r10 != null goto label1;
+
+        $r11 = new javax.xml.ws.WebServiceException;
+
+        $r12 = virtualinvoke r4.<com.sun.xml.internal.ws.api.server.WSEndpoint: javax.xml.namespace.QName getPortName()>();
+
+        $r13 = staticinvoke <com.sun.xml.internal.ws.resources.WsservletMessages: java.lang.String SERVLET_NO_ADDRESS_AVAILABLE(java.lang.Object)>($r12);
+
+        specialinvoke $r11.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>($r13);
+
+        throw $r11;
+
+     label1:
+        return $r10;
+    }
+
+    public java.lang.Object getServletContext()
+    {
+        java.lang.Object $r2;
+        javax.xml.ws.spi.http.HttpExchange $r1;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<javax.xml.ws.spi.http.HttpExchange: java.lang.Object getAttribute(java.lang.String)>("javax.xml.ws.servlet.context");
+
+        return $r2;
+    }
+
+    public java.lang.Object getServletResponse()
+    {
+        java.lang.Object $r2;
+        javax.xml.ws.spi.http.HttpExchange $r1;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<javax.xml.ws.spi.http.HttpExchange: java.lang.Object getAttribute(java.lang.String)>("javax.xml.ws.servlet.response");
+
+        return $r2;
+    }
+
+    public java.lang.Object getServletRequest()
+    {
+        java.lang.Object $r2;
+        javax.xml.ws.spi.http.HttpExchange $r1;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<javax.xml.ws.spi.http.HttpExchange: java.lang.Object getAttribute(java.lang.String)>("javax.xml.ws.servlet.request");
+
+        return $r2;
+    }
+
+    public java.lang.String getWSDLAddress(com.sun.xml.internal.ws.api.message.Packet, com.sun.xml.internal.ws.api.server.WSEndpoint)
+    {
+        com.sun.xml.internal.ws.api.server.WSEndpoint r2, $r5;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+        com.sun.xml.internal.ws.api.message.Packet r1;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLPort $r6;
+        java.lang.StringBuilder $r7, $r8, $r9;
+        java.lang.String $r3, $r10;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter $r4;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.api.message.Packet;
+
+        r2 := @parameter1: com.sun.xml.internal.ws.api.server.WSEndpoint;
+
+        $r3 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: java.lang.String getEPRAddress(com.sun.xml.internal.ws.api.message.Packet,com.sun.xml.internal.ws.api.server.WSEndpoint)>(r1, r2);
+
+        $r4 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: com.sun.xml.internal.ws.transport.http.HttpAdapter adapter>;
+
+        $r5 = virtualinvoke $r4.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.api.server.WSEndpoint getEndpoint()>();
+
+        $r6 = virtualinvoke $r5.<com.sun.xml.internal.ws.api.server.WSEndpoint: com.sun.xml.internal.ws.api.model.wsdl.WSDLPort getPort()>();
+
+        if $r6 == null goto label1;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("?wsdl");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r10;
+
+     label1:
+        return null;
+    }
+
+    public boolean isSecure()
+    {
+        java.lang.String $r2;
+        javax.xml.ws.spi.http.HttpExchange $r1;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<javax.xml.ws.spi.http.HttpExchange: java.lang.String getScheme()>();
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("https");
+
+        return $z0;
+    }
+
+    public java.lang.String getRequestMethod()
+    {
+        java.lang.String $r2;
+        javax.xml.ws.spi.http.HttpExchange $r1;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<javax.xml.ws.spi.http.HttpExchange: java.lang.String getRequestMethod()>();
+
+        return $r2;
+    }
+
+    public java.lang.String getQueryString()
+    {
+        java.lang.String $r2;
+        javax.xml.ws.spi.http.HttpExchange $r1;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<javax.xml.ws.spi.http.HttpExchange: java.lang.String getQueryString()>();
+
+        return $r2;
+    }
+
+    public java.lang.String getPathInfo()
+    {
+        java.lang.String $r2;
+        javax.xml.ws.spi.http.HttpExchange $r1;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<javax.xml.ws.spi.http.HttpExchange: java.lang.String getPathInfo()>();
+
+        return $r2;
+    }
+
+    public javax.xml.ws.spi.http.HttpExchange getExchange()
+    {
+        javax.xml.ws.spi.http.HttpExchange $r1;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        return $r1;
+    }
+
+    public java.lang.String getBaseAddress()
+    {
+        javax.xml.ws.spi.http.HttpExchange $r2, $r4, $r7, $r9;
+        java.net.InetSocketAddress $r5, $r8;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r1;
+        int $i0;
+        java.lang.StringBuilder $r0;
+        java.lang.String $r3, $r6, $r10, $r11;
+
+        r1 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = r1.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r3 = virtualinvoke $r2.<javax.xml.ws.spi.http.HttpExchange: java.lang.String getScheme()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("://");
+
+        $r4 = r1.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r5 = virtualinvoke $r4.<javax.xml.ws.spi.http.HttpExchange: java.net.InetSocketAddress getLocalAddress()>();
+
+        $r6 = virtualinvoke $r5.<java.net.InetSocketAddress: java.lang.String getHostName()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r7 = r1.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r8 = virtualinvoke $r7.<javax.xml.ws.spi.http.HttpExchange: java.net.InetSocketAddress getLocalAddress()>();
+
+        $i0 = virtualinvoke $r8.<java.net.InetSocketAddress: int getPort()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r9 = r1.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r10 = virtualinvoke $r9.<javax.xml.ws.spi.http.HttpExchange: java.lang.String getContextPath()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r11 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r11;
+    }
+
+    public java.lang.String getProtocol()
+    {
+        java.lang.String $r2;
+        javax.xml.ws.spi.http.HttpExchange $r1;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<javax.xml.ws.spi.http.HttpExchange: java.lang.String getProtocol()>();
+
+        return $r2;
+    }
+
+    public void setContentLengthResponseHeader(int)
+    {
+        int i0;
+        java.lang.StringBuilder $r1, $r3, $r4;
+        java.lang.String $r5;
+        javax.xml.ws.spi.http.HttpExchange $r2;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        i0 := @parameter0: int;
+
+        $r2 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<javax.xml.ws.spi.http.HttpExchange: void addResponseHeader(java.lang.String,java.lang.String)>("Content-Length", $r5);
+
+        return;
+    }
+
+    public java.lang.String getRequestURI()
+    {
+        java.lang.String $r2, $r3;
+        javax.xml.ws.spi.http.HttpExchange $r1;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<javax.xml.ws.spi.http.HttpExchange: java.lang.String getRequestURI()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.String: java.lang.String toString()>();
+
+        return $r3;
+    }
+
+    public java.lang.String getRequestScheme()
+    {
+        java.lang.String $r2;
+        javax.xml.ws.spi.http.HttpExchange $r1;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<javax.xml.ws.spi.http.HttpExchange: java.lang.String getScheme()>();
+
+        return $r2;
+    }
+
+    public java.lang.String getServerName()
+    {
+        java.lang.String $r3;
+        javax.xml.ws.spi.http.HttpExchange $r1;
+        java.net.InetSocketAddress $r2;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<javax.xml.ws.spi.http.HttpExchange: java.net.InetSocketAddress getLocalAddress()>();
+
+        $r3 = virtualinvoke $r2.<java.net.InetSocketAddress: java.lang.String getHostName()>();
+
+        return $r3;
+    }
+
+    public int getServerPort()
+    {
+        int $i0;
+        javax.xml.ws.spi.http.HttpExchange $r1;
+        java.net.InetSocketAddress $r2;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: javax.xml.ws.spi.http.HttpExchange httpExchange>;
+
+        $r2 = virtualinvoke $r1.<javax.xml.ws.spi.http.HttpExchange: java.net.InetSocketAddress getLocalAddress()>();
+
+        $i0 = virtualinvoke $r2.<java.net.InetSocketAddress: int getPort()>();
+
+        return $i0;
+    }
+
+    protected com.oracle.webservices.internal.api.message.BasePropertySet$PropertyMap getPropertyMap()
+    {
+        com.oracle.webservices.internal.api.message.BasePropertySet$PropertyMap $r0;
+        com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl r1;
+
+        r1 := @this: com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl;
+
+        $r0 = <com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: com.oracle.webservices.internal.api.message.BasePropertySet$PropertyMap model>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        com.oracle.webservices.internal.api.message.BasePropertySet$PropertyMap $r1;
+        boolean $z0, $z1;
+
+        $r0 = class "Lcom/sun/xml/internal/ws/transport/http/server/PortableConnectionImpl;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: boolean $assertionsDisabled> = $z1;
+
+        $r1 = staticinvoke <com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: com.oracle.webservices.internal.api.message.BasePropertySet$PropertyMap parse(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/transport/http/server/PortableConnectionImpl;");
+
+        <com.sun.xml.internal.ws.transport.http.server.PortableConnectionImpl: com.oracle.webservices.internal.api.message.BasePropertySet$PropertyMap model> = $r1;
+
+        return;
+    }
+}

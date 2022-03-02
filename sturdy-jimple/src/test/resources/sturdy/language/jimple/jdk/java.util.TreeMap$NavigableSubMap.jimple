@@ -1,0 +1,1202 @@
+abstract class java.util.TreeMap$NavigableSubMap extends java.util.AbstractMap implements java.util.NavigableMap, java.io.Serializable
+{
+    private static final long serialVersionUID;
+    final java.util.TreeMap m;
+    final java.lang.Object lo;
+    final java.lang.Object hi;
+    final boolean fromStart;
+    final boolean toEnd;
+    final boolean loInclusive;
+    final boolean hiInclusive;
+    transient java.util.NavigableMap descendingMapView;
+    transient java.util.TreeMap$NavigableSubMap$EntrySetView entrySetView;
+    transient java.util.TreeMap$KeySet navigableKeySetView;
+
+    void <init>(java.util.TreeMap, boolean, java.lang.Object, boolean, boolean, java.lang.Object, boolean)
+    {
+        java.lang.IllegalArgumentException $r4;
+        java.util.TreeMap r1;
+        java.util.TreeMap$NavigableSubMap r0;
+        int $i0;
+        java.lang.Object r2, r3;
+        boolean z0, z1, z2, z3;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 := @parameter0: java.util.TreeMap;
+
+        z0 := @parameter1: boolean;
+
+        r2 := @parameter2: java.lang.Object;
+
+        z2 := @parameter3: boolean;
+
+        z1 := @parameter4: boolean;
+
+        r3 := @parameter5: java.lang.Object;
+
+        z3 := @parameter6: boolean;
+
+        specialinvoke r0.<java.util.AbstractMap: void <init>()>();
+
+        if z0 != 0 goto label1;
+
+        if z1 != 0 goto label1;
+
+        $i0 = virtualinvoke r1.<java.util.TreeMap: int compare(java.lang.Object,java.lang.Object)>(r2, r3);
+
+        if $i0 <= 0 goto label3;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("fromKey > toKey");
+
+        throw $r4;
+
+     label1:
+        if z0 != 0 goto label2;
+
+        virtualinvoke r1.<java.util.TreeMap: int compare(java.lang.Object,java.lang.Object)>(r2, r2);
+
+     label2:
+        if z1 != 0 goto label3;
+
+        virtualinvoke r1.<java.util.TreeMap: int compare(java.lang.Object,java.lang.Object)>(r3, r3);
+
+     label3:
+        r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m> = r1;
+
+        r0.<java.util.TreeMap$NavigableSubMap: boolean fromStart> = z0;
+
+        r0.<java.util.TreeMap$NavigableSubMap: java.lang.Object lo> = r2;
+
+        r0.<java.util.TreeMap$NavigableSubMap: boolean loInclusive> = z2;
+
+        r0.<java.util.TreeMap$NavigableSubMap: boolean toEnd> = z1;
+
+        r0.<java.util.TreeMap$NavigableSubMap: java.lang.Object hi> = r3;
+
+        r0.<java.util.TreeMap$NavigableSubMap: boolean hiInclusive> = z3;
+
+        return;
+    }
+
+    final boolean tooLow(java.lang.Object)
+    {
+        java.util.TreeMap $r3;
+        java.util.TreeMap$NavigableSubMap r0;
+        int $i0;
+        java.lang.Object r1, $r2;
+        boolean $z0, $z1;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $z0 = r0.<java.util.TreeMap$NavigableSubMap: boolean fromStart>;
+
+        if $z0 != 0 goto label2;
+
+        $r3 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        $r2 = r0.<java.util.TreeMap$NavigableSubMap: java.lang.Object lo>;
+
+        $i0 = virtualinvoke $r3.<java.util.TreeMap: int compare(java.lang.Object,java.lang.Object)>(r1, $r2);
+
+        if $i0 < 0 goto label1;
+
+        if $i0 != 0 goto label2;
+
+        $z1 = r0.<java.util.TreeMap$NavigableSubMap: boolean loInclusive>;
+
+        if $z1 != 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    final boolean tooHigh(java.lang.Object)
+    {
+        java.util.TreeMap $r3;
+        java.util.TreeMap$NavigableSubMap r0;
+        int $i0;
+        java.lang.Object r1, $r2;
+        boolean $z0, $z1;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $z0 = r0.<java.util.TreeMap$NavigableSubMap: boolean toEnd>;
+
+        if $z0 != 0 goto label2;
+
+        $r3 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        $r2 = r0.<java.util.TreeMap$NavigableSubMap: java.lang.Object hi>;
+
+        $i0 = virtualinvoke $r3.<java.util.TreeMap: int compare(java.lang.Object,java.lang.Object)>(r1, $r2);
+
+        if $i0 > 0 goto label1;
+
+        if $i0 != 0 goto label2;
+
+        $z1 = r0.<java.util.TreeMap$NavigableSubMap: boolean hiInclusive>;
+
+        if $z1 != 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    final boolean inRange(java.lang.Object)
+    {
+        java.util.TreeMap$NavigableSubMap r0;
+        java.lang.Object r1;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $z0 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: boolean tooLow(java.lang.Object)>(r1);
+
+        if $z0 != 0 goto label1;
+
+        $z1 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: boolean tooHigh(java.lang.Object)>(r1);
+
+        if $z1 != 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+    }
+
+    final boolean inClosedRange(java.lang.Object)
+    {
+        java.util.TreeMap $r3, $r5;
+        java.util.TreeMap$NavigableSubMap r0;
+        int $i0, $i1;
+        java.lang.Object r1, $r2, $r4;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $z0 = r0.<java.util.TreeMap$NavigableSubMap: boolean fromStart>;
+
+        if $z0 != 0 goto label1;
+
+        $r5 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        $r4 = r0.<java.util.TreeMap$NavigableSubMap: java.lang.Object lo>;
+
+        $i1 = virtualinvoke $r5.<java.util.TreeMap: int compare(java.lang.Object,java.lang.Object)>(r1, $r4);
+
+        if $i1 < 0 goto label3;
+
+     label1:
+        $z1 = r0.<java.util.TreeMap$NavigableSubMap: boolean toEnd>;
+
+        if $z1 != 0 goto label2;
+
+        $r3 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        $r2 = r0.<java.util.TreeMap$NavigableSubMap: java.lang.Object hi>;
+
+        $i0 = virtualinvoke $r3.<java.util.TreeMap: int compare(java.lang.Object,java.lang.Object)>($r2, r1);
+
+        if $i0 < 0 goto label3;
+
+     label2:
+        $z2 = 1;
+
+        goto label4;
+
+     label3:
+        $z2 = 0;
+
+     label4:
+        return $z2;
+    }
+
+    final boolean inRange(java.lang.Object, boolean)
+    {
+        java.util.TreeMap$NavigableSubMap r0;
+        java.lang.Object r1;
+        boolean z0, $z1;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        z0 := @parameter1: boolean;
+
+        if z0 == 0 goto label1;
+
+        $z1 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: boolean inRange(java.lang.Object)>(r1);
+
+        goto label2;
+
+     label1:
+        $z1 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: boolean inClosedRange(java.lang.Object)>(r1);
+
+     label2:
+        return $z1;
+    }
+
+    final java.util.TreeMap$Entry absLowest()
+    {
+        java.util.TreeMap$Entry $r7, $r8;
+        java.util.TreeMap $r2, $r5, $r6;
+        java.util.TreeMap$NavigableSubMap r0;
+        java.lang.Object $r1, $r3, $r4;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        $z0 = r0.<java.util.TreeMap$NavigableSubMap: boolean fromStart>;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        $r7 = virtualinvoke $r6.<java.util.TreeMap: java.util.TreeMap$Entry getFirstEntry()>();
+
+        goto label3;
+
+     label1:
+        $z1 = r0.<java.util.TreeMap$NavigableSubMap: boolean loInclusive>;
+
+        if $z1 == 0 goto label2;
+
+        $r5 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        $r4 = r0.<java.util.TreeMap$NavigableSubMap: java.lang.Object lo>;
+
+        $r7 = virtualinvoke $r5.<java.util.TreeMap: java.util.TreeMap$Entry getCeilingEntry(java.lang.Object)>($r4);
+
+        goto label3;
+
+     label2:
+        $r2 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        $r1 = r0.<java.util.TreeMap$NavigableSubMap: java.lang.Object lo>;
+
+        $r7 = virtualinvoke $r2.<java.util.TreeMap: java.util.TreeMap$Entry getHigherEntry(java.lang.Object)>($r1);
+
+     label3:
+        if $r7 == null goto label4;
+
+        $r3 = $r7.<java.util.TreeMap$Entry: java.lang.Object key>;
+
+        $z2 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: boolean tooHigh(java.lang.Object)>($r3);
+
+        if $z2 == 0 goto label5;
+
+     label4:
+        $r8 = null;
+
+        goto label6;
+
+     label5:
+        $r8 = $r7;
+
+     label6:
+        return $r8;
+    }
+
+    final java.util.TreeMap$Entry absHighest()
+    {
+        java.util.TreeMap$Entry $r7, $r8;
+        java.util.TreeMap $r2, $r5, $r6;
+        java.util.TreeMap$NavigableSubMap r0;
+        java.lang.Object $r1, $r3, $r4;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        $z0 = r0.<java.util.TreeMap$NavigableSubMap: boolean toEnd>;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        $r7 = virtualinvoke $r6.<java.util.TreeMap: java.util.TreeMap$Entry getLastEntry()>();
+
+        goto label3;
+
+     label1:
+        $z1 = r0.<java.util.TreeMap$NavigableSubMap: boolean hiInclusive>;
+
+        if $z1 == 0 goto label2;
+
+        $r5 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        $r4 = r0.<java.util.TreeMap$NavigableSubMap: java.lang.Object hi>;
+
+        $r7 = virtualinvoke $r5.<java.util.TreeMap: java.util.TreeMap$Entry getFloorEntry(java.lang.Object)>($r4);
+
+        goto label3;
+
+     label2:
+        $r2 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        $r1 = r0.<java.util.TreeMap$NavigableSubMap: java.lang.Object hi>;
+
+        $r7 = virtualinvoke $r2.<java.util.TreeMap: java.util.TreeMap$Entry getLowerEntry(java.lang.Object)>($r1);
+
+     label3:
+        if $r7 == null goto label4;
+
+        $r3 = $r7.<java.util.TreeMap$Entry: java.lang.Object key>;
+
+        $z2 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: boolean tooLow(java.lang.Object)>($r3);
+
+        if $z2 == 0 goto label5;
+
+     label4:
+        $r8 = null;
+
+        goto label6;
+
+     label5:
+        $r8 = $r7;
+
+     label6:
+        return $r8;
+    }
+
+    final java.util.TreeMap$Entry absCeiling(java.lang.Object)
+    {
+        java.util.TreeMap$Entry $r3, $r5, $r6;
+        java.util.TreeMap $r2;
+        java.util.TreeMap$NavigableSubMap r0;
+        java.lang.Object r1, $r4;
+        boolean $z0, $z1;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $z0 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: boolean tooLow(java.lang.Object)>(r1);
+
+        if $z0 == 0 goto label1;
+
+        $r5 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap$Entry absLowest()>();
+
+        return $r5;
+
+     label1:
+        $r2 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        $r3 = virtualinvoke $r2.<java.util.TreeMap: java.util.TreeMap$Entry getCeilingEntry(java.lang.Object)>(r1);
+
+        if $r3 == null goto label2;
+
+        $r4 = $r3.<java.util.TreeMap$Entry: java.lang.Object key>;
+
+        $z1 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: boolean tooHigh(java.lang.Object)>($r4);
+
+        if $z1 == 0 goto label3;
+
+     label2:
+        $r6 = null;
+
+        goto label4;
+
+     label3:
+        $r6 = $r3;
+
+     label4:
+        return $r6;
+    }
+
+    final java.util.TreeMap$Entry absHigher(java.lang.Object)
+    {
+        java.util.TreeMap$Entry $r3, $r5, $r6;
+        java.util.TreeMap $r2;
+        java.util.TreeMap$NavigableSubMap r0;
+        java.lang.Object r1, $r4;
+        boolean $z0, $z1;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $z0 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: boolean tooLow(java.lang.Object)>(r1);
+
+        if $z0 == 0 goto label1;
+
+        $r5 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap$Entry absLowest()>();
+
+        return $r5;
+
+     label1:
+        $r2 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        $r3 = virtualinvoke $r2.<java.util.TreeMap: java.util.TreeMap$Entry getHigherEntry(java.lang.Object)>(r1);
+
+        if $r3 == null goto label2;
+
+        $r4 = $r3.<java.util.TreeMap$Entry: java.lang.Object key>;
+
+        $z1 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: boolean tooHigh(java.lang.Object)>($r4);
+
+        if $z1 == 0 goto label3;
+
+     label2:
+        $r6 = null;
+
+        goto label4;
+
+     label3:
+        $r6 = $r3;
+
+     label4:
+        return $r6;
+    }
+
+    final java.util.TreeMap$Entry absFloor(java.lang.Object)
+    {
+        java.util.TreeMap$Entry $r3, $r5, $r6;
+        java.util.TreeMap $r2;
+        java.util.TreeMap$NavigableSubMap r0;
+        java.lang.Object r1, $r4;
+        boolean $z0, $z1;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $z0 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: boolean tooHigh(java.lang.Object)>(r1);
+
+        if $z0 == 0 goto label1;
+
+        $r5 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap$Entry absHighest()>();
+
+        return $r5;
+
+     label1:
+        $r2 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        $r3 = virtualinvoke $r2.<java.util.TreeMap: java.util.TreeMap$Entry getFloorEntry(java.lang.Object)>(r1);
+
+        if $r3 == null goto label2;
+
+        $r4 = $r3.<java.util.TreeMap$Entry: java.lang.Object key>;
+
+        $z1 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: boolean tooLow(java.lang.Object)>($r4);
+
+        if $z1 == 0 goto label3;
+
+     label2:
+        $r6 = null;
+
+        goto label4;
+
+     label3:
+        $r6 = $r3;
+
+     label4:
+        return $r6;
+    }
+
+    final java.util.TreeMap$Entry absLower(java.lang.Object)
+    {
+        java.util.TreeMap$Entry $r3, $r5, $r6;
+        java.util.TreeMap $r2;
+        java.util.TreeMap$NavigableSubMap r0;
+        java.lang.Object r1, $r4;
+        boolean $z0, $z1;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $z0 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: boolean tooHigh(java.lang.Object)>(r1);
+
+        if $z0 == 0 goto label1;
+
+        $r5 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap$Entry absHighest()>();
+
+        return $r5;
+
+     label1:
+        $r2 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        $r3 = virtualinvoke $r2.<java.util.TreeMap: java.util.TreeMap$Entry getLowerEntry(java.lang.Object)>(r1);
+
+        if $r3 == null goto label2;
+
+        $r4 = $r3.<java.util.TreeMap$Entry: java.lang.Object key>;
+
+        $z1 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: boolean tooLow(java.lang.Object)>($r4);
+
+        if $z1 == 0 goto label3;
+
+     label2:
+        $r6 = null;
+
+        goto label4;
+
+     label3:
+        $r6 = $r3;
+
+     label4:
+        return $r6;
+    }
+
+    final java.util.TreeMap$Entry absHighFence()
+    {
+        java.util.TreeMap$Entry $r5;
+        java.util.TreeMap $r2, $r4;
+        java.util.TreeMap$NavigableSubMap r0;
+        java.lang.Object $r1, $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        $z0 = r0.<java.util.TreeMap$NavigableSubMap: boolean toEnd>;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = null;
+
+        goto label3;
+
+     label1:
+        $z1 = r0.<java.util.TreeMap$NavigableSubMap: boolean hiInclusive>;
+
+        if $z1 == 0 goto label2;
+
+        $r4 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        $r3 = r0.<java.util.TreeMap$NavigableSubMap: java.lang.Object hi>;
+
+        $r5 = virtualinvoke $r4.<java.util.TreeMap: java.util.TreeMap$Entry getHigherEntry(java.lang.Object)>($r3);
+
+        goto label3;
+
+     label2:
+        $r2 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        $r1 = r0.<java.util.TreeMap$NavigableSubMap: java.lang.Object hi>;
+
+        $r5 = virtualinvoke $r2.<java.util.TreeMap: java.util.TreeMap$Entry getCeilingEntry(java.lang.Object)>($r1);
+
+     label3:
+        return $r5;
+    }
+
+    final java.util.TreeMap$Entry absLowFence()
+    {
+        java.util.TreeMap$Entry $r5;
+        java.util.TreeMap $r2, $r4;
+        java.util.TreeMap$NavigableSubMap r0;
+        java.lang.Object $r1, $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        $z0 = r0.<java.util.TreeMap$NavigableSubMap: boolean fromStart>;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = null;
+
+        goto label3;
+
+     label1:
+        $z1 = r0.<java.util.TreeMap$NavigableSubMap: boolean loInclusive>;
+
+        if $z1 == 0 goto label2;
+
+        $r4 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        $r3 = r0.<java.util.TreeMap$NavigableSubMap: java.lang.Object lo>;
+
+        $r5 = virtualinvoke $r4.<java.util.TreeMap: java.util.TreeMap$Entry getLowerEntry(java.lang.Object)>($r3);
+
+        goto label3;
+
+     label2:
+        $r2 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        $r1 = r0.<java.util.TreeMap$NavigableSubMap: java.lang.Object lo>;
+
+        $r5 = virtualinvoke $r2.<java.util.TreeMap: java.util.TreeMap$Entry getFloorEntry(java.lang.Object)>($r1);
+
+     label3:
+        return $r5;
+    }
+
+    abstract java.util.TreeMap$Entry subLowest();
+
+    abstract java.util.TreeMap$Entry subHighest();
+
+    abstract java.util.TreeMap$Entry subCeiling(java.lang.Object);
+
+    abstract java.util.TreeMap$Entry subHigher(java.lang.Object);
+
+    abstract java.util.TreeMap$Entry subFloor(java.lang.Object);
+
+    abstract java.util.TreeMap$Entry subLower(java.lang.Object);
+
+    abstract java.util.Iterator keyIterator();
+
+    abstract java.util.Spliterator keySpliterator();
+
+    abstract java.util.Iterator descendingKeyIterator();
+
+    public boolean isEmpty()
+    {
+        java.util.TreeMap $r2;
+        java.util.TreeMap$NavigableSubMap r0;
+        java.util.Set $r1;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        $z0 = r0.<java.util.TreeMap$NavigableSubMap: boolean fromStart>;
+
+        if $z0 == 0 goto label1;
+
+        $z1 = r0.<java.util.TreeMap$NavigableSubMap: boolean toEnd>;
+
+        if $z1 == 0 goto label1;
+
+        $r2 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        $z2 = virtualinvoke $r2.<java.util.TreeMap: boolean isEmpty()>();
+
+        goto label2;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: java.util.Set entrySet()>();
+
+        $z2 = interfaceinvoke $r1.<java.util.Set: boolean isEmpty()>();
+
+     label2:
+        return $z2;
+    }
+
+    public int size()
+    {
+        java.util.TreeMap $r2;
+        java.util.TreeMap$NavigableSubMap r0;
+        int $i0;
+        java.util.Set $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        $z0 = r0.<java.util.TreeMap$NavigableSubMap: boolean fromStart>;
+
+        if $z0 == 0 goto label1;
+
+        $z1 = r0.<java.util.TreeMap$NavigableSubMap: boolean toEnd>;
+
+        if $z1 == 0 goto label1;
+
+        $r2 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        $i0 = virtualinvoke $r2.<java.util.TreeMap: int size()>();
+
+        goto label2;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: java.util.Set entrySet()>();
+
+        $i0 = interfaceinvoke $r1.<java.util.Set: int size()>();
+
+     label2:
+        return $i0;
+    }
+
+    public final boolean containsKey(java.lang.Object)
+    {
+        java.util.TreeMap $r2;
+        java.util.TreeMap$NavigableSubMap r0;
+        java.lang.Object r1;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $z0 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: boolean inRange(java.lang.Object)>(r1);
+
+        if $z0 == 0 goto label1;
+
+        $r2 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        $z1 = virtualinvoke $r2.<java.util.TreeMap: boolean containsKey(java.lang.Object)>(r1);
+
+        if $z1 == 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+    }
+
+    public final java.lang.Object put(java.lang.Object, java.lang.Object)
+    {
+        java.util.TreeMap $r3;
+        java.util.TreeMap$NavigableSubMap r0;
+        java.lang.Object r1, r2, $r4;
+        java.lang.IllegalArgumentException $r5;
+        boolean $z0;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.lang.Object;
+
+        $z0 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: boolean inRange(java.lang.Object)>(r1);
+
+        if $z0 != 0 goto label1;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("key out of range");
+
+        throw $r5;
+
+     label1:
+        $r3 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        $r4 = virtualinvoke $r3.<java.util.TreeMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, r2);
+
+        return $r4;
+    }
+
+    public final java.lang.Object get(java.lang.Object)
+    {
+        java.util.TreeMap $r2;
+        java.util.TreeMap$NavigableSubMap r0;
+        java.lang.Object r1, $r3;
+        boolean $z0;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $z0 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: boolean inRange(java.lang.Object)>(r1);
+
+        if $z0 != 0 goto label1;
+
+        $r3 = null;
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        $r3 = virtualinvoke $r2.<java.util.TreeMap: java.lang.Object get(java.lang.Object)>(r1);
+
+     label2:
+        return $r3;
+    }
+
+    public final java.lang.Object remove(java.lang.Object)
+    {
+        java.util.TreeMap $r2;
+        java.util.TreeMap$NavigableSubMap r0;
+        java.lang.Object r1, $r3;
+        boolean $z0;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $z0 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: boolean inRange(java.lang.Object)>(r1);
+
+        if $z0 != 0 goto label1;
+
+        $r3 = null;
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        $r3 = virtualinvoke $r2.<java.util.TreeMap: java.lang.Object remove(java.lang.Object)>(r1);
+
+     label2:
+        return $r3;
+    }
+
+    public final java.util.Map$Entry ceilingEntry(java.lang.Object)
+    {
+        java.util.Map$Entry $r3;
+        java.util.TreeMap$NavigableSubMap r0;
+        java.lang.Object r1;
+        java.util.TreeMap$Entry $r2;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap$Entry subCeiling(java.lang.Object)>(r1);
+
+        $r3 = staticinvoke <java.util.TreeMap: java.util.Map$Entry exportEntry(java.util.TreeMap$Entry)>($r2);
+
+        return $r3;
+    }
+
+    public final java.lang.Object ceilingKey(java.lang.Object)
+    {
+        java.util.TreeMap$NavigableSubMap r0;
+        java.lang.Object r1, $r3;
+        java.util.TreeMap$Entry $r2;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap$Entry subCeiling(java.lang.Object)>(r1);
+
+        $r3 = staticinvoke <java.util.TreeMap: java.lang.Object keyOrNull(java.util.TreeMap$Entry)>($r2);
+
+        return $r3;
+    }
+
+    public final java.util.Map$Entry higherEntry(java.lang.Object)
+    {
+        java.util.Map$Entry $r3;
+        java.util.TreeMap$NavigableSubMap r0;
+        java.lang.Object r1;
+        java.util.TreeMap$Entry $r2;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap$Entry subHigher(java.lang.Object)>(r1);
+
+        $r3 = staticinvoke <java.util.TreeMap: java.util.Map$Entry exportEntry(java.util.TreeMap$Entry)>($r2);
+
+        return $r3;
+    }
+
+    public final java.lang.Object higherKey(java.lang.Object)
+    {
+        java.util.TreeMap$NavigableSubMap r0;
+        java.lang.Object r1, $r3;
+        java.util.TreeMap$Entry $r2;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap$Entry subHigher(java.lang.Object)>(r1);
+
+        $r3 = staticinvoke <java.util.TreeMap: java.lang.Object keyOrNull(java.util.TreeMap$Entry)>($r2);
+
+        return $r3;
+    }
+
+    public final java.util.Map$Entry floorEntry(java.lang.Object)
+    {
+        java.util.Map$Entry $r3;
+        java.util.TreeMap$NavigableSubMap r0;
+        java.lang.Object r1;
+        java.util.TreeMap$Entry $r2;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap$Entry subFloor(java.lang.Object)>(r1);
+
+        $r3 = staticinvoke <java.util.TreeMap: java.util.Map$Entry exportEntry(java.util.TreeMap$Entry)>($r2);
+
+        return $r3;
+    }
+
+    public final java.lang.Object floorKey(java.lang.Object)
+    {
+        java.util.TreeMap$NavigableSubMap r0;
+        java.lang.Object r1, $r3;
+        java.util.TreeMap$Entry $r2;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap$Entry subFloor(java.lang.Object)>(r1);
+
+        $r3 = staticinvoke <java.util.TreeMap: java.lang.Object keyOrNull(java.util.TreeMap$Entry)>($r2);
+
+        return $r3;
+    }
+
+    public final java.util.Map$Entry lowerEntry(java.lang.Object)
+    {
+        java.util.Map$Entry $r3;
+        java.util.TreeMap$NavigableSubMap r0;
+        java.lang.Object r1;
+        java.util.TreeMap$Entry $r2;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap$Entry subLower(java.lang.Object)>(r1);
+
+        $r3 = staticinvoke <java.util.TreeMap: java.util.Map$Entry exportEntry(java.util.TreeMap$Entry)>($r2);
+
+        return $r3;
+    }
+
+    public final java.lang.Object lowerKey(java.lang.Object)
+    {
+        java.util.TreeMap$NavigableSubMap r0;
+        java.lang.Object r1, $r3;
+        java.util.TreeMap$Entry $r2;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap$Entry subLower(java.lang.Object)>(r1);
+
+        $r3 = staticinvoke <java.util.TreeMap: java.lang.Object keyOrNull(java.util.TreeMap$Entry)>($r2);
+
+        return $r3;
+    }
+
+    public final java.lang.Object firstKey()
+    {
+        java.lang.Object $r2;
+        java.util.TreeMap$Entry $r1;
+        java.util.TreeMap$NavigableSubMap r0;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        $r1 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap$Entry subLowest()>();
+
+        $r2 = staticinvoke <java.util.TreeMap: java.lang.Object key(java.util.TreeMap$Entry)>($r1);
+
+        return $r2;
+    }
+
+    public final java.lang.Object lastKey()
+    {
+        java.lang.Object $r2;
+        java.util.TreeMap$Entry $r1;
+        java.util.TreeMap$NavigableSubMap r0;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        $r1 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap$Entry subHighest()>();
+
+        $r2 = staticinvoke <java.util.TreeMap: java.lang.Object key(java.util.TreeMap$Entry)>($r1);
+
+        return $r2;
+    }
+
+    public final java.util.Map$Entry firstEntry()
+    {
+        java.util.Map$Entry $r2;
+        java.util.TreeMap$Entry $r1;
+        java.util.TreeMap$NavigableSubMap r0;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        $r1 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap$Entry subLowest()>();
+
+        $r2 = staticinvoke <java.util.TreeMap: java.util.Map$Entry exportEntry(java.util.TreeMap$Entry)>($r1);
+
+        return $r2;
+    }
+
+    public final java.util.Map$Entry lastEntry()
+    {
+        java.util.Map$Entry $r2;
+        java.util.TreeMap$Entry $r1;
+        java.util.TreeMap$NavigableSubMap r0;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        $r1 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap$Entry subHighest()>();
+
+        $r2 = staticinvoke <java.util.TreeMap: java.util.Map$Entry exportEntry(java.util.TreeMap$Entry)>($r1);
+
+        return $r2;
+    }
+
+    public final java.util.Map$Entry pollFirstEntry()
+    {
+        java.util.Map$Entry $r2;
+        java.util.TreeMap $r3;
+        java.util.TreeMap$NavigableSubMap r0;
+        java.util.TreeMap$Entry $r1;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        $r1 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap$Entry subLowest()>();
+
+        $r2 = staticinvoke <java.util.TreeMap: java.util.Map$Entry exportEntry(java.util.TreeMap$Entry)>($r1);
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        staticinvoke <java.util.TreeMap: void access$000(java.util.TreeMap,java.util.TreeMap$Entry)>($r3, $r1);
+
+     label1:
+        return $r2;
+    }
+
+    public final java.util.Map$Entry pollLastEntry()
+    {
+        java.util.Map$Entry $r2;
+        java.util.TreeMap $r3;
+        java.util.TreeMap$NavigableSubMap r0;
+        java.util.TreeMap$Entry $r1;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        $r1 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap$Entry subHighest()>();
+
+        $r2 = staticinvoke <java.util.TreeMap: java.util.Map$Entry exportEntry(java.util.TreeMap$Entry)>($r1);
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap m>;
+
+        staticinvoke <java.util.TreeMap: void access$000(java.util.TreeMap,java.util.TreeMap$Entry)>($r3, $r1);
+
+     label1:
+        return $r2;
+    }
+
+    public final java.util.NavigableSet navigableKeySet()
+    {
+        java.util.TreeMap$KeySet r1, $r2;
+        java.util.TreeMap$NavigableSubMap r0;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 = r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap$KeySet navigableKeySetView>;
+
+        if r1 == null goto label1;
+
+        $r2 = r1;
+
+        goto label2;
+
+     label1:
+        $r2 = new java.util.TreeMap$KeySet;
+
+        specialinvoke $r2.<java.util.TreeMap$KeySet: void <init>(java.util.NavigableMap)>(r0);
+
+        r0.<java.util.TreeMap$NavigableSubMap: java.util.TreeMap$KeySet navigableKeySetView> = $r2;
+
+     label2:
+        return $r2;
+    }
+
+    public final java.util.Set keySet()
+    {
+        java.util.NavigableSet $r1;
+        java.util.TreeMap$NavigableSubMap r0;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        $r1 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: java.util.NavigableSet navigableKeySet()>();
+
+        return $r1;
+    }
+
+    public java.util.NavigableSet descendingKeySet()
+    {
+        java.util.NavigableSet $r2;
+        java.util.NavigableMap $r1;
+        java.util.TreeMap$NavigableSubMap r0;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        $r1 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: java.util.NavigableMap descendingMap()>();
+
+        $r2 = interfaceinvoke $r1.<java.util.NavigableMap: java.util.NavigableSet navigableKeySet()>();
+
+        return $r2;
+    }
+
+    public final java.util.SortedMap subMap(java.lang.Object, java.lang.Object)
+    {
+        java.util.TreeMap$NavigableSubMap r0;
+        java.lang.Object r1, r2;
+        java.util.NavigableMap $r3;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.lang.Object;
+
+        $r3 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: java.util.NavigableMap subMap(java.lang.Object,boolean,java.lang.Object,boolean)>(r1, 1, r2, 0);
+
+        return $r3;
+    }
+
+    public final java.util.SortedMap headMap(java.lang.Object)
+    {
+        java.lang.Object r1;
+        java.util.NavigableMap $r2;
+        java.util.TreeMap$NavigableSubMap r0;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: java.util.NavigableMap headMap(java.lang.Object,boolean)>(r1, 0);
+
+        return $r2;
+    }
+
+    public final java.util.SortedMap tailMap(java.lang.Object)
+    {
+        java.lang.Object r1;
+        java.util.NavigableMap $r2;
+        java.util.TreeMap$NavigableSubMap r0;
+
+        r0 := @this: java.util.TreeMap$NavigableSubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.TreeMap$NavigableSubMap: java.util.NavigableMap tailMap(java.lang.Object,boolean)>(r1, 1);
+
+        return $r2;
+    }
+
+    public static void <clinit>()
+    {
+        <java.util.TreeMap$NavigableSubMap: long serialVersionUID> = -2102997345730753016L;
+
+        return;
+    }
+}

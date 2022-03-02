@@ -1,0 +1,528 @@
+public class java.awt.Desktop extends java.lang.Object
+{
+    private java.awt.peer.DesktopPeer peer;
+
+    private void <init>()
+    {
+        java.awt.Desktop r0;
+        java.awt.peer.DesktopPeer $r2;
+        java.awt.Toolkit $r1;
+
+        r0 := @this: java.awt.Desktop;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r2 = virtualinvoke $r1.<java.awt.Toolkit: java.awt.peer.DesktopPeer createDesktopPeer(java.awt.Desktop)>(r0);
+
+        r0.<java.awt.Desktop: java.awt.peer.DesktopPeer peer> = $r2;
+
+        return;
+    }
+
+    public static synchronized java.awt.Desktop getDesktop()
+    {
+        java.awt.Desktop $r2, r5;
+        java.lang.UnsupportedOperationException $r3;
+        sun.awt.AppContext $r0;
+        java.lang.Object $r1;
+        java.awt.HeadlessException $r4;
+        boolean $z0, $z1;
+
+        $z0 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        if $z0 == 0 goto label1;
+
+        $r4 = new java.awt.HeadlessException;
+
+        specialinvoke $r4.<java.awt.HeadlessException: void <init>()>();
+
+        throw $r4;
+
+     label1:
+        $z1 = staticinvoke <java.awt.Desktop: boolean isDesktopSupported()>();
+
+        if $z1 != 0 goto label2;
+
+        $r3 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r3.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("Desktop API is not supported on the current platform");
+
+        throw $r3;
+
+     label2:
+        $r0 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r1 = virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>(class "Ljava/awt/Desktop;");
+
+        r5 = (java.awt.Desktop) $r1;
+
+        if r5 != null goto label3;
+
+        $r2 = new java.awt.Desktop;
+
+        specialinvoke $r2.<java.awt.Desktop: void <init>()>();
+
+        r5 = $r2;
+
+        virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>(class "Ljava/awt/Desktop;", $r2);
+
+     label3:
+        return r5;
+    }
+
+    public static boolean isDesktopSupported()
+    {
+        sun.awt.SunToolkit $r1;
+        java.awt.Toolkit $r0;
+        boolean $z0, $z1;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $z0 = $r0 instanceof sun.awt.SunToolkit;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = (sun.awt.SunToolkit) $r0;
+
+        $z1 = virtualinvoke $r1.<sun.awt.SunToolkit: boolean isDesktopSupported()>();
+
+        return $z1;
+
+     label1:
+        return 0;
+    }
+
+    public boolean isSupported(java.awt.Desktop$Action)
+    {
+        java.awt.Desktop r0;
+        java.awt.peer.DesktopPeer $r2;
+        java.awt.Desktop$Action r1;
+        boolean $z0;
+
+        r0 := @this: java.awt.Desktop;
+
+        r1 := @parameter0: java.awt.Desktop$Action;
+
+        $r2 = r0.<java.awt.Desktop: java.awt.peer.DesktopPeer peer>;
+
+        $z0 = interfaceinvoke $r2.<java.awt.peer.DesktopPeer: boolean isSupported(java.awt.Desktop$Action)>(r1);
+
+        return $z0;
+    }
+
+    private static void checkFileValidation(java.io.File)
+    {
+        java.lang.IllegalArgumentException $r1;
+        java.io.File r0;
+        java.lang.StringBuilder $r2, $r3, $r5, $r6;
+        java.lang.String $r4, $r7;
+        boolean $z0;
+
+        r0 := @parameter0: java.io.File;
+
+        $z0 = virtualinvoke r0.<java.io.File: boolean exists()>();
+
+        if $z0 != 0 goto label1;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("The file: ");
+
+        $r4 = virtualinvoke r0.<java.io.File: java.lang.String getPath()>();
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" doesn\'t exist.");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r7);
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+
+    private void checkActionSupport(java.awt.Desktop$Action)
+    {
+        java.awt.Desktop r0;
+        java.lang.UnsupportedOperationException $r2;
+        java.awt.Desktop$Action r1;
+        java.lang.StringBuilder $r3, $r4, $r6, $r7;
+        java.lang.String $r5, $r8;
+        boolean $z0;
+
+        r0 := @this: java.awt.Desktop;
+
+        r1 := @parameter0: java.awt.Desktop$Action;
+
+        $z0 = virtualinvoke r0.<java.awt.Desktop: boolean isSupported(java.awt.Desktop$Action)>(r1);
+
+        if $z0 != 0 goto label1;
+
+        $r2 = new java.lang.UnsupportedOperationException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("The ");
+
+        $r5 = virtualinvoke r1.<java.awt.Desktop$Action: java.lang.String name()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" action is not supported on the current platform!");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>($r8);
+
+        throw $r2;
+
+     label1:
+        return;
+    }
+
+    private void checkAWTPermission()
+    {
+        java.awt.Desktop r2;
+        java.awt.AWTPermission $r1;
+        java.lang.SecurityManager $r0;
+
+        r2 := @this: java.awt.Desktop;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r1 = new java.awt.AWTPermission;
+
+        specialinvoke $r1.<java.awt.AWTPermission: void <init>(java.lang.String)>("showWindowWithoutWarningBanner");
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r1);
+
+     label1:
+        return;
+    }
+
+    public void open(java.io.File) throws java.io.IOException
+    {
+        java.awt.Desktop r2;
+        java.awt.peer.DesktopPeer $r4;
+        java.awt.Desktop$Action $r3;
+        java.lang.String $r1;
+        java.io.File $r0, r5;
+
+        r2 := @this: java.awt.Desktop;
+
+        r5 := @parameter0: java.io.File;
+
+        $r0 = new java.io.File;
+
+        $r1 = virtualinvoke r5.<java.io.File: java.lang.String getPath()>();
+
+        specialinvoke $r0.<java.io.File: void <init>(java.lang.String)>($r1);
+
+        specialinvoke r2.<java.awt.Desktop: void checkAWTPermission()>();
+
+        specialinvoke r2.<java.awt.Desktop: void checkExec()>();
+
+        $r3 = <java.awt.Desktop$Action: java.awt.Desktop$Action OPEN>;
+
+        specialinvoke r2.<java.awt.Desktop: void checkActionSupport(java.awt.Desktop$Action)>($r3);
+
+        staticinvoke <java.awt.Desktop: void checkFileValidation(java.io.File)>($r0);
+
+        $r4 = r2.<java.awt.Desktop: java.awt.peer.DesktopPeer peer>;
+
+        interfaceinvoke $r4.<java.awt.peer.DesktopPeer: void open(java.io.File)>($r0);
+
+        return;
+    }
+
+    public void edit(java.io.File) throws java.io.IOException
+    {
+        java.awt.Desktop r2;
+        java.awt.peer.DesktopPeer $r4;
+        java.awt.Desktop$Action $r3;
+        java.lang.String $r1;
+        java.io.File $r0, r5;
+
+        r2 := @this: java.awt.Desktop;
+
+        r5 := @parameter0: java.io.File;
+
+        $r0 = new java.io.File;
+
+        $r1 = virtualinvoke r5.<java.io.File: java.lang.String getPath()>();
+
+        specialinvoke $r0.<java.io.File: void <init>(java.lang.String)>($r1);
+
+        specialinvoke r2.<java.awt.Desktop: void checkAWTPermission()>();
+
+        specialinvoke r2.<java.awt.Desktop: void checkExec()>();
+
+        $r3 = <java.awt.Desktop$Action: java.awt.Desktop$Action EDIT>;
+
+        specialinvoke r2.<java.awt.Desktop: void checkActionSupport(java.awt.Desktop$Action)>($r3);
+
+        virtualinvoke $r0.<java.io.File: boolean canWrite()>();
+
+        staticinvoke <java.awt.Desktop: void checkFileValidation(java.io.File)>($r0);
+
+        $r4 = r2.<java.awt.Desktop: java.awt.peer.DesktopPeer peer>;
+
+        interfaceinvoke $r4.<java.awt.peer.DesktopPeer: void edit(java.io.File)>($r0);
+
+        return;
+    }
+
+    public void print(java.io.File) throws java.io.IOException
+    {
+        java.awt.Desktop r2;
+        java.awt.peer.DesktopPeer $r5;
+        java.awt.Desktop$Action $r4;
+        java.lang.String $r1;
+        java.io.File $r0, r6;
+        java.lang.SecurityManager $r3;
+
+        r2 := @this: java.awt.Desktop;
+
+        r6 := @parameter0: java.io.File;
+
+        $r0 = new java.io.File;
+
+        $r1 = virtualinvoke r6.<java.io.File: java.lang.String getPath()>();
+
+        specialinvoke $r0.<java.io.File: void <init>(java.lang.String)>($r1);
+
+        specialinvoke r2.<java.awt.Desktop: void checkExec()>();
+
+        $r3 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r3 == null goto label1;
+
+        virtualinvoke $r3.<java.lang.SecurityManager: void checkPrintJobAccess()>();
+
+     label1:
+        $r4 = <java.awt.Desktop$Action: java.awt.Desktop$Action PRINT>;
+
+        specialinvoke r2.<java.awt.Desktop: void checkActionSupport(java.awt.Desktop$Action)>($r4);
+
+        staticinvoke <java.awt.Desktop: void checkFileValidation(java.io.File)>($r0);
+
+        $r5 = r2.<java.awt.Desktop: java.awt.peer.DesktopPeer peer>;
+
+        interfaceinvoke $r5.<java.awt.peer.DesktopPeer: void print(java.io.File)>($r0);
+
+        return;
+    }
+
+    public void browse(java.net.URI) throws java.io.IOException
+    {
+        java.awt.Desktop r0;
+        sun.awt.DesktopBrowse $r4;
+        java.awt.peer.DesktopPeer $r5;
+        java.net.MalformedURLException $r7;
+        java.net.URL $r3;
+        java.awt.Desktop$Action $r1;
+        java.lang.IllegalArgumentException $r8;
+        java.lang.NullPointerException $r6;
+        java.lang.SecurityException $r9, r10;
+        java.net.URI r2;
+
+        r0 := @this: java.awt.Desktop;
+
+        r2 := @parameter0: java.net.URI;
+
+        r10 = null;
+
+     label01:
+        specialinvoke r0.<java.awt.Desktop: void checkAWTPermission()>();
+
+        specialinvoke r0.<java.awt.Desktop: void checkExec()>();
+
+     label02:
+        goto label04;
+
+     label03:
+        $r9 := @caughtexception;
+
+        r10 = $r9;
+
+     label04:
+        $r1 = <java.awt.Desktop$Action: java.awt.Desktop$Action BROWSE>;
+
+        specialinvoke r0.<java.awt.Desktop: void checkActionSupport(java.awt.Desktop$Action)>($r1);
+
+        if r2 != null goto label05;
+
+        $r6 = new java.lang.NullPointerException;
+
+        specialinvoke $r6.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r6;
+
+     label05:
+        if r10 != null goto label06;
+
+        $r5 = r0.<java.awt.Desktop: java.awt.peer.DesktopPeer peer>;
+
+        interfaceinvoke $r5.<java.awt.peer.DesktopPeer: void browse(java.net.URI)>(r2);
+
+        return;
+
+     label06:
+        $r3 = virtualinvoke r2.<java.net.URI: java.net.URL toURL()>();
+
+     label07:
+        goto label09;
+
+     label08:
+        $r7 := @caughtexception;
+
+        $r8 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>(java.lang.String,java.lang.Throwable)>("Unable to convert URI to URL", $r7);
+
+        throw $r8;
+
+     label09:
+        $r4 = staticinvoke <sun.awt.DesktopBrowse: sun.awt.DesktopBrowse getInstance()>();
+
+        if $r4 != null goto label10;
+
+        throw r10;
+
+     label10:
+        virtualinvoke $r4.<sun.awt.DesktopBrowse: void browse(java.net.URL)>($r3);
+
+        return;
+
+        catch java.lang.SecurityException from label01 to label02 with label03;
+        catch java.net.MalformedURLException from label06 to label07 with label08;
+    }
+
+    public void mail() throws java.io.IOException
+    {
+        java.awt.Desktop r0;
+        java.awt.peer.DesktopPeer $r3;
+        java.net.URISyntaxException $r4;
+        java.awt.Desktop$Action $r1;
+        java.net.URI $r2;
+
+        r0 := @this: java.awt.Desktop;
+
+        specialinvoke r0.<java.awt.Desktop: void checkAWTPermission()>();
+
+        specialinvoke r0.<java.awt.Desktop: void checkExec()>();
+
+        $r1 = <java.awt.Desktop$Action: java.awt.Desktop$Action MAIL>;
+
+        specialinvoke r0.<java.awt.Desktop: void checkActionSupport(java.awt.Desktop$Action)>($r1);
+
+     label1:
+        $r2 = new java.net.URI;
+
+        specialinvoke $r2.<java.net.URI: void <init>(java.lang.String)>("mailto:?");
+
+        $r3 = r0.<java.awt.Desktop: java.awt.peer.DesktopPeer peer>;
+
+        interfaceinvoke $r3.<java.awt.peer.DesktopPeer: void mail(java.net.URI)>($r2);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+     label4:
+        return;
+
+        catch java.net.URISyntaxException from label1 to label2 with label3;
+    }
+
+    public void mail(java.net.URI) throws java.io.IOException
+    {
+        java.awt.Desktop r0;
+        java.awt.peer.DesktopPeer $r5;
+        java.awt.Desktop$Action $r1;
+        java.lang.IllegalArgumentException $r6;
+        java.lang.NullPointerException $r7;
+        java.net.URI r2;
+        java.lang.String $r3, $r4;
+        boolean $z0;
+
+        r0 := @this: java.awt.Desktop;
+
+        r2 := @parameter0: java.net.URI;
+
+        specialinvoke r0.<java.awt.Desktop: void checkAWTPermission()>();
+
+        specialinvoke r0.<java.awt.Desktop: void checkExec()>();
+
+        $r1 = <java.awt.Desktop$Action: java.awt.Desktop$Action MAIL>;
+
+        specialinvoke r0.<java.awt.Desktop: void checkActionSupport(java.awt.Desktop$Action)>($r1);
+
+        if r2 != null goto label1;
+
+        $r7 = new java.lang.NullPointerException;
+
+        specialinvoke $r7.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r7;
+
+     label1:
+        $r3 = "mailto";
+
+        $r4 = virtualinvoke r2.<java.net.URI: java.lang.String getScheme()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r4);
+
+        if $z0 != 0 goto label2;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("URI scheme is not \"mailto\"");
+
+        throw $r6;
+
+     label2:
+        $r5 = r0.<java.awt.Desktop: java.awt.peer.DesktopPeer peer>;
+
+        interfaceinvoke $r5.<java.awt.peer.DesktopPeer: void mail(java.net.URI)>(r2);
+
+        return;
+    }
+
+    private void checkExec() throws java.lang.SecurityException
+    {
+        java.awt.Desktop r2;
+        java.lang.SecurityManager $r0;
+        java.io.FilePermission $r1;
+
+        r2 := @this: java.awt.Desktop;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r1 = new java.io.FilePermission;
+
+        specialinvoke $r1.<java.io.FilePermission: void <init>(java.lang.String,java.lang.String)>("<<ALL FILES>>", "execute");
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r1);
+
+     label1:
+        return;
+    }
+}

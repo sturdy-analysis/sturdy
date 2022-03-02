@@ -1,0 +1,200 @@
+public class sun.java2d.Spans extends java.lang.Object
+{
+    private static final int kMaxAddsSinceSort;
+    private java.util.List mSpans;
+    private int mAddsSinceSort;
+
+    public void <init>()
+    {
+        sun.java2d.Spans r0;
+        java.util.Vector $r1;
+
+        r0 := @this: sun.java2d.Spans;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.Vector;
+
+        specialinvoke $r1.<java.util.Vector: void <init>(int)>(256);
+
+        r0.<sun.java2d.Spans: java.util.List mSpans> = $r1;
+
+        r0.<sun.java2d.Spans: int mAddsSinceSort> = 0;
+
+        return;
+    }
+
+    public void add(float, float)
+    {
+        sun.java2d.Spans r0;
+        sun.java2d.Spans$Span $r2;
+        java.util.List $r1, $r3;
+        int $i0, $i1;
+        float f0, f1;
+
+        r0 := @this: sun.java2d.Spans;
+
+        f0 := @parameter0: float;
+
+        f1 := @parameter1: float;
+
+        $r1 = r0.<sun.java2d.Spans: java.util.List mSpans>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<sun.java2d.Spans: java.util.List mSpans>;
+
+        $r2 = new sun.java2d.Spans$Span;
+
+        specialinvoke $r2.<sun.java2d.Spans$Span: void <init>(float,float)>(f0, f1);
+
+        interfaceinvoke $r3.<java.util.List: boolean add(java.lang.Object)>($r2);
+
+        $i0 = r0.<sun.java2d.Spans: int mAddsSinceSort>;
+
+        $i1 = $i0 + 1;
+
+        r0.<sun.java2d.Spans: int mAddsSinceSort> = $i1;
+
+        if $i1 < 256 goto label1;
+
+        specialinvoke r0.<sun.java2d.Spans: void sortAndCollapse()>();
+
+     label1:
+        return;
+    }
+
+    public void addInfinite()
+    {
+        sun.java2d.Spans r0;
+
+        r0 := @this: sun.java2d.Spans;
+
+        r0.<sun.java2d.Spans: java.util.List mSpans> = null;
+
+        return;
+    }
+
+    public boolean intersects(float, float)
+    {
+        sun.java2d.Spans r0;
+        sun.java2d.Spans$Span $r2;
+        java.util.List $r1, $r3;
+        int $i0, $i1;
+        float f0, f1;
+        sun.java2d.Spans$SpanIntersection $r4;
+        boolean $z0, z1;
+
+        r0 := @this: sun.java2d.Spans;
+
+        f0 := @parameter0: float;
+
+        f1 := @parameter1: float;
+
+        $r1 = r0.<sun.java2d.Spans: java.util.List mSpans>;
+
+        if $r1 == null goto label4;
+
+        $i0 = r0.<sun.java2d.Spans: int mAddsSinceSort>;
+
+        if $i0 <= 0 goto label1;
+
+        specialinvoke r0.<sun.java2d.Spans: void sortAndCollapse()>();
+
+     label1:
+        $r3 = r0.<sun.java2d.Spans: java.util.List mSpans>;
+
+        $r2 = new sun.java2d.Spans$Span;
+
+        specialinvoke $r2.<sun.java2d.Spans$Span: void <init>(float,float)>(f0, f1);
+
+        $r4 = <sun.java2d.Spans$SpanIntersection: sun.java2d.Spans$SpanIntersection instance>;
+
+        $i1 = staticinvoke <java.util.Collections: int binarySearch(java.util.List,java.lang.Object,java.util.Comparator)>($r3, $r2, $r4);
+
+        if $i1 < 0 goto label2;
+
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        z1 = $z0;
+
+        goto label5;
+
+     label4:
+        z1 = 1;
+
+     label5:
+        return z1;
+    }
+
+    private void sortAndCollapse()
+    {
+        sun.java2d.Spans r0;
+        java.util.Iterator $r3;
+        sun.java2d.Spans$Span r5, r7;
+        java.util.List $r1, $r2;
+        java.lang.Object $r4, $r6;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.java2d.Spans;
+
+        $r1 = r0.<sun.java2d.Spans: java.util.List mSpans>;
+
+        staticinvoke <java.util.Collections: void sort(java.util.List)>($r1);
+
+        r0.<sun.java2d.Spans: int mAddsSinceSort> = 0;
+
+        $r2 = r0.<sun.java2d.Spans: java.util.List mSpans>;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+        r7 = null;
+
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label1;
+
+        $r6 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (sun.java2d.Spans$Span) $r6;
+
+     label1:
+        $z2 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label4;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (sun.java2d.Spans$Span) $r4;
+
+        $z1 = virtualinvoke r7.<sun.java2d.Spans$Span: boolean subsume(sun.java2d.Spans$Span)>(r5);
+
+        if $z1 == 0 goto label2;
+
+        interfaceinvoke $r3.<java.util.Iterator: void remove()>();
+
+        goto label3;
+
+     label2:
+        r7 = r5;
+
+     label3:
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.java2d.Spans: int kMaxAddsSinceSort> = 256;
+
+        return;
+    }
+}

@@ -1,0 +1,780 @@
+public class sun.security.jgss.GSSUtil extends java.lang.Object
+{
+    public static final org.ietf.jgss.Oid GSS_KRB5_MECH_OID;
+    public static final org.ietf.jgss.Oid GSS_KRB5_MECH_OID2;
+    public static final org.ietf.jgss.Oid GSS_KRB5_MECH_OID_MS;
+    public static final org.ietf.jgss.Oid GSS_SPNEGO_MECH_OID;
+    public static final org.ietf.jgss.Oid NT_GSS_KRB5_PRINCIPAL;
+    private static final java.lang.String DEFAULT_HANDLER;
+    static final boolean DEBUG;
+    static final boolean $assertionsDisabled;
+
+    public void <init>()
+    {
+        sun.security.jgss.GSSUtil r0;
+
+        r0 := @this: sun.security.jgss.GSSUtil;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    static void debug(java.lang.String)
+    {
+        java.io.PrintStream $r1;
+        java.lang.String r0;
+        java.lang.AssertionError $r2;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = <sun.security.jgss.GSSUtil: boolean DEBUG>;
+
+        if $z0 == 0 goto label2;
+
+        $z1 = <sun.security.jgss.GSSUtil: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label1;
+
+        if r0 != null goto label1;
+
+        $r2 = new java.lang.AssertionError;
+
+        specialinvoke $r2.<java.lang.AssertionError: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        $r1 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>(r0);
+
+     label2:
+        return;
+    }
+
+    public static org.ietf.jgss.Oid createOid(java.lang.String)
+    {
+        org.ietf.jgss.Oid $r0;
+        java.lang.StringBuilder $r3, $r4, $r5;
+        java.lang.String r1, $r6;
+        org.ietf.jgss.GSSException $r2;
+
+        r1 := @parameter0: java.lang.String;
+
+     label1:
+        $r0 = new org.ietf.jgss.Oid;
+
+        specialinvoke $r0.<org.ietf.jgss.Oid: void <init>(java.lang.String)>(r1);
+
+     label2:
+        return $r0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignored invalid OID: ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.security.jgss.GSSUtil: void debug(java.lang.String)>($r6);
+
+        return null;
+
+        catch org.ietf.jgss.GSSException from label1 to label2 with label3;
+    }
+
+    public static boolean isSpNegoMech(org.ietf.jgss.Oid)
+    {
+        org.ietf.jgss.Oid r0, $r1;
+        boolean $z0;
+
+        r0 := @parameter0: org.ietf.jgss.Oid;
+
+        $r1 = <sun.security.jgss.GSSUtil: org.ietf.jgss.Oid GSS_SPNEGO_MECH_OID>;
+
+        $z0 = virtualinvoke $r1.<org.ietf.jgss.Oid: boolean equals(java.lang.Object)>(r0);
+
+        return $z0;
+    }
+
+    public static boolean isKerberosMech(org.ietf.jgss.Oid)
+    {
+        org.ietf.jgss.Oid r0, $r1, $r2, $r3;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @parameter0: org.ietf.jgss.Oid;
+
+        $r1 = <sun.security.jgss.GSSUtil: org.ietf.jgss.Oid GSS_KRB5_MECH_OID>;
+
+        $z0 = virtualinvoke $r1.<org.ietf.jgss.Oid: boolean equals(java.lang.Object)>(r0);
+
+        if $z0 != 0 goto label1;
+
+        $r2 = <sun.security.jgss.GSSUtil: org.ietf.jgss.Oid GSS_KRB5_MECH_OID2>;
+
+        $z1 = virtualinvoke $r2.<org.ietf.jgss.Oid: boolean equals(java.lang.Object)>(r0);
+
+        if $z1 != 0 goto label1;
+
+        $r3 = <sun.security.jgss.GSSUtil: org.ietf.jgss.Oid GSS_KRB5_MECH_OID_MS>;
+
+        $z2 = virtualinvoke $r3.<org.ietf.jgss.Oid: boolean equals(java.lang.Object)>(r0);
+
+        if $z2 == 0 goto label2;
+
+     label1:
+        $z3 = 1;
+
+        goto label3;
+
+     label2:
+        $z3 = 0;
+
+     label3:
+        return $z3;
+    }
+
+    public static java.lang.String getMechStr(org.ietf.jgss.Oid)
+    {
+        org.ietf.jgss.Oid r0;
+        java.lang.String $r1;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: org.ietf.jgss.Oid;
+
+        $z0 = staticinvoke <sun.security.jgss.GSSUtil: boolean isSpNegoMech(org.ietf.jgss.Oid)>(r0);
+
+        if $z0 == 0 goto label1;
+
+        return "SPNEGO";
+
+     label1:
+        $z1 = staticinvoke <sun.security.jgss.GSSUtil: boolean isKerberosMech(org.ietf.jgss.Oid)>(r0);
+
+        if $z1 == 0 goto label2;
+
+        return "Kerberos V5";
+
+     label2:
+        $r1 = virtualinvoke r0.<org.ietf.jgss.Oid: java.lang.String toString()>();
+
+        return $r1;
+    }
+
+    public static javax.security.auth.Subject getSubject(org.ietf.jgss.GSSName, org.ietf.jgss.GSSCredential)
+    {
+        sun.security.jgss.GSSCredentialImpl $r18;
+        boolean $z0, $z1, $z2;
+        org.ietf.jgss.GSSCredential r3;
+        javax.security.auth.kerberos.KerberosPrincipal $r24;
+        org.ietf.jgss.Oid $r21;
+        sun.security.jgss.GSSNameImpl $r22;
+        java.util.Set $r19;
+        org.ietf.jgss.GSSException $r27;
+        java.lang.StringBuilder $r5, $r6, $r7, $r9, $r10, $r11, $r13, $r14, $r15, $r28, $r29, $r30, $r31, $r32;
+        sun.security.krb5.PrincipalName $r26;
+        sun.security.jgss.krb5.Krb5NameElement $r25;
+        java.util.HashSet $r0, $r1, $r4, $r20, r35;
+        sun.security.jgss.spi.GSSNameSpi $r23;
+        int $i0;
+        java.lang.String $r8, $r12, $r16, $r33, r34;
+        javax.security.auth.Subject $r17;
+        org.ietf.jgss.GSSName r2;
+
+        r2 := @parameter0: org.ietf.jgss.GSSName;
+
+        r3 := @parameter1: org.ietf.jgss.GSSCredential;
+
+        $r0 = new java.util.HashSet;
+
+        specialinvoke $r0.<java.util.HashSet: void <init>()>();
+
+        $r1 = new java.util.HashSet;
+
+        specialinvoke $r1.<java.util.HashSet: void <init>()>();
+
+        $z0 = r2 instanceof sun.security.jgss.GSSNameImpl;
+
+        if $z0 == 0 goto label5;
+
+     label1:
+        $r22 = (sun.security.jgss.GSSNameImpl) r2;
+
+        $r21 = <sun.security.jgss.GSSUtil: org.ietf.jgss.Oid GSS_KRB5_MECH_OID>;
+
+        $r23 = virtualinvoke $r22.<sun.security.jgss.GSSNameImpl: sun.security.jgss.spi.GSSNameSpi getElement(org.ietf.jgss.Oid)>($r21);
+
+        r34 = interfaceinvoke $r23.<sun.security.jgss.spi.GSSNameSpi: java.lang.String toString()>();
+
+        $z1 = $r23 instanceof sun.security.jgss.krb5.Krb5NameElement;
+
+        if $z1 == 0 goto label2;
+
+        $r25 = (sun.security.jgss.krb5.Krb5NameElement) $r23;
+
+        $r26 = virtualinvoke $r25.<sun.security.jgss.krb5.Krb5NameElement: sun.security.krb5.PrincipalName getKrb5PrincipalName()>();
+
+        r34 = virtualinvoke $r26.<sun.security.krb5.PrincipalName: java.lang.String getName()>();
+
+     label2:
+        $r24 = new javax.security.auth.kerberos.KerberosPrincipal;
+
+        specialinvoke $r24.<javax.security.auth.kerberos.KerberosPrincipal: void <init>(java.lang.String)>(r34);
+
+        interfaceinvoke $r1.<java.util.Set: boolean add(java.lang.Object)>($r24);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r27 := @caughtexception;
+
+        $r28 = new java.lang.StringBuilder;
+
+        specialinvoke $r28.<java.lang.StringBuilder: void <init>()>();
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Skipped name ");
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" due to ");
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r27);
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.security.jgss.GSSUtil: void debug(java.lang.String)>($r33);
+
+     label5:
+        $z2 = r3 instanceof sun.security.jgss.GSSCredentialImpl;
+
+        if $z2 == 0 goto label6;
+
+        $r18 = (sun.security.jgss.GSSCredentialImpl) r3;
+
+        $r19 = virtualinvoke $r18.<sun.security.jgss.GSSCredentialImpl: java.util.Set getElements()>();
+
+        $r20 = new java.util.HashSet;
+
+        $i0 = interfaceinvoke $r19.<java.util.Set: int size()>();
+
+        specialinvoke $r20.<java.util.HashSet: void <init>(int)>($i0);
+
+        r35 = $r20;
+
+        staticinvoke <sun.security.jgss.GSSUtil: void populateCredentials(java.util.Set,java.util.Set)>($r20, $r19);
+
+        goto label7;
+
+     label6:
+        $r4 = new java.util.HashSet;
+
+        specialinvoke $r4.<java.util.HashSet: void <init>()>();
+
+        r35 = $r4;
+
+     label7:
+        staticinvoke <sun.security.jgss.GSSUtil: void debug(java.lang.String)>("Created Subject with the following");
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("principals=");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.security.jgss.GSSUtil: void debug(java.lang.String)>($r8);
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("public creds=");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r0);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.security.jgss.GSSUtil: void debug(java.lang.String)>($r12);
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("private creds=");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r35);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.security.jgss.GSSUtil: void debug(java.lang.String)>($r16);
+
+        $r17 = new javax.security.auth.Subject;
+
+        specialinvoke $r17.<javax.security.auth.Subject: void <init>(boolean,java.util.Set,java.util.Set,java.util.Set)>(0, $r1, $r0, r35);
+
+        return $r17;
+
+        catch org.ietf.jgss.GSSException from label1 to label3 with label4;
+    }
+
+    private static void populateCredentials(java.util.Set, java.util.Set)
+    {
+        byte[] $r12, $r16, $r20;
+        java.net.InetAddress[] $r26;
+        java.util.Date $r22, $r23, $r24, $r25;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        javax.security.auth.kerberos.KerberosPrincipal $r11, $r17, $r18;
+        sun.security.jgss.spnego.SpNegoCredElement $r27;
+        java.util.Set r0, r9;
+        javax.security.auth.kerberos.KerberosTicket $r15, r29;
+        java.lang.StringBuilder $r3, $r4, $r5;
+        javax.crypto.SecretKey $r19;
+        int $i0, $i1, $i2;
+        java.lang.String $r6, $r8, $r14;
+        javax.security.auth.kerberos.KerberosKey $r10, r30;
+        java.util.Iterator $r1;
+        boolean[] $r21;
+        java.lang.Object $r2, r28;
+        java.lang.Class $r7, $r13;
+
+        r9 := @parameter0: java.util.Set;
+
+        r0 := @parameter1: java.util.Set;
+
+        $r1 = interfaceinvoke r0.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z5 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z5 == 0 goto label7;
+
+        $r2 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        r28 = $r2;
+
+        $z0 = $r2 instanceof sun.security.jgss.spnego.SpNegoCredElement;
+
+        if $z0 == 0 goto label2;
+
+        $r27 = (sun.security.jgss.spnego.SpNegoCredElement) $r2;
+
+        r28 = virtualinvoke $r27.<sun.security.jgss.spnego.SpNegoCredElement: sun.security.jgss.spi.GSSCredentialSpi getInternalCred()>();
+
+     label2:
+        $z1 = r28 instanceof javax.security.auth.kerberos.KerberosTicket;
+
+        if $z1 == 0 goto label4;
+
+        $r13 = virtualinvoke r28.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.Class: java.lang.String getName()>();
+
+        $z4 = virtualinvoke $r14.<java.lang.String: boolean equals(java.lang.Object)>("javax.security.auth.kerberos.KerberosTicket");
+
+        if $z4 != 0 goto label3;
+
+        r29 = (javax.security.auth.kerberos.KerberosTicket) r28;
+
+        $r15 = new javax.security.auth.kerberos.KerberosTicket;
+
+        $r16 = virtualinvoke r29.<javax.security.auth.kerberos.KerberosTicket: byte[] getEncoded()>();
+
+        $r17 = virtualinvoke r29.<javax.security.auth.kerberos.KerberosTicket: javax.security.auth.kerberos.KerberosPrincipal getClient()>();
+
+        $r18 = virtualinvoke r29.<javax.security.auth.kerberos.KerberosTicket: javax.security.auth.kerberos.KerberosPrincipal getServer()>();
+
+        $r19 = virtualinvoke r29.<javax.security.auth.kerberos.KerberosTicket: javax.crypto.SecretKey getSessionKey()>();
+
+        $r20 = interfaceinvoke $r19.<javax.crypto.SecretKey: byte[] getEncoded()>();
+
+        $i2 = virtualinvoke r29.<javax.security.auth.kerberos.KerberosTicket: int getSessionKeyType()>();
+
+        $r21 = virtualinvoke r29.<javax.security.auth.kerberos.KerberosTicket: boolean[] getFlags()>();
+
+        $r22 = virtualinvoke r29.<javax.security.auth.kerberos.KerberosTicket: java.util.Date getAuthTime()>();
+
+        $r23 = virtualinvoke r29.<javax.security.auth.kerberos.KerberosTicket: java.util.Date getStartTime()>();
+
+        $r24 = virtualinvoke r29.<javax.security.auth.kerberos.KerberosTicket: java.util.Date getEndTime()>();
+
+        $r25 = virtualinvoke r29.<javax.security.auth.kerberos.KerberosTicket: java.util.Date getRenewTill()>();
+
+        $r26 = virtualinvoke r29.<javax.security.auth.kerberos.KerberosTicket: java.net.InetAddress[] getClientAddresses()>();
+
+        specialinvoke $r15.<javax.security.auth.kerberos.KerberosTicket: void <init>(byte[],javax.security.auth.kerberos.KerberosPrincipal,javax.security.auth.kerberos.KerberosPrincipal,byte[],int,boolean[],java.util.Date,java.util.Date,java.util.Date,java.util.Date,java.net.InetAddress[])>($r16, $r17, $r18, $r20, $i2, $r21, $r22, $r23, $r24, $r25, $r26);
+
+        r28 = $r15;
+
+     label3:
+        interfaceinvoke r9.<java.util.Set: boolean add(java.lang.Object)>(r28);
+
+        goto label1;
+
+     label4:
+        $z2 = r28 instanceof javax.security.auth.kerberos.KerberosKey;
+
+        if $z2 == 0 goto label6;
+
+        $r7 = virtualinvoke r28.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.Class: java.lang.String getName()>();
+
+        $z3 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>("javax.security.auth.kerberos.KerberosKey");
+
+        if $z3 != 0 goto label5;
+
+        r30 = (javax.security.auth.kerberos.KerberosKey) r28;
+
+        $r10 = new javax.security.auth.kerberos.KerberosKey;
+
+        $r11 = virtualinvoke r30.<javax.security.auth.kerberos.KerberosKey: javax.security.auth.kerberos.KerberosPrincipal getPrincipal()>();
+
+        $r12 = virtualinvoke r30.<javax.security.auth.kerberos.KerberosKey: byte[] getEncoded()>();
+
+        $i0 = virtualinvoke r30.<javax.security.auth.kerberos.KerberosKey: int getKeyType()>();
+
+        $i1 = virtualinvoke r30.<javax.security.auth.kerberos.KerberosKey: int getVersionNumber()>();
+
+        specialinvoke $r10.<javax.security.auth.kerberos.KerberosKey: void <init>(javax.security.auth.kerberos.KerberosPrincipal,byte[],int,int)>($r11, $r12, $i0, $i1);
+
+        r28 = $r10;
+
+     label5:
+        interfaceinvoke r9.<java.util.Set: boolean add(java.lang.Object)>(r28);
+
+        goto label1;
+
+     label6:
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Skipped cred element: ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r28);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.security.jgss.GSSUtil: void debug(java.lang.String)>($r6);
+
+        goto label1;
+
+     label7:
+        return;
+    }
+
+    public static javax.security.auth.Subject login(sun.security.jgss.GSSCaller, org.ietf.jgss.Oid) throws javax.security.auth.login.LoginException
+    {
+        com.sun.security.auth.callback.TextCallbackHandler $r2;
+        org.ietf.jgss.Oid r3;
+        sun.security.jgss.GSSCaller r0;
+        sun.security.jgss.HttpCaller $r5;
+        javax.security.auth.login.LoginContext $r8;
+        javax.security.auth.Subject $r10;
+        javax.security.auth.callback.CallbackHandler r7;
+        sun.net.www.protocol.http.spnego.NegotiateCallbackHandler $r4;
+        int $i0;
+        java.lang.String $r1;
+        sun.net.www.protocol.http.HttpCallerInfo $r6;
+        sun.security.jgss.LoginConfigImpl $r9;
+        boolean $z0;
+
+        r0 := @parameter0: sun.security.jgss.GSSCaller;
+
+        r3 := @parameter1: org.ietf.jgss.Oid;
+
+        $z0 = r0 instanceof sun.security.jgss.HttpCaller;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = new sun.net.www.protocol.http.spnego.NegotiateCallbackHandler;
+
+        $r5 = (sun.security.jgss.HttpCaller) r0;
+
+        $r6 = virtualinvoke $r5.<sun.security.jgss.HttpCaller: sun.net.www.protocol.http.HttpCallerInfo info()>();
+
+        specialinvoke $r4.<sun.net.www.protocol.http.spnego.NegotiateCallbackHandler: void <init>(sun.net.www.protocol.http.HttpCallerInfo)>($r6);
+
+        r7 = $r4;
+
+        goto label3;
+
+     label1:
+        $r1 = staticinvoke <java.security.Security: java.lang.String getProperty(java.lang.String)>("auth.login.defaultCallbackHandler");
+
+        if $r1 == null goto label2;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label2;
+
+        r7 = null;
+
+        goto label3;
+
+     label2:
+        $r2 = new com.sun.security.auth.callback.TextCallbackHandler;
+
+        specialinvoke $r2.<com.sun.security.auth.callback.TextCallbackHandler: void <init>()>();
+
+        r7 = $r2;
+
+     label3:
+        $r8 = new javax.security.auth.login.LoginContext;
+
+        $r9 = new sun.security.jgss.LoginConfigImpl;
+
+        specialinvoke $r9.<sun.security.jgss.LoginConfigImpl: void <init>(sun.security.jgss.GSSCaller,org.ietf.jgss.Oid)>(r0, r3);
+
+        specialinvoke $r8.<javax.security.auth.login.LoginContext: void <init>(java.lang.String,javax.security.auth.Subject,javax.security.auth.callback.CallbackHandler,javax.security.auth.login.Configuration)>("", null, r7, $r9);
+
+        virtualinvoke $r8.<javax.security.auth.login.LoginContext: void login()>();
+
+        $r10 = virtualinvoke $r8.<javax.security.auth.login.LoginContext: javax.security.auth.Subject getSubject()>();
+
+        return $r10;
+    }
+
+    public static boolean useSubjectCredsOnly(sun.security.jgss.GSSCaller)
+    {
+        sun.security.jgss.GSSCaller r1;
+        java.lang.String $r0, $r2, $r3;
+        boolean $z0, $z1, $z2, $z3;
+
+        r1 := @parameter0: sun.security.jgss.GSSCaller;
+
+        $r0 = staticinvoke <sun.security.action.GetPropertyAction: java.lang.String privilegedGetProperty(java.lang.String)>("javax.security.auth.useSubjectCredsOnly");
+
+        $z0 = r1 instanceof sun.security.jgss.HttpCaller;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = "true";
+
+        $z2 = virtualinvoke $r3.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r0);
+
+        return $z2;
+
+     label1:
+        $r2 = "false";
+
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r0);
+
+        if $z1 != 0 goto label2;
+
+        $z3 = 1;
+
+        goto label3;
+
+     label2:
+        $z3 = 0;
+
+     label3:
+        return $z3;
+    }
+
+    public static boolean useMSInterop()
+    {
+        java.lang.Object $r1;
+        java.lang.String r2;
+        sun.security.action.GetPropertyAction $r0;
+        boolean $z0, $z1;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String,java.lang.String)>("sun.security.spnego.msinterop", "true");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r2 = (java.lang.String) $r1;
+
+        $z0 = virtualinvoke r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("false");
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public static java.util.Vector searchSubject(sun.security.jgss.spi.GSSNameSpi, org.ietf.jgss.Oid, boolean, java.lang.Class)
+    {
+        java.security.AccessControlContext $r15;
+        java.util.Vector $r18;
+        sun.security.jgss.spi.GSSNameSpi r7;
+        sun.security.jgss.GSSUtil$1 $r16;
+        java.lang.String $r3, $r11, $r14, $r20, $r21;
+        boolean z0, $z1;
+        java.security.PrivilegedActionException $r19;
+        org.ietf.jgss.Oid r2;
+        java.lang.StringBuilder $r0, $r1, $r4, $r5, $r6, $r8, $r9, $r12, $r13;
+        java.lang.Class r10;
+        java.lang.Object $r17;
+
+        r7 := @parameter0: sun.security.jgss.spi.GSSNameSpi;
+
+        r2 := @parameter1: org.ietf.jgss.Oid;
+
+        z0 := @parameter2: boolean;
+
+        r10 := @parameter3: java.lang.Class;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Search Subject for ");
+
+        $r3 = staticinvoke <sun.security.jgss.GSSUtil: java.lang.String getMechStr(org.ietf.jgss.Oid)>(r2);
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        if z0 == 0 goto label1;
+
+        $r20 = " INIT";
+
+        goto label2;
+
+     label1:
+        $r20 = " ACCEPT";
+
+     label2:
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" cred (");
+
+        if r7 != null goto label3;
+
+        $r21 = "<<DEF>>";
+
+        goto label4;
+
+     label3:
+        $r21 = interfaceinvoke r7.<sun.security.jgss.spi.GSSNameSpi: java.lang.String toString()>();
+
+     label4:
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r21);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $r11 = virtualinvoke r10.<java.lang.Class: java.lang.String getName()>();
+
+        $r12 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.security.jgss.GSSUtil: void debug(java.lang.String)>($r14);
+
+        $r15 = staticinvoke <java.security.AccessController: java.security.AccessControlContext getContext()>();
+
+     label5:
+        $r16 = new sun.security.jgss.GSSUtil$1;
+
+        specialinvoke $r16.<sun.security.jgss.GSSUtil$1: void <init>(java.security.AccessControlContext,org.ietf.jgss.Oid,boolean,java.lang.Class,sun.security.jgss.spi.GSSNameSpi)>($r15, r2, z0, r10, r7);
+
+        $r17 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r16);
+
+        $r18 = (java.util.Vector) $r17;
+
+     label6:
+        return $r18;
+
+     label7:
+        $r19 := @caughtexception;
+
+        staticinvoke <sun.security.jgss.GSSUtil: void debug(java.lang.String)>("Unexpected exception when searching Subject:");
+
+        $z1 = <sun.security.jgss.GSSUtil: boolean DEBUG>;
+
+        if $z1 == 0 goto label8;
+
+        virtualinvoke $r19.<java.security.PrivilegedActionException: void printStackTrace()>();
+
+     label8:
+        return null;
+
+        catch java.security.PrivilegedActionException from label5 to label6 with label7;
+    }
+
+    static void <clinit>()
+    {
+        org.ietf.jgss.Oid $r1, $r2, $r3, $r4, $r5;
+        sun.security.action.GetBooleanAction $r6;
+        java.lang.Boolean $r8;
+        java.lang.Class $r0;
+        java.lang.Object $r7;
+        boolean $z0, $z1, $z2;
+
+        <sun.security.jgss.GSSUtil: java.lang.String DEFAULT_HANDLER> = "auth.login.defaultCallbackHandler";
+
+        $r0 = class "Lsun/security/jgss/GSSUtil;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        <sun.security.jgss.GSSUtil: boolean $assertionsDisabled> = $z2;
+
+        $r1 = staticinvoke <sun.security.jgss.GSSUtil: org.ietf.jgss.Oid createOid(java.lang.String)>("1.2.840.113554.1.2.2");
+
+        <sun.security.jgss.GSSUtil: org.ietf.jgss.Oid GSS_KRB5_MECH_OID> = $r1;
+
+        $r2 = staticinvoke <sun.security.jgss.GSSUtil: org.ietf.jgss.Oid createOid(java.lang.String)>("1.3.5.1.5.2");
+
+        <sun.security.jgss.GSSUtil: org.ietf.jgss.Oid GSS_KRB5_MECH_OID2> = $r2;
+
+        $r3 = staticinvoke <sun.security.jgss.GSSUtil: org.ietf.jgss.Oid createOid(java.lang.String)>("1.2.840.48018.1.2.2");
+
+        <sun.security.jgss.GSSUtil: org.ietf.jgss.Oid GSS_KRB5_MECH_OID_MS> = $r3;
+
+        $r4 = staticinvoke <sun.security.jgss.GSSUtil: org.ietf.jgss.Oid createOid(java.lang.String)>("1.3.6.1.5.5.2");
+
+        <sun.security.jgss.GSSUtil: org.ietf.jgss.Oid GSS_SPNEGO_MECH_OID> = $r4;
+
+        $r5 = staticinvoke <sun.security.jgss.GSSUtil: org.ietf.jgss.Oid createOid(java.lang.String)>("1.2.840.113554.1.2.2.1");
+
+        <sun.security.jgss.GSSUtil: org.ietf.jgss.Oid NT_GSS_KRB5_PRINCIPAL> = $r5;
+
+        $r6 = new sun.security.action.GetBooleanAction;
+
+        specialinvoke $r6.<sun.security.action.GetBooleanAction: void <init>(java.lang.String)>("sun.security.jgss.debug");
+
+        $r7 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r6);
+
+        $r8 = (java.lang.Boolean) $r7;
+
+        $z1 = virtualinvoke $r8.<java.lang.Boolean: boolean booleanValue()>();
+
+        <sun.security.jgss.GSSUtil: boolean DEBUG> = $z1;
+
+        return;
+    }
+}

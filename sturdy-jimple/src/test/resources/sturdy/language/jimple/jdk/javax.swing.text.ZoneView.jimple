@@ -1,0 +1,538 @@
+public class javax.swing.text.ZoneView extends javax.swing.text.BoxView
+{
+    int maxZoneSize;
+    int maxZonesLoaded;
+    java.util.Vector loadedZones;
+
+    public void <init>(javax.swing.text.Element, int)
+    {
+        java.util.Vector $r2;
+        int i0;
+        javax.swing.text.ZoneView r0;
+        javax.swing.text.Element r1;
+
+        r0 := @this: javax.swing.text.ZoneView;
+
+        r1 := @parameter0: javax.swing.text.Element;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<javax.swing.text.BoxView: void <init>(javax.swing.text.Element,int)>(r1, i0);
+
+        r0.<javax.swing.text.ZoneView: int maxZoneSize> = 8192;
+
+        r0.<javax.swing.text.ZoneView: int maxZonesLoaded> = 3;
+
+        $r2 = new java.util.Vector;
+
+        specialinvoke $r2.<java.util.Vector: void <init>()>();
+
+        r0.<javax.swing.text.ZoneView: java.util.Vector loadedZones> = $r2;
+
+        return;
+    }
+
+    public int getMaximumZoneSize()
+    {
+        int $i0;
+        javax.swing.text.ZoneView r0;
+
+        r0 := @this: javax.swing.text.ZoneView;
+
+        $i0 = r0.<javax.swing.text.ZoneView: int maxZoneSize>;
+
+        return $i0;
+    }
+
+    public void setMaximumZoneSize(int)
+    {
+        int i0;
+        javax.swing.text.ZoneView r0;
+
+        r0 := @this: javax.swing.text.ZoneView;
+
+        i0 := @parameter0: int;
+
+        r0.<javax.swing.text.ZoneView: int maxZoneSize> = i0;
+
+        return;
+    }
+
+    public int getMaxZonesLoaded()
+    {
+        int $i0;
+        javax.swing.text.ZoneView r0;
+
+        r0 := @this: javax.swing.text.ZoneView;
+
+        $i0 = r0.<javax.swing.text.ZoneView: int maxZonesLoaded>;
+
+        return $i0;
+    }
+
+    public void setMaxZonesLoaded(int)
+    {
+        int i0;
+        javax.swing.text.ZoneView r0;
+        java.lang.IllegalArgumentException $r1;
+
+        r0 := @this: javax.swing.text.ZoneView;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 1 goto label1;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("ZoneView.setMaxZonesLoaded must be greater than 0.");
+
+        throw $r1;
+
+     label1:
+        r0.<javax.swing.text.ZoneView: int maxZonesLoaded> = i0;
+
+        virtualinvoke r0.<javax.swing.text.ZoneView: void unloadOldZones()>();
+
+        return;
+    }
+
+    protected void zoneWasLoaded(javax.swing.text.View)
+    {
+        javax.swing.text.ZoneView r0;
+        javax.swing.text.View r1;
+        java.util.Vector $r2;
+
+        r0 := @this: javax.swing.text.ZoneView;
+
+        r1 := @parameter0: javax.swing.text.View;
+
+        $r2 = r0.<javax.swing.text.ZoneView: java.util.Vector loadedZones>;
+
+        virtualinvoke $r2.<java.util.Vector: void addElement(java.lang.Object)>(r1);
+
+        virtualinvoke r0.<javax.swing.text.ZoneView: void unloadOldZones()>();
+
+        return;
+    }
+
+    void unloadOldZones()
+    {
+        javax.swing.text.ZoneView r0;
+        java.util.Vector $r1, $r2, $r5;
+        int $i0, $i1;
+        javax.swing.text.View r4;
+        java.lang.Object $r3;
+
+        r0 := @this: javax.swing.text.ZoneView;
+
+     label1:
+        $r1 = r0.<javax.swing.text.ZoneView: java.util.Vector loadedZones>;
+
+        $i0 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        $i1 = virtualinvoke r0.<javax.swing.text.ZoneView: int getMaxZonesLoaded()>();
+
+        if $i0 <= $i1 goto label2;
+
+        $r2 = r0.<javax.swing.text.ZoneView: java.util.Vector loadedZones>;
+
+        $r3 = virtualinvoke $r2.<java.util.Vector: java.lang.Object elementAt(int)>(0);
+
+        r4 = (javax.swing.text.View) $r3;
+
+        $r5 = r0.<javax.swing.text.ZoneView: java.util.Vector loadedZones>;
+
+        virtualinvoke $r5.<java.util.Vector: void removeElementAt(int)>(0);
+
+        virtualinvoke r0.<javax.swing.text.ZoneView: void unloadZone(javax.swing.text.View)>(r4);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    protected void unloadZone(javax.swing.text.View)
+    {
+        javax.swing.text.View r0;
+        javax.swing.text.ZoneView r1;
+
+        r1 := @this: javax.swing.text.ZoneView;
+
+        r0 := @parameter0: javax.swing.text.View;
+
+        virtualinvoke r0.<javax.swing.text.View: void removeAll()>();
+
+        return;
+    }
+
+    protected boolean isZoneLoaded(javax.swing.text.View)
+    {
+        int $i0;
+        javax.swing.text.View r0;
+        javax.swing.text.ZoneView r1;
+        boolean $z0;
+
+        r1 := @this: javax.swing.text.ZoneView;
+
+        r0 := @parameter0: javax.swing.text.View;
+
+        $i0 = virtualinvoke r0.<javax.swing.text.View: int getViewCount()>();
+
+        if $i0 <= 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    protected javax.swing.text.View createZone(int, int)
+    {
+        javax.swing.text.Position $r4, $r5;
+        javax.swing.text.ZoneView r0;
+        javax.swing.text.BadLocationException $r6;
+        javax.swing.text.StateInvariantError $r7;
+        javax.swing.text.ZoneView$Zone $r2;
+        int i0, i1;
+        javax.swing.text.Document $r1;
+        java.lang.String $r8;
+        javax.swing.text.Element $r3;
+
+        r0 := @this: javax.swing.text.ZoneView;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.ZoneView: javax.swing.text.Document getDocument()>();
+
+     label1:
+        $r2 = new javax.swing.text.ZoneView$Zone;
+
+        $r3 = virtualinvoke r0.<javax.swing.text.ZoneView: javax.swing.text.Element getElement()>();
+
+        $r4 = interfaceinvoke $r1.<javax.swing.text.Document: javax.swing.text.Position createPosition(int)>(i0);
+
+        $r5 = interfaceinvoke $r1.<javax.swing.text.Document: javax.swing.text.Position createPosition(int)>(i1);
+
+        specialinvoke $r2.<javax.swing.text.ZoneView$Zone: void <init>(javax.swing.text.ZoneView,javax.swing.text.Element,javax.swing.text.Position,javax.swing.text.Position)>(r0, $r3, $r4, $r5);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = new javax.swing.text.StateInvariantError;
+
+        $r8 = virtualinvoke $r6.<javax.swing.text.BadLocationException: java.lang.String getMessage()>();
+
+        specialinvoke $r7.<javax.swing.text.StateInvariantError: void <init>(java.lang.String)>($r8);
+
+        throw $r7;
+
+     label4:
+        return $r2;
+
+        catch javax.swing.text.BadLocationException from label1 to label2 with label3;
+    }
+
+    protected void loadChildren(javax.swing.text.ViewFactory)
+    {
+        javax.swing.text.ViewFactory r2;
+        int $i0, $i1, $i2;
+        javax.swing.text.ZoneView r0;
+        javax.swing.text.View $r1;
+
+        r0 := @this: javax.swing.text.ZoneView;
+
+        r2 := @parameter0: javax.swing.text.ViewFactory;
+
+        virtualinvoke r0.<javax.swing.text.ZoneView: javax.swing.text.Document getDocument()>();
+
+        $i0 = virtualinvoke r0.<javax.swing.text.ZoneView: int getStartOffset()>();
+
+        $i1 = virtualinvoke r0.<javax.swing.text.ZoneView: int getEndOffset()>();
+
+        $r1 = virtualinvoke r0.<javax.swing.text.ZoneView: javax.swing.text.View createZone(int,int)>($i0, $i1);
+
+        virtualinvoke r0.<javax.swing.text.ZoneView: void append(javax.swing.text.View)>($r1);
+
+        $i2 = $i1 - $i0;
+
+        virtualinvoke r0.<javax.swing.text.ZoneView: void handleInsert(int,int)>($i0, $i2);
+
+        return;
+    }
+
+    protected int getViewIndexAtPosition(int)
+    {
+        javax.swing.text.ZoneView r0;
+        int $i0, i1, $i2, $i3, $i4, $i5, i6, $i8;
+        javax.swing.text.View $r1;
+
+        r0 := @this: javax.swing.text.ZoneView;
+
+        i1 := @parameter0: int;
+
+        $i0 = virtualinvoke r0.<javax.swing.text.ZoneView: int getViewCount()>();
+
+        $i2 = virtualinvoke r0.<javax.swing.text.ZoneView: int getEndOffset()>();
+
+        if i1 != $i2 goto label1;
+
+        $i5 = $i0 - 1;
+
+        return $i5;
+
+     label1:
+        i6 = 0;
+
+     label2:
+        if i6 >= $i0 goto label4;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.ZoneView: javax.swing.text.View getView(int)>(i6);
+
+        $i3 = virtualinvoke $r1.<javax.swing.text.View: int getStartOffset()>();
+
+        if i1 < $i3 goto label3;
+
+        $i4 = virtualinvoke $r1.<javax.swing.text.View: int getEndOffset()>();
+
+        if i1 >= $i4 goto label3;
+
+        return i6;
+
+     label3:
+        i6 = i6 + 1;
+
+        goto label2;
+
+     label4:
+        $i8 = (int) -1;
+
+        return $i8;
+    }
+
+    void handleInsert(int, int)
+    {
+        javax.swing.text.ZoneView r0;
+        javax.swing.text.Position$Bias $r1;
+        int i0, $i1, $i2, $i3, $i4, $i5, i6;
+        javax.swing.text.View $r2;
+
+        r0 := @this: javax.swing.text.ZoneView;
+
+        i0 := @parameter0: int;
+
+        i6 := @parameter1: int;
+
+        $r1 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Forward>;
+
+        $i1 = virtualinvoke r0.<javax.swing.text.ZoneView: int getViewIndex(int,javax.swing.text.Position$Bias)>(i0, $r1);
+
+        $r2 = virtualinvoke r0.<javax.swing.text.ZoneView: javax.swing.text.View getView(int)>($i1);
+
+        $i2 = virtualinvoke $r2.<javax.swing.text.View: int getStartOffset()>();
+
+        $i3 = virtualinvoke $r2.<javax.swing.text.View: int getEndOffset()>();
+
+        $i5 = $i3 - $i2;
+
+        $i4 = r0.<javax.swing.text.ZoneView: int maxZoneSize>;
+
+        if $i5 <= $i4 goto label1;
+
+        virtualinvoke r0.<javax.swing.text.ZoneView: void splitZone(int,int,int)>($i1, $i2, $i3);
+
+     label1:
+        return;
+    }
+
+    void handleRemove(int, int)
+    {
+        int i0, i1;
+        javax.swing.text.ZoneView r0;
+
+        r0 := @this: javax.swing.text.ZoneView;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        return;
+    }
+
+    void splitZone(int, int, int)
+    {
+        javax.swing.text.ZoneView r0;
+        javax.swing.text.View[] r4;
+        java.util.Vector $r2;
+        int $i0, i1, $i2, i3, $i4, i5, i6, i7;
+        javax.swing.text.View $r3;
+        javax.swing.text.Element $r1;
+
+        r0 := @this: javax.swing.text.ZoneView;
+
+        i3 := @parameter0: int;
+
+        i5 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.ZoneView: javax.swing.text.Element getElement()>();
+
+        interfaceinvoke $r1.<javax.swing.text.Element: javax.swing.text.Document getDocument()>();
+
+        $r2 = new java.util.Vector;
+
+        specialinvoke $r2.<java.util.Vector: void <init>()>();
+
+        i6 = i5;
+
+     label1:
+        i7 = i6;
+
+        $i0 = virtualinvoke r0.<javax.swing.text.ZoneView: int getDesiredZoneEnd(int)>(i6);
+
+        $i2 = staticinvoke <java.lang.Math: int min(int,int)>($i0, i1);
+
+        i6 = $i2;
+
+        $r3 = virtualinvoke r0.<javax.swing.text.ZoneView: javax.swing.text.View createZone(int,int)>(i7, $i2);
+
+        virtualinvoke $r2.<java.util.Vector: void addElement(java.lang.Object)>($r3);
+
+        if $i2 < i1 goto label1;
+
+        virtualinvoke r0.<javax.swing.text.ZoneView: javax.swing.text.View getView(int)>(i3);
+
+        $i4 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        r4 = newarray (javax.swing.text.View)[$i4];
+
+        virtualinvoke $r2.<java.util.Vector: void copyInto(java.lang.Object[])>(r4);
+
+        virtualinvoke r0.<javax.swing.text.ZoneView: void replace(int,int,javax.swing.text.View[])>(i3, 1, r4);
+
+        return;
+    }
+
+    int getDesiredZoneEnd(int)
+    {
+        javax.swing.text.ZoneView r0;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        javax.swing.text.Element $r1, $r2;
+
+        r0 := @this: javax.swing.text.ZoneView;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.ZoneView: javax.swing.text.Element getElement()>();
+
+        $i1 = r0.<javax.swing.text.ZoneView: int maxZoneSize>;
+
+        $i2 = $i1 / 2;
+
+        $i3 = i0 + $i2;
+
+        $i4 = interfaceinvoke $r1.<javax.swing.text.Element: int getElementIndex(int)>($i3);
+
+        $r2 = interfaceinvoke $r1.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i4);
+
+        $i5 = interfaceinvoke $r2.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i6 = interfaceinvoke $r2.<javax.swing.text.Element: int getEndOffset()>();
+
+        $i8 = $i6 - i0;
+
+        $i7 = r0.<javax.swing.text.ZoneView: int maxZoneSize>;
+
+        if $i8 <= $i7 goto label1;
+
+        if $i5 <= i0 goto label1;
+
+        return $i5;
+
+     label1:
+        return $i6;
+    }
+
+    protected boolean updateChildren(javax.swing.event.DocumentEvent$ElementChange, javax.swing.event.DocumentEvent, javax.swing.text.ViewFactory)
+    {
+        javax.swing.text.ViewFactory r3;
+        javax.swing.text.ZoneView r0;
+        javax.swing.event.DocumentEvent r2;
+        javax.swing.event.DocumentEvent$ElementChange r1;
+
+        r0 := @this: javax.swing.text.ZoneView;
+
+        r1 := @parameter0: javax.swing.event.DocumentEvent$ElementChange;
+
+        r2 := @parameter1: javax.swing.event.DocumentEvent;
+
+        r3 := @parameter2: javax.swing.text.ViewFactory;
+
+        return 0;
+    }
+
+    public void insertUpdate(javax.swing.event.DocumentEvent, java.awt.Shape, javax.swing.text.ViewFactory)
+    {
+        java.awt.Shape r2;
+        javax.swing.text.ViewFactory r3;
+        int $i0, $i1;
+        javax.swing.text.ZoneView r0;
+        javax.swing.event.DocumentEvent r1;
+
+        r0 := @this: javax.swing.text.ZoneView;
+
+        r1 := @parameter0: javax.swing.event.DocumentEvent;
+
+        r2 := @parameter1: java.awt.Shape;
+
+        r3 := @parameter2: javax.swing.text.ViewFactory;
+
+        $i0 = interfaceinvoke r1.<javax.swing.event.DocumentEvent: int getOffset()>();
+
+        $i1 = interfaceinvoke r1.<javax.swing.event.DocumentEvent: int getLength()>();
+
+        virtualinvoke r0.<javax.swing.text.ZoneView: void handleInsert(int,int)>($i0, $i1);
+
+        specialinvoke r0.<javax.swing.text.BoxView: void insertUpdate(javax.swing.event.DocumentEvent,java.awt.Shape,javax.swing.text.ViewFactory)>(r1, r2, r3);
+
+        return;
+    }
+
+    public void removeUpdate(javax.swing.event.DocumentEvent, java.awt.Shape, javax.swing.text.ViewFactory)
+    {
+        java.awt.Shape r2;
+        javax.swing.text.ViewFactory r3;
+        int $i0, $i1;
+        javax.swing.text.ZoneView r0;
+        javax.swing.event.DocumentEvent r1;
+
+        r0 := @this: javax.swing.text.ZoneView;
+
+        r1 := @parameter0: javax.swing.event.DocumentEvent;
+
+        r2 := @parameter1: java.awt.Shape;
+
+        r3 := @parameter2: javax.swing.text.ViewFactory;
+
+        $i0 = interfaceinvoke r1.<javax.swing.event.DocumentEvent: int getOffset()>();
+
+        $i1 = interfaceinvoke r1.<javax.swing.event.DocumentEvent: int getLength()>();
+
+        virtualinvoke r0.<javax.swing.text.ZoneView: void handleRemove(int,int)>($i0, $i1);
+
+        specialinvoke r0.<javax.swing.text.BoxView: void removeUpdate(javax.swing.event.DocumentEvent,java.awt.Shape,javax.swing.text.ViewFactory)>(r1, r2, r3);
+
+        return;
+    }
+}

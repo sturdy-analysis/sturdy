@@ -1,0 +1,141 @@
+class javax.swing.text.DefaultEditorKit$DeletePrevCharAction extends javax.swing.text.TextAction
+{
+
+    void <init>()
+    {
+        javax.swing.text.DefaultEditorKit$DeletePrevCharAction r0;
+
+        r0 := @this: javax.swing.text.DefaultEditorKit$DeletePrevCharAction;
+
+        specialinvoke r0.<javax.swing.text.TextAction: void <init>(java.lang.String)>("delete-previous");
+
+        return;
+    }
+
+    public void actionPerformed(java.awt.event.ActionEvent)
+    {
+        byte b8, b10, b11;
+        int $i0, $i1, $i2, $i5, $i6, $i7, $i9, $i12, $i14, $i15, $i17, $i18, $i20, $i21, $i23;
+        javax.swing.text.DefaultEditorKit$DeletePrevCharAction r0;
+        java.lang.String $r6;
+        boolean $z0, z1;
+        javax.swing.text.Caret $r5;
+        javax.swing.LookAndFeel $r3;
+        char $c3, $c4;
+        javax.swing.text.BadLocationException $r7;
+        java.awt.event.ActionEvent r1;
+        javax.swing.text.JTextComponent $r2;
+        javax.swing.text.Document $r4;
+
+        r0 := @this: javax.swing.text.DefaultEditorKit$DeletePrevCharAction;
+
+        r1 := @parameter0: java.awt.event.ActionEvent;
+
+        $r2 = virtualinvoke r0.<javax.swing.text.DefaultEditorKit$DeletePrevCharAction: javax.swing.text.JTextComponent getTextComponent(java.awt.event.ActionEvent)>(r1);
+
+        z1 = 1;
+
+        if $r2 == null goto label6;
+
+        $z0 = virtualinvoke $r2.<javax.swing.text.JTextComponent: boolean isEditable()>();
+
+        if $z0 == 0 goto label6;
+
+     label1:
+        $r4 = virtualinvoke $r2.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        $r5 = virtualinvoke $r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret getCaret()>();
+
+        $i0 = interfaceinvoke $r5.<javax.swing.text.Caret: int getDot()>();
+
+        $i1 = interfaceinvoke $r5.<javax.swing.text.Caret: int getMark()>();
+
+        if $i0 == $i1 goto label2;
+
+        $i5 = staticinvoke <java.lang.Math: int min(int,int)>($i0, $i1);
+
+        $i6 = $i0 - $i1;
+
+        $i7 = staticinvoke <java.lang.Math: int abs(int)>($i6);
+
+        interfaceinvoke $r4.<javax.swing.text.Document: void remove(int,int)>($i5, $i7);
+
+        z1 = 0;
+
+        goto label4;
+
+     label2:
+        if $i0 <= 0 goto label4;
+
+        b8 = 1;
+
+        b11 = 1;
+
+        b10 = 1;
+
+        if $i0 <= 1 goto label3;
+
+        $i2 = $i0 - 2;
+
+        $r6 = interfaceinvoke $r4.<javax.swing.text.Document: java.lang.String getText(int,int)>($i2, 2);
+
+        $c3 = virtualinvoke $r6.<java.lang.String: char charAt(int)>(0);
+
+        $c4 = virtualinvoke $r6.<java.lang.String: char charAt(int)>(1);
+
+        $i12 = (int) $c3;
+
+        $i14 = (int) 55296;
+
+        if $i12 < $i14 goto label3;
+
+        $i15 = (int) $c3;
+
+        $i17 = (int) 56319;
+
+        if $i15 > $i17 goto label3;
+
+        $i18 = (int) $c4;
+
+        $i20 = (int) 56320;
+
+        if $i18 < $i20 goto label3;
+
+        $i21 = (int) $c4;
+
+        $i23 = (int) 57343;
+
+        if $i21 > $i23 goto label3;
+
+        b8 = 2;
+
+        b11 = 2;
+
+        b10 = 2;
+
+     label3:
+        $i9 = $i0 - b10;
+
+        interfaceinvoke $r4.<javax.swing.text.Document: void remove(int,int)>($i9, b11);
+
+        z1 = 0;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r7 := @caughtexception;
+
+     label6:
+        if z1 == 0 goto label7;
+
+        $r3 = staticinvoke <javax.swing.UIManager: javax.swing.LookAndFeel getLookAndFeel()>();
+
+        virtualinvoke $r3.<javax.swing.LookAndFeel: void provideErrorFeedback(java.awt.Component)>($r2);
+
+     label7:
+        return;
+
+        catch javax.swing.text.BadLocationException from label1 to label4 with label5;
+    }
+}

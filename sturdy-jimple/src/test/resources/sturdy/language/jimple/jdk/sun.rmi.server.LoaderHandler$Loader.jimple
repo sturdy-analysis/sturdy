@@ -1,0 +1,191 @@
+class sun.rmi.server.LoaderHandler$Loader extends java.net.URLClassLoader
+{
+    private java.lang.ClassLoader parent;
+    private java.lang.String 'annotation';
+    private java.security.Permissions permissions;
+
+    private void <init>(java.net.URL[], java.lang.ClassLoader)
+    {
+        java.net.URL[] r1;
+        sun.rmi.server.LoaderHandler$Loader r0;
+        java.lang.ClassLoader r2;
+        java.lang.String $r5;
+        java.security.Permissions $r3, $r4;
+
+        r0 := @this: sun.rmi.server.LoaderHandler$Loader;
+
+        r1 := @parameter0: java.net.URL[];
+
+        r2 := @parameter1: java.lang.ClassLoader;
+
+        specialinvoke r0.<java.net.URLClassLoader: void <init>(java.net.URL[],java.lang.ClassLoader)>(r1, r2);
+
+        r0.<sun.rmi.server.LoaderHandler$Loader: java.lang.ClassLoader parent> = r2;
+
+        $r3 = new java.security.Permissions;
+
+        specialinvoke $r3.<java.security.Permissions: void <init>()>();
+
+        r0.<sun.rmi.server.LoaderHandler$Loader: java.security.Permissions permissions> = $r3;
+
+        $r4 = r0.<sun.rmi.server.LoaderHandler$Loader: java.security.Permissions permissions>;
+
+        staticinvoke <sun.rmi.server.LoaderHandler: void access$300(java.net.URL[],java.security.PermissionCollection,boolean)>(r1, $r4, 0);
+
+        $r5 = staticinvoke <sun.rmi.server.LoaderHandler: java.lang.String access$400(java.net.URL[])>(r1);
+
+        r0.<sun.rmi.server.LoaderHandler$Loader: java.lang.String 'annotation'> = $r5;
+
+        return;
+    }
+
+    public java.lang.String getClassAnnotation()
+    {
+        java.lang.String $r1;
+        sun.rmi.server.LoaderHandler$Loader r0;
+
+        r0 := @this: sun.rmi.server.LoaderHandler$Loader;
+
+        $r1 = r0.<sun.rmi.server.LoaderHandler$Loader: java.lang.String 'annotation'>;
+
+        return $r1;
+    }
+
+    private void checkPermissions()
+    {
+        sun.rmi.server.LoaderHandler$Loader r1;
+        java.util.Enumeration $r3;
+        java.security.Permission $r5;
+        java.lang.Object $r4;
+        java.lang.SecurityManager $r0;
+        java.security.Permissions $r2;
+        boolean $z0;
+
+        r1 := @this: sun.rmi.server.LoaderHandler$Loader;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label2;
+
+        $r2 = r1.<sun.rmi.server.LoaderHandler$Loader: java.security.Permissions permissions>;
+
+        $r3 = virtualinvoke $r2.<java.security.Permissions: java.util.Enumeration elements()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = interfaceinvoke $r3.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        $r5 = (java.security.Permission) $r4;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r5);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    protected java.security.PermissionCollection getPermissions(java.security.CodeSource)
+    {
+        java.security.CodeSource r1;
+        java.security.PermissionCollection $r2;
+        sun.rmi.server.LoaderHandler$Loader r0;
+
+        r0 := @this: sun.rmi.server.LoaderHandler$Loader;
+
+        r1 := @parameter0: java.security.CodeSource;
+
+        $r2 = specialinvoke r0.<java.net.URLClassLoader: java.security.PermissionCollection getPermissions(java.security.CodeSource)>(r1);
+
+        return $r2;
+    }
+
+    public java.lang.String toString()
+    {
+        sun.rmi.server.LoaderHandler$Loader r1;
+        java.lang.StringBuilder $r0, $r3, $r4, $r6, $r7;
+        java.lang.String $r2, $r5, $r8;
+
+        r1 := @this: sun.rmi.server.LoaderHandler$Loader;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = specialinvoke r1.<java.lang.Object: java.lang.String toString()>();
+
+        $r3 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[\"");
+
+        $r5 = r1.<sun.rmi.server.LoaderHandler$Loader: java.lang.String 'annotation'>;
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"]");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r8;
+    }
+
+    protected java.lang.Class loadClass(java.lang.String, boolean) throws java.lang.ClassNotFoundException
+    {
+        sun.rmi.server.LoaderHandler$Loader r0;
+        java.lang.Class $r3;
+        java.lang.ClassLoader $r1;
+        java.lang.String r2;
+        boolean z0;
+
+        r0 := @this: sun.rmi.server.LoaderHandler$Loader;
+
+        r2 := @parameter0: java.lang.String;
+
+        z0 := @parameter1: boolean;
+
+        $r1 = r0.<sun.rmi.server.LoaderHandler$Loader: java.lang.ClassLoader parent>;
+
+        if $r1 != null goto label1;
+
+        staticinvoke <sun.reflect.misc.ReflectUtil: void checkPackageAccess(java.lang.String)>(r2);
+
+     label1:
+        $r3 = specialinvoke r0.<java.net.URLClassLoader: java.lang.Class loadClass(java.lang.String,boolean)>(r2, z0);
+
+        return $r3;
+    }
+
+    static void access$000(sun.rmi.server.LoaderHandler$Loader)
+    {
+        sun.rmi.server.LoaderHandler$Loader r0;
+
+        r0 := @parameter0: sun.rmi.server.LoaderHandler$Loader;
+
+        specialinvoke r0.<sun.rmi.server.LoaderHandler$Loader: void checkPermissions()>();
+
+        return;
+    }
+
+    void <init>(java.net.URL[], java.lang.ClassLoader, sun.rmi.server.LoaderHandler$1)
+    {
+        java.net.URL[] r1;
+        sun.rmi.server.LoaderHandler$Loader r0;
+        java.lang.ClassLoader r2;
+        sun.rmi.server.LoaderHandler$1 r3;
+
+        r0 := @this: sun.rmi.server.LoaderHandler$Loader;
+
+        r1 := @parameter0: java.net.URL[];
+
+        r2 := @parameter1: java.lang.ClassLoader;
+
+        r3 := @parameter2: sun.rmi.server.LoaderHandler$1;
+
+        specialinvoke r0.<sun.rmi.server.LoaderHandler$Loader: void <init>(java.net.URL[],java.lang.ClassLoader)>(r1, r2);
+
+        return;
+    }
+}

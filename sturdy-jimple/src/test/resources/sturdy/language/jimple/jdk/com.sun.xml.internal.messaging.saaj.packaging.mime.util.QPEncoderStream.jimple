@@ -1,0 +1,382 @@
+public class com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream extends java.io.FilterOutputStream
+{
+    private int count;
+    private int bytesPerLine;
+    private boolean gotSpace;
+    private boolean gotCR;
+    private static final char[] hex;
+
+    public void <init>(java.io.OutputStream, int)
+    {
+        java.io.OutputStream r1;
+        int i0, $i1;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream r0;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream;
+
+        r1 := @parameter0: java.io.OutputStream;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<java.io.FilterOutputStream: void <init>(java.io.OutputStream)>(r1);
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: int count> = 0;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: boolean gotSpace> = 0;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: boolean gotCR> = 0;
+
+        $i1 = i0 - 1;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: int bytesPerLine> = $i1;
+
+        return;
+    }
+
+    public void <init>(java.io.OutputStream)
+    {
+        java.io.OutputStream r1;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream r0;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream;
+
+        r1 := @parameter0: java.io.OutputStream;
+
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: void <init>(java.io.OutputStream,int)>(r1, 76);
+
+        return;
+    }
+
+    public void write(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r1;
+        byte $b3;
+        int i0, i1, $i2, i4, $i5;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream r0;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream;
+
+        r1 := @parameter0: byte[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i4 = 0;
+
+     label1:
+        if i4 >= i0 goto label2;
+
+        $i2 = i1 + i4;
+
+        $b3 = r1[$i2];
+
+        $i5 = (int) $b3;
+
+        virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: void write(int)>($i5);
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void write(byte[]) throws java.io.IOException
+    {
+        int $i0;
+        byte[] r1;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream r0;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream;
+
+        r1 := @parameter0: byte[];
+
+        $i0 = lengthof r1;
+
+        virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: void write(byte[],int,int)>(r1, 0, $i0);
+
+        return;
+    }
+
+    public void write(int) throws java.io.IOException
+    {
+        int i0, i1;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream r0;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream;
+
+        i0 := @parameter0: int;
+
+        i1 = i0 & 255;
+
+        $z0 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: boolean gotSpace>;
+
+        if $z0 == 0 goto label04;
+
+        if i1 == 13 goto label01;
+
+        if i1 != 10 goto label02;
+
+     label01:
+        virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: void output(int,boolean)>(32, 1);
+
+        goto label03;
+
+     label02:
+        virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: void output(int,boolean)>(32, 0);
+
+     label03:
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: boolean gotSpace> = 0;
+
+     label04:
+        if i1 != 13 goto label05;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: boolean gotCR> = 1;
+
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: void outputCRLF()>();
+
+        goto label12;
+
+     label05:
+        if i1 != 10 goto label07;
+
+        $z1 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: boolean gotCR>;
+
+        if $z1 == 0 goto label06;
+
+        goto label11;
+
+     label06:
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: void outputCRLF()>();
+
+        goto label11;
+
+     label07:
+        if i1 != 32 goto label08;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: boolean gotSpace> = 1;
+
+        goto label11;
+
+     label08:
+        if i1 < 32 goto label09;
+
+        if i1 >= 127 goto label09;
+
+        if i1 != 61 goto label10;
+
+     label09:
+        virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: void output(int,boolean)>(i1, 1);
+
+        goto label11;
+
+     label10:
+        virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: void output(int,boolean)>(i1, 0);
+
+     label11:
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: boolean gotCR> = 0;
+
+     label12:
+        return;
+    }
+
+    public void flush() throws java.io.IOException
+    {
+        java.io.OutputStream $r1;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream r0;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream;
+
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: java.io.OutputStream out>;
+
+        virtualinvoke $r1.<java.io.OutputStream: void flush()>();
+
+        return;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        java.io.OutputStream $r1;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream r0;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream;
+
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: java.io.OutputStream out>;
+
+        virtualinvoke $r1.<java.io.OutputStream: void close()>();
+
+        return;
+    }
+
+    private void outputCRLF() throws java.io.IOException
+    {
+        java.io.OutputStream $r1, $r2;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream r0;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream;
+
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: java.io.OutputStream out>;
+
+        virtualinvoke $r1.<java.io.OutputStream: void write(int)>(13);
+
+        $r2 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: java.io.OutputStream out>;
+
+        virtualinvoke $r2.<java.io.OutputStream: void write(int)>(10);
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: int count> = 0;
+
+        return;
+    }
+
+    protected void output(int, boolean) throws java.io.IOException
+    {
+        int $i0, $i1, $i2, i3, $i4, $i5, $i6, $i7, $i9, $i11, $i12;
+        boolean z0;
+        java.io.OutputStream $r1, $r2, $r3, $r4, $r5, $r7, $r9, $r10, $r11, $r12;
+        char $c8, $c10;
+        char[] $r6, $r8;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream r0;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream;
+
+        i3 := @parameter0: int;
+
+        z0 := @parameter1: boolean;
+
+        if z0 == 0 goto label2;
+
+        $i4 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: int count>;
+
+        $i5 = $i4 + 3;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: int count> = $i5;
+
+        $i6 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: int bytesPerLine>;
+
+        if $i5 <= $i6 goto label1;
+
+        $r10 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: java.io.OutputStream out>;
+
+        virtualinvoke $r10.<java.io.OutputStream: void write(int)>(61);
+
+        $r11 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: java.io.OutputStream out>;
+
+        virtualinvoke $r11.<java.io.OutputStream: void write(int)>(13);
+
+        $r12 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: java.io.OutputStream out>;
+
+        virtualinvoke $r12.<java.io.OutputStream: void write(int)>(10);
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: int count> = 3;
+
+     label1:
+        $r5 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: java.io.OutputStream out>;
+
+        virtualinvoke $r5.<java.io.OutputStream: void write(int)>(61);
+
+        $r7 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: java.io.OutputStream out>;
+
+        $r6 = <com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: char[] hex>;
+
+        $i7 = i3 >> 4;
+
+        $c8 = $r6[$i7];
+
+        $i11 = (int) $c8;
+
+        virtualinvoke $r7.<java.io.OutputStream: void write(int)>($i11);
+
+        $r9 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: java.io.OutputStream out>;
+
+        $r8 = <com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: char[] hex>;
+
+        $i9 = i3 & 15;
+
+        $c10 = $r8[$i9];
+
+        $i12 = (int) $c10;
+
+        virtualinvoke $r9.<java.io.OutputStream: void write(int)>($i12);
+
+        goto label4;
+
+     label2:
+        $i0 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: int count>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: int count> = $i1;
+
+        $i2 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: int bytesPerLine>;
+
+        if $i1 <= $i2 goto label3;
+
+        $r2 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: java.io.OutputStream out>;
+
+        virtualinvoke $r2.<java.io.OutputStream: void write(int)>(61);
+
+        $r3 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: java.io.OutputStream out>;
+
+        virtualinvoke $r3.<java.io.OutputStream: void write(int)>(13);
+
+        $r4 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: java.io.OutputStream out>;
+
+        virtualinvoke $r4.<java.io.OutputStream: void write(int)>(10);
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: int count> = 1;
+
+     label3:
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: java.io.OutputStream out>;
+
+        virtualinvoke $r1.<java.io.OutputStream: void write(int)>(i3);
+
+     label4:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        char[] $r0;
+
+        $r0 = newarray (char)[16];
+
+        $r0[0] = 48;
+
+        $r0[1] = 49;
+
+        $r0[2] = 50;
+
+        $r0[3] = 51;
+
+        $r0[4] = 52;
+
+        $r0[5] = 53;
+
+        $r0[6] = 54;
+
+        $r0[7] = 55;
+
+        $r0[8] = 56;
+
+        $r0[9] = 57;
+
+        $r0[10] = 65;
+
+        $r0[11] = 66;
+
+        $r0[12] = 67;
+
+        $r0[13] = 68;
+
+        $r0[14] = 69;
+
+        $r0[15] = 70;
+
+        <com.sun.xml.internal.messaging.saaj.packaging.mime.util.QPEncoderStream: char[] hex> = $r0;
+
+        return;
+    }
+}

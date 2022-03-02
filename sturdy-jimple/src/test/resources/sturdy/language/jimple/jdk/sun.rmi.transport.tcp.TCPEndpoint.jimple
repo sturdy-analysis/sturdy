@@ -1,0 +1,1716 @@
+public class sun.rmi.transport.tcp.TCPEndpoint extends java.lang.Object implements sun.rmi.transport.Endpoint
+{
+    private java.lang.String host;
+    private int port;
+    private final java.rmi.server.RMIClientSocketFactory csf;
+    private final java.rmi.server.RMIServerSocketFactory ssf;
+    private int listenPort;
+    private sun.rmi.transport.tcp.TCPTransport transport;
+    private static java.lang.String localHost;
+    private static boolean localHostKnown;
+    private static final java.util.Map localEndpoints;
+    private static final int FORMAT_HOST_PORT;
+    private static final int FORMAT_HOST_PORT_FACTORY;
+
+    private static int getInt(java.lang.String, int)
+    {
+        sun.security.action.GetIntegerAction $r0;
+        int i0, $i1;
+        java.lang.Object $r2;
+        java.lang.String r1;
+        java.lang.Integer $r3;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $r0 = new sun.security.action.GetIntegerAction;
+
+        specialinvoke $r0.<sun.security.action.GetIntegerAction: void <init>(java.lang.String,int)>(r1, i0);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r3 = (java.lang.Integer) $r2;
+
+        $i1 = virtualinvoke $r3.<java.lang.Integer: int intValue()>();
+
+        return $i1;
+    }
+
+    private static boolean getBoolean(java.lang.String)
+    {
+        sun.security.action.GetBooleanAction $r0;
+        java.lang.Boolean $r3;
+        java.lang.Object $r2;
+        java.lang.String r1;
+        boolean $z0;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = new sun.security.action.GetBooleanAction;
+
+        specialinvoke $r0.<sun.security.action.GetBooleanAction: void <init>(java.lang.String)>(r1);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r3 = (java.lang.Boolean) $r2;
+
+        $z0 = virtualinvoke $r3.<java.lang.Boolean: boolean booleanValue()>();
+
+        return $z0;
+    }
+
+    private static java.lang.String getHostnameProperty()
+    {
+        java.lang.Object $r1;
+        java.lang.String $r2;
+        sun.security.action.GetPropertyAction $r0;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("java.rmi.server.hostname");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r2 = (java.lang.String) $r1;
+
+        return $r2;
+    }
+
+    public void <init>(java.lang.String, int)
+    {
+        sun.rmi.transport.tcp.TCPEndpoint r0;
+        int i0;
+        java.lang.String r1;
+
+        r0 := @this: sun.rmi.transport.tcp.TCPEndpoint;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<sun.rmi.transport.tcp.TCPEndpoint: void <init>(java.lang.String,int,java.rmi.server.RMIClientSocketFactory,java.rmi.server.RMIServerSocketFactory)>(r1, i0, null, null);
+
+        return;
+    }
+
+    public void <init>(java.lang.String, int, java.rmi.server.RMIClientSocketFactory, java.rmi.server.RMIServerSocketFactory)
+    {
+        sun.rmi.transport.tcp.TCPEndpoint r0;
+        int i0, $i2;
+        java.rmi.server.RMIServerSocketFactory r2;
+        java.lang.String r3;
+        java.rmi.server.RMIClientSocketFactory r1;
+
+        r0 := @this: sun.rmi.transport.tcp.TCPEndpoint;
+
+        r3 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        r1 := @parameter2: java.rmi.server.RMIClientSocketFactory;
+
+        r2 := @parameter3: java.rmi.server.RMIServerSocketFactory;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $i2 = (int) -1;
+
+        r0.<sun.rmi.transport.tcp.TCPEndpoint: int listenPort> = $i2;
+
+        r0.<sun.rmi.transport.tcp.TCPEndpoint: sun.rmi.transport.tcp.TCPTransport transport> = null;
+
+        if r3 != null goto label1;
+
+        r3 = "";
+
+     label1:
+        r0.<sun.rmi.transport.tcp.TCPEndpoint: java.lang.String host> = r3;
+
+        r0.<sun.rmi.transport.tcp.TCPEndpoint: int port> = i0;
+
+        r0.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIClientSocketFactory csf> = r1;
+
+        r0.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIServerSocketFactory ssf> = r2;
+
+        return;
+    }
+
+    public static sun.rmi.transport.tcp.TCPEndpoint getLocalEndpoint(int)
+    {
+        int i0;
+        sun.rmi.transport.tcp.TCPEndpoint $r0;
+
+        i0 := @parameter0: int;
+
+        $r0 = staticinvoke <sun.rmi.transport.tcp.TCPEndpoint: sun.rmi.transport.tcp.TCPEndpoint getLocalEndpoint(int,java.rmi.server.RMIClientSocketFactory,java.rmi.server.RMIServerSocketFactory)>(i0, null, null);
+
+        return $r0;
+    }
+
+    public static sun.rmi.transport.tcp.TCPEndpoint getLocalEndpoint(int, java.rmi.server.RMIClientSocketFactory, java.rmi.server.RMIServerSocketFactory)
+    {
+        java.util.Map $r0, $r4, $r14;
+        boolean $z0, $z1;
+        sun.rmi.runtime.Log $r16, $r18;
+        java.lang.StringBuilder $r17, $r20, $r21, $r22, $r23;
+        java.rmi.server.RMIClientSocketFactory r2;
+        sun.rmi.transport.tcp.TCPTransport r9, $r13;
+        java.lang.Throwable $r25, $r26;
+        java.util.logging.Level $r15, $r19;
+        sun.rmi.transport.tcp.TCPEndpoint $r1, $r10, $r11, r28;
+        int i0, i1;
+        java.rmi.server.RMIServerSocketFactory r3;
+        java.lang.String $r6, r8, $r24;
+        java.util.LinkedList $r12, r27;
+        java.lang.Object $r5, $r7;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.rmi.server.RMIClientSocketFactory;
+
+        r3 := @parameter2: java.rmi.server.RMIServerSocketFactory;
+
+        $r0 = <sun.rmi.transport.tcp.TCPEndpoint: java.util.Map localEndpoints>;
+
+        entermonitor $r0;
+
+     label01:
+        $r1 = new sun.rmi.transport.tcp.TCPEndpoint;
+
+        specialinvoke $r1.<sun.rmi.transport.tcp.TCPEndpoint: void <init>(java.lang.String,int,java.rmi.server.RMIClientSocketFactory,java.rmi.server.RMIServerSocketFactory)>(null, i0, r2, r3);
+
+        $r4 = <sun.rmi.transport.tcp.TCPEndpoint: java.util.Map localEndpoints>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Map: java.lang.Object get(java.lang.Object)>($r1);
+
+        r27 = (java.util.LinkedList) $r5;
+
+        $r6 = staticinvoke <sun.rmi.transport.tcp.TCPEndpoint: java.lang.String resampleLocalHost()>();
+
+        if r27 != null goto label02;
+
+        $r11 = new sun.rmi.transport.tcp.TCPEndpoint;
+
+        specialinvoke $r11.<sun.rmi.transport.tcp.TCPEndpoint: void <init>(java.lang.String,int,java.rmi.server.RMIClientSocketFactory,java.rmi.server.RMIServerSocketFactory)>($r6, i0, r2, r3);
+
+        r28 = $r11;
+
+        $r12 = new java.util.LinkedList;
+
+        specialinvoke $r12.<java.util.LinkedList: void <init>()>();
+
+        virtualinvoke $r12.<java.util.LinkedList: boolean add(java.lang.Object)>($r11);
+
+        $r11.<sun.rmi.transport.tcp.TCPEndpoint: int listenPort> = i0;
+
+        $r13 = new sun.rmi.transport.tcp.TCPTransport;
+
+        specialinvoke $r13.<sun.rmi.transport.tcp.TCPTransport: void <init>(java.util.LinkedList)>($r12);
+
+        $r11.<sun.rmi.transport.tcp.TCPEndpoint: sun.rmi.transport.tcp.TCPTransport transport> = $r13;
+
+        $r14 = <sun.rmi.transport.tcp.TCPEndpoint: java.util.Map localEndpoints>;
+
+        interfaceinvoke $r14.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r12);
+
+        $r16 = <sun.rmi.transport.tcp.TCPTransport: sun.rmi.runtime.Log tcpLog>;
+
+        $r15 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z1 = virtualinvoke $r16.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r15);
+
+        if $z1 == 0 goto label09;
+
+        $r18 = <sun.rmi.transport.tcp.TCPTransport: sun.rmi.runtime.Log tcpLog>;
+
+        $r19 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("created local endpoint for socket factory ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r3);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" on port ");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r18.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r19, $r24);
+
+        goto label09;
+
+     label02:
+        entermonitor r27;
+
+     label03:
+        $r7 = virtualinvoke r27.<java.util.LinkedList: java.lang.Object getLast()>();
+
+        r28 = (sun.rmi.transport.tcp.TCPEndpoint) $r7;
+
+        r8 = r28.<sun.rmi.transport.tcp.TCPEndpoint: java.lang.String host>;
+
+        i1 = r28.<sun.rmi.transport.tcp.TCPEndpoint: int port>;
+
+        r9 = r28.<sun.rmi.transport.tcp.TCPEndpoint: sun.rmi.transport.tcp.TCPTransport transport>;
+
+        if $r6 == null goto label05;
+
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>(r8);
+
+        if $z0 != 0 goto label05;
+
+        if i1 == 0 goto label04;
+
+        virtualinvoke r27.<java.util.LinkedList: void clear()>();
+
+     label04:
+        $r10 = new sun.rmi.transport.tcp.TCPEndpoint;
+
+        specialinvoke $r10.<sun.rmi.transport.tcp.TCPEndpoint: void <init>(java.lang.String,int,java.rmi.server.RMIClientSocketFactory,java.rmi.server.RMIServerSocketFactory)>($r6, i1, r2, r3);
+
+        r28 = $r10;
+
+        $r10.<sun.rmi.transport.tcp.TCPEndpoint: int listenPort> = i0;
+
+        $r10.<sun.rmi.transport.tcp.TCPEndpoint: sun.rmi.transport.tcp.TCPTransport transport> = r9;
+
+        virtualinvoke r27.<java.util.LinkedList: boolean add(java.lang.Object)>($r10);
+
+     label05:
+        exitmonitor r27;
+
+     label06:
+        goto label09;
+
+     label07:
+        $r26 := @caughtexception;
+
+        exitmonitor r27;
+
+     label08:
+        throw $r26;
+
+     label09:
+        exitmonitor $r0;
+
+     label10:
+        goto label13;
+
+     label11:
+        $r25 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label12:
+        throw $r25;
+
+     label13:
+        return r28;
+
+        catch java.lang.Throwable from label03 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+        catch java.lang.Throwable from label01 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+    }
+
+    private static java.lang.String resampleLocalHost()
+    {
+        java.lang.Throwable $r12;
+        java.util.logging.Level $r3, $r7;
+        java.util.Map $r1;
+        java.lang.String $r0, $r2, $r9, $r11, $r13;
+        boolean $z0, $z1, $z2;
+        sun.rmi.runtime.Log $r4, $r6;
+        java.lang.StringBuilder $r5, $r8, $r10;
+
+        $r0 = staticinvoke <sun.rmi.transport.tcp.TCPEndpoint: java.lang.String getHostnameProperty()>();
+
+        $r1 = <sun.rmi.transport.tcp.TCPEndpoint: java.util.Map localEndpoints>;
+
+        entermonitor $r1;
+
+     label1:
+        if $r0 == null goto label3;
+
+        $z0 = <sun.rmi.transport.tcp.TCPEndpoint: boolean localHostKnown>;
+
+        if $z0 != 0 goto label2;
+
+        staticinvoke <sun.rmi.transport.tcp.TCPEndpoint: void setLocalHost(java.lang.String)>($r0);
+
+        goto label3;
+
+     label2:
+        $r2 = <sun.rmi.transport.tcp.TCPEndpoint: java.lang.String localHost>;
+
+        $z1 = virtualinvoke $r0.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z1 != 0 goto label3;
+
+        <sun.rmi.transport.tcp.TCPEndpoint: java.lang.String localHost> = $r0;
+
+        $r4 = <sun.rmi.transport.tcp.TCPTransport: sun.rmi.runtime.Log tcpLog>;
+
+        $r3 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z2 = virtualinvoke $r4.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r3);
+
+        if $z2 == 0 goto label3;
+
+        $r6 = <sun.rmi.transport.tcp.TCPTransport: sun.rmi.runtime.Log tcpLog>;
+
+        $r7 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("updated local hostname to: ");
+
+        $r9 = <sun.rmi.transport.tcp.TCPEndpoint: java.lang.String localHost>;
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r7, $r11);
+
+     label3:
+        $r13 = <sun.rmi.transport.tcp.TCPEndpoint: java.lang.String localHost>;
+
+        exitmonitor $r1;
+
+     label4:
+        return $r13;
+
+     label5:
+        $r12 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r12;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    static void setLocalHost(java.lang.String)
+    {
+        java.lang.Throwable $r18, $r19;
+        java.util.logging.Level $r2, $r14;
+        java.util.Map $r0, $r4;
+        sun.rmi.transport.tcp.TCPEndpoint r11;
+        java.lang.String r1, $r17;
+        java.util.LinkedList r8;
+        boolean $z0, $z1, $z2, $z3;
+        java.util.Iterator $r6, $r9;
+        java.util.Collection $r5;
+        sun.rmi.runtime.Log $r3, $r13;
+        java.lang.Object $r7, $r10;
+        java.lang.StringBuilder $r12, $r15, $r16;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = <sun.rmi.transport.tcp.TCPEndpoint: java.util.Map localEndpoints>;
+
+        entermonitor $r0;
+
+     label01:
+        $z0 = <sun.rmi.transport.tcp.TCPEndpoint: boolean localHostKnown>;
+
+        if $z0 != 0 goto label11;
+
+        <sun.rmi.transport.tcp.TCPEndpoint: java.lang.String localHost> = r1;
+
+        <sun.rmi.transport.tcp.TCPEndpoint: boolean localHostKnown> = 1;
+
+        $r3 = <sun.rmi.transport.tcp.TCPTransport: sun.rmi.runtime.Log tcpLog>;
+
+        $r2 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z1 = virtualinvoke $r3.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r2);
+
+        if $z1 == 0 goto label02;
+
+        $r13 = <sun.rmi.transport.tcp.TCPTransport: sun.rmi.runtime.Log tcpLog>;
+
+        $r14 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("local host set to ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r13.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r14, $r17);
+
+     label02:
+        $r4 = <sun.rmi.transport.tcp.TCPEndpoint: java.util.Map localEndpoints>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Map: java.util.Collection values()>();
+
+        $r6 = interfaceinvoke $r5.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label03:
+        $z3 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label11;
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r8 = (java.util.LinkedList) $r7;
+
+        entermonitor r8;
+
+     label04:
+        $r9 = virtualinvoke r8.<java.util.LinkedList: java.util.Iterator iterator()>();
+
+     label05:
+        $z2 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label06;
+
+        $r10 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        r11 = (sun.rmi.transport.tcp.TCPEndpoint) $r10;
+
+        r11.<sun.rmi.transport.tcp.TCPEndpoint: java.lang.String host> = r1;
+
+        goto label05;
+
+     label06:
+        exitmonitor r8;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r19 := @caughtexception;
+
+        exitmonitor r8;
+
+     label09:
+        throw $r19;
+
+     label10:
+        goto label03;
+
+     label11:
+        exitmonitor $r0;
+
+     label12:
+        goto label15;
+
+     label13:
+        $r18 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label14:
+        throw $r18;
+
+     label15:
+        return;
+
+        catch java.lang.Throwable from label04 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+        catch java.lang.Throwable from label01 to label12 with label13;
+        catch java.lang.Throwable from label13 to label14 with label13;
+    }
+
+    static void setDefaultPort(int, java.rmi.server.RMIClientSocketFactory, java.rmi.server.RMIServerSocketFactory)
+    {
+        java.util.Map $r3, $r4, $r11;
+        boolean $z0, $z1;
+        sun.rmi.runtime.Log $r13, $r15;
+        java.lang.StringBuilder $r14, $r17, $r18, $r19, $r20, $r21, $r22;
+        java.rmi.server.RMIClientSocketFactory r1;
+        java.lang.Throwable $r26, $r27;
+        java.util.logging.Level $r12, $r16;
+        sun.rmi.transport.tcp.TCPEndpoint $r0, r8, $r10, r25;
+        int $i0, i1;
+        java.rmi.server.RMIServerSocketFactory r2;
+        java.lang.String $r23;
+        java.util.LinkedList r6;
+        java.util.Iterator $r9;
+        java.lang.Object $r5, $r7, $r24;
+
+        i1 := @parameter0: int;
+
+        r1 := @parameter1: java.rmi.server.RMIClientSocketFactory;
+
+        r2 := @parameter2: java.rmi.server.RMIServerSocketFactory;
+
+        $r0 = new sun.rmi.transport.tcp.TCPEndpoint;
+
+        specialinvoke $r0.<sun.rmi.transport.tcp.TCPEndpoint: void <init>(java.lang.String,int,java.rmi.server.RMIClientSocketFactory,java.rmi.server.RMIServerSocketFactory)>(null, 0, r1, r2);
+
+        $r3 = <sun.rmi.transport.tcp.TCPEndpoint: java.util.Map localEndpoints>;
+
+        entermonitor $r3;
+
+     label01:
+        $r4 = <sun.rmi.transport.tcp.TCPEndpoint: java.util.Map localEndpoints>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Map: java.lang.Object get(java.lang.Object)>($r0);
+
+        r6 = (java.util.LinkedList) $r5;
+
+        entermonitor r6;
+
+     label02:
+        $i0 = virtualinvoke r6.<java.util.LinkedList: int size()>();
+
+        $r7 = virtualinvoke r6.<java.util.LinkedList: java.lang.Object getLast()>();
+
+        r8 = (sun.rmi.transport.tcp.TCPEndpoint) $r7;
+
+        $r9 = virtualinvoke r6.<java.util.LinkedList: java.util.Iterator iterator()>();
+
+     label03:
+        $z0 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label04;
+
+        $r24 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        r25 = (sun.rmi.transport.tcp.TCPEndpoint) $r24;
+
+        r25.<sun.rmi.transport.tcp.TCPEndpoint: int port> = i1;
+
+        goto label03;
+
+     label04:
+        if $i0 <= 1 goto label05;
+
+        virtualinvoke r6.<java.util.LinkedList: void clear()>();
+
+        virtualinvoke r6.<java.util.LinkedList: boolean add(java.lang.Object)>(r8);
+
+     label05:
+        exitmonitor r6;
+
+     label06:
+        goto label09;
+
+     label07:
+        $r27 := @caughtexception;
+
+        exitmonitor r6;
+
+     label08:
+        throw $r27;
+
+     label09:
+        $r10 = new sun.rmi.transport.tcp.TCPEndpoint;
+
+        specialinvoke $r10.<sun.rmi.transport.tcp.TCPEndpoint: void <init>(java.lang.String,int,java.rmi.server.RMIClientSocketFactory,java.rmi.server.RMIServerSocketFactory)>(null, i1, r1, r2);
+
+        $r11 = <sun.rmi.transport.tcp.TCPEndpoint: java.util.Map localEndpoints>;
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r10, r6);
+
+        $r13 = <sun.rmi.transport.tcp.TCPTransport: sun.rmi.runtime.Log tcpLog>;
+
+        $r12 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z1 = virtualinvoke $r13.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r12);
+
+        if $z1 == 0 goto label10;
+
+        $r15 = <sun.rmi.transport.tcp.TCPTransport: sun.rmi.runtime.Log tcpLog>;
+
+        $r16 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("default port for server socket factory ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" and client socket factory ");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" set to ");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r15.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r16, $r23);
+
+     label10:
+        exitmonitor $r3;
+
+     label11:
+        goto label14;
+
+     label12:
+        $r26 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label13:
+        throw $r26;
+
+     label14:
+        return;
+
+        catch java.lang.Throwable from label02 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+        catch java.lang.Throwable from label01 to label11 with label12;
+        catch java.lang.Throwable from label12 to label13 with label12;
+    }
+
+    public sun.rmi.transport.Transport getOutboundTransport()
+    {
+        sun.rmi.transport.tcp.TCPEndpoint $r0, r2;
+        sun.rmi.transport.tcp.TCPTransport $r1;
+
+        r2 := @this: sun.rmi.transport.tcp.TCPEndpoint;
+
+        $r0 = staticinvoke <sun.rmi.transport.tcp.TCPEndpoint: sun.rmi.transport.tcp.TCPEndpoint getLocalEndpoint(int,java.rmi.server.RMIClientSocketFactory,java.rmi.server.RMIServerSocketFactory)>(0, null, null);
+
+        $r1 = $r0.<sun.rmi.transport.tcp.TCPEndpoint: sun.rmi.transport.tcp.TCPTransport transport>;
+
+        return $r1;
+    }
+
+    private static java.util.Collection allKnownTransports()
+    {
+        java.lang.Throwable $r11;
+        java.util.Iterator $r5;
+        java.util.Collection $r4;
+        java.util.HashSet $r1;
+        java.util.Map $r0, $r2, $r3;
+        int $i0;
+        sun.rmi.transport.tcp.TCPEndpoint r9;
+        java.lang.Object $r6, $r8;
+        java.util.LinkedList r7;
+        boolean $z0;
+        sun.rmi.transport.tcp.TCPTransport $r10;
+
+        $r0 = <sun.rmi.transport.tcp.TCPEndpoint: java.util.Map localEndpoints>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = new java.util.HashSet;
+
+        $r2 = <sun.rmi.transport.tcp.TCPEndpoint: java.util.Map localEndpoints>;
+
+        $i0 = interfaceinvoke $r2.<java.util.Map: int size()>();
+
+        specialinvoke $r1.<java.util.HashSet: void <init>(int)>($i0);
+
+        $r3 = <sun.rmi.transport.tcp.TCPEndpoint: java.util.Map localEndpoints>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.util.Collection values()>();
+
+        $r5 = interfaceinvoke $r4.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (java.util.LinkedList) $r6;
+
+        $r8 = virtualinvoke r7.<java.util.LinkedList: java.lang.Object getFirst()>();
+
+        r9 = (sun.rmi.transport.tcp.TCPEndpoint) $r8;
+
+        $r10 = r9.<sun.rmi.transport.tcp.TCPEndpoint: sun.rmi.transport.tcp.TCPTransport transport>;
+
+        interfaceinvoke $r1.<java.util.Set: boolean add(java.lang.Object)>($r10);
+
+        goto label2;
+
+     label3:
+        exitmonitor $r0;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r11 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label6:
+        throw $r11;
+
+     label7:
+        return $r1;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public static void shedConnectionCaches()
+    {
+        java.util.Iterator $r1;
+        java.util.Collection $r0;
+        java.lang.Object $r2;
+        boolean $z0;
+        sun.rmi.transport.tcp.TCPTransport r3;
+
+        $r0 = staticinvoke <sun.rmi.transport.tcp.TCPEndpoint: java.util.Collection allKnownTransports()>();
+
+        $r1 = interfaceinvoke $r0.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r2 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        r3 = (sun.rmi.transport.tcp.TCPTransport) $r2;
+
+        virtualinvoke r3.<sun.rmi.transport.tcp.TCPTransport: void shedConnectionCaches()>();
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void exportObject(sun.rmi.transport.Target) throws java.rmi.RemoteException
+    {
+        sun.rmi.transport.tcp.TCPEndpoint r0;
+        sun.rmi.transport.Target r1;
+        sun.rmi.transport.tcp.TCPTransport $r2;
+
+        r0 := @this: sun.rmi.transport.tcp.TCPEndpoint;
+
+        r1 := @parameter0: sun.rmi.transport.Target;
+
+        $r2 = r0.<sun.rmi.transport.tcp.TCPEndpoint: sun.rmi.transport.tcp.TCPTransport transport>;
+
+        virtualinvoke $r2.<sun.rmi.transport.tcp.TCPTransport: void exportObject(sun.rmi.transport.Target)>(r1);
+
+        return;
+    }
+
+    public sun.rmi.transport.Channel getChannel()
+    {
+        sun.rmi.transport.tcp.TCPEndpoint r0;
+        sun.rmi.transport.Transport $r1;
+        sun.rmi.transport.Channel $r2;
+
+        r0 := @this: sun.rmi.transport.tcp.TCPEndpoint;
+
+        $r1 = virtualinvoke r0.<sun.rmi.transport.tcp.TCPEndpoint: sun.rmi.transport.Transport getOutboundTransport()>();
+
+        $r2 = virtualinvoke $r1.<sun.rmi.transport.Transport: sun.rmi.transport.Channel getChannel(sun.rmi.transport.Endpoint)>(r0);
+
+        return $r2;
+    }
+
+    public java.lang.String getHost()
+    {
+        sun.rmi.transport.tcp.TCPEndpoint r0;
+        java.lang.String $r1;
+
+        r0 := @this: sun.rmi.transport.tcp.TCPEndpoint;
+
+        $r1 = r0.<sun.rmi.transport.tcp.TCPEndpoint: java.lang.String host>;
+
+        return $r1;
+    }
+
+    public int getPort()
+    {
+        sun.rmi.transport.tcp.TCPEndpoint r0;
+        int $i0;
+
+        r0 := @this: sun.rmi.transport.tcp.TCPEndpoint;
+
+        $i0 = r0.<sun.rmi.transport.tcp.TCPEndpoint: int port>;
+
+        return $i0;
+    }
+
+    public int getListenPort()
+    {
+        sun.rmi.transport.tcp.TCPEndpoint r0;
+        int $i0;
+
+        r0 := @this: sun.rmi.transport.tcp.TCPEndpoint;
+
+        $i0 = r0.<sun.rmi.transport.tcp.TCPEndpoint: int listenPort>;
+
+        return $i0;
+    }
+
+    public sun.rmi.transport.Transport getInboundTransport()
+    {
+        sun.rmi.transport.tcp.TCPEndpoint r0;
+        sun.rmi.transport.tcp.TCPTransport $r1;
+
+        r0 := @this: sun.rmi.transport.tcp.TCPEndpoint;
+
+        $r1 = r0.<sun.rmi.transport.tcp.TCPEndpoint: sun.rmi.transport.tcp.TCPTransport transport>;
+
+        return $r1;
+    }
+
+    public java.rmi.server.RMIClientSocketFactory getClientSocketFactory()
+    {
+        sun.rmi.transport.tcp.TCPEndpoint r0;
+        java.rmi.server.RMIClientSocketFactory $r1;
+
+        r0 := @this: sun.rmi.transport.tcp.TCPEndpoint;
+
+        $r1 = r0.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIClientSocketFactory csf>;
+
+        return $r1;
+    }
+
+    public java.rmi.server.RMIServerSocketFactory getServerSocketFactory()
+    {
+        sun.rmi.transport.tcp.TCPEndpoint r0;
+        java.rmi.server.RMIServerSocketFactory $r1;
+
+        r0 := @this: sun.rmi.transport.tcp.TCPEndpoint;
+
+        $r1 = r0.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIServerSocketFactory ssf>;
+
+        return $r1;
+    }
+
+    public java.lang.String toString()
+    {
+        sun.rmi.transport.tcp.TCPEndpoint r2;
+        int $i0;
+        java.rmi.server.RMIServerSocketFactory $r7, $r19;
+        java.lang.String $r3, $r12, $r21, $r22;
+        java.lang.StringBuilder $r0, $r1, $r4, $r5, $r6, $r8, $r10, $r11, $r13, $r14, $r16, $r17, $r18, $r20;
+        java.rmi.server.RMIClientSocketFactory $r9, $r15;
+
+        r2 := @this: sun.rmi.transport.tcp.TCPEndpoint;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r3 = r2.<sun.rmi.transport.tcp.TCPEndpoint: java.lang.String host>;
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $i0 = r2.<sun.rmi.transport.tcp.TCPEndpoint: int port>;
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r7 = r2.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIServerSocketFactory ssf>;
+
+        if $r7 == null goto label1;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",");
+
+        $r19 = r2.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIServerSocketFactory ssf>;
+
+        $r20 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label2;
+
+     label1:
+        $r21 = "";
+
+     label2:
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r21);
+
+        $r9 = r2.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIClientSocketFactory csf>;
+
+        if $r9 == null goto label3;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",");
+
+        $r15 = r2.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIClientSocketFactory csf>;
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r15);
+
+        $r22 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label4;
+
+     label3:
+        $r22 = "";
+
+     label4:
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r12;
+    }
+
+    public int hashCode()
+    {
+        sun.rmi.transport.tcp.TCPEndpoint r0;
+        int $i0;
+
+        r0 := @this: sun.rmi.transport.tcp.TCPEndpoint;
+
+        $i0 = r0.<sun.rmi.transport.tcp.TCPEndpoint: int port>;
+
+        return $i0;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        java.rmi.server.RMIClientSocketFactory $r5, $r6, $r9, $r17, $r19, $r21, $r22;
+        sun.rmi.transport.tcp.TCPEndpoint r1, r2;
+        int $i0, $i1;
+        java.rmi.server.RMIServerSocketFactory $r7, $r8, $r10, $r11, $r13, $r15, $r16;
+        java.lang.String $r3, $r4;
+        java.lang.Object r0;
+        java.lang.Class $r12, $r14, $r18, $r20;
+
+        r2 := @this: sun.rmi.transport.tcp.TCPEndpoint;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 == null goto label17;
+
+        $z0 = r0 instanceof sun.rmi.transport.tcp.TCPEndpoint;
+
+        if $z0 == 0 goto label17;
+
+        r1 = (sun.rmi.transport.tcp.TCPEndpoint) r0;
+
+        $i1 = r2.<sun.rmi.transport.tcp.TCPEndpoint: int port>;
+
+        $i0 = r1.<sun.rmi.transport.tcp.TCPEndpoint: int port>;
+
+        if $i1 != $i0 goto label01;
+
+        $r4 = r2.<sun.rmi.transport.tcp.TCPEndpoint: java.lang.String host>;
+
+        $r3 = r1.<sun.rmi.transport.tcp.TCPEndpoint: java.lang.String host>;
+
+        $z1 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z1 != 0 goto label02;
+
+     label01:
+        return 0;
+
+     label02:
+        $r5 = r2.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIClientSocketFactory csf>;
+
+        if $r5 != null goto label03;
+
+        $z4 = 1;
+
+        goto label04;
+
+     label03:
+        $z4 = 0;
+
+     label04:
+        $r6 = r1.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIClientSocketFactory csf>;
+
+        if $r6 != null goto label05;
+
+        $z5 = 1;
+
+        goto label06;
+
+     label05:
+        $z5 = 0;
+
+     label06:
+        $z6 = $z4 ^ $z5;
+
+        if $z6 != 0 goto label11;
+
+        $r7 = r2.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIServerSocketFactory ssf>;
+
+        if $r7 != null goto label07;
+
+        $z7 = 1;
+
+        goto label08;
+
+     label07:
+        $z7 = 0;
+
+     label08:
+        $r8 = r1.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIServerSocketFactory ssf>;
+
+        if $r8 != null goto label09;
+
+        $z8 = 1;
+
+        goto label10;
+
+     label09:
+        $z8 = 0;
+
+     label10:
+        $z9 = $z7 ^ $z8;
+
+        if $z9 == 0 goto label12;
+
+     label11:
+        return 0;
+
+     label12:
+        $r9 = r2.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIClientSocketFactory csf>;
+
+        if $r9 == null goto label14;
+
+        $r17 = r2.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIClientSocketFactory csf>;
+
+        $r18 = virtualinvoke $r17.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r19 = r1.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIClientSocketFactory csf>;
+
+        $r20 = virtualinvoke $r19.<java.lang.Object: java.lang.Class getClass()>();
+
+        if $r18 != $r20 goto label13;
+
+        $r22 = r2.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIClientSocketFactory csf>;
+
+        $r21 = r1.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIClientSocketFactory csf>;
+
+        $z3 = virtualinvoke $r22.<java.lang.Object: boolean equals(java.lang.Object)>($r21);
+
+        if $z3 != 0 goto label14;
+
+     label13:
+        return 0;
+
+     label14:
+        $r10 = r2.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIServerSocketFactory ssf>;
+
+        if $r10 == null goto label16;
+
+        $r11 = r2.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIServerSocketFactory ssf>;
+
+        $r12 = virtualinvoke $r11.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r13 = r1.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIServerSocketFactory ssf>;
+
+        $r14 = virtualinvoke $r13.<java.lang.Object: java.lang.Class getClass()>();
+
+        if $r12 != $r14 goto label15;
+
+        $r16 = r2.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIServerSocketFactory ssf>;
+
+        $r15 = r1.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIServerSocketFactory ssf>;
+
+        $z2 = virtualinvoke $r16.<java.lang.Object: boolean equals(java.lang.Object)>($r15);
+
+        if $z2 != 0 goto label16;
+
+     label15:
+        return 0;
+
+     label16:
+        return 1;
+
+     label17:
+        return 0;
+    }
+
+    public void write(java.io.ObjectOutput) throws java.io.IOException
+    {
+        java.io.ObjectOutput r2;
+        sun.rmi.transport.tcp.TCPEndpoint r0;
+        int $i0, $i1;
+        java.lang.String $r3, $r5;
+        java.rmi.server.RMIClientSocketFactory $r1, $r4;
+
+        r0 := @this: sun.rmi.transport.tcp.TCPEndpoint;
+
+        r2 := @parameter0: java.io.ObjectOutput;
+
+        $r1 = r0.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIClientSocketFactory csf>;
+
+        if $r1 != null goto label1;
+
+        interfaceinvoke r2.<java.io.ObjectOutput: void writeByte(int)>(0);
+
+        $r5 = r0.<sun.rmi.transport.tcp.TCPEndpoint: java.lang.String host>;
+
+        interfaceinvoke r2.<java.io.ObjectOutput: void writeUTF(java.lang.String)>($r5);
+
+        $i1 = r0.<sun.rmi.transport.tcp.TCPEndpoint: int port>;
+
+        interfaceinvoke r2.<java.io.ObjectOutput: void writeInt(int)>($i1);
+
+        goto label2;
+
+     label1:
+        interfaceinvoke r2.<java.io.ObjectOutput: void writeByte(int)>(1);
+
+        $r3 = r0.<sun.rmi.transport.tcp.TCPEndpoint: java.lang.String host>;
+
+        interfaceinvoke r2.<java.io.ObjectOutput: void writeUTF(java.lang.String)>($r3);
+
+        $i0 = r0.<sun.rmi.transport.tcp.TCPEndpoint: int port>;
+
+        interfaceinvoke r2.<java.io.ObjectOutput: void writeInt(int)>($i0);
+
+        $r4 = r0.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIClientSocketFactory csf>;
+
+        interfaceinvoke r2.<java.io.ObjectOutput: void writeObject(java.lang.Object)>($r4);
+
+     label2:
+        return;
+    }
+
+    public static sun.rmi.transport.tcp.TCPEndpoint read(java.io.ObjectInput) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.IOException $r8, $r9;
+        byte $b0;
+        int i1, $i2;
+        sun.rmi.transport.tcp.TCPEndpoint $r10;
+        java.io.ObjectInput r0;
+        java.lang.Object $r1;
+        java.lang.Class $r2;
+        java.lang.String r6;
+        java.rmi.server.RMIClientSocketFactory r5;
+        boolean $z0;
+
+        r0 := @parameter0: java.io.ObjectInput;
+
+        r5 = null;
+
+        $b0 = interfaceinvoke r0.<java.io.ObjectInput: byte readByte()>();
+
+        $i2 = (int) $b0;
+
+        lookupswitch($i2)
+        {
+            case 0: goto label1;
+            case 1: goto label2;
+            default: goto label3;
+        };
+
+     label1:
+        r6 = interfaceinvoke r0.<java.io.ObjectInput: java.lang.String readUTF()>();
+
+        i1 = interfaceinvoke r0.<java.io.ObjectInput: int readInt()>();
+
+        goto label4;
+
+     label2:
+        r6 = interfaceinvoke r0.<java.io.ObjectInput: java.lang.String readUTF()>();
+
+        i1 = interfaceinvoke r0.<java.io.ObjectInput: int readInt()>();
+
+        $r1 = interfaceinvoke r0.<java.io.ObjectInput: java.lang.Object readObject()>();
+
+        r5 = (java.rmi.server.RMIClientSocketFactory) $r1;
+
+        if r5 == null goto label4;
+
+        $r2 = virtualinvoke r5.<java.lang.Object: java.lang.Class getClass()>();
+
+        $z0 = staticinvoke <java.lang.reflect.Proxy: boolean isProxyClass(java.lang.Class)>($r2);
+
+        if $z0 == 0 goto label4;
+
+        $r8 = new java.io.IOException;
+
+        specialinvoke $r8.<java.io.IOException: void <init>(java.lang.String)>("Invalid SocketFactory");
+
+        throw $r8;
+
+     label3:
+        $r9 = new java.io.IOException;
+
+        specialinvoke $r9.<java.io.IOException: void <init>(java.lang.String)>("invalid endpoint format");
+
+        throw $r9;
+
+     label4:
+        $r10 = new sun.rmi.transport.tcp.TCPEndpoint;
+
+        specialinvoke $r10.<sun.rmi.transport.tcp.TCPEndpoint: void <init>(java.lang.String,int,java.rmi.server.RMIClientSocketFactory,java.rmi.server.RMIServerSocketFactory)>(r6, i1, r5, null);
+
+        return $r10;
+    }
+
+    public void writeHostPortFormat(java.io.DataOutput) throws java.io.IOException
+    {
+        java.io.DataOutput r2;
+        sun.rmi.transport.tcp.TCPEndpoint r0;
+        int $i0;
+        java.lang.InternalError $r4;
+        java.lang.String $r3;
+        java.rmi.server.RMIClientSocketFactory $r1;
+
+        r0 := @this: sun.rmi.transport.tcp.TCPEndpoint;
+
+        r2 := @parameter0: java.io.DataOutput;
+
+        $r1 = r0.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIClientSocketFactory csf>;
+
+        if $r1 == null goto label1;
+
+        $r4 = new java.lang.InternalError;
+
+        specialinvoke $r4.<java.lang.InternalError: void <init>(java.lang.String)>("TCPEndpoint.writeHostPortFormat: called for endpoint with non-null socket factory");
+
+        throw $r4;
+
+     label1:
+        $r3 = r0.<sun.rmi.transport.tcp.TCPEndpoint: java.lang.String host>;
+
+        interfaceinvoke r2.<java.io.DataOutput: void writeUTF(java.lang.String)>($r3);
+
+        $i0 = r0.<sun.rmi.transport.tcp.TCPEndpoint: int port>;
+
+        interfaceinvoke r2.<java.io.DataOutput: void writeInt(int)>($i0);
+
+        return;
+    }
+
+    public static sun.rmi.transport.tcp.TCPEndpoint readHostPortFormat(java.io.DataInput) throws java.io.IOException
+    {
+        java.io.DataInput r0;
+        int $i0;
+        sun.rmi.transport.tcp.TCPEndpoint $r2;
+        java.lang.String $r1;
+
+        r0 := @parameter0: java.io.DataInput;
+
+        $r1 = interfaceinvoke r0.<java.io.DataInput: java.lang.String readUTF()>();
+
+        $i0 = interfaceinvoke r0.<java.io.DataInput: int readInt()>();
+
+        $r2 = new sun.rmi.transport.tcp.TCPEndpoint;
+
+        specialinvoke $r2.<sun.rmi.transport.tcp.TCPEndpoint: void <init>(java.lang.String,int)>($r1, $i0);
+
+        return $r2;
+    }
+
+    private static java.rmi.server.RMISocketFactory chooseFactory()
+    {
+        java.rmi.server.RMISocketFactory $r0, r1;
+
+        $r0 = staticinvoke <java.rmi.server.RMISocketFactory: java.rmi.server.RMISocketFactory getSocketFactory()>();
+
+        r1 = $r0;
+
+        if $r0 != null goto label1;
+
+        r1 = <sun.rmi.transport.tcp.TCPTransport: java.rmi.server.RMISocketFactory defaultSocketFactory>;
+
+     label1:
+        return r1;
+    }
+
+    java.net.Socket newSocket() throws java.rmi.RemoteException
+    {
+        java.rmi.ConnectIOException $r15;
+        boolean $z0;
+        java.lang.Exception $r12, $r13;
+        sun.rmi.runtime.Log $r1, $r6;
+        java.lang.StringBuilder $r5, $r8, $r9, $r16, $r17, $r19, $r24, $r25, $r27, $r31, $r32, $r34;
+        java.rmi.server.RMIClientSocketFactory $r11, r36;
+        java.lang.Throwable $r14;
+        java.net.Socket $r4;
+        java.rmi.UnknownHostException $r30;
+        java.util.logging.Level $r0, $r7;
+        sun.rmi.transport.tcp.TCPEndpoint r2;
+        int $i0;
+        java.net.ConnectException $r22;
+        java.lang.String $r3, $r10, $r18, $r20, $r26, $r28, $r33, $r35;
+        java.rmi.ConnectException $r23;
+        java.io.IOException $r21;
+        java.net.UnknownHostException $r29;
+
+        r2 := @this: sun.rmi.transport.tcp.TCPEndpoint;
+
+        $r1 = <sun.rmi.transport.tcp.TCPTransport: sun.rmi.runtime.Log tcpLog>;
+
+        $r0 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z0 = virtualinvoke $r1.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r0);
+
+        if $z0 == 0 goto label01;
+
+        $r6 = <sun.rmi.transport.tcp.TCPTransport: sun.rmi.runtime.Log tcpLog>;
+
+        $r7 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("opening socket to ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r7, $r10);
+
+     label01:
+        $r11 = r2.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIClientSocketFactory csf>;
+
+        r36 = $r11;
+
+        if $r11 != null goto label02;
+
+        r36 = staticinvoke <sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMISocketFactory chooseFactory()>();
+
+     label02:
+        $r3 = r2.<sun.rmi.transport.tcp.TCPEndpoint: java.lang.String host>;
+
+        $i0 = r2.<sun.rmi.transport.tcp.TCPEndpoint: int port>;
+
+        $r4 = interfaceinvoke r36.<java.rmi.server.RMIClientSocketFactory: java.net.Socket createSocket(java.lang.String,int)>($r3, $i0);
+
+     label03:
+        goto label11;
+
+     label04:
+        $r29 := @caughtexception;
+
+        $r30 = new java.rmi.UnknownHostException;
+
+        $r31 = new java.lang.StringBuilder;
+
+        specialinvoke $r31.<java.lang.StringBuilder: void <init>()>();
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown host: ");
+
+        $r33 = r2.<sun.rmi.transport.tcp.TCPEndpoint: java.lang.String host>;
+
+        $r34 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r33);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r30.<java.rmi.UnknownHostException: void <init>(java.lang.String,java.lang.Exception)>($r35, $r29);
+
+        throw $r30;
+
+     label05:
+        $r22 := @caughtexception;
+
+        $r23 = new java.rmi.ConnectException;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Connection refused to host: ");
+
+        $r26 = r2.<sun.rmi.transport.tcp.TCPEndpoint: java.lang.String host>;
+
+        $r27 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r26);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r23.<java.rmi.ConnectException: void <init>(java.lang.String,java.lang.Exception)>($r28, $r22);
+
+        throw $r23;
+
+     label06:
+        $r21 := @caughtexception;
+
+     label07:
+        staticinvoke <sun.rmi.transport.tcp.TCPEndpoint: void shedConnectionCaches()>();
+
+     label08:
+        goto label10;
+
+     label09:
+        $r14 := @caughtexception;
+
+     label10:
+        $r15 = new java.rmi.ConnectIOException;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception creating connection to: ");
+
+        $r18 = r2.<sun.rmi.transport.tcp.TCPEndpoint: java.lang.String host>;
+
+        $r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r15.<java.rmi.ConnectIOException: void <init>(java.lang.String,java.lang.Exception)>($r20, $r21);
+
+        throw $r15;
+
+     label11:
+        virtualinvoke $r4.<java.net.Socket: void setTcpNoDelay(boolean)>(1);
+
+     label12:
+        goto label14;
+
+     label13:
+        $r13 := @caughtexception;
+
+     label14:
+        virtualinvoke $r4.<java.net.Socket: void setKeepAlive(boolean)>(1);
+
+     label15:
+        goto label17;
+
+     label16:
+        $r12 := @caughtexception;
+
+     label17:
+        return $r4;
+
+        catch java.net.UnknownHostException from label01 to label03 with label04;
+        catch java.net.ConnectException from label01 to label03 with label05;
+        catch java.io.IOException from label01 to label03 with label06;
+        catch java.lang.OutOfMemoryError from label07 to label08 with label09;
+        catch java.lang.Exception from label07 to label08 with label09;
+        catch java.lang.Exception from label11 to label12 with label13;
+        catch java.lang.Exception from label14 to label15 with label16;
+    }
+
+    java.net.ServerSocket newServerSocket() throws java.io.IOException
+    {
+        java.util.logging.Level $r0, $r8;
+        java.net.ServerSocket $r3;
+        sun.rmi.transport.tcp.TCPEndpoint r2;
+        int $i0, $i1, $i2;
+        java.rmi.server.RMIServerSocketFactory $r4, $r12, r13;
+        java.lang.String $r11;
+        boolean $z0;
+        sun.rmi.runtime.Log $r1, $r7;
+        java.lang.StringBuilder $r6, $r9, $r10;
+        java.rmi.server.RMIClientSocketFactory $r5;
+
+        r2 := @this: sun.rmi.transport.tcp.TCPEndpoint;
+
+        $r1 = <sun.rmi.transport.tcp.TCPTransport: sun.rmi.runtime.Log tcpLog>;
+
+        $r0 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z0 = virtualinvoke $r1.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r0);
+
+        if $z0 == 0 goto label1;
+
+        $r7 = <sun.rmi.transport.tcp.TCPTransport: sun.rmi.runtime.Log tcpLog>;
+
+        $r8 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("creating server socket on ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r8, $r11);
+
+     label1:
+        $r12 = r2.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIServerSocketFactory ssf>;
+
+        r13 = $r12;
+
+        if $r12 != null goto label2;
+
+        r13 = staticinvoke <sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMISocketFactory chooseFactory()>();
+
+     label2:
+        $i0 = r2.<sun.rmi.transport.tcp.TCPEndpoint: int listenPort>;
+
+        $r3 = interfaceinvoke r13.<java.rmi.server.RMIServerSocketFactory: java.net.ServerSocket createServerSocket(int)>($i0);
+
+        $i1 = r2.<sun.rmi.transport.tcp.TCPEndpoint: int listenPort>;
+
+        if $i1 != 0 goto label3;
+
+        $i2 = virtualinvoke $r3.<java.net.ServerSocket: int getLocalPort()>();
+
+        $r5 = r2.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIClientSocketFactory csf>;
+
+        $r4 = r2.<sun.rmi.transport.tcp.TCPEndpoint: java.rmi.server.RMIServerSocketFactory ssf>;
+
+        staticinvoke <sun.rmi.transport.tcp.TCPEndpoint: void setDefaultPort(int,java.rmi.server.RMIClientSocketFactory,java.rmi.server.RMIServerSocketFactory)>($i2, $r5, $r4);
+
+     label3:
+        return $r3;
+    }
+
+    static int access$000(java.lang.String, int)
+    {
+        int i0, $i1;
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $i1 = staticinvoke <sun.rmi.transport.tcp.TCPEndpoint: int getInt(java.lang.String,int)>(r0, i0);
+
+        return $i1;
+    }
+
+    static void <clinit>()
+    {
+        byte[] $r13;
+        java.util.HashMap $r20;
+        java.util.logging.Level $r5, $r18;
+        java.net.InetAddress $r12;
+        byte $b0, $b1, $b2, $b3;
+        int $i4;
+        java.lang.String $r0, $r1, $r9, $r11, $r14, $r15;
+        boolean $z0, $z1, $z2;
+        java.lang.Exception $r16;
+        sun.rmi.runtime.Log $r4, $r17;
+        java.lang.StringBuilder $r6, $r7, $r8, $r10, $r19;
+
+        <sun.rmi.transport.tcp.TCPEndpoint: int FORMAT_HOST_PORT_FACTORY> = 1;
+
+        <sun.rmi.transport.tcp.TCPEndpoint: int FORMAT_HOST_PORT> = 0;
+
+        <sun.rmi.transport.tcp.TCPEndpoint: boolean localHostKnown> = 1;
+
+        $r0 = staticinvoke <sun.rmi.transport.tcp.TCPEndpoint: java.lang.String getHostnameProperty()>();
+
+        <sun.rmi.transport.tcp.TCPEndpoint: java.lang.String localHost> = $r0;
+
+        $r1 = <sun.rmi.transport.tcp.TCPEndpoint: java.lang.String localHost>;
+
+        if $r1 != null goto label6;
+
+     label1:
+        $r12 = staticinvoke <java.net.InetAddress: java.net.InetAddress getLocalHost()>();
+
+        $r13 = virtualinvoke $r12.<java.net.InetAddress: byte[] getAddress()>();
+
+        $b0 = $r13[0];
+
+        $i4 = (int) $b0;
+
+        if $i4 != 127 goto label2;
+
+        $b1 = $r13[1];
+
+        if $b1 != 0 goto label2;
+
+        $b2 = $r13[2];
+
+        if $b2 != 0 goto label2;
+
+        $b3 = $r13[3];
+
+        if $b3 != 1 goto label2;
+
+        <sun.rmi.transport.tcp.TCPEndpoint: boolean localHostKnown> = 0;
+
+     label2:
+        $z1 = staticinvoke <sun.rmi.transport.tcp.TCPEndpoint: boolean getBoolean(java.lang.String)>("java.rmi.server.useLocalHostName");
+
+        if $z1 == 0 goto label3;
+
+        $r15 = staticinvoke <sun.rmi.transport.tcp.TCPEndpoint$FQDN: java.lang.String attemptFQDN(java.net.InetAddress)>($r12);
+
+        <sun.rmi.transport.tcp.TCPEndpoint: java.lang.String localHost> = $r15;
+
+        goto label4;
+
+     label3:
+        $r14 = virtualinvoke $r12.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+        <sun.rmi.transport.tcp.TCPEndpoint: java.lang.String localHost> = $r14;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r16 := @caughtexception;
+
+        <sun.rmi.transport.tcp.TCPEndpoint: boolean localHostKnown> = 0;
+
+        <sun.rmi.transport.tcp.TCPEndpoint: java.lang.String localHost> = null;
+
+     label6:
+        $r17 = <sun.rmi.transport.tcp.TCPTransport: sun.rmi.runtime.Log tcpLog>;
+
+        $r18 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z2 = virtualinvoke $r17.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r18);
+
+        if $z2 == 0 goto label7;
+
+        $r4 = <sun.rmi.transport.tcp.TCPTransport: sun.rmi.runtime.Log tcpLog>;
+
+        $r5 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("localHostKnown = ");
+
+        $z0 = <sun.rmi.transport.tcp.TCPEndpoint: boolean localHostKnown>;
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", localHost = ");
+
+        $r9 = <sun.rmi.transport.tcp.TCPEndpoint: java.lang.String localHost>;
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r5, $r11);
+
+     label7:
+        $r20 = new java.util.HashMap;
+
+        specialinvoke $r20.<java.util.HashMap: void <init>()>();
+
+        <sun.rmi.transport.tcp.TCPEndpoint: java.util.Map localEndpoints> = $r20;
+
+        return;
+
+        catch java.lang.Exception from label1 to label4 with label5;
+    }
+}

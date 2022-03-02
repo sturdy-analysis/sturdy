@@ -1,0 +1,242 @@
+final class java.net.InetAddress$Cache extends java.lang.Object
+{
+    private java.util.LinkedHashMap cache;
+    private java.net.InetAddress$Cache$Type type;
+
+    public void <init>(java.net.InetAddress$Cache$Type)
+    {
+        java.util.LinkedHashMap $r2;
+        java.net.InetAddress$Cache r0;
+        java.net.InetAddress$Cache$Type r1;
+
+        r0 := @this: java.net.InetAddress$Cache;
+
+        r1 := @parameter0: java.net.InetAddress$Cache$Type;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.net.InetAddress$Cache: java.net.InetAddress$Cache$Type type> = r1;
+
+        $r2 = new java.util.LinkedHashMap;
+
+        specialinvoke $r2.<java.util.LinkedHashMap: void <init>()>();
+
+        r0.<java.net.InetAddress$Cache: java.util.LinkedHashMap cache> = $r2;
+
+        return;
+    }
+
+    private int getPolicy()
+    {
+        java.net.InetAddress$Cache r0;
+        int $i0, $i1;
+        java.net.InetAddress$Cache$Type $r1, $r2;
+
+        r0 := @this: java.net.InetAddress$Cache;
+
+        $r2 = r0.<java.net.InetAddress$Cache: java.net.InetAddress$Cache$Type type>;
+
+        $r1 = <java.net.InetAddress$Cache$Type: java.net.InetAddress$Cache$Type Positive>;
+
+        if $r2 != $r1 goto label1;
+
+        $i1 = staticinvoke <sun.net.InetAddressCachePolicy: int get()>();
+
+        return $i1;
+
+     label1:
+        $i0 = staticinvoke <sun.net.InetAddressCachePolicy: int getNegative()>();
+
+        return $i0;
+    }
+
+    public java.net.InetAddress$Cache put(java.lang.String, java.net.InetAddress[])
+    {
+        java.net.InetAddress[] r2;
+        java.net.InetAddress$Cache r0;
+        byte $b6, $b8;
+        java.net.InetAddress$CacheEntry r14, $r19;
+        boolean $z0, $z1;
+        java.util.Set $r7;
+        long $l1, $l3, $l4, $l5, $l7, l9;
+        java.util.LinkedHashMap $r4, $r6, $r10, $r12;
+        int $i0, $i2, $i11, $i12, $i13, $i15;
+        java.lang.String r3, r15, r17;
+        java.util.LinkedList $r18;
+        java.util.Iterator $r8, $r16;
+        java.lang.Object $r9, $r11, $r13;
+
+        r0 := @this: java.net.InetAddress$Cache;
+
+        r3 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.net.InetAddress[];
+
+        $i0 = specialinvoke r0.<java.net.InetAddress$Cache: int getPolicy()>();
+
+        if $i0 != 0 goto label1;
+
+        return r0;
+
+     label1:
+        $i11 = (int) -1;
+
+        if $i0 == $i11 goto label5;
+
+        $r18 = new java.util.LinkedList;
+
+        specialinvoke $r18.<java.util.LinkedList: void <init>()>();
+
+        $l4 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r6 = r0.<java.net.InetAddress$Cache: java.util.LinkedHashMap cache>;
+
+        $r7 = virtualinvoke $r6.<java.util.LinkedHashMap: java.util.Set keySet()>();
+
+        $r8 = interfaceinvoke $r7.<java.util.Set: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r11 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        r15 = (java.lang.String) $r11;
+
+        $r12 = r0.<java.net.InetAddress$Cache: java.util.LinkedHashMap cache>;
+
+        $r13 = virtualinvoke $r12.<java.util.LinkedHashMap: java.lang.Object get(java.lang.Object)>(r15);
+
+        r14 = (java.net.InetAddress$CacheEntry) $r13;
+
+        $l5 = r14.<java.net.InetAddress$CacheEntry: long expiration>;
+
+        $b6 = $l5 cmp 0L;
+
+        $i12 = (int) $b6;
+
+        if $i12 < 0 goto label3;
+
+        $l7 = r14.<java.net.InetAddress$CacheEntry: long expiration>;
+
+        $b8 = $l7 cmp $l4;
+
+        $i13 = (int) $b8;
+
+        if $i13 >= 0 goto label3;
+
+        virtualinvoke $r18.<java.util.LinkedList: boolean add(java.lang.Object)>(r15);
+
+        goto label2;
+
+     label3:
+        $r16 = virtualinvoke $r18.<java.util.LinkedList: java.util.Iterator iterator()>();
+
+     label4:
+        $z1 = interfaceinvoke $r16.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label5;
+
+        $r9 = interfaceinvoke $r16.<java.util.Iterator: java.lang.Object next()>();
+
+        r17 = (java.lang.String) $r9;
+
+        $r10 = r0.<java.net.InetAddress$Cache: java.util.LinkedHashMap cache>;
+
+        virtualinvoke $r10.<java.util.LinkedHashMap: java.lang.Object remove(java.lang.Object)>(r17);
+
+        goto label4;
+
+     label5:
+        $i15 = (int) -1;
+
+        if $i0 != $i15 goto label6;
+
+        l9 = -1L;
+
+        goto label7;
+
+     label6:
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $i2 = $i0 * 1000;
+
+        $l3 = (long) $i2;
+
+        l9 = $l1 + $l3;
+
+     label7:
+        $r19 = new java.net.InetAddress$CacheEntry;
+
+        specialinvoke $r19.<java.net.InetAddress$CacheEntry: void <init>(java.net.InetAddress[],long)>(r2, l9);
+
+        $r4 = r0.<java.net.InetAddress$Cache: java.util.LinkedHashMap cache>;
+
+        virtualinvoke $r4.<java.util.LinkedHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r3, $r19);
+
+        return r0;
+    }
+
+    public java.net.InetAddress$CacheEntry get(java.lang.String)
+    {
+        long $l1, $l3, $l4;
+        java.util.LinkedHashMap $r2, $r4;
+        java.net.InetAddress$Cache r0;
+        byte $b2, $b5;
+        java.net.InetAddress$CacheEntry r5;
+        int $i0, $i7, $i8, $i9;
+        java.lang.Object $r3;
+        java.lang.String r1;
+
+        r0 := @this: java.net.InetAddress$Cache;
+
+        r1 := @parameter0: java.lang.String;
+
+        $i0 = specialinvoke r0.<java.net.InetAddress$Cache: int getPolicy()>();
+
+        if $i0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<java.net.InetAddress$Cache: java.util.LinkedHashMap cache>;
+
+        $r3 = virtualinvoke $r2.<java.util.LinkedHashMap: java.lang.Object get(java.lang.Object)>(r1);
+
+        r5 = (java.net.InetAddress$CacheEntry) $r3;
+
+        if r5 == null goto label2;
+
+        $i7 = (int) -1;
+
+        if $i0 == $i7 goto label2;
+
+        $l1 = r5.<java.net.InetAddress$CacheEntry: long expiration>;
+
+        $b2 = $l1 cmp 0L;
+
+        $i8 = (int) $b2;
+
+        if $i8 < 0 goto label2;
+
+        $l3 = r5.<java.net.InetAddress$CacheEntry: long expiration>;
+
+        $l4 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $b5 = $l3 cmp $l4;
+
+        $i9 = (int) $b5;
+
+        if $i9 >= 0 goto label2;
+
+        $r4 = r0.<java.net.InetAddress$Cache: java.util.LinkedHashMap cache>;
+
+        virtualinvoke $r4.<java.util.LinkedHashMap: java.lang.Object remove(java.lang.Object)>(r1);
+
+        r5 = null;
+
+     label2:
+        return r5;
+    }
+}

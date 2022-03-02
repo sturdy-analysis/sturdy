@@ -1,0 +1,923 @@
+public abstract class java.nio.ByteBuffer extends java.nio.Buffer implements java.lang.Comparable
+{
+    final byte[] hb;
+    final int offset;
+    boolean isReadOnly;
+    boolean bigEndian;
+    boolean nativeByteOrder;
+
+    void <init>(int, int, int, int, byte[], int)
+    {
+        byte[] r3;
+        java.nio.ByteBuffer r0;
+        java.nio.ByteOrder $r1, $r2;
+        int i0, i1, i2, i3, i4;
+        boolean $z0;
+
+        r0 := @this: java.nio.ByteBuffer;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        r3 := @parameter4: byte[];
+
+        i4 := @parameter5: int;
+
+        specialinvoke r0.<java.nio.Buffer: void <init>(int,int,int,int)>(i0, i1, i2, i3);
+
+        r0.<java.nio.ByteBuffer: boolean bigEndian> = 1;
+
+        $r1 = staticinvoke <java.nio.Bits: java.nio.ByteOrder byteOrder()>();
+
+        $r2 = <java.nio.ByteOrder: java.nio.ByteOrder BIG_ENDIAN>;
+
+        if $r1 != $r2 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        r0.<java.nio.ByteBuffer: boolean nativeByteOrder> = $z0;
+
+        r0.<java.nio.ByteBuffer: byte[] hb> = r3;
+
+        r0.<java.nio.ByteBuffer: int offset> = i4;
+
+        return;
+    }
+
+    void <init>(int, int, int, int)
+    {
+        int i0, i1, i2, i3;
+        java.nio.ByteBuffer r0;
+
+        r0 := @this: java.nio.ByteBuffer;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        specialinvoke r0.<java.nio.ByteBuffer: void <init>(int,int,int,int,byte[],int)>(i0, i1, i2, i3, null, 0);
+
+        return;
+    }
+
+    public static java.nio.ByteBuffer allocateDirect(int)
+    {
+        int i0;
+        java.nio.DirectByteBuffer $r0;
+
+        i0 := @parameter0: int;
+
+        $r0 = new java.nio.DirectByteBuffer;
+
+        specialinvoke $r0.<java.nio.DirectByteBuffer: void <init>(int)>(i0);
+
+        return $r0;
+    }
+
+    public static java.nio.ByteBuffer allocate(int)
+    {
+        int i0;
+        java.nio.HeapByteBuffer $r0;
+        java.lang.IllegalArgumentException $r1;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 0 goto label1;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        $r0 = new java.nio.HeapByteBuffer;
+
+        specialinvoke $r0.<java.nio.HeapByteBuffer: void <init>(int,int)>(i0, i0);
+
+        return $r0;
+    }
+
+    public static java.nio.ByteBuffer wrap(byte[], int, int)
+    {
+        byte[] r1;
+        java.lang.IndexOutOfBoundsException $r3;
+        int i0, i1;
+        java.nio.HeapByteBuffer $r0;
+        java.lang.IllegalArgumentException $r2;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+     label1:
+        $r0 = new java.nio.HeapByteBuffer;
+
+        specialinvoke $r0.<java.nio.HeapByteBuffer: void <init>(byte[],int,int)>(r1, i0, i1);
+
+     label2:
+        return $r0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r3.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r3;
+
+        catch java.lang.IllegalArgumentException from label1 to label2 with label3;
+    }
+
+    public static java.nio.ByteBuffer wrap(byte[])
+    {
+        int $i0;
+        byte[] r0;
+        java.nio.ByteBuffer $r1;
+
+        r0 := @parameter0: byte[];
+
+        $i0 = lengthof r0;
+
+        $r1 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[],int,int)>(r0, 0, $i0);
+
+        return $r1;
+    }
+
+    public abstract java.nio.ByteBuffer slice();
+
+    public abstract java.nio.ByteBuffer duplicate();
+
+    public abstract java.nio.ByteBuffer asReadOnlyBuffer();
+
+    public abstract byte get();
+
+    public abstract java.nio.ByteBuffer put(byte);
+
+    public abstract byte get(int);
+
+    public abstract java.nio.ByteBuffer put(int, byte);
+
+    public java.nio.ByteBuffer get(byte[], int, int)
+    {
+        byte[] r0;
+        java.nio.ByteBuffer r1;
+        java.nio.BufferUnderflowException $r2;
+        byte $b5;
+        int i0, i1, $i2, $i3, i4, i6;
+
+        r1 := @this: java.nio.ByteBuffer;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $i2 = lengthof r0;
+
+        staticinvoke <java.nio.ByteBuffer: void checkBounds(int,int,int)>(i0, i1, $i2);
+
+        $i3 = virtualinvoke r1.<java.nio.ByteBuffer: int remaining()>();
+
+        if i1 <= $i3 goto label1;
+
+        $r2 = new java.nio.BufferUnderflowException;
+
+        specialinvoke $r2.<java.nio.BufferUnderflowException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        i4 = i0 + i1;
+
+        i6 = i0;
+
+     label2:
+        if i6 >= i4 goto label3;
+
+        $b5 = virtualinvoke r1.<java.nio.ByteBuffer: byte get()>();
+
+        r0[i6] = $b5;
+
+        i6 = i6 + 1;
+
+        goto label2;
+
+     label3:
+        return r1;
+    }
+
+    public java.nio.ByteBuffer get(byte[])
+    {
+        byte[] r1;
+        int $i0;
+        java.nio.ByteBuffer r0, $r2;
+
+        r0 := @this: java.nio.ByteBuffer;
+
+        r1 := @parameter0: byte[];
+
+        $i0 = lengthof r1;
+
+        $r2 = virtualinvoke r0.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[],int,int)>(r1, 0, $i0);
+
+        return $r2;
+    }
+
+    public java.nio.ByteBuffer put(java.nio.ByteBuffer)
+    {
+        java.nio.BufferOverflowException $r2;
+        java.lang.IllegalArgumentException $r4;
+        java.nio.ByteBuffer r0, r1;
+        byte $b2;
+        int $i0, $i1, i3;
+        boolean $z0;
+        java.nio.ReadOnlyBufferException $r3;
+
+        r1 := @this: java.nio.ByteBuffer;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        if r0 != r1 goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r4;
+
+     label1:
+        $z0 = virtualinvoke r1.<java.nio.ByteBuffer: boolean isReadOnly()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = new java.nio.ReadOnlyBufferException;
+
+        specialinvoke $r3.<java.nio.ReadOnlyBufferException: void <init>()>();
+
+        throw $r3;
+
+     label2:
+        $i0 = virtualinvoke r0.<java.nio.ByteBuffer: int remaining()>();
+
+        $i1 = virtualinvoke r1.<java.nio.ByteBuffer: int remaining()>();
+
+        if $i0 <= $i1 goto label3;
+
+        $r2 = new java.nio.BufferOverflowException;
+
+        specialinvoke $r2.<java.nio.BufferOverflowException: void <init>()>();
+
+        throw $r2;
+
+     label3:
+        i3 = 0;
+
+     label4:
+        if i3 >= $i0 goto label5;
+
+        $b2 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        virtualinvoke r1.<java.nio.ByteBuffer: java.nio.ByteBuffer put(byte)>($b2);
+
+        i3 = i3 + 1;
+
+        goto label4;
+
+     label5:
+        return r1;
+    }
+
+    public java.nio.ByteBuffer put(byte[], int, int)
+    {
+        byte[] r0;
+        java.nio.BufferOverflowException $r2;
+        java.nio.ByteBuffer r1;
+        byte $b5;
+        int i0, i1, $i2, $i3, i4, i6;
+
+        r1 := @this: java.nio.ByteBuffer;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $i2 = lengthof r0;
+
+        staticinvoke <java.nio.ByteBuffer: void checkBounds(int,int,int)>(i0, i1, $i2);
+
+        $i3 = virtualinvoke r1.<java.nio.ByteBuffer: int remaining()>();
+
+        if i1 <= $i3 goto label1;
+
+        $r2 = new java.nio.BufferOverflowException;
+
+        specialinvoke $r2.<java.nio.BufferOverflowException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        i4 = i0 + i1;
+
+        i6 = i0;
+
+     label2:
+        if i6 >= i4 goto label3;
+
+        $b5 = r0[i6];
+
+        virtualinvoke r1.<java.nio.ByteBuffer: java.nio.ByteBuffer put(byte)>($b5);
+
+        i6 = i6 + 1;
+
+        goto label2;
+
+     label3:
+        return r1;
+    }
+
+    public final java.nio.ByteBuffer put(byte[])
+    {
+        byte[] r1;
+        int $i0;
+        java.nio.ByteBuffer r0, $r2;
+
+        r0 := @this: java.nio.ByteBuffer;
+
+        r1 := @parameter0: byte[];
+
+        $i0 = lengthof r1;
+
+        $r2 = virtualinvoke r0.<java.nio.ByteBuffer: java.nio.ByteBuffer put(byte[],int,int)>(r1, 0, $i0);
+
+        return $r2;
+    }
+
+    public final boolean hasArray()
+    {
+        byte[] $r1;
+        java.nio.ByteBuffer r0;
+        boolean $z0, $z1;
+
+        r0 := @this: java.nio.ByteBuffer;
+
+        $r1 = r0.<java.nio.ByteBuffer: byte[] hb>;
+
+        if $r1 == null goto label1;
+
+        $z0 = r0.<java.nio.ByteBuffer: boolean isReadOnly>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public final byte[] array()
+    {
+        byte[] $r1, $r2;
+        java.lang.UnsupportedOperationException $r4;
+        java.nio.ByteBuffer r0;
+        boolean $z0;
+        java.nio.ReadOnlyBufferException $r3;
+
+        r0 := @this: java.nio.ByteBuffer;
+
+        $r1 = r0.<java.nio.ByteBuffer: byte[] hb>;
+
+        if $r1 != null goto label1;
+
+        $r4 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r4.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r4;
+
+     label1:
+        $z0 = r0.<java.nio.ByteBuffer: boolean isReadOnly>;
+
+        if $z0 == 0 goto label2;
+
+        $r3 = new java.nio.ReadOnlyBufferException;
+
+        specialinvoke $r3.<java.nio.ReadOnlyBufferException: void <init>()>();
+
+        throw $r3;
+
+     label2:
+        $r2 = r0.<java.nio.ByteBuffer: byte[] hb>;
+
+        return $r2;
+    }
+
+    public final int arrayOffset()
+    {
+        byte[] $r1;
+        java.lang.UnsupportedOperationException $r3;
+        int $i0;
+        java.nio.ByteBuffer r0;
+        boolean $z0;
+        java.nio.ReadOnlyBufferException $r2;
+
+        r0 := @this: java.nio.ByteBuffer;
+
+        $r1 = r0.<java.nio.ByteBuffer: byte[] hb>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r3.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $z0 = r0.<java.nio.ByteBuffer: boolean isReadOnly>;
+
+        if $z0 == 0 goto label2;
+
+        $r2 = new java.nio.ReadOnlyBufferException;
+
+        specialinvoke $r2.<java.nio.ReadOnlyBufferException: void <init>()>();
+
+        throw $r2;
+
+     label2:
+        $i0 = r0.<java.nio.ByteBuffer: int offset>;
+
+        return $i0;
+    }
+
+    public abstract java.nio.ByteBuffer compact();
+
+    public abstract boolean isDirect();
+
+    public java.lang.String toString()
+    {
+        java.nio.ByteBuffer r1;
+        java.lang.StringBuffer $r0;
+        int $i0, $i1, $i2;
+        java.lang.Class $r2;
+        java.lang.String $r3, $r4;
+
+        r1 := @this: java.nio.ByteBuffer;
+
+        $r0 = new java.lang.StringBuffer;
+
+        specialinvoke $r0.<java.lang.StringBuffer: void <init>()>();
+
+        $r2 = virtualinvoke r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r3);
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("[pos=");
+
+        $i0 = virtualinvoke r1.<java.nio.ByteBuffer: int position()>();
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(int)>($i0);
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>(" lim=");
+
+        $i1 = virtualinvoke r1.<java.nio.ByteBuffer: int limit()>();
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(int)>($i1);
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>(" cap=");
+
+        $i2 = virtualinvoke r1.<java.nio.ByteBuffer: int capacity()>();
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(int)>($i2);
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("]");
+
+        $r4 = virtualinvoke $r0.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r4;
+    }
+
+    public int hashCode()
+    {
+        java.nio.ByteBuffer r0;
+        byte $b3;
+        int $i0, $i1, $i2, i4, i5, $i6, $i8;
+
+        r0 := @this: java.nio.ByteBuffer;
+
+        i4 = 1;
+
+        $i0 = virtualinvoke r0.<java.nio.ByteBuffer: int position()>();
+
+        $i1 = virtualinvoke r0.<java.nio.ByteBuffer: int limit()>();
+
+        i5 = $i1 - 1;
+
+     label1:
+        if i5 < $i0 goto label2;
+
+        $i2 = 31 * i4;
+
+        $b3 = virtualinvoke r0.<java.nio.ByteBuffer: byte get(int)>(i5);
+
+        $i6 = (int) $b3;
+
+        i4 = $i2 + $i6;
+
+        $i8 = (int) -1;
+
+        i5 = i5 + $i8;
+
+        goto label1;
+
+     label2:
+        return i4;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        java.nio.ByteBuffer r0, r2;
+        byte $b8, $b9;
+        int $i0, $i1, i2, $i3, $i4, i5, $i6, $i7, i10, i11, $i13, $i15;
+        boolean $z0, $z1;
+        java.lang.Object r1;
+
+        r0 := @this: java.nio.ByteBuffer;
+
+        r1 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        $z0 = r1 instanceof java.nio.ByteBuffer;
+
+        if $z0 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        r2 = (java.nio.ByteBuffer) r1;
+
+        $i0 = virtualinvoke r0.<java.nio.ByteBuffer: int position()>();
+
+        $i1 = virtualinvoke r0.<java.nio.ByteBuffer: int limit()>();
+
+        i2 = $i1 - $i0;
+
+        $i3 = virtualinvoke r2.<java.nio.ByteBuffer: int position()>();
+
+        $i4 = virtualinvoke r2.<java.nio.ByteBuffer: int limit()>();
+
+        i5 = $i4 - $i3;
+
+        if i2 < 0 goto label3;
+
+        if i2 == i5 goto label4;
+
+     label3:
+        return 0;
+
+     label4:
+        $i6 = virtualinvoke r0.<java.nio.ByteBuffer: int limit()>();
+
+        i10 = $i6 - 1;
+
+        $i7 = virtualinvoke r2.<java.nio.ByteBuffer: int limit()>();
+
+        i11 = $i7 - 1;
+
+     label5:
+        if i10 < $i0 goto label7;
+
+        $b8 = virtualinvoke r0.<java.nio.ByteBuffer: byte get(int)>(i10);
+
+        $b9 = virtualinvoke r2.<java.nio.ByteBuffer: byte get(int)>(i11);
+
+        $z1 = staticinvoke <java.nio.ByteBuffer: boolean equals(byte,byte)>($b8, $b9);
+
+        if $z1 != 0 goto label6;
+
+        return 0;
+
+     label6:
+        $i13 = (int) -1;
+
+        i10 = i10 + $i13;
+
+        $i15 = (int) -1;
+
+        i11 = i11 + $i15;
+
+        goto label5;
+
+     label7:
+        return 1;
+    }
+
+    private static boolean equals(byte, byte)
+    {
+        byte b0, b1;
+        int $i2, $i3;
+        boolean $z0;
+
+        b0 := @parameter0: byte;
+
+        b1 := @parameter1: byte;
+
+        $i2 = (int) b0;
+
+        $i3 = (int) b1;
+
+        if $i2 != $i3 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public int compareTo(java.nio.ByteBuffer)
+    {
+        java.nio.ByteBuffer r0, r1;
+        byte $b10, $b11;
+        int $i0, $i1, i2, $i3, $i4, i5, $i6, $i7, i8, $i9, $i12, i13, i14, $i16;
+
+        r0 := @this: java.nio.ByteBuffer;
+
+        r1 := @parameter0: java.nio.ByteBuffer;
+
+        $i0 = virtualinvoke r0.<java.nio.ByteBuffer: int position()>();
+
+        $i1 = virtualinvoke r0.<java.nio.ByteBuffer: int limit()>();
+
+        i2 = $i1 - $i0;
+
+        $i3 = virtualinvoke r1.<java.nio.ByteBuffer: int position()>();
+
+        $i4 = virtualinvoke r1.<java.nio.ByteBuffer: int limit()>();
+
+        i5 = $i4 - $i3;
+
+        $i6 = staticinvoke <java.lang.Math: int min(int,int)>(i2, i5);
+
+        if $i6 >= 0 goto label1;
+
+        $i16 = (int) -1;
+
+        return $i16;
+
+     label1:
+        $i7 = staticinvoke <java.lang.Math: int min(int,int)>(i2, i5);
+
+        i8 = $i0 + $i7;
+
+        i13 = $i0;
+
+        i14 = $i3;
+
+     label2:
+        if i13 >= i8 goto label4;
+
+        $b10 = virtualinvoke r0.<java.nio.ByteBuffer: byte get(int)>(i13);
+
+        $b11 = virtualinvoke r1.<java.nio.ByteBuffer: byte get(int)>(i14);
+
+        $i12 = staticinvoke <java.nio.ByteBuffer: int compare(byte,byte)>($b10, $b11);
+
+        if $i12 == 0 goto label3;
+
+        return $i12;
+
+     label3:
+        i13 = i13 + 1;
+
+        i14 = i14 + 1;
+
+        goto label2;
+
+     label4:
+        $i9 = i2 - i5;
+
+        return $i9;
+    }
+
+    private static int compare(byte, byte)
+    {
+        int $i2;
+        byte b0, b1;
+
+        b0 := @parameter0: byte;
+
+        b1 := @parameter1: byte;
+
+        $i2 = staticinvoke <java.lang.Byte: int compare(byte,byte)>(b0, b1);
+
+        return $i2;
+    }
+
+    public final java.nio.ByteOrder order()
+    {
+        java.nio.ByteOrder $r1;
+        java.nio.ByteBuffer r0;
+        boolean $z0;
+
+        r0 := @this: java.nio.ByteBuffer;
+
+        $z0 = r0.<java.nio.ByteBuffer: boolean bigEndian>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = <java.nio.ByteOrder: java.nio.ByteOrder BIG_ENDIAN>;
+
+        goto label2;
+
+     label1:
+        $r1 = <java.nio.ByteOrder: java.nio.ByteOrder LITTLE_ENDIAN>;
+
+     label2:
+        return $r1;
+    }
+
+    public final java.nio.ByteBuffer order(java.nio.ByteOrder)
+    {
+        java.nio.ByteBuffer r0;
+        java.nio.ByteOrder r1, $r2, $r3, $r4;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: java.nio.ByteBuffer;
+
+        r1 := @parameter0: java.nio.ByteOrder;
+
+        $r2 = <java.nio.ByteOrder: java.nio.ByteOrder BIG_ENDIAN>;
+
+        if r1 != $r2 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        r0.<java.nio.ByteBuffer: boolean bigEndian> = $z1;
+
+        $z0 = r0.<java.nio.ByteBuffer: boolean bigEndian>;
+
+        $r3 = staticinvoke <java.nio.Bits: java.nio.ByteOrder byteOrder()>();
+
+        $r4 = <java.nio.ByteOrder: java.nio.ByteOrder BIG_ENDIAN>;
+
+        if $r3 != $r4 goto label3;
+
+        $z2 = 1;
+
+        goto label4;
+
+     label3:
+        $z2 = 0;
+
+     label4:
+        if $z0 != $z2 goto label5;
+
+        $z3 = 1;
+
+        goto label6;
+
+     label5:
+        $z3 = 0;
+
+     label6:
+        r0.<java.nio.ByteBuffer: boolean nativeByteOrder> = $z3;
+
+        return r0;
+    }
+
+    abstract byte _get(int);
+
+    abstract void _put(int, byte);
+
+    public abstract char getChar();
+
+    public abstract java.nio.ByteBuffer putChar(char);
+
+    public abstract char getChar(int);
+
+    public abstract java.nio.ByteBuffer putChar(int, char);
+
+    public abstract java.nio.CharBuffer asCharBuffer();
+
+    public abstract short getShort();
+
+    public abstract java.nio.ByteBuffer putShort(short);
+
+    public abstract short getShort(int);
+
+    public abstract java.nio.ByteBuffer putShort(int, short);
+
+    public abstract java.nio.ShortBuffer asShortBuffer();
+
+    public abstract int getInt();
+
+    public abstract java.nio.ByteBuffer putInt(int);
+
+    public abstract int getInt(int);
+
+    public abstract java.nio.ByteBuffer putInt(int, int);
+
+    public abstract java.nio.IntBuffer asIntBuffer();
+
+    public abstract long getLong();
+
+    public abstract java.nio.ByteBuffer putLong(long);
+
+    public abstract long getLong(int);
+
+    public abstract java.nio.ByteBuffer putLong(int, long);
+
+    public abstract java.nio.LongBuffer asLongBuffer();
+
+    public abstract float getFloat();
+
+    public abstract java.nio.ByteBuffer putFloat(float);
+
+    public abstract float getFloat(int);
+
+    public abstract java.nio.ByteBuffer putFloat(int, float);
+
+    public abstract java.nio.FloatBuffer asFloatBuffer();
+
+    public abstract double getDouble();
+
+    public abstract java.nio.ByteBuffer putDouble(double);
+
+    public abstract double getDouble(int);
+
+    public abstract java.nio.ByteBuffer putDouble(int, double);
+
+    public abstract java.nio.DoubleBuffer asDoubleBuffer();
+
+    public volatile java.lang.Object array()
+    {
+        byte[] $r1;
+        java.nio.ByteBuffer r0;
+
+        r0 := @this: java.nio.ByteBuffer;
+
+        $r1 = virtualinvoke r0.<java.nio.ByteBuffer: byte[] array()>();
+
+        return $r1;
+    }
+
+    public volatile int compareTo(java.lang.Object)
+    {
+        int $i0;
+        java.lang.Object r1;
+        java.nio.ByteBuffer r0, $r2;
+
+        r0 := @this: java.nio.ByteBuffer;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = (java.nio.ByteBuffer) r1;
+
+        $i0 = virtualinvoke r0.<java.nio.ByteBuffer: int compareTo(java.nio.ByteBuffer)>($r2);
+
+        return $i0;
+    }
+}

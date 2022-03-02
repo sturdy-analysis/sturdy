@@ -1,0 +1,1667 @@
+public class sun.java2d.d3d.D3DSurfaceData extends sun.java2d.SurfaceData implements sun.java2d.pipe.hw.AccelSurface
+{
+    public static final int D3D_DEVICE_RESOURCE;
+    public static final int ST_INT_ARGB;
+    public static final int ST_INT_ARGB_PRE;
+    public static final int ST_INT_ARGB_BM;
+    public static final int ST_INT_RGB;
+    public static final int ST_INT_BGR;
+    public static final int ST_USHORT_565_RGB;
+    public static final int ST_USHORT_555_RGB;
+    public static final int ST_BYTE_INDEXED;
+    public static final int ST_BYTE_INDEXED_BM;
+    public static final int ST_3BYTE_BGR;
+    public static final int SWAP_DISCARD;
+    public static final int SWAP_FLIP;
+    public static final int SWAP_COPY;
+    private static final java.lang.String DESC_D3D_SURFACE;
+    private static final java.lang.String DESC_D3D_SURFACE_RTT;
+    private static final java.lang.String DESC_D3D_TEXTURE;
+    static final sun.java2d.loops.SurfaceType D3DSurface;
+    static final sun.java2d.loops.SurfaceType D3DSurfaceRTT;
+    static final sun.java2d.loops.SurfaceType D3DTexture;
+    private int type;
+    private int width;
+    private int height;
+    private int nativeWidth;
+    private int nativeHeight;
+    protected sun.awt.windows.WComponentPeer peer;
+    private java.awt.Image offscreenImage;
+    protected sun.java2d.d3d.D3DGraphicsDevice graphicsDevice;
+    private int swapEffect;
+    private sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType syncType;
+    private int backBuffersNum;
+    private sun.awt.image.WritableRasterNative wrn;
+    protected static sun.java2d.d3d.D3DRenderer d3dRenderPipe;
+    protected static sun.java2d.pipe.PixelToParallelogramConverter d3dTxRenderPipe;
+    protected static sun.java2d.pipe.ParallelogramPipe d3dAAPgramPipe;
+    protected static sun.java2d.d3d.D3DTextRenderer d3dTextPipe;
+    protected static sun.java2d.d3d.D3DDrawImage d3dImagePipe;
+
+    private native boolean initTexture(long, boolean, boolean);
+
+    private native boolean initFlipBackbuffer(long, long, int, int, int);
+
+    private native boolean initRTSurface(long, boolean);
+
+    private native void initOps(int, int, int);
+
+    protected void <init>(sun.awt.windows.WComponentPeer, sun.java2d.d3d.D3DGraphicsConfig, int, int, java.awt.Image, java.awt.image.ColorModel, int, int, sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType, int)
+    {
+        sun.java2d.loops.SurfaceType $r1;
+        sun.java2d.d3d.D3DSurfaceData r0;
+        int i0, i1, i2, i3, i4, $i5;
+        sun.java2d.d3d.D3DGraphicsConfig r3;
+        sun.java2d.d3d.D3DGraphicsDevice $r4, $r8;
+        java.awt.Image r6;
+        java.awt.image.ColorModel r2;
+        sun.awt.windows.WComponentPeer r5;
+        java.lang.Object $r9;
+        sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType r7;
+
+        r0 := @this: sun.java2d.d3d.D3DSurfaceData;
+
+        r5 := @parameter0: sun.awt.windows.WComponentPeer;
+
+        r3 := @parameter1: sun.java2d.d3d.D3DGraphicsConfig;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        r6 := @parameter4: java.awt.Image;
+
+        r2 := @parameter5: java.awt.image.ColorModel;
+
+        i3 := @parameter6: int;
+
+        i4 := @parameter7: int;
+
+        r7 := @parameter8: sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType;
+
+        i0 := @parameter9: int;
+
+        $r1 = staticinvoke <sun.java2d.d3d.D3DSurfaceData: sun.java2d.loops.SurfaceType getCustomSurfaceType(int)>(i0);
+
+        specialinvoke r0.<sun.java2d.SurfaceData: void <init>(sun.java2d.loops.SurfaceType,java.awt.image.ColorModel)>($r1, r2);
+
+        $r4 = virtualinvoke r3.<sun.java2d.d3d.D3DGraphicsConfig: sun.java2d.d3d.D3DGraphicsDevice getD3DDevice()>();
+
+        r0.<sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DGraphicsDevice graphicsDevice> = $r4;
+
+        r0.<sun.java2d.d3d.D3DSurfaceData: sun.awt.windows.WComponentPeer peer> = r5;
+
+        r0.<sun.java2d.d3d.D3DSurfaceData: int type> = i0;
+
+        r0.<sun.java2d.d3d.D3DSurfaceData: int width> = i1;
+
+        r0.<sun.java2d.d3d.D3DSurfaceData: int height> = i2;
+
+        r0.<sun.java2d.d3d.D3DSurfaceData: java.awt.Image offscreenImage> = r6;
+
+        r0.<sun.java2d.d3d.D3DSurfaceData: int backBuffersNum> = i3;
+
+        r0.<sun.java2d.d3d.D3DSurfaceData: int swapEffect> = i4;
+
+        r0.<sun.java2d.d3d.D3DSurfaceData: sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType syncType> = r7;
+
+        $r8 = r0.<sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DGraphicsDevice graphicsDevice>;
+
+        $i5 = virtualinvoke $r8.<sun.java2d.d3d.D3DGraphicsDevice: int getScreen()>();
+
+        specialinvoke r0.<sun.java2d.d3d.D3DSurfaceData: void initOps(int,int,int)>($i5, i1, i2);
+
+        if i0 != 1 goto label1;
+
+        virtualinvoke r0.<sun.java2d.d3d.D3DSurfaceData: void setSurfaceLost(boolean)>(1);
+
+        goto label2;
+
+     label1:
+        virtualinvoke r0.<sun.java2d.d3d.D3DSurfaceData: void initSurface()>();
+
+     label2:
+        $r9 = virtualinvoke r3.<sun.java2d.d3d.D3DGraphicsConfig: java.lang.Object getProxyKey()>();
+
+        virtualinvoke r0.<sun.java2d.d3d.D3DSurfaceData: void setBlitProxyKey(java.lang.Object)>($r9);
+
+        return;
+    }
+
+    public sun.java2d.SurfaceDataProxy makeProxyFor(sun.java2d.SurfaceData)
+    {
+        java.awt.GraphicsConfiguration $r3;
+        sun.java2d.d3d.D3DSurfaceData r1;
+        sun.java2d.SurfaceData r0;
+        sun.java2d.SurfaceDataProxy $r5;
+        sun.java2d.d3d.D3DGraphicsDevice $r2;
+        sun.java2d.d3d.D3DGraphicsConfig $r4;
+
+        r1 := @this: sun.java2d.d3d.D3DSurfaceData;
+
+        r0 := @parameter0: sun.java2d.SurfaceData;
+
+        $r2 = r1.<sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DGraphicsDevice graphicsDevice>;
+
+        $r3 = virtualinvoke $r2.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.GraphicsConfiguration getDefaultConfiguration()>();
+
+        $r4 = (sun.java2d.d3d.D3DGraphicsConfig) $r3;
+
+        $r5 = staticinvoke <sun.java2d.d3d.D3DSurfaceDataProxy: sun.java2d.SurfaceDataProxy createProxy(sun.java2d.SurfaceData,sun.java2d.d3d.D3DGraphicsConfig)>(r0, $r4);
+
+        return $r5;
+    }
+
+    public static sun.java2d.d3d.D3DSurfaceData createData(sun.awt.windows.WComponentPeer, java.awt.Image)
+    {
+        java.awt.Rectangle $r3;
+        java.awt.BufferCapabilities$FlipContents $r4, $r5, $r6;
+        sun.java2d.d3d.D3DSurfaceData $r10;
+        byte b0;
+        sun.java2d.pipe.hw.ExtendedBufferCapabilities $r8;
+        int $i1, $i2, $i3;
+        java.awt.BufferCapabilities $r2;
+        sun.java2d.d3d.D3DGraphicsConfig $r1;
+        boolean $z0, $z1;
+        java.awt.Image r7;
+        java.awt.image.ColorModel $r11;
+        sun.awt.windows.WComponentPeer r0;
+        sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType r9;
+
+        r0 := @parameter0: sun.awt.windows.WComponentPeer;
+
+        r7 := @parameter1: java.awt.Image;
+
+        $r1 = staticinvoke <sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DGraphicsConfig getGC(sun.awt.windows.WComponentPeer)>(r0);
+
+        if $r1 == null goto label1;
+
+        $z0 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: boolean isAccelCapable()>();
+
+        if $z0 != 0 goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r2 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: java.awt.BufferCapabilities getBackBufferCaps()>();
+
+        r9 = <sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType: sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType VSYNC_DEFAULT>;
+
+        $z1 = $r2 instanceof sun.java2d.pipe.hw.ExtendedBufferCapabilities;
+
+        if $z1 == 0 goto label3;
+
+        $r8 = (sun.java2d.pipe.hw.ExtendedBufferCapabilities) $r2;
+
+        r9 = virtualinvoke $r8.<sun.java2d.pipe.hw.ExtendedBufferCapabilities: sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType getVSync()>();
+
+     label3:
+        $r3 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: java.awt.Rectangle getBounds()>();
+
+        $r4 = virtualinvoke $r2.<java.awt.BufferCapabilities: java.awt.BufferCapabilities$FlipContents getFlipContents()>();
+
+        $r5 = <java.awt.BufferCapabilities$FlipContents: java.awt.BufferCapabilities$FlipContents COPIED>;
+
+        if $r4 != $r5 goto label4;
+
+        b0 = 3;
+
+        goto label6;
+
+     label4:
+        $r6 = <java.awt.BufferCapabilities$FlipContents: java.awt.BufferCapabilities$FlipContents PRIOR>;
+
+        if $r4 != $r6 goto label5;
+
+        b0 = 2;
+
+        goto label6;
+
+     label5:
+        b0 = 1;
+
+     label6:
+        $r10 = new sun.java2d.d3d.D3DSurfaceData;
+
+        $i1 = $r3.<java.awt.Rectangle: int width>;
+
+        $i2 = $r3.<java.awt.Rectangle: int height>;
+
+        $r11 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: java.awt.image.ColorModel getColorModel()>();
+
+        $i3 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: int getBackBuffersNum()>();
+
+        specialinvoke $r10.<sun.java2d.d3d.D3DSurfaceData: void <init>(sun.awt.windows.WComponentPeer,sun.java2d.d3d.D3DGraphicsConfig,int,int,java.awt.Image,java.awt.image.ColorModel,int,int,sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType,int)>(r0, $r1, $i1, $i2, r7, $r11, $i3, b0, r9, 4);
+
+        return $r10;
+    }
+
+    public static sun.java2d.d3d.D3DSurfaceData createData(sun.awt.windows.WComponentPeer)
+    {
+        sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData $r2;
+        sun.awt.windows.WComponentPeer r0;
+        sun.java2d.d3d.D3DGraphicsConfig $r1;
+        boolean $z0;
+
+        r0 := @parameter0: sun.awt.windows.WComponentPeer;
+
+        $r1 = staticinvoke <sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DGraphicsConfig getGC(sun.awt.windows.WComponentPeer)>(r0);
+
+        if $r1 == null goto label1;
+
+        $z0 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: boolean isAccelCapable()>();
+
+        if $z0 != 0 goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r2 = new sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData;
+
+        specialinvoke $r2.<sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData: void <init>(sun.awt.windows.WComponentPeer,sun.java2d.d3d.D3DGraphicsConfig)>(r0, $r1);
+
+        return $r2;
+    }
+
+    public static sun.java2d.d3d.D3DSurfaceData createData(sun.java2d.d3d.D3DGraphicsConfig, int, int, java.awt.image.ColorModel, java.awt.Image, int)
+    {
+        sun.awt.image.SunVolatileImage $r5;
+        sun.java2d.d3d.D3DSurfaceData $r6, r8, $r9;
+        byte $b5;
+        int i0, i1, $i2, $i3, i4;
+        sun.java2d.d3d.D3DGraphicsConfig r0;
+        sun.java2d.d3d.D3DGraphicsDevice $r3;
+        boolean $z0, $z1;
+        java.awt.Image r1;
+        sun.java2d.InvalidPipeException $r4;
+        java.awt.image.ColorModel r2;
+        sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType $r7, $r10;
+
+        r0 := @parameter0: sun.java2d.d3d.D3DGraphicsConfig;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r2 := @parameter3: java.awt.image.ColorModel;
+
+        r1 := @parameter4: java.awt.Image;
+
+        i4 := @parameter5: int;
+
+        if i4 != 5 goto label5;
+
+        $i2 = virtualinvoke r2.<java.awt.image.ColorModel: int getTransparency()>();
+
+        if $i2 != 1 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        if $z1 == 0 goto label3;
+
+        $b5 = 8;
+
+        goto label4;
+
+     label3:
+        $b5 = 4;
+
+     label4:
+        $r3 = virtualinvoke r0.<sun.java2d.d3d.D3DGraphicsConfig: sun.java2d.d3d.D3DGraphicsDevice getD3DDevice()>();
+
+        $z0 = virtualinvoke $r3.<sun.java2d.d3d.D3DGraphicsDevice: boolean isCapPresent(int)>($b5);
+
+        if $z0 != 0 goto label5;
+
+        i4 = 2;
+
+     label5:
+        r8 = null;
+
+     label6:
+        $r9 = new sun.java2d.d3d.D3DSurfaceData;
+
+        $r10 = <sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType: sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType VSYNC_DEFAULT>;
+
+        specialinvoke $r9.<sun.java2d.d3d.D3DSurfaceData: void <init>(sun.awt.windows.WComponentPeer,sun.java2d.d3d.D3DGraphicsConfig,int,int,java.awt.Image,java.awt.image.ColorModel,int,int,sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType,int)>(null, r0, i0, i1, r1, r2, 0, 1, $r10, i4);
+
+        r8 = $r9;
+
+     label7:
+        goto label9;
+
+     label8:
+        $r4 := @caughtexception;
+
+        if i4 != 5 goto label9;
+
+        $r5 = (sun.awt.image.SunVolatileImage) r1;
+
+        $i3 = virtualinvoke $r5.<sun.awt.image.SunVolatileImage: int getForcedAccelSurfaceType()>();
+
+        if $i3 == 5 goto label9;
+
+        $r6 = new sun.java2d.d3d.D3DSurfaceData;
+
+        $r7 = <sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType: sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType VSYNC_DEFAULT>;
+
+        specialinvoke $r6.<sun.java2d.d3d.D3DSurfaceData: void <init>(sun.awt.windows.WComponentPeer,sun.java2d.d3d.D3DGraphicsConfig,int,int,java.awt.Image,java.awt.image.ColorModel,int,int,sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType,int)>(null, r0, i0, i1, r1, r2, 0, 1, $r7, 2);
+
+        r8 = $r6;
+
+     label9:
+        return r8;
+
+        catch sun.java2d.InvalidPipeException from label6 to label7 with label8;
+    }
+
+    private static sun.java2d.loops.SurfaceType getCustomSurfaceType(int)
+    {
+        sun.java2d.loops.SurfaceType $r0, $r1, $r2;
+        int i0;
+
+        i0 := @parameter0: int;
+
+        lookupswitch(i0)
+        {
+            case 3: goto label1;
+            case 5: goto label2;
+            default: goto label3;
+        };
+
+     label1:
+        $r1 = <sun.java2d.d3d.D3DSurfaceData: sun.java2d.loops.SurfaceType D3DTexture>;
+
+        return $r1;
+
+     label2:
+        $r0 = <sun.java2d.d3d.D3DSurfaceData: sun.java2d.loops.SurfaceType D3DSurfaceRTT>;
+
+        return $r0;
+
+     label3:
+        $r2 = <sun.java2d.d3d.D3DSurfaceData: sun.java2d.loops.SurfaceType D3DSurface>;
+
+        return $r2;
+    }
+
+    private boolean initSurfaceNow()
+    {
+        sun.java2d.d3d.D3DSurfaceData r0;
+        long $l2, $l3, $l4, $l5, $l6;
+        int $i0, $i1, $i7, $i8, $i9;
+        boolean $z0, $z1, $z2, $z3, $z5, $z6, $z7;
+        sun.awt.windows.WComponentPeer $r1;
+        sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType $r2;
+
+        r0 := @this: sun.java2d.d3d.D3DSurfaceData;
+
+        $i0 = virtualinvoke r0.<sun.java2d.d3d.D3DSurfaceData: int getTransparency()>();
+
+        if $i0 != 1 goto label1;
+
+        $z7 = 1;
+
+        $z6 = 1;
+
+        $z5 = 1;
+
+        goto label2;
+
+     label1:
+        $z7 = 0;
+
+        $z6 = 0;
+
+        $z5 = 0;
+
+     label2:
+        $i1 = r0.<sun.java2d.d3d.D3DSurfaceData: int type>;
+
+        tableswitch($i1)
+        {
+            case 1: goto label6;
+            case 2: goto label3;
+            case 3: goto label4;
+            case 4: goto label6;
+            case 5: goto label5;
+            default: goto label7;
+        };
+
+     label3:
+        $l4 = virtualinvoke r0.<sun.java2d.d3d.D3DSurfaceData: long getNativeOps()>();
+
+        $z2 = specialinvoke r0.<sun.java2d.d3d.D3DSurfaceData: boolean initRTSurface(long,boolean)>($l4, $z5);
+
+        return $z2;
+
+     label4:
+        $l3 = virtualinvoke r0.<sun.java2d.d3d.D3DSurfaceData: long getNativeOps()>();
+
+        $z1 = specialinvoke r0.<sun.java2d.d3d.D3DSurfaceData: boolean initTexture(long,boolean,boolean)>($l3, 0, $z6);
+
+        return $z1;
+
+     label5:
+        $l2 = virtualinvoke r0.<sun.java2d.d3d.D3DSurfaceData: long getNativeOps()>();
+
+        $z0 = specialinvoke r0.<sun.java2d.d3d.D3DSurfaceData: boolean initTexture(long,boolean,boolean)>($l2, 1, $z7);
+
+        return $z0;
+
+     label6:
+        $l5 = virtualinvoke r0.<sun.java2d.d3d.D3DSurfaceData: long getNativeOps()>();
+
+        $r1 = r0.<sun.java2d.d3d.D3DSurfaceData: sun.awt.windows.WComponentPeer peer>;
+
+        $l6 = virtualinvoke $r1.<sun.awt.windows.WComponentPeer: long getData()>();
+
+        $i7 = r0.<sun.java2d.d3d.D3DSurfaceData: int backBuffersNum>;
+
+        $i8 = r0.<sun.java2d.d3d.D3DSurfaceData: int swapEffect>;
+
+        $r2 = r0.<sun.java2d.d3d.D3DSurfaceData: sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType syncType>;
+
+        $i9 = virtualinvoke $r2.<sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType: int id()>();
+
+        $z3 = specialinvoke r0.<sun.java2d.d3d.D3DSurfaceData: boolean initFlipBackbuffer(long,long,int,int,int)>($l5, $l6, $i7, $i8, $i9);
+
+        return $z3;
+
+     label7:
+        return 0;
+    }
+
+    protected void initSurface()
+    {
+        java.lang.Throwable $r5, $r6;
+        sun.java2d.d3d.D3DRenderQueue $r2;
+        sun.java2d.InvalidPipeException $r4;
+        sun.java2d.d3d.D3DSurfaceData r0;
+        sun.java2d.d3d.D3DSurfaceData$1 $r3;
+        sun.java2d.d3d.D3DSurfaceData$1Status $r1;
+        boolean $z0;
+
+        r0 := @this: sun.java2d.d3d.D3DSurfaceData;
+
+        entermonitor r0;
+
+     label1:
+        r0.<sun.java2d.d3d.D3DSurfaceData: sun.awt.image.WritableRasterNative wrn> = null;
+
+        exitmonitor r0;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r6 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r6;
+
+     label5:
+        $r1 = new sun.java2d.d3d.D3DSurfaceData$1Status;
+
+        specialinvoke $r1.<sun.java2d.d3d.D3DSurfaceData$1Status: void <init>(sun.java2d.d3d.D3DSurfaceData)>(r0);
+
+        $r2 = staticinvoke <sun.java2d.d3d.D3DRenderQueue: sun.java2d.d3d.D3DRenderQueue getInstance()>();
+
+        virtualinvoke $r2.<sun.java2d.d3d.D3DRenderQueue: void lock()>();
+
+     label6:
+        $r3 = new sun.java2d.d3d.D3DSurfaceData$1;
+
+        specialinvoke $r3.<sun.java2d.d3d.D3DSurfaceData$1: void <init>(sun.java2d.d3d.D3DSurfaceData,sun.java2d.d3d.D3DSurfaceData$1Status)>(r0, $r1);
+
+        virtualinvoke $r2.<sun.java2d.d3d.D3DRenderQueue: void flushAndInvokeNow(java.lang.Runnable)>($r3);
+
+        $z0 = $r1.<sun.java2d.d3d.D3DSurfaceData$1Status: boolean success>;
+
+        if $z0 != 0 goto label7;
+
+        $r4 = new sun.java2d.InvalidPipeException;
+
+        specialinvoke $r4.<sun.java2d.InvalidPipeException: void <init>(java.lang.String)>("Error creating D3DSurface");
+
+        throw $r4;
+
+     label7:
+        virtualinvoke $r2.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        goto label9;
+
+     label8:
+        $r5 := @caughtexception;
+
+        virtualinvoke $r2.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        throw $r5;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+        catch java.lang.Throwable from label6 to label7 with label8;
+    }
+
+    public final sun.java2d.d3d.D3DContext getContext()
+    {
+        sun.java2d.d3d.D3DContext $r2;
+        sun.java2d.d3d.D3DSurfaceData r0;
+        sun.java2d.d3d.D3DGraphicsDevice $r1;
+
+        r0 := @this: sun.java2d.d3d.D3DSurfaceData;
+
+        $r1 = r0.<sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DGraphicsDevice graphicsDevice>;
+
+        $r2 = virtualinvoke $r1.<sun.java2d.d3d.D3DGraphicsDevice: sun.java2d.d3d.D3DContext getContext()>();
+
+        return $r2;
+    }
+
+    public final int getType()
+    {
+        int $i0;
+        sun.java2d.d3d.D3DSurfaceData r0;
+
+        r0 := @this: sun.java2d.d3d.D3DSurfaceData;
+
+        $i0 = r0.<sun.java2d.d3d.D3DSurfaceData: int type>;
+
+        return $i0;
+    }
+
+    private static native int dbGetPixelNative(long, int, int);
+
+    private static native void dbSetPixelNative(long, int, int, int);
+
+    public synchronized java.awt.image.Raster getRaster(int, int, int, int)
+    {
+        sun.java2d.d3d.D3DSurfaceData r0;
+        sun.awt.image.WritableRasterNative $r1, $r7, $r8;
+        byte b10, b11, b12;
+        int[] $r5;
+        int i0, $i1, $i2, $i3, $i4, $i5, i6, i7, i8, i9;
+        java.awt.image.SinglePixelPackedSampleModel $r4;
+        java.awt.image.DirectColorModel r3;
+        java.awt.image.ColorModel $r2;
+        sun.java2d.d3d.D3DSurfaceData$D3DDataBufferNative $r6;
+
+        r0 := @this: sun.java2d.d3d.D3DSurfaceData;
+
+        i6 := @parameter0: int;
+
+        i7 := @parameter1: int;
+
+        i8 := @parameter2: int;
+
+        i9 := @parameter3: int;
+
+        $r1 = r0.<sun.java2d.d3d.D3DSurfaceData: sun.awt.image.WritableRasterNative wrn>;
+
+        if $r1 != null goto label3;
+
+        $r2 = virtualinvoke r0.<sun.java2d.d3d.D3DSurfaceData: java.awt.image.ColorModel getColorModel()>();
+
+        r3 = (java.awt.image.DirectColorModel) $r2;
+
+        i0 = r0.<sun.java2d.d3d.D3DSurfaceData: int width>;
+
+        $i1 = virtualinvoke r3.<java.awt.image.DirectColorModel: int getPixelSize()>();
+
+        if $i1 <= 16 goto label1;
+
+        b10 = 3;
+
+        b12 = 3;
+
+        b11 = 3;
+
+        goto label2;
+
+     label1:
+        b10 = 1;
+
+        b12 = 1;
+
+        b11 = 1;
+
+     label2:
+        $r4 = new java.awt.image.SinglePixelPackedSampleModel;
+
+        $i2 = r0.<sun.java2d.d3d.D3DSurfaceData: int width>;
+
+        $i3 = r0.<sun.java2d.d3d.D3DSurfaceData: int height>;
+
+        $r5 = virtualinvoke r3.<java.awt.image.DirectColorModel: int[] getMasks()>();
+
+        specialinvoke $r4.<java.awt.image.SinglePixelPackedSampleModel: void <init>(int,int,int,int,int[])>(b12, $i2, $i3, i0, $r5);
+
+        $r6 = new sun.java2d.d3d.D3DSurfaceData$D3DDataBufferNative;
+
+        $i5 = r0.<sun.java2d.d3d.D3DSurfaceData: int width>;
+
+        $i4 = r0.<sun.java2d.d3d.D3DSurfaceData: int height>;
+
+        specialinvoke $r6.<sun.java2d.d3d.D3DSurfaceData$D3DDataBufferNative: void <init>(sun.java2d.SurfaceData,int,int,int)>(r0, b11, $i5, $i4);
+
+        $r7 = staticinvoke <sun.awt.image.WritableRasterNative: sun.awt.image.WritableRasterNative createNativeRaster(java.awt.image.SampleModel,java.awt.image.DataBuffer)>($r4, $r6);
+
+        r0.<sun.java2d.d3d.D3DSurfaceData: sun.awt.image.WritableRasterNative wrn> = $r7;
+
+     label3:
+        $r8 = r0.<sun.java2d.d3d.D3DSurfaceData: sun.awt.image.WritableRasterNative wrn>;
+
+        return $r8;
+    }
+
+    public boolean canRenderLCDText(sun.java2d.SunGraphics2D)
+    {
+        sun.java2d.d3d.D3DSurfaceData r0;
+        sun.java2d.SurfaceData $r3;
+        int $i0, $i1, $i2;
+        sun.java2d.SunGraphics2D r2;
+        sun.java2d.d3d.D3DGraphicsDevice $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.java2d.d3d.D3DSurfaceData;
+
+        r2 := @parameter0: sun.java2d.SunGraphics2D;
+
+        $r1 = r0.<sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DGraphicsDevice graphicsDevice>;
+
+        $z0 = virtualinvoke $r1.<sun.java2d.d3d.D3DGraphicsDevice: boolean isCapPresent(int)>(65536);
+
+        if $z0 == 0 goto label1;
+
+        $i0 = r2.<sun.java2d.SunGraphics2D: int compositeState>;
+
+        if $i0 > 0 goto label1;
+
+        $i1 = r2.<sun.java2d.SunGraphics2D: int paintState>;
+
+        if $i1 > 0 goto label1;
+
+        $r3 = r2.<sun.java2d.SunGraphics2D: sun.java2d.SurfaceData surfaceData>;
+
+        $i2 = virtualinvoke $r3.<sun.java2d.SurfaceData: int getTransparency()>();
+
+        if $i2 != 1 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    void disableAccelerationForSurface()
+    {
+        java.awt.Image $r1, $r2;
+        sun.java2d.d3d.D3DSurfaceData r0;
+        sun.java2d.d3d.D3DVolatileSurfaceManager $r4;
+        sun.awt.image.SurfaceManager $r3;
+        boolean $z0;
+
+        r0 := @this: sun.java2d.d3d.D3DSurfaceData;
+
+        $r1 = r0.<sun.java2d.d3d.D3DSurfaceData: java.awt.Image offscreenImage>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.java2d.d3d.D3DSurfaceData: java.awt.Image offscreenImage>;
+
+        $r3 = staticinvoke <sun.awt.image.SurfaceManager: sun.awt.image.SurfaceManager getManager(java.awt.Image)>($r2);
+
+        $z0 = $r3 instanceof sun.java2d.d3d.D3DVolatileSurfaceManager;
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r0.<sun.java2d.d3d.D3DSurfaceData: void setSurfaceLost(boolean)>(1);
+
+        $r4 = (sun.java2d.d3d.D3DVolatileSurfaceManager) $r3;
+
+        virtualinvoke $r4.<sun.java2d.d3d.D3DVolatileSurfaceManager: void setAccelerationEnabled(boolean)>(0);
+
+     label1:
+        return;
+    }
+
+    public void validatePipe(sun.java2d.SunGraphics2D)
+    {
+        sun.java2d.loops.CompositeType $r3, $r4, $r8, $r9;
+        sun.java2d.pipe.PixelToParallelogramConverter $r5, r14;
+        sun.java2d.d3d.D3DRenderer r15;
+        sun.java2d.d3d.D3DGraphicsDevice $r2;
+        boolean $z0, $z1, z2, z3, z4;
+        sun.java2d.d3d.D3DDrawImage $r12, $r16;
+        java.awt.Composite $r10;
+        sun.java2d.pipe.ShapeDrawPipe $r7;
+        sun.java2d.SunGraphics2D r0;
+        sun.java2d.d3d.D3DSurfaceData r1;
+        java.awt.AlphaComposite $r11;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15;
+        sun.java2d.pipe.ParallelogramPipe $r6;
+        sun.java2d.pipe.TextPipe r13;
+
+        r1 := @this: sun.java2d.d3d.D3DSurfaceData;
+
+        r0 := @parameter0: sun.java2d.SunGraphics2D;
+
+        z2 = 0;
+
+        z4 = 0;
+
+        z3 = 0;
+
+        $i0 = r0.<sun.java2d.SunGraphics2D: int compositeState>;
+
+        if $i0 < 2 goto label01;
+
+        specialinvoke r1.<sun.java2d.SurfaceData: void validatePipe(sun.java2d.SunGraphics2D)>(r0);
+
+        $r12 = <sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DDrawImage d3dImagePipe>;
+
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.DrawImagePipe imagepipe> = $r12;
+
+        virtualinvoke r1.<sun.java2d.d3d.D3DSurfaceData: void disableAccelerationForSurface()>();
+
+        return;
+
+     label01:
+        $i1 = r0.<sun.java2d.SunGraphics2D: int compositeState>;
+
+        if $i1 > 0 goto label02;
+
+        $i13 = r0.<sun.java2d.SunGraphics2D: int paintState>;
+
+        if $i13 <= 1 goto label04;
+
+     label02:
+        $i2 = r0.<sun.java2d.SunGraphics2D: int compositeState>;
+
+        if $i2 != 1 goto label03;
+
+        $i11 = r0.<sun.java2d.SunGraphics2D: int paintState>;
+
+        if $i11 > 1 goto label03;
+
+        $r10 = r0.<sun.java2d.SunGraphics2D: java.awt.Composite composite>;
+
+        $r11 = (java.awt.AlphaComposite) $r10;
+
+        $i12 = virtualinvoke $r11.<java.awt.AlphaComposite: int getRule()>();
+
+        if $i12 == 3 goto label04;
+
+     label03:
+        $i14 = r0.<sun.java2d.SunGraphics2D: int compositeState>;
+
+        if $i14 != 2 goto label05;
+
+        $i10 = r0.<sun.java2d.SunGraphics2D: int paintState>;
+
+        if $i10 > 1 goto label05;
+
+     label04:
+        r13 = <sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DTextRenderer d3dTextPipe>;
+
+        goto label06;
+
+     label05:
+        specialinvoke r1.<sun.java2d.SurfaceData: void validatePipe(sun.java2d.SunGraphics2D)>(r0);
+
+        r13 = r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.TextPipe textpipe>;
+
+        z2 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+     label06:
+        r14 = null;
+
+        r15 = null;
+
+        $i15 = r0.<sun.java2d.SunGraphics2D: int antialiasHint>;
+
+        if $i15 == 2 goto label08;
+
+        $i7 = r0.<sun.java2d.SunGraphics2D: int paintState>;
+
+        if $i7 > 1 goto label07;
+
+        $i9 = r0.<sun.java2d.SunGraphics2D: int compositeState>;
+
+        if $i9 > 2 goto label12;
+
+        r14 = <sun.java2d.d3d.D3DSurfaceData: sun.java2d.pipe.PixelToParallelogramConverter d3dTxRenderPipe>;
+
+        r15 = <sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DRenderer d3dRenderPipe>;
+
+        goto label12;
+
+     label07:
+        $i8 = r0.<sun.java2d.SunGraphics2D: int compositeState>;
+
+        if $i8 > 1 goto label12;
+
+        $z1 = staticinvoke <sun.java2d.d3d.D3DPaints: boolean isValid(sun.java2d.SunGraphics2D)>(r0);
+
+        if $z1 == 0 goto label12;
+
+        r14 = <sun.java2d.d3d.D3DSurfaceData: sun.java2d.pipe.PixelToParallelogramConverter d3dTxRenderPipe>;
+
+        r15 = <sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DRenderer d3dRenderPipe>;
+
+        goto label12;
+
+     label08:
+        $i3 = r0.<sun.java2d.SunGraphics2D: int paintState>;
+
+        if $i3 > 1 goto label12;
+
+        $r2 = r1.<sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DGraphicsDevice graphicsDevice>;
+
+        $z0 = virtualinvoke $r2.<sun.java2d.d3d.D3DGraphicsDevice: boolean isCapPresent(int)>(524288);
+
+        if $z0 == 0 goto label11;
+
+        $r4 = r0.<sun.java2d.SunGraphics2D: sun.java2d.loops.CompositeType imageComp>;
+
+        $r3 = <sun.java2d.loops.CompositeType: sun.java2d.loops.CompositeType SrcOverNoEa>;
+
+        if $r4 == $r3 goto label09;
+
+        $r9 = r0.<sun.java2d.SunGraphics2D: sun.java2d.loops.CompositeType imageComp>;
+
+        $r8 = <sun.java2d.loops.CompositeType: sun.java2d.loops.CompositeType SrcOver>;
+
+        if $r9 != $r8 goto label11;
+
+     label09:
+        if z3 != 0 goto label10;
+
+        specialinvoke r1.<sun.java2d.SurfaceData: void validatePipe(sun.java2d.SunGraphics2D)>(r0);
+
+        z2 = 1;
+
+        z4 = 1;
+
+     label10:
+        $r5 = new sun.java2d.pipe.PixelToParallelogramConverter;
+
+        $r7 = r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.ShapeDrawPipe shapepipe>;
+
+        $r6 = <sun.java2d.d3d.D3DSurfaceData: sun.java2d.pipe.ParallelogramPipe d3dAAPgramPipe>;
+
+        specialinvoke $r5.<sun.java2d.pipe.PixelToParallelogramConverter: void <init>(sun.java2d.pipe.ShapeDrawPipe,sun.java2d.pipe.ParallelogramPipe,double,double,boolean)>($r7, $r6, 0.125, 0.499, 0);
+
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.PixelDrawPipe drawpipe> = $r5;
+
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.PixelFillPipe fillpipe> = $r5;
+
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.ShapeDrawPipe shapepipe> = $r5;
+
+        goto label12;
+
+     label11:
+        $i6 = r0.<sun.java2d.SunGraphics2D: int compositeState>;
+
+        if $i6 != 2 goto label12;
+
+        r14 = <sun.java2d.d3d.D3DSurfaceData: sun.java2d.pipe.PixelToParallelogramConverter d3dTxRenderPipe>;
+
+        r15 = <sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DRenderer d3dRenderPipe>;
+
+     label12:
+        if r14 == null goto label16;
+
+        $i4 = r0.<sun.java2d.SunGraphics2D: int transformState>;
+
+        if $i4 < 3 goto label13;
+
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.PixelDrawPipe drawpipe> = r14;
+
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.PixelFillPipe fillpipe> = r14;
+
+        goto label15;
+
+     label13:
+        $i5 = r0.<sun.java2d.SunGraphics2D: int strokeState>;
+
+        if $i5 == 0 goto label14;
+
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.PixelDrawPipe drawpipe> = r14;
+
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.PixelFillPipe fillpipe> = r15;
+
+        goto label15;
+
+     label14:
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.PixelDrawPipe drawpipe> = r15;
+
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.PixelFillPipe fillpipe> = r15;
+
+     label15:
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.ShapeDrawPipe shapepipe> = r14;
+
+        goto label17;
+
+     label16:
+        if z4 != 0 goto label17;
+
+        specialinvoke r1.<sun.java2d.SurfaceData: void validatePipe(sun.java2d.SunGraphics2D)>(r0);
+
+     label17:
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.TextPipe textpipe> = r13;
+
+        $r16 = <sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DDrawImage d3dImagePipe>;
+
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.DrawImagePipe imagepipe> = $r16;
+
+        return;
+    }
+
+    protected sun.java2d.loops.MaskFill getMaskFill(sun.java2d.SunGraphics2D)
+    {
+        sun.java2d.loops.MaskFill $r2;
+        sun.java2d.d3d.D3DSurfaceData r1;
+        int $i0;
+        sun.java2d.SunGraphics2D r0;
+        sun.java2d.d3d.D3DGraphicsDevice $r3;
+        boolean $z0, $z1;
+
+        r1 := @this: sun.java2d.d3d.D3DSurfaceData;
+
+        r0 := @parameter0: sun.java2d.SunGraphics2D;
+
+        $i0 = r0.<sun.java2d.SunGraphics2D: int paintState>;
+
+        if $i0 <= 1 goto label2;
+
+        $z0 = staticinvoke <sun.java2d.d3d.D3DPaints: boolean isValid(sun.java2d.SunGraphics2D)>(r0);
+
+        if $z0 == 0 goto label1;
+
+        $r3 = r1.<sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DGraphicsDevice graphicsDevice>;
+
+        $z1 = virtualinvoke $r3.<sun.java2d.d3d.D3DGraphicsDevice: boolean isCapPresent(int)>(16);
+
+        if $z1 != 0 goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r2 = specialinvoke r1.<sun.java2d.SurfaceData: sun.java2d.loops.MaskFill getMaskFill(sun.java2d.SunGraphics2D)>(r0);
+
+        return $r2;
+    }
+
+    public boolean copyArea(sun.java2d.SunGraphics2D, int, int, int, int, int, int)
+    {
+        sun.java2d.d3d.D3DSurfaceData r2;
+        int $i0, $i1, $i2, $i3, i4, i5, i6, i7, i8, i9, i10, i11;
+        sun.java2d.d3d.D3DRenderer $r1;
+        sun.java2d.SunGraphics2D r0;
+
+        r2 := @this: sun.java2d.d3d.D3DSurfaceData;
+
+        r0 := @parameter0: sun.java2d.SunGraphics2D;
+
+        i8 := @parameter1: int;
+
+        i9 := @parameter2: int;
+
+        i4 := @parameter3: int;
+
+        i5 := @parameter4: int;
+
+        i6 := @parameter5: int;
+
+        i7 := @parameter6: int;
+
+        $i0 = r0.<sun.java2d.SunGraphics2D: int transformState>;
+
+        if $i0 >= 3 goto label1;
+
+        $i1 = r0.<sun.java2d.SunGraphics2D: int compositeState>;
+
+        if $i1 >= 2 goto label1;
+
+        $i2 = r0.<sun.java2d.SunGraphics2D: int transX>;
+
+        i10 = i8 + $i2;
+
+        $i3 = r0.<sun.java2d.SunGraphics2D: int transY>;
+
+        i11 = i9 + $i3;
+
+        $r1 = <sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DRenderer d3dRenderPipe>;
+
+        virtualinvoke $r1.<sun.java2d.d3d.D3DRenderer: void copyArea(sun.java2d.SunGraphics2D,int,int,int,int,int,int)>(r0, i10, i11, i4, i5, i6, i7);
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    public void flush()
+    {
+        java.lang.Throwable $r3;
+        sun.java2d.d3d.D3DRenderQueue $r0;
+        sun.java2d.d3d.D3DSurfaceData r2;
+        sun.java2d.pipe.RenderBuffer $r1;
+        long $l0;
+
+        r2 := @this: sun.java2d.d3d.D3DSurfaceData;
+
+        $r0 = staticinvoke <sun.java2d.d3d.D3DRenderQueue: sun.java2d.d3d.D3DRenderQueue getInstance()>();
+
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void lock()>();
+
+     label1:
+        $r1 = virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: sun.java2d.pipe.RenderBuffer getBuffer()>();
+
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void ensureCapacityAndAlignment(int,int)>(12, 4);
+
+        virtualinvoke $r1.<sun.java2d.pipe.RenderBuffer: sun.java2d.pipe.RenderBuffer putInt(int)>(72);
+
+        $l0 = virtualinvoke r2.<sun.java2d.d3d.D3DSurfaceData: long getNativeOps()>();
+
+        virtualinvoke $r1.<sun.java2d.pipe.RenderBuffer: sun.java2d.pipe.RenderBuffer putLong(long)>($l0);
+
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void flushNow()>();
+
+     label2:
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        throw $r3;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    static void dispose(long)
+    {
+        java.lang.Throwable $r2;
+        sun.java2d.d3d.D3DRenderQueue $r0;
+        sun.java2d.pipe.RenderBuffer $r1;
+        long l0;
+
+        l0 := @parameter0: long;
+
+        $r0 = staticinvoke <sun.java2d.d3d.D3DRenderQueue: sun.java2d.d3d.D3DRenderQueue getInstance()>();
+
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void lock()>();
+
+     label1:
+        $r1 = virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: sun.java2d.pipe.RenderBuffer getBuffer()>();
+
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void ensureCapacityAndAlignment(int,int)>(12, 4);
+
+        virtualinvoke $r1.<sun.java2d.pipe.RenderBuffer: sun.java2d.pipe.RenderBuffer putInt(int)>(73);
+
+        virtualinvoke $r1.<sun.java2d.pipe.RenderBuffer: sun.java2d.pipe.RenderBuffer putLong(long)>(l0);
+
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void flushNow()>();
+
+     label2:
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        goto label5;
+
+     label3:
+        $r2 := @caughtexception;
+
+     label4:
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        throw $r2;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    static void swapBuffers(sun.java2d.d3d.D3DSurfaceData, int, int, int, int)
+    {
+        java.lang.Throwable $r6;
+        sun.java2d.d3d.D3DRenderQueue $r1;
+        sun.java2d.d3d.D3DSurfaceData r0;
+        long $l0;
+        sun.java2d.d3d.D3DSurfaceData$2 $r5;
+        java.awt.Component r7;
+        int i1, i2, i3, i4;
+        sun.awt.windows.WComponentPeer $r3;
+        sun.java2d.pipe.RenderBuffer $r2;
+        java.lang.Object $r4;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: sun.java2d.d3d.D3DSurfaceData;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        i4 := @parameter4: int;
+
+        $l0 = virtualinvoke r0.<sun.java2d.d3d.D3DSurfaceData: long getNativeOps()>();
+
+        $r1 = staticinvoke <sun.java2d.d3d.D3DRenderQueue: sun.java2d.d3d.D3DRenderQueue getInstance()>();
+
+        $z0 = staticinvoke <sun.java2d.d3d.D3DRenderQueue: boolean isRenderQueueThread()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = virtualinvoke $r1.<sun.java2d.d3d.D3DRenderQueue: boolean tryLock()>();
+
+        if $z1 != 0 goto label2;
+
+        $r3 = virtualinvoke r0.<sun.java2d.d3d.D3DSurfaceData: sun.awt.windows.WComponentPeer getPeer()>();
+
+        $r4 = virtualinvoke $r3.<sun.awt.windows.WComponentPeer: java.lang.Object getTarget()>();
+
+        r7 = (java.awt.Component) $r4;
+
+        $r5 = new sun.java2d.d3d.D3DSurfaceData$2;
+
+        specialinvoke $r5.<sun.java2d.d3d.D3DSurfaceData$2: void <init>(java.awt.Component,int,int,int,int)>(r7, i1, i2, i3, i4);
+
+        staticinvoke <sun.awt.SunToolkit: void executeOnEventHandlerThread(java.lang.Object,java.lang.Runnable)>(r7, $r5);
+
+        return;
+
+     label1:
+        virtualinvoke $r1.<sun.java2d.d3d.D3DRenderQueue: void lock()>();
+
+     label2:
+        $r2 = virtualinvoke $r1.<sun.java2d.d3d.D3DRenderQueue: sun.java2d.pipe.RenderBuffer getBuffer()>();
+
+        virtualinvoke $r1.<sun.java2d.d3d.D3DRenderQueue: void ensureCapacityAndAlignment(int,int)>(28, 4);
+
+        virtualinvoke $r2.<sun.java2d.pipe.RenderBuffer: sun.java2d.pipe.RenderBuffer putInt(int)>(80);
+
+        virtualinvoke $r2.<sun.java2d.pipe.RenderBuffer: sun.java2d.pipe.RenderBuffer putLong(long)>($l0);
+
+        virtualinvoke $r2.<sun.java2d.pipe.RenderBuffer: sun.java2d.pipe.RenderBuffer putInt(int)>(i1);
+
+        virtualinvoke $r2.<sun.java2d.pipe.RenderBuffer: sun.java2d.pipe.RenderBuffer putInt(int)>(i2);
+
+        virtualinvoke $r2.<sun.java2d.pipe.RenderBuffer: sun.java2d.pipe.RenderBuffer putInt(int)>(i3);
+
+        virtualinvoke $r2.<sun.java2d.pipe.RenderBuffer: sun.java2d.pipe.RenderBuffer putInt(int)>(i4);
+
+        virtualinvoke $r1.<sun.java2d.d3d.D3DRenderQueue: void flushNow()>();
+
+     label3:
+        virtualinvoke $r1.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        goto label6;
+
+     label4:
+        $r6 := @caughtexception;
+
+     label5:
+        virtualinvoke $r1.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        throw $r6;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public java.lang.Object getDestination()
+    {
+        java.awt.Image $r1;
+        sun.java2d.d3d.D3DSurfaceData r0;
+
+        r0 := @this: sun.java2d.d3d.D3DSurfaceData;
+
+        $r1 = r0.<sun.java2d.d3d.D3DSurfaceData: java.awt.Image offscreenImage>;
+
+        return $r1;
+    }
+
+    public java.awt.Rectangle getBounds()
+    {
+        java.awt.Rectangle $r2, $r3;
+        sun.java2d.d3d.D3DSurfaceData r0;
+        int $i0, $i1, $i2, $i3;
+        sun.awt.windows.WComponentPeer $r1;
+
+        r0 := @this: sun.java2d.d3d.D3DSurfaceData;
+
+        $i0 = r0.<sun.java2d.d3d.D3DSurfaceData: int type>;
+
+        if $i0 == 4 goto label1;
+
+        $i1 = r0.<sun.java2d.d3d.D3DSurfaceData: int type>;
+
+        if $i1 != 1 goto label2;
+
+     label1:
+        $r1 = r0.<sun.java2d.d3d.D3DSurfaceData: sun.awt.windows.WComponentPeer peer>;
+
+        $r2 = virtualinvoke $r1.<sun.awt.windows.WComponentPeer: java.awt.Rectangle getBounds()>();
+
+        $r2.<java.awt.Rectangle: int y> = 0;
+
+        $r2.<java.awt.Rectangle: int x> = 0;
+
+        return $r2;
+
+     label2:
+        $r3 = new java.awt.Rectangle;
+
+        $i3 = r0.<sun.java2d.d3d.D3DSurfaceData: int width>;
+
+        $i2 = r0.<sun.java2d.d3d.D3DSurfaceData: int height>;
+
+        specialinvoke $r3.<java.awt.Rectangle: void <init>(int,int)>($i3, $i2);
+
+        return $r3;
+    }
+
+    public java.awt.Rectangle getNativeBounds()
+    {
+        java.lang.Throwable $r3;
+        java.awt.Rectangle $r1;
+        sun.java2d.d3d.D3DRenderQueue $r0;
+        sun.java2d.d3d.D3DSurfaceData r2;
+        int $i0, $i1;
+
+        r2 := @this: sun.java2d.d3d.D3DSurfaceData;
+
+        $r0 = staticinvoke <sun.java2d.d3d.D3DRenderQueue: sun.java2d.d3d.D3DRenderQueue getInstance()>();
+
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void lock()>();
+
+     label1:
+        $r1 = new java.awt.Rectangle;
+
+        $i1 = r2.<sun.java2d.d3d.D3DSurfaceData: int nativeWidth>;
+
+        $i0 = r2.<sun.java2d.d3d.D3DSurfaceData: int nativeHeight>;
+
+        specialinvoke $r1.<java.awt.Rectangle: void <init>(int,int)>($i1, $i0);
+
+     label2:
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        return $r1;
+
+     label3:
+        $r3 := @caughtexception;
+
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public java.awt.GraphicsConfiguration getDeviceConfiguration()
+    {
+        java.awt.GraphicsConfiguration $r2;
+        sun.java2d.d3d.D3DSurfaceData r0;
+        sun.java2d.d3d.D3DGraphicsDevice $r1;
+
+        r0 := @this: sun.java2d.d3d.D3DSurfaceData;
+
+        $r1 = r0.<sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DGraphicsDevice graphicsDevice>;
+
+        $r2 = virtualinvoke $r1.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.GraphicsConfiguration getDefaultConfiguration()>();
+
+        return $r2;
+    }
+
+    public sun.java2d.SurfaceData getReplacement()
+    {
+        sun.java2d.SurfaceData $r2;
+        java.awt.Image $r1;
+        sun.java2d.d3d.D3DSurfaceData r0;
+
+        r0 := @this: sun.java2d.d3d.D3DSurfaceData;
+
+        $r1 = r0.<sun.java2d.d3d.D3DSurfaceData: java.awt.Image offscreenImage>;
+
+        $r2 = staticinvoke <sun.java2d.d3d.D3DSurfaceData: sun.java2d.SurfaceData restoreContents(java.awt.Image)>($r1);
+
+        return $r2;
+    }
+
+    private static sun.java2d.d3d.D3DGraphicsConfig getGC(sun.awt.windows.WComponentPeer)
+    {
+        java.awt.GraphicsConfiguration r3;
+        java.awt.GraphicsDevice $r2;
+        sun.awt.windows.WComponentPeer r0;
+        java.awt.GraphicsEnvironment $r1;
+        sun.java2d.d3d.D3DGraphicsConfig $r4;
+        boolean $z0;
+
+        r0 := @parameter0: sun.awt.windows.WComponentPeer;
+
+        if r0 == null goto label1;
+
+        r3 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+        goto label2;
+
+     label1:
+        $r1 = staticinvoke <java.awt.GraphicsEnvironment: java.awt.GraphicsEnvironment getLocalGraphicsEnvironment()>();
+
+        $r2 = virtualinvoke $r1.<java.awt.GraphicsEnvironment: java.awt.GraphicsDevice getDefaultScreenDevice()>();
+
+        r3 = virtualinvoke $r2.<java.awt.GraphicsDevice: java.awt.GraphicsConfiguration getDefaultConfiguration()>();
+
+     label2:
+        $z0 = r3 instanceof sun.java2d.d3d.D3DGraphicsConfig;
+
+        if $z0 == 0 goto label3;
+
+        $r4 = (sun.java2d.d3d.D3DGraphicsConfig) r3;
+
+        goto label4;
+
+     label3:
+        $r4 = null;
+
+     label4:
+        return $r4;
+    }
+
+    void restoreSurface()
+    {
+        sun.java2d.d3d.D3DSurfaceData r0;
+
+        r0 := @this: sun.java2d.d3d.D3DSurfaceData;
+
+        virtualinvoke r0.<sun.java2d.d3d.D3DSurfaceData: void initSurface()>();
+
+        return;
+    }
+
+    sun.awt.windows.WComponentPeer getPeer()
+    {
+        sun.awt.windows.WComponentPeer $r1;
+        sun.java2d.d3d.D3DSurfaceData r0;
+
+        r0 := @this: sun.java2d.d3d.D3DSurfaceData;
+
+        $r1 = r0.<sun.java2d.d3d.D3DSurfaceData: sun.awt.windows.WComponentPeer peer>;
+
+        return $r1;
+    }
+
+    public void setSurfaceLost(boolean)
+    {
+        java.awt.Image $r1, $r2;
+        sun.java2d.d3d.D3DSurfaceData r0;
+        boolean z0;
+        sun.awt.image.SurfaceManager $r3;
+
+        r0 := @this: sun.java2d.d3d.D3DSurfaceData;
+
+        z0 := @parameter0: boolean;
+
+        specialinvoke r0.<sun.java2d.SurfaceData: void setSurfaceLost(boolean)>(z0);
+
+        if z0 == 0 goto label1;
+
+        $r1 = r0.<sun.java2d.d3d.D3DSurfaceData: java.awt.Image offscreenImage>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.java2d.d3d.D3DSurfaceData: java.awt.Image offscreenImage>;
+
+        $r3 = staticinvoke <sun.awt.image.SurfaceManager: sun.awt.image.SurfaceManager getManager(java.awt.Image)>($r2);
+
+        virtualinvoke $r3.<sun.awt.image.SurfaceManager: void acceleratedSurfaceLost()>();
+
+     label1:
+        return;
+    }
+
+    private static native long getNativeResourceNative(long, int);
+
+    public long getNativeResource(int)
+    {
+        sun.java2d.d3d.D3DSurfaceData r0;
+        int i1;
+        long $l0, $l2;
+
+        r0 := @this: sun.java2d.d3d.D3DSurfaceData;
+
+        i1 := @parameter0: int;
+
+        $l0 = virtualinvoke r0.<sun.java2d.d3d.D3DSurfaceData: long getNativeOps()>();
+
+        $l2 = staticinvoke <sun.java2d.d3d.D3DSurfaceData: long getNativeResourceNative(long,int)>($l0, i1);
+
+        return $l2;
+    }
+
+    public static native boolean updateWindowAccelImpl(long, long, int, int);
+
+    public volatile sun.java2d.pipe.BufferedContext getContext()
+    {
+        sun.java2d.d3d.D3DContext $r1;
+        sun.java2d.d3d.D3DSurfaceData r0;
+
+        r0 := @this: sun.java2d.d3d.D3DSurfaceData;
+
+        $r1 = virtualinvoke r0.<sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DContext getContext()>();
+
+        return $r1;
+    }
+
+    static boolean access$000(sun.java2d.d3d.D3DSurfaceData)
+    {
+        sun.java2d.d3d.D3DSurfaceData r0;
+        boolean $z0;
+
+        r0 := @parameter0: sun.java2d.d3d.D3DSurfaceData;
+
+        $z0 = specialinvoke r0.<sun.java2d.d3d.D3DSurfaceData: boolean initSurfaceNow()>();
+
+        return $z0;
+    }
+
+    static int access$100(long, int, int)
+    {
+        int i1, i2, $i3;
+        long l0;
+
+        l0 := @parameter0: long;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $i3 = staticinvoke <sun.java2d.d3d.D3DSurfaceData: int dbGetPixelNative(long,int,int)>(l0, i1, i2);
+
+        return $i3;
+    }
+
+    static void access$200(long, int, int, int)
+    {
+        int i1, i2, i3;
+        long l0;
+
+        l0 := @parameter0: long;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        staticinvoke <sun.java2d.d3d.D3DSurfaceData: void dbSetPixelNative(long,int,int,int)>(l0, i1, i2, i3);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        sun.java2d.loops.SurfaceType $r1, $r2, $r3, $r4, $r5, $r6;
+        sun.java2d.d3d.D3DRenderQueue $r7;
+        sun.java2d.d3d.D3DTextRenderer $r9, $r16, $r17;
+        sun.java2d.pipe.PixelToParallelogramConverter $r13;
+        sun.java2d.d3d.D3DRenderer $r10, $r11, $r14, $r15, $r18, $r19;
+        boolean $z0;
+        sun.java2d.d3d.D3DDrawImage $r8;
+        sun.java2d.pipe.ParallelogramPipe $r12;
+        sun.awt.image.PixelConverter $r0;
+
+        <sun.java2d.d3d.D3DSurfaceData: java.lang.String DESC_D3D_TEXTURE> = "D3D Texture";
+
+        <sun.java2d.d3d.D3DSurfaceData: java.lang.String DESC_D3D_SURFACE_RTT> = "D3D Surface (render-to-texture)";
+
+        <sun.java2d.d3d.D3DSurfaceData: java.lang.String DESC_D3D_SURFACE> = "D3D Surface";
+
+        <sun.java2d.d3d.D3DSurfaceData: int SWAP_COPY> = 3;
+
+        <sun.java2d.d3d.D3DSurfaceData: int SWAP_FLIP> = 2;
+
+        <sun.java2d.d3d.D3DSurfaceData: int SWAP_DISCARD> = 1;
+
+        <sun.java2d.d3d.D3DSurfaceData: int ST_3BYTE_BGR> = 9;
+
+        <sun.java2d.d3d.D3DSurfaceData: int ST_BYTE_INDEXED_BM> = 8;
+
+        <sun.java2d.d3d.D3DSurfaceData: int ST_BYTE_INDEXED> = 7;
+
+        <sun.java2d.d3d.D3DSurfaceData: int ST_USHORT_555_RGB> = 6;
+
+        <sun.java2d.d3d.D3DSurfaceData: int ST_USHORT_565_RGB> = 5;
+
+        <sun.java2d.d3d.D3DSurfaceData: int ST_INT_BGR> = 4;
+
+        <sun.java2d.d3d.D3DSurfaceData: int ST_INT_RGB> = 3;
+
+        <sun.java2d.d3d.D3DSurfaceData: int ST_INT_ARGB_BM> = 2;
+
+        <sun.java2d.d3d.D3DSurfaceData: int ST_INT_ARGB_PRE> = 1;
+
+        <sun.java2d.d3d.D3DSurfaceData: int ST_INT_ARGB> = 0;
+
+        <sun.java2d.d3d.D3DSurfaceData: int D3D_DEVICE_RESOURCE> = 100;
+
+        $r1 = <sun.java2d.loops.SurfaceType: sun.java2d.loops.SurfaceType Any>;
+
+        $r0 = <sun.awt.image.PixelConverter$ArgbPre: sun.awt.image.PixelConverter instance>;
+
+        $r2 = virtualinvoke $r1.<sun.java2d.loops.SurfaceType: sun.java2d.loops.SurfaceType deriveSubType(java.lang.String,sun.awt.image.PixelConverter)>("D3D Surface", $r0);
+
+        <sun.java2d.d3d.D3DSurfaceData: sun.java2d.loops.SurfaceType D3DSurface> = $r2;
+
+        $r3 = <sun.java2d.d3d.D3DSurfaceData: sun.java2d.loops.SurfaceType D3DSurface>;
+
+        $r4 = virtualinvoke $r3.<sun.java2d.loops.SurfaceType: sun.java2d.loops.SurfaceType deriveSubType(java.lang.String)>("D3D Surface (render-to-texture)");
+
+        <sun.java2d.d3d.D3DSurfaceData: sun.java2d.loops.SurfaceType D3DSurfaceRTT> = $r4;
+
+        $r5 = <sun.java2d.loops.SurfaceType: sun.java2d.loops.SurfaceType Any>;
+
+        $r6 = virtualinvoke $r5.<sun.java2d.loops.SurfaceType: sun.java2d.loops.SurfaceType deriveSubType(java.lang.String)>("D3D Texture");
+
+        <sun.java2d.d3d.D3DSurfaceData: sun.java2d.loops.SurfaceType D3DTexture> = $r6;
+
+        $r7 = staticinvoke <sun.java2d.d3d.D3DRenderQueue: sun.java2d.d3d.D3DRenderQueue getInstance()>();
+
+        $r8 = new sun.java2d.d3d.D3DDrawImage;
+
+        specialinvoke $r8.<sun.java2d.d3d.D3DDrawImage: void <init>()>();
+
+        <sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DDrawImage d3dImagePipe> = $r8;
+
+        $r9 = new sun.java2d.d3d.D3DTextRenderer;
+
+        specialinvoke $r9.<sun.java2d.d3d.D3DTextRenderer: void <init>(sun.java2d.pipe.RenderQueue)>($r7);
+
+        <sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DTextRenderer d3dTextPipe> = $r9;
+
+        $r10 = new sun.java2d.d3d.D3DRenderer;
+
+        specialinvoke $r10.<sun.java2d.d3d.D3DRenderer: void <init>(sun.java2d.pipe.RenderQueue)>($r7);
+
+        <sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DRenderer d3dRenderPipe> = $r10;
+
+        $z0 = staticinvoke <sun.java2d.loops.GraphicsPrimitive: boolean tracingEnabled()>();
+
+        if $z0 == 0 goto label1;
+
+        $r16 = <sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DTextRenderer d3dTextPipe>;
+
+        $r17 = virtualinvoke $r16.<sun.java2d.d3d.D3DTextRenderer: sun.java2d.d3d.D3DTextRenderer traceWrap()>();
+
+        <sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DTextRenderer d3dTextPipe> = $r17;
+
+        $r18 = <sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DRenderer d3dRenderPipe>;
+
+        $r19 = virtualinvoke $r18.<sun.java2d.d3d.D3DRenderer: sun.java2d.d3d.D3DRenderer traceWrap()>();
+
+        <sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DRenderer d3dRenderPipe> = $r19;
+
+     label1:
+        $r11 = <sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DRenderer d3dRenderPipe>;
+
+        $r12 = virtualinvoke $r11.<sun.java2d.d3d.D3DRenderer: sun.java2d.pipe.ParallelogramPipe getAAParallelogramPipe()>();
+
+        <sun.java2d.d3d.D3DSurfaceData: sun.java2d.pipe.ParallelogramPipe d3dAAPgramPipe> = $r12;
+
+        $r13 = new sun.java2d.pipe.PixelToParallelogramConverter;
+
+        $r15 = <sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DRenderer d3dRenderPipe>;
+
+        $r14 = <sun.java2d.d3d.D3DSurfaceData: sun.java2d.d3d.D3DRenderer d3dRenderPipe>;
+
+        specialinvoke $r13.<sun.java2d.pipe.PixelToParallelogramConverter: void <init>(sun.java2d.pipe.ShapeDrawPipe,sun.java2d.pipe.ParallelogramPipe,double,double,boolean)>($r15, $r14, 1.0, 0.25, 1);
+
+        <sun.java2d.d3d.D3DSurfaceData: sun.java2d.pipe.PixelToParallelogramConverter d3dTxRenderPipe> = $r13;
+
+        staticinvoke <sun.java2d.d3d.D3DBlitLoops: void register()>();
+
+        staticinvoke <sun.java2d.d3d.D3DMaskFill: void register()>();
+
+        staticinvoke <sun.java2d.d3d.D3DMaskBlit: void register()>();
+
+        return;
+    }
+}

@@ -1,0 +1,341 @@
+public class sun.misc.HexDumpEncoder extends sun.misc.CharacterEncoder
+{
+    private int offset;
+    private int thisLineLength;
+    private int currentByte;
+    private byte[] thisLine;
+
+    public void <init>()
+    {
+        byte[] $r1;
+        sun.misc.HexDumpEncoder r0;
+
+        r0 := @this: sun.misc.HexDumpEncoder;
+
+        specialinvoke r0.<sun.misc.CharacterEncoder: void <init>()>();
+
+        $r1 = newarray (byte)[16];
+
+        r0.<sun.misc.HexDumpEncoder: byte[] thisLine> = $r1;
+
+        return;
+    }
+
+    static void hexDigit(java.io.PrintStream, byte)
+    {
+        byte b0, $b4;
+        int $i1, $i2, $i3, $i5, $i6, $i7, $i8, $i9, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22;
+        java.io.PrintStream r0;
+        char $c10, c11, c12, c13;
+
+        r0 := @parameter0: java.io.PrintStream;
+
+        b0 := @parameter1: byte;
+
+        $i14 = (int) b0;
+
+        $i1 = $i14 >> 4;
+
+        $i2 = $i1 & 15;
+
+        c11 = (char) $i2;
+
+        $i15 = (int) c11;
+
+        if $i15 <= 9 goto label1;
+
+        $i16 = (int) c11;
+
+        $i8 = $i16 - 10;
+
+        $i9 = $i8 + 65;
+
+        c12 = (char) $i9;
+
+        goto label2;
+
+     label1:
+        $i17 = (int) c11;
+
+        $i3 = $i17 + 48;
+
+        c12 = (char) $i3;
+
+     label2:
+        $i18 = (int) c12;
+
+        virtualinvoke r0.<java.io.PrintStream: void write(int)>($i18);
+
+        $b4 = b0 & 15;
+
+        $c10 = (char) $b4;
+
+        $i19 = (int) $c10;
+
+        if $i19 <= 9 goto label3;
+
+        $i20 = (int) $c10;
+
+        $i6 = $i20 - 10;
+
+        $i7 = $i6 + 65;
+
+        c13 = (char) $i7;
+
+        goto label4;
+
+     label3:
+        $i21 = (int) $c10;
+
+        $i5 = $i21 + 48;
+
+        c13 = (char) $i5;
+
+     label4:
+        $i22 = (int) c13;
+
+        virtualinvoke r0.<java.io.PrintStream: void write(int)>($i22);
+
+        return;
+    }
+
+    protected int bytesPerAtom()
+    {
+        sun.misc.HexDumpEncoder r0;
+
+        r0 := @this: sun.misc.HexDumpEncoder;
+
+        return 1;
+    }
+
+    protected int bytesPerLine()
+    {
+        sun.misc.HexDumpEncoder r0;
+
+        r0 := @this: sun.misc.HexDumpEncoder;
+
+        return 16;
+    }
+
+    protected void encodeBufferPrefix(java.io.OutputStream) throws java.io.IOException
+    {
+        java.io.OutputStream r1;
+        sun.misc.HexDumpEncoder r0;
+
+        r0 := @this: sun.misc.HexDumpEncoder;
+
+        r1 := @parameter0: java.io.OutputStream;
+
+        r0.<sun.misc.HexDumpEncoder: int offset> = 0;
+
+        specialinvoke r0.<sun.misc.CharacterEncoder: void encodeBufferPrefix(java.io.OutputStream)>(r1);
+
+        return;
+    }
+
+    protected void encodeLinePrefix(java.io.OutputStream, int) throws java.io.IOException
+    {
+        java.io.PrintStream $r1, $r2, $r3;
+        java.io.OutputStream r4;
+        byte $b3, $b6;
+        int $i0, $i1, $i2, $i4, $i5, i7;
+        sun.misc.HexDumpEncoder r0;
+
+        r0 := @this: sun.misc.HexDumpEncoder;
+
+        r4 := @parameter0: java.io.OutputStream;
+
+        i7 := @parameter1: int;
+
+        $r1 = r0.<sun.misc.HexDumpEncoder: java.io.PrintStream pStream>;
+
+        $i0 = r0.<sun.misc.HexDumpEncoder: int offset>;
+
+        $i1 = $i0 >>> 8;
+
+        $i2 = $i1 & 255;
+
+        $b3 = (byte) $i2;
+
+        staticinvoke <sun.misc.HexDumpEncoder: void hexDigit(java.io.PrintStream,byte)>($r1, $b3);
+
+        $r2 = r0.<sun.misc.HexDumpEncoder: java.io.PrintStream pStream>;
+
+        $i4 = r0.<sun.misc.HexDumpEncoder: int offset>;
+
+        $i5 = $i4 & 255;
+
+        $b6 = (byte) $i5;
+
+        staticinvoke <sun.misc.HexDumpEncoder: void hexDigit(java.io.PrintStream,byte)>($r2, $b6);
+
+        $r3 = r0.<sun.misc.HexDumpEncoder: java.io.PrintStream pStream>;
+
+        virtualinvoke $r3.<java.io.PrintStream: void print(java.lang.String)>(": ");
+
+        r0.<sun.misc.HexDumpEncoder: int currentByte> = 0;
+
+        r0.<sun.misc.HexDumpEncoder: int thisLineLength> = i7;
+
+        return;
+    }
+
+    protected void encodeAtom(java.io.OutputStream, byte[], int, int) throws java.io.IOException
+    {
+        java.io.PrintStream $r3, $r4, $r5;
+        java.io.OutputStream r6;
+        byte[] r1, $r2;
+        byte $b1, $b3;
+        int i0, $i2, $i4, $i5, $i6, i7;
+        sun.misc.HexDumpEncoder r0;
+
+        r0 := @this: sun.misc.HexDumpEncoder;
+
+        r6 := @parameter0: java.io.OutputStream;
+
+        r1 := @parameter1: byte[];
+
+        i0 := @parameter2: int;
+
+        i7 := @parameter3: int;
+
+        $r2 = r0.<sun.misc.HexDumpEncoder: byte[] thisLine>;
+
+        $i2 = r0.<sun.misc.HexDumpEncoder: int currentByte>;
+
+        $b1 = r1[i0];
+
+        $r2[$i2] = $b1;
+
+        $r3 = r0.<sun.misc.HexDumpEncoder: java.io.PrintStream pStream>;
+
+        $b3 = r1[i0];
+
+        staticinvoke <sun.misc.HexDumpEncoder: void hexDigit(java.io.PrintStream,byte)>($r3, $b3);
+
+        $r4 = r0.<sun.misc.HexDumpEncoder: java.io.PrintStream pStream>;
+
+        virtualinvoke $r4.<java.io.PrintStream: void print(java.lang.String)>(" ");
+
+        $i4 = r0.<sun.misc.HexDumpEncoder: int currentByte>;
+
+        $i5 = $i4 + 1;
+
+        r0.<sun.misc.HexDumpEncoder: int currentByte> = $i5;
+
+        $i6 = r0.<sun.misc.HexDumpEncoder: int currentByte>;
+
+        if $i6 != 8 goto label1;
+
+        $r5 = r0.<sun.misc.HexDumpEncoder: java.io.PrintStream pStream>;
+
+        virtualinvoke $r5.<java.io.PrintStream: void print(java.lang.String)>("  ");
+
+     label1:
+        return;
+    }
+
+    protected void encodeLineSuffix(java.io.OutputStream) throws java.io.IOException
+    {
+        byte[] $r3, $r5, $r6;
+        byte $b4, $b5, $b6;
+        int $i0, $i1, $i2, $i3, i7, i8, $i9, $i10, $i11, $i12;
+        sun.misc.HexDumpEncoder r0;
+        java.io.PrintStream $r1, $r2, $r4, $r7, $r8, $r9;
+        java.io.OutputStream r10;
+
+        r0 := @this: sun.misc.HexDumpEncoder;
+
+        r10 := @parameter0: java.io.OutputStream;
+
+        $i0 = r0.<sun.misc.HexDumpEncoder: int thisLineLength>;
+
+        if $i0 >= 16 goto label3;
+
+        i7 = r0.<sun.misc.HexDumpEncoder: int thisLineLength>;
+
+     label1:
+        if i7 >= 16 goto label3;
+
+        $r8 = r0.<sun.misc.HexDumpEncoder: java.io.PrintStream pStream>;
+
+        virtualinvoke $r8.<java.io.PrintStream: void print(java.lang.String)>("   ");
+
+        if i7 != 7 goto label2;
+
+        $r9 = r0.<sun.misc.HexDumpEncoder: java.io.PrintStream pStream>;
+
+        virtualinvoke $r9.<java.io.PrintStream: void print(java.lang.String)>("  ");
+
+     label2:
+        i7 = i7 + 1;
+
+        goto label1;
+
+     label3:
+        $r1 = r0.<sun.misc.HexDumpEncoder: java.io.PrintStream pStream>;
+
+        virtualinvoke $r1.<java.io.PrintStream: void print(java.lang.String)>(" ");
+
+        i8 = 0;
+
+     label4:
+        $i9 = r0.<sun.misc.HexDumpEncoder: int thisLineLength>;
+
+        if i8 >= $i9 goto label8;
+
+        $r3 = r0.<sun.misc.HexDumpEncoder: byte[] thisLine>;
+
+        $b4 = $r3[i8];
+
+        $i10 = (int) $b4;
+
+        if $i10 < 32 goto label5;
+
+        $r5 = r0.<sun.misc.HexDumpEncoder: byte[] thisLine>;
+
+        $b5 = $r5[i8];
+
+        $i11 = (int) $b5;
+
+        if $i11 <= 122 goto label6;
+
+     label5:
+        $r4 = r0.<sun.misc.HexDumpEncoder: java.io.PrintStream pStream>;
+
+        virtualinvoke $r4.<java.io.PrintStream: void print(java.lang.String)>(".");
+
+        goto label7;
+
+     label6:
+        $r7 = r0.<sun.misc.HexDumpEncoder: java.io.PrintStream pStream>;
+
+        $r6 = r0.<sun.misc.HexDumpEncoder: byte[] thisLine>;
+
+        $b6 = $r6[i8];
+
+        $i12 = (int) $b6;
+
+        virtualinvoke $r7.<java.io.PrintStream: void write(int)>($i12);
+
+     label7:
+        i8 = i8 + 1;
+
+        goto label4;
+
+     label8:
+        $r2 = r0.<sun.misc.HexDumpEncoder: java.io.PrintStream pStream>;
+
+        virtualinvoke $r2.<java.io.PrintStream: void println()>();
+
+        $i2 = r0.<sun.misc.HexDumpEncoder: int offset>;
+
+        $i1 = r0.<sun.misc.HexDumpEncoder: int thisLineLength>;
+
+        $i3 = $i2 + $i1;
+
+        r0.<sun.misc.HexDumpEncoder: int offset> = $i3;
+
+        return;
+    }
+}

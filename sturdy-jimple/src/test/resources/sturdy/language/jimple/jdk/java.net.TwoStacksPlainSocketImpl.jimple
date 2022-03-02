@@ -1,0 +1,425 @@
+class java.net.TwoStacksPlainSocketImpl extends java.net.AbstractPlainSocketImpl
+{
+    private java.io.FileDescriptor fd1;
+    private java.net.InetAddress anyLocalBoundAddr;
+    private int lastfd;
+    private final boolean exclusiveBind;
+    private boolean isReuseAddress;
+
+    public void <init>(boolean, boolean)
+    {
+        java.net.TwoStacksPlainSocketImpl r0;
+        int $i1;
+        boolean z0, z1;
+
+        r0 := @this: java.net.TwoStacksPlainSocketImpl;
+
+        z1 := @parameter0: boolean;
+
+        z0 := @parameter1: boolean;
+
+        specialinvoke r0.<java.net.AbstractPlainSocketImpl: void <init>(boolean)>(z0);
+
+        r0.<java.net.TwoStacksPlainSocketImpl: java.net.InetAddress anyLocalBoundAddr> = null;
+
+        $i1 = (int) -1;
+
+        r0.<java.net.TwoStacksPlainSocketImpl: int lastfd> = $i1;
+
+        r0.<java.net.TwoStacksPlainSocketImpl: boolean exclusiveBind> = z1;
+
+        return;
+    }
+
+    protected synchronized void create(boolean) throws java.io.IOException
+    {
+        java.net.TwoStacksPlainSocketImpl r0;
+        java.io.FileDescriptor $r1;
+        java.io.IOException $r2;
+        boolean z0;
+
+        r0 := @this: java.net.TwoStacksPlainSocketImpl;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = new java.io.FileDescriptor;
+
+        specialinvoke $r1.<java.io.FileDescriptor: void <init>()>();
+
+        r0.<java.net.TwoStacksPlainSocketImpl: java.io.FileDescriptor fd1> = $r1;
+
+     label1:
+        specialinvoke r0.<java.net.AbstractPlainSocketImpl: void create(boolean)>(z0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        r0.<java.net.TwoStacksPlainSocketImpl: java.io.FileDescriptor fd1> = null;
+
+        throw $r2;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    protected synchronized void bind(java.net.InetAddress, int) throws java.io.IOException
+    {
+        java.net.InetAddress r1;
+        java.net.TwoStacksPlainSocketImpl r0;
+        int i0;
+        boolean $z0;
+
+        r0 := @this: java.net.TwoStacksPlainSocketImpl;
+
+        r1 := @parameter0: java.net.InetAddress;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<java.net.AbstractPlainSocketImpl: void bind(java.net.InetAddress,int)>(r1, i0);
+
+        $z0 = virtualinvoke r1.<java.net.InetAddress: boolean isAnyLocalAddress()>();
+
+        if $z0 == 0 goto label1;
+
+        r0.<java.net.TwoStacksPlainSocketImpl: java.net.InetAddress anyLocalBoundAddr> = r1;
+
+     label1:
+        return;
+    }
+
+    public java.lang.Object getOption(int) throws java.net.SocketException
+    {
+        java.net.InetAddressContainer $r4;
+        java.net.InetAddress $r5, $r7;
+        java.net.TwoStacksPlainSocketImpl r0;
+        java.net.SocketException $r8;
+        java.io.FileDescriptor $r3, $r6;
+        int i0;
+        java.lang.Boolean $r2;
+        java.lang.Object $r1;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.net.TwoStacksPlainSocketImpl;
+
+        i0 := @parameter0: int;
+
+        $z0 = virtualinvoke r0.<java.net.TwoStacksPlainSocketImpl: boolean isClosedOrPending()>();
+
+        if $z0 == 0 goto label1;
+
+        $r8 = new java.net.SocketException;
+
+        specialinvoke $r8.<java.net.SocketException: void <init>(java.lang.String)>("Socket Closed");
+
+        throw $r8;
+
+     label1:
+        if i0 != 15 goto label3;
+
+        $r3 = r0.<java.net.TwoStacksPlainSocketImpl: java.io.FileDescriptor fd>;
+
+        if $r3 == null goto label2;
+
+        $r6 = r0.<java.net.TwoStacksPlainSocketImpl: java.io.FileDescriptor fd1>;
+
+        if $r6 == null goto label2;
+
+        $r7 = r0.<java.net.TwoStacksPlainSocketImpl: java.net.InetAddress anyLocalBoundAddr>;
+
+        return $r7;
+
+     label2:
+        $r4 = new java.net.InetAddressContainer;
+
+        specialinvoke $r4.<java.net.InetAddressContainer: void <init>()>();
+
+        virtualinvoke r0.<java.net.TwoStacksPlainSocketImpl: int socketGetOption(int,java.lang.Object)>(i0, $r4);
+
+        $r5 = $r4.<java.net.InetAddressContainer: java.net.InetAddress addr>;
+
+        return $r5;
+
+     label3:
+        if i0 != 4 goto label4;
+
+        $z1 = r0.<java.net.TwoStacksPlainSocketImpl: boolean exclusiveBind>;
+
+        if $z1 == 0 goto label4;
+
+        $z2 = r0.<java.net.TwoStacksPlainSocketImpl: boolean isReuseAddress>;
+
+        $r2 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z2);
+
+        return $r2;
+
+     label4:
+        $r1 = specialinvoke r0.<java.net.AbstractPlainSocketImpl: java.lang.Object getOption(int)>(i0);
+
+        return $r1;
+    }
+
+    void socketBind(java.net.InetAddress, int) throws java.io.IOException
+    {
+        java.net.InetAddress r1;
+        java.net.TwoStacksPlainSocketImpl r0;
+        int i0;
+        boolean $z0;
+
+        r0 := @this: java.net.TwoStacksPlainSocketImpl;
+
+        r1 := @parameter0: java.net.InetAddress;
+
+        i0 := @parameter1: int;
+
+        $z0 = r0.<java.net.TwoStacksPlainSocketImpl: boolean exclusiveBind>;
+
+        virtualinvoke r0.<java.net.TwoStacksPlainSocketImpl: void socketBind(java.net.InetAddress,int,boolean)>(r1, i0, $z0);
+
+        return;
+    }
+
+    void socketSetOption(int, boolean, java.lang.Object) throws java.net.SocketException
+    {
+        java.net.TwoStacksPlainSocketImpl r0;
+        int i0;
+        java.lang.Object r1;
+        boolean z0, $z1;
+
+        r0 := @this: java.net.TwoStacksPlainSocketImpl;
+
+        i0 := @parameter0: int;
+
+        z0 := @parameter1: boolean;
+
+        r1 := @parameter2: java.lang.Object;
+
+        if i0 != 4 goto label1;
+
+        $z1 = r0.<java.net.TwoStacksPlainSocketImpl: boolean exclusiveBind>;
+
+        if $z1 == 0 goto label1;
+
+        r0.<java.net.TwoStacksPlainSocketImpl: boolean isReuseAddress> = z0;
+
+        goto label2;
+
+     label1:
+        virtualinvoke r0.<java.net.TwoStacksPlainSocketImpl: void socketNativeSetOption(int,boolean,java.lang.Object)>(i0, z0, r1);
+
+     label2:
+        return;
+    }
+
+    protected void close() throws java.io.IOException
+    {
+        java.lang.Throwable $r4;
+        java.net.TwoStacksPlainSocketImpl r0;
+        java.io.FileDescriptor $r2, $r3;
+        int $i0, $i1, $i2;
+        java.lang.Object $r1;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.net.TwoStacksPlainSocketImpl;
+
+        $r1 = r0.<java.net.TwoStacksPlainSocketImpl: java.lang.Object fdLock>;
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = r0.<java.net.TwoStacksPlainSocketImpl: java.io.FileDescriptor fd>;
+
+        if $r2 != null goto label02;
+
+        $r3 = r0.<java.net.TwoStacksPlainSocketImpl: java.io.FileDescriptor fd1>;
+
+        if $r3 == null goto label08;
+
+     label02:
+        $z0 = r0.<java.net.TwoStacksPlainSocketImpl: boolean stream>;
+
+        if $z0 != 0 goto label03;
+
+        staticinvoke <sun.net.ResourceManager: void afterUdpClose()>();
+
+     label03:
+        $i0 = r0.<java.net.TwoStacksPlainSocketImpl: int fdUseCount>;
+
+        if $i0 != 0 goto label07;
+
+        $z2 = r0.<java.net.TwoStacksPlainSocketImpl: boolean closePending>;
+
+        if $z2 == 0 goto label05;
+
+        exitmonitor $r1;
+
+     label04:
+        return;
+
+     label05:
+        r0.<java.net.TwoStacksPlainSocketImpl: boolean closePending> = 1;
+
+        virtualinvoke r0.<java.net.TwoStacksPlainSocketImpl: void socketClose()>();
+
+        r0.<java.net.TwoStacksPlainSocketImpl: java.io.FileDescriptor fd> = null;
+
+        r0.<java.net.TwoStacksPlainSocketImpl: java.io.FileDescriptor fd1> = null;
+
+        exitmonitor $r1;
+
+     label06:
+        return;
+
+     label07:
+        $z1 = r0.<java.net.TwoStacksPlainSocketImpl: boolean closePending>;
+
+        if $z1 != 0 goto label08;
+
+        r0.<java.net.TwoStacksPlainSocketImpl: boolean closePending> = 1;
+
+        $i1 = r0.<java.net.TwoStacksPlainSocketImpl: int fdUseCount>;
+
+        $i2 = $i1 - 1;
+
+        r0.<java.net.TwoStacksPlainSocketImpl: int fdUseCount> = $i2;
+
+        virtualinvoke r0.<java.net.TwoStacksPlainSocketImpl: void socketClose()>();
+
+     label08:
+        exitmonitor $r1;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label11:
+        throw $r4;
+
+     label12:
+        return;
+
+        catch java.lang.Throwable from label01 to label04 with label10;
+        catch java.lang.Throwable from label05 to label06 with label10;
+        catch java.lang.Throwable from label07 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    void reset() throws java.io.IOException
+    {
+        java.net.TwoStacksPlainSocketImpl r0;
+        java.io.FileDescriptor $r1, $r2;
+
+        r0 := @this: java.net.TwoStacksPlainSocketImpl;
+
+        $r1 = r0.<java.net.TwoStacksPlainSocketImpl: java.io.FileDescriptor fd>;
+
+        if $r1 != null goto label1;
+
+        $r2 = r0.<java.net.TwoStacksPlainSocketImpl: java.io.FileDescriptor fd1>;
+
+        if $r2 == null goto label2;
+
+     label1:
+        virtualinvoke r0.<java.net.TwoStacksPlainSocketImpl: void socketClose()>();
+
+     label2:
+        r0.<java.net.TwoStacksPlainSocketImpl: java.io.FileDescriptor fd> = null;
+
+        r0.<java.net.TwoStacksPlainSocketImpl: java.io.FileDescriptor fd1> = null;
+
+        specialinvoke r0.<java.net.AbstractPlainSocketImpl: void reset()>();
+
+        return;
+    }
+
+    public boolean isClosedOrPending()
+    {
+        java.lang.Throwable $r4;
+        java.net.TwoStacksPlainSocketImpl r0;
+        java.io.FileDescriptor $r2, $r3;
+        java.lang.Object $r1;
+        boolean $z0;
+
+        r0 := @this: java.net.TwoStacksPlainSocketImpl;
+
+        $r1 = r0.<java.net.TwoStacksPlainSocketImpl: java.lang.Object fdLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = r0.<java.net.TwoStacksPlainSocketImpl: boolean closePending>;
+
+        if $z0 != 0 goto label2;
+
+        $r2 = r0.<java.net.TwoStacksPlainSocketImpl: java.io.FileDescriptor fd>;
+
+        if $r2 != null goto label4;
+
+        $r3 = r0.<java.net.TwoStacksPlainSocketImpl: java.io.FileDescriptor fd1>;
+
+        if $r3 != null goto label4;
+
+     label2:
+        exitmonitor $r1;
+
+     label3:
+        return 1;
+
+     label4:
+        exitmonitor $r1;
+
+     label5:
+        return 0;
+
+     label6:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label7:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label3 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    static native void initProto();
+
+    native void socketCreate(boolean) throws java.io.IOException;
+
+    native void socketConnect(java.net.InetAddress, int, int) throws java.io.IOException;
+
+    native void socketBind(java.net.InetAddress, int, boolean) throws java.io.IOException;
+
+    native void socketListen(int) throws java.io.IOException;
+
+    native void socketAccept(java.net.SocketImpl) throws java.io.IOException;
+
+    native int socketAvailable() throws java.io.IOException;
+
+    native void socketClose0(boolean) throws java.io.IOException;
+
+    native void socketShutdown(int) throws java.io.IOException;
+
+    native void socketNativeSetOption(int, boolean, java.lang.Object) throws java.net.SocketException;
+
+    native int socketGetOption(int, java.lang.Object) throws java.net.SocketException;
+
+    native void socketSendUrgentData(int) throws java.io.IOException;
+
+    static void <clinit>()
+    {
+        staticinvoke <java.net.TwoStacksPlainSocketImpl: void initProto()>();
+
+        return;
+    }
+}

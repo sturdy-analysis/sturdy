@@ -1,0 +1,197 @@
+public class com.sun.corba.se.impl.resolver.FileResolverImpl extends java.lang.Object implements com.sun.corba.se.spi.resolver.Resolver
+{
+    private com.sun.corba.se.spi.orb.ORB orb;
+    private java.io.File file;
+    private java.util.Properties savedProps;
+    private long fileModified;
+
+    public void <init>(com.sun.corba.se.spi.orb.ORB, java.io.File)
+    {
+        java.util.Properties $r3;
+        com.sun.corba.se.impl.resolver.FileResolverImpl r0;
+        com.sun.corba.se.spi.orb.ORB r1;
+        java.io.File r2;
+
+        r0 := @this: com.sun.corba.se.impl.resolver.FileResolverImpl;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        r2 := @parameter1: java.io.File;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.resolver.FileResolverImpl: long fileModified> = 0L;
+
+        r0.<com.sun.corba.se.impl.resolver.FileResolverImpl: com.sun.corba.se.spi.orb.ORB orb> = r1;
+
+        r0.<com.sun.corba.se.impl.resolver.FileResolverImpl: java.io.File file> = r2;
+
+        $r3 = new java.util.Properties;
+
+        specialinvoke $r3.<java.util.Properties: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.resolver.FileResolverImpl: java.util.Properties savedProps> = $r3;
+
+        return;
+    }
+
+    public org.omg.CORBA.Object resolve(java.lang.String)
+    {
+        java.util.Properties $r2;
+        org.omg.CORBA.Object $r5;
+        com.sun.corba.se.impl.resolver.FileResolverImpl r0;
+        java.lang.String r1, $r3;
+        com.sun.corba.se.spi.orb.ORB $r4;
+
+        r0 := @this: com.sun.corba.se.impl.resolver.FileResolverImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<com.sun.corba.se.impl.resolver.FileResolverImpl: void check()>();
+
+        $r2 = r0.<com.sun.corba.se.impl.resolver.FileResolverImpl: java.util.Properties savedProps>;
+
+        $r3 = virtualinvoke $r2.<java.util.Properties: java.lang.String getProperty(java.lang.String)>(r1);
+
+        if $r3 != null goto label1;
+
+        return null;
+
+     label1:
+        $r4 = r0.<com.sun.corba.se.impl.resolver.FileResolverImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r5 = virtualinvoke $r4.<com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.Object string_to_object(java.lang.String)>($r3);
+
+        return $r5;
+    }
+
+    public java.util.Set list()
+    {
+        java.util.HashSet $r1;
+        java.util.Properties $r2;
+        java.util.Enumeration $r3;
+        java.lang.Object $r4;
+        com.sun.corba.se.impl.resolver.FileResolverImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.resolver.FileResolverImpl;
+
+        specialinvoke r0.<com.sun.corba.se.impl.resolver.FileResolverImpl: void check()>();
+
+        $r1 = new java.util.HashSet;
+
+        specialinvoke $r1.<java.util.HashSet: void <init>()>();
+
+        $r2 = r0.<com.sun.corba.se.impl.resolver.FileResolverImpl: java.util.Properties savedProps>;
+
+        $r3 = virtualinvoke $r2.<java.util.Properties: java.util.Enumeration propertyNames()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = interfaceinvoke $r3.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        interfaceinvoke $r1.<java.util.Set: boolean add(java.lang.Object)>($r4);
+
+        goto label1;
+
+     label2:
+        return $r1;
+    }
+
+    private void check()
+    {
+        long $l0, $l1;
+        byte $b2;
+        int $i3;
+        java.lang.String $r10, $r11, $r12, $r16, $r17;
+        java.io.PrintStream $r9, $r15;
+        java.util.Properties $r5, $r6;
+        java.io.IOException $r7;
+        com.sun.corba.se.impl.resolver.FileResolverImpl r0;
+        java.io.FileInputStream $r18;
+        java.io.File $r1, $r2, $r4, $r8, $r14;
+        java.io.FileNotFoundException $r13;
+
+        r0 := @this: com.sun.corba.se.impl.resolver.FileResolverImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.resolver.FileResolverImpl: java.io.File file>;
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = r0.<com.sun.corba.se.impl.resolver.FileResolverImpl: java.io.File file>;
+
+        $l0 = virtualinvoke $r2.<java.io.File: long lastModified()>();
+
+        $l1 = r0.<com.sun.corba.se.impl.resolver.FileResolverImpl: long fileModified>;
+
+        $b2 = $l0 cmp $l1;
+
+        $i3 = (int) $b2;
+
+        if $i3 <= 0 goto label6;
+
+     label2:
+        $r18 = new java.io.FileInputStream;
+
+        $r4 = r0.<com.sun.corba.se.impl.resolver.FileResolverImpl: java.io.File file>;
+
+        specialinvoke $r18.<java.io.FileInputStream: void <init>(java.io.File)>($r4);
+
+        $r5 = r0.<com.sun.corba.se.impl.resolver.FileResolverImpl: java.util.Properties savedProps>;
+
+        virtualinvoke $r5.<java.util.Properties: void clear()>();
+
+        $r6 = r0.<com.sun.corba.se.impl.resolver.FileResolverImpl: java.util.Properties savedProps>;
+
+        virtualinvoke $r6.<java.util.Properties: void load(java.io.InputStream)>($r18);
+
+        virtualinvoke $r18.<java.io.FileInputStream: void close()>();
+
+        r0.<com.sun.corba.se.impl.resolver.FileResolverImpl: long fileModified> = $l0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r13 := @caughtexception;
+
+        $r15 = <java.lang.System: java.io.PrintStream err>;
+
+        $r14 = r0.<com.sun.corba.se.impl.resolver.FileResolverImpl: java.io.File file>;
+
+        $r16 = virtualinvoke $r14.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        $r17 = staticinvoke <com.sun.corba.se.impl.orbutil.CorbaResourceUtil: java.lang.String getText(java.lang.String,java.lang.String)>("bootstrap.filenotfound", $r16);
+
+        virtualinvoke $r15.<java.io.PrintStream: void println(java.lang.String)>($r17);
+
+        goto label6;
+
+     label5:
+        $r7 := @caughtexception;
+
+        $r9 = <java.lang.System: java.io.PrintStream err>;
+
+        $r8 = r0.<com.sun.corba.se.impl.resolver.FileResolverImpl: java.io.File file>;
+
+        $r10 = virtualinvoke $r8.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        $r11 = virtualinvoke $r7.<java.io.IOException: java.lang.String toString()>();
+
+        $r12 = staticinvoke <com.sun.corba.se.impl.orbutil.CorbaResourceUtil: java.lang.String getText(java.lang.String,java.lang.String,java.lang.String)>("bootstrap.exception", $r10, $r11);
+
+        virtualinvoke $r9.<java.io.PrintStream: void println(java.lang.String)>($r12);
+
+     label6:
+        return;
+
+        catch java.io.FileNotFoundException from label2 to label3 with label4;
+        catch java.io.IOException from label2 to label3 with label5;
+    }
+}

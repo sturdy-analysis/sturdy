@@ -1,0 +1,521 @@
+class jdk.management.resource.internal.HeapMetrics extends java.lang.Object implements java.lang.Runnable
+{
+    private static final jdk.management.resource.internal.HeapMetrics instance;
+    private static volatile java.lang.Thread thread;
+    private static jdk.management.resource.internal.ResourceIdImpl[] idWithAccuracy;
+    private static jdk.management.resource.internal.ResourceIdImpl[] idWithAccuracyForced;
+
+    private void <init>()
+    {
+        jdk.management.resource.internal.HeapMetrics r0;
+
+        r0 := @this: jdk.management.resource.internal.HeapMetrics;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    static void init()
+    {
+        java.security.Permission[] $r3;
+        java.lang.Throwable $r10;
+        java.security.PrivilegedAction $r2;
+        jdk.management.resource.internal.HeapMetrics $r0;
+        java.lang.Thread $r1, $r7, $r8, $r9;
+        java.lang.RuntimePermission $r4, $r5;
+        java.lang.Object $r6;
+        boolean $z0;
+
+        $r0 = <jdk.management.resource.internal.HeapMetrics: jdk.management.resource.internal.HeapMetrics instance>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = <jdk.management.resource.internal.HeapMetrics: java.lang.Thread thread>;
+
+        if $r1 == null goto label4;
+
+        $r9 = <jdk.management.resource.internal.HeapMetrics: java.lang.Thread thread>;
+
+        $z0 = virtualinvoke $r9.<java.lang.Thread: boolean isAlive()>();
+
+        if $z0 == 0 goto label3;
+
+        exitmonitor $r0;
+
+     label2:
+        return;
+
+     label3:
+        staticinvoke <jdk.management.resource.internal.HeapMetrics: void terminate()>();
+
+     label4:
+        $r2 = staticinvoke <jdk.management.resource.internal.HeapMetrics$lambda_init_0__340: java.security.PrivilegedAction bootstrap$()>();
+
+        $r3 = newarray (java.security.Permission)[2];
+
+        $r4 = new java.lang.RuntimePermission;
+
+        specialinvoke $r4.<java.lang.RuntimePermission: void <init>(java.lang.String)>("modifyThreadGroup");
+
+        $r3[0] = $r4;
+
+        $r5 = new java.lang.RuntimePermission;
+
+        specialinvoke $r5.<java.lang.RuntimePermission: void <init>(java.lang.String)>("modifyThread");
+
+        $r3[1] = $r5;
+
+        $r6 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction,java.security.AccessControlContext,java.security.Permission[])>($r2, null, $r3);
+
+        $r7 = (java.lang.Thread) $r6;
+
+        <jdk.management.resource.internal.HeapMetrics: java.lang.Thread thread> = $r7;
+
+        $r8 = <jdk.management.resource.internal.HeapMetrics: java.lang.Thread thread>;
+
+        virtualinvoke $r8.<java.lang.Thread: void start()>();
+
+        exitmonitor $r0;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r10 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label7:
+        throw $r10;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label3 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    static void terminate()
+    {
+        java.lang.Throwable $r3;
+        jdk.management.resource.internal.HeapMetrics $r0;
+        java.lang.Thread $r1, r2;
+
+        $r0 = <jdk.management.resource.internal.HeapMetrics: jdk.management.resource.internal.HeapMetrics instance>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = <jdk.management.resource.internal.HeapMetrics: java.lang.Thread thread>;
+
+        if $r1 == null goto label2;
+
+        r2 = <jdk.management.resource.internal.HeapMetrics: java.lang.Thread thread>;
+
+        <jdk.management.resource.internal.HeapMetrics: java.lang.Thread thread> = null;
+
+        virtualinvoke r2.<java.lang.Thread: void interrupt()>();
+
+     label2:
+        exitmonitor $r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r3;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private jdk.management.resource.ResourceId selectId(int, boolean)
+    {
+        jdk.management.resource.internal.ResourceIdImpl[] $r0, $r1;
+        jdk.management.resource.internal.HeapMetrics r2;
+        int i0;
+        jdk.management.resource.internal.ResourceIdImpl $r3;
+        boolean z0;
+
+        r2 := @this: jdk.management.resource.internal.HeapMetrics;
+
+        i0 := @parameter0: int;
+
+        z0 := @parameter1: boolean;
+
+        if z0 == 0 goto label1;
+
+        $r1 = <jdk.management.resource.internal.HeapMetrics: jdk.management.resource.internal.ResourceIdImpl[] idWithAccuracyForced>;
+
+        $r3 = $r1[i0];
+
+        goto label2;
+
+     label1:
+        $r0 = <jdk.management.resource.internal.HeapMetrics: jdk.management.resource.internal.ResourceIdImpl[] idWithAccuracy>;
+
+        $r3 = $r0[i0];
+
+     label2:
+        return $r3;
+    }
+
+    public void run()
+    {
+        byte[] r19;
+        jdk.management.resource.internal.SimpleResourceContext $r14, $r22;
+        jdk.management.resource.ResourceMeter $r10;
+        jdk.management.resource.ResourceAccuracy $r11;
+        jdk.management.resource.internal.SimpleResourceContext[] $r5, $r7;
+        byte $b5, $b9, $b11, $b12;
+        int[] r18;
+        java.lang.Thread $r20, $r21;
+        boolean $z0, z1, $z2, $z4, $z5;
+        java.util.Collection $r4;
+        java.util.concurrent.ConcurrentHashMap $r3;
+        jdk.management.resource.internal.HeapMetrics r12;
+        java.lang.Throwable $r15;
+        java.lang.Object[] $r6;
+        jdk.management.resource.ResourceType $r8;
+        jdk.management.resource.internal.UnassignedContext $r1, $r2;
+        long $l4, $l6, $l7, l8;
+        long[] r17;
+        int $i0, $i1, $i2, $i3, $i10, $i13, $i14, $i15, $i16, i17, i18, $i19, $i20;
+        jdk.management.resource.ResourceId $r13;
+        jdk.management.resource.ResourceRequest $r9;
+        java.lang.InterruptedException $r16;
+        java.lang.Object $r23;
+
+        r12 := @this: jdk.management.resource.internal.HeapMetrics;
+
+        $r23 = new java.lang.Object;
+
+        specialinvoke $r23.<java.lang.Object: void <init>()>();
+
+        staticinvoke <jdk.management.resource.internal.ResourceNatives: void setRetainedMemoryNotificationEnabled(java.lang.Object)>($r23);
+
+        $r1 = staticinvoke <jdk.management.resource.internal.UnassignedContext: jdk.management.resource.internal.UnassignedContext getSystemContext()>();
+
+        virtualinvoke $r1.<jdk.management.resource.internal.UnassignedContext: jdk.management.resource.ResourceContext bindThreadContext()>();
+
+        $r2 = staticinvoke <jdk.management.resource.internal.UnassignedContext: jdk.management.resource.internal.UnassignedContext getUnassignedContext()>();
+
+        r17 = newarray (long)[1];
+
+        r18 = newarray (int)[1];
+
+        r19 = newarray (byte)[1];
+
+        entermonitor $r23;
+
+     label01:
+        $r20 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r21 = <jdk.management.resource.internal.HeapMetrics: java.lang.Thread thread>;
+
+        $z2 = virtualinvoke $r20.<java.lang.Object: boolean equals(java.lang.Object)>($r21);
+
+        if $z2 == 0 goto label16;
+
+     label02:
+        $r3 = staticinvoke <jdk.management.resource.internal.SimpleResourceContext: java.util.concurrent.ConcurrentHashMap getContexts()>();
+
+        $r4 = virtualinvoke $r3.<java.util.concurrent.ConcurrentHashMap: java.util.Collection values()>();
+
+        $r5 = newarray (jdk.management.resource.internal.SimpleResourceContext)[0];
+
+        $r6 = interfaceinvoke $r4.<java.util.Collection: java.lang.Object[] toArray(java.lang.Object[])>($r5);
+
+        $r7 = (jdk.management.resource.internal.SimpleResourceContext[]) $r6;
+
+        $i3 = lengthof $r7;
+
+        $i1 = $i3 + 1;
+
+        $i0 = lengthof r17;
+
+        if $i1 == $i0 goto label03;
+
+        $i14 = $i3 + 1;
+
+        r17 = newarray (long)[$i14];
+
+        $i15 = $i3 + 1;
+
+        r18 = newarray (int)[$i15];
+
+        $i16 = $i3 + 1;
+
+        r19 = newarray (byte)[$i16];
+
+     label03:
+        i17 = 0;
+
+     label04:
+        if i17 >= $i3 goto label05;
+
+        $r14 = $r7[i17];
+
+        $i13 = virtualinvoke $r14.<jdk.management.resource.internal.SimpleResourceContext: int nativeThreadContext()>();
+
+        r18[i17] = $i13;
+
+        i17 = i17 + 1;
+
+        goto label04;
+
+     label05:
+        $i2 = virtualinvoke $r2.<jdk.management.resource.internal.UnassignedContext: int nativeThreadContext()>();
+
+        r18[$i3] = $i2;
+
+        staticinvoke <java.util.Arrays: void fill(long[],long)>(r17, -1L);
+
+        $z0 = staticinvoke <jdk.management.resource.internal.ResourceNatives: boolean getContextsRetainedMemory(int[],long[],byte[])>(r18, r17, r19);
+
+        i18 = 0;
+
+     label06:
+        if i18 > $i3 goto label13;
+
+        $l4 = r17[i18];
+
+        $b5 = $l4 cmp -1L;
+
+        if $b5 == 0 goto label12;
+
+        if i18 >= $i3 goto label07;
+
+        $r22 = $r7[i18];
+
+        goto label08;
+
+     label07:
+        $r22 = $r2;
+
+     label08:
+        $r8 = <jdk.management.resource.ResourceType: jdk.management.resource.ResourceType HEAP_RETAINED>;
+
+        $r9 = interfaceinvoke $r22.<jdk.management.resource.ResourceContext: jdk.management.resource.ResourceRequest getResourceRequest(jdk.management.resource.ResourceType)>($r8);
+
+        if $r9 == null goto label12;
+
+        $l6 = r17[i18];
+
+        $r10 = (jdk.management.resource.ResourceMeter) $r9;
+
+        $l7 = interfaceinvoke $r10.<jdk.management.resource.ResourceMeter: long getValue()>();
+
+        l8 = $l6 - $l7;
+
+        $b9 = r19[i18];
+
+        $r11 = <jdk.management.resource.ResourceAccuracy: jdk.management.resource.ResourceAccuracy HIGH>;
+
+        $i10 = virtualinvoke $r11.<jdk.management.resource.ResourceAccuracy: int ordinal()>();
+
+        $i19 = (int) $b9;
+
+        if $i19 < $i10 goto label09;
+
+        $z5 = 1;
+
+        $z4 = 1;
+
+        goto label10;
+
+     label09:
+        $z5 = 0;
+
+        $z4 = 0;
+
+     label10:
+        z1 = $z4;
+
+        $b11 = l8 cmp 0L;
+
+        if $b11 != 0 goto label11;
+
+        if $z5 == 0 goto label12;
+
+     label11:
+        $b12 = r19[i18];
+
+        $i20 = (int) $b12;
+
+        $r13 = specialinvoke r12.<jdk.management.resource.internal.HeapMetrics: jdk.management.resource.ResourceId selectId(int,boolean)>($i20, z1);
+
+        interfaceinvoke $r9.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>(l8, $r13);
+
+     label12:
+        i18 = i18 + 1;
+
+        goto label06;
+
+     label13:
+        if $z0 != 0 goto label02;
+
+        virtualinvoke $r23.<java.lang.Object: void wait()>();
+
+     label14:
+        goto label01;
+
+     label15:
+        $r16 := @caughtexception;
+
+        goto label01;
+
+     label16:
+        exitmonitor $r23;
+
+     label17:
+        goto label20;
+
+     label18:
+        $r15 := @caughtexception;
+
+        exitmonitor $r23;
+
+     label19:
+        throw $r15;
+
+     label20:
+        return;
+
+        catch java.lang.InterruptedException from label02 to label14 with label15;
+        catch java.lang.Throwable from label01 to label17 with label18;
+        catch java.lang.Throwable from label18 to label19 with label18;
+    }
+
+    public static java.lang.Thread lambda$init$0()
+    {
+        jdk.management.resource.internal.UnassignedContext $r4;
+        java.lang.ThreadGroup $r1, r9;
+        jdk.management.resource.ResourceContext $r3;
+        java.lang.Thread $r0, $r2, $r5, $r7, $r8;
+        jdk.management.resource.internal.HeapMetrics $r6;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        r9 = virtualinvoke $r0.<java.lang.Thread: java.lang.ThreadGroup getThreadGroup()>();
+
+     label1:
+        $r1 = virtualinvoke r9.<java.lang.ThreadGroup: java.lang.ThreadGroup getParent()>();
+
+        if $r1 == null goto label2;
+
+        r9 = virtualinvoke r9.<java.lang.ThreadGroup: java.lang.ThreadGroup getParent()>();
+
+        goto label1;
+
+     label2:
+        $r2 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r3 = staticinvoke <jdk.management.resource.internal.SimpleResourceContext: jdk.management.resource.ResourceContext getThreadContext(java.lang.Thread)>($r2);
+
+        $r4 = staticinvoke <jdk.management.resource.internal.UnassignedContext: jdk.management.resource.internal.UnassignedContext getSystemContext()>();
+
+        virtualinvoke $r4.<jdk.management.resource.internal.UnassignedContext: jdk.management.resource.ResourceContext bindThreadContext()>();
+
+        $r5 = new java.lang.Thread;
+
+        $r6 = <jdk.management.resource.internal.HeapMetrics: jdk.management.resource.internal.HeapMetrics instance>;
+
+        specialinvoke $r5.<java.lang.Thread: void <init>(java.lang.ThreadGroup,java.lang.Runnable,java.lang.String)>(r9, $r6, "HeapMetrics");
+
+        <jdk.management.resource.internal.HeapMetrics: java.lang.Thread thread> = $r5;
+
+        $r7 = <jdk.management.resource.internal.HeapMetrics: java.lang.Thread thread>;
+
+        virtualinvoke $r7.<java.lang.Thread: void setDaemon(boolean)>(1);
+
+        interfaceinvoke $r3.<jdk.management.resource.ResourceContext: jdk.management.resource.ResourceContext bindThreadContext()>();
+
+        $r8 = <jdk.management.resource.internal.HeapMetrics: java.lang.Thread thread>;
+
+        return $r8;
+    }
+
+    static void <clinit>()
+    {
+        jdk.management.resource.internal.ResourceIdImpl[] $r1, $r10;
+        jdk.management.resource.ResourceAccuracy $r2, $r4, $r6, $r8, $r11, $r13, $r15, $r17;
+        jdk.management.resource.internal.ResourceIdImpl $r3, $r5, $r7, $r9, $r12, $r14, $r16, $r18;
+        jdk.management.resource.internal.HeapMetrics $r0;
+
+        $r0 = new jdk.management.resource.internal.HeapMetrics;
+
+        specialinvoke $r0.<jdk.management.resource.internal.HeapMetrics: void <init>()>();
+
+        <jdk.management.resource.internal.HeapMetrics: jdk.management.resource.internal.HeapMetrics instance> = $r0;
+
+        $r1 = newarray (jdk.management.resource.internal.ResourceIdImpl)[4];
+
+        $r2 = <jdk.management.resource.ResourceAccuracy: jdk.management.resource.ResourceAccuracy LOW>;
+
+        $r3 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.lang.Object,jdk.management.resource.ResourceAccuracy)>("Heap", $r2);
+
+        $r1[0] = $r3;
+
+        $r4 = <jdk.management.resource.ResourceAccuracy: jdk.management.resource.ResourceAccuracy MEDIUM>;
+
+        $r5 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.lang.Object,jdk.management.resource.ResourceAccuracy)>("Heap", $r4);
+
+        $r1[1] = $r5;
+
+        $r6 = <jdk.management.resource.ResourceAccuracy: jdk.management.resource.ResourceAccuracy HIGH>;
+
+        $r7 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.lang.Object,jdk.management.resource.ResourceAccuracy)>("Heap", $r6);
+
+        $r1[2] = $r7;
+
+        $r8 = <jdk.management.resource.ResourceAccuracy: jdk.management.resource.ResourceAccuracy HIGHEST>;
+
+        $r9 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.lang.Object,jdk.management.resource.ResourceAccuracy)>("Heap", $r8);
+
+        $r1[3] = $r9;
+
+        <jdk.management.resource.internal.HeapMetrics: jdk.management.resource.internal.ResourceIdImpl[] idWithAccuracy> = $r1;
+
+        $r10 = newarray (jdk.management.resource.internal.ResourceIdImpl)[4];
+
+        $r11 = <jdk.management.resource.ResourceAccuracy: jdk.management.resource.ResourceAccuracy LOW>;
+
+        $r12 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.lang.Object,jdk.management.resource.ResourceAccuracy,boolean)>("Heap", $r11, 1);
+
+        $r10[0] = $r12;
+
+        $r13 = <jdk.management.resource.ResourceAccuracy: jdk.management.resource.ResourceAccuracy MEDIUM>;
+
+        $r14 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.lang.Object,jdk.management.resource.ResourceAccuracy,boolean)>("Heap", $r13, 1);
+
+        $r10[1] = $r14;
+
+        $r15 = <jdk.management.resource.ResourceAccuracy: jdk.management.resource.ResourceAccuracy HIGH>;
+
+        $r16 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.lang.Object,jdk.management.resource.ResourceAccuracy,boolean)>("Heap", $r15, 1);
+
+        $r10[2] = $r16;
+
+        $r17 = <jdk.management.resource.ResourceAccuracy: jdk.management.resource.ResourceAccuracy HIGHEST>;
+
+        $r18 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.lang.Object,jdk.management.resource.ResourceAccuracy,boolean)>("Heap", $r17, 1);
+
+        $r10[3] = $r18;
+
+        <jdk.management.resource.internal.HeapMetrics: jdk.management.resource.internal.ResourceIdImpl[] idWithAccuracyForced> = $r10;
+
+        return;
+    }
+}

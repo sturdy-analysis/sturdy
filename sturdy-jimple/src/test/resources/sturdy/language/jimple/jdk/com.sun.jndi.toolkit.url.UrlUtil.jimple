@@ -1,0 +1,213 @@
+public final class com.sun.jndi.toolkit.url.UrlUtil extends java.lang.Object
+{
+
+    private void <init>()
+    {
+        com.sun.jndi.toolkit.url.UrlUtil r0;
+
+        r0 := @this: com.sun.jndi.toolkit.url.UrlUtil;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static final java.lang.String decode(java.lang.String) throws java.net.MalformedURLException
+    {
+        java.net.MalformedURLException $r3;
+        java.lang.String r0, $r1;
+        java.io.UnsupportedEncodingException $r2;
+
+        r0 := @parameter0: java.lang.String;
+
+     label1:
+        $r1 = staticinvoke <com.sun.jndi.toolkit.url.UrlUtil: java.lang.String decode(java.lang.String,java.lang.String)>(r0, "8859_1");
+
+     label2:
+        return $r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new java.net.MalformedURLException;
+
+        specialinvoke $r3.<java.net.MalformedURLException: void <init>(java.lang.String)>("ISO-Latin-1 decoder unavailable");
+
+        throw $r3;
+
+        catch java.io.UnsupportedEncodingException from label1 to label2 with label3;
+    }
+
+    public static final java.lang.String decode(java.lang.String, java.lang.String) throws java.net.MalformedURLException, java.io.UnsupportedEncodingException
+    {
+        java.net.MalformedURLException $r4;
+        java.lang.IllegalArgumentException $r3;
+        java.lang.StringBuilder $r5, $r6, $r7;
+        java.lang.String r0, r1, $r2, $r8;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+     label1:
+        $r2 = staticinvoke <java.net.URLDecoder: java.lang.String decode(java.lang.String,java.lang.String)>(r0, r1);
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.net.MalformedURLException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid URI encoding: ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.net.MalformedURLException: void <init>(java.lang.String)>($r8);
+
+        virtualinvoke $r4.<java.net.MalformedURLException: java.lang.Throwable initCause(java.lang.Throwable)>($r3);
+
+        throw $r4;
+
+        catch java.lang.IllegalArgumentException from label1 to label2 with label3;
+    }
+
+    public static final java.lang.String encode(java.lang.String, java.lang.String) throws java.io.UnsupportedEncodingException
+    {
+        byte[] $r2;
+        byte $b2, $b3, $b4, $b5, $b7, $b11, $b12, $b14, $b15, $b16, $b20;
+        int i0, $i1, $i6, $i8, $i9, i17, i18, $i19, i22, i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31;
+        java.lang.String r0, r1, $r5, $r6;
+        char $c10, $c13, $c21;
+        char[] r3;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        $r2 = virtualinvoke r0.<java.lang.String: byte[] getBytes(java.lang.String)>(r1);
+
+        i0 = lengthof $r2;
+
+        $i1 = 3 * i0;
+
+        r3 = newarray (char)[$i1];
+
+        i17 = 0;
+
+        i18 = 0;
+
+     label1:
+        if i18 >= i0 goto label8;
+
+        $b2 = $r2[i18];
+
+        $i24 = (int) $b2;
+
+        if $i24 < 97 goto label2;
+
+        $b16 = $r2[i18];
+
+        $i25 = (int) $b16;
+
+        if $i25 <= 122 goto label5;
+
+     label2:
+        $b3 = $r2[i18];
+
+        $i26 = (int) $b3;
+
+        if $i26 < 65 goto label3;
+
+        $b15 = $r2[i18];
+
+        $i27 = (int) $b15;
+
+        if $i27 <= 90 goto label5;
+
+     label3:
+        $b4 = $r2[i18];
+
+        $i28 = (int) $b4;
+
+        if $i28 < 48 goto label4;
+
+        $b14 = $r2[i18];
+
+        $i29 = (int) $b14;
+
+        if $i29 <= 57 goto label5;
+
+     label4:
+        $r5 = "=,+;.\'-@&/$_()!~*:";
+
+        $b5 = $r2[i18];
+
+        $i30 = (int) $b5;
+
+        $i6 = virtualinvoke $r5.<java.lang.String: int indexOf(int)>($i30);
+
+        if $i6 < 0 goto label6;
+
+     label5:
+        $i19 = i17;
+
+        i17 = i17 + 1;
+
+        $b20 = $r2[i18];
+
+        $c21 = (char) $b20;
+
+        r3[$i19] = $c21;
+
+        goto label7;
+
+     label6:
+        i22 = i17 + 1;
+
+        r3[i17] = 37;
+
+        i23 = i22 + 1;
+
+        $b7 = $r2[i18];
+
+        $i31 = (int) $b7;
+
+        $i8 = $i31 >>> 4;
+
+        $i9 = 15 & $i8;
+
+        $c10 = staticinvoke <java.lang.Character: char forDigit(int,int)>($i9, 16);
+
+        r3[i22] = $c10;
+
+        i17 = i23 + 1;
+
+        $b11 = $r2[i18];
+
+        $b12 = 15 & $b11;
+
+        $c13 = staticinvoke <java.lang.Character: char forDigit(int,int)>($b12, 16);
+
+        r3[i23] = $c13;
+
+     label7:
+        i18 = i18 + 1;
+
+        goto label1;
+
+     label8:
+        $r6 = new java.lang.String;
+
+        specialinvoke $r6.<java.lang.String: void <init>(char[],int,int)>(r3, 0, i17);
+
+        return $r6;
+    }
+}

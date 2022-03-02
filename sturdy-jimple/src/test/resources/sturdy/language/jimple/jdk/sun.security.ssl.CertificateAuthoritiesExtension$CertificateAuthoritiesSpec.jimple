@@ -1,0 +1,322 @@
+final class sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec extends java.lang.Object implements sun.security.ssl.SSLExtension$SSLExtensionSpec
+{
+    final java.util.List authorities;
+
+    private void <init>(java.util.List)
+    {
+        sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec r0;
+        java.util.List r1;
+
+        r0 := @this: sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec;
+
+        r1 := @parameter0: java.util.List;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec: java.util.List authorities> = r1;
+
+        return;
+    }
+
+    private void <init>(java.nio.ByteBuffer) throws java.io.IOException
+    {
+        sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec r0;
+        byte[] $r3;
+        javax.net.ssl.SSLProtocolException $r5, $r6, $r7;
+        java.nio.ByteBuffer r1;
+        java.util.List $r4;
+        int $i0, $i1, $i2, $i3, $i4, i5;
+        java.util.LinkedList $r2;
+
+        r0 := @this: sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec;
+
+        r1 := @parameter0: java.nio.ByteBuffer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $i0 = virtualinvoke r1.<java.nio.ByteBuffer: int remaining()>();
+
+        if $i0 >= 3 goto label1;
+
+        $r7 = new javax.net.ssl.SSLProtocolException;
+
+        specialinvoke $r7.<javax.net.ssl.SSLProtocolException: void <init>(java.lang.String)>("Invalid certificate_authorities extension: insufficient data");
+
+        throw $r7;
+
+     label1:
+        $i1 = staticinvoke <sun.security.ssl.Record: int getInt16(java.nio.ByteBuffer)>(r1);
+
+        i5 = $i1;
+
+        if $i1 != 0 goto label2;
+
+        $r6 = new javax.net.ssl.SSLProtocolException;
+
+        specialinvoke $r6.<javax.net.ssl.SSLProtocolException: void <init>(java.lang.String)>("Invalid certificate_authorities extension: no certificate authorities");
+
+        throw $r6;
+
+     label2:
+        $i2 = virtualinvoke r1.<java.nio.ByteBuffer: int remaining()>();
+
+        if $i1 <= $i2 goto label3;
+
+        $r5 = new javax.net.ssl.SSLProtocolException;
+
+        specialinvoke $r5.<javax.net.ssl.SSLProtocolException: void <init>(java.lang.String)>("Invalid certificate_authorities extension: insufficient data");
+
+        throw $r5;
+
+     label3:
+        $r2 = new java.util.LinkedList;
+
+        specialinvoke $r2.<java.util.LinkedList: void <init>()>();
+
+        r0.<sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec: java.util.List authorities> = $r2;
+
+     label4:
+        if i5 <= 0 goto label5;
+
+        $r3 = staticinvoke <sun.security.ssl.Record: byte[] getBytes16(java.nio.ByteBuffer)>(r1);
+
+        $i3 = lengthof $r3;
+
+        $i4 = 2 + $i3;
+
+        i5 = i5 - $i4;
+
+        $r4 = r0.<sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec: java.util.List authorities>;
+
+        interfaceinvoke $r4.<java.util.List: boolean add(java.lang.Object)>($r3);
+
+        goto label4;
+
+     label5:
+        return;
+    }
+
+    private static java.util.List getEncodedAuthorities(java.security.cert.X509Certificate[])
+    {
+        java.security.cert.X509Certificate r2;
+        byte[] $r4;
+        javax.security.auth.x500.X500Principal $r3;
+        java.util.ArrayList $r6;
+        java.util.List $r5;
+        int $i0, i1, $i2, $i3, i4, i5, $i7;
+        java.security.cert.X509Certificate[] r1;
+
+        r1 := @parameter0: java.security.cert.X509Certificate[];
+
+        $r6 = new java.util.ArrayList;
+
+        $i0 = lengthof r1;
+
+        specialinvoke $r6.<java.util.ArrayList: void <init>(int)>($i0);
+
+        i4 = 0;
+
+        i1 = lengthof r1;
+
+        i5 = 0;
+
+     label1:
+        if i5 >= i1 goto label4;
+
+        r2 = r1[i5];
+
+        $r3 = virtualinvoke r2.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        $r4 = virtualinvoke $r3.<javax.security.auth.x500.X500Principal: byte[] getEncoded()>();
+
+        $i2 = lengthof $r4;
+
+        i4 = i4 + $i2;
+
+        $i7 = (int) 65535;
+
+        if i4 <= $i7 goto label2;
+
+        $r5 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+        return $r5;
+
+     label2:
+        $i3 = lengthof $r4;
+
+        if $i3 == 0 goto label3;
+
+        interfaceinvoke $r6.<java.util.List: boolean add(java.lang.Object)>($r4);
+
+     label3:
+        i5 = i5 + 1;
+
+        goto label1;
+
+     label4:
+        return $r6;
+    }
+
+    javax.security.auth.x500.X500Principal[] getAuthorities()
+    {
+        sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec r0;
+        byte[] r6;
+        javax.security.auth.x500.X500Principal $r7;
+        java.util.Iterator $r4;
+        javax.security.auth.x500.X500Principal[] r2;
+        java.util.List $r1, $r3;
+        int $i0, $i1, i2;
+        java.lang.Object $r5;
+        boolean $z0;
+
+        r0 := @this: sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec;
+
+        $r1 = r0.<sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec: java.util.List authorities>;
+
+        $i0 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        r2 = newarray (javax.security.auth.x500.X500Principal)[$i0];
+
+        i2 = 0;
+
+        $r3 = r0.<sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec: java.util.List authorities>;
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (byte[]) $r5;
+
+        $i1 = i2;
+
+        i2 = i2 + 1;
+
+        $r7 = new javax.security.auth.x500.X500Principal;
+
+        specialinvoke $r7.<javax.security.auth.x500.X500Principal: void <init>(byte[])>(r6);
+
+        r2[$i1] = $r7;
+
+        goto label1;
+
+     label2:
+        return r2;
+    }
+
+    public java.lang.String toString()
+    {
+        sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec r3;
+        byte[] r11;
+        java.lang.Object[] $r6;
+        javax.security.auth.x500.X500Principal $r12;
+        java.util.Iterator $r5;
+        java.text.MessageFormat $r0;
+        java.util.List $r4;
+        java.util.Locale $r1;
+        java.lang.StringBuilder $r2;
+        java.lang.Object $r10;
+        java.lang.String $r7, $r8, $r9, $r13;
+        boolean $z0;
+
+        r3 := @this: sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec;
+
+        $r0 = new java.text.MessageFormat;
+
+        $r1 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        specialinvoke $r0.<java.text.MessageFormat: void <init>(java.lang.String,java.util.Locale)>("\"certificate authorities\": \'[\'\n{0}\']\'", $r1);
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>(int)>(512);
+
+        $r4 = r3.<sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec: java.util.List authorities>;
+
+        $r5 = interfaceinvoke $r4.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r10 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r11 = (byte[]) $r10;
+
+        $r12 = new javax.security.auth.x500.X500Principal;
+
+        specialinvoke $r12.<javax.security.auth.x500.X500Principal: void <init>(byte[])>(r11);
+
+        $r13 = virtualinvoke $r12.<javax.security.auth.x500.X500Principal: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        goto label1;
+
+     label2:
+        $r6 = newarray (java.lang.Object)[1];
+
+        $r7 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r8 = staticinvoke <sun.security.ssl.Utilities: java.lang.String indent(java.lang.String)>($r7);
+
+        $r6[0] = $r8;
+
+        $r9 = virtualinvoke $r0.<java.text.MessageFormat: java.lang.String format(java.lang.Object)>($r6);
+
+        return $r9;
+    }
+
+    void <init>(java.nio.ByteBuffer, sun.security.ssl.CertificateAuthoritiesExtension$1) throws java.io.IOException
+    {
+        sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec r0;
+        sun.security.ssl.CertificateAuthoritiesExtension$1 r2;
+        java.nio.ByteBuffer r1;
+
+        r0 := @this: sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec;
+
+        r1 := @parameter0: java.nio.ByteBuffer;
+
+        r2 := @parameter1: sun.security.ssl.CertificateAuthoritiesExtension$1;
+
+        specialinvoke r0.<sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec: void <init>(java.nio.ByteBuffer)>(r1);
+
+        return;
+    }
+
+    static java.util.List access$600(java.security.cert.X509Certificate[])
+    {
+        java.util.List $r1;
+        java.security.cert.X509Certificate[] r0;
+
+        r0 := @parameter0: java.security.cert.X509Certificate[];
+
+        $r1 = staticinvoke <sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec: java.util.List getEncodedAuthorities(java.security.cert.X509Certificate[])>(r0);
+
+        return $r1;
+    }
+
+    void <init>(java.util.List, sun.security.ssl.CertificateAuthoritiesExtension$1)
+    {
+        sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec r0;
+        java.util.List r1;
+        sun.security.ssl.CertificateAuthoritiesExtension$1 r2;
+
+        r0 := @this: sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec;
+
+        r1 := @parameter0: java.util.List;
+
+        r2 := @parameter1: sun.security.ssl.CertificateAuthoritiesExtension$1;
+
+        specialinvoke r0.<sun.security.ssl.CertificateAuthoritiesExtension$CertificateAuthoritiesSpec: void <init>(java.util.List)>(r1);
+
+        return;
+    }
+}

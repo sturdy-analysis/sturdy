@@ -1,0 +1,414 @@
+public class sun.awt.Win32GraphicsEnvironment extends sun.java2d.SunGraphicsEnvironment
+{
+    private static boolean displayInitialized;
+    private java.util.ArrayList oldDevices;
+    private static volatile boolean isDWMCompositionEnabled;
+    static final boolean $assertionsDisabled;
+
+    private static native void initDisplay();
+
+    public static void initDisplayWrapper()
+    {
+        boolean $z0;
+
+        $z0 = <sun.awt.Win32GraphicsEnvironment: boolean displayInitialized>;
+
+        if $z0 != 0 goto label1;
+
+        <sun.awt.Win32GraphicsEnvironment: boolean displayInitialized> = 1;
+
+        staticinvoke <sun.awt.Win32GraphicsEnvironment: void initDisplay()>();
+
+     label1:
+        return;
+    }
+
+    public void <init>()
+    {
+        sun.awt.Win32GraphicsEnvironment r0;
+
+        r0 := @this: sun.awt.Win32GraphicsEnvironment;
+
+        specialinvoke r0.<sun.java2d.SunGraphicsEnvironment: void <init>()>();
+
+        return;
+    }
+
+    protected native int getNumScreens();
+
+    protected native int getDefaultScreen();
+
+    public java.awt.GraphicsDevice getDefaultScreenDevice()
+    {
+        java.awt.AWTError $r2;
+        java.awt.GraphicsDevice $r3;
+        sun.awt.Win32GraphicsEnvironment r0;
+        java.awt.GraphicsDevice[] $r1;
+        int $i0, $i1, $i2, $i3;
+
+        r0 := @this: sun.awt.Win32GraphicsEnvironment;
+
+        $r1 = virtualinvoke r0.<sun.awt.Win32GraphicsEnvironment: java.awt.GraphicsDevice[] getScreenDevices()>();
+
+        $i0 = lengthof $r1;
+
+        if $i0 != 0 goto label1;
+
+        $r2 = new java.awt.AWTError;
+
+        specialinvoke $r2.<java.awt.AWTError: void <init>(java.lang.String)>("no screen devices");
+
+        throw $r2;
+
+     label1:
+        $i1 = virtualinvoke r0.<sun.awt.Win32GraphicsEnvironment: int getDefaultScreen()>();
+
+        if 0 >= $i1 goto label2;
+
+        $i2 = lengthof $r1;
+
+        if $i1 >= $i2 goto label2;
+
+        $i3 = $i1;
+
+        goto label3;
+
+     label2:
+        $i3 = 0;
+
+     label3:
+        $r3 = $r1[$i3];
+
+        return $r3;
+    }
+
+    public native int getXResolution();
+
+    public native int getYResolution();
+
+    public void displayChanged()
+    {
+        java.util.ListIterator $r5;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        sun.awt.Win32GraphicsDevice r23, r25;
+        sun.awt.SunDisplayChanger $r3;
+        java.awt.GraphicsDevice r9, $r11, $r12, $r14, $r15, $r21;
+        java.lang.AssertionError $r20;
+        java.util.ArrayList $r2, $r4, $r16, $r18, $r19;
+        sun.awt.DisplayChangedListener $r10;
+        java.awt.GraphicsDevice[] r1, $r13, r22, r24;
+        int $i0, $i1, $i2, $i3, i4, i5, $i6, i7, i8;
+        java.lang.ref.WeakReference $r7, $r17;
+        sun.awt.Win32GraphicsEnvironment r0;
+        java.lang.Object $r6, $r8;
+
+        r0 := @this: sun.awt.Win32GraphicsEnvironment;
+
+        $i0 = virtualinvoke r0.<sun.awt.Win32GraphicsEnvironment: int getNumScreens()>();
+
+        r1 = newarray (java.awt.GraphicsDevice)[$i0];
+
+        r22 = r0.<sun.awt.Win32GraphicsEnvironment: java.awt.GraphicsDevice[] screens>;
+
+        if r22 == null goto label06;
+
+        i4 = 0;
+
+     label01:
+        $i2 = lengthof r22;
+
+        if i4 >= $i2 goto label06;
+
+        $r13 = r0.<sun.awt.Win32GraphicsEnvironment: java.awt.GraphicsDevice[] screens>;
+
+        $r14 = $r13[i4];
+
+        $z2 = $r14 instanceof sun.awt.Win32GraphicsDevice;
+
+        if $z2 != 0 goto label02;
+
+        $z4 = <sun.awt.Win32GraphicsEnvironment: boolean $assertionsDisabled>;
+
+        if $z4 != 0 goto label05;
+
+        $r20 = new java.lang.AssertionError;
+
+        $r21 = r22[i4];
+
+        specialinvoke $r20.<java.lang.AssertionError: void <init>(java.lang.Object)>($r21);
+
+        throw $r20;
+
+     label02:
+        $r15 = r22[i4];
+
+        r23 = (sun.awt.Win32GraphicsDevice) $r15;
+
+        $z3 = virtualinvoke r23.<sun.awt.Win32GraphicsDevice: boolean isValid()>();
+
+        if $z3 != 0 goto label04;
+
+        $r16 = r0.<sun.awt.Win32GraphicsEnvironment: java.util.ArrayList oldDevices>;
+
+        if $r16 != null goto label03;
+
+        $r19 = new java.util.ArrayList;
+
+        specialinvoke $r19.<java.util.ArrayList: void <init>()>();
+
+        r0.<sun.awt.Win32GraphicsEnvironment: java.util.ArrayList oldDevices> = $r19;
+
+     label03:
+        $r18 = r0.<sun.awt.Win32GraphicsEnvironment: java.util.ArrayList oldDevices>;
+
+        $r17 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r17.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>(r23);
+
+        virtualinvoke $r18.<java.util.ArrayList: boolean add(java.lang.Object)>($r17);
+
+        goto label05;
+
+     label04:
+        $i3 = lengthof r1;
+
+        if i4 >= $i3 goto label05;
+
+        r1[i4] = r23;
+
+     label05:
+        i4 = i4 + 1;
+
+        goto label01;
+
+     label06:
+        i5 = 0;
+
+     label07:
+        $i6 = lengthof r1;
+
+        if i5 >= $i6 goto label09;
+
+        $r11 = r1[i5];
+
+        if $r11 != null goto label08;
+
+        $r12 = virtualinvoke r0.<sun.awt.Win32GraphicsEnvironment: java.awt.GraphicsDevice makeScreenDevice(int)>(i5);
+
+        r1[i5] = $r12;
+
+     label08:
+        i5 = i5 + 1;
+
+        goto label07;
+
+     label09:
+        r0.<sun.awt.Win32GraphicsEnvironment: java.awt.GraphicsDevice[] screens> = r1;
+
+        r24 = r0.<sun.awt.Win32GraphicsEnvironment: java.awt.GraphicsDevice[] screens>;
+
+        i7 = lengthof r24;
+
+        i8 = 0;
+
+     label10:
+        if i8 >= i7 goto label12;
+
+        r9 = r24[i8];
+
+        $z1 = r9 instanceof sun.awt.DisplayChangedListener;
+
+        if $z1 == 0 goto label11;
+
+        $r10 = (sun.awt.DisplayChangedListener) r9;
+
+        interfaceinvoke $r10.<sun.awt.DisplayChangedListener: void displayChanged()>();
+
+     label11:
+        i8 = i8 + 1;
+
+        goto label10;
+
+     label12:
+        $r2 = r0.<sun.awt.Win32GraphicsEnvironment: java.util.ArrayList oldDevices>;
+
+        if $r2 == null goto label16;
+
+        $i1 = virtualinvoke r0.<sun.awt.Win32GraphicsEnvironment: int getDefaultScreen()>();
+
+        $r4 = r0.<sun.awt.Win32GraphicsEnvironment: java.util.ArrayList oldDevices>;
+
+        $r5 = virtualinvoke $r4.<java.util.ArrayList: java.util.ListIterator listIterator()>();
+
+     label13:
+        $z0 = interfaceinvoke $r5.<java.util.ListIterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label16;
+
+        $r6 = interfaceinvoke $r5.<java.util.ListIterator: java.lang.Object next()>();
+
+        $r7 = (java.lang.ref.WeakReference) $r6;
+
+        $r8 = virtualinvoke $r7.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        r25 = (sun.awt.Win32GraphicsDevice) $r8;
+
+        if r25 == null goto label14;
+
+        virtualinvoke r25.<sun.awt.Win32GraphicsDevice: void invalidate(int)>($i1);
+
+        virtualinvoke r25.<sun.awt.Win32GraphicsDevice: void displayChanged()>();
+
+        goto label15;
+
+     label14:
+        interfaceinvoke $r5.<java.util.ListIterator: void remove()>();
+
+     label15:
+        goto label13;
+
+     label16:
+        staticinvoke <sun.awt.windows.WToolkit: void resetGC()>();
+
+        $r3 = r0.<sun.awt.Win32GraphicsEnvironment: sun.awt.SunDisplayChanger displayChanger>;
+
+        virtualinvoke $r3.<sun.awt.SunDisplayChanger: void notifyListeners()>();
+
+        return;
+    }
+
+    protected java.awt.GraphicsDevice makeScreenDevice(int)
+    {
+        int i0;
+        sun.awt.Win32GraphicsEnvironment r1;
+        boolean $z0;
+        sun.awt.Win32GraphicsDevice $r0, r2;
+
+        r1 := @this: sun.awt.Win32GraphicsEnvironment;
+
+        i0 := @parameter0: int;
+
+        r2 = null;
+
+        $z0 = staticinvoke <sun.java2d.windows.WindowsFlags: boolean isD3DEnabled()>();
+
+        if $z0 == 0 goto label1;
+
+        r2 = staticinvoke <sun.java2d.d3d.D3DGraphicsDevice: sun.java2d.d3d.D3DGraphicsDevice createDevice(int)>(i0);
+
+     label1:
+        if r2 != null goto label2;
+
+        $r0 = new sun.awt.Win32GraphicsDevice;
+
+        specialinvoke $r0.<sun.awt.Win32GraphicsDevice: void <init>(int)>(i0);
+
+        r2 = $r0;
+
+     label2:
+        return r2;
+    }
+
+    public boolean isDisplayLocal()
+    {
+        sun.awt.Win32GraphicsEnvironment r0;
+
+        r0 := @this: sun.awt.Win32GraphicsEnvironment;
+
+        return 1;
+    }
+
+    public boolean isFlipStrategyPreferred(java.awt.peer.ComponentPeer)
+    {
+        java.awt.peer.ComponentPeer r0;
+        java.awt.GraphicsConfiguration $r1;
+        java.awt.GraphicsDevice $r2;
+        sun.awt.Win32GraphicsEnvironment r4;
+        sun.java2d.d3d.D3DGraphicsDevice $r3;
+        boolean $z0, $z1;
+
+        r4 := @this: sun.awt.Win32GraphicsEnvironment;
+
+        r0 := @parameter0: java.awt.peer.ComponentPeer;
+
+        if r0 == null goto label1;
+
+        $r1 = interfaceinvoke r0.<java.awt.peer.ComponentPeer: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = virtualinvoke $r1.<java.awt.GraphicsConfiguration: java.awt.GraphicsDevice getDevice()>();
+
+        $z0 = $r2 instanceof sun.java2d.d3d.D3DGraphicsDevice;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = (sun.java2d.d3d.D3DGraphicsDevice) $r2;
+
+        $z1 = virtualinvoke $r3.<sun.java2d.d3d.D3DGraphicsDevice: boolean isD3DEnabledOnDevice()>();
+
+        return $z1;
+
+     label1:
+        return 0;
+    }
+
+    public static boolean isDWMCompositionEnabled()
+    {
+        boolean $z0;
+
+        $z0 = <sun.awt.Win32GraphicsEnvironment: boolean isDWMCompositionEnabled>;
+
+        return $z0;
+    }
+
+    private static void dwmCompositionChanged(boolean)
+    {
+        boolean z0;
+
+        z0 := @parameter0: boolean;
+
+        <sun.awt.Win32GraphicsEnvironment: boolean isDWMCompositionEnabled> = z0;
+
+        return;
+    }
+
+    public static native boolean isVistaOS();
+
+    static void <clinit>()
+    {
+        sun.java2d.WindowsSurfaceManagerFactory $r1;
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        $r0 = class "Lsun/awt/Win32GraphicsEnvironment;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.awt.Win32GraphicsEnvironment: boolean $assertionsDisabled> = $z1;
+
+        staticinvoke <sun.awt.windows.WToolkit: void loadLibraries()>();
+
+        staticinvoke <sun.java2d.windows.WindowsFlags: void initFlags()>();
+
+        staticinvoke <sun.awt.Win32GraphicsEnvironment: void initDisplayWrapper()>();
+
+        $r1 = new sun.java2d.WindowsSurfaceManagerFactory;
+
+        specialinvoke $r1.<sun.java2d.WindowsSurfaceManagerFactory: void <init>()>();
+
+        staticinvoke <sun.java2d.SurfaceManagerFactory: void setInstance(sun.java2d.SurfaceManagerFactory)>($r1);
+
+        return;
+    }
+}

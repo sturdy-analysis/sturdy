@@ -1,0 +1,100 @@
+abstract class org.jcp.xml.dsig.internal.dom.DOMSignatureMethod$AbstractRSAPSSSignatureMethod extends org.jcp.xml.dsig.internal.dom.DOMSignatureMethod$AbstractRSASignatureMethod
+{
+
+    void <init>(java.security.spec.AlgorithmParameterSpec) throws java.security.InvalidAlgorithmParameterException
+    {
+        org.jcp.xml.dsig.internal.dom.DOMSignatureMethod$AbstractRSAPSSSignatureMethod r0;
+        java.security.spec.AlgorithmParameterSpec r1;
+
+        r0 := @this: org.jcp.xml.dsig.internal.dom.DOMSignatureMethod$AbstractRSAPSSSignatureMethod;
+
+        r1 := @parameter0: java.security.spec.AlgorithmParameterSpec;
+
+        specialinvoke r0.<org.jcp.xml.dsig.internal.dom.DOMSignatureMethod$AbstractRSASignatureMethod: void <init>(java.security.spec.AlgorithmParameterSpec)>(r1);
+
+        return;
+    }
+
+    void <init>(org.w3c.dom.Element) throws javax.xml.crypto.MarshalException
+    {
+        org.jcp.xml.dsig.internal.dom.DOMSignatureMethod$AbstractRSAPSSSignatureMethod r0;
+        org.w3c.dom.Element r1;
+
+        r0 := @this: org.jcp.xml.dsig.internal.dom.DOMSignatureMethod$AbstractRSAPSSSignatureMethod;
+
+        r1 := @parameter0: org.w3c.dom.Element;
+
+        specialinvoke r0.<org.jcp.xml.dsig.internal.dom.DOMSignatureMethod$AbstractRSASignatureMethod: void <init>(org.w3c.dom.Element)>(r1);
+
+        return;
+    }
+
+    public abstract java.security.spec.PSSParameterSpec getPSSParameterSpec();
+
+    java.security.Signature getSignature(java.security.Provider) throws java.security.NoSuchAlgorithmException
+    {
+        org.jcp.xml.dsig.internal.dom.DOMSignatureMethod$AbstractRSAPSSSignatureMethod r1;
+        java.security.spec.PSSParameterSpec $r2;
+        java.security.Signature $r8, $r9;
+        java.security.Provider r0;
+        java.security.InvalidAlgorithmParameterException $r6;
+        java.security.NoSuchAlgorithmException $r3, $r7;
+        java.lang.String $r4, $r5;
+
+        r1 := @this: org.jcp.xml.dsig.internal.dom.DOMSignatureMethod$AbstractRSAPSSSignatureMethod;
+
+        r0 := @parameter0: java.security.Provider;
+
+     label1:
+        if r0 != null goto label2;
+
+        $r8 = staticinvoke <java.security.Signature: java.security.Signature getInstance(java.lang.String)>("RSASSA-PSS");
+
+        goto label3;
+
+     label2:
+        $r8 = staticinvoke <java.security.Signature: java.security.Signature getInstance(java.lang.String,java.security.Provider)>("RSASSA-PSS", r0);
+
+     label3:
+        $r2 = virtualinvoke r1.<org.jcp.xml.dsig.internal.dom.DOMSignatureMethod$AbstractRSAPSSSignatureMethod: java.security.spec.PSSParameterSpec getPSSParameterSpec()>();
+
+        virtualinvoke $r8.<java.security.Signature: void setParameter(java.security.spec.AlgorithmParameterSpec)>($r2);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r6 := @caughtexception;
+
+        $r7 = new java.security.NoSuchAlgorithmException;
+
+        specialinvoke $r7.<java.security.NoSuchAlgorithmException: void <init>(java.lang.String,java.lang.Throwable)>("Should not happen", $r6);
+
+        throw $r7;
+
+     label6:
+        return $r8;
+
+     label7:
+        $r3 := @caughtexception;
+
+        if r0 != null goto label8;
+
+        $r5 = virtualinvoke r1.<org.jcp.xml.dsig.internal.dom.DOMSignatureMethod$AbstractRSAPSSSignatureMethod: java.lang.String getJCAAlgorithm()>();
+
+        $r9 = staticinvoke <java.security.Signature: java.security.Signature getInstance(java.lang.String)>($r5);
+
+        goto label9;
+
+     label8:
+        $r4 = virtualinvoke r1.<org.jcp.xml.dsig.internal.dom.DOMSignatureMethod$AbstractRSAPSSSignatureMethod: java.lang.String getJCAAlgorithm()>();
+
+        $r9 = staticinvoke <java.security.Signature: java.security.Signature getInstance(java.lang.String,java.security.Provider)>($r4, r0);
+
+     label9:
+        return $r9;
+
+        catch java.security.InvalidAlgorithmParameterException from label3 to label4 with label5;
+        catch java.security.NoSuchAlgorithmException from label1 to label6 with label7;
+    }
+}

@@ -1,0 +1,703 @@
+class javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber extends java.lang.Object implements javax.swing.event.ChangeListener, java.awt.event.AWTEventListener, java.awt.event.ComponentListener, java.awt.event.WindowListener
+{
+    java.awt.Window grabbedWindow;
+    javax.swing.MenuElement[] lastPathSelected;
+
+    public void <init>()
+    {
+        javax.swing.MenuElement[] $r2, $r3, $r4;
+        javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber r0;
+        int $i0;
+        javax.swing.MenuSelectionManager $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = staticinvoke <javax.swing.MenuSelectionManager: javax.swing.MenuSelectionManager defaultManager()>();
+
+        virtualinvoke $r1.<javax.swing.MenuSelectionManager: void addChangeListener(javax.swing.event.ChangeListener)>(r0);
+
+        $r2 = virtualinvoke $r1.<javax.swing.MenuSelectionManager: javax.swing.MenuElement[] getSelectedPath()>();
+
+        r0.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: javax.swing.MenuElement[] lastPathSelected> = $r2;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: javax.swing.MenuElement[] lastPathSelected>;
+
+        $i0 = lengthof $r3;
+
+        if $i0 == 0 goto label1;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: javax.swing.MenuElement[] lastPathSelected>;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: void grabWindow(javax.swing.MenuElement[])>($r4);
+
+     label1:
+        return;
+    }
+
+    void uninstall()
+    {
+        java.lang.Throwable $r5;
+        javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber r2;
+        sun.awt.AppContext $r3;
+        javax.swing.MenuSelectionManager $r1;
+        java.lang.StringBuilder $r0, $r4;
+
+        r2 := @this: javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber;
+
+        $r0 = <javax.swing.plaf.basic.BasicPopupMenuUI: java.lang.StringBuilder MOUSE_GRABBER_KEY>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = staticinvoke <javax.swing.MenuSelectionManager: javax.swing.MenuSelectionManager defaultManager()>();
+
+        virtualinvoke $r1.<javax.swing.MenuSelectionManager: void removeChangeListener(javax.swing.event.ChangeListener)>(r2);
+
+        virtualinvoke r2.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: void ungrabWindow()>();
+
+        $r3 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r4 = <javax.swing.plaf.basic.BasicPopupMenuUI: java.lang.StringBuilder MOUSE_GRABBER_KEY>;
+
+        virtualinvoke $r3.<sun.awt.AppContext: java.lang.Object remove(java.lang.Object)>($r4);
+
+        exitmonitor $r0;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label4:
+        throw $r5;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    void grabWindow(javax.swing.MenuElement[])
+    {
+        boolean $z0, $z1, $z2;
+        java.awt.Window $r6, $r7, $r8, $r9, $r13;
+        javax.swing.JPopupMenu $r11;
+        javax.swing.MenuElement $r4;
+        java.awt.Component $r5, r12;
+        sun.awt.SunToolkit $r10;
+        javax.swing.MenuElement[] r3;
+        javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber r2;
+        javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber$1 $r1;
+        java.awt.Toolkit $r0;
+
+        r2 := @this: javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber;
+
+        r3 := @parameter0: javax.swing.MenuElement[];
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r1 = new javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber$1;
+
+        specialinvoke $r1.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber$1: void <init>(javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber,java.awt.Toolkit)>(r2, $r0);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        $r4 = r3[0];
+
+        $r5 = interfaceinvoke $r4.<javax.swing.MenuElement: java.awt.Component getComponent()>();
+
+        r12 = $r5;
+
+        $z0 = $r5 instanceof javax.swing.JPopupMenu;
+
+        if $z0 == 0 goto label1;
+
+        $r11 = (javax.swing.JPopupMenu) $r5;
+
+        r12 = virtualinvoke $r11.<javax.swing.JPopupMenu: java.awt.Component getInvoker()>();
+
+     label1:
+        $z1 = r12 instanceof java.awt.Window;
+
+        if $z1 == 0 goto label2;
+
+        $r13 = (java.awt.Window) r12;
+
+        goto label3;
+
+     label2:
+        $r13 = staticinvoke <javax.swing.SwingUtilities: java.awt.Window getWindowAncestor(java.awt.Component)>(r12);
+
+     label3:
+        r2.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: java.awt.Window grabbedWindow> = $r13;
+
+        $r6 = r2.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: java.awt.Window grabbedWindow>;
+
+        if $r6 == null goto label5;
+
+        $z2 = $r0 instanceof sun.awt.SunToolkit;
+
+        if $z2 == 0 goto label4;
+
+        $r10 = (sun.awt.SunToolkit) $r0;
+
+        $r9 = r2.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: java.awt.Window grabbedWindow>;
+
+        virtualinvoke $r10.<sun.awt.SunToolkit: void grab(java.awt.Window)>($r9);
+
+        goto label5;
+
+     label4:
+        $r7 = r2.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: java.awt.Window grabbedWindow>;
+
+        virtualinvoke $r7.<java.awt.Window: void addComponentListener(java.awt.event.ComponentListener)>(r2);
+
+        $r8 = r2.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: java.awt.Window grabbedWindow>;
+
+        virtualinvoke $r8.<java.awt.Window: void addWindowListener(java.awt.event.WindowListener)>(r2);
+
+     label5:
+        return;
+    }
+
+    void ungrabWindow()
+    {
+        javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber$2 $r1;
+        javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber r2;
+        java.awt.Toolkit $r0;
+
+        r2 := @this: javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r1 = new javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber$2;
+
+        specialinvoke $r1.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber$2: void <init>(javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber,java.awt.Toolkit)>(r2, $r0);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        virtualinvoke r2.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: void realUngrabWindow()>();
+
+        return;
+    }
+
+    void realUngrabWindow()
+    {
+        java.awt.Window $r2, $r3, $r4, $r5;
+        sun.awt.SunToolkit $r6;
+        javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber r1;
+        java.awt.Toolkit $r0;
+        boolean $z0;
+
+        r1 := @this: javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r2 = r1.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: java.awt.Window grabbedWindow>;
+
+        if $r2 == null goto label3;
+
+        $z0 = $r0 instanceof sun.awt.SunToolkit;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = (sun.awt.SunToolkit) $r0;
+
+        $r5 = r1.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: java.awt.Window grabbedWindow>;
+
+        virtualinvoke $r6.<sun.awt.SunToolkit: void ungrab(java.awt.Window)>($r5);
+
+        goto label2;
+
+     label1:
+        $r3 = r1.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: java.awt.Window grabbedWindow>;
+
+        virtualinvoke $r3.<java.awt.Window: void removeComponentListener(java.awt.event.ComponentListener)>(r1);
+
+        $r4 = r1.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: java.awt.Window grabbedWindow>;
+
+        virtualinvoke $r4.<java.awt.Window: void removeWindowListener(java.awt.event.WindowListener)>(r1);
+
+     label2:
+        r1.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: java.awt.Window grabbedWindow> = null;
+
+     label3:
+        return;
+    }
+
+    public void stateChanged(javax.swing.event.ChangeEvent)
+    {
+        javax.swing.event.ChangeEvent r4;
+        javax.swing.MenuSelectionManager $r0;
+        javax.swing.MenuElement[] $r1, $r3, $r5;
+        javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber r2;
+        int $i0, $i1, $i2, $i3;
+
+        r2 := @this: javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber;
+
+        r4 := @parameter0: javax.swing.event.ChangeEvent;
+
+        $r0 = staticinvoke <javax.swing.MenuSelectionManager: javax.swing.MenuSelectionManager defaultManager()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.MenuSelectionManager: javax.swing.MenuElement[] getSelectedPath()>();
+
+        $r3 = r2.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: javax.swing.MenuElement[] lastPathSelected>;
+
+        $i0 = lengthof $r3;
+
+        if $i0 != 0 goto label1;
+
+        $i2 = lengthof $r1;
+
+        if $i2 == 0 goto label1;
+
+        virtualinvoke r2.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: void grabWindow(javax.swing.MenuElement[])>($r1);
+
+     label1:
+        $r5 = r2.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: javax.swing.MenuElement[] lastPathSelected>;
+
+        $i3 = lengthof $r5;
+
+        if $i3 == 0 goto label2;
+
+        $i1 = lengthof $r1;
+
+        if $i1 != 0 goto label2;
+
+        virtualinvoke r2.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: void ungrabWindow()>();
+
+     label2:
+        r2.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: javax.swing.MenuElement[] lastPathSelected> = $r1;
+
+        return;
+    }
+
+    public void eventDispatched(java.awt.AWTEvent)
+    {
+        javax.swing.MenuSelectionManager $r5, $r6;
+        java.awt.AWTEvent r0;
+        java.lang.StringBuffer $r9;
+        int $i0;
+        javax.swing.JComboBox $r4;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16;
+        javax.swing.JComponent $r7;
+        javax.swing.JMenu $r10;
+        java.awt.Component $r2;
+        java.awt.event.MouseEvent r1;
+        javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber r3;
+        java.lang.Object $r8;
+
+        r3 := @this: javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber;
+
+        r0 := @parameter0: java.awt.AWTEvent;
+
+        $z0 = r0 instanceof sun.awt.UngrabEvent;
+
+        if $z0 == 0 goto label01;
+
+        virtualinvoke r3.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: void cancelPopupMenu()>();
+
+        return;
+
+     label01:
+        $z1 = r0 instanceof java.awt.event.MouseEvent;
+
+        if $z1 != 0 goto label02;
+
+        return;
+
+     label02:
+        r1 = (java.awt.event.MouseEvent) r0;
+
+        $r2 = virtualinvoke r1.<java.awt.event.MouseEvent: java.awt.Component getComponent()>();
+
+        $i0 = virtualinvoke r1.<java.awt.event.MouseEvent: int getID()>();
+
+        tableswitch($i0)
+        {
+            case 501: goto label03;
+            case 502: goto label08;
+            case 503: goto label16;
+            case 504: goto label16;
+            case 505: goto label16;
+            case 506: goto label11;
+            case 507: goto label13;
+            default: goto label16;
+        };
+
+     label03:
+        $z11 = virtualinvoke r3.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: boolean isInPopup(java.awt.Component)>($r2);
+
+        if $z11 != 0 goto label04;
+
+        $z12 = $r2 instanceof javax.swing.JMenu;
+
+        if $z12 == 0 goto label05;
+
+        $r10 = (javax.swing.JMenu) $r2;
+
+        $z16 = virtualinvoke $r10.<javax.swing.JMenu: boolean isSelected()>();
+
+        if $z16 == 0 goto label05;
+
+     label04:
+        return;
+
+     label05:
+        $z13 = $r2 instanceof javax.swing.JComponent;
+
+        if $z13 == 0 goto label06;
+
+        $r7 = (javax.swing.JComponent) $r2;
+
+        $r8 = virtualinvoke $r7.<javax.swing.JComponent: java.lang.Object getClientProperty(java.lang.Object)>("doNotCancelPopup");
+
+        $r9 = <javax.swing.plaf.basic.BasicComboBoxUI: java.lang.StringBuffer HIDE_POPUP_KEY>;
+
+        if $r8 == $r9 goto label16;
+
+     label06:
+        virtualinvoke r3.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: void cancelPopupMenu()>();
+
+        $z14 = staticinvoke <javax.swing.UIManager: boolean getBoolean(java.lang.Object)>("PopupMenu.consumeEventOnClose");
+
+        if $z14 == 0 goto label07;
+
+        $z15 = $r2 instanceof javax.swing.MenuElement;
+
+        if $z15 != 0 goto label07;
+
+        virtualinvoke r1.<java.awt.event.MouseEvent: void consume()>();
+
+     label07:
+        goto label16;
+
+     label08:
+        $z7 = $r2 instanceof javax.swing.MenuElement;
+
+        if $z7 != 0 goto label09;
+
+        $z10 = virtualinvoke r3.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: boolean isInPopup(java.awt.Component)>($r2);
+
+        if $z10 == 0 goto label09;
+
+        goto label16;
+
+     label09:
+        $z8 = $r2 instanceof javax.swing.JMenu;
+
+        if $z8 != 0 goto label10;
+
+        $z9 = $r2 instanceof javax.swing.JMenuItem;
+
+        if $z9 != 0 goto label16;
+
+     label10:
+        $r6 = staticinvoke <javax.swing.MenuSelectionManager: javax.swing.MenuSelectionManager defaultManager()>();
+
+        virtualinvoke $r6.<javax.swing.MenuSelectionManager: void processMouseEvent(java.awt.event.MouseEvent)>(r1);
+
+        goto label16;
+
+     label11:
+        $z5 = $r2 instanceof javax.swing.MenuElement;
+
+        if $z5 != 0 goto label12;
+
+        $z6 = virtualinvoke r3.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: boolean isInPopup(java.awt.Component)>($r2);
+
+        if $z6 == 0 goto label12;
+
+        goto label16;
+
+     label12:
+        $r5 = staticinvoke <javax.swing.MenuSelectionManager: javax.swing.MenuSelectionManager defaultManager()>();
+
+        virtualinvoke $r5.<javax.swing.MenuSelectionManager: void processMouseEvent(java.awt.event.MouseEvent)>(r1);
+
+        goto label16;
+
+     label13:
+        $z2 = virtualinvoke r3.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: boolean isInPopup(java.awt.Component)>($r2);
+
+        if $z2 != 0 goto label14;
+
+        $z3 = $r2 instanceof javax.swing.JComboBox;
+
+        if $z3 == 0 goto label15;
+
+        $r4 = (javax.swing.JComboBox) $r2;
+
+        $z4 = virtualinvoke $r4.<javax.swing.JComboBox: boolean isPopupVisible()>();
+
+        if $z4 == 0 goto label15;
+
+     label14:
+        return;
+
+     label15:
+        virtualinvoke r3.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: void cancelPopupMenu()>();
+
+     label16:
+        return;
+    }
+
+    boolean isInPopup(java.awt.Component)
+    {
+        javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber r1;
+        java.awt.Component r0, r2;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber;
+
+        r0 := @parameter0: java.awt.Component;
+
+        r2 = r0;
+
+     label1:
+        if r2 == null goto label4;
+
+        $z0 = r2 instanceof java.applet.Applet;
+
+        if $z0 != 0 goto label4;
+
+        $z1 = r2 instanceof java.awt.Window;
+
+        if $z1 == 0 goto label2;
+
+        goto label4;
+
+     label2:
+        $z2 = r2 instanceof javax.swing.JPopupMenu;
+
+        if $z2 == 0 goto label3;
+
+        return 1;
+
+     label3:
+        r2 = virtualinvoke r2.<java.awt.Component: java.awt.Container getParent()>();
+
+        goto label1;
+
+     label4:
+        return 0;
+    }
+
+    void cancelPopupMenu()
+    {
+        java.util.Iterator $r1;
+        javax.swing.JPopupMenu r4;
+        javax.swing.MenuSelectionManager $r2;
+        java.lang.Error $r6;
+        java.lang.RuntimeException $r8;
+        java.util.List $r0;
+        javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber r7;
+        java.lang.Boolean $r5;
+        java.lang.Object $r3;
+        boolean $z0;
+
+        r7 := @this: javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber;
+
+     label1:
+        $r0 = staticinvoke <javax.swing.plaf.basic.BasicPopupMenuUI: java.util.List getPopups()>();
+
+        $r1 = interfaceinvoke $r0.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r3 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (javax.swing.JPopupMenu) $r3;
+
+        $r5 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke r4.<javax.swing.JPopupMenu: void putClientProperty(java.lang.Object,java.lang.Object)>("JPopupMenu.firePopupMenuCanceled", $r5);
+
+        goto label2;
+
+     label3:
+        $r2 = staticinvoke <javax.swing.MenuSelectionManager: javax.swing.MenuSelectionManager defaultManager()>();
+
+        virtualinvoke $r2.<javax.swing.MenuSelectionManager: void clearSelectedPath()>();
+
+     label4:
+        goto label7;
+
+     label5:
+        $r8 := @caughtexception;
+
+        virtualinvoke r7.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: void realUngrabWindow()>();
+
+        throw $r8;
+
+     label6:
+        $r6 := @caughtexception;
+
+        virtualinvoke r7.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: void realUngrabWindow()>();
+
+        throw $r6;
+
+     label7:
+        return;
+
+        catch java.lang.RuntimeException from label1 to label4 with label5;
+        catch java.lang.Error from label1 to label4 with label6;
+    }
+
+    public void componentResized(java.awt.event.ComponentEvent)
+    {
+        java.awt.event.ComponentEvent r1;
+        javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber;
+
+        r1 := @parameter0: java.awt.event.ComponentEvent;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: void cancelPopupMenu()>();
+
+        return;
+    }
+
+    public void componentMoved(java.awt.event.ComponentEvent)
+    {
+        java.awt.event.ComponentEvent r1;
+        javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber;
+
+        r1 := @parameter0: java.awt.event.ComponentEvent;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: void cancelPopupMenu()>();
+
+        return;
+    }
+
+    public void componentShown(java.awt.event.ComponentEvent)
+    {
+        java.awt.event.ComponentEvent r1;
+        javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber;
+
+        r1 := @parameter0: java.awt.event.ComponentEvent;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: void cancelPopupMenu()>();
+
+        return;
+    }
+
+    public void componentHidden(java.awt.event.ComponentEvent)
+    {
+        java.awt.event.ComponentEvent r1;
+        javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber;
+
+        r1 := @parameter0: java.awt.event.ComponentEvent;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: void cancelPopupMenu()>();
+
+        return;
+    }
+
+    public void windowClosing(java.awt.event.WindowEvent)
+    {
+        javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber r0;
+        java.awt.event.WindowEvent r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber;
+
+        r1 := @parameter0: java.awt.event.WindowEvent;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: void cancelPopupMenu()>();
+
+        return;
+    }
+
+    public void windowClosed(java.awt.event.WindowEvent)
+    {
+        javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber r0;
+        java.awt.event.WindowEvent r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber;
+
+        r1 := @parameter0: java.awt.event.WindowEvent;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: void cancelPopupMenu()>();
+
+        return;
+    }
+
+    public void windowIconified(java.awt.event.WindowEvent)
+    {
+        javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber r0;
+        java.awt.event.WindowEvent r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber;
+
+        r1 := @parameter0: java.awt.event.WindowEvent;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: void cancelPopupMenu()>();
+
+        return;
+    }
+
+    public void windowDeactivated(java.awt.event.WindowEvent)
+    {
+        javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber r0;
+        java.awt.event.WindowEvent r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber;
+
+        r1 := @parameter0: java.awt.event.WindowEvent;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber: void cancelPopupMenu()>();
+
+        return;
+    }
+
+    public void windowOpened(java.awt.event.WindowEvent)
+    {
+        javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber r0;
+        java.awt.event.WindowEvent r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber;
+
+        r1 := @parameter0: java.awt.event.WindowEvent;
+
+        return;
+    }
+
+    public void windowDeiconified(java.awt.event.WindowEvent)
+    {
+        javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber r0;
+        java.awt.event.WindowEvent r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber;
+
+        r1 := @parameter0: java.awt.event.WindowEvent;
+
+        return;
+    }
+
+    public void windowActivated(java.awt.event.WindowEvent)
+    {
+        javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber r0;
+        java.awt.event.WindowEvent r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicPopupMenuUI$MouseGrabber;
+
+        r1 := @parameter0: java.awt.event.WindowEvent;
+
+        return;
+    }
+}

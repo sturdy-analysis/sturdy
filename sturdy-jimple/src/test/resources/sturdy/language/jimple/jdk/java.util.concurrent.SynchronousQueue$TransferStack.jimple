@@ -1,0 +1,598 @@
+final class java.util.concurrent.SynchronousQueue$TransferStack extends java.util.concurrent.SynchronousQueue$Transferer
+{
+    static final int REQUEST;
+    static final int DATA;
+    static final int FULFILLING;
+    volatile java.util.concurrent.SynchronousQueue$TransferStack$SNode head;
+    private static final sun.misc.Unsafe UNSAFE;
+    private static final long headOffset;
+
+    void <init>()
+    {
+        java.util.concurrent.SynchronousQueue$TransferStack r0;
+
+        r0 := @this: java.util.concurrent.SynchronousQueue$TransferStack;
+
+        specialinvoke r0.<java.util.concurrent.SynchronousQueue$Transferer: void <init>()>();
+
+        return;
+    }
+
+    static boolean isFulfilling(int)
+    {
+        int i0, $i1;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        $i1 = i0 & 2;
+
+        if $i1 == 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    boolean casHead(java.util.concurrent.SynchronousQueue$TransferStack$SNode, java.util.concurrent.SynchronousQueue$TransferStack$SNode)
+    {
+        sun.misc.Unsafe $r4;
+        long $l0;
+        java.util.concurrent.SynchronousQueue$TransferStack$SNode r0, $r2, r3;
+        java.util.concurrent.SynchronousQueue$TransferStack r1;
+        boolean $z0, $z1;
+
+        r1 := @this: java.util.concurrent.SynchronousQueue$TransferStack;
+
+        r0 := @parameter0: java.util.concurrent.SynchronousQueue$TransferStack$SNode;
+
+        r3 := @parameter1: java.util.concurrent.SynchronousQueue$TransferStack$SNode;
+
+        $r2 = r1.<java.util.concurrent.SynchronousQueue$TransferStack: java.util.concurrent.SynchronousQueue$TransferStack$SNode head>;
+
+        if r0 != $r2 goto label1;
+
+        $r4 = <java.util.concurrent.SynchronousQueue$TransferStack: sun.misc.Unsafe UNSAFE>;
+
+        $l0 = <java.util.concurrent.SynchronousQueue$TransferStack: long headOffset>;
+
+        $z0 = virtualinvoke $r4.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r1, $l0, r0, r3);
+
+        if $z0 == 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    static java.util.concurrent.SynchronousQueue$TransferStack$SNode snode(java.util.concurrent.SynchronousQueue$TransferStack$SNode, java.lang.Object, java.util.concurrent.SynchronousQueue$TransferStack$SNode, int)
+    {
+        int i0;
+        java.lang.Object r2;
+        java.util.concurrent.SynchronousQueue$TransferStack$SNode r0, $r1, r3;
+
+        r3 := @parameter0: java.util.concurrent.SynchronousQueue$TransferStack$SNode;
+
+        r2 := @parameter1: java.lang.Object;
+
+        r0 := @parameter2: java.util.concurrent.SynchronousQueue$TransferStack$SNode;
+
+        i0 := @parameter3: int;
+
+        if r3 != null goto label1;
+
+        $r1 = new java.util.concurrent.SynchronousQueue$TransferStack$SNode;
+
+        specialinvoke $r1.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: void <init>(java.lang.Object)>(r2);
+
+        r3 = $r1;
+
+     label1:
+        r3.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: int mode> = i0;
+
+        r3.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.util.concurrent.SynchronousQueue$TransferStack$SNode next> = r0;
+
+        return r3;
+    }
+
+    java.lang.Object transfer(java.lang.Object, boolean, long)
+    {
+        byte b0, $b2, $b5, $b6;
+        boolean z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        long l1;
+        java.util.concurrent.SynchronousQueue$TransferStack$SNode $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, r11, $r12, r14, r16, r17;
+        int $i3, $i4, $i7;
+        java.util.concurrent.SynchronousQueue$TransferStack r1;
+        java.lang.Object r0, $r13, $r15;
+
+        r1 := @this: java.util.concurrent.SynchronousQueue$TransferStack;
+
+        r0 := @parameter0: java.lang.Object;
+
+        z0 := @parameter1: boolean;
+
+        l1 := @parameter2: long;
+
+        r11 = null;
+
+        if r0 != null goto label01;
+
+        $b6 = 0;
+
+        goto label02;
+
+     label01:
+        $b6 = 1;
+
+     label02:
+        b0 = $b6;
+
+     label03:
+        $r12 = r1.<java.util.concurrent.SynchronousQueue$TransferStack: java.util.concurrent.SynchronousQueue$TransferStack$SNode head>;
+
+        if $r12 == null goto label04;
+
+        $i3 = $r12.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: int mode>;
+
+        if $i3 != b0 goto label11;
+
+     label04:
+        if z0 == 0 goto label06;
+
+        $b2 = l1 cmp 0L;
+
+        $i7 = (int) $b2;
+
+        if $i7 > 0 goto label06;
+
+        if $r12 == null goto label05;
+
+        $z2 = virtualinvoke $r12.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: boolean isCancelled()>();
+
+        if $z2 == 0 goto label05;
+
+        $r7 = $r12.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.util.concurrent.SynchronousQueue$TransferStack$SNode next>;
+
+        virtualinvoke r1.<java.util.concurrent.SynchronousQueue$TransferStack: boolean casHead(java.util.concurrent.SynchronousQueue$TransferStack$SNode,java.util.concurrent.SynchronousQueue$TransferStack$SNode)>($r12, $r7);
+
+        goto label21;
+
+     label05:
+        return null;
+
+     label06:
+        $r2 = staticinvoke <java.util.concurrent.SynchronousQueue$TransferStack: java.util.concurrent.SynchronousQueue$TransferStack$SNode snode(java.util.concurrent.SynchronousQueue$TransferStack$SNode,java.lang.Object,java.util.concurrent.SynchronousQueue$TransferStack$SNode,int)>(r11, r0, $r12, b0);
+
+        r11 = $r2;
+
+        $z1 = virtualinvoke r1.<java.util.concurrent.SynchronousQueue$TransferStack: boolean casHead(java.util.concurrent.SynchronousQueue$TransferStack$SNode,java.util.concurrent.SynchronousQueue$TransferStack$SNode)>($r12, $r2);
+
+        if $z1 == 0 goto label21;
+
+        $r3 = virtualinvoke r1.<java.util.concurrent.SynchronousQueue$TransferStack: java.util.concurrent.SynchronousQueue$TransferStack$SNode awaitFulfill(java.util.concurrent.SynchronousQueue$TransferStack$SNode,boolean,long)>($r2, z0, l1);
+
+        if $r3 != $r2 goto label07;
+
+        virtualinvoke r1.<java.util.concurrent.SynchronousQueue$TransferStack: void clean(java.util.concurrent.SynchronousQueue$TransferStack$SNode)>($r2);
+
+        return null;
+
+     label07:
+        $r4 = r1.<java.util.concurrent.SynchronousQueue$TransferStack: java.util.concurrent.SynchronousQueue$TransferStack$SNode head>;
+
+        if $r4 == null goto label08;
+
+        $r5 = $r4.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.util.concurrent.SynchronousQueue$TransferStack$SNode next>;
+
+        if $r5 != $r2 goto label08;
+
+        $r6 = $r2.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.util.concurrent.SynchronousQueue$TransferStack$SNode next>;
+
+        virtualinvoke r1.<java.util.concurrent.SynchronousQueue$TransferStack: boolean casHead(java.util.concurrent.SynchronousQueue$TransferStack$SNode,java.util.concurrent.SynchronousQueue$TransferStack$SNode)>($r4, $r6);
+
+     label08:
+        if b0 != 0 goto label09;
+
+        $r13 = $r3.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.lang.Object item>;
+
+        goto label10;
+
+     label09:
+        $r13 = $r2.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.lang.Object item>;
+
+     label10:
+        return $r13;
+
+     label11:
+        $i4 = $r12.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: int mode>;
+
+        $z3 = staticinvoke <java.util.concurrent.SynchronousQueue$TransferStack: boolean isFulfilling(int)>($i4);
+
+        if $z3 != 0 goto label18;
+
+        $z5 = virtualinvoke $r12.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: boolean isCancelled()>();
+
+        if $z5 == 0 goto label12;
+
+        $r10 = $r12.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.util.concurrent.SynchronousQueue$TransferStack$SNode next>;
+
+        virtualinvoke r1.<java.util.concurrent.SynchronousQueue$TransferStack: boolean casHead(java.util.concurrent.SynchronousQueue$TransferStack$SNode,java.util.concurrent.SynchronousQueue$TransferStack$SNode)>($r12, $r10);
+
+        goto label21;
+
+     label12:
+        $b5 = 2 | b0;
+
+        $r8 = staticinvoke <java.util.concurrent.SynchronousQueue$TransferStack: java.util.concurrent.SynchronousQueue$TransferStack$SNode snode(java.util.concurrent.SynchronousQueue$TransferStack$SNode,java.lang.Object,java.util.concurrent.SynchronousQueue$TransferStack$SNode,int)>(r11, r0, $r12, $b5);
+
+        r11 = $r8;
+
+        $z6 = virtualinvoke r1.<java.util.concurrent.SynchronousQueue$TransferStack: boolean casHead(java.util.concurrent.SynchronousQueue$TransferStack$SNode,java.util.concurrent.SynchronousQueue$TransferStack$SNode)>($r12, $r8);
+
+        if $z6 == 0 goto label21;
+
+     label13:
+        $r9 = $r8.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.util.concurrent.SynchronousQueue$TransferStack$SNode next>;
+
+        if $r9 != null goto label14;
+
+        virtualinvoke r1.<java.util.concurrent.SynchronousQueue$TransferStack: boolean casHead(java.util.concurrent.SynchronousQueue$TransferStack$SNode,java.util.concurrent.SynchronousQueue$TransferStack$SNode)>($r8, null);
+
+        r11 = null;
+
+        goto label21;
+
+     label14:
+        r14 = $r9.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.util.concurrent.SynchronousQueue$TransferStack$SNode next>;
+
+        $z7 = virtualinvoke $r9.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: boolean tryMatch(java.util.concurrent.SynchronousQueue$TransferStack$SNode)>($r8);
+
+        if $z7 == 0 goto label17;
+
+        virtualinvoke r1.<java.util.concurrent.SynchronousQueue$TransferStack: boolean casHead(java.util.concurrent.SynchronousQueue$TransferStack$SNode,java.util.concurrent.SynchronousQueue$TransferStack$SNode)>($r8, r14);
+
+        if b0 != 0 goto label15;
+
+        $r15 = $r9.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.lang.Object item>;
+
+        goto label16;
+
+     label15:
+        $r15 = $r8.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.lang.Object item>;
+
+     label16:
+        return $r15;
+
+     label17:
+        virtualinvoke $r8.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: boolean casNext(java.util.concurrent.SynchronousQueue$TransferStack$SNode,java.util.concurrent.SynchronousQueue$TransferStack$SNode)>($r9, r14);
+
+        goto label13;
+
+     label18:
+        r16 = $r12.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.util.concurrent.SynchronousQueue$TransferStack$SNode next>;
+
+        if r16 != null goto label19;
+
+        virtualinvoke r1.<java.util.concurrent.SynchronousQueue$TransferStack: boolean casHead(java.util.concurrent.SynchronousQueue$TransferStack$SNode,java.util.concurrent.SynchronousQueue$TransferStack$SNode)>($r12, null);
+
+        goto label21;
+
+     label19:
+        r17 = r16.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.util.concurrent.SynchronousQueue$TransferStack$SNode next>;
+
+        $z4 = virtualinvoke r16.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: boolean tryMatch(java.util.concurrent.SynchronousQueue$TransferStack$SNode)>($r12);
+
+        if $z4 == 0 goto label20;
+
+        virtualinvoke r1.<java.util.concurrent.SynchronousQueue$TransferStack: boolean casHead(java.util.concurrent.SynchronousQueue$TransferStack$SNode,java.util.concurrent.SynchronousQueue$TransferStack$SNode)>($r12, r17);
+
+        goto label21;
+
+     label20:
+        virtualinvoke $r12.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: boolean casNext(java.util.concurrent.SynchronousQueue$TransferStack$SNode,java.util.concurrent.SynchronousQueue$TransferStack$SNode)>(r16, r17);
+
+     label21:
+        goto label03;
+    }
+
+    java.util.concurrent.SynchronousQueue$TransferStack$SNode awaitFulfill(java.util.concurrent.SynchronousQueue$TransferStack$SNode, boolean, long)
+    {
+        long l0, $l2, $l4, l5, $l6;
+        java.util.concurrent.SynchronousQueue$TransferStack$SNode r2, $r4;
+        byte $b1, $b3;
+        java.lang.Thread $r0, $r3;
+        int $i7, i8, $i9, $i10, $i11;
+        boolean z0, $z1, $z2, $z3;
+        java.util.concurrent.SynchronousQueue$TransferStack r1;
+
+        r1 := @this: java.util.concurrent.SynchronousQueue$TransferStack;
+
+        r2 := @parameter0: java.util.concurrent.SynchronousQueue$TransferStack$SNode;
+
+        z0 := @parameter1: boolean;
+
+        l5 := @parameter2: long;
+
+        if z0 == 0 goto label01;
+
+        $l4 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        $l6 = $l4 + l5;
+
+        goto label02;
+
+     label01:
+        $l6 = 0L;
+
+     label02:
+        l0 = $l6;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $z1 = virtualinvoke r1.<java.util.concurrent.SynchronousQueue$TransferStack: boolean shouldSpin(java.util.concurrent.SynchronousQueue$TransferStack$SNode)>(r2);
+
+        if $z1 == 0 goto label04;
+
+        if z0 == 0 goto label03;
+
+        $i7 = <java.util.concurrent.SynchronousQueue: int maxTimedSpins>;
+
+        goto label05;
+
+     label03:
+        $i7 = <java.util.concurrent.SynchronousQueue: int maxUntimedSpins>;
+
+        goto label05;
+
+     label04:
+        $i7 = 0;
+
+     label05:
+        i8 = $i7;
+
+     label06:
+        $z3 = virtualinvoke $r0.<java.lang.Thread: boolean isInterrupted()>();
+
+        if $z3 == 0 goto label07;
+
+        virtualinvoke r2.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: void tryCancel()>();
+
+     label07:
+        $r4 = r2.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.util.concurrent.SynchronousQueue$TransferStack$SNode match>;
+
+        if $r4 == null goto label08;
+
+        return $r4;
+
+     label08:
+        if z0 == 0 goto label09;
+
+        $l2 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        l5 = l0 - $l2;
+
+        $b3 = l5 cmp 0L;
+
+        $i10 = (int) $b3;
+
+        if $i10 > 0 goto label09;
+
+        virtualinvoke r2.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: void tryCancel()>();
+
+        goto label06;
+
+     label09:
+        if i8 <= 0 goto label12;
+
+        $z2 = virtualinvoke r1.<java.util.concurrent.SynchronousQueue$TransferStack: boolean shouldSpin(java.util.concurrent.SynchronousQueue$TransferStack$SNode)>(r2);
+
+        if $z2 == 0 goto label10;
+
+        $i9 = i8 - 1;
+
+        goto label11;
+
+     label10:
+        $i9 = 0;
+
+     label11:
+        i8 = $i9;
+
+        goto label15;
+
+     label12:
+        $r3 = r2.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.lang.Thread waiter>;
+
+        if $r3 != null goto label13;
+
+        r2.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.lang.Thread waiter> = $r0;
+
+        goto label15;
+
+     label13:
+        if z0 != 0 goto label14;
+
+        staticinvoke <java.util.concurrent.locks.LockSupport: void park(java.lang.Object)>(r1);
+
+        goto label15;
+
+     label14:
+        $b1 = l5 cmp 1000L;
+
+        $i11 = (int) $b1;
+
+        if $i11 <= 0 goto label15;
+
+        staticinvoke <java.util.concurrent.locks.LockSupport: void parkNanos(java.lang.Object,long)>(r1, l5);
+
+     label15:
+        goto label06;
+    }
+
+    boolean shouldSpin(java.util.concurrent.SynchronousQueue$TransferStack$SNode)
+    {
+        int $i0;
+        java.util.concurrent.SynchronousQueue$TransferStack$SNode r1, r2;
+        java.util.concurrent.SynchronousQueue$TransferStack r0;
+        boolean $z0, $z1;
+
+        r0 := @this: java.util.concurrent.SynchronousQueue$TransferStack;
+
+        r2 := @parameter0: java.util.concurrent.SynchronousQueue$TransferStack$SNode;
+
+        r1 = r0.<java.util.concurrent.SynchronousQueue$TransferStack: java.util.concurrent.SynchronousQueue$TransferStack$SNode head>;
+
+        if r1 == r2 goto label1;
+
+        if r1 == null goto label1;
+
+        $i0 = r1.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: int mode>;
+
+        $z0 = staticinvoke <java.util.concurrent.SynchronousQueue$TransferStack: boolean isFulfilling(int)>($i0);
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        return $z1;
+    }
+
+    void clean(java.util.concurrent.SynchronousQueue$TransferStack$SNode)
+    {
+        java.util.concurrent.SynchronousQueue$TransferStack$SNode r0, r2, $r3, $r4, r5, $r6, r7;
+        java.util.concurrent.SynchronousQueue$TransferStack r1;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: java.util.concurrent.SynchronousQueue$TransferStack;
+
+        r0 := @parameter0: java.util.concurrent.SynchronousQueue$TransferStack$SNode;
+
+        r0.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.lang.Object item> = null;
+
+        r0.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.lang.Thread waiter> = null;
+
+        r5 = r0.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.util.concurrent.SynchronousQueue$TransferStack$SNode next>;
+
+        if r5 == null goto label1;
+
+        $z2 = virtualinvoke r5.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: boolean isCancelled()>();
+
+        if $z2 == 0 goto label1;
+
+        r5 = r5.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.util.concurrent.SynchronousQueue$TransferStack$SNode next>;
+
+     label1:
+        $r6 = r1.<java.util.concurrent.SynchronousQueue$TransferStack: java.util.concurrent.SynchronousQueue$TransferStack$SNode head>;
+
+        r7 = $r6;
+
+        if $r6 == null goto label2;
+
+        if $r6 == r5 goto label2;
+
+        $z1 = virtualinvoke $r6.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: boolean isCancelled()>();
+
+        if $z1 == 0 goto label2;
+
+        $r4 = $r6.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.util.concurrent.SynchronousQueue$TransferStack$SNode next>;
+
+        virtualinvoke r1.<java.util.concurrent.SynchronousQueue$TransferStack: boolean casHead(java.util.concurrent.SynchronousQueue$TransferStack$SNode,java.util.concurrent.SynchronousQueue$TransferStack$SNode)>($r6, $r4);
+
+        goto label1;
+
+     label2:
+        if r7 == null goto label5;
+
+        if r7 == r5 goto label5;
+
+        r2 = r7.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.util.concurrent.SynchronousQueue$TransferStack$SNode next>;
+
+        if r2 == null goto label3;
+
+        $z0 = virtualinvoke r2.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: boolean isCancelled()>();
+
+        if $z0 == 0 goto label3;
+
+        $r3 = r2.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: java.util.concurrent.SynchronousQueue$TransferStack$SNode next>;
+
+        virtualinvoke r7.<java.util.concurrent.SynchronousQueue$TransferStack$SNode: boolean casNext(java.util.concurrent.SynchronousQueue$TransferStack$SNode,java.util.concurrent.SynchronousQueue$TransferStack$SNode)>(r2, $r3);
+
+        goto label4;
+
+     label3:
+        r7 = r2;
+
+     label4:
+        goto label2;
+
+     label5:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        sun.misc.Unsafe $r0, $r1;
+        java.lang.Error $r4;
+        long $l0;
+        java.lang.Class r5;
+        java.lang.reflect.Field $r2;
+        java.lang.Exception $r3;
+
+        <java.util.concurrent.SynchronousQueue$TransferStack: int FULFILLING> = 2;
+
+        <java.util.concurrent.SynchronousQueue$TransferStack: int DATA> = 1;
+
+        <java.util.concurrent.SynchronousQueue$TransferStack: int REQUEST> = 0;
+
+     label1:
+        $r0 = staticinvoke <sun.misc.Unsafe: sun.misc.Unsafe getUnsafe()>();
+
+        <java.util.concurrent.SynchronousQueue$TransferStack: sun.misc.Unsafe UNSAFE> = $r0;
+
+        r5 = class "Ljava/util/concurrent/SynchronousQueue$TransferStack;";
+
+        $r1 = <java.util.concurrent.SynchronousQueue$TransferStack: sun.misc.Unsafe UNSAFE>;
+
+        $r2 = virtualinvoke r5.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("head");
+
+        $l0 = virtualinvoke $r1.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r2);
+
+        <java.util.concurrent.SynchronousQueue$TransferStack: long headOffset> = $l0;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.lang.Error;
+
+        specialinvoke $r4.<java.lang.Error: void <init>(java.lang.Throwable)>($r3);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+}

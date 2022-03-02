@@ -1,0 +1,3200 @@
+public abstract class java.lang.ClassLoader extends java.lang.Object
+{
+    private final java.lang.ClassLoader parent;
+    private final java.util.concurrent.ConcurrentHashMap parallelLockMap;
+    private final java.util.Map package2certs;
+    private static final java.security.cert.Certificate[] nocerts;
+    private final java.util.Vector classes;
+    private final java.security.ProtectionDomain defaultDomain;
+    private final java.util.HashMap packages;
+    private static java.lang.ClassLoader scl;
+    private static boolean sclSet;
+    private static java.util.Vector loadedLibraryNames;
+    private static java.util.Vector systemNativeLibraries;
+    private java.util.Vector nativeLibraries;
+    private static java.util.Stack nativeLibraryContext;
+    private static java.lang.String[] usr_paths;
+    private static java.lang.String[] sys_paths;
+    final java.lang.Object assertionLock;
+    private boolean defaultAssertionStatus;
+    private java.util.Map packageAssertionStatus;
+    java.util.Map classAssertionStatus;
+
+    private static native void registerNatives();
+
+    void addClass(java.lang.Class)
+    {
+        java.lang.Class r1;
+        java.lang.ClassLoader r0;
+        java.util.Vector $r2;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        r1 := @parameter0: java.lang.Class;
+
+        $r2 = r0.<java.lang.ClassLoader: java.util.Vector classes>;
+
+        virtualinvoke $r2.<java.util.Vector: void addElement(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    private static java.lang.Void checkCreateClassLoader()
+    {
+        java.lang.SecurityManager $r0;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkCreateClassLoader()>();
+
+     label1:
+        return null;
+    }
+
+    private void <init>(java.lang.Void, java.lang.ClassLoader)
+    {
+        java.lang.Void r13;
+        java.util.concurrent.ConcurrentHashMap $r10, $r11;
+        java.util.HashMap $r5;
+        java.util.Vector $r1, $r6;
+        java.security.ProtectionDomain $r2;
+        java.security.cert.Certificate[] $r4;
+        java.lang.Class $r8;
+        java.lang.Object $r12;
+        java.lang.ClassLoader r0, r7;
+        java.security.CodeSource $r3;
+        java.util.Hashtable $r9;
+        boolean $z0;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        r13 := @parameter0: java.lang.Void;
+
+        r7 := @parameter1: java.lang.ClassLoader;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.Vector;
+
+        specialinvoke $r1.<java.util.Vector: void <init>()>();
+
+        r0.<java.lang.ClassLoader: java.util.Vector classes> = $r1;
+
+        $r2 = new java.security.ProtectionDomain;
+
+        $r3 = new java.security.CodeSource;
+
+        $r4 = (java.security.cert.Certificate[]) null;
+
+        specialinvoke $r3.<java.security.CodeSource: void <init>(java.net.URL,java.security.cert.Certificate[])>(null, $r4);
+
+        specialinvoke $r2.<java.security.ProtectionDomain: void <init>(java.security.CodeSource,java.security.PermissionCollection,java.lang.ClassLoader,java.security.Principal[])>($r3, null, r0, null);
+
+        r0.<java.lang.ClassLoader: java.security.ProtectionDomain defaultDomain> = $r2;
+
+        $r5 = new java.util.HashMap;
+
+        specialinvoke $r5.<java.util.HashMap: void <init>()>();
+
+        r0.<java.lang.ClassLoader: java.util.HashMap packages> = $r5;
+
+        $r6 = new java.util.Vector;
+
+        specialinvoke $r6.<java.util.Vector: void <init>()>();
+
+        r0.<java.lang.ClassLoader: java.util.Vector nativeLibraries> = $r6;
+
+        r0.<java.lang.ClassLoader: boolean defaultAssertionStatus> = 0;
+
+        r0.<java.lang.ClassLoader: java.util.Map packageAssertionStatus> = null;
+
+        r0.<java.lang.ClassLoader: java.util.Map classAssertionStatus> = null;
+
+        r0.<java.lang.ClassLoader: java.lang.ClassLoader parent> = r7;
+
+        $r8 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $z0 = staticinvoke <java.lang.ClassLoader$ParallelLoaders: boolean isRegistered(java.lang.Class)>($r8);
+
+        if $z0 == 0 goto label1;
+
+        $r10 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r10.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r0.<java.lang.ClassLoader: java.util.concurrent.ConcurrentHashMap parallelLockMap> = $r10;
+
+        $r11 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r11.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r0.<java.lang.ClassLoader: java.util.Map package2certs> = $r11;
+
+        $r12 = new java.lang.Object;
+
+        specialinvoke $r12.<java.lang.Object: void <init>()>();
+
+        r0.<java.lang.ClassLoader: java.lang.Object assertionLock> = $r12;
+
+        goto label2;
+
+     label1:
+        r0.<java.lang.ClassLoader: java.util.concurrent.ConcurrentHashMap parallelLockMap> = null;
+
+        $r9 = new java.util.Hashtable;
+
+        specialinvoke $r9.<java.util.Hashtable: void <init>()>();
+
+        r0.<java.lang.ClassLoader: java.util.Map package2certs> = $r9;
+
+        r0.<java.lang.ClassLoader: java.lang.Object assertionLock> = r0;
+
+     label2:
+        return;
+    }
+
+    protected void <init>(java.lang.ClassLoader)
+    {
+        java.lang.Void $r1;
+        java.lang.ClassLoader r0, r2;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        r2 := @parameter0: java.lang.ClassLoader;
+
+        $r1 = staticinvoke <java.lang.ClassLoader: java.lang.Void checkCreateClassLoader()>();
+
+        specialinvoke r0.<java.lang.ClassLoader: void <init>(java.lang.Void,java.lang.ClassLoader)>($r1, r2);
+
+        return;
+    }
+
+    protected void <init>()
+    {
+        java.lang.Void $r1;
+        java.lang.ClassLoader r0, $r2;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        $r1 = staticinvoke <java.lang.ClassLoader: java.lang.Void checkCreateClassLoader()>();
+
+        $r2 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getSystemClassLoader()>();
+
+        specialinvoke r0.<java.lang.ClassLoader: void <init>(java.lang.Void,java.lang.ClassLoader)>($r1, $r2);
+
+        return;
+    }
+
+    public java.lang.Class loadClass(java.lang.String) throws java.lang.ClassNotFoundException
+    {
+        java.lang.Class $r2;
+        java.lang.ClassLoader r0;
+        java.lang.String r1;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = virtualinvoke r0.<java.lang.ClassLoader: java.lang.Class loadClass(java.lang.String,boolean)>(r1, 0);
+
+        return $r2;
+    }
+
+    protected java.lang.Class loadClass(java.lang.String, boolean) throws java.lang.ClassNotFoundException
+    {
+        java.lang.Throwable $r9;
+        long $l0, $l1, $l2;
+        java.lang.String r1;
+        boolean z0;
+        sun.misc.PerfCounter $r5, $r6, $r7;
+        java.lang.Object $r2;
+        java.lang.Class $r3, r11;
+        java.lang.ClassNotFoundException $r10;
+        java.lang.ClassLoader r0, $r4, $r8;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        r1 := @parameter0: java.lang.String;
+
+        z0 := @parameter1: boolean;
+
+        $r2 = virtualinvoke r0.<java.lang.ClassLoader: java.lang.Object getClassLoadingLock(java.lang.String)>(r1);
+
+        entermonitor $r2;
+
+     label01:
+        $r3 = virtualinvoke r0.<java.lang.ClassLoader: java.lang.Class findLoadedClass(java.lang.String)>(r1);
+
+        r11 = $r3;
+
+        if $r3 != null goto label07;
+
+        $l0 = staticinvoke <java.lang.System: long nanoTime()>();
+
+     label02:
+        $r4 = r0.<java.lang.ClassLoader: java.lang.ClassLoader parent>;
+
+        if $r4 == null goto label03;
+
+        $r8 = r0.<java.lang.ClassLoader: java.lang.ClassLoader parent>;
+
+        r11 = virtualinvoke $r8.<java.lang.ClassLoader: java.lang.Class loadClass(java.lang.String,boolean)>(r1, 0);
+
+        goto label04;
+
+     label03:
+        r11 = specialinvoke r0.<java.lang.ClassLoader: java.lang.Class findBootstrapClassOrNull(java.lang.String)>(r1);
+
+     label04:
+        goto label06;
+
+     label05:
+        $r10 := @caughtexception;
+
+     label06:
+        if r11 != null goto label07;
+
+        $l1 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        r11 = virtualinvoke r0.<java.lang.ClassLoader: java.lang.Class findClass(java.lang.String)>(r1);
+
+        $r5 = staticinvoke <sun.misc.PerfCounter: sun.misc.PerfCounter getParentDelegationTime()>();
+
+        $l2 = $l1 - $l0;
+
+        virtualinvoke $r5.<sun.misc.PerfCounter: void addTime(long)>($l2);
+
+        $r6 = staticinvoke <sun.misc.PerfCounter: sun.misc.PerfCounter getFindClassTime()>();
+
+        virtualinvoke $r6.<sun.misc.PerfCounter: void addElapsedTimeFrom(long)>($l1);
+
+        $r7 = staticinvoke <sun.misc.PerfCounter: sun.misc.PerfCounter getFindClasses()>();
+
+        virtualinvoke $r7.<sun.misc.PerfCounter: void increment()>();
+
+     label07:
+        if z0 == 0 goto label08;
+
+        virtualinvoke r0.<java.lang.ClassLoader: void resolveClass(java.lang.Class)>(r11);
+
+     label08:
+        exitmonitor $r2;
+
+     label09:
+        return r11;
+
+     label10:
+        $r9 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label11:
+        throw $r9;
+
+        catch java.lang.ClassNotFoundException from label02 to label04 with label05;
+        catch java.lang.Throwable from label01 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    protected java.lang.Object getClassLoadingLock(java.lang.String)
+    {
+        java.util.concurrent.ConcurrentHashMap $r1, $r4;
+        java.lang.Object $r2, $r5, r6;
+        java.lang.ClassLoader r0;
+        java.lang.String r3;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        r3 := @parameter0: java.lang.String;
+
+        r6 = r0;
+
+        $r1 = r0.<java.lang.ClassLoader: java.util.concurrent.ConcurrentHashMap parallelLockMap>;
+
+        if $r1 == null goto label1;
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        $r4 = r0.<java.lang.ClassLoader: java.util.concurrent.ConcurrentHashMap parallelLockMap>;
+
+        $r5 = virtualinvoke $r4.<java.util.concurrent.ConcurrentHashMap: java.lang.Object putIfAbsent(java.lang.Object,java.lang.Object)>(r3, $r2);
+
+        r6 = $r5;
+
+        if $r5 != null goto label1;
+
+        r6 = $r2;
+
+     label1:
+        return r6;
+    }
+
+    private java.lang.Class loadClassInternal(java.lang.String) throws java.lang.ClassNotFoundException
+    {
+        java.lang.Throwable $r5;
+        java.util.concurrent.ConcurrentHashMap $r1;
+        java.lang.Class $r3, $r4;
+        java.lang.ClassLoader r0;
+        java.lang.String r2;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = r0.<java.lang.ClassLoader: java.util.concurrent.ConcurrentHashMap parallelLockMap>;
+
+        if $r1 != null goto label5;
+
+        entermonitor r0;
+
+     label1:
+        $r4 = virtualinvoke r0.<java.lang.ClassLoader: java.lang.Class loadClass(java.lang.String)>(r2);
+
+        exitmonitor r0;
+
+     label2:
+        return $r4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r5;
+
+     label5:
+        $r3 = virtualinvoke r0.<java.lang.ClassLoader: java.lang.Class loadClass(java.lang.String)>(r2);
+
+        return $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private void checkPackageAccess(java.lang.Class, java.security.ProtectionDomain)
+    {
+        java.security.AccessControlContext $r11;
+        java.lang.ClassLoader$1 $r10;
+        java.lang.Class[] $r8;
+        java.lang.SecurityManager $r0;
+        java.security.ProtectionDomain[] $r6;
+        java.security.ProtectionDomain r7;
+        int $i0, i1, i2, $i4;
+        java.lang.Class r1, r9;
+        java.lang.String $r2;
+        java.lang.ClassLoader r4;
+        boolean $z0;
+
+        r4 := @this: java.lang.ClassLoader;
+
+        r1 := @parameter0: java.lang.Class;
+
+        r7 := @parameter1: java.security.ProtectionDomain;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label4;
+
+        $z0 = staticinvoke <sun.reflect.misc.ReflectUtil: boolean isNonPublicProxyClass(java.lang.Class)>(r1);
+
+        if $z0 == 0 goto label3;
+
+        $r8 = virtualinvoke r1.<java.lang.Class: java.lang.Class[] getInterfaces()>();
+
+        i1 = lengthof $r8;
+
+        i2 = 0;
+
+     label1:
+        if i2 >= i1 goto label2;
+
+        r9 = $r8[i2];
+
+        specialinvoke r4.<java.lang.ClassLoader: void checkPackageAccess(java.lang.Class,java.security.ProtectionDomain)>(r9, r7);
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+
+     label3:
+        $r2 = virtualinvoke r1.<java.lang.Class: java.lang.String getName()>();
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int lastIndexOf(int)>(46);
+
+        $i4 = (int) -1;
+
+        if $i0 == $i4 goto label4;
+
+        $r10 = new java.lang.ClassLoader$1;
+
+        specialinvoke $r10.<java.lang.ClassLoader$1: void <init>(java.lang.ClassLoader,java.lang.SecurityManager,java.lang.String,int)>(r4, $r0, $r2, $i0);
+
+        $r11 = new java.security.AccessControlContext;
+
+        $r6 = newarray (java.security.ProtectionDomain)[1];
+
+        $r6[0] = r7;
+
+        specialinvoke $r11.<java.security.AccessControlContext: void <init>(java.security.ProtectionDomain[])>($r6);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction,java.security.AccessControlContext)>($r10, $r11);
+
+     label4:
+        return;
+    }
+
+    protected java.lang.Class findClass(java.lang.String) throws java.lang.ClassNotFoundException
+    {
+        java.lang.ClassNotFoundException $r0;
+        java.lang.String r1;
+        java.lang.ClassLoader r2;
+
+        r2 := @this: java.lang.ClassLoader;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = new java.lang.ClassNotFoundException;
+
+        specialinvoke $r0.<java.lang.ClassNotFoundException: void <init>(java.lang.String)>(r1);
+
+        throw $r0;
+    }
+
+    protected final java.lang.Class defineClass(byte[], int, int) throws java.lang.ClassFormatError
+    {
+        byte[] r1;
+        int i0, i1;
+        java.lang.Class $r2;
+        java.lang.ClassLoader r0;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r2 = virtualinvoke r0.<java.lang.ClassLoader: java.lang.Class defineClass(java.lang.String,byte[],int,int,java.security.ProtectionDomain)>(null, r1, i0, i1, null);
+
+        return $r2;
+    }
+
+    protected final java.lang.Class defineClass(java.lang.String, byte[], int, int) throws java.lang.ClassFormatError
+    {
+        byte[] r2;
+        int i0, i1;
+        java.lang.Class $r3;
+        java.lang.ClassLoader r0;
+        java.lang.String r1;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: byte[];
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        $r3 = virtualinvoke r0.<java.lang.ClassLoader: java.lang.Class defineClass(java.lang.String,byte[],int,int,java.security.ProtectionDomain)>(r1, r2, i0, i1, null);
+
+        return $r3;
+    }
+
+    private java.security.ProtectionDomain preDefineClass(java.lang.String, java.security.ProtectionDomain)
+    {
+        int $i0;
+        java.lang.SecurityException $r3;
+        java.lang.String r1, $r6, $r8, $r13;
+        java.lang.NoClassDefFoundError $r9;
+        boolean $z0, $z1;
+        java.security.ProtectionDomain r14;
+        java.lang.StringBuilder $r4, $r5, $r7, $r10, $r11, $r12;
+        java.lang.ClassLoader r0;
+        java.security.CodeSource $r2;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        r1 := @parameter0: java.lang.String;
+
+        r14 := @parameter1: java.security.ProtectionDomain;
+
+        $z0 = specialinvoke r0.<java.lang.ClassLoader: boolean checkName(java.lang.String)>(r1);
+
+        if $z0 != 0 goto label1;
+
+        $r9 = new java.lang.NoClassDefFoundError;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("IllegalName: ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<java.lang.NoClassDefFoundError: void <init>(java.lang.String)>($r13);
+
+        throw $r9;
+
+     label1:
+        if r1 == null goto label2;
+
+        $z1 = virtualinvoke r1.<java.lang.String: boolean startsWith(java.lang.String)>("java.");
+
+        if $z1 == 0 goto label2;
+
+        $r3 = new java.lang.SecurityException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Prohibited package name: ");
+
+        $i0 = virtualinvoke r1.<java.lang.String: int lastIndexOf(int)>(46);
+
+        $r6 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.SecurityException: void <init>(java.lang.String)>($r8);
+
+        throw $r3;
+
+     label2:
+        if r14 != null goto label3;
+
+        r14 = r0.<java.lang.ClassLoader: java.security.ProtectionDomain defaultDomain>;
+
+     label3:
+        if r1 == null goto label4;
+
+        $r2 = virtualinvoke r14.<java.security.ProtectionDomain: java.security.CodeSource getCodeSource()>();
+
+        specialinvoke r0.<java.lang.ClassLoader: void checkCerts(java.lang.String,java.security.CodeSource)>(r1, $r2);
+
+     label4:
+        return r14;
+    }
+
+    private java.lang.String defineClassSourceLocation(java.security.ProtectionDomain)
+    {
+        java.net.URL $r2, $r3;
+        java.security.ProtectionDomain r0;
+        java.security.CodeSource $r1;
+        java.lang.ClassLoader r4;
+        java.lang.String r5;
+
+        r4 := @this: java.lang.ClassLoader;
+
+        r0 := @parameter0: java.security.ProtectionDomain;
+
+        $r1 = virtualinvoke r0.<java.security.ProtectionDomain: java.security.CodeSource getCodeSource()>();
+
+        r5 = null;
+
+        if $r1 == null goto label1;
+
+        $r2 = virtualinvoke $r1.<java.security.CodeSource: java.net.URL getLocation()>();
+
+        if $r2 == null goto label1;
+
+        $r3 = virtualinvoke $r1.<java.security.CodeSource: java.net.URL getLocation()>();
+
+        r5 = virtualinvoke $r3.<java.net.URL: java.lang.String toString()>();
+
+     label1:
+        return r5;
+    }
+
+    private void postDefineClass(java.lang.Class, java.security.ProtectionDomain)
+    {
+        java.security.ProtectionDomain r0;
+        java.security.cert.Certificate[] $r3;
+        java.lang.Class r5;
+        java.security.CodeSource $r1, $r2;
+        java.lang.ClassLoader r4;
+
+        r4 := @this: java.lang.ClassLoader;
+
+        r5 := @parameter0: java.lang.Class;
+
+        r0 := @parameter1: java.security.ProtectionDomain;
+
+        $r1 = virtualinvoke r0.<java.security.ProtectionDomain: java.security.CodeSource getCodeSource()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = virtualinvoke r0.<java.security.ProtectionDomain: java.security.CodeSource getCodeSource()>();
+
+        $r3 = virtualinvoke $r2.<java.security.CodeSource: java.security.cert.Certificate[] getCertificates()>();
+
+        if $r3 == null goto label1;
+
+        virtualinvoke r4.<java.lang.ClassLoader: void setSigners(java.lang.Class,java.lang.Object[])>(r5, $r3);
+
+     label1:
+        return;
+    }
+
+    protected final java.lang.Class defineClass(java.lang.String, byte[], int, int, java.security.ProtectionDomain) throws java.lang.ClassFormatError
+    {
+        byte[] r4;
+        java.security.ProtectionDomain $r2, r6;
+        int i0, i1;
+        java.lang.Class $r5;
+        java.lang.ClassLoader r0;
+        java.lang.String r1, $r3;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        r1 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: byte[];
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        r6 := @parameter4: java.security.ProtectionDomain;
+
+        $r2 = specialinvoke r0.<java.lang.ClassLoader: java.security.ProtectionDomain preDefineClass(java.lang.String,java.security.ProtectionDomain)>(r1, r6);
+
+        $r3 = specialinvoke r0.<java.lang.ClassLoader: java.lang.String defineClassSourceLocation(java.security.ProtectionDomain)>($r2);
+
+        $r5 = specialinvoke r0.<java.lang.ClassLoader: java.lang.Class defineClass1(java.lang.String,byte[],int,int,java.security.ProtectionDomain,java.lang.String)>(r1, r4, i0, i1, $r2, $r3);
+
+        specialinvoke r0.<java.lang.ClassLoader: void postDefineClass(java.lang.Class,java.security.ProtectionDomain)>($r5, $r2);
+
+        return $r5;
+    }
+
+    protected final java.lang.Class defineClass(java.lang.String, java.nio.ByteBuffer, java.security.ProtectionDomain) throws java.lang.ClassFormatError
+    {
+        byte[] $r7, r10;
+        java.nio.ByteBuffer r0;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.lang.String r2, $r4;
+        boolean $z0, $z1;
+        java.security.ProtectionDomain $r3, r9;
+        java.lang.Class $r5, $r6, $r8;
+        java.lang.ClassLoader r1;
+
+        r1 := @this: java.lang.ClassLoader;
+
+        r2 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.nio.ByteBuffer;
+
+        r9 := @parameter2: java.security.ProtectionDomain;
+
+        $i0 = virtualinvoke r0.<java.nio.ByteBuffer: int remaining()>();
+
+        $z0 = virtualinvoke r0.<java.nio.ByteBuffer: boolean isDirect()>();
+
+        if $z0 != 0 goto label2;
+
+        $z1 = virtualinvoke r0.<java.nio.ByteBuffer: boolean hasArray()>();
+
+        if $z1 == 0 goto label1;
+
+        $r7 = virtualinvoke r0.<java.nio.ByteBuffer: byte[] array()>();
+
+        $i2 = virtualinvoke r0.<java.nio.ByteBuffer: int position()>();
+
+        $i3 = virtualinvoke r0.<java.nio.ByteBuffer: int arrayOffset()>();
+
+        $i4 = $i2 + $i3;
+
+        $r8 = virtualinvoke r1.<java.lang.ClassLoader: java.lang.Class defineClass(java.lang.String,byte[],int,int,java.security.ProtectionDomain)>(r2, $r7, $i4, $i0, r9);
+
+        return $r8;
+
+     label1:
+        r10 = newarray (byte)[$i0];
+
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[])>(r10);
+
+        $r6 = virtualinvoke r1.<java.lang.ClassLoader: java.lang.Class defineClass(java.lang.String,byte[],int,int,java.security.ProtectionDomain)>(r2, r10, 0, $i0, r9);
+
+        return $r6;
+
+     label2:
+        $r3 = specialinvoke r1.<java.lang.ClassLoader: java.security.ProtectionDomain preDefineClass(java.lang.String,java.security.ProtectionDomain)>(r2, r9);
+
+        $r4 = specialinvoke r1.<java.lang.ClassLoader: java.lang.String defineClassSourceLocation(java.security.ProtectionDomain)>($r3);
+
+        $i1 = virtualinvoke r0.<java.nio.ByteBuffer: int position()>();
+
+        $r5 = specialinvoke r1.<java.lang.ClassLoader: java.lang.Class defineClass2(java.lang.String,java.nio.ByteBuffer,int,int,java.security.ProtectionDomain,java.lang.String)>(r2, r0, $i1, $i0, $r3, $r4);
+
+        specialinvoke r1.<java.lang.ClassLoader: void postDefineClass(java.lang.Class,java.security.ProtectionDomain)>($r5, $r3);
+
+        return $r5;
+    }
+
+    private native java.lang.Class defineClass0(java.lang.String, byte[], int, int, java.security.ProtectionDomain);
+
+    private native java.lang.Class defineClass1(java.lang.String, byte[], int, int, java.security.ProtectionDomain, java.lang.String);
+
+    private native java.lang.Class defineClass2(java.lang.String, java.nio.ByteBuffer, int, int, java.security.ProtectionDomain, java.lang.String);
+
+    private boolean checkName(java.lang.String)
+    {
+        char $c1;
+        int $i0, $i3, $i4;
+        java.lang.String r0;
+        java.lang.ClassLoader r1;
+        boolean $z0, $z1;
+
+        r1 := @this: java.lang.ClassLoader;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 == null goto label1;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        $i0 = virtualinvoke r0.<java.lang.String: int indexOf(int)>(47);
+
+        $i3 = (int) -1;
+
+        if $i0 != $i3 goto label3;
+
+        $z1 = staticinvoke <sun.misc.VM: boolean allowArraySyntax()>();
+
+        if $z1 != 0 goto label4;
+
+        $c1 = virtualinvoke r0.<java.lang.String: char charAt(int)>(0);
+
+        $i4 = (int) $c1;
+
+        if $i4 != 91 goto label4;
+
+     label3:
+        return 0;
+
+     label4:
+        return 1;
+    }
+
+    private void checkCerts(java.lang.String, java.security.CodeSource)
+    {
+        java.lang.Throwable $r17;
+        java.util.Map $r5, $r14, $r16;
+        int $i0, $i2;
+        java.lang.SecurityException $r24;
+        java.lang.String r0, r1, $r13, $r18;
+        boolean $z0;
+        java.util.concurrent.ConcurrentHashMap $r4, $r6;
+        java.lang.Object $r7, $r15;
+        java.lang.StringBuilder $r10, $r11, $r12, $r23;
+        java.security.cert.Certificate[] r19, r20, $r21, $r22;
+        java.security.CodeSource r2;
+        java.lang.ClassLoader r3;
+
+        r3 := @this: java.lang.ClassLoader;
+
+        r0 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.security.CodeSource;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int lastIndexOf(int)>(46);
+
+        $i2 = (int) -1;
+
+        if $i0 != $i2 goto label01;
+
+        $r18 = "";
+
+        goto label02;
+
+     label01:
+        $r18 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+     label02:
+        r1 = $r18;
+
+        r19 = null;
+
+        if r2 == null goto label03;
+
+        r19 = virtualinvoke r2.<java.security.CodeSource: java.security.cert.Certificate[] getCertificates()>();
+
+     label03:
+        $r4 = r3.<java.lang.ClassLoader: java.util.concurrent.ConcurrentHashMap parallelLockMap>;
+
+        if $r4 != null goto label12;
+
+        entermonitor r3;
+
+     label04:
+        $r14 = r3.<java.lang.ClassLoader: java.util.Map package2certs>;
+
+        $r15 = interfaceinvoke $r14.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r20 = (java.security.cert.Certificate[]) $r15;
+
+        if r20 != null goto label07;
+
+        $r16 = r3.<java.lang.ClassLoader: java.util.Map package2certs>;
+
+        if r19 != null goto label05;
+
+        $r21 = <java.lang.ClassLoader: java.security.cert.Certificate[] nocerts>;
+
+        goto label06;
+
+     label05:
+        $r21 = r19;
+
+     label06:
+        interfaceinvoke $r16.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r21);
+
+     label07:
+        exitmonitor r3;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r17 := @caughtexception;
+
+        exitmonitor r3;
+
+     label10:
+        throw $r17;
+
+     label11:
+        goto label15;
+
+     label12:
+        $r5 = r3.<java.lang.ClassLoader: java.util.Map package2certs>;
+
+        $r6 = (java.util.concurrent.ConcurrentHashMap) $r5;
+
+        if r19 != null goto label13;
+
+        $r22 = <java.lang.ClassLoader: java.security.cert.Certificate[] nocerts>;
+
+        goto label14;
+
+     label13:
+        $r22 = r19;
+
+     label14:
+        $r7 = virtualinvoke $r6.<java.util.concurrent.ConcurrentHashMap: java.lang.Object putIfAbsent(java.lang.Object,java.lang.Object)>(r1, $r22);
+
+        r20 = (java.security.cert.Certificate[]) $r7;
+
+     label15:
+        if r20 == null goto label16;
+
+        $z0 = specialinvoke r3.<java.lang.ClassLoader: boolean compareCerts(java.security.cert.Certificate[],java.security.cert.Certificate[])>(r20, r19);
+
+        if $z0 != 0 goto label16;
+
+        $r24 = new java.lang.SecurityException;
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("class \"");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"\'s signer information does not match signer information of other classes in the same package");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r24.<java.lang.SecurityException: void <init>(java.lang.String)>($r13);
+
+        throw $r24;
+
+     label16:
+        return;
+
+        catch java.lang.Throwable from label04 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    private boolean compareCerts(java.security.cert.Certificate[], java.security.cert.Certificate[])
+    {
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, i8, i9, i10, i11;
+        boolean $z0, $z1, $z2, z3, z4;
+        java.security.cert.Certificate $r2, $r3, $r4, $r5;
+        java.security.cert.Certificate[] r0, r1;
+        java.lang.ClassLoader r6;
+
+        r6 := @this: java.lang.ClassLoader;
+
+        r1 := @parameter0: java.security.cert.Certificate[];
+
+        r0 := @parameter1: java.security.cert.Certificate[];
+
+        if r0 == null goto label01;
+
+        $i1 = lengthof r0;
+
+        if $i1 != 0 goto label04;
+
+     label01:
+        $i0 = lengthof r1;
+
+        if $i0 != 0 goto label02;
+
+        $z2 = 1;
+
+        goto label03;
+
+     label02:
+        $z2 = 0;
+
+     label03:
+        return $z2;
+
+     label04:
+        $i3 = lengthof r0;
+
+        $i2 = lengthof r1;
+
+        if $i3 == $i2 goto label05;
+
+        return 0;
+
+     label05:
+        i8 = 0;
+
+     label06:
+        $i4 = lengthof r0;
+
+        if i8 >= $i4 goto label11;
+
+        z3 = 0;
+
+        i9 = 0;
+
+     label07:
+        $i7 = lengthof r1;
+
+        if i9 >= $i7 goto label09;
+
+        $r5 = r0[i8];
+
+        $r4 = r1[i9];
+
+        $z1 = virtualinvoke $r5.<java.security.cert.Certificate: boolean equals(java.lang.Object)>($r4);
+
+        if $z1 == 0 goto label08;
+
+        z3 = 1;
+
+        goto label09;
+
+     label08:
+        i9 = i9 + 1;
+
+        goto label07;
+
+     label09:
+        if z3 != 0 goto label10;
+
+        return 0;
+
+     label10:
+        i8 = i8 + 1;
+
+        goto label06;
+
+     label11:
+        i10 = 0;
+
+     label12:
+        $i5 = lengthof r1;
+
+        if i10 >= $i5 goto label17;
+
+        z4 = 0;
+
+        i11 = 0;
+
+     label13:
+        $i6 = lengthof r0;
+
+        if i11 >= $i6 goto label15;
+
+        $r3 = r1[i10];
+
+        $r2 = r0[i11];
+
+        $z0 = virtualinvoke $r3.<java.security.cert.Certificate: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label14;
+
+        z4 = 1;
+
+        goto label15;
+
+     label14:
+        i11 = i11 + 1;
+
+        goto label13;
+
+     label15:
+        if z4 != 0 goto label16;
+
+        return 0;
+
+     label16:
+        i10 = i10 + 1;
+
+        goto label12;
+
+     label17:
+        return 1;
+    }
+
+    protected final void resolveClass(java.lang.Class)
+    {
+        java.lang.Class r1;
+        java.lang.ClassLoader r0;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        r1 := @parameter0: java.lang.Class;
+
+        specialinvoke r0.<java.lang.ClassLoader: void resolveClass0(java.lang.Class)>(r1);
+
+        return;
+    }
+
+    private native void resolveClass0(java.lang.Class);
+
+    protected final java.lang.Class findSystemClass(java.lang.String) throws java.lang.ClassNotFoundException
+    {
+        java.lang.Class $r2, $r4;
+        java.lang.ClassNotFoundException $r5, $r6;
+        java.lang.ClassLoader $r0, r3;
+        java.lang.String r1;
+        boolean $z0;
+
+        r3 := @this: java.lang.ClassLoader;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getSystemClassLoader()>();
+
+        if $r0 != null goto label3;
+
+        $z0 = specialinvoke r3.<java.lang.ClassLoader: boolean checkName(java.lang.String)>(r1);
+
+        if $z0 != 0 goto label1;
+
+        $r6 = new java.lang.ClassNotFoundException;
+
+        specialinvoke $r6.<java.lang.ClassNotFoundException: void <init>(java.lang.String)>(r1);
+
+        throw $r6;
+
+     label1:
+        $r4 = specialinvoke r3.<java.lang.ClassLoader: java.lang.Class findBootstrapClass(java.lang.String)>(r1);
+
+        if $r4 != null goto label2;
+
+        $r5 = new java.lang.ClassNotFoundException;
+
+        specialinvoke $r5.<java.lang.ClassNotFoundException: void <init>(java.lang.String)>(r1);
+
+        throw $r5;
+
+     label2:
+        return $r4;
+
+     label3:
+        $r2 = virtualinvoke $r0.<java.lang.ClassLoader: java.lang.Class loadClass(java.lang.String)>(r1);
+
+        return $r2;
+    }
+
+    private java.lang.Class findBootstrapClassOrNull(java.lang.String)
+    {
+        java.lang.Class $r2;
+        java.lang.ClassLoader r0;
+        java.lang.String r1;
+        boolean $z0;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        r1 := @parameter0: java.lang.String;
+
+        $z0 = specialinvoke r0.<java.lang.ClassLoader: boolean checkName(java.lang.String)>(r1);
+
+        if $z0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r2 = specialinvoke r0.<java.lang.ClassLoader: java.lang.Class findBootstrapClass(java.lang.String)>(r1);
+
+        return $r2;
+    }
+
+    private native java.lang.Class findBootstrapClass(java.lang.String);
+
+    protected final java.lang.Class findLoadedClass(java.lang.String)
+    {
+        java.lang.Class $r2;
+        java.lang.ClassLoader r0;
+        java.lang.String r1;
+        boolean $z0;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        r1 := @parameter0: java.lang.String;
+
+        $z0 = specialinvoke r0.<java.lang.ClassLoader: boolean checkName(java.lang.String)>(r1);
+
+        if $z0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r2 = specialinvoke r0.<java.lang.ClassLoader: java.lang.Class findLoadedClass0(java.lang.String)>(r1);
+
+        return $r2;
+    }
+
+    private final native java.lang.Class findLoadedClass0(java.lang.String);
+
+    protected final void setSigners(java.lang.Class, java.lang.Object[])
+    {
+        java.lang.Class r0;
+        java.lang.Object[] r1;
+        java.lang.ClassLoader r2;
+
+        r2 := @this: java.lang.ClassLoader;
+
+        r0 := @parameter0: java.lang.Class;
+
+        r1 := @parameter1: java.lang.Object[];
+
+        virtualinvoke r0.<java.lang.Class: void setSigners(java.lang.Object[])>(r1);
+
+        return;
+    }
+
+    public java.net.URL getResource(java.lang.String)
+    {
+        java.net.URL r4;
+        java.lang.ClassLoader r0, $r1, $r3;
+        java.lang.String r2;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = r0.<java.lang.ClassLoader: java.lang.ClassLoader parent>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<java.lang.ClassLoader: java.lang.ClassLoader parent>;
+
+        r4 = virtualinvoke $r3.<java.lang.ClassLoader: java.net.URL getResource(java.lang.String)>(r2);
+
+        goto label2;
+
+     label1:
+        r4 = staticinvoke <java.lang.ClassLoader: java.net.URL getBootstrapResource(java.lang.String)>(r2);
+
+     label2:
+        if r4 != null goto label3;
+
+        r4 = virtualinvoke r0.<java.lang.ClassLoader: java.net.URL findResource(java.lang.String)>(r2);
+
+     label3:
+        return r4;
+    }
+
+    public java.util.Enumeration getResources(java.lang.String) throws java.io.IOException
+    {
+        java.util.Enumeration $r5, $r6, $r9;
+        java.util.Enumeration[] $r0, r1;
+        sun.misc.CompoundEnumeration $r7;
+        java.lang.ClassLoader r2, $r3, $r8;
+        java.lang.String r4;
+
+        r2 := @this: java.lang.ClassLoader;
+
+        r4 := @parameter0: java.lang.String;
+
+        $r0 = newarray (java.util.Enumeration)[2];
+
+        r1 = (java.util.Enumeration[]) $r0;
+
+        $r3 = r2.<java.lang.ClassLoader: java.lang.ClassLoader parent>;
+
+        if $r3 == null goto label1;
+
+        $r8 = r2.<java.lang.ClassLoader: java.lang.ClassLoader parent>;
+
+        $r9 = virtualinvoke $r8.<java.lang.ClassLoader: java.util.Enumeration getResources(java.lang.String)>(r4);
+
+        r1[0] = $r9;
+
+        goto label2;
+
+     label1:
+        $r5 = staticinvoke <java.lang.ClassLoader: java.util.Enumeration getBootstrapResources(java.lang.String)>(r4);
+
+        r1[0] = $r5;
+
+     label2:
+        $r6 = virtualinvoke r2.<java.lang.ClassLoader: java.util.Enumeration findResources(java.lang.String)>(r4);
+
+        r1[1] = $r6;
+
+        $r7 = new sun.misc.CompoundEnumeration;
+
+        specialinvoke $r7.<sun.misc.CompoundEnumeration: void <init>(java.util.Enumeration[])>(r1);
+
+        return $r7;
+    }
+
+    protected java.net.URL findResource(java.lang.String)
+    {
+        java.lang.ClassLoader r0;
+        java.lang.String r1;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        r1 := @parameter0: java.lang.String;
+
+        return null;
+    }
+
+    protected java.util.Enumeration findResources(java.lang.String) throws java.io.IOException
+    {
+        java.lang.ClassLoader r1;
+        java.lang.String r2;
+        java.util.Enumeration $r0;
+
+        r1 := @this: java.lang.ClassLoader;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r0 = staticinvoke <java.util.Collections: java.util.Enumeration emptyEnumeration()>();
+
+        return $r0;
+    }
+
+    protected static boolean registerAsParallelCapable()
+    {
+        java.lang.Class $r0, $r1;
+        boolean $z0;
+
+        $r0 = staticinvoke <sun.reflect.Reflection: java.lang.Class getCallerClass()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.Class: java.lang.Class asSubclass(java.lang.Class)>(class "Ljava/lang/ClassLoader;");
+
+        $z0 = staticinvoke <java.lang.ClassLoader$ParallelLoaders: boolean register(java.lang.Class)>($r1);
+
+        return $z0;
+    }
+
+    public static java.net.URL getSystemResource(java.lang.String)
+    {
+        java.net.URL $r2, $r3;
+        java.lang.ClassLoader $r0;
+        java.lang.String r1;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getSystemClassLoader()>();
+
+        if $r0 != null goto label1;
+
+        $r3 = staticinvoke <java.lang.ClassLoader: java.net.URL getBootstrapResource(java.lang.String)>(r1);
+
+        return $r3;
+
+     label1:
+        $r2 = virtualinvoke $r0.<java.lang.ClassLoader: java.net.URL getResource(java.lang.String)>(r1);
+
+        return $r2;
+    }
+
+    public static java.util.Enumeration getSystemResources(java.lang.String) throws java.io.IOException
+    {
+        java.util.Enumeration $r2, $r3;
+        java.lang.ClassLoader $r0;
+        java.lang.String r1;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getSystemClassLoader()>();
+
+        if $r0 != null goto label1;
+
+        $r3 = staticinvoke <java.lang.ClassLoader: java.util.Enumeration getBootstrapResources(java.lang.String)>(r1);
+
+        return $r3;
+
+     label1:
+        $r2 = virtualinvoke $r0.<java.lang.ClassLoader: java.util.Enumeration getResources(java.lang.String)>(r1);
+
+        return $r2;
+    }
+
+    private static java.net.URL getBootstrapResource(java.lang.String)
+    {
+        java.net.URL $r3;
+        sun.misc.URLClassPath $r0;
+        sun.misc.Resource $r2;
+        java.lang.String r1;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = staticinvoke <java.lang.ClassLoader: sun.misc.URLClassPath getBootstrapClassPath()>();
+
+        $r2 = virtualinvoke $r0.<sun.misc.URLClassPath: sun.misc.Resource getResource(java.lang.String)>(r1);
+
+        if $r2 == null goto label1;
+
+        $r3 = virtualinvoke $r2.<sun.misc.Resource: java.net.URL getURL()>();
+
+        goto label2;
+
+     label1:
+        $r3 = null;
+
+     label2:
+        return $r3;
+    }
+
+    private static java.util.Enumeration getBootstrapResources(java.lang.String) throws java.io.IOException
+    {
+        java.lang.ClassLoader$2 $r3;
+        java.util.Enumeration $r2;
+        sun.misc.URLClassPath $r0;
+        java.lang.String r1;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = staticinvoke <java.lang.ClassLoader: sun.misc.URLClassPath getBootstrapClassPath()>();
+
+        $r2 = virtualinvoke $r0.<sun.misc.URLClassPath: java.util.Enumeration getResources(java.lang.String)>(r1);
+
+        $r3 = new java.lang.ClassLoader$2;
+
+        specialinvoke $r3.<java.lang.ClassLoader$2: void <init>(java.util.Enumeration)>($r2);
+
+        return $r3;
+    }
+
+    static sun.misc.URLClassPath getBootstrapClassPath()
+    {
+        sun.misc.URLClassPath $r0;
+
+        $r0 = staticinvoke <sun.misc.Launcher: sun.misc.URLClassPath getBootstrapClassPath()>();
+
+        return $r0;
+    }
+
+    public java.io.InputStream getResourceAsStream(java.lang.String)
+    {
+        java.net.URL $r2;
+        java.io.IOException $r3;
+        java.lang.ClassLoader r0;
+        java.lang.String r1;
+        java.io.InputStream $r4;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = virtualinvoke r0.<java.lang.ClassLoader: java.net.URL getResource(java.lang.String)>(r1);
+
+     label1:
+        if $r2 == null goto label2;
+
+        $r4 = virtualinvoke $r2.<java.net.URL: java.io.InputStream openStream()>();
+
+        goto label3;
+
+     label2:
+        $r4 = null;
+
+     label3:
+        return $r4;
+
+     label4:
+        $r3 := @caughtexception;
+
+        return null;
+
+        catch java.io.IOException from label1 to label3 with label4;
+    }
+
+    public static java.io.InputStream getSystemResourceAsStream(java.lang.String)
+    {
+        java.net.URL $r1;
+        java.io.IOException $r2;
+        java.lang.String r0;
+        java.io.InputStream $r3;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <java.lang.ClassLoader: java.net.URL getSystemResource(java.lang.String)>(r0);
+
+     label1:
+        if $r1 == null goto label2;
+
+        $r3 = virtualinvoke $r1.<java.net.URL: java.io.InputStream openStream()>();
+
+        goto label3;
+
+     label2:
+        $r3 = null;
+
+     label3:
+        return $r3;
+
+     label4:
+        $r2 := @caughtexception;
+
+        return null;
+
+        catch java.io.IOException from label1 to label3 with label4;
+    }
+
+    public final java.lang.ClassLoader getParent()
+    {
+        java.lang.Class $r5;
+        java.lang.ClassLoader r0, $r1, $r3, $r4;
+        java.lang.SecurityManager $r2;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        $r1 = r0.<java.lang.ClassLoader: java.lang.ClassLoader parent>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r2 == null goto label2;
+
+        $r4 = r0.<java.lang.ClassLoader: java.lang.ClassLoader parent>;
+
+        $r5 = staticinvoke <sun.reflect.Reflection: java.lang.Class getCallerClass()>();
+
+        staticinvoke <java.lang.ClassLoader: void checkClassLoaderPermission(java.lang.ClassLoader,java.lang.Class)>($r4, $r5);
+
+     label2:
+        $r3 = r0.<java.lang.ClassLoader: java.lang.ClassLoader parent>;
+
+        return $r3;
+    }
+
+    public static java.lang.ClassLoader getSystemClassLoader()
+    {
+        java.lang.Class $r4;
+        java.lang.ClassLoader $r0, $r2, $r3;
+        java.lang.SecurityManager $r1;
+
+        staticinvoke <java.lang.ClassLoader: void initSystemClassLoader()>();
+
+        $r0 = <java.lang.ClassLoader: java.lang.ClassLoader scl>;
+
+        if $r0 != null goto label1;
+
+        return null;
+
+     label1:
+        $r1 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r1 == null goto label2;
+
+        $r3 = <java.lang.ClassLoader: java.lang.ClassLoader scl>;
+
+        $r4 = staticinvoke <sun.reflect.Reflection: java.lang.Class getCallerClass()>();
+
+        staticinvoke <java.lang.ClassLoader: void checkClassLoaderPermission(java.lang.ClassLoader,java.lang.Class)>($r3, $r4);
+
+     label2:
+        $r2 = <java.lang.ClassLoader: java.lang.ClassLoader scl>;
+
+        return $r2;
+    }
+
+    private static synchronized void initSystemClassLoader()
+    {
+        java.lang.Throwable $r11, r12;
+        java.lang.IllegalStateException $r9;
+        java.lang.Error $r7, $r8;
+        sun.misc.Launcher $r1;
+        boolean $z0, $z1, $z2;
+        java.lang.SystemClassLoaderAction $r3;
+        java.security.PrivilegedActionException $r10;
+        java.lang.Object $r5;
+        java.lang.ClassLoader $r0, $r2, $r4, $r6;
+
+        $z0 = <java.lang.ClassLoader: boolean sclSet>;
+
+        if $z0 != 0 goto label8;
+
+        $r0 = <java.lang.ClassLoader: java.lang.ClassLoader scl>;
+
+        if $r0 == null goto label1;
+
+        $r9 = new java.lang.IllegalStateException;
+
+        specialinvoke $r9.<java.lang.IllegalStateException: void <init>(java.lang.String)>("recursive invocation");
+
+        throw $r9;
+
+     label1:
+        $r1 = staticinvoke <sun.misc.Launcher: sun.misc.Launcher getLauncher()>();
+
+        if $r1 == null goto label7;
+
+        r12 = null;
+
+        $r2 = virtualinvoke $r1.<sun.misc.Launcher: java.lang.ClassLoader getClassLoader()>();
+
+        <java.lang.ClassLoader: java.lang.ClassLoader scl> = $r2;
+
+     label2:
+        $r3 = new java.lang.SystemClassLoaderAction;
+
+        $r4 = <java.lang.ClassLoader: java.lang.ClassLoader scl>;
+
+        specialinvoke $r3.<java.lang.SystemClassLoaderAction: void <init>(java.lang.ClassLoader)>($r4);
+
+        $r5 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r3);
+
+        $r6 = (java.lang.ClassLoader) $r5;
+
+        <java.lang.ClassLoader: java.lang.ClassLoader scl> = $r6;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r10 := @caughtexception;
+
+        $r11 = virtualinvoke $r10.<java.security.PrivilegedActionException: java.lang.Throwable getCause()>();
+
+        r12 = $r11;
+
+        $z2 = $r11 instanceof java.lang.reflect.InvocationTargetException;
+
+        if $z2 == 0 goto label5;
+
+        r12 = virtualinvoke $r11.<java.lang.Throwable: java.lang.Throwable getCause()>();
+
+     label5:
+        if r12 == null goto label7;
+
+        $z1 = r12 instanceof java.lang.Error;
+
+        if $z1 == 0 goto label6;
+
+        $r8 = (java.lang.Error) r12;
+
+        throw $r8;
+
+     label6:
+        $r7 = new java.lang.Error;
+
+        specialinvoke $r7.<java.lang.Error: void <init>(java.lang.Throwable)>(r12);
+
+        throw $r7;
+
+     label7:
+        <java.lang.ClassLoader: boolean sclSet> = 1;
+
+     label8:
+        return;
+
+        catch java.security.PrivilegedActionException from label2 to label3 with label4;
+    }
+
+    boolean isAncestor(java.lang.ClassLoader)
+    {
+        java.lang.ClassLoader r0, r1, $r2, r3;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        r1 := @parameter0: java.lang.ClassLoader;
+
+        r3 = r0;
+
+     label1:
+        $r2 = r3.<java.lang.ClassLoader: java.lang.ClassLoader parent>;
+
+        r3 = $r2;
+
+        if r1 != $r2 goto label2;
+
+        return 1;
+
+     label2:
+        if $r2 != null goto label1;
+
+        return 0;
+    }
+
+    private static boolean needsClassLoaderPermissionCheck(java.lang.ClassLoader, java.lang.ClassLoader)
+    {
+        java.lang.ClassLoader r0, r1;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.ClassLoader;
+
+        r1 := @parameter1: java.lang.ClassLoader;
+
+        if r0 != r1 goto label1;
+
+        return 0;
+
+     label1:
+        if r0 != null goto label2;
+
+        return 0;
+
+     label2:
+        $z0 = virtualinvoke r1.<java.lang.ClassLoader: boolean isAncestor(java.lang.ClassLoader)>(r0);
+
+        if $z0 != 0 goto label3;
+
+        $z1 = 1;
+
+        goto label4;
+
+     label3:
+        $z1 = 0;
+
+     label4:
+        return $z1;
+    }
+
+    static java.lang.ClassLoader getClassLoader(java.lang.Class)
+    {
+        java.lang.Class r0;
+        java.lang.ClassLoader $r1;
+
+        r0 := @parameter0: java.lang.Class;
+
+        if r0 != null goto label1;
+
+        return null;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.lang.Class: java.lang.ClassLoader getClassLoader0()>();
+
+        return $r1;
+    }
+
+    static void checkClassLoaderPermission(java.lang.ClassLoader, java.lang.Class)
+    {
+        java.lang.Class r1;
+        java.lang.RuntimePermission $r4;
+        java.lang.ClassLoader $r2, r3;
+        java.lang.SecurityManager $r0;
+        boolean $z0;
+
+        r3 := @parameter0: java.lang.ClassLoader;
+
+        r1 := @parameter1: java.lang.Class;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r2 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getClassLoader(java.lang.Class)>(r1);
+
+        $z0 = staticinvoke <java.lang.ClassLoader: boolean needsClassLoaderPermissionCheck(java.lang.ClassLoader,java.lang.ClassLoader)>($r2, r3);
+
+        if $z0 == 0 goto label1;
+
+        $r4 = <sun.security.util.SecurityConstants: java.lang.RuntimePermission GET_CLASSLOADER_PERMISSION>;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r4);
+
+     label1:
+        return;
+    }
+
+    protected java.lang.Package definePackage(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.net.URL) throws java.lang.IllegalArgumentException
+    {
+        java.lang.Throwable $r14;
+        java.lang.Package $r3, $r4;
+        java.net.URL r11;
+        java.util.HashMap $r1, $r12;
+        java.lang.IllegalArgumentException $r13;
+        java.lang.ClassLoader r0;
+        java.lang.String r2, r5, r6, r7, r8, r9, r10;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        r2 := @parameter0: java.lang.String;
+
+        r5 := @parameter1: java.lang.String;
+
+        r6 := @parameter2: java.lang.String;
+
+        r7 := @parameter3: java.lang.String;
+
+        r8 := @parameter4: java.lang.String;
+
+        r9 := @parameter5: java.lang.String;
+
+        r10 := @parameter6: java.lang.String;
+
+        r11 := @parameter7: java.net.URL;
+
+        $r1 = r0.<java.lang.ClassLoader: java.util.HashMap packages>;
+
+        entermonitor $r1;
+
+     label1:
+        $r3 = virtualinvoke r0.<java.lang.ClassLoader: java.lang.Package getPackage(java.lang.String)>(r2);
+
+        if $r3 == null goto label2;
+
+        $r13 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r13.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>(r2);
+
+        throw $r13;
+
+     label2:
+        $r4 = new java.lang.Package;
+
+        specialinvoke $r4.<java.lang.Package: void <init>(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.net.URL,java.lang.ClassLoader)>(r2, r5, r6, r7, r8, r9, r10, r11, r0);
+
+        $r12 = r0.<java.lang.ClassLoader: java.util.HashMap packages>;
+
+        virtualinvoke $r12.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r2, $r4);
+
+        exitmonitor $r1;
+
+     label3:
+        return $r4;
+
+     label4:
+        $r14 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r14;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    protected java.lang.Package getPackage(java.lang.String)
+    {
+        java.lang.Throwable $r11, $r12;
+        java.lang.Package r13, r14;
+        java.util.HashMap $r1, $r3, $r6, $r7, $r9;
+        java.lang.Object $r4, $r8;
+        java.lang.ClassLoader r0, $r5, $r10;
+        java.lang.String r2;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = r0.<java.lang.ClassLoader: java.util.HashMap packages>;
+
+        entermonitor $r1;
+
+     label01:
+        $r3 = r0.<java.lang.ClassLoader: java.util.HashMap packages>;
+
+        $r4 = virtualinvoke $r3.<java.util.HashMap: java.lang.Object get(java.lang.Object)>(r2);
+
+        r13 = (java.lang.Package) $r4;
+
+        exitmonitor $r1;
+
+     label02:
+        goto label05;
+
+     label03:
+        $r12 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label04:
+        throw $r12;
+
+     label05:
+        if r13 != null goto label14;
+
+        $r5 = r0.<java.lang.ClassLoader: java.lang.ClassLoader parent>;
+
+        if $r5 == null goto label06;
+
+        $r10 = r0.<java.lang.ClassLoader: java.lang.ClassLoader parent>;
+
+        r13 = virtualinvoke $r10.<java.lang.ClassLoader: java.lang.Package getPackage(java.lang.String)>(r2);
+
+        goto label07;
+
+     label06:
+        r13 = staticinvoke <java.lang.Package: java.lang.Package getSystemPackage(java.lang.String)>(r2);
+
+     label07:
+        if r13 == null goto label14;
+
+        $r6 = r0.<java.lang.ClassLoader: java.util.HashMap packages>;
+
+        entermonitor $r6;
+
+     label08:
+        $r7 = r0.<java.lang.ClassLoader: java.util.HashMap packages>;
+
+        $r8 = virtualinvoke $r7.<java.util.HashMap: java.lang.Object get(java.lang.Object)>(r2);
+
+        r14 = (java.lang.Package) $r8;
+
+        if r14 != null goto label09;
+
+        $r9 = r0.<java.lang.ClassLoader: java.util.HashMap packages>;
+
+        virtualinvoke $r9.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r2, r13);
+
+        goto label10;
+
+     label09:
+        r13 = r14;
+
+     label10:
+        exitmonitor $r6;
+
+     label11:
+        goto label14;
+
+     label12:
+        $r11 := @caughtexception;
+
+        exitmonitor $r6;
+
+     label13:
+        throw $r11;
+
+     label14:
+        return r13;
+
+        catch java.lang.Throwable from label01 to label02 with label03;
+        catch java.lang.Throwable from label03 to label04 with label03;
+        catch java.lang.Throwable from label08 to label11 with label12;
+        catch java.lang.Throwable from label12 to label13 with label12;
+    }
+
+    protected java.lang.Package[] getPackages()
+    {
+        java.lang.Throwable $r14;
+        java.lang.Object[] $r7;
+        java.util.HashMap $r1, $r2, $r3;
+        int $i0, $i1, i2;
+        java.lang.String $r10;
+        java.lang.Package $r9, $r12;
+        java.util.Collection $r5;
+        java.lang.Package[] $r6, $r8, r15;
+        java.lang.Object $r11;
+        java.lang.ClassLoader r0, $r4, $r13;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        $r1 = r0.<java.lang.ClassLoader: java.util.HashMap packages>;
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = new java.util.HashMap;
+
+        $r3 = r0.<java.lang.ClassLoader: java.util.HashMap packages>;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>(java.util.Map)>($r3);
+
+        exitmonitor $r1;
+
+     label02:
+        goto label05;
+
+     label03:
+        $r14 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label04:
+        throw $r14;
+
+     label05:
+        $r4 = r0.<java.lang.ClassLoader: java.lang.ClassLoader parent>;
+
+        if $r4 == null goto label06;
+
+        $r13 = r0.<java.lang.ClassLoader: java.lang.ClassLoader parent>;
+
+        r15 = virtualinvoke $r13.<java.lang.ClassLoader: java.lang.Package[] getPackages()>();
+
+        goto label07;
+
+     label06:
+        r15 = staticinvoke <java.lang.Package: java.lang.Package[] getSystemPackages()>();
+
+     label07:
+        if r15 == null goto label10;
+
+        i2 = 0;
+
+     label08:
+        $i1 = lengthof r15;
+
+        if i2 >= $i1 goto label10;
+
+        $r9 = r15[i2];
+
+        $r10 = virtualinvoke $r9.<java.lang.Package: java.lang.String getName()>();
+
+        $r11 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>($r10);
+
+        if $r11 != null goto label09;
+
+        $r12 = r15[i2];
+
+        interfaceinvoke $r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r10, $r12);
+
+     label09:
+        i2 = i2 + 1;
+
+        goto label08;
+
+     label10:
+        $r5 = interfaceinvoke $r2.<java.util.Map: java.util.Collection values()>();
+
+        $i0 = interfaceinvoke $r2.<java.util.Map: int size()>();
+
+        $r6 = newarray (java.lang.Package)[$i0];
+
+        $r7 = interfaceinvoke $r5.<java.util.Collection: java.lang.Object[] toArray(java.lang.Object[])>($r6);
+
+        $r8 = (java.lang.Package[]) $r7;
+
+        return $r8;
+
+        catch java.lang.Throwable from label01 to label02 with label03;
+        catch java.lang.Throwable from label03 to label04 with label03;
+    }
+
+    protected java.lang.String findLibrary(java.lang.String)
+    {
+        java.lang.ClassLoader r0;
+        java.lang.String r1;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        r1 := @parameter0: java.lang.String;
+
+        return null;
+    }
+
+    private static java.lang.String[] initializePath(java.lang.String)
+    {
+        java.lang.String[] r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, i7, i8, i9, i10, i11, $i12;
+        java.lang.String r0, $r1, r2, $r4, $r5;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String,java.lang.String)>(r0, "");
+
+        r2 = <java.io.File: java.lang.String pathSeparator>;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        i7 = virtualinvoke $r1.<java.lang.String: int indexOf(java.lang.String)>(r2);
+
+        i8 = 0;
+
+     label1:
+        if i7 < 0 goto label2;
+
+        i8 = i8 + 1;
+
+        $i6 = i7 + 1;
+
+        i7 = virtualinvoke $r1.<java.lang.String: int indexOf(java.lang.String,int)>(r2, $i6);
+
+        goto label1;
+
+     label2:
+        $i1 = i8 + 1;
+
+        r3 = newarray (java.lang.String)[$i1];
+
+        i9 = 0;
+
+        i10 = 0;
+
+        i11 = virtualinvoke $r1.<java.lang.String: int indexOf(java.lang.String)>(r2);
+
+     label3:
+        if i11 < 0 goto label6;
+
+        $i2 = i11 - i9;
+
+        if $i2 <= 0 goto label4;
+
+        $i5 = i10;
+
+        i10 = i10 + 1;
+
+        $r5 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(i9, i11);
+
+        r3[$i5] = $r5;
+
+        goto label5;
+
+     label4:
+        $i3 = i11 - i9;
+
+        if $i3 != 0 goto label5;
+
+        $i4 = i10;
+
+        i10 = i10 + 1;
+
+        r3[$i4] = ".";
+
+     label5:
+        $i12 = i11 + 1;
+
+        i9 = $i12;
+
+        i11 = virtualinvoke $r1.<java.lang.String: int indexOf(java.lang.String,int)>(r2, $i12);
+
+        goto label3;
+
+     label6:
+        $r4 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(i9, $i0);
+
+        r3[i10] = $r4;
+
+        return r3;
+    }
+
+    static void loadLibrary(java.lang.Class, java.lang.String, boolean)
+    {
+        boolean z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        java.lang.StringBuilder $r4, $r5, $r7, $r8, $r24, $r25, $r26, $r29, $r30, $r31, $r35, $r36, $r37;
+        java.lang.ClassLoader r1, $r41;
+        java.lang.String[] $r2, $r10, $r12, $r17, $r39, $r40, $r42;
+        int $i0, i1, $i2, i3;
+        java.lang.String r6, $r9, $r13, $r14, $r18, $r19, $r21, $r27, $r32, $r38;
+        java.io.File $r11, $r15, $r16, $r20, $r22, $r33;
+        java.lang.Class r0;
+        java.lang.UnsatisfiedLinkError $r3, $r23, $r28, $r34;
+
+        r0 := @parameter0: java.lang.Class;
+
+        r6 := @parameter1: java.lang.String;
+
+        z0 := @parameter2: boolean;
+
+        if r0 != null goto label01;
+
+        $r41 = null;
+
+        goto label02;
+
+     label01:
+        $r41 = virtualinvoke r0.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+     label02:
+        r1 = $r41;
+
+        $r2 = <java.lang.ClassLoader: java.lang.String[] sys_paths>;
+
+        if $r2 != null goto label03;
+
+        $r39 = staticinvoke <java.lang.ClassLoader: java.lang.String[] initializePath(java.lang.String)>("java.library.path");
+
+        <java.lang.ClassLoader: java.lang.String[] usr_paths> = $r39;
+
+        $r40 = staticinvoke <java.lang.ClassLoader: java.lang.String[] initializePath(java.lang.String)>("sun.boot.library.path");
+
+        <java.lang.ClassLoader: java.lang.String[] sys_paths> = $r40;
+
+     label03:
+        if z0 == 0 goto label05;
+
+        $r33 = new java.io.File;
+
+        specialinvoke $r33.<java.io.File: void <init>(java.lang.String)>(r6);
+
+        $z7 = staticinvoke <java.lang.ClassLoader: boolean loadLibrary0(java.lang.Class,java.io.File)>(r0, $r33);
+
+        if $z7 == 0 goto label04;
+
+        return;
+
+     label04:
+        $r34 = new java.lang.UnsatisfiedLinkError;
+
+        $r35 = new java.lang.StringBuilder;
+
+        specialinvoke $r35.<java.lang.StringBuilder: void <init>()>();
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Can\'t load library: ");
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r34.<java.lang.UnsatisfiedLinkError: void <init>(java.lang.String)>($r38);
+
+        throw $r34;
+
+     label05:
+        if r1 == null goto label08;
+
+        $r21 = virtualinvoke r1.<java.lang.ClassLoader: java.lang.String findLibrary(java.lang.String)>(r6);
+
+        if $r21 == null goto label08;
+
+        $r22 = new java.io.File;
+
+        specialinvoke $r22.<java.io.File: void <init>(java.lang.String)>($r21);
+
+        $z5 = virtualinvoke $r22.<java.io.File: boolean isAbsolute()>();
+
+        if $z5 != 0 goto label06;
+
+        $r28 = new java.lang.UnsatisfiedLinkError;
+
+        $r29 = new java.lang.StringBuilder;
+
+        specialinvoke $r29.<java.lang.StringBuilder: void <init>()>();
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ClassLoader.findLibrary failed to return an absolute path: ");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r21);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r28.<java.lang.UnsatisfiedLinkError: void <init>(java.lang.String)>($r32);
+
+        throw $r28;
+
+     label06:
+        $z6 = staticinvoke <java.lang.ClassLoader: boolean loadLibrary0(java.lang.Class,java.io.File)>(r0, $r22);
+
+        if $z6 == 0 goto label07;
+
+        return;
+
+     label07:
+        $r23 = new java.lang.UnsatisfiedLinkError;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Can\'t load ");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r21);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r23.<java.lang.UnsatisfiedLinkError: void <init>(java.lang.String)>($r27);
+
+        throw $r23;
+
+     label08:
+        i1 = 0;
+
+     label09:
+        $r42 = <java.lang.ClassLoader: java.lang.String[] sys_paths>;
+
+        $i2 = lengthof $r42;
+
+        if i1 >= $i2 goto label12;
+
+        $r16 = new java.io.File;
+
+        $r17 = <java.lang.ClassLoader: java.lang.String[] sys_paths>;
+
+        $r18 = $r17[i1];
+
+        $r19 = staticinvoke <java.lang.System: java.lang.String mapLibraryName(java.lang.String)>(r6);
+
+        specialinvoke $r16.<java.io.File: void <init>(java.lang.String,java.lang.String)>($r18, $r19);
+
+        $z3 = staticinvoke <java.lang.ClassLoader: boolean loadLibrary0(java.lang.Class,java.io.File)>(r0, $r16);
+
+        if $z3 == 0 goto label10;
+
+        return;
+
+     label10:
+        $r20 = staticinvoke <java.lang.ClassLoaderHelper: java.io.File mapAlternativeName(java.io.File)>($r16);
+
+        if $r20 == null goto label11;
+
+        $z4 = staticinvoke <java.lang.ClassLoader: boolean loadLibrary0(java.lang.Class,java.io.File)>(r0, $r20);
+
+        if $z4 == 0 goto label11;
+
+        return;
+
+     label11:
+        i1 = i1 + 1;
+
+        goto label09;
+
+     label12:
+        if r1 == null goto label16;
+
+        i3 = 0;
+
+     label13:
+        $r10 = <java.lang.ClassLoader: java.lang.String[] usr_paths>;
+
+        $i0 = lengthof $r10;
+
+        if i3 >= $i0 goto label16;
+
+        $r11 = new java.io.File;
+
+        $r12 = <java.lang.ClassLoader: java.lang.String[] usr_paths>;
+
+        $r13 = $r12[i3];
+
+        $r14 = staticinvoke <java.lang.System: java.lang.String mapLibraryName(java.lang.String)>(r6);
+
+        specialinvoke $r11.<java.io.File: void <init>(java.lang.String,java.lang.String)>($r13, $r14);
+
+        $z1 = staticinvoke <java.lang.ClassLoader: boolean loadLibrary0(java.lang.Class,java.io.File)>(r0, $r11);
+
+        if $z1 == 0 goto label14;
+
+        return;
+
+     label14:
+        $r15 = staticinvoke <java.lang.ClassLoaderHelper: java.io.File mapAlternativeName(java.io.File)>($r11);
+
+        if $r15 == null goto label15;
+
+        $z2 = staticinvoke <java.lang.ClassLoader: boolean loadLibrary0(java.lang.Class,java.io.File)>(r0, $r15);
+
+        if $z2 == 0 goto label15;
+
+        return;
+
+     label15:
+        i3 = i3 + 1;
+
+        goto label13;
+
+     label16:
+        $r3 = new java.lang.UnsatisfiedLinkError;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("no ");
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" in java.library.path");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.UnsatisfiedLinkError: void <init>(java.lang.String)>($r9);
+
+        throw $r3;
+    }
+
+    private static native java.lang.String findBuiltinLib(java.lang.String);
+
+    private static boolean loadLibrary0(java.lang.Class, java.io.File)
+    {
+        java.util.Vector r4, $r5, $r6, $r11, $r42, r43;
+        boolean z0, $z1, $z2, $z3, $z4, $z6, $z7, $z8;
+        java.lang.ClassLoader$NativeLibrary $r8, r14, r44;
+        java.lang.StringBuilder $r19, $r20, $r21, $r22, $r25, $r26, $r27, $r28;
+        java.lang.ClassLoader $r17, $r40, r41;
+        java.lang.Throwable $r34, $r35, $r36;
+        java.lang.ClassLoader$3 $r32;
+        java.util.Stack $r7, $r9, $r10, $r12, $r37;
+        int $i0, $i1, i2, i3;
+        java.lang.String $r1, $r2, $r15, $r23, $r29, $r31, r39;
+        java.io.IOException $r38;
+        java.io.File r0;
+        java.lang.Class r3, $r16;
+        java.lang.Object $r13, $r30, $r33;
+        java.lang.UnsatisfiedLinkError $r18, $r24;
+
+        r3 := @parameter0: java.lang.Class;
+
+        r0 := @parameter1: java.io.File;
+
+        $r1 = virtualinvoke r0.<java.io.File: java.lang.String getName()>();
+
+        $r2 = staticinvoke <java.lang.ClassLoader: java.lang.String findBuiltinLib(java.lang.String)>($r1);
+
+        r39 = $r2;
+
+        if $r2 == null goto label01;
+
+        $z8 = 1;
+
+        $z7 = 1;
+
+        goto label02;
+
+     label01:
+        $z8 = 0;
+
+        $z7 = 0;
+
+     label02:
+        z0 = $z7;
+
+        if $z8 != 0 goto label08;
+
+        $r32 = new java.lang.ClassLoader$3;
+
+        specialinvoke $r32.<java.lang.ClassLoader$3: void <init>(java.io.File)>(r0);
+
+        $r33 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r32);
+
+        if $r33 == null goto label03;
+
+        $z6 = 1;
+
+        goto label04;
+
+     label03:
+        $z6 = 0;
+
+     label04:
+        if $z6 != 0 goto label05;
+
+        return 0;
+
+     label05:
+        r39 = virtualinvoke r0.<java.io.File: java.lang.String getCanonicalPath()>();
+
+     label06:
+        goto label08;
+
+     label07:
+        $r38 := @caughtexception;
+
+        return 0;
+
+     label08:
+        if r3 != null goto label09;
+
+        $r40 = null;
+
+        goto label10;
+
+     label09:
+        $r40 = virtualinvoke r3.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+     label10:
+        r41 = $r40;
+
+        if $r40 == null goto label11;
+
+        $r42 = $r40.<java.lang.ClassLoader: java.util.Vector nativeLibraries>;
+
+        goto label12;
+
+     label11:
+        $r42 = <java.lang.ClassLoader: java.util.Vector systemNativeLibraries>;
+
+     label12:
+        r43 = $r42;
+
+        r4 = $r42;
+
+        entermonitor $r42;
+
+     label13:
+        $i0 = virtualinvoke $r42.<java.util.Vector: int size()>();
+
+        i2 = 0;
+
+     label14:
+        if i2 >= $i0 goto label17;
+
+        $r30 = virtualinvoke r43.<java.util.Vector: java.lang.Object elementAt(int)>(i2);
+
+        r44 = (java.lang.ClassLoader$NativeLibrary) $r30;
+
+        $r31 = r44.<java.lang.ClassLoader$NativeLibrary: java.lang.String name>;
+
+        $z4 = virtualinvoke r39.<java.lang.String: boolean equals(java.lang.Object)>($r31);
+
+        if $z4 == 0 goto label16;
+
+        exitmonitor r4;
+
+     label15:
+        return 1;
+
+     label16:
+        i2 = i2 + 1;
+
+        goto label14;
+
+     label17:
+        $r5 = <java.lang.ClassLoader: java.util.Vector loadedLibraryNames>;
+
+        entermonitor $r5;
+
+     label18:
+        $r6 = <java.lang.ClassLoader: java.util.Vector loadedLibraryNames>;
+
+        $z1 = virtualinvoke $r6.<java.util.Vector: boolean contains(java.lang.Object)>(r39);
+
+        if $z1 == 0 goto label19;
+
+        $r24 = new java.lang.UnsatisfiedLinkError;
+
+        $r25 = new java.lang.StringBuilder;
+
+        specialinvoke $r25.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Native Library ");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r39);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" already loaded in another classloader");
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r24.<java.lang.UnsatisfiedLinkError: void <init>(java.lang.String)>($r29);
+
+        throw $r24;
+
+     label19:
+        $r7 = <java.lang.ClassLoader: java.util.Stack nativeLibraryContext>;
+
+        $i1 = virtualinvoke $r7.<java.util.Stack: int size()>();
+
+        i3 = 0;
+
+     label20:
+        if i3 >= $i1 goto label25;
+
+        $r12 = <java.lang.ClassLoader: java.util.Stack nativeLibraryContext>;
+
+        $r13 = virtualinvoke $r12.<java.util.Stack: java.lang.Object elementAt(int)>(i3);
+
+        r14 = (java.lang.ClassLoader$NativeLibrary) $r13;
+
+        $r15 = r14.<java.lang.ClassLoader$NativeLibrary: java.lang.String name>;
+
+        $z3 = virtualinvoke r39.<java.lang.String: boolean equals(java.lang.Object)>($r15);
+
+        if $z3 == 0 goto label24;
+
+        $r16 = staticinvoke <java.lang.ClassLoader$NativeLibrary: java.lang.Class access$200(java.lang.ClassLoader$NativeLibrary)>(r14);
+
+        $r17 = virtualinvoke $r16.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        if r41 != $r17 goto label23;
+
+        exitmonitor $r5;
+
+     label21:
+        exitmonitor r4;
+
+     label22:
+        return 1;
+
+     label23:
+        $r18 = new java.lang.UnsatisfiedLinkError;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Native Library ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r39);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is being loaded in another classloader");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r18.<java.lang.UnsatisfiedLinkError: void <init>(java.lang.String)>($r23);
+
+        throw $r18;
+
+     label24:
+        i3 = i3 + 1;
+
+        goto label20;
+
+     label25:
+        $r8 = new java.lang.ClassLoader$NativeLibrary;
+
+        specialinvoke $r8.<java.lang.ClassLoader$NativeLibrary: void <init>(java.lang.Class,java.lang.String,boolean)>(r3, r39, z0);
+
+        $r9 = <java.lang.ClassLoader: java.util.Stack nativeLibraryContext>;
+
+        virtualinvoke $r9.<java.util.Stack: java.lang.Object push(java.lang.Object)>($r8);
+
+     label26:
+        virtualinvoke $r8.<java.lang.ClassLoader$NativeLibrary: void load(java.lang.String,boolean)>(r39, z0);
+
+     label27:
+        $r10 = <java.lang.ClassLoader: java.util.Stack nativeLibraryContext>;
+
+        virtualinvoke $r10.<java.util.Stack: java.lang.Object pop()>();
+
+        goto label30;
+
+     label28:
+        $r36 := @caughtexception;
+
+     label29:
+        $r37 = <java.lang.ClassLoader: java.util.Stack nativeLibraryContext>;
+
+        virtualinvoke $r37.<java.util.Stack: java.lang.Object pop()>();
+
+        throw $r36;
+
+     label30:
+        $z2 = $r8.<java.lang.ClassLoader$NativeLibrary: boolean loaded>;
+
+        if $z2 == 0 goto label33;
+
+        $r11 = <java.lang.ClassLoader: java.util.Vector loadedLibraryNames>;
+
+        virtualinvoke $r11.<java.util.Vector: void addElement(java.lang.Object)>(r39);
+
+        virtualinvoke r43.<java.util.Vector: void addElement(java.lang.Object)>($r8);
+
+        exitmonitor $r5;
+
+     label31:
+        exitmonitor r4;
+
+     label32:
+        return 1;
+
+     label33:
+        exitmonitor $r5;
+
+     label34:
+        exitmonitor r4;
+
+     label35:
+        return 0;
+
+     label36:
+        $r35 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label37:
+        throw $r35;
+
+     label38:
+        $r34 := @caughtexception;
+
+        exitmonitor r4;
+
+     label39:
+        throw $r34;
+
+        catch java.io.IOException from label05 to label06 with label07;
+        catch java.lang.Throwable from label26 to label27 with label28;
+        catch java.lang.Throwable from label28 to label29 with label28;
+        catch java.lang.Throwable from label18 to label21 with label36;
+        catch java.lang.Throwable from label23 to label31 with label36;
+        catch java.lang.Throwable from label33 to label34 with label36;
+        catch java.lang.Throwable from label36 to label37 with label36;
+        catch java.lang.Throwable from label13 to label15 with label38;
+        catch java.lang.Throwable from label16 to label22 with label38;
+        catch java.lang.Throwable from label23 to label32 with label38;
+        catch java.lang.Throwable from label33 to label35 with label38;
+        catch java.lang.Throwable from label36 to label39 with label38;
+    }
+
+    static long findNative(java.lang.ClassLoader, java.lang.String)
+    {
+        java.lang.Throwable $r6;
+        long $l1;
+        java.util.Vector r1, r2, $r7;
+        byte $b2;
+        int $i0, i3;
+        java.lang.ClassLoader$NativeLibrary r4;
+        java.lang.Object $r3;
+        java.lang.ClassLoader r0;
+        java.lang.String r5;
+
+        r0 := @parameter0: java.lang.ClassLoader;
+
+        r5 := @parameter1: java.lang.String;
+
+        if r0 == null goto label01;
+
+        $r7 = r0.<java.lang.ClassLoader: java.util.Vector nativeLibraries>;
+
+        goto label02;
+
+     label01:
+        $r7 = <java.lang.ClassLoader: java.util.Vector systemNativeLibraries>;
+
+     label02:
+        r1 = $r7;
+
+        r2 = $r7;
+
+        entermonitor $r7;
+
+     label03:
+        $i0 = virtualinvoke $r7.<java.util.Vector: int size()>();
+
+        i3 = 0;
+
+     label04:
+        if i3 >= $i0 goto label07;
+
+        $r3 = virtualinvoke r1.<java.util.Vector: java.lang.Object elementAt(int)>(i3);
+
+        r4 = (java.lang.ClassLoader$NativeLibrary) $r3;
+
+        $l1 = virtualinvoke r4.<java.lang.ClassLoader$NativeLibrary: long find(java.lang.String)>(r5);
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 == 0 goto label06;
+
+        exitmonitor r2;
+
+     label05:
+        return $l1;
+
+     label06:
+        i3 = i3 + 1;
+
+        goto label04;
+
+     label07:
+        exitmonitor r2;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r6 := @caughtexception;
+
+        exitmonitor r2;
+
+     label10:
+        throw $r6;
+
+     label11:
+        return 0L;
+
+        catch java.lang.Throwable from label03 to label05 with label09;
+        catch java.lang.Throwable from label06 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    public void setDefaultAssertionStatus(boolean)
+    {
+        java.lang.Throwable $r3;
+        java.util.Map $r2;
+        java.lang.Object $r1;
+        java.lang.ClassLoader r0;
+        boolean z0;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = r0.<java.lang.ClassLoader: java.lang.Object assertionLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<java.lang.ClassLoader: java.util.Map classAssertionStatus>;
+
+        if $r2 != null goto label2;
+
+        specialinvoke r0.<java.lang.ClassLoader: void initializeJavaAssertionMaps()>();
+
+     label2:
+        r0.<java.lang.ClassLoader: boolean defaultAssertionStatus> = z0;
+
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r3;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void setPackageAssertionStatus(java.lang.String, boolean)
+    {
+        java.lang.Throwable $r6;
+        java.util.Map $r2, $r4;
+        java.lang.Boolean $r5;
+        java.lang.Object $r1;
+        java.lang.ClassLoader r0;
+        java.lang.String r3;
+        boolean z0;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        r3 := @parameter0: java.lang.String;
+
+        z0 := @parameter1: boolean;
+
+        $r1 = r0.<java.lang.ClassLoader: java.lang.Object assertionLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<java.lang.ClassLoader: java.util.Map packageAssertionStatus>;
+
+        if $r2 != null goto label2;
+
+        specialinvoke r0.<java.lang.ClassLoader: void initializeJavaAssertionMaps()>();
+
+     label2:
+        $r4 = r0.<java.lang.ClassLoader: java.util.Map packageAssertionStatus>;
+
+        $r5 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(z0);
+
+        interfaceinvoke $r4.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r3, $r5);
+
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r6 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r6;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void setClassAssertionStatus(java.lang.String, boolean)
+    {
+        java.lang.Throwable $r6;
+        java.util.Map $r2, $r4;
+        java.lang.Boolean $r5;
+        java.lang.Object $r1;
+        java.lang.ClassLoader r0;
+        java.lang.String r3;
+        boolean z0;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        r3 := @parameter0: java.lang.String;
+
+        z0 := @parameter1: boolean;
+
+        $r1 = r0.<java.lang.ClassLoader: java.lang.Object assertionLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<java.lang.ClassLoader: java.util.Map classAssertionStatus>;
+
+        if $r2 != null goto label2;
+
+        specialinvoke r0.<java.lang.ClassLoader: void initializeJavaAssertionMaps()>();
+
+     label2:
+        $r4 = r0.<java.lang.ClassLoader: java.util.Map classAssertionStatus>;
+
+        $r5 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(z0);
+
+        interfaceinvoke $r4.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r3, $r5);
+
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r6 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r6;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void clearAssertionStatus()
+    {
+        java.lang.Throwable $r4;
+        java.lang.Object $r1;
+        java.util.HashMap $r2, $r3;
+        java.lang.ClassLoader r0;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        $r1 = r0.<java.lang.ClassLoader: java.lang.Object assertionLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        r0.<java.lang.ClassLoader: java.util.Map classAssertionStatus> = $r2;
+
+        $r3 = new java.util.HashMap;
+
+        specialinvoke $r3.<java.util.HashMap: void <init>()>();
+
+        r0.<java.lang.ClassLoader: java.util.Map packageAssertionStatus> = $r3;
+
+        r0.<java.lang.ClassLoader: boolean defaultAssertionStatus> = 0;
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r4;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    boolean desiredAssertionStatus(java.lang.String)
+    {
+        java.lang.Throwable $r9;
+        java.util.Map $r2, $r5, $r7;
+        int $i0, $i1, i2;
+        java.lang.Boolean r11, r12, r13;
+        java.lang.String $r4, r10;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.Object $r1, $r3, $r6, $r8;
+        java.lang.ClassLoader r0;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        r10 := @parameter0: java.lang.String;
+
+        $r1 = r0.<java.lang.ClassLoader: java.lang.Object assertionLock>;
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = r0.<java.lang.ClassLoader: java.util.Map classAssertionStatus>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r10);
+
+        r11 = (java.lang.Boolean) $r3;
+
+        if r11 == null goto label03;
+
+        $z3 = virtualinvoke r11.<java.lang.Boolean: boolean booleanValue()>();
+
+        exitmonitor $r1;
+
+     label02:
+        return $z3;
+
+     label03:
+        $i0 = virtualinvoke r10.<java.lang.String: int lastIndexOf(java.lang.String)>(".");
+
+        i2 = $i0;
+
+        if $i0 >= 0 goto label05;
+
+        $r7 = r0.<java.lang.ClassLoader: java.util.Map packageAssertionStatus>;
+
+        $r8 = interfaceinvoke $r7.<java.util.Map: java.lang.Object get(java.lang.Object)>(null);
+
+        r12 = (java.lang.Boolean) $r8;
+
+        if r12 == null goto label05;
+
+        $z2 = virtualinvoke r12.<java.lang.Boolean: boolean booleanValue()>();
+
+        exitmonitor $r1;
+
+     label04:
+        return $z2;
+
+     label05:
+        if i2 <= 0 goto label08;
+
+        $r4 = virtualinvoke r10.<java.lang.String: java.lang.String substring(int,int)>(0, i2);
+
+        r10 = $r4;
+
+        $r5 = r0.<java.lang.ClassLoader: java.util.Map packageAssertionStatus>;
+
+        $r6 = interfaceinvoke $r5.<java.util.Map: java.lang.Object get(java.lang.Object)>($r4);
+
+        r13 = (java.lang.Boolean) $r6;
+
+        if r13 == null goto label07;
+
+        $z1 = virtualinvoke r13.<java.lang.Boolean: boolean booleanValue()>();
+
+        exitmonitor $r1;
+
+     label06:
+        return $z1;
+
+     label07:
+        $i1 = i2 - 1;
+
+        i2 = virtualinvoke $r4.<java.lang.String: int lastIndexOf(java.lang.String,int)>(".", $i1);
+
+        goto label05;
+
+     label08:
+        $z0 = r0.<java.lang.ClassLoader: boolean defaultAssertionStatus>;
+
+        exitmonitor $r1;
+
+     label09:
+        return $z0;
+
+     label10:
+        $r9 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label11:
+        throw $r9;
+
+        catch java.lang.Throwable from label01 to label02 with label10;
+        catch java.lang.Throwable from label03 to label04 with label10;
+        catch java.lang.Throwable from label05 to label06 with label10;
+        catch java.lang.Throwable from label07 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    private void initializeJavaAssertionMaps()
+    {
+        java.util.HashMap $r1, $r2;
+        java.lang.String[] $r4, $r5, $r6, $r11;
+        java.util.Map $r8, $r13;
+        int $i0, $i1, i2, i3;
+        java.lang.Boolean $r10, $r15;
+        java.lang.String $r9, $r14;
+        boolean $z0, $z1, $z2;
+        java.lang.AssertionStatusDirectives $r3;
+        boolean[] $r7, $r12;
+        java.lang.ClassLoader r0;
+
+        r0 := @this: java.lang.ClassLoader;
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>()>();
+
+        r0.<java.lang.ClassLoader: java.util.Map classAssertionStatus> = $r1;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        r0.<java.lang.ClassLoader: java.util.Map packageAssertionStatus> = $r2;
+
+        $r3 = staticinvoke <java.lang.ClassLoader: java.lang.AssertionStatusDirectives retrieveDirectives()>();
+
+        i2 = 0;
+
+     label1:
+        $r4 = $r3.<java.lang.AssertionStatusDirectives: java.lang.String[] classes>;
+
+        $i0 = lengthof $r4;
+
+        if i2 >= $i0 goto label2;
+
+        $r13 = r0.<java.lang.ClassLoader: java.util.Map classAssertionStatus>;
+
+        $r11 = $r3.<java.lang.AssertionStatusDirectives: java.lang.String[] classes>;
+
+        $r14 = $r11[i2];
+
+        $r12 = $r3.<java.lang.AssertionStatusDirectives: boolean[] classEnabled>;
+
+        $z2 = $r12[i2];
+
+        $r15 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z2);
+
+        interfaceinvoke $r13.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r14, $r15);
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        i3 = 0;
+
+     label3:
+        $r5 = $r3.<java.lang.AssertionStatusDirectives: java.lang.String[] packages>;
+
+        $i1 = lengthof $r5;
+
+        if i3 >= $i1 goto label4;
+
+        $r8 = r0.<java.lang.ClassLoader: java.util.Map packageAssertionStatus>;
+
+        $r6 = $r3.<java.lang.AssertionStatusDirectives: java.lang.String[] packages>;
+
+        $r9 = $r6[i3];
+
+        $r7 = $r3.<java.lang.AssertionStatusDirectives: boolean[] packageEnabled>;
+
+        $z1 = $r7[i3];
+
+        $r10 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z1);
+
+        interfaceinvoke $r8.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r9, $r10);
+
+        i3 = i3 + 1;
+
+        goto label3;
+
+     label4:
+        $z0 = $r3.<java.lang.AssertionStatusDirectives: boolean deflt>;
+
+        r0.<java.lang.ClassLoader: boolean defaultAssertionStatus> = $z0;
+
+        return;
+    }
+
+    private static native java.lang.AssertionStatusDirectives retrieveDirectives();
+
+    static java.util.Vector access$000()
+    {
+        java.util.Vector $r0;
+
+        $r0 = <java.lang.ClassLoader: java.util.Vector loadedLibraryNames>;
+
+        return $r0;
+    }
+
+    static java.util.Stack access$100()
+    {
+        java.util.Stack $r0;
+
+        $r0 = <java.lang.ClassLoader: java.util.Stack nativeLibraryContext>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.util.Vector $r1, $r2;
+        java.security.cert.Certificate[] $r0;
+        java.util.Stack $r3;
+
+        staticinvoke <java.lang.ClassLoader: void registerNatives()>();
+
+        $r0 = newarray (java.security.cert.Certificate)[0];
+
+        <java.lang.ClassLoader: java.security.cert.Certificate[] nocerts> = $r0;
+
+        $r1 = new java.util.Vector;
+
+        specialinvoke $r1.<java.util.Vector: void <init>()>();
+
+        <java.lang.ClassLoader: java.util.Vector loadedLibraryNames> = $r1;
+
+        $r2 = new java.util.Vector;
+
+        specialinvoke $r2.<java.util.Vector: void <init>()>();
+
+        <java.lang.ClassLoader: java.util.Vector systemNativeLibraries> = $r2;
+
+        $r3 = new java.util.Stack;
+
+        specialinvoke $r3.<java.util.Stack: void <init>()>();
+
+        <java.lang.ClassLoader: java.util.Stack nativeLibraryContext> = $r3;
+
+        return;
+    }
+}

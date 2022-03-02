@@ -1,0 +1,1669 @@
+final class javax.crypto.JarVerifier extends java.lang.Object
+{
+    private static final java.lang.String PLUGIN_IMPL_NAME;
+    private static java.security.cert.X509Certificate frameworkCertificate;
+    private static sun.security.validator.Validator providerValidator;
+    private static sun.security.validator.Validator exemptValidator;
+    private java.util.List verifiedSignerCache;
+    private java.net.URL jarURL;
+    private sun.security.validator.Validator validator;
+    private boolean savePerms;
+    private javax.crypto.CryptoPermissions appPerms;
+
+    private static java.security.cert.X509Certificate parseCertificate(java.lang.String, java.security.cert.CertificateFactory) throws java.lang.Exception
+    {
+        java.security.cert.X509Certificate $r5;
+        byte[] $r2;
+        java.security.cert.Certificate $r4;
+        java.io.ByteArrayInputStream $r0;
+        java.security.cert.CertificateFactory r3;
+        java.lang.String r1;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.security.cert.CertificateFactory;
+
+        $r0 = new java.io.ByteArrayInputStream;
+
+        $r2 = virtualinvoke r1.<java.lang.String: byte[] getBytes(java.lang.String)>("UTF8");
+
+        specialinvoke $r0.<java.io.ByteArrayInputStream: void <init>(byte[])>($r2);
+
+        $r4 = virtualinvoke r3.<java.security.cert.CertificateFactory: java.security.cert.Certificate generateCertificate(java.io.InputStream)>($r0);
+
+        $r5 = (java.security.cert.X509Certificate) $r4;
+
+        return $r5;
+    }
+
+    void <init>(java.net.URL, boolean)
+    {
+        java.util.List $r3;
+        java.net.URL r1;
+        javax.crypto.JarVerifier r0;
+        sun.security.validator.Validator $r4;
+        boolean z0;
+        java.util.ArrayList $r2;
+
+        r0 := @this: javax.crypto.JarVerifier;
+
+        r1 := @parameter0: java.net.URL;
+
+        z0 := @parameter1: boolean;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<javax.crypto.JarVerifier: java.util.List verifiedSignerCache> = null;
+
+        r0.<javax.crypto.JarVerifier: javax.crypto.CryptoPermissions appPerms> = null;
+
+        r0.<javax.crypto.JarVerifier: java.net.URL jarURL> = r1;
+
+        r0.<javax.crypto.JarVerifier: boolean savePerms> = z0;
+
+        if z0 == 0 goto label1;
+
+        $r4 = <javax.crypto.JarVerifier: sun.security.validator.Validator providerValidator>;
+
+        goto label2;
+
+     label1:
+        $r4 = <javax.crypto.JarVerifier: sun.security.validator.Validator exemptValidator>;
+
+     label2:
+        r0.<javax.crypto.JarVerifier: sun.security.validator.Validator validator> = $r4;
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>(int)>(2);
+
+        $r3 = staticinvoke <java.util.Collections: java.util.List synchronizedList(java.util.List)>($r2);
+
+        r0.<javax.crypto.JarVerifier: java.util.List verifiedSignerCache> = $r3;
+
+        return;
+    }
+
+    void verify() throws java.util.jar.JarException, java.io.IOException
+    {
+        java.net.URL $r1, $r2, $r13, $r21, $r29;
+        java.util.List $r3, $r4, $r7, $r8;
+        java.lang.StringBuilder $r11, $r12, $r15, $r19, $r20, $r23, $r27, $r28, $r31;
+        javax.crypto.JarVerifier r0;
+        java.lang.Throwable $r6;
+        java.lang.String $r14, $r16, $r22, $r24, $r30, $r32;
+        javax.crypto.CryptoPolicyParser$ParsingException $r9;
+        java.security.cert.CertificateException $r17;
+        java.util.jar.JarException $r5, $r10, $r18, $r26;
+        java.security.NoSuchProviderException $r25;
+
+        r0 := @this: javax.crypto.JarVerifier;
+
+        $r1 = r0.<javax.crypto.JarVerifier: java.net.URL jarURL>;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.util.jar.JarException;
+
+        specialinvoke $r5.<java.util.jar.JarException: void <init>(java.lang.String)>("Class is on the bootclasspath");
+
+        throw $r5;
+
+     label1:
+        $r2 = r0.<javax.crypto.JarVerifier: java.net.URL jarURL>;
+
+        specialinvoke r0.<javax.crypto.JarVerifier: void verifyJars(java.net.URL,java.util.List)>($r2, null);
+
+     label2:
+        $r3 = r0.<javax.crypto.JarVerifier: java.util.List verifiedSignerCache>;
+
+        if $r3 == null goto label9;
+
+        $r4 = r0.<javax.crypto.JarVerifier: java.util.List verifiedSignerCache>;
+
+        interfaceinvoke $r4.<java.util.List: void clear()>();
+
+        goto label9;
+
+     label3:
+        $r25 := @caughtexception;
+
+        $r26 = new java.util.jar.JarException;
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot verify ");
+
+        $r29 = r0.<javax.crypto.JarVerifier: java.net.URL jarURL>;
+
+        $r30 = virtualinvoke $r29.<java.net.URL: java.lang.String toString()>();
+
+        $r31 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r30);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r26.<java.util.jar.JarException: void <init>(java.lang.String)>($r32);
+
+        throw $r26;
+
+     label4:
+        $r17 := @caughtexception;
+
+        $r18 = new java.util.jar.JarException;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot verify ");
+
+        $r21 = r0.<javax.crypto.JarVerifier: java.net.URL jarURL>;
+
+        $r22 = virtualinvoke $r21.<java.net.URL: java.lang.String toString()>();
+
+        $r23 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r18.<java.util.jar.JarException: void <init>(java.lang.String)>($r24);
+
+        throw $r18;
+
+     label5:
+        $r9 := @caughtexception;
+
+        $r10 = new java.util.jar.JarException;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot parse ");
+
+        $r13 = r0.<javax.crypto.JarVerifier: java.net.URL jarURL>;
+
+        $r14 = virtualinvoke $r13.<java.net.URL: java.lang.String toString()>();
+
+        $r15 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r10.<java.util.jar.JarException: void <init>(java.lang.String)>($r16);
+
+        throw $r10;
+
+     label6:
+        $r6 := @caughtexception;
+
+     label7:
+        $r7 = r0.<javax.crypto.JarVerifier: java.util.List verifiedSignerCache>;
+
+        if $r7 == null goto label8;
+
+        $r8 = r0.<javax.crypto.JarVerifier: java.util.List verifiedSignerCache>;
+
+        interfaceinvoke $r8.<java.util.List: void clear()>();
+
+     label8:
+        throw $r6;
+
+     label9:
+        return;
+
+        catch java.security.NoSuchProviderException from label1 to label2 with label3;
+        catch java.security.cert.CertificateException from label1 to label2 with label4;
+        catch javax.crypto.CryptoPolicyParser$ParsingException from label1 to label2 with label5;
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label3 to label7 with label6;
+    }
+
+    static void verifyPolicySigned(java.security.cert.Certificate[]) throws java.lang.Exception
+    {
+        java.security.cert.X509Certificate r6, $r7;
+        java.util.Iterator $r2;
+        java.util.List $r1;
+        java.security.cert.Certificate[] r0;
+        java.lang.SecurityException $r3;
+        java.lang.Object $r4;
+        java.security.cert.X509Certificate[] r5;
+        boolean $z0, $z1, z2;
+
+        r0 := @parameter0: java.security.cert.Certificate[];
+
+        $r1 = staticinvoke <javax.crypto.JarVerifier: java.util.List convertCertsToChains(java.security.cert.Certificate[])>(r0);
+
+        z2 = 0;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r4 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (java.security.cert.X509Certificate[]) $r4;
+
+        r6 = r5[0];
+
+        $r7 = <javax.crypto.JarVerifier: java.security.cert.X509Certificate frameworkCertificate>;
+
+        $z1 = virtualinvoke r6.<java.security.cert.X509Certificate: boolean equals(java.lang.Object)>($r7);
+
+        if $z1 == 0 goto label2;
+
+        z2 = 1;
+
+        goto label3;
+
+     label2:
+        goto label1;
+
+     label3:
+        if z2 != 0 goto label4;
+
+        $r3 = new java.lang.SecurityException;
+
+        specialinvoke $r3.<java.lang.SecurityException: void <init>(java.lang.String)>("The jurisdiction policy files are not signed by the expected signer! (Policy files are specific per major JDK release.Ensure the correct version is installed.)");
+
+        throw $r3;
+
+     label4:
+        return;
+    }
+
+    javax.crypto.CryptoPermissions getPermissions()
+    {
+        javax.crypto.JarVerifier r0;
+        javax.crypto.CryptoPermissions $r1;
+
+        r0 := @this: javax.crypto.JarVerifier;
+
+        $r1 = r0.<javax.crypto.JarVerifier: javax.crypto.CryptoPermissions appPerms>;
+
+        return $r1;
+    }
+
+    private void verifyJars(java.net.URL, java.util.List) throws java.security.NoSuchProviderException, java.security.cert.CertificateException, java.io.IOException, javax.crypto.CryptoPolicyParser$ParsingException
+    {
+        java.net.URL r0;
+        java.util.ArrayList $r4;
+        java.util.List $r5, r6;
+        java.lang.String $r1, $r3;
+        javax.crypto.JarVerifier r2;
+        boolean $z0;
+
+        r2 := @this: javax.crypto.JarVerifier;
+
+        r0 := @parameter0: java.net.URL;
+
+        r6 := @parameter1: java.util.List;
+
+        $r1 = virtualinvoke r0.<java.net.URL: java.lang.String toString()>();
+
+        if r6 == null goto label1;
+
+        $z0 = interfaceinvoke r6.<java.util.List: boolean contains(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label4;
+
+     label1:
+        $r3 = specialinvoke r2.<javax.crypto.JarVerifier: java.lang.String verifySingleJar(java.net.URL)>(r0);
+
+        if r6 == null goto label2;
+
+        interfaceinvoke r6.<java.util.List: boolean add(java.lang.Object)>($r1);
+
+     label2:
+        if $r3 == null goto label4;
+
+        if r6 != null goto label3;
+
+        $r4 = new java.util.ArrayList;
+
+        specialinvoke $r4.<java.util.ArrayList: void <init>()>();
+
+        $r5 = staticinvoke <java.util.Collections: java.util.List synchronizedList(java.util.List)>($r4);
+
+        r6 = $r5;
+
+        interfaceinvoke $r5.<java.util.List: boolean add(java.lang.Object)>($r1);
+
+     label3:
+        specialinvoke r2.<javax.crypto.JarVerifier: void verifyManifestClassPathJars(java.net.URL,java.lang.String,java.util.List)>(r0, $r3, r6);
+
+     label4:
+        return;
+    }
+
+    private void verifyManifestClassPathJars(java.net.URL, java.lang.String, java.util.List) throws java.security.NoSuchProviderException, java.security.cert.CertificateException, java.io.IOException, javax.crypto.CryptoPolicyParser$ParsingException
+    {
+        java.net.URL $r2, r3;
+        java.lang.String[] $r1;
+        int $i0, i1;
+        java.lang.String r0, $r4, $r11, $r14;
+        java.net.MalformedURLException $r7, $r8;
+        java.util.List r6;
+        java.lang.StringBuilder $r9, $r10, $r12, $r13;
+        javax.crypto.JarVerifier r5;
+
+        r5 := @this: javax.crypto.JarVerifier;
+
+        r3 := @parameter0: java.net.URL;
+
+        r0 := @parameter1: java.lang.String;
+
+        r6 := @parameter2: java.util.List;
+
+        $r1 = staticinvoke <javax.crypto.JarVerifier: java.lang.String[] parseAttrClasspath(java.lang.String)>(r0);
+
+     label1:
+        i1 = 0;
+
+     label2:
+        $i0 = lengthof $r1;
+
+        if i1 >= $i0 goto label3;
+
+        $r2 = new java.net.URL;
+
+        $r4 = $r1[i1];
+
+        specialinvoke $r2.<java.net.URL: void <init>(java.net.URL,java.lang.String)>(r3, $r4);
+
+        specialinvoke r5.<javax.crypto.JarVerifier: void verifyJars(java.net.URL,java.util.List)>($r2, r6);
+
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r7 := @caughtexception;
+
+        $r8 = new java.net.MalformedURLException;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("The JAR file ");
+
+        $r11 = virtualinvoke r3.<java.net.URL: java.lang.String toString()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" contains invalid URLs in its Class-Path attribute");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<java.net.MalformedURLException: void <init>(java.lang.String)>($r14);
+
+        virtualinvoke $r8.<java.net.MalformedURLException: java.lang.Throwable initCause(java.lang.Throwable)>($r7);
+
+        throw $r8;
+
+     label5:
+        return;
+
+        catch java.net.MalformedURLException from label1 to label3 with label4;
+    }
+
+    private java.lang.String verifySingleJar(java.net.URL) throws java.security.NoSuchProviderException, java.security.cert.CertificateException, java.io.IOException, javax.crypto.CryptoPolicyParser$ParsingException
+    {
+        java.util.jar.Manifest $r14;
+        byte[] r73;
+        java.io.BufferedInputStream $r85;
+        java.util.Enumeration $r13, $r15;
+        javax.crypto.JarVerifier$2 $r82;
+        java.lang.StringBuilder $r3, $r5, $r6, $r31, $r32, $r34, $r40, $r41, $r50, $r51, $r66, $r68, $r80, $r83, $r86, $r88, $r90;
+        java.lang.Throwable $r57, $r59, $r60, $r61, r75;
+        javax.crypto.JarVerifier$JarHolder $r56, r71;
+        java.util.jar.Attributes$Name $r78;
+        java.lang.String $r1, $r4, $r7, $r27, $r30, $r33, $r35, $r39, $r42, $r49, $r52, $r67, $r69, $r79;
+        java.security.PrivilegedActionException $r63;
+        javax.crypto.CryptoPermissions $r22, $r93;
+        java.util.jar.JarException $r87, $r89, $r91, $r92;
+        java.security.cert.X509Certificate $r43, $r45;
+        java.net.URL r0, r8, $r16, $r70, $r81;
+        java.util.jar.JarFile $r12, $r17, $r18, $r21, $r58, r72;
+        java.lang.SecurityException $r84;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, z12;
+        java.util.jar.Attributes $r77;
+        java.util.List $r44, $r46;
+        java.security.cert.Certificate[] $r26;
+        javax.crypto.JarVerifier r10;
+        java.security.cert.X509Certificate[] $r36;
+        java.util.jar.JarEntry $r19, r74, r76;
+        int $i0, $i1, $i2, $i3, i4, $i6;
+        java.lang.Object $r11, $r25, $r53;
+        java.io.InputStream $r23, $r55;
+
+        r10 := @this: javax.crypto.JarVerifier;
+
+        r0 := @parameter0: java.net.URL;
+
+        $r1 = virtualinvoke r0.<java.net.URL: java.lang.String getProtocol()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("jar");
+
+        if $z0 == 0 goto label01;
+
+        $r70 = r0;
+
+        goto label02;
+
+     label01:
+        $r81 = new java.net.URL;
+
+        $r70 = $r81;
+
+        $r80 = new java.lang.StringBuilder;
+
+        specialinvoke $r80.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r80.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("jar:");
+
+        $r4 = virtualinvoke r0.<java.net.URL: java.lang.String toString()>();
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("!/");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r81.<java.net.URL: void <init>(java.lang.String)>($r7);
+
+     label02:
+        r8 = $r70;
+
+        r71 = null;
+
+     label03:
+        $r82 = new javax.crypto.JarVerifier$2;
+
+        specialinvoke $r82.<javax.crypto.JarVerifier$2: void <init>(javax.crypto.JarVerifier,java.net.URL)>(r10, $r70);
+
+        $r11 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r82);
+
+        $r56 = (javax.crypto.JarVerifier$JarHolder) $r11;
+
+        r71 = $r56;
+
+     label04:
+        goto label06;
+
+     label05:
+        $r63 := @caughtexception;
+
+        $r84 = new java.lang.SecurityException;
+
+        $r83 = new java.lang.StringBuilder;
+
+        specialinvoke $r83.<java.lang.StringBuilder: void <init>()>();
+
+        $r66 = virtualinvoke $r83.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot verify ");
+
+        $r67 = virtualinvoke r8.<java.net.URL: java.lang.String toString()>();
+
+        $r68 = virtualinvoke $r66.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r67);
+
+        $r69 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r84.<java.lang.SecurityException: void <init>(java.lang.String)>($r69);
+
+        virtualinvoke $r84.<java.lang.SecurityException: java.lang.Throwable initCause(java.lang.Throwable)>($r63);
+
+        throw $r84;
+
+     label06:
+        if $r56 == null goto label36;
+
+        r72 = $r56.<javax.crypto.JarVerifier$JarHolder: java.util.jar.JarFile file>;
+
+        r73 = newarray (byte)[8192];
+
+        $r13 = virtualinvoke r72.<java.util.jar.JarFile: java.util.Enumeration entries()>();
+
+     label07:
+        $z2 = interfaceinvoke $r13.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z2 == 0 goto label20;
+
+        $r53 = interfaceinvoke $r13.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r74 = (java.util.jar.JarEntry) $r53;
+
+        $r85 = new java.io.BufferedInputStream;
+
+        $r55 = virtualinvoke r72.<java.util.jar.JarFile: java.io.InputStream getInputStream(java.util.zip.ZipEntry)>(r74);
+
+        specialinvoke $r85.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>($r55);
+
+        r75 = null;
+
+     label08:
+        $i2 = lengthof r73;
+
+        $i3 = virtualinvoke $r85.<java.io.BufferedInputStream: int read(byte[],int,int)>(r73, 0, $i2);
+
+        $i6 = (int) -1;
+
+        if $i3 == $i6 goto label09;
+
+        goto label08;
+
+     label09:
+        if $r85 == null goto label19;
+
+        goto label10;
+
+     label10:
+        virtualinvoke $r85.<java.io.BufferedInputStream: void close()>();
+
+        goto label19;
+
+     label11:
+        $r61 := @caughtexception;
+
+        r75 = $r61;
+
+        throw $r61;
+
+     label12:
+        $r60 := @caughtexception;
+
+     label13:
+        if $r85 == null goto label18;
+
+        if r75 == null goto label17;
+
+     label14:
+        virtualinvoke $r85.<java.io.BufferedInputStream: void close()>();
+
+     label15:
+        goto label18;
+
+     label16:
+        $r59 := @caughtexception;
+
+        virtualinvoke r75.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r59);
+
+        goto label18;
+
+     label17:
+        virtualinvoke $r85.<java.io.BufferedInputStream: void close()>();
+
+     label18:
+        throw $r60;
+
+     label19:
+        goto label07;
+
+     label20:
+        $r14 = virtualinvoke r72.<java.util.jar.JarFile: java.util.jar.Manifest getManifest()>();
+
+        if $r14 != null goto label21;
+
+        $r87 = new java.util.jar.JarException;
+
+        $r86 = new java.lang.StringBuilder;
+
+        specialinvoke $r86.<java.lang.StringBuilder: void <init>()>();
+
+        $r49 = virtualinvoke r0.<java.net.URL: java.lang.String toString()>();
+
+        $r50 = virtualinvoke $r86.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r49);
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is not signed.");
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r87.<java.util.jar.JarException: void <init>(java.lang.String)>($r52);
+
+        throw $r87;
+
+     label21:
+        $r15 = virtualinvoke r72.<java.util.jar.JarFile: java.util.Enumeration entries()>();
+
+     label22:
+        $z11 = interfaceinvoke $r15.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z11 == 0 goto label31;
+
+        $r25 = interfaceinvoke $r15.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r76 = (java.util.jar.JarEntry) $r25;
+
+        $z6 = virtualinvoke r76.<java.util.jar.JarEntry: boolean isDirectory()>();
+
+        if $z6 == 0 goto label23;
+
+        goto label22;
+
+     label23:
+        $r26 = virtualinvoke r76.<java.util.jar.JarEntry: java.security.cert.Certificate[] getCertificates()>();
+
+        if $r26 == null goto label24;
+
+        $i0 = lengthof $r26;
+
+        if $i0 != 0 goto label25;
+
+     label24:
+        $r27 = virtualinvoke r76.<java.util.jar.JarEntry: java.lang.String getName()>();
+
+        $z7 = virtualinvoke $r27.<java.lang.String: boolean startsWith(java.lang.String)>("META-INF");
+
+        if $z7 != 0 goto label30;
+
+        $r89 = new java.util.jar.JarException;
+
+        $r88 = new java.lang.StringBuilder;
+
+        specialinvoke $r88.<java.lang.StringBuilder: void <init>()>();
+
+        $r30 = virtualinvoke r0.<java.net.URL: java.lang.String toString()>();
+
+        $r31 = virtualinvoke $r88.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r30);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" has unsigned entries - ");
+
+        $r33 = virtualinvoke r76.<java.util.jar.JarEntry: java.lang.String getName()>();
+
+        $r34 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r33);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r89.<java.util.jar.JarException: void <init>(java.lang.String)>($r35);
+
+        throw $r89;
+
+     label25:
+        i4 = 0;
+
+        z12 = 0;
+
+     label26:
+        $r36 = staticinvoke <javax.crypto.JarVerifier: java.security.cert.X509Certificate[] getAChain(java.security.cert.Certificate[],int)>($r26, i4);
+
+        if $r36 == null goto label29;
+
+        $r44 = r10.<javax.crypto.JarVerifier: java.util.List verifiedSignerCache>;
+
+        $r43 = $r36[0];
+
+        $z8 = interfaceinvoke $r44.<java.util.List: boolean contains(java.lang.Object)>($r43);
+
+        if $z8 == 0 goto label27;
+
+        z12 = 1;
+
+        goto label29;
+
+     label27:
+        $z9 = specialinvoke r10.<javax.crypto.JarVerifier: boolean isTrusted(java.security.cert.X509Certificate[])>($r36);
+
+        if $z9 == 0 goto label28;
+
+        z12 = 1;
+
+        $r46 = r10.<javax.crypto.JarVerifier: java.util.List verifiedSignerCache>;
+
+        $r45 = $r36[0];
+
+        interfaceinvoke $r46.<java.util.List: boolean add(java.lang.Object)>($r45);
+
+        goto label29;
+
+     label28:
+        $i1 = lengthof $r36;
+
+        i4 = i4 + $i1;
+
+        goto label26;
+
+     label29:
+        if z12 != 0 goto label30;
+
+        $r91 = new java.util.jar.JarException;
+
+        $r90 = new java.lang.StringBuilder;
+
+        specialinvoke $r90.<java.lang.StringBuilder: void <init>()>();
+
+        $r39 = virtualinvoke r0.<java.net.URL: java.lang.String toString()>();
+
+        $r40 = virtualinvoke $r90.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r39);
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is not signed by a trusted signer.");
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r91.<java.util.jar.JarException: void <init>(java.lang.String)>($r42);
+
+        throw $r91;
+
+     label30:
+        goto label22;
+
+     label31:
+        $r16 = r10.<javax.crypto.JarVerifier: java.net.URL jarURL>;
+
+        $z3 = virtualinvoke $r16.<java.net.URL: boolean equals(java.lang.Object)>(r0);
+
+        if $z3 == 0 goto label33;
+
+        $z5 = r10.<javax.crypto.JarVerifier: boolean savePerms>;
+
+        if $z5 == 0 goto label33;
+
+        $r18 = $r56.<javax.crypto.JarVerifier$JarHolder: java.util.jar.JarFile file>;
+
+        $r19 = virtualinvoke $r18.<java.util.jar.JarFile: java.util.jar.JarEntry getJarEntry(java.lang.String)>("cryptoPerms");
+
+        if $r19 != null goto label32;
+
+        $r92 = new java.util.jar.JarException;
+
+        specialinvoke $r92.<java.util.jar.JarException: void <init>(java.lang.String)>("Can not find cryptoPerms");
+
+        throw $r92;
+
+     label32:
+        $r93 = new javax.crypto.CryptoPermissions;
+
+        specialinvoke $r93.<javax.crypto.CryptoPermissions: void <init>()>();
+
+        r10.<javax.crypto.JarVerifier: javax.crypto.CryptoPermissions appPerms> = $r93;
+
+        $r22 = r10.<javax.crypto.JarVerifier: javax.crypto.CryptoPermissions appPerms>;
+
+        $r21 = $r56.<javax.crypto.JarVerifier$JarHolder: java.util.jar.JarFile file>;
+
+        $r23 = virtualinvoke $r21.<java.util.jar.JarFile: java.io.InputStream getInputStream(java.util.zip.ZipEntry)>($r19);
+
+        virtualinvoke $r22.<javax.crypto.CryptoPermissions: void load(java.io.InputStream)>($r23);
+
+     label33:
+        $r77 = virtualinvoke $r14.<java.util.jar.Manifest: java.util.jar.Attributes getMainAttributes()>();
+
+        $r78 = <java.util.jar.Attributes$Name: java.util.jar.Attributes$Name CLASS_PATH>;
+
+        $r79 = virtualinvoke $r77.<java.util.jar.Attributes: java.lang.String getValue(java.util.jar.Attributes$Name)>($r78);
+
+     label34:
+        if $r56 == null goto label35;
+
+        $z4 = $r56.<javax.crypto.JarVerifier$JarHolder: boolean useCaches>;
+
+        if $z4 != 0 goto label35;
+
+        $r17 = $r56.<javax.crypto.JarVerifier$JarHolder: java.util.jar.JarFile file>;
+
+        virtualinvoke $r17.<java.util.jar.JarFile: void close()>();
+
+     label35:
+        return $r79;
+
+     label36:
+        if $r56 == null goto label37;
+
+        $z1 = $r56.<javax.crypto.JarVerifier$JarHolder: boolean useCaches>;
+
+        if $z1 != 0 goto label37;
+
+        $r12 = $r56.<javax.crypto.JarVerifier$JarHolder: java.util.jar.JarFile file>;
+
+        virtualinvoke $r12.<java.util.jar.JarFile: void close()>();
+
+     label37:
+        return null;
+
+     label38:
+        $r57 := @caughtexception;
+
+     label39:
+        if r71 == null goto label40;
+
+        $z10 = r71.<javax.crypto.JarVerifier$JarHolder: boolean useCaches>;
+
+        if $z10 != 0 goto label40;
+
+        $r58 = r71.<javax.crypto.JarVerifier$JarHolder: java.util.jar.JarFile file>;
+
+        virtualinvoke $r58.<java.util.jar.JarFile: void close()>();
+
+     label40:
+        throw $r57;
+
+        catch java.security.PrivilegedActionException from label03 to label04 with label05;
+        catch java.lang.Throwable from label08 to label09 with label11;
+        catch java.lang.Throwable from label14 to label15 with label16;
+        catch java.lang.Throwable from label11 to label13 with label12;
+        catch java.lang.Throwable from label03 to label34 with label38;
+        catch java.lang.Throwable from label38 to label39 with label38;
+    }
+
+    private static java.lang.String[] parseAttrClasspath(java.lang.String) throws java.util.jar.JarException
+    {
+        java.lang.Object[] $r4;
+        java.lang.String[] $r3, $r5;
+        java.util.ArrayList $r1;
+        java.util.jar.JarException $r2;
+        int $i0, i1;
+        java.lang.String $r0, $r6, $r7, r8, r9, r10;
+        boolean $z0, z1;
+
+        r8 := @parameter0: java.lang.String;
+
+        $r0 = virtualinvoke r8.<java.lang.String: java.lang.String trim()>();
+
+        r9 = $r0;
+
+        i1 = virtualinvoke $r0.<java.lang.String: int indexOf(int)>(32);
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        z1 = 0;
+
+     label1:
+        if i1 <= 0 goto label2;
+
+        r10 = virtualinvoke r9.<java.lang.String: java.lang.String substring(int,int)>(0, i1);
+
+        $i0 = i1 + 1;
+
+        $r6 = virtualinvoke r9.<java.lang.String: java.lang.String substring(int)>($i0);
+
+        $r7 = virtualinvoke $r6.<java.lang.String: java.lang.String trim()>();
+
+        r9 = $r7;
+
+        i1 = virtualinvoke $r7.<java.lang.String: int indexOf(int)>(32);
+
+        goto label3;
+
+     label2:
+        r10 = r9;
+
+        z1 = 1;
+
+     label3:
+        $z0 = virtualinvoke r10.<java.lang.String: boolean endsWith(java.lang.String)>(".jar");
+
+        if $z0 == 0 goto label4;
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>(r10);
+
+        goto label5;
+
+     label4:
+        $r2 = new java.util.jar.JarException;
+
+        specialinvoke $r2.<java.util.jar.JarException: void <init>(java.lang.String)>("The provider contains un-verifiable components");
+
+        throw $r2;
+
+     label5:
+        if z1 == 0 goto label1;
+
+        $r3 = newarray (java.lang.String)[0];
+
+        $r4 = interfaceinvoke $r1.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r3);
+
+        $r5 = (java.lang.String[]) $r4;
+
+        return $r5;
+    }
+
+    private boolean isTrusted(java.security.cert.X509Certificate[])
+    {
+        java.security.cert.CertificateException $r3;
+        javax.crypto.JarVerifier r0;
+        java.security.cert.X509Certificate[] r1;
+        sun.security.validator.Validator $r2;
+
+        r0 := @this: javax.crypto.JarVerifier;
+
+        r1 := @parameter0: java.security.cert.X509Certificate[];
+
+     label1:
+        $r2 = r0.<javax.crypto.JarVerifier: sun.security.validator.Validator validator>;
+
+        virtualinvoke $r2.<sun.security.validator.Validator: java.security.cert.X509Certificate[] validate(java.security.cert.X509Certificate[])>(r1);
+
+     label2:
+        return 1;
+
+     label3:
+        $r3 := @caughtexception;
+
+        return 0;
+
+        catch java.security.cert.CertificateException from label1 to label2 with label3;
+    }
+
+    private static java.security.cert.X509Certificate[] getAChain(java.security.cert.Certificate[], int)
+    {
+        java.security.cert.X509Certificate $r2, $r4, $r7;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, i10;
+        boolean $z0;
+        java.security.cert.Certificate $r1, $r3, $r6;
+        java.security.Principal $r5, $r8;
+        java.security.cert.Certificate[] r0;
+        java.security.cert.X509Certificate[] $r9;
+
+        r0 := @parameter0: java.security.cert.Certificate[];
+
+        i0 := @parameter1: int;
+
+        $i1 = lengthof r0;
+
+        $i2 = $i1 - 1;
+
+        if i0 <= $i2 goto label1;
+
+        return null;
+
+     label1:
+        i9 = i0;
+
+     label2:
+        $i3 = lengthof r0;
+
+        $i4 = $i3 - 1;
+
+        if i9 >= $i4 goto label4;
+
+        $i7 = i9 + 1;
+
+        $r3 = r0[$i7];
+
+        $r4 = (java.security.cert.X509Certificate) $r3;
+
+        $r5 = virtualinvoke $r4.<java.security.cert.X509Certificate: java.security.Principal getSubjectDN()>();
+
+        $r6 = r0[i9];
+
+        $r7 = (java.security.cert.X509Certificate) $r6;
+
+        $r8 = virtualinvoke $r7.<java.security.cert.X509Certificate: java.security.Principal getIssuerDN()>();
+
+        $z0 = interfaceinvoke $r5.<java.security.Principal: boolean equals(java.lang.Object)>($r8);
+
+        if $z0 != 0 goto label3;
+
+        goto label4;
+
+     label3:
+        i9 = i9 + 1;
+
+        goto label2;
+
+     label4:
+        $i5 = i9 - i0;
+
+        $i8 = $i5 + 1;
+
+        $r9 = newarray (java.security.cert.X509Certificate)[$i8];
+
+        i10 = 0;
+
+     label5:
+        if i10 >= $i8 goto label6;
+
+        $i6 = i0 + i10;
+
+        $r1 = r0[$i6];
+
+        $r2 = (java.security.cert.X509Certificate) $r1;
+
+        $r9[i10] = $r2;
+
+        i10 = i10 + 1;
+
+        goto label5;
+
+     label6:
+        return $r9;
+    }
+
+    private static java.util.List convertCertsToChains(java.security.cert.Certificate[]) throws java.security.cert.CertificateException
+    {
+        java.util.List $r3;
+        int $i0, i1;
+        java.security.cert.Certificate[] r0;
+        java.security.cert.X509Certificate[] $r2;
+        java.util.ArrayList $r1;
+
+        r0 := @parameter0: java.security.cert.Certificate[];
+
+        if r0 != null goto label1;
+
+        $r3 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+        return $r3;
+
+     label1:
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        i1 = 0;
+
+     label2:
+        $r2 = staticinvoke <javax.crypto.JarVerifier: java.security.cert.X509Certificate[] getAChain(java.security.cert.Certificate[],int)>(r0, i1);
+
+        if $r2 == null goto label3;
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>($r2);
+
+        $i0 = lengthof $r2;
+
+        i1 = i1 + $i0;
+
+        goto label2;
+
+     label3:
+        return $r1;
+    }
+
+    private static void testSignatures(java.security.cert.X509Certificate, java.security.cert.CertificateFactory) throws java.lang.Exception
+    {
+        java.security.cert.X509Certificate r2, $r4, $r5, $r6, $r10, $r15;
+        byte[] $r0;
+        java.security.cert.CertificateFactory r3;
+        byte $b0, $b1, $b5, $b9;
+        java.lang.SecurityException $r19;
+        boolean z0, $z1;
+        java.security.SignatureException $r18;
+        java.security.InvalidKeyException $r17;
+        java.security.cert.X509Certificate[] $r1;
+        short $s2, $s4, $s6, $s15, $s16, $s19;
+        int $i3, $i7, $i8, $i10, $i11, i12, i13, i14, $i17, $i18, $i20, $i21;
+        boolean[] $r13;
+        java.security.PublicKey $r8, $r9, $r11, $r12, $r14;
+        java.security.PublicKey[] r7;
+
+        r2 := @parameter0: java.security.cert.X509Certificate;
+
+        r3 := @parameter1: java.security.cert.CertificateFactory;
+
+        $r0 = staticinvoke <javax.crypto.JarVerifier: byte[] getSystemEntropy()>();
+
+        $b0 = $r0[0];
+
+        $s15 = (short) $b0;
+
+        $s4 = $s15 & 255;
+
+        $b1 = $r0[1];
+
+        $s16 = (short) $b1;
+
+        $s2 = $s16 & 255;
+
+        $i17 = (int) $s2;
+
+        $i3 = $i17 << 8;
+
+        $i18 = (int) $s4;
+
+        $i8 = $i18 | $i3;
+
+        $b5 = $r0[2];
+
+        $s19 = (short) $b5;
+
+        $s6 = $s19 & 255;
+
+        $i20 = (int) $s6;
+
+        $i7 = $i20 << 16;
+
+        $i11 = $i8 | $i7;
+
+        $b9 = $r0[3];
+
+        $i21 = (int) $b9;
+
+        $i10 = $i21 << 24;
+
+        i13 = $i11 | $i10;
+
+        $r1 = newarray (java.security.cert.X509Certificate)[4];
+
+        $r1[0] = r2;
+
+        $r4 = staticinvoke <javax.crypto.JarVerifier: java.security.cert.X509Certificate parseCertificate(java.lang.String,java.security.cert.CertificateFactory)>("-----BEGIN CERTIFICATE-----\nMIIDLDCCAukCBDf5OeUwCwYHKoZIzjgEAwUAMHsxCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJDQTESMBAGA1UEBxMJQ3VwZXJ0aW5vMRkwFwYDVQQKExBTdW4gTWljcm9zeXN0ZW1zMRYwFAYDVQQLEw1KYXZhIFNvZnR3YXJlMRgwFgYDVQQDEw9KQ0UgRGV2ZWxvcG1lbnQwHhcNOTkxMDA0MjMzNjA1WhcNMDAxMDAzMjMzNjA1WjB7MQswCQYDVQQGEwJVUzELMAkGA1UECBMCQ0ExEjAQBgNVBAcTCUN1cGVydGlubzEZMBcGA1UEChMQU3VuIE1pY3Jvc3lzdGVtczEWMBQGA1UECxMNSmF2YSBTb2Z0d2FyZTEYMBYGA1UEAxMPSkNFIERldmVsb3BtZW50MIIBuDCCASwGByqGSM44BAEwggEfAoGBAP1/U4EddRIpUt9KnC7s5Of2EbdSPO9EAMMeP4C2USZpRV1AIlH7WT2NWPq/xfW6MPbLm1Vs14E7gB00b/JmYLdrmVClpJ+f6AR7ECLCT7up1/63xhv4O1fnxqimFQ8E+4P208UewwI1VBNaFpEy9nXzrith1yrv8iIDGZ3RSAHHAhUAl2BQjxUjC8yykrmCouuEC/BYHPUCgYEA9+GghdabPd7LvKtcNrhXuXmUr7v6OuqC+VdMCz0HgmdRWVeOutRZT+ZxBxCBgLRJFnEj6EwoFhO3zwkyjMim4TwWeotUfI0o4KOuHiuzpnWRbqN/C/ohNWLx+2J6ASQ7zKTxvqhRkImog9/hWuWfBpKLZl6Ae1UlZAFMO/7PSSoDgYUAAoGBAOGsR8waR5aiuOk1yBLemRlVCY+APJv3xqmPRxWAF6nwV2xrFUB8ghSEMFcHywoe4vBDvkGSoAFzeB5jy5wjDiFsN5AFPEVRfveS4NNZ1dgRdHbbh3h5O1dZE4MAKQwQfUoh9Oa3aahlB+orRzKOHLlGDpbNRQLST5BClvohramCMAsGByqGSM44BAMFAAMwADAtAhRF46T3nS+inP9TA1pLd3LIV0NNDQIVAIafi+1/+JKxu0rcoXWMFSxNaRb3\n-----END CERTIFICATE-----", r3);
+
+        $r1[1] = $r4;
+
+        $r5 = staticinvoke <javax.crypto.JarVerifier: java.security.cert.X509Certificate parseCertificate(java.lang.String,java.security.cert.CertificateFactory)>("-----BEGIN CERTIFICATE-----\nMIIB4DCCAYoCAQEwDQYJKoZIhvcNAQEEBQAwezELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRIwEAYDVQQHEwlDdXBlcnRpbm8xGTAXBgNVBAoTEFN1biBNaWNyb3N5c3RlbXMxFjAUBgNVBAsTDUphdmEgU29mdHdhcmUxGDAWBgNVBAMTD0pDRSBEZXZlbG9wbWVudDAeFw0wMjEwMzExNTI3NDRaFw0wNzEwMzExNTI3NDRaMHsxCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJDQTESMBAGA1UEBxMJQ3VwZXJ0aW5vMRkwFwYDVQQKExBTdW4gTWljcm9zeXN0ZW1zMRYwFAYDVQQLEw1KYXZhIFNvZnR3YXJlMRgwFgYDVQQDEw9KQ0UgRGV2ZWxvcG1lbnQwXDANBgkqhkiG9w0BAQEFAANLADBIAkEAo/4CddEOa3M6v9JFAhnBYgTq54Y30++F8yzCK9EeYaG3AzvzZqNshDy579647p0cOM/4VO6rU2PgbzgKXPcs8wIDAQABMA0GCSqGSIb3DQEBBAUAA0EACqPlFmVdKdYSCTNltXKQnBqss9GNjbnB+CitvWrwN+oOK8qQpvV+5LB6LruvRy6zCedCV95Z2kXKg/Fnj0gvsg==\n-----END CERTIFICATE-----", r3);
+
+        $r1[2] = $r5;
+
+        $r6 = staticinvoke <javax.crypto.JarVerifier: java.security.cert.X509Certificate parseCertificate(java.lang.String,java.security.cert.CertificateFactory)>("-----BEGIN CERTIFICATE-----\nMIIB4DCCAYoCAQIwDQYJKoZIhvcNAQEEBQAwezELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRIwEAYDVQQHEwlDdXBlcnRpbm8xGTAXBgNVBAoTEFN1biBNaWNyb3N5c3RlbXMxFjAUBgNVBAsTDUphdmEgU29mdHdhcmUxGDAWBgNVBAMTD0pDRSBEZXZlbG9wbWVudDAeFw0wMjEwMzExNTI3NDRaFw0wNzEwMzExNTI3NDRaMHsxCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJDQTESMBAGA1UEBxMJQ3VwZXJ0aW5vMRkwFwYDVQQKExBTdW4gTWljcm9zeXN0ZW1zMRYwFAYDVQQLEw1KYXZhIFNvZnR3YXJlMRgwFgYDVQQDEw9KQ0UgRGV2ZWxvcG1lbnQwXDANBgkqhkiG9w0BAQEFAANLADBIAkEAr1OSXaOzpnVoqL2LqS5+HLy1kVvBwiM/E5iYT9eZaghE8qvF+4fETipWUNTWCQzHR4cDJGJOl9Nm77tELhES4QIDAQABMA0GCSqGSIb3DQEBBAUAA0EAL+WcVFyj+iXlEVNVQbNOOUlWmlmXGiNKKXnIdNcc1ZUyi+JW0zmlfZ7iU/eRYhEEJBwdrUoyiGOGLo7pi6JzAA==\n-----END CERTIFICATE-----", r3);
+
+        $r1[3] = $r6;
+
+        r7 = newarray (java.security.PublicKey)[4];
+
+        $r8 = virtualinvoke r2.<java.security.cert.X509Certificate: java.security.PublicKey getPublicKey()>();
+
+        r7[0] = $r8;
+
+        $r9 = r7[0];
+
+        r7[1] = $r9;
+
+        $r10 = $r1[2];
+
+        $r11 = virtualinvoke $r10.<java.security.cert.X509Certificate: java.security.PublicKey getPublicKey()>();
+
+        r7[2] = $r11;
+
+        $r12 = r7[2];
+
+        r7[3] = $r12;
+
+        $r13 = newarray (boolean)[4];
+
+        $r13[0] = 1;
+
+        $r13[1] = 0;
+
+        $r13[2] = 1;
+
+        $r13[3] = 0;
+
+        i14 = 0;
+
+     label1:
+        if i14 >= 12 goto label8;
+
+        i12 = i13 & 3;
+
+        i13 = i13 >> 2;
+
+     label2:
+        $r15 = $r1[i12];
+
+        $r14 = r7[i12];
+
+        virtualinvoke $r15.<java.security.cert.X509Certificate: void verify(java.security.PublicKey)>($r14);
+
+        z0 = 1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r18 := @caughtexception;
+
+        z0 = 0;
+
+        goto label6;
+
+     label5:
+        $r17 := @caughtexception;
+
+        z0 = 0;
+
+     label6:
+        $z1 = $r13[i12];
+
+        if z0 == $z1 goto label7;
+
+        $r19 = new java.lang.SecurityException;
+
+        specialinvoke $r19.<java.lang.SecurityException: void <init>(java.lang.String)>("Signature classes have been tampered with");
+
+        throw $r19;
+
+     label7:
+        i14 = i14 + 1;
+
+        goto label1;
+
+     label8:
+        return;
+
+        catch java.security.SignatureException from label2 to label3 with label4;
+        catch java.security.InvalidKeyException from label2 to label3 with label5;
+    }
+
+    private static byte[] getSystemEntropy()
+    {
+        byte[] $r11, $r12, $r13, $r18, $r20, $r22;
+        java.util.Random $r8;
+        java.nio.file.DirectoryStream $r7;
+        byte $b7, b8;
+        java.lang.InternalError $r29;
+        java.nio.file.Path $r6, r15, $r16;
+        boolean $z0, $z1, $z2;
+        java.lang.Runtime $r10;
+        java.util.Set $r2;
+        java.lang.Exception $r23;
+        java.security.NoSuchAlgorithmException $r28;
+        java.lang.Throwable $r24, $r25, $r26, r31;
+        java.security.MessageDigest $r0;
+        long $l0, $l2, $l4;
+        int $i1, $i3, $i5, $i6, i9, $i10;
+        java.lang.String $r5, $r17, $r21, r30;
+        java.util.Properties $r1;
+        java.util.Iterator $r3, $r9;
+        java.io.File $r4;
+        java.lang.Object $r14, $r19;
+
+     label01:
+        $r0 = staticinvoke <java.security.MessageDigest: java.security.MessageDigest getInstance(java.lang.String)>("SHA");
+
+     label02:
+        goto label04;
+
+     label03:
+        $r28 := @caughtexception;
+
+        $r29 = new java.lang.InternalError;
+
+        specialinvoke $r29.<java.lang.InternalError: void <init>(java.lang.String,java.lang.Throwable)>("internal error: SHA-1 not available.", $r28);
+
+        throw $r29;
+
+     label04:
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $i1 = (int) $l0;
+
+        b8 = (byte) $i1;
+
+        virtualinvoke $r0.<java.security.MessageDigest: void update(byte)>(b8);
+
+     label05:
+        $r1 = staticinvoke <java.lang.System: java.util.Properties getProperties()>();
+
+        $r2 = virtualinvoke $r1.<java.util.Properties: java.util.Set stringPropertyNames()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Set: java.util.Iterator iterator()>();
+
+     label06:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label07;
+
+        $r19 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r30 = (java.lang.String) $r19;
+
+        $r20 = virtualinvoke r30.<java.lang.String: byte[] getBytes()>();
+
+        virtualinvoke $r0.<java.security.MessageDigest: void update(byte[])>($r20);
+
+        $r21 = virtualinvoke $r1.<java.util.Properties: java.lang.String getProperty(java.lang.String)>(r30);
+
+        $r22 = virtualinvoke $r21.<java.lang.String: byte[] getBytes()>();
+
+        virtualinvoke $r0.<java.security.MessageDigest: void update(byte[])>($r22);
+
+        goto label06;
+
+     label07:
+        staticinvoke <javax.crypto.JarVerifier: void addNetworkAdapterInfo(java.security.MessageDigest)>($r0);
+
+        $r4 = new java.io.File;
+
+        $r5 = virtualinvoke $r1.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("java.io.tmpdir");
+
+        specialinvoke $r4.<java.io.File: void <init>(java.lang.String)>($r5);
+
+        i9 = 0;
+
+        $r6 = virtualinvoke $r4.<java.io.File: java.nio.file.Path toPath()>();
+
+        $r7 = staticinvoke <java.nio.file.Files: java.nio.file.DirectoryStream newDirectoryStream(java.nio.file.Path)>($r6);
+
+        r31 = null;
+
+     label08:
+        $r8 = new java.util.Random;
+
+        specialinvoke $r8.<java.util.Random: void <init>()>();
+
+        $r9 = interfaceinvoke $r7.<java.nio.file.DirectoryStream: java.util.Iterator iterator()>();
+
+     label09:
+        $z1 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label13;
+
+        $r14 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        r15 = (java.nio.file.Path) $r14;
+
+        if i9 < 512 goto label10;
+
+        $z2 = virtualinvoke $r8.<java.util.Random: boolean nextBoolean()>();
+
+        if $z2 == 0 goto label11;
+
+     label10:
+        $r16 = interfaceinvoke r15.<java.nio.file.Path: java.nio.file.Path getFileName()>();
+
+        $r17 = interfaceinvoke $r16.<java.nio.file.Path: java.lang.String toString()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.String: byte[] getBytes()>();
+
+        virtualinvoke $r0.<java.security.MessageDigest: void update(byte[])>($r18);
+
+     label11:
+        $i10 = i9;
+
+        i9 = i9 + 1;
+
+        if $i10 <= 1024 goto label12;
+
+        goto label13;
+
+     label12:
+        goto label09;
+
+     label13:
+        if $r7 == null goto label23;
+
+        goto label14;
+
+     label14:
+        interfaceinvoke $r7.<java.nio.file.DirectoryStream: void close()>();
+
+        goto label23;
+
+     label15:
+        $r26 := @caughtexception;
+
+        r31 = $r26;
+
+        throw $r26;
+
+     label16:
+        $r25 := @caughtexception;
+
+     label17:
+        if $r7 == null goto label22;
+
+        if r31 == null goto label21;
+
+     label18:
+        interfaceinvoke $r7.<java.nio.file.DirectoryStream: void close()>();
+
+     label19:
+        goto label22;
+
+     label20:
+        $r24 := @caughtexception;
+
+        virtualinvoke r31.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r24);
+
+        goto label22;
+
+     label21:
+        interfaceinvoke $r7.<java.nio.file.DirectoryStream: void close()>();
+
+     label22:
+        throw $r25;
+
+     label23:
+        goto label25;
+
+     label24:
+        $r23 := @caughtexception;
+
+        $i6 = virtualinvoke $r23.<java.lang.Object: int hashCode()>();
+
+        $b7 = (byte) $i6;
+
+        virtualinvoke $r0.<java.security.MessageDigest: void update(byte)>($b7);
+
+     label25:
+        $r10 = staticinvoke <java.lang.Runtime: java.lang.Runtime getRuntime()>();
+
+        $l2 = virtualinvoke $r10.<java.lang.Runtime: long totalMemory()>();
+
+        $r11 = staticinvoke <javax.crypto.JarVerifier: byte[] longToByteArray(long)>($l2);
+
+        $i3 = lengthof $r11;
+
+        virtualinvoke $r0.<java.security.MessageDigest: void update(byte[],int,int)>($r11, 0, $i3);
+
+        $l4 = virtualinvoke $r10.<java.lang.Runtime: long freeMemory()>();
+
+        $r12 = staticinvoke <javax.crypto.JarVerifier: byte[] longToByteArray(long)>($l4);
+
+        $i5 = lengthof $r12;
+
+        virtualinvoke $r0.<java.security.MessageDigest: void update(byte[],int,int)>($r12, 0, $i5);
+
+        $r13 = virtualinvoke $r0.<java.security.MessageDigest: byte[] digest()>();
+
+        return $r13;
+
+        catch java.security.NoSuchAlgorithmException from label01 to label02 with label03;
+        catch java.lang.Throwable from label08 to label13 with label15;
+        catch java.lang.Throwable from label18 to label19 with label20;
+        catch java.lang.Throwable from label15 to label17 with label16;
+        catch java.lang.Exception from label05 to label23 with label24;
+    }
+
+    private static byte[] longToByteArray(long)
+    {
+        byte[] r0;
+        byte $b1;
+        int $i0, i3;
+        long l2;
+
+        l2 := @parameter0: long;
+
+        r0 = newarray (byte)[8];
+
+        i3 = 0;
+
+     label1:
+        if i3 >= 8 goto label2;
+
+        $i0 = (int) l2;
+
+        $b1 = (byte) $i0;
+
+        r0[i3] = $b1;
+
+        l2 = l2 >> 8;
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label2:
+        return r0;
+    }
+
+    private static void addNetworkAdapterInfo(java.security.MessageDigest)
+    {
+        byte[] $r5, $r6;
+        java.util.Enumeration $r0;
+        java.security.MessageDigest r3;
+        java.net.NetworkInterface r2;
+        java.lang.Exception $r7;
+        java.lang.Object $r1;
+        java.lang.String $r4;
+        boolean $z0, $z1;
+
+        r3 := @parameter0: java.security.MessageDigest;
+
+     label1:
+        $r0 = staticinvoke <java.net.NetworkInterface: java.util.Enumeration getNetworkInterfaces()>();
+
+     label2:
+        $z0 = interfaceinvoke $r0.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label4;
+
+        $r1 = interfaceinvoke $r0.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r2 = (java.net.NetworkInterface) $r1;
+
+        $r4 = virtualinvoke r2.<java.net.NetworkInterface: java.lang.String toString()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.String: byte[] getBytes()>();
+
+        virtualinvoke r3.<java.security.MessageDigest: void update(byte[])>($r5);
+
+        $z1 = virtualinvoke r2.<java.net.NetworkInterface: boolean isVirtual()>();
+
+        if $z1 != 0 goto label3;
+
+        $r6 = virtualinvoke r2.<java.net.NetworkInterface: byte[] getHardwareAddress()>();
+
+        if $r6 == null goto label3;
+
+        virtualinvoke r3.<java.security.MessageDigest: void update(byte[])>($r6);
+
+        goto label4;
+
+     label3:
+        goto label2;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r7 := @caughtexception;
+
+     label6:
+        return;
+
+        catch java.lang.Exception from label1 to label4 with label5;
+    }
+
+    static java.security.cert.X509Certificate access$002(java.security.cert.X509Certificate)
+    {
+        java.security.cert.X509Certificate r0;
+
+        r0 := @parameter0: java.security.cert.X509Certificate;
+
+        <javax.crypto.JarVerifier: java.security.cert.X509Certificate frameworkCertificate> = r0;
+
+        return r0;
+    }
+
+    static java.security.cert.X509Certificate access$100(java.lang.String, java.security.cert.CertificateFactory) throws java.lang.Exception
+    {
+        java.security.cert.X509Certificate $r2;
+        java.lang.String r0;
+        java.security.cert.CertificateFactory r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.security.cert.CertificateFactory;
+
+        $r2 = staticinvoke <javax.crypto.JarVerifier: java.security.cert.X509Certificate parseCertificate(java.lang.String,java.security.cert.CertificateFactory)>(r0, r1);
+
+        return $r2;
+    }
+
+    static java.security.cert.X509Certificate access$000()
+    {
+        java.security.cert.X509Certificate $r0;
+
+        $r0 = <javax.crypto.JarVerifier: java.security.cert.X509Certificate frameworkCertificate>;
+
+        return $r0;
+    }
+
+    static sun.security.validator.Validator access$202(sun.security.validator.Validator)
+    {
+        sun.security.validator.Validator r0;
+
+        r0 := @parameter0: sun.security.validator.Validator;
+
+        <javax.crypto.JarVerifier: sun.security.validator.Validator providerValidator> = r0;
+
+        return r0;
+    }
+
+    static sun.security.validator.Validator access$302(sun.security.validator.Validator)
+    {
+        sun.security.validator.Validator r0;
+
+        r0 := @parameter0: sun.security.validator.Validator;
+
+        <javax.crypto.JarVerifier: sun.security.validator.Validator exemptValidator> = r0;
+
+        return r0;
+    }
+
+    static sun.security.validator.Validator access$200()
+    {
+        sun.security.validator.Validator $r0;
+
+        $r0 = <javax.crypto.JarVerifier: sun.security.validator.Validator providerValidator>;
+
+        return $r0;
+    }
+
+    static void access$400(java.security.cert.X509Certificate, java.security.cert.CertificateFactory) throws java.lang.Exception
+    {
+        java.security.cert.X509Certificate r0;
+        java.security.cert.CertificateFactory r1;
+
+        r0 := @parameter0: java.security.cert.X509Certificate;
+
+        r1 := @parameter1: java.security.cert.CertificateFactory;
+
+        staticinvoke <javax.crypto.JarVerifier: void testSignatures(java.security.cert.X509Certificate,java.security.cert.CertificateFactory)>(r0, r1);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.SecurityException $r2;
+        javax.crypto.JarVerifier$1 $r0;
+        java.lang.Exception $r1;
+
+        <javax.crypto.JarVerifier: java.lang.String PLUGIN_IMPL_NAME> = "sun.plugin.net.protocol.jar.CachedJarURLConnection";
+
+     label1:
+        $r0 = new javax.crypto.JarVerifier$1;
+
+        specialinvoke $r0.<javax.crypto.JarVerifier$1: void <init>()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r1 := @caughtexception;
+
+        $r2 = new java.lang.SecurityException;
+
+        specialinvoke $r2.<java.lang.SecurityException: void <init>(java.lang.String)>("Framework jar verification can not be initialized");
+
+        virtualinvoke $r2.<java.lang.SecurityException: java.lang.Throwable initCause(java.lang.Throwable)>($r1);
+
+        throw $r2;
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+}

@@ -1,0 +1,401 @@
+public class sun.awt.image.URLImageSource extends sun.awt.image.InputStreamImageSource
+{
+    java.net.URL url;
+    java.net.URLConnection conn;
+    java.lang.String actualHost;
+    int actualPort;
+
+    public void <init>(java.net.URL)
+    {
+        java.net.URL r2;
+        int $i0, $i1, $i2, $i3, $i5, $i7;
+        java.lang.SecurityException $r6;
+        java.lang.String $r5, $r7, $r8, $r9, $r10;
+        boolean $z0, $z1;
+        sun.awt.image.URLImageSource r0;
+        java.io.IOException $r4;
+        java.lang.SecurityManager $r1;
+        java.security.Permission $r3;
+
+        r0 := @this: sun.awt.image.URLImageSource;
+
+        r2 := @parameter0: java.net.URL;
+
+        specialinvoke r0.<sun.awt.image.InputStreamImageSource: void <init>()>();
+
+        $r1 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r1 == null goto label9;
+
+     label1:
+        $r3 = staticinvoke <sun.net.util.URLUtil: java.security.Permission getConnectPermission(java.net.URL)>(r2);
+
+        if $r3 == null goto label7;
+
+     label2:
+        virtualinvoke $r1.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r3);
+
+     label3:
+        goto label7;
+
+     label4:
+        $r6 := @caughtexception;
+
+        $z0 = $r3 instanceof java.io.FilePermission;
+
+        if $z0 == 0 goto label5;
+
+        $r9 = virtualinvoke $r3.<java.security.Permission: java.lang.String getActions()>();
+
+        $i3 = virtualinvoke $r9.<java.lang.String: int indexOf(java.lang.String)>("read");
+
+        $i5 = (int) -1;
+
+        if $i3 == $i5 goto label5;
+
+        $r10 = virtualinvoke $r3.<java.security.Permission: java.lang.String getName()>();
+
+        virtualinvoke $r1.<java.lang.SecurityManager: void checkRead(java.lang.String)>($r10);
+
+        goto label7;
+
+     label5:
+        $z1 = $r3 instanceof java.net.SocketPermission;
+
+        if $z1 == 0 goto label6;
+
+        $r7 = virtualinvoke $r3.<java.security.Permission: java.lang.String getActions()>();
+
+        $i1 = virtualinvoke $r7.<java.lang.String: int indexOf(java.lang.String)>("connect");
+
+        $i7 = (int) -1;
+
+        if $i1 == $i7 goto label6;
+
+        $r8 = virtualinvoke r2.<java.net.URL: java.lang.String getHost()>();
+
+        $i2 = virtualinvoke r2.<java.net.URL: int getPort()>();
+
+        virtualinvoke $r1.<java.lang.SecurityManager: void checkConnect(java.lang.String,int)>($r8, $i2);
+
+        goto label7;
+
+     label6:
+        throw $r6;
+
+     label7:
+        goto label9;
+
+     label8:
+        $r4 := @caughtexception;
+
+        $r5 = virtualinvoke r2.<java.net.URL: java.lang.String getHost()>();
+
+        $i0 = virtualinvoke r2.<java.net.URL: int getPort()>();
+
+        virtualinvoke $r1.<java.lang.SecurityManager: void checkConnect(java.lang.String,int)>($r5, $i0);
+
+     label9:
+        r0.<sun.awt.image.URLImageSource: java.net.URL url> = r2;
+
+        return;
+
+        catch java.lang.SecurityException from label2 to label3 with label4;
+        catch java.io.IOException from label1 to label7 with label8;
+    }
+
+    public void <init>(java.lang.String) throws java.net.MalformedURLException
+    {
+        java.lang.String r2;
+        sun.awt.image.URLImageSource r0;
+        java.net.URL $r1;
+
+        r0 := @this: sun.awt.image.URLImageSource;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = new java.net.URL;
+
+        specialinvoke $r1.<java.net.URL: void <init>(java.net.URL,java.lang.String)>(null, r2);
+
+        specialinvoke r0.<sun.awt.image.URLImageSource: void <init>(java.net.URL)>($r1);
+
+        return;
+    }
+
+    public void <init>(java.net.URL, java.net.URLConnection)
+    {
+        sun.awt.image.URLImageSource r0;
+        java.net.URL r1;
+        java.net.URLConnection r2;
+
+        r0 := @this: sun.awt.image.URLImageSource;
+
+        r1 := @parameter0: java.net.URL;
+
+        r2 := @parameter1: java.net.URLConnection;
+
+        specialinvoke r0.<sun.awt.image.URLImageSource: void <init>(java.net.URL)>(r1);
+
+        r0.<sun.awt.image.URLImageSource: java.net.URLConnection conn> = r2;
+
+        return;
+    }
+
+    public void <init>(java.net.URLConnection)
+    {
+        sun.awt.image.URLImageSource r0;
+        java.net.URLConnection r1;
+        java.net.URL $r2;
+
+        r0 := @this: sun.awt.image.URLImageSource;
+
+        r1 := @parameter0: java.net.URLConnection;
+
+        $r2 = virtualinvoke r1.<java.net.URLConnection: java.net.URL getURL()>();
+
+        specialinvoke r0.<sun.awt.image.URLImageSource: void <init>(java.net.URL,java.net.URLConnection)>($r2, r1);
+
+        return;
+    }
+
+    final boolean checkSecurity(java.lang.Object, boolean)
+    {
+        sun.awt.image.URLImageSource r0;
+        java.lang.SecurityManager $r2;
+        int $i0;
+        java.lang.Object r3;
+        java.lang.SecurityException $r5;
+        java.lang.String $r1, $r4;
+        boolean z0;
+
+        r0 := @this: sun.awt.image.URLImageSource;
+
+        r3 := @parameter0: java.lang.Object;
+
+        z0 := @parameter1: boolean;
+
+        $r1 = r0.<sun.awt.image.URLImageSource: java.lang.String actualHost>;
+
+        if $r1 == null goto label5;
+
+     label1:
+        $r2 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r2 == null goto label2;
+
+        $r4 = r0.<sun.awt.image.URLImageSource: java.lang.String actualHost>;
+
+        $i0 = r0.<sun.awt.image.URLImageSource: int actualPort>;
+
+        virtualinvoke $r2.<java.lang.SecurityManager: void checkConnect(java.lang.String,int,java.lang.Object)>($r4, $i0, r3);
+
+     label2:
+        goto label5;
+
+     label3:
+        $r5 := @caughtexception;
+
+        if z0 != 0 goto label4;
+
+        throw $r5;
+
+     label4:
+        return 0;
+
+     label5:
+        return 1;
+
+        catch java.lang.SecurityException from label1 to label2 with label3;
+    }
+
+    private synchronized java.net.URLConnection getConnection() throws java.io.IOException
+    {
+        sun.awt.image.URLImageSource r0;
+        java.net.URLConnection $r1, r3;
+        java.net.URL $r2;
+
+        r0 := @this: sun.awt.image.URLImageSource;
+
+        $r1 = r0.<sun.awt.image.URLImageSource: java.net.URLConnection conn>;
+
+        if $r1 == null goto label1;
+
+        r3 = r0.<sun.awt.image.URLImageSource: java.net.URLConnection conn>;
+
+        r0.<sun.awt.image.URLImageSource: java.net.URLConnection conn> = null;
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<sun.awt.image.URLImageSource: java.net.URL url>;
+
+        r3 = virtualinvoke $r2.<java.net.URL: java.net.URLConnection openConnection()>();
+
+     label2:
+        return r3;
+    }
+
+    protected sun.awt.image.ImageDecoder getDecoder()
+    {
+        java.net.HttpURLConnection $r7, $r20;
+        java.net.URL $r4, $r5, $r9, $r16;
+        java.lang.SecurityException $r15;
+        boolean $z0, $z1, $z2, $z3;
+        sun.awt.image.URLImageSource r0;
+        sun.awt.image.ImageDecoder $r6, r23;
+        java.net.URLConnection $r1, r22;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.lang.String $r3, $r8, $r10, $r11, $r12, $r13, $r14;
+        java.io.IOException $r17, $r18, $r19;
+        java.io.InputStream $r2, r21;
+
+        r0 := @this: sun.awt.image.URLImageSource;
+
+        r21 = null;
+
+        r22 = null;
+
+     label01:
+        $r1 = specialinvoke r0.<sun.awt.image.URLImageSource: java.net.URLConnection getConnection()>();
+
+        r22 = $r1;
+
+        $r2 = virtualinvoke $r1.<java.net.URLConnection: java.io.InputStream getInputStream()>();
+
+        r21 = $r2;
+
+        $r3 = virtualinvoke $r1.<java.net.URLConnection: java.lang.String getContentType()>();
+
+        $r4 = virtualinvoke $r1.<java.net.URLConnection: java.net.URL getURL()>();
+
+        $r5 = r0.<sun.awt.image.URLImageSource: java.net.URL url>;
+
+        if $r4 == $r5 goto label05;
+
+        $r8 = virtualinvoke $r4.<java.net.URL: java.lang.String getHost()>();
+
+        $r9 = r0.<sun.awt.image.URLImageSource: java.net.URL url>;
+
+        $r10 = virtualinvoke $r9.<java.net.URL: java.lang.String getHost()>();
+
+        $z1 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>($r10);
+
+        if $z1 == 0 goto label02;
+
+        $i3 = virtualinvoke $r4.<java.net.URL: int getPort()>();
+
+        $r16 = r0.<sun.awt.image.URLImageSource: java.net.URL url>;
+
+        $i4 = virtualinvoke $r16.<java.net.URL: int getPort()>();
+
+        if $i3 == $i4 goto label05;
+
+     label02:
+        $r11 = r0.<sun.awt.image.URLImageSource: java.lang.String actualHost>;
+
+        if $r11 == null goto label04;
+
+        $r13 = r0.<sun.awt.image.URLImageSource: java.lang.String actualHost>;
+
+        $r14 = virtualinvoke $r4.<java.net.URL: java.lang.String getHost()>();
+
+        $z2 = virtualinvoke $r13.<java.lang.String: boolean equals(java.lang.Object)>($r14);
+
+        if $z2 == 0 goto label03;
+
+        $i1 = r0.<sun.awt.image.URLImageSource: int actualPort>;
+
+        $i2 = virtualinvoke $r4.<java.net.URL: int getPort()>();
+
+        if $i1 == $i2 goto label04;
+
+     label03:
+        $r15 = new java.lang.SecurityException;
+
+        specialinvoke $r15.<java.lang.SecurityException: void <init>(java.lang.String)>("image moved!");
+
+        throw $r15;
+
+     label04:
+        $r12 = virtualinvoke $r4.<java.net.URL: java.lang.String getHost()>();
+
+        r0.<sun.awt.image.URLImageSource: java.lang.String actualHost> = $r12;
+
+        $i0 = virtualinvoke $r4.<java.net.URL: int getPort()>();
+
+        r0.<sun.awt.image.URLImageSource: int actualPort> = $i0;
+
+     label05:
+        goto label12;
+
+     label06:
+        $r19 := @caughtexception;
+
+        if r21 == null goto label10;
+
+     label07:
+        virtualinvoke r21.<java.io.InputStream: void close()>();
+
+     label08:
+        goto label11;
+
+     label09:
+        $r18 := @caughtexception;
+
+        goto label11;
+
+     label10:
+        $z3 = r22 instanceof java.net.HttpURLConnection;
+
+        if $z3 == 0 goto label11;
+
+        $r20 = (java.net.HttpURLConnection) r22;
+
+        virtualinvoke $r20.<java.net.HttpURLConnection: void disconnect()>();
+
+     label11:
+        return null;
+
+     label12:
+        $r6 = virtualinvoke r0.<sun.awt.image.URLImageSource: sun.awt.image.ImageDecoder decoderForType(java.io.InputStream,java.lang.String)>($r2, $r3);
+
+        r23 = $r6;
+
+        if $r6 != null goto label13;
+
+        r23 = virtualinvoke r0.<sun.awt.image.URLImageSource: sun.awt.image.ImageDecoder getDecoder(java.io.InputStream)>($r2);
+
+     label13:
+        if r23 != null goto label18;
+
+        if $r2 == null goto label17;
+
+     label14:
+        virtualinvoke $r2.<java.io.InputStream: void close()>();
+
+     label15:
+        goto label18;
+
+     label16:
+        $r17 := @caughtexception;
+
+        goto label18;
+
+     label17:
+        $z0 = $r1 instanceof java.net.HttpURLConnection;
+
+        if $z0 == 0 goto label18;
+
+        $r7 = (java.net.HttpURLConnection) $r1;
+
+        virtualinvoke $r7.<java.net.HttpURLConnection: void disconnect()>();
+
+     label18:
+        return r23;
+
+        catch java.io.IOException from label01 to label05 with label06;
+        catch java.io.IOException from label07 to label08 with label09;
+        catch java.io.IOException from label14 to label15 with label16;
+    }
+}

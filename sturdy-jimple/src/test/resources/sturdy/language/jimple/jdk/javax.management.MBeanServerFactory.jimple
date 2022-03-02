@@ -1,0 +1,548 @@
+public class javax.management.MBeanServerFactory extends java.lang.Object
+{
+    private static javax.management.MBeanServerBuilder builder;
+    private static final java.util.ArrayList mBeanServerList;
+
+    private void <init>()
+    {
+        javax.management.MBeanServerFactory r0;
+
+        r0 := @this: javax.management.MBeanServerFactory;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static void releaseMBeanServer(javax.management.MBeanServer)
+    {
+        javax.management.MBeanServer r0;
+
+        r0 := @parameter0: javax.management.MBeanServer;
+
+        staticinvoke <javax.management.MBeanServerFactory: void checkPermission(java.lang.String)>("releaseMBeanServer");
+
+        staticinvoke <javax.management.MBeanServerFactory: void removeMBeanServer(javax.management.MBeanServer)>(r0);
+
+        return;
+    }
+
+    public static javax.management.MBeanServer createMBeanServer()
+    {
+        javax.management.MBeanServer $r0;
+
+        $r0 = staticinvoke <javax.management.MBeanServerFactory: javax.management.MBeanServer createMBeanServer(java.lang.String)>(null);
+
+        return $r0;
+    }
+
+    public static javax.management.MBeanServer createMBeanServer(java.lang.String)
+    {
+        java.lang.String r0;
+        javax.management.MBeanServer $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        staticinvoke <javax.management.MBeanServerFactory: void checkPermission(java.lang.String)>("createMBeanServer");
+
+        $r1 = staticinvoke <javax.management.MBeanServerFactory: javax.management.MBeanServer newMBeanServer(java.lang.String)>(r0);
+
+        staticinvoke <javax.management.MBeanServerFactory: void addMBeanServer(javax.management.MBeanServer)>($r1);
+
+        return $r1;
+    }
+
+    public static javax.management.MBeanServer newMBeanServer()
+    {
+        javax.management.MBeanServer $r0;
+
+        $r0 = staticinvoke <javax.management.MBeanServerFactory: javax.management.MBeanServer newMBeanServer(java.lang.String)>(null);
+
+        return $r0;
+    }
+
+    public static javax.management.MBeanServer newMBeanServer(java.lang.String)
+    {
+        javax.management.JMRuntimeException $r4, $r5;
+        java.lang.Throwable $r6;
+        javax.management.MBeanServer $r3;
+        javax.management.MBeanServerDelegate $r1;
+        java.lang.String r2;
+        javax.management.MBeanServerBuilder $r0;
+
+        r2 := @parameter0: java.lang.String;
+
+        staticinvoke <javax.management.MBeanServerFactory: void checkPermission(java.lang.String)>("newMBeanServer");
+
+        $r0 = staticinvoke <javax.management.MBeanServerFactory: javax.management.MBeanServerBuilder getNewMBeanServerBuilder()>();
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = virtualinvoke $r0.<javax.management.MBeanServerBuilder: javax.management.MBeanServerDelegate newMBeanServerDelegate()>();
+
+        if $r1 != null goto label2;
+
+        $r5 = new javax.management.JMRuntimeException;
+
+        specialinvoke $r5.<javax.management.JMRuntimeException: void <init>(java.lang.String)>("MBeanServerBuilder.newMBeanServerDelegate() returned null");
+
+        throw $r5;
+
+     label2:
+        $r3 = virtualinvoke $r0.<javax.management.MBeanServerBuilder: javax.management.MBeanServer newMBeanServer(java.lang.String,javax.management.MBeanServer,javax.management.MBeanServerDelegate)>(r2, null, $r1);
+
+        if $r3 != null goto label3;
+
+        $r4 = new javax.management.JMRuntimeException;
+
+        specialinvoke $r4.<javax.management.JMRuntimeException: void <init>(java.lang.String)>("MBeanServerBuilder.newMBeanServer() returned null");
+
+        throw $r4;
+
+     label3:
+        exitmonitor $r0;
+
+     label4:
+        return $r3;
+
+     label5:
+        $r6 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label6:
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public static synchronized java.util.ArrayList findMBeanServer(java.lang.String)
+    {
+        java.util.Iterator $r3;
+        java.util.ArrayList $r1, $r2, $r7, $r8;
+        javax.management.MBeanServer r5;
+        java.lang.Object $r4;
+        java.lang.String r0, $r6;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.String;
+
+        staticinvoke <javax.management.MBeanServerFactory: void checkPermission(java.lang.String)>("findMBeanServer");
+
+        if r0 != null goto label1;
+
+        $r7 = new java.util.ArrayList;
+
+        $r8 = <javax.management.MBeanServerFactory: java.util.ArrayList mBeanServerList>;
+
+        specialinvoke $r7.<java.util.ArrayList: void <init>(java.util.Collection)>($r8);
+
+        return $r7;
+
+     label1:
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        $r2 = <javax.management.MBeanServerFactory: java.util.ArrayList mBeanServerList>;
+
+        $r3 = virtualinvoke $r2.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (javax.management.MBeanServer) $r4;
+
+        $r6 = staticinvoke <javax.management.MBeanServerFactory: java.lang.String mBeanServerId(javax.management.MBeanServer)>(r5);
+
+        $z1 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+        if $z1 == 0 goto label3;
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>(r5);
+
+     label3:
+        goto label2;
+
+     label4:
+        return $r1;
+    }
+
+    public static javax.management.loading.ClassLoaderRepository getClassLoaderRepository(javax.management.MBeanServer)
+    {
+        javax.management.loading.ClassLoaderRepository $r1;
+        javax.management.MBeanServer r0;
+
+        r0 := @parameter0: javax.management.MBeanServer;
+
+        $r1 = interfaceinvoke r0.<javax.management.MBeanServer: javax.management.loading.ClassLoaderRepository getClassLoaderRepository()>();
+
+        return $r1;
+    }
+
+    private static java.lang.String mBeanServerId(javax.management.MBeanServer)
+    {
+        javax.management.ObjectName $r1;
+        java.util.logging.Logger $r6;
+        javax.management.JMException $r4;
+        javax.management.MBeanServer r0;
+        java.lang.Object $r2;
+        java.lang.StringBuilder $r5, $r7, $r8;
+        java.lang.String $r3, $r9;
+
+        r0 := @parameter0: javax.management.MBeanServer;
+
+     label1:
+        $r1 = <javax.management.MBeanServerDelegate: javax.management.ObjectName DELEGATE_NAME>;
+
+        $r2 = interfaceinvoke r0.<javax.management.MBeanServer: java.lang.Object getAttribute(javax.management.ObjectName,java.lang.String)>($r1, "MBeanServerId");
+
+        $r3 = (java.lang.String) $r2;
+
+     label2:
+        return $r3;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r6 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger MISC_LOGGER>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignoring exception while getting MBeanServerId: ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<java.util.logging.Logger: void finest(java.lang.String)>($r9);
+
+        return null;
+
+        catch javax.management.JMException from label1 to label2 with label3;
+    }
+
+    private static void checkPermission(java.lang.String) throws java.lang.SecurityException
+    {
+        java.lang.String r2;
+        javax.management.MBeanServerPermission $r1;
+        java.lang.SecurityManager $r0;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r1 = new javax.management.MBeanServerPermission;
+
+        specialinvoke $r1.<javax.management.MBeanServerPermission: void <init>(java.lang.String)>(r2);
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r1);
+
+     label1:
+        return;
+    }
+
+    private static synchronized void addMBeanServer(javax.management.MBeanServer)
+    {
+        javax.management.MBeanServer r0;
+        java.util.ArrayList $r1;
+
+        r0 := @parameter0: javax.management.MBeanServer;
+
+        $r1 = <javax.management.MBeanServerFactory: java.util.ArrayList mBeanServerList>;
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>(r0);
+
+        return;
+    }
+
+    private static synchronized void removeMBeanServer(javax.management.MBeanServer)
+    {
+        java.util.logging.Logger $r3;
+        java.lang.IllegalArgumentException $r6;
+        java.util.ArrayList $r1;
+        java.util.logging.Level $r4;
+        javax.management.MBeanServer r0;
+        java.lang.Class $r2;
+        java.lang.String $r5;
+        boolean $z0;
+
+        r0 := @parameter0: javax.management.MBeanServer;
+
+        $r1 = <javax.management.MBeanServerFactory: java.util.ArrayList mBeanServerList>;
+
+        $z0 = virtualinvoke $r1.<java.util.ArrayList: boolean remove(java.lang.Object)>(r0);
+
+        if $z0 != 0 goto label1;
+
+        $r3 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger MBEANSERVER_LOGGER>;
+
+        $r4 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r2 = class "Ljavax/management/MBeanServerFactory;";
+
+        $r5 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r3.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r4, $r5, "removeMBeanServer(MBeanServer)", "MBeanServer was not in list!");
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("MBeanServer was not in list!");
+
+        throw $r6;
+
+     label1:
+        return;
+    }
+
+    private static java.lang.Class loadBuilderClass(java.lang.String) throws java.lang.ClassNotFoundException
+    {
+        java.lang.Thread $r0;
+        java.lang.Class $r3, $r4;
+        java.lang.ClassLoader $r1;
+        java.lang.String r2;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.Thread: java.lang.ClassLoader getContextClassLoader()>();
+
+        if $r1 == null goto label1;
+
+        $r4 = virtualinvoke $r1.<java.lang.ClassLoader: java.lang.Class loadClass(java.lang.String)>(r2);
+
+        return $r4;
+
+     label1:
+        $r3 = staticinvoke <sun.reflect.misc.ReflectUtil: java.lang.Class forName(java.lang.String)>(r2);
+
+        return $r3;
+    }
+
+    private static javax.management.MBeanServerBuilder newBuilder(java.lang.Class)
+    {
+        javax.management.JMRuntimeException $r10;
+        java.lang.RuntimeException $r11;
+        java.lang.Exception $r3;
+        java.lang.Class r0;
+        java.lang.Object $r1;
+        java.lang.StringBuilder $r4, $r5, $r6, $r7, $r8;
+        java.lang.String $r9;
+        javax.management.MBeanServerBuilder $r2;
+
+        r0 := @parameter0: java.lang.Class;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.lang.Class: java.lang.Object newInstance()>();
+
+        $r2 = (javax.management.MBeanServerBuilder) $r1;
+
+     label2:
+        return $r2;
+
+     label3:
+        $r11 := @caughtexception;
+
+        throw $r11;
+
+     label4:
+        $r3 := @caughtexception;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to instantiate a MBeanServerBuilder from ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r3);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r10 = new javax.management.JMRuntimeException;
+
+        specialinvoke $r10.<javax.management.JMRuntimeException: void <init>(java.lang.String,java.lang.Throwable)>($r9, $r3);
+
+        throw $r10;
+
+        catch java.lang.RuntimeException from label1 to label2 with label3;
+        catch java.lang.Exception from label1 to label2 with label4;
+    }
+
+    private static synchronized void checkMBeanServerBuilder()
+    {
+        boolean $z0;
+        java.util.logging.Logger $r8, $r16;
+        java.lang.StringBuilder $r9, $r10, $r11, $r12, $r13, $r14, $r21, $r22, $r23, $r24, $r25;
+        javax.management.MBeanServerBuilder $r2, $r3, $r4;
+        java.util.logging.Level $r7, $r17;
+        int $i0;
+        java.lang.String $r18, $r19, $r26, r28;
+        javax.management.JMRuntimeException $r27;
+        java.lang.RuntimeException $r6;
+        com.sun.jmx.mbeanserver.GetPropertyAction $r0;
+        java.lang.Object $r1;
+        java.lang.Class $r5, $r15, r29;
+        java.lang.ClassNotFoundException $r20;
+
+     label01:
+        $r0 = new com.sun.jmx.mbeanserver.GetPropertyAction;
+
+        specialinvoke $r0.<com.sun.jmx.mbeanserver.GetPropertyAction: void <init>(java.lang.String)>("javax.management.builder.initial");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r28 = (java.lang.String) $r1;
+
+     label02:
+        if r28 == null goto label03;
+
+        $i0 = virtualinvoke r28.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label04;
+
+     label03:
+        r29 = class "Ljavax/management/MBeanServerBuilder;";
+
+        goto label05;
+
+     label04:
+        r29 = staticinvoke <javax.management.MBeanServerFactory: java.lang.Class loadBuilderClass(java.lang.String)>(r28);
+
+     label05:
+        $r2 = <javax.management.MBeanServerFactory: javax.management.MBeanServerBuilder builder>;
+
+        if $r2 == null goto label07;
+
+        $r4 = <javax.management.MBeanServerFactory: javax.management.MBeanServerBuilder builder>;
+
+        $r5 = virtualinvoke $r4.<java.lang.Object: java.lang.Class getClass()>();
+
+        if r29 != $r5 goto label07;
+
+     label06:
+        return;
+
+     label07:
+        $r3 = staticinvoke <javax.management.MBeanServerFactory: javax.management.MBeanServerBuilder newBuilder(java.lang.Class)>(r29);
+
+        <javax.management.MBeanServerFactory: javax.management.MBeanServerBuilder builder> = $r3;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r20 := @caughtexception;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to load MBeanServerBuilder class ");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r28);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r20);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r27 = new javax.management.JMRuntimeException;
+
+        specialinvoke $r27.<javax.management.JMRuntimeException: void <init>(java.lang.String,java.lang.Throwable)>($r26, $r20);
+
+        throw $r27;
+
+     label10:
+        goto label13;
+
+     label11:
+        $r6 := @caughtexception;
+
+        $r8 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger MBEANSERVER_LOGGER>;
+
+        $r7 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z0 = virtualinvoke $r8.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r7);
+
+        if $z0 == 0 goto label12;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to instantiate MBeanServerBuilder: ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n\t\tCheck the value of the ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("javax.management.builder.initial");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" property.");
+
+        $r16 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger MBEANSERVER_LOGGER>;
+
+        $r17 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r15 = class "Ljavax/management/MBeanServerFactory;";
+
+        $r18 = virtualinvoke $r15.<java.lang.Class: java.lang.String getName()>();
+
+        $r19 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r16.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r17, $r18, "checkMBeanServerBuilder", $r19);
+
+     label12:
+        throw $r6;
+
+     label13:
+        return;
+
+        catch java.lang.ClassNotFoundException from label02 to label06 with label09;
+        catch java.lang.ClassNotFoundException from label07 to label08 with label09;
+        catch java.lang.RuntimeException from label01 to label06 with label11;
+        catch java.lang.RuntimeException from label07 to label10 with label11;
+    }
+
+    private static synchronized javax.management.MBeanServerBuilder getNewMBeanServerBuilder()
+    {
+        javax.management.MBeanServerBuilder $r0;
+
+        staticinvoke <javax.management.MBeanServerFactory: void checkMBeanServerBuilder()>();
+
+        $r0 = <javax.management.MBeanServerFactory: javax.management.MBeanServerBuilder builder>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.util.ArrayList $r0;
+
+        <javax.management.MBeanServerFactory: javax.management.MBeanServerBuilder builder> = null;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+        <javax.management.MBeanServerFactory: java.util.ArrayList mBeanServerList> = $r0;
+
+        return;
+    }
+}

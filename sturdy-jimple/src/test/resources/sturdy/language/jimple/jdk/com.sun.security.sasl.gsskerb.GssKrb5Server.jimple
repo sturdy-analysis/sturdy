@@ -1,0 +1,898 @@
+final class com.sun.security.sasl.gsskerb.GssKrb5Server extends com.sun.security.sasl.gsskerb.GssKrb5Base implements javax.security.sasl.SaslServer
+{
+    private static final java.lang.String MY_CLASS_NAME;
+    private int handshakeStage;
+    private java.lang.String peer;
+    private java.lang.String me;
+    private java.lang.String authzid;
+    private javax.security.auth.callback.CallbackHandler cbh;
+    private final java.lang.String protocolSaved;
+
+    void <init>(java.lang.String, java.lang.String, java.util.Map, javax.security.auth.callback.CallbackHandler) throws javax.security.sasl.SaslException
+    {
+        javax.security.sasl.SaslException $r23;
+        java.util.logging.Level $r10, $r18;
+        javax.security.auth.callback.CallbackHandler r3;
+        byte $b0, $b1, $b2, $b3;
+        java.util.Map r1;
+        java.lang.String $r2, r4, r6, r24;
+        org.ietf.jgss.GSSContext $r17, $r20, $r21;
+        org.ietf.jgss.GSSCredential $r16;
+        org.ietf.jgss.Oid $r13, $r14, $r15;
+        org.ietf.jgss.GSSException $r22;
+        java.util.logging.Logger $r11, $r19;
+        org.ietf.jgss.GSSManager $r12;
+        com.sun.security.sasl.gsskerb.GssKrb5Server r0;
+        java.lang.StringBuilder $r5, $r7, $r8, $r9;
+        org.ietf.jgss.GSSName $r25;
+
+        r0 := @this: com.sun.security.sasl.gsskerb.GssKrb5Server;
+
+        r6 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.lang.String;
+
+        r1 := @parameter2: java.util.Map;
+
+        r3 := @parameter3: javax.security.auth.callback.CallbackHandler;
+
+        $r2 = <com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String MY_CLASS_NAME>;
+
+        specialinvoke r0.<com.sun.security.sasl.gsskerb.GssKrb5Base: void <init>(java.util.Map,java.lang.String)>(r1, $r2);
+
+        r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: int handshakeStage> = 0;
+
+        r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: javax.security.auth.callback.CallbackHandler cbh> = r3;
+
+        if r4 != null goto label1;
+
+        r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String protocolSaved> = r6;
+
+        r24 = null;
+
+        goto label2;
+
+     label1:
+        r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String protocolSaved> = null;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("@");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        r24 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label2:
+        $r11 = <com.sun.security.sasl.gsskerb.GssKrb5Server: java.util.logging.Logger logger>;
+
+        $r10 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        virtualinvoke $r11.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r10, "KRB5SRV01:Using service name: {0}", r24);
+
+     label3:
+        $r12 = staticinvoke <org.ietf.jgss.GSSManager: org.ietf.jgss.GSSManager getInstance()>();
+
+        if r24 != null goto label4;
+
+        $r25 = null;
+
+        goto label5;
+
+     label4:
+        $r14 = <org.ietf.jgss.GSSName: org.ietf.jgss.Oid NT_HOSTBASED_SERVICE>;
+
+        $r13 = <com.sun.security.sasl.gsskerb.GssKrb5Server: org.ietf.jgss.Oid KRB5_OID>;
+
+        $r25 = virtualinvoke $r12.<org.ietf.jgss.GSSManager: org.ietf.jgss.GSSName createName(java.lang.String,org.ietf.jgss.Oid,org.ietf.jgss.Oid)>(r24, $r14, $r13);
+
+     label5:
+        $r15 = <com.sun.security.sasl.gsskerb.GssKrb5Server: org.ietf.jgss.Oid KRB5_OID>;
+
+        $r16 = virtualinvoke $r12.<org.ietf.jgss.GSSManager: org.ietf.jgss.GSSCredential createCredential(org.ietf.jgss.GSSName,int,org.ietf.jgss.Oid,int)>($r25, 2147483647, $r15, 2);
+
+        $r17 = virtualinvoke $r12.<org.ietf.jgss.GSSManager: org.ietf.jgss.GSSContext createContext(org.ietf.jgss.GSSCredential)>($r16);
+
+        r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: org.ietf.jgss.GSSContext secCtx> = $r17;
+
+        $b0 = r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: byte allQop>;
+
+        $b1 = $b0 & 2;
+
+        if $b1 == 0 goto label6;
+
+        $r21 = r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: org.ietf.jgss.GSSContext secCtx>;
+
+        interfaceinvoke $r21.<org.ietf.jgss.GSSContext: void requestInteg(boolean)>(1);
+
+     label6:
+        $b2 = r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: byte allQop>;
+
+        $b3 = $b2 & 4;
+
+        if $b3 == 0 goto label7;
+
+        $r20 = r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: org.ietf.jgss.GSSContext secCtx>;
+
+        interfaceinvoke $r20.<org.ietf.jgss.GSSContext: void requestConf(boolean)>(1);
+
+     label7:
+        goto label9;
+
+     label8:
+        $r22 := @caughtexception;
+
+        $r23 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r23.<javax.security.sasl.SaslException: void <init>(java.lang.String,java.lang.Throwable)>("Failure to initialize security context", $r22);
+
+        throw $r23;
+
+     label9:
+        $r19 = <com.sun.security.sasl.gsskerb.GssKrb5Server: java.util.logging.Logger logger>;
+
+        $r18 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        virtualinvoke $r19.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String)>($r18, "KRB5SRV02:Initialization complete");
+
+        return;
+
+        catch org.ietf.jgss.GSSException from label3 to label7 with label8;
+    }
+
+    public byte[] evaluateResponse(byte[]) throws javax.security.sasl.SaslException
+    {
+        byte[] r3, $r4, $r5, $r7, $r23, $r24;
+        javax.security.sasl.SaslException $r29, $r37, $r39;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        org.ietf.jgss.GSSContext $r6, $r10, $r11, $r14;
+        org.ietf.jgss.GSSException $r38;
+        java.util.logging.Logger $r2, $r9, $r21;
+        com.sun.security.sasl.gsskerb.GssKrb5Server r0;
+        java.lang.StringBuilder $r30, $r31, $r33;
+        java.lang.Object[] $r17;
+        java.lang.String[] $r27;
+        java.util.logging.Level $r1, $r8, $r20;
+        int $i0, $i1;
+        java.lang.String $r13, $r16, $r18, $r19, $r22, $r25, $r26, $r28, $r32, $r34, $r35, $r36;
+        org.ietf.jgss.GSSName $r12, $r15;
+
+        r0 := @this: com.sun.security.sasl.gsskerb.GssKrb5Server;
+
+        r3 := @parameter0: byte[];
+
+        $z0 = r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: boolean completed>;
+
+        if $z0 == 0 goto label01;
+
+        $r37 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r37.<javax.security.sasl.SaslException: void <init>(java.lang.String)>("SASL authentication already complete");
+
+        throw $r37;
+
+     label01:
+        $r2 = <com.sun.security.sasl.gsskerb.GssKrb5Server: java.util.logging.Logger logger>;
+
+        $r1 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z1 = virtualinvoke $r2.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r1);
+
+        if $z1 == 0 goto label02;
+
+        $r36 = <com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String MY_CLASS_NAME>;
+
+        staticinvoke <com.sun.security.sasl.gsskerb.GssKrb5Server: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>($r36, "evaluateResponse", "KRB5SRV03:Response [raw]:", r3);
+
+     label02:
+        $i0 = r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: int handshakeStage>;
+
+        lookupswitch($i0)
+        {
+            case 1: goto label03;
+            case 2: goto label04;
+            default: goto label05;
+        };
+
+     label03:
+        $r5 = specialinvoke r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: byte[] doHandshake1(byte[])>(r3);
+
+        return $r5;
+
+     label04:
+        $r4 = specialinvoke r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: byte[] doHandshake2(byte[])>(r3);
+
+        return $r4;
+
+     label05:
+        $r6 = r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: org.ietf.jgss.GSSContext secCtx>;
+
+        $i1 = lengthof r3;
+
+        $r7 = interfaceinvoke $r6.<org.ietf.jgss.GSSContext: byte[] acceptSecContext(byte[],int,int)>(r3, 0, $i1);
+
+        $r9 = <com.sun.security.sasl.gsskerb.GssKrb5Server: java.util.logging.Logger logger>;
+
+        $r8 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z2 = virtualinvoke $r9.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r8);
+
+        if $z2 == 0 goto label06;
+
+        $r35 = <com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String MY_CLASS_NAME>;
+
+        staticinvoke <com.sun.security.sasl.gsskerb.GssKrb5Server: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>($r35, "evaluateResponse", "KRB5SRV04:Challenge: [after acceptSecCtx]", $r7);
+
+     label06:
+        $r10 = r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: org.ietf.jgss.GSSContext secCtx>;
+
+        $z3 = interfaceinvoke $r10.<org.ietf.jgss.GSSContext: boolean isEstablished()>();
+
+        if $z3 == 0 goto label09;
+
+        r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: int handshakeStage> = 1;
+
+        $r11 = r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: org.ietf.jgss.GSSContext secCtx>;
+
+        $r12 = interfaceinvoke $r11.<org.ietf.jgss.GSSContext: org.ietf.jgss.GSSName getSrcName()>();
+
+        $r13 = interfaceinvoke $r12.<org.ietf.jgss.GSSName: java.lang.String toString()>();
+
+        r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String peer> = $r13;
+
+        $r14 = r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: org.ietf.jgss.GSSContext secCtx>;
+
+        $r15 = interfaceinvoke $r14.<org.ietf.jgss.GSSContext: org.ietf.jgss.GSSName getTargName()>();
+
+        $r16 = interfaceinvoke $r15.<org.ietf.jgss.GSSName: java.lang.String toString()>();
+
+        r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String me> = $r16;
+
+        $r21 = <com.sun.security.sasl.gsskerb.GssKrb5Server: java.util.logging.Logger logger>;
+
+        $r20 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r17 = newarray (java.lang.Object)[2];
+
+        $r18 = r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String peer>;
+
+        $r17[0] = $r18;
+
+        $r19 = r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String me>;
+
+        $r17[1] = $r19;
+
+        virtualinvoke $r21.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r20, "KRB5SRV05:Peer name is : {0}, my name is : {1}", $r17);
+
+        $r22 = r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String protocolSaved>;
+
+        if $r22 == null goto label07;
+
+        $r26 = r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String protocolSaved>;
+
+        $r25 = r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String me>;
+
+        $r27 = virtualinvoke $r25.<java.lang.String: java.lang.String[] split(java.lang.String)>("[/@]");
+
+        $r28 = $r27[0];
+
+        $z4 = virtualinvoke $r26.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r28);
+
+        if $z4 != 0 goto label07;
+
+        $r29 = new javax.security.sasl.SaslException;
+
+        $r30 = new java.lang.StringBuilder;
+
+        specialinvoke $r30.<java.lang.StringBuilder: void <init>()>();
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("GSS context targ name protocol error: ");
+
+        $r32 = r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String me>;
+
+        $r33 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r32);
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r29.<javax.security.sasl.SaslException: void <init>(java.lang.String)>($r34);
+
+        throw $r29;
+
+     label07:
+        if $r7 != null goto label09;
+
+        $r23 = <com.sun.security.sasl.gsskerb.GssKrb5Server: byte[] EMPTY>;
+
+        $r24 = specialinvoke r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: byte[] doHandshake1(byte[])>($r23);
+
+     label08:
+        return $r24;
+
+     label09:
+        return $r7;
+
+     label10:
+        $r38 := @caughtexception;
+
+        $r39 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r39.<javax.security.sasl.SaslException: void <init>(java.lang.String,java.lang.Throwable)>("GSS initiate failed", $r38);
+
+        throw $r39;
+
+        catch org.ietf.jgss.GSSException from label05 to label08 with label10;
+    }
+
+    private byte[] doHandshake1(byte[]) throws javax.security.sasl.SaslException
+    {
+        byte[] r0, $r8, $r18;
+        java.lang.Object[] $r13;
+        javax.security.sasl.SaslException $r19, $r21;
+        java.lang.Integer $r17;
+        java.util.logging.Level $r2, $r4, $r9, $r16;
+        byte $b0, $b3;
+        int $i1, $i2, $i4, $i5;
+        java.lang.String $r11, $r12;
+        java.lang.Byte $r14;
+        boolean $z0, $z1, $z2;
+        org.ietf.jgss.GSSContext $r7;
+        org.ietf.jgss.GSSException $r20;
+        java.util.logging.Logger $r3, $r5, $r10, $r15;
+        org.ietf.jgss.MessageProp $r6;
+        com.sun.security.sasl.gsskerb.GssKrb5Server r1;
+
+        r1 := @this: com.sun.security.sasl.gsskerb.GssKrb5Server;
+
+        r0 := @parameter0: byte[];
+
+     label1:
+        if r0 == null goto label2;
+
+        $i5 = lengthof r0;
+
+        if $i5 <= 0 goto label2;
+
+        $r19 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r19.<javax.security.sasl.SaslException: void <init>(java.lang.String)>("Handshake expecting no response data from server");
+
+        throw $r19;
+
+     label2:
+        $r18 = newarray (byte)[4];
+
+        $b0 = r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: byte allQop>;
+
+        $r18[0] = $b0;
+
+        $i1 = r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: int recvMaxBufSize>;
+
+        staticinvoke <com.sun.security.sasl.gsskerb.GssKrb5Server: void intToNetworkByteOrder(int,byte[],int,int)>($i1, $r18, 1, 3);
+
+        $r3 = <com.sun.security.sasl.gsskerb.GssKrb5Server: java.util.logging.Logger logger>;
+
+        $r2 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $z0 = virtualinvoke $r3.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r2);
+
+        if $z0 == 0 goto label3;
+
+        $r15 = <com.sun.security.sasl.gsskerb.GssKrb5Server: java.util.logging.Logger logger>;
+
+        $r16 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r13 = newarray (java.lang.Object)[2];
+
+        $r14 = new java.lang.Byte;
+
+        $b3 = r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: byte allQop>;
+
+        specialinvoke $r14.<java.lang.Byte: void <init>(byte)>($b3);
+
+        $r13[0] = $r14;
+
+        $r17 = new java.lang.Integer;
+
+        $i4 = r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: int recvMaxBufSize>;
+
+        specialinvoke $r17.<java.lang.Integer: void <init>(int)>($i4);
+
+        $r13[1] = $r17;
+
+        virtualinvoke $r15.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r16, "KRB5SRV06:Supported protections: {0}; recv max buf size: {1}", $r13);
+
+     label3:
+        r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: int handshakeStage> = 2;
+
+        $r5 = <com.sun.security.sasl.gsskerb.GssKrb5Server: java.util.logging.Logger logger>;
+
+        $r4 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z1 = virtualinvoke $r5.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r4);
+
+        if $z1 == 0 goto label4;
+
+        $r12 = <com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String MY_CLASS_NAME>;
+
+        staticinvoke <com.sun.security.sasl.gsskerb.GssKrb5Server: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>($r12, "doHandshake1", "KRB5SRV07:Challenge [raw]", $r18);
+
+     label4:
+        $r7 = r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: org.ietf.jgss.GSSContext secCtx>;
+
+        $i2 = lengthof $r18;
+
+        $r6 = new org.ietf.jgss.MessageProp;
+
+        specialinvoke $r6.<org.ietf.jgss.MessageProp: void <init>(int,boolean)>(0, 0);
+
+        $r8 = interfaceinvoke $r7.<org.ietf.jgss.GSSContext: byte[] wrap(byte[],int,int,org.ietf.jgss.MessageProp)>($r18, 0, $i2, $r6);
+
+        $r10 = <com.sun.security.sasl.gsskerb.GssKrb5Server: java.util.logging.Logger logger>;
+
+        $r9 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z2 = virtualinvoke $r10.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r9);
+
+        if $z2 == 0 goto label5;
+
+        $r11 = <com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String MY_CLASS_NAME>;
+
+        staticinvoke <com.sun.security.sasl.gsskerb.GssKrb5Server: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>($r11, "doHandshake1", "KRB5SRV08:Challenge [after wrap]", $r8);
+
+     label5:
+        return $r8;
+
+     label6:
+        $r20 := @caughtexception;
+
+        $r21 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r21.<javax.security.sasl.SaslException: void <init>(java.lang.String,java.lang.Throwable)>("Problem wrapping handshake1", $r20);
+
+        throw $r21;
+
+        catch org.ietf.jgss.GSSException from label1 to label5 with label6;
+    }
+
+    private byte[] doHandshake2(byte[]) throws javax.security.sasl.SaslException
+    {
+        byte[] r2, $r4;
+        javax.security.auth.callback.UnsupportedCallbackException $r47;
+        javax.security.sasl.SaslException $r57, $r63, $r66, $r67, $r68, $r69;
+        java.lang.Integer $r59, $r60, $r61;
+        byte $b1, $b2, $b3, $b4, $b13;
+        org.ietf.jgss.MessageProp $r55;
+        com.sun.security.sasl.gsskerb.GssKrb5Server r1;
+        java.lang.StringBuilder $r22, $r23, $r25, $r43, $r44, $r56, $r65;
+        java.lang.Object[] $r29, $r35;
+        javax.security.auth.callback.Callback[] $r17;
+        java.lang.String $r10, $r11, $r15, $r16, $r21, $r24, $r26, $r27, $r45, $r46, $r62;
+        java.io.IOException $r49;
+        javax.security.auth.callback.CallbackHandler $r18;
+        java.lang.Byte $r58;
+        org.ietf.jgss.GSSContext $r3, $r7;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        org.ietf.jgss.GSSException $r51;
+        java.util.logging.Logger $r6, $r9, $r13, $r31, $r37;
+        javax.security.sasl.AuthorizeCallback $r64;
+        java.io.UnsupportedEncodingException $r53;
+        java.util.logging.Level $r5, $r8, $r12, $r32, $r38;
+        int $i0, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i14, $i15, $i16, $i17;
+        java.lang.Boolean $r33, $r34;
+
+        r1 := @this: com.sun.security.sasl.gsskerb.GssKrb5Server;
+
+        r2 := @parameter0: byte[];
+
+     label01:
+        $r55 = new org.ietf.jgss.MessageProp;
+
+        specialinvoke $r55.<org.ietf.jgss.MessageProp: void <init>(boolean)>(0);
+
+        $r3 = r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: org.ietf.jgss.GSSContext secCtx>;
+
+        $i0 = lengthof r2;
+
+        $r4 = interfaceinvoke $r3.<org.ietf.jgss.GSSContext: byte[] unwrap(byte[],int,int,org.ietf.jgss.MessageProp)>(r2, 0, $i0, $r55);
+
+        virtualinvoke r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: void checkMessageProp(java.lang.String,org.ietf.jgss.MessageProp)>("Handshake failure: ", $r55);
+
+        $r6 = <com.sun.security.sasl.gsskerb.GssKrb5Server: java.util.logging.Logger logger>;
+
+        $r5 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z0 = virtualinvoke $r6.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r5);
+
+        if $z0 == 0 goto label02;
+
+        $r46 = <com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String MY_CLASS_NAME>;
+
+        staticinvoke <com.sun.security.sasl.gsskerb.GssKrb5Server: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>($r46, "doHandshake2", "KRB5SRV09:Response [after unwrap]", $r4);
+
+     label02:
+        $b13 = $r4[0];
+
+        $b1 = r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: byte allQop>;
+
+        $b2 = $b13 & $b1;
+
+        if $b2 != 0 goto label03;
+
+        $r57 = new javax.security.sasl.SaslException;
+
+        $r56 = new java.lang.StringBuilder;
+
+        specialinvoke $r56.<java.lang.StringBuilder: void <init>()>();
+
+        $r43 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Client selected unsupported protection: ");
+
+        $i17 = (int) $b13;
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i17);
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r57.<javax.security.sasl.SaslException: void <init>(java.lang.String)>($r45);
+
+        throw $r57;
+
+     label03:
+        $b3 = $b13 & 4;
+
+        if $b3 == 0 goto label04;
+
+        r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: boolean privacy> = 1;
+
+        r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: boolean integrity> = 1;
+
+        goto label05;
+
+     label04:
+        $b4 = $b13 & 2;
+
+        if $b4 == 0 goto label05;
+
+        r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: boolean integrity> = 1;
+
+     label05:
+        $i14 = staticinvoke <com.sun.security.sasl.gsskerb.GssKrb5Server: int networkByteOrderToInt(byte[],int,int)>($r4, 1, 3);
+
+        $i15 = r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: int sendMaxBufSize>;
+
+        if $i15 != 0 goto label06;
+
+        $i16 = $i14;
+
+        goto label07;
+
+     label06:
+        $i5 = r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: int sendMaxBufSize>;
+
+        $i16 = staticinvoke <java.lang.Math: int min(int,int)>($i5, $i14);
+
+     label07:
+        r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: int sendMaxBufSize> = $i16;
+
+        $r7 = r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: org.ietf.jgss.GSSContext secCtx>;
+
+        $z1 = r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: boolean privacy>;
+
+        $i6 = r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: int sendMaxBufSize>;
+
+        $i7 = interfaceinvoke $r7.<org.ietf.jgss.GSSContext: int getWrapSizeLimit(int,boolean,int)>(0, $z1, $i6);
+
+        r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: int rawSendSize> = $i7;
+
+        $r9 = <com.sun.security.sasl.gsskerb.GssKrb5Server: java.util.logging.Logger logger>;
+
+        $r8 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $z2 = virtualinvoke $r9.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r8);
+
+        if $z2 == 0 goto label08;
+
+        $r31 = <com.sun.security.sasl.gsskerb.GssKrb5Server: java.util.logging.Logger logger>;
+
+        $r32 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r29 = newarray (java.lang.Object)[3];
+
+        $r58 = new java.lang.Byte;
+
+        specialinvoke $r58.<java.lang.Byte: void <init>(byte)>($b13);
+
+        $r29[0] = $r58;
+
+        $z4 = r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: boolean privacy>;
+
+        $r33 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z4);
+
+        $r29[1] = $r33;
+
+        $z5 = r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: boolean integrity>;
+
+        $r34 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z5);
+
+        $r29[2] = $r34;
+
+        virtualinvoke $r31.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r32, "KRB5SRV10:Selected protection: {0}; privacy: {1}; integrity: {2}", $r29);
+
+        $r37 = <com.sun.security.sasl.gsskerb.GssKrb5Server: java.util.logging.Logger logger>;
+
+        $r38 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r35 = newarray (java.lang.Object)[3];
+
+        $r59 = new java.lang.Integer;
+
+        specialinvoke $r59.<java.lang.Integer: void <init>(int)>($i14);
+
+        $r35[0] = $r59;
+
+        $r60 = new java.lang.Integer;
+
+        $i11 = r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: int sendMaxBufSize>;
+
+        specialinvoke $r60.<java.lang.Integer: void <init>(int)>($i11);
+
+        $r35[1] = $r60;
+
+        $r61 = new java.lang.Integer;
+
+        $i12 = r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: int rawSendSize>;
+
+        specialinvoke $r61.<java.lang.Integer: void <init>(int)>($i12);
+
+        $r35[2] = $r61;
+
+        virtualinvoke $r37.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r38, "KRB5SRV11:Client max recv size: {0}; server max send size: {1}; rawSendSize: {2}", $r35);
+
+     label08:
+        $i8 = lengthof $r4;
+
+        if $i8 <= 4 goto label12;
+
+     label09:
+        $r62 = new java.lang.String;
+
+        $i9 = lengthof $r4;
+
+        $i10 = $i9 - 4;
+
+        specialinvoke $r62.<java.lang.String: void <init>(byte[],int,int,java.lang.String)>($r4, 4, $i10, "UTF-8");
+
+        r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String authzid> = $r62;
+
+     label10:
+        goto label13;
+
+     label11:
+        $r53 := @caughtexception;
+
+        $r63 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r63.<javax.security.sasl.SaslException: void <init>(java.lang.String,java.lang.Throwable)>("Cannot decode authzid", $r53);
+
+        throw $r63;
+
+     label12:
+        $r10 = r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String peer>;
+
+        r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String authzid> = $r10;
+
+     label13:
+        $r13 = <com.sun.security.sasl.gsskerb.GssKrb5Server: java.util.logging.Logger logger>;
+
+        $r12 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r11 = r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String authzid>;
+
+        virtualinvoke $r13.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r12, "KRB5SRV12:Authzid: {0}", $r11);
+
+        $r64 = new javax.security.sasl.AuthorizeCallback;
+
+        $r16 = r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String peer>;
+
+        $r15 = r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String authzid>;
+
+        specialinvoke $r64.<javax.security.sasl.AuthorizeCallback: void <init>(java.lang.String,java.lang.String)>($r16, $r15);
+
+        $r18 = r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: javax.security.auth.callback.CallbackHandler cbh>;
+
+        $r17 = newarray (javax.security.auth.callback.Callback)[1];
+
+        $r17[0] = $r64;
+
+        interfaceinvoke $r18.<javax.security.auth.callback.CallbackHandler: void handle(javax.security.auth.callback.Callback[])>($r17);
+
+        $z3 = virtualinvoke $r64.<javax.security.sasl.AuthorizeCallback: boolean isAuthorized()>();
+
+        if $z3 == 0 goto label14;
+
+        $r27 = virtualinvoke $r64.<javax.security.sasl.AuthorizeCallback: java.lang.String getAuthorizedID()>();
+
+        r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String authzid> = $r27;
+
+        r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: boolean completed> = 1;
+
+        goto label15;
+
+     label14:
+        $r66 = new javax.security.sasl.SaslException;
+
+        $r65 = new java.lang.StringBuilder;
+
+        specialinvoke $r65.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String peer>;
+
+        $r22 = virtualinvoke $r65.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r21);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is not authorized to connect as ");
+
+        $r24 = r1.<com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String authzid>;
+
+        $r25 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r24);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r66.<javax.security.sasl.SaslException: void <init>(java.lang.String)>($r26);
+
+        throw $r66;
+
+     label15:
+        return null;
+
+     label16:
+        $r51 := @caughtexception;
+
+        $r67 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r67.<javax.security.sasl.SaslException: void <init>(java.lang.String,java.lang.Throwable)>("Final handshake step failed", $r51);
+
+        throw $r67;
+
+     label17:
+        $r49 := @caughtexception;
+
+        $r68 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r68.<javax.security.sasl.SaslException: void <init>(java.lang.String,java.lang.Throwable)>("Problem with callback handler", $r49);
+
+        throw $r68;
+
+     label18:
+        $r47 := @caughtexception;
+
+        $r69 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r69.<javax.security.sasl.SaslException: void <init>(java.lang.String,java.lang.Throwable)>("Problem with callback handler", $r47);
+
+        throw $r69;
+
+        catch java.io.UnsupportedEncodingException from label09 to label10 with label11;
+        catch org.ietf.jgss.GSSException from label01 to label15 with label16;
+        catch java.io.IOException from label01 to label15 with label17;
+        catch javax.security.auth.callback.UnsupportedCallbackException from label01 to label15 with label18;
+    }
+
+    public java.lang.String getAuthorizationID()
+    {
+        java.lang.IllegalStateException $r1;
+        com.sun.security.sasl.gsskerb.GssKrb5Server r0;
+        java.lang.String $r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.security.sasl.gsskerb.GssKrb5Server;
+
+        $z0 = r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: boolean completed>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String authzid>;
+
+        return $r2;
+
+     label1:
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Authentication incomplete");
+
+        throw $r1;
+    }
+
+    public java.lang.Object getNegotiatedProperty(java.lang.String)
+    {
+        java.lang.IllegalStateException $r4;
+        java.lang.String[] $r3;
+        java.lang.Exception $r5;
+        byte b1;
+        int $i0;
+        com.sun.security.sasl.gsskerb.GssKrb5Server r0;
+        java.lang.Object r6;
+        java.lang.String r1, $r2;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.security.sasl.gsskerb.GssKrb5Server;
+
+        r1 := @parameter0: java.lang.String;
+
+        $z0 = r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: boolean completed>;
+
+        if $z0 != 0 goto label1;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Authentication incomplete");
+
+        throw $r4;
+
+     label1:
+        b1 = -1;
+
+        $i0 = virtualinvoke r1.<java.lang.String: int hashCode()>();
+
+        lookupswitch($i0)
+        {
+            case 183461877: goto label2;
+            default: goto label3;
+        };
+
+     label2:
+        $z1 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("javax.security.sasl.bound.server.name");
+
+        if $z1 == 0 goto label3;
+
+        b1 = 0;
+
+     label3:
+        lookupswitch(b1)
+        {
+            case 0: goto label4;
+            default: goto label7;
+        };
+
+     label4:
+        $r2 = r0.<com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String me>;
+
+        $r3 = virtualinvoke $r2.<java.lang.String: java.lang.String[] split(java.lang.String)>("[/@]");
+
+        r6 = $r3[1];
+
+     label5:
+        goto label8;
+
+     label6:
+        $r5 := @caughtexception;
+
+        r6 = null;
+
+        goto label8;
+
+     label7:
+        r6 = specialinvoke r0.<com.sun.security.sasl.gsskerb.GssKrb5Base: java.lang.Object getNegotiatedProperty(java.lang.String)>(r1);
+
+     label8:
+        return r6;
+
+        catch java.lang.Exception from label4 to label5 with label6;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        java.lang.String $r1;
+
+        $r0 = class "Lcom/sun/security/sasl/gsskerb/GssKrb5Server;";
+
+        $r1 = virtualinvoke $r0.<java.lang.Class: java.lang.String getName()>();
+
+        <com.sun.security.sasl.gsskerb.GssKrb5Server: java.lang.String MY_CLASS_NAME> = $r1;
+
+        return;
+    }
+}

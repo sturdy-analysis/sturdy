@@ -1,0 +1,1591 @@
+public class javax.swing.plaf.basic.BasicInternalFrameUI extends javax.swing.plaf.InternalFrameUI
+{
+    protected javax.swing.JInternalFrame frame;
+    private javax.swing.plaf.basic.BasicInternalFrameUI$Handler handler;
+    protected javax.swing.event.MouseInputAdapter borderListener;
+    protected java.beans.PropertyChangeListener propertyChangeListener;
+    protected java.awt.LayoutManager internalFrameLayout;
+    protected java.awt.event.ComponentListener componentListener;
+    protected javax.swing.event.MouseInputListener glassPaneDispatcher;
+    private javax.swing.event.InternalFrameListener internalFrameListener;
+    protected javax.swing.JComponent northPane;
+    protected javax.swing.JComponent southPane;
+    protected javax.swing.JComponent westPane;
+    protected javax.swing.JComponent eastPane;
+    protected javax.swing.plaf.basic.BasicInternalFrameTitlePane titlePane;
+    private static javax.swing.DesktopManager sharedDesktopManager;
+    private boolean componentListenerAdded;
+    private java.awt.Rectangle parentBounds;
+    private boolean dragging;
+    private boolean resizing;
+    protected javax.swing.KeyStroke openMenuKey;
+    private boolean keyBindingRegistered;
+    private boolean keyBindingActive;
+
+    public static javax.swing.plaf.ComponentUI createUI(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r1;
+        javax.swing.JInternalFrame $r2;
+        javax.swing.plaf.basic.BasicInternalFrameUI $r0;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        $r0 = new javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $r2 = (javax.swing.JInternalFrame) r1;
+
+        specialinvoke $r0.<javax.swing.plaf.basic.BasicInternalFrameUI: void <init>(javax.swing.JInternalFrame)>($r2);
+
+        return $r0;
+    }
+
+    public void <init>(javax.swing.JInternalFrame)
+    {
+        javax.swing.plaf.basic.BasicLookAndFeel $r2;
+        javax.swing.JInternalFrame r3;
+        javax.swing.LookAndFeel $r1;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r3 := @parameter0: javax.swing.JInternalFrame;
+
+        specialinvoke r0.<javax.swing.plaf.InternalFrameUI: void <init>()>();
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: boolean componentListenerAdded> = 0;
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: boolean dragging> = 0;
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: boolean resizing> = 0;
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: boolean keyBindingRegistered> = 0;
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: boolean keyBindingActive> = 0;
+
+        $r1 = staticinvoke <javax.swing.UIManager: javax.swing.LookAndFeel getLookAndFeel()>();
+
+        $z0 = $r1 instanceof javax.swing.plaf.basic.BasicLookAndFeel;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = (javax.swing.plaf.basic.BasicLookAndFeel) $r1;
+
+        virtualinvoke $r2.<javax.swing.plaf.basic.BasicLookAndFeel: void installAWTEventListener()>();
+
+     label1:
+        return;
+    }
+
+    public void installUI(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r1;
+        javax.swing.JInternalFrame $r2, $r4;
+        java.lang.Boolean $r3;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        $r2 = (javax.swing.JInternalFrame) r1;
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame> = $r2;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: void installDefaults()>();
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: void installListeners()>();
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: void installComponents()>();
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: void installKeyboardActions()>();
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r3 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        staticinvoke <javax.swing.LookAndFeel: void installProperty(javax.swing.JComponent,java.lang.String,java.lang.Object)>($r4, "opaque", $r3);
+
+        return;
+    }
+
+    public void uninstallUI(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r0;
+        java.awt.IllegalComponentStateException $r3;
+        javax.swing.JInternalFrame $r2, $r9;
+        javax.swing.plaf.basic.BasicInternalFrameUI r1;
+        java.lang.StringBuilder $r4, $r5, $r6, $r7, $r8, $r10, $r11;
+        java.lang.String $r12;
+
+        r1 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r0 := @parameter0: javax.swing.JComponent;
+
+        $r2 = r1.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        if r0 == $r2 goto label1;
+
+        $r3 = new java.awt.IllegalComponentStateException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" was asked to deinstall() ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" when it only knows about ");
+
+        $r9 = r1.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.awt.IllegalComponentStateException: void <init>(java.lang.String)>($r12);
+
+        throw $r3;
+
+     label1:
+        virtualinvoke r1.<javax.swing.plaf.basic.BasicInternalFrameUI: void uninstallKeyboardActions()>();
+
+        virtualinvoke r1.<javax.swing.plaf.basic.BasicInternalFrameUI: void uninstallComponents()>();
+
+        virtualinvoke r1.<javax.swing.plaf.basic.BasicInternalFrameUI: void uninstallListeners()>();
+
+        virtualinvoke r1.<javax.swing.plaf.basic.BasicInternalFrameUI: void uninstallDefaults()>();
+
+        virtualinvoke r1.<javax.swing.plaf.basic.BasicInternalFrameUI: void updateFrameCursor()>();
+
+        r1.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.plaf.basic.BasicInternalFrameUI$Handler handler> = null;
+
+        r1.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame> = null;
+
+        return;
+    }
+
+    protected void installDefaults()
+    {
+        java.awt.Color $r5, $r12;
+        javax.swing.JInternalFrame $r1, $r3, $r6, $r8, $r10, $r13;
+        java.awt.Container $r7;
+        java.awt.LayoutManager $r9;
+        boolean $z0, $z1;
+        javax.swing.UIDefaults $r11;
+        javax.swing.Icon $r2, $r4;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.JInternalFrame: javax.swing.Icon getFrameIcon()>();
+
+        if $r2 == null goto label1;
+
+        $z1 = $r2 instanceof javax.swing.plaf.UIResource;
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $r3 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r4 = staticinvoke <javax.swing.UIManager: javax.swing.Icon getIcon(java.lang.Object)>("InternalFrame.icon");
+
+        virtualinvoke $r3.<javax.swing.JInternalFrame: void setFrameIcon(javax.swing.Icon)>($r4);
+
+     label2:
+        $r6 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r7 = virtualinvoke $r6.<javax.swing.JInternalFrame: java.awt.Container getContentPane()>();
+
+        if $r7 == null goto label3;
+
+        $r5 = virtualinvoke $r7.<java.awt.Container: java.awt.Color getBackground()>();
+
+        $z0 = $r5 instanceof javax.swing.plaf.UIResource;
+
+        if $z0 == 0 goto label3;
+
+        virtualinvoke $r7.<java.awt.Container: void setBackground(java.awt.Color)>(null);
+
+     label3:
+        $r8 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r9 = virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: java.awt.LayoutManager createLayoutManager()>();
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: java.awt.LayoutManager internalFrameLayout> = $r9;
+
+        virtualinvoke $r8.<javax.swing.JInternalFrame: void setLayout(java.awt.LayoutManager)>($r9);
+
+        $r10 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r11 = staticinvoke <javax.swing.UIManager: javax.swing.UIDefaults getLookAndFeelDefaults()>();
+
+        $r12 = virtualinvoke $r11.<javax.swing.UIDefaults: java.awt.Color getColor(java.lang.Object)>("control");
+
+        virtualinvoke $r10.<javax.swing.JInternalFrame: void setBackground(java.awt.Color)>($r12);
+
+        $r13 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        staticinvoke <javax.swing.LookAndFeel: void installBorder(javax.swing.JComponent,java.lang.String)>($r13, "InternalFrame.border");
+
+        return;
+    }
+
+    protected void installKeyboardActions()
+    {
+        javax.swing.JInternalFrame $r2, $r4;
+        javax.swing.event.InternalFrameListener $r1, $r3;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: void createInternalFrameListener()>();
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.event.InternalFrameListener internalFrameListener>;
+
+        if $r1 == null goto label1;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.event.InternalFrameListener internalFrameListener>;
+
+        virtualinvoke $r4.<javax.swing.JInternalFrame: void addInternalFrameListener(javax.swing.event.InternalFrameListener)>($r3);
+
+     label1:
+        $r2 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        staticinvoke <javax.swing.plaf.basic.LazyActionMap: void installLazyActionMap(javax.swing.JComponent,java.lang.Class,java.lang.String)>($r2, class "Ljavax/swing/plaf/basic/BasicInternalFrameUI;", "InternalFrame.actionMap");
+
+        return;
+    }
+
+    static void loadActionMap(javax.swing.plaf.basic.LazyActionMap)
+    {
+        javax.swing.plaf.basic.LazyActionMap r0;
+        javax.swing.plaf.basic.BasicInternalFrameUI$1 $r1;
+
+        r0 := @parameter0: javax.swing.plaf.basic.LazyActionMap;
+
+        $r1 = new javax.swing.plaf.basic.BasicInternalFrameUI$1;
+
+        specialinvoke $r1.<javax.swing.plaf.basic.BasicInternalFrameUI$1: void <init>(java.lang.String)>("showSystemMenu");
+
+        virtualinvoke r0.<javax.swing.plaf.basic.LazyActionMap: void put(javax.swing.Action)>($r1);
+
+        staticinvoke <javax.swing.plaf.basic.BasicLookAndFeel: void installAudioActionMap(javax.swing.ActionMap)>(r0);
+
+        return;
+    }
+
+    protected void installComponents()
+    {
+        javax.swing.JComponent $r2, $r4, $r6, $r8;
+        javax.swing.JInternalFrame $r1, $r3, $r5, $r7;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r2 = virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JComponent createNorthPane(javax.swing.JInternalFrame)>($r1);
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: void setNorthPane(javax.swing.JComponent)>($r2);
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r4 = virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JComponent createSouthPane(javax.swing.JInternalFrame)>($r3);
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: void setSouthPane(javax.swing.JComponent)>($r4);
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r6 = virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JComponent createEastPane(javax.swing.JInternalFrame)>($r5);
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: void setEastPane(javax.swing.JComponent)>($r6);
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r8 = virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JComponent createWestPane(javax.swing.JInternalFrame)>($r7);
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: void setWestPane(javax.swing.JComponent)>($r8);
+
+        return;
+    }
+
+    protected void installListeners()
+    {
+        java.awt.Rectangle $r19;
+        javax.swing.JInternalFrame $r1, $r5, $r6, $r10, $r12, $r14, $r17, $r20, $r23;
+        java.awt.event.ComponentListener $r9, $r16;
+        java.awt.Container $r11, $r13, $r15, $r18;
+        boolean $z0;
+        javax.swing.event.MouseInputListener $r7, $r8, $r22, $r25;
+        javax.swing.event.MouseInputAdapter $r2;
+        java.awt.Component $r21, $r24;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+        java.beans.PropertyChangeListener $r3, $r4;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r2 = virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.event.MouseInputAdapter createBorderListener(javax.swing.JInternalFrame)>($r1);
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.event.MouseInputAdapter borderListener> = $r2;
+
+        $r3 = virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: java.beans.PropertyChangeListener createPropertyChangeListener()>();
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: java.beans.PropertyChangeListener propertyChangeListener> = $r3;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: java.beans.PropertyChangeListener propertyChangeListener>;
+
+        virtualinvoke $r5.<javax.swing.JInternalFrame: void addPropertyChangeListener(java.beans.PropertyChangeListener)>($r4);
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: void installMouseHandlers(javax.swing.JComponent)>($r6);
+
+        $r7 = virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.event.MouseInputListener createGlassPaneDispatcher()>();
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.event.MouseInputListener glassPaneDispatcher> = $r7;
+
+        $r8 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.event.MouseInputListener glassPaneDispatcher>;
+
+        if $r8 == null goto label1;
+
+        $r20 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r21 = virtualinvoke $r20.<javax.swing.JInternalFrame: java.awt.Component getGlassPane()>();
+
+        $r22 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.event.MouseInputListener glassPaneDispatcher>;
+
+        virtualinvoke $r21.<java.awt.Component: void addMouseListener(java.awt.event.MouseListener)>($r22);
+
+        $r23 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r24 = virtualinvoke $r23.<javax.swing.JInternalFrame: java.awt.Component getGlassPane()>();
+
+        $r25 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.event.MouseInputListener glassPaneDispatcher>;
+
+        virtualinvoke $r24.<java.awt.Component: void addMouseMotionListener(java.awt.event.MouseMotionListener)>($r25);
+
+     label1:
+        $r9 = virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: java.awt.event.ComponentListener createComponentListener()>();
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: java.awt.event.ComponentListener componentListener> = $r9;
+
+        $r10 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r11 = virtualinvoke $r10.<javax.swing.JInternalFrame: java.awt.Container getParent()>();
+
+        if $r11 == null goto label2;
+
+        $r17 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r18 = virtualinvoke $r17.<javax.swing.JInternalFrame: java.awt.Container getParent()>();
+
+        $r19 = virtualinvoke $r18.<java.awt.Container: java.awt.Rectangle getBounds()>();
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: java.awt.Rectangle parentBounds> = $r19;
+
+     label2:
+        $r12 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r13 = virtualinvoke $r12.<javax.swing.JInternalFrame: java.awt.Container getParent()>();
+
+        if $r13 == null goto label3;
+
+        $z0 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: boolean componentListenerAdded>;
+
+        if $z0 != 0 goto label3;
+
+        $r14 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r15 = virtualinvoke $r14.<javax.swing.JInternalFrame: java.awt.Container getParent()>();
+
+        $r16 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: java.awt.event.ComponentListener componentListener>;
+
+        virtualinvoke $r15.<java.awt.Container: void addComponentListener(java.awt.event.ComponentListener)>($r16);
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: boolean componentListenerAdded> = 1;
+
+     label3:
+        return;
+    }
+
+    private java.awt.event.WindowFocusListener getWindowFocusListener()
+    {
+        javax.swing.plaf.basic.BasicInternalFrameUI$Handler $r1;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.plaf.basic.BasicInternalFrameUI$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    private void cancelResize()
+    {
+        javax.swing.plaf.basic.BasicInternalFrameUI$BorderListener $r3;
+        javax.swing.event.MouseInputAdapter $r1, $r2;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $z0 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: boolean resizing>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.event.MouseInputAdapter borderListener>;
+
+        $z1 = $r1 instanceof javax.swing.plaf.basic.BasicInternalFrameUI$BorderListener;
+
+        if $z1 == 0 goto label1;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.event.MouseInputAdapter borderListener>;
+
+        $r3 = (javax.swing.plaf.basic.BasicInternalFrameUI$BorderListener) $r2;
+
+        virtualinvoke $r3.<javax.swing.plaf.basic.BasicInternalFrameUI$BorderListener: void finishMouseReleased()>();
+
+     label1:
+        return;
+    }
+
+    private javax.swing.plaf.basic.BasicInternalFrameUI$Handler getHandler()
+    {
+        javax.swing.plaf.basic.BasicInternalFrameUI$Handler $r1, $r2, $r3;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.plaf.basic.BasicInternalFrameUI$Handler handler>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new javax.swing.plaf.basic.BasicInternalFrameUI$Handler;
+
+        specialinvoke $r3.<javax.swing.plaf.basic.BasicInternalFrameUI$Handler: void <init>(javax.swing.plaf.basic.BasicInternalFrameUI,javax.swing.plaf.basic.BasicInternalFrameUI$1)>(r0, null);
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.plaf.basic.BasicInternalFrameUI$Handler handler> = $r3;
+
+     label1:
+        $r2 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.plaf.basic.BasicInternalFrameUI$Handler handler>;
+
+        return $r2;
+    }
+
+    javax.swing.InputMap getInputMap(int)
+    {
+        int i0;
+        javax.swing.InputMap $r1;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        i0 := @parameter0: int;
+
+        if i0 != 2 goto label1;
+
+        $r1 = virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.InputMap createInputMap(int)>(i0);
+
+        return $r1;
+
+     label1:
+        return null;
+    }
+
+    javax.swing.InputMap createInputMap(int)
+    {
+        java.lang.Object[] $r3, r4;
+        javax.swing.JInternalFrame $r1, $r5;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+        javax.swing.ComponentInputMap $r6;
+        int i0;
+        java.lang.Object $r2;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        i0 := @parameter0: int;
+
+        if i0 != 2 goto label1;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r2 = staticinvoke <sun.swing.DefaultLookup: java.lang.Object get(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String)>($r1, r0, "InternalFrame.windowBindings");
+
+        $r3 = (java.lang.Object[]) $r2;
+
+        r4 = (java.lang.Object[]) $r3;
+
+        if r4 == null goto label1;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r6 = staticinvoke <javax.swing.LookAndFeel: javax.swing.ComponentInputMap makeComponentInputMap(javax.swing.JComponent,java.lang.Object[])>($r5, r4);
+
+        return $r6;
+
+     label1:
+        return null;
+    }
+
+    protected void uninstallDefaults()
+    {
+        javax.swing.JInternalFrame $r1, $r3, $r4, $r5;
+        javax.swing.Icon $r2;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.JInternalFrame: javax.swing.Icon getFrameIcon()>();
+
+        $z0 = $r2 instanceof javax.swing.plaf.UIResource;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        virtualinvoke $r5.<javax.swing.JInternalFrame: void setFrameIcon(javax.swing.Icon)>(null);
+
+     label1:
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: java.awt.LayoutManager internalFrameLayout> = null;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        virtualinvoke $r3.<javax.swing.JInternalFrame: void setLayout(java.awt.LayoutManager)>(null);
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        staticinvoke <javax.swing.LookAndFeel: void uninstallBorder(javax.swing.JComponent)>($r4);
+
+        return;
+    }
+
+    protected void uninstallComponents()
+    {
+        javax.swing.plaf.basic.BasicInternalFrameTitlePane $r1, $r2;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: void setNorthPane(javax.swing.JComponent)>(null);
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: void setSouthPane(javax.swing.JComponent)>(null);
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: void setEastPane(javax.swing.JComponent)>(null);
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: void setWestPane(javax.swing.JComponent)>(null);
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.plaf.basic.BasicInternalFrameTitlePane titlePane>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.plaf.basic.BasicInternalFrameTitlePane titlePane>;
+
+        virtualinvoke $r2.<javax.swing.plaf.basic.BasicInternalFrameTitlePane: void uninstallDefaults()>();
+
+     label1:
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.plaf.basic.BasicInternalFrameTitlePane titlePane> = null;
+
+        return;
+    }
+
+    protected void uninstallListeners()
+    {
+        javax.swing.JInternalFrame $r1, $r3, $r5, $r6, $r9, $r12;
+        java.awt.event.ComponentListener $r14;
+        java.awt.Container $r2, $r13;
+        boolean $z0;
+        javax.swing.event.MouseInputListener $r8, $r11, $r15;
+        java.awt.Component $r7, $r10;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+        java.beans.PropertyChangeListener $r4;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.JInternalFrame: java.awt.Container getParent()>();
+
+        if $r2 == null goto label1;
+
+        $z0 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: boolean componentListenerAdded>;
+
+        if $z0 == 0 goto label1;
+
+        $r12 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r13 = virtualinvoke $r12.<javax.swing.JInternalFrame: java.awt.Container getParent()>();
+
+        $r14 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: java.awt.event.ComponentListener componentListener>;
+
+        virtualinvoke $r13.<java.awt.Container: void removeComponentListener(java.awt.event.ComponentListener)>($r14);
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: boolean componentListenerAdded> = 0;
+
+     label1:
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: java.awt.event.ComponentListener componentListener> = null;
+
+        $r15 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.event.MouseInputListener glassPaneDispatcher>;
+
+        if $r15 == null goto label2;
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r7 = virtualinvoke $r6.<javax.swing.JInternalFrame: java.awt.Component getGlassPane()>();
+
+        $r8 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.event.MouseInputListener glassPaneDispatcher>;
+
+        virtualinvoke $r7.<java.awt.Component: void removeMouseListener(java.awt.event.MouseListener)>($r8);
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r10 = virtualinvoke $r9.<javax.swing.JInternalFrame: java.awt.Component getGlassPane()>();
+
+        $r11 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.event.MouseInputListener glassPaneDispatcher>;
+
+        virtualinvoke $r10.<java.awt.Component: void removeMouseMotionListener(java.awt.event.MouseMotionListener)>($r11);
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.event.MouseInputListener glassPaneDispatcher> = null;
+
+     label2:
+        $r3 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: void deinstallMouseHandlers(javax.swing.JComponent)>($r3);
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: java.beans.PropertyChangeListener propertyChangeListener>;
+
+        virtualinvoke $r5.<javax.swing.JInternalFrame: void removePropertyChangeListener(java.beans.PropertyChangeListener)>($r4);
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: java.beans.PropertyChangeListener propertyChangeListener> = null;
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.event.MouseInputAdapter borderListener> = null;
+
+        return;
+    }
+
+    protected void uninstallKeyboardActions()
+    {
+        javax.swing.JInternalFrame $r2, $r3, $r5;
+        javax.swing.event.InternalFrameListener $r1, $r4;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.event.InternalFrameListener internalFrameListener>;
+
+        if $r1 == null goto label1;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.event.InternalFrameListener internalFrameListener>;
+
+        virtualinvoke $r5.<javax.swing.JInternalFrame: void removeInternalFrameListener(javax.swing.event.InternalFrameListener)>($r4);
+
+     label1:
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.event.InternalFrameListener internalFrameListener> = null;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        staticinvoke <javax.swing.SwingUtilities: void replaceUIInputMap(javax.swing.JComponent,int,javax.swing.InputMap)>($r2, 2, null);
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        staticinvoke <javax.swing.SwingUtilities: void replaceUIActionMap(javax.swing.JComponent,javax.swing.ActionMap)>($r3, null);
+
+        return;
+    }
+
+    void updateFrameCursor()
+    {
+        javax.swing.JInternalFrame $r1, $r3;
+        java.awt.Cursor $r2, r4;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $z0 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: boolean resizing>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.JInternalFrame: java.awt.Cursor getLastCursor()>();
+
+        r4 = $r2;
+
+        if $r2 != null goto label2;
+
+        r4 = staticinvoke <java.awt.Cursor: java.awt.Cursor getPredefinedCursor(int)>(0);
+
+     label2:
+        $r3 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        virtualinvoke $r3.<javax.swing.JInternalFrame: void setCursor(java.awt.Cursor)>(r4);
+
+        return;
+    }
+
+    protected java.awt.LayoutManager createLayoutManager()
+    {
+        javax.swing.plaf.basic.BasicInternalFrameUI$Handler $r1;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.plaf.basic.BasicInternalFrameUI$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    protected java.beans.PropertyChangeListener createPropertyChangeListener()
+    {
+        javax.swing.plaf.basic.BasicInternalFrameUI$Handler $r1;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.plaf.basic.BasicInternalFrameUI$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    public java.awt.Dimension getPreferredSize(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r1;
+        java.awt.Dimension $r3, $r6;
+        javax.swing.JInternalFrame $r2, $r4;
+        java.awt.LayoutManager $r5;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        if $r2 != r1 goto label1;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r5 = virtualinvoke $r4.<javax.swing.JInternalFrame: java.awt.LayoutManager getLayout()>();
+
+        $r6 = interfaceinvoke $r5.<java.awt.LayoutManager: java.awt.Dimension preferredLayoutSize(java.awt.Container)>(r1);
+
+        return $r6;
+
+     label1:
+        $r3 = new java.awt.Dimension;
+
+        specialinvoke $r3.<java.awt.Dimension: void <init>(int,int)>(100, 100);
+
+        return $r3;
+    }
+
+    public java.awt.Dimension getMinimumSize(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r1;
+        java.awt.Dimension $r3, $r6;
+        javax.swing.JInternalFrame $r2, $r4;
+        java.awt.LayoutManager $r5;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        if $r2 != r1 goto label1;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r5 = virtualinvoke $r4.<javax.swing.JInternalFrame: java.awt.LayoutManager getLayout()>();
+
+        $r6 = interfaceinvoke $r5.<java.awt.LayoutManager: java.awt.Dimension minimumLayoutSize(java.awt.Container)>(r1);
+
+        return $r6;
+
+     label1:
+        $r3 = new java.awt.Dimension;
+
+        specialinvoke $r3.<java.awt.Dimension: void <init>(int,int)>(0, 0);
+
+        return $r3;
+    }
+
+    public java.awt.Dimension getMaximumSize(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r2;
+        java.awt.Dimension $r0;
+        javax.swing.plaf.basic.BasicInternalFrameUI r1;
+
+        r1 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r2 := @parameter0: javax.swing.JComponent;
+
+        $r0 = new java.awt.Dimension;
+
+        specialinvoke $r0.<java.awt.Dimension: void <init>(int,int)>(2147483647, 2147483647);
+
+        return $r0;
+    }
+
+    protected void replacePane(javax.swing.JComponent, javax.swing.JComponent)
+    {
+        javax.swing.JComponent r0, r1;
+        javax.swing.JInternalFrame $r3, $r4;
+        javax.swing.plaf.basic.BasicInternalFrameUI r2;
+
+        r2 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r0 := @parameter0: javax.swing.JComponent;
+
+        r1 := @parameter1: javax.swing.JComponent;
+
+        if r0 == null goto label1;
+
+        virtualinvoke r2.<javax.swing.plaf.basic.BasicInternalFrameUI: void deinstallMouseHandlers(javax.swing.JComponent)>(r0);
+
+        $r4 = r2.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        virtualinvoke $r4.<javax.swing.JInternalFrame: void remove(java.awt.Component)>(r0);
+
+     label1:
+        if r1 == null goto label2;
+
+        $r3 = r2.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        virtualinvoke $r3.<javax.swing.JInternalFrame: java.awt.Component add(java.awt.Component)>(r1);
+
+        virtualinvoke r2.<javax.swing.plaf.basic.BasicInternalFrameUI: void installMouseHandlers(javax.swing.JComponent)>(r1);
+
+     label2:
+        return;
+    }
+
+    protected void deinstallMouseHandlers(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r0;
+        javax.swing.event.MouseInputAdapter $r2, $r3;
+        javax.swing.plaf.basic.BasicInternalFrameUI r1;
+
+        r1 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r0 := @parameter0: javax.swing.JComponent;
+
+        $r2 = r1.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.event.MouseInputAdapter borderListener>;
+
+        virtualinvoke r0.<javax.swing.JComponent: void removeMouseListener(java.awt.event.MouseListener)>($r2);
+
+        $r3 = r1.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.event.MouseInputAdapter borderListener>;
+
+        virtualinvoke r0.<javax.swing.JComponent: void removeMouseMotionListener(java.awt.event.MouseMotionListener)>($r3);
+
+        return;
+    }
+
+    protected void installMouseHandlers(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r0;
+        javax.swing.event.MouseInputAdapter $r2, $r3;
+        javax.swing.plaf.basic.BasicInternalFrameUI r1;
+
+        r1 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r0 := @parameter0: javax.swing.JComponent;
+
+        $r2 = r1.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.event.MouseInputAdapter borderListener>;
+
+        virtualinvoke r0.<javax.swing.JComponent: void addMouseListener(java.awt.event.MouseListener)>($r2);
+
+        $r3 = r1.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.event.MouseInputAdapter borderListener>;
+
+        virtualinvoke r0.<javax.swing.JComponent: void addMouseMotionListener(java.awt.event.MouseMotionListener)>($r3);
+
+        return;
+    }
+
+    protected javax.swing.JComponent createNorthPane(javax.swing.JInternalFrame)
+    {
+        javax.swing.plaf.basic.BasicInternalFrameTitlePane $r1, $r3;
+        javax.swing.JInternalFrame r2;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r2 := @parameter0: javax.swing.JInternalFrame;
+
+        $r1 = new javax.swing.plaf.basic.BasicInternalFrameTitlePane;
+
+        specialinvoke $r1.<javax.swing.plaf.basic.BasicInternalFrameTitlePane: void <init>(javax.swing.JInternalFrame)>(r2);
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.plaf.basic.BasicInternalFrameTitlePane titlePane> = $r1;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.plaf.basic.BasicInternalFrameTitlePane titlePane>;
+
+        return $r3;
+    }
+
+    protected javax.swing.JComponent createSouthPane(javax.swing.JInternalFrame)
+    {
+        javax.swing.JInternalFrame r1;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r1 := @parameter0: javax.swing.JInternalFrame;
+
+        return null;
+    }
+
+    protected javax.swing.JComponent createWestPane(javax.swing.JInternalFrame)
+    {
+        javax.swing.JInternalFrame r1;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r1 := @parameter0: javax.swing.JInternalFrame;
+
+        return null;
+    }
+
+    protected javax.swing.JComponent createEastPane(javax.swing.JInternalFrame)
+    {
+        javax.swing.JInternalFrame r1;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r1 := @parameter0: javax.swing.JInternalFrame;
+
+        return null;
+    }
+
+    protected javax.swing.event.MouseInputAdapter createBorderListener(javax.swing.JInternalFrame)
+    {
+        javax.swing.JInternalFrame r2;
+        javax.swing.plaf.basic.BasicInternalFrameUI$BorderListener $r0;
+        javax.swing.plaf.basic.BasicInternalFrameUI r1;
+
+        r1 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r2 := @parameter0: javax.swing.JInternalFrame;
+
+        $r0 = new javax.swing.plaf.basic.BasicInternalFrameUI$BorderListener;
+
+        specialinvoke $r0.<javax.swing.plaf.basic.BasicInternalFrameUI$BorderListener: void <init>(javax.swing.plaf.basic.BasicInternalFrameUI)>(r1);
+
+        return $r0;
+    }
+
+    protected void createInternalFrameListener()
+    {
+        javax.swing.plaf.basic.BasicInternalFrameUI$Handler $r1;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.plaf.basic.BasicInternalFrameUI$Handler getHandler()>();
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.event.InternalFrameListener internalFrameListener> = $r1;
+
+        return;
+    }
+
+    protected final boolean isKeyBindingRegistered()
+    {
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $z0 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: boolean keyBindingRegistered>;
+
+        return $z0;
+    }
+
+    protected final void setKeyBindingRegistered(boolean)
+    {
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+        boolean z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        z0 := @parameter0: boolean;
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: boolean keyBindingRegistered> = z0;
+
+        return;
+    }
+
+    public final boolean isKeyBindingActive()
+    {
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $z0 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: boolean keyBindingActive>;
+
+        return $z0;
+    }
+
+    protected final void setKeyBindingActive(boolean)
+    {
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+        boolean z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        z0 := @parameter0: boolean;
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: boolean keyBindingActive> = z0;
+
+        return;
+    }
+
+    protected void setupMenuOpenKey()
+    {
+        javax.swing.InputMap $r1;
+        javax.swing.JInternalFrame $r2;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $r1 = virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.InputMap getInputMap(int)>(2);
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        staticinvoke <javax.swing.SwingUtilities: void replaceUIInputMap(javax.swing.JComponent,int,javax.swing.InputMap)>($r2, 2, $r1);
+
+        return;
+    }
+
+    protected void setupMenuCloseKey()
+    {
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        return;
+    }
+
+    public javax.swing.JComponent getNorthPane()
+    {
+        javax.swing.JComponent $r1;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JComponent northPane>;
+
+        return $r1;
+    }
+
+    public void setNorthPane(javax.swing.JComponent)
+    {
+        javax.swing.JComponent $r1, r2, $r4, $r5, $r7;
+        javax.swing.plaf.basic.BasicInternalFrameTitlePane $r3, $r6;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r2 := @parameter0: javax.swing.JComponent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JComponent northPane>;
+
+        if $r1 == null goto label1;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JComponent northPane>;
+
+        $z0 = $r4 instanceof javax.swing.plaf.basic.BasicInternalFrameTitlePane;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JComponent northPane>;
+
+        $r6 = (javax.swing.plaf.basic.BasicInternalFrameTitlePane) $r5;
+
+        virtualinvoke $r6.<javax.swing.plaf.basic.BasicInternalFrameTitlePane: void uninstallListeners()>();
+
+     label1:
+        $r7 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JComponent northPane>;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: void replacePane(javax.swing.JComponent,javax.swing.JComponent)>($r7, r2);
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JComponent northPane> = r2;
+
+        $z1 = r2 instanceof javax.swing.plaf.basic.BasicInternalFrameTitlePane;
+
+        if $z1 == 0 goto label2;
+
+        $r3 = (javax.swing.plaf.basic.BasicInternalFrameTitlePane) r2;
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.plaf.basic.BasicInternalFrameTitlePane titlePane> = $r3;
+
+     label2:
+        return;
+    }
+
+    public javax.swing.JComponent getSouthPane()
+    {
+        javax.swing.JComponent $r1;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JComponent southPane>;
+
+        return $r1;
+    }
+
+    public void setSouthPane(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r1;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JComponent southPane> = r1;
+
+        return;
+    }
+
+    public javax.swing.JComponent getWestPane()
+    {
+        javax.swing.JComponent $r1;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JComponent westPane>;
+
+        return $r1;
+    }
+
+    public void setWestPane(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r1;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JComponent westPane> = r1;
+
+        return;
+    }
+
+    public javax.swing.JComponent getEastPane()
+    {
+        javax.swing.JComponent $r1;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JComponent eastPane>;
+
+        return $r1;
+    }
+
+    public void setEastPane(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r1;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JComponent eastPane> = r1;
+
+        return;
+    }
+
+    protected javax.swing.DesktopManager getDesktopManager()
+    {
+        javax.swing.JDesktopPane $r2, $r7, $r10;
+        javax.swing.JInternalFrame $r1, $r6, $r9;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+        javax.swing.DesktopManager $r3, $r4, $r5, $r8, $r11;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.JInternalFrame: javax.swing.JDesktopPane getDesktopPane()>();
+
+        if $r2 == null goto label1;
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r7 = virtualinvoke $r6.<javax.swing.JInternalFrame: javax.swing.JDesktopPane getDesktopPane()>();
+
+        $r8 = virtualinvoke $r7.<javax.swing.JDesktopPane: javax.swing.DesktopManager getDesktopManager()>();
+
+        if $r8 == null goto label1;
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        $r10 = virtualinvoke $r9.<javax.swing.JInternalFrame: javax.swing.JDesktopPane getDesktopPane()>();
+
+        $r11 = virtualinvoke $r10.<javax.swing.JDesktopPane: javax.swing.DesktopManager getDesktopManager()>();
+
+        return $r11;
+
+     label1:
+        $r3 = <javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.DesktopManager sharedDesktopManager>;
+
+        if $r3 != null goto label2;
+
+        $r5 = virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.DesktopManager createDesktopManager()>();
+
+        <javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.DesktopManager sharedDesktopManager> = $r5;
+
+     label2:
+        $r4 = <javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.DesktopManager sharedDesktopManager>;
+
+        return $r4;
+    }
+
+    protected javax.swing.DesktopManager createDesktopManager()
+    {
+        javax.swing.DefaultDesktopManager $r0;
+        javax.swing.plaf.basic.BasicInternalFrameUI r1;
+
+        r1 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $r0 = new javax.swing.DefaultDesktopManager;
+
+        specialinvoke $r0.<javax.swing.DefaultDesktopManager: void <init>()>();
+
+        return $r0;
+    }
+
+    protected void closeFrame(javax.swing.JInternalFrame)
+    {
+        javax.swing.JInternalFrame $r1, r3;
+        javax.swing.DesktopManager $r2;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r3 := @parameter0: javax.swing.JInternalFrame;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        staticinvoke <javax.swing.plaf.basic.BasicLookAndFeel: void playSound(javax.swing.JComponent,java.lang.Object)>($r1, "InternalFrame.closeSound");
+
+        $r2 = virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.DesktopManager getDesktopManager()>();
+
+        interfaceinvoke $r2.<javax.swing.DesktopManager: void closeFrame(javax.swing.JInternalFrame)>(r3);
+
+        return;
+    }
+
+    protected void maximizeFrame(javax.swing.JInternalFrame)
+    {
+        javax.swing.JInternalFrame $r1, r3;
+        javax.swing.DesktopManager $r2;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r3 := @parameter0: javax.swing.JInternalFrame;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        staticinvoke <javax.swing.plaf.basic.BasicLookAndFeel: void playSound(javax.swing.JComponent,java.lang.Object)>($r1, "InternalFrame.maximizeSound");
+
+        $r2 = virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.DesktopManager getDesktopManager()>();
+
+        interfaceinvoke $r2.<javax.swing.DesktopManager: void maximizeFrame(javax.swing.JInternalFrame)>(r3);
+
+        return;
+    }
+
+    protected void minimizeFrame(javax.swing.JInternalFrame)
+    {
+        javax.swing.JInternalFrame r0, $r3;
+        javax.swing.DesktopManager $r2;
+        boolean $z0;
+        javax.swing.plaf.basic.BasicInternalFrameUI r1;
+
+        r1 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r0 := @parameter0: javax.swing.JInternalFrame;
+
+        $z0 = virtualinvoke r0.<javax.swing.JInternalFrame: boolean isIcon()>();
+
+        if $z0 != 0 goto label1;
+
+        $r3 = r1.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        staticinvoke <javax.swing.plaf.basic.BasicLookAndFeel: void playSound(javax.swing.JComponent,java.lang.Object)>($r3, "InternalFrame.restoreDownSound");
+
+     label1:
+        $r2 = virtualinvoke r1.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.DesktopManager getDesktopManager()>();
+
+        interfaceinvoke $r2.<javax.swing.DesktopManager: void minimizeFrame(javax.swing.JInternalFrame)>(r0);
+
+        return;
+    }
+
+    protected void iconifyFrame(javax.swing.JInternalFrame)
+    {
+        javax.swing.JInternalFrame $r1, r3;
+        javax.swing.DesktopManager $r2;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r3 := @parameter0: javax.swing.JInternalFrame;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        staticinvoke <javax.swing.plaf.basic.BasicLookAndFeel: void playSound(javax.swing.JComponent,java.lang.Object)>($r1, "InternalFrame.minimizeSound");
+
+        $r2 = virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.DesktopManager getDesktopManager()>();
+
+        interfaceinvoke $r2.<javax.swing.DesktopManager: void iconifyFrame(javax.swing.JInternalFrame)>(r3);
+
+        return;
+    }
+
+    protected void deiconifyFrame(javax.swing.JInternalFrame)
+    {
+        javax.swing.JInternalFrame r0, $r3;
+        javax.swing.DesktopManager $r2;
+        boolean $z0;
+        javax.swing.plaf.basic.BasicInternalFrameUI r1;
+
+        r1 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r0 := @parameter0: javax.swing.JInternalFrame;
+
+        $z0 = virtualinvoke r0.<javax.swing.JInternalFrame: boolean isMaximum()>();
+
+        if $z0 != 0 goto label1;
+
+        $r3 = r1.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.JInternalFrame frame>;
+
+        staticinvoke <javax.swing.plaf.basic.BasicLookAndFeel: void playSound(javax.swing.JComponent,java.lang.Object)>($r3, "InternalFrame.restoreUpSound");
+
+     label1:
+        $r2 = virtualinvoke r1.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.DesktopManager getDesktopManager()>();
+
+        interfaceinvoke $r2.<javax.swing.DesktopManager: void deiconifyFrame(javax.swing.JInternalFrame)>(r0);
+
+        return;
+    }
+
+    protected void activateFrame(javax.swing.JInternalFrame)
+    {
+        javax.swing.JInternalFrame r2;
+        javax.swing.DesktopManager $r1;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r2 := @parameter0: javax.swing.JInternalFrame;
+
+        $r1 = virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.DesktopManager getDesktopManager()>();
+
+        interfaceinvoke $r1.<javax.swing.DesktopManager: void activateFrame(javax.swing.JInternalFrame)>(r2);
+
+        return;
+    }
+
+    protected void deactivateFrame(javax.swing.JInternalFrame)
+    {
+        javax.swing.JInternalFrame r2;
+        javax.swing.DesktopManager $r1;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r2 := @parameter0: javax.swing.JInternalFrame;
+
+        $r1 = virtualinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.DesktopManager getDesktopManager()>();
+
+        interfaceinvoke $r1.<javax.swing.DesktopManager: void deactivateFrame(javax.swing.JInternalFrame)>(r2);
+
+        return;
+    }
+
+    protected java.awt.event.ComponentListener createComponentListener()
+    {
+        javax.swing.plaf.basic.BasicInternalFrameUI$Handler $r1;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.plaf.basic.BasicInternalFrameUI$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    protected javax.swing.event.MouseInputListener createGlassPaneDispatcher()
+    {
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        return null;
+    }
+
+    static javax.swing.plaf.basic.BasicInternalFrameUI$Handler access$100(javax.swing.plaf.basic.BasicInternalFrameUI)
+    {
+        javax.swing.plaf.basic.BasicInternalFrameUI$Handler $r1;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: javax.swing.plaf.basic.BasicInternalFrameUI$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    static boolean access$202(javax.swing.plaf.basic.BasicInternalFrameUI, boolean)
+    {
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+        boolean z0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        z0 := @parameter1: boolean;
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: boolean dragging> = z0;
+
+        return z0;
+    }
+
+    static java.awt.event.WindowFocusListener access$300(javax.swing.plaf.basic.BasicInternalFrameUI)
+    {
+        java.awt.event.WindowFocusListener $r1;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: java.awt.event.WindowFocusListener getWindowFocusListener()>();
+
+        return $r1;
+    }
+
+    static boolean access$402(javax.swing.plaf.basic.BasicInternalFrameUI, boolean)
+    {
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+        boolean z0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        z0 := @parameter1: boolean;
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: boolean resizing> = z0;
+
+        return z0;
+    }
+
+    static boolean access$200(javax.swing.plaf.basic.BasicInternalFrameUI)
+    {
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+        boolean $z0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $z0 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: boolean dragging>;
+
+        return $z0;
+    }
+
+    static java.awt.Rectangle access$502(javax.swing.plaf.basic.BasicInternalFrameUI, java.awt.Rectangle)
+    {
+        java.awt.Rectangle r1;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        r1 := @parameter1: java.awt.Rectangle;
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: java.awt.Rectangle parentBounds> = r1;
+
+        return r1;
+    }
+
+    static java.awt.Rectangle access$500(javax.swing.plaf.basic.BasicInternalFrameUI)
+    {
+        java.awt.Rectangle $r1;
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: java.awt.Rectangle parentBounds>;
+
+        return $r1;
+    }
+
+    static void access$600(javax.swing.plaf.basic.BasicInternalFrameUI)
+    {
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicInternalFrameUI: void cancelResize()>();
+
+        return;
+    }
+
+    static boolean access$700(javax.swing.plaf.basic.BasicInternalFrameUI)
+    {
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+        boolean $z0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        $z0 = r0.<javax.swing.plaf.basic.BasicInternalFrameUI: boolean componentListenerAdded>;
+
+        return $z0;
+    }
+
+    static boolean access$702(javax.swing.plaf.basic.BasicInternalFrameUI, boolean)
+    {
+        javax.swing.plaf.basic.BasicInternalFrameUI r0;
+        boolean z0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicInternalFrameUI;
+
+        z0 := @parameter1: boolean;
+
+        r0.<javax.swing.plaf.basic.BasicInternalFrameUI: boolean componentListenerAdded> = z0;
+
+        return z0;
+    }
+}

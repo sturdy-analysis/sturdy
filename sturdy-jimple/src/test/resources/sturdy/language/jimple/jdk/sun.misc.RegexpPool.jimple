@@ -1,0 +1,571 @@
+public class sun.misc.RegexpPool extends java.lang.Object
+{
+    private sun.misc.RegexpNode prefixMachine;
+    private sun.misc.RegexpNode suffixMachine;
+    private static final int BIG;
+    private int lastDepth;
+
+    public void <init>()
+    {
+        sun.misc.RegexpPool r0;
+        sun.misc.RegexpNode $r1, $r2;
+
+        r0 := @this: sun.misc.RegexpPool;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new sun.misc.RegexpNode;
+
+        specialinvoke $r1.<sun.misc.RegexpNode: void <init>()>();
+
+        r0.<sun.misc.RegexpPool: sun.misc.RegexpNode prefixMachine> = $r1;
+
+        $r2 = new sun.misc.RegexpNode;
+
+        specialinvoke $r2.<sun.misc.RegexpNode: void <init>()>();
+
+        r0.<sun.misc.RegexpPool: sun.misc.RegexpNode suffixMachine> = $r2;
+
+        r0.<sun.misc.RegexpPool: int lastDepth> = 2147483647;
+
+        return;
+    }
+
+    public void add(java.lang.String, java.lang.Object) throws sun.misc.REException
+    {
+        java.lang.Object r2;
+        sun.misc.RegexpPool r0;
+        java.lang.String r1;
+
+        r0 := @this: sun.misc.RegexpPool;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Object;
+
+        specialinvoke r0.<sun.misc.RegexpPool: void add(java.lang.String,java.lang.Object,boolean)>(r1, r2, 0);
+
+        return;
+    }
+
+    public void replace(java.lang.String, java.lang.Object)
+    {
+        java.lang.Object r2;
+        sun.misc.RegexpPool r0;
+        java.lang.String r1;
+        java.lang.Exception $r3;
+
+        r0 := @this: sun.misc.RegexpPool;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Object;
+
+     label1:
+        specialinvoke r0.<sun.misc.RegexpPool: void add(java.lang.String,java.lang.Object,boolean)>(r1, r2, 1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public java.lang.Object delete(java.lang.String)
+    {
+        sun.misc.RegexpNode r7, r8, r9;
+        int $i0, $i1, $i3, i4, i5, i6, $i9;
+        java.lang.String r1, $r2, $r3;
+        boolean $z0, $z1, $z2, $z3, $z4, z5;
+        char $c2, $c7;
+        java.lang.Object $r4, $r5, r6;
+        sun.misc.RegexpPool r0;
+
+        r0 := @this: sun.misc.RegexpPool;
+
+        r1 := @parameter0: java.lang.String;
+
+        r6 = null;
+
+        r7 = r0.<sun.misc.RegexpPool: sun.misc.RegexpNode prefixMachine>;
+
+        r8 = r7;
+
+        $i0 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        i4 = $i0 - 1;
+
+        z5 = 1;
+
+        $z0 = virtualinvoke r1.<java.lang.String: boolean startsWith(java.lang.String)>("*");
+
+        if $z0 == 0 goto label01;
+
+        $z4 = virtualinvoke r1.<java.lang.String: boolean endsWith(java.lang.String)>("*");
+
+        if $z4 != 0 goto label02;
+
+     label01:
+        i4 = i4 + 1;
+
+     label02:
+        if i4 > 0 goto label03;
+
+        return null;
+
+     label03:
+        i5 = 0;
+
+     label04:
+        if r7 == null goto label08;
+
+        $r5 = r7.<sun.misc.RegexpNode: java.lang.Object result>;
+
+        if $r5 == null goto label06;
+
+        $i3 = r7.<sun.misc.RegexpNode: int depth>;
+
+        if $i3 >= 2147483647 goto label06;
+
+        $z3 = r7.<sun.misc.RegexpNode: boolean exact>;
+
+        if $z3 == 0 goto label05;
+
+        if i5 != i4 goto label06;
+
+     label05:
+        r8 = r7;
+
+     label06:
+        if i5 < i4 goto label07;
+
+        goto label08;
+
+     label07:
+        $c2 = virtualinvoke r1.<java.lang.String: char charAt(int)>(i5);
+
+        r7 = virtualinvoke r7.<sun.misc.RegexpNode: sun.misc.RegexpNode find(char)>($c2);
+
+        i5 = i5 + 1;
+
+        goto label04;
+
+     label08:
+        r9 = r0.<sun.misc.RegexpPool: sun.misc.RegexpNode suffixMachine>;
+
+        i6 = i4;
+
+     label09:
+        $i9 = (int) -1;
+
+        i6 = i6 + $i9;
+
+        if i6 < 0 goto label11;
+
+        if r9 == null goto label11;
+
+        $r4 = r9.<sun.misc.RegexpNode: java.lang.Object result>;
+
+        if $r4 == null goto label10;
+
+        $i1 = r9.<sun.misc.RegexpNode: int depth>;
+
+        if $i1 >= 2147483647 goto label10;
+
+        z5 = 0;
+
+        r8 = r9;
+
+     label10:
+        $c7 = virtualinvoke r1.<java.lang.String: char charAt(int)>(i6);
+
+        r9 = virtualinvoke r9.<sun.misc.RegexpNode: sun.misc.RegexpNode find(char)>($c7);
+
+        goto label09;
+
+     label11:
+        if z5 == 0 goto label12;
+
+        $r3 = r8.<sun.misc.RegexpNode: java.lang.String re>;
+
+        $z2 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z2 == 0 goto label13;
+
+        r6 = r8.<sun.misc.RegexpNode: java.lang.Object result>;
+
+        r8.<sun.misc.RegexpNode: java.lang.Object result> = null;
+
+        goto label13;
+
+     label12:
+        $r2 = r8.<sun.misc.RegexpNode: java.lang.String re>;
+
+        $z1 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z1 == 0 goto label13;
+
+        r6 = r8.<sun.misc.RegexpNode: java.lang.Object result>;
+
+        r8.<sun.misc.RegexpNode: java.lang.Object result> = null;
+
+     label13:
+        return r6;
+    }
+
+    public java.lang.Object match(java.lang.String)
+    {
+        java.lang.Object $r2;
+        sun.misc.RegexpPool r0;
+        java.lang.String r1;
+
+        r0 := @this: sun.misc.RegexpPool;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = specialinvoke r0.<sun.misc.RegexpPool: java.lang.Object matchAfter(java.lang.String,int)>(r1, 2147483647);
+
+        return $r2;
+    }
+
+    public java.lang.Object matchNext(java.lang.String)
+    {
+        int $i0;
+        java.lang.Object $r2;
+        sun.misc.RegexpPool r0;
+        java.lang.String r1;
+
+        r0 := @this: sun.misc.RegexpPool;
+
+        r1 := @parameter0: java.lang.String;
+
+        $i0 = r0.<sun.misc.RegexpPool: int lastDepth>;
+
+        $r2 = specialinvoke r0.<sun.misc.RegexpPool: java.lang.Object matchAfter(java.lang.String,int)>(r1, $i0);
+
+        return $r2;
+    }
+
+    private void add(java.lang.String, java.lang.Object, boolean) throws sun.misc.REException
+    {
+        sun.misc.REException $r11;
+        sun.misc.RegexpNode r9;
+        int $i0, $i2, i6, i7, $i8, $i10, $i11, $i13;
+        java.lang.String r0, $r8;
+        boolean z0, z1;
+        char $c1, $c3, $c4, $c5;
+        java.lang.Object $r2, r3;
+        java.lang.StringBuilder $r6, $r7, $r10;
+        sun.misc.RegexpPool r1;
+
+        r1 := @this: sun.misc.RegexpPool;
+
+        r0 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.Object;
+
+        z0 := @parameter2: boolean;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        i6 = $i0;
+
+        $c1 = virtualinvoke r0.<java.lang.String: char charAt(int)>(0);
+
+        $i8 = (int) $c1;
+
+        if $i8 != 42 goto label2;
+
+        r9 = r1.<sun.misc.RegexpPool: sun.misc.RegexpNode suffixMachine>;
+
+     label1:
+        if i6 <= 1 goto label7;
+
+        $i10 = (int) -1;
+
+        i6 = i6 + $i10;
+
+        $c5 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i6);
+
+        r9 = virtualinvoke r9.<sun.misc.RegexpNode: sun.misc.RegexpNode add(char)>($c5);
+
+        goto label1;
+
+     label2:
+        z1 = 0;
+
+        $i2 = $i0 - 1;
+
+        $c3 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i2);
+
+        $i11 = (int) $c3;
+
+        if $i11 != 42 goto label3;
+
+        $i13 = (int) -1;
+
+        i6 = $i0 + $i13;
+
+        goto label4;
+
+     label3:
+        z1 = 1;
+
+     label4:
+        r9 = r1.<sun.misc.RegexpPool: sun.misc.RegexpNode prefixMachine>;
+
+        i7 = 0;
+
+     label5:
+        if i7 >= i6 goto label6;
+
+        $c4 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i7);
+
+        r9 = virtualinvoke r9.<sun.misc.RegexpNode: sun.misc.RegexpNode add(char)>($c4);
+
+        i7 = i7 + 1;
+
+        goto label5;
+
+     label6:
+        r9.<sun.misc.RegexpNode: boolean exact> = z1;
+
+     label7:
+        $r2 = r9.<sun.misc.RegexpNode: java.lang.Object result>;
+
+        if $r2 == null goto label8;
+
+        if z0 != 0 goto label8;
+
+        $r11 = new sun.misc.REException;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is a duplicate");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r11.<sun.misc.REException: void <init>(java.lang.String)>($r8);
+
+        throw $r11;
+
+     label8:
+        r9.<sun.misc.RegexpNode: java.lang.String re> = r0;
+
+        r9.<sun.misc.RegexpNode: java.lang.Object result> = r3;
+
+        return;
+    }
+
+    private java.lang.Object matchAfter(java.lang.String, int)
+    {
+        sun.misc.RegexpTarget $r2;
+        sun.misc.RegexpNode r7, r8, r9;
+        int $i0, i1, $i2, $i3, $i5, $i6, i7, i8, i9, i10, $i13;
+        java.lang.String r1, $r3;
+        boolean $z0, $z1;
+        char $c4, $c11;
+        java.lang.Object $r4, $r5, $r6, r10;
+        sun.misc.RegexpPool r0;
+
+        r0 := @this: sun.misc.RegexpPool;
+
+        r1 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        r7 = r0.<sun.misc.RegexpPool: sun.misc.RegexpNode prefixMachine>;
+
+        r8 = r7;
+
+        i7 = 0;
+
+        i8 = 0;
+
+        $i0 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if $i0 > 0 goto label01;
+
+        return null;
+
+     label01:
+        i9 = 0;
+
+     label02:
+        if r7 == null goto label06;
+
+        $r6 = r7.<sun.misc.RegexpNode: java.lang.Object result>;
+
+        if $r6 == null goto label04;
+
+        $i5 = r7.<sun.misc.RegexpNode: int depth>;
+
+        if $i5 >= i1 goto label04;
+
+        $z1 = r7.<sun.misc.RegexpNode: boolean exact>;
+
+        if $z1 == 0 goto label03;
+
+        if i9 != $i0 goto label04;
+
+     label03:
+        $i6 = r7.<sun.misc.RegexpNode: int depth>;
+
+        r0.<sun.misc.RegexpPool: int lastDepth> = $i6;
+
+        r8 = r7;
+
+        i7 = i9;
+
+        i8 = $i0;
+
+     label04:
+        if i9 < $i0 goto label05;
+
+        goto label06;
+
+     label05:
+        $c4 = virtualinvoke r1.<java.lang.String: char charAt(int)>(i9);
+
+        r7 = virtualinvoke r7.<sun.misc.RegexpNode: sun.misc.RegexpNode find(char)>($c4);
+
+        i9 = i9 + 1;
+
+        goto label02;
+
+     label06:
+        r9 = r0.<sun.misc.RegexpPool: sun.misc.RegexpNode suffixMachine>;
+
+        i10 = $i0;
+
+     label07:
+        $i13 = (int) -1;
+
+        i10 = i10 + $i13;
+
+        if i10 < 0 goto label09;
+
+        if r9 == null goto label09;
+
+        $r5 = r9.<sun.misc.RegexpNode: java.lang.Object result>;
+
+        if $r5 == null goto label08;
+
+        $i2 = r9.<sun.misc.RegexpNode: int depth>;
+
+        if $i2 >= i1 goto label08;
+
+        $i3 = r9.<sun.misc.RegexpNode: int depth>;
+
+        r0.<sun.misc.RegexpPool: int lastDepth> = $i3;
+
+        r8 = r9;
+
+        i7 = 0;
+
+        i8 = i10 + 1;
+
+     label08:
+        $c11 = virtualinvoke r1.<java.lang.String: char charAt(int)>(i10);
+
+        r9 = virtualinvoke r9.<sun.misc.RegexpNode: sun.misc.RegexpNode find(char)>($c11);
+
+        goto label07;
+
+     label09:
+        $r4 = r8.<sun.misc.RegexpNode: java.lang.Object result>;
+
+        r10 = $r4;
+
+        if $r4 == null goto label10;
+
+        $z0 = $r4 instanceof sun.misc.RegexpTarget;
+
+        if $z0 == 0 goto label10;
+
+        $r2 = (sun.misc.RegexpTarget) $r4;
+
+        $r3 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int,int)>(i7, i8);
+
+        r10 = interfaceinvoke $r2.<sun.misc.RegexpTarget: java.lang.Object found(java.lang.String)>($r3);
+
+     label10:
+        return r10;
+    }
+
+    public void reset()
+    {
+        sun.misc.RegexpPool r0;
+
+        r0 := @this: sun.misc.RegexpPool;
+
+        r0.<sun.misc.RegexpPool: int lastDepth> = 2147483647;
+
+        return;
+    }
+
+    public void print(java.io.PrintStream)
+    {
+        java.io.PrintStream r0;
+        sun.misc.RegexpNode $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9;
+        sun.misc.RegexpPool r1;
+
+        r1 := @this: sun.misc.RegexpPool;
+
+        r0 := @parameter0: java.io.PrintStream;
+
+        virtualinvoke r0.<java.io.PrintStream: void print(java.lang.String)>("Regexp pool:\n");
+
+        $r2 = r1.<sun.misc.RegexpPool: sun.misc.RegexpNode suffixMachine>;
+
+        $r3 = $r2.<sun.misc.RegexpNode: sun.misc.RegexpNode firstchild>;
+
+        if $r3 == null goto label1;
+
+        virtualinvoke r0.<java.io.PrintStream: void print(java.lang.String)>(" Suffix machine: ");
+
+        $r8 = r1.<sun.misc.RegexpPool: sun.misc.RegexpNode suffixMachine>;
+
+        $r9 = $r8.<sun.misc.RegexpNode: sun.misc.RegexpNode firstchild>;
+
+        virtualinvoke $r9.<sun.misc.RegexpNode: void print(java.io.PrintStream)>(r0);
+
+        virtualinvoke r0.<java.io.PrintStream: void print(java.lang.String)>("\n");
+
+     label1:
+        $r4 = r1.<sun.misc.RegexpPool: sun.misc.RegexpNode prefixMachine>;
+
+        $r5 = $r4.<sun.misc.RegexpNode: sun.misc.RegexpNode firstchild>;
+
+        if $r5 == null goto label2;
+
+        virtualinvoke r0.<java.io.PrintStream: void print(java.lang.String)>(" Prefix machine: ");
+
+        $r6 = r1.<sun.misc.RegexpPool: sun.misc.RegexpNode prefixMachine>;
+
+        $r7 = $r6.<sun.misc.RegexpNode: sun.misc.RegexpNode firstchild>;
+
+        virtualinvoke $r7.<sun.misc.RegexpNode: void print(java.io.PrintStream)>(r0);
+
+        virtualinvoke r0.<java.io.PrintStream: void print(java.lang.String)>("\n");
+
+     label2:
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.misc.RegexpPool: int BIG> = 2147483647;
+
+        return;
+    }
+}

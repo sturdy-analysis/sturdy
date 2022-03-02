@@ -1,0 +1,918 @@
+class javax.swing.plaf.nimbus.EffectUtils extends java.lang.Object
+{
+
+    void <init>()
+    {
+        javax.swing.plaf.nimbus.EffectUtils r0;
+
+        r0 := @this: javax.swing.plaf.nimbus.EffectUtils;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    static void clearImage(java.awt.image.BufferedImage)
+    {
+        java.awt.AlphaComposite $r2;
+        java.awt.image.BufferedImage r0;
+        java.awt.Graphics2D $r1;
+        int $i0, $i1;
+
+        r0 := @parameter0: java.awt.image.BufferedImage;
+
+        $r1 = virtualinvoke r0.<java.awt.image.BufferedImage: java.awt.Graphics2D createGraphics()>();
+
+        $r2 = <java.awt.AlphaComposite: java.awt.AlphaComposite Clear>;
+
+        virtualinvoke $r1.<java.awt.Graphics2D: void setComposite(java.awt.Composite)>($r2);
+
+        $i0 = virtualinvoke r0.<java.awt.image.BufferedImage: int getWidth()>();
+
+        $i1 = virtualinvoke r0.<java.awt.image.BufferedImage: int getHeight()>();
+
+        virtualinvoke $r1.<java.awt.Graphics2D: void fillRect(int,int,int,int)>(0, 0, $i0, $i1);
+
+        virtualinvoke $r1.<java.awt.Graphics2D: void dispose()>();
+
+        return;
+    }
+
+    static java.awt.image.BufferedImage gaussianBlur(java.awt.image.BufferedImage, java.awt.image.BufferedImage, int)
+    {
+        byte[] r11, r12;
+        float[] $r8;
+        int[] r9, r10;
+        int $i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13;
+        java.lang.String $r6;
+        java.awt.image.BufferedImage r0, r7;
+        java.lang.IllegalArgumentException $r1;
+        java.lang.StringBuilder $r2, $r3, $r4, $r5;
+
+        r0 := @parameter0: java.awt.image.BufferedImage;
+
+        r7 := @parameter1: java.awt.image.BufferedImage;
+
+        i2 := @parameter2: int;
+
+        $i0 = virtualinvoke r0.<java.awt.image.BufferedImage: int getWidth()>();
+
+        $i1 = virtualinvoke r0.<java.awt.image.BufferedImage: int getHeight()>();
+
+        if r7 == null goto label1;
+
+        $i9 = virtualinvoke r7.<java.awt.image.BufferedImage: int getWidth()>();
+
+        if $i9 != $i0 goto label1;
+
+        $i10 = virtualinvoke r7.<java.awt.image.BufferedImage: int getHeight()>();
+
+        if $i10 != $i1 goto label1;
+
+        $i11 = virtualinvoke r0.<java.awt.image.BufferedImage: int getType()>();
+
+        $i12 = virtualinvoke r7.<java.awt.image.BufferedImage: int getType()>();
+
+        if $i11 == $i12 goto label2;
+
+     label1:
+        r7 = staticinvoke <javax.swing.plaf.nimbus.EffectUtils: java.awt.image.BufferedImage createColorModelCompatibleImage(java.awt.image.BufferedImage)>(r0);
+
+     label2:
+        $r8 = staticinvoke <javax.swing.plaf.nimbus.EffectUtils: float[] createGaussianKernel(int)>(i2);
+
+        $i13 = virtualinvoke r0.<java.awt.image.BufferedImage: int getType()>();
+
+        if $i13 != 2 goto label3;
+
+        $i7 = $i0 * $i1;
+
+        r9 = newarray (int)[$i7];
+
+        $i8 = $i0 * $i1;
+
+        r10 = newarray (int)[$i8];
+
+        staticinvoke <javax.swing.plaf.nimbus.EffectUtils: int[] getPixels(java.awt.image.BufferedImage,int,int,int,int,int[])>(r0, 0, 0, $i0, $i1, r9);
+
+        staticinvoke <javax.swing.plaf.nimbus.EffectUtils: void blur(int[],int[],int,int,float[],int)>(r9, r10, $i0, $i1, $r8, i2);
+
+        staticinvoke <javax.swing.plaf.nimbus.EffectUtils: void blur(int[],int[],int,int,float[],int)>(r10, r9, $i1, $i0, $r8, i2);
+
+        staticinvoke <javax.swing.plaf.nimbus.EffectUtils: void setPixels(java.awt.image.BufferedImage,int,int,int,int,int[])>(r7, 0, 0, $i0, $i1, r9);
+
+        goto label5;
+
+     label3:
+        $i3 = virtualinvoke r0.<java.awt.image.BufferedImage: int getType()>();
+
+        if $i3 != 10 goto label4;
+
+        $i5 = $i0 * $i1;
+
+        r11 = newarray (byte)[$i5];
+
+        $i6 = $i0 * $i1;
+
+        r12 = newarray (byte)[$i6];
+
+        staticinvoke <javax.swing.plaf.nimbus.EffectUtils: byte[] getPixels(java.awt.image.BufferedImage,int,int,int,int,byte[])>(r0, 0, 0, $i0, $i1, r11);
+
+        staticinvoke <javax.swing.plaf.nimbus.EffectUtils: void blur(byte[],byte[],int,int,float[],int)>(r11, r12, $i0, $i1, $r8, i2);
+
+        staticinvoke <javax.swing.plaf.nimbus.EffectUtils: void blur(byte[],byte[],int,int,float[],int)>(r12, r11, $i1, $i0, $r8, i2);
+
+        staticinvoke <javax.swing.plaf.nimbus.EffectUtils: void setPixels(java.awt.image.BufferedImage,int,int,int,int,byte[])>(r7, 0, 0, $i0, $i1, r11);
+
+        goto label5;
+
+     label4:
+        $r1 = new java.lang.IllegalArgumentException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("EffectUtils.gaussianBlur() src image is not a supported type, type=[");
+
+        $i4 = virtualinvoke r0.<java.awt.image.BufferedImage: int getType()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r6);
+
+        throw $r1;
+
+     label5:
+        return r7;
+    }
+
+    private static void blur(int[], int[], int, int, float[], int)
+    {
+        int[] r0, r1;
+        float $f0, $f1, $f2, $f3, f4, f5, f6, f7, $f8, $f9, $f10, $f11, $f12, $f13, $f14, $f15, $f16;
+        float[] r2;
+        int i0, i1, i2, i3, i4, i5, i6, i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, i16, i17, i18, i19, i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34;
+
+        r1 := @parameter0: int[];
+
+        r0 := @parameter1: int[];
+
+        i1 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        r2 := @parameter4: float[];
+
+        i3 := @parameter5: int;
+
+        i16 = 0;
+
+     label01:
+        if i16 >= i0 goto label16;
+
+        i17 = i16;
+
+        i2 = i16 * i1;
+
+        i18 = 0;
+
+     label02:
+        if i18 >= i1 goto label15;
+
+        f4 = 0.0F;
+
+        f5 = 0.0F;
+
+        f6 = 0.0F;
+
+        f7 = 0.0F;
+
+        i19 = neg i3;
+
+     label03:
+        if i19 > i3 goto label06;
+
+        i20 = i18 + i19;
+
+        if i20 < 0 goto label04;
+
+        if i20 < i1 goto label05;
+
+     label04:
+        $i15 = i18 + i1;
+
+        i20 = $i15 % i1;
+
+     label05:
+        $i21 = i2 + i20;
+
+        $i22 = r1[$i21];
+
+        $i23 = i3 + i19;
+
+        $f8 = r2[$i23];
+
+        $i24 = $i22 >> 24;
+
+        $i25 = $i24 & 255;
+
+        $f9 = (float) $i25;
+
+        $f10 = $f8 * $f9;
+
+        f7 = f7 + $f10;
+
+        $i26 = $i22 >> 16;
+
+        $i27 = $i26 & 255;
+
+        $f11 = (float) $i27;
+
+        $f12 = $f8 * $f11;
+
+        f6 = f6 + $f12;
+
+        $i28 = $i22 >> 8;
+
+        $i29 = $i28 & 255;
+
+        $f13 = (float) $i29;
+
+        $f14 = $f8 * $f13;
+
+        f5 = f5 + $f14;
+
+        $i30 = $i22 & 255;
+
+        $f15 = (float) $i30;
+
+        $f16 = $f8 * $f15;
+
+        f4 = f4 + $f16;
+
+        i19 = i19 + 1;
+
+        goto label03;
+
+     label06:
+        $f0 = f7 + 0.5F;
+
+        i4 = (int) $f0;
+
+        $f1 = f6 + 0.5F;
+
+        i5 = (int) $f1;
+
+        $f2 = f5 + 0.5F;
+
+        i6 = (int) $f2;
+
+        $f3 = f4 + 0.5F;
+
+        i7 = (int) $f3;
+
+        $i14 = i17;
+
+        if i4 <= 255 goto label07;
+
+        $i31 = 255;
+
+        goto label08;
+
+     label07:
+        $i31 = i4;
+
+     label08:
+        $i9 = $i31 << 24;
+
+        if i5 <= 255 goto label09;
+
+        $i32 = 255;
+
+        goto label10;
+
+     label09:
+        $i32 = i5;
+
+     label10:
+        $i8 = $i32 << 16;
+
+        $i11 = $i9 | $i8;
+
+        if i6 <= 255 goto label11;
+
+        $i33 = 255;
+
+        goto label12;
+
+     label11:
+        $i33 = i6;
+
+     label12:
+        $i10 = $i33 << 8;
+
+        $i12 = $i11 | $i10;
+
+        if i7 <= 255 goto label13;
+
+        $i34 = 255;
+
+        goto label14;
+
+     label13:
+        $i34 = i7;
+
+     label14:
+        $i13 = $i12 | $i34;
+
+        r0[$i14] = $i13;
+
+        i17 = i17 + i0;
+
+        i18 = i18 + 1;
+
+        goto label02;
+
+     label15:
+        i16 = i16 + 1;
+
+        goto label01;
+
+     label16:
+        return;
+    }
+
+    static void blur(byte[], byte[], int, int, float[], int)
+    {
+        byte[] r0, r1;
+        float[] r2;
+        short $s15, $s18;
+        byte $b5, $b14;
+        int i0, i1, i2, i3, i4, $i6, $i7, i8, i9, i10, i11, i12, $i13, $i16, $i17;
+        float $f0, f1, $f2, $f3, $f4;
+
+        r1 := @parameter0: byte[];
+
+        r0 := @parameter1: byte[];
+
+        i1 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        r2 := @parameter4: float[];
+
+        i3 := @parameter5: int;
+
+        i8 = 0;
+
+     label01:
+        if i8 >= i0 goto label10;
+
+        i9 = i8;
+
+        i2 = i8 * i1;
+
+        i10 = 0;
+
+     label02:
+        if i10 >= i1 goto label09;
+
+        f1 = 0.0F;
+
+        i11 = neg i3;
+
+     label03:
+        if i11 > i3 goto label06;
+
+        i12 = i10 + i11;
+
+        if i12 < 0 goto label04;
+
+        if i12 < i1 goto label05;
+
+     label04:
+        $i7 = i10 + i1;
+
+        i12 = $i7 % i1;
+
+     label05:
+        $i13 = i2 + i12;
+
+        $b14 = r1[$i13];
+
+        $s18 = (short) $b14;
+
+        $s15 = $s18 & 255;
+
+        $i16 = i3 + i11;
+
+        $f2 = r2[$i16];
+
+        $f3 = (float) $s15;
+
+        $f4 = $f2 * $f3;
+
+        f1 = f1 + $f4;
+
+        i11 = i11 + 1;
+
+        goto label03;
+
+     label06:
+        $f0 = f1 + 0.5F;
+
+        i4 = (int) $f0;
+
+        $i6 = i9;
+
+        if i4 <= 255 goto label07;
+
+        $i17 = 255;
+
+        goto label08;
+
+     label07:
+        $i17 = i4;
+
+     label08:
+        $b5 = (byte) $i17;
+
+        r0[$i6] = $b5;
+
+        i9 = i9 + i0;
+
+        i10 = i10 + 1;
+
+        goto label02;
+
+     label09:
+        i8 = i8 + 1;
+
+        goto label01;
+
+     label10:
+        return;
+    }
+
+    static float[] createGaussianKernel(int)
+    {
+        float[] r0;
+        int i0, $i1, $i2, $i3, $i4, i5, i6, i7;
+        double $d0, $d1, $d2, $d3, $d4;
+        java.lang.IllegalArgumentException $r1;
+        float $f0, f1, $f2, f3, f4, $f5, $f6, f7, $f8, $f9, $f10, $f11, $f12, f13;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 1 goto label1;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Radius must be >= 1");
+
+        throw $r1;
+
+     label1:
+        $i1 = i0 * 2;
+
+        $i2 = $i1 + 1;
+
+        r0 = newarray (float)[$i2];
+
+        $f0 = (float) i0;
+
+        f1 = $f0 / 3.0F;
+
+        $f2 = 2.0F * f1;
+
+        f3 = $f2 * f1;
+
+        $d0 = (double) f3;
+
+        $d1 = $d0 * 3.141592653589793;
+
+        $d2 = staticinvoke <java.lang.Math: double sqrt(double)>($d1);
+
+        f4 = (float) $d2;
+
+        f13 = 0.0F;
+
+        i6 = neg i0;
+
+     label2:
+        if i6 > i0 goto label3;
+
+        $i4 = i6 * i6;
+
+        f7 = (float) $i4;
+
+        i5 = i6 + i0;
+
+        $f8 = neg f7;
+
+        $f9 = $f8 / f3;
+
+        $d3 = (double) $f9;
+
+        $d4 = staticinvoke <java.lang.Math: double exp(double)>($d3);
+
+        $f10 = (float) $d4;
+
+        $f11 = $f10 / f4;
+
+        r0[i5] = $f11;
+
+        $f12 = r0[i5];
+
+        f13 = f13 + $f12;
+
+        i6 = i6 + 1;
+
+        goto label2;
+
+     label3:
+        i7 = 0;
+
+     label4:
+        $i3 = lengthof r0;
+
+        if i7 >= $i3 goto label5;
+
+        $f5 = r0[i7];
+
+        $f6 = $f5 / f13;
+
+        r0[i7] = $f6;
+
+        i7 = i7 + 1;
+
+        goto label4;
+
+     label5:
+        return r0;
+    }
+
+    static byte[] getPixels(java.awt.image.BufferedImage, int, int, int, int, byte[])
+    {
+        byte[] $r0, $r5, $r6, r8;
+        int i0, i1, $i2, $i3, $i4, i5, i6, $i7;
+        java.awt.image.BufferedImage r1;
+        java.lang.IllegalArgumentException $r2, $r7;
+        java.awt.image.WritableRaster $r3;
+        java.lang.Object $r4;
+
+        r1 := @parameter0: java.awt.image.BufferedImage;
+
+        i5 := @parameter1: int;
+
+        i6 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        i1 := @parameter4: int;
+
+        r8 := @parameter5: byte[];
+
+        if i0 == 0 goto label1;
+
+        if i1 != 0 goto label2;
+
+     label1:
+        $r0 = newarray (byte)[0];
+
+        return $r0;
+
+     label2:
+        if r8 != null goto label3;
+
+        $i7 = i0 * i1;
+
+        r8 = newarray (byte)[$i7];
+
+        goto label4;
+
+     label3:
+        $i3 = lengthof r8;
+
+        $i2 = i0 * i1;
+
+        if $i3 >= $i2 goto label4;
+
+        $r7 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r7.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("pixels array must have a length >= w*h");
+
+        throw $r7;
+
+     label4:
+        $i4 = virtualinvoke r1.<java.awt.image.BufferedImage: int getType()>();
+
+        if $i4 != 10 goto label5;
+
+        $r3 = virtualinvoke r1.<java.awt.image.BufferedImage: java.awt.image.WritableRaster getRaster()>();
+
+        $r4 = virtualinvoke $r3.<java.awt.image.Raster: java.lang.Object getDataElements(int,int,int,int,java.lang.Object)>(i5, i6, i0, i1, r8);
+
+        $r5 = (byte[]) $r4;
+
+        $r6 = (byte[]) $r5;
+
+        return $r6;
+
+     label5:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Only type BYTE_GRAY is supported");
+
+        throw $r2;
+    }
+
+    static void setPixels(java.awt.image.BufferedImage, int, int, int, int, byte[])
+    {
+        byte[] r0;
+        java.awt.image.BufferedImage r1;
+        java.lang.IllegalArgumentException $r2, $r4;
+        int i0, i1, $i2, $i3, $i4, i5, i6;
+        java.awt.image.WritableRaster $r3;
+
+        r1 := @parameter0: java.awt.image.BufferedImage;
+
+        i5 := @parameter1: int;
+
+        i6 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        i1 := @parameter4: int;
+
+        r0 := @parameter5: byte[];
+
+        if r0 == null goto label1;
+
+        if i0 == 0 goto label1;
+
+        if i1 != 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        $i3 = lengthof r0;
+
+        $i2 = i0 * i1;
+
+        if $i3 >= $i2 goto label3;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("pixels array must have a length >= w*h");
+
+        throw $r4;
+
+     label3:
+        $i4 = virtualinvoke r1.<java.awt.image.BufferedImage: int getType()>();
+
+        if $i4 != 10 goto label4;
+
+        $r3 = virtualinvoke r1.<java.awt.image.BufferedImage: java.awt.image.WritableRaster getRaster()>();
+
+        virtualinvoke $r3.<java.awt.image.WritableRaster: void setDataElements(int,int,int,int,java.lang.Object)>(i5, i6, i0, i1, r0);
+
+        goto label5;
+
+     label4:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Only type BYTE_GRAY is supported");
+
+        throw $r2;
+
+     label5:
+        return;
+    }
+
+    public static int[] getPixels(java.awt.image.BufferedImage, int, int, int, int, int[])
+    {
+        int[] $r0, $r4, $r5, $r6, r8;
+        int i0, i1, $i2, $i3, $i4, i5, i6, $i7;
+        java.awt.image.BufferedImage r1;
+        java.lang.IllegalArgumentException $r7;
+        java.awt.image.WritableRaster $r2;
+        java.lang.Object $r3;
+
+        r1 := @parameter0: java.awt.image.BufferedImage;
+
+        i5 := @parameter1: int;
+
+        i6 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        i1 := @parameter4: int;
+
+        r8 := @parameter5: int[];
+
+        if i0 == 0 goto label1;
+
+        if i1 != 0 goto label2;
+
+     label1:
+        $r0 = newarray (int)[0];
+
+        return $r0;
+
+     label2:
+        if r8 != null goto label3;
+
+        $i7 = i0 * i1;
+
+        r8 = newarray (int)[$i7];
+
+        goto label4;
+
+     label3:
+        $i3 = lengthof r8;
+
+        $i2 = i0 * i1;
+
+        if $i3 >= $i2 goto label4;
+
+        $r7 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r7.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("pixels array must have a length >= w*h");
+
+        throw $r7;
+
+     label4:
+        $i4 = virtualinvoke r1.<java.awt.image.BufferedImage: int getType()>();
+
+        if $i4 == 2 goto label5;
+
+        if $i4 != 1 goto label6;
+
+     label5:
+        $r2 = virtualinvoke r1.<java.awt.image.BufferedImage: java.awt.image.WritableRaster getRaster()>();
+
+        $r3 = virtualinvoke $r2.<java.awt.image.Raster: java.lang.Object getDataElements(int,int,int,int,java.lang.Object)>(i5, i6, i0, i1, r8);
+
+        $r4 = (int[]) $r3;
+
+        $r5 = (int[]) $r4;
+
+        return $r5;
+
+     label6:
+        $r6 = virtualinvoke r1.<java.awt.image.BufferedImage: int[] getRGB(int,int,int,int,int[],int,int)>(i5, i6, i0, i1, r8, 0, i0);
+
+        return $r6;
+    }
+
+    public static void setPixels(java.awt.image.BufferedImage, int, int, int, int, int[])
+    {
+        java.awt.image.BufferedImage r1;
+        java.lang.IllegalArgumentException $r3;
+        int[] r0;
+        int i0, i1, $i2, $i3, $i4, i5, i6;
+        java.awt.image.WritableRaster $r2;
+
+        r1 := @parameter0: java.awt.image.BufferedImage;
+
+        i5 := @parameter1: int;
+
+        i6 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        i1 := @parameter4: int;
+
+        r0 := @parameter5: int[];
+
+        if r0 == null goto label1;
+
+        if i0 == 0 goto label1;
+
+        if i1 != 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        $i3 = lengthof r0;
+
+        $i2 = i0 * i1;
+
+        if $i3 >= $i2 goto label3;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("pixels array must have a length >= w*h");
+
+        throw $r3;
+
+     label3:
+        $i4 = virtualinvoke r1.<java.awt.image.BufferedImage: int getType()>();
+
+        if $i4 == 2 goto label4;
+
+        if $i4 != 1 goto label5;
+
+     label4:
+        $r2 = virtualinvoke r1.<java.awt.image.BufferedImage: java.awt.image.WritableRaster getRaster()>();
+
+        virtualinvoke $r2.<java.awt.image.WritableRaster: void setDataElements(int,int,int,int,java.lang.Object)>(i5, i6, i0, i1, r0);
+
+        goto label6;
+
+     label5:
+        virtualinvoke r1.<java.awt.image.BufferedImage: void setRGB(int,int,int,int,int[],int,int)>(i5, i6, i0, i1, r0, 0, i0);
+
+     label6:
+        return;
+    }
+
+    public static java.awt.image.BufferedImage createColorModelCompatibleImage(java.awt.image.BufferedImage)
+    {
+        java.awt.image.ColorModel $r1;
+        java.awt.image.BufferedImage r0, $r2;
+        int $i0, $i1;
+        java.awt.image.WritableRaster $r3;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.image.BufferedImage;
+
+        $r1 = virtualinvoke r0.<java.awt.image.BufferedImage: java.awt.image.ColorModel getColorModel()>();
+
+        $r2 = new java.awt.image.BufferedImage;
+
+        $i0 = virtualinvoke r0.<java.awt.image.BufferedImage: int getWidth()>();
+
+        $i1 = virtualinvoke r0.<java.awt.image.BufferedImage: int getHeight()>();
+
+        $r3 = virtualinvoke $r1.<java.awt.image.ColorModel: java.awt.image.WritableRaster createCompatibleWritableRaster(int,int)>($i0, $i1);
+
+        $z0 = virtualinvoke $r1.<java.awt.image.ColorModel: boolean isAlphaPremultiplied()>();
+
+        specialinvoke $r2.<java.awt.image.BufferedImage: void <init>(java.awt.image.ColorModel,java.awt.image.WritableRaster,boolean,java.util.Hashtable)>($r1, $r3, $z0, null);
+
+        return $r2;
+    }
+
+    public static java.awt.image.BufferedImage createCompatibleTranslucentImage(int, int)
+    {
+        java.awt.GraphicsConfiguration $r0;
+        java.awt.image.BufferedImage $r1;
+        int i0, i1;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $z0 = staticinvoke <javax.swing.plaf.nimbus.EffectUtils: boolean isHeadless()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new java.awt.image.BufferedImage;
+
+        specialinvoke $r1.<java.awt.image.BufferedImage: void <init>(int,int,int)>(i0, i1, 2);
+
+        goto label2;
+
+     label1:
+        $r0 = staticinvoke <javax.swing.plaf.nimbus.EffectUtils: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+        $r1 = virtualinvoke $r0.<java.awt.GraphicsConfiguration: java.awt.image.BufferedImage createCompatibleImage(int,int,int)>(i0, i1, 3);
+
+     label2:
+        return $r1;
+    }
+
+    private static boolean isHeadless()
+    {
+        boolean $z0;
+
+        $z0 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        return $z0;
+    }
+
+    private static java.awt.GraphicsConfiguration getGraphicsConfiguration()
+    {
+        java.awt.GraphicsConfiguration $r2;
+        java.awt.GraphicsEnvironment $r0;
+        java.awt.GraphicsDevice $r1;
+
+        $r0 = staticinvoke <java.awt.GraphicsEnvironment: java.awt.GraphicsEnvironment getLocalGraphicsEnvironment()>();
+
+        $r1 = virtualinvoke $r0.<java.awt.GraphicsEnvironment: java.awt.GraphicsDevice getDefaultScreenDevice()>();
+
+        $r2 = virtualinvoke $r1.<java.awt.GraphicsDevice: java.awt.GraphicsConfiguration getDefaultConfiguration()>();
+
+        return $r2;
+    }
+}

@@ -1,0 +1,147 @@
+final class sun.security.ssl.SignatureAlgorithmsExtension$CHSignatureSchemesProducer extends java.lang.Object implements sun.security.ssl.HandshakeProducer
+{
+
+    private void <init>()
+    {
+        sun.security.ssl.SignatureAlgorithmsExtension$CHSignatureSchemesProducer r0;
+
+        r0 := @this: sun.security.ssl.SignatureAlgorithmsExtension$CHSignatureSchemesProducer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public byte[] produce(sun.security.ssl.ConnectionContext, sun.security.ssl.SSLHandshake$HandshakeMessage) throws java.io.IOException
+    {
+        byte[] $r19;
+        sun.security.ssl.SSLHandshake$HandshakeMessage r22;
+        java.nio.ByteBuffer $r6;
+        java.util.Map $r11;
+        sun.security.ssl.SSLConfiguration $r3, $r17;
+        boolean $z0, $z1, $z2, $z3;
+        java.util.List $r4, $r5, $r7, $r10, $r15, $r18;
+        java.lang.Object[] $r20;
+        sun.security.ssl.ConnectionContext r0;
+        int $i0, $i1, $i2, $i3, $i4;
+        sun.security.ssl.SignatureAlgorithmsExtension$SignatureSchemesSpec $r9;
+        java.util.Iterator $r8;
+        sun.security.ssl.ClientHandshakeContext r1;
+        sun.security.ssl.SSLExtension $r2, $r12;
+        java.security.AlgorithmConstraints $r16;
+        java.lang.Object $r13;
+        sun.security.ssl.SignatureAlgorithmsExtension$CHSignatureSchemesProducer r21;
+        sun.security.ssl.SignatureScheme r14;
+
+        r21 := @this: sun.security.ssl.SignatureAlgorithmsExtension$CHSignatureSchemesProducer;
+
+        r0 := @parameter0: sun.security.ssl.ConnectionContext;
+
+        r22 := @parameter1: sun.security.ssl.SSLHandshake$HandshakeMessage;
+
+        r1 = (sun.security.ssl.ClientHandshakeContext) r0;
+
+        $r3 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $r2 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension CH_SIGNATURE_ALGORITHMS>;
+
+        $z0 = virtualinvoke $r3.<sun.security.ssl.SSLConfiguration: boolean isAvailable(sun.security.ssl.SSLExtension)>($r2);
+
+        if $z0 != 0 goto label2;
+
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label1;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z2 == 0 goto label1;
+
+        $r20 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Ignore unavailable signature_algorithms extension", $r20);
+
+     label1:
+        return null;
+
+     label2:
+        $r4 = r1.<sun.security.ssl.ClientHandshakeContext: java.util.List localSupportedSignAlgs>;
+
+        if $r4 != null goto label3;
+
+        $r17 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $r16 = r1.<sun.security.ssl.ClientHandshakeContext: java.security.AlgorithmConstraints algorithmConstraints>;
+
+        $r15 = r1.<sun.security.ssl.ClientHandshakeContext: java.util.List activeProtocols>;
+
+        $r18 = staticinvoke <sun.security.ssl.SignatureScheme: java.util.List getSupportedAlgorithms(sun.security.ssl.SSLConfiguration,java.security.AlgorithmConstraints,java.util.List)>($r17, $r16, $r15);
+
+        r1.<sun.security.ssl.ClientHandshakeContext: java.util.List localSupportedSignAlgs> = $r18;
+
+     label3:
+        $i0 = staticinvoke <sun.security.ssl.SignatureScheme: int sizeInRecord()>();
+
+        $r5 = r1.<sun.security.ssl.ClientHandshakeContext: java.util.List localSupportedSignAlgs>;
+
+        $i1 = interfaceinvoke $r5.<java.util.List: int size()>();
+
+        $i4 = $i0 * $i1;
+
+        $i2 = $i4 + 2;
+
+        $r19 = newarray (byte)[$i2];
+
+        $r6 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>($r19);
+
+        staticinvoke <sun.security.ssl.Record: void putInt16(java.nio.ByteBuffer,int)>($r6, $i4);
+
+        $r7 = r1.<sun.security.ssl.ClientHandshakeContext: java.util.List localSupportedSignAlgs>;
+
+        $r8 = interfaceinvoke $r7.<java.util.List: java.util.Iterator iterator()>();
+
+     label4:
+        $z3 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label5;
+
+        $r13 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        r14 = (sun.security.ssl.SignatureScheme) $r13;
+
+        $i3 = r14.<sun.security.ssl.SignatureScheme: int id>;
+
+        staticinvoke <sun.security.ssl.Record: void putInt16(java.nio.ByteBuffer,int)>($r6, $i3);
+
+        goto label4;
+
+     label5:
+        $r11 = r1.<sun.security.ssl.ClientHandshakeContext: java.util.Map handshakeExtensions>;
+
+        $r12 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension CH_SIGNATURE_ALGORITHMS>;
+
+        $r9 = new sun.security.ssl.SignatureAlgorithmsExtension$SignatureSchemesSpec;
+
+        $r10 = r1.<sun.security.ssl.ClientHandshakeContext: java.util.List localSupportedSignAlgs>;
+
+        specialinvoke $r9.<sun.security.ssl.SignatureAlgorithmsExtension$SignatureSchemesSpec: void <init>(java.util.List)>($r10);
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r12, $r9);
+
+        return $r19;
+    }
+
+    void <init>(sun.security.ssl.SignatureAlgorithmsExtension$1)
+    {
+        sun.security.ssl.SignatureAlgorithmsExtension$1 r1;
+        sun.security.ssl.SignatureAlgorithmsExtension$CHSignatureSchemesProducer r0;
+
+        r0 := @this: sun.security.ssl.SignatureAlgorithmsExtension$CHSignatureSchemesProducer;
+
+        r1 := @parameter0: sun.security.ssl.SignatureAlgorithmsExtension$1;
+
+        specialinvoke r0.<sun.security.ssl.SignatureAlgorithmsExtension$CHSignatureSchemesProducer: void <init>()>();
+
+        return;
+    }
+}

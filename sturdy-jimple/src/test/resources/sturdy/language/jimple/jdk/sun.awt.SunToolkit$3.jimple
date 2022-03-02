@@ -1,0 +1,144 @@
+class sun.awt.SunToolkit$3 extends sun.awt.PeerEvent
+{
+    final long val$end;
+    final java.util.concurrent.atomic.AtomicBoolean val$queueEmpty;
+    final java.util.concurrent.atomic.AtomicBoolean val$eventDispatched;
+    final sun.awt.SunToolkit this$0;
+
+    void <init>(sun.awt.SunToolkit, java.lang.Object, java.lang.Runnable, long, long, java.util.concurrent.atomic.AtomicBoolean, java.util.concurrent.atomic.AtomicBoolean)
+    {
+        java.util.concurrent.atomic.AtomicBoolean r2, r3;
+        long l0, l1;
+        sun.awt.SunToolkit r1;
+        java.lang.Runnable r5;
+        java.lang.Object r4;
+        sun.awt.SunToolkit$3 r0;
+
+        r0 := @this: sun.awt.SunToolkit$3;
+
+        r1 := @parameter0: sun.awt.SunToolkit;
+
+        r4 := @parameter1: java.lang.Object;
+
+        r5 := @parameter2: java.lang.Runnable;
+
+        l1 := @parameter3: long;
+
+        l0 := @parameter4: long;
+
+        r2 := @parameter5: java.util.concurrent.atomic.AtomicBoolean;
+
+        r3 := @parameter6: java.util.concurrent.atomic.AtomicBoolean;
+
+        r0.<sun.awt.SunToolkit$3: sun.awt.SunToolkit this$0> = r1;
+
+        r0.<sun.awt.SunToolkit$3: long val$end> = l0;
+
+        r0.<sun.awt.SunToolkit$3: java.util.concurrent.atomic.AtomicBoolean val$queueEmpty> = r2;
+
+        r0.<sun.awt.SunToolkit$3: java.util.concurrent.atomic.AtomicBoolean val$eventDispatched> = r3;
+
+        specialinvoke r0.<sun.awt.PeerEvent: void <init>(java.lang.Object,java.lang.Runnable,long)>(r4, r5, l1);
+
+        return;
+    }
+
+    public void dispatch()
+    {
+        java.lang.Throwable $r12;
+        java.util.concurrent.atomic.AtomicBoolean $r6, $r7;
+        long $l0, $l1, $l2, $l3;
+        int i4;
+        sun.awt.SunToolkit$3 r0;
+        boolean $z0, $z1;
+        sun.awt.SunToolkit $r1, $r2, $r3, $r5, $r8, $r10, $r11;
+        java.lang.Object $r4, $r9;
+
+        r0 := @this: sun.awt.SunToolkit$3;
+
+        i4 = 0;
+
+     label1:
+        if i4 >= 1 goto label2;
+
+        $r11 = r0.<sun.awt.SunToolkit$3: sun.awt.SunToolkit this$0>;
+
+        $r10 = r0.<sun.awt.SunToolkit$3: sun.awt.SunToolkit this$0>;
+
+        $l2 = r0.<sun.awt.SunToolkit$3: long val$end>;
+
+        $l3 = virtualinvoke $r10.<sun.awt.SunToolkit: long timeout(long)>($l2);
+
+        virtualinvoke $r11.<sun.awt.SunToolkit: boolean syncNativeQueue(long)>($l3);
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label2:
+        $r2 = r0.<sun.awt.SunToolkit$3: sun.awt.SunToolkit this$0>;
+
+        $r1 = r0.<sun.awt.SunToolkit$3: sun.awt.SunToolkit this$0>;
+
+        $l0 = r0.<sun.awt.SunToolkit$3: long val$end>;
+
+        $l1 = virtualinvoke $r1.<sun.awt.SunToolkit: long timeout(long)>($l0);
+
+        $z0 = virtualinvoke $r2.<sun.awt.SunToolkit: boolean syncNativeQueue(long)>($l1);
+
+        if $z0 == 0 goto label3;
+
+        if i4 >= 100 goto label3;
+
+        i4 = i4 + 1;
+
+        goto label2;
+
+     label3:
+        staticinvoke <sun.awt.SunToolkit: void flushPendingEvents()>();
+
+        $r3 = r0.<sun.awt.SunToolkit$3: sun.awt.SunToolkit this$0>;
+
+        $r4 = staticinvoke <sun.awt.SunToolkit: java.lang.Object access$000(sun.awt.SunToolkit)>($r3);
+
+        entermonitor $r4;
+
+     label4:
+        $r6 = r0.<sun.awt.SunToolkit$3: java.util.concurrent.atomic.AtomicBoolean val$queueEmpty>;
+
+        $r5 = r0.<sun.awt.SunToolkit$3: sun.awt.SunToolkit this$0>;
+
+        $z1 = staticinvoke <sun.awt.SunToolkit: boolean access$100(sun.awt.SunToolkit)>($r5);
+
+        virtualinvoke $r6.<java.util.concurrent.atomic.AtomicBoolean: void set(boolean)>($z1);
+
+        $r7 = r0.<sun.awt.SunToolkit$3: java.util.concurrent.atomic.AtomicBoolean val$eventDispatched>;
+
+        virtualinvoke $r7.<java.util.concurrent.atomic.AtomicBoolean: void set(boolean)>(1);
+
+        $r8 = r0.<sun.awt.SunToolkit$3: sun.awt.SunToolkit this$0>;
+
+        $r9 = staticinvoke <sun.awt.SunToolkit: java.lang.Object access$000(sun.awt.SunToolkit)>($r8);
+
+        virtualinvoke $r9.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor $r4;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r12 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label7:
+        throw $r12;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label4 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+}

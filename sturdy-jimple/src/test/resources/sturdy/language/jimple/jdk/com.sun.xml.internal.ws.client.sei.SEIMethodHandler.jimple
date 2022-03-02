@@ -1,0 +1,562 @@
+abstract class com.sun.xml.internal.ws.client.sei.SEIMethodHandler extends com.sun.xml.internal.ws.client.sei.MethodHandler
+{
+    private com.sun.xml.internal.ws.client.sei.BodyBuilder bodyBuilder;
+    private com.sun.xml.internal.ws.client.sei.MessageFiller[] inFillers;
+    protected java.lang.String soapAction;
+    protected boolean isOneWay;
+    protected com.sun.xml.internal.ws.model.JavaMethodImpl javaMethod;
+    protected java.util.Map checkedExceptions;
+
+    void <init>(com.sun.xml.internal.ws.client.sei.SEIStub)
+    {
+        com.sun.xml.internal.ws.client.sei.SEIStub r1;
+        com.sun.xml.internal.ws.client.sei.SEIMethodHandler r0;
+
+        r0 := @this: com.sun.xml.internal.ws.client.sei.SEIMethodHandler;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.client.sei.SEIStub;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.client.sei.MethodHandler: void <init>(com.sun.xml.internal.ws.client.sei.SEIStub,java.lang.reflect.Method)>(r1, null);
+
+        return;
+    }
+
+    void <init>(com.sun.xml.internal.ws.client.sei.SEIStub, com.sun.xml.internal.ws.model.JavaMethodImpl)
+    {
+        com.sun.xml.internal.ws.client.sei.MessageFiller$Header $r20;
+        com.sun.xml.internal.ws.api.model.MEP $r51;
+        com.sun.xml.internal.ws.api.model.ParameterBinding $r17;
+        java.util.Map $r39;
+        com.sun.xml.internal.ws.client.sei.ValueGetter $r15;
+        com.sun.xml.internal.ws.client.sei.BodyBuilder r45;
+        com.sun.xml.internal.ws.api.model.soap.SOAPBinding $r7, $r25, $r35;
+        com.sun.xml.internal.ws.client.sei.SEIMethodHandler r0;
+        javax.xml.namespace.QName $r42;
+        com.sun.xml.internal.ws.client.sei.SEIStub r1;
+        com.sun.xml.internal.ws.client.sei.MessageFiller[] $r48, $r50;
+        java.lang.Object[] $r49;
+        com.sun.xml.internal.ws.api.SOAPVersion $r9, $r23, $r28, $r32;
+        com.sun.xml.internal.ws.client.sei.BodyBuilder$DocLit $r26;
+        java.lang.AssertionError $r11, $r34;
+        java.util.ArrayList $r46;
+        java.lang.String $r6, $r8, $r36, $r37;
+        com.sun.xml.internal.ws.api.model.JavaMethod $r24;
+        com.sun.xml.internal.ws.model.ParameterImpl r13;
+        com.sun.xml.internal.ws.client.sei.BodyBuilder$Bare $r22;
+        com.sun.xml.internal.ws.model.JavaMethodImpl r3;
+        int[] $r10, $r16;
+        com.sun.xml.internal.ws.client.sei.BodyBuilder$RpcLit $r30;
+        com.sun.xml.internal.ws.spi.db.XMLBridge $r21, $r40;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        com.sun.xml.internal.ws.spi.db.TypeInfo $r41;
+        com.sun.xml.internal.ws.model.WrapperParameter $r27, $r31;
+        java.util.List $r4, $r44;
+        java.util.HashMap $r2;
+        com.sun.xml.internal.ws.model.CheckedExceptionImpl r43;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        com.sun.xml.internal.ws.client.sei.MessageFiller $r19;
+        com.sun.xml.internal.ws.client.sei.ValueGetterFactory $r14, $r29, $r33;
+        java.util.Iterator $r5, $r47;
+        java.lang.Object $r12, $r38;
+        com.sun.xml.internal.ws.api.model.ParameterBinding$Kind $r18;
+
+        r0 := @this: com.sun.xml.internal.ws.client.sei.SEIMethodHandler;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.client.sei.SEIStub;
+
+        r3 := @parameter1: com.sun.xml.internal.ws.model.JavaMethodImpl;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.client.sei.MethodHandler: void <init>(com.sun.xml.internal.ws.client.sei.SEIStub,java.lang.reflect.Method)>(r1, null);
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.client.sei.SEIMethodHandler: java.util.Map checkedExceptions> = $r2;
+
+        $r4 = virtualinvoke r3.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.util.List getCheckedExceptions()>();
+
+        $r5 = interfaceinvoke $r4.<java.util.List: java.util.Iterator iterator()>();
+
+     label01:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label02;
+
+        $r38 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r43 = (com.sun.xml.internal.ws.model.CheckedExceptionImpl) $r38;
+
+        $r39 = r0.<com.sun.xml.internal.ws.client.sei.SEIMethodHandler: java.util.Map checkedExceptions>;
+
+        $r40 = virtualinvoke r43.<com.sun.xml.internal.ws.model.CheckedExceptionImpl: com.sun.xml.internal.ws.spi.db.XMLBridge getBond()>();
+
+        $r41 = interfaceinvoke $r40.<com.sun.xml.internal.ws.spi.db.XMLBridge: com.sun.xml.internal.ws.spi.db.TypeInfo getTypeInfo()>();
+
+        $r42 = $r41.<com.sun.xml.internal.ws.spi.db.TypeInfo: javax.xml.namespace.QName tagName>;
+
+        interfaceinvoke $r39.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r42, r43);
+
+        goto label01;
+
+     label02:
+        $r6 = virtualinvoke r3.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.lang.String getInputAction()>();
+
+        if $r6 == null goto label03;
+
+        $r35 = virtualinvoke r3.<com.sun.xml.internal.ws.model.JavaMethodImpl: com.sun.xml.internal.ws.api.model.soap.SOAPBinding getBinding()>();
+
+        $r36 = virtualinvoke $r35.<com.sun.xml.internal.ws.api.model.soap.SOAPBinding: java.lang.String getSOAPAction()>();
+
+        $z3 = virtualinvoke $r36.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z3 != 0 goto label03;
+
+        $r37 = virtualinvoke r3.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.lang.String getInputAction()>();
+
+        r0.<com.sun.xml.internal.ws.client.sei.SEIMethodHandler: java.lang.String soapAction> = $r37;
+
+        goto label04;
+
+     label03:
+        $r7 = virtualinvoke r3.<com.sun.xml.internal.ws.model.JavaMethodImpl: com.sun.xml.internal.ws.api.model.soap.SOAPBinding getBinding()>();
+
+        $r8 = virtualinvoke $r7.<com.sun.xml.internal.ws.api.model.soap.SOAPBinding: java.lang.String getSOAPAction()>();
+
+        r0.<com.sun.xml.internal.ws.client.sei.SEIMethodHandler: java.lang.String soapAction> = $r8;
+
+     label04:
+        r0.<com.sun.xml.internal.ws.client.sei.SEIMethodHandler: com.sun.xml.internal.ws.model.JavaMethodImpl javaMethod> = r3;
+
+        $r44 = virtualinvoke r3.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.util.List getRequestParameters()>();
+
+        r45 = null;
+
+        $r46 = new java.util.ArrayList;
+
+        specialinvoke $r46.<java.util.ArrayList: void <init>()>();
+
+        $r47 = interfaceinvoke $r44.<java.util.List: java.util.Iterator iterator()>();
+
+     label05:
+        $z4 = interfaceinvoke $r47.<java.util.Iterator: boolean hasNext()>();
+
+        if $z4 == 0 goto label14;
+
+        $r12 = interfaceinvoke $r47.<java.util.Iterator: java.lang.Object next()>();
+
+        r13 = (com.sun.xml.internal.ws.model.ParameterImpl) $r12;
+
+        $r14 = virtualinvoke r0.<com.sun.xml.internal.ws.client.sei.SEIMethodHandler: com.sun.xml.internal.ws.client.sei.ValueGetterFactory getValueGetterFactory()>();
+
+        $r15 = virtualinvoke $r14.<com.sun.xml.internal.ws.client.sei.ValueGetterFactory: com.sun.xml.internal.ws.client.sei.ValueGetter get(com.sun.xml.internal.ws.model.ParameterImpl)>(r13);
+
+        $r16 = <com.sun.xml.internal.ws.client.sei.SEIMethodHandler$1: int[] $SwitchMap$com$sun$xml$internal$ws$api$model$ParameterBinding$Kind>;
+
+        $r17 = virtualinvoke r13.<com.sun.xml.internal.ws.model.ParameterImpl: com.sun.xml.internal.ws.api.model.ParameterBinding getInBinding()>();
+
+        $r18 = $r17.<com.sun.xml.internal.ws.api.model.ParameterBinding: com.sun.xml.internal.ws.api.model.ParameterBinding$Kind kind>;
+
+        $i2 = virtualinvoke $r18.<com.sun.xml.internal.ws.api.model.ParameterBinding$Kind: int ordinal()>();
+
+        $i3 = $r16[$i2];
+
+        tableswitch($i3)
+        {
+            case 1: goto label06;
+            case 2: goto label09;
+            case 3: goto label10;
+            case 4: goto label11;
+            default: goto label12;
+        };
+
+     label06:
+        $z1 = virtualinvoke r13.<com.sun.xml.internal.ws.model.ParameterImpl: boolean isWrapperStyle()>();
+
+        if $z1 == 0 goto label08;
+
+        $r24 = virtualinvoke r13.<com.sun.xml.internal.ws.model.ParameterImpl: com.sun.xml.internal.ws.api.model.JavaMethod getParent()>();
+
+        $r25 = interfaceinvoke $r24.<com.sun.xml.internal.ws.api.model.JavaMethod: com.sun.xml.internal.ws.api.model.soap.SOAPBinding getBinding()>();
+
+        $z2 = virtualinvoke $r25.<com.sun.xml.internal.ws.api.model.soap.SOAPBinding: boolean isRpcLit()>();
+
+        if $z2 == 0 goto label07;
+
+        $r30 = new com.sun.xml.internal.ws.client.sei.BodyBuilder$RpcLit;
+
+        $r31 = (com.sun.xml.internal.ws.model.WrapperParameter) r13;
+
+        $r32 = r1.<com.sun.xml.internal.ws.client.sei.SEIStub: com.sun.xml.internal.ws.api.SOAPVersion soapVersion>;
+
+        $r33 = virtualinvoke r0.<com.sun.xml.internal.ws.client.sei.SEIMethodHandler: com.sun.xml.internal.ws.client.sei.ValueGetterFactory getValueGetterFactory()>();
+
+        specialinvoke $r30.<com.sun.xml.internal.ws.client.sei.BodyBuilder$RpcLit: void <init>(com.sun.xml.internal.ws.model.WrapperParameter,com.sun.xml.internal.ws.api.SOAPVersion,com.sun.xml.internal.ws.client.sei.ValueGetterFactory)>($r31, $r32, $r33);
+
+        r45 = $r30;
+
+        goto label13;
+
+     label07:
+        $r26 = new com.sun.xml.internal.ws.client.sei.BodyBuilder$DocLit;
+
+        $r27 = (com.sun.xml.internal.ws.model.WrapperParameter) r13;
+
+        $r28 = r1.<com.sun.xml.internal.ws.client.sei.SEIStub: com.sun.xml.internal.ws.api.SOAPVersion soapVersion>;
+
+        $r29 = virtualinvoke r0.<com.sun.xml.internal.ws.client.sei.SEIMethodHandler: com.sun.xml.internal.ws.client.sei.ValueGetterFactory getValueGetterFactory()>();
+
+        specialinvoke $r26.<com.sun.xml.internal.ws.client.sei.BodyBuilder$DocLit: void <init>(com.sun.xml.internal.ws.model.WrapperParameter,com.sun.xml.internal.ws.api.SOAPVersion,com.sun.xml.internal.ws.client.sei.ValueGetterFactory)>($r27, $r28, $r29);
+
+        r45 = $r26;
+
+        goto label13;
+
+     label08:
+        $r22 = new com.sun.xml.internal.ws.client.sei.BodyBuilder$Bare;
+
+        $r23 = r1.<com.sun.xml.internal.ws.client.sei.SEIStub: com.sun.xml.internal.ws.api.SOAPVersion soapVersion>;
+
+        specialinvoke $r22.<com.sun.xml.internal.ws.client.sei.BodyBuilder$Bare: void <init>(com.sun.xml.internal.ws.model.ParameterImpl,com.sun.xml.internal.ws.api.SOAPVersion,com.sun.xml.internal.ws.client.sei.ValueGetter)>(r13, $r23, $r15);
+
+        r45 = $r22;
+
+        goto label13;
+
+     label09:
+        $r20 = new com.sun.xml.internal.ws.client.sei.MessageFiller$Header;
+
+        $i4 = virtualinvoke r13.<com.sun.xml.internal.ws.model.ParameterImpl: int getIndex()>();
+
+        $r21 = virtualinvoke r13.<com.sun.xml.internal.ws.model.ParameterImpl: com.sun.xml.internal.ws.spi.db.XMLBridge getXMLBridge()>();
+
+        specialinvoke $r20.<com.sun.xml.internal.ws.client.sei.MessageFiller$Header: void <init>(int,com.sun.xml.internal.ws.spi.db.XMLBridge,com.sun.xml.internal.ws.client.sei.ValueGetter)>($i4, $r21, $r15);
+
+        interfaceinvoke $r46.<java.util.List: boolean add(java.lang.Object)>($r20);
+
+        goto label13;
+
+     label10:
+        $r19 = staticinvoke <com.sun.xml.internal.ws.client.sei.MessageFiller$AttachmentFiller: com.sun.xml.internal.ws.client.sei.MessageFiller createAttachmentFiller(com.sun.xml.internal.ws.model.ParameterImpl,com.sun.xml.internal.ws.client.sei.ValueGetter)>(r13, $r15);
+
+        interfaceinvoke $r46.<java.util.List: boolean add(java.lang.Object)>($r19);
+
+        goto label13;
+
+     label11:
+        goto label13;
+
+     label12:
+        $r34 = new java.lang.AssertionError;
+
+        specialinvoke $r34.<java.lang.AssertionError: void <init>()>();
+
+        throw $r34;
+
+     label13:
+        goto label05;
+
+     label14:
+        if r45 != null goto label18;
+
+        $r10 = <com.sun.xml.internal.ws.client.sei.SEIMethodHandler$1: int[] $SwitchMap$com$sun$xml$internal$ws$api$SOAPVersion>;
+
+        $r9 = r1.<com.sun.xml.internal.ws.client.sei.SEIStub: com.sun.xml.internal.ws.api.SOAPVersion soapVersion>;
+
+        $i0 = virtualinvoke $r9.<com.sun.xml.internal.ws.api.SOAPVersion: int ordinal()>();
+
+        $i1 = $r10[$i0];
+
+        lookupswitch($i1)
+        {
+            case 1: goto label15;
+            case 2: goto label16;
+            default: goto label17;
+        };
+
+     label15:
+        r45 = <com.sun.xml.internal.ws.client.sei.BodyBuilder: com.sun.xml.internal.ws.client.sei.BodyBuilder EMPTY_SOAP11>;
+
+        goto label18;
+
+     label16:
+        r45 = <com.sun.xml.internal.ws.client.sei.BodyBuilder: com.sun.xml.internal.ws.client.sei.BodyBuilder EMPTY_SOAP12>;
+
+        goto label18;
+
+     label17:
+        $r11 = new java.lang.AssertionError;
+
+        specialinvoke $r11.<java.lang.AssertionError: void <init>()>();
+
+        throw $r11;
+
+     label18:
+        r0.<com.sun.xml.internal.ws.client.sei.SEIMethodHandler: com.sun.xml.internal.ws.client.sei.BodyBuilder bodyBuilder> = r45;
+
+        $i5 = interfaceinvoke $r46.<java.util.List: int size()>();
+
+        $r48 = newarray (com.sun.xml.internal.ws.client.sei.MessageFiller)[$i5];
+
+        $r49 = interfaceinvoke $r46.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r48);
+
+        $r50 = (com.sun.xml.internal.ws.client.sei.MessageFiller[]) $r49;
+
+        r0.<com.sun.xml.internal.ws.client.sei.SEIMethodHandler: com.sun.xml.internal.ws.client.sei.MessageFiller[] inFillers> = $r50;
+
+        $r51 = virtualinvoke r3.<com.sun.xml.internal.ws.model.JavaMethodImpl: com.sun.xml.internal.ws.api.model.MEP getMEP()>();
+
+        $z5 = virtualinvoke $r51.<com.sun.xml.internal.ws.api.model.MEP: boolean isOneWay()>();
+
+        r0.<com.sun.xml.internal.ws.client.sei.SEIMethodHandler: boolean isOneWay> = $z5;
+
+        return;
+    }
+
+    com.sun.xml.internal.ws.client.sei.ResponseBuilder buildResponseBuilder(com.sun.xml.internal.ws.model.JavaMethodImpl, com.sun.xml.internal.ws.client.sei.ValueSetterFactory)
+    {
+        com.sun.xml.internal.ws.model.JavaMethodImpl r0;
+        com.sun.xml.internal.ws.client.sei.ValueSetterFactory r11;
+        com.sun.xml.internal.ws.api.model.ParameterBinding $r9;
+        int[] $r8;
+        com.sun.xml.internal.ws.client.sei.ResponseBuilder$NullSetter $r13;
+        com.sun.xml.internal.ws.client.sei.ResponseBuilder$DocLit $r29;
+        com.sun.xml.internal.ws.spi.db.XMLBridge $r26;
+        boolean $z0, $z1, $z2;
+        com.sun.xml.internal.ws.client.sei.ResponseBuilder$Body $r25;
+        com.sun.xml.internal.ws.spi.db.TypeInfo $r14;
+        com.sun.xml.internal.ws.model.WrapperParameter $r30, $r32;
+        com.sun.xml.internal.ws.client.sei.ResponseBuilder$Header $r20;
+        java.util.List $r1;
+        com.sun.xml.internal.ws.api.model.soap.SOAPBinding $r28;
+        java.lang.reflect.Type $r15;
+        com.sun.xml.internal.ws.client.sei.SEIMethodHandler r21;
+        com.sun.xml.internal.ws.client.sei.ResponseBuilder$RpcLit $r31;
+        com.sun.xml.internal.ws.client.sei.SEIStub $r22;
+        com.sun.xml.internal.ws.client.sei.ResponseBuilder$Composite $r5;
+        com.sun.xml.internal.ws.api.SOAPVersion $r23;
+        java.lang.AssertionError $r33;
+        java.util.ArrayList $r2;
+        int $i0, $i1, $i2;
+        com.sun.xml.internal.ws.client.sei.ValueSetter $r12, $r17, $r19, $r24;
+        com.sun.xml.internal.ws.api.model.JavaMethod $r27;
+        com.sun.xml.internal.ws.model.ParameterImpl r7;
+        java.util.Iterator $r3;
+        com.sun.xml.internal.ws.client.sei.ResponseBuilder $r18, r34;
+        java.lang.Object $r4, $r6, $r16;
+        com.sun.xml.internal.ws.api.model.ParameterBinding$Kind $r10;
+
+        r21 := @this: com.sun.xml.internal.ws.client.sei.SEIMethodHandler;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.model.JavaMethodImpl;
+
+        r11 := @parameter1: com.sun.xml.internal.ws.client.sei.ValueSetterFactory;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.model.JavaMethodImpl: java.util.List getResponseParameters()>();
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        $r3 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label01:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label10;
+
+        $r6 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (com.sun.xml.internal.ws.model.ParameterImpl) $r6;
+
+        $r8 = <com.sun.xml.internal.ws.client.sei.SEIMethodHandler$1: int[] $SwitchMap$com$sun$xml$internal$ws$api$model$ParameterBinding$Kind>;
+
+        $r9 = virtualinvoke r7.<com.sun.xml.internal.ws.model.ParameterImpl: com.sun.xml.internal.ws.api.model.ParameterBinding getOutBinding()>();
+
+        $r10 = $r9.<com.sun.xml.internal.ws.api.model.ParameterBinding: com.sun.xml.internal.ws.api.model.ParameterBinding$Kind kind>;
+
+        $i1 = virtualinvoke $r10.<com.sun.xml.internal.ws.api.model.ParameterBinding$Kind: int ordinal()>();
+
+        $i2 = $r8[$i1];
+
+        tableswitch($i2)
+        {
+            case 1: goto label02;
+            case 2: goto label05;
+            case 3: goto label06;
+            case 4: goto label07;
+            default: goto label08;
+        };
+
+     label02:
+        $z1 = virtualinvoke r7.<com.sun.xml.internal.ws.model.ParameterImpl: boolean isWrapperStyle()>();
+
+        if $z1 == 0 goto label04;
+
+        $r27 = virtualinvoke r7.<com.sun.xml.internal.ws.model.ParameterImpl: com.sun.xml.internal.ws.api.model.JavaMethod getParent()>();
+
+        $r28 = interfaceinvoke $r27.<com.sun.xml.internal.ws.api.model.JavaMethod: com.sun.xml.internal.ws.api.model.soap.SOAPBinding getBinding()>();
+
+        $z2 = virtualinvoke $r28.<com.sun.xml.internal.ws.api.model.soap.SOAPBinding: boolean isRpcLit()>();
+
+        if $z2 == 0 goto label03;
+
+        $r31 = new com.sun.xml.internal.ws.client.sei.ResponseBuilder$RpcLit;
+
+        $r32 = (com.sun.xml.internal.ws.model.WrapperParameter) r7;
+
+        specialinvoke $r31.<com.sun.xml.internal.ws.client.sei.ResponseBuilder$RpcLit: void <init>(com.sun.xml.internal.ws.model.WrapperParameter,com.sun.xml.internal.ws.client.sei.ValueSetterFactory)>($r32, r11);
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>($r31);
+
+        goto label09;
+
+     label03:
+        $r29 = new com.sun.xml.internal.ws.client.sei.ResponseBuilder$DocLit;
+
+        $r30 = (com.sun.xml.internal.ws.model.WrapperParameter) r7;
+
+        specialinvoke $r29.<com.sun.xml.internal.ws.client.sei.ResponseBuilder$DocLit: void <init>(com.sun.xml.internal.ws.model.WrapperParameter,com.sun.xml.internal.ws.client.sei.ValueSetterFactory)>($r30, r11);
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>($r29);
+
+        goto label09;
+
+     label04:
+        $r24 = virtualinvoke r11.<com.sun.xml.internal.ws.client.sei.ValueSetterFactory: com.sun.xml.internal.ws.client.sei.ValueSetter get(com.sun.xml.internal.ws.model.ParameterImpl)>(r7);
+
+        $r25 = new com.sun.xml.internal.ws.client.sei.ResponseBuilder$Body;
+
+        $r26 = virtualinvoke r7.<com.sun.xml.internal.ws.model.ParameterImpl: com.sun.xml.internal.ws.spi.db.XMLBridge getXMLBridge()>();
+
+        specialinvoke $r25.<com.sun.xml.internal.ws.client.sei.ResponseBuilder$Body: void <init>(com.sun.xml.internal.ws.spi.db.XMLBridge,com.sun.xml.internal.ws.client.sei.ValueSetter)>($r26, $r24);
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>($r25);
+
+        goto label09;
+
+     label05:
+        $r19 = virtualinvoke r11.<com.sun.xml.internal.ws.client.sei.ValueSetterFactory: com.sun.xml.internal.ws.client.sei.ValueSetter get(com.sun.xml.internal.ws.model.ParameterImpl)>(r7);
+
+        $r20 = new com.sun.xml.internal.ws.client.sei.ResponseBuilder$Header;
+
+        $r22 = r21.<com.sun.xml.internal.ws.client.sei.SEIMethodHandler: com.sun.xml.internal.ws.client.sei.SEIStub owner>;
+
+        $r23 = $r22.<com.sun.xml.internal.ws.client.sei.SEIStub: com.sun.xml.internal.ws.api.SOAPVersion soapVersion>;
+
+        specialinvoke $r20.<com.sun.xml.internal.ws.client.sei.ResponseBuilder$Header: void <init>(com.sun.xml.internal.ws.api.SOAPVersion,com.sun.xml.internal.ws.model.ParameterImpl,com.sun.xml.internal.ws.client.sei.ValueSetter)>($r23, r7, $r19);
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>($r20);
+
+        goto label09;
+
+     label06:
+        $r17 = virtualinvoke r11.<com.sun.xml.internal.ws.client.sei.ValueSetterFactory: com.sun.xml.internal.ws.client.sei.ValueSetter get(com.sun.xml.internal.ws.model.ParameterImpl)>(r7);
+
+        $r18 = staticinvoke <com.sun.xml.internal.ws.client.sei.ResponseBuilder$AttachmentBuilder: com.sun.xml.internal.ws.client.sei.ResponseBuilder createAttachmentBuilder(com.sun.xml.internal.ws.model.ParameterImpl,com.sun.xml.internal.ws.client.sei.ValueSetter)>(r7, $r17);
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>($r18);
+
+        goto label09;
+
+     label07:
+        $r12 = virtualinvoke r11.<com.sun.xml.internal.ws.client.sei.ValueSetterFactory: com.sun.xml.internal.ws.client.sei.ValueSetter get(com.sun.xml.internal.ws.model.ParameterImpl)>(r7);
+
+        $r13 = new com.sun.xml.internal.ws.client.sei.ResponseBuilder$NullSetter;
+
+        $r14 = virtualinvoke r7.<com.sun.xml.internal.ws.model.ParameterImpl: com.sun.xml.internal.ws.spi.db.TypeInfo getTypeInfo()>();
+
+        $r15 = $r14.<com.sun.xml.internal.ws.spi.db.TypeInfo: java.lang.reflect.Type type>;
+
+        $r16 = staticinvoke <com.sun.xml.internal.ws.client.sei.ResponseBuilder: java.lang.Object getVMUninitializedValue(java.lang.reflect.Type)>($r15);
+
+        specialinvoke $r13.<com.sun.xml.internal.ws.client.sei.ResponseBuilder$NullSetter: void <init>(com.sun.xml.internal.ws.client.sei.ValueSetter,java.lang.Object)>($r12, $r16);
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>($r13);
+
+        goto label09;
+
+     label08:
+        $r33 = new java.lang.AssertionError;
+
+        specialinvoke $r33.<java.lang.AssertionError: void <init>()>();
+
+        throw $r33;
+
+     label09:
+        goto label01;
+
+     label10:
+        $i0 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        lookupswitch($i0)
+        {
+            case 0: goto label11;
+            case 1: goto label12;
+            default: goto label13;
+        };
+
+     label11:
+        r34 = <com.sun.xml.internal.ws.client.sei.ResponseBuilder: com.sun.xml.internal.ws.client.sei.ResponseBuilder NONE>;
+
+        goto label14;
+
+     label12:
+        $r4 = interfaceinvoke $r2.<java.util.List: java.lang.Object get(int)>(0);
+
+        r34 = (com.sun.xml.internal.ws.client.sei.ResponseBuilder) $r4;
+
+        goto label14;
+
+     label13:
+        $r5 = new com.sun.xml.internal.ws.client.sei.ResponseBuilder$Composite;
+
+        specialinvoke $r5.<com.sun.xml.internal.ws.client.sei.ResponseBuilder$Composite: void <init>(java.util.Collection)>($r2);
+
+        r34 = $r5;
+
+     label14:
+        return r34;
+    }
+
+    com.sun.xml.internal.ws.api.message.Message createRequestMessage(java.lang.Object[])
+    {
+        com.sun.xml.internal.ws.client.sei.MessageFiller[] r4;
+        java.lang.Object[] r1;
+        com.sun.xml.internal.ws.api.message.Message $r3;
+        com.sun.xml.internal.ws.client.sei.BodyBuilder $r2;
+        int i0, i1;
+        com.sun.xml.internal.ws.client.sei.SEIMethodHandler r0;
+        com.sun.xml.internal.ws.client.sei.MessageFiller r5;
+
+        r0 := @this: com.sun.xml.internal.ws.client.sei.SEIMethodHandler;
+
+        r1 := @parameter0: java.lang.Object[];
+
+        $r2 = r0.<com.sun.xml.internal.ws.client.sei.SEIMethodHandler: com.sun.xml.internal.ws.client.sei.BodyBuilder bodyBuilder>;
+
+        $r3 = virtualinvoke $r2.<com.sun.xml.internal.ws.client.sei.BodyBuilder: com.sun.xml.internal.ws.api.message.Message createMessage(java.lang.Object[])>(r1);
+
+        r4 = r0.<com.sun.xml.internal.ws.client.sei.SEIMethodHandler: com.sun.xml.internal.ws.client.sei.MessageFiller[] inFillers>;
+
+        i0 = lengthof r4;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label2;
+
+        r5 = r4[i1];
+
+        virtualinvoke r5.<com.sun.xml.internal.ws.client.sei.MessageFiller: void fillIn(java.lang.Object[],com.sun.xml.internal.ws.api.message.Message)>(r1, $r3);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return $r3;
+    }
+
+    abstract com.sun.xml.internal.ws.client.sei.ValueGetterFactory getValueGetterFactory();
+}

@@ -1,0 +1,2160 @@
+public class sun.net.www.ParseUtil extends java.lang.Object
+{
+    static java.util.BitSet encodedInPath;
+    private static final char[] hexDigits;
+    private static final long L_DIGIT;
+    private static final long H_DIGIT;
+    private static final long L_HEX;
+    private static final long H_HEX;
+    private static final long L_UPALPHA;
+    private static final long H_UPALPHA;
+    private static final long L_LOWALPHA;
+    private static final long H_LOWALPHA;
+    private static final long L_ALPHA;
+    private static final long H_ALPHA;
+    private static final long L_ALPHANUM;
+    private static final long H_ALPHANUM;
+    private static final long L_MARK;
+    private static final long H_MARK;
+    private static final long L_UNRESERVED;
+    private static final long H_UNRESERVED;
+    private static final long L_RESERVED;
+    private static final long H_RESERVED;
+    private static final long L_ESCAPED;
+    private static final long H_ESCAPED;
+    private static final long L_DASH;
+    private static final long H_DASH;
+    private static final long L_URIC;
+    private static final long H_URIC;
+    private static final long L_PCHAR;
+    private static final long H_PCHAR;
+    private static final long L_PATH;
+    private static final long H_PATH;
+    private static final long L_USERINFO;
+    private static final long H_USERINFO;
+    private static final long L_REG_NAME;
+    private static final long H_REG_NAME;
+    private static final long L_SERVER;
+    private static final long H_SERVER;
+    static final boolean $assertionsDisabled;
+
+    public void <init>()
+    {
+        sun.net.www.ParseUtil r0;
+
+        r0 := @this: sun.net.www.ParseUtil;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static java.lang.String encodePath(java.lang.String)
+    {
+        java.lang.String r0, $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <sun.net.www.ParseUtil: java.lang.String encodePath(java.lang.String,boolean)>(r0, 1);
+
+        return $r1;
+    }
+
+    public static java.lang.String encodePath(java.lang.String, boolean)
+    {
+        java.lang.String r0, $r6;
+        char[] $r1, $r3, r5;
+        boolean z0, $z1;
+        int $i0, $i1, $i2, $i3, $i5, $i6, $i7, $i9, $i10, $i11, $i12, $i14, $i15, $i16, $i17, $i18, $i20, $i21, $i22, $i23, $i25, $i26, $i27, $i28, $i30, $i32, i33, i34, $i35, $i36, $i37, i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55;
+        char c4, $c8, $c13, $c19, $c24, $c29, $c31;
+        java.util.BitSet $r4;
+
+        r0 := @parameter0: java.lang.String;
+
+        z0 := @parameter1: boolean;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $i1 = $i0 * 2;
+
+        $i2 = $i1 + 16;
+
+        r5 = newarray (char)[$i2];
+
+        i33 = 0;
+
+        $r1 = virtualinvoke r0.<java.lang.String: char[] toCharArray()>();
+
+        $i3 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        i34 = 0;
+
+     label01:
+        if i34 >= $i3 goto label15;
+
+        c4 = $r1[i34];
+
+        if z0 != 0 goto label02;
+
+        $i39 = (int) c4;
+
+        if $i39 == 47 goto label03;
+
+     label02:
+        if z0 == 0 goto label04;
+
+        $c31 = <java.io.File: char separatorChar>;
+
+        $i40 = (int) c4;
+
+        $i41 = (int) $c31;
+
+        if $i40 != $i41 goto label04;
+
+     label03:
+        $i32 = i33;
+
+        i33 = i33 + 1;
+
+        r5[$i32] = 47;
+
+        goto label12;
+
+     label04:
+        $i42 = (int) c4;
+
+        if $i42 > 127 goto label10;
+
+        $i43 = (int) c4;
+
+        if $i43 < 97 goto label05;
+
+        $i44 = (int) c4;
+
+        if $i44 <= 122 goto label07;
+
+     label05:
+        $i45 = (int) c4;
+
+        if $i45 < 65 goto label06;
+
+        $i46 = (int) c4;
+
+        if $i46 <= 90 goto label07;
+
+     label06:
+        $i47 = (int) c4;
+
+        if $i47 < 48 goto label08;
+
+        $i48 = (int) c4;
+
+        if $i48 > 57 goto label08;
+
+     label07:
+        $i35 = i33;
+
+        i33 = i33 + 1;
+
+        r5[$i35] = c4;
+
+        goto label12;
+
+     label08:
+        $r4 = <sun.net.www.ParseUtil: java.util.BitSet encodedInPath>;
+
+        $i49 = (int) c4;
+
+        $z1 = virtualinvoke $r4.<java.util.BitSet: boolean get(int)>($i49);
+
+        if $z1 == 0 goto label09;
+
+        i33 = staticinvoke <sun.net.www.ParseUtil: int escape(char[],char,int)>(r5, c4, i33);
+
+        goto label12;
+
+     label09:
+        $i30 = i33;
+
+        i33 = i33 + 1;
+
+        r5[$i30] = c4;
+
+        goto label12;
+
+     label10:
+        $i50 = (int) c4;
+
+        if $i50 <= 2047 goto label11;
+
+        $i51 = (int) c4;
+
+        $i16 = $i51 >> 12;
+
+        $i17 = $i16 & 15;
+
+        $i18 = 224 | $i17;
+
+        $c19 = (char) $i18;
+
+        $i20 = staticinvoke <sun.net.www.ParseUtil: int escape(char[],char,int)>(r5, $c19, i33);
+
+        $i52 = (int) c4;
+
+        $i21 = $i52 >> 6;
+
+        $i22 = $i21 & 63;
+
+        $i23 = 128 | $i22;
+
+        $c24 = (char) $i23;
+
+        $i25 = staticinvoke <sun.net.www.ParseUtil: int escape(char[],char,int)>(r5, $c24, $i20);
+
+        $i53 = (int) c4;
+
+        $i26 = $i53 >> 0;
+
+        $i27 = $i26 & 63;
+
+        $i28 = 128 | $i27;
+
+        $c29 = (char) $i28;
+
+        i33 = staticinvoke <sun.net.www.ParseUtil: int escape(char[],char,int)>(r5, $c29, $i25);
+
+        goto label12;
+
+     label11:
+        $i54 = (int) c4;
+
+        $i5 = $i54 >> 6;
+
+        $i6 = $i5 & 31;
+
+        $i7 = 192 | $i6;
+
+        $c8 = (char) $i7;
+
+        $i9 = staticinvoke <sun.net.www.ParseUtil: int escape(char[],char,int)>(r5, $c8, i33);
+
+        $i55 = (int) c4;
+
+        $i10 = $i55 >> 0;
+
+        $i11 = $i10 & 63;
+
+        $i12 = 128 | $i11;
+
+        $c13 = (char) $i12;
+
+        i33 = staticinvoke <sun.net.www.ParseUtil: int escape(char[],char,int)>(r5, $c13, $i9);
+
+     label12:
+        $i36 = i33 + 9;
+
+        $i37 = lengthof r5;
+
+        if $i36 <= $i37 goto label14;
+
+        $i14 = lengthof r5;
+
+        $i15 = $i14 * 2;
+
+        i38 = $i15 + 16;
+
+        if i38 >= 0 goto label13;
+
+        i38 = 2147483647;
+
+     label13:
+        $r3 = newarray (char)[i38];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r5, 0, $r3, 0, i33);
+
+        r5 = $r3;
+
+     label14:
+        i34 = i34 + 1;
+
+        goto label01;
+
+     label15:
+        $r6 = new java.lang.String;
+
+        specialinvoke $r6.<java.lang.String: void <init>(char[],int,int)>(r5, 0, i33);
+
+        return $r6;
+    }
+
+    private static int escape(char[], char, int)
+    {
+        char c0, $c3, $c4, $c5;
+        int $i1, $i2, i6, i7, i8, i9, $i10, $i11;
+        char[] r0;
+
+        r0 := @parameter0: char[];
+
+        c0 := @parameter1: char;
+
+        i6 := @parameter2: int;
+
+        i7 = i6 + 1;
+
+        r0[i6] = 37;
+
+        i8 = i7 + 1;
+
+        $i10 = (int) c0;
+
+        $i1 = $i10 >> 4;
+
+        $i2 = $i1 & 15;
+
+        $c3 = staticinvoke <java.lang.Character: char forDigit(int,int)>($i2, 16);
+
+        r0[i7] = $c3;
+
+        i9 = i8 + 1;
+
+        $c4 = c0 & 15;
+
+        $i11 = (int) $c4;
+
+        $c5 = staticinvoke <java.lang.Character: char forDigit(int,int)>($i11, 16);
+
+        r0[i8] = $c5;
+
+        return i9;
+    }
+
+    private static byte unescape(java.lang.String, int)
+    {
+        byte $b4;
+        int i0, $i1, $i2, $i3;
+        java.lang.String r0, $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $i2 = i0 + 1;
+
+        $i1 = i0 + 3;
+
+        $r1 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>($i2, $i1);
+
+        $i3 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String,int)>($r1, 16);
+
+        $b4 = (byte) $i3;
+
+        return $b4;
+    }
+
+    public static java.lang.String decode(java.lang.String)
+    {
+        java.nio.ByteBuffer $r2;
+        byte $b2;
+        boolean $z0, $z1, $z2, $z3;
+        java.nio.CharBuffer $r3;
+        java.nio.charset.CharsetDecoder $r4, $r6, $r8;
+        java.lang.StringBuilder $r20;
+        java.lang.AssertionError $r21, $r22;
+        java.nio.charset.CoderResult $r10, $r11;
+        java.nio.charset.CodingErrorAction $r5, $r7;
+        java.nio.Buffer $r12;
+        int $i0, $i1, $i4, i7, $i8, $i9, $i10, $i11;
+        java.lang.String r0, $r9, $r13;
+        char $c3, $c5, c6;
+        java.lang.NumberFormatException $r18;
+        java.lang.IllegalArgumentException $r23, $r24, $r25;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label01;
+
+        $i1 = virtualinvoke r0.<java.lang.String: int indexOf(int)>(37);
+
+        if $i1 >= 0 goto label02;
+
+     label01:
+        return r0;
+
+     label02:
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>(int)>($i0);
+
+        $r2 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer allocate(int)>($i0);
+
+        $r3 = staticinvoke <java.nio.CharBuffer: java.nio.CharBuffer allocate(int)>($i0);
+
+        $r4 = staticinvoke <sun.nio.cs.ThreadLocalCoders: java.nio.charset.CharsetDecoder decoderFor(java.lang.Object)>("UTF-8");
+
+        $r5 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPORT>;
+
+        $r6 = virtualinvoke $r4.<java.nio.charset.CharsetDecoder: java.nio.charset.CharsetDecoder onMalformedInput(java.nio.charset.CodingErrorAction)>($r5);
+
+        $r7 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPORT>;
+
+        $r8 = virtualinvoke $r6.<java.nio.charset.CharsetDecoder: java.nio.charset.CharsetDecoder onUnmappableCharacter(java.nio.charset.CodingErrorAction)>($r7);
+
+        c6 = virtualinvoke r0.<java.lang.String: char charAt(int)>(0);
+
+        i7 = 0;
+
+     label03:
+        if i7 >= $i0 goto label16;
+
+        $z0 = <sun.net.www.ParseUtil: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label04;
+
+        $c5 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i7);
+
+        $i8 = (int) c6;
+
+        $i9 = (int) $c5;
+
+        if $i8 == $i9 goto label04;
+
+        $r21 = new java.lang.AssertionError;
+
+        specialinvoke $r21.<java.lang.AssertionError: void <init>()>();
+
+        throw $r21;
+
+     label04:
+        $i10 = (int) c6;
+
+        if $i10 == 37 goto label06;
+
+        virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(c6);
+
+        i7 = i7 + 1;
+
+        if i7 < $i0 goto label05;
+
+        goto label16;
+
+     label05:
+        c6 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i7);
+
+        goto label03;
+
+     label06:
+        virtualinvoke $r2.<java.nio.ByteBuffer: java.nio.Buffer clear()>();
+
+     label07:
+        $z1 = <sun.net.www.ParseUtil: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label08;
+
+        $i4 = $i0 - i7;
+
+        if $i4 >= 2 goto label08;
+
+        $r22 = new java.lang.AssertionError;
+
+        specialinvoke $r22.<java.lang.AssertionError: void <init>()>();
+
+        throw $r22;
+
+     label08:
+        $b2 = staticinvoke <sun.net.www.ParseUtil: byte unescape(java.lang.String,int)>(r0, i7);
+
+        virtualinvoke $r2.<java.nio.ByteBuffer: java.nio.ByteBuffer put(byte)>($b2);
+
+     label09:
+        goto label11;
+
+     label10:
+        $r18 := @caughtexception;
+
+        $r23 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r23.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r23;
+
+     label11:
+        i7 = i7 + 3;
+
+        if i7 < $i0 goto label12;
+
+        goto label13;
+
+     label12:
+        $c3 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i7);
+
+        c6 = $c3;
+
+        $i11 = (int) $c3;
+
+        if $i11 == 37 goto label07;
+
+        goto label13;
+
+     label13:
+        virtualinvoke $r2.<java.nio.ByteBuffer: java.nio.Buffer flip()>();
+
+        virtualinvoke $r3.<java.nio.CharBuffer: java.nio.Buffer clear()>();
+
+        virtualinvoke $r8.<java.nio.charset.CharsetDecoder: java.nio.charset.CharsetDecoder reset()>();
+
+        $r10 = virtualinvoke $r8.<java.nio.charset.CharsetDecoder: java.nio.charset.CoderResult decode(java.nio.ByteBuffer,java.nio.CharBuffer,boolean)>($r2, $r3, 1);
+
+        $z2 = virtualinvoke $r10.<java.nio.charset.CoderResult: boolean isError()>();
+
+        if $z2 == 0 goto label14;
+
+        $r24 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r24.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Error decoding percent encoded characters");
+
+        throw $r24;
+
+     label14:
+        $r11 = virtualinvoke $r8.<java.nio.charset.CharsetDecoder: java.nio.charset.CoderResult flush(java.nio.CharBuffer)>($r3);
+
+        $z3 = virtualinvoke $r11.<java.nio.charset.CoderResult: boolean isError()>();
+
+        if $z3 == 0 goto label15;
+
+        $r25 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r25.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Error decoding percent encoded characters");
+
+        throw $r25;
+
+     label15:
+        $r12 = virtualinvoke $r3.<java.nio.CharBuffer: java.nio.Buffer flip()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.Object: java.lang.String toString()>();
+
+        virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        goto label03;
+
+     label16:
+        $r9 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r9;
+
+        catch java.lang.NumberFormatException from label08 to label09 with label10;
+    }
+
+    public java.lang.String canonizeString(java.lang.String)
+    {
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12;
+        java.lang.String $r1, $r3, $r6, $r8, r11;
+        boolean $z0, $z1;
+        java.lang.StringBuilder $r0, $r2, $r4, $r5, $r7, $r9;
+        sun.net.www.ParseUtil r10;
+
+        r10 := @this: sun.net.www.ParseUtil;
+
+        r11 := @parameter0: java.lang.String;
+
+        virtualinvoke r11.<java.lang.String: int length()>();
+
+     label1:
+        $i12 = virtualinvoke r11.<java.lang.String: int indexOf(java.lang.String)>("/../");
+
+        if $i12 < 0 goto label3;
+
+        $i8 = $i12 - 1;
+
+        $i9 = virtualinvoke r11.<java.lang.String: int lastIndexOf(int,int)>(47, $i8);
+
+        if $i9 < 0 goto label2;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke r11.<java.lang.String: java.lang.String substring(int,int)>(0, $i9);
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $i11 = $i12 + 3;
+
+        $r8 = virtualinvoke r11.<java.lang.String: java.lang.String substring(int)>($i11);
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label1;
+
+     label2:
+        $i10 = $i12 + 3;
+
+        r11 = virtualinvoke r11.<java.lang.String: java.lang.String substring(int)>($i10);
+
+        goto label1;
+
+     label3:
+        $i0 = virtualinvoke r11.<java.lang.String: int indexOf(java.lang.String)>("/./");
+
+        if $i0 < 0 goto label4;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke r11.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $r2 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $i7 = $i0 + 2;
+
+        $r3 = virtualinvoke r11.<java.lang.String: java.lang.String substring(int)>($i7);
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        r11 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label3;
+
+     label4:
+        $z1 = virtualinvoke r11.<java.lang.String: boolean endsWith(java.lang.String)>("/..");
+
+        if $z1 == 0 goto label6;
+
+        $i3 = virtualinvoke r11.<java.lang.String: int indexOf(java.lang.String)>("/..");
+
+        $i4 = $i3 - 1;
+
+        $i5 = virtualinvoke r11.<java.lang.String: int lastIndexOf(int,int)>(47, $i4);
+
+        if $i5 < 0 goto label5;
+
+        $i6 = $i5 + 1;
+
+        r11 = virtualinvoke r11.<java.lang.String: java.lang.String substring(int,int)>(0, $i6);
+
+        goto label4;
+
+     label5:
+        r11 = virtualinvoke r11.<java.lang.String: java.lang.String substring(int,int)>(0, $i3);
+
+        goto label4;
+
+     label6:
+        $z0 = virtualinvoke r11.<java.lang.String: boolean endsWith(java.lang.String)>("/.");
+
+        if $z0 == 0 goto label7;
+
+        $i1 = virtualinvoke r11.<java.lang.String: int length()>();
+
+        $i2 = $i1 - 1;
+
+        r11 = virtualinvoke r11.<java.lang.String: java.lang.String substring(int,int)>(0, $i2);
+
+     label7:
+        return r11;
+    }
+
+    public static java.net.URL fileToEncodedURL(java.io.File) throws java.net.MalformedURLException
+    {
+        java.net.URL $r10;
+        java.io.File r0;
+        java.lang.StringBuilder $r3, $r4, $r5, $r6, $r7, $r8;
+        java.lang.String $r1, $r2, r9;
+        boolean $z0, $z1, $z2;
+
+        r0 := @parameter0: java.io.File;
+
+        $r1 = virtualinvoke r0.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        $r2 = staticinvoke <sun.net.www.ParseUtil: java.lang.String encodePath(java.lang.String)>($r1);
+
+        r9 = $r2;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>("/");
+
+        if $z0 != 0 goto label1;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label1:
+        $z1 = virtualinvoke r9.<java.lang.String: boolean endsWith(java.lang.String)>("/");
+
+        if $z1 != 0 goto label2;
+
+        $z2 = virtualinvoke r0.<java.io.File: boolean isDirectory()>();
+
+        if $z2 == 0 goto label2;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r9);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        r9 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label2:
+        $r10 = new java.net.URL;
+
+        specialinvoke $r10.<java.net.URL: void <init>(java.lang.String,java.lang.String,java.lang.String)>("file", "", r9);
+
+        return $r10;
+    }
+
+    public static java.net.URI toURI(java.net.URL)
+    {
+        java.net.URL r0;
+        java.net.URISyntaxException $r9;
+        int $i0, $i1;
+        java.lang.String $r1, $r2, $r3, $r4, $r5, r10, r11;
+        java.net.URI r12;
+        boolean $z0, $z1;
+        java.lang.StringBuilder $r6, $r7, $r8;
+
+        r0 := @parameter0: java.net.URL;
+
+        $r1 = virtualinvoke r0.<java.net.URL: java.lang.String getProtocol()>();
+
+        $r2 = virtualinvoke r0.<java.net.URL: java.lang.String getAuthority()>();
+
+        r10 = $r2;
+
+        $r3 = virtualinvoke r0.<java.net.URL: java.lang.String getPath()>();
+
+        r11 = $r3;
+
+        $r4 = virtualinvoke r0.<java.net.URL: java.lang.String getQuery()>();
+
+        $r5 = virtualinvoke r0.<java.net.URL: java.lang.String getRef()>();
+
+        if $r3 == null goto label1;
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean startsWith(java.lang.String)>("/");
+
+        if $z1 != 0 goto label1;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        r11 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label1:
+        if $r2 == null goto label2;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean endsWith(java.lang.String)>(":-1");
+
+        if $z0 == 0 goto label2;
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        $i1 = $i0 - 3;
+
+        r10 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+     label2:
+        r12 = staticinvoke <sun.net.www.ParseUtil: java.net.URI createURI(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)>($r1, r10, r11, $r4, $r5);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r9 := @caughtexception;
+
+        r12 = null;
+
+     label5:
+        return r12;
+
+        catch java.net.URISyntaxException from label2 to label3 with label4;
+    }
+
+    private static java.net.URI createURI(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String) throws java.net.URISyntaxException
+    {
+        int $i1;
+        java.lang.String r0, r1, r2, r3, r4, $r5;
+        java.net.URI $r7;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: java.lang.String;
+
+        r4 := @parameter4: java.lang.String;
+
+        $i1 = (int) -1;
+
+        $r5 = staticinvoke <sun.net.www.ParseUtil: java.lang.String toString(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,java.lang.String,java.lang.String,java.lang.String)>(r0, null, r1, null, null, $i1, r2, r3, r4);
+
+        staticinvoke <sun.net.www.ParseUtil: void checkPath(java.lang.String,java.lang.String,java.lang.String)>($r5, r0, r2);
+
+        $r7 = new java.net.URI;
+
+        specialinvoke $r7.<java.net.URI: void <init>(java.lang.String)>($r5);
+
+        return $r7;
+    }
+
+    private static java.lang.String toString(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, int, java.lang.String, java.lang.String, java.lang.String)
+    {
+        java.lang.StringBuffer $r0;
+        int i0;
+        java.lang.String r1, r2, r3, r4, r5, r6, r7, r8, $r9;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.String;
+
+        r4 := @parameter3: java.lang.String;
+
+        r5 := @parameter4: java.lang.String;
+
+        i0 := @parameter5: int;
+
+        r6 := @parameter6: java.lang.String;
+
+        r7 := @parameter7: java.lang.String;
+
+        r8 := @parameter8: java.lang.String;
+
+        $r0 = new java.lang.StringBuffer;
+
+        specialinvoke $r0.<java.lang.StringBuffer: void <init>()>();
+
+        if r1 == null goto label1;
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>(r1);
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(58);
+
+     label1:
+        staticinvoke <sun.net.www.ParseUtil: void appendSchemeSpecificPart(java.lang.StringBuffer,java.lang.String,java.lang.String,java.lang.String,java.lang.String,int,java.lang.String,java.lang.String)>($r0, r2, r3, r4, r5, i0, r6, r7);
+
+        staticinvoke <sun.net.www.ParseUtil: void appendFragment(java.lang.StringBuffer,java.lang.String)>($r0, r8);
+
+        $r9 = virtualinvoke $r0.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r9;
+    }
+
+    private static void appendSchemeSpecificPart(java.lang.StringBuffer, java.lang.String, java.lang.String, java.lang.String, java.lang.String, int, java.lang.String, java.lang.String)
+    {
+        long $l1, $l2, $l3, $l4, $l5, $l6, $l12, $l13;
+        java.lang.StringBuffer r1;
+        int i0, $i7, $i8, $i9, $i10, $i11, $i15, $i17;
+        java.lang.String r0, r2, r3, r4, r5, r6, $r7, $r8, $r9, $r10, r11, r12;
+        boolean $z0;
+
+        r1 := @parameter0: java.lang.StringBuffer;
+
+        r0 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: java.lang.String;
+
+        r4 := @parameter4: java.lang.String;
+
+        i0 := @parameter5: int;
+
+        r5 := @parameter6: java.lang.String;
+
+        r6 := @parameter7: java.lang.String;
+
+        if r0 == null goto label5;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("//[");
+
+        if $z0 == 0 goto label4;
+
+        $i7 = virtualinvoke r0.<java.lang.String: int indexOf(java.lang.String)>("]");
+
+        $i15 = (int) -1;
+
+        if $i7 == $i15 goto label3;
+
+        $i8 = virtualinvoke r0.<java.lang.String: int indexOf(java.lang.String)>(":");
+
+        $i17 = (int) -1;
+
+        if $i8 == $i17 goto label3;
+
+        $i9 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i7 != $i9 goto label1;
+
+        r11 = r0;
+
+        r12 = "";
+
+        goto label2;
+
+     label1:
+        $i10 = $i7 + 1;
+
+        r11 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, $i10);
+
+        $i11 = $i7 + 1;
+
+        r12 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>($i11);
+
+     label2:
+        virtualinvoke r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>(r11);
+
+        $l13 = <sun.net.www.ParseUtil: long L_URIC>;
+
+        $l12 = <sun.net.www.ParseUtil: long H_URIC>;
+
+        $r10 = staticinvoke <sun.net.www.ParseUtil: java.lang.String quote(java.lang.String,long,long)>(r12, $l13, $l12);
+
+        virtualinvoke r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r10);
+
+     label3:
+        goto label7;
+
+     label4:
+        $l6 = <sun.net.www.ParseUtil: long L_URIC>;
+
+        $l5 = <sun.net.www.ParseUtil: long H_URIC>;
+
+        $r9 = staticinvoke <sun.net.www.ParseUtil: java.lang.String quote(java.lang.String,long,long)>(r0, $l6, $l5);
+
+        virtualinvoke r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r9);
+
+        goto label7;
+
+     label5:
+        staticinvoke <sun.net.www.ParseUtil: void appendAuthority(java.lang.StringBuffer,java.lang.String,java.lang.String,java.lang.String,int)>(r1, r2, r3, r4, i0);
+
+        if r5 == null goto label6;
+
+        $l4 = <sun.net.www.ParseUtil: long L_PATH>;
+
+        $l3 = <sun.net.www.ParseUtil: long H_PATH>;
+
+        $r8 = staticinvoke <sun.net.www.ParseUtil: java.lang.String quote(java.lang.String,long,long)>(r5, $l4, $l3);
+
+        virtualinvoke r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r8);
+
+     label6:
+        if r6 == null goto label7;
+
+        virtualinvoke r1.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(63);
+
+        $l2 = <sun.net.www.ParseUtil: long L_URIC>;
+
+        $l1 = <sun.net.www.ParseUtil: long H_URIC>;
+
+        $r7 = staticinvoke <sun.net.www.ParseUtil: java.lang.String quote(java.lang.String,long,long)>(r6, $l2, $l1);
+
+        virtualinvoke r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r7);
+
+     label7:
+        return;
+    }
+
+    private static void appendAuthority(java.lang.StringBuffer, java.lang.String, java.lang.String, java.lang.String, int)
+    {
+        boolean $z0, $z1, $z2, z4, $z5, $z6;
+        long $l0, $l1, $l2, $l3, $l4, $l5, $l11, $l12, $l13, $l14, $l15, $l16, $l19, $l20;
+        java.lang.StringBuffer r2;
+        int $i6, $i7, $i8, $i9, $i10, $i17, i18, $i22, $i24, $i26;
+        java.lang.String r0, r1, $r3, $r4, r5, $r6, r7, r8;
+
+        r2 := @parameter0: java.lang.StringBuffer;
+
+        r1 := @parameter1: java.lang.String;
+
+        r5 := @parameter2: java.lang.String;
+
+        r0 := @parameter3: java.lang.String;
+
+        i18 := @parameter4: int;
+
+        if r0 == null goto label07;
+
+        virtualinvoke r2.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("//");
+
+        if r5 == null goto label01;
+
+        $l20 = <sun.net.www.ParseUtil: long L_USERINFO>;
+
+        $l19 = <sun.net.www.ParseUtil: long H_USERINFO>;
+
+        $r6 = staticinvoke <sun.net.www.ParseUtil: java.lang.String quote(java.lang.String,long,long)>(r5, $l20, $l19);
+
+        virtualinvoke r2.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r6);
+
+        virtualinvoke r2.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(64);
+
+     label01:
+        $i17 = virtualinvoke r0.<java.lang.String: int indexOf(int)>(58);
+
+        if $i17 < 0 goto label02;
+
+        $z1 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("[");
+
+        if $z1 != 0 goto label02;
+
+        $z2 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("]");
+
+        if $z2 != 0 goto label02;
+
+        $z6 = 1;
+
+        $z5 = 1;
+
+        goto label03;
+
+     label02:
+        $z6 = 0;
+
+        $z5 = 0;
+
+     label03:
+        z4 = $z5;
+
+        if $z6 == 0 goto label04;
+
+        virtualinvoke r2.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(91);
+
+     label04:
+        virtualinvoke r2.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>(r0);
+
+        if z4 == 0 goto label05;
+
+        virtualinvoke r2.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(93);
+
+     label05:
+        $i22 = (int) -1;
+
+        if i18 == $i22 goto label06;
+
+        virtualinvoke r2.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(58);
+
+        virtualinvoke r2.<java.lang.StringBuffer: java.lang.StringBuffer append(int)>(i18);
+
+     label06:
+        goto label12;
+
+     label07:
+        if r1 == null goto label12;
+
+        virtualinvoke r2.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("//");
+
+        $z0 = virtualinvoke r1.<java.lang.String: boolean startsWith(java.lang.String)>("[");
+
+        if $z0 == 0 goto label11;
+
+        $i6 = virtualinvoke r1.<java.lang.String: int indexOf(java.lang.String)>("]");
+
+        $i24 = (int) -1;
+
+        if $i6 == $i24 goto label10;
+
+        $i7 = virtualinvoke r1.<java.lang.String: int indexOf(java.lang.String)>(":");
+
+        $i26 = (int) -1;
+
+        if $i7 == $i26 goto label10;
+
+        $i8 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if $i6 != $i8 goto label08;
+
+        r7 = r1;
+
+        r8 = "";
+
+        goto label09;
+
+     label08:
+        $i9 = $i6 + 1;
+
+        r7 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int,int)>(0, $i9);
+
+        $i10 = $i6 + 1;
+
+        r8 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int)>($i10);
+
+     label09:
+        virtualinvoke r2.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>(r7);
+
+        $l12 = <sun.net.www.ParseUtil: long L_REG_NAME>;
+
+        $l11 = <sun.net.www.ParseUtil: long L_SERVER>;
+
+        $l16 = $l12 | $l11;
+
+        $l14 = <sun.net.www.ParseUtil: long H_REG_NAME>;
+
+        $l13 = <sun.net.www.ParseUtil: long H_SERVER>;
+
+        $l15 = $l14 | $l13;
+
+        $r4 = staticinvoke <sun.net.www.ParseUtil: java.lang.String quote(java.lang.String,long,long)>(r8, $l16, $l15);
+
+        virtualinvoke r2.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r4);
+
+     label10:
+        goto label12;
+
+     label11:
+        $l1 = <sun.net.www.ParseUtil: long L_REG_NAME>;
+
+        $l0 = <sun.net.www.ParseUtil: long L_SERVER>;
+
+        $l5 = $l1 | $l0;
+
+        $l3 = <sun.net.www.ParseUtil: long H_REG_NAME>;
+
+        $l2 = <sun.net.www.ParseUtil: long H_SERVER>;
+
+        $l4 = $l3 | $l2;
+
+        $r3 = staticinvoke <sun.net.www.ParseUtil: java.lang.String quote(java.lang.String,long,long)>(r1, $l5, $l4);
+
+        virtualinvoke r2.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r3);
+
+     label12:
+        return;
+    }
+
+    private static void appendFragment(java.lang.StringBuffer, java.lang.String)
+    {
+        java.lang.StringBuffer r1;
+        long $l0, $l1;
+        java.lang.String r0, $r2;
+
+        r1 := @parameter0: java.lang.StringBuffer;
+
+        r0 := @parameter1: java.lang.String;
+
+        if r0 == null goto label1;
+
+        virtualinvoke r1.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(35);
+
+        $l1 = <sun.net.www.ParseUtil: long L_URIC>;
+
+        $l0 = <sun.net.www.ParseUtil: long H_URIC>;
+
+        $r2 = staticinvoke <sun.net.www.ParseUtil: java.lang.String quote(java.lang.String,long,long)>(r0, $l1, $l0);
+
+        virtualinvoke r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r2);
+
+     label1:
+        return;
+    }
+
+    private static java.lang.String quote(java.lang.String, long, long)
+    {
+        long l0, $l1, l4;
+        byte $b2, $b5;
+        java.lang.StringBuffer r5, $r7, $r8;
+        int i6, $i7, $i8;
+        java.lang.String r0, $r2, $r4, $r6;
+        boolean z0, $z1, $z2, $z3, $z4, $z5;
+        char $c3;
+
+        r0 := @parameter0: java.lang.String;
+
+        l0 := @parameter1: long;
+
+        l4 := @parameter2: long;
+
+        virtualinvoke r0.<java.lang.String: int length()>();
+
+        r5 = null;
+
+        $l1 = l0 & 1L;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 == 0 goto label01;
+
+        $z5 = 1;
+
+        goto label02;
+
+     label01:
+        $z5 = 0;
+
+     label02:
+        z0 = $z5;
+
+        i6 = 0;
+
+     label03:
+        $i7 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if i6 >= $i7 goto label11;
+
+        $c3 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i6);
+
+        $i8 = (int) $c3;
+
+        if $i8 >= 128 goto label06;
+
+        $z3 = staticinvoke <sun.net.www.ParseUtil: boolean match(char,long,long)>($c3, l0, l4);
+
+        if $z3 != 0 goto label05;
+
+        $z4 = staticinvoke <sun.net.www.ParseUtil: boolean isEscaped(java.lang.String,int)>(r0, i6);
+
+        if $z4 != 0 goto label05;
+
+        if r5 != null goto label04;
+
+        $r7 = new java.lang.StringBuffer;
+
+        specialinvoke $r7.<java.lang.StringBuffer: void <init>()>();
+
+        r5 = $r7;
+
+        $r4 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, i6);
+
+        virtualinvoke $r7.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r4);
+
+     label04:
+        $b5 = (byte) $c3;
+
+        staticinvoke <sun.net.www.ParseUtil: void appendEscape(java.lang.StringBuffer,byte)>(r5, $b5);
+
+        goto label10;
+
+     label05:
+        if r5 == null goto label10;
+
+        virtualinvoke r5.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c3);
+
+        goto label10;
+
+     label06:
+        if z0 == 0 goto label09;
+
+        $z1 = staticinvoke <java.lang.Character: boolean isSpaceChar(char)>($c3);
+
+        if $z1 != 0 goto label07;
+
+        $z2 = staticinvoke <java.lang.Character: boolean isISOControl(char)>($c3);
+
+        if $z2 == 0 goto label09;
+
+     label07:
+        if r5 != null goto label08;
+
+        $r8 = new java.lang.StringBuffer;
+
+        specialinvoke $r8.<java.lang.StringBuffer: void <init>()>();
+
+        r5 = $r8;
+
+        $r2 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, i6);
+
+        virtualinvoke $r8.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r2);
+
+     label08:
+        staticinvoke <sun.net.www.ParseUtil: void appendEncoded(java.lang.StringBuffer,char)>(r5, $c3);
+
+        goto label10;
+
+     label09:
+        if r5 == null goto label10;
+
+        virtualinvoke r5.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c3);
+
+     label10:
+        i6 = i6 + 1;
+
+        goto label03;
+
+     label11:
+        if r5 != null goto label12;
+
+        $r6 = r0;
+
+        goto label13;
+
+     label12:
+        $r6 = virtualinvoke r5.<java.lang.StringBuffer: java.lang.String toString()>();
+
+     label13:
+        return $r6;
+    }
+
+    private static boolean isEscaped(java.lang.String, int)
+    {
+        long $l6, $l7, $l10, $l11;
+        int $i0, i1, $i2, $i4, $i8, $i12;
+        java.lang.String r0;
+        boolean $z0, $z1, $z2;
+        char $c3, $c5, $c9;
+
+        r0 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        if r0 == null goto label1;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $i2 = i1 + 2;
+
+        if $i0 > $i2 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $c3 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i1);
+
+        $i12 = (int) $c3;
+
+        if $i12 != 37 goto label3;
+
+        $i4 = i1 + 1;
+
+        $c5 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i4);
+
+        $l7 = <sun.net.www.ParseUtil: long L_HEX>;
+
+        $l6 = <sun.net.www.ParseUtil: long H_HEX>;
+
+        $z0 = staticinvoke <sun.net.www.ParseUtil: boolean match(char,long,long)>($c5, $l7, $l6);
+
+        if $z0 == 0 goto label3;
+
+        $i8 = i1 + 2;
+
+        $c9 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i8);
+
+        $l11 = <sun.net.www.ParseUtil: long L_HEX>;
+
+        $l10 = <sun.net.www.ParseUtil: long H_HEX>;
+
+        $z1 = staticinvoke <sun.net.www.ParseUtil: boolean match(char,long,long)>($c9, $l11, $l10);
+
+        if $z1 == 0 goto label3;
+
+        $z2 = 1;
+
+        goto label4;
+
+     label3:
+        $z2 = 0;
+
+     label4:
+        return $z2;
+    }
+
+    private static void appendEncoded(java.lang.StringBuffer, char)
+    {
+        java.nio.charset.CharacterCodingException $r7;
+        java.lang.AssertionError $r11;
+        java.nio.ByteBuffer r9;
+        short s4, $s5;
+        byte $b1, $b3;
+        java.lang.StringBuffer r6;
+        int $i6;
+        java.lang.String $r4;
+        boolean $z0, $z1;
+        java.nio.CharBuffer $r5;
+        char c0, $c2;
+        java.nio.charset.CharsetEncoder $r0;
+        java.lang.StringBuilder $r2, $r3, $r10;
+
+        r6 := @parameter0: java.lang.StringBuffer;
+
+        c0 := @parameter1: char;
+
+        r9 = null;
+
+     label1:
+        $r0 = staticinvoke <sun.nio.cs.ThreadLocalCoders: java.nio.charset.CharsetEncoder encoderFor(java.lang.Object)>("UTF-8");
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(c0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r5 = staticinvoke <java.nio.CharBuffer: java.nio.CharBuffer wrap(java.lang.CharSequence)>($r4);
+
+        r9 = virtualinvoke $r0.<java.nio.charset.CharsetEncoder: java.nio.ByteBuffer encode(java.nio.CharBuffer)>($r5);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $z0 = <sun.net.www.ParseUtil: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label4;
+
+        $r11 = new java.lang.AssertionError;
+
+        specialinvoke $r11.<java.lang.AssertionError: void <init>()>();
+
+        throw $r11;
+
+     label4:
+        $z1 = virtualinvoke r9.<java.nio.ByteBuffer: boolean hasRemaining()>();
+
+        if $z1 == 0 goto label7;
+
+        $b1 = virtualinvoke r9.<java.nio.ByteBuffer: byte get()>();
+
+        $s5 = (short) $b1;
+
+        s4 = $s5 & 255;
+
+        $i6 = (int) s4;
+
+        if $i6 < 128 goto label5;
+
+        $b3 = (byte) s4;
+
+        staticinvoke <sun.net.www.ParseUtil: void appendEscape(java.lang.StringBuffer,byte)>(r6, $b3);
+
+        goto label6;
+
+     label5:
+        $c2 = (char) s4;
+
+        virtualinvoke r6.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c2);
+
+     label6:
+        goto label4;
+
+     label7:
+        return;
+
+        catch java.nio.charset.CharacterCodingException from label1 to label2 with label3;
+    }
+
+    private static void appendEscape(java.lang.StringBuffer, byte)
+    {
+        char $c3, $c6;
+        byte b0;
+        java.lang.StringBuffer r0;
+        int $i1, $i2, $i4, $i5, $i7, $i8;
+        char[] $r1, $r2;
+
+        r0 := @parameter0: java.lang.StringBuffer;
+
+        b0 := @parameter1: byte;
+
+        virtualinvoke r0.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(37);
+
+        $r1 = <sun.net.www.ParseUtil: char[] hexDigits>;
+
+        $i7 = (int) b0;
+
+        $i1 = $i7 >> 4;
+
+        $i2 = $i1 & 15;
+
+        $c3 = $r1[$i2];
+
+        virtualinvoke r0.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c3);
+
+        $r2 = <sun.net.www.ParseUtil: char[] hexDigits>;
+
+        $i8 = (int) b0;
+
+        $i4 = $i8 >> 0;
+
+        $i5 = $i4 & 15;
+
+        $c6 = $r2[$i5];
+
+        virtualinvoke r0.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c6);
+
+        return;
+    }
+
+    private static boolean match(char, long, long)
+    {
+        char c0;
+        long l2, $l3, $l4, l6, $l7, $l8;
+        byte $b5, $b9;
+        int $i1, $i10, $i11, $i12;
+        boolean $z0, $z1;
+
+        c0 := @parameter0: char;
+
+        l6 := @parameter1: long;
+
+        l2 := @parameter2: long;
+
+        $i10 = (int) c0;
+
+        if $i10 >= 64 goto label3;
+
+        $l7 = 1L << c0;
+
+        $l8 = $l7 & l6;
+
+        $b9 = $l8 cmp 0L;
+
+        if $b9 == 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+
+     label3:
+        $i11 = (int) c0;
+
+        if $i11 >= 128 goto label6;
+
+        $i12 = (int) c0;
+
+        $i1 = $i12 - 64;
+
+        $l3 = 1L << $i1;
+
+        $l4 = $l3 & l2;
+
+        $b5 = $l4 cmp 0L;
+
+        if $b5 == 0 goto label4;
+
+        $z1 = 1;
+
+        goto label5;
+
+     label4:
+        $z1 = 0;
+
+     label5:
+        return $z1;
+
+     label6:
+        return 0;
+    }
+
+    private static void checkPath(java.lang.String, java.lang.String, java.lang.String) throws java.net.URISyntaxException
+    {
+        java.net.URISyntaxException $r4;
+        int $i1;
+        char $c0;
+        java.lang.String r0, r1, r3;
+        boolean $z0;
+
+        r3 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.lang.String;
+
+        r1 := @parameter2: java.lang.String;
+
+        if r0 == null goto label1;
+
+        if r1 == null goto label1;
+
+        $z0 = virtualinvoke r1.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 != 0 goto label1;
+
+        $c0 = virtualinvoke r1.<java.lang.String: char charAt(int)>(0);
+
+        $i1 = (int) $c0;
+
+        if $i1 == 47 goto label1;
+
+        $r4 = new java.net.URISyntaxException;
+
+        specialinvoke $r4.<java.net.URISyntaxException: void <init>(java.lang.String,java.lang.String)>(r3, "Relative path in absolute URI");
+
+        throw $r4;
+
+     label1:
+        return;
+    }
+
+    private static long lowMask(char, char)
+    {
+        char c0, c3;
+        long $l6, l7;
+        int $i1, $i2, $i4, $i5, i8, $i9, $i10;
+
+        c0 := @parameter0: char;
+
+        c3 := @parameter1: char;
+
+        l7 = 0L;
+
+        $i9 = (int) c0;
+
+        $i1 = staticinvoke <java.lang.Math: int min(int,int)>($i9, 63);
+
+        $i2 = staticinvoke <java.lang.Math: int max(int,int)>($i1, 0);
+
+        $i10 = (int) c3;
+
+        $i4 = staticinvoke <java.lang.Math: int min(int,int)>($i10, 63);
+
+        $i5 = staticinvoke <java.lang.Math: int max(int,int)>($i4, 0);
+
+        i8 = $i2;
+
+     label1:
+        if i8 > $i5 goto label2;
+
+        $l6 = 1L << i8;
+
+        l7 = l7 | $l6;
+
+        i8 = i8 + 1;
+
+        goto label1;
+
+     label2:
+        return l7;
+    }
+
+    private static long lowMask(java.lang.String)
+    {
+        int $i0, i4, $i5;
+        char $c1;
+        long $l2, l3;
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        l3 = 0L;
+
+        i4 = 0;
+
+     label1:
+        if i4 >= $i0 goto label3;
+
+        $c1 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i4);
+
+        $i5 = (int) $c1;
+
+        if $i5 >= 64 goto label2;
+
+        $l2 = 1L << $c1;
+
+        l3 = l3 | $l2;
+
+     label2:
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label3:
+        return l3;
+    }
+
+    private static long highMask(char, char)
+    {
+        char c0, c4;
+        long $l8, l9;
+        int $i1, $i2, i3, $i5, $i6, i7, i10, $i11, $i12;
+
+        c0 := @parameter0: char;
+
+        c4 := @parameter1: char;
+
+        l9 = 0L;
+
+        $i11 = (int) c0;
+
+        $i1 = staticinvoke <java.lang.Math: int min(int,int)>($i11, 127);
+
+        $i2 = staticinvoke <java.lang.Math: int max(int,int)>($i1, 64);
+
+        i3 = $i2 - 64;
+
+        $i12 = (int) c4;
+
+        $i5 = staticinvoke <java.lang.Math: int min(int,int)>($i12, 127);
+
+        $i6 = staticinvoke <java.lang.Math: int max(int,int)>($i5, 64);
+
+        i7 = $i6 - 64;
+
+        i10 = i3;
+
+     label1:
+        if i10 > i7 goto label2;
+
+        $l8 = 1L << i10;
+
+        l9 = l9 | $l8;
+
+        i10 = i10 + 1;
+
+        goto label1;
+
+     label2:
+        return l9;
+    }
+
+    private static long highMask(java.lang.String)
+    {
+        char $c1;
+        long $l3, l4;
+        int $i0, $i2, i5, $i6, $i7, $i8;
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        l4 = 0L;
+
+        i5 = 0;
+
+     label1:
+        if i5 >= $i0 goto label3;
+
+        $c1 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i5);
+
+        $i6 = (int) $c1;
+
+        if $i6 < 64 goto label2;
+
+        $i7 = (int) $c1;
+
+        if $i7 >= 128 goto label2;
+
+        $i8 = (int) $c1;
+
+        $i2 = $i8 - 64;
+
+        $l3 = 1L << $i2;
+
+        l4 = l4 | $l3;
+
+     label2:
+        i5 = i5 + 1;
+
+        goto label1;
+
+     label3:
+        return l4;
+    }
+
+    static void <clinit>()
+    {
+        long $l0, $l1, $l2, $l3, $l4, $l5, $l6, $l7, $l8, $l9, $l10, $l11, $l12, $l13, $l14, $l15, $l16, $l17, $l18, $l19, $l20, $l21, $l22, $l23, $l24, $l25, $l26, $l27, $l28, $l29, $l30, $l31, $l32, $l33, $l34, $l35, $l36, $l37, $l38, $l39, $l40, $l41, $l42, $l43, $l44, $l45, $l46, $l47, $l48, $l49, $l50, $l51, $l52, $l53, $l54, $l55, $l56, $l57, $l58, $l59, $l60, $l61, $l62, $l63, $l64, $l65, $l66, $l67, $l68, $l69, $l70, $l71, $l72, $l73, $l74, $l75, $l76, $l77;
+        char[] $r21;
+        boolean $z0, $z1;
+        int i78;
+        java.lang.Class $r0;
+        java.util.BitSet $r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r22;
+
+        <sun.net.www.ParseUtil: long H_ESCAPED> = 0L;
+
+        <sun.net.www.ParseUtil: long L_ESCAPED> = 1L;
+
+        <sun.net.www.ParseUtil: long L_ALPHA> = 0L;
+
+        <sun.net.www.ParseUtil: long L_LOWALPHA> = 0L;
+
+        <sun.net.www.ParseUtil: long L_UPALPHA> = 0L;
+
+        <sun.net.www.ParseUtil: long H_DIGIT> = 0L;
+
+        $r0 = class "Lsun/net/www/ParseUtil;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.net.www.ParseUtil: boolean $assertionsDisabled> = $z1;
+
+        $r1 = new java.util.BitSet;
+
+        specialinvoke $r1.<java.util.BitSet: void <init>(int)>(256);
+
+        <sun.net.www.ParseUtil: java.util.BitSet encodedInPath> = $r1;
+
+        $r2 = <sun.net.www.ParseUtil: java.util.BitSet encodedInPath>;
+
+        virtualinvoke $r2.<java.util.BitSet: void set(int)>(61);
+
+        $r3 = <sun.net.www.ParseUtil: java.util.BitSet encodedInPath>;
+
+        virtualinvoke $r3.<java.util.BitSet: void set(int)>(59);
+
+        $r4 = <sun.net.www.ParseUtil: java.util.BitSet encodedInPath>;
+
+        virtualinvoke $r4.<java.util.BitSet: void set(int)>(63);
+
+        $r5 = <sun.net.www.ParseUtil: java.util.BitSet encodedInPath>;
+
+        virtualinvoke $r5.<java.util.BitSet: void set(int)>(47);
+
+        $r6 = <sun.net.www.ParseUtil: java.util.BitSet encodedInPath>;
+
+        virtualinvoke $r6.<java.util.BitSet: void set(int)>(35);
+
+        $r7 = <sun.net.www.ParseUtil: java.util.BitSet encodedInPath>;
+
+        virtualinvoke $r7.<java.util.BitSet: void set(int)>(32);
+
+        $r8 = <sun.net.www.ParseUtil: java.util.BitSet encodedInPath>;
+
+        virtualinvoke $r8.<java.util.BitSet: void set(int)>(60);
+
+        $r9 = <sun.net.www.ParseUtil: java.util.BitSet encodedInPath>;
+
+        virtualinvoke $r9.<java.util.BitSet: void set(int)>(62);
+
+        $r10 = <sun.net.www.ParseUtil: java.util.BitSet encodedInPath>;
+
+        virtualinvoke $r10.<java.util.BitSet: void set(int)>(37);
+
+        $r11 = <sun.net.www.ParseUtil: java.util.BitSet encodedInPath>;
+
+        virtualinvoke $r11.<java.util.BitSet: void set(int)>(34);
+
+        $r12 = <sun.net.www.ParseUtil: java.util.BitSet encodedInPath>;
+
+        virtualinvoke $r12.<java.util.BitSet: void set(int)>(123);
+
+        $r13 = <sun.net.www.ParseUtil: java.util.BitSet encodedInPath>;
+
+        virtualinvoke $r13.<java.util.BitSet: void set(int)>(125);
+
+        $r14 = <sun.net.www.ParseUtil: java.util.BitSet encodedInPath>;
+
+        virtualinvoke $r14.<java.util.BitSet: void set(int)>(124);
+
+        $r15 = <sun.net.www.ParseUtil: java.util.BitSet encodedInPath>;
+
+        virtualinvoke $r15.<java.util.BitSet: void set(int)>(92);
+
+        $r16 = <sun.net.www.ParseUtil: java.util.BitSet encodedInPath>;
+
+        virtualinvoke $r16.<java.util.BitSet: void set(int)>(94);
+
+        $r17 = <sun.net.www.ParseUtil: java.util.BitSet encodedInPath>;
+
+        virtualinvoke $r17.<java.util.BitSet: void set(int)>(91);
+
+        $r18 = <sun.net.www.ParseUtil: java.util.BitSet encodedInPath>;
+
+        virtualinvoke $r18.<java.util.BitSet: void set(int)>(93);
+
+        $r19 = <sun.net.www.ParseUtil: java.util.BitSet encodedInPath>;
+
+        virtualinvoke $r19.<java.util.BitSet: void set(int)>(96);
+
+        i78 = 0;
+
+     label3:
+        if i78 >= 32 goto label4;
+
+        $r22 = <sun.net.www.ParseUtil: java.util.BitSet encodedInPath>;
+
+        virtualinvoke $r22.<java.util.BitSet: void set(int)>(i78);
+
+        i78 = i78 + 1;
+
+        goto label3;
+
+     label4:
+        $r20 = <sun.net.www.ParseUtil: java.util.BitSet encodedInPath>;
+
+        virtualinvoke $r20.<java.util.BitSet: void set(int)>(127);
+
+        $r21 = newarray (char)[16];
+
+        $r21[0] = 48;
+
+        $r21[1] = 49;
+
+        $r21[2] = 50;
+
+        $r21[3] = 51;
+
+        $r21[4] = 52;
+
+        $r21[5] = 53;
+
+        $r21[6] = 54;
+
+        $r21[7] = 55;
+
+        $r21[8] = 56;
+
+        $r21[9] = 57;
+
+        $r21[10] = 65;
+
+        $r21[11] = 66;
+
+        $r21[12] = 67;
+
+        $r21[13] = 68;
+
+        $r21[14] = 69;
+
+        $r21[15] = 70;
+
+        <sun.net.www.ParseUtil: char[] hexDigits> = $r21;
+
+        $l0 = staticinvoke <sun.net.www.ParseUtil: long lowMask(char,char)>(48, 57);
+
+        <sun.net.www.ParseUtil: long L_DIGIT> = $l0;
+
+        $l1 = <sun.net.www.ParseUtil: long L_DIGIT>;
+
+        <sun.net.www.ParseUtil: long L_HEX> = $l1;
+
+        $l2 = staticinvoke <sun.net.www.ParseUtil: long highMask(char,char)>(65, 70);
+
+        $l3 = staticinvoke <sun.net.www.ParseUtil: long highMask(char,char)>(97, 102);
+
+        $l4 = $l2 | $l3;
+
+        <sun.net.www.ParseUtil: long H_HEX> = $l4;
+
+        $l5 = staticinvoke <sun.net.www.ParseUtil: long highMask(char,char)>(65, 90);
+
+        <sun.net.www.ParseUtil: long H_UPALPHA> = $l5;
+
+        $l6 = staticinvoke <sun.net.www.ParseUtil: long highMask(char,char)>(97, 122);
+
+        <sun.net.www.ParseUtil: long H_LOWALPHA> = $l6;
+
+        $l8 = <sun.net.www.ParseUtil: long H_LOWALPHA>;
+
+        $l7 = <sun.net.www.ParseUtil: long H_UPALPHA>;
+
+        $l9 = $l8 | $l7;
+
+        <sun.net.www.ParseUtil: long H_ALPHA> = $l9;
+
+        $l10 = <sun.net.www.ParseUtil: long L_DIGIT>;
+
+        $l11 = $l10 | 0L;
+
+        <sun.net.www.ParseUtil: long L_ALPHANUM> = $l11;
+
+        $l12 = <sun.net.www.ParseUtil: long H_ALPHA>;
+
+        $l13 = 0L | $l12;
+
+        <sun.net.www.ParseUtil: long H_ALPHANUM> = $l13;
+
+        $l14 = staticinvoke <sun.net.www.ParseUtil: long lowMask(java.lang.String)>("-_.!~*\'()");
+
+        <sun.net.www.ParseUtil: long L_MARK> = $l14;
+
+        $l15 = staticinvoke <sun.net.www.ParseUtil: long highMask(java.lang.String)>("-_.!~*\'()");
+
+        <sun.net.www.ParseUtil: long H_MARK> = $l15;
+
+        $l17 = <sun.net.www.ParseUtil: long L_ALPHANUM>;
+
+        $l16 = <sun.net.www.ParseUtil: long L_MARK>;
+
+        $l18 = $l17 | $l16;
+
+        <sun.net.www.ParseUtil: long L_UNRESERVED> = $l18;
+
+        $l20 = <sun.net.www.ParseUtil: long H_ALPHANUM>;
+
+        $l19 = <sun.net.www.ParseUtil: long H_MARK>;
+
+        $l21 = $l20 | $l19;
+
+        <sun.net.www.ParseUtil: long H_UNRESERVED> = $l21;
+
+        $l22 = staticinvoke <sun.net.www.ParseUtil: long lowMask(java.lang.String)>(";/?:@&=+$,[]");
+
+        <sun.net.www.ParseUtil: long L_RESERVED> = $l22;
+
+        $l23 = staticinvoke <sun.net.www.ParseUtil: long highMask(java.lang.String)>(";/?:@&=+$,[]");
+
+        <sun.net.www.ParseUtil: long H_RESERVED> = $l23;
+
+        $l24 = staticinvoke <sun.net.www.ParseUtil: long lowMask(java.lang.String)>("-");
+
+        <sun.net.www.ParseUtil: long L_DASH> = $l24;
+
+        $l25 = staticinvoke <sun.net.www.ParseUtil: long highMask(java.lang.String)>("-");
+
+        <sun.net.www.ParseUtil: long H_DASH> = $l25;
+
+        $l27 = <sun.net.www.ParseUtil: long L_RESERVED>;
+
+        $l26 = <sun.net.www.ParseUtil: long L_UNRESERVED>;
+
+        $l28 = $l27 | $l26;
+
+        $l29 = $l28 | 1L;
+
+        <sun.net.www.ParseUtil: long L_URIC> = $l29;
+
+        $l31 = <sun.net.www.ParseUtil: long H_RESERVED>;
+
+        $l30 = <sun.net.www.ParseUtil: long H_UNRESERVED>;
+
+        $l32 = $l31 | $l30;
+
+        $l33 = $l32 | 0L;
+
+        <sun.net.www.ParseUtil: long H_URIC> = $l33;
+
+        $l34 = <sun.net.www.ParseUtil: long L_UNRESERVED>;
+
+        $l35 = $l34 | 1L;
+
+        $l36 = staticinvoke <sun.net.www.ParseUtil: long lowMask(java.lang.String)>(":@&=+$,");
+
+        $l37 = $l35 | $l36;
+
+        <sun.net.www.ParseUtil: long L_PCHAR> = $l37;
+
+        $l38 = <sun.net.www.ParseUtil: long H_UNRESERVED>;
+
+        $l39 = $l38 | 0L;
+
+        $l40 = staticinvoke <sun.net.www.ParseUtil: long highMask(java.lang.String)>(":@&=+$,");
+
+        $l41 = $l39 | $l40;
+
+        <sun.net.www.ParseUtil: long H_PCHAR> = $l41;
+
+        $l42 = <sun.net.www.ParseUtil: long L_PCHAR>;
+
+        $l43 = staticinvoke <sun.net.www.ParseUtil: long lowMask(java.lang.String)>(";/");
+
+        $l44 = $l42 | $l43;
+
+        <sun.net.www.ParseUtil: long L_PATH> = $l44;
+
+        $l45 = <sun.net.www.ParseUtil: long H_PCHAR>;
+
+        $l46 = staticinvoke <sun.net.www.ParseUtil: long highMask(java.lang.String)>(";/");
+
+        $l47 = $l45 | $l46;
+
+        <sun.net.www.ParseUtil: long H_PATH> = $l47;
+
+        $l48 = <sun.net.www.ParseUtil: long L_UNRESERVED>;
+
+        $l49 = $l48 | 1L;
+
+        $l50 = staticinvoke <sun.net.www.ParseUtil: long lowMask(java.lang.String)>(";:&=+$,");
+
+        $l51 = $l49 | $l50;
+
+        <sun.net.www.ParseUtil: long L_USERINFO> = $l51;
+
+        $l52 = <sun.net.www.ParseUtil: long H_UNRESERVED>;
+
+        $l53 = $l52 | 0L;
+
+        $l54 = staticinvoke <sun.net.www.ParseUtil: long highMask(java.lang.String)>(";:&=+$,");
+
+        $l55 = $l53 | $l54;
+
+        <sun.net.www.ParseUtil: long H_USERINFO> = $l55;
+
+        $l56 = <sun.net.www.ParseUtil: long L_UNRESERVED>;
+
+        $l57 = $l56 | 1L;
+
+        $l58 = staticinvoke <sun.net.www.ParseUtil: long lowMask(java.lang.String)>("$,;:@&=+");
+
+        $l59 = $l57 | $l58;
+
+        <sun.net.www.ParseUtil: long L_REG_NAME> = $l59;
+
+        $l60 = <sun.net.www.ParseUtil: long H_UNRESERVED>;
+
+        $l61 = $l60 | 0L;
+
+        $l62 = staticinvoke <sun.net.www.ParseUtil: long highMask(java.lang.String)>("$,;:@&=+");
+
+        $l63 = $l61 | $l62;
+
+        <sun.net.www.ParseUtil: long H_REG_NAME> = $l63;
+
+        $l65 = <sun.net.www.ParseUtil: long L_USERINFO>;
+
+        $l64 = <sun.net.www.ParseUtil: long L_ALPHANUM>;
+
+        $l67 = $l65 | $l64;
+
+        $l66 = <sun.net.www.ParseUtil: long L_DASH>;
+
+        $l68 = $l67 | $l66;
+
+        $l69 = staticinvoke <sun.net.www.ParseUtil: long lowMask(java.lang.String)>(".:@[]");
+
+        $l70 = $l68 | $l69;
+
+        <sun.net.www.ParseUtil: long L_SERVER> = $l70;
+
+        $l72 = <sun.net.www.ParseUtil: long H_USERINFO>;
+
+        $l71 = <sun.net.www.ParseUtil: long H_ALPHANUM>;
+
+        $l74 = $l72 | $l71;
+
+        $l73 = <sun.net.www.ParseUtil: long H_DASH>;
+
+        $l75 = $l74 | $l73;
+
+        $l76 = staticinvoke <sun.net.www.ParseUtil: long highMask(java.lang.String)>(".:@[]");
+
+        $l77 = $l75 | $l76;
+
+        <sun.net.www.ParseUtil: long H_SERVER> = $l77;
+
+        return;
+    }
+}

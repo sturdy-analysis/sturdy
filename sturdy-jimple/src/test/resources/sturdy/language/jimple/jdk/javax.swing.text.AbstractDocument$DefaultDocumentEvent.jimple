@@ -1,0 +1,508 @@
+public class javax.swing.text.AbstractDocument$DefaultDocumentEvent extends javax.swing.undo.CompoundEdit implements javax.swing.event.DocumentEvent
+{
+    private int offset;
+    private int length;
+    private java.util.Hashtable changeLookup;
+    private javax.swing.event.DocumentEvent$EventType type;
+    final javax.swing.text.AbstractDocument this$0;
+
+    public void <init>(javax.swing.text.AbstractDocument, int, int, javax.swing.event.DocumentEvent$EventType)
+    {
+        javax.swing.event.DocumentEvent$EventType r2;
+        javax.swing.text.AbstractDocument r1;
+        int i0, i1;
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent r0;
+
+        r0 := @this: javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        r1 := @parameter0: javax.swing.text.AbstractDocument;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r2 := @parameter3: javax.swing.event.DocumentEvent$EventType;
+
+        r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.text.AbstractDocument this$0> = r1;
+
+        specialinvoke r0.<javax.swing.undo.CompoundEdit: void <init>()>();
+
+        r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: int offset> = i0;
+
+        r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: int length> = i1;
+
+        r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.event.DocumentEvent$EventType type> = r2;
+
+        return;
+    }
+
+    public java.lang.String toString()
+    {
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent r0;
+        java.util.Vector $r1;
+        java.lang.String $r2;
+
+        r0 := @this: javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        $r1 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: java.util.Vector edits>;
+
+        $r2 = virtualinvoke $r1.<java.util.Vector: java.lang.String toString()>();
+
+        return $r2;
+    }
+
+    public boolean addEdit(javax.swing.undo.UndoableEdit)
+    {
+        java.util.Vector $r5, $r7, $r8;
+        int $i0, $i1, i2;
+        java.util.Hashtable $r1, $r3, $r6, $r11, $r13;
+        boolean $z0, $z1, $z2;
+        javax.swing.undo.UndoableEdit r2;
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent r0;
+        javax.swing.event.DocumentEvent$ElementChange r10, r14;
+        java.lang.Object $r9;
+        javax.swing.text.Element $r4, $r12;
+
+        r0 := @this: javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        r2 := @parameter0: javax.swing.undo.UndoableEdit;
+
+        $r1 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: java.util.Hashtable changeLookup>;
+
+        if $r1 != null goto label3;
+
+        $r5 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: java.util.Vector edits>;
+
+        $i0 = virtualinvoke $r5.<java.util.Vector: int size()>();
+
+        if $i0 <= 10 goto label3;
+
+        $r6 = new java.util.Hashtable;
+
+        specialinvoke $r6.<java.util.Hashtable: void <init>()>();
+
+        r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: java.util.Hashtable changeLookup> = $r6;
+
+        $r7 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: java.util.Vector edits>;
+
+        $i1 = virtualinvoke $r7.<java.util.Vector: int size()>();
+
+        i2 = 0;
+
+     label1:
+        if i2 >= $i1 goto label3;
+
+        $r8 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: java.util.Vector edits>;
+
+        $r9 = virtualinvoke $r8.<java.util.Vector: java.lang.Object elementAt(int)>(i2);
+
+        $z1 = $r9 instanceof javax.swing.event.DocumentEvent$ElementChange;
+
+        if $z1 == 0 goto label2;
+
+        r10 = (javax.swing.event.DocumentEvent$ElementChange) $r9;
+
+        $r11 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: java.util.Hashtable changeLookup>;
+
+        $r12 = interfaceinvoke r10.<javax.swing.event.DocumentEvent$ElementChange: javax.swing.text.Element getElement()>();
+
+        virtualinvoke $r11.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r12, r10);
+
+     label2:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label3:
+        $r13 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: java.util.Hashtable changeLookup>;
+
+        if $r13 == null goto label4;
+
+        $z0 = r2 instanceof javax.swing.event.DocumentEvent$ElementChange;
+
+        if $z0 == 0 goto label4;
+
+        r14 = (javax.swing.event.DocumentEvent$ElementChange) r2;
+
+        $r3 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: java.util.Hashtable changeLookup>;
+
+        $r4 = interfaceinvoke r14.<javax.swing.event.DocumentEvent$ElementChange: javax.swing.text.Element getElement()>();
+
+        virtualinvoke $r3.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r4, r14);
+
+     label4:
+        $z2 = specialinvoke r0.<javax.swing.undo.CompoundEdit: boolean addEdit(javax.swing.undo.UndoableEdit)>(r2);
+
+        return $z2;
+    }
+
+    public void redo() throws javax.swing.undo.CannotRedoException
+    {
+        java.lang.Throwable $r11;
+        javax.swing.text.AbstractDocument $r1, $r3, $r8, $r9, $r10, $r12, $r13;
+        javax.swing.text.AbstractDocument$UndoRedoDocumentEvent $r2;
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent r0;
+        javax.swing.event.DocumentEvent$EventType $r4, $r5, $r6, $r7;
+
+        r0 := @this: javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        $r1 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.text.AbstractDocument this$0>;
+
+        virtualinvoke $r1.<javax.swing.text.AbstractDocument: void writeLock()>();
+
+     label1:
+        specialinvoke r0.<javax.swing.undo.CompoundEdit: void redo()>();
+
+        $r2 = new javax.swing.text.AbstractDocument$UndoRedoDocumentEvent;
+
+        $r3 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.text.AbstractDocument this$0>;
+
+        specialinvoke $r2.<javax.swing.text.AbstractDocument$UndoRedoDocumentEvent: void <init>(javax.swing.text.AbstractDocument,javax.swing.text.AbstractDocument$DefaultDocumentEvent,boolean)>($r3, r0, 0);
+
+        $r5 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.event.DocumentEvent$EventType type>;
+
+        $r4 = <javax.swing.event.DocumentEvent$EventType: javax.swing.event.DocumentEvent$EventType INSERT>;
+
+        if $r5 != $r4 goto label2;
+
+        $r10 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.text.AbstractDocument this$0>;
+
+        virtualinvoke $r10.<javax.swing.text.AbstractDocument: void fireInsertUpdate(javax.swing.event.DocumentEvent)>($r2);
+
+        goto label4;
+
+     label2:
+        $r7 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.event.DocumentEvent$EventType type>;
+
+        $r6 = <javax.swing.event.DocumentEvent$EventType: javax.swing.event.DocumentEvent$EventType REMOVE>;
+
+        if $r7 != $r6 goto label3;
+
+        $r9 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.text.AbstractDocument this$0>;
+
+        virtualinvoke $r9.<javax.swing.text.AbstractDocument: void fireRemoveUpdate(javax.swing.event.DocumentEvent)>($r2);
+
+        goto label4;
+
+     label3:
+        $r8 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.text.AbstractDocument this$0>;
+
+        virtualinvoke $r8.<javax.swing.text.AbstractDocument: void fireChangedUpdate(javax.swing.event.DocumentEvent)>($r2);
+
+     label4:
+        $r13 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.text.AbstractDocument this$0>;
+
+        virtualinvoke $r13.<javax.swing.text.AbstractDocument: void writeUnlock()>();
+
+        goto label6;
+
+     label5:
+        $r11 := @caughtexception;
+
+        $r12 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.text.AbstractDocument this$0>;
+
+        virtualinvoke $r12.<javax.swing.text.AbstractDocument: void writeUnlock()>();
+
+        throw $r11;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+    }
+
+    public void undo() throws javax.swing.undo.CannotUndoException
+    {
+        java.lang.Throwable $r11;
+        javax.swing.text.AbstractDocument $r1, $r3, $r8, $r9, $r10, $r12, $r13;
+        javax.swing.text.AbstractDocument$UndoRedoDocumentEvent $r2;
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent r0;
+        javax.swing.event.DocumentEvent$EventType $r4, $r5, $r6, $r7;
+
+        r0 := @this: javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        $r1 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.text.AbstractDocument this$0>;
+
+        virtualinvoke $r1.<javax.swing.text.AbstractDocument: void writeLock()>();
+
+     label1:
+        specialinvoke r0.<javax.swing.undo.CompoundEdit: void undo()>();
+
+        $r2 = new javax.swing.text.AbstractDocument$UndoRedoDocumentEvent;
+
+        $r3 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.text.AbstractDocument this$0>;
+
+        specialinvoke $r2.<javax.swing.text.AbstractDocument$UndoRedoDocumentEvent: void <init>(javax.swing.text.AbstractDocument,javax.swing.text.AbstractDocument$DefaultDocumentEvent,boolean)>($r3, r0, 1);
+
+        $r5 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.event.DocumentEvent$EventType type>;
+
+        $r4 = <javax.swing.event.DocumentEvent$EventType: javax.swing.event.DocumentEvent$EventType REMOVE>;
+
+        if $r5 != $r4 goto label2;
+
+        $r10 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.text.AbstractDocument this$0>;
+
+        virtualinvoke $r10.<javax.swing.text.AbstractDocument: void fireInsertUpdate(javax.swing.event.DocumentEvent)>($r2);
+
+        goto label4;
+
+     label2:
+        $r7 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.event.DocumentEvent$EventType type>;
+
+        $r6 = <javax.swing.event.DocumentEvent$EventType: javax.swing.event.DocumentEvent$EventType INSERT>;
+
+        if $r7 != $r6 goto label3;
+
+        $r9 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.text.AbstractDocument this$0>;
+
+        virtualinvoke $r9.<javax.swing.text.AbstractDocument: void fireRemoveUpdate(javax.swing.event.DocumentEvent)>($r2);
+
+        goto label4;
+
+     label3:
+        $r8 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.text.AbstractDocument this$0>;
+
+        virtualinvoke $r8.<javax.swing.text.AbstractDocument: void fireChangedUpdate(javax.swing.event.DocumentEvent)>($r2);
+
+     label4:
+        $r13 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.text.AbstractDocument this$0>;
+
+        virtualinvoke $r13.<javax.swing.text.AbstractDocument: void writeUnlock()>();
+
+        goto label6;
+
+     label5:
+        $r11 := @caughtexception;
+
+        $r12 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.text.AbstractDocument this$0>;
+
+        virtualinvoke $r12.<javax.swing.text.AbstractDocument: void writeUnlock()>();
+
+        throw $r11;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+    }
+
+    public boolean isSignificant()
+    {
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent r0;
+
+        r0 := @this: javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        return 1;
+    }
+
+    public java.lang.String getPresentationName()
+    {
+        javax.swing.event.DocumentEvent$EventType $r1, $r2, $r3;
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent r0;
+        java.lang.String $r4, $r5, $r6;
+
+        r0 := @this: javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.event.DocumentEvent$EventType getType()>();
+
+        $r2 = <javax.swing.event.DocumentEvent$EventType: javax.swing.event.DocumentEvent$EventType INSERT>;
+
+        if $r1 != $r2 goto label1;
+
+        $r6 = staticinvoke <javax.swing.UIManager: java.lang.String getString(java.lang.Object)>("AbstractDocument.additionText");
+
+        return $r6;
+
+     label1:
+        $r3 = <javax.swing.event.DocumentEvent$EventType: javax.swing.event.DocumentEvent$EventType REMOVE>;
+
+        if $r1 != $r3 goto label2;
+
+        $r5 = staticinvoke <javax.swing.UIManager: java.lang.String getString(java.lang.Object)>("AbstractDocument.deletionText");
+
+        return $r5;
+
+     label2:
+        $r4 = staticinvoke <javax.swing.UIManager: java.lang.String getString(java.lang.Object)>("AbstractDocument.styleChangeText");
+
+        return $r4;
+    }
+
+    public java.lang.String getUndoPresentationName()
+    {
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent r4;
+        java.lang.StringBuilder $r0, $r2, $r3, $r6;
+        java.lang.String $r1, $r5, $r7;
+
+        r4 := @this: javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = staticinvoke <javax.swing.UIManager: java.lang.String getString(java.lang.Object)>("AbstractDocument.undoText");
+
+        $r2 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r5 = virtualinvoke r4.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: java.lang.String getPresentationName()>();
+
+        $r6 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r7;
+    }
+
+    public java.lang.String getRedoPresentationName()
+    {
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent r4;
+        java.lang.StringBuilder $r0, $r2, $r3, $r6;
+        java.lang.String $r1, $r5, $r7;
+
+        r4 := @this: javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = staticinvoke <javax.swing.UIManager: java.lang.String getString(java.lang.Object)>("AbstractDocument.redoText");
+
+        $r2 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r5 = virtualinvoke r4.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: java.lang.String getPresentationName()>();
+
+        $r6 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r7;
+    }
+
+    public javax.swing.event.DocumentEvent$EventType getType()
+    {
+        javax.swing.event.DocumentEvent$EventType $r1;
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent r0;
+
+        r0 := @this: javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        $r1 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.event.DocumentEvent$EventType type>;
+
+        return $r1;
+    }
+
+    public int getOffset()
+    {
+        int $i0;
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent r0;
+
+        r0 := @this: javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        $i0 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: int offset>;
+
+        return $i0;
+    }
+
+    public int getLength()
+    {
+        int $i0;
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent r0;
+
+        r0 := @this: javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        $i0 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: int length>;
+
+        return $i0;
+    }
+
+    public javax.swing.text.Document getDocument()
+    {
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent r0;
+        javax.swing.text.AbstractDocument $r1;
+
+        r0 := @this: javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        $r1 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.text.AbstractDocument this$0>;
+
+        return $r1;
+    }
+
+    public javax.swing.event.DocumentEvent$ElementChange getChange(javax.swing.text.Element)
+    {
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent r0;
+        javax.swing.event.DocumentEvent$ElementChange r5, $r10;
+        java.util.Vector $r2, $r3;
+        int $i0, i1;
+        java.lang.Object $r4, $r9;
+        javax.swing.text.Element r6, $r7;
+        java.util.Hashtable $r1, $r8;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        r6 := @parameter0: javax.swing.text.Element;
+
+        $r1 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: java.util.Hashtable changeLookup>;
+
+        if $r1 == null goto label1;
+
+        $r8 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: java.util.Hashtable changeLookup>;
+
+        $r9 = virtualinvoke $r8.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r6);
+
+        $r10 = (javax.swing.event.DocumentEvent$ElementChange) $r9;
+
+        return $r10;
+
+     label1:
+        $r2 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: java.util.Vector edits>;
+
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        i1 = 0;
+
+     label2:
+        if i1 >= $i0 goto label4;
+
+        $r3 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: java.util.Vector edits>;
+
+        $r4 = virtualinvoke $r3.<java.util.Vector: java.lang.Object elementAt(int)>(i1);
+
+        $z0 = $r4 instanceof javax.swing.event.DocumentEvent$ElementChange;
+
+        if $z0 == 0 goto label3;
+
+        r5 = (javax.swing.event.DocumentEvent$ElementChange) $r4;
+
+        $r7 = interfaceinvoke r5.<javax.swing.event.DocumentEvent$ElementChange: javax.swing.text.Element getElement()>();
+
+        $z1 = virtualinvoke r6.<java.lang.Object: boolean equals(java.lang.Object)>($r7);
+
+        if $z1 == 0 goto label3;
+
+        return r5;
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label4:
+        return null;
+    }
+
+    static javax.swing.event.DocumentEvent$EventType access$100(javax.swing.text.AbstractDocument$DefaultDocumentEvent)
+    {
+        javax.swing.event.DocumentEvent$EventType $r1;
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent r0;
+
+        r0 := @parameter0: javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        $r1 = r0.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: javax.swing.event.DocumentEvent$EventType type>;
+
+        return $r1;
+    }
+}

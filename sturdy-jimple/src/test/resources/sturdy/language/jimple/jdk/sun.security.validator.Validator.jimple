@@ -1,0 +1,301 @@
+public abstract class sun.security.validator.Validator extends java.lang.Object
+{
+    static final java.security.cert.X509Certificate[] CHAIN0;
+    public static final java.lang.String TYPE_SIMPLE;
+    public static final java.lang.String TYPE_PKIX;
+    public static final java.lang.String VAR_GENERIC;
+    public static final java.lang.String VAR_CODE_SIGNING;
+    public static final java.lang.String VAR_JCE_SIGNING;
+    public static final java.lang.String VAR_TLS_CLIENT;
+    public static final java.lang.String VAR_TLS_SERVER;
+    public static final java.lang.String VAR_TSA_SERVER;
+    public static final java.lang.String VAR_PLUGIN_CODE_SIGNING;
+    private final java.lang.String type;
+    final sun.security.validator.EndEntityChecker endEntityChecker;
+    final java.lang.String variant;
+    volatile java.util.Date validationDate;
+
+    void <init>(java.lang.String, java.lang.String)
+    {
+        sun.security.validator.EndEntityChecker $r3;
+        java.lang.String r1, r2;
+        sun.security.validator.Validator r0;
+
+        r0 := @this: sun.security.validator.Validator;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.validator.Validator: java.lang.String type> = r1;
+
+        r0.<sun.security.validator.Validator: java.lang.String variant> = r2;
+
+        $r3 = staticinvoke <sun.security.validator.EndEntityChecker: sun.security.validator.EndEntityChecker getInstance(java.lang.String,java.lang.String)>(r1, r2);
+
+        r0.<sun.security.validator.Validator: sun.security.validator.EndEntityChecker endEntityChecker> = $r3;
+
+        return;
+    }
+
+    public static sun.security.validator.Validator getInstance(java.lang.String, java.lang.String, java.security.KeyStore)
+    {
+        java.util.Set $r3;
+        java.security.KeyStore r2;
+        java.lang.String r0, r1;
+        sun.security.validator.Validator $r4;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.security.KeyStore;
+
+        $r3 = staticinvoke <sun.security.validator.TrustStoreUtil: java.util.Set getTrustedCerts(java.security.KeyStore)>(r2);
+
+        $r4 = staticinvoke <sun.security.validator.Validator: sun.security.validator.Validator getInstance(java.lang.String,java.lang.String,java.util.Collection)>(r0, r1, $r3);
+
+        return $r4;
+    }
+
+    public static sun.security.validator.Validator getInstance(java.lang.String, java.lang.String, java.util.Collection)
+    {
+        sun.security.validator.SimpleValidator $r9;
+        sun.security.validator.PKIXValidator $r6;
+        java.util.Collection r8;
+        java.lang.IllegalArgumentException $r1;
+        java.lang.StringBuilder $r2, $r3, $r4;
+        java.lang.String r0, $r5, r7;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.String;
+
+        r7 := @parameter1: java.lang.String;
+
+        r8 := @parameter2: java.util.Collection;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("Simple");
+
+        if $z0 == 0 goto label1;
+
+        $r9 = new sun.security.validator.SimpleValidator;
+
+        specialinvoke $r9.<sun.security.validator.SimpleValidator: void <init>(java.lang.String,java.util.Collection)>(r7, r8);
+
+        return $r9;
+
+     label1:
+        $z1 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("PKIX");
+
+        if $z1 == 0 goto label2;
+
+        $r6 = new sun.security.validator.PKIXValidator;
+
+        specialinvoke $r6.<sun.security.validator.PKIXValidator: void <init>(java.lang.String,java.util.Collection)>(r7, r8);
+
+        return $r6;
+
+     label2:
+        $r1 = new java.lang.IllegalArgumentException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown validator type: ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r5);
+
+        throw $r1;
+    }
+
+    public static sun.security.validator.Validator getInstance(java.lang.String, java.lang.String, java.security.cert.PKIXBuilderParameters)
+    {
+        java.security.cert.PKIXBuilderParameters r3;
+        sun.security.validator.PKIXValidator $r1;
+        java.lang.String r0, r2;
+        java.lang.IllegalArgumentException $r4;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.security.cert.PKIXBuilderParameters;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("PKIX");
+
+        if $z0 != 0 goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("getInstance(PKIXBuilderParameters) can only be used with PKIX validator");
+
+        throw $r4;
+
+     label1:
+        $r1 = new sun.security.validator.PKIXValidator;
+
+        specialinvoke $r1.<sun.security.validator.PKIXValidator: void <init>(java.lang.String,java.security.cert.PKIXBuilderParameters)>(r2, r3);
+
+        return $r1;
+    }
+
+    public final java.security.cert.X509Certificate[] validate(java.security.cert.X509Certificate[]) throws java.security.cert.CertificateException
+    {
+        sun.security.validator.Validator r0;
+        java.security.cert.X509Certificate[] r1, $r2;
+
+        r0 := @this: sun.security.validator.Validator;
+
+        r1 := @parameter0: java.security.cert.X509Certificate[];
+
+        $r2 = virtualinvoke r0.<sun.security.validator.Validator: java.security.cert.X509Certificate[] validate(java.security.cert.X509Certificate[],java.util.Collection,java.lang.Object)>(r1, null, null);
+
+        return $r2;
+    }
+
+    public final java.security.cert.X509Certificate[] validate(java.security.cert.X509Certificate[], java.util.Collection) throws java.security.cert.CertificateException
+    {
+        java.util.Collection r2;
+        sun.security.validator.Validator r0;
+        java.security.cert.X509Certificate[] r1, $r3;
+
+        r0 := @this: sun.security.validator.Validator;
+
+        r1 := @parameter0: java.security.cert.X509Certificate[];
+
+        r2 := @parameter1: java.util.Collection;
+
+        $r3 = virtualinvoke r0.<sun.security.validator.Validator: java.security.cert.X509Certificate[] validate(java.security.cert.X509Certificate[],java.util.Collection,java.lang.Object)>(r1, r2, null);
+
+        return $r3;
+    }
+
+    public final java.security.cert.X509Certificate[] validate(java.security.cert.X509Certificate[], java.util.Collection, java.lang.Object) throws java.security.cert.CertificateException
+    {
+        java.util.List $r3;
+        java.util.Collection r2;
+        java.lang.Object r4;
+        sun.security.validator.Validator r0;
+        java.security.cert.X509Certificate[] r1, $r5;
+
+        r0 := @this: sun.security.validator.Validator;
+
+        r1 := @parameter0: java.security.cert.X509Certificate[];
+
+        r2 := @parameter1: java.util.Collection;
+
+        r4 := @parameter2: java.lang.Object;
+
+        $r3 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+        $r5 = virtualinvoke r0.<sun.security.validator.Validator: java.security.cert.X509Certificate[] validate(java.security.cert.X509Certificate[],java.util.Collection,java.util.List,java.security.AlgorithmConstraints,java.lang.Object)>(r1, r2, $r3, null, r4);
+
+        return $r5;
+    }
+
+    public final java.security.cert.X509Certificate[] validate(java.security.cert.X509Certificate[], java.util.Collection, java.util.List, java.security.AlgorithmConstraints, java.lang.Object) throws java.security.cert.CertificateException
+    {
+        sun.security.validator.EndEntityChecker $r7;
+        java.util.Collection r1;
+        sun.security.validator.Validator r0;
+        java.util.List r2;
+        java.security.AlgorithmConstraints r3;
+        int $i0;
+        java.lang.Object r4;
+        java.lang.String $r6;
+        java.security.cert.X509Certificate[] $r5, r8;
+        boolean $z0;
+
+        r0 := @this: sun.security.validator.Validator;
+
+        r8 := @parameter0: java.security.cert.X509Certificate[];
+
+        r1 := @parameter1: java.util.Collection;
+
+        r2 := @parameter2: java.util.List;
+
+        r3 := @parameter3: java.security.AlgorithmConstraints;
+
+        r4 := @parameter4: java.lang.Object;
+
+        $r5 = virtualinvoke r0.<sun.security.validator.Validator: java.security.cert.X509Certificate[] engineValidate(java.security.cert.X509Certificate[],java.util.Collection,java.util.List,java.security.AlgorithmConstraints,java.lang.Object)>(r8, r1, r2, r3, r4);
+
+        $i0 = lengthof $r5;
+
+        if $i0 <= 1 goto label3;
+
+        $r6 = r0.<sun.security.validator.Validator: java.lang.String type>;
+
+        if $r6 != "PKIX" goto label1;
+
+        $z0 = 0;
+
+        goto label2;
+
+     label1:
+        $z0 = 1;
+
+     label2:
+        $r7 = r0.<sun.security.validator.Validator: sun.security.validator.EndEntityChecker endEntityChecker>;
+
+        virtualinvoke $r7.<sun.security.validator.EndEntityChecker: void check(java.security.cert.X509Certificate[],java.lang.Object,boolean)>($r5, r4, $z0);
+
+     label3:
+        return $r5;
+    }
+
+    abstract java.security.cert.X509Certificate[] engineValidate(java.security.cert.X509Certificate[], java.util.Collection, java.util.List, java.security.AlgorithmConstraints, java.lang.Object) throws java.security.cert.CertificateException;
+
+    public abstract java.util.Collection getTrustedCertificates();
+
+    public void setValidationDate(java.util.Date)
+    {
+        sun.security.validator.Validator r0;
+        java.util.Date r1;
+
+        r0 := @this: sun.security.validator.Validator;
+
+        r1 := @parameter0: java.util.Date;
+
+        r0.<sun.security.validator.Validator: java.util.Date validationDate> = r1;
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.security.cert.X509Certificate[] $r0;
+
+        <sun.security.validator.Validator: java.lang.String VAR_PLUGIN_CODE_SIGNING> = "plugin code signing";
+
+        <sun.security.validator.Validator: java.lang.String VAR_TSA_SERVER> = "tsa server";
+
+        <sun.security.validator.Validator: java.lang.String VAR_TLS_SERVER> = "tls server";
+
+        <sun.security.validator.Validator: java.lang.String VAR_TLS_CLIENT> = "tls client";
+
+        <sun.security.validator.Validator: java.lang.String VAR_JCE_SIGNING> = "jce signing";
+
+        <sun.security.validator.Validator: java.lang.String VAR_CODE_SIGNING> = "code signing";
+
+        <sun.security.validator.Validator: java.lang.String VAR_GENERIC> = "generic";
+
+        <sun.security.validator.Validator: java.lang.String TYPE_PKIX> = "PKIX";
+
+        <sun.security.validator.Validator: java.lang.String TYPE_SIMPLE> = "Simple";
+
+        $r0 = newarray (java.security.cert.X509Certificate)[0];
+
+        <sun.security.validator.Validator: java.security.cert.X509Certificate[] CHAIN0> = $r0;
+
+        return;
+    }
+}

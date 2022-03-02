@@ -1,0 +1,528 @@
+public abstract class sun.nio.ch.SelectorImpl extends java.nio.channels.spi.AbstractSelector
+{
+    protected java.util.Set selectedKeys;
+    protected java.util.HashSet keys;
+    private java.util.Set publicKeys;
+    private java.util.Set publicSelectedKeys;
+
+    protected void <init>(java.nio.channels.spi.SelectorProvider)
+    {
+        sun.nio.ch.SelectorImpl r0;
+        java.util.Set $r5, $r6, $r7, $r9;
+        java.util.HashSet $r2, $r3, $r4, $r8;
+        java.nio.channels.spi.SelectorProvider r1;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.SelectorImpl;
+
+        r1 := @parameter0: java.nio.channels.spi.SelectorProvider;
+
+        specialinvoke r0.<java.nio.channels.spi.AbstractSelector: void <init>(java.nio.channels.spi.SelectorProvider)>(r1);
+
+        $r2 = new java.util.HashSet;
+
+        specialinvoke $r2.<java.util.HashSet: void <init>()>();
+
+        r0.<sun.nio.ch.SelectorImpl: java.util.HashSet keys> = $r2;
+
+        $r3 = new java.util.HashSet;
+
+        specialinvoke $r3.<java.util.HashSet: void <init>()>();
+
+        r0.<sun.nio.ch.SelectorImpl: java.util.Set selectedKeys> = $r3;
+
+        $z0 = staticinvoke <sun.nio.ch.Util: boolean atBugLevel(java.lang.String)>("1.4");
+
+        if $z0 == 0 goto label1;
+
+        $r8 = r0.<sun.nio.ch.SelectorImpl: java.util.HashSet keys>;
+
+        r0.<sun.nio.ch.SelectorImpl: java.util.Set publicKeys> = $r8;
+
+        $r9 = r0.<sun.nio.ch.SelectorImpl: java.util.Set selectedKeys>;
+
+        r0.<sun.nio.ch.SelectorImpl: java.util.Set publicSelectedKeys> = $r9;
+
+        goto label2;
+
+     label1:
+        $r4 = r0.<sun.nio.ch.SelectorImpl: java.util.HashSet keys>;
+
+        $r5 = staticinvoke <java.util.Collections: java.util.Set unmodifiableSet(java.util.Set)>($r4);
+
+        r0.<sun.nio.ch.SelectorImpl: java.util.Set publicKeys> = $r5;
+
+        $r6 = r0.<sun.nio.ch.SelectorImpl: java.util.Set selectedKeys>;
+
+        $r7 = staticinvoke <sun.nio.ch.Util: java.util.Set ungrowableSet(java.util.Set)>($r6);
+
+        r0.<sun.nio.ch.SelectorImpl: java.util.Set publicSelectedKeys> = $r7;
+
+     label2:
+        return;
+    }
+
+    public java.util.Set keys()
+    {
+        java.nio.channels.ClosedSelectorException $r2;
+        sun.nio.ch.SelectorImpl r0;
+        java.util.Set $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.nio.ch.SelectorImpl;
+
+        $z0 = virtualinvoke r0.<sun.nio.ch.SelectorImpl: boolean isOpen()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = staticinvoke <sun.nio.ch.Util: boolean atBugLevel(java.lang.String)>("1.4");
+
+        if $z1 != 0 goto label1;
+
+        $r2 = new java.nio.channels.ClosedSelectorException;
+
+        specialinvoke $r2.<java.nio.channels.ClosedSelectorException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        $r1 = r0.<sun.nio.ch.SelectorImpl: java.util.Set publicKeys>;
+
+        return $r1;
+    }
+
+    public java.util.Set selectedKeys()
+    {
+        java.nio.channels.ClosedSelectorException $r2;
+        sun.nio.ch.SelectorImpl r0;
+        java.util.Set $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.nio.ch.SelectorImpl;
+
+        $z0 = virtualinvoke r0.<sun.nio.ch.SelectorImpl: boolean isOpen()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = staticinvoke <sun.nio.ch.Util: boolean atBugLevel(java.lang.String)>("1.4");
+
+        if $z1 != 0 goto label1;
+
+        $r2 = new java.nio.channels.ClosedSelectorException;
+
+        specialinvoke $r2.<java.nio.channels.ClosedSelectorException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        $r1 = r0.<sun.nio.ch.SelectorImpl: java.util.Set publicSelectedKeys>;
+
+        return $r1;
+    }
+
+    protected abstract int doSelect(long) throws java.io.IOException;
+
+    private int lockAndDoSelect(long) throws java.io.IOException
+    {
+        java.lang.Throwable $r4, $r5, $r6;
+        sun.nio.ch.SelectorImpl r0;
+        java.util.Set $r1, $r2;
+        long l0;
+        java.nio.channels.ClosedSelectorException $r3;
+        int $i1;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.SelectorImpl;
+
+        l0 := @parameter0: long;
+
+        entermonitor r0;
+
+     label01:
+        $z0 = virtualinvoke r0.<sun.nio.ch.SelectorImpl: boolean isOpen()>();
+
+        if $z0 != 0 goto label02;
+
+        $r3 = new java.nio.channels.ClosedSelectorException;
+
+        specialinvoke $r3.<java.nio.channels.ClosedSelectorException: void <init>()>();
+
+        throw $r3;
+
+     label02:
+        $r1 = r0.<sun.nio.ch.SelectorImpl: java.util.Set publicKeys>;
+
+        entermonitor $r1;
+
+     label03:
+        $r2 = r0.<sun.nio.ch.SelectorImpl: java.util.Set publicSelectedKeys>;
+
+        entermonitor $r2;
+
+     label04:
+        $i1 = virtualinvoke r0.<sun.nio.ch.SelectorImpl: int doSelect(long)>(l0);
+
+        exitmonitor $r2;
+
+     label05:
+        exitmonitor $r1;
+
+     label06:
+        exitmonitor r0;
+
+     label07:
+        return $i1;
+
+     label08:
+        $r6 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label09:
+        throw $r6;
+
+     label10:
+        $r5 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label11:
+        throw $r5;
+
+     label12:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+     label13:
+        throw $r4;
+
+        catch java.lang.Throwable from label04 to label05 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+        catch java.lang.Throwable from label03 to label06 with label10;
+        catch java.lang.Throwable from label08 to label11 with label10;
+        catch java.lang.Throwable from label01 to label07 with label12;
+        catch java.lang.Throwable from label08 to label13 with label12;
+    }
+
+    public int select(long) throws java.io.IOException
+    {
+        sun.nio.ch.SelectorImpl r0;
+        long l0, $l4;
+        java.lang.IllegalArgumentException $r2;
+        byte $b1, $b2;
+        int $i3, $i5;
+
+        r0 := @this: sun.nio.ch.SelectorImpl;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        $i5 = (int) $b1;
+
+        if $i5 >= 0 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Negative timeout");
+
+        throw $r2;
+
+     label1:
+        $b2 = l0 cmp 0L;
+
+        if $b2 != 0 goto label2;
+
+        $l4 = -1L;
+
+        goto label3;
+
+     label2:
+        $l4 = l0;
+
+     label3:
+        $i3 = specialinvoke r0.<sun.nio.ch.SelectorImpl: int lockAndDoSelect(long)>($l4);
+
+        return $i3;
+    }
+
+    public int select() throws java.io.IOException
+    {
+        int $i0;
+        sun.nio.ch.SelectorImpl r0;
+
+        r0 := @this: sun.nio.ch.SelectorImpl;
+
+        $i0 = virtualinvoke r0.<sun.nio.ch.SelectorImpl: int select(long)>(0L);
+
+        return $i0;
+    }
+
+    public int selectNow() throws java.io.IOException
+    {
+        int $i0;
+        sun.nio.ch.SelectorImpl r0;
+
+        r0 := @this: sun.nio.ch.SelectorImpl;
+
+        $i0 = specialinvoke r0.<sun.nio.ch.SelectorImpl: int lockAndDoSelect(long)>(0L);
+
+        return $i0;
+    }
+
+    public void implCloseSelector() throws java.io.IOException
+    {
+        java.lang.Throwable $r3, $r4, $r5;
+        sun.nio.ch.SelectorImpl r0;
+        java.util.Set $r1, $r2;
+
+        r0 := @this: sun.nio.ch.SelectorImpl;
+
+        virtualinvoke r0.<sun.nio.ch.SelectorImpl: java.nio.channels.Selector wakeup()>();
+
+        entermonitor r0;
+
+     label01:
+        $r1 = r0.<sun.nio.ch.SelectorImpl: java.util.Set publicKeys>;
+
+        entermonitor $r1;
+
+     label02:
+        $r2 = r0.<sun.nio.ch.SelectorImpl: java.util.Set publicSelectedKeys>;
+
+        entermonitor $r2;
+
+     label03:
+        virtualinvoke r0.<sun.nio.ch.SelectorImpl: void implClose()>();
+
+        exitmonitor $r2;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r5 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label06:
+        throw $r5;
+
+     label07:
+        exitmonitor $r1;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label10:
+        throw $r4;
+
+     label11:
+        exitmonitor r0;
+
+     label12:
+        goto label15;
+
+     label13:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+     label14:
+        throw $r3;
+
+     label15:
+        return;
+
+        catch java.lang.Throwable from label03 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.lang.Throwable from label02 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+        catch java.lang.Throwable from label01 to label12 with label13;
+        catch java.lang.Throwable from label13 to label14 with label13;
+    }
+
+    protected abstract void implClose() throws java.io.IOException;
+
+    public void putEventOps(sun.nio.ch.SelectionKeyImpl, int)
+    {
+        int i0;
+        sun.nio.ch.SelectorImpl r0;
+        sun.nio.ch.SelectionKeyImpl r1;
+
+        r0 := @this: sun.nio.ch.SelectorImpl;
+
+        r1 := @parameter0: sun.nio.ch.SelectionKeyImpl;
+
+        i0 := @parameter1: int;
+
+        return;
+    }
+
+    protected final java.nio.channels.SelectionKey register(java.nio.channels.spi.AbstractSelectableChannel, int, java.lang.Object)
+    {
+        java.lang.Throwable $r7;
+        sun.nio.ch.SelectorImpl r2;
+        java.util.Set $r5;
+        java.nio.channels.spi.AbstractSelectableChannel r0;
+        java.nio.channels.IllegalSelectorException $r6;
+        int i0;
+        java.lang.Object r4;
+        sun.nio.ch.SelectionKeyImpl $r1;
+        sun.nio.ch.SelChImpl $r3;
+        boolean $z0;
+
+        r2 := @this: sun.nio.ch.SelectorImpl;
+
+        r0 := @parameter0: java.nio.channels.spi.AbstractSelectableChannel;
+
+        i0 := @parameter1: int;
+
+        r4 := @parameter2: java.lang.Object;
+
+        $z0 = r0 instanceof sun.nio.ch.SelChImpl;
+
+        if $z0 != 0 goto label1;
+
+        $r6 = new java.nio.channels.IllegalSelectorException;
+
+        specialinvoke $r6.<java.nio.channels.IllegalSelectorException: void <init>()>();
+
+        throw $r6;
+
+     label1:
+        $r1 = new sun.nio.ch.SelectionKeyImpl;
+
+        $r3 = (sun.nio.ch.SelChImpl) r0;
+
+        specialinvoke $r1.<sun.nio.ch.SelectionKeyImpl: void <init>(sun.nio.ch.SelChImpl,sun.nio.ch.SelectorImpl)>($r3, r2);
+
+        virtualinvoke $r1.<sun.nio.ch.SelectionKeyImpl: java.lang.Object attach(java.lang.Object)>(r4);
+
+        $r5 = r2.<sun.nio.ch.SelectorImpl: java.util.Set publicKeys>;
+
+        entermonitor $r5;
+
+     label2:
+        virtualinvoke r2.<sun.nio.ch.SelectorImpl: void implRegister(sun.nio.ch.SelectionKeyImpl)>($r1);
+
+        exitmonitor $r5;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r7 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label5:
+        throw $r7;
+
+     label6:
+        virtualinvoke $r1.<sun.nio.ch.SelectionKeyImpl: java.nio.channels.SelectionKey interestOps(int)>(i0);
+
+        return $r1;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    protected abstract void implRegister(sun.nio.ch.SelectionKeyImpl);
+
+    void processDeregisterQueue() throws java.io.IOException
+    {
+        java.lang.Throwable $r5, $r6;
+        java.util.Iterator $r2;
+        sun.nio.ch.SelectorImpl r0;
+        java.util.Set $r1;
+        java.io.IOException $r8;
+        java.net.SocketException $r7;
+        java.lang.Object $r3;
+        sun.nio.ch.SelectionKeyImpl r4;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.nio.ch.SelectorImpl;
+
+        $r1 = virtualinvoke r0.<sun.nio.ch.SelectorImpl: java.util.Set cancelledKeys()>();
+
+        entermonitor $r1;
+
+     label01:
+        $z0 = interfaceinvoke $r1.<java.util.Set: boolean isEmpty()>();
+
+        if $z0 != 0 goto label09;
+
+        $r2 = interfaceinvoke $r1.<java.util.Set: java.util.Iterator iterator()>();
+
+     label02:
+        $z1 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label09;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (sun.nio.ch.SelectionKeyImpl) $r3;
+
+     label03:
+        virtualinvoke r0.<sun.nio.ch.SelectorImpl: void implDereg(sun.nio.ch.SelectionKeyImpl)>(r4);
+
+     label04:
+        interfaceinvoke $r2.<java.util.Iterator: void remove()>();
+
+        goto label08;
+
+     label05:
+        $r7 := @caughtexception;
+
+        $r8 = new java.io.IOException;
+
+        specialinvoke $r8.<java.io.IOException: void <init>(java.lang.String,java.lang.Throwable)>("Error deregistering key", $r7);
+
+        throw $r8;
+
+     label06:
+        $r6 := @caughtexception;
+
+     label07:
+        interfaceinvoke $r2.<java.util.Iterator: void remove()>();
+
+        throw $r6;
+
+     label08:
+        goto label02;
+
+     label09:
+        exitmonitor $r1;
+
+     label10:
+        goto label13;
+
+     label11:
+        $r5 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label12:
+        throw $r5;
+
+     label13:
+        return;
+
+        catch java.net.SocketException from label03 to label04 with label05;
+        catch java.lang.Throwable from label03 to label04 with label06;
+        catch java.lang.Throwable from label05 to label07 with label06;
+        catch java.lang.Throwable from label01 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+    }
+
+    protected abstract void implDereg(sun.nio.ch.SelectionKeyImpl) throws java.io.IOException;
+
+    public abstract java.nio.channels.Selector wakeup();
+}

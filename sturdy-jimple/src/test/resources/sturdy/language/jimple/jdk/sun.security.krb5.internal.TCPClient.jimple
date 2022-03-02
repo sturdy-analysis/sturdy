@@ -1,0 +1,386 @@
+class sun.security.krb5.internal.TCPClient extends sun.security.krb5.internal.NetClient
+{
+    private java.net.Socket tcpSocket;
+    private java.io.BufferedOutputStream out;
+    private java.io.BufferedInputStream in;
+
+    void <init>(java.lang.String, int, int) throws java.io.IOException
+    {
+        java.io.OutputStream $r7;
+        java.net.Socket $r1, $r4, $r6, $r9, $r11;
+        java.io.BufferedInputStream $r8;
+        sun.security.krb5.internal.TCPClient r0;
+        java.net.InetSocketAddress $r2;
+        java.io.BufferedOutputStream $r5;
+        int i0, i1;
+        java.lang.String r3;
+        java.io.InputStream $r10;
+
+        r0 := @this: sun.security.krb5.internal.TCPClient;
+
+        r3 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<sun.security.krb5.internal.NetClient: void <init>()>();
+
+        $r1 = new java.net.Socket;
+
+        specialinvoke $r1.<java.net.Socket: void <init>()>();
+
+        r0.<sun.security.krb5.internal.TCPClient: java.net.Socket tcpSocket> = $r1;
+
+        $r4 = r0.<sun.security.krb5.internal.TCPClient: java.net.Socket tcpSocket>;
+
+        $r2 = new java.net.InetSocketAddress;
+
+        specialinvoke $r2.<java.net.InetSocketAddress: void <init>(java.lang.String,int)>(r3, i0);
+
+        virtualinvoke $r4.<java.net.Socket: void connect(java.net.SocketAddress,int)>($r2, i1);
+
+        $r5 = new java.io.BufferedOutputStream;
+
+        $r6 = r0.<sun.security.krb5.internal.TCPClient: java.net.Socket tcpSocket>;
+
+        $r7 = virtualinvoke $r6.<java.net.Socket: java.io.OutputStream getOutputStream()>();
+
+        specialinvoke $r5.<java.io.BufferedOutputStream: void <init>(java.io.OutputStream)>($r7);
+
+        r0.<sun.security.krb5.internal.TCPClient: java.io.BufferedOutputStream out> = $r5;
+
+        $r8 = new java.io.BufferedInputStream;
+
+        $r9 = r0.<sun.security.krb5.internal.TCPClient: java.net.Socket tcpSocket>;
+
+        $r10 = virtualinvoke $r9.<java.net.Socket: java.io.InputStream getInputStream()>();
+
+        specialinvoke $r8.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>($r10);
+
+        r0.<sun.security.krb5.internal.TCPClient: java.io.BufferedInputStream in> = $r8;
+
+        $r11 = r0.<sun.security.krb5.internal.TCPClient: java.net.Socket tcpSocket>;
+
+        virtualinvoke $r11.<java.net.Socket: void setSoTimeout(int)>(i1);
+
+        return;
+    }
+
+    public void send(byte[]) throws java.io.IOException
+    {
+        byte[] r0, r1;
+        sun.security.krb5.internal.TCPClient r2;
+        int $i0;
+        java.io.BufferedOutputStream $r3, $r4, $r5;
+
+        r2 := @this: sun.security.krb5.internal.TCPClient;
+
+        r1 := @parameter0: byte[];
+
+        r0 = newarray (byte)[4];
+
+        $i0 = lengthof r1;
+
+        staticinvoke <sun.security.krb5.internal.TCPClient: void intToNetworkByteOrder(int,byte[],int,int)>($i0, r0, 0, 4);
+
+        $r3 = r2.<sun.security.krb5.internal.TCPClient: java.io.BufferedOutputStream out>;
+
+        virtualinvoke $r3.<java.io.BufferedOutputStream: void write(byte[])>(r0);
+
+        $r4 = r2.<sun.security.krb5.internal.TCPClient: java.io.BufferedOutputStream out>;
+
+        virtualinvoke $r4.<java.io.BufferedOutputStream: void write(byte[])>(r1);
+
+        $r5 = r2.<sun.security.krb5.internal.TCPClient: java.io.BufferedOutputStream out>;
+
+        virtualinvoke $r5.<java.io.BufferedOutputStream: void flush()>();
+
+        return;
+    }
+
+    public byte[] receive() throws java.io.IOException
+    {
+        byte[] r0, $r3;
+        java.io.BufferedInputStream $r2;
+        sun.security.krb5.internal.TCPClient r1;
+        int $i0, $i1;
+        java.lang.String $r8, $r14, $r24;
+        boolean $z0, $z1, $z2, $z3;
+        java.io.PrintStream $r5, $r10, $r15, $r18;
+        java.io.IOException $r16;
+        java.lang.StringBuilder $r4, $r6, $r7, $r9, $r11, $r12, $r13, $r17, $r19, $r20, $r21, $r22, $r23;
+
+        r1 := @this: sun.security.krb5.internal.TCPClient;
+
+        r0 = newarray (byte)[4];
+
+        $i0 = specialinvoke r1.<sun.security.krb5.internal.TCPClient: int readFully(byte[],int)>(r0, 4);
+
+        if $i0 == 4 goto label2;
+
+        $z2 = <sun.security.krb5.internal.Krb5: boolean DEBUG>;
+
+        if $z2 == 0 goto label1;
+
+        $r15 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r15.<java.io.PrintStream: void println(java.lang.String)>(">>>DEBUG: TCPClient could not read length field");
+
+     label1:
+        return null;
+
+     label2:
+        $i1 = staticinvoke <sun.security.krb5.internal.TCPClient: int networkByteOrderToInt(byte[],int,int)>(r0, 0, 4);
+
+        $z0 = <sun.security.krb5.internal.Krb5: boolean DEBUG>;
+
+        if $z0 == 0 goto label3;
+
+        $r10 = <java.lang.System: java.io.PrintStream out>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">>>DEBUG: TCPClient reading ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" bytes");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r10.<java.io.PrintStream: void println(java.lang.String)>($r14);
+
+     label3:
+        if $i1 > 0 goto label5;
+
+        $z1 = <sun.security.krb5.internal.Krb5: boolean DEBUG>;
+
+        if $z1 == 0 goto label4;
+
+        $r5 = <java.lang.System: java.io.PrintStream out>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">>>DEBUG: TCPClient zero or negative length field: ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>($r8);
+
+     label4:
+        return null;
+
+     label5:
+        $r2 = r1.<sun.security.krb5.internal.TCPClient: java.io.BufferedInputStream in>;
+
+        $r3 = staticinvoke <sun.misc.IOUtils: byte[] readExactlyNBytes(java.io.InputStream,int)>($r2, $i1);
+
+     label6:
+        return $r3;
+
+     label7:
+        $r16 := @caughtexception;
+
+        $z3 = <sun.security.krb5.internal.Krb5: boolean DEBUG>;
+
+        if $z3 == 0 goto label8;
+
+        $r18 = <java.lang.System: java.io.PrintStream out>;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">>>DEBUG: TCPClient could not read complete packet (");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r18.<java.io.PrintStream: void println(java.lang.String)>($r24);
+
+     label8:
+        return null;
+
+        catch java.io.IOException from label5 to label6 with label7;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        java.net.Socket $r1;
+        sun.security.krb5.internal.TCPClient r0;
+
+        r0 := @this: sun.security.krb5.internal.TCPClient;
+
+        $r1 = r0.<sun.security.krb5.internal.TCPClient: java.net.Socket tcpSocket>;
+
+        virtualinvoke $r1.<java.net.Socket: void close()>();
+
+        return;
+    }
+
+    private int readFully(byte[], int) throws java.io.IOException
+    {
+        byte[] r1;
+        java.io.BufferedInputStream $r2;
+        sun.security.krb5.internal.TCPClient r0;
+        int $i0, i1, i2, $i3, $i5, $i7;
+
+        r0 := @this: sun.security.krb5.internal.TCPClient;
+
+        r1 := @parameter0: byte[];
+
+        i1 := @parameter1: int;
+
+        i2 = 0;
+
+     label1:
+        if i1 <= 0 goto label5;
+
+        $r2 = r0.<sun.security.krb5.internal.TCPClient: java.io.BufferedInputStream in>;
+
+        $i0 = virtualinvoke $r2.<java.io.BufferedInputStream: int read(byte[],int,int)>(r1, i2, i1);
+
+        $i5 = (int) -1;
+
+        if $i0 != $i5 goto label4;
+
+        if i2 != 0 goto label2;
+
+        $i7 = (int) -1;
+
+        $i3 = $i7;
+
+        goto label3;
+
+     label2:
+        $i3 = i2;
+
+     label3:
+        return $i3;
+
+     label4:
+        i2 = i2 + $i0;
+
+        i1 = i1 - $i0;
+
+        goto label1;
+
+     label5:
+        return i2;
+    }
+
+    private static int networkByteOrderToInt(byte[], int, int)
+    {
+        byte[] r0;
+        java.lang.IllegalArgumentException $r2;
+        short $s4, $s8;
+        byte $b3;
+        int i0, i1, $i2, i5, i6, i7, $i9;
+
+        r0 := @parameter0: byte[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        if i0 <= 4 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Cannot handle more than 4 bytes");
+
+        throw $r2;
+
+     label1:
+        i5 = 0;
+
+        i6 = 0;
+
+     label2:
+        if i6 >= i0 goto label3;
+
+        i7 = i5 << 8;
+
+        $i2 = i1 + i6;
+
+        $b3 = r0[$i2];
+
+        $s8 = (short) $b3;
+
+        $s4 = $s8 & 255;
+
+        $i9 = (int) $s4;
+
+        i5 = i7 | $i9;
+
+        i6 = i6 + 1;
+
+        goto label2;
+
+     label3:
+        return i5;
+    }
+
+    private static void intToNetworkByteOrder(int, byte[], int, int)
+    {
+        byte[] r0;
+        java.lang.IllegalArgumentException $r2;
+        byte $b3;
+        int i0, i1, $i2, $i4, i5, i6, $i8;
+
+        i5 := @parameter0: int;
+
+        r0 := @parameter1: byte[];
+
+        i1 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        if i0 <= 4 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Cannot handle more than 4 bytes");
+
+        throw $r2;
+
+     label1:
+        i6 = i0 - 1;
+
+     label2:
+        if i6 < 0 goto label3;
+
+        $i4 = i1 + i6;
+
+        $i2 = i5 & 255;
+
+        $b3 = (byte) $i2;
+
+        r0[$i4] = $b3;
+
+        i5 = i5 >>> 8;
+
+        $i8 = (int) -1;
+
+        i6 = i6 + $i8;
+
+        goto label2;
+
+     label3:
+        return;
+    }
+}

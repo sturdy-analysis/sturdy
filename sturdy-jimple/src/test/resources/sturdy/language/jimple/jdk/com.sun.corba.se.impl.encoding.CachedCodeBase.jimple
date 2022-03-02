@@ -1,0 +1,525 @@
+public class com.sun.corba.se.impl.encoding.CachedCodeBase extends com.sun.org.omg.SendingContext._CodeBaseImplBase
+{
+    private java.util.Hashtable implementations;
+    private java.util.Hashtable fvds;
+    private java.util.Hashtable bases;
+    private volatile com.sun.org.omg.SendingContext.CodeBase delegate;
+    private com.sun.corba.se.spi.transport.CorbaConnection conn;
+    private static java.lang.Object iorMapLock;
+    private static java.util.Hashtable iorMap;
+
+    public static synchronized void cleanCache(com.sun.corba.se.spi.orb.ORB)
+    {
+        java.lang.Throwable $r9;
+        java.util.Iterator $r3;
+        com.sun.corba.se.spi.ior.IOR r5;
+        java.util.Set $r2;
+        com.sun.corba.se.spi.orb.ORB $r6, r7;
+        java.lang.Object $r0, $r4;
+        java.util.Hashtable $r1, $r8;
+        boolean $z0;
+
+        r7 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        $r0 = <com.sun.corba.se.impl.encoding.CachedCodeBase: java.lang.Object iorMapLock>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = <com.sun.corba.se.impl.encoding.CachedCodeBase: java.util.Hashtable iorMap>;
+
+        $r2 = virtualinvoke $r1.<java.util.Hashtable: java.util.Set keySet()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Set: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (com.sun.corba.se.spi.ior.IOR) $r4;
+
+        $r6 = interfaceinvoke r5.<com.sun.corba.se.spi.ior.IOR: com.sun.corba.se.spi.orb.ORB getORB()>();
+
+        if $r6 != r7 goto label3;
+
+        $r8 = <com.sun.corba.se.impl.encoding.CachedCodeBase: java.util.Hashtable iorMap>;
+
+        virtualinvoke $r8.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>(r5);
+
+     label3:
+        goto label2;
+
+     label4:
+        exitmonitor $r0;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r9 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label7:
+        throw $r9;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public void <init>(com.sun.corba.se.spi.transport.CorbaConnection)
+    {
+        com.sun.corba.se.impl.encoding.CachedCodeBase r0;
+        com.sun.corba.se.spi.transport.CorbaConnection r1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.CachedCodeBase;
+
+        r1 := @parameter0: com.sun.corba.se.spi.transport.CorbaConnection;
+
+        specialinvoke r0.<com.sun.org.omg.SendingContext._CodeBaseImplBase: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: com.sun.corba.se.spi.transport.CorbaConnection conn> = r1;
+
+        return;
+    }
+
+    public com.sun.org.omg.CORBA.Repository get_ir()
+    {
+        com.sun.corba.se.impl.encoding.CachedCodeBase r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.CachedCodeBase;
+
+        return null;
+    }
+
+    public synchronized java.lang.String implementation(java.lang.String)
+    {
+        com.sun.org.omg.SendingContext.CodeBase $r5;
+        com.sun.corba.se.impl.encoding.CachedCodeBase r0;
+        java.lang.Object $r4;
+        java.lang.String r2, $r6, r9;
+        java.util.Hashtable $r1, $r3, $r7, $r8;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.CachedCodeBase;
+
+        r2 := @parameter0: java.lang.String;
+
+        r9 = null;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: java.util.Hashtable implementations>;
+
+        if $r1 != null goto label1;
+
+        $r8 = new java.util.Hashtable;
+
+        specialinvoke $r8.<java.util.Hashtable: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: java.util.Hashtable implementations> = $r8;
+
+        goto label2;
+
+     label1:
+        $r3 = r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: java.util.Hashtable implementations>;
+
+        $r4 = virtualinvoke $r3.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r2);
+
+        r9 = (java.lang.String) $r4;
+
+     label2:
+        if r9 != null goto label3;
+
+        $z0 = specialinvoke r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: boolean connectedCodeBase()>();
+
+        if $z0 == 0 goto label3;
+
+        $r5 = r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: com.sun.org.omg.SendingContext.CodeBase delegate>;
+
+        $r6 = interfaceinvoke $r5.<com.sun.org.omg.SendingContext.CodeBase: java.lang.String implementation(java.lang.String)>(r2);
+
+        r9 = $r6;
+
+        if $r6 == null goto label3;
+
+        $r7 = r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: java.util.Hashtable implementations>;
+
+        virtualinvoke $r7.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>(r2, $r6);
+
+     label3:
+        return r9;
+    }
+
+    public synchronized java.lang.String[] implementations(java.lang.String[])
+    {
+        java.lang.String[] r0, r1;
+        com.sun.corba.se.impl.encoding.CachedCodeBase r2;
+        int $i0, $i1, i2;
+        java.lang.String $r3, $r4;
+
+        r2 := @this: com.sun.corba.se.impl.encoding.CachedCodeBase;
+
+        r0 := @parameter0: java.lang.String[];
+
+        $i0 = lengthof r0;
+
+        r1 = newarray (java.lang.String)[$i0];
+
+        i2 = 0;
+
+     label1:
+        $i1 = lengthof r1;
+
+        if i2 >= $i1 goto label2;
+
+        $r3 = r0[i2];
+
+        $r4 = virtualinvoke r2.<com.sun.corba.se.impl.encoding.CachedCodeBase: java.lang.String implementation(java.lang.String)>($r3);
+
+        r1[i2] = $r4;
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return r1;
+    }
+
+    public synchronized com.sun.org.omg.CORBA.ValueDefPackage.FullValueDescription meta(java.lang.String)
+    {
+        com.sun.org.omg.SendingContext.CodeBase $r5;
+        com.sun.corba.se.impl.encoding.CachedCodeBase r0;
+        java.lang.Object $r4;
+        java.lang.String r2;
+        java.util.Hashtable $r1, $r3, $r7, $r8;
+        com.sun.org.omg.CORBA.ValueDefPackage.FullValueDescription $r6, r9;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.CachedCodeBase;
+
+        r2 := @parameter0: java.lang.String;
+
+        r9 = null;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: java.util.Hashtable fvds>;
+
+        if $r1 != null goto label1;
+
+        $r8 = new java.util.Hashtable;
+
+        specialinvoke $r8.<java.util.Hashtable: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: java.util.Hashtable fvds> = $r8;
+
+        goto label2;
+
+     label1:
+        $r3 = r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: java.util.Hashtable fvds>;
+
+        $r4 = virtualinvoke $r3.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r2);
+
+        r9 = (com.sun.org.omg.CORBA.ValueDefPackage.FullValueDescription) $r4;
+
+     label2:
+        if r9 != null goto label3;
+
+        $z0 = specialinvoke r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: boolean connectedCodeBase()>();
+
+        if $z0 == 0 goto label3;
+
+        $r5 = r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: com.sun.org.omg.SendingContext.CodeBase delegate>;
+
+        $r6 = interfaceinvoke $r5.<com.sun.org.omg.SendingContext.CodeBase: com.sun.org.omg.CORBA.ValueDefPackage.FullValueDescription meta(java.lang.String)>(r2);
+
+        r9 = $r6;
+
+        if $r6 == null goto label3;
+
+        $r7 = r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: java.util.Hashtable fvds>;
+
+        virtualinvoke $r7.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>(r2, $r6);
+
+     label3:
+        return r9;
+    }
+
+    public synchronized com.sun.org.omg.CORBA.ValueDefPackage.FullValueDescription[] metas(java.lang.String[])
+    {
+        java.lang.String[] r0;
+        com.sun.org.omg.CORBA.ValueDefPackage.FullValueDescription[] r1;
+        com.sun.corba.se.impl.encoding.CachedCodeBase r2;
+        int $i0, $i1, i2;
+        java.lang.String $r3;
+        com.sun.org.omg.CORBA.ValueDefPackage.FullValueDescription $r4;
+
+        r2 := @this: com.sun.corba.se.impl.encoding.CachedCodeBase;
+
+        r0 := @parameter0: java.lang.String[];
+
+        $i0 = lengthof r0;
+
+        r1 = newarray (com.sun.org.omg.CORBA.ValueDefPackage.FullValueDescription)[$i0];
+
+        i2 = 0;
+
+     label1:
+        $i1 = lengthof r1;
+
+        if i2 >= $i1 goto label2;
+
+        $r3 = r0[i2];
+
+        $r4 = virtualinvoke r2.<com.sun.corba.se.impl.encoding.CachedCodeBase: com.sun.org.omg.CORBA.ValueDefPackage.FullValueDescription meta(java.lang.String)>($r3);
+
+        r1[i2] = $r4;
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return r1;
+    }
+
+    public synchronized java.lang.String[] bases(java.lang.String)
+    {
+        com.sun.org.omg.SendingContext.CodeBase $r6;
+        java.lang.String[] $r5, $r7, r10;
+        com.sun.corba.se.impl.encoding.CachedCodeBase r0;
+        java.lang.Object $r4;
+        java.lang.String r2;
+        java.util.Hashtable $r1, $r3, $r8, $r9;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.CachedCodeBase;
+
+        r2 := @parameter0: java.lang.String;
+
+        r10 = null;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: java.util.Hashtable bases>;
+
+        if $r1 != null goto label1;
+
+        $r9 = new java.util.Hashtable;
+
+        specialinvoke $r9.<java.util.Hashtable: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: java.util.Hashtable bases> = $r9;
+
+        goto label2;
+
+     label1:
+        $r3 = r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: java.util.Hashtable bases>;
+
+        $r4 = virtualinvoke $r3.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r2);
+
+        $r5 = (java.lang.String[]) $r4;
+
+        r10 = (java.lang.String[]) $r5;
+
+     label2:
+        if r10 != null goto label3;
+
+        $z0 = specialinvoke r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: boolean connectedCodeBase()>();
+
+        if $z0 == 0 goto label3;
+
+        $r6 = r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: com.sun.org.omg.SendingContext.CodeBase delegate>;
+
+        $r7 = interfaceinvoke $r6.<com.sun.org.omg.SendingContext.CodeBase: java.lang.String[] bases(java.lang.String)>(r2);
+
+        r10 = $r7;
+
+        if $r7 == null goto label3;
+
+        $r8 = r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: java.util.Hashtable bases>;
+
+        virtualinvoke $r8.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>(r2, $r7);
+
+     label3:
+        return r10;
+    }
+
+    private synchronized boolean connectedCodeBase()
+    {
+        java.lang.Throwable $r26;
+        com.sun.corba.se.spi.transport.CorbaConnection $r2, $r6, $r14, $r18, $r21, $r23;
+        com.sun.corba.se.impl.encoding.CachedCodeBase r0;
+        java.lang.String $r25;
+        java.util.Hashtable $r7, $r15;
+        boolean $z0;
+        com.sun.corba.se.spi.ior.IOR $r3, $r8, $r16;
+        com.sun.org.omg.SendingContext.CodeBase $r1, $r5, $r10, $r11, $r13, $r17;
+        com.sun.corba.se.spi.orb.ORB $r19;
+        org.omg.CORBA.Object $r12;
+        java.lang.Object $r4, $r9;
+        java.lang.StringBuilder $r20, $r22, $r24;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.CachedCodeBase;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: com.sun.org.omg.SendingContext.CodeBase delegate>;
+
+        if $r1 == null goto label01;
+
+        return 1;
+
+     label01:
+        $r2 = r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: com.sun.corba.se.spi.transport.CorbaConnection conn>;
+
+        $r3 = interfaceinvoke $r2.<com.sun.corba.se.spi.transport.CorbaConnection: com.sun.corba.se.spi.ior.IOR getCodeBaseIOR()>();
+
+        if $r3 != null goto label03;
+
+        $r18 = r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: com.sun.corba.se.spi.transport.CorbaConnection conn>;
+
+        $r19 = interfaceinvoke $r18.<com.sun.corba.se.spi.transport.CorbaConnection: com.sun.corba.se.spi.orb.ORB getBroker()>();
+
+        $z0 = $r19.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label02;
+
+        $r21 = r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: com.sun.corba.se.spi.transport.CorbaConnection conn>;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("CodeBase unavailable on connection: ");
+
+        $r23 = r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: com.sun.corba.se.spi.transport.CorbaConnection conn>;
+
+        $r24 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r23);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r21.<com.sun.corba.se.spi.transport.CorbaConnection: void dprint(java.lang.String)>($r25);
+
+     label02:
+        return 0;
+
+     label03:
+        $r4 = <com.sun.corba.se.impl.encoding.CachedCodeBase: java.lang.Object iorMapLock>;
+
+        entermonitor $r4;
+
+     label04:
+        $r5 = r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: com.sun.org.omg.SendingContext.CodeBase delegate>;
+
+        if $r5 == null goto label06;
+
+        exitmonitor $r4;
+
+     label05:
+        return 1;
+
+     label06:
+        $r7 = <com.sun.corba.se.impl.encoding.CachedCodeBase: java.util.Hashtable iorMap>;
+
+        $r6 = r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: com.sun.corba.se.spi.transport.CorbaConnection conn>;
+
+        $r8 = interfaceinvoke $r6.<com.sun.corba.se.spi.transport.CorbaConnection: com.sun.corba.se.spi.ior.IOR getCodeBaseIOR()>();
+
+        $r9 = virtualinvoke $r7.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r8);
+
+        $r10 = (com.sun.org.omg.SendingContext.CodeBase) $r9;
+
+        r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: com.sun.org.omg.SendingContext.CodeBase delegate> = $r10;
+
+        $r11 = r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: com.sun.org.omg.SendingContext.CodeBase delegate>;
+
+        if $r11 == null goto label08;
+
+        exitmonitor $r4;
+
+     label07:
+        return 1;
+
+     label08:
+        $r12 = specialinvoke r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: org.omg.CORBA.Object getObjectFromIOR()>();
+
+        $r13 = staticinvoke <com.sun.org.omg.SendingContext.CodeBaseHelper: com.sun.org.omg.SendingContext.CodeBase narrow(org.omg.CORBA.Object)>($r12);
+
+        r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: com.sun.org.omg.SendingContext.CodeBase delegate> = $r13;
+
+        $r15 = <com.sun.corba.se.impl.encoding.CachedCodeBase: java.util.Hashtable iorMap>;
+
+        $r14 = r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: com.sun.corba.se.spi.transport.CorbaConnection conn>;
+
+        $r16 = interfaceinvoke $r14.<com.sun.corba.se.spi.transport.CorbaConnection: com.sun.corba.se.spi.ior.IOR getCodeBaseIOR()>();
+
+        $r17 = r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: com.sun.org.omg.SendingContext.CodeBase delegate>;
+
+        virtualinvoke $r15.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r16, $r17);
+
+        exitmonitor $r4;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r26 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label11:
+        throw $r26;
+
+     label12:
+        return 1;
+
+        catch java.lang.Throwable from label04 to label05 with label10;
+        catch java.lang.Throwable from label06 to label07 with label10;
+        catch java.lang.Throwable from label08 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    private final org.omg.CORBA.Object getObjectFromIOR()
+    {
+        com.sun.corba.se.impl.encoding.CachedCodeBase r0;
+        com.sun.corba.se.spi.ior.IOR $r2;
+        org.omg.CORBA.Object $r5;
+        com.sun.corba.se.spi.transport.CorbaConnection $r1, $r3;
+        com.sun.corba.se.spi.orb.ORB $r4;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.CachedCodeBase;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: com.sun.corba.se.spi.transport.CorbaConnection conn>;
+
+        $r2 = interfaceinvoke $r1.<com.sun.corba.se.spi.transport.CorbaConnection: com.sun.corba.se.spi.ior.IOR getCodeBaseIOR()>();
+
+        $r3 = r0.<com.sun.corba.se.impl.encoding.CachedCodeBase: com.sun.corba.se.spi.transport.CorbaConnection conn>;
+
+        $r4 = interfaceinvoke $r3.<com.sun.corba.se.spi.transport.CorbaConnection: com.sun.corba.se.spi.orb.ORB getBroker()>();
+
+        $r5 = staticinvoke <com.sun.corba.se.impl.encoding.CDRInputStream_1_0: org.omg.CORBA.Object internalIORToObject(com.sun.corba.se.spi.ior.IOR,com.sun.corba.se.spi.presentation.rmi.PresentationManager$StubFactory,com.sun.corba.se.spi.orb.ORB)>($r2, null, $r4);
+
+        return $r5;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Object $r0;
+        java.util.Hashtable $r1;
+
+        $r0 = new java.lang.Object;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        <com.sun.corba.se.impl.encoding.CachedCodeBase: java.lang.Object iorMapLock> = $r0;
+
+        $r1 = new java.util.Hashtable;
+
+        specialinvoke $r1.<java.util.Hashtable: void <init>()>();
+
+        <com.sun.corba.se.impl.encoding.CachedCodeBase: java.util.Hashtable iorMap> = $r1;
+
+        return;
+    }
+}

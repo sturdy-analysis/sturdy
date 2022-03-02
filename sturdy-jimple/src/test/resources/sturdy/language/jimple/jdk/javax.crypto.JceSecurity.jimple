@@ -1,0 +1,944 @@
+final class javax.crypto.JceSecurity extends java.lang.Object
+{
+    static final java.security.SecureRandom RANDOM;
+    private static javax.crypto.CryptoPermissions defaultPolicy;
+    private static javax.crypto.CryptoPermissions exemptPolicy;
+    private static final java.util.Map verificationResults;
+    private static final java.util.Map verifyingProviders;
+    private static final boolean isRestricted;
+    private static final sun.security.util.Debug debug;
+    private static final java.lang.Object PROVIDER_VERIFIED;
+    private static final java.net.URL NULL_URL;
+    private static final java.util.Map codeBaseCacheRef;
+
+    private void <init>()
+    {
+        javax.crypto.JceSecurity r0;
+
+        r0 := @this: javax.crypto.JceSecurity;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    static sun.security.jca.GetInstance$Instance getInstance(java.lang.String, java.lang.Class, java.lang.String, java.lang.String) throws java.security.NoSuchAlgorithmException, java.security.NoSuchProviderException
+    {
+        java.lang.Throwable $r13;
+        sun.security.jca.GetInstance$Instance $r7;
+        java.lang.Exception $r5;
+        java.security.Provider $r4;
+        java.security.Provider$Service $r3;
+        java.lang.Class r6;
+        java.lang.StringBuilder $r8, $r9, $r10;
+        java.lang.String r0, r1, r2, $r11;
+        java.security.NoSuchProviderException $r12, $r14;
+
+        r0 := @parameter0: java.lang.String;
+
+        r6 := @parameter1: java.lang.Class;
+
+        r1 := @parameter2: java.lang.String;
+
+        r2 := @parameter3: java.lang.String;
+
+        $r3 = staticinvoke <sun.security.jca.GetInstance: java.security.Provider$Service getService(java.lang.String,java.lang.String,java.lang.String)>(r0, r1, r2);
+
+        $r4 = virtualinvoke $r3.<java.security.Provider$Service: java.security.Provider getProvider()>();
+
+        $r5 = staticinvoke <javax.crypto.JceSecurity: java.lang.Exception getVerificationResult(java.security.Provider)>($r4);
+
+        if $r5 == null goto label1;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("JCE cannot authenticate the provider ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r12 = new java.security.NoSuchProviderException;
+
+        specialinvoke $r12.<java.security.NoSuchProviderException: void <init>(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.security.NoSuchProviderException: java.lang.Throwable initCause(java.lang.Throwable)>($r5);
+
+        $r14 = (java.security.NoSuchProviderException) $r13;
+
+        throw $r14;
+
+     label1:
+        $r7 = staticinvoke <sun.security.jca.GetInstance: sun.security.jca.GetInstance$Instance getInstance(java.security.Provider$Service,java.lang.Class)>($r3, r6);
+
+        return $r7;
+    }
+
+    static sun.security.jca.GetInstance$Instance getInstance(java.lang.String, java.lang.Class, java.lang.String, java.security.Provider) throws java.security.NoSuchAlgorithmException
+    {
+        sun.security.jca.GetInstance$Instance $r6;
+        java.lang.Exception $r4;
+        java.security.Provider r2;
+        java.security.Provider$Service $r3;
+        java.lang.Class r5;
+        java.lang.StringBuilder $r7, $r8, $r10;
+        java.lang.SecurityException $r12;
+        java.lang.String r0, r1, $r9, $r11;
+
+        r0 := @parameter0: java.lang.String;
+
+        r5 := @parameter1: java.lang.Class;
+
+        r1 := @parameter2: java.lang.String;
+
+        r2 := @parameter3: java.security.Provider;
+
+        $r3 = staticinvoke <sun.security.jca.GetInstance: java.security.Provider$Service getService(java.lang.String,java.lang.String,java.security.Provider)>(r0, r1, r2);
+
+        $r4 = staticinvoke <javax.crypto.JceSecurity: java.lang.Exception getVerificationResult(java.security.Provider)>(r2);
+
+        if $r4 == null goto label1;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("JCE cannot authenticate the provider ");
+
+        $r9 = virtualinvoke r2.<java.security.Provider: java.lang.String getName()>();
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r12 = new java.lang.SecurityException;
+
+        specialinvoke $r12.<java.lang.SecurityException: void <init>(java.lang.String,java.lang.Throwable)>($r11, $r4);
+
+        throw $r12;
+
+     label1:
+        $r6 = staticinvoke <sun.security.jca.GetInstance: sun.security.jca.GetInstance$Instance getInstance(java.security.Provider$Service,java.lang.Class)>($r3, r5);
+
+        return $r6;
+    }
+
+    static sun.security.jca.GetInstance$Instance getInstance(java.lang.String, java.lang.Class, java.lang.String) throws java.security.NoSuchAlgorithmException
+    {
+        sun.security.jca.GetInstance$Instance $r14;
+        java.lang.String r0, r1, $r9;
+        boolean $z0, $z1;
+        java.util.Iterator $r3;
+        java.security.Provider $r12;
+        java.util.List $r2;
+        java.security.Provider$Service r11;
+        java.security.NoSuchAlgorithmException $r4, $r15, r16;
+        java.lang.StringBuilder $r5, $r6, $r7, $r8;
+        java.lang.Object $r10;
+        java.lang.Class r13;
+
+        r0 := @parameter0: java.lang.String;
+
+        r13 := @parameter1: java.lang.Class;
+
+        r1 := @parameter2: java.lang.String;
+
+        $r2 = staticinvoke <sun.security.jca.GetInstance: java.util.List getServices(java.lang.String,java.lang.String)>(r0, r1);
+
+        r16 = null;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z1 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label5;
+
+        $r10 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r11 = (java.security.Provider$Service) $r10;
+
+        $r12 = virtualinvoke r11.<java.security.Provider$Service: java.security.Provider getProvider()>();
+
+        $z0 = staticinvoke <javax.crypto.JceSecurity: boolean canUseProvider(java.security.Provider)>($r12);
+
+        if $z0 != 0 goto label2;
+
+        goto label1;
+
+     label2:
+        $r14 = staticinvoke <sun.security.jca.GetInstance: sun.security.jca.GetInstance$Instance getInstance(java.security.Provider$Service,java.lang.Class)>(r11, r13);
+
+     label3:
+        return $r14;
+
+     label4:
+        $r15 := @caughtexception;
+
+        r16 = $r15;
+
+        goto label1;
+
+     label5:
+        $r4 = new java.security.NoSuchAlgorithmException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Algorithm ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" not available");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.security.NoSuchAlgorithmException: void <init>(java.lang.String,java.lang.Throwable)>($r9, r16);
+
+        throw $r4;
+
+        catch java.security.NoSuchAlgorithmException from label2 to label3 with label4;
+    }
+
+    static javax.crypto.CryptoPermissions verifyExemptJar(java.net.URL) throws java.lang.Exception
+    {
+        javax.crypto.JarVerifier $r0;
+        java.net.URL r1;
+        javax.crypto.CryptoPermissions $r2;
+
+        r1 := @parameter0: java.net.URL;
+
+        $r0 = new javax.crypto.JarVerifier;
+
+        specialinvoke $r0.<javax.crypto.JarVerifier: void <init>(java.net.URL,boolean)>(r1, 1);
+
+        virtualinvoke $r0.<javax.crypto.JarVerifier: void verify()>();
+
+        $r2 = virtualinvoke $r0.<javax.crypto.JarVerifier: javax.crypto.CryptoPermissions getPermissions()>();
+
+        return $r2;
+    }
+
+    static void verifyProviderJar(java.net.URL) throws java.lang.Exception
+    {
+        javax.crypto.JarVerifier $r0;
+        java.net.URL r1;
+
+        r1 := @parameter0: java.net.URL;
+
+        $r0 = new javax.crypto.JarVerifier;
+
+        specialinvoke $r0.<javax.crypto.JarVerifier: void <init>(java.net.URL,boolean)>(r1, 0);
+
+        virtualinvoke $r0.<javax.crypto.JarVerifier: void verify()>();
+
+        return;
+    }
+
+    static synchronized java.lang.Exception getVerificationResult(java.security.Provider)
+    {
+        java.lang.Throwable $r15;
+        java.net.URL $r9;
+        java.util.Map $r1, $r4, $r7, $r11, $r12, $r16, $r18, $r19;
+        java.lang.Boolean $r6;
+        java.lang.Exception $r14, $r17;
+        java.security.Provider r0;
+        java.lang.Object $r2, $r3, $r5, $r10;
+        java.lang.Class $r8;
+        java.security.NoSuchProviderException $r13;
+
+        r0 := @parameter0: java.security.Provider;
+
+        $r1 = <javax.crypto.JceSecurity: java.util.Map verificationResults>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.lang.Object get(java.lang.Object)>(r0);
+
+        $r3 = <javax.crypto.JceSecurity: java.lang.Object PROVIDER_VERIFIED>;
+
+        if $r2 != $r3 goto label1;
+
+        return null;
+
+     label1:
+        if $r2 == null goto label2;
+
+        $r14 = (java.lang.Exception) $r2;
+
+        return $r14;
+
+     label2:
+        $r4 = <javax.crypto.JceSecurity: java.util.Map verifyingProviders>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Map: java.lang.Object get(java.lang.Object)>(r0);
+
+        if $r5 == null goto label3;
+
+        $r13 = new java.security.NoSuchProviderException;
+
+        specialinvoke $r13.<java.security.NoSuchProviderException: void <init>(java.lang.String)>("Recursion during verification");
+
+        return $r13;
+
+     label3:
+        $r7 = <javax.crypto.JceSecurity: java.util.Map verifyingProviders>;
+
+        $r6 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        interfaceinvoke $r7.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r0, $r6);
+
+        $r8 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r9 = staticinvoke <javax.crypto.JceSecurity: java.net.URL getCodeBase(java.lang.Class)>($r8);
+
+        staticinvoke <javax.crypto.JceSecurity: void verifyProviderJar(java.net.URL)>($r9);
+
+        $r11 = <javax.crypto.JceSecurity: java.util.Map verificationResults>;
+
+        $r10 = <javax.crypto.JceSecurity: java.lang.Object PROVIDER_VERIFIED>;
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r0, $r10);
+
+     label4:
+        $r12 = <javax.crypto.JceSecurity: java.util.Map verifyingProviders>;
+
+        interfaceinvoke $r12.<java.util.Map: java.lang.Object remove(java.lang.Object)>(r0);
+
+        return null;
+
+     label5:
+        $r17 := @caughtexception;
+
+        $r18 = <javax.crypto.JceSecurity: java.util.Map verificationResults>;
+
+        interfaceinvoke $r18.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r0, $r17);
+
+     label6:
+        $r19 = <javax.crypto.JceSecurity: java.util.Map verifyingProviders>;
+
+        interfaceinvoke $r19.<java.util.Map: java.lang.Object remove(java.lang.Object)>(r0);
+
+        return $r17;
+
+     label7:
+        $r15 := @caughtexception;
+
+     label8:
+        $r16 = <javax.crypto.JceSecurity: java.util.Map verifyingProviders>;
+
+        interfaceinvoke $r16.<java.util.Map: java.lang.Object remove(java.lang.Object)>(r0);
+
+        throw $r15;
+
+        catch java.lang.Exception from label3 to label4 with label5;
+        catch java.lang.Throwable from label3 to label4 with label7;
+        catch java.lang.Throwable from label5 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    static boolean canUseProvider(java.security.Provider)
+    {
+        java.lang.Exception $r1;
+        java.security.Provider r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.security.Provider;
+
+        $r1 = staticinvoke <javax.crypto.JceSecurity: java.lang.Exception getVerificationResult(java.security.Provider)>(r0);
+
+        if $r1 != null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    static java.net.URL getCodeBase(java.lang.Class)
+    {
+        java.lang.Throwable $r8;
+        java.net.URL $r4, r9, $r10;
+        java.util.Map $r0, $r2, $r7;
+        java.lang.Class r1;
+        java.lang.Object $r3, $r6;
+        javax.crypto.JceSecurity$2 $r5;
+
+        r1 := @parameter0: java.lang.Class;
+
+        $r0 = <javax.crypto.JceSecurity: java.util.Map codeBaseCacheRef>;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = <javax.crypto.JceSecurity: java.util.Map codeBaseCacheRef>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r9 = (java.net.URL) $r3;
+
+        if r9 != null goto label2;
+
+        $r5 = new javax.crypto.JceSecurity$2;
+
+        specialinvoke $r5.<javax.crypto.JceSecurity$2: void <init>(java.lang.Class)>(r1);
+
+        $r6 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r5);
+
+        r9 = (java.net.URL) $r6;
+
+        $r7 = <javax.crypto.JceSecurity: java.util.Map codeBaseCacheRef>;
+
+        interfaceinvoke $r7.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, r9);
+
+     label2:
+        $r4 = <javax.crypto.JceSecurity: java.net.URL NULL_URL>;
+
+        if r9 != $r4 goto label3;
+
+        $r10 = null;
+
+        goto label4;
+
+     label3:
+        $r10 = r9;
+
+     label4:
+        exitmonitor $r0;
+
+     label5:
+        return $r10;
+
+     label6:
+        $r8 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label7:
+        throw $r8;
+
+        catch java.lang.Throwable from label1 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    private static void setupJurisdictionPolicies() throws java.lang.Exception
+    {
+        java.net.URL $r39;
+        java.lang.SecurityException $r13, $r28, $r40;
+        java.nio.file.Path $r17, $r33, $r34, r35, r36;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        sun.security.util.Debug $r4, $r23;
+        java.lang.StringBuilder $r22, $r24, $r25, $r29, $r30, $r31;
+        java.lang.String[] $r2, $r3, $r16, $r27;
+        int $i0, $i1;
+        java.lang.String $r0, $r1, $r26, $r32;
+        javax.crypto.CryptoPermissions $r9, $r10, $r11, $r12, $r14, $r15, $r41;
+        java.io.File $r5, $r6, $r7, $r8, $r18, $r19, $r20, $r21, r37, r38;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.home");
+
+        $r1 = staticinvoke <java.security.Security: java.lang.String getProperty(java.lang.String)>("crypto.policy");
+
+        if $r1 != null goto label01;
+
+        $r34 = null;
+
+        goto label02;
+
+     label01:
+        $r2 = newarray (java.lang.String)[0];
+
+        $r34 = staticinvoke <java.nio.file.Paths: java.nio.file.Path get(java.lang.String,java.lang.String[])>($r1, $r2);
+
+     label02:
+        r35 = $r34;
+
+        if $r34 == null goto label04;
+
+        $i0 = interfaceinvoke $r34.<java.nio.file.Path: int getNameCount()>();
+
+        if $i0 != 1 goto label03;
+
+        $r33 = interfaceinvoke $r34.<java.nio.file.Path: java.nio.file.Path getFileName()>();
+
+        $i1 = interfaceinvoke $r34.<java.nio.file.Path: int compareTo(java.nio.file.Path)>($r33);
+
+        if $i1 == 0 goto label04;
+
+     label03:
+        $r28 = new java.lang.SecurityException;
+
+        $r29 = new java.lang.StringBuilder;
+
+        specialinvoke $r29.<java.lang.StringBuilder: void <init>()>();
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid policy directory name format: ");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r28.<java.lang.SecurityException: void <init>(java.lang.String)>($r32);
+
+        throw $r28;
+
+     label04:
+        if r35 != null goto label05;
+
+        $r27 = newarray (java.lang.String)[2];
+
+        $r27[0] = "lib";
+
+        $r27[1] = "security";
+
+        r36 = staticinvoke <java.nio.file.Paths: java.nio.file.Path get(java.lang.String,java.lang.String[])>($r0, $r27);
+
+        goto label06;
+
+     label05:
+        $r3 = newarray (java.lang.String)[4];
+
+        $r3[0] = "lib";
+
+        $r3[1] = "security";
+
+        $r3[2] = "policy";
+
+        $r3[3] = $r1;
+
+        r36 = staticinvoke <java.nio.file.Paths: java.nio.file.Path get(java.lang.String,java.lang.String[])>($r0, $r3);
+
+     label06:
+        $r4 = <javax.crypto.JceSecurity: sun.security.util.Debug debug>;
+
+        if $r4 == null goto label07;
+
+        $r23 = <javax.crypto.JceSecurity: sun.security.util.Debug debug>;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("crypto policy directory: ");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r36);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r23.<sun.security.util.Debug: void println(java.lang.String)>($r26);
+
+     label07:
+        $r5 = new java.io.File;
+
+        $r6 = interfaceinvoke r36.<java.nio.file.Path: java.io.File toFile()>();
+
+        specialinvoke $r5.<java.io.File: void <init>(java.io.File,java.lang.String)>($r6, "US_export_policy.jar");
+
+        r37 = $r5;
+
+        $r7 = new java.io.File;
+
+        $r8 = interfaceinvoke r36.<java.nio.file.Path: java.io.File toFile()>();
+
+        specialinvoke $r7.<java.io.File: void <init>(java.io.File,java.lang.String)>($r8, "local_policy.jar");
+
+        r38 = $r7;
+
+        if $r1 != null goto label09;
+
+        $z6 = virtualinvoke $r5.<java.io.File: boolean exists()>();
+
+        if $z6 == 0 goto label08;
+
+        $z7 = virtualinvoke $r7.<java.io.File: boolean exists()>();
+
+        if $z7 != 0 goto label09;
+
+     label08:
+        $r16 = newarray (java.lang.String)[4];
+
+        $r16[0] = "lib";
+
+        $r16[1] = "security";
+
+        $r16[2] = "policy";
+
+        $r16[3] = "unlimited";
+
+        $r17 = staticinvoke <java.nio.file.Paths: java.nio.file.Path get(java.lang.String,java.lang.String[])>($r0, $r16);
+
+        $r18 = new java.io.File;
+
+        $r19 = interfaceinvoke $r17.<java.nio.file.Path: java.io.File toFile()>();
+
+        specialinvoke $r18.<java.io.File: void <init>(java.io.File,java.lang.String)>($r19, "US_export_policy.jar");
+
+        r37 = $r18;
+
+        $r20 = new java.io.File;
+
+        $r21 = interfaceinvoke $r17.<java.nio.file.Path: java.io.File toFile()>();
+
+        specialinvoke $r20.<java.io.File: void <init>(java.io.File,java.lang.String)>($r21, "local_policy.jar");
+
+        r38 = $r20;
+
+     label09:
+        $r39 = staticinvoke <java.lang.ClassLoader: java.net.URL getSystemResource(java.lang.String)>("javax/crypto/Cipher.class");
+
+        if $r39 == null goto label10;
+
+        $z0 = virtualinvoke r37.<java.io.File: boolean exists()>();
+
+        if $z0 == 0 goto label10;
+
+        $z1 = virtualinvoke r38.<java.io.File: boolean exists()>();
+
+        if $z1 != 0 goto label11;
+
+     label10:
+        $r40 = new java.lang.SecurityException;
+
+        specialinvoke $r40.<java.lang.SecurityException: void <init>(java.lang.String)>("Cannot locate policy or framework files!");
+
+        throw $r40;
+
+     label11:
+        $r9 = new javax.crypto.CryptoPermissions;
+
+        specialinvoke $r9.<javax.crypto.CryptoPermissions: void <init>()>();
+
+        $r10 = new javax.crypto.CryptoPermissions;
+
+        specialinvoke $r10.<javax.crypto.CryptoPermissions: void <init>()>();
+
+        staticinvoke <javax.crypto.JceSecurity: void loadPolicies(java.io.File,javax.crypto.CryptoPermissions,javax.crypto.CryptoPermissions)>(r37, $r9, $r10);
+
+        $r11 = new javax.crypto.CryptoPermissions;
+
+        specialinvoke $r11.<javax.crypto.CryptoPermissions: void <init>()>();
+
+        $r12 = new javax.crypto.CryptoPermissions;
+
+        specialinvoke $r12.<javax.crypto.CryptoPermissions: void <init>()>();
+
+        staticinvoke <javax.crypto.JceSecurity: void loadPolicies(java.io.File,javax.crypto.CryptoPermissions,javax.crypto.CryptoPermissions)>(r38, $r11, $r12);
+
+        $z2 = virtualinvoke $r9.<javax.crypto.CryptoPermissions: boolean isEmpty()>();
+
+        if $z2 != 0 goto label12;
+
+        $z3 = virtualinvoke $r11.<javax.crypto.CryptoPermissions: boolean isEmpty()>();
+
+        if $z3 == 0 goto label13;
+
+     label12:
+        $r13 = new java.lang.SecurityException;
+
+        specialinvoke $r13.<java.lang.SecurityException: void <init>(java.lang.String)>("Missing mandatory jurisdiction policy files");
+
+        throw $r13;
+
+     label13:
+        $r14 = virtualinvoke $r9.<javax.crypto.CryptoPermissions: javax.crypto.CryptoPermissions getMinimum(javax.crypto.CryptoPermissions)>($r11);
+
+        <javax.crypto.JceSecurity: javax.crypto.CryptoPermissions defaultPolicy> = $r14;
+
+        $z4 = virtualinvoke $r10.<javax.crypto.CryptoPermissions: boolean isEmpty()>();
+
+        if $z4 == 0 goto label16;
+
+        $z5 = virtualinvoke $r12.<javax.crypto.CryptoPermissions: boolean isEmpty()>();
+
+        if $z5 == 0 goto label14;
+
+        $r41 = null;
+
+        goto label15;
+
+     label14:
+        $r41 = $r12;
+
+     label15:
+        <javax.crypto.JceSecurity: javax.crypto.CryptoPermissions exemptPolicy> = $r41;
+
+        goto label17;
+
+     label16:
+        $r15 = virtualinvoke $r10.<javax.crypto.CryptoPermissions: javax.crypto.CryptoPermissions getMinimum(javax.crypto.CryptoPermissions)>($r12);
+
+        <javax.crypto.JceSecurity: javax.crypto.CryptoPermissions exemptPolicy> = $r15;
+
+     label17:
+        return;
+    }
+
+    private static void loadPolicies(java.io.File, javax.crypto.CryptoPermissions, javax.crypto.CryptoPermissions) throws java.lang.Exception
+    {
+        java.lang.Throwable $r12;
+        java.util.Enumeration $r2;
+        java.util.jar.JarFile $r0;
+        java.util.jar.JarEntry r4;
+        java.lang.String $r5, $r6;
+        boolean $z0, $z1, $z2;
+        javax.crypto.CryptoPermissions r8, r11;
+        java.io.File r1;
+        java.lang.Object $r3;
+        java.security.cert.Certificate[] $r9;
+        java.io.InputStream $r7, $r10, r13;
+
+        r1 := @parameter0: java.io.File;
+
+        r11 := @parameter1: javax.crypto.CryptoPermissions;
+
+        r8 := @parameter2: javax.crypto.CryptoPermissions;
+
+        $r0 = new java.util.jar.JarFile;
+
+        specialinvoke $r0.<java.util.jar.JarFile: void <init>(java.io.File)>(r1);
+
+        $r2 = virtualinvoke $r0.<java.util.jar.JarFile: java.util.Enumeration entries()>();
+
+     label01:
+        $z2 = interfaceinvoke $r2.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z2 == 0 goto label10;
+
+        $r3 = interfaceinvoke $r2.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r4 = (java.util.jar.JarEntry) $r3;
+
+        r13 = null;
+
+     label02:
+        $r5 = virtualinvoke r4.<java.util.jar.JarEntry: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean startsWith(java.lang.String)>("default_");
+
+        if $z0 == 0 goto label03;
+
+        $r10 = virtualinvoke $r0.<java.util.jar.JarFile: java.io.InputStream getInputStream(java.util.zip.ZipEntry)>(r4);
+
+        r13 = $r10;
+
+        virtualinvoke r11.<javax.crypto.CryptoPermissions: void load(java.io.InputStream)>($r10);
+
+        goto label05;
+
+     label03:
+        $r6 = virtualinvoke r4.<java.util.jar.JarEntry: java.lang.String getName()>();
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean startsWith(java.lang.String)>("exempt_");
+
+        if $z1 == 0 goto label04;
+
+        $r7 = virtualinvoke $r0.<java.util.jar.JarFile: java.io.InputStream getInputStream(java.util.zip.ZipEntry)>(r4);
+
+        r13 = $r7;
+
+        virtualinvoke r8.<javax.crypto.CryptoPermissions: void load(java.io.InputStream)>($r7);
+
+        goto label05;
+
+     label04:
+        goto label01;
+
+     label05:
+        if r13 == null goto label09;
+
+        virtualinvoke r13.<java.io.InputStream: void close()>();
+
+        goto label09;
+
+     label06:
+        $r12 := @caughtexception;
+
+     label07:
+        if r13 == null goto label08;
+
+        virtualinvoke r13.<java.io.InputStream: void close()>();
+
+     label08:
+        throw $r12;
+
+     label09:
+        $r9 = virtualinvoke r4.<java.util.jar.JarEntry: java.security.cert.Certificate[] getCertificates()>();
+
+        staticinvoke <javax.crypto.JarVerifier: void verifyPolicySigned(java.security.cert.Certificate[])>($r9);
+
+        goto label01;
+
+     label10:
+        virtualinvoke $r0.<java.util.jar.JarFile: void close()>();
+
+        return;
+
+        catch java.lang.Throwable from label02 to label04 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+    }
+
+    static javax.crypto.CryptoPermissions getDefaultPolicy()
+    {
+        javax.crypto.CryptoPermissions $r0;
+
+        $r0 = <javax.crypto.JceSecurity: javax.crypto.CryptoPermissions defaultPolicy>;
+
+        return $r0;
+    }
+
+    static javax.crypto.CryptoPermissions getExemptPolicy()
+    {
+        javax.crypto.CryptoPermissions $r0;
+
+        $r0 = <javax.crypto.JceSecurity: javax.crypto.CryptoPermissions exemptPolicy>;
+
+        return $r0;
+    }
+
+    static boolean isRestricted()
+    {
+        boolean $z0;
+
+        $z0 = <javax.crypto.JceSecurity: boolean isRestricted>;
+
+        return $z0;
+    }
+
+    static void access$000() throws java.lang.Exception
+    {
+        staticinvoke <javax.crypto.JceSecurity: void setupJurisdictionPolicies()>();
+
+        return;
+    }
+
+    static java.net.URL access$100()
+    {
+        java.net.URL $r0;
+
+        $r0 = <javax.crypto.JceSecurity: java.net.URL NULL_URL>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.net.URL $r8;
+        java.security.SecureRandom $r0;
+        java.lang.Boolean $r7;
+        java.lang.SecurityException $r13;
+        java.util.WeakHashMap $r9;
+        boolean $z0, $z1;
+        java.util.IdentityHashMap $r1, $r2;
+        javax.crypto.CryptoAllPermission $r5;
+        javax.crypto.CryptoPermissions $r6;
+        java.lang.RuntimeException $r11;
+        sun.security.util.Debug $r3;
+        java.lang.Exception $r10, $r12;
+        javax.crypto.JceSecurity$1 $r4;
+
+        $r0 = new java.security.SecureRandom;
+
+        specialinvoke $r0.<java.security.SecureRandom: void <init>()>();
+
+        <javax.crypto.JceSecurity: java.security.SecureRandom RANDOM> = $r0;
+
+        <javax.crypto.JceSecurity: javax.crypto.CryptoPermissions defaultPolicy> = null;
+
+        <javax.crypto.JceSecurity: javax.crypto.CryptoPermissions exemptPolicy> = null;
+
+        $r1 = new java.util.IdentityHashMap;
+
+        specialinvoke $r1.<java.util.IdentityHashMap: void <init>()>();
+
+        <javax.crypto.JceSecurity: java.util.Map verificationResults> = $r1;
+
+        $r2 = new java.util.IdentityHashMap;
+
+        specialinvoke $r2.<java.util.IdentityHashMap: void <init>()>();
+
+        <javax.crypto.JceSecurity: java.util.Map verifyingProviders> = $r2;
+
+        $r3 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String,java.lang.String)>("jca", "Cipher");
+
+        <javax.crypto.JceSecurity: sun.security.util.Debug debug> = $r3;
+
+     label01:
+        $r4 = new javax.crypto.JceSecurity$1;
+
+        specialinvoke $r4.<javax.crypto.JceSecurity$1: void <init>()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r4);
+
+        $r6 = <javax.crypto.JceSecurity: javax.crypto.CryptoPermissions defaultPolicy>;
+
+        $r5 = <javax.crypto.CryptoAllPermission: javax.crypto.CryptoAllPermission INSTANCE>;
+
+        $z0 = virtualinvoke $r6.<javax.crypto.CryptoPermissions: boolean implies(java.security.Permission)>($r5);
+
+        if $z0 == 0 goto label02;
+
+        $z1 = 0;
+
+        goto label03;
+
+     label02:
+        $z1 = 1;
+
+     label03:
+        <javax.crypto.JceSecurity: boolean isRestricted> = $z1;
+
+     label04:
+        goto label06;
+
+     label05:
+        $r12 := @caughtexception;
+
+        $r13 = new java.lang.SecurityException;
+
+        specialinvoke $r13.<java.lang.SecurityException: void <init>(java.lang.String,java.lang.Throwable)>("Can not initialize cryptographic mechanism", $r12);
+
+        throw $r13;
+
+     label06:
+        $r7 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        <javax.crypto.JceSecurity: java.lang.Object PROVIDER_VERIFIED> = $r7;
+
+     label07:
+        $r8 = new java.net.URL;
+
+        specialinvoke $r8.<java.net.URL: void <init>(java.lang.String)>("http://null.oracle.com/");
+
+        <javax.crypto.JceSecurity: java.net.URL NULL_URL> = $r8;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r10 := @caughtexception;
+
+        $r11 = new java.lang.RuntimeException;
+
+        specialinvoke $r11.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r10);
+
+        throw $r11;
+
+     label10:
+        $r9 = new java.util.WeakHashMap;
+
+        specialinvoke $r9.<java.util.WeakHashMap: void <init>()>();
+
+        <javax.crypto.JceSecurity: java.util.Map codeBaseCacheRef> = $r9;
+
+        return;
+
+        catch java.lang.Exception from label01 to label04 with label05;
+        catch java.lang.Exception from label07 to label08 with label09;
+    }
+}

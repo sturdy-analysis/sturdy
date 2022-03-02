@@ -1,0 +1,1075 @@
+class sun.nio.fs.WindowsFileCopy extends java.lang.Object
+{
+    static final boolean $assertionsDisabled;
+
+    private void <init>()
+    {
+        sun.nio.fs.WindowsFileCopy r0;
+
+        r0 := @this: sun.nio.fs.WindowsFileCopy;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    static transient void copy(sun.nio.fs.WindowsPath, sun.nio.fs.WindowsPath, java.nio.file.CopyOption[]) throws java.io.IOException
+    {
+        java.nio.file.CopyOption r37;
+        java.lang.Throwable $r26, $r32, $r34;
+        long $l0, l5;
+        java.nio.file.StandardCopyOption $r13, $r15;
+        short $s7, $s8;
+        java.lang.String $r5, $r6, $r12, $r31, $r40, $r41;
+        java.lang.UnsupportedOperationException $r17;
+        sun.nio.fs.WindowsPath r2, r3;
+        sun.nio.fs.WindowsFileSystem $r8;
+        java.nio.file.DirectoryNotEmptyException $r30;
+        java.io.IOException $r19, $r21, $r23, $r27, $r28;
+        java.util.concurrent.ExecutionException $r25;
+        sun.nio.fs.WindowsFileAttributes $r4, r38, r39;
+        com.sun.nio.file.ExtendedCopyOption $r16;
+        sun.nio.fs.WindowsFileAttributeViews$Dos $r7;
+        java.lang.NullPointerException $r18;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, z10, z11, z12, z13, $z14, z15, z16, z17, z18, z19, z20;
+        java.nio.file.CopyOption[] r0;
+        sun.nio.fs.WindowsFileCopy$1 $r9;
+        java.nio.file.LinkOption $r14;
+        sun.nio.fs.WindowsException $r20, $r22, $r24, $r29, $r33, $r35, $r36;
+        int $i1, $i2, i3, i4;
+        java.nio.file.FileAlreadyExistsException $r11;
+        java.lang.SecurityManager $r1;
+        java.nio.file.LinkPermission $r10;
+
+        r2 := @parameter0: sun.nio.fs.WindowsPath;
+
+        r3 := @parameter1: sun.nio.fs.WindowsPath;
+
+        r0 := @parameter2: java.nio.file.CopyOption[];
+
+        z10 = 0;
+
+        z11 = 0;
+
+        z20 = 0;
+
+        z19 = 0;
+
+        z12 = 1;
+
+        z18 = 1;
+
+        z17 = 1;
+
+        z16 = 1;
+
+        z15 = 1;
+
+        z13 = 0;
+
+        i3 = lengthof r0;
+
+        i4 = 0;
+
+     label01:
+        if i4 >= i3 goto label08;
+
+        r37 = r0[i4];
+
+        $r13 = <java.nio.file.StandardCopyOption: java.nio.file.StandardCopyOption REPLACE_EXISTING>;
+
+        if r37 != $r13 goto label02;
+
+        z10 = 1;
+
+        goto label07;
+
+     label02:
+        $r14 = <java.nio.file.LinkOption: java.nio.file.LinkOption NOFOLLOW_LINKS>;
+
+        if r37 != $r14 goto label03;
+
+        z12 = 0;
+
+        z18 = 0;
+
+        z17 = 0;
+
+        z16 = 0;
+
+        z15 = 0;
+
+        goto label07;
+
+     label03:
+        $r15 = <java.nio.file.StandardCopyOption: java.nio.file.StandardCopyOption COPY_ATTRIBUTES>;
+
+        if r37 != $r15 goto label04;
+
+        z11 = 1;
+
+        z20 = 1;
+
+        z19 = 1;
+
+        goto label07;
+
+     label04:
+        $r16 = <com.sun.nio.file.ExtendedCopyOption: com.sun.nio.file.ExtendedCopyOption INTERRUPTIBLE>;
+
+        if r37 != $r16 goto label05;
+
+        z13 = 1;
+
+        goto label07;
+
+     label05:
+        if r37 != null goto label06;
+
+        $r18 = new java.lang.NullPointerException;
+
+        specialinvoke $r18.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r18;
+
+     label06:
+        $r17 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r17.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("Unsupported copy option");
+
+        throw $r17;
+
+     label07:
+        i4 = i4 + 1;
+
+        goto label01;
+
+     label08:
+        $r1 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r1 == null goto label09;
+
+        virtualinvoke r2.<sun.nio.fs.WindowsPath: void checkRead()>();
+
+        virtualinvoke r3.<sun.nio.fs.WindowsPath: void checkWrite()>();
+
+     label09:
+        r38 = null;
+
+        r39 = null;
+
+        l5 = 0L;
+
+     label10:
+        l5 = virtualinvoke r2.<sun.nio.fs.WindowsPath: long openForReadAttributeAccess(boolean)>(z16);
+
+     label11:
+        goto label13;
+
+     label12:
+        $r36 := @caughtexception;
+
+        virtualinvoke $r36.<sun.nio.fs.WindowsException: void rethrowAsIOException(sun.nio.fs.WindowsPath)>(r2);
+
+     label13:
+        r38 = staticinvoke <sun.nio.fs.WindowsFileAttributes: sun.nio.fs.WindowsFileAttributes readAttributes(long)>(l5);
+
+     label14:
+        goto label16;
+
+     label15:
+        $r35 := @caughtexception;
+
+        virtualinvoke $r35.<sun.nio.fs.WindowsException: void rethrowAsIOException(sun.nio.fs.WindowsPath)>(r2);
+
+     label16:
+        $l0 = virtualinvoke r3.<sun.nio.fs.WindowsPath: long openForReadAttributeAccess(boolean)>(0);
+
+     label17:
+        $r4 = staticinvoke <sun.nio.fs.WindowsFileAttributes: sun.nio.fs.WindowsFileAttributes readAttributes(long)>($l0);
+
+        r39 = $r4;
+
+        $z0 = staticinvoke <sun.nio.fs.WindowsFileAttributes: boolean isSameFile(sun.nio.fs.WindowsFileAttributes,sun.nio.fs.WindowsFileAttributes)>(r38, $r4);
+
+        if $z0 == 0 goto label20;
+
+     label18:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CloseHandle(long)>($l0);
+
+     label19:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CloseHandle(long)>(l5);
+
+        return;
+
+     label20:
+        if z10 != 0 goto label21;
+
+        $r11 = new java.nio.file.FileAlreadyExistsException;
+
+        $r12 = virtualinvoke r3.<sun.nio.fs.WindowsPath: java.lang.String getPathForExceptionMessage()>();
+
+        specialinvoke $r11.<java.nio.file.FileAlreadyExistsException: void <init>(java.lang.String)>($r12);
+
+        throw $r11;
+
+     label21:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CloseHandle(long)>($l0);
+
+        goto label24;
+
+     label22:
+        $r34 := @caughtexception;
+
+     label23:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CloseHandle(long)>($l0);
+
+        throw $r34;
+
+     label24:
+        goto label26;
+
+     label25:
+        $r33 := @caughtexception;
+
+     label26:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CloseHandle(long)>(l5);
+
+        goto label29;
+
+     label27:
+        $r32 := @caughtexception;
+
+     label28:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CloseHandle(long)>(l5);
+
+        throw $r32;
+
+     label29:
+        if $r1 == null goto label30;
+
+        $z6 = virtualinvoke r38.<sun.nio.fs.WindowsFileAttributes: boolean isSymbolicLink()>();
+
+        if $z6 == 0 goto label30;
+
+        $r10 = new java.nio.file.LinkPermission;
+
+        specialinvoke $r10.<java.nio.file.LinkPermission: void <init>(java.lang.String)>("symbolic");
+
+        virtualinvoke $r1.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r10);
+
+     label30:
+        $r40 = staticinvoke <sun.nio.fs.WindowsFileCopy: java.lang.String asWin32Path(sun.nio.fs.WindowsPath)>(r2);
+
+        $r41 = staticinvoke <sun.nio.fs.WindowsFileCopy: java.lang.String asWin32Path(sun.nio.fs.WindowsPath)>(r3);
+
+        if r39 == null goto label38;
+
+     label31:
+        $z4 = virtualinvoke r39.<sun.nio.fs.WindowsFileAttributes: boolean isDirectory()>();
+
+        if $z4 != 0 goto label32;
+
+        $z5 = virtualinvoke r39.<sun.nio.fs.WindowsFileAttributes: boolean isDirectoryLink()>();
+
+        if $z5 == 0 goto label33;
+
+     label32:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void RemoveDirectory(java.lang.String)>($r41);
+
+        goto label34;
+
+     label33:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void DeleteFile(java.lang.String)>($r41);
+
+     label34:
+        goto label38;
+
+     label35:
+        $r29 := @caughtexception;
+
+        $z9 = virtualinvoke r39.<sun.nio.fs.WindowsFileAttributes: boolean isDirectory()>();
+
+        if $z9 == 0 goto label37;
+
+        $i1 = virtualinvoke $r29.<sun.nio.fs.WindowsException: int lastError()>();
+
+        if $i1 == 145 goto label36;
+
+        $i2 = virtualinvoke $r29.<sun.nio.fs.WindowsException: int lastError()>();
+
+        if $i2 != 183 goto label37;
+
+     label36:
+        $r30 = new java.nio.file.DirectoryNotEmptyException;
+
+        $r31 = virtualinvoke r3.<sun.nio.fs.WindowsPath: java.lang.String getPathForExceptionMessage()>();
+
+        specialinvoke $r30.<java.nio.file.DirectoryNotEmptyException: void <init>(java.lang.String)>($r31);
+
+        throw $r30;
+
+     label37:
+        virtualinvoke $r29.<sun.nio.fs.WindowsException: void rethrowAsIOException(sun.nio.fs.WindowsPath)>(r3);
+
+     label38:
+        $z14 = virtualinvoke r38.<sun.nio.fs.WindowsFileAttributes: boolean isDirectory()>();
+
+        if $z14 != 0 goto label54;
+
+        $z2 = virtualinvoke r38.<sun.nio.fs.WindowsFileAttributes: boolean isDirectoryLink()>();
+
+        if $z2 != 0 goto label54;
+
+        $r8 = virtualinvoke r2.<sun.nio.fs.WindowsPath: sun.nio.fs.WindowsFileSystem getFileSystem()>();
+
+        $z3 = virtualinvoke $r8.<sun.nio.fs.WindowsFileSystem: boolean supportsLinks()>();
+
+        if $z3 == 0 goto label39;
+
+        if z17 != 0 goto label39;
+
+        $s8 = 2048;
+
+        $s7 = 2048;
+
+        goto label40;
+
+     label39:
+        $s8 = 0;
+
+        $s7 = 0;
+
+     label40:
+        if z13 == 0 goto label46;
+
+        $r9 = new sun.nio.fs.WindowsFileCopy$1;
+
+        specialinvoke $r9.<sun.nio.fs.WindowsFileCopy$1: void <init>(java.lang.String,java.lang.String,int,sun.nio.fs.WindowsPath,sun.nio.fs.WindowsPath)>($r40, $r41, $s8, r2, r3);
+
+     label41:
+        staticinvoke <sun.nio.fs.Cancellable: void runInterruptibly(sun.nio.fs.Cancellable)>($r9);
+
+     label42:
+        goto label45;
+
+     label43:
+        $r25 := @caughtexception;
+
+        $r26 = virtualinvoke $r25.<java.util.concurrent.ExecutionException: java.lang.Throwable getCause()>();
+
+        $z8 = $r26 instanceof java.io.IOException;
+
+        if $z8 == 0 goto label44;
+
+        $r28 = (java.io.IOException) $r26;
+
+        throw $r28;
+
+     label44:
+        $r27 = new java.io.IOException;
+
+        specialinvoke $r27.<java.io.IOException: void <init>(java.lang.Throwable)>($r26);
+
+        throw $r27;
+
+     label45:
+        goto label49;
+
+     label46:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CopyFileEx(java.lang.String,java.lang.String,int,long)>($r40, $r41, $s7, 0L);
+
+     label47:
+        goto label49;
+
+     label48:
+        $r24 := @caughtexception;
+
+        virtualinvoke $r24.<sun.nio.fs.WindowsException: void rethrowAsIOException(sun.nio.fs.WindowsPath,sun.nio.fs.WindowsPath)>(r2, r3);
+
+     label49:
+        if z19 == 0 goto label53;
+
+     label50:
+        staticinvoke <sun.nio.fs.WindowsFileCopy: void copySecurityAttributes(sun.nio.fs.WindowsPath,sun.nio.fs.WindowsPath,boolean)>(r2, r3, z15);
+
+     label51:
+        goto label53;
+
+     label52:
+        $r23 := @caughtexception;
+
+     label53:
+        return;
+
+     label54:
+        $z1 = virtualinvoke r38.<sun.nio.fs.WindowsFileAttributes: boolean isDirectory()>();
+
+        if $z1 == 0 goto label55;
+
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CreateDirectory(java.lang.String,long)>($r41, 0L);
+
+        goto label56;
+
+     label55:
+        $r5 = staticinvoke <sun.nio.fs.WindowsLinkSupport: java.lang.String readLink(sun.nio.fs.WindowsPath)>(r2);
+
+        $r6 = staticinvoke <sun.nio.fs.WindowsPath: java.lang.String addPrefixIfNeeded(java.lang.String)>($r5);
+
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CreateSymbolicLink(java.lang.String,java.lang.String,int)>($r41, $r6, 1);
+
+     label56:
+        goto label58;
+
+     label57:
+        $r22 := @caughtexception;
+
+        virtualinvoke $r22.<sun.nio.fs.WindowsException: void rethrowAsIOException(sun.nio.fs.WindowsPath)>(r3);
+
+     label58:
+        if z20 == 0 goto label68;
+
+        $r7 = staticinvoke <sun.nio.fs.WindowsFileAttributeViews: sun.nio.fs.WindowsFileAttributeViews$Dos createDosView(sun.nio.fs.WindowsPath,boolean)>(r3, 0);
+
+     label59:
+        virtualinvoke $r7.<sun.nio.fs.WindowsFileAttributeViews$Dos: void setAttributes(sun.nio.fs.WindowsFileAttributes)>(r38);
+
+     label60:
+        goto label65;
+
+     label61:
+        $r21 := @caughtexception;
+
+        $z7 = virtualinvoke r38.<sun.nio.fs.WindowsFileAttributes: boolean isDirectory()>();
+
+        if $z7 == 0 goto label65;
+
+     label62:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void RemoveDirectory(java.lang.String)>($r41);
+
+     label63:
+        goto label65;
+
+     label64:
+        $r20 := @caughtexception;
+
+     label65:
+        staticinvoke <sun.nio.fs.WindowsFileCopy: void copySecurityAttributes(sun.nio.fs.WindowsPath,sun.nio.fs.WindowsPath,boolean)>(r2, r3, z18);
+
+     label66:
+        goto label68;
+
+     label67:
+        $r19 := @caughtexception;
+
+     label68:
+        return;
+
+        catch sun.nio.fs.WindowsException from label10 to label11 with label12;
+        catch sun.nio.fs.WindowsException from label13 to label14 with label15;
+        catch java.lang.Throwable from label17 to label18 with label22;
+        catch java.lang.Throwable from label20 to label21 with label22;
+        catch java.lang.Throwable from label22 to label23 with label22;
+        catch sun.nio.fs.WindowsException from label16 to label19 with label25;
+        catch sun.nio.fs.WindowsException from label20 to label24 with label25;
+        catch java.lang.Throwable from label13 to label19 with label27;
+        catch java.lang.Throwable from label20 to label26 with label27;
+        catch java.lang.Throwable from label27 to label28 with label27;
+        catch sun.nio.fs.WindowsException from label31 to label34 with label35;
+        catch java.util.concurrent.ExecutionException from label41 to label42 with label43;
+        catch sun.nio.fs.WindowsException from label46 to label47 with label48;
+        catch java.io.IOException from label50 to label51 with label52;
+        catch sun.nio.fs.WindowsException from label54 to label56 with label57;
+        catch java.io.IOException from label59 to label60 with label61;
+        catch sun.nio.fs.WindowsException from label62 to label63 with label64;
+        catch java.io.IOException from label65 to label66 with label67;
+    }
+
+    static transient void move(sun.nio.fs.WindowsPath, sun.nio.fs.WindowsPath, java.nio.file.CopyOption[]) throws java.io.IOException
+    {
+        java.nio.file.CopyOption r42;
+        java.lang.Throwable $r32, $r34;
+        long $l0, l9;
+        java.lang.AssertionError $r28;
+        java.nio.file.StandardCopyOption $r9, $r10;
+        java.lang.String $r3, $r5, $r8, $r16, $r26, $r27, $r31, $r39, $r40, $r41;
+        java.lang.UnsupportedOperationException $r12;
+        sun.nio.fs.WindowsPath r2, r4;
+        java.nio.file.DirectoryNotEmptyException $r15, $r30;
+        java.io.IOException $r18, $r20, $r23;
+        sun.nio.fs.WindowsFileAttributes $r6, r43, r44;
+        sun.nio.fs.WindowsFileAttributeViews$Dos $r22;
+        java.lang.NullPointerException $r13;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, z9, z10, $z11;
+        java.nio.file.CopyOption[] r0;
+        java.nio.file.LinkOption $r11;
+        sun.nio.fs.WindowsException $r14, $r17, $r19, $r21, $r24, $r25, $r29, $r33, $r35, $r36, $r37;
+        int $i1, $i2, $i3, $i4, $i5, $i6, i7, i8;
+        java.nio.file.FileAlreadyExistsException $r7;
+        java.lang.SecurityManager $r1;
+        java.nio.file.AtomicMoveNotSupportedException $r38;
+
+        r2 := @parameter0: sun.nio.fs.WindowsPath;
+
+        r4 := @parameter1: sun.nio.fs.WindowsPath;
+
+        r0 := @parameter2: java.nio.file.CopyOption[];
+
+        z9 = 0;
+
+        z10 = 0;
+
+        i7 = lengthof r0;
+
+        i8 = 0;
+
+     label01:
+        if i8 >= i7 goto label07;
+
+        r42 = r0[i8];
+
+        $r9 = <java.nio.file.StandardCopyOption: java.nio.file.StandardCopyOption ATOMIC_MOVE>;
+
+        if r42 != $r9 goto label02;
+
+        z9 = 1;
+
+        goto label06;
+
+     label02:
+        $r10 = <java.nio.file.StandardCopyOption: java.nio.file.StandardCopyOption REPLACE_EXISTING>;
+
+        if r42 != $r10 goto label03;
+
+        z10 = 1;
+
+        goto label06;
+
+     label03:
+        $r11 = <java.nio.file.LinkOption: java.nio.file.LinkOption NOFOLLOW_LINKS>;
+
+        if r42 != $r11 goto label04;
+
+        goto label06;
+
+     label04:
+        if r42 != null goto label05;
+
+        $r13 = new java.lang.NullPointerException;
+
+        specialinvoke $r13.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r13;
+
+     label05:
+        $r12 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r12.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("Unsupported copy option");
+
+        throw $r12;
+
+     label06:
+        i8 = i8 + 1;
+
+        goto label01;
+
+     label07:
+        $r1 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r1 == null goto label08;
+
+        virtualinvoke r2.<sun.nio.fs.WindowsPath: void checkWrite()>();
+
+        virtualinvoke r4.<sun.nio.fs.WindowsPath: void checkWrite()>();
+
+     label08:
+        $r3 = staticinvoke <sun.nio.fs.WindowsFileCopy: java.lang.String asWin32Path(sun.nio.fs.WindowsPath)>(r2);
+
+        $r5 = staticinvoke <sun.nio.fs.WindowsFileCopy: java.lang.String asWin32Path(sun.nio.fs.WindowsPath)>(r4);
+
+        if z9 == 0 goto label14;
+
+     label09:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void MoveFileEx(java.lang.String,java.lang.String,int)>($r3, $r5, 1);
+
+     label10:
+        goto label13;
+
+     label11:
+        $r37 := @caughtexception;
+
+        $i6 = virtualinvoke $r37.<sun.nio.fs.WindowsException: int lastError()>();
+
+        if $i6 != 17 goto label12;
+
+        $r38 = new java.nio.file.AtomicMoveNotSupportedException;
+
+        $r39 = virtualinvoke r2.<sun.nio.fs.WindowsPath: java.lang.String getPathForExceptionMessage()>();
+
+        $r40 = virtualinvoke r4.<sun.nio.fs.WindowsPath: java.lang.String getPathForExceptionMessage()>();
+
+        $r41 = virtualinvoke $r37.<sun.nio.fs.WindowsException: java.lang.String errorString()>();
+
+        specialinvoke $r38.<java.nio.file.AtomicMoveNotSupportedException: void <init>(java.lang.String,java.lang.String,java.lang.String)>($r39, $r40, $r41);
+
+        throw $r38;
+
+     label12:
+        virtualinvoke $r37.<sun.nio.fs.WindowsException: void rethrowAsIOException(sun.nio.fs.WindowsPath,sun.nio.fs.WindowsPath)>(r2, r4);
+
+     label13:
+        return;
+
+     label14:
+        r43 = null;
+
+        r44 = null;
+
+        l9 = 0L;
+
+     label15:
+        l9 = virtualinvoke r2.<sun.nio.fs.WindowsPath: long openForReadAttributeAccess(boolean)>(0);
+
+     label16:
+        goto label18;
+
+     label17:
+        $r36 := @caughtexception;
+
+        virtualinvoke $r36.<sun.nio.fs.WindowsException: void rethrowAsIOException(sun.nio.fs.WindowsPath)>(r2);
+
+     label18:
+        r43 = staticinvoke <sun.nio.fs.WindowsFileAttributes: sun.nio.fs.WindowsFileAttributes readAttributes(long)>(l9);
+
+     label19:
+        goto label21;
+
+     label20:
+        $r35 := @caughtexception;
+
+        virtualinvoke $r35.<sun.nio.fs.WindowsException: void rethrowAsIOException(sun.nio.fs.WindowsPath)>(r2);
+
+     label21:
+        $l0 = virtualinvoke r4.<sun.nio.fs.WindowsPath: long openForReadAttributeAccess(boolean)>(0);
+
+     label22:
+        $r6 = staticinvoke <sun.nio.fs.WindowsFileAttributes: sun.nio.fs.WindowsFileAttributes readAttributes(long)>($l0);
+
+        r44 = $r6;
+
+        $z0 = staticinvoke <sun.nio.fs.WindowsFileAttributes: boolean isSameFile(sun.nio.fs.WindowsFileAttributes,sun.nio.fs.WindowsFileAttributes)>(r43, $r6);
+
+        if $z0 == 0 goto label25;
+
+     label23:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CloseHandle(long)>($l0);
+
+     label24:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CloseHandle(long)>(l9);
+
+        return;
+
+     label25:
+        if z10 != 0 goto label26;
+
+        $r7 = new java.nio.file.FileAlreadyExistsException;
+
+        $r8 = virtualinvoke r4.<sun.nio.fs.WindowsPath: java.lang.String getPathForExceptionMessage()>();
+
+        specialinvoke $r7.<java.nio.file.FileAlreadyExistsException: void <init>(java.lang.String)>($r8);
+
+        throw $r7;
+
+     label26:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CloseHandle(long)>($l0);
+
+        goto label29;
+
+     label27:
+        $r34 := @caughtexception;
+
+     label28:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CloseHandle(long)>($l0);
+
+        throw $r34;
+
+     label29:
+        goto label31;
+
+     label30:
+        $r33 := @caughtexception;
+
+     label31:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CloseHandle(long)>(l9);
+
+        goto label34;
+
+     label32:
+        $r32 := @caughtexception;
+
+     label33:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CloseHandle(long)>(l9);
+
+        throw $r32;
+
+     label34:
+        if r44 == null goto label42;
+
+     label35:
+        $z1 = virtualinvoke r44.<sun.nio.fs.WindowsFileAttributes: boolean isDirectory()>();
+
+        if $z1 != 0 goto label36;
+
+        $z2 = virtualinvoke r44.<sun.nio.fs.WindowsFileAttributes: boolean isDirectoryLink()>();
+
+        if $z2 == 0 goto label37;
+
+     label36:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void RemoveDirectory(java.lang.String)>($r5);
+
+        goto label38;
+
+     label37:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void DeleteFile(java.lang.String)>($r5);
+
+     label38:
+        goto label42;
+
+     label39:
+        $r29 := @caughtexception;
+
+        $z8 = virtualinvoke r44.<sun.nio.fs.WindowsFileAttributes: boolean isDirectory()>();
+
+        if $z8 == 0 goto label41;
+
+        $i4 = virtualinvoke $r29.<sun.nio.fs.WindowsException: int lastError()>();
+
+        if $i4 == 145 goto label40;
+
+        $i5 = virtualinvoke $r29.<sun.nio.fs.WindowsException: int lastError()>();
+
+        if $i5 != 183 goto label41;
+
+     label40:
+        $r30 = new java.nio.file.DirectoryNotEmptyException;
+
+        $r31 = virtualinvoke r4.<sun.nio.fs.WindowsPath: java.lang.String getPathForExceptionMessage()>();
+
+        specialinvoke $r30.<java.nio.file.DirectoryNotEmptyException: void <init>(java.lang.String)>($r31);
+
+        throw $r30;
+
+     label41:
+        virtualinvoke $r29.<sun.nio.fs.WindowsException: void rethrowAsIOException(sun.nio.fs.WindowsPath)>(r4);
+
+     label42:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void MoveFileEx(java.lang.String,java.lang.String,int)>($r3, $r5, 0);
+
+     label43:
+        return;
+
+     label44:
+        $r25 := @caughtexception;
+
+        $i3 = virtualinvoke $r25.<sun.nio.fs.WindowsException: int lastError()>();
+
+        if $i3 == 17 goto label45;
+
+        virtualinvoke $r25.<sun.nio.fs.WindowsException: void rethrowAsIOException(sun.nio.fs.WindowsPath,sun.nio.fs.WindowsPath)>(r2, r4);
+
+     label45:
+        $z3 = virtualinvoke r43.<sun.nio.fs.WindowsFileAttributes: boolean isDirectory()>();
+
+        if $z3 != 0 goto label53;
+
+        $z7 = virtualinvoke r43.<sun.nio.fs.WindowsFileAttributes: boolean isDirectoryLink()>();
+
+        if $z7 != 0 goto label53;
+
+     label46:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void MoveFileEx(java.lang.String,java.lang.String,int)>($r3, $r5, 2);
+
+     label47:
+        goto label49;
+
+     label48:
+        $r24 := @caughtexception;
+
+        virtualinvoke $r24.<sun.nio.fs.WindowsException: void rethrowAsIOException(sun.nio.fs.WindowsPath,sun.nio.fs.WindowsPath)>(r2, r4);
+
+     label49:
+        staticinvoke <sun.nio.fs.WindowsFileCopy: void copySecurityAttributes(sun.nio.fs.WindowsPath,sun.nio.fs.WindowsPath,boolean)>(r2, r4, 0);
+
+     label50:
+        goto label52;
+
+     label51:
+        $r23 := @caughtexception;
+
+     label52:
+        return;
+
+     label53:
+        $z4 = <sun.nio.fs.WindowsFileCopy: boolean $assertionsDisabled>;
+
+        if $z4 != 0 goto label54;
+
+        $z5 = virtualinvoke r43.<sun.nio.fs.WindowsFileAttributes: boolean isDirectory()>();
+
+        if $z5 != 0 goto label54;
+
+        $z6 = virtualinvoke r43.<sun.nio.fs.WindowsFileAttributes: boolean isDirectoryLink()>();
+
+        if $z6 != 0 goto label54;
+
+        $r28 = new java.lang.AssertionError;
+
+        specialinvoke $r28.<java.lang.AssertionError: void <init>()>();
+
+        throw $r28;
+
+     label54:
+        $z11 = virtualinvoke r43.<sun.nio.fs.WindowsFileAttributes: boolean isDirectory()>();
+
+        if $z11 == 0 goto label55;
+
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CreateDirectory(java.lang.String,long)>($r5, 0L);
+
+        goto label56;
+
+     label55:
+        $r26 = staticinvoke <sun.nio.fs.WindowsLinkSupport: java.lang.String readLink(sun.nio.fs.WindowsPath)>(r2);
+
+        $r27 = staticinvoke <sun.nio.fs.WindowsPath: java.lang.String addPrefixIfNeeded(java.lang.String)>($r26);
+
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CreateSymbolicLink(java.lang.String,java.lang.String,int)>($r5, $r27, 1);
+
+     label56:
+        goto label58;
+
+     label57:
+        $r21 := @caughtexception;
+
+        virtualinvoke $r21.<sun.nio.fs.WindowsException: void rethrowAsIOException(sun.nio.fs.WindowsPath)>(r4);
+
+     label58:
+        $r22 = staticinvoke <sun.nio.fs.WindowsFileAttributeViews: sun.nio.fs.WindowsFileAttributeViews$Dos createDosView(sun.nio.fs.WindowsPath,boolean)>(r4, 0);
+
+     label59:
+        virtualinvoke $r22.<sun.nio.fs.WindowsFileAttributeViews$Dos: void setAttributes(sun.nio.fs.WindowsFileAttributes)>(r43);
+
+     label60:
+        goto label66;
+
+     label61:
+        $r20 := @caughtexception;
+
+     label62:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void RemoveDirectory(java.lang.String)>($r5);
+
+     label63:
+        goto label65;
+
+     label64:
+        $r19 := @caughtexception;
+
+     label65:
+        throw $r20;
+
+     label66:
+        staticinvoke <sun.nio.fs.WindowsFileCopy: void copySecurityAttributes(sun.nio.fs.WindowsPath,sun.nio.fs.WindowsPath,boolean)>(r2, r4, 0);
+
+     label67:
+        goto label69;
+
+     label68:
+        $r18 := @caughtexception;
+
+     label69:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void RemoveDirectory(java.lang.String)>($r3);
+
+     label70:
+        goto label78;
+
+     label71:
+        $r17 := @caughtexception;
+
+     label72:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void RemoveDirectory(java.lang.String)>($r5);
+
+     label73:
+        goto label75;
+
+     label74:
+        $r14 := @caughtexception;
+
+     label75:
+        $i1 = virtualinvoke $r17.<sun.nio.fs.WindowsException: int lastError()>();
+
+        if $i1 == 145 goto label76;
+
+        $i2 = virtualinvoke $r17.<sun.nio.fs.WindowsException: int lastError()>();
+
+        if $i2 != 183 goto label77;
+
+     label76:
+        $r15 = new java.nio.file.DirectoryNotEmptyException;
+
+        $r16 = virtualinvoke r4.<sun.nio.fs.WindowsPath: java.lang.String getPathForExceptionMessage()>();
+
+        specialinvoke $r15.<java.nio.file.DirectoryNotEmptyException: void <init>(java.lang.String)>($r16);
+
+        throw $r15;
+
+     label77:
+        virtualinvoke $r17.<sun.nio.fs.WindowsException: void rethrowAsIOException(sun.nio.fs.WindowsPath)>(r2);
+
+     label78:
+        return;
+
+        catch sun.nio.fs.WindowsException from label09 to label10 with label11;
+        catch sun.nio.fs.WindowsException from label15 to label16 with label17;
+        catch sun.nio.fs.WindowsException from label18 to label19 with label20;
+        catch java.lang.Throwable from label22 to label23 with label27;
+        catch java.lang.Throwable from label25 to label26 with label27;
+        catch java.lang.Throwable from label27 to label28 with label27;
+        catch sun.nio.fs.WindowsException from label21 to label24 with label30;
+        catch sun.nio.fs.WindowsException from label25 to label29 with label30;
+        catch java.lang.Throwable from label18 to label24 with label32;
+        catch java.lang.Throwable from label25 to label31 with label32;
+        catch java.lang.Throwable from label32 to label33 with label32;
+        catch sun.nio.fs.WindowsException from label35 to label38 with label39;
+        catch sun.nio.fs.WindowsException from label42 to label43 with label44;
+        catch sun.nio.fs.WindowsException from label46 to label47 with label48;
+        catch java.io.IOException from label49 to label50 with label51;
+        catch sun.nio.fs.WindowsException from label54 to label56 with label57;
+        catch java.io.IOException from label59 to label60 with label61;
+        catch sun.nio.fs.WindowsException from label62 to label63 with label64;
+        catch java.io.IOException from label66 to label67 with label68;
+        catch sun.nio.fs.WindowsException from label69 to label70 with label71;
+        catch sun.nio.fs.WindowsException from label72 to label73 with label74;
+    }
+
+    private static java.lang.String asWin32Path(sun.nio.fs.WindowsPath) throws java.io.IOException
+    {
+        sun.nio.fs.WindowsException $r2;
+        java.lang.String $r1;
+        sun.nio.fs.WindowsPath r0;
+
+        r0 := @parameter0: sun.nio.fs.WindowsPath;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.nio.fs.WindowsPath: java.lang.String getPathForWin32Calls()>();
+
+     label2:
+        return $r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        virtualinvoke $r2.<sun.nio.fs.WindowsException: void rethrowAsIOException(sun.nio.fs.WindowsPath)>(r0);
+
+        return null;
+
+        catch sun.nio.fs.WindowsException from label1 to label2 with label3;
+    }
+
+    private static void copySecurityAttributes(sun.nio.fs.WindowsPath, sun.nio.fs.WindowsPath, boolean) throws java.io.IOException
+    {
+        java.lang.Throwable $r6, $r7;
+        sun.nio.fs.WindowsPath r0, r4;
+        long $l0;
+        sun.nio.fs.NativeBuffer $r3;
+        sun.nio.fs.WindowsSecurity$Privilege $r2;
+        sun.nio.fs.WindowsException $r8;
+        java.lang.String $r1, $r5;
+        boolean z0;
+
+        r0 := @parameter0: sun.nio.fs.WindowsPath;
+
+        r4 := @parameter1: sun.nio.fs.WindowsPath;
+
+        z0 := @parameter2: boolean;
+
+        $r1 = staticinvoke <sun.nio.fs.WindowsLinkSupport: java.lang.String getFinalPath(sun.nio.fs.WindowsPath,boolean)>(r0, z0);
+
+        $r2 = staticinvoke <sun.nio.fs.WindowsSecurity: sun.nio.fs.WindowsSecurity$Privilege enablePrivilege(java.lang.String)>("SeRestorePrivilege");
+
+     label01:
+        $r3 = staticinvoke <sun.nio.fs.WindowsAclFileAttributeView: sun.nio.fs.NativeBuffer getFileSecurity(java.lang.String,int)>($r1, 7);
+
+     label02:
+        $r5 = virtualinvoke r4.<sun.nio.fs.WindowsPath: java.lang.String getPathForWin32Calls()>();
+
+        $l0 = virtualinvoke $r3.<sun.nio.fs.NativeBuffer: long address()>();
+
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void SetFileSecurity(java.lang.String,int,long)>($r5, 7, $l0);
+
+     label03:
+        goto label05;
+
+     label04:
+        $r8 := @caughtexception;
+
+        virtualinvoke $r8.<sun.nio.fs.WindowsException: void rethrowAsIOException(sun.nio.fs.WindowsPath)>(r4);
+
+     label05:
+        virtualinvoke $r3.<sun.nio.fs.NativeBuffer: void release()>();
+
+        goto label08;
+
+     label06:
+        $r7 := @caughtexception;
+
+     label07:
+        virtualinvoke $r3.<sun.nio.fs.NativeBuffer: void release()>();
+
+        throw $r7;
+
+     label08:
+        interfaceinvoke $r2.<sun.nio.fs.WindowsSecurity$Privilege: void drop()>();
+
+        goto label11;
+
+     label09:
+        $r6 := @caughtexception;
+
+     label10:
+        interfaceinvoke $r2.<sun.nio.fs.WindowsSecurity$Privilege: void drop()>();
+
+        throw $r6;
+
+     label11:
+        return;
+
+        catch sun.nio.fs.WindowsException from label02 to label03 with label04;
+        catch java.lang.Throwable from label02 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+        catch java.lang.Throwable from label01 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        $r0 = class "Lsun/nio/fs/WindowsFileCopy;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.nio.fs.WindowsFileCopy: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

@@ -1,0 +1,222 @@
+public abstract class java.net.JarURLConnection extends java.net.URLConnection
+{
+    private java.net.URL jarFileURL;
+    private java.lang.String entryName;
+    protected java.net.URLConnection jarFileURLConnection;
+
+    protected void <init>(java.net.URL) throws java.net.MalformedURLException
+    {
+        java.net.JarURLConnection r0;
+        java.net.URL r1;
+
+        r0 := @this: java.net.JarURLConnection;
+
+        r1 := @parameter0: java.net.URL;
+
+        specialinvoke r0.<java.net.URLConnection: void <init>(java.net.URL)>(r1);
+
+        specialinvoke r0.<java.net.JarURLConnection: void parseSpecs(java.net.URL)>(r1);
+
+        return;
+    }
+
+    private void parseSpecs(java.net.URL) throws java.net.MalformedURLException
+    {
+        java.net.URL r0, $r15;
+        int $i0, $i1, $i2, i3, i4, $i6;
+        java.lang.String $r1, $r4, $r5, $r6, $r7, $r12;
+        java.net.JarURLConnection r2;
+        java.net.MalformedURLException $r14;
+        java.lang.StringBuilder $r10, $r11, $r13;
+
+        r2 := @this: java.net.JarURLConnection;
+
+        r0 := @parameter0: java.net.URL;
+
+        $r1 = virtualinvoke r0.<java.net.URL: java.lang.String getFile()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int indexOf(java.lang.String)>("!/");
+
+        $i6 = (int) -1;
+
+        if $i0 != $i6 goto label1;
+
+        $r14 = new java.net.MalformedURLException;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("no !/ found in url spec:");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r14.<java.net.MalformedURLException: void <init>(java.lang.String)>($r12);
+
+        throw $r14;
+
+     label1:
+        $r15 = new java.net.URL;
+
+        i3 = $i0 + 1;
+
+        $r4 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        specialinvoke $r15.<java.net.URL: void <init>(java.lang.String)>($r4);
+
+        r2.<java.net.JarURLConnection: java.net.URL jarFileURL> = $r15;
+
+        r2.<java.net.JarURLConnection: java.lang.String entryName> = null;
+
+        i4 = i3 + 1;
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if i4 == $i1 goto label2;
+
+        $i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $r5 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(i4, $i2);
+
+        r2.<java.net.JarURLConnection: java.lang.String entryName> = $r5;
+
+        $r6 = r2.<java.net.JarURLConnection: java.lang.String entryName>;
+
+        $r7 = staticinvoke <sun.net.www.ParseUtil: java.lang.String decode(java.lang.String)>($r6);
+
+        r2.<java.net.JarURLConnection: java.lang.String entryName> = $r7;
+
+     label2:
+        return;
+    }
+
+    public java.net.URL getJarFileURL()
+    {
+        java.net.JarURLConnection r0;
+        java.net.URL $r1;
+
+        r0 := @this: java.net.JarURLConnection;
+
+        $r1 = r0.<java.net.JarURLConnection: java.net.URL jarFileURL>;
+
+        return $r1;
+    }
+
+    public java.lang.String getEntryName()
+    {
+        java.lang.String $r1;
+        java.net.JarURLConnection r0;
+
+        r0 := @this: java.net.JarURLConnection;
+
+        $r1 = r0.<java.net.JarURLConnection: java.lang.String entryName>;
+
+        return $r1;
+    }
+
+    public abstract java.util.jar.JarFile getJarFile() throws java.io.IOException;
+
+    public java.util.jar.Manifest getManifest() throws java.io.IOException
+    {
+        java.util.jar.Manifest $r2;
+        java.util.jar.JarFile $r1;
+        java.net.JarURLConnection r0;
+
+        r0 := @this: java.net.JarURLConnection;
+
+        $r1 = virtualinvoke r0.<java.net.JarURLConnection: java.util.jar.JarFile getJarFile()>();
+
+        $r2 = virtualinvoke $r1.<java.util.jar.JarFile: java.util.jar.Manifest getManifest()>();
+
+        return $r2;
+    }
+
+    public java.util.jar.JarEntry getJarEntry() throws java.io.IOException
+    {
+        java.util.jar.JarEntry $r3;
+        java.util.jar.JarFile $r1;
+        java.lang.String $r2;
+        java.net.JarURLConnection r0;
+
+        r0 := @this: java.net.JarURLConnection;
+
+        $r1 = virtualinvoke r0.<java.net.JarURLConnection: java.util.jar.JarFile getJarFile()>();
+
+        $r2 = r0.<java.net.JarURLConnection: java.lang.String entryName>;
+
+        $r3 = virtualinvoke $r1.<java.util.jar.JarFile: java.util.jar.JarEntry getJarEntry(java.lang.String)>($r2);
+
+        return $r3;
+    }
+
+    public java.util.jar.Attributes getAttributes() throws java.io.IOException
+    {
+        java.util.jar.JarEntry $r1;
+        java.net.JarURLConnection r0;
+        java.util.jar.Attributes $r2;
+
+        r0 := @this: java.net.JarURLConnection;
+
+        $r1 = virtualinvoke r0.<java.net.JarURLConnection: java.util.jar.JarEntry getJarEntry()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = virtualinvoke $r1.<java.util.jar.JarEntry: java.util.jar.Attributes getAttributes()>();
+
+        goto label2;
+
+     label1:
+        $r2 = null;
+
+     label2:
+        return $r2;
+    }
+
+    public java.util.jar.Attributes getMainAttributes() throws java.io.IOException
+    {
+        java.util.jar.Manifest $r1;
+        java.net.JarURLConnection r0;
+        java.util.jar.Attributes $r2;
+
+        r0 := @this: java.net.JarURLConnection;
+
+        $r1 = virtualinvoke r0.<java.net.JarURLConnection: java.util.jar.Manifest getManifest()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = virtualinvoke $r1.<java.util.jar.Manifest: java.util.jar.Attributes getMainAttributes()>();
+
+        goto label2;
+
+     label1:
+        $r2 = null;
+
+     label2:
+        return $r2;
+    }
+
+    public java.security.cert.Certificate[] getCertificates() throws java.io.IOException
+    {
+        java.util.jar.JarEntry $r1;
+        java.security.cert.Certificate[] $r2;
+        java.net.JarURLConnection r0;
+
+        r0 := @this: java.net.JarURLConnection;
+
+        $r1 = virtualinvoke r0.<java.net.JarURLConnection: java.util.jar.JarEntry getJarEntry()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = virtualinvoke $r1.<java.util.jar.JarEntry: java.security.cert.Certificate[] getCertificates()>();
+
+        goto label2;
+
+     label1:
+        $r2 = null;
+
+     label2:
+        return $r2;
+    }
+}

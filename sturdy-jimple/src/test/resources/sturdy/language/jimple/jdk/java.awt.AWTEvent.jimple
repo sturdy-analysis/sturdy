@@ -1,0 +1,952 @@
+public abstract class java.awt.AWTEvent extends java.util.EventObject
+{
+    private static final sun.util.logging.PlatformLogger log;
+    private byte[] bdata;
+    protected int id;
+    protected boolean consumed;
+    private transient volatile java.security.AccessControlContext acc;
+    transient boolean focusManagerIsDispatching;
+    transient boolean isPosted;
+    private transient boolean isSystemGenerated;
+    public static final long COMPONENT_EVENT_MASK;
+    public static final long CONTAINER_EVENT_MASK;
+    public static final long FOCUS_EVENT_MASK;
+    public static final long KEY_EVENT_MASK;
+    public static final long MOUSE_EVENT_MASK;
+    public static final long MOUSE_MOTION_EVENT_MASK;
+    public static final long WINDOW_EVENT_MASK;
+    public static final long ACTION_EVENT_MASK;
+    public static final long ADJUSTMENT_EVENT_MASK;
+    public static final long ITEM_EVENT_MASK;
+    public static final long TEXT_EVENT_MASK;
+    public static final long INPUT_METHOD_EVENT_MASK;
+    static final long INPUT_METHODS_ENABLED_MASK;
+    public static final long PAINT_EVENT_MASK;
+    public static final long INVOCATION_EVENT_MASK;
+    public static final long HIERARCHY_EVENT_MASK;
+    public static final long HIERARCHY_BOUNDS_EVENT_MASK;
+    public static final long MOUSE_WHEEL_EVENT_MASK;
+    public static final long WINDOW_STATE_EVENT_MASK;
+    public static final long WINDOW_FOCUS_EVENT_MASK;
+    public static final int RESERVED_ID_MAX;
+    private static java.lang.reflect.Field inputEvent_CanAccessSystemClipboard_Field;
+    private static final long serialVersionUID;
+
+    final java.security.AccessControlContext getAccessControlContext()
+    {
+        java.security.AccessControlContext $r1, $r2;
+        java.awt.AWTEvent r0;
+        java.lang.SecurityException $r3;
+
+        r0 := @this: java.awt.AWTEvent;
+
+        $r1 = r0.<java.awt.AWTEvent: java.security.AccessControlContext acc>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.lang.SecurityException;
+
+        specialinvoke $r3.<java.lang.SecurityException: void <init>(java.lang.String)>("AWTEvent is missing AccessControlContext");
+
+        throw $r3;
+
+     label1:
+        $r2 = r0.<java.awt.AWTEvent: java.security.AccessControlContext acc>;
+
+        return $r2;
+    }
+
+    private static synchronized java.lang.reflect.Field get_InputEvent_CanAccessSystemClipboard()
+    {
+        java.awt.AWTEvent$2 $r2;
+        java.lang.Object $r3;
+        java.lang.reflect.Field $r0, $r1, $r4;
+
+        $r0 = <java.awt.AWTEvent: java.lang.reflect.Field inputEvent_CanAccessSystemClipboard_Field>;
+
+        if $r0 != null goto label1;
+
+        $r2 = new java.awt.AWTEvent$2;
+
+        specialinvoke $r2.<java.awt.AWTEvent$2: void <init>()>();
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        $r4 = (java.lang.reflect.Field) $r3;
+
+        <java.awt.AWTEvent: java.lang.reflect.Field inputEvent_CanAccessSystemClipboard_Field> = $r4;
+
+     label1:
+        $r1 = <java.awt.AWTEvent: java.lang.reflect.Field inputEvent_CanAccessSystemClipboard_Field>;
+
+        return $r1;
+    }
+
+    private static native void initIDs();
+
+    public void <init>(java.awt.Event)
+    {
+        java.awt.AWTEvent r0;
+        java.awt.Event r1;
+        int $i0;
+        java.lang.Object $r2;
+
+        r0 := @this: java.awt.AWTEvent;
+
+        r1 := @parameter0: java.awt.Event;
+
+        $r2 = r1.<java.awt.Event: java.lang.Object target>;
+
+        $i0 = r1.<java.awt.Event: int id>;
+
+        specialinvoke r0.<java.awt.AWTEvent: void <init>(java.lang.Object,int)>($r2, $i0);
+
+        return;
+    }
+
+    public void <init>(java.lang.Object, int)
+    {
+        java.security.AccessControlContext $r2;
+        java.awt.AWTEvent r0;
+        int i0;
+        java.lang.Object r1;
+
+        r0 := @this: java.awt.AWTEvent;
+
+        r1 := @parameter0: java.lang.Object;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<java.util.EventObject: void <init>(java.lang.Object)>(r1);
+
+        r0.<java.awt.AWTEvent: boolean consumed> = 0;
+
+        $r2 = staticinvoke <java.security.AccessController: java.security.AccessControlContext getContext()>();
+
+        r0.<java.awt.AWTEvent: java.security.AccessControlContext acc> = $r2;
+
+        r0.<java.awt.AWTEvent: boolean focusManagerIsDispatching> = 0;
+
+        r0.<java.awt.AWTEvent: int id> = i0;
+
+        lookupswitch(i0)
+        {
+            case 601: goto label1;
+            case 701: goto label1;
+            case 900: goto label1;
+            case 1001: goto label1;
+            default: goto label2;
+        };
+
+     label1:
+        r0.<java.awt.AWTEvent: boolean consumed> = 1;
+
+        goto label2;
+
+     label2:
+        return;
+    }
+
+    public void setSource(java.lang.Object)
+    {
+        java.lang.Throwable $r6;
+        java.awt.peer.ComponentPeer r3, $r4, $r5;
+        java.awt.Component r7;
+        java.awt.AWTEvent r0;
+        java.lang.Object r1, $r2;
+        boolean $z0, $z1;
+
+        r0 := @this: java.awt.AWTEvent;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = r0.<java.awt.AWTEvent: java.lang.Object source>;
+
+        if $r2 != r1 goto label1;
+
+        return;
+
+     label1:
+        r7 = null;
+
+        $z0 = r1 instanceof java.awt.Component;
+
+        if $z0 == 0 goto label3;
+
+        r7 = (java.awt.Component) r1;
+
+     label2:
+        if r7 == null goto label3;
+
+        $r4 = r7.<java.awt.Component: java.awt.peer.ComponentPeer peer>;
+
+        if $r4 == null goto label3;
+
+        $r5 = r7.<java.awt.Component: java.awt.peer.ComponentPeer peer>;
+
+        $z1 = $r5 instanceof java.awt.peer.LightweightPeer;
+
+        if $z1 == 0 goto label3;
+
+        r7 = r7.<java.awt.Component: java.awt.Container parent>;
+
+        goto label2;
+
+     label3:
+        entermonitor r0;
+
+     label4:
+        r0.<java.awt.AWTEvent: java.lang.Object source> = r1;
+
+        if r7 == null goto label5;
+
+        r3 = r7.<java.awt.Component: java.awt.peer.ComponentPeer peer>;
+
+        if r3 == null goto label5;
+
+        specialinvoke r0.<java.awt.AWTEvent: void nativeSetSource(java.awt.peer.ComponentPeer)>(r3);
+
+     label5:
+        exitmonitor r0;
+
+     label6:
+        goto label9;
+
+     label7:
+        $r6 := @caughtexception;
+
+        exitmonitor r0;
+
+     label8:
+        throw $r6;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label4 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    private native void nativeSetSource(java.awt.peer.ComponentPeer);
+
+    public int getID()
+    {
+        int $i0;
+        java.awt.AWTEvent r0;
+
+        r0 := @this: java.awt.AWTEvent;
+
+        $i0 = r0.<java.awt.AWTEvent: int id>;
+
+        return $i0;
+    }
+
+    public java.lang.String toString()
+    {
+        java.awt.AWTEvent r0;
+        java.lang.String $r5, r10, $r13, $r16;
+        boolean $z0, $z1;
+        java.awt.Component $r9;
+        java.awt.MenuComponent $r7;
+        java.lang.Object $r1, $r2, $r6, $r8, $r18;
+        java.lang.StringBuilder $r3, $r4, $r11, $r14, $r15, $r17;
+        java.lang.Class $r12;
+
+        r0 := @this: java.awt.AWTEvent;
+
+        r10 = null;
+
+        $r1 = r0.<java.awt.AWTEvent: java.lang.Object source>;
+
+        $z0 = $r1 instanceof java.awt.Component;
+
+        if $z0 == 0 goto label1;
+
+        $r8 = r0.<java.awt.AWTEvent: java.lang.Object source>;
+
+        $r9 = (java.awt.Component) $r8;
+
+        r10 = virtualinvoke $r9.<java.awt.Component: java.lang.String getName()>();
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<java.awt.AWTEvent: java.lang.Object source>;
+
+        $z1 = $r2 instanceof java.awt.MenuComponent;
+
+        if $z1 == 0 goto label2;
+
+        $r6 = r0.<java.awt.AWTEvent: java.lang.Object source>;
+
+        $r7 = (java.awt.MenuComponent) $r6;
+
+        r10 = virtualinvoke $r7.<java.awt.MenuComponent: java.lang.String getName()>();
+
+     label2:
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.Class: java.lang.String getName()>();
+
+        $r14 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r16 = virtualinvoke r0.<java.awt.AWTEvent: java.lang.String paramString()>();
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r16);
+
+        $r3 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("] on ");
+
+        if r10 == null goto label3;
+
+        $r18 = r10;
+
+        goto label4;
+
+     label3:
+        $r18 = r0.<java.awt.AWTEvent: java.lang.Object source>;
+
+     label4:
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r18);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r5;
+    }
+
+    public java.lang.String paramString()
+    {
+        java.awt.AWTEvent r0;
+
+        r0 := @this: java.awt.AWTEvent;
+
+        return "";
+    }
+
+    protected void consume()
+    {
+        int $i0;
+        java.awt.AWTEvent r0;
+
+        r0 := @this: java.awt.AWTEvent;
+
+        $i0 = r0.<java.awt.AWTEvent: int id>;
+
+        lookupswitch($i0)
+        {
+            case 401: goto label1;
+            case 402: goto label1;
+            case 501: goto label1;
+            case 502: goto label1;
+            case 503: goto label1;
+            case 504: goto label1;
+            case 505: goto label1;
+            case 506: goto label1;
+            case 507: goto label1;
+            case 1100: goto label1;
+            case 1101: goto label1;
+            default: goto label2;
+        };
+
+     label1:
+        r0.<java.awt.AWTEvent: boolean consumed> = 1;
+
+        goto label2;
+
+     label2:
+        return;
+    }
+
+    protected boolean isConsumed()
+    {
+        java.awt.AWTEvent r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.AWTEvent;
+
+        $z0 = r0.<java.awt.AWTEvent: boolean consumed>;
+
+        return $z0;
+    }
+
+    java.awt.Event convertToOld()
+    {
+        java.awt.Point $r14;
+        java.lang.Integer $r22;
+        java.awt.Button $r5;
+        java.awt.Event $r23, $r24, $r25, $r26, $r27, $r28, $r29, $r30, $r31;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        java.awt.event.ItemEvent r6;
+        java.awt.event.KeyEvent r10;
+        java.awt.Component $r13;
+        java.awt.MenuItem $r4;
+        long $l4, $l10;
+        java.awt.AWTEvent r0;
+        short $s18, $s21, s22, s23;
+        int $i0, $i1, $i2, $i3, $i5, $i6, $i7, $i8, $i9, $i11, $i12, $i13, $i14, $i15, $i16, i17, $i19, $i20, $i24, $i26, $i28;
+        java.lang.String r17;
+        java.awt.event.AdjustmentEvent r7;
+        java.awt.event.ActionEvent r16;
+        java.awt.event.MouseEvent r8;
+        java.lang.Object $r1, r19;
+
+        r0 := @this: java.awt.AWTEvent;
+
+        $r1 = virtualinvoke r0.<java.awt.AWTEvent: java.lang.Object getSource()>();
+
+        i17 = r0.<java.awt.AWTEvent: int id>;
+
+        $i0 = r0.<java.awt.AWTEvent: int id>;
+
+        lookupswitch($i0)
+        {
+            case 100: goto label11;
+            case 201: goto label10;
+            case 203: goto label10;
+            case 204: goto label10;
+            case 401: goto label01;
+            case 402: goto label01;
+            case 501: goto label07;
+            case 502: goto label07;
+            case 503: goto label07;
+            case 504: goto label07;
+            case 505: goto label07;
+            case 506: goto label07;
+            case 601: goto label25;
+            case 701: goto label17;
+            case 1001: goto label13;
+            case 1004: goto label08;
+            case 1005: goto label09;
+            default: goto label34;
+        };
+
+     label01:
+        r10 = (java.awt.event.KeyEvent) r0;
+
+        $z5 = virtualinvoke r10.<java.awt.event.KeyEvent: boolean isActionKey()>();
+
+        if $z5 == 0 goto label04;
+
+        $i14 = r0.<java.awt.AWTEvent: int id>;
+
+        if $i14 != 401 goto label02;
+
+        $s18 = 403;
+
+        goto label03;
+
+     label02:
+        $s18 = 404;
+
+     label03:
+        i17 = $s18;
+
+     label04:
+        $i19 = virtualinvoke r10.<java.awt.event.KeyEvent: int getKeyCode()>();
+
+        if $i19 == 16 goto label05;
+
+        if $i19 == 17 goto label05;
+
+        if $i19 != 18 goto label06;
+
+     label05:
+        return null;
+
+     label06:
+        $r23 = new java.awt.Event;
+
+        $l10 = virtualinvoke r10.<java.awt.event.KeyEvent: long getWhen()>();
+
+        $i11 = staticinvoke <java.awt.Event: int getOldEventKey(java.awt.event.KeyEvent)>(r10);
+
+        $i12 = virtualinvoke r10.<java.awt.event.KeyEvent: int getModifiers()>();
+
+        $i26 = (int) -17;
+
+        $i13 = $i12 & $i26;
+
+        specialinvoke $r23.<java.awt.Event: void <init>(java.lang.Object,long,int,int,int,int,int)>($r1, $l10, i17, 0, 0, $i11, $i13);
+
+        return $r23;
+
+     label07:
+        r8 = (java.awt.event.MouseEvent) r0;
+
+        $r24 = new java.awt.Event;
+
+        $l4 = virtualinvoke r8.<java.awt.event.MouseEvent: long getWhen()>();
+
+        $i5 = virtualinvoke r8.<java.awt.event.MouseEvent: int getX()>();
+
+        $i6 = virtualinvoke r8.<java.awt.event.MouseEvent: int getY()>();
+
+        $i7 = virtualinvoke r8.<java.awt.event.MouseEvent: int getModifiers()>();
+
+        $i28 = (int) -17;
+
+        $i8 = $i7 & $i28;
+
+        specialinvoke $r24.<java.awt.Event: void <init>(java.lang.Object,long,int,int,int,int,int)>($r1, $l4, i17, $i5, $i6, 0, $i8);
+
+        $i9 = virtualinvoke r8.<java.awt.event.MouseEvent: int getClickCount()>();
+
+        $r24.<java.awt.Event: int clickCount> = $i9;
+
+        return $r24;
+
+     label08:
+        $r25 = new java.awt.Event;
+
+        specialinvoke $r25.<java.awt.Event: void <init>(java.lang.Object,int,java.lang.Object)>($r1, 1004, null);
+
+        return $r25;
+
+     label09:
+        $r26 = new java.awt.Event;
+
+        specialinvoke $r26.<java.awt.Event: void <init>(java.lang.Object,int,java.lang.Object)>($r1, 1005, null);
+
+        return $r26;
+
+     label10:
+        $r27 = new java.awt.Event;
+
+        specialinvoke $r27.<java.awt.Event: void <init>(java.lang.Object,int,java.lang.Object)>($r1, i17, null);
+
+        return $r27;
+
+     label11:
+        $z6 = $r1 instanceof java.awt.Frame;
+
+        if $z6 != 0 goto label12;
+
+        $z7 = $r1 instanceof java.awt.Dialog;
+
+        if $z7 == 0 goto label34;
+
+     label12:
+        $r13 = (java.awt.Component) $r1;
+
+        $r14 = virtualinvoke $r13.<java.awt.Component: java.awt.Point getLocation()>();
+
+        $r28 = new java.awt.Event;
+
+        $i16 = $r14.<java.awt.Point: int x>;
+
+        $i15 = $r14.<java.awt.Point: int y>;
+
+        specialinvoke $r28.<java.awt.Event: void <init>(java.lang.Object,long,int,int,int,int,int)>($r1, 0L, 205, $i16, $i15, 0, 0);
+
+        return $r28;
+
+     label13:
+        r16 = (java.awt.event.ActionEvent) r0;
+
+        $z0 = $r1 instanceof java.awt.Button;
+
+        if $z0 == 0 goto label14;
+
+        $r5 = (java.awt.Button) $r1;
+
+        r17 = virtualinvoke $r5.<java.awt.Button: java.lang.String getLabel()>();
+
+        goto label16;
+
+     label14:
+        $z1 = $r1 instanceof java.awt.MenuItem;
+
+        if $z1 == 0 goto label15;
+
+        $r4 = (java.awt.MenuItem) $r1;
+
+        r17 = virtualinvoke $r4.<java.awt.MenuItem: java.lang.String getLabel()>();
+
+        goto label16;
+
+     label15:
+        r17 = virtualinvoke r16.<java.awt.event.ActionEvent: java.lang.String getActionCommand()>();
+
+     label16:
+        $r29 = new java.awt.Event;
+
+        $i20 = virtualinvoke r16.<java.awt.event.ActionEvent: int getModifiers()>();
+
+        specialinvoke $r29.<java.awt.Event: void <init>(java.lang.Object,long,int,int,int,int,int,java.lang.Object)>($r1, 0L, i17, 0, 0, 0, $i20, r17);
+
+        return $r29;
+
+     label17:
+        r6 = (java.awt.event.ItemEvent) r0;
+
+        $z2 = $r1 instanceof java.awt.List;
+
+        if $z2 == 0 goto label20;
+
+        $i2 = virtualinvoke r6.<java.awt.event.ItemEvent: int getStateChange()>();
+
+        if $i2 != 1 goto label18;
+
+        $s21 = 701;
+
+        goto label19;
+
+     label18:
+        $s21 = 702;
+
+     label19:
+        s22 = $s21;
+
+        r19 = virtualinvoke r6.<java.awt.event.ItemEvent: java.lang.Object getItem()>();
+
+        goto label24;
+
+     label20:
+        s22 = 1001;
+
+        $z3 = $r1 instanceof java.awt.Choice;
+
+        if $z3 == 0 goto label21;
+
+        r19 = virtualinvoke r6.<java.awt.event.ItemEvent: java.lang.Object getItem()>();
+
+        goto label24;
+
+     label21:
+        $i1 = virtualinvoke r6.<java.awt.event.ItemEvent: int getStateChange()>();
+
+        if $i1 != 1 goto label22;
+
+        $z8 = 1;
+
+        goto label23;
+
+     label22:
+        $z8 = 0;
+
+     label23:
+        r19 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z8);
+
+     label24:
+        $r30 = new java.awt.Event;
+
+        specialinvoke $r30.<java.awt.Event: void <init>(java.lang.Object,int,java.lang.Object)>($r1, s22, r19);
+
+        return $r30;
+
+     label25:
+        r7 = (java.awt.event.AdjustmentEvent) r0;
+
+        $i3 = virtualinvoke r7.<java.awt.event.AdjustmentEvent: int getAdjustmentType()>();
+
+        tableswitch($i3)
+        {
+            case 1: goto label26;
+            case 2: goto label27;
+            case 3: goto label29;
+            case 4: goto label28;
+            case 5: goto label30;
+            default: goto label32;
+        };
+
+     label26:
+        s23 = 602;
+
+        goto label33;
+
+     label27:
+        s23 = 601;
+
+        goto label33;
+
+     label28:
+        s23 = 604;
+
+        goto label33;
+
+     label29:
+        s23 = 603;
+
+        goto label33;
+
+     label30:
+        $z4 = virtualinvoke r7.<java.awt.event.AdjustmentEvent: boolean getValueIsAdjusting()>();
+
+        if $z4 == 0 goto label31;
+
+        s23 = 605;
+
+        goto label33;
+
+     label31:
+        s23 = 607;
+
+        goto label33;
+
+     label32:
+        return null;
+
+     label33:
+        $r31 = new java.awt.Event;
+
+        $i24 = virtualinvoke r7.<java.awt.event.AdjustmentEvent: int getValue()>();
+
+        $r22 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i24);
+
+        specialinvoke $r31.<java.awt.Event: void <init>(java.lang.Object,int,java.lang.Object)>($r1, s23, $r22);
+
+        return $r31;
+
+     label34:
+        return null;
+    }
+
+    void copyPrivateDataInto(java.awt.AWTEvent)
+    {
+        byte[] $r2;
+        java.lang.IllegalAccessException $r4;
+        sun.util.logging.PlatformLogger$Level $r5;
+        sun.util.logging.PlatformLogger $r6, $r7;
+        java.lang.reflect.Field $r3;
+        java.awt.AWTEvent r0, r1;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        r1 := @this: java.awt.AWTEvent;
+
+        r0 := @parameter0: java.awt.AWTEvent;
+
+        $r2 = r1.<java.awt.AWTEvent: byte[] bdata>;
+
+        r0.<java.awt.AWTEvent: byte[] bdata> = $r2;
+
+        $z0 = r1 instanceof java.awt.event.InputEvent;
+
+        if $z0 == 0 goto label4;
+
+        $z1 = r0 instanceof java.awt.event.InputEvent;
+
+        if $z1 == 0 goto label4;
+
+        $r3 = staticinvoke <java.awt.AWTEvent: java.lang.reflect.Field get_InputEvent_CanAccessSystemClipboard()>();
+
+        if $r3 == null goto label4;
+
+     label1:
+        $z2 = virtualinvoke $r3.<java.lang.reflect.Field: boolean getBoolean(java.lang.Object)>(r1);
+
+        virtualinvoke $r3.<java.lang.reflect.Field: void setBoolean(java.lang.Object,boolean)>(r0, $z2);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r6 = <java.awt.AWTEvent: sun.util.logging.PlatformLogger log>;
+
+        $r5 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINE>;
+
+        $z3 = virtualinvoke $r6.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r5);
+
+        if $z3 == 0 goto label4;
+
+        $r7 = <java.awt.AWTEvent: sun.util.logging.PlatformLogger log>;
+
+        virtualinvoke $r7.<sun.util.logging.PlatformLogger: void fine(java.lang.String,java.lang.Throwable)>("AWTEvent.copyPrivateDataInto() got IllegalAccessException ", $r4);
+
+     label4:
+        $z4 = r1.<java.awt.AWTEvent: boolean isSystemGenerated>;
+
+        r0.<java.awt.AWTEvent: boolean isSystemGenerated> = $z4;
+
+        return;
+
+        catch java.lang.IllegalAccessException from label1 to label2 with label3;
+    }
+
+    void dispatched()
+    {
+        java.lang.IllegalAccessException $r2;
+        sun.util.logging.PlatformLogger$Level $r3;
+        sun.util.logging.PlatformLogger $r4, $r5;
+        java.lang.reflect.Field $r1;
+        java.awt.AWTEvent r0;
+        boolean $z0, $z1;
+
+        r0 := @this: java.awt.AWTEvent;
+
+        $z0 = r0 instanceof java.awt.event.InputEvent;
+
+        if $z0 == 0 goto label4;
+
+        $r1 = staticinvoke <java.awt.AWTEvent: java.lang.reflect.Field get_InputEvent_CanAccessSystemClipboard()>();
+
+        if $r1 == null goto label4;
+
+     label1:
+        virtualinvoke $r1.<java.lang.reflect.Field: void setBoolean(java.lang.Object,boolean)>(r0, 0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r4 = <java.awt.AWTEvent: sun.util.logging.PlatformLogger log>;
+
+        $r3 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINE>;
+
+        $z1 = virtualinvoke $r4.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r3);
+
+        if $z1 == 0 goto label4;
+
+        $r5 = <java.awt.AWTEvent: sun.util.logging.PlatformLogger log>;
+
+        virtualinvoke $r5.<sun.util.logging.PlatformLogger: void fine(java.lang.String,java.lang.Throwable)>("AWTEvent.dispatched() got IllegalAccessException ", $r2);
+
+     label4:
+        return;
+
+        catch java.lang.IllegalAccessException from label1 to label2 with label3;
+    }
+
+    static boolean access$002(java.awt.AWTEvent, boolean)
+    {
+        java.awt.AWTEvent r0;
+        boolean z0;
+
+        r0 := @parameter0: java.awt.AWTEvent;
+
+        z0 := @parameter1: boolean;
+
+        r0.<java.awt.AWTEvent: boolean isSystemGenerated> = z0;
+
+        return z0;
+    }
+
+    static boolean access$000(java.awt.AWTEvent)
+    {
+        java.awt.AWTEvent r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.AWTEvent;
+
+        $z0 = r0.<java.awt.AWTEvent: boolean isSystemGenerated>;
+
+        return $z0;
+    }
+
+    static byte[] access$100(java.awt.AWTEvent)
+    {
+        java.awt.AWTEvent r0;
+        byte[] $r1;
+
+        r0 := @parameter0: java.awt.AWTEvent;
+
+        $r1 = r0.<java.awt.AWTEvent: byte[] bdata>;
+
+        return $r1;
+    }
+
+    static byte[] access$102(java.awt.AWTEvent, byte[])
+    {
+        java.awt.AWTEvent r0;
+        byte[] r1;
+
+        r0 := @parameter0: java.awt.AWTEvent;
+
+        r1 := @parameter1: byte[];
+
+        r0.<java.awt.AWTEvent: byte[] bdata> = r1;
+
+        return r1;
+    }
+
+    static sun.util.logging.PlatformLogger access$200()
+    {
+        sun.util.logging.PlatformLogger $r0;
+
+        $r0 = <java.awt.AWTEvent: sun.util.logging.PlatformLogger log>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        sun.util.logging.PlatformLogger $r0;
+        java.awt.AWTEvent$1 $r1;
+        boolean $z0;
+
+        <java.awt.AWTEvent: long serialVersionUID> = -1825314779160409405L;
+
+        <java.awt.AWTEvent: int RESERVED_ID_MAX> = 1999;
+
+        <java.awt.AWTEvent: long WINDOW_FOCUS_EVENT_MASK> = 524288L;
+
+        <java.awt.AWTEvent: long WINDOW_STATE_EVENT_MASK> = 262144L;
+
+        <java.awt.AWTEvent: long MOUSE_WHEEL_EVENT_MASK> = 131072L;
+
+        <java.awt.AWTEvent: long HIERARCHY_BOUNDS_EVENT_MASK> = 65536L;
+
+        <java.awt.AWTEvent: long HIERARCHY_EVENT_MASK> = 32768L;
+
+        <java.awt.AWTEvent: long INVOCATION_EVENT_MASK> = 16384L;
+
+        <java.awt.AWTEvent: long PAINT_EVENT_MASK> = 8192L;
+
+        <java.awt.AWTEvent: long INPUT_METHODS_ENABLED_MASK> = 4096L;
+
+        <java.awt.AWTEvent: long INPUT_METHOD_EVENT_MASK> = 2048L;
+
+        <java.awt.AWTEvent: long TEXT_EVENT_MASK> = 1024L;
+
+        <java.awt.AWTEvent: long ITEM_EVENT_MASK> = 512L;
+
+        <java.awt.AWTEvent: long ADJUSTMENT_EVENT_MASK> = 256L;
+
+        <java.awt.AWTEvent: long ACTION_EVENT_MASK> = 128L;
+
+        <java.awt.AWTEvent: long WINDOW_EVENT_MASK> = 64L;
+
+        <java.awt.AWTEvent: long MOUSE_MOTION_EVENT_MASK> = 32L;
+
+        <java.awt.AWTEvent: long MOUSE_EVENT_MASK> = 16L;
+
+        <java.awt.AWTEvent: long KEY_EVENT_MASK> = 8L;
+
+        <java.awt.AWTEvent: long FOCUS_EVENT_MASK> = 4L;
+
+        <java.awt.AWTEvent: long CONTAINER_EVENT_MASK> = 2L;
+
+        <java.awt.AWTEvent: long COMPONENT_EVENT_MASK> = 1L;
+
+        $r0 = staticinvoke <sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger getLogger(java.lang.String)>("java.awt.AWTEvent");
+
+        <java.awt.AWTEvent: sun.util.logging.PlatformLogger log> = $r0;
+
+        <java.awt.AWTEvent: java.lang.reflect.Field inputEvent_CanAccessSystemClipboard_Field> = null;
+
+        staticinvoke <java.awt.Toolkit: void loadLibraries()>();
+
+        $z0 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        if $z0 != 0 goto label1;
+
+        staticinvoke <java.awt.AWTEvent: void initIDs()>();
+
+     label1:
+        $r1 = new java.awt.AWTEvent$1;
+
+        specialinvoke $r1.<java.awt.AWTEvent$1: void <init>()>();
+
+        staticinvoke <sun.awt.AWTAccessor: void setAWTEventAccessor(sun.awt.AWTAccessor$AWTEventAccessor)>($r1);
+
+        return;
+    }
+}

@@ -1,0 +1,171 @@
+public class sun.misc.VMSupport extends java.lang.Object
+{
+    private static java.util.Properties agentProps;
+
+    public void <init>()
+    {
+        sun.misc.VMSupport r0;
+
+        r0 := @this: sun.misc.VMSupport;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static synchronized java.util.Properties getAgentProperties()
+    {
+        java.util.Properties $r0, $r1, $r2, $r3;
+
+        $r0 = <sun.misc.VMSupport: java.util.Properties agentProps>;
+
+        if $r0 != null goto label1;
+
+        $r2 = new java.util.Properties;
+
+        specialinvoke $r2.<java.util.Properties: void <init>()>();
+
+        <sun.misc.VMSupport: java.util.Properties agentProps> = $r2;
+
+        $r3 = <sun.misc.VMSupport: java.util.Properties agentProps>;
+
+        staticinvoke <sun.misc.VMSupport: java.util.Properties initAgentProperties(java.util.Properties)>($r3);
+
+     label1:
+        $r1 = <sun.misc.VMSupport: java.util.Properties agentProps>;
+
+        return $r1;
+    }
+
+    private static native java.util.Properties initAgentProperties(java.util.Properties);
+
+    private static byte[] serializePropertiesToByteArray(java.util.Properties) throws java.io.IOException
+    {
+        byte[] $r5;
+        java.util.Properties $r1, r2;
+        java.io.ByteArrayOutputStream $r0;
+        java.util.Iterator $r4;
+        java.util.Set $r3;
+        java.lang.Object $r6;
+        java.lang.String r7, $r8;
+        boolean $z0;
+
+        r2 := @parameter0: java.util.Properties;
+
+        $r0 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r0.<java.io.ByteArrayOutputStream: void <init>(int)>(4096);
+
+        $r1 = new java.util.Properties;
+
+        specialinvoke $r1.<java.util.Properties: void <init>()>();
+
+        $r3 = virtualinvoke r2.<java.util.Properties: java.util.Set stringPropertyNames()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r6 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (java.lang.String) $r6;
+
+        $r8 = virtualinvoke r2.<java.util.Properties: java.lang.String getProperty(java.lang.String)>(r7);
+
+        virtualinvoke $r1.<java.util.Properties: java.lang.Object put(java.lang.Object,java.lang.Object)>(r7, $r8);
+
+        goto label1;
+
+     label2:
+        virtualinvoke $r1.<java.util.Properties: void store(java.io.OutputStream,java.lang.String)>($r0, null);
+
+        $r5 = virtualinvoke $r0.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        return $r5;
+    }
+
+    public static byte[] serializePropertiesToByteArray() throws java.io.IOException
+    {
+        byte[] $r1;
+        java.util.Properties $r0;
+
+        $r0 = staticinvoke <java.lang.System: java.util.Properties getProperties()>();
+
+        $r1 = staticinvoke <sun.misc.VMSupport: byte[] serializePropertiesToByteArray(java.util.Properties)>($r0);
+
+        return $r1;
+    }
+
+    public static byte[] serializeAgentPropertiesToByteArray() throws java.io.IOException
+    {
+        byte[] $r1;
+        java.util.Properties $r0;
+
+        $r0 = staticinvoke <sun.misc.VMSupport: java.util.Properties getAgentProperties()>();
+
+        $r1 = staticinvoke <sun.misc.VMSupport: byte[] serializePropertiesToByteArray(java.util.Properties)>($r0);
+
+        return $r1;
+    }
+
+    public static boolean isClassPathAttributePresent(java.lang.String)
+    {
+        java.util.jar.Manifest $r2;
+        java.util.jar.JarFile $r0;
+        java.io.IOException $r6;
+        java.lang.RuntimeException $r7;
+        java.util.jar.Attributes $r3;
+        java.util.jar.Attributes$Name $r4;
+        java.lang.String r1, $r5, $r8;
+
+        r1 := @parameter0: java.lang.String;
+
+     label1:
+        $r0 = new java.util.jar.JarFile;
+
+        specialinvoke $r0.<java.util.jar.JarFile: void <init>(java.lang.String)>(r1);
+
+        $r2 = virtualinvoke $r0.<java.util.jar.JarFile: java.util.jar.Manifest getManifest()>();
+
+        if $r2 == null goto label3;
+
+        $r3 = virtualinvoke $r2.<java.util.jar.Manifest: java.util.jar.Attributes getMainAttributes()>();
+
+        $r4 = <java.util.jar.Attributes$Name: java.util.jar.Attributes$Name CLASS_PATH>;
+
+        $r5 = virtualinvoke $r3.<java.util.jar.Attributes: java.lang.String getValue(java.util.jar.Attributes$Name)>($r4);
+
+        if $r5 == null goto label3;
+
+     label2:
+        return 1;
+
+     label3:
+        return 0;
+
+     label4:
+        $r6 := @caughtexception;
+
+        $r7 = new java.lang.RuntimeException;
+
+        $r8 = virtualinvoke $r6.<java.io.IOException: java.lang.String getMessage()>();
+
+        specialinvoke $r7.<java.lang.RuntimeException: void <init>(java.lang.String)>($r8);
+
+        throw $r7;
+
+        catch java.io.IOException from label1 to label2 with label4;
+    }
+
+    public static native java.lang.String getVMTemporaryDirectory();
+
+    static void <clinit>()
+    {
+        <sun.misc.VMSupport: java.util.Properties agentProps> = null;
+
+        return;
+    }
+}

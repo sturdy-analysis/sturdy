@@ -1,0 +1,908 @@
+public final class sun.security.jgss.ProviderList extends java.lang.Object
+{
+    private static final java.lang.String PROV_PROP_PREFIX;
+    private static final int PROV_PROP_PREFIX_LEN;
+    private static final java.lang.String SPI_MECH_FACTORY_TYPE;
+    private static final java.lang.String DEFAULT_MECH_PROP;
+    public static final org.ietf.jgss.Oid DEFAULT_MECH_OID;
+    private java.util.ArrayList preferences;
+    private java.util.HashMap factories;
+    private java.util.HashSet mechs;
+    private final sun.security.jgss.GSSCaller caller;
+
+    public void <init>(sun.security.jgss.GSSCaller, boolean)
+    {
+        sun.security.jgss.GSSCaller r4;
+        java.util.HashMap $r2;
+        java.util.ArrayList $r1;
+        java.util.HashSet $r3;
+        int i0, $i1;
+        sun.security.jgss.wrapper.SunNativeProvider $r6;
+        java.lang.String $r10, $r14;
+        boolean z0;
+        org.ietf.jgss.GSSException $r7;
+        sun.security.jgss.ProviderList r0;
+        java.security.Provider r5;
+        java.lang.StringBuilder $r8, $r9, $r11, $r12, $r13;
+        java.security.Provider[] r15;
+
+        r0 := @this: sun.security.jgss.ProviderList;
+
+        r4 := @parameter0: sun.security.jgss.GSSCaller;
+
+        z0 := @parameter1: boolean;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>(int)>(5);
+
+        r0.<sun.security.jgss.ProviderList: java.util.ArrayList preferences> = $r1;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>(int)>(5);
+
+        r0.<sun.security.jgss.ProviderList: java.util.HashMap factories> = $r2;
+
+        $r3 = new java.util.HashSet;
+
+        specialinvoke $r3.<java.util.HashSet: void <init>(int)>(5);
+
+        r0.<sun.security.jgss.ProviderList: java.util.HashSet mechs> = $r3;
+
+        r0.<sun.security.jgss.ProviderList: sun.security.jgss.GSSCaller caller> = r4;
+
+        if z0 == 0 goto label1;
+
+        r15 = newarray (java.security.Provider)[1];
+
+        $r6 = new sun.security.jgss.wrapper.SunNativeProvider;
+
+        specialinvoke $r6.<sun.security.jgss.wrapper.SunNativeProvider: void <init>()>();
+
+        r15[0] = $r6;
+
+        goto label2;
+
+     label1:
+        r15 = staticinvoke <java.security.Security: java.security.Provider[] getProviders()>();
+
+     label2:
+        i0 = 0;
+
+     label3:
+        $i1 = lengthof r15;
+
+        if i0 >= $i1 goto label8;
+
+        r5 = r15[i0];
+
+     label4:
+        virtualinvoke r0.<sun.security.jgss.ProviderList: void addProviderAtEnd(java.security.Provider,org.ietf.jgss.Oid)>(r5, null);
+
+     label5:
+        goto label7;
+
+     label6:
+        $r7 := @caughtexception;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error in adding provider ");
+
+        $r10 = virtualinvoke r5.<java.security.Provider: java.lang.String getName()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r7);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.security.jgss.GSSUtil: void debug(java.lang.String)>($r14);
+
+     label7:
+        i0 = i0 + 1;
+
+        goto label3;
+
+     label8:
+        return;
+
+        catch org.ietf.jgss.GSSException from label4 to label5 with label6;
+    }
+
+    private boolean isMechFactoryProperty(java.lang.String)
+    {
+        int $i0;
+        java.lang.String r0;
+        sun.security.jgss.ProviderList r1;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: sun.security.jgss.ProviderList;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("GssApiMechanism.");
+
+        if $z0 != 0 goto label1;
+
+        $i0 = <sun.security.jgss.ProviderList: int PROV_PROP_PREFIX_LEN>;
+
+        $z1 = virtualinvoke r0.<java.lang.String: boolean regionMatches(boolean,int,java.lang.String,int,int)>(1, 0, "GssApiMechanism.", 0, $i0);
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+    }
+
+    private org.ietf.jgss.Oid getOidFromMechFactoryProperty(java.lang.String) throws org.ietf.jgss.GSSException
+    {
+        org.ietf.jgss.Oid $r2;
+        int $i0;
+        java.lang.String r0, $r1;
+        sun.security.jgss.ProviderList r3;
+
+        r3 := @this: sun.security.jgss.ProviderList;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = <sun.security.jgss.ProviderList: int PROV_PROP_PREFIX_LEN>;
+
+        $r1 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>($i0);
+
+        $r2 = new org.ietf.jgss.Oid;
+
+        specialinvoke $r2.<org.ietf.jgss.Oid: void <init>(java.lang.String)>($r1);
+
+        return $r2;
+    }
+
+    public synchronized sun.security.jgss.spi.MechanismFactory getMechFactory(org.ietf.jgss.Oid) throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.spi.MechanismFactory $r1;
+        sun.security.jgss.ProviderList r0;
+        org.ietf.jgss.Oid r2;
+
+        r0 := @this: sun.security.jgss.ProviderList;
+
+        r2 := @parameter0: org.ietf.jgss.Oid;
+
+        if r2 != null goto label1;
+
+        r2 = <sun.security.jgss.ProviderList: org.ietf.jgss.Oid DEFAULT_MECH_OID>;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.security.jgss.ProviderList: sun.security.jgss.spi.MechanismFactory getMechFactory(org.ietf.jgss.Oid,java.security.Provider)>(r2, null);
+
+        return $r1;
+    }
+
+    public synchronized sun.security.jgss.spi.MechanismFactory getMechFactory(org.ietf.jgss.Oid, java.security.Provider) throws org.ietf.jgss.GSSException
+    {
+        java.util.Iterator $r5;
+        org.ietf.jgss.Oid r10;
+        sun.security.jgss.spi.MechanismFactory $r3, $r9;
+        sun.security.jgss.ProviderList r2;
+        java.security.Provider r0;
+        java.util.ArrayList $r4;
+        sun.security.jgss.ProviderList$PreferencesEntry $r1, r8;
+        sun.security.jgss.GSSExceptionImpl $r6;
+        java.lang.Object $r7;
+        boolean $z0, $z1;
+
+        r2 := @this: sun.security.jgss.ProviderList;
+
+        r10 := @parameter0: org.ietf.jgss.Oid;
+
+        r0 := @parameter1: java.security.Provider;
+
+        if r10 != null goto label1;
+
+        r10 = <sun.security.jgss.ProviderList: org.ietf.jgss.Oid DEFAULT_MECH_OID>;
+
+     label1:
+        if r0 != null goto label5;
+
+        $r4 = r2.<sun.security.jgss.ProviderList: java.util.ArrayList preferences>;
+
+        $r5 = virtualinvoke $r4.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label2:
+        $z1 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label4;
+
+        $r7 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r8 = (sun.security.jgss.ProviderList$PreferencesEntry) $r7;
+
+        $z0 = virtualinvoke r8.<sun.security.jgss.ProviderList$PreferencesEntry: boolean impliesMechanism(org.ietf.jgss.Oid)>(r10);
+
+        if $z0 == 0 goto label2;
+
+        $r9 = specialinvoke r2.<sun.security.jgss.ProviderList: sun.security.jgss.spi.MechanismFactory getMechFactory(sun.security.jgss.ProviderList$PreferencesEntry,org.ietf.jgss.Oid)>(r8, r10);
+
+        if $r9 == null goto label3;
+
+        return $r9;
+
+     label3:
+        goto label2;
+
+     label4:
+        $r6 = new sun.security.jgss.GSSExceptionImpl;
+
+        specialinvoke $r6.<sun.security.jgss.GSSExceptionImpl: void <init>(int,org.ietf.jgss.Oid)>(2, r10);
+
+        throw $r6;
+
+     label5:
+        $r1 = new sun.security.jgss.ProviderList$PreferencesEntry;
+
+        specialinvoke $r1.<sun.security.jgss.ProviderList$PreferencesEntry: void <init>(java.security.Provider,org.ietf.jgss.Oid)>(r0, r10);
+
+        $r3 = specialinvoke r2.<sun.security.jgss.ProviderList: sun.security.jgss.spi.MechanismFactory getMechFactory(sun.security.jgss.ProviderList$PreferencesEntry,org.ietf.jgss.Oid)>($r1, r10);
+
+        return $r3;
+    }
+
+    private sun.security.jgss.spi.MechanismFactory getMechFactory(sun.security.jgss.ProviderList$PreferencesEntry, org.ietf.jgss.Oid) throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.GSSCaller $r22;
+        java.util.HashMap $r5, $r24;
+        java.lang.String $r9, $r11, $r12, $r17, $r21;
+        org.ietf.jgss.Oid r3, $r13;
+        sun.security.jgss.spi.MechanismFactory $r23, r25;
+        sun.security.jgss.ProviderList r4;
+        java.security.Provider $r1;
+        sun.security.jgss.ProviderList$PreferencesEntry r0, $r2;
+        sun.security.jgss.GSSExceptionImpl $r14;
+        java.lang.Object $r6;
+        java.lang.StringBuilder $r7, $r8, $r10, $r15, $r16, $r18, $r19, $r20;
+
+        r4 := @this: sun.security.jgss.ProviderList;
+
+        r0 := @parameter0: sun.security.jgss.ProviderList$PreferencesEntry;
+
+        r3 := @parameter1: org.ietf.jgss.Oid;
+
+        $r1 = virtualinvoke r0.<sun.security.jgss.ProviderList$PreferencesEntry: java.security.Provider getProvider()>();
+
+        $r2 = new sun.security.jgss.ProviderList$PreferencesEntry;
+
+        specialinvoke $r2.<sun.security.jgss.ProviderList$PreferencesEntry: void <init>(java.security.Provider,org.ietf.jgss.Oid)>($r1, r3);
+
+        $r5 = r4.<sun.security.jgss.ProviderList: java.util.HashMap factories>;
+
+        $r6 = virtualinvoke $r5.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r2);
+
+        r25 = (sun.security.jgss.spi.MechanismFactory) $r6;
+
+        if r25 != null goto label2;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("GssApiMechanism.");
+
+        $r9 = virtualinvoke r3.<org.ietf.jgss.Oid: java.lang.String toString()>();
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r12 = virtualinvoke $r1.<java.security.Provider: java.lang.String getProperty(java.lang.String)>($r11);
+
+        if $r12 == null goto label1;
+
+        $r22 = r4.<sun.security.jgss.ProviderList: sun.security.jgss.GSSCaller caller>;
+
+        $r23 = staticinvoke <sun.security.jgss.ProviderList: sun.security.jgss.spi.MechanismFactory getMechFactoryImpl(java.security.Provider,java.lang.String,org.ietf.jgss.Oid,sun.security.jgss.GSSCaller)>($r1, $r12, r3, $r22);
+
+        r25 = $r23;
+
+        $r24 = r4.<sun.security.jgss.ProviderList: java.util.HashMap factories>;
+
+        virtualinvoke $r24.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, $r23);
+
+        goto label2;
+
+     label1:
+        $r13 = virtualinvoke r0.<sun.security.jgss.ProviderList$PreferencesEntry: org.ietf.jgss.Oid getOid()>();
+
+        if $r13 == null goto label2;
+
+        $r14 = new sun.security.jgss.GSSExceptionImpl;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Provider ");
+
+        $r17 = virtualinvoke $r1.<java.security.Provider: java.lang.String getName()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" does not support mechanism ");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r3);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r14.<sun.security.jgss.GSSExceptionImpl: void <init>(int,java.lang.String)>(2, $r21);
+
+        throw $r14;
+
+     label2:
+        return r25;
+    }
+
+    private static sun.security.jgss.spi.MechanismFactory getMechFactoryImpl(java.security.Provider, java.lang.String, org.ietf.jgss.Oid, sun.security.jgss.GSSCaller) throws org.ietf.jgss.GSSException
+    {
+        java.lang.Object[] $r8;
+        java.lang.NoSuchMethodException $r23;
+        sun.security.jgss.GSSCaller r9;
+        java.lang.reflect.Constructor $r7;
+        java.lang.InstantiationException $r19;
+        java.lang.SecurityException $r15;
+        java.lang.String r4;
+        boolean $z0, $z1;
+        java.lang.IllegalAccessException $r17;
+        org.ietf.jgss.Oid r13;
+        sun.security.jgss.spi.MechanismFactory $r11, r12;
+        java.lang.Class[] $r6;
+        org.ietf.jgss.GSSException $r5, $r16, $r18, $r20, $r22, $r24, $r26;
+        java.security.Provider r1;
+        java.lang.reflect.InvocationTargetException $r21;
+        sun.security.jgss.wrapper.NativeGSSFactory $r14;
+        java.lang.Class $r0, $r2, r27;
+        java.lang.Object $r10;
+        java.lang.ClassNotFoundException $r25;
+        java.lang.ClassLoader $r3;
+
+        r1 := @parameter0: java.security.Provider;
+
+        r4 := @parameter1: java.lang.String;
+
+        r13 := @parameter2: org.ietf.jgss.Oid;
+
+        r9 := @parameter3: sun.security.jgss.GSSCaller;
+
+     label01:
+        $r0 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String)>("sun.security.jgss.spi.MechanismFactory");
+
+        $r2 = virtualinvoke r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        if $r3 == null goto label02;
+
+        r27 = virtualinvoke $r3.<java.lang.ClassLoader: java.lang.Class loadClass(java.lang.String)>(r4);
+
+        goto label03;
+
+     label02:
+        r27 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String)>(r4);
+
+     label03:
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(r27);
+
+        if $z0 == 0 goto label05;
+
+        $r6 = newarray (java.lang.Class)[1];
+
+        $r6[0] = class "Lsun/security/jgss/GSSCaller;";
+
+        $r7 = virtualinvoke r27.<java.lang.Class: java.lang.reflect.Constructor getConstructor(java.lang.Class[])>($r6);
+
+        $r8 = newarray (java.lang.Object)[1];
+
+        $r8[0] = r9;
+
+        $r10 = virtualinvoke $r7.<java.lang.reflect.Constructor: java.lang.Object newInstance(java.lang.Object[])>($r8);
+
+        $r11 = (sun.security.jgss.spi.MechanismFactory) $r10;
+
+        r12 = (sun.security.jgss.spi.MechanismFactory) $r11;
+
+        $z1 = r12 instanceof sun.security.jgss.wrapper.NativeGSSFactory;
+
+        if $z1 == 0 goto label04;
+
+        $r14 = (sun.security.jgss.wrapper.NativeGSSFactory) r12;
+
+        virtualinvoke $r14.<sun.security.jgss.wrapper.NativeGSSFactory: void setMech(org.ietf.jgss.Oid)>(r13);
+
+     label04:
+        return r12;
+
+     label05:
+        $r5 = staticinvoke <sun.security.jgss.ProviderList: org.ietf.jgss.GSSException createGSSException(java.security.Provider,java.lang.String,java.lang.String,java.lang.Exception)>(r1, r4, "is not a sun.security.jgss.spi.MechanismFactory", null);
+
+        throw $r5;
+
+     label06:
+        $r25 := @caughtexception;
+
+        $r26 = staticinvoke <sun.security.jgss.ProviderList: org.ietf.jgss.GSSException createGSSException(java.security.Provider,java.lang.String,java.lang.String,java.lang.Exception)>(r1, r4, "cannot be created", $r25);
+
+        throw $r26;
+
+     label07:
+        $r23 := @caughtexception;
+
+        $r24 = staticinvoke <sun.security.jgss.ProviderList: org.ietf.jgss.GSSException createGSSException(java.security.Provider,java.lang.String,java.lang.String,java.lang.Exception)>(r1, r4, "cannot be created", $r23);
+
+        throw $r24;
+
+     label08:
+        $r21 := @caughtexception;
+
+        $r22 = staticinvoke <sun.security.jgss.ProviderList: org.ietf.jgss.GSSException createGSSException(java.security.Provider,java.lang.String,java.lang.String,java.lang.Exception)>(r1, r4, "cannot be created", $r21);
+
+        throw $r22;
+
+     label09:
+        $r19 := @caughtexception;
+
+        $r20 = staticinvoke <sun.security.jgss.ProviderList: org.ietf.jgss.GSSException createGSSException(java.security.Provider,java.lang.String,java.lang.String,java.lang.Exception)>(r1, r4, "cannot be created", $r19);
+
+        throw $r20;
+
+     label10:
+        $r17 := @caughtexception;
+
+        $r18 = staticinvoke <sun.security.jgss.ProviderList: org.ietf.jgss.GSSException createGSSException(java.security.Provider,java.lang.String,java.lang.String,java.lang.Exception)>(r1, r4, "cannot be created", $r17);
+
+        throw $r18;
+
+     label11:
+        $r15 := @caughtexception;
+
+        $r16 = staticinvoke <sun.security.jgss.ProviderList: org.ietf.jgss.GSSException createGSSException(java.security.Provider,java.lang.String,java.lang.String,java.lang.Exception)>(r1, r4, "cannot be created", $r15);
+
+        throw $r16;
+
+        catch java.lang.ClassNotFoundException from label01 to label04 with label06;
+        catch java.lang.ClassNotFoundException from label05 to label06 with label06;
+        catch java.lang.NoSuchMethodException from label01 to label04 with label07;
+        catch java.lang.NoSuchMethodException from label05 to label06 with label07;
+        catch java.lang.reflect.InvocationTargetException from label01 to label04 with label08;
+        catch java.lang.reflect.InvocationTargetException from label05 to label06 with label08;
+        catch java.lang.InstantiationException from label01 to label04 with label09;
+        catch java.lang.InstantiationException from label05 to label06 with label09;
+        catch java.lang.IllegalAccessException from label01 to label04 with label10;
+        catch java.lang.IllegalAccessException from label05 to label06 with label10;
+        catch java.lang.SecurityException from label01 to label04 with label11;
+        catch java.lang.SecurityException from label05 to label06 with label11;
+    }
+
+    private static org.ietf.jgss.GSSException createGSSException(java.security.Provider, java.lang.String, java.lang.String, java.lang.Exception)
+    {
+        java.lang.String r1, $r5, $r8, r12, $r14;
+        java.lang.Exception r15;
+        java.security.Provider r4;
+        sun.security.jgss.GSSExceptionImpl $r9;
+        java.lang.StringBuilder $r0, $r2, $r3, $r6, $r7, $r10, $r11, $r13;
+
+        r4 := @parameter0: java.security.Provider;
+
+        r1 := @parameter1: java.lang.String;
+
+        r12 := @parameter2: java.lang.String;
+
+        r15 := @parameter3: java.lang.Exception;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" configured by ");
+
+        $r5 = virtualinvoke r4.<java.security.Provider: java.lang.String getName()>();
+
+        $r6 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" for GSS-API Mechanism Factory ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r9 = new sun.security.jgss.GSSExceptionImpl;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<sun.security.jgss.GSSExceptionImpl: void <init>(int,java.lang.String,java.lang.Exception)>(2, $r14, r15);
+
+        return $r9;
+    }
+
+    public org.ietf.jgss.Oid[] getMechs()
+    {
+        java.util.HashSet $r2;
+        java.lang.Object[] $r3;
+        org.ietf.jgss.Oid[] $r1, $r4;
+        sun.security.jgss.ProviderList r0;
+
+        r0 := @this: sun.security.jgss.ProviderList;
+
+        $r2 = r0.<sun.security.jgss.ProviderList: java.util.HashSet mechs>;
+
+        $r1 = newarray (org.ietf.jgss.Oid)[0];
+
+        $r3 = virtualinvoke $r2.<java.util.HashSet: java.lang.Object[] toArray(java.lang.Object[])>($r1);
+
+        $r4 = (org.ietf.jgss.Oid[]) $r3;
+
+        return $r4;
+    }
+
+    public synchronized void addProviderAtFront(java.security.Provider, org.ietf.jgss.Oid) throws org.ietf.jgss.GSSException
+    {
+        java.util.ArrayList $r4, $r13;
+        java.util.HashSet $r12;
+        java.lang.String $r6, $r10, $r11, $r17, $r21;
+        boolean $z0, $z1, z2;
+        java.util.Iterator $r5;
+        org.ietf.jgss.Oid r2;
+        sun.security.jgss.ProviderList r3;
+        java.security.Provider r1;
+        sun.security.jgss.ProviderList$PreferencesEntry $r0, r23;
+        sun.security.jgss.GSSExceptionImpl $r14;
+        java.lang.StringBuilder $r7, $r8, $r9, $r15, $r16, $r18, $r19, $r20;
+        java.lang.Object $r22;
+
+        r3 := @this: sun.security.jgss.ProviderList;
+
+        r1 := @parameter0: java.security.Provider;
+
+        r2 := @parameter1: org.ietf.jgss.Oid;
+
+        $r0 = new sun.security.jgss.ProviderList$PreferencesEntry;
+
+        specialinvoke $r0.<sun.security.jgss.ProviderList$PreferencesEntry: void <init>(java.security.Provider,org.ietf.jgss.Oid)>(r1, r2);
+
+        $r4 = r3.<sun.security.jgss.ProviderList: java.util.ArrayList preferences>;
+
+        $r5 = virtualinvoke $r4.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label1:
+        $z1 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label2;
+
+        $r22 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r23 = (sun.security.jgss.ProviderList$PreferencesEntry) $r22;
+
+        $z0 = virtualinvoke $r0.<sun.security.jgss.ProviderList$PreferencesEntry: boolean implies(java.lang.Object)>(r23);
+
+        if $z0 == 0 goto label1;
+
+        interfaceinvoke $r5.<java.util.Iterator: void remove()>();
+
+        goto label1;
+
+     label2:
+        if r2 != null goto label3;
+
+        z2 = specialinvoke r3.<sun.security.jgss.ProviderList: boolean addAllMechsFromProvider(java.security.Provider)>(r1);
+
+        goto label5;
+
+     label3:
+        $r6 = virtualinvoke r2.<org.ietf.jgss.Oid: java.lang.String toString()>();
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("GssApiMechanism.");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r11 = virtualinvoke r1.<java.security.Provider: java.lang.String getProperty(java.lang.String)>($r10);
+
+        if $r11 != null goto label4;
+
+        $r14 = new sun.security.jgss.GSSExceptionImpl;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Provider ");
+
+        $r17 = virtualinvoke r1.<java.security.Provider: java.lang.String getName()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" does not support ");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r14.<sun.security.jgss.GSSExceptionImpl: void <init>(int,java.lang.String)>(2, $r21);
+
+        throw $r14;
+
+     label4:
+        $r12 = r3.<sun.security.jgss.ProviderList: java.util.HashSet mechs>;
+
+        virtualinvoke $r12.<java.util.HashSet: boolean add(java.lang.Object)>(r2);
+
+        z2 = 1;
+
+     label5:
+        if z2 == 0 goto label6;
+
+        $r13 = r3.<sun.security.jgss.ProviderList: java.util.ArrayList preferences>;
+
+        virtualinvoke $r13.<java.util.ArrayList: void add(int,java.lang.Object)>(0, $r0);
+
+     label6:
+        return;
+    }
+
+    public synchronized void addProviderAtEnd(java.security.Provider, org.ietf.jgss.Oid) throws org.ietf.jgss.GSSException
+    {
+        java.util.ArrayList $r4, $r13;
+        java.util.HashSet $r12;
+        java.lang.String $r6, $r10, $r11, $r17, $r21;
+        boolean $z0, $z1, z2;
+        java.util.Iterator $r5;
+        org.ietf.jgss.Oid r2;
+        sun.security.jgss.ProviderList r3;
+        java.security.Provider r1;
+        sun.security.jgss.ProviderList$PreferencesEntry $r0, r23;
+        sun.security.jgss.GSSExceptionImpl $r14;
+        java.lang.StringBuilder $r7, $r8, $r9, $r15, $r16, $r18, $r19, $r20;
+        java.lang.Object $r22;
+
+        r3 := @this: sun.security.jgss.ProviderList;
+
+        r1 := @parameter0: java.security.Provider;
+
+        r2 := @parameter1: org.ietf.jgss.Oid;
+
+        $r0 = new sun.security.jgss.ProviderList$PreferencesEntry;
+
+        specialinvoke $r0.<sun.security.jgss.ProviderList$PreferencesEntry: void <init>(java.security.Provider,org.ietf.jgss.Oid)>(r1, r2);
+
+        $r4 = r3.<sun.security.jgss.ProviderList: java.util.ArrayList preferences>;
+
+        $r5 = virtualinvoke $r4.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r22 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r23 = (sun.security.jgss.ProviderList$PreferencesEntry) $r22;
+
+        $z1 = virtualinvoke r23.<sun.security.jgss.ProviderList$PreferencesEntry: boolean implies(java.lang.Object)>($r0);
+
+        if $z1 == 0 goto label1;
+
+        return;
+
+     label2:
+        if r2 != null goto label3;
+
+        z2 = specialinvoke r3.<sun.security.jgss.ProviderList: boolean addAllMechsFromProvider(java.security.Provider)>(r1);
+
+        goto label5;
+
+     label3:
+        $r6 = virtualinvoke r2.<org.ietf.jgss.Oid: java.lang.String toString()>();
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("GssApiMechanism.");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r11 = virtualinvoke r1.<java.security.Provider: java.lang.String getProperty(java.lang.String)>($r10);
+
+        if $r11 != null goto label4;
+
+        $r14 = new sun.security.jgss.GSSExceptionImpl;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Provider ");
+
+        $r17 = virtualinvoke r1.<java.security.Provider: java.lang.String getName()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" does not support ");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r14.<sun.security.jgss.GSSExceptionImpl: void <init>(int,java.lang.String)>(2, $r21);
+
+        throw $r14;
+
+     label4:
+        $r12 = r3.<sun.security.jgss.ProviderList: java.util.HashSet mechs>;
+
+        virtualinvoke $r12.<java.util.HashSet: boolean add(java.lang.Object)>(r2);
+
+        z2 = 1;
+
+     label5:
+        if z2 == 0 goto label6;
+
+        $r13 = r3.<sun.security.jgss.ProviderList: java.util.ArrayList preferences>;
+
+        virtualinvoke $r13.<java.util.ArrayList: boolean add(java.lang.Object)>($r0);
+
+     label6:
+        return;
+    }
+
+    private boolean addAllMechsFromProvider(java.security.Provider)
+    {
+        java.util.Enumeration $r1;
+        java.util.HashSet $r6;
+        java.lang.String r3, $r12, $r14;
+        boolean $z0, z1, $z2;
+        org.ietf.jgss.Oid $r5;
+        org.ietf.jgss.GSSException $r7;
+        sun.security.jgss.ProviderList r4;
+        java.security.Provider r0;
+        java.lang.Object $r2;
+        java.lang.StringBuilder $r8, $r9, $r10, $r11, $r13;
+
+        r4 := @this: sun.security.jgss.ProviderList;
+
+        r0 := @parameter0: java.security.Provider;
+
+        z1 = 0;
+
+        $r1 = virtualinvoke r0.<java.security.Provider: java.util.Enumeration keys()>();
+
+     label1:
+        $z2 = interfaceinvoke $r1.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z2 == 0 goto label5;
+
+        $r2 = interfaceinvoke $r1.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r3 = (java.lang.String) $r2;
+
+        $z0 = specialinvoke r4.<sun.security.jgss.ProviderList: boolean isMechFactoryProperty(java.lang.String)>(r3);
+
+        if $z0 == 0 goto label1;
+
+     label2:
+        $r5 = specialinvoke r4.<sun.security.jgss.ProviderList: org.ietf.jgss.Oid getOidFromMechFactoryProperty(java.lang.String)>(r3);
+
+        $r6 = r4.<sun.security.jgss.ProviderList: java.util.HashSet mechs>;
+
+        virtualinvoke $r6.<java.util.HashSet: boolean add(java.lang.Object)>($r5);
+
+        z1 = 1;
+
+     label3:
+        goto label1;
+
+     label4:
+        $r7 := @caughtexception;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignore the invalid property ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" from provider ");
+
+        $r12 = virtualinvoke r0.<java.security.Provider: java.lang.String getName()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.security.jgss.GSSUtil: void debug(java.lang.String)>($r14);
+
+        goto label1;
+
+     label5:
+        return z1;
+
+        catch org.ietf.jgss.GSSException from label2 to label3 with label4;
+    }
+
+    static void <clinit>()
+    {
+        org.ietf.jgss.Oid r4, $r5;
+        int $i0;
+        java.lang.Object $r2;
+        java.lang.String $r0, r3;
+        sun.security.action.GetPropertyAction $r1;
+
+        <sun.security.jgss.ProviderList: java.lang.String DEFAULT_MECH_PROP> = "sun.security.jgss.mechanism";
+
+        <sun.security.jgss.ProviderList: java.lang.String SPI_MECH_FACTORY_TYPE> = "sun.security.jgss.spi.MechanismFactory";
+
+        <sun.security.jgss.ProviderList: java.lang.String PROV_PROP_PREFIX> = "GssApiMechanism.";
+
+        $r0 = "GssApiMechanism.";
+
+        $i0 = virtualinvoke $r0.<java.lang.String: int length()>();
+
+        <sun.security.jgss.ProviderList: int PROV_PROP_PREFIX_LEN> = $i0;
+
+        r4 = null;
+
+        $r1 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r1.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("sun.security.jgss.mechanism");
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        r3 = (java.lang.String) $r2;
+
+        if r3 == null goto label1;
+
+        r4 = staticinvoke <sun.security.jgss.GSSUtil: org.ietf.jgss.Oid createOid(java.lang.String)>(r3);
+
+     label1:
+        if r4 != null goto label2;
+
+        $r5 = <sun.security.jgss.GSSUtil: org.ietf.jgss.Oid GSS_KRB5_MECH_OID>;
+
+        goto label3;
+
+     label2:
+        $r5 = r4;
+
+     label3:
+        <sun.security.jgss.ProviderList: org.ietf.jgss.Oid DEFAULT_MECH_OID> = $r5;
+
+        return;
+    }
+}

@@ -1,0 +1,413 @@
+public class com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl extends java.lang.Object implements com.sun.corba.se.spi.orbutil.threadpool.WorkQueue
+{
+    private com.sun.corba.se.spi.orbutil.threadpool.ThreadPool workerThreadPool;
+    private java.util.LinkedList theWorkQueue;
+    private long workItemsAdded;
+    private long workItemsDequeued;
+    private long totalTimeInQueue;
+    private java.lang.String name;
+    private com.sun.corba.se.spi.monitoring.MonitoredObject workqueueMonitoredObject;
+
+    public void <init>()
+    {
+        com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl r0;
+        java.util.LinkedList $r1;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.LinkedList;
+
+        specialinvoke $r1.<java.util.LinkedList: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: java.util.LinkedList theWorkQueue> = $r1;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: long workItemsAdded> = 0L;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: long workItemsDequeued> = 1L;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: long totalTimeInQueue> = 0L;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: java.lang.String name> = "default-workqueue";
+
+        specialinvoke r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: void initializeMonitoring()>();
+
+        return;
+    }
+
+    public void <init>(com.sun.corba.se.spi.orbutil.threadpool.ThreadPool)
+    {
+        com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl r0;
+        com.sun.corba.se.spi.orbutil.threadpool.ThreadPool r1;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orbutil.threadpool.ThreadPool;
+
+        specialinvoke r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: void <init>(com.sun.corba.se.spi.orbutil.threadpool.ThreadPool,java.lang.String)>(r1, "default-workqueue");
+
+        return;
+    }
+
+    public void <init>(com.sun.corba.se.spi.orbutil.threadpool.ThreadPool, java.lang.String)
+    {
+        com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl r0;
+        com.sun.corba.se.spi.orbutil.threadpool.ThreadPool r2;
+        java.lang.String r3;
+        java.util.LinkedList $r1;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl;
+
+        r2 := @parameter0: com.sun.corba.se.spi.orbutil.threadpool.ThreadPool;
+
+        r3 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.LinkedList;
+
+        specialinvoke $r1.<java.util.LinkedList: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: java.util.LinkedList theWorkQueue> = $r1;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: long workItemsAdded> = 0L;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: long workItemsDequeued> = 1L;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: long totalTimeInQueue> = 0L;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: com.sun.corba.se.spi.orbutil.threadpool.ThreadPool workerThreadPool> = r2;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: java.lang.String name> = r3;
+
+        specialinvoke r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: void initializeMonitoring()>();
+
+        return;
+    }
+
+    private void initializeMonitoring()
+    {
+        com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl$3 $r8;
+        com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl$1 $r4;
+        com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl$2 $r6;
+        com.sun.corba.se.spi.monitoring.MonitoredObject $r3, $r5, $r7, $r9;
+        com.sun.corba.se.spi.monitoring.MonitoredObjectFactory $r1;
+        com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl r0;
+        java.lang.String $r2;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl;
+
+        $r1 = staticinvoke <com.sun.corba.se.spi.monitoring.MonitoringFactories: com.sun.corba.se.spi.monitoring.MonitoredObjectFactory getMonitoredObjectFactory()>();
+
+        $r2 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: java.lang.String name>;
+
+        $r3 = interfaceinvoke $r1.<com.sun.corba.se.spi.monitoring.MonitoredObjectFactory: com.sun.corba.se.spi.monitoring.MonitoredObject createMonitoredObject(java.lang.String,java.lang.String)>($r2, "Monitoring for a Work Queue");
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: com.sun.corba.se.spi.monitoring.MonitoredObject workqueueMonitoredObject> = $r3;
+
+        $r4 = new com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl$1;
+
+        specialinvoke $r4.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl$1: void <init>(com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl,java.lang.String,java.lang.String)>(r0, "totalWorkItemsAdded", "Total number of Work items added to the Queue");
+
+        $r5 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: com.sun.corba.se.spi.monitoring.MonitoredObject workqueueMonitoredObject>;
+
+        interfaceinvoke $r5.<com.sun.corba.se.spi.monitoring.MonitoredObject: void addAttribute(com.sun.corba.se.spi.monitoring.MonitoredAttribute)>($r4);
+
+        $r6 = new com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl$2;
+
+        specialinvoke $r6.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl$2: void <init>(com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl,java.lang.String,java.lang.String)>(r0, "workItemsInQueue", "Number of Work items in the Queue to be processed");
+
+        $r7 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: com.sun.corba.se.spi.monitoring.MonitoredObject workqueueMonitoredObject>;
+
+        interfaceinvoke $r7.<com.sun.corba.se.spi.monitoring.MonitoredObject: void addAttribute(com.sun.corba.se.spi.monitoring.MonitoredAttribute)>($r6);
+
+        $r8 = new com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl$3;
+
+        specialinvoke $r8.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl$3: void <init>(com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl,java.lang.String,java.lang.String)>(r0, "averageTimeInQueue", "Average time a work item waits in the work queue");
+
+        $r9 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: com.sun.corba.se.spi.monitoring.MonitoredObject workqueueMonitoredObject>;
+
+        interfaceinvoke $r9.<com.sun.corba.se.spi.monitoring.MonitoredObject: void addAttribute(com.sun.corba.se.spi.monitoring.MonitoredAttribute)>($r8);
+
+        return;
+    }
+
+    com.sun.corba.se.spi.monitoring.MonitoredObject getMonitoredObject()
+    {
+        com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl r0;
+        com.sun.corba.se.spi.monitoring.MonitoredObject $r1;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: com.sun.corba.se.spi.monitoring.MonitoredObject workqueueMonitoredObject>;
+
+        return $r1;
+    }
+
+    public synchronized void addWork(com.sun.corba.se.spi.orbutil.threadpool.Work)
+    {
+        com.sun.corba.se.spi.orbutil.threadpool.Work r1;
+        com.sun.corba.se.spi.orbutil.threadpool.ThreadPool $r3;
+        long $l0, $l1, $l2;
+        com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl r0;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl $r4;
+        java.util.LinkedList $r2;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orbutil.threadpool.Work;
+
+        $l0 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: long workItemsAdded>;
+
+        $l1 = $l0 + 1L;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: long workItemsAdded> = $l1;
+
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        interfaceinvoke r1.<com.sun.corba.se.spi.orbutil.threadpool.Work: void setEnqueueTime(long)>($l2);
+
+        $r2 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: java.util.LinkedList theWorkQueue>;
+
+        virtualinvoke $r2.<java.util.LinkedList: void addLast(java.lang.Object)>(r1);
+
+        $r3 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: com.sun.corba.se.spi.orbutil.threadpool.ThreadPool workerThreadPool>;
+
+        $r4 = (com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl) $r3;
+
+        virtualinvoke $r4.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: void notifyForAvailableWork(com.sun.corba.se.spi.orbutil.threadpool.WorkQueue)>(r0);
+
+        return;
+    }
+
+    synchronized com.sun.corba.se.spi.orbutil.threadpool.Work requestWork(long) throws com.sun.corba.se.impl.orbutil.threadpool.TimeoutException, java.lang.InterruptedException
+    {
+        com.sun.corba.se.impl.orbutil.threadpool.TimeoutException $r21;
+        com.sun.corba.se.spi.orbutil.threadpool.ThreadPool $r1, $r5, $r10, $r14, $r17;
+        byte $b6;
+        long l1, $l2, l3, $l5, $l7, $l8, $l9, $l10, $l11, $l12, $l13, $l14, $l15, $l16, $l17, $l18, $l19, $l20, l21;
+        int $i0, $i4, $i22;
+        java.util.LinkedList $r3, $r4, $r8, $r12;
+        com.sun.corba.se.spi.orbutil.threadpool.Work r19, r20;
+        com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl r0;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl $r2, $r6, $r11, $r15, $r18;
+        java.lang.InterruptedException $r16;
+        java.lang.Object $r9, $r13;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl;
+
+        l1 := @parameter0: long;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: com.sun.corba.se.spi.orbutil.threadpool.ThreadPool workerThreadPool>;
+
+        $r2 = (com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl) $r1;
+
+        virtualinvoke $r2.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: void incrementNumberOfAvailableThreads()>();
+
+        $r3 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: java.util.LinkedList theWorkQueue>;
+
+        $i0 = virtualinvoke $r3.<java.util.LinkedList: int size()>();
+
+        if $i0 == 0 goto label1;
+
+        $r12 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: java.util.LinkedList theWorkQueue>;
+
+        $r13 = virtualinvoke $r12.<java.util.LinkedList: java.lang.Object removeFirst()>();
+
+        r19 = (com.sun.corba.se.spi.orbutil.threadpool.Work) $r13;
+
+        $l14 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: long totalTimeInQueue>;
+
+        $l15 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l16 = interfaceinvoke r19.<com.sun.corba.se.spi.orbutil.threadpool.Work: long getEnqueueTime()>();
+
+        $l17 = $l15 - $l16;
+
+        $l18 = $l14 + $l17;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: long totalTimeInQueue> = $l18;
+
+        $l19 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: long workItemsDequeued>;
+
+        $l20 = $l19 + 1L;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: long workItemsDequeued> = $l20;
+
+        $r14 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: com.sun.corba.se.spi.orbutil.threadpool.ThreadPool workerThreadPool>;
+
+        $r15 = (com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl) $r14;
+
+        virtualinvoke $r15.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: void decrementNumberOfAvailableThreads()>();
+
+        return r19;
+
+     label1:
+        l21 = l1;
+
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        l3 = $l2 + l1;
+
+     label2:
+        virtualinvoke r0.<java.lang.Object: void wait(long)>(l21);
+
+        $r4 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: java.util.LinkedList theWorkQueue>;
+
+        $i4 = virtualinvoke $r4.<java.util.LinkedList: int size()>();
+
+        if $i4 == 0 goto label4;
+
+        $r8 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: java.util.LinkedList theWorkQueue>;
+
+        $r9 = virtualinvoke $r8.<java.util.LinkedList: java.lang.Object removeFirst()>();
+
+        r20 = (com.sun.corba.se.spi.orbutil.threadpool.Work) $r9;
+
+        $l7 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: long totalTimeInQueue>;
+
+        $l8 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l9 = interfaceinvoke r20.<com.sun.corba.se.spi.orbutil.threadpool.Work: long getEnqueueTime()>();
+
+        $l10 = $l8 - $l9;
+
+        $l11 = $l7 + $l10;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: long totalTimeInQueue> = $l11;
+
+        $l12 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: long workItemsDequeued>;
+
+        $l13 = $l12 + 1L;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: long workItemsDequeued> = $l13;
+
+        $r10 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: com.sun.corba.se.spi.orbutil.threadpool.ThreadPool workerThreadPool>;
+
+        $r11 = (com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl) $r10;
+
+        virtualinvoke $r11.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: void decrementNumberOfAvailableThreads()>();
+
+     label3:
+        return r20;
+
+     label4:
+        $l5 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        l21 = l3 - $l5;
+
+        $b6 = l21 cmp 0L;
+
+        $i22 = (int) $b6;
+
+        if $i22 > 0 goto label2;
+
+        $r5 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: com.sun.corba.se.spi.orbutil.threadpool.ThreadPool workerThreadPool>;
+
+        $r6 = (com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl) $r5;
+
+        virtualinvoke $r6.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: void decrementNumberOfAvailableThreads()>();
+
+        $r21 = new com.sun.corba.se.impl.orbutil.threadpool.TimeoutException;
+
+        specialinvoke $r21.<com.sun.corba.se.impl.orbutil.threadpool.TimeoutException: void <init>()>();
+
+        throw $r21;
+
+     label5:
+        $r16 := @caughtexception;
+
+        $r17 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: com.sun.corba.se.spi.orbutil.threadpool.ThreadPool workerThreadPool>;
+
+        $r18 = (com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl) $r17;
+
+        virtualinvoke $r18.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: void decrementNumberOfAvailableThreads()>();
+
+        throw $r16;
+
+        catch java.lang.InterruptedException from label1 to label3 with label5;
+        catch java.lang.InterruptedException from label4 to label5 with label5;
+    }
+
+    public void setThreadPool(com.sun.corba.se.spi.orbutil.threadpool.ThreadPool)
+    {
+        com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl r0;
+        com.sun.corba.se.spi.orbutil.threadpool.ThreadPool r1;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orbutil.threadpool.ThreadPool;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: com.sun.corba.se.spi.orbutil.threadpool.ThreadPool workerThreadPool> = r1;
+
+        return;
+    }
+
+    public com.sun.corba.se.spi.orbutil.threadpool.ThreadPool getThreadPool()
+    {
+        com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl r0;
+        com.sun.corba.se.spi.orbutil.threadpool.ThreadPool $r1;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: com.sun.corba.se.spi.orbutil.threadpool.ThreadPool workerThreadPool>;
+
+        return $r1;
+    }
+
+    public long totalWorkItemsAdded()
+    {
+        com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl r0;
+        long $l0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl;
+
+        $l0 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: long workItemsAdded>;
+
+        return $l0;
+    }
+
+    public int workItemsInQueue()
+    {
+        int $i0;
+        com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl r0;
+        java.util.LinkedList $r1;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: java.util.LinkedList theWorkQueue>;
+
+        $i0 = virtualinvoke $r1.<java.util.LinkedList: int size()>();
+
+        return $i0;
+    }
+
+    public synchronized long averageTimeInQueue()
+    {
+        com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl r0;
+        long $l0, $l1, $l2;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl;
+
+        $l1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: long totalTimeInQueue>;
+
+        $l0 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: long workItemsDequeued>;
+
+        $l2 = $l1 / $l0;
+
+        return $l2;
+    }
+
+    public java.lang.String getName()
+    {
+        com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl r0;
+        java.lang.String $r1;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: java.lang.String name>;
+
+        return $r1;
+    }
+}

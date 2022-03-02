@@ -1,0 +1,3398 @@
+public class java.util.concurrent.locks.StampedLock extends java.lang.Object implements java.io.Serializable
+{
+    private static final long serialVersionUID;
+    private static final int NCPU;
+    private static final int SPINS;
+    private static final int HEAD_SPINS;
+    private static final int MAX_HEAD_SPINS;
+    private static final int OVERFLOW_YIELD_RATE;
+    private static final int LG_READERS;
+    private static final long RUNIT;
+    private static final long WBIT;
+    private static final long RBITS;
+    private static final long RFULL;
+    private static final long ABITS;
+    private static final long SBITS;
+    private static final long ORIGIN;
+    private static final long INTERRUPTED;
+    private static final int WAITING;
+    private static final int CANCELLED;
+    private static final int RMODE;
+    private static final int WMODE;
+    private transient volatile java.util.concurrent.locks.StampedLock$WNode whead;
+    private transient volatile java.util.concurrent.locks.StampedLock$WNode wtail;
+    transient java.util.concurrent.locks.StampedLock$ReadLockView readLockView;
+    transient java.util.concurrent.locks.StampedLock$WriteLockView writeLockView;
+    transient java.util.concurrent.locks.StampedLock$ReadWriteLockView readWriteLockView;
+    private transient volatile long state;
+    private transient int readerOverflow;
+    private static final sun.misc.Unsafe U;
+    private static final long STATE;
+    private static final long WHEAD;
+    private static final long WTAIL;
+    private static final long WNEXT;
+    private static final long WSTATUS;
+    private static final long WCOWAIT;
+    private static final long PARKBLOCKER;
+
+    public void <init>()
+    {
+        java.util.concurrent.locks.StampedLock r0;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.util.concurrent.locks.StampedLock: long state> = 256L;
+
+        return;
+    }
+
+    public long writeLock()
+    {
+        sun.misc.Unsafe $r1;
+        long $l0, $l1, $l3, $l4, $l5;
+        byte $b2;
+        java.util.concurrent.locks.StampedLock r0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+        $l0 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l1 = $l0 & 255L;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 != 0 goto label1;
+
+        $r1 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l4 = <java.util.concurrent.locks.StampedLock: long STATE>;
+
+        $l3 = $l0 + 128L;
+
+        $z0 = virtualinvoke $r1.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l4, $l0, $l3);
+
+        if $z0 == 0 goto label1;
+
+        $l5 = $l3;
+
+        goto label2;
+
+     label1:
+        $l5 = specialinvoke r0.<java.util.concurrent.locks.StampedLock: long acquireWrite(boolean,long)>(0, 0L);
+
+     label2:
+        return $l5;
+    }
+
+    public long tryWriteLock()
+    {
+        sun.misc.Unsafe $r1;
+        long $l0, $l1, $l3, $l4, $l5;
+        byte $b2;
+        java.util.concurrent.locks.StampedLock r0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+        $l0 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l1 = $l0 & 255L;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 != 0 goto label1;
+
+        $r1 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l4 = <java.util.concurrent.locks.StampedLock: long STATE>;
+
+        $l3 = $l0 + 128L;
+
+        $z0 = virtualinvoke $r1.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l4, $l0, $l3);
+
+        if $z0 == 0 goto label1;
+
+        $l5 = $l3;
+
+        goto label2;
+
+     label1:
+        $l5 = 0L;
+
+     label2:
+        return $l5;
+    }
+
+    public long tryWriteLock(long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException
+    {
+        long l0, $l1, $l2, $l5, $l6, $l8, l10;
+        byte $b3, $b4, $b7, $b9;
+        int $i11;
+        boolean $z0;
+        java.util.concurrent.TimeUnit r0;
+        java.lang.InterruptedException $r3;
+        java.util.concurrent.locks.StampedLock r2;
+
+        r2 := @this: java.util.concurrent.locks.StampedLock;
+
+        l0 := @parameter0: long;
+
+        r0 := @parameter1: java.util.concurrent.TimeUnit;
+
+        $l1 = virtualinvoke r0.<java.util.concurrent.TimeUnit: long toNanos(long)>(l0);
+
+        $z0 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z0 != 0 goto label4;
+
+        $l2 = virtualinvoke r2.<java.util.concurrent.locks.StampedLock: long tryWriteLock()>();
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 == 0 goto label1;
+
+        return $l2;
+
+     label1:
+        $b4 = $l1 cmp 0L;
+
+        $i11 = (int) $b4;
+
+        if $i11 > 0 goto label2;
+
+        return 0L;
+
+     label2:
+        $l5 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        $l6 = $l5 + $l1;
+
+        l10 = $l6;
+
+        $b7 = $l6 cmp 0L;
+
+        if $b7 != 0 goto label3;
+
+        l10 = 1L;
+
+     label3:
+        $l8 = specialinvoke r2.<java.util.concurrent.locks.StampedLock: long acquireWrite(boolean,long)>(1, l10);
+
+        $b9 = $l8 cmp 1L;
+
+        if $b9 == 0 goto label4;
+
+        return $l8;
+
+     label4:
+        $r3 = new java.lang.InterruptedException;
+
+        specialinvoke $r3.<java.lang.InterruptedException: void <init>()>();
+
+        throw $r3;
+    }
+
+    public long writeLockInterruptibly() throws java.lang.InterruptedException
+    {
+        byte $b1;
+        java.lang.InterruptedException $r0;
+        long $l0;
+        java.util.concurrent.locks.StampedLock r1;
+        boolean $z0;
+
+        r1 := @this: java.util.concurrent.locks.StampedLock;
+
+        $z0 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z0 != 0 goto label1;
+
+        $l0 = specialinvoke r1.<java.util.concurrent.locks.StampedLock: long acquireWrite(boolean,long)>(1, 0L);
+
+        $b1 = $l0 cmp 1L;
+
+        if $b1 == 0 goto label1;
+
+        return $l0;
+
+     label1:
+        $r0 = new java.lang.InterruptedException;
+
+        specialinvoke $r0.<java.lang.InterruptedException: void <init>()>();
+
+        throw $r0;
+    }
+
+    public long readLock()
+    {
+        sun.misc.Unsafe $r3;
+        java.util.concurrent.locks.StampedLock$WNode $r1, $r2;
+        long l0, $l1, $l3, $l4, $l5;
+        byte $b2;
+        int $i6;
+        java.util.concurrent.locks.StampedLock r0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+        l0 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $r2 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        $r1 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode wtail>;
+
+        if $r2 != $r1 goto label1;
+
+        $l1 = l0 & 255L;
+
+        $b2 = $l1 cmp 126L;
+
+        $i6 = (int) $b2;
+
+        if $i6 >= 0 goto label1;
+
+        $r3 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l4 = <java.util.concurrent.locks.StampedLock: long STATE>;
+
+        $l3 = l0 + 1L;
+
+        $z0 = virtualinvoke $r3.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l4, l0, $l3);
+
+        if $z0 == 0 goto label1;
+
+        $l5 = $l3;
+
+        goto label2;
+
+     label1:
+        $l5 = specialinvoke r0.<java.util.concurrent.locks.StampedLock: long acquireRead(boolean,long)>(0, 0L);
+
+     label2:
+        return $l5;
+    }
+
+    public long tryReadLock()
+    {
+        sun.misc.Unsafe $r1;
+        long $l0, $l1, $l4, $l6, $l7;
+        byte $b2, $b3, $b5;
+        int $i8;
+        java.util.concurrent.locks.StampedLock r0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+     label1:
+        $l0 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l1 = $l0 & 255L;
+
+        $b2 = $l1 cmp 128L;
+
+        if $b2 != 0 goto label2;
+
+        return 0L;
+
+     label2:
+        $b3 = $l1 cmp 126L;
+
+        $i8 = (int) $b3;
+
+        if $i8 >= 0 goto label3;
+
+        $r1 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l7 = <java.util.concurrent.locks.StampedLock: long STATE>;
+
+        $l6 = $l0 + 1L;
+
+        $z0 = virtualinvoke $r1.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l7, $l0, $l6);
+
+        if $z0 == 0 goto label4;
+
+        return $l6;
+
+     label3:
+        $l4 = specialinvoke r0.<java.util.concurrent.locks.StampedLock: long tryIncReaderOverflow(long)>($l0);
+
+        $b5 = $l4 cmp 0L;
+
+        if $b5 == 0 goto label4;
+
+        return $l4;
+
+     label4:
+        goto label1;
+    }
+
+    public long tryReadLock(long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException
+    {
+        sun.misc.Unsafe $r3;
+        long l0, $l1, $l2, $l3, $l5, $l6, $l8, $l11, $l13, $l14, l16;
+        byte $b4, $b7, $b9, $b10, $b12, $b15;
+        int $i17, $i18;
+        boolean $z0, $z1;
+        java.util.concurrent.TimeUnit r0;
+        java.lang.InterruptedException $r4;
+        java.util.concurrent.locks.StampedLock r2;
+
+        r2 := @this: java.util.concurrent.locks.StampedLock;
+
+        l0 := @parameter0: long;
+
+        r0 := @parameter1: java.util.concurrent.TimeUnit;
+
+        $l1 = virtualinvoke r0.<java.util.concurrent.TimeUnit: long toNanos(long)>(l0);
+
+        $z0 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z0 != 0 goto label5;
+
+        $l2 = r2.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l3 = $l2 & 255L;
+
+        $b4 = $l3 cmp 128L;
+
+        if $b4 == 0 goto label2;
+
+        $b10 = $l3 cmp 126L;
+
+        $i17 = (int) $b10;
+
+        if $i17 >= 0 goto label1;
+
+        $r3 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l14 = <java.util.concurrent.locks.StampedLock: long STATE>;
+
+        $l13 = $l2 + 1L;
+
+        $z1 = virtualinvoke $r3.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r2, $l14, $l2, $l13);
+
+        if $z1 == 0 goto label2;
+
+        return $l13;
+
+     label1:
+        $l11 = specialinvoke r2.<java.util.concurrent.locks.StampedLock: long tryIncReaderOverflow(long)>($l2);
+
+        $b12 = $l11 cmp 0L;
+
+        if $b12 == 0 goto label2;
+
+        return $l11;
+
+     label2:
+        $b15 = $l1 cmp 0L;
+
+        $i18 = (int) $b15;
+
+        if $i18 > 0 goto label3;
+
+        return 0L;
+
+     label3:
+        $l5 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        $l6 = $l5 + $l1;
+
+        l16 = $l6;
+
+        $b7 = $l6 cmp 0L;
+
+        if $b7 != 0 goto label4;
+
+        l16 = 1L;
+
+     label4:
+        $l8 = specialinvoke r2.<java.util.concurrent.locks.StampedLock: long acquireRead(boolean,long)>(1, l16);
+
+        $b9 = $l8 cmp 1L;
+
+        if $b9 == 0 goto label5;
+
+        return $l8;
+
+     label5:
+        $r4 = new java.lang.InterruptedException;
+
+        specialinvoke $r4.<java.lang.InterruptedException: void <init>()>();
+
+        throw $r4;
+    }
+
+    public long readLockInterruptibly() throws java.lang.InterruptedException
+    {
+        byte $b1;
+        java.lang.InterruptedException $r0;
+        long $l0;
+        java.util.concurrent.locks.StampedLock r1;
+        boolean $z0;
+
+        r1 := @this: java.util.concurrent.locks.StampedLock;
+
+        $z0 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z0 != 0 goto label1;
+
+        $l0 = specialinvoke r1.<java.util.concurrent.locks.StampedLock: long acquireRead(boolean,long)>(1, 0L);
+
+        $b1 = $l0 cmp 1L;
+
+        if $b1 == 0 goto label1;
+
+        return $l0;
+
+     label1:
+        $r0 = new java.lang.InterruptedException;
+
+        specialinvoke $r0.<java.lang.InterruptedException: void <init>()>();
+
+        throw $r0;
+    }
+
+    public long tryOptimisticRead()
+    {
+        byte $b2;
+        long $l0, $l1, $l3;
+        java.util.concurrent.locks.StampedLock r0;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+        $l0 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l1 = $l0 & 128L;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 != 0 goto label1;
+
+        $l3 = $l0 & -128L;
+
+        goto label2;
+
+     label1:
+        $l3 = 0L;
+
+     label2:
+        return $l3;
+    }
+
+    public boolean validate(long)
+    {
+        sun.misc.Unsafe $r0;
+        long l0, $l1, $l2, $l3;
+        byte $b4;
+        java.util.concurrent.locks.StampedLock r1;
+        boolean $z0;
+
+        r1 := @this: java.util.concurrent.locks.StampedLock;
+
+        l0 := @parameter0: long;
+
+        $r0 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        virtualinvoke $r0.<sun.misc.Unsafe: void loadFence()>();
+
+        $l3 = l0 & -128L;
+
+        $l1 = r1.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l2 = $l1 & -128L;
+
+        $b4 = $l3 cmp $l2;
+
+        if $b4 != 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public void unlockWrite(long)
+    {
+        java.util.concurrent.locks.StampedLock$WNode $r2;
+        long $l0, $l2, $l4, l7, $l8;
+        java.lang.IllegalMonitorStateException $r1;
+        byte $b1, $b3, $b5;
+        int $i6;
+        java.util.concurrent.locks.StampedLock r0;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+        l7 := @parameter0: long;
+
+        $l0 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $b1 = $l0 cmp l7;
+
+        if $b1 != 0 goto label1;
+
+        $l2 = l7 & 128L;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 != 0 goto label2;
+
+     label1:
+        $r1 = new java.lang.IllegalMonitorStateException;
+
+        specialinvoke $r1.<java.lang.IllegalMonitorStateException: void <init>()>();
+
+        throw $r1;
+
+     label2:
+        $l4 = l7 + 128L;
+
+        $b5 = $l4 cmp 0L;
+
+        if $b5 != 0 goto label3;
+
+        $l8 = 256L;
+
+        goto label4;
+
+     label3:
+        $l8 = $l4;
+
+     label4:
+        r0.<java.util.concurrent.locks.StampedLock: long state> = $l8;
+
+        $r2 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        if $r2 == null goto label5;
+
+        $i6 = $r2.<java.util.concurrent.locks.StampedLock$WNode: int status>;
+
+        if $i6 == 0 goto label5;
+
+        specialinvoke r0.<java.util.concurrent.locks.StampedLock: void release(java.util.concurrent.locks.StampedLock$WNode)>($r2);
+
+     label5:
+        return;
+    }
+
+    public void unlockRead(long)
+    {
+        sun.misc.Unsafe $r1;
+        java.util.concurrent.locks.StampedLock$WNode $r2;
+        long l0, $l1, $l3, $l7, $l9, $l10, $l13, $l14, $l15;
+        java.lang.IllegalMonitorStateException $r4;
+        byte $b2, $b4, $b5, $b6, $b8, $b11, $b16;
+        int $i12, $i17;
+        boolean $z0;
+        java.util.concurrent.locks.StampedLock r0;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+        l0 := @parameter0: long;
+
+     label1:
+        $l13 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l14 = $l13 & -128L;
+
+        $l15 = l0 & -128L;
+
+        $b16 = $l14 cmp $l15;
+
+        if $b16 != 0 goto label2;
+
+        $l1 = l0 & 255L;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 == 0 goto label2;
+
+        $l3 = $l13 & 255L;
+
+        $b4 = $l3 cmp 0L;
+
+        if $b4 == 0 goto label2;
+
+        $b5 = $l3 cmp 128L;
+
+        if $b5 != 0 goto label3;
+
+     label2:
+        $r4 = new java.lang.IllegalMonitorStateException;
+
+        specialinvoke $r4.<java.lang.IllegalMonitorStateException: void <init>()>();
+
+        throw $r4;
+
+     label3:
+        $b6 = $l3 cmp 126L;
+
+        $i17 = (int) $b6;
+
+        if $i17 >= 0 goto label4;
+
+        $r1 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l10 = <java.util.concurrent.locks.StampedLock: long STATE>;
+
+        $l9 = $l13 - 1L;
+
+        $z0 = virtualinvoke $r1.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l10, $l13, $l9);
+
+        if $z0 == 0 goto label1;
+
+        $b11 = $l3 cmp 1L;
+
+        if $b11 != 0 goto label5;
+
+        $r2 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        if $r2 == null goto label5;
+
+        $i12 = $r2.<java.util.concurrent.locks.StampedLock$WNode: int status>;
+
+        if $i12 == 0 goto label5;
+
+        specialinvoke r0.<java.util.concurrent.locks.StampedLock: void release(java.util.concurrent.locks.StampedLock$WNode)>($r2);
+
+        goto label5;
+
+     label4:
+        $l7 = specialinvoke r0.<java.util.concurrent.locks.StampedLock: long tryDecReaderOverflow(long)>($l13);
+
+        $b8 = $l7 cmp 0L;
+
+        if $b8 == 0 goto label1;
+
+        goto label5;
+
+     label5:
+        return;
+    }
+
+    public void unlock(long)
+    {
+        sun.misc.Unsafe $r1;
+        java.util.concurrent.locks.StampedLock$WNode $r2, $r3;
+        long l0, l1, $l2, $l8, $l10, $l11, $l15, $l18, $l19, $l20, $l22;
+        java.lang.IllegalMonitorStateException $r5;
+        byte $b3, $b4, $b5, $b6, $b7, $b9, $b12, $b14, $b16, $b21;
+        int $i13, $i17, $i23, $i24;
+        boolean $z0;
+        java.util.concurrent.locks.StampedLock r0;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+        l0 := @parameter0: long;
+
+        l1 = l0 & 255L;
+
+     label01:
+        $l18 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l19 = $l18 & -128L;
+
+        $l20 = l0 & -128L;
+
+        $b21 = $l19 cmp $l20;
+
+        if $b21 != 0 goto label11;
+
+        $l2 = $l18 & 255L;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 != 0 goto label02;
+
+        goto label11;
+
+     label02:
+        $b4 = $l2 cmp 128L;
+
+        if $b4 != 0 goto label07;
+
+        $b14 = l1 cmp $l2;
+
+        if $b14 == 0 goto label03;
+
+        goto label11;
+
+     label03:
+        $l15 = $l18 + 128L;
+
+        $b16 = $l15 cmp 0L;
+
+        if $b16 != 0 goto label04;
+
+        $l22 = 256L;
+
+        goto label05;
+
+     label04:
+        $l22 = $l15;
+
+     label05:
+        r0.<java.util.concurrent.locks.StampedLock: long state> = $l22;
+
+        $r3 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        if $r3 == null goto label06;
+
+        $i17 = $r3.<java.util.concurrent.locks.StampedLock$WNode: int status>;
+
+        if $i17 == 0 goto label06;
+
+        specialinvoke r0.<java.util.concurrent.locks.StampedLock: void release(java.util.concurrent.locks.StampedLock$WNode)>($r3);
+
+     label06:
+        return;
+
+     label07:
+        $b5 = l1 cmp 0L;
+
+        if $b5 == 0 goto label11;
+
+        $b6 = l1 cmp 128L;
+
+        $i23 = (int) $b6;
+
+        if $i23 < 0 goto label08;
+
+        goto label11;
+
+     label08:
+        $b7 = $l2 cmp 126L;
+
+        $i24 = (int) $b7;
+
+        if $i24 >= 0 goto label10;
+
+        $r1 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l11 = <java.util.concurrent.locks.StampedLock: long STATE>;
+
+        $l10 = $l18 - 1L;
+
+        $z0 = virtualinvoke $r1.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l11, $l18, $l10);
+
+        if $z0 == 0 goto label01;
+
+        $b12 = $l2 cmp 1L;
+
+        if $b12 != 0 goto label09;
+
+        $r2 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        if $r2 == null goto label09;
+
+        $i13 = $r2.<java.util.concurrent.locks.StampedLock$WNode: int status>;
+
+        if $i13 == 0 goto label09;
+
+        specialinvoke r0.<java.util.concurrent.locks.StampedLock: void release(java.util.concurrent.locks.StampedLock$WNode)>($r2);
+
+     label09:
+        return;
+
+     label10:
+        $l8 = specialinvoke r0.<java.util.concurrent.locks.StampedLock: long tryDecReaderOverflow(long)>($l18);
+
+        $b9 = $l8 cmp 0L;
+
+        if $b9 == 0 goto label01;
+
+        return;
+
+     label11:
+        $r5 = new java.lang.IllegalMonitorStateException;
+
+        specialinvoke $r5.<java.lang.IllegalMonitorStateException: void <init>()>();
+
+        throw $r5;
+    }
+
+    public long tryConvertToWriteLock(long)
+    {
+        sun.misc.Unsafe $r1, $r2;
+        long l0, l1, $l2, $l7, $l8, $l9, $l12, $l13, $l14, $l15, $l16;
+        byte $b3, $b4, $b5, $b6, $b10, $b11, $b17;
+        boolean $z0, $z1;
+        java.util.concurrent.locks.StampedLock r0;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+        l0 := @parameter0: long;
+
+        l1 = l0 & 255L;
+
+     label1:
+        $l14 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l15 = $l14 & -128L;
+
+        $l16 = l0 & -128L;
+
+        $b17 = $l15 cmp $l16;
+
+        if $b17 != 0 goto label6;
+
+        $l2 = $l14 & 255L;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 != 0 goto label3;
+
+        $b11 = l1 cmp 0L;
+
+        if $b11 == 0 goto label2;
+
+        goto label6;
+
+     label2:
+        $r2 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l13 = <java.util.concurrent.locks.StampedLock: long STATE>;
+
+        $l12 = $l14 + 128L;
+
+        $z1 = virtualinvoke $r2.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l13, $l14, $l12);
+
+        if $z1 == 0 goto label1;
+
+        return $l12;
+
+     label3:
+        $b4 = $l2 cmp 128L;
+
+        if $b4 != 0 goto label5;
+
+        $b10 = l1 cmp $l2;
+
+        if $b10 == 0 goto label4;
+
+        goto label6;
+
+     label4:
+        return l0;
+
+     label5:
+        $b5 = $l2 cmp 1L;
+
+        if $b5 != 0 goto label6;
+
+        $b6 = l1 cmp 0L;
+
+        if $b6 == 0 goto label6;
+
+        $r1 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l9 = <java.util.concurrent.locks.StampedLock: long STATE>;
+
+        $l7 = $l14 - 1L;
+
+        $l8 = $l7 + 128L;
+
+        $z0 = virtualinvoke $r1.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l9, $l14, $l8);
+
+        if $z0 == 0 goto label1;
+
+        return $l8;
+
+     label6:
+        return 0L;
+    }
+
+    public long tryConvertToReadLock(long)
+    {
+        sun.misc.Unsafe $r2;
+        java.util.concurrent.locks.StampedLock$WNode $r1;
+        long l0, l1, $l2, $l8, $l12, $l14, $l15, $l16, $l17, $l18;
+        byte $b3, $b4, $b5, $b6, $b7, $b10, $b11, $b13, $b19;
+        int $i9, $i20, $i21;
+        boolean $z0;
+        java.util.concurrent.locks.StampedLock r0;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+        l0 := @parameter0: long;
+
+        l1 = l0 & 255L;
+
+     label1:
+        $l16 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l17 = $l16 & -128L;
+
+        $l18 = l0 & -128L;
+
+        $b19 = $l17 cmp $l18;
+
+        if $b19 != 0 goto label8;
+
+        $l2 = $l16 & 255L;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 != 0 goto label4;
+
+        $b10 = l1 cmp 0L;
+
+        if $b10 == 0 goto label2;
+
+        goto label8;
+
+     label2:
+        $b11 = $l2 cmp 126L;
+
+        $i20 = (int) $b11;
+
+        if $i20 >= 0 goto label3;
+
+        $r2 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l15 = <java.util.concurrent.locks.StampedLock: long STATE>;
+
+        $l14 = $l16 + 1L;
+
+        $z0 = virtualinvoke $r2.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l15, $l16, $l14);
+
+        if $z0 == 0 goto label1;
+
+        return $l14;
+
+     label3:
+        $l12 = specialinvoke r0.<java.util.concurrent.locks.StampedLock: long tryIncReaderOverflow(long)>($l16);
+
+        $b13 = $l12 cmp 0L;
+
+        if $b13 == 0 goto label1;
+
+        return $l12;
+
+     label4:
+        $b4 = $l2 cmp 128L;
+
+        if $b4 != 0 goto label7;
+
+        $b7 = l1 cmp $l2;
+
+        if $b7 == 0 goto label5;
+
+        goto label8;
+
+     label5:
+        $l8 = $l16 + 129L;
+
+        r0.<java.util.concurrent.locks.StampedLock: long state> = $l8;
+
+        $r1 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        if $r1 == null goto label6;
+
+        $i9 = $r1.<java.util.concurrent.locks.StampedLock$WNode: int status>;
+
+        if $i9 == 0 goto label6;
+
+        specialinvoke r0.<java.util.concurrent.locks.StampedLock: void release(java.util.concurrent.locks.StampedLock$WNode)>($r1);
+
+     label6:
+        return $l8;
+
+     label7:
+        $b5 = l1 cmp 0L;
+
+        if $b5 == 0 goto label8;
+
+        $b6 = l1 cmp 128L;
+
+        $i21 = (int) $b6;
+
+        if $i21 >= 0 goto label8;
+
+        return l0;
+
+     label8:
+        return 0L;
+    }
+
+    public long tryConvertToOptimisticRead(long)
+    {
+        java.util.concurrent.locks.StampedLock$WNode $r3, $r4;
+        byte $b3, $b4, $b5, $b6, $b7, $b9, $b13, $b15, $b17, $b19, $b23;
+        boolean $z0;
+        sun.misc.Unsafe $r0, $r2;
+        long l0, l1, $l2, $l8, $l10, $l11, $l12, $l16, $l20, $l21, $l22, $l24, l25, $l26;
+        int $i14, $i18, $i27, $i28;
+        java.util.concurrent.locks.StampedLock r1;
+
+        r1 := @this: java.util.concurrent.locks.StampedLock;
+
+        l0 := @parameter0: long;
+
+        l1 = l0 & 255L;
+
+        $r0 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        virtualinvoke $r0.<sun.misc.Unsafe: void loadFence()>();
+
+     label01:
+        $l20 = r1.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l21 = $l20 & -128L;
+
+        $l22 = l0 & -128L;
+
+        $b23 = $l21 cmp $l22;
+
+        if $b23 == 0 goto label02;
+
+        goto label13;
+
+     label02:
+        $l2 = $l20 & 255L;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 != 0 goto label04;
+
+        $b19 = l1 cmp 0L;
+
+        if $b19 == 0 goto label03;
+
+        goto label13;
+
+     label03:
+        return $l20;
+
+     label04:
+        $b4 = $l2 cmp 128L;
+
+        if $b4 != 0 goto label09;
+
+        $b15 = l1 cmp $l2;
+
+        if $b15 == 0 goto label05;
+
+        goto label13;
+
+     label05:
+        $l16 = $l20 + 128L;
+
+        $b17 = $l16 cmp 0L;
+
+        if $b17 != 0 goto label06;
+
+        $l24 = 256L;
+
+        goto label07;
+
+     label06:
+        $l24 = $l16;
+
+     label07:
+        l25 = $l24;
+
+        r1.<java.util.concurrent.locks.StampedLock: long state> = $l24;
+
+        $r4 = r1.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        if $r4 == null goto label08;
+
+        $i18 = $r4.<java.util.concurrent.locks.StampedLock$WNode: int status>;
+
+        if $i18 == 0 goto label08;
+
+        specialinvoke r1.<java.util.concurrent.locks.StampedLock: void release(java.util.concurrent.locks.StampedLock$WNode)>($r4);
+
+     label08:
+        return l25;
+
+     label09:
+        $b5 = l1 cmp 0L;
+
+        if $b5 == 0 goto label13;
+
+        $b6 = l1 cmp 128L;
+
+        $i27 = (int) $b6;
+
+        if $i27 < 0 goto label10;
+
+        goto label13;
+
+     label10:
+        $b7 = $l2 cmp 126L;
+
+        $i28 = (int) $b7;
+
+        if $i28 >= 0 goto label12;
+
+        $r2 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l12 = <java.util.concurrent.locks.StampedLock: long STATE>;
+
+        $l11 = $l20 - 1L;
+
+        $z0 = virtualinvoke $r2.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r1, $l12, $l20, $l11);
+
+        if $z0 == 0 goto label01;
+
+        $b13 = $l2 cmp 1L;
+
+        if $b13 != 0 goto label11;
+
+        $r3 = r1.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        if $r3 == null goto label11;
+
+        $i14 = $r3.<java.util.concurrent.locks.StampedLock$WNode: int status>;
+
+        if $i14 == 0 goto label11;
+
+        specialinvoke r1.<java.util.concurrent.locks.StampedLock: void release(java.util.concurrent.locks.StampedLock$WNode)>($r3);
+
+     label11:
+        $l26 = $l11 & -128L;
+
+        return $l26;
+
+     label12:
+        $l8 = specialinvoke r1.<java.util.concurrent.locks.StampedLock: long tryDecReaderOverflow(long)>($l20);
+
+        $b9 = $l8 cmp 0L;
+
+        if $b9 == 0 goto label01;
+
+        $l10 = $l8 & -128L;
+
+        return $l10;
+
+     label13:
+        return 0L;
+    }
+
+    public boolean tryUnlockWrite()
+    {
+        java.util.concurrent.locks.StampedLock$WNode $r1;
+        long $l0, $l1, $l3, $l6;
+        byte $b2, $b4;
+        int $i5;
+        java.util.concurrent.locks.StampedLock r0;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+        $l0 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l1 = $l0 & 128L;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 == 0 goto label4;
+
+        $l3 = $l0 + 128L;
+
+        $b4 = $l3 cmp 0L;
+
+        if $b4 != 0 goto label1;
+
+        $l6 = 256L;
+
+        goto label2;
+
+     label1:
+        $l6 = $l3;
+
+     label2:
+        r0.<java.util.concurrent.locks.StampedLock: long state> = $l6;
+
+        $r1 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        if $r1 == null goto label3;
+
+        $i5 = $r1.<java.util.concurrent.locks.StampedLock$WNode: int status>;
+
+        if $i5 == 0 goto label3;
+
+        specialinvoke r0.<java.util.concurrent.locks.StampedLock: void release(java.util.concurrent.locks.StampedLock$WNode)>($r1);
+
+     label3:
+        return 1;
+
+     label4:
+        return 0;
+    }
+
+    public boolean tryUnlockRead()
+    {
+        sun.misc.Unsafe $r1;
+        java.util.concurrent.locks.StampedLock$WNode $r2;
+        long $l2, $l4, $l5, $l8, $l9;
+        byte $b0, $b1, $b3, $b6, $b10;
+        int $i7, $i11, $i12;
+        boolean $z0;
+        java.util.concurrent.locks.StampedLock r0;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+     label1:
+        $l8 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l9 = $l8 & 255L;
+
+        $b10 = $l9 cmp 0L;
+
+        if $b10 == 0 goto label4;
+
+        $b0 = $l9 cmp 128L;
+
+        $i11 = (int) $b0;
+
+        if $i11 >= 0 goto label4;
+
+        $b1 = $l9 cmp 126L;
+
+        $i12 = (int) $b1;
+
+        if $i12 >= 0 goto label3;
+
+        $r1 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l5 = <java.util.concurrent.locks.StampedLock: long STATE>;
+
+        $l4 = $l8 - 1L;
+
+        $z0 = virtualinvoke $r1.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l5, $l8, $l4);
+
+        if $z0 == 0 goto label1;
+
+        $b6 = $l9 cmp 1L;
+
+        if $b6 != 0 goto label2;
+
+        $r2 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        if $r2 == null goto label2;
+
+        $i7 = $r2.<java.util.concurrent.locks.StampedLock$WNode: int status>;
+
+        if $i7 == 0 goto label2;
+
+        specialinvoke r0.<java.util.concurrent.locks.StampedLock: void release(java.util.concurrent.locks.StampedLock$WNode)>($r2);
+
+     label2:
+        return 1;
+
+     label3:
+        $l2 = specialinvoke r0.<java.util.concurrent.locks.StampedLock: long tryDecReaderOverflow(long)>($l8);
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 == 0 goto label1;
+
+        return 1;
+
+     label4:
+        return 0;
+    }
+
+    private int getReadLockCount(long)
+    {
+        long l0, $l1, $l5, l6;
+        byte $b2;
+        int $i3, $i4, $i7;
+        java.util.concurrent.locks.StampedLock r0;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+        l0 := @parameter0: long;
+
+        $l1 = l0 & 127L;
+
+        l6 = $l1;
+
+        $b2 = $l1 cmp 126L;
+
+        $i7 = (int) $b2;
+
+        if $i7 < 0 goto label1;
+
+        $i4 = r0.<java.util.concurrent.locks.StampedLock: int readerOverflow>;
+
+        $l5 = (long) $i4;
+
+        l6 = 126L + $l5;
+
+     label1:
+        $i3 = (int) l6;
+
+        return $i3;
+    }
+
+    public boolean isWriteLocked()
+    {
+        byte $b2;
+        long $l0, $l1;
+        java.util.concurrent.locks.StampedLock r0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+        $l0 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l1 = $l0 & 128L;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 == 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean isReadLocked()
+    {
+        byte $b2;
+        long $l0, $l1;
+        java.util.concurrent.locks.StampedLock r0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+        $l0 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l1 = $l0 & 127L;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 == 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public int getReadLockCount()
+    {
+        int $i1;
+        long $l0;
+        java.util.concurrent.locks.StampedLock r0;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+        $l0 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $i1 = specialinvoke r0.<java.util.concurrent.locks.StampedLock: int getReadLockCount(long)>($l0);
+
+        return $i1;
+    }
+
+    public java.lang.String toString()
+    {
+        long l0, $l1, $l3;
+        byte $b2, $b4;
+        int $i5;
+        java.lang.String $r2, $r8, $r10;
+        java.lang.StringBuilder $r1, $r3, $r4, $r5, $r6, $r7, $r9;
+        java.util.concurrent.locks.StampedLock r0;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+        l0 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = specialinvoke r0.<java.lang.Object: java.lang.String toString()>();
+
+        $r7 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $l1 = l0 & 255L;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 != 0 goto label1;
+
+        $r8 = "[Unlocked]";
+
+        goto label3;
+
+     label1:
+        $l3 = l0 & 128L;
+
+        $b4 = $l3 cmp 0L;
+
+        if $b4 == 0 goto label2;
+
+        $r8 = "[Write-locked]";
+
+        goto label3;
+
+     label2:
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[Read-locks:");
+
+        $i5 = specialinvoke r0.<java.util.concurrent.locks.StampedLock: int getReadLockCount(long)>(l0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label3:
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r10;
+    }
+
+    public java.util.concurrent.locks.Lock asReadLock()
+    {
+        java.util.concurrent.locks.StampedLock$ReadLockView $r1, $r2;
+        java.util.concurrent.locks.StampedLock r0;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+        $r1 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$ReadLockView readLockView>;
+
+        if $r1 == null goto label1;
+
+        $r2 = $r1;
+
+        goto label2;
+
+     label1:
+        $r2 = new java.util.concurrent.locks.StampedLock$ReadLockView;
+
+        specialinvoke $r2.<java.util.concurrent.locks.StampedLock$ReadLockView: void <init>(java.util.concurrent.locks.StampedLock)>(r0);
+
+        r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$ReadLockView readLockView> = $r2;
+
+     label2:
+        return $r2;
+    }
+
+    public java.util.concurrent.locks.Lock asWriteLock()
+    {
+        java.util.concurrent.locks.StampedLock$WriteLockView $r1, $r2;
+        java.util.concurrent.locks.StampedLock r0;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+        $r1 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WriteLockView writeLockView>;
+
+        if $r1 == null goto label1;
+
+        $r2 = $r1;
+
+        goto label2;
+
+     label1:
+        $r2 = new java.util.concurrent.locks.StampedLock$WriteLockView;
+
+        specialinvoke $r2.<java.util.concurrent.locks.StampedLock$WriteLockView: void <init>(java.util.concurrent.locks.StampedLock)>(r0);
+
+        r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WriteLockView writeLockView> = $r2;
+
+     label2:
+        return $r2;
+    }
+
+    public java.util.concurrent.locks.ReadWriteLock asReadWriteLock()
+    {
+        java.util.concurrent.locks.StampedLock$ReadWriteLockView $r1, $r2;
+        java.util.concurrent.locks.StampedLock r0;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+        $r1 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$ReadWriteLockView readWriteLockView>;
+
+        if $r1 == null goto label1;
+
+        $r2 = $r1;
+
+        goto label2;
+
+     label1:
+        $r2 = new java.util.concurrent.locks.StampedLock$ReadWriteLockView;
+
+        specialinvoke $r2.<java.util.concurrent.locks.StampedLock$ReadWriteLockView: void <init>(java.util.concurrent.locks.StampedLock)>(r0);
+
+        r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$ReadWriteLockView readWriteLockView> = $r2;
+
+     label2:
+        return $r2;
+    }
+
+    final void unstampedUnlockWrite()
+    {
+        java.util.concurrent.locks.StampedLock$WNode $r1;
+        long $l0, $l1, $l3, $l6;
+        java.lang.IllegalMonitorStateException $r2;
+        byte $b2, $b4;
+        int $i5;
+        java.util.concurrent.locks.StampedLock r0;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+        $l0 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l1 = $l0 & 128L;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 != 0 goto label1;
+
+        $r2 = new java.lang.IllegalMonitorStateException;
+
+        specialinvoke $r2.<java.lang.IllegalMonitorStateException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        $l3 = $l0 + 128L;
+
+        $b4 = $l3 cmp 0L;
+
+        if $b4 != 0 goto label2;
+
+        $l6 = 256L;
+
+        goto label3;
+
+     label2:
+        $l6 = $l3;
+
+     label3:
+        r0.<java.util.concurrent.locks.StampedLock: long state> = $l6;
+
+        $r1 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        if $r1 == null goto label4;
+
+        $i5 = $r1.<java.util.concurrent.locks.StampedLock$WNode: int status>;
+
+        if $i5 == 0 goto label4;
+
+        specialinvoke r0.<java.util.concurrent.locks.StampedLock: void release(java.util.concurrent.locks.StampedLock$WNode)>($r1);
+
+     label4:
+        return;
+    }
+
+    final void unstampedUnlockRead()
+    {
+        sun.misc.Unsafe $r2;
+        java.util.concurrent.locks.StampedLock$WNode $r3;
+        long $l0, $l1, $l5, $l7, $l8;
+        java.lang.IllegalMonitorStateException $r4;
+        byte $b2, $b3, $b4, $b6, $b9;
+        int $i10, $i11, $i12;
+        boolean $z0;
+        java.util.concurrent.locks.StampedLock r0;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+     label1:
+        $l0 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l1 = $l0 & 255L;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 == 0 goto label2;
+
+        $b3 = $l1 cmp 128L;
+
+        $i11 = (int) $b3;
+
+        if $i11 < 0 goto label3;
+
+     label2:
+        $r4 = new java.lang.IllegalMonitorStateException;
+
+        specialinvoke $r4.<java.lang.IllegalMonitorStateException: void <init>()>();
+
+        throw $r4;
+
+     label3:
+        $b4 = $l1 cmp 126L;
+
+        $i12 = (int) $b4;
+
+        if $i12 >= 0 goto label4;
+
+        $r2 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l8 = <java.util.concurrent.locks.StampedLock: long STATE>;
+
+        $l7 = $l0 - 1L;
+
+        $z0 = virtualinvoke $r2.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l8, $l0, $l7);
+
+        if $z0 == 0 goto label5;
+
+        $b9 = $l1 cmp 1L;
+
+        if $b9 != 0 goto label6;
+
+        $r3 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        if $r3 == null goto label6;
+
+        $i10 = $r3.<java.util.concurrent.locks.StampedLock$WNode: int status>;
+
+        if $i10 == 0 goto label6;
+
+        specialinvoke r0.<java.util.concurrent.locks.StampedLock: void release(java.util.concurrent.locks.StampedLock$WNode)>($r3);
+
+        goto label6;
+
+     label4:
+        $l5 = specialinvoke r0.<java.util.concurrent.locks.StampedLock: long tryDecReaderOverflow(long)>($l0);
+
+        $b6 = $l5 cmp 0L;
+
+        if $b6 == 0 goto label5;
+
+        goto label6;
+
+     label5:
+        goto label1;
+
+     label6:
+        return;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.ObjectInputStream r0;
+        java.util.concurrent.locks.StampedLock r1;
+
+        r1 := @this: java.util.concurrent.locks.StampedLock;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        r1.<java.util.concurrent.locks.StampedLock: long state> = 256L;
+
+        return;
+    }
+
+    private long tryIncReaderOverflow(long)
+    {
+        sun.misc.Unsafe $r1;
+        long l0, $l1, $l5, $l6;
+        byte $b2;
+        int $i3, $i4, $i7, $i8;
+        java.util.concurrent.locks.StampedLock r0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+        l0 := @parameter0: long;
+
+        $l1 = l0 & 255L;
+
+        $b2 = $l1 cmp 126L;
+
+        if $b2 != 0 goto label1;
+
+        $r1 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l6 = <java.util.concurrent.locks.StampedLock: long STATE>;
+
+        $l5 = l0 | 127L;
+
+        $z0 = virtualinvoke $r1.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l6, l0, $l5);
+
+        if $z0 == 0 goto label2;
+
+        $i7 = r0.<java.util.concurrent.locks.StampedLock: int readerOverflow>;
+
+        $i8 = $i7 + 1;
+
+        r0.<java.util.concurrent.locks.StampedLock: int readerOverflow> = $i8;
+
+        r0.<java.util.concurrent.locks.StampedLock: long state> = l0;
+
+        return l0;
+
+     label1:
+        $i3 = staticinvoke <java.util.concurrent.locks.LockSupport: int nextSecondarySeed()>();
+
+        $i4 = $i3 & 7;
+
+        if $i4 != 0 goto label2;
+
+        staticinvoke <java.lang.Thread: void yield()>();
+
+     label2:
+        return 0L;
+    }
+
+    private long tryDecReaderOverflow(long)
+    {
+        sun.misc.Unsafe $r1;
+        long l0, $l1, $l5, $l6, l9;
+        byte $b2;
+        int $i3, $i4, $i7, $i8;
+        java.util.concurrent.locks.StampedLock r0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+        l0 := @parameter0: long;
+
+        $l1 = l0 & 255L;
+
+        $b2 = $l1 cmp 126L;
+
+        if $b2 != 0 goto label3;
+
+        $r1 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l6 = <java.util.concurrent.locks.StampedLock: long STATE>;
+
+        $l5 = l0 | 127L;
+
+        $z0 = virtualinvoke $r1.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l6, l0, $l5);
+
+        if $z0 == 0 goto label4;
+
+        $i7 = r0.<java.util.concurrent.locks.StampedLock: int readerOverflow>;
+
+        if $i7 <= 0 goto label1;
+
+        $i8 = $i7 - 1;
+
+        r0.<java.util.concurrent.locks.StampedLock: int readerOverflow> = $i8;
+
+        l9 = l0;
+
+        goto label2;
+
+     label1:
+        l9 = l0 - 1L;
+
+     label2:
+        r0.<java.util.concurrent.locks.StampedLock: long state> = l9;
+
+        return l9;
+
+     label3:
+        $i3 = staticinvoke <java.util.concurrent.locks.LockSupport: int nextSecondarySeed()>();
+
+        $i4 = $i3 & 7;
+
+        if $i4 != 0 goto label4;
+
+        staticinvoke <java.lang.Thread: void yield()>();
+
+     label4:
+        return 0L;
+    }
+
+    private void release(java.util.concurrent.locks.StampedLock$WNode)
+    {
+        sun.misc.Unsafe $r1, $r5;
+        java.util.concurrent.locks.StampedLock$WNode r0, $r2, r6, r7;
+        long $l0;
+        java.lang.Thread $r4;
+        int $i1, $i2, $i4;
+        java.util.concurrent.locks.StampedLock r3;
+
+        r3 := @this: java.util.concurrent.locks.StampedLock;
+
+        r0 := @parameter0: java.util.concurrent.locks.StampedLock$WNode;
+
+        if r0 == null goto label5;
+
+        $r1 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l0 = <java.util.concurrent.locks.StampedLock: long WSTATUS>;
+
+        $i4 = (int) -1;
+
+        virtualinvoke $r1.<sun.misc.Unsafe: boolean compareAndSwapInt(java.lang.Object,long,int,int)>(r0, $l0, $i4, 0);
+
+        $r2 = r0.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode next>;
+
+        r6 = $r2;
+
+        if $r2 == null goto label1;
+
+        $i2 = $r2.<java.util.concurrent.locks.StampedLock$WNode: int status>;
+
+        if $i2 != 1 goto label4;
+
+     label1:
+        r7 = r3.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode wtail>;
+
+     label2:
+        if r7 == null goto label4;
+
+        if r7 == r0 goto label4;
+
+        $i1 = r7.<java.util.concurrent.locks.StampedLock$WNode: int status>;
+
+        if $i1 > 0 goto label3;
+
+        r6 = r7;
+
+     label3:
+        r7 = r7.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode prev>;
+
+        goto label2;
+
+     label4:
+        if r6 == null goto label5;
+
+        $r4 = r6.<java.util.concurrent.locks.StampedLock$WNode: java.lang.Thread thread>;
+
+        if $r4 == null goto label5;
+
+        $r5 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        virtualinvoke $r5.<sun.misc.Unsafe: void unpark(java.lang.Object)>($r4);
+
+     label5:
+        return;
+    }
+
+    private long acquireWrite(boolean, long)
+    {
+        byte $b2, $b6, $b9, $b15, $b25, $b34;
+        java.lang.Thread $r6, $r15;
+        sun.misc.Unsafe $r3, $r7, $r10, $r12, $r14, $r16, $r17, $r20, $r23, $r28;
+        long $l0, $l1, $l3, l5, $l7, $l8, $l10, $l12, $l13, $l14, $l16, $l17, $l18, $l21, $l22, $l23, $l26, $l27, $l32, $l33, l35, $l36;
+        java.util.concurrent.locks.StampedLock r0;
+        java.util.concurrent.locks.StampedLock$WNode $r1, $r2, $r4, $r5, $r8, $r9, $r11, $r13, $r21, $r22, r24, r25, $r26, $r27, $r29, $r30;
+        boolean $z0, z1, $z2, $z3, $z4, $z5, $z6;
+        int $i4, $i11, $i19, $i20, $i24, i28, $i29, i30, i31, $i38, $i40, $i42, $i44, $i46, $i47;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+        z1 := @parameter0: boolean;
+
+        l5 := @parameter1: long;
+
+        r24 = null;
+
+        $i38 = (int) -1;
+
+        i28 = $i38;
+
+     label01:
+        $l0 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l1 = $l0 & 255L;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 != 0 goto label02;
+
+        $r23 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l27 = <java.util.concurrent.locks.StampedLock: long STATE>;
+
+        $l26 = $l0 + 128L;
+
+        $z6 = virtualinvoke $r23.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l27, $l0, $l26);
+
+        if $z6 == 0 goto label11;
+
+        return $l26;
+
+     label02:
+        if i28 >= 0 goto label05;
+
+        $b25 = $l1 cmp 128L;
+
+        if $b25 != 0 goto label03;
+
+        $r22 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode wtail>;
+
+        $r21 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        if $r22 != $r21 goto label03;
+
+        $i29 = <java.util.concurrent.locks.StampedLock: int SPINS>;
+
+        goto label04;
+
+     label03:
+        $i29 = 0;
+
+     label04:
+        i28 = $i29;
+
+        goto label11;
+
+     label05:
+        if i28 <= 0 goto label06;
+
+        $i24 = staticinvoke <java.util.concurrent.locks.LockSupport: int nextSecondarySeed()>();
+
+        if $i24 < 0 goto label11;
+
+        $i40 = (int) -1;
+
+        i28 = i28 + $i40;
+
+        goto label11;
+
+     label06:
+        $r1 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode wtail>;
+
+        r25 = $r1;
+
+        if $r1 != null goto label08;
+
+        $r29 = new java.util.concurrent.locks.StampedLock$WNode;
+
+        specialinvoke $r29.<java.util.concurrent.locks.StampedLock$WNode: void <init>(int,java.util.concurrent.locks.StampedLock$WNode)>(1, null);
+
+        $r20 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l23 = <java.util.concurrent.locks.StampedLock: long WHEAD>;
+
+        $z5 = virtualinvoke $r20.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r0, $l23, null, $r29);
+
+        if $z5 == 0 goto label07;
+
+        r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode wtail> = $r29;
+
+     label07:
+        goto label11;
+
+     label08:
+        if r24 != null goto label09;
+
+        $r30 = new java.util.concurrent.locks.StampedLock$WNode;
+
+        specialinvoke $r30.<java.util.concurrent.locks.StampedLock$WNode: void <init>(int,java.util.concurrent.locks.StampedLock$WNode)>(1, $r1);
+
+        r24 = $r30;
+
+        goto label11;
+
+     label09:
+        $r2 = r24.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode prev>;
+
+        if $r2 == $r1 goto label10;
+
+        r24.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode prev> = $r1;
+
+        goto label11;
+
+     label10:
+        $r3 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l3 = <java.util.concurrent.locks.StampedLock: long WTAIL>;
+
+        $z0 = virtualinvoke $r3.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r0, $l3, $r1, r24);
+
+        if $z0 == 0 goto label11;
+
+        $r1.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode next> = r24;
+
+        goto label12;
+
+     label11:
+        goto label01;
+
+     label12:
+        $i42 = (int) -1;
+
+        i30 = $i42;
+
+     label13:
+        $r4 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        if $r4 != r25 goto label20;
+
+        if i30 >= 0 goto label14;
+
+        i30 = <java.util.concurrent.locks.StampedLock: int HEAD_SPINS>;
+
+        goto label15;
+
+     label14:
+        $i19 = <java.util.concurrent.locks.StampedLock: int MAX_HEAD_SPINS>;
+
+        if i30 >= $i19 goto label15;
+
+        i30 = i30 << 1;
+
+     label15:
+        i31 = i30;
+
+     label16:
+        $l32 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l33 = $l32 & 255L;
+
+        $b34 = $l33 cmp 0L;
+
+        if $b34 != 0 goto label17;
+
+        $r17 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l22 = <java.util.concurrent.locks.StampedLock: long STATE>;
+
+        $l21 = $l32 + 128L;
+
+        $z4 = virtualinvoke $r17.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l22, $l32, $l21);
+
+        if $z4 == 0 goto label18;
+
+        r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead> = r24;
+
+        r24.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode prev> = null;
+
+        return $l21;
+
+     label17:
+        $i20 = staticinvoke <java.util.concurrent.locks.LockSupport: int nextSecondarySeed()>();
+
+        if $i20 < 0 goto label18;
+
+        $i44 = (int) -1;
+
+        i31 = i31 + $i44;
+
+        if i31 > 0 goto label18;
+
+        goto label19;
+
+     label18:
+        goto label16;
+
+     label19:
+        goto label22;
+
+     label20:
+        if $r4 == null goto label22;
+
+     label21:
+        $r26 = $r4.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode cowait>;
+
+        if $r26 == null goto label22;
+
+        $r14 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l18 = <java.util.concurrent.locks.StampedLock: long WCOWAIT>;
+
+        $r13 = $r26.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode cowait>;
+
+        $z3 = virtualinvoke $r14.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>($r4, $l18, $r26, $r13);
+
+        if $z3 == 0 goto label21;
+
+        $r15 = $r26.<java.util.concurrent.locks.StampedLock$WNode: java.lang.Thread thread>;
+
+        if $r15 == null goto label21;
+
+        $r16 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        virtualinvoke $r16.<sun.misc.Unsafe: void unpark(java.lang.Object)>($r15);
+
+        goto label21;
+
+     label22:
+        $r27 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        if $r27 != $r4 goto label30;
+
+        $r5 = r24.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode prev>;
+
+        if $r5 == r25 goto label23;
+
+        if $r5 == null goto label30;
+
+        r25 = $r5;
+
+        $r5.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode next> = r24;
+
+        goto label30;
+
+     label23:
+        $i4 = r25.<java.util.concurrent.locks.StampedLock$WNode: int status>;
+
+        if $i4 != 0 goto label24;
+
+        $r12 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l17 = <java.util.concurrent.locks.StampedLock: long WSTATUS>;
+
+        $i46 = (int) -1;
+
+        virtualinvoke $r12.<sun.misc.Unsafe: boolean compareAndSwapInt(java.lang.Object,long,int,int)>(r25, $l17, 0, $i46);
+
+        goto label30;
+
+     label24:
+        if $i4 != 1 goto label25;
+
+        $r11 = r25.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode prev>;
+
+        if $r11 == null goto label30;
+
+        r24.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode prev> = $r11;
+
+        $r11.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode next> = r24;
+
+        goto label30;
+
+     label25:
+        $b6 = l5 cmp 0L;
+
+        if $b6 != 0 goto label26;
+
+        l35 = 0L;
+
+        goto label27;
+
+     label26:
+        $l7 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        $l8 = l5 - $l7;
+
+        l35 = $l8;
+
+        $b9 = $l8 cmp 0L;
+
+        $i47 = (int) $b9;
+
+        if $i47 > 0 goto label27;
+
+        $l16 = specialinvoke r0.<java.util.concurrent.locks.StampedLock: long cancelWaiter(java.util.concurrent.locks.StampedLock$WNode,java.util.concurrent.locks.StampedLock$WNode,boolean)>(r24, r24, 0);
+
+        return $l16;
+
+     label27:
+        $r6 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r7 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l10 = <java.util.concurrent.locks.StampedLock: long PARKBLOCKER>;
+
+        virtualinvoke $r7.<sun.misc.Unsafe: void putObject(java.lang.Object,long,java.lang.Object)>($r6, $l10, r0);
+
+        r24.<java.util.concurrent.locks.StampedLock$WNode: java.lang.Thread thread> = $r6;
+
+        $i11 = r25.<java.util.concurrent.locks.StampedLock$WNode: int status>;
+
+        if $i11 >= 0 goto label29;
+
+        if r25 != $r4 goto label28;
+
+        $l13 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l14 = $l13 & 255L;
+
+        $b15 = $l14 cmp 0L;
+
+        if $b15 == 0 goto label29;
+
+     label28:
+        $r8 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        if $r8 != $r4 goto label29;
+
+        $r9 = r24.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode prev>;
+
+        if $r9 != r25 goto label29;
+
+        $r10 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        virtualinvoke $r10.<sun.misc.Unsafe: void park(boolean,long)>(0, l35);
+
+     label29:
+        r24.<java.util.concurrent.locks.StampedLock$WNode: java.lang.Thread thread> = null;
+
+        $r28 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l36 = <java.util.concurrent.locks.StampedLock: long PARKBLOCKER>;
+
+        virtualinvoke $r28.<sun.misc.Unsafe: void putObject(java.lang.Object,long,java.lang.Object)>($r6, $l36, null);
+
+        if z1 == 0 goto label30;
+
+        $z2 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z2 == 0 goto label30;
+
+        $l12 = specialinvoke r0.<java.util.concurrent.locks.StampedLock: long cancelWaiter(java.util.concurrent.locks.StampedLock$WNode,java.util.concurrent.locks.StampedLock$WNode,boolean)>(r24, r24, 1);
+
+        return $l12;
+
+     label30:
+        goto label13;
+    }
+
+    private long acquireRead(boolean, long)
+    {
+        byte $b3, $b6, $b12, $b17, $b20, $b26, $b28, $b31, $b36, $b39, $b44, $b47, $b53, $b55, $b58, $b60, $b67, $b69;
+        java.lang.Thread $r7, $r16, $r20, $r28, $r37;
+        long $l0, l2, $l4, $l5, $l7, $l9, $l10, $l11, $l13, $l14, $l15, $l19, $l21, $l22, $l23, $l25, $l29, $l30, $l32, $l33, $l34, $l35, $l37, $l38, $l40, $l41, $l42, $l43, $l46, $l48, $l49, $l51, $l52, l54, $l56, $l57, l59, l61, $l62, $l65, $l66, l68, l70, $l71;
+        java.util.concurrent.locks.StampedLock$WNode $r1, $r2, $r3, $r5, $r6, $r9, $r10, $r12, $r14, $r18, $r23, $r25, $r26, $r27, $r30, $r31, $r34, $r35, r43, r44, r45, r46, r47, $r48, $r50, $r51, $r52, $r54, $r55;
+        int $i1, $i8, $i16, $i18, $i24, $i27, $i45, i50, i63, i64, $i73, $i74, $i75, $i76, $i78, $i79, $i80, $i81, $i82, $i84, $i85, $i86, $i87, $i89, $i91, $i92;
+        sun.misc.Unsafe $r4, $r8, $r11, $r13, $r15, $r17, $r19, $r21, $r22, $r24, $r29, $r32, $r33, $r36, $r38, $r41, $r42, $r49, $r53;
+        java.util.concurrent.locks.StampedLock r0;
+        boolean $z0, z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11;
+
+        r0 := @this: java.util.concurrent.locks.StampedLock;
+
+        z1 := @parameter0: boolean;
+
+        l2 := @parameter1: long;
+
+        r43 = null;
+
+        $i73 = (int) -1;
+
+        i50 = $i73;
+
+     label01:
+        $r1 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        r44 = $r1;
+
+        $r2 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode wtail>;
+
+        r45 = $r2;
+
+        if $r1 != $r2 goto label09;
+
+     label02:
+        $l51 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l52 = $l51 & 255L;
+
+        $b53 = $l52 cmp 126L;
+
+        $i74 = (int) $b53;
+
+        if $i74 >= 0 goto label03;
+
+        $r42 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l49 = <java.util.concurrent.locks.StampedLock: long STATE>;
+
+        $l48 = $l51 + 1L;
+
+        l54 = $l48;
+
+        $z11 = virtualinvoke $r42.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l49, $l51, $l48);
+
+        if $z11 == 0 goto label05;
+
+        goto label04;
+
+     label03:
+        $b44 = $l52 cmp 128L;
+
+        $i75 = (int) $b44;
+
+        if $i75 >= 0 goto label05;
+
+        $l46 = specialinvoke r0.<java.util.concurrent.locks.StampedLock: long tryIncReaderOverflow(long)>($l51);
+
+        l54 = $l46;
+
+        $b47 = $l46 cmp 0L;
+
+        if $b47 == 0 goto label05;
+
+     label04:
+        return l54;
+
+     label05:
+        $b55 = $l52 cmp 128L;
+
+        $i76 = (int) $b55;
+
+        if $i76 < 0 goto label02;
+
+        if i50 <= 0 goto label06;
+
+        $i45 = staticinvoke <java.util.concurrent.locks.LockSupport: int nextSecondarySeed()>();
+
+        if $i45 < 0 goto label02;
+
+        $i78 = (int) -1;
+
+        i50 = i50 + $i78;
+
+        goto label02;
+
+     label06:
+        if i50 != 0 goto label08;
+
+        r46 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        r47 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode wtail>;
+
+        if r46 != r44 goto label07;
+
+        if r47 == r45 goto label09;
+
+     label07:
+        r44 = r46;
+
+        r45 = r47;
+
+        if r46 == r47 goto label08;
+
+        goto label09;
+
+     label08:
+        i50 = <java.util.concurrent.locks.StampedLock: int SPINS>;
+
+        goto label02;
+
+     label09:
+        if r45 != null goto label11;
+
+        $r54 = new java.util.concurrent.locks.StampedLock$WNode;
+
+        specialinvoke $r54.<java.util.concurrent.locks.StampedLock$WNode: void <init>(int,java.util.concurrent.locks.StampedLock$WNode)>(1, null);
+
+        $r41 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l43 = <java.util.concurrent.locks.StampedLock: long WHEAD>;
+
+        $z10 = virtualinvoke $r41.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r0, $l43, null, $r54);
+
+        if $z10 == 0 goto label10;
+
+        r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode wtail> = $r54;
+
+     label10:
+        goto label30;
+
+     label11:
+        if r43 != null goto label12;
+
+        $r55 = new java.util.concurrent.locks.StampedLock$WNode;
+
+        specialinvoke $r55.<java.util.concurrent.locks.StampedLock$WNode: void <init>(int,java.util.concurrent.locks.StampedLock$WNode)>(0, r45);
+
+        r43 = $r55;
+
+        goto label30;
+
+     label12:
+        if r44 == r45 goto label13;
+
+        $i24 = r45.<java.util.concurrent.locks.StampedLock$WNode: int mode>;
+
+        if $i24 == 0 goto label15;
+
+     label13:
+        $r3 = r43.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode prev>;
+
+        if $r3 == r45 goto label14;
+
+        r43.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode prev> = r45;
+
+        goto label30;
+
+     label14:
+        $r4 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l0 = <java.util.concurrent.locks.StampedLock: long WTAIL>;
+
+        $z0 = virtualinvoke $r4.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r0, $l0, r45, r43);
+
+        if $z0 == 0 goto label30;
+
+        r45.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode next> = r43;
+
+        goto label31;
+
+     label15:
+        $r24 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l25 = <java.util.concurrent.locks.StampedLock: long WCOWAIT>;
+
+        $r23 = r45.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode cowait>;
+
+        r43.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode cowait> = $r23;
+
+        $z6 = virtualinvoke $r24.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r45, $l25, $r23, r43);
+
+        if $z6 != 0 goto label16;
+
+        r43.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode cowait> = null;
+
+        goto label30;
+
+     label16:
+        $r25 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        if $r25 == null goto label17;
+
+        $r34 = $r25.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode cowait>;
+
+        if $r34 == null goto label17;
+
+        $r36 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l42 = <java.util.concurrent.locks.StampedLock: long WCOWAIT>;
+
+        $r35 = $r34.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode cowait>;
+
+        $z9 = virtualinvoke $r36.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>($r25, $l42, $r34, $r35);
+
+        if $z9 == 0 goto label17;
+
+        $r37 = $r34.<java.util.concurrent.locks.StampedLock$WNode: java.lang.Thread thread>;
+
+        if $r37 == null goto label17;
+
+        $r38 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        virtualinvoke $r38.<sun.misc.Unsafe: void unpark(java.lang.Object)>($r37);
+
+     label17:
+        $r48 = r45.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode prev>;
+
+        if $r25 == $r48 goto label18;
+
+        if $r25 == r45 goto label18;
+
+        if $r48 != null goto label22;
+
+     label18:
+        $l56 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l57 = $l56 & 255L;
+
+        $b58 = $l57 cmp 126L;
+
+        $i79 = (int) $b58;
+
+        if $i79 >= 0 goto label19;
+
+        $r33 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l41 = <java.util.concurrent.locks.StampedLock: long STATE>;
+
+        $l40 = $l56 + 1L;
+
+        l59 = $l40;
+
+        $z8 = virtualinvoke $r33.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l41, $l56, $l40);
+
+        if $z8 == 0 goto label21;
+
+        goto label20;
+
+     label19:
+        $b26 = $l57 cmp 128L;
+
+        $i80 = (int) $b26;
+
+        if $i80 >= 0 goto label21;
+
+        $l38 = specialinvoke r0.<java.util.concurrent.locks.StampedLock: long tryIncReaderOverflow(long)>($l56);
+
+        l59 = $l38;
+
+        $b39 = $l38 cmp 0L;
+
+        if $b39 == 0 goto label21;
+
+     label20:
+        return l59;
+
+     label21:
+        $b60 = $l57 cmp 128L;
+
+        $i81 = (int) $b60;
+
+        if $i81 < 0 goto label18;
+
+     label22:
+        $r26 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        if $r26 != $r25 goto label29;
+
+        $r27 = r45.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode prev>;
+
+        if $r27 != $r48 goto label29;
+
+        if $r48 == null goto label23;
+
+        if $r25 == r45 goto label23;
+
+        $i27 = r45.<java.util.concurrent.locks.StampedLock$WNode: int status>;
+
+        if $i27 <= 0 goto label24;
+
+     label23:
+        r43 = null;
+
+        goto label30;
+
+     label24:
+        $b28 = l2 cmp 0L;
+
+        if $b28 != 0 goto label25;
+
+        l61 = 0L;
+
+        goto label26;
+
+     label25:
+        $l29 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        $l30 = l2 - $l29;
+
+        l61 = $l30;
+
+        $b31 = $l30 cmp 0L;
+
+        $i82 = (int) $b31;
+
+        if $i82 > 0 goto label26;
+
+        $l37 = specialinvoke r0.<java.util.concurrent.locks.StampedLock: long cancelWaiter(java.util.concurrent.locks.StampedLock$WNode,java.util.concurrent.locks.StampedLock$WNode,boolean)>(r43, r45, 0);
+
+        return $l37;
+
+     label26:
+        $r28 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r29 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l32 = <java.util.concurrent.locks.StampedLock: long PARKBLOCKER>;
+
+        virtualinvoke $r29.<sun.misc.Unsafe: void putObject(java.lang.Object,long,java.lang.Object)>($r28, $l32, r0);
+
+        r43.<java.util.concurrent.locks.StampedLock$WNode: java.lang.Thread thread> = $r28;
+
+        if $r25 != $r48 goto label27;
+
+        $l34 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l35 = $l34 & 255L;
+
+        $b36 = $l35 cmp 128L;
+
+        if $b36 != 0 goto label28;
+
+     label27:
+        $r30 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        if $r30 != $r25 goto label28;
+
+        $r31 = r45.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode prev>;
+
+        if $r31 != $r48 goto label28;
+
+        $r32 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        virtualinvoke $r32.<sun.misc.Unsafe: void park(boolean,long)>(0, l61);
+
+     label28:
+        r43.<java.util.concurrent.locks.StampedLock$WNode: java.lang.Thread thread> = null;
+
+        $r49 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l62 = <java.util.concurrent.locks.StampedLock: long PARKBLOCKER>;
+
+        virtualinvoke $r49.<sun.misc.Unsafe: void putObject(java.lang.Object,long,java.lang.Object)>($r28, $l62, null);
+
+        if z1 == 0 goto label29;
+
+        $z7 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z7 == 0 goto label29;
+
+        $l33 = specialinvoke r0.<java.util.concurrent.locks.StampedLock: long cancelWaiter(java.util.concurrent.locks.StampedLock$WNode,java.util.concurrent.locks.StampedLock$WNode,boolean)>(r43, r45, 1);
+
+        return $l33;
+
+     label29:
+        goto label16;
+
+     label30:
+        goto label01;
+
+     label31:
+        $i84 = (int) -1;
+
+        i63 = $i84;
+
+     label32:
+        $r5 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        if $r5 != r45 goto label43;
+
+        if i63 >= 0 goto label33;
+
+        i63 = <java.util.concurrent.locks.StampedLock: int HEAD_SPINS>;
+
+        goto label34;
+
+     label33:
+        $i16 = <java.util.concurrent.locks.StampedLock: int MAX_HEAD_SPINS>;
+
+        if i63 >= $i16 goto label34;
+
+        i63 = i63 << 1;
+
+     label34:
+        i64 = i63;
+
+     label35:
+        $l65 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l66 = $l65 & 255L;
+
+        $b67 = $l66 cmp 126L;
+
+        $i85 = (int) $b67;
+
+        if $i85 >= 0 goto label36;
+
+        $r22 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l23 = <java.util.concurrent.locks.StampedLock: long STATE>;
+
+        $l22 = $l65 + 1L;
+
+        l68 = $l22;
+
+        $z5 = virtualinvoke $r22.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l23, $l65, $l22);
+
+        if $z5 == 0 goto label40;
+
+        goto label37;
+
+     label36:
+        $b17 = $l66 cmp 128L;
+
+        $i86 = (int) $b17;
+
+        if $i86 >= 0 goto label40;
+
+        $l19 = specialinvoke r0.<java.util.concurrent.locks.StampedLock: long tryIncReaderOverflow(long)>($l65);
+
+        l68 = $l19;
+
+        $b20 = $l19 cmp 0L;
+
+        if $b20 == 0 goto label40;
+
+     label37:
+        r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead> = r43;
+
+        r43.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode prev> = null;
+
+     label38:
+        $r50 = r43.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode cowait>;
+
+        if $r50 == null goto label39;
+
+        $r19 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l21 = <java.util.concurrent.locks.StampedLock: long WCOWAIT>;
+
+        $r18 = $r50.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode cowait>;
+
+        $z4 = virtualinvoke $r19.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r43, $l21, $r50, $r18);
+
+        if $z4 == 0 goto label38;
+
+        $r20 = $r50.<java.util.concurrent.locks.StampedLock$WNode: java.lang.Thread thread>;
+
+        if $r20 == null goto label38;
+
+        $r21 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        virtualinvoke $r21.<sun.misc.Unsafe: void unpark(java.lang.Object)>($r20);
+
+        goto label38;
+
+     label39:
+        return l68;
+
+     label40:
+        $b69 = $l66 cmp 128L;
+
+        $i87 = (int) $b69;
+
+        if $i87 < 0 goto label41;
+
+        $i18 = staticinvoke <java.util.concurrent.locks.LockSupport: int nextSecondarySeed()>();
+
+        if $i18 < 0 goto label41;
+
+        $i89 = (int) -1;
+
+        i64 = i64 + $i89;
+
+        if i64 > 0 goto label41;
+
+        goto label42;
+
+     label41:
+        goto label35;
+
+     label42:
+        goto label45;
+
+     label43:
+        if $r5 == null goto label45;
+
+     label44:
+        $r51 = $r5.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode cowait>;
+
+        if $r51 == null goto label45;
+
+        $r15 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l15 = <java.util.concurrent.locks.StampedLock: long WCOWAIT>;
+
+        $r14 = $r51.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode cowait>;
+
+        $z3 = virtualinvoke $r15.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>($r5, $l15, $r51, $r14);
+
+        if $z3 == 0 goto label44;
+
+        $r16 = $r51.<java.util.concurrent.locks.StampedLock$WNode: java.lang.Thread thread>;
+
+        if $r16 == null goto label44;
+
+        $r17 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        virtualinvoke $r17.<sun.misc.Unsafe: void unpark(java.lang.Object)>($r16);
+
+        goto label44;
+
+     label45:
+        $r52 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        if $r52 != $r5 goto label53;
+
+        $r6 = r43.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode prev>;
+
+        if $r6 == r45 goto label46;
+
+        if $r6 == null goto label53;
+
+        r45 = $r6;
+
+        $r6.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode next> = r43;
+
+        goto label53;
+
+     label46:
+        $i1 = r45.<java.util.concurrent.locks.StampedLock$WNode: int status>;
+
+        if $i1 != 0 goto label47;
+
+        $r13 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l14 = <java.util.concurrent.locks.StampedLock: long WSTATUS>;
+
+        $i91 = (int) -1;
+
+        virtualinvoke $r13.<sun.misc.Unsafe: boolean compareAndSwapInt(java.lang.Object,long,int,int)>(r45, $l14, 0, $i91);
+
+        goto label53;
+
+     label47:
+        if $i1 != 1 goto label48;
+
+        $r12 = r45.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode prev>;
+
+        if $r12 == null goto label53;
+
+        r43.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode prev> = $r12;
+
+        $r12.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode next> = r43;
+
+        goto label53;
+
+     label48:
+        $b3 = l2 cmp 0L;
+
+        if $b3 != 0 goto label49;
+
+        l70 = 0L;
+
+        goto label50;
+
+     label49:
+        $l4 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        $l5 = l2 - $l4;
+
+        l70 = $l5;
+
+        $b6 = $l5 cmp 0L;
+
+        $i92 = (int) $b6;
+
+        if $i92 > 0 goto label50;
+
+        $l13 = specialinvoke r0.<java.util.concurrent.locks.StampedLock: long cancelWaiter(java.util.concurrent.locks.StampedLock$WNode,java.util.concurrent.locks.StampedLock$WNode,boolean)>(r43, r43, 0);
+
+        return $l13;
+
+     label50:
+        $r7 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r8 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l7 = <java.util.concurrent.locks.StampedLock: long PARKBLOCKER>;
+
+        virtualinvoke $r8.<sun.misc.Unsafe: void putObject(java.lang.Object,long,java.lang.Object)>($r7, $l7, r0);
+
+        r43.<java.util.concurrent.locks.StampedLock$WNode: java.lang.Thread thread> = $r7;
+
+        $i8 = r45.<java.util.concurrent.locks.StampedLock$WNode: int status>;
+
+        if $i8 >= 0 goto label52;
+
+        if r45 != $r5 goto label51;
+
+        $l10 = r0.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l11 = $l10 & 255L;
+
+        $b12 = $l11 cmp 128L;
+
+        if $b12 != 0 goto label52;
+
+     label51:
+        $r9 = r0.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        if $r9 != $r5 goto label52;
+
+        $r10 = r43.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode prev>;
+
+        if $r10 != r45 goto label52;
+
+        $r11 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        virtualinvoke $r11.<sun.misc.Unsafe: void park(boolean,long)>(0, l70);
+
+     label52:
+        r43.<java.util.concurrent.locks.StampedLock$WNode: java.lang.Thread thread> = null;
+
+        $r53 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l71 = <java.util.concurrent.locks.StampedLock: long PARKBLOCKER>;
+
+        virtualinvoke $r53.<sun.misc.Unsafe: void putObject(java.lang.Object,long,java.lang.Object)>($r7, $l71, null);
+
+        if z1 == 0 goto label53;
+
+        $z2 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z2 == 0 goto label53;
+
+        $l9 = specialinvoke r0.<java.util.concurrent.locks.StampedLock: long cancelWaiter(java.util.concurrent.locks.StampedLock$WNode,java.util.concurrent.locks.StampedLock$WNode,boolean)>(r43, r43, 1);
+
+        return $l9;
+
+     label53:
+        goto label32;
+    }
+
+    private long cancelWaiter(java.util.concurrent.locks.StampedLock$WNode, java.util.concurrent.locks.StampedLock$WNode, boolean)
+    {
+        java.util.concurrent.locks.StampedLock$WNode r0, $r2, r3, $r4, $r5, $r10, $r15, r17, $r18, r19, r20, r21, r22, r23, $r24, $r25, r26, r27, $r28;
+        byte $b3, $b4;
+        java.lang.Thread $r7, $r13;
+        boolean z0, $z1, $z2;
+        sun.misc.Unsafe $r6, $r8, $r9, $r11, $r12, $r14, $r16;
+        long $l1, $l2, $l8, $l9, $l10, $l11, $l15, $l17;
+        int $i0, $i5, $i6, $i7, $i12, $i13, $i14, $i16;
+        java.util.concurrent.locks.StampedLock r1;
+
+        r1 := @this: java.util.concurrent.locks.StampedLock;
+
+        r0 := @parameter0: java.util.concurrent.locks.StampedLock$WNode;
+
+        r3 := @parameter1: java.util.concurrent.locks.StampedLock$WNode;
+
+        z0 := @parameter2: boolean;
+
+        if r0 == null goto label19;
+
+        if r3 == null goto label19;
+
+        r0.<java.util.concurrent.locks.StampedLock$WNode: int status> = 1;
+
+        r17 = r3;
+
+     label01:
+        $r18 = r17.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode cowait>;
+
+        if $r18 == null goto label03;
+
+        $i14 = $r18.<java.util.concurrent.locks.StampedLock$WNode: int status>;
+
+        if $i14 != 1 goto label02;
+
+        $r16 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l15 = <java.util.concurrent.locks.StampedLock: long WCOWAIT>;
+
+        $r15 = $r18.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode cowait>;
+
+        virtualinvoke $r16.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r17, $l15, $r18, $r15);
+
+        r17 = r3;
+
+        goto label01;
+
+     label02:
+        r17 = $r18;
+
+        goto label01;
+
+     label03:
+        if r3 != r0 goto label19;
+
+        r19 = r3.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode cowait>;
+
+     label04:
+        if r19 == null goto label06;
+
+        $r13 = r19.<java.util.concurrent.locks.StampedLock$WNode: java.lang.Thread thread>;
+
+        if $r13 == null goto label05;
+
+        $r14 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        virtualinvoke $r14.<sun.misc.Unsafe: void unpark(java.lang.Object)>($r13);
+
+     label05:
+        r19 = r19.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode cowait>;
+
+        goto label04;
+
+     label06:
+        r20 = r0.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode prev>;
+
+     label07:
+        if r20 == null goto label19;
+
+     label08:
+        $r4 = r0.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode next>;
+
+        r21 = $r4;
+
+        if $r4 == null goto label09;
+
+        $i13 = $r4.<java.util.concurrent.locks.StampedLock$WNode: int status>;
+
+        if $i13 != 1 goto label15;
+
+     label09:
+        r22 = null;
+
+        r23 = r1.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode wtail>;
+
+     label10:
+        if r23 == null goto label12;
+
+        if r23 == r0 goto label12;
+
+        $i12 = r23.<java.util.concurrent.locks.StampedLock$WNode: int status>;
+
+        if $i12 == 1 goto label11;
+
+        r22 = r23;
+
+     label11:
+        r23 = r23.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode prev>;
+
+        goto label10;
+
+     label12:
+        if $r4 == r22 goto label13;
+
+        $r12 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l11 = <java.util.concurrent.locks.StampedLock: long WNEXT>;
+
+        r21 = r22;
+
+        $z2 = virtualinvoke $r12.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r0, $l11, $r4, r22);
+
+        if $z2 == 0 goto label14;
+
+     label13:
+        if r21 != null goto label15;
+
+        $r10 = r1.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode wtail>;
+
+        if r0 != $r10 goto label15;
+
+        $r11 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l10 = <java.util.concurrent.locks.StampedLock: long WTAIL>;
+
+        virtualinvoke $r11.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r1, $l10, r0, r20);
+
+        goto label15;
+
+     label14:
+        goto label08;
+
+     label15:
+        $r24 = r20.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode next>;
+
+        if $r24 != r0 goto label16;
+
+        $r9 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l9 = <java.util.concurrent.locks.StampedLock: long WNEXT>;
+
+        virtualinvoke $r9.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r20, $l9, r0, r21);
+
+     label16:
+        if r21 == null goto label17;
+
+        $r7 = r21.<java.util.concurrent.locks.StampedLock$WNode: java.lang.Thread thread>;
+
+        if $r7 == null goto label17;
+
+        r21.<java.util.concurrent.locks.StampedLock$WNode: java.lang.Thread thread> = null;
+
+        $r8 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        virtualinvoke $r8.<sun.misc.Unsafe: void unpark(java.lang.Object)>($r7);
+
+     label17:
+        $i16 = r20.<java.util.concurrent.locks.StampedLock$WNode: int status>;
+
+        if $i16 != 1 goto label19;
+
+        $r5 = r20.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode prev>;
+
+        if $r5 != null goto label18;
+
+        goto label19;
+
+     label18:
+        r0.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode prev> = $r5;
+
+        $r6 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $l8 = <java.util.concurrent.locks.StampedLock: long WNEXT>;
+
+        virtualinvoke $r6.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>($r5, $l8, r20, r21);
+
+        r20 = $r5;
+
+        goto label07;
+
+     label19:
+        $r25 = r1.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        if $r25 == null goto label26;
+
+        $r2 = $r25.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode next>;
+
+        r26 = $r2;
+
+        if $r2 == null goto label20;
+
+        $i7 = $r2.<java.util.concurrent.locks.StampedLock$WNode: int status>;
+
+        if $i7 != 1 goto label23;
+
+     label20:
+        r27 = r1.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode wtail>;
+
+     label21:
+        if r27 == null goto label23;
+
+        if r27 == $r25 goto label23;
+
+        $i6 = r27.<java.util.concurrent.locks.StampedLock$WNode: int status>;
+
+        if $i6 > 0 goto label22;
+
+        r26 = r27;
+
+     label22:
+        r27 = r27.<java.util.concurrent.locks.StampedLock$WNode: java.util.concurrent.locks.StampedLock$WNode prev>;
+
+        goto label21;
+
+     label23:
+        $r28 = r1.<java.util.concurrent.locks.StampedLock: java.util.concurrent.locks.StampedLock$WNode whead>;
+
+        if $r25 != $r28 goto label25;
+
+        if r26 == null goto label26;
+
+        $i0 = $r25.<java.util.concurrent.locks.StampedLock$WNode: int status>;
+
+        if $i0 != 0 goto label26;
+
+        $l1 = r1.<java.util.concurrent.locks.StampedLock: long state>;
+
+        $l2 = $l1 & 255L;
+
+        $b3 = $l2 cmp 128L;
+
+        if $b3 == 0 goto label26;
+
+        $b4 = $l1 cmp 0L;
+
+        if $b4 == 0 goto label24;
+
+        $i5 = r26.<java.util.concurrent.locks.StampedLock$WNode: int mode>;
+
+        if $i5 != 0 goto label26;
+
+     label24:
+        specialinvoke r1.<java.util.concurrent.locks.StampedLock: void release(java.util.concurrent.locks.StampedLock$WNode)>($r25);
+
+        goto label26;
+
+     label25:
+        goto label19;
+
+     label26:
+        if z0 != 0 goto label27;
+
+        $z1 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z1 == 0 goto label28;
+
+     label27:
+        $l17 = 1L;
+
+        goto label29;
+
+     label28:
+        $l17 = 0L;
+
+     label29:
+        return $l17;
+    }
+
+    static void <clinit>()
+    {
+        byte $b11;
+        java.lang.Runtime $r0;
+        java.lang.Exception $r23;
+        sun.misc.Unsafe $r1, $r2, $r4, $r6, $r8, $r10, $r12, $r14;
+        java.lang.Error $r24;
+        long $l4, $l5, $l6, $l7, $l8, $l9, $l10;
+        short $s12;
+        int $i0, $i1, $i2, $i3, $i13;
+        java.lang.reflect.Field $r3, $r5, $r7, $r9, $r11, $r13, $r15;
+        java.lang.Class $r16, $r17, $r18, $r19, $r20, $r21, $r22;
+
+        <java.util.concurrent.locks.StampedLock: int WMODE> = 1;
+
+        <java.util.concurrent.locks.StampedLock: int RMODE> = 0;
+
+        <java.util.concurrent.locks.StampedLock: int CANCELLED> = 1;
+
+        <java.util.concurrent.locks.StampedLock: int WAITING> = -1;
+
+        <java.util.concurrent.locks.StampedLock: long INTERRUPTED> = 1L;
+
+        <java.util.concurrent.locks.StampedLock: long ORIGIN> = 256L;
+
+        <java.util.concurrent.locks.StampedLock: long SBITS> = -128L;
+
+        <java.util.concurrent.locks.StampedLock: long ABITS> = 255L;
+
+        <java.util.concurrent.locks.StampedLock: long RFULL> = 126L;
+
+        <java.util.concurrent.locks.StampedLock: long RBITS> = 127L;
+
+        <java.util.concurrent.locks.StampedLock: long WBIT> = 128L;
+
+        <java.util.concurrent.locks.StampedLock: long RUNIT> = 1L;
+
+        <java.util.concurrent.locks.StampedLock: int LG_READERS> = 7;
+
+        <java.util.concurrent.locks.StampedLock: int OVERFLOW_YIELD_RATE> = 7;
+
+        <java.util.concurrent.locks.StampedLock: long serialVersionUID> = -6001602636862214147L;
+
+        $r0 = staticinvoke <java.lang.Runtime: java.lang.Runtime getRuntime()>();
+
+        $i0 = virtualinvoke $r0.<java.lang.Runtime: int availableProcessors()>();
+
+        <java.util.concurrent.locks.StampedLock: int NCPU> = $i0;
+
+        $i1 = <java.util.concurrent.locks.StampedLock: int NCPU>;
+
+        if $i1 <= 1 goto label01;
+
+        $b11 = 64;
+
+        goto label02;
+
+     label01:
+        $b11 = 0;
+
+     label02:
+        <java.util.concurrent.locks.StampedLock: int SPINS> = $b11;
+
+        $i2 = <java.util.concurrent.locks.StampedLock: int NCPU>;
+
+        if $i2 <= 1 goto label03;
+
+        $s12 = 1024;
+
+        goto label04;
+
+     label03:
+        $s12 = 0;
+
+     label04:
+        <java.util.concurrent.locks.StampedLock: int HEAD_SPINS> = $s12;
+
+        $i3 = <java.util.concurrent.locks.StampedLock: int NCPU>;
+
+        if $i3 <= 1 goto label05;
+
+        $i13 = 65536;
+
+        goto label06;
+
+     label05:
+        $i13 = 0;
+
+     label06:
+        <java.util.concurrent.locks.StampedLock: int MAX_HEAD_SPINS> = $i13;
+
+     label07:
+        $r1 = staticinvoke <sun.misc.Unsafe: sun.misc.Unsafe getUnsafe()>();
+
+        <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U> = $r1;
+
+        $r2 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $r16 = class "Ljava/util/concurrent/locks/StampedLock;";
+
+        $r3 = virtualinvoke $r16.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("state");
+
+        $l4 = virtualinvoke $r2.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r3);
+
+        <java.util.concurrent.locks.StampedLock: long STATE> = $l4;
+
+        $r4 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $r17 = class "Ljava/util/concurrent/locks/StampedLock;";
+
+        $r5 = virtualinvoke $r17.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("whead");
+
+        $l5 = virtualinvoke $r4.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r5);
+
+        <java.util.concurrent.locks.StampedLock: long WHEAD> = $l5;
+
+        $r6 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $r18 = class "Ljava/util/concurrent/locks/StampedLock;";
+
+        $r7 = virtualinvoke $r18.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("wtail");
+
+        $l6 = virtualinvoke $r6.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r7);
+
+        <java.util.concurrent.locks.StampedLock: long WTAIL> = $l6;
+
+        $r8 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $r19 = class "Ljava/util/concurrent/locks/StampedLock$WNode;";
+
+        $r9 = virtualinvoke $r19.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("status");
+
+        $l7 = virtualinvoke $r8.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r9);
+
+        <java.util.concurrent.locks.StampedLock: long WSTATUS> = $l7;
+
+        $r10 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $r20 = class "Ljava/util/concurrent/locks/StampedLock$WNode;";
+
+        $r11 = virtualinvoke $r20.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("next");
+
+        $l8 = virtualinvoke $r10.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r11);
+
+        <java.util.concurrent.locks.StampedLock: long WNEXT> = $l8;
+
+        $r12 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $r21 = class "Ljava/util/concurrent/locks/StampedLock$WNode;";
+
+        $r13 = virtualinvoke $r21.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("cowait");
+
+        $l9 = virtualinvoke $r12.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r13);
+
+        <java.util.concurrent.locks.StampedLock: long WCOWAIT> = $l9;
+
+        $r14 = <java.util.concurrent.locks.StampedLock: sun.misc.Unsafe U>;
+
+        $r22 = class "Ljava/lang/Thread;";
+
+        $r15 = virtualinvoke $r22.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("parkBlocker");
+
+        $l10 = virtualinvoke $r14.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r15);
+
+        <java.util.concurrent.locks.StampedLock: long PARKBLOCKER> = $l10;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r23 := @caughtexception;
+
+        $r24 = new java.lang.Error;
+
+        specialinvoke $r24.<java.lang.Error: void <init>(java.lang.Throwable)>($r23);
+
+        throw $r24;
+
+     label10:
+        return;
+
+        catch java.lang.Exception from label07 to label08 with label09;
+    }
+}

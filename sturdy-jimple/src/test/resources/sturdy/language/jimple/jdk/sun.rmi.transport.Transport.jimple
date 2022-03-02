@@ -1,0 +1,451 @@
+public abstract class sun.rmi.transport.Transport extends java.lang.Object
+{
+    static final int logLevel;
+    static final sun.rmi.runtime.Log transportLog;
+    private static final java.lang.ThreadLocal currentTransport;
+    private static final java.rmi.server.ObjID dgcID;
+    private static final java.security.AccessControlContext SETCCL_ACC;
+
+    public void <init>()
+    {
+        sun.rmi.transport.Transport r0;
+
+        r0 := @this: sun.rmi.transport.Transport;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static java.lang.String getLogLevel()
+    {
+        java.lang.Object $r1;
+        java.lang.String $r2;
+        sun.security.action.GetPropertyAction $r0;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("sun.rmi.transport.logLevel");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r2 = (java.lang.String) $r1;
+
+        return $r2;
+    }
+
+    public abstract sun.rmi.transport.Channel getChannel(sun.rmi.transport.Endpoint);
+
+    public abstract void free(sun.rmi.transport.Endpoint);
+
+    public void exportObject(sun.rmi.transport.Target) throws java.rmi.RemoteException
+    {
+        sun.rmi.transport.Transport r1;
+        sun.rmi.transport.Target r0;
+
+        r1 := @this: sun.rmi.transport.Transport;
+
+        r0 := @parameter0: sun.rmi.transport.Target;
+
+        virtualinvoke r0.<sun.rmi.transport.Target: void setExportedTransport(sun.rmi.transport.Transport)>(r1);
+
+        staticinvoke <sun.rmi.transport.ObjectTable: void putTarget(sun.rmi.transport.Target)>(r0);
+
+        return;
+    }
+
+    protected void targetUnexported()
+    {
+        sun.rmi.transport.Transport r0;
+
+        r0 := @this: sun.rmi.transport.Transport;
+
+        return;
+    }
+
+    static sun.rmi.transport.Transport currentTransport()
+    {
+        java.lang.ThreadLocal $r0;
+        java.lang.Object $r1;
+        sun.rmi.transport.Transport $r2;
+
+        $r0 = <sun.rmi.transport.Transport: java.lang.ThreadLocal currentTransport>;
+
+        $r1 = virtualinvoke $r0.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        $r2 = (sun.rmi.transport.Transport) $r1;
+
+        return $r2;
+    }
+
+    protected abstract void checkAcceptPermission(java.security.AccessControlContext);
+
+    private static void setContextClassLoader(java.lang.ClassLoader)
+    {
+        java.security.AccessControlContext $r2;
+        java.lang.ClassLoader r0;
+        java.security.PrivilegedAction $r1;
+
+        r0 := @parameter0: java.lang.ClassLoader;
+
+        $r1 = staticinvoke <sun.rmi.transport.Transport$lambda_setContextClassLoader_0__419: java.security.PrivilegedAction bootstrap$(java.lang.ClassLoader)>(r0);
+
+        $r2 = <sun.rmi.transport.Transport: java.security.AccessControlContext SETCCL_ACC>;
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction,java.security.AccessControlContext)>($r1, $r2);
+
+        return;
+    }
+
+    public boolean serviceCall(java.rmi.server.RemoteCall)
+    {
+        java.security.AccessControlContext $r12;
+        java.io.ObjectOutput $r50;
+        java.rmi.server.ServerNotActiveException $r22;
+        java.lang.Thread $r14;
+        sun.rmi.transport.Transport$1 $r17;
+        boolean $z0, $z1;
+        java.lang.ThreadLocal $r16, $r18, $r42;
+        java.lang.Exception $r44;
+        sun.rmi.runtime.Log $r11, $r21, $r28, $r31, $r40;
+        java.rmi.RemoteException $r29;
+        java.io.ObjectInput $r1;
+        java.lang.StringBuilder $r23, $r24, $r25, $r32, $r33, $r35, $r36;
+        java.lang.ClassLoader $r13, $r15;
+        sun.rmi.transport.Target $r6;
+        java.rmi.server.RemoteCall r0;
+        java.lang.Throwable $r37, $r41;
+        java.rmi.NoSuchObjectException $r7;
+        sun.rmi.server.Dispatcher $r9;
+        java.util.logging.Level $r10, $r20, $r27, $r30, $r39;
+        java.rmi.MarshalException $r47;
+        java.lang.String $r26, $r34, r49;
+        sun.rmi.transport.Transport r4, $r48;
+        java.security.PrivilegedActionException $r43;
+        java.rmi.Remote $r8;
+        java.io.IOException $r19, $r38, $r45, $r46;
+        sun.rmi.transport.ObjectEndpoint $r5;
+        java.rmi.server.ObjID $r2, $r3;
+
+        r4 := @this: sun.rmi.transport.Transport;
+
+        r0 := @parameter0: java.rmi.server.RemoteCall;
+
+     label01:
+        $r1 = interfaceinvoke r0.<java.rmi.server.RemoteCall: java.io.ObjectInput getInputStream()>();
+
+        $r2 = staticinvoke <java.rmi.server.ObjID: java.rmi.server.ObjID read(java.io.ObjectInput)>($r1);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r46 := @caughtexception;
+
+        $r47 = new java.rmi.MarshalException;
+
+        specialinvoke $r47.<java.rmi.MarshalException: void <init>(java.lang.String,java.lang.Exception)>("unable to read objID", $r46);
+
+        throw $r47;
+
+     label04:
+        $r3 = <sun.rmi.transport.Transport: java.rmi.server.ObjID dgcID>;
+
+        $z0 = virtualinvoke $r2.<java.rmi.server.ObjID: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label05;
+
+        $r48 = null;
+
+        goto label06;
+
+     label05:
+        $r48 = r4;
+
+     label06:
+        $r5 = new sun.rmi.transport.ObjectEndpoint;
+
+        specialinvoke $r5.<sun.rmi.transport.ObjectEndpoint: void <init>(java.rmi.server.ObjID,sun.rmi.transport.Transport)>($r2, $r48);
+
+        $r6 = staticinvoke <sun.rmi.transport.ObjectTable: sun.rmi.transport.Target getTarget(sun.rmi.transport.ObjectEndpoint)>($r5);
+
+        if $r6 == null goto label07;
+
+        $r8 = virtualinvoke $r6.<sun.rmi.transport.Target: java.rmi.Remote getImpl()>();
+
+        if $r8 != null goto label08;
+
+     label07:
+        $r7 = new java.rmi.NoSuchObjectException;
+
+        specialinvoke $r7.<java.rmi.NoSuchObjectException: void <init>(java.lang.String)>("no such object in table");
+
+        throw $r7;
+
+     label08:
+        $r9 = virtualinvoke $r6.<sun.rmi.transport.Target: sun.rmi.server.Dispatcher getDispatcher()>();
+
+        virtualinvoke $r6.<sun.rmi.transport.Target: void incrementCallCount()>();
+
+     label09:
+        $r11 = <sun.rmi.transport.Transport: sun.rmi.runtime.Log transportLog>;
+
+        $r10 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        virtualinvoke $r11.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r10, "call dispatcher");
+
+        $r12 = virtualinvoke $r6.<sun.rmi.transport.Target: java.security.AccessControlContext getAccessControlContext()>();
+
+        $r13 = virtualinvoke $r6.<sun.rmi.transport.Target: java.lang.ClassLoader getContextClassLoader()>();
+
+        $r14 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.Thread: java.lang.ClassLoader getContextClassLoader()>();
+
+     label10:
+        staticinvoke <sun.rmi.transport.Transport: void setContextClassLoader(java.lang.ClassLoader)>($r13);
+
+        $r16 = <sun.rmi.transport.Transport: java.lang.ThreadLocal currentTransport>;
+
+        virtualinvoke $r16.<java.lang.ThreadLocal: void set(java.lang.Object)>(r4);
+
+     label11:
+        $r17 = new sun.rmi.transport.Transport$1;
+
+        specialinvoke $r17.<sun.rmi.transport.Transport$1: void <init>(sun.rmi.transport.Transport,java.security.AccessControlContext,sun.rmi.server.Dispatcher,java.rmi.Remote,java.rmi.server.RemoteCall)>(r4, $r12, $r9, $r8, r0);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction,java.security.AccessControlContext)>($r17, $r12);
+
+     label12:
+        goto label14;
+
+     label13:
+        $r43 := @caughtexception;
+
+        $r44 = virtualinvoke $r43.<java.security.PrivilegedActionException: java.lang.Exception getException()>();
+
+        $r45 = (java.io.IOException) $r44;
+
+        throw $r45;
+
+     label14:
+        staticinvoke <sun.rmi.transport.Transport: void setContextClassLoader(java.lang.ClassLoader)>($r15);
+
+        $r18 = <sun.rmi.transport.Transport: java.lang.ThreadLocal currentTransport>;
+
+        virtualinvoke $r18.<java.lang.ThreadLocal: void set(java.lang.Object)>(null);
+
+        goto label17;
+
+     label15:
+        $r41 := @caughtexception;
+
+     label16:
+        staticinvoke <sun.rmi.transport.Transport: void setContextClassLoader(java.lang.ClassLoader)>($r15);
+
+        $r42 = <sun.rmi.transport.Transport: java.lang.ThreadLocal currentTransport>;
+
+        virtualinvoke $r42.<java.lang.ThreadLocal: void set(java.lang.Object)>(null);
+
+        throw $r41;
+
+     label17:
+        virtualinvoke $r6.<sun.rmi.transport.Target: void decrementCallCount()>();
+
+        goto label23;
+
+     label18:
+        $r38 := @caughtexception;
+
+        $r40 = <sun.rmi.transport.Transport: sun.rmi.runtime.Log transportLog>;
+
+        $r39 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        virtualinvoke $r40.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r39, "exception thrown by dispatcher: ", $r38);
+
+     label19:
+        virtualinvoke $r6.<sun.rmi.transport.Target: void decrementCallCount()>();
+
+     label20:
+        return 0;
+
+     label21:
+        $r37 := @caughtexception;
+
+     label22:
+        virtualinvoke $r6.<sun.rmi.transport.Target: void decrementCallCount()>();
+
+        throw $r37;
+
+     label23:
+        goto label32;
+
+     label24:
+        $r29 := @caughtexception;
+
+        $r31 = <sun.rmi.server.UnicastServerRef: sun.rmi.runtime.Log callLog>;
+
+        $r30 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z1 = virtualinvoke $r31.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r30);
+
+        if $z1 == 0 goto label29;
+
+        r49 = "";
+
+     label25:
+        $r32 = new java.lang.StringBuilder;
+
+        specialinvoke $r32.<java.lang.StringBuilder: void <init>()>();
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r34 = staticinvoke <java.rmi.server.RemoteServer: java.lang.String getClientHost()>();
+
+        $r35 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r34);
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("] ");
+
+        r49 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label26:
+        goto label28;
+
+     label27:
+        $r22 := @caughtexception;
+
+     label28:
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r49);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("exception: ");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r28 = <sun.rmi.server.UnicastServerRef: sun.rmi.runtime.Log callLog>;
+
+        $r27 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        virtualinvoke $r28.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r27, $r26, $r29);
+
+     label29:
+        $r50 = interfaceinvoke r0.<java.rmi.server.RemoteCall: java.io.ObjectOutput getResultStream(boolean)>(0);
+
+        staticinvoke <sun.rmi.server.UnicastServerRef: void clearStackTraces(java.lang.Throwable)>($r29);
+
+        interfaceinvoke $r50.<java.io.ObjectOutput: void writeObject(java.lang.Object)>($r29);
+
+        interfaceinvoke r0.<java.rmi.server.RemoteCall: void releaseOutputStream()>();
+
+     label30:
+        goto label32;
+
+     label31:
+        $r19 := @caughtexception;
+
+        $r21 = <sun.rmi.transport.Transport: sun.rmi.runtime.Log transportLog>;
+
+        $r20 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        virtualinvoke $r21.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r20, "exception thrown marshalling exception: ", $r19);
+
+        return 0;
+
+     label32:
+        return 1;
+
+        catch java.io.IOException from label01 to label02 with label03;
+        catch java.security.PrivilegedActionException from label11 to label12 with label13;
+        catch java.lang.Throwable from label10 to label14 with label15;
+        catch java.lang.Throwable from label15 to label16 with label15;
+        catch java.io.IOException from label09 to label17 with label18;
+        catch java.lang.Throwable from label09 to label17 with label21;
+        catch java.lang.Throwable from label18 to label19 with label21;
+        catch java.lang.Throwable from label21 to label22 with label21;
+        catch java.rmi.RemoteException from label01 to label20 with label24;
+        catch java.rmi.RemoteException from label21 to label23 with label24;
+        catch java.rmi.server.ServerNotActiveException from label25 to label26 with label27;
+        catch java.io.IOException from label29 to label30 with label31;
+    }
+
+    public static java.lang.Void lambda$setContextClassLoader$0(java.lang.ClassLoader)
+    {
+        java.lang.ClassLoader r1;
+        java.lang.Thread $r0;
+
+        r1 := @parameter0: java.lang.ClassLoader;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r0.<java.lang.Thread: void setContextClassLoader(java.lang.ClassLoader)>(r1);
+
+        return null;
+    }
+
+    static void <clinit>()
+    {
+        java.security.AccessControlContext $r8;
+        java.lang.ThreadLocal $r2;
+        sun.rmi.runtime.Log $r1;
+        java.security.ProtectionDomain[] $r6;
+        java.security.ProtectionDomain $r7;
+        int $i0, $i1;
+        java.lang.RuntimePermission $r5;
+        java.lang.String $r0;
+        java.rmi.server.ObjID $r3;
+        java.security.Permissions $r4;
+
+        $r0 = staticinvoke <sun.rmi.transport.Transport: java.lang.String getLogLevel()>();
+
+        $i0 = staticinvoke <java.rmi.server.LogStream: int parseLevel(java.lang.String)>($r0);
+
+        <sun.rmi.transport.Transport: int logLevel> = $i0;
+
+        $i1 = <sun.rmi.transport.Transport: int logLevel>;
+
+        $r1 = staticinvoke <sun.rmi.runtime.Log: sun.rmi.runtime.Log getLog(java.lang.String,java.lang.String,int)>("sun.rmi.transport.misc", "transport", $i1);
+
+        <sun.rmi.transport.Transport: sun.rmi.runtime.Log transportLog> = $r1;
+
+        $r2 = new java.lang.ThreadLocal;
+
+        specialinvoke $r2.<java.lang.ThreadLocal: void <init>()>();
+
+        <sun.rmi.transport.Transport: java.lang.ThreadLocal currentTransport> = $r2;
+
+        $r3 = new java.rmi.server.ObjID;
+
+        specialinvoke $r3.<java.rmi.server.ObjID: void <init>(int)>(2);
+
+        <sun.rmi.transport.Transport: java.rmi.server.ObjID dgcID> = $r3;
+
+        $r4 = new java.security.Permissions;
+
+        specialinvoke $r4.<java.security.Permissions: void <init>()>();
+
+        $r5 = new java.lang.RuntimePermission;
+
+        specialinvoke $r5.<java.lang.RuntimePermission: void <init>(java.lang.String)>("setContextClassLoader");
+
+        virtualinvoke $r4.<java.security.Permissions: void add(java.security.Permission)>($r5);
+
+        $r6 = newarray (java.security.ProtectionDomain)[1];
+
+        $r7 = new java.security.ProtectionDomain;
+
+        specialinvoke $r7.<java.security.ProtectionDomain: void <init>(java.security.CodeSource,java.security.PermissionCollection)>(null, $r4);
+
+        $r6[0] = $r7;
+
+        $r8 = new java.security.AccessControlContext;
+
+        specialinvoke $r8.<java.security.AccessControlContext: void <init>(java.security.ProtectionDomain[])>($r6);
+
+        <sun.rmi.transport.Transport: java.security.AccessControlContext SETCCL_ACC> = $r8;
+
+        return;
+    }
+}

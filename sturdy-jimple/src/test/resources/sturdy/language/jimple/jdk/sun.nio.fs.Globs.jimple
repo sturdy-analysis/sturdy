@@ -1,0 +1,564 @@
+public class sun.nio.fs.Globs extends java.lang.Object
+{
+    private static final java.lang.String regexMetaChars;
+    private static final java.lang.String globMetaChars;
+    private static char EOL;
+
+    private void <init>()
+    {
+        sun.nio.fs.Globs r0;
+
+        r0 := @this: sun.nio.fs.Globs;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static boolean isRegexMeta(char)
+    {
+        int $i1, $i2, $i4;
+        char c0;
+        java.lang.String $r0;
+        boolean $z0;
+
+        c0 := @parameter0: char;
+
+        $r0 = ".^$+{[]|()";
+
+        $i2 = (int) c0;
+
+        $i1 = virtualinvoke $r0.<java.lang.String: int indexOf(int)>($i2);
+
+        $i4 = (int) -1;
+
+        if $i1 == $i4 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private static boolean isGlobMeta(char)
+    {
+        int $i1, $i2, $i4;
+        char c0;
+        java.lang.String $r0;
+        boolean $z0;
+
+        c0 := @parameter0: char;
+
+        $r0 = "\\*?[{";
+
+        $i2 = (int) c0;
+
+        $i1 = virtualinvoke $r0.<java.lang.String: int indexOf(int)>($i2);
+
+        $i4 = (int) -1;
+
+        if $i1 == $i4 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private static char next(java.lang.String, int)
+    {
+        int i0, $i1;
+        char $c2, $c3;
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $i1 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if i0 >= $i1 goto label1;
+
+        $c3 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i0);
+
+        return $c3;
+
+     label1:
+        $c2 = <sun.nio.fs.Globs: char EOL>;
+
+        return $c2;
+    }
+
+    private static java.lang.String toRegexPattern(java.lang.String, boolean)
+    {
+        java.lang.StringBuilder $r2, $r11;
+        java.lang.String r1, $r3;
+        boolean $z0, $z1, z2, $z3, z4, z5, z6, z7, z8, z9;
+        java.util.regex.PatternSyntaxException $r12, $r13, $r14, $r15, $r16, $r17, $r18;
+        int $i0, $i1, $i2, $i4, $i5, $i6, $i8, $i12, $i13, $i15, $i16, $i19, $i20, i23, i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44;
+        char $c3, $c7, $c9, $c10, $c11, $c14, $c17, $c18, $c21, $c22, c24;
+
+        r1 := @parameter0: java.lang.String;
+
+        z2 := @parameter1: boolean;
+
+        z4 = 0;
+
+        z9 = 0;
+
+        z8 = 0;
+
+        z7 = 0;
+
+        z6 = 0;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>(java.lang.String)>("^");
+
+        i23 = 0;
+
+     label01:
+        $i0 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if i23 >= $i0 goto label40;
+
+        $i2 = i23;
+
+        i23 = i23 + 1;
+
+        $c3 = virtualinvoke r1.<java.lang.String: char charAt(int)>($i2);
+
+        c24 = $c3;
+
+        $i27 = (int) $c3;
+
+        lookupswitch($i27)
+        {
+            case 42: goto label32;
+            case 44: goto label30;
+            case 47: goto label06;
+            case 63: goto label35;
+            case 91: goto label08;
+            case 92: goto label02;
+            case 123: goto label26;
+            case 125: goto label28;
+            default: goto label37;
+        };
+
+     label02:
+        $i5 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if i23 != $i5 goto label03;
+
+        $r12 = new java.util.regex.PatternSyntaxException;
+
+        $i8 = i23 - 1;
+
+        specialinvoke $r12.<java.util.regex.PatternSyntaxException: void <init>(java.lang.String,java.lang.String,int)>("No character to escape", r1, $i8);
+
+        throw $r12;
+
+     label03:
+        $i6 = i23;
+
+        i23 = i23 + 1;
+
+        $c7 = virtualinvoke r1.<java.lang.String: char charAt(int)>($i6);
+
+        $z0 = staticinvoke <sun.nio.fs.Globs: boolean isGlobMeta(char)>($c7);
+
+        if $z0 != 0 goto label04;
+
+        $z1 = staticinvoke <sun.nio.fs.Globs: boolean isRegexMeta(char)>($c7);
+
+        if $z1 == 0 goto label05;
+
+     label04:
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(92);
+
+     label05:
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c7);
+
+        goto label39;
+
+     label06:
+        if z2 == 0 goto label07;
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\\\\");
+
+        goto label39;
+
+     label07:
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c3);
+
+        goto label39;
+
+     label08:
+        if z2 == 0 goto label09;
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[[^\\\\]&&[");
+
+        goto label10;
+
+     label09:
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[[^/]&&[");
+
+     label10:
+        $c9 = staticinvoke <sun.nio.fs.Globs: char next(java.lang.String,int)>(r1, i23);
+
+        $i28 = (int) $c9;
+
+        if $i28 != 94 goto label11;
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\\^");
+
+        i23 = i23 + 1;
+
+        goto label13;
+
+     label11:
+        $c10 = staticinvoke <sun.nio.fs.Globs: char next(java.lang.String,int)>(r1, i23);
+
+        $i29 = (int) $c10;
+
+        if $i29 != 33 goto label12;
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(94);
+
+        i23 = i23 + 1;
+
+     label12:
+        $c11 = staticinvoke <sun.nio.fs.Globs: char next(java.lang.String,int)>(r1, i23);
+
+        $i30 = (int) $c11;
+
+        if $i30 != 45 goto label13;
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(45);
+
+        i23 = i23 + 1;
+
+     label13:
+        z5 = 0;
+
+        i25 = 0;
+
+     label14:
+        $i26 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if i23 >= $i26 goto label24;
+
+        $i13 = i23;
+
+        i23 = i23 + 1;
+
+        $c14 = virtualinvoke r1.<java.lang.String: char charAt(int)>($i13);
+
+        c24 = $c14;
+
+        $i31 = (int) $c14;
+
+        if $i31 != 93 goto label15;
+
+        goto label24;
+
+     label15:
+        $i32 = (int) $c14;
+
+        if $i32 == 47 goto label16;
+
+        if z2 == 0 goto label17;
+
+        $i33 = (int) $c14;
+
+        if $i33 != 92 goto label17;
+
+     label16:
+        $r13 = new java.util.regex.PatternSyntaxException;
+
+        $i15 = i23 - 1;
+
+        specialinvoke $r13.<java.util.regex.PatternSyntaxException: void <init>(java.lang.String,java.lang.String,int)>("Explicit \'name separator\' in class", r1, $i15);
+
+        throw $r13;
+
+     label17:
+        $i34 = (int) $c14;
+
+        if $i34 == 92 goto label18;
+
+        $i35 = (int) $c14;
+
+        if $i35 == 91 goto label18;
+
+        $i36 = (int) $c14;
+
+        if $i36 != 38 goto label19;
+
+        $c21 = staticinvoke <sun.nio.fs.Globs: char next(java.lang.String,int)>(r1, i23);
+
+        $i37 = (int) $c21;
+
+        if $i37 != 38 goto label19;
+
+     label18:
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(92);
+
+     label19:
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c14);
+
+        $i38 = (int) $c14;
+
+        if $i38 != 45 goto label23;
+
+        if z5 != 0 goto label20;
+
+        $r14 = new java.util.regex.PatternSyntaxException;
+
+        $i20 = i23 - 1;
+
+        specialinvoke $r14.<java.util.regex.PatternSyntaxException: void <init>(java.lang.String,java.lang.String,int)>("Invalid range", r1, $i20);
+
+        throw $r14;
+
+     label20:
+        $i16 = i23;
+
+        i23 = i23 + 1;
+
+        $c17 = staticinvoke <sun.nio.fs.Globs: char next(java.lang.String,int)>(r1, $i16);
+
+        c24 = $c17;
+
+        $c18 = <sun.nio.fs.Globs: char EOL>;
+
+        $i39 = (int) $c17;
+
+        $i40 = (int) $c18;
+
+        if $i39 == $i40 goto label24;
+
+        $i41 = (int) $c17;
+
+        if $i41 != 93 goto label21;
+
+        goto label24;
+
+     label21:
+        $i42 = (int) $c17;
+
+        if $i42 >= i25 goto label22;
+
+        $r15 = new java.util.regex.PatternSyntaxException;
+
+        $i19 = i23 - 3;
+
+        specialinvoke $r15.<java.util.regex.PatternSyntaxException: void <init>(java.lang.String,java.lang.String,int)>("Invalid range", r1, $i19);
+
+        throw $r15;
+
+     label22:
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c17);
+
+        z5 = 0;
+
+        goto label14;
+
+     label23:
+        z5 = 1;
+
+        i25 = $c14;
+
+        goto label14;
+
+     label24:
+        $i43 = (int) c24;
+
+        if $i43 == 93 goto label25;
+
+        $r16 = new java.util.regex.PatternSyntaxException;
+
+        $i12 = i23 - 1;
+
+        specialinvoke $r16.<java.util.regex.PatternSyntaxException: void <init>(java.lang.String,java.lang.String,int)>("Missing \']", r1, $i12);
+
+        throw $r16;
+
+     label25:
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]]");
+
+        goto label39;
+
+     label26:
+        if z8 == 0 goto label27;
+
+        $r17 = new java.util.regex.PatternSyntaxException;
+
+        $i4 = i23 - 1;
+
+        specialinvoke $r17.<java.util.regex.PatternSyntaxException: void <init>(java.lang.String,java.lang.String,int)>("Cannot nest groups", r1, $i4);
+
+        throw $r17;
+
+     label27:
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(?:(?:");
+
+        z4 = 1;
+
+        z9 = 1;
+
+        z8 = 1;
+
+        z7 = 1;
+
+        z6 = 1;
+
+        goto label39;
+
+     label28:
+        if z9 == 0 goto label29;
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("))");
+
+        z4 = 0;
+
+        z9 = 0;
+
+        z8 = 0;
+
+        z7 = 0;
+
+        z6 = 0;
+
+        goto label39;
+
+     label29:
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(125);
+
+        goto label39;
+
+     label30:
+        if z6 == 0 goto label31;
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")|(?:");
+
+        goto label39;
+
+     label31:
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        goto label39;
+
+     label32:
+        $c22 = staticinvoke <sun.nio.fs.Globs: char next(java.lang.String,int)>(r1, i23);
+
+        $i44 = (int) $c22;
+
+        if $i44 != 42 goto label33;
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".*");
+
+        i23 = i23 + 1;
+
+        goto label39;
+
+     label33:
+        if z2 == 0 goto label34;
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[^\\\\]*");
+
+        goto label39;
+
+     label34:
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[^/]*");
+
+        goto label39;
+
+     label35:
+        if z2 == 0 goto label36;
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[^\\\\]");
+
+        goto label39;
+
+     label36:
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[^/]");
+
+        goto label39;
+
+     label37:
+        $z3 = staticinvoke <sun.nio.fs.Globs: boolean isRegexMeta(char)>($c3);
+
+        if $z3 == 0 goto label38;
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(92);
+
+     label38:
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c3);
+
+     label39:
+        goto label01;
+
+     label40:
+        if z7 == 0 goto label41;
+
+        $r18 = new java.util.regex.PatternSyntaxException;
+
+        $i1 = i23 - 1;
+
+        specialinvoke $r18.<java.util.regex.PatternSyntaxException: void <init>(java.lang.String,java.lang.String,int)>("Missing \'}", r1, $i1);
+
+        throw $r18;
+
+     label41:
+        $r2 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(36);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+    }
+
+    static java.lang.String toUnixRegexPattern(java.lang.String)
+    {
+        java.lang.String r0, $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <sun.nio.fs.Globs: java.lang.String toRegexPattern(java.lang.String,boolean)>(r0, 0);
+
+        return $r1;
+    }
+
+    static java.lang.String toWindowsRegexPattern(java.lang.String)
+    {
+        java.lang.String r0, $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <sun.nio.fs.Globs: java.lang.String toRegexPattern(java.lang.String,boolean)>(r0, 1);
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        <sun.nio.fs.Globs: java.lang.String globMetaChars> = "\\*?[{";
+
+        <sun.nio.fs.Globs: java.lang.String regexMetaChars> = ".^$+{[]|()";
+
+        <sun.nio.fs.Globs: char EOL> = 0;
+
+        return;
+    }
+}

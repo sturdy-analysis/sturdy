@@ -1,0 +1,237 @@
+final class sun.security.ssl.Krb5ClientKeyExchange$Krb5ClientKeyExchangeConsumer extends java.lang.Object implements sun.security.ssl.SSLConsumer
+{
+
+    private void <init>()
+    {
+        sun.security.ssl.Krb5ClientKeyExchange$Krb5ClientKeyExchangeConsumer r0;
+
+        r0 := @this: sun.security.ssl.Krb5ClientKeyExchange$Krb5ClientKeyExchangeConsumer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void consume(sun.security.ssl.ConnectionContext, java.nio.ByteBuffer) throws java.io.IOException
+    {
+        java.security.AccessControlContext $r12;
+        byte[] $r43;
+        javax.crypto.spec.SecretKeySpec $r44;
+        sun.security.ssl.Krb5Authentication$Krb5Possession r37;
+        java.nio.ByteBuffer r9;
+        java.security.SecureRandom $r8;
+        boolean $z0, $z1, $z2, $z3;
+        sun.security.ssl.Krb5ClientKeyExchange$Krb5ClientKeyExchangeMessage $r13;
+        sun.security.ssl.ServerHandshakeContext r1;
+        sun.security.ssl.SSLContextImpl $r7;
+        sun.security.ssl.Krb5ClientKeyExchange$Krb5ClientKeyExchangeConsumer r36;
+        java.util.List $r2, $r45;
+        javax.net.ssl.SSLException $r27, $r30, $r34;
+        java.security.Principal $r40, $r42;
+        sun.security.ssl.SSLPossession r38;
+        java.lang.StringBuilder $r20, $r23, $r25;
+        javax.crypto.SecretKey $r15;
+        sun.security.ssl.CipherSuite $r47;
+        sun.security.ssl.SSLTrafficKeyDerivation $r18;
+        java.lang.Object[] $r31;
+        sun.security.ssl.Krb5KeyExchange$Krb5PremasterSecret $r46;
+        sun.security.ssl.ProtocolVersion $r5, $r6, $r17, $r24, $r49;
+        sun.security.ssl.CipherSuite$KeyExchange $r48;
+        sun.security.ssl.ConnectionContext r0;
+        int $i0;
+        java.lang.String $r26;
+        sun.security.ssl.KerberosClientKeyExchange $r4;
+        java.util.Iterator $r3;
+        sun.security.ssl.TransportContext $r10, $r21, $r29, $r33;
+        sun.security.ssl.Alert $r22, $r28, $r32;
+        sun.security.ssl.SSLKeyExchange $r50;
+        sun.security.ssl.SSLKeyDerivation $r14, $r19;
+        java.lang.Object $r11, $r35;
+        sun.security.ssl.SSLSessionImpl $r16, $r39, $r41;
+
+        r36 := @this: sun.security.ssl.Krb5ClientKeyExchange$Krb5ClientKeyExchangeConsumer;
+
+        r0 := @parameter0: sun.security.ssl.ConnectionContext;
+
+        r9 := @parameter1: java.nio.ByteBuffer;
+
+        r1 = (sun.security.ssl.ServerHandshakeContext) r0;
+
+        r37 = null;
+
+        $r2 = r1.<sun.security.ssl.ServerHandshakeContext: java.util.List handshakePossessions>;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r35 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r38 = (sun.security.ssl.SSLPossession) $r35;
+
+        $z3 = r38 instanceof sun.security.ssl.Krb5Authentication$Krb5Possession;
+
+        if $z3 == 0 goto label2;
+
+        r37 = (sun.security.ssl.Krb5Authentication$Krb5Possession) r38;
+
+        goto label3;
+
+     label2:
+        goto label1;
+
+     label3:
+        if r37 != null goto label4;
+
+        $r33 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r32 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r34 = virtualinvoke $r33.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r32, "No Kerberos possessions negotiated for client key exchange");
+
+        throw $r34;
+
+     label4:
+        $r4 = new sun.security.ssl.KerberosClientKeyExchange;
+
+        $r5 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $i0 = r1.<sun.security.ssl.ServerHandshakeContext: int clientHelloVersion>;
+
+        $r6 = staticinvoke <sun.security.ssl.ProtocolVersion: sun.security.ssl.ProtocolVersion valueOf(int)>($i0);
+
+        $r7 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLContextImpl sslContext>;
+
+        $r8 = virtualinvoke $r7.<sun.security.ssl.SSLContextImpl: java.security.SecureRandom getSecureRandom()>();
+
+        $r10 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r12 = $r10.<sun.security.ssl.TransportContext: java.security.AccessControlContext acc>;
+
+        $r11 = r37.<sun.security.ssl.Krb5Authentication$Krb5Possession: java.lang.Object serviceCreds>;
+
+        specialinvoke $r4.<sun.security.ssl.KerberosClientKeyExchange: void <init>(sun.security.ssl.ProtocolVersion,sun.security.ssl.ProtocolVersion,java.security.SecureRandom,java.nio.ByteBuffer,java.security.AccessControlContext,java.lang.Object)>($r5, $r6, $r8, r9, $r12, $r11);
+
+        $r13 = new sun.security.ssl.Krb5ClientKeyExchange$Krb5ClientKeyExchangeMessage;
+
+        specialinvoke $r13.<sun.security.ssl.Krb5ClientKeyExchange$Krb5ClientKeyExchangeMessage: void <init>(sun.security.ssl.HandshakeContext,sun.security.ssl.KerberosClientKeyExchange)>(r1, $r4);
+
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label5;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z2 == 0 goto label5;
+
+        $r31 = newarray (java.lang.Object)[1];
+
+        $r31[0] = $r13;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Consuming KRB5 ClientKeyExchange handshake message", $r31);
+
+     label5:
+        $r39 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        $r40 = virtualinvoke $r4.<sun.security.ssl.KerberosClientKeyExchange: java.security.Principal getPeerPrincipal()>();
+
+        virtualinvoke $r39.<sun.security.ssl.SSLSessionImpl: void setPeerPrincipal(java.security.Principal)>($r40);
+
+        $r41 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        $r42 = virtualinvoke $r4.<sun.security.ssl.KerberosClientKeyExchange: java.security.Principal getLocalPrincipal()>();
+
+        virtualinvoke $r41.<sun.security.ssl.SSLSessionImpl: void setLocalPrincipal(java.security.Principal)>($r42);
+
+        $r43 = virtualinvoke $r4.<sun.security.ssl.KerberosClientKeyExchange: byte[] getUnencryptedPreMasterSecret()>();
+
+        $r44 = new javax.crypto.spec.SecretKeySpec;
+
+        specialinvoke $r44.<javax.crypto.spec.SecretKeySpec: void <init>(byte[],java.lang.String)>($r43, "TlsPremasterSecret");
+
+        $r45 = r1.<sun.security.ssl.ServerHandshakeContext: java.util.List handshakeCredentials>;
+
+        $r46 = new sun.security.ssl.Krb5KeyExchange$Krb5PremasterSecret;
+
+        specialinvoke $r46.<sun.security.ssl.Krb5KeyExchange$Krb5PremasterSecret: void <init>(javax.crypto.SecretKey)>($r44);
+
+        interfaceinvoke $r45.<java.util.List: boolean add(java.lang.Object)>($r46);
+
+        $r47 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.CipherSuite negotiatedCipherSuite>;
+
+        $r48 = $r47.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$KeyExchange keyExchange>;
+
+        $r49 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r50 = staticinvoke <sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLKeyExchange valueOf(sun.security.ssl.CipherSuite$KeyExchange,sun.security.ssl.ProtocolVersion)>($r48, $r49);
+
+        if $r50 != null goto label6;
+
+        $r29 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r28 = <sun.security.ssl.Alert: sun.security.ssl.Alert INTERNAL_ERROR>;
+
+        $r30 = virtualinvoke $r29.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r28, "Not supported key exchange type");
+
+        throw $r30;
+
+     label6:
+        $r14 = virtualinvoke $r50.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLKeyDerivation createKeyDerivation(sun.security.ssl.HandshakeContext)>(r1);
+
+        $r15 = interfaceinvoke $r14.<sun.security.ssl.SSLKeyDerivation: javax.crypto.SecretKey deriveKey(java.lang.String,java.security.spec.AlgorithmParameterSpec)>("MasterSecret", null);
+
+        $r16 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        virtualinvoke $r16.<sun.security.ssl.SSLSessionImpl: void setMasterSecret(javax.crypto.SecretKey)>($r15);
+
+        $r17 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r18 = staticinvoke <sun.security.ssl.SSLTrafficKeyDerivation: sun.security.ssl.SSLTrafficKeyDerivation valueOf(sun.security.ssl.ProtocolVersion)>($r17);
+
+        if $r18 != null goto label7;
+
+        $r21 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r22 = <sun.security.ssl.Alert: sun.security.ssl.Alert INTERNAL_ERROR>;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Not supported key derivation: ");
+
+        $r24 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r25 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r24);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r27 = virtualinvoke $r21.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r22, $r26);
+
+        throw $r27;
+
+     label7:
+        $r19 = virtualinvoke $r18.<sun.security.ssl.SSLTrafficKeyDerivation: sun.security.ssl.SSLKeyDerivation createKeyDerivation(sun.security.ssl.HandshakeContext,javax.crypto.SecretKey)>(r1, $r15);
+
+        r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLKeyDerivation handshakeKeyDerivation> = $r19;
+
+        return;
+    }
+
+    void <init>(sun.security.ssl.Krb5ClientKeyExchange$1)
+    {
+        sun.security.ssl.Krb5ClientKeyExchange$1 r1;
+        sun.security.ssl.Krb5ClientKeyExchange$Krb5ClientKeyExchangeConsumer r0;
+
+        r0 := @this: sun.security.ssl.Krb5ClientKeyExchange$Krb5ClientKeyExchangeConsumer;
+
+        r1 := @parameter0: sun.security.ssl.Krb5ClientKeyExchange$1;
+
+        specialinvoke r0.<sun.security.ssl.Krb5ClientKeyExchange$Krb5ClientKeyExchangeConsumer: void <init>()>();
+
+        return;
+    }
+}

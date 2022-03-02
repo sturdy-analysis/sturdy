@@ -1,0 +1,214 @@
+public abstract class java.nio.channels.spi.AbstractSelector extends java.nio.channels.Selector
+{
+    private java.util.concurrent.atomic.AtomicBoolean selectorOpen;
+    private final java.nio.channels.spi.SelectorProvider provider;
+    private final java.util.Set cancelledKeys;
+    private sun.nio.ch.Interruptible interruptor;
+
+    protected void <init>(java.nio.channels.spi.SelectorProvider)
+    {
+        java.util.HashSet $r2;
+        java.nio.channels.spi.AbstractSelector r0;
+        java.nio.channels.spi.SelectorProvider r3;
+        java.util.concurrent.atomic.AtomicBoolean $r1;
+
+        r0 := @this: java.nio.channels.spi.AbstractSelector;
+
+        r3 := @parameter0: java.nio.channels.spi.SelectorProvider;
+
+        specialinvoke r0.<java.nio.channels.Selector: void <init>()>();
+
+        $r1 = new java.util.concurrent.atomic.AtomicBoolean;
+
+        specialinvoke $r1.<java.util.concurrent.atomic.AtomicBoolean: void <init>(boolean)>(1);
+
+        r0.<java.nio.channels.spi.AbstractSelector: java.util.concurrent.atomic.AtomicBoolean selectorOpen> = $r1;
+
+        $r2 = new java.util.HashSet;
+
+        specialinvoke $r2.<java.util.HashSet: void <init>()>();
+
+        r0.<java.nio.channels.spi.AbstractSelector: java.util.Set cancelledKeys> = $r2;
+
+        r0.<java.nio.channels.spi.AbstractSelector: sun.nio.ch.Interruptible interruptor> = null;
+
+        r0.<java.nio.channels.spi.AbstractSelector: java.nio.channels.spi.SelectorProvider provider> = r3;
+
+        return;
+    }
+
+    void cancel(java.nio.channels.SelectionKey)
+    {
+        java.lang.Throwable $r4;
+        java.nio.channels.spi.AbstractSelector r0;
+        java.nio.channels.SelectionKey r2;
+        java.util.Set $r1, $r3;
+
+        r0 := @this: java.nio.channels.spi.AbstractSelector;
+
+        r2 := @parameter0: java.nio.channels.SelectionKey;
+
+        $r1 = r0.<java.nio.channels.spi.AbstractSelector: java.util.Set cancelledKeys>;
+
+        entermonitor $r1;
+
+     label1:
+        $r3 = r0.<java.nio.channels.spi.AbstractSelector: java.util.Set cancelledKeys>;
+
+        interfaceinvoke $r3.<java.util.Set: boolean add(java.lang.Object)>(r2);
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r4;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public final void close() throws java.io.IOException
+    {
+        java.nio.channels.spi.AbstractSelector r0;
+        java.util.concurrent.atomic.AtomicBoolean $r1;
+        boolean $z0;
+
+        r0 := @this: java.nio.channels.spi.AbstractSelector;
+
+        $r1 = r0.<java.nio.channels.spi.AbstractSelector: java.util.concurrent.atomic.AtomicBoolean selectorOpen>;
+
+        $z0 = virtualinvoke $r1.<java.util.concurrent.atomic.AtomicBoolean: boolean getAndSet(boolean)>(0);
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        virtualinvoke r0.<java.nio.channels.spi.AbstractSelector: void implCloseSelector()>();
+
+        return;
+    }
+
+    protected abstract void implCloseSelector() throws java.io.IOException;
+
+    public final boolean isOpen()
+    {
+        java.nio.channels.spi.AbstractSelector r0;
+        java.util.concurrent.atomic.AtomicBoolean $r1;
+        boolean $z0;
+
+        r0 := @this: java.nio.channels.spi.AbstractSelector;
+
+        $r1 = r0.<java.nio.channels.spi.AbstractSelector: java.util.concurrent.atomic.AtomicBoolean selectorOpen>;
+
+        $z0 = virtualinvoke $r1.<java.util.concurrent.atomic.AtomicBoolean: boolean get()>();
+
+        return $z0;
+    }
+
+    public final java.nio.channels.spi.SelectorProvider provider()
+    {
+        java.nio.channels.spi.AbstractSelector r0;
+        java.nio.channels.spi.SelectorProvider $r1;
+
+        r0 := @this: java.nio.channels.spi.AbstractSelector;
+
+        $r1 = r0.<java.nio.channels.spi.AbstractSelector: java.nio.channels.spi.SelectorProvider provider>;
+
+        return $r1;
+    }
+
+    protected final java.util.Set cancelledKeys()
+    {
+        java.nio.channels.spi.AbstractSelector r0;
+        java.util.Set $r1;
+
+        r0 := @this: java.nio.channels.spi.AbstractSelector;
+
+        $r1 = r0.<java.nio.channels.spi.AbstractSelector: java.util.Set cancelledKeys>;
+
+        return $r1;
+    }
+
+    protected abstract java.nio.channels.SelectionKey register(java.nio.channels.spi.AbstractSelectableChannel, int, java.lang.Object);
+
+    protected final void deregister(java.nio.channels.spi.AbstractSelectionKey)
+    {
+        java.nio.channels.spi.AbstractSelector r3;
+        java.nio.channels.spi.AbstractSelectionKey r0;
+        java.nio.channels.SelectableChannel $r1;
+        java.nio.channels.spi.AbstractSelectableChannel $r2;
+
+        r3 := @this: java.nio.channels.spi.AbstractSelector;
+
+        r0 := @parameter0: java.nio.channels.spi.AbstractSelectionKey;
+
+        $r1 = virtualinvoke r0.<java.nio.channels.spi.AbstractSelectionKey: java.nio.channels.SelectableChannel channel()>();
+
+        $r2 = (java.nio.channels.spi.AbstractSelectableChannel) $r1;
+
+        virtualinvoke $r2.<java.nio.channels.spi.AbstractSelectableChannel: void removeKey(java.nio.channels.SelectionKey)>(r0);
+
+        return;
+    }
+
+    protected final void begin()
+    {
+        java.nio.channels.spi.AbstractSelector r0;
+        java.lang.Thread $r3;
+        sun.nio.ch.Interruptible $r1, $r2, $r4;
+        java.nio.channels.spi.AbstractSelector$1 $r5;
+        boolean $z0;
+
+        r0 := @this: java.nio.channels.spi.AbstractSelector;
+
+        $r1 = r0.<java.nio.channels.spi.AbstractSelector: sun.nio.ch.Interruptible interruptor>;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.nio.channels.spi.AbstractSelector$1;
+
+        specialinvoke $r5.<java.nio.channels.spi.AbstractSelector$1: void <init>(java.nio.channels.spi.AbstractSelector)>(r0);
+
+        r0.<java.nio.channels.spi.AbstractSelector: sun.nio.ch.Interruptible interruptor> = $r5;
+
+     label1:
+        $r2 = r0.<java.nio.channels.spi.AbstractSelector: sun.nio.ch.Interruptible interruptor>;
+
+        staticinvoke <java.nio.channels.spi.AbstractInterruptibleChannel: void blockedOn(sun.nio.ch.Interruptible)>($r2);
+
+        $r3 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.Thread: boolean isInterrupted()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = r0.<java.nio.channels.spi.AbstractSelector: sun.nio.ch.Interruptible interruptor>;
+
+        interfaceinvoke $r4.<sun.nio.ch.Interruptible: void interrupt(java.lang.Thread)>($r3);
+
+     label2:
+        return;
+    }
+
+    protected final void end()
+    {
+        java.nio.channels.spi.AbstractSelector r0;
+
+        r0 := @this: java.nio.channels.spi.AbstractSelector;
+
+        staticinvoke <java.nio.channels.spi.AbstractInterruptibleChannel: void blockedOn(sun.nio.ch.Interruptible)>(null);
+
+        return;
+    }
+}

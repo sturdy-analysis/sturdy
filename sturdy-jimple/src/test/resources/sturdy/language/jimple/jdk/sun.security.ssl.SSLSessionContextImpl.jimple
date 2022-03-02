@@ -1,0 +1,520 @@
+final class sun.security.ssl.SSLSessionContextImpl extends java.lang.Object implements javax.net.ssl.SSLSessionContext
+{
+    private static final int DEFAULT_MAX_CACHE_SIZE;
+    private final sun.security.util.Cache sessionCache;
+    private final sun.security.util.Cache sessionHostPortCache;
+    private int cacheLimit;
+    private int timeout;
+
+    void <init>()
+    {
+        sun.security.util.Cache $r1, $r2;
+        sun.security.ssl.SSLSessionContextImpl r0;
+        int $i0, $i1, $i2, $i3, $i4;
+
+        r0 := @this: sun.security.ssl.SSLSessionContextImpl;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $i0 = staticinvoke <sun.security.ssl.SSLSessionContextImpl: int getDefaultCacheLimit()>();
+
+        r0.<sun.security.ssl.SSLSessionContextImpl: int cacheLimit> = $i0;
+
+        r0.<sun.security.ssl.SSLSessionContextImpl: int timeout> = 86400;
+
+        $i2 = r0.<sun.security.ssl.SSLSessionContextImpl: int cacheLimit>;
+
+        $i1 = r0.<sun.security.ssl.SSLSessionContextImpl: int timeout>;
+
+        $r1 = staticinvoke <sun.security.util.Cache: sun.security.util.Cache newSoftMemoryCache(int,int)>($i2, $i1);
+
+        r0.<sun.security.ssl.SSLSessionContextImpl: sun.security.util.Cache sessionCache> = $r1;
+
+        $i4 = r0.<sun.security.ssl.SSLSessionContextImpl: int cacheLimit>;
+
+        $i3 = r0.<sun.security.ssl.SSLSessionContextImpl: int timeout>;
+
+        $r2 = staticinvoke <sun.security.util.Cache: sun.security.util.Cache newSoftMemoryCache(int,int)>($i4, $i3);
+
+        r0.<sun.security.ssl.SSLSessionContextImpl: sun.security.util.Cache sessionHostPortCache> = $r2;
+
+        return;
+    }
+
+    public javax.net.ssl.SSLSession getSession(byte[])
+    {
+        byte[] r0;
+        sun.security.util.Cache $r3;
+        java.lang.NullPointerException $r6;
+        sun.security.ssl.SessionId $r2;
+        sun.security.ssl.SSLSessionContextImpl r1;
+        java.lang.Object $r4;
+        sun.security.ssl.SSLSessionImpl r5;
+        boolean $z0;
+
+        r1 := @this: sun.security.ssl.SSLSessionContextImpl;
+
+        r0 := @parameter0: byte[];
+
+        if r0 != null goto label1;
+
+        $r6 = new java.lang.NullPointerException;
+
+        specialinvoke $r6.<java.lang.NullPointerException: void <init>(java.lang.String)>("session id cannot be null");
+
+        throw $r6;
+
+     label1:
+        $r3 = r1.<sun.security.ssl.SSLSessionContextImpl: sun.security.util.Cache sessionCache>;
+
+        $r2 = new sun.security.ssl.SessionId;
+
+        specialinvoke $r2.<sun.security.ssl.SessionId: void <init>(byte[])>(r0);
+
+        $r4 = virtualinvoke $r3.<sun.security.util.Cache: java.lang.Object get(java.lang.Object)>($r2);
+
+        r5 = (sun.security.ssl.SSLSessionImpl) $r4;
+
+        $z0 = specialinvoke r1.<sun.security.ssl.SSLSessionContextImpl: boolean isTimedout(javax.net.ssl.SSLSession)>(r5);
+
+        if $z0 != 0 goto label2;
+
+        return r5;
+
+     label2:
+        return null;
+    }
+
+    public java.util.Enumeration getIds()
+    {
+        java.util.Enumeration $r3;
+        sun.security.ssl.SSLSessionContextImpl r1;
+        sun.security.util.Cache $r2;
+        sun.security.ssl.SSLSessionContextImpl$SessionCacheVisitor $r0;
+
+        r1 := @this: sun.security.ssl.SSLSessionContextImpl;
+
+        $r0 = new sun.security.ssl.SSLSessionContextImpl$SessionCacheVisitor;
+
+        specialinvoke $r0.<sun.security.ssl.SSLSessionContextImpl$SessionCacheVisitor: void <init>(sun.security.ssl.SSLSessionContextImpl,sun.security.ssl.SSLSessionContextImpl$1)>(r1, null);
+
+        $r2 = r1.<sun.security.ssl.SSLSessionContextImpl: sun.security.util.Cache sessionCache>;
+
+        virtualinvoke $r2.<sun.security.util.Cache: void accept(sun.security.util.Cache$CacheVisitor)>($r0);
+
+        $r3 = virtualinvoke $r0.<sun.security.ssl.SSLSessionContextImpl$SessionCacheVisitor: java.util.Enumeration getSessionIds()>();
+
+        return $r3;
+    }
+
+    public void setSessionTimeout(int) throws java.lang.IllegalArgumentException
+    {
+        sun.security.ssl.SSLSessionContextImpl r0;
+        int i0, $i1;
+        sun.security.util.Cache $r1, $r2;
+        java.lang.IllegalArgumentException $r3;
+
+        r0 := @this: sun.security.ssl.SSLSessionContextImpl;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 0 goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $i1 = r0.<sun.security.ssl.SSLSessionContextImpl: int timeout>;
+
+        if $i1 == i0 goto label2;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionContextImpl: sun.security.util.Cache sessionCache>;
+
+        virtualinvoke $r1.<sun.security.util.Cache: void setTimeout(int)>(i0);
+
+        $r2 = r0.<sun.security.ssl.SSLSessionContextImpl: sun.security.util.Cache sessionHostPortCache>;
+
+        virtualinvoke $r2.<sun.security.util.Cache: void setTimeout(int)>(i0);
+
+        r0.<sun.security.ssl.SSLSessionContextImpl: int timeout> = i0;
+
+     label2:
+        return;
+    }
+
+    public int getSessionTimeout()
+    {
+        int $i0;
+        sun.security.ssl.SSLSessionContextImpl r0;
+
+        r0 := @this: sun.security.ssl.SSLSessionContextImpl;
+
+        $i0 = r0.<sun.security.ssl.SSLSessionContextImpl: int timeout>;
+
+        return $i0;
+    }
+
+    public void setSessionCacheSize(int) throws java.lang.IllegalArgumentException
+    {
+        sun.security.ssl.SSLSessionContextImpl r0;
+        int i0, $i1;
+        sun.security.util.Cache $r1, $r2;
+        java.lang.IllegalArgumentException $r3;
+
+        r0 := @this: sun.security.ssl.SSLSessionContextImpl;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 0 goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $i1 = r0.<sun.security.ssl.SSLSessionContextImpl: int cacheLimit>;
+
+        if $i1 == i0 goto label2;
+
+        $r1 = r0.<sun.security.ssl.SSLSessionContextImpl: sun.security.util.Cache sessionCache>;
+
+        virtualinvoke $r1.<sun.security.util.Cache: void setCapacity(int)>(i0);
+
+        $r2 = r0.<sun.security.ssl.SSLSessionContextImpl: sun.security.util.Cache sessionHostPortCache>;
+
+        virtualinvoke $r2.<sun.security.util.Cache: void setCapacity(int)>(i0);
+
+        r0.<sun.security.ssl.SSLSessionContextImpl: int cacheLimit> = i0;
+
+     label2:
+        return;
+    }
+
+    public int getSessionCacheSize()
+    {
+        int $i0;
+        sun.security.ssl.SSLSessionContextImpl r0;
+
+        r0 := @this: sun.security.ssl.SSLSessionContextImpl;
+
+        $i0 = r0.<sun.security.ssl.SSLSessionContextImpl: int cacheLimit>;
+
+        return $i0;
+    }
+
+    sun.security.ssl.SSLSessionImpl get(byte[])
+    {
+        byte[] r1;
+        javax.net.ssl.SSLSession $r2;
+        sun.security.ssl.SSLSessionContextImpl r0;
+        sun.security.ssl.SSLSessionImpl $r3;
+
+        r0 := @this: sun.security.ssl.SSLSessionContextImpl;
+
+        r1 := @parameter0: byte[];
+
+        $r2 = virtualinvoke r0.<sun.security.ssl.SSLSessionContextImpl: javax.net.ssl.SSLSession getSession(byte[])>(r1);
+
+        $r3 = (sun.security.ssl.SSLSessionImpl) $r2;
+
+        return $r3;
+    }
+
+    sun.security.ssl.SSLSessionImpl get(java.lang.String, int)
+    {
+        sun.security.util.Cache $r2;
+        sun.security.ssl.SSLSessionContextImpl r1;
+        int i0, $i2;
+        java.lang.Object $r4;
+        java.lang.String r0, $r3;
+        sun.security.ssl.SSLSessionImpl $r5;
+        boolean $z0;
+
+        r1 := @this: sun.security.ssl.SSLSessionContextImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        if r0 != null goto label1;
+
+        $i2 = (int) -1;
+
+        if i0 != $i2 goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r1.<sun.security.ssl.SSLSessionContextImpl: sun.security.util.Cache sessionHostPortCache>;
+
+        $r3 = staticinvoke <sun.security.ssl.SSLSessionContextImpl: java.lang.String getKey(java.lang.String,int)>(r0, i0);
+
+        $r4 = virtualinvoke $r2.<sun.security.util.Cache: java.lang.Object get(java.lang.Object)>($r3);
+
+        $r5 = (sun.security.ssl.SSLSessionImpl) $r4;
+
+        $z0 = specialinvoke r1.<sun.security.ssl.SSLSessionContextImpl: boolean isTimedout(javax.net.ssl.SSLSession)>($r5);
+
+        if $z0 != 0 goto label2;
+
+        return $r5;
+
+     label2:
+        return null;
+    }
+
+    private static java.lang.String getKey(java.lang.String, int)
+    {
+        java.util.Locale $r7;
+        int i0;
+        java.lang.StringBuilder $r0, $r2, $r3, $r5;
+        java.lang.String r1, $r4, $r6, $r8;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r4 = staticinvoke <java.lang.String: java.lang.String valueOf(int)>(i0);
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r7 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r8 = virtualinvoke $r6.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r7);
+
+        return $r8;
+    }
+
+    void put(sun.security.ssl.SSLSessionImpl)
+    {
+        sun.security.util.Cache $r2, $r5;
+        sun.security.ssl.SessionId $r3;
+        sun.security.ssl.SSLSessionContextImpl r0;
+        int $i0, $i1, $i3;
+        sun.security.ssl.SSLSessionImpl r1;
+        java.lang.String $r4, $r6, $r7;
+
+        r0 := @this: sun.security.ssl.SSLSessionContextImpl;
+
+        r1 := @parameter0: sun.security.ssl.SSLSessionImpl;
+
+        $r2 = r0.<sun.security.ssl.SSLSessionContextImpl: sun.security.util.Cache sessionCache>;
+
+        $r3 = virtualinvoke r1.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.SessionId getSessionId()>();
+
+        virtualinvoke $r2.<sun.security.util.Cache: void put(java.lang.Object,java.lang.Object)>($r3, r1);
+
+        $r4 = virtualinvoke r1.<sun.security.ssl.SSLSessionImpl: java.lang.String getPeerHost()>();
+
+        if $r4 == null goto label1;
+
+        $i0 = virtualinvoke r1.<sun.security.ssl.SSLSessionImpl: int getPeerPort()>();
+
+        $i3 = (int) -1;
+
+        if $i0 == $i3 goto label1;
+
+        $r5 = r0.<sun.security.ssl.SSLSessionContextImpl: sun.security.util.Cache sessionHostPortCache>;
+
+        $r6 = virtualinvoke r1.<sun.security.ssl.SSLSessionImpl: java.lang.String getPeerHost()>();
+
+        $i1 = virtualinvoke r1.<sun.security.ssl.SSLSessionImpl: int getPeerPort()>();
+
+        $r7 = staticinvoke <sun.security.ssl.SSLSessionContextImpl: java.lang.String getKey(java.lang.String,int)>($r6, $i1);
+
+        virtualinvoke $r5.<sun.security.util.Cache: void put(java.lang.Object,java.lang.Object)>($r7, r1);
+
+     label1:
+        virtualinvoke r1.<sun.security.ssl.SSLSessionImpl: void setContext(sun.security.ssl.SSLSessionContextImpl)>(r0);
+
+        return;
+    }
+
+    void remove(sun.security.ssl.SessionId)
+    {
+        sun.security.util.Cache $r2, $r5, $r6;
+        sun.security.ssl.SessionId r1;
+        sun.security.ssl.SSLSessionContextImpl r0;
+        int $i0;
+        java.lang.Object $r3;
+        sun.security.ssl.SSLSessionImpl r4;
+        java.lang.String $r7, $r8;
+
+        r0 := @this: sun.security.ssl.SSLSessionContextImpl;
+
+        r1 := @parameter0: sun.security.ssl.SessionId;
+
+        $r2 = r0.<sun.security.ssl.SSLSessionContextImpl: sun.security.util.Cache sessionCache>;
+
+        $r3 = virtualinvoke $r2.<sun.security.util.Cache: java.lang.Object get(java.lang.Object)>(r1);
+
+        r4 = (sun.security.ssl.SSLSessionImpl) $r3;
+
+        if r4 == null goto label1;
+
+        $r5 = r0.<sun.security.ssl.SSLSessionContextImpl: sun.security.util.Cache sessionCache>;
+
+        virtualinvoke $r5.<sun.security.util.Cache: void remove(java.lang.Object)>(r1);
+
+        $r6 = r0.<sun.security.ssl.SSLSessionContextImpl: sun.security.util.Cache sessionHostPortCache>;
+
+        $r7 = virtualinvoke r4.<sun.security.ssl.SSLSessionImpl: java.lang.String getPeerHost()>();
+
+        $i0 = virtualinvoke r4.<sun.security.ssl.SSLSessionImpl: int getPeerPort()>();
+
+        $r8 = staticinvoke <sun.security.ssl.SSLSessionContextImpl: java.lang.String getKey(java.lang.String,int)>($r7, $i0);
+
+        virtualinvoke $r6.<sun.security.util.Cache: void remove(java.lang.Object)>($r8);
+
+     label1:
+        return;
+    }
+
+    private static int getDefaultCacheLimit()
+    {
+        java.lang.Object[] $r1, $r3;
+        java.lang.Exception $r2;
+        int $i0;
+        java.lang.String $r0;
+        boolean $z0, $z1, $z2, $z3;
+
+     label1:
+        $r0 = staticinvoke <sun.security.action.GetPropertyAction: java.lang.String privilegedGetProperty(java.lang.String)>("javax.net.ssl.sessionCacheSize");
+
+        if $r0 == null goto label2;
+
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r0);
+
+        goto label3;
+
+     label2:
+        $i0 = 20480;
+
+     label3:
+        if $i0 < 0 goto label5;
+
+     label4:
+        return $i0;
+
+     label5:
+        $z0 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z0 == 0 goto label6;
+
+        $z1 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl");
+
+        if $z1 == 0 goto label6;
+
+        $r1 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void warning(java.lang.String,java.lang.Object[])>("invalid System Property javax.net.ssl.sessionCacheSize, use the default session cache size (20480) instead", $r1);
+
+     label6:
+        goto label8;
+
+     label7:
+        $r2 := @caughtexception;
+
+        $z2 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z2 == 0 goto label8;
+
+        $z3 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl");
+
+        if $z3 == 0 goto label8;
+
+        $r3 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void warning(java.lang.String,java.lang.Object[])>("the System Property javax.net.ssl.sessionCacheSize is not available, use the default value (20480) instead", $r3);
+
+     label8:
+        return 20480;
+
+        catch java.lang.Exception from label1 to label4 with label7;
+        catch java.lang.Exception from label5 to label6 with label7;
+    }
+
+    private boolean isTimedout(javax.net.ssl.SSLSession)
+    {
+        long $l1, $l3, $l4, $l5, $l6;
+        javax.net.ssl.SSLSession r1;
+        byte $b7;
+        sun.security.ssl.SSLSessionContextImpl r0;
+        int $i0, $i2, $i8;
+
+        r0 := @this: sun.security.ssl.SSLSessionContextImpl;
+
+        r1 := @parameter0: javax.net.ssl.SSLSession;
+
+        $i0 = r0.<sun.security.ssl.SSLSessionContextImpl: int timeout>;
+
+        if $i0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        if r1 == null goto label2;
+
+        $l1 = interfaceinvoke r1.<javax.net.ssl.SSLSession: long getCreationTime()>();
+
+        $i2 = r0.<sun.security.ssl.SSLSessionContextImpl: int timeout>;
+
+        $l3 = (long) $i2;
+
+        $l4 = $l3 * 1000L;
+
+        $l5 = $l1 + $l4;
+
+        $l6 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $b7 = $l5 cmp $l6;
+
+        $i8 = (int) $b7;
+
+        if $i8 > 0 goto label2;
+
+        interfaceinvoke r1.<javax.net.ssl.SSLSession: void invalidate()>();
+
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    static boolean access$100(sun.security.ssl.SSLSessionContextImpl, javax.net.ssl.SSLSession)
+    {
+        javax.net.ssl.SSLSession r1;
+        sun.security.ssl.SSLSessionContextImpl r0;
+        boolean $z0;
+
+        r0 := @parameter0: sun.security.ssl.SSLSessionContextImpl;
+
+        r1 := @parameter1: javax.net.ssl.SSLSession;
+
+        $z0 = specialinvoke r0.<sun.security.ssl.SSLSessionContextImpl: boolean isTimedout(javax.net.ssl.SSLSession)>(r1);
+
+        return $z0;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.security.ssl.SSLSessionContextImpl: int DEFAULT_MAX_CACHE_SIZE> = 20480;
+
+        return;
+    }
+}

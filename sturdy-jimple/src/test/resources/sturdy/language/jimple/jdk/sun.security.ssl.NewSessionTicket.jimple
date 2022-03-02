@@ -1,0 +1,120 @@
+final class sun.security.ssl.NewSessionTicket extends java.lang.Object
+{
+    private static final int MAX_TICKET_LIFETIME;
+    static final sun.security.ssl.SSLConsumer handshakeConsumer;
+    static final sun.security.ssl.SSLProducer t13PosthandshakeProducer;
+    static final sun.security.ssl.HandshakeProducer handshakeProducer;
+
+    void <init>()
+    {
+        sun.security.ssl.NewSessionTicket r0;
+
+        r0 := @this: sun.security.ssl.NewSessionTicket;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static javax.crypto.SecretKey derivePreSharedKey(sun.security.ssl.CipherSuite$HashAlg, javax.crypto.SecretKey, byte[]) throws java.io.IOException
+    {
+        java.lang.Throwable $r11;
+        byte[] $r4, r5, $r6;
+        javax.net.ssl.SSLHandshakeException $r10, $r12;
+        sun.security.ssl.CipherSuite$HashAlg r1;
+        java.security.GeneralSecurityException $r9;
+        int $i0, $i1;
+        java.lang.String $r2, $r3;
+        javax.crypto.SecretKey r7, $r8;
+        sun.security.ssl.HKDF $r0;
+
+        r1 := @parameter0: sun.security.ssl.CipherSuite$HashAlg;
+
+        r7 := @parameter1: javax.crypto.SecretKey;
+
+        r5 := @parameter2: byte[];
+
+     label1:
+        $r0 = new sun.security.ssl.HKDF;
+
+        $r2 = r1.<sun.security.ssl.CipherSuite$HashAlg: java.lang.String name>;
+
+        specialinvoke $r0.<sun.security.ssl.HKDF: void <init>(java.lang.String)>($r2);
+
+        $r3 = "tls13 resumption";
+
+        $r4 = virtualinvoke $r3.<java.lang.String: byte[] getBytes()>();
+
+        $i0 = r1.<sun.security.ssl.CipherSuite$HashAlg: int hashLength>;
+
+        $r6 = staticinvoke <sun.security.ssl.SSLSecretDerivation: byte[] createHkdfInfo(byte[],byte[],int)>($r4, r5, $i0);
+
+        $i1 = r1.<sun.security.ssl.CipherSuite$HashAlg: int hashLength>;
+
+        $r8 = virtualinvoke $r0.<sun.security.ssl.HKDF: javax.crypto.SecretKey expand(javax.crypto.SecretKey,byte[],int,java.lang.String)>(r7, $r6, $i1, "TlsPreSharedKey");
+
+     label2:
+        return $r8;
+
+     label3:
+        $r9 := @caughtexception;
+
+        $r10 = new javax.net.ssl.SSLHandshakeException;
+
+        specialinvoke $r10.<javax.net.ssl.SSLHandshakeException: void <init>(java.lang.String)>("Could not derive PSK");
+
+        $r11 = virtualinvoke $r10.<javax.net.ssl.SSLHandshakeException: java.lang.Throwable initCause(java.lang.Throwable)>($r9);
+
+        $r12 = (javax.net.ssl.SSLHandshakeException) $r11;
+
+        throw $r12;
+
+        catch java.security.GeneralSecurityException from label1 to label2 with label3;
+    }
+
+    static javax.crypto.SecretKey access$300(sun.security.ssl.CipherSuite$HashAlg, javax.crypto.SecretKey, byte[]) throws java.io.IOException
+    {
+        byte[] r2;
+        sun.security.ssl.CipherSuite$HashAlg r0;
+        javax.crypto.SecretKey r1, $r3;
+
+        r0 := @parameter0: sun.security.ssl.CipherSuite$HashAlg;
+
+        r1 := @parameter1: javax.crypto.SecretKey;
+
+        r2 := @parameter2: byte[];
+
+        $r3 = staticinvoke <sun.security.ssl.NewSessionTicket: javax.crypto.SecretKey derivePreSharedKey(sun.security.ssl.CipherSuite$HashAlg,javax.crypto.SecretKey,byte[])>(r0, r1, r2);
+
+        return $r3;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.ssl.NewSessionTicket$T13NewSessionTicketProducer $r1;
+        sun.security.ssl.NewSessionTicket$NewSessionTicketProducer $r2;
+        sun.security.ssl.NewSessionTicket$NewSessionTicketConsumer $r0;
+
+        <sun.security.ssl.NewSessionTicket: int MAX_TICKET_LIFETIME> = 604800;
+
+        $r0 = new sun.security.ssl.NewSessionTicket$NewSessionTicketConsumer;
+
+        specialinvoke $r0.<sun.security.ssl.NewSessionTicket$NewSessionTicketConsumer: void <init>(sun.security.ssl.NewSessionTicket$1)>(null);
+
+        <sun.security.ssl.NewSessionTicket: sun.security.ssl.SSLConsumer handshakeConsumer> = $r0;
+
+        $r1 = new sun.security.ssl.NewSessionTicket$T13NewSessionTicketProducer;
+
+        specialinvoke $r1.<sun.security.ssl.NewSessionTicket$T13NewSessionTicketProducer: void <init>(sun.security.ssl.NewSessionTicket$1)>(null);
+
+        <sun.security.ssl.NewSessionTicket: sun.security.ssl.SSLProducer t13PosthandshakeProducer> = $r1;
+
+        $r2 = new sun.security.ssl.NewSessionTicket$NewSessionTicketProducer;
+
+        specialinvoke $r2.<sun.security.ssl.NewSessionTicket$NewSessionTicketProducer: void <init>(sun.security.ssl.NewSessionTicket$1)>(null);
+
+        <sun.security.ssl.NewSessionTicket: sun.security.ssl.HandshakeProducer handshakeProducer> = $r2;
+
+        return;
+    }
+}

@@ -1,0 +1,730 @@
+class java.awt.EventDispatchThread extends java.lang.Thread
+{
+    private static final sun.util.logging.PlatformLogger eventLog;
+    private java.awt.EventQueue theQueue;
+    private volatile boolean doDispatch;
+    private static final int ANY_EVENT;
+    private java.util.ArrayList eventFilters;
+
+    void <init>(java.lang.ThreadGroup, java.lang.String, java.awt.EventQueue)
+    {
+        java.awt.EventDispatchThread r0;
+        java.awt.EventQueue r4;
+        java.lang.ThreadGroup r1;
+        java.lang.String r2;
+        java.util.ArrayList $r3;
+
+        r0 := @this: java.awt.EventDispatchThread;
+
+        r1 := @parameter0: java.lang.ThreadGroup;
+
+        r2 := @parameter1: java.lang.String;
+
+        r4 := @parameter2: java.awt.EventQueue;
+
+        specialinvoke r0.<java.lang.Thread: void <init>(java.lang.ThreadGroup,java.lang.String)>(r1, r2);
+
+        r0.<java.awt.EventDispatchThread: boolean doDispatch> = 1;
+
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>()>();
+
+        r0.<java.awt.EventDispatchThread: java.util.ArrayList eventFilters> = $r3;
+
+        virtualinvoke r0.<java.awt.EventDispatchThread: void setEventQueue(java.awt.EventQueue)>(r4);
+
+        return;
+    }
+
+    public void stopDispatching()
+    {
+        java.awt.EventDispatchThread r0;
+
+        r0 := @this: java.awt.EventDispatchThread;
+
+        r0.<java.awt.EventDispatchThread: boolean doDispatch> = 0;
+
+        return;
+    }
+
+    public void run()
+    {
+        java.awt.EventDispatchThread r0;
+        java.awt.EventQueue $r2, $r4;
+        java.lang.Throwable $r3;
+        java.awt.EventDispatchThread$1 $r1;
+
+        r0 := @this: java.awt.EventDispatchThread;
+
+     label1:
+        $r1 = new java.awt.EventDispatchThread$1;
+
+        specialinvoke $r1.<java.awt.EventDispatchThread$1: void <init>(java.awt.EventDispatchThread)>(r0);
+
+        virtualinvoke r0.<java.awt.EventDispatchThread: void pumpEvents(java.awt.Conditional)>($r1);
+
+     label2:
+        $r2 = virtualinvoke r0.<java.awt.EventDispatchThread: java.awt.EventQueue getEventQueue()>();
+
+        virtualinvoke $r2.<java.awt.EventQueue: void detachDispatchThread(java.awt.EventDispatchThread)>(r0);
+
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = virtualinvoke r0.<java.awt.EventDispatchThread: java.awt.EventQueue getEventQueue()>();
+
+        virtualinvoke $r4.<java.awt.EventQueue: void detachDispatchThread(java.awt.EventDispatchThread)>(r0);
+
+        throw $r3;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    void pumpEvents(java.awt.Conditional)
+    {
+        java.awt.EventDispatchThread r0;
+        int $i1;
+        java.awt.Conditional r1;
+
+        r0 := @this: java.awt.EventDispatchThread;
+
+        r1 := @parameter0: java.awt.Conditional;
+
+        $i1 = (int) -1;
+
+        virtualinvoke r0.<java.awt.EventDispatchThread: void pumpEvents(int,java.awt.Conditional)>($i1, r1);
+
+        return;
+    }
+
+    void pumpEventsForHierarchy(java.awt.Conditional, java.awt.Component)
+    {
+        java.awt.EventDispatchThread r0;
+        int $i1;
+        java.awt.Component r2;
+        java.awt.Conditional r1;
+
+        r0 := @this: java.awt.EventDispatchThread;
+
+        r1 := @parameter0: java.awt.Conditional;
+
+        r2 := @parameter1: java.awt.Component;
+
+        $i1 = (int) -1;
+
+        virtualinvoke r0.<java.awt.EventDispatchThread: void pumpEventsForHierarchy(int,java.awt.Conditional,java.awt.Component)>($i1, r1, r2);
+
+        return;
+    }
+
+    void pumpEvents(int, java.awt.Conditional)
+    {
+        java.awt.EventDispatchThread r0;
+        int i0;
+        java.awt.Conditional r1;
+
+        r0 := @this: java.awt.EventDispatchThread;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.awt.Conditional;
+
+        virtualinvoke r0.<java.awt.EventDispatchThread: void pumpEventsForHierarchy(int,java.awt.Conditional,java.awt.Component)>(i0, r1, null);
+
+        return;
+    }
+
+    void pumpEventsForHierarchy(int, java.awt.Conditional, java.awt.Component)
+    {
+        java.awt.EventDispatchThread r0;
+        java.awt.EventDispatchThread$HierarchyEventFilter $r2;
+        int i0;
+        java.awt.Component r3;
+        java.awt.Conditional r1;
+
+        r0 := @this: java.awt.EventDispatchThread;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.awt.Conditional;
+
+        r3 := @parameter2: java.awt.Component;
+
+        $r2 = new java.awt.EventDispatchThread$HierarchyEventFilter;
+
+        specialinvoke $r2.<java.awt.EventDispatchThread$HierarchyEventFilter: void <init>(java.awt.Component)>(r3);
+
+        virtualinvoke r0.<java.awt.EventDispatchThread: void pumpEventsForFilter(int,java.awt.Conditional,java.awt.EventFilter)>(i0, r1, $r2);
+
+        return;
+    }
+
+    void pumpEventsForFilter(java.awt.Conditional, java.awt.EventFilter)
+    {
+        java.awt.EventDispatchThread r0;
+        int $i1;
+        java.awt.Conditional r1;
+        java.awt.EventFilter r2;
+
+        r0 := @this: java.awt.EventDispatchThread;
+
+        r1 := @parameter0: java.awt.Conditional;
+
+        r2 := @parameter1: java.awt.EventFilter;
+
+        $i1 = (int) -1;
+
+        virtualinvoke r0.<java.awt.EventDispatchThread: void pumpEventsForFilter(int,java.awt.Conditional,java.awt.EventFilter)>($i1, r1, r2);
+
+        return;
+    }
+
+    void pumpEventsForFilter(int, java.awt.Conditional, java.awt.EventFilter)
+    {
+        java.awt.EventDispatchThread r0;
+        int i0;
+        java.awt.EventFilter r1;
+        boolean $z0, $z1, $z2;
+        java.awt.Conditional r2;
+
+        r0 := @this: java.awt.EventDispatchThread;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.awt.Conditional;
+
+        r1 := @parameter2: java.awt.EventFilter;
+
+        virtualinvoke r0.<java.awt.EventDispatchThread: void addEventFilter(java.awt.EventFilter)>(r1);
+
+        r0.<java.awt.EventDispatchThread: boolean doDispatch> = 1;
+
+     label1:
+        $z0 = r0.<java.awt.EventDispatchThread: boolean doDispatch>;
+
+        if $z0 == 0 goto label2;
+
+        $z1 = virtualinvoke r0.<java.awt.EventDispatchThread: boolean isInterrupted()>();
+
+        if $z1 != 0 goto label2;
+
+        $z2 = interfaceinvoke r2.<java.awt.Conditional: boolean evaluate()>();
+
+        if $z2 == 0 goto label2;
+
+        virtualinvoke r0.<java.awt.EventDispatchThread: void pumpOneEventForFilters(int)>(i0);
+
+        goto label1;
+
+     label2:
+        virtualinvoke r0.<java.awt.EventDispatchThread: void removeEventFilter(java.awt.EventFilter)>(r1);
+
+        return;
+    }
+
+    void addEventFilter(java.awt.EventFilter)
+    {
+        java.lang.Throwable $r19;
+        java.util.ArrayList $r3, $r5, $r6, $r8, $r9, $r10;
+        int $i0, $i1, i2;
+        java.lang.String $r18;
+        boolean $z0, $z1, $z2, $z3;
+        java.awt.ModalEventFilter r7, r13;
+        java.awt.EventDispatchThread r2;
+        sun.util.logging.PlatformLogger$Level $r0;
+        sun.util.logging.PlatformLogger $r1, $r15;
+        java.lang.Object $r11;
+        java.lang.StringBuilder $r14, $r16, $r17;
+        java.awt.EventFilter r4, r12;
+
+        r2 := @this: java.awt.EventDispatchThread;
+
+        r4 := @parameter0: java.awt.EventFilter;
+
+        $r1 = <java.awt.EventDispatchThread: sun.util.logging.PlatformLogger eventLog>;
+
+        $r0 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINEST>;
+
+        $z0 = virtualinvoke $r1.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r0);
+
+        if $z0 == 0 goto label01;
+
+        $r15 = <java.awt.EventDispatchThread: sun.util.logging.PlatformLogger eventLog>;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("adding the event filter: ");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r4);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r15.<sun.util.logging.PlatformLogger: void finest(java.lang.String)>($r18);
+
+     label01:
+        $r3 = r2.<java.awt.EventDispatchThread: java.util.ArrayList eventFilters>;
+
+        entermonitor $r3;
+
+     label02:
+        $r5 = r2.<java.awt.EventDispatchThread: java.util.ArrayList eventFilters>;
+
+        $z1 = virtualinvoke $r5.<java.util.ArrayList: boolean contains(java.lang.Object)>(r4);
+
+        if $z1 != 0 goto label07;
+
+        $z2 = r4 instanceof java.awt.ModalEventFilter;
+
+        if $z2 == 0 goto label06;
+
+        r7 = (java.awt.ModalEventFilter) r4;
+
+        i2 = 0;
+
+     label03:
+        $r8 = r2.<java.awt.EventDispatchThread: java.util.ArrayList eventFilters>;
+
+        $i0 = virtualinvoke $r8.<java.util.ArrayList: int size()>();
+
+        if i2 >= $i0 goto label05;
+
+        $r10 = r2.<java.awt.EventDispatchThread: java.util.ArrayList eventFilters>;
+
+        $r11 = virtualinvoke $r10.<java.util.ArrayList: java.lang.Object get(int)>(i2);
+
+        r12 = (java.awt.EventFilter) $r11;
+
+        $z3 = r12 instanceof java.awt.ModalEventFilter;
+
+        if $z3 == 0 goto label04;
+
+        r13 = (java.awt.ModalEventFilter) r12;
+
+        $i1 = virtualinvoke r13.<java.awt.ModalEventFilter: int compareTo(java.awt.ModalEventFilter)>(r7);
+
+        if $i1 <= 0 goto label04;
+
+        goto label05;
+
+     label04:
+        i2 = i2 + 1;
+
+        goto label03;
+
+     label05:
+        $r9 = r2.<java.awt.EventDispatchThread: java.util.ArrayList eventFilters>;
+
+        virtualinvoke $r9.<java.util.ArrayList: void add(int,java.lang.Object)>(i2, r4);
+
+        goto label07;
+
+     label06:
+        $r6 = r2.<java.awt.EventDispatchThread: java.util.ArrayList eventFilters>;
+
+        virtualinvoke $r6.<java.util.ArrayList: boolean add(java.lang.Object)>(r4);
+
+     label07:
+        exitmonitor $r3;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r19 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label10:
+        throw $r19;
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label02 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    void removeEventFilter(java.awt.EventFilter)
+    {
+        java.awt.EventDispatchThread r2;
+        java.lang.Throwable $r11;
+        sun.util.logging.PlatformLogger$Level $r0;
+        sun.util.logging.PlatformLogger $r1, $r7;
+        java.util.ArrayList $r3, $r5;
+        java.lang.StringBuilder $r6, $r8, $r9;
+        java.lang.String $r10;
+        boolean $z0;
+        java.awt.EventFilter r4;
+
+        r2 := @this: java.awt.EventDispatchThread;
+
+        r4 := @parameter0: java.awt.EventFilter;
+
+        $r1 = <java.awt.EventDispatchThread: sun.util.logging.PlatformLogger eventLog>;
+
+        $r0 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINEST>;
+
+        $z0 = virtualinvoke $r1.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r0);
+
+        if $z0 == 0 goto label1;
+
+        $r7 = <java.awt.EventDispatchThread: sun.util.logging.PlatformLogger eventLog>;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("removing the event filter: ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r4);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<sun.util.logging.PlatformLogger: void finest(java.lang.String)>($r10);
+
+     label1:
+        $r3 = r2.<java.awt.EventDispatchThread: java.util.ArrayList eventFilters>;
+
+        entermonitor $r3;
+
+     label2:
+        $r5 = r2.<java.awt.EventDispatchThread: java.util.ArrayList eventFilters>;
+
+        virtualinvoke $r5.<java.util.ArrayList: boolean remove(java.lang.Object)>(r4);
+
+        exitmonitor $r3;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r11 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label5:
+        throw $r11;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    boolean filterAndCheckEvent(java.awt.AWTEvent)
+    {
+        java.lang.Throwable $r10;
+        java.util.ArrayList $r1, $r2, $r4;
+        java.awt.AWTEvent r3;
+        int $i0, i1, $i3;
+        boolean $z0, z1, $z2;
+        java.awt.EventDispatchThread r0;
+        java.awt.EventFilter$FilterAction $r7, $r8, $r9;
+        java.lang.Object $r5;
+        java.awt.EventFilter r6;
+
+        r0 := @this: java.awt.EventDispatchThread;
+
+        r3 := @parameter0: java.awt.AWTEvent;
+
+        z1 = 1;
+
+        $r1 = r0.<java.awt.EventDispatchThread: java.util.ArrayList eventFilters>;
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = r0.<java.awt.EventDispatchThread: java.util.ArrayList eventFilters>;
+
+        $i0 = virtualinvoke $r2.<java.util.ArrayList: int size()>();
+
+        i1 = $i0 - 1;
+
+     label02:
+        if i1 < 0 goto label05;
+
+        $r4 = r0.<java.awt.EventDispatchThread: java.util.ArrayList eventFilters>;
+
+        $r5 = virtualinvoke $r4.<java.util.ArrayList: java.lang.Object get(int)>(i1);
+
+        r6 = (java.awt.EventFilter) $r5;
+
+        $r7 = interfaceinvoke r6.<java.awt.EventFilter: java.awt.EventFilter$FilterAction acceptEvent(java.awt.AWTEvent)>(r3);
+
+        $r8 = <java.awt.EventFilter$FilterAction: java.awt.EventFilter$FilterAction REJECT>;
+
+        if $r7 != $r8 goto label03;
+
+        z1 = 0;
+
+        goto label05;
+
+     label03:
+        $r9 = <java.awt.EventFilter$FilterAction: java.awt.EventFilter$FilterAction ACCEPT_IMMEDIATELY>;
+
+        if $r7 != $r9 goto label04;
+
+        goto label05;
+
+     label04:
+        $i3 = (int) -1;
+
+        i1 = i1 + $i3;
+
+        goto label02;
+
+     label05:
+        exitmonitor $r1;
+
+     label06:
+        goto label09;
+
+     label07:
+        $r10 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label08:
+        throw $r10;
+
+     label09:
+        if z1 == 0 goto label10;
+
+        $z0 = staticinvoke <sun.awt.dnd.SunDragSourceContextPeer: boolean checkEvent(java.awt.AWTEvent)>(r3);
+
+        if $z0 == 0 goto label10;
+
+        $z2 = 1;
+
+        goto label11;
+
+     label10:
+        $z2 = 0;
+
+     label11:
+        return $z2;
+
+        catch java.lang.Throwable from label01 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+    }
+
+    void pumpOneEventForFilters(int)
+    {
+        java.lang.Throwable $r10;
+        java.awt.AWTEvent r13, $r14;
+        int i0, $i2, $i4;
+        java.lang.String $r9;
+        boolean $z0, $z1;
+        java.awt.EventDispatchThread r0;
+        java.awt.EventQueue $r1;
+        sun.util.logging.PlatformLogger$Level $r3;
+        sun.util.logging.PlatformLogger $r4, $r6;
+        java.lang.ThreadDeath $r12;
+        java.lang.InterruptedException $r11;
+        sun.awt.EventQueueDelegate$Delegate $r2;
+        java.lang.StringBuilder $r7, $r8, $r16;
+        java.lang.Object r15;
+
+        r0 := @this: java.awt.EventDispatchThread;
+
+        i0 := @parameter0: int;
+
+     label01:
+        $r1 = virtualinvoke r0.<java.awt.EventDispatchThread: java.awt.EventQueue getEventQueue()>();
+
+        $r2 = staticinvoke <sun.awt.EventQueueDelegate: sun.awt.EventQueueDelegate$Delegate getDelegate()>();
+
+        if $r2 == null goto label02;
+
+        $i2 = (int) -1;
+
+        if i0 != $i2 goto label02;
+
+        r13 = interfaceinvoke $r2.<sun.awt.EventQueueDelegate$Delegate: java.awt.AWTEvent getNextEvent(java.awt.EventQueue)>($r1);
+
+        goto label05;
+
+     label02:
+        $i4 = (int) -1;
+
+        if i0 != $i4 goto label03;
+
+        $r14 = virtualinvoke $r1.<java.awt.EventQueue: java.awt.AWTEvent getNextEvent()>();
+
+        goto label04;
+
+     label03:
+        $r14 = virtualinvoke $r1.<java.awt.EventQueue: java.awt.AWTEvent getNextEvent(int)>(i0);
+
+     label04:
+        r13 = $r14;
+
+     label05:
+        $z1 = virtualinvoke r0.<java.awt.EventDispatchThread: boolean filterAndCheckEvent(java.awt.AWTEvent)>(r13);
+
+        if $z1 != 0 goto label06;
+
+        virtualinvoke r13.<java.awt.AWTEvent: void consume()>();
+
+     label06:
+        if $z1 == 0 goto label01;
+
+        $r4 = <java.awt.EventDispatchThread: sun.util.logging.PlatformLogger eventLog>;
+
+        $r3 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINEST>;
+
+        $z0 = virtualinvoke $r4.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r3);
+
+        if $z0 == 0 goto label07;
+
+        $r6 = <java.awt.EventDispatchThread: sun.util.logging.PlatformLogger eventLog>;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Dispatching: ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r13);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<sun.util.logging.PlatformLogger: void finest(java.lang.String)>($r9);
+
+     label07:
+        r15 = null;
+
+        if $r2 == null goto label08;
+
+        r15 = interfaceinvoke $r2.<sun.awt.EventQueueDelegate$Delegate: java.lang.Object beforeDispatch(java.awt.AWTEvent)>(r13);
+
+     label08:
+        virtualinvoke $r1.<java.awt.EventQueue: void dispatchEvent(java.awt.AWTEvent)>(r13);
+
+        if $r2 == null goto label09;
+
+        interfaceinvoke $r2.<sun.awt.EventQueueDelegate$Delegate: void afterDispatch(java.awt.AWTEvent,java.lang.Object)>(r13, r15);
+
+     label09:
+        goto label13;
+
+     label10:
+        $r12 := @caughtexception;
+
+        r0.<java.awt.EventDispatchThread: boolean doDispatch> = 0;
+
+        throw $r12;
+
+     label11:
+        $r11 := @caughtexception;
+
+        r0.<java.awt.EventDispatchThread: boolean doDispatch> = 0;
+
+        goto label13;
+
+     label12:
+        $r10 := @caughtexception;
+
+        specialinvoke r0.<java.awt.EventDispatchThread: void processException(java.lang.Throwable)>($r10);
+
+     label13:
+        return;
+
+        catch java.lang.ThreadDeath from label01 to label09 with label10;
+        catch java.lang.InterruptedException from label01 to label09 with label11;
+        catch java.lang.Throwable from label01 to label09 with label12;
+    }
+
+    private void processException(java.lang.Throwable)
+    {
+        java.awt.EventDispatchThread r2;
+        java.lang.Throwable r4;
+        sun.util.logging.PlatformLogger$Level $r0;
+        sun.util.logging.PlatformLogger $r1, $r6;
+        java.lang.Thread$UncaughtExceptionHandler $r3;
+        java.lang.StringBuilder $r5, $r7, $r8;
+        java.lang.String $r9;
+        boolean $z0;
+
+        r2 := @this: java.awt.EventDispatchThread;
+
+        r4 := @parameter0: java.lang.Throwable;
+
+        $r1 = <java.awt.EventDispatchThread: sun.util.logging.PlatformLogger eventLog>;
+
+        $r0 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINE>;
+
+        $z0 = virtualinvoke $r1.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r0);
+
+        if $z0 == 0 goto label1;
+
+        $r6 = <java.awt.EventDispatchThread: sun.util.logging.PlatformLogger eventLog>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Processing exception: ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r4);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<sun.util.logging.PlatformLogger: void fine(java.lang.String)>($r9);
+
+     label1:
+        $r3 = virtualinvoke r2.<java.awt.EventDispatchThread: java.lang.Thread$UncaughtExceptionHandler getUncaughtExceptionHandler()>();
+
+        interfaceinvoke $r3.<java.lang.Thread$UncaughtExceptionHandler: void uncaughtException(java.lang.Thread,java.lang.Throwable)>(r2, r4);
+
+        return;
+    }
+
+    public synchronized java.awt.EventQueue getEventQueue()
+    {
+        java.awt.EventDispatchThread r0;
+        java.awt.EventQueue $r1;
+
+        r0 := @this: java.awt.EventDispatchThread;
+
+        $r1 = r0.<java.awt.EventDispatchThread: java.awt.EventQueue theQueue>;
+
+        return $r1;
+    }
+
+    public synchronized void setEventQueue(java.awt.EventQueue)
+    {
+        java.awt.EventDispatchThread r0;
+        java.awt.EventQueue r1;
+
+        r0 := @this: java.awt.EventDispatchThread;
+
+        r1 := @parameter0: java.awt.EventQueue;
+
+        r0.<java.awt.EventDispatchThread: java.awt.EventQueue theQueue> = r1;
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        sun.util.logging.PlatformLogger $r0;
+
+        <java.awt.EventDispatchThread: int ANY_EVENT> = -1;
+
+        $r0 = staticinvoke <sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger getLogger(java.lang.String)>("java.awt.event.EventDispatchThread");
+
+        <java.awt.EventDispatchThread: sun.util.logging.PlatformLogger eventLog> = $r0;
+
+        return;
+    }
+}

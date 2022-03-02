@@ -1,0 +1,4445 @@
+public class sun.security.x509.X509CertImpl extends java.security.cert.X509Certificate implements sun.security.util.DerEncoder
+{
+    private static final long serialVersionUID;
+    private static final java.lang.String DOT;
+    public static final java.lang.String NAME;
+    public static final java.lang.String INFO;
+    public static final java.lang.String ALG_ID;
+    public static final java.lang.String SIGNATURE;
+    public static final java.lang.String SIGNED_CERT;
+    public static final java.lang.String SUBJECT_DN;
+    public static final java.lang.String ISSUER_DN;
+    public static final java.lang.String SERIAL_ID;
+    public static final java.lang.String PUBLIC_KEY;
+    public static final java.lang.String VERSION;
+    public static final java.lang.String SIG_ALG;
+    public static final java.lang.String SIG;
+    private boolean readOnly;
+    private byte[] signedCert;
+    protected sun.security.x509.X509CertInfo info;
+    protected sun.security.x509.AlgorithmId algId;
+    protected byte[] signature;
+    private static final java.lang.String KEY_USAGE_OID;
+    private static final java.lang.String EXTENDED_KEY_USAGE_OID;
+    private static final java.lang.String BASIC_CONSTRAINT_OID;
+    private static final java.lang.String SUBJECT_ALT_NAME_OID;
+    private static final java.lang.String ISSUER_ALT_NAME_OID;
+    private static final java.lang.String AUTH_INFO_ACCESS_OID;
+    private static final int NUM_STANDARD_KEY_USAGE;
+    private java.util.Collection subjectAlternativeNames;
+    private java.util.Collection issuerAlternativeNames;
+    private java.util.List extKeyUsage;
+    private java.util.Set authInfoAccess;
+    private java.security.PublicKey verifiedPublicKey;
+    private java.lang.String verifiedProvider;
+    private boolean verificationResult;
+    private java.util.concurrent.ConcurrentHashMap fingerprints;
+
+    public void <init>()
+    {
+        java.util.concurrent.ConcurrentHashMap $r1;
+        sun.security.x509.X509CertImpl r0;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        specialinvoke r0.<java.security.cert.X509Certificate: void <init>()>();
+
+        r0.<sun.security.x509.X509CertImpl: boolean readOnly> = 0;
+
+        r0.<sun.security.x509.X509CertImpl: byte[] signedCert> = null;
+
+        r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info> = null;
+
+        r0.<sun.security.x509.X509CertImpl: sun.security.x509.AlgorithmId algId> = null;
+
+        r0.<sun.security.x509.X509CertImpl: byte[] signature> = null;
+
+        $r1 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r1.<java.util.concurrent.ConcurrentHashMap: void <init>(int)>(2);
+
+        r0.<sun.security.x509.X509CertImpl: java.util.concurrent.ConcurrentHashMap fingerprints> = $r1;
+
+        return;
+    }
+
+    public void <init>(byte[]) throws java.security.cert.CertificateException
+    {
+        sun.security.util.DerValue $r2;
+        byte[] r3;
+        java.util.concurrent.ConcurrentHashMap $r1;
+        java.io.IOException $r4;
+        java.security.cert.CertificateException $r5;
+        sun.security.x509.X509CertImpl r0;
+        java.lang.StringBuilder $r6, $r7, $r8;
+        java.lang.String $r9;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        r3 := @parameter0: byte[];
+
+        specialinvoke r0.<java.security.cert.X509Certificate: void <init>()>();
+
+        r0.<sun.security.x509.X509CertImpl: boolean readOnly> = 0;
+
+        r0.<sun.security.x509.X509CertImpl: byte[] signedCert> = null;
+
+        r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info> = null;
+
+        r0.<sun.security.x509.X509CertImpl: sun.security.x509.AlgorithmId algId> = null;
+
+        r0.<sun.security.x509.X509CertImpl: byte[] signature> = null;
+
+        $r1 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r1.<java.util.concurrent.ConcurrentHashMap: void <init>(int)>(2);
+
+        r0.<sun.security.x509.X509CertImpl: java.util.concurrent.ConcurrentHashMap fingerprints> = $r1;
+
+     label1:
+        $r2 = new sun.security.util.DerValue;
+
+        specialinvoke $r2.<sun.security.util.DerValue: void <init>(byte[])>(r3);
+
+        specialinvoke r0.<sun.security.x509.X509CertImpl: void parse(sun.security.util.DerValue)>($r2);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        r0.<sun.security.x509.X509CertImpl: byte[] signedCert> = null;
+
+        $r5 = new java.security.cert.CertificateException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to initialize, ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.security.cert.CertificateException: void <init>(java.lang.String,java.lang.Throwable)>($r9, $r4);
+
+        throw $r5;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public void <init>(java.io.InputStream) throws java.security.cert.CertificateException
+    {
+        java.io.BufferedInputStream $r2;
+        java.lang.String $r9, $r14, $r16;
+        sun.security.util.DerValue $r18, r19;
+        java.util.concurrent.ConcurrentHashMap $r1;
+        java.io.IOException $r4, $r10, $r17;
+        java.security.cert.CertificateException $r5, $r11;
+        sun.security.x509.X509CertImpl r0;
+        java.lang.StringBuilder $r6, $r7, $r8, $r12, $r13, $r15;
+        java.io.InputStream r3;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        r3 := @parameter0: java.io.InputStream;
+
+        specialinvoke r0.<java.security.cert.X509Certificate: void <init>()>();
+
+        r0.<sun.security.x509.X509CertImpl: boolean readOnly> = 0;
+
+        r0.<sun.security.x509.X509CertImpl: byte[] signedCert> = null;
+
+        r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info> = null;
+
+        r0.<sun.security.x509.X509CertImpl: sun.security.x509.AlgorithmId algId> = null;
+
+        r0.<sun.security.x509.X509CertImpl: byte[] signature> = null;
+
+        $r1 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r1.<java.util.concurrent.ConcurrentHashMap: void <init>(int)>(2);
+
+        r0.<sun.security.x509.X509CertImpl: java.util.concurrent.ConcurrentHashMap fingerprints> = $r1;
+
+        $r2 = new java.io.BufferedInputStream;
+
+        specialinvoke $r2.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>(r3);
+
+     label01:
+        virtualinvoke $r2.<java.io.BufferedInputStream: void mark(int)>(2147483647);
+
+        r19 = specialinvoke r0.<sun.security.x509.X509CertImpl: sun.security.util.DerValue readRFC1421Cert(java.io.InputStream)>($r2);
+
+     label02:
+        goto label07;
+
+     label03:
+        $r17 := @caughtexception;
+
+     label04:
+        virtualinvoke $r2.<java.io.BufferedInputStream: void reset()>();
+
+        $r18 = new sun.security.util.DerValue;
+
+        specialinvoke $r18.<sun.security.util.DerValue: void <init>(java.io.InputStream)>($r2);
+
+        r19 = $r18;
+
+     label05:
+        goto label07;
+
+     label06:
+        $r10 := @caughtexception;
+
+        $r11 = new java.security.cert.CertificateException;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Input stream must be either DER-encoded bytes or RFC1421 hex-encoded DER-encoded bytes: ");
+
+        $r14 = virtualinvoke $r10.<java.io.IOException: java.lang.String getMessage()>();
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r11.<java.security.cert.CertificateException: void <init>(java.lang.String,java.lang.Throwable)>($r16, $r10);
+
+        throw $r11;
+
+     label07:
+        specialinvoke r0.<sun.security.x509.X509CertImpl: void parse(sun.security.util.DerValue)>(r19);
+
+     label08:
+        goto label10;
+
+     label09:
+        $r4 := @caughtexception;
+
+        r0.<sun.security.x509.X509CertImpl: byte[] signedCert> = null;
+
+        $r5 = new java.security.cert.CertificateException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to parse DER value of certificate, ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.security.cert.CertificateException: void <init>(java.lang.String,java.lang.Throwable)>($r9, $r4);
+
+        throw $r5;
+
+     label10:
+        return;
+
+        catch java.io.IOException from label01 to label02 with label03;
+        catch java.io.IOException from label04 to label05 with label06;
+        catch java.io.IOException from label07 to label08 with label09;
+    }
+
+    private sun.security.util.DerValue readRFC1421Cert(java.io.InputStream) throws java.io.IOException
+    {
+        byte[] $r7, $r9;
+        java.io.ByteArrayOutputStream $r5;
+        java.lang.String $r3, $r6, $r14, $r16, $r21, $r23;
+        boolean $z0, $z1;
+        sun.security.util.DerValue $r8, r25;
+        java.io.IOException $r4, $r10, $r11, $r17, $r18;
+        sun.security.x509.X509CertImpl r24;
+        java.io.InputStreamReader $r1;
+        java.lang.StringBuilder $r12, $r13, $r15, $r19, $r20, $r22;
+        java.io.BufferedReader $r0;
+        java.io.InputStream r2;
+
+        r24 := @this: sun.security.x509.X509CertImpl;
+
+        r2 := @parameter0: java.io.InputStream;
+
+        r25 = null;
+
+        $r0 = new java.io.BufferedReader;
+
+        $r1 = new java.io.InputStreamReader;
+
+        specialinvoke $r1.<java.io.InputStreamReader: void <init>(java.io.InputStream,java.lang.String)>(r2, "ASCII");
+
+        specialinvoke $r0.<java.io.BufferedReader: void <init>(java.io.Reader)>($r1);
+
+     label01:
+        $r3 = virtualinvoke $r0.<java.io.BufferedReader: java.lang.String readLine()>();
+
+     label02:
+        goto label04;
+
+     label03:
+        $r17 := @caughtexception;
+
+        $r18 = new java.io.IOException;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to read InputStream: ");
+
+        $r21 = virtualinvoke $r17.<java.io.IOException: java.lang.String getMessage()>();
+
+        $r22 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r21);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r18.<java.io.IOException: void <init>(java.lang.String)>($r23);
+
+        throw $r18;
+
+     label04:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("-----BEGIN CERTIFICATE-----");
+
+        if $z0 == 0 goto label10;
+
+        $r5 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r5.<java.io.ByteArrayOutputStream: void <init>()>();
+
+     label05:
+        $r6 = virtualinvoke $r0.<java.io.BufferedReader: java.lang.String readLine()>();
+
+        if $r6 == null goto label07;
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>("-----END CERTIFICATE-----");
+
+        if $z1 == 0 goto label06;
+
+        $r8 = new sun.security.util.DerValue;
+
+        $r9 = virtualinvoke $r5.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        specialinvoke $r8.<sun.security.util.DerValue: void <init>(byte[])>($r9);
+
+        r25 = $r8;
+
+        goto label07;
+
+     label06:
+        $r7 = staticinvoke <sun.security.util.Pem: byte[] decode(java.lang.String)>($r6);
+
+        virtualinvoke $r5.<java.io.ByteArrayOutputStream: void write(byte[])>($r7);
+
+        goto label05;
+
+     label07:
+        goto label09;
+
+     label08:
+        $r10 := @caughtexception;
+
+        $r11 = new java.io.IOException;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to read InputStream: ");
+
+        $r14 = virtualinvoke $r10.<java.io.IOException: java.lang.String getMessage()>();
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r11.<java.io.IOException: void <init>(java.lang.String)>($r16);
+
+        throw $r11;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r4 = new java.io.IOException;
+
+        specialinvoke $r4.<java.io.IOException: void <init>(java.lang.String)>("InputStream is not RFC1421 hex-encoded DER bytes");
+
+        throw $r4;
+
+     label11:
+        return r25;
+
+        catch java.io.IOException from label01 to label02 with label03;
+        catch java.io.IOException from label05 to label07 with label08;
+    }
+
+    public void <init>(sun.security.x509.X509CertInfo)
+    {
+        java.util.concurrent.ConcurrentHashMap $r1;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.X509CertInfo r2;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        r2 := @parameter0: sun.security.x509.X509CertInfo;
+
+        specialinvoke r0.<java.security.cert.X509Certificate: void <init>()>();
+
+        r0.<sun.security.x509.X509CertImpl: boolean readOnly> = 0;
+
+        r0.<sun.security.x509.X509CertImpl: byte[] signedCert> = null;
+
+        r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info> = null;
+
+        r0.<sun.security.x509.X509CertImpl: sun.security.x509.AlgorithmId algId> = null;
+
+        r0.<sun.security.x509.X509CertImpl: byte[] signature> = null;
+
+        $r1 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r1.<java.util.concurrent.ConcurrentHashMap: void <init>(int)>(2);
+
+        r0.<sun.security.x509.X509CertImpl: java.util.concurrent.ConcurrentHashMap fingerprints> = $r1;
+
+        r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info> = r2;
+
+        return;
+    }
+
+    public void <init>(sun.security.util.DerValue) throws java.security.cert.CertificateException
+    {
+        sun.security.util.DerValue r2;
+        java.util.concurrent.ConcurrentHashMap $r1;
+        java.io.IOException $r3;
+        java.security.cert.CertificateException $r4;
+        sun.security.x509.X509CertImpl r0;
+        java.lang.StringBuilder $r5, $r6, $r7;
+        java.lang.String $r8;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        r2 := @parameter0: sun.security.util.DerValue;
+
+        specialinvoke r0.<java.security.cert.X509Certificate: void <init>()>();
+
+        r0.<sun.security.x509.X509CertImpl: boolean readOnly> = 0;
+
+        r0.<sun.security.x509.X509CertImpl: byte[] signedCert> = null;
+
+        r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info> = null;
+
+        r0.<sun.security.x509.X509CertImpl: sun.security.x509.AlgorithmId algId> = null;
+
+        r0.<sun.security.x509.X509CertImpl: byte[] signature> = null;
+
+        $r1 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r1.<java.util.concurrent.ConcurrentHashMap: void <init>(int)>(2);
+
+        r0.<sun.security.x509.X509CertImpl: java.util.concurrent.ConcurrentHashMap fingerprints> = $r1;
+
+     label1:
+        specialinvoke r0.<sun.security.x509.X509CertImpl: void parse(sun.security.util.DerValue)>(r2);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        r0.<sun.security.x509.X509CertImpl: byte[] signedCert> = null;
+
+        $r4 = new java.security.cert.CertificateException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to initialize, ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r3);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.security.cert.CertificateException: void <init>(java.lang.String,java.lang.Throwable)>($r8, $r3);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public void encode(java.io.OutputStream) throws java.security.cert.CertificateEncodingException
+    {
+        java.io.OutputStream r2;
+        byte[] $r1, $r3, $r5;
+        java.io.IOException $r7;
+        sun.security.x509.X509CertImpl r0;
+        java.lang.Object $r4;
+        java.lang.String $r9;
+        java.security.cert.CertificateEncodingException $r6, $r8;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        r2 := @parameter0: java.io.OutputStream;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: byte[] signedCert>;
+
+        if $r1 != null goto label1;
+
+        $r6 = new java.security.cert.CertificateEncodingException;
+
+        specialinvoke $r6.<java.security.cert.CertificateEncodingException: void <init>(java.lang.String)>("Null certificate to encode");
+
+        throw $r6;
+
+     label1:
+        $r3 = r0.<sun.security.x509.X509CertImpl: byte[] signedCert>;
+
+        $r4 = virtualinvoke $r3.<java.lang.Object: java.lang.Object clone()>();
+
+        $r5 = (byte[]) $r4;
+
+        virtualinvoke r2.<java.io.OutputStream: void write(byte[])>($r5);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $r8 = new java.security.cert.CertificateEncodingException;
+
+        $r9 = virtualinvoke $r7.<java.io.IOException: java.lang.String toString()>();
+
+        specialinvoke $r8.<java.security.cert.CertificateEncodingException: void <init>(java.lang.String)>($r9);
+
+        throw $r8;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public void derEncode(java.io.OutputStream) throws java.io.IOException
+    {
+        java.io.OutputStream r2;
+        byte[] $r1, $r3, $r5;
+        java.lang.Object $r4;
+        java.io.IOException $r6;
+        sun.security.x509.X509CertImpl r0;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        r2 := @parameter0: java.io.OutputStream;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: byte[] signedCert>;
+
+        if $r1 != null goto label1;
+
+        $r6 = new java.io.IOException;
+
+        specialinvoke $r6.<java.io.IOException: void <init>(java.lang.String)>("Null certificate to encode");
+
+        throw $r6;
+
+     label1:
+        $r3 = r0.<sun.security.x509.X509CertImpl: byte[] signedCert>;
+
+        $r4 = virtualinvoke $r3.<java.lang.Object: java.lang.Object clone()>();
+
+        $r5 = (byte[]) $r4;
+
+        virtualinvoke r2.<java.io.OutputStream: void write(byte[])>($r5);
+
+        return;
+    }
+
+    public byte[] getEncoded() throws java.security.cert.CertificateEncodingException
+    {
+        byte[] $r1, $r3;
+        java.lang.Object $r2;
+        sun.security.x509.X509CertImpl r0;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = virtualinvoke r0.<sun.security.x509.X509CertImpl: byte[] getEncodedInternal()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.Object: java.lang.Object clone()>();
+
+        $r3 = (byte[]) $r2;
+
+        return $r3;
+    }
+
+    public byte[] getEncodedInternal() throws java.security.cert.CertificateEncodingException
+    {
+        byte[] $r1, $r2;
+        sun.security.x509.X509CertImpl r0;
+        java.security.cert.CertificateEncodingException $r3;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: byte[] signedCert>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.security.cert.CertificateEncodingException;
+
+        specialinvoke $r3.<java.security.cert.CertificateEncodingException: void <init>(java.lang.String)>("Null certificate to encode");
+
+        throw $r3;
+
+     label1:
+        $r2 = r0.<sun.security.x509.X509CertImpl: byte[] signedCert>;
+
+        return $r2;
+    }
+
+    public void verify(java.security.PublicKey) throws java.security.cert.CertificateException, java.security.NoSuchAlgorithmException, java.security.InvalidKeyException, java.security.NoSuchProviderException, java.security.SignatureException
+    {
+        java.security.PublicKey r1;
+        sun.security.x509.X509CertImpl r0;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        r1 := @parameter0: java.security.PublicKey;
+
+        virtualinvoke r0.<sun.security.x509.X509CertImpl: void verify(java.security.PublicKey,java.lang.String)>(r1, "");
+
+        return;
+    }
+
+    public synchronized void verify(java.security.PublicKey, java.lang.String) throws java.security.cert.CertificateException, java.security.NoSuchAlgorithmException, java.security.InvalidKeyException, java.security.NoSuchProviderException, java.security.SignatureException
+    {
+        java.lang.Throwable $r20;
+        byte[] $r5, $r8, $r9, $r22;
+        java.security.InvalidAlgorithmParameterException $r15;
+        int $i0;
+        java.lang.String $r3, $r13, $r19, r21;
+        java.security.spec.AlgorithmParameterSpec $r6;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.security.SignatureException $r10, $r14;
+        java.security.Signature r23;
+        java.security.ProviderException $r17;
+        java.security.PublicKey $r1, r4, $r12;
+        java.security.cert.CertificateException $r16, $r18;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.AlgorithmId $r2;
+        sun.security.x509.X509CertInfo $r7;
+        java.security.cert.CertificateEncodingException $r11;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        r4 := @parameter0: java.security.PublicKey;
+
+        r21 := @parameter1: java.lang.String;
+
+        if r21 != null goto label01;
+
+        r21 = "";
+
+     label01:
+        $r1 = r0.<sun.security.x509.X509CertImpl: java.security.PublicKey verifiedPublicKey>;
+
+        if $r1 == null goto label03;
+
+        $r12 = r0.<sun.security.x509.X509CertImpl: java.security.PublicKey verifiedPublicKey>;
+
+        $z3 = virtualinvoke $r12.<java.lang.Object: boolean equals(java.lang.Object)>(r4);
+
+        if $z3 == 0 goto label03;
+
+        $r13 = r0.<sun.security.x509.X509CertImpl: java.lang.String verifiedProvider>;
+
+        $z4 = virtualinvoke r21.<java.lang.String: boolean equals(java.lang.Object)>($r13);
+
+        if $z4 == 0 goto label03;
+
+        $z5 = r0.<sun.security.x509.X509CertImpl: boolean verificationResult>;
+
+        if $z5 == 0 goto label02;
+
+        return;
+
+     label02:
+        $r14 = new java.security.SignatureException;
+
+        specialinvoke $r14.<java.security.SignatureException: void <init>(java.lang.String)>("Signature does not match.");
+
+        throw $r14;
+
+     label03:
+        $r22 = r0.<sun.security.x509.X509CertImpl: byte[] signedCert>;
+
+        if $r22 != null goto label04;
+
+        $r11 = new java.security.cert.CertificateEncodingException;
+
+        specialinvoke $r11.<java.security.cert.CertificateEncodingException: void <init>(java.lang.String)>("Uninitialized certificate");
+
+        throw $r11;
+
+     label04:
+        $r2 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.AlgorithmId algId>;
+
+        $r3 = virtualinvoke $r2.<sun.security.x509.AlgorithmId: java.lang.String getName()>();
+
+        $z0 = virtualinvoke r21.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 == 0 goto label05;
+
+        r23 = staticinvoke <java.security.Signature: java.security.Signature getInstance(java.lang.String)>($r3);
+
+        goto label06;
+
+     label05:
+        r23 = staticinvoke <java.security.Signature: java.security.Signature getInstance(java.lang.String,java.lang.String)>($r3, r21);
+
+     label06:
+        $r5 = virtualinvoke r0.<sun.security.x509.X509CertImpl: byte[] getSigAlgParams()>();
+
+        $r6 = staticinvoke <sun.security.util.SignatureUtil: java.security.spec.AlgorithmParameterSpec getParamSpec(java.lang.String,byte[])>($r3, $r5);
+
+        staticinvoke <sun.security.util.SignatureUtil: void initVerifyWithParam(java.security.Signature,java.security.PublicKey,java.security.spec.AlgorithmParameterSpec)>(r23, r4, $r6);
+
+     label07:
+        goto label10;
+
+     label08:
+        $r17 := @caughtexception;
+
+        $r18 = new java.security.cert.CertificateException;
+
+        $r19 = virtualinvoke $r17.<java.security.ProviderException: java.lang.String getMessage()>();
+
+        $r20 = virtualinvoke $r17.<java.security.ProviderException: java.lang.Throwable getCause()>();
+
+        specialinvoke $r18.<java.security.cert.CertificateException: void <init>(java.lang.String,java.lang.Throwable)>($r19, $r20);
+
+        throw $r18;
+
+     label09:
+        $r15 := @caughtexception;
+
+        $r16 = new java.security.cert.CertificateException;
+
+        specialinvoke $r16.<java.security.cert.CertificateException: void <init>(java.lang.Throwable)>($r15);
+
+        throw $r16;
+
+     label10:
+        $r7 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r8 = virtualinvoke $r7.<sun.security.x509.X509CertInfo: byte[] getEncodedInfo()>();
+
+        $i0 = lengthof $r8;
+
+        virtualinvoke r23.<java.security.Signature: void update(byte[],int,int)>($r8, 0, $i0);
+
+        $r9 = r0.<sun.security.x509.X509CertImpl: byte[] signature>;
+
+        $z1 = virtualinvoke r23.<java.security.Signature: boolean verify(byte[])>($r9);
+
+        r0.<sun.security.x509.X509CertImpl: boolean verificationResult> = $z1;
+
+        r0.<sun.security.x509.X509CertImpl: java.security.PublicKey verifiedPublicKey> = r4;
+
+        r0.<sun.security.x509.X509CertImpl: java.lang.String verifiedProvider> = r21;
+
+        $z2 = r0.<sun.security.x509.X509CertImpl: boolean verificationResult>;
+
+        if $z2 != 0 goto label11;
+
+        $r10 = new java.security.SignatureException;
+
+        specialinvoke $r10.<java.security.SignatureException: void <init>(java.lang.String)>("Signature does not match.");
+
+        throw $r10;
+
+     label11:
+        return;
+
+        catch java.security.ProviderException from label06 to label07 with label08;
+        catch java.security.InvalidAlgorithmParameterException from label06 to label07 with label09;
+    }
+
+    public synchronized void verify(java.security.PublicKey, java.security.Provider) throws java.security.cert.CertificateException, java.security.NoSuchAlgorithmException, java.security.InvalidKeyException, java.security.SignatureException
+    {
+        java.lang.Throwable $r18;
+        byte[] $r1, $r6, $r9, $r10;
+        java.security.InvalidAlgorithmParameterException $r13;
+        int $i0;
+        java.lang.String $r3, $r17;
+        java.security.spec.AlgorithmParameterSpec $r7;
+        boolean $z0, $z1;
+        java.security.SignatureException $r11;
+        java.security.Signature r19;
+        java.security.ProviderException $r15;
+        java.security.PublicKey r5;
+        java.security.cert.CertificateException $r14, $r16;
+        sun.security.x509.X509CertImpl r0;
+        java.security.Provider r4;
+        sun.security.x509.AlgorithmId $r2;
+        sun.security.x509.X509CertInfo $r8;
+        java.security.cert.CertificateEncodingException $r12;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        r5 := @parameter0: java.security.PublicKey;
+
+        r4 := @parameter1: java.security.Provider;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: byte[] signedCert>;
+
+        if $r1 != null goto label1;
+
+        $r12 = new java.security.cert.CertificateEncodingException;
+
+        specialinvoke $r12.<java.security.cert.CertificateEncodingException: void <init>(java.lang.String)>("Uninitialized certificate");
+
+        throw $r12;
+
+     label1:
+        $r2 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.AlgorithmId algId>;
+
+        $r3 = virtualinvoke $r2.<sun.security.x509.AlgorithmId: java.lang.String getName()>();
+
+        if r4 != null goto label2;
+
+        r19 = staticinvoke <java.security.Signature: java.security.Signature getInstance(java.lang.String)>($r3);
+
+        goto label3;
+
+     label2:
+        r19 = staticinvoke <java.security.Signature: java.security.Signature getInstance(java.lang.String,java.security.Provider)>($r3, r4);
+
+     label3:
+        $r6 = virtualinvoke r0.<sun.security.x509.X509CertImpl: byte[] getSigAlgParams()>();
+
+        $r7 = staticinvoke <sun.security.util.SignatureUtil: java.security.spec.AlgorithmParameterSpec getParamSpec(java.lang.String,byte[])>($r3, $r6);
+
+        staticinvoke <sun.security.util.SignatureUtil: void initVerifyWithParam(java.security.Signature,java.security.PublicKey,java.security.spec.AlgorithmParameterSpec)>(r19, r5, $r7);
+
+     label4:
+        goto label7;
+
+     label5:
+        $r15 := @caughtexception;
+
+        $r16 = new java.security.cert.CertificateException;
+
+        $r17 = virtualinvoke $r15.<java.security.ProviderException: java.lang.String getMessage()>();
+
+        $r18 = virtualinvoke $r15.<java.security.ProviderException: java.lang.Throwable getCause()>();
+
+        specialinvoke $r16.<java.security.cert.CertificateException: void <init>(java.lang.String,java.lang.Throwable)>($r17, $r18);
+
+        throw $r16;
+
+     label6:
+        $r13 := @caughtexception;
+
+        $r14 = new java.security.cert.CertificateException;
+
+        specialinvoke $r14.<java.security.cert.CertificateException: void <init>(java.lang.Throwable)>($r13);
+
+        throw $r14;
+
+     label7:
+        $r8 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r9 = virtualinvoke $r8.<sun.security.x509.X509CertInfo: byte[] getEncodedInfo()>();
+
+        $i0 = lengthof $r9;
+
+        virtualinvoke r19.<java.security.Signature: void update(byte[],int,int)>($r9, 0, $i0);
+
+        $r10 = r0.<sun.security.x509.X509CertImpl: byte[] signature>;
+
+        $z0 = virtualinvoke r19.<java.security.Signature: boolean verify(byte[])>($r10);
+
+        r0.<sun.security.x509.X509CertImpl: boolean verificationResult> = $z0;
+
+        r0.<sun.security.x509.X509CertImpl: java.security.PublicKey verifiedPublicKey> = r5;
+
+        $z1 = r0.<sun.security.x509.X509CertImpl: boolean verificationResult>;
+
+        if $z1 != 0 goto label8;
+
+        $r11 = new java.security.SignatureException;
+
+        specialinvoke $r11.<java.security.SignatureException: void <init>(java.lang.String)>("Signature does not match.");
+
+        throw $r11;
+
+     label8:
+        return;
+
+        catch java.security.ProviderException from label3 to label4 with label5;
+        catch java.security.InvalidAlgorithmParameterException from label3 to label4 with label6;
+    }
+
+    public void sign(java.security.PrivateKey, java.lang.String) throws java.security.cert.CertificateException, java.security.NoSuchAlgorithmException, java.security.InvalidKeyException, java.security.NoSuchProviderException, java.security.SignatureException
+    {
+        java.lang.String r2;
+        sun.security.x509.X509CertImpl r0;
+        java.security.PrivateKey r1;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        r1 := @parameter0: java.security.PrivateKey;
+
+        r2 := @parameter1: java.lang.String;
+
+        virtualinvoke r0.<sun.security.x509.X509CertImpl: void sign(java.security.PrivateKey,java.lang.String,java.lang.String)>(r1, r2, null);
+
+        return;
+    }
+
+    public void sign(java.security.PrivateKey, java.lang.String, java.lang.String) throws java.security.cert.CertificateException, java.security.NoSuchAlgorithmException, java.security.InvalidKeyException, java.security.NoSuchProviderException, java.security.SignatureException
+    {
+        java.security.PrivateKey r1;
+        java.security.SignatureException $r5;
+        java.lang.String r2, r3;
+        sun.security.x509.X509CertImpl r0;
+        java.security.InvalidAlgorithmParameterException $r4;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        r1 := @parameter0: java.security.PrivateKey;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.String;
+
+     label1:
+        virtualinvoke r0.<sun.security.x509.X509CertImpl: void sign(java.security.PrivateKey,java.security.spec.AlgorithmParameterSpec,java.lang.String,java.lang.String)>(r1, null, r2, r3);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = new java.security.SignatureException;
+
+        specialinvoke $r5.<java.security.SignatureException: void <init>(java.lang.Throwable)>($r4);
+
+        throw $r5;
+
+     label4:
+        return;
+
+        catch java.security.InvalidAlgorithmParameterException from label1 to label2 with label3;
+    }
+
+    public void sign(java.security.PrivateKey, java.security.spec.AlgorithmParameterSpec, java.lang.String, java.lang.String) throws java.security.cert.CertificateException, java.security.NoSuchAlgorithmException, java.security.InvalidKeyException, java.security.InvalidAlgorithmParameterException, java.security.NoSuchProviderException, java.security.SignatureException
+    {
+        byte[] $r9, $r11, $r12, $r13;
+        int $i0;
+        java.lang.String r1, r2, $r19;
+        java.security.spec.AlgorithmParameterSpec r4;
+        boolean $z0, $z1;
+        java.security.Signature r20;
+        java.io.IOException $r17;
+        sun.security.x509.X509CertImpl r0;
+        java.security.AlgorithmParameters $r14;
+        java.security.PrivateKey r3;
+        sun.security.util.DerOutputStream $r6, $r7;
+        sun.security.x509.AlgorithmId $r5, $r10, $r15;
+        sun.security.x509.X509CertInfo $r8;
+        java.security.cert.CertificateEncodingException $r16, $r18;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        r3 := @parameter0: java.security.PrivateKey;
+
+        r4 := @parameter1: java.security.spec.AlgorithmParameterSpec;
+
+        r2 := @parameter2: java.lang.String;
+
+        r1 := @parameter3: java.lang.String;
+
+     label01:
+        $z0 = r0.<sun.security.x509.X509CertImpl: boolean readOnly>;
+
+        if $z0 == 0 goto label02;
+
+        $r16 = new java.security.cert.CertificateEncodingException;
+
+        specialinvoke $r16.<java.security.cert.CertificateEncodingException: void <init>(java.lang.String)>("cannot over-write existing certificate");
+
+        throw $r16;
+
+     label02:
+        if r1 == null goto label03;
+
+        $z1 = virtualinvoke r1.<java.lang.String: boolean isEmpty()>();
+
+        if $z1 == 0 goto label04;
+
+     label03:
+        r20 = staticinvoke <java.security.Signature: java.security.Signature getInstance(java.lang.String)>(r2);
+
+        goto label05;
+
+     label04:
+        r20 = staticinvoke <java.security.Signature: java.security.Signature getInstance(java.lang.String,java.lang.String)>(r2, r1);
+
+     label05:
+        staticinvoke <sun.security.util.SignatureUtil: void initSignWithParam(java.security.Signature,java.security.PrivateKey,java.security.spec.AlgorithmParameterSpec,java.security.SecureRandom)>(r20, r3, r4, null);
+
+        if r4 == null goto label06;
+
+        $r14 = virtualinvoke r20.<java.security.Signature: java.security.AlgorithmParameters getParameters()>();
+
+        $r15 = staticinvoke <sun.security.x509.AlgorithmId: sun.security.x509.AlgorithmId get(java.security.AlgorithmParameters)>($r14);
+
+        r0.<sun.security.x509.X509CertImpl: sun.security.x509.AlgorithmId algId> = $r15;
+
+        goto label07;
+
+     label06:
+        $r5 = staticinvoke <sun.security.x509.AlgorithmId: sun.security.x509.AlgorithmId get(java.lang.String)>(r2);
+
+        r0.<sun.security.x509.X509CertImpl: sun.security.x509.AlgorithmId algId> = $r5;
+
+     label07:
+        $r6 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r6.<sun.security.util.DerOutputStream: void <init>()>();
+
+        $r7 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r7.<sun.security.util.DerOutputStream: void <init>()>();
+
+        $r8 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        virtualinvoke $r8.<sun.security.x509.X509CertInfo: void encode(java.io.OutputStream)>($r7);
+
+        $r9 = virtualinvoke $r7.<sun.security.util.DerOutputStream: byte[] toByteArray()>();
+
+        $r10 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.AlgorithmId algId>;
+
+        virtualinvoke $r10.<sun.security.x509.AlgorithmId: void encode(sun.security.util.DerOutputStream)>($r7);
+
+        $i0 = lengthof $r9;
+
+        virtualinvoke r20.<java.security.Signature: void update(byte[],int,int)>($r9, 0, $i0);
+
+        $r11 = virtualinvoke r20.<java.security.Signature: byte[] sign()>();
+
+        r0.<sun.security.x509.X509CertImpl: byte[] signature> = $r11;
+
+        $r12 = r0.<sun.security.x509.X509CertImpl: byte[] signature>;
+
+        virtualinvoke $r7.<sun.security.util.DerOutputStream: void putBitString(byte[])>($r12);
+
+        virtualinvoke $r6.<sun.security.util.DerOutputStream: void write(byte,sun.security.util.DerOutputStream)>(48, $r7);
+
+        $r13 = virtualinvoke $r6.<sun.security.util.DerOutputStream: byte[] toByteArray()>();
+
+        r0.<sun.security.x509.X509CertImpl: byte[] signedCert> = $r13;
+
+        r0.<sun.security.x509.X509CertImpl: boolean readOnly> = 1;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r17 := @caughtexception;
+
+        $r18 = new java.security.cert.CertificateEncodingException;
+
+        $r19 = virtualinvoke $r17.<java.io.IOException: java.lang.String toString()>();
+
+        specialinvoke $r18.<java.security.cert.CertificateEncodingException: void <init>(java.lang.String)>($r19);
+
+        throw $r18;
+
+     label10:
+        return;
+
+        catch java.io.IOException from label01 to label08 with label09;
+    }
+
+    public void checkValidity() throws java.security.cert.CertificateExpiredException, java.security.cert.CertificateNotYetValidException
+    {
+        sun.security.x509.X509CertImpl r1;
+        java.util.Date $r0;
+
+        r1 := @this: sun.security.x509.X509CertImpl;
+
+        $r0 = new java.util.Date;
+
+        specialinvoke $r0.<java.util.Date: void <init>()>();
+
+        virtualinvoke r1.<sun.security.x509.X509CertImpl: void checkValidity(java.util.Date)>($r0);
+
+        return;
+    }
+
+    public void checkValidity(java.util.Date) throws java.security.cert.CertificateExpiredException, java.security.cert.CertificateNotYetValidException
+    {
+        sun.security.x509.CertificateValidity r7;
+        java.util.Date r3;
+        java.security.cert.CertificateNotYetValidException $r4, $r6;
+        sun.security.x509.X509CertImpl r0;
+        java.lang.Exception $r5;
+        java.lang.Object $r2;
+        sun.security.x509.X509CertInfo $r1;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        r3 := @parameter0: java.util.Date;
+
+     label1:
+        $r1 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r2 = virtualinvoke $r1.<sun.security.x509.X509CertInfo: java.lang.Object get(java.lang.String)>("validity");
+
+        r7 = (sun.security.x509.CertificateValidity) $r2;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new java.security.cert.CertificateNotYetValidException;
+
+        specialinvoke $r6.<java.security.cert.CertificateNotYetValidException: void <init>(java.lang.String)>("Incorrect validity period");
+
+        throw $r6;
+
+     label4:
+        if r7 != null goto label5;
+
+        $r4 = new java.security.cert.CertificateNotYetValidException;
+
+        specialinvoke $r4.<java.security.cert.CertificateNotYetValidException: void <init>(java.lang.String)>("Null validity period");
+
+        throw $r4;
+
+     label5:
+        virtualinvoke r7.<sun.security.x509.CertificateValidity: void valid(java.util.Date)>(r3);
+
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public java.lang.Object get(java.lang.String) throws java.security.cert.CertificateParsingException
+    {
+        byte[] $r12, $r13, $r15, $r16;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        sun.security.x509.X509CertImpl r11;
+        java.lang.StringBuilder $r7, $r8, $r9, $r26, $r27, $r28, $r29;
+        sun.security.x509.AlgorithmId $r18;
+        sun.security.x509.X509CertInfo $r19, $r21, $r22;
+        java.security.cert.CertificateParsingException $r6, $r25, $r32, $r35;
+        java.lang.String r1, $r2, $r4, $r5, $r10, $r20, $r23, $r30, $r33, $r36;
+        java.io.IOException $r34;
+        java.security.cert.CertificateException $r31;
+        java.lang.Object $r14, $r17, $r24;
+        sun.security.x509.X509AttributeName $r0, $r3;
+
+        r11 := @this: sun.security.x509.X509CertImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = new sun.security.x509.X509AttributeName;
+
+        specialinvoke $r0.<sun.security.x509.X509AttributeName: void <init>(java.lang.String)>(r1);
+
+        $r2 = virtualinvoke $r0.<sun.security.x509.X509AttributeName: java.lang.String getPrefix()>();
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("x509");
+
+        if $z0 != 0 goto label01;
+
+        $r25 = new java.security.cert.CertificateParsingException;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid root of attribute name, expected [x509], received [");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r25.<java.security.cert.CertificateParsingException: void <init>(java.lang.String)>($r30);
+
+        throw $r25;
+
+     label01:
+        $r3 = new sun.security.x509.X509AttributeName;
+
+        $r4 = virtualinvoke $r0.<sun.security.x509.X509AttributeName: java.lang.String getSuffix()>();
+
+        specialinvoke $r3.<sun.security.x509.X509AttributeName: void <init>(java.lang.String)>($r4);
+
+        $r5 = virtualinvoke $r3.<sun.security.x509.X509AttributeName: java.lang.String getPrefix()>();
+
+        $z1 = virtualinvoke $r5.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("info");
+
+        if $z1 == 0 goto label08;
+
+        $r19 = r11.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        if $r19 != null goto label02;
+
+        return null;
+
+     label02:
+        $r20 = virtualinvoke $r3.<sun.security.x509.X509AttributeName: java.lang.String getSuffix()>();
+
+        if $r20 == null goto label07;
+
+     label03:
+        $r22 = r11.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r23 = virtualinvoke $r3.<sun.security.x509.X509AttributeName: java.lang.String getSuffix()>();
+
+        $r24 = virtualinvoke $r22.<sun.security.x509.X509CertInfo: java.lang.Object get(java.lang.String)>($r23);
+
+     label04:
+        return $r24;
+
+     label05:
+        $r34 := @caughtexception;
+
+        $r35 = new java.security.cert.CertificateParsingException;
+
+        $r36 = virtualinvoke $r34.<java.io.IOException: java.lang.String toString()>();
+
+        specialinvoke $r35.<java.security.cert.CertificateParsingException: void <init>(java.lang.String)>($r36);
+
+        throw $r35;
+
+     label06:
+        $r31 := @caughtexception;
+
+        $r32 = new java.security.cert.CertificateParsingException;
+
+        $r33 = virtualinvoke $r31.<java.security.cert.CertificateException: java.lang.String toString()>();
+
+        specialinvoke $r32.<java.security.cert.CertificateParsingException: void <init>(java.lang.String)>($r33);
+
+        throw $r32;
+
+     label07:
+        $r21 = r11.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        return $r21;
+
+     label08:
+        $z2 = virtualinvoke $r5.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("algorithm");
+
+        if $z2 == 0 goto label09;
+
+        $r18 = r11.<sun.security.x509.X509CertImpl: sun.security.x509.AlgorithmId algId>;
+
+        return $r18;
+
+     label09:
+        $z3 = virtualinvoke $r5.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("signature");
+
+        if $z3 == 0 goto label11;
+
+        $r15 = r11.<sun.security.x509.X509CertImpl: byte[] signature>;
+
+        if $r15 == null goto label10;
+
+        $r16 = r11.<sun.security.x509.X509CertImpl: byte[] signature>;
+
+        $r17 = virtualinvoke $r16.<java.lang.Object: java.lang.Object clone()>();
+
+        return $r17;
+
+     label10:
+        return null;
+
+     label11:
+        $z4 = virtualinvoke $r5.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("signed_cert");
+
+        if $z4 == 0 goto label13;
+
+        $r12 = r11.<sun.security.x509.X509CertImpl: byte[] signedCert>;
+
+        if $r12 == null goto label12;
+
+        $r13 = r11.<sun.security.x509.X509CertImpl: byte[] signedCert>;
+
+        $r14 = virtualinvoke $r13.<java.lang.Object: java.lang.Object clone()>();
+
+        return $r14;
+
+     label12:
+        return null;
+
+     label13:
+        $r6 = new java.security.cert.CertificateParsingException;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Attribute name not recognized or get() not allowed for the same: ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.security.cert.CertificateParsingException: void <init>(java.lang.String)>($r10);
+
+        throw $r6;
+
+        catch java.io.IOException from label03 to label04 with label05;
+        catch java.security.cert.CertificateException from label03 to label04 with label06;
+    }
+
+    public void set(java.lang.String, java.lang.Object) throws java.security.cert.CertificateException, java.io.IOException
+    {
+        java.lang.String r2, $r3, $r5, $r6, $r11, $r12, $r14, $r22;
+        boolean $z0, $z1, $z2, $z3;
+        java.security.cert.CertificateException $r7, $r17, $r18, $r23;
+        sun.security.x509.X509CertImpl r0;
+        java.lang.StringBuilder $r8, $r9, $r10, $r19, $r20, $r21;
+        java.lang.Object r15;
+        sun.security.x509.X509AttributeName $r1, $r4;
+        sun.security.x509.X509CertInfo $r13, $r16;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+        r15 := @parameter1: java.lang.Object;
+
+        $z0 = r0.<sun.security.x509.X509CertImpl: boolean readOnly>;
+
+        if $z0 == 0 goto label1;
+
+        $r23 = new java.security.cert.CertificateException;
+
+        specialinvoke $r23.<java.security.cert.CertificateException: void <init>(java.lang.String)>("cannot over-write existing certificate");
+
+        throw $r23;
+
+     label1:
+        $r1 = new sun.security.x509.X509AttributeName;
+
+        specialinvoke $r1.<sun.security.x509.X509AttributeName: void <init>(java.lang.String)>(r2);
+
+        $r3 = virtualinvoke $r1.<sun.security.x509.X509AttributeName: java.lang.String getPrefix()>();
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("x509");
+
+        if $z1 != 0 goto label2;
+
+        $r18 = new java.security.cert.CertificateException;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid root of attribute name, expected [x509], received ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r18.<java.security.cert.CertificateException: void <init>(java.lang.String)>($r22);
+
+        throw $r18;
+
+     label2:
+        $r4 = new sun.security.x509.X509AttributeName;
+
+        $r5 = virtualinvoke $r1.<sun.security.x509.X509AttributeName: java.lang.String getSuffix()>();
+
+        specialinvoke $r4.<sun.security.x509.X509AttributeName: void <init>(java.lang.String)>($r5);
+
+        $r6 = virtualinvoke $r4.<sun.security.x509.X509AttributeName: java.lang.String getPrefix()>();
+
+        $z2 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("info");
+
+        if $z2 == 0 goto label5;
+
+        $r12 = virtualinvoke $r4.<sun.security.x509.X509AttributeName: java.lang.String getSuffix()>();
+
+        if $r12 != null goto label4;
+
+        $z3 = r15 instanceof sun.security.x509.X509CertInfo;
+
+        if $z3 != 0 goto label3;
+
+        $r17 = new java.security.cert.CertificateException;
+
+        specialinvoke $r17.<java.security.cert.CertificateException: void <init>(java.lang.String)>("Attribute value should be of type X509CertInfo.");
+
+        throw $r17;
+
+     label3:
+        $r16 = (sun.security.x509.X509CertInfo) r15;
+
+        r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info> = $r16;
+
+        r0.<sun.security.x509.X509CertImpl: byte[] signedCert> = null;
+
+        goto label6;
+
+     label4:
+        $r13 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r14 = virtualinvoke $r4.<sun.security.x509.X509AttributeName: java.lang.String getSuffix()>();
+
+        virtualinvoke $r13.<sun.security.x509.X509CertInfo: void set(java.lang.String,java.lang.Object)>($r14, r15);
+
+        r0.<sun.security.x509.X509CertImpl: byte[] signedCert> = null;
+
+        goto label6;
+
+     label5:
+        $r7 = new java.security.cert.CertificateException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Attribute name not recognized or set() not allowed for the same: ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.security.cert.CertificateException: void <init>(java.lang.String)>($r11);
+
+        throw $r7;
+
+     label6:
+        return;
+    }
+
+    public void delete(java.lang.String) throws java.security.cert.CertificateException, java.io.IOException
+    {
+        java.lang.String r2, $r3, $r5, $r6, $r11, $r12, $r14, $r19;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.security.cert.CertificateException $r7, $r15, $r20;
+        sun.security.x509.X509CertImpl r0;
+        java.lang.StringBuilder $r8, $r9, $r10, $r16, $r17, $r18;
+        sun.security.x509.X509AttributeName $r1, $r4;
+        sun.security.x509.X509CertInfo $r13;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+        $z0 = r0.<sun.security.x509.X509CertImpl: boolean readOnly>;
+
+        if $z0 == 0 goto label1;
+
+        $r20 = new java.security.cert.CertificateException;
+
+        specialinvoke $r20.<java.security.cert.CertificateException: void <init>(java.lang.String)>("cannot over-write existing certificate");
+
+        throw $r20;
+
+     label1:
+        $r1 = new sun.security.x509.X509AttributeName;
+
+        specialinvoke $r1.<sun.security.x509.X509AttributeName: void <init>(java.lang.String)>(r2);
+
+        $r3 = virtualinvoke $r1.<sun.security.x509.X509AttributeName: java.lang.String getPrefix()>();
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("x509");
+
+        if $z1 != 0 goto label2;
+
+        $r15 = new java.security.cert.CertificateException;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid root of attribute name, expected [x509], received ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r15.<java.security.cert.CertificateException: void <init>(java.lang.String)>($r19);
+
+        throw $r15;
+
+     label2:
+        $r4 = new sun.security.x509.X509AttributeName;
+
+        $r5 = virtualinvoke $r1.<sun.security.x509.X509AttributeName: java.lang.String getSuffix()>();
+
+        specialinvoke $r4.<sun.security.x509.X509AttributeName: void <init>(java.lang.String)>($r5);
+
+        $r6 = virtualinvoke $r4.<sun.security.x509.X509AttributeName: java.lang.String getPrefix()>();
+
+        $z2 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("info");
+
+        if $z2 == 0 goto label4;
+
+        $r12 = virtualinvoke $r4.<sun.security.x509.X509AttributeName: java.lang.String getSuffix()>();
+
+        if $r12 == null goto label3;
+
+        r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info> = null;
+
+        goto label8;
+
+     label3:
+        $r13 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r14 = virtualinvoke $r4.<sun.security.x509.X509AttributeName: java.lang.String getSuffix()>();
+
+        virtualinvoke $r13.<sun.security.x509.X509CertInfo: void delete(java.lang.String)>($r14);
+
+        goto label8;
+
+     label4:
+        $z3 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("algorithm");
+
+        if $z3 == 0 goto label5;
+
+        r0.<sun.security.x509.X509CertImpl: sun.security.x509.AlgorithmId algId> = null;
+
+        goto label8;
+
+     label5:
+        $z4 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("signature");
+
+        if $z4 == 0 goto label6;
+
+        r0.<sun.security.x509.X509CertImpl: byte[] signature> = null;
+
+        goto label8;
+
+     label6:
+        $z5 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("signed_cert");
+
+        if $z5 == 0 goto label7;
+
+        r0.<sun.security.x509.X509CertImpl: byte[] signedCert> = null;
+
+        goto label8;
+
+     label7:
+        $r7 = new java.security.cert.CertificateException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Attribute name not recognized or delete() not allowed for the same: ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.security.cert.CertificateException: void <init>(java.lang.String)>($r11);
+
+        throw $r7;
+
+     label8:
+        return;
+    }
+
+    public java.util.Enumeration getElements()
+    {
+        sun.security.x509.AttributeNameEnumeration $r0;
+        sun.security.x509.X509CertImpl r2;
+        java.util.Enumeration $r1;
+
+        r2 := @this: sun.security.x509.X509CertImpl;
+
+        $r0 = new sun.security.x509.AttributeNameEnumeration;
+
+        specialinvoke $r0.<sun.security.x509.AttributeNameEnumeration: void <init>()>();
+
+        virtualinvoke $r0.<sun.security.x509.AttributeNameEnumeration: void addElement(java.lang.Object)>("x509.info");
+
+        virtualinvoke $r0.<sun.security.x509.AttributeNameEnumeration: void addElement(java.lang.Object)>("x509.algorithm");
+
+        virtualinvoke $r0.<sun.security.x509.AttributeNameEnumeration: void addElement(java.lang.Object)>("x509.signature");
+
+        virtualinvoke $r0.<sun.security.x509.AttributeNameEnumeration: void addElement(java.lang.Object)>("x509.signed_cert");
+
+        $r1 = virtualinvoke $r0.<sun.security.x509.AttributeNameEnumeration: java.util.Enumeration elements()>();
+
+        return $r1;
+    }
+
+    public java.lang.String getName()
+    {
+        sun.security.x509.X509CertImpl r0;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        return "x509";
+    }
+
+    public java.lang.String toString()
+    {
+        byte[] $r3, $r21;
+        java.lang.String $r7, $r10, $r14, $r17, $r22, $r24, $r25;
+        sun.misc.HexDumpEncoder $r18;
+        sun.security.x509.X509CertImpl r0;
+        java.lang.StringBuilder $r4, $r5, $r8, $r9, $r11, $r12, $r15, $r16, $r19, $r20, $r23;
+        sun.security.x509.X509CertInfo $r1, $r6;
+        sun.security.x509.AlgorithmId $r2, $r13;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.AlgorithmId algId>;
+
+        if $r2 == null goto label1;
+
+        $r3 = r0.<sun.security.x509.X509CertImpl: byte[] signature>;
+
+        if $r3 != null goto label2;
+
+     label1:
+        return "";
+
+     label2:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[\n");
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r7 = virtualinvoke $r6.<sun.security.x509.X509CertInfo: java.lang.String toString()>();
+
+        $r8 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  Algorithm: [");
+
+        $r13 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.AlgorithmId algId>;
+
+        $r14 = virtualinvoke $r13.<sun.security.x509.AlgorithmId: java.lang.String toString()>();
+
+        $r15 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]\n");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r18 = new sun.misc.HexDumpEncoder;
+
+        specialinvoke $r18.<sun.misc.HexDumpEncoder: void <init>()>();
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  Signature:\n");
+
+        $r21 = r0.<sun.security.x509.X509CertImpl: byte[] signature>;
+
+        $r22 = virtualinvoke $r18.<sun.misc.HexDumpEncoder: java.lang.String encodeBuffer(byte[])>($r21);
+
+        $r23 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r24);
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n]");
+
+        $r25 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r25;
+    }
+
+    public java.security.PublicKey getPublicKey()
+    {
+        java.lang.Object $r3;
+        java.security.PublicKey r5;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.X509CertInfo $r1, $r2;
+        java.lang.Exception $r4;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r3 = virtualinvoke $r2.<sun.security.x509.X509CertInfo: java.lang.Object get(java.lang.String)>("key.value");
+
+        r5 = (java.security.PublicKey) $r3;
+
+     label2:
+        return r5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public int getVersion()
+    {
+        sun.security.x509.X509CertImpl r0;
+        java.lang.Integer $r4;
+        java.lang.Exception $r5;
+        int $i0, $i1, $i3, $i5;
+        java.lang.Object $r3;
+        sun.security.x509.X509CertInfo $r1, $r2;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        if $r1 != null goto label1;
+
+        $i3 = (int) -1;
+
+        return $i3;
+
+     label1:
+        $r2 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r3 = virtualinvoke $r2.<sun.security.x509.X509CertInfo: java.lang.Object get(java.lang.String)>("version.number");
+
+        $r4 = (java.lang.Integer) $r3;
+
+        $i0 = virtualinvoke $r4.<java.lang.Integer: int intValue()>();
+
+        $i1 = $i0 + 1;
+
+     label2:
+        return $i1;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $i5 = (int) -1;
+
+        return $i5;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public java.math.BigInteger getSerialNumber()
+    {
+        java.math.BigInteger $r2;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.SerialNumber $r1;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = virtualinvoke r0.<sun.security.x509.X509CertImpl: sun.security.x509.SerialNumber getSerialNumberObject()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = virtualinvoke $r1.<sun.security.x509.SerialNumber: java.math.BigInteger getNumber()>();
+
+        goto label2;
+
+     label1:
+        $r2 = null;
+
+     label2:
+        return $r2;
+    }
+
+    public sun.security.x509.SerialNumber getSerialNumberObject()
+    {
+        java.lang.Object $r3;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.X509CertInfo $r1, $r2;
+        java.lang.Exception $r4;
+        sun.security.x509.SerialNumber r5;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r3 = virtualinvoke $r2.<sun.security.x509.X509CertInfo: java.lang.Object get(java.lang.String)>("serialNumber.number");
+
+        r5 = (sun.security.x509.SerialNumber) $r3;
+
+     label2:
+        return r5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public java.security.Principal getSubjectDN()
+    {
+        java.security.Principal r5;
+        java.lang.Object $r3;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.X509CertInfo $r1, $r2;
+        java.lang.Exception $r4;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r3 = virtualinvoke $r2.<sun.security.x509.X509CertInfo: java.lang.Object get(java.lang.String)>("subject.dname");
+
+        r5 = (java.security.Principal) $r3;
+
+     label2:
+        return r5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public javax.security.auth.x500.X500Principal getSubjectX500Principal()
+    {
+        javax.security.auth.x500.X500Principal r5;
+        java.lang.Object $r3;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.X509CertInfo $r1, $r2;
+        java.lang.Exception $r4;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r3 = virtualinvoke $r2.<sun.security.x509.X509CertInfo: java.lang.Object get(java.lang.String)>("subject.x500principal");
+
+        r5 = (javax.security.auth.x500.X500Principal) $r3;
+
+     label2:
+        return r5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public java.security.Principal getIssuerDN()
+    {
+        java.security.Principal r5;
+        java.lang.Object $r3;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.X509CertInfo $r1, $r2;
+        java.lang.Exception $r4;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r3 = virtualinvoke $r2.<sun.security.x509.X509CertInfo: java.lang.Object get(java.lang.String)>("issuer.dname");
+
+        r5 = (java.security.Principal) $r3;
+
+     label2:
+        return r5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public javax.security.auth.x500.X500Principal getIssuerX500Principal()
+    {
+        javax.security.auth.x500.X500Principal r5;
+        java.lang.Object $r3;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.X509CertInfo $r1, $r2;
+        java.lang.Exception $r4;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r3 = virtualinvoke $r2.<sun.security.x509.X509CertInfo: java.lang.Object get(java.lang.String)>("issuer.x500principal");
+
+        r5 = (javax.security.auth.x500.X500Principal) $r3;
+
+     label2:
+        return r5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public java.util.Date getNotBefore()
+    {
+        java.util.Date r5;
+        java.lang.Object $r3;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.X509CertInfo $r1, $r2;
+        java.lang.Exception $r4;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r3 = virtualinvoke $r2.<sun.security.x509.X509CertInfo: java.lang.Object get(java.lang.String)>("validity.notBefore");
+
+        r5 = (java.util.Date) $r3;
+
+     label2:
+        return r5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public java.util.Date getNotAfter()
+    {
+        java.util.Date r5;
+        java.lang.Object $r3;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.X509CertInfo $r1, $r2;
+        java.lang.Exception $r4;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r3 = virtualinvoke $r2.<sun.security.x509.X509CertInfo: java.lang.Object get(java.lang.String)>("validity.notAfter");
+
+        r5 = (java.util.Date) $r3;
+
+     label2:
+        return r5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public byte[] getTBSCertificate() throws java.security.cert.CertificateEncodingException
+    {
+        byte[] $r4;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.X509CertInfo $r1, $r3;
+        java.security.cert.CertificateEncodingException $r2;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r4 = virtualinvoke $r3.<sun.security.x509.X509CertInfo: byte[] getEncodedInfo()>();
+
+        return $r4;
+
+     label1:
+        $r2 = new java.security.cert.CertificateEncodingException;
+
+        specialinvoke $r2.<java.security.cert.CertificateEncodingException: void <init>(java.lang.String)>("Uninitialized certificate");
+
+        throw $r2;
+    }
+
+    public byte[] getSignature()
+    {
+        byte[] $r1, $r2, $r4;
+        java.lang.Object $r3;
+        sun.security.x509.X509CertImpl r0;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: byte[] signature>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<sun.security.x509.X509CertImpl: byte[] signature>;
+
+        $r3 = virtualinvoke $r2.<java.lang.Object: java.lang.Object clone()>();
+
+        $r4 = (byte[]) $r3;
+
+        return $r4;
+    }
+
+    public java.lang.String getSigAlgName()
+    {
+        java.lang.String $r3;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.AlgorithmId $r1, $r2;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.AlgorithmId algId>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.AlgorithmId algId>;
+
+        $r3 = virtualinvoke $r2.<sun.security.x509.AlgorithmId: java.lang.String getName()>();
+
+        return $r3;
+    }
+
+    public java.lang.String getSigAlgOID()
+    {
+        sun.security.util.ObjectIdentifier $r3;
+        java.lang.String $r4;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.AlgorithmId $r1, $r2;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.AlgorithmId algId>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.AlgorithmId algId>;
+
+        $r3 = virtualinvoke $r2.<sun.security.x509.AlgorithmId: sun.security.util.ObjectIdentifier getOID()>();
+
+        $r4 = virtualinvoke $r3.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        return $r4;
+    }
+
+    public byte[] getSigAlgParams()
+    {
+        byte[] $r3;
+        java.io.IOException $r4;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.AlgorithmId $r1, $r2;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.AlgorithmId algId>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.AlgorithmId algId>;
+
+        $r3 = virtualinvoke $r2.<sun.security.x509.AlgorithmId: byte[] getEncodedParams()>();
+
+     label2:
+        return $r3;
+
+     label3:
+        $r4 := @caughtexception;
+
+        return null;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public boolean[] getIssuerUniqueID()
+    {
+        boolean[] $r4;
+        java.lang.Object $r3;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.UniqueIdentity r6;
+        sun.security.x509.X509CertInfo $r1, $r2;
+        java.lang.Exception $r5;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r3 = virtualinvoke $r2.<sun.security.x509.X509CertInfo: java.lang.Object get(java.lang.String)>("issuerID");
+
+        r6 = (sun.security.x509.UniqueIdentity) $r3;
+
+        if r6 != null goto label3;
+
+     label2:
+        return null;
+
+     label3:
+        $r4 = virtualinvoke r6.<sun.security.x509.UniqueIdentity: boolean[] getId()>();
+
+     label4:
+        return $r4;
+
+     label5:
+        $r5 := @caughtexception;
+
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label5;
+        catch java.lang.Exception from label3 to label4 with label5;
+    }
+
+    public boolean[] getSubjectUniqueID()
+    {
+        boolean[] $r4;
+        java.lang.Object $r3;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.UniqueIdentity r6;
+        sun.security.x509.X509CertInfo $r1, $r2;
+        java.lang.Exception $r5;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r3 = virtualinvoke $r2.<sun.security.x509.X509CertInfo: java.lang.Object get(java.lang.String)>("subjectID");
+
+        r6 = (sun.security.x509.UniqueIdentity) $r3;
+
+        if r6 != null goto label3;
+
+     label2:
+        return null;
+
+     label3:
+        $r4 = virtualinvoke r6.<sun.security.x509.UniqueIdentity: boolean[] getId()>();
+
+     label4:
+        return $r4;
+
+     label5:
+        $r5 := @caughtexception;
+
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label5;
+        catch java.lang.Exception from label3 to label4 with label5;
+    }
+
+    public sun.security.x509.KeyIdentifier getAuthKeyId()
+    {
+        sun.security.x509.KeyIdentifier $r3;
+        sun.security.x509.AuthorityKeyIdentifierExtension $r1;
+        java.lang.Object $r2;
+        java.io.IOException $r4;
+        sun.security.x509.X509CertImpl r0;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = virtualinvoke r0.<sun.security.x509.X509CertImpl: sun.security.x509.AuthorityKeyIdentifierExtension getAuthorityKeyIdentifierExtension()>();
+
+        if $r1 == null goto label4;
+
+     label1:
+        $r2 = virtualinvoke $r1.<sun.security.x509.AuthorityKeyIdentifierExtension: java.lang.Object get(java.lang.String)>("key_id");
+
+        $r3 = (sun.security.x509.KeyIdentifier) $r2;
+
+     label2:
+        return $r3;
+
+     label3:
+        $r4 := @caughtexception;
+
+     label4:
+        return null;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public sun.security.x509.KeyIdentifier getSubjectKeyId()
+    {
+        sun.security.x509.KeyIdentifier $r2;
+        java.io.IOException $r3;
+        sun.security.x509.SubjectKeyIdentifierExtension $r1;
+        sun.security.x509.X509CertImpl r0;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = virtualinvoke r0.<sun.security.x509.X509CertImpl: sun.security.x509.SubjectKeyIdentifierExtension getSubjectKeyIdentifierExtension()>();
+
+        if $r1 == null goto label4;
+
+     label1:
+        $r2 = virtualinvoke $r1.<sun.security.x509.SubjectKeyIdentifierExtension: sun.security.x509.KeyIdentifier get(java.lang.String)>("key_id");
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+     label4:
+        return null;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public sun.security.x509.AuthorityKeyIdentifierExtension getAuthorityKeyIdentifierExtension()
+    {
+        sun.security.x509.AuthorityKeyIdentifierExtension $r3;
+        sun.security.util.ObjectIdentifier $r1;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.Extension $r2;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier AuthorityKey_Id>;
+
+        $r2 = virtualinvoke r0.<sun.security.x509.X509CertImpl: sun.security.x509.Extension getExtension(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = (sun.security.x509.AuthorityKeyIdentifierExtension) $r2;
+
+        return $r3;
+    }
+
+    public sun.security.x509.BasicConstraintsExtension getBasicConstraintsExtension()
+    {
+        sun.security.util.ObjectIdentifier $r1;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.Extension $r2;
+        sun.security.x509.BasicConstraintsExtension $r3;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier BasicConstraints_Id>;
+
+        $r2 = virtualinvoke r0.<sun.security.x509.X509CertImpl: sun.security.x509.Extension getExtension(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = (sun.security.x509.BasicConstraintsExtension) $r2;
+
+        return $r3;
+    }
+
+    public sun.security.x509.CertificatePoliciesExtension getCertificatePoliciesExtension()
+    {
+        sun.security.x509.CertificatePoliciesExtension $r3;
+        sun.security.util.ObjectIdentifier $r1;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.Extension $r2;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier CertificatePolicies_Id>;
+
+        $r2 = virtualinvoke r0.<sun.security.x509.X509CertImpl: sun.security.x509.Extension getExtension(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = (sun.security.x509.CertificatePoliciesExtension) $r2;
+
+        return $r3;
+    }
+
+    public sun.security.x509.ExtendedKeyUsageExtension getExtendedKeyUsageExtension()
+    {
+        sun.security.util.ObjectIdentifier $r1;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.Extension $r2;
+        sun.security.x509.ExtendedKeyUsageExtension $r3;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier ExtendedKeyUsage_Id>;
+
+        $r2 = virtualinvoke r0.<sun.security.x509.X509CertImpl: sun.security.x509.Extension getExtension(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = (sun.security.x509.ExtendedKeyUsageExtension) $r2;
+
+        return $r3;
+    }
+
+    public sun.security.x509.IssuerAlternativeNameExtension getIssuerAlternativeNameExtension()
+    {
+        sun.security.x509.IssuerAlternativeNameExtension $r3;
+        sun.security.util.ObjectIdentifier $r1;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.Extension $r2;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier IssuerAlternativeName_Id>;
+
+        $r2 = virtualinvoke r0.<sun.security.x509.X509CertImpl: sun.security.x509.Extension getExtension(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = (sun.security.x509.IssuerAlternativeNameExtension) $r2;
+
+        return $r3;
+    }
+
+    public sun.security.x509.NameConstraintsExtension getNameConstraintsExtension()
+    {
+        sun.security.x509.NameConstraintsExtension $r3;
+        sun.security.util.ObjectIdentifier $r1;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.Extension $r2;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier NameConstraints_Id>;
+
+        $r2 = virtualinvoke r0.<sun.security.x509.X509CertImpl: sun.security.x509.Extension getExtension(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = (sun.security.x509.NameConstraintsExtension) $r2;
+
+        return $r3;
+    }
+
+    public sun.security.x509.PolicyConstraintsExtension getPolicyConstraintsExtension()
+    {
+        sun.security.x509.PolicyConstraintsExtension $r3;
+        sun.security.util.ObjectIdentifier $r1;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.Extension $r2;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier PolicyConstraints_Id>;
+
+        $r2 = virtualinvoke r0.<sun.security.x509.X509CertImpl: sun.security.x509.Extension getExtension(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = (sun.security.x509.PolicyConstraintsExtension) $r2;
+
+        return $r3;
+    }
+
+    public sun.security.x509.PolicyMappingsExtension getPolicyMappingsExtension()
+    {
+        sun.security.x509.PolicyMappingsExtension $r3;
+        sun.security.util.ObjectIdentifier $r1;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.Extension $r2;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier PolicyMappings_Id>;
+
+        $r2 = virtualinvoke r0.<sun.security.x509.X509CertImpl: sun.security.x509.Extension getExtension(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = (sun.security.x509.PolicyMappingsExtension) $r2;
+
+        return $r3;
+    }
+
+    public sun.security.x509.PrivateKeyUsageExtension getPrivateKeyUsageExtension()
+    {
+        sun.security.util.ObjectIdentifier $r1;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.Extension $r2;
+        sun.security.x509.PrivateKeyUsageExtension $r3;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier PrivateKeyUsage_Id>;
+
+        $r2 = virtualinvoke r0.<sun.security.x509.X509CertImpl: sun.security.x509.Extension getExtension(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = (sun.security.x509.PrivateKeyUsageExtension) $r2;
+
+        return $r3;
+    }
+
+    public sun.security.x509.SubjectAlternativeNameExtension getSubjectAlternativeNameExtension()
+    {
+        sun.security.x509.SubjectAlternativeNameExtension $r3;
+        sun.security.util.ObjectIdentifier $r1;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.Extension $r2;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier SubjectAlternativeName_Id>;
+
+        $r2 = virtualinvoke r0.<sun.security.x509.X509CertImpl: sun.security.x509.Extension getExtension(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = (sun.security.x509.SubjectAlternativeNameExtension) $r2;
+
+        return $r3;
+    }
+
+    public sun.security.x509.SubjectKeyIdentifierExtension getSubjectKeyIdentifierExtension()
+    {
+        sun.security.util.ObjectIdentifier $r1;
+        sun.security.x509.SubjectKeyIdentifierExtension $r3;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.Extension $r2;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier SubjectKey_Id>;
+
+        $r2 = virtualinvoke r0.<sun.security.x509.X509CertImpl: sun.security.x509.Extension getExtension(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = (sun.security.x509.SubjectKeyIdentifierExtension) $r2;
+
+        return $r3;
+    }
+
+    public sun.security.x509.CRLDistributionPointsExtension getCRLDistributionPointsExtension()
+    {
+        sun.security.util.ObjectIdentifier $r1;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.CRLDistributionPointsExtension $r3;
+        sun.security.x509.Extension $r2;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier CRLDistributionPoints_Id>;
+
+        $r2 = virtualinvoke r0.<sun.security.x509.X509CertImpl: sun.security.x509.Extension getExtension(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = (sun.security.x509.CRLDistributionPointsExtension) $r2;
+
+        return $r3;
+    }
+
+    public boolean hasUnsupportedCriticalExtension()
+    {
+        java.lang.Object $r3;
+        sun.security.x509.CertificateExtensions r5;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.X509CertInfo $r1, $r2;
+        java.lang.Exception $r4;
+        boolean $z0;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        if $r1 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r2 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r3 = virtualinvoke $r2.<sun.security.x509.X509CertInfo: java.lang.Object get(java.lang.String)>("extensions");
+
+        r5 = (sun.security.x509.CertificateExtensions) $r3;
+
+        if r5 != null goto label3;
+
+     label2:
+        return 0;
+
+     label3:
+        $z0 = virtualinvoke r5.<sun.security.x509.CertificateExtensions: boolean hasUnsupportedCriticalExtension()>();
+
+     label4:
+        return $z0;
+
+     label5:
+        $r4 := @caughtexception;
+
+        return 0;
+
+        catch java.lang.Exception from label1 to label2 with label5;
+        catch java.lang.Exception from label3 to label4 with label5;
+    }
+
+    public java.util.Set getCriticalExtensionOIDs()
+    {
+        java.util.Iterator $r6;
+        java.util.Collection $r5;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.Extension r8;
+        java.util.TreeSet $r4;
+        java.lang.Exception $r11;
+        java.lang.Object $r3, $r7;
+        sun.security.util.ObjectIdentifier $r9;
+        sun.security.x509.CertificateExtensions r12;
+        java.lang.String $r10;
+        sun.security.x509.X509CertInfo $r1, $r2;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r3 = virtualinvoke $r2.<sun.security.x509.X509CertInfo: java.lang.Object get(java.lang.String)>("extensions");
+
+        r12 = (sun.security.x509.CertificateExtensions) $r3;
+
+        if r12 != null goto label3;
+
+     label2:
+        return null;
+
+     label3:
+        $r4 = new java.util.TreeSet;
+
+        specialinvoke $r4.<java.util.TreeSet: void <init>()>();
+
+        $r5 = virtualinvoke r12.<sun.security.x509.CertificateExtensions: java.util.Collection getAllExtensions()>();
+
+        $r6 = interfaceinvoke $r5.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label4:
+        $z0 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label6;
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r8 = (sun.security.x509.Extension) $r7;
+
+        $z1 = virtualinvoke r8.<sun.security.x509.Extension: boolean isCritical()>();
+
+        if $z1 == 0 goto label5;
+
+        $r9 = virtualinvoke r8.<sun.security.x509.Extension: sun.security.util.ObjectIdentifier getExtensionId()>();
+
+        $r10 = virtualinvoke $r9.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        interfaceinvoke $r4.<java.util.Set: boolean add(java.lang.Object)>($r10);
+
+     label5:
+        goto label4;
+
+     label6:
+        return $r4;
+
+     label7:
+        $r11 := @caughtexception;
+
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label7;
+        catch java.lang.Exception from label3 to label6 with label7;
+    }
+
+    public java.util.Set getNonCriticalExtensionOIDs()
+    {
+        java.util.TreeSet $r4;
+        java.util.Map $r7;
+        sun.security.util.ObjectIdentifier $r11;
+        sun.security.x509.CertificateExtensions r14;
+        java.lang.String $r12;
+        boolean $z0, $z1;
+        java.util.Iterator $r6;
+        java.util.Collection $r5;
+        java.util.Set $r8;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.Extension r10;
+        java.lang.Exception $r13;
+        java.lang.Object $r3, $r9;
+        sun.security.x509.X509CertInfo $r1, $r2;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r3 = virtualinvoke $r2.<sun.security.x509.X509CertInfo: java.lang.Object get(java.lang.String)>("extensions");
+
+        r14 = (sun.security.x509.CertificateExtensions) $r3;
+
+        if r14 != null goto label3;
+
+     label2:
+        return null;
+
+     label3:
+        $r4 = new java.util.TreeSet;
+
+        specialinvoke $r4.<java.util.TreeSet: void <init>()>();
+
+        $r5 = virtualinvoke r14.<sun.security.x509.CertificateExtensions: java.util.Collection getAllExtensions()>();
+
+        $r6 = interfaceinvoke $r5.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label4:
+        $z0 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label6;
+
+        $r9 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r10 = (sun.security.x509.Extension) $r9;
+
+        $z1 = virtualinvoke r10.<sun.security.x509.Extension: boolean isCritical()>();
+
+        if $z1 != 0 goto label5;
+
+        $r11 = virtualinvoke r10.<sun.security.x509.Extension: sun.security.util.ObjectIdentifier getExtensionId()>();
+
+        $r12 = virtualinvoke $r11.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        interfaceinvoke $r4.<java.util.Set: boolean add(java.lang.Object)>($r12);
+
+     label5:
+        goto label4;
+
+     label6:
+        $r7 = virtualinvoke r14.<sun.security.x509.CertificateExtensions: java.util.Map getUnparseableExtensions()>();
+
+        $r8 = interfaceinvoke $r7.<java.util.Map: java.util.Set keySet()>();
+
+        interfaceinvoke $r4.<java.util.Set: boolean addAll(java.util.Collection)>($r8);
+
+     label7:
+        return $r4;
+
+     label8:
+        $r13 := @caughtexception;
+
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label8;
+        catch java.lang.Exception from label3 to label7 with label8;
+    }
+
+    public sun.security.x509.Extension getExtension(sun.security.util.ObjectIdentifier)
+    {
+        sun.security.util.ObjectIdentifier r4, $r11;
+        sun.security.x509.CertificateExtensions r14;
+        java.lang.String $r5;
+        boolean $z0, $z1;
+        java.util.Iterator $r8;
+        java.util.Collection $r7;
+        java.io.IOException $r12;
+        java.security.cert.CertificateException $r13;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.Extension $r6, r10;
+        java.lang.Object $r3, $r9;
+        sun.security.x509.X509CertInfo $r1, $r2;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        r4 := @parameter0: sun.security.util.ObjectIdentifier;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        if $r1 != null goto label01;
+
+        return null;
+
+     label01:
+        $r2 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r3 = virtualinvoke $r2.<sun.security.x509.X509CertInfo: java.lang.Object get(java.lang.String)>("extensions");
+
+        r14 = (sun.security.x509.CertificateExtensions) $r3;
+
+     label02:
+        goto label05;
+
+     label03:
+        $r13 := @caughtexception;
+
+     label04:
+        return null;
+
+     label05:
+        if r14 != null goto label07;
+
+     label06:
+        return null;
+
+     label07:
+        $r5 = virtualinvoke r4.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        $r6 = virtualinvoke r14.<sun.security.x509.CertificateExtensions: sun.security.x509.Extension getExtension(java.lang.String)>($r5);
+
+        if $r6 == null goto label09;
+
+     label08:
+        return $r6;
+
+     label09:
+        $r7 = virtualinvoke r14.<sun.security.x509.CertificateExtensions: java.util.Collection getAllExtensions()>();
+
+        $r8 = interfaceinvoke $r7.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label10:
+        $z0 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label13;
+
+        $r9 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        r10 = (sun.security.x509.Extension) $r9;
+
+        $r11 = virtualinvoke r10.<sun.security.x509.Extension: sun.security.util.ObjectIdentifier getExtensionId()>();
+
+        $z1 = virtualinvoke $r11.<sun.security.util.ObjectIdentifier: boolean equals(java.lang.Object)>(r4);
+
+        if $z1 == 0 goto label12;
+
+     label11:
+        return r10;
+
+     label12:
+        goto label10;
+
+     label13:
+        return null;
+
+     label14:
+        $r12 := @caughtexception;
+
+        return null;
+
+        catch java.security.cert.CertificateException from label01 to label02 with label03;
+        catch java.io.IOException from label01 to label04 with label14;
+        catch java.io.IOException from label05 to label06 with label14;
+        catch java.io.IOException from label07 to label08 with label14;
+        catch java.io.IOException from label09 to label11 with label14;
+        catch java.io.IOException from label12 to label13 with label14;
+    }
+
+    public sun.security.x509.Extension getUnparseableExtension(sun.security.util.ObjectIdentifier)
+    {
+        java.io.IOException $r9;
+        java.security.cert.CertificateException $r10;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.Extension $r8;
+        java.util.Map $r4;
+        java.lang.Object $r3, $r7;
+        sun.security.util.ObjectIdentifier r5;
+        sun.security.x509.CertificateExtensions r11;
+        java.lang.String $r6;
+        sun.security.x509.X509CertInfo $r1, $r2;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        r5 := @parameter0: sun.security.util.ObjectIdentifier;
+
+        $r1 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r3 = virtualinvoke $r2.<sun.security.x509.X509CertInfo: java.lang.Object get(java.lang.String)>("extensions");
+
+        r11 = (sun.security.x509.CertificateExtensions) $r3;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r10 := @caughtexception;
+
+     label4:
+        return null;
+
+     label5:
+        if r11 != null goto label7;
+
+     label6:
+        return null;
+
+     label7:
+        $r4 = virtualinvoke r11.<sun.security.x509.CertificateExtensions: java.util.Map getUnparseableExtensions()>();
+
+        $r6 = virtualinvoke r5.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        $r7 = interfaceinvoke $r4.<java.util.Map: java.lang.Object get(java.lang.Object)>($r6);
+
+        $r8 = (sun.security.x509.Extension) $r7;
+
+     label8:
+        return $r8;
+
+     label9:
+        $r9 := @caughtexception;
+
+        return null;
+
+        catch java.security.cert.CertificateException from label1 to label2 with label3;
+        catch java.io.IOException from label1 to label4 with label9;
+        catch java.io.IOException from label5 to label6 with label9;
+        catch java.io.IOException from label7 to label8 with label9;
+    }
+
+    public byte[] getExtensionValue(java.lang.String)
+    {
+        byte[] $r8, $r10;
+        java.util.Map $r11;
+        sun.security.util.ObjectIdentifier $r0, $r16;
+        sun.security.x509.CertificateExtensions r6;
+        java.lang.String r1, $r2;
+        boolean $z0, $z1;
+        java.util.Iterator $r14;
+        java.util.Collection $r13;
+        java.security.cert.CertificateException $r18;
+        sun.security.x509.X509CertImpl r3;
+        sun.security.x509.Extension r19, r20;
+        java.lang.Exception $r17;
+        sun.security.util.DerOutputStream $r9;
+        java.lang.Object $r5, $r7, $r12, $r15;
+        sun.security.x509.X509CertInfo $r4;
+
+        r3 := @this: sun.security.x509.X509CertImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+     label01:
+        $r0 = new sun.security.util.ObjectIdentifier;
+
+        specialinvoke $r0.<sun.security.util.ObjectIdentifier: void <init>(java.lang.String)>(r1);
+
+        $r2 = staticinvoke <sun.security.x509.OIDMap: java.lang.String getName(sun.security.util.ObjectIdentifier)>($r0);
+
+        r19 = null;
+
+        $r4 = r3.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r5 = virtualinvoke $r4.<sun.security.x509.X509CertInfo: java.lang.Object get(java.lang.String)>("extensions");
+
+        r6 = (sun.security.x509.CertificateExtensions) $r5;
+
+        if $r2 != null goto label07;
+
+        if r6 != null goto label03;
+
+     label02:
+        return null;
+
+     label03:
+        $r13 = virtualinvoke r6.<sun.security.x509.CertificateExtensions: java.util.Collection getAllExtensions()>();
+
+        $r14 = interfaceinvoke $r13.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label04:
+        $z0 = interfaceinvoke $r14.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label06;
+
+        $r15 = interfaceinvoke $r14.<java.util.Iterator: java.lang.Object next()>();
+
+        r20 = (sun.security.x509.Extension) $r15;
+
+        $r16 = virtualinvoke r20.<sun.security.x509.Extension: sun.security.util.ObjectIdentifier getExtensionId()>();
+
+        $z1 = virtualinvoke $r16.<sun.security.util.ObjectIdentifier: boolean equals(java.lang.Object)>($r0);
+
+        if $z1 == 0 goto label05;
+
+        r19 = r20;
+
+        goto label06;
+
+     label05:
+        goto label04;
+
+     label06:
+        goto label10;
+
+     label07:
+        $r7 = virtualinvoke r3.<sun.security.x509.X509CertImpl: java.lang.Object get(java.lang.String)>($r2);
+
+        r19 = (sun.security.x509.Extension) $r7;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r18 := @caughtexception;
+
+     label10:
+        if r19 != null goto label13;
+
+        if r6 == null goto label11;
+
+        $r11 = virtualinvoke r6.<sun.security.x509.CertificateExtensions: java.util.Map getUnparseableExtensions()>();
+
+        $r12 = interfaceinvoke $r11.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r19 = (sun.security.x509.Extension) $r12;
+
+     label11:
+        if r19 != null goto label13;
+
+     label12:
+        return null;
+
+     label13:
+        $r8 = virtualinvoke r19.<sun.security.x509.Extension: byte[] getExtensionValue()>();
+
+        if $r8 != null goto label15;
+
+     label14:
+        return null;
+
+     label15:
+        $r9 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r9.<sun.security.util.DerOutputStream: void <init>()>();
+
+        virtualinvoke $r9.<sun.security.util.DerOutputStream: void putOctetString(byte[])>($r8);
+
+        $r10 = virtualinvoke $r9.<sun.security.util.DerOutputStream: byte[] toByteArray()>();
+
+     label16:
+        return $r10;
+
+     label17:
+        $r17 := @caughtexception;
+
+        return null;
+
+        catch java.security.cert.CertificateException from label07 to label08 with label09;
+        catch java.lang.Exception from label01 to label02 with label17;
+        catch java.lang.Exception from label03 to label12 with label17;
+        catch java.lang.Exception from label13 to label14 with label17;
+        catch java.lang.Exception from label15 to label16 with label17;
+    }
+
+    public boolean[] getKeyUsage()
+    {
+        sun.security.x509.KeyUsageExtension r4;
+        boolean[] $r5, r6, r8;
+        sun.security.x509.X509CertImpl r2;
+        java.lang.Exception $r7;
+        int $i0, $i1;
+        sun.security.util.ObjectIdentifier $r0;
+        java.lang.Object $r3;
+        java.lang.String $r1;
+
+        r2 := @this: sun.security.x509.X509CertImpl;
+
+     label1:
+        $r0 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier KeyUsage_Id>;
+
+        $r1 = staticinvoke <sun.security.x509.OIDMap: java.lang.String getName(sun.security.util.ObjectIdentifier)>($r0);
+
+        if $r1 != null goto label3;
+
+     label2:
+        return null;
+
+     label3:
+        $r3 = virtualinvoke r2.<sun.security.x509.X509CertImpl: java.lang.Object get(java.lang.String)>($r1);
+
+        r4 = (sun.security.x509.KeyUsageExtension) $r3;
+
+        if r4 != null goto label5;
+
+     label4:
+        return null;
+
+     label5:
+        $r5 = virtualinvoke r4.<sun.security.x509.KeyUsageExtension: boolean[] getBits()>();
+
+        r8 = $r5;
+
+        $i0 = lengthof $r5;
+
+        if $i0 >= 9 goto label6;
+
+        r6 = newarray (boolean)[9];
+
+        $i1 = lengthof $r5;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r5, 0, r6, 0, $i1);
+
+        r8 = r6;
+
+     label6:
+        return r8;
+
+     label7:
+        $r7 := @caughtexception;
+
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label7;
+        catch java.lang.Exception from label3 to label4 with label7;
+        catch java.lang.Exception from label5 to label6 with label7;
+    }
+
+    public synchronized java.util.List getExtendedKeyUsage() throws java.security.cert.CertificateParsingException
+    {
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.ExtendedKeyUsageExtension $r1;
+        java.util.List $r2, $r3, $r4, $r5, $r6;
+        boolean $z0;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $z0 = r0.<sun.security.x509.X509CertImpl: boolean readOnly>;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = r0.<sun.security.x509.X509CertImpl: java.util.List extKeyUsage>;
+
+        if $r5 == null goto label1;
+
+        $r6 = r0.<sun.security.x509.X509CertImpl: java.util.List extKeyUsage>;
+
+        return $r6;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.security.x509.X509CertImpl: sun.security.x509.ExtendedKeyUsageExtension getExtendedKeyUsageExtension()>();
+
+        if $r1 != null goto label2;
+
+        return null;
+
+     label2:
+        $r2 = virtualinvoke $r1.<sun.security.x509.ExtendedKeyUsageExtension: java.util.List getExtendedKeyUsage()>();
+
+        $r3 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r2);
+
+        r0.<sun.security.x509.X509CertImpl: java.util.List extKeyUsage> = $r3;
+
+        $r4 = r0.<sun.security.x509.X509CertImpl: java.util.List extKeyUsage>;
+
+        return $r4;
+    }
+
+    public static java.util.List getExtendedKeyUsage(java.security.cert.X509Certificate) throws java.security.cert.CertificateParsingException
+    {
+        java.security.cert.X509Certificate r0;
+        sun.security.util.DerValue $r2;
+        byte[] $r1, $r3;
+        java.security.cert.CertificateParsingException $r9;
+        java.io.IOException $r8;
+        sun.security.x509.ExtendedKeyUsageExtension $r4;
+        java.util.List $r6, $r7;
+        java.lang.Boolean $r5;
+
+        r0 := @parameter0: java.security.cert.X509Certificate;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.security.cert.X509Certificate: byte[] getExtensionValue(java.lang.String)>("2.5.29.37");
+
+        if $r1 != null goto label3;
+
+     label2:
+        return null;
+
+     label3:
+        $r2 = new sun.security.util.DerValue;
+
+        specialinvoke $r2.<sun.security.util.DerValue: void <init>(byte[])>($r1);
+
+        $r3 = virtualinvoke $r2.<sun.security.util.DerValue: byte[] getOctetString()>();
+
+        $r4 = new sun.security.x509.ExtendedKeyUsageExtension;
+
+        $r5 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        specialinvoke $r4.<sun.security.x509.ExtendedKeyUsageExtension: void <init>(java.lang.Boolean,java.lang.Object)>($r5, $r3);
+
+        $r6 = virtualinvoke $r4.<sun.security.x509.ExtendedKeyUsageExtension: java.util.List getExtendedKeyUsage()>();
+
+        $r7 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r6);
+
+     label4:
+        return $r7;
+
+     label5:
+        $r8 := @caughtexception;
+
+        $r9 = new java.security.cert.CertificateParsingException;
+
+        specialinvoke $r9.<java.security.cert.CertificateParsingException: void <init>(java.lang.Throwable)>($r8);
+
+        throw $r9;
+
+        catch java.io.IOException from label1 to label2 with label5;
+        catch java.io.IOException from label3 to label4 with label5;
+    }
+
+    public int getBasicConstraints()
+    {
+        java.lang.Integer $r8;
+        int $i0, $i2, $i4, $i6, $i8;
+        java.lang.Boolean $r6;
+        sun.security.util.ObjectIdentifier $r0;
+        java.lang.String $r1;
+        sun.security.x509.BasicConstraintsExtension r4;
+        boolean $z0;
+        sun.security.x509.X509CertImpl r2;
+        java.lang.Exception $r9;
+        java.lang.Object $r3, $r5, $r7;
+
+        r2 := @this: sun.security.x509.X509CertImpl;
+
+     label1:
+        $r0 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier BasicConstraints_Id>;
+
+        $r1 = staticinvoke <sun.security.x509.OIDMap: java.lang.String getName(sun.security.util.ObjectIdentifier)>($r0);
+
+        if $r1 != null goto label3;
+
+     label2:
+        $i2 = (int) -1;
+
+        return $i2;
+
+     label3:
+        $r3 = virtualinvoke r2.<sun.security.x509.X509CertImpl: java.lang.Object get(java.lang.String)>($r1);
+
+        r4 = (sun.security.x509.BasicConstraintsExtension) $r3;
+
+        if r4 != null goto label5;
+
+     label4:
+        $i4 = (int) -1;
+
+        return $i4;
+
+     label5:
+        $r5 = virtualinvoke r4.<sun.security.x509.BasicConstraintsExtension: java.lang.Object get(java.lang.String)>("is_ca");
+
+        $r6 = (java.lang.Boolean) $r5;
+
+        $z0 = virtualinvoke $r6.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z0 != 1 goto label7;
+
+        $r7 = virtualinvoke r4.<sun.security.x509.BasicConstraintsExtension: java.lang.Object get(java.lang.String)>("path_len");
+
+        $r8 = (java.lang.Integer) $r7;
+
+        $i0 = virtualinvoke $r8.<java.lang.Integer: int intValue()>();
+
+     label6:
+        return $i0;
+
+     label7:
+        $i6 = (int) -1;
+
+        return $i6;
+
+     label8:
+        $r9 := @caughtexception;
+
+        $i8 = (int) -1;
+
+        return $i8;
+
+        catch java.lang.Exception from label1 to label2 with label8;
+        catch java.lang.Exception from label3 to label4 with label8;
+        catch java.lang.Exception from label5 to label6 with label8;
+    }
+
+    private static java.util.Collection makeAltNames(sun.security.x509.GeneralNames)
+    {
+        byte[] $r24;
+        sun.security.x509.OIDName $r10;
+        sun.security.x509.GeneralName r6;
+        java.lang.Integer $r9;
+        sun.security.x509.X500Name $r17;
+        sun.security.x509.URIName $r15;
+        sun.security.util.ObjectIdentifier $r11;
+        boolean $z0, $z1;
+        java.util.Collection $r4;
+        java.util.Set $r25;
+        sun.security.x509.DNSName $r19;
+        java.util.List $r2, $r30;
+        sun.security.x509.GeneralNameInterface $r7;
+        sun.security.util.DerOutputStream $r23;
+        sun.security.x509.IPAddressName $r13;
+        java.util.ArrayList $r1, $r8;
+        int $i0, $i1;
+        java.lang.String $r12, $r14, $r16, $r18, $r20, $r22;
+        sun.security.x509.RFC822Name $r21;
+        java.util.Iterator $r3;
+        java.io.IOException $r26, $r28;
+        java.lang.RuntimeException $r27, $r29;
+        java.lang.Object $r5;
+        sun.security.x509.GeneralNames r0;
+
+        r0 := @parameter0: sun.security.x509.GeneralNames;
+
+        $z0 = virtualinvoke r0.<sun.security.x509.GeneralNames: boolean isEmpty()>();
+
+        if $z0 == 0 goto label01;
+
+        $r25 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+        return $r25;
+
+     label01:
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        $r2 = virtualinvoke r0.<sun.security.x509.GeneralNames: java.util.List names()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label02:
+        $z1 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label17;
+
+        $r5 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (sun.security.x509.GeneralName) $r5;
+
+        $r7 = virtualinvoke r6.<sun.security.x509.GeneralName: sun.security.x509.GeneralNameInterface getName()>();
+
+        $r8 = new java.util.ArrayList;
+
+        specialinvoke $r8.<java.util.ArrayList: void <init>(int)>(2);
+
+        $i0 = interfaceinvoke $r7.<sun.security.x509.GeneralNameInterface: int getType()>();
+
+        $r9 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        interfaceinvoke $r8.<java.util.List: boolean add(java.lang.Object)>($r9);
+
+        $i1 = interfaceinvoke $r7.<sun.security.x509.GeneralNameInterface: int getType()>();
+
+        tableswitch($i1)
+        {
+            case 1: goto label03;
+            case 2: goto label04;
+            case 3: goto label11;
+            case 4: goto label05;
+            case 5: goto label11;
+            case 6: goto label06;
+            case 7: goto label07;
+            case 8: goto label10;
+            default: goto label11;
+        };
+
+     label03:
+        $r21 = (sun.security.x509.RFC822Name) $r7;
+
+        $r22 = virtualinvoke $r21.<sun.security.x509.RFC822Name: java.lang.String getName()>();
+
+        interfaceinvoke $r8.<java.util.List: boolean add(java.lang.Object)>($r22);
+
+        goto label16;
+
+     label04:
+        $r19 = (sun.security.x509.DNSName) $r7;
+
+        $r20 = virtualinvoke $r19.<sun.security.x509.DNSName: java.lang.String getName()>();
+
+        interfaceinvoke $r8.<java.util.List: boolean add(java.lang.Object)>($r20);
+
+        goto label16;
+
+     label05:
+        $r17 = (sun.security.x509.X500Name) $r7;
+
+        $r18 = virtualinvoke $r17.<sun.security.x509.X500Name: java.lang.String getRFC2253Name()>();
+
+        interfaceinvoke $r8.<java.util.List: boolean add(java.lang.Object)>($r18);
+
+        goto label16;
+
+     label06:
+        $r15 = (sun.security.x509.URIName) $r7;
+
+        $r16 = virtualinvoke $r15.<sun.security.x509.URIName: java.lang.String getName()>();
+
+        interfaceinvoke $r8.<java.util.List: boolean add(java.lang.Object)>($r16);
+
+        goto label16;
+
+     label07:
+        $r13 = (sun.security.x509.IPAddressName) $r7;
+
+        $r14 = virtualinvoke $r13.<sun.security.x509.IPAddressName: java.lang.String getName()>();
+
+        interfaceinvoke $r8.<java.util.List: boolean add(java.lang.Object)>($r14);
+
+     label08:
+        goto label16;
+
+     label09:
+        $r28 := @caughtexception;
+
+        $r29 = new java.lang.RuntimeException;
+
+        specialinvoke $r29.<java.lang.RuntimeException: void <init>(java.lang.String,java.lang.Throwable)>("IPAddress cannot be parsed", $r28);
+
+        throw $r29;
+
+     label10:
+        $r10 = (sun.security.x509.OIDName) $r7;
+
+        $r11 = virtualinvoke $r10.<sun.security.x509.OIDName: sun.security.util.ObjectIdentifier getOID()>();
+
+        $r12 = virtualinvoke $r11.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        interfaceinvoke $r8.<java.util.List: boolean add(java.lang.Object)>($r12);
+
+        goto label16;
+
+     label11:
+        $r23 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r23.<sun.security.util.DerOutputStream: void <init>()>();
+
+     label12:
+        interfaceinvoke $r7.<sun.security.x509.GeneralNameInterface: void encode(sun.security.util.DerOutputStream)>($r23);
+
+     label13:
+        goto label15;
+
+     label14:
+        $r26 := @caughtexception;
+
+        $r27 = new java.lang.RuntimeException;
+
+        specialinvoke $r27.<java.lang.RuntimeException: void <init>(java.lang.String,java.lang.Throwable)>("name cannot be encoded", $r26);
+
+        throw $r27;
+
+     label15:
+        $r24 = virtualinvoke $r23.<sun.security.util.DerOutputStream: byte[] toByteArray()>();
+
+        interfaceinvoke $r8.<java.util.List: boolean add(java.lang.Object)>($r24);
+
+     label16:
+        $r30 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r8);
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>($r30);
+
+        goto label02;
+
+     label17:
+        $r4 = staticinvoke <java.util.Collections: java.util.Collection unmodifiableCollection(java.util.Collection)>($r1);
+
+        return $r4;
+
+        catch java.io.IOException from label07 to label08 with label09;
+        catch java.io.IOException from label12 to label13 with label14;
+    }
+
+    private static java.util.Collection cloneAltNames(java.util.Collection)
+    {
+        byte[] $r9, $r10;
+        java.util.ArrayList $r2, $r8;
+        boolean $z0, $z1, $z2, $z3, z4;
+        java.util.Iterator $r1, $r3;
+        java.util.Collection r0, $r4;
+        java.util.List r6, $r12, r15;
+        java.lang.Object $r5, $r7, $r11, $r13, $r14;
+
+        r0 := @parameter0: java.util.Collection;
+
+        z4 = 0;
+
+        $r1 = interfaceinvoke r0.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r13 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        r15 = (java.util.List) $r13;
+
+        $r14 = interfaceinvoke r15.<java.util.List: java.lang.Object get(int)>(1);
+
+        $z3 = $r14 instanceof byte[];
+
+        if $z3 == 0 goto label2;
+
+        z4 = 1;
+
+     label2:
+        goto label1;
+
+     label3:
+        if z4 == 0 goto label8;
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        $r3 = interfaceinvoke r0.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label4:
+        $z1 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label7;
+
+        $r5 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (java.util.List) $r5;
+
+        $r7 = interfaceinvoke r6.<java.util.List: java.lang.Object get(int)>(1);
+
+        $z2 = $r7 instanceof byte[];
+
+        if $z2 == 0 goto label5;
+
+        $r8 = new java.util.ArrayList;
+
+        specialinvoke $r8.<java.util.ArrayList: void <init>(java.util.Collection)>(r6);
+
+        $r9 = (byte[]) $r7;
+
+        $r10 = (byte[]) $r9;
+
+        $r11 = virtualinvoke $r10.<java.lang.Object: java.lang.Object clone()>();
+
+        interfaceinvoke $r8.<java.util.List: java.lang.Object set(int,java.lang.Object)>(1, $r11);
+
+        $r12 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r8);
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>($r12);
+
+        goto label6;
+
+     label5:
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>(r6);
+
+     label6:
+        goto label4;
+
+     label7:
+        $r4 = staticinvoke <java.util.Collections: java.util.Collection unmodifiableCollection(java.util.Collection)>($r2);
+
+        return $r4;
+
+     label8:
+        return r0;
+    }
+
+    public synchronized java.util.Collection getSubjectAlternativeNames() throws java.security.cert.CertificateParsingException
+    {
+        sun.security.x509.SubjectAlternativeNameExtension $r1;
+        java.util.Collection $r3, $r4, $r5, $r6, $r7;
+        java.util.Set $r9;
+        java.io.IOException $r8;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.GeneralNames $r2;
+        boolean $z0;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $z0 = r0.<sun.security.x509.X509CertImpl: boolean readOnly>;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = r0.<sun.security.x509.X509CertImpl: java.util.Collection subjectAlternativeNames>;
+
+        if $r5 == null goto label1;
+
+        $r6 = r0.<sun.security.x509.X509CertImpl: java.util.Collection subjectAlternativeNames>;
+
+        $r7 = staticinvoke <sun.security.x509.X509CertImpl: java.util.Collection cloneAltNames(java.util.Collection)>($r6);
+
+        return $r7;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.security.x509.X509CertImpl: sun.security.x509.SubjectAlternativeNameExtension getSubjectAlternativeNameExtension()>();
+
+        if $r1 != null goto label2;
+
+        return null;
+
+     label2:
+        $r2 = virtualinvoke $r1.<sun.security.x509.SubjectAlternativeNameExtension: sun.security.x509.GeneralNames get(java.lang.String)>("subject_name");
+
+     label3:
+        goto label5;
+
+     label4:
+        $r8 := @caughtexception;
+
+        $r9 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+        return $r9;
+
+     label5:
+        $r3 = staticinvoke <sun.security.x509.X509CertImpl: java.util.Collection makeAltNames(sun.security.x509.GeneralNames)>($r2);
+
+        r0.<sun.security.x509.X509CertImpl: java.util.Collection subjectAlternativeNames> = $r3;
+
+        $r4 = r0.<sun.security.x509.X509CertImpl: java.util.Collection subjectAlternativeNames>;
+
+        return $r4;
+
+        catch java.io.IOException from label2 to label3 with label4;
+    }
+
+    public static java.util.Collection getSubjectAlternativeNames(java.security.cert.X509Certificate) throws java.security.cert.CertificateParsingException
+    {
+        java.security.cert.X509Certificate r0;
+        sun.security.util.DerValue $r2;
+        byte[] $r1, $r3;
+        sun.security.x509.SubjectAlternativeNameExtension $r4;
+        java.util.Collection $r7;
+        java.security.cert.CertificateParsingException $r9;
+        java.util.Set $r11;
+        java.io.IOException $r8, $r10;
+        java.lang.Boolean $r5;
+        sun.security.x509.GeneralNames $r6;
+
+        r0 := @parameter0: java.security.cert.X509Certificate;
+
+     label01:
+        $r1 = virtualinvoke r0.<java.security.cert.X509Certificate: byte[] getExtensionValue(java.lang.String)>("2.5.29.17");
+
+        if $r1 != null goto label03;
+
+     label02:
+        return null;
+
+     label03:
+        $r2 = new sun.security.util.DerValue;
+
+        specialinvoke $r2.<sun.security.util.DerValue: void <init>(byte[])>($r1);
+
+        $r3 = virtualinvoke $r2.<sun.security.util.DerValue: byte[] getOctetString()>();
+
+        $r4 = new sun.security.x509.SubjectAlternativeNameExtension;
+
+        $r5 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        specialinvoke $r4.<sun.security.x509.SubjectAlternativeNameExtension: void <init>(java.lang.Boolean,java.lang.Object)>($r5, $r3);
+
+     label04:
+        $r6 = virtualinvoke $r4.<sun.security.x509.SubjectAlternativeNameExtension: sun.security.x509.GeneralNames get(java.lang.String)>("subject_name");
+
+     label05:
+        goto label08;
+
+     label06:
+        $r10 := @caughtexception;
+
+        $r11 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+     label07:
+        return $r11;
+
+     label08:
+        $r7 = staticinvoke <sun.security.x509.X509CertImpl: java.util.Collection makeAltNames(sun.security.x509.GeneralNames)>($r6);
+
+     label09:
+        return $r7;
+
+     label10:
+        $r8 := @caughtexception;
+
+        $r9 = new java.security.cert.CertificateParsingException;
+
+        specialinvoke $r9.<java.security.cert.CertificateParsingException: void <init>(java.lang.Throwable)>($r8);
+
+        throw $r9;
+
+        catch java.io.IOException from label04 to label05 with label06;
+        catch java.io.IOException from label01 to label02 with label10;
+        catch java.io.IOException from label03 to label07 with label10;
+        catch java.io.IOException from label08 to label09 with label10;
+    }
+
+    public synchronized java.util.Collection getIssuerAlternativeNames() throws java.security.cert.CertificateParsingException
+    {
+        sun.security.x509.IssuerAlternativeNameExtension $r1;
+        java.util.Collection $r3, $r4, $r5, $r6, $r7;
+        java.util.Set $r9;
+        java.io.IOException $r8;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.GeneralNames $r2;
+        boolean $z0;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $z0 = r0.<sun.security.x509.X509CertImpl: boolean readOnly>;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = r0.<sun.security.x509.X509CertImpl: java.util.Collection issuerAlternativeNames>;
+
+        if $r5 == null goto label1;
+
+        $r6 = r0.<sun.security.x509.X509CertImpl: java.util.Collection issuerAlternativeNames>;
+
+        $r7 = staticinvoke <sun.security.x509.X509CertImpl: java.util.Collection cloneAltNames(java.util.Collection)>($r6);
+
+        return $r7;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.security.x509.X509CertImpl: sun.security.x509.IssuerAlternativeNameExtension getIssuerAlternativeNameExtension()>();
+
+        if $r1 != null goto label2;
+
+        return null;
+
+     label2:
+        $r2 = virtualinvoke $r1.<sun.security.x509.IssuerAlternativeNameExtension: sun.security.x509.GeneralNames get(java.lang.String)>("issuer_name");
+
+     label3:
+        goto label5;
+
+     label4:
+        $r8 := @caughtexception;
+
+        $r9 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+        return $r9;
+
+     label5:
+        $r3 = staticinvoke <sun.security.x509.X509CertImpl: java.util.Collection makeAltNames(sun.security.x509.GeneralNames)>($r2);
+
+        r0.<sun.security.x509.X509CertImpl: java.util.Collection issuerAlternativeNames> = $r3;
+
+        $r4 = r0.<sun.security.x509.X509CertImpl: java.util.Collection issuerAlternativeNames>;
+
+        return $r4;
+
+        catch java.io.IOException from label2 to label3 with label4;
+    }
+
+    public static java.util.Collection getIssuerAlternativeNames(java.security.cert.X509Certificate) throws java.security.cert.CertificateParsingException
+    {
+        java.security.cert.X509Certificate r0;
+        sun.security.util.DerValue $r2;
+        sun.security.x509.IssuerAlternativeNameExtension $r4;
+        byte[] $r1, $r3;
+        java.util.Collection $r7;
+        java.security.cert.CertificateParsingException $r9;
+        java.util.Set $r11;
+        java.io.IOException $r8, $r10;
+        java.lang.Boolean $r5;
+        sun.security.x509.GeneralNames $r6;
+
+        r0 := @parameter0: java.security.cert.X509Certificate;
+
+     label01:
+        $r1 = virtualinvoke r0.<java.security.cert.X509Certificate: byte[] getExtensionValue(java.lang.String)>("2.5.29.18");
+
+        if $r1 != null goto label03;
+
+     label02:
+        return null;
+
+     label03:
+        $r2 = new sun.security.util.DerValue;
+
+        specialinvoke $r2.<sun.security.util.DerValue: void <init>(byte[])>($r1);
+
+        $r3 = virtualinvoke $r2.<sun.security.util.DerValue: byte[] getOctetString()>();
+
+        $r4 = new sun.security.x509.IssuerAlternativeNameExtension;
+
+        $r5 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        specialinvoke $r4.<sun.security.x509.IssuerAlternativeNameExtension: void <init>(java.lang.Boolean,java.lang.Object)>($r5, $r3);
+
+     label04:
+        $r6 = virtualinvoke $r4.<sun.security.x509.IssuerAlternativeNameExtension: sun.security.x509.GeneralNames get(java.lang.String)>("issuer_name");
+
+     label05:
+        goto label08;
+
+     label06:
+        $r10 := @caughtexception;
+
+        $r11 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+     label07:
+        return $r11;
+
+     label08:
+        $r7 = staticinvoke <sun.security.x509.X509CertImpl: java.util.Collection makeAltNames(sun.security.x509.GeneralNames)>($r6);
+
+     label09:
+        return $r7;
+
+     label10:
+        $r8 := @caughtexception;
+
+        $r9 = new java.security.cert.CertificateParsingException;
+
+        specialinvoke $r9.<java.security.cert.CertificateParsingException: void <init>(java.lang.Throwable)>($r8);
+
+        throw $r9;
+
+        catch java.io.IOException from label04 to label05 with label06;
+        catch java.io.IOException from label01 to label02 with label10;
+        catch java.io.IOException from label03 to label07 with label10;
+        catch java.io.IOException from label08 to label09 with label10;
+    }
+
+    public sun.security.x509.AuthorityInfoAccessExtension getAuthorityInfoAccessExtension()
+    {
+        sun.security.util.ObjectIdentifier $r1;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.AuthorityInfoAccessExtension $r3;
+        sun.security.x509.Extension $r2;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        $r1 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier AuthInfoAccess_Id>;
+
+        $r2 = virtualinvoke r0.<sun.security.x509.X509CertImpl: sun.security.x509.Extension getExtension(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = (sun.security.x509.AuthorityInfoAccessExtension) $r2;
+
+        return $r3;
+    }
+
+    private void parse(sun.security.util.DerValue) throws java.security.cert.CertificateException, java.io.IOException
+    {
+        byte[] $r4, $r17;
+        byte $b0, $b2;
+        boolean $z0, $z1;
+        sun.security.util.DerValue r1, $r7, $r9, $r11, $r13, $r14, $r16, $r18, $r20, $r23;
+        sun.security.x509.X509CertImpl r0;
+        java.lang.StringBuilder $r34, $r36, $r41;
+        sun.security.x509.AlgorithmId $r15, r26, $r27;
+        sun.security.x509.X509CertInfo $r24, $r46;
+        sun.security.util.DerInputStream $r2, $r6, $r8, $r10, $r12, $r19, $r21, $r35;
+        java.security.cert.CertificateParsingException $r39, $r40, $r42, $r43, $r44, $r45;
+        sun.security.util.DerValue[] r5;
+        int $i1, $i3, $i4, $i5, $i6, $i7;
+        java.lang.String $r37;
+        java.security.cert.CertificateException $r47;
+        java.lang.Object $r25;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        r1 := @parameter0: sun.security.util.DerValue;
+
+        $z0 = r0.<sun.security.x509.X509CertImpl: boolean readOnly>;
+
+        if $z0 == 0 goto label1;
+
+        $r39 = new java.security.cert.CertificateParsingException;
+
+        specialinvoke $r39.<java.security.cert.CertificateParsingException: void <init>(java.lang.String)>("cannot over-write existing certificate");
+
+        throw $r39;
+
+     label1:
+        $r2 = r1.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        if $r2 == null goto label2;
+
+        $b0 = r1.<sun.security.util.DerValue: byte tag>;
+
+        $i6 = (int) $b0;
+
+        if $i6 == 48 goto label3;
+
+     label2:
+        $r40 = new java.security.cert.CertificateParsingException;
+
+        specialinvoke $r40.<java.security.cert.CertificateParsingException: void <init>(java.lang.String)>("invalid DER-encoded certificate data");
+
+        throw $r40;
+
+     label3:
+        $r4 = virtualinvoke r1.<sun.security.util.DerValue: byte[] toByteArray()>();
+
+        r0.<sun.security.x509.X509CertImpl: byte[] signedCert> = $r4;
+
+        r5 = newarray (sun.security.util.DerValue)[3];
+
+        $r6 = r1.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $r7 = virtualinvoke $r6.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+        r5[0] = $r7;
+
+        $r8 = r1.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $r9 = virtualinvoke $r8.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+        r5[1] = $r9;
+
+        $r10 = r1.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $r11 = virtualinvoke $r10.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+        r5[2] = $r11;
+
+        $r12 = r1.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $i1 = virtualinvoke $r12.<sun.security.util.DerInputStream: int available()>();
+
+        if $i1 == 0 goto label4;
+
+        $r42 = new java.security.cert.CertificateParsingException;
+
+        $r41 = new java.lang.StringBuilder;
+
+        specialinvoke $r41.<java.lang.StringBuilder: void <init>()>();
+
+        $r34 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("signed overrun, bytes = ");
+
+        $r35 = r1.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $i5 = virtualinvoke $r35.<sun.security.util.DerInputStream: int available()>();
+
+        $r36 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r42.<java.security.cert.CertificateParsingException: void <init>(java.lang.String)>($r37);
+
+        throw $r42;
+
+     label4:
+        $r13 = r5[0];
+
+        $b2 = $r13.<sun.security.util.DerValue: byte tag>;
+
+        $i7 = (int) $b2;
+
+        if $i7 == 48 goto label5;
+
+        $r43 = new java.security.cert.CertificateParsingException;
+
+        specialinvoke $r43.<java.security.cert.CertificateParsingException: void <init>(java.lang.String)>("signed fields invalid");
+
+        throw $r43;
+
+     label5:
+        $r14 = r5[1];
+
+        $r15 = staticinvoke <sun.security.x509.AlgorithmId: sun.security.x509.AlgorithmId parse(sun.security.util.DerValue)>($r14);
+
+        r0.<sun.security.x509.X509CertImpl: sun.security.x509.AlgorithmId algId> = $r15;
+
+        $r16 = r5[2];
+
+        $r17 = virtualinvoke $r16.<sun.security.util.DerValue: byte[] getBitString()>();
+
+        r0.<sun.security.x509.X509CertImpl: byte[] signature> = $r17;
+
+        $r18 = r5[1];
+
+        $r19 = $r18.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $i3 = virtualinvoke $r19.<sun.security.util.DerInputStream: int available()>();
+
+        if $i3 == 0 goto label6;
+
+        $r44 = new java.security.cert.CertificateParsingException;
+
+        specialinvoke $r44.<java.security.cert.CertificateParsingException: void <init>(java.lang.String)>("algid field overrun");
+
+        throw $r44;
+
+     label6:
+        $r20 = r5[2];
+
+        $r21 = $r20.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $i4 = virtualinvoke $r21.<sun.security.util.DerInputStream: int available()>();
+
+        if $i4 == 0 goto label7;
+
+        $r45 = new java.security.cert.CertificateParsingException;
+
+        specialinvoke $r45.<java.security.cert.CertificateParsingException: void <init>(java.lang.String)>("signed fields overrun");
+
+        throw $r45;
+
+     label7:
+        $r46 = new sun.security.x509.X509CertInfo;
+
+        $r23 = r5[0];
+
+        specialinvoke $r46.<sun.security.x509.X509CertInfo: void <init>(sun.security.util.DerValue)>($r23);
+
+        r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info> = $r46;
+
+        $r24 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.X509CertInfo info>;
+
+        $r25 = virtualinvoke $r24.<sun.security.x509.X509CertInfo: java.lang.Object get(java.lang.String)>("algorithmID.algorithm");
+
+        r26 = (sun.security.x509.AlgorithmId) $r25;
+
+        $r27 = r0.<sun.security.x509.X509CertImpl: sun.security.x509.AlgorithmId algId>;
+
+        $z1 = virtualinvoke $r27.<sun.security.x509.AlgorithmId: boolean equals(sun.security.x509.AlgorithmId)>(r26);
+
+        if $z1 != 0 goto label8;
+
+        $r47 = new java.security.cert.CertificateException;
+
+        specialinvoke $r47.<java.security.cert.CertificateException: void <init>(java.lang.String)>("Signature algorithm mismatch");
+
+        throw $r47;
+
+     label8:
+        r0.<sun.security.x509.X509CertImpl: boolean readOnly> = 1;
+
+        return;
+    }
+
+    private static javax.security.auth.x500.X500Principal getX500Principal(java.security.cert.X509Certificate, boolean) throws java.lang.Exception
+    {
+        java.security.cert.X509Certificate r0;
+        sun.security.util.DerValue r4, $r6, r9;
+        byte[] $r1, $r7;
+        javax.security.auth.x500.X500Principal $r8;
+        sun.security.util.DerInputStream $r2, r5;
+        sun.security.util.DerValue[] $r3;
+        boolean $z0, z1;
+
+        r0 := @parameter0: java.security.cert.X509Certificate;
+
+        z1 := @parameter1: boolean;
+
+        $r1 = virtualinvoke r0.<java.security.cert.X509Certificate: byte[] getEncoded()>();
+
+        $r2 = new sun.security.util.DerInputStream;
+
+        specialinvoke $r2.<sun.security.util.DerInputStream: void <init>(byte[])>($r1);
+
+        $r3 = virtualinvoke $r2.<sun.security.util.DerInputStream: sun.security.util.DerValue[] getSequence(int)>(3);
+
+        r4 = $r3[0];
+
+        r5 = r4.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $r6 = virtualinvoke r5.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+        $z0 = virtualinvoke $r6.<sun.security.util.DerValue: boolean isContextSpecific(byte)>(0);
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r5.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+     label1:
+        virtualinvoke r5.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+        r9 = virtualinvoke r5.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+        if z1 != 0 goto label2;
+
+        virtualinvoke r5.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+        r9 = virtualinvoke r5.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+     label2:
+        $r7 = virtualinvoke r9.<sun.security.util.DerValue: byte[] toByteArray()>();
+
+        $r8 = new javax.security.auth.x500.X500Principal;
+
+        specialinvoke $r8.<javax.security.auth.x500.X500Principal: void <init>(byte[])>($r7);
+
+        return $r8;
+    }
+
+    public static javax.security.auth.x500.X500Principal getSubjectX500Principal(java.security.cert.X509Certificate)
+    {
+        java.security.cert.X509Certificate r0;
+        javax.security.auth.x500.X500Principal $r1;
+        java.lang.RuntimeException $r3;
+        java.lang.Exception $r2;
+
+        r0 := @parameter0: java.security.cert.X509Certificate;
+
+     label1:
+        $r1 = staticinvoke <sun.security.x509.X509CertImpl: javax.security.auth.x500.X500Principal getX500Principal(java.security.cert.X509Certificate,boolean)>(r0, 0);
+
+     label2:
+        return $r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new java.lang.RuntimeException;
+
+        specialinvoke $r3.<java.lang.RuntimeException: void <init>(java.lang.String,java.lang.Throwable)>("Could not parse subject", $r2);
+
+        throw $r3;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public static javax.security.auth.x500.X500Principal getIssuerX500Principal(java.security.cert.X509Certificate)
+    {
+        java.security.cert.X509Certificate r0;
+        javax.security.auth.x500.X500Principal $r1;
+        java.lang.RuntimeException $r3;
+        java.lang.Exception $r2;
+
+        r0 := @parameter0: java.security.cert.X509Certificate;
+
+     label1:
+        $r1 = staticinvoke <sun.security.x509.X509CertImpl: javax.security.auth.x500.X500Principal getX500Principal(java.security.cert.X509Certificate,boolean)>(r0, 1);
+
+     label2:
+        return $r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new java.lang.RuntimeException;
+
+        specialinvoke $r3.<java.lang.RuntimeException: void <init>(java.lang.String,java.lang.Throwable)>("Could not parse issuer", $r2);
+
+        throw $r3;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public static byte[] getEncodedInternal(java.security.cert.Certificate) throws java.security.cert.CertificateEncodingException
+    {
+        byte[] $r1, $r3;
+        java.security.cert.Certificate r0;
+        sun.security.x509.X509CertImpl $r2;
+        boolean $z0;
+
+        r0 := @parameter0: java.security.cert.Certificate;
+
+        $z0 = r0 instanceof sun.security.x509.X509CertImpl;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = (sun.security.x509.X509CertImpl) r0;
+
+        $r3 = virtualinvoke $r2.<sun.security.x509.X509CertImpl: byte[] getEncodedInternal()>();
+
+        return $r3;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.security.cert.Certificate: byte[] getEncoded()>();
+
+        return $r1;
+    }
+
+    public static sun.security.x509.X509CertImpl toImpl(java.security.cert.X509Certificate) throws java.security.cert.CertificateException
+    {
+        java.security.cert.X509Certificate r0;
+        sun.security.x509.X509CertImpl $r1, $r2;
+        boolean $z0;
+
+        r0 := @parameter0: java.security.cert.X509Certificate;
+
+        $z0 = r0 instanceof sun.security.x509.X509CertImpl;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = (sun.security.x509.X509CertImpl) r0;
+
+        return $r2;
+
+     label1:
+        $r1 = staticinvoke <sun.security.provider.X509Factory: sun.security.x509.X509CertImpl intern(java.security.cert.X509Certificate)>(r0);
+
+        return $r1;
+    }
+
+    public static boolean isSelfIssued(java.security.cert.X509Certificate)
+    {
+        java.security.cert.X509Certificate r0;
+        javax.security.auth.x500.X500Principal $r1, $r2;
+        boolean $z0;
+
+        r0 := @parameter0: java.security.cert.X509Certificate;
+
+        $r1 = virtualinvoke r0.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        $r2 = virtualinvoke r0.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getIssuerX500Principal()>();
+
+        $z0 = virtualinvoke $r1.<javax.security.auth.x500.X500Principal: boolean equals(java.lang.Object)>($r2);
+
+        return $z0;
+    }
+
+    public static boolean isSelfSigned(java.security.cert.X509Certificate, java.lang.String)
+    {
+        java.security.cert.X509Certificate r0;
+        java.security.PublicKey $r2, $r3;
+        java.lang.String r1;
+        java.lang.Exception $r4;
+        boolean $z0;
+
+        r0 := @parameter0: java.security.cert.X509Certificate;
+
+        r1 := @parameter1: java.lang.String;
+
+        $z0 = staticinvoke <sun.security.x509.X509CertImpl: boolean isSelfIssued(java.security.cert.X509Certificate)>(r0);
+
+        if $z0 == 0 goto label5;
+
+     label1:
+        if r1 != null goto label2;
+
+        $r3 = virtualinvoke r0.<java.security.cert.X509Certificate: java.security.PublicKey getPublicKey()>();
+
+        virtualinvoke r0.<java.security.cert.X509Certificate: void verify(java.security.PublicKey)>($r3);
+
+        goto label3;
+
+     label2:
+        $r2 = virtualinvoke r0.<java.security.cert.X509Certificate: java.security.PublicKey getPublicKey()>();
+
+        virtualinvoke r0.<java.security.cert.X509Certificate: void verify(java.security.PublicKey,java.lang.String)>($r2, r1);
+
+     label3:
+        return 1;
+
+     label4:
+        $r4 := @caughtexception;
+
+     label5:
+        return 0;
+
+        catch java.lang.Exception from label1 to label3 with label4;
+    }
+
+    public java.lang.String getFingerprint(java.lang.String)
+    {
+        java.util.concurrent.ConcurrentHashMap $r2;
+        java.lang.Object $r4;
+        java.lang.String r1, $r5;
+        sun.security.x509.X509CertImpl r0;
+        java.util.function.Function $r3;
+
+        r0 := @this: sun.security.x509.X509CertImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<sun.security.x509.X509CertImpl: java.util.concurrent.ConcurrentHashMap fingerprints>;
+
+        $r3 = staticinvoke <sun.security.x509.X509CertImpl$lambda_getFingerprint_0__427: java.util.function.Function bootstrap$(sun.security.x509.X509CertImpl)>(r0);
+
+        $r4 = virtualinvoke $r2.<java.util.concurrent.ConcurrentHashMap: java.lang.Object computeIfAbsent(java.lang.Object,java.util.function.Function)>(r1, $r3);
+
+        $r5 = (java.lang.String) $r4;
+
+        return $r5;
+    }
+
+    public static java.lang.String getFingerprint(java.lang.String, java.security.cert.X509Certificate)
+    {
+        java.security.cert.X509Certificate r0;
+        byte[] $r1, $r4;
+        java.security.MessageDigest $r3;
+        java.security.GeneralSecurityException $r6;
+        byte $b1;
+        java.lang.StringBuffer $r5;
+        int $i0, i2;
+        java.lang.String r2, r7;
+
+        r2 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.security.cert.X509Certificate;
+
+        r7 = "";
+
+     label1:
+        $r1 = virtualinvoke r0.<java.security.cert.X509Certificate: byte[] getEncoded()>();
+
+        $r3 = staticinvoke <java.security.MessageDigest: java.security.MessageDigest getInstance(java.lang.String)>(r2);
+
+        $r4 = virtualinvoke $r3.<java.security.MessageDigest: byte[] digest(byte[])>($r1);
+
+        $r5 = new java.lang.StringBuffer;
+
+        specialinvoke $r5.<java.lang.StringBuffer: void <init>()>();
+
+        i2 = 0;
+
+     label2:
+        $i0 = lengthof $r4;
+
+        if i2 >= $i0 goto label3;
+
+        $b1 = $r4[i2];
+
+        staticinvoke <sun.security.x509.X509CertImpl: void byte2hex(byte,java.lang.StringBuffer)>($b1, $r5);
+
+        i2 = i2 + 1;
+
+        goto label2;
+
+     label3:
+        r7 = virtualinvoke $r5.<java.lang.StringBuffer: java.lang.String toString()>();
+
+     label4:
+        goto label6;
+
+     label5:
+        $r6 := @caughtexception;
+
+     label6:
+        return r7;
+
+        catch java.security.NoSuchAlgorithmException from label1 to label4 with label5;
+        catch java.security.cert.CertificateEncodingException from label1 to label4 with label5;
+    }
+
+    private static void byte2hex(byte, java.lang.StringBuffer)
+    {
+        char $c4, $c5;
+        short $s1, $s6;
+        byte b0, b3;
+        java.lang.StringBuffer r1;
+        int i2, $i7, $i8;
+        char[] $r0;
+
+        b0 := @parameter0: byte;
+
+        r1 := @parameter1: java.lang.StringBuffer;
+
+        $r0 = newarray (char)[16];
+
+        $r0[0] = 48;
+
+        $r0[1] = 49;
+
+        $r0[2] = 50;
+
+        $r0[3] = 51;
+
+        $r0[4] = 52;
+
+        $r0[5] = 53;
+
+        $r0[6] = 54;
+
+        $r0[7] = 55;
+
+        $r0[8] = 56;
+
+        $r0[9] = 57;
+
+        $r0[10] = 65;
+
+        $r0[11] = 66;
+
+        $r0[12] = 67;
+
+        $r0[13] = 68;
+
+        $r0[14] = 69;
+
+        $r0[15] = 70;
+
+        $s6 = (short) b0;
+
+        $s1 = $s6 & 240;
+
+        $i7 = (int) $s1;
+
+        i2 = $i7 >> 4;
+
+        b3 = b0 & 15;
+
+        $c4 = $r0[i2];
+
+        virtualinvoke r1.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c4);
+
+        $i8 = (int) b3;
+
+        $c5 = $r0[$i8];
+
+        virtualinvoke r1.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c5);
+
+        return;
+    }
+
+    public java.lang.String lambda$getFingerprint$0(java.lang.String)
+    {
+        java.lang.String r0, $r2;
+        sun.security.x509.X509CertImpl r1;
+
+        r1 := @this: sun.security.x509.X509CertImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r2 = staticinvoke <sun.security.x509.X509CertImpl: java.lang.String getFingerprint(java.lang.String,java.security.cert.X509Certificate)>(r0, r1);
+
+        return $r2;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.security.x509.X509CertImpl: int NUM_STANDARD_KEY_USAGE> = 9;
+
+        <sun.security.x509.X509CertImpl: java.lang.String AUTH_INFO_ACCESS_OID> = "1.3.6.1.5.5.7.1.1";
+
+        <sun.security.x509.X509CertImpl: java.lang.String ISSUER_ALT_NAME_OID> = "2.5.29.18";
+
+        <sun.security.x509.X509CertImpl: java.lang.String SUBJECT_ALT_NAME_OID> = "2.5.29.17";
+
+        <sun.security.x509.X509CertImpl: java.lang.String BASIC_CONSTRAINT_OID> = "2.5.29.19";
+
+        <sun.security.x509.X509CertImpl: java.lang.String EXTENDED_KEY_USAGE_OID> = "2.5.29.37";
+
+        <sun.security.x509.X509CertImpl: java.lang.String KEY_USAGE_OID> = "2.5.29.15";
+
+        <sun.security.x509.X509CertImpl: java.lang.String SIG> = "x509.signature";
+
+        <sun.security.x509.X509CertImpl: java.lang.String SIG_ALG> = "x509.algorithm";
+
+        <sun.security.x509.X509CertImpl: java.lang.String VERSION> = "x509.info.version.number";
+
+        <sun.security.x509.X509CertImpl: java.lang.String PUBLIC_KEY> = "x509.info.key.value";
+
+        <sun.security.x509.X509CertImpl: java.lang.String SERIAL_ID> = "x509.info.serialNumber.number";
+
+        <sun.security.x509.X509CertImpl: java.lang.String ISSUER_DN> = "x509.info.issuer.dname";
+
+        <sun.security.x509.X509CertImpl: java.lang.String SUBJECT_DN> = "x509.info.subject.dname";
+
+        <sun.security.x509.X509CertImpl: java.lang.String SIGNED_CERT> = "signed_cert";
+
+        <sun.security.x509.X509CertImpl: java.lang.String SIGNATURE> = "signature";
+
+        <sun.security.x509.X509CertImpl: java.lang.String ALG_ID> = "algorithm";
+
+        <sun.security.x509.X509CertImpl: java.lang.String INFO> = "info";
+
+        <sun.security.x509.X509CertImpl: java.lang.String NAME> = "x509";
+
+        <sun.security.x509.X509CertImpl: java.lang.String DOT> = ".";
+
+        <sun.security.x509.X509CertImpl: long serialVersionUID> = -3457612960190864406L;
+
+        return;
+    }
+}

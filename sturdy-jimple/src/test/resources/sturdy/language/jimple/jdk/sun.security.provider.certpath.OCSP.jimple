@@ -1,0 +1,631 @@
+public final class sun.security.provider.certpath.OCSP extends java.lang.Object
+{
+    private static final sun.security.util.Debug debug;
+    private static final int DEFAULT_CONNECT_TIMEOUT;
+    private static final int CONNECT_TIMEOUT;
+
+    private static int initializeTimeout()
+    {
+        sun.security.action.GetIntegerAction $r0;
+        int $i0, $i1, $i2;
+        java.lang.Object $r1;
+        java.lang.Integer r2;
+
+        $r0 = new sun.security.action.GetIntegerAction;
+
+        specialinvoke $r0.<sun.security.action.GetIntegerAction: void <init>(java.lang.String)>("com.sun.security.ocsp.timeout");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r2 = (java.lang.Integer) $r1;
+
+        if r2 == null goto label1;
+
+        $i0 = virtualinvoke r2.<java.lang.Integer: int intValue()>();
+
+        if $i0 >= 0 goto label2;
+
+     label1:
+        return 15000;
+
+     label2:
+        $i1 = virtualinvoke r2.<java.lang.Integer: int intValue()>();
+
+        $i2 = $i1 * 1000;
+
+        return $i2;
+    }
+
+    private void <init>()
+    {
+        sun.security.provider.certpath.OCSP r0;
+
+        r0 := @this: sun.security.provider.certpath.OCSP;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static sun.security.provider.certpath.OCSP$RevocationStatus check(java.security.cert.X509Certificate, java.security.cert.X509Certificate, java.net.URI, java.security.cert.X509Certificate, java.util.Date) throws java.io.IOException, java.security.cert.CertPathValidatorException
+    {
+        java.security.cert.X509Certificate r0, r1, r3;
+        java.util.List $r5;
+        java.util.Date r4;
+        sun.security.provider.certpath.OCSP$RevocationStatus $r6;
+        java.net.URI r2;
+
+        r0 := @parameter0: java.security.cert.X509Certificate;
+
+        r1 := @parameter1: java.security.cert.X509Certificate;
+
+        r2 := @parameter2: java.net.URI;
+
+        r3 := @parameter3: java.security.cert.X509Certificate;
+
+        r4 := @parameter4: java.util.Date;
+
+        $r5 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+        $r6 = staticinvoke <sun.security.provider.certpath.OCSP: sun.security.provider.certpath.OCSP$RevocationStatus check(java.security.cert.X509Certificate,java.security.cert.X509Certificate,java.net.URI,java.security.cert.X509Certificate,java.util.Date,java.util.List,java.lang.String)>(r0, r1, r2, r3, r4, $r5, "plugin code signing");
+
+        return $r6;
+    }
+
+    public static sun.security.provider.certpath.OCSP$RevocationStatus check(java.security.cert.X509Certificate, java.security.cert.X509Certificate, java.net.URI, java.security.cert.X509Certificate, java.util.Date, java.util.List, java.lang.String) throws java.io.IOException, java.security.cert.CertPathValidatorException
+    {
+        java.security.cert.X509Certificate r0, r2, r3;
+        java.util.Date r4;
+        sun.security.provider.certpath.OCSP$RevocationStatus $r7;
+        java.util.List r5;
+        java.net.URI r1;
+        java.lang.String r6;
+
+        r0 := @parameter0: java.security.cert.X509Certificate;
+
+        r2 := @parameter1: java.security.cert.X509Certificate;
+
+        r1 := @parameter2: java.net.URI;
+
+        r3 := @parameter3: java.security.cert.X509Certificate;
+
+        r4 := @parameter4: java.util.Date;
+
+        r5 := @parameter5: java.util.List;
+
+        r6 := @parameter6: java.lang.String;
+
+        $r7 = staticinvoke <sun.security.provider.certpath.OCSP: sun.security.provider.certpath.OCSP$RevocationStatus check(java.security.cert.X509Certificate,java.net.URI,java.security.cert.TrustAnchor,java.security.cert.X509Certificate,java.security.cert.X509Certificate,java.util.Date,java.util.List,java.lang.String)>(r0, r1, null, r2, r3, r4, r5, r6);
+
+        return $r7;
+    }
+
+    public static sun.security.provider.certpath.OCSP$RevocationStatus check(java.security.cert.X509Certificate, java.net.URI, java.security.cert.TrustAnchor, java.security.cert.X509Certificate, java.security.cert.X509Certificate, java.util.Date, java.util.List, java.lang.String) throws java.io.IOException, java.security.cert.CertPathValidatorException
+    {
+        java.security.cert.X509Certificate r0, r3, r9;
+        sun.security.provider.certpath.CertId $r2;
+        java.util.Date r10;
+        sun.security.provider.certpath.OCSPResponse$IssuerInfo $r7;
+        sun.security.provider.certpath.OCSPResponse$SingleResponse $r14;
+        java.net.URI r6;
+        java.lang.String r12;
+        java.security.cert.CertPathValidatorException $r16;
+        sun.security.x509.X509CertImpl $r1;
+        sun.security.provider.certpath.OCSPResponse $r13;
+        java.lang.Exception $r15;
+        sun.security.x509.SerialNumber $r4;
+        java.util.List $r5, r11;
+        java.security.cert.TrustAnchor r8;
+
+        r0 := @parameter0: java.security.cert.X509Certificate;
+
+        r6 := @parameter1: java.net.URI;
+
+        r8 := @parameter2: java.security.cert.TrustAnchor;
+
+        r3 := @parameter3: java.security.cert.X509Certificate;
+
+        r9 := @parameter4: java.security.cert.X509Certificate;
+
+        r10 := @parameter5: java.util.Date;
+
+        r11 := @parameter6: java.util.List;
+
+        r12 := @parameter7: java.lang.String;
+
+     label1:
+        $r1 = staticinvoke <sun.security.x509.X509CertImpl: sun.security.x509.X509CertImpl toImpl(java.security.cert.X509Certificate)>(r0);
+
+        $r2 = new sun.security.provider.certpath.CertId;
+
+        $r4 = virtualinvoke $r1.<sun.security.x509.X509CertImpl: sun.security.x509.SerialNumber getSerialNumberObject()>();
+
+        specialinvoke $r2.<sun.security.provider.certpath.CertId: void <init>(java.security.cert.X509Certificate,sun.security.x509.SerialNumber)>(r3, $r4);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r15 := @caughtexception;
+
+        $r16 = new java.security.cert.CertPathValidatorException;
+
+        specialinvoke $r16.<java.security.cert.CertPathValidatorException: void <init>(java.lang.String,java.lang.Throwable)>("Exception while encoding OCSPRequest", $r15);
+
+        throw $r16;
+
+     label4:
+        $r5 = staticinvoke <java.util.Collections: java.util.List singletonList(java.lang.Object)>($r2);
+
+        $r7 = new sun.security.provider.certpath.OCSPResponse$IssuerInfo;
+
+        specialinvoke $r7.<sun.security.provider.certpath.OCSPResponse$IssuerInfo: void <init>(java.security.cert.TrustAnchor,java.security.cert.X509Certificate)>(r8, r3);
+
+        $r13 = staticinvoke <sun.security.provider.certpath.OCSP: sun.security.provider.certpath.OCSPResponse check(java.util.List,java.net.URI,sun.security.provider.certpath.OCSPResponse$IssuerInfo,java.security.cert.X509Certificate,java.util.Date,java.util.List,java.lang.String)>($r5, r6, $r7, r9, r10, r11, r12);
+
+        $r14 = virtualinvoke $r13.<sun.security.provider.certpath.OCSPResponse: sun.security.provider.certpath.OCSPResponse$SingleResponse getSingleResponse(sun.security.provider.certpath.CertId)>($r2);
+
+        return $r14;
+
+        catch java.security.cert.CertificateException from label1 to label2 with label3;
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    static sun.security.provider.certpath.OCSPResponse check(java.util.List, java.net.URI, sun.security.provider.certpath.OCSPResponse$IssuerInfo, java.security.cert.X509Certificate, java.util.Date, java.util.List, java.lang.String) throws java.io.IOException, java.security.cert.CertPathValidatorException
+    {
+        java.security.cert.X509Certificate r7;
+        byte[] $r4, r17;
+        java.util.Date r8;
+        sun.security.provider.certpath.OCSPResponse$IssuerInfo r6;
+        int $i1;
+        sun.security.util.ObjectIdentifier $r12;
+        java.net.URI r3;
+        java.lang.String r9, $r11, $r13;
+        java.security.cert.CertPathValidatorException $r20;
+        boolean $z0, $z1;
+        java.security.cert.CertPathValidatorException$BasicReason $r16;
+        java.util.Iterator $r1;
+        java.io.IOException $r14;
+        sun.security.provider.certpath.OCSPResponse $r19;
+        java.util.List r0, r2;
+        java.security.cert.Extension r18;
+        java.lang.Object $r10;
+
+        r2 := @parameter0: java.util.List;
+
+        r3 := @parameter1: java.net.URI;
+
+        r6 := @parameter2: sun.security.provider.certpath.OCSPResponse$IssuerInfo;
+
+        r7 := @parameter3: java.security.cert.X509Certificate;
+
+        r8 := @parameter4: java.util.Date;
+
+        r0 := @parameter5: java.util.List;
+
+        r9 := @parameter6: java.lang.String;
+
+        r17 = null;
+
+        $r1 = interfaceinvoke r0.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r10 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        r18 = (java.security.cert.Extension) $r10;
+
+        $r11 = interfaceinvoke r18.<java.security.cert.Extension: java.lang.String getId()>();
+
+        $r12 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier OCSPNonce_Id>;
+
+        $r13 = virtualinvoke $r12.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        $z1 = virtualinvoke $r11.<java.lang.String: boolean equals(java.lang.Object)>($r13);
+
+        if $z1 == 0 goto label2;
+
+        r17 = interfaceinvoke r18.<java.security.cert.Extension: byte[] getValue()>();
+
+     label2:
+        goto label1;
+
+     label3:
+        $r4 = staticinvoke <sun.security.provider.certpath.OCSP: byte[] getOCSPBytes(java.util.List,java.net.URI,java.util.List)>(r2, r3, r0);
+
+        $r19 = new sun.security.provider.certpath.OCSPResponse;
+
+        specialinvoke $r19.<sun.security.provider.certpath.OCSPResponse: void <init>(byte[])>($r4);
+
+        virtualinvoke $r19.<sun.security.provider.certpath.OCSPResponse: void verify(java.util.List,sun.security.provider.certpath.OCSPResponse$IssuerInfo,java.security.cert.X509Certificate,java.util.Date,byte[],java.lang.String)>(r2, r6, r7, r8, r17, r9);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r14 := @caughtexception;
+
+        $r20 = new java.security.cert.CertPathValidatorException;
+
+        $r16 = <java.security.cert.CertPathValidatorException$BasicReason: java.security.cert.CertPathValidatorException$BasicReason UNDETERMINED_REVOCATION_STATUS>;
+
+        $i1 = (int) -1;
+
+        specialinvoke $r20.<java.security.cert.CertPathValidatorException: void <init>(java.lang.String,java.lang.Throwable,java.security.cert.CertPath,int,java.security.cert.CertPathValidatorException$Reason)>("Unable to determine revocation status due to network error", $r14, null, $i1, $r16);
+
+        throw $r20;
+
+     label6:
+        return $r19;
+
+        catch java.io.IOException from label3 to label4 with label5;
+    }
+
+    public static byte[] getOCSPBytes(java.util.List, java.net.URI, java.util.List) throws java.io.IOException
+    {
+        java.net.HttpURLConnection $r25;
+        byte[] $r3, $r11, r34;
+        java.net.URL $r5;
+        java.net.URI r4;
+        sun.security.util.Debug $r6, $r10, $r13, $r21;
+        java.util.List r1, r2;
+        java.lang.StringBuilder $r14, $r15, $r16, $r18, $r22, $r23, $r36, $r37;
+        sun.security.provider.certpath.OCSPRequest $r35;
+        java.lang.Throwable $r28;
+        java.net.URLConnection $r7;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, i11, $i12, i13, $i15;
+        java.lang.String $r8, $r17, $r19, $r24;
+        java.io.OutputStream $r9, r32;
+        java.io.IOException $r26, $r27, $r29, $r30;
+        java.io.InputStream r31, $r33;
+
+        r1 := @parameter0: java.util.List;
+
+        r4 := @parameter1: java.net.URI;
+
+        r2 := @parameter2: java.util.List;
+
+        $r35 = new sun.security.provider.certpath.OCSPRequest;
+
+        specialinvoke $r35.<sun.security.provider.certpath.OCSPRequest: void <init>(java.util.List,java.util.List)>(r1, r2);
+
+        $r3 = virtualinvoke $r35.<sun.security.provider.certpath.OCSPRequest: byte[] encodeBytes()>();
+
+        r31 = null;
+
+        r32 = null;
+
+     label01:
+        $r5 = virtualinvoke r4.<java.net.URI: java.net.URL toURL()>();
+
+        $r6 = <sun.security.provider.certpath.OCSP: sun.security.util.Debug debug>;
+
+        if $r6 == null goto label02;
+
+        $r21 = <sun.security.provider.certpath.OCSP: sun.security.util.Debug debug>;
+
+        $r36 = new java.lang.StringBuilder;
+
+        specialinvoke $r36.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("connecting to OCSP service at: ");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r5);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r21.<sun.security.util.Debug: void println(java.lang.String)>($r24);
+
+     label02:
+        $r7 = virtualinvoke $r5.<java.net.URL: java.net.URLConnection openConnection()>();
+
+        $r25 = (java.net.HttpURLConnection) $r7;
+
+        $i0 = <sun.security.provider.certpath.OCSP: int CONNECT_TIMEOUT>;
+
+        virtualinvoke $r25.<java.net.HttpURLConnection: void setConnectTimeout(int)>($i0);
+
+        $i1 = <sun.security.provider.certpath.OCSP: int CONNECT_TIMEOUT>;
+
+        virtualinvoke $r25.<java.net.HttpURLConnection: void setReadTimeout(int)>($i1);
+
+        virtualinvoke $r25.<java.net.HttpURLConnection: void setDoOutput(boolean)>(1);
+
+        virtualinvoke $r25.<java.net.HttpURLConnection: void setDoInput(boolean)>(1);
+
+        virtualinvoke $r25.<java.net.HttpURLConnection: void setRequestMethod(java.lang.String)>("POST");
+
+        virtualinvoke $r25.<java.net.HttpURLConnection: void setRequestProperty(java.lang.String,java.lang.String)>("Content-type", "application/ocsp-request");
+
+        $i2 = lengthof $r3;
+
+        $r8 = staticinvoke <java.lang.String: java.lang.String valueOf(int)>($i2);
+
+        virtualinvoke $r25.<java.net.HttpURLConnection: void setRequestProperty(java.lang.String,java.lang.String)>("Content-length", $r8);
+
+        $r9 = virtualinvoke $r25.<java.net.HttpURLConnection: java.io.OutputStream getOutputStream()>();
+
+        r32 = $r9;
+
+        virtualinvoke $r9.<java.io.OutputStream: void write(byte[])>($r3);
+
+        virtualinvoke $r9.<java.io.OutputStream: void flush()>();
+
+        $r10 = <sun.security.provider.certpath.OCSP: sun.security.util.Debug debug>;
+
+        if $r10 == null goto label03;
+
+        $i8 = virtualinvoke $r25.<java.net.HttpURLConnection: int getResponseCode()>();
+
+        if $i8 == 200 goto label03;
+
+        $r13 = <sun.security.provider.certpath.OCSP: sun.security.util.Debug debug>;
+
+        $r37 = new java.lang.StringBuilder;
+
+        specialinvoke $r37.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Received HTTP error: ");
+
+        $i9 = virtualinvoke $r25.<java.net.HttpURLConnection: int getResponseCode()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i9);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" - ");
+
+        $r17 = virtualinvoke $r25.<java.net.HttpURLConnection: java.lang.String getResponseMessage()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r13.<sun.security.util.Debug: void println(java.lang.String)>($r19);
+
+     label03:
+        $r33 = virtualinvoke $r25.<java.net.HttpURLConnection: java.io.InputStream getInputStream()>();
+
+        r31 = $r33;
+
+        $i10 = virtualinvoke $r25.<java.net.HttpURLConnection: int getContentLength()>();
+
+        i11 = $i10;
+
+        $i15 = (int) -1;
+
+        if $i10 != $i15 goto label04;
+
+        i11 = 2147483647;
+
+     label04:
+        if i11 <= 2048 goto label05;
+
+        $i12 = 2048;
+
+        goto label06;
+
+     label05:
+        $i12 = i11;
+
+     label06:
+        r34 = newarray (byte)[$i12];
+
+        i13 = 0;
+
+     label07:
+        if i13 >= i11 goto label10;
+
+        $i3 = lengthof r34;
+
+        $i4 = $i3 - i13;
+
+        $i5 = virtualinvoke $r33.<java.io.InputStream: int read(byte[],int,int)>(r34, i13, $i4);
+
+        if $i5 >= 0 goto label08;
+
+        goto label10;
+
+     label08:
+        i13 = i13 + $i5;
+
+        $i6 = lengthof r34;
+
+        if i13 < $i6 goto label09;
+
+        if i13 >= i11 goto label09;
+
+        $i7 = i13 * 2;
+
+        r34 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>(r34, $i7);
+
+     label09:
+        goto label07;
+
+     label10:
+        $r11 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>(r34, i13);
+
+     label11:
+        if $r33 == null goto label15;
+
+     label12:
+        virtualinvoke $r33.<java.io.InputStream: void close()>();
+
+     label13:
+        goto label15;
+
+     label14:
+        $r30 := @caughtexception;
+
+        throw $r30;
+
+     label15:
+        if $r9 == null goto label29;
+
+     label16:
+        virtualinvoke $r9.<java.io.OutputStream: void close()>();
+
+     label17:
+        goto label29;
+
+     label18:
+        $r29 := @caughtexception;
+
+        throw $r29;
+
+     label19:
+        $r28 := @caughtexception;
+
+     label20:
+        if r31 == null goto label24;
+
+     label21:
+        virtualinvoke r31.<java.io.InputStream: void close()>();
+
+     label22:
+        goto label24;
+
+     label23:
+        $r27 := @caughtexception;
+
+        throw $r27;
+
+     label24:
+        if r32 == null goto label28;
+
+     label25:
+        virtualinvoke r32.<java.io.OutputStream: void close()>();
+
+     label26:
+        goto label28;
+
+     label27:
+        $r26 := @caughtexception;
+
+        throw $r26;
+
+     label28:
+        throw $r28;
+
+     label29:
+        return $r11;
+
+        catch java.io.IOException from label12 to label13 with label14;
+        catch java.io.IOException from label16 to label17 with label18;
+        catch java.lang.Throwable from label01 to label11 with label19;
+        catch java.io.IOException from label21 to label22 with label23;
+        catch java.io.IOException from label25 to label26 with label27;
+        catch java.lang.Throwable from label19 to label20 with label19;
+    }
+
+    public static java.net.URI getResponderURI(java.security.cert.X509Certificate)
+    {
+        java.security.cert.X509Certificate r0;
+        java.net.URI $r2;
+        java.security.cert.CertificateException $r3;
+        sun.security.x509.X509CertImpl $r1;
+
+        r0 := @parameter0: java.security.cert.X509Certificate;
+
+     label1:
+        $r1 = staticinvoke <sun.security.x509.X509CertImpl: sun.security.x509.X509CertImpl toImpl(java.security.cert.X509Certificate)>(r0);
+
+        $r2 = staticinvoke <sun.security.provider.certpath.OCSP: java.net.URI getResponderURI(sun.security.x509.X509CertImpl)>($r1);
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        return null;
+
+        catch java.security.cert.CertificateException from label1 to label2 with label3;
+    }
+
+    static java.net.URI getResponderURI(sun.security.x509.X509CertImpl)
+    {
+        java.util.Iterator $r3;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.x509.AuthorityInfoAccessExtension $r1;
+        sun.security.x509.GeneralName $r8;
+        sun.security.x509.AccessDescription r5;
+        java.util.List $r2;
+        sun.security.x509.GeneralNameInterface $r9;
+        int $i0;
+        sun.security.x509.URIName r10;
+        java.lang.Object $r4;
+        sun.security.util.ObjectIdentifier $r6, $r7;
+        java.net.URI $r11;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: sun.security.x509.X509CertImpl;
+
+        $r1 = virtualinvoke r0.<sun.security.x509.X509CertImpl: sun.security.x509.AuthorityInfoAccessExtension getAuthorityInfoAccessExtension()>();
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = virtualinvoke $r1.<sun.security.x509.AuthorityInfoAccessExtension: java.util.List getAccessDescriptions()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (sun.security.x509.AccessDescription) $r4;
+
+        $r6 = virtualinvoke r5.<sun.security.x509.AccessDescription: sun.security.util.ObjectIdentifier getAccessMethod()>();
+
+        $r7 = <sun.security.x509.AccessDescription: sun.security.util.ObjectIdentifier Ad_OCSP_Id>;
+
+        $z1 = virtualinvoke $r6.<sun.security.util.ObjectIdentifier: boolean equals(sun.security.util.ObjectIdentifier)>($r7);
+
+        if $z1 == 0 goto label3;
+
+        $r8 = virtualinvoke r5.<sun.security.x509.AccessDescription: sun.security.x509.GeneralName getAccessLocation()>();
+
+        $i0 = virtualinvoke $r8.<sun.security.x509.GeneralName: int getType()>();
+
+        if $i0 != 6 goto label3;
+
+        $r9 = virtualinvoke $r8.<sun.security.x509.GeneralName: sun.security.x509.GeneralNameInterface getName()>();
+
+        r10 = (sun.security.x509.URIName) $r9;
+
+        $r11 = virtualinvoke r10.<sun.security.x509.URIName: java.net.URI getURI()>();
+
+        return $r11;
+
+     label3:
+        goto label2;
+
+     label4:
+        return null;
+    }
+
+    static void <clinit>()
+    {
+        int $i0;
+        sun.security.util.Debug $r0;
+
+        <sun.security.provider.certpath.OCSP: int DEFAULT_CONNECT_TIMEOUT> = 15000;
+
+        $r0 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String)>("certpath");
+
+        <sun.security.provider.certpath.OCSP: sun.security.util.Debug debug> = $r0;
+
+        $i0 = staticinvoke <sun.security.provider.certpath.OCSP: int initializeTimeout()>();
+
+        <sun.security.provider.certpath.OCSP: int CONNECT_TIMEOUT> = $i0;
+
+        return;
+    }
+}

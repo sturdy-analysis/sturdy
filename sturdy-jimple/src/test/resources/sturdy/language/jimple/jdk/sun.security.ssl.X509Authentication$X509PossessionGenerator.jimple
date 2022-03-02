@@ -1,0 +1,727 @@
+final class sun.security.ssl.X509Authentication$X509PossessionGenerator extends java.lang.Object implements sun.security.ssl.SSLPossessionGenerator
+{
+    final java.lang.String[] keyTypes;
+
+    private void <init>(java.lang.String[])
+    {
+        sun.security.ssl.X509Authentication$X509PossessionGenerator r0;
+        java.lang.String[] r1;
+
+        r0 := @this: sun.security.ssl.X509Authentication$X509PossessionGenerator;
+
+        r1 := @parameter0: java.lang.String[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.ssl.X509Authentication$X509PossessionGenerator: java.lang.String[] keyTypes> = r1;
+
+        return;
+    }
+
+    public sun.security.ssl.SSLPossession createPossession(sun.security.ssl.HandshakeContext)
+    {
+        java.lang.String[] r7, r9;
+        int i0, i1, i2, i3;
+        sun.security.ssl.SSLConfiguration $r1;
+        java.lang.String r8, r10;
+        boolean $z0;
+        sun.security.ssl.ServerHandshakeContext $r3;
+        sun.security.ssl.ClientHandshakeContext $r5;
+        sun.security.ssl.X509Authentication$X509PossessionGenerator r2;
+        sun.security.ssl.SSLPossession $r4, $r6;
+        sun.security.ssl.HandshakeContext r0;
+
+        r2 := @this: sun.security.ssl.X509Authentication$X509PossessionGenerator;
+
+        r0 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        $r1 = r0.<sun.security.ssl.HandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $z0 = $r1.<sun.security.ssl.SSLConfiguration: boolean isClientMode>;
+
+        if $z0 == 0 goto label4;
+
+        r7 = r2.<sun.security.ssl.X509Authentication$X509PossessionGenerator: java.lang.String[] keyTypes>;
+
+        i0 = lengthof r7;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label3;
+
+        r8 = r7[i1];
+
+        $r5 = (sun.security.ssl.ClientHandshakeContext) r0;
+
+        $r6 = specialinvoke r2.<sun.security.ssl.X509Authentication$X509PossessionGenerator: sun.security.ssl.SSLPossession createClientPossession(sun.security.ssl.ClientHandshakeContext,java.lang.String)>($r5, r8);
+
+        if $r6 == null goto label2;
+
+        return $r6;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        goto label7;
+
+     label4:
+        r9 = r2.<sun.security.ssl.X509Authentication$X509PossessionGenerator: java.lang.String[] keyTypes>;
+
+        i2 = lengthof r9;
+
+        i3 = 0;
+
+     label5:
+        if i3 >= i2 goto label7;
+
+        r10 = r9[i3];
+
+        $r3 = (sun.security.ssl.ServerHandshakeContext) r0;
+
+        $r4 = specialinvoke r2.<sun.security.ssl.X509Authentication$X509PossessionGenerator: sun.security.ssl.SSLPossession createServerPossession(sun.security.ssl.ServerHandshakeContext,java.lang.String)>($r3, r10);
+
+        if $r4 == null goto label6;
+
+        return $r4;
+
+     label6:
+        i3 = i3 + 1;
+
+        goto label5;
+
+     label7:
+        return null;
+    }
+
+    private sun.security.ssl.SSLPossession createClientPossession(sun.security.ssl.ClientHandshakeContext, java.lang.String)
+    {
+        sun.security.ssl.SSLTransport $r4, $r6, $r42, $r49;
+        java.security.PrivateKey $r7;
+        java.lang.StringBuilder $r9, $r10, $r11, $r18, $r19, $r20, $r21, $r22, $r27, $r28, $r29, $r32, $r33, $r34;
+        java.lang.Object[] $r13, $r24, $r31, $r36;
+        javax.security.auth.x500.X500Principal[] $r38, $r39, $r45, $r46;
+        java.lang.String $r12, $r16, r17, $r23, $r25, $r30, $r35, r52;
+        sun.security.ssl.TransportContext $r3, $r5, $r41, $r48;
+        sun.security.ssl.X509Authentication$X509PossessionGenerator r51;
+        javax.net.ssl.X509ExtendedKeyManager $r2;
+        java.security.cert.X509Certificate $r14;
+        javax.net.ssl.SSLSocket $r50;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11;
+        java.security.Principal[] $r53, $r54;
+        sun.security.ssl.SSLContextImpl $r1;
+        sun.security.ssl.X509Authentication$X509Possession $r26;
+        java.security.cert.X509Certificate[] $r8;
+        java.lang.String[] $r37, $r44;
+        javax.net.ssl.SSLEngine $r43;
+        int $i0;
+        sun.security.ssl.ClientHandshakeContext r0;
+        java.security.PublicKey $r15;
+        java.lang.Object $r40, $r47;
+
+        r51 := @this: sun.security.ssl.X509Authentication$X509PossessionGenerator;
+
+        r0 := @parameter0: sun.security.ssl.ClientHandshakeContext;
+
+        r17 := @parameter1: java.lang.String;
+
+        $r1 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLContextImpl sslContext>;
+
+        $r2 = virtualinvoke $r1.<sun.security.ssl.SSLContextImpl: javax.net.ssl.X509ExtendedKeyManager getX509KeyManager()>();
+
+        r52 = null;
+
+        $r3 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r4 = $r3.<sun.security.ssl.TransportContext: sun.security.ssl.SSLTransport transport>;
+
+        $z0 = $r4 instanceof sun.security.ssl.SSLSocketImpl;
+
+        if $z0 == 0 goto label03;
+
+        $r44 = newarray (java.lang.String)[1];
+
+        $r44[0] = r17;
+
+        $r45 = r0.<sun.security.ssl.ClientHandshakeContext: javax.security.auth.x500.X500Principal[] peerSupportedAuthorities>;
+
+        if $r45 != null goto label01;
+
+        $r53 = null;
+
+        goto label02;
+
+     label01:
+        $r46 = r0.<sun.security.ssl.ClientHandshakeContext: javax.security.auth.x500.X500Principal[] peerSupportedAuthorities>;
+
+        $r47 = virtualinvoke $r46.<java.lang.Object: java.lang.Object clone()>();
+
+        $r53 = (java.security.Principal[]) $r47;
+
+     label02:
+        $r48 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r49 = $r48.<sun.security.ssl.TransportContext: sun.security.ssl.SSLTransport transport>;
+
+        $r50 = (javax.net.ssl.SSLSocket) $r49;
+
+        r52 = virtualinvoke $r2.<javax.net.ssl.X509ExtendedKeyManager: java.lang.String chooseClientAlias(java.lang.String[],java.security.Principal[],java.net.Socket)>($r44, $r53, $r50);
+
+        goto label06;
+
+     label03:
+        $r5 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r6 = $r5.<sun.security.ssl.TransportContext: sun.security.ssl.SSLTransport transport>;
+
+        $z1 = $r6 instanceof sun.security.ssl.SSLEngineImpl;
+
+        if $z1 == 0 goto label06;
+
+        $r37 = newarray (java.lang.String)[1];
+
+        $r37[0] = r17;
+
+        $r38 = r0.<sun.security.ssl.ClientHandshakeContext: javax.security.auth.x500.X500Principal[] peerSupportedAuthorities>;
+
+        if $r38 != null goto label04;
+
+        $r54 = null;
+
+        goto label05;
+
+     label04:
+        $r39 = r0.<sun.security.ssl.ClientHandshakeContext: javax.security.auth.x500.X500Principal[] peerSupportedAuthorities>;
+
+        $r40 = virtualinvoke $r39.<java.lang.Object: java.lang.Object clone()>();
+
+        $r54 = (java.security.Principal[]) $r40;
+
+     label05:
+        $r41 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r42 = $r41.<sun.security.ssl.TransportContext: sun.security.ssl.SSLTransport transport>;
+
+        $r43 = (javax.net.ssl.SSLEngine) $r42;
+
+        r52 = virtualinvoke $r2.<javax.net.ssl.X509ExtendedKeyManager: java.lang.String chooseEngineClientAlias(java.lang.String[],java.security.Principal[],javax.net.ssl.SSLEngine)>($r37, $r54, $r43);
+
+     label06:
+        if r52 != null goto label08;
+
+        $z10 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z10 == 0 goto label07;
+
+        $z11 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl");
+
+        if $z11 == 0 goto label07;
+
+        $r32 = new java.lang.StringBuilder;
+
+        specialinvoke $r32.<java.lang.StringBuilder: void <init>()>();
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No X.509 cert selected for ");
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r17);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r36 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>($r35, $r36);
+
+     label07:
+        return null;
+
+     label08:
+        $r7 = virtualinvoke $r2.<javax.net.ssl.X509ExtendedKeyManager: java.security.PrivateKey getPrivateKey(java.lang.String)>(r52);
+
+        if $r7 != null goto label10;
+
+        $z8 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z8 == 0 goto label09;
+
+        $z9 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl");
+
+        if $z9 == 0 goto label09;
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r52);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is not a private key entry");
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r31 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>($r30, $r31);
+
+     label09:
+        return null;
+
+     label10:
+        $r8 = virtualinvoke $r2.<javax.net.ssl.X509ExtendedKeyManager: java.security.cert.X509Certificate[] getCertificateChain(java.lang.String)>(r52);
+
+        if $r8 == null goto label11;
+
+        $i0 = lengthof $r8;
+
+        if $i0 != 0 goto label13;
+
+     label11:
+        $z2 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z2 == 0 goto label12;
+
+        $z3 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl");
+
+        if $z3 == 0 goto label12;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r52);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is a private key entry with no cert chain stored");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r13 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>($r12, $r13);
+
+     label12:
+        return null;
+
+     label13:
+        $r14 = $r8[0];
+
+        $r15 = virtualinvoke $r14.<java.security.cert.X509Certificate: java.security.PublicKey getPublicKey()>();
+
+        $r16 = interfaceinvoke $r7.<java.security.PrivateKey: java.lang.String getAlgorithm()>();
+
+        $z4 = virtualinvoke $r16.<java.lang.String: boolean equals(java.lang.Object)>(r17);
+
+        if $z4 == 0 goto label14;
+
+        $r25 = interfaceinvoke $r15.<java.security.PublicKey: java.lang.String getAlgorithm()>();
+
+        $z7 = virtualinvoke $r25.<java.lang.String: boolean equals(java.lang.Object)>(r17);
+
+        if $z7 != 0 goto label16;
+
+     label14:
+        $z5 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z5 == 0 goto label15;
+
+        $z6 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl");
+
+        if $z6 == 0 goto label15;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r52);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" private or public key is not of ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r17);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" algorithm");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r24 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r23, $r24);
+
+     label15:
+        return null;
+
+     label16:
+        $r26 = new sun.security.ssl.X509Authentication$X509Possession;
+
+        specialinvoke $r26.<sun.security.ssl.X509Authentication$X509Possession: void <init>(java.security.PrivateKey,java.security.cert.X509Certificate[])>($r7, $r8);
+
+        return $r26;
+    }
+
+    private sun.security.ssl.SSLPossession createServerPossession(sun.security.ssl.ServerHandshakeContext, java.lang.String)
+    {
+        sun.security.ssl.SSLTransport $r4, $r6, $r59, $r65;
+        sun.security.ssl.ServerHandshakeContext r0;
+        java.security.PrivateKey $r7;
+        java.lang.StringBuilder $r9, $r10, $r11, $r18, $r19, $r20, $r21, $r22, $r30, $r31, $r32, $r33, $r34, $r35, $r40, $r41, $r42, $r45, $r46, $r47, $r50, $r51, $r52;
+        java.lang.Object[] $r13, $r24, $r37, $r44, $r49, $r54;
+        sun.security.ssl.ProtocolVersion $r26;
+        javax.security.auth.x500.X500Principal[] $r55, $r56, $r61, $r62;
+        java.lang.String $r12, $r16, r17, $r23, $r25, $r36, $r43, $r48, $r53, r68;
+        sun.security.ssl.TransportContext $r3, $r5, $r58, $r64;
+        java.security.spec.ECParameterSpec $r28;
+        sun.security.ssl.X509Authentication$X509PossessionGenerator r67;
+        javax.net.ssl.X509ExtendedKeyManager $r2;
+        java.security.cert.X509Certificate $r14;
+        javax.net.ssl.SSLSocket $r66;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19, $z20;
+        java.security.Principal[] $r69, $r70;
+        sun.security.ssl.SSLContextImpl $r1;
+        sun.security.ssl.X509Authentication$X509Possession $r71;
+        java.util.List $r38, $r39;
+        java.security.cert.X509Certificate[] $r8;
+        java.security.interfaces.ECPublicKey $r27;
+        sun.security.ssl.SupportedGroupsExtension$NamedGroup $r29;
+        javax.net.ssl.SSLEngine $r60;
+        int $i0;
+        java.security.PublicKey $r15;
+        java.lang.Object $r57, $r63;
+
+        r67 := @this: sun.security.ssl.X509Authentication$X509PossessionGenerator;
+
+        r0 := @parameter0: sun.security.ssl.ServerHandshakeContext;
+
+        r17 := @parameter1: java.lang.String;
+
+        $r1 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLContextImpl sslContext>;
+
+        $r2 = virtualinvoke $r1.<sun.security.ssl.SSLContextImpl: javax.net.ssl.X509ExtendedKeyManager getX509KeyManager()>();
+
+        r68 = null;
+
+        $r3 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r4 = $r3.<sun.security.ssl.TransportContext: sun.security.ssl.SSLTransport transport>;
+
+        $z0 = $r4 instanceof sun.security.ssl.SSLSocketImpl;
+
+        if $z0 == 0 goto label03;
+
+        $r61 = r0.<sun.security.ssl.ServerHandshakeContext: javax.security.auth.x500.X500Principal[] peerSupportedAuthorities>;
+
+        if $r61 != null goto label01;
+
+        $r69 = null;
+
+        goto label02;
+
+     label01:
+        $r62 = r0.<sun.security.ssl.ServerHandshakeContext: javax.security.auth.x500.X500Principal[] peerSupportedAuthorities>;
+
+        $r63 = virtualinvoke $r62.<java.lang.Object: java.lang.Object clone()>();
+
+        $r69 = (java.security.Principal[]) $r63;
+
+     label02:
+        $r64 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r65 = $r64.<sun.security.ssl.TransportContext: sun.security.ssl.SSLTransport transport>;
+
+        $r66 = (javax.net.ssl.SSLSocket) $r65;
+
+        r68 = virtualinvoke $r2.<javax.net.ssl.X509ExtendedKeyManager: java.lang.String chooseServerAlias(java.lang.String,java.security.Principal[],java.net.Socket)>(r17, $r69, $r66);
+
+        goto label06;
+
+     label03:
+        $r5 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r6 = $r5.<sun.security.ssl.TransportContext: sun.security.ssl.SSLTransport transport>;
+
+        $z1 = $r6 instanceof sun.security.ssl.SSLEngineImpl;
+
+        if $z1 == 0 goto label06;
+
+        $r55 = r0.<sun.security.ssl.ServerHandshakeContext: javax.security.auth.x500.X500Principal[] peerSupportedAuthorities>;
+
+        if $r55 != null goto label04;
+
+        $r70 = null;
+
+        goto label05;
+
+     label04:
+        $r56 = r0.<sun.security.ssl.ServerHandshakeContext: javax.security.auth.x500.X500Principal[] peerSupportedAuthorities>;
+
+        $r57 = virtualinvoke $r56.<java.lang.Object: java.lang.Object clone()>();
+
+        $r70 = (java.security.Principal[]) $r57;
+
+     label05:
+        $r58 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r59 = $r58.<sun.security.ssl.TransportContext: sun.security.ssl.SSLTransport transport>;
+
+        $r60 = (javax.net.ssl.SSLEngine) $r59;
+
+        r68 = virtualinvoke $r2.<javax.net.ssl.X509ExtendedKeyManager: java.lang.String chooseEngineServerAlias(java.lang.String,java.security.Principal[],javax.net.ssl.SSLEngine)>(r17, $r70, $r60);
+
+     label06:
+        if r68 != null goto label08;
+
+        $z18 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z18 == 0 goto label07;
+
+        $z19 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl");
+
+        if $z19 == 0 goto label07;
+
+        $r50 = new java.lang.StringBuilder;
+
+        specialinvoke $r50.<java.lang.StringBuilder: void <init>()>();
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No X.509 cert selected for ");
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r17);
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r54 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>($r53, $r54);
+
+     label07:
+        return null;
+
+     label08:
+        $r7 = virtualinvoke $r2.<javax.net.ssl.X509ExtendedKeyManager: java.security.PrivateKey getPrivateKey(java.lang.String)>(r68);
+
+        if $r7 != null goto label10;
+
+        $z16 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z16 == 0 goto label09;
+
+        $z17 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl");
+
+        if $z17 == 0 goto label09;
+
+        $r45 = new java.lang.StringBuilder;
+
+        specialinvoke $r45.<java.lang.StringBuilder: void <init>()>();
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r68);
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is not a private key entry");
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r49 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>($r48, $r49);
+
+     label09:
+        return null;
+
+     label10:
+        $r8 = virtualinvoke $r2.<javax.net.ssl.X509ExtendedKeyManager: java.security.cert.X509Certificate[] getCertificateChain(java.lang.String)>(r68);
+
+        if $r8 == null goto label11;
+
+        $i0 = lengthof $r8;
+
+        if $i0 != 0 goto label13;
+
+     label11:
+        $z2 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z2 == 0 goto label12;
+
+        $z3 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl");
+
+        if $z3 == 0 goto label12;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r68);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is not a certificate entry");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r13 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>($r12, $r13);
+
+     label12:
+        return null;
+
+     label13:
+        $r14 = $r8[0];
+
+        $r15 = virtualinvoke $r14.<java.security.cert.X509Certificate: java.security.PublicKey getPublicKey()>();
+
+        $r16 = interfaceinvoke $r7.<java.security.PrivateKey: java.lang.String getAlgorithm()>();
+
+        $z4 = virtualinvoke $r16.<java.lang.String: boolean equals(java.lang.Object)>(r17);
+
+        if $z4 == 0 goto label14;
+
+        $r25 = interfaceinvoke $r15.<java.security.PublicKey: java.lang.String getAlgorithm()>();
+
+        $z7 = virtualinvoke $r25.<java.lang.String: boolean equals(java.lang.Object)>(r17);
+
+        if $z7 != 0 goto label16;
+
+     label14:
+        $z5 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z5 == 0 goto label15;
+
+        $z6 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl");
+
+        if $z6 == 0 goto label15;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r68);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" private or public key is not of ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r17);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" algorithm");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r24 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r23, $r24);
+
+     label15:
+        return null;
+
+     label16:
+        $r26 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $z8 = virtualinvoke $r26.<sun.security.ssl.ProtocolVersion: boolean useTLS13PlusSpec()>();
+
+        if $z8 != 0 goto label21;
+
+        $z9 = virtualinvoke r17.<java.lang.String: boolean equals(java.lang.Object)>("EC");
+
+        if $z9 == 0 goto label21;
+
+        $z10 = $r15 instanceof java.security.interfaces.ECPublicKey;
+
+        if $z10 != 0 goto label18;
+
+        $z14 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z14 == 0 goto label17;
+
+        $z15 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl");
+
+        if $z15 == 0 goto label17;
+
+        $r40 = new java.lang.StringBuilder;
+
+        specialinvoke $r40.<java.lang.StringBuilder: void <init>()>();
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r68);
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" public key is not an instance of ECPublicKey");
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r44 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void warning(java.lang.String,java.lang.Object[])>($r43, $r44);
+
+     label17:
+        return null;
+
+     label18:
+        $r27 = (java.security.interfaces.ECPublicKey) $r15;
+
+        $r28 = interfaceinvoke $r27.<java.security.interfaces.ECPublicKey: java.security.spec.ECParameterSpec getParams()>();
+
+        $r29 = staticinvoke <sun.security.ssl.SupportedGroupsExtension$NamedGroup: sun.security.ssl.SupportedGroupsExtension$NamedGroup valueOf(java.security.spec.ECParameterSpec)>($r28);
+
+        if $r29 == null goto label19;
+
+        $z12 = staticinvoke <sun.security.ssl.SupportedGroupsExtension$SupportedGroups: boolean isSupported(sun.security.ssl.SupportedGroupsExtension$NamedGroup)>($r29);
+
+        if $z12 == 0 goto label19;
+
+        $r38 = r0.<sun.security.ssl.ServerHandshakeContext: java.util.List clientRequestedNamedGroups>;
+
+        if $r38 == null goto label21;
+
+        $r39 = r0.<sun.security.ssl.ServerHandshakeContext: java.util.List clientRequestedNamedGroups>;
+
+        $z13 = interfaceinvoke $r39.<java.util.List: boolean contains(java.lang.Object)>($r29);
+
+        if $z13 != 0 goto label21;
+
+     label19:
+        $z20 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z20 == 0 goto label20;
+
+        $z11 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl");
+
+        if $z11 == 0 goto label20;
+
+        $r30 = new java.lang.StringBuilder;
+
+        specialinvoke $r30.<java.lang.StringBuilder: void <init>()>();
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported named group (");
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r29);
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") used in the ");
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r68);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" certificate");
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r37 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void warning(java.lang.String,java.lang.Object[])>($r36, $r37);
+
+     label20:
+        return null;
+
+     label21:
+        $r71 = new sun.security.ssl.X509Authentication$X509Possession;
+
+        specialinvoke $r71.<sun.security.ssl.X509Authentication$X509Possession: void <init>(java.security.PrivateKey,java.security.cert.X509Certificate[])>($r7, $r8);
+
+        return $r71;
+    }
+
+    void <init>(java.lang.String[], sun.security.ssl.X509Authentication$1)
+    {
+        sun.security.ssl.X509Authentication$1 r2;
+        sun.security.ssl.X509Authentication$X509PossessionGenerator r0;
+        java.lang.String[] r1;
+
+        r0 := @this: sun.security.ssl.X509Authentication$X509PossessionGenerator;
+
+        r1 := @parameter0: java.lang.String[];
+
+        r2 := @parameter1: sun.security.ssl.X509Authentication$1;
+
+        specialinvoke r0.<sun.security.ssl.X509Authentication$X509PossessionGenerator: void <init>(java.lang.String[])>(r1);
+
+        return;
+    }
+}

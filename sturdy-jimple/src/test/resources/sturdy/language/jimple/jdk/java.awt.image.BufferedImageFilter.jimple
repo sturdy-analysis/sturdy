@@ -1,0 +1,981 @@
+public class java.awt.image.BufferedImageFilter extends java.awt.image.ImageFilter implements java.lang.Cloneable
+{
+    java.awt.image.BufferedImageOp bufferedImageOp;
+    java.awt.image.ColorModel model;
+    int width;
+    int height;
+    byte[] bytePixels;
+    int[] intPixels;
+
+    public void <init>(java.awt.image.BufferedImageOp)
+    {
+        java.awt.image.BufferedImageFilter r0;
+        java.awt.image.BufferedImageOp r1;
+        java.lang.NullPointerException $r2;
+
+        r0 := @this: java.awt.image.BufferedImageFilter;
+
+        r1 := @parameter0: java.awt.image.BufferedImageOp;
+
+        specialinvoke r0.<java.awt.image.ImageFilter: void <init>()>();
+
+        if r1 != null goto label1;
+
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>(java.lang.String)>("Operation cannot be null");
+
+        throw $r2;
+
+     label1:
+        r0.<java.awt.image.BufferedImageFilter: java.awt.image.BufferedImageOp bufferedImageOp> = r1;
+
+        return;
+    }
+
+    public java.awt.image.BufferedImageOp getBufferedImageOp()
+    {
+        java.awt.image.BufferedImageFilter r0;
+        java.awt.image.BufferedImageOp $r1;
+
+        r0 := @this: java.awt.image.BufferedImageFilter;
+
+        $r1 = r0.<java.awt.image.BufferedImageFilter: java.awt.image.BufferedImageOp bufferedImageOp>;
+
+        return $r1;
+    }
+
+    public void setDimensions(int, int)
+    {
+        int i0, i1;
+        java.awt.image.BufferedImageFilter r0;
+
+        r0 := @this: java.awt.image.BufferedImageFilter;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        if i0 <= 0 goto label1;
+
+        if i1 > 0 goto label2;
+
+     label1:
+        virtualinvoke r0.<java.awt.image.BufferedImageFilter: void imageComplete(int)>(3);
+
+        return;
+
+     label2:
+        r0.<java.awt.image.BufferedImageFilter: int width> = i0;
+
+        r0.<java.awt.image.BufferedImageFilter: int height> = i1;
+
+        return;
+    }
+
+    public void setColorModel(java.awt.image.ColorModel)
+    {
+        java.awt.image.BufferedImageFilter r0;
+        java.awt.image.ColorModel r1;
+
+        r0 := @this: java.awt.image.BufferedImageFilter;
+
+        r1 := @parameter0: java.awt.image.ColorModel;
+
+        r0.<java.awt.image.BufferedImageFilter: java.awt.image.ColorModel model> = r1;
+
+        return;
+    }
+
+    private void convertToRGB()
+    {
+        byte[] $r2, $r6;
+        java.awt.image.BufferedImageFilter r0;
+        short $s6, $s10;
+        byte $b5;
+        int[] r1, $r3, $r4;
+        int $i0, $i1, i2, $i3, $i4, $i7, i8, i9, $i11;
+        java.awt.image.ColorModel $r5, $r7, $r8;
+
+        r0 := @this: java.awt.image.BufferedImageFilter;
+
+        $i1 = r0.<java.awt.image.BufferedImageFilter: int width>;
+
+        $i0 = r0.<java.awt.image.BufferedImageFilter: int height>;
+
+        i2 = $i1 * $i0;
+
+        r1 = newarray (int)[i2];
+
+        $r2 = r0.<java.awt.image.BufferedImageFilter: byte[] bytePixels>;
+
+        if $r2 == null goto label3;
+
+        i8 = 0;
+
+     label1:
+        if i8 >= i2 goto label2;
+
+        $r7 = r0.<java.awt.image.BufferedImageFilter: java.awt.image.ColorModel model>;
+
+        $r6 = r0.<java.awt.image.BufferedImageFilter: byte[] bytePixels>;
+
+        $b5 = $r6[i8];
+
+        $s10 = (short) $b5;
+
+        $s6 = $s10 & 255;
+
+        $i11 = (int) $s6;
+
+        $i7 = virtualinvoke $r7.<java.awt.image.ColorModel: int getRGB(int)>($i11);
+
+        r1[i8] = $i7;
+
+        i8 = i8 + 1;
+
+        goto label1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r3 = r0.<java.awt.image.BufferedImageFilter: int[] intPixels>;
+
+        if $r3 == null goto label5;
+
+        i9 = 0;
+
+     label4:
+        if i9 >= i2 goto label5;
+
+        $r5 = r0.<java.awt.image.BufferedImageFilter: java.awt.image.ColorModel model>;
+
+        $r4 = r0.<java.awt.image.BufferedImageFilter: int[] intPixels>;
+
+        $i3 = $r4[i9];
+
+        $i4 = virtualinvoke $r5.<java.awt.image.ColorModel: int getRGB(int)>($i3);
+
+        r1[i9] = $i4;
+
+        i9 = i9 + 1;
+
+        goto label4;
+
+     label5:
+        r0.<java.awt.image.BufferedImageFilter: byte[] bytePixels> = null;
+
+        r0.<java.awt.image.BufferedImageFilter: int[] intPixels> = r1;
+
+        $r8 = staticinvoke <java.awt.image.ColorModel: java.awt.image.ColorModel getRGBdefault()>();
+
+        r0.<java.awt.image.BufferedImageFilter: java.awt.image.ColorModel model> = $r8;
+
+        return;
+    }
+
+    public void setPixels(int, int, int, int, java.awt.image.ColorModel, byte[], int, int)
+    {
+        byte[] r11, $r13, $r15, $r16, $r17;
+        byte $b11;
+        int[] $r9, $r12, $r18;
+        java.lang.StringBuilder $r2, $r3, $r4, $r5, $r6, $r19;
+        java.awt.image.BufferedImageFilter r8;
+        short $s12, $s35;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, i7, i8, $i9, $i10, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, $i34, $i36, $i38, $i40;
+        java.lang.String $r7;
+        java.lang.IllegalArgumentException $r20;
+        java.awt.image.ColorModel r10, $r14;
+
+        r8 := @this: java.awt.image.BufferedImageFilter;
+
+        i21 := @parameter0: int;
+
+        i22 := @parameter1: int;
+
+        i23 := @parameter2: int;
+
+        i24 := @parameter3: int;
+
+        r10 := @parameter4: java.awt.image.ColorModel;
+
+        r11 := @parameter5: byte[];
+
+        i25 := @parameter6: int;
+
+        i7 := @parameter7: int;
+
+        if i23 < 0 goto label01;
+
+        if i24 >= 0 goto label02;
+
+     label01:
+        $r20 = new java.lang.IllegalArgumentException;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Width (");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i23);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") and height (");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i24);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") must be > 0");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r20.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r7);
+
+        throw $r20;
+
+     label02:
+        if i23 == 0 goto label03;
+
+        if i24 != 0 goto label04;
+
+     label03:
+        return;
+
+     label04:
+        if i22 >= 0 goto label06;
+
+        i26 = neg i22;
+
+        if i26 < i24 goto label05;
+
+        return;
+
+     label05:
+        $i20 = i7 * i26;
+
+        i25 = i25 + $i20;
+
+        i22 = i22 + i26;
+
+        i24 = i24 - i26;
+
+     label06:
+        $i1 = i22 + i24;
+
+        $i0 = r8.<java.awt.image.BufferedImageFilter: int height>;
+
+        if $i1 <= $i0 goto label07;
+
+        $i19 = r8.<java.awt.image.BufferedImageFilter: int height>;
+
+        i24 = $i19 - i22;
+
+        if i24 > 0 goto label07;
+
+        return;
+
+     label07:
+        if i21 >= 0 goto label09;
+
+        i27 = neg i21;
+
+        if i27 < i23 goto label08;
+
+        return;
+
+     label08:
+        i25 = i25 + i27;
+
+        i21 = i21 + i27;
+
+        i23 = i23 - i27;
+
+     label09:
+        $i3 = i21 + i23;
+
+        $i2 = r8.<java.awt.image.BufferedImageFilter: int width>;
+
+        if $i3 <= $i2 goto label10;
+
+        $i18 = r8.<java.awt.image.BufferedImageFilter: int width>;
+
+        i23 = $i18 - i21;
+
+        if i23 > 0 goto label10;
+
+        return;
+
+     label10:
+        $i4 = r8.<java.awt.image.BufferedImageFilter: int width>;
+
+        $i5 = i22 * $i4;
+
+        i28 = $i5 + i21;
+
+        $r9 = r8.<java.awt.image.BufferedImageFilter: int[] intPixels>;
+
+        if $r9 != null goto label14;
+
+        $r13 = r8.<java.awt.image.BufferedImageFilter: byte[] bytePixels>;
+
+        if $r13 != null goto label11;
+
+        $i16 = r8.<java.awt.image.BufferedImageFilter: int width>;
+
+        $i15 = r8.<java.awt.image.BufferedImageFilter: int height>;
+
+        $i17 = $i16 * $i15;
+
+        $r16 = newarray (byte)[$i17];
+
+        r8.<java.awt.image.BufferedImageFilter: byte[] bytePixels> = $r16;
+
+        r8.<java.awt.image.BufferedImageFilter: java.awt.image.ColorModel model> = r10;
+
+        goto label12;
+
+     label11:
+        $r14 = r8.<java.awt.image.BufferedImageFilter: java.awt.image.ColorModel model>;
+
+        if $r14 == r10 goto label12;
+
+        specialinvoke r8.<java.awt.image.BufferedImageFilter: void convertToRGB()>();
+
+     label12:
+        $r17 = r8.<java.awt.image.BufferedImageFilter: byte[] bytePixels>;
+
+        if $r17 == null goto label14;
+
+        i29 = i24;
+
+     label13:
+        if i29 <= 0 goto label14;
+
+        $r15 = r8.<java.awt.image.BufferedImageFilter: byte[] bytePixels>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r11, i25, $r15, i28, i23);
+
+        i25 = i25 + i7;
+
+        $i14 = r8.<java.awt.image.BufferedImageFilter: int width>;
+
+        i28 = i28 + $i14;
+
+        $i34 = (int) -1;
+
+        i29 = i29 + $i34;
+
+        goto label13;
+
+     label14:
+        $r18 = r8.<java.awt.image.BufferedImageFilter: int[] intPixels>;
+
+        if $r18 == null goto label18;
+
+        $i6 = r8.<java.awt.image.BufferedImageFilter: int width>;
+
+        i30 = $i6 - i23;
+
+        i8 = i7 - i23;
+
+        i31 = i24;
+
+     label15:
+        if i31 <= 0 goto label18;
+
+        i32 = i23;
+
+     label16:
+        if i32 <= 0 goto label17;
+
+        $r12 = r8.<java.awt.image.BufferedImageFilter: int[] intPixels>;
+
+        $i9 = i28;
+
+        i28 = i28 + 1;
+
+        $i10 = i25;
+
+        i25 = i25 + 1;
+
+        $b11 = r11[$i10];
+
+        $s35 = (short) $b11;
+
+        $s12 = $s35 & 255;
+
+        $i36 = (int) $s12;
+
+        $i13 = virtualinvoke r10.<java.awt.image.ColorModel: int getRGB(int)>($i36);
+
+        $r12[$i9] = $i13;
+
+        $i38 = (int) -1;
+
+        i32 = i32 + $i38;
+
+        goto label16;
+
+     label17:
+        i25 = i25 + i8;
+
+        i28 = i28 + i30;
+
+        $i40 = (int) -1;
+
+        i31 = i31 + $i40;
+
+        goto label15;
+
+     label18:
+        return;
+    }
+
+    public void setPixels(int, int, int, int, java.awt.image.ColorModel, int[], int, int)
+    {
+        byte[] $r16;
+        int[] $r9, r13, $r14, $r15, $r17;
+        java.lang.StringBuilder $r2, $r3, $r4, $r5, $r6, $r19;
+        java.awt.image.BufferedImageFilter r8;
+        int $i0, $i1, $i2, $i3, $i4, i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, i19, i20, i21, i22, i23, i24, i25, $i26, $i27, i28, i29, i30, i31, $i33, $i35, $i37;
+        java.lang.String $r7;
+        java.lang.IllegalArgumentException $r20;
+        java.awt.image.ColorModel r10, $r11, $r12, $r18;
+
+        r8 := @this: java.awt.image.BufferedImageFilter;
+
+        i19 := @parameter0: int;
+
+        i20 := @parameter1: int;
+
+        i21 := @parameter2: int;
+
+        i22 := @parameter3: int;
+
+        r10 := @parameter4: java.awt.image.ColorModel;
+
+        r13 := @parameter5: int[];
+
+        i23 := @parameter6: int;
+
+        i5 := @parameter7: int;
+
+        if i21 < 0 goto label01;
+
+        if i22 >= 0 goto label02;
+
+     label01:
+        $r20 = new java.lang.IllegalArgumentException;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Width (");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i21);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") and height (");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i22);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") must be > 0");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r20.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r7);
+
+        throw $r20;
+
+     label02:
+        if i21 == 0 goto label03;
+
+        if i22 != 0 goto label04;
+
+     label03:
+        return;
+
+     label04:
+        if i20 >= 0 goto label06;
+
+        i24 = neg i20;
+
+        if i24 < i22 goto label05;
+
+        return;
+
+     label05:
+        $i18 = i5 * i24;
+
+        i23 = i23 + $i18;
+
+        i20 = i20 + i24;
+
+        i22 = i22 - i24;
+
+     label06:
+        $i1 = i20 + i22;
+
+        $i0 = r8.<java.awt.image.BufferedImageFilter: int height>;
+
+        if $i1 <= $i0 goto label07;
+
+        $i17 = r8.<java.awt.image.BufferedImageFilter: int height>;
+
+        i22 = $i17 - i20;
+
+        if i22 > 0 goto label07;
+
+        return;
+
+     label07:
+        if i19 >= 0 goto label09;
+
+        i25 = neg i19;
+
+        if i25 < i21 goto label08;
+
+        return;
+
+     label08:
+        i23 = i23 + i25;
+
+        i19 = i19 + i25;
+
+        i21 = i21 - i25;
+
+     label09:
+        $i3 = i19 + i21;
+
+        $i2 = r8.<java.awt.image.BufferedImageFilter: int width>;
+
+        if $i3 <= $i2 goto label10;
+
+        $i16 = r8.<java.awt.image.BufferedImageFilter: int width>;
+
+        i21 = $i16 - i19;
+
+        if i21 > 0 goto label10;
+
+        return;
+
+     label10:
+        $r9 = r8.<java.awt.image.BufferedImageFilter: int[] intPixels>;
+
+        if $r9 != null goto label12;
+
+        $r16 = r8.<java.awt.image.BufferedImageFilter: byte[] bytePixels>;
+
+        if $r16 != null goto label11;
+
+        $i14 = r8.<java.awt.image.BufferedImageFilter: int width>;
+
+        $i13 = r8.<java.awt.image.BufferedImageFilter: int height>;
+
+        $i15 = $i14 * $i13;
+
+        $r17 = newarray (int)[$i15];
+
+        r8.<java.awt.image.BufferedImageFilter: int[] intPixels> = $r17;
+
+        r8.<java.awt.image.BufferedImageFilter: java.awt.image.ColorModel model> = r10;
+
+        goto label12;
+
+     label11:
+        specialinvoke r8.<java.awt.image.BufferedImageFilter: void convertToRGB()>();
+
+     label12:
+        $i26 = r8.<java.awt.image.BufferedImageFilter: int width>;
+
+        $i27 = i20 * $i26;
+
+        i28 = $i27 + i19;
+
+        $r18 = r8.<java.awt.image.BufferedImageFilter: java.awt.image.ColorModel model>;
+
+        if $r18 != r10 goto label15;
+
+        i29 = i22;
+
+     label13:
+        if i29 <= 0 goto label14;
+
+        $r15 = r8.<java.awt.image.BufferedImageFilter: int[] intPixels>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r13, i23, $r15, i28, i21);
+
+        i23 = i23 + i5;
+
+        $i12 = r8.<java.awt.image.BufferedImageFilter: int width>;
+
+        i28 = i28 + $i12;
+
+        $i33 = (int) -1;
+
+        i29 = i29 + $i33;
+
+        goto label13;
+
+     label14:
+        goto label20;
+
+     label15:
+        $r11 = r8.<java.awt.image.BufferedImageFilter: java.awt.image.ColorModel model>;
+
+        $r12 = staticinvoke <java.awt.image.ColorModel: java.awt.image.ColorModel getRGBdefault()>();
+
+        if $r11 == $r12 goto label16;
+
+        specialinvoke r8.<java.awt.image.BufferedImageFilter: void convertToRGB()>();
+
+     label16:
+        $i4 = r8.<java.awt.image.BufferedImageFilter: int width>;
+
+        $i10 = $i4 - i21;
+
+        $i11 = i5 - i21;
+
+        i30 = i22;
+
+     label17:
+        if i30 <= 0 goto label20;
+
+        i31 = i21;
+
+     label18:
+        if i31 <= 0 goto label19;
+
+        $r14 = r8.<java.awt.image.BufferedImageFilter: int[] intPixels>;
+
+        $i6 = i28;
+
+        i28 = i28 + 1;
+
+        $i7 = i23;
+
+        i23 = i23 + 1;
+
+        $i8 = r13[$i7];
+
+        $i9 = virtualinvoke r10.<java.awt.image.ColorModel: int getRGB(int)>($i8);
+
+        $r14[$i6] = $i9;
+
+        $i35 = (int) -1;
+
+        i31 = i31 + $i35;
+
+        goto label18;
+
+     label19:
+        i23 = i23 + $i11;
+
+        i28 = i28 + $i10;
+
+        $i37 = (int) -1;
+
+        i30 = i30 + $i37;
+
+        goto label17;
+
+     label20:
+        return;
+    }
+
+    public void imageComplete(int)
+    {
+        byte[] $r11, $r16, $r18;
+        java.awt.image.DataBufferByte r31, $r33;
+        int[] $r3, $r14, $r15, $r19;
+        java.lang.InternalError $r36;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.awt.image.BufferedImage $r25, $r34;
+        java.lang.StringBuilder $r6, $r7, $r35;
+        java.awt.image.DataBuffer $r9, $r12;
+        java.awt.image.BufferedImageFilter r0;
+        java.awt.image.BufferedImageOp $r24;
+        java.awt.image.ImageConsumer $r10, $r13, $r28, $r29, $r32;
+        java.awt.image.DataBufferInt r30;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i12, $i14;
+        java.lang.String $r8;
+        java.awt.image.ColorModel $r1, $r2, $r22, $r23, $r27;
+        java.awt.image.WritableRaster r20, $r26;
+
+        r0 := @this: java.awt.image.BufferedImageFilter;
+
+        i0 := @parameter0: int;
+
+        tableswitch(i0)
+        {
+            case 1: goto label01;
+            case 2: goto label02;
+            case 3: goto label02;
+            case 4: goto label01;
+            default: goto label12;
+        };
+
+     label01:
+        r0.<java.awt.image.BufferedImageFilter: java.awt.image.ColorModel model> = null;
+
+        $i12 = (int) -1;
+
+        r0.<java.awt.image.BufferedImageFilter: int width> = $i12;
+
+        $i14 = (int) -1;
+
+        r0.<java.awt.image.BufferedImageFilter: int height> = $i14;
+
+        r0.<java.awt.image.BufferedImageFilter: int[] intPixels> = null;
+
+        r0.<java.awt.image.BufferedImageFilter: byte[] bytePixels> = null;
+
+        goto label12;
+
+     label02:
+        $i1 = r0.<java.awt.image.BufferedImageFilter: int width>;
+
+        if $i1 <= 0 goto label12;
+
+        $i2 = r0.<java.awt.image.BufferedImageFilter: int height>;
+
+        if $i2 > 0 goto label03;
+
+        goto label12;
+
+     label03:
+        $r1 = r0.<java.awt.image.BufferedImageFilter: java.awt.image.ColorModel model>;
+
+        $z0 = $r1 instanceof java.awt.image.DirectColorModel;
+
+        if $z0 == 0 goto label05;
+
+        $r19 = r0.<java.awt.image.BufferedImageFilter: int[] intPixels>;
+
+        if $r19 != null goto label04;
+
+        goto label12;
+
+     label04:
+        r20 = specialinvoke r0.<java.awt.image.BufferedImageFilter: java.awt.image.WritableRaster createDCMraster()>();
+
+        goto label09;
+
+     label05:
+        $r2 = r0.<java.awt.image.BufferedImageFilter: java.awt.image.ColorModel model>;
+
+        $z1 = $r2 instanceof java.awt.image.IndexColorModel;
+
+        if $z1 == 0 goto label07;
+
+        $r15 = newarray (int)[1];
+
+        $r15[0] = 0;
+
+        $r16 = r0.<java.awt.image.BufferedImageFilter: byte[] bytePixels>;
+
+        if $r16 != null goto label06;
+
+        goto label12;
+
+     label06:
+        $r33 = new java.awt.image.DataBufferByte;
+
+        $r18 = r0.<java.awt.image.BufferedImageFilter: byte[] bytePixels>;
+
+        $i4 = r0.<java.awt.image.BufferedImageFilter: int width>;
+
+        $i3 = r0.<java.awt.image.BufferedImageFilter: int height>;
+
+        $i5 = $i4 * $i3;
+
+        specialinvoke $r33.<java.awt.image.DataBufferByte: void <init>(byte[],int)>($r18, $i5);
+
+        $i8 = r0.<java.awt.image.BufferedImageFilter: int width>;
+
+        $i7 = r0.<java.awt.image.BufferedImageFilter: int height>;
+
+        $i6 = r0.<java.awt.image.BufferedImageFilter: int width>;
+
+        r20 = staticinvoke <java.awt.image.Raster: java.awt.image.WritableRaster createInterleavedRaster(java.awt.image.DataBuffer,int,int,int,int,int[],java.awt.Point)>($r33, $i8, $i7, $i6, 1, $r15, null);
+
+        goto label09;
+
+     label07:
+        specialinvoke r0.<java.awt.image.BufferedImageFilter: void convertToRGB()>();
+
+        $r3 = r0.<java.awt.image.BufferedImageFilter: int[] intPixels>;
+
+        if $r3 != null goto label08;
+
+        goto label12;
+
+     label08:
+        r20 = specialinvoke r0.<java.awt.image.BufferedImageFilter: java.awt.image.WritableRaster createDCMraster()>();
+
+     label09:
+        $r34 = new java.awt.image.BufferedImage;
+
+        $r22 = r0.<java.awt.image.BufferedImageFilter: java.awt.image.ColorModel model>;
+
+        $r23 = r0.<java.awt.image.BufferedImageFilter: java.awt.image.ColorModel model>;
+
+        $z3 = virtualinvoke $r23.<java.awt.image.ColorModel: boolean isAlphaPremultiplied()>();
+
+        specialinvoke $r34.<java.awt.image.BufferedImage: void <init>(java.awt.image.ColorModel,java.awt.image.WritableRaster,boolean,java.util.Hashtable)>($r22, r20, $z3, null);
+
+        $r24 = r0.<java.awt.image.BufferedImageFilter: java.awt.image.BufferedImageOp bufferedImageOp>;
+
+        $r25 = interfaceinvoke $r24.<java.awt.image.BufferedImageOp: java.awt.image.BufferedImage filter(java.awt.image.BufferedImage,java.awt.image.BufferedImage)>($r34, null);
+
+        $r26 = virtualinvoke $r25.<java.awt.image.BufferedImage: java.awt.image.WritableRaster getRaster()>();
+
+        $r27 = virtualinvoke $r25.<java.awt.image.BufferedImage: java.awt.image.ColorModel getColorModel()>();
+
+        $i9 = virtualinvoke $r26.<java.awt.image.WritableRaster: int getWidth()>();
+
+        $i10 = virtualinvoke $r26.<java.awt.image.WritableRaster: int getHeight()>();
+
+        $r28 = r0.<java.awt.image.BufferedImageFilter: java.awt.image.ImageConsumer consumer>;
+
+        interfaceinvoke $r28.<java.awt.image.ImageConsumer: void setDimensions(int,int)>($i9, $i10);
+
+        $r29 = r0.<java.awt.image.BufferedImageFilter: java.awt.image.ImageConsumer consumer>;
+
+        interfaceinvoke $r29.<java.awt.image.ImageConsumer: void setColorModel(java.awt.image.ColorModel)>($r27);
+
+        $z4 = $r27 instanceof java.awt.image.DirectColorModel;
+
+        if $z4 == 0 goto label10;
+
+        $r12 = virtualinvoke $r26.<java.awt.image.WritableRaster: java.awt.image.DataBuffer getDataBuffer()>();
+
+        r30 = (java.awt.image.DataBufferInt) $r12;
+
+        $r13 = r0.<java.awt.image.BufferedImageFilter: java.awt.image.ImageConsumer consumer>;
+
+        $r14 = virtualinvoke r30.<java.awt.image.DataBufferInt: int[] getData()>();
+
+        interfaceinvoke $r13.<java.awt.image.ImageConsumer: void setPixels(int,int,int,int,java.awt.image.ColorModel,int[],int,int)>(0, 0, $i9, $i10, $r27, $r14, 0, $i9);
+
+        goto label12;
+
+     label10:
+        $z2 = $r27 instanceof java.awt.image.IndexColorModel;
+
+        if $z2 == 0 goto label11;
+
+        $r9 = virtualinvoke $r26.<java.awt.image.WritableRaster: java.awt.image.DataBuffer getDataBuffer()>();
+
+        r31 = (java.awt.image.DataBufferByte) $r9;
+
+        $r10 = r0.<java.awt.image.BufferedImageFilter: java.awt.image.ImageConsumer consumer>;
+
+        $r11 = virtualinvoke r31.<java.awt.image.DataBufferByte: byte[] getData()>();
+
+        interfaceinvoke $r10.<java.awt.image.ImageConsumer: void setPixels(int,int,int,int,java.awt.image.ColorModel,byte[],int,int)>(0, 0, $i9, $i10, $r27, $r11, 0, $i9);
+
+        goto label12;
+
+     label11:
+        $r36 = new java.lang.InternalError;
+
+        $r35 = new java.lang.StringBuilder;
+
+        specialinvoke $r35.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown color model ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r27);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r36.<java.lang.InternalError: void <init>(java.lang.String)>($r8);
+
+        throw $r36;
+
+     label12:
+        $r32 = r0.<java.awt.image.BufferedImageFilter: java.awt.image.ImageConsumer consumer>;
+
+        interfaceinvoke $r32.<java.awt.image.ImageConsumer: void imageComplete(int)>(i0);
+
+        return;
+    }
+
+    private final java.awt.image.WritableRaster createDCMraster()
+    {
+        java.awt.image.BufferedImageFilter r0;
+        java.awt.image.DataBufferInt $r4;
+        int[] $r5, $r7;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10;
+        boolean $z0, $z1;
+        java.awt.image.DirectColorModel r2;
+        java.awt.image.ColorModel $r1, $r3;
+        java.awt.image.WritableRaster $r6;
+
+        r0 := @this: java.awt.image.BufferedImageFilter;
+
+        $r1 = r0.<java.awt.image.BufferedImageFilter: java.awt.image.ColorModel model>;
+
+        r2 = (java.awt.image.DirectColorModel) $r1;
+
+        $r3 = r0.<java.awt.image.BufferedImageFilter: java.awt.image.ColorModel model>;
+
+        $z0 = virtualinvoke $r3.<java.awt.image.ColorModel: boolean hasAlpha()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        $i0 = 3 + $z1;
+
+        $r7 = newarray (int)[$i0];
+
+        $i1 = virtualinvoke r2.<java.awt.image.DirectColorModel: int getRedMask()>();
+
+        $r7[0] = $i1;
+
+        $i2 = virtualinvoke r2.<java.awt.image.DirectColorModel: int getGreenMask()>();
+
+        $r7[1] = $i2;
+
+        $i3 = virtualinvoke r2.<java.awt.image.DirectColorModel: int getBlueMask()>();
+
+        $r7[2] = $i3;
+
+        if $z0 == 0 goto label3;
+
+        $i10 = virtualinvoke r2.<java.awt.image.DirectColorModel: int getAlphaMask()>();
+
+        $r7[3] = $i10;
+
+     label3:
+        $r4 = new java.awt.image.DataBufferInt;
+
+        $r5 = r0.<java.awt.image.BufferedImageFilter: int[] intPixels>;
+
+        $i5 = r0.<java.awt.image.BufferedImageFilter: int width>;
+
+        $i4 = r0.<java.awt.image.BufferedImageFilter: int height>;
+
+        $i6 = $i5 * $i4;
+
+        specialinvoke $r4.<java.awt.image.DataBufferInt: void <init>(int[],int)>($r5, $i6);
+
+        $i9 = r0.<java.awt.image.BufferedImageFilter: int width>;
+
+        $i8 = r0.<java.awt.image.BufferedImageFilter: int height>;
+
+        $i7 = r0.<java.awt.image.BufferedImageFilter: int width>;
+
+        $r6 = staticinvoke <java.awt.image.Raster: java.awt.image.WritableRaster createPackedRaster(java.awt.image.DataBuffer,int,int,int,int[],java.awt.Point)>($r4, $i9, $i8, $i7, $r7, null);
+
+        return $r6;
+    }
+}

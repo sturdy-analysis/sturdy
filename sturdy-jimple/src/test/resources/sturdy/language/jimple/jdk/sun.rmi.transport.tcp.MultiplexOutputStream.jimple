@@ -1,0 +1,581 @@
+final class sun.rmi.transport.tcp.MultiplexOutputStream extends java.io.OutputStream
+{
+    private sun.rmi.transport.tcp.ConnectionMultiplexer manager;
+    private sun.rmi.transport.tcp.MultiplexConnectionInfo info;
+    private byte[] buffer;
+    private int pos;
+    private int requested;
+    private boolean disconnected;
+    private java.lang.Object lock;
+
+    void <init>(sun.rmi.transport.tcp.ConnectionMultiplexer, sun.rmi.transport.tcp.MultiplexConnectionInfo, int)
+    {
+        sun.rmi.transport.tcp.ConnectionMultiplexer r2;
+        byte[] $r4;
+        sun.rmi.transport.tcp.MultiplexOutputStream r0;
+        int i0;
+        sun.rmi.transport.tcp.MultiplexConnectionInfo r3;
+        java.lang.Object $r1;
+
+        r0 := @this: sun.rmi.transport.tcp.MultiplexOutputStream;
+
+        r2 := @parameter0: sun.rmi.transport.tcp.ConnectionMultiplexer;
+
+        r3 := @parameter1: sun.rmi.transport.tcp.MultiplexConnectionInfo;
+
+        i0 := @parameter2: int;
+
+        specialinvoke r0.<java.io.OutputStream: void <init>()>();
+
+        r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int pos> = 0;
+
+        r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int requested> = 0;
+
+        r0.<sun.rmi.transport.tcp.MultiplexOutputStream: boolean disconnected> = 0;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<sun.rmi.transport.tcp.MultiplexOutputStream: java.lang.Object lock> = $r1;
+
+        r0.<sun.rmi.transport.tcp.MultiplexOutputStream: sun.rmi.transport.tcp.ConnectionMultiplexer manager> = r2;
+
+        r0.<sun.rmi.transport.tcp.MultiplexOutputStream: sun.rmi.transport.tcp.MultiplexConnectionInfo info> = r3;
+
+        $r4 = newarray (byte)[i0];
+
+        r0.<sun.rmi.transport.tcp.MultiplexOutputStream: byte[] buffer> = $r4;
+
+        r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int pos> = 0;
+
+        return;
+    }
+
+    public synchronized void write(int) throws java.io.IOException
+    {
+        byte[] $r1, $r2;
+        sun.rmi.transport.tcp.MultiplexOutputStream r0;
+        byte $b5;
+        int $i0, $i1, $i2, $i3, i4;
+
+        r0 := @this: sun.rmi.transport.tcp.MultiplexOutputStream;
+
+        i4 := @parameter0: int;
+
+     label1:
+        $i1 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int pos>;
+
+        $r1 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: byte[] buffer>;
+
+        $i0 = lengthof $r1;
+
+        if $i1 < $i0 goto label2;
+
+        specialinvoke r0.<sun.rmi.transport.tcp.MultiplexOutputStream: void push()>();
+
+        goto label1;
+
+     label2:
+        $r2 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: byte[] buffer>;
+
+        $i2 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int pos>;
+
+        $i3 = $i2 + 1;
+
+        r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int pos> = $i3;
+
+        $b5 = (byte) i4;
+
+        $r2[$i2] = $b5;
+
+        return;
+    }
+
+    public synchronized void write(byte[], int, int) throws java.io.IOException
+    {
+        byte[] $r1, r3, $r12;
+        sun.rmi.transport.tcp.MultiplexConnectionInfo $r4, $r7;
+        boolean $z0, $z1;
+        sun.rmi.transport.tcp.ConnectionMultiplexer $r5, $r8;
+        sun.rmi.transport.tcp.MultiplexOutputStream r0;
+        java.lang.Throwable $r13, $r14, $r15;
+        int $i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, i10, i11, $i12;
+        java.io.IOException $r10;
+        java.lang.InterruptedException $r16;
+        java.lang.Object $r2, $r6, $r9, $r11;
+
+        r0 := @this: sun.rmi.transport.tcp.MultiplexOutputStream;
+
+        r3 := @parameter0: byte[];
+
+        i10 := @parameter1: int;
+
+        i11 := @parameter2: int;
+
+        if i11 > 0 goto label01;
+
+        return;
+
+     label01:
+        $r1 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: byte[] buffer>;
+
+        $i1 = lengthof $r1;
+
+        $i0 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int pos>;
+
+        i2 = $i1 - $i0;
+
+        if i11 > i2 goto label02;
+
+        $r12 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: byte[] buffer>;
+
+        $i7 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int pos>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r3, i10, $r12, $i7, i11);
+
+        $i8 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int pos>;
+
+        $i9 = $i8 + i11;
+
+        r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int pos> = $i9;
+
+        return;
+
+     label02:
+        virtualinvoke r0.<sun.rmi.transport.tcp.MultiplexOutputStream: void flush()>();
+
+     label03:
+        $r2 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: java.lang.Object lock>;
+
+        entermonitor $r2;
+
+     label04:
+        $i12 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int requested>;
+
+        if $i12 >= 1 goto label08;
+
+        $z1 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: boolean disconnected>;
+
+        if $z1 != 0 goto label08;
+
+     label05:
+        $r11 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: java.lang.Object lock>;
+
+        virtualinvoke $r11.<java.lang.Object: void wait()>();
+
+     label06:
+        goto label04;
+
+     label07:
+        $r16 := @caughtexception;
+
+        goto label04;
+
+     label08:
+        $z0 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: boolean disconnected>;
+
+        if $z0 == 0 goto label09;
+
+        $r10 = new java.io.IOException;
+
+        specialinvoke $r10.<java.io.IOException: void <init>(java.lang.String)>("Connection closed");
+
+        throw $r10;
+
+     label09:
+        exitmonitor $r2;
+
+     label10:
+        goto label13;
+
+     label11:
+        $r15 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label12:
+        throw $r15;
+
+     label13:
+        if $i12 >= i11 goto label19;
+
+        $r8 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: sun.rmi.transport.tcp.ConnectionMultiplexer manager>;
+
+        $r7 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: sun.rmi.transport.tcp.MultiplexConnectionInfo info>;
+
+        virtualinvoke $r8.<sun.rmi.transport.tcp.ConnectionMultiplexer: void sendTransmit(sun.rmi.transport.tcp.MultiplexConnectionInfo,byte[],int,int)>($r7, r3, i10, $i12);
+
+        i10 = i10 + $i12;
+
+        i11 = i11 - $i12;
+
+        $r9 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: java.lang.Object lock>;
+
+        entermonitor $r9;
+
+     label14:
+        $i5 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int requested>;
+
+        $i6 = $i5 - $i12;
+
+        r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int requested> = $i6;
+
+        exitmonitor $r9;
+
+     label15:
+        goto label18;
+
+     label16:
+        $r14 := @caughtexception;
+
+        exitmonitor $r9;
+
+     label17:
+        throw $r14;
+
+     label18:
+        goto label03;
+
+     label19:
+        $r5 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: sun.rmi.transport.tcp.ConnectionMultiplexer manager>;
+
+        $r4 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: sun.rmi.transport.tcp.MultiplexConnectionInfo info>;
+
+        virtualinvoke $r5.<sun.rmi.transport.tcp.ConnectionMultiplexer: void sendTransmit(sun.rmi.transport.tcp.MultiplexConnectionInfo,byte[],int,int)>($r4, r3, i10, i11);
+
+        $r6 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: java.lang.Object lock>;
+
+        entermonitor $r6;
+
+     label20:
+        $i3 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int requested>;
+
+        $i4 = $i3 - i11;
+
+        r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int requested> = $i4;
+
+        exitmonitor $r6;
+
+     label21:
+        goto label24;
+
+     label22:
+        $r13 := @caughtexception;
+
+        exitmonitor $r6;
+
+     label23:
+        throw $r13;
+
+     label24:
+        goto label25;
+
+     label25:
+        return;
+
+        catch java.lang.InterruptedException from label05 to label06 with label07;
+        catch java.lang.Throwable from label04 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+        catch java.lang.Throwable from label14 to label15 with label16;
+        catch java.lang.Throwable from label16 to label17 with label16;
+        catch java.lang.Throwable from label20 to label21 with label22;
+        catch java.lang.Throwable from label22 to label23 with label22;
+    }
+
+    public synchronized void flush() throws java.io.IOException
+    {
+        int $i0;
+        sun.rmi.transport.tcp.MultiplexOutputStream r0;
+
+        r0 := @this: sun.rmi.transport.tcp.MultiplexOutputStream;
+
+     label1:
+        $i0 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int pos>;
+
+        if $i0 <= 0 goto label2;
+
+        specialinvoke r0.<sun.rmi.transport.tcp.MultiplexOutputStream: void push()>();
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        sun.rmi.transport.tcp.MultiplexConnectionInfo $r1;
+        sun.rmi.transport.tcp.ConnectionMultiplexer $r2;
+        sun.rmi.transport.tcp.MultiplexOutputStream r0;
+
+        r0 := @this: sun.rmi.transport.tcp.MultiplexOutputStream;
+
+        $r2 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: sun.rmi.transport.tcp.ConnectionMultiplexer manager>;
+
+        $r1 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: sun.rmi.transport.tcp.MultiplexConnectionInfo info>;
+
+        virtualinvoke $r2.<sun.rmi.transport.tcp.ConnectionMultiplexer: void sendClose(sun.rmi.transport.tcp.MultiplexConnectionInfo)>($r1);
+
+        return;
+    }
+
+    void request(int)
+    {
+        java.lang.Throwable $r3;
+        sun.rmi.transport.tcp.MultiplexOutputStream r0;
+        int i0, $i1, $i2;
+        java.lang.Object $r1, $r2;
+
+        r0 := @this: sun.rmi.transport.tcp.MultiplexOutputStream;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label1:
+        $i1 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int requested>;
+
+        $i2 = $i1 + i0;
+
+        r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int requested> = $i2;
+
+        $r2 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: java.lang.Object lock>;
+
+        virtualinvoke $r2.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r3;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    void disconnect()
+    {
+        java.lang.Throwable $r3;
+        sun.rmi.transport.tcp.MultiplexOutputStream r0;
+        java.lang.Object $r1, $r2;
+
+        r0 := @this: sun.rmi.transport.tcp.MultiplexOutputStream;
+
+        $r1 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label1:
+        r0.<sun.rmi.transport.tcp.MultiplexOutputStream: boolean disconnected> = 1;
+
+        $r2 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: java.lang.Object lock>;
+
+        virtualinvoke $r2.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r3;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private void push() throws java.io.IOException
+    {
+        byte[] $r2, $r6, $r9, $r10;
+        sun.rmi.transport.tcp.MultiplexConnectionInfo $r3, $r7;
+        boolean $z0, $z1;
+        sun.rmi.transport.tcp.ConnectionMultiplexer $r4, $r8;
+        sun.rmi.transport.tcp.MultiplexOutputStream r0;
+        java.lang.Throwable $r14, $r15, $r16;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11;
+        java.io.IOException $r12;
+        java.lang.InterruptedException $r17;
+        java.lang.Object $r1, $r5, $r11, $r13;
+
+        r0 := @this: sun.rmi.transport.tcp.MultiplexOutputStream;
+
+        $r1 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label01:
+        $i11 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int requested>;
+
+        if $i11 >= 1 goto label05;
+
+        $z1 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: boolean disconnected>;
+
+        if $z1 != 0 goto label05;
+
+     label02:
+        $r13 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: java.lang.Object lock>;
+
+        virtualinvoke $r13.<java.lang.Object: void wait()>();
+
+     label03:
+        goto label01;
+
+     label04:
+        $r17 := @caughtexception;
+
+        goto label01;
+
+     label05:
+        $z0 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: boolean disconnected>;
+
+        if $z0 == 0 goto label06;
+
+        $r12 = new java.io.IOException;
+
+        specialinvoke $r12.<java.io.IOException: void <init>(java.lang.String)>("Connection closed");
+
+        throw $r12;
+
+     label06:
+        exitmonitor $r1;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r16 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label09:
+        throw $r16;
+
+     label10:
+        $i0 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int pos>;
+
+        if $i11 >= $i0 goto label16;
+
+        $r8 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: sun.rmi.transport.tcp.ConnectionMultiplexer manager>;
+
+        $r7 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: sun.rmi.transport.tcp.MultiplexConnectionInfo info>;
+
+        $r6 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: byte[] buffer>;
+
+        virtualinvoke $r8.<sun.rmi.transport.tcp.ConnectionMultiplexer: void sendTransmit(sun.rmi.transport.tcp.MultiplexConnectionInfo,byte[],int,int)>($r7, $r6, 0, $i11);
+
+        $r10 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: byte[] buffer>;
+
+        $r9 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: byte[] buffer>;
+
+        $i5 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int pos>;
+
+        $i6 = $i5 - $i11;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r10, $i11, $r9, 0, $i6);
+
+        $i7 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int pos>;
+
+        $i8 = $i7 - $i11;
+
+        r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int pos> = $i8;
+
+        $r11 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: java.lang.Object lock>;
+
+        entermonitor $r11;
+
+     label11:
+        $i9 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int requested>;
+
+        $i10 = $i9 - $i11;
+
+        r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int requested> = $i10;
+
+        exitmonitor $r11;
+
+     label12:
+        goto label15;
+
+     label13:
+        $r15 := @caughtexception;
+
+        exitmonitor $r11;
+
+     label14:
+        throw $r15;
+
+     label15:
+        goto label22;
+
+     label16:
+        $r4 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: sun.rmi.transport.tcp.ConnectionMultiplexer manager>;
+
+        $r3 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: sun.rmi.transport.tcp.MultiplexConnectionInfo info>;
+
+        $r2 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: byte[] buffer>;
+
+        $i1 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int pos>;
+
+        virtualinvoke $r4.<sun.rmi.transport.tcp.ConnectionMultiplexer: void sendTransmit(sun.rmi.transport.tcp.MultiplexConnectionInfo,byte[],int,int)>($r3, $r2, 0, $i1);
+
+        $r5 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: java.lang.Object lock>;
+
+        entermonitor $r5;
+
+     label17:
+        $i3 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int requested>;
+
+        $i2 = r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int pos>;
+
+        $i4 = $i3 - $i2;
+
+        r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int requested> = $i4;
+
+        exitmonitor $r5;
+
+     label18:
+        goto label21;
+
+     label19:
+        $r14 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label20:
+        throw $r14;
+
+     label21:
+        r0.<sun.rmi.transport.tcp.MultiplexOutputStream: int pos> = 0;
+
+     label22:
+        return;
+
+        catch java.lang.InterruptedException from label02 to label03 with label04;
+        catch java.lang.Throwable from label01 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+        catch java.lang.Throwable from label11 to label12 with label13;
+        catch java.lang.Throwable from label13 to label14 with label13;
+        catch java.lang.Throwable from label17 to label18 with label19;
+        catch java.lang.Throwable from label19 to label20 with label19;
+    }
+}

@@ -1,0 +1,3391 @@
+public class javax.swing.RepaintManager extends java.lang.Object
+{
+    static final boolean HANDLE_TOP_LEVEL_PAINT;
+    private static final short BUFFER_STRATEGY_NOT_SPECIFIED;
+    private static final short BUFFER_STRATEGY_SPECIFIED_ON;
+    private static final short BUFFER_STRATEGY_SPECIFIED_OFF;
+    private static final short BUFFER_STRATEGY_TYPE;
+    private java.util.Map volatileMap;
+    private java.util.Map hwDirtyComponents;
+    private java.util.Map dirtyComponents;
+    private java.util.Map tmpDirtyComponents;
+    private java.util.List invalidComponents;
+    private java.util.List runnableList;
+    boolean doubleBufferingEnabled;
+    private java.awt.Dimension doubleBufferMaxSize;
+    javax.swing.RepaintManager$DoubleBufferInfo standardDoubleBuffer;
+    private javax.swing.RepaintManager$PaintManager paintManager;
+    private static final java.lang.Object repaintManagerKey;
+    static boolean volatileImageBufferEnabled;
+    private static final int volatileBufferType;
+    private static boolean nativeDoubleBuffering;
+    private static final int VOLATILE_LOOP_MAX;
+    private int paintDepth;
+    private short bufferStrategyType;
+    private boolean painting;
+    private javax.swing.JComponent repaintRoot;
+    private java.lang.Thread paintThread;
+    private final javax.swing.RepaintManager$ProcessingRunnable processingRunnable;
+    private static final sun.misc.JavaSecurityAccess javaSecurityAccess;
+    private static final sun.awt.DisplayChangedListener displayChangedHandler;
+    java.awt.Rectangle tmp;
+    private java.util.List repaintListeners;
+
+    public static javax.swing.RepaintManager currentManager(java.awt.Component)
+    {
+        java.awt.Component r2;
+        javax.swing.RepaintManager $r1;
+        sun.awt.AppContext $r0;
+
+        r2 := @parameter0: java.awt.Component;
+
+        $r0 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r1 = staticinvoke <javax.swing.RepaintManager: javax.swing.RepaintManager currentManager(sun.awt.AppContext)>($r0);
+
+        return $r1;
+    }
+
+    static javax.swing.RepaintManager currentManager(sun.awt.AppContext)
+    {
+        short $s0;
+        javax.swing.RepaintManager $r3, r5;
+        sun.awt.AppContext r0;
+        java.lang.Object $r1, $r2, $r4;
+
+        r0 := @parameter0: sun.awt.AppContext;
+
+        $r1 = <javax.swing.RepaintManager: java.lang.Object repaintManagerKey>;
+
+        $r2 = virtualinvoke r0.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>($r1);
+
+        r5 = (javax.swing.RepaintManager) $r2;
+
+        if r5 != null goto label1;
+
+        $r3 = new javax.swing.RepaintManager;
+
+        $s0 = <javax.swing.RepaintManager: short BUFFER_STRATEGY_TYPE>;
+
+        specialinvoke $r3.<javax.swing.RepaintManager: void <init>(short)>($s0);
+
+        r5 = $r3;
+
+        $r4 = <javax.swing.RepaintManager: java.lang.Object repaintManagerKey>;
+
+        virtualinvoke r0.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>($r4, $r3);
+
+     label1:
+        return r5;
+    }
+
+    public static javax.swing.RepaintManager currentManager(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r0;
+        javax.swing.RepaintManager $r1;
+
+        r0 := @parameter0: javax.swing.JComponent;
+
+        $r1 = staticinvoke <javax.swing.RepaintManager: javax.swing.RepaintManager currentManager(java.awt.Component)>(r0);
+
+        return $r1;
+    }
+
+    public static void setCurrentManager(javax.swing.RepaintManager)
+    {
+        java.lang.Object $r1, $r2;
+        javax.swing.RepaintManager r0;
+
+        r0 := @parameter0: javax.swing.RepaintManager;
+
+        if r0 == null goto label1;
+
+        $r2 = <javax.swing.RepaintManager: java.lang.Object repaintManagerKey>;
+
+        staticinvoke <javax.swing.SwingUtilities: void appContextPut(java.lang.Object,java.lang.Object)>($r2, r0);
+
+        goto label2;
+
+     label1:
+        $r1 = <javax.swing.RepaintManager: java.lang.Object repaintManagerKey>;
+
+        staticinvoke <javax.swing.SwingUtilities: void appContextRemove(java.lang.Object)>($r1);
+
+     label2:
+        return;
+    }
+
+    public void <init>()
+    {
+        javax.swing.RepaintManager r0;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        specialinvoke r0.<javax.swing.RepaintManager: void <init>(short)>(2);
+
+        return;
+    }
+
+    private void <init>(short)
+    {
+        java.lang.Throwable $r8;
+        java.awt.Rectangle $r2;
+        java.util.IdentityHashMap $r4, $r5, $r6;
+        java.util.HashMap $r1;
+        java.util.ArrayList $r3;
+        short s0;
+        javax.swing.RepaintManager r0;
+        javax.swing.RepaintManager$ProcessingRunnable $r7;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        s0 := @parameter0: short;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>(int)>(1);
+
+        r0.<javax.swing.RepaintManager: java.util.Map volatileMap> = $r1;
+
+        r0.<javax.swing.RepaintManager: boolean doubleBufferingEnabled> = 1;
+
+        r0.<javax.swing.RepaintManager: int paintDepth> = 0;
+
+        $r2 = new java.awt.Rectangle;
+
+        specialinvoke $r2.<java.awt.Rectangle: void <init>()>();
+
+        r0.<javax.swing.RepaintManager: java.awt.Rectangle tmp> = $r2;
+
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>(int)>(1);
+
+        r0.<javax.swing.RepaintManager: java.util.List repaintListeners> = $r3;
+
+        $z0 = <javax.swing.RepaintManager: boolean nativeDoubleBuffering>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        r0.<javax.swing.RepaintManager: boolean doubleBufferingEnabled> = $z1;
+
+        entermonitor r0;
+
+     label3:
+        $r4 = new java.util.IdentityHashMap;
+
+        specialinvoke $r4.<java.util.IdentityHashMap: void <init>()>();
+
+        r0.<javax.swing.RepaintManager: java.util.Map dirtyComponents> = $r4;
+
+        $r5 = new java.util.IdentityHashMap;
+
+        specialinvoke $r5.<java.util.IdentityHashMap: void <init>()>();
+
+        r0.<javax.swing.RepaintManager: java.util.Map tmpDirtyComponents> = $r5;
+
+        r0.<javax.swing.RepaintManager: short bufferStrategyType> = s0;
+
+        $r6 = new java.util.IdentityHashMap;
+
+        specialinvoke $r6.<java.util.IdentityHashMap: void <init>()>();
+
+        r0.<javax.swing.RepaintManager: java.util.Map hwDirtyComponents> = $r6;
+
+        exitmonitor r0;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r8 := @caughtexception;
+
+        exitmonitor r0;
+
+     label6:
+        throw $r8;
+
+     label7:
+        $r7 = new javax.swing.RepaintManager$ProcessingRunnable;
+
+        specialinvoke $r7.<javax.swing.RepaintManager$ProcessingRunnable: void <init>(javax.swing.RepaintManager,javax.swing.RepaintManager$1)>(r0, null);
+
+        r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$ProcessingRunnable processingRunnable> = $r7;
+
+        return;
+
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    private void displayChanged()
+    {
+        javax.swing.RepaintManager r0;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        specialinvoke r0.<javax.swing.RepaintManager: void clearImages()>();
+
+        return;
+    }
+
+    public synchronized void addInvalidComponent(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r1;
+        java.util.ArrayList $r10;
+        java.util.List $r4, $r5, $r6, $r8;
+        javax.swing.RepaintManager r0, $r2;
+        sun.awt.AppContext $r7;
+        int $i0, i1;
+        java.lang.Object $r9;
+        java.awt.Container $r3;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        $r2 = specialinvoke r0.<javax.swing.RepaintManager: javax.swing.RepaintManager getDelegate(java.awt.Component)>(r1);
+
+        if $r2 == null goto label1;
+
+        virtualinvoke $r2.<javax.swing.RepaintManager: void addInvalidComponent(javax.swing.JComponent)>(r1);
+
+        return;
+
+     label1:
+        $r3 = staticinvoke <javax.swing.SwingUtilities: java.awt.Container getValidateRoot(java.awt.Container,boolean)>(r1, 1);
+
+        if $r3 != null goto label2;
+
+        return;
+
+     label2:
+        $r4 = r0.<javax.swing.RepaintManager: java.util.List invalidComponents>;
+
+        if $r4 != null goto label3;
+
+        $r10 = new java.util.ArrayList;
+
+        specialinvoke $r10.<java.util.ArrayList: void <init>()>();
+
+        r0.<javax.swing.RepaintManager: java.util.List invalidComponents> = $r10;
+
+        goto label6;
+
+     label3:
+        $r5 = r0.<javax.swing.RepaintManager: java.util.List invalidComponents>;
+
+        $i0 = interfaceinvoke $r5.<java.util.List: int size()>();
+
+        i1 = 0;
+
+     label4:
+        if i1 >= $i0 goto label6;
+
+        $r8 = r0.<javax.swing.RepaintManager: java.util.List invalidComponents>;
+
+        $r9 = interfaceinvoke $r8.<java.util.List: java.lang.Object get(int)>(i1);
+
+        if $r3 != $r9 goto label5;
+
+        return;
+
+     label5:
+        i1 = i1 + 1;
+
+        goto label4;
+
+     label6:
+        $r6 = r0.<javax.swing.RepaintManager: java.util.List invalidComponents>;
+
+        interfaceinvoke $r6.<java.util.List: boolean add(java.lang.Object)>($r3);
+
+        $r7 = staticinvoke <sun.awt.SunToolkit: sun.awt.AppContext targetToAppContext(java.lang.Object)>(r1);
+
+        specialinvoke r0.<javax.swing.RepaintManager: void scheduleProcessingRunnable(sun.awt.AppContext)>($r7);
+
+        return;
+    }
+
+    public synchronized void removeInvalidComponent(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r1;
+        java.util.List $r3, $r4, $r5;
+        javax.swing.RepaintManager r0, $r2;
+        int $i0, $i2;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        $r2 = specialinvoke r0.<javax.swing.RepaintManager: javax.swing.RepaintManager getDelegate(java.awt.Component)>(r1);
+
+        if $r2 == null goto label1;
+
+        virtualinvoke $r2.<javax.swing.RepaintManager: void removeInvalidComponent(javax.swing.JComponent)>(r1);
+
+        return;
+
+     label1:
+        $r3 = r0.<javax.swing.RepaintManager: java.util.List invalidComponents>;
+
+        if $r3 == null goto label2;
+
+        $r4 = r0.<javax.swing.RepaintManager: java.util.List invalidComponents>;
+
+        $i0 = interfaceinvoke $r4.<java.util.List: int indexOf(java.lang.Object)>(r1);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label2;
+
+        $r5 = r0.<javax.swing.RepaintManager: java.util.List invalidComponents>;
+
+        interfaceinvoke $r5.<java.util.List: java.lang.Object remove(int)>($i0);
+
+     label2:
+        return;
+    }
+
+    private void addDirtyRegion0(java.awt.Container, int, int, int, int)
+    {
+        java.lang.Throwable $r7;
+        java.awt.Rectangle $r2;
+        java.util.Map $r3;
+        sun.awt.AppContext $r4;
+        int i0, i1, $i2, $i3, i4, i5, $i6, $i7;
+        java.awt.Container r0, r8, r9;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.awt.peer.ComponentPeer $r5;
+        java.awt.Frame $r6;
+        javax.swing.RepaintManager r1;
+
+        r1 := @this: javax.swing.RepaintManager;
+
+        r0 := @parameter0: java.awt.Container;
+
+        i4 := @parameter1: int;
+
+        i5 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        i1 := @parameter4: int;
+
+        if i0 <= 0 goto label01;
+
+        if i1 <= 0 goto label01;
+
+        if r0 != null goto label02;
+
+     label01:
+        return;
+
+     label02:
+        $i2 = virtualinvoke r0.<java.awt.Container: int getWidth()>();
+
+        if $i2 <= 0 goto label03;
+
+        $i3 = virtualinvoke r0.<java.awt.Container: int getHeight()>();
+
+        if $i3 > 0 goto label04;
+
+     label03:
+        return;
+
+     label04:
+        $z0 = specialinvoke r1.<javax.swing.RepaintManager: boolean extendDirtyRegion(java.awt.Component,int,int,int,int)>(r0, i4, i5, i0, i1);
+
+        if $z0 == 0 goto label05;
+
+        return;
+
+     label05:
+        r8 = null;
+
+        r9 = r0;
+
+     label06:
+        if r9 == null goto label12;
+
+        $z2 = virtualinvoke r9.<java.awt.Container: boolean isVisible()>();
+
+        if $z2 == 0 goto label07;
+
+        $r5 = virtualinvoke r9.<java.awt.Container: java.awt.peer.ComponentPeer getPeer()>();
+
+        if $r5 != null goto label08;
+
+     label07:
+        return;
+
+     label08:
+        $z3 = r9 instanceof java.awt.Window;
+
+        if $z3 != 0 goto label09;
+
+        $z5 = r9 instanceof java.applet.Applet;
+
+        if $z5 == 0 goto label11;
+
+     label09:
+        $z4 = r9 instanceof java.awt.Frame;
+
+        if $z4 == 0 goto label10;
+
+        $r6 = (java.awt.Frame) r9;
+
+        $i6 = virtualinvoke $r6.<java.awt.Frame: int getExtendedState()>();
+
+        $i7 = $i6 & 1;
+
+        if $i7 != 1 goto label10;
+
+        return;
+
+     label10:
+        r8 = r9;
+
+        goto label12;
+
+     label11:
+        r9 = virtualinvoke r9.<java.awt.Container: java.awt.Container getParent()>();
+
+        goto label06;
+
+     label12:
+        if r8 != null goto label13;
+
+        return;
+
+     label13:
+        entermonitor r1;
+
+     label14:
+        $z1 = specialinvoke r1.<javax.swing.RepaintManager: boolean extendDirtyRegion(java.awt.Component,int,int,int,int)>(r0, i4, i5, i0, i1);
+
+        if $z1 == 0 goto label16;
+
+        exitmonitor r1;
+
+     label15:
+        return;
+
+     label16:
+        $r3 = r1.<javax.swing.RepaintManager: java.util.Map dirtyComponents>;
+
+        $r2 = new java.awt.Rectangle;
+
+        specialinvoke $r2.<java.awt.Rectangle: void <init>(int,int,int,int)>(i4, i5, i0, i1);
+
+        interfaceinvoke $r3.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r0, $r2);
+
+        exitmonitor r1;
+
+     label17:
+        goto label20;
+
+     label18:
+        $r7 := @caughtexception;
+
+        exitmonitor r1;
+
+     label19:
+        throw $r7;
+
+     label20:
+        $r4 = staticinvoke <sun.awt.SunToolkit: sun.awt.AppContext targetToAppContext(java.lang.Object)>(r0);
+
+        specialinvoke r1.<javax.swing.RepaintManager: void scheduleProcessingRunnable(sun.awt.AppContext)>($r4);
+
+        return;
+
+        catch java.lang.Throwable from label14 to label15 with label18;
+        catch java.lang.Throwable from label16 to label17 with label18;
+        catch java.lang.Throwable from label18 to label19 with label18;
+    }
+
+    public void addDirtyRegion(javax.swing.JComponent, int, int, int, int)
+    {
+        javax.swing.JComponent r1;
+        javax.swing.RepaintManager r0, $r2;
+        int i0, i1, i2, i3;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        i3 := @parameter4: int;
+
+        $r2 = specialinvoke r0.<javax.swing.RepaintManager: javax.swing.RepaintManager getDelegate(java.awt.Component)>(r1);
+
+        if $r2 == null goto label1;
+
+        virtualinvoke $r2.<javax.swing.RepaintManager: void addDirtyRegion(javax.swing.JComponent,int,int,int,int)>(r1, i0, i1, i2, i3);
+
+        return;
+
+     label1:
+        specialinvoke r0.<javax.swing.RepaintManager: void addDirtyRegion0(java.awt.Container,int,int,int,int)>(r1, i0, i1, i2, i3);
+
+        return;
+    }
+
+    public void addDirtyRegion(java.awt.Window, int, int, int, int)
+    {
+        javax.swing.RepaintManager r0;
+        java.awt.Window r1;
+        int i0, i1, i2, i3;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r1 := @parameter0: java.awt.Window;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        i3 := @parameter4: int;
+
+        specialinvoke r0.<javax.swing.RepaintManager: void addDirtyRegion0(java.awt.Container,int,int,int,int)>(r1, i0, i1, i2, i3);
+
+        return;
+    }
+
+    public void addDirtyRegion(java.applet.Applet, int, int, int, int)
+    {
+        java.applet.Applet r1;
+        javax.swing.RepaintManager r0;
+        int i0, i1, i2, i3;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r1 := @parameter0: java.applet.Applet;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        i3 := @parameter4: int;
+
+        specialinvoke r0.<javax.swing.RepaintManager: void addDirtyRegion0(java.awt.Container,int,int,int,int)>(r1, i0, i1, i2, i3);
+
+        return;
+    }
+
+    void scheduleHeavyWeightPaints()
+    {
+        java.lang.Throwable $r11;
+        java.awt.Rectangle r8;
+        java.applet.Applet $r9;
+        java.util.Map $r1, r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12;
+        java.awt.Container r12;
+        boolean $z0, $z1, $z2;
+        java.util.IdentityHashMap $r3;
+        java.util.Iterator $r5;
+        java.awt.Window $r10;
+        java.util.Set $r4;
+        javax.swing.RepaintManager r0;
+        java.lang.Object $r6, $r7;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        entermonitor r0;
+
+     label01:
+        $r1 = r0.<javax.swing.RepaintManager: java.util.Map hwDirtyComponents>;
+
+        $i0 = interfaceinvoke $r1.<java.util.Map: int size()>();
+
+        if $i0 != 0 goto label03;
+
+        exitmonitor r0;
+
+     label02:
+        return;
+
+     label03:
+        r2 = r0.<javax.swing.RepaintManager: java.util.Map hwDirtyComponents>;
+
+        $r3 = new java.util.IdentityHashMap;
+
+        specialinvoke $r3.<java.util.IdentityHashMap: void <init>()>();
+
+        r0.<javax.swing.RepaintManager: java.util.Map hwDirtyComponents> = $r3;
+
+        exitmonitor r0;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r11 := @caughtexception;
+
+        exitmonitor r0;
+
+     label06:
+        throw $r11;
+
+     label07:
+        $r4 = interfaceinvoke r2.<java.util.Map: java.util.Set keySet()>();
+
+        $r5 = interfaceinvoke $r4.<java.util.Set: java.util.Iterator iterator()>();
+
+     label08:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label12;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r12 = (java.awt.Container) $r6;
+
+        $r7 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r12);
+
+        r8 = (java.awt.Rectangle) $r7;
+
+        $z1 = r12 instanceof java.awt.Window;
+
+        if $z1 == 0 goto label09;
+
+        $r10 = (java.awt.Window) r12;
+
+        $i12 = r8.<java.awt.Rectangle: int x>;
+
+        $i11 = r8.<java.awt.Rectangle: int y>;
+
+        $i10 = r8.<java.awt.Rectangle: int width>;
+
+        $i9 = r8.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r0.<javax.swing.RepaintManager: void addDirtyRegion(java.awt.Window,int,int,int,int)>($r10, $i12, $i11, $i10, $i9);
+
+        goto label11;
+
+     label09:
+        $z2 = r12 instanceof java.applet.Applet;
+
+        if $z2 == 0 goto label10;
+
+        $r9 = (java.applet.Applet) r12;
+
+        $i8 = r8.<java.awt.Rectangle: int x>;
+
+        $i7 = r8.<java.awt.Rectangle: int y>;
+
+        $i6 = r8.<java.awt.Rectangle: int width>;
+
+        $i5 = r8.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r0.<javax.swing.RepaintManager: void addDirtyRegion(java.applet.Applet,int,int,int,int)>($r9, $i8, $i7, $i6, $i5);
+
+        goto label11;
+
+     label10:
+        $i4 = r8.<java.awt.Rectangle: int x>;
+
+        $i3 = r8.<java.awt.Rectangle: int y>;
+
+        $i2 = r8.<java.awt.Rectangle: int width>;
+
+        $i1 = r8.<java.awt.Rectangle: int height>;
+
+        specialinvoke r0.<javax.swing.RepaintManager: void addDirtyRegion0(java.awt.Container,int,int,int,int)>(r12, $i4, $i3, $i2, $i1);
+
+     label11:
+        goto label08;
+
+     label12:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label05;
+        catch java.lang.Throwable from label03 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+    }
+
+    void nativeAddDirtyRegion(sun.awt.AppContext, java.awt.Container, int, int, int, int)
+    {
+        java.lang.Throwable $r10;
+        java.awt.Rectangle r4, $r6, $r8;
+        javax.swing.RepaintManager r0;
+        java.util.Map $r2, $r5, $r9;
+        sun.awt.AppContext r7;
+        int i0, i1, i2, i3;
+        java.lang.Object $r3;
+        java.awt.Container r1;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r7 := @parameter0: sun.awt.AppContext;
+
+        r1 := @parameter1: java.awt.Container;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        i0 := @parameter4: int;
+
+        i1 := @parameter5: int;
+
+        if i0 <= 0 goto label8;
+
+        if i1 <= 0 goto label8;
+
+        entermonitor r0;
+
+     label1:
+        $r2 = r0.<javax.swing.RepaintManager: java.util.Map hwDirtyComponents>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r4 = (java.awt.Rectangle) $r3;
+
+        if r4 != null goto label2;
+
+        $r9 = r0.<javax.swing.RepaintManager: java.util.Map hwDirtyComponents>;
+
+        $r8 = new java.awt.Rectangle;
+
+        specialinvoke $r8.<java.awt.Rectangle: void <init>(int,int,int,int)>(i2, i3, i0, i1);
+
+        interfaceinvoke $r9.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r8);
+
+        goto label3;
+
+     label2:
+        $r5 = r0.<javax.swing.RepaintManager: java.util.Map hwDirtyComponents>;
+
+        $r6 = staticinvoke <javax.swing.SwingUtilities: java.awt.Rectangle computeUnion(int,int,int,int,java.awt.Rectangle)>(i2, i3, i0, i1, r4);
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r6);
+
+     label3:
+        exitmonitor r0;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r10 := @caughtexception;
+
+        exitmonitor r0;
+
+     label6:
+        throw $r10;
+
+     label7:
+        specialinvoke r0.<javax.swing.RepaintManager: void scheduleProcessingRunnable(sun.awt.AppContext)>(r7);
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    void nativeQueueSurfaceDataRunnable(sun.awt.AppContext, java.awt.Component, java.lang.Runnable)
+    {
+        java.lang.Throwable $r8;
+        javax.swing.RepaintManager$2 $r2;
+        java.awt.Component r3;
+        java.lang.Runnable r4;
+        java.util.List $r1, $r5;
+        javax.swing.RepaintManager r0;
+        sun.awt.AppContext r6;
+        java.util.LinkedList $r7;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r6 := @parameter0: sun.awt.AppContext;
+
+        r3 := @parameter1: java.awt.Component;
+
+        r4 := @parameter2: java.lang.Runnable;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = r0.<javax.swing.RepaintManager: java.util.List runnableList>;
+
+        if $r1 != null goto label2;
+
+        $r7 = new java.util.LinkedList;
+
+        specialinvoke $r7.<java.util.LinkedList: void <init>()>();
+
+        r0.<javax.swing.RepaintManager: java.util.List runnableList> = $r7;
+
+     label2:
+        $r5 = r0.<javax.swing.RepaintManager: java.util.List runnableList>;
+
+        $r2 = new javax.swing.RepaintManager$2;
+
+        specialinvoke $r2.<javax.swing.RepaintManager$2: void <init>(javax.swing.RepaintManager,java.awt.Component,java.lang.Runnable)>(r0, r3, r4);
+
+        interfaceinvoke $r5.<java.util.List: boolean add(java.lang.Object)>($r2);
+
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r8 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r8;
+
+     label6:
+        specialinvoke r0.<javax.swing.RepaintManager: void scheduleProcessingRunnable(sun.awt.AppContext)>(r6);
+
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private synchronized boolean extendDirtyRegion(java.awt.Component, int, int, int, int)
+    {
+        java.awt.Rectangle r4;
+        java.awt.Component r1;
+        javax.swing.RepaintManager r0;
+        java.util.Map $r2;
+        int i0, i1, i2, i3;
+        java.lang.Object $r3;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r1 := @parameter0: java.awt.Component;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        i3 := @parameter4: int;
+
+        $r2 = r0.<javax.swing.RepaintManager: java.util.Map dirtyComponents>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r4 = (java.awt.Rectangle) $r3;
+
+        if r4 == null goto label1;
+
+        staticinvoke <javax.swing.SwingUtilities: java.awt.Rectangle computeUnion(int,int,int,int,java.awt.Rectangle)>(i0, i1, i2, i3, r4);
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    public java.awt.Rectangle getDirtyRegion(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r1;
+        java.lang.Throwable $r9;
+        java.awt.Rectangle r5, $r6, $r7, $r8;
+        javax.swing.RepaintManager r0, $r2;
+        java.util.Map $r3;
+        java.lang.Object $r4;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        $r2 = specialinvoke r0.<javax.swing.RepaintManager: javax.swing.RepaintManager getDelegate(java.awt.Component)>(r1);
+
+        if $r2 == null goto label1;
+
+        $r8 = virtualinvoke $r2.<javax.swing.RepaintManager: java.awt.Rectangle getDirtyRegion(javax.swing.JComponent)>(r1);
+
+        return $r8;
+
+     label1:
+        entermonitor r0;
+
+     label2:
+        $r3 = r0.<javax.swing.RepaintManager: java.util.Map dirtyComponents>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r5 = (java.awt.Rectangle) $r4;
+
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r9 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r9;
+
+     label6:
+        if r5 != null goto label7;
+
+        $r7 = new java.awt.Rectangle;
+
+        specialinvoke $r7.<java.awt.Rectangle: void <init>(int,int,int,int)>(0, 0, 0, 0);
+
+        return $r7;
+
+     label7:
+        $r6 = new java.awt.Rectangle;
+
+        specialinvoke $r6.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>(r5);
+
+        return $r6;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void markCompletelyDirty(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r1;
+        javax.swing.RepaintManager r0, $r2;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        $r2 = specialinvoke r0.<javax.swing.RepaintManager: javax.swing.RepaintManager getDelegate(java.awt.Component)>(r1);
+
+        if $r2 == null goto label1;
+
+        virtualinvoke $r2.<javax.swing.RepaintManager: void markCompletelyDirty(javax.swing.JComponent)>(r1);
+
+        return;
+
+     label1:
+        virtualinvoke r0.<javax.swing.RepaintManager: void addDirtyRegion(javax.swing.JComponent,int,int,int,int)>(r1, 0, 0, 2147483647, 2147483647);
+
+        return;
+    }
+
+    public void markCompletelyClean(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r1;
+        java.lang.Throwable $r4;
+        javax.swing.RepaintManager r0, $r2;
+        java.util.Map $r3;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        $r2 = specialinvoke r0.<javax.swing.RepaintManager: javax.swing.RepaintManager getDelegate(java.awt.Component)>(r1);
+
+        if $r2 == null goto label1;
+
+        virtualinvoke $r2.<javax.swing.RepaintManager: void markCompletelyClean(javax.swing.JComponent)>(r1);
+
+        return;
+
+     label1:
+        entermonitor r0;
+
+     label2:
+        $r3 = r0.<javax.swing.RepaintManager: java.util.Map dirtyComponents>;
+
+        interfaceinvoke $r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>(r1);
+
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r4;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public boolean isCompletelyDirty(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r1;
+        java.awt.Rectangle $r3;
+        javax.swing.RepaintManager r0, $r2;
+        int $i0, $i1;
+        boolean $z0;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        $r2 = specialinvoke r0.<javax.swing.RepaintManager: javax.swing.RepaintManager getDelegate(java.awt.Component)>(r1);
+
+        if $r2 == null goto label1;
+
+        $z0 = virtualinvoke $r2.<javax.swing.RepaintManager: boolean isCompletelyDirty(javax.swing.JComponent)>(r1);
+
+        return $z0;
+
+     label1:
+        $r3 = virtualinvoke r0.<javax.swing.RepaintManager: java.awt.Rectangle getDirtyRegion(javax.swing.JComponent)>(r1);
+
+        $i0 = $r3.<java.awt.Rectangle: int width>;
+
+        if $i0 != 2147483647 goto label2;
+
+        $i1 = $r3.<java.awt.Rectangle: int height>;
+
+        if $i1 != 2147483647 goto label2;
+
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    public void validateInvalidComponents()
+    {
+        java.security.AccessControlContext $r5, $r7;
+        java.lang.Throwable $r10;
+        sun.misc.JavaSecurityAccess $r9;
+        java.awt.Component r4;
+        javax.swing.RepaintManager$3 $r8;
+        sun.awt.AWTAccessor$ComponentAccessor $r6;
+        java.util.List $r1, r2;
+        javax.swing.RepaintManager r0;
+        int $i0, i1;
+        java.lang.Object $r3;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = r0.<javax.swing.RepaintManager: java.util.List invalidComponents>;
+
+        if $r1 != null goto label3;
+
+        exitmonitor r0;
+
+     label2:
+        return;
+
+     label3:
+        r2 = r0.<javax.swing.RepaintManager: java.util.List invalidComponents>;
+
+        r0.<javax.swing.RepaintManager: java.util.List invalidComponents> = null;
+
+        exitmonitor r0;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r10 := @caughtexception;
+
+        exitmonitor r0;
+
+     label6:
+        throw $r10;
+
+     label7:
+        $i0 = interfaceinvoke r2.<java.util.List: int size()>();
+
+        i1 = 0;
+
+     label8:
+        if i1 >= $i0 goto label9;
+
+        $r3 = interfaceinvoke r2.<java.util.List: java.lang.Object get(int)>(i1);
+
+        r4 = (java.awt.Component) $r3;
+
+        $r5 = staticinvoke <java.security.AccessController: java.security.AccessControlContext getContext()>();
+
+        $r6 = staticinvoke <sun.awt.AWTAccessor: sun.awt.AWTAccessor$ComponentAccessor getComponentAccessor()>();
+
+        $r7 = interfaceinvoke $r6.<sun.awt.AWTAccessor$ComponentAccessor: java.security.AccessControlContext getAccessControlContext(java.awt.Component)>(r4);
+
+        $r9 = <javax.swing.RepaintManager: sun.misc.JavaSecurityAccess javaSecurityAccess>;
+
+        $r8 = new javax.swing.RepaintManager$3;
+
+        specialinvoke $r8.<javax.swing.RepaintManager$3: void <init>(javax.swing.RepaintManager,java.awt.Component)>(r0, r4);
+
+        interfaceinvoke $r9.<sun.misc.JavaSecurityAccess: java.lang.Object doIntersectionPrivilege(java.security.PrivilegedAction,java.security.AccessControlContext,java.security.AccessControlContext)>($r8, $r5, $r7);
+
+        i1 = i1 + 1;
+
+        goto label8;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    private void prePaintDirtyRegions()
+    {
+        java.lang.Throwable $r5;
+        java.util.Iterator $r3;
+        java.lang.Runnable r6;
+        java.util.List r2;
+        javax.swing.RepaintManager r0;
+        java.util.Map r1;
+        int $i0;
+        java.lang.Object $r4;
+        boolean $z0;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        entermonitor r0;
+
+     label1:
+        r1 = r0.<javax.swing.RepaintManager: java.util.Map dirtyComponents>;
+
+        r2 = r0.<javax.swing.RepaintManager: java.util.List runnableList>;
+
+        r0.<javax.swing.RepaintManager: java.util.List runnableList> = null;
+
+        exitmonitor r0;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r5;
+
+     label5:
+        if r2 == null goto label7;
+
+        $r3 = interfaceinvoke r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label6:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label7;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (java.lang.Runnable) $r4;
+
+        interfaceinvoke r6.<java.lang.Runnable: void run()>();
+
+        goto label6;
+
+     label7:
+        virtualinvoke r0.<javax.swing.RepaintManager: void paintDirtyRegions()>();
+
+        $i0 = interfaceinvoke r1.<java.util.Map: int size()>();
+
+        if $i0 <= 0 goto label8;
+
+        specialinvoke r0.<javax.swing.RepaintManager: void paintDirtyRegions(java.util.Map)>(r1);
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private void updateWindows(java.util.Map)
+    {
+        java.util.HashSet $r2;
+        java.util.Map r3;
+        sun.awt.AWTAccessor$WindowAccessor $r8;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.util.Iterator $r5, $r6;
+        java.awt.Window $r12, r13;
+        java.util.Set $r4;
+        sun.awt.SunToolkit $r1;
+        java.awt.Component r11;
+        javax.swing.RepaintManager r10;
+        java.lang.Object $r7, $r9;
+        java.awt.Toolkit $r0;
+
+        r10 := @this: javax.swing.RepaintManager;
+
+        r3 := @parameter0: java.util.Map;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $z0 = $r0 instanceof sun.awt.SunToolkit;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = (sun.awt.SunToolkit) $r0;
+
+        $z1 = virtualinvoke $r1.<sun.awt.SunToolkit: boolean needUpdateWindow()>();
+
+        if $z1 != 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        $r2 = new java.util.HashSet;
+
+        specialinvoke $r2.<java.util.HashSet: void <init>()>();
+
+        $r4 = interfaceinvoke r3.<java.util.Map: java.util.Set keySet()>();
+
+        $r5 = interfaceinvoke $r4.<java.util.Set: java.util.Iterator iterator()>();
+
+     label3:
+        $z2 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label7;
+
+        $r9 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r11 = (java.awt.Component) $r9;
+
+        $z4 = r11 instanceof java.awt.Window;
+
+        if $z4 == 0 goto label4;
+
+        $r12 = (java.awt.Window) r11;
+
+        goto label5;
+
+     label4:
+        $r12 = staticinvoke <javax.swing.SwingUtilities: java.awt.Window getWindowAncestor(java.awt.Component)>(r11);
+
+     label5:
+        if $r12 == null goto label6;
+
+        $z5 = virtualinvoke $r12.<java.awt.Window: boolean isOpaque()>();
+
+        if $z5 != 0 goto label6;
+
+        interfaceinvoke $r2.<java.util.Set: boolean add(java.lang.Object)>($r12);
+
+     label6:
+        goto label3;
+
+     label7:
+        $r6 = interfaceinvoke $r2.<java.util.Set: java.util.Iterator iterator()>();
+
+     label8:
+        $z3 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label9;
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r13 = (java.awt.Window) $r7;
+
+        $r8 = staticinvoke <sun.awt.AWTAccessor: sun.awt.AWTAccessor$WindowAccessor getWindowAccessor()>();
+
+        interfaceinvoke $r8.<sun.awt.AWTAccessor$WindowAccessor: void updateWindow(java.awt.Window)>(r13);
+
+        goto label8;
+
+     label9:
+        return;
+    }
+
+    boolean isPainting()
+    {
+        javax.swing.RepaintManager r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        $z0 = r0.<javax.swing.RepaintManager: boolean painting>;
+
+        return $z0;
+    }
+
+    public void paintDirtyRegions()
+    {
+        java.lang.Throwable $r5;
+        javax.swing.RepaintManager r0;
+        java.util.Map r1, $r2, $r3, $r4;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        entermonitor r0;
+
+     label1:
+        r1 = r0.<javax.swing.RepaintManager: java.util.Map tmpDirtyComponents>;
+
+        $r2 = r0.<javax.swing.RepaintManager: java.util.Map dirtyComponents>;
+
+        r0.<javax.swing.RepaintManager: java.util.Map tmpDirtyComponents> = $r2;
+
+        r0.<javax.swing.RepaintManager: java.util.Map dirtyComponents> = r1;
+
+        $r3 = r0.<javax.swing.RepaintManager: java.util.Map dirtyComponents>;
+
+        interfaceinvoke $r3.<java.util.Map: void clear()>();
+
+        exitmonitor r0;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r5;
+
+     label5:
+        $r4 = r0.<javax.swing.RepaintManager: java.util.Map tmpDirtyComponents>;
+
+        specialinvoke r0.<javax.swing.RepaintManager: void paintDirtyRegions(java.util.Map)>($r4);
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private void paintDirtyRegions(java.util.Map)
+    {
+        java.security.AccessControlContext $r8, $r10;
+        java.lang.Throwable $r14;
+        sun.misc.JavaSecurityAccess $r12;
+        sun.awt.AWTAccessor$ComponentAccessor $r9;
+        java.util.ArrayList $r1;
+        java.util.concurrent.atomic.AtomicInteger $r4;
+        java.util.Map r0;
+        int $i0, $i1, $i2, i3;
+        boolean $z0, $z1;
+        java.util.Iterator $r3;
+        java.util.Set $r2;
+        java.awt.Component r7, r15;
+        javax.swing.RepaintManager$4 $r11;
+        javax.swing.RepaintManager r5;
+        java.lang.Object $r6, $r13;
+
+        r5 := @this: javax.swing.RepaintManager;
+
+        r0 := @parameter0: java.util.Map;
+
+        $z0 = interfaceinvoke r0.<java.util.Map: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = new java.util.ArrayList;
+
+        $i0 = interfaceinvoke r0.<java.util.Map: int size()>();
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>(int)>($i0);
+
+        $r2 = interfaceinvoke r0.<java.util.Map: java.util.Set keySet()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Set: java.util.Iterator iterator()>();
+
+     label2:
+        $z1 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label3;
+
+        $r13 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r15 = (java.awt.Component) $r13;
+
+        virtualinvoke r5.<javax.swing.RepaintManager: void collectDirtyComponents(java.util.Map,java.awt.Component,java.util.List)>(r0, r15, $r1);
+
+        goto label2;
+
+     label3:
+        $r4 = new java.util.concurrent.atomic.AtomicInteger;
+
+        $i1 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        specialinvoke $r4.<java.util.concurrent.atomic.AtomicInteger: void <init>(int)>($i1);
+
+        r5.<javax.swing.RepaintManager: boolean painting> = 1;
+
+     label4:
+        i3 = 0;
+
+     label5:
+        $i2 = virtualinvoke $r4.<java.util.concurrent.atomic.AtomicInteger: int get()>();
+
+        if i3 >= $i2 goto label6;
+
+        $r6 = interfaceinvoke $r1.<java.util.List: java.lang.Object get(int)>(i3);
+
+        r7 = (java.awt.Component) $r6;
+
+        $r8 = staticinvoke <java.security.AccessController: java.security.AccessControlContext getContext()>();
+
+        $r9 = staticinvoke <sun.awt.AWTAccessor: sun.awt.AWTAccessor$ComponentAccessor getComponentAccessor()>();
+
+        $r10 = interfaceinvoke $r9.<sun.awt.AWTAccessor$ComponentAccessor: java.security.AccessControlContext getAccessControlContext(java.awt.Component)>(r7);
+
+        $r12 = <javax.swing.RepaintManager: sun.misc.JavaSecurityAccess javaSecurityAccess>;
+
+        $r11 = new javax.swing.RepaintManager$4;
+
+        specialinvoke $r11.<javax.swing.RepaintManager$4: void <init>(javax.swing.RepaintManager,java.util.Map,java.awt.Component,java.util.List,int,java.util.concurrent.atomic.AtomicInteger)>(r5, r0, r7, $r1, i3, $r4);
+
+        interfaceinvoke $r12.<sun.misc.JavaSecurityAccess: java.lang.Object doIntersectionPrivilege(java.security.PrivilegedAction,java.security.AccessControlContext,java.security.AccessControlContext)>($r11, $r8, $r10);
+
+        i3 = i3 + 1;
+
+        goto label5;
+
+     label6:
+        r5.<javax.swing.RepaintManager: boolean painting> = 0;
+
+        goto label9;
+
+     label7:
+        $r14 := @caughtexception;
+
+     label8:
+        r5.<javax.swing.RepaintManager: boolean painting> = 0;
+
+        throw $r14;
+
+     label9:
+        specialinvoke r5.<javax.swing.RepaintManager: void updateWindows(java.util.Map)>(r0);
+
+        interfaceinvoke r0.<java.util.Map: void clear()>();
+
+        return;
+
+        catch java.lang.Throwable from label4 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    private void adjustRoots(javax.swing.JComponent, java.util.List, int)
+    {
+        javax.swing.JComponent r2;
+        java.awt.Component r4;
+        java.util.List r0;
+        javax.swing.RepaintManager r3;
+        int $i0, i1, i2, $i4;
+        java.lang.Object $r1;
+        boolean $z0;
+
+        r3 := @this: javax.swing.RepaintManager;
+
+        r2 := @parameter0: javax.swing.JComponent;
+
+        r0 := @parameter1: java.util.List;
+
+        i1 := @parameter2: int;
+
+        $i0 = interfaceinvoke r0.<java.util.List: int size()>();
+
+        i2 = $i0 - 1;
+
+     label1:
+        if i2 < i1 goto label6;
+
+        $r1 = interfaceinvoke r0.<java.util.List: java.lang.Object get(int)>(i2);
+
+        r4 = (java.awt.Component) $r1;
+
+     label2:
+        if r4 == r2 goto label4;
+
+        if r4 == null goto label4;
+
+        $z0 = r4 instanceof javax.swing.JComponent;
+
+        if $z0 != 0 goto label3;
+
+        goto label4;
+
+     label3:
+        r4 = virtualinvoke r4.<java.awt.Component: java.awt.Container getParent()>();
+
+        goto label2;
+
+     label4:
+        if r4 != r2 goto label5;
+
+        interfaceinvoke r0.<java.util.List: java.lang.Object remove(int)>(i2);
+
+     label5:
+        $i4 = (int) -1;
+
+        i2 = i2 + $i4;
+
+        goto label1;
+
+     label6:
+        return;
+    }
+
+    void collectDirtyComponents(java.util.Map, java.awt.Component, java.util.List)
+    {
+        java.util.Map r2;
+        boolean $z0, $z1, $z2, $z3;
+        java.awt.Component r0, r26, r27;
+        java.util.List r16;
+        java.awt.Rectangle $r3, $r5, $r6, $r7, $r9, $r10, $r11, $r12, $r13, $r14, $r17, $r18, $r19, r21, $r22, $r23, $r24, $r25;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, i18, i19, i20, i21, i22, i23;
+        java.awt.Container $r8;
+        javax.swing.RepaintManager r1;
+        java.lang.Object $r4, $r15, $r20;
+
+        r1 := @this: javax.swing.RepaintManager;
+
+        r2 := @parameter0: java.util.Map;
+
+        r0 := @parameter1: java.awt.Component;
+
+        r16 := @parameter2: java.util.List;
+
+        r26 = r0;
+
+        r27 = r0;
+
+        i18 = virtualinvoke r0.<java.awt.Component: int getX()>();
+
+        i19 = virtualinvoke r0.<java.awt.Component: int getY()>();
+
+        $i0 = virtualinvoke r0.<java.awt.Component: int getWidth()>();
+
+        $i1 = virtualinvoke r0.<java.awt.Component: int getHeight()>();
+
+        i20 = 0;
+
+        i21 = 0;
+
+        i22 = 0;
+
+        i23 = 0;
+
+        $r3 = r1.<javax.swing.RepaintManager: java.awt.Rectangle tmp>;
+
+        $r4 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r0);
+
+        $r5 = (java.awt.Rectangle) $r4;
+
+        virtualinvoke $r3.<java.awt.Rectangle: void setBounds(java.awt.Rectangle)>($r5);
+
+        $r6 = r1.<javax.swing.RepaintManager: java.awt.Rectangle tmp>;
+
+        staticinvoke <javax.swing.SwingUtilities: java.awt.Rectangle computeIntersection(int,int,int,int,java.awt.Rectangle)>(0, 0, $i0, $i1, $r6);
+
+        $r7 = r1.<javax.swing.RepaintManager: java.awt.Rectangle tmp>;
+
+        $z0 = virtualinvoke $r7.<java.awt.Rectangle: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $z3 = r27 instanceof javax.swing.JComponent;
+
+        if $z3 != 0 goto label2;
+
+        goto label5;
+
+     label2:
+        $r8 = virtualinvoke r27.<java.awt.Component: java.awt.Container getParent()>();
+
+        if $r8 != null goto label3;
+
+        goto label5;
+
+     label3:
+        r27 = $r8;
+
+        i21 = i21 + i18;
+
+        i23 = i23 + i19;
+
+        $r11 = r1.<javax.swing.RepaintManager: java.awt.Rectangle tmp>;
+
+        $r9 = r1.<javax.swing.RepaintManager: java.awt.Rectangle tmp>;
+
+        $i2 = $r9.<java.awt.Rectangle: int x>;
+
+        $i5 = $i2 + i18;
+
+        $r10 = r1.<javax.swing.RepaintManager: java.awt.Rectangle tmp>;
+
+        $i3 = $r10.<java.awt.Rectangle: int y>;
+
+        $i4 = $i3 + i19;
+
+        virtualinvoke $r11.<java.awt.Rectangle: void setLocation(int,int)>($i5, $i4);
+
+        i18 = virtualinvoke $r8.<java.awt.Component: int getX()>();
+
+        i19 = virtualinvoke $r8.<java.awt.Component: int getY()>();
+
+        $i6 = virtualinvoke $r8.<java.awt.Component: int getWidth()>();
+
+        $i7 = virtualinvoke $r8.<java.awt.Component: int getHeight()>();
+
+        $r12 = r1.<javax.swing.RepaintManager: java.awt.Rectangle tmp>;
+
+        $r13 = staticinvoke <javax.swing.SwingUtilities: java.awt.Rectangle computeIntersection(int,int,int,int,java.awt.Rectangle)>(0, 0, $i6, $i7, $r12);
+
+        r1.<javax.swing.RepaintManager: java.awt.Rectangle tmp> = $r13;
+
+        $r14 = r1.<javax.swing.RepaintManager: java.awt.Rectangle tmp>;
+
+        $z1 = virtualinvoke $r14.<java.awt.Rectangle: boolean isEmpty()>();
+
+        if $z1 == 0 goto label4;
+
+        return;
+
+     label4:
+        $r15 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>($r8);
+
+        if $r15 == null goto label1;
+
+        r26 = $r8;
+
+        i20 = i21;
+
+        i22 = i23;
+
+        goto label1;
+
+     label5:
+        if r0 == r26 goto label6;
+
+        $r19 = r1.<javax.swing.RepaintManager: java.awt.Rectangle tmp>;
+
+        $r17 = r1.<javax.swing.RepaintManager: java.awt.Rectangle tmp>;
+
+        $i8 = $r17.<java.awt.Rectangle: int x>;
+
+        $i9 = $i8 + i20;
+
+        $i13 = $i9 - i21;
+
+        $r18 = r1.<javax.swing.RepaintManager: java.awt.Rectangle tmp>;
+
+        $i10 = $r18.<java.awt.Rectangle: int y>;
+
+        $i11 = $i10 + i22;
+
+        $i12 = $i11 - i23;
+
+        virtualinvoke $r19.<java.awt.Rectangle: void setLocation(int,int)>($i13, $i12);
+
+        $r20 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r26);
+
+        r21 = (java.awt.Rectangle) $r20;
+
+        $r22 = r1.<javax.swing.RepaintManager: java.awt.Rectangle tmp>;
+
+        $i17 = $r22.<java.awt.Rectangle: int x>;
+
+        $r23 = r1.<javax.swing.RepaintManager: java.awt.Rectangle tmp>;
+
+        $i16 = $r23.<java.awt.Rectangle: int y>;
+
+        $r24 = r1.<javax.swing.RepaintManager: java.awt.Rectangle tmp>;
+
+        $i15 = $r24.<java.awt.Rectangle: int width>;
+
+        $r25 = r1.<javax.swing.RepaintManager: java.awt.Rectangle tmp>;
+
+        $i14 = $r25.<java.awt.Rectangle: int height>;
+
+        staticinvoke <javax.swing.SwingUtilities: java.awt.Rectangle computeUnion(int,int,int,int,java.awt.Rectangle)>($i17, $i16, $i15, $i14, r21);
+
+     label6:
+        $z2 = interfaceinvoke r16.<java.util.List: boolean contains(java.lang.Object)>(r26);
+
+        if $z2 != 0 goto label7;
+
+        interfaceinvoke r16.<java.util.List: boolean add(java.lang.Object)>(r26);
+
+     label7:
+        return;
+    }
+
+    public synchronized java.lang.String toString()
+    {
+        java.lang.StringBuffer $r0;
+        javax.swing.RepaintManager r1;
+        java.util.Map $r2, $r6;
+        java.lang.StringBuilder $r4, $r5, $r7;
+        java.lang.String $r3, $r8;
+
+        r1 := @this: javax.swing.RepaintManager;
+
+        $r0 = new java.lang.StringBuffer;
+
+        specialinvoke $r0.<java.lang.StringBuffer: void <init>()>();
+
+        $r2 = r1.<javax.swing.RepaintManager: java.util.Map dirtyComponents>;
+
+        if $r2 == null goto label1;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r6 = r1.<javax.swing.RepaintManager: java.util.Map dirtyComponents>;
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r8);
+
+     label1:
+        $r3 = virtualinvoke $r0.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r3;
+    }
+
+    public java.awt.Image getOffscreenBuffer(java.awt.Component, int, int)
+    {
+        java.awt.Image $r3, $r4;
+        javax.swing.RepaintManager r0, $r2;
+        int i0, i1;
+        java.awt.Component r1;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r1 := @parameter0: java.awt.Component;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r2 = specialinvoke r0.<javax.swing.RepaintManager: javax.swing.RepaintManager getDelegate(java.awt.Component)>(r1);
+
+        if $r2 == null goto label1;
+
+        $r4 = virtualinvoke $r2.<javax.swing.RepaintManager: java.awt.Image getOffscreenBuffer(java.awt.Component,int,int)>(r1, i0, i1);
+
+        return $r4;
+
+     label1:
+        $r3 = specialinvoke r0.<javax.swing.RepaintManager: java.awt.Image _getOffscreenBuffer(java.awt.Component,int,int)>(r1, i0, i1);
+
+        return $r3;
+    }
+
+    public java.awt.Image getVolatileOffscreenBuffer(java.awt.Component, int, int)
+    {
+        java.awt.GraphicsEnvironment $r6;
+        java.util.Map $r5, $r14;
+        boolean $z0, $z1, $z2, $z3;
+        java.awt.GraphicsConfiguration $r12, r13;
+        java.awt.Image $r10;
+        java.awt.Component r1;
+        sun.awt.SunToolkit $r9;
+        java.awt.image.VolatileImage $r4, $r16, r17;
+        java.awt.Dimension $r3;
+        java.awt.Toolkit $r8;
+        java.awt.GraphicsDevice $r7;
+        int i0, $i1, i2, i3, $i4, i5, $i6, $i7, $i8, $i9, $i10;
+        java.awt.Window $r11;
+        javax.swing.RepaintManager r0, $r2;
+        java.lang.Object $r15;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r1 := @parameter0: java.awt.Component;
+
+        i0 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        $r2 = specialinvoke r0.<javax.swing.RepaintManager: javax.swing.RepaintManager getDelegate(java.awt.Component)>(r1);
+
+        if $r2 == null goto label01;
+
+        $r10 = virtualinvoke $r2.<javax.swing.RepaintManager: java.awt.Image getVolatileOffscreenBuffer(java.awt.Component,int,int)>(r1, i0, i3);
+
+        return $r10;
+
+     label01:
+        $z0 = r1 instanceof java.awt.Window;
+
+        if $z0 == 0 goto label02;
+
+        $r11 = (java.awt.Window) r1;
+
+        goto label03;
+
+     label02:
+        $r11 = staticinvoke <javax.swing.SwingUtilities: java.awt.Window getWindowAncestor(java.awt.Component)>(r1);
+
+     label03:
+        $z1 = virtualinvoke $r11.<java.awt.Window: boolean isOpaque()>();
+
+        if $z1 != 0 goto label04;
+
+        $r8 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $z2 = $r8 instanceof sun.awt.SunToolkit;
+
+        if $z2 == 0 goto label04;
+
+        $r9 = (sun.awt.SunToolkit) $r8;
+
+        $z3 = virtualinvoke $r9.<sun.awt.SunToolkit: boolean needUpdateWindow()>();
+
+        if $z3 == 0 goto label04;
+
+        return null;
+
+     label04:
+        $r12 = virtualinvoke r1.<java.awt.Component: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+        r13 = $r12;
+
+        if $r12 != null goto label05;
+
+        $r6 = staticinvoke <java.awt.GraphicsEnvironment: java.awt.GraphicsEnvironment getLocalGraphicsEnvironment()>();
+
+        $r7 = virtualinvoke $r6.<java.awt.GraphicsEnvironment: java.awt.GraphicsDevice getDefaultScreenDevice()>();
+
+        r13 = virtualinvoke $r7.<java.awt.GraphicsDevice: java.awt.GraphicsConfiguration getDefaultConfiguration()>();
+
+     label05:
+        $r3 = virtualinvoke r0.<javax.swing.RepaintManager: java.awt.Dimension getDoubleBufferMaximumSize()>();
+
+        if i0 >= 1 goto label06;
+
+        $i9 = 1;
+
+        goto label08;
+
+     label06:
+        $i1 = $r3.<java.awt.Dimension: int width>;
+
+        if i0 <= $i1 goto label07;
+
+        $i9 = $r3.<java.awt.Dimension: int width>;
+
+        goto label08;
+
+     label07:
+        $i9 = i0;
+
+     label08:
+        i2 = $i9;
+
+        if i3 >= 1 goto label09;
+
+        $i10 = 1;
+
+        goto label11;
+
+     label09:
+        $i4 = $r3.<java.awt.Dimension: int height>;
+
+        if i3 <= $i4 goto label10;
+
+        $i10 = $r3.<java.awt.Dimension: int height>;
+
+        goto label11;
+
+     label10:
+        $i10 = i3;
+
+     label11:
+        i5 = $i10;
+
+        $r14 = r0.<javax.swing.RepaintManager: java.util.Map volatileMap>;
+
+        $r15 = interfaceinvoke $r14.<java.util.Map: java.lang.Object get(java.lang.Object)>(r13);
+
+        $r16 = (java.awt.image.VolatileImage) $r15;
+
+        r17 = $r16;
+
+        if $r16 == null goto label12;
+
+        $i7 = virtualinvoke $r16.<java.awt.image.VolatileImage: int getWidth()>();
+
+        if $i7 < i2 goto label12;
+
+        $i8 = virtualinvoke $r16.<java.awt.image.VolatileImage: int getHeight()>();
+
+        if $i8 >= $i10 goto label14;
+
+     label12:
+        if $r16 == null goto label13;
+
+        virtualinvoke $r16.<java.awt.image.VolatileImage: void flush()>();
+
+     label13:
+        $i6 = <javax.swing.RepaintManager: int volatileBufferType>;
+
+        $r4 = virtualinvoke r13.<java.awt.GraphicsConfiguration: java.awt.image.VolatileImage createCompatibleVolatileImage(int,int,int)>(i2, i5, $i6);
+
+        r17 = $r4;
+
+        $r5 = r0.<javax.swing.RepaintManager: java.util.Map volatileMap>;
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r13, $r4);
+
+     label14:
+        return r17;
+    }
+
+    private java.awt.Image _getOffscreenBuffer(java.awt.Component, int, int)
+    {
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.awt.Image $r5, $r8, $r9, $r18, r19, $r20;
+        java.awt.Component r2;
+        sun.awt.SunToolkit $r15;
+        java.awt.Dimension $r1, $r3, $r4, $r6, $r10, $r11;
+        java.awt.Toolkit $r14;
+        javax.swing.RepaintManager$DoubleBufferInfo $r12, $r13, $r17;
+        int i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, $i10, i11;
+        javax.swing.JComponent $r7;
+        java.awt.Window $r16;
+        javax.swing.RepaintManager r0;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r2 := @parameter0: java.awt.Component;
+
+        i0 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $r1 = virtualinvoke r0.<javax.swing.RepaintManager: java.awt.Dimension getDoubleBufferMaximumSize()>();
+
+        $z0 = r2 instanceof java.awt.Window;
+
+        if $z0 == 0 goto label01;
+
+        $r16 = (java.awt.Window) r2;
+
+        goto label02;
+
+     label01:
+        $r16 = staticinvoke <javax.swing.SwingUtilities: java.awt.Window getWindowAncestor(java.awt.Component)>(r2);
+
+     label02:
+        $z1 = virtualinvoke $r16.<java.awt.Window: boolean isOpaque()>();
+
+        if $z1 != 0 goto label03;
+
+        $r14 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $z3 = $r14 instanceof sun.awt.SunToolkit;
+
+        if $z3 == 0 goto label03;
+
+        $r15 = (sun.awt.SunToolkit) $r14;
+
+        $z4 = virtualinvoke $r15.<sun.awt.SunToolkit: boolean needUpdateWindow()>();
+
+        if $z4 == 0 goto label03;
+
+        return null;
+
+     label03:
+        $r17 = r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$DoubleBufferInfo standardDoubleBuffer>;
+
+        if $r17 != null goto label04;
+
+        $r12 = new javax.swing.RepaintManager$DoubleBufferInfo;
+
+        specialinvoke $r12.<javax.swing.RepaintManager$DoubleBufferInfo: void <init>(javax.swing.RepaintManager,javax.swing.RepaintManager$1)>(r0, null);
+
+        r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$DoubleBufferInfo standardDoubleBuffer> = $r12;
+
+     label04:
+        $r13 = r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$DoubleBufferInfo standardDoubleBuffer>;
+
+        if i0 >= 1 goto label05;
+
+        $i8 = 1;
+
+        goto label07;
+
+     label05:
+        $i1 = $r1.<java.awt.Dimension: int width>;
+
+        if i0 <= $i1 goto label06;
+
+        $i8 = $r1.<java.awt.Dimension: int width>;
+
+        goto label07;
+
+     label06:
+        $i8 = i0;
+
+     label07:
+        i9 = $i8;
+
+        if i2 >= 1 goto label08;
+
+        $i10 = 1;
+
+        goto label10;
+
+     label08:
+        $i3 = $r1.<java.awt.Dimension: int height>;
+
+        if i2 <= $i3 goto label09;
+
+        $i10 = $r1.<java.awt.Dimension: int height>;
+
+        goto label10;
+
+     label09:
+        $i10 = i2;
+
+     label10:
+        i11 = $i10;
+
+        $z5 = $r13.<javax.swing.RepaintManager$DoubleBufferInfo: boolean needsReset>;
+
+        if $z5 != 0 goto label11;
+
+        $r9 = $r13.<javax.swing.RepaintManager$DoubleBufferInfo: java.awt.Image image>;
+
+        if $r9 == null goto label13;
+
+        $r10 = $r13.<javax.swing.RepaintManager$DoubleBufferInfo: java.awt.Dimension size>;
+
+        $i6 = $r10.<java.awt.Dimension: int width>;
+
+        if $i6 < i9 goto label11;
+
+        $r11 = $r13.<javax.swing.RepaintManager$DoubleBufferInfo: java.awt.Dimension size>;
+
+        $i7 = $r11.<java.awt.Dimension: int height>;
+
+        if $i7 >= $i10 goto label13;
+
+     label11:
+        $r13.<javax.swing.RepaintManager$DoubleBufferInfo: boolean needsReset> = 0;
+
+        $r18 = $r13.<javax.swing.RepaintManager$DoubleBufferInfo: java.awt.Image image>;
+
+        if $r18 == null goto label12;
+
+        $r8 = $r13.<javax.swing.RepaintManager$DoubleBufferInfo: java.awt.Image image>;
+
+        virtualinvoke $r8.<java.awt.Image: void flush()>();
+
+        $r13.<javax.swing.RepaintManager$DoubleBufferInfo: java.awt.Image image> = null;
+
+     label12:
+        $r3 = $r13.<javax.swing.RepaintManager$DoubleBufferInfo: java.awt.Dimension size>;
+
+        $i4 = $r3.<java.awt.Dimension: int width>;
+
+        i9 = staticinvoke <java.lang.Math: int max(int,int)>($i4, i9);
+
+        $r4 = $r13.<javax.swing.RepaintManager$DoubleBufferInfo: java.awt.Dimension size>;
+
+        $i5 = $r4.<java.awt.Dimension: int height>;
+
+        i11 = staticinvoke <java.lang.Math: int max(int,int)>($i5, i11);
+
+     label13:
+        r19 = $r13.<javax.swing.RepaintManager$DoubleBufferInfo: java.awt.Image image>;
+
+        $r20 = $r13.<javax.swing.RepaintManager$DoubleBufferInfo: java.awt.Image image>;
+
+        if $r20 != null goto label14;
+
+        $r5 = virtualinvoke r2.<java.awt.Component: java.awt.Image createImage(int,int)>(i9, i11);
+
+        r19 = $r5;
+
+        $r6 = new java.awt.Dimension;
+
+        specialinvoke $r6.<java.awt.Dimension: void <init>(int,int)>(i9, i11);
+
+        $r13.<javax.swing.RepaintManager$DoubleBufferInfo: java.awt.Dimension size> = $r6;
+
+        $z2 = r2 instanceof javax.swing.JComponent;
+
+        if $z2 == 0 goto label14;
+
+        $r7 = (javax.swing.JComponent) r2;
+
+        virtualinvoke $r7.<javax.swing.JComponent: void setCreatedDoubleBuffer(boolean)>(1);
+
+        $r13.<javax.swing.RepaintManager$DoubleBufferInfo: java.awt.Image image> = $r5;
+
+     label14:
+        return r19;
+    }
+
+    public void setDoubleBufferMaximumSize(java.awt.Dimension)
+    {
+        java.awt.Dimension r1, $r2;
+        javax.swing.RepaintManager r0;
+        int $i0, $i1;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r1 := @parameter0: java.awt.Dimension;
+
+        r0.<javax.swing.RepaintManager: java.awt.Dimension doubleBufferMaxSize> = r1;
+
+        $r2 = r0.<javax.swing.RepaintManager: java.awt.Dimension doubleBufferMaxSize>;
+
+        if $r2 != null goto label1;
+
+        specialinvoke r0.<javax.swing.RepaintManager: void clearImages()>();
+
+        goto label2;
+
+     label1:
+        $i1 = r1.<java.awt.Dimension: int width>;
+
+        $i0 = r1.<java.awt.Dimension: int height>;
+
+        specialinvoke r0.<javax.swing.RepaintManager: void clearImages(int,int)>($i1, $i0);
+
+     label2:
+        return;
+    }
+
+    private void clearImages()
+    {
+        javax.swing.RepaintManager r0;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        specialinvoke r0.<javax.swing.RepaintManager: void clearImages(int,int)>(0, 0);
+
+        return;
+    }
+
+    private void clearImages(int, int)
+    {
+        javax.swing.RepaintManager$DoubleBufferInfo $r1, $r7, $r9, $r11, $r13, $r14;
+        java.util.Map $r4, $r16;
+        int $i0, i1, $i2, i3, $i4, $i5;
+        boolean $z0;
+        java.awt.GraphicsConfiguration r3;
+        java.util.Iterator $r18;
+        java.awt.Image $r8, $r10, $r12, $r15;
+        java.util.Set $r17;
+        java.awt.image.VolatileImage r6;
+        javax.swing.RepaintManager r0;
+        java.lang.Object $r2, $r5;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        i1 := @parameter0: int;
+
+        i3 := @parameter1: int;
+
+        $r1 = r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$DoubleBufferInfo standardDoubleBuffer>;
+
+        if $r1 == null goto label2;
+
+        $r7 = r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$DoubleBufferInfo standardDoubleBuffer>;
+
+        $r8 = $r7.<javax.swing.RepaintManager$DoubleBufferInfo: java.awt.Image image>;
+
+        if $r8 == null goto label2;
+
+        $r9 = r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$DoubleBufferInfo standardDoubleBuffer>;
+
+        $r10 = $r9.<javax.swing.RepaintManager$DoubleBufferInfo: java.awt.Image image>;
+
+        $i4 = virtualinvoke $r10.<java.awt.Image: int getWidth(java.awt.image.ImageObserver)>(null);
+
+        if $i4 > i1 goto label1;
+
+        $r14 = r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$DoubleBufferInfo standardDoubleBuffer>;
+
+        $r15 = $r14.<javax.swing.RepaintManager$DoubleBufferInfo: java.awt.Image image>;
+
+        $i5 = virtualinvoke $r15.<java.awt.Image: int getHeight(java.awt.image.ImageObserver)>(null);
+
+        if $i5 <= i3 goto label2;
+
+     label1:
+        $r11 = r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$DoubleBufferInfo standardDoubleBuffer>;
+
+        $r12 = $r11.<javax.swing.RepaintManager$DoubleBufferInfo: java.awt.Image image>;
+
+        virtualinvoke $r12.<java.awt.Image: void flush()>();
+
+        $r13 = r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$DoubleBufferInfo standardDoubleBuffer>;
+
+        $r13.<javax.swing.RepaintManager$DoubleBufferInfo: java.awt.Image image> = null;
+
+     label2:
+        $r16 = r0.<javax.swing.RepaintManager: java.util.Map volatileMap>;
+
+        $r17 = interfaceinvoke $r16.<java.util.Map: java.util.Set keySet()>();
+
+        $r18 = interfaceinvoke $r17.<java.util.Set: java.util.Iterator iterator()>();
+
+     label3:
+        $z0 = interfaceinvoke $r18.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label6;
+
+        $r2 = interfaceinvoke $r18.<java.util.Iterator: java.lang.Object next()>();
+
+        r3 = (java.awt.GraphicsConfiguration) $r2;
+
+        $r4 = r0.<javax.swing.RepaintManager: java.util.Map volatileMap>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Map: java.lang.Object get(java.lang.Object)>(r3);
+
+        r6 = (java.awt.image.VolatileImage) $r5;
+
+        $i0 = virtualinvoke r6.<java.awt.image.VolatileImage: int getWidth()>();
+
+        if $i0 > i1 goto label4;
+
+        $i2 = virtualinvoke r6.<java.awt.image.VolatileImage: int getHeight()>();
+
+        if $i2 <= i3 goto label5;
+
+     label4:
+        virtualinvoke r6.<java.awt.image.VolatileImage: void flush()>();
+
+        interfaceinvoke $r18.<java.util.Iterator: void remove()>();
+
+     label5:
+        goto label3;
+
+     label6:
+        return;
+    }
+
+    public java.awt.Dimension getDoubleBufferMaximumSize()
+    {
+        java.awt.Rectangle $r2, $r8, r11;
+        java.awt.GraphicsDevice r6;
+        java.awt.GraphicsEnvironment $r3;
+        java.awt.GraphicsDevice[] $r4;
+        int i0, $i1, $i2, i3;
+        java.awt.HeadlessException $r9;
+        java.awt.GraphicsConfiguration $r7;
+        java.awt.Dimension $r1, $r5, $r10, $r12;
+        javax.swing.RepaintManager r0;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        $r1 = r0.<javax.swing.RepaintManager: java.awt.Dimension doubleBufferMaxSize>;
+
+        if $r1 != null goto label6;
+
+     label1:
+        $r2 = new java.awt.Rectangle;
+
+        specialinvoke $r2.<java.awt.Rectangle: void <init>()>();
+
+        r11 = $r2;
+
+        $r3 = staticinvoke <java.awt.GraphicsEnvironment: java.awt.GraphicsEnvironment getLocalGraphicsEnvironment()>();
+
+        $r4 = virtualinvoke $r3.<java.awt.GraphicsEnvironment: java.awt.GraphicsDevice[] getScreenDevices()>();
+
+        i0 = lengthof $r4;
+
+        i3 = 0;
+
+     label2:
+        if i3 >= i0 goto label3;
+
+        r6 = $r4[i3];
+
+        $r7 = virtualinvoke r6.<java.awt.GraphicsDevice: java.awt.GraphicsConfiguration getDefaultConfiguration()>();
+
+        $r8 = virtualinvoke $r7.<java.awt.GraphicsConfiguration: java.awt.Rectangle getBounds()>();
+
+        r11 = virtualinvoke r11.<java.awt.Rectangle: java.awt.Rectangle union(java.awt.Rectangle)>($r8);
+
+        i3 = i3 + 1;
+
+        goto label2;
+
+     label3:
+        $r5 = new java.awt.Dimension;
+
+        $i2 = r11.<java.awt.Rectangle: int width>;
+
+        $i1 = r11.<java.awt.Rectangle: int height>;
+
+        specialinvoke $r5.<java.awt.Dimension: void <init>(int,int)>($i2, $i1);
+
+        r0.<javax.swing.RepaintManager: java.awt.Dimension doubleBufferMaxSize> = $r5;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r9 := @caughtexception;
+
+        $r10 = new java.awt.Dimension;
+
+        specialinvoke $r10.<java.awt.Dimension: void <init>(int,int)>(2147483647, 2147483647);
+
+        r0.<javax.swing.RepaintManager: java.awt.Dimension doubleBufferMaxSize> = $r10;
+
+     label6:
+        $r12 = r0.<javax.swing.RepaintManager: java.awt.Dimension doubleBufferMaxSize>;
+
+        return $r12;
+
+        catch java.awt.HeadlessException from label1 to label4 with label5;
+    }
+
+    public void setDoubleBufferingEnabled(boolean)
+    {
+        javax.swing.RepaintManager$PaintManager $r1, $r3;
+        javax.swing.RepaintManager r0;
+        java.lang.Class $r2;
+        boolean z0;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        z0 := @parameter0: boolean;
+
+        r0.<javax.swing.RepaintManager: boolean doubleBufferingEnabled> = z0;
+
+        $r1 = specialinvoke r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$PaintManager getPaintManager()>();
+
+        if z0 != 0 goto label1;
+
+        $r2 = virtualinvoke $r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        if $r2 == class "Ljavax/swing/RepaintManager$PaintManager;" goto label1;
+
+        $r3 = new javax.swing.RepaintManager$PaintManager;
+
+        specialinvoke $r3.<javax.swing.RepaintManager$PaintManager: void <init>()>();
+
+        virtualinvoke r0.<javax.swing.RepaintManager: void setPaintManager(javax.swing.RepaintManager$PaintManager)>($r3);
+
+     label1:
+        return;
+    }
+
+    public boolean isDoubleBufferingEnabled()
+    {
+        javax.swing.RepaintManager r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        $z0 = r0.<javax.swing.RepaintManager: boolean doubleBufferingEnabled>;
+
+        return $z0;
+    }
+
+    void resetDoubleBuffer()
+    {
+        javax.swing.RepaintManager r0;
+        javax.swing.RepaintManager$DoubleBufferInfo $r1, $r2;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        $r1 = r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$DoubleBufferInfo standardDoubleBuffer>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$DoubleBufferInfo standardDoubleBuffer>;
+
+        $r2.<javax.swing.RepaintManager$DoubleBufferInfo: boolean needsReset> = 1;
+
+     label1:
+        return;
+    }
+
+    void resetVolatileDoubleBuffer(java.awt.GraphicsConfiguration)
+    {
+        java.awt.GraphicsConfiguration r1;
+        java.awt.Image r4;
+        javax.swing.RepaintManager r0;
+        java.util.Map $r2;
+        java.lang.Object $r3;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r1 := @parameter0: java.awt.GraphicsConfiguration;
+
+        $r2 = r0.<javax.swing.RepaintManager: java.util.Map volatileMap>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object remove(java.lang.Object)>(r1);
+
+        r4 = (java.awt.Image) $r3;
+
+        if r4 == null goto label1;
+
+        virtualinvoke r4.<java.awt.Image: void flush()>();
+
+     label1:
+        return;
+    }
+
+    boolean useVolatileDoubleBuffer()
+    {
+        javax.swing.RepaintManager r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        $z0 = <javax.swing.RepaintManager: boolean volatileImageBufferEnabled>;
+
+        return $z0;
+    }
+
+    private synchronized boolean isPaintingThread()
+    {
+        javax.swing.RepaintManager r1;
+        java.lang.Thread $r0, $r2;
+        boolean $z0;
+
+        r1 := @this: javax.swing.RepaintManager;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = r1.<javax.swing.RepaintManager: java.lang.Thread paintThread>;
+
+        if $r0 != $r2 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    void paint(javax.swing.JComponent, javax.swing.JComponent, java.awt.Graphics, int, int, int, int)
+    {
+        int i0, i1, i2, i3, $i4, $i5;
+        boolean $z0, $z1;
+        javax.swing.JComponent r2, r3;
+        javax.swing.RepaintManager$PaintManager $r1, $r6, r7;
+        javax.swing.RepaintManager r0;
+        java.awt.Graphics r4;
+        java.lang.Class $r5;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r2 := @parameter0: javax.swing.JComponent;
+
+        r3 := @parameter1: javax.swing.JComponent;
+
+        r4 := @parameter2: java.awt.Graphics;
+
+        i0 := @parameter3: int;
+
+        i1 := @parameter4: int;
+
+        i2 := @parameter5: int;
+
+        i3 := @parameter6: int;
+
+        $r1 = specialinvoke r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$PaintManager getPaintManager()>();
+
+        r7 = $r1;
+
+        $z0 = specialinvoke r0.<javax.swing.RepaintManager: boolean isPaintingThread()>();
+
+        if $z0 != 0 goto label1;
+
+        $r5 = virtualinvoke $r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        if $r5 == class "Ljavax/swing/RepaintManager$PaintManager;" goto label1;
+
+        $r6 = new javax.swing.RepaintManager$PaintManager;
+
+        specialinvoke $r6.<javax.swing.RepaintManager$PaintManager: void <init>()>();
+
+        r7 = $r6;
+
+        $r6.<javax.swing.RepaintManager$PaintManager: javax.swing.RepaintManager repaintManager> = r0;
+
+     label1:
+        $z1 = virtualinvoke r7.<javax.swing.RepaintManager$PaintManager: boolean paint(javax.swing.JComponent,javax.swing.JComponent,java.awt.Graphics,int,int,int,int)>(r2, r3, r4, i0, i1, i2, i3);
+
+        if $z1 != 0 goto label2;
+
+        virtualinvoke r4.<java.awt.Graphics: void setClip(int,int,int,int)>(i0, i1, i2, i3);
+
+        $i5 = i0 + i2;
+
+        $i4 = i1 + i3;
+
+        virtualinvoke r2.<javax.swing.JComponent: void paintToOffscreen(java.awt.Graphics,int,int,int,int,int,int)>(r4, i0, i1, i2, i3, $i5, $i4);
+
+     label2:
+        return;
+    }
+
+    void copyArea(javax.swing.JComponent, java.awt.Graphics, int, int, int, int, int, int, boolean)
+    {
+        javax.swing.JComponent r2;
+        javax.swing.RepaintManager$PaintManager $r1;
+        javax.swing.RepaintManager r0;
+        java.awt.Graphics r3;
+        int i0, i1, i2, i3, i4, i5;
+        boolean z0;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r2 := @parameter0: javax.swing.JComponent;
+
+        r3 := @parameter1: java.awt.Graphics;
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        i2 := @parameter4: int;
+
+        i3 := @parameter5: int;
+
+        i4 := @parameter6: int;
+
+        i5 := @parameter7: int;
+
+        z0 := @parameter8: boolean;
+
+        $r1 = specialinvoke r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$PaintManager getPaintManager()>();
+
+        virtualinvoke $r1.<javax.swing.RepaintManager$PaintManager: void copyArea(javax.swing.JComponent,java.awt.Graphics,int,int,int,int,int,int,boolean)>(r2, r3, i0, i1, i2, i3, i4, i5, z0);
+
+        return;
+    }
+
+    private void addRepaintListener(sun.swing.SwingUtilities2$RepaintListener)
+    {
+        java.util.List $r2;
+        javax.swing.RepaintManager r0;
+        sun.swing.SwingUtilities2$RepaintListener r1;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r1 := @parameter0: sun.swing.SwingUtilities2$RepaintListener;
+
+        $r2 = r0.<javax.swing.RepaintManager: java.util.List repaintListeners>;
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    private void removeRepaintListener(sun.swing.SwingUtilities2$RepaintListener)
+    {
+        java.util.List $r2;
+        javax.swing.RepaintManager r0;
+        sun.swing.SwingUtilities2$RepaintListener r1;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r1 := @parameter0: sun.swing.SwingUtilities2$RepaintListener;
+
+        $r2 = r0.<javax.swing.RepaintManager: java.util.List repaintListeners>;
+
+        interfaceinvoke $r2.<java.util.List: boolean remove(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    void notifyRepaintPerformed(javax.swing.JComponent, int, int, int, int)
+    {
+        javax.swing.JComponent r5;
+        java.util.Iterator $r2;
+        java.util.List $r1;
+        javax.swing.RepaintManager r0;
+        sun.swing.SwingUtilities2$RepaintListener r4;
+        int i0, i1, i2, i3;
+        java.lang.Object $r3;
+        boolean $z0;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r5 := @parameter0: javax.swing.JComponent;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        i3 := @parameter4: int;
+
+        $r1 = r0.<javax.swing.RepaintManager: java.util.List repaintListeners>;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (sun.swing.SwingUtilities2$RepaintListener) $r3;
+
+        interfaceinvoke r4.<sun.swing.SwingUtilities2$RepaintListener: void repaintPerformed(javax.swing.JComponent,int,int,int,int)>(r5, i0, i1, i2, i3);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    void beginPaint()
+    {
+        java.lang.Throwable $r5;
+        javax.swing.RepaintManager$PaintManager $r3;
+        javax.swing.RepaintManager r1;
+        java.lang.Thread $r0, $r2, $r4;
+        int i0, $i1, $i2;
+        boolean z0;
+
+        r1 := @this: javax.swing.RepaintManager;
+
+        z0 = 0;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        entermonitor r1;
+
+     label1:
+        i0 = r1.<javax.swing.RepaintManager: int paintDepth>;
+
+        $r2 = r1.<javax.swing.RepaintManager: java.lang.Thread paintThread>;
+
+        if $r2 == null goto label2;
+
+        $r4 = r1.<javax.swing.RepaintManager: java.lang.Thread paintThread>;
+
+        if $r0 != $r4 goto label3;
+
+     label2:
+        r1.<javax.swing.RepaintManager: java.lang.Thread paintThread> = $r0;
+
+        $i1 = r1.<javax.swing.RepaintManager: int paintDepth>;
+
+        $i2 = $i1 + 1;
+
+        r1.<javax.swing.RepaintManager: int paintDepth> = $i2;
+
+        goto label4;
+
+     label3:
+        z0 = 1;
+
+     label4:
+        exitmonitor r1;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r5 := @caughtexception;
+
+        exitmonitor r1;
+
+     label7:
+        throw $r5;
+
+     label8:
+        if z0 != 0 goto label9;
+
+        if i0 != 0 goto label9;
+
+        $r3 = specialinvoke r1.<javax.swing.RepaintManager: javax.swing.RepaintManager$PaintManager getPaintManager()>();
+
+        virtualinvoke $r3.<javax.swing.RepaintManager$PaintManager: void beginPaint()>();
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    void endPaint()
+    {
+        java.lang.Throwable $r1, $r2;
+        javax.swing.RepaintManager$PaintManager r3;
+        javax.swing.RepaintManager r0;
+        int $i0, $i1;
+        boolean $z0;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        $z0 = specialinvoke r0.<javax.swing.RepaintManager: boolean isPaintingThread()>();
+
+        if $z0 == 0 goto label11;
+
+        r3 = null;
+
+        entermonitor r0;
+
+     label01:
+        $i0 = r0.<javax.swing.RepaintManager: int paintDepth>;
+
+        $i1 = $i0 - 1;
+
+        r0.<javax.swing.RepaintManager: int paintDepth> = $i1;
+
+        if $i1 != 0 goto label02;
+
+        r3 = specialinvoke r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$PaintManager getPaintManager()>();
+
+     label02:
+        exitmonitor r0;
+
+     label03:
+        goto label06;
+
+     label04:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+     label05:
+        throw $r2;
+
+     label06:
+        if r3 == null goto label11;
+
+        virtualinvoke r3.<javax.swing.RepaintManager$PaintManager: void endPaint()>();
+
+        entermonitor r0;
+
+     label07:
+        r0.<javax.swing.RepaintManager: java.lang.Thread paintThread> = null;
+
+        exitmonitor r0;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+     label10:
+        throw $r1;
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label01 to label03 with label04;
+        catch java.lang.Throwable from label04 to label05 with label04;
+        catch java.lang.Throwable from label07 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    boolean show(java.awt.Container, int, int, int, int)
+    {
+        javax.swing.RepaintManager$PaintManager $r1;
+        javax.swing.RepaintManager r0;
+        int i0, i1, i2, i3;
+        java.awt.Container r2;
+        boolean $z0;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r2 := @parameter0: java.awt.Container;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        i3 := @parameter4: int;
+
+        $r1 = specialinvoke r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$PaintManager getPaintManager()>();
+
+        $z0 = virtualinvoke $r1.<javax.swing.RepaintManager$PaintManager: boolean show(java.awt.Container,int,int,int,int)>(r2, i0, i1, i2, i3);
+
+        return $z0;
+    }
+
+    void doubleBufferingChanged(javax.swing.JRootPane)
+    {
+        javax.swing.JRootPane r2;
+        javax.swing.RepaintManager$PaintManager $r1;
+        javax.swing.RepaintManager r0;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r2 := @parameter0: javax.swing.JRootPane;
+
+        $r1 = specialinvoke r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$PaintManager getPaintManager()>();
+
+        virtualinvoke $r1.<javax.swing.RepaintManager$PaintManager: void doubleBufferingChanged(javax.swing.JRootPane)>(r2);
+
+        return;
+    }
+
+    void setPaintManager(javax.swing.RepaintManager$PaintManager)
+    {
+        java.lang.Throwable $r3;
+        javax.swing.RepaintManager$PaintManager $r1, $r2, r4;
+        javax.swing.RepaintManager r0;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r4 := @parameter0: javax.swing.RepaintManager$PaintManager;
+
+        if r4 != null goto label1;
+
+        $r1 = new javax.swing.RepaintManager$PaintManager;
+
+        specialinvoke $r1.<javax.swing.RepaintManager$PaintManager: void <init>()>();
+
+        r4 = $r1;
+
+     label1:
+        entermonitor r0;
+
+     label2:
+        $r2 = r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$PaintManager paintManager>;
+
+        r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$PaintManager paintManager> = r4;
+
+        r4.<javax.swing.RepaintManager$PaintManager: javax.swing.RepaintManager repaintManager> = r0;
+
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r3;
+
+     label6:
+        if $r2 == null goto label7;
+
+        virtualinvoke $r2.<javax.swing.RepaintManager$PaintManager: void dispose()>();
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private synchronized javax.swing.RepaintManager$PaintManager getPaintManager()
+    {
+        javax.swing.RepaintManager$PaintManager $r1, $r7;
+        sun.awt.SunToolkit r4;
+        short $s0;
+        javax.swing.BufferStrategyPaintManager r6, $r8, $r9;
+        javax.swing.RepaintManager r0;
+        int $i1;
+        boolean $z0, $z1, $z2, $z3;
+        java.awt.Toolkit $r3;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        $r1 = r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$PaintManager paintManager>;
+
+        if $r1 != null goto label5;
+
+        r6 = null;
+
+        $z0 = r0.<javax.swing.RepaintManager: boolean doubleBufferingEnabled>;
+
+        if $z0 == 0 goto label4;
+
+        $z1 = <javax.swing.RepaintManager: boolean nativeDoubleBuffering>;
+
+        if $z1 != 0 goto label4;
+
+        $s0 = r0.<javax.swing.RepaintManager: short bufferStrategyType>;
+
+        $i1 = (int) $s0;
+
+        lookupswitch($i1)
+        {
+            case 0: goto label1;
+            case 1: goto label3;
+            default: goto label4;
+        };
+
+     label1:
+        $r3 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $z2 = $r3 instanceof sun.awt.SunToolkit;
+
+        if $z2 == 0 goto label4;
+
+        r4 = (sun.awt.SunToolkit) $r3;
+
+        $z3 = virtualinvoke r4.<sun.awt.SunToolkit: boolean useBufferPerWindow()>();
+
+        if $z3 == 0 goto label2;
+
+        $r8 = new javax.swing.BufferStrategyPaintManager;
+
+        specialinvoke $r8.<javax.swing.BufferStrategyPaintManager: void <init>()>();
+
+        r6 = $r8;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r9 = new javax.swing.BufferStrategyPaintManager;
+
+        specialinvoke $r9.<javax.swing.BufferStrategyPaintManager: void <init>()>();
+
+        r6 = $r9;
+
+        goto label4;
+
+     label4:
+        virtualinvoke r0.<javax.swing.RepaintManager: void setPaintManager(javax.swing.RepaintManager$PaintManager)>(r6);
+
+     label5:
+        $r7 = r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$PaintManager paintManager>;
+
+        return $r7;
+    }
+
+    private void scheduleProcessingRunnable(sun.awt.AppContext)
+    {
+        java.awt.EventQueue $r4, $r9;
+        java.awt.event.InvocationEvent $r5, $r10;
+        javax.swing.RepaintManager r0;
+        sun.awt.AppContext r8;
+        javax.swing.RepaintManager$ProcessingRunnable $r1, $r7, $r12;
+        boolean $z0, $z1;
+        java.awt.Toolkit $r2, $r3, $r6, $r11;
+
+        r0 := @this: javax.swing.RepaintManager;
+
+        r8 := @parameter0: sun.awt.AppContext;
+
+        $r1 = r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$ProcessingRunnable processingRunnable>;
+
+        $z0 = virtualinvoke $r1.<javax.swing.RepaintManager$ProcessingRunnable: boolean markPending()>();
+
+        if $z0 == 0 goto label2;
+
+        $r2 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $z1 = $r2 instanceof sun.awt.SunToolkit;
+
+        if $z1 == 0 goto label1;
+
+        $r9 = staticinvoke <sun.awt.SunToolkit: java.awt.EventQueue getSystemEventQueueImplPP(sun.awt.AppContext)>(r8);
+
+        $r10 = new java.awt.event.InvocationEvent;
+
+        $r11 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r12 = r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$ProcessingRunnable processingRunnable>;
+
+        specialinvoke $r10.<java.awt.event.InvocationEvent: void <init>(java.lang.Object,java.lang.Runnable)>($r11, $r12);
+
+        virtualinvoke $r9.<java.awt.EventQueue: void postEvent(java.awt.AWTEvent)>($r10);
+
+        goto label2;
+
+     label1:
+        $r3 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r4 = virtualinvoke $r3.<java.awt.Toolkit: java.awt.EventQueue getSystemEventQueue()>();
+
+        $r5 = new java.awt.event.InvocationEvent;
+
+        $r6 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r7 = r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$ProcessingRunnable processingRunnable>;
+
+        specialinvoke $r5.<java.awt.event.InvocationEvent: void <init>(java.lang.Object,java.lang.Runnable)>($r6, $r7);
+
+        virtualinvoke $r4.<java.awt.EventQueue: void postEvent(java.awt.AWTEvent)>($r5);
+
+     label2:
+        return;
+    }
+
+    private javax.swing.RepaintManager getDelegate(java.awt.Component)
+    {
+        javax.swing.RepaintManager $r1, r2, r3;
+        java.awt.Component r0;
+
+        r2 := @this: javax.swing.RepaintManager;
+
+        r0 := @parameter0: java.awt.Component;
+
+        $r1 = staticinvoke <com.sun.java.swing.SwingUtilities3: javax.swing.RepaintManager getDelegateRepaintManager(java.awt.Component)>(r0);
+
+        r3 = $r1;
+
+        if r2 != $r1 goto label1;
+
+        r3 = null;
+
+     label1:
+        return r3;
+    }
+
+    static void access$000(javax.swing.RepaintManager, sun.swing.SwingUtilities2$RepaintListener)
+    {
+        javax.swing.RepaintManager r0;
+        sun.swing.SwingUtilities2$RepaintListener r1;
+
+        r0 := @parameter0: javax.swing.RepaintManager;
+
+        r1 := @parameter1: sun.swing.SwingUtilities2$RepaintListener;
+
+        specialinvoke r0.<javax.swing.RepaintManager: void addRepaintListener(sun.swing.SwingUtilities2$RepaintListener)>(r1);
+
+        return;
+    }
+
+    static void access$100(javax.swing.RepaintManager, sun.swing.SwingUtilities2$RepaintListener)
+    {
+        javax.swing.RepaintManager r0;
+        sun.swing.SwingUtilities2$RepaintListener r1;
+
+        r0 := @parameter0: javax.swing.RepaintManager;
+
+        r1 := @parameter1: sun.swing.SwingUtilities2$RepaintListener;
+
+        specialinvoke r0.<javax.swing.RepaintManager: void removeRepaintListener(sun.swing.SwingUtilities2$RepaintListener)>(r1);
+
+        return;
+    }
+
+    static sun.misc.JavaSecurityAccess access$300()
+    {
+        sun.misc.JavaSecurityAccess $r0;
+
+        $r0 = <javax.swing.RepaintManager: sun.misc.JavaSecurityAccess javaSecurityAccess>;
+
+        return $r0;
+    }
+
+    static javax.swing.JComponent access$400(javax.swing.RepaintManager)
+    {
+        javax.swing.JComponent $r1;
+        javax.swing.RepaintManager r0;
+
+        r0 := @parameter0: javax.swing.RepaintManager;
+
+        $r1 = r0.<javax.swing.RepaintManager: javax.swing.JComponent repaintRoot>;
+
+        return $r1;
+    }
+
+    static void access$500(javax.swing.RepaintManager, javax.swing.JComponent, java.util.List, int)
+    {
+        javax.swing.JComponent r1;
+        java.util.List r2;
+        javax.swing.RepaintManager r0;
+        int i0;
+
+        r0 := @parameter0: javax.swing.RepaintManager;
+
+        r1 := @parameter1: javax.swing.JComponent;
+
+        r2 := @parameter2: java.util.List;
+
+        i0 := @parameter3: int;
+
+        specialinvoke r0.<javax.swing.RepaintManager: void adjustRoots(javax.swing.JComponent,java.util.List,int)>(r1, r2, i0);
+
+        return;
+    }
+
+    static javax.swing.RepaintManager$PaintManager access$600(javax.swing.RepaintManager)
+    {
+        javax.swing.RepaintManager$PaintManager $r1;
+        javax.swing.RepaintManager r0;
+
+        r0 := @parameter0: javax.swing.RepaintManager;
+
+        $r1 = r0.<javax.swing.RepaintManager: javax.swing.RepaintManager$PaintManager paintManager>;
+
+        return $r1;
+    }
+
+    static javax.swing.JComponent access$402(javax.swing.RepaintManager, javax.swing.JComponent)
+    {
+        javax.swing.JComponent r1;
+        javax.swing.RepaintManager r0;
+
+        r0 := @parameter0: javax.swing.RepaintManager;
+
+        r1 := @parameter1: javax.swing.JComponent;
+
+        r0.<javax.swing.RepaintManager: javax.swing.JComponent repaintRoot> = r1;
+
+        return r1;
+    }
+
+    static int access$800()
+    {
+        int $i0;
+
+        $i0 = <javax.swing.RepaintManager: int volatileBufferType>;
+
+        return $i0;
+    }
+
+    static boolean access$900(javax.swing.RepaintManager)
+    {
+        javax.swing.RepaintManager r0;
+        boolean $z0;
+
+        r0 := @parameter0: javax.swing.RepaintManager;
+
+        $z0 = r0.<javax.swing.RepaintManager: boolean painting>;
+
+        return $z0;
+    }
+
+    static void access$1100(javax.swing.RepaintManager)
+    {
+        javax.swing.RepaintManager r0;
+
+        r0 := @parameter0: javax.swing.RepaintManager;
+
+        specialinvoke r0.<javax.swing.RepaintManager: void displayChanged()>();
+
+        return;
+    }
+
+    static void access$1200(javax.swing.RepaintManager)
+    {
+        javax.swing.RepaintManager r0;
+
+        r0 := @parameter0: javax.swing.RepaintManager;
+
+        specialinvoke r0.<javax.swing.RepaintManager: void prePaintDirtyRegions()>();
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        sun.misc.JavaSecurityAccess $r0;
+        sun.security.action.GetPropertyAction $r3, $r12, $r14, $r18;
+        java.awt.GraphicsEnvironment $r20;
+        sun.awt.DisplayChangedListener $r9;
+        java.lang.String $r4, $r6, $r11, $r16, $r17;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        javax.swing.RepaintManager$DisplayChangedHandler $r1;
+        javax.swing.RepaintManager$1 $r2;
+        sun.awt.SunToolkit $r8;
+        java.lang.Object $r5, $r13, $r15, $r19;
+        sun.java2d.SunGraphicsEnvironment $r10;
+        java.awt.Toolkit $r7;
+
+        <javax.swing.RepaintManager: int VOLATILE_LOOP_MAX> = 2;
+
+        <javax.swing.RepaintManager: short BUFFER_STRATEGY_SPECIFIED_OFF> = 2;
+
+        <javax.swing.RepaintManager: short BUFFER_STRATEGY_SPECIFIED_ON> = 1;
+
+        <javax.swing.RepaintManager: short BUFFER_STRATEGY_NOT_SPECIFIED> = 0;
+
+        <javax.swing.RepaintManager: java.lang.Object repaintManagerKey> = class "Ljavax/swing/RepaintManager;";
+
+        <javax.swing.RepaintManager: boolean volatileImageBufferEnabled> = 1;
+
+        $r0 = staticinvoke <sun.misc.SharedSecrets: sun.misc.JavaSecurityAccess getJavaSecurityAccess()>();
+
+        <javax.swing.RepaintManager: sun.misc.JavaSecurityAccess javaSecurityAccess> = $r0;
+
+        $r1 = new javax.swing.RepaintManager$DisplayChangedHandler;
+
+        specialinvoke $r1.<javax.swing.RepaintManager$DisplayChangedHandler: void <init>()>();
+
+        <javax.swing.RepaintManager: sun.awt.DisplayChangedListener displayChangedHandler> = $r1;
+
+        $r2 = new javax.swing.RepaintManager$1;
+
+        specialinvoke $r2.<javax.swing.RepaintManager$1: void <init>()>();
+
+        staticinvoke <sun.swing.SwingAccessor: void setRepaintManagerAccessor(sun.swing.SwingAccessor$RepaintManagerAccessor)>($r2);
+
+        $r4 = "true";
+
+        $r3 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r3.<sun.security.action.GetPropertyAction: void <init>(java.lang.String,java.lang.String)>("swing.volatileImageBufferEnabled", "true");
+
+        $r5 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r3);
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>($r5);
+
+        <javax.swing.RepaintManager: boolean volatileImageBufferEnabled> = $z0;
+
+        $z1 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        $z2 = <javax.swing.RepaintManager: boolean volatileImageBufferEnabled>;
+
+        if $z2 == 0 goto label1;
+
+        if $z1 == 0 goto label1;
+
+        <javax.swing.RepaintManager: boolean volatileImageBufferEnabled> = 0;
+
+     label1:
+        $r11 = "true";
+
+        $r12 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r12.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("awt.nativeDoubleBuffering");
+
+        $r13 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r12);
+
+        $z6 = virtualinvoke $r11.<java.lang.String: boolean equals(java.lang.Object)>($r13);
+
+        <javax.swing.RepaintManager: boolean nativeDoubleBuffering> = $z6;
+
+        $r14 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r14.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("swing.bufferPerWindow");
+
+        $r15 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r14);
+
+        $r16 = (java.lang.String) $r15;
+
+        if $z1 == 0 goto label2;
+
+        <javax.swing.RepaintManager: short BUFFER_STRATEGY_TYPE> = 2;
+
+        goto label5;
+
+     label2:
+        if $r16 != null goto label3;
+
+        <javax.swing.RepaintManager: short BUFFER_STRATEGY_TYPE> = 0;
+
+        goto label5;
+
+     label3:
+        $r6 = "true";
+
+        $z3 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r16);
+
+        if $z3 == 0 goto label4;
+
+        <javax.swing.RepaintManager: short BUFFER_STRATEGY_TYPE> = 1;
+
+        goto label5;
+
+     label4:
+        <javax.swing.RepaintManager: short BUFFER_STRATEGY_TYPE> = 2;
+
+     label5:
+        $r17 = "true";
+
+        $r18 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r18.<sun.security.action.GetPropertyAction: void <init>(java.lang.String,java.lang.String)>("swing.handleTopLevelPaint", "true");
+
+        $r19 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r18);
+
+        $z7 = virtualinvoke $r17.<java.lang.String: boolean equals(java.lang.Object)>($r19);
+
+        <javax.swing.RepaintManager: boolean HANDLE_TOP_LEVEL_PAINT> = $z7;
+
+        $r20 = staticinvoke <java.awt.GraphicsEnvironment: java.awt.GraphicsEnvironment getLocalGraphicsEnvironment()>();
+
+        $z8 = $r20 instanceof sun.java2d.SunGraphicsEnvironment;
+
+        if $z8 == 0 goto label6;
+
+        $r10 = (sun.java2d.SunGraphicsEnvironment) $r20;
+
+        $r9 = <javax.swing.RepaintManager: sun.awt.DisplayChangedListener displayChangedHandler>;
+
+        virtualinvoke $r10.<sun.java2d.SunGraphicsEnvironment: void addDisplayChangedListener(sun.awt.DisplayChangedListener)>($r9);
+
+     label6:
+        $r7 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $z4 = $r7 instanceof sun.awt.SunToolkit;
+
+        if $z4 == 0 goto label7;
+
+        $r8 = (sun.awt.SunToolkit) $r7;
+
+        $z5 = virtualinvoke $r8.<sun.awt.SunToolkit: boolean isSwingBackbufferTranslucencySupported()>();
+
+        if $z5 == 0 goto label7;
+
+        <javax.swing.RepaintManager: int volatileBufferType> = 3;
+
+        goto label8;
+
+     label7:
+        <javax.swing.RepaintManager: int volatileBufferType> = 1;
+
+     label8:
+        return;
+    }
+}

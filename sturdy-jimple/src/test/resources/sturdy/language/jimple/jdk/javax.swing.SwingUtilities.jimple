@@ -1,0 +1,4856 @@
+public class javax.swing.SwingUtilities extends java.lang.Object implements javax.swing.SwingConstants
+{
+    private static boolean canAccessEventQueue;
+    private static boolean eventQueueTested;
+    private static boolean suppressDropSupport;
+    private static boolean checkedSuppressDropSupport;
+    private static final java.lang.Object sharedOwnerFrameKey;
+
+    private static boolean getSuppressDropTarget()
+    {
+        java.lang.Boolean $r3;
+        java.lang.Object $r1;
+        java.lang.String $r2;
+        sun.security.action.GetPropertyAction $r0;
+        boolean $z0, $z1, $z2;
+
+        $z0 = <javax.swing.SwingUtilities: boolean checkedSuppressDropSupport>;
+
+        if $z0 != 0 goto label1;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("suppressSwingDropSupport");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r2 = (java.lang.String) $r1;
+
+        $r3 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(java.lang.String)>($r2);
+
+        $z2 = virtualinvoke $r3.<java.lang.Boolean: boolean booleanValue()>();
+
+        <javax.swing.SwingUtilities: boolean suppressDropSupport> = $z2;
+
+        <javax.swing.SwingUtilities: boolean checkedSuppressDropSupport> = 1;
+
+     label1:
+        $z1 = <javax.swing.SwingUtilities: boolean suppressDropSupport>;
+
+        return $z1;
+    }
+
+    static void installSwingDropTargetAsNecessary(java.awt.Component, javax.swing.TransferHandler)
+    {
+        java.awt.dnd.DropTarget $r1;
+        javax.swing.TransferHandler r2;
+        javax.swing.TransferHandler$SwingDropTarget $r3;
+        java.awt.Component r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @parameter0: java.awt.Component;
+
+        r2 := @parameter1: javax.swing.TransferHandler;
+
+        $z0 = staticinvoke <javax.swing.SwingUtilities: boolean getSuppressDropTarget()>();
+
+        if $z0 != 0 goto label3;
+
+        $r1 = virtualinvoke r0.<java.awt.Component: java.awt.dnd.DropTarget getDropTarget()>();
+
+        if $r1 == null goto label1;
+
+        $z2 = $r1 instanceof javax.swing.plaf.UIResource;
+
+        if $z2 == 0 goto label3;
+
+     label1:
+        if r2 != null goto label2;
+
+        virtualinvoke r0.<java.awt.Component: void setDropTarget(java.awt.dnd.DropTarget)>(null);
+
+        goto label3;
+
+     label2:
+        $z1 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        if $z1 != 0 goto label3;
+
+        $r3 = new javax.swing.TransferHandler$SwingDropTarget;
+
+        specialinvoke $r3.<javax.swing.TransferHandler$SwingDropTarget: void <init>(java.awt.Component)>(r0);
+
+        virtualinvoke r0.<java.awt.Component: void setDropTarget(java.awt.dnd.DropTarget)>($r3);
+
+     label3:
+        return;
+    }
+
+    public static final boolean isRectangleContainingRectangle(java.awt.Rectangle, java.awt.Rectangle)
+    {
+        java.awt.Rectangle r0, r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15;
+        boolean $z0;
+
+        r1 := @parameter0: java.awt.Rectangle;
+
+        r0 := @parameter1: java.awt.Rectangle;
+
+        $i1 = r0.<java.awt.Rectangle: int x>;
+
+        $i0 = r1.<java.awt.Rectangle: int x>;
+
+        if $i1 < $i0 goto label1;
+
+        $i3 = r0.<java.awt.Rectangle: int x>;
+
+        $i2 = r0.<java.awt.Rectangle: int width>;
+
+        $i7 = $i3 + $i2;
+
+        $i5 = r1.<java.awt.Rectangle: int x>;
+
+        $i4 = r1.<java.awt.Rectangle: int width>;
+
+        $i6 = $i5 + $i4;
+
+        if $i7 > $i6 goto label1;
+
+        $i9 = r0.<java.awt.Rectangle: int y>;
+
+        $i8 = r1.<java.awt.Rectangle: int y>;
+
+        if $i9 < $i8 goto label1;
+
+        $i11 = r0.<java.awt.Rectangle: int y>;
+
+        $i10 = r0.<java.awt.Rectangle: int height>;
+
+        $i15 = $i11 + $i10;
+
+        $i13 = r1.<java.awt.Rectangle: int y>;
+
+        $i12 = r1.<java.awt.Rectangle: int height>;
+
+        $i14 = $i13 + $i12;
+
+        if $i15 > $i14 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public static java.awt.Rectangle getLocalBounds(java.awt.Component)
+    {
+        java.awt.Rectangle $r0, $r2;
+        java.awt.Component r1;
+
+        r1 := @parameter0: java.awt.Component;
+
+        $r0 = new java.awt.Rectangle;
+
+        $r2 = virtualinvoke r1.<java.awt.Component: java.awt.Rectangle getBounds()>();
+
+        specialinvoke $r0.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        $r0.<java.awt.Rectangle: int y> = 0;
+
+        $r0.<java.awt.Rectangle: int x> = 0;
+
+        return $r0;
+    }
+
+    public static java.awt.Window getWindowAncestor(java.awt.Component)
+    {
+        java.awt.Window $r1;
+        java.awt.Container r2;
+        java.awt.Component r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.Component;
+
+        r2 = virtualinvoke r0.<java.awt.Component: java.awt.Container getParent()>();
+
+     label1:
+        if r2 == null goto label3;
+
+        $z0 = r2 instanceof java.awt.Window;
+
+        if $z0 == 0 goto label2;
+
+        $r1 = (java.awt.Window) r2;
+
+        return $r1;
+
+     label2:
+        r2 = virtualinvoke r2.<java.awt.Container: java.awt.Container getParent()>();
+
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    static java.awt.Point convertScreenLocationToParent(java.awt.Container, int, int)
+    {
+        int i0, i1;
+        java.lang.Error $r1;
+        java.awt.Point $r2;
+        java.awt.Container r0, r3;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.Container;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r3 = r0;
+
+     label1:
+        if r3 == null goto label3;
+
+        $z0 = r3 instanceof java.awt.Window;
+
+        if $z0 == 0 goto label2;
+
+        $r2 = new java.awt.Point;
+
+        specialinvoke $r2.<java.awt.Point: void <init>(int,int)>(i0, i1);
+
+        staticinvoke <javax.swing.SwingUtilities: void convertPointFromScreen(java.awt.Point,java.awt.Component)>($r2, r0);
+
+        return $r2;
+
+     label2:
+        r3 = virtualinvoke r3.<java.awt.Container: java.awt.Container getParent()>();
+
+        goto label1;
+
+     label3:
+        $r1 = new java.lang.Error;
+
+        specialinvoke $r1.<java.lang.Error: void <init>(java.lang.String)>("convertScreenLocationToParent: no window ancestor");
+
+        throw $r1;
+    }
+
+    public static java.awt.Point convertPoint(java.awt.Component, java.awt.Point, java.awt.Component)
+    {
+        java.awt.Window $r2, $r4;
+        java.lang.Error $r3, $r5;
+        java.awt.Point $r0, r1;
+        java.awt.Component r6, r7;
+
+        r6 := @parameter0: java.awt.Component;
+
+        r1 := @parameter1: java.awt.Point;
+
+        r7 := @parameter2: java.awt.Component;
+
+        if r6 != null goto label1;
+
+        if r7 != null goto label1;
+
+        return r1;
+
+     label1:
+        if r6 != null goto label2;
+
+        $r4 = staticinvoke <javax.swing.SwingUtilities: java.awt.Window getWindowAncestor(java.awt.Component)>(r7);
+
+        r6 = $r4;
+
+        if $r4 != null goto label2;
+
+        $r5 = new java.lang.Error;
+
+        specialinvoke $r5.<java.lang.Error: void <init>(java.lang.String)>("Source component not connected to component tree hierarchy");
+
+        throw $r5;
+
+     label2:
+        $r0 = new java.awt.Point;
+
+        specialinvoke $r0.<java.awt.Point: void <init>(java.awt.Point)>(r1);
+
+        staticinvoke <javax.swing.SwingUtilities: void convertPointToScreen(java.awt.Point,java.awt.Component)>($r0, r6);
+
+        if r7 != null goto label3;
+
+        $r2 = staticinvoke <javax.swing.SwingUtilities: java.awt.Window getWindowAncestor(java.awt.Component)>(r6);
+
+        r7 = $r2;
+
+        if $r2 != null goto label3;
+
+        $r3 = new java.lang.Error;
+
+        specialinvoke $r3.<java.lang.Error: void <init>(java.lang.String)>("Destination component not connected to component tree hierarchy");
+
+        throw $r3;
+
+     label3:
+        staticinvoke <javax.swing.SwingUtilities: void convertPointFromScreen(java.awt.Point,java.awt.Component)>($r0, r7);
+
+        return $r0;
+    }
+
+    public static java.awt.Point convertPoint(java.awt.Component, int, int, java.awt.Component)
+    {
+        int i0, i1;
+        java.awt.Point $r0, $r3;
+        java.awt.Component r1, r2;
+
+        r1 := @parameter0: java.awt.Component;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r2 := @parameter3: java.awt.Component;
+
+        $r0 = new java.awt.Point;
+
+        specialinvoke $r0.<java.awt.Point: void <init>(int,int)>(i0, i1);
+
+        $r3 = staticinvoke <javax.swing.SwingUtilities: java.awt.Point convertPoint(java.awt.Component,java.awt.Point,java.awt.Component)>(r1, $r0, r2);
+
+        return $r3;
+    }
+
+    public static java.awt.Rectangle convertRectangle(java.awt.Component, java.awt.Rectangle, java.awt.Component)
+    {
+        java.awt.Rectangle r1, $r5;
+        java.awt.Point $r0, $r4;
+        java.awt.Component r2, r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+
+        r2 := @parameter0: java.awt.Component;
+
+        r1 := @parameter1: java.awt.Rectangle;
+
+        r3 := @parameter2: java.awt.Component;
+
+        $r0 = new java.awt.Point;
+
+        $i1 = r1.<java.awt.Rectangle: int x>;
+
+        $i0 = r1.<java.awt.Rectangle: int y>;
+
+        specialinvoke $r0.<java.awt.Point: void <init>(int,int)>($i1, $i0);
+
+        $r4 = staticinvoke <javax.swing.SwingUtilities: java.awt.Point convertPoint(java.awt.Component,java.awt.Point,java.awt.Component)>(r2, $r0, r3);
+
+        $r5 = new java.awt.Rectangle;
+
+        $i5 = $r4.<java.awt.Point: int x>;
+
+        $i4 = $r4.<java.awt.Point: int y>;
+
+        $i3 = r1.<java.awt.Rectangle: int width>;
+
+        $i2 = r1.<java.awt.Rectangle: int height>;
+
+        specialinvoke $r5.<java.awt.Rectangle: void <init>(int,int,int,int)>($i5, $i4, $i3, $i2);
+
+        return $r5;
+    }
+
+    public static java.awt.Container getAncestorOfClass(java.lang.Class, java.awt.Component)
+    {
+        java.lang.Class r1;
+        java.awt.Container r2;
+        java.awt.Component r0;
+        boolean $z0;
+
+        r1 := @parameter0: java.lang.Class;
+
+        r0 := @parameter1: java.awt.Component;
+
+        if r0 == null goto label1;
+
+        if r1 != null goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        r2 = virtualinvoke r0.<java.awt.Component: java.awt.Container getParent()>();
+
+     label3:
+        if r2 == null goto label4;
+
+        $z0 = virtualinvoke r1.<java.lang.Class: boolean isInstance(java.lang.Object)>(r2);
+
+        if $z0 != 0 goto label4;
+
+        r2 = virtualinvoke r2.<java.awt.Container: java.awt.Container getParent()>();
+
+        goto label3;
+
+     label4:
+        return r2;
+    }
+
+    public static java.awt.Container getAncestorNamed(java.lang.String, java.awt.Component)
+    {
+        java.lang.String r1, $r2;
+        java.awt.Container r3;
+        java.awt.Component r0;
+        boolean $z0;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.awt.Component;
+
+        if r0 == null goto label1;
+
+        if r1 != null goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        r3 = virtualinvoke r0.<java.awt.Component: java.awt.Container getParent()>();
+
+     label3:
+        if r3 == null goto label4;
+
+        $r2 = virtualinvoke r3.<java.awt.Container: java.lang.String getName()>();
+
+        $z0 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 != 0 goto label4;
+
+        r3 = virtualinvoke r3.<java.awt.Container: java.awt.Container getParent()>();
+
+        goto label3;
+
+     label4:
+        return r3;
+    }
+
+    public static java.awt.Component getDeepestComponentAt(java.awt.Component, int, int)
+    {
+        java.awt.Point $r3;
+        int i0, i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, i11;
+        java.awt.Component[] $r2;
+        java.awt.Container $r1;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.awt.Component r0, r4, r5;
+
+        r0 := @parameter0: java.awt.Component;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $z0 = virtualinvoke r0.<java.awt.Component: boolean contains(int,int)>(i0, i1);
+
+        if $z0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $z1 = r0 instanceof java.awt.Container;
+
+        if $z1 == 0 goto label6;
+
+        $r1 = (java.awt.Container) r0;
+
+        $r2 = virtualinvoke $r1.<java.awt.Container: java.awt.Component[] getComponents()>();
+
+        i2 = lengthof $r2;
+
+        i11 = 0;
+
+     label2:
+        if i11 >= i2 goto label6;
+
+        r4 = $r2[i11];
+
+        if r4 == null goto label5;
+
+        $z2 = virtualinvoke r4.<java.awt.Component: boolean isVisible()>();
+
+        if $z2 == 0 goto label5;
+
+        $r3 = virtualinvoke r4.<java.awt.Component: java.awt.Point getLocation()>();
+
+        $z3 = r4 instanceof java.awt.Container;
+
+        if $z3 == 0 goto label3;
+
+        $i7 = $r3.<java.awt.Point: int x>;
+
+        $i10 = i0 - $i7;
+
+        $i8 = $r3.<java.awt.Point: int y>;
+
+        $i9 = i1 - $i8;
+
+        r5 = staticinvoke <javax.swing.SwingUtilities: java.awt.Component getDeepestComponentAt(java.awt.Component,int,int)>(r4, $i10, $i9);
+
+        goto label4;
+
+     label3:
+        $i3 = $r3.<java.awt.Point: int x>;
+
+        $i6 = i0 - $i3;
+
+        $i4 = $r3.<java.awt.Point: int y>;
+
+        $i5 = i1 - $i4;
+
+        r5 = virtualinvoke r4.<java.awt.Component: java.awt.Component getComponentAt(int,int)>($i6, $i5);
+
+     label4:
+        if r5 == null goto label5;
+
+        $z4 = virtualinvoke r5.<java.awt.Component: boolean isVisible()>();
+
+        if $z4 == 0 goto label5;
+
+        return r5;
+
+     label5:
+        i11 = i11 + 1;
+
+        goto label2;
+
+     label6:
+        return r0;
+    }
+
+    public static java.awt.event.MouseEvent convertMouseEvent(java.awt.Component, java.awt.event.MouseEvent, java.awt.Component)
+    {
+        java.awt.Point $r1, $r4;
+        javax.swing.event.MenuDragMouseEvent $r7, r14;
+        java.awt.event.MouseWheelEvent $r10, r12;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.awt.Component r0, r3, r11;
+        javax.swing.MenuSelectionManager $r9;
+        long $l3, $l14, $l24;
+        int $i0, $i1, $i2, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35;
+        sun.awt.AWTAccessor$MouseEventAccessor $r6;
+        java.awt.event.MouseEvent r2, $r5, r13;
+        javax.swing.MenuElement[] $r8;
+
+        r0 := @parameter0: java.awt.Component;
+
+        r2 := @parameter1: java.awt.event.MouseEvent;
+
+        r3 := @parameter2: java.awt.Component;
+
+        $r1 = new java.awt.Point;
+
+        $i0 = virtualinvoke r2.<java.awt.event.MouseEvent: int getX()>();
+
+        $i1 = virtualinvoke r2.<java.awt.event.MouseEvent: int getY()>();
+
+        specialinvoke $r1.<java.awt.Point: void <init>(int,int)>($i0, $i1);
+
+        $r4 = staticinvoke <javax.swing.SwingUtilities: java.awt.Point convertPoint(java.awt.Component,java.awt.Point,java.awt.Component)>(r0, $r1, r3);
+
+        if r3 == null goto label1;
+
+        r11 = r3;
+
+        goto label2;
+
+     label1:
+        r11 = r0;
+
+     label2:
+        $z0 = r2 instanceof java.awt.event.MouseWheelEvent;
+
+        if $z0 == 0 goto label3;
+
+        r12 = (java.awt.event.MouseWheelEvent) r2;
+
+        $r10 = new java.awt.event.MouseWheelEvent;
+
+        $i23 = virtualinvoke r12.<java.awt.event.MouseWheelEvent: int getID()>();
+
+        $l24 = virtualinvoke r12.<java.awt.event.MouseWheelEvent: long getWhen()>();
+
+        $i25 = virtualinvoke r12.<java.awt.event.MouseWheelEvent: int getModifiers()>();
+
+        $i26 = virtualinvoke r12.<java.awt.event.MouseWheelEvent: int getModifiersEx()>();
+
+        $i27 = $i25 | $i26;
+
+        $i28 = $r4.<java.awt.Point: int x>;
+
+        $i29 = $r4.<java.awt.Point: int y>;
+
+        $i30 = virtualinvoke r12.<java.awt.event.MouseWheelEvent: int getXOnScreen()>();
+
+        $i31 = virtualinvoke r12.<java.awt.event.MouseWheelEvent: int getYOnScreen()>();
+
+        $i32 = virtualinvoke r12.<java.awt.event.MouseWheelEvent: int getClickCount()>();
+
+        $z5 = virtualinvoke r12.<java.awt.event.MouseWheelEvent: boolean isPopupTrigger()>();
+
+        $i33 = virtualinvoke r12.<java.awt.event.MouseWheelEvent: int getScrollType()>();
+
+        $i34 = virtualinvoke r12.<java.awt.event.MouseWheelEvent: int getScrollAmount()>();
+
+        $i35 = virtualinvoke r12.<java.awt.event.MouseWheelEvent: int getWheelRotation()>();
+
+        specialinvoke $r10.<java.awt.event.MouseWheelEvent: void <init>(java.awt.Component,int,long,int,int,int,int,int,int,boolean,int,int,int)>(r11, $i23, $l24, $i27, $i28, $i29, $i30, $i31, $i32, $z5, $i33, $i34, $i35);
+
+        r13 = $r10;
+
+        goto label5;
+
+     label3:
+        $z1 = r2 instanceof javax.swing.event.MenuDragMouseEvent;
+
+        if $z1 == 0 goto label4;
+
+        r14 = (javax.swing.event.MenuDragMouseEvent) r2;
+
+        $r7 = new javax.swing.event.MenuDragMouseEvent;
+
+        $i13 = virtualinvoke r14.<javax.swing.event.MenuDragMouseEvent: int getID()>();
+
+        $l14 = virtualinvoke r14.<javax.swing.event.MenuDragMouseEvent: long getWhen()>();
+
+        $i15 = virtualinvoke r14.<javax.swing.event.MenuDragMouseEvent: int getModifiers()>();
+
+        $i16 = virtualinvoke r14.<javax.swing.event.MenuDragMouseEvent: int getModifiersEx()>();
+
+        $i17 = $i15 | $i16;
+
+        $i18 = $r4.<java.awt.Point: int x>;
+
+        $i19 = $r4.<java.awt.Point: int y>;
+
+        $i20 = virtualinvoke r14.<javax.swing.event.MenuDragMouseEvent: int getXOnScreen()>();
+
+        $i21 = virtualinvoke r14.<javax.swing.event.MenuDragMouseEvent: int getYOnScreen()>();
+
+        $i22 = virtualinvoke r14.<javax.swing.event.MenuDragMouseEvent: int getClickCount()>();
+
+        $z4 = virtualinvoke r14.<javax.swing.event.MenuDragMouseEvent: boolean isPopupTrigger()>();
+
+        $r8 = virtualinvoke r14.<javax.swing.event.MenuDragMouseEvent: javax.swing.MenuElement[] getPath()>();
+
+        $r9 = virtualinvoke r14.<javax.swing.event.MenuDragMouseEvent: javax.swing.MenuSelectionManager getMenuSelectionManager()>();
+
+        specialinvoke $r7.<javax.swing.event.MenuDragMouseEvent: void <init>(java.awt.Component,int,long,int,int,int,int,int,int,boolean,javax.swing.MenuElement[],javax.swing.MenuSelectionManager)>(r11, $i13, $l14, $i17, $i18, $i19, $i20, $i21, $i22, $z4, $r8, $r9);
+
+        r13 = $r7;
+
+        goto label5;
+
+     label4:
+        $r5 = new java.awt.event.MouseEvent;
+
+        $i2 = virtualinvoke r2.<java.awt.event.MouseEvent: int getID()>();
+
+        $l3 = virtualinvoke r2.<java.awt.event.MouseEvent: long getWhen()>();
+
+        $i4 = virtualinvoke r2.<java.awt.event.MouseEvent: int getModifiers()>();
+
+        $i5 = virtualinvoke r2.<java.awt.event.MouseEvent: int getModifiersEx()>();
+
+        $i6 = $i4 | $i5;
+
+        $i7 = $r4.<java.awt.Point: int x>;
+
+        $i8 = $r4.<java.awt.Point: int y>;
+
+        $i9 = virtualinvoke r2.<java.awt.event.MouseEvent: int getXOnScreen()>();
+
+        $i10 = virtualinvoke r2.<java.awt.event.MouseEvent: int getYOnScreen()>();
+
+        $i11 = virtualinvoke r2.<java.awt.event.MouseEvent: int getClickCount()>();
+
+        $z2 = virtualinvoke r2.<java.awt.event.MouseEvent: boolean isPopupTrigger()>();
+
+        $i12 = virtualinvoke r2.<java.awt.event.MouseEvent: int getButton()>();
+
+        specialinvoke $r5.<java.awt.event.MouseEvent: void <init>(java.awt.Component,int,long,int,int,int,int,int,int,boolean,int)>(r11, $i2, $l3, $i6, $i7, $i8, $i9, $i10, $i11, $z2, $i12);
+
+        r13 = $r5;
+
+        $r6 = staticinvoke <sun.awt.AWTAccessor: sun.awt.AWTAccessor$MouseEventAccessor getMouseEventAccessor()>();
+
+        $z3 = interfaceinvoke $r6.<sun.awt.AWTAccessor$MouseEventAccessor: boolean isCausedByTouchEvent(java.awt.event.MouseEvent)>(r2);
+
+        interfaceinvoke $r6.<sun.awt.AWTAccessor$MouseEventAccessor: void setCausedByTouchEvent(java.awt.event.MouseEvent,boolean)>($r5, $z3);
+
+     label5:
+        return r13;
+    }
+
+    public static void convertPointToScreen(java.awt.Point, java.awt.Component)
+    {
+        java.awt.Point $r0, r1;
+        int i0, i1, $i2, $i3, $i4, $i5;
+        java.awt.Container $r2;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.awt.IllegalComponentStateException $r3;
+        java.awt.Component r4;
+
+        r1 := @parameter0: java.awt.Point;
+
+        r4 := @parameter1: java.awt.Component;
+
+     label1:
+        $z0 = r4 instanceof javax.swing.JComponent;
+
+        if $z0 == 0 goto label2;
+
+        i0 = virtualinvoke r4.<java.awt.Component: int getX()>();
+
+        i1 = virtualinvoke r4.<java.awt.Component: int getY()>();
+
+        goto label7;
+
+     label2:
+        $z1 = r4 instanceof java.applet.Applet;
+
+        if $z1 != 0 goto label3;
+
+        $z3 = r4 instanceof java.awt.Window;
+
+        if $z3 == 0 goto label6;
+
+     label3:
+        $r0 = virtualinvoke r4.<java.awt.Component: java.awt.Point getLocationOnScreen()>();
+
+        i0 = $r0.<java.awt.Point: int x>;
+
+        i1 = $r0.<java.awt.Point: int y>;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r3 := @caughtexception;
+
+        i0 = virtualinvoke r4.<java.awt.Component: int getX()>();
+
+        i1 = virtualinvoke r4.<java.awt.Component: int getY()>();
+
+        goto label7;
+
+     label6:
+        i0 = virtualinvoke r4.<java.awt.Component: int getX()>();
+
+        i1 = virtualinvoke r4.<java.awt.Component: int getY()>();
+
+     label7:
+        $i2 = r1.<java.awt.Point: int x>;
+
+        $i3 = $i2 + i0;
+
+        r1.<java.awt.Point: int x> = $i3;
+
+        $i4 = r1.<java.awt.Point: int y>;
+
+        $i5 = $i4 + i1;
+
+        r1.<java.awt.Point: int y> = $i5;
+
+        $z4 = r4 instanceof java.awt.Window;
+
+        if $z4 != 0 goto label9;
+
+        $z2 = r4 instanceof java.applet.Applet;
+
+        if $z2 == 0 goto label8;
+
+        goto label9;
+
+     label8:
+        $r2 = virtualinvoke r4.<java.awt.Component: java.awt.Container getParent()>();
+
+        r4 = $r2;
+
+        if $r2 != null goto label1;
+
+     label9:
+        return;
+
+        catch java.awt.IllegalComponentStateException from label3 to label4 with label5;
+    }
+
+    public static void convertPointFromScreen(java.awt.Point, java.awt.Component)
+    {
+        java.awt.Point $r0, r1;
+        int i0, i1, $i2, $i3, $i4, $i5;
+        java.awt.Container $r2;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.awt.IllegalComponentStateException $r3;
+        java.awt.Component r4;
+
+        r1 := @parameter0: java.awt.Point;
+
+        r4 := @parameter1: java.awt.Component;
+
+     label1:
+        $z0 = r4 instanceof javax.swing.JComponent;
+
+        if $z0 == 0 goto label2;
+
+        i0 = virtualinvoke r4.<java.awt.Component: int getX()>();
+
+        i1 = virtualinvoke r4.<java.awt.Component: int getY()>();
+
+        goto label7;
+
+     label2:
+        $z1 = r4 instanceof java.applet.Applet;
+
+        if $z1 != 0 goto label3;
+
+        $z3 = r4 instanceof java.awt.Window;
+
+        if $z3 == 0 goto label6;
+
+     label3:
+        $r0 = virtualinvoke r4.<java.awt.Component: java.awt.Point getLocationOnScreen()>();
+
+        i0 = $r0.<java.awt.Point: int x>;
+
+        i1 = $r0.<java.awt.Point: int y>;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r3 := @caughtexception;
+
+        i0 = virtualinvoke r4.<java.awt.Component: int getX()>();
+
+        i1 = virtualinvoke r4.<java.awt.Component: int getY()>();
+
+        goto label7;
+
+     label6:
+        i0 = virtualinvoke r4.<java.awt.Component: int getX()>();
+
+        i1 = virtualinvoke r4.<java.awt.Component: int getY()>();
+
+     label7:
+        $i2 = r1.<java.awt.Point: int x>;
+
+        $i3 = $i2 - i0;
+
+        r1.<java.awt.Point: int x> = $i3;
+
+        $i4 = r1.<java.awt.Point: int y>;
+
+        $i5 = $i4 - i1;
+
+        r1.<java.awt.Point: int y> = $i5;
+
+        $z4 = r4 instanceof java.awt.Window;
+
+        if $z4 != 0 goto label9;
+
+        $z2 = r4 instanceof java.applet.Applet;
+
+        if $z2 == 0 goto label8;
+
+        goto label9;
+
+     label8:
+        $r2 = virtualinvoke r4.<java.awt.Component: java.awt.Container getParent()>();
+
+        r4 = $r2;
+
+        if $r2 != null goto label1;
+
+     label9:
+        return;
+
+        catch java.awt.IllegalComponentStateException from label3 to label4 with label5;
+    }
+
+    public static java.awt.Window windowForComponent(java.awt.Component)
+    {
+        java.awt.Component r0;
+        java.awt.Window $r1;
+
+        r0 := @parameter0: java.awt.Component;
+
+        $r1 = staticinvoke <javax.swing.SwingUtilities: java.awt.Window getWindowAncestor(java.awt.Component)>(r0);
+
+        return $r1;
+    }
+
+    public static boolean isDescendingFrom(java.awt.Component, java.awt.Component)
+    {
+        java.awt.Container r2;
+        java.awt.Component r0, r1;
+
+        r0 := @parameter0: java.awt.Component;
+
+        r1 := @parameter1: java.awt.Component;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        r2 = virtualinvoke r0.<java.awt.Component: java.awt.Container getParent()>();
+
+     label2:
+        if r2 == null goto label4;
+
+        if r2 != r1 goto label3;
+
+        return 1;
+
+     label3:
+        r2 = virtualinvoke r2.<java.awt.Container: java.awt.Container getParent()>();
+
+        goto label2;
+
+     label4:
+        return 0;
+    }
+
+    public static java.awt.Rectangle computeIntersection(int, int, int, int, java.awt.Rectangle)
+    {
+        java.awt.Rectangle r0;
+        int i0, $i1, i2, i3, $i4, $i5, $i6, $i7, $i8, $i9, i10, i11, $i12, i13, i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28;
+
+        i0 := @parameter0: int;
+
+        i11 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        i14 := @parameter3: int;
+
+        r0 := @parameter4: java.awt.Rectangle;
+
+        $i1 = r0.<java.awt.Rectangle: int x>;
+
+        if i0 <= $i1 goto label01;
+
+        $i25 = i0;
+
+        goto label02;
+
+     label01:
+        $i25 = r0.<java.awt.Rectangle: int x>;
+
+     label02:
+        i2 = $i25;
+
+        $i7 = i0 + i3;
+
+        $i5 = r0.<java.awt.Rectangle: int x>;
+
+        $i4 = r0.<java.awt.Rectangle: int width>;
+
+        $i6 = $i5 + $i4;
+
+        if $i7 >= $i6 goto label03;
+
+        $i26 = i0 + i3;
+
+        goto label04;
+
+     label03:
+        $i9 = r0.<java.awt.Rectangle: int x>;
+
+        $i8 = r0.<java.awt.Rectangle: int width>;
+
+        $i26 = $i9 + $i8;
+
+     label04:
+        i10 = $i26;
+
+        $i12 = r0.<java.awt.Rectangle: int y>;
+
+        if i11 <= $i12 goto label05;
+
+        $i27 = i11;
+
+        goto label06;
+
+     label05:
+        $i27 = r0.<java.awt.Rectangle: int y>;
+
+     label06:
+        i13 = $i27;
+
+        $i18 = i11 + i14;
+
+        $i16 = r0.<java.awt.Rectangle: int y>;
+
+        $i15 = r0.<java.awt.Rectangle: int height>;
+
+        $i17 = $i16 + $i15;
+
+        if $i18 >= $i17 goto label07;
+
+        $i28 = i11 + i14;
+
+        goto label08;
+
+     label07:
+        $i20 = r0.<java.awt.Rectangle: int y>;
+
+        $i19 = r0.<java.awt.Rectangle: int height>;
+
+        $i28 = $i20 + $i19;
+
+     label08:
+        r0.<java.awt.Rectangle: int x> = i2;
+
+        r0.<java.awt.Rectangle: int y> = i13;
+
+        $i21 = i10 - i2;
+
+        r0.<java.awt.Rectangle: int width> = $i21;
+
+        $i22 = $i28 - i13;
+
+        r0.<java.awt.Rectangle: int height> = $i22;
+
+        $i23 = r0.<java.awt.Rectangle: int width>;
+
+        if $i23 < 0 goto label09;
+
+        $i24 = r0.<java.awt.Rectangle: int height>;
+
+        if $i24 >= 0 goto label10;
+
+     label09:
+        r0.<java.awt.Rectangle: int height> = 0;
+
+        r0.<java.awt.Rectangle: int width> = 0;
+
+        r0.<java.awt.Rectangle: int y> = 0;
+
+        r0.<java.awt.Rectangle: int x> = 0;
+
+     label10:
+        return r0;
+    }
+
+    public static java.awt.Rectangle computeUnion(int, int, int, int, java.awt.Rectangle)
+    {
+        java.awt.Rectangle r0;
+        int i0, $i1, i2, i3, $i4, $i5, $i6, $i7, $i8, $i9, i10, i11, $i12, i13, i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26;
+
+        i0 := @parameter0: int;
+
+        i11 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        i14 := @parameter3: int;
+
+        r0 := @parameter4: java.awt.Rectangle;
+
+        $i1 = r0.<java.awt.Rectangle: int x>;
+
+        if i0 >= $i1 goto label1;
+
+        $i23 = i0;
+
+        goto label2;
+
+     label1:
+        $i23 = r0.<java.awt.Rectangle: int x>;
+
+     label2:
+        i2 = $i23;
+
+        $i7 = i0 + i3;
+
+        $i5 = r0.<java.awt.Rectangle: int x>;
+
+        $i4 = r0.<java.awt.Rectangle: int width>;
+
+        $i6 = $i5 + $i4;
+
+        if $i7 <= $i6 goto label3;
+
+        $i24 = i0 + i3;
+
+        goto label4;
+
+     label3:
+        $i9 = r0.<java.awt.Rectangle: int x>;
+
+        $i8 = r0.<java.awt.Rectangle: int width>;
+
+        $i24 = $i9 + $i8;
+
+     label4:
+        i10 = $i24;
+
+        $i12 = r0.<java.awt.Rectangle: int y>;
+
+        if i11 >= $i12 goto label5;
+
+        $i25 = i11;
+
+        goto label6;
+
+     label5:
+        $i25 = r0.<java.awt.Rectangle: int y>;
+
+     label6:
+        i13 = $i25;
+
+        $i18 = i11 + i14;
+
+        $i16 = r0.<java.awt.Rectangle: int y>;
+
+        $i15 = r0.<java.awt.Rectangle: int height>;
+
+        $i17 = $i16 + $i15;
+
+        if $i18 <= $i17 goto label7;
+
+        $i26 = i11 + i14;
+
+        goto label8;
+
+     label7:
+        $i20 = r0.<java.awt.Rectangle: int y>;
+
+        $i19 = r0.<java.awt.Rectangle: int height>;
+
+        $i26 = $i20 + $i19;
+
+     label8:
+        r0.<java.awt.Rectangle: int x> = i2;
+
+        r0.<java.awt.Rectangle: int y> = i13;
+
+        $i21 = i10 - i2;
+
+        r0.<java.awt.Rectangle: int width> = $i21;
+
+        $i22 = $i26 - i13;
+
+        r0.<java.awt.Rectangle: int height> = $i22;
+
+        return r0;
+    }
+
+    public static java.awt.Rectangle[] computeDifference(java.awt.Rectangle, java.awt.Rectangle)
+    {
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57, $i58, $i59, $i60, $i61, $i62, $i63, $i64, $i65, $i66, $i67, $i68, $i69, $i70, $i71, $i72, $i73, $i74, $i75, $i76, $i77, $i78, $i79, $i80, $i81, $i82, $i83, $i84, $i85, $i86, $i87, $i88, $i89, $i90, $i91, $i92, $i93, $i94, $i95, $i96, $i97, $i98, $i99, $i100, $i101, $i102, $i103, $i104, $i105, $i106, $i107, $i108, $i109, $i110, $i111, $i112, $i113, $i114, $i115, $i116, $i117, $i118, $i119, $i120, $i121, $i122, $i123, $i124, $i125, $i126, $i127, $i128, $i129, $i130, $i131, $i132, $i133, $i134, $i135, $i136, $i137, $i138, $i139, $i140, $i141, $i142, $i143, $i144, $i145, $i146, $i147, $i148, $i149, $i150, $i151, $i152, $i153, $i154, $i155, $i156, $i157, $i158, $i159, $i160, $i161, $i162, $i163, $i164, $i165, $i166, $i167, $i168, $i169, $i170, $i171, $i172, $i173, $i174, $i175, $i176, $i177, $i178, $i179, $i180, $i181, $i182, $i183, $i184, $i185, $i186, $i187, $i188, $i189, $i190, $i191, $i192, $i193, $i194, $i195, $i196, $i197, $i198, $i199, $i200, $i201, $i202, $i203, $i204, $i205, $i206, $i207, $i208, $i209, $i210, $i211, $i212, $i213, $i214, $i215, $i216, $i217, $i218, $i219, $i220, $i221, $i222, $i223, $i224, $i225, $i226, $i227, $i228, $i229, $i230, $i231, $i232, $i233, $i234, $i235, $i236, $i237, $i238, $i239, $i240, $i241, $i242, $i243, $i244, $i245, i246, $i247, $i248, $i249, $i250, $i251, $i252, $i253, $i254, $i255, $i256, $i257, $i258, $i259, $i260, $i261, $i262, $i263, $i264, $i265, $i266, $i267, $i268, $i269, $i270, $i271, $i272, $i273, $i274, $i275, $i276, $i277, $i278, $i279, $i280, $i281, $i282, $i283, $i284, $i285, $i286, $i287, $i288, $i289, $i290, $i291, $i292, $i293, $i294, $i295, $i296, $i297, $i298, $i299, $i300, $i301, $i302, $i303, $i304, $i305, $i306, $i307, $i308, $i309, $i310, $i311, $i312, $i313, $i314, $i315, $i316, $i317, $i318, $i319, $i320, $i321, $i322, $i323, $i324, $i325, $i326, $i327, $i328, $i329, $i330, $i331, $i332, $i333, $i334, $i335, $i336, $i337, $i338, $i339, $i340, $i341, $i342, $i343, $i344, $i345, $i346, $i347, $i348, $i349, $i350, $i351, $i352, $i353, $i354, $i355, $i356, $i357, $i358, $i359, $i360, $i361, $i362, $i363, $i364, $i365, $i366, $i367, $i368, $i369, $i370, $i371, $i372, $i373, $i374, $i375, $i376, $i377, $i378, $i379, $i380, $i381, $i382, $i383, $i384, $i385, $i386, $i387, $i388, $i389, $i390, $i391, $i392, $i393, $i394, $i395, $i396, $i397, $i398, $i399, $i400, $i401, $i402, $i403, $i404, $i405, $i406, $i407, $i408, $i409, $i410, $i411, $i412, $i413, $i414, $i415, $i416, $i417, $i418, $i419, $i420, $i421, $i422, $i423, $i424, $i425, $i426, $i427, $i428, $i429, $i430, $i431, $i432, $i433, $i434, $i435, $i436, $i437, $i438, $i439, $i440, $i441, $i442, $i443, $i444, $i445, $i446, $i447, $i448, $i449, $i450, $i451, i452;
+        boolean $z0, $z1, $z2, z3, z4, z5, z6, z7, z8, z9, z10, z11, z12, z13, z14;
+        java.awt.Rectangle r0, r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26, $r27, $r28, $r29, $r30, r32, r33, r34, r35;
+        byte b453;
+        java.awt.Rectangle[] $r31, $r36;
+
+        r1 := @parameter0: java.awt.Rectangle;
+
+        r0 := @parameter1: java.awt.Rectangle;
+
+        if r0 == null goto label01;
+
+        $z0 = virtualinvoke r1.<java.awt.Rectangle: boolean intersects(java.awt.Rectangle)>(r0);
+
+        if $z0 == 0 goto label01;
+
+        $z1 = staticinvoke <javax.swing.SwingUtilities: boolean isRectangleContainingRectangle(java.awt.Rectangle,java.awt.Rectangle)>(r0, r1);
+
+        if $z1 == 0 goto label02;
+
+     label01:
+        $r31 = newarray (java.awt.Rectangle)[0];
+
+        return $r31;
+
+     label02:
+        $r2 = new java.awt.Rectangle;
+
+        specialinvoke $r2.<java.awt.Rectangle: void <init>()>();
+
+        r32 = null;
+
+        r33 = null;
+
+        r34 = null;
+
+        r35 = null;
+
+        i246 = 0;
+
+        z14 = 0;
+
+        z13 = 0;
+
+        z12 = 0;
+
+        z11 = 0;
+
+        z10 = 0;
+
+        z9 = 0;
+
+        z8 = 0;
+
+        z7 = 0;
+
+        z6 = 0;
+
+        z5 = 0;
+
+        z4 = 0;
+
+        $z2 = staticinvoke <javax.swing.SwingUtilities: boolean isRectangleContainingRectangle(java.awt.Rectangle,java.awt.Rectangle)>(r1, r0);
+
+        if $z2 == 0 goto label06;
+
+        $i235 = r1.<java.awt.Rectangle: int x>;
+
+        $r2.<java.awt.Rectangle: int x> = $i235;
+
+        $i236 = r1.<java.awt.Rectangle: int y>;
+
+        $r2.<java.awt.Rectangle: int y> = $i236;
+
+        $i238 = r0.<java.awt.Rectangle: int x>;
+
+        $i237 = r1.<java.awt.Rectangle: int x>;
+
+        $i239 = $i238 - $i237;
+
+        $r2.<java.awt.Rectangle: int width> = $i239;
+
+        $i240 = r1.<java.awt.Rectangle: int height>;
+
+        $r2.<java.awt.Rectangle: int height> = $i240;
+
+        $i241 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i241 <= 0 goto label03;
+
+        $i245 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i245 <= 0 goto label03;
+
+        $r30 = new java.awt.Rectangle;
+
+        specialinvoke $r30.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r32 = $r30;
+
+        i246 = 1;
+
+        z8 = 1;
+
+     label03:
+        $i247 = r0.<java.awt.Rectangle: int x>;
+
+        $r2.<java.awt.Rectangle: int x> = $i247;
+
+        $i248 = r1.<java.awt.Rectangle: int y>;
+
+        $r2.<java.awt.Rectangle: int y> = $i248;
+
+        $i249 = r0.<java.awt.Rectangle: int width>;
+
+        $r2.<java.awt.Rectangle: int width> = $i249;
+
+        $i250 = r0.<java.awt.Rectangle: int y>;
+
+        $i251 = r1.<java.awt.Rectangle: int y>;
+
+        $i252 = $i250 - $i251;
+
+        $r2.<java.awt.Rectangle: int height> = $i252;
+
+        $i253 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i253 <= 0 goto label04;
+
+        $i244 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i244 <= 0 goto label04;
+
+        $r29 = new java.awt.Rectangle;
+
+        specialinvoke $r29.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r33 = $r29;
+
+        i246 = z8 + 1;
+
+     label04:
+        $i254 = r0.<java.awt.Rectangle: int x>;
+
+        $r2.<java.awt.Rectangle: int x> = $i254;
+
+        $i255 = r0.<java.awt.Rectangle: int y>;
+
+        $i256 = r0.<java.awt.Rectangle: int height>;
+
+        $i257 = $i255 + $i256;
+
+        $r2.<java.awt.Rectangle: int y> = $i257;
+
+        $i258 = r0.<java.awt.Rectangle: int width>;
+
+        $r2.<java.awt.Rectangle: int width> = $i258;
+
+        $i259 = r1.<java.awt.Rectangle: int y>;
+
+        $i260 = r1.<java.awt.Rectangle: int height>;
+
+        $i261 = $i259 + $i260;
+
+        $i262 = r0.<java.awt.Rectangle: int y>;
+
+        $i263 = r0.<java.awt.Rectangle: int height>;
+
+        $i264 = $i262 + $i263;
+
+        $i265 = $i261 - $i264;
+
+        $r2.<java.awt.Rectangle: int height> = $i265;
+
+        $i266 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i266 <= 0 goto label05;
+
+        $i243 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i243 <= 0 goto label05;
+
+        $r28 = new java.awt.Rectangle;
+
+        specialinvoke $r28.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r34 = $r28;
+
+        i246 = i246 + 1;
+
+     label05:
+        $i267 = r0.<java.awt.Rectangle: int x>;
+
+        $i268 = r0.<java.awt.Rectangle: int width>;
+
+        $i269 = $i267 + $i268;
+
+        $r2.<java.awt.Rectangle: int x> = $i269;
+
+        $i270 = r1.<java.awt.Rectangle: int y>;
+
+        $r2.<java.awt.Rectangle: int y> = $i270;
+
+        $i271 = r1.<java.awt.Rectangle: int x>;
+
+        $i272 = r1.<java.awt.Rectangle: int width>;
+
+        $i273 = $i271 + $i272;
+
+        $i274 = r0.<java.awt.Rectangle: int x>;
+
+        $i275 = r0.<java.awt.Rectangle: int width>;
+
+        $i276 = $i274 + $i275;
+
+        $i277 = $i273 - $i276;
+
+        $r2.<java.awt.Rectangle: int width> = $i277;
+
+        $i278 = r1.<java.awt.Rectangle: int height>;
+
+        $r2.<java.awt.Rectangle: int height> = $i278;
+
+        $i279 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i279 <= 0 goto label34;
+
+        $i242 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i242 <= 0 goto label34;
+
+        $r27 = new java.awt.Rectangle;
+
+        specialinvoke $r27.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r35 = $r27;
+
+        i246 = i246 + 1;
+
+        goto label34;
+
+     label06:
+        $i1 = r0.<java.awt.Rectangle: int x>;
+
+        $i0 = r1.<java.awt.Rectangle: int x>;
+
+        if $i1 > $i0 goto label10;
+
+        $i175 = r0.<java.awt.Rectangle: int y>;
+
+        $i174 = r1.<java.awt.Rectangle: int y>;
+
+        if $i175 > $i174 goto label10;
+
+        $i177 = r0.<java.awt.Rectangle: int x>;
+
+        $i176 = r0.<java.awt.Rectangle: int width>;
+
+        $i181 = $i177 + $i176;
+
+        $i179 = r1.<java.awt.Rectangle: int x>;
+
+        $i178 = r1.<java.awt.Rectangle: int width>;
+
+        $i180 = $i179 + $i178;
+
+        if $i181 <= $i180 goto label07;
+
+        $i221 = r1.<java.awt.Rectangle: int x>;
+
+        $r2.<java.awt.Rectangle: int x> = $i221;
+
+        $i223 = r0.<java.awt.Rectangle: int y>;
+
+        $i222 = r0.<java.awt.Rectangle: int height>;
+
+        $i224 = $i223 + $i222;
+
+        $r2.<java.awt.Rectangle: int y> = $i224;
+
+        $i225 = r1.<java.awt.Rectangle: int width>;
+
+        $r2.<java.awt.Rectangle: int width> = $i225;
+
+        $i227 = r1.<java.awt.Rectangle: int y>;
+
+        $i226 = r1.<java.awt.Rectangle: int height>;
+
+        $i231 = $i227 + $i226;
+
+        $i229 = r0.<java.awt.Rectangle: int y>;
+
+        $i228 = r0.<java.awt.Rectangle: int height>;
+
+        $i230 = $i229 + $i228;
+
+        $i232 = $i231 - $i230;
+
+        $r2.<java.awt.Rectangle: int height> = $i232;
+
+        $i233 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i233 <= 0 goto label34;
+
+        $i234 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i234 <= 0 goto label34;
+
+        r32 = $r2;
+
+        i246 = 1;
+
+        goto label34;
+
+     label07:
+        $i183 = r0.<java.awt.Rectangle: int y>;
+
+        $i182 = r0.<java.awt.Rectangle: int height>;
+
+        $i187 = $i183 + $i182;
+
+        $i185 = r1.<java.awt.Rectangle: int y>;
+
+        $i184 = r1.<java.awt.Rectangle: int height>;
+
+        $i186 = $i185 + $i184;
+
+        if $i187 <= $i186 goto label08;
+
+        $i208 = r0.<java.awt.Rectangle: int x>;
+
+        $i207 = r0.<java.awt.Rectangle: int width>;
+
+        $i218 = $i208 + $i207;
+
+        $i217 = r1.<java.awt.Rectangle: int y>;
+
+        $i210 = r1.<java.awt.Rectangle: int x>;
+
+        $i209 = r1.<java.awt.Rectangle: int width>;
+
+        $i214 = $i210 + $i209;
+
+        $i212 = r0.<java.awt.Rectangle: int x>;
+
+        $i211 = r0.<java.awt.Rectangle: int width>;
+
+        $i213 = $i212 + $i211;
+
+        $i216 = $i214 - $i213;
+
+        $i215 = r1.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i218, $i217, $i216, $i215);
+
+        $i219 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i219 <= 0 goto label34;
+
+        $i220 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i220 <= 0 goto label34;
+
+        r32 = $r2;
+
+        i246 = 1;
+
+        goto label34;
+
+     label08:
+        $i189 = r0.<java.awt.Rectangle: int x>;
+
+        $i188 = r0.<java.awt.Rectangle: int width>;
+
+        $i203 = $i189 + $i188;
+
+        $i202 = r1.<java.awt.Rectangle: int y>;
+
+        $i191 = r1.<java.awt.Rectangle: int x>;
+
+        $i190 = r1.<java.awt.Rectangle: int width>;
+
+        $i195 = $i191 + $i190;
+
+        $i193 = r0.<java.awt.Rectangle: int x>;
+
+        $i192 = r0.<java.awt.Rectangle: int width>;
+
+        $i194 = $i193 + $i192;
+
+        $i201 = $i195 - $i194;
+
+        $i197 = r0.<java.awt.Rectangle: int y>;
+
+        $i196 = r0.<java.awt.Rectangle: int height>;
+
+        $i199 = $i197 + $i196;
+
+        $i198 = r1.<java.awt.Rectangle: int y>;
+
+        $i200 = $i199 - $i198;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i203, $i202, $i201, $i200);
+
+        $i204 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i204 <= 0 goto label09;
+
+        $i206 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i206 <= 0 goto label09;
+
+        $r26 = new java.awt.Rectangle;
+
+        specialinvoke $r26.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r32 = $r26;
+
+        i246 = 1;
+
+        z9 = 1;
+
+     label09:
+        $i280 = r1.<java.awt.Rectangle: int x>;
+
+        $i281 = r0.<java.awt.Rectangle: int y>;
+
+        $i282 = r0.<java.awt.Rectangle: int height>;
+
+        $i283 = $i281 + $i282;
+
+        $i284 = r1.<java.awt.Rectangle: int width>;
+
+        $i285 = r1.<java.awt.Rectangle: int y>;
+
+        $i286 = r1.<java.awt.Rectangle: int height>;
+
+        $i287 = $i285 + $i286;
+
+        $i288 = r0.<java.awt.Rectangle: int y>;
+
+        $i289 = r0.<java.awt.Rectangle: int height>;
+
+        $i290 = $i288 + $i289;
+
+        $i291 = $i287 - $i290;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i280, $i283, $i284, $i291);
+
+        $i292 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i292 <= 0 goto label34;
+
+        $i205 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i205 <= 0 goto label34;
+
+        $r25 = new java.awt.Rectangle;
+
+        specialinvoke $r25.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r33 = $r25;
+
+        i246 = z9 + 1;
+
+        goto label34;
+
+     label10:
+        $i3 = r0.<java.awt.Rectangle: int x>;
+
+        $i2 = r1.<java.awt.Rectangle: int x>;
+
+        if $i3 > $i2 goto label13;
+
+        $i146 = r0.<java.awt.Rectangle: int y>;
+
+        $i145 = r0.<java.awt.Rectangle: int height>;
+
+        $i150 = $i146 + $i145;
+
+        $i148 = r1.<java.awt.Rectangle: int y>;
+
+        $i147 = r1.<java.awt.Rectangle: int height>;
+
+        $i149 = $i148 + $i147;
+
+        if $i150 < $i149 goto label13;
+
+        $i152 = r0.<java.awt.Rectangle: int x>;
+
+        $i151 = r0.<java.awt.Rectangle: int width>;
+
+        $i156 = $i152 + $i151;
+
+        $i154 = r1.<java.awt.Rectangle: int x>;
+
+        $i153 = r1.<java.awt.Rectangle: int width>;
+
+        $i155 = $i154 + $i153;
+
+        if $i156 <= $i155 goto label11;
+
+        $i171 = r1.<java.awt.Rectangle: int x>;
+
+        $i170 = r1.<java.awt.Rectangle: int y>;
+
+        $i169 = r1.<java.awt.Rectangle: int width>;
+
+        $i167 = r0.<java.awt.Rectangle: int y>;
+
+        $i166 = r1.<java.awt.Rectangle: int y>;
+
+        $i168 = $i167 - $i166;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i171, $i170, $i169, $i168);
+
+        $i172 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i172 <= 0 goto label34;
+
+        $i173 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i173 <= 0 goto label34;
+
+        r32 = $r2;
+
+        i246 = 1;
+
+        goto label34;
+
+     label11:
+        $i162 = r1.<java.awt.Rectangle: int x>;
+
+        $i161 = r1.<java.awt.Rectangle: int y>;
+
+        $i160 = r1.<java.awt.Rectangle: int width>;
+
+        $i158 = r0.<java.awt.Rectangle: int y>;
+
+        $i157 = r1.<java.awt.Rectangle: int y>;
+
+        $i159 = $i158 - $i157;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i162, $i161, $i160, $i159);
+
+        $i163 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i163 <= 0 goto label12;
+
+        $i165 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i165 <= 0 goto label12;
+
+        $r24 = new java.awt.Rectangle;
+
+        specialinvoke $r24.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r32 = $r24;
+
+        i246 = 1;
+
+        z6 = 1;
+
+     label12:
+        $i293 = r0.<java.awt.Rectangle: int x>;
+
+        $i294 = r0.<java.awt.Rectangle: int width>;
+
+        $i295 = $i293 + $i294;
+
+        $i296 = r0.<java.awt.Rectangle: int y>;
+
+        $i297 = r1.<java.awt.Rectangle: int x>;
+
+        $i298 = r1.<java.awt.Rectangle: int width>;
+
+        $i299 = $i297 + $i298;
+
+        $i300 = r0.<java.awt.Rectangle: int x>;
+
+        $i301 = r0.<java.awt.Rectangle: int width>;
+
+        $i302 = $i300 + $i301;
+
+        $i303 = $i299 - $i302;
+
+        $i304 = r1.<java.awt.Rectangle: int y>;
+
+        $i305 = r1.<java.awt.Rectangle: int height>;
+
+        $i306 = $i304 + $i305;
+
+        $i307 = r0.<java.awt.Rectangle: int y>;
+
+        $i308 = $i306 - $i307;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i295, $i296, $i303, $i308);
+
+        $i309 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i309 <= 0 goto label34;
+
+        $i164 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i164 <= 0 goto label34;
+
+        $r23 = new java.awt.Rectangle;
+
+        specialinvoke $r23.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r33 = $r23;
+
+        i246 = z6 + 1;
+
+        goto label34;
+
+     label13:
+        $i5 = r0.<java.awt.Rectangle: int x>;
+
+        $i4 = r1.<java.awt.Rectangle: int x>;
+
+        if $i5 > $i4 goto label18;
+
+        $i121 = r0.<java.awt.Rectangle: int x>;
+
+        $i120 = r0.<java.awt.Rectangle: int width>;
+
+        $i125 = $i121 + $i120;
+
+        $i123 = r1.<java.awt.Rectangle: int x>;
+
+        $i122 = r1.<java.awt.Rectangle: int width>;
+
+        $i124 = $i123 + $i122;
+
+        if $i125 < $i124 goto label15;
+
+        $i141 = r1.<java.awt.Rectangle: int x>;
+
+        $i140 = r1.<java.awt.Rectangle: int y>;
+
+        $i139 = r1.<java.awt.Rectangle: int width>;
+
+        $i137 = r0.<java.awt.Rectangle: int y>;
+
+        $i136 = r1.<java.awt.Rectangle: int y>;
+
+        $i138 = $i137 - $i136;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i141, $i140, $i139, $i138);
+
+        $i142 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i142 <= 0 goto label14;
+
+        $i144 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i144 <= 0 goto label14;
+
+        $r22 = new java.awt.Rectangle;
+
+        specialinvoke $r22.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r32 = $r22;
+
+        i246 = 1;
+
+        z7 = 1;
+
+     label14:
+        $i310 = r1.<java.awt.Rectangle: int x>;
+
+        $i311 = r0.<java.awt.Rectangle: int y>;
+
+        $i312 = r0.<java.awt.Rectangle: int height>;
+
+        $i313 = $i311 + $i312;
+
+        $i314 = r1.<java.awt.Rectangle: int width>;
+
+        $i315 = r1.<java.awt.Rectangle: int y>;
+
+        $i316 = r1.<java.awt.Rectangle: int height>;
+
+        $i317 = $i315 + $i316;
+
+        $i318 = r0.<java.awt.Rectangle: int y>;
+
+        $i319 = r0.<java.awt.Rectangle: int height>;
+
+        $i320 = $i318 + $i319;
+
+        $i321 = $i317 - $i320;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i310, $i313, $i314, $i321);
+
+        $i322 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i322 <= 0 goto label34;
+
+        $i143 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i143 <= 0 goto label34;
+
+        $r21 = new java.awt.Rectangle;
+
+        specialinvoke $r21.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r33 = $r21;
+
+        i246 = z7 + 1;
+
+        goto label34;
+
+     label15:
+        $i131 = r1.<java.awt.Rectangle: int x>;
+
+        $i130 = r1.<java.awt.Rectangle: int y>;
+
+        $i129 = r1.<java.awt.Rectangle: int width>;
+
+        $i127 = r0.<java.awt.Rectangle: int y>;
+
+        $i126 = r1.<java.awt.Rectangle: int y>;
+
+        $i128 = $i127 - $i126;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i131, $i130, $i129, $i128);
+
+        $i132 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i132 <= 0 goto label16;
+
+        $i135 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i135 <= 0 goto label16;
+
+        $r20 = new java.awt.Rectangle;
+
+        specialinvoke $r20.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r32 = $r20;
+
+        i246 = 1;
+
+        z12 = 1;
+
+     label16:
+        $i323 = r0.<java.awt.Rectangle: int x>;
+
+        $i324 = r0.<java.awt.Rectangle: int width>;
+
+        $i325 = $i323 + $i324;
+
+        $i326 = r0.<java.awt.Rectangle: int y>;
+
+        $i327 = r1.<java.awt.Rectangle: int x>;
+
+        $i328 = r1.<java.awt.Rectangle: int width>;
+
+        $i329 = $i327 + $i328;
+
+        $i330 = r0.<java.awt.Rectangle: int x>;
+
+        $i331 = r0.<java.awt.Rectangle: int width>;
+
+        $i332 = $i330 + $i331;
+
+        $i333 = $i329 - $i332;
+
+        $i334 = r0.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i325, $i326, $i333, $i334);
+
+        $i335 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i335 <= 0 goto label17;
+
+        $i134 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i134 <= 0 goto label17;
+
+        $r19 = new java.awt.Rectangle;
+
+        specialinvoke $r19.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r33 = $r19;
+
+        i246 = z12 + 1;
+
+     label17:
+        $i336 = r1.<java.awt.Rectangle: int x>;
+
+        $i337 = r0.<java.awt.Rectangle: int y>;
+
+        $i338 = r0.<java.awt.Rectangle: int height>;
+
+        $i339 = $i337 + $i338;
+
+        $i340 = r1.<java.awt.Rectangle: int width>;
+
+        $i341 = r1.<java.awt.Rectangle: int y>;
+
+        $i342 = r1.<java.awt.Rectangle: int height>;
+
+        $i343 = $i341 + $i342;
+
+        $i344 = r0.<java.awt.Rectangle: int y>;
+
+        $i345 = r0.<java.awt.Rectangle: int height>;
+
+        $i346 = $i344 + $i345;
+
+        $i347 = $i343 - $i346;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i336, $i339, $i340, $i347);
+
+        $i348 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i348 <= 0 goto label34;
+
+        $i133 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i133 <= 0 goto label34;
+
+        $r18 = new java.awt.Rectangle;
+
+        specialinvoke $r18.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r34 = $r18;
+
+        i246 = i246 + 1;
+
+        goto label34;
+
+     label18:
+        $i9 = r0.<java.awt.Rectangle: int x>;
+
+        $i7 = r1.<java.awt.Rectangle: int x>;
+
+        $i6 = r1.<java.awt.Rectangle: int width>;
+
+        $i8 = $i7 + $i6;
+
+        if $i9 > $i8 goto label26;
+
+        $i59 = r0.<java.awt.Rectangle: int x>;
+
+        $i58 = r0.<java.awt.Rectangle: int width>;
+
+        $i63 = $i59 + $i58;
+
+        $i61 = r1.<java.awt.Rectangle: int x>;
+
+        $i60 = r1.<java.awt.Rectangle: int width>;
+
+        $i62 = $i61 + $i60;
+
+        if $i63 <= $i62 goto label26;
+
+        $i65 = r0.<java.awt.Rectangle: int y>;
+
+        $i64 = r1.<java.awt.Rectangle: int y>;
+
+        if $i65 > $i64 goto label19;
+
+        $i107 = r0.<java.awt.Rectangle: int y>;
+
+        $i106 = r0.<java.awt.Rectangle: int height>;
+
+        $i111 = $i107 + $i106;
+
+        $i109 = r1.<java.awt.Rectangle: int y>;
+
+        $i108 = r1.<java.awt.Rectangle: int height>;
+
+        $i110 = $i109 + $i108;
+
+        if $i111 <= $i110 goto label19;
+
+        $i117 = r1.<java.awt.Rectangle: int x>;
+
+        $i116 = r1.<java.awt.Rectangle: int y>;
+
+        $i113 = r0.<java.awt.Rectangle: int x>;
+
+        $i112 = r1.<java.awt.Rectangle: int x>;
+
+        $i115 = $i113 - $i112;
+
+        $i114 = r1.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i117, $i116, $i115, $i114);
+
+        $i118 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i118 <= 0 goto label34;
+
+        $i119 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i119 <= 0 goto label34;
+
+        r32 = $r2;
+
+        i246 = 1;
+
+        goto label34;
+
+     label19:
+        $i67 = r0.<java.awt.Rectangle: int y>;
+
+        $i66 = r1.<java.awt.Rectangle: int y>;
+
+        if $i67 > $i66 goto label21;
+
+        $i102 = r1.<java.awt.Rectangle: int x>;
+
+        $i101 = r1.<java.awt.Rectangle: int y>;
+
+        $i94 = r0.<java.awt.Rectangle: int x>;
+
+        $i93 = r1.<java.awt.Rectangle: int x>;
+
+        $i100 = $i94 - $i93;
+
+        $i96 = r0.<java.awt.Rectangle: int y>;
+
+        $i95 = r0.<java.awt.Rectangle: int height>;
+
+        $i98 = $i96 + $i95;
+
+        $i97 = r1.<java.awt.Rectangle: int y>;
+
+        $i99 = $i98 - $i97;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i102, $i101, $i100, $i99);
+
+        $i103 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i103 <= 0 goto label20;
+
+        $i105 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i105 <= 0 goto label20;
+
+        $r17 = new java.awt.Rectangle;
+
+        specialinvoke $r17.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r32 = $r17;
+
+        i246 = 1;
+
+        z11 = 1;
+
+     label20:
+        $i349 = r1.<java.awt.Rectangle: int x>;
+
+        $i350 = r0.<java.awt.Rectangle: int y>;
+
+        $i351 = r0.<java.awt.Rectangle: int height>;
+
+        $i352 = $i350 + $i351;
+
+        $i353 = r1.<java.awt.Rectangle: int width>;
+
+        $i354 = r1.<java.awt.Rectangle: int y>;
+
+        $i355 = r1.<java.awt.Rectangle: int height>;
+
+        $i356 = $i354 + $i355;
+
+        $i357 = r0.<java.awt.Rectangle: int y>;
+
+        $i358 = r0.<java.awt.Rectangle: int height>;
+
+        $i359 = $i357 + $i358;
+
+        $i360 = $i356 - $i359;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i349, $i352, $i353, $i360);
+
+        $i361 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i361 <= 0 goto label34;
+
+        $i104 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i104 <= 0 goto label34;
+
+        $r16 = new java.awt.Rectangle;
+
+        specialinvoke $r16.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r33 = $r16;
+
+        i246 = z11 + 1;
+
+        goto label34;
+
+     label21:
+        $i69 = r0.<java.awt.Rectangle: int y>;
+
+        $i68 = r0.<java.awt.Rectangle: int height>;
+
+        $i73 = $i69 + $i68;
+
+        $i71 = r1.<java.awt.Rectangle: int y>;
+
+        $i70 = r1.<java.awt.Rectangle: int height>;
+
+        $i72 = $i71 + $i70;
+
+        if $i73 <= $i72 goto label23;
+
+        $i89 = r1.<java.awt.Rectangle: int x>;
+
+        $i88 = r1.<java.awt.Rectangle: int y>;
+
+        $i87 = r1.<java.awt.Rectangle: int width>;
+
+        $i85 = r0.<java.awt.Rectangle: int y>;
+
+        $i84 = r1.<java.awt.Rectangle: int y>;
+
+        $i86 = $i85 - $i84;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i89, $i88, $i87, $i86);
+
+        $i90 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i90 <= 0 goto label22;
+
+        $i92 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i92 <= 0 goto label22;
+
+        $r15 = new java.awt.Rectangle;
+
+        specialinvoke $r15.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r32 = $r15;
+
+        i246 = 1;
+
+        z5 = 1;
+
+     label22:
+        $i362 = r1.<java.awt.Rectangle: int x>;
+
+        $i363 = r0.<java.awt.Rectangle: int y>;
+
+        $i364 = r0.<java.awt.Rectangle: int x>;
+
+        $i365 = r1.<java.awt.Rectangle: int x>;
+
+        $i366 = $i364 - $i365;
+
+        $i367 = r1.<java.awt.Rectangle: int y>;
+
+        $i368 = r1.<java.awt.Rectangle: int height>;
+
+        $i369 = $i367 + $i368;
+
+        $i370 = r0.<java.awt.Rectangle: int y>;
+
+        $i371 = $i369 - $i370;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i362, $i363, $i366, $i371);
+
+        $i372 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i372 <= 0 goto label34;
+
+        $i91 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i91 <= 0 goto label34;
+
+        $r14 = new java.awt.Rectangle;
+
+        specialinvoke $r14.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r33 = $r14;
+
+        i246 = z5 + 1;
+
+        goto label34;
+
+     label23:
+        $i79 = r1.<java.awt.Rectangle: int x>;
+
+        $i78 = r1.<java.awt.Rectangle: int y>;
+
+        $i77 = r1.<java.awt.Rectangle: int width>;
+
+        $i75 = r0.<java.awt.Rectangle: int y>;
+
+        $i74 = r1.<java.awt.Rectangle: int y>;
+
+        $i76 = $i75 - $i74;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i79, $i78, $i77, $i76);
+
+        $i80 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i80 <= 0 goto label24;
+
+        $i83 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i83 <= 0 goto label24;
+
+        $r13 = new java.awt.Rectangle;
+
+        specialinvoke $r13.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r32 = $r13;
+
+        i246 = 1;
+
+        z4 = 1;
+
+     label24:
+        $i373 = r1.<java.awt.Rectangle: int x>;
+
+        $i374 = r0.<java.awt.Rectangle: int y>;
+
+        $i375 = r0.<java.awt.Rectangle: int x>;
+
+        $i376 = r1.<java.awt.Rectangle: int x>;
+
+        $i377 = $i375 - $i376;
+
+        $i378 = r0.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i373, $i374, $i377, $i378);
+
+        $i379 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i379 <= 0 goto label25;
+
+        $i82 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i82 <= 0 goto label25;
+
+        $r12 = new java.awt.Rectangle;
+
+        specialinvoke $r12.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r33 = $r12;
+
+        i246 = z4 + 1;
+
+     label25:
+        $i380 = r1.<java.awt.Rectangle: int x>;
+
+        $i381 = r0.<java.awt.Rectangle: int y>;
+
+        $i382 = r0.<java.awt.Rectangle: int height>;
+
+        $i383 = $i381 + $i382;
+
+        $i384 = r1.<java.awt.Rectangle: int width>;
+
+        $i385 = r1.<java.awt.Rectangle: int y>;
+
+        $i386 = r1.<java.awt.Rectangle: int height>;
+
+        $i387 = $i385 + $i386;
+
+        $i388 = r0.<java.awt.Rectangle: int y>;
+
+        $i389 = r0.<java.awt.Rectangle: int height>;
+
+        $i390 = $i388 + $i389;
+
+        $i391 = $i387 - $i390;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i380, $i383, $i384, $i391);
+
+        $i392 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i392 <= 0 goto label34;
+
+        $i81 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i81 <= 0 goto label34;
+
+        $r11 = new java.awt.Rectangle;
+
+        specialinvoke $r11.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r34 = $r11;
+
+        i246 = i246 + 1;
+
+        goto label34;
+
+     label26:
+        $i11 = r0.<java.awt.Rectangle: int x>;
+
+        $i10 = r1.<java.awt.Rectangle: int x>;
+
+        if $i11 < $i10 goto label34;
+
+        $i14 = r0.<java.awt.Rectangle: int x>;
+
+        $i13 = r0.<java.awt.Rectangle: int width>;
+
+        $i18 = $i14 + $i13;
+
+        $i16 = r1.<java.awt.Rectangle: int x>;
+
+        $i15 = r1.<java.awt.Rectangle: int width>;
+
+        $i17 = $i16 + $i15;
+
+        if $i18 > $i17 goto label34;
+
+        $i20 = r0.<java.awt.Rectangle: int y>;
+
+        $i19 = r1.<java.awt.Rectangle: int y>;
+
+        if $i20 > $i19 goto label28;
+
+        $i44 = r0.<java.awt.Rectangle: int y>;
+
+        $i43 = r0.<java.awt.Rectangle: int height>;
+
+        $i48 = $i44 + $i43;
+
+        $i46 = r1.<java.awt.Rectangle: int y>;
+
+        $i45 = r1.<java.awt.Rectangle: int height>;
+
+        $i47 = $i46 + $i45;
+
+        if $i48 <= $i47 goto label28;
+
+        $i54 = r1.<java.awt.Rectangle: int x>;
+
+        $i53 = r1.<java.awt.Rectangle: int y>;
+
+        $i50 = r0.<java.awt.Rectangle: int x>;
+
+        $i49 = r1.<java.awt.Rectangle: int x>;
+
+        $i52 = $i50 - $i49;
+
+        $i51 = r1.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i54, $i53, $i52, $i51);
+
+        $i55 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i55 <= 0 goto label27;
+
+        $i57 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i57 <= 0 goto label27;
+
+        $r10 = new java.awt.Rectangle;
+
+        specialinvoke $r10.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r32 = $r10;
+
+        i246 = 1;
+
+        z10 = 1;
+
+     label27:
+        $i393 = r0.<java.awt.Rectangle: int x>;
+
+        $i394 = r0.<java.awt.Rectangle: int width>;
+
+        $i395 = $i393 + $i394;
+
+        $i396 = r1.<java.awt.Rectangle: int y>;
+
+        $i397 = r1.<java.awt.Rectangle: int x>;
+
+        $i398 = r1.<java.awt.Rectangle: int width>;
+
+        $i399 = $i397 + $i398;
+
+        $i400 = r0.<java.awt.Rectangle: int x>;
+
+        $i401 = r0.<java.awt.Rectangle: int width>;
+
+        $i402 = $i400 + $i401;
+
+        $i403 = $i399 - $i402;
+
+        $i404 = r1.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i395, $i396, $i403, $i404);
+
+        $i405 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i405 <= 0 goto label34;
+
+        $i56 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i56 <= 0 goto label34;
+
+        $r9 = new java.awt.Rectangle;
+
+        specialinvoke $r9.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r33 = $r9;
+
+        i246 = z10 + 1;
+
+        goto label34;
+
+     label28:
+        $i22 = r0.<java.awt.Rectangle: int y>;
+
+        $i21 = r1.<java.awt.Rectangle: int y>;
+
+        if $i22 > $i21 goto label31;
+
+        $i38 = r1.<java.awt.Rectangle: int x>;
+
+        $i37 = r1.<java.awt.Rectangle: int y>;
+
+        $i34 = r0.<java.awt.Rectangle: int x>;
+
+        $i33 = r1.<java.awt.Rectangle: int x>;
+
+        $i36 = $i34 - $i33;
+
+        $i35 = r1.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i38, $i37, $i36, $i35);
+
+        $i39 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i39 <= 0 goto label29;
+
+        $i42 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i42 <= 0 goto label29;
+
+        $r8 = new java.awt.Rectangle;
+
+        specialinvoke $r8.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r32 = $r8;
+
+        i246 = 1;
+
+        z14 = 1;
+
+     label29:
+        $i406 = r0.<java.awt.Rectangle: int x>;
+
+        $i407 = r0.<java.awt.Rectangle: int y>;
+
+        $i408 = r0.<java.awt.Rectangle: int height>;
+
+        $i409 = $i407 + $i408;
+
+        $i410 = r0.<java.awt.Rectangle: int width>;
+
+        $i411 = r1.<java.awt.Rectangle: int y>;
+
+        $i412 = r1.<java.awt.Rectangle: int height>;
+
+        $i413 = $i411 + $i412;
+
+        $i414 = r0.<java.awt.Rectangle: int y>;
+
+        $i415 = r0.<java.awt.Rectangle: int height>;
+
+        $i416 = $i414 + $i415;
+
+        $i417 = $i413 - $i416;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i406, $i409, $i410, $i417);
+
+        $i418 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i418 <= 0 goto label30;
+
+        $i41 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i41 <= 0 goto label30;
+
+        $r7 = new java.awt.Rectangle;
+
+        specialinvoke $r7.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r33 = $r7;
+
+        i246 = z14 + 1;
+
+     label30:
+        $i419 = r0.<java.awt.Rectangle: int x>;
+
+        $i420 = r0.<java.awt.Rectangle: int width>;
+
+        $i421 = $i419 + $i420;
+
+        $i422 = r1.<java.awt.Rectangle: int y>;
+
+        $i423 = r1.<java.awt.Rectangle: int x>;
+
+        $i424 = r1.<java.awt.Rectangle: int width>;
+
+        $i425 = $i423 + $i424;
+
+        $i426 = r0.<java.awt.Rectangle: int x>;
+
+        $i427 = r0.<java.awt.Rectangle: int width>;
+
+        $i428 = $i426 + $i427;
+
+        $i429 = $i425 - $i428;
+
+        $i430 = r1.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i421, $i422, $i429, $i430);
+
+        $i431 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i431 <= 0 goto label34;
+
+        $i40 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i40 <= 0 goto label34;
+
+        $r6 = new java.awt.Rectangle;
+
+        specialinvoke $r6.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r34 = $r6;
+
+        i246 = i246 + 1;
+
+        goto label34;
+
+     label31:
+        $i28 = r1.<java.awt.Rectangle: int x>;
+
+        $i27 = r1.<java.awt.Rectangle: int y>;
+
+        $i24 = r0.<java.awt.Rectangle: int x>;
+
+        $i23 = r1.<java.awt.Rectangle: int x>;
+
+        $i26 = $i24 - $i23;
+
+        $i25 = r1.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i28, $i27, $i26, $i25);
+
+        $i29 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i29 <= 0 goto label32;
+
+        $i32 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i32 <= 0 goto label32;
+
+        $r5 = new java.awt.Rectangle;
+
+        specialinvoke $r5.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r32 = $r5;
+
+        i246 = 1;
+
+        z13 = 1;
+
+     label32:
+        $i432 = r0.<java.awt.Rectangle: int x>;
+
+        $i433 = r1.<java.awt.Rectangle: int y>;
+
+        $i434 = r0.<java.awt.Rectangle: int width>;
+
+        $i435 = r0.<java.awt.Rectangle: int y>;
+
+        $i436 = r1.<java.awt.Rectangle: int y>;
+
+        $i437 = $i435 - $i436;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i432, $i433, $i434, $i437);
+
+        $i438 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i438 <= 0 goto label33;
+
+        $i31 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i31 <= 0 goto label33;
+
+        $r4 = new java.awt.Rectangle;
+
+        specialinvoke $r4.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r33 = $r4;
+
+        i246 = z13 + 1;
+
+     label33:
+        $i439 = r0.<java.awt.Rectangle: int x>;
+
+        $i440 = r0.<java.awt.Rectangle: int width>;
+
+        $i441 = $i439 + $i440;
+
+        $i442 = r1.<java.awt.Rectangle: int y>;
+
+        $i443 = r1.<java.awt.Rectangle: int x>;
+
+        $i444 = r1.<java.awt.Rectangle: int width>;
+
+        $i445 = $i443 + $i444;
+
+        $i446 = r0.<java.awt.Rectangle: int x>;
+
+        $i447 = r0.<java.awt.Rectangle: int width>;
+
+        $i448 = $i446 + $i447;
+
+        $i449 = $i445 - $i448;
+
+        $i450 = r1.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void setBounds(int,int,int,int)>($i441, $i442, $i449, $i450);
+
+        $i451 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i451 <= 0 goto label34;
+
+        $i30 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i30 <= 0 goto label34;
+
+        $r3 = new java.awt.Rectangle;
+
+        specialinvoke $r3.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r2);
+
+        r34 = $r3;
+
+        i246 = i246 + 1;
+
+     label34:
+        $r36 = newarray (java.awt.Rectangle)[i246];
+
+        i452 = 0;
+
+        z3 = 0;
+
+        b453 = 0;
+
+        if r32 == null goto label35;
+
+        i452 = 1;
+
+        z3 = 1;
+
+        b453 = 1;
+
+        $r36[0] = r32;
+
+     label35:
+        if r33 == null goto label36;
+
+        i452 = z3 + 1;
+
+        $r36[b453] = r33;
+
+     label36:
+        if r34 == null goto label37;
+
+        $i12 = i452;
+
+        i452 = i452 + 1;
+
+        $r36[$i12] = r34;
+
+     label37:
+        if r35 == null goto label38;
+
+        $r36[i452] = r35;
+
+     label38:
+        return $r36;
+    }
+
+    public static boolean isLeftMouseButton(java.awt.event.MouseEvent)
+    {
+        int $i0, $i1, $i2;
+        java.awt.event.MouseEvent r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.event.MouseEvent;
+
+        $i0 = virtualinvoke r0.<java.awt.event.MouseEvent: int getModifiersEx()>();
+
+        $i1 = $i0 & 1024;
+
+        if $i1 != 0 goto label1;
+
+        $i2 = virtualinvoke r0.<java.awt.event.MouseEvent: int getButton()>();
+
+        if $i2 != 1 goto label2;
+
+     label1:
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+    }
+
+    public static boolean isMiddleMouseButton(java.awt.event.MouseEvent)
+    {
+        int $i0, $i1, $i2;
+        java.awt.event.MouseEvent r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.event.MouseEvent;
+
+        $i0 = virtualinvoke r0.<java.awt.event.MouseEvent: int getModifiersEx()>();
+
+        $i1 = $i0 & 2048;
+
+        if $i1 != 0 goto label1;
+
+        $i2 = virtualinvoke r0.<java.awt.event.MouseEvent: int getButton()>();
+
+        if $i2 != 2 goto label2;
+
+     label1:
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+    }
+
+    public static boolean isRightMouseButton(java.awt.event.MouseEvent)
+    {
+        int $i0, $i1, $i2;
+        java.awt.event.MouseEvent r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.event.MouseEvent;
+
+        $i0 = virtualinvoke r0.<java.awt.event.MouseEvent: int getModifiersEx()>();
+
+        $i1 = $i0 & 4096;
+
+        if $i1 != 0 goto label1;
+
+        $i2 = virtualinvoke r0.<java.awt.event.MouseEvent: int getButton()>();
+
+        if $i2 != 3 goto label2;
+
+     label1:
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+    }
+
+    public static int computeStringWidth(java.awt.FontMetrics, java.lang.String)
+    {
+        int $i0;
+        java.awt.FontMetrics r0;
+        java.lang.String r1;
+
+        r0 := @parameter0: java.awt.FontMetrics;
+
+        r1 := @parameter1: java.lang.String;
+
+        $i0 = staticinvoke <sun.swing.SwingUtilities2: int stringWidth(javax.swing.JComponent,java.awt.FontMetrics,java.lang.String)>(null, r0, r1);
+
+        return $i0;
+    }
+
+    public static java.lang.String layoutCompoundLabel(javax.swing.JComponent, java.awt.FontMetrics, java.lang.String, javax.swing.Icon, int, int, int, int, java.awt.Rectangle, java.awt.Rectangle, java.awt.Rectangle, int)
+    {
+        java.awt.Rectangle r4, r5, r6;
+        byte $b7, $b8, $b9, $b10;
+        int i0, i1, i2, i3, i4, i5, i6;
+        java.lang.String r2, $r8;
+        boolean $z0, z1, z2, z3, z4, z5;
+        javax.swing.JComponent r0;
+        javax.swing.Icon r3;
+        java.awt.ComponentOrientation $r7;
+        java.awt.FontMetrics r1;
+
+        r0 := @parameter0: javax.swing.JComponent;
+
+        r1 := @parameter1: java.awt.FontMetrics;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: javax.swing.Icon;
+
+        i2 := @parameter4: int;
+
+        i0 := @parameter5: int;
+
+        i3 := @parameter6: int;
+
+        i1 := @parameter7: int;
+
+        r4 := @parameter8: java.awt.Rectangle;
+
+        r5 := @parameter9: java.awt.Rectangle;
+
+        r6 := @parameter10: java.awt.Rectangle;
+
+        i4 := @parameter11: int;
+
+        z1 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+        z2 = 1;
+
+        i5 = i0;
+
+        i6 = i1;
+
+        if r0 == null goto label01;
+
+        $r7 = virtualinvoke r0.<javax.swing.JComponent: java.awt.ComponentOrientation getComponentOrientation()>();
+
+        $z0 = virtualinvoke $r7.<java.awt.ComponentOrientation: boolean isLeftToRight()>();
+
+        if $z0 != 0 goto label01;
+
+        z1 = 0;
+
+        z5 = 0;
+
+        z4 = 0;
+
+        z3 = 0;
+
+        z2 = 0;
+
+     label01:
+        lookupswitch(i0)
+        {
+            case 10: goto label02;
+            case 11: goto label05;
+            default: goto label08;
+        };
+
+     label02:
+        if z4 == 0 goto label03;
+
+        $b7 = 2;
+
+        goto label04;
+
+     label03:
+        $b7 = 4;
+
+     label04:
+        i5 = $b7;
+
+        goto label08;
+
+     label05:
+        if z3 == 0 goto label06;
+
+        $b8 = 4;
+
+        goto label07;
+
+     label06:
+        $b8 = 2;
+
+     label07:
+        i5 = $b8;
+
+     label08:
+        lookupswitch(i1)
+        {
+            case 10: goto label09;
+            case 11: goto label12;
+            default: goto label15;
+        };
+
+     label09:
+        if z5 == 0 goto label10;
+
+        $b9 = 2;
+
+        goto label11;
+
+     label10:
+        $b9 = 4;
+
+     label11:
+        i6 = $b9;
+
+        goto label15;
+
+     label12:
+        if z2 == 0 goto label13;
+
+        $b10 = 4;
+
+        goto label14;
+
+     label13:
+        $b10 = 2;
+
+     label14:
+        i6 = $b10;
+
+     label15:
+        $r8 = staticinvoke <javax.swing.SwingUtilities: java.lang.String layoutCompoundLabelImpl(javax.swing.JComponent,java.awt.FontMetrics,java.lang.String,javax.swing.Icon,int,int,int,int,java.awt.Rectangle,java.awt.Rectangle,java.awt.Rectangle,int)>(r0, r1, r2, r3, i2, i5, i3, i6, r4, r5, r6, i4);
+
+        return $r8;
+    }
+
+    public static java.lang.String layoutCompoundLabel(java.awt.FontMetrics, java.lang.String, javax.swing.Icon, int, int, int, int, java.awt.Rectangle, java.awt.Rectangle, java.awt.Rectangle, int)
+    {
+        java.awt.Rectangle r3, r4, r5;
+        javax.swing.Icon r2;
+        java.awt.FontMetrics r0;
+        int i0, i1, i2, i3, i4;
+        java.lang.String r1, $r6;
+
+        r0 := @parameter0: java.awt.FontMetrics;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: javax.swing.Icon;
+
+        i0 := @parameter3: int;
+
+        i1 := @parameter4: int;
+
+        i2 := @parameter5: int;
+
+        i3 := @parameter6: int;
+
+        r3 := @parameter7: java.awt.Rectangle;
+
+        r4 := @parameter8: java.awt.Rectangle;
+
+        r5 := @parameter9: java.awt.Rectangle;
+
+        i4 := @parameter10: int;
+
+        $r6 = staticinvoke <javax.swing.SwingUtilities: java.lang.String layoutCompoundLabelImpl(javax.swing.JComponent,java.awt.FontMetrics,java.lang.String,javax.swing.Icon,int,int,int,int,java.awt.Rectangle,java.awt.Rectangle,java.awt.Rectangle,int)>(null, r0, r1, r2, i0, i1, i2, i3, r3, r4, r5, i4);
+
+        return $r6;
+    }
+
+    private static java.lang.String layoutCompoundLabelImpl(javax.swing.JComponent, java.awt.FontMetrics, java.lang.String, javax.swing.Icon, int, int, int, int, java.awt.Rectangle, java.awt.Rectangle, java.awt.Rectangle, int)
+    {
+        javax.swing.text.View $r9;
+        java.lang.String $r6, r8;
+        java.awt.FontMetrics r5;
+        boolean $z0, $z1;
+        javax.swing.Icon r0;
+        float $f0, $f1;
+        java.awt.Rectangle r1, r2, r4;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, $i10, $i11, $i12, $i13, i14, $i15, $i16, $i17, $i18, i19, $i20, $i21, $i22, $i23, $i24, $i25, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57, $i58, $i59, $i60, $i61, $i62, $i63, $i64, $i65, $i66, $i67, $i68, $i69, $i70, i71, i72, $i73, i74, $i75, $i76, $i77, $i78, $i79, $i80, $i81, $i82, $i83, $i84, $i85, $i86, $i87, $i88, $i89, $i90, $i91, $i92, $i93, $i94, $i95, $i96, i97, i98, $i99, $i100, $i101, $i102, $i103, $i104, $i105, $i106;
+        javax.swing.JComponent r3;
+        java.lang.Object $r7;
+
+        r3 := @parameter0: javax.swing.JComponent;
+
+        r5 := @parameter1: java.awt.FontMetrics;
+
+        r8 := @parameter2: java.lang.String;
+
+        r0 := @parameter3: javax.swing.Icon;
+
+        i14 := @parameter4: int;
+
+        i19 := @parameter5: int;
+
+        i9 := @parameter6: int;
+
+        i1 := @parameter7: int;
+
+        r2 := @parameter8: java.awt.Rectangle;
+
+        r1 := @parameter9: java.awt.Rectangle;
+
+        r4 := @parameter10: java.awt.Rectangle;
+
+        i0 := @parameter11: int;
+
+        if r0 == null goto label01;
+
+        $i69 = interfaceinvoke r0.<javax.swing.Icon: int getIconWidth()>();
+
+        r1.<java.awt.Rectangle: int width> = $i69;
+
+        $i70 = interfaceinvoke r0.<javax.swing.Icon: int getIconHeight()>();
+
+        r1.<java.awt.Rectangle: int height> = $i70;
+
+        goto label02;
+
+     label01:
+        r1.<java.awt.Rectangle: int height> = 0;
+
+        r1.<java.awt.Rectangle: int width> = 0;
+
+     label02:
+        if r8 == null goto label03;
+
+        $z0 = virtualinvoke r8.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z0 == 0 goto label04;
+
+     label03:
+        $z1 = 1;
+
+        goto label05;
+
+     label04:
+        $z1 = 0;
+
+     label05:
+        i71 = 0;
+
+        if $z1 == 0 goto label06;
+
+        r4.<java.awt.Rectangle: int height> = 0;
+
+        r4.<java.awt.Rectangle: int width> = 0;
+
+        r8 = "";
+
+        i72 = 0;
+
+        goto label16;
+
+     label06:
+        if r0 != null goto label07;
+
+        $i73 = 0;
+
+        goto label08;
+
+     label07:
+        $i73 = i0;
+
+     label08:
+        i72 = $i73;
+
+        if i1 != 0 goto label09;
+
+        i74 = r2.<java.awt.Rectangle: int width>;
+
+        goto label10;
+
+     label09:
+        $i4 = r2.<java.awt.Rectangle: int width>;
+
+        $i2 = r1.<java.awt.Rectangle: int width>;
+
+        $i3 = $i2 + $i73;
+
+        i74 = $i4 - $i3;
+
+     label10:
+        if r3 == null goto label11;
+
+        $r7 = virtualinvoke r3.<javax.swing.JComponent: java.lang.Object getClientProperty(java.lang.Object)>("html");
+
+        $r9 = (javax.swing.text.View) $r7;
+
+        goto label12;
+
+     label11:
+        $r9 = null;
+
+     label12:
+        if $r9 == null goto label13;
+
+        $f0 = virtualinvoke $r9.<javax.swing.text.View: float getPreferredSpan(int)>(0);
+
+        $i66 = (int) $f0;
+
+        $i67 = staticinvoke <java.lang.Math: int min(int,int)>(i74, $i66);
+
+        r4.<java.awt.Rectangle: int width> = $i67;
+
+        $f1 = virtualinvoke $r9.<javax.swing.text.View: float getPreferredSpan(int)>(1);
+
+        $i68 = (int) $f1;
+
+        r4.<java.awt.Rectangle: int height> = $i68;
+
+        goto label16;
+
+     label13:
+        $i5 = staticinvoke <sun.swing.SwingUtilities2: int stringWidth(javax.swing.JComponent,java.awt.FontMetrics,java.lang.String)>(r3, r5, r8);
+
+        r4.<java.awt.Rectangle: int width> = $i5;
+
+        $i6 = staticinvoke <sun.swing.SwingUtilities2: int getLeftSideBearing(javax.swing.JComponent,java.awt.FontMetrics,java.lang.String)>(r3, r5, r8);
+
+        i71 = $i6;
+
+        if $i6 >= 0 goto label14;
+
+        $i64 = r4.<java.awt.Rectangle: int width>;
+
+        $i65 = $i64 - $i6;
+
+        r4.<java.awt.Rectangle: int width> = $i65;
+
+     label14:
+        $i7 = r4.<java.awt.Rectangle: int width>;
+
+        if $i7 <= i74 goto label15;
+
+        $r6 = staticinvoke <sun.swing.SwingUtilities2: java.lang.String clipString(javax.swing.JComponent,java.awt.FontMetrics,java.lang.String,int)>(r3, r5, r8, i74);
+
+        r8 = $r6;
+
+        $i63 = staticinvoke <sun.swing.SwingUtilities2: int stringWidth(javax.swing.JComponent,java.awt.FontMetrics,java.lang.String)>(r3, r5, $r6);
+
+        r4.<java.awt.Rectangle: int width> = $i63;
+
+     label15:
+        $i8 = virtualinvoke r5.<java.awt.FontMetrics: int getHeight()>();
+
+        r4.<java.awt.Rectangle: int height> = $i8;
+
+     label16:
+        if i9 != 1 goto label18;
+
+        if i1 == 0 goto label17;
+
+        r4.<java.awt.Rectangle: int y> = 0;
+
+        goto label21;
+
+     label17:
+        $i60 = r4.<java.awt.Rectangle: int height>;
+
+        $i61 = $i60 + i72;
+
+        $i62 = neg $i61;
+
+        r4.<java.awt.Rectangle: int y> = $i62;
+
+        goto label21;
+
+     label18:
+        if i9 != 0 goto label19;
+
+        $i55 = r1.<java.awt.Rectangle: int height>;
+
+        $i58 = $i55 / 2;
+
+        $i56 = r4.<java.awt.Rectangle: int height>;
+
+        $i57 = $i56 / 2;
+
+        $i59 = $i58 - $i57;
+
+        r4.<java.awt.Rectangle: int y> = $i59;
+
+        goto label21;
+
+     label19:
+        if i1 == 0 goto label20;
+
+        $i53 = r1.<java.awt.Rectangle: int height>;
+
+        $i52 = r4.<java.awt.Rectangle: int height>;
+
+        $i54 = $i53 - $i52;
+
+        r4.<java.awt.Rectangle: int y> = $i54;
+
+        goto label21;
+
+     label20:
+        $i10 = r1.<java.awt.Rectangle: int height>;
+
+        $i11 = $i10 + i72;
+
+        r4.<java.awt.Rectangle: int y> = $i11;
+
+     label21:
+        if i1 != 2 goto label22;
+
+        $i49 = r4.<java.awt.Rectangle: int width>;
+
+        $i50 = $i49 + i72;
+
+        $i51 = neg $i50;
+
+        r4.<java.awt.Rectangle: int x> = $i51;
+
+        goto label24;
+
+     label22:
+        if i1 != 0 goto label23;
+
+        $i44 = r1.<java.awt.Rectangle: int width>;
+
+        $i47 = $i44 / 2;
+
+        $i45 = r4.<java.awt.Rectangle: int width>;
+
+        $i46 = $i45 / 2;
+
+        $i48 = $i47 - $i46;
+
+        r4.<java.awt.Rectangle: int x> = $i48;
+
+        goto label24;
+
+     label23:
+        $i12 = r1.<java.awt.Rectangle: int width>;
+
+        $i13 = $i12 + i72;
+
+        r4.<java.awt.Rectangle: int x> = $i13;
+
+     label24:
+        $i75 = r1.<java.awt.Rectangle: int x>;
+
+        $i76 = r4.<java.awt.Rectangle: int x>;
+
+        $i77 = staticinvoke <java.lang.Math: int min(int,int)>($i75, $i76);
+
+        $i78 = r1.<java.awt.Rectangle: int x>;
+
+        $i79 = r1.<java.awt.Rectangle: int width>;
+
+        $i80 = $i78 + $i79;
+
+        $i81 = r4.<java.awt.Rectangle: int x>;
+
+        $i82 = r4.<java.awt.Rectangle: int width>;
+
+        $i83 = $i81 + $i82;
+
+        $i84 = staticinvoke <java.lang.Math: int max(int,int)>($i80, $i83);
+
+        $i85 = $i84 - $i77;
+
+        $i86 = r1.<java.awt.Rectangle: int y>;
+
+        $i87 = r4.<java.awt.Rectangle: int y>;
+
+        $i88 = staticinvoke <java.lang.Math: int min(int,int)>($i86, $i87);
+
+        $i89 = r1.<java.awt.Rectangle: int y>;
+
+        $i90 = r1.<java.awt.Rectangle: int height>;
+
+        $i91 = $i89 + $i90;
+
+        $i92 = r4.<java.awt.Rectangle: int y>;
+
+        $i93 = r4.<java.awt.Rectangle: int height>;
+
+        $i94 = $i92 + $i93;
+
+        $i95 = staticinvoke <java.lang.Math: int max(int,int)>($i91, $i94);
+
+        $i96 = $i95 - $i88;
+
+        if i14 != 1 goto label25;
+
+        $i43 = r2.<java.awt.Rectangle: int y>;
+
+        i97 = $i43 - $i88;
+
+        goto label27;
+
+     label25:
+        if i14 != 0 goto label26;
+
+        $i39 = r2.<java.awt.Rectangle: int y>;
+
+        $i37 = r2.<java.awt.Rectangle: int height>;
+
+        $i38 = $i37 / 2;
+
+        $i42 = $i39 + $i38;
+
+        $i40 = $i96 / 2;
+
+        $i41 = $i88 + $i40;
+
+        i97 = $i42 - $i41;
+
+        goto label27;
+
+     label26:
+        $i16 = r2.<java.awt.Rectangle: int y>;
+
+        $i15 = r2.<java.awt.Rectangle: int height>;
+
+        $i18 = $i16 + $i15;
+
+        $i17 = $i88 + $i96;
+
+        i97 = $i18 - $i17;
+
+     label27:
+        if i19 != 2 goto label28;
+
+        $i36 = r2.<java.awt.Rectangle: int x>;
+
+        i98 = $i36 - $i77;
+
+        goto label30;
+
+     label28:
+        if i19 != 4 goto label29;
+
+        $i33 = r2.<java.awt.Rectangle: int x>;
+
+        $i32 = r2.<java.awt.Rectangle: int width>;
+
+        $i35 = $i33 + $i32;
+
+        $i34 = $i77 + $i85;
+
+        i98 = $i35 - $i34;
+
+        goto label30;
+
+     label29:
+        $i22 = r2.<java.awt.Rectangle: int x>;
+
+        $i20 = r2.<java.awt.Rectangle: int width>;
+
+        $i21 = $i20 / 2;
+
+        $i25 = $i22 + $i21;
+
+        $i23 = $i85 / 2;
+
+        $i24 = $i77 + $i23;
+
+        i98 = $i25 - $i24;
+
+     label30:
+        $i99 = r4.<java.awt.Rectangle: int x>;
+
+        $i100 = $i99 + i98;
+
+        r4.<java.awt.Rectangle: int x> = $i100;
+
+        $i101 = r4.<java.awt.Rectangle: int y>;
+
+        $i102 = $i101 + i97;
+
+        r4.<java.awt.Rectangle: int y> = $i102;
+
+        $i103 = r1.<java.awt.Rectangle: int x>;
+
+        $i104 = $i103 + i98;
+
+        r1.<java.awt.Rectangle: int x> = $i104;
+
+        $i105 = r1.<java.awt.Rectangle: int y>;
+
+        $i106 = $i105 + i97;
+
+        r1.<java.awt.Rectangle: int y> = $i106;
+
+        if i71 >= 0 goto label31;
+
+        $i28 = r4.<java.awt.Rectangle: int x>;
+
+        $i29 = $i28 - i71;
+
+        r4.<java.awt.Rectangle: int x> = $i29;
+
+        $i30 = r4.<java.awt.Rectangle: int width>;
+
+        $i31 = $i30 + i71;
+
+        r4.<java.awt.Rectangle: int width> = $i31;
+
+     label31:
+        goto label32;
+
+     label32:
+        return r8;
+    }
+
+    public static void paintComponent(java.awt.Graphics, java.awt.Component, java.awt.Container, int, int, int, int)
+    {
+        java.awt.Component r0;
+        javax.swing.CellRendererPane $r2;
+        java.awt.Graphics r3;
+        int i0, i1, i2, i3;
+        java.awt.Container r1;
+
+        r3 := @parameter0: java.awt.Graphics;
+
+        r0 := @parameter1: java.awt.Component;
+
+        r1 := @parameter2: java.awt.Container;
+
+        i0 := @parameter3: int;
+
+        i1 := @parameter4: int;
+
+        i2 := @parameter5: int;
+
+        i3 := @parameter6: int;
+
+        $r2 = staticinvoke <javax.swing.SwingUtilities: javax.swing.CellRendererPane getCellRendererPane(java.awt.Component,java.awt.Container)>(r0, r1);
+
+        virtualinvoke $r2.<javax.swing.CellRendererPane: void paintComponent(java.awt.Graphics,java.awt.Component,java.awt.Container,int,int,int,int,boolean)>(r3, r0, r1, i0, i1, i2, i3, 0);
+
+        return;
+    }
+
+    public static void paintComponent(java.awt.Graphics, java.awt.Component, java.awt.Container, java.awt.Rectangle)
+    {
+        java.awt.Rectangle r3;
+        java.awt.Component r1;
+        java.awt.Graphics r0;
+        int $i0, $i1, $i2, $i3;
+        java.awt.Container r2;
+
+        r0 := @parameter0: java.awt.Graphics;
+
+        r1 := @parameter1: java.awt.Component;
+
+        r2 := @parameter2: java.awt.Container;
+
+        r3 := @parameter3: java.awt.Rectangle;
+
+        $i3 = r3.<java.awt.Rectangle: int x>;
+
+        $i2 = r3.<java.awt.Rectangle: int y>;
+
+        $i1 = r3.<java.awt.Rectangle: int width>;
+
+        $i0 = r3.<java.awt.Rectangle: int height>;
+
+        staticinvoke <javax.swing.SwingUtilities: void paintComponent(java.awt.Graphics,java.awt.Component,java.awt.Container,int,int,int,int)>(r0, r1, r2, $i3, $i2, $i1, $i0);
+
+        return;
+    }
+
+    private static javax.swing.CellRendererPane getCellRendererPane(java.awt.Component, java.awt.Container)
+    {
+        java.awt.Component r0;
+        javax.swing.CellRendererPane $r2, $r6;
+        java.awt.Container $r1, r3, $r4, r5;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.Component;
+
+        r3 := @parameter1: java.awt.Container;
+
+        $r1 = virtualinvoke r0.<java.awt.Component: java.awt.Container getParent()>();
+
+        r5 = $r1;
+
+        $z0 = $r1 instanceof javax.swing.CellRendererPane;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = virtualinvoke $r1.<java.awt.Container: java.awt.Container getParent()>();
+
+        if $r4 == r3 goto label2;
+
+        virtualinvoke r3.<java.awt.Container: java.awt.Component add(java.awt.Component)>($r1);
+
+        goto label2;
+
+     label1:
+        $r2 = new javax.swing.CellRendererPane;
+
+        specialinvoke $r2.<javax.swing.CellRendererPane: void <init>()>();
+
+        r5 = $r2;
+
+        virtualinvoke $r2.<java.awt.Container: java.awt.Component add(java.awt.Component)>(r0);
+
+        virtualinvoke r3.<java.awt.Container: java.awt.Component add(java.awt.Component)>($r2);
+
+     label2:
+        $r6 = (javax.swing.CellRendererPane) r5;
+
+        return $r6;
+    }
+
+    public static void updateComponentTreeUI(java.awt.Component)
+    {
+        java.awt.Component r0;
+
+        r0 := @parameter0: java.awt.Component;
+
+        staticinvoke <javax.swing.SwingUtilities: void updateComponentTreeUI0(java.awt.Component)>(r0);
+
+        virtualinvoke r0.<java.awt.Component: void invalidate()>();
+
+        virtualinvoke r0.<java.awt.Component: void validate()>();
+
+        virtualinvoke r0.<java.awt.Component: void repaint()>();
+
+        return;
+    }
+
+    private static void updateComponentTreeUI0(java.awt.Component)
+    {
+        javax.swing.JComponent r5;
+        javax.swing.JPopupMenu $r4;
+        javax.swing.JMenu $r3;
+        java.awt.Component r0, r1;
+        int i0, i1;
+        java.awt.Component[] r6, r7;
+        java.awt.Container $r2;
+        boolean $z0, $z1, $z2;
+
+        r0 := @parameter0: java.awt.Component;
+
+        $z0 = r0 instanceof javax.swing.JComponent;
+
+        if $z0 == 0 goto label1;
+
+        r5 = (javax.swing.JComponent) r0;
+
+        virtualinvoke r5.<javax.swing.JComponent: void updateUI()>();
+
+        $r4 = virtualinvoke r5.<javax.swing.JComponent: javax.swing.JPopupMenu getComponentPopupMenu()>();
+
+        if $r4 == null goto label1;
+
+        staticinvoke <javax.swing.SwingUtilities: void updateComponentTreeUI(java.awt.Component)>($r4);
+
+     label1:
+        r6 = null;
+
+        $z2 = r0 instanceof javax.swing.JMenu;
+
+        if $z2 == 0 goto label2;
+
+        $r3 = (javax.swing.JMenu) r0;
+
+        r6 = virtualinvoke $r3.<javax.swing.JMenu: java.awt.Component[] getMenuComponents()>();
+
+        goto label3;
+
+     label2:
+        $z1 = r0 instanceof java.awt.Container;
+
+        if $z1 == 0 goto label3;
+
+        $r2 = (java.awt.Container) r0;
+
+        r6 = virtualinvoke $r2.<java.awt.Container: java.awt.Component[] getComponents()>();
+
+     label3:
+        if r6 == null goto label5;
+
+        r7 = r6;
+
+        i0 = lengthof r6;
+
+        i1 = 0;
+
+     label4:
+        if i1 >= i0 goto label5;
+
+        r1 = r7[i1];
+
+        staticinvoke <javax.swing.SwingUtilities: void updateComponentTreeUI0(java.awt.Component)>(r1);
+
+        i1 = i1 + 1;
+
+        goto label4;
+
+     label5:
+        return;
+    }
+
+    public static void invokeLater(java.lang.Runnable)
+    {
+        java.lang.Runnable r0;
+
+        r0 := @parameter0: java.lang.Runnable;
+
+        staticinvoke <java.awt.EventQueue: void invokeLater(java.lang.Runnable)>(r0);
+
+        return;
+    }
+
+    public static void invokeAndWait(java.lang.Runnable) throws java.lang.InterruptedException, java.lang.reflect.InvocationTargetException
+    {
+        java.lang.Runnable r0;
+
+        r0 := @parameter0: java.lang.Runnable;
+
+        staticinvoke <java.awt.EventQueue: void invokeAndWait(java.lang.Runnable)>(r0);
+
+        return;
+    }
+
+    public static boolean isEventDispatchThread()
+    {
+        boolean $z0;
+
+        $z0 = staticinvoke <java.awt.EventQueue: boolean isDispatchThread()>();
+
+        return $z0;
+    }
+
+    public static int getAccessibleIndexInParent(java.awt.Component)
+    {
+        int $i0;
+        javax.accessibility.AccessibleContext $r1;
+        java.awt.Component r0;
+
+        r0 := @parameter0: java.awt.Component;
+
+        $r1 = virtualinvoke r0.<java.awt.Component: javax.accessibility.AccessibleContext getAccessibleContext()>();
+
+        $i0 = virtualinvoke $r1.<javax.accessibility.AccessibleContext: int getAccessibleIndexInParent()>();
+
+        return $i0;
+    }
+
+    public static javax.accessibility.Accessible getAccessibleAt(java.awt.Component, java.awt.Point)
+    {
+        java.awt.Point $r5, $r6, r7;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, i7;
+        boolean $z0, $z1, $z2, $z3;
+        javax.accessibility.AccessibleContext $r1, $r3, $r8, r12;
+        javax.accessibility.Accessible $r2, $r10, r11, $r13;
+        java.awt.Component r0;
+        javax.accessibility.AccessibleComponent $r4, $r9;
+
+        r0 := @parameter0: java.awt.Component;
+
+        r7 := @parameter1: java.awt.Point;
+
+        $z0 = r0 instanceof java.awt.Container;
+
+        if $z0 == 0 goto label1;
+
+        $r8 = virtualinvoke r0.<java.awt.Component: javax.accessibility.AccessibleContext getAccessibleContext()>();
+
+        $r9 = virtualinvoke $r8.<javax.accessibility.AccessibleContext: javax.accessibility.AccessibleComponent getAccessibleComponent()>();
+
+        $r10 = interfaceinvoke $r9.<javax.accessibility.AccessibleComponent: javax.accessibility.Accessible getAccessibleAt(java.awt.Point)>(r7);
+
+        return $r10;
+
+     label1:
+        $z1 = r0 instanceof javax.accessibility.Accessible;
+
+        if $z1 == 0 goto label5;
+
+        r11 = (javax.accessibility.Accessible) r0;
+
+        if r11 == null goto label4;
+
+        $r1 = interfaceinvoke r11.<javax.accessibility.Accessible: javax.accessibility.AccessibleContext getAccessibleContext()>();
+
+        r12 = $r1;
+
+        if $r1 == null goto label4;
+
+        $i0 = virtualinvoke $r1.<javax.accessibility.AccessibleContext: int getAccessibleChildrenCount()>();
+
+        i7 = 0;
+
+     label2:
+        if i7 >= $i0 goto label4;
+
+        $r2 = virtualinvoke r12.<javax.accessibility.AccessibleContext: javax.accessibility.Accessible getAccessibleChild(int)>(i7);
+
+        if $r2 == null goto label3;
+
+        $r3 = interfaceinvoke $r2.<javax.accessibility.Accessible: javax.accessibility.AccessibleContext getAccessibleContext()>();
+
+        r12 = $r3;
+
+        if $r3 == null goto label3;
+
+        $r4 = virtualinvoke $r3.<javax.accessibility.AccessibleContext: javax.accessibility.AccessibleComponent getAccessibleComponent()>();
+
+        if $r4 == null goto label3;
+
+        $z2 = interfaceinvoke $r4.<javax.accessibility.AccessibleComponent: boolean isShowing()>();
+
+        if $z2 == 0 goto label3;
+
+        $r5 = interfaceinvoke $r4.<javax.accessibility.AccessibleComponent: java.awt.Point getLocation()>();
+
+        $r6 = new java.awt.Point;
+
+        $i2 = r7.<java.awt.Point: int x>;
+
+        $i1 = $r5.<java.awt.Point: int x>;
+
+        $i6 = $i2 - $i1;
+
+        $i4 = r7.<java.awt.Point: int y>;
+
+        $i3 = $r5.<java.awt.Point: int y>;
+
+        $i5 = $i4 - $i3;
+
+        specialinvoke $r6.<java.awt.Point: void <init>(int,int)>($i6, $i5);
+
+        $z3 = interfaceinvoke $r4.<javax.accessibility.AccessibleComponent: boolean contains(java.awt.Point)>($r6);
+
+        if $z3 == 0 goto label3;
+
+        return $r2;
+
+     label3:
+        i7 = i7 + 1;
+
+        goto label2;
+
+     label4:
+        $r13 = (javax.accessibility.Accessible) r0;
+
+        return $r13;
+
+     label5:
+        return null;
+    }
+
+    public static javax.accessibility.AccessibleStateSet getAccessibleStateSet(java.awt.Component)
+    {
+        javax.accessibility.AccessibleContext $r1;
+        javax.accessibility.AccessibleStateSet $r2;
+        java.awt.Component r0;
+
+        r0 := @parameter0: java.awt.Component;
+
+        $r1 = virtualinvoke r0.<java.awt.Component: javax.accessibility.AccessibleContext getAccessibleContext()>();
+
+        $r2 = virtualinvoke $r1.<javax.accessibility.AccessibleContext: javax.accessibility.AccessibleStateSet getAccessibleStateSet()>();
+
+        return $r2;
+    }
+
+    public static int getAccessibleChildrenCount(java.awt.Component)
+    {
+        int $i0;
+        javax.accessibility.AccessibleContext $r1;
+        java.awt.Component r0;
+
+        r0 := @parameter0: java.awt.Component;
+
+        $r1 = virtualinvoke r0.<java.awt.Component: javax.accessibility.AccessibleContext getAccessibleContext()>();
+
+        $i0 = virtualinvoke $r1.<javax.accessibility.AccessibleContext: int getAccessibleChildrenCount()>();
+
+        return $i0;
+    }
+
+    public static javax.accessibility.Accessible getAccessibleChild(java.awt.Component, int)
+    {
+        int i0;
+        javax.accessibility.AccessibleContext $r1;
+        javax.accessibility.Accessible $r2;
+        java.awt.Component r0;
+
+        r0 := @parameter0: java.awt.Component;
+
+        i0 := @parameter1: int;
+
+        $r1 = virtualinvoke r0.<java.awt.Component: javax.accessibility.AccessibleContext getAccessibleContext()>();
+
+        $r2 = virtualinvoke $r1.<javax.accessibility.AccessibleContext: javax.accessibility.Accessible getAccessibleChild(int)>(i0);
+
+        return $r2;
+    }
+
+    public static java.awt.Component findFocusOwner(java.awt.Component)
+    {
+        java.awt.KeyboardFocusManager $r0;
+        java.awt.Container $r4;
+        java.awt.Component $r1, r2, r3;
+        boolean $z0;
+
+        r2 := @parameter0: java.awt.Component;
+
+        $r0 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager()>();
+
+        $r1 = virtualinvoke $r0.<java.awt.KeyboardFocusManager: java.awt.Component getFocusOwner()>();
+
+        r3 = $r1;
+
+     label1:
+        if r3 == null goto label5;
+
+        if r3 != r2 goto label2;
+
+        return $r1;
+
+     label2:
+        $z0 = r3 instanceof java.awt.Window;
+
+        if $z0 == 0 goto label3;
+
+        $r4 = null;
+
+        goto label4;
+
+     label3:
+        $r4 = virtualinvoke r3.<java.awt.Component: java.awt.Container getParent()>();
+
+     label4:
+        r3 = $r4;
+
+        goto label1;
+
+     label5:
+        return null;
+    }
+
+    public static javax.swing.JRootPane getRootPane(java.awt.Component)
+    {
+        javax.swing.JRootPane $r0, $r2;
+        javax.swing.RootPaneContainer $r1;
+        java.awt.Component r3;
+        boolean $z0, $z1;
+
+        r3 := @parameter0: java.awt.Component;
+
+        $z0 = r3 instanceof javax.swing.RootPaneContainer;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = (javax.swing.RootPaneContainer) r3;
+
+        $r2 = interfaceinvoke $r1.<javax.swing.RootPaneContainer: javax.swing.JRootPane getRootPane()>();
+
+        return $r2;
+
+     label1:
+        if r3 == null goto label3;
+
+        $z1 = r3 instanceof javax.swing.JRootPane;
+
+        if $z1 == 0 goto label2;
+
+        $r0 = (javax.swing.JRootPane) r3;
+
+        return $r0;
+
+     label2:
+        r3 = virtualinvoke r3.<java.awt.Component: java.awt.Container getParent()>();
+
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    public static java.awt.Component getRoot(java.awt.Component)
+    {
+        java.awt.Component r0, r1, r2;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.awt.Component;
+
+        r1 = null;
+
+        r2 = r0;
+
+     label1:
+        if r2 == null goto label4;
+
+        $z0 = r2 instanceof java.awt.Window;
+
+        if $z0 == 0 goto label2;
+
+        return r2;
+
+     label2:
+        $z1 = r2 instanceof java.applet.Applet;
+
+        if $z1 == 0 goto label3;
+
+        r1 = r2;
+
+     label3:
+        r2 = virtualinvoke r2.<java.awt.Component: java.awt.Container getParent()>();
+
+        goto label1;
+
+     label4:
+        return r1;
+    }
+
+    static javax.swing.JComponent getPaintingOrigin(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r0, r2;
+        java.awt.Container $r1, r3;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: javax.swing.JComponent;
+
+        r3 = r0;
+
+     label1:
+        $r1 = virtualinvoke r3.<java.awt.Container: java.awt.Container getParent()>();
+
+        r3 = $r1;
+
+        $z0 = $r1 instanceof javax.swing.JComponent;
+
+        if $z0 == 0 goto label3;
+
+        r2 = (javax.swing.JComponent) $r1;
+
+        $z1 = virtualinvoke r2.<javax.swing.JComponent: boolean isPaintingOrigin()>();
+
+        if $z1 == 0 goto label2;
+
+        return r2;
+
+     label2:
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    public static boolean processKeyBindings(java.awt.event.KeyEvent)
+    {
+        javax.swing.JComponent $r2;
+        java.awt.event.KeyEvent r0;
+        java.awt.Component r3;
+        int $i0;
+        java.awt.Container $r1;
+        boolean $z0, z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+
+        r0 := @parameter0: java.awt.event.KeyEvent;
+
+        if r0 == null goto label8;
+
+        $z0 = virtualinvoke r0.<java.awt.event.KeyEvent: boolean isConsumed()>();
+
+        if $z0 == 0 goto label1;
+
+        return 0;
+
+     label1:
+        r3 = virtualinvoke r0.<java.awt.event.KeyEvent: java.awt.Component getComponent()>();
+
+        $i0 = virtualinvoke r0.<java.awt.event.KeyEvent: int getID()>();
+
+        if $i0 != 401 goto label2;
+
+        $z8 = 1;
+
+        goto label3;
+
+     label2:
+        $z8 = 0;
+
+     label3:
+        z1 = $z8;
+
+        $z2 = staticinvoke <javax.swing.SwingUtilities: boolean isValidKeyEventForKeyBindings(java.awt.event.KeyEvent)>(r0);
+
+        if $z2 != 0 goto label4;
+
+        return 0;
+
+     label4:
+        if r3 == null goto label8;
+
+        $z3 = r3 instanceof javax.swing.JComponent;
+
+        if $z3 == 0 goto label5;
+
+        $r2 = (javax.swing.JComponent) r3;
+
+        $z7 = virtualinvoke $r2.<javax.swing.JComponent: boolean processKeyBindings(java.awt.event.KeyEvent,boolean)>(r0, z1);
+
+        return $z7;
+
+     label5:
+        $z4 = r3 instanceof java.applet.Applet;
+
+        if $z4 != 0 goto label6;
+
+        $z6 = r3 instanceof java.awt.Window;
+
+        if $z6 == 0 goto label7;
+
+     label6:
+        $r1 = (java.awt.Container) r3;
+
+        $z5 = staticinvoke <javax.swing.JComponent: boolean processKeyBindingsForAllComponents(java.awt.event.KeyEvent,java.awt.Container,boolean)>(r0, $r1, z1);
+
+        return $z5;
+
+     label7:
+        r3 = virtualinvoke r3.<java.awt.Component: java.awt.Container getParent()>();
+
+        goto label4;
+
+     label8:
+        return 0;
+    }
+
+    static boolean isValidKeyEventForKeyBindings(java.awt.event.KeyEvent)
+    {
+        java.awt.event.KeyEvent r0;
+
+        r0 := @parameter0: java.awt.event.KeyEvent;
+
+        return 1;
+    }
+
+    public static boolean notifyAction(javax.swing.Action, javax.swing.KeyStroke, java.awt.event.KeyEvent, java.lang.Object, int)
+    {
+        long $l3;
+        javax.swing.Action r0;
+        int i0, $i4, $i6;
+        java.lang.String r6;
+        boolean $z0, $z1, $z2, $z3, z4;
+        javax.swing.KeyStroke r5;
+        char $c1, $c2;
+        java.awt.event.KeyEvent r3;
+        java.awt.event.ActionEvent $r8;
+        sun.swing.UIAction $r4;
+        java.lang.Object $r1, r2;
+
+        r0 := @parameter0: javax.swing.Action;
+
+        r5 := @parameter1: javax.swing.KeyStroke;
+
+        r3 := @parameter2: java.awt.event.KeyEvent;
+
+        r2 := @parameter3: java.lang.Object;
+
+        i0 := @parameter4: int;
+
+        if r0 != null goto label1;
+
+        return 0;
+
+     label1:
+        $z0 = r0 instanceof sun.swing.UIAction;
+
+        if $z0 == 0 goto label2;
+
+        $r4 = (sun.swing.UIAction) r0;
+
+        $z3 = virtualinvoke $r4.<sun.swing.UIAction: boolean isEnabled(java.lang.Object)>(r2);
+
+        if $z3 != 0 goto label3;
+
+        return 0;
+
+     label2:
+        $z1 = interfaceinvoke r0.<javax.swing.Action: boolean isEnabled()>();
+
+        if $z1 != 0 goto label3;
+
+        return 0;
+
+     label3:
+        $r1 = interfaceinvoke r0.<javax.swing.Action: java.lang.Object getValue(java.lang.String)>("ActionCommandKey");
+
+        if $r1 != null goto label4;
+
+        $z2 = r0 instanceof javax.swing.JComponent$ActionStandin;
+
+        if $z2 == 0 goto label4;
+
+        z4 = 1;
+
+        goto label5;
+
+     label4:
+        z4 = 0;
+
+     label5:
+        if $r1 == null goto label6;
+
+        r6 = virtualinvoke $r1.<java.lang.Object: java.lang.String toString()>();
+
+        goto label8;
+
+     label6:
+        if z4 != 0 goto label7;
+
+        $c1 = virtualinvoke r3.<java.awt.event.KeyEvent: char getKeyChar()>();
+
+        $i4 = (int) $c1;
+
+        $i6 = (int) 65535;
+
+        if $i4 == $i6 goto label7;
+
+        $c2 = virtualinvoke r3.<java.awt.event.KeyEvent: char getKeyChar()>();
+
+        r6 = staticinvoke <java.lang.String: java.lang.String valueOf(char)>($c2);
+
+        goto label8;
+
+     label7:
+        r6 = null;
+
+     label8:
+        $r8 = new java.awt.event.ActionEvent;
+
+        $l3 = virtualinvoke r3.<java.awt.event.KeyEvent: long getWhen()>();
+
+        specialinvoke $r8.<java.awt.event.ActionEvent: void <init>(java.lang.Object,int,java.lang.String,long,int)>(r2, 1001, r6, $l3, i0);
+
+        interfaceinvoke r0.<javax.swing.Action: void actionPerformed(java.awt.event.ActionEvent)>($r8);
+
+        return 1;
+    }
+
+    public static void replaceUIInputMap(javax.swing.JComponent, int, javax.swing.InputMap)
+    {
+        javax.swing.JComponent r0;
+        int i0;
+        javax.swing.InputMap r1, $r2, r3;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: javax.swing.JComponent;
+
+        i0 := @parameter1: int;
+
+        r1 := @parameter2: javax.swing.InputMap;
+
+        if r1 == null goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        r3 = virtualinvoke r0.<javax.swing.JComponent: javax.swing.InputMap getInputMap(int,boolean)>(i0, $z1);
+
+     label3:
+        if r3 == null goto label6;
+
+        $r2 = virtualinvoke r3.<javax.swing.InputMap: javax.swing.InputMap getParent()>();
+
+        if $r2 == null goto label4;
+
+        $z0 = $r2 instanceof javax.swing.plaf.UIResource;
+
+        if $z0 == 0 goto label5;
+
+     label4:
+        virtualinvoke r3.<javax.swing.InputMap: void setParent(javax.swing.InputMap)>(r1);
+
+        return;
+
+     label5:
+        r3 = $r2;
+
+        goto label3;
+
+     label6:
+        return;
+    }
+
+    public static void replaceUIActionMap(javax.swing.JComponent, javax.swing.ActionMap)
+    {
+        javax.swing.JComponent r0;
+        javax.swing.ActionMap r1, $r2, r3;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: javax.swing.JComponent;
+
+        r1 := @parameter1: javax.swing.ActionMap;
+
+        if r1 == null goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        r3 = virtualinvoke r0.<javax.swing.JComponent: javax.swing.ActionMap getActionMap(boolean)>($z1);
+
+     label3:
+        if r3 == null goto label6;
+
+        $r2 = virtualinvoke r3.<javax.swing.ActionMap: javax.swing.ActionMap getParent()>();
+
+        if $r2 == null goto label4;
+
+        $z0 = $r2 instanceof javax.swing.plaf.UIResource;
+
+        if $z0 == 0 goto label5;
+
+     label4:
+        virtualinvoke r3.<javax.swing.ActionMap: void setParent(javax.swing.ActionMap)>(r1);
+
+        return;
+
+     label5:
+        r3 = $r2;
+
+        goto label3;
+
+     label6:
+        return;
+    }
+
+    public static javax.swing.InputMap getUIInputMap(javax.swing.JComponent, int)
+    {
+        javax.swing.JComponent r0;
+        int i0;
+        javax.swing.InputMap $r1, r2;
+        boolean $z0;
+
+        r0 := @parameter0: javax.swing.JComponent;
+
+        i0 := @parameter1: int;
+
+        r2 = virtualinvoke r0.<javax.swing.JComponent: javax.swing.InputMap getInputMap(int,boolean)>(i0, 0);
+
+     label1:
+        if r2 == null goto label3;
+
+        $r1 = virtualinvoke r2.<javax.swing.InputMap: javax.swing.InputMap getParent()>();
+
+        $z0 = $r1 instanceof javax.swing.plaf.UIResource;
+
+        if $z0 == 0 goto label2;
+
+        return $r1;
+
+     label2:
+        r2 = $r1;
+
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    public static javax.swing.ActionMap getUIActionMap(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r0;
+        javax.swing.ActionMap $r1, r2;
+        boolean $z0;
+
+        r0 := @parameter0: javax.swing.JComponent;
+
+        r2 = virtualinvoke r0.<javax.swing.JComponent: javax.swing.ActionMap getActionMap(boolean)>(0);
+
+     label1:
+        if r2 == null goto label3;
+
+        $r1 = virtualinvoke r2.<javax.swing.ActionMap: javax.swing.ActionMap getParent()>();
+
+        $z0 = $r1 instanceof javax.swing.plaf.UIResource;
+
+        if $z0 == 0 goto label2;
+
+        return $r1;
+
+     label2:
+        r2 = $r1;
+
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    static java.awt.Frame getSharedOwnerFrame() throws java.awt.HeadlessException
+    {
+        java.awt.Frame r4;
+        java.lang.Object $r0, $r1, $r3;
+        javax.swing.SwingUtilities$SharedOwnerFrame $r2;
+
+        $r0 = <javax.swing.SwingUtilities: java.lang.Object sharedOwnerFrameKey>;
+
+        $r1 = staticinvoke <javax.swing.SwingUtilities: java.lang.Object appContextGet(java.lang.Object)>($r0);
+
+        r4 = (java.awt.Frame) $r1;
+
+        if r4 != null goto label1;
+
+        $r2 = new javax.swing.SwingUtilities$SharedOwnerFrame;
+
+        specialinvoke $r2.<javax.swing.SwingUtilities$SharedOwnerFrame: void <init>()>();
+
+        r4 = $r2;
+
+        $r3 = <javax.swing.SwingUtilities: java.lang.Object sharedOwnerFrameKey>;
+
+        staticinvoke <javax.swing.SwingUtilities: void appContextPut(java.lang.Object,java.lang.Object)>($r3, $r2);
+
+     label1:
+        return r4;
+    }
+
+    static java.awt.event.WindowListener getSharedOwnerFrameShutdownListener() throws java.awt.HeadlessException
+    {
+        java.awt.Frame $r0;
+        java.awt.event.WindowListener $r1;
+
+        $r0 = staticinvoke <javax.swing.SwingUtilities: java.awt.Frame getSharedOwnerFrame()>();
+
+        $r1 = (java.awt.event.WindowListener) $r0;
+
+        return $r1;
+    }
+
+    static java.lang.Object appContextGet(java.lang.Object)
+    {
+        java.lang.Object r1, $r2;
+        sun.awt.AppContext $r0;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r0 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r2 = virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>(r1);
+
+        return $r2;
+    }
+
+    static void appContextPut(java.lang.Object, java.lang.Object)
+    {
+        java.lang.Object r1, r2;
+        sun.awt.AppContext $r0;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.lang.Object;
+
+        $r0 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, r2);
+
+        return;
+    }
+
+    static void appContextRemove(java.lang.Object)
+    {
+        java.lang.Object r1;
+        sun.awt.AppContext $r0;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r0 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object remove(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    static java.lang.Class loadSystemClass(java.lang.String) throws java.lang.ClassNotFoundException
+    {
+        java.lang.Thread $r1;
+        java.lang.Class $r3;
+        java.lang.String r0;
+        java.lang.ClassLoader $r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        staticinvoke <sun.reflect.misc.ReflectUtil: void checkPackageAccess(java.lang.String)>(r0);
+
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.Thread: java.lang.ClassLoader getContextClassLoader()>();
+
+        $r3 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>(r0, 1, $r2);
+
+        return $r3;
+    }
+
+    static boolean isLeftToRight(java.awt.Component)
+    {
+        java.awt.Component r0;
+        java.awt.ComponentOrientation $r1;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.Component;
+
+        $r1 = virtualinvoke r0.<java.awt.Component: java.awt.ComponentOrientation getComponentOrientation()>();
+
+        $z0 = virtualinvoke $r1.<java.awt.ComponentOrientation: boolean isLeftToRight()>();
+
+        return $z0;
+    }
+
+    private void <init>()
+    {
+        java.lang.Error $r1;
+        javax.swing.SwingUtilities r0;
+
+        r0 := @this: javax.swing.SwingUtilities;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.lang.Error;
+
+        specialinvoke $r1.<java.lang.Error: void <init>(java.lang.String)>("SwingUtilities is just a container for static methods");
+
+        throw $r1;
+    }
+
+    static boolean doesIconReferenceImage(javax.swing.Icon, java.awt.Image)
+    {
+        java.awt.Image r1, $r3;
+        javax.swing.ImageIcon $r2;
+        javax.swing.Icon r0;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: javax.swing.Icon;
+
+        r1 := @parameter1: java.awt.Image;
+
+        if r0 == null goto label1;
+
+        $z0 = r0 instanceof javax.swing.ImageIcon;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = (javax.swing.ImageIcon) r0;
+
+        $r3 = virtualinvoke $r2.<javax.swing.ImageIcon: java.awt.Image getImage()>();
+
+        goto label2;
+
+     label1:
+        $r3 = null;
+
+     label2:
+        if $r3 != r1 goto label3;
+
+        $z1 = 1;
+
+        goto label4;
+
+     label3:
+        $z1 = 0;
+
+     label4:
+        return $z1;
+    }
+
+    static int findDisplayedMnemonicIndex(java.lang.String, int)
+    {
+        char $c1, $c2, $c3, $c4;
+        int i0, $i5, $i6, $i7, $i9, $i10, $i11, $i13, $i15;
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        if r0 == null goto label1;
+
+        if i0 != 0 goto label2;
+
+     label1:
+        $i9 = (int) -1;
+
+        return $i9;
+
+     label2:
+        $c1 = (char) i0;
+
+        $c2 = staticinvoke <java.lang.Character: char toUpperCase(char)>($c1);
+
+        $c3 = (char) i0;
+
+        $c4 = staticinvoke <java.lang.Character: char toLowerCase(char)>($c3);
+
+        $i10 = (int) $c2;
+
+        $i5 = virtualinvoke r0.<java.lang.String: int indexOf(int)>($i10);
+
+        $i11 = (int) $c4;
+
+        $i6 = virtualinvoke r0.<java.lang.String: int indexOf(int)>($i11);
+
+        $i13 = (int) -1;
+
+        if $i5 != $i13 goto label3;
+
+        return $i6;
+
+     label3:
+        $i15 = (int) -1;
+
+        if $i6 != $i15 goto label4;
+
+        return $i5;
+
+     label4:
+        if $i6 >= $i5 goto label5;
+
+        $i7 = $i6;
+
+        goto label6;
+
+     label5:
+        $i7 = $i5;
+
+     label6:
+        return $i7;
+    }
+
+    public static java.awt.Rectangle calculateInnerArea(javax.swing.JComponent, java.awt.Rectangle)
+    {
+        java.awt.Rectangle r1, $r3, r4;
+        java.awt.Insets $r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11;
+        javax.swing.JComponent r0;
+
+        r0 := @parameter0: javax.swing.JComponent;
+
+        r1 := @parameter1: java.awt.Rectangle;
+
+        if r0 != null goto label1;
+
+        return null;
+
+     label1:
+        r4 = r1;
+
+        $r2 = virtualinvoke r0.<javax.swing.JComponent: java.awt.Insets getInsets()>();
+
+        if r1 != null goto label2;
+
+        $r3 = new java.awt.Rectangle;
+
+        specialinvoke $r3.<java.awt.Rectangle: void <init>()>();
+
+        r4 = $r3;
+
+     label2:
+        $i0 = $r2.<java.awt.Insets: int left>;
+
+        r4.<java.awt.Rectangle: int x> = $i0;
+
+        $i1 = $r2.<java.awt.Insets: int top>;
+
+        r4.<java.awt.Rectangle: int y> = $i1;
+
+        $i2 = virtualinvoke r0.<javax.swing.JComponent: int getWidth()>();
+
+        $i3 = $r2.<java.awt.Insets: int left>;
+
+        $i5 = $i2 - $i3;
+
+        $i4 = $r2.<java.awt.Insets: int right>;
+
+        $i6 = $i5 - $i4;
+
+        r4.<java.awt.Rectangle: int width> = $i6;
+
+        $i7 = virtualinvoke r0.<javax.swing.JComponent: int getHeight()>();
+
+        $i8 = $r2.<java.awt.Insets: int top>;
+
+        $i10 = $i7 - $i8;
+
+        $i9 = $r2.<java.awt.Insets: int bottom>;
+
+        $i11 = $i10 - $i9;
+
+        r4.<java.awt.Rectangle: int height> = $i11;
+
+        return r4;
+    }
+
+    static void updateRendererOrEditorUI(java.lang.Object)
+    {
+        java.lang.Object r0;
+        java.awt.Component r2;
+        javax.swing.DefaultCellEditor $r1;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        r2 = null;
+
+        $z0 = r0 instanceof java.awt.Component;
+
+        if $z0 == 0 goto label2;
+
+        r2 = (java.awt.Component) r0;
+
+     label2:
+        $z1 = r0 instanceof javax.swing.DefaultCellEditor;
+
+        if $z1 == 0 goto label3;
+
+        $r1 = (javax.swing.DefaultCellEditor) r0;
+
+        r2 = virtualinvoke $r1.<javax.swing.DefaultCellEditor: java.awt.Component getComponent()>();
+
+     label3:
+        if r2 == null goto label4;
+
+        staticinvoke <javax.swing.SwingUtilities: void updateComponentTreeUI(java.awt.Component)>(r2);
+
+     label4:
+        return;
+    }
+
+    public static java.awt.Container getUnwrappedParent(java.awt.Component)
+    {
+        java.awt.Container r1;
+        java.awt.Component r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.Component;
+
+        r1 = virtualinvoke r0.<java.awt.Component: java.awt.Container getParent()>();
+
+     label1:
+        $z0 = r1 instanceof javax.swing.JLayer;
+
+        if $z0 == 0 goto label2;
+
+        r1 = virtualinvoke r1.<java.awt.Container: java.awt.Container getParent()>();
+
+        goto label1;
+
+     label2:
+        return r1;
+    }
+
+    public static java.awt.Component getUnwrappedView(javax.swing.JViewport)
+    {
+        javax.swing.JLayer $r1;
+        java.awt.Component r2;
+        javax.swing.JViewport r0;
+        boolean $z0;
+
+        r0 := @parameter0: javax.swing.JViewport;
+
+        r2 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Component getView()>();
+
+     label1:
+        $z0 = r2 instanceof javax.swing.JLayer;
+
+        if $z0 == 0 goto label2;
+
+        $r1 = (javax.swing.JLayer) r2;
+
+        r2 = virtualinvoke $r1.<javax.swing.JLayer: java.awt.Component getView()>();
+
+        goto label1;
+
+     label2:
+        return r2;
+    }
+
+    static java.awt.Container getValidateRoot(java.awt.Container, boolean)
+    {
+        java.awt.Container r0, r1;
+        boolean $z0, z1, $z2, $z3, $z4, $z5, $z6, $z7;
+
+        r0 := @parameter0: java.awt.Container;
+
+        z1 := @parameter1: boolean;
+
+        r1 = null;
+
+     label01:
+        if r0 == null goto label05;
+
+        $z5 = virtualinvoke r0.<java.awt.Container: boolean isDisplayable()>();
+
+        if $z5 == 0 goto label02;
+
+        $z6 = r0 instanceof javax.swing.CellRendererPane;
+
+        if $z6 == 0 goto label03;
+
+     label02:
+        return null;
+
+     label03:
+        $z7 = virtualinvoke r0.<java.awt.Container: boolean isValidateRoot()>();
+
+        if $z7 == 0 goto label04;
+
+        r1 = r0;
+
+        goto label05;
+
+     label04:
+        r0 = virtualinvoke r0.<java.awt.Container: java.awt.Container getParent()>();
+
+        goto label01;
+
+     label05:
+        if r1 != null goto label06;
+
+        return null;
+
+     label06:
+        if r0 == null goto label11;
+
+        $z0 = virtualinvoke r0.<java.awt.Container: boolean isDisplayable()>();
+
+        if $z0 == 0 goto label07;
+
+        if z1 == 0 goto label08;
+
+        $z4 = virtualinvoke r0.<java.awt.Container: boolean isVisible()>();
+
+        if $z4 != 0 goto label08;
+
+     label07:
+        return null;
+
+     label08:
+        $z2 = r0 instanceof java.awt.Window;
+
+        if $z2 != 0 goto label09;
+
+        $z3 = r0 instanceof java.applet.Applet;
+
+        if $z3 == 0 goto label10;
+
+     label09:
+        return r1;
+
+     label10:
+        r0 = virtualinvoke r0.<java.awt.Container: java.awt.Container getParent()>();
+
+        goto label06;
+
+     label11:
+        return null;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.StringBuffer $r0;
+
+        <javax.swing.SwingUtilities: boolean canAccessEventQueue> = 0;
+
+        <javax.swing.SwingUtilities: boolean eventQueueTested> = 0;
+
+        $r0 = new java.lang.StringBuffer;
+
+        specialinvoke $r0.<java.lang.StringBuffer: void <init>(java.lang.String)>("SwingUtilities.sharedOwnerFrame");
+
+        <javax.swing.SwingUtilities: java.lang.Object sharedOwnerFrameKey> = $r0;
+
+        return;
+    }
+}

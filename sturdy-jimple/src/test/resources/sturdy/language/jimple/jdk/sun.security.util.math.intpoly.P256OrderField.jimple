@@ -1,0 +1,3373 @@
+public class sun.security.util.math.intpoly.P256OrderField extends sun.security.util.math.intpoly.IntegerPolynomial
+{
+    private static final int BITS_PER_LIMB;
+    private static final int NUM_LIMBS;
+    private static final int MAX_ADDS;
+    public static final java.math.BigInteger MODULUS;
+    private static final long CARRY_ADD;
+    private static final int LIMB_MASK;
+
+    public void <init>()
+    {
+        sun.security.util.math.intpoly.P256OrderField r0;
+        java.math.BigInteger $r1;
+
+        r0 := @this: sun.security.util.math.intpoly.P256OrderField;
+
+        $r1 = <sun.security.util.math.intpoly.P256OrderField: java.math.BigInteger MODULUS>;
+
+        specialinvoke r0.<sun.security.util.math.intpoly.IntegerPolynomial: void <init>(int,int,int,java.math.BigInteger)>(26, 10, 1, $r1);
+
+        return;
+    }
+
+    private static java.math.BigInteger evaluateModulus()
+    {
+        java.math.BigInteger $r0, $r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26, $r27, $r28, $r29, $r30, $r31, $r32, $r33;
+
+        $r0 = staticinvoke <java.math.BigInteger: java.math.BigInteger valueOf(long)>(2L);
+
+        $r1 = virtualinvoke $r0.<java.math.BigInteger: java.math.BigInteger pow(int)>(256);
+
+        $r2 = staticinvoke <java.math.BigInteger: java.math.BigInteger valueOf(long)>(6497617L);
+
+        $r3 = virtualinvoke $r1.<java.math.BigInteger: java.math.BigInteger add(java.math.BigInteger)>($r2);
+
+        $r4 = staticinvoke <java.math.BigInteger: java.math.BigInteger valueOf(long)>(2L);
+
+        $r5 = virtualinvoke $r4.<java.math.BigInteger: java.math.BigInteger pow(int)>(26);
+
+        $r6 = staticinvoke <java.math.BigInteger: java.math.BigInteger valueOf(long)>(26038081L);
+
+        $r7 = virtualinvoke $r5.<java.math.BigInteger: java.math.BigInteger multiply(java.math.BigInteger)>($r6);
+
+        $r8 = virtualinvoke $r3.<java.math.BigInteger: java.math.BigInteger subtract(java.math.BigInteger)>($r7);
+
+        $r9 = staticinvoke <java.math.BigInteger: java.math.BigInteger valueOf(long)>(2L);
+
+        $r10 = virtualinvoke $r9.<java.math.BigInteger: java.math.BigInteger pow(int)>(52);
+
+        $r11 = staticinvoke <java.math.BigInteger: java.math.BigInteger valueOf(long)>(32001852L);
+
+        $r12 = virtualinvoke $r10.<java.math.BigInteger: java.math.BigInteger multiply(java.math.BigInteger)>($r11);
+
+        $r13 = virtualinvoke $r8.<java.math.BigInteger: java.math.BigInteger add(java.math.BigInteger)>($r12);
+
+        $r14 = staticinvoke <java.math.BigInteger: java.math.BigInteger valueOf(long)>(2L);
+
+        $r15 = virtualinvoke $r14.<java.math.BigInteger: java.math.BigInteger pow(int)>(78);
+
+        $r16 = staticinvoke <java.math.BigInteger: java.math.BigInteger valueOf(long)>(21586850L);
+
+        $r17 = virtualinvoke $r15.<java.math.BigInteger: java.math.BigInteger multiply(java.math.BigInteger)>($r16);
+
+        $r18 = virtualinvoke $r13.<java.math.BigInteger: java.math.BigInteger subtract(java.math.BigInteger)>($r17);
+
+        $r19 = staticinvoke <java.math.BigInteger: java.math.BigInteger valueOf(long)>(2L);
+
+        $r20 = virtualinvoke $r19.<java.math.BigInteger: java.math.BigInteger pow(int)>(104);
+
+        $r21 = staticinvoke <java.math.BigInteger: java.math.BigInteger valueOf(long)>(4397317L);
+
+        $r22 = virtualinvoke $r20.<java.math.BigInteger: java.math.BigInteger multiply(java.math.BigInteger)>($r21);
+
+        $r23 = virtualinvoke $r18.<java.math.BigInteger: java.math.BigInteger subtract(java.math.BigInteger)>($r22);
+
+        $r24 = staticinvoke <java.math.BigInteger: java.math.BigInteger valueOf(long)>(2L);
+
+        $r25 = virtualinvoke $r24.<java.math.BigInteger: java.math.BigInteger pow(int)>(182);
+
+        $r26 = staticinvoke <java.math.BigInteger: java.math.BigInteger valueOf(long)>(1024L);
+
+        $r27 = virtualinvoke $r25.<java.math.BigInteger: java.math.BigInteger multiply(java.math.BigInteger)>($r26);
+
+        $r28 = virtualinvoke $r23.<java.math.BigInteger: java.math.BigInteger add(java.math.BigInteger)>($r27);
+
+        $r29 = staticinvoke <java.math.BigInteger: java.math.BigInteger valueOf(long)>(2L);
+
+        $r30 = virtualinvoke $r29.<java.math.BigInteger: java.math.BigInteger pow(int)>(208);
+
+        $r31 = staticinvoke <java.math.BigInteger: java.math.BigInteger valueOf(long)>(65536L);
+
+        $r32 = virtualinvoke $r30.<java.math.BigInteger: java.math.BigInteger multiply(java.math.BigInteger)>($r31);
+
+        $r33 = virtualinvoke $r28.<java.math.BigInteger: java.math.BigInteger subtract(java.math.BigInteger)>($r32);
+
+        return $r33;
+    }
+
+    protected void finalCarryReduceLast(long[])
+    {
+        long $l0, l1, $l2, $l3, $l4, $l5, $l6, $l7, $l8, $l9, $l10, $l11, $l12, $l13, $l14, $l15, $l16, $l17, $l18, l19, l20, l21, l22, l23, l24, l25;
+        long[] r0;
+        sun.security.util.math.intpoly.P256OrderField r1;
+
+        r1 := @this: sun.security.util.math.intpoly.P256OrderField;
+
+        r0 := @parameter0: long[];
+
+        $l0 = r0[9];
+
+        l1 = $l0 >> 22;
+
+        $l3 = r0[9];
+
+        $l2 = l1 << 22;
+
+        $l4 = $l3 - $l2;
+
+        r0[9] = $l4;
+
+        l19 = -6497617L * l1;
+
+        $l5 = r0[0];
+
+        $l6 = $l5 + l19;
+
+        r0[0] = $l6;
+
+        l20 = 26038081L * l1;
+
+        $l7 = r0[1];
+
+        $l8 = $l7 + l20;
+
+        r0[1] = $l8;
+
+        l21 = -32001852L * l1;
+
+        $l9 = r0[2];
+
+        $l10 = $l9 + l21;
+
+        r0[2] = $l10;
+
+        l22 = 21586850L * l1;
+
+        $l11 = r0[3];
+
+        $l12 = $l11 + l22;
+
+        r0[3] = $l12;
+
+        l23 = 4397317L * l1;
+
+        $l13 = r0[4];
+
+        $l14 = $l13 + l23;
+
+        r0[4] = $l14;
+
+        l24 = -1024L * l1;
+
+        $l15 = r0[7];
+
+        $l16 = $l15 + l24;
+
+        r0[7] = $l16;
+
+        l25 = 65536L * l1;
+
+        $l17 = r0[8];
+
+        $l18 = $l17 + l25;
+
+        r0[8] = $l18;
+
+        return;
+    }
+
+    private void carryReduce(long[], long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long)
+    {
+        long $l0, $l1, $l2, $l3, $l4, $l5, $l6, $l7, $l8, $l9, $l10, $l11, $l12, $l13, $l14, $l15, $l16, $l17, $l18, $l19, $l20, $l21, $l22, $l23, $l24, $l25, $l26, $l27, $l28, $l29, $l30, $l31, $l32, $l33, $l34, $l35, $l36, $l37, l38, l39, l40, l41, l42, l43, l44, l45, l46, l47, l48, l49, l50, l51, l52, l53, l54, l55, l56, l57, l58, l59, l60, l61, l62, l63, l64, l65, l66, l67, l68, l69, l70, l71, l72, l73, l74, l75, l76, l77, l78, l79, l80, l81, l82, l83, l84, l85, l86, l87, l88, l89, l90, l91, l92, l93, l94, l95, l96, l97, l98, l99, l100, l101, l102, l103, l104, l105, l106, l107, l108, l109, l110, l111, l112, l113;
+        sun.security.util.math.intpoly.P256OrderField r0;
+        long[] r1;
+
+        r0 := @this: sun.security.util.math.intpoly.P256OrderField;
+
+        r1 := @parameter0: long[];
+
+        l38 := @parameter1: long;
+
+        l39 := @parameter2: long;
+
+        l40 := @parameter3: long;
+
+        l41 := @parameter4: long;
+
+        l42 := @parameter5: long;
+
+        l43 := @parameter6: long;
+
+        l44 := @parameter7: long;
+
+        l45 := @parameter8: long;
+
+        l46 := @parameter9: long;
+
+        l47 := @parameter10: long;
+
+        l48 := @parameter11: long;
+
+        l49 := @parameter12: long;
+
+        l50 := @parameter13: long;
+
+        l51 := @parameter14: long;
+
+        l52 := @parameter15: long;
+
+        l53 := @parameter16: long;
+
+        l54 := @parameter17: long;
+
+        l55 := @parameter18: long;
+
+        l56 := @parameter19: long;
+
+        $l0 = l38 + 33554432L;
+
+        l57 = $l0 >> 26;
+
+        $l1 = l57 << 26;
+
+        l58 = l38 - $l1;
+
+        l59 = l39 + l57;
+
+        $l2 = l59 + 33554432L;
+
+        l60 = $l2 >> 26;
+
+        $l3 = l60 << 26;
+
+        l61 = l59 - $l3;
+
+        l62 = l40 + l60;
+
+        $l4 = l62 + 33554432L;
+
+        l63 = $l4 >> 26;
+
+        $l5 = l63 << 26;
+
+        l64 = l62 - $l5;
+
+        l65 = l41 + l63;
+
+        $l6 = l65 + 33554432L;
+
+        l66 = $l6 >> 26;
+
+        $l7 = l66 << 26;
+
+        l67 = l65 - $l7;
+
+        l68 = l42 + l66;
+
+        $l8 = l68 + 33554432L;
+
+        l69 = $l8 >> 26;
+
+        $l9 = l69 << 26;
+
+        l70 = l68 - $l9;
+
+        l71 = l43 + l69;
+
+        $l10 = l71 + 33554432L;
+
+        l72 = $l10 >> 26;
+
+        $l11 = l72 << 26;
+
+        l73 = l71 - $l11;
+
+        l74 = l44 + l72;
+
+        $l12 = l74 + 33554432L;
+
+        l75 = $l12 >> 26;
+
+        $l13 = l75 << 26;
+
+        l76 = l74 - $l13;
+
+        l77 = l45 + l75;
+
+        $l14 = l77 + 33554432L;
+
+        l78 = $l14 >> 26;
+
+        $l15 = l78 << 26;
+
+        l79 = l77 - $l15;
+
+        l80 = l46 + l78;
+
+        $l16 = l80 + 33554432L;
+
+        l81 = $l16 >> 26;
+
+        $l17 = l81 << 26;
+
+        l82 = l80 - $l17;
+
+        l83 = l47 + l81;
+
+        $l18 = l83 + 33554432L;
+
+        l84 = $l18 >> 26;
+
+        $l19 = l84 << 26;
+
+        l85 = l83 - $l19;
+
+        l86 = l48 + l84;
+
+        $l20 = l86 + 33554432L;
+
+        l87 = $l20 >> 26;
+
+        $l21 = l87 << 26;
+
+        l88 = l86 - $l21;
+
+        l89 = l49 + l87;
+
+        $l22 = l89 + 33554432L;
+
+        l90 = $l22 >> 26;
+
+        $l23 = l90 << 26;
+
+        l91 = l89 - $l23;
+
+        l92 = l50 + l90;
+
+        $l24 = l92 + 33554432L;
+
+        l93 = $l24 >> 26;
+
+        $l25 = l93 << 26;
+
+        l94 = l92 - $l25;
+
+        l95 = l51 + l93;
+
+        $l26 = l95 + 33554432L;
+
+        l96 = $l26 >> 26;
+
+        $l27 = l96 << 26;
+
+        l97 = l95 - $l27;
+
+        l98 = l52 + l96;
+
+        $l28 = l98 + 33554432L;
+
+        l99 = $l28 >> 26;
+
+        $l29 = l99 << 26;
+
+        l100 = l98 - $l29;
+
+        l101 = l53 + l99;
+
+        $l30 = l101 + 33554432L;
+
+        l102 = $l30 >> 26;
+
+        $l31 = l102 << 26;
+
+        l103 = l101 - $l31;
+
+        l104 = l54 + l102;
+
+        $l32 = l104 + 33554432L;
+
+        l105 = $l32 >> 26;
+
+        $l33 = l105 << 26;
+
+        l106 = l104 - $l33;
+
+        l107 = l55 + l105;
+
+        $l34 = l107 + 33554432L;
+
+        l108 = $l34 >> 26;
+
+        $l35 = l108 << 26;
+
+        l109 = l107 - $l35;
+
+        l110 = l56 + l108;
+
+        $l36 = l110 + 33554432L;
+
+        l111 = $l36 >> 26;
+
+        $l37 = l111 << 26;
+
+        l112 = l110 - $l37;
+
+        l113 = 0L + l111;
+
+        virtualinvoke r0.<sun.security.util.math.intpoly.P256OrderField: void carryReduce0(long[],long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long)>(r1, l58, l61, l64, l67, l70, l73, l76, l79, l82, l85, l88, l91, l94, l97, l100, l103, l106, l109, l112, l113);
+
+        return;
+    }
+
+    void carryReduce0(long[], long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long)
+    {
+        sun.security.util.math.intpoly.P256OrderField r0;
+        long l0, $l1, $l2, $l3, $l4, $l5, $l6, $l7, $l8, $l9, $l10, $l11, $l12, $l13, $l14, $l15, $l16, $l17, $l18, $l19, $l20, $l21, $l22, $l23, $l24, $l25, $l26, $l27, $l28, $l29, $l30, $l31, $l32, $l33, $l34, $l35, $l36, $l37, $l38, $l39, $l40, $l41, $l42, $l43, $l44, $l45, $l46, $l47, $l48, $l49, $l50, $l51, $l52, $l53, $l54, $l55, $l56, $l57, $l58, $l59, $l60, $l61, $l62, $l63, $l64, $l65, $l66, $l67, $l68, $l69, $l70, $l71, $l72, $l73, $l74, $l75, $l76, $l77, $l78, $l79, $l80, $l81, $l82, $l83, $l84, $l85, $l86, $l87, $l88, $l89, $l90, $l91, $l92, $l93, $l94, $l95, $l96, $l97, $l98, $l99, $l100, $l101, $l102, $l103, $l104, $l105, $l106, $l107, $l108, $l109, $l110, $l111, $l112, $l113, $l114, $l115, $l116, $l117, $l118, $l119, $l120, $l121, $l122, $l123, $l124, $l125, $l126, $l127, $l128, $l129, $l130, $l131, $l132, $l133, $l134, $l135, $l136, $l137, $l138, $l139, $l140, $l141, $l142, $l143, $l144, $l145, $l146, $l147, $l148, $l149, $l150, $l151, $l152, $l153, $l154, $l155, $l156, $l157, $l158, $l159, $l160, $l161, $l162, $l163, $l164, $l165, $l166, $l167, $l168, $l169, $l170, $l171, $l172, $l173, $l174, $l175, $l176, $l177, $l178, $l179, $l180, $l181, $l182, $l183, $l184, $l185, $l186, $l187, $l188, $l189, $l190, $l191, $l192, $l193, $l194, $l195, $l196, $l197, $l198, $l199, $l200, $l201, $l202, $l203, $l204, $l205, $l206, $l207, $l208, $l209, $l210, l211, l212, l213, l214, l215, l216, l217, l218, l219, l220, l221, l222, l223, l224, l225, l226, l227, l228, l229, l230, l231, l232, l233, l234, l235, l236, l237, l238, l239, l240, l241, l242, l243, l244, l245, l246, l247, l248, l249, l250, l251, l252, l253, l254, l255, l256, l257, l258, l259, l260, l261, l262, l263, l264, l265, l266, l267, l268, l269, l270, l271, l272, l273, l274, l275, l276, l277, l278, l279, l280, l281, l282, l283, l284, l285, l286, l287, l288, l289, l290, l291, l292, l293, l294, l295, l296, l297, l298, l299, l300, l301, l302, l303, l304, l305, l306, l307, l308, l309, l310, l311, l312, l313, l314, l315, l316, l317, l318, l319, l320, l321, l322, l323, l324, l325, l326, l327, l328, l329, l330, l331, l332, l333, l334, l335, l336, l337, l338, l339, l340, l341, l342, l343, l344, l345, l346, l347, l348, l349, l350, l351, l352, l353, l354, l355, l356, l357, l358, l359, l360, l361, l362, l363, l364, l365, l366, l367, l368, l369, l370, l371, l372, l373, l374, l375, l376, l377, l378, l379, l380, l381, l382, l383, l384, l385, l386, l387, l388, l389, l390, l391, l392, l393, l394, l395, l396, l397, l398, l399, l400, l401, l402, l403, l404, l405, l406, l407, l408, l409, l410, l411, l412, l413, l414, l415, l416, l417, l418, l419, l420, l421, l422, l423, l424, l425, l426, l427, l428, l429, l430, l431, l432, l433, l434, l435, l436, l437, l438, l439;
+        long[] r1;
+
+        r0 := @this: sun.security.util.math.intpoly.P256OrderField;
+
+        r1 := @parameter0: long[];
+
+        l211 := @parameter1: long;
+
+        l212 := @parameter2: long;
+
+        l213 := @parameter3: long;
+
+        l214 := @parameter4: long;
+
+        l215 := @parameter5: long;
+
+        l216 := @parameter6: long;
+
+        l217 := @parameter7: long;
+
+        l218 := @parameter8: long;
+
+        l219 := @parameter9: long;
+
+        l220 := @parameter10: long;
+
+        l221 := @parameter11: long;
+
+        l222 := @parameter12: long;
+
+        l223 := @parameter13: long;
+
+        l224 := @parameter14: long;
+
+        l225 := @parameter15: long;
+
+        l226 := @parameter16: long;
+
+        l227 := @parameter17: long;
+
+        l228 := @parameter18: long;
+
+        l229 := @parameter19: long;
+
+        l0 := @parameter20: long;
+
+        l230 = -6497617L * l0;
+
+        $l1 = l230 << 4;
+
+        $l2 = $l1 & 67108863L;
+
+        l231 = l220 + $l2;
+
+        $l3 = l230 >> 22;
+
+        l232 = l221 + $l3;
+
+        l233 = 26038081L * l0;
+
+        $l4 = l233 << 4;
+
+        $l5 = $l4 & 67108863L;
+
+        l234 = l232 + $l5;
+
+        $l6 = l233 >> 22;
+
+        l235 = l222 + $l6;
+
+        l236 = -32001852L * l0;
+
+        $l7 = l236 << 4;
+
+        $l8 = $l7 & 67108863L;
+
+        l237 = l235 + $l8;
+
+        $l9 = l236 >> 22;
+
+        l238 = l223 + $l9;
+
+        l239 = 21586850L * l0;
+
+        $l10 = l239 << 4;
+
+        $l11 = $l10 & 67108863L;
+
+        l240 = l238 + $l11;
+
+        $l12 = l239 >> 22;
+
+        l241 = l224 + $l12;
+
+        l242 = 4397317L * l0;
+
+        $l13 = l242 << 4;
+
+        $l14 = $l13 & 67108863L;
+
+        l243 = l241 + $l14;
+
+        $l15 = l242 >> 22;
+
+        l244 = l225 + $l15;
+
+        l245 = -1024L * l0;
+
+        $l16 = l245 << 4;
+
+        $l17 = $l16 & 67108863L;
+
+        l246 = l227 + $l17;
+
+        $l18 = l245 >> 22;
+
+        l247 = l228 + $l18;
+
+        l248 = 65536L * l0;
+
+        $l19 = l248 << 4;
+
+        $l20 = $l19 & 67108863L;
+
+        l249 = l247 + $l20;
+
+        $l21 = l248 >> 22;
+
+        l250 = l229 + $l21;
+
+        l251 = -6497617L * l250;
+
+        $l22 = l251 << 4;
+
+        $l23 = $l22 & 67108863L;
+
+        l252 = l219 + $l23;
+
+        $l24 = l251 >> 22;
+
+        l253 = l231 + $l24;
+
+        l254 = 26038081L * l250;
+
+        $l25 = l254 << 4;
+
+        $l26 = $l25 & 67108863L;
+
+        l255 = l253 + $l26;
+
+        $l27 = l254 >> 22;
+
+        l256 = l234 + $l27;
+
+        l257 = -32001852L * l250;
+
+        $l28 = l257 << 4;
+
+        $l29 = $l28 & 67108863L;
+
+        l258 = l256 + $l29;
+
+        $l30 = l257 >> 22;
+
+        l259 = l237 + $l30;
+
+        l260 = 21586850L * l250;
+
+        $l31 = l260 << 4;
+
+        $l32 = $l31 & 67108863L;
+
+        l261 = l259 + $l32;
+
+        $l33 = l260 >> 22;
+
+        l262 = l240 + $l33;
+
+        l263 = 4397317L * l250;
+
+        $l34 = l263 << 4;
+
+        $l35 = $l34 & 67108863L;
+
+        l264 = l262 + $l35;
+
+        $l36 = l263 >> 22;
+
+        l265 = l243 + $l36;
+
+        l266 = -1024L * l250;
+
+        $l37 = l266 << 4;
+
+        $l38 = $l37 & 67108863L;
+
+        l267 = l226 + $l38;
+
+        $l39 = l266 >> 22;
+
+        l268 = l246 + $l39;
+
+        l269 = 65536L * l250;
+
+        $l40 = l269 << 4;
+
+        $l41 = $l40 & 67108863L;
+
+        l270 = l268 + $l41;
+
+        $l42 = l269 >> 22;
+
+        l271 = l249 + $l42;
+
+        l272 = -6497617L * l271;
+
+        $l43 = l272 << 4;
+
+        $l44 = $l43 & 67108863L;
+
+        l273 = l218 + $l44;
+
+        $l45 = l272 >> 22;
+
+        l274 = l252 + $l45;
+
+        l275 = 26038081L * l271;
+
+        $l46 = l275 << 4;
+
+        $l47 = $l46 & 67108863L;
+
+        l276 = l274 + $l47;
+
+        $l48 = l275 >> 22;
+
+        l277 = l255 + $l48;
+
+        l278 = -32001852L * l271;
+
+        $l49 = l278 << 4;
+
+        $l50 = $l49 & 67108863L;
+
+        l279 = l277 + $l50;
+
+        $l51 = l278 >> 22;
+
+        l280 = l258 + $l51;
+
+        l281 = 21586850L * l271;
+
+        $l52 = l281 << 4;
+
+        $l53 = $l52 & 67108863L;
+
+        l282 = l280 + $l53;
+
+        $l54 = l281 >> 22;
+
+        l283 = l261 + $l54;
+
+        l284 = 4397317L * l271;
+
+        $l55 = l284 << 4;
+
+        $l56 = $l55 & 67108863L;
+
+        l285 = l283 + $l56;
+
+        $l57 = l284 >> 22;
+
+        l286 = l264 + $l57;
+
+        l287 = -1024L * l271;
+
+        $l58 = l287 << 4;
+
+        $l59 = $l58 & 67108863L;
+
+        l288 = l244 + $l59;
+
+        $l60 = l287 >> 22;
+
+        l289 = l267 + $l60;
+
+        l290 = 65536L * l271;
+
+        $l61 = l290 << 4;
+
+        $l62 = $l61 & 67108863L;
+
+        l291 = l289 + $l62;
+
+        $l63 = l290 >> 22;
+
+        l292 = l270 + $l63;
+
+        l293 = -6497617L * l292;
+
+        $l64 = l293 << 4;
+
+        $l65 = $l64 & 67108863L;
+
+        l294 = l217 + $l65;
+
+        $l66 = l293 >> 22;
+
+        l295 = l273 + $l66;
+
+        l296 = 26038081L * l292;
+
+        $l67 = l296 << 4;
+
+        $l68 = $l67 & 67108863L;
+
+        l297 = l295 + $l68;
+
+        $l69 = l296 >> 22;
+
+        l298 = l276 + $l69;
+
+        l299 = -32001852L * l292;
+
+        $l70 = l299 << 4;
+
+        $l71 = $l70 & 67108863L;
+
+        l300 = l298 + $l71;
+
+        $l72 = l299 >> 22;
+
+        l301 = l279 + $l72;
+
+        l302 = 21586850L * l292;
+
+        $l73 = l302 << 4;
+
+        $l74 = $l73 & 67108863L;
+
+        l303 = l301 + $l74;
+
+        $l75 = l302 >> 22;
+
+        l304 = l282 + $l75;
+
+        l305 = 4397317L * l292;
+
+        $l76 = l305 << 4;
+
+        $l77 = $l76 & 67108863L;
+
+        l306 = l304 + $l77;
+
+        $l78 = l305 >> 22;
+
+        l307 = l285 + $l78;
+
+        l308 = -1024L * l292;
+
+        $l79 = l308 << 4;
+
+        $l80 = $l79 & 67108863L;
+
+        l309 = l265 + $l80;
+
+        $l81 = l308 >> 22;
+
+        l310 = l288 + $l81;
+
+        l311 = 65536L * l292;
+
+        $l82 = l311 << 4;
+
+        $l83 = $l82 & 67108863L;
+
+        l312 = l310 + $l83;
+
+        $l84 = l311 >> 22;
+
+        l313 = l291 + $l84;
+
+        l314 = -6497617L * l313;
+
+        $l85 = l314 << 4;
+
+        $l86 = $l85 & 67108863L;
+
+        l315 = l216 + $l86;
+
+        $l87 = l314 >> 22;
+
+        l316 = l294 + $l87;
+
+        l317 = 26038081L * l313;
+
+        $l88 = l317 << 4;
+
+        $l89 = $l88 & 67108863L;
+
+        l318 = l316 + $l89;
+
+        $l90 = l317 >> 22;
+
+        l319 = l297 + $l90;
+
+        l320 = -32001852L * l313;
+
+        $l91 = l320 << 4;
+
+        $l92 = $l91 & 67108863L;
+
+        l321 = l319 + $l92;
+
+        $l93 = l320 >> 22;
+
+        l322 = l300 + $l93;
+
+        l323 = 21586850L * l313;
+
+        $l94 = l323 << 4;
+
+        $l95 = $l94 & 67108863L;
+
+        l324 = l322 + $l95;
+
+        $l96 = l323 >> 22;
+
+        l325 = l303 + $l96;
+
+        l326 = 4397317L * l313;
+
+        $l97 = l326 << 4;
+
+        $l98 = $l97 & 67108863L;
+
+        l327 = l325 + $l98;
+
+        $l99 = l326 >> 22;
+
+        l328 = l306 + $l99;
+
+        l329 = -1024L * l313;
+
+        $l100 = l329 << 4;
+
+        $l101 = $l100 & 67108863L;
+
+        l330 = l286 + $l101;
+
+        $l102 = l329 >> 22;
+
+        l331 = l309 + $l102;
+
+        l332 = 65536L * l313;
+
+        $l103 = l332 << 4;
+
+        $l104 = $l103 & 67108863L;
+
+        l333 = l331 + $l104;
+
+        $l105 = l332 >> 22;
+
+        l334 = l312 + $l105;
+
+        l335 = -6497617L * l334;
+
+        $l106 = l335 << 4;
+
+        $l107 = $l106 & 67108863L;
+
+        l336 = l215 + $l107;
+
+        $l108 = l335 >> 22;
+
+        l337 = l315 + $l108;
+
+        l338 = 26038081L * l334;
+
+        $l109 = l338 << 4;
+
+        $l110 = $l109 & 67108863L;
+
+        l339 = l337 + $l110;
+
+        $l111 = l338 >> 22;
+
+        l340 = l318 + $l111;
+
+        l341 = -32001852L * l334;
+
+        $l112 = l341 << 4;
+
+        $l113 = $l112 & 67108863L;
+
+        l342 = l340 + $l113;
+
+        $l114 = l341 >> 22;
+
+        l343 = l321 + $l114;
+
+        l344 = 21586850L * l334;
+
+        $l115 = l344 << 4;
+
+        $l116 = $l115 & 67108863L;
+
+        l345 = l343 + $l116;
+
+        $l117 = l344 >> 22;
+
+        l346 = l324 + $l117;
+
+        l347 = 4397317L * l334;
+
+        $l118 = l347 << 4;
+
+        $l119 = $l118 & 67108863L;
+
+        l348 = l346 + $l119;
+
+        $l120 = l347 >> 22;
+
+        l349 = l327 + $l120;
+
+        l350 = -1024L * l334;
+
+        $l121 = l350 << 4;
+
+        $l122 = $l121 & 67108863L;
+
+        l351 = l307 + $l122;
+
+        $l123 = l350 >> 22;
+
+        l352 = l330 + $l123;
+
+        l353 = 65536L * l334;
+
+        $l124 = l353 << 4;
+
+        $l125 = $l124 & 67108863L;
+
+        l354 = l352 + $l125;
+
+        $l126 = l353 >> 22;
+
+        l355 = l333 + $l126;
+
+        l356 = -6497617L * l355;
+
+        $l127 = l356 << 4;
+
+        $l128 = $l127 & 67108863L;
+
+        l357 = l214 + $l128;
+
+        $l129 = l356 >> 22;
+
+        l358 = l336 + $l129;
+
+        l359 = 26038081L * l355;
+
+        $l130 = l359 << 4;
+
+        $l131 = $l130 & 67108863L;
+
+        l360 = l358 + $l131;
+
+        $l132 = l359 >> 22;
+
+        l361 = l339 + $l132;
+
+        l362 = -32001852L * l355;
+
+        $l133 = l362 << 4;
+
+        $l134 = $l133 & 67108863L;
+
+        l363 = l361 + $l134;
+
+        $l135 = l362 >> 22;
+
+        l364 = l342 + $l135;
+
+        l365 = 21586850L * l355;
+
+        $l136 = l365 << 4;
+
+        $l137 = $l136 & 67108863L;
+
+        l366 = l364 + $l137;
+
+        $l138 = l365 >> 22;
+
+        l367 = l345 + $l138;
+
+        l368 = 4397317L * l355;
+
+        $l139 = l368 << 4;
+
+        $l140 = $l139 & 67108863L;
+
+        l369 = l367 + $l140;
+
+        $l141 = l368 >> 22;
+
+        l370 = l348 + $l141;
+
+        l371 = -1024L * l355;
+
+        $l142 = l371 << 4;
+
+        $l143 = $l142 & 67108863L;
+
+        l372 = l328 + $l143;
+
+        $l144 = l371 >> 22;
+
+        l373 = l351 + $l144;
+
+        l374 = 65536L * l355;
+
+        $l145 = l374 << 4;
+
+        $l146 = $l145 & 67108863L;
+
+        l375 = l373 + $l146;
+
+        $l147 = l374 >> 22;
+
+        l376 = l354 + $l147;
+
+        l377 = -6497617L * l376;
+
+        $l148 = l377 << 4;
+
+        $l149 = $l148 & 67108863L;
+
+        l378 = l213 + $l149;
+
+        $l150 = l377 >> 22;
+
+        l379 = l357 + $l150;
+
+        l380 = 26038081L * l376;
+
+        $l151 = l380 << 4;
+
+        $l152 = $l151 & 67108863L;
+
+        l381 = l379 + $l152;
+
+        $l153 = l380 >> 22;
+
+        l382 = l360 + $l153;
+
+        l383 = -32001852L * l376;
+
+        $l154 = l383 << 4;
+
+        $l155 = $l154 & 67108863L;
+
+        l384 = l382 + $l155;
+
+        $l156 = l383 >> 22;
+
+        l385 = l363 + $l156;
+
+        l386 = 21586850L * l376;
+
+        $l157 = l386 << 4;
+
+        $l158 = $l157 & 67108863L;
+
+        l387 = l385 + $l158;
+
+        $l159 = l386 >> 22;
+
+        l388 = l366 + $l159;
+
+        l389 = 4397317L * l376;
+
+        $l160 = l389 << 4;
+
+        $l161 = $l160 & 67108863L;
+
+        l390 = l388 + $l161;
+
+        $l162 = l389 >> 22;
+
+        l391 = l369 + $l162;
+
+        l392 = -1024L * l376;
+
+        $l163 = l392 << 4;
+
+        $l164 = $l163 & 67108863L;
+
+        l393 = l349 + $l164;
+
+        $l165 = l392 >> 22;
+
+        l394 = l372 + $l165;
+
+        l395 = 65536L * l376;
+
+        $l166 = l395 << 4;
+
+        $l167 = $l166 & 67108863L;
+
+        l396 = l394 + $l167;
+
+        $l168 = l395 >> 22;
+
+        l397 = l375 + $l168;
+
+        l398 = -6497617L * l397;
+
+        $l169 = l398 << 4;
+
+        $l170 = $l169 & 67108863L;
+
+        l399 = l212 + $l170;
+
+        $l171 = l398 >> 22;
+
+        l400 = l378 + $l171;
+
+        l401 = 26038081L * l397;
+
+        $l172 = l401 << 4;
+
+        $l173 = $l172 & 67108863L;
+
+        l402 = l400 + $l173;
+
+        $l174 = l401 >> 22;
+
+        l403 = l381 + $l174;
+
+        l404 = -32001852L * l397;
+
+        $l175 = l404 << 4;
+
+        $l176 = $l175 & 67108863L;
+
+        l405 = l403 + $l176;
+
+        $l177 = l404 >> 22;
+
+        l406 = l384 + $l177;
+
+        l407 = 21586850L * l397;
+
+        $l178 = l407 << 4;
+
+        $l179 = $l178 & 67108863L;
+
+        l408 = l406 + $l179;
+
+        $l180 = l407 >> 22;
+
+        l409 = l387 + $l180;
+
+        l410 = 4397317L * l397;
+
+        $l181 = l410 << 4;
+
+        $l182 = $l181 & 67108863L;
+
+        l411 = l409 + $l182;
+
+        $l183 = l410 >> 22;
+
+        l412 = l390 + $l183;
+
+        l413 = -1024L * l397;
+
+        $l184 = l413 << 4;
+
+        $l185 = $l184 & 67108863L;
+
+        l414 = l370 + $l185;
+
+        $l186 = l413 >> 22;
+
+        l415 = l393 + $l186;
+
+        l416 = 65536L * l397;
+
+        $l187 = l416 << 4;
+
+        $l188 = $l187 & 67108863L;
+
+        l417 = l415 + $l188;
+
+        $l189 = l416 >> 22;
+
+        l418 = l396 + $l189;
+
+        l419 = -6497617L * l418;
+
+        $l190 = l419 << 4;
+
+        $l191 = $l190 & 67108863L;
+
+        l420 = l211 + $l191;
+
+        $l192 = l419 >> 22;
+
+        l421 = l399 + $l192;
+
+        l422 = 26038081L * l418;
+
+        $l193 = l422 << 4;
+
+        $l194 = $l193 & 67108863L;
+
+        l423 = l421 + $l194;
+
+        $l195 = l422 >> 22;
+
+        l424 = l402 + $l195;
+
+        l425 = -32001852L * l418;
+
+        $l196 = l425 << 4;
+
+        $l197 = $l196 & 67108863L;
+
+        l426 = l424 + $l197;
+
+        $l198 = l425 >> 22;
+
+        l427 = l405 + $l198;
+
+        l428 = 21586850L * l418;
+
+        $l199 = l428 << 4;
+
+        $l200 = $l199 & 67108863L;
+
+        l429 = l427 + $l200;
+
+        $l201 = l428 >> 22;
+
+        l430 = l408 + $l201;
+
+        l431 = 4397317L * l418;
+
+        $l202 = l431 << 4;
+
+        $l203 = $l202 & 67108863L;
+
+        l432 = l430 + $l203;
+
+        $l204 = l431 >> 22;
+
+        l433 = l411 + $l204;
+
+        l434 = -1024L * l418;
+
+        $l205 = l434 << 4;
+
+        $l206 = $l205 & 67108863L;
+
+        l435 = l391 + $l206;
+
+        $l207 = l434 >> 22;
+
+        l436 = l414 + $l207;
+
+        l437 = 65536L * l418;
+
+        $l208 = l437 << 4;
+
+        $l209 = $l208 & 67108863L;
+
+        l438 = l436 + $l209;
+
+        $l210 = l437 >> 22;
+
+        l439 = l417 + $l210;
+
+        virtualinvoke r0.<sun.security.util.math.intpoly.P256OrderField: void carryReduce1(long[],long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long)>(r1, l420, l423, l426, l429, l432, l433, l412, l435, l438, l439, 0L, l397, l376, l355, l334, l313, l292, l271, l250, l0);
+
+        return;
+    }
+
+    void carryReduce1(long[], long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long)
+    {
+        long $l0, $l1, $l2, $l3, $l4, $l5, $l6, $l7, $l8, $l9, $l10, $l11, $l12, $l13, $l14, $l15, $l16, $l17, $l18, $l19, l20, l21, l22, l23, l24, l25, l26, l27, l28, l29, l30, l31, l32, l33, l34, l35, l36, l37, l38, l39, l40, l41, l42, l43, l44, l45, l46, l47, l48, l49, l50, l51, l52, l53, l54, l55, l56, l57, l58, l59, l60, l61, l62, l63, l64, l65, l66, l67, l68, l69;
+        sun.security.util.math.intpoly.P256OrderField r0;
+        long[] r1;
+
+        r0 := @this: sun.security.util.math.intpoly.P256OrderField;
+
+        r1 := @parameter0: long[];
+
+        l29 := @parameter1: long;
+
+        l30 := @parameter2: long;
+
+        l31 := @parameter3: long;
+
+        l32 := @parameter4: long;
+
+        l33 := @parameter5: long;
+
+        l34 := @parameter6: long;
+
+        l35 := @parameter7: long;
+
+        l36 := @parameter8: long;
+
+        l37 := @parameter9: long;
+
+        l38 := @parameter10: long;
+
+        l39 := @parameter11: long;
+
+        l20 := @parameter12: long;
+
+        l21 := @parameter13: long;
+
+        l22 := @parameter14: long;
+
+        l23 := @parameter15: long;
+
+        l24 := @parameter16: long;
+
+        l25 := @parameter17: long;
+
+        l26 := @parameter18: long;
+
+        l27 := @parameter19: long;
+
+        l28 := @parameter20: long;
+
+        $l0 = l29 + 33554432L;
+
+        l40 = $l0 >> 26;
+
+        $l1 = l40 << 26;
+
+        l41 = l29 - $l1;
+
+        l42 = l30 + l40;
+
+        $l2 = l42 + 33554432L;
+
+        l43 = $l2 >> 26;
+
+        $l3 = l43 << 26;
+
+        l44 = l42 - $l3;
+
+        l45 = l31 + l43;
+
+        $l4 = l45 + 33554432L;
+
+        l46 = $l4 >> 26;
+
+        $l5 = l46 << 26;
+
+        l47 = l45 - $l5;
+
+        l48 = l32 + l46;
+
+        $l6 = l48 + 33554432L;
+
+        l49 = $l6 >> 26;
+
+        $l7 = l49 << 26;
+
+        l50 = l48 - $l7;
+
+        l51 = l33 + l49;
+
+        $l8 = l51 + 33554432L;
+
+        l52 = $l8 >> 26;
+
+        $l9 = l52 << 26;
+
+        l53 = l51 - $l9;
+
+        l54 = l34 + l52;
+
+        $l10 = l54 + 33554432L;
+
+        l55 = $l10 >> 26;
+
+        $l11 = l55 << 26;
+
+        l56 = l54 - $l11;
+
+        l57 = l35 + l55;
+
+        $l12 = l57 + 33554432L;
+
+        l58 = $l12 >> 26;
+
+        $l13 = l58 << 26;
+
+        l59 = l57 - $l13;
+
+        l60 = l36 + l58;
+
+        $l14 = l60 + 33554432L;
+
+        l61 = $l14 >> 26;
+
+        $l15 = l61 << 26;
+
+        l62 = l60 - $l15;
+
+        l63 = l37 + l61;
+
+        $l16 = l63 + 33554432L;
+
+        l64 = $l16 >> 26;
+
+        $l17 = l64 << 26;
+
+        l65 = l63 - $l17;
+
+        l66 = l38 + l64;
+
+        $l18 = l66 + 33554432L;
+
+        l67 = $l18 >> 26;
+
+        $l19 = l67 << 26;
+
+        l68 = l66 - $l19;
+
+        l69 = l39 + l67;
+
+        virtualinvoke r0.<sun.security.util.math.intpoly.P256OrderField: void carryReduce2(long[],long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long)>(r1, l41, l44, l47, l50, l53, l56, l59, l62, l65, l68, l69, l20, l21, l22, l23, l24, l25, l26, l27, l28);
+
+        return;
+    }
+
+    void carryReduce2(long[], long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long)
+    {
+        long l0, $l1, $l2, $l3, $l4, $l5, $l6, $l7, $l8, $l9, $l10, $l11, $l12, $l13, $l14, $l15, $l16, $l17, $l18, $l19, $l20, $l21, $l22, $l23, $l24, $l25, $l26, $l27, $l28, $l29, $l30, $l31, $l32, $l33, $l34, $l35, $l36, $l37, $l38, $l39, l40, l41, l42, l43, l44, l45, l46, l47, l48, l49, l50, l51, l52, l53, l54, l55, l56, l57, l58, l59, l60, l61, l62, l63, l64, l65, l66, l67, l68, l69, l70, l71, l72, l73, l74, l75, l76, l77, l78, l79, l80, l81, l82, l83, l84, l85, l86, l87, l88, l89, l90, l91, l92, l93, l94, l95, l96, l97, l98, l99, l100, l101, l102, l103, l104, l105, l106;
+        sun.security.util.math.intpoly.P256OrderField r1;
+        long[] r0;
+
+        r1 := @this: sun.security.util.math.intpoly.P256OrderField;
+
+        r0 := @parameter0: long[];
+
+        l49 := @parameter1: long;
+
+        l50 := @parameter2: long;
+
+        l51 := @parameter3: long;
+
+        l52 := @parameter4: long;
+
+        l53 := @parameter5: long;
+
+        l54 := @parameter6: long;
+
+        l55 := @parameter7: long;
+
+        l56 := @parameter8: long;
+
+        l57 := @parameter9: long;
+
+        l58 := @parameter10: long;
+
+        l0 := @parameter11: long;
+
+        l40 := @parameter12: long;
+
+        l41 := @parameter13: long;
+
+        l42 := @parameter14: long;
+
+        l43 := @parameter15: long;
+
+        l44 := @parameter16: long;
+
+        l45 := @parameter17: long;
+
+        l46 := @parameter18: long;
+
+        l47 := @parameter19: long;
+
+        l48 := @parameter20: long;
+
+        l59 = -6497617L * l0;
+
+        $l1 = l59 << 4;
+
+        $l2 = $l1 & 67108863L;
+
+        l60 = l49 + $l2;
+
+        $l3 = l59 >> 22;
+
+        l61 = l50 + $l3;
+
+        l62 = 26038081L * l0;
+
+        $l4 = l62 << 4;
+
+        $l5 = $l4 & 67108863L;
+
+        l63 = l61 + $l5;
+
+        $l6 = l62 >> 22;
+
+        l64 = l51 + $l6;
+
+        l65 = -32001852L * l0;
+
+        $l7 = l65 << 4;
+
+        $l8 = $l7 & 67108863L;
+
+        l66 = l64 + $l8;
+
+        $l9 = l65 >> 22;
+
+        l67 = l52 + $l9;
+
+        l68 = 21586850L * l0;
+
+        $l10 = l68 << 4;
+
+        $l11 = $l10 & 67108863L;
+
+        l69 = l67 + $l11;
+
+        $l12 = l68 >> 22;
+
+        l70 = l53 + $l12;
+
+        l71 = 4397317L * l0;
+
+        $l13 = l71 << 4;
+
+        $l14 = $l13 & 67108863L;
+
+        l72 = l70 + $l14;
+
+        $l15 = l71 >> 22;
+
+        l73 = l54 + $l15;
+
+        l74 = -1024L * l0;
+
+        $l16 = l74 << 4;
+
+        $l17 = $l16 & 67108863L;
+
+        l75 = l56 + $l17;
+
+        $l18 = l74 >> 22;
+
+        l76 = l57 + $l18;
+
+        l77 = 65536L * l0;
+
+        $l19 = l77 << 4;
+
+        $l20 = $l19 & 67108863L;
+
+        l78 = l76 + $l20;
+
+        $l21 = l77 >> 22;
+
+        l79 = l58 + $l21;
+
+        $l22 = l60 + 33554432L;
+
+        l80 = $l22 >> 26;
+
+        $l23 = l80 << 26;
+
+        l81 = l60 - $l23;
+
+        l82 = l63 + l80;
+
+        $l24 = l82 + 33554432L;
+
+        l83 = $l24 >> 26;
+
+        $l25 = l83 << 26;
+
+        l84 = l82 - $l25;
+
+        l85 = l66 + l83;
+
+        $l26 = l85 + 33554432L;
+
+        l86 = $l26 >> 26;
+
+        $l27 = l86 << 26;
+
+        l87 = l85 - $l27;
+
+        l88 = l69 + l86;
+
+        $l28 = l88 + 33554432L;
+
+        l89 = $l28 >> 26;
+
+        $l29 = l89 << 26;
+
+        l90 = l88 - $l29;
+
+        l91 = l72 + l89;
+
+        $l30 = l91 + 33554432L;
+
+        l92 = $l30 >> 26;
+
+        $l31 = l92 << 26;
+
+        l93 = l91 - $l31;
+
+        l94 = l73 + l92;
+
+        $l32 = l94 + 33554432L;
+
+        l95 = $l32 >> 26;
+
+        $l33 = l95 << 26;
+
+        l96 = l94 - $l33;
+
+        l97 = l55 + l95;
+
+        $l34 = l97 + 33554432L;
+
+        l98 = $l34 >> 26;
+
+        $l35 = l98 << 26;
+
+        l99 = l97 - $l35;
+
+        l100 = l75 + l98;
+
+        $l36 = l100 + 33554432L;
+
+        l101 = $l36 >> 26;
+
+        $l37 = l101 << 26;
+
+        l102 = l100 - $l37;
+
+        l103 = l78 + l101;
+
+        $l38 = l103 + 33554432L;
+
+        l104 = $l38 >> 26;
+
+        $l39 = l104 << 26;
+
+        l105 = l103 - $l39;
+
+        l106 = l79 + l104;
+
+        r0[0] = l81;
+
+        r0[1] = l84;
+
+        r0[2] = l87;
+
+        r0[3] = l90;
+
+        r0[4] = l93;
+
+        r0[5] = l96;
+
+        r0[6] = l99;
+
+        r0[7] = l102;
+
+        r0[8] = l105;
+
+        r0[9] = l106;
+
+        return;
+    }
+
+    private void carryReduce(long[], long, long, long, long, long, long, long, long, long, long)
+    {
+        long $l0, $l1, $l2, $l3, $l4, $l5, $l6, $l7, $l8, $l9, $l10, $l11, $l12, $l13, $l14, $l15, $l16, $l17, $l18, $l19, l20, l21, l22, l23, l24, l25, l26, l27, l28, l29, l30, l31, l32, l33, l34, l35, l36, l37, l38, l39, l40, l41, l42, l43, l44, l45, l46, l47, l48, l49, l50, l51, l52, l53, l54, l55, l56, l57, l58, l59;
+        long[] r1;
+        sun.security.util.math.intpoly.P256OrderField r0;
+
+        r0 := @this: sun.security.util.math.intpoly.P256OrderField;
+
+        r1 := @parameter0: long[];
+
+        l20 := @parameter1: long;
+
+        l21 := @parameter2: long;
+
+        l22 := @parameter3: long;
+
+        l23 := @parameter4: long;
+
+        l24 := @parameter5: long;
+
+        l25 := @parameter6: long;
+
+        l26 := @parameter7: long;
+
+        l27 := @parameter8: long;
+
+        l28 := @parameter9: long;
+
+        l29 := @parameter10: long;
+
+        $l0 = l20 + 33554432L;
+
+        l30 = $l0 >> 26;
+
+        $l1 = l30 << 26;
+
+        l31 = l20 - $l1;
+
+        l32 = l21 + l30;
+
+        $l2 = l32 + 33554432L;
+
+        l33 = $l2 >> 26;
+
+        $l3 = l33 << 26;
+
+        l34 = l32 - $l3;
+
+        l35 = l22 + l33;
+
+        $l4 = l35 + 33554432L;
+
+        l36 = $l4 >> 26;
+
+        $l5 = l36 << 26;
+
+        l37 = l35 - $l5;
+
+        l38 = l23 + l36;
+
+        $l6 = l38 + 33554432L;
+
+        l39 = $l6 >> 26;
+
+        $l7 = l39 << 26;
+
+        l40 = l38 - $l7;
+
+        l41 = l24 + l39;
+
+        $l8 = l41 + 33554432L;
+
+        l42 = $l8 >> 26;
+
+        $l9 = l42 << 26;
+
+        l43 = l41 - $l9;
+
+        l44 = l25 + l42;
+
+        $l10 = l44 + 33554432L;
+
+        l45 = $l10 >> 26;
+
+        $l11 = l45 << 26;
+
+        l46 = l44 - $l11;
+
+        l47 = l26 + l45;
+
+        $l12 = l47 + 33554432L;
+
+        l48 = $l12 >> 26;
+
+        $l13 = l48 << 26;
+
+        l49 = l47 - $l13;
+
+        l50 = l27 + l48;
+
+        $l14 = l50 + 33554432L;
+
+        l51 = $l14 >> 26;
+
+        $l15 = l51 << 26;
+
+        l52 = l50 - $l15;
+
+        l53 = l28 + l51;
+
+        $l16 = l53 + 33554432L;
+
+        l54 = $l16 >> 26;
+
+        $l17 = l54 << 26;
+
+        l55 = l53 - $l17;
+
+        l56 = l29 + l54;
+
+        $l18 = l56 + 33554432L;
+
+        l57 = $l18 >> 26;
+
+        $l19 = l57 << 26;
+
+        l58 = l56 - $l19;
+
+        l59 = 0L + l57;
+
+        virtualinvoke r0.<sun.security.util.math.intpoly.P256OrderField: void carryReduce0(long[],long,long,long,long,long,long,long,long,long,long,long)>(r1, l31, l34, l37, l40, l43, l46, l49, l52, l55, l58, l59);
+
+        return;
+    }
+
+    void carryReduce0(long[], long, long, long, long, long, long, long, long, long, long, long)
+    {
+        long l0, $l1, $l2, $l3, $l4, $l5, $l6, $l7, $l8, $l9, $l10, $l11, $l12, $l13, $l14, $l15, $l16, $l17, $l18, $l19, $l20, $l21, $l22, $l23, $l24, $l25, $l26, $l27, $l28, $l29, $l30, $l31, $l32, $l33, $l34, $l35, $l36, $l37, $l38, $l39, l40, l41, l42, l43, l44, l45, l46, l47, l48, l49, l50, l51, l52, l53, l54, l55, l56, l57, l58, l59, l60, l61, l62, l63, l64, l65, l66, l67, l68, l69, l70, l71, l72, l73, l74, l75, l76, l77, l78, l79, l80, l81, l82, l83, l84, l85, l86, l87, l88, l89, l90, l91, l92, l93, l94, l95, l96, l97;
+        sun.security.util.math.intpoly.P256OrderField r1;
+        long[] r0;
+
+        r1 := @this: sun.security.util.math.intpoly.P256OrderField;
+
+        r0 := @parameter0: long[];
+
+        l40 := @parameter1: long;
+
+        l41 := @parameter2: long;
+
+        l42 := @parameter3: long;
+
+        l43 := @parameter4: long;
+
+        l44 := @parameter5: long;
+
+        l45 := @parameter6: long;
+
+        l46 := @parameter7: long;
+
+        l47 := @parameter8: long;
+
+        l48 := @parameter9: long;
+
+        l49 := @parameter10: long;
+
+        l0 := @parameter11: long;
+
+        l50 = -6497617L * l0;
+
+        $l1 = l50 << 4;
+
+        $l2 = $l1 & 67108863L;
+
+        l51 = l40 + $l2;
+
+        $l3 = l50 >> 22;
+
+        l52 = l41 + $l3;
+
+        l53 = 26038081L * l0;
+
+        $l4 = l53 << 4;
+
+        $l5 = $l4 & 67108863L;
+
+        l54 = l52 + $l5;
+
+        $l6 = l53 >> 22;
+
+        l55 = l42 + $l6;
+
+        l56 = -32001852L * l0;
+
+        $l7 = l56 << 4;
+
+        $l8 = $l7 & 67108863L;
+
+        l57 = l55 + $l8;
+
+        $l9 = l56 >> 22;
+
+        l58 = l43 + $l9;
+
+        l59 = 21586850L * l0;
+
+        $l10 = l59 << 4;
+
+        $l11 = $l10 & 67108863L;
+
+        l60 = l58 + $l11;
+
+        $l12 = l59 >> 22;
+
+        l61 = l44 + $l12;
+
+        l62 = 4397317L * l0;
+
+        $l13 = l62 << 4;
+
+        $l14 = $l13 & 67108863L;
+
+        l63 = l61 + $l14;
+
+        $l15 = l62 >> 22;
+
+        l64 = l45 + $l15;
+
+        l65 = -1024L * l0;
+
+        $l16 = l65 << 4;
+
+        $l17 = $l16 & 67108863L;
+
+        l66 = l47 + $l17;
+
+        $l18 = l65 >> 22;
+
+        l67 = l48 + $l18;
+
+        l68 = 65536L * l0;
+
+        $l19 = l68 << 4;
+
+        $l20 = $l19 & 67108863L;
+
+        l69 = l67 + $l20;
+
+        $l21 = l68 >> 22;
+
+        l70 = l49 + $l21;
+
+        $l22 = l51 + 33554432L;
+
+        l71 = $l22 >> 26;
+
+        $l23 = l71 << 26;
+
+        l72 = l51 - $l23;
+
+        l73 = l54 + l71;
+
+        $l24 = l73 + 33554432L;
+
+        l74 = $l24 >> 26;
+
+        $l25 = l74 << 26;
+
+        l75 = l73 - $l25;
+
+        l76 = l57 + l74;
+
+        $l26 = l76 + 33554432L;
+
+        l77 = $l26 >> 26;
+
+        $l27 = l77 << 26;
+
+        l78 = l76 - $l27;
+
+        l79 = l60 + l77;
+
+        $l28 = l79 + 33554432L;
+
+        l80 = $l28 >> 26;
+
+        $l29 = l80 << 26;
+
+        l81 = l79 - $l29;
+
+        l82 = l63 + l80;
+
+        $l30 = l82 + 33554432L;
+
+        l83 = $l30 >> 26;
+
+        $l31 = l83 << 26;
+
+        l84 = l82 - $l31;
+
+        l85 = l64 + l83;
+
+        $l32 = l85 + 33554432L;
+
+        l86 = $l32 >> 26;
+
+        $l33 = l86 << 26;
+
+        l87 = l85 - $l33;
+
+        l88 = l46 + l86;
+
+        $l34 = l88 + 33554432L;
+
+        l89 = $l34 >> 26;
+
+        $l35 = l89 << 26;
+
+        l90 = l88 - $l35;
+
+        l91 = l66 + l89;
+
+        $l36 = l91 + 33554432L;
+
+        l92 = $l36 >> 26;
+
+        $l37 = l92 << 26;
+
+        l93 = l91 - $l37;
+
+        l94 = l69 + l92;
+
+        $l38 = l94 + 33554432L;
+
+        l95 = $l38 >> 26;
+
+        $l39 = l95 << 26;
+
+        l96 = l94 - $l39;
+
+        l97 = l70 + l95;
+
+        r0[0] = l72;
+
+        r0[1] = l75;
+
+        r0[2] = l78;
+
+        r0[3] = l81;
+
+        r0[4] = l84;
+
+        r0[5] = l87;
+
+        r0[6] = l90;
+
+        r0[7] = l93;
+
+        r0[8] = l96;
+
+        r0[9] = l97;
+
+        return;
+    }
+
+    protected void mult(long[], long[], long[])
+    {
+        sun.security.util.math.intpoly.P256OrderField r2;
+        long $l0, $l1, l2, $l3, $l4, $l5, $l6, $l7, $l8, l9, $l10, $l11, $l12, $l13, $l14, $l15, $l16, $l17, $l18, $l19, l20, $l21, $l22, $l23, $l24, $l25, $l26, $l27, $l28, $l29, $l30, $l31, $l32, $l33, $l34, l35, $l36, $l37, $l38, $l39, $l40, $l41, $l42, $l43, $l44, $l45, $l46, $l47, $l48, $l49, $l50, $l51, $l52, $l53, l54, $l55, $l56, $l57, $l58, $l59, $l60, $l61, $l62, $l63, $l64, $l65, $l66, $l67, $l68, $l69, $l70, $l71, $l72, $l73, $l74, $l75, $l76, l77, $l78, $l79, $l80, $l81, $l82, $l83, $l84, $l85, $l86, $l87, $l88, $l89, $l90, $l91, $l92, $l93, $l94, $l95, $l96, $l97, $l98, $l99, $l100, $l101, $l102, $l103, l104, $l105, $l106, $l107, $l108, $l109, $l110, $l111, $l112, $l113, $l114, $l115, $l116, $l117, $l118, $l119, $l120, $l121, $l122, $l123, $l124, $l125, $l126, $l127, $l128, $l129, $l130, $l131, $l132, $l133, $l134, l135, $l136, $l137, $l138, $l139, $l140, $l141, $l142, $l143, $l144, $l145, $l146, $l147, $l148, $l149, $l150, $l151, $l152, $l153, $l154, $l155, $l156, $l157, $l158, $l159, $l160, $l161, $l162, $l163, $l164, $l165, $l166, $l167, $l168, $l169, l170, $l171, $l172, $l173, $l174, $l175, $l176, $l177, $l178, $l179, $l180, $l181, $l182, $l183, $l184, $l185, $l186, $l187, $l188, $l189, $l190, $l191, $l192, $l193, $l194, $l195, $l196, $l197, $l198, $l199, $l200, $l201, $l202, $l203, $l204, $l205, $l206, $l207, $l208, l209, $l210, $l211, $l212, $l213, $l214, $l215, $l216, $l217, $l218, $l219, $l220, $l221, $l222, $l223, $l224, $l225, $l226, $l227, $l228, $l229, $l230, $l231, $l232, $l233, $l234, $l235, $l236, $l237, $l238, $l239, $l240, $l241, $l242, $l243, l244, $l245, $l246, $l247, $l248, $l249, $l250, $l251, $l252, $l253, $l254, $l255, $l256, $l257, $l258, $l259, $l260, $l261, $l262, $l263, $l264, $l265, $l266, $l267, $l268, $l269, $l270, $l271, $l272, $l273, $l274, l275, $l276, $l277, $l278, $l279, $l280, $l281, $l282, $l283, $l284, $l285, $l286, $l287, $l288, $l289, $l290, $l291, $l292, $l293, $l294, $l295, $l296, $l297, $l298, $l299, $l300, $l301, l302, $l303, $l304, $l305, $l306, $l307, $l308, $l309, $l310, $l311, $l312, $l313, $l314, $l315, $l316, $l317, $l318, $l319, $l320, $l321, $l322, $l323, $l324, l325, $l326, $l327, $l328, $l329, $l330, $l331, $l332, $l333, $l334, $l335, $l336, $l337, $l338, $l339, $l340, $l341, $l342, $l343, l344, $l345, $l346, $l347, $l348, $l349, $l350, $l351, $l352, $l353, $l354, $l355, $l356, $l357, $l358, l359, $l360, $l361, $l362, $l363, $l364, $l365, $l366, $l367, $l368, $l369, l370, $l371, $l372, $l373, $l374, $l375, $l376, l377, $l378, $l379, l380;
+        long[] r0, r1, r3;
+
+        r2 := @this: sun.security.util.math.intpoly.P256OrderField;
+
+        r0 := @parameter0: long[];
+
+        r1 := @parameter1: long[];
+
+        r3 := @parameter2: long[];
+
+        $l1 = r0[0];
+
+        $l0 = r1[0];
+
+        l2 = $l1 * $l0;
+
+        $l4 = r0[0];
+
+        $l3 = r1[1];
+
+        $l8 = $l4 * $l3;
+
+        $l6 = r0[1];
+
+        $l5 = r1[0];
+
+        $l7 = $l6 * $l5;
+
+        l9 = $l8 + $l7;
+
+        $l11 = r0[0];
+
+        $l10 = r1[2];
+
+        $l15 = $l11 * $l10;
+
+        $l13 = r0[1];
+
+        $l12 = r1[1];
+
+        $l14 = $l13 * $l12;
+
+        $l19 = $l15 + $l14;
+
+        $l17 = r0[2];
+
+        $l16 = r1[0];
+
+        $l18 = $l17 * $l16;
+
+        l20 = $l19 + $l18;
+
+        $l22 = r0[0];
+
+        $l21 = r1[3];
+
+        $l26 = $l22 * $l21;
+
+        $l24 = r0[1];
+
+        $l23 = r1[2];
+
+        $l25 = $l24 * $l23;
+
+        $l30 = $l26 + $l25;
+
+        $l28 = r0[2];
+
+        $l27 = r1[1];
+
+        $l29 = $l28 * $l27;
+
+        $l34 = $l30 + $l29;
+
+        $l32 = r0[3];
+
+        $l31 = r1[0];
+
+        $l33 = $l32 * $l31;
+
+        l35 = $l34 + $l33;
+
+        $l37 = r0[0];
+
+        $l36 = r1[4];
+
+        $l41 = $l37 * $l36;
+
+        $l39 = r0[1];
+
+        $l38 = r1[3];
+
+        $l40 = $l39 * $l38;
+
+        $l45 = $l41 + $l40;
+
+        $l43 = r0[2];
+
+        $l42 = r1[2];
+
+        $l44 = $l43 * $l42;
+
+        $l49 = $l45 + $l44;
+
+        $l47 = r0[3];
+
+        $l46 = r1[1];
+
+        $l48 = $l47 * $l46;
+
+        $l53 = $l49 + $l48;
+
+        $l51 = r0[4];
+
+        $l50 = r1[0];
+
+        $l52 = $l51 * $l50;
+
+        l54 = $l53 + $l52;
+
+        $l56 = r0[0];
+
+        $l55 = r1[5];
+
+        $l60 = $l56 * $l55;
+
+        $l58 = r0[1];
+
+        $l57 = r1[4];
+
+        $l59 = $l58 * $l57;
+
+        $l64 = $l60 + $l59;
+
+        $l62 = r0[2];
+
+        $l61 = r1[3];
+
+        $l63 = $l62 * $l61;
+
+        $l68 = $l64 + $l63;
+
+        $l66 = r0[3];
+
+        $l65 = r1[2];
+
+        $l67 = $l66 * $l65;
+
+        $l72 = $l68 + $l67;
+
+        $l70 = r0[4];
+
+        $l69 = r1[1];
+
+        $l71 = $l70 * $l69;
+
+        $l76 = $l72 + $l71;
+
+        $l74 = r0[5];
+
+        $l73 = r1[0];
+
+        $l75 = $l74 * $l73;
+
+        l77 = $l76 + $l75;
+
+        $l79 = r0[0];
+
+        $l78 = r1[6];
+
+        $l83 = $l79 * $l78;
+
+        $l81 = r0[1];
+
+        $l80 = r1[5];
+
+        $l82 = $l81 * $l80;
+
+        $l87 = $l83 + $l82;
+
+        $l85 = r0[2];
+
+        $l84 = r1[4];
+
+        $l86 = $l85 * $l84;
+
+        $l91 = $l87 + $l86;
+
+        $l89 = r0[3];
+
+        $l88 = r1[3];
+
+        $l90 = $l89 * $l88;
+
+        $l95 = $l91 + $l90;
+
+        $l93 = r0[4];
+
+        $l92 = r1[2];
+
+        $l94 = $l93 * $l92;
+
+        $l99 = $l95 + $l94;
+
+        $l97 = r0[5];
+
+        $l96 = r1[1];
+
+        $l98 = $l97 * $l96;
+
+        $l103 = $l99 + $l98;
+
+        $l101 = r0[6];
+
+        $l100 = r1[0];
+
+        $l102 = $l101 * $l100;
+
+        l104 = $l103 + $l102;
+
+        $l106 = r0[0];
+
+        $l105 = r1[7];
+
+        $l110 = $l106 * $l105;
+
+        $l108 = r0[1];
+
+        $l107 = r1[6];
+
+        $l109 = $l108 * $l107;
+
+        $l114 = $l110 + $l109;
+
+        $l112 = r0[2];
+
+        $l111 = r1[5];
+
+        $l113 = $l112 * $l111;
+
+        $l118 = $l114 + $l113;
+
+        $l116 = r0[3];
+
+        $l115 = r1[4];
+
+        $l117 = $l116 * $l115;
+
+        $l122 = $l118 + $l117;
+
+        $l120 = r0[4];
+
+        $l119 = r1[3];
+
+        $l121 = $l120 * $l119;
+
+        $l126 = $l122 + $l121;
+
+        $l124 = r0[5];
+
+        $l123 = r1[2];
+
+        $l125 = $l124 * $l123;
+
+        $l130 = $l126 + $l125;
+
+        $l128 = r0[6];
+
+        $l127 = r1[1];
+
+        $l129 = $l128 * $l127;
+
+        $l134 = $l130 + $l129;
+
+        $l132 = r0[7];
+
+        $l131 = r1[0];
+
+        $l133 = $l132 * $l131;
+
+        l135 = $l134 + $l133;
+
+        $l137 = r0[0];
+
+        $l136 = r1[8];
+
+        $l141 = $l137 * $l136;
+
+        $l139 = r0[1];
+
+        $l138 = r1[7];
+
+        $l140 = $l139 * $l138;
+
+        $l145 = $l141 + $l140;
+
+        $l143 = r0[2];
+
+        $l142 = r1[6];
+
+        $l144 = $l143 * $l142;
+
+        $l149 = $l145 + $l144;
+
+        $l147 = r0[3];
+
+        $l146 = r1[5];
+
+        $l148 = $l147 * $l146;
+
+        $l153 = $l149 + $l148;
+
+        $l151 = r0[4];
+
+        $l150 = r1[4];
+
+        $l152 = $l151 * $l150;
+
+        $l157 = $l153 + $l152;
+
+        $l155 = r0[5];
+
+        $l154 = r1[3];
+
+        $l156 = $l155 * $l154;
+
+        $l161 = $l157 + $l156;
+
+        $l159 = r0[6];
+
+        $l158 = r1[2];
+
+        $l160 = $l159 * $l158;
+
+        $l165 = $l161 + $l160;
+
+        $l163 = r0[7];
+
+        $l162 = r1[1];
+
+        $l164 = $l163 * $l162;
+
+        $l169 = $l165 + $l164;
+
+        $l167 = r0[8];
+
+        $l166 = r1[0];
+
+        $l168 = $l167 * $l166;
+
+        l170 = $l169 + $l168;
+
+        $l172 = r0[0];
+
+        $l171 = r1[9];
+
+        $l176 = $l172 * $l171;
+
+        $l174 = r0[1];
+
+        $l173 = r1[8];
+
+        $l175 = $l174 * $l173;
+
+        $l180 = $l176 + $l175;
+
+        $l178 = r0[2];
+
+        $l177 = r1[7];
+
+        $l179 = $l178 * $l177;
+
+        $l184 = $l180 + $l179;
+
+        $l182 = r0[3];
+
+        $l181 = r1[6];
+
+        $l183 = $l182 * $l181;
+
+        $l188 = $l184 + $l183;
+
+        $l186 = r0[4];
+
+        $l185 = r1[5];
+
+        $l187 = $l186 * $l185;
+
+        $l192 = $l188 + $l187;
+
+        $l190 = r0[5];
+
+        $l189 = r1[4];
+
+        $l191 = $l190 * $l189;
+
+        $l196 = $l192 + $l191;
+
+        $l194 = r0[6];
+
+        $l193 = r1[3];
+
+        $l195 = $l194 * $l193;
+
+        $l200 = $l196 + $l195;
+
+        $l198 = r0[7];
+
+        $l197 = r1[2];
+
+        $l199 = $l198 * $l197;
+
+        $l204 = $l200 + $l199;
+
+        $l202 = r0[8];
+
+        $l201 = r1[1];
+
+        $l203 = $l202 * $l201;
+
+        $l208 = $l204 + $l203;
+
+        $l206 = r0[9];
+
+        $l205 = r1[0];
+
+        $l207 = $l206 * $l205;
+
+        l209 = $l208 + $l207;
+
+        $l211 = r0[1];
+
+        $l210 = r1[9];
+
+        $l215 = $l211 * $l210;
+
+        $l213 = r0[2];
+
+        $l212 = r1[8];
+
+        $l214 = $l213 * $l212;
+
+        $l219 = $l215 + $l214;
+
+        $l217 = r0[3];
+
+        $l216 = r1[7];
+
+        $l218 = $l217 * $l216;
+
+        $l223 = $l219 + $l218;
+
+        $l221 = r0[4];
+
+        $l220 = r1[6];
+
+        $l222 = $l221 * $l220;
+
+        $l227 = $l223 + $l222;
+
+        $l225 = r0[5];
+
+        $l224 = r1[5];
+
+        $l226 = $l225 * $l224;
+
+        $l231 = $l227 + $l226;
+
+        $l229 = r0[6];
+
+        $l228 = r1[4];
+
+        $l230 = $l229 * $l228;
+
+        $l235 = $l231 + $l230;
+
+        $l233 = r0[7];
+
+        $l232 = r1[3];
+
+        $l234 = $l233 * $l232;
+
+        $l239 = $l235 + $l234;
+
+        $l237 = r0[8];
+
+        $l236 = r1[2];
+
+        $l238 = $l237 * $l236;
+
+        $l243 = $l239 + $l238;
+
+        $l241 = r0[9];
+
+        $l240 = r1[1];
+
+        $l242 = $l241 * $l240;
+
+        l244 = $l243 + $l242;
+
+        $l246 = r0[2];
+
+        $l245 = r1[9];
+
+        $l250 = $l246 * $l245;
+
+        $l248 = r0[3];
+
+        $l247 = r1[8];
+
+        $l249 = $l248 * $l247;
+
+        $l254 = $l250 + $l249;
+
+        $l252 = r0[4];
+
+        $l251 = r1[7];
+
+        $l253 = $l252 * $l251;
+
+        $l258 = $l254 + $l253;
+
+        $l256 = r0[5];
+
+        $l255 = r1[6];
+
+        $l257 = $l256 * $l255;
+
+        $l262 = $l258 + $l257;
+
+        $l260 = r0[6];
+
+        $l259 = r1[5];
+
+        $l261 = $l260 * $l259;
+
+        $l266 = $l262 + $l261;
+
+        $l264 = r0[7];
+
+        $l263 = r1[4];
+
+        $l265 = $l264 * $l263;
+
+        $l270 = $l266 + $l265;
+
+        $l268 = r0[8];
+
+        $l267 = r1[3];
+
+        $l269 = $l268 * $l267;
+
+        $l274 = $l270 + $l269;
+
+        $l272 = r0[9];
+
+        $l271 = r1[2];
+
+        $l273 = $l272 * $l271;
+
+        l275 = $l274 + $l273;
+
+        $l277 = r0[3];
+
+        $l276 = r1[9];
+
+        $l281 = $l277 * $l276;
+
+        $l279 = r0[4];
+
+        $l278 = r1[8];
+
+        $l280 = $l279 * $l278;
+
+        $l285 = $l281 + $l280;
+
+        $l283 = r0[5];
+
+        $l282 = r1[7];
+
+        $l284 = $l283 * $l282;
+
+        $l289 = $l285 + $l284;
+
+        $l287 = r0[6];
+
+        $l286 = r1[6];
+
+        $l288 = $l287 * $l286;
+
+        $l293 = $l289 + $l288;
+
+        $l291 = r0[7];
+
+        $l290 = r1[5];
+
+        $l292 = $l291 * $l290;
+
+        $l297 = $l293 + $l292;
+
+        $l295 = r0[8];
+
+        $l294 = r1[4];
+
+        $l296 = $l295 * $l294;
+
+        $l301 = $l297 + $l296;
+
+        $l299 = r0[9];
+
+        $l298 = r1[3];
+
+        $l300 = $l299 * $l298;
+
+        l302 = $l301 + $l300;
+
+        $l304 = r0[4];
+
+        $l303 = r1[9];
+
+        $l308 = $l304 * $l303;
+
+        $l306 = r0[5];
+
+        $l305 = r1[8];
+
+        $l307 = $l306 * $l305;
+
+        $l312 = $l308 + $l307;
+
+        $l310 = r0[6];
+
+        $l309 = r1[7];
+
+        $l311 = $l310 * $l309;
+
+        $l316 = $l312 + $l311;
+
+        $l314 = r0[7];
+
+        $l313 = r1[6];
+
+        $l315 = $l314 * $l313;
+
+        $l320 = $l316 + $l315;
+
+        $l318 = r0[8];
+
+        $l317 = r1[5];
+
+        $l319 = $l318 * $l317;
+
+        $l324 = $l320 + $l319;
+
+        $l322 = r0[9];
+
+        $l321 = r1[4];
+
+        $l323 = $l322 * $l321;
+
+        l325 = $l324 + $l323;
+
+        $l327 = r0[5];
+
+        $l326 = r1[9];
+
+        $l331 = $l327 * $l326;
+
+        $l329 = r0[6];
+
+        $l328 = r1[8];
+
+        $l330 = $l329 * $l328;
+
+        $l335 = $l331 + $l330;
+
+        $l333 = r0[7];
+
+        $l332 = r1[7];
+
+        $l334 = $l333 * $l332;
+
+        $l339 = $l335 + $l334;
+
+        $l337 = r0[8];
+
+        $l336 = r1[6];
+
+        $l338 = $l337 * $l336;
+
+        $l343 = $l339 + $l338;
+
+        $l341 = r0[9];
+
+        $l340 = r1[5];
+
+        $l342 = $l341 * $l340;
+
+        l344 = $l343 + $l342;
+
+        $l346 = r0[6];
+
+        $l345 = r1[9];
+
+        $l350 = $l346 * $l345;
+
+        $l348 = r0[7];
+
+        $l347 = r1[8];
+
+        $l349 = $l348 * $l347;
+
+        $l354 = $l350 + $l349;
+
+        $l352 = r0[8];
+
+        $l351 = r1[7];
+
+        $l353 = $l352 * $l351;
+
+        $l358 = $l354 + $l353;
+
+        $l356 = r0[9];
+
+        $l355 = r1[6];
+
+        $l357 = $l356 * $l355;
+
+        l359 = $l358 + $l357;
+
+        $l361 = r0[7];
+
+        $l360 = r1[9];
+
+        $l365 = $l361 * $l360;
+
+        $l363 = r0[8];
+
+        $l362 = r1[8];
+
+        $l364 = $l363 * $l362;
+
+        $l369 = $l365 + $l364;
+
+        $l367 = r0[9];
+
+        $l366 = r1[7];
+
+        $l368 = $l367 * $l366;
+
+        l370 = $l369 + $l368;
+
+        $l372 = r0[8];
+
+        $l371 = r1[9];
+
+        $l376 = $l372 * $l371;
+
+        $l374 = r0[9];
+
+        $l373 = r1[8];
+
+        $l375 = $l374 * $l373;
+
+        l377 = $l376 + $l375;
+
+        $l379 = r0[9];
+
+        $l378 = r1[9];
+
+        l380 = $l379 * $l378;
+
+        specialinvoke r2.<sun.security.util.math.intpoly.P256OrderField: void carryReduce(long[],long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long)>(r3, l2, l9, l20, l35, l54, l77, l104, l135, l170, l209, l244, l275, l302, l325, l344, l359, l370, l377, l380);
+
+        return;
+    }
+
+    protected void reduce(long[])
+    {
+        long $l0, $l1, $l2, $l3, $l4, $l5, $l6, $l7, $l8, $l9;
+        long[] r1;
+        sun.security.util.math.intpoly.P256OrderField r0;
+
+        r0 := @this: sun.security.util.math.intpoly.P256OrderField;
+
+        r1 := @parameter0: long[];
+
+        $l9 = r1[0];
+
+        $l8 = r1[1];
+
+        $l7 = r1[2];
+
+        $l6 = r1[3];
+
+        $l5 = r1[4];
+
+        $l4 = r1[5];
+
+        $l3 = r1[6];
+
+        $l2 = r1[7];
+
+        $l1 = r1[8];
+
+        $l0 = r1[9];
+
+        specialinvoke r0.<sun.security.util.math.intpoly.P256OrderField: void carryReduce(long[],long,long,long,long,long,long,long,long,long,long)>(r1, $l9, $l8, $l7, $l6, $l5, $l4, $l3, $l2, $l1, $l0);
+
+        return;
+    }
+
+    protected void square(long[], long[])
+    {
+        long $l0, $l1, l2, $l3, $l4, $l5, l6, $l7, $l8, $l9, $l10, $l11, $l12, $l13, l14, $l15, $l16, $l17, $l18, $l19, $l20, $l21, l22, $l23, $l24, $l25, $l26, $l27, $l28, $l29, $l30, $l31, $l32, $l33, l34, $l35, $l36, $l37, $l38, $l39, $l40, $l41, $l42, $l43, $l44, $l45, l46, $l47, $l48, $l49, $l50, $l51, $l52, $l53, $l54, $l55, $l56, $l57, $l58, $l59, $l60, $l61, l62, $l63, $l64, $l65, $l66, $l67, $l68, $l69, $l70, $l71, $l72, $l73, $l74, $l75, $l76, $l77, l78, $l79, $l80, $l81, $l82, $l83, $l84, $l85, $l86, $l87, $l88, $l89, $l90, $l91, $l92, $l93, $l94, $l95, $l96, $l97, l98, $l99, $l100, $l101, $l102, $l103, $l104, $l105, $l106, $l107, $l108, $l109, $l110, $l111, $l112, $l113, $l114, $l115, $l116, $l117, l118, $l119, $l120, $l121, $l122, $l123, $l124, $l125, $l126, $l127, $l128, $l129, $l130, $l131, $l132, $l133, $l134, $l135, $l136, $l137, l138, $l139, $l140, $l141, $l142, $l143, $l144, $l145, $l146, $l147, $l148, $l149, $l150, $l151, $l152, $l153, l154, $l155, $l156, $l157, $l158, $l159, $l160, $l161, $l162, $l163, $l164, $l165, $l166, $l167, $l168, $l169, l170, $l171, $l172, $l173, $l174, $l175, $l176, $l177, $l178, $l179, $l180, $l181, l182, $l183, $l184, $l185, $l186, $l187, $l188, $l189, $l190, $l191, $l192, $l193, l194, $l195, $l196, $l197, $l198, $l199, $l200, $l201, l202, $l203, $l204, $l205, $l206, $l207, $l208, $l209, l210, $l211, $l212, $l213, l214, $l215, $l216, l217;
+        long[] r0, r2;
+        sun.security.util.math.intpoly.P256OrderField r1;
+
+        r1 := @this: sun.security.util.math.intpoly.P256OrderField;
+
+        r0 := @parameter0: long[];
+
+        r2 := @parameter1: long[];
+
+        $l1 = r0[0];
+
+        $l0 = r0[0];
+
+        l2 = $l1 * $l0;
+
+        $l4 = r0[0];
+
+        $l3 = r0[1];
+
+        $l5 = $l4 * $l3;
+
+        l6 = 2L * $l5;
+
+        $l8 = r0[0];
+
+        $l7 = r0[2];
+
+        $l9 = $l8 * $l7;
+
+        $l13 = 2L * $l9;
+
+        $l11 = r0[1];
+
+        $l10 = r0[1];
+
+        $l12 = $l11 * $l10;
+
+        l14 = $l13 + $l12;
+
+        $l16 = r0[0];
+
+        $l15 = r0[3];
+
+        $l20 = $l16 * $l15;
+
+        $l18 = r0[1];
+
+        $l17 = r0[2];
+
+        $l19 = $l18 * $l17;
+
+        $l21 = $l20 + $l19;
+
+        l22 = 2L * $l21;
+
+        $l24 = r0[0];
+
+        $l23 = r0[4];
+
+        $l28 = $l24 * $l23;
+
+        $l26 = r0[1];
+
+        $l25 = r0[3];
+
+        $l27 = $l26 * $l25;
+
+        $l29 = $l28 + $l27;
+
+        $l33 = 2L * $l29;
+
+        $l31 = r0[2];
+
+        $l30 = r0[2];
+
+        $l32 = $l31 * $l30;
+
+        l34 = $l33 + $l32;
+
+        $l36 = r0[0];
+
+        $l35 = r0[5];
+
+        $l40 = $l36 * $l35;
+
+        $l38 = r0[1];
+
+        $l37 = r0[4];
+
+        $l39 = $l38 * $l37;
+
+        $l44 = $l40 + $l39;
+
+        $l42 = r0[2];
+
+        $l41 = r0[3];
+
+        $l43 = $l42 * $l41;
+
+        $l45 = $l44 + $l43;
+
+        l46 = 2L * $l45;
+
+        $l48 = r0[0];
+
+        $l47 = r0[6];
+
+        $l52 = $l48 * $l47;
+
+        $l50 = r0[1];
+
+        $l49 = r0[5];
+
+        $l51 = $l50 * $l49;
+
+        $l56 = $l52 + $l51;
+
+        $l54 = r0[2];
+
+        $l53 = r0[4];
+
+        $l55 = $l54 * $l53;
+
+        $l57 = $l56 + $l55;
+
+        $l61 = 2L * $l57;
+
+        $l59 = r0[3];
+
+        $l58 = r0[3];
+
+        $l60 = $l59 * $l58;
+
+        l62 = $l61 + $l60;
+
+        $l64 = r0[0];
+
+        $l63 = r0[7];
+
+        $l68 = $l64 * $l63;
+
+        $l66 = r0[1];
+
+        $l65 = r0[6];
+
+        $l67 = $l66 * $l65;
+
+        $l72 = $l68 + $l67;
+
+        $l70 = r0[2];
+
+        $l69 = r0[5];
+
+        $l71 = $l70 * $l69;
+
+        $l76 = $l72 + $l71;
+
+        $l74 = r0[3];
+
+        $l73 = r0[4];
+
+        $l75 = $l74 * $l73;
+
+        $l77 = $l76 + $l75;
+
+        l78 = 2L * $l77;
+
+        $l80 = r0[0];
+
+        $l79 = r0[8];
+
+        $l84 = $l80 * $l79;
+
+        $l82 = r0[1];
+
+        $l81 = r0[7];
+
+        $l83 = $l82 * $l81;
+
+        $l88 = $l84 + $l83;
+
+        $l86 = r0[2];
+
+        $l85 = r0[6];
+
+        $l87 = $l86 * $l85;
+
+        $l92 = $l88 + $l87;
+
+        $l90 = r0[3];
+
+        $l89 = r0[5];
+
+        $l91 = $l90 * $l89;
+
+        $l93 = $l92 + $l91;
+
+        $l97 = 2L * $l93;
+
+        $l95 = r0[4];
+
+        $l94 = r0[4];
+
+        $l96 = $l95 * $l94;
+
+        l98 = $l97 + $l96;
+
+        $l100 = r0[0];
+
+        $l99 = r0[9];
+
+        $l104 = $l100 * $l99;
+
+        $l102 = r0[1];
+
+        $l101 = r0[8];
+
+        $l103 = $l102 * $l101;
+
+        $l108 = $l104 + $l103;
+
+        $l106 = r0[2];
+
+        $l105 = r0[7];
+
+        $l107 = $l106 * $l105;
+
+        $l112 = $l108 + $l107;
+
+        $l110 = r0[3];
+
+        $l109 = r0[6];
+
+        $l111 = $l110 * $l109;
+
+        $l116 = $l112 + $l111;
+
+        $l114 = r0[4];
+
+        $l113 = r0[5];
+
+        $l115 = $l114 * $l113;
+
+        $l117 = $l116 + $l115;
+
+        l118 = 2L * $l117;
+
+        $l120 = r0[1];
+
+        $l119 = r0[9];
+
+        $l124 = $l120 * $l119;
+
+        $l122 = r0[2];
+
+        $l121 = r0[8];
+
+        $l123 = $l122 * $l121;
+
+        $l128 = $l124 + $l123;
+
+        $l126 = r0[3];
+
+        $l125 = r0[7];
+
+        $l127 = $l126 * $l125;
+
+        $l132 = $l128 + $l127;
+
+        $l130 = r0[4];
+
+        $l129 = r0[6];
+
+        $l131 = $l130 * $l129;
+
+        $l133 = $l132 + $l131;
+
+        $l137 = 2L * $l133;
+
+        $l135 = r0[5];
+
+        $l134 = r0[5];
+
+        $l136 = $l135 * $l134;
+
+        l138 = $l137 + $l136;
+
+        $l140 = r0[2];
+
+        $l139 = r0[9];
+
+        $l144 = $l140 * $l139;
+
+        $l142 = r0[3];
+
+        $l141 = r0[8];
+
+        $l143 = $l142 * $l141;
+
+        $l148 = $l144 + $l143;
+
+        $l146 = r0[4];
+
+        $l145 = r0[7];
+
+        $l147 = $l146 * $l145;
+
+        $l152 = $l148 + $l147;
+
+        $l150 = r0[5];
+
+        $l149 = r0[6];
+
+        $l151 = $l150 * $l149;
+
+        $l153 = $l152 + $l151;
+
+        l154 = 2L * $l153;
+
+        $l156 = r0[3];
+
+        $l155 = r0[9];
+
+        $l160 = $l156 * $l155;
+
+        $l158 = r0[4];
+
+        $l157 = r0[8];
+
+        $l159 = $l158 * $l157;
+
+        $l164 = $l160 + $l159;
+
+        $l162 = r0[5];
+
+        $l161 = r0[7];
+
+        $l163 = $l162 * $l161;
+
+        $l165 = $l164 + $l163;
+
+        $l169 = 2L * $l165;
+
+        $l167 = r0[6];
+
+        $l166 = r0[6];
+
+        $l168 = $l167 * $l166;
+
+        l170 = $l169 + $l168;
+
+        $l172 = r0[4];
+
+        $l171 = r0[9];
+
+        $l176 = $l172 * $l171;
+
+        $l174 = r0[5];
+
+        $l173 = r0[8];
+
+        $l175 = $l174 * $l173;
+
+        $l180 = $l176 + $l175;
+
+        $l178 = r0[6];
+
+        $l177 = r0[7];
+
+        $l179 = $l178 * $l177;
+
+        $l181 = $l180 + $l179;
+
+        l182 = 2L * $l181;
+
+        $l184 = r0[5];
+
+        $l183 = r0[9];
+
+        $l188 = $l184 * $l183;
+
+        $l186 = r0[6];
+
+        $l185 = r0[8];
+
+        $l187 = $l186 * $l185;
+
+        $l189 = $l188 + $l187;
+
+        $l193 = 2L * $l189;
+
+        $l191 = r0[7];
+
+        $l190 = r0[7];
+
+        $l192 = $l191 * $l190;
+
+        l194 = $l193 + $l192;
+
+        $l196 = r0[6];
+
+        $l195 = r0[9];
+
+        $l200 = $l196 * $l195;
+
+        $l198 = r0[7];
+
+        $l197 = r0[8];
+
+        $l199 = $l198 * $l197;
+
+        $l201 = $l200 + $l199;
+
+        l202 = 2L * $l201;
+
+        $l204 = r0[7];
+
+        $l203 = r0[9];
+
+        $l205 = $l204 * $l203;
+
+        $l209 = 2L * $l205;
+
+        $l207 = r0[8];
+
+        $l206 = r0[8];
+
+        $l208 = $l207 * $l206;
+
+        l210 = $l209 + $l208;
+
+        $l212 = r0[8];
+
+        $l211 = r0[9];
+
+        $l213 = $l212 * $l211;
+
+        l214 = 2L * $l213;
+
+        $l216 = r0[9];
+
+        $l215 = r0[9];
+
+        l217 = $l216 * $l215;
+
+        specialinvoke r1.<sun.security.util.math.intpoly.P256OrderField: void carryReduce(long[],long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long)>(r2, l2, l6, l14, l22, l34, l46, l62, l78, l98, l118, l138, l154, l170, l182, l194, l202, l210, l214, l217);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.math.BigInteger $r0;
+
+        <sun.security.util.math.intpoly.P256OrderField: int LIMB_MASK> = 67108863;
+
+        <sun.security.util.math.intpoly.P256OrderField: long CARRY_ADD> = 33554432L;
+
+        <sun.security.util.math.intpoly.P256OrderField: int MAX_ADDS> = 1;
+
+        <sun.security.util.math.intpoly.P256OrderField: int NUM_LIMBS> = 10;
+
+        <sun.security.util.math.intpoly.P256OrderField: int BITS_PER_LIMB> = 26;
+
+        $r0 = staticinvoke <sun.security.util.math.intpoly.P256OrderField: java.math.BigInteger evaluateModulus()>();
+
+        <sun.security.util.math.intpoly.P256OrderField: java.math.BigInteger MODULUS> = $r0;
+
+        return;
+    }
+}

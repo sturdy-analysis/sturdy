@@ -1,0 +1,430 @@
+class javax.swing.PopupFactory$ContainerPopup extends javax.swing.Popup
+{
+    java.awt.Component owner;
+    int x;
+    int y;
+
+    private void <init>()
+    {
+        javax.swing.PopupFactory$ContainerPopup r0;
+
+        r0 := @this: javax.swing.PopupFactory$ContainerPopup;
+
+        specialinvoke r0.<javax.swing.Popup: void <init>()>();
+
+        return;
+    }
+
+    public void hide()
+    {
+        java.awt.Rectangle $r3;
+        java.awt.Component $r1;
+        javax.swing.PopupFactory$ContainerPopup r0;
+        int $i0, $i1, $i2, $i3;
+        java.awt.Container $r2;
+
+        r0 := @this: javax.swing.PopupFactory$ContainerPopup;
+
+        $r1 = virtualinvoke r0.<javax.swing.PopupFactory$ContainerPopup: java.awt.Component getComponent()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = virtualinvoke $r1.<java.awt.Component: java.awt.Container getParent()>();
+
+        if $r2 == null goto label1;
+
+        $r3 = virtualinvoke $r1.<java.awt.Component: java.awt.Rectangle getBounds()>();
+
+        virtualinvoke $r2.<java.awt.Container: void remove(java.awt.Component)>($r1);
+
+        $i3 = $r3.<java.awt.Rectangle: int x>;
+
+        $i2 = $r3.<java.awt.Rectangle: int y>;
+
+        $i1 = $r3.<java.awt.Rectangle: int width>;
+
+        $i0 = $r3.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r2.<java.awt.Container: void repaint(int,int,int,int)>($i3, $i2, $i1, $i0);
+
+     label1:
+        r0.<javax.swing.PopupFactory$ContainerPopup: java.awt.Component owner> = null;
+
+        return;
+    }
+
+    public void pack()
+    {
+        javax.swing.PopupFactory$ContainerPopup r0;
+        java.awt.Dimension $r2;
+        java.awt.Component $r1;
+
+        r0 := @this: javax.swing.PopupFactory$ContainerPopup;
+
+        $r1 = virtualinvoke r0.<javax.swing.PopupFactory$ContainerPopup: java.awt.Component getComponent()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = virtualinvoke $r1.<java.awt.Component: java.awt.Dimension getPreferredSize()>();
+
+        virtualinvoke $r1.<java.awt.Component: void setSize(java.awt.Dimension)>($r2);
+
+     label1:
+        return;
+    }
+
+    void reset(java.awt.Component, java.awt.Component, int, int)
+    {
+        javax.swing.RootPaneContainer $r3;
+        java.awt.Component r1, r2;
+        javax.swing.PopupFactory$ContainerPopup r0;
+        int i0, i1;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: javax.swing.PopupFactory$ContainerPopup;
+
+        r2 := @parameter0: java.awt.Component;
+
+        r1 := @parameter1: java.awt.Component;
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        $z0 = r2 instanceof javax.swing.JFrame;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = r2 instanceof javax.swing.JDialog;
+
+        if $z1 != 0 goto label1;
+
+        $z2 = r2 instanceof javax.swing.JWindow;
+
+        if $z2 == 0 goto label2;
+
+     label1:
+        $r3 = (javax.swing.RootPaneContainer) r2;
+
+        r2 = interfaceinvoke $r3.<javax.swing.RootPaneContainer: javax.swing.JLayeredPane getLayeredPane()>();
+
+     label2:
+        specialinvoke r0.<javax.swing.Popup: void reset(java.awt.Component,java.awt.Component,int,int)>(r2, r1, i0, i1);
+
+        r0.<javax.swing.PopupFactory$ContainerPopup: int x> = i0;
+
+        r0.<javax.swing.PopupFactory$ContainerPopup: int y> = i1;
+
+        r0.<javax.swing.PopupFactory$ContainerPopup: java.awt.Component owner> = r2;
+
+        return;
+    }
+
+    boolean overlappedByOwnedWindow()
+    {
+        java.awt.Rectangle $r6, $r8;
+        java.awt.Window $r4, r7;
+        java.awt.Component $r1, $r2, $r3;
+        javax.swing.PopupFactory$ContainerPopup r0;
+        java.awt.Window[] $r5;
+        int i0, i1;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.swing.PopupFactory$ContainerPopup;
+
+        $r1 = virtualinvoke r0.<javax.swing.PopupFactory$ContainerPopup: java.awt.Component getComponent()>();
+
+        $r2 = r0.<javax.swing.PopupFactory$ContainerPopup: java.awt.Component owner>;
+
+        if $r2 == null goto label4;
+
+        if $r1 == null goto label4;
+
+        $r3 = r0.<javax.swing.PopupFactory$ContainerPopup: java.awt.Component owner>;
+
+        $r4 = staticinvoke <javax.swing.SwingUtilities: java.awt.Window getWindowAncestor(java.awt.Component)>($r3);
+
+        if $r4 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r5 = virtualinvoke $r4.<java.awt.Window: java.awt.Window[] getOwnedWindows()>();
+
+        if $r5 == null goto label4;
+
+        $r6 = virtualinvoke $r1.<java.awt.Component: java.awt.Rectangle getBounds()>();
+
+        i0 = lengthof $r5;
+
+        i1 = 0;
+
+     label2:
+        if i1 >= i0 goto label4;
+
+        r7 = $r5[i1];
+
+        $z0 = virtualinvoke r7.<java.awt.Window: boolean isVisible()>();
+
+        if $z0 == 0 goto label3;
+
+        $r8 = virtualinvoke r7.<java.awt.Window: java.awt.Rectangle getBounds()>();
+
+        $z1 = virtualinvoke $r6.<java.awt.Rectangle: boolean intersects(java.awt.Rectangle)>($r8);
+
+        if $z1 == 0 goto label3;
+
+        return 1;
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label4:
+        return 0;
+    }
+
+    boolean fitsOnScreen()
+    {
+        java.awt.Point $r10;
+        javax.swing.PopupFactory$ContainerPopup r0;
+        boolean $z0, $z1, $z2, $z3, z4, $z5;
+        java.awt.GraphicsConfiguration $r6;
+        java.awt.Component $r1, $r2, $r3, $r4;
+        java.awt.Rectangle $r7, $r8, $r9, $r11;
+        java.awt.Insets $r12;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25;
+        java.awt.Container r5;
+
+        r0 := @this: javax.swing.PopupFactory$ContainerPopup;
+
+        z4 = 0;
+
+        $r1 = virtualinvoke r0.<javax.swing.PopupFactory$ContainerPopup: java.awt.Component getComponent()>();
+
+        $r2 = r0.<javax.swing.PopupFactory$ContainerPopup: java.awt.Component owner>;
+
+        if $r2 == null goto label5;
+
+        if $r1 == null goto label5;
+
+        $i0 = virtualinvoke $r1.<java.awt.Component: int getWidth()>();
+
+        $i1 = virtualinvoke $r1.<java.awt.Component: int getHeight()>();
+
+        $r3 = r0.<javax.swing.PopupFactory$ContainerPopup: java.awt.Component owner>;
+
+        $r4 = staticinvoke <javax.swing.SwingUtilities: java.awt.Component getRoot(java.awt.Component)>($r3);
+
+        r5 = (java.awt.Container) $r4;
+
+        $z0 = r5 instanceof javax.swing.JFrame;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = r5 instanceof javax.swing.JDialog;
+
+        if $z1 != 0 goto label1;
+
+        $z2 = r5 instanceof javax.swing.JWindow;
+
+        if $z2 == 0 goto label4;
+
+     label1:
+        $r11 = virtualinvoke r5.<java.awt.Container: java.awt.Rectangle getBounds()>();
+
+        $r12 = virtualinvoke r5.<java.awt.Container: java.awt.Insets getInsets()>();
+
+        $i10 = $r11.<java.awt.Rectangle: int x>;
+
+        $i11 = $r12.<java.awt.Insets: int left>;
+
+        $i12 = $i10 + $i11;
+
+        $r11.<java.awt.Rectangle: int x> = $i12;
+
+        $i13 = $r11.<java.awt.Rectangle: int y>;
+
+        $i14 = $r12.<java.awt.Insets: int top>;
+
+        $i15 = $i13 + $i14;
+
+        $r11.<java.awt.Rectangle: int y> = $i15;
+
+        $i16 = $r11.<java.awt.Rectangle: int width>;
+
+        $i17 = $r12.<java.awt.Insets: int left>;
+
+        $i18 = $r12.<java.awt.Insets: int right>;
+
+        $i19 = $i17 + $i18;
+
+        $i20 = $i16 - $i19;
+
+        $r11.<java.awt.Rectangle: int width> = $i20;
+
+        $i21 = $r11.<java.awt.Rectangle: int height>;
+
+        $i22 = $r12.<java.awt.Insets: int top>;
+
+        $i23 = $r12.<java.awt.Insets: int bottom>;
+
+        $i24 = $i22 + $i23;
+
+        $i25 = $i21 - $i24;
+
+        $r11.<java.awt.Rectangle: int height> = $i25;
+
+        $z5 = staticinvoke <javax.swing.JPopupMenu: boolean canPopupOverlapTaskBar()>();
+
+        if $z5 == 0 goto label2;
+
+        $r6 = virtualinvoke r5.<java.awt.Container: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+        $r7 = virtualinvoke r0.<javax.swing.PopupFactory$ContainerPopup: java.awt.Rectangle getContainerPopupArea(java.awt.GraphicsConfiguration)>($r6);
+
+        $r8 = virtualinvoke $r11.<java.awt.Rectangle: java.awt.Rectangle intersection(java.awt.Rectangle)>($r7);
+
+        $i5 = r0.<javax.swing.PopupFactory$ContainerPopup: int x>;
+
+        $i4 = r0.<javax.swing.PopupFactory$ContainerPopup: int y>;
+
+        z4 = virtualinvoke $r8.<java.awt.Rectangle: boolean contains(int,int,int,int)>($i5, $i4, $i0, $i1);
+
+        goto label3;
+
+     label2:
+        $i3 = r0.<javax.swing.PopupFactory$ContainerPopup: int x>;
+
+        $i2 = r0.<javax.swing.PopupFactory$ContainerPopup: int y>;
+
+        z4 = virtualinvoke $r11.<java.awt.Rectangle: boolean contains(int,int,int,int)>($i3, $i2, $i0, $i1);
+
+     label3:
+        goto label5;
+
+     label4:
+        $z3 = r5 instanceof javax.swing.JApplet;
+
+        if $z3 == 0 goto label5;
+
+        $r9 = virtualinvoke r5.<java.awt.Container: java.awt.Rectangle getBounds()>();
+
+        $r10 = virtualinvoke r5.<java.awt.Container: java.awt.Point getLocationOnScreen()>();
+
+        $i6 = $r10.<java.awt.Point: int x>;
+
+        $r9.<java.awt.Rectangle: int x> = $i6;
+
+        $i7 = $r10.<java.awt.Point: int y>;
+
+        $r9.<java.awt.Rectangle: int y> = $i7;
+
+        $i9 = r0.<javax.swing.PopupFactory$ContainerPopup: int x>;
+
+        $i8 = r0.<javax.swing.PopupFactory$ContainerPopup: int y>;
+
+        z4 = virtualinvoke $r9.<java.awt.Rectangle: boolean contains(int,int,int,int)>($i9, $i8, $i0, $i1);
+
+     label5:
+        return z4;
+    }
+
+    java.awt.Rectangle getContainerPopupArea(java.awt.GraphicsConfiguration)
+    {
+        java.awt.Rectangle $r2, r6;
+        java.awt.Insets $r4, r7;
+        javax.swing.PopupFactory$ContainerPopup r5;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15;
+        java.awt.GraphicsConfiguration r1;
+        java.awt.Dimension $r3;
+        java.awt.Toolkit $r0;
+
+        r5 := @this: javax.swing.PopupFactory$ContainerPopup;
+
+        r1 := @parameter0: java.awt.GraphicsConfiguration;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        if r1 == null goto label1;
+
+        r6 = virtualinvoke r1.<java.awt.GraphicsConfiguration: java.awt.Rectangle getBounds()>();
+
+        r7 = virtualinvoke $r0.<java.awt.Toolkit: java.awt.Insets getScreenInsets(java.awt.GraphicsConfiguration)>(r1);
+
+        goto label2;
+
+     label1:
+        $r2 = new java.awt.Rectangle;
+
+        $r3 = virtualinvoke $r0.<java.awt.Toolkit: java.awt.Dimension getScreenSize()>();
+
+        specialinvoke $r2.<java.awt.Rectangle: void <init>(java.awt.Dimension)>($r3);
+
+        r6 = $r2;
+
+        $r4 = new java.awt.Insets;
+
+        specialinvoke $r4.<java.awt.Insets: void <init>(int,int,int,int)>(0, 0, 0, 0);
+
+        r7 = $r4;
+
+     label2:
+        $i1 = r6.<java.awt.Rectangle: int x>;
+
+        $i0 = r7.<java.awt.Insets: int left>;
+
+        $i2 = $i1 + $i0;
+
+        r6.<java.awt.Rectangle: int x> = $i2;
+
+        $i4 = r6.<java.awt.Rectangle: int y>;
+
+        $i3 = r7.<java.awt.Insets: int top>;
+
+        $i5 = $i4 + $i3;
+
+        r6.<java.awt.Rectangle: int y> = $i5;
+
+        $i9 = r6.<java.awt.Rectangle: int width>;
+
+        $i7 = r7.<java.awt.Insets: int left>;
+
+        $i6 = r7.<java.awt.Insets: int right>;
+
+        $i8 = $i7 + $i6;
+
+        $i10 = $i9 - $i8;
+
+        r6.<java.awt.Rectangle: int width> = $i10;
+
+        $i14 = r6.<java.awt.Rectangle: int height>;
+
+        $i12 = r7.<java.awt.Insets: int top>;
+
+        $i11 = r7.<java.awt.Insets: int bottom>;
+
+        $i13 = $i12 + $i11;
+
+        $i15 = $i14 - $i13;
+
+        r6.<java.awt.Rectangle: int height> = $i15;
+
+        return r6;
+    }
+
+    void <init>(javax.swing.PopupFactory$1)
+    {
+        javax.swing.PopupFactory$ContainerPopup r0;
+        javax.swing.PopupFactory$1 r1;
+
+        r0 := @this: javax.swing.PopupFactory$ContainerPopup;
+
+        r1 := @parameter0: javax.swing.PopupFactory$1;
+
+        specialinvoke r0.<javax.swing.PopupFactory$ContainerPopup: void <init>()>();
+
+        return;
+    }
+}

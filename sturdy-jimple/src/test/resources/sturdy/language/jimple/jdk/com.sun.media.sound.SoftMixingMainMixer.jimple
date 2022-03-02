@@ -1,0 +1,663 @@
+public final class com.sun.media.sound.SoftMixingMainMixer extends java.lang.Object
+{
+    public static final int CHANNEL_LEFT;
+    public static final int CHANNEL_RIGHT;
+    public static final int CHANNEL_EFFECT1;
+    public static final int CHANNEL_EFFECT2;
+    public static final int CHANNEL_EFFECT3;
+    public static final int CHANNEL_EFFECT4;
+    public static final int CHANNEL_LEFT_DRY;
+    public static final int CHANNEL_RIGHT_DRY;
+    public static final int CHANNEL_SCRATCH1;
+    public static final int CHANNEL_SCRATCH2;
+    public static final int CHANNEL_CHANNELMIXER_LEFT;
+    public static final int CHANNEL_CHANNELMIXER_RIGHT;
+    private final com.sun.media.sound.SoftMixingMixer mixer;
+    private final javax.sound.sampled.AudioInputStream ais;
+    private final com.sun.media.sound.SoftAudioBuffer[] buffers;
+    private final com.sun.media.sound.SoftAudioProcessor reverb;
+    private final com.sun.media.sound.SoftAudioProcessor chorus;
+    private final com.sun.media.sound.SoftAudioProcessor agc;
+    private final int nrofchannels;
+    private final java.lang.Object control_mutex;
+    private final java.util.List openLinesList;
+    private com.sun.media.sound.SoftMixingDataLine[] openLines;
+
+    public javax.sound.sampled.AudioInputStream getInputStream()
+    {
+        javax.sound.sampled.AudioInputStream $r1;
+        com.sun.media.sound.SoftMixingMainMixer r0;
+
+        r0 := @this: com.sun.media.sound.SoftMixingMainMixer;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingMainMixer: javax.sound.sampled.AudioInputStream ais>;
+
+        return $r1;
+    }
+
+    void processAudioBuffers()
+    {
+        java.lang.Throwable $r14;
+        com.sun.media.sound.SoftAudioBuffer[] $r1, $r9, $r12;
+        com.sun.media.sound.SoftMixingMainMixer r0;
+        int $i0, $i1, $i2, i3, i4, i5;
+        com.sun.media.sound.SoftMixingDataLine[] r15;
+        com.sun.media.sound.SoftMixingDataLine $r10, $r11;
+        com.sun.media.sound.SoftAudioBuffer $r13;
+        com.sun.media.sound.SoftAudioProcessor $r3, $r4, $r5, $r6, $r7, $r8;
+        java.lang.Object $r2;
+
+        r0 := @this: com.sun.media.sound.SoftMixingMainMixer;
+
+        i3 = 0;
+
+     label01:
+        $r1 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioBuffer[] buffers>;
+
+        $i0 = lengthof $r1;
+
+        if i3 >= $i0 goto label02;
+
+        $r12 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioBuffer[] buffers>;
+
+        $r13 = $r12[i3];
+
+        virtualinvoke $r13.<com.sun.media.sound.SoftAudioBuffer: void clear()>();
+
+        i3 = i3 + 1;
+
+        goto label01;
+
+     label02:
+        $r2 = r0.<com.sun.media.sound.SoftMixingMainMixer: java.lang.Object control_mutex>;
+
+        entermonitor $r2;
+
+     label03:
+        r15 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftMixingDataLine[] openLines>;
+
+        i4 = 0;
+
+     label04:
+        $i1 = lengthof r15;
+
+        if i4 >= $i1 goto label05;
+
+        $r11 = r15[i4];
+
+        virtualinvoke $r11.<com.sun.media.sound.SoftMixingDataLine: void processControlLogic()>();
+
+        i4 = i4 + 1;
+
+        goto label04;
+
+     label05:
+        $r3 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor chorus>;
+
+        interfaceinvoke $r3.<com.sun.media.sound.SoftAudioProcessor: void processControlLogic()>();
+
+        $r4 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor reverb>;
+
+        interfaceinvoke $r4.<com.sun.media.sound.SoftAudioProcessor: void processControlLogic()>();
+
+        $r5 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor agc>;
+
+        interfaceinvoke $r5.<com.sun.media.sound.SoftAudioProcessor: void processControlLogic()>();
+
+        exitmonitor $r2;
+
+     label06:
+        goto label09;
+
+     label07:
+        $r14 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label08:
+        throw $r14;
+
+     label09:
+        i5 = 0;
+
+     label10:
+        $i2 = lengthof r15;
+
+        if i5 >= $i2 goto label11;
+
+        $r10 = r15[i5];
+
+        $r9 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioBuffer[] buffers>;
+
+        virtualinvoke $r10.<com.sun.media.sound.SoftMixingDataLine: void processAudioLogic(com.sun.media.sound.SoftAudioBuffer[])>($r9);
+
+        i5 = i5 + 1;
+
+        goto label10;
+
+     label11:
+        $r6 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor chorus>;
+
+        interfaceinvoke $r6.<com.sun.media.sound.SoftAudioProcessor: void processAudio()>();
+
+        $r7 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor reverb>;
+
+        interfaceinvoke $r7.<com.sun.media.sound.SoftAudioProcessor: void processAudio()>();
+
+        $r8 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor agc>;
+
+        interfaceinvoke $r8.<com.sun.media.sound.SoftAudioProcessor: void processAudio()>();
+
+        return;
+
+        catch java.lang.Throwable from label03 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+    }
+
+    public void <init>(com.sun.media.sound.SoftMixingMixer)
+    {
+        com.sun.media.sound.SoftChorus $r10;
+        javax.sound.sampled.AudioFormat $r4, $r5, $r12, $r42, $r57;
+        com.sun.media.sound.SoftMixingMixer r3;
+        com.sun.media.sound.SoftMixingMainMixer r0;
+        com.sun.media.sound.SoftMixingDataLine[] $r2;
+        com.sun.media.sound.SoftReverb $r9;
+        java.util.ArrayList $r1;
+        com.sun.media.sound.SoftAudioBuffer $r20, $r23, $r26, $r29, $r32, $r35, $r38, $r44, $r47, $r50, $r53, $r55;
+        com.sun.media.sound.SoftAudioProcessor $r13, $r14, $r15, $r16, $r17, $r18, $r21, $r24, $r27, $r30, $r33, $r36, $r39, $r45, $r48, $r51, $r54;
+        javax.sound.sampled.AudioInputStream $r41;
+        com.sun.media.sound.SoftMixingMainMixer$1 $r40;
+        float $f0, $f1, $f2, $f3, $f4;
+        com.sun.media.sound.SoftAudioBuffer[] $r7, $r8, $r19, $r22, $r25, $r28, $r31, $r34, $r37, $r43, $r46, $r49, $r52, $r56;
+        com.sun.media.sound.SoftLimiter $r11;
+        int $i0, i1, $i2, $i3, $i4, $i5, $i6, i7;
+        java.lang.Object $r6;
+
+        r0 := @this: com.sun.media.sound.SoftMixingMainMixer;
+
+        r3 := @parameter0: com.sun.media.sound.SoftMixingMixer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        r0.<com.sun.media.sound.SoftMixingMainMixer: java.util.List openLinesList> = $r1;
+
+        $r2 = newarray (com.sun.media.sound.SoftMixingDataLine)[0];
+
+        r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftMixingDataLine[] openLines> = $r2;
+
+        r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftMixingMixer mixer> = r3;
+
+        $r4 = virtualinvoke r3.<com.sun.media.sound.SoftMixingMixer: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $i0 = virtualinvoke $r4.<javax.sound.sampled.AudioFormat: int getChannels()>();
+
+        r0.<com.sun.media.sound.SoftMixingMainMixer: int nrofchannels> = $i0;
+
+        $r5 = virtualinvoke r3.<com.sun.media.sound.SoftMixingMixer: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $f0 = virtualinvoke $r5.<javax.sound.sampled.AudioFormat: float getSampleRate()>();
+
+        $f1 = virtualinvoke r3.<com.sun.media.sound.SoftMixingMixer: float getControlRate()>();
+
+        $f2 = $f0 / $f1;
+
+        i1 = (int) $f2;
+
+        $r6 = r3.<com.sun.media.sound.SoftMixingMixer: java.lang.Object control_mutex>;
+
+        r0.<com.sun.media.sound.SoftMixingMainMixer: java.lang.Object control_mutex> = $r6;
+
+        $r7 = newarray (com.sun.media.sound.SoftAudioBuffer)[16];
+
+        r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioBuffer[] buffers> = $r7;
+
+        i7 = 0;
+
+     label1:
+        $r8 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioBuffer[] buffers>;
+
+        $i2 = lengthof $r8;
+
+        if i7 >= $i2 goto label2;
+
+        $r56 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioBuffer[] buffers>;
+
+        $r55 = new com.sun.media.sound.SoftAudioBuffer;
+
+        $r57 = virtualinvoke r3.<com.sun.media.sound.SoftMixingMixer: javax.sound.sampled.AudioFormat getFormat()>();
+
+        specialinvoke $r55.<com.sun.media.sound.SoftAudioBuffer: void <init>(int,javax.sound.sampled.AudioFormat)>(i1, $r57);
+
+        $r56[i7] = $r55;
+
+        i7 = i7 + 1;
+
+        goto label1;
+
+     label2:
+        $r9 = new com.sun.media.sound.SoftReverb;
+
+        specialinvoke $r9.<com.sun.media.sound.SoftReverb: void <init>()>();
+
+        r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor reverb> = $r9;
+
+        $r10 = new com.sun.media.sound.SoftChorus;
+
+        specialinvoke $r10.<com.sun.media.sound.SoftChorus: void <init>()>();
+
+        r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor chorus> = $r10;
+
+        $r11 = new com.sun.media.sound.SoftLimiter;
+
+        specialinvoke $r11.<com.sun.media.sound.SoftLimiter: void <init>()>();
+
+        r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor agc> = $r11;
+
+        $r12 = virtualinvoke r3.<com.sun.media.sound.SoftMixingMixer: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $f3 = virtualinvoke $r12.<javax.sound.sampled.AudioFormat: float getSampleRate()>();
+
+        $f4 = virtualinvoke r3.<com.sun.media.sound.SoftMixingMixer: float getControlRate()>();
+
+        $r13 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor reverb>;
+
+        interfaceinvoke $r13.<com.sun.media.sound.SoftAudioProcessor: void init(float,float)>($f3, $f4);
+
+        $r14 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor chorus>;
+
+        interfaceinvoke $r14.<com.sun.media.sound.SoftAudioProcessor: void init(float,float)>($f3, $f4);
+
+        $r15 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor agc>;
+
+        interfaceinvoke $r15.<com.sun.media.sound.SoftAudioProcessor: void init(float,float)>($f3, $f4);
+
+        $r16 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor reverb>;
+
+        interfaceinvoke $r16.<com.sun.media.sound.SoftAudioProcessor: void setMixMode(boolean)>(1);
+
+        $r17 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor chorus>;
+
+        interfaceinvoke $r17.<com.sun.media.sound.SoftAudioProcessor: void setMixMode(boolean)>(1);
+
+        $r18 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor agc>;
+
+        interfaceinvoke $r18.<com.sun.media.sound.SoftAudioProcessor: void setMixMode(boolean)>(0);
+
+        $r21 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor chorus>;
+
+        $r19 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioBuffer[] buffers>;
+
+        $r20 = $r19[3];
+
+        interfaceinvoke $r21.<com.sun.media.sound.SoftAudioProcessor: void setInput(int,com.sun.media.sound.SoftAudioBuffer)>(0, $r20);
+
+        $r24 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor chorus>;
+
+        $r22 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioBuffer[] buffers>;
+
+        $r23 = $r22[0];
+
+        interfaceinvoke $r24.<com.sun.media.sound.SoftAudioProcessor: void setOutput(int,com.sun.media.sound.SoftAudioBuffer)>(0, $r23);
+
+        $i3 = r0.<com.sun.media.sound.SoftMixingMainMixer: int nrofchannels>;
+
+        if $i3 == 1 goto label3;
+
+        $r54 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor chorus>;
+
+        $r52 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioBuffer[] buffers>;
+
+        $r53 = $r52[1];
+
+        interfaceinvoke $r54.<com.sun.media.sound.SoftAudioProcessor: void setOutput(int,com.sun.media.sound.SoftAudioBuffer)>(1, $r53);
+
+     label3:
+        $r27 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor chorus>;
+
+        $r25 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioBuffer[] buffers>;
+
+        $r26 = $r25[2];
+
+        interfaceinvoke $r27.<com.sun.media.sound.SoftAudioProcessor: void setOutput(int,com.sun.media.sound.SoftAudioBuffer)>(2, $r26);
+
+        $r30 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor reverb>;
+
+        $r28 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioBuffer[] buffers>;
+
+        $r29 = $r28[2];
+
+        interfaceinvoke $r30.<com.sun.media.sound.SoftAudioProcessor: void setInput(int,com.sun.media.sound.SoftAudioBuffer)>(0, $r29);
+
+        $r33 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor reverb>;
+
+        $r31 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioBuffer[] buffers>;
+
+        $r32 = $r31[0];
+
+        interfaceinvoke $r33.<com.sun.media.sound.SoftAudioProcessor: void setOutput(int,com.sun.media.sound.SoftAudioBuffer)>(0, $r32);
+
+        $i4 = r0.<com.sun.media.sound.SoftMixingMainMixer: int nrofchannels>;
+
+        if $i4 == 1 goto label4;
+
+        $r51 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor reverb>;
+
+        $r49 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioBuffer[] buffers>;
+
+        $r50 = $r49[1];
+
+        interfaceinvoke $r51.<com.sun.media.sound.SoftAudioProcessor: void setOutput(int,com.sun.media.sound.SoftAudioBuffer)>(1, $r50);
+
+     label4:
+        $r36 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor agc>;
+
+        $r34 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioBuffer[] buffers>;
+
+        $r35 = $r34[0];
+
+        interfaceinvoke $r36.<com.sun.media.sound.SoftAudioProcessor: void setInput(int,com.sun.media.sound.SoftAudioBuffer)>(0, $r35);
+
+        $i5 = r0.<com.sun.media.sound.SoftMixingMainMixer: int nrofchannels>;
+
+        if $i5 == 1 goto label5;
+
+        $r48 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor agc>;
+
+        $r46 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioBuffer[] buffers>;
+
+        $r47 = $r46[1];
+
+        interfaceinvoke $r48.<com.sun.media.sound.SoftAudioProcessor: void setInput(int,com.sun.media.sound.SoftAudioBuffer)>(1, $r47);
+
+     label5:
+        $r39 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor agc>;
+
+        $r37 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioBuffer[] buffers>;
+
+        $r38 = $r37[0];
+
+        interfaceinvoke $r39.<com.sun.media.sound.SoftAudioProcessor: void setOutput(int,com.sun.media.sound.SoftAudioBuffer)>(0, $r38);
+
+        $i6 = r0.<com.sun.media.sound.SoftMixingMainMixer: int nrofchannels>;
+
+        if $i6 == 1 goto label6;
+
+        $r45 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioProcessor agc>;
+
+        $r43 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioBuffer[] buffers>;
+
+        $r44 = $r43[1];
+
+        interfaceinvoke $r45.<com.sun.media.sound.SoftAudioProcessor: void setOutput(int,com.sun.media.sound.SoftAudioBuffer)>(1, $r44);
+
+     label6:
+        $r40 = new com.sun.media.sound.SoftMixingMainMixer$1;
+
+        specialinvoke $r40.<com.sun.media.sound.SoftMixingMainMixer$1: void <init>(com.sun.media.sound.SoftMixingMainMixer)>(r0);
+
+        $r41 = new javax.sound.sampled.AudioInputStream;
+
+        $r42 = virtualinvoke r3.<com.sun.media.sound.SoftMixingMixer: javax.sound.sampled.AudioFormat getFormat()>();
+
+        specialinvoke $r41.<javax.sound.sampled.AudioInputStream: void <init>(java.io.InputStream,javax.sound.sampled.AudioFormat,long)>($r40, $r42, -1L);
+
+        r0.<com.sun.media.sound.SoftMixingMainMixer: javax.sound.sampled.AudioInputStream ais> = $r41;
+
+        return;
+    }
+
+    public void openLine(com.sun.media.sound.SoftMixingDataLine)
+    {
+        java.lang.Throwable $r9;
+        java.lang.Object[] $r7;
+        com.sun.media.sound.SoftMixingMainMixer r0;
+        java.util.List $r3, $r4, $r5;
+        com.sun.media.sound.SoftMixingDataLine r2;
+        int $i0;
+        com.sun.media.sound.SoftMixingDataLine[] $r6, $r8;
+        java.lang.Object $r1;
+
+        r0 := @this: com.sun.media.sound.SoftMixingMainMixer;
+
+        r2 := @parameter0: com.sun.media.sound.SoftMixingDataLine;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingMainMixer: java.lang.Object control_mutex>;
+
+        entermonitor $r1;
+
+     label1:
+        $r3 = r0.<com.sun.media.sound.SoftMixingMainMixer: java.util.List openLinesList>;
+
+        interfaceinvoke $r3.<java.util.List: boolean add(java.lang.Object)>(r2);
+
+        $r5 = r0.<com.sun.media.sound.SoftMixingMainMixer: java.util.List openLinesList>;
+
+        $r4 = r0.<com.sun.media.sound.SoftMixingMainMixer: java.util.List openLinesList>;
+
+        $i0 = interfaceinvoke $r4.<java.util.List: int size()>();
+
+        $r6 = newarray (com.sun.media.sound.SoftMixingDataLine)[$i0];
+
+        $r7 = interfaceinvoke $r5.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r6);
+
+        $r8 = (com.sun.media.sound.SoftMixingDataLine[]) $r7;
+
+        r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftMixingDataLine[] openLines> = $r8;
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r9 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r9;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void closeLine(com.sun.media.sound.SoftMixingDataLine)
+    {
+        java.lang.Throwable $r12;
+        java.lang.Object[] $r7;
+        com.sun.media.sound.SoftMixingMixer $r10, $r11;
+        com.sun.media.sound.SoftMixingMainMixer r0;
+        int $i0, $i1;
+        com.sun.media.sound.SoftMixingDataLine[] $r6, $r8, $r9;
+        boolean $z0;
+        java.util.List $r3, $r4, $r5;
+        com.sun.media.sound.SoftMixingDataLine r2;
+        java.lang.Object $r1;
+
+        r0 := @this: com.sun.media.sound.SoftMixingMainMixer;
+
+        r2 := @parameter0: com.sun.media.sound.SoftMixingDataLine;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingMainMixer: java.lang.Object control_mutex>;
+
+        entermonitor $r1;
+
+     label1:
+        $r3 = r0.<com.sun.media.sound.SoftMixingMainMixer: java.util.List openLinesList>;
+
+        interfaceinvoke $r3.<java.util.List: boolean remove(java.lang.Object)>(r2);
+
+        $r5 = r0.<com.sun.media.sound.SoftMixingMainMixer: java.util.List openLinesList>;
+
+        $r4 = r0.<com.sun.media.sound.SoftMixingMainMixer: java.util.List openLinesList>;
+
+        $i0 = interfaceinvoke $r4.<java.util.List: int size()>();
+
+        $r6 = newarray (com.sun.media.sound.SoftMixingDataLine)[$i0];
+
+        $r7 = interfaceinvoke $r5.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r6);
+
+        $r8 = (com.sun.media.sound.SoftMixingDataLine[]) $r7;
+
+        r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftMixingDataLine[] openLines> = $r8;
+
+        $r9 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftMixingDataLine[] openLines>;
+
+        $i1 = lengthof $r9;
+
+        if $i1 != 0 goto label2;
+
+        $r10 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftMixingMixer mixer>;
+
+        $z0 = $r10.<com.sun.media.sound.SoftMixingMixer: boolean implicitOpen>;
+
+        if $z0 == 0 goto label2;
+
+        $r11 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftMixingMixer mixer>;
+
+        virtualinvoke $r11.<com.sun.media.sound.SoftMixingMixer: void close()>();
+
+     label2:
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r12 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r12;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public com.sun.media.sound.SoftMixingDataLine[] getOpenLines()
+    {
+        java.lang.Throwable $r3;
+        com.sun.media.sound.SoftMixingMainMixer r0;
+        com.sun.media.sound.SoftMixingDataLine[] $r2;
+        java.lang.Object $r1;
+
+        r0 := @this: com.sun.media.sound.SoftMixingMainMixer;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingMainMixer: java.lang.Object control_mutex>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftMixingDataLine[] openLines>;
+
+        exitmonitor $r1;
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void close()
+    {
+        com.sun.media.sound.SoftMixingMainMixer r0;
+        com.sun.media.sound.SoftMixingDataLine $r2;
+        int $i0, i1;
+        com.sun.media.sound.SoftMixingDataLine[] r1;
+
+        r0 := @this: com.sun.media.sound.SoftMixingMainMixer;
+
+        r1 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftMixingDataLine[] openLines>;
+
+        i1 = 0;
+
+     label1:
+        $i0 = lengthof r1;
+
+        if i1 >= $i0 goto label2;
+
+        $r2 = r1[i1];
+
+        virtualinvoke $r2.<com.sun.media.sound.SoftMixingDataLine: void close()>();
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    static com.sun.media.sound.SoftAudioBuffer[] access$000(com.sun.media.sound.SoftMixingMainMixer)
+    {
+        com.sun.media.sound.SoftMixingMainMixer r0;
+        com.sun.media.sound.SoftAudioBuffer[] $r1;
+
+        r0 := @parameter0: com.sun.media.sound.SoftMixingMainMixer;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftAudioBuffer[] buffers>;
+
+        return $r1;
+    }
+
+    static com.sun.media.sound.SoftMixingMixer access$100(com.sun.media.sound.SoftMixingMainMixer)
+    {
+        com.sun.media.sound.SoftMixingMainMixer r0;
+        com.sun.media.sound.SoftMixingMixer $r1;
+
+        r0 := @parameter0: com.sun.media.sound.SoftMixingMainMixer;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingMainMixer: com.sun.media.sound.SoftMixingMixer mixer>;
+
+        return $r1;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.media.sound.SoftMixingMainMixer: int CHANNEL_CHANNELMIXER_RIGHT> = 15;
+
+        <com.sun.media.sound.SoftMixingMainMixer: int CHANNEL_CHANNELMIXER_LEFT> = 14;
+
+        <com.sun.media.sound.SoftMixingMainMixer: int CHANNEL_SCRATCH2> = 13;
+
+        <com.sun.media.sound.SoftMixingMainMixer: int CHANNEL_SCRATCH1> = 12;
+
+        <com.sun.media.sound.SoftMixingMainMixer: int CHANNEL_RIGHT_DRY> = 11;
+
+        <com.sun.media.sound.SoftMixingMainMixer: int CHANNEL_LEFT_DRY> = 10;
+
+        <com.sun.media.sound.SoftMixingMainMixer: int CHANNEL_EFFECT4> = 5;
+
+        <com.sun.media.sound.SoftMixingMainMixer: int CHANNEL_EFFECT3> = 4;
+
+        <com.sun.media.sound.SoftMixingMainMixer: int CHANNEL_EFFECT2> = 3;
+
+        <com.sun.media.sound.SoftMixingMainMixer: int CHANNEL_EFFECT1> = 2;
+
+        <com.sun.media.sound.SoftMixingMainMixer: int CHANNEL_RIGHT> = 1;
+
+        <com.sun.media.sound.SoftMixingMainMixer: int CHANNEL_LEFT> = 0;
+
+        return;
+    }
+}

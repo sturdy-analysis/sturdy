@@ -1,0 +1,5317 @@
+public abstract class java.awt.KeyboardFocusManager extends java.lang.Object implements java.awt.KeyEventDispatcher, java.awt.KeyEventPostProcessor
+{
+    private static final sun.util.logging.PlatformLogger focusLog;
+    transient java.awt.peer.KeyboardFocusManagerPeer peer;
+    private static final sun.util.logging.PlatformLogger log;
+    public static final int FORWARD_TRAVERSAL_KEYS;
+    public static final int BACKWARD_TRAVERSAL_KEYS;
+    public static final int UP_CYCLE_TRAVERSAL_KEYS;
+    public static final int DOWN_CYCLE_TRAVERSAL_KEYS;
+    static final int TRAVERSAL_KEY_LENGTH;
+    private static java.awt.Component focusOwner;
+    private static java.awt.Component permanentFocusOwner;
+    private static java.awt.Window focusedWindow;
+    private static java.awt.Window activeWindow;
+    private java.awt.FocusTraversalPolicy defaultPolicy;
+    private static final java.lang.String[] defaultFocusTraversalKeyPropertyNames;
+    private static final java.awt.AWTKeyStroke[][] defaultFocusTraversalKeyStrokes;
+    private java.util.Set[] defaultFocusTraversalKeys;
+    private static java.awt.Container currentFocusCycleRoot;
+    private java.beans.VetoableChangeSupport vetoableSupport;
+    private java.beans.PropertyChangeSupport changeSupport;
+    private java.util.LinkedList keyEventDispatchers;
+    private java.util.LinkedList keyEventPostProcessors;
+    private static java.util.Map mostRecentFocusOwners;
+    private static java.awt.AWTPermission replaceKeyboardFocusManagerPermission;
+    transient java.awt.SequencedEvent currentSequencedEvent;
+    private static java.util.LinkedList heavyweightRequests;
+    private static java.util.LinkedList currentLightweightRequests;
+    private static boolean clearingCurrentLightweightRequests;
+    private static boolean allowSyncFocusRequests;
+    private static java.awt.Component newFocusOwner;
+    private static volatile boolean disableRestoreFocus;
+    static final int SNFH_FAILURE;
+    static final int SNFH_SUCCESS_HANDLED;
+    static final int SNFH_SUCCESS_PROCEED;
+    static java.lang.reflect.Field proxyActive;
+    static final boolean $assertionsDisabled;
+
+    private static native void initIDs();
+
+    public static java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager()
+    {
+        java.awt.KeyboardFocusManager $r1;
+        sun.awt.AppContext $r0;
+
+        $r0 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r1 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager(sun.awt.AppContext)>($r0);
+
+        return $r1;
+    }
+
+    static synchronized java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager(sun.awt.AppContext)
+    {
+        java.awt.KeyboardFocusManager r3;
+        sun.awt.AppContext r0;
+        java.lang.Object $r1;
+        java.awt.DefaultKeyboardFocusManager $r2;
+
+        r0 := @parameter0: sun.awt.AppContext;
+
+        $r1 = virtualinvoke r0.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>(class "Ljava/awt/KeyboardFocusManager;");
+
+        r3 = (java.awt.KeyboardFocusManager) $r1;
+
+        if r3 != null goto label1;
+
+        $r2 = new java.awt.DefaultKeyboardFocusManager;
+
+        specialinvoke $r2.<java.awt.DefaultKeyboardFocusManager: void <init>()>();
+
+        r3 = $r2;
+
+        virtualinvoke r0.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>(class "Ljava/awt/KeyboardFocusManager;", $r2);
+
+     label1:
+        return r3;
+    }
+
+    public static void setCurrentKeyboardFocusManager(java.awt.KeyboardFocusManager) throws java.lang.SecurityException
+    {
+        java.lang.Throwable $r6;
+        java.awt.KeyboardFocusManager r1, r7;
+        sun.awt.AppContext $r0;
+        java.lang.Boolean $r2, $r3, $r4, $r5;
+
+        r1 := @parameter0: java.awt.KeyboardFocusManager;
+
+        staticinvoke <java.awt.KeyboardFocusManager: void checkReplaceKFMPermission()>();
+
+        entermonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label1:
+        $r0 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        if r1 == null goto label2;
+
+        r7 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager(sun.awt.AppContext)>($r0);
+
+        virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>(class "Ljava/awt/KeyboardFocusManager;", r1);
+
+        goto label3;
+
+     label2:
+        r7 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager(sun.awt.AppContext)>($r0);
+
+        virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object remove(java.lang.Object)>(class "Ljava/awt/KeyboardFocusManager;");
+
+     label3:
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label4:
+        goto label7;
+
+     label5:
+        $r6 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label6:
+        throw $r6;
+
+     label7:
+        if r7 == null goto label8;
+
+        $r5 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r4 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        virtualinvoke r7.<java.awt.KeyboardFocusManager: void firePropertyChange(java.lang.String,java.lang.Object,java.lang.Object)>("managingFocus", $r5, $r4);
+
+     label8:
+        if r1 == null goto label9;
+
+        $r3 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        $r2 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke r1.<java.awt.KeyboardFocusManager: void firePropertyChange(java.lang.String,java.lang.Object,java.lang.Object)>("managingFocus", $r3, $r2);
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    final void setCurrentSequencedEvent(java.awt.SequencedEvent)
+    {
+        java.lang.Throwable $r4;
+        java.awt.KeyboardFocusManager r0;
+        java.awt.SequencedEvent r1, $r2;
+        java.lang.AssertionError $r3;
+        boolean $z0;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        r1 := @parameter0: java.awt.SequencedEvent;
+
+        entermonitor class "Ljava/awt/SequencedEvent;";
+
+     label1:
+        $z0 = <java.awt.KeyboardFocusManager: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label2;
+
+        if r1 == null goto label2;
+
+        $r2 = r0.<java.awt.KeyboardFocusManager: java.awt.SequencedEvent currentSequencedEvent>;
+
+        if $r2 == null goto label2;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>()>();
+
+        throw $r3;
+
+     label2:
+        r0.<java.awt.KeyboardFocusManager: java.awt.SequencedEvent currentSequencedEvent> = r1;
+
+        exitmonitor class "Ljava/awt/SequencedEvent;";
+
+     label3:
+        goto label6;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/SequencedEvent;";
+
+     label5:
+        throw $r4;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    final java.awt.SequencedEvent getCurrentSequencedEvent()
+    {
+        java.lang.Throwable $r2;
+        java.awt.KeyboardFocusManager r0;
+        java.awt.SequencedEvent $r1;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        entermonitor class "Ljava/awt/SequencedEvent;";
+
+     label1:
+        $r1 = r0.<java.awt.KeyboardFocusManager: java.awt.SequencedEvent currentSequencedEvent>;
+
+        exitmonitor class "Ljava/awt/SequencedEvent;";
+
+     label2:
+        return $r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/SequencedEvent;";
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    static java.util.Set initFocusTraversalKeysSet(java.lang.String, java.util.Set)
+    {
+        java.util.Set r2, $r5;
+        java.awt.AWTKeyStroke $r4;
+        java.util.StringTokenizer $r0;
+        java.lang.String r1, $r3;
+        boolean $z0, $z1;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.util.Set;
+
+        $r0 = new java.util.StringTokenizer;
+
+        specialinvoke $r0.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>(r1, ",");
+
+     label1:
+        $z0 = virtualinvoke $r0.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = virtualinvoke $r0.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $r4 = staticinvoke <java.awt.AWTKeyStroke: java.awt.AWTKeyStroke getAWTKeyStroke(java.lang.String)>($r3);
+
+        interfaceinvoke r2.<java.util.Set: boolean add(java.lang.Object)>($r4);
+
+        goto label1;
+
+     label2:
+        $z1 = interfaceinvoke r2.<java.util.Set: boolean isEmpty()>();
+
+        if $z1 == 0 goto label3;
+
+        $r5 = <java.util.Collections: java.util.Set EMPTY_SET>;
+
+        goto label4;
+
+     label3:
+        $r5 = staticinvoke <java.util.Collections: java.util.Set unmodifiableSet(java.util.Set)>(r2);
+
+     label4:
+        return $r5;
+    }
+
+    public void <init>()
+    {
+        java.util.HashSet $r3;
+        java.awt.AWTKeyStroke $r9;
+        java.awt.DefaultFocusTraversalPolicy $r1;
+        int $i0, $i1, i2, i3;
+        java.util.Set[] $r2, $r6;
+        boolean $z0;
+        java.awt.AWTKeyStroke[] $r5, $r8;
+        java.util.Set $r10;
+        java.awt.KeyboardFocusManager r0;
+        java.awt.AWTKeyStroke[][] $r4, $r7;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.awt.DefaultFocusTraversalPolicy;
+
+        specialinvoke $r1.<java.awt.DefaultFocusTraversalPolicy: void <init>()>();
+
+        r0.<java.awt.KeyboardFocusManager: java.awt.FocusTraversalPolicy defaultPolicy> = $r1;
+
+        $r2 = newarray (java.util.Set)[4];
+
+        r0.<java.awt.KeyboardFocusManager: java.util.Set[] defaultFocusTraversalKeys> = $r2;
+
+        r0.<java.awt.KeyboardFocusManager: java.awt.SequencedEvent currentSequencedEvent> = null;
+
+        i2 = 0;
+
+     label1:
+        if i2 >= 4 goto label6;
+
+        $r3 = new java.util.HashSet;
+
+        specialinvoke $r3.<java.util.HashSet: void <init>()>();
+
+        i3 = 0;
+
+     label2:
+        $r4 = <java.awt.KeyboardFocusManager: java.awt.AWTKeyStroke[][] defaultFocusTraversalKeyStrokes>;
+
+        $r5 = $r4[i2];
+
+        $i0 = lengthof $r5;
+
+        if i3 >= $i0 goto label3;
+
+        $r7 = <java.awt.KeyboardFocusManager: java.awt.AWTKeyStroke[][] defaultFocusTraversalKeyStrokes>;
+
+        $r8 = $r7[i2];
+
+        $r9 = $r8[i3];
+
+        interfaceinvoke $r3.<java.util.Set: boolean add(java.lang.Object)>($r9);
+
+        i3 = i3 + 1;
+
+        goto label2;
+
+     label3:
+        $r6 = r0.<java.awt.KeyboardFocusManager: java.util.Set[] defaultFocusTraversalKeys>;
+
+        $i1 = i2;
+
+        $z0 = interfaceinvoke $r3.<java.util.Set: boolean isEmpty()>();
+
+        if $z0 == 0 goto label4;
+
+        $r10 = <java.util.Collections: java.util.Set EMPTY_SET>;
+
+        goto label5;
+
+     label4:
+        $r10 = staticinvoke <java.util.Collections: java.util.Set unmodifiableSet(java.util.Set)>($r3);
+
+     label5:
+        $r6[$i1] = $r10;
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label6:
+        specialinvoke r0.<java.awt.KeyboardFocusManager: void initPeer()>();
+
+        return;
+    }
+
+    private void initPeer()
+    {
+        java.awt.peer.KeyboardFocusManagerPeer $r3;
+        java.awt.KeyboardFocusManager r2;
+        sun.awt.KeyboardFocusManagerPeerProvider r1;
+        java.awt.Toolkit $r0;
+
+        r2 := @this: java.awt.KeyboardFocusManager;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        r1 = (sun.awt.KeyboardFocusManagerPeerProvider) $r0;
+
+        $r3 = interfaceinvoke r1.<sun.awt.KeyboardFocusManagerPeerProvider: java.awt.peer.KeyboardFocusManagerPeer getKeyboardFocusManagerPeer()>();
+
+        r2.<java.awt.KeyboardFocusManager: java.awt.peer.KeyboardFocusManagerPeer peer> = $r3;
+
+        return;
+    }
+
+    public java.awt.Component getFocusOwner()
+    {
+        java.lang.Throwable $r4;
+        java.awt.KeyboardFocusManager r5;
+        sun.awt.AppContext $r2, $r3;
+        java.awt.Component $r0, $r1, $r6;
+
+        r5 := @this: java.awt.KeyboardFocusManager;
+
+        entermonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label1:
+        $r0 = <java.awt.KeyboardFocusManager: java.awt.Component focusOwner>;
+
+        if $r0 != null goto label3;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label2:
+        return null;
+
+     label3:
+        $r1 = <java.awt.KeyboardFocusManager: java.awt.Component focusOwner>;
+
+        $r2 = $r1.<java.awt.Component: sun.awt.AppContext appContext>;
+
+        $r3 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        if $r2 != $r3 goto label4;
+
+        $r6 = <java.awt.KeyboardFocusManager: java.awt.Component focusOwner>;
+
+        goto label5;
+
+     label4:
+        $r6 = null;
+
+     label5:
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label6:
+        return $r6;
+
+     label7:
+        $r4 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label8:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label3 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    protected java.awt.Component getGlobalFocusOwner() throws java.lang.SecurityException
+    {
+        java.lang.Throwable $r2;
+        java.awt.KeyboardFocusManager r0;
+        java.awt.Component $r1;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        entermonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label1:
+        specialinvoke r0.<java.awt.KeyboardFocusManager: void checkKFMSecurity()>();
+
+        $r1 = <java.awt.KeyboardFocusManager: java.awt.Component focusOwner>;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label2:
+        return $r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    protected void setGlobalFocusOwner(java.awt.Component) throws java.lang.SecurityException
+    {
+        java.lang.Throwable $r6;
+        java.awt.Component r0, $r2, r8;
+        java.beans.PropertyVetoException $r7;
+        java.awt.KeyboardFocusManager r1;
+        java.awt.Container $r3, $r4, $r5, r9;
+        boolean $z0, $z1, $z2, z3;
+
+        r1 := @this: java.awt.KeyboardFocusManager;
+
+        r0 := @parameter0: java.awt.Component;
+
+        r8 = null;
+
+        z3 = 0;
+
+        if r0 == null goto label01;
+
+        $z2 = virtualinvoke r0.<java.awt.Component: boolean isFocusable()>();
+
+        if $z2 == 0 goto label14;
+
+     label01:
+        entermonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label02:
+        specialinvoke r1.<java.awt.KeyboardFocusManager: void checkKFMSecurity()>();
+
+        $r2 = virtualinvoke r1.<java.awt.KeyboardFocusManager: java.awt.Component getFocusOwner()>();
+
+        r8 = $r2;
+
+     label03:
+        virtualinvoke r1.<java.awt.KeyboardFocusManager: void fireVetoableChange(java.lang.String,java.lang.Object,java.lang.Object)>("focusOwner", $r2, r0);
+
+     label04:
+        goto label07;
+
+     label05:
+        $r7 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label06:
+        return;
+
+     label07:
+        <java.awt.KeyboardFocusManager: java.awt.Component focusOwner> = r0;
+
+        if r0 == null goto label10;
+
+        $r3 = virtualinvoke r1.<java.awt.KeyboardFocusManager: java.awt.Container getCurrentFocusCycleRoot()>();
+
+        if $r3 == null goto label08;
+
+        $r5 = virtualinvoke r1.<java.awt.KeyboardFocusManager: java.awt.Container getCurrentFocusCycleRoot()>();
+
+        $z1 = virtualinvoke r0.<java.awt.Component: boolean isFocusCycleRoot(java.awt.Container)>($r5);
+
+        if $z1 != 0 goto label10;
+
+     label08:
+        $r4 = virtualinvoke r0.<java.awt.Component: java.awt.Container getFocusCycleRootAncestor()>();
+
+        r9 = $r4;
+
+        if $r4 != null goto label09;
+
+        $z0 = r0 instanceof java.awt.Window;
+
+        if $z0 == 0 goto label09;
+
+        r9 = (java.awt.Container) r0;
+
+     label09:
+        if r9 == null goto label10;
+
+        virtualinvoke r1.<java.awt.KeyboardFocusManager: void setGlobalCurrentFocusCycleRootPriv(java.awt.Container)>(r9);
+
+     label10:
+        z3 = 1;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label11:
+        goto label14;
+
+     label12:
+        $r6 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label13:
+        throw $r6;
+
+     label14:
+        if z3 == 0 goto label15;
+
+        virtualinvoke r1.<java.awt.KeyboardFocusManager: void firePropertyChange(java.lang.String,java.lang.Object,java.lang.Object)>("focusOwner", r8, r0);
+
+     label15:
+        return;
+
+        catch java.beans.PropertyVetoException from label03 to label04 with label05;
+        catch java.lang.Throwable from label02 to label06 with label12;
+        catch java.lang.Throwable from label07 to label11 with label12;
+        catch java.lang.Throwable from label12 to label13 with label12;
+    }
+
+    public void clearFocusOwner()
+    {
+        java.awt.KeyboardFocusManager r0;
+        java.awt.Component $r1;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        $r1 = virtualinvoke r0.<java.awt.KeyboardFocusManager: java.awt.Component getFocusOwner()>();
+
+        if $r1 == null goto label1;
+
+        virtualinvoke r0.<java.awt.KeyboardFocusManager: void clearGlobalFocusOwner()>();
+
+     label1:
+        return;
+    }
+
+    public void clearGlobalFocusOwner() throws java.lang.SecurityException
+    {
+        java.awt.KeyboardFocusManager r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        staticinvoke <java.awt.KeyboardFocusManager: void checkReplaceKFMPermission()>();
+
+        $z0 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        if $z0 != 0 goto label1;
+
+        staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        specialinvoke r0.<java.awt.KeyboardFocusManager: void _clearGlobalFocusOwner()>();
+
+     label1:
+        return;
+    }
+
+    private void _clearGlobalFocusOwner()
+    {
+        java.awt.peer.KeyboardFocusManagerPeer $r2;
+        java.awt.KeyboardFocusManager r1;
+        java.awt.Window $r0;
+
+        r1 := @this: java.awt.KeyboardFocusManager;
+
+        $r0 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.Window markClearGlobalFocusOwner()>();
+
+        $r2 = r1.<java.awt.KeyboardFocusManager: java.awt.peer.KeyboardFocusManagerPeer peer>;
+
+        interfaceinvoke $r2.<java.awt.peer.KeyboardFocusManagerPeer: void clearGlobalFocusOwner(java.awt.Window)>($r0);
+
+        return;
+    }
+
+    void clearGlobalFocusOwnerPriv()
+    {
+        java.awt.KeyboardFocusManager r1;
+        java.awt.KeyboardFocusManager$2 $r0;
+
+        r1 := @this: java.awt.KeyboardFocusManager;
+
+        $r0 = new java.awt.KeyboardFocusManager$2;
+
+        specialinvoke $r0.<java.awt.KeyboardFocusManager$2: void <init>(java.awt.KeyboardFocusManager)>(r1);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        return;
+    }
+
+    java.awt.Component getNativeFocusOwner()
+    {
+        java.awt.peer.KeyboardFocusManagerPeer $r1;
+        java.awt.KeyboardFocusManager r0;
+        java.awt.Component $r2;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        $r1 = r0.<java.awt.KeyboardFocusManager: java.awt.peer.KeyboardFocusManagerPeer peer>;
+
+        $r2 = interfaceinvoke $r1.<java.awt.peer.KeyboardFocusManagerPeer: java.awt.Component getCurrentFocusOwner()>();
+
+        return $r2;
+    }
+
+    void setNativeFocusOwner(java.awt.Component)
+    {
+        sun.util.logging.PlatformLogger$Level $r0;
+        sun.util.logging.PlatformLogger $r1, $r7;
+        java.lang.Object[] $r5;
+        java.awt.Component r3;
+        java.awt.peer.KeyboardFocusManagerPeer $r4, $r6;
+        java.awt.KeyboardFocusManager r2;
+        java.lang.String $r8, $r9;
+        boolean $z0;
+
+        r2 := @this: java.awt.KeyboardFocusManager;
+
+        r3 := @parameter0: java.awt.Component;
+
+        $r1 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r0 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINEST>;
+
+        $z0 = virtualinvoke $r1.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r0);
+
+        if $z0 == 0 goto label1;
+
+        $r7 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r5 = newarray (java.lang.Object)[2];
+
+        $r6 = r2.<java.awt.KeyboardFocusManager: java.awt.peer.KeyboardFocusManagerPeer peer>;
+
+        $r8 = staticinvoke <java.lang.String: java.lang.String valueOf(java.lang.Object)>($r6);
+
+        $r5[0] = $r8;
+
+        $r9 = staticinvoke <java.lang.String: java.lang.String valueOf(java.lang.Object)>(r3);
+
+        $r5[1] = $r9;
+
+        virtualinvoke $r7.<sun.util.logging.PlatformLogger: void finest(java.lang.String,java.lang.Object[])>("Calling peer {0} setCurrentFocusOwner for {1}", $r5);
+
+     label1:
+        $r4 = r2.<java.awt.KeyboardFocusManager: java.awt.peer.KeyboardFocusManagerPeer peer>;
+
+        interfaceinvoke $r4.<java.awt.peer.KeyboardFocusManagerPeer: void setCurrentFocusOwner(java.awt.Component)>(r3);
+
+        return;
+    }
+
+    java.awt.Window getNativeFocusedWindow()
+    {
+        java.awt.peer.KeyboardFocusManagerPeer $r1;
+        java.awt.KeyboardFocusManager r0;
+        java.awt.Window $r2;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        $r1 = r0.<java.awt.KeyboardFocusManager: java.awt.peer.KeyboardFocusManagerPeer peer>;
+
+        $r2 = interfaceinvoke $r1.<java.awt.peer.KeyboardFocusManagerPeer: java.awt.Window getCurrentFocusedWindow()>();
+
+        return $r2;
+    }
+
+    public java.awt.Component getPermanentFocusOwner()
+    {
+        java.lang.Throwable $r4;
+        java.awt.KeyboardFocusManager r5;
+        sun.awt.AppContext $r2, $r3;
+        java.awt.Component $r0, $r1, $r6;
+
+        r5 := @this: java.awt.KeyboardFocusManager;
+
+        entermonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label1:
+        $r0 = <java.awt.KeyboardFocusManager: java.awt.Component permanentFocusOwner>;
+
+        if $r0 != null goto label3;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label2:
+        return null;
+
+     label3:
+        $r1 = <java.awt.KeyboardFocusManager: java.awt.Component permanentFocusOwner>;
+
+        $r2 = $r1.<java.awt.Component: sun.awt.AppContext appContext>;
+
+        $r3 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        if $r2 != $r3 goto label4;
+
+        $r6 = <java.awt.KeyboardFocusManager: java.awt.Component permanentFocusOwner>;
+
+        goto label5;
+
+     label4:
+        $r6 = null;
+
+     label5:
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label6:
+        return $r6;
+
+     label7:
+        $r4 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label8:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label3 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    protected java.awt.Component getGlobalPermanentFocusOwner() throws java.lang.SecurityException
+    {
+        java.lang.Throwable $r2;
+        java.awt.KeyboardFocusManager r0;
+        java.awt.Component $r1;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        entermonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label1:
+        specialinvoke r0.<java.awt.KeyboardFocusManager: void checkKFMSecurity()>();
+
+        $r1 = <java.awt.KeyboardFocusManager: java.awt.Component permanentFocusOwner>;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label2:
+        return $r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    protected void setGlobalPermanentFocusOwner(java.awt.Component) throws java.lang.SecurityException
+    {
+        java.lang.Throwable $r3;
+        java.awt.Component r0, $r2, r5;
+        java.beans.PropertyVetoException $r4;
+        java.awt.KeyboardFocusManager r1;
+        boolean $z0, z1;
+
+        r1 := @this: java.awt.KeyboardFocusManager;
+
+        r0 := @parameter0: java.awt.Component;
+
+        r5 = null;
+
+        z1 = 0;
+
+        if r0 == null goto label01;
+
+        $z0 = virtualinvoke r0.<java.awt.Component: boolean isFocusable()>();
+
+        if $z0 == 0 goto label11;
+
+     label01:
+        entermonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label02:
+        specialinvoke r1.<java.awt.KeyboardFocusManager: void checkKFMSecurity()>();
+
+        $r2 = virtualinvoke r1.<java.awt.KeyboardFocusManager: java.awt.Component getPermanentFocusOwner()>();
+
+        r5 = $r2;
+
+     label03:
+        virtualinvoke r1.<java.awt.KeyboardFocusManager: void fireVetoableChange(java.lang.String,java.lang.Object,java.lang.Object)>("permanentFocusOwner", $r2, r0);
+
+     label04:
+        goto label07;
+
+     label05:
+        $r4 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label06:
+        return;
+
+     label07:
+        <java.awt.KeyboardFocusManager: java.awt.Component permanentFocusOwner> = r0;
+
+        staticinvoke <java.awt.KeyboardFocusManager: void setMostRecentFocusOwner(java.awt.Component)>(r0);
+
+        z1 = 1;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label08:
+        goto label11;
+
+     label09:
+        $r3 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label10:
+        throw $r3;
+
+     label11:
+        if z1 == 0 goto label12;
+
+        virtualinvoke r1.<java.awt.KeyboardFocusManager: void firePropertyChange(java.lang.String,java.lang.Object,java.lang.Object)>("permanentFocusOwner", r5, r0);
+
+     label12:
+        return;
+
+        catch java.beans.PropertyVetoException from label03 to label04 with label05;
+        catch java.lang.Throwable from label02 to label06 with label09;
+        catch java.lang.Throwable from label07 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    public java.awt.Window getFocusedWindow()
+    {
+        java.lang.Throwable $r4;
+        java.awt.KeyboardFocusManager r5;
+        java.awt.Window $r0, $r1, $r6;
+        sun.awt.AppContext $r2, $r3;
+
+        r5 := @this: java.awt.KeyboardFocusManager;
+
+        entermonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label1:
+        $r0 = <java.awt.KeyboardFocusManager: java.awt.Window focusedWindow>;
+
+        if $r0 != null goto label3;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label2:
+        return null;
+
+     label3:
+        $r1 = <java.awt.KeyboardFocusManager: java.awt.Window focusedWindow>;
+
+        $r2 = $r1.<java.awt.Window: sun.awt.AppContext appContext>;
+
+        $r3 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        if $r2 != $r3 goto label4;
+
+        $r6 = <java.awt.KeyboardFocusManager: java.awt.Window focusedWindow>;
+
+        goto label5;
+
+     label4:
+        $r6 = null;
+
+     label5:
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label6:
+        return $r6;
+
+     label7:
+        $r4 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label8:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label3 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    protected java.awt.Window getGlobalFocusedWindow() throws java.lang.SecurityException
+    {
+        java.lang.Throwable $r2;
+        java.awt.KeyboardFocusManager r0;
+        java.awt.Window $r1;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        entermonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label1:
+        specialinvoke r0.<java.awt.KeyboardFocusManager: void checkKFMSecurity()>();
+
+        $r1 = <java.awt.KeyboardFocusManager: java.awt.Window focusedWindow>;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label2:
+        return $r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    protected void setGlobalFocusedWindow(java.awt.Window) throws java.lang.SecurityException
+    {
+        java.lang.Throwable $r3;
+        java.awt.Window r0, $r2, r5;
+        java.beans.PropertyVetoException $r4;
+        java.awt.KeyboardFocusManager r1;
+        boolean $z0, z1;
+
+        r1 := @this: java.awt.KeyboardFocusManager;
+
+        r0 := @parameter0: java.awt.Window;
+
+        r5 = null;
+
+        z1 = 0;
+
+        if r0 == null goto label01;
+
+        $z0 = virtualinvoke r0.<java.awt.Window: boolean isFocusableWindow()>();
+
+        if $z0 == 0 goto label11;
+
+     label01:
+        entermonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label02:
+        specialinvoke r1.<java.awt.KeyboardFocusManager: void checkKFMSecurity()>();
+
+        $r2 = virtualinvoke r1.<java.awt.KeyboardFocusManager: java.awt.Window getFocusedWindow()>();
+
+        r5 = $r2;
+
+     label03:
+        virtualinvoke r1.<java.awt.KeyboardFocusManager: void fireVetoableChange(java.lang.String,java.lang.Object,java.lang.Object)>("focusedWindow", $r2, r0);
+
+     label04:
+        goto label07;
+
+     label05:
+        $r4 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label06:
+        return;
+
+     label07:
+        <java.awt.KeyboardFocusManager: java.awt.Window focusedWindow> = r0;
+
+        z1 = 1;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label08:
+        goto label11;
+
+     label09:
+        $r3 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label10:
+        throw $r3;
+
+     label11:
+        if z1 == 0 goto label12;
+
+        virtualinvoke r1.<java.awt.KeyboardFocusManager: void firePropertyChange(java.lang.String,java.lang.Object,java.lang.Object)>("focusedWindow", r5, r0);
+
+     label12:
+        return;
+
+        catch java.beans.PropertyVetoException from label03 to label04 with label05;
+        catch java.lang.Throwable from label02 to label06 with label09;
+        catch java.lang.Throwable from label07 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    public java.awt.Window getActiveWindow()
+    {
+        java.lang.Throwable $r4;
+        java.awt.KeyboardFocusManager r5;
+        java.awt.Window $r0, $r1, $r6;
+        sun.awt.AppContext $r2, $r3;
+
+        r5 := @this: java.awt.KeyboardFocusManager;
+
+        entermonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label1:
+        $r0 = <java.awt.KeyboardFocusManager: java.awt.Window activeWindow>;
+
+        if $r0 != null goto label3;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label2:
+        return null;
+
+     label3:
+        $r1 = <java.awt.KeyboardFocusManager: java.awt.Window activeWindow>;
+
+        $r2 = $r1.<java.awt.Window: sun.awt.AppContext appContext>;
+
+        $r3 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        if $r2 != $r3 goto label4;
+
+        $r6 = <java.awt.KeyboardFocusManager: java.awt.Window activeWindow>;
+
+        goto label5;
+
+     label4:
+        $r6 = null;
+
+     label5:
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label6:
+        return $r6;
+
+     label7:
+        $r4 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label8:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label3 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    protected java.awt.Window getGlobalActiveWindow() throws java.lang.SecurityException
+    {
+        java.lang.Throwable $r2;
+        java.awt.KeyboardFocusManager r0;
+        java.awt.Window $r1;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        entermonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label1:
+        specialinvoke r0.<java.awt.KeyboardFocusManager: void checkKFMSecurity()>();
+
+        $r1 = <java.awt.KeyboardFocusManager: java.awt.Window activeWindow>;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label2:
+        return $r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    protected void setGlobalActiveWindow(java.awt.Window) throws java.lang.SecurityException
+    {
+        java.lang.Throwable $r12;
+        sun.util.logging.PlatformLogger$Level $r2;
+        sun.util.logging.PlatformLogger $r3, $r6;
+        java.awt.Window $r1, r4;
+        java.beans.PropertyVetoException $r13;
+        java.awt.KeyboardFocusManager r0;
+        java.lang.StringBuilder $r5, $r7, $r8, $r9, $r10;
+        java.lang.String $r11;
+        boolean $z0;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        r4 := @parameter0: java.awt.Window;
+
+        entermonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label01:
+        specialinvoke r0.<java.awt.KeyboardFocusManager: void checkKFMSecurity()>();
+
+        $r1 = virtualinvoke r0.<java.awt.KeyboardFocusManager: java.awt.Window getActiveWindow()>();
+
+        $r3 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r2 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINER>;
+
+        $z0 = virtualinvoke $r3.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r2);
+
+        if $z0 == 0 goto label02;
+
+        $r6 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Setting global active window to ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r4);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", old active ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<sun.util.logging.PlatformLogger: void finer(java.lang.String)>($r11);
+
+     label02:
+        virtualinvoke r0.<java.awt.KeyboardFocusManager: void fireVetoableChange(java.lang.String,java.lang.Object,java.lang.Object)>("activeWindow", $r1, r4);
+
+     label03:
+        goto label06;
+
+     label04:
+        $r13 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label05:
+        return;
+
+     label06:
+        <java.awt.KeyboardFocusManager: java.awt.Window activeWindow> = r4;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label07:
+        goto label10;
+
+     label08:
+        $r12 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label09:
+        throw $r12;
+
+     label10:
+        virtualinvoke r0.<java.awt.KeyboardFocusManager: void firePropertyChange(java.lang.String,java.lang.Object,java.lang.Object)>("activeWindow", $r1, r4);
+
+        return;
+
+        catch java.beans.PropertyVetoException from label02 to label03 with label04;
+        catch java.lang.Throwable from label01 to label05 with label08;
+        catch java.lang.Throwable from label06 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    public synchronized java.awt.FocusTraversalPolicy getDefaultFocusTraversalPolicy()
+    {
+        java.awt.KeyboardFocusManager r0;
+        java.awt.FocusTraversalPolicy $r1;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        $r1 = r0.<java.awt.KeyboardFocusManager: java.awt.FocusTraversalPolicy defaultPolicy>;
+
+        return $r1;
+    }
+
+    public void setDefaultFocusTraversalPolicy(java.awt.FocusTraversalPolicy)
+    {
+        java.lang.Throwable $r4;
+        java.awt.FocusTraversalPolicy r0, r2;
+        java.awt.KeyboardFocusManager r1;
+        java.lang.IllegalArgumentException $r3;
+
+        r1 := @this: java.awt.KeyboardFocusManager;
+
+        r0 := @parameter0: java.awt.FocusTraversalPolicy;
+
+        if r0 != null goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("default focus traversal policy cannot be null");
+
+        throw $r3;
+
+     label1:
+        entermonitor r1;
+
+     label2:
+        r2 = r1.<java.awt.KeyboardFocusManager: java.awt.FocusTraversalPolicy defaultPolicy>;
+
+        r1.<java.awt.KeyboardFocusManager: java.awt.FocusTraversalPolicy defaultPolicy> = r0;
+
+        exitmonitor r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor r1;
+
+     label5:
+        throw $r4;
+
+     label6:
+        virtualinvoke r1.<java.awt.KeyboardFocusManager: void firePropertyChange(java.lang.String,java.lang.Object,java.lang.Object)>("defaultFocusTraversalPolicy", r2, r0);
+
+        return;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void setDefaultFocusTraversalKeys(int, java.util.Set)
+    {
+        java.lang.Throwable $r19;
+        java.lang.String[] $r9;
+        java.util.HashSet $r25;
+        java.awt.AWTKeyStroke r12;
+        int i0, i2, $i3, $i5;
+        java.util.Set[] $r4, $r7, $r13;
+        java.lang.String $r10;
+        boolean $z0, $z1;
+        java.util.Iterator $r3;
+        java.util.Set r1, r5, $r8, $r14;
+        char $c1;
+        java.lang.IllegalArgumentException $r20, $r21, $r22, $r23, $r24;
+        java.awt.KeyboardFocusManager r2;
+        java.lang.Object $r11;
+
+        r2 := @this: java.awt.KeyboardFocusManager;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.util.Set;
+
+        if i0 < 0 goto label01;
+
+        if i0 < 4 goto label02;
+
+     label01:
+        $r20 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r20.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("invalid focus traversal key identifier");
+
+        throw $r20;
+
+     label02:
+        if r1 != null goto label03;
+
+        $r21 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r21.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("cannot set null Set of default focus traversal keys");
+
+        throw $r21;
+
+     label03:
+        entermonitor r2;
+
+     label04:
+        $r3 = interfaceinvoke r1.<java.util.Set: java.util.Iterator iterator()>();
+
+     label05:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label12;
+
+        $r11 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r12 = (java.awt.AWTKeyStroke) $r11;
+
+        if r12 != null goto label06;
+
+        $r22 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r22.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("cannot set null focus traversal key");
+
+        throw $r22;
+
+     label06:
+        $c1 = virtualinvoke r12.<java.awt.AWTKeyStroke: char getKeyChar()>();
+
+        $i3 = (int) $c1;
+
+        $i5 = (int) 65535;
+
+        if $i3 == $i5 goto label07;
+
+        $r23 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r23.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("focus traversal keys cannot map to KEY_TYPED events");
+
+        throw $r23;
+
+     label07:
+        i2 = 0;
+
+     label08:
+        if i2 >= 4 goto label11;
+
+        if i2 != i0 goto label09;
+
+        goto label10;
+
+     label09:
+        $r13 = r2.<java.awt.KeyboardFocusManager: java.util.Set[] defaultFocusTraversalKeys>;
+
+        $r14 = $r13[i2];
+
+        $z1 = interfaceinvoke $r14.<java.util.Set: boolean contains(java.lang.Object)>(r12);
+
+        if $z1 == 0 goto label10;
+
+        $r24 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r24.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("focus traversal keys must be unique for a Component");
+
+        throw $r24;
+
+     label10:
+        i2 = i2 + 1;
+
+        goto label08;
+
+     label11:
+        goto label05;
+
+     label12:
+        $r4 = r2.<java.awt.KeyboardFocusManager: java.util.Set[] defaultFocusTraversalKeys>;
+
+        r5 = $r4[i0];
+
+        $r7 = r2.<java.awt.KeyboardFocusManager: java.util.Set[] defaultFocusTraversalKeys>;
+
+        $r25 = new java.util.HashSet;
+
+        specialinvoke $r25.<java.util.HashSet: void <init>(java.util.Collection)>(r1);
+
+        $r8 = staticinvoke <java.util.Collections: java.util.Set unmodifiableSet(java.util.Set)>($r25);
+
+        $r7[i0] = $r8;
+
+        exitmonitor r2;
+
+     label13:
+        goto label16;
+
+     label14:
+        $r19 := @caughtexception;
+
+        exitmonitor r2;
+
+     label15:
+        throw $r19;
+
+     label16:
+        $r9 = <java.awt.KeyboardFocusManager: java.lang.String[] defaultFocusTraversalKeyPropertyNames>;
+
+        $r10 = $r9[i0];
+
+        virtualinvoke r2.<java.awt.KeyboardFocusManager: void firePropertyChange(java.lang.String,java.lang.Object,java.lang.Object)>($r10, r5, r1);
+
+        return;
+
+        catch java.lang.Throwable from label04 to label13 with label14;
+        catch java.lang.Throwable from label14 to label15 with label14;
+    }
+
+    public java.util.Set getDefaultFocusTraversalKeys(int)
+    {
+        java.awt.KeyboardFocusManager r1;
+        int i0;
+        java.util.Set $r3;
+        java.util.Set[] $r2;
+        java.lang.IllegalArgumentException $r0;
+
+        r1 := @this: java.awt.KeyboardFocusManager;
+
+        i0 := @parameter0: int;
+
+        if i0 < 0 goto label1;
+
+        if i0 < 4 goto label2;
+
+     label1:
+        $r0 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r0.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("invalid focus traversal key identifier");
+
+        throw $r0;
+
+     label2:
+        $r2 = r1.<java.awt.KeyboardFocusManager: java.util.Set[] defaultFocusTraversalKeys>;
+
+        $r3 = $r2[i0];
+
+        return $r3;
+    }
+
+    public java.awt.Container getCurrentFocusCycleRoot()
+    {
+        java.lang.Throwable $r4;
+        java.awt.KeyboardFocusManager r5;
+        sun.awt.AppContext $r2, $r3;
+        java.awt.Container $r0, $r1, $r6;
+
+        r5 := @this: java.awt.KeyboardFocusManager;
+
+        entermonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label1:
+        $r0 = <java.awt.KeyboardFocusManager: java.awt.Container currentFocusCycleRoot>;
+
+        if $r0 != null goto label3;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label2:
+        return null;
+
+     label3:
+        $r1 = <java.awt.KeyboardFocusManager: java.awt.Container currentFocusCycleRoot>;
+
+        $r2 = $r1.<java.awt.Container: sun.awt.AppContext appContext>;
+
+        $r3 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        if $r2 != $r3 goto label4;
+
+        $r6 = <java.awt.KeyboardFocusManager: java.awt.Container currentFocusCycleRoot>;
+
+        goto label5;
+
+     label4:
+        $r6 = null;
+
+     label5:
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label6:
+        return $r6;
+
+     label7:
+        $r4 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label8:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label3 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    protected java.awt.Container getGlobalCurrentFocusCycleRoot() throws java.lang.SecurityException
+    {
+        java.lang.Throwable $r2;
+        java.awt.KeyboardFocusManager r0;
+        java.awt.Container $r1;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        entermonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label1:
+        specialinvoke r0.<java.awt.KeyboardFocusManager: void checkKFMSecurity()>();
+
+        $r1 = <java.awt.KeyboardFocusManager: java.awt.Container currentFocusCycleRoot>;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label2:
+        return $r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void setGlobalCurrentFocusCycleRoot(java.awt.Container) throws java.lang.SecurityException
+    {
+        java.lang.Throwable $r3;
+        java.awt.KeyboardFocusManager r0;
+        java.awt.Container $r1, r2;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        r2 := @parameter0: java.awt.Container;
+
+        staticinvoke <java.awt.KeyboardFocusManager: void checkReplaceKFMPermission()>();
+
+        entermonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label1:
+        $r1 = virtualinvoke r0.<java.awt.KeyboardFocusManager: java.awt.Container getCurrentFocusCycleRoot()>();
+
+        <java.awt.KeyboardFocusManager: java.awt.Container currentFocusCycleRoot> = r2;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label2:
+        goto label5;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label4:
+        throw $r3;
+
+     label5:
+        virtualinvoke r0.<java.awt.KeyboardFocusManager: void firePropertyChange(java.lang.String,java.lang.Object,java.lang.Object)>("currentFocusCycleRoot", $r1, r2);
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    void setGlobalCurrentFocusCycleRootPriv(java.awt.Container)
+    {
+        java.awt.KeyboardFocusManager r1;
+        java.awt.Container r2;
+        java.awt.KeyboardFocusManager$3 $r0;
+
+        r1 := @this: java.awt.KeyboardFocusManager;
+
+        r2 := @parameter0: java.awt.Container;
+
+        $r0 = new java.awt.KeyboardFocusManager$3;
+
+        specialinvoke $r0.<java.awt.KeyboardFocusManager$3: void <init>(java.awt.KeyboardFocusManager,java.awt.Container)>(r1, r2);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        return;
+    }
+
+    public void addPropertyChangeListener(java.beans.PropertyChangeListener)
+    {
+        java.lang.Throwable $r5;
+        java.awt.KeyboardFocusManager r1;
+        java.beans.PropertyChangeListener r0;
+        java.beans.PropertyChangeSupport $r2, $r3, $r4;
+
+        r1 := @this: java.awt.KeyboardFocusManager;
+
+        r0 := @parameter0: java.beans.PropertyChangeListener;
+
+        if r0 == null goto label6;
+
+        entermonitor r1;
+
+     label1:
+        $r2 = r1.<java.awt.KeyboardFocusManager: java.beans.PropertyChangeSupport changeSupport>;
+
+        if $r2 != null goto label2;
+
+        $r4 = new java.beans.PropertyChangeSupport;
+
+        specialinvoke $r4.<java.beans.PropertyChangeSupport: void <init>(java.lang.Object)>(r1);
+
+        r1.<java.awt.KeyboardFocusManager: java.beans.PropertyChangeSupport changeSupport> = $r4;
+
+     label2:
+        $r3 = r1.<java.awt.KeyboardFocusManager: java.beans.PropertyChangeSupport changeSupport>;
+
+        virtualinvoke $r3.<java.beans.PropertyChangeSupport: void addPropertyChangeListener(java.beans.PropertyChangeListener)>(r0);
+
+        exitmonitor r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor r1;
+
+     label5:
+        throw $r5;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void removePropertyChangeListener(java.beans.PropertyChangeListener)
+    {
+        java.lang.Throwable $r4;
+        java.awt.KeyboardFocusManager r1;
+        java.beans.PropertyChangeListener r0;
+        java.beans.PropertyChangeSupport $r2, $r3;
+
+        r1 := @this: java.awt.KeyboardFocusManager;
+
+        r0 := @parameter0: java.beans.PropertyChangeListener;
+
+        if r0 == null goto label6;
+
+        entermonitor r1;
+
+     label1:
+        $r2 = r1.<java.awt.KeyboardFocusManager: java.beans.PropertyChangeSupport changeSupport>;
+
+        if $r2 == null goto label2;
+
+        $r3 = r1.<java.awt.KeyboardFocusManager: java.beans.PropertyChangeSupport changeSupport>;
+
+        virtualinvoke $r3.<java.beans.PropertyChangeSupport: void removePropertyChangeListener(java.beans.PropertyChangeListener)>(r0);
+
+     label2:
+        exitmonitor r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor r1;
+
+     label5:
+        throw $r4;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public synchronized java.beans.PropertyChangeListener[] getPropertyChangeListeners()
+    {
+        java.awt.KeyboardFocusManager r0;
+        java.beans.PropertyChangeListener[] $r3;
+        java.beans.PropertyChangeSupport $r1, $r2, $r4;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        $r1 = r0.<java.awt.KeyboardFocusManager: java.beans.PropertyChangeSupport changeSupport>;
+
+        if $r1 != null goto label1;
+
+        $r4 = new java.beans.PropertyChangeSupport;
+
+        specialinvoke $r4.<java.beans.PropertyChangeSupport: void <init>(java.lang.Object)>(r0);
+
+        r0.<java.awt.KeyboardFocusManager: java.beans.PropertyChangeSupport changeSupport> = $r4;
+
+     label1:
+        $r2 = r0.<java.awt.KeyboardFocusManager: java.beans.PropertyChangeSupport changeSupport>;
+
+        $r3 = virtualinvoke $r2.<java.beans.PropertyChangeSupport: java.beans.PropertyChangeListener[] getPropertyChangeListeners()>();
+
+        return $r3;
+    }
+
+    public void addPropertyChangeListener(java.lang.String, java.beans.PropertyChangeListener)
+    {
+        java.lang.Throwable $r6;
+        java.awt.KeyboardFocusManager r1;
+        java.beans.PropertyChangeListener r0;
+        java.beans.PropertyChangeSupport $r2, $r4, $r5;
+        java.lang.String r3;
+
+        r1 := @this: java.awt.KeyboardFocusManager;
+
+        r3 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.beans.PropertyChangeListener;
+
+        if r0 == null goto label6;
+
+        entermonitor r1;
+
+     label1:
+        $r2 = r1.<java.awt.KeyboardFocusManager: java.beans.PropertyChangeSupport changeSupport>;
+
+        if $r2 != null goto label2;
+
+        $r5 = new java.beans.PropertyChangeSupport;
+
+        specialinvoke $r5.<java.beans.PropertyChangeSupport: void <init>(java.lang.Object)>(r1);
+
+        r1.<java.awt.KeyboardFocusManager: java.beans.PropertyChangeSupport changeSupport> = $r5;
+
+     label2:
+        $r4 = r1.<java.awt.KeyboardFocusManager: java.beans.PropertyChangeSupport changeSupport>;
+
+        virtualinvoke $r4.<java.beans.PropertyChangeSupport: void addPropertyChangeListener(java.lang.String,java.beans.PropertyChangeListener)>(r3, r0);
+
+        exitmonitor r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r6 := @caughtexception;
+
+        exitmonitor r1;
+
+     label5:
+        throw $r6;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void removePropertyChangeListener(java.lang.String, java.beans.PropertyChangeListener)
+    {
+        java.lang.Throwable $r5;
+        java.awt.KeyboardFocusManager r1;
+        java.beans.PropertyChangeListener r0;
+        java.beans.PropertyChangeSupport $r2, $r4;
+        java.lang.String r3;
+
+        r1 := @this: java.awt.KeyboardFocusManager;
+
+        r3 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.beans.PropertyChangeListener;
+
+        if r0 == null goto label6;
+
+        entermonitor r1;
+
+     label1:
+        $r2 = r1.<java.awt.KeyboardFocusManager: java.beans.PropertyChangeSupport changeSupport>;
+
+        if $r2 == null goto label2;
+
+        $r4 = r1.<java.awt.KeyboardFocusManager: java.beans.PropertyChangeSupport changeSupport>;
+
+        virtualinvoke $r4.<java.beans.PropertyChangeSupport: void removePropertyChangeListener(java.lang.String,java.beans.PropertyChangeListener)>(r3, r0);
+
+     label2:
+        exitmonitor r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor r1;
+
+     label5:
+        throw $r5;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public synchronized java.beans.PropertyChangeListener[] getPropertyChangeListeners(java.lang.String)
+    {
+        java.awt.KeyboardFocusManager r0;
+        java.beans.PropertyChangeListener[] $r4;
+        java.beans.PropertyChangeSupport $r1, $r3, $r5;
+        java.lang.String r2;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = r0.<java.awt.KeyboardFocusManager: java.beans.PropertyChangeSupport changeSupport>;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.beans.PropertyChangeSupport;
+
+        specialinvoke $r5.<java.beans.PropertyChangeSupport: void <init>(java.lang.Object)>(r0);
+
+        r0.<java.awt.KeyboardFocusManager: java.beans.PropertyChangeSupport changeSupport> = $r5;
+
+     label1:
+        $r3 = r0.<java.awt.KeyboardFocusManager: java.beans.PropertyChangeSupport changeSupport>;
+
+        $r4 = virtualinvoke $r3.<java.beans.PropertyChangeSupport: java.beans.PropertyChangeListener[] getPropertyChangeListeners(java.lang.String)>(r2);
+
+        return $r4;
+    }
+
+    protected void firePropertyChange(java.lang.String, java.lang.Object, java.lang.Object)
+    {
+        java.awt.KeyboardFocusManager r2;
+        java.beans.PropertyChangeSupport r3;
+        java.lang.Object r0, r1;
+        java.lang.String r4;
+
+        r2 := @this: java.awt.KeyboardFocusManager;
+
+        r4 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.lang.Object;
+
+        r1 := @parameter2: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        return;
+
+     label1:
+        r3 = r2.<java.awt.KeyboardFocusManager: java.beans.PropertyChangeSupport changeSupport>;
+
+        if r3 == null goto label2;
+
+        virtualinvoke r3.<java.beans.PropertyChangeSupport: void firePropertyChange(java.lang.String,java.lang.Object,java.lang.Object)>(r4, r0, r1);
+
+     label2:
+        return;
+    }
+
+    public void addVetoableChangeListener(java.beans.VetoableChangeListener)
+    {
+        java.lang.Throwable $r5;
+        java.beans.VetoableChangeSupport $r2, $r3, $r4;
+        java.awt.KeyboardFocusManager r1;
+        java.beans.VetoableChangeListener r0;
+
+        r1 := @this: java.awt.KeyboardFocusManager;
+
+        r0 := @parameter0: java.beans.VetoableChangeListener;
+
+        if r0 == null goto label6;
+
+        entermonitor r1;
+
+     label1:
+        $r2 = r1.<java.awt.KeyboardFocusManager: java.beans.VetoableChangeSupport vetoableSupport>;
+
+        if $r2 != null goto label2;
+
+        $r4 = new java.beans.VetoableChangeSupport;
+
+        specialinvoke $r4.<java.beans.VetoableChangeSupport: void <init>(java.lang.Object)>(r1);
+
+        r1.<java.awt.KeyboardFocusManager: java.beans.VetoableChangeSupport vetoableSupport> = $r4;
+
+     label2:
+        $r3 = r1.<java.awt.KeyboardFocusManager: java.beans.VetoableChangeSupport vetoableSupport>;
+
+        virtualinvoke $r3.<java.beans.VetoableChangeSupport: void addVetoableChangeListener(java.beans.VetoableChangeListener)>(r0);
+
+        exitmonitor r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor r1;
+
+     label5:
+        throw $r5;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void removeVetoableChangeListener(java.beans.VetoableChangeListener)
+    {
+        java.lang.Throwable $r4;
+        java.beans.VetoableChangeSupport $r2, $r3;
+        java.awt.KeyboardFocusManager r1;
+        java.beans.VetoableChangeListener r0;
+
+        r1 := @this: java.awt.KeyboardFocusManager;
+
+        r0 := @parameter0: java.beans.VetoableChangeListener;
+
+        if r0 == null goto label6;
+
+        entermonitor r1;
+
+     label1:
+        $r2 = r1.<java.awt.KeyboardFocusManager: java.beans.VetoableChangeSupport vetoableSupport>;
+
+        if $r2 == null goto label2;
+
+        $r3 = r1.<java.awt.KeyboardFocusManager: java.beans.VetoableChangeSupport vetoableSupport>;
+
+        virtualinvoke $r3.<java.beans.VetoableChangeSupport: void removeVetoableChangeListener(java.beans.VetoableChangeListener)>(r0);
+
+     label2:
+        exitmonitor r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor r1;
+
+     label5:
+        throw $r4;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public synchronized java.beans.VetoableChangeListener[] getVetoableChangeListeners()
+    {
+        java.beans.VetoableChangeSupport $r1, $r2, $r4;
+        java.awt.KeyboardFocusManager r0;
+        java.beans.VetoableChangeListener[] $r3;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        $r1 = r0.<java.awt.KeyboardFocusManager: java.beans.VetoableChangeSupport vetoableSupport>;
+
+        if $r1 != null goto label1;
+
+        $r4 = new java.beans.VetoableChangeSupport;
+
+        specialinvoke $r4.<java.beans.VetoableChangeSupport: void <init>(java.lang.Object)>(r0);
+
+        r0.<java.awt.KeyboardFocusManager: java.beans.VetoableChangeSupport vetoableSupport> = $r4;
+
+     label1:
+        $r2 = r0.<java.awt.KeyboardFocusManager: java.beans.VetoableChangeSupport vetoableSupport>;
+
+        $r3 = virtualinvoke $r2.<java.beans.VetoableChangeSupport: java.beans.VetoableChangeListener[] getVetoableChangeListeners()>();
+
+        return $r3;
+    }
+
+    public void addVetoableChangeListener(java.lang.String, java.beans.VetoableChangeListener)
+    {
+        java.lang.Throwable $r6;
+        java.beans.VetoableChangeSupport $r2, $r4, $r5;
+        java.awt.KeyboardFocusManager r1;
+        java.beans.VetoableChangeListener r0;
+        java.lang.String r3;
+
+        r1 := @this: java.awt.KeyboardFocusManager;
+
+        r3 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.beans.VetoableChangeListener;
+
+        if r0 == null goto label6;
+
+        entermonitor r1;
+
+     label1:
+        $r2 = r1.<java.awt.KeyboardFocusManager: java.beans.VetoableChangeSupport vetoableSupport>;
+
+        if $r2 != null goto label2;
+
+        $r5 = new java.beans.VetoableChangeSupport;
+
+        specialinvoke $r5.<java.beans.VetoableChangeSupport: void <init>(java.lang.Object)>(r1);
+
+        r1.<java.awt.KeyboardFocusManager: java.beans.VetoableChangeSupport vetoableSupport> = $r5;
+
+     label2:
+        $r4 = r1.<java.awt.KeyboardFocusManager: java.beans.VetoableChangeSupport vetoableSupport>;
+
+        virtualinvoke $r4.<java.beans.VetoableChangeSupport: void addVetoableChangeListener(java.lang.String,java.beans.VetoableChangeListener)>(r3, r0);
+
+        exitmonitor r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r6 := @caughtexception;
+
+        exitmonitor r1;
+
+     label5:
+        throw $r6;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void removeVetoableChangeListener(java.lang.String, java.beans.VetoableChangeListener)
+    {
+        java.lang.Throwable $r5;
+        java.beans.VetoableChangeSupport $r2, $r4;
+        java.awt.KeyboardFocusManager r1;
+        java.beans.VetoableChangeListener r0;
+        java.lang.String r3;
+
+        r1 := @this: java.awt.KeyboardFocusManager;
+
+        r3 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.beans.VetoableChangeListener;
+
+        if r0 == null goto label6;
+
+        entermonitor r1;
+
+     label1:
+        $r2 = r1.<java.awt.KeyboardFocusManager: java.beans.VetoableChangeSupport vetoableSupport>;
+
+        if $r2 == null goto label2;
+
+        $r4 = r1.<java.awt.KeyboardFocusManager: java.beans.VetoableChangeSupport vetoableSupport>;
+
+        virtualinvoke $r4.<java.beans.VetoableChangeSupport: void removeVetoableChangeListener(java.lang.String,java.beans.VetoableChangeListener)>(r3, r0);
+
+     label2:
+        exitmonitor r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor r1;
+
+     label5:
+        throw $r5;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public synchronized java.beans.VetoableChangeListener[] getVetoableChangeListeners(java.lang.String)
+    {
+        java.beans.VetoableChangeSupport $r1, $r3, $r5;
+        java.awt.KeyboardFocusManager r0;
+        java.beans.VetoableChangeListener[] $r4;
+        java.lang.String r2;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = r0.<java.awt.KeyboardFocusManager: java.beans.VetoableChangeSupport vetoableSupport>;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.beans.VetoableChangeSupport;
+
+        specialinvoke $r5.<java.beans.VetoableChangeSupport: void <init>(java.lang.Object)>(r0);
+
+        r0.<java.awt.KeyboardFocusManager: java.beans.VetoableChangeSupport vetoableSupport> = $r5;
+
+     label1:
+        $r3 = r0.<java.awt.KeyboardFocusManager: java.beans.VetoableChangeSupport vetoableSupport>;
+
+        $r4 = virtualinvoke $r3.<java.beans.VetoableChangeSupport: java.beans.VetoableChangeListener[] getVetoableChangeListeners(java.lang.String)>(r2);
+
+        return $r4;
+    }
+
+    protected void fireVetoableChange(java.lang.String, java.lang.Object, java.lang.Object) throws java.beans.PropertyVetoException
+    {
+        java.beans.VetoableChangeSupport r3;
+        java.awt.KeyboardFocusManager r2;
+        java.lang.Object r0, r1;
+        java.lang.String r4;
+
+        r2 := @this: java.awt.KeyboardFocusManager;
+
+        r4 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.lang.Object;
+
+        r1 := @parameter2: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        return;
+
+     label1:
+        r3 = r2.<java.awt.KeyboardFocusManager: java.beans.VetoableChangeSupport vetoableSupport>;
+
+        if r3 == null goto label2;
+
+        virtualinvoke r3.<java.beans.VetoableChangeSupport: void fireVetoableChange(java.lang.String,java.lang.Object,java.lang.Object)>(r4, r0, r1);
+
+     label2:
+        return;
+    }
+
+    public void addKeyEventDispatcher(java.awt.KeyEventDispatcher)
+    {
+        java.lang.Throwable $r5;
+        java.awt.KeyboardFocusManager r1;
+        java.awt.KeyEventDispatcher r0;
+        java.util.LinkedList $r2, $r3, $r4;
+
+        r1 := @this: java.awt.KeyboardFocusManager;
+
+        r0 := @parameter0: java.awt.KeyEventDispatcher;
+
+        if r0 == null goto label6;
+
+        entermonitor r1;
+
+     label1:
+        $r2 = r1.<java.awt.KeyboardFocusManager: java.util.LinkedList keyEventDispatchers>;
+
+        if $r2 != null goto label2;
+
+        $r4 = new java.util.LinkedList;
+
+        specialinvoke $r4.<java.util.LinkedList: void <init>()>();
+
+        r1.<java.awt.KeyboardFocusManager: java.util.LinkedList keyEventDispatchers> = $r4;
+
+     label2:
+        $r3 = r1.<java.awt.KeyboardFocusManager: java.util.LinkedList keyEventDispatchers>;
+
+        virtualinvoke $r3.<java.util.LinkedList: boolean add(java.lang.Object)>(r0);
+
+        exitmonitor r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor r1;
+
+     label5:
+        throw $r5;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void removeKeyEventDispatcher(java.awt.KeyEventDispatcher)
+    {
+        java.lang.Throwable $r4;
+        java.awt.KeyboardFocusManager r1;
+        java.awt.KeyEventDispatcher r0;
+        java.util.LinkedList $r2, $r3;
+
+        r1 := @this: java.awt.KeyboardFocusManager;
+
+        r0 := @parameter0: java.awt.KeyEventDispatcher;
+
+        if r0 == null goto label6;
+
+        entermonitor r1;
+
+     label1:
+        $r2 = r1.<java.awt.KeyboardFocusManager: java.util.LinkedList keyEventDispatchers>;
+
+        if $r2 == null goto label2;
+
+        $r3 = r1.<java.awt.KeyboardFocusManager: java.util.LinkedList keyEventDispatchers>;
+
+        virtualinvoke $r3.<java.util.LinkedList: boolean remove(java.lang.Object)>(r0);
+
+     label2:
+        exitmonitor r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor r1;
+
+     label5:
+        throw $r4;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    protected synchronized java.util.List getKeyEventDispatchers()
+    {
+        java.util.List $r4;
+        java.awt.KeyboardFocusManager r0;
+        java.lang.Object $r3;
+        java.util.LinkedList $r1, $r2;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        $r1 = r0.<java.awt.KeyboardFocusManager: java.util.LinkedList keyEventDispatchers>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<java.awt.KeyboardFocusManager: java.util.LinkedList keyEventDispatchers>;
+
+        $r3 = virtualinvoke $r2.<java.util.LinkedList: java.lang.Object clone()>();
+
+        $r4 = (java.util.List) $r3;
+
+        goto label2;
+
+     label1:
+        $r4 = null;
+
+     label2:
+        return $r4;
+    }
+
+    public void addKeyEventPostProcessor(java.awt.KeyEventPostProcessor)
+    {
+        java.awt.KeyEventPostProcessor r0;
+        java.lang.Throwable $r5;
+        java.awt.KeyboardFocusManager r1;
+        java.util.LinkedList $r2, $r3, $r4;
+
+        r1 := @this: java.awt.KeyboardFocusManager;
+
+        r0 := @parameter0: java.awt.KeyEventPostProcessor;
+
+        if r0 == null goto label6;
+
+        entermonitor r1;
+
+     label1:
+        $r2 = r1.<java.awt.KeyboardFocusManager: java.util.LinkedList keyEventPostProcessors>;
+
+        if $r2 != null goto label2;
+
+        $r4 = new java.util.LinkedList;
+
+        specialinvoke $r4.<java.util.LinkedList: void <init>()>();
+
+        r1.<java.awt.KeyboardFocusManager: java.util.LinkedList keyEventPostProcessors> = $r4;
+
+     label2:
+        $r3 = r1.<java.awt.KeyboardFocusManager: java.util.LinkedList keyEventPostProcessors>;
+
+        virtualinvoke $r3.<java.util.LinkedList: boolean add(java.lang.Object)>(r0);
+
+        exitmonitor r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor r1;
+
+     label5:
+        throw $r5;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void removeKeyEventPostProcessor(java.awt.KeyEventPostProcessor)
+    {
+        java.awt.KeyEventPostProcessor r0;
+        java.lang.Throwable $r4;
+        java.awt.KeyboardFocusManager r1;
+        java.util.LinkedList $r2, $r3;
+
+        r1 := @this: java.awt.KeyboardFocusManager;
+
+        r0 := @parameter0: java.awt.KeyEventPostProcessor;
+
+        if r0 == null goto label6;
+
+        entermonitor r1;
+
+     label1:
+        $r2 = r1.<java.awt.KeyboardFocusManager: java.util.LinkedList keyEventPostProcessors>;
+
+        if $r2 == null goto label2;
+
+        $r3 = r1.<java.awt.KeyboardFocusManager: java.util.LinkedList keyEventPostProcessors>;
+
+        virtualinvoke $r3.<java.util.LinkedList: boolean remove(java.lang.Object)>(r0);
+
+     label2:
+        exitmonitor r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor r1;
+
+     label5:
+        throw $r4;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    protected java.util.List getKeyEventPostProcessors()
+    {
+        java.util.List $r4;
+        java.awt.KeyboardFocusManager r0;
+        java.lang.Object $r3;
+        java.util.LinkedList $r1, $r2;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        $r1 = r0.<java.awt.KeyboardFocusManager: java.util.LinkedList keyEventPostProcessors>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<java.awt.KeyboardFocusManager: java.util.LinkedList keyEventPostProcessors>;
+
+        $r3 = virtualinvoke $r2.<java.util.LinkedList: java.lang.Object clone()>();
+
+        $r4 = (java.util.List) $r3;
+
+        goto label2;
+
+     label1:
+        $r4 = null;
+
+     label2:
+        return $r4;
+    }
+
+    static void setMostRecentFocusOwner(java.awt.Component)
+    {
+        java.awt.Window $r1;
+        java.awt.Component r0, r2;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.Component;
+
+        r2 = r0;
+
+     label1:
+        if r2 == null goto label2;
+
+        $z0 = r2 instanceof java.awt.Window;
+
+        if $z0 != 0 goto label2;
+
+        r2 = r2.<java.awt.Component: java.awt.Container parent>;
+
+        goto label1;
+
+     label2:
+        if r2 == null goto label3;
+
+        $r1 = (java.awt.Window) r2;
+
+        staticinvoke <java.awt.KeyboardFocusManager: void setMostRecentFocusOwner(java.awt.Window,java.awt.Component)>($r1, r0);
+
+     label3:
+        return;
+    }
+
+    static synchronized void setMostRecentFocusOwner(java.awt.Window, java.awt.Component)
+    {
+        java.awt.Window r1;
+        java.util.Map $r2;
+        java.lang.ref.WeakReference $r3, r4;
+        java.awt.Component r0;
+
+        r1 := @parameter0: java.awt.Window;
+
+        r0 := @parameter1: java.awt.Component;
+
+        r4 = null;
+
+        if r0 == null goto label1;
+
+        $r3 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r3.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>(r0);
+
+        r4 = $r3;
+
+     label1:
+        $r2 = <java.awt.KeyboardFocusManager: java.util.Map mostRecentFocusOwners>;
+
+        interfaceinvoke $r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, r4);
+
+        return;
+    }
+
+    static void clearMostRecentFocusOwner(java.awt.Component)
+    {
+        java.lang.Throwable $r6, $r7;
+        java.awt.Window $r3, $r5, r9;
+        java.awt.Component r0, $r2, $r4;
+        java.lang.Object $r1;
+        java.awt.Container r8;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.Component;
+
+        if r0 != null goto label01;
+
+        return;
+
+     label01:
+        $r1 = virtualinvoke r0.<java.awt.Component: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label02:
+        r8 = virtualinvoke r0.<java.awt.Component: java.awt.Container getParent()>();
+
+     label03:
+        if r8 == null goto label04;
+
+        $z0 = r8 instanceof java.awt.Window;
+
+        if $z0 != 0 goto label04;
+
+        r8 = virtualinvoke r8.<java.awt.Container: java.awt.Container getParent()>();
+
+        goto label03;
+
+     label04:
+        exitmonitor $r1;
+
+     label05:
+        goto label08;
+
+     label06:
+        $r7 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label07:
+        throw $r7;
+
+     label08:
+        entermonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label09:
+        if r8 == null goto label10;
+
+        $r3 = (java.awt.Window) r8;
+
+        $r4 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.Component getMostRecentFocusOwner(java.awt.Window)>($r3);
+
+        if $r4 != r0 goto label10;
+
+        $r5 = (java.awt.Window) r8;
+
+        staticinvoke <java.awt.KeyboardFocusManager: void setMostRecentFocusOwner(java.awt.Window,java.awt.Component)>($r5, null);
+
+     label10:
+        if r8 == null goto label11;
+
+        r9 = (java.awt.Window) r8;
+
+        $r2 = virtualinvoke r9.<java.awt.Window: java.awt.Component getTemporaryLostComponent()>();
+
+        if $r2 != r0 goto label11;
+
+        virtualinvoke r9.<java.awt.Window: java.awt.Component setTemporaryLostComponent(java.awt.Component)>(null);
+
+     label11:
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label12:
+        goto label15;
+
+     label13:
+        $r6 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/KeyboardFocusManager;";
+
+     label14:
+        throw $r6;
+
+     label15:
+        return;
+
+        catch java.lang.Throwable from label02 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+        catch java.lang.Throwable from label09 to label12 with label13;
+        catch java.lang.Throwable from label13 to label14 with label13;
+    }
+
+    static synchronized java.awt.Component getMostRecentFocusOwner(java.awt.Window)
+    {
+        java.awt.Window r0;
+        java.util.Map $r1;
+        java.lang.Object $r2, $r4;
+        java.lang.ref.WeakReference r3;
+        java.awt.Component $r5;
+
+        r0 := @parameter0: java.awt.Window;
+
+        $r1 = <java.awt.KeyboardFocusManager: java.util.Map mostRecentFocusOwners>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.lang.Object get(java.lang.Object)>(r0);
+
+        r3 = (java.lang.ref.WeakReference) $r2;
+
+        if r3 != null goto label1;
+
+        $r5 = null;
+
+        goto label2;
+
+     label1:
+        $r4 = virtualinvoke r3.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        $r5 = (java.awt.Component) $r4;
+
+     label2:
+        return $r5;
+    }
+
+    public abstract boolean dispatchEvent(java.awt.AWTEvent);
+
+    public final void redispatchEvent(java.awt.Component, java.awt.AWTEvent)
+    {
+        java.awt.AWTEvent r0;
+        java.awt.KeyboardFocusManager r2;
+        java.awt.Component r1;
+
+        r2 := @this: java.awt.KeyboardFocusManager;
+
+        r1 := @parameter0: java.awt.Component;
+
+        r0 := @parameter1: java.awt.AWTEvent;
+
+        r0.<java.awt.AWTEvent: boolean focusManagerIsDispatching> = 1;
+
+        virtualinvoke r1.<java.awt.Component: void dispatchEvent(java.awt.AWTEvent)>(r0);
+
+        r0.<java.awt.AWTEvent: boolean focusManagerIsDispatching> = 0;
+
+        return;
+    }
+
+    public abstract boolean dispatchKeyEvent(java.awt.event.KeyEvent);
+
+    public abstract boolean postProcessKeyEvent(java.awt.event.KeyEvent);
+
+    public abstract void processKeyEvent(java.awt.Component, java.awt.event.KeyEvent);
+
+    protected abstract void enqueueKeyEvents(long, java.awt.Component);
+
+    protected abstract void dequeueKeyEvents(long, java.awt.Component);
+
+    protected abstract void discardKeyEvents(java.awt.Component);
+
+    public abstract void focusNextComponent(java.awt.Component);
+
+    public abstract void focusPreviousComponent(java.awt.Component);
+
+    public abstract void upFocusCycle(java.awt.Component);
+
+    public abstract void downFocusCycle(java.awt.Container);
+
+    public final void focusNextComponent()
+    {
+        java.awt.KeyboardFocusManager r0;
+        java.awt.Component $r1;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        $r1 = virtualinvoke r0.<java.awt.KeyboardFocusManager: java.awt.Component getFocusOwner()>();
+
+        if $r1 == null goto label1;
+
+        virtualinvoke r0.<java.awt.KeyboardFocusManager: void focusNextComponent(java.awt.Component)>($r1);
+
+     label1:
+        return;
+    }
+
+    public final void focusPreviousComponent()
+    {
+        java.awt.KeyboardFocusManager r0;
+        java.awt.Component $r1;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        $r1 = virtualinvoke r0.<java.awt.KeyboardFocusManager: java.awt.Component getFocusOwner()>();
+
+        if $r1 == null goto label1;
+
+        virtualinvoke r0.<java.awt.KeyboardFocusManager: void focusPreviousComponent(java.awt.Component)>($r1);
+
+     label1:
+        return;
+    }
+
+    public final void upFocusCycle()
+    {
+        java.awt.KeyboardFocusManager r0;
+        java.awt.Component $r1;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        $r1 = virtualinvoke r0.<java.awt.KeyboardFocusManager: java.awt.Component getFocusOwner()>();
+
+        if $r1 == null goto label1;
+
+        virtualinvoke r0.<java.awt.KeyboardFocusManager: void upFocusCycle(java.awt.Component)>($r1);
+
+     label1:
+        return;
+    }
+
+    public final void downFocusCycle()
+    {
+        java.awt.KeyboardFocusManager r0;
+        java.awt.Container $r2;
+        java.awt.Component $r1;
+        boolean $z0;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        $r1 = virtualinvoke r0.<java.awt.KeyboardFocusManager: java.awt.Component getFocusOwner()>();
+
+        $z0 = $r1 instanceof java.awt.Container;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = (java.awt.Container) $r1;
+
+        virtualinvoke r0.<java.awt.KeyboardFocusManager: void downFocusCycle(java.awt.Container)>($r2);
+
+     label1:
+        return;
+    }
+
+    void dumpRequests()
+    {
+        java.lang.Throwable $r16;
+        long $l0;
+        java.lang.String $r4, $r15;
+        java.util.LinkedList $r5, $r6;
+        boolean $z0;
+        java.io.PrintStream $r1, $r8, $r12;
+        java.util.Iterator $r7;
+        java.awt.KeyboardFocusManager$HeavyweightFocusRequest r10;
+        java.awt.KeyboardFocusManager r17;
+        java.lang.StringBuilder $r0, $r2, $r3, $r11, $r13, $r14;
+        java.lang.Object $r9;
+
+        r17 := @this: java.awt.KeyboardFocusManager;
+
+        $r1 = <java.lang.System: java.io.PrintStream err>;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">>> Requests dump, time: ");
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>($r4);
+
+        $r5 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        entermonitor $r5;
+
+     label1:
+        $r6 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        $r7 = virtualinvoke $r6.<java.util.LinkedList: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r9 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r10 = (java.awt.KeyboardFocusManager$HeavyweightFocusRequest) $r9;
+
+        $r12 = <java.lang.System: java.io.PrintStream err>;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">>> Req: ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r10);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r12.<java.io.PrintStream: void println(java.lang.String)>($r15);
+
+        goto label2;
+
+     label3:
+        exitmonitor $r5;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r16 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label6:
+        throw $r16;
+
+     label7:
+        $r8 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r8.<java.io.PrintStream: void println(java.lang.String)>("");
+
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    static boolean processSynchronousLightweightTransfer(java.awt.Component, java.awt.Component, boolean, boolean, long)
+    {
+        sun.awt.AppContext $r2;
+        boolean $z0, $z1, $z2, $z3, z4, z5, z6, z7;
+        java.awt.Component r0, $r4, $r10, r19;
+        java.awt.KeyboardFocusManager$HeavyweightFocusRequest $r6, $r11;
+        java.lang.Throwable $r16, $r17, $r18, r22;
+        java.lang.Error $r8;
+        long l0;
+        java.util.LinkedList $r5, $r13;
+        java.awt.Window $r1;
+        java.lang.RuntimeException $r9;
+        sun.awt.CausedFocusEvent$Cause $r12;
+        java.awt.KeyboardFocusManager $r3;
+        java.awt.event.FocusEvent $r14, $r15, r20, r21;
+        java.lang.Object $r7;
+
+        r0 := @parameter0: java.awt.Component;
+
+        r19 := @parameter1: java.awt.Component;
+
+        z4 := @parameter2: boolean;
+
+        z5 := @parameter3: boolean;
+
+        l0 := @parameter4: long;
+
+        $r1 = staticinvoke <sun.awt.SunToolkit: java.awt.Window getContainingWindow(java.awt.Component)>(r0);
+
+        if $r1 == null goto label01;
+
+        $z0 = $r1.<java.awt.Window: boolean syncLWRequests>;
+
+        if $z0 != 0 goto label02;
+
+     label01:
+        return 0;
+
+     label02:
+        if r19 != null goto label03;
+
+        r19 = r0;
+
+     label03:
+        $r2 = staticinvoke <sun.awt.SunToolkit: sun.awt.AppContext targetToAppContext(java.lang.Object)>(r19);
+
+        $r3 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager(sun.awt.AppContext)>($r2);
+
+        r20 = null;
+
+        r21 = null;
+
+        $r4 = virtualinvoke $r3.<java.awt.KeyboardFocusManager: java.awt.Component getGlobalFocusOwner()>();
+
+        $r5 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        entermonitor $r5;
+
+     label04:
+        $r6 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager$HeavyweightFocusRequest getLastHWRequest()>();
+
+        if $r6 != null goto label08;
+
+        $r10 = virtualinvoke $r3.<java.awt.KeyboardFocusManager: java.awt.Component getNativeFocusOwner()>();
+
+        if r0 != $r10 goto label08;
+
+        $z3 = <java.awt.KeyboardFocusManager: boolean allowSyncFocusRequests>;
+
+        if $z3 == 0 goto label08;
+
+        if r19 != $r4 goto label06;
+
+        exitmonitor $r5;
+
+     label05:
+        return 1;
+
+     label06:
+        virtualinvoke $r3.<java.awt.KeyboardFocusManager: void enqueueKeyEvents(long,java.awt.Component)>(l0, r19);
+
+        $r11 = new java.awt.KeyboardFocusManager$HeavyweightFocusRequest;
+
+        $r12 = <sun.awt.CausedFocusEvent$Cause: sun.awt.CausedFocusEvent$Cause UNKNOWN>;
+
+        specialinvoke $r11.<java.awt.KeyboardFocusManager$HeavyweightFocusRequest: void <init>(java.awt.Component,java.awt.Component,boolean,sun.awt.CausedFocusEvent$Cause)>(r0, r19, z4, $r12);
+
+        $r13 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        virtualinvoke $r13.<java.util.LinkedList: boolean add(java.lang.Object)>($r11);
+
+        if $r4 == null goto label07;
+
+        $r15 = new java.awt.event.FocusEvent;
+
+        specialinvoke $r15.<java.awt.event.FocusEvent: void <init>(java.awt.Component,int,boolean,java.awt.Component)>($r4, 1005, z4, r19);
+
+        r20 = $r15;
+
+     label07:
+        $r14 = new java.awt.event.FocusEvent;
+
+        specialinvoke $r14.<java.awt.event.FocusEvent: void <init>(java.awt.Component,int,boolean,java.awt.Component)>(r19, 1004, z4, $r4);
+
+        r21 = $r14;
+
+     label08:
+        exitmonitor $r5;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r18 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label11:
+        throw $r18;
+
+     label12:
+        z6 = 0;
+
+        z7 = <java.awt.KeyboardFocusManager: boolean clearingCurrentLightweightRequests>;
+
+        r22 = null;
+
+     label13:
+        <java.awt.KeyboardFocusManager: boolean clearingCurrentLightweightRequests> = 0;
+
+        $r7 = <java.awt.Component: java.lang.Object LOCK>;
+
+        entermonitor $r7;
+
+     label14:
+        if r20 == null goto label15;
+
+        if $r4 == null goto label15;
+
+        r20.<java.awt.AWTEvent: boolean isPosted> = 1;
+
+        r22 = staticinvoke <java.awt.KeyboardFocusManager: java.lang.Throwable dispatchAndCatchException(java.lang.Throwable,java.awt.Component,java.awt.event.FocusEvent)>(null, $r4, r20);
+
+        z6 = 1;
+
+     label15:
+        if r21 == null goto label16;
+
+        if r19 == null goto label16;
+
+        r21.<java.awt.AWTEvent: boolean isPosted> = 1;
+
+        r22 = staticinvoke <java.awt.KeyboardFocusManager: java.lang.Throwable dispatchAndCatchException(java.lang.Throwable,java.awt.Component,java.awt.event.FocusEvent)>(r22, r19, r21);
+
+        z6 = 1;
+
+     label16:
+        exitmonitor $r7;
+
+     label17:
+        goto label20;
+
+     label18:
+        $r17 := @caughtexception;
+
+        exitmonitor $r7;
+
+     label19:
+        throw $r17;
+
+     label20:
+        <java.awt.KeyboardFocusManager: boolean clearingCurrentLightweightRequests> = z7;
+
+        goto label23;
+
+     label21:
+        $r16 := @caughtexception;
+
+     label22:
+        <java.awt.KeyboardFocusManager: boolean clearingCurrentLightweightRequests> = z7;
+
+        throw $r16;
+
+     label23:
+        $z1 = r22 instanceof java.lang.RuntimeException;
+
+        if $z1 == 0 goto label24;
+
+        $r9 = (java.lang.RuntimeException) r22;
+
+        throw $r9;
+
+     label24:
+        $z2 = r22 instanceof java.lang.Error;
+
+        if $z2 == 0 goto label25;
+
+        $r8 = (java.lang.Error) r22;
+
+        throw $r8;
+
+     label25:
+        return z6;
+
+        catch java.lang.Throwable from label04 to label05 with label10;
+        catch java.lang.Throwable from label06 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+        catch java.lang.Throwable from label14 to label17 with label18;
+        catch java.lang.Throwable from label18 to label19 with label18;
+        catch java.lang.Throwable from label13 to label20 with label21;
+        catch java.lang.Throwable from label21 to label22 with label21;
+    }
+
+    static int shouldNativelyFocusHeavyweight(java.awt.Component, java.awt.Component, boolean, boolean, long, sun.awt.CausedFocusEvent$Cause)
+    {
+        byte $b3;
+        java.awt.Component $r5, $r6, r17, $r38, r84, $r87;
+        java.awt.KeyboardFocusManager$HeavyweightFocusRequest $r13, $r16, $r27, $r49, r85, $r86;
+        sun.awt.CausedFocusEvent $r51, $r58;
+        java.lang.StringBuilder $r22, $r24, $r25, $r30, $r32, $r33, $r41, $r43, $r44, $r45, $r46;
+        java.lang.Throwable $r83;
+        java.lang.Object[] $r55, $r62, $r65, $r68, $r71, $r74, $r77;
+        long l0;
+        java.lang.String $r26, $r34, $r47, $r57, $r64, $r67, $r70, $r73, $r76, $r79, $r80;
+        sun.util.logging.PlatformLogger $r1, $r9, $r11, $r15, $r21, $r23, $r29, $r31, $r40, $r42, $r54, $r56, $r61, $r63, $r66, $r69, $r72, $r75, $r78, $r81, $r82;
+        java.awt.Window $r7, $r48;
+        sun.awt.CausedFocusEvent$Cause r18;
+        java.awt.KeyboardFocusManager $r3, $r4;
+        sun.awt.AppContext $r2, $r52, $r59;
+        boolean $z0, $z1, $z2, $z3, z4, z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12;
+        sun.util.logging.PlatformLogger$Level $r0, $r8, $r10, $r14, $r20, $r28, $r39, $r53, $r60;
+        int $i1, $i2;
+        java.util.LinkedList $r12, $r19, $r35, $r36, $r50;
+        java.lang.Object $r37;
+
+        r17 := @parameter0: java.awt.Component;
+
+        r84 := @parameter1: java.awt.Component;
+
+        z5 := @parameter2: boolean;
+
+        z4 := @parameter3: boolean;
+
+        l0 := @parameter4: long;
+
+        r18 := @parameter5: sun.awt.CausedFocusEvent$Cause;
+
+        $r1 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger log>;
+
+        $r0 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINE>;
+
+        $z0 = virtualinvoke $r1.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r0);
+
+        if $z0 == 0 goto label02;
+
+        if r17 != null goto label01;
+
+        $r82 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger log>;
+
+        virtualinvoke $r82.<sun.util.logging.PlatformLogger: void fine(java.lang.String)>("Assertion (heavyweight != null) failed");
+
+     label01:
+        $b3 = l0 cmp 0L;
+
+        if $b3 != 0 goto label02;
+
+        $r81 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger log>;
+
+        virtualinvoke $r81.<sun.util.logging.PlatformLogger: void fine(java.lang.String)>("Assertion (time != 0) failed");
+
+     label02:
+        if r84 != null goto label03;
+
+        r84 = r17;
+
+     label03:
+        $r2 = staticinvoke <sun.awt.SunToolkit: sun.awt.AppContext targetToAppContext(java.lang.Object)>(r84);
+
+        $r3 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager(sun.awt.AppContext)>($r2);
+
+        $r4 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager()>();
+
+        $r5 = virtualinvoke $r4.<java.awt.KeyboardFocusManager: java.awt.Component getGlobalFocusOwner()>();
+
+        $r6 = virtualinvoke $r4.<java.awt.KeyboardFocusManager: java.awt.Component getNativeFocusOwner()>();
+
+        $r7 = virtualinvoke $r4.<java.awt.KeyboardFocusManager: java.awt.Window getNativeFocusedWindow()>();
+
+        $r9 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r8 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINER>;
+
+        $z1 = virtualinvoke $r9.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r8);
+
+        if $z1 == 0 goto label04;
+
+        $r78 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r77 = newarray (java.lang.Object)[2];
+
+        $r79 = staticinvoke <java.lang.String: java.lang.String valueOf(java.lang.Object)>(r84);
+
+        $r77[0] = $r79;
+
+        $r80 = staticinvoke <java.lang.String: java.lang.String valueOf(java.lang.Object)>(r17);
+
+        $r77[1] = $r80;
+
+        virtualinvoke $r78.<sun.util.logging.PlatformLogger: void finer(java.lang.String,java.lang.Object[])>("SNFH for {0} in {1}", $r77);
+
+     label04:
+        $r11 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r10 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINEST>;
+
+        $z2 = virtualinvoke $r11.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r10);
+
+        if $z2 == 0 goto label05;
+
+        $r69 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r68 = newarray (java.lang.Object)[1];
+
+        $r70 = staticinvoke <java.lang.String: java.lang.String valueOf(java.lang.Object)>($r5);
+
+        $r68[0] = $r70;
+
+        virtualinvoke $r69.<sun.util.logging.PlatformLogger: void finest(java.lang.String,java.lang.Object[])>("0. Current focus owner {0}", $r68);
+
+        $r72 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r71 = newarray (java.lang.Object)[1];
+
+        $r73 = staticinvoke <java.lang.String: java.lang.String valueOf(java.lang.Object)>($r6);
+
+        $r71[0] = $r73;
+
+        virtualinvoke $r72.<sun.util.logging.PlatformLogger: void finest(java.lang.String,java.lang.Object[])>("0. Native focus owner {0}", $r71);
+
+        $r75 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r74 = newarray (java.lang.Object)[1];
+
+        $r76 = staticinvoke <java.lang.String: java.lang.String valueOf(java.lang.Object)>($r7);
+
+        $r74[0] = $r76;
+
+        virtualinvoke $r75.<sun.util.logging.PlatformLogger: void finest(java.lang.String,java.lang.Object[])>("0. Native focused window {0}", $r74);
+
+     label05:
+        $r12 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        entermonitor $r12;
+
+     label06:
+        $r13 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager$HeavyweightFocusRequest getLastHWRequest()>();
+
+        r85 = $r13;
+
+        $r15 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r14 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINEST>;
+
+        $z3 = virtualinvoke $r15.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r14);
+
+        if $z3 == 0 goto label07;
+
+        $r66 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r65 = newarray (java.lang.Object)[1];
+
+        $r67 = staticinvoke <java.lang.String: java.lang.String valueOf(java.lang.Object)>($r13);
+
+        $r65[0] = $r67;
+
+        virtualinvoke $r66.<sun.util.logging.PlatformLogger: void finest(java.lang.String,java.lang.Object[])>("Request {0}", $r65);
+
+     label07:
+        if $r13 != null goto label14;
+
+        if r17 != $r6 goto label14;
+
+        $r48 = virtualinvoke r17.<java.awt.Component: java.awt.Window getContainingWindow()>();
+
+        if $r48 != $r7 goto label14;
+
+        if r84 != $r5 goto label10;
+
+        $r61 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r60 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINEST>;
+
+        $z12 = virtualinvoke $r61.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r60);
+
+        if $z12 == 0 goto label08;
+
+        $r63 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r62 = newarray (java.lang.Object)[1];
+
+        $r64 = staticinvoke <java.lang.String: java.lang.String valueOf(java.lang.Object)>(r84);
+
+        $r62[0] = $r64;
+
+        virtualinvoke $r63.<sun.util.logging.PlatformLogger: void finest(java.lang.String,java.lang.Object[])>("1. SNFH_FAILURE for {0}", $r62);
+
+     label08:
+        exitmonitor $r12;
+
+     label09:
+        return 0;
+
+     label10:
+        virtualinvoke $r3.<java.awt.KeyboardFocusManager: void enqueueKeyEvents(long,java.awt.Component)>(l0, r84);
+
+        $r49 = new java.awt.KeyboardFocusManager$HeavyweightFocusRequest;
+
+        specialinvoke $r49.<java.awt.KeyboardFocusManager$HeavyweightFocusRequest: void <init>(java.awt.Component,java.awt.Component,boolean,sun.awt.CausedFocusEvent$Cause)>(r17, r84, z5, r18);
+
+        $r50 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        virtualinvoke $r50.<java.util.LinkedList: boolean add(java.lang.Object)>($r49);
+
+        if $r5 == null goto label11;
+
+        $r58 = new sun.awt.CausedFocusEvent;
+
+        specialinvoke $r58.<sun.awt.CausedFocusEvent: void <init>(java.awt.Component,int,boolean,java.awt.Component,sun.awt.CausedFocusEvent$Cause)>($r5, 1005, z5, r84, r18);
+
+        $r59 = $r5.<java.awt.Component: sun.awt.AppContext appContext>;
+
+        staticinvoke <sun.awt.SunToolkit: void postEvent(sun.awt.AppContext,java.awt.AWTEvent)>($r59, $r58);
+
+     label11:
+        $r51 = new sun.awt.CausedFocusEvent;
+
+        specialinvoke $r51.<sun.awt.CausedFocusEvent: void <init>(java.awt.Component,int,boolean,java.awt.Component,sun.awt.CausedFocusEvent$Cause)>(r84, 1004, z5, $r5, r18);
+
+        $r52 = r84.<java.awt.Component: sun.awt.AppContext appContext>;
+
+        staticinvoke <sun.awt.SunToolkit: void postEvent(sun.awt.AppContext,java.awt.AWTEvent)>($r52, $r51);
+
+        $r54 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r53 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINEST>;
+
+        $z11 = virtualinvoke $r54.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r53);
+
+        if $z11 == 0 goto label12;
+
+        $r56 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r55 = newarray (java.lang.Object)[1];
+
+        $r57 = staticinvoke <java.lang.String: java.lang.String valueOf(java.lang.Object)>(r84);
+
+        $r55[0] = $r57;
+
+        virtualinvoke $r56.<sun.util.logging.PlatformLogger: void finest(java.lang.String,java.lang.Object[])>("2. SNFH_HANDLED for {0}", $r55);
+
+     label12:
+        exitmonitor $r12;
+
+     label13:
+        return 1;
+
+     label14:
+        if $r13 == null goto label18;
+
+        $r38 = $r13.<java.awt.KeyboardFocusManager$HeavyweightFocusRequest: java.awt.Component heavyweight>;
+
+        if $r38 != r17 goto label18;
+
+        $z9 = virtualinvoke $r13.<java.awt.KeyboardFocusManager$HeavyweightFocusRequest: boolean addLightweightRequest(java.awt.Component,boolean,sun.awt.CausedFocusEvent$Cause)>(r84, z5, r18);
+
+        if $z9 == 0 goto label15;
+
+        virtualinvoke $r3.<java.awt.KeyboardFocusManager: void enqueueKeyEvents(long,java.awt.Component)>(l0, r84);
+
+     label15:
+        $r40 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r39 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINEST>;
+
+        $z10 = virtualinvoke $r40.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r39);
+
+        if $z10 == 0 goto label16;
+
+        $r42 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r41 = new java.lang.StringBuilder;
+
+        specialinvoke $r41.<java.lang.StringBuilder: void <init>()>();
+
+        $r43 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("3. SNFH_HANDLED for lightweight");
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r84);
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" in ");
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r17);
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r42.<sun.util.logging.PlatformLogger: void finest(java.lang.String)>($r47);
+
+     label16:
+        exitmonitor $r12;
+
+     label17:
+        return 1;
+
+     label18:
+        if z4 != 0 goto label26;
+
+        $r27 = <java.awt.KeyboardFocusManager$HeavyweightFocusRequest: java.awt.KeyboardFocusManager$HeavyweightFocusRequest CLEAR_GLOBAL_FOCUS_OWNER>;
+
+        if $r13 != $r27 goto label21;
+
+        $r35 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        $i1 = virtualinvoke $r35.<java.util.LinkedList: int size()>();
+
+        if $i1 < 2 goto label19;
+
+        $r36 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        $i2 = $i1 - 2;
+
+        $r37 = virtualinvoke $r36.<java.util.LinkedList: java.lang.Object get(int)>($i2);
+
+        $r86 = (java.awt.KeyboardFocusManager$HeavyweightFocusRequest) $r37;
+
+        goto label20;
+
+     label19:
+        $r86 = null;
+
+     label20:
+        r85 = $r86;
+
+     label21:
+        if r85 == null goto label22;
+
+        $r87 = r85.<java.awt.KeyboardFocusManager$HeavyweightFocusRequest: java.awt.Component heavyweight>;
+
+        goto label23;
+
+     label22:
+        $r87 = $r7;
+
+     label23:
+        $z7 = staticinvoke <java.awt.KeyboardFocusManager: boolean focusedWindowChanged(java.awt.Component,java.awt.Component)>(r17, $r87);
+
+        if $z7 == 0 goto label26;
+
+        $r29 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r28 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINEST>;
+
+        $z8 = virtualinvoke $r29.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r28);
+
+        if $z8 == 0 goto label24;
+
+        $r31 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r30 = new java.lang.StringBuilder;
+
+        specialinvoke $r30.<java.lang.StringBuilder: void <init>()>();
+
+        $r32 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("4. SNFH_FAILURE for ");
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r84);
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r31.<sun.util.logging.PlatformLogger: void finest(java.lang.String)>($r34);
+
+     label24:
+        exitmonitor $r12;
+
+     label25:
+        return 0;
+
+     label26:
+        virtualinvoke $r3.<java.awt.KeyboardFocusManager: void enqueueKeyEvents(long,java.awt.Component)>(l0, r84);
+
+        $r19 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        $r16 = new java.awt.KeyboardFocusManager$HeavyweightFocusRequest;
+
+        specialinvoke $r16.<java.awt.KeyboardFocusManager$HeavyweightFocusRequest: void <init>(java.awt.Component,java.awt.Component,boolean,sun.awt.CausedFocusEvent$Cause)>(r17, r84, z5, r18);
+
+        virtualinvoke $r19.<java.util.LinkedList: boolean add(java.lang.Object)>($r16);
+
+        $r21 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r20 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINEST>;
+
+        $z6 = virtualinvoke $r21.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r20);
+
+        if $z6 == 0 goto label27;
+
+        $r23 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("5. SNFH_PROCEED for ");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r84);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r23.<sun.util.logging.PlatformLogger: void finest(java.lang.String)>($r26);
+
+     label27:
+        exitmonitor $r12;
+
+     label28:
+        return 2;
+
+     label29:
+        $r83 := @caughtexception;
+
+        exitmonitor $r12;
+
+     label30:
+        throw $r83;
+
+        catch java.lang.Throwable from label06 to label09 with label29;
+        catch java.lang.Throwable from label10 to label13 with label29;
+        catch java.lang.Throwable from label14 to label17 with label29;
+        catch java.lang.Throwable from label18 to label25 with label29;
+        catch java.lang.Throwable from label26 to label28 with label29;
+        catch java.lang.Throwable from label29 to label30 with label29;
+    }
+
+    static java.awt.Window markClearGlobalFocusOwner()
+    {
+        java.lang.Throwable $r8;
+        java.awt.Window $r1, $r9, $r11;
+        java.awt.Component $r7;
+        java.awt.KeyboardFocusManager$HeavyweightFocusRequest $r3, $r4, $r5;
+        java.awt.KeyboardFocusManager $r0;
+        java.awt.Container r10;
+        java.util.LinkedList $r2, $r6;
+        boolean $z0, $z1;
+
+        $r0 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager()>();
+
+        $r1 = virtualinvoke $r0.<java.awt.KeyboardFocusManager: java.awt.Window getNativeFocusedWindow()>();
+
+        $r2 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        entermonitor $r2;
+
+     label01:
+        $r3 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager$HeavyweightFocusRequest getLastHWRequest()>();
+
+        $r4 = <java.awt.KeyboardFocusManager$HeavyweightFocusRequest: java.awt.KeyboardFocusManager$HeavyweightFocusRequest CLEAR_GLOBAL_FOCUS_OWNER>;
+
+        if $r3 != $r4 goto label03;
+
+        exitmonitor $r2;
+
+     label02:
+        return null;
+
+     label03:
+        $r6 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        $r5 = <java.awt.KeyboardFocusManager$HeavyweightFocusRequest: java.awt.KeyboardFocusManager$HeavyweightFocusRequest CLEAR_GLOBAL_FOCUS_OWNER>;
+
+        virtualinvoke $r6.<java.util.LinkedList: boolean add(java.lang.Object)>($r5);
+
+        if $r3 == null goto label04;
+
+        $r7 = $r3.<java.awt.KeyboardFocusManager$HeavyweightFocusRequest: java.awt.Component heavyweight>;
+
+        $r9 = staticinvoke <sun.awt.SunToolkit: java.awt.Window getContainingWindow(java.awt.Component)>($r7);
+
+        goto label05;
+
+     label04:
+        $r9 = $r1;
+
+     label05:
+        r10 = $r9;
+
+     label06:
+        if r10 == null goto label07;
+
+        $z0 = r10 instanceof java.awt.Frame;
+
+        if $z0 != 0 goto label07;
+
+        $z1 = r10 instanceof java.awt.Dialog;
+
+        if $z1 != 0 goto label07;
+
+        r10 = virtualinvoke r10.<java.awt.Component: java.awt.Container getParent_NoClientCode()>();
+
+        goto label06;
+
+     label07:
+        $r11 = (java.awt.Window) r10;
+
+        exitmonitor $r2;
+
+     label08:
+        return $r11;
+
+     label09:
+        $r8 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label10:
+        throw $r8;
+
+        catch java.lang.Throwable from label01 to label02 with label09;
+        catch java.lang.Throwable from label03 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    java.awt.Component getCurrentWaitingRequest(java.awt.Component)
+    {
+        java.lang.Throwable $r8;
+        java.awt.Component r2, $r3, $r7;
+        java.awt.KeyboardFocusManager$HeavyweightFocusRequest $r1;
+        java.awt.KeyboardFocusManager r9;
+        java.awt.KeyboardFocusManager$LightweightFocusRequest r6;
+        java.lang.Object $r5;
+        java.util.LinkedList $r0, $r4;
+
+        r9 := @this: java.awt.KeyboardFocusManager;
+
+        r2 := @parameter0: java.awt.Component;
+
+        $r0 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager$HeavyweightFocusRequest getFirstHWRequest()>();
+
+        if $r1 == null goto label3;
+
+        $r3 = $r1.<java.awt.KeyboardFocusManager$HeavyweightFocusRequest: java.awt.Component heavyweight>;
+
+        if $r3 != r2 goto label3;
+
+        $r4 = $r1.<java.awt.KeyboardFocusManager$HeavyweightFocusRequest: java.util.LinkedList lightweightRequests>;
+
+        $r5 = virtualinvoke $r4.<java.util.LinkedList: java.lang.Object getFirst()>();
+
+        r6 = (java.awt.KeyboardFocusManager$LightweightFocusRequest) $r5;
+
+        if r6 == null goto label3;
+
+        $r7 = r6.<java.awt.KeyboardFocusManager$LightweightFocusRequest: java.awt.Component component>;
+
+        exitmonitor $r0;
+
+     label2:
+        return $r7;
+
+     label3:
+        exitmonitor $r0;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r8 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label6:
+        throw $r8;
+
+     label7:
+        return null;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    static boolean isAutoFocusTransferEnabled()
+    {
+        java.lang.Throwable $r3;
+        int $i0;
+        java.util.LinkedList $r0, $r1, $r2;
+        boolean $z0, $z1;
+
+        $r0 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        $i0 = virtualinvoke $r1.<java.util.LinkedList: int size()>();
+
+        if $i0 != 0 goto label2;
+
+        $z0 = <java.awt.KeyboardFocusManager: boolean disableRestoreFocus>;
+
+        if $z0 != 0 goto label2;
+
+        $r2 = <java.awt.KeyboardFocusManager: java.util.LinkedList currentLightweightRequests>;
+
+        if null != $r2 goto label2;
+
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        exitmonitor $r0;
+
+     label4:
+        return $z1;
+
+     label5:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label6:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    static boolean isAutoFocusTransferEnabledFor(java.awt.Component)
+    {
+        java.awt.Component r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @parameter0: java.awt.Component;
+
+        $z0 = staticinvoke <java.awt.KeyboardFocusManager: boolean isAutoFocusTransferEnabled()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = virtualinvoke r0.<java.awt.Component: boolean isAutoFocusTransferOnDisposal()>();
+
+        if $z1 == 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+    }
+
+    private static java.lang.Throwable dispatchAndCatchException(java.lang.Throwable, java.awt.Component, java.awt.event.FocusEvent)
+    {
+        java.lang.Throwable r2, r5;
+        java.awt.event.FocusEvent r1;
+        java.lang.Error $r3;
+        java.lang.RuntimeException $r4;
+        java.awt.Component r0;
+
+        r2 := @parameter0: java.lang.Throwable;
+
+        r0 := @parameter1: java.awt.Component;
+
+        r1 := @parameter2: java.awt.event.FocusEvent;
+
+        r5 = null;
+
+     label1:
+        virtualinvoke r0.<java.awt.Component: void dispatchEvent(java.awt.AWTEvent)>(r1);
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        r5 = $r4;
+
+        goto label5;
+
+     label4:
+        $r3 := @caughtexception;
+
+        r5 = $r3;
+
+     label5:
+        if r5 == null goto label7;
+
+        if r2 == null goto label6;
+
+        staticinvoke <java.awt.KeyboardFocusManager: void handleException(java.lang.Throwable)>(r2);
+
+     label6:
+        return r5;
+
+     label7:
+        return r2;
+
+        catch java.lang.RuntimeException from label1 to label2 with label3;
+        catch java.lang.Error from label1 to label2 with label4;
+    }
+
+    private static void handleException(java.lang.Throwable)
+    {
+        java.lang.Throwable r0;
+
+        r0 := @parameter0: java.lang.Throwable;
+
+        virtualinvoke r0.<java.lang.Throwable: void printStackTrace()>();
+
+        return;
+    }
+
+    static void processCurrentLightweightRequests()
+    {
+        sun.awt.AppContext $r19, $r20;
+        java.awt.KeyboardFocusManager$LightweightFocusRequest r9;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.awt.Component $r1, $r7, $r12, $r13, $r14, $r15, $r18, r25, $r27;
+        sun.awt.CausedFocusEvent $r10, $r16, r26;
+        java.lang.Throwable $r21, $r22, r24;
+        java.lang.Error $r4;
+        int $i0;
+        java.util.LinkedList $r2, $r3, r23;
+        java.util.Iterator $r6;
+        java.lang.RuntimeException $r5;
+        sun.awt.CausedFocusEvent$Cause $r11, $r17;
+        java.awt.KeyboardFocusManager $r0;
+        java.lang.Object $r8;
+
+        $r0 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager()>();
+
+        $r1 = virtualinvoke $r0.<java.awt.KeyboardFocusManager: java.awt.Component getGlobalFocusOwner()>();
+
+        if $r1 == null goto label01;
+
+        $r19 = $r1.<java.awt.Component: sun.awt.AppContext appContext>;
+
+        $r20 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        if $r19 == $r20 goto label01;
+
+        return;
+
+     label01:
+        $r2 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        entermonitor $r2;
+
+     label02:
+        $r3 = <java.awt.KeyboardFocusManager: java.util.LinkedList currentLightweightRequests>;
+
+        if $r3 == null goto label05;
+
+        <java.awt.KeyboardFocusManager: boolean clearingCurrentLightweightRequests> = 1;
+
+        <java.awt.KeyboardFocusManager: boolean disableRestoreFocus> = 1;
+
+        r23 = <java.awt.KeyboardFocusManager: java.util.LinkedList currentLightweightRequests>;
+
+        $i0 = virtualinvoke r23.<java.util.LinkedList: int size()>();
+
+        if $i0 >= 2 goto label03;
+
+        $z6 = 1;
+
+        goto label04;
+
+     label03:
+        $z6 = 0;
+
+     label04:
+        <java.awt.KeyboardFocusManager: boolean allowSyncFocusRequests> = $z6;
+
+        <java.awt.KeyboardFocusManager: java.util.LinkedList currentLightweightRequests> = null;
+
+        goto label07;
+
+     label05:
+        exitmonitor $r2;
+
+     label06:
+        return;
+
+     label07:
+        exitmonitor $r2;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r22 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label10:
+        throw $r22;
+
+     label11:
+        r24 = null;
+
+     label12:
+        if r23 == null goto label20;
+
+        r25 = null;
+
+        $r6 = virtualinvoke r23.<java.util.LinkedList: java.util.Iterator iterator()>();
+
+     label13:
+        $z2 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label20;
+
+        $r7 = virtualinvoke $r0.<java.awt.KeyboardFocusManager: java.awt.Component getGlobalFocusOwner()>();
+
+        $r8 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (java.awt.KeyboardFocusManager$LightweightFocusRequest) $r8;
+
+        $z3 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 != 0 goto label14;
+
+        <java.awt.KeyboardFocusManager: boolean disableRestoreFocus> = 0;
+
+     label14:
+        r26 = null;
+
+        if $r7 == null goto label15;
+
+        $r16 = new sun.awt.CausedFocusEvent;
+
+        $z5 = r9.<java.awt.KeyboardFocusManager$LightweightFocusRequest: boolean temporary>;
+
+        $r18 = r9.<java.awt.KeyboardFocusManager$LightweightFocusRequest: java.awt.Component component>;
+
+        $r17 = r9.<java.awt.KeyboardFocusManager$LightweightFocusRequest: sun.awt.CausedFocusEvent$Cause cause>;
+
+        specialinvoke $r16.<sun.awt.CausedFocusEvent: void <init>(java.awt.Component,int,boolean,java.awt.Component,sun.awt.CausedFocusEvent$Cause)>($r7, 1005, $z5, $r18, $r17);
+
+        r26 = $r16;
+
+     label15:
+        $r10 = new sun.awt.CausedFocusEvent;
+
+        $r12 = r9.<java.awt.KeyboardFocusManager$LightweightFocusRequest: java.awt.Component component>;
+
+        $z4 = r9.<java.awt.KeyboardFocusManager$LightweightFocusRequest: boolean temporary>;
+
+        if $r7 != null goto label16;
+
+        $r27 = r25;
+
+        goto label17;
+
+     label16:
+        $r27 = $r7;
+
+     label17:
+        $r11 = r9.<java.awt.KeyboardFocusManager$LightweightFocusRequest: sun.awt.CausedFocusEvent$Cause cause>;
+
+        specialinvoke $r10.<sun.awt.CausedFocusEvent: void <init>(java.awt.Component,int,boolean,java.awt.Component,sun.awt.CausedFocusEvent$Cause)>($r12, 1004, $z4, $r27, $r11);
+
+        if $r7 == null goto label18;
+
+        r26.<java.awt.AWTEvent: boolean isPosted> = 1;
+
+        r24 = staticinvoke <java.awt.KeyboardFocusManager: java.lang.Throwable dispatchAndCatchException(java.lang.Throwable,java.awt.Component,java.awt.event.FocusEvent)>(r24, $r7, r26);
+
+     label18:
+        $r10.<java.awt.AWTEvent: boolean isPosted> = 1;
+
+        $r13 = r9.<java.awt.KeyboardFocusManager$LightweightFocusRequest: java.awt.Component component>;
+
+        r24 = staticinvoke <java.awt.KeyboardFocusManager: java.lang.Throwable dispatchAndCatchException(java.lang.Throwable,java.awt.Component,java.awt.event.FocusEvent)>(r24, $r13, $r10);
+
+        $r14 = virtualinvoke $r0.<java.awt.KeyboardFocusManager: java.awt.Component getGlobalFocusOwner()>();
+
+        $r15 = r9.<java.awt.KeyboardFocusManager$LightweightFocusRequest: java.awt.Component component>;
+
+        if $r14 != $r15 goto label19;
+
+        r25 = r9.<java.awt.KeyboardFocusManager$LightweightFocusRequest: java.awt.Component component>;
+
+     label19:
+        goto label13;
+
+     label20:
+        <java.awt.KeyboardFocusManager: boolean clearingCurrentLightweightRequests> = 0;
+
+        <java.awt.KeyboardFocusManager: boolean disableRestoreFocus> = 0;
+
+        <java.awt.KeyboardFocusManager: boolean allowSyncFocusRequests> = 1;
+
+        goto label23;
+
+     label21:
+        $r21 := @caughtexception;
+
+     label22:
+        <java.awt.KeyboardFocusManager: boolean clearingCurrentLightweightRequests> = 0;
+
+        <java.awt.KeyboardFocusManager: boolean disableRestoreFocus> = 0;
+
+        <java.awt.KeyboardFocusManager: boolean allowSyncFocusRequests> = 1;
+
+        throw $r21;
+
+     label23:
+        $z0 = r24 instanceof java.lang.RuntimeException;
+
+        if $z0 == 0 goto label24;
+
+        $r5 = (java.lang.RuntimeException) r24;
+
+        throw $r5;
+
+     label24:
+        $z1 = r24 instanceof java.lang.Error;
+
+        if $z1 == 0 goto label25;
+
+        $r4 = (java.lang.Error) r24;
+
+        throw $r4;
+
+     label25:
+        return;
+
+        catch java.lang.Throwable from label02 to label06 with label09;
+        catch java.lang.Throwable from label07 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+        catch java.lang.Throwable from label12 to label20 with label21;
+        catch java.lang.Throwable from label21 to label22 with label21;
+    }
+
+    static java.awt.event.FocusEvent retargetUnexpectedFocusEvent(java.awt.event.FocusEvent)
+    {
+        java.lang.Throwable $r6;
+        sun.awt.CausedFocusEvent$Cause $r8;
+        java.awt.Component $r2, $r3;
+        java.awt.AWTEvent $r4;
+        sun.awt.CausedFocusEvent $r7;
+        java.awt.event.FocusEvent r1, $r5;
+        int $i0, $i1;
+        java.util.LinkedList $r0;
+        boolean $z0, $z1, z2;
+
+        r1 := @parameter0: java.awt.event.FocusEvent;
+
+        $r0 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        entermonitor $r0;
+
+     label1:
+        $z0 = staticinvoke <java.awt.KeyboardFocusManager: boolean removeFirstRequest()>();
+
+        if $z0 == 0 goto label3;
+
+        $r4 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.AWTEvent retargetFocusEvent(java.awt.AWTEvent)>(r1);
+
+        $r5 = (java.awt.event.FocusEvent) $r4;
+
+        exitmonitor $r0;
+
+     label2:
+        return $r5;
+
+     label3:
+        $r2 = virtualinvoke r1.<java.awt.event.FocusEvent: java.awt.Component getComponent()>();
+
+        $r3 = virtualinvoke r1.<java.awt.event.FocusEvent: java.awt.Component getOppositeComponent()>();
+
+        z2 = 0;
+
+        $i0 = virtualinvoke r1.<java.awt.event.FocusEvent: int getID()>();
+
+        if $i0 != 1005 goto label5;
+
+        if $r3 == null goto label4;
+
+        $z1 = staticinvoke <java.awt.KeyboardFocusManager: boolean isTemporary(java.awt.Component,java.awt.Component)>($r3, $r2);
+
+        if $z1 == 0 goto label5;
+
+     label4:
+        z2 = 1;
+
+     label5:
+        $r7 = new sun.awt.CausedFocusEvent;
+
+        $i1 = virtualinvoke r1.<java.awt.event.FocusEvent: int getID()>();
+
+        $r8 = <sun.awt.CausedFocusEvent$Cause: sun.awt.CausedFocusEvent$Cause NATIVE_SYSTEM>;
+
+        specialinvoke $r7.<sun.awt.CausedFocusEvent: void <init>(java.awt.Component,int,boolean,java.awt.Component,sun.awt.CausedFocusEvent$Cause)>($r2, $i1, z2, $r3, $r8);
+
+        exitmonitor $r0;
+
+     label6:
+        return $r7;
+
+     label7:
+        $r6 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label8:
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label3 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    static java.awt.event.FocusEvent retargetFocusGained(java.awt.event.FocusEvent)
+    {
+        java.awt.KeyboardFocusManager$4 $r23;
+        java.awt.KeyboardFocusManager$LightweightFocusRequest r17, $r24;
+        boolean $z0, z1, $z2, $z3;
+        java.awt.Component $r1, $r3, $r4, $r5, $r12, $r13, r18, $r25, r29, r30;
+        java.awt.KeyboardFocusManager$HeavyweightFocusRequest $r7, $r8;
+        sun.awt.CausedFocusEvent $r10, $r20;
+        java.lang.Throwable $r28;
+        java.lang.AssertionError $r27;
+        int $i0, $i1;
+        java.util.LinkedList $r6, $r14, $r15, $r19, $r22;
+        java.awt.Window $r9;
+        sun.awt.CausedFocusEvent$Cause $r11, $r21;
+        java.awt.KeyboardFocusManager $r0;
+        java.awt.event.FocusEvent r2, $r26, $r31;
+        java.lang.Object $r16;
+
+        r2 := @parameter0: java.awt.event.FocusEvent;
+
+        $z0 = <java.awt.KeyboardFocusManager: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label01;
+
+        $i1 = virtualinvoke r2.<java.awt.event.FocusEvent: int getID()>();
+
+        if $i1 == 1004 goto label01;
+
+        $r27 = new java.lang.AssertionError;
+
+        specialinvoke $r27.<java.lang.AssertionError: void <init>()>();
+
+        throw $r27;
+
+     label01:
+        $r0 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager()>();
+
+        $r1 = virtualinvoke $r0.<java.awt.KeyboardFocusManager: java.awt.Component getGlobalFocusOwner()>();
+
+        $r3 = virtualinvoke r2.<java.awt.event.FocusEvent: java.awt.Component getComponent()>();
+
+        r29 = $r3;
+
+        $r4 = virtualinvoke r2.<java.awt.event.FocusEvent: java.awt.Component getOppositeComponent()>();
+
+        $r5 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.Component getHeavyweight(java.awt.Component)>($r3);
+
+        r30 = $r5;
+
+        $r6 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        entermonitor $r6;
+
+     label02:
+        $r7 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager$HeavyweightFocusRequest getFirstHWRequest()>();
+
+        $r8 = <java.awt.KeyboardFocusManager$HeavyweightFocusRequest: java.awt.KeyboardFocusManager$HeavyweightFocusRequest CLEAR_GLOBAL_FOCUS_OWNER>;
+
+        if $r7 != $r8 goto label04;
+
+        $r26 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.event.FocusEvent retargetUnexpectedFocusEvent(java.awt.event.FocusEvent)>(r2);
+
+        exitmonitor $r6;
+
+     label03:
+        return $r26;
+
+     label04:
+        if $r3 == null goto label05;
+
+        if $r5 != null goto label05;
+
+        if $r7 == null goto label05;
+
+        $r24 = virtualinvoke $r7.<java.awt.KeyboardFocusManager$HeavyweightFocusRequest: java.awt.KeyboardFocusManager$LightweightFocusRequest getFirstLightweightRequest()>();
+
+        $r25 = $r24.<java.awt.KeyboardFocusManager$LightweightFocusRequest: java.awt.Component component>;
+
+        if $r3 != $r25 goto label05;
+
+        r29 = $r7.<java.awt.KeyboardFocusManager$HeavyweightFocusRequest: java.awt.Component heavyweight>;
+
+        r30 = r29;
+
+     label05:
+        if $r7 == null goto label12;
+
+        $r13 = $r7.<java.awt.KeyboardFocusManager$HeavyweightFocusRequest: java.awt.Component heavyweight>;
+
+        if r30 != $r13 goto label12;
+
+        $r14 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        virtualinvoke $r14.<java.util.LinkedList: java.lang.Object removeFirst()>();
+
+        $r15 = $r7.<java.awt.KeyboardFocusManager$HeavyweightFocusRequest: java.util.LinkedList lightweightRequests>;
+
+        $r16 = virtualinvoke $r15.<java.util.LinkedList: java.lang.Object removeFirst()>();
+
+        r17 = (java.awt.KeyboardFocusManager$LightweightFocusRequest) $r16;
+
+        r18 = r17.<java.awt.KeyboardFocusManager$LightweightFocusRequest: java.awt.Component component>;
+
+        if $r1 == null goto label06;
+
+        <java.awt.KeyboardFocusManager: java.awt.Component newFocusOwner> = r18;
+
+     label06:
+        if $r4 == null goto label07;
+
+        $z2 = staticinvoke <java.awt.KeyboardFocusManager: boolean isTemporary(java.awt.Component,java.awt.Component)>(r18, $r4);
+
+        if $z2 == 0 goto label08;
+
+     label07:
+        $z3 = 0;
+
+        goto label09;
+
+     label08:
+        $z3 = r17.<java.awt.KeyboardFocusManager$LightweightFocusRequest: boolean temporary>;
+
+     label09:
+        z1 = $z3;
+
+        $r19 = $r7.<java.awt.KeyboardFocusManager$HeavyweightFocusRequest: java.util.LinkedList lightweightRequests>;
+
+        $i0 = virtualinvoke $r19.<java.util.LinkedList: int size()>();
+
+        if $i0 <= 0 goto label10;
+
+        $r22 = $r7.<java.awt.KeyboardFocusManager$HeavyweightFocusRequest: java.util.LinkedList lightweightRequests>;
+
+        <java.awt.KeyboardFocusManager: java.util.LinkedList currentLightweightRequests> = $r22;
+
+        $r23 = new java.awt.KeyboardFocusManager$4;
+
+        specialinvoke $r23.<java.awt.KeyboardFocusManager$4: void <init>()>();
+
+        staticinvoke <java.awt.EventQueue: void invokeLater(java.lang.Runnable)>($r23);
+
+     label10:
+        $r20 = new sun.awt.CausedFocusEvent;
+
+        $r21 = r17.<java.awt.KeyboardFocusManager$LightweightFocusRequest: sun.awt.CausedFocusEvent$Cause cause>;
+
+        specialinvoke $r20.<sun.awt.CausedFocusEvent: void <init>(java.awt.Component,int,boolean,java.awt.Component,sun.awt.CausedFocusEvent$Cause)>(r18, 1004, z1, $r4, $r21);
+
+        exitmonitor $r6;
+
+     label11:
+        return $r20;
+
+     label12:
+        if $r1 == null goto label15;
+
+        $r9 = virtualinvoke $r1.<java.awt.Component: java.awt.Window getContainingWindow()>();
+
+        if $r9 != r29 goto label15;
+
+        if $r7 == null goto label13;
+
+        $r12 = $r7.<java.awt.KeyboardFocusManager$HeavyweightFocusRequest: java.awt.Component heavyweight>;
+
+        if r29 == $r12 goto label15;
+
+     label13:
+        $r10 = new sun.awt.CausedFocusEvent;
+
+        $r11 = <sun.awt.CausedFocusEvent$Cause: sun.awt.CausedFocusEvent$Cause ACTIVATION>;
+
+        specialinvoke $r10.<sun.awt.CausedFocusEvent: void <init>(java.awt.Component,int,boolean,java.awt.Component,sun.awt.CausedFocusEvent$Cause)>($r1, 1004, 0, null, $r11);
+
+        exitmonitor $r6;
+
+     label14:
+        return $r10;
+
+     label15:
+        $r31 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.event.FocusEvent retargetUnexpectedFocusEvent(java.awt.event.FocusEvent)>(r2);
+
+        exitmonitor $r6;
+
+     label16:
+        return $r31;
+
+     label17:
+        $r28 := @caughtexception;
+
+        exitmonitor $r6;
+
+     label18:
+        throw $r28;
+
+        catch java.lang.Throwable from label02 to label03 with label17;
+        catch java.lang.Throwable from label04 to label11 with label17;
+        catch java.lang.Throwable from label12 to label14 with label17;
+        catch java.lang.Throwable from label15 to label16 with label17;
+        catch java.lang.Throwable from label17 to label18 with label17;
+    }
+
+    static java.awt.event.FocusEvent retargetFocusLost(java.awt.event.FocusEvent)
+    {
+        java.awt.KeyboardFocusManager$LightweightFocusRequest r13, $r17;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.awt.Component $r1, $r2, $r3, $r10, $r16, $r18;
+        java.awt.KeyboardFocusManager$HeavyweightFocusRequest $r5, $r6;
+        sun.awt.CausedFocusEvent $r8, $r14, $r19, $r22;
+        java.lang.Throwable $r25;
+        java.lang.AssertionError $r24;
+        int $i0;
+        java.util.LinkedList $r4, $r11, $r21;
+        sun.awt.CausedFocusEvent$Cause $r9, $r15, $r20, $r23;
+        java.awt.KeyboardFocusManager $r0;
+        java.awt.event.FocusEvent $r7, r26;
+        java.lang.Object $r12;
+
+        r26 := @parameter0: java.awt.event.FocusEvent;
+
+        $z0 = <java.awt.KeyboardFocusManager: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label01;
+
+        $i0 = virtualinvoke r26.<java.awt.event.FocusEvent: int getID()>();
+
+        if $i0 == 1005 goto label01;
+
+        $r24 = new java.lang.AssertionError;
+
+        specialinvoke $r24.<java.lang.AssertionError: void <init>()>();
+
+        throw $r24;
+
+     label01:
+        $r0 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager()>();
+
+        $r1 = virtualinvoke $r0.<java.awt.KeyboardFocusManager: java.awt.Component getGlobalFocusOwner()>();
+
+        $r2 = virtualinvoke r26.<java.awt.event.FocusEvent: java.awt.Component getOppositeComponent()>();
+
+        $r3 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.Component getHeavyweight(java.awt.Component)>($r2);
+
+        $r4 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        entermonitor $r4;
+
+     label02:
+        $r5 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager$HeavyweightFocusRequest getFirstHWRequest()>();
+
+        $r6 = <java.awt.KeyboardFocusManager$HeavyweightFocusRequest: java.awt.KeyboardFocusManager$HeavyweightFocusRequest CLEAR_GLOBAL_FOCUS_OWNER>;
+
+        if $r5 != $r6 goto label04;
+
+        if $r1 == null goto label18;
+
+        $r21 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        virtualinvoke $r21.<java.util.LinkedList: java.lang.Object removeFirst()>();
+
+        $r22 = new sun.awt.CausedFocusEvent;
+
+        $r23 = <sun.awt.CausedFocusEvent$Cause: sun.awt.CausedFocusEvent$Cause CLEAR_GLOBAL_FOCUS_OWNER>;
+
+        specialinvoke $r22.<sun.awt.CausedFocusEvent: void <init>(java.awt.Component,int,boolean,java.awt.Component,sun.awt.CausedFocusEvent$Cause)>($r1, 1005, 0, null, $r23);
+
+        exitmonitor $r4;
+
+     label03:
+        return $r22;
+
+     label04:
+        if $r2 != null goto label08;
+
+        if $r1 == null goto label06;
+
+        $r19 = new sun.awt.CausedFocusEvent;
+
+        $r20 = <sun.awt.CausedFocusEvent$Cause: sun.awt.CausedFocusEvent$Cause ACTIVATION>;
+
+        specialinvoke $r19.<sun.awt.CausedFocusEvent: void <init>(java.awt.Component,int,boolean,java.awt.Component,sun.awt.CausedFocusEvent$Cause)>($r1, 1005, 1, null, $r20);
+
+        exitmonitor $r4;
+
+     label05:
+        return $r19;
+
+     label06:
+        exitmonitor $r4;
+
+     label07:
+        return r26;
+
+     label08:
+        if $r5 == null goto label15;
+
+        $r10 = $r5.<java.awt.KeyboardFocusManager$HeavyweightFocusRequest: java.awt.Component heavyweight>;
+
+        if $r3 == $r10 goto label09;
+
+        if $r3 != null goto label15;
+
+        $r17 = virtualinvoke $r5.<java.awt.KeyboardFocusManager$HeavyweightFocusRequest: java.awt.KeyboardFocusManager$LightweightFocusRequest getFirstLightweightRequest()>();
+
+        $r18 = $r17.<java.awt.KeyboardFocusManager$LightweightFocusRequest: java.awt.Component component>;
+
+        if $r2 != $r18 goto label15;
+
+     label09:
+        if $r1 != null goto label11;
+
+        exitmonitor $r4;
+
+     label10:
+        return r26;
+
+     label11:
+        $r11 = $r5.<java.awt.KeyboardFocusManager$HeavyweightFocusRequest: java.util.LinkedList lightweightRequests>;
+
+        $r12 = virtualinvoke $r11.<java.util.LinkedList: java.lang.Object getFirst()>();
+
+        r13 = (java.awt.KeyboardFocusManager$LightweightFocusRequest) $r12;
+
+        $z2 = staticinvoke <java.awt.KeyboardFocusManager: boolean isTemporary(java.awt.Component,java.awt.Component)>($r2, $r1);
+
+        if $z2 == 0 goto label12;
+
+        $z3 = 1;
+
+        goto label13;
+
+     label12:
+        $z3 = r13.<java.awt.KeyboardFocusManager$LightweightFocusRequest: boolean temporary>;
+
+     label13:
+        $r14 = new sun.awt.CausedFocusEvent;
+
+        $r16 = r13.<java.awt.KeyboardFocusManager$LightweightFocusRequest: java.awt.Component component>;
+
+        $r15 = r13.<java.awt.KeyboardFocusManager$LightweightFocusRequest: sun.awt.CausedFocusEvent$Cause cause>;
+
+        specialinvoke $r14.<sun.awt.CausedFocusEvent: void <init>(java.awt.Component,int,boolean,java.awt.Component,sun.awt.CausedFocusEvent$Cause)>($r1, 1005, $z3, $r16, $r15);
+
+        exitmonitor $r4;
+
+     label14:
+        return $r14;
+
+     label15:
+        $z4 = staticinvoke <java.awt.KeyboardFocusManager: boolean focusedWindowChanged(java.awt.Component,java.awt.Component)>($r2, $r1);
+
+        if $z4 == 0 goto label18;
+
+        $z1 = virtualinvoke r26.<java.awt.event.FocusEvent: boolean isTemporary()>();
+
+        if $z1 != 0 goto label16;
+
+        if $r1 == null goto label16;
+
+        $r8 = new sun.awt.CausedFocusEvent;
+
+        $r9 = <sun.awt.CausedFocusEvent$Cause: sun.awt.CausedFocusEvent$Cause ACTIVATION>;
+
+        specialinvoke $r8.<sun.awt.CausedFocusEvent: void <init>(java.awt.Component,int,boolean,java.awt.Component,sun.awt.CausedFocusEvent$Cause)>($r1, 1005, 1, $r2, $r9);
+
+        r26 = $r8;
+
+     label16:
+        exitmonitor $r4;
+
+     label17:
+        return r26;
+
+     label18:
+        $r7 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.event.FocusEvent retargetUnexpectedFocusEvent(java.awt.event.FocusEvent)>(r26);
+
+        exitmonitor $r4;
+
+     label19:
+        return $r7;
+
+     label20:
+        $r25 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label21:
+        throw $r25;
+
+        catch java.lang.Throwable from label02 to label03 with label20;
+        catch java.lang.Throwable from label04 to label05 with label20;
+        catch java.lang.Throwable from label06 to label07 with label20;
+        catch java.lang.Throwable from label08 to label10 with label20;
+        catch java.lang.Throwable from label11 to label14 with label20;
+        catch java.lang.Throwable from label15 to label17 with label20;
+        catch java.lang.Throwable from label18 to label19 with label20;
+        catch java.lang.Throwable from label20 to label21 with label20;
+    }
+
+    static java.awt.AWTEvent retargetFocusEvent(java.awt.AWTEvent)
+    {
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        sun.util.logging.PlatformLogger$Level $r1, $r23;
+        java.awt.Component $r6, $r7, $r8, $r9, $r15, $r25;
+        java.lang.Throwable $r20;
+        java.lang.Object[] $r10, $r13, $r17;
+        java.awt.AWTEvent r21;
+        int $i0, $i1;
+        java.lang.String $r12, $r16, $r19;
+        java.util.LinkedList $r24;
+        sun.util.logging.PlatformLogger $r2, $r11, $r14, $r18, $r22;
+        java.awt.KeyboardFocusManager $r0;
+        java.awt.event.FocusEvent $r3, $r4, r5;
+
+        r21 := @parameter0: java.awt.AWTEvent;
+
+        $z0 = <java.awt.KeyboardFocusManager: boolean clearingCurrentLightweightRequests>;
+
+        if $z0 == 0 goto label01;
+
+        return r21;
+
+     label01:
+        $r0 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager()>();
+
+        $r2 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r1 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINER>;
+
+        $z1 = virtualinvoke $r2.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r1);
+
+        if $z1 == 0 goto label04;
+
+        $z2 = r21 instanceof java.awt.event.FocusEvent;
+
+        if $z2 != 0 goto label02;
+
+        $z4 = r21 instanceof java.awt.event.WindowEvent;
+
+        if $z4 == 0 goto label03;
+
+     label02:
+        $r11 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r10 = newarray (java.lang.Object)[1];
+
+        $r12 = staticinvoke <java.lang.String: java.lang.String valueOf(java.lang.Object)>(r21);
+
+        $r10[0] = $r12;
+
+        virtualinvoke $r11.<sun.util.logging.PlatformLogger: void finer(java.lang.String,java.lang.Object[])>(">>> {0}", $r10);
+
+     label03:
+        $r22 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r23 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINER>;
+
+        $z5 = virtualinvoke $r22.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r23);
+
+        if $z5 == 0 goto label04;
+
+        $z3 = r21 instanceof java.awt.event.KeyEvent;
+
+        if $z3 == 0 goto label04;
+
+        $r14 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r13 = newarray (java.lang.Object)[1];
+
+        $r15 = virtualinvoke $r0.<java.awt.KeyboardFocusManager: java.awt.Component getGlobalFocusOwner()>();
+
+        $r16 = staticinvoke <java.lang.String: java.lang.String valueOf(java.lang.Object)>($r15);
+
+        $r13[0] = $r16;
+
+        virtualinvoke $r14.<sun.util.logging.PlatformLogger: void finer(java.lang.String,java.lang.Object[])>("    focus owner is {0}", $r13);
+
+        $r18 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog>;
+
+        $r17 = newarray (java.lang.Object)[1];
+
+        $r19 = staticinvoke <java.lang.String: java.lang.String valueOf(java.lang.Object)>(r21);
+
+        $r17[0] = $r19;
+
+        virtualinvoke $r18.<sun.util.logging.PlatformLogger: void finer(java.lang.String,java.lang.Object[])>(">>> {0}", $r17);
+
+     label04:
+        $r24 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        entermonitor $r24;
+
+     label05:
+        $r25 = <java.awt.KeyboardFocusManager: java.awt.Component newFocusOwner>;
+
+        if $r25 == null goto label07;
+
+        $i1 = virtualinvoke r21.<java.awt.AWTEvent: int getID()>();
+
+        if $i1 != 1005 goto label07;
+
+        r5 = (java.awt.event.FocusEvent) r21;
+
+        $r6 = virtualinvoke $r0.<java.awt.KeyboardFocusManager: java.awt.Component getGlobalFocusOwner()>();
+
+        $r7 = virtualinvoke r5.<java.awt.event.FocusEvent: java.awt.Component getComponent()>();
+
+        if $r6 != $r7 goto label07;
+
+        $r8 = virtualinvoke r5.<java.awt.event.FocusEvent: java.awt.Component getOppositeComponent()>();
+
+        $r9 = <java.awt.KeyboardFocusManager: java.awt.Component newFocusOwner>;
+
+        if $r8 != $r9 goto label07;
+
+        <java.awt.KeyboardFocusManager: java.awt.Component newFocusOwner> = null;
+
+        exitmonitor $r24;
+
+     label06:
+        return r21;
+
+     label07:
+        exitmonitor $r24;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r20 := @caughtexception;
+
+        exitmonitor $r24;
+
+     label10:
+        throw $r20;
+
+     label11:
+        staticinvoke <java.awt.KeyboardFocusManager: void processCurrentLightweightRequests()>();
+
+        $i0 = virtualinvoke r21.<java.awt.AWTEvent: int getID()>();
+
+        lookupswitch($i0)
+        {
+            case 1004: goto label12;
+            case 1005: goto label13;
+            default: goto label14;
+        };
+
+     label12:
+        $r4 = (java.awt.event.FocusEvent) r21;
+
+        r21 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.event.FocusEvent retargetFocusGained(java.awt.event.FocusEvent)>($r4);
+
+        goto label14;
+
+     label13:
+        $r3 = (java.awt.event.FocusEvent) r21;
+
+        r21 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.event.FocusEvent retargetFocusLost(java.awt.event.FocusEvent)>($r3);
+
+        goto label14;
+
+     label14:
+        return r21;
+
+        catch java.lang.Throwable from label05 to label06 with label09;
+        catch java.lang.Throwable from label07 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    void clearMarkers()
+    {
+        java.awt.KeyboardFocusManager r0;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        return;
+    }
+
+    static boolean removeFirstRequest()
+    {
+        java.lang.Throwable $r11;
+        int $i0, $i1;
+        java.awt.KeyboardFocusManager$LightweightFocusRequest $r9;
+        java.util.LinkedList $r1, $r3, $r4, $r5, $r6, $r12;
+        boolean $z0, $z1;
+        java.util.Iterator $r7;
+        java.awt.Component $r10;
+        java.awt.KeyboardFocusManager$HeavyweightFocusRequest $r2;
+        java.awt.KeyboardFocusManager $r0;
+        java.lang.Object $r8;
+
+        $r0 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager()>();
+
+        $r1 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager$HeavyweightFocusRequest getFirstHWRequest()>();
+
+        if $r2 == null goto label3;
+
+        $r4 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        virtualinvoke $r4.<java.util.LinkedList: java.lang.Object removeFirst()>();
+
+        $r5 = $r2.<java.awt.KeyboardFocusManager$HeavyweightFocusRequest: java.util.LinkedList lightweightRequests>;
+
+        if $r5 == null goto label3;
+
+        $r6 = $r2.<java.awt.KeyboardFocusManager$HeavyweightFocusRequest: java.util.LinkedList lightweightRequests>;
+
+        $r7 = virtualinvoke $r6.<java.util.LinkedList: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        $r9 = (java.awt.KeyboardFocusManager$LightweightFocusRequest) $r8;
+
+        $r10 = $r9.<java.awt.KeyboardFocusManager$LightweightFocusRequest: java.awt.Component component>;
+
+        virtualinvoke $r0.<java.awt.KeyboardFocusManager: void dequeueKeyEvents(long,java.awt.Component)>(-1L, $r10);
+
+        goto label2;
+
+     label3:
+        $r12 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        $i1 = virtualinvoke $r12.<java.util.LinkedList: int size()>();
+
+        if $i1 != 0 goto label4;
+
+        virtualinvoke $r0.<java.awt.KeyboardFocusManager: void clearMarkers()>();
+
+     label4:
+        $r3 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        $i0 = virtualinvoke $r3.<java.util.LinkedList: int size()>();
+
+        if $i0 <= 0 goto label5;
+
+        $z1 = 1;
+
+        goto label6;
+
+     label5:
+        $z1 = 0;
+
+     label6:
+        exitmonitor $r1;
+
+     label7:
+        return $z1;
+
+     label8:
+        $r11 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label9:
+        throw $r11;
+
+        catch java.lang.Throwable from label1 to label7 with label8;
+        catch java.lang.Throwable from label8 to label9 with label8;
+    }
+
+    static void removeLastFocusRequest(java.awt.Component)
+    {
+        java.lang.Throwable $r6;
+        sun.util.logging.PlatformLogger$Level $r0;
+        sun.util.logging.PlatformLogger $r1, $r5;
+        java.awt.Component r2, $r3;
+        java.awt.KeyboardFocusManager$HeavyweightFocusRequest $r9;
+        java.awt.KeyboardFocusManager $r7;
+        int $i0;
+        java.util.LinkedList $r4, $r8, $r10;
+        boolean $z0;
+
+        r2 := @parameter0: java.awt.Component;
+
+        $r1 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger log>;
+
+        $r0 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINE>;
+
+        $z0 = virtualinvoke $r1.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r0);
+
+        if $z0 == 0 goto label1;
+
+        if r2 != null goto label1;
+
+        $r5 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger log>;
+
+        virtualinvoke $r5.<sun.util.logging.PlatformLogger: void fine(java.lang.String)>("Assertion (heavyweight != null) failed");
+
+     label1:
+        $r7 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager()>();
+
+        $r8 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        entermonitor $r8;
+
+     label2:
+        $r9 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager$HeavyweightFocusRequest getLastHWRequest()>();
+
+        if $r9 == null goto label3;
+
+        $r3 = $r9.<java.awt.KeyboardFocusManager$HeavyweightFocusRequest: java.awt.Component heavyweight>;
+
+        if $r3 != r2 goto label3;
+
+        $r4 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        virtualinvoke $r4.<java.util.LinkedList: java.lang.Object removeLast()>();
+
+     label3:
+        $r10 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        $i0 = virtualinvoke $r10.<java.util.LinkedList: int size()>();
+
+        if $i0 != 0 goto label4;
+
+        virtualinvoke $r7.<java.awt.KeyboardFocusManager: void clearMarkers()>();
+
+     label4:
+        exitmonitor $r8;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r6 := @caughtexception;
+
+        exitmonitor $r8;
+
+     label7:
+        throw $r6;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label2 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    private static boolean focusedWindowChanged(java.awt.Component, java.awt.Component)
+    {
+        java.awt.Window $r1, $r3;
+        java.awt.Component r0, r2;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.Component;
+
+        r2 := @parameter1: java.awt.Component;
+
+        $r1 = staticinvoke <sun.awt.SunToolkit: java.awt.Window getContainingWindow(java.awt.Component)>(r0);
+
+        $r3 = staticinvoke <sun.awt.SunToolkit: java.awt.Window getContainingWindow(java.awt.Component)>(r2);
+
+        if $r1 != null goto label1;
+
+        if $r3 != null goto label1;
+
+        return 1;
+
+     label1:
+        if $r1 != null goto label2;
+
+        return 1;
+
+     label2:
+        if $r3 != null goto label3;
+
+        return 1;
+
+     label3:
+        if $r1 == $r3 goto label4;
+
+        $z0 = 1;
+
+        goto label5;
+
+     label4:
+        $z0 = 0;
+
+     label5:
+        return $z0;
+    }
+
+    private static boolean isTemporary(java.awt.Component, java.awt.Component)
+    {
+        java.awt.Window $r1, $r3;
+        java.awt.Component r0, r2;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.Component;
+
+        r2 := @parameter1: java.awt.Component;
+
+        $r1 = staticinvoke <sun.awt.SunToolkit: java.awt.Window getContainingWindow(java.awt.Component)>(r0);
+
+        $r3 = staticinvoke <sun.awt.SunToolkit: java.awt.Window getContainingWindow(java.awt.Component)>(r2);
+
+        if $r1 != null goto label1;
+
+        if $r3 != null goto label1;
+
+        return 0;
+
+     label1:
+        if $r1 != null goto label2;
+
+        return 1;
+
+     label2:
+        if $r3 != null goto label3;
+
+        return 0;
+
+     label3:
+        if $r1 == $r3 goto label4;
+
+        $z0 = 1;
+
+        goto label5;
+
+     label4:
+        $z0 = 0;
+
+     label5:
+        return $z0;
+    }
+
+    static java.awt.Component getHeavyweight(java.awt.Component)
+    {
+        java.awt.peer.ComponentPeer $r1, $r2;
+        java.awt.Container $r3;
+        java.awt.Component r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.Component;
+
+        if r0 == null goto label1;
+
+        $r1 = virtualinvoke r0.<java.awt.Component: java.awt.peer.ComponentPeer getPeer()>();
+
+        if $r1 != null goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r2 = virtualinvoke r0.<java.awt.Component: java.awt.peer.ComponentPeer getPeer()>();
+
+        $z0 = $r2 instanceof java.awt.peer.LightweightPeer;
+
+        if $z0 == 0 goto label3;
+
+        $r3 = virtualinvoke r0.<java.awt.Component: java.awt.Container getNativeContainer()>();
+
+        return $r3;
+
+     label3:
+        return r0;
+    }
+
+    private static boolean isProxyActiveImpl(java.awt.event.KeyEvent)
+    {
+        java.lang.IllegalAccessException $r6;
+        java.lang.AssertionError $r7;
+        java.lang.reflect.Field $r0, $r2, $r5;
+        java.awt.event.KeyEvent r1;
+        java.awt.KeyboardFocusManager$5 $r3;
+        java.lang.Object $r4;
+        boolean $z0, $z1;
+
+        r1 := @parameter0: java.awt.event.KeyEvent;
+
+        $r0 = <java.awt.KeyboardFocusManager: java.lang.reflect.Field proxyActive>;
+
+        if $r0 != null goto label1;
+
+        $r3 = new java.awt.KeyboardFocusManager$5;
+
+        specialinvoke $r3.<java.awt.KeyboardFocusManager$5: void <init>()>();
+
+        $r4 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r3);
+
+        $r5 = (java.lang.reflect.Field) $r4;
+
+        <java.awt.KeyboardFocusManager: java.lang.reflect.Field proxyActive> = $r5;
+
+     label1:
+        $r2 = <java.awt.KeyboardFocusManager: java.lang.reflect.Field proxyActive>;
+
+        $z0 = virtualinvoke $r2.<java.lang.reflect.Field: boolean getBoolean(java.lang.Object)>(r1);
+
+     label2:
+        return $z0;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $z1 = <java.awt.KeyboardFocusManager: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label4;
+
+        $r7 = new java.lang.AssertionError;
+
+        specialinvoke $r7.<java.lang.AssertionError: void <init>()>();
+
+        throw $r7;
+
+     label4:
+        return 0;
+
+        catch java.lang.IllegalAccessException from label1 to label2 with label3;
+    }
+
+    static boolean isProxyActive(java.awt.event.KeyEvent)
+    {
+        java.awt.event.KeyEvent r0;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.awt.event.KeyEvent;
+
+        $z0 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = staticinvoke <java.awt.KeyboardFocusManager: boolean isProxyActiveImpl(java.awt.event.KeyEvent)>(r0);
+
+        return $z1;
+
+     label1:
+        return 0;
+    }
+
+    private static java.awt.KeyboardFocusManager$HeavyweightFocusRequest getLastHWRequest()
+    {
+        java.lang.Throwable $r4;
+        java.awt.KeyboardFocusManager$HeavyweightFocusRequest $r5;
+        int $i0;
+        java.lang.Object $r3;
+        java.util.LinkedList $r0, $r1, $r2;
+
+        $r0 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        $i0 = virtualinvoke $r1.<java.util.LinkedList: int size()>();
+
+        if $i0 <= 0 goto label2;
+
+        $r2 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        $r3 = virtualinvoke $r2.<java.util.LinkedList: java.lang.Object getLast()>();
+
+        $r5 = (java.awt.KeyboardFocusManager$HeavyweightFocusRequest) $r3;
+
+        goto label3;
+
+     label2:
+        $r5 = null;
+
+     label3:
+        exitmonitor $r0;
+
+     label4:
+        return $r5;
+
+     label5:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label6:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    private static java.awt.KeyboardFocusManager$HeavyweightFocusRequest getFirstHWRequest()
+    {
+        java.lang.Throwable $r4;
+        java.awt.KeyboardFocusManager$HeavyweightFocusRequest $r5;
+        int $i0;
+        java.lang.Object $r3;
+        java.util.LinkedList $r0, $r1, $r2;
+
+        $r0 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        $i0 = virtualinvoke $r1.<java.util.LinkedList: int size()>();
+
+        if $i0 <= 0 goto label2;
+
+        $r2 = <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests>;
+
+        $r3 = virtualinvoke $r2.<java.util.LinkedList: java.lang.Object getFirst()>();
+
+        $r5 = (java.awt.KeyboardFocusManager$HeavyweightFocusRequest) $r3;
+
+        goto label3;
+
+     label2:
+        $r5 = null;
+
+     label3:
+        exitmonitor $r0;
+
+     label4:
+        return $r5;
+
+     label5:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label6:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    private static void checkReplaceKFMPermission() throws java.lang.SecurityException
+    {
+        java.awt.AWTPermission $r1, $r2, $r3;
+        java.lang.SecurityManager $r0;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label2;
+
+        $r1 = <java.awt.KeyboardFocusManager: java.awt.AWTPermission replaceKeyboardFocusManagerPermission>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.awt.AWTPermission;
+
+        specialinvoke $r3.<java.awt.AWTPermission: void <init>(java.lang.String)>("replaceKeyboardFocusManager");
+
+        <java.awt.KeyboardFocusManager: java.awt.AWTPermission replaceKeyboardFocusManagerPermission> = $r3;
+
+     label1:
+        $r2 = <java.awt.KeyboardFocusManager: java.awt.AWTPermission replaceKeyboardFocusManagerPermission>;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r2);
+
+     label2:
+        return;
+    }
+
+    private void checkKFMSecurity() throws java.lang.SecurityException
+    {
+        java.awt.KeyboardFocusManager r0, $r1;
+
+        r0 := @this: java.awt.KeyboardFocusManager;
+
+        $r1 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager()>();
+
+        if r0 == $r1 goto label1;
+
+        staticinvoke <java.awt.KeyboardFocusManager: void checkReplaceKFMPermission()>();
+
+     label1:
+        return;
+    }
+
+    static java.awt.Container access$000()
+    {
+        java.awt.Container $r0;
+
+        $r0 = <java.awt.KeyboardFocusManager: java.awt.Container currentFocusCycleRoot>;
+
+        return $r0;
+    }
+
+    static sun.util.logging.PlatformLogger access$100()
+    {
+        sun.util.logging.PlatformLogger $r0;
+
+        $r0 = <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger log>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.String[] $r4;
+        java.awt.AWTKeyStroke $r7, $r8, $r10, $r11;
+        java.util.LinkedList $r15;
+        java.util.WeakHashMap $r14;
+        boolean $z0, $z1, $z2;
+        java.awt.KeyboardFocusManager$1 $r2;
+        sun.util.logging.PlatformLogger $r1, $r3;
+        java.awt.AWTKeyStroke[] $r6, $r9, $r12, $r13;
+        java.awt.AWTKeyStroke[][] $r5;
+        java.lang.Class $r0;
+
+        <java.awt.KeyboardFocusManager: int SNFH_SUCCESS_PROCEED> = 2;
+
+        <java.awt.KeyboardFocusManager: int SNFH_SUCCESS_HANDLED> = 1;
+
+        <java.awt.KeyboardFocusManager: int SNFH_FAILURE> = 0;
+
+        <java.awt.KeyboardFocusManager: int TRAVERSAL_KEY_LENGTH> = 4;
+
+        <java.awt.KeyboardFocusManager: int DOWN_CYCLE_TRAVERSAL_KEYS> = 3;
+
+        <java.awt.KeyboardFocusManager: int UP_CYCLE_TRAVERSAL_KEYS> = 2;
+
+        <java.awt.KeyboardFocusManager: int BACKWARD_TRAVERSAL_KEYS> = 1;
+
+        <java.awt.KeyboardFocusManager: int FORWARD_TRAVERSAL_KEYS> = 0;
+
+        $r0 = class "Ljava/awt/KeyboardFocusManager;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        <java.awt.KeyboardFocusManager: boolean $assertionsDisabled> = $z2;
+
+        $r1 = staticinvoke <sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger getLogger(java.lang.String)>("java.awt.focus.KeyboardFocusManager");
+
+        <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger focusLog> = $r1;
+
+        staticinvoke <java.awt.Toolkit: void loadLibraries()>();
+
+        $z1 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        if $z1 != 0 goto label3;
+
+        staticinvoke <java.awt.KeyboardFocusManager: void initIDs()>();
+
+     label3:
+        $r2 = new java.awt.KeyboardFocusManager$1;
+
+        specialinvoke $r2.<java.awt.KeyboardFocusManager$1: void <init>()>();
+
+        staticinvoke <sun.awt.AWTAccessor: void setKeyboardFocusManagerAccessor(sun.awt.AWTAccessor$KeyboardFocusManagerAccessor)>($r2);
+
+        $r3 = staticinvoke <sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger getLogger(java.lang.String)>("java.awt.KeyboardFocusManager");
+
+        <java.awt.KeyboardFocusManager: sun.util.logging.PlatformLogger log> = $r3;
+
+        $r4 = newarray (java.lang.String)[4];
+
+        $r4[0] = "forwardDefaultFocusTraversalKeys";
+
+        $r4[1] = "backwardDefaultFocusTraversalKeys";
+
+        $r4[2] = "upCycleDefaultFocusTraversalKeys";
+
+        $r4[3] = "downCycleDefaultFocusTraversalKeys";
+
+        <java.awt.KeyboardFocusManager: java.lang.String[] defaultFocusTraversalKeyPropertyNames> = $r4;
+
+        $r5 = newarray (java.awt.AWTKeyStroke[])[4];
+
+        $r6 = newarray (java.awt.AWTKeyStroke)[2];
+
+        $r7 = staticinvoke <java.awt.AWTKeyStroke: java.awt.AWTKeyStroke getAWTKeyStroke(int,int,boolean)>(9, 0, 0);
+
+        $r6[0] = $r7;
+
+        $r8 = staticinvoke <java.awt.AWTKeyStroke: java.awt.AWTKeyStroke getAWTKeyStroke(int,int,boolean)>(9, 130, 0);
+
+        $r6[1] = $r8;
+
+        $r5[0] = $r6;
+
+        $r9 = newarray (java.awt.AWTKeyStroke)[2];
+
+        $r10 = staticinvoke <java.awt.AWTKeyStroke: java.awt.AWTKeyStroke getAWTKeyStroke(int,int,boolean)>(9, 65, 0);
+
+        $r9[0] = $r10;
+
+        $r11 = staticinvoke <java.awt.AWTKeyStroke: java.awt.AWTKeyStroke getAWTKeyStroke(int,int,boolean)>(9, 195, 0);
+
+        $r9[1] = $r11;
+
+        $r5[1] = $r9;
+
+        $r12 = newarray (java.awt.AWTKeyStroke)[0];
+
+        $r5[2] = $r12;
+
+        $r13 = newarray (java.awt.AWTKeyStroke)[0];
+
+        $r5[3] = $r13;
+
+        <java.awt.KeyboardFocusManager: java.awt.AWTKeyStroke[][] defaultFocusTraversalKeyStrokes> = $r5;
+
+        $r14 = new java.util.WeakHashMap;
+
+        specialinvoke $r14.<java.util.WeakHashMap: void <init>()>();
+
+        <java.awt.KeyboardFocusManager: java.util.Map mostRecentFocusOwners> = $r14;
+
+        $r15 = new java.util.LinkedList;
+
+        specialinvoke $r15.<java.util.LinkedList: void <init>()>();
+
+        <java.awt.KeyboardFocusManager: java.util.LinkedList heavyweightRequests> = $r15;
+
+        <java.awt.KeyboardFocusManager: boolean allowSyncFocusRequests> = 1;
+
+        <java.awt.KeyboardFocusManager: java.awt.Component newFocusOwner> = null;
+
+        return;
+    }
+}

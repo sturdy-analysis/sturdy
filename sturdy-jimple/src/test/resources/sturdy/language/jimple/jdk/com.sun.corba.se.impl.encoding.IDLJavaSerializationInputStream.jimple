@@ -1,0 +1,3395 @@
+public class com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream extends com.sun.corba.se.impl.encoding.CDRInputStreamBase
+{
+    private com.sun.corba.se.spi.orb.ORB orb;
+    private int bufSize;
+    private java.nio.ByteBuffer buffer;
+    private byte encodingVersion;
+    private java.io.ObjectInputStream is;
+    private com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream bis;
+    private com.sun.corba.se.impl.encoding.BufferManagerRead bufferManager;
+    private final int directReadLength;
+    private boolean markOn;
+    private int peekIndex;
+    private int peekCount;
+    private java.util.LinkedList markedItemQ;
+    protected com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper;
+
+    public void <init>(byte)
+    {
+        java.util.LinkedList $r1;
+        byte b0;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        b0 := @parameter0: byte;
+
+        specialinvoke r0.<com.sun.corba.se.impl.encoding.CDRInputStreamBase: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int directReadLength> = 16;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int directReadLength> = 16;
+
+        $r1 = new java.util.LinkedList;
+
+        specialinvoke $r1.<java.util.LinkedList: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ> = $r1;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: byte encodingVersion> = b0;
+
+        return;
+    }
+
+    public void init(org.omg.CORBA.ORB, java.nio.ByteBuffer, int, boolean, com.sun.corba.se.impl.encoding.BufferManagerRead)
+    {
+        byte[] r11;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r6;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        com.sun.corba.se.spi.orb.ORB $r2, $r5;
+        com.sun.corba.se.impl.encoding.BufferManagerRead r3;
+        java.nio.ByteBuffer r4, $r7, $r8, $r10;
+        org.omg.CORBA.ORB r1;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream $r9;
+        int i0;
+        boolean $z0, z1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r1 := @parameter0: org.omg.CORBA.ORB;
+
+        r4 := @parameter1: java.nio.ByteBuffer;
+
+        i0 := @parameter2: int;
+
+        z1 := @parameter3: boolean;
+
+        r3 := @parameter4: com.sun.corba.se.impl.encoding.BufferManagerRead;
+
+        $r2 = (com.sun.corba.se.spi.orb.ORB) r1;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.spi.orb.ORB orb> = $r2;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int bufSize> = i0;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.encoding.BufferManagerRead bufferManager> = r3;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.nio.ByteBuffer buffer> = r4;
+
+        $r5 = (com.sun.corba.se.spi.orb.ORB) r1;
+
+        $r6 = staticinvoke <com.sun.corba.se.impl.logging.ORBUtilSystemException: com.sun.corba.se.impl.logging.ORBUtilSystemException get(com.sun.corba.se.spi.orb.ORB,java.lang.String)>($r5, "rpc.encoding");
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper> = $r6;
+
+        $r7 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.nio.ByteBuffer buffer>;
+
+        $z0 = virtualinvoke $r7.<java.nio.ByteBuffer: boolean hasArray()>();
+
+        if $z0 == 0 goto label1;
+
+        $r10 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.nio.ByteBuffer buffer>;
+
+        r11 = virtualinvoke $r10.<java.nio.ByteBuffer: byte[] array()>();
+
+        goto label2;
+
+     label1:
+        r11 = newarray (byte)[i0];
+
+        $r8 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.nio.ByteBuffer buffer>;
+
+        virtualinvoke $r8.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[])>(r11);
+
+     label2:
+        $r9 = new com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream;
+
+        specialinvoke $r9.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream: void <init>(com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream,byte[])>(r0, r11);
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream bis> = $r9;
+
+        return;
+    }
+
+    private void initObjectInputStream()
+    {
+        org.omg.CORBA.INTERNAL $r6, $r9;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r5, $r8;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        java.io.ObjectInputStream $r1;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$MarshalObjectInputStream $r2;
+        com.sun.corba.se.spi.orb.ORB $r3;
+        java.lang.Exception $r7;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream $r4;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.io.ObjectInputStream is>;
+
+        if $r1 == null goto label1;
+
+        $r5 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r6 = virtualinvoke $r5.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL javaStreamInitFailed()>();
+
+        throw $r6;
+
+     label1:
+        $r2 = new com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$MarshalObjectInputStream;
+
+        $r4 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream bis>;
+
+        $r3 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.spi.orb.ORB orb>;
+
+        specialinvoke $r2.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$MarshalObjectInputStream: void <init>(com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream,java.io.InputStream,com.sun.corba.se.spi.orb.ORB)>(r0, $r4, $r3);
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.io.ObjectInputStream is> = $r2;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $r8 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r9 = virtualinvoke $r8.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL javaStreamInitFailed(java.lang.Throwable)>($r7);
+
+        throw $r9;
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public boolean read_boolean()
+    {
+        org.omg.CORBA.MARSHAL $r13;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r12;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        java.io.ObjectInputStream $r14;
+        int $i0, $i1, $i2, $i3;
+        java.lang.Boolean $r2, $r6, $r10;
+        java.util.LinkedList $r1, $r3, $r4, $r7, $r8;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        java.lang.Exception $r11;
+        java.lang.Object $r5, $r9;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $z0 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z0 != 0 goto label1;
+
+        $r7 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $z4 = virtualinvoke $r7.<java.util.LinkedList: boolean isEmpty()>();
+
+        if $z4 != 0 goto label1;
+
+        $r8 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $r9 = virtualinvoke $r8.<java.util.LinkedList: java.lang.Object removeFirst()>();
+
+        $r10 = (java.lang.Boolean) $r9;
+
+        $z5 = virtualinvoke $r10.<java.lang.Boolean: boolean booleanValue()>();
+
+        return $z5;
+
+     label1:
+        $z1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z1 == 0 goto label2;
+
+        $r3 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $z2 = virtualinvoke $r3.<java.util.LinkedList: boolean isEmpty()>();
+
+        if $z2 != 0 goto label2;
+
+        $i1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex>;
+
+        $i0 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekCount>;
+
+        if $i1 >= $i0 goto label2;
+
+        $r4 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $i2 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex>;
+
+        $i3 = $i2 + 1;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex> = $i3;
+
+        $r5 = virtualinvoke $r4.<java.util.LinkedList: java.lang.Object get(int)>($i2);
+
+        $r6 = (java.lang.Boolean) $r5;
+
+        $z3 = virtualinvoke $r6.<java.lang.Boolean: boolean booleanValue()>();
+
+        return $z3;
+
+     label2:
+        $r14 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.io.ObjectInputStream is>;
+
+        $z6 = virtualinvoke $r14.<java.io.ObjectInputStream: boolean readBoolean()>();
+
+        $z7 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z7 == 0 goto label3;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $r2 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z6);
+
+        virtualinvoke $r1.<java.util.LinkedList: void addLast(java.lang.Object)>($r2);
+
+     label3:
+        return $z6;
+
+     label4:
+        $r11 := @caughtexception;
+
+        $r12 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r13 = virtualinvoke $r12.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.MARSHAL javaSerializationException(java.lang.Throwable,java.lang.Object)>($r11, "read_boolean");
+
+        throw $r13;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    public char read_char()
+    {
+        org.omg.CORBA.MARSHAL $r13;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r12;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        java.io.ObjectInputStream $r14;
+        java.lang.Character $r1, $r6, $r10;
+        int $i0, $i1, $i2, $i3;
+        java.util.LinkedList $r2, $r3, $r4, $r7, $r8;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        char $c4, $c5, $c6;
+        java.lang.Exception $r11;
+        java.lang.Object $r5, $r9;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $z0 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z0 != 0 goto label1;
+
+        $r7 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $z3 = virtualinvoke $r7.<java.util.LinkedList: boolean isEmpty()>();
+
+        if $z3 != 0 goto label1;
+
+        $r8 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $r9 = virtualinvoke $r8.<java.util.LinkedList: java.lang.Object removeFirst()>();
+
+        $r10 = (java.lang.Character) $r9;
+
+        $c5 = virtualinvoke $r10.<java.lang.Character: char charValue()>();
+
+        return $c5;
+
+     label1:
+        $z1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z1 == 0 goto label2;
+
+        $r3 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $z2 = virtualinvoke $r3.<java.util.LinkedList: boolean isEmpty()>();
+
+        if $z2 != 0 goto label2;
+
+        $i1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex>;
+
+        $i0 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekCount>;
+
+        if $i1 >= $i0 goto label2;
+
+        $r4 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $i2 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex>;
+
+        $i3 = $i2 + 1;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex> = $i3;
+
+        $r5 = virtualinvoke $r4.<java.util.LinkedList: java.lang.Object get(int)>($i2);
+
+        $r6 = (java.lang.Character) $r5;
+
+        $c4 = virtualinvoke $r6.<java.lang.Character: char charValue()>();
+
+        return $c4;
+
+     label2:
+        $r14 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.io.ObjectInputStream is>;
+
+        $c6 = virtualinvoke $r14.<java.io.ObjectInputStream: char readChar()>();
+
+        $z4 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z4 == 0 goto label3;
+
+        $r2 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $r1 = new java.lang.Character;
+
+        specialinvoke $r1.<java.lang.Character: void <init>(char)>($c6);
+
+        virtualinvoke $r2.<java.util.LinkedList: void addLast(java.lang.Object)>($r1);
+
+     label3:
+        return $c6;
+
+     label4:
+        $r11 := @caughtexception;
+
+        $r12 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r13 = virtualinvoke $r12.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.MARSHAL javaSerializationException(java.lang.Throwable,java.lang.Object)>($r11, "read_char");
+
+        throw $r13;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    public char read_wchar()
+    {
+        char $c0;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $c0 = virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: char read_char()>();
+
+        return $c0;
+    }
+
+    public byte read_octet()
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r15;
+        java.io.ObjectInputStream $r17;
+        byte $b5, $b6, b9, $b10;
+        java.lang.Byte $r2, $r7, $r11;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.lang.Exception $r14;
+        org.omg.CORBA.MARSHAL $r16;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream $r1, $r12, $r13;
+        int $i0, $i1, $i2, $i3, $i4, $i7, $i8;
+        java.util.LinkedList $r3, $r4, $r5, $r8, $r9;
+        java.lang.Object $r6, $r10;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream bis>;
+
+        $i0 = virtualinvoke $r1.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream: int getPosition()>();
+
+        if $i0 >= 16 goto label2;
+
+        $r12 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream bis>;
+
+        $i7 = virtualinvoke $r12.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream: int read()>();
+
+        b9 = (byte) $i7;
+
+        $r13 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream bis>;
+
+        $i8 = virtualinvoke $r13.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream: int getPosition()>();
+
+        if $i8 != 16 goto label1;
+
+        specialinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: void initObjectInputStream()>();
+
+     label1:
+        return b9;
+
+     label2:
+        $z0 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z0 != 0 goto label3;
+
+        $r8 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $z3 = virtualinvoke $r8.<java.util.LinkedList: boolean isEmpty()>();
+
+        if $z3 != 0 goto label3;
+
+        $r9 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $r10 = virtualinvoke $r9.<java.util.LinkedList: java.lang.Object removeFirst()>();
+
+        $r11 = (java.lang.Byte) $r10;
+
+        $b6 = virtualinvoke $r11.<java.lang.Byte: byte byteValue()>();
+
+        return $b6;
+
+     label3:
+        $z1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z1 == 0 goto label4;
+
+        $r4 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $z2 = virtualinvoke $r4.<java.util.LinkedList: boolean isEmpty()>();
+
+        if $z2 != 0 goto label4;
+
+        $i2 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex>;
+
+        $i1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekCount>;
+
+        if $i2 >= $i1 goto label4;
+
+        $r5 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $i3 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex>;
+
+        $i4 = $i3 + 1;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex> = $i4;
+
+        $r6 = virtualinvoke $r5.<java.util.LinkedList: java.lang.Object get(int)>($i3);
+
+        $r7 = (java.lang.Byte) $r6;
+
+        $b5 = virtualinvoke $r7.<java.lang.Byte: byte byteValue()>();
+
+        return $b5;
+
+     label4:
+        $r17 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.io.ObjectInputStream is>;
+
+        $b10 = virtualinvoke $r17.<java.io.ObjectInputStream: byte readByte()>();
+
+        $z4 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z4 == 0 goto label5;
+
+        $r3 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $r2 = new java.lang.Byte;
+
+        specialinvoke $r2.<java.lang.Byte: void <init>(byte)>($b10);
+
+        virtualinvoke $r3.<java.util.LinkedList: void addLast(java.lang.Object)>($r2);
+
+     label5:
+        return $b10;
+
+     label6:
+        $r14 := @caughtexception;
+
+        $r15 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r16 = virtualinvoke $r15.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.MARSHAL javaSerializationException(java.lang.Throwable,java.lang.Object)>($r14, "read_octet");
+
+        throw $r16;
+
+        catch java.lang.Exception from label4 to label5 with label6;
+    }
+
+    public short read_short()
+    {
+        org.omg.CORBA.MARSHAL $r13;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r12;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        java.io.ObjectInputStream $r14;
+        short $s4, $s5, $s6;
+        java.lang.Short $r1, $r6, $r10;
+        int $i0, $i1, $i2, $i3;
+        java.util.LinkedList $r2, $r3, $r4, $r7, $r8;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.lang.Exception $r11;
+        java.lang.Object $r5, $r9;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $z0 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z0 != 0 goto label1;
+
+        $r7 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $z3 = virtualinvoke $r7.<java.util.LinkedList: boolean isEmpty()>();
+
+        if $z3 != 0 goto label1;
+
+        $r8 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $r9 = virtualinvoke $r8.<java.util.LinkedList: java.lang.Object removeFirst()>();
+
+        $r10 = (java.lang.Short) $r9;
+
+        $s5 = virtualinvoke $r10.<java.lang.Short: short shortValue()>();
+
+        return $s5;
+
+     label1:
+        $z1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z1 == 0 goto label2;
+
+        $r3 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $z2 = virtualinvoke $r3.<java.util.LinkedList: boolean isEmpty()>();
+
+        if $z2 != 0 goto label2;
+
+        $i1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex>;
+
+        $i0 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekCount>;
+
+        if $i1 >= $i0 goto label2;
+
+        $r4 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $i2 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex>;
+
+        $i3 = $i2 + 1;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex> = $i3;
+
+        $r5 = virtualinvoke $r4.<java.util.LinkedList: java.lang.Object get(int)>($i2);
+
+        $r6 = (java.lang.Short) $r5;
+
+        $s4 = virtualinvoke $r6.<java.lang.Short: short shortValue()>();
+
+        return $s4;
+
+     label2:
+        $r14 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.io.ObjectInputStream is>;
+
+        $s6 = virtualinvoke $r14.<java.io.ObjectInputStream: short readShort()>();
+
+        $z4 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z4 == 0 goto label3;
+
+        $r2 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $r1 = new java.lang.Short;
+
+        specialinvoke $r1.<java.lang.Short: void <init>(short)>($s6);
+
+        virtualinvoke $r2.<java.util.LinkedList: void addLast(java.lang.Object)>($r1);
+
+     label3:
+        return $s6;
+
+     label4:
+        $r11 := @caughtexception;
+
+        $r12 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r13 = virtualinvoke $r12.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.MARSHAL javaSerializationException(java.lang.Throwable,java.lang.Object)>($r11, "read_short");
+
+        throw $r13;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    public short read_ushort()
+    {
+        short $s0;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $s0 = virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: short read_short()>();
+
+        return $s0;
+    }
+
+    public int read_long()
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r18, $r20;
+        java.io.ObjectInputStream $r22;
+        java.lang.Integer $r7, $r11, $r23;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.lang.Exception $r19;
+        org.omg.CORBA.MARSHAL $r21;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream $r1, $r12, $r13, $r14, $r15, $r16, $r17;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, i11, $i12, $i13, i14, $i15, $i16, i17, $i18, $i19, i20, $i21, $i22, $i23, $i24, $i26;
+        java.util.LinkedList $r3, $r4, $r5, $r8, $r9;
+        java.lang.Object $r6, $r10;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream bis>;
+
+        $i0 = virtualinvoke $r1.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream: int getPosition()>();
+
+        if $i0 >= 16 goto label3;
+
+        $r12 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream bis>;
+
+        $i7 = virtualinvoke $r12.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream: int read()>();
+
+        $i8 = $i7 << 24;
+
+        i20 = $i8 & -16777216;
+
+        $r13 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream bis>;
+
+        $i9 = virtualinvoke $r13.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream: int read()>();
+
+        $i10 = $i9 << 16;
+
+        i11 = $i10 & 16711680;
+
+        $r14 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream bis>;
+
+        $i12 = virtualinvoke $r14.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream: int read()>();
+
+        $i13 = $i12 << 8;
+
+        $i26 = (int) 65280;
+
+        i14 = $i13 & $i26;
+
+        $r15 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream bis>;
+
+        $i15 = virtualinvoke $r15.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream: int read()>();
+
+        $i16 = $i15 << 0;
+
+        i17 = $i16 & 255;
+
+        $r16 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream bis>;
+
+        $i18 = virtualinvoke $r16.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream: int getPosition()>();
+
+        if $i18 != 16 goto label1;
+
+        specialinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: void initObjectInputStream()>();
+
+        goto label2;
+
+     label1:
+        $r17 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream bis>;
+
+        $i19 = virtualinvoke $r17.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream: int getPosition()>();
+
+        if $i19 <= 16 goto label2;
+
+        $r18 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        virtualinvoke $r18.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.MARSHAL javaSerializationException(java.lang.Object)>("read_long");
+
+     label2:
+        $i21 = i20 | i11;
+
+        $i22 = $i21 | i14;
+
+        $i23 = $i22 | i17;
+
+        return $i23;
+
+     label3:
+        $z0 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z0 != 0 goto label4;
+
+        $r8 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $z3 = virtualinvoke $r8.<java.util.LinkedList: boolean isEmpty()>();
+
+        if $z3 != 0 goto label4;
+
+        $r9 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $r10 = virtualinvoke $r9.<java.util.LinkedList: java.lang.Object removeFirst()>();
+
+        $r11 = (java.lang.Integer) $r10;
+
+        $i6 = virtualinvoke $r11.<java.lang.Integer: int intValue()>();
+
+        return $i6;
+
+     label4:
+        $z1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z1 == 0 goto label5;
+
+        $r4 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $z2 = virtualinvoke $r4.<java.util.LinkedList: boolean isEmpty()>();
+
+        if $z2 != 0 goto label5;
+
+        $i2 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex>;
+
+        $i1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekCount>;
+
+        if $i2 >= $i1 goto label5;
+
+        $r5 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $i3 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex>;
+
+        $i4 = $i3 + 1;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex> = $i4;
+
+        $r6 = virtualinvoke $r5.<java.util.LinkedList: java.lang.Object get(int)>($i3);
+
+        $r7 = (java.lang.Integer) $r6;
+
+        $i5 = virtualinvoke $r7.<java.lang.Integer: int intValue()>();
+
+        return $i5;
+
+     label5:
+        $r22 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.io.ObjectInputStream is>;
+
+        $i24 = virtualinvoke $r22.<java.io.ObjectInputStream: int readInt()>();
+
+        $z4 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z4 == 0 goto label6;
+
+        $r3 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $r23 = new java.lang.Integer;
+
+        specialinvoke $r23.<java.lang.Integer: void <init>(int)>($i24);
+
+        virtualinvoke $r3.<java.util.LinkedList: void addLast(java.lang.Object)>($r23);
+
+     label6:
+        return $i24;
+
+     label7:
+        $r19 := @caughtexception;
+
+        $r20 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r21 = virtualinvoke $r20.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.MARSHAL javaSerializationException(java.lang.Throwable,java.lang.Object)>($r19, "read_long");
+
+        throw $r21;
+
+        catch java.lang.Exception from label5 to label6 with label7;
+    }
+
+    public int read_ulong()
+    {
+        int $i0;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $i0 = virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int read_long()>();
+
+        return $i0;
+    }
+
+    public long read_longlong()
+    {
+        org.omg.CORBA.MARSHAL $r13;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r12;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        java.io.ObjectInputStream $r14;
+        long $l4, $l5, $l6;
+        java.lang.Long $r1, $r6, $r10;
+        int $i0, $i1, $i2, $i3;
+        java.util.LinkedList $r2, $r3, $r4, $r7, $r8;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.lang.Exception $r11;
+        java.lang.Object $r5, $r9;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $z0 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z0 != 0 goto label1;
+
+        $r7 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $z3 = virtualinvoke $r7.<java.util.LinkedList: boolean isEmpty()>();
+
+        if $z3 != 0 goto label1;
+
+        $r8 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $r9 = virtualinvoke $r8.<java.util.LinkedList: java.lang.Object removeFirst()>();
+
+        $r10 = (java.lang.Long) $r9;
+
+        $l5 = virtualinvoke $r10.<java.lang.Long: long longValue()>();
+
+        return $l5;
+
+     label1:
+        $z1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z1 == 0 goto label2;
+
+        $r3 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $z2 = virtualinvoke $r3.<java.util.LinkedList: boolean isEmpty()>();
+
+        if $z2 != 0 goto label2;
+
+        $i1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex>;
+
+        $i0 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekCount>;
+
+        if $i1 >= $i0 goto label2;
+
+        $r4 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $i2 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex>;
+
+        $i3 = $i2 + 1;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex> = $i3;
+
+        $r5 = virtualinvoke $r4.<java.util.LinkedList: java.lang.Object get(int)>($i2);
+
+        $r6 = (java.lang.Long) $r5;
+
+        $l4 = virtualinvoke $r6.<java.lang.Long: long longValue()>();
+
+        return $l4;
+
+     label2:
+        $r14 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.io.ObjectInputStream is>;
+
+        $l6 = virtualinvoke $r14.<java.io.ObjectInputStream: long readLong()>();
+
+        $z4 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z4 == 0 goto label3;
+
+        $r2 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $r1 = new java.lang.Long;
+
+        specialinvoke $r1.<java.lang.Long: void <init>(long)>($l6);
+
+        virtualinvoke $r2.<java.util.LinkedList: void addLast(java.lang.Object)>($r1);
+
+     label3:
+        return $l6;
+
+     label4:
+        $r11 := @caughtexception;
+
+        $r12 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r13 = virtualinvoke $r12.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.MARSHAL javaSerializationException(java.lang.Throwable,java.lang.Object)>($r11, "read_longlong");
+
+        throw $r13;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    public long read_ulonglong()
+    {
+        long $l0;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $l0 = virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: long read_longlong()>();
+
+        return $l0;
+    }
+
+    public float read_float()
+    {
+        java.lang.Float $r1, $r6, $r10;
+        org.omg.CORBA.MARSHAL $r13;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r12;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        java.io.ObjectInputStream $r14;
+        int $i0, $i1, $i2, $i3;
+        java.util.LinkedList $r2, $r3, $r4, $r7, $r8;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.lang.Exception $r11;
+        float $f0, $f1, $f2;
+        java.lang.Object $r5, $r9;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $z0 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z0 != 0 goto label1;
+
+        $r7 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $z3 = virtualinvoke $r7.<java.util.LinkedList: boolean isEmpty()>();
+
+        if $z3 != 0 goto label1;
+
+        $r8 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $r9 = virtualinvoke $r8.<java.util.LinkedList: java.lang.Object removeFirst()>();
+
+        $r10 = (java.lang.Float) $r9;
+
+        $f1 = virtualinvoke $r10.<java.lang.Float: float floatValue()>();
+
+        return $f1;
+
+     label1:
+        $z1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z1 == 0 goto label2;
+
+        $r3 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $z2 = virtualinvoke $r3.<java.util.LinkedList: boolean isEmpty()>();
+
+        if $z2 != 0 goto label2;
+
+        $i1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex>;
+
+        $i0 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekCount>;
+
+        if $i1 >= $i0 goto label2;
+
+        $r4 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $i2 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex>;
+
+        $i3 = $i2 + 1;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex> = $i3;
+
+        $r5 = virtualinvoke $r4.<java.util.LinkedList: java.lang.Object get(int)>($i2);
+
+        $r6 = (java.lang.Float) $r5;
+
+        $f0 = virtualinvoke $r6.<java.lang.Float: float floatValue()>();
+
+        return $f0;
+
+     label2:
+        $r14 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.io.ObjectInputStream is>;
+
+        $f2 = virtualinvoke $r14.<java.io.ObjectInputStream: float readFloat()>();
+
+        $z4 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z4 == 0 goto label3;
+
+        $r2 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $r1 = new java.lang.Float;
+
+        specialinvoke $r1.<java.lang.Float: void <init>(float)>($f2);
+
+        virtualinvoke $r2.<java.util.LinkedList: void addLast(java.lang.Object)>($r1);
+
+     label3:
+        return $f2;
+
+     label4:
+        $r11 := @caughtexception;
+
+        $r12 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r13 = virtualinvoke $r12.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.MARSHAL javaSerializationException(java.lang.Throwable,java.lang.Object)>($r11, "read_float");
+
+        throw $r13;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    public double read_double()
+    {
+        org.omg.CORBA.MARSHAL $r13;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r12;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        java.lang.Double $r1, $r6, $r10;
+        java.io.ObjectInputStream $r14;
+        int $i0, $i1, $i2, $i3;
+        java.util.LinkedList $r2, $r3, $r4, $r7, $r8;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        double $d0, $d1, $d2;
+        java.lang.Exception $r11;
+        java.lang.Object $r5, $r9;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $z0 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z0 != 0 goto label1;
+
+        $r7 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $z3 = virtualinvoke $r7.<java.util.LinkedList: boolean isEmpty()>();
+
+        if $z3 != 0 goto label1;
+
+        $r8 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $r9 = virtualinvoke $r8.<java.util.LinkedList: java.lang.Object removeFirst()>();
+
+        $r10 = (java.lang.Double) $r9;
+
+        $d1 = virtualinvoke $r10.<java.lang.Double: double doubleValue()>();
+
+        return $d1;
+
+     label1:
+        $z1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z1 == 0 goto label2;
+
+        $r3 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $z2 = virtualinvoke $r3.<java.util.LinkedList: boolean isEmpty()>();
+
+        if $z2 != 0 goto label2;
+
+        $i1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex>;
+
+        $i0 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekCount>;
+
+        if $i1 >= $i0 goto label2;
+
+        $r4 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $i2 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex>;
+
+        $i3 = $i2 + 1;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex> = $i3;
+
+        $r5 = virtualinvoke $r4.<java.util.LinkedList: java.lang.Object get(int)>($i2);
+
+        $r6 = (java.lang.Double) $r5;
+
+        $d0 = virtualinvoke $r6.<java.lang.Double: double doubleValue()>();
+
+        return $d0;
+
+     label2:
+        $r14 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.io.ObjectInputStream is>;
+
+        $d2 = virtualinvoke $r14.<java.io.ObjectInputStream: double readDouble()>();
+
+        $z4 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z4 == 0 goto label3;
+
+        $r2 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $r1 = new java.lang.Double;
+
+        specialinvoke $r1.<java.lang.Double: void <init>(double)>($d2);
+
+        virtualinvoke $r2.<java.util.LinkedList: void addLast(java.lang.Object)>($r1);
+
+     label3:
+        return $d2;
+
+     label4:
+        $r11 := @caughtexception;
+
+        $r12 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r13 = virtualinvoke $r12.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.MARSHAL javaSerializationException(java.lang.Throwable,java.lang.Object)>($r11, "read_double");
+
+        throw $r13;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    public java.lang.String read_string()
+    {
+        org.omg.CORBA.MARSHAL $r12;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r11;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        java.io.ObjectInputStream $r13;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String $r5, $r9, $r14;
+        java.util.LinkedList $r1, $r2, $r3, $r6, $r7;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.lang.Exception $r10;
+        java.lang.Object $r4, $r8;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $z0 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z0 != 0 goto label1;
+
+        $r6 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $z3 = virtualinvoke $r6.<java.util.LinkedList: boolean isEmpty()>();
+
+        if $z3 != 0 goto label1;
+
+        $r7 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $r8 = virtualinvoke $r7.<java.util.LinkedList: java.lang.Object removeFirst()>();
+
+        $r9 = (java.lang.String) $r8;
+
+        return $r9;
+
+     label1:
+        $z1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z1 == 0 goto label2;
+
+        $r2 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $z2 = virtualinvoke $r2.<java.util.LinkedList: boolean isEmpty()>();
+
+        if $z2 != 0 goto label2;
+
+        $i1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex>;
+
+        $i0 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekCount>;
+
+        if $i1 >= $i0 goto label2;
+
+        $r3 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $i2 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex>;
+
+        $i3 = $i2 + 1;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex> = $i3;
+
+        $r4 = virtualinvoke $r3.<java.util.LinkedList: java.lang.Object get(int)>($i2);
+
+        $r5 = (java.lang.String) $r4;
+
+        return $r5;
+
+     label2:
+        $r13 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.io.ObjectInputStream is>;
+
+        $r14 = virtualinvoke $r13.<java.io.ObjectInputStream: java.lang.String readUTF()>();
+
+        $z4 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z4 == 0 goto label3;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        virtualinvoke $r1.<java.util.LinkedList: void addLast(java.lang.Object)>($r14);
+
+     label3:
+        return $r14;
+
+     label4:
+        $r10 := @caughtexception;
+
+        $r11 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r12 = virtualinvoke $r11.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.MARSHAL javaSerializationException(java.lang.Throwable,java.lang.Object)>($r10, "read_string");
+
+        throw $r12;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    public java.lang.String read_wstring()
+    {
+        org.omg.CORBA.MARSHAL $r12;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r11;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        java.io.ObjectInputStream $r13;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String $r5, $r9, $r15;
+        java.util.LinkedList $r1, $r2, $r3, $r6, $r7;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.lang.Exception $r10;
+        java.lang.Object $r4, $r8, $r14;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $z0 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z0 != 0 goto label1;
+
+        $r6 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $z3 = virtualinvoke $r6.<java.util.LinkedList: boolean isEmpty()>();
+
+        if $z3 != 0 goto label1;
+
+        $r7 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $r8 = virtualinvoke $r7.<java.util.LinkedList: java.lang.Object removeFirst()>();
+
+        $r9 = (java.lang.String) $r8;
+
+        return $r9;
+
+     label1:
+        $z1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z1 == 0 goto label2;
+
+        $r2 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $z2 = virtualinvoke $r2.<java.util.LinkedList: boolean isEmpty()>();
+
+        if $z2 != 0 goto label2;
+
+        $i1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex>;
+
+        $i0 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekCount>;
+
+        if $i1 >= $i0 goto label2;
+
+        $r3 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $i2 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex>;
+
+        $i3 = $i2 + 1;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex> = $i3;
+
+        $r4 = virtualinvoke $r3.<java.util.LinkedList: java.lang.Object get(int)>($i2);
+
+        $r5 = (java.lang.String) $r4;
+
+        return $r5;
+
+     label2:
+        $r13 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.io.ObjectInputStream is>;
+
+        $r14 = virtualinvoke $r13.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        $r15 = (java.lang.String) $r14;
+
+        $z4 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z4 == 0 goto label3;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        virtualinvoke $r1.<java.util.LinkedList: void addLast(java.lang.Object)>($r15);
+
+     label3:
+        return $r15;
+
+     label4:
+        $r10 := @caughtexception;
+
+        $r11 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r12 = virtualinvoke $r11.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.MARSHAL javaSerializationException(java.lang.Throwable,java.lang.Object)>($r10, "read_wstring");
+
+        throw $r12;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    public void read_boolean_array(boolean[], int, int)
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r1;
+        int i0, i1, $i2, i3;
+        boolean[] r0;
+        boolean $z0;
+
+        r1 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r0 := @parameter0: boolean[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i3 = 0;
+
+     label1:
+        if i3 >= i0 goto label2;
+
+        $i2 = i3 + i1;
+
+        $z0 = virtualinvoke r1.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean read_boolean()>();
+
+        r0[$i2] = $z0;
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void read_char_array(char[], int, int)
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r1;
+        int i0, i1, $i2, i4;
+        char[] r0;
+        char $c3;
+
+        r1 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r0 := @parameter0: char[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i4 = 0;
+
+     label1:
+        if i4 >= i0 goto label2;
+
+        $i2 = i4 + i1;
+
+        $c3 = virtualinvoke r1.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: char read_char()>();
+
+        r0[$i2] = $c3;
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void read_wchar_array(char[], int, int)
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        int i0, i1;
+        char[] r1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r1 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: void read_char_array(char[],int,int)>(r1, i0, i1);
+
+        return;
+    }
+
+    public void read_octet_array(byte[], int, int)
+    {
+        byte[] r0;
+        byte $b3;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r1;
+        int i0, i1, $i2, i4;
+
+        r1 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r0 := @parameter0: byte[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i4 = 0;
+
+     label1:
+        if i4 >= i0 goto label2;
+
+        $i2 = i4 + i1;
+
+        $b3 = virtualinvoke r1.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: byte read_octet()>();
+
+        r0[$i2] = $b3;
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void read_short_array(short[], int, int)
+    {
+        short $s3;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r1;
+        int i0, i1, $i2, i4;
+        short[] r0;
+
+        r1 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r0 := @parameter0: short[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i4 = 0;
+
+     label1:
+        if i4 >= i0 goto label2;
+
+        $i2 = i4 + i1;
+
+        $s3 = virtualinvoke r1.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: short read_short()>();
+
+        r0[$i2] = $s3;
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void read_ushort_array(short[], int, int)
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        int i0, i1;
+        short[] r1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r1 := @parameter0: short[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: void read_short_array(short[],int,int)>(r1, i0, i1);
+
+        return;
+    }
+
+    public void read_long_array(int[], int, int)
+    {
+        int[] r0;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r1;
+        int i0, i1, $i2, $i3, i4;
+
+        r1 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r0 := @parameter0: int[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i4 = 0;
+
+     label1:
+        if i4 >= i0 goto label2;
+
+        $i2 = i4 + i1;
+
+        $i3 = virtualinvoke r1.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int read_long()>();
+
+        r0[$i2] = $i3;
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void read_ulong_array(int[], int, int)
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        int[] r1;
+        int i0, i1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r1 := @parameter0: int[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: void read_long_array(int[],int,int)>(r1, i0, i1);
+
+        return;
+    }
+
+    public void read_longlong_array(long[], int, int)
+    {
+        long[] r0;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r1;
+        int i0, i1, $i2, i4;
+        long $l3;
+
+        r1 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r0 := @parameter0: long[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i4 = 0;
+
+     label1:
+        if i4 >= i0 goto label2;
+
+        $i2 = i4 + i1;
+
+        $l3 = virtualinvoke r1.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: long read_longlong()>();
+
+        r0[$i2] = $l3;
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void read_ulonglong_array(long[], int, int)
+    {
+        long[] r1;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        int i0, i1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r1 := @parameter0: long[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: void read_longlong_array(long[],int,int)>(r1, i0, i1);
+
+        return;
+    }
+
+    public void read_float_array(float[], int, int)
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r1;
+        int i0, i1, $i2, i3;
+        float $f0;
+        float[] r0;
+
+        r1 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r0 := @parameter0: float[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i3 = 0;
+
+     label1:
+        if i3 >= i0 goto label2;
+
+        $i2 = i3 + i1;
+
+        $f0 = virtualinvoke r1.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: float read_float()>();
+
+        r0[$i2] = $f0;
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void read_double_array(double[], int, int)
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r1;
+        int i0, i1, $i2, i3;
+        double[] r0;
+        double $d0;
+
+        r1 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r0 := @parameter0: double[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i3 = 0;
+
+     label1:
+        if i3 >= i0 goto label2;
+
+        $i2 = i3 + i1;
+
+        $d0 = virtualinvoke r1.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: double read_double()>();
+
+        r0[$i2] = $d0;
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public org.omg.CORBA.Object read_Object()
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        org.omg.CORBA.Object $r1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: org.omg.CORBA.Object read_Object(java.lang.Class)>(null);
+
+        return $r1;
+    }
+
+    public org.omg.CORBA.TypeCode read_TypeCode()
+    {
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r0;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r1;
+        com.sun.corba.se.spi.orb.ORB $r2;
+        com.sun.corba.se.impl.encoding.CDRInputStream $r3;
+
+        r1 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $r0 = new com.sun.corba.se.impl.corba.TypeCodeImpl;
+
+        $r2 = r1.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.spi.orb.ORB orb>;
+
+        specialinvoke $r0.<com.sun.corba.se.impl.corba.TypeCodeImpl: void <init>(com.sun.corba.se.spi.orb.ORB)>($r2);
+
+        $r3 = r1.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.encoding.CDRInputStream parent>;
+
+        virtualinvoke $r0.<com.sun.corba.se.impl.corba.TypeCodeImpl: void read_value(org.omg.CORBA_2_3.portable.InputStream)>($r3);
+
+        return $r0;
+    }
+
+    public org.omg.CORBA.Any read_any()
+    {
+        org.omg.CORBA.Any $r2;
+        org.omg.CORBA.MARSHAL $r7;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        com.sun.corba.se.spi.orb.ORB $r1, $r4;
+        org.omg.CORBA.TCKind $r8;
+        com.sun.corba.se.impl.corba.TypeCodeImpl $r3;
+        int $i0;
+        com.sun.corba.se.impl.encoding.CDRInputStream $r5, $r6;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.spi.orb.ORB: org.omg.CORBA.Any create_any()>();
+
+        $r3 = new com.sun.corba.se.impl.corba.TypeCodeImpl;
+
+        $r4 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.spi.orb.ORB orb>;
+
+        specialinvoke $r3.<com.sun.corba.se.impl.corba.TypeCodeImpl: void <init>(com.sun.corba.se.spi.orb.ORB)>($r4);
+
+     label1:
+        $r5 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.encoding.CDRInputStream parent>;
+
+        virtualinvoke $r3.<com.sun.corba.se.impl.corba.TypeCodeImpl: void read_value(org.omg.CORBA_2_3.portable.InputStream)>($r5);
+
+     label2:
+        goto label5;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $r8 = virtualinvoke $r3.<com.sun.corba.se.impl.corba.TypeCodeImpl: org.omg.CORBA.TCKind kind()>();
+
+        $i0 = virtualinvoke $r8.<org.omg.CORBA.TCKind: int value()>();
+
+        if $i0 == 29 goto label4;
+
+        throw $r7;
+
+     label4:
+        virtualinvoke $r7.<org.omg.CORBA.MARSHAL: void printStackTrace()>();
+
+     label5:
+        $r6 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.encoding.CDRInputStream parent>;
+
+        virtualinvoke $r2.<org.omg.CORBA.Any: void read_value(org.omg.CORBA.portable.InputStream,org.omg.CORBA.TypeCode)>($r6, $r3);
+
+        return $r2;
+
+        catch org.omg.CORBA.MARSHAL from label1 to label2 with label3;
+    }
+
+    public org.omg.CORBA.Principal read_Principal()
+    {
+        byte[] r1;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        int $i0;
+        com.sun.corba.se.impl.corba.PrincipalImpl $r2;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $i0 = virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int read_long()>();
+
+        r1 = newarray (byte)[$i0];
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: void read_octet_array(byte[],int,int)>(r1, 0, $i0);
+
+        $r2 = new com.sun.corba.se.impl.corba.PrincipalImpl;
+
+        specialinvoke $r2.<com.sun.corba.se.impl.corba.PrincipalImpl: void <init>()>();
+
+        virtualinvoke $r2.<org.omg.CORBA.Principal: void name(byte[])>(r1);
+
+        return $r2;
+    }
+
+    public java.math.BigDecimal read_fixed()
+    {
+        java.math.BigDecimal $r0;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r1;
+        java.lang.StringBuffer $r2;
+        java.lang.String $r3;
+
+        r1 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $r0 = new java.math.BigDecimal;
+
+        $r2 = specialinvoke r1.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.lang.StringBuffer read_fixed_buffer()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        specialinvoke $r0.<java.math.BigDecimal: void <init>(java.lang.String)>($r3);
+
+        return $r0;
+    }
+
+    private java.lang.StringBuffer read_fixed_buffer()
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r1;
+        short $s1, $s6;
+        byte $b0, b3;
+        java.lang.StringBuffer $r3, $r4;
+        int i2, $i7, $i8, $i9, $i10;
+        boolean z0, z1, z2, z3;
+        char $c4, $c5;
+
+        r1 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $r3 = new java.lang.StringBuffer;
+
+        specialinvoke $r3.<java.lang.StringBuffer: void <init>(int)>(64);
+
+        z0 = 0;
+
+        z3 = 0;
+
+        z2 = 0;
+
+        z1 = 1;
+
+     label1:
+        if z1 == 0 goto label7;
+
+        $b0 = virtualinvoke r1.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: byte read_octet()>();
+
+        $s6 = (short) $b0;
+
+        $s1 = $s6 & 240;
+
+        $i7 = (int) $s1;
+
+        i2 = $i7 >> 4;
+
+        b3 = $b0 & 15;
+
+        if z2 != 0 goto label2;
+
+        if i2 == 0 goto label3;
+
+     label2:
+        $c4 = staticinvoke <java.lang.Character: char forDigit(int,int)>(i2, 10);
+
+        virtualinvoke $r3.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c4);
+
+        z0 = 1;
+
+        z3 = 1;
+
+        z2 = 1;
+
+     label3:
+        $i8 = (int) b3;
+
+        if $i8 != 12 goto label5;
+
+        if z3 != 0 goto label4;
+
+        $r4 = new java.lang.StringBuffer;
+
+        specialinvoke $r4.<java.lang.StringBuffer: void <init>(java.lang.String)>("0.0");
+
+        return $r4;
+
+     label4:
+        z1 = 0;
+
+        goto label1;
+
+     label5:
+        $i9 = (int) b3;
+
+        if $i9 != 13 goto label6;
+
+        virtualinvoke $r3.<java.lang.StringBuffer: java.lang.StringBuffer insert(int,char)>(0, 45);
+
+        z1 = 0;
+
+        goto label1;
+
+     label6:
+        $i10 = (int) b3;
+
+        $c5 = staticinvoke <java.lang.Character: char forDigit(int,int)>($i10, 10);
+
+        virtualinvoke $r3.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c5);
+
+        z0 = 1;
+
+        z3 = 1;
+
+        z2 = 1;
+
+        goto label1;
+
+     label7:
+        return $r3;
+    }
+
+    public org.omg.CORBA.Object read_Object(java.lang.Class)
+    {
+        com.sun.corba.se.spi.presentation.rmi.PresentationManager$StubFactoryFactory $r3;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        com.sun.corba.se.spi.presentation.rmi.PresentationManager$StubFactory r15;
+        java.lang.String $r5, $r8, $r11, $r13;
+        com.sun.corba.se.impl.util.RepositoryId $r12;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        com.sun.corba.se.spi.ior.IOR $r2;
+        java.lang.Exception $r14;
+        com.sun.corba.se.spi.orb.ORB $r16;
+        com.sun.corba.se.spi.ior.iiop.IIOPProfile $r4;
+        org.omg.CORBA.Object $r17;
+        java.lang.Class r6, $r7;
+        java.lang.ClassLoader $r9;
+        com.sun.corba.se.impl.encoding.CDRInputStream $r1;
+        com.sun.corba.se.impl.util.RepositoryIdCache $r10;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r6 := @parameter0: java.lang.Class;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.encoding.CDRInputStream parent>;
+
+        $r2 = staticinvoke <com.sun.corba.se.spi.ior.IORFactories: com.sun.corba.se.spi.ior.IOR makeIOR(org.omg.CORBA_2_3.portable.InputStream)>($r1);
+
+        $z0 = interfaceinvoke $r2.<com.sun.corba.se.spi.ior.IOR: boolean isNil()>();
+
+        if $z0 == 0 goto label1;
+
+        return null;
+
+     label1:
+        $r3 = staticinvoke <com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.presentation.rmi.PresentationManager$StubFactoryFactory getStubFactoryFactory()>();
+
+        $r4 = interfaceinvoke $r2.<com.sun.corba.se.spi.ior.IOR: com.sun.corba.se.spi.ior.iiop.IIOPProfile getProfile()>();
+
+        $r5 = interfaceinvoke $r4.<com.sun.corba.se.spi.ior.iiop.IIOPProfile: java.lang.String getCodebase()>();
+
+        if r6 != null goto label7;
+
+        $r10 = <com.sun.corba.se.impl.util.RepositoryId: com.sun.corba.se.impl.util.RepositoryIdCache cache>;
+
+        $r11 = interfaceinvoke $r2.<com.sun.corba.se.spi.ior.IOR: java.lang.String getTypeId()>();
+
+        $r12 = virtualinvoke $r10.<com.sun.corba.se.impl.util.RepositoryIdCache: com.sun.corba.se.impl.util.RepositoryId getId(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<com.sun.corba.se.impl.util.RepositoryId: java.lang.String getClassName()>();
+
+        $z3 = virtualinvoke $r12.<com.sun.corba.se.impl.util.RepositoryId: boolean isIDLType()>();
+
+        if $r13 == null goto label2;
+
+        $z4 = virtualinvoke $r13.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z4 == 0 goto label3;
+
+     label2:
+        r15 = null;
+
+        goto label6;
+
+     label3:
+        r15 = interfaceinvoke $r3.<com.sun.corba.se.spi.presentation.rmi.PresentationManager$StubFactoryFactory: com.sun.corba.se.spi.presentation.rmi.PresentationManager$StubFactory createStubFactory(java.lang.String,boolean,java.lang.String,java.lang.Class,java.lang.ClassLoader)>($r13, $z3, $r5, null, null);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r14 := @caughtexception;
+
+        r15 = null;
+
+     label6:
+        goto label9;
+
+     label7:
+        $z1 = staticinvoke <com.sun.corba.se.spi.presentation.rmi.StubAdapter: boolean isStubClass(java.lang.Class)>(r6);
+
+        if $z1 == 0 goto label8;
+
+        r15 = staticinvoke <com.sun.corba.se.spi.presentation.rmi.PresentationDefaults: com.sun.corba.se.spi.presentation.rmi.PresentationManager$StubFactory makeStaticStubFactory(java.lang.Class)>(r6);
+
+        goto label9;
+
+     label8:
+        $r7 = class "Lorg/omg/CORBA/portable/IDLEntity;";
+
+        $z2 = virtualinvoke $r7.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(r6);
+
+        $r8 = virtualinvoke r6.<java.lang.Class: java.lang.String getName()>();
+
+        $r9 = virtualinvoke r6.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        r15 = interfaceinvoke $r3.<com.sun.corba.se.spi.presentation.rmi.PresentationManager$StubFactoryFactory: com.sun.corba.se.spi.presentation.rmi.PresentationManager$StubFactory createStubFactory(java.lang.String,boolean,java.lang.String,java.lang.Class,java.lang.ClassLoader)>($r8, $z2, $r5, r6, $r9);
+
+     label9:
+        $r16 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r17 = staticinvoke <com.sun.corba.se.impl.encoding.CDRInputStream_1_0: org.omg.CORBA.Object internalIORToObject(com.sun.corba.se.spi.ior.IOR,com.sun.corba.se.spi.presentation.rmi.PresentationManager$StubFactory,com.sun.corba.se.spi.orb.ORB)>($r2, r15, $r16);
+
+        return $r17;
+
+        catch java.lang.Exception from label3 to label4 with label5;
+    }
+
+    public org.omg.CORBA.ORB orb()
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        com.sun.corba.se.spi.orb.ORB $r1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.spi.orb.ORB orb>;
+
+        return $r1;
+    }
+
+    public java.io.Serializable read_value()
+    {
+        org.omg.CORBA.MARSHAL $r12;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r11;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        java.io.ObjectInputStream $r13;
+        int $i0, $i1, $i2, $i3;
+        java.util.LinkedList $r1, $r2, $r3, $r6, $r7;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.lang.Exception $r10;
+        java.io.Serializable $r5, $r9, $r15;
+        java.lang.Object $r4, $r8, $r14;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $z0 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z0 != 0 goto label1;
+
+        $r6 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $z3 = virtualinvoke $r6.<java.util.LinkedList: boolean isEmpty()>();
+
+        if $z3 != 0 goto label1;
+
+        $r7 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $r8 = virtualinvoke $r7.<java.util.LinkedList: java.lang.Object removeFirst()>();
+
+        $r9 = (java.io.Serializable) $r8;
+
+        return $r9;
+
+     label1:
+        $z1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z1 == 0 goto label2;
+
+        $r2 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $z2 = virtualinvoke $r2.<java.util.LinkedList: boolean isEmpty()>();
+
+        if $z2 != 0 goto label2;
+
+        $i1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex>;
+
+        $i0 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekCount>;
+
+        if $i1 >= $i0 goto label2;
+
+        $r3 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $i2 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex>;
+
+        $i3 = $i2 + 1;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex> = $i3;
+
+        $r4 = virtualinvoke $r3.<java.util.LinkedList: java.lang.Object get(int)>($i2);
+
+        $r5 = (java.io.Serializable) $r4;
+
+        return $r5;
+
+     label2:
+        $r13 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.io.ObjectInputStream is>;
+
+        $r14 = virtualinvoke $r13.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        $r15 = (java.io.Serializable) $r14;
+
+        $z4 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z4 == 0 goto label3;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        virtualinvoke $r1.<java.util.LinkedList: void addLast(java.lang.Object)>($r15);
+
+     label3:
+        return $r15;
+
+     label4:
+        $r10 := @caughtexception;
+
+        $r11 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r12 = virtualinvoke $r11.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.MARSHAL javaSerializationException(java.lang.Throwable,java.lang.Object)>($r10, "read_value");
+
+        throw $r12;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    public java.io.Serializable read_value(java.lang.Class)
+    {
+        java.lang.Class r2;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        java.io.Serializable $r1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r2 := @parameter0: java.lang.Class;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.io.Serializable read_value()>();
+
+        return $r1;
+    }
+
+    public java.io.Serializable read_value(org.omg.CORBA.portable.BoxedValueHelper)
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        java.io.Serializable $r1;
+        org.omg.CORBA.portable.BoxedValueHelper r2;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r2 := @parameter0: org.omg.CORBA.portable.BoxedValueHelper;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.io.Serializable read_value()>();
+
+        return $r1;
+    }
+
+    public java.io.Serializable read_value(java.lang.String)
+    {
+        java.lang.String r2;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        java.io.Serializable $r1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.io.Serializable read_value()>();
+
+        return $r1;
+    }
+
+    public java.io.Serializable read_value(java.io.Serializable)
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        java.io.Serializable $r1, r2;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r2 := @parameter0: java.io.Serializable;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.io.Serializable read_value()>();
+
+        return $r1;
+    }
+
+    public java.lang.Object read_abstract_interface()
+    {
+        java.lang.Object $r1;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.lang.Object read_abstract_interface(java.lang.Class)>(null);
+
+        return $r1;
+    }
+
+    public java.lang.Object read_abstract_interface(java.lang.Class)
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        org.omg.CORBA.Object $r3;
+        java.lang.Class r2;
+        boolean $z0;
+        java.io.Serializable $r1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r2 := @parameter0: java.lang.Class;
+
+        $z0 = virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean read_boolean()>();
+
+        if $z0 == 0 goto label1;
+
+        $r3 = virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: org.omg.CORBA.Object read_Object(java.lang.Class)>(r2);
+
+        return $r3;
+
+     label1:
+        $r1 = virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.io.Serializable read_value()>();
+
+        return $r1;
+    }
+
+    public void consumeEndian()
+    {
+        org.omg.CORBA.INTERNAL $r2;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r1;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL giopVersionError()>();
+
+        throw $r2;
+    }
+
+    public int getPosition()
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream $r1;
+        org.omg.CORBA.MARSHAL $r4;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r3;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        int $i0;
+        java.lang.Exception $r2;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream bis>;
+
+        $i0 = virtualinvoke $r1.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream: int getPosition()>();
+
+     label2:
+        return $i0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r4 = virtualinvoke $r3.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.MARSHAL javaSerializationException(java.lang.Throwable,java.lang.Object)>($r2, "getPosition");
+
+        throw $r4;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public java.lang.Object read_Abstract()
+    {
+        java.lang.Object $r1;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.lang.Object read_abstract_interface()>();
+
+        return $r1;
+    }
+
+    public java.io.Serializable read_Value()
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        java.io.Serializable $r1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.io.Serializable read_value()>();
+
+        return $r1;
+    }
+
+    public void read_any_array(org.omg.CORBA.AnySeqHolder, int, int)
+    {
+        org.omg.CORBA.AnySeqHolder r1;
+        org.omg.CORBA.Any[] $r2;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        int i0, i1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r1 := @parameter0: org.omg.CORBA.AnySeqHolder;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r2 = r1.<org.omg.CORBA.AnySeqHolder: org.omg.CORBA.Any[] value>;
+
+        specialinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: void read_any_array(org.omg.CORBA.Any[],int,int)>($r2, i0, i1);
+
+        return;
+    }
+
+    private final void read_any_array(org.omg.CORBA.Any[], int, int)
+    {
+        org.omg.CORBA.Any[] r0;
+        org.omg.CORBA.Any $r2;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r1;
+        int i0, i1, $i2, i3;
+
+        r1 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r0 := @parameter0: org.omg.CORBA.Any[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i3 = 0;
+
+     label1:
+        if i3 >= i0 goto label2;
+
+        $i2 = i3 + i1;
+
+        $r2 = virtualinvoke r1.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: org.omg.CORBA.Any read_any()>();
+
+        r0[$i2] = $r2;
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void read_boolean_array(org.omg.CORBA.BooleanSeqHolder, int, int)
+    {
+        org.omg.CORBA.BooleanSeqHolder r1;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        int i0, i1;
+        boolean[] $r2;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r1 := @parameter0: org.omg.CORBA.BooleanSeqHolder;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r2 = r1.<org.omg.CORBA.BooleanSeqHolder: boolean[] value>;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: void read_boolean_array(boolean[],int,int)>($r2, i0, i1);
+
+        return;
+    }
+
+    public void read_char_array(org.omg.CORBA.CharSeqHolder, int, int)
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        org.omg.CORBA.CharSeqHolder r1;
+        int i0, i1;
+        char[] $r2;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r1 := @parameter0: org.omg.CORBA.CharSeqHolder;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r2 = r1.<org.omg.CORBA.CharSeqHolder: char[] value>;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: void read_char_array(char[],int,int)>($r2, i0, i1);
+
+        return;
+    }
+
+    public void read_wchar_array(org.omg.CORBA.WCharSeqHolder, int, int)
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        org.omg.CORBA.WCharSeqHolder r1;
+        int i0, i1;
+        char[] $r2;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r1 := @parameter0: org.omg.CORBA.WCharSeqHolder;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r2 = r1.<org.omg.CORBA.WCharSeqHolder: char[] value>;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: void read_wchar_array(char[],int,int)>($r2, i0, i1);
+
+        return;
+    }
+
+    public void read_octet_array(org.omg.CORBA.OctetSeqHolder, int, int)
+    {
+        byte[] $r2;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        int i0, i1;
+        org.omg.CORBA.OctetSeqHolder r1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r1 := @parameter0: org.omg.CORBA.OctetSeqHolder;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r2 = r1.<org.omg.CORBA.OctetSeqHolder: byte[] value>;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: void read_octet_array(byte[],int,int)>($r2, i0, i1);
+
+        return;
+    }
+
+    public void read_short_array(org.omg.CORBA.ShortSeqHolder, int, int)
+    {
+        org.omg.CORBA.ShortSeqHolder r1;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        int i0, i1;
+        short[] $r2;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r1 := @parameter0: org.omg.CORBA.ShortSeqHolder;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r2 = r1.<org.omg.CORBA.ShortSeqHolder: short[] value>;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: void read_short_array(short[],int,int)>($r2, i0, i1);
+
+        return;
+    }
+
+    public void read_ushort_array(org.omg.CORBA.UShortSeqHolder, int, int)
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        int i0, i1;
+        short[] $r2;
+        org.omg.CORBA.UShortSeqHolder r1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r1 := @parameter0: org.omg.CORBA.UShortSeqHolder;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r2 = r1.<org.omg.CORBA.UShortSeqHolder: short[] value>;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: void read_ushort_array(short[],int,int)>($r2, i0, i1);
+
+        return;
+    }
+
+    public void read_long_array(org.omg.CORBA.LongSeqHolder, int, int)
+    {
+        org.omg.CORBA.LongSeqHolder r1;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        int[] $r2;
+        int i0, i1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r1 := @parameter0: org.omg.CORBA.LongSeqHolder;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r2 = r1.<org.omg.CORBA.LongSeqHolder: int[] value>;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: void read_long_array(int[],int,int)>($r2, i0, i1);
+
+        return;
+    }
+
+    public void read_ulong_array(org.omg.CORBA.ULongSeqHolder, int, int)
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        int[] $r2;
+        int i0, i1;
+        org.omg.CORBA.ULongSeqHolder r1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r1 := @parameter0: org.omg.CORBA.ULongSeqHolder;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r2 = r1.<org.omg.CORBA.ULongSeqHolder: int[] value>;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: void read_ulong_array(int[],int,int)>($r2, i0, i1);
+
+        return;
+    }
+
+    public void read_ulonglong_array(org.omg.CORBA.ULongLongSeqHolder, int, int)
+    {
+        long[] $r2;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        int i0, i1;
+        org.omg.CORBA.ULongLongSeqHolder r1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r1 := @parameter0: org.omg.CORBA.ULongLongSeqHolder;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r2 = r1.<org.omg.CORBA.ULongLongSeqHolder: long[] value>;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: void read_ulonglong_array(long[],int,int)>($r2, i0, i1);
+
+        return;
+    }
+
+    public void read_longlong_array(org.omg.CORBA.LongLongSeqHolder, int, int)
+    {
+        long[] $r2;
+        org.omg.CORBA.LongLongSeqHolder r1;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        int i0, i1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r1 := @parameter0: org.omg.CORBA.LongLongSeqHolder;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r2 = r1.<org.omg.CORBA.LongLongSeqHolder: long[] value>;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: void read_longlong_array(long[],int,int)>($r2, i0, i1);
+
+        return;
+    }
+
+    public void read_float_array(org.omg.CORBA.FloatSeqHolder, int, int)
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        int i0, i1;
+        org.omg.CORBA.FloatSeqHolder r1;
+        float[] $r2;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r1 := @parameter0: org.omg.CORBA.FloatSeqHolder;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r2 = r1.<org.omg.CORBA.FloatSeqHolder: float[] value>;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: void read_float_array(float[],int,int)>($r2, i0, i1);
+
+        return;
+    }
+
+    public void read_double_array(org.omg.CORBA.DoubleSeqHolder, int, int)
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        int i0, i1;
+        double[] $r2;
+        org.omg.CORBA.DoubleSeqHolder r1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r1 := @parameter0: org.omg.CORBA.DoubleSeqHolder;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r2 = r1.<org.omg.CORBA.DoubleSeqHolder: double[] value>;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: void read_double_array(double[],int,int)>($r2, i0, i1);
+
+        return;
+    }
+
+    public java.lang.String[] _truncatable_ids()
+    {
+        org.omg.CORBA.INTERNAL $r2;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r1;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL giopVersionError()>();
+
+        throw $r2;
+    }
+
+    public void mark(int)
+    {
+        org.omg.CORBA.MARSHAL $r2;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r1;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        java.io.ObjectInputStream $r3;
+        int $i0, i1;
+        java.util.LinkedList $r4, $r5;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        i1 := @parameter0: int;
+
+        $z0 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        if $z0 != 0 goto label1;
+
+        $r3 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.io.ObjectInputStream is>;
+
+        if $r3 != null goto label2;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.MARSHAL javaSerializationException(java.lang.Object)>("mark");
+
+        throw $r2;
+
+     label2:
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn> = 1;
+
+        $r4 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $z1 = virtualinvoke $r4.<java.util.LinkedList: boolean isEmpty()>();
+
+        if $z1 != 0 goto label3;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex> = 0;
+
+        $r5 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $i0 = virtualinvoke $r5.<java.util.LinkedList: int size()>();
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekCount> = $i0;
+
+     label3:
+        return;
+    }
+
+    public void reset()
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn> = 0;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex> = 0;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekCount> = 0;
+
+        return;
+    }
+
+    public boolean markSupported()
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        return 1;
+    }
+
+    public com.sun.corba.se.impl.encoding.CDRInputStreamBase dup()
+    {
+        org.omg.CORBA.INTERNAL $r12;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r11;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0, $r5, $r7;
+        java.nio.ByteBuffer $r3;
+        int $i0, $i1, $i2, $i3;
+        java.util.LinkedList $r6, $r9;
+        boolean $z0;
+        com.sun.corba.se.impl.encoding.CDRInputStreamBase r13;
+        com.sun.corba.se.spi.orb.ORB $r4;
+        java.lang.Exception $r10;
+        java.lang.Class $r1;
+        java.lang.Object $r2, $r8;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.Object newInstance()>();
+
+        r13 = (com.sun.corba.se.impl.encoding.CDRInputStreamBase) $r2;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r10 := @caughtexception;
+
+        $r11 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r12 = virtualinvoke $r11.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL couldNotDuplicateCdrInputStream(java.lang.Throwable)>($r10);
+
+        throw $r12;
+
+     label4:
+        $r4 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r3 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.nio.ByteBuffer buffer>;
+
+        $i0 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int bufSize>;
+
+        virtualinvoke r13.<com.sun.corba.se.impl.encoding.CDRInputStreamBase: void init(org.omg.CORBA.ORB,java.nio.ByteBuffer,int,boolean,com.sun.corba.se.impl.encoding.BufferManagerRead)>($r4, $r3, $i0, 0, null);
+
+        $r5 = (com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream) r13;
+
+        $i1 = virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int getPosition()>();
+
+        virtualinvoke $r5.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: void skipBytes(int)>($i1);
+
+        $r7 = (com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream) r13;
+
+        $z0 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn>;
+
+        $i2 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex>;
+
+        $i3 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekCount>;
+
+        $r6 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ>;
+
+        $r8 = virtualinvoke $r6.<java.util.LinkedList: java.lang.Object clone()>();
+
+        $r9 = (java.util.LinkedList) $r8;
+
+        virtualinvoke $r7.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: void setMarkData(boolean,int,int,java.util.LinkedList)>($z0, $i2, $i3, $r9);
+
+        return r13;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    void skipBytes(int)
+    {
+        org.omg.CORBA.MARSHAL $r4;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r3;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        int i0;
+        java.io.ObjectInputStream $r1;
+        java.lang.Exception $r2;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        i0 := @parameter0: int;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.io.ObjectInputStream is>;
+
+        virtualinvoke $r1.<java.io.ObjectInputStream: int skipBytes(int)>(i0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r4 = virtualinvoke $r3.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.MARSHAL javaSerializationException(java.lang.Throwable,java.lang.Object)>($r2, "skipBytes");
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    void setMarkData(boolean, int, int, java.util.LinkedList)
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        int i0, i1;
+        java.util.LinkedList r1;
+        boolean z0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        z0 := @parameter0: boolean;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r1 := @parameter3: java.util.LinkedList;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: boolean markOn> = z0;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekIndex> = i0;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int peekCount> = i1;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.util.LinkedList markedItemQ> = r1;
+
+        return;
+    }
+
+    public java.math.BigDecimal read_fixed(short, short)
+    {
+        org.omg.CORBA.MARSHAL $r7;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r5;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        java.lang.Integer $r8, $r9;
+        java.math.BigDecimal $r10;
+        short s0, s2;
+        java.lang.StringBuffer $r1;
+        int $i1, $i3, $i4, $i5, $i6, $i7, $i8;
+        java.lang.String $r3;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        s0 := @parameter0: short;
+
+        s2 := @parameter1: short;
+
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.lang.StringBuffer read_fixed_buffer()>();
+
+        $i1 = virtualinvoke $r1.<java.lang.StringBuffer: int length()>();
+
+        $i5 = (int) s0;
+
+        if $i5 == $i1 goto label1;
+
+        $r5 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r8 = new java.lang.Integer;
+
+        $i6 = (int) s0;
+
+        specialinvoke $r8.<java.lang.Integer: void <init>(int)>($i6);
+
+        $r9 = new java.lang.Integer;
+
+        $i4 = virtualinvoke $r1.<java.lang.StringBuffer: int length()>();
+
+        specialinvoke $r9.<java.lang.Integer: void <init>(int)>($i4);
+
+        $r7 = virtualinvoke $r5.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.MARSHAL badFixed(java.lang.Object,java.lang.Object)>($r8, $r9);
+
+        throw $r7;
+
+     label1:
+        $i7 = (int) s0;
+
+        $i8 = (int) s2;
+
+        $i3 = $i7 - $i8;
+
+        virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer insert(int,char)>($i3, 46);
+
+        $r10 = new java.math.BigDecimal;
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        specialinvoke $r10.<java.math.BigDecimal: void <init>(java.lang.String)>($r3);
+
+        return $r10;
+    }
+
+    public boolean isLittleEndian()
+    {
+        org.omg.CORBA.INTERNAL $r2;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r1;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL giopVersionError()>();
+
+        throw $r2;
+    }
+
+    void setHeaderPadding(boolean)
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        boolean z0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        z0 := @parameter0: boolean;
+
+        return;
+    }
+
+    public java.nio.ByteBuffer getByteBuffer()
+    {
+        org.omg.CORBA.INTERNAL $r2;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r1;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL giopVersionError()>();
+
+        throw $r2;
+    }
+
+    public void setByteBuffer(java.nio.ByteBuffer)
+    {
+        org.omg.CORBA.INTERNAL $r2;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r1;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        java.nio.ByteBuffer r3;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r3 := @parameter0: java.nio.ByteBuffer;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL giopVersionError()>();
+
+        throw $r2;
+    }
+
+    public void setByteBufferWithInfo(com.sun.corba.se.impl.encoding.ByteBufferWithInfo)
+    {
+        org.omg.CORBA.INTERNAL $r2;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r1;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        com.sun.corba.se.impl.encoding.ByteBufferWithInfo r3;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r3 := @parameter0: com.sun.corba.se.impl.encoding.ByteBufferWithInfo;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL giopVersionError()>();
+
+        throw $r2;
+    }
+
+    public int getBufferLength()
+    {
+        int $i0;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $i0 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int bufSize>;
+
+        return $i0;
+    }
+
+    public void setBufferLength(int)
+    {
+        int i0;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        i0 := @parameter0: int;
+
+        return;
+    }
+
+    public int getIndex()
+    {
+        int $i0;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream $r1;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream bis>;
+
+        $i0 = virtualinvoke $r1.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream: int getPosition()>();
+
+        return $i0;
+    }
+
+    public void setIndex(int)
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream $r1;
+        java.lang.IndexOutOfBoundsException $r2;
+        org.omg.CORBA.MARSHAL $r4;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r3;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        int i0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        i0 := @parameter0: int;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream bis>;
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream$_ByteArrayInputStream: void setPosition(int)>(i0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r4 = virtualinvoke $r3.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.MARSHAL javaSerializationException(java.lang.Throwable,java.lang.Object)>($r2, "setIndex");
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.lang.IndexOutOfBoundsException from label1 to label2 with label3;
+    }
+
+    public void orb(org.omg.CORBA.ORB)
+    {
+        org.omg.CORBA.ORB r1;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        com.sun.corba.se.spi.orb.ORB $r2;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r1 := @parameter0: org.omg.CORBA.ORB;
+
+        $r2 = (com.sun.corba.se.spi.orb.ORB) r1;
+
+        r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.spi.orb.ORB orb> = $r2;
+
+        return;
+    }
+
+    public com.sun.corba.se.impl.encoding.BufferManagerRead getBufferManager()
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        com.sun.corba.se.impl.encoding.BufferManagerRead $r1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.encoding.BufferManagerRead bufferManager>;
+
+        return $r1;
+    }
+
+    public com.sun.corba.se.spi.ior.iiop.GIOPVersion getGIOPVersion()
+    {
+        com.sun.corba.se.spi.ior.iiop.GIOPVersion $r0;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r1;
+
+        r1 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $r0 = <com.sun.corba.se.spi.ior.iiop.GIOPVersion: com.sun.corba.se.spi.ior.iiop.GIOPVersion V1_2>;
+
+        return $r0;
+    }
+
+    com.sun.org.omg.SendingContext.CodeBase getCodeBase()
+    {
+        com.sun.org.omg.SendingContext.CodeBase $r2;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        com.sun.corba.se.impl.encoding.CDRInputStream $r1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.encoding.CDRInputStream parent>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.encoding.CDRInputStream: com.sun.org.omg.SendingContext.CodeBase getCodeBase()>();
+
+        return $r2;
+    }
+
+    void printBuffer()
+    {
+        byte[] $r2;
+        java.nio.ByteBuffer $r1;
+        byte $b6, $b9;
+        boolean $z0;
+        java.lang.StringBuilder $r5, $r7, $r8, $r10, $r12, $r13, $r22, $r24, $r25, $r27, $r28, $r29;
+        java.lang.Throwable $r30;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i8, $i11, $i12, $i13, $i14, i15, i16, i17, i18;
+        java.lang.String $r9, $r14, $r18, $r21, $r26, r31;
+        java.io.PrintStream $r3, $r4, $r6, $r11, $r15, $r17, $r19, $r20, $r23;
+        char $c7, $c10;
+        char[] r16;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: java.nio.ByteBuffer buffer>;
+
+        $r2 = virtualinvoke $r1.<java.nio.ByteBuffer: byte[] array()>();
+
+        $r3 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>("+++++++ Input Buffer ++++++++");
+
+        $r4 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r4.<java.io.PrintStream: void println()>();
+
+        $r6 = <java.lang.System: java.io.PrintStream out>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Current position: ");
+
+        $i0 = virtualinvoke r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int getPosition()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<java.io.PrintStream: void println(java.lang.String)>($r9);
+
+        $r11 = <java.lang.System: java.io.PrintStream out>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Total length : ");
+
+        $i1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: int bufSize>;
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r11.<java.io.PrintStream: void println(java.lang.String)>($r14);
+
+        $r15 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r15.<java.io.PrintStream: void println()>();
+
+        r16 = newarray (char)[16];
+
+     label01:
+        i15 = 0;
+
+     label02:
+        $i2 = lengthof $r2;
+
+        if i15 >= $i2 goto label12;
+
+        i16 = 0;
+
+     label03:
+        if i16 >= 16 goto label06;
+
+        $i12 = i16 + i15;
+
+        $i11 = lengthof $r2;
+
+        if $i12 >= $i11 goto label06;
+
+        $i13 = i15 + i16;
+
+        i17 = $r2[$i13];
+
+        if i17 >= 0 goto label04;
+
+        i17 = 256 + i17;
+
+     label04:
+        $r21 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>(i17);
+
+        r31 = $r21;
+
+        $i14 = virtualinvoke $r21.<java.lang.String: int length()>();
+
+        if $i14 != 1 goto label05;
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("0");
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r21);
+
+        r31 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label05:
+        $r23 = <java.lang.System: java.io.PrintStream out>;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r31);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r23.<java.io.PrintStream: void print(java.lang.String)>($r26);
+
+        i16 = i16 + 1;
+
+        goto label03;
+
+     label06:
+        if i16 >= 16 goto label07;
+
+        $r20 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r20.<java.io.PrintStream: void print(java.lang.String)>("   ");
+
+        i16 = i16 + 1;
+
+        goto label06;
+
+     label07:
+        i18 = 0;
+
+     label08:
+        if i18 >= 16 goto label11;
+
+        $i4 = i18 + i15;
+
+        $i3 = lengthof $r2;
+
+        if $i4 >= $i3 goto label11;
+
+        $i5 = i15 + i18;
+
+        $b6 = $r2[$i5];
+
+        $c7 = (char) $b6;
+
+        $z0 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: boolean isPrintable(char)>($c7);
+
+        if $z0 == 0 goto label09;
+
+        $i8 = i15 + i18;
+
+        $b9 = $r2[$i8];
+
+        $c10 = (char) $b9;
+
+        r16[i18] = $c10;
+
+        goto label10;
+
+     label09:
+        r16[i18] = 46;
+
+     label10:
+        i18 = i18 + 1;
+
+        goto label08;
+
+     label11:
+        $r19 = <java.lang.System: java.io.PrintStream out>;
+
+        $r18 = new java.lang.String;
+
+        specialinvoke $r18.<java.lang.String: void <init>(char[],int,int)>(r16, 0, i18);
+
+        virtualinvoke $r19.<java.io.PrintStream: void println(java.lang.String)>($r18);
+
+        i15 = i15 + 16;
+
+        goto label02;
+
+     label12:
+        goto label14;
+
+     label13:
+        $r30 := @caughtexception;
+
+        virtualinvoke $r30.<java.lang.Throwable: void printStackTrace()>();
+
+     label14:
+        $r17 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r17.<java.io.PrintStream: void println(java.lang.String)>("++++++++++++++++++++++++++++++");
+
+        return;
+
+        catch java.lang.Throwable from label01 to label12 with label13;
+    }
+
+    void alignOnBoundary(int)
+    {
+        org.omg.CORBA.INTERNAL $r2;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r1;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        int i0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL giopVersionError()>();
+
+        throw $r2;
+    }
+
+    void performORBVersionSpecificInit()
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        return;
+    }
+
+    public void resetCodeSetConverters()
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        return;
+    }
+
+    public void start_value()
+    {
+        org.omg.CORBA.INTERNAL $r2;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r1;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL giopVersionError()>();
+
+        throw $r2;
+    }
+
+    public void end_value()
+    {
+        org.omg.CORBA.INTERNAL $r2;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r1;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL giopVersionError()>();
+
+        throw $r2;
+    }
+
+    public volatile org.omg.CORBA.Context read_Context()
+    {
+        org.omg.CORBA.Context $r1;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.encoding.CDRInputStreamBase: org.omg.CORBA.Context read_Context()>();
+
+        return $r1;
+    }
+
+    public volatile int read() throws java.io.IOException
+    {
+        int $i0;
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        $i0 = specialinvoke r0.<com.sun.corba.se.impl.encoding.CDRInputStreamBase: int read()>();
+
+        return $i0;
+    }
+
+    public volatile void setParent(com.sun.corba.se.impl.encoding.CDRInputStream)
+    {
+        com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream r0;
+        com.sun.corba.se.impl.encoding.CDRInputStream r1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.IDLJavaSerializationInputStream;
+
+        r1 := @parameter0: com.sun.corba.se.impl.encoding.CDRInputStream;
+
+        specialinvoke r0.<com.sun.corba.se.impl.encoding.CDRInputStreamBase: void setParent(com.sun.corba.se.impl.encoding.CDRInputStream)>(r1);
+
+        return;
+    }
+}

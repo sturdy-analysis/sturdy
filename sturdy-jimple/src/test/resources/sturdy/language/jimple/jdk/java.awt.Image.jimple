@@ -1,0 +1,230 @@
+public abstract class java.awt.Image extends java.lang.Object
+{
+    private static java.awt.ImageCapabilities defaultImageCaps;
+    protected float accelerationPriority;
+    public static final java.lang.Object UndefinedProperty;
+    public static final int SCALE_DEFAULT;
+    public static final int SCALE_FAST;
+    public static final int SCALE_SMOOTH;
+    public static final int SCALE_REPLICATE;
+    public static final int SCALE_AREA_AVERAGING;
+    sun.awt.image.SurfaceManager surfaceManager;
+
+    public void <init>()
+    {
+        java.awt.Image r0;
+
+        r0 := @this: java.awt.Image;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.awt.Image: float accelerationPriority> = 0.5F;
+
+        return;
+    }
+
+    public abstract int getWidth(java.awt.image.ImageObserver);
+
+    public abstract int getHeight(java.awt.image.ImageObserver);
+
+    public abstract java.awt.image.ImageProducer getSource();
+
+    public abstract java.awt.Graphics getGraphics();
+
+    public abstract java.lang.Object getProperty(java.lang.String, java.awt.image.ImageObserver);
+
+    public java.awt.Image getScaledInstance(int, int, int)
+    {
+        java.awt.Image r2, $r5;
+        java.awt.image.ReplicateScaleFilter $r0, r7;
+        java.awt.image.FilteredImageSource $r1;
+        java.awt.image.ImageProducer $r3;
+        int i0, $i1, i2, i3;
+        java.awt.image.AreaAveragingScaleFilter $r6;
+        java.awt.Toolkit $r4;
+
+        r2 := @this: java.awt.Image;
+
+        i2 := @parameter0: int;
+
+        i3 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        $i1 = i0 & 20;
+
+        if $i1 == 0 goto label1;
+
+        $r6 = new java.awt.image.AreaAveragingScaleFilter;
+
+        specialinvoke $r6.<java.awt.image.AreaAveragingScaleFilter: void <init>(int,int)>(i2, i3);
+
+        r7 = $r6;
+
+        goto label2;
+
+     label1:
+        $r0 = new java.awt.image.ReplicateScaleFilter;
+
+        specialinvoke $r0.<java.awt.image.ReplicateScaleFilter: void <init>(int,int)>(i2, i3);
+
+        r7 = $r0;
+
+     label2:
+        $r1 = new java.awt.image.FilteredImageSource;
+
+        $r3 = virtualinvoke r2.<java.awt.Image: java.awt.image.ImageProducer getSource()>();
+
+        specialinvoke $r1.<java.awt.image.FilteredImageSource: void <init>(java.awt.image.ImageProducer,java.awt.image.ImageFilter)>($r3, r7);
+
+        $r4 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r5 = virtualinvoke $r4.<java.awt.Toolkit: java.awt.Image createImage(java.awt.image.ImageProducer)>($r1);
+
+        return $r5;
+    }
+
+    public void flush()
+    {
+        java.awt.Image r0;
+        sun.awt.image.SurfaceManager $r1, $r2;
+
+        r0 := @this: java.awt.Image;
+
+        $r1 = r0.<java.awt.Image: sun.awt.image.SurfaceManager surfaceManager>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<java.awt.Image: sun.awt.image.SurfaceManager surfaceManager>;
+
+        virtualinvoke $r2.<sun.awt.image.SurfaceManager: void flush()>();
+
+     label1:
+        return;
+    }
+
+    public java.awt.ImageCapabilities getCapabilities(java.awt.GraphicsConfiguration)
+    {
+        java.awt.GraphicsConfiguration r3;
+        java.awt.Image r0;
+        java.awt.ImageCapabilities $r2, $r5;
+        sun.awt.image.SurfaceManager $r1, $r4;
+
+        r0 := @this: java.awt.Image;
+
+        r3 := @parameter0: java.awt.GraphicsConfiguration;
+
+        $r1 = r0.<java.awt.Image: sun.awt.image.SurfaceManager surfaceManager>;
+
+        if $r1 == null goto label1;
+
+        $r4 = r0.<java.awt.Image: sun.awt.image.SurfaceManager surfaceManager>;
+
+        $r5 = virtualinvoke $r4.<sun.awt.image.SurfaceManager: java.awt.ImageCapabilities getCapabilities(java.awt.GraphicsConfiguration)>(r3);
+
+        return $r5;
+
+     label1:
+        $r2 = <java.awt.Image: java.awt.ImageCapabilities defaultImageCaps>;
+
+        return $r2;
+    }
+
+    public void setAccelerationPriority(float)
+    {
+        java.awt.Image r1;
+        java.lang.IllegalArgumentException $r4;
+        sun.awt.image.SurfaceManager $r2, $r3;
+        byte $b0, $b1;
+        int $i2, $i3;
+        float f0, $f1;
+
+        r1 := @this: java.awt.Image;
+
+        f0 := @parameter0: float;
+
+        $b0 = f0 cmpg 0.0F;
+
+        $i2 = (int) $b0;
+
+        if $i2 < 0 goto label1;
+
+        $b1 = f0 cmpl 1.0F;
+
+        $i3 = (int) $b1;
+
+        if $i3 <= 0 goto label2;
+
+     label1:
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Priority must be a value between 0 and 1, inclusive");
+
+        throw $r4;
+
+     label2:
+        r1.<java.awt.Image: float accelerationPriority> = f0;
+
+        $r2 = r1.<java.awt.Image: sun.awt.image.SurfaceManager surfaceManager>;
+
+        if $r2 == null goto label3;
+
+        $r3 = r1.<java.awt.Image: sun.awt.image.SurfaceManager surfaceManager>;
+
+        $f1 = r1.<java.awt.Image: float accelerationPriority>;
+
+        virtualinvoke $r3.<sun.awt.image.SurfaceManager: void setAccelerationPriority(float)>($f1);
+
+     label3:
+        return;
+    }
+
+    public float getAccelerationPriority()
+    {
+        float $f0;
+        java.awt.Image r0;
+
+        r0 := @this: java.awt.Image;
+
+        $f0 = r0.<java.awt.Image: float accelerationPriority>;
+
+        return $f0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Object $r1;
+        java.awt.Image$1 $r2;
+        java.awt.ImageCapabilities $r0;
+
+        <java.awt.Image: int SCALE_AREA_AVERAGING> = 16;
+
+        <java.awt.Image: int SCALE_REPLICATE> = 8;
+
+        <java.awt.Image: int SCALE_SMOOTH> = 4;
+
+        <java.awt.Image: int SCALE_FAST> = 2;
+
+        <java.awt.Image: int SCALE_DEFAULT> = 1;
+
+        $r0 = new java.awt.ImageCapabilities;
+
+        specialinvoke $r0.<java.awt.ImageCapabilities: void <init>(boolean)>(0);
+
+        <java.awt.Image: java.awt.ImageCapabilities defaultImageCaps> = $r0;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        <java.awt.Image: java.lang.Object UndefinedProperty> = $r1;
+
+        $r2 = new java.awt.Image$1;
+
+        specialinvoke $r2.<java.awt.Image$1: void <init>()>();
+
+        staticinvoke <sun.awt.image.SurfaceManager: void setImageAccessor(sun.awt.image.SurfaceManager$ImageAccessor)>($r2);
+
+        return;
+    }
+}

@@ -1,0 +1,1496 @@
+public class javax.swing.text.AsyncBoxView extends javax.swing.text.View
+{
+    int axis;
+    java.util.List stats;
+    float majorSpan;
+    boolean estimatedMajorSpan;
+    float minorSpan;
+    protected javax.swing.text.AsyncBoxView$ChildLocator locator;
+    float topInset;
+    float bottomInset;
+    float leftInset;
+    float rightInset;
+    javax.swing.text.AsyncBoxView$ChildState minRequest;
+    javax.swing.text.AsyncBoxView$ChildState prefRequest;
+    boolean majorChanged;
+    boolean minorChanged;
+    java.lang.Runnable flushTask;
+    javax.swing.text.AsyncBoxView$ChildState changing;
+
+    public void <init>(javax.swing.text.Element, int)
+    {
+        javax.swing.text.AsyncBoxView$ChildLocator $r3;
+        int i0;
+        javax.swing.text.AsyncBoxView$FlushTask $r4;
+        javax.swing.text.Element r1;
+        javax.swing.text.AsyncBoxView r0;
+        java.util.ArrayList $r2;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        r1 := @parameter0: javax.swing.text.Element;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<javax.swing.text.View: void <init>(javax.swing.text.Element)>(r1);
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        r0.<javax.swing.text.AsyncBoxView: java.util.List stats> = $r2;
+
+        r0.<javax.swing.text.AsyncBoxView: int axis> = i0;
+
+        $r3 = new javax.swing.text.AsyncBoxView$ChildLocator;
+
+        specialinvoke $r3.<javax.swing.text.AsyncBoxView$ChildLocator: void <init>(javax.swing.text.AsyncBoxView)>(r0);
+
+        r0.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildLocator locator> = $r3;
+
+        $r4 = new javax.swing.text.AsyncBoxView$FlushTask;
+
+        specialinvoke $r4.<javax.swing.text.AsyncBoxView$FlushTask: void <init>(javax.swing.text.AsyncBoxView)>(r0);
+
+        r0.<javax.swing.text.AsyncBoxView: java.lang.Runnable flushTask> = $r4;
+
+        r0.<javax.swing.text.AsyncBoxView: float minorSpan> = 32767.0F;
+
+        r0.<javax.swing.text.AsyncBoxView: boolean estimatedMajorSpan> = 0;
+
+        return;
+    }
+
+    public int getMajorAxis()
+    {
+        int $i0;
+        javax.swing.text.AsyncBoxView r0;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        $i0 = r0.<javax.swing.text.AsyncBoxView: int axis>;
+
+        return $i0;
+    }
+
+    public int getMinorAxis()
+    {
+        int $i0;
+        byte $b1;
+        javax.swing.text.AsyncBoxView r0;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        $i0 = r0.<javax.swing.text.AsyncBoxView: int axis>;
+
+        if $i0 != 0 goto label1;
+
+        $b1 = 1;
+
+        goto label2;
+
+     label1:
+        $b1 = 0;
+
+     label2:
+        return $b1;
+    }
+
+    public float getTopInset()
+    {
+        float $f0;
+        javax.swing.text.AsyncBoxView r0;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        $f0 = r0.<javax.swing.text.AsyncBoxView: float topInset>;
+
+        return $f0;
+    }
+
+    public void setTopInset(float)
+    {
+        float f0;
+        javax.swing.text.AsyncBoxView r0;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        f0 := @parameter0: float;
+
+        r0.<javax.swing.text.AsyncBoxView: float topInset> = f0;
+
+        return;
+    }
+
+    public float getBottomInset()
+    {
+        float $f0;
+        javax.swing.text.AsyncBoxView r0;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        $f0 = r0.<javax.swing.text.AsyncBoxView: float bottomInset>;
+
+        return $f0;
+    }
+
+    public void setBottomInset(float)
+    {
+        float f0;
+        javax.swing.text.AsyncBoxView r0;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        f0 := @parameter0: float;
+
+        r0.<javax.swing.text.AsyncBoxView: float bottomInset> = f0;
+
+        return;
+    }
+
+    public float getLeftInset()
+    {
+        float $f0;
+        javax.swing.text.AsyncBoxView r0;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        $f0 = r0.<javax.swing.text.AsyncBoxView: float leftInset>;
+
+        return $f0;
+    }
+
+    public void setLeftInset(float)
+    {
+        float f0;
+        javax.swing.text.AsyncBoxView r0;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        f0 := @parameter0: float;
+
+        r0.<javax.swing.text.AsyncBoxView: float leftInset> = f0;
+
+        return;
+    }
+
+    public float getRightInset()
+    {
+        float $f0;
+        javax.swing.text.AsyncBoxView r0;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        $f0 = r0.<javax.swing.text.AsyncBoxView: float rightInset>;
+
+        return $f0;
+    }
+
+    public void setRightInset(float)
+    {
+        float f0;
+        javax.swing.text.AsyncBoxView r0;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        f0 := @parameter0: float;
+
+        r0.<javax.swing.text.AsyncBoxView: float rightInset> = f0;
+
+        return;
+    }
+
+    protected float getInsetSpan(int)
+    {
+        int i0;
+        float $f0, $f1, $f2, $f3, $f4;
+        javax.swing.text.AsyncBoxView r0;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        i0 := @parameter0: int;
+
+        if i0 != 0 goto label1;
+
+        $f2 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: float getLeftInset()>();
+
+        $f3 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: float getRightInset()>();
+
+        $f4 = $f2 + $f3;
+
+        goto label2;
+
+     label1:
+        $f0 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: float getTopInset()>();
+
+        $f1 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: float getBottomInset()>();
+
+        $f4 = $f0 + $f1;
+
+     label2:
+        return $f4;
+    }
+
+    protected void setEstimatedMajorSpan(boolean)
+    {
+        javax.swing.text.AsyncBoxView r0;
+        boolean z0;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        z0 := @parameter0: boolean;
+
+        r0.<javax.swing.text.AsyncBoxView: boolean estimatedMajorSpan> = z0;
+
+        return;
+    }
+
+    protected boolean getEstimatedMajorSpan()
+    {
+        javax.swing.text.AsyncBoxView r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        $z0 = r0.<javax.swing.text.AsyncBoxView: boolean estimatedMajorSpan>;
+
+        return $z0;
+    }
+
+    protected javax.swing.text.AsyncBoxView$ChildState getChildState(int)
+    {
+        java.lang.Throwable $r6;
+        javax.swing.text.AsyncBoxView$ChildState $r5;
+        javax.swing.text.AsyncBoxView r0;
+        java.util.List $r1, $r2, $r3;
+        int i0, $i1;
+        java.lang.Object $r4;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<javax.swing.text.AsyncBoxView: java.util.List stats>;
+
+        entermonitor $r1;
+
+     label1:
+        if i0 < 0 goto label3;
+
+        $r2 = r0.<javax.swing.text.AsyncBoxView: java.util.List stats>;
+
+        $i1 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        if i0 >= $i1 goto label3;
+
+        $r3 = r0.<javax.swing.text.AsyncBoxView: java.util.List stats>;
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.lang.Object get(int)>(i0);
+
+        $r5 = (javax.swing.text.AsyncBoxView$ChildState) $r4;
+
+        exitmonitor $r1;
+
+     label2:
+        return $r5;
+
+     label3:
+        exitmonitor $r1;
+
+     label4:
+        return null;
+
+     label5:
+        $r6 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    protected javax.swing.text.LayoutQueue getLayoutQueue()
+    {
+        javax.swing.text.LayoutQueue $r0;
+        javax.swing.text.AsyncBoxView r1;
+
+        r1 := @this: javax.swing.text.AsyncBoxView;
+
+        $r0 = staticinvoke <javax.swing.text.LayoutQueue: javax.swing.text.LayoutQueue getDefaultQueue()>();
+
+        return $r0;
+    }
+
+    protected javax.swing.text.AsyncBoxView$ChildState createChildState(javax.swing.text.View)
+    {
+        javax.swing.text.AsyncBoxView$ChildState $r0;
+        javax.swing.text.View r2;
+        javax.swing.text.AsyncBoxView r1;
+
+        r1 := @this: javax.swing.text.AsyncBoxView;
+
+        r2 := @parameter0: javax.swing.text.View;
+
+        $r0 = new javax.swing.text.AsyncBoxView$ChildState;
+
+        specialinvoke $r0.<javax.swing.text.AsyncBoxView$ChildState: void <init>(javax.swing.text.AsyncBoxView,javax.swing.text.View)>(r1, r2);
+
+        return $r0;
+    }
+
+    protected synchronized void majorRequirementChange(javax.swing.text.AsyncBoxView$ChildState, float)
+    {
+        javax.swing.text.AsyncBoxView$ChildState r1;
+        float f0, $f1, $f2;
+        javax.swing.text.AsyncBoxView r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        r1 := @parameter0: javax.swing.text.AsyncBoxView$ChildState;
+
+        f0 := @parameter1: float;
+
+        $z0 = r0.<javax.swing.text.AsyncBoxView: boolean estimatedMajorSpan>;
+
+        if $z0 != 0 goto label1;
+
+        $f1 = r0.<javax.swing.text.AsyncBoxView: float majorSpan>;
+
+        $f2 = $f1 + f0;
+
+        r0.<javax.swing.text.AsyncBoxView: float majorSpan> = $f2;
+
+     label1:
+        r0.<javax.swing.text.AsyncBoxView: boolean majorChanged> = 1;
+
+        return;
+    }
+
+    protected synchronized void minorRequirementChange(javax.swing.text.AsyncBoxView$ChildState)
+    {
+        javax.swing.text.AsyncBoxView$ChildState r1;
+        javax.swing.text.AsyncBoxView r0;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        r1 := @parameter0: javax.swing.text.AsyncBoxView$ChildState;
+
+        r0.<javax.swing.text.AsyncBoxView: boolean minorChanged> = 1;
+
+        return;
+    }
+
+    protected void flushRequirementChanges()
+    {
+        javax.swing.text.AbstractDocument r2;
+        javax.swing.text.AsyncBoxView$ChildState $r6, r11, r12;
+        javax.swing.text.AsyncBoxView r0;
+        byte $b2, $b3;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, z7, z8, $z9;
+        java.util.List $r3;
+        javax.swing.text.View $r4, r10;
+        float $f0, $f1, $f2, $f3, $f4, f5;
+        javax.swing.text.Document $r1;
+        java.lang.Throwable $r7, $r8, $r9;
+        int $i0, $i1, i4, $i5, $i6;
+        java.awt.Container $r5;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: javax.swing.text.Document getDocument()>();
+
+        r2 = (javax.swing.text.AbstractDocument) $r1;
+
+     label01:
+        virtualinvoke r2.<javax.swing.text.AbstractDocument: void readLock()>();
+
+        r10 = null;
+
+        z7 = 0;
+
+        z8 = 0;
+
+        entermonitor r0;
+
+     label02:
+        $r3 = r0.<javax.swing.text.AsyncBoxView: java.util.List stats>;
+
+        entermonitor $r3;
+
+     label03:
+        $i0 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: int getViewCount()>();
+
+        if $i0 <= 0 goto label11;
+
+        $z2 = r0.<javax.swing.text.AsyncBoxView: boolean minorChanged>;
+
+        if $z2 != 0 goto label04;
+
+        $z6 = r0.<javax.swing.text.AsyncBoxView: boolean estimatedMajorSpan>;
+
+        if $z6 == 0 goto label11;
+
+     label04:
+        virtualinvoke r0.<javax.swing.text.AsyncBoxView: javax.swing.text.LayoutQueue getLayoutQueue()>();
+
+        r11 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildState getChildState(int)>(0);
+
+        r12 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildState getChildState(int)>(0);
+
+        f5 = 0.0F;
+
+        i4 = 1;
+
+     label05:
+        if i4 >= $i0 goto label09;
+
+        $r6 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildState getChildState(int)>(i4);
+
+        $z5 = r0.<javax.swing.text.AsyncBoxView: boolean minorChanged>;
+
+        if $z5 == 0 goto label07;
+
+        $f1 = staticinvoke <javax.swing.text.AsyncBoxView$ChildState: float access$000(javax.swing.text.AsyncBoxView$ChildState)>($r6);
+
+        $f2 = staticinvoke <javax.swing.text.AsyncBoxView$ChildState: float access$000(javax.swing.text.AsyncBoxView$ChildState)>(r11);
+
+        $b2 = $f1 cmpl $f2;
+
+        $i5 = (int) $b2;
+
+        if $i5 <= 0 goto label06;
+
+        r11 = $r6;
+
+     label06:
+        $f3 = staticinvoke <javax.swing.text.AsyncBoxView$ChildState: float access$100(javax.swing.text.AsyncBoxView$ChildState)>($r6);
+
+        $f4 = staticinvoke <javax.swing.text.AsyncBoxView$ChildState: float access$100(javax.swing.text.AsyncBoxView$ChildState)>(r12);
+
+        $b3 = $f3 cmpl $f4;
+
+        $i6 = (int) $b3;
+
+        if $i6 <= 0 goto label07;
+
+        r12 = $r6;
+
+     label07:
+        $z9 = r0.<javax.swing.text.AsyncBoxView: boolean estimatedMajorSpan>;
+
+        if $z9 == 0 goto label08;
+
+        $f0 = virtualinvoke $r6.<javax.swing.text.AsyncBoxView$ChildState: float getMajorSpan()>();
+
+        f5 = f5 + $f0;
+
+     label08:
+        i4 = i4 + 1;
+
+        goto label05;
+
+     label09:
+        $z3 = r0.<javax.swing.text.AsyncBoxView: boolean minorChanged>;
+
+        if $z3 == 0 goto label10;
+
+        r0.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildState minRequest> = r11;
+
+        r0.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildState prefRequest> = r12;
+
+     label10:
+        $z4 = r0.<javax.swing.text.AsyncBoxView: boolean estimatedMajorSpan>;
+
+        if $z4 == 0 goto label11;
+
+        r0.<javax.swing.text.AsyncBoxView: float majorSpan> = f5;
+
+        r0.<javax.swing.text.AsyncBoxView: boolean estimatedMajorSpan> = 0;
+
+        r0.<javax.swing.text.AsyncBoxView: boolean majorChanged> = 1;
+
+     label11:
+        exitmonitor $r3;
+
+     label12:
+        goto label15;
+
+     label13:
+        $r9 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label14:
+        throw $r9;
+
+     label15:
+        $z0 = r0.<javax.swing.text.AsyncBoxView: boolean majorChanged>;
+
+        if $z0 != 0 goto label16;
+
+        $z1 = r0.<javax.swing.text.AsyncBoxView: boolean minorChanged>;
+
+        if $z1 == 0 goto label19;
+
+     label16:
+        $r4 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: javax.swing.text.View getParent()>();
+
+        r10 = $r4;
+
+        if $r4 == null goto label18;
+
+        $i1 = r0.<javax.swing.text.AsyncBoxView: int axis>;
+
+        if $i1 != 0 goto label17;
+
+        z7 = r0.<javax.swing.text.AsyncBoxView: boolean majorChanged>;
+
+        z8 = r0.<javax.swing.text.AsyncBoxView: boolean minorChanged>;
+
+        goto label18;
+
+     label17:
+        z8 = r0.<javax.swing.text.AsyncBoxView: boolean majorChanged>;
+
+        z7 = r0.<javax.swing.text.AsyncBoxView: boolean minorChanged>;
+
+     label18:
+        r0.<javax.swing.text.AsyncBoxView: boolean majorChanged> = 0;
+
+        r0.<javax.swing.text.AsyncBoxView: boolean minorChanged> = 0;
+
+     label19:
+        exitmonitor r0;
+
+     label20:
+        goto label23;
+
+     label21:
+        $r8 := @caughtexception;
+
+        exitmonitor r0;
+
+     label22:
+        throw $r8;
+
+     label23:
+        if r10 == null goto label24;
+
+        virtualinvoke r10.<javax.swing.text.View: void preferenceChanged(javax.swing.text.View,boolean,boolean)>(r0, z7, z8);
+
+        $r5 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: java.awt.Container getContainer()>();
+
+        if $r5 == null goto label24;
+
+        virtualinvoke $r5.<java.awt.Component: void repaint()>();
+
+     label24:
+        virtualinvoke r2.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+        goto label27;
+
+     label25:
+        $r7 := @caughtexception;
+
+     label26:
+        virtualinvoke r2.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+        throw $r7;
+
+     label27:
+        return;
+
+        catch java.lang.Throwable from label03 to label12 with label13;
+        catch java.lang.Throwable from label13 to label14 with label13;
+        catch java.lang.Throwable from label02 to label20 with label21;
+        catch java.lang.Throwable from label21 to label22 with label21;
+        catch java.lang.Throwable from label01 to label24 with label25;
+        catch java.lang.Throwable from label25 to label26 with label25;
+    }
+
+    public void replace(int, int, javax.swing.text.View[])
+    {
+        java.lang.Throwable $r11;
+        javax.swing.text.AsyncBoxView$ChildState $r6, r12;
+        javax.swing.text.View[] r3;
+        java.lang.Runnable $r4;
+        javax.swing.text.AsyncBoxView r0;
+        byte $b4;
+        int i0, $i1, i2, $i3, i5, i6;
+        java.util.List $r1, $r7, $r8;
+        javax.swing.text.View $r5, $r10;
+        float $f0, $f1;
+        javax.swing.text.LayoutQueue $r2;
+        java.lang.Object $r9;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        i2 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        r3 := @parameter2: javax.swing.text.View[];
+
+        $r1 = r0.<javax.swing.text.AsyncBoxView: java.util.List stats>;
+
+        entermonitor $r1;
+
+     label01:
+        i5 = 0;
+
+     label02:
+        if i5 >= i0 goto label04;
+
+        $r8 = r0.<javax.swing.text.AsyncBoxView: java.util.List stats>;
+
+        $r9 = interfaceinvoke $r8.<java.util.List: java.lang.Object remove(int)>(i2);
+
+        r12 = (javax.swing.text.AsyncBoxView$ChildState) $r9;
+
+        $f0 = virtualinvoke r12.<javax.swing.text.AsyncBoxView$ChildState: float getMajorSpan()>();
+
+        $r10 = virtualinvoke r12.<javax.swing.text.AsyncBoxView$ChildState: javax.swing.text.View getChildView()>();
+
+        virtualinvoke $r10.<javax.swing.text.View: void setParent(javax.swing.text.View)>(null);
+
+        $b4 = $f0 cmpl 0.0F;
+
+        if $b4 == 0 goto label03;
+
+        $f1 = neg $f0;
+
+        virtualinvoke r0.<javax.swing.text.AsyncBoxView: void majorRequirementChange(javax.swing.text.AsyncBoxView$ChildState,float)>(r12, $f1);
+
+     label03:
+        i5 = i5 + 1;
+
+        goto label02;
+
+     label04:
+        $r2 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: javax.swing.text.LayoutQueue getLayoutQueue()>();
+
+        if r3 == null goto label06;
+
+        i6 = 0;
+
+     label05:
+        $i1 = lengthof r3;
+
+        if i6 >= $i1 goto label06;
+
+        $r5 = r3[i6];
+
+        $r6 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildState createChildState(javax.swing.text.View)>($r5);
+
+        $r7 = r0.<javax.swing.text.AsyncBoxView: java.util.List stats>;
+
+        $i3 = i2 + i6;
+
+        interfaceinvoke $r7.<java.util.List: void add(int,java.lang.Object)>($i3, $r6);
+
+        virtualinvoke $r2.<javax.swing.text.LayoutQueue: void addTask(java.lang.Runnable)>($r6);
+
+        i6 = i6 + 1;
+
+        goto label05;
+
+     label06:
+        $r4 = r0.<javax.swing.text.AsyncBoxView: java.lang.Runnable flushTask>;
+
+        virtualinvoke $r2.<javax.swing.text.LayoutQueue: void addTask(java.lang.Runnable)>($r4);
+
+        exitmonitor $r1;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r11 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label09:
+        throw $r11;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label01 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    protected void loadChildren(javax.swing.text.ViewFactory)
+    {
+        javax.swing.text.ViewFactory r3;
+        javax.swing.text.View[] r2;
+        javax.swing.text.AsyncBoxView r0;
+        int $i0, i1;
+        javax.swing.text.View $r5;
+        javax.swing.text.Element $r1, $r4;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        r3 := @parameter0: javax.swing.text.ViewFactory;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: javax.swing.text.Element getElement()>();
+
+        $i0 = interfaceinvoke $r1.<javax.swing.text.Element: int getElementCount()>();
+
+        if $i0 <= 0 goto label3;
+
+        r2 = newarray (javax.swing.text.View)[$i0];
+
+        i1 = 0;
+
+     label1:
+        if i1 >= $i0 goto label2;
+
+        $r4 = interfaceinvoke $r1.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(i1);
+
+        $r5 = interfaceinvoke r3.<javax.swing.text.ViewFactory: javax.swing.text.View create(javax.swing.text.Element)>($r4);
+
+        r2[i1] = $r5;
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        virtualinvoke r0.<javax.swing.text.AsyncBoxView: void replace(int,int,javax.swing.text.View[])>(0, 0, r2);
+
+     label3:
+        return;
+    }
+
+    protected synchronized int getViewIndexAtPosition(int, javax.swing.text.Position$Bias)
+    {
+        javax.swing.text.AsyncBoxView r2;
+        javax.swing.text.Position$Bias r0, $r1;
+        int $i0, $i1, i2, $i3;
+        javax.swing.text.Element $r3;
+        boolean $z0;
+
+        r2 := @this: javax.swing.text.AsyncBoxView;
+
+        i2 := @parameter0: int;
+
+        r0 := @parameter1: javax.swing.text.Position$Bias;
+
+        $r1 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Backward>;
+
+        if r0 != $r1 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        if $z0 == 0 goto label3;
+
+        $i1 = i2 - 1;
+
+        $i3 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i1);
+
+        goto label4;
+
+     label3:
+        $i3 = i2;
+
+     label4:
+        $r3 = virtualinvoke r2.<javax.swing.text.AsyncBoxView: javax.swing.text.Element getElement()>();
+
+        $i0 = interfaceinvoke $r3.<javax.swing.text.Element: int getElementIndex(int)>($i3);
+
+        return $i0;
+    }
+
+    protected void updateLayout(javax.swing.event.DocumentEvent$ElementChange, javax.swing.event.DocumentEvent, java.awt.Shape)
+    {
+        java.awt.Shape r5;
+        javax.swing.text.AsyncBoxView$ChildState $r2;
+        javax.swing.event.DocumentEvent$ElementChange r0;
+        javax.swing.text.AsyncBoxView r1;
+        javax.swing.text.AsyncBoxView$ChildLocator $r3;
+        int $i0, $i1, $i2;
+        javax.swing.event.DocumentEvent r4;
+
+        r1 := @this: javax.swing.text.AsyncBoxView;
+
+        r0 := @parameter0: javax.swing.event.DocumentEvent$ElementChange;
+
+        r4 := @parameter1: javax.swing.event.DocumentEvent;
+
+        r5 := @parameter2: java.awt.Shape;
+
+        if r0 == null goto label1;
+
+        $i0 = interfaceinvoke r0.<javax.swing.event.DocumentEvent$ElementChange: int getIndex()>();
+
+        $i1 = $i0 - 1;
+
+        $i2 = staticinvoke <java.lang.Math: int max(int,int)>($i1, 0);
+
+        $r2 = virtualinvoke r1.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildState getChildState(int)>($i2);
+
+        $r3 = r1.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildLocator locator>;
+
+        virtualinvoke $r3.<javax.swing.text.AsyncBoxView$ChildLocator: void childChanged(javax.swing.text.AsyncBoxView$ChildState)>($r2);
+
+     label1:
+        return;
+    }
+
+    public void setParent(javax.swing.text.View)
+    {
+        javax.swing.text.ViewFactory $r2;
+        int $i0;
+        javax.swing.text.View r1;
+        javax.swing.text.AsyncBoxView r0;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        r1 := @parameter0: javax.swing.text.View;
+
+        specialinvoke r0.<javax.swing.text.View: void setParent(javax.swing.text.View)>(r1);
+
+        if r1 == null goto label1;
+
+        $i0 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: int getViewCount()>();
+
+        if $i0 != 0 goto label1;
+
+        $r2 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: javax.swing.text.ViewFactory getViewFactory()>();
+
+        virtualinvoke r0.<javax.swing.text.AsyncBoxView: void loadChildren(javax.swing.text.ViewFactory)>($r2);
+
+     label1:
+        return;
+    }
+
+    public synchronized void preferenceChanged(javax.swing.text.View, boolean, boolean)
+    {
+        javax.swing.text.AsyncBoxView$ChildState $r2, $r4, $r7, $r9;
+        java.lang.Runnable $r6;
+        javax.swing.text.AsyncBoxView r1;
+        javax.swing.text.Position$Bias $r3;
+        int $i0, $i1;
+        javax.swing.text.View r0, $r8, $r10;
+        javax.swing.text.LayoutQueue $r5;
+        boolean z0, z1;
+
+        r1 := @this: javax.swing.text.AsyncBoxView;
+
+        r0 := @parameter0: javax.swing.text.View;
+
+        z0 := @parameter1: boolean;
+
+        z1 := @parameter2: boolean;
+
+        if r0 != null goto label1;
+
+        $r10 = virtualinvoke r1.<javax.swing.text.AsyncBoxView: javax.swing.text.View getParent()>();
+
+        virtualinvoke $r10.<javax.swing.text.View: void preferenceChanged(javax.swing.text.View,boolean,boolean)>(r1, z0, z1);
+
+        goto label3;
+
+     label1:
+        $r2 = r1.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildState changing>;
+
+        if $r2 == null goto label2;
+
+        $r7 = r1.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildState changing>;
+
+        $r8 = virtualinvoke $r7.<javax.swing.text.AsyncBoxView$ChildState: javax.swing.text.View getChildView()>();
+
+        if $r8 != r0 goto label2;
+
+        $r9 = r1.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildState changing>;
+
+        virtualinvoke $r9.<javax.swing.text.AsyncBoxView$ChildState: void preferenceChanged(boolean,boolean)>(z0, z1);
+
+        return;
+
+     label2:
+        $i0 = virtualinvoke r0.<javax.swing.text.View: int getStartOffset()>();
+
+        $r3 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Forward>;
+
+        $i1 = virtualinvoke r1.<javax.swing.text.AsyncBoxView: int getViewIndex(int,javax.swing.text.Position$Bias)>($i0, $r3);
+
+        $r4 = virtualinvoke r1.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildState getChildState(int)>($i1);
+
+        virtualinvoke $r4.<javax.swing.text.AsyncBoxView$ChildState: void preferenceChanged(boolean,boolean)>(z0, z1);
+
+        $r5 = virtualinvoke r1.<javax.swing.text.AsyncBoxView: javax.swing.text.LayoutQueue getLayoutQueue()>();
+
+        virtualinvoke $r5.<javax.swing.text.LayoutQueue: void addTask(java.lang.Runnable)>($r4);
+
+        $r6 = r1.<javax.swing.text.AsyncBoxView: java.lang.Runnable flushTask>;
+
+        virtualinvoke $r5.<javax.swing.text.LayoutQueue: void addTask(java.lang.Runnable)>($r6);
+
+     label3:
+        return;
+    }
+
+    public void setSize(float, float)
+    {
+        float f0, f1;
+        javax.swing.text.AsyncBoxView r0;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        f0 := @parameter0: float;
+
+        f1 := @parameter1: float;
+
+        virtualinvoke r0.<javax.swing.text.AsyncBoxView: void setSpanOnAxis(int,float)>(0, f0);
+
+        virtualinvoke r0.<javax.swing.text.AsyncBoxView: void setSpanOnAxis(int,float)>(1, f1);
+
+        return;
+    }
+
+    float getSpanOnAxis(int)
+    {
+        int i0, $i1;
+        float $f0, $f1;
+        javax.swing.text.AsyncBoxView r0;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        i0 := @parameter0: int;
+
+        $i1 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: int getMajorAxis()>();
+
+        if i0 != $i1 goto label1;
+
+        $f1 = r0.<javax.swing.text.AsyncBoxView: float majorSpan>;
+
+        return $f1;
+
+     label1:
+        $f0 = r0.<javax.swing.text.AsyncBoxView: float minorSpan>;
+
+        return $f0;
+    }
+
+    void setSpanOnAxis(int, float)
+    {
+        javax.swing.text.AsyncBoxView$ChildState $r3;
+        java.lang.Runnable $r2;
+        javax.swing.text.AsyncBoxView r0;
+        byte $b2;
+        int i0, $i1, $i3, i4;
+        float $f0, f1, $f2, f3, $f4;
+        javax.swing.text.LayoutQueue $r1;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        i0 := @parameter0: int;
+
+        f1 := @parameter1: float;
+
+        $f0 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: float getInsetSpan(int)>(i0);
+
+        $i1 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: int getMinorAxis()>();
+
+        if i0 != $i1 goto label4;
+
+        f3 = f1 - $f0;
+
+        $f4 = r0.<javax.swing.text.AsyncBoxView: float minorSpan>;
+
+        $b2 = f3 cmpl $f4;
+
+        if $b2 == 0 goto label3;
+
+        r0.<javax.swing.text.AsyncBoxView: float minorSpan> = f3;
+
+        $i3 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: int getViewCount()>();
+
+        if $i3 == 0 goto label3;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: javax.swing.text.LayoutQueue getLayoutQueue()>();
+
+        i4 = 0;
+
+     label1:
+        if i4 >= $i3 goto label2;
+
+        $r3 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildState getChildState(int)>(i4);
+
+        staticinvoke <javax.swing.text.AsyncBoxView$ChildState: boolean access$202(javax.swing.text.AsyncBoxView$ChildState,boolean)>($r3, 0);
+
+        virtualinvoke $r1.<javax.swing.text.LayoutQueue: void addTask(java.lang.Runnable)>($r3);
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label2:
+        $r2 = r0.<javax.swing.text.AsyncBoxView: java.lang.Runnable flushTask>;
+
+        virtualinvoke $r1.<javax.swing.text.LayoutQueue: void addTask(java.lang.Runnable)>($r2);
+
+     label3:
+        goto label5;
+
+     label4:
+        $z0 = r0.<javax.swing.text.AsyncBoxView: boolean estimatedMajorSpan>;
+
+        if $z0 == 0 goto label5;
+
+        $f2 = f1 - $f0;
+
+        r0.<javax.swing.text.AsyncBoxView: float majorSpan> = $f2;
+
+     label5:
+        return;
+    }
+
+    public void paint(java.awt.Graphics, java.awt.Shape)
+    {
+        java.awt.Shape r2;
+        java.lang.Throwable $r6;
+        javax.swing.text.AsyncBoxView$ChildLocator $r1, $r3, $r5;
+        java.awt.Graphics r4;
+        javax.swing.text.AsyncBoxView r0;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        r4 := @parameter0: java.awt.Graphics;
+
+        r2 := @parameter1: java.awt.Shape;
+
+        $r1 = r0.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildLocator locator>;
+
+        entermonitor $r1;
+
+     label1:
+        $r3 = r0.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildLocator locator>;
+
+        virtualinvoke $r3.<javax.swing.text.AsyncBoxView$ChildLocator: void setAllocation(java.awt.Shape)>(r2);
+
+        $r5 = r0.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildLocator locator>;
+
+        virtualinvoke $r5.<javax.swing.text.AsyncBoxView$ChildLocator: void paintChildren(java.awt.Graphics)>(r4);
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r6 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r6;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public float getPreferredSpan(int)
+    {
+        javax.swing.text.AsyncBoxView$ChildState $r1, $r2;
+        javax.swing.text.AsyncBoxView r0;
+        int i0, $i1;
+        float $f0, $f1, $f2, $f3, $f4, $f5;
+        javax.swing.text.View $r3;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        i0 := @parameter0: int;
+
+        $f0 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: float getInsetSpan(int)>(i0);
+
+        $i1 = r0.<javax.swing.text.AsyncBoxView: int axis>;
+
+        if i0 != $i1 goto label1;
+
+        $f4 = r0.<javax.swing.text.AsyncBoxView: float majorSpan>;
+
+        $f5 = $f4 + $f0;
+
+        return $f5;
+
+     label1:
+        $r1 = r0.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildState prefRequest>;
+
+        if $r1 == null goto label2;
+
+        $r2 = r0.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildState prefRequest>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.text.AsyncBoxView$ChildState: javax.swing.text.View getChildView()>();
+
+        $f2 = virtualinvoke $r3.<javax.swing.text.View: float getPreferredSpan(int)>(i0);
+
+        $f3 = $f2 + $f0;
+
+        return $f3;
+
+     label2:
+        $f1 = $f0 + 30.0F;
+
+        return $f1;
+    }
+
+    public float getMinimumSpan(int)
+    {
+        javax.swing.text.AsyncBoxView$ChildState $r1, $r2;
+        javax.swing.text.AsyncBoxView r0;
+        int i0, $i1;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9;
+        javax.swing.text.View $r3;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        i0 := @parameter0: int;
+
+        $i1 = r0.<javax.swing.text.AsyncBoxView: int axis>;
+
+        if i0 != $i1 goto label1;
+
+        $f9 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: float getPreferredSpan(int)>(i0);
+
+        return $f9;
+
+     label1:
+        $r1 = r0.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildState minRequest>;
+
+        if $r1 == null goto label2;
+
+        $r2 = r0.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildState minRequest>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.text.AsyncBoxView$ChildState: javax.swing.text.View getChildView()>();
+
+        $f8 = virtualinvoke $r3.<javax.swing.text.View: float getMinimumSpan(int)>(i0);
+
+        return $f8;
+
+     label2:
+        if i0 != 0 goto label3;
+
+        $f4 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: float getLeftInset()>();
+
+        $f5 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: float getRightInset()>();
+
+        $f6 = $f4 + $f5;
+
+        $f7 = $f6 + 5.0F;
+
+        return $f7;
+
+     label3:
+        $f0 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: float getTopInset()>();
+
+        $f1 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: float getBottomInset()>();
+
+        $f2 = $f0 + $f1;
+
+        $f3 = $f2 + 5.0F;
+
+        return $f3;
+    }
+
+    public float getMaximumSpan(int)
+    {
+        int i0, $i1;
+        float $f0;
+        javax.swing.text.AsyncBoxView r0;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        i0 := @parameter0: int;
+
+        $i1 = r0.<javax.swing.text.AsyncBoxView: int axis>;
+
+        if i0 != $i1 goto label1;
+
+        $f0 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: float getPreferredSpan(int)>(i0);
+
+        return $f0;
+
+     label1:
+        return 2.14748365E9F;
+    }
+
+    public int getViewCount()
+    {
+        java.lang.Throwable $r3;
+        java.util.List $r1, $r2;
+        int $i0;
+        javax.swing.text.AsyncBoxView r0;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        $r1 = r0.<javax.swing.text.AsyncBoxView: java.util.List stats>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<javax.swing.text.AsyncBoxView: java.util.List stats>;
+
+        $i0 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        exitmonitor $r1;
+
+     label2:
+        return $i0;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public javax.swing.text.View getView(int)
+    {
+        int i0;
+        javax.swing.text.AsyncBoxView$ChildState $r1;
+        javax.swing.text.View $r2;
+        javax.swing.text.AsyncBoxView r0;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildState getChildState(int)>(i0);
+
+        if $r1 == null goto label1;
+
+        $r2 = virtualinvoke $r1.<javax.swing.text.AsyncBoxView$ChildState: javax.swing.text.View getChildView()>();
+
+        return $r2;
+
+     label1:
+        return null;
+    }
+
+    public java.awt.Shape getChildAllocation(int, java.awt.Shape)
+    {
+        java.awt.Shape r1, $r3;
+        javax.swing.text.AsyncBoxView$ChildLocator $r2;
+        int i0;
+        javax.swing.text.AsyncBoxView r0;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.awt.Shape;
+
+        $r2 = r0.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildLocator locator>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.text.AsyncBoxView$ChildLocator: java.awt.Shape getChildAllocation(int,java.awt.Shape)>(i0, r1);
+
+        return $r3;
+    }
+
+    public int getViewIndex(int, javax.swing.text.Position$Bias)
+    {
+        javax.swing.text.Position$Bias r1;
+        int i0, $i1;
+        javax.swing.text.AsyncBoxView r0;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: javax.swing.text.Position$Bias;
+
+        $i1 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: int getViewIndexAtPosition(int,javax.swing.text.Position$Bias)>(i0, r1);
+
+        return $i1;
+    }
+
+    public java.awt.Shape modelToView(int, java.awt.Shape, javax.swing.text.Position$Bias) throws javax.swing.text.BadLocationException
+    {
+        java.awt.Shape r2, $r4, $r7;
+        java.lang.Throwable $r8;
+        javax.swing.text.AsyncBoxView$ChildState $r5;
+        javax.swing.text.AsyncBoxView r0;
+        javax.swing.text.AsyncBoxView$ChildLocator $r3;
+        javax.swing.text.Position$Bias r1;
+        int i0, $i1;
+        javax.swing.text.View $r6;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.awt.Shape;
+
+        r1 := @parameter2: javax.swing.text.Position$Bias;
+
+        $i1 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: int getViewIndex(int,javax.swing.text.Position$Bias)>(i0, r1);
+
+        $r3 = r0.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildLocator locator>;
+
+        $r4 = virtualinvoke $r3.<javax.swing.text.AsyncBoxView$ChildLocator: java.awt.Shape getChildAllocation(int,java.awt.Shape)>($i1, r2);
+
+        $r5 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildState getChildState(int)>($i1);
+
+        entermonitor $r5;
+
+     label1:
+        $r6 = virtualinvoke $r5.<javax.swing.text.AsyncBoxView$ChildState: javax.swing.text.View getChildView()>();
+
+        $r7 = virtualinvoke $r6.<javax.swing.text.View: java.awt.Shape modelToView(int,java.awt.Shape,javax.swing.text.Position$Bias)>(i0, $r4, r1);
+
+        exitmonitor $r5;
+
+     label2:
+        return $r7;
+
+     label3:
+        $r8 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label4:
+        throw $r8;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public int viewToModel(float, float, java.awt.Shape, javax.swing.text.Position$Bias[])
+    {
+        java.awt.Shape r2, $r5;
+        java.lang.Throwable $r9, $r10;
+        javax.swing.text.Position$Bias[] r8;
+        javax.swing.text.AsyncBoxView$ChildState $r6;
+        javax.swing.text.AsyncBoxView r0;
+        javax.swing.text.AsyncBoxView$ChildLocator $r1, $r3, $r4;
+        int $i0, $i1;
+        float f0, f1;
+        javax.swing.text.View $r7;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        f0 := @parameter0: float;
+
+        f1 := @parameter1: float;
+
+        r2 := @parameter2: java.awt.Shape;
+
+        r8 := @parameter3: javax.swing.text.Position$Bias[];
+
+        $r1 = r0.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildLocator locator>;
+
+        entermonitor $r1;
+
+     label01:
+        $r3 = r0.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildLocator locator>;
+
+        $i0 = virtualinvoke $r3.<javax.swing.text.AsyncBoxView$ChildLocator: int getViewIndexAtPoint(float,float,java.awt.Shape)>(f0, f1, r2);
+
+        $r4 = r0.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildLocator locator>;
+
+        $r5 = virtualinvoke $r4.<javax.swing.text.AsyncBoxView$ChildLocator: java.awt.Shape getChildAllocation(int,java.awt.Shape)>($i0, r2);
+
+        exitmonitor $r1;
+
+     label02:
+        goto label05;
+
+     label03:
+        $r10 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label04:
+        throw $r10;
+
+     label05:
+        $r6 = virtualinvoke r0.<javax.swing.text.AsyncBoxView: javax.swing.text.AsyncBoxView$ChildState getChildState(int)>($i0);
+
+        entermonitor $r6;
+
+     label06:
+        $r7 = virtualinvoke $r6.<javax.swing.text.AsyncBoxView$ChildState: javax.swing.text.View getChildView()>();
+
+        $i1 = virtualinvoke $r7.<javax.swing.text.View: int viewToModel(float,float,java.awt.Shape,javax.swing.text.Position$Bias[])>(f0, f1, $r5, r8);
+
+        exitmonitor $r6;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r9 := @caughtexception;
+
+        exitmonitor $r6;
+
+     label09:
+        throw $r9;
+
+     label10:
+        return $i1;
+
+        catch java.lang.Throwable from label01 to label02 with label03;
+        catch java.lang.Throwable from label03 to label04 with label03;
+        catch java.lang.Throwable from label06 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    public int getNextVisualPositionFrom(int, javax.swing.text.Position$Bias, java.awt.Shape, int, javax.swing.text.Position$Bias[]) throws javax.swing.text.BadLocationException
+    {
+        java.awt.Shape r2;
+        javax.swing.text.Position$Bias[] r3;
+        javax.swing.text.BadLocationException $r5;
+        javax.swing.text.AsyncBoxView r0;
+        javax.swing.text.Position$Bias r1;
+        int i0, i1, $i2, $i4;
+
+        r0 := @this: javax.swing.text.AsyncBoxView;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: javax.swing.text.Position$Bias;
+
+        r2 := @parameter2: java.awt.Shape;
+
+        i1 := @parameter3: int;
+
+        r3 := @parameter4: javax.swing.text.Position$Bias[];
+
+        $i4 = (int) -1;
+
+        if i0 >= $i4 goto label1;
+
+        $r5 = new javax.swing.text.BadLocationException;
+
+        specialinvoke $r5.<javax.swing.text.BadLocationException: void <init>(java.lang.String,int)>("invalid position", i0);
+
+        throw $r5;
+
+     label1:
+        $i2 = staticinvoke <javax.swing.text.Utilities: int getNextVisualPositionFrom(javax.swing.text.View,int,javax.swing.text.Position$Bias,java.awt.Shape,int,javax.swing.text.Position$Bias[])>(r0, i0, r1, r2, i1, r3);
+
+        return $i2;
+    }
+}

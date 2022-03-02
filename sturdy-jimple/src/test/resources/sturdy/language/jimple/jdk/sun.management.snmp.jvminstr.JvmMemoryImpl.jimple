@@ -1,0 +1,791 @@
+public class sun.management.snmp.jvminstr.JvmMemoryImpl extends java.lang.Object implements sun.management.snmp.jvmmib.JvmMemoryMBean
+{
+    static final sun.management.snmp.jvmmib.EnumJvmMemoryGCCall JvmMemoryGCCallSupported;
+    static final sun.management.snmp.jvmmib.EnumJvmMemoryGCCall JvmMemoryGCCallStart;
+    static final sun.management.snmp.jvmmib.EnumJvmMemoryGCCall JvmMemoryGCCallFailed;
+    static final sun.management.snmp.jvmmib.EnumJvmMemoryGCCall JvmMemoryGCCallStarted;
+    static final sun.management.snmp.jvmmib.EnumJvmMemoryGCVerboseLevel JvmMemoryGCVerboseLevelVerbose;
+    static final sun.management.snmp.jvmmib.EnumJvmMemoryGCVerboseLevel JvmMemoryGCVerboseLevelSilent;
+    static final java.lang.String heapMemoryTag;
+    static final java.lang.String nonHeapMemoryTag;
+    static final java.lang.Long Long0;
+    static final sun.management.snmp.util.MibLogger log;
+
+    public void <init>(com.sun.jmx.snmp.agent.SnmpMib)
+    {
+        sun.management.snmp.jvminstr.JvmMemoryImpl r0;
+        com.sun.jmx.snmp.agent.SnmpMib r1;
+
+        r0 := @this: sun.management.snmp.jvminstr.JvmMemoryImpl;
+
+        r1 := @parameter0: com.sun.jmx.snmp.agent.SnmpMib;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void <init>(com.sun.jmx.snmp.agent.SnmpMib, javax.management.MBeanServer)
+    {
+        sun.management.snmp.jvminstr.JvmMemoryImpl r0;
+        com.sun.jmx.snmp.agent.SnmpMib r1;
+        javax.management.MBeanServer r2;
+
+        r0 := @this: sun.management.snmp.jvminstr.JvmMemoryImpl;
+
+        r1 := @parameter0: com.sun.jmx.snmp.agent.SnmpMib;
+
+        r2 := @parameter1: javax.management.MBeanServer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private java.lang.management.MemoryUsage getMemoryUsage(java.lang.management.MemoryType)
+    {
+        sun.management.snmp.jvminstr.JvmMemoryImpl r6;
+        java.lang.management.MemoryMXBean $r2, $r4;
+        java.lang.management.MemoryType r0, $r1;
+        java.lang.management.MemoryUsage $r3, $r5;
+
+        r6 := @this: sun.management.snmp.jvminstr.JvmMemoryImpl;
+
+        r0 := @parameter0: java.lang.management.MemoryType;
+
+        $r1 = <java.lang.management.MemoryType: java.lang.management.MemoryType HEAP>;
+
+        if r0 != $r1 goto label1;
+
+        $r4 = staticinvoke <java.lang.management.ManagementFactory: java.lang.management.MemoryMXBean getMemoryMXBean()>();
+
+        $r5 = interfaceinvoke $r4.<java.lang.management.MemoryMXBean: java.lang.management.MemoryUsage getHeapMemoryUsage()>();
+
+        return $r5;
+
+     label1:
+        $r2 = staticinvoke <java.lang.management.ManagementFactory: java.lang.management.MemoryMXBean getMemoryMXBean()>();
+
+        $r3 = interfaceinvoke $r2.<java.lang.management.MemoryMXBean: java.lang.management.MemoryUsage getNonHeapMemoryUsage()>();
+
+        return $r3;
+    }
+
+    java.lang.management.MemoryUsage getNonHeapMemoryUsage()
+    {
+        sun.management.snmp.jvminstr.JvmMemoryImpl r2;
+        java.lang.management.MemoryType $r3, $r7;
+        java.util.Map $r0;
+        java.lang.String $r15;
+        java.lang.management.MemoryUsage $r4, r6, $r8;
+        sun.management.snmp.util.MibLogger $r1, $r9, $r12, $r16;
+        java.lang.RuntimeException $r10;
+        java.lang.Object $r5;
+        java.lang.StringBuilder $r11, $r13, $r14;
+
+        r2 := @this: sun.management.snmp.jvminstr.JvmMemoryImpl;
+
+     label1:
+        $r0 = staticinvoke <sun.management.snmp.util.JvmContextFactory: java.util.Map getUserData()>();
+
+        if $r0 == null goto label5;
+
+        $r5 = interfaceinvoke $r0.<java.util.Map: java.lang.Object get(java.lang.Object)>("jvmMemory.getNonHeapMemoryUsage");
+
+        r6 = (java.lang.management.MemoryUsage) $r5;
+
+        if r6 == null goto label3;
+
+        $r9 = <sun.management.snmp.jvminstr.JvmMemoryImpl: sun.management.snmp.util.MibLogger log>;
+
+        virtualinvoke $r9.<sun.management.snmp.util.MibLogger: void debug(java.lang.String,java.lang.String)>("getNonHeapMemoryUsage", "jvmMemory.getNonHeapMemoryUsage found in cache.");
+
+     label2:
+        return r6;
+
+     label3:
+        $r7 = <java.lang.management.MemoryType: java.lang.management.MemoryType NON_HEAP>;
+
+        $r8 = specialinvoke r2.<sun.management.snmp.jvminstr.JvmMemoryImpl: java.lang.management.MemoryUsage getMemoryUsage(java.lang.management.MemoryType)>($r7);
+
+        interfaceinvoke $r0.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("jvmMemory.getNonHeapMemoryUsage", $r8);
+
+     label4:
+        return $r8;
+
+     label5:
+        $r1 = <sun.management.snmp.jvminstr.JvmMemoryImpl: sun.management.snmp.util.MibLogger log>;
+
+        virtualinvoke $r1.<sun.management.snmp.util.MibLogger: void trace(java.lang.String,java.lang.String)>("getNonHeapMemoryUsage", "ERROR: should never come here!");
+
+        $r3 = <java.lang.management.MemoryType: java.lang.management.MemoryType NON_HEAP>;
+
+        $r4 = specialinvoke r2.<sun.management.snmp.jvminstr.JvmMemoryImpl: java.lang.management.MemoryUsage getMemoryUsage(java.lang.management.MemoryType)>($r3);
+
+     label6:
+        return $r4;
+
+     label7:
+        $r10 := @caughtexception;
+
+        $r12 = <sun.management.snmp.jvminstr.JvmMemoryImpl: sun.management.snmp.util.MibLogger log>;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to get NonHeapMemoryUsage: ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r10);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r12.<sun.management.snmp.util.MibLogger: void trace(java.lang.String,java.lang.String)>("getNonHeapMemoryUsage", $r15);
+
+        $r16 = <sun.management.snmp.jvminstr.JvmMemoryImpl: sun.management.snmp.util.MibLogger log>;
+
+        virtualinvoke $r16.<sun.management.snmp.util.MibLogger: void debug(java.lang.String,java.lang.Throwable)>("getNonHeapMemoryUsage", $r10);
+
+        throw $r10;
+
+        catch java.lang.RuntimeException from label1 to label2 with label7;
+        catch java.lang.RuntimeException from label3 to label4 with label7;
+        catch java.lang.RuntimeException from label5 to label6 with label7;
+    }
+
+    java.lang.management.MemoryUsage getHeapMemoryUsage()
+    {
+        sun.management.snmp.jvminstr.JvmMemoryImpl r2;
+        java.lang.management.MemoryType $r3, $r7;
+        java.util.Map $r0;
+        java.lang.String $r15;
+        java.lang.management.MemoryUsage $r4, r6, $r8;
+        sun.management.snmp.util.MibLogger $r1, $r9, $r12, $r16;
+        java.lang.RuntimeException $r10;
+        java.lang.Object $r5;
+        java.lang.StringBuilder $r11, $r13, $r14;
+
+        r2 := @this: sun.management.snmp.jvminstr.JvmMemoryImpl;
+
+     label1:
+        $r0 = staticinvoke <sun.management.snmp.util.JvmContextFactory: java.util.Map getUserData()>();
+
+        if $r0 == null goto label5;
+
+        $r5 = interfaceinvoke $r0.<java.util.Map: java.lang.Object get(java.lang.Object)>("jvmMemory.getHeapMemoryUsage");
+
+        r6 = (java.lang.management.MemoryUsage) $r5;
+
+        if r6 == null goto label3;
+
+        $r9 = <sun.management.snmp.jvminstr.JvmMemoryImpl: sun.management.snmp.util.MibLogger log>;
+
+        virtualinvoke $r9.<sun.management.snmp.util.MibLogger: void debug(java.lang.String,java.lang.String)>("getHeapMemoryUsage", "jvmMemory.getHeapMemoryUsage found in cache.");
+
+     label2:
+        return r6;
+
+     label3:
+        $r7 = <java.lang.management.MemoryType: java.lang.management.MemoryType HEAP>;
+
+        $r8 = specialinvoke r2.<sun.management.snmp.jvminstr.JvmMemoryImpl: java.lang.management.MemoryUsage getMemoryUsage(java.lang.management.MemoryType)>($r7);
+
+        interfaceinvoke $r0.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("jvmMemory.getHeapMemoryUsage", $r8);
+
+     label4:
+        return $r8;
+
+     label5:
+        $r1 = <sun.management.snmp.jvminstr.JvmMemoryImpl: sun.management.snmp.util.MibLogger log>;
+
+        virtualinvoke $r1.<sun.management.snmp.util.MibLogger: void trace(java.lang.String,java.lang.String)>("getHeapMemoryUsage", "ERROR: should never come here!");
+
+        $r3 = <java.lang.management.MemoryType: java.lang.management.MemoryType HEAP>;
+
+        $r4 = specialinvoke r2.<sun.management.snmp.jvminstr.JvmMemoryImpl: java.lang.management.MemoryUsage getMemoryUsage(java.lang.management.MemoryType)>($r3);
+
+     label6:
+        return $r4;
+
+     label7:
+        $r10 := @caughtexception;
+
+        $r12 = <sun.management.snmp.jvminstr.JvmMemoryImpl: sun.management.snmp.util.MibLogger log>;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to get HeapMemoryUsage: ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r10);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r12.<sun.management.snmp.util.MibLogger: void trace(java.lang.String,java.lang.String)>("getHeapMemoryUsage", $r15);
+
+        $r16 = <sun.management.snmp.jvminstr.JvmMemoryImpl: sun.management.snmp.util.MibLogger log>;
+
+        virtualinvoke $r16.<sun.management.snmp.util.MibLogger: void debug(java.lang.String,java.lang.Throwable)>("getHeapMemoryUsage", $r10);
+
+        throw $r10;
+
+        catch java.lang.RuntimeException from label1 to label2 with label7;
+        catch java.lang.RuntimeException from label3 to label4 with label7;
+        catch java.lang.RuntimeException from label5 to label6 with label7;
+    }
+
+    public java.lang.Long getJvmMemoryNonHeapMaxSize() throws com.sun.jmx.snmp.SnmpStatusException
+    {
+        sun.management.snmp.jvminstr.JvmMemoryImpl r0;
+        byte $b1;
+        java.lang.Long $r2, $r4;
+        int $i2;
+        long $l0;
+        java.lang.management.MemoryUsage $r1;
+
+        r0 := @this: sun.management.snmp.jvminstr.JvmMemoryImpl;
+
+        $r1 = virtualinvoke r0.<sun.management.snmp.jvminstr.JvmMemoryImpl: java.lang.management.MemoryUsage getNonHeapMemoryUsage()>();
+
+        $l0 = virtualinvoke $r1.<java.lang.management.MemoryUsage: long getMax()>();
+
+        $b1 = $l0 cmp -1L;
+
+        $i2 = (int) $b1;
+
+        if $i2 <= 0 goto label1;
+
+        $r4 = new java.lang.Long;
+
+        specialinvoke $r4.<java.lang.Long: void <init>(long)>($l0);
+
+        return $r4;
+
+     label1:
+        $r2 = <sun.management.snmp.jvminstr.JvmMemoryImpl: java.lang.Long Long0>;
+
+        return $r2;
+    }
+
+    public java.lang.Long getJvmMemoryNonHeapCommitted() throws com.sun.jmx.snmp.SnmpStatusException
+    {
+        sun.management.snmp.jvminstr.JvmMemoryImpl r0;
+        byte $b1;
+        java.lang.Long $r2, $r4;
+        int $i2;
+        long $l0;
+        java.lang.management.MemoryUsage $r1;
+
+        r0 := @this: sun.management.snmp.jvminstr.JvmMemoryImpl;
+
+        $r1 = virtualinvoke r0.<sun.management.snmp.jvminstr.JvmMemoryImpl: java.lang.management.MemoryUsage getNonHeapMemoryUsage()>();
+
+        $l0 = virtualinvoke $r1.<java.lang.management.MemoryUsage: long getCommitted()>();
+
+        $b1 = $l0 cmp -1L;
+
+        $i2 = (int) $b1;
+
+        if $i2 <= 0 goto label1;
+
+        $r4 = new java.lang.Long;
+
+        specialinvoke $r4.<java.lang.Long: void <init>(long)>($l0);
+
+        return $r4;
+
+     label1:
+        $r2 = <sun.management.snmp.jvminstr.JvmMemoryImpl: java.lang.Long Long0>;
+
+        return $r2;
+    }
+
+    public java.lang.Long getJvmMemoryNonHeapUsed() throws com.sun.jmx.snmp.SnmpStatusException
+    {
+        sun.management.snmp.jvminstr.JvmMemoryImpl r0;
+        byte $b1;
+        java.lang.Long $r2, $r4;
+        int $i2;
+        long $l0;
+        java.lang.management.MemoryUsage $r1;
+
+        r0 := @this: sun.management.snmp.jvminstr.JvmMemoryImpl;
+
+        $r1 = virtualinvoke r0.<sun.management.snmp.jvminstr.JvmMemoryImpl: java.lang.management.MemoryUsage getNonHeapMemoryUsage()>();
+
+        $l0 = virtualinvoke $r1.<java.lang.management.MemoryUsage: long getUsed()>();
+
+        $b1 = $l0 cmp -1L;
+
+        $i2 = (int) $b1;
+
+        if $i2 <= 0 goto label1;
+
+        $r4 = new java.lang.Long;
+
+        specialinvoke $r4.<java.lang.Long: void <init>(long)>($l0);
+
+        return $r4;
+
+     label1:
+        $r2 = <sun.management.snmp.jvminstr.JvmMemoryImpl: java.lang.Long Long0>;
+
+        return $r2;
+    }
+
+    public java.lang.Long getJvmMemoryNonHeapInitSize() throws com.sun.jmx.snmp.SnmpStatusException
+    {
+        sun.management.snmp.jvminstr.JvmMemoryImpl r0;
+        byte $b1;
+        java.lang.Long $r2, $r4;
+        int $i2;
+        long $l0;
+        java.lang.management.MemoryUsage $r1;
+
+        r0 := @this: sun.management.snmp.jvminstr.JvmMemoryImpl;
+
+        $r1 = virtualinvoke r0.<sun.management.snmp.jvminstr.JvmMemoryImpl: java.lang.management.MemoryUsage getNonHeapMemoryUsage()>();
+
+        $l0 = virtualinvoke $r1.<java.lang.management.MemoryUsage: long getInit()>();
+
+        $b1 = $l0 cmp -1L;
+
+        $i2 = (int) $b1;
+
+        if $i2 <= 0 goto label1;
+
+        $r4 = new java.lang.Long;
+
+        specialinvoke $r4.<java.lang.Long: void <init>(long)>($l0);
+
+        return $r4;
+
+     label1:
+        $r2 = <sun.management.snmp.jvminstr.JvmMemoryImpl: java.lang.Long Long0>;
+
+        return $r2;
+    }
+
+    public java.lang.Long getJvmMemoryHeapMaxSize() throws com.sun.jmx.snmp.SnmpStatusException
+    {
+        sun.management.snmp.jvminstr.JvmMemoryImpl r0;
+        byte $b1;
+        java.lang.Long $r2, $r4;
+        int $i2;
+        long $l0;
+        java.lang.management.MemoryUsage $r1;
+
+        r0 := @this: sun.management.snmp.jvminstr.JvmMemoryImpl;
+
+        $r1 = virtualinvoke r0.<sun.management.snmp.jvminstr.JvmMemoryImpl: java.lang.management.MemoryUsage getHeapMemoryUsage()>();
+
+        $l0 = virtualinvoke $r1.<java.lang.management.MemoryUsage: long getMax()>();
+
+        $b1 = $l0 cmp -1L;
+
+        $i2 = (int) $b1;
+
+        if $i2 <= 0 goto label1;
+
+        $r4 = new java.lang.Long;
+
+        specialinvoke $r4.<java.lang.Long: void <init>(long)>($l0);
+
+        return $r4;
+
+     label1:
+        $r2 = <sun.management.snmp.jvminstr.JvmMemoryImpl: java.lang.Long Long0>;
+
+        return $r2;
+    }
+
+    public sun.management.snmp.jvmmib.EnumJvmMemoryGCCall getJvmMemoryGCCall() throws com.sun.jmx.snmp.SnmpStatusException
+    {
+        sun.management.snmp.jvminstr.JvmMemoryImpl r4;
+        java.util.Map $r0;
+        java.lang.Object $r2;
+        sun.management.snmp.jvmmib.EnumJvmMemoryGCCall $r1, r3;
+
+        r4 := @this: sun.management.snmp.jvminstr.JvmMemoryImpl;
+
+        $r0 = staticinvoke <sun.management.snmp.util.JvmContextFactory: java.util.Map getUserData()>();
+
+        if $r0 == null goto label1;
+
+        $r2 = interfaceinvoke $r0.<java.util.Map: java.lang.Object get(java.lang.Object)>("jvmMemory.getJvmMemoryGCCall");
+
+        r3 = (sun.management.snmp.jvmmib.EnumJvmMemoryGCCall) $r2;
+
+        if r3 == null goto label1;
+
+        return r3;
+
+     label1:
+        $r1 = <sun.management.snmp.jvminstr.JvmMemoryImpl: sun.management.snmp.jvmmib.EnumJvmMemoryGCCall JvmMemoryGCCallSupported>;
+
+        return $r1;
+    }
+
+    public void setJvmMemoryGCCall(sun.management.snmp.jvmmib.EnumJvmMemoryGCCall) throws com.sun.jmx.snmp.SnmpStatusException
+    {
+        sun.management.snmp.jvminstr.JvmMemoryImpl r8;
+        java.lang.Exception $r6;
+        java.lang.management.MemoryMXBean $r4;
+        com.sun.jmx.snmp.SnmpStatusException $r2;
+        java.util.Map $r3;
+        int $i0, $i1;
+        sun.management.snmp.jvmmib.EnumJvmMemoryGCCall r0, $r1, $r5, $r7;
+
+        r8 := @this: sun.management.snmp.jvminstr.JvmMemoryImpl;
+
+        r0 := @parameter0: sun.management.snmp.jvmmib.EnumJvmMemoryGCCall;
+
+        $i0 = virtualinvoke r0.<sun.management.snmp.jvmmib.EnumJvmMemoryGCCall: int intValue()>();
+
+        $r1 = <sun.management.snmp.jvminstr.JvmMemoryImpl: sun.management.snmp.jvmmib.EnumJvmMemoryGCCall JvmMemoryGCCallStart>;
+
+        $i1 = virtualinvoke $r1.<sun.management.snmp.jvmmib.EnumJvmMemoryGCCall: int intValue()>();
+
+        if $i0 != $i1 goto label5;
+
+        $r3 = staticinvoke <sun.management.snmp.util.JvmContextFactory: java.util.Map getUserData()>();
+
+     label1:
+        $r4 = staticinvoke <java.lang.management.ManagementFactory: java.lang.management.MemoryMXBean getMemoryMXBean()>();
+
+        interfaceinvoke $r4.<java.lang.management.MemoryMXBean: void gc()>();
+
+        if $r3 == null goto label2;
+
+        $r5 = <sun.management.snmp.jvminstr.JvmMemoryImpl: sun.management.snmp.jvmmib.EnumJvmMemoryGCCall JvmMemoryGCCallStarted>;
+
+        interfaceinvoke $r3.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("jvmMemory.getJvmMemoryGCCall", $r5);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        if $r3 == null goto label4;
+
+        $r7 = <sun.management.snmp.jvminstr.JvmMemoryImpl: sun.management.snmp.jvmmib.EnumJvmMemoryGCCall JvmMemoryGCCallFailed>;
+
+        interfaceinvoke $r3.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("jvmMemory.getJvmMemoryGCCall", $r7);
+
+     label4:
+        return;
+
+     label5:
+        $r2 = new com.sun.jmx.snmp.SnmpStatusException;
+
+        specialinvoke $r2.<com.sun.jmx.snmp.SnmpStatusException: void <init>(int)>(10);
+
+        throw $r2;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public void checkJvmMemoryGCCall(sun.management.snmp.jvmmib.EnumJvmMemoryGCCall) throws com.sun.jmx.snmp.SnmpStatusException
+    {
+        sun.management.snmp.jvminstr.JvmMemoryImpl r3;
+        com.sun.jmx.snmp.SnmpStatusException $r2;
+        int $i0, $i1;
+        sun.management.snmp.jvmmib.EnumJvmMemoryGCCall r0, $r1;
+
+        r3 := @this: sun.management.snmp.jvminstr.JvmMemoryImpl;
+
+        r0 := @parameter0: sun.management.snmp.jvmmib.EnumJvmMemoryGCCall;
+
+        $i0 = virtualinvoke r0.<sun.management.snmp.jvmmib.EnumJvmMemoryGCCall: int intValue()>();
+
+        $r1 = <sun.management.snmp.jvminstr.JvmMemoryImpl: sun.management.snmp.jvmmib.EnumJvmMemoryGCCall JvmMemoryGCCallStart>;
+
+        $i1 = virtualinvoke $r1.<sun.management.snmp.jvmmib.EnumJvmMemoryGCCall: int intValue()>();
+
+        if $i0 == $i1 goto label1;
+
+        $r2 = new com.sun.jmx.snmp.SnmpStatusException;
+
+        specialinvoke $r2.<com.sun.jmx.snmp.SnmpStatusException: void <init>(int)>(10);
+
+        throw $r2;
+
+     label1:
+        return;
+    }
+
+    public java.lang.Long getJvmMemoryHeapCommitted() throws com.sun.jmx.snmp.SnmpStatusException
+    {
+        sun.management.snmp.jvminstr.JvmMemoryImpl r0;
+        byte $b1;
+        java.lang.Long $r2, $r4;
+        int $i2;
+        long $l0;
+        java.lang.management.MemoryUsage $r1;
+
+        r0 := @this: sun.management.snmp.jvminstr.JvmMemoryImpl;
+
+        $r1 = virtualinvoke r0.<sun.management.snmp.jvminstr.JvmMemoryImpl: java.lang.management.MemoryUsage getHeapMemoryUsage()>();
+
+        $l0 = virtualinvoke $r1.<java.lang.management.MemoryUsage: long getCommitted()>();
+
+        $b1 = $l0 cmp -1L;
+
+        $i2 = (int) $b1;
+
+        if $i2 <= 0 goto label1;
+
+        $r4 = new java.lang.Long;
+
+        specialinvoke $r4.<java.lang.Long: void <init>(long)>($l0);
+
+        return $r4;
+
+     label1:
+        $r2 = <sun.management.snmp.jvminstr.JvmMemoryImpl: java.lang.Long Long0>;
+
+        return $r2;
+    }
+
+    public sun.management.snmp.jvmmib.EnumJvmMemoryGCVerboseLevel getJvmMemoryGCVerboseLevel() throws com.sun.jmx.snmp.SnmpStatusException
+    {
+        sun.management.snmp.jvminstr.JvmMemoryImpl r3;
+        java.lang.management.MemoryMXBean $r0;
+        sun.management.snmp.jvmmib.EnumJvmMemoryGCVerboseLevel $r1, $r2;
+        boolean $z0;
+
+        r3 := @this: sun.management.snmp.jvminstr.JvmMemoryImpl;
+
+        $r0 = staticinvoke <java.lang.management.ManagementFactory: java.lang.management.MemoryMXBean getMemoryMXBean()>();
+
+        $z0 = interfaceinvoke $r0.<java.lang.management.MemoryMXBean: boolean isVerbose()>();
+
+        if $z0 == 0 goto label1;
+
+        $r2 = <sun.management.snmp.jvminstr.JvmMemoryImpl: sun.management.snmp.jvmmib.EnumJvmMemoryGCVerboseLevel JvmMemoryGCVerboseLevelVerbose>;
+
+        return $r2;
+
+     label1:
+        $r1 = <sun.management.snmp.jvminstr.JvmMemoryImpl: sun.management.snmp.jvmmib.EnumJvmMemoryGCVerboseLevel JvmMemoryGCVerboseLevelSilent>;
+
+        return $r1;
+    }
+
+    public void setJvmMemoryGCVerboseLevel(sun.management.snmp.jvmmib.EnumJvmMemoryGCVerboseLevel) throws com.sun.jmx.snmp.SnmpStatusException
+    {
+        sun.management.snmp.jvminstr.JvmMemoryImpl r4;
+        java.lang.management.MemoryMXBean $r2, $r3;
+        sun.management.snmp.jvmmib.EnumJvmMemoryGCVerboseLevel $r0, r1;
+        int $i0, $i1;
+
+        r4 := @this: sun.management.snmp.jvminstr.JvmMemoryImpl;
+
+        r1 := @parameter0: sun.management.snmp.jvmmib.EnumJvmMemoryGCVerboseLevel;
+
+        $r0 = <sun.management.snmp.jvminstr.JvmMemoryImpl: sun.management.snmp.jvmmib.EnumJvmMemoryGCVerboseLevel JvmMemoryGCVerboseLevelVerbose>;
+
+        $i0 = virtualinvoke $r0.<sun.management.snmp.jvmmib.EnumJvmMemoryGCVerboseLevel: int intValue()>();
+
+        $i1 = virtualinvoke r1.<sun.management.snmp.jvmmib.EnumJvmMemoryGCVerboseLevel: int intValue()>();
+
+        if $i0 != $i1 goto label1;
+
+        $r3 = staticinvoke <java.lang.management.ManagementFactory: java.lang.management.MemoryMXBean getMemoryMXBean()>();
+
+        interfaceinvoke $r3.<java.lang.management.MemoryMXBean: void setVerbose(boolean)>(1);
+
+        goto label2;
+
+     label1:
+        $r2 = staticinvoke <java.lang.management.ManagementFactory: java.lang.management.MemoryMXBean getMemoryMXBean()>();
+
+        interfaceinvoke $r2.<java.lang.management.MemoryMXBean: void setVerbose(boolean)>(0);
+
+     label2:
+        return;
+    }
+
+    public void checkJvmMemoryGCVerboseLevel(sun.management.snmp.jvmmib.EnumJvmMemoryGCVerboseLevel) throws com.sun.jmx.snmp.SnmpStatusException
+    {
+        sun.management.snmp.jvminstr.JvmMemoryImpl r0;
+        sun.management.snmp.jvmmib.EnumJvmMemoryGCVerboseLevel r1;
+
+        r0 := @this: sun.management.snmp.jvminstr.JvmMemoryImpl;
+
+        r1 := @parameter0: sun.management.snmp.jvmmib.EnumJvmMemoryGCVerboseLevel;
+
+        return;
+    }
+
+    public java.lang.Long getJvmMemoryHeapUsed() throws com.sun.jmx.snmp.SnmpStatusException
+    {
+        sun.management.snmp.jvminstr.JvmMemoryImpl r0;
+        byte $b1;
+        java.lang.Long $r2, $r4;
+        int $i2;
+        long $l0;
+        java.lang.management.MemoryUsage $r1;
+
+        r0 := @this: sun.management.snmp.jvminstr.JvmMemoryImpl;
+
+        $r1 = virtualinvoke r0.<sun.management.snmp.jvminstr.JvmMemoryImpl: java.lang.management.MemoryUsage getHeapMemoryUsage()>();
+
+        $l0 = virtualinvoke $r1.<java.lang.management.MemoryUsage: long getUsed()>();
+
+        $b1 = $l0 cmp -1L;
+
+        $i2 = (int) $b1;
+
+        if $i2 <= 0 goto label1;
+
+        $r4 = new java.lang.Long;
+
+        specialinvoke $r4.<java.lang.Long: void <init>(long)>($l0);
+
+        return $r4;
+
+     label1:
+        $r2 = <sun.management.snmp.jvminstr.JvmMemoryImpl: java.lang.Long Long0>;
+
+        return $r2;
+    }
+
+    public java.lang.Long getJvmMemoryHeapInitSize() throws com.sun.jmx.snmp.SnmpStatusException
+    {
+        sun.management.snmp.jvminstr.JvmMemoryImpl r0;
+        byte $b1;
+        java.lang.Long $r2, $r4;
+        int $i2;
+        long $l0;
+        java.lang.management.MemoryUsage $r1;
+
+        r0 := @this: sun.management.snmp.jvminstr.JvmMemoryImpl;
+
+        $r1 = virtualinvoke r0.<sun.management.snmp.jvminstr.JvmMemoryImpl: java.lang.management.MemoryUsage getHeapMemoryUsage()>();
+
+        $l0 = virtualinvoke $r1.<java.lang.management.MemoryUsage: long getInit()>();
+
+        $b1 = $l0 cmp -1L;
+
+        $i2 = (int) $b1;
+
+        if $i2 <= 0 goto label1;
+
+        $r4 = new java.lang.Long;
+
+        specialinvoke $r4.<java.lang.Long: void <init>(long)>($l0);
+
+        return $r4;
+
+     label1:
+        $r2 = <sun.management.snmp.jvminstr.JvmMemoryImpl: java.lang.Long Long0>;
+
+        return $r2;
+    }
+
+    public java.lang.Long getJvmMemoryPendingFinalCount() throws com.sun.jmx.snmp.SnmpStatusException
+    {
+        sun.management.snmp.jvminstr.JvmMemoryImpl r3;
+        long l1, $l4;
+        java.lang.management.MemoryMXBean $r0;
+        byte $b2;
+        java.lang.Long $r4, $r5;
+        int $i0, $i3, $i5;
+
+        r3 := @this: sun.management.snmp.jvminstr.JvmMemoryImpl;
+
+        $r0 = staticinvoke <java.lang.management.ManagementFactory: java.lang.management.MemoryMXBean getMemoryMXBean()>();
+
+        $i0 = interfaceinvoke $r0.<java.lang.management.MemoryMXBean: int getObjectPendingFinalizationCount()>();
+
+        l1 = (long) $i0;
+
+        $b2 = l1 cmp -1L;
+
+        $i5 = (int) $b2;
+
+        if $i5 <= 0 goto label1;
+
+        $r4 = new java.lang.Long;
+
+        $i3 = (int) l1;
+
+        $l4 = (long) $i3;
+
+        specialinvoke $r4.<java.lang.Long: void <init>(long)>($l4);
+
+        return $r4;
+
+     label1:
+        $r5 = new java.lang.Long;
+
+        specialinvoke $r5.<java.lang.Long: void <init>(long)>(0L);
+
+        return $r5;
+    }
+
+    static void <clinit>()
+    {
+        sun.management.snmp.util.MibLogger $r7;
+        java.lang.Long $r6;
+        sun.management.snmp.jvmmib.EnumJvmMemoryGCVerboseLevel $r4, $r5;
+        sun.management.snmp.jvmmib.EnumJvmMemoryGCCall $r0, $r1, $r2, $r3;
+
+        <sun.management.snmp.jvminstr.JvmMemoryImpl: java.lang.String nonHeapMemoryTag> = "jvmMemory.getNonHeapMemoryUsage";
+
+        <sun.management.snmp.jvminstr.JvmMemoryImpl: java.lang.String heapMemoryTag> = "jvmMemory.getHeapMemoryUsage";
+
+        $r0 = new sun.management.snmp.jvmmib.EnumJvmMemoryGCCall;
+
+        specialinvoke $r0.<sun.management.snmp.jvmmib.EnumJvmMemoryGCCall: void <init>(java.lang.String)>("supported");
+
+        <sun.management.snmp.jvminstr.JvmMemoryImpl: sun.management.snmp.jvmmib.EnumJvmMemoryGCCall JvmMemoryGCCallSupported> = $r0;
+
+        $r1 = new sun.management.snmp.jvmmib.EnumJvmMemoryGCCall;
+
+        specialinvoke $r1.<sun.management.snmp.jvmmib.EnumJvmMemoryGCCall: void <init>(java.lang.String)>("start");
+
+        <sun.management.snmp.jvminstr.JvmMemoryImpl: sun.management.snmp.jvmmib.EnumJvmMemoryGCCall JvmMemoryGCCallStart> = $r1;
+
+        $r2 = new sun.management.snmp.jvmmib.EnumJvmMemoryGCCall;
+
+        specialinvoke $r2.<sun.management.snmp.jvmmib.EnumJvmMemoryGCCall: void <init>(java.lang.String)>("failed");
+
+        <sun.management.snmp.jvminstr.JvmMemoryImpl: sun.management.snmp.jvmmib.EnumJvmMemoryGCCall JvmMemoryGCCallFailed> = $r2;
+
+        $r3 = new sun.management.snmp.jvmmib.EnumJvmMemoryGCCall;
+
+        specialinvoke $r3.<sun.management.snmp.jvmmib.EnumJvmMemoryGCCall: void <init>(java.lang.String)>("started");
+
+        <sun.management.snmp.jvminstr.JvmMemoryImpl: sun.management.snmp.jvmmib.EnumJvmMemoryGCCall JvmMemoryGCCallStarted> = $r3;
+
+        $r4 = new sun.management.snmp.jvmmib.EnumJvmMemoryGCVerboseLevel;
+
+        specialinvoke $r4.<sun.management.snmp.jvmmib.EnumJvmMemoryGCVerboseLevel: void <init>(java.lang.String)>("verbose");
+
+        <sun.management.snmp.jvminstr.JvmMemoryImpl: sun.management.snmp.jvmmib.EnumJvmMemoryGCVerboseLevel JvmMemoryGCVerboseLevelVerbose> = $r4;
+
+        $r5 = new sun.management.snmp.jvmmib.EnumJvmMemoryGCVerboseLevel;
+
+        specialinvoke $r5.<sun.management.snmp.jvmmib.EnumJvmMemoryGCVerboseLevel: void <init>(java.lang.String)>("silent");
+
+        <sun.management.snmp.jvminstr.JvmMemoryImpl: sun.management.snmp.jvmmib.EnumJvmMemoryGCVerboseLevel JvmMemoryGCVerboseLevelSilent> = $r5;
+
+        $r6 = new java.lang.Long;
+
+        specialinvoke $r6.<java.lang.Long: void <init>(long)>(0L);
+
+        <sun.management.snmp.jvminstr.JvmMemoryImpl: java.lang.Long Long0> = $r6;
+
+        $r7 = new sun.management.snmp.util.MibLogger;
+
+        specialinvoke $r7.<sun.management.snmp.util.MibLogger: void <init>(java.lang.Class)>(class "Lsun/management/snmp/jvminstr/JvmMemoryImpl;");
+
+        <sun.management.snmp.jvminstr.JvmMemoryImpl: sun.management.snmp.util.MibLogger log> = $r7;
+
+        return;
+    }
+}

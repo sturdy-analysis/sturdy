@@ -1,0 +1,718 @@
+final class sun.java2d.marlin.Dasher$LengthIterator extends java.lang.Object
+{
+    private final float[][] recCurveStack;
+    private final boolean[] sidesRight;
+    private int curveType;
+    private float nextT;
+    private float lenAtNextT;
+    private float lastT;
+    private float lenAtLastT;
+    private float lenAtLastSplit;
+    private float lastSegLen;
+    private int recLevel;
+    private boolean done;
+    private final float[] curLeafCtrlPolyLengths;
+    private int cachedHaveLowAcceleration;
+    private final float[] nextRoots;
+    private final float[] flatLeafCoefCache;
+
+    void <init>()
+    {
+        float[][] $r4;
+        boolean[] $r5;
+        int $i1;
+        float[] $r1, $r2, $r3;
+        sun.java2d.marlin.Dasher$LengthIterator r0;
+
+        r0 := @this: sun.java2d.marlin.Dasher$LengthIterator;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = newarray (float)[3];
+
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: float[] curLeafCtrlPolyLengths> = $r1;
+
+        $i1 = (int) -1;
+
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: int cachedHaveLowAcceleration> = $i1;
+
+        $r2 = newarray (float)[4];
+
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: float[] nextRoots> = $r2;
+
+        $r3 = newarray (float)[4];
+
+        $r3[0] = 0.0F;
+
+        $r3[1] = 0.0F;
+
+        $r3[2] = -1.0F;
+
+        $r3[3] = 0.0F;
+
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: float[] flatLeafCoefCache> = $r3;
+
+        $r4 = newmultiarray (float)[17][8];
+
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: float[][] recCurveStack> = $r4;
+
+        $r5 = newarray (boolean)[16];
+
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: boolean[] sidesRight> = $r5;
+
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: float nextT> = 3.4028235E38F;
+
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: float lenAtNextT> = 3.4028235E38F;
+
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: float lenAtLastSplit> = 1.4E-45F;
+
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: int recLevel> = -2147483648;
+
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: float lastSegLen> = 3.4028235E38F;
+
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: boolean done> = 1;
+
+        return;
+    }
+
+    void reset()
+    {
+        sun.java2d.marlin.Dasher$LengthIterator r0;
+
+        r0 := @this: sun.java2d.marlin.Dasher$LengthIterator;
+
+        return;
+    }
+
+    void initializeIterationOnCurve(float[], int)
+    {
+        float[][] $r2;
+        boolean[] $r4, $r5;
+        float[] r0, $r3;
+        int i0, $i1;
+        sun.java2d.marlin.Dasher$LengthIterator r1;
+
+        r1 := @this: sun.java2d.marlin.Dasher$LengthIterator;
+
+        r0 := @parameter0: float[];
+
+        i0 := @parameter1: int;
+
+        $r2 = r1.<sun.java2d.marlin.Dasher$LengthIterator: float[][] recCurveStack>;
+
+        $r3 = $r2[0];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, 0, $r3, 0, 8);
+
+        r1.<sun.java2d.marlin.Dasher$LengthIterator: int curveType> = i0;
+
+        r1.<sun.java2d.marlin.Dasher$LengthIterator: int recLevel> = 0;
+
+        r1.<sun.java2d.marlin.Dasher$LengthIterator: float lastT> = 0.0F;
+
+        r1.<sun.java2d.marlin.Dasher$LengthIterator: float lenAtLastT> = 0.0F;
+
+        r1.<sun.java2d.marlin.Dasher$LengthIterator: float nextT> = 0.0F;
+
+        r1.<sun.java2d.marlin.Dasher$LengthIterator: float lenAtNextT> = 0.0F;
+
+        specialinvoke r1.<sun.java2d.marlin.Dasher$LengthIterator: void goLeft()>();
+
+        r1.<sun.java2d.marlin.Dasher$LengthIterator: float lenAtLastSplit> = 0.0F;
+
+        $i1 = r1.<sun.java2d.marlin.Dasher$LengthIterator: int recLevel>;
+
+        if $i1 <= 0 goto label1;
+
+        $r5 = r1.<sun.java2d.marlin.Dasher$LengthIterator: boolean[] sidesRight>;
+
+        $r5[0] = 0;
+
+        r1.<sun.java2d.marlin.Dasher$LengthIterator: boolean done> = 0;
+
+        goto label2;
+
+     label1:
+        $r4 = r1.<sun.java2d.marlin.Dasher$LengthIterator: boolean[] sidesRight>;
+
+        $r4[0] = 1;
+
+        r1.<sun.java2d.marlin.Dasher$LengthIterator: boolean done> = 1;
+
+     label2:
+        r1.<sun.java2d.marlin.Dasher$LengthIterator: float lastSegLen> = 0.0F;
+
+        return;
+    }
+
+    private boolean haveLowAcceleration(float)
+    {
+        float[] $r1, $r2, $r3;
+        int $i0, $i1, $i2, $i4;
+        sun.java2d.marlin.Dasher$LengthIterator r0;
+        boolean $z0, $z1, $z2, $z3;
+        float f0, f1, f2, $f3, f4, f5;
+
+        r0 := @this: sun.java2d.marlin.Dasher$LengthIterator;
+
+        f2 := @parameter0: float;
+
+        $i0 = r0.<sun.java2d.marlin.Dasher$LengthIterator: int cachedHaveLowAcceleration>;
+
+        $i4 = (int) -1;
+
+        if $i0 != $i4 goto label4;
+
+        $r1 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float[] curLeafCtrlPolyLengths>;
+
+        f0 = $r1[0];
+
+        $r2 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float[] curLeafCtrlPolyLengths>;
+
+        f1 = $r2[1];
+
+        $f3 = f2 * f1;
+
+        $z0 = staticinvoke <sun.java2d.marlin.Helpers: boolean within(float,float,float)>(f0, f1, $f3);
+
+        if $z0 != 0 goto label1;
+
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: int cachedHaveLowAcceleration> = 0;
+
+        return 0;
+
+     label1:
+        $i2 = r0.<sun.java2d.marlin.Dasher$LengthIterator: int curveType>;
+
+        if $i2 != 8 goto label3;
+
+        $r3 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float[] curLeafCtrlPolyLengths>;
+
+        f4 = $r3[2];
+
+        f5 = f2 * f4;
+
+        $z1 = staticinvoke <sun.java2d.marlin.Helpers: boolean within(float,float,float)>(f1, f4, f5);
+
+        if $z1 == 0 goto label2;
+
+        $z2 = staticinvoke <sun.java2d.marlin.Helpers: boolean within(float,float,float)>(f0, f4, f5);
+
+        if $z2 != 0 goto label3;
+
+     label2:
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: int cachedHaveLowAcceleration> = 0;
+
+        return 0;
+
+     label3:
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: int cachedHaveLowAcceleration> = 1;
+
+        return 1;
+
+     label4:
+        $i1 = r0.<sun.java2d.marlin.Dasher$LengthIterator: int cachedHaveLowAcceleration>;
+
+        if $i1 != 1 goto label5;
+
+        $z3 = 1;
+
+        goto label6;
+
+     label5:
+        $z3 = 0;
+
+     label6:
+        return $z3;
+    }
+
+    float next(float)
+    {
+        byte $b0, $b1, $b5;
+        float[] r1, $r2, $r3, $r4, $r5, $r6, $r7;
+        sun.java2d.marlin.Dasher$LengthIterator r0;
+        boolean $z0, $z1, $z2;
+        float f0, $f1, f2, $f3, $f4, $f5, f6, $f7, $f8, $f9, $f10, $f11, $f12, $f13, $f14, $f15, $f16, $f17, $f18, $f19, $f20, $f21, $f22, $f23, $f24, $f25, $f26, $f27, f28, f29, f30, f31, $f32, $f33, $f34, $f35, $f36, $f37, $f38, $f39, $f40, $f41, $f42, f43;
+        int $i2, $i3, $i4, $i6, $i7, $i8;
+
+        r0 := @this: sun.java2d.marlin.Dasher$LengthIterator;
+
+        f0 := @parameter0: float;
+
+        $f1 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float lenAtLastSplit>;
+
+        f2 = $f1 + f0;
+
+     label1:
+        $f3 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float lenAtNextT>;
+
+        $b0 = $f3 cmpg f2;
+
+        $i6 = (int) $b0;
+
+        if $i6 >= 0 goto label3;
+
+        $z2 = r0.<sun.java2d.marlin.Dasher$LengthIterator: boolean done>;
+
+        if $z2 == 0 goto label2;
+
+        $f26 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float lenAtNextT>;
+
+        $f25 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float lenAtLastSplit>;
+
+        $f27 = $f26 - $f25;
+
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: float lastSegLen> = $f27;
+
+        return 1.0F;
+
+     label2:
+        specialinvoke r0.<sun.java2d.marlin.Dasher$LengthIterator: void goToNextLeaf()>();
+
+        goto label1;
+
+     label3:
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: float lenAtLastSplit> = f2;
+
+        $f5 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float lenAtNextT>;
+
+        $f4 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float lenAtLastT>;
+
+        f6 = $f5 - $f4;
+
+        $f7 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float lenAtLastT>;
+
+        $f8 = f2 - $f7;
+
+        f28 = $f8 / f6;
+
+        $z0 = specialinvoke r0.<sun.java2d.marlin.Dasher$LengthIterator: boolean haveLowAcceleration(float)>(0.05F);
+
+        if $z0 != 0 goto label6;
+
+        r1 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float[] flatLeafCoefCache>;
+
+        $f9 = r1[2];
+
+        $b1 = $f9 cmpg 0.0F;
+
+        $i7 = (int) $b1;
+
+        if $i7 >= 0 goto label5;
+
+        $r4 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float[] curLeafCtrlPolyLengths>;
+
+        f29 = $r4[0];
+
+        $r5 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float[] curLeafCtrlPolyLengths>;
+
+        $f11 = $r5[1];
+
+        f30 = f29 + $f11;
+
+        $i2 = r0.<sun.java2d.marlin.Dasher$LengthIterator: int curveType>;
+
+        if $i2 != 8 goto label4;
+
+        $r6 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float[] curLeafCtrlPolyLengths>;
+
+        $f16 = $r6[2];
+
+        f31 = f30 + $f16;
+
+        $f17 = f29 - f30;
+
+        $f18 = 3.0F * $f17;
+
+        $f19 = $f18 + f31;
+
+        r1[0] = $f19;
+
+        $f20 = 2.0F * f29;
+
+        $f21 = f30 - $f20;
+
+        $f22 = 3.0F * $f21;
+
+        r1[1] = $f22;
+
+        $f23 = 3.0F * f29;
+
+        r1[2] = $f23;
+
+        $f24 = neg f31;
+
+        r1[3] = $f24;
+
+        goto label5;
+
+     label4:
+        $i3 = r0.<sun.java2d.marlin.Dasher$LengthIterator: int curveType>;
+
+        if $i3 != 6 goto label5;
+
+        r1[0] = 0.0F;
+
+        $f12 = 2.0F * f29;
+
+        $f13 = f30 - $f12;
+
+        r1[1] = $f13;
+
+        $f14 = 2.0F * f29;
+
+        r1[2] = $f14;
+
+        $f15 = neg f30;
+
+        r1[3] = $f15;
+
+     label5:
+        $f32 = r1[0];
+
+        $f33 = r1[1];
+
+        $f34 = r1[2];
+
+        $f35 = r1[3];
+
+        $f36 = f28 * $f35;
+
+        $r7 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float[] nextRoots>;
+
+        $i4 = staticinvoke <sun.java2d.marlin.Helpers: int cubicRootsInAB(float,float,float,float,float[],int,float,float)>($f32, $f33, $f34, $f36, $r7, 0, 0.0F, 1.0F);
+
+        if $i4 != 1 goto label6;
+
+        $r2 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float[] nextRoots>;
+
+        $f10 = $r2[0];
+
+        $z1 = staticinvoke <java.lang.Float: boolean isNaN(float)>($f10);
+
+        if $z1 != 0 goto label6;
+
+        $r3 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float[] nextRoots>;
+
+        f28 = $r3[0];
+
+     label6:
+        $f37 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float nextT>;
+
+        $f38 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float lastT>;
+
+        $f39 = $f37 - $f38;
+
+        $f40 = f28 * $f39;
+
+        $f41 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float lastT>;
+
+        $f42 = $f40 + $f41;
+
+        f43 = $f42;
+
+        $b5 = $f42 cmpl 1.0F;
+
+        $i8 = (int) $b5;
+
+        if $i8 < 0 goto label7;
+
+        f43 = 1.0F;
+
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: boolean done> = 1;
+
+     label7:
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: float lastSegLen> = f0;
+
+        return f43;
+    }
+
+    float totalLength()
+    {
+        float $f0;
+        sun.java2d.marlin.Dasher$LengthIterator r0;
+        boolean $z0;
+
+        r0 := @this: sun.java2d.marlin.Dasher$LengthIterator;
+
+     label1:
+        $z0 = r0.<sun.java2d.marlin.Dasher$LengthIterator: boolean done>;
+
+        if $z0 != 0 goto label2;
+
+        specialinvoke r0.<sun.java2d.marlin.Dasher$LengthIterator: void goToNextLeaf()>();
+
+        goto label1;
+
+     label2:
+        virtualinvoke r0.<sun.java2d.marlin.Dasher$LengthIterator: void reset()>();
+
+        $f0 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float lenAtNextT>;
+
+        return $f0;
+    }
+
+    float lastSegLen()
+    {
+        float $f0;
+        sun.java2d.marlin.Dasher$LengthIterator r0;
+
+        r0 := @this: sun.java2d.marlin.Dasher$LengthIterator;
+
+        $f0 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float lastSegLen>;
+
+        return $f0;
+    }
+
+    private void goToNextLeaf()
+    {
+        float[][] $r2, $r3;
+        boolean[] r1;
+        float[] $r4, $r5;
+        int i0, i1, i2, $i4, $i6;
+        sun.java2d.marlin.Dasher$LengthIterator r0;
+        boolean $z0;
+
+        r0 := @this: sun.java2d.marlin.Dasher$LengthIterator;
+
+        r1 = r0.<sun.java2d.marlin.Dasher$LengthIterator: boolean[] sidesRight>;
+
+        i0 = r0.<sun.java2d.marlin.Dasher$LengthIterator: int recLevel>;
+
+        $i4 = (int) -1;
+
+        i1 = i0 + $i4;
+
+     label1:
+        $z0 = r1[i1];
+
+        if $z0 == 0 goto label3;
+
+        if i1 != 0 goto label2;
+
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: int recLevel> = 0;
+
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: boolean done> = 1;
+
+        return;
+
+     label2:
+        $i6 = (int) -1;
+
+        i1 = i1 + $i6;
+
+        goto label1;
+
+     label3:
+        r1[i1] = 1;
+
+        $r2 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float[][] recCurveStack>;
+
+        i2 = i1 + 1;
+
+        $r5 = $r2[i1];
+
+        $r3 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float[][] recCurveStack>;
+
+        $r4 = $r3[i2];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r5, 0, $r4, 0, 8);
+
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: int recLevel> = i2;
+
+        specialinvoke r0.<sun.java2d.marlin.Dasher$LengthIterator: void goLeft()>();
+
+        return;
+    }
+
+    private void goLeft()
+    {
+        byte $b0;
+        sun.java2d.marlin.Dasher$LengthIterator r0;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8;
+        float[] $r4, $r5, $r6, $r8;
+        int $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i14;
+        float[][] $r1, $r2, $r3;
+        boolean[] $r7;
+
+        r0 := @this: sun.java2d.marlin.Dasher$LengthIterator;
+
+        $f0 = specialinvoke r0.<sun.java2d.marlin.Dasher$LengthIterator: float onLeaf()>();
+
+        $b0 = $f0 cmpl 0.0F;
+
+        $i12 = (int) $b0;
+
+        if $i12 < 0 goto label1;
+
+        $f1 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float nextT>;
+
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: float lastT> = $f1;
+
+        $f2 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float lenAtNextT>;
+
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: float lenAtLastT> = $f2;
+
+        $f5 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float nextT>;
+
+        $i9 = r0.<sun.java2d.marlin.Dasher$LengthIterator: int recLevel>;
+
+        $i10 = 16 - $i9;
+
+        $i11 = 1 << $i10;
+
+        $f3 = (float) $i11;
+
+        $f4 = $f3 * 1.5258789E-5F;
+
+        $f6 = $f5 + $f4;
+
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: float nextT> = $f6;
+
+        $f7 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float lenAtNextT>;
+
+        $f8 = $f7 + $f0;
+
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: float lenAtNextT> = $f8;
+
+        $r8 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float[] flatLeafCoefCache>;
+
+        $r8[2] = -1.0F;
+
+        $i14 = (int) -1;
+
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: int cachedHaveLowAcceleration> = $i14;
+
+        goto label2;
+
+     label1:
+        $r1 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float[][] recCurveStack>;
+
+        $i1 = r0.<sun.java2d.marlin.Dasher$LengthIterator: int recLevel>;
+
+        $r6 = $r1[$i1];
+
+        $r2 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float[][] recCurveStack>;
+
+        $i2 = r0.<sun.java2d.marlin.Dasher$LengthIterator: int recLevel>;
+
+        $i3 = $i2 + 1;
+
+        $r5 = $r2[$i3];
+
+        $r3 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float[][] recCurveStack>;
+
+        $i4 = r0.<sun.java2d.marlin.Dasher$LengthIterator: int recLevel>;
+
+        $r4 = $r3[$i4];
+
+        $i5 = r0.<sun.java2d.marlin.Dasher$LengthIterator: int curveType>;
+
+        staticinvoke <sun.java2d.marlin.Helpers: void subdivide(float[],float[],float[],int)>($r6, $r5, $r4, $i5);
+
+        $r7 = r0.<sun.java2d.marlin.Dasher$LengthIterator: boolean[] sidesRight>;
+
+        $i6 = r0.<sun.java2d.marlin.Dasher$LengthIterator: int recLevel>;
+
+        $r7[$i6] = 0;
+
+        $i7 = r0.<sun.java2d.marlin.Dasher$LengthIterator: int recLevel>;
+
+        $i8 = $i7 + 1;
+
+        r0.<sun.java2d.marlin.Dasher$LengthIterator: int recLevel> = $i8;
+
+        specialinvoke r0.<sun.java2d.marlin.Dasher$LengthIterator: void goLeft()>();
+
+     label2:
+        return;
+    }
+
+    private float onLeaf()
+    {
+        float[] r2, $r3;
+        byte $b2;
+        int $i0, i1, $i3, $i4, $i5, $i6, i7, $i8;
+        sun.java2d.marlin.Dasher$LengthIterator r0;
+        float[][] $r1;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, f7, f8, $f9, f10, f11, f12;
+
+        r0 := @this: sun.java2d.marlin.Dasher$LengthIterator;
+
+        $r1 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float[][] recCurveStack>;
+
+        $i0 = r0.<sun.java2d.marlin.Dasher$LengthIterator: int recLevel>;
+
+        r2 = $r1[$i0];
+
+        i1 = r0.<sun.java2d.marlin.Dasher$LengthIterator: int curveType>;
+
+        f10 = 0.0F;
+
+        f11 = r2[0];
+
+        f12 = r2[1];
+
+        i7 = 2;
+
+     label1:
+        if i7 >= i1 goto label2;
+
+        f7 = r2[i7];
+
+        $i4 = i7 + 1;
+
+        f8 = r2[$i4];
+
+        $f9 = staticinvoke <sun.java2d.marlin.Helpers: float linelen(float,float,float,float)>(f11, f12, f7, f8);
+
+        f10 = f10 + $f9;
+
+        $r3 = r0.<sun.java2d.marlin.Dasher$LengthIterator: float[] curLeafCtrlPolyLengths>;
+
+        $i5 = i7 >> 1;
+
+        $i6 = $i5 - 1;
+
+        $r3[$i6] = $f9;
+
+        f11 = f7;
+
+        f12 = f8;
+
+        i7 = i7 + 2;
+
+        goto label1;
+
+     label2:
+        $f1 = r2[0];
+
+        $f0 = r2[1];
+
+        $f2 = staticinvoke <sun.java2d.marlin.Helpers: float linelen(float,float,float,float)>($f1, $f0, f11, f12);
+
+        $f4 = f10 - $f2;
+
+        $f3 = <sun.java2d.marlin.Dasher: float CURVE_LEN_ERR>;
+
+        $b2 = $f4 cmpg $f3;
+
+        $i8 = (int) $b2;
+
+        if $i8 < 0 goto label3;
+
+        $i3 = r0.<sun.java2d.marlin.Dasher$LengthIterator: int recLevel>;
+
+        if $i3 != 16 goto label4;
+
+     label3:
+        $f5 = f10 + $f2;
+
+        $f6 = $f5 / 2.0F;
+
+        return $f6;
+
+     label4:
+        return -1.0F;
+    }
+}

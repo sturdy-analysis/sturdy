@@ -1,0 +1,963 @@
+public class java.awt.dnd.DragSource extends java.lang.Object implements java.io.Serializable
+{
+    private static final long serialVersionUID;
+    public static final java.awt.Cursor DefaultCopyDrop;
+    public static final java.awt.Cursor DefaultMoveDrop;
+    public static final java.awt.Cursor DefaultLinkDrop;
+    public static final java.awt.Cursor DefaultCopyNoDrop;
+    public static final java.awt.Cursor DefaultMoveNoDrop;
+    public static final java.awt.Cursor DefaultLinkNoDrop;
+    private static final java.awt.dnd.DragSource dflt;
+    static final java.lang.String dragSourceListenerK;
+    static final java.lang.String dragSourceMotionListenerK;
+    private transient java.awt.datatransfer.FlavorMap flavorMap;
+    private transient java.awt.dnd.DragSourceListener listener;
+    private transient java.awt.dnd.DragSourceMotionListener motionListener;
+
+    private static java.awt.Cursor load(java.lang.String)
+    {
+        java.awt.Cursor $r3;
+        java.lang.RuntimeException $r5;
+        java.lang.Exception $r4;
+        java.lang.Object $r2;
+        java.lang.StringBuilder $r6, $r7, $r8, $r9, $r11;
+        java.lang.String r1, $r10, $r12;
+        boolean $z0;
+        java.awt.Toolkit $r0;
+
+        r1 := @parameter0: java.lang.String;
+
+        $z0 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        if $z0 == 0 goto label1;
+
+        return null;
+
+     label1:
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r2 = virtualinvoke $r0.<java.awt.Toolkit: java.lang.Object getDesktopProperty(java.lang.String)>(r1);
+
+        $r3 = (java.awt.Cursor) $r2;
+
+     label2:
+        return $r3;
+
+     label3:
+        $r4 := @caughtexception;
+
+        virtualinvoke $r4.<java.lang.Exception: void printStackTrace()>();
+
+        $r5 = new java.lang.RuntimeException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("failed to load system cursor: ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" : ");
+
+        $r10 = virtualinvoke $r4.<java.lang.Exception: java.lang.String getMessage()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.lang.RuntimeException: void <init>(java.lang.String)>($r12);
+
+        throw $r5;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public static java.awt.dnd.DragSource getDefaultDragSource()
+    {
+        java.awt.HeadlessException $r1;
+        java.awt.dnd.DragSource $r0;
+        boolean $z0;
+
+        $z0 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new java.awt.HeadlessException;
+
+        specialinvoke $r1.<java.awt.HeadlessException: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        $r0 = <java.awt.dnd.DragSource: java.awt.dnd.DragSource dflt>;
+
+        return $r0;
+    }
+
+    public static boolean isDragImageSupported()
+    {
+        java.lang.Boolean r2;
+        java.lang.Object $r1;
+        java.lang.Exception $r3;
+        java.awt.Toolkit $r0;
+        boolean $z0;
+
+        staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+     label1:
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r1 = virtualinvoke $r0.<java.awt.Toolkit: java.lang.Object getDesktopProperty(java.lang.String)>("DnD.isDragImageSupported");
+
+        r2 = (java.lang.Boolean) $r1;
+
+        $z0 = virtualinvoke r2.<java.lang.Boolean: boolean booleanValue()>();
+
+     label2:
+        return $z0;
+
+     label3:
+        $r3 := @caughtexception;
+
+        return 0;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public void <init>() throws java.awt.HeadlessException
+    {
+        java.awt.dnd.DragSource r0;
+        java.awt.datatransfer.FlavorMap $r1;
+        java.awt.HeadlessException $r2;
+        boolean $z0;
+
+        r0 := @this: java.awt.dnd.DragSource;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = staticinvoke <java.awt.datatransfer.SystemFlavorMap: java.awt.datatransfer.FlavorMap getDefaultFlavorMap()>();
+
+        r0.<java.awt.dnd.DragSource: java.awt.datatransfer.FlavorMap flavorMap> = $r1;
+
+        $z0 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new java.awt.HeadlessException;
+
+        specialinvoke $r2.<java.awt.HeadlessException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        return;
+    }
+
+    public void startDrag(java.awt.dnd.DragGestureEvent, java.awt.Cursor, java.awt.Image, java.awt.Point, java.awt.datatransfer.Transferable, java.awt.dnd.DragSourceListener, java.awt.datatransfer.FlavorMap) throws java.awt.dnd.InvalidDnDOperationException
+    {
+        java.awt.Image r6;
+        java.awt.dnd.DragSource r4;
+        java.awt.Cursor r5, $r11;
+        java.awt.datatransfer.FlavorMap r0;
+        java.awt.dnd.peer.DragSourceContextPeer $r3;
+        java.awt.datatransfer.Transferable r8;
+        java.awt.Point r7;
+        java.lang.RuntimeException $r13;
+        java.awt.dnd.DragGestureEvent r2;
+        java.awt.dnd.DragSourceContext $r10;
+        java.awt.dnd.InvalidDnDOperationException $r12;
+        java.awt.dnd.DragSourceListener r9;
+        java.awt.Toolkit $r1;
+
+        r4 := @this: java.awt.dnd.DragSource;
+
+        r2 := @parameter0: java.awt.dnd.DragGestureEvent;
+
+        r5 := @parameter1: java.awt.Cursor;
+
+        r6 := @parameter2: java.awt.Image;
+
+        r7 := @parameter3: java.awt.Point;
+
+        r8 := @parameter4: java.awt.datatransfer.Transferable;
+
+        r9 := @parameter5: java.awt.dnd.DragSourceListener;
+
+        r0 := @parameter6: java.awt.datatransfer.FlavorMap;
+
+        staticinvoke <sun.awt.dnd.SunDragSourceContextPeer: void setDragDropInProgress(boolean)>(1);
+
+     label1:
+        if r0 == null goto label2;
+
+        r4.<java.awt.dnd.DragSource: java.awt.datatransfer.FlavorMap flavorMap> = r0;
+
+     label2:
+        $r1 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r3 = virtualinvoke $r1.<java.awt.Toolkit: java.awt.dnd.peer.DragSourceContextPeer createDragSourceContextPeer(java.awt.dnd.DragGestureEvent)>(r2);
+
+        $r10 = virtualinvoke r4.<java.awt.dnd.DragSource: java.awt.dnd.DragSourceContext createDragSourceContext(java.awt.dnd.peer.DragSourceContextPeer,java.awt.dnd.DragGestureEvent,java.awt.Cursor,java.awt.Image,java.awt.Point,java.awt.datatransfer.Transferable,java.awt.dnd.DragSourceListener)>($r3, r2, r5, r6, r7, r8, r9);
+
+        if $r10 != null goto label3;
+
+        $r12 = new java.awt.dnd.InvalidDnDOperationException;
+
+        specialinvoke $r12.<java.awt.dnd.InvalidDnDOperationException: void <init>()>();
+
+        throw $r12;
+
+     label3:
+        $r11 = virtualinvoke $r10.<java.awt.dnd.DragSourceContext: java.awt.Cursor getCursor()>();
+
+        interfaceinvoke $r3.<java.awt.dnd.peer.DragSourceContextPeer: void startDrag(java.awt.dnd.DragSourceContext,java.awt.Cursor,java.awt.Image,java.awt.Point)>($r10, $r11, r6, r7);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r13 := @caughtexception;
+
+        staticinvoke <sun.awt.dnd.SunDragSourceContextPeer: void setDragDropInProgress(boolean)>(0);
+
+        throw $r13;
+
+     label6:
+        return;
+
+        catch java.lang.RuntimeException from label1 to label4 with label5;
+    }
+
+    public void startDrag(java.awt.dnd.DragGestureEvent, java.awt.Cursor, java.awt.datatransfer.Transferable, java.awt.dnd.DragSourceListener, java.awt.datatransfer.FlavorMap) throws java.awt.dnd.InvalidDnDOperationException
+    {
+        java.awt.dnd.DragSource r0;
+        java.awt.Cursor r2;
+        java.awt.datatransfer.Transferable r3;
+        java.awt.datatransfer.FlavorMap r5;
+        java.awt.dnd.DragGestureEvent r1;
+        java.awt.dnd.DragSourceListener r4;
+
+        r0 := @this: java.awt.dnd.DragSource;
+
+        r1 := @parameter0: java.awt.dnd.DragGestureEvent;
+
+        r2 := @parameter1: java.awt.Cursor;
+
+        r3 := @parameter2: java.awt.datatransfer.Transferable;
+
+        r4 := @parameter3: java.awt.dnd.DragSourceListener;
+
+        r5 := @parameter4: java.awt.datatransfer.FlavorMap;
+
+        virtualinvoke r0.<java.awt.dnd.DragSource: void startDrag(java.awt.dnd.DragGestureEvent,java.awt.Cursor,java.awt.Image,java.awt.Point,java.awt.datatransfer.Transferable,java.awt.dnd.DragSourceListener,java.awt.datatransfer.FlavorMap)>(r1, r2, null, null, r3, r4, r5);
+
+        return;
+    }
+
+    public void startDrag(java.awt.dnd.DragGestureEvent, java.awt.Cursor, java.awt.Image, java.awt.Point, java.awt.datatransfer.Transferable, java.awt.dnd.DragSourceListener) throws java.awt.dnd.InvalidDnDOperationException
+    {
+        java.awt.Image r3;
+        java.awt.dnd.DragSource r0;
+        java.awt.Cursor r2;
+        java.awt.datatransfer.Transferable r5;
+        java.awt.Point r4;
+        java.awt.dnd.DragGestureEvent r1;
+        java.awt.dnd.DragSourceListener r6;
+
+        r0 := @this: java.awt.dnd.DragSource;
+
+        r1 := @parameter0: java.awt.dnd.DragGestureEvent;
+
+        r2 := @parameter1: java.awt.Cursor;
+
+        r3 := @parameter2: java.awt.Image;
+
+        r4 := @parameter3: java.awt.Point;
+
+        r5 := @parameter4: java.awt.datatransfer.Transferable;
+
+        r6 := @parameter5: java.awt.dnd.DragSourceListener;
+
+        virtualinvoke r0.<java.awt.dnd.DragSource: void startDrag(java.awt.dnd.DragGestureEvent,java.awt.Cursor,java.awt.Image,java.awt.Point,java.awt.datatransfer.Transferable,java.awt.dnd.DragSourceListener,java.awt.datatransfer.FlavorMap)>(r1, r2, r3, r4, r5, r6, null);
+
+        return;
+    }
+
+    public void startDrag(java.awt.dnd.DragGestureEvent, java.awt.Cursor, java.awt.datatransfer.Transferable, java.awt.dnd.DragSourceListener) throws java.awt.dnd.InvalidDnDOperationException
+    {
+        java.awt.dnd.DragSource r0;
+        java.awt.Cursor r2;
+        java.awt.datatransfer.Transferable r3;
+        java.awt.dnd.DragGestureEvent r1;
+        java.awt.dnd.DragSourceListener r4;
+
+        r0 := @this: java.awt.dnd.DragSource;
+
+        r1 := @parameter0: java.awt.dnd.DragGestureEvent;
+
+        r2 := @parameter1: java.awt.Cursor;
+
+        r3 := @parameter2: java.awt.datatransfer.Transferable;
+
+        r4 := @parameter3: java.awt.dnd.DragSourceListener;
+
+        virtualinvoke r0.<java.awt.dnd.DragSource: void startDrag(java.awt.dnd.DragGestureEvent,java.awt.Cursor,java.awt.Image,java.awt.Point,java.awt.datatransfer.Transferable,java.awt.dnd.DragSourceListener,java.awt.datatransfer.FlavorMap)>(r1, r2, null, null, r3, r4, null);
+
+        return;
+    }
+
+    protected java.awt.dnd.DragSourceContext createDragSourceContext(java.awt.dnd.peer.DragSourceContextPeer, java.awt.dnd.DragGestureEvent, java.awt.Cursor, java.awt.Image, java.awt.Point, java.awt.datatransfer.Transferable, java.awt.dnd.DragSourceListener)
+    {
+        java.awt.Image r4;
+        java.awt.dnd.DragSource r8;
+        java.awt.Cursor r3;
+        java.awt.dnd.peer.DragSourceContextPeer r1;
+        java.awt.datatransfer.Transferable r6;
+        java.awt.Point r5;
+        java.awt.dnd.DragGestureEvent r2;
+        java.awt.dnd.DragSourceContext $r0;
+        java.awt.dnd.DragSourceListener r7;
+
+        r8 := @this: java.awt.dnd.DragSource;
+
+        r1 := @parameter0: java.awt.dnd.peer.DragSourceContextPeer;
+
+        r2 := @parameter1: java.awt.dnd.DragGestureEvent;
+
+        r3 := @parameter2: java.awt.Cursor;
+
+        r4 := @parameter3: java.awt.Image;
+
+        r5 := @parameter4: java.awt.Point;
+
+        r6 := @parameter5: java.awt.datatransfer.Transferable;
+
+        r7 := @parameter6: java.awt.dnd.DragSourceListener;
+
+        $r0 = new java.awt.dnd.DragSourceContext;
+
+        specialinvoke $r0.<java.awt.dnd.DragSourceContext: void <init>(java.awt.dnd.peer.DragSourceContextPeer,java.awt.dnd.DragGestureEvent,java.awt.Cursor,java.awt.Image,java.awt.Point,java.awt.datatransfer.Transferable,java.awt.dnd.DragSourceListener)>(r1, r2, r3, r4, r5, r6, r7);
+
+        return $r0;
+    }
+
+    public java.awt.datatransfer.FlavorMap getFlavorMap()
+    {
+        java.awt.datatransfer.FlavorMap $r1;
+        java.awt.dnd.DragSource r0;
+
+        r0 := @this: java.awt.dnd.DragSource;
+
+        $r1 = r0.<java.awt.dnd.DragSource: java.awt.datatransfer.FlavorMap flavorMap>;
+
+        return $r1;
+    }
+
+    public java.awt.dnd.DragGestureRecognizer createDragGestureRecognizer(java.lang.Class, java.awt.Component, int, java.awt.dnd.DragGestureListener)
+    {
+        java.awt.dnd.DragGestureListener r4;
+        java.awt.dnd.DragGestureRecognizer $r5;
+        java.awt.dnd.DragSource r2;
+        int i0;
+        java.lang.Class r1;
+        java.awt.Component r3;
+        java.awt.Toolkit $r0;
+
+        r2 := @this: java.awt.dnd.DragSource;
+
+        r1 := @parameter0: java.lang.Class;
+
+        r3 := @parameter1: java.awt.Component;
+
+        i0 := @parameter2: int;
+
+        r4 := @parameter3: java.awt.dnd.DragGestureListener;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r5 = virtualinvoke $r0.<java.awt.Toolkit: java.awt.dnd.DragGestureRecognizer createDragGestureRecognizer(java.lang.Class,java.awt.dnd.DragSource,java.awt.Component,int,java.awt.dnd.DragGestureListener)>(r1, r2, r3, i0, r4);
+
+        return $r5;
+    }
+
+    public java.awt.dnd.DragGestureRecognizer createDefaultDragGestureRecognizer(java.awt.Component, int, java.awt.dnd.DragGestureListener)
+    {
+        java.awt.dnd.DragGestureListener r3;
+        java.awt.dnd.DragGestureRecognizer $r4;
+        java.awt.dnd.DragSource r1;
+        int i0;
+        java.awt.Component r2;
+        java.awt.Toolkit $r0;
+
+        r1 := @this: java.awt.dnd.DragSource;
+
+        r2 := @parameter0: java.awt.Component;
+
+        i0 := @parameter1: int;
+
+        r3 := @parameter2: java.awt.dnd.DragGestureListener;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r4 = virtualinvoke $r0.<java.awt.Toolkit: java.awt.dnd.DragGestureRecognizer createDragGestureRecognizer(java.lang.Class,java.awt.dnd.DragSource,java.awt.Component,int,java.awt.dnd.DragGestureListener)>(class "Ljava/awt/dnd/MouseDragGestureRecognizer;", r1, r2, i0, r3);
+
+        return $r4;
+    }
+
+    public void addDragSourceListener(java.awt.dnd.DragSourceListener)
+    {
+        java.lang.Throwable $r4;
+        java.awt.dnd.DragSource r1;
+        java.awt.dnd.DragSourceListener r0, $r2, $r3;
+
+        r1 := @this: java.awt.dnd.DragSource;
+
+        r0 := @parameter0: java.awt.dnd.DragSourceListener;
+
+        if r0 == null goto label5;
+
+        entermonitor r1;
+
+     label1:
+        $r2 = r1.<java.awt.dnd.DragSource: java.awt.dnd.DragSourceListener listener>;
+
+        $r3 = staticinvoke <java.awt.dnd.DnDEventMulticaster: java.awt.dnd.DragSourceListener add(java.awt.dnd.DragSourceListener,java.awt.dnd.DragSourceListener)>($r2, r0);
+
+        r1.<java.awt.dnd.DragSource: java.awt.dnd.DragSourceListener listener> = $r3;
+
+        exitmonitor r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor r1;
+
+     label4:
+        throw $r4;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void removeDragSourceListener(java.awt.dnd.DragSourceListener)
+    {
+        java.lang.Throwable $r4;
+        java.awt.dnd.DragSource r1;
+        java.awt.dnd.DragSourceListener r0, $r2, $r3;
+
+        r1 := @this: java.awt.dnd.DragSource;
+
+        r0 := @parameter0: java.awt.dnd.DragSourceListener;
+
+        if r0 == null goto label5;
+
+        entermonitor r1;
+
+     label1:
+        $r2 = r1.<java.awt.dnd.DragSource: java.awt.dnd.DragSourceListener listener>;
+
+        $r3 = staticinvoke <java.awt.dnd.DnDEventMulticaster: java.awt.dnd.DragSourceListener remove(java.awt.dnd.DragSourceListener,java.awt.dnd.DragSourceListener)>($r2, r0);
+
+        r1.<java.awt.dnd.DragSource: java.awt.dnd.DragSourceListener listener> = $r3;
+
+        exitmonitor r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor r1;
+
+     label4:
+        throw $r4;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public java.awt.dnd.DragSourceListener[] getDragSourceListeners()
+    {
+        java.awt.dnd.DragSourceListener[] $r2;
+        java.util.EventListener[] $r1;
+        java.awt.dnd.DragSource r0;
+
+        r0 := @this: java.awt.dnd.DragSource;
+
+        $r1 = virtualinvoke r0.<java.awt.dnd.DragSource: java.util.EventListener[] getListeners(java.lang.Class)>(class "Ljava/awt/dnd/DragSourceListener;");
+
+        $r2 = (java.awt.dnd.DragSourceListener[]) $r1;
+
+        return $r2;
+    }
+
+    public void addDragSourceMotionListener(java.awt.dnd.DragSourceMotionListener)
+    {
+        java.lang.Throwable $r4;
+        java.awt.dnd.DragSourceMotionListener r0, $r2, $r3;
+        java.awt.dnd.DragSource r1;
+
+        r1 := @this: java.awt.dnd.DragSource;
+
+        r0 := @parameter0: java.awt.dnd.DragSourceMotionListener;
+
+        if r0 == null goto label5;
+
+        entermonitor r1;
+
+     label1:
+        $r2 = r1.<java.awt.dnd.DragSource: java.awt.dnd.DragSourceMotionListener motionListener>;
+
+        $r3 = staticinvoke <java.awt.dnd.DnDEventMulticaster: java.awt.dnd.DragSourceMotionListener add(java.awt.dnd.DragSourceMotionListener,java.awt.dnd.DragSourceMotionListener)>($r2, r0);
+
+        r1.<java.awt.dnd.DragSource: java.awt.dnd.DragSourceMotionListener motionListener> = $r3;
+
+        exitmonitor r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor r1;
+
+     label4:
+        throw $r4;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void removeDragSourceMotionListener(java.awt.dnd.DragSourceMotionListener)
+    {
+        java.lang.Throwable $r4;
+        java.awt.dnd.DragSourceMotionListener r0, $r2, $r3;
+        java.awt.dnd.DragSource r1;
+
+        r1 := @this: java.awt.dnd.DragSource;
+
+        r0 := @parameter0: java.awt.dnd.DragSourceMotionListener;
+
+        if r0 == null goto label5;
+
+        entermonitor r1;
+
+     label1:
+        $r2 = r1.<java.awt.dnd.DragSource: java.awt.dnd.DragSourceMotionListener motionListener>;
+
+        $r3 = staticinvoke <java.awt.dnd.DnDEventMulticaster: java.awt.dnd.DragSourceMotionListener remove(java.awt.dnd.DragSourceMotionListener,java.awt.dnd.DragSourceMotionListener)>($r2, r0);
+
+        r1.<java.awt.dnd.DragSource: java.awt.dnd.DragSourceMotionListener motionListener> = $r3;
+
+        exitmonitor r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor r1;
+
+     label4:
+        throw $r4;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public java.awt.dnd.DragSourceMotionListener[] getDragSourceMotionListeners()
+    {
+        java.util.EventListener[] $r1;
+        java.awt.dnd.DragSource r0;
+        java.awt.dnd.DragSourceMotionListener[] $r2;
+
+        r0 := @this: java.awt.dnd.DragSource;
+
+        $r1 = virtualinvoke r0.<java.awt.dnd.DragSource: java.util.EventListener[] getListeners(java.lang.Class)>(class "Ljava/awt/dnd/DragSourceMotionListener;");
+
+        $r2 = (java.awt.dnd.DragSourceMotionListener[]) $r1;
+
+        return $r2;
+    }
+
+    public java.util.EventListener[] getListeners(java.lang.Class)
+    {
+        java.util.EventListener r2;
+        java.util.EventListener[] $r3;
+        java.awt.dnd.DragSource r1;
+        java.lang.Class r0;
+
+        r1 := @this: java.awt.dnd.DragSource;
+
+        r0 := @parameter0: java.lang.Class;
+
+        r2 = null;
+
+        if r0 != class "Ljava/awt/dnd/DragSourceListener;" goto label1;
+
+        r2 = r1.<java.awt.dnd.DragSource: java.awt.dnd.DragSourceListener listener>;
+
+        goto label2;
+
+     label1:
+        if r0 != class "Ljava/awt/dnd/DragSourceMotionListener;" goto label2;
+
+        r2 = r1.<java.awt.dnd.DragSource: java.awt.dnd.DragSourceMotionListener motionListener>;
+
+     label2:
+        $r3 = staticinvoke <java.awt.dnd.DnDEventMulticaster: java.util.EventListener[] getListeners(java.util.EventListener,java.lang.Class)>(r2, r0);
+
+        return $r3;
+    }
+
+    void processDragEnter(java.awt.dnd.DragSourceDragEvent)
+    {
+        java.awt.dnd.DragSourceDragEvent r2;
+        java.awt.dnd.DragSourceListener r1;
+        java.awt.dnd.DragSource r0;
+
+        r0 := @this: java.awt.dnd.DragSource;
+
+        r2 := @parameter0: java.awt.dnd.DragSourceDragEvent;
+
+        r1 = r0.<java.awt.dnd.DragSource: java.awt.dnd.DragSourceListener listener>;
+
+        if r1 == null goto label1;
+
+        interfaceinvoke r1.<java.awt.dnd.DragSourceListener: void dragEnter(java.awt.dnd.DragSourceDragEvent)>(r2);
+
+     label1:
+        return;
+    }
+
+    void processDragOver(java.awt.dnd.DragSourceDragEvent)
+    {
+        java.awt.dnd.DragSourceDragEvent r2;
+        java.awt.dnd.DragSourceListener r1;
+        java.awt.dnd.DragSource r0;
+
+        r0 := @this: java.awt.dnd.DragSource;
+
+        r2 := @parameter0: java.awt.dnd.DragSourceDragEvent;
+
+        r1 = r0.<java.awt.dnd.DragSource: java.awt.dnd.DragSourceListener listener>;
+
+        if r1 == null goto label1;
+
+        interfaceinvoke r1.<java.awt.dnd.DragSourceListener: void dragOver(java.awt.dnd.DragSourceDragEvent)>(r2);
+
+     label1:
+        return;
+    }
+
+    void processDropActionChanged(java.awt.dnd.DragSourceDragEvent)
+    {
+        java.awt.dnd.DragSourceDragEvent r2;
+        java.awt.dnd.DragSourceListener r1;
+        java.awt.dnd.DragSource r0;
+
+        r0 := @this: java.awt.dnd.DragSource;
+
+        r2 := @parameter0: java.awt.dnd.DragSourceDragEvent;
+
+        r1 = r0.<java.awt.dnd.DragSource: java.awt.dnd.DragSourceListener listener>;
+
+        if r1 == null goto label1;
+
+        interfaceinvoke r1.<java.awt.dnd.DragSourceListener: void dropActionChanged(java.awt.dnd.DragSourceDragEvent)>(r2);
+
+     label1:
+        return;
+    }
+
+    void processDragExit(java.awt.dnd.DragSourceEvent)
+    {
+        java.awt.dnd.DragSourceEvent r2;
+        java.awt.dnd.DragSourceListener r1;
+        java.awt.dnd.DragSource r0;
+
+        r0 := @this: java.awt.dnd.DragSource;
+
+        r2 := @parameter0: java.awt.dnd.DragSourceEvent;
+
+        r1 = r0.<java.awt.dnd.DragSource: java.awt.dnd.DragSourceListener listener>;
+
+        if r1 == null goto label1;
+
+        interfaceinvoke r1.<java.awt.dnd.DragSourceListener: void dragExit(java.awt.dnd.DragSourceEvent)>(r2);
+
+     label1:
+        return;
+    }
+
+    void processDragDropEnd(java.awt.dnd.DragSourceDropEvent)
+    {
+        java.awt.dnd.DragSourceListener r1;
+        java.awt.dnd.DragSource r0;
+        java.awt.dnd.DragSourceDropEvent r2;
+
+        r0 := @this: java.awt.dnd.DragSource;
+
+        r2 := @parameter0: java.awt.dnd.DragSourceDropEvent;
+
+        r1 = r0.<java.awt.dnd.DragSource: java.awt.dnd.DragSourceListener listener>;
+
+        if r1 == null goto label1;
+
+        interfaceinvoke r1.<java.awt.dnd.DragSourceListener: void dragDropEnd(java.awt.dnd.DragSourceDropEvent)>(r2);
+
+     label1:
+        return;
+    }
+
+    void processDragMouseMoved(java.awt.dnd.DragSourceDragEvent)
+    {
+        java.awt.dnd.DragSourceDragEvent r2;
+        java.awt.dnd.DragSource r0;
+        java.awt.dnd.DragSourceMotionListener r1;
+
+        r0 := @this: java.awt.dnd.DragSource;
+
+        r2 := @parameter0: java.awt.dnd.DragSourceDragEvent;
+
+        r1 = r0.<java.awt.dnd.DragSource: java.awt.dnd.DragSourceMotionListener motionListener>;
+
+        if r1 == null goto label1;
+
+        interfaceinvoke r1.<java.awt.dnd.DragSourceMotionListener: void dragMouseMoved(java.awt.dnd.DragSourceDragEvent)>(r2);
+
+     label1:
+        return;
+    }
+
+    private void writeObject(java.io.ObjectOutputStream) throws java.io.IOException
+    {
+        java.awt.dnd.DragSource r1;
+        java.awt.dnd.DragSourceMotionListener $r4;
+        java.awt.datatransfer.FlavorMap $r2, $r5;
+        java.io.ObjectOutputStream r0;
+        java.awt.dnd.DragSourceListener $r3;
+        boolean $z0;
+
+        r1 := @this: java.awt.dnd.DragSource;
+
+        r0 := @parameter0: java.io.ObjectOutputStream;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void defaultWriteObject()>();
+
+        $r2 = r1.<java.awt.dnd.DragSource: java.awt.datatransfer.FlavorMap flavorMap>;
+
+        $z0 = staticinvoke <java.awt.dnd.SerializationTester: boolean test(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        $r5 = r1.<java.awt.dnd.DragSource: java.awt.datatransfer.FlavorMap flavorMap>;
+
+        goto label2;
+
+     label1:
+        $r5 = null;
+
+     label2:
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeObject(java.lang.Object)>($r5);
+
+        $r3 = r1.<java.awt.dnd.DragSource: java.awt.dnd.DragSourceListener listener>;
+
+        staticinvoke <java.awt.dnd.DnDEventMulticaster: void save(java.io.ObjectOutputStream,java.lang.String,java.util.EventListener)>(r0, "dragSourceL", $r3);
+
+        $r4 = r1.<java.awt.dnd.DragSource: java.awt.dnd.DragSourceMotionListener motionListener>;
+
+        staticinvoke <java.awt.dnd.DnDEventMulticaster: void save(java.io.ObjectOutputStream,java.lang.String,java.util.EventListener)>(r0, "dragSourceMotionL", $r4);
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeObject(java.lang.Object)>(null);
+
+        return;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.lang.ClassNotFoundException, java.io.IOException
+    {
+        java.awt.dnd.DragSource r1;
+        java.awt.dnd.DragSourceMotionListener $r8, $r9;
+        java.io.ObjectInputStream r0;
+        java.awt.datatransfer.FlavorMap $r3, $r4, $r13;
+        java.lang.Object $r2, $r7, $r10, $r14;
+        java.lang.String $r5, $r6;
+        java.awt.dnd.DragSourceListener $r11, $r12;
+
+        r1 := @this: java.awt.dnd.DragSource;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        $r2 = virtualinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        $r3 = (java.awt.datatransfer.FlavorMap) $r2;
+
+        r1.<java.awt.dnd.DragSource: java.awt.datatransfer.FlavorMap flavorMap> = $r3;
+
+        $r4 = r1.<java.awt.dnd.DragSource: java.awt.datatransfer.FlavorMap flavorMap>;
+
+        if $r4 != null goto label1;
+
+        $r13 = staticinvoke <java.awt.datatransfer.SystemFlavorMap: java.awt.datatransfer.FlavorMap getDefaultFlavorMap()>();
+
+        r1.<java.awt.dnd.DragSource: java.awt.datatransfer.FlavorMap flavorMap> = $r13;
+
+     label1:
+        $r14 = virtualinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        if null == $r14 goto label5;
+
+        $r5 = (java.lang.String) $r14;
+
+        $r6 = virtualinvoke $r5.<java.lang.String: java.lang.String intern()>();
+
+        if "dragSourceL" != $r6 goto label2;
+
+        $r10 = virtualinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        $r11 = (java.awt.dnd.DragSourceListener) $r10;
+
+        $r12 = (java.awt.dnd.DragSourceListener) $r11;
+
+        virtualinvoke r1.<java.awt.dnd.DragSource: void addDragSourceListener(java.awt.dnd.DragSourceListener)>($r12);
+
+        goto label4;
+
+     label2:
+        if "dragSourceMotionL" != $r6 goto label3;
+
+        $r7 = virtualinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        $r8 = (java.awt.dnd.DragSourceMotionListener) $r7;
+
+        $r9 = (java.awt.dnd.DragSourceMotionListener) $r8;
+
+        virtualinvoke r1.<java.awt.dnd.DragSource: void addDragSourceMotionListener(java.awt.dnd.DragSourceMotionListener)>($r9);
+
+        goto label4;
+
+     label3:
+        virtualinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+     label4:
+        goto label1;
+
+     label5:
+        return;
+    }
+
+    public static int getDragThreshold()
+    {
+        sun.security.action.GetIntegerAction $r0;
+        java.lang.Integer $r2, r5;
+        int $i0, $i1;
+        java.lang.Object $r1, $r4;
+        java.awt.Toolkit $r3;
+
+        $r0 = new sun.security.action.GetIntegerAction;
+
+        specialinvoke $r0.<sun.security.action.GetIntegerAction: void <init>(java.lang.String,int)>("awt.dnd.drag.threshold", 0);
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r2 = (java.lang.Integer) $r1;
+
+        $i0 = virtualinvoke $r2.<java.lang.Integer: int intValue()>();
+
+        if $i0 <= 0 goto label1;
+
+        return $i0;
+
+     label1:
+        $r3 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r4 = virtualinvoke $r3.<java.awt.Toolkit: java.lang.Object getDesktopProperty(java.lang.String)>("DnD.gestureMotionThreshold");
+
+        r5 = (java.lang.Integer) $r4;
+
+        if r5 == null goto label2;
+
+        $i1 = virtualinvoke r5.<java.lang.Integer: int intValue()>();
+
+        return $i1;
+
+     label2:
+        return 5;
+    }
+
+    static void <clinit>()
+    {
+        java.awt.dnd.DragSource $r6;
+        java.awt.Cursor $r0, $r1, $r2, $r3, $r4, $r5;
+        boolean $z0;
+
+        <java.awt.dnd.DragSource: java.lang.String dragSourceMotionListenerK> = "dragSourceMotionL";
+
+        <java.awt.dnd.DragSource: java.lang.String dragSourceListenerK> = "dragSourceL";
+
+        <java.awt.dnd.DragSource: long serialVersionUID> = 6236096958971414066L;
+
+        $r0 = staticinvoke <java.awt.dnd.DragSource: java.awt.Cursor load(java.lang.String)>("DnD.Cursor.CopyDrop");
+
+        <java.awt.dnd.DragSource: java.awt.Cursor DefaultCopyDrop> = $r0;
+
+        $r1 = staticinvoke <java.awt.dnd.DragSource: java.awt.Cursor load(java.lang.String)>("DnD.Cursor.MoveDrop");
+
+        <java.awt.dnd.DragSource: java.awt.Cursor DefaultMoveDrop> = $r1;
+
+        $r2 = staticinvoke <java.awt.dnd.DragSource: java.awt.Cursor load(java.lang.String)>("DnD.Cursor.LinkDrop");
+
+        <java.awt.dnd.DragSource: java.awt.Cursor DefaultLinkDrop> = $r2;
+
+        $r3 = staticinvoke <java.awt.dnd.DragSource: java.awt.Cursor load(java.lang.String)>("DnD.Cursor.CopyNoDrop");
+
+        <java.awt.dnd.DragSource: java.awt.Cursor DefaultCopyNoDrop> = $r3;
+
+        $r4 = staticinvoke <java.awt.dnd.DragSource: java.awt.Cursor load(java.lang.String)>("DnD.Cursor.MoveNoDrop");
+
+        <java.awt.dnd.DragSource: java.awt.Cursor DefaultMoveNoDrop> = $r4;
+
+        $r5 = staticinvoke <java.awt.dnd.DragSource: java.awt.Cursor load(java.lang.String)>("DnD.Cursor.LinkNoDrop");
+
+        <java.awt.dnd.DragSource: java.awt.Cursor DefaultLinkNoDrop> = $r5;
+
+        $z0 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        if $z0 == 0 goto label1;
+
+        $r6 = null;
+
+        goto label2;
+
+     label1:
+        $r6 = new java.awt.dnd.DragSource;
+
+        specialinvoke $r6.<java.awt.dnd.DragSource: void <init>()>();
+
+     label2:
+        <java.awt.dnd.DragSource: java.awt.dnd.DragSource dflt> = $r6;
+
+        return;
+    }
+}

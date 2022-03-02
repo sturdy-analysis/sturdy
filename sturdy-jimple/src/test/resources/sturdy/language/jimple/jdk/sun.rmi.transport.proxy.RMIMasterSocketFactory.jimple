@@ -1,0 +1,1217 @@
+public class sun.rmi.transport.proxy.RMIMasterSocketFactory extends java.rmi.server.RMISocketFactory
+{
+    static int logLevel;
+    static final sun.rmi.runtime.Log proxyLog;
+    private static long connectTimeout;
+    private static final boolean eagerHttpFallback;
+    private java.util.Hashtable successTable;
+    private static final int MaxRememberedHosts;
+    private java.util.Vector hostList;
+    protected java.rmi.server.RMISocketFactory initialFactory;
+    protected java.util.Vector altFactoryList;
+
+    private static java.lang.String getLogLevel()
+    {
+        java.lang.Object $r1;
+        java.lang.String $r2;
+        sun.security.action.GetPropertyAction $r0;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("sun.rmi.transport.proxy.logLevel");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r2 = (java.lang.String) $r1;
+
+        return $r2;
+    }
+
+    private static long getConnectTimeout()
+    {
+        sun.security.action.GetLongAction $r0;
+        java.lang.Long $r2;
+        java.lang.Object $r1;
+        long $l0;
+
+        $r0 = new sun.security.action.GetLongAction;
+
+        specialinvoke $r0.<sun.security.action.GetLongAction: void <init>(java.lang.String,long)>("sun.rmi.transport.proxy.connectTimeout", 15000L);
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r2 = (java.lang.Long) $r1;
+
+        $l0 = virtualinvoke $r2.<java.lang.Long: long longValue()>();
+
+        return $l0;
+    }
+
+    public void <init>()
+    {
+        sun.rmi.transport.proxy.RMIHttpToPortSocketFactory $r10;
+        sun.security.action.GetPropertyAction $r5, $r7, $r14;
+        sun.rmi.transport.proxy.RMIDirectSocketFactory $r3;
+        java.util.Vector $r2, $r4, $r11, $r13;
+        sun.rmi.transport.proxy.RMIMasterSocketFactory r0;
+        int $i0;
+        java.lang.String $r9, r17;
+        sun.rmi.transport.proxy.RMIHttpToCGISocketFactory $r12;
+        java.util.Hashtable $r1;
+        boolean $z0, z1;
+        java.lang.Exception $r16;
+        java.lang.Object $r6, $r8, $r15;
+
+        r0 := @this: sun.rmi.transport.proxy.RMIMasterSocketFactory;
+
+        specialinvoke r0.<java.rmi.server.RMISocketFactory: void <init>()>();
+
+        $r1 = new java.util.Hashtable;
+
+        specialinvoke $r1.<java.util.Hashtable: void <init>()>();
+
+        r0.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.util.Hashtable successTable> = $r1;
+
+        $r2 = new java.util.Vector;
+
+        specialinvoke $r2.<java.util.Vector: void <init>(int)>(64);
+
+        r0.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.util.Vector hostList> = $r2;
+
+        $r3 = new sun.rmi.transport.proxy.RMIDirectSocketFactory;
+
+        specialinvoke $r3.<sun.rmi.transport.proxy.RMIDirectSocketFactory: void <init>()>();
+
+        r0.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.rmi.server.RMISocketFactory initialFactory> = $r3;
+
+        $r4 = new java.util.Vector;
+
+        specialinvoke $r4.<java.util.Vector: void <init>(int)>(2);
+
+        r0.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.util.Vector altFactoryList> = $r4;
+
+        z1 = 0;
+
+     label1:
+        $r5 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r5.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("http.proxyHost");
+
+        $r6 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r5);
+
+        r17 = (java.lang.String) $r6;
+
+        if r17 != null goto label2;
+
+        $r14 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r14.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("proxyHost");
+
+        $r15 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r14);
+
+        r17 = (java.lang.String) $r15;
+
+     label2:
+        $r7 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r7.<sun.security.action.GetPropertyAction: void <init>(java.lang.String,java.lang.String)>("java.rmi.server.disableHttp", "true");
+
+        $r8 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r7);
+
+        $r9 = (java.lang.String) $r8;
+
+        $z0 = virtualinvoke $r9.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("true");
+
+        if $z0 != 0 goto label3;
+
+        if r17 == null goto label3;
+
+        $i0 = virtualinvoke r17.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label3;
+
+        z1 = 1;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r16 := @caughtexception;
+
+     label5:
+        if z1 == 0 goto label6;
+
+        $r11 = r0.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.util.Vector altFactoryList>;
+
+        $r10 = new sun.rmi.transport.proxy.RMIHttpToPortSocketFactory;
+
+        specialinvoke $r10.<sun.rmi.transport.proxy.RMIHttpToPortSocketFactory: void <init>()>();
+
+        virtualinvoke $r11.<java.util.Vector: void addElement(java.lang.Object)>($r10);
+
+        $r13 = r0.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.util.Vector altFactoryList>;
+
+        $r12 = new sun.rmi.transport.proxy.RMIHttpToCGISocketFactory;
+
+        specialinvoke $r12.<sun.rmi.transport.proxy.RMIHttpToCGISocketFactory: void <init>()>();
+
+        virtualinvoke $r13.<java.util.Vector: void addElement(java.lang.Object)>($r12);
+
+     label6:
+        return;
+
+        catch java.lang.Exception from label1 to label3 with label4;
+    }
+
+    public java.net.Socket createSocket(java.lang.String, int) throws java.io.IOException
+    {
+        java.util.Vector $r3, $r65, $r94, $r123, $r168, $r170, $r172;
+        byte $b6;
+        java.lang.Thread r164;
+        java.lang.StringBuilder $r35, $r36, $r44, $r45, $r52, $r53, $r54, $r55, $r76, $r77, $r105, $r106, $r134, $r135, $r177, $r178, $r182, $r185, $r186, $r187;
+        long $l2, $l3, $l4, $l5, l7, l8;
+        java.io.IOException $r59, $r61, $r62, $r90, $r91, $r119, $r120, $r143, r163;
+        java.util.logging.Level $r0, $r13, $r38, $r43, $r51, $r63, $r67, $r71, $r75, $r79, $r86, $r88, $r92, $r96, $r100, $r104, $r108, $r115, $r117, $r121, $r125, $r129, $r133, $r137, $r144, $r146;
+        int $i0, i1, i11, $i12, i13, $i14, i15, $i16, $i17;
+        java.rmi.server.RMISocketFactory $r8, $r47, r161, r173;
+        java.lang.Object $r6, $r11, $r66, $r95, $r124;
+        sun.rmi.runtime.NewThreadAction $r180;
+        java.security.AccessControlContext $r9;
+        sun.rmi.runtime.Log $r1, $r14, $r39, $r42, $r50, $r64, $r68, $r72, $r74, $r80, $r87, $r89, $r93, $r97, $r101, $r103, $r109, $r116, $r118, $r122, $r126, $r130, $r132, $r138, $r145, $r147;
+        java.lang.Throwable $r57, $r60, $r81, $r82, $r83, $r85, $r110, $r111, $r112, $r139, $r140, $r141, $r158, r169, r171, r174;
+        java.io.InterruptedIOException $r181;
+        java.net.SocketException $r58, $r114;
+        java.lang.String r4, $r37, $r46, $r56, $r78, $r107, $r136;
+        sun.rmi.transport.proxy.RMIMasterSocketFactory$AsyncConnector $r179;
+        sun.rmi.transport.proxy.RMIMasterSocketFactory r2;
+        boolean $z0, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14;
+        java.net.NoRouteToHostException $r183;
+        java.net.Socket $r12, $r40, $r48, $r69, $r98, $r127, r162, $r176;
+        java.util.Hashtable $r5, $r175;
+        java.lang.InterruptedException $r159;
+        java.io.InputStream $r70, $r99, $r128;
+
+        r2 := @this: sun.rmi.transport.proxy.RMIMasterSocketFactory;
+
+        r4 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        $r1 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r0 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z0 = virtualinvoke $r1.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r0);
+
+        if $z0 == 0 goto label001;
+
+        $r50 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r51 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $r177 = new java.lang.StringBuilder;
+
+        specialinvoke $r177.<java.lang.StringBuilder: void <init>()>();
+
+        $r52 = virtualinvoke $r177.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("host: ");
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", port: ");
+
+        $r55 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r56 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r50.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r51, $r56);
+
+     label001:
+        $r3 = r2.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.util.Vector altFactoryList>;
+
+        $i0 = virtualinvoke $r3.<java.util.Vector: int size()>();
+
+        if $i0 != 0 goto label002;
+
+        $r47 = r2.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.rmi.server.RMISocketFactory initialFactory>;
+
+        $r48 = virtualinvoke $r47.<java.rmi.server.RMISocketFactory: java.net.Socket createSocket(java.lang.String,int)>(r4, i1);
+
+        return $r48;
+
+     label002:
+        $r5 = r2.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.util.Hashtable successTable>;
+
+        $r6 = virtualinvoke $r5.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r4);
+
+        r161 = (java.rmi.server.RMISocketFactory) $r6;
+
+        if r161 == null goto label004;
+
+        $r39 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r38 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z3 = virtualinvoke $r39.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r38);
+
+        if $z3 == 0 goto label003;
+
+        $r42 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r43 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $r178 = new java.lang.StringBuilder;
+
+        specialinvoke $r178.<java.lang.StringBuilder: void <init>()>();
+
+        $r44 = virtualinvoke $r178.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("previously successful factory found: ");
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r161);
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r42.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r43, $r46);
+
+     label003:
+        $r40 = virtualinvoke r161.<java.rmi.server.RMISocketFactory: java.net.Socket createSocket(java.lang.String,int)>(r4, i1);
+
+        return $r40;
+
+     label004:
+        r162 = null;
+
+        $r179 = new sun.rmi.transport.proxy.RMIMasterSocketFactory$AsyncConnector;
+
+        $r8 = r2.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.rmi.server.RMISocketFactory initialFactory>;
+
+        $r9 = staticinvoke <java.security.AccessController: java.security.AccessControlContext getContext()>();
+
+        specialinvoke $r179.<sun.rmi.transport.proxy.RMIMasterSocketFactory$AsyncConnector: void <init>(sun.rmi.transport.proxy.RMIMasterSocketFactory,java.rmi.server.RMISocketFactory,java.lang.String,int,java.security.AccessControlContext)>(r2, $r8, r4, i1, $r9);
+
+        r163 = null;
+
+     label005:
+        entermonitor $r179;
+
+     label006:
+        $r180 = new sun.rmi.runtime.NewThreadAction;
+
+        specialinvoke $r180.<sun.rmi.runtime.NewThreadAction: void <init>(java.lang.Runnable,java.lang.String,boolean)>($r179, "AsyncConnector", 1);
+
+        $r11 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r180);
+
+        r164 = (java.lang.Thread) $r11;
+
+        virtualinvoke r164.<java.lang.Thread: void start()>();
+
+     label007:
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        l7 = $l2;
+
+        $l3 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: long connectTimeout>;
+
+        l8 = $l2 + $l3;
+
+     label008:
+        $l4 = l8 - l7;
+
+        virtualinvoke $r179.<java.lang.Object: void wait(long)>($l4);
+
+        $r12 = virtualinvoke r2.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.net.Socket checkConnector(sun.rmi.transport.proxy.RMIMasterSocketFactory$AsyncConnector)>($r179);
+
+        if $r12 == null goto label009;
+
+        goto label010;
+
+     label009:
+        $l5 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        l7 = $l5;
+
+        $b6 = $l5 cmp l8;
+
+        $i17 = (int) $b6;
+
+        if $i17 < 0 goto label008;
+
+     label010:
+        goto label012;
+
+     label011:
+        $r159 := @caughtexception;
+
+        $r181 = new java.io.InterruptedIOException;
+
+        specialinvoke $r181.<java.io.InterruptedIOException: void <init>(java.lang.String)>("interrupted while waiting for connector");
+
+        throw $r181;
+
+     label012:
+        exitmonitor $r179;
+
+     label013:
+        goto label016;
+
+     label014:
+        $r158 := @caughtexception;
+
+        exitmonitor $r179;
+
+     label015:
+        throw $r158;
+
+     label016:
+        if $r12 != null goto label017;
+
+        $r183 = new java.net.NoRouteToHostException;
+
+        $r182 = new java.lang.StringBuilder;
+
+        specialinvoke $r182.<java.lang.StringBuilder: void <init>()>();
+
+        $r35 = virtualinvoke $r182.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("connect timed out: ");
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r183.<java.net.NoRouteToHostException: void <init>(java.lang.String)>($r37);
+
+        throw $r183;
+
+     label017:
+        $r14 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r13 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        virtualinvoke $r14.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r13, "direct socket connection successful");
+
+     label018:
+        goto label019;
+
+     label019:
+        return $r12;
+
+     label020:
+        $r143 := @caughtexception;
+
+        r163 = $r143;
+
+     label021:
+        if $r143 == null goto label096;
+
+        $r145 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r144 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z14 = virtualinvoke $r145.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r144);
+
+        if $z14 == 0 goto label022;
+
+        $r147 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r146 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        virtualinvoke $r147.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r146, "direct socket connection failed: ", $r143);
+
+     label022:
+        i11 = 0;
+
+     label023:
+        $r168 = r2.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.util.Vector altFactoryList>;
+
+        $i12 = virtualinvoke $r168.<java.util.Vector: int size()>();
+
+        if i11 >= $i12 goto label044;
+
+        $r123 = r2.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.util.Vector altFactoryList>;
+
+        $r124 = virtualinvoke $r123.<java.util.Vector: java.lang.Object elementAt(int)>(i11);
+
+        r161 = (java.rmi.server.RMISocketFactory) $r124;
+
+        $r126 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r125 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z13 = virtualinvoke $r126.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r125);
+
+        if $z13 == 0 goto label024;
+
+        $r132 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r133 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $r185 = new java.lang.StringBuilder;
+
+        specialinvoke $r185.<java.lang.StringBuilder: void <init>()>();
+
+        $r134 = virtualinvoke $r185.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("trying with factory: ");
+
+        $r135 = virtualinvoke $r134.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r161);
+
+        $r136 = virtualinvoke $r135.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r132.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r133, $r136);
+
+     label024:
+        $r127 = virtualinvoke r161.<java.rmi.server.RMISocketFactory: java.net.Socket createSocket(java.lang.String,int)>(r4, i1);
+
+        r169 = null;
+
+     label025:
+        $r128 = virtualinvoke $r127.<java.net.Socket: java.io.InputStream getInputStream()>();
+
+        virtualinvoke $r128.<java.io.InputStream: int read()>();
+
+     label026:
+        if $r127 == null goto label036;
+
+        goto label027;
+
+     label027:
+        virtualinvoke $r127.<java.net.Socket: void close()>();
+
+        goto label036;
+
+     label028:
+        $r141 := @caughtexception;
+
+        r169 = $r141;
+
+        throw $r141;
+
+     label029:
+        $r140 := @caughtexception;
+
+     label030:
+        if $r127 == null goto label035;
+
+        if r169 == null goto label034;
+
+     label031:
+        virtualinvoke $r127.<java.net.Socket: void close()>();
+
+     label032:
+        goto label035;
+
+     label033:
+        $r139 := @caughtexception;
+
+        virtualinvoke r169.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r139);
+
+        goto label035;
+
+     label034:
+        virtualinvoke $r127.<java.net.Socket: void close()>();
+
+     label035:
+        throw $r140;
+
+     label036:
+        goto label039;
+
+     label037:
+        $r120 := @caughtexception;
+
+        $r122 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r121 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z12 = virtualinvoke $r122.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r121);
+
+        if $z12 == 0 goto label038;
+
+        $r138 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r137 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        virtualinvoke $r138.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r137, "factory failed: ", $r120);
+
+     label038:
+        goto label043;
+
+     label039:
+        $r130 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r129 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        virtualinvoke $r130.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r129, "factory succeeded");
+
+     label040:
+        r162 = virtualinvoke r161.<java.rmi.server.RMISocketFactory: java.net.Socket createSocket(java.lang.String,int)>(r4, i1);
+
+     label041:
+        goto label044;
+
+     label042:
+        $r119 := @caughtexception;
+
+        goto label044;
+
+     label043:
+        i11 = i11 + 1;
+
+        goto label023;
+
+     label044:
+        goto label096;
+
+     label045:
+        $r114 := @caughtexception;
+
+        $z10 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: boolean eagerHttpFallback>;
+
+        if $z10 == 0 goto label046;
+
+        r163 = $r114;
+
+        goto label047;
+
+     label046:
+        throw $r114;
+
+     label047:
+        if $r114 == null goto label096;
+
+        $r116 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r115 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z11 = virtualinvoke $r116.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r115);
+
+        if $z11 == 0 goto label048;
+
+        $r118 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r117 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        virtualinvoke $r118.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r117, "direct socket connection failed: ", $r114);
+
+     label048:
+        i13 = 0;
+
+     label049:
+        $r170 = r2.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.util.Vector altFactoryList>;
+
+        $i14 = virtualinvoke $r170.<java.util.Vector: int size()>();
+
+        if i13 >= $i14 goto label070;
+
+        $r94 = r2.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.util.Vector altFactoryList>;
+
+        $r95 = virtualinvoke $r94.<java.util.Vector: java.lang.Object elementAt(int)>(i13);
+
+        r161 = (java.rmi.server.RMISocketFactory) $r95;
+
+        $r97 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r96 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z9 = virtualinvoke $r97.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r96);
+
+        if $z9 == 0 goto label050;
+
+        $r103 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r104 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $r186 = new java.lang.StringBuilder;
+
+        specialinvoke $r186.<java.lang.StringBuilder: void <init>()>();
+
+        $r105 = virtualinvoke $r186.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("trying with factory: ");
+
+        $r106 = virtualinvoke $r105.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r161);
+
+        $r107 = virtualinvoke $r106.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r103.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r104, $r107);
+
+     label050:
+        $r98 = virtualinvoke r161.<java.rmi.server.RMISocketFactory: java.net.Socket createSocket(java.lang.String,int)>(r4, i1);
+
+        r171 = null;
+
+     label051:
+        $r99 = virtualinvoke $r98.<java.net.Socket: java.io.InputStream getInputStream()>();
+
+        virtualinvoke $r99.<java.io.InputStream: int read()>();
+
+     label052:
+        if $r98 == null goto label062;
+
+        goto label053;
+
+     label053:
+        virtualinvoke $r98.<java.net.Socket: void close()>();
+
+        goto label062;
+
+     label054:
+        $r112 := @caughtexception;
+
+        r171 = $r112;
+
+        throw $r112;
+
+     label055:
+        $r111 := @caughtexception;
+
+     label056:
+        if $r98 == null goto label061;
+
+        if r171 == null goto label060;
+
+     label057:
+        virtualinvoke $r98.<java.net.Socket: void close()>();
+
+     label058:
+        goto label061;
+
+     label059:
+        $r110 := @caughtexception;
+
+        virtualinvoke r171.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r110);
+
+        goto label061;
+
+     label060:
+        virtualinvoke $r98.<java.net.Socket: void close()>();
+
+     label061:
+        throw $r111;
+
+     label062:
+        goto label065;
+
+     label063:
+        $r91 := @caughtexception;
+
+        $r93 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r92 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z8 = virtualinvoke $r93.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r92);
+
+        if $z8 == 0 goto label064;
+
+        $r109 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r108 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        virtualinvoke $r109.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r108, "factory failed: ", $r91);
+
+     label064:
+        goto label069;
+
+     label065:
+        $r101 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r100 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        virtualinvoke $r101.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r100, "factory succeeded");
+
+     label066:
+        r162 = virtualinvoke r161.<java.rmi.server.RMISocketFactory: java.net.Socket createSocket(java.lang.String,int)>(r4, i1);
+
+     label067:
+        goto label070;
+
+     label068:
+        $r90 := @caughtexception;
+
+        goto label070;
+
+     label069:
+        i13 = i13 + 1;
+
+        goto label049;
+
+     label070:
+        goto label096;
+
+     label071:
+        $r85 := @caughtexception;
+
+     label072:
+        if r163 == null goto label095;
+
+        $r87 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r86 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z7 = virtualinvoke $r87.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r86);
+
+        if $z7 == 0 goto label073;
+
+        $r89 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r88 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        virtualinvoke $r89.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r88, "direct socket connection failed: ", r163);
+
+     label073:
+        i15 = 0;
+
+     label074:
+        $r172 = r2.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.util.Vector altFactoryList>;
+
+        $i16 = virtualinvoke $r172.<java.util.Vector: int size()>();
+
+        if i15 >= $i16 goto label095;
+
+        $r65 = r2.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.util.Vector altFactoryList>;
+
+        $r66 = virtualinvoke $r65.<java.util.Vector: java.lang.Object elementAt(int)>(i15);
+
+        r173 = (java.rmi.server.RMISocketFactory) $r66;
+
+        $r68 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r67 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z6 = virtualinvoke $r68.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r67);
+
+        if $z6 == 0 goto label075;
+
+        $r74 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r75 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $r187 = new java.lang.StringBuilder;
+
+        specialinvoke $r187.<java.lang.StringBuilder: void <init>()>();
+
+        $r76 = virtualinvoke $r187.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("trying with factory: ");
+
+        $r77 = virtualinvoke $r76.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r173);
+
+        $r78 = virtualinvoke $r77.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r74.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r75, $r78);
+
+     label075:
+        $r69 = virtualinvoke r173.<java.rmi.server.RMISocketFactory: java.net.Socket createSocket(java.lang.String,int)>(r4, i1);
+
+        r174 = null;
+
+     label076:
+        $r70 = virtualinvoke $r69.<java.net.Socket: java.io.InputStream getInputStream()>();
+
+        virtualinvoke $r70.<java.io.InputStream: int read()>();
+
+     label077:
+        if $r69 == null goto label087;
+
+        goto label078;
+
+     label078:
+        virtualinvoke $r69.<java.net.Socket: void close()>();
+
+        goto label087;
+
+     label079:
+        $r83 := @caughtexception;
+
+        r174 = $r83;
+
+        throw $r83;
+
+     label080:
+        $r82 := @caughtexception;
+
+     label081:
+        if $r69 == null goto label086;
+
+        if r174 == null goto label085;
+
+     label082:
+        virtualinvoke $r69.<java.net.Socket: void close()>();
+
+     label083:
+        goto label086;
+
+     label084:
+        $r81 := @caughtexception;
+
+        virtualinvoke r174.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r81);
+
+        goto label086;
+
+     label085:
+        virtualinvoke $r69.<java.net.Socket: void close()>();
+
+     label086:
+        throw $r82;
+
+     label087:
+        goto label090;
+
+     label088:
+        $r62 := @caughtexception;
+
+        $r64 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r63 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z5 = virtualinvoke $r64.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r63);
+
+        if $z5 == 0 goto label089;
+
+        $r80 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r79 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        virtualinvoke $r80.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r79, "factory failed: ", $r62);
+
+     label089:
+        goto label094;
+
+     label090:
+        $r72 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r71 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        virtualinvoke $r72.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r71, "factory succeeded");
+
+     label091:
+        virtualinvoke r173.<java.rmi.server.RMISocketFactory: java.net.Socket createSocket(java.lang.String,int)>(r4, i1);
+
+     label092:
+        goto label095;
+
+     label093:
+        $r61 := @caughtexception;
+
+        goto label095;
+
+     label094:
+        i15 = i15 + 1;
+
+        goto label074;
+
+     label095:
+        throw $r85;
+
+     label096:
+        $r175 = r2.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.util.Hashtable successTable>;
+
+        entermonitor $r175;
+
+     label097:
+        entermonitor $r179;
+
+     label098:
+        $r176 = virtualinvoke r2.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.net.Socket checkConnector(sun.rmi.transport.proxy.RMIMasterSocketFactory$AsyncConnector)>($r179);
+
+        exitmonitor $r179;
+
+     label099:
+        goto label102;
+
+     label100:
+        $r60 := @caughtexception;
+
+        exitmonitor $r179;
+
+     label101:
+        throw $r60;
+
+     label102:
+        if $r176 == null goto label105;
+
+        if r162 == null goto label103;
+
+        virtualinvoke r162.<java.net.Socket: void close()>();
+
+     label103:
+        exitmonitor $r175;
+
+     label104:
+        return $r176;
+
+     label105:
+        virtualinvoke $r179.<sun.rmi.transport.proxy.RMIMasterSocketFactory$AsyncConnector: void notUsed()>();
+
+     label106:
+        goto label110;
+
+     label107:
+        $r59 := @caughtexception;
+
+        r163 = $r59;
+
+        goto label110;
+
+     label108:
+        $r58 := @caughtexception;
+
+        $z4 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: boolean eagerHttpFallback>;
+
+        if $z4 == 0 goto label109;
+
+        r163 = $r58;
+
+        goto label110;
+
+     label109:
+        throw $r58;
+
+     label110:
+        if r162 == null goto label112;
+
+        virtualinvoke r2.<sun.rmi.transport.proxy.RMIMasterSocketFactory: void rememberFactory(java.lang.String,java.rmi.server.RMISocketFactory)>(r4, r161);
+
+        exitmonitor $r175;
+
+     label111:
+        return r162;
+
+     label112:
+        throw r163;
+
+     label113:
+        $r57 := @caughtexception;
+
+        exitmonitor $r175;
+
+     label114:
+        throw $r57;
+
+        catch java.lang.InterruptedException from label007 to label010 with label011;
+        catch java.lang.Throwable from label006 to label013 with label014;
+        catch java.lang.Throwable from label014 to label015 with label014;
+        catch java.net.UnknownHostException from label005 to label018 with label020;
+        catch java.net.NoRouteToHostException from label005 to label018 with label020;
+        catch java.lang.Throwable from label025 to label026 with label028;
+        catch java.lang.Throwable from label031 to label032 with label033;
+        catch java.lang.Throwable from label028 to label030 with label029;
+        catch java.io.IOException from label024 to label036 with label037;
+        catch java.io.IOException from label040 to label041 with label042;
+        catch java.net.SocketException from label005 to label018 with label045;
+        catch java.lang.Throwable from label051 to label052 with label054;
+        catch java.lang.Throwable from label057 to label058 with label059;
+        catch java.lang.Throwable from label054 to label056 with label055;
+        catch java.io.IOException from label050 to label062 with label063;
+        catch java.io.IOException from label066 to label067 with label068;
+        catch java.lang.Throwable from label005 to label018 with label071;
+        catch java.lang.Throwable from label020 to label021 with label071;
+        catch java.lang.Throwable from label045 to label047 with label071;
+        catch java.lang.Throwable from label076 to label077 with label079;
+        catch java.lang.Throwable from label082 to label083 with label084;
+        catch java.lang.Throwable from label079 to label081 with label080;
+        catch java.io.IOException from label075 to label087 with label088;
+        catch java.io.IOException from label091 to label092 with label093;
+        catch java.lang.Throwable from label071 to label072 with label071;
+        catch java.lang.Throwable from label098 to label099 with label100;
+        catch java.lang.Throwable from label100 to label101 with label100;
+        catch java.net.UnknownHostException from label097 to label103 with label107;
+        catch java.net.NoRouteToHostException from label097 to label103 with label107;
+        catch java.net.UnknownHostException from label105 to label106 with label107;
+        catch java.net.NoRouteToHostException from label105 to label106 with label107;
+        catch java.net.SocketException from label097 to label103 with label108;
+        catch java.net.SocketException from label105 to label106 with label108;
+        catch java.lang.Throwable from label097 to label104 with label113;
+        catch java.lang.Throwable from label105 to label111 with label113;
+        catch java.lang.Throwable from label112 to label114 with label113;
+    }
+
+    void rememberFactory(java.lang.String, java.rmi.server.RMISocketFactory)
+    {
+        java.lang.Throwable $r11;
+        java.util.Vector $r2, $r4, $r7, $r10;
+        sun.rmi.transport.proxy.RMIMasterSocketFactory r0;
+        int $i0;
+        java.rmi.server.RMISocketFactory r5;
+        java.lang.Object $r9;
+        java.lang.String r3;
+        java.util.Hashtable $r1, $r6, $r8;
+
+        r0 := @this: sun.rmi.transport.proxy.RMIMasterSocketFactory;
+
+        r3 := @parameter0: java.lang.String;
+
+        r5 := @parameter1: java.rmi.server.RMISocketFactory;
+
+        $r1 = r0.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.util.Hashtable successTable>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.util.Vector hostList>;
+
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        if $i0 < 64 goto label2;
+
+        $r8 = r0.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.util.Hashtable successTable>;
+
+        $r7 = r0.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.util.Vector hostList>;
+
+        $r9 = virtualinvoke $r7.<java.util.Vector: java.lang.Object elementAt(int)>(0);
+
+        virtualinvoke $r8.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>($r9);
+
+        $r10 = r0.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.util.Vector hostList>;
+
+        virtualinvoke $r10.<java.util.Vector: void removeElementAt(int)>(0);
+
+        goto label1;
+
+     label2:
+        $r4 = r0.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.util.Vector hostList>;
+
+        virtualinvoke $r4.<java.util.Vector: void addElement(java.lang.Object)>(r3);
+
+        $r6 = r0.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.util.Hashtable successTable>;
+
+        virtualinvoke $r6.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>(r3, r5);
+
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r11 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r11;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    java.net.Socket checkConnector(sun.rmi.transport.proxy.RMIMasterSocketFactory$AsyncConnector) throws java.io.IOException
+    {
+        java.net.Socket $r2;
+        java.lang.Error $r3;
+        java.io.IOException $r10;
+        java.lang.RuntimeException $r9;
+        java.lang.Exception $r1;
+        sun.rmi.transport.proxy.RMIMasterSocketFactory r11;
+        java.lang.StringBuilder $r4, $r5, $r7;
+        java.lang.String $r6, $r8;
+        sun.rmi.transport.proxy.RMIMasterSocketFactory$AsyncConnector r0;
+        boolean $z0, $z1;
+
+        r11 := @this: sun.rmi.transport.proxy.RMIMasterSocketFactory;
+
+        r0 := @parameter0: sun.rmi.transport.proxy.RMIMasterSocketFactory$AsyncConnector;
+
+        $r1 = staticinvoke <sun.rmi.transport.proxy.RMIMasterSocketFactory$AsyncConnector: java.lang.Exception access$000(sun.rmi.transport.proxy.RMIMasterSocketFactory$AsyncConnector)>(r0);
+
+        if $r1 == null goto label3;
+
+        virtualinvoke $r1.<java.lang.Exception: java.lang.Throwable fillInStackTrace()>();
+
+        $z0 = $r1 instanceof java.io.IOException;
+
+        if $z0 == 0 goto label1;
+
+        $r10 = (java.io.IOException) $r1;
+
+        throw $r10;
+
+     label1:
+        $z1 = $r1 instanceof java.lang.RuntimeException;
+
+        if $z1 == 0 goto label2;
+
+        $r9 = (java.lang.RuntimeException) $r1;
+
+        throw $r9;
+
+     label2:
+        $r3 = new java.lang.Error;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("internal error: unexpected checked exception: ");
+
+        $r6 = virtualinvoke $r1.<java.lang.Exception: java.lang.String toString()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.Error: void <init>(java.lang.String)>($r8);
+
+        throw $r3;
+
+     label3:
+        $r2 = staticinvoke <sun.rmi.transport.proxy.RMIMasterSocketFactory$AsyncConnector: java.net.Socket access$100(sun.rmi.transport.proxy.RMIMasterSocketFactory$AsyncConnector)>(r0);
+
+        return $r2;
+    }
+
+    public java.net.ServerSocket createServerSocket(int) throws java.io.IOException
+    {
+        java.net.ServerSocket $r2;
+        sun.rmi.transport.proxy.RMIMasterSocketFactory r0;
+        int i0;
+        java.rmi.server.RMISocketFactory $r1;
+
+        r0 := @this: sun.rmi.transport.proxy.RMIMasterSocketFactory;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.rmi.transport.proxy.RMIMasterSocketFactory: java.rmi.server.RMISocketFactory initialFactory>;
+
+        $r2 = virtualinvoke $r1.<java.rmi.server.RMISocketFactory: java.net.ServerSocket createServerSocket(int)>(i0);
+
+        return $r2;
+    }
+
+    static void <clinit>()
+    {
+        long $l2;
+        sun.rmi.runtime.Log $r1;
+        int $i0, $i1;
+        sun.security.action.GetBooleanAction $r2;
+        java.lang.Boolean $r4;
+        java.lang.Object $r3;
+        java.lang.String $r0;
+        boolean $z0;
+
+        <sun.rmi.transport.proxy.RMIMasterSocketFactory: int MaxRememberedHosts> = 64;
+
+        $r0 = staticinvoke <sun.rmi.transport.proxy.RMIMasterSocketFactory: java.lang.String getLogLevel()>();
+
+        $i0 = staticinvoke <java.rmi.server.LogStream: int parseLevel(java.lang.String)>($r0);
+
+        <sun.rmi.transport.proxy.RMIMasterSocketFactory: int logLevel> = $i0;
+
+        $i1 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: int logLevel>;
+
+        $r1 = staticinvoke <sun.rmi.runtime.Log: sun.rmi.runtime.Log getLog(java.lang.String,java.lang.String,int)>("sun.rmi.transport.tcp.proxy", "transport", $i1);
+
+        <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog> = $r1;
+
+        $l2 = staticinvoke <sun.rmi.transport.proxy.RMIMasterSocketFactory: long getConnectTimeout()>();
+
+        <sun.rmi.transport.proxy.RMIMasterSocketFactory: long connectTimeout> = $l2;
+
+        $r2 = new sun.security.action.GetBooleanAction;
+
+        specialinvoke $r2.<sun.security.action.GetBooleanAction: void <init>(java.lang.String)>("sun.rmi.transport.proxy.eagerHttpFallback");
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        $r4 = (java.lang.Boolean) $r3;
+
+        $z0 = virtualinvoke $r4.<java.lang.Boolean: boolean booleanValue()>();
+
+        <sun.rmi.transport.proxy.RMIMasterSocketFactory: boolean eagerHttpFallback> = $z0;
+
+        return;
+    }
+}

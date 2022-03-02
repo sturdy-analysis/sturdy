@@ -1,0 +1,1125 @@
+public class sun.awt.Win32GraphicsDevice extends java.awt.GraphicsDevice implements sun.awt.DisplayChangedListener
+{
+    int screen;
+    java.awt.image.ColorModel dynamicColorModel;
+    java.awt.image.ColorModel colorModel;
+    protected java.awt.GraphicsConfiguration[] configs;
+    protected java.awt.GraphicsConfiguration defaultConfig;
+    private final java.lang.String idString;
+    protected java.lang.String descString;
+    private boolean valid;
+    private sun.awt.SunDisplayChanger topLevels;
+    protected static boolean pfDisabled;
+    private static java.awt.AWTPermission fullScreenExclusivePermission;
+    private java.awt.DisplayMode defaultDisplayMode;
+    private java.awt.event.WindowListener fsWindowListener;
+
+    private static native void initIDs();
+
+    native void initDevice(int);
+
+    public void <init>(int)
+    {
+        sun.awt.SunDisplayChanger $r1;
+        int i0, $i1, $i2;
+        java.lang.StringBuilder $r2, $r3, $r4, $r6, $r7, $r8;
+        java.lang.String $r5, $r9;
+        sun.awt.Win32GraphicsDevice r0;
+
+        r0 := @this: sun.awt.Win32GraphicsDevice;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.awt.GraphicsDevice: void <init>()>();
+
+        $r1 = new sun.awt.SunDisplayChanger;
+
+        specialinvoke $r1.<sun.awt.SunDisplayChanger: void <init>()>();
+
+        r0.<sun.awt.Win32GraphicsDevice: sun.awt.SunDisplayChanger topLevels> = $r1;
+
+        r0.<sun.awt.Win32GraphicsDevice: int screen> = i0;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\\Display");
+
+        $i1 = r0.<sun.awt.Win32GraphicsDevice: int screen>;
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r0.<sun.awt.Win32GraphicsDevice: java.lang.String idString> = $r5;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Win32GraphicsDevice[screen=");
+
+        $i2 = r0.<sun.awt.Win32GraphicsDevice: int screen>;
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r0.<sun.awt.Win32GraphicsDevice: java.lang.String descString> = $r9;
+
+        r0.<sun.awt.Win32GraphicsDevice: boolean valid> = 1;
+
+        virtualinvoke r0.<sun.awt.Win32GraphicsDevice: void initDevice(int)>(i0);
+
+        return;
+    }
+
+    public int getType()
+    {
+        sun.awt.Win32GraphicsDevice r0;
+
+        r0 := @this: sun.awt.Win32GraphicsDevice;
+
+        return 0;
+    }
+
+    public int getScreen()
+    {
+        int $i0;
+        sun.awt.Win32GraphicsDevice r0;
+
+        r0 := @this: sun.awt.Win32GraphicsDevice;
+
+        $i0 = r0.<sun.awt.Win32GraphicsDevice: int screen>;
+
+        return $i0;
+    }
+
+    public boolean isValid()
+    {
+        sun.awt.Win32GraphicsDevice r0;
+        boolean $z0;
+
+        r0 := @this: sun.awt.Win32GraphicsDevice;
+
+        $z0 = r0.<sun.awt.Win32GraphicsDevice: boolean valid>;
+
+        return $z0;
+    }
+
+    protected void invalidate(int)
+    {
+        int i0;
+        sun.awt.Win32GraphicsDevice r0;
+
+        r0 := @this: sun.awt.Win32GraphicsDevice;
+
+        i0 := @parameter0: int;
+
+        r0.<sun.awt.Win32GraphicsDevice: boolean valid> = 0;
+
+        r0.<sun.awt.Win32GraphicsDevice: int screen> = i0;
+
+        return;
+    }
+
+    public java.lang.String getIDstring()
+    {
+        java.lang.String $r1;
+        sun.awt.Win32GraphicsDevice r0;
+
+        r0 := @this: sun.awt.Win32GraphicsDevice;
+
+        $r1 = r0.<sun.awt.Win32GraphicsDevice: java.lang.String idString>;
+
+        return $r1;
+    }
+
+    public java.awt.GraphicsConfiguration[] getConfigurations()
+    {
+        java.awt.GraphicsConfiguration[] $r1, $r2, $r3, $r11, $r13, $r14, $r16, $r18, $r20;
+        java.util.Vector $r17;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6;
+        sun.awt.Win32GraphicsDevice r0;
+        boolean $z0, $z1, $z2;
+        sun.awt.Win32GraphicsConfig $r4, $r5, $r7;
+        java.awt.GraphicsConfiguration $r6, $r8, $r9, $r10, $r12;
+        java.lang.Object $r15, $r19;
+
+        r0 := @this: sun.awt.Win32GraphicsDevice;
+
+        $r1 = r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration[] configs>;
+
+        if $r1 != null goto label7;
+
+        $z0 = staticinvoke <sun.java2d.windows.WindowsFlags: boolean isOGLEnabled()>();
+
+        if $z0 == 0 goto label1;
+
+        $z2 = specialinvoke r0.<sun.awt.Win32GraphicsDevice: boolean isDefaultDevice()>();
+
+        if $z2 == 0 goto label1;
+
+        $r9 = virtualinvoke r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration getDefaultConfiguration()>();
+
+        r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration defaultConfig> = $r9;
+
+        $r10 = r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration defaultConfig>;
+
+        if $r10 == null goto label1;
+
+        $r11 = newarray (java.awt.GraphicsConfiguration)[1];
+
+        r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration[] configs> = $r11;
+
+        $r13 = r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration[] configs>;
+
+        $r12 = r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration defaultConfig>;
+
+        $r13[0] = $r12;
+
+        $r14 = r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration[] configs>;
+
+        $r15 = virtualinvoke $r14.<java.lang.Object: java.lang.Object clone()>();
+
+        $r16 = (java.awt.GraphicsConfiguration[]) $r15;
+
+        return $r16;
+
+     label1:
+        $i2 = r0.<sun.awt.Win32GraphicsDevice: int screen>;
+
+        $i3 = virtualinvoke r0.<sun.awt.Win32GraphicsDevice: int getMaxConfigs(int)>($i2);
+
+        $i4 = r0.<sun.awt.Win32GraphicsDevice: int screen>;
+
+        $i5 = virtualinvoke r0.<sun.awt.Win32GraphicsDevice: int getDefaultPixID(int)>($i4);
+
+        $r17 = new java.util.Vector;
+
+        specialinvoke $r17.<java.util.Vector: void <init>(int)>($i3);
+
+        if $i5 != 0 goto label2;
+
+        $r7 = staticinvoke <sun.awt.Win32GraphicsConfig: sun.awt.Win32GraphicsConfig getConfig(sun.awt.Win32GraphicsDevice,int)>(r0, $i5);
+
+        r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration defaultConfig> = $r7;
+
+        $r8 = r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration defaultConfig>;
+
+        virtualinvoke $r17.<java.util.Vector: void addElement(java.lang.Object)>($r8);
+
+        goto label6;
+
+     label2:
+        i6 = 1;
+
+     label3:
+        if i6 > $i3 goto label6;
+
+        $i1 = r0.<sun.awt.Win32GraphicsDevice: int screen>;
+
+        $z1 = virtualinvoke r0.<sun.awt.Win32GraphicsDevice: boolean isPixFmtSupported(int,int)>(i6, $i1);
+
+        if $z1 == 0 goto label5;
+
+        if i6 != $i5 goto label4;
+
+        $r5 = staticinvoke <sun.awt.Win32GraphicsConfig: sun.awt.Win32GraphicsConfig getConfig(sun.awt.Win32GraphicsDevice,int)>(r0, i6);
+
+        r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration defaultConfig> = $r5;
+
+        $r6 = r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration defaultConfig>;
+
+        virtualinvoke $r17.<java.util.Vector: void addElement(java.lang.Object)>($r6);
+
+        goto label5;
+
+     label4:
+        $r4 = staticinvoke <sun.awt.Win32GraphicsConfig: sun.awt.Win32GraphicsConfig getConfig(sun.awt.Win32GraphicsDevice,int)>(r0, i6);
+
+        virtualinvoke $r17.<java.util.Vector: void addElement(java.lang.Object)>($r4);
+
+     label5:
+        i6 = i6 + 1;
+
+        goto label3;
+
+     label6:
+        $i0 = virtualinvoke $r17.<java.util.Vector: int size()>();
+
+        $r2 = newarray (java.awt.GraphicsConfiguration)[$i0];
+
+        r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration[] configs> = $r2;
+
+        $r3 = r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration[] configs>;
+
+        virtualinvoke $r17.<java.util.Vector: void copyInto(java.lang.Object[])>($r3);
+
+     label7:
+        $r18 = r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration[] configs>;
+
+        $r19 = virtualinvoke $r18.<java.lang.Object: java.lang.Object clone()>();
+
+        $r20 = (java.awt.GraphicsConfiguration[]) $r19;
+
+        return $r20;
+    }
+
+    protected int getMaxConfigs(int)
+    {
+        int i0, $i1;
+        boolean $z0;
+        sun.awt.Win32GraphicsDevice r0;
+
+        r0 := @this: sun.awt.Win32GraphicsDevice;
+
+        i0 := @parameter0: int;
+
+        $z0 = <sun.awt.Win32GraphicsDevice: boolean pfDisabled>;
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        $i1 = specialinvoke r0.<sun.awt.Win32GraphicsDevice: int getMaxConfigsImpl(int)>(i0);
+
+        return $i1;
+    }
+
+    private native int getMaxConfigsImpl(int);
+
+    protected native boolean isPixFmtSupported(int, int);
+
+    protected int getDefaultPixID(int)
+    {
+        int i0, $i1;
+        boolean $z0;
+        sun.awt.Win32GraphicsDevice r0;
+
+        r0 := @this: sun.awt.Win32GraphicsDevice;
+
+        i0 := @parameter0: int;
+
+        $z0 = <sun.awt.Win32GraphicsDevice: boolean pfDisabled>;
+
+        if $z0 == 0 goto label1;
+
+        return 0;
+
+     label1:
+        $i1 = specialinvoke r0.<sun.awt.Win32GraphicsDevice: int getDefaultPixIDImpl(int)>(i0);
+
+        return $i1;
+    }
+
+    private native int getDefaultPixIDImpl(int);
+
+    public java.awt.GraphicsConfiguration getDefaultConfiguration()
+    {
+        int $i0, $i1, $i2;
+        java.lang.String $r10;
+        sun.awt.Win32GraphicsDevice r0;
+        boolean $z0, $z1, $z2;
+        sun.awt.Win32GraphicsConfig $r2;
+        java.io.PrintStream $r5, $r7, $r11;
+        java.awt.GraphicsConfiguration $r1, $r4, $r12, $r13;
+        sun.java2d.opengl.WGLGraphicsConfig $r3;
+        java.lang.StringBuilder $r6, $r8, $r9;
+
+        r0 := @this: sun.awt.Win32GraphicsDevice;
+
+        $r1 = r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration defaultConfig>;
+
+        if $r1 != null goto label4;
+
+        $z0 = staticinvoke <sun.java2d.windows.WindowsFlags: boolean isOGLEnabled()>();
+
+        if $z0 == 0 goto label3;
+
+        $z1 = specialinvoke r0.<sun.awt.Win32GraphicsDevice: boolean isDefaultDevice()>();
+
+        if $z1 == 0 goto label3;
+
+        $i0 = r0.<sun.awt.Win32GraphicsDevice: int screen>;
+
+        $i1 = staticinvoke <sun.java2d.opengl.WGLGraphicsConfig: int getDefaultPixFmt(int)>($i0);
+
+        $r3 = staticinvoke <sun.java2d.opengl.WGLGraphicsConfig: sun.java2d.opengl.WGLGraphicsConfig getConfig(sun.awt.Win32GraphicsDevice,int)>(r0, $i1);
+
+        r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration defaultConfig> = $r3;
+
+        $z2 = staticinvoke <sun.java2d.windows.WindowsFlags: boolean isOGLVerbose()>();
+
+        if $z2 == 0 goto label3;
+
+        $r4 = r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration defaultConfig>;
+
+        if $r4 == null goto label1;
+
+        $r11 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r11.<java.io.PrintStream: void print(java.lang.String)>("OpenGL pipeline enabled");
+
+        goto label2;
+
+     label1:
+        $r5 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r5.<java.io.PrintStream: void print(java.lang.String)>("Could not enable OpenGL pipeline");
+
+     label2:
+        $r7 = <java.lang.System: java.io.PrintStream out>;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" for default config on screen ");
+
+        $i2 = r0.<sun.awt.Win32GraphicsDevice: int screen>;
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<java.io.PrintStream: void println(java.lang.String)>($r10);
+
+     label3:
+        $r12 = r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration defaultConfig>;
+
+        if $r12 != null goto label4;
+
+        $r2 = staticinvoke <sun.awt.Win32GraphicsConfig: sun.awt.Win32GraphicsConfig getConfig(sun.awt.Win32GraphicsDevice,int)>(r0, 0);
+
+        r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration defaultConfig> = $r2;
+
+     label4:
+        $r13 = r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration defaultConfig>;
+
+        return $r13;
+    }
+
+    public java.lang.String toString()
+    {
+        java.lang.StringBuilder $r1, $r3, $r4, $r5, $r7, $r8;
+        java.lang.String $r2, $r6, $r9;
+        sun.awt.Win32GraphicsDevice r0;
+        boolean $z0;
+
+        r0 := @this: sun.awt.Win32GraphicsDevice;
+
+        $z0 = r0.<sun.awt.Win32GraphicsDevice: boolean valid>;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = r0.<sun.awt.Win32GraphicsDevice: java.lang.String descString>;
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label2;
+
+     label1:
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = r0.<sun.awt.Win32GraphicsDevice: java.lang.String descString>;
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", removed]");
+
+        $r9 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label2:
+        return $r9;
+    }
+
+    private boolean isDefaultDevice()
+    {
+        java.awt.GraphicsDevice $r2;
+        java.awt.GraphicsEnvironment $r1;
+        sun.awt.Win32GraphicsDevice r0;
+        boolean $z0;
+
+        r0 := @this: sun.awt.Win32GraphicsDevice;
+
+        $r1 = staticinvoke <java.awt.GraphicsEnvironment: java.awt.GraphicsEnvironment getLocalGraphicsEnvironment()>();
+
+        $r2 = virtualinvoke $r1.<java.awt.GraphicsEnvironment: java.awt.GraphicsDevice getDefaultScreenDevice()>();
+
+        if r0 != $r2 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private static boolean isFSExclusiveModeAllowed()
+    {
+        java.lang.SecurityException $r4;
+        java.awt.AWTPermission $r1, $r2, $r3;
+        java.lang.SecurityManager $r0;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label4;
+
+        $r1 = <sun.awt.Win32GraphicsDevice: java.awt.AWTPermission fullScreenExclusivePermission>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.awt.AWTPermission;
+
+        specialinvoke $r3.<java.awt.AWTPermission: void <init>(java.lang.String)>("fullScreenExclusive");
+
+        <sun.awt.Win32GraphicsDevice: java.awt.AWTPermission fullScreenExclusivePermission> = $r3;
+
+     label1:
+        $r2 = <sun.awt.Win32GraphicsDevice: java.awt.AWTPermission fullScreenExclusivePermission>;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r2);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        return 0;
+
+     label4:
+        return 1;
+
+        catch java.lang.SecurityException from label1 to label2 with label3;
+    }
+
+    public boolean isFullScreenSupported()
+    {
+        boolean $z0;
+        sun.awt.Win32GraphicsDevice r0;
+
+        r0 := @this: sun.awt.Win32GraphicsDevice;
+
+        $z0 = staticinvoke <sun.awt.Win32GraphicsDevice: boolean isFSExclusiveModeAllowed()>();
+
+        return $z0;
+    }
+
+    public synchronized void setFullScreenWindow(java.awt.Window)
+    {
+        java.lang.Throwable $r9, $r10;
+        java.awt.peer.ComponentPeer $r4, $r6;
+        java.awt.Window $r1, r2;
+        java.awt.DisplayMode $r3, $r5, $r7;
+        int $i0, $i1;
+        sun.awt.windows.WWindowPeer $r8, r11;
+        sun.awt.Win32GraphicsDevice r0;
+        boolean $z0;
+
+        r0 := @this: sun.awt.Win32GraphicsDevice;
+
+        r2 := @parameter0: java.awt.Window;
+
+        $r1 = virtualinvoke r0.<sun.awt.Win32GraphicsDevice: java.awt.Window getFullScreenWindow()>();
+
+        if r2 != $r1 goto label01;
+
+        return;
+
+     label01:
+        $z0 = virtualinvoke r0.<sun.awt.Win32GraphicsDevice: boolean isFullScreenSupported()>();
+
+        if $z0 != 0 goto label02;
+
+        specialinvoke r0.<java.awt.GraphicsDevice: void setFullScreenWindow(java.awt.Window)>(r2);
+
+        return;
+
+     label02:
+        if $r1 == null goto label09;
+
+        $r5 = r0.<sun.awt.Win32GraphicsDevice: java.awt.DisplayMode defaultDisplayMode>;
+
+        if $r5 == null goto label03;
+
+        $r7 = r0.<sun.awt.Win32GraphicsDevice: java.awt.DisplayMode defaultDisplayMode>;
+
+        virtualinvoke r0.<sun.awt.Win32GraphicsDevice: void setDisplayMode(java.awt.DisplayMode)>($r7);
+
+        r0.<sun.awt.Win32GraphicsDevice: java.awt.DisplayMode defaultDisplayMode> = null;
+
+     label03:
+        $r6 = virtualinvoke $r1.<java.awt.Window: java.awt.peer.ComponentPeer getPeer()>();
+
+        $r8 = (sun.awt.windows.WWindowPeer) $r6;
+
+        if $r8 == null goto label08;
+
+        virtualinvoke $r8.<sun.awt.windows.WWindowPeer: void setFullScreenExclusiveModeState(boolean)>(0);
+
+        entermonitor $r8;
+
+     label04:
+        $i1 = r0.<sun.awt.Win32GraphicsDevice: int screen>;
+
+        virtualinvoke r0.<sun.awt.Win32GraphicsDevice: void exitFullScreenExclusive(int,java.awt.peer.WindowPeer)>($i1, $r8);
+
+        exitmonitor $r8;
+
+     label05:
+        goto label08;
+
+     label06:
+        $r10 := @caughtexception;
+
+        exitmonitor $r8;
+
+     label07:
+        throw $r10;
+
+     label08:
+        virtualinvoke r0.<sun.awt.Win32GraphicsDevice: void removeFSWindowListener(java.awt.Window)>($r1);
+
+     label09:
+        specialinvoke r0.<java.awt.GraphicsDevice: void setFullScreenWindow(java.awt.Window)>(r2);
+
+        if r2 == null goto label16;
+
+        $r3 = virtualinvoke r0.<sun.awt.Win32GraphicsDevice: java.awt.DisplayMode getDisplayMode()>();
+
+        r0.<sun.awt.Win32GraphicsDevice: java.awt.DisplayMode defaultDisplayMode> = $r3;
+
+        virtualinvoke r0.<sun.awt.Win32GraphicsDevice: void addFSWindowListener(java.awt.Window)>(r2);
+
+        $r4 = virtualinvoke r2.<java.awt.Window: java.awt.peer.ComponentPeer getPeer()>();
+
+        r11 = (sun.awt.windows.WWindowPeer) $r4;
+
+        if r11 == null goto label15;
+
+        entermonitor r11;
+
+     label10:
+        $i0 = r0.<sun.awt.Win32GraphicsDevice: int screen>;
+
+        virtualinvoke r0.<sun.awt.Win32GraphicsDevice: void enterFullScreenExclusive(int,java.awt.peer.WindowPeer)>($i0, r11);
+
+        exitmonitor r11;
+
+     label11:
+        goto label14;
+
+     label12:
+        $r9 := @caughtexception;
+
+        exitmonitor r11;
+
+     label13:
+        throw $r9;
+
+     label14:
+        virtualinvoke r11.<sun.awt.windows.WWindowPeer: void setFullScreenExclusiveModeState(boolean)>(1);
+
+     label15:
+        virtualinvoke r11.<sun.awt.windows.WWindowPeer: void updateGC()>();
+
+     label16:
+        return;
+
+        catch java.lang.Throwable from label04 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+        catch java.lang.Throwable from label10 to label11 with label12;
+        catch java.lang.Throwable from label12 to label13 with label12;
+    }
+
+    protected native void enterFullScreenExclusive(int, java.awt.peer.WindowPeer);
+
+    protected native void exitFullScreenExclusive(int, java.awt.peer.WindowPeer);
+
+    public boolean isDisplayChangeSupported()
+    {
+        java.awt.Window $r1;
+        sun.awt.Win32GraphicsDevice r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.awt.Win32GraphicsDevice;
+
+        $z0 = virtualinvoke r0.<sun.awt.Win32GraphicsDevice: boolean isFullScreenSupported()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = virtualinvoke r0.<sun.awt.Win32GraphicsDevice: java.awt.Window getFullScreenWindow()>();
+
+        if $r1 == null goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public synchronized void setDisplayMode(java.awt.DisplayMode)
+    {
+        java.lang.IllegalStateException $r5;
+        java.awt.Rectangle $r9;
+        java.awt.DisplayMode $r2, $r3, r10;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        sun.awt.windows.WWindowPeer r7;
+        sun.awt.Win32GraphicsDevice r0;
+        boolean $z0, $z1;
+        java.awt.peer.ComponentPeer $r6;
+        java.awt.GraphicsConfiguration $r8;
+        java.awt.Window $r4;
+        java.lang.IllegalArgumentException $r1;
+
+        r0 := @this: sun.awt.Win32GraphicsDevice;
+
+        r10 := @parameter0: java.awt.DisplayMode;
+
+        $z0 = virtualinvoke r0.<sun.awt.Win32GraphicsDevice: boolean isDisplayChangeSupported()>();
+
+        if $z0 != 0 goto label1;
+
+        specialinvoke r0.<java.awt.GraphicsDevice: void setDisplayMode(java.awt.DisplayMode)>(r10);
+
+        return;
+
+     label1:
+        if r10 == null goto label2;
+
+        $r2 = virtualinvoke r0.<sun.awt.Win32GraphicsDevice: java.awt.DisplayMode getMatchingDisplayMode(java.awt.DisplayMode)>(r10);
+
+        if $r2 != null goto label3;
+
+     label2:
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid display mode");
+
+        throw $r1;
+
+     label3:
+        $r3 = virtualinvoke r0.<sun.awt.Win32GraphicsDevice: java.awt.DisplayMode getDisplayMode()>();
+
+        $z1 = virtualinvoke $r3.<java.awt.DisplayMode: boolean equals(java.awt.DisplayMode)>($r2);
+
+        if $z1 == 0 goto label4;
+
+        return;
+
+     label4:
+        $r4 = virtualinvoke r0.<sun.awt.Win32GraphicsDevice: java.awt.Window getFullScreenWindow()>();
+
+        if $r4 == null goto label5;
+
+        $r6 = virtualinvoke $r4.<java.awt.Window: java.awt.peer.ComponentPeer getPeer()>();
+
+        r7 = (sun.awt.windows.WWindowPeer) $r6;
+
+        $i0 = r0.<sun.awt.Win32GraphicsDevice: int screen>;
+
+        $i1 = virtualinvoke $r2.<java.awt.DisplayMode: int getWidth()>();
+
+        $i2 = virtualinvoke $r2.<java.awt.DisplayMode: int getHeight()>();
+
+        $i3 = virtualinvoke $r2.<java.awt.DisplayMode: int getBitDepth()>();
+
+        $i4 = virtualinvoke $r2.<java.awt.DisplayMode: int getRefreshRate()>();
+
+        virtualinvoke r0.<sun.awt.Win32GraphicsDevice: void configDisplayMode(int,java.awt.peer.WindowPeer,int,int,int,int)>($i0, r7, $i1, $i2, $i3, $i4);
+
+        $r8 = virtualinvoke r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration getDefaultConfiguration()>();
+
+        $r9 = virtualinvoke $r8.<java.awt.GraphicsConfiguration: java.awt.Rectangle getBounds()>();
+
+        $i5 = $r9.<java.awt.Rectangle: int x>;
+
+        $i6 = $r9.<java.awt.Rectangle: int y>;
+
+        $i7 = virtualinvoke $r2.<java.awt.DisplayMode: int getWidth()>();
+
+        $i8 = virtualinvoke $r2.<java.awt.DisplayMode: int getHeight()>();
+
+        virtualinvoke $r4.<java.awt.Window: void setBounds(int,int,int,int)>($i5, $i6, $i7, $i8);
+
+        goto label6;
+
+     label5:
+        $r5 = new java.lang.IllegalStateException;
+
+        specialinvoke $r5.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Must be in fullscreen mode in order to set display mode");
+
+        throw $r5;
+
+     label6:
+        return;
+    }
+
+    protected native java.awt.DisplayMode getCurrentDisplayMode(int);
+
+    protected native void configDisplayMode(int, java.awt.peer.WindowPeer, int, int, int, int);
+
+    protected native void enumDisplayModes(int, java.util.ArrayList);
+
+    public synchronized java.awt.DisplayMode getDisplayMode()
+    {
+        int $i0;
+        sun.awt.Win32GraphicsDevice r0;
+        java.awt.DisplayMode $r1;
+
+        r0 := @this: sun.awt.Win32GraphicsDevice;
+
+        $i0 = r0.<sun.awt.Win32GraphicsDevice: int screen>;
+
+        $r1 = virtualinvoke r0.<sun.awt.Win32GraphicsDevice: java.awt.DisplayMode getCurrentDisplayMode(int)>($i0);
+
+        return $r1;
+    }
+
+    public synchronized java.awt.DisplayMode[] getDisplayModes()
+    {
+        java.awt.DisplayMode[] r2;
+        java.util.ArrayList $r0;
+        java.awt.DisplayMode $r4;
+        int $i0, $i1, i2;
+        java.lang.Object $r3;
+        sun.awt.Win32GraphicsDevice r1;
+
+        r1 := @this: sun.awt.Win32GraphicsDevice;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+        $i0 = r1.<sun.awt.Win32GraphicsDevice: int screen>;
+
+        virtualinvoke r1.<sun.awt.Win32GraphicsDevice: void enumDisplayModes(int,java.util.ArrayList)>($i0, $r0);
+
+        $i1 = virtualinvoke $r0.<java.util.ArrayList: int size()>();
+
+        r2 = newarray (java.awt.DisplayMode)[$i1];
+
+        i2 = 0;
+
+     label1:
+        if i2 >= $i1 goto label2;
+
+        $r3 = virtualinvoke $r0.<java.util.ArrayList: java.lang.Object get(int)>(i2);
+
+        $r4 = (java.awt.DisplayMode) $r3;
+
+        r2[i2] = $r4;
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return r2;
+    }
+
+    protected synchronized java.awt.DisplayMode getMatchingDisplayMode(java.awt.DisplayMode)
+    {
+        java.awt.DisplayMode[] $r1;
+        java.awt.DisplayMode r2, r3;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, i8;
+        sun.awt.Win32GraphicsDevice r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.awt.Win32GraphicsDevice;
+
+        r3 := @parameter0: java.awt.DisplayMode;
+
+        $z0 = virtualinvoke r0.<sun.awt.Win32GraphicsDevice: boolean isDisplayChangeSupported()>();
+
+        if $z0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.awt.Win32GraphicsDevice: java.awt.DisplayMode[] getDisplayModes()>();
+
+        i0 = lengthof $r1;
+
+        i8 = 0;
+
+     label2:
+        if i8 >= i0 goto label5;
+
+        r2 = $r1[i8];
+
+        $z1 = virtualinvoke r3.<java.awt.DisplayMode: boolean equals(java.awt.DisplayMode)>(r2);
+
+        if $z1 != 0 goto label3;
+
+        $i1 = virtualinvoke r3.<java.awt.DisplayMode: int getRefreshRate()>();
+
+        if $i1 != 0 goto label4;
+
+        $i2 = virtualinvoke r3.<java.awt.DisplayMode: int getWidth()>();
+
+        $i3 = virtualinvoke r2.<java.awt.DisplayMode: int getWidth()>();
+
+        if $i2 != $i3 goto label4;
+
+        $i4 = virtualinvoke r3.<java.awt.DisplayMode: int getHeight()>();
+
+        $i5 = virtualinvoke r2.<java.awt.DisplayMode: int getHeight()>();
+
+        if $i4 != $i5 goto label4;
+
+        $i6 = virtualinvoke r3.<java.awt.DisplayMode: int getBitDepth()>();
+
+        $i7 = virtualinvoke r2.<java.awt.DisplayMode: int getBitDepth()>();
+
+        if $i6 != $i7 goto label4;
+
+     label3:
+        return r2;
+
+     label4:
+        i8 = i8 + 1;
+
+        goto label2;
+
+     label5:
+        return null;
+    }
+
+    public void displayChanged()
+    {
+        sun.awt.SunDisplayChanger $r1;
+        sun.awt.Win32GraphicsDevice r0;
+
+        r0 := @this: sun.awt.Win32GraphicsDevice;
+
+        r0.<sun.awt.Win32GraphicsDevice: java.awt.image.ColorModel dynamicColorModel> = null;
+
+        r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration defaultConfig> = null;
+
+        r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration[] configs> = null;
+
+        $r1 = r0.<sun.awt.Win32GraphicsDevice: sun.awt.SunDisplayChanger topLevels>;
+
+        virtualinvoke $r1.<sun.awt.SunDisplayChanger: void notifyListeners()>();
+
+        return;
+    }
+
+    public void paletteChanged()
+    {
+        sun.awt.Win32GraphicsDevice r0;
+
+        r0 := @this: sun.awt.Win32GraphicsDevice;
+
+        return;
+    }
+
+    public void addDisplayChangedListener(sun.awt.DisplayChangedListener)
+    {
+        sun.awt.SunDisplayChanger $r2;
+        sun.awt.DisplayChangedListener r1;
+        sun.awt.Win32GraphicsDevice r0;
+
+        r0 := @this: sun.awt.Win32GraphicsDevice;
+
+        r1 := @parameter0: sun.awt.DisplayChangedListener;
+
+        $r2 = r0.<sun.awt.Win32GraphicsDevice: sun.awt.SunDisplayChanger topLevels>;
+
+        virtualinvoke $r2.<sun.awt.SunDisplayChanger: void add(sun.awt.DisplayChangedListener)>(r1);
+
+        return;
+    }
+
+    public void removeDisplayChangedListener(sun.awt.DisplayChangedListener)
+    {
+        sun.awt.SunDisplayChanger $r2;
+        sun.awt.DisplayChangedListener r1;
+        sun.awt.Win32GraphicsDevice r0;
+
+        r0 := @this: sun.awt.Win32GraphicsDevice;
+
+        r1 := @parameter0: sun.awt.DisplayChangedListener;
+
+        $r2 = r0.<sun.awt.Win32GraphicsDevice: sun.awt.SunDisplayChanger topLevels>;
+
+        virtualinvoke $r2.<sun.awt.SunDisplayChanger: void remove(sun.awt.DisplayChangedListener)>(r1);
+
+        return;
+    }
+
+    private native java.awt.image.ColorModel makeColorModel(int, boolean);
+
+    public java.awt.image.ColorModel getDynamicColorModel()
+    {
+        java.awt.image.ColorModel $r1, $r2, $r3;
+        int $i0;
+        sun.awt.Win32GraphicsDevice r0;
+
+        r0 := @this: sun.awt.Win32GraphicsDevice;
+
+        $r1 = r0.<sun.awt.Win32GraphicsDevice: java.awt.image.ColorModel dynamicColorModel>;
+
+        if $r1 != null goto label1;
+
+        $i0 = r0.<sun.awt.Win32GraphicsDevice: int screen>;
+
+        $r3 = specialinvoke r0.<sun.awt.Win32GraphicsDevice: java.awt.image.ColorModel makeColorModel(int,boolean)>($i0, 1);
+
+        r0.<sun.awt.Win32GraphicsDevice: java.awt.image.ColorModel dynamicColorModel> = $r3;
+
+     label1:
+        $r2 = r0.<sun.awt.Win32GraphicsDevice: java.awt.image.ColorModel dynamicColorModel>;
+
+        return $r2;
+    }
+
+    public java.awt.image.ColorModel getColorModel()
+    {
+        java.awt.image.ColorModel $r1, $r2, $r3;
+        int $i0;
+        sun.awt.Win32GraphicsDevice r0;
+
+        r0 := @this: sun.awt.Win32GraphicsDevice;
+
+        $r1 = r0.<sun.awt.Win32GraphicsDevice: java.awt.image.ColorModel colorModel>;
+
+        if $r1 != null goto label1;
+
+        $i0 = r0.<sun.awt.Win32GraphicsDevice: int screen>;
+
+        $r3 = specialinvoke r0.<sun.awt.Win32GraphicsDevice: java.awt.image.ColorModel makeColorModel(int,boolean)>($i0, 0);
+
+        r0.<sun.awt.Win32GraphicsDevice: java.awt.image.ColorModel colorModel> = $r3;
+
+     label1:
+        $r2 = r0.<sun.awt.Win32GraphicsDevice: java.awt.image.ColorModel colorModel>;
+
+        return $r2;
+    }
+
+    protected void addFSWindowListener(java.awt.Window)
+    {
+        java.awt.Window r3;
+        sun.awt.Win32GraphicsDevice$1 $r2;
+        sun.awt.Win32GraphicsDevice$Win32FSWindowAdapter $r1;
+        sun.awt.Win32GraphicsDevice r0;
+
+        r0 := @this: sun.awt.Win32GraphicsDevice;
+
+        r3 := @parameter0: java.awt.Window;
+
+        $r1 = new sun.awt.Win32GraphicsDevice$Win32FSWindowAdapter;
+
+        specialinvoke $r1.<sun.awt.Win32GraphicsDevice$Win32FSWindowAdapter: void <init>(sun.awt.Win32GraphicsDevice)>(r0);
+
+        r0.<sun.awt.Win32GraphicsDevice: java.awt.event.WindowListener fsWindowListener> = $r1;
+
+        $r2 = new sun.awt.Win32GraphicsDevice$1;
+
+        specialinvoke $r2.<sun.awt.Win32GraphicsDevice$1: void <init>(sun.awt.Win32GraphicsDevice,java.awt.Window)>(r0, r3);
+
+        staticinvoke <java.awt.EventQueue: void invokeLater(java.lang.Runnable)>($r2);
+
+        return;
+    }
+
+    protected void removeFSWindowListener(java.awt.Window)
+    {
+        java.awt.event.WindowListener $r2;
+        java.awt.Window r0;
+        sun.awt.Win32GraphicsDevice r1;
+
+        r1 := @this: sun.awt.Win32GraphicsDevice;
+
+        r0 := @parameter0: java.awt.Window;
+
+        $r2 = r1.<sun.awt.Win32GraphicsDevice: java.awt.event.WindowListener fsWindowListener>;
+
+        virtualinvoke r0.<java.awt.Window: void removeWindowListener(java.awt.event.WindowListener)>($r2);
+
+        r1.<sun.awt.Win32GraphicsDevice: java.awt.event.WindowListener fsWindowListener> = null;
+
+        return;
+    }
+
+    static java.awt.DisplayMode access$000(sun.awt.Win32GraphicsDevice)
+    {
+        sun.awt.Win32GraphicsDevice r0;
+        java.awt.DisplayMode $r1;
+
+        r0 := @parameter0: sun.awt.Win32GraphicsDevice;
+
+        $r1 = r0.<sun.awt.Win32GraphicsDevice: java.awt.DisplayMode defaultDisplayMode>;
+
+        return $r1;
+    }
+
+    static java.awt.event.WindowListener access$100(sun.awt.Win32GraphicsDevice)
+    {
+        java.awt.event.WindowListener $r1;
+        sun.awt.Win32GraphicsDevice r0;
+
+        r0 := @parameter0: sun.awt.Win32GraphicsDevice;
+
+        $r1 = r0.<sun.awt.Win32GraphicsDevice: java.awt.event.WindowListener fsWindowListener>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Object $r1;
+        java.lang.String r2;
+        sun.security.action.GetPropertyAction $r0;
+        boolean $z0;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("sun.awt.nopixfmt");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r2 = (java.lang.String) $r1;
+
+        if r2 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        <sun.awt.Win32GraphicsDevice: boolean pfDisabled> = $z0;
+
+        staticinvoke <sun.awt.Win32GraphicsDevice: void initIDs()>();
+
+        return;
+    }
+}

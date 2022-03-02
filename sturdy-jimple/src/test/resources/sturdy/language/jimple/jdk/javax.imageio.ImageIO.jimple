@@ -1,0 +1,1949 @@
+public final class javax.imageio.ImageIO extends java.lang.Object
+{
+    private static final javax.imageio.spi.IIORegistry theRegistry;
+    private static java.lang.reflect.Method readerFormatNamesMethod;
+    private static java.lang.reflect.Method readerFileSuffixesMethod;
+    private static java.lang.reflect.Method readerMIMETypesMethod;
+    private static java.lang.reflect.Method writerFormatNamesMethod;
+    private static java.lang.reflect.Method writerFileSuffixesMethod;
+    private static java.lang.reflect.Method writerMIMETypesMethod;
+
+    private void <init>()
+    {
+        javax.imageio.ImageIO r0;
+
+        r0 := @this: javax.imageio.ImageIO;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static void scanForPlugins()
+    {
+        javax.imageio.spi.IIORegistry $r0;
+
+        $r0 = <javax.imageio.ImageIO: javax.imageio.spi.IIORegistry theRegistry>;
+
+        virtualinvoke $r0.<javax.imageio.spi.IIORegistry: void registerApplicationClasspathSpis()>();
+
+        return;
+    }
+
+    private static synchronized javax.imageio.ImageIO$CacheInfo getCacheInfo()
+    {
+        sun.awt.AppContext $r0;
+        javax.imageio.ImageIO$CacheInfo $r2, r3;
+        java.lang.Object $r1;
+
+        $r0 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r1 = virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>(class "Ljavax/imageio/ImageIO$CacheInfo;");
+
+        r3 = (javax.imageio.ImageIO$CacheInfo) $r1;
+
+        if r3 != null goto label1;
+
+        $r2 = new javax.imageio.ImageIO$CacheInfo;
+
+        specialinvoke $r2.<javax.imageio.ImageIO$CacheInfo: void <init>()>();
+
+        r3 = $r2;
+
+        virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>(class "Ljavax/imageio/ImageIO$CacheInfo;", $r2);
+
+     label1:
+        return r3;
+    }
+
+    private static java.lang.String getTempDir()
+    {
+        java.lang.Object $r1;
+        java.lang.String $r2;
+        sun.security.action.GetPropertyAction $r0;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("java.io.tmpdir");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r2 = (java.lang.String) $r1;
+
+        return $r2;
+    }
+
+    private static boolean hasCachePermission()
+    {
+        javax.imageio.ImageIO$CacheInfo $r0, $r3, $r7, $r20;
+        java.io.FilePermission $r14;
+        java.lang.Boolean $r1, $r4, $r8, $r21;
+        java.lang.SecurityException $r19;
+        java.lang.String $r6, $r9, $r13, $r17, r22, r23;
+        boolean $z0, $z1, $z2;
+        java.lang.SecurityManager $r2;
+        java.io.File $r5;
+        java.lang.StringBuilder $r10, $r11, $r12, $r15, $r16, $r18;
+
+        $r0 = staticinvoke <javax.imageio.ImageIO: javax.imageio.ImageIO$CacheInfo getCacheInfo()>();
+
+        $r1 = virtualinvoke $r0.<javax.imageio.ImageIO$CacheInfo: java.lang.Boolean getHasPermission()>();
+
+        if $r1 == null goto label1;
+
+        $z2 = virtualinvoke $r1.<java.lang.Boolean: boolean booleanValue()>();
+
+        return $z2;
+
+     label1:
+        $r2 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r2 == null goto label7;
+
+        $r5 = staticinvoke <javax.imageio.ImageIO: java.io.File getCacheDirectory()>();
+
+        if $r5 == null goto label2;
+
+        r22 = virtualinvoke $r5.<java.io.File: java.lang.String getPath()>();
+
+        goto label5;
+
+     label2:
+        $r6 = staticinvoke <javax.imageio.ImageIO: java.lang.String getTempDir()>();
+
+        r22 = $r6;
+
+        if $r6 == null goto label3;
+
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 == 0 goto label5;
+
+     label3:
+        $r7 = staticinvoke <javax.imageio.ImageIO: javax.imageio.ImageIO$CacheInfo getCacheInfo()>();
+
+        $r8 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        virtualinvoke $r7.<javax.imageio.ImageIO$CacheInfo: void setHasPermission(java.lang.Boolean)>($r8);
+
+     label4:
+        return 0;
+
+     label5:
+        r23 = r22;
+
+        $r9 = <java.io.File: java.lang.String separator>;
+
+        $z1 = virtualinvoke r22.<java.lang.String: boolean endsWith(java.lang.String)>($r9);
+
+        if $z1 != 0 goto label6;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r22);
+
+        $r17 = <java.io.File: java.lang.String separator>;
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        r23 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label6:
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r23);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("*");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r14 = new java.io.FilePermission;
+
+        specialinvoke $r14.<java.io.FilePermission: void <init>(java.lang.String,java.lang.String)>($r13, "read, write, delete");
+
+        virtualinvoke $r2.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r14);
+
+     label7:
+        goto label9;
+
+     label8:
+        $r19 := @caughtexception;
+
+        $r20 = staticinvoke <javax.imageio.ImageIO: javax.imageio.ImageIO$CacheInfo getCacheInfo()>();
+
+        $r21 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        virtualinvoke $r20.<javax.imageio.ImageIO$CacheInfo: void setHasPermission(java.lang.Boolean)>($r21);
+
+        return 0;
+
+     label9:
+        $r3 = staticinvoke <javax.imageio.ImageIO: javax.imageio.ImageIO$CacheInfo getCacheInfo()>();
+
+        $r4 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke $r3.<javax.imageio.ImageIO$CacheInfo: void setHasPermission(java.lang.Boolean)>($r4);
+
+        return 1;
+
+        catch java.lang.SecurityException from label1 to label4 with label8;
+        catch java.lang.SecurityException from label5 to label7 with label8;
+    }
+
+    public static void setUseCache(boolean)
+    {
+        javax.imageio.ImageIO$CacheInfo $r0;
+        boolean z0;
+
+        z0 := @parameter0: boolean;
+
+        $r0 = staticinvoke <javax.imageio.ImageIO: javax.imageio.ImageIO$CacheInfo getCacheInfo()>();
+
+        virtualinvoke $r0.<javax.imageio.ImageIO$CacheInfo: void setUseCache(boolean)>(z0);
+
+        return;
+    }
+
+    public static boolean getUseCache()
+    {
+        javax.imageio.ImageIO$CacheInfo $r0;
+        boolean $z0;
+
+        $r0 = staticinvoke <javax.imageio.ImageIO: javax.imageio.ImageIO$CacheInfo getCacheInfo()>();
+
+        $z0 = virtualinvoke $r0.<javax.imageio.ImageIO$CacheInfo: boolean getUseCache()>();
+
+        return $z0;
+    }
+
+    public static void setCacheDirectory(java.io.File)
+    {
+        javax.imageio.ImageIO$CacheInfo $r1, $r2;
+        java.lang.IllegalArgumentException $r3;
+        java.io.File r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.io.File;
+
+        if r0 == null goto label1;
+
+        $z0 = virtualinvoke r0.<java.io.File: boolean isDirectory()>();
+
+        if $z0 != 0 goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Not a directory!");
+
+        throw $r3;
+
+     label1:
+        $r1 = staticinvoke <javax.imageio.ImageIO: javax.imageio.ImageIO$CacheInfo getCacheInfo()>();
+
+        virtualinvoke $r1.<javax.imageio.ImageIO$CacheInfo: void setCacheDirectory(java.io.File)>(r0);
+
+        $r2 = staticinvoke <javax.imageio.ImageIO: javax.imageio.ImageIO$CacheInfo getCacheInfo()>();
+
+        virtualinvoke $r2.<javax.imageio.ImageIO$CacheInfo: void setHasPermission(java.lang.Boolean)>(null);
+
+        return;
+    }
+
+    public static java.io.File getCacheDirectory()
+    {
+        javax.imageio.ImageIO$CacheInfo $r0;
+        java.io.File $r1;
+
+        $r0 = staticinvoke <javax.imageio.ImageIO: javax.imageio.ImageIO$CacheInfo getCacheInfo()>();
+
+        $r1 = virtualinvoke $r0.<javax.imageio.ImageIO$CacheInfo: java.io.File getCacheDirectory()>();
+
+        return $r1;
+    }
+
+    public static javax.imageio.stream.ImageInputStream createImageInputStream(java.lang.Object) throws java.io.IOException
+    {
+        javax.imageio.IIOException $r10;
+        boolean $z0, $z1, $z2, $z3, z4, $z5;
+        java.util.Iterator $r2;
+        javax.imageio.spi.IIORegistry $r1;
+        java.io.IOException $r9;
+        java.lang.IllegalArgumentException $r8, $r11;
+        java.io.File $r6;
+        javax.imageio.stream.ImageInputStream $r7;
+        javax.imageio.spi.ImageInputStreamSpi r4;
+        java.lang.Object r0, $r3;
+        java.lang.Class $r5;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label01;
+
+        $r8 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("input == null!");
+
+        throw $r8;
+
+     label01:
+        $r1 = <javax.imageio.ImageIO: javax.imageio.spi.IIORegistry theRegistry>;
+
+        $r2 = virtualinvoke $r1.<javax.imageio.spi.IIORegistry: java.util.Iterator getServiceProviders(java.lang.Class,boolean)>(class "Ljavax/imageio/spi/ImageInputStreamSpi;", 1);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r11 := @caughtexception;
+
+        return null;
+
+     label04:
+        $z0 = staticinvoke <javax.imageio.ImageIO: boolean getUseCache()>();
+
+        if $z0 == 0 goto label05;
+
+        $z2 = staticinvoke <javax.imageio.ImageIO: boolean hasCachePermission()>();
+
+        if $z2 == 0 goto label05;
+
+        $z3 = 1;
+
+        goto label06;
+
+     label05:
+        $z3 = 0;
+
+     label06:
+        z4 = $z3;
+
+     label07:
+        $z5 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z5 == 0 goto label12;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (javax.imageio.spi.ImageInputStreamSpi) $r3;
+
+        $r5 = virtualinvoke r4.<javax.imageio.spi.ImageInputStreamSpi: java.lang.Class getInputClass()>();
+
+        $z1 = virtualinvoke $r5.<java.lang.Class: boolean isInstance(java.lang.Object)>(r0);
+
+        if $z1 == 0 goto label11;
+
+     label08:
+        $r6 = staticinvoke <javax.imageio.ImageIO: java.io.File getCacheDirectory()>();
+
+        $r7 = virtualinvoke r4.<javax.imageio.spi.ImageInputStreamSpi: javax.imageio.stream.ImageInputStream createInputStreamInstance(java.lang.Object,boolean,java.io.File)>(r0, z4, $r6);
+
+     label09:
+        return $r7;
+
+     label10:
+        $r9 := @caughtexception;
+
+        $r10 = new javax.imageio.IIOException;
+
+        specialinvoke $r10.<javax.imageio.IIOException: void <init>(java.lang.String,java.lang.Throwable)>("Can\'t create cache file!", $r9);
+
+        throw $r10;
+
+     label11:
+        goto label07;
+
+     label12:
+        return null;
+
+        catch java.lang.IllegalArgumentException from label01 to label02 with label03;
+        catch java.io.IOException from label08 to label09 with label10;
+    }
+
+    public static javax.imageio.stream.ImageOutputStream createImageOutputStream(java.lang.Object) throws java.io.IOException
+    {
+        javax.imageio.IIOException $r10;
+        boolean $z0, $z1, $z2, $z3, z4, $z5;
+        java.util.Iterator $r2;
+        javax.imageio.spi.IIORegistry $r1;
+        java.io.IOException $r9;
+        java.lang.IllegalArgumentException $r8, $r11;
+        java.io.File $r6;
+        javax.imageio.stream.ImageOutputStream $r7;
+        javax.imageio.spi.ImageOutputStreamSpi r4;
+        java.lang.Object r0, $r3;
+        java.lang.Class $r5;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label01;
+
+        $r8 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("output == null!");
+
+        throw $r8;
+
+     label01:
+        $r1 = <javax.imageio.ImageIO: javax.imageio.spi.IIORegistry theRegistry>;
+
+        $r2 = virtualinvoke $r1.<javax.imageio.spi.IIORegistry: java.util.Iterator getServiceProviders(java.lang.Class,boolean)>(class "Ljavax/imageio/spi/ImageOutputStreamSpi;", 1);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r11 := @caughtexception;
+
+        return null;
+
+     label04:
+        $z0 = staticinvoke <javax.imageio.ImageIO: boolean getUseCache()>();
+
+        if $z0 == 0 goto label05;
+
+        $z2 = staticinvoke <javax.imageio.ImageIO: boolean hasCachePermission()>();
+
+        if $z2 == 0 goto label05;
+
+        $z3 = 1;
+
+        goto label06;
+
+     label05:
+        $z3 = 0;
+
+     label06:
+        z4 = $z3;
+
+     label07:
+        $z5 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z5 == 0 goto label12;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (javax.imageio.spi.ImageOutputStreamSpi) $r3;
+
+        $r5 = virtualinvoke r4.<javax.imageio.spi.ImageOutputStreamSpi: java.lang.Class getOutputClass()>();
+
+        $z1 = virtualinvoke $r5.<java.lang.Class: boolean isInstance(java.lang.Object)>(r0);
+
+        if $z1 == 0 goto label11;
+
+     label08:
+        $r6 = staticinvoke <javax.imageio.ImageIO: java.io.File getCacheDirectory()>();
+
+        $r7 = virtualinvoke r4.<javax.imageio.spi.ImageOutputStreamSpi: javax.imageio.stream.ImageOutputStream createOutputStreamInstance(java.lang.Object,boolean,java.io.File)>(r0, z4, $r6);
+
+     label09:
+        return $r7;
+
+     label10:
+        $r9 := @caughtexception;
+
+        $r10 = new javax.imageio.IIOException;
+
+        specialinvoke $r10.<javax.imageio.IIOException: void <init>(java.lang.String,java.lang.Throwable)>("Can\'t create cache file!", $r9);
+
+        throw $r10;
+
+     label11:
+        goto label07;
+
+     label12:
+        return null;
+
+        catch java.lang.IllegalArgumentException from label01 to label02 with label03;
+        catch java.io.IOException from label08 to label09 with label10;
+    }
+
+    private static java.lang.String[] getReaderWriterInfo(java.lang.Class, javax.imageio.ImageIO$SpiInfo)
+    {
+        javax.imageio.ImageIO$SpiInfo r9;
+        java.lang.Object[] $r5;
+        java.util.Iterator $r2;
+        javax.imageio.spi.IIORegistry $r1;
+        java.lang.String[] $r4, $r6, $r10, $r12;
+        java.lang.IllegalArgumentException $r11;
+        java.util.HashSet $r3;
+        int $i0;
+        java.lang.Class r0;
+        java.lang.Object $r7;
+        javax.imageio.spi.ImageReaderWriterSpi r8;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.Class;
+
+        r9 := @parameter1: javax.imageio.ImageIO$SpiInfo;
+
+     label1:
+        $r1 = <javax.imageio.ImageIO: javax.imageio.spi.IIORegistry theRegistry>;
+
+        $r2 = virtualinvoke $r1.<javax.imageio.spi.IIORegistry: java.util.Iterator getServiceProviders(java.lang.Class,boolean)>(r0, 1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r11 := @caughtexception;
+
+        $r12 = newarray (java.lang.String)[0];
+
+        return $r12;
+
+     label4:
+        $r3 = new java.util.HashSet;
+
+        specialinvoke $r3.<java.util.HashSet: void <init>()>();
+
+     label5:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label6;
+
+        $r7 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r8 = (javax.imageio.spi.ImageReaderWriterSpi) $r7;
+
+        $r10 = virtualinvoke r9.<javax.imageio.ImageIO$SpiInfo: java.lang.String[] info(javax.imageio.spi.ImageReaderWriterSpi)>(r8);
+
+        staticinvoke <java.util.Collections: boolean addAll(java.util.Collection,java.lang.Object[])>($r3, $r10);
+
+        goto label5;
+
+     label6:
+        $i0 = virtualinvoke $r3.<java.util.HashSet: int size()>();
+
+        $r4 = newarray (java.lang.String)[$i0];
+
+        $r5 = virtualinvoke $r3.<java.util.HashSet: java.lang.Object[] toArray(java.lang.Object[])>($r4);
+
+        $r6 = (java.lang.String[]) $r5;
+
+        return $r6;
+
+        catch java.lang.IllegalArgumentException from label1 to label2 with label3;
+    }
+
+    public static java.lang.String[] getReaderFormatNames()
+    {
+        javax.imageio.ImageIO$SpiInfo $r0;
+        java.lang.String[] $r1;
+
+        $r0 = <javax.imageio.ImageIO$SpiInfo: javax.imageio.ImageIO$SpiInfo FORMAT_NAMES>;
+
+        $r1 = staticinvoke <javax.imageio.ImageIO: java.lang.String[] getReaderWriterInfo(java.lang.Class,javax.imageio.ImageIO$SpiInfo)>(class "Ljavax/imageio/spi/ImageReaderSpi;", $r0);
+
+        return $r1;
+    }
+
+    public static java.lang.String[] getReaderMIMETypes()
+    {
+        javax.imageio.ImageIO$SpiInfo $r0;
+        java.lang.String[] $r1;
+
+        $r0 = <javax.imageio.ImageIO$SpiInfo: javax.imageio.ImageIO$SpiInfo MIME_TYPES>;
+
+        $r1 = staticinvoke <javax.imageio.ImageIO: java.lang.String[] getReaderWriterInfo(java.lang.Class,javax.imageio.ImageIO$SpiInfo)>(class "Ljavax/imageio/spi/ImageReaderSpi;", $r0);
+
+        return $r1;
+    }
+
+    public static java.lang.String[] getReaderFileSuffixes()
+    {
+        javax.imageio.ImageIO$SpiInfo $r0;
+        java.lang.String[] $r1;
+
+        $r0 = <javax.imageio.ImageIO$SpiInfo: javax.imageio.ImageIO$SpiInfo FILE_SUFFIXES>;
+
+        $r1 = staticinvoke <javax.imageio.ImageIO: java.lang.String[] getReaderWriterInfo(java.lang.Class,javax.imageio.ImageIO$SpiInfo)>(class "Ljavax/imageio/spi/ImageReaderSpi;", $r0);
+
+        return $r1;
+    }
+
+    public static java.util.Iterator getImageReaders(java.lang.Object)
+    {
+        javax.imageio.ImageIO$CanDecodeInputFilter $r1;
+        java.util.Iterator $r3, $r7;
+        javax.imageio.spi.IIORegistry $r2;
+        java.lang.IllegalArgumentException $r5, $r6;
+        javax.imageio.ImageIO$ImageReaderIterator $r4;
+        java.lang.Object r0;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("input == null!");
+
+        throw $r5;
+
+     label1:
+        $r2 = <javax.imageio.ImageIO: javax.imageio.spi.IIORegistry theRegistry>;
+
+        $r1 = new javax.imageio.ImageIO$CanDecodeInputFilter;
+
+        specialinvoke $r1.<javax.imageio.ImageIO$CanDecodeInputFilter: void <init>(java.lang.Object)>(r0);
+
+        $r3 = virtualinvoke $r2.<javax.imageio.spi.IIORegistry: java.util.Iterator getServiceProviders(java.lang.Class,javax.imageio.spi.ServiceRegistry$Filter,boolean)>(class "Ljavax/imageio/spi/ImageReaderSpi;", $r1, 1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = staticinvoke <java.util.Collections: java.util.Iterator emptyIterator()>();
+
+        return $r7;
+
+     label4:
+        $r4 = new javax.imageio.ImageIO$ImageReaderIterator;
+
+        specialinvoke $r4.<javax.imageio.ImageIO$ImageReaderIterator: void <init>(java.util.Iterator)>($r3);
+
+        return $r4;
+
+        catch java.lang.IllegalArgumentException from label1 to label2 with label3;
+    }
+
+    public static java.util.Iterator getImageReadersByFormatName(java.lang.String)
+    {
+        java.util.Iterator $r4, $r8;
+        javax.imageio.spi.IIORegistry $r3;
+        java.lang.IllegalArgumentException $r6, $r7;
+        javax.imageio.ImageIO$ImageReaderIterator $r5;
+        java.lang.String r0;
+        java.lang.reflect.Method $r2;
+        javax.imageio.ImageIO$ContainsFilter $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("formatName == null!");
+
+        throw $r6;
+
+     label1:
+        $r3 = <javax.imageio.ImageIO: javax.imageio.spi.IIORegistry theRegistry>;
+
+        $r1 = new javax.imageio.ImageIO$ContainsFilter;
+
+        $r2 = <javax.imageio.ImageIO: java.lang.reflect.Method readerFormatNamesMethod>;
+
+        specialinvoke $r1.<javax.imageio.ImageIO$ContainsFilter: void <init>(java.lang.reflect.Method,java.lang.String)>($r2, r0);
+
+        $r4 = virtualinvoke $r3.<javax.imageio.spi.IIORegistry: java.util.Iterator getServiceProviders(java.lang.Class,javax.imageio.spi.ServiceRegistry$Filter,boolean)>(class "Ljavax/imageio/spi/ImageReaderSpi;", $r1, 1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $r8 = staticinvoke <java.util.Collections: java.util.Iterator emptyIterator()>();
+
+        return $r8;
+
+     label4:
+        $r5 = new javax.imageio.ImageIO$ImageReaderIterator;
+
+        specialinvoke $r5.<javax.imageio.ImageIO$ImageReaderIterator: void <init>(java.util.Iterator)>($r4);
+
+        return $r5;
+
+        catch java.lang.IllegalArgumentException from label1 to label2 with label3;
+    }
+
+    public static java.util.Iterator getImageReadersBySuffix(java.lang.String)
+    {
+        java.util.Iterator $r4, $r8;
+        javax.imageio.spi.IIORegistry $r3;
+        java.lang.IllegalArgumentException $r6, $r7;
+        javax.imageio.ImageIO$ImageReaderIterator $r5;
+        java.lang.String r0;
+        java.lang.reflect.Method $r2;
+        javax.imageio.ImageIO$ContainsFilter $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("fileSuffix == null!");
+
+        throw $r6;
+
+     label1:
+        $r3 = <javax.imageio.ImageIO: javax.imageio.spi.IIORegistry theRegistry>;
+
+        $r1 = new javax.imageio.ImageIO$ContainsFilter;
+
+        $r2 = <javax.imageio.ImageIO: java.lang.reflect.Method readerFileSuffixesMethod>;
+
+        specialinvoke $r1.<javax.imageio.ImageIO$ContainsFilter: void <init>(java.lang.reflect.Method,java.lang.String)>($r2, r0);
+
+        $r4 = virtualinvoke $r3.<javax.imageio.spi.IIORegistry: java.util.Iterator getServiceProviders(java.lang.Class,javax.imageio.spi.ServiceRegistry$Filter,boolean)>(class "Ljavax/imageio/spi/ImageReaderSpi;", $r1, 1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $r8 = staticinvoke <java.util.Collections: java.util.Iterator emptyIterator()>();
+
+        return $r8;
+
+     label4:
+        $r5 = new javax.imageio.ImageIO$ImageReaderIterator;
+
+        specialinvoke $r5.<javax.imageio.ImageIO$ImageReaderIterator: void <init>(java.util.Iterator)>($r4);
+
+        return $r5;
+
+        catch java.lang.IllegalArgumentException from label1 to label2 with label3;
+    }
+
+    public static java.util.Iterator getImageReadersByMIMEType(java.lang.String)
+    {
+        java.util.Iterator $r4, $r8;
+        javax.imageio.spi.IIORegistry $r3;
+        java.lang.IllegalArgumentException $r6, $r7;
+        javax.imageio.ImageIO$ImageReaderIterator $r5;
+        java.lang.String r0;
+        java.lang.reflect.Method $r2;
+        javax.imageio.ImageIO$ContainsFilter $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("MIMEType == null!");
+
+        throw $r6;
+
+     label1:
+        $r3 = <javax.imageio.ImageIO: javax.imageio.spi.IIORegistry theRegistry>;
+
+        $r1 = new javax.imageio.ImageIO$ContainsFilter;
+
+        $r2 = <javax.imageio.ImageIO: java.lang.reflect.Method readerMIMETypesMethod>;
+
+        specialinvoke $r1.<javax.imageio.ImageIO$ContainsFilter: void <init>(java.lang.reflect.Method,java.lang.String)>($r2, r0);
+
+        $r4 = virtualinvoke $r3.<javax.imageio.spi.IIORegistry: java.util.Iterator getServiceProviders(java.lang.Class,javax.imageio.spi.ServiceRegistry$Filter,boolean)>(class "Ljavax/imageio/spi/ImageReaderSpi;", $r1, 1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $r8 = staticinvoke <java.util.Collections: java.util.Iterator emptyIterator()>();
+
+        return $r8;
+
+     label4:
+        $r5 = new javax.imageio.ImageIO$ImageReaderIterator;
+
+        specialinvoke $r5.<javax.imageio.ImageIO$ImageReaderIterator: void <init>(java.util.Iterator)>($r4);
+
+        return $r5;
+
+        catch java.lang.IllegalArgumentException from label1 to label2 with label3;
+    }
+
+    public static java.lang.String[] getWriterFormatNames()
+    {
+        javax.imageio.ImageIO$SpiInfo $r0;
+        java.lang.String[] $r1;
+
+        $r0 = <javax.imageio.ImageIO$SpiInfo: javax.imageio.ImageIO$SpiInfo FORMAT_NAMES>;
+
+        $r1 = staticinvoke <javax.imageio.ImageIO: java.lang.String[] getReaderWriterInfo(java.lang.Class,javax.imageio.ImageIO$SpiInfo)>(class "Ljavax/imageio/spi/ImageWriterSpi;", $r0);
+
+        return $r1;
+    }
+
+    public static java.lang.String[] getWriterMIMETypes()
+    {
+        javax.imageio.ImageIO$SpiInfo $r0;
+        java.lang.String[] $r1;
+
+        $r0 = <javax.imageio.ImageIO$SpiInfo: javax.imageio.ImageIO$SpiInfo MIME_TYPES>;
+
+        $r1 = staticinvoke <javax.imageio.ImageIO: java.lang.String[] getReaderWriterInfo(java.lang.Class,javax.imageio.ImageIO$SpiInfo)>(class "Ljavax/imageio/spi/ImageWriterSpi;", $r0);
+
+        return $r1;
+    }
+
+    public static java.lang.String[] getWriterFileSuffixes()
+    {
+        javax.imageio.ImageIO$SpiInfo $r0;
+        java.lang.String[] $r1;
+
+        $r0 = <javax.imageio.ImageIO$SpiInfo: javax.imageio.ImageIO$SpiInfo FILE_SUFFIXES>;
+
+        $r1 = staticinvoke <javax.imageio.ImageIO: java.lang.String[] getReaderWriterInfo(java.lang.Class,javax.imageio.ImageIO$SpiInfo)>(class "Ljavax/imageio/spi/ImageWriterSpi;", $r0);
+
+        return $r1;
+    }
+
+    private static boolean contains(java.lang.String[], java.lang.String)
+    {
+        int $i0, i1;
+        java.lang.String[] r0;
+        java.lang.String r1, $r2;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String[];
+
+        r1 := @parameter1: java.lang.String;
+
+        i1 = 0;
+
+     label1:
+        $i0 = lengthof r0;
+
+        if i1 >= $i0 goto label3;
+
+        $r2 = r0[i1];
+
+        $z0 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r2);
+
+        if $z0 == 0 goto label2;
+
+        return 1;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    public static java.util.Iterator getImageWritersByFormatName(java.lang.String)
+    {
+        java.util.Iterator $r4, $r8;
+        javax.imageio.ImageIO$ImageWriterIterator $r5;
+        javax.imageio.spi.IIORegistry $r3;
+        java.lang.IllegalArgumentException $r6, $r7;
+        java.lang.String r0;
+        java.lang.reflect.Method $r2;
+        javax.imageio.ImageIO$ContainsFilter $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("formatName == null!");
+
+        throw $r6;
+
+     label1:
+        $r3 = <javax.imageio.ImageIO: javax.imageio.spi.IIORegistry theRegistry>;
+
+        $r1 = new javax.imageio.ImageIO$ContainsFilter;
+
+        $r2 = <javax.imageio.ImageIO: java.lang.reflect.Method writerFormatNamesMethod>;
+
+        specialinvoke $r1.<javax.imageio.ImageIO$ContainsFilter: void <init>(java.lang.reflect.Method,java.lang.String)>($r2, r0);
+
+        $r4 = virtualinvoke $r3.<javax.imageio.spi.IIORegistry: java.util.Iterator getServiceProviders(java.lang.Class,javax.imageio.spi.ServiceRegistry$Filter,boolean)>(class "Ljavax/imageio/spi/ImageWriterSpi;", $r1, 1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $r8 = staticinvoke <java.util.Collections: java.util.Iterator emptyIterator()>();
+
+        return $r8;
+
+     label4:
+        $r5 = new javax.imageio.ImageIO$ImageWriterIterator;
+
+        specialinvoke $r5.<javax.imageio.ImageIO$ImageWriterIterator: void <init>(java.util.Iterator)>($r4);
+
+        return $r5;
+
+        catch java.lang.IllegalArgumentException from label1 to label2 with label3;
+    }
+
+    public static java.util.Iterator getImageWritersBySuffix(java.lang.String)
+    {
+        java.util.Iterator $r4, $r8;
+        javax.imageio.ImageIO$ImageWriterIterator $r5;
+        javax.imageio.spi.IIORegistry $r3;
+        java.lang.IllegalArgumentException $r6, $r7;
+        java.lang.String r0;
+        java.lang.reflect.Method $r2;
+        javax.imageio.ImageIO$ContainsFilter $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("fileSuffix == null!");
+
+        throw $r6;
+
+     label1:
+        $r3 = <javax.imageio.ImageIO: javax.imageio.spi.IIORegistry theRegistry>;
+
+        $r1 = new javax.imageio.ImageIO$ContainsFilter;
+
+        $r2 = <javax.imageio.ImageIO: java.lang.reflect.Method writerFileSuffixesMethod>;
+
+        specialinvoke $r1.<javax.imageio.ImageIO$ContainsFilter: void <init>(java.lang.reflect.Method,java.lang.String)>($r2, r0);
+
+        $r4 = virtualinvoke $r3.<javax.imageio.spi.IIORegistry: java.util.Iterator getServiceProviders(java.lang.Class,javax.imageio.spi.ServiceRegistry$Filter,boolean)>(class "Ljavax/imageio/spi/ImageWriterSpi;", $r1, 1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $r8 = staticinvoke <java.util.Collections: java.util.Iterator emptyIterator()>();
+
+        return $r8;
+
+     label4:
+        $r5 = new javax.imageio.ImageIO$ImageWriterIterator;
+
+        specialinvoke $r5.<javax.imageio.ImageIO$ImageWriterIterator: void <init>(java.util.Iterator)>($r4);
+
+        return $r5;
+
+        catch java.lang.IllegalArgumentException from label1 to label2 with label3;
+    }
+
+    public static java.util.Iterator getImageWritersByMIMEType(java.lang.String)
+    {
+        java.util.Iterator $r4, $r8;
+        javax.imageio.ImageIO$ImageWriterIterator $r5;
+        javax.imageio.spi.IIORegistry $r3;
+        java.lang.IllegalArgumentException $r6, $r7;
+        java.lang.String r0;
+        java.lang.reflect.Method $r2;
+        javax.imageio.ImageIO$ContainsFilter $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("MIMEType == null!");
+
+        throw $r6;
+
+     label1:
+        $r3 = <javax.imageio.ImageIO: javax.imageio.spi.IIORegistry theRegistry>;
+
+        $r1 = new javax.imageio.ImageIO$ContainsFilter;
+
+        $r2 = <javax.imageio.ImageIO: java.lang.reflect.Method writerMIMETypesMethod>;
+
+        specialinvoke $r1.<javax.imageio.ImageIO$ContainsFilter: void <init>(java.lang.reflect.Method,java.lang.String)>($r2, r0);
+
+        $r4 = virtualinvoke $r3.<javax.imageio.spi.IIORegistry: java.util.Iterator getServiceProviders(java.lang.Class,javax.imageio.spi.ServiceRegistry$Filter,boolean)>(class "Ljavax/imageio/spi/ImageWriterSpi;", $r1, 1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $r8 = staticinvoke <java.util.Collections: java.util.Iterator emptyIterator()>();
+
+        return $r8;
+
+     label4:
+        $r5 = new javax.imageio.ImageIO$ImageWriterIterator;
+
+        specialinvoke $r5.<javax.imageio.ImageIO$ImageWriterIterator: void <init>(java.util.Iterator)>($r4);
+
+        return $r5;
+
+        catch java.lang.IllegalArgumentException from label1 to label2 with label3;
+    }
+
+    public static javax.imageio.ImageWriter getImageWriter(javax.imageio.ImageReader)
+    {
+        java.lang.String[] $r2;
+        javax.imageio.spi.ImageWriterSpi r19;
+        java.lang.String $r3;
+        boolean $z0, $z1;
+        javax.imageio.spi.ImageReaderSpi $r1, r17, r18;
+        javax.imageio.ImageReader r0;
+        java.util.Iterator $r10;
+        javax.imageio.spi.IIORegistry $r6, $r9, $r14;
+        java.io.IOException $r13;
+        java.lang.IllegalArgumentException $r12, $r16;
+        javax.imageio.ImageWriter $r8;
+        java.lang.Class $r5;
+        java.lang.Object $r7, $r11;
+        java.lang.ClassNotFoundException $r15;
+        java.lang.ClassLoader $r4;
+
+        r0 := @parameter0: javax.imageio.ImageReader;
+
+        if r0 != null goto label01;
+
+        $r12 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r12.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("reader == null!");
+
+        throw $r12;
+
+     label01:
+        $r1 = virtualinvoke r0.<javax.imageio.ImageReader: javax.imageio.spi.ImageReaderSpi getOriginatingProvider()>();
+
+        r17 = $r1;
+
+        if $r1 != null goto label08;
+
+     label02:
+        $r9 = <javax.imageio.ImageIO: javax.imageio.spi.IIORegistry theRegistry>;
+
+        $r10 = virtualinvoke $r9.<javax.imageio.spi.IIORegistry: java.util.Iterator getServiceProviders(java.lang.Class,boolean)>(class "Ljavax/imageio/spi/ImageReaderSpi;", 0);
+
+     label03:
+        goto label05;
+
+     label04:
+        $r16 := @caughtexception;
+
+        return null;
+
+     label05:
+        $z0 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label07;
+
+        $r11 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        r18 = (javax.imageio.spi.ImageReaderSpi) $r11;
+
+        $z1 = virtualinvoke r18.<javax.imageio.spi.ImageReaderSpi: boolean isOwnReader(javax.imageio.ImageReader)>(r0);
+
+        if $z1 == 0 goto label06;
+
+        r17 = r18;
+
+        goto label07;
+
+     label06:
+        goto label05;
+
+     label07:
+        if r17 != null goto label08;
+
+        return null;
+
+     label08:
+        $r2 = virtualinvoke r17.<javax.imageio.spi.ImageReaderSpi: java.lang.String[] getImageWriterSpiNames()>();
+
+        if $r2 != null goto label09;
+
+        return null;
+
+     label09:
+        $r3 = $r2[0];
+
+        $r4 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getSystemClassLoader()>();
+
+        $r5 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>($r3, 1, $r4);
+
+     label10:
+        goto label12;
+
+     label11:
+        $r15 := @caughtexception;
+
+        return null;
+
+     label12:
+        $r6 = <javax.imageio.ImageIO: javax.imageio.spi.IIORegistry theRegistry>;
+
+        $r7 = virtualinvoke $r6.<javax.imageio.spi.IIORegistry: java.lang.Object getServiceProviderByClass(java.lang.Class)>($r5);
+
+        r19 = (javax.imageio.spi.ImageWriterSpi) $r7;
+
+        if r19 != null goto label13;
+
+        return null;
+
+     label13:
+        $r8 = virtualinvoke r19.<javax.imageio.spi.ImageWriterSpi: javax.imageio.ImageWriter createWriterInstance()>();
+
+     label14:
+        return $r8;
+
+     label15:
+        $r13 := @caughtexception;
+
+        $r14 = <javax.imageio.ImageIO: javax.imageio.spi.IIORegistry theRegistry>;
+
+        virtualinvoke $r14.<javax.imageio.spi.IIORegistry: boolean deregisterServiceProvider(java.lang.Object,java.lang.Class)>(r19, class "Ljavax/imageio/spi/ImageWriterSpi;");
+
+        return null;
+
+        catch java.lang.IllegalArgumentException from label02 to label03 with label04;
+        catch java.lang.ClassNotFoundException from label09 to label10 with label11;
+        catch java.io.IOException from label13 to label14 with label15;
+    }
+
+    public static javax.imageio.ImageReader getImageReader(javax.imageio.ImageWriter)
+    {
+        java.lang.String[] $r2;
+        javax.imageio.spi.ImageWriterSpi $r1, r17, r18;
+        java.lang.String $r3;
+        boolean $z0, $z1;
+        javax.imageio.spi.ImageReaderSpi r19;
+        javax.imageio.ImageReader $r8;
+        java.util.Iterator $r10;
+        javax.imageio.spi.IIORegistry $r6, $r9, $r14;
+        java.io.IOException $r13;
+        java.lang.IllegalArgumentException $r12, $r16;
+        javax.imageio.ImageWriter r0;
+        java.lang.Class $r5;
+        java.lang.Object $r7, $r11;
+        java.lang.ClassNotFoundException $r15;
+        java.lang.ClassLoader $r4;
+
+        r0 := @parameter0: javax.imageio.ImageWriter;
+
+        if r0 != null goto label01;
+
+        $r12 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r12.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("writer == null!");
+
+        throw $r12;
+
+     label01:
+        $r1 = virtualinvoke r0.<javax.imageio.ImageWriter: javax.imageio.spi.ImageWriterSpi getOriginatingProvider()>();
+
+        r17 = $r1;
+
+        if $r1 != null goto label08;
+
+     label02:
+        $r9 = <javax.imageio.ImageIO: javax.imageio.spi.IIORegistry theRegistry>;
+
+        $r10 = virtualinvoke $r9.<javax.imageio.spi.IIORegistry: java.util.Iterator getServiceProviders(java.lang.Class,boolean)>(class "Ljavax/imageio/spi/ImageWriterSpi;", 0);
+
+     label03:
+        goto label05;
+
+     label04:
+        $r16 := @caughtexception;
+
+        return null;
+
+     label05:
+        $z0 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label07;
+
+        $r11 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        r18 = (javax.imageio.spi.ImageWriterSpi) $r11;
+
+        $z1 = virtualinvoke r18.<javax.imageio.spi.ImageWriterSpi: boolean isOwnWriter(javax.imageio.ImageWriter)>(r0);
+
+        if $z1 == 0 goto label06;
+
+        r17 = r18;
+
+        goto label07;
+
+     label06:
+        goto label05;
+
+     label07:
+        if r17 != null goto label08;
+
+        return null;
+
+     label08:
+        $r2 = virtualinvoke r17.<javax.imageio.spi.ImageWriterSpi: java.lang.String[] getImageReaderSpiNames()>();
+
+        if $r2 != null goto label09;
+
+        return null;
+
+     label09:
+        $r3 = $r2[0];
+
+        $r4 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getSystemClassLoader()>();
+
+        $r5 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>($r3, 1, $r4);
+
+     label10:
+        goto label12;
+
+     label11:
+        $r15 := @caughtexception;
+
+        return null;
+
+     label12:
+        $r6 = <javax.imageio.ImageIO: javax.imageio.spi.IIORegistry theRegistry>;
+
+        $r7 = virtualinvoke $r6.<javax.imageio.spi.IIORegistry: java.lang.Object getServiceProviderByClass(java.lang.Class)>($r5);
+
+        r19 = (javax.imageio.spi.ImageReaderSpi) $r7;
+
+        if r19 != null goto label13;
+
+        return null;
+
+     label13:
+        $r8 = virtualinvoke r19.<javax.imageio.spi.ImageReaderSpi: javax.imageio.ImageReader createReaderInstance()>();
+
+     label14:
+        return $r8;
+
+     label15:
+        $r13 := @caughtexception;
+
+        $r14 = <javax.imageio.ImageIO: javax.imageio.spi.IIORegistry theRegistry>;
+
+        virtualinvoke $r14.<javax.imageio.spi.IIORegistry: boolean deregisterServiceProvider(java.lang.Object,java.lang.Class)>(r19, class "Ljavax/imageio/spi/ImageReaderSpi;");
+
+        return null;
+
+        catch java.lang.IllegalArgumentException from label02 to label03 with label04;
+        catch java.lang.ClassNotFoundException from label09 to label10 with label11;
+        catch java.io.IOException from label13 to label14 with label15;
+    }
+
+    public static java.util.Iterator getImageWriters(javax.imageio.ImageTypeSpecifier, java.lang.String)
+    {
+        java.util.Iterator $r4, $r9;
+        javax.imageio.ImageIO$ImageWriterIterator $r5;
+        javax.imageio.ImageTypeSpecifier r0;
+        javax.imageio.spi.IIORegistry $r3;
+        javax.imageio.ImageIO$CanEncodeImageAndFormatFilter $r2;
+        java.lang.IllegalArgumentException $r6, $r7, $r8;
+        java.lang.String r1;
+
+        r0 := @parameter0: javax.imageio.ImageTypeSpecifier;
+
+        r1 := @parameter1: java.lang.String;
+
+        if r0 != null goto label1;
+
+        $r7 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r7.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("type == null!");
+
+        throw $r7;
+
+     label1:
+        if r1 != null goto label2;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("formatName == null!");
+
+        throw $r6;
+
+     label2:
+        $r3 = <javax.imageio.ImageIO: javax.imageio.spi.IIORegistry theRegistry>;
+
+        $r2 = new javax.imageio.ImageIO$CanEncodeImageAndFormatFilter;
+
+        specialinvoke $r2.<javax.imageio.ImageIO$CanEncodeImageAndFormatFilter: void <init>(javax.imageio.ImageTypeSpecifier,java.lang.String)>(r0, r1);
+
+        $r4 = virtualinvoke $r3.<javax.imageio.spi.IIORegistry: java.util.Iterator getServiceProviders(java.lang.Class,javax.imageio.spi.ServiceRegistry$Filter,boolean)>(class "Ljavax/imageio/spi/ImageWriterSpi;", $r2, 1);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r8 := @caughtexception;
+
+        $r9 = staticinvoke <java.util.Collections: java.util.Iterator emptyIterator()>();
+
+        return $r9;
+
+     label5:
+        $r5 = new javax.imageio.ImageIO$ImageWriterIterator;
+
+        specialinvoke $r5.<javax.imageio.ImageIO$ImageWriterIterator: void <init>(java.util.Iterator)>($r4);
+
+        return $r5;
+
+        catch java.lang.IllegalArgumentException from label2 to label3 with label4;
+    }
+
+    public static java.util.Iterator getImageTranscoders(javax.imageio.ImageReader, javax.imageio.ImageWriter)
+    {
+        javax.imageio.spi.ImageReaderSpi $r2;
+        javax.imageio.ImageReader r0;
+        java.util.Iterator $r6, $r11;
+        javax.imageio.ImageIO$TranscoderFilter $r4;
+        javax.imageio.spi.IIORegistry $r5;
+        javax.imageio.ImageIO$ImageTranscoderIterator $r7;
+        java.lang.IllegalArgumentException $r8, $r9, $r10;
+        javax.imageio.ImageWriter r1;
+        javax.imageio.spi.ImageWriterSpi $r3;
+
+        r0 := @parameter0: javax.imageio.ImageReader;
+
+        r1 := @parameter1: javax.imageio.ImageWriter;
+
+        if r0 != null goto label1;
+
+        $r9 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r9.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("reader == null!");
+
+        throw $r9;
+
+     label1:
+        if r1 != null goto label2;
+
+        $r8 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("writer == null!");
+
+        throw $r8;
+
+     label2:
+        $r2 = virtualinvoke r0.<javax.imageio.ImageReader: javax.imageio.spi.ImageReaderSpi getOriginatingProvider()>();
+
+        $r3 = virtualinvoke r1.<javax.imageio.ImageWriter: javax.imageio.spi.ImageWriterSpi getOriginatingProvider()>();
+
+        $r4 = new javax.imageio.ImageIO$TranscoderFilter;
+
+        specialinvoke $r4.<javax.imageio.ImageIO$TranscoderFilter: void <init>(javax.imageio.spi.ImageReaderSpi,javax.imageio.spi.ImageWriterSpi)>($r2, $r3);
+
+     label3:
+        $r5 = <javax.imageio.ImageIO: javax.imageio.spi.IIORegistry theRegistry>;
+
+        $r6 = virtualinvoke $r5.<javax.imageio.spi.IIORegistry: java.util.Iterator getServiceProviders(java.lang.Class,javax.imageio.spi.ServiceRegistry$Filter,boolean)>(class "Ljavax/imageio/spi/ImageTranscoderSpi;", $r4, 1);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r10 := @caughtexception;
+
+        $r11 = staticinvoke <java.util.Collections: java.util.Iterator emptyIterator()>();
+
+        return $r11;
+
+     label6:
+        $r7 = new javax.imageio.ImageIO$ImageTranscoderIterator;
+
+        specialinvoke $r7.<javax.imageio.ImageIO$ImageTranscoderIterator: void <init>(java.util.Iterator)>($r6);
+
+        return $r7;
+
+        catch java.lang.IllegalArgumentException from label3 to label4 with label5;
+    }
+
+    public static java.awt.image.BufferedImage read(java.io.File) throws java.io.IOException
+    {
+        java.awt.image.BufferedImage $r2;
+        javax.imageio.IIOException $r3, $r4;
+        java.lang.IllegalArgumentException $r5;
+        java.io.File r0;
+        boolean $z0;
+        javax.imageio.stream.ImageInputStream $r1;
+
+        r0 := @parameter0: java.io.File;
+
+        if r0 != null goto label1;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("input == null!");
+
+        throw $r5;
+
+     label1:
+        $z0 = virtualinvoke r0.<java.io.File: boolean canRead()>();
+
+        if $z0 != 0 goto label2;
+
+        $r4 = new javax.imageio.IIOException;
+
+        specialinvoke $r4.<javax.imageio.IIOException: void <init>(java.lang.String)>("Can\'t read input file!");
+
+        throw $r4;
+
+     label2:
+        $r1 = staticinvoke <javax.imageio.ImageIO: javax.imageio.stream.ImageInputStream createImageInputStream(java.lang.Object)>(r0);
+
+        if $r1 != null goto label3;
+
+        $r3 = new javax.imageio.IIOException;
+
+        specialinvoke $r3.<javax.imageio.IIOException: void <init>(java.lang.String)>("Can\'t create an ImageInputStream!");
+
+        throw $r3;
+
+     label3:
+        $r2 = staticinvoke <javax.imageio.ImageIO: java.awt.image.BufferedImage read(javax.imageio.stream.ImageInputStream)>($r1);
+
+        if $r2 != null goto label4;
+
+        interfaceinvoke $r1.<javax.imageio.stream.ImageInputStream: void close()>();
+
+     label4:
+        return $r2;
+    }
+
+    public static java.awt.image.BufferedImage read(java.io.InputStream) throws java.io.IOException
+    {
+        java.awt.image.BufferedImage $r2;
+        java.lang.IllegalArgumentException $r3;
+        java.io.InputStream r0;
+        javax.imageio.stream.ImageInputStream $r1;
+
+        r0 := @parameter0: java.io.InputStream;
+
+        if r0 != null goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("input == null!");
+
+        throw $r3;
+
+     label1:
+        $r1 = staticinvoke <javax.imageio.ImageIO: javax.imageio.stream.ImageInputStream createImageInputStream(java.lang.Object)>(r0);
+
+        $r2 = staticinvoke <javax.imageio.ImageIO: java.awt.image.BufferedImage read(javax.imageio.stream.ImageInputStream)>($r1);
+
+        if $r2 != null goto label2;
+
+        interfaceinvoke $r1.<javax.imageio.stream.ImageInputStream: void close()>();
+
+     label2:
+        return $r2;
+    }
+
+    public static java.awt.image.BufferedImage read(java.net.URL) throws java.io.IOException
+    {
+        java.lang.Throwable $r5;
+        java.awt.image.BufferedImage $r3;
+        java.net.URL r0;
+        java.io.IOException $r6;
+        javax.imageio.IIOException $r7;
+        java.lang.IllegalArgumentException $r4;
+        javax.imageio.stream.ImageInputStream $r2;
+        java.io.InputStream $r1;
+
+        r0 := @parameter0: java.net.URL;
+
+        if r0 != null goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("input == null!");
+
+        throw $r4;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.net.URL: java.io.InputStream openStream()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = new javax.imageio.IIOException;
+
+        specialinvoke $r7.<javax.imageio.IIOException: void <init>(java.lang.String,java.lang.Throwable)>("Can\'t get input stream from URL!", $r6);
+
+        throw $r7;
+
+     label4:
+        $r2 = staticinvoke <javax.imageio.ImageIO: javax.imageio.stream.ImageInputStream createImageInputStream(java.lang.Object)>($r1);
+
+     label5:
+        $r3 = staticinvoke <javax.imageio.ImageIO: java.awt.image.BufferedImage read(javax.imageio.stream.ImageInputStream)>($r2);
+
+        if $r3 != null goto label6;
+
+        interfaceinvoke $r2.<javax.imageio.stream.ImageInputStream: void close()>();
+
+     label6:
+        virtualinvoke $r1.<java.io.InputStream: void close()>();
+
+        goto label9;
+
+     label7:
+        $r5 := @caughtexception;
+
+     label8:
+        virtualinvoke $r1.<java.io.InputStream: void close()>();
+
+        throw $r5;
+
+     label9:
+        return $r3;
+
+        catch java.io.IOException from label1 to label2 with label3;
+        catch java.lang.Throwable from label5 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public static java.awt.image.BufferedImage read(javax.imageio.stream.ImageInputStream) throws java.io.IOException
+    {
+        java.lang.Throwable $r7;
+        javax.imageio.ImageReader r3;
+        java.util.Iterator $r1;
+        java.awt.image.BufferedImage $r5;
+        java.lang.IllegalArgumentException $r6;
+        javax.imageio.stream.ImageInputStream r0;
+        javax.imageio.ImageReadParam $r4;
+        java.lang.Object $r2;
+        boolean $z0;
+
+        r0 := @parameter0: javax.imageio.stream.ImageInputStream;
+
+        if r0 != null goto label1;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("stream == null!");
+
+        throw $r6;
+
+     label1:
+        $r1 = staticinvoke <javax.imageio.ImageIO: java.util.Iterator getImageReaders(java.lang.Object)>(r0);
+
+        $z0 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 != 0 goto label2;
+
+        return null;
+
+     label2:
+        $r2 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        r3 = (javax.imageio.ImageReader) $r2;
+
+        $r4 = virtualinvoke r3.<javax.imageio.ImageReader: javax.imageio.ImageReadParam getDefaultReadParam()>();
+
+        virtualinvoke r3.<javax.imageio.ImageReader: void setInput(java.lang.Object,boolean,boolean)>(r0, 1, 1);
+
+     label3:
+        $r5 = virtualinvoke r3.<javax.imageio.ImageReader: java.awt.image.BufferedImage read(int,javax.imageio.ImageReadParam)>(0, $r4);
+
+     label4:
+        virtualinvoke r3.<javax.imageio.ImageReader: void dispose()>();
+
+        interfaceinvoke r0.<javax.imageio.stream.ImageInputStream: void close()>();
+
+        goto label7;
+
+     label5:
+        $r7 := @caughtexception;
+
+     label6:
+        virtualinvoke r3.<javax.imageio.ImageReader: void dispose()>();
+
+        interfaceinvoke r0.<javax.imageio.stream.ImageInputStream: void close()>();
+
+        throw $r7;
+
+     label7:
+        return $r5;
+
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public static boolean write(java.awt.image.RenderedImage, java.lang.String, javax.imageio.stream.ImageOutputStream) throws java.io.IOException
+    {
+        java.awt.image.RenderedImage r0;
+        java.lang.IllegalArgumentException $r4, $r5, $r6;
+        javax.imageio.stream.ImageOutputStream r2;
+        javax.imageio.ImageWriter $r3;
+        java.lang.String r1;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.image.RenderedImage;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: javax.imageio.stream.ImageOutputStream;
+
+        if r0 != null goto label1;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("im == null!");
+
+        throw $r6;
+
+     label1:
+        if r1 != null goto label2;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("formatName == null!");
+
+        throw $r5;
+
+     label2:
+        if r2 != null goto label3;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("output == null!");
+
+        throw $r4;
+
+     label3:
+        $r3 = staticinvoke <javax.imageio.ImageIO: javax.imageio.ImageWriter getWriter(java.awt.image.RenderedImage,java.lang.String)>(r0, r1);
+
+        $z0 = staticinvoke <javax.imageio.ImageIO: boolean doWrite(java.awt.image.RenderedImage,javax.imageio.ImageWriter,javax.imageio.stream.ImageOutputStream)>(r0, $r3, r2);
+
+        return $z0;
+    }
+
+    public static boolean write(java.awt.image.RenderedImage, java.lang.String, java.io.File) throws java.io.IOException
+    {
+        java.lang.Throwable $r6;
+        java.awt.image.RenderedImage r1;
+        java.io.IOException $r7;
+        javax.imageio.IIOException $r8;
+        java.lang.IllegalArgumentException $r5;
+        java.io.File r0;
+        javax.imageio.stream.ImageOutputStream $r4;
+        javax.imageio.ImageWriter $r3;
+        java.lang.String r2;
+        boolean $z0;
+
+        r1 := @parameter0: java.awt.image.RenderedImage;
+
+        r2 := @parameter1: java.lang.String;
+
+        r0 := @parameter2: java.io.File;
+
+        if r0 != null goto label1;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("output == null!");
+
+        throw $r5;
+
+     label1:
+        $r3 = staticinvoke <javax.imageio.ImageIO: javax.imageio.ImageWriter getWriter(java.awt.image.RenderedImage,java.lang.String)>(r1, r2);
+
+        if $r3 != null goto label2;
+
+        return 0;
+
+     label2:
+        virtualinvoke r0.<java.io.File: boolean delete()>();
+
+        $r4 = staticinvoke <javax.imageio.ImageIO: javax.imageio.stream.ImageOutputStream createImageOutputStream(java.lang.Object)>(r0);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r7 := @caughtexception;
+
+        $r8 = new javax.imageio.IIOException;
+
+        specialinvoke $r8.<javax.imageio.IIOException: void <init>(java.lang.String,java.lang.Throwable)>("Can\'t create output stream!", $r7);
+
+        throw $r8;
+
+     label5:
+        $z0 = staticinvoke <javax.imageio.ImageIO: boolean doWrite(java.awt.image.RenderedImage,javax.imageio.ImageWriter,javax.imageio.stream.ImageOutputStream)>(r1, $r3, $r4);
+
+     label6:
+        interfaceinvoke $r4.<javax.imageio.stream.ImageOutputStream: void close()>();
+
+        return $z0;
+
+     label7:
+        $r6 := @caughtexception;
+
+     label8:
+        interfaceinvoke $r4.<javax.imageio.stream.ImageOutputStream: void close()>();
+
+        throw $r6;
+
+        catch java.io.IOException from label2 to label3 with label4;
+        catch java.lang.Throwable from label5 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public static boolean write(java.awt.image.RenderedImage, java.lang.String, java.io.OutputStream) throws java.io.IOException
+    {
+        java.io.OutputStream r0;
+        java.lang.Throwable $r6;
+        java.awt.image.RenderedImage r2;
+        java.io.IOException $r7;
+        javax.imageio.IIOException $r8;
+        java.lang.IllegalArgumentException $r5;
+        javax.imageio.stream.ImageOutputStream $r1;
+        javax.imageio.ImageWriter $r4;
+        java.lang.String r3;
+        boolean $z0;
+
+        r2 := @parameter0: java.awt.image.RenderedImage;
+
+        r3 := @parameter1: java.lang.String;
+
+        r0 := @parameter2: java.io.OutputStream;
+
+        if r0 != null goto label1;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("output == null!");
+
+        throw $r5;
+
+     label1:
+        $r1 = staticinvoke <javax.imageio.ImageIO: javax.imageio.stream.ImageOutputStream createImageOutputStream(java.lang.Object)>(r0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $r8 = new javax.imageio.IIOException;
+
+        specialinvoke $r8.<javax.imageio.IIOException: void <init>(java.lang.String,java.lang.Throwable)>("Can\'t create output stream!", $r7);
+
+        throw $r8;
+
+     label4:
+        $r4 = staticinvoke <javax.imageio.ImageIO: javax.imageio.ImageWriter getWriter(java.awt.image.RenderedImage,java.lang.String)>(r2, r3);
+
+        $z0 = staticinvoke <javax.imageio.ImageIO: boolean doWrite(java.awt.image.RenderedImage,javax.imageio.ImageWriter,javax.imageio.stream.ImageOutputStream)>(r2, $r4, $r1);
+
+     label5:
+        interfaceinvoke $r1.<javax.imageio.stream.ImageOutputStream: void close()>();
+
+        return $z0;
+
+     label6:
+        $r6 := @caughtexception;
+
+     label7:
+        interfaceinvoke $r1.<javax.imageio.stream.ImageOutputStream: void close()>();
+
+        throw $r6;
+
+        catch java.io.IOException from label1 to label2 with label3;
+        catch java.lang.Throwable from label4 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    private static javax.imageio.ImageWriter getWriter(java.awt.image.RenderedImage, java.lang.String)
+    {
+        java.util.Iterator $r3;
+        java.awt.image.RenderedImage r0;
+        javax.imageio.ImageWriter $r5;
+        javax.imageio.ImageTypeSpecifier $r1;
+        java.lang.Object $r4;
+        java.lang.String r2;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.image.RenderedImage;
+
+        r2 := @parameter1: java.lang.String;
+
+        $r1 = staticinvoke <javax.imageio.ImageTypeSpecifier: javax.imageio.ImageTypeSpecifier createFromRenderedImage(java.awt.image.RenderedImage)>(r0);
+
+        $r3 = staticinvoke <javax.imageio.ImageIO: java.util.Iterator getImageWriters(javax.imageio.ImageTypeSpecifier,java.lang.String)>($r1, r2);
+
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label1;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        $r5 = (javax.imageio.ImageWriter) $r4;
+
+        return $r5;
+
+     label1:
+        return null;
+    }
+
+    private static boolean doWrite(java.awt.image.RenderedImage, javax.imageio.ImageWriter, javax.imageio.stream.ImageOutputStream) throws java.io.IOException
+    {
+        java.lang.Throwable $r3;
+        javax.imageio.ImageWriter r0;
+        java.awt.image.RenderedImage r2;
+        javax.imageio.stream.ImageOutputStream r1;
+
+        r2 := @parameter0: java.awt.image.RenderedImage;
+
+        r0 := @parameter1: javax.imageio.ImageWriter;
+
+        r1 := @parameter2: javax.imageio.stream.ImageOutputStream;
+
+        if r0 != null goto label1;
+
+        return 0;
+
+     label1:
+        virtualinvoke r0.<javax.imageio.ImageWriter: void setOutput(java.lang.Object)>(r1);
+
+     label2:
+        virtualinvoke r0.<javax.imageio.ImageWriter: void write(java.awt.image.RenderedImage)>(r2);
+
+     label3:
+        virtualinvoke r0.<javax.imageio.ImageWriter: void dispose()>();
+
+        interfaceinvoke r1.<javax.imageio.stream.ImageOutputStream: void flush()>();
+
+        goto label5;
+
+     label4:
+        $r3 := @caughtexception;
+
+        virtualinvoke r0.<javax.imageio.ImageWriter: void dispose()>();
+
+        interfaceinvoke r1.<javax.imageio.stream.ImageOutputStream: void flush()>();
+
+        throw $r3;
+
+     label5:
+        return 1;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+    }
+
+    static javax.imageio.spi.IIORegistry access$100()
+    {
+        javax.imageio.spi.IIORegistry $r0;
+
+        $r0 = <javax.imageio.ImageIO: javax.imageio.spi.IIORegistry theRegistry>;
+
+        return $r0;
+    }
+
+    static boolean access$200(java.lang.String[], java.lang.String)
+    {
+        java.lang.String[] r0;
+        java.lang.String r1;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String[];
+
+        r1 := @parameter1: java.lang.String;
+
+        $z0 = staticinvoke <javax.imageio.ImageIO: boolean contains(java.lang.String[],java.lang.String)>(r0, r1);
+
+        return $z0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.NoSuchMethodException $r19;
+        java.lang.reflect.Method $r3, $r6, $r9, $r12, $r15, $r18;
+        java.lang.Class[] $r1, $r4, $r7, $r10, $r13, $r16;
+        javax.imageio.spi.IIORegistry $r0;
+        java.lang.Class $r2, $r5, $r8, $r11, $r14, $r17;
+
+        $r0 = staticinvoke <javax.imageio.spi.IIORegistry: javax.imageio.spi.IIORegistry getDefaultInstance()>();
+
+        <javax.imageio.ImageIO: javax.imageio.spi.IIORegistry theRegistry> = $r0;
+
+     label1:
+        $r2 = class "Ljavax/imageio/spi/ImageReaderSpi;";
+
+        $r1 = newarray (java.lang.Class)[0];
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.reflect.Method getMethod(java.lang.String,java.lang.Class[])>("getFormatNames", $r1);
+
+        <javax.imageio.ImageIO: java.lang.reflect.Method readerFormatNamesMethod> = $r3;
+
+        $r5 = class "Ljavax/imageio/spi/ImageReaderSpi;";
+
+        $r4 = newarray (java.lang.Class)[0];
+
+        $r6 = virtualinvoke $r5.<java.lang.Class: java.lang.reflect.Method getMethod(java.lang.String,java.lang.Class[])>("getFileSuffixes", $r4);
+
+        <javax.imageio.ImageIO: java.lang.reflect.Method readerFileSuffixesMethod> = $r6;
+
+        $r8 = class "Ljavax/imageio/spi/ImageReaderSpi;";
+
+        $r7 = newarray (java.lang.Class)[0];
+
+        $r9 = virtualinvoke $r8.<java.lang.Class: java.lang.reflect.Method getMethod(java.lang.String,java.lang.Class[])>("getMIMETypes", $r7);
+
+        <javax.imageio.ImageIO: java.lang.reflect.Method readerMIMETypesMethod> = $r9;
+
+        $r11 = class "Ljavax/imageio/spi/ImageWriterSpi;";
+
+        $r10 = newarray (java.lang.Class)[0];
+
+        $r12 = virtualinvoke $r11.<java.lang.Class: java.lang.reflect.Method getMethod(java.lang.String,java.lang.Class[])>("getFormatNames", $r10);
+
+        <javax.imageio.ImageIO: java.lang.reflect.Method writerFormatNamesMethod> = $r12;
+
+        $r14 = class "Ljavax/imageio/spi/ImageWriterSpi;";
+
+        $r13 = newarray (java.lang.Class)[0];
+
+        $r15 = virtualinvoke $r14.<java.lang.Class: java.lang.reflect.Method getMethod(java.lang.String,java.lang.Class[])>("getFileSuffixes", $r13);
+
+        <javax.imageio.ImageIO: java.lang.reflect.Method writerFileSuffixesMethod> = $r15;
+
+        $r17 = class "Ljavax/imageio/spi/ImageWriterSpi;";
+
+        $r16 = newarray (java.lang.Class)[0];
+
+        $r18 = virtualinvoke $r17.<java.lang.Class: java.lang.reflect.Method getMethod(java.lang.String,java.lang.Class[])>("getMIMETypes", $r16);
+
+        <javax.imageio.ImageIO: java.lang.reflect.Method writerMIMETypesMethod> = $r18;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r19 := @caughtexception;
+
+        virtualinvoke $r19.<java.lang.NoSuchMethodException: void printStackTrace()>();
+
+     label4:
+        return;
+
+        catch java.lang.NoSuchMethodException from label1 to label2 with label3;
+    }
+}

@@ -1,0 +1,3738 @@
+class sun.security.jgss.krb5.Krb5Context extends java.lang.Object implements sun.security.jgss.spi.GSSContextSpi
+{
+    private static final int STATE_NEW;
+    private static final int STATE_IN_PROCESS;
+    private static final int STATE_DONE;
+    private static final int STATE_DELETED;
+    private int state;
+    public static final int SESSION_KEY;
+    public static final int INITIATOR_SUBKEY;
+    public static final int ACCEPTOR_SUBKEY;
+    private boolean credDelegState;
+    private boolean mutualAuthState;
+    private boolean replayDetState;
+    private boolean sequenceDetState;
+    private boolean confState;
+    private boolean integState;
+    private boolean delegPolicyState;
+    private boolean isConstrainedDelegationTried;
+    private int mySeqNumber;
+    private int peerSeqNumber;
+    private int keySrc;
+    private sun.security.jgss.TokenTracker peerTokenTracker;
+    private sun.security.jgss.krb5.CipherHelper cipherHelper;
+    private java.lang.Object mySeqNumberLock;
+    private java.lang.Object peerSeqNumberLock;
+    private sun.security.krb5.EncryptionKey key;
+    private sun.security.jgss.krb5.Krb5NameElement myName;
+    private sun.security.jgss.krb5.Krb5NameElement peerName;
+    private int lifetime;
+    private boolean initiator;
+    private org.ietf.jgss.ChannelBinding channelBinding;
+    private sun.security.jgss.krb5.Krb5CredElement myCred;
+    private sun.security.jgss.krb5.Krb5CredElement delegatedCred;
+    private sun.security.krb5.Credentials serviceCreds;
+    private sun.security.krb5.KrbApReq apReq;
+    sun.security.krb5.internal.Ticket serviceTicket;
+    private final sun.security.jgss.GSSCaller caller;
+    private static final boolean DEBUG;
+    private boolean[] tktFlags;
+    private java.lang.String authTime;
+    private com.sun.security.jgss.AuthorizationDataEntry[] authzData;
+
+    void <init>(sun.security.jgss.GSSCaller, sun.security.jgss.krb5.Krb5NameElement, sun.security.jgss.krb5.Krb5CredElement, int) throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.krb5.Krb5NameElement r3;
+        sun.security.jgss.GSSCaller r4;
+        java.lang.IllegalArgumentException $r6;
+        sun.security.jgss.krb5.Krb5Context r0;
+        sun.security.jgss.krb5.Krb5CredElement r5;
+        int i0;
+        java.lang.Object $r1, $r2;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r4 := @parameter0: sun.security.jgss.GSSCaller;
+
+        r3 := @parameter1: sun.security.jgss.krb5.Krb5NameElement;
+
+        r5 := @parameter2: sun.security.jgss.krb5.Krb5CredElement;
+
+        i0 := @parameter3: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.jgss.krb5.Krb5Context: int state> = 1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean credDelegState> = 0;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean mutualAuthState> = 1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean replayDetState> = 1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean sequenceDetState> = 1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean confState> = 1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean integState> = 1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean delegPolicyState> = 0;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean isConstrainedDelegationTried> = 0;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper> = null;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.jgss.krb5.Krb5Context: java.lang.Object mySeqNumberLock> = $r1;
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.jgss.krb5.Krb5Context: java.lang.Object peerSeqNumberLock> = $r2;
+
+        if r3 != null goto label1;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Cannot have null peer name");
+
+        throw $r6;
+
+     label1:
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.GSSCaller caller> = r4;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5NameElement peerName> = r3;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement myCred> = r5;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: int lifetime> = i0;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean initiator> = 1;
+
+        return;
+    }
+
+    void <init>(sun.security.jgss.GSSCaller, sun.security.jgss.krb5.Krb5CredElement) throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.GSSCaller r3;
+        java.lang.Object $r1, $r2;
+        sun.security.jgss.krb5.Krb5Context r0;
+        sun.security.jgss.krb5.Krb5CredElement r4;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r3 := @parameter0: sun.security.jgss.GSSCaller;
+
+        r4 := @parameter1: sun.security.jgss.krb5.Krb5CredElement;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.jgss.krb5.Krb5Context: int state> = 1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean credDelegState> = 0;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean mutualAuthState> = 1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean replayDetState> = 1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean sequenceDetState> = 1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean confState> = 1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean integState> = 1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean delegPolicyState> = 0;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean isConstrainedDelegationTried> = 0;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper> = null;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.jgss.krb5.Krb5Context: java.lang.Object mySeqNumberLock> = $r1;
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.jgss.krb5.Krb5Context: java.lang.Object peerSeqNumberLock> = $r2;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.GSSCaller caller> = r3;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement myCred> = r4;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean initiator> = 0;
+
+        return;
+    }
+
+    public void <init>(sun.security.jgss.GSSCaller, byte[]) throws org.ietf.jgss.GSSException
+    {
+        byte[] r5;
+        int $i1;
+        sun.security.jgss.GSSCaller r4;
+        java.lang.Object $r6, $r7;
+        org.ietf.jgss.GSSException $r8;
+        sun.security.jgss.krb5.Krb5Context r0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r4 := @parameter0: sun.security.jgss.GSSCaller;
+
+        r5 := @parameter1: byte[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.jgss.krb5.Krb5Context: int state> = 1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean credDelegState> = 0;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean mutualAuthState> = 1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean replayDetState> = 1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean sequenceDetState> = 1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean confState> = 1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean integState> = 1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean delegPolicyState> = 0;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean isConstrainedDelegationTried> = 0;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper> = null;
+
+        $r6 = new java.lang.Object;
+
+        specialinvoke $r6.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.jgss.krb5.Krb5Context: java.lang.Object mySeqNumberLock> = $r6;
+
+        $r7 = new java.lang.Object;
+
+        specialinvoke $r7.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.jgss.krb5.Krb5Context: java.lang.Object peerSeqNumberLock> = $r7;
+
+        $r8 = new org.ietf.jgss.GSSException;
+
+        $i1 = (int) -1;
+
+        specialinvoke $r8.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(16, $i1, "GSS Import Context not available");
+
+        throw $r8;
+    }
+
+    public final boolean isTransferable() throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.krb5.Krb5Context r0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        return 0;
+    }
+
+    public final int getLifetime()
+    {
+        sun.security.jgss.krb5.Krb5Context r0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        return 2147483647;
+    }
+
+    public void requestLifetime(int) throws org.ietf.jgss.GSSException
+    {
+        int $i0, i1;
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        i1 := @parameter0: int;
+
+        $i0 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        if $i0 != 1 goto label1;
+
+        $z0 = virtualinvoke r0.<sun.security.jgss.krb5.Krb5Context: boolean isInitiator()>();
+
+        if $z0 == 0 goto label1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: int lifetime> = i1;
+
+     label1:
+        return;
+    }
+
+    public final void requestConf(boolean) throws org.ietf.jgss.GSSException
+    {
+        int $i0;
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean $z0, z1;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        z1 := @parameter0: boolean;
+
+        $i0 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        if $i0 != 1 goto label1;
+
+        $z0 = virtualinvoke r0.<sun.security.jgss.krb5.Krb5Context: boolean isInitiator()>();
+
+        if $z0 == 0 goto label1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean confState> = z1;
+
+     label1:
+        return;
+    }
+
+    public final boolean getConfState()
+    {
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        $z0 = r0.<sun.security.jgss.krb5.Krb5Context: boolean confState>;
+
+        return $z0;
+    }
+
+    public final void requestInteg(boolean) throws org.ietf.jgss.GSSException
+    {
+        int $i0;
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean $z0, z1;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        z1 := @parameter0: boolean;
+
+        $i0 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        if $i0 != 1 goto label1;
+
+        $z0 = virtualinvoke r0.<sun.security.jgss.krb5.Krb5Context: boolean isInitiator()>();
+
+        if $z0 == 0 goto label1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean integState> = z1;
+
+     label1:
+        return;
+    }
+
+    public final boolean getIntegState()
+    {
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        $z0 = r0.<sun.security.jgss.krb5.Krb5Context: boolean integState>;
+
+        return $z0;
+    }
+
+    public final void requestCredDeleg(boolean) throws org.ietf.jgss.GSSException
+    {
+        int $i0;
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean $z0, z1, $z2;
+        sun.security.jgss.krb5.Krb5CredElement $r1, $r2;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        z1 := @parameter0: boolean;
+
+        $i0 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        if $i0 != 1 goto label2;
+
+        $z0 = virtualinvoke r0.<sun.security.jgss.krb5.Krb5Context: boolean isInitiator()>();
+
+        if $z0 == 0 goto label2;
+
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement myCred>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement myCred>;
+
+        $z2 = $r2 instanceof sun.security.jgss.krb5.Krb5ProxyCredential;
+
+        if $z2 != 0 goto label2;
+
+     label1:
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean credDelegState> = z1;
+
+     label2:
+        return;
+    }
+
+    public final boolean getCredDelegState()
+    {
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean $z0, $z1, $z2;
+        sun.security.jgss.krb5.Krb5CredElement $r1;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        $z0 = virtualinvoke r0.<sun.security.jgss.krb5.Krb5Context: boolean isInitiator()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = r0.<sun.security.jgss.krb5.Krb5Context: boolean credDelegState>;
+
+        return $z1;
+
+     label1:
+        specialinvoke r0.<sun.security.jgss.krb5.Krb5Context: void tryConstrainedDelegation()>();
+
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement delegatedCred>;
+
+        if $r1 == null goto label2;
+
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+    }
+
+    public final void requestMutualAuth(boolean) throws org.ietf.jgss.GSSException
+    {
+        int $i0;
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean $z0, z1;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        z1 := @parameter0: boolean;
+
+        $i0 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        if $i0 != 1 goto label1;
+
+        $z0 = virtualinvoke r0.<sun.security.jgss.krb5.Krb5Context: boolean isInitiator()>();
+
+        if $z0 == 0 goto label1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean mutualAuthState> = z1;
+
+     label1:
+        return;
+    }
+
+    public final boolean getMutualAuthState()
+    {
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        $z0 = r0.<sun.security.jgss.krb5.Krb5Context: boolean mutualAuthState>;
+
+        return $z0;
+    }
+
+    public final void requestReplayDet(boolean) throws org.ietf.jgss.GSSException
+    {
+        int $i0;
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean $z0, z1;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        z1 := @parameter0: boolean;
+
+        $i0 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        if $i0 != 1 goto label1;
+
+        $z0 = virtualinvoke r0.<sun.security.jgss.krb5.Krb5Context: boolean isInitiator()>();
+
+        if $z0 == 0 goto label1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean replayDetState> = z1;
+
+     label1:
+        return;
+    }
+
+    public final boolean getReplayDetState()
+    {
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        $z0 = r0.<sun.security.jgss.krb5.Krb5Context: boolean replayDetState>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = r0.<sun.security.jgss.krb5.Krb5Context: boolean sequenceDetState>;
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+    }
+
+    public final void requestSequenceDet(boolean) throws org.ietf.jgss.GSSException
+    {
+        int $i0;
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean $z0, z1;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        z1 := @parameter0: boolean;
+
+        $i0 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        if $i0 != 1 goto label1;
+
+        $z0 = virtualinvoke r0.<sun.security.jgss.krb5.Krb5Context: boolean isInitiator()>();
+
+        if $z0 == 0 goto label1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean sequenceDetState> = z1;
+
+     label1:
+        return;
+    }
+
+    public final boolean getSequenceDetState()
+    {
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        $z0 = r0.<sun.security.jgss.krb5.Krb5Context: boolean sequenceDetState>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = r0.<sun.security.jgss.krb5.Krb5Context: boolean replayDetState>;
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+    }
+
+    public final void requestDelegPolicy(boolean)
+    {
+        int $i0;
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean $z0, z1;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        z1 := @parameter0: boolean;
+
+        $i0 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        if $i0 != 1 goto label1;
+
+        $z0 = virtualinvoke r0.<sun.security.jgss.krb5.Krb5Context: boolean isInitiator()>();
+
+        if $z0 == 0 goto label1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean delegPolicyState> = z1;
+
+     label1:
+        return;
+    }
+
+    public final boolean getDelegPolicyState()
+    {
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        $z0 = r0.<sun.security.jgss.krb5.Krb5Context: boolean delegPolicyState>;
+
+        return $z0;
+    }
+
+    public final void requestAnonymity(boolean) throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean z0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        z0 := @parameter0: boolean;
+
+        return;
+    }
+
+    public final boolean getAnonymityState()
+    {
+        sun.security.jgss.krb5.Krb5Context r0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        return 0;
+    }
+
+    final sun.security.jgss.krb5.CipherHelper getCipherHelper(sun.security.krb5.EncryptionKey) throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.krb5.CipherHelper $r1, $r3, $r6;
+        sun.security.jgss.krb5.Krb5Context r0;
+        sun.security.krb5.EncryptionKey $r2, r4, $r5;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r4 := @parameter0: sun.security.krb5.EncryptionKey;
+
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        if $r1 != null goto label3;
+
+        $r2 = specialinvoke r0.<sun.security.jgss.krb5.Krb5Context: sun.security.krb5.EncryptionKey getKey()>();
+
+        if $r2 != null goto label1;
+
+        $r5 = r4;
+
+        goto label2;
+
+     label1:
+        $r5 = specialinvoke r0.<sun.security.jgss.krb5.Krb5Context: sun.security.krb5.EncryptionKey getKey()>();
+
+     label2:
+        $r3 = new sun.security.jgss.krb5.CipherHelper;
+
+        specialinvoke $r3.<sun.security.jgss.krb5.CipherHelper: void <init>(sun.security.krb5.EncryptionKey)>($r5);
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper> = $r3;
+
+     label3:
+        $r6 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        return $r6;
+    }
+
+    final int incrementMySequenceNumber()
+    {
+        java.lang.Throwable $r2;
+        int i0, $i1;
+        java.lang.Object $r1;
+        sun.security.jgss.krb5.Krb5Context r0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: java.lang.Object mySeqNumberLock>;
+
+        entermonitor $r1;
+
+     label1:
+        i0 = r0.<sun.security.jgss.krb5.Krb5Context: int mySeqNumber>;
+
+        $i1 = i0 + 1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: int mySeqNumber> = $i1;
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+     label5:
+        return i0;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    final void resetMySequenceNumber(int)
+    {
+        java.io.PrintStream $r3;
+        java.lang.Throwable $r7;
+        sun.security.jgss.krb5.Krb5Context r0;
+        int i0;
+        java.lang.Object $r1;
+        java.lang.StringBuilder $r2, $r4, $r5;
+        java.lang.String $r6;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        i0 := @parameter0: int;
+
+        $z0 = <sun.security.jgss.krb5.Krb5Context: boolean DEBUG>;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = <java.lang.System: java.io.PrintStream out>;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Krb5Context setting mySeqNumber to: ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>($r6);
+
+     label1:
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: java.lang.Object mySeqNumberLock>;
+
+        entermonitor $r1;
+
+     label2:
+        r0.<sun.security.jgss.krb5.Krb5Context: int mySeqNumber> = i0;
+
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r7 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r7;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    final void resetPeerSequenceNumber(int)
+    {
+        java.io.PrintStream $r4;
+        java.lang.Throwable $r8;
+        sun.security.jgss.TokenTracker $r2;
+        sun.security.jgss.krb5.Krb5Context r0;
+        int i0, $i1;
+        java.lang.Object $r1;
+        java.lang.StringBuilder $r3, $r5, $r6;
+        java.lang.String $r7;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        i0 := @parameter0: int;
+
+        $z0 = <sun.security.jgss.krb5.Krb5Context: boolean DEBUG>;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = <java.lang.System: java.io.PrintStream out>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Krb5Context setting peerSeqNumber to: ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<java.io.PrintStream: void println(java.lang.String)>($r7);
+
+     label1:
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: java.lang.Object peerSeqNumberLock>;
+
+        entermonitor $r1;
+
+     label2:
+        r0.<sun.security.jgss.krb5.Krb5Context: int peerSeqNumber> = i0;
+
+        $r2 = new sun.security.jgss.TokenTracker;
+
+        $i1 = r0.<sun.security.jgss.krb5.Krb5Context: int peerSeqNumber>;
+
+        specialinvoke $r2.<sun.security.jgss.TokenTracker: void <init>(int)>($i1);
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.TokenTracker peerTokenTracker> = $r2;
+
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r8 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r8;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    final void setKey(int, sun.security.krb5.EncryptionKey) throws org.ietf.jgss.GSSException
+    {
+        int i0;
+        sun.security.jgss.krb5.CipherHelper $r2;
+        sun.security.jgss.krb5.Krb5Context r0;
+        sun.security.krb5.EncryptionKey r1;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: sun.security.krb5.EncryptionKey;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.krb5.EncryptionKey key> = r1;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: int keySrc> = i0;
+
+        $r2 = new sun.security.jgss.krb5.CipherHelper;
+
+        specialinvoke $r2.<sun.security.jgss.krb5.CipherHelper: void <init>(sun.security.krb5.EncryptionKey)>(r1);
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper> = $r2;
+
+        return;
+    }
+
+    public final int getKeySrc()
+    {
+        int $i0;
+        sun.security.jgss.krb5.Krb5Context r0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        $i0 = r0.<sun.security.jgss.krb5.Krb5Context: int keySrc>;
+
+        return $i0;
+    }
+
+    private final sun.security.krb5.EncryptionKey getKey()
+    {
+        sun.security.jgss.krb5.Krb5Context r0;
+        sun.security.krb5.EncryptionKey $r1;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.krb5.EncryptionKey key>;
+
+        return $r1;
+    }
+
+    final void setDelegCred(sun.security.jgss.krb5.Krb5CredElement)
+    {
+        sun.security.jgss.krb5.Krb5Context r0;
+        sun.security.jgss.krb5.Krb5CredElement r1;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r1 := @parameter0: sun.security.jgss.krb5.Krb5CredElement;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement delegatedCred> = r1;
+
+        return;
+    }
+
+    final void setCredDelegState(boolean)
+    {
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean z0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        z0 := @parameter0: boolean;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean credDelegState> = z0;
+
+        return;
+    }
+
+    final void setMutualAuthState(boolean)
+    {
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean z0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        z0 := @parameter0: boolean;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean mutualAuthState> = z0;
+
+        return;
+    }
+
+    final void setReplayDetState(boolean)
+    {
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean z0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        z0 := @parameter0: boolean;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean replayDetState> = z0;
+
+        return;
+    }
+
+    final void setSequenceDetState(boolean)
+    {
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean z0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        z0 := @parameter0: boolean;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean sequenceDetState> = z0;
+
+        return;
+    }
+
+    final void setConfState(boolean)
+    {
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean z0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        z0 := @parameter0: boolean;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean confState> = z0;
+
+        return;
+    }
+
+    final void setIntegState(boolean)
+    {
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean z0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        z0 := @parameter0: boolean;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean integState> = z0;
+
+        return;
+    }
+
+    final void setDelegPolicyState(boolean)
+    {
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean z0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        z0 := @parameter0: boolean;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean delegPolicyState> = z0;
+
+        return;
+    }
+
+    public final void setChannelBinding(org.ietf.jgss.ChannelBinding) throws org.ietf.jgss.GSSException
+    {
+        org.ietf.jgss.ChannelBinding r1;
+        sun.security.jgss.krb5.Krb5Context r0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r1 := @parameter0: org.ietf.jgss.ChannelBinding;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: org.ietf.jgss.ChannelBinding channelBinding> = r1;
+
+        return;
+    }
+
+    final org.ietf.jgss.ChannelBinding getChannelBinding()
+    {
+        org.ietf.jgss.ChannelBinding $r1;
+        sun.security.jgss.krb5.Krb5Context r0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: org.ietf.jgss.ChannelBinding channelBinding>;
+
+        return $r1;
+    }
+
+    public final org.ietf.jgss.Oid getMech()
+    {
+        sun.security.jgss.krb5.Krb5Context r1;
+        org.ietf.jgss.Oid $r0;
+
+        r1 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        $r0 = <sun.security.jgss.krb5.Krb5MechFactory: org.ietf.jgss.Oid GSS_KRB5_MECH_OID>;
+
+        return $r0;
+    }
+
+    public final sun.security.jgss.spi.GSSNameSpi getSrcName() throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.krb5.Krb5NameElement $r1;
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        $z0 = virtualinvoke r0.<sun.security.jgss.krb5.Krb5Context: boolean isInitiator()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5NameElement myName>;
+
+        goto label2;
+
+     label1:
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5NameElement peerName>;
+
+     label2:
+        return $r1;
+    }
+
+    public final sun.security.jgss.spi.GSSNameSpi getTargName() throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.krb5.Krb5NameElement $r1;
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        $z0 = virtualinvoke r0.<sun.security.jgss.krb5.Krb5Context: boolean isInitiator()>();
+
+        if $z0 != 0 goto label1;
+
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5NameElement myName>;
+
+        goto label2;
+
+     label1:
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5NameElement peerName>;
+
+     label2:
+        return $r1;
+    }
+
+    public final sun.security.jgss.spi.GSSCredentialSpi getDelegCred() throws org.ietf.jgss.GSSException
+    {
+        org.ietf.jgss.GSSException $r3, $r4, $r5;
+        sun.security.jgss.krb5.Krb5Context r0;
+        sun.security.jgss.krb5.Krb5CredElement $r1, $r2;
+        int $i0, $i1;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        $i0 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        if $i0 == 2 goto label1;
+
+        $i1 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        if $i1 == 3 goto label1;
+
+        $r5 = new org.ietf.jgss.GSSException;
+
+        specialinvoke $r5.<org.ietf.jgss.GSSException: void <init>(int)>(12);
+
+        throw $r5;
+
+     label1:
+        $z0 = virtualinvoke r0.<sun.security.jgss.krb5.Krb5Context: boolean isInitiator()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = new org.ietf.jgss.GSSException;
+
+        specialinvoke $r4.<org.ietf.jgss.GSSException: void <init>(int)>(13);
+
+        throw $r4;
+
+     label2:
+        specialinvoke r0.<sun.security.jgss.krb5.Krb5Context: void tryConstrainedDelegation()>();
+
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement delegatedCred>;
+
+        if $r1 != null goto label3;
+
+        $r3 = new org.ietf.jgss.GSSException;
+
+        specialinvoke $r3.<org.ietf.jgss.GSSException: void <init>(int)>(13);
+
+        throw $r3;
+
+     label3:
+        $r2 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement delegatedCred>;
+
+        return $r2;
+    }
+
+    private void tryConstrainedDelegation()
+    {
+        sun.security.jgss.krb5.Krb5ProxyCredential $r2;
+        sun.security.jgss.krb5.Krb5NameElement $r3, $r7;
+        sun.security.jgss.GSSCaller $r4, $r11;
+        sun.security.krb5.internal.Ticket $r6;
+        int $i0, $i1, $i2;
+        java.lang.String $r13;
+        boolean $z0, $z1;
+        java.io.PrintStream $r9;
+        org.ietf.jgss.GSSException $r14;
+        sun.security.jgss.krb5.Krb5Context r0;
+        sun.security.jgss.krb5.Krb5CredElement $r1;
+        sun.security.jgss.krb5.Krb5InitCredential $r5;
+        java.lang.StringBuilder $r8, $r10, $r12;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        $i0 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        if $i0 == 2 goto label1;
+
+        $i2 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        if $i2 == 3 goto label1;
+
+        return;
+
+     label1:
+        $z0 = r0.<sun.security.jgss.krb5.Krb5Context: boolean isConstrainedDelegationTried>;
+
+        if $z0 != 0 goto label6;
+
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement delegatedCred>;
+
+        if $r1 != null goto label5;
+
+        $z1 = <sun.security.jgss.krb5.Krb5Context: boolean DEBUG>;
+
+        if $z1 == 0 goto label2;
+
+        $r9 = <java.lang.System: java.io.PrintStream out>;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">>> Constrained deleg from ");
+
+        $r11 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.GSSCaller caller>;
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r9.<java.io.PrintStream: void println(java.lang.String)>($r13);
+
+     label2:
+        $r2 = new sun.security.jgss.krb5.Krb5ProxyCredential;
+
+        $r4 = <sun.security.jgss.GSSCaller: sun.security.jgss.GSSCaller CALLER_ACCEPT>;
+
+        $r3 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5NameElement myName>;
+
+        $i1 = r0.<sun.security.jgss.krb5.Krb5Context: int lifetime>;
+
+        $r5 = staticinvoke <sun.security.jgss.krb5.Krb5InitCredential: sun.security.jgss.krb5.Krb5InitCredential getInstance(sun.security.jgss.GSSCaller,sun.security.jgss.krb5.Krb5NameElement,int)>($r4, $r3, $i1);
+
+        $r7 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5NameElement peerName>;
+
+        $r6 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.krb5.internal.Ticket serviceTicket>;
+
+        specialinvoke $r2.<sun.security.jgss.krb5.Krb5ProxyCredential: void <init>(sun.security.jgss.krb5.Krb5InitCredential,sun.security.jgss.krb5.Krb5NameElement,sun.security.krb5.internal.Ticket)>($r5, $r7, $r6);
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement delegatedCred> = $r2;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r14 := @caughtexception;
+
+     label5:
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean isConstrainedDelegationTried> = 1;
+
+     label6:
+        return;
+
+        catch org.ietf.jgss.GSSException from label2 to label3 with label4;
+    }
+
+    public final boolean isInitiator()
+    {
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        $z0 = r0.<sun.security.jgss.krb5.Krb5Context: boolean initiator>;
+
+        return $z0;
+    }
+
+    public final boolean isProtReady()
+    {
+        int $i0;
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        $i0 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        if $i0 != 3 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public final byte[] initSecContext(java.io.InputStream, int) throws org.ietf.jgss.GSSException
+    {
+        java.security.AccessControlContext $r17;
+        byte[] r78, $r88;
+        sun.security.jgss.GSSCaller $r18, $r33, $r57, $r61;
+        byte b5, b6, b7;
+        sun.security.jgss.krb5.Krb5Context r0;
+        sun.security.krb5.Credentials $r5, $r32, $r37, $r43, $r47, r80, $r82, $r85;
+        java.lang.StringBuilder $r21, $r24, $r50, $r51, $r66, $r68, $r89, $r93, $r97;
+        sun.security.jgss.krb5.Krb5ProxyCredential r79;
+        sun.security.jgss.krb5.Krb5Context$3 $r95;
+        sun.security.jgss.krb5.Krb5Context$2 $r94;
+        sun.security.jgss.spi.GSSNameSpi $r9;
+        sun.security.jgss.krb5.Krb5Context$1 $r92;
+        sun.security.jgss.krb5.AcceptSecContextToken $r99;
+        java.lang.String $r16, $r23, $r25, $r28, $r42, $r52, $r67, $r69, $r72, $r75;
+        sun.misc.HexDumpEncoder $r98;
+        java.security.PrivilegedActionException $r76;
+        java.io.IOException $r70;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14;
+        javax.security.auth.kerberos.KerberosTicket $r38, r81;
+        org.ietf.jgss.GSSException $r90, $r91, $r100, $r101;
+        sun.security.jgss.krb5.Krb5InitCredential $r13, $r54, $r58, $r60;
+        sun.security.krb5.KrbApReq $r4, $r87;
+        sun.security.krb5.PrincipalName $r15, $r27, $r31, $r41;
+        sun.security.jgss.krb5.Krb5NameElement $r10, $r14, $r26, $r30, $r40, $r56;
+        sun.security.krb5.internal.Ticket $r29;
+        sun.security.krb5.KrbException $r73;
+        int $i0, $i1, $i2, $i3, i4, $i9, $i11, $i13, $i15;
+        sun.security.jgss.krb5.InitSecContextToken $r86, $r96;
+        java.io.PrintStream $r1, $r20, $r36, $r44, $r49, $r65, $r77;
+        javax.security.auth.Subject r83;
+        sun.security.jgss.krb5.Krb5CredElement $r6, $r7, $r8, $r11, $r12, $r53, $r59, $r62;
+        java.lang.Object $r35, $r46;
+        java.io.InputStream r3;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r3 := @parameter0: java.io.InputStream;
+
+        i4 := @parameter1: int;
+
+        r78 = null;
+
+        b5 = 11;
+
+        b7 = 11;
+
+        b6 = 11;
+
+        $z0 = <sun.security.jgss.krb5.Krb5Context: boolean DEBUG>;
+
+        if $z0 == 0 goto label01;
+
+        $r65 = <java.lang.System: java.io.PrintStream out>;
+
+        $r89 = new java.lang.StringBuilder;
+
+        specialinvoke $r89.<java.lang.StringBuilder: void <init>()>();
+
+        $r66 = virtualinvoke $r89.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Entered Krb5Context.initSecContext with state=");
+
+        $i3 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        $r67 = staticinvoke <sun.security.jgss.krb5.Krb5Context: java.lang.String printState(int)>($i3);
+
+        $r68 = virtualinvoke $r66.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r67);
+
+        $r69 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r65.<java.io.PrintStream: void println(java.lang.String)>($r69);
+
+     label01:
+        $z1 = virtualinvoke r0.<sun.security.jgss.krb5.Krb5Context: boolean isInitiator()>();
+
+        if $z1 != 0 goto label02;
+
+        $r90 = new org.ietf.jgss.GSSException;
+
+        $i9 = (int) -1;
+
+        specialinvoke $r90.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i9, "initSecContext on an acceptor GSSContext");
+
+        throw $r90;
+
+     label02:
+        $i0 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        if $i0 != 1 goto label20;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: int state> = 2;
+
+        b5 = 13;
+
+        b7 = 13;
+
+        b6 = 13;
+
+        $r6 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement myCred>;
+
+        if $r6 != null goto label03;
+
+        $r57 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.GSSCaller caller>;
+
+        $r56 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5NameElement myName>;
+
+        $r58 = staticinvoke <sun.security.jgss.krb5.Krb5InitCredential: sun.security.jgss.krb5.Krb5InitCredential getInstance(sun.security.jgss.GSSCaller,sun.security.jgss.krb5.Krb5NameElement,int)>($r57, $r56, 0);
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement myCred> = $r58;
+
+        $r61 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.GSSCaller caller>;
+
+        $r59 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement myCred>;
+
+        $r60 = (sun.security.jgss.krb5.Krb5InitCredential) $r59;
+
+        $r62 = staticinvoke <sun.security.jgss.krb5.Krb5ProxyCredential: sun.security.jgss.krb5.Krb5CredElement tryImpersonation(sun.security.jgss.GSSCaller,sun.security.jgss.krb5.Krb5InitCredential)>($r61, $r60);
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement myCred> = $r62;
+
+        goto label04;
+
+     label03:
+        $r7 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement myCred>;
+
+        $z3 = interfaceinvoke $r7.<sun.security.jgss.krb5.Krb5CredElement: boolean isInitiatorCredential()>();
+
+        if $z3 != 0 goto label04;
+
+        $r91 = new org.ietf.jgss.GSSException;
+
+        $i11 = (int) -1;
+
+        specialinvoke $r91.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(13, $i11, "No TGT available");
+
+        throw $r91;
+
+     label04:
+        $r8 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement myCred>;
+
+        $r9 = interfaceinvoke $r8.<sun.security.jgss.krb5.Krb5CredElement: sun.security.jgss.spi.GSSNameSpi getName()>();
+
+        $r10 = (sun.security.jgss.krb5.Krb5NameElement) $r9;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5NameElement myName> = $r10;
+
+        $r11 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement myCred>;
+
+        $z4 = $r11 instanceof sun.security.jgss.krb5.Krb5InitCredential;
+
+        if $z4 == 0 goto label05;
+
+        r79 = null;
+
+        $r53 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement myCred>;
+
+        $r54 = (sun.security.jgss.krb5.Krb5InitCredential) $r53;
+
+        r80 = virtualinvoke $r54.<sun.security.jgss.krb5.Krb5InitCredential: sun.security.krb5.Credentials getKrb5Credentials()>();
+
+        goto label06;
+
+     label05:
+        $r12 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement myCred>;
+
+        r79 = (sun.security.jgss.krb5.Krb5ProxyCredential) $r12;
+
+        $r13 = r79.<sun.security.jgss.krb5.Krb5ProxyCredential: sun.security.jgss.krb5.Krb5InitCredential self>;
+
+        r80 = virtualinvoke $r13.<sun.security.jgss.krb5.Krb5InitCredential: sun.security.krb5.Credentials getKrb5Credentials()>();
+
+     label06:
+        $r14 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5NameElement peerName>;
+
+        $r15 = virtualinvoke $r14.<sun.security.jgss.krb5.Krb5NameElement: sun.security.krb5.PrincipalName getKrb5PrincipalName()>();
+
+        $r16 = virtualinvoke $r15.<sun.security.krb5.PrincipalName: java.lang.String getName()>();
+
+        specialinvoke r0.<sun.security.jgss.krb5.Krb5Context: void checkPermission(java.lang.String,java.lang.String)>($r16, "initiate");
+
+        $r17 = staticinvoke <java.security.AccessController: java.security.AccessControlContext getContext()>();
+
+        $r18 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.GSSCaller caller>;
+
+        $z5 = staticinvoke <sun.security.jgss.GSSUtil: boolean useSubjectCredsOnly(sun.security.jgss.GSSCaller)>($r18);
+
+        if $z5 == 0 goto label12;
+
+        r81 = null;
+
+     label07:
+        $r92 = new sun.security.jgss.krb5.Krb5Context$1;
+
+        specialinvoke $r92.<sun.security.jgss.krb5.Krb5Context$1: void <init>(sun.security.jgss.krb5.Krb5Context,sun.security.jgss.krb5.Krb5ProxyCredential,java.security.AccessControlContext)>(r0, r79, $r17);
+
+        $r46 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r92);
+
+        r81 = (javax.security.auth.kerberos.KerberosTicket) $r46;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r76 := @caughtexception;
+
+        $z13 = <sun.security.jgss.krb5.Krb5Context: boolean DEBUG>;
+
+        if $z13 == 0 goto label10;
+
+        $r77 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r77.<java.io.PrintStream: void println(java.lang.String)>("Attempt to obtain service ticket from the subject failed!");
+
+     label10:
+        if r81 == null goto label12;
+
+        $z11 = <sun.security.jgss.krb5.Krb5Context: boolean DEBUG>;
+
+        if $z11 == 0 goto label11;
+
+        $r49 = <java.lang.System: java.io.PrintStream out>;
+
+        $r93 = new java.lang.StringBuilder;
+
+        specialinvoke $r93.<java.lang.StringBuilder: void <init>()>();
+
+        $r50 = virtualinvoke $r93.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Found service ticket in the subject");
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r81);
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r49.<java.io.PrintStream: void println(java.lang.String)>($r52);
+
+     label11:
+        $r47 = staticinvoke <sun.security.jgss.krb5.Krb5Util: sun.security.krb5.Credentials ticketToCreds(javax.security.auth.kerberos.KerberosTicket)>(r81);
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.krb5.Credentials serviceCreds> = $r47;
+
+     label12:
+        $r82 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.krb5.Credentials serviceCreds>;
+
+        if $r82 != null goto label17;
+
+        $z7 = <sun.security.jgss.krb5.Krb5Context: boolean DEBUG>;
+
+        if $z7 == 0 goto label13;
+
+        $r44 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r44.<java.io.PrintStream: void println(java.lang.String)>("Service ticket not found in the subject");
+
+     label13:
+        if r79 != null goto label14;
+
+        $r40 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5NameElement peerName>;
+
+        $r41 = virtualinvoke $r40.<sun.security.jgss.krb5.Krb5NameElement: sun.security.krb5.PrincipalName getKrb5PrincipalName()>();
+
+        $r42 = virtualinvoke $r41.<sun.security.krb5.PrincipalName: java.lang.String getName()>();
+
+        $r43 = staticinvoke <sun.security.krb5.Credentials: sun.security.krb5.Credentials acquireServiceCreds(java.lang.String,sun.security.krb5.Credentials)>($r42, r80);
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.krb5.Credentials serviceCreds> = $r43;
+
+        goto label15;
+
+     label14:
+        $r26 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5NameElement peerName>;
+
+        $r27 = virtualinvoke $r26.<sun.security.jgss.krb5.Krb5NameElement: sun.security.krb5.PrincipalName getKrb5PrincipalName()>();
+
+        $r28 = virtualinvoke $r27.<sun.security.krb5.PrincipalName: java.lang.String getName()>();
+
+        $r29 = r79.<sun.security.jgss.krb5.Krb5ProxyCredential: sun.security.krb5.internal.Ticket tkt>;
+
+        $r30 = virtualinvoke r79.<sun.security.jgss.krb5.Krb5ProxyCredential: sun.security.jgss.krb5.Krb5NameElement getName()>();
+
+        $r31 = virtualinvoke $r30.<sun.security.jgss.krb5.Krb5NameElement: sun.security.krb5.PrincipalName getKrb5PrincipalName()>();
+
+        $r32 = staticinvoke <sun.security.krb5.Credentials: sun.security.krb5.Credentials acquireS4U2proxyCreds(java.lang.String,sun.security.krb5.internal.Ticket,sun.security.krb5.PrincipalName,sun.security.krb5.Credentials)>($r28, $r29, $r31, r80);
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.krb5.Credentials serviceCreds> = $r32;
+
+     label15:
+        $r33 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.GSSCaller caller>;
+
+        $z8 = staticinvoke <sun.security.jgss.GSSUtil: boolean useSubjectCredsOnly(sun.security.jgss.GSSCaller)>($r33);
+
+        if $z8 == 0 goto label17;
+
+        $r94 = new sun.security.jgss.krb5.Krb5Context$2;
+
+        specialinvoke $r94.<sun.security.jgss.krb5.Krb5Context$2: void <init>(sun.security.jgss.krb5.Krb5Context,java.security.AccessControlContext)>(r0, $r17);
+
+        $r35 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r94);
+
+        r83 = (javax.security.auth.Subject) $r35;
+
+        if r83 == null goto label16;
+
+        $z10 = virtualinvoke r83.<javax.security.auth.Subject: boolean isReadOnly()>();
+
+        if $z10 != 0 goto label16;
+
+        $r37 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.krb5.Credentials serviceCreds>;
+
+        $r38 = staticinvoke <sun.security.jgss.krb5.Krb5Util: javax.security.auth.kerberos.KerberosTicket credsToTicket(sun.security.krb5.Credentials)>($r37);
+
+        $r95 = new sun.security.jgss.krb5.Krb5Context$3;
+
+        specialinvoke $r95.<sun.security.jgss.krb5.Krb5Context$3: void <init>(sun.security.jgss.krb5.Krb5Context,javax.security.auth.Subject,javax.security.auth.kerberos.KerberosTicket)>(r0, r83, $r38);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r95);
+
+        goto label17;
+
+     label16:
+        $z9 = <sun.security.jgss.krb5.Krb5Context: boolean DEBUG>;
+
+        if $z9 == 0 goto label17;
+
+        $r36 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r36.<java.io.PrintStream: void println(java.lang.String)>("Subject is readOnly;Kerberos Service ticket not stored");
+
+     label17:
+        b5 = 11;
+
+        b7 = 11;
+
+        b6 = 11;
+
+        $r96 = new sun.security.jgss.krb5.InitSecContextToken;
+
+        $r85 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.krb5.Credentials serviceCreds>;
+
+        specialinvoke $r96.<sun.security.jgss.krb5.InitSecContextToken: void <init>(sun.security.jgss.krb5.Krb5Context,sun.security.krb5.Credentials,sun.security.krb5.Credentials)>(r0, r80, $r85);
+
+        $r86 = (sun.security.jgss.krb5.InitSecContextToken) $r96;
+
+        $r87 = virtualinvoke $r86.<sun.security.jgss.krb5.InitSecContextToken: sun.security.krb5.KrbApReq getKrbApReq()>();
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.krb5.KrbApReq apReq> = $r87;
+
+        $r88 = virtualinvoke $r96.<sun.security.jgss.krb5.InitialToken: byte[] encode()>();
+
+        r78 = $r88;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement myCred> = null;
+
+        $z14 = virtualinvoke r0.<sun.security.jgss.krb5.Krb5Context: boolean getMutualAuthState()>();
+
+        if $z14 != 0 goto label18;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: int state> = 3;
+
+     label18:
+        $z6 = <sun.security.jgss.krb5.Krb5Context: boolean DEBUG>;
+
+        if $z6 == 0 goto label19;
+
+        $r20 = <java.lang.System: java.io.PrintStream out>;
+
+        $r97 = new java.lang.StringBuilder;
+
+        specialinvoke $r97.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r97.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Created InitSecContextToken:\n");
+
+        $r98 = new sun.misc.HexDumpEncoder;
+
+        specialinvoke $r98.<sun.misc.HexDumpEncoder: void <init>()>();
+
+        $r23 = virtualinvoke $r98.<sun.misc.HexDumpEncoder: java.lang.String encodeBuffer(byte[])>($r88);
+
+        $r24 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r23);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r20.<java.io.PrintStream: void println(java.lang.String)>($r25);
+
+     label19:
+        goto label22;
+
+     label20:
+        $i1 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        if $i1 != 2 goto label21;
+
+        $r99 = new sun.security.jgss.krb5.AcceptSecContextToken;
+
+        $r5 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.krb5.Credentials serviceCreds>;
+
+        $r4 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.krb5.KrbApReq apReq>;
+
+        specialinvoke $r99.<sun.security.jgss.krb5.AcceptSecContextToken: void <init>(sun.security.jgss.krb5.Krb5Context,sun.security.krb5.Credentials,sun.security.krb5.KrbApReq,java.io.InputStream)>(r0, $r5, $r4, r3);
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.krb5.Credentials serviceCreds> = null;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.krb5.KrbApReq apReq> = null;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: int state> = 3;
+
+        goto label22;
+
+     label21:
+        $z2 = <sun.security.jgss.krb5.Krb5Context: boolean DEBUG>;
+
+        if $z2 == 0 goto label22;
+
+        $r1 = <java.lang.System: java.io.PrintStream out>;
+
+        $i2 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(int)>($i2);
+
+     label22:
+        goto label26;
+
+     label23:
+        $r73 := @caughtexception;
+
+        $z12 = <sun.security.jgss.krb5.Krb5Context: boolean DEBUG>;
+
+        if $z12 == 0 goto label24;
+
+        virtualinvoke $r73.<sun.security.krb5.KrbException: void printStackTrace()>();
+
+     label24:
+        $r100 = new org.ietf.jgss.GSSException;
+
+        $r75 = virtualinvoke $r73.<sun.security.krb5.KrbException: java.lang.String getMessage()>();
+
+        $i13 = (int) -1;
+
+        specialinvoke $r100.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(b6, $i13, $r75);
+
+        virtualinvoke $r100.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r73);
+
+        throw $r100;
+
+     label25:
+        $r70 := @caughtexception;
+
+        $r101 = new org.ietf.jgss.GSSException;
+
+        $r72 = virtualinvoke $r70.<java.io.IOException: java.lang.String getMessage()>();
+
+        $i15 = (int) -1;
+
+        specialinvoke $r101.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(b7, $i15, $r72);
+
+        virtualinvoke $r101.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r70);
+
+        throw $r101;
+
+     label26:
+        return r78;
+
+        catch java.security.PrivilegedActionException from label07 to label08 with label09;
+        catch sun.security.krb5.KrbException from label02 to label22 with label23;
+        catch java.io.IOException from label02 to label22 with label25;
+    }
+
+    public final boolean isEstablished()
+    {
+        int $i0;
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        $i0 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        if $i0 != 3 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public final byte[] acceptSecContext(java.io.InputStream, int) throws org.ietf.jgss.GSSException
+    {
+        byte[] r46;
+        sun.security.jgss.GSSCaller $r31;
+        sun.security.jgss.krb5.Krb5AcceptCredential $r11, $r32;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        org.ietf.jgss.GSSException $r48, $r49, $r52, $r53;
+        sun.security.jgss.krb5.Krb5Context r0;
+        sun.security.krb5.Credentials $r17, $r22;
+        java.lang.StringBuilder $r36, $r38, $r47;
+        sun.security.krb5.KrbApReq $r12, $r16, $r20, $r21;
+        sun.security.krb5.PrincipalName $r13, $r23;
+        sun.security.jgss.krb5.Krb5NameElement $r6, $r7, $r14, $r15, $r24, $r25, $r26, $r27, $r28, $r30;
+        sun.security.krb5.internal.Ticket $r18;
+        sun.security.krb5.KrbException $r43;
+        sun.security.jgss.spi.GSSNameSpi $r5;
+        int $i0, $i1, $i2, i3, $i5, $i7, $i9, $i11;
+        sun.security.jgss.krb5.InitSecContextToken $r50;
+        sun.security.jgss.krb5.AcceptSecContextToken $r51;
+        java.lang.String $r37, $r39, $r42, $r45;
+        java.io.PrintStream $r1, $r35;
+        java.io.IOException $r40;
+        sun.security.jgss.krb5.Krb5CredElement $r2, $r3, $r4, $r9;
+        java.io.InputStream r10;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r10 := @parameter0: java.io.InputStream;
+
+        i3 := @parameter1: int;
+
+        r46 = null;
+
+        $z0 = <sun.security.jgss.krb5.Krb5Context: boolean DEBUG>;
+
+        if $z0 == 0 goto label01;
+
+        $r35 = <java.lang.System: java.io.PrintStream out>;
+
+        $r47 = new java.lang.StringBuilder;
+
+        specialinvoke $r47.<java.lang.StringBuilder: void <init>()>();
+
+        $r36 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Entered Krb5Context.acceptSecContext with state=");
+
+        $i2 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        $r37 = staticinvoke <sun.security.jgss.krb5.Krb5Context: java.lang.String printState(int)>($i2);
+
+        $r38 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r37);
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r35.<java.io.PrintStream: void println(java.lang.String)>($r39);
+
+     label01:
+        $z1 = virtualinvoke r0.<sun.security.jgss.krb5.Krb5Context: boolean isInitiator()>();
+
+        if $z1 == 0 goto label02;
+
+        $r48 = new org.ietf.jgss.GSSException;
+
+        $i5 = (int) -1;
+
+        specialinvoke $r48.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i5, "acceptSecContext on an initiator GSSContext");
+
+        throw $r48;
+
+     label02:
+        $i0 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        if $i0 != 1 goto label08;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: int state> = 2;
+
+        $r2 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement myCred>;
+
+        if $r2 != null goto label03;
+
+        $r31 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.GSSCaller caller>;
+
+        $r30 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5NameElement myName>;
+
+        $r32 = staticinvoke <sun.security.jgss.krb5.Krb5AcceptCredential: sun.security.jgss.krb5.Krb5AcceptCredential getInstance(sun.security.jgss.GSSCaller,sun.security.jgss.krb5.Krb5NameElement)>($r31, $r30);
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement myCred> = $r32;
+
+        goto label04;
+
+     label03:
+        $r3 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement myCred>;
+
+        $z3 = interfaceinvoke $r3.<sun.security.jgss.krb5.Krb5CredElement: boolean isAcceptorCredential()>();
+
+        if $z3 != 0 goto label04;
+
+        $r49 = new org.ietf.jgss.GSSException;
+
+        $i7 = (int) -1;
+
+        specialinvoke $r49.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(13, $i7, "No Secret Key available");
+
+        throw $r49;
+
+     label04:
+        $r4 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement myCred>;
+
+        $r5 = interfaceinvoke $r4.<sun.security.jgss.krb5.Krb5CredElement: sun.security.jgss.spi.GSSNameSpi getName()>();
+
+        $r6 = (sun.security.jgss.krb5.Krb5NameElement) $r5;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5NameElement myName> = $r6;
+
+        $r7 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5NameElement myName>;
+
+        if $r7 == null goto label05;
+
+        $r28 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5NameElement myName>;
+
+        $r27 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5NameElement myName>;
+
+        staticinvoke <sun.security.jgss.krb5.Krb5MechFactory: void checkAcceptCredPermission(sun.security.jgss.krb5.Krb5NameElement,sun.security.jgss.spi.GSSNameSpi)>($r28, $r27);
+
+     label05:
+        $r50 = new sun.security.jgss.krb5.InitSecContextToken;
+
+        $r9 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement myCred>;
+
+        $r11 = (sun.security.jgss.krb5.Krb5AcceptCredential) $r9;
+
+        specialinvoke $r50.<sun.security.jgss.krb5.InitSecContextToken: void <init>(sun.security.jgss.krb5.Krb5Context,sun.security.jgss.krb5.Krb5AcceptCredential,java.io.InputStream)>(r0, $r11, r10);
+
+        $r12 = virtualinvoke $r50.<sun.security.jgss.krb5.InitSecContextToken: sun.security.krb5.KrbApReq getKrbApReq()>();
+
+        $r13 = virtualinvoke $r12.<sun.security.krb5.KrbApReq: sun.security.krb5.PrincipalName getClient()>();
+
+        $r14 = staticinvoke <sun.security.jgss.krb5.Krb5NameElement: sun.security.jgss.krb5.Krb5NameElement getInstance(sun.security.krb5.PrincipalName)>($r13);
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5NameElement peerName> = $r14;
+
+        $r15 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5NameElement myName>;
+
+        if $r15 != null goto label06;
+
+        $r21 = virtualinvoke $r50.<sun.security.jgss.krb5.InitSecContextToken: sun.security.krb5.KrbApReq getKrbApReq()>();
+
+        $r22 = virtualinvoke $r21.<sun.security.krb5.KrbApReq: sun.security.krb5.Credentials getCreds()>();
+
+        $r23 = virtualinvoke $r22.<sun.security.krb5.Credentials: sun.security.krb5.PrincipalName getServer()>();
+
+        $r24 = staticinvoke <sun.security.jgss.krb5.Krb5NameElement: sun.security.jgss.krb5.Krb5NameElement getInstance(sun.security.krb5.PrincipalName)>($r23);
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5NameElement myName> = $r24;
+
+        $r26 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5NameElement myName>;
+
+        $r25 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5NameElement myName>;
+
+        staticinvoke <sun.security.jgss.krb5.Krb5MechFactory: void checkAcceptCredPermission(sun.security.jgss.krb5.Krb5NameElement,sun.security.jgss.spi.GSSNameSpi)>($r26, $r25);
+
+     label06:
+        $z4 = virtualinvoke r0.<sun.security.jgss.krb5.Krb5Context: boolean getMutualAuthState()>();
+
+        if $z4 == 0 goto label07;
+
+        $r51 = new sun.security.jgss.krb5.AcceptSecContextToken;
+
+        $r20 = virtualinvoke $r50.<sun.security.jgss.krb5.InitSecContextToken: sun.security.krb5.KrbApReq getKrbApReq()>();
+
+        specialinvoke $r51.<sun.security.jgss.krb5.AcceptSecContextToken: void <init>(sun.security.jgss.krb5.Krb5Context,sun.security.krb5.KrbApReq)>(r0, $r20);
+
+        r46 = virtualinvoke $r51.<sun.security.jgss.krb5.AcceptSecContextToken: byte[] encode()>();
+
+     label07:
+        $r16 = virtualinvoke $r50.<sun.security.jgss.krb5.InitSecContextToken: sun.security.krb5.KrbApReq getKrbApReq()>();
+
+        $r17 = virtualinvoke $r16.<sun.security.krb5.KrbApReq: sun.security.krb5.Credentials getCreds()>();
+
+        $r18 = virtualinvoke $r17.<sun.security.krb5.Credentials: sun.security.krb5.internal.Ticket getTicket()>();
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.krb5.internal.Ticket serviceTicket> = $r18;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement myCred> = null;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: int state> = 3;
+
+        goto label09;
+
+     label08:
+        $z2 = <sun.security.jgss.krb5.Krb5Context: boolean DEBUG>;
+
+        if $z2 == 0 goto label09;
+
+        $r1 = <java.lang.System: java.io.PrintStream out>;
+
+        $i1 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(int)>($i1);
+
+     label09:
+        goto label13;
+
+     label10:
+        $r43 := @caughtexception;
+
+        $r52 = new org.ietf.jgss.GSSException;
+
+        $r45 = virtualinvoke $r43.<sun.security.krb5.KrbException: java.lang.String getMessage()>();
+
+        $i9 = (int) -1;
+
+        specialinvoke $r52.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i9, $r45);
+
+        virtualinvoke $r52.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r43);
+
+        throw $r52;
+
+     label11:
+        $r40 := @caughtexception;
+
+        $z5 = <sun.security.jgss.krb5.Krb5Context: boolean DEBUG>;
+
+        if $z5 == 0 goto label12;
+
+        virtualinvoke $r40.<java.io.IOException: void printStackTrace()>();
+
+     label12:
+        $r53 = new org.ietf.jgss.GSSException;
+
+        $r42 = virtualinvoke $r40.<java.io.IOException: java.lang.String getMessage()>();
+
+        $i11 = (int) -1;
+
+        specialinvoke $r53.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i11, $r42);
+
+        virtualinvoke $r53.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r40);
+
+        throw $r53;
+
+     label13:
+        return r46;
+
+        catch sun.security.krb5.KrbException from label02 to label09 with label10;
+        catch java.io.IOException from label02 to label09 with label11;
+    }
+
+    public final int getWrapSizeLimit(int, boolean, int) throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.krb5.CipherHelper $r1, $r2, $r3, $r4;
+        sun.security.jgss.krb5.Krb5Context r0;
+        int $i0, $i1, i2, i3, i4;
+        boolean z0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        i2 := @parameter0: int;
+
+        z0 := @parameter1: boolean;
+
+        i3 := @parameter2: int;
+
+        i4 = 0;
+
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i0 = virtualinvoke $r1.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i0 != 0 goto label1;
+
+        $r4 = virtualinvoke r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper getCipherHelper(sun.security.krb5.EncryptionKey)>(null);
+
+        i4 = staticinvoke <sun.security.jgss.krb5.WrapToken: int getSizeLimit(int,boolean,int,sun.security.jgss.krb5.CipherHelper)>(i2, z0, i3, $r4);
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i1 = virtualinvoke $r2.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i1 != 1 goto label2;
+
+        $r3 = virtualinvoke r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper getCipherHelper(sun.security.krb5.EncryptionKey)>(null);
+
+        i4 = staticinvoke <sun.security.jgss.krb5.WrapToken_v2: int getSizeLimit(int,boolean,int,sun.security.jgss.krb5.CipherHelper)>(i2, z0, i3, $r3);
+
+     label2:
+        return i4;
+    }
+
+    public final byte[] wrap(byte[], int, int, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        byte[] r12, r25;
+        sun.security.jgss.krb5.WrapToken $r28;
+        boolean $z0, $z1;
+        org.ietf.jgss.GSSException $r27, $r31;
+        org.ietf.jgss.MessageProp r11;
+        sun.security.jgss.krb5.Krb5Context r0;
+        java.lang.StringBuilder $r5, $r7, $r8, $r17, $r19, $r20, $r26, $r30;
+        sun.security.jgss.krb5.CipherHelper $r1, $r2;
+        sun.security.jgss.krb5.WrapToken_v2 $r29;
+        int $i0, $i1, $i2, $i3, i4, i5, $i7, $i9;
+        java.lang.String $r6, $r9, $r18, $r21, $r24;
+        java.io.PrintStream $r4, $r16;
+        java.io.IOException $r22;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r12 := @parameter0: byte[];
+
+        i4 := @parameter1: int;
+
+        i5 := @parameter2: int;
+
+        r11 := @parameter3: org.ietf.jgss.MessageProp;
+
+        $z0 = <sun.security.jgss.krb5.Krb5Context: boolean DEBUG>;
+
+        if $z0 == 0 goto label1;
+
+        $r16 = <java.lang.System: java.io.PrintStream out>;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Krb5Context.wrap: data=[");
+
+        $r18 = staticinvoke <sun.security.jgss.krb5.Krb5Context: java.lang.String getHexBytes(byte[],int,int)>(r12, i4, i5);
+
+        $r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r16.<java.io.PrintStream: void println(java.lang.String)>($r21);
+
+     label1:
+        $i0 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        if $i0 == 3 goto label2;
+
+        $r27 = new org.ietf.jgss.GSSException;
+
+        $i7 = (int) -1;
+
+        specialinvoke $r27.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(12, $i7, "Wrap called in invalid state!");
+
+        throw $r27;
+
+     label2:
+        r25 = null;
+
+     label3:
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i1 = virtualinvoke $r1.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i1 != 0 goto label4;
+
+        $r28 = new sun.security.jgss.krb5.WrapToken;
+
+        specialinvoke $r28.<sun.security.jgss.krb5.WrapToken: void <init>(sun.security.jgss.krb5.Krb5Context,org.ietf.jgss.MessageProp,byte[],int,int)>(r0, r11, r12, i4, i5);
+
+        r25 = virtualinvoke $r28.<sun.security.jgss.krb5.WrapToken: byte[] encode()>();
+
+        goto label5;
+
+     label4:
+        $r2 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i2 = virtualinvoke $r2.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i2 != 1 goto label5;
+
+        $r29 = new sun.security.jgss.krb5.WrapToken_v2;
+
+        specialinvoke $r29.<sun.security.jgss.krb5.WrapToken_v2: void <init>(sun.security.jgss.krb5.Krb5Context,org.ietf.jgss.MessageProp,byte[],int,int)>(r0, r11, r12, i4, i5);
+
+        r25 = virtualinvoke $r29.<sun.security.jgss.krb5.WrapToken_v2: byte[] encode()>();
+
+     label5:
+        $z1 = <sun.security.jgss.krb5.Krb5Context: boolean DEBUG>;
+
+        if $z1 == 0 goto label6;
+
+        $r4 = <java.lang.System: java.io.PrintStream out>;
+
+        $r30 = new java.lang.StringBuilder;
+
+        specialinvoke $r30.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Krb5Context.wrap: token=[");
+
+        $i3 = lengthof r25;
+
+        $r6 = staticinvoke <sun.security.jgss.krb5.Krb5Context: java.lang.String getHexBytes(byte[],int,int)>(r25, 0, $i3);
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<java.io.PrintStream: void println(java.lang.String)>($r9);
+
+     label6:
+        return r25;
+
+     label7:
+        $r22 := @caughtexception;
+
+        $r31 = new org.ietf.jgss.GSSException;
+
+        $r24 = virtualinvoke $r22.<java.io.IOException: java.lang.String getMessage()>();
+
+        $i9 = (int) -1;
+
+        specialinvoke $r31.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i9, $r24);
+
+        virtualinvoke $r31.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r22);
+
+        throw $r31;
+
+        catch java.io.IOException from label3 to label6 with label7;
+    }
+
+    public final int wrap(byte[], int, int, byte[], int, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        byte[] r6, r13;
+        sun.security.jgss.krb5.CipherHelper $r1, $r2;
+        sun.security.jgss.krb5.WrapToken_v2 $r21;
+        sun.security.jgss.krb5.WrapToken $r20;
+        int $i0, $i1, $i2, i3, i4, i5, i6, $i8, $i10;
+        java.lang.String $r7, $r10, $r18;
+        boolean $z0;
+        java.io.PrintStream $r4;
+        java.io.IOException $r16;
+        org.ietf.jgss.GSSException $r19, $r23;
+        org.ietf.jgss.MessageProp r12;
+        sun.security.jgss.krb5.Krb5Context r0;
+        java.lang.StringBuilder $r5, $r8, $r9, $r22;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r13 := @parameter0: byte[];
+
+        i4 := @parameter1: int;
+
+        i5 := @parameter2: int;
+
+        r6 := @parameter3: byte[];
+
+        i3 := @parameter4: int;
+
+        r12 := @parameter5: org.ietf.jgss.MessageProp;
+
+        $i0 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        if $i0 == 3 goto label1;
+
+        $r19 = new org.ietf.jgss.GSSException;
+
+        $i8 = (int) -1;
+
+        specialinvoke $r19.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(12, $i8, "Wrap called in invalid state!");
+
+        throw $r19;
+
+     label1:
+        i6 = 0;
+
+     label2:
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i1 = virtualinvoke $r1.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i1 != 0 goto label3;
+
+        $r20 = new sun.security.jgss.krb5.WrapToken;
+
+        specialinvoke $r20.<sun.security.jgss.krb5.WrapToken: void <init>(sun.security.jgss.krb5.Krb5Context,org.ietf.jgss.MessageProp,byte[],int,int)>(r0, r12, r13, i4, i5);
+
+        i6 = virtualinvoke $r20.<sun.security.jgss.krb5.WrapToken: int encode(byte[],int)>(r6, i3);
+
+        goto label4;
+
+     label3:
+        $r2 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i2 = virtualinvoke $r2.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i2 != 1 goto label4;
+
+        $r21 = new sun.security.jgss.krb5.WrapToken_v2;
+
+        specialinvoke $r21.<sun.security.jgss.krb5.WrapToken_v2: void <init>(sun.security.jgss.krb5.Krb5Context,org.ietf.jgss.MessageProp,byte[],int,int)>(r0, r12, r13, i4, i5);
+
+        i6 = virtualinvoke $r21.<sun.security.jgss.krb5.WrapToken_v2: int encode(byte[],int)>(r6, i3);
+
+     label4:
+        $z0 = <sun.security.jgss.krb5.Krb5Context: boolean DEBUG>;
+
+        if $z0 == 0 goto label5;
+
+        $r4 = <java.lang.System: java.io.PrintStream out>;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Krb5Context.wrap: token=[");
+
+        $r7 = staticinvoke <sun.security.jgss.krb5.Krb5Context: java.lang.String getHexBytes(byte[],int,int)>(r6, i3, i6);
+
+        $r8 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<java.io.PrintStream: void println(java.lang.String)>($r10);
+
+     label5:
+        return i6;
+
+     label6:
+        $r16 := @caughtexception;
+
+        $r23 = new org.ietf.jgss.GSSException;
+
+        $r18 = virtualinvoke $r16.<java.io.IOException: java.lang.String getMessage()>();
+
+        $i10 = (int) -1;
+
+        specialinvoke $r23.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i10, $r18);
+
+        virtualinvoke $r23.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r16);
+
+        throw $r23;
+
+        catch java.io.IOException from label2 to label5 with label6;
+    }
+
+    public final void wrap(byte[], int, int, java.io.OutputStream, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        byte[] r12, r19;
+        sun.security.jgss.krb5.CipherHelper $r1, $r2;
+        sun.security.jgss.krb5.WrapToken_v2 $r22;
+        sun.security.jgss.krb5.WrapToken $r21;
+        int $i0, $i1, $i2, $i3, i4, i5, $i7, $i9;
+        java.lang.String $r6, $r9, $r18;
+        boolean $z0, $z1, $z2;
+        java.io.PrintStream $r4;
+        java.io.OutputStream r13;
+        java.io.IOException $r16;
+        org.ietf.jgss.GSSException $r20, $r23;
+        org.ietf.jgss.MessageProp r11;
+        sun.security.jgss.krb5.Krb5Context r0;
+        java.lang.StringBuilder $r5, $r7, $r8, $r24;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r12 := @parameter0: byte[];
+
+        i4 := @parameter1: int;
+
+        i5 := @parameter2: int;
+
+        r13 := @parameter3: java.io.OutputStream;
+
+        r11 := @parameter4: org.ietf.jgss.MessageProp;
+
+        $i0 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        if $i0 == 3 goto label1;
+
+        $r20 = new org.ietf.jgss.GSSException;
+
+        $i7 = (int) -1;
+
+        specialinvoke $r20.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(12, $i7, "Wrap called in invalid state!");
+
+        throw $r20;
+
+     label1:
+        r19 = null;
+
+     label2:
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i1 = virtualinvoke $r1.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i1 != 0 goto label4;
+
+        $r21 = new sun.security.jgss.krb5.WrapToken;
+
+        specialinvoke $r21.<sun.security.jgss.krb5.WrapToken: void <init>(sun.security.jgss.krb5.Krb5Context,org.ietf.jgss.MessageProp,byte[],int,int)>(r0, r11, r12, i4, i5);
+
+        virtualinvoke $r21.<sun.security.jgss.krb5.WrapToken: void encode(java.io.OutputStream)>(r13);
+
+        $z2 = <sun.security.jgss.krb5.Krb5Context: boolean DEBUG>;
+
+        if $z2 == 0 goto label3;
+
+        r19 = virtualinvoke $r21.<sun.security.jgss.krb5.WrapToken: byte[] encode()>();
+
+     label3:
+        goto label5;
+
+     label4:
+        $r2 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i2 = virtualinvoke $r2.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i2 != 1 goto label5;
+
+        $r22 = new sun.security.jgss.krb5.WrapToken_v2;
+
+        specialinvoke $r22.<sun.security.jgss.krb5.WrapToken_v2: void <init>(sun.security.jgss.krb5.Krb5Context,org.ietf.jgss.MessageProp,byte[],int,int)>(r0, r11, r12, i4, i5);
+
+        virtualinvoke $r22.<sun.security.jgss.krb5.WrapToken_v2: void encode(java.io.OutputStream)>(r13);
+
+        $z1 = <sun.security.jgss.krb5.Krb5Context: boolean DEBUG>;
+
+        if $z1 == 0 goto label5;
+
+        r19 = virtualinvoke $r22.<sun.security.jgss.krb5.WrapToken_v2: byte[] encode()>();
+
+     label5:
+        goto label7;
+
+     label6:
+        $r16 := @caughtexception;
+
+        $r23 = new org.ietf.jgss.GSSException;
+
+        $r18 = virtualinvoke $r16.<java.io.IOException: java.lang.String getMessage()>();
+
+        $i9 = (int) -1;
+
+        specialinvoke $r23.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i9, $r18);
+
+        virtualinvoke $r23.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r16);
+
+        throw $r23;
+
+     label7:
+        $z0 = <sun.security.jgss.krb5.Krb5Context: boolean DEBUG>;
+
+        if $z0 == 0 goto label8;
+
+        $r4 = <java.lang.System: java.io.PrintStream out>;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Krb5Context.wrap: token=[");
+
+        $i3 = lengthof r19;
+
+        $r6 = staticinvoke <sun.security.jgss.krb5.Krb5Context: java.lang.String getHexBytes(byte[],int,int)>(r19, 0, $i3);
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<java.io.PrintStream: void println(java.lang.String)>($r9);
+
+     label8:
+        return;
+
+        catch java.io.IOException from label2 to label5 with label6;
+    }
+
+    public final void wrap(java.io.InputStream, java.io.OutputStream, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        java.io.OutputStream r3;
+        byte[] r1;
+        java.io.IOException $r5;
+        org.ietf.jgss.GSSException $r8;
+        org.ietf.jgss.MessageProp r4;
+        sun.security.jgss.krb5.Krb5Context r2;
+        int $i0, $i1, $i3;
+        java.lang.String $r7;
+        java.io.InputStream r0;
+
+        r2 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r0 := @parameter0: java.io.InputStream;
+
+        r3 := @parameter1: java.io.OutputStream;
+
+        r4 := @parameter2: org.ietf.jgss.MessageProp;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.io.InputStream: int available()>();
+
+        r1 = newarray (byte)[$i0];
+
+        virtualinvoke r0.<java.io.InputStream: int read(byte[])>(r1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r8 = new org.ietf.jgss.GSSException;
+
+        $r7 = virtualinvoke $r5.<java.io.IOException: java.lang.String getMessage()>();
+
+        $i3 = (int) -1;
+
+        specialinvoke $r8.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i3, $r7);
+
+        virtualinvoke $r8.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r5);
+
+        throw $r8;
+
+     label4:
+        $i1 = lengthof r1;
+
+        virtualinvoke r2.<sun.security.jgss.krb5.Krb5Context: void wrap(byte[],int,int,java.io.OutputStream,org.ietf.jgss.MessageProp)>(r1, 0, $i1, r3, r4);
+
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public final byte[] unwrap(byte[], int, int, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        byte[] r11, r22;
+        sun.security.jgss.krb5.WrapToken $r25;
+        boolean $z0, $z1;
+        org.ietf.jgss.GSSException $r24;
+        org.ietf.jgss.MessageProp r12;
+        sun.security.jgss.krb5.Krb5Context r0;
+        java.lang.StringBuilder $r5, $r7, $r8, $r17, $r19, $r20, $r23, $r27;
+        sun.security.jgss.krb5.CipherHelper $r1, $r2;
+        sun.security.jgss.krb5.WrapToken_v2 $r26;
+        int $i0, $i1, $i2, $i3, i4, i5, $i7;
+        java.lang.String $r6, $r9, $r18, $r21;
+        java.io.PrintStream $r4, $r16;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r11 := @parameter0: byte[];
+
+        i4 := @parameter1: int;
+
+        i5 := @parameter2: int;
+
+        r12 := @parameter3: org.ietf.jgss.MessageProp;
+
+        $z0 = <sun.security.jgss.krb5.Krb5Context: boolean DEBUG>;
+
+        if $z0 == 0 goto label1;
+
+        $r16 = <java.lang.System: java.io.PrintStream out>;
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Krb5Context.unwrap: token=[");
+
+        $r18 = staticinvoke <sun.security.jgss.krb5.Krb5Context: java.lang.String getHexBytes(byte[],int,int)>(r11, i4, i5);
+
+        $r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r16.<java.io.PrintStream: void println(java.lang.String)>($r21);
+
+     label1:
+        $i0 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        if $i0 == 3 goto label2;
+
+        $r24 = new org.ietf.jgss.GSSException;
+
+        $i7 = (int) -1;
+
+        specialinvoke $r24.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(12, $i7, " Unwrap called in invalid state!");
+
+        throw $r24;
+
+     label2:
+        r22 = null;
+
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i1 = virtualinvoke $r1.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i1 != 0 goto label3;
+
+        $r25 = new sun.security.jgss.krb5.WrapToken;
+
+        specialinvoke $r25.<sun.security.jgss.krb5.WrapToken: void <init>(sun.security.jgss.krb5.Krb5Context,byte[],int,int,org.ietf.jgss.MessageProp)>(r0, r11, i4, i5, r12);
+
+        r22 = virtualinvoke $r25.<sun.security.jgss.krb5.WrapToken: byte[] getData()>();
+
+        specialinvoke r0.<sun.security.jgss.krb5.Krb5Context: void setSequencingAndReplayProps(sun.security.jgss.krb5.MessageToken,org.ietf.jgss.MessageProp)>($r25, r12);
+
+        goto label4;
+
+     label3:
+        $r2 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i2 = virtualinvoke $r2.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i2 != 1 goto label4;
+
+        $r26 = new sun.security.jgss.krb5.WrapToken_v2;
+
+        specialinvoke $r26.<sun.security.jgss.krb5.WrapToken_v2: void <init>(sun.security.jgss.krb5.Krb5Context,byte[],int,int,org.ietf.jgss.MessageProp)>(r0, r11, i4, i5, r12);
+
+        r22 = virtualinvoke $r26.<sun.security.jgss.krb5.WrapToken_v2: byte[] getData()>();
+
+        specialinvoke r0.<sun.security.jgss.krb5.Krb5Context: void setSequencingAndReplayProps(sun.security.jgss.krb5.MessageToken_v2,org.ietf.jgss.MessageProp)>($r26, r12);
+
+     label4:
+        $z1 = <sun.security.jgss.krb5.Krb5Context: boolean DEBUG>;
+
+        if $z1 == 0 goto label5;
+
+        $r4 = <java.lang.System: java.io.PrintStream out>;
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Krb5Context.unwrap: data=[");
+
+        $i3 = lengthof r22;
+
+        $r6 = staticinvoke <sun.security.jgss.krb5.Krb5Context: java.lang.String getHexBytes(byte[],int,int)>(r22, 0, $i3);
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<java.io.PrintStream: void println(java.lang.String)>($r9);
+
+     label5:
+        return r22;
+    }
+
+    public final int unwrap(byte[], int, int, byte[], int, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        byte[] r4, r6;
+        sun.security.jgss.krb5.CipherHelper $r1, $r2;
+        sun.security.jgss.krb5.WrapToken_v2 $r11;
+        sun.security.jgss.krb5.WrapToken $r10;
+        int $i0, $i1, $i2, i3, i4, i5, $i7;
+        org.ietf.jgss.GSSException $r9;
+        org.ietf.jgss.MessageProp r5;
+        sun.security.jgss.krb5.Krb5Context r0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r4 := @parameter0: byte[];
+
+        i3 := @parameter1: int;
+
+        i5 := @parameter2: int;
+
+        r6 := @parameter3: byte[];
+
+        i4 := @parameter4: int;
+
+        r5 := @parameter5: org.ietf.jgss.MessageProp;
+
+        $i0 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        if $i0 == 3 goto label1;
+
+        $r9 = new org.ietf.jgss.GSSException;
+
+        $i7 = (int) -1;
+
+        specialinvoke $r9.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(12, $i7, "Unwrap called in invalid state!");
+
+        throw $r9;
+
+     label1:
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i1 = virtualinvoke $r1.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i1 != 0 goto label2;
+
+        $r10 = new sun.security.jgss.krb5.WrapToken;
+
+        specialinvoke $r10.<sun.security.jgss.krb5.WrapToken: void <init>(sun.security.jgss.krb5.Krb5Context,byte[],int,int,org.ietf.jgss.MessageProp)>(r0, r4, i3, i5, r5);
+
+        i5 = virtualinvoke $r10.<sun.security.jgss.krb5.WrapToken: int getData(byte[],int)>(r6, i4);
+
+        specialinvoke r0.<sun.security.jgss.krb5.Krb5Context: void setSequencingAndReplayProps(sun.security.jgss.krb5.MessageToken,org.ietf.jgss.MessageProp)>($r10, r5);
+
+        goto label3;
+
+     label2:
+        $r2 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i2 = virtualinvoke $r2.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i2 != 1 goto label3;
+
+        $r11 = new sun.security.jgss.krb5.WrapToken_v2;
+
+        specialinvoke $r11.<sun.security.jgss.krb5.WrapToken_v2: void <init>(sun.security.jgss.krb5.Krb5Context,byte[],int,int,org.ietf.jgss.MessageProp)>(r0, r4, i3, i5, r5);
+
+        i5 = virtualinvoke $r11.<sun.security.jgss.krb5.WrapToken_v2: int getData(byte[],int)>(r6, i4);
+
+        specialinvoke r0.<sun.security.jgss.krb5.Krb5Context: void setSequencingAndReplayProps(sun.security.jgss.krb5.MessageToken_v2,org.ietf.jgss.MessageProp)>($r11, r5);
+
+     label3:
+        return i5;
+    }
+
+    public final int unwrap(java.io.InputStream, byte[], int, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        byte[] r6;
+        sun.security.jgss.krb5.CipherHelper $r1, $r2;
+        org.ietf.jgss.GSSException $r9;
+        org.ietf.jgss.MessageProp r5;
+        sun.security.jgss.krb5.WrapToken_v2 $r11;
+        sun.security.jgss.krb5.Krb5Context r0;
+        sun.security.jgss.krb5.WrapToken $r10;
+        int $i0, $i1, $i2, i3, i4, $i6;
+        java.io.InputStream r4;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r4 := @parameter0: java.io.InputStream;
+
+        r6 := @parameter1: byte[];
+
+        i3 := @parameter2: int;
+
+        r5 := @parameter3: org.ietf.jgss.MessageProp;
+
+        $i0 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        if $i0 == 3 goto label1;
+
+        $r9 = new org.ietf.jgss.GSSException;
+
+        $i6 = (int) -1;
+
+        specialinvoke $r9.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(12, $i6, "Unwrap called in invalid state!");
+
+        throw $r9;
+
+     label1:
+        i4 = 0;
+
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i1 = virtualinvoke $r1.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i1 != 0 goto label2;
+
+        $r10 = new sun.security.jgss.krb5.WrapToken;
+
+        specialinvoke $r10.<sun.security.jgss.krb5.WrapToken: void <init>(sun.security.jgss.krb5.Krb5Context,java.io.InputStream,org.ietf.jgss.MessageProp)>(r0, r4, r5);
+
+        i4 = virtualinvoke $r10.<sun.security.jgss.krb5.WrapToken: int getData(byte[],int)>(r6, i3);
+
+        specialinvoke r0.<sun.security.jgss.krb5.Krb5Context: void setSequencingAndReplayProps(sun.security.jgss.krb5.MessageToken,org.ietf.jgss.MessageProp)>($r10, r5);
+
+        goto label3;
+
+     label2:
+        $r2 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i2 = virtualinvoke $r2.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i2 != 1 goto label3;
+
+        $r11 = new sun.security.jgss.krb5.WrapToken_v2;
+
+        specialinvoke $r11.<sun.security.jgss.krb5.WrapToken_v2: void <init>(sun.security.jgss.krb5.Krb5Context,java.io.InputStream,org.ietf.jgss.MessageProp)>(r0, r4, r5);
+
+        i4 = virtualinvoke $r11.<sun.security.jgss.krb5.WrapToken_v2: int getData(byte[],int)>(r6, i3);
+
+        specialinvoke r0.<sun.security.jgss.krb5.Krb5Context: void setSequencingAndReplayProps(sun.security.jgss.krb5.MessageToken_v2,org.ietf.jgss.MessageProp)>($r11, r5);
+
+     label3:
+        return i4;
+    }
+
+    public final void unwrap(java.io.InputStream, java.io.OutputStream, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        byte[] r12;
+        sun.security.jgss.krb5.CipherHelper $r1, $r2;
+        sun.security.jgss.krb5.WrapToken_v2 $r15;
+        sun.security.jgss.krb5.WrapToken $r14;
+        int $i0, $i1, $i2, $i4, $i6;
+        java.lang.String $r11;
+        java.io.OutputStream r3;
+        java.io.IOException $r9;
+        org.ietf.jgss.GSSException $r13, $r16;
+        org.ietf.jgss.MessageProp r6;
+        sun.security.jgss.krb5.Krb5Context r0;
+        java.io.InputStream r5;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r5 := @parameter0: java.io.InputStream;
+
+        r3 := @parameter1: java.io.OutputStream;
+
+        r6 := @parameter2: org.ietf.jgss.MessageProp;
+
+        $i0 = r0.<sun.security.jgss.krb5.Krb5Context: int state>;
+
+        if $i0 == 3 goto label1;
+
+        $r13 = new org.ietf.jgss.GSSException;
+
+        $i4 = (int) -1;
+
+        specialinvoke $r13.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(12, $i4, "Unwrap called in invalid state!");
+
+        throw $r13;
+
+     label1:
+        r12 = null;
+
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i1 = virtualinvoke $r1.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i1 != 0 goto label2;
+
+        $r14 = new sun.security.jgss.krb5.WrapToken;
+
+        specialinvoke $r14.<sun.security.jgss.krb5.WrapToken: void <init>(sun.security.jgss.krb5.Krb5Context,java.io.InputStream,org.ietf.jgss.MessageProp)>(r0, r5, r6);
+
+        r12 = virtualinvoke $r14.<sun.security.jgss.krb5.WrapToken: byte[] getData()>();
+
+        specialinvoke r0.<sun.security.jgss.krb5.Krb5Context: void setSequencingAndReplayProps(sun.security.jgss.krb5.MessageToken,org.ietf.jgss.MessageProp)>($r14, r6);
+
+        goto label3;
+
+     label2:
+        $r2 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i2 = virtualinvoke $r2.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i2 != 1 goto label3;
+
+        $r15 = new sun.security.jgss.krb5.WrapToken_v2;
+
+        specialinvoke $r15.<sun.security.jgss.krb5.WrapToken_v2: void <init>(sun.security.jgss.krb5.Krb5Context,java.io.InputStream,org.ietf.jgss.MessageProp)>(r0, r5, r6);
+
+        r12 = virtualinvoke $r15.<sun.security.jgss.krb5.WrapToken_v2: byte[] getData()>();
+
+        specialinvoke r0.<sun.security.jgss.krb5.Krb5Context: void setSequencingAndReplayProps(sun.security.jgss.krb5.MessageToken_v2,org.ietf.jgss.MessageProp)>($r15, r6);
+
+     label3:
+        virtualinvoke r3.<java.io.OutputStream: void write(byte[])>(r12);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r9 := @caughtexception;
+
+        $r16 = new org.ietf.jgss.GSSException;
+
+        $r11 = virtualinvoke $r9.<java.io.IOException: java.lang.String getMessage()>();
+
+        $i6 = (int) -1;
+
+        specialinvoke $r16.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i6, $r11);
+
+        virtualinvoke $r16.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r9);
+
+        throw $r16;
+
+     label6:
+        return;
+
+        catch java.io.IOException from label3 to label4 with label5;
+    }
+
+    public final byte[] getMIC(byte[], int, int, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        byte[] r5, r10;
+        sun.security.jgss.krb5.CipherHelper $r1, $r2;
+        sun.security.jgss.krb5.MicToken $r11;
+        int $i0, $i1, i2, i3, $i5;
+        java.lang.String $r9;
+        java.io.IOException $r7;
+        org.ietf.jgss.GSSException $r13;
+        org.ietf.jgss.MessageProp r4;
+        sun.security.jgss.krb5.Krb5Context r0;
+        sun.security.jgss.krb5.MicToken_v2 $r12;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r5 := @parameter0: byte[];
+
+        i2 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        r4 := @parameter3: org.ietf.jgss.MessageProp;
+
+        r10 = null;
+
+     label1:
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i0 = virtualinvoke $r1.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i0 != 0 goto label2;
+
+        $r11 = new sun.security.jgss.krb5.MicToken;
+
+        specialinvoke $r11.<sun.security.jgss.krb5.MicToken: void <init>(sun.security.jgss.krb5.Krb5Context,org.ietf.jgss.MessageProp,byte[],int,int)>(r0, r4, r5, i2, i3);
+
+        r10 = virtualinvoke $r11.<sun.security.jgss.krb5.MicToken: byte[] encode()>();
+
+        goto label3;
+
+     label2:
+        $r2 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i1 = virtualinvoke $r2.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i1 != 1 goto label3;
+
+        $r12 = new sun.security.jgss.krb5.MicToken_v2;
+
+        specialinvoke $r12.<sun.security.jgss.krb5.MicToken_v2: void <init>(sun.security.jgss.krb5.Krb5Context,org.ietf.jgss.MessageProp,byte[],int,int)>(r0, r4, r5, i2, i3);
+
+        r10 = virtualinvoke $r12.<sun.security.jgss.krb5.MicToken_v2: byte[] encode()>();
+
+     label3:
+        return r10;
+
+     label4:
+        $r7 := @caughtexception;
+
+        $r13 = new org.ietf.jgss.GSSException;
+
+        $r9 = virtualinvoke $r7.<java.io.IOException: java.lang.String getMessage()>();
+
+        $i5 = (int) -1;
+
+        specialinvoke $r13.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i5, $r9);
+
+        virtualinvoke $r13.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r7);
+
+        throw $r13;
+
+        catch java.io.IOException from label1 to label3 with label4;
+    }
+
+    private int getMIC(byte[], int, int, byte[], int, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        byte[] r5, r6;
+        sun.security.jgss.krb5.CipherHelper $r1, $r2;
+        sun.security.jgss.krb5.MicToken $r11;
+        int $i0, $i1, i2, i3, i4, i5, $i7;
+        java.lang.String $r10;
+        java.io.IOException $r8;
+        org.ietf.jgss.GSSException $r13;
+        org.ietf.jgss.MessageProp r4;
+        sun.security.jgss.krb5.Krb5Context r0;
+        sun.security.jgss.krb5.MicToken_v2 $r12;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r5 := @parameter0: byte[];
+
+        i2 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        r6 := @parameter3: byte[];
+
+        i4 := @parameter4: int;
+
+        r4 := @parameter5: org.ietf.jgss.MessageProp;
+
+        i5 = 0;
+
+     label1:
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i0 = virtualinvoke $r1.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i0 != 0 goto label2;
+
+        $r11 = new sun.security.jgss.krb5.MicToken;
+
+        specialinvoke $r11.<sun.security.jgss.krb5.MicToken: void <init>(sun.security.jgss.krb5.Krb5Context,org.ietf.jgss.MessageProp,byte[],int,int)>(r0, r4, r5, i2, i3);
+
+        i5 = virtualinvoke $r11.<sun.security.jgss.krb5.MicToken: int encode(byte[],int)>(r6, i4);
+
+        goto label3;
+
+     label2:
+        $r2 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i1 = virtualinvoke $r2.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i1 != 1 goto label3;
+
+        $r12 = new sun.security.jgss.krb5.MicToken_v2;
+
+        specialinvoke $r12.<sun.security.jgss.krb5.MicToken_v2: void <init>(sun.security.jgss.krb5.Krb5Context,org.ietf.jgss.MessageProp,byte[],int,int)>(r0, r4, r5, i2, i3);
+
+        i5 = virtualinvoke $r12.<sun.security.jgss.krb5.MicToken_v2: int encode(byte[],int)>(r6, i4);
+
+     label3:
+        return i5;
+
+     label4:
+        $r8 := @caughtexception;
+
+        $r13 = new org.ietf.jgss.GSSException;
+
+        $r10 = virtualinvoke $r8.<java.io.IOException: java.lang.String getMessage()>();
+
+        $i7 = (int) -1;
+
+        specialinvoke $r13.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i7, $r10);
+
+        virtualinvoke $r13.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r8);
+
+        throw $r13;
+
+        catch java.io.IOException from label1 to label3 with label4;
+    }
+
+    private void getMIC(byte[], int, int, java.io.OutputStream, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        byte[] r5;
+        sun.security.jgss.krb5.CipherHelper $r1, $r2;
+        sun.security.jgss.krb5.MicToken $r11;
+        int $i0, $i1, i2, i3, $i5;
+        java.lang.String $r10;
+        java.io.OutputStream r6;
+        java.io.IOException $r8;
+        org.ietf.jgss.GSSException $r13;
+        org.ietf.jgss.MessageProp r4;
+        sun.security.jgss.krb5.Krb5Context r0;
+        sun.security.jgss.krb5.MicToken_v2 $r12;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r5 := @parameter0: byte[];
+
+        i2 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        r6 := @parameter3: java.io.OutputStream;
+
+        r4 := @parameter4: org.ietf.jgss.MessageProp;
+
+     label1:
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i0 = virtualinvoke $r1.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i0 != 0 goto label2;
+
+        $r11 = new sun.security.jgss.krb5.MicToken;
+
+        specialinvoke $r11.<sun.security.jgss.krb5.MicToken: void <init>(sun.security.jgss.krb5.Krb5Context,org.ietf.jgss.MessageProp,byte[],int,int)>(r0, r4, r5, i2, i3);
+
+        virtualinvoke $r11.<sun.security.jgss.krb5.MicToken: void encode(java.io.OutputStream)>(r6);
+
+        goto label3;
+
+     label2:
+        $r2 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i1 = virtualinvoke $r2.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i1 != 1 goto label3;
+
+        $r12 = new sun.security.jgss.krb5.MicToken_v2;
+
+        specialinvoke $r12.<sun.security.jgss.krb5.MicToken_v2: void <init>(sun.security.jgss.krb5.Krb5Context,org.ietf.jgss.MessageProp,byte[],int,int)>(r0, r4, r5, i2, i3);
+
+        virtualinvoke $r12.<sun.security.jgss.krb5.MicToken_v2: void encode(java.io.OutputStream)>(r6);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r8 := @caughtexception;
+
+        $r13 = new org.ietf.jgss.GSSException;
+
+        $r10 = virtualinvoke $r8.<java.io.IOException: java.lang.String getMessage()>();
+
+        $i5 = (int) -1;
+
+        specialinvoke $r13.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i5, $r10);
+
+        virtualinvoke $r13.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r8);
+
+        throw $r13;
+
+     label5:
+        return;
+
+        catch java.io.IOException from label1 to label3 with label4;
+    }
+
+    public final void getMIC(java.io.InputStream, java.io.OutputStream, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        java.io.OutputStream r3;
+        byte[] r1;
+        java.io.IOException $r5;
+        org.ietf.jgss.GSSException $r8;
+        org.ietf.jgss.MessageProp r4;
+        sun.security.jgss.krb5.Krb5Context r2;
+        int $i0, $i1, $i3;
+        java.lang.String $r7;
+        java.io.InputStream r0;
+
+        r2 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r0 := @parameter0: java.io.InputStream;
+
+        r3 := @parameter1: java.io.OutputStream;
+
+        r4 := @parameter2: org.ietf.jgss.MessageProp;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.io.InputStream: int available()>();
+
+        r1 = newarray (byte)[$i0];
+
+        virtualinvoke r0.<java.io.InputStream: int read(byte[])>(r1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r8 = new org.ietf.jgss.GSSException;
+
+        $r7 = virtualinvoke $r5.<java.io.IOException: java.lang.String getMessage()>();
+
+        $i3 = (int) -1;
+
+        specialinvoke $r8.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i3, $r7);
+
+        virtualinvoke $r8.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r5);
+
+        throw $r8;
+
+     label4:
+        $i1 = lengthof r1;
+
+        specialinvoke r2.<sun.security.jgss.krb5.Krb5Context: void getMIC(byte[],int,int,java.io.OutputStream,org.ietf.jgss.MessageProp)>(r1, 0, $i1, r3, r4);
+
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public final void verifyMIC(byte[], int, int, byte[], int, int, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        byte[] r4, r6;
+        sun.security.jgss.krb5.CipherHelper $r1, $r2;
+        org.ietf.jgss.MessageProp r5;
+        sun.security.jgss.krb5.Krb5Context r0;
+        sun.security.jgss.krb5.MicToken $r7;
+        int $i0, $i1, i2, i3, i4, i5;
+        sun.security.jgss.krb5.MicToken_v2 $r3;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r4 := @parameter0: byte[];
+
+        i2 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        r6 := @parameter3: byte[];
+
+        i4 := @parameter4: int;
+
+        i5 := @parameter5: int;
+
+        r5 := @parameter6: org.ietf.jgss.MessageProp;
+
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i0 = virtualinvoke $r1.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i0 != 0 goto label1;
+
+        $r7 = new sun.security.jgss.krb5.MicToken;
+
+        specialinvoke $r7.<sun.security.jgss.krb5.MicToken: void <init>(sun.security.jgss.krb5.Krb5Context,byte[],int,int,org.ietf.jgss.MessageProp)>(r0, r4, i2, i3, r5);
+
+        virtualinvoke $r7.<sun.security.jgss.krb5.MicToken: void verify(byte[],int,int)>(r6, i4, i5);
+
+        specialinvoke r0.<sun.security.jgss.krb5.Krb5Context: void setSequencingAndReplayProps(sun.security.jgss.krb5.MessageToken,org.ietf.jgss.MessageProp)>($r7, r5);
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i1 = virtualinvoke $r2.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i1 != 1 goto label2;
+
+        $r3 = new sun.security.jgss.krb5.MicToken_v2;
+
+        specialinvoke $r3.<sun.security.jgss.krb5.MicToken_v2: void <init>(sun.security.jgss.krb5.Krb5Context,byte[],int,int,org.ietf.jgss.MessageProp)>(r0, r4, i2, i3, r5);
+
+        virtualinvoke $r3.<sun.security.jgss.krb5.MicToken_v2: void verify(byte[],int,int)>(r6, i4, i5);
+
+        specialinvoke r0.<sun.security.jgss.krb5.Krb5Context: void setSequencingAndReplayProps(sun.security.jgss.krb5.MessageToken_v2,org.ietf.jgss.MessageProp)>($r3, r5);
+
+     label2:
+        return;
+    }
+
+    private void verifyMIC(java.io.InputStream, byte[], int, int, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        byte[] r6;
+        sun.security.jgss.krb5.CipherHelper $r1, $r2;
+        org.ietf.jgss.MessageProp r5;
+        sun.security.jgss.krb5.Krb5Context r0;
+        sun.security.jgss.krb5.MicToken $r7;
+        int $i0, $i1, i2, i3;
+        sun.security.jgss.krb5.MicToken_v2 $r3;
+        java.io.InputStream r4;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r4 := @parameter0: java.io.InputStream;
+
+        r6 := @parameter1: byte[];
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        r5 := @parameter4: org.ietf.jgss.MessageProp;
+
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i0 = virtualinvoke $r1.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i0 != 0 goto label1;
+
+        $r7 = new sun.security.jgss.krb5.MicToken;
+
+        specialinvoke $r7.<sun.security.jgss.krb5.MicToken: void <init>(sun.security.jgss.krb5.Krb5Context,java.io.InputStream,org.ietf.jgss.MessageProp)>(r0, r4, r5);
+
+        virtualinvoke $r7.<sun.security.jgss.krb5.MicToken: void verify(byte[],int,int)>(r6, i2, i3);
+
+        specialinvoke r0.<sun.security.jgss.krb5.Krb5Context: void setSequencingAndReplayProps(sun.security.jgss.krb5.MessageToken,org.ietf.jgss.MessageProp)>($r7, r5);
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.CipherHelper cipherHelper>;
+
+        $i1 = virtualinvoke $r2.<sun.security.jgss.krb5.CipherHelper: int getProto()>();
+
+        if $i1 != 1 goto label2;
+
+        $r3 = new sun.security.jgss.krb5.MicToken_v2;
+
+        specialinvoke $r3.<sun.security.jgss.krb5.MicToken_v2: void <init>(sun.security.jgss.krb5.Krb5Context,java.io.InputStream,org.ietf.jgss.MessageProp)>(r0, r4, r5);
+
+        virtualinvoke $r3.<sun.security.jgss.krb5.MicToken_v2: void verify(byte[],int,int)>(r6, i2, i3);
+
+        specialinvoke r0.<sun.security.jgss.krb5.Krb5Context: void setSequencingAndReplayProps(sun.security.jgss.krb5.MessageToken_v2,org.ietf.jgss.MessageProp)>($r3, r5);
+
+     label2:
+        return;
+    }
+
+    public final void verifyMIC(java.io.InputStream, java.io.InputStream, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        byte[] r1;
+        java.io.IOException $r5;
+        org.ietf.jgss.GSSException $r8;
+        org.ietf.jgss.MessageProp r4;
+        sun.security.jgss.krb5.Krb5Context r2;
+        int $i0, $i1, $i3;
+        java.lang.String $r7;
+        java.io.InputStream r0, r3;
+
+        r2 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r3 := @parameter0: java.io.InputStream;
+
+        r0 := @parameter1: java.io.InputStream;
+
+        r4 := @parameter2: org.ietf.jgss.MessageProp;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.io.InputStream: int available()>();
+
+        r1 = newarray (byte)[$i0];
+
+        virtualinvoke r0.<java.io.InputStream: int read(byte[])>(r1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r8 = new org.ietf.jgss.GSSException;
+
+        $r7 = virtualinvoke $r5.<java.io.IOException: java.lang.String getMessage()>();
+
+        $i3 = (int) -1;
+
+        specialinvoke $r8.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i3, $r7);
+
+        virtualinvoke $r8.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r5);
+
+        throw $r8;
+
+     label4:
+        $i1 = lengthof r1;
+
+        specialinvoke r2.<sun.security.jgss.krb5.Krb5Context: void verifyMIC(java.io.InputStream,byte[],int,int,org.ietf.jgss.MessageProp)>(r3, r1, 0, $i1, r4);
+
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public final byte[] export() throws org.ietf.jgss.GSSException
+    {
+        int $i1;
+        org.ietf.jgss.GSSException $r2;
+        sun.security.jgss.krb5.Krb5Context r1;
+
+        r1 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        $r2 = new org.ietf.jgss.GSSException;
+
+        $i1 = (int) -1;
+
+        specialinvoke $r2.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(16, $i1, "GSS Export Context not available");
+
+        throw $r2;
+    }
+
+    public final void dispose() throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.krb5.Krb5Context r0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: int state> = 4;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5CredElement delegatedCred> = null;
+
+        return;
+    }
+
+    public final java.security.Provider getProvider()
+    {
+        sun.security.jgss.krb5.Krb5Context r1;
+        java.security.Provider $r0;
+
+        r1 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        $r0 = <sun.security.jgss.krb5.Krb5MechFactory: java.security.Provider PROVIDER>;
+
+        return $r0;
+    }
+
+    private void setSequencingAndReplayProps(sun.security.jgss.krb5.MessageToken, org.ietf.jgss.MessageProp)
+    {
+        sun.security.jgss.krb5.MessageToken r1;
+        int $i0;
+        sun.security.jgss.TokenTracker $r3;
+        org.ietf.jgss.MessageProp r2;
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r1 := @parameter0: sun.security.jgss.krb5.MessageToken;
+
+        r2 := @parameter1: org.ietf.jgss.MessageProp;
+
+        $z0 = r0.<sun.security.jgss.krb5.Krb5Context: boolean replayDetState>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = r0.<sun.security.jgss.krb5.Krb5Context: boolean sequenceDetState>;
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $i0 = virtualinvoke r1.<sun.security.jgss.krb5.MessageToken: int getSequenceNumber()>();
+
+        $r3 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.TokenTracker peerTokenTracker>;
+
+        virtualinvoke $r3.<sun.security.jgss.TokenTracker: void getProps(int,org.ietf.jgss.MessageProp)>($i0, r2);
+
+     label2:
+        return;
+    }
+
+    private void setSequencingAndReplayProps(sun.security.jgss.krb5.MessageToken_v2, org.ietf.jgss.MessageProp)
+    {
+        sun.security.jgss.krb5.MessageToken_v2 r1;
+        int $i0;
+        sun.security.jgss.TokenTracker $r3;
+        org.ietf.jgss.MessageProp r2;
+        sun.security.jgss.krb5.Krb5Context r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r1 := @parameter0: sun.security.jgss.krb5.MessageToken_v2;
+
+        r2 := @parameter1: org.ietf.jgss.MessageProp;
+
+        $z0 = r0.<sun.security.jgss.krb5.Krb5Context: boolean replayDetState>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = r0.<sun.security.jgss.krb5.Krb5Context: boolean sequenceDetState>;
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $i0 = virtualinvoke r1.<sun.security.jgss.krb5.MessageToken_v2: int getSequenceNumber()>();
+
+        $r3 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.TokenTracker peerTokenTracker>;
+
+        virtualinvoke $r3.<sun.security.jgss.TokenTracker: void getProps(int,org.ietf.jgss.MessageProp)>($i0, r2);
+
+     label2:
+        return;
+    }
+
+    private void checkPermission(java.lang.String, java.lang.String)
+    {
+        javax.security.auth.kerberos.ServicePermission $r1;
+        java.lang.String r2, r3;
+        sun.security.jgss.krb5.Krb5Context r4;
+        java.lang.SecurityManager $r0;
+
+        r4 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r1 = new javax.security.auth.kerberos.ServicePermission;
+
+        specialinvoke $r1.<javax.security.auth.kerberos.ServicePermission: void <init>(java.lang.String,java.lang.String)>(r2, r3);
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r1);
+
+     label1:
+        return;
+    }
+
+    private static java.lang.String getHexBytes(byte[], int, int)
+    {
+        byte[] r2;
+        byte $b1, $b4, b5;
+        java.lang.StringBuffer $r5;
+        int i0, $i2, i3, i6, i7, $i8, $i9;
+        java.lang.String $r1, $r3, $r4;
+
+        r2 := @parameter0: byte[];
+
+        i6 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        $r5 = new java.lang.StringBuffer;
+
+        specialinvoke $r5.<java.lang.StringBuffer: void <init>()>();
+
+        i7 = 0;
+
+     label1:
+        if i7 >= i0 goto label2;
+
+        $b1 = r2[i7];
+
+        $i8 = (int) $b1;
+
+        $i2 = $i8 >> 4;
+
+        i3 = $i2 & 15;
+
+        $b4 = r2[i7];
+
+        b5 = $b4 & 15;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>(i3);
+
+        virtualinvoke $r5.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r3);
+
+        $i9 = (int) b5;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i9);
+
+        virtualinvoke $r5.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r4);
+
+        virtualinvoke $r5.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(32);
+
+        i7 = i7 + 1;
+
+        goto label1;
+
+     label2:
+        $r1 = virtualinvoke $r5.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r1;
+    }
+
+    private static java.lang.String printState(int)
+    {
+        int i0;
+        java.lang.StringBuilder $r0, $r1, $r2;
+        java.lang.String $r3;
+
+        i0 := @parameter0: int;
+
+        tableswitch(i0)
+        {
+            case 1: goto label1;
+            case 2: goto label2;
+            case 3: goto label3;
+            case 4: goto label4;
+            default: goto label5;
+        };
+
+     label1:
+        return "STATE_NEW";
+
+     label2:
+        return "STATE_IN_PROCESS";
+
+     label3:
+        return "STATE_DONE";
+
+     label4:
+        return "STATE_DELETED";
+
+     label5:
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown state ");
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+    }
+
+    sun.security.jgss.GSSCaller getCaller()
+    {
+        sun.security.jgss.GSSCaller $r1;
+        sun.security.jgss.krb5.Krb5Context r0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.GSSCaller caller>;
+
+        return $r1;
+    }
+
+    public java.lang.Object inquireSecContext(com.sun.security.jgss.InquireType) throws org.ietf.jgss.GSSException
+    {
+        com.sun.security.jgss.InquireType r1;
+        com.sun.security.jgss.AuthorizationDataEntry[] $r4, $r5;
+        int[] $r2;
+        int $i0, $i1, $i3, $i5, $i7;
+        java.lang.String $r3;
+        boolean $z0, $z1;
+        boolean[] $r7;
+        org.ietf.jgss.GSSException $r14, $r16, $r17;
+        sun.security.jgss.krb5.Krb5Context r0;
+        sun.security.krb5.EncryptionKey $r10;
+        java.lang.Object $r8, $r13;
+        sun.security.jgss.krb5.Krb5Context$KerberosSessionKey $r15;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r1 := @parameter0: com.sun.security.jgss.InquireType;
+
+        $z0 = virtualinvoke r0.<sun.security.jgss.krb5.Krb5Context: boolean isEstablished()>();
+
+        if $z0 != 0 goto label1;
+
+        $r14 = new org.ietf.jgss.GSSException;
+
+        $i3 = (int) -1;
+
+        specialinvoke $r14.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(12, $i3, "Security context not established.");
+
+        throw $r14;
+
+     label1:
+        $r2 = <sun.security.jgss.krb5.Krb5Context$4: int[] $SwitchMap$com$sun$security$jgss$InquireType>;
+
+        $i0 = virtualinvoke r1.<com.sun.security.jgss.InquireType: int ordinal()>();
+
+        $i1 = $r2[$i0];
+
+        tableswitch($i1)
+        {
+            case 1: goto label2;
+            case 2: goto label3;
+            case 3: goto label4;
+            case 4: goto label8;
+            default: goto label9;
+        };
+
+     label2:
+        $r15 = new sun.security.jgss.krb5.Krb5Context$KerberosSessionKey;
+
+        $r10 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.krb5.EncryptionKey key>;
+
+        specialinvoke $r15.<sun.security.jgss.krb5.Krb5Context$KerberosSessionKey: void <init>(sun.security.krb5.EncryptionKey)>($r10);
+
+        return $r15;
+
+     label3:
+        $r7 = r0.<sun.security.jgss.krb5.Krb5Context: boolean[] tktFlags>;
+
+        $r8 = virtualinvoke $r7.<java.lang.Object: java.lang.Object clone()>();
+
+        return $r8;
+
+     label4:
+        $z1 = virtualinvoke r0.<sun.security.jgss.krb5.Krb5Context: boolean isInitiator()>();
+
+        if $z1 == 0 goto label5;
+
+        $r16 = new org.ietf.jgss.GSSException;
+
+        $i5 = (int) -1;
+
+        specialinvoke $r16.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(16, $i5, "AuthzData not available on initiator side.");
+
+        throw $r16;
+
+     label5:
+        $r4 = r0.<sun.security.jgss.krb5.Krb5Context: com.sun.security.jgss.AuthorizationDataEntry[] authzData>;
+
+        if $r4 != null goto label6;
+
+        $r13 = null;
+
+        goto label7;
+
+     label6:
+        $r5 = r0.<sun.security.jgss.krb5.Krb5Context: com.sun.security.jgss.AuthorizationDataEntry[] authzData>;
+
+        $r13 = virtualinvoke $r5.<java.lang.Object: java.lang.Object clone()>();
+
+     label7:
+        return $r13;
+
+     label8:
+        $r3 = r0.<sun.security.jgss.krb5.Krb5Context: java.lang.String authTime>;
+
+        return $r3;
+
+     label9:
+        $r17 = new org.ietf.jgss.GSSException;
+
+        $i7 = (int) -1;
+
+        specialinvoke $r17.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(16, $i7, "Inquire type not supported.");
+
+        throw $r17;
+    }
+
+    public void setTktFlags(boolean[])
+    {
+        boolean[] r1;
+        sun.security.jgss.krb5.Krb5Context r0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r1 := @parameter0: boolean[];
+
+        r0.<sun.security.jgss.krb5.Krb5Context: boolean[] tktFlags> = r1;
+
+        return;
+    }
+
+    public void setAuthTime(java.lang.String)
+    {
+        java.lang.String r1;
+        sun.security.jgss.krb5.Krb5Context r0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0.<sun.security.jgss.krb5.Krb5Context: java.lang.String authTime> = r1;
+
+        return;
+    }
+
+    public void setAuthzData(com.sun.security.jgss.AuthorizationDataEntry[])
+    {
+        com.sun.security.jgss.AuthorizationDataEntry[] r1;
+        sun.security.jgss.krb5.Krb5Context r0;
+
+        r0 := @this: sun.security.jgss.krb5.Krb5Context;
+
+        r1 := @parameter0: com.sun.security.jgss.AuthorizationDataEntry[];
+
+        r0.<sun.security.jgss.krb5.Krb5Context: com.sun.security.jgss.AuthorizationDataEntry[] authzData> = r1;
+
+        return;
+    }
+
+    static sun.security.jgss.krb5.Krb5NameElement access$000(sun.security.jgss.krb5.Krb5Context)
+    {
+        sun.security.jgss.krb5.Krb5NameElement $r1;
+        sun.security.jgss.krb5.Krb5Context r0;
+
+        r0 := @parameter0: sun.security.jgss.krb5.Krb5Context;
+
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5NameElement myName>;
+
+        return $r1;
+    }
+
+    static sun.security.jgss.krb5.Krb5NameElement access$100(sun.security.jgss.krb5.Krb5Context)
+    {
+        sun.security.jgss.krb5.Krb5NameElement $r1;
+        sun.security.jgss.krb5.Krb5Context r0;
+
+        r0 := @parameter0: sun.security.jgss.krb5.Krb5Context;
+
+        $r1 = r0.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.krb5.Krb5NameElement peerName>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        boolean $z0;
+
+        <sun.security.jgss.krb5.Krb5Context: int ACCEPTOR_SUBKEY> = 2;
+
+        <sun.security.jgss.krb5.Krb5Context: int INITIATOR_SUBKEY> = 1;
+
+        <sun.security.jgss.krb5.Krb5Context: int SESSION_KEY> = 0;
+
+        <sun.security.jgss.krb5.Krb5Context: int STATE_DELETED> = 4;
+
+        <sun.security.jgss.krb5.Krb5Context: int STATE_DONE> = 3;
+
+        <sun.security.jgss.krb5.Krb5Context: int STATE_IN_PROCESS> = 2;
+
+        <sun.security.jgss.krb5.Krb5Context: int STATE_NEW> = 1;
+
+        $z0 = <sun.security.jgss.krb5.Krb5Util: boolean DEBUG>;
+
+        <sun.security.jgss.krb5.Krb5Context: boolean DEBUG> = $z0;
+
+        return;
+    }
+}

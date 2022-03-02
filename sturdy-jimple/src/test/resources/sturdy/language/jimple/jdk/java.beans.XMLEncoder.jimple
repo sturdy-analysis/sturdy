@@ -1,0 +1,1987 @@
+public class java.beans.XMLEncoder extends java.beans.Encoder implements java.lang.AutoCloseable
+{
+    private final java.nio.charset.CharsetEncoder encoder;
+    private final java.lang.String charset;
+    private final boolean declaration;
+    private java.io.OutputStreamWriter out;
+    private java.lang.Object owner;
+    private int indentation;
+    private boolean internal;
+    private java.util.Map valueToExpression;
+    private java.util.Map targetToStatementList;
+    private boolean preambleWritten;
+    private java.beans.NameGenerator nameGenerator;
+
+    public void <init>(java.io.OutputStream)
+    {
+        java.io.OutputStream r1;
+        java.beans.XMLEncoder r0;
+
+        r0 := @this: java.beans.XMLEncoder;
+
+        r1 := @parameter0: java.io.OutputStream;
+
+        specialinvoke r0.<java.beans.XMLEncoder: void <init>(java.io.OutputStream,java.lang.String,boolean,int)>(r1, "UTF-8", 1, 0);
+
+        return;
+    }
+
+    public void <init>(java.io.OutputStream, java.lang.String, boolean, int)
+    {
+        java.io.OutputStream r1;
+        java.util.IdentityHashMap $r7, $r8;
+        java.beans.XMLEncoder r0;
+        java.lang.IllegalArgumentException $r10, $r11;
+        java.beans.NameGenerator $r9;
+        java.nio.charset.Charset $r3;
+        java.nio.charset.CharsetEncoder $r4, $r6;
+        int i0;
+        java.io.OutputStreamWriter $r5;
+        java.lang.String r2;
+        boolean z0;
+
+        r0 := @this: java.beans.XMLEncoder;
+
+        r1 := @parameter0: java.io.OutputStream;
+
+        r2 := @parameter1: java.lang.String;
+
+        z0 := @parameter2: boolean;
+
+        i0 := @parameter3: int;
+
+        specialinvoke r0.<java.beans.Encoder: void <init>()>();
+
+        r0.<java.beans.XMLEncoder: int indentation> = 0;
+
+        r0.<java.beans.XMLEncoder: boolean internal> = 0;
+
+        r0.<java.beans.XMLEncoder: boolean preambleWritten> = 0;
+
+        if r1 != null goto label1;
+
+        $r11 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r11.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("the output stream cannot be null");
+
+        throw $r11;
+
+     label1:
+        if i0 >= 0 goto label2;
+
+        $r10 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r10.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("the indentation must be >= 0");
+
+        throw $r10;
+
+     label2:
+        $r3 = staticinvoke <java.nio.charset.Charset: java.nio.charset.Charset forName(java.lang.String)>(r2);
+
+        $r4 = virtualinvoke $r3.<java.nio.charset.Charset: java.nio.charset.CharsetEncoder newEncoder()>();
+
+        r0.<java.beans.XMLEncoder: java.nio.charset.CharsetEncoder encoder> = $r4;
+
+        r0.<java.beans.XMLEncoder: java.lang.String charset> = r2;
+
+        r0.<java.beans.XMLEncoder: boolean declaration> = z0;
+
+        r0.<java.beans.XMLEncoder: int indentation> = i0;
+
+        $r5 = new java.io.OutputStreamWriter;
+
+        $r6 = virtualinvoke $r3.<java.nio.charset.Charset: java.nio.charset.CharsetEncoder newEncoder()>();
+
+        specialinvoke $r5.<java.io.OutputStreamWriter: void <init>(java.io.OutputStream,java.nio.charset.CharsetEncoder)>(r1, $r6);
+
+        r0.<java.beans.XMLEncoder: java.io.OutputStreamWriter out> = $r5;
+
+        $r7 = new java.util.IdentityHashMap;
+
+        specialinvoke $r7.<java.util.IdentityHashMap: void <init>()>();
+
+        r0.<java.beans.XMLEncoder: java.util.Map valueToExpression> = $r7;
+
+        $r8 = new java.util.IdentityHashMap;
+
+        specialinvoke $r8.<java.util.IdentityHashMap: void <init>()>();
+
+        r0.<java.beans.XMLEncoder: java.util.Map targetToStatementList> = $r8;
+
+        $r9 = new java.beans.NameGenerator;
+
+        specialinvoke $r9.<java.beans.NameGenerator: void <init>()>();
+
+        r0.<java.beans.XMLEncoder: java.beans.NameGenerator nameGenerator> = $r9;
+
+        return;
+    }
+
+    public void setOwner(java.lang.Object)
+    {
+        java.beans.Expression $r2;
+        java.lang.Object[] $r3;
+        java.beans.XMLEncoder r0;
+        java.lang.Object r1;
+
+        r0 := @this: java.beans.XMLEncoder;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r0.<java.beans.XMLEncoder: java.lang.Object owner> = r1;
+
+        $r2 = new java.beans.Expression;
+
+        $r3 = newarray (java.lang.Object)[0];
+
+        specialinvoke $r2.<java.beans.Expression: void <init>(java.lang.Object,java.lang.String,java.lang.Object[])>(r0, "getOwner", $r3);
+
+        virtualinvoke r0.<java.beans.XMLEncoder: void writeExpression(java.beans.Expression)>($r2);
+
+        return;
+    }
+
+    public java.lang.Object getOwner()
+    {
+        java.lang.Object $r1;
+        java.beans.XMLEncoder r0;
+
+        r0 := @this: java.beans.XMLEncoder;
+
+        $r1 = r0.<java.beans.XMLEncoder: java.lang.Object owner>;
+
+        return $r1;
+    }
+
+    public void writeObject(java.lang.Object)
+    {
+        java.lang.Object[] $r2;
+        java.beans.XMLEncoder r0;
+        java.lang.Object r3;
+        java.beans.Statement $r1;
+        boolean $z0;
+
+        r0 := @this: java.beans.XMLEncoder;
+
+        r3 := @parameter0: java.lang.Object;
+
+        $z0 = r0.<java.beans.XMLEncoder: boolean internal>;
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<java.beans.Encoder: void writeObject(java.lang.Object)>(r3);
+
+        goto label2;
+
+     label1:
+        $r1 = new java.beans.Statement;
+
+        $r2 = newarray (java.lang.Object)[1];
+
+        $r2[0] = r3;
+
+        specialinvoke $r1.<java.beans.Statement: void <init>(java.lang.Object,java.lang.String,java.lang.Object[])>(r0, "writeObject", $r2);
+
+        virtualinvoke r0.<java.beans.XMLEncoder: void writeStatement(java.beans.Statement)>($r1);
+
+     label2:
+        return;
+    }
+
+    private java.util.List statementList(java.lang.Object)
+    {
+        java.util.List r6;
+        java.beans.XMLEncoder r0;
+        java.util.Map $r2, $r5;
+        java.lang.Object r1, $r3;
+        java.util.ArrayList $r4;
+
+        r0 := @this: java.beans.XMLEncoder;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = r0.<java.beans.XMLEncoder: java.util.Map targetToStatementList>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r6 = (java.util.List) $r3;
+
+        if r6 != null goto label1;
+
+        $r4 = new java.util.ArrayList;
+
+        specialinvoke $r4.<java.util.ArrayList: void <init>()>();
+
+        r6 = $r4;
+
+        $r5 = r0.<java.beans.XMLEncoder: java.util.Map targetToStatementList>;
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r4);
+
+     label1:
+        return r6;
+    }
+
+    private void mark(java.lang.Object, boolean)
+    {
+        java.beans.Expression r3;
+        java.beans.XMLEncoder r1;
+        java.util.List $r6;
+        java.beans.XMLEncoder$ValueData $r2;
+        int $i0, $i1, $i2, $i3;
+        java.lang.Object r0, $r5;
+        java.lang.Class $r4;
+        boolean z0, $z1, $z2;
+
+        r1 := @this: java.beans.XMLEncoder;
+
+        r0 := @parameter0: java.lang.Object;
+
+        z0 := @parameter1: boolean;
+
+        if r0 == null goto label1;
+
+        if r0 != r1 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        $r2 = specialinvoke r1.<java.beans.XMLEncoder: java.beans.XMLEncoder$ValueData getValueData(java.lang.Object)>(r0);
+
+        r3 = $r2.<java.beans.XMLEncoder$ValueData: java.beans.Expression exp>;
+
+        $r4 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        if $r4 != class "Ljava/lang/String;" goto label3;
+
+        if r3 != null goto label3;
+
+        return;
+
+     label3:
+        if z0 == 0 goto label4;
+
+        $i2 = $r2.<java.beans.XMLEncoder$ValueData: int refs>;
+
+        $i3 = $i2 + 1;
+
+        $r2.<java.beans.XMLEncoder$ValueData: int refs> = $i3;
+
+     label4:
+        $z1 = $r2.<java.beans.XMLEncoder$ValueData: boolean marked>;
+
+        if $z1 == 0 goto label5;
+
+        return;
+
+     label5:
+        $r2.<java.beans.XMLEncoder$ValueData: boolean marked> = 1;
+
+        $r5 = virtualinvoke r3.<java.beans.Expression: java.lang.Object getTarget()>();
+
+        specialinvoke r1.<java.beans.XMLEncoder: void mark(java.beans.Statement)>(r3);
+
+        $z2 = $r5 instanceof java.lang.Class;
+
+        if $z2 != 0 goto label6;
+
+        $r6 = specialinvoke r1.<java.beans.XMLEncoder: java.util.List statementList(java.lang.Object)>($r5);
+
+        interfaceinvoke $r6.<java.util.List: boolean add(java.lang.Object)>(r3);
+
+        $i0 = $r2.<java.beans.XMLEncoder$ValueData: int refs>;
+
+        $i1 = $i0 + 1;
+
+        $r2.<java.beans.XMLEncoder$ValueData: int refs> = $i1;
+
+     label6:
+        return;
+    }
+
+    private void mark(java.beans.Statement)
+    {
+        java.lang.Object[] $r1;
+        java.beans.XMLEncoder r2;
+        java.beans.Statement r0;
+        int $i0, i1;
+        java.lang.Object $r3, r4;
+        boolean $z0;
+
+        r2 := @this: java.beans.XMLEncoder;
+
+        r0 := @parameter0: java.beans.Statement;
+
+        $r1 = virtualinvoke r0.<java.beans.Statement: java.lang.Object[] getArguments()>();
+
+        i1 = 0;
+
+     label1:
+        $i0 = lengthof $r1;
+
+        if i1 >= $i0 goto label2;
+
+        r4 = $r1[i1];
+
+        specialinvoke r2.<java.beans.XMLEncoder: void mark(java.lang.Object,boolean)>(r4, 1);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        $r3 = virtualinvoke r0.<java.beans.Statement: java.lang.Object getTarget()>();
+
+        $z0 = r0 instanceof java.beans.Expression;
+
+        specialinvoke r2.<java.beans.XMLEncoder: void mark(java.lang.Object,boolean)>($r3, $z0);
+
+        return;
+    }
+
+    public void writeStatement(java.beans.Statement)
+    {
+        java.lang.Object[] $r4;
+        java.beans.XMLEncoder r0;
+        int $i0, $i1;
+        java.lang.String $r3, $r11;
+        boolean z0, $z1, $z2, $z3;
+        java.beans.Statement r1;
+        java.lang.Exception $r5, $r7;
+        java.beans.ExceptionListener $r6;
+        java.util.List $r13;
+        java.lang.Object $r2, r12;
+        java.lang.StringBuilder $r8, $r9, $r10;
+
+        r0 := @this: java.beans.XMLEncoder;
+
+        r1 := @parameter0: java.beans.Statement;
+
+        z0 = r0.<java.beans.XMLEncoder: boolean internal>;
+
+        r0.<java.beans.XMLEncoder: boolean internal> = 1;
+
+     label1:
+        specialinvoke r0.<java.beans.Encoder: void writeStatement(java.beans.Statement)>(r1);
+
+        specialinvoke r0.<java.beans.XMLEncoder: void mark(java.beans.Statement)>(r1);
+
+        $r2 = virtualinvoke r1.<java.beans.Statement: java.lang.Object getTarget()>();
+
+        r12 = $r2;
+
+        $z1 = $r2 instanceof java.lang.reflect.Field;
+
+        if $z1 == 0 goto label4;
+
+        $r3 = virtualinvoke r1.<java.beans.Statement: java.lang.String getMethodName()>();
+
+        $r4 = virtualinvoke r1.<java.beans.Statement: java.lang.Object[] getArguments()>();
+
+        if $r3 == null goto label4;
+
+        if $r4 != null goto label2;
+
+        goto label4;
+
+     label2:
+        $z2 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("get");
+
+        if $z2 == 0 goto label3;
+
+        $i1 = lengthof $r4;
+
+        if $i1 != 1 goto label3;
+
+        r12 = $r4[0];
+
+        goto label4;
+
+     label3:
+        $z3 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("set");
+
+        if $z3 == 0 goto label4;
+
+        $i0 = lengthof $r4;
+
+        if $i0 != 2 goto label4;
+
+        r12 = $r4[0];
+
+     label4:
+        $r13 = specialinvoke r0.<java.beans.XMLEncoder: java.util.List statementList(java.lang.Object)>(r12);
+
+        interfaceinvoke $r13.<java.util.List: boolean add(java.lang.Object)>(r1);
+
+     label5:
+        goto label7;
+
+     label6:
+        $r5 := @caughtexception;
+
+        $r6 = virtualinvoke r0.<java.beans.XMLEncoder: java.beans.ExceptionListener getExceptionListener()>();
+
+        $r7 = new java.lang.Exception;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("XMLEncoder: discarding statement ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.lang.Exception: void <init>(java.lang.String,java.lang.Throwable)>($r11, $r5);
+
+        interfaceinvoke $r6.<java.beans.ExceptionListener: void exceptionThrown(java.lang.Exception)>($r7);
+
+     label7:
+        r0.<java.beans.XMLEncoder: boolean internal> = z0;
+
+        return;
+
+        catch java.lang.Exception from label1 to label5 with label6;
+    }
+
+    public void writeExpression(java.beans.Expression)
+    {
+        java.beans.Expression r1;
+        java.beans.XMLEncoder$ValueData $r4;
+        java.beans.XMLEncoder r0;
+        java.lang.Object $r2, $r3;
+        boolean z0, $z1;
+
+        r0 := @this: java.beans.XMLEncoder;
+
+        r1 := @parameter0: java.beans.Expression;
+
+        z0 = r0.<java.beans.XMLEncoder: boolean internal>;
+
+        r0.<java.beans.XMLEncoder: boolean internal> = 1;
+
+        $r2 = virtualinvoke r0.<java.beans.XMLEncoder: java.lang.Object getValue(java.beans.Expression)>(r1);
+
+        $r3 = virtualinvoke r0.<java.beans.XMLEncoder: java.lang.Object get(java.lang.Object)>($r2);
+
+        if $r3 == null goto label1;
+
+        $z1 = $r2 instanceof java.lang.String;
+
+        if $z1 == 0 goto label2;
+
+        if z0 != 0 goto label2;
+
+     label1:
+        $r4 = specialinvoke r0.<java.beans.XMLEncoder: java.beans.XMLEncoder$ValueData getValueData(java.lang.Object)>($r2);
+
+        $r4.<java.beans.XMLEncoder$ValueData: java.beans.Expression exp> = r1;
+
+        specialinvoke r0.<java.beans.Encoder: void writeExpression(java.beans.Expression)>(r1);
+
+     label2:
+        r0.<java.beans.XMLEncoder: boolean internal> = z0;
+
+        return;
+    }
+
+    public void flush()
+    {
+        boolean $z0, $z1, $z2, $z3;
+        java.beans.ExceptionListener $r30;
+        java.util.List $r31;
+        java.lang.StringBuilder $r7, $r8, $r11, $r12, $r16, $r17, $r19, $r20, $r22, $r23, $r26, $r27;
+        java.lang.Object[] $r5;
+        java.beans.XMLEncoder r0;
+        int $i0, $i1, $i2, $i3;
+        java.io.OutputStreamWriter $r1;
+        java.lang.String $r3, $r4, $r9, $r10, $r14, $r15, $r18, $r21, $r24, $r25, $r28;
+        java.io.IOException $r29;
+        java.beans.Statement r32, r33;
+        java.lang.Object $r2, $r6;
+        java.lang.Class $r13;
+
+        r0 := @this: java.beans.XMLEncoder;
+
+        $z0 = r0.<java.beans.XMLEncoder: boolean preambleWritten>;
+
+        if $z0 != 0 goto label02;
+
+        $z2 = r0.<java.beans.XMLEncoder: boolean declaration>;
+
+        if $z2 == 0 goto label01;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<?xml version=");
+
+        $r21 = specialinvoke r0.<java.beans.XMLEncoder: java.lang.String quote(java.lang.String)>("1.0");
+
+        $r22 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r21);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" encoding=");
+
+        $r24 = r0.<java.beans.XMLEncoder: java.lang.String charset>;
+
+        $r25 = specialinvoke r0.<java.beans.XMLEncoder: java.lang.String quote(java.lang.String)>($r24);
+
+        $r26 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r25);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("?>");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.beans.XMLEncoder: void writeln(java.lang.String)>($r28);
+
+     label01:
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<java version=");
+
+        $r9 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.version");
+
+        $r10 = specialinvoke r0.<java.beans.XMLEncoder: java.lang.String quote(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" class=");
+
+        $r13 = class "Ljava/beans/XMLDecoder;";
+
+        $r14 = virtualinvoke $r13.<java.lang.Class: java.lang.String getName()>();
+
+        $r15 = specialinvoke r0.<java.beans.XMLEncoder: java.lang.String quote(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.beans.XMLEncoder: void writeln(java.lang.String)>($r18);
+
+        r0.<java.beans.XMLEncoder: boolean preambleWritten> = 1;
+
+     label02:
+        $i2 = r0.<java.beans.XMLEncoder: int indentation>;
+
+        $i3 = $i2 + 1;
+
+        r0.<java.beans.XMLEncoder: int indentation> = $i3;
+
+        $r31 = specialinvoke r0.<java.beans.XMLEncoder: java.util.List statementList(java.lang.Object)>(r0);
+
+     label03:
+        $z3 = interfaceinvoke $r31.<java.util.List: boolean isEmpty()>();
+
+        if $z3 != 0 goto label06;
+
+        $r2 = interfaceinvoke $r31.<java.util.List: java.lang.Object remove(int)>(0);
+
+        r32 = (java.beans.Statement) $r2;
+
+        $r3 = "writeObject";
+
+        $r4 = virtualinvoke r32.<java.beans.Statement: java.lang.String getMethodName()>();
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        if $z1 == 0 goto label04;
+
+        $r5 = virtualinvoke r32.<java.beans.Statement: java.lang.Object[] getArguments()>();
+
+        $r6 = $r5[0];
+
+        specialinvoke r0.<java.beans.XMLEncoder: void outputValue(java.lang.Object,java.lang.Object,boolean)>($r6, r0, 1);
+
+        goto label05;
+
+     label04:
+        specialinvoke r0.<java.beans.XMLEncoder: void outputStatement(java.beans.Statement,java.lang.Object,boolean)>(r32, r0, 0);
+
+     label05:
+        goto label03;
+
+     label06:
+        $i0 = r0.<java.beans.XMLEncoder: int indentation>;
+
+        $i1 = $i0 - 1;
+
+        r0.<java.beans.XMLEncoder: int indentation> = $i1;
+
+        r33 = virtualinvoke r0.<java.beans.XMLEncoder: java.beans.Statement getMissedStatement()>();
+
+     label07:
+        if r33 == null goto label08;
+
+        specialinvoke r0.<java.beans.XMLEncoder: void outputStatement(java.beans.Statement,java.lang.Object,boolean)>(r33, r0, 0);
+
+        r33 = virtualinvoke r0.<java.beans.XMLEncoder: java.beans.Statement getMissedStatement()>();
+
+        goto label07;
+
+     label08:
+        $r1 = r0.<java.beans.XMLEncoder: java.io.OutputStreamWriter out>;
+
+        virtualinvoke $r1.<java.io.OutputStreamWriter: void flush()>();
+
+     label09:
+        goto label11;
+
+     label10:
+        $r29 := @caughtexception;
+
+        $r30 = virtualinvoke r0.<java.beans.XMLEncoder: java.beans.ExceptionListener getExceptionListener()>();
+
+        interfaceinvoke $r30.<java.beans.ExceptionListener: void exceptionThrown(java.lang.Exception)>($r29);
+
+     label11:
+        virtualinvoke r0.<java.beans.XMLEncoder: void clear()>();
+
+        return;
+
+        catch java.io.IOException from label08 to label09 with label10;
+    }
+
+    void clear()
+    {
+        java.beans.XMLEncoder r0;
+        java.util.Map $r2, $r3;
+        java.beans.NameGenerator $r1;
+
+        r0 := @this: java.beans.XMLEncoder;
+
+        specialinvoke r0.<java.beans.Encoder: void clear()>();
+
+        $r1 = r0.<java.beans.XMLEncoder: java.beans.NameGenerator nameGenerator>;
+
+        virtualinvoke $r1.<java.beans.NameGenerator: void clear()>();
+
+        $r2 = r0.<java.beans.XMLEncoder: java.util.Map valueToExpression>;
+
+        interfaceinvoke $r2.<java.util.Map: void clear()>();
+
+        $r3 = r0.<java.beans.XMLEncoder: java.util.Map targetToStatementList>;
+
+        interfaceinvoke $r3.<java.util.Map: void clear()>();
+
+        return;
+    }
+
+    java.beans.Statement getMissedStatement()
+    {
+        java.beans.XMLEncoder r0;
+        java.util.Iterator $r3;
+        java.util.Collection $r2;
+        java.beans.Statement $r7, $r10;
+        java.util.List r5;
+        java.util.Map $r1;
+        int $i0, i1;
+        java.lang.Object $r4, $r6, $r9;
+        java.lang.Class $r8;
+        boolean $z0;
+
+        r0 := @this: java.beans.XMLEncoder;
+
+        $r1 = r0.<java.beans.XMLEncoder: java.util.Map targetToStatementList>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.util.Collection values()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (java.util.List) $r4;
+
+        i1 = 0;
+
+     label2:
+        $i0 = interfaceinvoke r5.<java.util.List: int size()>();
+
+        if i1 >= $i0 goto label4;
+
+        $r6 = interfaceinvoke r5.<java.util.List: java.lang.Object get(int)>(i1);
+
+        $r7 = (java.beans.Statement) $r6;
+
+        $r8 = virtualinvoke $r7.<java.lang.Object: java.lang.Class getClass()>();
+
+        if class "Ljava/beans/Statement;" != $r8 goto label3;
+
+        $r9 = interfaceinvoke r5.<java.util.List: java.lang.Object remove(int)>(i1);
+
+        $r10 = (java.beans.Statement) $r9;
+
+        return $r10;
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label4:
+        goto label1;
+
+     label5:
+        return null;
+    }
+
+    public void close()
+    {
+        java.beans.ExceptionListener $r3;
+        java.beans.XMLEncoder r0;
+        java.io.OutputStreamWriter $r1;
+        java.io.IOException $r2;
+
+        r0 := @this: java.beans.XMLEncoder;
+
+        virtualinvoke r0.<java.beans.XMLEncoder: void flush()>();
+
+        specialinvoke r0.<java.beans.XMLEncoder: void writeln(java.lang.String)>("</java>");
+
+     label1:
+        $r1 = r0.<java.beans.XMLEncoder: java.io.OutputStreamWriter out>;
+
+        virtualinvoke $r1.<java.io.OutputStreamWriter: void close()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = virtualinvoke r0.<java.beans.XMLEncoder: java.beans.ExceptionListener getExceptionListener()>();
+
+        interfaceinvoke $r3.<java.beans.ExceptionListener: void exceptionThrown(java.lang.Exception)>($r2);
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    private java.lang.String quote(java.lang.String)
+    {
+        java.beans.XMLEncoder r6;
+        java.lang.StringBuilder $r0, $r1, $r3, $r4;
+        java.lang.String r2, $r5;
+
+        r6 := @this: java.beans.XMLEncoder;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r5;
+    }
+
+    private java.beans.XMLEncoder$ValueData getValueData(java.lang.Object)
+    {
+        java.beans.XMLEncoder$ValueData $r4, r6;
+        java.beans.XMLEncoder r0;
+        java.util.Map $r2, $r5;
+        java.lang.Object r1, $r3;
+
+        r0 := @this: java.beans.XMLEncoder;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = r0.<java.beans.XMLEncoder: java.util.Map valueToExpression>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r6 = (java.beans.XMLEncoder$ValueData) $r3;
+
+        if r6 != null goto label1;
+
+        $r4 = new java.beans.XMLEncoder$ValueData;
+
+        specialinvoke $r4.<java.beans.XMLEncoder$ValueData: void <init>(java.beans.XMLEncoder,java.beans.XMLEncoder$1)>(r0, null);
+
+        r6 = $r4;
+
+        $r5 = r0.<java.beans.XMLEncoder: java.util.Map valueToExpression>;
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r4);
+
+     label1:
+        return r6;
+    }
+
+    private static boolean isValidCharCode(int)
+    {
+        int i0, $i2, $i4, $i6;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        if 32 > i0 goto label1;
+
+        $i2 = (int) 55295;
+
+        if i0 <= $i2 goto label3;
+
+     label1:
+        if 10 == i0 goto label3;
+
+        if 9 == i0 goto label3;
+
+        if 13 == i0 goto label3;
+
+        $i4 = (int) 57344;
+
+        if $i4 > i0 goto label2;
+
+        $i6 = (int) 65533;
+
+        if i0 <= $i6 goto label3;
+
+     label2:
+        if 65536 > i0 goto label4;
+
+        if i0 > 1114111 goto label4;
+
+     label3:
+        $z0 = 1;
+
+        goto label5;
+
+     label4:
+        $z0 = 0;
+
+     label5:
+        return $z0;
+    }
+
+    private void writeln(java.lang.String)
+    {
+        java.beans.XMLEncoder r1;
+        java.io.IOException $r5;
+        java.beans.ExceptionListener $r6;
+        int $i0, i1;
+        java.io.OutputStreamWriter $r3;
+        java.lang.StringBuilder $r0;
+        java.lang.String r2, $r4;
+
+        r1 := @this: java.beans.XMLEncoder;
+
+        r2 := @parameter0: java.lang.String;
+
+     label1:
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        i1 = 0;
+
+     label2:
+        $i0 = r1.<java.beans.XMLEncoder: int indentation>;
+
+        if i1 >= $i0 goto label3;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(32);
+
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label3:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(10);
+
+        $r3 = r1.<java.beans.XMLEncoder: java.io.OutputStreamWriter out>;
+
+        $r4 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r3.<java.io.OutputStreamWriter: void write(java.lang.String)>($r4);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r5 := @caughtexception;
+
+        $r6 = virtualinvoke r1.<java.beans.XMLEncoder: java.beans.ExceptionListener getExceptionListener()>();
+
+        interfaceinvoke $r6.<java.beans.ExceptionListener: void exceptionThrown(java.lang.Exception)>($r5);
+
+     label6:
+        return;
+
+        catch java.io.IOException from label1 to label4 with label5;
+    }
+
+    private void outputValue(java.lang.Object, java.lang.Object, boolean)
+    {
+        java.lang.Character $r35;
+        java.lang.StringBuilder $r8, $r11, $r15, $r18, $r19, $r29, $r30, $r39, $r43, $r44, $r47, $r48, $r51, $r54, $r55, $r63, $r64, $r65, $r66, $r67, $r68, $r69, $r71, $r72, $r74, $r75, $r76, $r77;
+        java.lang.Object[] $r13;
+        java.lang.String $r3, $r9, $r10, $r12, $r16, $r17, $r20, $r21, $r22, $r26, $r31, $r33, $r36, $r37, $r41, $r42, $r45, $r46, $r49, $r53, $r56, $r58, $r70;
+        java.beans.Expression $r2, $r4, $r6, $r23, $r25;
+        java.lang.reflect.Field r59;
+        java.beans.XMLEncoder$ValueData $r1;
+        java.lang.NullPointerException $r73;
+        boolean $z0, $z1, z2, $z3, $z4, $z5, $z6, $z7;
+        java.beans.XMLEncoder r0;
+        int $i1, $i2, $i3, $i4;
+        char $c0;
+        java.lang.Object r5, $r24, r57;
+        java.lang.Class $r32, $r34, $r40, $r52, $r60, $r61;
+
+        r0 := @this: java.beans.XMLEncoder;
+
+        r57 := @parameter0: java.lang.Object;
+
+        r5 := @parameter1: java.lang.Object;
+
+        z2 := @parameter2: boolean;
+
+        if r57 != null goto label01;
+
+        specialinvoke r0.<java.beans.XMLEncoder: void writeln(java.lang.String)>("<null/>");
+
+        return;
+
+     label01:
+        $z0 = r57 instanceof java.lang.Class;
+
+        if $z0 == 0 goto label02;
+
+        $r71 = new java.lang.StringBuilder;
+
+        specialinvoke $r71.<java.lang.StringBuilder: void <init>()>();
+
+        $r51 = virtualinvoke $r71.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<class>");
+
+        $r52 = (java.lang.Class) r57;
+
+        $r53 = virtualinvoke $r52.<java.lang.Class: java.lang.String getName()>();
+
+        $r54 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r53);
+
+        $r55 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</class>");
+
+        $r56 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.beans.XMLEncoder: void writeln(java.lang.String)>($r56);
+
+        return;
+
+     label02:
+        $r1 = specialinvoke r0.<java.beans.XMLEncoder: java.beans.XMLEncoder$ValueData getValueData(java.lang.Object)>(r57);
+
+        $r2 = $r1.<java.beans.XMLEncoder$ValueData: java.beans.Expression exp>;
+
+        if $r2 == null goto label11;
+
+        $r23 = $r1.<java.beans.XMLEncoder$ValueData: java.beans.Expression exp>;
+
+        $r24 = virtualinvoke $r23.<java.beans.Expression: java.lang.Object getTarget()>();
+
+        $r25 = $r1.<java.beans.XMLEncoder$ValueData: java.beans.Expression exp>;
+
+        $r26 = virtualinvoke $r25.<java.beans.Expression: java.lang.String getMethodName()>();
+
+        if $r24 == null goto label03;
+
+        if $r26 != null goto label06;
+
+     label03:
+        $r73 = new java.lang.NullPointerException;
+
+        $r72 = new java.lang.StringBuilder;
+
+        specialinvoke $r72.<java.lang.StringBuilder: void <init>()>();
+
+        if $r24 != null goto label04;
+
+        $r58 = "target";
+
+        goto label05;
+
+     label04:
+        $r58 = "methodName";
+
+     label05:
+        $r29 = virtualinvoke $r72.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r58);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" should not be null");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r73.<java.lang.NullPointerException: void <init>(java.lang.String)>($r31);
+
+        throw $r73;
+
+     label06:
+        if z2 == 0 goto label07;
+
+        $z5 = $r24 instanceof java.lang.reflect.Field;
+
+        if $z5 == 0 goto label07;
+
+        $z6 = virtualinvoke $r26.<java.lang.String: boolean equals(java.lang.Object)>("get");
+
+        if $z6 == 0 goto label07;
+
+        r59 = (java.lang.reflect.Field) $r24;
+
+        $i1 = virtualinvoke r59.<java.lang.reflect.Field: int getModifiers()>();
+
+        $z7 = staticinvoke <java.lang.reflect.Modifier: boolean isStatic(int)>($i1);
+
+        if $z7 == 0 goto label07;
+
+        $r74 = new java.lang.StringBuilder;
+
+        specialinvoke $r74.<java.lang.StringBuilder: void <init>()>();
+
+        $r39 = virtualinvoke $r74.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<object class=");
+
+        $r40 = virtualinvoke r59.<java.lang.reflect.Field: java.lang.Class getDeclaringClass()>();
+
+        $r41 = virtualinvoke $r40.<java.lang.Class: java.lang.String getName()>();
+
+        $r42 = specialinvoke r0.<java.beans.XMLEncoder: java.lang.String quote(java.lang.String)>($r41);
+
+        $r43 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r42);
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" field=");
+
+        $r45 = virtualinvoke r59.<java.lang.reflect.Field: java.lang.String getName()>();
+
+        $r46 = specialinvoke r0.<java.beans.XMLEncoder: java.lang.String quote(java.lang.String)>($r45);
+
+        $r47 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r46);
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/>");
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.beans.XMLEncoder: void writeln(java.lang.String)>($r49);
+
+        return;
+
+     label07:
+        $r60 = virtualinvoke r57.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r61 = staticinvoke <java.beans.XMLEncoder: java.lang.Class primitiveTypeFor(java.lang.Class)>($r60);
+
+        if $r61 == null goto label10;
+
+        $r32 = virtualinvoke r57.<java.lang.Object: java.lang.Class getClass()>();
+
+        if $r24 != $r32 goto label10;
+
+        $z3 = virtualinvoke $r26.<java.lang.String: boolean equals(java.lang.Object)>("new");
+
+        if $z3 == 0 goto label10;
+
+        $r33 = virtualinvoke $r61.<java.lang.Class: java.lang.String getName()>();
+
+        $r34 = <java.lang.Character: java.lang.Class TYPE>;
+
+        if $r61 != $r34 goto label09;
+
+        $r35 = (java.lang.Character) r57;
+
+        $c0 = virtualinvoke $r35.<java.lang.Character: char charValue()>();
+
+        $i2 = (int) $c0;
+
+        $z4 = staticinvoke <java.beans.XMLEncoder: boolean isValidCharCode(int)>($i2);
+
+        if $z4 != 0 goto label08;
+
+        $i3 = (int) $c0;
+
+        $r37 = staticinvoke <java.beans.XMLEncoder: java.lang.String createString(int)>($i3);
+
+        specialinvoke r0.<java.beans.XMLEncoder: void writeln(java.lang.String)>($r37);
+
+        return;
+
+     label08:
+        $i4 = (int) $c0;
+
+        $r36 = staticinvoke <java.beans.XMLEncoder: java.lang.String quoteCharCode(int)>($i4);
+
+        r57 = $r36;
+
+        if $r36 != null goto label09;
+
+        r57 = staticinvoke <java.lang.Character: java.lang.Character valueOf(char)>($c0);
+
+     label09:
+        $r75 = new java.lang.StringBuilder;
+
+        specialinvoke $r75.<java.lang.StringBuilder: void <init>()>();
+
+        $r63 = virtualinvoke $r75.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<");
+
+        $r64 = virtualinvoke $r63.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r33);
+
+        $r65 = virtualinvoke $r64.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">");
+
+        $r66 = virtualinvoke $r65.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r57);
+
+        $r67 = virtualinvoke $r66.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</");
+
+        $r68 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r33);
+
+        $r69 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">");
+
+        $r70 = virtualinvoke $r69.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.beans.XMLEncoder: void writeln(java.lang.String)>($r70);
+
+        return;
+
+     label10:
+        goto label12;
+
+     label11:
+        $z1 = r57 instanceof java.lang.String;
+
+        if $z1 == 0 goto label12;
+
+        $r21 = (java.lang.String) r57;
+
+        $r22 = specialinvoke r0.<java.beans.XMLEncoder: java.lang.String createString(java.lang.String)>($r21);
+
+        specialinvoke r0.<java.beans.XMLEncoder: void writeln(java.lang.String)>($r22);
+
+        return;
+
+     label12:
+        $r3 = $r1.<java.beans.XMLEncoder$ValueData: java.lang.String name>;
+
+        if $r3 == null goto label14;
+
+        if z2 == 0 goto label13;
+
+        $r76 = new java.lang.StringBuilder;
+
+        specialinvoke $r76.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r76.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<object idref=");
+
+        $r16 = $r1.<java.beans.XMLEncoder$ValueData: java.lang.String name>;
+
+        $r17 = specialinvoke r0.<java.beans.XMLEncoder: java.lang.String quote(java.lang.String)>($r16);
+
+        $r18 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/>");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.beans.XMLEncoder: void writeln(java.lang.String)>($r20);
+
+        goto label15;
+
+     label13:
+        $r77 = new java.lang.StringBuilder;
+
+        specialinvoke $r77.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r77.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" idref=");
+
+        $r9 = $r1.<java.beans.XMLEncoder$ValueData: java.lang.String name>;
+
+        $r10 = specialinvoke r0.<java.beans.XMLEncoder: java.lang.String quote(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r13 = newarray (java.lang.Object)[0];
+
+        specialinvoke r0.<java.beans.XMLEncoder: void outputXML(java.lang.String,java.lang.String,java.lang.Object,java.lang.Object[])>("void", $r12, r57, $r13);
+
+        goto label15;
+
+     label14:
+        $r4 = $r1.<java.beans.XMLEncoder$ValueData: java.beans.Expression exp>;
+
+        if $r4 == null goto label15;
+
+        $r6 = $r1.<java.beans.XMLEncoder$ValueData: java.beans.Expression exp>;
+
+        specialinvoke r0.<java.beans.XMLEncoder: void outputStatement(java.beans.Statement,java.lang.Object,boolean)>($r6, r5, z2);
+
+     label15:
+        return;
+    }
+
+    private static java.lang.String quoteCharCode(int)
+    {
+        int i0;
+
+        i0 := @parameter0: int;
+
+        lookupswitch(i0)
+        {
+            case 13: goto label6;
+            case 34: goto label4;
+            case 38: goto label1;
+            case 39: goto label5;
+            case 60: goto label2;
+            case 62: goto label3;
+            default: goto label7;
+        };
+
+     label1:
+        return "&amp;";
+
+     label2:
+        return "&lt;";
+
+     label3:
+        return "&gt;";
+
+     label4:
+        return "&quot;";
+
+     label5:
+        return "&apos;";
+
+     label6:
+        return "&#13;";
+
+     label7:
+        return null;
+    }
+
+    private static java.lang.String createString(int)
+    {
+        int i0;
+        java.lang.StringBuilder $r0, $r1, $r3, $r4;
+        java.lang.String $r2, $r5;
+
+        i0 := @parameter0: int;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<char code=\"#");
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.String toString(int,int)>(i0, 16);
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"/>");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r5;
+    }
+
+    private java.lang.String createString(java.lang.String)
+    {
+        java.beans.XMLEncoder r4;
+        int $i0, $i1, $i2, $i4, i5, $i6;
+        java.lang.String r1, $r2, $r3, $r6, $r7;
+        boolean $z0, $z1;
+        char $c3;
+        java.nio.charset.CharsetEncoder $r5;
+        java.lang.StringBuilder $r8;
+
+        r4 := @this: java.beans.XMLEncoder;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<string>");
+
+        i5 = 0;
+
+     label1:
+        $i0 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if i5 >= $i0 goto label6;
+
+        $i1 = virtualinvoke r1.<java.lang.String: int codePointAt(int)>(i5);
+
+        $i2 = staticinvoke <java.lang.Character: int charCount(int)>($i1);
+
+        $z0 = staticinvoke <java.beans.XMLEncoder: boolean isValidCharCode(int)>($i1);
+
+        if $z0 == 0 goto label4;
+
+        $r5 = r4.<java.beans.XMLEncoder: java.nio.charset.CharsetEncoder encoder>;
+
+        $i4 = i5 + $i2;
+
+        $r6 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int,int)>(i5, $i4);
+
+        $z1 = virtualinvoke $r5.<java.nio.charset.CharsetEncoder: boolean canEncode(java.lang.CharSequence)>($r6);
+
+        if $z1 == 0 goto label4;
+
+        $r7 = staticinvoke <java.beans.XMLEncoder: java.lang.String quoteCharCode(int)>($i1);
+
+        if $r7 == null goto label2;
+
+        virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        goto label3;
+
+     label2:
+        virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder appendCodePoint(int)>($i1);
+
+     label3:
+        i5 = i5 + $i2;
+
+        goto label5;
+
+     label4:
+        $c3 = virtualinvoke r1.<java.lang.String: char charAt(int)>(i5);
+
+        $i6 = (int) $c3;
+
+        $r3 = staticinvoke <java.beans.XMLEncoder: java.lang.String createString(int)>($i6);
+
+        virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        i5 = i5 + 1;
+
+     label5:
+        goto label1;
+
+     label6:
+        virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</string>");
+
+        $r2 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r2;
+    }
+
+    private void outputStatement(java.beans.Statement, java.lang.Object, boolean)
+    {
+        java.lang.StringBuilder $r4, $r5, $r6, $r17, $r18, $r19, $r23, $r24, $r25, $r26, $r28, $r29, $r30, $r31, $r35, $r37, $r38, $r39, $r43, $r48, $r49, $r50, $r52, $r53, $r54, $r55, $r60, $r62, $r63, $r64, $r68;
+        java.lang.Object[] $r8, r71, $r77;
+        java.lang.String $r2, $r7, $r14, $r21, $r22, $r27, $r32, $r33, $r34, $r41, $r42, $r47, $r51, $r58, $r59, $r61, $r66, $r67, $r70, $r73, r74, r75;
+        java.beans.Expression $r69;
+        java.beans.XMLEncoder$ValueData $r15, $r76;
+        java.lang.NullPointerException $r3;
+        boolean z0, z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z12, $z13, $z14;
+        java.util.List $r16;
+        java.beans.XMLEncoder r11;
+        java.beans.NameGenerator $r46;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        java.beans.Statement r0;
+        java.lang.Object $r1, r10, r12, $r36, $r40, $r44, $r45, $r56, $r65, $r72;
+        java.lang.Class $r9, $r13, $r20, $r57;
+
+        r11 := @this: java.beans.XMLEncoder;
+
+        r0 := @parameter0: java.beans.Statement;
+
+        r12 := @parameter1: java.lang.Object;
+
+        z1 := @parameter2: boolean;
+
+        $r1 = virtualinvoke r0.<java.beans.Statement: java.lang.Object getTarget()>();
+
+        $r2 = virtualinvoke r0.<java.beans.Statement: java.lang.String getMethodName()>();
+
+        if $r1 == null goto label01;
+
+        if $r2 != null goto label04;
+
+     label01:
+        $r3 = new java.lang.NullPointerException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        if $r1 != null goto label02;
+
+        $r70 = "target";
+
+        goto label03;
+
+     label02:
+        $r70 = "methodName";
+
+     label03:
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r70);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" should not be null");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.NullPointerException: void <init>(java.lang.String)>($r7);
+
+        throw $r3;
+
+     label04:
+        $r8 = virtualinvoke r0.<java.beans.Statement: java.lang.Object[] getArguments()>();
+
+        r71 = $r8;
+
+        $r9 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        if $r9 != class "Ljava/beans/Expression;" goto label05;
+
+        $z14 = 1;
+
+        $z13 = 1;
+
+        goto label06;
+
+     label05:
+        $z14 = 0;
+
+        $z13 = 0;
+
+     label06:
+        z0 = $z14;
+
+        if $z13 == 0 goto label07;
+
+        $r69 = (java.beans.Expression) r0;
+
+        $r72 = virtualinvoke r11.<java.beans.XMLEncoder: java.lang.Object getValue(java.beans.Expression)>($r69);
+
+        goto label08;
+
+     label07:
+        $r72 = null;
+
+     label08:
+        r10 = $r72;
+
+        if z0 == 0 goto label09;
+
+        if z1 == 0 goto label09;
+
+        $r73 = "object";
+
+        goto label10;
+
+     label09:
+        $r73 = "void";
+
+     label10:
+        r74 = $r73;
+
+        r75 = "";
+
+        $r76 = specialinvoke r11.<java.beans.XMLEncoder: java.beans.XMLEncoder$ValueData getValueData(java.lang.Object)>(r10);
+
+        if $r1 != r12 goto label11;
+
+        goto label17;
+
+     label11:
+        if $r1 != class "Ljava/lang/reflect/Array;" goto label12;
+
+        $z10 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("newInstance");
+
+        if $z10 == 0 goto label12;
+
+        r74 = "array";
+
+        $r53 = new java.lang.StringBuilder;
+
+        specialinvoke $r53.<java.lang.StringBuilder: void <init>()>();
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r55 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" class=");
+
+        $r56 = $r8[0];
+
+        $r57 = (java.lang.Class) $r56;
+
+        $r58 = virtualinvoke $r57.<java.lang.Class: java.lang.String getName()>();
+
+        $r59 = specialinvoke r11.<java.beans.XMLEncoder: java.lang.String quote(java.lang.String)>($r58);
+
+        $r60 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r59);
+
+        $r61 = virtualinvoke $r60.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r62 = new java.lang.StringBuilder;
+
+        specialinvoke $r62.<java.lang.StringBuilder: void <init>()>();
+
+        $r63 = virtualinvoke $r62.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r61);
+
+        $r64 = virtualinvoke $r63.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" length=");
+
+        $r65 = $r8[1];
+
+        $r66 = virtualinvoke $r65.<java.lang.Object: java.lang.String toString()>();
+
+        $r67 = specialinvoke r11.<java.beans.XMLEncoder: java.lang.String quote(java.lang.String)>($r66);
+
+        $r68 = virtualinvoke $r64.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r67);
+
+        r75 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r71 = newarray (java.lang.Object)[0];
+
+        goto label17;
+
+     label12:
+        $r13 = virtualinvoke $r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        if $r13 != class "Ljava/lang/Class;" goto label13;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" class=");
+
+        $r20 = (java.lang.Class) $r1;
+
+        $r21 = virtualinvoke $r20.<java.lang.Class: java.lang.String getName()>();
+
+        $r22 = specialinvoke r11.<java.beans.XMLEncoder: java.lang.String quote(java.lang.String)>($r21);
+
+        $r23 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        r75 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label17;
+
+     label13:
+        $r76.<java.beans.XMLEncoder$ValueData: int refs> = 2;
+
+        $r14 = $r76.<java.beans.XMLEncoder$ValueData: java.lang.String name>;
+
+        if $r14 != null goto label15;
+
+        $r15 = specialinvoke r11.<java.beans.XMLEncoder: java.beans.XMLEncoder$ValueData getValueData(java.lang.Object)>($r1);
+
+        $i0 = $r15.<java.beans.XMLEncoder$ValueData: int refs>;
+
+        $i1 = $i0 + 1;
+
+        $r15.<java.beans.XMLEncoder$ValueData: int refs> = $i1;
+
+        $r16 = specialinvoke r11.<java.beans.XMLEncoder: java.util.List statementList(java.lang.Object)>($r1);
+
+        $z2 = interfaceinvoke $r16.<java.util.List: boolean contains(java.lang.Object)>(r0);
+
+        if $z2 != 0 goto label14;
+
+        interfaceinvoke $r16.<java.util.List: boolean add(java.lang.Object)>(r0);
+
+     label14:
+        specialinvoke r11.<java.beans.XMLEncoder: void outputValue(java.lang.Object,java.lang.Object,boolean)>($r1, r12, 0);
+
+     label15:
+        if z0 == 0 goto label16;
+
+        specialinvoke r11.<java.beans.XMLEncoder: void outputValue(java.lang.Object,java.lang.Object,boolean)>(r10, r12, z1);
+
+     label16:
+        return;
+
+     label17:
+        if z0 == 0 goto label18;
+
+        $i8 = $r76.<java.beans.XMLEncoder$ValueData: int refs>;
+
+        if $i8 <= 1 goto label18;
+
+        $r46 = r11.<java.beans.XMLEncoder: java.beans.NameGenerator nameGenerator>;
+
+        $r47 = virtualinvoke $r46.<java.beans.NameGenerator: java.lang.String instanceName(java.lang.Object)>(r10);
+
+        $r76.<java.beans.XMLEncoder$ValueData: java.lang.String name> = $r47;
+
+        $r48 = new java.lang.StringBuilder;
+
+        specialinvoke $r48.<java.lang.StringBuilder: void <init>()>();
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r75);
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" id=");
+
+        $r51 = specialinvoke r11.<java.beans.XMLEncoder: java.lang.String quote(java.lang.String)>($r47);
+
+        $r52 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r51);
+
+        r75 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label18:
+        if z0 != 0 goto label19;
+
+        $z8 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("set");
+
+        if $z8 == 0 goto label19;
+
+        $i7 = lengthof r71;
+
+        if $i7 != 2 goto label19;
+
+        $r45 = r71[0];
+
+        $z9 = $r45 instanceof java.lang.Integer;
+
+        if $z9 != 0 goto label20;
+
+     label19:
+        if z0 == 0 goto label23;
+
+        $z6 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("get");
+
+        if $z6 == 0 goto label23;
+
+        $i5 = lengthof r71;
+
+        if $i5 != 1 goto label23;
+
+        $r36 = r71[0];
+
+        $z7 = $r36 instanceof java.lang.Integer;
+
+        if $z7 == 0 goto label23;
+
+     label20:
+        $r37 = new java.lang.StringBuilder;
+
+        specialinvoke $r37.<java.lang.StringBuilder: void <init>()>();
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r75);
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" index=");
+
+        $r40 = r71[0];
+
+        $r41 = virtualinvoke $r40.<java.lang.Object: java.lang.String toString()>();
+
+        $r42 = specialinvoke r11.<java.beans.XMLEncoder: java.lang.String quote(java.lang.String)>($r41);
+
+        $r43 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r42);
+
+        r75 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i6 = lengthof r71;
+
+        if $i6 != 1 goto label21;
+
+        $r77 = newarray (java.lang.Object)[0];
+
+        goto label22;
+
+     label21:
+        $r77 = newarray (java.lang.Object)[1];
+
+        $r44 = r71[1];
+
+        $r77[0] = $r44;
+
+     label22:
+        r71 = $r77;
+
+        goto label27;
+
+     label23:
+        if z0 != 0 goto label24;
+
+        $z5 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>("set");
+
+        if $z5 == 0 goto label24;
+
+        $i4 = lengthof r71;
+
+        if $i4 == 1 goto label25;
+
+     label24:
+        if z0 == 0 goto label26;
+
+        $z4 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>("get");
+
+        if $z4 == 0 goto label26;
+
+        $i2 = lengthof r71;
+
+        if $i2 != 0 goto label26;
+
+     label25:
+        $i3 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        if 3 >= $i3 goto label27;
+
+        $r29 = new java.lang.StringBuilder;
+
+        specialinvoke $r29.<java.lang.StringBuilder: void <init>()>();
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r75);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" property=");
+
+        $r32 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int)>(3);
+
+        $r33 = staticinvoke <java.beans.Introspector: java.lang.String decapitalize(java.lang.String)>($r32);
+
+        $r34 = specialinvoke r11.<java.beans.XMLEncoder: java.lang.String quote(java.lang.String)>($r33);
+
+        $r35 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r34);
+
+        r75 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label27;
+
+     label26:
+        $z12 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("new");
+
+        if $z12 != 0 goto label27;
+
+        $z3 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("newInstance");
+
+        if $z3 != 0 goto label27;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r75);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" method=");
+
+        $r27 = specialinvoke r11.<java.beans.XMLEncoder: java.lang.String quote(java.lang.String)>($r2);
+
+        $r28 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r27);
+
+        r75 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label27:
+        specialinvoke r11.<java.beans.XMLEncoder: void outputXML(java.lang.String,java.lang.String,java.lang.Object,java.lang.Object[])>(r74, r75, r10, r71);
+
+        return;
+    }
+
+    private transient void outputXML(java.lang.String, java.lang.String, java.lang.Object, java.lang.Object[])
+    {
+        boolean $z0;
+        java.util.List $r2;
+        java.lang.StringBuilder $r4, $r5, $r7, $r9, $r10, $r12, $r13, $r14, $r15, $r19, $r20, $r21, $r22, $r23;
+        java.lang.Object[] r3;
+        java.beans.XMLEncoder r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, $i7;
+        java.lang.String r6, r8, $r11, $r16, $r24;
+        java.beans.Statement r25;
+        java.lang.Object r1, $r17, $r18;
+
+        r0 := @this: java.beans.XMLEncoder;
+
+        r6 := @parameter0: java.lang.String;
+
+        r8 := @parameter1: java.lang.String;
+
+        r1 := @parameter2: java.lang.Object;
+
+        r3 := @parameter3: java.lang.Object[];
+
+        $r2 = specialinvoke r0.<java.beans.XMLEncoder: java.util.List statementList(java.lang.Object)>(r1);
+
+        $i0 = lengthof r3;
+
+        if $i0 != 0 goto label1;
+
+        $i5 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        if $i5 != 0 goto label1;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r8);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/>");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.beans.XMLEncoder: void writeln(java.lang.String)>($r24);
+
+        return;
+
+     label1:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<");
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.beans.XMLEncoder: void writeln(java.lang.String)>($r11);
+
+        $i1 = r0.<java.beans.XMLEncoder: int indentation>;
+
+        $i2 = $i1 + 1;
+
+        r0.<java.beans.XMLEncoder: int indentation> = $i2;
+
+        i6 = 0;
+
+     label2:
+        $i7 = lengthof r3;
+
+        if i6 >= $i7 goto label3;
+
+        $r18 = r3[i6];
+
+        specialinvoke r0.<java.beans.XMLEncoder: void outputValue(java.lang.Object,java.lang.Object,boolean)>($r18, null, 1);
+
+        i6 = i6 + 1;
+
+        goto label2;
+
+     label3:
+        $z0 = interfaceinvoke $r2.<java.util.List: boolean isEmpty()>();
+
+        if $z0 != 0 goto label4;
+
+        $r17 = interfaceinvoke $r2.<java.util.List: java.lang.Object remove(int)>(0);
+
+        r25 = (java.beans.Statement) $r17;
+
+        specialinvoke r0.<java.beans.XMLEncoder: void outputStatement(java.beans.Statement,java.lang.Object,boolean)>(r25, r1, 0);
+
+        goto label3;
+
+     label4:
+        $i3 = r0.<java.beans.XMLEncoder: int indentation>;
+
+        $i4 = $i3 - 1;
+
+        r0.<java.beans.XMLEncoder: int indentation> = $i4;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.beans.XMLEncoder: void writeln(java.lang.String)>($r16);
+
+        return;
+    }
+
+    static java.lang.Class primitiveTypeFor(java.lang.Class)
+    {
+        java.lang.Class r0, $r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9;
+
+        r0 := @parameter0: java.lang.Class;
+
+        if r0 != class "Ljava/lang/Boolean;" goto label1;
+
+        $r9 = <java.lang.Boolean: java.lang.Class TYPE>;
+
+        return $r9;
+
+     label1:
+        if r0 != class "Ljava/lang/Byte;" goto label2;
+
+        $r8 = <java.lang.Byte: java.lang.Class TYPE>;
+
+        return $r8;
+
+     label2:
+        if r0 != class "Ljava/lang/Character;" goto label3;
+
+        $r7 = <java.lang.Character: java.lang.Class TYPE>;
+
+        return $r7;
+
+     label3:
+        if r0 != class "Ljava/lang/Short;" goto label4;
+
+        $r6 = <java.lang.Short: java.lang.Class TYPE>;
+
+        return $r6;
+
+     label4:
+        if r0 != class "Ljava/lang/Integer;" goto label5;
+
+        $r5 = <java.lang.Integer: java.lang.Class TYPE>;
+
+        return $r5;
+
+     label5:
+        if r0 != class "Ljava/lang/Long;" goto label6;
+
+        $r4 = <java.lang.Long: java.lang.Class TYPE>;
+
+        return $r4;
+
+     label6:
+        if r0 != class "Ljava/lang/Float;" goto label7;
+
+        $r3 = <java.lang.Float: java.lang.Class TYPE>;
+
+        return $r3;
+
+     label7:
+        if r0 != class "Ljava/lang/Double;" goto label8;
+
+        $r2 = <java.lang.Double: java.lang.Class TYPE>;
+
+        return $r2;
+
+     label8:
+        if r0 != class "Ljava/lang/Void;" goto label9;
+
+        $r1 = <java.lang.Void: java.lang.Class TYPE>;
+
+        return $r1;
+
+     label9:
+        return null;
+    }
+}

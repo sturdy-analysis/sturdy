@@ -1,0 +1,287 @@
+public class sun.rmi.transport.proxy.HttpReceiveSocket extends sun.rmi.transport.proxy.WrappedSocket implements sun.rmi.transport.proxy.RMISocketInfo
+{
+    private boolean headerSent;
+
+    public void <init>(java.net.Socket, java.io.InputStream, java.io.OutputStream) throws java.io.IOException
+    {
+        java.io.OutputStream r3, $r6;
+        java.net.Socket r1;
+        sun.rmi.transport.proxy.HttpReceiveSocket r0;
+        sun.rmi.transport.proxy.HttpInputStream $r4;
+        java.io.InputStream r2, $r5;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpReceiveSocket;
+
+        r1 := @parameter0: java.net.Socket;
+
+        r2 := @parameter1: java.io.InputStream;
+
+        r3 := @parameter2: java.io.OutputStream;
+
+        specialinvoke r0.<sun.rmi.transport.proxy.WrappedSocket: void <init>(java.net.Socket,java.io.InputStream,java.io.OutputStream)>(r1, r2, r3);
+
+        r0.<sun.rmi.transport.proxy.HttpReceiveSocket: boolean headerSent> = 0;
+
+        $r4 = new sun.rmi.transport.proxy.HttpInputStream;
+
+        if r2 == null goto label1;
+
+        $r5 = r2;
+
+        goto label2;
+
+     label1:
+        $r5 = virtualinvoke r1.<java.net.Socket: java.io.InputStream getInputStream()>();
+
+     label2:
+        specialinvoke $r4.<sun.rmi.transport.proxy.HttpInputStream: void <init>(java.io.InputStream)>($r5);
+
+        r0.<sun.rmi.transport.proxy.HttpReceiveSocket: java.io.InputStream in> = $r4;
+
+        if r3 == null goto label3;
+
+        $r6 = r3;
+
+        goto label4;
+
+     label3:
+        $r6 = virtualinvoke r1.<java.net.Socket: java.io.OutputStream getOutputStream()>();
+
+     label4:
+        r0.<sun.rmi.transport.proxy.HttpReceiveSocket: java.io.OutputStream out> = $r6;
+
+        return;
+    }
+
+    public boolean isReusable()
+    {
+        sun.rmi.transport.proxy.HttpReceiveSocket r0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpReceiveSocket;
+
+        return 0;
+    }
+
+    public java.net.InetAddress getInetAddress()
+    {
+        sun.rmi.transport.proxy.HttpReceiveSocket r0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpReceiveSocket;
+
+        return null;
+    }
+
+    public java.io.OutputStream getOutputStream() throws java.io.IOException
+    {
+        java.io.OutputStream $r1, $r3, $r5;
+        java.io.DataOutputStream $r2;
+        sun.rmi.transport.proxy.HttpReceiveSocket r0;
+        sun.rmi.transport.proxy.HttpOutputStream $r4;
+        boolean $z0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpReceiveSocket;
+
+        $z0 = r0.<sun.rmi.transport.proxy.HttpReceiveSocket: boolean headerSent>;
+
+        if $z0 != 0 goto label1;
+
+        $r2 = new java.io.DataOutputStream;
+
+        $r3 = r0.<sun.rmi.transport.proxy.HttpReceiveSocket: java.io.OutputStream out>;
+
+        specialinvoke $r2.<java.io.DataOutputStream: void <init>(java.io.OutputStream)>($r3);
+
+        virtualinvoke $r2.<java.io.DataOutputStream: void writeBytes(java.lang.String)>("HTTP/1.0 200 OK\r\n");
+
+        virtualinvoke $r2.<java.io.DataOutputStream: void flush()>();
+
+        r0.<sun.rmi.transport.proxy.HttpReceiveSocket: boolean headerSent> = 1;
+
+        $r4 = new sun.rmi.transport.proxy.HttpOutputStream;
+
+        $r5 = r0.<sun.rmi.transport.proxy.HttpReceiveSocket: java.io.OutputStream out>;
+
+        specialinvoke $r4.<sun.rmi.transport.proxy.HttpOutputStream: void <init>(java.io.OutputStream)>($r5);
+
+        r0.<sun.rmi.transport.proxy.HttpReceiveSocket: java.io.OutputStream out> = $r4;
+
+     label1:
+        $r1 = r0.<sun.rmi.transport.proxy.HttpReceiveSocket: java.io.OutputStream out>;
+
+        return $r1;
+    }
+
+    public synchronized void close() throws java.io.IOException
+    {
+        java.io.OutputStream $r1;
+        java.net.Socket $r2;
+        sun.rmi.transport.proxy.HttpReceiveSocket r0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpReceiveSocket;
+
+        $r1 = virtualinvoke r0.<sun.rmi.transport.proxy.HttpReceiveSocket: java.io.OutputStream getOutputStream()>();
+
+        virtualinvoke $r1.<java.io.OutputStream: void close()>();
+
+        $r2 = r0.<sun.rmi.transport.proxy.HttpReceiveSocket: java.net.Socket socket>;
+
+        virtualinvoke $r2.<java.net.Socket: void close()>();
+
+        return;
+    }
+
+    public java.lang.String toString()
+    {
+        java.net.Socket $r3;
+        sun.rmi.transport.proxy.HttpReceiveSocket r2;
+        java.lang.StringBuilder $r0, $r1, $r5;
+        java.lang.String $r4, $r6;
+
+        r2 := @this: sun.rmi.transport.proxy.HttpReceiveSocket;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("HttpReceive");
+
+        $r3 = r2.<sun.rmi.transport.proxy.HttpReceiveSocket: java.net.Socket socket>;
+
+        $r4 = virtualinvoke $r3.<java.net.Socket: java.lang.String toString()>();
+
+        $r5 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r6;
+    }
+
+    public volatile int getSoTimeout() throws java.net.SocketException
+    {
+        int $i0;
+        sun.rmi.transport.proxy.HttpReceiveSocket r0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpReceiveSocket;
+
+        $i0 = specialinvoke r0.<sun.rmi.transport.proxy.WrappedSocket: int getSoTimeout()>();
+
+        return $i0;
+    }
+
+    public volatile void setSoTimeout(int) throws java.net.SocketException
+    {
+        int i0;
+        sun.rmi.transport.proxy.HttpReceiveSocket r0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpReceiveSocket;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<sun.rmi.transport.proxy.WrappedSocket: void setSoTimeout(int)>(i0);
+
+        return;
+    }
+
+    public volatile int getSoLinger() throws java.net.SocketException
+    {
+        int $i0;
+        sun.rmi.transport.proxy.HttpReceiveSocket r0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpReceiveSocket;
+
+        $i0 = specialinvoke r0.<sun.rmi.transport.proxy.WrappedSocket: int getSoLinger()>();
+
+        return $i0;
+    }
+
+    public volatile void setSoLinger(boolean, int) throws java.net.SocketException
+    {
+        int i0;
+        sun.rmi.transport.proxy.HttpReceiveSocket r0;
+        boolean z0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpReceiveSocket;
+
+        z0 := @parameter0: boolean;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<sun.rmi.transport.proxy.WrappedSocket: void setSoLinger(boolean,int)>(z0, i0);
+
+        return;
+    }
+
+    public volatile boolean getTcpNoDelay() throws java.net.SocketException
+    {
+        sun.rmi.transport.proxy.HttpReceiveSocket r0;
+        boolean $z0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpReceiveSocket;
+
+        $z0 = specialinvoke r0.<sun.rmi.transport.proxy.WrappedSocket: boolean getTcpNoDelay()>();
+
+        return $z0;
+    }
+
+    public volatile void setTcpNoDelay(boolean) throws java.net.SocketException
+    {
+        sun.rmi.transport.proxy.HttpReceiveSocket r0;
+        boolean z0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpReceiveSocket;
+
+        z0 := @parameter0: boolean;
+
+        specialinvoke r0.<sun.rmi.transport.proxy.WrappedSocket: void setTcpNoDelay(boolean)>(z0);
+
+        return;
+    }
+
+    public volatile java.io.InputStream getInputStream() throws java.io.IOException
+    {
+        sun.rmi.transport.proxy.HttpReceiveSocket r0;
+        java.io.InputStream $r1;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpReceiveSocket;
+
+        $r1 = specialinvoke r0.<sun.rmi.transport.proxy.WrappedSocket: java.io.InputStream getInputStream()>();
+
+        return $r1;
+    }
+
+    public volatile int getLocalPort()
+    {
+        int $i0;
+        sun.rmi.transport.proxy.HttpReceiveSocket r0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpReceiveSocket;
+
+        $i0 = specialinvoke r0.<sun.rmi.transport.proxy.WrappedSocket: int getLocalPort()>();
+
+        return $i0;
+    }
+
+    public volatile int getPort()
+    {
+        int $i0;
+        sun.rmi.transport.proxy.HttpReceiveSocket r0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpReceiveSocket;
+
+        $i0 = specialinvoke r0.<sun.rmi.transport.proxy.WrappedSocket: int getPort()>();
+
+        return $i0;
+    }
+
+    public volatile java.net.InetAddress getLocalAddress()
+    {
+        java.net.InetAddress $r1;
+        sun.rmi.transport.proxy.HttpReceiveSocket r0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpReceiveSocket;
+
+        $r1 = specialinvoke r0.<sun.rmi.transport.proxy.WrappedSocket: java.net.InetAddress getLocalAddress()>();
+
+        return $r1;
+    }
+}

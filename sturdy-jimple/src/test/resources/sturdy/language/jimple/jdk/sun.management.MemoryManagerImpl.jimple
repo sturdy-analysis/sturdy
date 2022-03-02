@@ -1,0 +1,171 @@
+class sun.management.MemoryManagerImpl extends sun.management.NotificationEmitterSupport implements java.lang.management.MemoryManagerMXBean
+{
+    private final java.lang.String name;
+    private final boolean isValid;
+    private java.lang.management.MemoryPoolMXBean[] pools;
+    private javax.management.MBeanNotificationInfo[] notifInfo;
+
+    void <init>(java.lang.String)
+    {
+        sun.management.MemoryManagerImpl r0;
+        java.lang.String r1;
+
+        r0 := @this: sun.management.MemoryManagerImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<sun.management.NotificationEmitterSupport: void <init>()>();
+
+        r0.<sun.management.MemoryManagerImpl: javax.management.MBeanNotificationInfo[] notifInfo> = null;
+
+        r0.<sun.management.MemoryManagerImpl: java.lang.String name> = r1;
+
+        r0.<sun.management.MemoryManagerImpl: boolean isValid> = 1;
+
+        r0.<sun.management.MemoryManagerImpl: java.lang.management.MemoryPoolMXBean[] pools> = null;
+
+        return;
+    }
+
+    public java.lang.String getName()
+    {
+        sun.management.MemoryManagerImpl r0;
+        java.lang.String $r1;
+
+        r0 := @this: sun.management.MemoryManagerImpl;
+
+        $r1 = r0.<sun.management.MemoryManagerImpl: java.lang.String name>;
+
+        return $r1;
+    }
+
+    public boolean isValid()
+    {
+        sun.management.MemoryManagerImpl r0;
+        boolean $z0;
+
+        r0 := @this: sun.management.MemoryManagerImpl;
+
+        $z0 = r0.<sun.management.MemoryManagerImpl: boolean isValid>;
+
+        return $z0;
+    }
+
+    public java.lang.String[] getMemoryPoolNames()
+    {
+        java.lang.String[] r2;
+        java.lang.management.MemoryPoolMXBean $r3;
+        int $i0, $i1, i2;
+        sun.management.MemoryManagerImpl r0;
+        java.lang.management.MemoryPoolMXBean[] $r1;
+        java.lang.String $r4;
+
+        r0 := @this: sun.management.MemoryManagerImpl;
+
+        $r1 = virtualinvoke r0.<sun.management.MemoryManagerImpl: java.lang.management.MemoryPoolMXBean[] getMemoryPools()>();
+
+        $i0 = lengthof $r1;
+
+        r2 = newarray (java.lang.String)[$i0];
+
+        i2 = 0;
+
+     label1:
+        $i1 = lengthof $r1;
+
+        if i2 >= $i1 goto label2;
+
+        $r3 = $r1[i2];
+
+        $r4 = interfaceinvoke $r3.<java.lang.management.MemoryPoolMXBean: java.lang.String getName()>();
+
+        r2[i2] = $r4;
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return r2;
+    }
+
+    synchronized java.lang.management.MemoryPoolMXBean[] getMemoryPools()
+    {
+        sun.management.MemoryManagerImpl r0;
+        java.lang.management.MemoryPoolMXBean[] $r1, $r2, $r3;
+
+        r0 := @this: sun.management.MemoryManagerImpl;
+
+        $r1 = r0.<sun.management.MemoryManagerImpl: java.lang.management.MemoryPoolMXBean[] pools>;
+
+        if $r1 != null goto label1;
+
+        $r3 = specialinvoke r0.<sun.management.MemoryManagerImpl: java.lang.management.MemoryPoolMXBean[] getMemoryPools0()>();
+
+        r0.<sun.management.MemoryManagerImpl: java.lang.management.MemoryPoolMXBean[] pools> = $r3;
+
+     label1:
+        $r2 = r0.<sun.management.MemoryManagerImpl: java.lang.management.MemoryPoolMXBean[] pools>;
+
+        return $r2;
+    }
+
+    private native java.lang.management.MemoryPoolMXBean[] getMemoryPools0();
+
+    public javax.management.MBeanNotificationInfo[] getNotificationInfo()
+    {
+        java.lang.Throwable $r4;
+        sun.management.MemoryManagerImpl r0;
+        javax.management.MBeanNotificationInfo[] $r1, $r2, $r3;
+
+        r0 := @this: sun.management.MemoryManagerImpl;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = r0.<sun.management.MemoryManagerImpl: javax.management.MBeanNotificationInfo[] notifInfo>;
+
+        if $r1 != null goto label2;
+
+        $r3 = newarray (javax.management.MBeanNotificationInfo)[0];
+
+        r0.<sun.management.MemoryManagerImpl: javax.management.MBeanNotificationInfo[] notifInfo> = $r3;
+
+     label2:
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r4;
+
+     label6:
+        $r2 = r0.<sun.management.MemoryManagerImpl: javax.management.MBeanNotificationInfo[] notifInfo>;
+
+        return $r2;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public javax.management.ObjectName getObjectName()
+    {
+        sun.management.MemoryManagerImpl r0;
+        java.lang.String $r1;
+        javax.management.ObjectName $r2;
+
+        r0 := @this: sun.management.MemoryManagerImpl;
+
+        $r1 = virtualinvoke r0.<sun.management.MemoryManagerImpl: java.lang.String getName()>();
+
+        $r2 = staticinvoke <sun.management.Util: javax.management.ObjectName newObjectName(java.lang.String,java.lang.String)>("java.lang:type=MemoryManager", $r1);
+
+        return $r2;
+    }
+}

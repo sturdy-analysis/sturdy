@@ -1,0 +1,426 @@
+public abstract class java.lang.ClassValue extends java.lang.Object
+{
+    private static final java.lang.ClassValue$Entry[] EMPTY_CACHE;
+    final int hashCodeForCache;
+    private static final java.util.concurrent.atomic.AtomicInteger nextHashCode;
+    private static final int HASH_INCREMENT;
+    static final int HASH_MASK;
+    final java.lang.ClassValue$Identity identity;
+    private volatile java.lang.ClassValue$Version version;
+    private static final java.lang.Object CRITICAL_SECTION;
+    private static final sun.misc.Unsafe UNSAFE;
+
+    protected void <init>()
+    {
+        java.lang.ClassValue$Identity $r2;
+        java.lang.ClassValue r0;
+        java.util.concurrent.atomic.AtomicInteger $r1;
+        int $i0, $i1;
+        java.lang.ClassValue$Version $r3;
+
+        r0 := @this: java.lang.ClassValue;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = <java.lang.ClassValue: java.util.concurrent.atomic.AtomicInteger nextHashCode>;
+
+        $i0 = virtualinvoke $r1.<java.util.concurrent.atomic.AtomicInteger: int getAndAdd(int)>(1640531527);
+
+        $i1 = $i0 & 1073741823;
+
+        r0.<java.lang.ClassValue: int hashCodeForCache> = $i1;
+
+        $r2 = new java.lang.ClassValue$Identity;
+
+        specialinvoke $r2.<java.lang.ClassValue$Identity: void <init>()>();
+
+        r0.<java.lang.ClassValue: java.lang.ClassValue$Identity identity> = $r2;
+
+        $r3 = new java.lang.ClassValue$Version;
+
+        specialinvoke $r3.<java.lang.ClassValue$Version: void <init>(java.lang.ClassValue)>(r0);
+
+        r0.<java.lang.ClassValue: java.lang.ClassValue$Version version> = $r3;
+
+        return;
+    }
+
+    protected abstract java.lang.Object computeValue(java.lang.Class);
+
+    public java.lang.Object get(java.lang.Class)
+    {
+        java.lang.ClassValue$Entry[] $r1;
+        java.lang.ClassValue r2;
+        java.lang.Class r0;
+        java.lang.Object $r4, $r5;
+        java.lang.ClassValue$Entry $r3;
+        boolean $z0;
+
+        r2 := @this: java.lang.ClassValue;
+
+        r0 := @parameter0: java.lang.Class;
+
+        $r1 = staticinvoke <java.lang.ClassValue: java.lang.ClassValue$Entry[] getCacheCarefully(java.lang.Class)>(r0);
+
+        $r3 = staticinvoke <java.lang.ClassValue$ClassValueMap: java.lang.ClassValue$Entry probeHomeLocation(java.lang.ClassValue$Entry[],java.lang.ClassValue)>($r1, r2);
+
+        $z0 = virtualinvoke r2.<java.lang.ClassValue: boolean match(java.lang.ClassValue$Entry)>($r3);
+
+        if $z0 == 0 goto label1;
+
+        $r5 = virtualinvoke $r3.<java.lang.ClassValue$Entry: java.lang.Object value()>();
+
+        return $r5;
+
+     label1:
+        $r4 = specialinvoke r2.<java.lang.ClassValue: java.lang.Object getFromBackup(java.lang.ClassValue$Entry[],java.lang.Class)>($r1, r0);
+
+        return $r4;
+    }
+
+    public void remove(java.lang.Class)
+    {
+        java.lang.Class r0;
+        java.lang.ClassValue$ClassValueMap $r1;
+        java.lang.ClassValue r2;
+
+        r2 := @this: java.lang.ClassValue;
+
+        r0 := @parameter0: java.lang.Class;
+
+        $r1 = staticinvoke <java.lang.ClassValue: java.lang.ClassValue$ClassValueMap getMap(java.lang.Class)>(r0);
+
+        virtualinvoke $r1.<java.lang.ClassValue$ClassValueMap: void removeEntry(java.lang.ClassValue)>(r2);
+
+        return;
+    }
+
+    void put(java.lang.Class, java.lang.Object)
+    {
+        java.lang.ClassValue$ClassValueMap $r1;
+        java.lang.ClassValue r2;
+        java.lang.Class r0;
+        java.lang.Object r3;
+
+        r2 := @this: java.lang.ClassValue;
+
+        r0 := @parameter0: java.lang.Class;
+
+        r3 := @parameter1: java.lang.Object;
+
+        $r1 = staticinvoke <java.lang.ClassValue: java.lang.ClassValue$ClassValueMap getMap(java.lang.Class)>(r0);
+
+        virtualinvoke $r1.<java.lang.ClassValue$ClassValueMap: void changeEntry(java.lang.ClassValue,java.lang.Object)>(r2, r3);
+
+        return;
+    }
+
+    private static java.lang.ClassValue$Entry[] getCacheCarefully(java.lang.Class)
+    {
+        java.lang.ClassValue$Entry[] $r2, $r3;
+        java.lang.ClassValue$ClassValueMap r1;
+        java.lang.Class r0;
+
+        r0 := @parameter0: java.lang.Class;
+
+        r1 = r0.<java.lang.Class: java.lang.ClassValue$ClassValueMap classValueMap>;
+
+        if r1 != null goto label1;
+
+        $r3 = <java.lang.ClassValue: java.lang.ClassValue$Entry[] EMPTY_CACHE>;
+
+        return $r3;
+
+     label1:
+        $r2 = virtualinvoke r1.<java.lang.ClassValue$ClassValueMap: java.lang.ClassValue$Entry[] getCache()>();
+
+        return $r2;
+    }
+
+    private java.lang.Object getFromBackup(java.lang.ClassValue$Entry[], java.lang.Class)
+    {
+        java.lang.ClassValue$Entry[] r0;
+        java.lang.ClassValue r1;
+        java.lang.Class r3;
+        java.lang.Object $r4, $r5;
+        java.lang.ClassValue$Entry $r2;
+
+        r1 := @this: java.lang.ClassValue;
+
+        r0 := @parameter0: java.lang.ClassValue$Entry[];
+
+        r3 := @parameter1: java.lang.Class;
+
+        $r2 = staticinvoke <java.lang.ClassValue$ClassValueMap: java.lang.ClassValue$Entry probeBackupLocations(java.lang.ClassValue$Entry[],java.lang.ClassValue)>(r0, r1);
+
+        if $r2 == null goto label1;
+
+        $r5 = virtualinvoke $r2.<java.lang.ClassValue$Entry: java.lang.Object value()>();
+
+        return $r5;
+
+     label1:
+        $r4 = specialinvoke r1.<java.lang.ClassValue: java.lang.Object getFromHashMap(java.lang.Class)>(r3);
+
+        return $r4;
+    }
+
+    java.lang.ClassValue$Entry castEntry(java.lang.ClassValue$Entry)
+    {
+        java.lang.ClassValue$Entry r0;
+        java.lang.ClassValue r1;
+
+        r1 := @this: java.lang.ClassValue;
+
+        r0 := @parameter0: java.lang.ClassValue$Entry;
+
+        return r0;
+    }
+
+    private java.lang.Object getFromHashMap(java.lang.Class)
+    {
+        java.lang.Throwable $r10;
+        java.lang.ClassValue$ClassValueMap $r1;
+        java.lang.ClassValue r2;
+        java.lang.ClassValue$Version $r4;
+        java.lang.Class r0;
+        java.lang.Object $r5, $r8, $r9;
+        java.lang.ClassValue$Entry $r3, $r6, $r7;
+        boolean $z0;
+
+        r2 := @this: java.lang.ClassValue;
+
+        r0 := @parameter0: java.lang.Class;
+
+        $r1 = staticinvoke <java.lang.ClassValue: java.lang.ClassValue$ClassValueMap getMap(java.lang.Class)>(r0);
+
+     label1:
+        $r3 = virtualinvoke $r1.<java.lang.ClassValue$ClassValueMap: java.lang.ClassValue$Entry startEntry(java.lang.ClassValue)>(r2);
+
+        $z0 = virtualinvoke $r3.<java.lang.ClassValue$Entry: boolean isPromise()>();
+
+        if $z0 != 0 goto label2;
+
+        $r9 = virtualinvoke $r3.<java.lang.ClassValue$Entry: java.lang.Object value()>();
+
+        return $r9;
+
+     label2:
+        $r4 = virtualinvoke $r3.<java.lang.ClassValue$Entry: java.lang.ClassValue$Version version()>();
+
+        $r5 = virtualinvoke r2.<java.lang.ClassValue: java.lang.Object computeValue(java.lang.Class)>(r0);
+
+        $r6 = staticinvoke <java.lang.ClassValue: java.lang.ClassValue$Entry makeEntry(java.lang.ClassValue$Version,java.lang.Object)>($r4, $r5);
+
+     label3:
+        $r7 = virtualinvoke $r1.<java.lang.ClassValue$ClassValueMap: java.lang.ClassValue$Entry finishEntry(java.lang.ClassValue,java.lang.ClassValue$Entry)>(r2, $r6);
+
+        goto label6;
+
+     label4:
+        $r10 := @caughtexception;
+
+     label5:
+        virtualinvoke $r1.<java.lang.ClassValue$ClassValueMap: java.lang.ClassValue$Entry finishEntry(java.lang.ClassValue,java.lang.ClassValue$Entry)>(r2, $r3);
+
+        throw $r10;
+
+     label6:
+        if $r7 == null goto label7;
+
+        $r8 = virtualinvoke $r7.<java.lang.ClassValue$Entry: java.lang.Object value()>();
+
+        return $r8;
+
+     label7:
+        goto label1;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    boolean match(java.lang.ClassValue$Entry)
+    {
+        java.lang.ClassValue r2;
+        java.lang.ClassValue$Version $r3;
+        java.lang.Object $r1;
+        java.lang.ClassValue$Entry r0;
+        boolean $z0;
+
+        r2 := @this: java.lang.ClassValue;
+
+        r0 := @parameter0: java.lang.ClassValue$Entry;
+
+        if r0 == null goto label1;
+
+        $r1 = virtualinvoke r0.<java.lang.ClassValue$Entry: java.lang.Object get()>();
+
+        $r3 = r2.<java.lang.ClassValue: java.lang.ClassValue$Version version>;
+
+        if $r1 != $r3 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    java.lang.ClassValue$Version version()
+    {
+        java.lang.ClassValue$Version $r1;
+        java.lang.ClassValue r0;
+
+        r0 := @this: java.lang.ClassValue;
+
+        $r1 = r0.<java.lang.ClassValue: java.lang.ClassValue$Version version>;
+
+        return $r1;
+    }
+
+    void bumpVersion()
+    {
+        java.lang.ClassValue$Version $r1;
+        java.lang.ClassValue r0;
+
+        r0 := @this: java.lang.ClassValue;
+
+        $r1 = new java.lang.ClassValue$Version;
+
+        specialinvoke $r1.<java.lang.ClassValue$Version: void <init>(java.lang.ClassValue)>(r0);
+
+        r0.<java.lang.ClassValue: java.lang.ClassValue$Version version> = $r1;
+
+        return;
+    }
+
+    private static java.lang.ClassValue$ClassValueMap getMap(java.lang.Class)
+    {
+        java.lang.Class r0;
+        java.lang.ClassValue$ClassValueMap r1, $r2;
+
+        r0 := @parameter0: java.lang.Class;
+
+        r1 = r0.<java.lang.Class: java.lang.ClassValue$ClassValueMap classValueMap>;
+
+        if r1 == null goto label1;
+
+        return r1;
+
+     label1:
+        $r2 = staticinvoke <java.lang.ClassValue: java.lang.ClassValue$ClassValueMap initializeMap(java.lang.Class)>(r0);
+
+        return $r2;
+    }
+
+    private static java.lang.ClassValue$ClassValueMap initializeMap(java.lang.Class)
+    {
+        sun.misc.Unsafe $r4;
+        java.lang.Throwable $r5;
+        java.lang.ClassValue$ClassValueMap $r2, $r3, r6;
+        java.lang.Object $r0;
+        java.lang.Class r1;
+
+        r1 := @parameter0: java.lang.Class;
+
+        $r0 = <java.lang.ClassValue: java.lang.Object CRITICAL_SECTION>;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = r1.<java.lang.Class: java.lang.ClassValue$ClassValueMap classValueMap>;
+
+        r6 = $r2;
+
+        if $r2 != null goto label2;
+
+        $r3 = new java.lang.ClassValue$ClassValueMap;
+
+        specialinvoke $r3.<java.lang.ClassValue$ClassValueMap: void <init>(java.lang.Class)>(r1);
+
+        r6 = $r3;
+
+        $r4 = <java.lang.ClassValue: sun.misc.Unsafe UNSAFE>;
+
+        virtualinvoke $r4.<sun.misc.Unsafe: void storeFence()>();
+
+        r1.<java.lang.Class: java.lang.ClassValue$ClassValueMap classValueMap> = $r3;
+
+     label2:
+        exitmonitor $r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r5;
+
+     label6:
+        return r6;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    static java.lang.ClassValue$Entry makeEntry(java.lang.ClassValue$Version, java.lang.Object)
+    {
+        java.lang.ClassValue$Version r1;
+        java.lang.Object r2;
+        java.lang.ClassValue$Entry $r0;
+
+        r1 := @parameter0: java.lang.ClassValue$Version;
+
+        r2 := @parameter1: java.lang.Object;
+
+        $r0 = new java.lang.ClassValue$Entry;
+
+        specialinvoke $r0.<java.lang.ClassValue$Entry: void <init>(java.lang.ClassValue$Version,java.lang.Object)>(r1, r2);
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        sun.misc.Unsafe $r3;
+        java.lang.ClassValue$Entry[] $r0;
+        java.util.concurrent.atomic.AtomicInteger $r1;
+        java.lang.Object $r2;
+
+        <java.lang.ClassValue: int HASH_MASK> = 1073741823;
+
+        <java.lang.ClassValue: int HASH_INCREMENT> = 1640531527;
+
+        $r0 = newarray (java.lang.ClassValue$Entry)[1];
+
+        $r0[0] = null;
+
+        <java.lang.ClassValue: java.lang.ClassValue$Entry[] EMPTY_CACHE> = $r0;
+
+        $r1 = new java.util.concurrent.atomic.AtomicInteger;
+
+        specialinvoke $r1.<java.util.concurrent.atomic.AtomicInteger: void <init>()>();
+
+        <java.lang.ClassValue: java.util.concurrent.atomic.AtomicInteger nextHashCode> = $r1;
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        <java.lang.ClassValue: java.lang.Object CRITICAL_SECTION> = $r2;
+
+        $r3 = staticinvoke <sun.misc.Unsafe: sun.misc.Unsafe getUnsafe()>();
+
+        <java.lang.ClassValue: sun.misc.Unsafe UNSAFE> = $r3;
+
+        return;
+    }
+}

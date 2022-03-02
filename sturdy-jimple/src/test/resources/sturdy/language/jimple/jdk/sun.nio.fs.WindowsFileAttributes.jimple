@@ -1,0 +1,1137 @@
+class sun.nio.fs.WindowsFileAttributes extends java.lang.Object implements java.nio.file.attribute.DosFileAttributes
+{
+    private static final sun.misc.Unsafe unsafe;
+    private static final short SIZEOF_FILE_INFORMATION;
+    private static final short OFFSETOF_FILE_INFORMATION_ATTRIBUTES;
+    private static final short OFFSETOF_FILE_INFORMATION_CREATETIME;
+    private static final short OFFSETOF_FILE_INFORMATION_LASTACCESSTIME;
+    private static final short OFFSETOF_FILE_INFORMATION_LASTWRITETIME;
+    private static final short OFFSETOF_FILE_INFORMATION_VOLSERIALNUM;
+    private static final short OFFSETOF_FILE_INFORMATION_SIZEHIGH;
+    private static final short OFFSETOF_FILE_INFORMATION_SIZELOW;
+    private static final short OFFSETOF_FILE_INFORMATION_INDEXHIGH;
+    private static final short OFFSETOF_FILE_INFORMATION_INDEXLOW;
+    private static final short SIZEOF_FILE_ATTRIBUTE_DATA;
+    private static final short OFFSETOF_FILE_ATTRIBUTE_DATA_ATTRIBUTES;
+    private static final short OFFSETOF_FILE_ATTRIBUTE_DATA_CREATETIME;
+    private static final short OFFSETOF_FILE_ATTRIBUTE_DATA_LASTACCESSTIME;
+    private static final short OFFSETOF_FILE_ATTRIBUTE_DATA_LASTWRITETIME;
+    private static final short OFFSETOF_FILE_ATTRIBUTE_DATA_SIZEHIGH;
+    private static final short OFFSETOF_FILE_ATTRIBUTE_DATA_SIZELOW;
+    private static final short SIZEOF_FIND_DATA;
+    private static final short OFFSETOF_FIND_DATA_ATTRIBUTES;
+    private static final short OFFSETOF_FIND_DATA_CREATETIME;
+    private static final short OFFSETOF_FIND_DATA_LASTACCESSTIME;
+    private static final short OFFSETOF_FIND_DATA_LASTWRITETIME;
+    private static final short OFFSETOF_FIND_DATA_SIZEHIGH;
+    private static final short OFFSETOF_FIND_DATA_SIZELOW;
+    private static final short OFFSETOF_FIND_DATA_RESERVED0;
+    private static final long WINDOWS_EPOCH_IN_MICROSECONDS;
+    private static final boolean ensureAccurateMetadata;
+    private final int fileAttrs;
+    private final long creationTime;
+    private final long lastAccessTime;
+    private final long lastWriteTime;
+    private final long size;
+    private final int reparseTag;
+    private final int volSerialNumber;
+    private final int fileIndexHigh;
+    private final int fileIndexLow;
+
+    static java.nio.file.attribute.FileTime toFileTime(long)
+    {
+        java.util.concurrent.TimeUnit $r0;
+        java.nio.file.attribute.FileTime $r1;
+        long l0, l1, l2;
+
+        l0 := @parameter0: long;
+
+        l1 = l0 / 10L;
+
+        l2 = l1 + -11644473600000000L;
+
+        $r0 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MICROSECONDS>;
+
+        $r1 = staticinvoke <java.nio.file.attribute.FileTime: java.nio.file.attribute.FileTime 'from'(long,java.util.concurrent.TimeUnit)>(l2, $r0);
+
+        return $r1;
+    }
+
+    static long toWindowsTime(java.nio.file.attribute.FileTime)
+    {
+        java.util.concurrent.TimeUnit $r1;
+        java.nio.file.attribute.FileTime r0;
+        long $l0, l1, l2;
+
+        r0 := @parameter0: java.nio.file.attribute.FileTime;
+
+        $r1 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MICROSECONDS>;
+
+        $l0 = virtualinvoke r0.<java.nio.file.attribute.FileTime: long 'to'(java.util.concurrent.TimeUnit)>($r1);
+
+        l1 = $l0 - -11644473600000000L;
+
+        l2 = l1 * 10L;
+
+        return l2;
+    }
+
+    private void <init>(int, long, long, long, long, int, int, int, int)
+    {
+        long l1, l2, l3, l4;
+        int i0, i5, i6, i7, i8;
+        sun.nio.fs.WindowsFileAttributes r0;
+
+        r0 := @this: sun.nio.fs.WindowsFileAttributes;
+
+        i0 := @parameter0: int;
+
+        l1 := @parameter1: long;
+
+        l2 := @parameter2: long;
+
+        l3 := @parameter3: long;
+
+        l4 := @parameter4: long;
+
+        i5 := @parameter5: int;
+
+        i6 := @parameter6: int;
+
+        i7 := @parameter7: int;
+
+        i8 := @parameter8: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.nio.fs.WindowsFileAttributes: int fileAttrs> = i0;
+
+        r0.<sun.nio.fs.WindowsFileAttributes: long creationTime> = l1;
+
+        r0.<sun.nio.fs.WindowsFileAttributes: long lastAccessTime> = l2;
+
+        r0.<sun.nio.fs.WindowsFileAttributes: long lastWriteTime> = l3;
+
+        r0.<sun.nio.fs.WindowsFileAttributes: long size> = l4;
+
+        r0.<sun.nio.fs.WindowsFileAttributes: int reparseTag> = i5;
+
+        r0.<sun.nio.fs.WindowsFileAttributes: int volSerialNumber> = i6;
+
+        r0.<sun.nio.fs.WindowsFileAttributes: int fileIndexHigh> = i7;
+
+        r0.<sun.nio.fs.WindowsFileAttributes: int fileIndexLow> = i8;
+
+        return;
+    }
+
+    private static sun.nio.fs.WindowsFileAttributes fromFileInformation(long, int)
+    {
+        sun.misc.Unsafe $r0, $r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8;
+        long l0, $l1, $l3, $l4, $l5, $l6, $l7, $l8, $l9, $l11, $l12, $l13, $l15, $l16, l17, $l18, $l20, $l22;
+        int $i2, $i10, $i14, $i19, $i21, $i23, i24;
+        sun.nio.fs.WindowsFileAttributes $r9;
+
+        l0 := @parameter0: long;
+
+        i24 := @parameter1: int;
+
+        $r0 = <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe>;
+
+        $l1 = l0 + 0L;
+
+        $i2 = virtualinvoke $r0.<sun.misc.Unsafe: int getInt(long)>($l1);
+
+        $r1 = <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe>;
+
+        $l3 = l0 + 4L;
+
+        $l4 = virtualinvoke $r1.<sun.misc.Unsafe: long getLong(long)>($l3);
+
+        $r2 = <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe>;
+
+        $l5 = l0 + 12L;
+
+        $l6 = virtualinvoke $r2.<sun.misc.Unsafe: long getLong(long)>($l5);
+
+        $r3 = <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe>;
+
+        $l7 = l0 + 20L;
+
+        $l8 = virtualinvoke $r3.<sun.misc.Unsafe: long getLong(long)>($l7);
+
+        $r4 = <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe>;
+
+        $l9 = l0 + 32L;
+
+        $i10 = virtualinvoke $r4.<sun.misc.Unsafe: int getInt(long)>($l9);
+
+        $l11 = (long) $i10;
+
+        $l13 = $l11 << 32;
+
+        $r5 = <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe>;
+
+        $l12 = l0 + 36L;
+
+        $i14 = virtualinvoke $r5.<sun.misc.Unsafe: int getInt(long)>($l12);
+
+        $l15 = (long) $i14;
+
+        $l16 = $l15 & 4294967295L;
+
+        l17 = $l13 + $l16;
+
+        $r6 = <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe>;
+
+        $l18 = l0 + 28L;
+
+        $i19 = virtualinvoke $r6.<sun.misc.Unsafe: int getInt(long)>($l18);
+
+        $r7 = <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe>;
+
+        $l20 = l0 + 44L;
+
+        $i21 = virtualinvoke $r7.<sun.misc.Unsafe: int getInt(long)>($l20);
+
+        $r8 = <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe>;
+
+        $l22 = l0 + 48L;
+
+        $i23 = virtualinvoke $r8.<sun.misc.Unsafe: int getInt(long)>($l22);
+
+        $r9 = new sun.nio.fs.WindowsFileAttributes;
+
+        specialinvoke $r9.<sun.nio.fs.WindowsFileAttributes: void <init>(int,long,long,long,long,int,int,int,int)>($i2, $l4, $l6, $l8, l17, i24, $i19, $i21, $i23);
+
+        return $r9;
+    }
+
+    private static sun.nio.fs.WindowsFileAttributes fromFileAttributeData(long, int)
+    {
+        sun.misc.Unsafe $r0, $r1, $r2, $r3, $r4, $r5;
+        long l0, $l1, $l3, $l4, $l5, $l6, $l7, $l8, $l9, $l11, $l12, $l13, $l15, $l16, l17;
+        int $i2, $i10, $i14, i18;
+        sun.nio.fs.WindowsFileAttributes $r6;
+
+        l0 := @parameter0: long;
+
+        i18 := @parameter1: int;
+
+        $r0 = <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe>;
+
+        $l1 = l0 + 0L;
+
+        $i2 = virtualinvoke $r0.<sun.misc.Unsafe: int getInt(long)>($l1);
+
+        $r1 = <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe>;
+
+        $l3 = l0 + 4L;
+
+        $l4 = virtualinvoke $r1.<sun.misc.Unsafe: long getLong(long)>($l3);
+
+        $r2 = <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe>;
+
+        $l5 = l0 + 12L;
+
+        $l6 = virtualinvoke $r2.<sun.misc.Unsafe: long getLong(long)>($l5);
+
+        $r3 = <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe>;
+
+        $l7 = l0 + 20L;
+
+        $l8 = virtualinvoke $r3.<sun.misc.Unsafe: long getLong(long)>($l7);
+
+        $r4 = <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe>;
+
+        $l9 = l0 + 28L;
+
+        $i10 = virtualinvoke $r4.<sun.misc.Unsafe: int getInt(long)>($l9);
+
+        $l11 = (long) $i10;
+
+        $l13 = $l11 << 32;
+
+        $r5 = <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe>;
+
+        $l12 = l0 + 32L;
+
+        $i14 = virtualinvoke $r5.<sun.misc.Unsafe: int getInt(long)>($l12);
+
+        $l15 = (long) $i14;
+
+        $l16 = $l15 & 4294967295L;
+
+        l17 = $l13 + $l16;
+
+        $r6 = new sun.nio.fs.WindowsFileAttributes;
+
+        specialinvoke $r6.<sun.nio.fs.WindowsFileAttributes: void <init>(int,long,long,long,long,int,int,int,int)>($i2, $l4, $l6, $l8, l17, i18, 0, 0, 0);
+
+        return $r6;
+    }
+
+    static sun.nio.fs.NativeBuffer getBufferForFindData()
+    {
+        sun.nio.fs.NativeBuffer $r0;
+
+        $r0 = staticinvoke <sun.nio.fs.NativeBuffers: sun.nio.fs.NativeBuffer getNativeBuffer(int)>(592);
+
+        return $r0;
+    }
+
+    static sun.nio.fs.WindowsFileAttributes fromFindData(long)
+    {
+        sun.misc.Unsafe $r0, $r1, $r2, $r3, $r4, $r5, $r7;
+        long l0, $l1, $l3, $l4, $l5, $l6, $l7, $l8, $l9, $l11, $l12, $l13, $l15, $l16, l17, $l18;
+        int $i2, $i10, $i14, $i19;
+        boolean $z0;
+        sun.nio.fs.WindowsFileAttributes $r6;
+
+        l0 := @parameter0: long;
+
+        $r0 = <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe>;
+
+        $l1 = l0 + 0L;
+
+        $i2 = virtualinvoke $r0.<sun.misc.Unsafe: int getInt(long)>($l1);
+
+        $r1 = <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe>;
+
+        $l3 = l0 + 4L;
+
+        $l4 = virtualinvoke $r1.<sun.misc.Unsafe: long getLong(long)>($l3);
+
+        $r2 = <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe>;
+
+        $l5 = l0 + 12L;
+
+        $l6 = virtualinvoke $r2.<sun.misc.Unsafe: long getLong(long)>($l5);
+
+        $r3 = <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe>;
+
+        $l7 = l0 + 20L;
+
+        $l8 = virtualinvoke $r3.<sun.misc.Unsafe: long getLong(long)>($l7);
+
+        $r4 = <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe>;
+
+        $l9 = l0 + 28L;
+
+        $i10 = virtualinvoke $r4.<sun.misc.Unsafe: int getInt(long)>($l9);
+
+        $l11 = (long) $i10;
+
+        $l13 = $l11 << 32;
+
+        $r5 = <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe>;
+
+        $l12 = l0 + 32L;
+
+        $i14 = virtualinvoke $r5.<sun.misc.Unsafe: int getInt(long)>($l12);
+
+        $l15 = (long) $i14;
+
+        $l16 = $l15 & 4294967295L;
+
+        l17 = $l13 + $l16;
+
+        $z0 = staticinvoke <sun.nio.fs.WindowsFileAttributes: boolean isReparsePoint(int)>($i2);
+
+        if $z0 == 0 goto label1;
+
+        $r7 = <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe>;
+
+        $l18 = l0 + 36L;
+
+        $i19 = virtualinvoke $r7.<sun.misc.Unsafe: int getInt(long)>($l18);
+
+        goto label2;
+
+     label1:
+        $i19 = 0;
+
+     label2:
+        $r6 = new sun.nio.fs.WindowsFileAttributes;
+
+        specialinvoke $r6.<sun.nio.fs.WindowsFileAttributes: void <init>(int,long,long,long,long,int,int,int,int)>($i2, $l4, $l6, $l8, l17, $i19, 0, 0, 0);
+
+        return $r6;
+    }
+
+    static sun.nio.fs.WindowsFileAttributes readAttributes(long) throws sun.nio.fs.WindowsException
+    {
+        sun.misc.Unsafe $r1, $r4;
+        java.lang.Throwable $r5, $r6;
+        long $l0, l1, $l2, $l4, $l5, $l6;
+        int $i3, i7;
+        boolean $z0;
+        sun.nio.fs.NativeBuffer $r0, $r3;
+        sun.nio.fs.WindowsFileAttributes $r2;
+
+        l1 := @parameter0: long;
+
+        $r0 = staticinvoke <sun.nio.fs.NativeBuffers: sun.nio.fs.NativeBuffer getNativeBuffer(int)>(52);
+
+     label1:
+        $l0 = virtualinvoke $r0.<sun.nio.fs.NativeBuffer: long address()>();
+
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void GetFileInformationByHandle(long,long)>(l1, $l0);
+
+        i7 = 0;
+
+        $r1 = <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe>;
+
+        $l2 = $l0 + 0L;
+
+        $i3 = virtualinvoke $r1.<sun.misc.Unsafe: int getInt(long)>($l2);
+
+        $z0 = staticinvoke <sun.nio.fs.WindowsFileAttributes: boolean isReparsePoint(int)>($i3);
+
+        if $z0 == 0 goto label6;
+
+        $r3 = staticinvoke <sun.nio.fs.NativeBuffers: sun.nio.fs.NativeBuffer getNativeBuffer(int)>(16384);
+
+     label2:
+        $l4 = virtualinvoke $r3.<sun.nio.fs.NativeBuffer: long address()>();
+
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void DeviceIoControlGetReparsePoint(long,long,int)>(l1, $l4, 16384);
+
+        $r4 = <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe>;
+
+        $l5 = virtualinvoke $r3.<sun.nio.fs.NativeBuffer: long address()>();
+
+        $l6 = virtualinvoke $r4.<sun.misc.Unsafe: long getLong(long)>($l5);
+
+        i7 = (int) $l6;
+
+     label3:
+        virtualinvoke $r3.<sun.nio.fs.NativeBuffer: void release()>();
+
+        goto label6;
+
+     label4:
+        $r6 := @caughtexception;
+
+     label5:
+        virtualinvoke $r3.<sun.nio.fs.NativeBuffer: void release()>();
+
+        throw $r6;
+
+     label6:
+        $r2 = staticinvoke <sun.nio.fs.WindowsFileAttributes: sun.nio.fs.WindowsFileAttributes fromFileInformation(long,int)>($l0, i7);
+
+     label7:
+        virtualinvoke $r0.<sun.nio.fs.NativeBuffer: void release()>();
+
+        return $r2;
+
+     label8:
+        $r5 := @caughtexception;
+
+     label9:
+        virtualinvoke $r0.<sun.nio.fs.NativeBuffer: void release()>();
+
+        throw $r5;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+        catch java.lang.Throwable from label1 to label7 with label8;
+        catch java.lang.Throwable from label8 to label9 with label8;
+    }
+
+    static sun.nio.fs.WindowsFileAttributes get(sun.nio.fs.WindowsPath, boolean) throws sun.nio.fs.WindowsException
+    {
+        boolean $z0, z1, $z2, $z3;
+        sun.misc.Unsafe $r4;
+        java.lang.Throwable $r9, $r10, $r12;
+        long $l0, $l1, $l2, $l7, $l8, $l9;
+        int $i3, $i4, $i5, $i10, $i11, $i12;
+        sun.nio.fs.WindowsException $r11, $r13, r14;
+        java.lang.String $r3, $r5;
+        sun.nio.fs.WindowsPath r0;
+        char $c6;
+        sun.nio.fs.NativeBuffer $r2, $r6;
+        sun.nio.fs.WindowsFileAttributes $r1, $r7, $r8;
+
+        r0 := @parameter0: sun.nio.fs.WindowsPath;
+
+        z1 := @parameter1: boolean;
+
+        $z0 = <sun.nio.fs.WindowsFileAttributes: boolean ensureAccurateMetadata>;
+
+        if $z0 != 0 goto label17;
+
+        r14 = null;
+
+        $r2 = staticinvoke <sun.nio.fs.NativeBuffers: sun.nio.fs.NativeBuffer getNativeBuffer(int)>(36);
+
+     label01:
+        $l1 = virtualinvoke $r2.<sun.nio.fs.NativeBuffer: long address()>();
+
+        $r3 = virtualinvoke r0.<sun.nio.fs.WindowsPath: java.lang.String getPathForWin32Calls()>();
+
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void GetFileAttributesEx(java.lang.String,long)>($r3, $l1);
+
+        $r4 = <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe>;
+
+        $l2 = $l1 + 0L;
+
+        $i3 = virtualinvoke $r4.<sun.misc.Unsafe: int getInt(long)>($l2);
+
+        $z2 = staticinvoke <sun.nio.fs.WindowsFileAttributes: boolean isReparsePoint(int)>($i3);
+
+        if $z2 != 0 goto label03;
+
+        $r8 = staticinvoke <sun.nio.fs.WindowsFileAttributes: sun.nio.fs.WindowsFileAttributes fromFileAttributeData(long,int)>($l1, 0);
+
+     label02:
+        virtualinvoke $r2.<sun.nio.fs.NativeBuffer: void release()>();
+
+        return $r8;
+
+     label03:
+        virtualinvoke $r2.<sun.nio.fs.NativeBuffer: void release()>();
+
+        goto label09;
+
+     label04:
+        $r13 := @caughtexception;
+
+        $i10 = virtualinvoke $r13.<sun.nio.fs.WindowsException: int lastError()>();
+
+        if $i10 == 32 goto label05;
+
+        throw $r13;
+
+     label05:
+        r14 = $r13;
+
+     label06:
+        virtualinvoke $r2.<sun.nio.fs.NativeBuffer: void release()>();
+
+        goto label09;
+
+     label07:
+        $r12 := @caughtexception;
+
+     label08:
+        virtualinvoke $r2.<sun.nio.fs.NativeBuffer: void release()>();
+
+        throw $r12;
+
+     label09:
+        if r14 == null goto label17;
+
+        $r5 = virtualinvoke r0.<sun.nio.fs.WindowsPath: java.lang.String getPathForWin32Calls()>();
+
+        $i4 = virtualinvoke $r5.<java.lang.String: int length()>();
+
+        $i5 = $i4 - 1;
+
+        $c6 = virtualinvoke $r5.<java.lang.String: char charAt(int)>($i5);
+
+        $i11 = (int) $c6;
+
+        if $i11 == 58 goto label10;
+
+        $i12 = (int) $c6;
+
+        if $i12 != 92 goto label11;
+
+     label10:
+        throw r14;
+
+     label11:
+        $r6 = staticinvoke <sun.nio.fs.WindowsFileAttributes: sun.nio.fs.NativeBuffer getBufferForFindData()>();
+
+     label12:
+        $l7 = virtualinvoke $r6.<sun.nio.fs.NativeBuffer: long address()>();
+
+        $l8 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: long FindFirstFile(java.lang.String,long)>($r5, $l7);
+
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void FindClose(long)>($l8);
+
+        $l9 = virtualinvoke $r6.<sun.nio.fs.NativeBuffer: long address()>();
+
+        $r7 = staticinvoke <sun.nio.fs.WindowsFileAttributes: sun.nio.fs.WindowsFileAttributes fromFindData(long)>($l9);
+
+        $z3 = virtualinvoke $r7.<sun.nio.fs.WindowsFileAttributes: boolean isReparsePoint()>();
+
+        if $z3 == 0 goto label13;
+
+        throw r14;
+
+     label13:
+        virtualinvoke $r6.<sun.nio.fs.NativeBuffer: void release()>();
+
+        return $r7;
+
+     label14:
+        $r11 := @caughtexception;
+
+        throw r14;
+
+     label15:
+        $r10 := @caughtexception;
+
+     label16:
+        virtualinvoke $r6.<sun.nio.fs.NativeBuffer: void release()>();
+
+        throw $r10;
+
+     label17:
+        $l0 = virtualinvoke r0.<sun.nio.fs.WindowsPath: long openForReadAttributeAccess(boolean)>(z1);
+
+     label18:
+        $r1 = staticinvoke <sun.nio.fs.WindowsFileAttributes: sun.nio.fs.WindowsFileAttributes readAttributes(long)>($l0);
+
+     label19:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CloseHandle(long)>($l0);
+
+        return $r1;
+
+     label20:
+        $r9 := @caughtexception;
+
+     label21:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CloseHandle(long)>($l0);
+
+        throw $r9;
+
+        catch sun.nio.fs.WindowsException from label01 to label02 with label04;
+        catch java.lang.Throwable from label01 to label02 with label07;
+        catch java.lang.Throwable from label04 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+        catch sun.nio.fs.WindowsException from label12 to label13 with label14;
+        catch java.lang.Throwable from label12 to label13 with label15;
+        catch java.lang.Throwable from label14 to label16 with label15;
+        catch java.lang.Throwable from label18 to label19 with label20;
+        catch java.lang.Throwable from label20 to label21 with label20;
+    }
+
+    static boolean isSameFile(sun.nio.fs.WindowsFileAttributes, sun.nio.fs.WindowsFileAttributes)
+    {
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        sun.nio.fs.WindowsFileAttributes r0, r1;
+        boolean $z0;
+
+        r0 := @parameter0: sun.nio.fs.WindowsFileAttributes;
+
+        r1 := @parameter1: sun.nio.fs.WindowsFileAttributes;
+
+        $i1 = r0.<sun.nio.fs.WindowsFileAttributes: int volSerialNumber>;
+
+        $i0 = r1.<sun.nio.fs.WindowsFileAttributes: int volSerialNumber>;
+
+        if $i1 != $i0 goto label1;
+
+        $i3 = r0.<sun.nio.fs.WindowsFileAttributes: int fileIndexHigh>;
+
+        $i2 = r1.<sun.nio.fs.WindowsFileAttributes: int fileIndexHigh>;
+
+        if $i3 != $i2 goto label1;
+
+        $i5 = r0.<sun.nio.fs.WindowsFileAttributes: int fileIndexLow>;
+
+        $i4 = r1.<sun.nio.fs.WindowsFileAttributes: int fileIndexLow>;
+
+        if $i5 != $i4 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    static boolean isReparsePoint(int)
+    {
+        int i0, $i1;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        $i1 = i0 & 1024;
+
+        if $i1 == 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    int attributes()
+    {
+        int $i0;
+        sun.nio.fs.WindowsFileAttributes r0;
+
+        r0 := @this: sun.nio.fs.WindowsFileAttributes;
+
+        $i0 = r0.<sun.nio.fs.WindowsFileAttributes: int fileAttrs>;
+
+        return $i0;
+    }
+
+    int volSerialNumber()
+    {
+        int $i0;
+        sun.nio.fs.WindowsFileAttributes r0;
+
+        r0 := @this: sun.nio.fs.WindowsFileAttributes;
+
+        $i0 = r0.<sun.nio.fs.WindowsFileAttributes: int volSerialNumber>;
+
+        return $i0;
+    }
+
+    int fileIndexHigh()
+    {
+        int $i0;
+        sun.nio.fs.WindowsFileAttributes r0;
+
+        r0 := @this: sun.nio.fs.WindowsFileAttributes;
+
+        $i0 = r0.<sun.nio.fs.WindowsFileAttributes: int fileIndexHigh>;
+
+        return $i0;
+    }
+
+    int fileIndexLow()
+    {
+        int $i0;
+        sun.nio.fs.WindowsFileAttributes r0;
+
+        r0 := @this: sun.nio.fs.WindowsFileAttributes;
+
+        $i0 = r0.<sun.nio.fs.WindowsFileAttributes: int fileIndexLow>;
+
+        return $i0;
+    }
+
+    public long size()
+    {
+        sun.nio.fs.WindowsFileAttributes r0;
+        long $l0;
+
+        r0 := @this: sun.nio.fs.WindowsFileAttributes;
+
+        $l0 = r0.<sun.nio.fs.WindowsFileAttributes: long size>;
+
+        return $l0;
+    }
+
+    public java.nio.file.attribute.FileTime lastModifiedTime()
+    {
+        sun.nio.fs.WindowsFileAttributes r0;
+        java.nio.file.attribute.FileTime $r1;
+        long $l0;
+
+        r0 := @this: sun.nio.fs.WindowsFileAttributes;
+
+        $l0 = r0.<sun.nio.fs.WindowsFileAttributes: long lastWriteTime>;
+
+        $r1 = staticinvoke <sun.nio.fs.WindowsFileAttributes: java.nio.file.attribute.FileTime toFileTime(long)>($l0);
+
+        return $r1;
+    }
+
+    public java.nio.file.attribute.FileTime lastAccessTime()
+    {
+        sun.nio.fs.WindowsFileAttributes r0;
+        java.nio.file.attribute.FileTime $r1;
+        long $l0;
+
+        r0 := @this: sun.nio.fs.WindowsFileAttributes;
+
+        $l0 = r0.<sun.nio.fs.WindowsFileAttributes: long lastAccessTime>;
+
+        $r1 = staticinvoke <sun.nio.fs.WindowsFileAttributes: java.nio.file.attribute.FileTime toFileTime(long)>($l0);
+
+        return $r1;
+    }
+
+    public java.nio.file.attribute.FileTime creationTime()
+    {
+        sun.nio.fs.WindowsFileAttributes r0;
+        java.nio.file.attribute.FileTime $r1;
+        long $l0;
+
+        r0 := @this: sun.nio.fs.WindowsFileAttributes;
+
+        $l0 = r0.<sun.nio.fs.WindowsFileAttributes: long creationTime>;
+
+        $r1 = staticinvoke <sun.nio.fs.WindowsFileAttributes: java.nio.file.attribute.FileTime toFileTime(long)>($l0);
+
+        return $r1;
+    }
+
+    public java.lang.Object fileKey()
+    {
+        sun.nio.fs.WindowsFileAttributes r0;
+
+        r0 := @this: sun.nio.fs.WindowsFileAttributes;
+
+        return null;
+    }
+
+    boolean isReparsePoint()
+    {
+        int $i0;
+        sun.nio.fs.WindowsFileAttributes r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.fs.WindowsFileAttributes;
+
+        $i0 = r0.<sun.nio.fs.WindowsFileAttributes: int fileAttrs>;
+
+        $z0 = staticinvoke <sun.nio.fs.WindowsFileAttributes: boolean isReparsePoint(int)>($i0);
+
+        return $z0;
+    }
+
+    boolean isDirectoryLink()
+    {
+        int $i0, $i1;
+        sun.nio.fs.WindowsFileAttributes r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.nio.fs.WindowsFileAttributes;
+
+        $z0 = virtualinvoke r0.<sun.nio.fs.WindowsFileAttributes: boolean isSymbolicLink()>();
+
+        if $z0 == 0 goto label1;
+
+        $i0 = r0.<sun.nio.fs.WindowsFileAttributes: int fileAttrs>;
+
+        $i1 = $i0 & 16;
+
+        if $i1 == 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public boolean isSymbolicLink()
+    {
+        int $i0;
+        sun.nio.fs.WindowsFileAttributes r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.fs.WindowsFileAttributes;
+
+        $i0 = r0.<sun.nio.fs.WindowsFileAttributes: int reparseTag>;
+
+        if $i0 != -1610612724 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean isDirectory()
+    {
+        int $i0, $i1;
+        sun.nio.fs.WindowsFileAttributes r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.nio.fs.WindowsFileAttributes;
+
+        $z0 = virtualinvoke r0.<sun.nio.fs.WindowsFileAttributes: boolean isSymbolicLink()>();
+
+        if $z0 == 0 goto label1;
+
+        return 0;
+
+     label1:
+        $i0 = r0.<sun.nio.fs.WindowsFileAttributes: int fileAttrs>;
+
+        $i1 = $i0 & 16;
+
+        if $i1 == 0 goto label2;
+
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        return $z1;
+    }
+
+    public boolean isOther()
+    {
+        int $i0, $i1;
+        sun.nio.fs.WindowsFileAttributes r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.nio.fs.WindowsFileAttributes;
+
+        $z0 = virtualinvoke r0.<sun.nio.fs.WindowsFileAttributes: boolean isSymbolicLink()>();
+
+        if $z0 == 0 goto label1;
+
+        return 0;
+
+     label1:
+        $i0 = r0.<sun.nio.fs.WindowsFileAttributes: int fileAttrs>;
+
+        $i1 = $i0 & 1088;
+
+        if $i1 == 0 goto label2;
+
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        return $z1;
+    }
+
+    public boolean isRegularFile()
+    {
+        sun.nio.fs.WindowsFileAttributes r0;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: sun.nio.fs.WindowsFileAttributes;
+
+        $z0 = virtualinvoke r0.<sun.nio.fs.WindowsFileAttributes: boolean isSymbolicLink()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = virtualinvoke r0.<sun.nio.fs.WindowsFileAttributes: boolean isDirectory()>();
+
+        if $z1 != 0 goto label1;
+
+        $z2 = virtualinvoke r0.<sun.nio.fs.WindowsFileAttributes: boolean isOther()>();
+
+        if $z2 != 0 goto label1;
+
+        $z3 = 1;
+
+        goto label2;
+
+     label1:
+        $z3 = 0;
+
+     label2:
+        return $z3;
+    }
+
+    public boolean isReadOnly()
+    {
+        int $i0, $i1;
+        sun.nio.fs.WindowsFileAttributes r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.fs.WindowsFileAttributes;
+
+        $i0 = r0.<sun.nio.fs.WindowsFileAttributes: int fileAttrs>;
+
+        $i1 = $i0 & 1;
+
+        if $i1 == 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean isHidden()
+    {
+        int $i0, $i1;
+        sun.nio.fs.WindowsFileAttributes r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.fs.WindowsFileAttributes;
+
+        $i0 = r0.<sun.nio.fs.WindowsFileAttributes: int fileAttrs>;
+
+        $i1 = $i0 & 2;
+
+        if $i1 == 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean isArchive()
+    {
+        int $i0, $i1;
+        sun.nio.fs.WindowsFileAttributes r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.fs.WindowsFileAttributes;
+
+        $i0 = r0.<sun.nio.fs.WindowsFileAttributes: int fileAttrs>;
+
+        $i1 = $i0 & 32;
+
+        if $i1 == 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean isSystem()
+    {
+        int $i0, $i1;
+        sun.nio.fs.WindowsFileAttributes r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.fs.WindowsFileAttributes;
+
+        $i0 = r0.<sun.nio.fs.WindowsFileAttributes: int fileAttrs>;
+
+        $i1 = $i0 & 4;
+
+        if $i1 == 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    static void <clinit>()
+    {
+        sun.misc.Unsafe $r0;
+        java.lang.Object $r2;
+        java.lang.String r3;
+        sun.security.action.GetPropertyAction $r1;
+        boolean $z0, $z1;
+
+        <sun.nio.fs.WindowsFileAttributes: long WINDOWS_EPOCH_IN_MICROSECONDS> = -11644473600000000L;
+
+        <sun.nio.fs.WindowsFileAttributes: short OFFSETOF_FIND_DATA_RESERVED0> = 36;
+
+        <sun.nio.fs.WindowsFileAttributes: short OFFSETOF_FIND_DATA_SIZELOW> = 32;
+
+        <sun.nio.fs.WindowsFileAttributes: short OFFSETOF_FIND_DATA_SIZEHIGH> = 28;
+
+        <sun.nio.fs.WindowsFileAttributes: short OFFSETOF_FIND_DATA_LASTWRITETIME> = 20;
+
+        <sun.nio.fs.WindowsFileAttributes: short OFFSETOF_FIND_DATA_LASTACCESSTIME> = 12;
+
+        <sun.nio.fs.WindowsFileAttributes: short OFFSETOF_FIND_DATA_CREATETIME> = 4;
+
+        <sun.nio.fs.WindowsFileAttributes: short OFFSETOF_FIND_DATA_ATTRIBUTES> = 0;
+
+        <sun.nio.fs.WindowsFileAttributes: short SIZEOF_FIND_DATA> = 592;
+
+        <sun.nio.fs.WindowsFileAttributes: short OFFSETOF_FILE_ATTRIBUTE_DATA_SIZELOW> = 32;
+
+        <sun.nio.fs.WindowsFileAttributes: short OFFSETOF_FILE_ATTRIBUTE_DATA_SIZEHIGH> = 28;
+
+        <sun.nio.fs.WindowsFileAttributes: short OFFSETOF_FILE_ATTRIBUTE_DATA_LASTWRITETIME> = 20;
+
+        <sun.nio.fs.WindowsFileAttributes: short OFFSETOF_FILE_ATTRIBUTE_DATA_LASTACCESSTIME> = 12;
+
+        <sun.nio.fs.WindowsFileAttributes: short OFFSETOF_FILE_ATTRIBUTE_DATA_CREATETIME> = 4;
+
+        <sun.nio.fs.WindowsFileAttributes: short OFFSETOF_FILE_ATTRIBUTE_DATA_ATTRIBUTES> = 0;
+
+        <sun.nio.fs.WindowsFileAttributes: short SIZEOF_FILE_ATTRIBUTE_DATA> = 36;
+
+        <sun.nio.fs.WindowsFileAttributes: short OFFSETOF_FILE_INFORMATION_INDEXLOW> = 48;
+
+        <sun.nio.fs.WindowsFileAttributes: short OFFSETOF_FILE_INFORMATION_INDEXHIGH> = 44;
+
+        <sun.nio.fs.WindowsFileAttributes: short OFFSETOF_FILE_INFORMATION_SIZELOW> = 36;
+
+        <sun.nio.fs.WindowsFileAttributes: short OFFSETOF_FILE_INFORMATION_SIZEHIGH> = 32;
+
+        <sun.nio.fs.WindowsFileAttributes: short OFFSETOF_FILE_INFORMATION_VOLSERIALNUM> = 28;
+
+        <sun.nio.fs.WindowsFileAttributes: short OFFSETOF_FILE_INFORMATION_LASTWRITETIME> = 20;
+
+        <sun.nio.fs.WindowsFileAttributes: short OFFSETOF_FILE_INFORMATION_LASTACCESSTIME> = 12;
+
+        <sun.nio.fs.WindowsFileAttributes: short OFFSETOF_FILE_INFORMATION_CREATETIME> = 4;
+
+        <sun.nio.fs.WindowsFileAttributes: short OFFSETOF_FILE_INFORMATION_ATTRIBUTES> = 0;
+
+        <sun.nio.fs.WindowsFileAttributes: short SIZEOF_FILE_INFORMATION> = 52;
+
+        $r0 = staticinvoke <sun.misc.Unsafe: sun.misc.Unsafe getUnsafe()>();
+
+        <sun.nio.fs.WindowsFileAttributes: sun.misc.Unsafe unsafe> = $r0;
+
+        $r1 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r1.<sun.security.action.GetPropertyAction: void <init>(java.lang.String,java.lang.String)>("sun.nio.fs.ensureAccurateMetadata", "false");
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        r3 = (java.lang.String) $r2;
+
+        $z0 = virtualinvoke r3.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = staticinvoke <java.lang.Boolean: boolean parseBoolean(java.lang.String)>(r3);
+
+     label2:
+        <sun.nio.fs.WindowsFileAttributes: boolean ensureAccurateMetadata> = $z1;
+
+        return;
+    }
+}

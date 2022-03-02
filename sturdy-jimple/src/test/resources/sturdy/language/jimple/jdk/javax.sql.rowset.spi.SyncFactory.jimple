@@ -1,0 +1,1291 @@
+public class javax.sql.rowset.spi.SyncFactory extends java.lang.Object
+{
+    public static final java.lang.String ROWSET_SYNC_PROVIDER;
+    public static final java.lang.String ROWSET_SYNC_VENDOR;
+    public static final java.lang.String ROWSET_SYNC_PROVIDER_VERSION;
+    private static java.lang.String ROWSET_PROPERTIES;
+    private static final java.sql.SQLPermission SET_SYNCFACTORY_PERMISSION;
+    private static javax.naming.Context ic;
+    private static volatile java.util.logging.Logger rsLogger;
+    private static java.util.Hashtable implementations;
+    private static java.lang.String colon;
+    private static java.lang.String strFileSep;
+    private static boolean debug;
+    private static int providerImplIndex;
+    private static boolean lazyJNDICtxRefresh;
+
+    private void <init>()
+    {
+        javax.sql.rowset.spi.SyncFactory r0;
+
+        r0 := @this: javax.sql.rowset.spi.SyncFactory;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static synchronized void registerProvider(java.lang.String) throws javax.sql.rowset.spi.SyncFactoryException
+    {
+        java.lang.String r1;
+        javax.sql.rowset.spi.ProviderImpl $r0;
+        java.util.Hashtable $r2;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = new javax.sql.rowset.spi.ProviderImpl;
+
+        specialinvoke $r0.<javax.sql.rowset.spi.ProviderImpl: void <init>()>();
+
+        virtualinvoke $r0.<javax.sql.rowset.spi.ProviderImpl: void setClassname(java.lang.String)>(r1);
+
+        staticinvoke <javax.sql.rowset.spi.SyncFactory: void initMapIfNecessary()>();
+
+        $r2 = <javax.sql.rowset.spi.SyncFactory: java.util.Hashtable implementations>;
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return;
+    }
+
+    public static javax.sql.rowset.spi.SyncFactory getSyncFactory()
+    {
+        javax.sql.rowset.spi.SyncFactory $r0;
+
+        $r0 = <javax.sql.rowset.spi.SyncFactory$SyncFactoryHolder: javax.sql.rowset.spi.SyncFactory factory>;
+
+        return $r0;
+    }
+
+    public static synchronized void unregisterProvider(java.lang.String) throws javax.sql.rowset.spi.SyncFactoryException
+    {
+        java.lang.String r0;
+        java.util.Hashtable $r1, $r2;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        staticinvoke <javax.sql.rowset.spi.SyncFactory: void initMapIfNecessary()>();
+
+        $r1 = <javax.sql.rowset.spi.SyncFactory: java.util.Hashtable implementations>;
+
+        $z0 = virtualinvoke $r1.<java.util.Hashtable: boolean containsKey(java.lang.Object)>(r0);
+
+        if $z0 == 0 goto label1;
+
+        $r2 = <javax.sql.rowset.spi.SyncFactory: java.util.Hashtable implementations>;
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>(r0);
+
+     label1:
+        return;
+    }
+
+    private static synchronized void initMapIfNecessary() throws javax.sql.rowset.spi.SyncFactoryException
+    {
+        java.security.Permission[] $r4, $r8;
+        java.lang.Thread $r63;
+        java.security.PrivilegedExceptionAction $r65;
+        java.lang.Exception $r21, $r35, $r37, $r43;
+        java.lang.StringBuilder $r14, $r15, $r16, $r24, $r25, $r26, $r30, $r31, $r32, $r44, $r46, $r47, $r51, $r52, $r54, $r55, $r57, $r58, $r60, $r61;
+        java.lang.ClassLoader $r64;
+        java.lang.Throwable $r39, $r40, $r41, r50;
+        java.util.StringTokenizer $r12;
+        java.lang.String $r11, $r13, $r17, $r18, $r20, $r27, $r33, $r48, r49, $r53, $r56, $r59, $r62, r66;
+        javax.sql.rowset.spi.SyncFactory$2 $r7;
+        javax.sql.rowset.spi.SyncFactory$1 $r3;
+        java.security.PrivilegedActionException $r34;
+        java.util.Properties $r0;
+        javax.sql.rowset.spi.SyncFactoryException $r23, $r29, $r36, $r38;
+        java.io.IOException $r22;
+        java.util.PropertyPermission $r5, $r9;
+        boolean $z0, $z1;
+        java.io.FileNotFoundException $r28;
+        int $i0, i1;
+        java.util.Hashtable $r1, $r2;
+        java.io.PrintStream $r45;
+        java.io.FileInputStream $r19;
+        java.lang.Object $r6, $r10;
+
+        $r0 = new java.util.Properties;
+
+        specialinvoke $r0.<java.util.Properties: void <init>()>();
+
+        $r1 = <javax.sql.rowset.spi.SyncFactory: java.util.Hashtable implementations>;
+
+        if $r1 != null goto label35;
+
+        $r2 = new java.util.Hashtable;
+
+        specialinvoke $r2.<java.util.Hashtable: void <init>()>();
+
+        <javax.sql.rowset.spi.SyncFactory: java.util.Hashtable implementations> = $r2;
+
+     label01:
+        $r3 = new javax.sql.rowset.spi.SyncFactory$1;
+
+        specialinvoke $r3.<javax.sql.rowset.spi.SyncFactory$1: void <init>()>();
+
+        $r4 = newarray (java.security.Permission)[1];
+
+        $r5 = new java.util.PropertyPermission;
+
+        specialinvoke $r5.<java.util.PropertyPermission: void <init>(java.lang.String,java.lang.String)>("rowset.properties", "read");
+
+        $r4[0] = $r5;
+
+        $r6 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction,java.security.AccessControlContext,java.security.Permission[])>($r3, null, $r4);
+
+        r49 = (java.lang.String) $r6;
+
+     label02:
+        goto label04;
+
+     label03:
+        $r43 := @caughtexception;
+
+        $r45 = <java.lang.System: java.io.PrintStream out>;
+
+        $r44 = new java.lang.StringBuilder;
+
+        specialinvoke $r44.<java.lang.StringBuilder: void <init>()>();
+
+        $r46 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("errorget rowset.properties: ");
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r43);
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r45.<java.io.PrintStream: void println(java.lang.String)>($r48);
+
+        r49 = null;
+
+     label04:
+        if r49 == null goto label17;
+
+        <javax.sql.rowset.spi.SyncFactory: java.lang.String ROWSET_PROPERTIES> = r49;
+
+        $r19 = new java.io.FileInputStream;
+
+        $r20 = <javax.sql.rowset.spi.SyncFactory: java.lang.String ROWSET_PROPERTIES>;
+
+        specialinvoke $r19.<java.io.FileInputStream: void <init>(java.lang.String)>($r20);
+
+        r50 = null;
+
+     label05:
+        virtualinvoke $r0.<java.util.Properties: void load(java.io.InputStream)>($r19);
+
+     label06:
+        if $r19 == null goto label16;
+
+        goto label07;
+
+     label07:
+        virtualinvoke $r19.<java.io.FileInputStream: void close()>();
+
+        goto label16;
+
+     label08:
+        $r41 := @caughtexception;
+
+        r50 = $r41;
+
+        throw $r41;
+
+     label09:
+        $r40 := @caughtexception;
+
+     label10:
+        if $r19 == null goto label15;
+
+        if r50 == null goto label14;
+
+     label11:
+        virtualinvoke $r19.<java.io.FileInputStream: void close()>();
+
+     label12:
+        goto label15;
+
+     label13:
+        $r39 := @caughtexception;
+
+        virtualinvoke r50.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r39);
+
+        goto label15;
+
+     label14:
+        virtualinvoke $r19.<java.io.FileInputStream: void close()>();
+
+     label15:
+        throw $r40;
+
+     label16:
+        staticinvoke <javax.sql.rowset.spi.SyncFactory: void parseProperties(java.util.Properties)>($r0);
+
+     label17:
+        $r51 = new java.lang.StringBuilder;
+
+        specialinvoke $r51.<java.lang.StringBuilder: void <init>()>();
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("javax");
+
+        $r53 = <javax.sql.rowset.spi.SyncFactory: java.lang.String strFileSep>;
+
+        $r54 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r53);
+
+        $r55 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("sql");
+
+        $r56 = <javax.sql.rowset.spi.SyncFactory: java.lang.String strFileSep>;
+
+        $r57 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r56);
+
+        $r58 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("rowset");
+
+        $r59 = <javax.sql.rowset.spi.SyncFactory: java.lang.String strFileSep>;
+
+        $r60 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r59);
+
+        $r61 = virtualinvoke $r60.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("rowset.properties");
+
+        $r62 = virtualinvoke $r61.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        <javax.sql.rowset.spi.SyncFactory: java.lang.String ROWSET_PROPERTIES> = $r62;
+
+        $r63 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r64 = virtualinvoke $r63.<java.lang.Thread: java.lang.ClassLoader getContextClassLoader()>();
+
+     label18:
+        $r65 = staticinvoke <javax.sql.rowset.spi.SyncFactory$lambda_initMapIfNecessary_0__331: java.security.PrivilegedExceptionAction bootstrap$(java.lang.ClassLoader,java.util.Properties)>($r64, $r0);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r65);
+
+     label19:
+        goto label22;
+
+     label20:
+        $r34 := @caughtexception;
+
+        $r35 = virtualinvoke $r34.<java.security.PrivilegedActionException: java.lang.Exception getException()>();
+
+        $z1 = $r35 instanceof javax.sql.rowset.spi.SyncFactoryException;
+
+        if $z1 == 0 goto label21;
+
+        $r38 = (javax.sql.rowset.spi.SyncFactoryException) $r35;
+
+        throw $r38;
+
+     label21:
+        $r36 = new javax.sql.rowset.spi.SyncFactoryException;
+
+        specialinvoke $r36.<javax.sql.rowset.spi.SyncFactoryException: void <init>()>();
+
+        $r37 = virtualinvoke $r34.<java.security.PrivilegedActionException: java.lang.Exception getException()>();
+
+        virtualinvoke $r36.<javax.sql.rowset.spi.SyncFactoryException: java.lang.Throwable initCause(java.lang.Throwable)>($r37);
+
+        throw $r36;
+
+     label22:
+        staticinvoke <javax.sql.rowset.spi.SyncFactory: void parseProperties(java.util.Properties)>($r0);
+
+     label23:
+        goto label26;
+
+     label24:
+        $r28 := @caughtexception;
+
+        $r29 = new javax.sql.rowset.spi.SyncFactoryException;
+
+        $r30 = new java.lang.StringBuilder;
+
+        specialinvoke $r30.<java.lang.StringBuilder: void <init>()>();
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot locate properties file: ");
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r28);
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r29.<javax.sql.rowset.spi.SyncFactoryException: void <init>(java.lang.String)>($r33);
+
+        throw $r29;
+
+     label25:
+        $r22 := @caughtexception;
+
+        $r23 = new javax.sql.rowset.spi.SyncFactoryException;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("IOException: ");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r22);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r23.<javax.sql.rowset.spi.SyncFactoryException: void <init>(java.lang.String)>($r27);
+
+        throw $r23;
+
+     label26:
+        virtualinvoke $r0.<java.util.Properties: void clear()>();
+
+     label27:
+        $r7 = new javax.sql.rowset.spi.SyncFactory$2;
+
+        specialinvoke $r7.<javax.sql.rowset.spi.SyncFactory$2: void <init>()>();
+
+        $r8 = newarray (java.security.Permission)[1];
+
+        $r9 = new java.util.PropertyPermission;
+
+        specialinvoke $r9.<java.util.PropertyPermission: void <init>(java.lang.String,java.lang.String)>("rowset.provider.classname", "read");
+
+        $r8[0] = $r9;
+
+        $r10 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction,java.security.AccessControlContext,java.security.Permission[])>($r7, null, $r8);
+
+        r66 = (java.lang.String) $r10;
+
+     label28:
+        goto label30;
+
+     label29:
+        $r21 := @caughtexception;
+
+        r66 = null;
+
+     label30:
+        if r66 == null goto label35;
+
+        i1 = 0;
+
+        $r11 = <javax.sql.rowset.spi.SyncFactory: java.lang.String colon>;
+
+        $i0 = virtualinvoke r66.<java.lang.String: int indexOf(java.lang.String)>($r11);
+
+        if $i0 <= 0 goto label33;
+
+        $r12 = new java.util.StringTokenizer;
+
+        $r13 = <javax.sql.rowset.spi.SyncFactory: java.lang.String colon>;
+
+        specialinvoke $r12.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>(r66, $r13);
+
+     label31:
+        $z0 = virtualinvoke $r12.<java.util.StringTokenizer: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label32;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("rowset.provider.classname.");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r18 = virtualinvoke $r12.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        virtualinvoke $r0.<java.util.Properties: java.lang.Object put(java.lang.Object,java.lang.Object)>($r17, $r18);
+
+        i1 = i1 + 1;
+
+        goto label31;
+
+     label32:
+        goto label34;
+
+     label33:
+        virtualinvoke $r0.<java.util.Properties: java.lang.Object put(java.lang.Object,java.lang.Object)>("rowset.provider.classname", r66);
+
+     label34:
+        staticinvoke <javax.sql.rowset.spi.SyncFactory: void parseProperties(java.util.Properties)>($r0);
+
+     label35:
+        return;
+
+        catch java.lang.Exception from label01 to label02 with label03;
+        catch java.lang.Throwable from label05 to label06 with label08;
+        catch java.lang.Throwable from label11 to label12 with label13;
+        catch java.lang.Throwable from label08 to label10 with label09;
+        catch java.security.PrivilegedActionException from label18 to label19 with label20;
+        catch java.io.FileNotFoundException from label01 to label23 with label24;
+        catch java.io.IOException from label01 to label23 with label25;
+        catch java.lang.Exception from label27 to label28 with label29;
+    }
+
+    private static void parseProperties(java.util.Properties)
+    {
+        java.util.Enumeration $r1;
+        java.lang.String[] r14;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.lang.String r3, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12;
+        java.util.Hashtable $r13;
+        boolean $z0, $z1;
+        java.util.Properties r0;
+        javax.sql.rowset.spi.ProviderImpl $r4;
+        java.lang.Object $r2;
+
+        r0 := @parameter0: java.util.Properties;
+
+        $r1 = virtualinvoke r0.<java.util.Properties: java.util.Enumeration propertyNames()>();
+
+     label1:
+        $z0 = interfaceinvoke $r1.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label5;
+
+        $r2 = interfaceinvoke $r1.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r3 = (java.lang.String) $r2;
+
+        $i0 = virtualinvoke r3.<java.lang.String: int length()>();
+
+        $z1 = virtualinvoke r3.<java.lang.String: boolean startsWith(java.lang.String)>("rowset.provider.classname");
+
+        if $z1 == 0 goto label4;
+
+        $r4 = new javax.sql.rowset.spi.ProviderImpl;
+
+        specialinvoke $r4.<javax.sql.rowset.spi.ProviderImpl: void <init>()>();
+
+        $i1 = <javax.sql.rowset.spi.SyncFactory: int providerImplIndex>;
+
+        $i2 = $i1 + 1;
+
+        <javax.sql.rowset.spi.SyncFactory: int providerImplIndex> = $i2;
+
+        virtualinvoke $r4.<javax.sql.rowset.spi.ProviderImpl: void setIndex(int)>($i1);
+
+        $r5 = "rowset.provider.classname";
+
+        $i3 = virtualinvoke $r5.<java.lang.String: int length()>();
+
+        if $i0 != $i3 goto label2;
+
+        r14 = staticinvoke <javax.sql.rowset.spi.SyncFactory: java.lang.String[] getPropertyNames(boolean)>(0);
+
+        goto label3;
+
+     label2:
+        $i4 = $i0 - 1;
+
+        $r6 = virtualinvoke r3.<java.lang.String: java.lang.String substring(int)>($i4);
+
+        r14 = staticinvoke <javax.sql.rowset.spi.SyncFactory: java.lang.String[] getPropertyNames(boolean,java.lang.String)>(1, $r6);
+
+     label3:
+        $r7 = r14[0];
+
+        $r8 = virtualinvoke r0.<java.util.Properties: java.lang.String getProperty(java.lang.String)>($r7);
+
+        virtualinvoke $r4.<javax.sql.rowset.spi.ProviderImpl: void setClassname(java.lang.String)>($r8);
+
+        $r9 = r14[1];
+
+        $r10 = virtualinvoke r0.<java.util.Properties: java.lang.String getProperty(java.lang.String)>($r9);
+
+        virtualinvoke $r4.<javax.sql.rowset.spi.ProviderImpl: void setVendor(java.lang.String)>($r10);
+
+        $r11 = r14[2];
+
+        $r12 = virtualinvoke r0.<java.util.Properties: java.lang.String getProperty(java.lang.String)>($r11);
+
+        virtualinvoke $r4.<javax.sql.rowset.spi.ProviderImpl: void setVersion(java.lang.String)>($r12);
+
+        $r13 = <javax.sql.rowset.spi.SyncFactory: java.util.Hashtable implementations>;
+
+        virtualinvoke $r13.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r8, $r4);
+
+     label4:
+        goto label1;
+
+     label5:
+        return;
+    }
+
+    private static java.lang.String[] getPropertyNames(boolean)
+    {
+        java.lang.String[] $r0;
+        boolean z0;
+
+        z0 := @parameter0: boolean;
+
+        $r0 = staticinvoke <javax.sql.rowset.spi.SyncFactory: java.lang.String[] getPropertyNames(boolean,java.lang.String)>(z0, null);
+
+        return $r0;
+    }
+
+    private static java.lang.String[] getPropertyNames(boolean, java.lang.String)
+    {
+        java.lang.String[] $r0;
+        int $i0, i1;
+        java.lang.StringBuilder $r1, $r3, $r4, $r6;
+        java.lang.String $r2, r5, $r7;
+        boolean z0;
+
+        z0 := @parameter0: boolean;
+
+        r5 := @parameter1: java.lang.String;
+
+        $r0 = newarray (java.lang.String)[3];
+
+        $r0[0] = "rowset.provider.classname";
+
+        $r0[1] = "rowset.provider.vendor";
+
+        $r0[2] = "rowset.provider.version";
+
+        if z0 == 0 goto label3;
+
+        i1 = 0;
+
+     label1:
+        $i0 = lengthof $r0;
+
+        if i1 >= $i0 goto label2;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = $r0[i1];
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r0[i1] = $r7;
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return $r0;
+
+     label3:
+        return $r0;
+    }
+
+    private static void showImpl(javax.sql.rowset.spi.ProviderImpl)
+    {
+        int $i0;
+        java.lang.String $r5, $r7, $r11, $r13, $r17, $r19, $r24;
+        java.io.PrintStream $r0, $r2, $r9, $r15, $r21;
+        javax.sql.rowset.spi.ProviderImpl r4;
+        java.lang.StringBuilder $r1, $r3, $r6, $r8, $r10, $r12, $r14, $r16, $r18, $r20, $r22, $r23;
+
+        r4 := @parameter0: javax.sql.rowset.spi.ProviderImpl;
+
+        $r0 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("Provider implementation:");
+
+        $r2 = <java.lang.System: java.io.PrintStream out>;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Classname: ");
+
+        $r5 = virtualinvoke r4.<javax.sql.rowset.spi.ProviderImpl: java.lang.String getClassname()>();
+
+        $r6 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>($r7);
+
+        $r9 = <java.lang.System: java.io.PrintStream out>;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Vendor: ");
+
+        $r11 = virtualinvoke r4.<javax.sql.rowset.spi.ProviderImpl: java.lang.String getVendor()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r9.<java.io.PrintStream: void println(java.lang.String)>($r13);
+
+        $r15 = <java.lang.System: java.io.PrintStream out>;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Version: ");
+
+        $r17 = virtualinvoke r4.<javax.sql.rowset.spi.ProviderImpl: java.lang.String getVersion()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r15.<java.io.PrintStream: void println(java.lang.String)>($r19);
+
+        $r21 = <java.lang.System: java.io.PrintStream out>;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Impl index: ");
+
+        $i0 = virtualinvoke r4.<javax.sql.rowset.spi.ProviderImpl: int getIndex()>();
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r21.<java.io.PrintStream: void println(java.lang.String)>($r24);
+
+        return;
+    }
+
+    public static javax.sql.rowset.spi.SyncProvider getInstance(java.lang.String) throws javax.sql.rowset.spi.SyncFactoryException
+    {
+        java.lang.Thread $r4;
+        java.lang.InstantiationException $r19;
+        java.lang.IllegalAccessException $r26;
+        javax.sql.rowset.spi.ProviderImpl r3;
+        java.security.AccessControlException $r33;
+        java.lang.StringBuilder $r14, $r15, $r17, $r21, $r22, $r24, $r28, $r29, $r31;
+        java.lang.ClassLoader $r5;
+        java.lang.String r0, $r16, $r18, $r23, $r25, $r30, $r32;
+        java.util.Hashtable $r1;
+        javax.sql.rowset.spi.SyncFactoryException $r11, $r13, $r20, $r27, $r34;
+        javax.sql.rowset.spi.SyncProvider $r9;
+        java.lang.Object $r2, $r8;
+        java.lang.Class $r6;
+        com.sun.rowset.providers.RIOptimisticProvider $r7, $r10;
+        java.lang.ClassNotFoundException $r12;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label01;
+
+        $r11 = new javax.sql.rowset.spi.SyncFactoryException;
+
+        specialinvoke $r11.<javax.sql.rowset.spi.SyncFactoryException: void <init>(java.lang.String)>("The providerID cannot be null");
+
+        throw $r11;
+
+     label01:
+        staticinvoke <javax.sql.rowset.spi.SyncFactory: void initMapIfNecessary()>();
+
+        staticinvoke <javax.sql.rowset.spi.SyncFactory: void initJNDIContext()>();
+
+        $r1 = <javax.sql.rowset.spi.SyncFactory: java.util.Hashtable implementations>;
+
+        $r2 = virtualinvoke $r1.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r0);
+
+        r3 = (javax.sql.rowset.spi.ProviderImpl) $r2;
+
+        if r3 != null goto label02;
+
+        $r10 = new com.sun.rowset.providers.RIOptimisticProvider;
+
+        specialinvoke $r10.<com.sun.rowset.providers.RIOptimisticProvider: void <init>()>();
+
+        return $r10;
+
+     label02:
+        staticinvoke <sun.reflect.misc.ReflectUtil: void checkPackageAccess(java.lang.String)>(r0);
+
+     label03:
+        goto label05;
+
+     label04:
+        $r33 := @caughtexception;
+
+        $r34 = new javax.sql.rowset.spi.SyncFactoryException;
+
+        specialinvoke $r34.<javax.sql.rowset.spi.SyncFactoryException: void <init>()>();
+
+        virtualinvoke $r34.<javax.sql.rowset.spi.SyncFactoryException: java.lang.Throwable initCause(java.lang.Throwable)>($r33);
+
+        throw $r34;
+
+     label05:
+        $r4 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.Thread: java.lang.ClassLoader getContextClassLoader()>();
+
+        $r6 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>(r0, 1, $r5);
+
+        if $r6 == null goto label07;
+
+        $r8 = virtualinvoke $r6.<java.lang.Class: java.lang.Object newInstance()>();
+
+        $r9 = (javax.sql.rowset.spi.SyncProvider) $r8;
+
+     label06:
+        return $r9;
+
+     label07:
+        $r7 = new com.sun.rowset.providers.RIOptimisticProvider;
+
+        specialinvoke $r7.<com.sun.rowset.providers.RIOptimisticProvider: void <init>()>();
+
+     label08:
+        return $r7;
+
+     label09:
+        $r26 := @caughtexception;
+
+        $r27 = new javax.sql.rowset.spi.SyncFactoryException;
+
+        $r28 = new java.lang.StringBuilder;
+
+        specialinvoke $r28.<java.lang.StringBuilder: void <init>()>();
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("IllegalAccessException: ");
+
+        $r30 = virtualinvoke $r26.<java.lang.IllegalAccessException: java.lang.String getMessage()>();
+
+        $r31 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r30);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r27.<javax.sql.rowset.spi.SyncFactoryException: void <init>(java.lang.String)>($r32);
+
+        throw $r27;
+
+     label10:
+        $r19 := @caughtexception;
+
+        $r20 = new javax.sql.rowset.spi.SyncFactoryException;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("InstantiationException: ");
+
+        $r23 = virtualinvoke $r19.<java.lang.InstantiationException: java.lang.String getMessage()>();
+
+        $r24 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r23);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r20.<javax.sql.rowset.spi.SyncFactoryException: void <init>(java.lang.String)>($r25);
+
+        throw $r20;
+
+     label11:
+        $r12 := @caughtexception;
+
+        $r13 = new javax.sql.rowset.spi.SyncFactoryException;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ClassNotFoundException: ");
+
+        $r16 = virtualinvoke $r12.<java.lang.ClassNotFoundException: java.lang.String getMessage()>();
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r16);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<javax.sql.rowset.spi.SyncFactoryException: void <init>(java.lang.String)>($r18);
+
+        throw $r13;
+
+        catch java.security.AccessControlException from label02 to label03 with label04;
+        catch java.lang.IllegalAccessException from label05 to label06 with label09;
+        catch java.lang.IllegalAccessException from label07 to label08 with label09;
+        catch java.lang.InstantiationException from label05 to label06 with label10;
+        catch java.lang.InstantiationException from label07 to label08 with label10;
+        catch java.lang.ClassNotFoundException from label05 to label06 with label11;
+        catch java.lang.ClassNotFoundException from label07 to label08 with label11;
+    }
+
+    public static java.util.Enumeration getRegisteredProviders() throws javax.sql.rowset.spi.SyncFactoryException
+    {
+        java.util.Enumeration $r1;
+        java.util.Hashtable $r0;
+
+        staticinvoke <javax.sql.rowset.spi.SyncFactory: void initMapIfNecessary()>();
+
+        $r0 = <javax.sql.rowset.spi.SyncFactory: java.util.Hashtable implementations>;
+
+        $r1 = virtualinvoke $r0.<java.util.Hashtable: java.util.Enumeration elements()>();
+
+        return $r1;
+    }
+
+    public static void setLogger(java.util.logging.Logger)
+    {
+        java.util.logging.Logger r1;
+        java.sql.SQLPermission $r3;
+        java.lang.SecurityManager $r0;
+        java.lang.NullPointerException $r2;
+
+        r1 := @parameter0: java.util.logging.Logger;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r3 = <javax.sql.rowset.spi.SyncFactory: java.sql.SQLPermission SET_SYNCFACTORY_PERMISSION>;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r3);
+
+     label1:
+        if r1 != null goto label2;
+
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>(java.lang.String)>("You must provide a Logger");
+
+        throw $r2;
+
+     label2:
+        <javax.sql.rowset.spi.SyncFactory: java.util.logging.Logger rsLogger> = r1;
+
+        return;
+    }
+
+    public static void setLogger(java.util.logging.Logger, java.util.logging.Level)
+    {
+        java.util.logging.Logger r1;
+        java.sql.SQLPermission $r4;
+        java.lang.SecurityManager $r0;
+        java.lang.NullPointerException $r3;
+        java.util.logging.Level r2;
+
+        r1 := @parameter0: java.util.logging.Logger;
+
+        r2 := @parameter1: java.util.logging.Level;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r4 = <javax.sql.rowset.spi.SyncFactory: java.sql.SQLPermission SET_SYNCFACTORY_PERMISSION>;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r4);
+
+     label1:
+        if r1 != null goto label2;
+
+        $r3 = new java.lang.NullPointerException;
+
+        specialinvoke $r3.<java.lang.NullPointerException: void <init>(java.lang.String)>("You must provide a Logger");
+
+        throw $r3;
+
+     label2:
+        virtualinvoke r1.<java.util.logging.Logger: void setLevel(java.util.logging.Level)>(r2);
+
+        <javax.sql.rowset.spi.SyncFactory: java.util.logging.Logger rsLogger> = r1;
+
+        return;
+    }
+
+    public static java.util.logging.Logger getLogger() throws javax.sql.rowset.spi.SyncFactoryException
+    {
+        java.util.logging.Logger r0;
+        javax.sql.rowset.spi.SyncFactoryException $r1;
+
+        r0 = <javax.sql.rowset.spi.SyncFactory: java.util.logging.Logger rsLogger>;
+
+        if r0 != null goto label1;
+
+        $r1 = new javax.sql.rowset.spi.SyncFactoryException;
+
+        specialinvoke $r1.<javax.sql.rowset.spi.SyncFactoryException: void <init>(java.lang.String)>("(SyncFactory) : No logger has been set");
+
+        throw $r1;
+
+     label1:
+        return r0;
+    }
+
+    public static synchronized void setJNDIContext(javax.naming.Context) throws javax.sql.rowset.spi.SyncFactoryException
+    {
+        javax.sql.rowset.spi.SyncFactoryException $r2;
+        javax.naming.Context r1;
+        java.sql.SQLPermission $r3;
+        java.lang.SecurityManager $r0;
+
+        r1 := @parameter0: javax.naming.Context;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r3 = <javax.sql.rowset.spi.SyncFactory: java.sql.SQLPermission SET_SYNCFACTORY_PERMISSION>;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r3);
+
+     label1:
+        if r1 != null goto label2;
+
+        $r2 = new javax.sql.rowset.spi.SyncFactoryException;
+
+        specialinvoke $r2.<javax.sql.rowset.spi.SyncFactoryException: void <init>(java.lang.String)>("Invalid JNDI context supplied");
+
+        throw $r2;
+
+     label2:
+        <javax.sql.rowset.spi.SyncFactory: javax.naming.Context ic> = r1;
+
+        return;
+    }
+
+    private static synchronized void initJNDIContext() throws javax.sql.rowset.spi.SyncFactoryException
+    {
+        javax.naming.NamingException $r9;
+        javax.naming.Context $r0;
+        java.lang.String $r6, $r8, $r13, $r15;
+        boolean $z0;
+        java.util.Properties $r1;
+        javax.sql.rowset.spi.SyncFactoryException $r3, $r10;
+        java.lang.Exception $r2;
+        java.lang.StringBuilder $r4, $r5, $r7, $r11, $r12, $r14;
+
+        $r0 = <javax.sql.rowset.spi.SyncFactory: javax.naming.Context ic>;
+
+        if $r0 == null goto label5;
+
+        $z0 = <javax.sql.rowset.spi.SyncFactory: boolean lazyJNDICtxRefresh>;
+
+        if $z0 != 0 goto label5;
+
+     label1:
+        $r1 = staticinvoke <javax.sql.rowset.spi.SyncFactory: java.util.Properties parseJNDIContext()>();
+
+        staticinvoke <javax.sql.rowset.spi.SyncFactory: void parseProperties(java.util.Properties)>($r1);
+
+        <javax.sql.rowset.spi.SyncFactory: boolean lazyJNDICtxRefresh> = 1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r9 := @caughtexception;
+
+        virtualinvoke $r9.<javax.naming.NamingException: void printStackTrace()>();
+
+        $r10 = new javax.sql.rowset.spi.SyncFactoryException;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SPI: NamingException: ");
+
+        $r13 = virtualinvoke $r9.<javax.naming.NamingException: java.lang.String getExplanation()>();
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r10.<javax.sql.rowset.spi.SyncFactoryException: void <init>(java.lang.String)>($r15);
+
+        throw $r10;
+
+     label4:
+        $r2 := @caughtexception;
+
+        virtualinvoke $r2.<java.lang.Exception: void printStackTrace()>();
+
+        $r3 = new javax.sql.rowset.spi.SyncFactoryException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SPI: Exception: ");
+
+        $r6 = virtualinvoke $r2.<java.lang.Exception: java.lang.String getMessage()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<javax.sql.rowset.spi.SyncFactoryException: void <init>(java.lang.String)>($r8);
+
+        throw $r3;
+
+     label5:
+        return;
+
+        catch javax.naming.NamingException from label1 to label2 with label3;
+        catch java.lang.Exception from label1 to label2 with label4;
+    }
+
+    private static java.util.Properties parseJNDIContext() throws javax.naming.NamingException
+    {
+        javax.naming.NamingEnumeration $r1;
+        javax.naming.Context $r0;
+        java.util.Properties $r2;
+
+        $r0 = <javax.sql.rowset.spi.SyncFactory: javax.naming.Context ic>;
+
+        $r1 = interfaceinvoke $r0.<javax.naming.Context: javax.naming.NamingEnumeration listBindings(java.lang.String)>("");
+
+        $r2 = new java.util.Properties;
+
+        specialinvoke $r2.<java.util.Properties: void <init>()>();
+
+        staticinvoke <javax.sql.rowset.spi.SyncFactory: void enumerateBindings(javax.naming.NamingEnumeration,java.util.Properties)>($r1, $r2);
+
+        return $r2;
+    }
+
+    private static void enumerateBindings(javax.naming.NamingEnumeration, java.util.Properties) throws javax.naming.NamingException
+    {
+        java.lang.String $r2, $r8;
+        javax.naming.Context $r4, $r9;
+        boolean $z0, $z1, z2, $z3;
+        java.util.Properties r7;
+        javax.naming.NotContextException $r11;
+        javax.sql.rowset.spi.SyncProvider r6;
+        javax.naming.NamingEnumeration r0;
+        javax.naming.Binding r12;
+        java.lang.Object $r1, $r3, $r5, $r10;
+
+        r0 := @parameter0: javax.naming.NamingEnumeration;
+
+        r7 := @parameter1: java.util.Properties;
+
+        z2 = 0;
+
+     label1:
+        $z3 = interfaceinvoke r0.<javax.naming.NamingEnumeration: boolean hasMore()>();
+
+        if $z3 == 0 goto label3;
+
+        $r1 = interfaceinvoke r0.<javax.naming.NamingEnumeration: java.lang.Object next()>();
+
+        r12 = (javax.naming.Binding) $r1;
+
+        $r2 = virtualinvoke r12.<javax.naming.Binding: java.lang.String getName()>();
+
+        $r3 = virtualinvoke r12.<javax.naming.Binding: java.lang.Object getObject()>();
+
+        $r4 = <javax.sql.rowset.spi.SyncFactory: javax.naming.Context ic>;
+
+        $r5 = interfaceinvoke $r4.<javax.naming.Context: java.lang.Object lookup(java.lang.String)>($r2);
+
+        $z0 = $r5 instanceof javax.naming.Context;
+
+        if $z0 != 0 goto label2;
+
+        $r9 = <javax.sql.rowset.spi.SyncFactory: javax.naming.Context ic>;
+
+        $r10 = interfaceinvoke $r9.<javax.naming.Context: java.lang.Object lookup(java.lang.String)>($r2);
+
+        $z1 = $r10 instanceof javax.sql.rowset.spi.SyncProvider;
+
+        if $z1 == 0 goto label2;
+
+        z2 = 1;
+
+     label2:
+        if z2 == 0 goto label1;
+
+        r6 = (javax.sql.rowset.spi.SyncProvider) $r3;
+
+        $r8 = virtualinvoke r6.<javax.sql.rowset.spi.SyncProvider: java.lang.String getProviderID()>();
+
+        virtualinvoke r7.<java.util.Properties: java.lang.Object put(java.lang.Object,java.lang.Object)>("rowset.provider.classname", $r8);
+
+        z2 = 0;
+
+        goto label1;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r11 := @caughtexception;
+
+        interfaceinvoke r0.<javax.naming.NamingEnumeration: java.lang.Object next()>();
+
+        staticinvoke <javax.sql.rowset.spi.SyncFactory: void enumerateBindings(javax.naming.NamingEnumeration,java.util.Properties)>(r0, r7);
+
+     label5:
+        return;
+
+        catch javax.naming.NotContextException from label1 to label3 with label4;
+    }
+
+    public static java.lang.Void lambda$initMapIfNecessary$0(java.lang.ClassLoader, java.util.Properties) throws java.lang.Exception
+    {
+        java.lang.Throwable $r12, $r13, $r14, r17;
+        java.lang.String $r1, $r7, $r10, $r11;
+        java.util.Properties r3;
+        javax.sql.rowset.spi.SyncFactoryException $r4;
+        java.lang.StringBuilder $r5, $r6, $r8, $r9;
+        java.lang.ClassLoader r0;
+        java.io.InputStream r2, $r16;
+
+        r0 := @parameter0: java.lang.ClassLoader;
+
+        r3 := @parameter1: java.util.Properties;
+
+        if r0 != null goto label01;
+
+        $r11 = <javax.sql.rowset.spi.SyncFactory: java.lang.String ROWSET_PROPERTIES>;
+
+        $r16 = staticinvoke <java.lang.ClassLoader: java.io.InputStream getSystemResourceAsStream(java.lang.String)>($r11);
+
+        goto label02;
+
+     label01:
+        $r1 = <javax.sql.rowset.spi.SyncFactory: java.lang.String ROWSET_PROPERTIES>;
+
+        $r16 = virtualinvoke r0.<java.lang.ClassLoader: java.io.InputStream getResourceAsStream(java.lang.String)>($r1);
+
+     label02:
+        r2 = $r16;
+
+        r17 = null;
+
+     label03:
+        if $r16 != null goto label04;
+
+        $r4 = new javax.sql.rowset.spi.SyncFactoryException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Resource ");
+
+        $r7 = <javax.sql.rowset.spi.SyncFactory: java.lang.String ROWSET_PROPERTIES>;
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" not found");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<javax.sql.rowset.spi.SyncFactoryException: void <init>(java.lang.String)>($r10);
+
+        throw $r4;
+
+     label04:
+        virtualinvoke r3.<java.util.Properties: void load(java.io.InputStream)>($r16);
+
+     label05:
+        if $r16 == null goto label15;
+
+        goto label06;
+
+     label06:
+        virtualinvoke $r16.<java.io.InputStream: void close()>();
+
+        goto label15;
+
+     label07:
+        $r14 := @caughtexception;
+
+        r17 = $r14;
+
+        throw $r14;
+
+     label08:
+        $r13 := @caughtexception;
+
+     label09:
+        if r2 == null goto label14;
+
+        if r17 == null goto label13;
+
+     label10:
+        virtualinvoke r2.<java.io.InputStream: void close()>();
+
+     label11:
+        goto label14;
+
+     label12:
+        $r12 := @caughtexception;
+
+        virtualinvoke r17.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r12);
+
+        goto label14;
+
+     label13:
+        virtualinvoke r2.<java.io.InputStream: void close()>();
+
+     label14:
+        throw $r13;
+
+     label15:
+        return null;
+
+        catch java.lang.Throwable from label03 to label05 with label07;
+        catch java.lang.Throwable from label10 to label11 with label12;
+        catch java.lang.Throwable from label07 to label09 with label08;
+    }
+
+    void <init>(javax.sql.rowset.spi.SyncFactory$1)
+    {
+        javax.sql.rowset.spi.SyncFactory r0;
+        javax.sql.rowset.spi.SyncFactory$1 r1;
+
+        r0 := @this: javax.sql.rowset.spi.SyncFactory;
+
+        r1 := @parameter0: javax.sql.rowset.spi.SyncFactory$1;
+
+        specialinvoke r0.<javax.sql.rowset.spi.SyncFactory: void <init>()>();
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.sql.SQLPermission $r0;
+
+        <javax.sql.rowset.spi.SyncFactory: java.lang.String ROWSET_SYNC_PROVIDER_VERSION> = "rowset.provider.version";
+
+        <javax.sql.rowset.spi.SyncFactory: java.lang.String ROWSET_SYNC_VENDOR> = "rowset.provider.vendor";
+
+        <javax.sql.rowset.spi.SyncFactory: java.lang.String ROWSET_SYNC_PROVIDER> = "rowset.provider.classname";
+
+        <javax.sql.rowset.spi.SyncFactory: java.lang.String ROWSET_PROPERTIES> = "rowset.properties";
+
+        $r0 = new java.sql.SQLPermission;
+
+        specialinvoke $r0.<java.sql.SQLPermission: void <init>(java.lang.String)>("setSyncFactory");
+
+        <javax.sql.rowset.spi.SyncFactory: java.sql.SQLPermission SET_SYNCFACTORY_PERMISSION> = $r0;
+
+        <javax.sql.rowset.spi.SyncFactory: java.lang.String colon> = ":";
+
+        <javax.sql.rowset.spi.SyncFactory: java.lang.String strFileSep> = "/";
+
+        <javax.sql.rowset.spi.SyncFactory: boolean debug> = 0;
+
+        <javax.sql.rowset.spi.SyncFactory: int providerImplIndex> = 0;
+
+        <javax.sql.rowset.spi.SyncFactory: boolean lazyJNDICtxRefresh> = 0;
+
+        return;
+    }
+}

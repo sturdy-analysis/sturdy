@@ -1,0 +1,1261 @@
+public class java.io.BufferedReader extends java.io.Reader
+{
+    private java.io.Reader in;
+    private char[] cb;
+    private int nChars;
+    private int nextChar;
+    private static final int INVALIDATED;
+    private static final int UNMARKED;
+    private int markedChar;
+    private int readAheadLimit;
+    private boolean skipLF;
+    private boolean markedSkipLF;
+    private static int defaultCharBufferSize;
+    private static int defaultExpectedLineLength;
+
+    public void <init>(java.io.Reader, int)
+    {
+        int i0, $i2;
+        char[] $r2;
+        java.io.BufferedReader r0;
+        java.io.Reader r1;
+        java.lang.IllegalArgumentException $r4;
+
+        r0 := @this: java.io.BufferedReader;
+
+        r1 := @parameter0: java.io.Reader;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<java.io.Reader: void <init>(java.lang.Object)>(r1);
+
+        $i2 = (int) -1;
+
+        r0.<java.io.BufferedReader: int markedChar> = $i2;
+
+        r0.<java.io.BufferedReader: int readAheadLimit> = 0;
+
+        r0.<java.io.BufferedReader: boolean skipLF> = 0;
+
+        r0.<java.io.BufferedReader: boolean markedSkipLF> = 0;
+
+        if i0 > 0 goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Buffer size <= 0");
+
+        throw $r4;
+
+     label1:
+        r0.<java.io.BufferedReader: java.io.Reader in> = r1;
+
+        $r2 = newarray (char)[i0];
+
+        r0.<java.io.BufferedReader: char[] cb> = $r2;
+
+        r0.<java.io.BufferedReader: int nChars> = 0;
+
+        r0.<java.io.BufferedReader: int nextChar> = 0;
+
+        return;
+    }
+
+    public void <init>(java.io.Reader)
+    {
+        int $i0;
+        java.io.BufferedReader r0;
+        java.io.Reader r1;
+
+        r0 := @this: java.io.BufferedReader;
+
+        r1 := @parameter0: java.io.Reader;
+
+        $i0 = <java.io.BufferedReader: int defaultCharBufferSize>;
+
+        specialinvoke r0.<java.io.BufferedReader: void <init>(java.io.Reader,int)>(r1, $i0);
+
+        return;
+    }
+
+    private void ensureOpen() throws java.io.IOException
+    {
+        java.io.IOException $r2;
+        java.io.BufferedReader r0;
+        java.io.Reader $r1;
+
+        r0 := @this: java.io.BufferedReader;
+
+        $r1 = r0.<java.io.BufferedReader: java.io.Reader in>;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.io.IOException;
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>("Stream closed");
+
+        throw $r2;
+
+     label1:
+        return;
+    }
+
+    private void fill() throws java.io.IOException
+    {
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, i10, i11, $i12, $i13, $i14, $i16, $i18;
+        java.io.Reader $r6;
+        char[] $r1, r2, $r3, $r4, $r5, $r7, $r8;
+        java.io.BufferedReader r0;
+
+        r0 := @this: java.io.BufferedReader;
+
+        $i0 = r0.<java.io.BufferedReader: int markedChar>;
+
+        $i16 = (int) -1;
+
+        if $i0 > $i16 goto label1;
+
+        i10 = 0;
+
+        goto label5;
+
+     label1:
+        $i2 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $i1 = r0.<java.io.BufferedReader: int markedChar>;
+
+        i11 = $i2 - $i1;
+
+        $i3 = r0.<java.io.BufferedReader: int readAheadLimit>;
+
+        if i11 < $i3 goto label2;
+
+        $i18 = (int) -2;
+
+        r0.<java.io.BufferedReader: int markedChar> = $i18;
+
+        r0.<java.io.BufferedReader: int readAheadLimit> = 0;
+
+        i10 = 0;
+
+        goto label5;
+
+     label2:
+        $i5 = r0.<java.io.BufferedReader: int readAheadLimit>;
+
+        $r1 = r0.<java.io.BufferedReader: char[] cb>;
+
+        $i4 = lengthof $r1;
+
+        if $i5 > $i4 goto label3;
+
+        $r5 = r0.<java.io.BufferedReader: char[] cb>;
+
+        $i9 = r0.<java.io.BufferedReader: int markedChar>;
+
+        $r4 = r0.<java.io.BufferedReader: char[] cb>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r5, $i9, $r4, 0, i11);
+
+        r0.<java.io.BufferedReader: int markedChar> = 0;
+
+        i10 = i11;
+
+        goto label4;
+
+     label3:
+        $i6 = r0.<java.io.BufferedReader: int readAheadLimit>;
+
+        r2 = newarray (char)[$i6];
+
+        $r3 = r0.<java.io.BufferedReader: char[] cb>;
+
+        $i7 = r0.<java.io.BufferedReader: int markedChar>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, $i7, r2, 0, i11);
+
+        r0.<java.io.BufferedReader: char[] cb> = r2;
+
+        r0.<java.io.BufferedReader: int markedChar> = 0;
+
+        i10 = i11;
+
+     label4:
+        r0.<java.io.BufferedReader: int nChars> = i11;
+
+        r0.<java.io.BufferedReader: int nextChar> = i11;
+
+     label5:
+        $r6 = r0.<java.io.BufferedReader: java.io.Reader in>;
+
+        $r7 = r0.<java.io.BufferedReader: char[] cb>;
+
+        $r8 = r0.<java.io.BufferedReader: char[] cb>;
+
+        $i12 = lengthof $r8;
+
+        $i13 = $i12 - i10;
+
+        $i14 = virtualinvoke $r6.<java.io.Reader: int read(char[],int,int)>($r7, i10, $i13);
+
+        if $i14 == 0 goto label5;
+
+        if $i14 <= 0 goto label6;
+
+        $i8 = i10 + $i14;
+
+        r0.<java.io.BufferedReader: int nChars> = $i8;
+
+        r0.<java.io.BufferedReader: int nextChar> = i10;
+
+     label6:
+        return;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        java.lang.Throwable $r4;
+        int $i0, $i1, $i2, $i3, $i5, $i7, $i8, $i9, $i10, $i12, $i13, $i14;
+        boolean $z0;
+        char $c4, $c6;
+        char[] $r2, $r3;
+        java.lang.Object $r1;
+        java.io.BufferedReader r0;
+
+        r0 := @this: java.io.BufferedReader;
+
+        $r1 = r0.<java.io.BufferedReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label1:
+        specialinvoke r0.<java.io.BufferedReader: void ensureOpen()>();
+
+     label2:
+        $i1 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $i0 = r0.<java.io.BufferedReader: int nChars>;
+
+        if $i1 < $i0 goto label4;
+
+        specialinvoke r0.<java.io.BufferedReader: void fill()>();
+
+        $i10 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $i9 = r0.<java.io.BufferedReader: int nChars>;
+
+        if $i10 < $i9 goto label4;
+
+        exitmonitor $r1;
+
+     label3:
+        $i12 = (int) -1;
+
+        return $i12;
+
+     label4:
+        $z0 = r0.<java.io.BufferedReader: boolean skipLF>;
+
+        if $z0 == 0 goto label5;
+
+        r0.<java.io.BufferedReader: boolean skipLF> = 0;
+
+        $r3 = r0.<java.io.BufferedReader: char[] cb>;
+
+        $i5 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $c6 = $r3[$i5];
+
+        $i13 = (int) $c6;
+
+        if $i13 != 10 goto label5;
+
+        $i7 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $i8 = $i7 + 1;
+
+        r0.<java.io.BufferedReader: int nextChar> = $i8;
+
+        goto label2;
+
+     label5:
+        $r2 = r0.<java.io.BufferedReader: char[] cb>;
+
+        $i2 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $i3 = $i2 + 1;
+
+        r0.<java.io.BufferedReader: int nextChar> = $i3;
+
+        $c4 = $r2[$i2];
+
+        exitmonitor $r1;
+
+     label6:
+        $i14 = (int) $c4;
+
+        return $i14;
+
+     label7:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label8:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label3 with label7;
+        catch java.lang.Throwable from label4 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    private int read1(char[], int, int) throws java.io.IOException
+    {
+        boolean $z0, $z1;
+        java.io.Reader $r4;
+        int $i0, $i1, i2, i3, $i4, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i25, $i27, $i28, $i30;
+        char $c5;
+        char[] r1, $r2, $r3, $r5;
+        java.io.BufferedReader r0;
+
+        r0 := @this: java.io.BufferedReader;
+
+        r1 := @parameter0: char[];
+
+        i3 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $i1 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $i0 = r0.<java.io.BufferedReader: int nChars>;
+
+        if $i1 < $i0 goto label2;
+
+        $r3 = r0.<java.io.BufferedReader: char[] cb>;
+
+        $i12 = lengthof $r3;
+
+        if i2 < $i12 goto label1;
+
+        $i13 = r0.<java.io.BufferedReader: int markedChar>;
+
+        $i25 = (int) -1;
+
+        if $i13 > $i25 goto label1;
+
+        $z1 = r0.<java.io.BufferedReader: boolean skipLF>;
+
+        if $z1 != 0 goto label1;
+
+        $r4 = r0.<java.io.BufferedReader: java.io.Reader in>;
+
+        $i14 = virtualinvoke $r4.<java.io.Reader: int read(char[],int,int)>(r1, i3, i2);
+
+        return $i14;
+
+     label1:
+        specialinvoke r0.<java.io.BufferedReader: void fill()>();
+
+     label2:
+        $i15 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $i16 = r0.<java.io.BufferedReader: int nChars>;
+
+        if $i15 < $i16 goto label3;
+
+        $i27 = (int) -1;
+
+        return $i27;
+
+     label3:
+        $z0 = r0.<java.io.BufferedReader: boolean skipLF>;
+
+        if $z0 == 0 goto label5;
+
+        r0.<java.io.BufferedReader: boolean skipLF> = 0;
+
+        $r2 = r0.<java.io.BufferedReader: char[] cb>;
+
+        $i4 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $c5 = $r2[$i4];
+
+        $i28 = (int) $c5;
+
+        if $i28 != 10 goto label5;
+
+        $i6 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $i7 = $i6 + 1;
+
+        r0.<java.io.BufferedReader: int nextChar> = $i7;
+
+        $i9 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $i8 = r0.<java.io.BufferedReader: int nChars>;
+
+        if $i9 < $i8 goto label4;
+
+        specialinvoke r0.<java.io.BufferedReader: void fill()>();
+
+     label4:
+        $i11 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $i10 = r0.<java.io.BufferedReader: int nChars>;
+
+        if $i11 < $i10 goto label5;
+
+        $i30 = (int) -1;
+
+        return $i30;
+
+     label5:
+        $i17 = r0.<java.io.BufferedReader: int nChars>;
+
+        $i18 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $i19 = $i17 - $i18;
+
+        $i20 = staticinvoke <java.lang.Math: int min(int,int)>(i2, $i19);
+
+        $r5 = r0.<java.io.BufferedReader: char[] cb>;
+
+        $i21 = r0.<java.io.BufferedReader: int nextChar>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r5, $i21, r1, i3, $i20);
+
+        $i22 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $i23 = $i22 + $i20;
+
+        r0.<java.io.BufferedReader: int nextChar> = $i23;
+
+        return $i20;
+    }
+
+    public int read(char[], int, int) throws java.io.IOException
+    {
+        java.lang.Throwable $r4;
+        java.lang.IndexOutOfBoundsException $r5;
+        int i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, i10;
+        boolean $z0;
+        java.io.Reader $r3;
+        char[] r2;
+        java.lang.Object $r1;
+        java.io.BufferedReader r0;
+
+        r0 := @this: java.io.BufferedReader;
+
+        r2 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $r1 = r0.<java.io.BufferedReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label01:
+        specialinvoke r0.<java.io.BufferedReader: void ensureOpen()>();
+
+        if i0 < 0 goto label02;
+
+        $i1 = lengthof r2;
+
+        if i0 > $i1 goto label02;
+
+        if i2 < 0 goto label02;
+
+        $i4 = i0 + i2;
+
+        $i3 = lengthof r2;
+
+        if $i4 > $i3 goto label02;
+
+        $i5 = i0 + i2;
+
+        if $i5 >= 0 goto label03;
+
+     label02:
+        $r5 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r5.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r5;
+
+     label03:
+        if i2 != 0 goto label05;
+
+        exitmonitor $r1;
+
+     label04:
+        return 0;
+
+     label05:
+        $i6 = specialinvoke r0.<java.io.BufferedReader: int read1(char[],int,int)>(r2, i0, i2);
+
+        i10 = $i6;
+
+        if $i6 > 0 goto label07;
+
+        exitmonitor $r1;
+
+     label06:
+        return $i6;
+
+     label07:
+        if i10 >= i2 goto label09;
+
+        $r3 = r0.<java.io.BufferedReader: java.io.Reader in>;
+
+        $z0 = virtualinvoke $r3.<java.io.Reader: boolean ready()>();
+
+        if $z0 == 0 goto label09;
+
+        $i8 = i0 + i10;
+
+        $i7 = i2 - i10;
+
+        $i9 = specialinvoke r0.<java.io.BufferedReader: int read1(char[],int,int)>(r2, $i8, $i7);
+
+        if $i9 > 0 goto label08;
+
+        goto label09;
+
+     label08:
+        i10 = i10 + $i9;
+
+        goto label07;
+
+     label09:
+        exitmonitor $r1;
+
+     label10:
+        return i10;
+
+     label11:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label12:
+        throw $r4;
+
+        catch java.lang.Throwable from label01 to label04 with label11;
+        catch java.lang.Throwable from label05 to label06 with label11;
+        catch java.lang.Throwable from label07 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+    }
+
+    java.lang.String readLine(boolean) throws java.io.IOException
+    {
+        boolean z0, $z1, $z2, z3, z4;
+        java.lang.StringBuilder r11, $r14;
+        java.lang.Throwable $r10;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i11, $i12, $i13, $i14, $i15, i16, i17, $i18, $i19;
+        java.lang.String $r9, r12, $r13;
+        char $c10;
+        char[] $r2, $r4, $r6, $r7, $r8;
+        java.lang.Object $r1;
+        java.io.BufferedReader r0;
+
+        r0 := @this: java.io.BufferedReader;
+
+        z0 := @parameter0: boolean;
+
+        r11 = null;
+
+        $r1 = r0.<java.io.BufferedReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label01:
+        specialinvoke r0.<java.io.BufferedReader: void ensureOpen()>();
+
+        if z0 != 0 goto label02;
+
+        $z1 = r0.<java.io.BufferedReader: boolean skipLF>;
+
+        if $z1 == 0 goto label03;
+
+     label02:
+        $z2 = 1;
+
+        goto label04;
+
+     label03:
+        $z2 = 0;
+
+     label04:
+        z3 = $z2;
+
+     label05:
+        $i14 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $i15 = r0.<java.io.BufferedReader: int nChars>;
+
+        if $i14 < $i15 goto label06;
+
+        specialinvoke r0.<java.io.BufferedReader: void fill()>();
+
+     label06:
+        $i1 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $i0 = r0.<java.io.BufferedReader: int nChars>;
+
+        if $i1 < $i0 goto label10;
+
+        if r11 == null goto label08;
+
+        $i13 = virtualinvoke r11.<java.lang.StringBuilder: int length()>();
+
+        if $i13 <= 0 goto label08;
+
+        $r9 = virtualinvoke r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        exitmonitor $r1;
+
+     label07:
+        return $r9;
+
+     label08:
+        exitmonitor $r1;
+
+     label09:
+        return null;
+
+     label10:
+        z4 = 0;
+
+        i16 = 0;
+
+        if z3 == 0 goto label11;
+
+        $r8 = r0.<java.io.BufferedReader: char[] cb>;
+
+        $i9 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $c10 = $r8[$i9];
+
+        $i19 = (int) $c10;
+
+        if $i19 != 10 goto label11;
+
+        $i11 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $i12 = $i11 + 1;
+
+        r0.<java.io.BufferedReader: int nextChar> = $i12;
+
+     label11:
+        r0.<java.io.BufferedReader: boolean skipLF> = 0;
+
+        z3 = 0;
+
+        i17 = r0.<java.io.BufferedReader: int nextChar>;
+
+     label12:
+        $i18 = r0.<java.io.BufferedReader: int nChars>;
+
+        if i17 >= $i18 goto label15;
+
+        $r7 = r0.<java.io.BufferedReader: char[] cb>;
+
+        i16 = $r7[i17];
+
+        if i16 == 10 goto label13;
+
+        if i16 != 13 goto label14;
+
+     label13:
+        z4 = 1;
+
+        goto label15;
+
+     label14:
+        i17 = i17 + 1;
+
+        goto label12;
+
+     label15:
+        $i8 = r0.<java.io.BufferedReader: int nextChar>;
+
+        r0.<java.io.BufferedReader: int nextChar> = i17;
+
+        if z4 == 0 goto label20;
+
+        if r11 != null goto label16;
+
+        $r13 = new java.lang.String;
+
+        $r6 = r0.<java.io.BufferedReader: char[] cb>;
+
+        $i7 = i17 - $i8;
+
+        specialinvoke $r13.<java.lang.String: void <init>(char[],int,int)>($r6, $i8, $i7);
+
+        r12 = $r13;
+
+        goto label17;
+
+     label16:
+        $r4 = r0.<java.io.BufferedReader: char[] cb>;
+
+        $i4 = i17 - $i8;
+
+        virtualinvoke r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char[],int,int)>($r4, $i8, $i4);
+
+        r12 = virtualinvoke r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label17:
+        $i5 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $i6 = $i5 + 1;
+
+        r0.<java.io.BufferedReader: int nextChar> = $i6;
+
+        if i16 != 13 goto label18;
+
+        r0.<java.io.BufferedReader: boolean skipLF> = 1;
+
+     label18:
+        exitmonitor $r1;
+
+     label19:
+        return r12;
+
+     label20:
+        if r11 != null goto label21;
+
+        $r14 = new java.lang.StringBuilder;
+
+        $i3 = <java.io.BufferedReader: int defaultExpectedLineLength>;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>(int)>($i3);
+
+        r11 = $r14;
+
+     label21:
+        $r2 = r0.<java.io.BufferedReader: char[] cb>;
+
+        $i2 = i17 - $i8;
+
+        virtualinvoke r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char[],int,int)>($r2, $i8, $i2);
+
+        goto label05;
+
+     label22:
+        $r10 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label23:
+        throw $r10;
+
+        catch java.lang.Throwable from label01 to label07 with label22;
+        catch java.lang.Throwable from label08 to label09 with label22;
+        catch java.lang.Throwable from label10 to label19 with label22;
+        catch java.lang.Throwable from label20 to label23 with label22;
+    }
+
+    public java.lang.String readLine() throws java.io.IOException
+    {
+        java.io.BufferedReader r0;
+        java.lang.String $r1;
+
+        r0 := @this: java.io.BufferedReader;
+
+        $r1 = virtualinvoke r0.<java.io.BufferedReader: java.lang.String readLine(boolean)>(0);
+
+        return $r1;
+    }
+
+    public long skip(long) throws java.io.IOException
+    {
+        byte $b1, $b2, $b21;
+        boolean $z0;
+        java.lang.Throwable $r4;
+        long l0, $l9, $l10, l16, $l20, $l22;
+        int $i3, $i4, $i5, $i6, $i7, $i8, $i11, $i12, $i14, $i15, $i17, $i18, $i19, $i23, $i24, $i25, $i26;
+        char $c13;
+        java.lang.IllegalArgumentException $r5;
+        char[] $r2;
+        java.lang.Object $r1;
+        java.io.BufferedReader r0;
+
+        r0 := @this: java.io.BufferedReader;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        $i23 = (int) $b1;
+
+        if $i23 >= 0 goto label01;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("skip value is negative");
+
+        throw $r5;
+
+     label01:
+        $r1 = r0.<java.io.BufferedReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label02:
+        specialinvoke r0.<java.io.BufferedReader: void ensureOpen()>();
+
+        l16 = l0;
+
+     label03:
+        $b2 = l16 cmp 0L;
+
+        $i24 = (int) $b2;
+
+        if $i24 <= 0 goto label08;
+
+        $i4 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $i3 = r0.<java.io.BufferedReader: int nChars>;
+
+        if $i4 < $i3 goto label04;
+
+        specialinvoke r0.<java.io.BufferedReader: void fill()>();
+
+     label04:
+        $i6 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $i5 = r0.<java.io.BufferedReader: int nChars>;
+
+        if $i6 < $i5 goto label05;
+
+        goto label08;
+
+     label05:
+        $z0 = r0.<java.io.BufferedReader: boolean skipLF>;
+
+        if $z0 == 0 goto label06;
+
+        r0.<java.io.BufferedReader: boolean skipLF> = 0;
+
+        $r2 = r0.<java.io.BufferedReader: char[] cb>;
+
+        $i12 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $c13 = $r2[$i12];
+
+        $i25 = (int) $c13;
+
+        if $i25 != 10 goto label06;
+
+        $i14 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $i15 = $i14 + 1;
+
+        r0.<java.io.BufferedReader: int nextChar> = $i15;
+
+     label06:
+        $i17 = r0.<java.io.BufferedReader: int nChars>;
+
+        $i18 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $i19 = $i17 - $i18;
+
+        $l20 = (long) $i19;
+
+        $b21 = l16 cmp $l20;
+
+        $i26 = (int) $b21;
+
+        if $i26 > 0 goto label07;
+
+        $i8 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $l9 = (long) $i8;
+
+        $l10 = $l9 + l16;
+
+        $i11 = (int) $l10;
+
+        r0.<java.io.BufferedReader: int nextChar> = $i11;
+
+        l16 = 0L;
+
+        goto label08;
+
+     label07:
+        l16 = l16 - $l20;
+
+        $i7 = r0.<java.io.BufferedReader: int nChars>;
+
+        r0.<java.io.BufferedReader: int nextChar> = $i7;
+
+        goto label03;
+
+     label08:
+        $l22 = l0 - l16;
+
+        exitmonitor $r1;
+
+     label09:
+        return $l22;
+
+     label10:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label11:
+        throw $r4;
+
+        catch java.lang.Throwable from label02 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    public boolean ready() throws java.io.IOException
+    {
+        java.lang.Throwable $r5;
+        int $i0, $i1, $i2, $i4, $i5, $i6, $i7, $i8, $i9, $i10;
+        boolean $z0, $z1, $z2, $z3;
+        char $c3;
+        java.io.Reader $r2, $r4;
+        char[] $r3;
+        java.lang.Object $r1;
+        java.io.BufferedReader r0;
+
+        r0 := @this: java.io.BufferedReader;
+
+        $r1 = r0.<java.io.BufferedReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label01:
+        specialinvoke r0.<java.io.BufferedReader: void ensureOpen()>();
+
+        $z0 = r0.<java.io.BufferedReader: boolean skipLF>;
+
+        if $z0 == 0 goto label04;
+
+        $i1 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $i0 = r0.<java.io.BufferedReader: int nChars>;
+
+        if $i1 < $i0 goto label02;
+
+        $r4 = r0.<java.io.BufferedReader: java.io.Reader in>;
+
+        $z2 = virtualinvoke $r4.<java.io.Reader: boolean ready()>();
+
+        if $z2 == 0 goto label02;
+
+        specialinvoke r0.<java.io.BufferedReader: void fill()>();
+
+     label02:
+        $i6 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $i7 = r0.<java.io.BufferedReader: int nChars>;
+
+        if $i6 >= $i7 goto label04;
+
+        $r3 = r0.<java.io.BufferedReader: char[] cb>;
+
+        $i2 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $c3 = $r3[$i2];
+
+        $i10 = (int) $c3;
+
+        if $i10 != 10 goto label03;
+
+        $i4 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $i5 = $i4 + 1;
+
+        r0.<java.io.BufferedReader: int nextChar> = $i5;
+
+     label03:
+        r0.<java.io.BufferedReader: boolean skipLF> = 0;
+
+     label04:
+        $i8 = r0.<java.io.BufferedReader: int nextChar>;
+
+        $i9 = r0.<java.io.BufferedReader: int nChars>;
+
+        if $i8 < $i9 goto label05;
+
+        $r2 = r0.<java.io.BufferedReader: java.io.Reader in>;
+
+        $z1 = virtualinvoke $r2.<java.io.Reader: boolean ready()>();
+
+        if $z1 == 0 goto label06;
+
+     label05:
+        $z3 = 1;
+
+        goto label07;
+
+     label06:
+        $z3 = 0;
+
+     label07:
+        exitmonitor $r1;
+
+     label08:
+        return $z3;
+
+     label09:
+        $r5 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label10:
+        throw $r5;
+
+        catch java.lang.Throwable from label01 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    public boolean markSupported()
+    {
+        java.io.BufferedReader r0;
+
+        r0 := @this: java.io.BufferedReader;
+
+        return 1;
+    }
+
+    public void mark(int) throws java.io.IOException
+    {
+        java.lang.Throwable $r3;
+        int i0, $i1;
+        java.lang.Object $r1;
+        java.io.BufferedReader r0;
+        java.lang.IllegalArgumentException $r2;
+        boolean $z0;
+
+        r0 := @this: java.io.BufferedReader;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 0 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Read-ahead limit < 0");
+
+        throw $r2;
+
+     label1:
+        $r1 = r0.<java.io.BufferedReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label2:
+        specialinvoke r0.<java.io.BufferedReader: void ensureOpen()>();
+
+        r0.<java.io.BufferedReader: int readAheadLimit> = i0;
+
+        $i1 = r0.<java.io.BufferedReader: int nextChar>;
+
+        r0.<java.io.BufferedReader: int markedChar> = $i1;
+
+        $z0 = r0.<java.io.BufferedReader: boolean skipLF>;
+
+        r0.<java.io.BufferedReader: boolean markedSkipLF> = $z0;
+
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r3;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void reset() throws java.io.IOException
+    {
+        java.lang.Throwable $r3;
+        java.io.IOException $r5;
+        int $i0, $i1, $i2, $i4;
+        java.lang.Object $r1;
+        java.io.BufferedReader r0;
+        java.lang.String $r4;
+        boolean $z0;
+
+        r0 := @this: java.io.BufferedReader;
+
+        $r1 = r0.<java.io.BufferedReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label1:
+        specialinvoke r0.<java.io.BufferedReader: void ensureOpen()>();
+
+        $i0 = r0.<java.io.BufferedReader: int markedChar>;
+
+        if $i0 >= 0 goto label4;
+
+        $r5 = new java.io.IOException;
+
+        $i2 = r0.<java.io.BufferedReader: int markedChar>;
+
+        $i4 = (int) -2;
+
+        if $i2 != $i4 goto label2;
+
+        $r4 = "Mark invalid";
+
+        goto label3;
+
+     label2:
+        $r4 = "Stream not marked";
+
+     label3:
+        specialinvoke $r5.<java.io.IOException: void <init>(java.lang.String)>($r4);
+
+        throw $r5;
+
+     label4:
+        $i1 = r0.<java.io.BufferedReader: int markedChar>;
+
+        r0.<java.io.BufferedReader: int nextChar> = $i1;
+
+        $z0 = r0.<java.io.BufferedReader: boolean markedSkipLF>;
+
+        r0.<java.io.BufferedReader: boolean skipLF> = $z0;
+
+        exitmonitor $r1;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label7:
+        throw $r3;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        java.lang.Throwable $r4, $r5;
+        java.lang.Object $r1;
+        java.io.BufferedReader r0;
+        java.io.Reader $r2, $r3;
+
+        r0 := @this: java.io.BufferedReader;
+
+        $r1 = r0.<java.io.BufferedReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = r0.<java.io.BufferedReader: java.io.Reader in>;
+
+        if $r2 != null goto label03;
+
+        exitmonitor $r1;
+
+     label02:
+        return;
+
+     label03:
+        $r3 = r0.<java.io.BufferedReader: java.io.Reader in>;
+
+        virtualinvoke $r3.<java.io.Reader: void close()>();
+
+     label04:
+        r0.<java.io.BufferedReader: java.io.Reader in> = null;
+
+        r0.<java.io.BufferedReader: char[] cb> = null;
+
+        goto label06;
+
+     label05:
+        $r5 := @caughtexception;
+
+        r0.<java.io.BufferedReader: java.io.Reader in> = null;
+
+        r0.<java.io.BufferedReader: char[] cb> = null;
+
+        throw $r5;
+
+     label06:
+        exitmonitor $r1;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label09:
+        throw $r4;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label03 to label04 with label05;
+        catch java.lang.Throwable from label01 to label02 with label08;
+        catch java.lang.Throwable from label03 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    public java.util.stream.Stream lines()
+    {
+        java.io.BufferedReader$1 $r0;
+        java.util.stream.Stream $r3;
+        java.io.BufferedReader r1;
+        java.util.Spliterator $r2;
+
+        r1 := @this: java.io.BufferedReader;
+
+        $r0 = new java.io.BufferedReader$1;
+
+        specialinvoke $r0.<java.io.BufferedReader$1: void <init>(java.io.BufferedReader)>(r1);
+
+        $r2 = staticinvoke <java.util.Spliterators: java.util.Spliterator spliteratorUnknownSize(java.util.Iterator,int)>($r0, 272);
+
+        $r3 = staticinvoke <java.util.stream.StreamSupport: java.util.stream.Stream stream(java.util.Spliterator,boolean)>($r2, 0);
+
+        return $r3;
+    }
+
+    static void <clinit>()
+    {
+        <java.io.BufferedReader: int UNMARKED> = -1;
+
+        <java.io.BufferedReader: int INVALIDATED> = -2;
+
+        <java.io.BufferedReader: int defaultCharBufferSize> = 8192;
+
+        <java.io.BufferedReader: int defaultExpectedLineLength> = 80;
+
+        return;
+    }
+}

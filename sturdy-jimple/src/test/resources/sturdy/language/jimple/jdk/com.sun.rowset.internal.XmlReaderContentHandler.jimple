@@ -1,0 +1,3278 @@
+public class com.sun.rowset.internal.XmlReaderContentHandler extends org.xml.sax.helpers.DefaultHandler
+{
+    private java.util.HashMap propMap;
+    private java.util.HashMap colDefMap;
+    private java.util.HashMap dataMap;
+    private java.util.HashMap typeMap;
+    private java.util.Vector updates;
+    private java.util.Vector keyCols;
+    private java.lang.String columnValue;
+    private java.lang.String propertyValue;
+    private java.lang.String metaDataValue;
+    private int tag;
+    private int state;
+    private com.sun.rowset.WebRowSetImpl rs;
+    private boolean nullVal;
+    private boolean emptyStringVal;
+    private javax.sql.RowSetMetaData md;
+    private int idx;
+    private java.lang.String lastval;
+    private java.lang.String Key_map;
+    private java.lang.String Value_map;
+    private java.lang.String tempStr;
+    private java.lang.String tempUpdate;
+    private java.lang.String tempCommand;
+    private java.lang.Object[] upd;
+    private java.lang.String[] properties;
+    private static final int CommandTag;
+    private static final int ConcurrencyTag;
+    private static final int DatasourceTag;
+    private static final int EscapeProcessingTag;
+    private static final int FetchDirectionTag;
+    private static final int FetchSizeTag;
+    private static final int IsolationLevelTag;
+    private static final int KeycolsTag;
+    private static final int MapTag;
+    private static final int MaxFieldSizeTag;
+    private static final int MaxRowsTag;
+    private static final int QueryTimeoutTag;
+    private static final int ReadOnlyTag;
+    private static final int RowsetTypeTag;
+    private static final int ShowDeletedTag;
+    private static final int TableNameTag;
+    private static final int UrlTag;
+    private static final int PropNullTag;
+    private static final int PropColumnTag;
+    private static final int PropTypeTag;
+    private static final int PropClassTag;
+    private static final int SyncProviderTag;
+    private static final int SyncProviderNameTag;
+    private static final int SyncProviderVendorTag;
+    private static final int SyncProviderVersionTag;
+    private static final int SyncProviderGradeTag;
+    private static final int DataSourceLock;
+    private java.lang.String[] colDef;
+    private static final int ColumnCountTag;
+    private static final int ColumnDefinitionTag;
+    private static final int ColumnIndexTag;
+    private static final int AutoIncrementTag;
+    private static final int CaseSensitiveTag;
+    private static final int CurrencyTag;
+    private static final int NullableTag;
+    private static final int SignedTag;
+    private static final int SearchableTag;
+    private static final int ColumnDisplaySizeTag;
+    private static final int ColumnLabelTag;
+    private static final int ColumnNameTag;
+    private static final int SchemaNameTag;
+    private static final int ColumnPrecisionTag;
+    private static final int ColumnScaleTag;
+    private static final int MetaTableNameTag;
+    private static final int CatalogNameTag;
+    private static final int ColumnTypeTag;
+    private static final int ColumnTypeNameTag;
+    private static final int MetaNullTag;
+    private java.lang.String[] data;
+    private static final int RowTag;
+    private static final int ColTag;
+    private static final int InsTag;
+    private static final int DelTag;
+    private static final int InsDelTag;
+    private static final int UpdTag;
+    private static final int NullTag;
+    private static final int EmptyStringTag;
+    private static final int INITIAL;
+    private static final int PROPERTIES;
+    private static final int METADATA;
+    private static final int DATA;
+    private com.sun.rowset.JdbcRowSetResourceBundle resBundle;
+
+    public void <init>(javax.sql.RowSet)
+    {
+        java.lang.String[] $r1, $r2, $r3;
+        java.io.IOException $r8;
+        com.sun.rowset.JdbcRowSetResourceBundle $r7;
+        java.lang.RuntimeException $r9;
+        java.util.Vector $r6;
+        com.sun.rowset.internal.XmlReaderContentHandler r0;
+        com.sun.rowset.WebRowSetImpl $r5;
+        javax.sql.RowSet r4;
+
+        r0 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r4 := @parameter0: javax.sql.RowSet;
+
+        specialinvoke r0.<org.xml.sax.helpers.DefaultHandler: void <init>()>();
+
+        $r1 = newarray (java.lang.String)[27];
+
+        $r1[0] = "command";
+
+        $r1[1] = "concurrency";
+
+        $r1[2] = "datasource";
+
+        $r1[3] = "escape-processing";
+
+        $r1[4] = "fetch-direction";
+
+        $r1[5] = "fetch-size";
+
+        $r1[6] = "isolation-level";
+
+        $r1[7] = "key-columns";
+
+        $r1[8] = "map";
+
+        $r1[9] = "max-field-size";
+
+        $r1[10] = "max-rows";
+
+        $r1[11] = "query-timeout";
+
+        $r1[12] = "read-only";
+
+        $r1[13] = "rowset-type";
+
+        $r1[14] = "show-deleted";
+
+        $r1[15] = "table-name";
+
+        $r1[16] = "url";
+
+        $r1[17] = "null";
+
+        $r1[18] = "column";
+
+        $r1[19] = "type";
+
+        $r1[20] = "class";
+
+        $r1[21] = "sync-provider";
+
+        $r1[22] = "sync-provider-name";
+
+        $r1[23] = "sync-provider-vendor";
+
+        $r1[24] = "sync-provider-version";
+
+        $r1[25] = "sync-provider-grade";
+
+        $r1[26] = "data-source-lock";
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String[] properties> = $r1;
+
+        $r2 = newarray (java.lang.String)[20];
+
+        $r2[0] = "column-count";
+
+        $r2[1] = "column-definition";
+
+        $r2[2] = "column-index";
+
+        $r2[3] = "auto-increment";
+
+        $r2[4] = "case-sensitive";
+
+        $r2[5] = "currency";
+
+        $r2[6] = "nullable";
+
+        $r2[7] = "signed";
+
+        $r2[8] = "searchable";
+
+        $r2[9] = "column-display-size";
+
+        $r2[10] = "column-label";
+
+        $r2[11] = "column-name";
+
+        $r2[12] = "schema-name";
+
+        $r2[13] = "column-precision";
+
+        $r2[14] = "column-scale";
+
+        $r2[15] = "table-name";
+
+        $r2[16] = "catalog-name";
+
+        $r2[17] = "column-type";
+
+        $r2[18] = "column-type-name";
+
+        $r2[19] = "null";
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String[] colDef> = $r2;
+
+        $r3 = newarray (java.lang.String)[8];
+
+        $r3[0] = "currentRow";
+
+        $r3[1] = "columnValue";
+
+        $r3[2] = "insertRow";
+
+        $r3[3] = "deleteRow";
+
+        $r3[4] = "insdel";
+
+        $r3[5] = "updateRow";
+
+        $r3[6] = "null";
+
+        $r3[7] = "emptyString";
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String[] data> = $r3;
+
+        $r5 = (com.sun.rowset.WebRowSetImpl) r4;
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs> = $r5;
+
+        specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: void initMaps()>();
+
+        $r6 = new java.util.Vector;
+
+        specialinvoke $r6.<java.util.Vector: void <init>()>();
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.Vector updates> = $r6;
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String columnValue> = "";
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String propertyValue> = "";
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String metaDataValue> = "";
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: boolean nullVal> = 0;
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx> = 0;
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String tempStr> = "";
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String tempUpdate> = "";
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String tempCommand> = "";
+
+     label1:
+        $r7 = staticinvoke <com.sun.rowset.JdbcRowSetResourceBundle: com.sun.rowset.JdbcRowSetResourceBundle getJdbcRowSetResourceBundle()>();
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle> = $r7;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r8 := @caughtexception;
+
+        $r9 = new java.lang.RuntimeException;
+
+        specialinvoke $r9.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r8);
+
+        throw $r9;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    private void initMaps()
+    {
+        java.util.HashMap $r1, $r3, $r5, $r7, $r9, $r13, $r17;
+        java.lang.String[] $r2, $r4, $r6, $r8, $r12, $r16;
+        java.lang.Integer $r11, $r15, $r19;
+        com.sun.rowset.internal.XmlReaderContentHandler r0;
+        int i0, i1, i2, i3, i4, i5;
+        java.lang.String $r10, $r14, $r18;
+
+        r0 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.HashMap propMap> = $r1;
+
+        $r2 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String[] properties>;
+
+        i0 = lengthof $r2;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label2;
+
+        $r17 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.HashMap propMap>;
+
+        $r16 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String[] properties>;
+
+        $r18 = $r16[i1];
+
+        $r19 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i1);
+
+        virtualinvoke $r17.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r18, $r19);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        $r3 = new java.util.HashMap;
+
+        specialinvoke $r3.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.HashMap colDefMap> = $r3;
+
+        $r4 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String[] colDef>;
+
+        i2 = lengthof $r4;
+
+        i3 = 0;
+
+     label3:
+        if i3 >= i2 goto label4;
+
+        $r13 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.HashMap colDefMap>;
+
+        $r12 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String[] colDef>;
+
+        $r14 = $r12[i3];
+
+        $r15 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i3);
+
+        virtualinvoke $r13.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r14, $r15);
+
+        i3 = i3 + 1;
+
+        goto label3;
+
+     label4:
+        $r5 = new java.util.HashMap;
+
+        specialinvoke $r5.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.HashMap dataMap> = $r5;
+
+        $r6 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String[] data>;
+
+        i4 = lengthof $r6;
+
+        i5 = 0;
+
+     label5:
+        if i5 >= i4 goto label6;
+
+        $r9 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.HashMap dataMap>;
+
+        $r8 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String[] data>;
+
+        $r10 = $r8[i5];
+
+        $r11 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i5);
+
+        virtualinvoke $r9.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r10, $r11);
+
+        i5 = i5 + 1;
+
+        goto label5;
+
+     label6:
+        $r7 = new java.util.HashMap;
+
+        specialinvoke $r7.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.HashMap typeMap> = $r7;
+
+        return;
+    }
+
+    public void startDocument() throws org.xml.sax.SAXException
+    {
+        com.sun.rowset.internal.XmlReaderContentHandler r0;
+
+        r0 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        return;
+    }
+
+    public void endDocument() throws org.xml.sax.SAXException
+    {
+        com.sun.rowset.internal.XmlReaderContentHandler r0;
+
+        r0 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        return;
+    }
+
+    public void startElement(java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes) throws org.xml.sax.SAXException
+    {
+        java.util.HashMap $r2, $r4, $r7, $r10, $r13;
+        java.lang.Integer $r6, $r9, $r12, $r15;
+        java.sql.SQLException $r16;
+        com.sun.rowset.internal.XmlReaderContentHandler r1;
+        int $i0, $i1, $i2, $i3, i4;
+        org.xml.sax.Attributes r19;
+        java.lang.String r0, r17, r18;
+        com.sun.rowset.WebRowSetImpl $r20;
+        java.lang.Object $r3, $r5, $r8, $r11, $r14;
+
+        r1 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r17 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.lang.String;
+
+        r18 := @parameter2: java.lang.String;
+
+        r19 := @parameter3: org.xml.sax.Attributes;
+
+        $i0 = specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: int getState()>();
+
+        tableswitch($i0)
+        {
+            case 1: goto label01;
+            case 2: goto label03;
+            case 3: goto label05;
+            default: goto label15;
+        };
+
+     label01:
+        r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String tempCommand> = "";
+
+        $r13 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.HashMap propMap>;
+
+        $r14 = virtualinvoke $r13.<java.util.HashMap: java.lang.Object get(java.lang.Object)>(r0);
+
+        $r15 = (java.lang.Integer) $r14;
+
+        $i3 = virtualinvoke $r15.<java.lang.Integer: int intValue()>();
+
+        if $i3 != 17 goto label02;
+
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void setNullValue(boolean)>(1);
+
+        goto label16;
+
+     label02:
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void setTag(int)>($i3);
+
+        goto label16;
+
+     label03:
+        $r10 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.HashMap colDefMap>;
+
+        $r11 = virtualinvoke $r10.<java.util.HashMap: java.lang.Object get(java.lang.Object)>(r0);
+
+        $r12 = (java.lang.Integer) $r11;
+
+        $i2 = virtualinvoke $r12.<java.lang.Integer: int intValue()>();
+
+        if $i2 != 19 goto label04;
+
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void setNullValue(boolean)>(1);
+
+        goto label16;
+
+     label04:
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void setTag(int)>($i2);
+
+        goto label16;
+
+     label05:
+        r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String tempStr> = "";
+
+        r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String tempUpdate> = "";
+
+        $r2 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.HashMap dataMap>;
+
+        $r3 = virtualinvoke $r2.<java.util.HashMap: java.lang.Object get(java.lang.Object)>(r0);
+
+        if $r3 != null goto label06;
+
+        i4 = 6;
+
+        goto label08;
+
+     label06:
+        $r4 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.HashMap dataMap>;
+
+        $r5 = virtualinvoke $r4.<java.util.HashMap: java.lang.Object get(java.lang.Object)>(r0);
+
+        $r6 = (java.lang.Integer) $r5;
+
+        $i1 = virtualinvoke $r6.<java.lang.Integer: int intValue()>();
+
+        if $i1 != 7 goto label07;
+
+        i4 = 7;
+
+        goto label08;
+
+     label07:
+        $r7 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.HashMap dataMap>;
+
+        $r8 = virtualinvoke $r7.<java.util.HashMap: java.lang.Object get(java.lang.Object)>(r0);
+
+        $r9 = (java.lang.Integer) $r8;
+
+        i4 = virtualinvoke $r9.<java.lang.Integer: int intValue()>();
+
+     label08:
+        if i4 != 6 goto label09;
+
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void setNullValue(boolean)>(1);
+
+        goto label16;
+
+     label09:
+        if i4 != 7 goto label10;
+
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void setEmptyStringValue(boolean)>(1);
+
+        goto label16;
+
+     label10:
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void setTag(int)>(i4);
+
+        if i4 == 0 goto label11;
+
+        if i4 == 3 goto label11;
+
+        if i4 != 2 goto label16;
+
+     label11:
+        r1.<com.sun.rowset.internal.XmlReaderContentHandler: int idx> = 0;
+
+     label12:
+        $r20 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r20.<com.sun.rowset.WebRowSetImpl: void moveToInsertRow()>();
+
+     label13:
+        goto label16;
+
+     label14:
+        $r16 := @caughtexception;
+
+        goto label16;
+
+     label15:
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void setState(java.lang.String)>(r0);
+
+     label16:
+        return;
+
+        catch java.sql.SQLException from label12 to label13 with label14;
+    }
+
+    public void endElement(java.lang.String, java.lang.String, java.lang.String) throws org.xml.sax.SAXException
+    {
+        java.lang.Integer $r6, $r31;
+        java.util.Vector $r8, $r39, $r40, $r42;
+        com.sun.rowset.internal.XmlReaderContentHandler r1;
+        com.sun.rowset.JdbcRowSetResourceBundle $r47, $r55, $r63, $r71, $r79, $r87, $r95, $r103, $r114;
+        com.sun.rowset.WebRowSetImpl $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r22, $r23, $r24, $r25, $r28, $r38, $r41;
+        java.lang.Object[] $r7, $r50, $r58, $r66, $r74, $r82, $r90, $r98, $r106, $r117;
+        int[] r122;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, i7, i8, $i10, $i12;
+        java.lang.Object $r3, $r5, $r30, $r43, $r48, $r56, $r64, $r72, $r80, $r88, $r96, $r104, $r115;
+        java.lang.Class $r35;
+        java.sql.SQLException $r45, $r53, $r61, $r69, $r77, $r85, $r93, $r101, $r109;
+        java.lang.String r0, $r21, $r26, $r32, $r34, $r36, $r44, $r49, $r51, $r52, $r57, $r59, $r60, $r65, $r67, $r68, $r73, $r75, $r76, $r81, $r83, $r84, $r89, $r91, $r92, $r97, $r99, $r100, $r105, $r107, $r108, $r111, $r116, $r118, $r119, r120, r121;
+        java.lang.ClassNotFoundException $r112;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        javax.sql.RowSetMetaData $r27;
+        org.xml.sax.SAXException $r123, $r124, $r125, $r126, $r127, $r128, $r129, $r130, $r131, $r132;
+        java.util.HashMap $r2, $r4, $r29, $r33, $r37;
+
+        r1 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r120 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.lang.String;
+
+        r121 := @parameter2: java.lang.String;
+
+        $i0 = specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: int getState()>();
+
+        tableswitch($i0)
+        {
+            case 1: goto label01;
+            case 2: goto label15;
+            case 3: goto label25;
+            default: goto label51;
+        };
+
+     label01:
+        $z6 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("properties");
+
+        if $z6 == 0 goto label02;
+
+        r1.<com.sun.rowset.internal.XmlReaderContentHandler: int state> = 0;
+
+        goto label51;
+
+     label02:
+        $r29 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.HashMap propMap>;
+
+        $r30 = virtualinvoke $r29.<java.util.HashMap: java.lang.Object get(java.lang.Object)>(r0);
+
+        $r31 = (java.lang.Integer) $r30;
+
+        $i3 = virtualinvoke $r31.<java.lang.Integer: int intValue()>();
+
+        lookupswitch($i3)
+        {
+            case 7: goto label03;
+            case 8: goto label09;
+            case 20: goto label06;
+            default: goto label10;
+        };
+
+     label03:
+        $r39 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.Vector keyCols>;
+
+        if $r39 == null goto label10;
+
+        $r40 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.Vector keyCols>;
+
+        $i4 = virtualinvoke $r40.<java.util.Vector: int size()>();
+
+        r122 = newarray (int)[$i4];
+
+        i7 = 0;
+
+     label04:
+        $i5 = lengthof r122;
+
+        if i7 >= $i5 goto label05;
+
+        $r42 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.Vector keyCols>;
+
+        $r43 = virtualinvoke $r42.<java.util.Vector: java.lang.Object elementAt(int)>(i7);
+
+        $r44 = (java.lang.String) $r43;
+
+        $i6 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r44);
+
+        r122[i7] = $i6;
+
+        i7 = i7 + 1;
+
+        goto label04;
+
+     label05:
+        $r41 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r41.<com.sun.rowset.WebRowSetImpl: void setKeyColumns(int[])>(r122);
+
+        goto label10;
+
+     label06:
+        $r33 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.HashMap typeMap>;
+
+        $r34 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String Key_map>;
+
+        $r32 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String Value_map>;
+
+        $r35 = staticinvoke <sun.reflect.misc.ReflectUtil: java.lang.Class forName(java.lang.String)>($r32);
+
+        virtualinvoke $r33.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r34, $r35);
+
+     label07:
+        goto label10;
+
+     label08:
+        $r112 := @caughtexception;
+
+        $r123 = new org.xml.sax.SAXException;
+
+        $r114 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r115 = virtualinvoke $r114.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.errmap");
+
+        $r116 = virtualinvoke $r115.<java.lang.Object: java.lang.String toString()>();
+
+        $r117 = newarray (java.lang.Object)[1];
+
+        $r118 = virtualinvoke $r112.<java.lang.ClassNotFoundException: java.lang.String getMessage()>();
+
+        $r117[0] = $r118;
+
+        $r119 = staticinvoke <java.text.MessageFormat: java.lang.String format(java.lang.String,java.lang.Object[])>($r116, $r117);
+
+        specialinvoke $r123.<org.xml.sax.SAXException: void <init>(java.lang.String)>($r119);
+
+        throw $r123;
+
+     label09:
+        $r38 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $r37 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.HashMap typeMap>;
+
+        virtualinvoke $r38.<com.sun.rowset.WebRowSetImpl: void setTypeMap(java.util.Map)>($r37);
+
+        goto label10;
+
+     label10:
+        $z7 = specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: boolean getNullValue()>();
+
+        if $z7 == 0 goto label11;
+
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void setPropertyValue(java.lang.String)>(null);
+
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void setNullValue(boolean)>(0);
+
+        goto label12;
+
+     label11:
+        $r36 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String propertyValue>;
+
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void setPropertyValue(java.lang.String)>($r36);
+
+     label12:
+        goto label14;
+
+     label13:
+        $r109 := @caughtexception;
+
+        $r124 = new org.xml.sax.SAXException;
+
+        $r111 = virtualinvoke $r109.<java.sql.SQLException: java.lang.String getMessage()>();
+
+        specialinvoke $r124.<org.xml.sax.SAXException: void <init>(java.lang.String)>($r111);
+
+        throw $r124;
+
+     label14:
+        r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String propertyValue> = "";
+
+        $i10 = (int) -1;
+
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void setTag(int)>($i10);
+
+        goto label51;
+
+     label15:
+        $z4 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("metadata");
+
+        if $z4 == 0 goto label19;
+
+     label16:
+        $r28 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $r27 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: javax.sql.RowSetMetaData md>;
+
+        virtualinvoke $r28.<com.sun.rowset.WebRowSetImpl: void setMetaData(javax.sql.RowSetMetaData)>($r27);
+
+        r1.<com.sun.rowset.internal.XmlReaderContentHandler: int state> = 0;
+
+     label17:
+        goto label24;
+
+     label18:
+        $r101 := @caughtexception;
+
+        $r125 = new org.xml.sax.SAXException;
+
+        $r103 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r104 = virtualinvoke $r103.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.errmetadata");
+
+        $r105 = virtualinvoke $r104.<java.lang.Object: java.lang.String toString()>();
+
+        $r106 = newarray (java.lang.Object)[1];
+
+        $r107 = virtualinvoke $r101.<java.sql.SQLException: java.lang.String getMessage()>();
+
+        $r106[0] = $r107;
+
+        $r108 = staticinvoke <java.text.MessageFormat: java.lang.String format(java.lang.String,java.lang.Object[])>($r105, $r106);
+
+        specialinvoke $r125.<org.xml.sax.SAXException: void <init>(java.lang.String)>($r108);
+
+        throw $r125;
+
+     label19:
+        $z5 = specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: boolean getNullValue()>();
+
+        if $z5 == 0 goto label20;
+
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void setMetaDataValue(java.lang.String)>(null);
+
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void setNullValue(boolean)>(0);
+
+        goto label21;
+
+     label20:
+        $r26 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String metaDataValue>;
+
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void setMetaDataValue(java.lang.String)>($r26);
+
+     label21:
+        goto label23;
+
+     label22:
+        $r93 := @caughtexception;
+
+        $r126 = new org.xml.sax.SAXException;
+
+        $r95 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r96 = virtualinvoke $r95.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.errmetadata");
+
+        $r97 = virtualinvoke $r96.<java.lang.Object: java.lang.String toString()>();
+
+        $r98 = newarray (java.lang.Object)[1];
+
+        $r99 = virtualinvoke $r93.<java.sql.SQLException: java.lang.String getMessage()>();
+
+        $r98[0] = $r99;
+
+        $r100 = staticinvoke <java.text.MessageFormat: java.lang.String format(java.lang.String,java.lang.Object[])>($r97, $r98);
+
+        specialinvoke $r126.<org.xml.sax.SAXException: void <init>(java.lang.String)>($r100);
+
+        throw $r126;
+
+     label23:
+        r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String metaDataValue> = "";
+
+     label24:
+        $i12 = (int) -1;
+
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void setTag(int)>($i12);
+
+        goto label51;
+
+     label25:
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("data");
+
+        if $z0 == 0 goto label26;
+
+        r1.<com.sun.rowset.internal.XmlReaderContentHandler: int state> = 0;
+
+        return;
+
+     label26:
+        $r2 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.HashMap dataMap>;
+
+        $r3 = virtualinvoke $r2.<java.util.HashMap: java.lang.Object get(java.lang.Object)>(r0);
+
+        if $r3 != null goto label27;
+
+        i8 = 6;
+
+        goto label28;
+
+     label27:
+        $r4 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.HashMap dataMap>;
+
+        $r5 = virtualinvoke $r4.<java.util.HashMap: java.lang.Object get(java.lang.Object)>(r0);
+
+        $r6 = (java.lang.Integer) $r5;
+
+        i8 = virtualinvoke $r6.<java.lang.Integer: int intValue()>();
+
+     label28:
+        tableswitch(i8)
+        {
+            case 0: goto label34;
+            case 1: goto label29;
+            case 2: goto label40;
+            case 3: goto label37;
+            case 4: goto label43;
+            case 5: goto label46;
+            default: goto label51;
+        };
+
+     label29:
+        $i1 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $i2 = $i1 + 1;
+
+        r1.<com.sun.rowset.internal.XmlReaderContentHandler: int idx> = $i2;
+
+        $z3 = specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: boolean getNullValue()>();
+
+        if $z3 == 0 goto label30;
+
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void insertValue(java.lang.String)>(null);
+
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void setNullValue(boolean)>(0);
+
+        goto label31;
+
+     label30:
+        $r21 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String tempStr>;
+
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void insertValue(java.lang.String)>($r21);
+
+     label31:
+        r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String columnValue> = "";
+
+     label32:
+        goto label51;
+
+     label33:
+        $r85 := @caughtexception;
+
+        $r127 = new org.xml.sax.SAXException;
+
+        $r87 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r88 = virtualinvoke $r87.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.errinsertval");
+
+        $r89 = virtualinvoke $r88.<java.lang.Object: java.lang.String toString()>();
+
+        $r90 = newarray (java.lang.Object)[1];
+
+        $r91 = virtualinvoke $r85.<java.sql.SQLException: java.lang.String getMessage()>();
+
+        $r90[0] = $r91;
+
+        $r92 = staticinvoke <java.text.MessageFormat: java.lang.String format(java.lang.String,java.lang.Object[])>($r89, $r90);
+
+        specialinvoke $r127.<org.xml.sax.SAXException: void <init>(java.lang.String)>($r92);
+
+        throw $r127;
+
+     label34:
+        $r22 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r22.<com.sun.rowset.WebRowSetImpl: void insertRow()>();
+
+        $r23 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r23.<com.sun.rowset.WebRowSetImpl: void moveToCurrentRow()>();
+
+        $r24 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r24.<com.sun.rowset.WebRowSetImpl: boolean next()>();
+
+        $r25 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r25.<com.sun.rowset.WebRowSetImpl: void setOriginalRow()>();
+
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void applyUpdates()>();
+
+     label35:
+        goto label51;
+
+     label36:
+        $r77 := @caughtexception;
+
+        $r128 = new org.xml.sax.SAXException;
+
+        $r79 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r80 = virtualinvoke $r79.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.errconstr");
+
+        $r81 = virtualinvoke $r80.<java.lang.Object: java.lang.String toString()>();
+
+        $r82 = newarray (java.lang.Object)[1];
+
+        $r83 = virtualinvoke $r77.<java.sql.SQLException: java.lang.String getMessage()>();
+
+        $r82[0] = $r83;
+
+        $r84 = staticinvoke <java.text.MessageFormat: java.lang.String format(java.lang.String,java.lang.Object[])>($r81, $r82);
+
+        specialinvoke $r128.<org.xml.sax.SAXException: void <init>(java.lang.String)>($r84);
+
+        throw $r128;
+
+     label37:
+        $r13 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r13.<com.sun.rowset.WebRowSetImpl: void insertRow()>();
+
+        $r14 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r14.<com.sun.rowset.WebRowSetImpl: void moveToCurrentRow()>();
+
+        $r15 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r15.<com.sun.rowset.WebRowSetImpl: boolean next()>();
+
+        $r16 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r16.<com.sun.rowset.WebRowSetImpl: void setOriginalRow()>();
+
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void applyUpdates()>();
+
+        $r17 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r17.<com.sun.rowset.WebRowSetImpl: void deleteRow()>();
+
+     label38:
+        goto label51;
+
+     label39:
+        $r69 := @caughtexception;
+
+        $r129 = new org.xml.sax.SAXException;
+
+        $r71 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r72 = virtualinvoke $r71.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.errdel");
+
+        $r73 = virtualinvoke $r72.<java.lang.Object: java.lang.String toString()>();
+
+        $r74 = newarray (java.lang.Object)[1];
+
+        $r75 = virtualinvoke $r69.<java.sql.SQLException: java.lang.String getMessage()>();
+
+        $r74[0] = $r75;
+
+        $r76 = staticinvoke <java.text.MessageFormat: java.lang.String format(java.lang.String,java.lang.Object[])>($r73, $r74);
+
+        specialinvoke $r129.<org.xml.sax.SAXException: void <init>(java.lang.String)>($r76);
+
+        throw $r129;
+
+     label40:
+        $r18 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r18.<com.sun.rowset.WebRowSetImpl: void insertRow()>();
+
+        $r19 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r19.<com.sun.rowset.WebRowSetImpl: void moveToCurrentRow()>();
+
+        $r20 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r20.<com.sun.rowset.WebRowSetImpl: boolean next()>();
+
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void applyUpdates()>();
+
+     label41:
+        goto label51;
+
+     label42:
+        $r61 := @caughtexception;
+
+        $r130 = new org.xml.sax.SAXException;
+
+        $r63 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r64 = virtualinvoke $r63.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.errinsert");
+
+        $r65 = virtualinvoke $r64.<java.lang.Object: java.lang.String toString()>();
+
+        $r66 = newarray (java.lang.Object)[1];
+
+        $r67 = virtualinvoke $r61.<java.sql.SQLException: java.lang.String getMessage()>();
+
+        $r66[0] = $r67;
+
+        $r68 = staticinvoke <java.text.MessageFormat: java.lang.String format(java.lang.String,java.lang.Object[])>($r65, $r66);
+
+        specialinvoke $r130.<org.xml.sax.SAXException: void <init>(java.lang.String)>($r68);
+
+        throw $r130;
+
+     label43:
+        $r9 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r9.<com.sun.rowset.WebRowSetImpl: void insertRow()>();
+
+        $r10 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r10.<com.sun.rowset.WebRowSetImpl: void moveToCurrentRow()>();
+
+        $r11 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r11.<com.sun.rowset.WebRowSetImpl: boolean next()>();
+
+        $r12 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r12.<com.sun.rowset.WebRowSetImpl: void setOriginalRow()>();
+
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void applyUpdates()>();
+
+     label44:
+        goto label51;
+
+     label45:
+        $r53 := @caughtexception;
+
+        $r131 = new org.xml.sax.SAXException;
+
+        $r55 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r56 = virtualinvoke $r55.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.errinsdel");
+
+        $r57 = virtualinvoke $r56.<java.lang.Object: java.lang.String toString()>();
+
+        $r58 = newarray (java.lang.Object)[1];
+
+        $r59 = virtualinvoke $r53.<java.sql.SQLException: java.lang.String getMessage()>();
+
+        $r58[0] = $r59;
+
+        $r60 = staticinvoke <java.text.MessageFormat: java.lang.String format(java.lang.String,java.lang.Object[])>($r57, $r58);
+
+        specialinvoke $r131.<org.xml.sax.SAXException: void <init>(java.lang.String)>($r60);
+
+        throw $r131;
+
+     label46:
+        $z1 = specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: boolean getNullValue()>();
+
+        if $z1 == 0 goto label47;
+
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void insertValue(java.lang.String)>(null);
+
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void setNullValue(boolean)>(0);
+
+        goto label49;
+
+     label47:
+        $z2 = specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: boolean getEmptyStringValue()>();
+
+        if $z2 == 0 goto label48;
+
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void insertValue(java.lang.String)>("");
+
+        specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: void setEmptyStringValue(boolean)>(0);
+
+        goto label49;
+
+     label48:
+        $r8 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.Vector updates>;
+
+        $r7 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.Object[] upd>;
+
+        virtualinvoke $r8.<java.util.Vector: boolean add(java.lang.Object)>($r7);
+
+     label49:
+        goto label51;
+
+     label50:
+        $r45 := @caughtexception;
+
+        $r132 = new org.xml.sax.SAXException;
+
+        $r47 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r48 = virtualinvoke $r47.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.errupdate");
+
+        $r49 = virtualinvoke $r48.<java.lang.Object: java.lang.String toString()>();
+
+        $r50 = newarray (java.lang.Object)[1];
+
+        $r51 = virtualinvoke $r45.<java.sql.SQLException: java.lang.String getMessage()>();
+
+        $r50[0] = $r51;
+
+        $r52 = staticinvoke <java.text.MessageFormat: java.lang.String format(java.lang.String,java.lang.Object[])>($r49, $r50);
+
+        specialinvoke $r132.<org.xml.sax.SAXException: void <init>(java.lang.String)>($r52);
+
+        throw $r132;
+
+     label51:
+        return;
+
+        catch java.lang.ClassNotFoundException from label06 to label07 with label08;
+        catch java.sql.SQLException from label02 to label12 with label13;
+        catch java.sql.SQLException from label16 to label17 with label18;
+        catch java.sql.SQLException from label19 to label21 with label22;
+        catch java.sql.SQLException from label29 to label32 with label33;
+        catch java.sql.SQLException from label34 to label35 with label36;
+        catch java.sql.SQLException from label37 to label38 with label39;
+        catch java.sql.SQLException from label40 to label41 with label42;
+        catch java.sql.SQLException from label43 to label44 with label45;
+        catch java.sql.SQLException from label46 to label49 with label50;
+    }
+
+    private void applyUpdates() throws org.xml.sax.SAXException
+    {
+        java.lang.Object[] $r7, $r20, r23;
+        java.lang.Integer $r9;
+        java.sql.SQLException $r15;
+        java.util.Vector $r1, $r2, $r5;
+        com.sun.rowset.internal.XmlReaderContentHandler r0;
+        int $i0, $i1;
+        java.lang.String $r11, $r13, $r14, $r19, $r21, $r22;
+        boolean $z0, $z1;
+        java.util.Iterator $r3;
+        com.sun.rowset.JdbcRowSetResourceBundle $r17;
+        com.sun.rowset.WebRowSetImpl $r4;
+        org.xml.sax.SAXException $r16;
+        java.lang.Object $r6, $r8, $r10, $r12, $r18;
+
+        r0 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        $r1 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.Vector updates>;
+
+        $i0 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        if $i0 <= 0 goto label7;
+
+     label1:
+        $r2 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.Vector updates>;
+
+        $r3 = virtualinvoke $r2.<java.util.Vector: java.util.Iterator iterator()>();
+
+     label2:
+        $z1 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label3;
+
+        $r6 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        $r7 = (java.lang.Object[]) $r6;
+
+        r23 = (java.lang.Object[]) $r7;
+
+        $r8 = r23[0];
+
+        $r9 = (java.lang.Integer) $r8;
+
+        $i1 = virtualinvoke $r9.<java.lang.Integer: int intValue()>();
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx> = $i1;
+
+        $r11 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String lastval>;
+
+        $r10 = r23[1];
+
+        $z0 = virtualinvoke $r11.<java.lang.String: boolean equals(java.lang.Object)>($r10);
+
+        if $z0 != 0 goto label2;
+
+        $r12 = r23[1];
+
+        $r13 = (java.lang.String) $r12;
+
+        $r14 = (java.lang.String) $r13;
+
+        specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: void insertValue(java.lang.String)>($r14);
+
+        goto label2;
+
+     label3:
+        $r4 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r4.<com.sun.rowset.WebRowSetImpl: void updateRow()>();
+
+     label4:
+        goto label6;
+
+     label5:
+        $r15 := @caughtexception;
+
+        $r16 = new org.xml.sax.SAXException;
+
+        $r17 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r18 = virtualinvoke $r17.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.errupdrow");
+
+        $r19 = virtualinvoke $r18.<java.lang.Object: java.lang.String toString()>();
+
+        $r20 = newarray (java.lang.Object)[1];
+
+        $r21 = virtualinvoke $r15.<java.sql.SQLException: java.lang.String getMessage()>();
+
+        $r20[0] = $r21;
+
+        $r22 = staticinvoke <java.text.MessageFormat: java.lang.String format(java.lang.String,java.lang.Object[])>($r19, $r20);
+
+        specialinvoke $r16.<org.xml.sax.SAXException: void <init>(java.lang.String)>($r22);
+
+        throw $r16;
+
+     label6:
+        $r5 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.Vector updates>;
+
+        virtualinvoke $r5.<java.util.Vector: void removeAllElements()>();
+
+     label7:
+        return;
+
+        catch java.sql.SQLException from label1 to label4 with label5;
+    }
+
+    public void characters(char[], int, int) throws org.xml.sax.SAXException
+    {
+        java.sql.SQLException $r10;
+        com.sun.rowset.internal.XmlReaderContentHandler r0;
+        int $i0, i1, i2, $i3, $i4, $i5, $i7;
+        java.lang.String $r4, $r5, $r6, $r7, $r8, $r9, $r15, $r17, $r19, $r20, $r21;
+        com.sun.rowset.JdbcRowSetResourceBundle $r13;
+        org.xml.sax.SAXException $r23;
+        char[] r1;
+        java.lang.Object $r14;
+        java.lang.StringBuilder $r16, $r18, $r22;
+
+        r0 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r1 := @parameter0: char[];
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+     label1:
+        $i0 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: int getState()>();
+
+        tableswitch($i0)
+        {
+            case 1: goto label2;
+            case 2: goto label4;
+            case 3: goto label6;
+            default: goto label7;
+        };
+
+     label2:
+        $r20 = new java.lang.String;
+
+        specialinvoke $r20.<java.lang.String: void <init>(char[],int,int)>(r1, i1, i2);
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String propertyValue> = $r20;
+
+        $r5 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String tempCommand>;
+
+        $r4 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String propertyValue>;
+
+        $r6 = virtualinvoke $r5.<java.lang.String: java.lang.String concat(java.lang.String)>($r4);
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String tempCommand> = $r6;
+
+        $r7 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String tempCommand>;
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String propertyValue> = $r7;
+
+        $i4 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int tag>;
+
+        if $i4 != 19 goto label3;
+
+        $r9 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String propertyValue>;
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String Key_map> = $r9;
+
+        goto label7;
+
+     label3:
+        $i5 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int tag>;
+
+        if $i5 != 20 goto label7;
+
+        $r8 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String propertyValue>;
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String Value_map> = $r8;
+
+        goto label7;
+
+     label4:
+        $i3 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int tag>;
+
+        $i7 = (int) -1;
+
+        if $i3 != $i7 goto label5;
+
+        goto label7;
+
+     label5:
+        $r21 = new java.lang.String;
+
+        specialinvoke $r21.<java.lang.String: void <init>(char[],int,int)>(r1, i1, i2);
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String metaDataValue> = $r21;
+
+        goto label7;
+
+     label6:
+        specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: void setDataValue(char[],int,int)>(r1, i1, i2);
+
+        goto label7;
+
+     label7:
+        goto label9;
+
+     label8:
+        $r10 := @caughtexception;
+
+        $r23 = new org.xml.sax.SAXException;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r14 = virtualinvoke $r13.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.chars");
+
+        $r15 = virtualinvoke $r14.<java.lang.Object: java.lang.String toString()>();
+
+        $r16 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r10.<java.sql.SQLException: java.lang.String getMessage()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r23.<org.xml.sax.SAXException: void <init>(java.lang.String)>($r19);
+
+        throw $r23;
+
+     label9:
+        return;
+
+        catch java.sql.SQLException from label1 to label7 with label8;
+    }
+
+    private void setState(java.lang.String) throws org.xml.sax.SAXException
+    {
+        com.sun.rowset.internal.XmlReaderContentHandler r1;
+        int $i0, $i1, $i2;
+        java.lang.String r0;
+        boolean $z0, $z1, $z2, $z3;
+
+        r1 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("webRowSet");
+
+        if $z0 == 0 goto label1;
+
+        r1.<com.sun.rowset.internal.XmlReaderContentHandler: int state> = 0;
+
+        goto label7;
+
+     label1:
+        $z1 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("properties");
+
+        if $z1 == 0 goto label3;
+
+        $i2 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: int state>;
+
+        if $i2 == 1 goto label2;
+
+        r1.<com.sun.rowset.internal.XmlReaderContentHandler: int state> = 1;
+
+        goto label7;
+
+     label2:
+        r1.<com.sun.rowset.internal.XmlReaderContentHandler: int state> = 0;
+
+        goto label7;
+
+     label3:
+        $z2 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("metadata");
+
+        if $z2 == 0 goto label5;
+
+        $i1 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: int state>;
+
+        if $i1 == 2 goto label4;
+
+        r1.<com.sun.rowset.internal.XmlReaderContentHandler: int state> = 2;
+
+        goto label7;
+
+     label4:
+        r1.<com.sun.rowset.internal.XmlReaderContentHandler: int state> = 0;
+
+        goto label7;
+
+     label5:
+        $z3 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("data");
+
+        if $z3 == 0 goto label7;
+
+        $i0 = r1.<com.sun.rowset.internal.XmlReaderContentHandler: int state>;
+
+        if $i0 == 3 goto label6;
+
+        r1.<com.sun.rowset.internal.XmlReaderContentHandler: int state> = 3;
+
+        goto label7;
+
+     label6:
+        r1.<com.sun.rowset.internal.XmlReaderContentHandler: int state> = 0;
+
+     label7:
+        return;
+    }
+
+    private int getState()
+    {
+        int $i0;
+        com.sun.rowset.internal.XmlReaderContentHandler r0;
+
+        r0 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        $i0 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int state>;
+
+        return $i0;
+    }
+
+    private void setTag(int)
+    {
+        int i0;
+        com.sun.rowset.internal.XmlReaderContentHandler r0;
+
+        r0 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        i0 := @parameter0: int;
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: int tag> = i0;
+
+        return;
+    }
+
+    private int getTag()
+    {
+        int $i0;
+        com.sun.rowset.internal.XmlReaderContentHandler r0;
+
+        r0 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        $i0 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int tag>;
+
+        return $i0;
+    }
+
+    private void setNullValue(boolean)
+    {
+        com.sun.rowset.internal.XmlReaderContentHandler r0;
+        boolean z0;
+
+        r0 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        z0 := @parameter0: boolean;
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: boolean nullVal> = z0;
+
+        return;
+    }
+
+    private boolean getNullValue()
+    {
+        com.sun.rowset.internal.XmlReaderContentHandler r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        $z0 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: boolean nullVal>;
+
+        return $z0;
+    }
+
+    private void setEmptyStringValue(boolean)
+    {
+        com.sun.rowset.internal.XmlReaderContentHandler r0;
+        boolean z0;
+
+        r0 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        z0 := @parameter0: boolean;
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: boolean emptyStringVal> = z0;
+
+        return;
+    }
+
+    private boolean getEmptyStringValue()
+    {
+        com.sun.rowset.internal.XmlReaderContentHandler r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        $z0 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: boolean emptyStringVal>;
+
+        return $z0;
+    }
+
+    private java.lang.String getStringValue(java.lang.String)
+    {
+        java.lang.String r0;
+        com.sun.rowset.internal.XmlReaderContentHandler r1;
+
+        r1 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r0 := @parameter0: java.lang.String;
+
+        return r0;
+    }
+
+    private int getIntegerValue(java.lang.String)
+    {
+        int $i0;
+        java.lang.String r0;
+        com.sun.rowset.internal.XmlReaderContentHandler r1;
+
+        r1 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>(r0);
+
+        return $i0;
+    }
+
+    private boolean getBooleanValue(java.lang.String)
+    {
+        com.sun.rowset.internal.XmlReaderContentHandler r2;
+        java.lang.Boolean $r1;
+        java.lang.String r0;
+        boolean $z0;
+
+        r2 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(java.lang.String)>(r0);
+
+        $z0 = virtualinvoke $r1.<java.lang.Boolean: boolean booleanValue()>();
+
+        return $z0;
+    }
+
+    private java.math.BigDecimal getBigDecimalValue(java.lang.String)
+    {
+        java.math.BigDecimal $r0;
+        java.lang.String r1;
+        com.sun.rowset.internal.XmlReaderContentHandler r2;
+
+        r2 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = new java.math.BigDecimal;
+
+        specialinvoke $r0.<java.math.BigDecimal: void <init>(java.lang.String)>(r1);
+
+        return $r0;
+    }
+
+    private byte getByteValue(java.lang.String)
+    {
+        java.lang.String r0;
+        byte $b0;
+        com.sun.rowset.internal.XmlReaderContentHandler r1;
+
+        r1 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r0 := @parameter0: java.lang.String;
+
+        $b0 = staticinvoke <java.lang.Byte: byte parseByte(java.lang.String)>(r0);
+
+        return $b0;
+    }
+
+    private short getShortValue(java.lang.String)
+    {
+        short $s0;
+        java.lang.String r0;
+        com.sun.rowset.internal.XmlReaderContentHandler r1;
+
+        r1 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r0 := @parameter0: java.lang.String;
+
+        $s0 = staticinvoke <java.lang.Short: short parseShort(java.lang.String)>(r0);
+
+        return $s0;
+    }
+
+    private long getLongValue(java.lang.String)
+    {
+        long $l0;
+        java.lang.String r0;
+        com.sun.rowset.internal.XmlReaderContentHandler r1;
+
+        r1 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r0 := @parameter0: java.lang.String;
+
+        $l0 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>(r0);
+
+        return $l0;
+    }
+
+    private float getFloatValue(java.lang.String)
+    {
+        float $f0;
+        java.lang.String r0;
+        com.sun.rowset.internal.XmlReaderContentHandler r1;
+
+        r1 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r0 := @parameter0: java.lang.String;
+
+        $f0 = staticinvoke <java.lang.Float: float parseFloat(java.lang.String)>(r0);
+
+        return $f0;
+    }
+
+    private double getDoubleValue(java.lang.String)
+    {
+        java.lang.String r0;
+        com.sun.rowset.internal.XmlReaderContentHandler r1;
+        double $d0;
+
+        r1 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r0 := @parameter0: java.lang.String;
+
+        $d0 = staticinvoke <java.lang.Double: double parseDouble(java.lang.String)>(r0);
+
+        return $d0;
+    }
+
+    private byte[] getBinaryValue(java.lang.String)
+    {
+        byte[] $r1;
+        java.lang.String r0;
+        com.sun.rowset.internal.XmlReaderContentHandler r2;
+
+        r2 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = virtualinvoke r0.<java.lang.String: byte[] getBytes()>();
+
+        return $r1;
+    }
+
+    private java.sql.Date getDateValue(java.lang.String)
+    {
+        com.sun.rowset.internal.XmlReaderContentHandler r1;
+        long $l0;
+        java.lang.String r2;
+        java.sql.Date $r0;
+
+        r1 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r0 = new java.sql.Date;
+
+        $l0 = specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: long getLongValue(java.lang.String)>(r2);
+
+        specialinvoke $r0.<java.sql.Date: void <init>(long)>($l0);
+
+        return $r0;
+    }
+
+    private java.sql.Time getTimeValue(java.lang.String)
+    {
+        java.sql.Time $r0;
+        com.sun.rowset.internal.XmlReaderContentHandler r1;
+        long $l0;
+        java.lang.String r2;
+
+        r1 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r0 = new java.sql.Time;
+
+        $l0 = specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: long getLongValue(java.lang.String)>(r2);
+
+        specialinvoke $r0.<java.sql.Time: void <init>(long)>($l0);
+
+        return $r0;
+    }
+
+    private java.sql.Timestamp getTimestampValue(java.lang.String)
+    {
+        com.sun.rowset.internal.XmlReaderContentHandler r1;
+        java.sql.Timestamp $r0;
+        long $l0;
+        java.lang.String r2;
+
+        r1 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r0 = new java.sql.Timestamp;
+
+        $l0 = specialinvoke r1.<com.sun.rowset.internal.XmlReaderContentHandler: long getLongValue(java.lang.String)>(r2);
+
+        specialinvoke $r0.<java.sql.Timestamp: void <init>(long)>($l0);
+
+        return $r0;
+    }
+
+    private void setPropertyValue(java.lang.String) throws java.sql.SQLException
+    {
+        java.util.Vector $r5, $r6, $r7;
+        com.sun.rowset.internal.XmlReaderContentHandler r0;
+        com.sun.rowset.JdbcRowSetResourceBundle $r13, $r21, $r26, $r31, $r36, $r41, $r46, $r51, $r56, $r61, $r68;
+        com.sun.rowset.WebRowSetImpl $r3, $r4, $r8, $r9, $r10, $r11, $r24, $r29, $r34, $r39, $r44, $r49, $r54, $r59, $r64, $r65, $r66, $r71, $r72;
+        java.sql.SQLException $r12, $r20, $r25, $r30, $r35, $r40, $r45, $r50, $r55, $r60, $r67;
+        short s10;
+        java.lang.String r1, $r2, $r15, $r16, $r17, $r18, $r19, $r23, $r28, $r33, $r38, $r43, $r48, $r53, $r58, $r63, $r70;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9;
+        java.lang.Object $r14, $r22, $r27, $r32, $r37, $r42, $r47, $r52, $r57, $r62, $r69;
+
+        r0 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r1 := @parameter0: java.lang.String;
+
+        $z0 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: boolean getNullValue()>();
+
+        $i0 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: int getTag()>();
+
+        tableswitch($i0)
+        {
+            case 0: goto label01;
+            case 1: goto label03;
+            case 2: goto label05;
+            case 3: goto label07;
+            case 4: goto label09;
+            case 5: goto label11;
+            case 6: goto label13;
+            case 7: goto label15;
+            case 8: goto label18;
+            case 9: goto label19;
+            case 10: goto label21;
+            case 11: goto label23;
+            case 12: goto label25;
+            case 13: goto label27;
+            case 14: goto label32;
+            case 15: goto label34;
+            case 16: goto label36;
+            case 17: goto label44;
+            case 18: goto label16;
+            case 19: goto label44;
+            case 20: goto label44;
+            case 21: goto label44;
+            case 22: goto label38;
+            case 23: goto label40;
+            case 24: goto label41;
+            case 25: goto label42;
+            case 26: goto label43;
+            default: goto label44;
+        };
+
+     label01:
+        if $z0 == 0 goto label02;
+
+        goto label44;
+
+     label02:
+        $r71 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r71.<com.sun.rowset.WebRowSetImpl: void setCommand(java.lang.String)>(r1);
+
+        goto label44;
+
+     label03:
+        if $z0 == 0 goto label04;
+
+        $r67 = new java.sql.SQLException;
+
+        $r68 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r69 = virtualinvoke $r68.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.badvalue");
+
+        $r70 = virtualinvoke $r69.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r67.<java.sql.SQLException: void <init>(java.lang.String)>($r70);
+
+        throw $r67;
+
+     label04:
+        $r66 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $i9 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: int getIntegerValue(java.lang.String)>(r1);
+
+        virtualinvoke $r66.<com.sun.rowset.WebRowSetImpl: void setConcurrency(int)>($i9);
+
+        goto label44;
+
+     label05:
+        if $z0 == 0 goto label06;
+
+        $r65 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r65.<com.sun.rowset.WebRowSetImpl: void setDataSourceName(java.lang.String)>(null);
+
+        goto label44;
+
+     label06:
+        $r64 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r64.<com.sun.rowset.WebRowSetImpl: void setDataSourceName(java.lang.String)>(r1);
+
+        goto label44;
+
+     label07:
+        if $z0 == 0 goto label08;
+
+        $r60 = new java.sql.SQLException;
+
+        $r61 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r62 = virtualinvoke $r61.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.badvalue");
+
+        $r63 = virtualinvoke $r62.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r60.<java.sql.SQLException: void <init>(java.lang.String)>($r63);
+
+        throw $r60;
+
+     label08:
+        $r59 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $z6 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: boolean getBooleanValue(java.lang.String)>(r1);
+
+        virtualinvoke $r59.<com.sun.rowset.WebRowSetImpl: void setEscapeProcessing(boolean)>($z6);
+
+        goto label44;
+
+     label09:
+        if $z0 == 0 goto label10;
+
+        $r55 = new java.sql.SQLException;
+
+        $r56 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r57 = virtualinvoke $r56.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.badvalue");
+
+        $r58 = virtualinvoke $r57.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r55.<java.sql.SQLException: void <init>(java.lang.String)>($r58);
+
+        throw $r55;
+
+     label10:
+        $r54 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $i8 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: int getIntegerValue(java.lang.String)>(r1);
+
+        virtualinvoke $r54.<com.sun.rowset.WebRowSetImpl: void setFetchDirection(int)>($i8);
+
+        goto label44;
+
+     label11:
+        if $z0 == 0 goto label12;
+
+        $r50 = new java.sql.SQLException;
+
+        $r51 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r52 = virtualinvoke $r51.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.badvalue");
+
+        $r53 = virtualinvoke $r52.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r50.<java.sql.SQLException: void <init>(java.lang.String)>($r53);
+
+        throw $r50;
+
+     label12:
+        $r49 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $i7 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: int getIntegerValue(java.lang.String)>(r1);
+
+        virtualinvoke $r49.<com.sun.rowset.WebRowSetImpl: void setFetchSize(int)>($i7);
+
+        goto label44;
+
+     label13:
+        if $z0 == 0 goto label14;
+
+        $r45 = new java.sql.SQLException;
+
+        $r46 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r47 = virtualinvoke $r46.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.badvalue");
+
+        $r48 = virtualinvoke $r47.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r45.<java.sql.SQLException: void <init>(java.lang.String)>($r48);
+
+        throw $r45;
+
+     label14:
+        $r44 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $i6 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: int getIntegerValue(java.lang.String)>(r1);
+
+        virtualinvoke $r44.<com.sun.rowset.WebRowSetImpl: void setTransactionIsolation(int)>($i6);
+
+        goto label44;
+
+     label15:
+        goto label44;
+
+     label16:
+        $r5 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.Vector keyCols>;
+
+        if $r5 != null goto label17;
+
+        $r7 = new java.util.Vector;
+
+        specialinvoke $r7.<java.util.Vector: void <init>()>();
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.Vector keyCols> = $r7;
+
+     label17:
+        $r6 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.util.Vector keyCols>;
+
+        virtualinvoke $r6.<java.util.Vector: boolean add(java.lang.Object)>(r1);
+
+        goto label44;
+
+     label18:
+        goto label44;
+
+     label19:
+        if $z0 == 0 goto label20;
+
+        $r40 = new java.sql.SQLException;
+
+        $r41 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r42 = virtualinvoke $r41.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.badvalue");
+
+        $r43 = virtualinvoke $r42.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r40.<java.sql.SQLException: void <init>(java.lang.String)>($r43);
+
+        throw $r40;
+
+     label20:
+        $r39 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $i5 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: int getIntegerValue(java.lang.String)>(r1);
+
+        virtualinvoke $r39.<com.sun.rowset.WebRowSetImpl: void setMaxFieldSize(int)>($i5);
+
+        goto label44;
+
+     label21:
+        if $z0 == 0 goto label22;
+
+        $r35 = new java.sql.SQLException;
+
+        $r36 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r37 = virtualinvoke $r36.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.badvalue");
+
+        $r38 = virtualinvoke $r37.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r35.<java.sql.SQLException: void <init>(java.lang.String)>($r38);
+
+        throw $r35;
+
+     label22:
+        $r34 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $i4 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: int getIntegerValue(java.lang.String)>(r1);
+
+        virtualinvoke $r34.<com.sun.rowset.WebRowSetImpl: void setMaxRows(int)>($i4);
+
+        goto label44;
+
+     label23:
+        if $z0 == 0 goto label24;
+
+        $r30 = new java.sql.SQLException;
+
+        $r31 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r32 = virtualinvoke $r31.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.badvalue");
+
+        $r33 = virtualinvoke $r32.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r30.<java.sql.SQLException: void <init>(java.lang.String)>($r33);
+
+        throw $r30;
+
+     label24:
+        $r29 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $i3 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: int getIntegerValue(java.lang.String)>(r1);
+
+        virtualinvoke $r29.<com.sun.rowset.WebRowSetImpl: void setQueryTimeout(int)>($i3);
+
+        goto label44;
+
+     label25:
+        if $z0 == 0 goto label26;
+
+        $r25 = new java.sql.SQLException;
+
+        $r26 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r27 = virtualinvoke $r26.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.badvalue");
+
+        $r28 = virtualinvoke $r27.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r25.<java.sql.SQLException: void <init>(java.lang.String)>($r28);
+
+        throw $r25;
+
+     label26:
+        $r24 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $z5 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: boolean getBooleanValue(java.lang.String)>(r1);
+
+        virtualinvoke $r24.<com.sun.rowset.WebRowSetImpl: void setReadOnly(boolean)>($z5);
+
+        goto label44;
+
+     label27:
+        if $z0 == 0 goto label28;
+
+        $r20 = new java.sql.SQLException;
+
+        $r21 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r22 = virtualinvoke $r21.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.badvalue");
+
+        $r23 = virtualinvoke $r22.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r20.<java.sql.SQLException: void <init>(java.lang.String)>($r23);
+
+        throw $r20;
+
+     label28:
+        $r16 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String getStringValue(java.lang.String)>(r1);
+
+        s10 = 0;
+
+        $r17 = virtualinvoke $r16.<java.lang.String: java.lang.String trim()>();
+
+        $z2 = virtualinvoke $r17.<java.lang.String: boolean equals(java.lang.Object)>("ResultSet.TYPE_SCROLL_INSENSITIVE");
+
+        if $z2 == 0 goto label29;
+
+        s10 = 1004;
+
+        goto label31;
+
+     label29:
+        $r18 = virtualinvoke $r16.<java.lang.String: java.lang.String trim()>();
+
+        $z3 = virtualinvoke $r18.<java.lang.String: boolean equals(java.lang.Object)>("ResultSet.TYPE_SCROLL_SENSITIVE");
+
+        if $z3 == 0 goto label30;
+
+        s10 = 1005;
+
+        goto label31;
+
+     label30:
+        $r19 = virtualinvoke $r16.<java.lang.String: java.lang.String trim()>();
+
+        $z4 = virtualinvoke $r19.<java.lang.String: boolean equals(java.lang.Object)>("ResultSet.TYPE_FORWARD_ONLY");
+
+        if $z4 == 0 goto label31;
+
+        s10 = 1003;
+
+     label31:
+        $r72 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r72.<com.sun.rowset.WebRowSetImpl: void setType(int)>(s10);
+
+        goto label44;
+
+     label32:
+        if $z0 == 0 goto label33;
+
+        $r12 = new java.sql.SQLException;
+
+        $r13 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r14 = virtualinvoke $r13.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.badvalue");
+
+        $r15 = virtualinvoke $r14.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r12.<java.sql.SQLException: void <init>(java.lang.String)>($r15);
+
+        throw $r12;
+
+     label33:
+        $r11 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $z1 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: boolean getBooleanValue(java.lang.String)>(r1);
+
+        virtualinvoke $r11.<com.sun.rowset.WebRowSetImpl: void setShowDeleted(boolean)>($z1);
+
+        goto label44;
+
+     label34:
+        if $z0 == 0 goto label35;
+
+        goto label44;
+
+     label35:
+        $r10 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r10.<com.sun.rowset.WebRowSetImpl: void setTableName(java.lang.String)>(r1);
+
+        goto label44;
+
+     label36:
+        if $z0 == 0 goto label37;
+
+        $r9 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r9.<com.sun.rowset.WebRowSetImpl: void setUrl(java.lang.String)>(null);
+
+        goto label44;
+
+     label37:
+        $r8 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r8.<com.sun.rowset.WebRowSetImpl: void setUrl(java.lang.String)>(r1);
+
+        goto label44;
+
+     label38:
+        if $z0 == 0 goto label39;
+
+        $r4 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r4.<com.sun.rowset.WebRowSetImpl: void setSyncProvider(java.lang.String)>(null);
+
+        goto label44;
+
+     label39:
+        $i1 = virtualinvoke r1.<java.lang.String: int indexOf(java.lang.String)>("@");
+
+        $i2 = $i1 + 1;
+
+        $r2 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int,int)>(0, $i2);
+
+        $r3 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        virtualinvoke $r3.<com.sun.rowset.WebRowSetImpl: void setSyncProvider(java.lang.String)>($r2);
+
+        goto label44;
+
+     label40:
+        goto label44;
+
+     label41:
+        goto label44;
+
+     label42:
+        goto label44;
+
+     label43:
+        goto label44;
+
+     label44:
+        return;
+    }
+
+    private void setMetaDataValue(java.lang.String) throws java.sql.SQLException
+    {
+        com.sun.rowset.internal.XmlReaderContentHandler r0;
+        com.sun.rowset.JdbcRowSetResourceBundle $r6, $r15, $r20, $r31, $r36, $r41, $r46, $r51, $r56, $r61, $r67;
+        java.sql.SQLException $r5, $r14, $r19, $r30, $r35, $r40, $r45, $r50, $r55, $r60, $r66;
+        javax.sql.rowset.RowSetMetaDataImpl $r64;
+        java.lang.String r1, $r8, $r17, $r22, $r33, $r38, $r43, $r48, $r53, $r58, $r63, $r69;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        javax.sql.RowSetMetaData $r2, $r3, $r4, $r9, $r10, $r11, $r12, $r13, $r18, $r23, $r24, $r25, $r26, $r27, $r28, $r29, $r34, $r39, $r44, $r49, $r54, $r59, $r65;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30;
+        java.lang.Object $r7, $r16, $r21, $r32, $r37, $r42, $r47, $r52, $r57, $r62, $r68;
+
+        r0 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r1 := @parameter0: java.lang.String;
+
+        $z0 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: boolean getNullValue()>();
+
+        $i0 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: int getTag()>();
+
+        tableswitch($i0)
+        {
+            case 0: goto label01;
+            case 1: goto label03;
+            case 2: goto label04;
+            case 3: goto label05;
+            case 4: goto label07;
+            case 5: goto label09;
+            case 6: goto label11;
+            case 7: goto label13;
+            case 8: goto label15;
+            case 9: goto label17;
+            case 10: goto label19;
+            case 11: goto label21;
+            case 12: goto label23;
+            case 13: goto label25;
+            case 14: goto label27;
+            case 15: goto label29;
+            case 16: goto label31;
+            case 17: goto label33;
+            case 18: goto label35;
+            default: goto label37;
+        };
+
+     label01:
+        $r64 = new javax.sql.rowset.RowSetMetaDataImpl;
+
+        specialinvoke $r64.<javax.sql.rowset.RowSetMetaDataImpl: void <init>()>();
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: javax.sql.RowSetMetaData md> = $r64;
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx> = 0;
+
+        if $z0 == 0 goto label02;
+
+        $r66 = new java.sql.SQLException;
+
+        $r67 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r68 = virtualinvoke $r67.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.badvalue1");
+
+        $r69 = virtualinvoke $r68.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r66.<java.sql.SQLException: void <init>(java.lang.String)>($r69);
+
+        throw $r66;
+
+     label02:
+        $r65 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: javax.sql.RowSetMetaData md>;
+
+        $i30 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: int getIntegerValue(java.lang.String)>(r1);
+
+        interfaceinvoke $r65.<javax.sql.RowSetMetaData: void setColumnCount(int)>($i30);
+
+        goto label37;
+
+     label03:
+        goto label37;
+
+     label04:
+        $i28 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $i29 = $i28 + 1;
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx> = $i29;
+
+        goto label37;
+
+     label05:
+        if $z0 == 0 goto label06;
+
+        $r60 = new java.sql.SQLException;
+
+        $r61 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r62 = virtualinvoke $r61.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.badvalue1");
+
+        $r63 = virtualinvoke $r62.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r60.<java.sql.SQLException: void <init>(java.lang.String)>($r63);
+
+        throw $r60;
+
+     label06:
+        $r59 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: javax.sql.RowSetMetaData md>;
+
+        $i27 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $z5 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: boolean getBooleanValue(java.lang.String)>(r1);
+
+        interfaceinvoke $r59.<javax.sql.RowSetMetaData: void setAutoIncrement(int,boolean)>($i27, $z5);
+
+        goto label37;
+
+     label07:
+        if $z0 == 0 goto label08;
+
+        $r55 = new java.sql.SQLException;
+
+        $r56 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r57 = virtualinvoke $r56.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.badvalue1");
+
+        $r58 = virtualinvoke $r57.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r55.<java.sql.SQLException: void <init>(java.lang.String)>($r58);
+
+        throw $r55;
+
+     label08:
+        $r54 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: javax.sql.RowSetMetaData md>;
+
+        $i26 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $z4 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: boolean getBooleanValue(java.lang.String)>(r1);
+
+        interfaceinvoke $r54.<javax.sql.RowSetMetaData: void setCaseSensitive(int,boolean)>($i26, $z4);
+
+        goto label37;
+
+     label09:
+        if $z0 == 0 goto label10;
+
+        $r50 = new java.sql.SQLException;
+
+        $r51 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r52 = virtualinvoke $r51.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.badvalue1");
+
+        $r53 = virtualinvoke $r52.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r50.<java.sql.SQLException: void <init>(java.lang.String)>($r53);
+
+        throw $r50;
+
+     label10:
+        $r49 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: javax.sql.RowSetMetaData md>;
+
+        $i25 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $z3 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: boolean getBooleanValue(java.lang.String)>(r1);
+
+        interfaceinvoke $r49.<javax.sql.RowSetMetaData: void setCurrency(int,boolean)>($i25, $z3);
+
+        goto label37;
+
+     label11:
+        if $z0 == 0 goto label12;
+
+        $r45 = new java.sql.SQLException;
+
+        $r46 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r47 = virtualinvoke $r46.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.badvalue1");
+
+        $r48 = virtualinvoke $r47.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r45.<java.sql.SQLException: void <init>(java.lang.String)>($r48);
+
+        throw $r45;
+
+     label12:
+        $r44 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: javax.sql.RowSetMetaData md>;
+
+        $i23 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $i24 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: int getIntegerValue(java.lang.String)>(r1);
+
+        interfaceinvoke $r44.<javax.sql.RowSetMetaData: void setNullable(int,int)>($i23, $i24);
+
+        goto label37;
+
+     label13:
+        if $z0 == 0 goto label14;
+
+        $r40 = new java.sql.SQLException;
+
+        $r41 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r42 = virtualinvoke $r41.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.badvalue1");
+
+        $r43 = virtualinvoke $r42.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r40.<java.sql.SQLException: void <init>(java.lang.String)>($r43);
+
+        throw $r40;
+
+     label14:
+        $r39 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: javax.sql.RowSetMetaData md>;
+
+        $i22 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $z2 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: boolean getBooleanValue(java.lang.String)>(r1);
+
+        interfaceinvoke $r39.<javax.sql.RowSetMetaData: void setSigned(int,boolean)>($i22, $z2);
+
+        goto label37;
+
+     label15:
+        if $z0 == 0 goto label16;
+
+        $r35 = new java.sql.SQLException;
+
+        $r36 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r37 = virtualinvoke $r36.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.badvalue1");
+
+        $r38 = virtualinvoke $r37.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r35.<java.sql.SQLException: void <init>(java.lang.String)>($r38);
+
+        throw $r35;
+
+     label16:
+        $r34 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: javax.sql.RowSetMetaData md>;
+
+        $i21 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $z1 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: boolean getBooleanValue(java.lang.String)>(r1);
+
+        interfaceinvoke $r34.<javax.sql.RowSetMetaData: void setSearchable(int,boolean)>($i21, $z1);
+
+        goto label37;
+
+     label17:
+        if $z0 == 0 goto label18;
+
+        $r30 = new java.sql.SQLException;
+
+        $r31 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r32 = virtualinvoke $r31.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.badvalue1");
+
+        $r33 = virtualinvoke $r32.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r30.<java.sql.SQLException: void <init>(java.lang.String)>($r33);
+
+        throw $r30;
+
+     label18:
+        $r29 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: javax.sql.RowSetMetaData md>;
+
+        $i19 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $i20 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: int getIntegerValue(java.lang.String)>(r1);
+
+        interfaceinvoke $r29.<javax.sql.RowSetMetaData: void setColumnDisplaySize(int,int)>($i19, $i20);
+
+        goto label37;
+
+     label19:
+        if $z0 == 0 goto label20;
+
+        $r28 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: javax.sql.RowSetMetaData md>;
+
+        $i18 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        interfaceinvoke $r28.<javax.sql.RowSetMetaData: void setColumnLabel(int,java.lang.String)>($i18, null);
+
+        goto label37;
+
+     label20:
+        $r27 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: javax.sql.RowSetMetaData md>;
+
+        $i17 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        interfaceinvoke $r27.<javax.sql.RowSetMetaData: void setColumnLabel(int,java.lang.String)>($i17, r1);
+
+        goto label37;
+
+     label21:
+        if $z0 == 0 goto label22;
+
+        $r26 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: javax.sql.RowSetMetaData md>;
+
+        $i16 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        interfaceinvoke $r26.<javax.sql.RowSetMetaData: void setColumnName(int,java.lang.String)>($i16, null);
+
+        goto label37;
+
+     label22:
+        $r25 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: javax.sql.RowSetMetaData md>;
+
+        $i15 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        interfaceinvoke $r25.<javax.sql.RowSetMetaData: void setColumnName(int,java.lang.String)>($i15, r1);
+
+        goto label37;
+
+     label23:
+        if $z0 == 0 goto label24;
+
+        $r24 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: javax.sql.RowSetMetaData md>;
+
+        $i14 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        interfaceinvoke $r24.<javax.sql.RowSetMetaData: void setSchemaName(int,java.lang.String)>($i14, null);
+
+        goto label37;
+
+     label24:
+        $r23 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: javax.sql.RowSetMetaData md>;
+
+        $i13 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        interfaceinvoke $r23.<javax.sql.RowSetMetaData: void setSchemaName(int,java.lang.String)>($i13, r1);
+
+        goto label37;
+
+     label25:
+        if $z0 == 0 goto label26;
+
+        $r19 = new java.sql.SQLException;
+
+        $r20 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r21 = virtualinvoke $r20.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.badvalue1");
+
+        $r22 = virtualinvoke $r21.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r19.<java.sql.SQLException: void <init>(java.lang.String)>($r22);
+
+        throw $r19;
+
+     label26:
+        $r18 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: javax.sql.RowSetMetaData md>;
+
+        $i11 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $i12 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: int getIntegerValue(java.lang.String)>(r1);
+
+        interfaceinvoke $r18.<javax.sql.RowSetMetaData: void setPrecision(int,int)>($i11, $i12);
+
+        goto label37;
+
+     label27:
+        if $z0 == 0 goto label28;
+
+        $r14 = new java.sql.SQLException;
+
+        $r15 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r16 = virtualinvoke $r15.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.badvalue1");
+
+        $r17 = virtualinvoke $r16.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r14.<java.sql.SQLException: void <init>(java.lang.String)>($r17);
+
+        throw $r14;
+
+     label28:
+        $r13 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: javax.sql.RowSetMetaData md>;
+
+        $i9 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $i10 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: int getIntegerValue(java.lang.String)>(r1);
+
+        interfaceinvoke $r13.<javax.sql.RowSetMetaData: void setScale(int,int)>($i9, $i10);
+
+        goto label37;
+
+     label29:
+        if $z0 == 0 goto label30;
+
+        $r12 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: javax.sql.RowSetMetaData md>;
+
+        $i8 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        interfaceinvoke $r12.<javax.sql.RowSetMetaData: void setTableName(int,java.lang.String)>($i8, null);
+
+        goto label37;
+
+     label30:
+        $r11 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: javax.sql.RowSetMetaData md>;
+
+        $i7 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        interfaceinvoke $r11.<javax.sql.RowSetMetaData: void setTableName(int,java.lang.String)>($i7, r1);
+
+        goto label37;
+
+     label31:
+        if $z0 == 0 goto label32;
+
+        $r10 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: javax.sql.RowSetMetaData md>;
+
+        $i6 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        interfaceinvoke $r10.<javax.sql.RowSetMetaData: void setCatalogName(int,java.lang.String)>($i6, null);
+
+        goto label37;
+
+     label32:
+        $r9 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: javax.sql.RowSetMetaData md>;
+
+        $i5 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        interfaceinvoke $r9.<javax.sql.RowSetMetaData: void setCatalogName(int,java.lang.String)>($i5, r1);
+
+        goto label37;
+
+     label33:
+        if $z0 == 0 goto label34;
+
+        $r5 = new java.sql.SQLException;
+
+        $r6 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r7 = virtualinvoke $r6.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.badvalue1");
+
+        $r8 = virtualinvoke $r7.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.sql.SQLException: void <init>(java.lang.String)>($r8);
+
+        throw $r5;
+
+     label34:
+        $r4 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: javax.sql.RowSetMetaData md>;
+
+        $i3 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $i4 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: int getIntegerValue(java.lang.String)>(r1);
+
+        interfaceinvoke $r4.<javax.sql.RowSetMetaData: void setColumnType(int,int)>($i3, $i4);
+
+        goto label37;
+
+     label35:
+        if $z0 == 0 goto label36;
+
+        $r3 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: javax.sql.RowSetMetaData md>;
+
+        $i2 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        interfaceinvoke $r3.<javax.sql.RowSetMetaData: void setColumnTypeName(int,java.lang.String)>($i2, null);
+
+        goto label37;
+
+     label36:
+        $r2 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: javax.sql.RowSetMetaData md>;
+
+        $i1 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        interfaceinvoke $r2.<javax.sql.RowSetMetaData: void setColumnTypeName(int,java.lang.String)>($i1, r1);
+
+        goto label37;
+
+     label37:
+        return;
+    }
+
+    private void setDataValue(char[], int, int) throws java.sql.SQLException
+    {
+        java.lang.Object[] $r1, $r6, $r9, $r10;
+        java.lang.Integer $r7;
+        com.sun.rowset.internal.XmlReaderContentHandler r0;
+        int $i0, i1, i2, $i3;
+        java.lang.String $r2, $r4, $r5, $r8, $r12, $r13, $r14, $r15, $r16;
+        char[] r3;
+        java.lang.Object $r11;
+
+        r0 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r3 := @parameter0: char[];
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $i0 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: int getTag()>();
+
+        tableswitch($i0)
+        {
+            case 1: goto label1;
+            case 2: goto label3;
+            case 3: goto label3;
+            case 4: goto label3;
+            case 5: goto label2;
+            default: goto label3;
+        };
+
+     label1:
+        $r13 = new java.lang.String;
+
+        specialinvoke $r13.<java.lang.String: void <init>(char[],int,int)>(r3, i1, i2);
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String columnValue> = $r13;
+
+        $r15 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String tempStr>;
+
+        $r14 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String columnValue>;
+
+        $r16 = virtualinvoke $r15.<java.lang.String: java.lang.String concat(java.lang.String)>($r14);
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String tempStr> = $r16;
+
+        goto label3;
+
+     label2:
+        $r1 = newarray (java.lang.Object)[2];
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.Object[] upd> = $r1;
+
+        $r4 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String tempUpdate>;
+
+        $r2 = new java.lang.String;
+
+        specialinvoke $r2.<java.lang.String: void <init>(char[],int,int)>(r3, i1, i2);
+
+        $r5 = virtualinvoke $r4.<java.lang.String: java.lang.String concat(java.lang.String)>($r2);
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String tempUpdate> = $r5;
+
+        $r6 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.Object[] upd>;
+
+        $i3 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i3);
+
+        $r6[0] = $r7;
+
+        $r9 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.Object[] upd>;
+
+        $r8 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String tempUpdate>;
+
+        $r9[1] = $r8;
+
+        $r10 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.Object[] upd>;
+
+        $r11 = $r10[1];
+
+        $r12 = (java.lang.String) $r11;
+
+        r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String lastval> = $r12;
+
+        goto label3;
+
+     label3:
+        return;
+    }
+
+    private void insertValue(java.lang.String) throws java.sql.SQLException
+    {
+        byte[] $r19;
+        java.sql.Time $r7;
+        java.math.BigDecimal $r15;
+        com.sun.rowset.internal.XmlReaderContentHandler r0;
+        boolean $z0, $z1, $z2;
+        java.sql.Timestamp $r5;
+        com.sun.rowset.WebRowSetImpl $r1, $r4, $r6, $r8, $r10, $r11, $r12, $r13, $r14, $r16, $r18, $r20, $r21, $r22, $r23;
+        float $f0;
+        java.sql.ResultSetMetaData $r2;
+        long $l14;
+        short $s16;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i15, $i17, $i18;
+        java.lang.String r3, $r17;
+        double $d0;
+        java.sql.Date $r9;
+
+        r0 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r3 := @parameter0: java.lang.String;
+
+        $z0 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: boolean getNullValue()>();
+
+        if $z0 == 0 goto label01;
+
+        $r23 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $i18 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        virtualinvoke $r23.<com.sun.rowset.WebRowSetImpl: void updateNull(int)>($i18);
+
+        return;
+
+     label01:
+        $r1 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $r2 = virtualinvoke $r1.<com.sun.rowset.WebRowSetImpl: java.sql.ResultSetMetaData getMetaData()>();
+
+        $i0 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $i1 = interfaceinvoke $r2.<java.sql.ResultSetMetaData: int getColumnType(int)>($i0);
+
+        lookupswitch($i1)
+        {
+            case -7: goto label02;
+            case -6: goto label04;
+            case -5: goto label06;
+            case -4: goto label10;
+            case -3: goto label10;
+            case -2: goto label10;
+            case -1: goto label14;
+            case 1: goto label14;
+            case 2: goto label09;
+            case 3: goto label09;
+            case 4: goto label05;
+            case 5: goto label04;
+            case 6: goto label07;
+            case 7: goto label07;
+            case 8: goto label08;
+            case 12: goto label14;
+            case 16: goto label03;
+            case 91: goto label11;
+            case 92: goto label12;
+            case 93: goto label13;
+            default: goto label15;
+        };
+
+     label02:
+        $r22 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $i17 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $z2 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: boolean getBooleanValue(java.lang.String)>(r3);
+
+        virtualinvoke $r22.<com.sun.rowset.WebRowSetImpl: void updateBoolean(int,boolean)>($i17, $z2);
+
+        goto label15;
+
+     label03:
+        $r10 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $i5 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $z1 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: boolean getBooleanValue(java.lang.String)>(r3);
+
+        virtualinvoke $r10.<com.sun.rowset.WebRowSetImpl: void updateBoolean(int,boolean)>($i5, $z1);
+
+        goto label15;
+
+     label04:
+        $r21 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $i15 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $s16 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: short getShortValue(java.lang.String)>(r3);
+
+        virtualinvoke $r21.<com.sun.rowset.WebRowSetImpl: void updateShort(int,short)>($i15, $s16);
+
+        goto label15;
+
+     label05:
+        $r13 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $i8 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $i9 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: int getIntegerValue(java.lang.String)>(r3);
+
+        virtualinvoke $r13.<com.sun.rowset.WebRowSetImpl: void updateInt(int,int)>($i8, $i9);
+
+        goto label15;
+
+     label06:
+        $r20 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $i13 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $l14 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: long getLongValue(java.lang.String)>(r3);
+
+        virtualinvoke $r20.<com.sun.rowset.WebRowSetImpl: void updateLong(int,long)>($i13, $l14);
+
+        goto label15;
+
+     label07:
+        $r12 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $i7 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $f0 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: float getFloatValue(java.lang.String)>(r3);
+
+        virtualinvoke $r12.<com.sun.rowset.WebRowSetImpl: void updateFloat(int,float)>($i7, $f0);
+
+        goto label15;
+
+     label08:
+        $r11 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $i6 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $d0 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: double getDoubleValue(java.lang.String)>(r3);
+
+        virtualinvoke $r11.<com.sun.rowset.WebRowSetImpl: void updateDouble(int,double)>($i6, $d0);
+
+        goto label15;
+
+     label09:
+        $r14 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $i10 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $r15 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.math.BigDecimal getBigDecimalValue(java.lang.String)>(r3);
+
+        virtualinvoke $r14.<com.sun.rowset.WebRowSetImpl: void updateObject(int,java.lang.Object)>($i10, $r15);
+
+        goto label15;
+
+     label10:
+        $r18 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $i12 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $r19 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: byte[] getBinaryValue(java.lang.String)>(r3);
+
+        virtualinvoke $r18.<com.sun.rowset.WebRowSetImpl: void updateBytes(int,byte[])>($i12, $r19);
+
+        goto label15;
+
+     label11:
+        $r8 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $i4 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $r9 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.sql.Date getDateValue(java.lang.String)>(r3);
+
+        virtualinvoke $r8.<com.sun.rowset.WebRowSetImpl: void updateDate(int,java.sql.Date)>($i4, $r9);
+
+        goto label15;
+
+     label12:
+        $r6 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $i3 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $r7 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.sql.Time getTimeValue(java.lang.String)>(r3);
+
+        virtualinvoke $r6.<com.sun.rowset.WebRowSetImpl: void updateTime(int,java.sql.Time)>($i3, $r7);
+
+        goto label15;
+
+     label13:
+        $r4 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $i2 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $r5 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.sql.Timestamp getTimestampValue(java.lang.String)>(r3);
+
+        virtualinvoke $r4.<com.sun.rowset.WebRowSetImpl: void updateTimestamp(int,java.sql.Timestamp)>($i2, $r5);
+
+        goto label15;
+
+     label14:
+        $r16 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.WebRowSetImpl rs>;
+
+        $i11 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: int idx>;
+
+        $r17 = specialinvoke r0.<com.sun.rowset.internal.XmlReaderContentHandler: java.lang.String getStringValue(java.lang.String)>(r3);
+
+        virtualinvoke $r16.<com.sun.rowset.WebRowSetImpl: void updateString(int,java.lang.String)>($i11, $r17);
+
+        goto label15;
+
+     label15:
+        return;
+    }
+
+    public void error(org.xml.sax.SAXParseException) throws org.xml.sax.SAXParseException
+    {
+        org.xml.sax.SAXParseException r0;
+        com.sun.rowset.internal.XmlReaderContentHandler r1;
+
+        r1 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r0 := @parameter0: org.xml.sax.SAXParseException;
+
+        throw r0;
+    }
+
+    public void warning(org.xml.sax.SAXParseException) throws org.xml.sax.SAXParseException
+    {
+        java.io.PrintStream $r2;
+        java.lang.Object[] $r5;
+        com.sun.rowset.JdbcRowSetResourceBundle $r1;
+        java.lang.Integer $r8;
+        org.xml.sax.SAXParseException r6;
+        com.sun.rowset.internal.XmlReaderContentHandler r0;
+        int $i0;
+        java.lang.Object $r3;
+        java.lang.String $r4, $r7, $r9, $r10;
+
+        r0 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r6 := @parameter0: org.xml.sax.SAXParseException;
+
+        $r2 = <java.lang.System: java.io.PrintStream out>;
+
+        $r1 = r0.<com.sun.rowset.internal.XmlReaderContentHandler: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r3 = virtualinvoke $r1.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("xmlrch.warning");
+
+        $r4 = virtualinvoke $r3.<java.lang.Object: java.lang.String toString()>();
+
+        $r5 = newarray (java.lang.Object)[3];
+
+        $r7 = virtualinvoke r6.<org.xml.sax.SAXParseException: java.lang.String getMessage()>();
+
+        $r5[0] = $r7;
+
+        $i0 = virtualinvoke r6.<org.xml.sax.SAXParseException: int getLineNumber()>();
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r5[1] = $r8;
+
+        $r9 = virtualinvoke r6.<org.xml.sax.SAXParseException: java.lang.String getSystemId()>();
+
+        $r5[2] = $r9;
+
+        $r10 = staticinvoke <java.text.MessageFormat: java.lang.String format(java.lang.String,java.lang.Object[])>($r4, $r5);
+
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>($r10);
+
+        return;
+    }
+
+    public void notationDecl(java.lang.String, java.lang.String, java.lang.String)
+    {
+        com.sun.rowset.internal.XmlReaderContentHandler r0;
+        java.lang.String r1, r2, r3;
+
+        r0 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.String;
+
+        return;
+    }
+
+    public void unparsedEntityDecl(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+    {
+        com.sun.rowset.internal.XmlReaderContentHandler r0;
+        java.lang.String r1, r2, r3, r4;
+
+        r0 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.String;
+
+        r4 := @parameter3: java.lang.String;
+
+        return;
+    }
+
+    private com.sun.rowset.internal.Row getPresentRow(com.sun.rowset.WebRowSetImpl) throws java.sql.SQLException
+    {
+        com.sun.rowset.internal.XmlReaderContentHandler r0;
+        com.sun.rowset.WebRowSetImpl r1;
+
+        r0 := @this: com.sun.rowset.internal.XmlReaderContentHandler;
+
+        r1 := @parameter0: com.sun.rowset.WebRowSetImpl;
+
+        return null;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.rowset.internal.XmlReaderContentHandler: int DATA> = 3;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int METADATA> = 2;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int PROPERTIES> = 1;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int INITIAL> = 0;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int EmptyStringTag> = 7;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int NullTag> = 6;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int UpdTag> = 5;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int InsDelTag> = 4;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int DelTag> = 3;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int InsTag> = 2;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int ColTag> = 1;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int RowTag> = 0;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int MetaNullTag> = 19;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int ColumnTypeNameTag> = 18;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int ColumnTypeTag> = 17;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int CatalogNameTag> = 16;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int MetaTableNameTag> = 15;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int ColumnScaleTag> = 14;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int ColumnPrecisionTag> = 13;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int SchemaNameTag> = 12;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int ColumnNameTag> = 11;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int ColumnLabelTag> = 10;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int ColumnDisplaySizeTag> = 9;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int SearchableTag> = 8;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int SignedTag> = 7;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int NullableTag> = 6;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int CurrencyTag> = 5;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int CaseSensitiveTag> = 4;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int AutoIncrementTag> = 3;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int ColumnIndexTag> = 2;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int ColumnDefinitionTag> = 1;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int ColumnCountTag> = 0;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int DataSourceLock> = 26;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int SyncProviderGradeTag> = 25;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int SyncProviderVersionTag> = 24;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int SyncProviderVendorTag> = 23;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int SyncProviderNameTag> = 22;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int SyncProviderTag> = 21;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int PropClassTag> = 20;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int PropTypeTag> = 19;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int PropColumnTag> = 18;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int PropNullTag> = 17;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int UrlTag> = 16;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int TableNameTag> = 15;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int ShowDeletedTag> = 14;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int RowsetTypeTag> = 13;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int ReadOnlyTag> = 12;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int QueryTimeoutTag> = 11;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int MaxRowsTag> = 10;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int MaxFieldSizeTag> = 9;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int MapTag> = 8;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int KeycolsTag> = 7;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int IsolationLevelTag> = 6;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int FetchSizeTag> = 5;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int FetchDirectionTag> = 4;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int EscapeProcessingTag> = 3;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int DatasourceTag> = 2;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int ConcurrencyTag> = 1;
+
+        <com.sun.rowset.internal.XmlReaderContentHandler: int CommandTag> = 0;
+
+        return;
+    }
+}

@@ -1,0 +1,1035 @@
+public final class sun.security.rsa.RSAPadding extends java.lang.Object
+{
+    public static final int PAD_BLOCKTYPE_1;
+    public static final int PAD_BLOCKTYPE_2;
+    public static final int PAD_NONE;
+    public static final int PAD_OAEP_MGF1;
+    private final int type;
+    private final int paddedSize;
+    private java.security.SecureRandom random;
+    private final int maxDataSize;
+    private java.security.MessageDigest md;
+    private sun.security.rsa.MGF1 mgf;
+    private byte[] lHash;
+    private static final java.util.Map emptyHashes;
+
+    public static sun.security.rsa.RSAPadding getInstance(int, int) throws java.security.InvalidKeyException, java.security.InvalidAlgorithmParameterException
+    {
+        int i0, i1;
+        sun.security.rsa.RSAPadding $r0;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r0 = new sun.security.rsa.RSAPadding;
+
+        specialinvoke $r0.<sun.security.rsa.RSAPadding: void <init>(int,int,java.security.SecureRandom,javax.crypto.spec.OAEPParameterSpec)>(i0, i1, null, null);
+
+        return $r0;
+    }
+
+    public static sun.security.rsa.RSAPadding getInstance(int, int, java.security.SecureRandom) throws java.security.InvalidKeyException, java.security.InvalidAlgorithmParameterException
+    {
+        java.security.SecureRandom r1;
+        sun.security.rsa.RSAPadding $r0;
+        int i0, i1;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        r1 := @parameter2: java.security.SecureRandom;
+
+        $r0 = new sun.security.rsa.RSAPadding;
+
+        specialinvoke $r0.<sun.security.rsa.RSAPadding: void <init>(int,int,java.security.SecureRandom,javax.crypto.spec.OAEPParameterSpec)>(i0, i1, r1, null);
+
+        return $r0;
+    }
+
+    public static sun.security.rsa.RSAPadding getInstance(int, int, java.security.SecureRandom, javax.crypto.spec.OAEPParameterSpec) throws java.security.InvalidKeyException, java.security.InvalidAlgorithmParameterException
+    {
+        java.security.SecureRandom r1;
+        javax.crypto.spec.OAEPParameterSpec r2;
+        sun.security.rsa.RSAPadding $r0;
+        int i0, i1;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        r1 := @parameter2: java.security.SecureRandom;
+
+        r2 := @parameter3: javax.crypto.spec.OAEPParameterSpec;
+
+        $r0 = new sun.security.rsa.RSAPadding;
+
+        specialinvoke $r0.<sun.security.rsa.RSAPadding: void <init>(int,int,java.security.SecureRandom,javax.crypto.spec.OAEPParameterSpec)>(i0, i1, r1, r2);
+
+        return $r0;
+    }
+
+    private void <init>(int, int, java.security.SecureRandom, javax.crypto.spec.OAEPParameterSpec) throws java.security.InvalidKeyException, java.security.InvalidAlgorithmParameterException
+    {
+        byte[] $r6, $r7, r43;
+        sun.security.rsa.RSAPadding r0;
+        java.security.SecureRandom r1;
+        sun.security.rsa.MGF1 $r4, $r13;
+        java.security.spec.AlgorithmParameterSpec $r18;
+        boolean $z0, $z1;
+        javax.crypto.spec.PSource $r20;
+        java.security.NoSuchAlgorithmException $r39;
+        java.security.InvalidKeyException $r8, $r33, $r38, $r40;
+        java.lang.StringBuilder $r9, $r10, $r11, $r12, $r15, $r24, $r25, $r26, $r29, $r30, $r31, $r34, $r35, $r36;
+        javax.crypto.spec.PSource$PSpecified $r22;
+        java.security.MessageDigest $r3, $r5;
+        java.security.InvalidAlgorithmParameterException $r23, $r28;
+        javax.crypto.spec.OAEPParameterSpec r2;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, i7;
+        java.lang.String $r14, $r16, $r17, $r21, $r27, $r32, $r37, r41, r42;
+        java.security.spec.MGF1ParameterSpec $r19;
+
+        r0 := @this: sun.security.rsa.RSAPadding;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        r1 := @parameter2: java.security.SecureRandom;
+
+        r2 := @parameter3: javax.crypto.spec.OAEPParameterSpec;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.rsa.RSAPadding: int type> = i0;
+
+        r0.<sun.security.rsa.RSAPadding: int paddedSize> = i1;
+
+        r0.<sun.security.rsa.RSAPadding: java.security.SecureRandom random> = r1;
+
+        if i1 >= 64 goto label01;
+
+        $r38 = new java.security.InvalidKeyException;
+
+        specialinvoke $r38.<java.security.InvalidKeyException: void <init>(java.lang.String)>("Padded size must be at least 64");
+
+        throw $r38;
+
+     label01:
+        tableswitch(i0)
+        {
+            case 1: goto label02;
+            case 2: goto label02;
+            case 3: goto label03;
+            case 4: goto label04;
+            default: goto label12;
+        };
+
+     label02:
+        $i6 = i1 - 11;
+
+        r0.<sun.security.rsa.RSAPadding: int maxDataSize> = $i6;
+
+        goto label13;
+
+     label03:
+        r0.<sun.security.rsa.RSAPadding: int maxDataSize> = i1;
+
+        goto label13;
+
+     label04:
+        r41 = "SHA-1";
+
+        r42 = "SHA-1";
+
+        r43 = null;
+
+     label05:
+        if r2 == null goto label08;
+
+        r41 = virtualinvoke r2.<javax.crypto.spec.OAEPParameterSpec: java.lang.String getDigestAlgorithm()>();
+
+        $r17 = virtualinvoke r2.<javax.crypto.spec.OAEPParameterSpec: java.lang.String getMGFAlgorithm()>();
+
+        $z0 = virtualinvoke $r17.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("MGF1");
+
+        if $z0 != 0 goto label06;
+
+        $r28 = new java.security.InvalidAlgorithmParameterException;
+
+        $r29 = new java.lang.StringBuilder;
+
+        specialinvoke $r29.<java.lang.StringBuilder: void <init>()>();
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported MGF algo: ");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r28.<java.security.InvalidAlgorithmParameterException: void <init>(java.lang.String)>($r32);
+
+        throw $r28;
+
+     label06:
+        $r18 = virtualinvoke r2.<javax.crypto.spec.OAEPParameterSpec: java.security.spec.AlgorithmParameterSpec getMGFParameters()>();
+
+        $r19 = (java.security.spec.MGF1ParameterSpec) $r18;
+
+        r42 = virtualinvoke $r19.<java.security.spec.MGF1ParameterSpec: java.lang.String getDigestAlgorithm()>();
+
+        $r20 = virtualinvoke r2.<javax.crypto.spec.OAEPParameterSpec: javax.crypto.spec.PSource getPSource()>();
+
+        $r21 = virtualinvoke $r20.<javax.crypto.spec.PSource: java.lang.String getAlgorithm()>();
+
+        $z1 = virtualinvoke $r21.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("PSpecified");
+
+        if $z1 != 0 goto label07;
+
+        $r23 = new java.security.InvalidAlgorithmParameterException;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported pSource algo: ");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r21);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r23.<java.security.InvalidAlgorithmParameterException: void <init>(java.lang.String)>($r27);
+
+        throw $r23;
+
+     label07:
+        $r22 = (javax.crypto.spec.PSource$PSpecified) $r20;
+
+        r43 = virtualinvoke $r22.<javax.crypto.spec.PSource$PSpecified: byte[] getValue()>();
+
+     label08:
+        $r3 = staticinvoke <java.security.MessageDigest: java.security.MessageDigest getInstance(java.lang.String)>(r41);
+
+        r0.<sun.security.rsa.RSAPadding: java.security.MessageDigest md> = $r3;
+
+        $r4 = new sun.security.rsa.MGF1;
+
+        specialinvoke $r4.<sun.security.rsa.MGF1: void <init>(java.lang.String)>(r42);
+
+        r0.<sun.security.rsa.RSAPadding: sun.security.rsa.MGF1 mgf> = $r4;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r39 := @caughtexception;
+
+        $r40 = new java.security.InvalidKeyException;
+
+        specialinvoke $r40.<java.security.InvalidKeyException: void <init>(java.lang.String,java.lang.Throwable)>("Digest not available", $r39);
+
+        throw $r40;
+
+     label11:
+        $r5 = r0.<sun.security.rsa.RSAPadding: java.security.MessageDigest md>;
+
+        $r6 = staticinvoke <sun.security.rsa.RSAPadding: byte[] getInitialHash(java.security.MessageDigest,byte[])>($r5, r43);
+
+        r0.<sun.security.rsa.RSAPadding: byte[] lHash> = $r6;
+
+        $r7 = r0.<sun.security.rsa.RSAPadding: byte[] lHash>;
+
+        i7 = lengthof $r7;
+
+        $i3 = i1 - 2;
+
+        $i2 = 2 * i7;
+
+        $i4 = $i3 - $i2;
+
+        r0.<sun.security.rsa.RSAPadding: int maxDataSize> = $i4;
+
+        $i5 = r0.<sun.security.rsa.RSAPadding: int maxDataSize>;
+
+        if $i5 > 0 goto label13;
+
+        $r8 = new java.security.InvalidKeyException;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Key is too short for encryption using OAEPPadding with ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r41);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" and ");
+
+        $r13 = r0.<sun.security.rsa.RSAPadding: sun.security.rsa.MGF1 mgf>;
+
+        $r14 = virtualinvoke $r13.<sun.security.rsa.MGF1: java.lang.String getName()>();
+
+        $r15 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<java.security.InvalidKeyException: void <init>(java.lang.String)>($r16);
+
+        throw $r8;
+
+     label12:
+        $r33 = new java.security.InvalidKeyException;
+
+        $r34 = new java.lang.StringBuilder;
+
+        specialinvoke $r34.<java.lang.StringBuilder: void <init>()>();
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid padding: ");
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r33.<java.security.InvalidKeyException: void <init>(java.lang.String)>($r37);
+
+        throw $r33;
+
+     label13:
+        return;
+
+        catch java.security.NoSuchAlgorithmException from label05 to label09 with label10;
+    }
+
+    private static byte[] getInitialHash(java.security.MessageDigest, byte[])
+    {
+        byte[] r0, $r5, $r7, r8;
+        java.security.MessageDigest r1;
+        java.util.Map $r3, $r6;
+        int $i0;
+        java.lang.Object $r4;
+        java.lang.String $r2;
+
+        r1 := @parameter0: java.security.MessageDigest;
+
+        r0 := @parameter1: byte[];
+
+        if r0 == null goto label1;
+
+        $i0 = lengthof r0;
+
+        if $i0 != 0 goto label3;
+
+     label1:
+        $r2 = virtualinvoke r1.<java.security.MessageDigest: java.lang.String getAlgorithm()>();
+
+        $r3 = <sun.security.rsa.RSAPadding: java.util.Map emptyHashes>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>($r2);
+
+        $r7 = (byte[]) $r4;
+
+        r8 = $r7;
+
+        if $r7 != null goto label2;
+
+        $r5 = virtualinvoke r1.<java.security.MessageDigest: byte[] digest()>();
+
+        r8 = $r5;
+
+        $r6 = <sun.security.rsa.RSAPadding: java.util.Map emptyHashes>;
+
+        interfaceinvoke $r6.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, $r5);
+
+     label2:
+        goto label4;
+
+     label3:
+        r8 = virtualinvoke r1.<java.security.MessageDigest: byte[] digest(byte[])>(r0);
+
+     label4:
+        return r8;
+    }
+
+    public int getMaxDataSize()
+    {
+        int $i0;
+        sun.security.rsa.RSAPadding r0;
+
+        r0 := @this: sun.security.rsa.RSAPadding;
+
+        $i0 = r0.<sun.security.rsa.RSAPadding: int maxDataSize>;
+
+        return $i0;
+    }
+
+    public byte[] pad(byte[]) throws javax.crypto.BadPaddingException
+    {
+        byte[] r1, $r2;
+        sun.security.rsa.RSAPadding r0;
+        int $i0;
+
+        r0 := @this: sun.security.rsa.RSAPadding;
+
+        r1 := @parameter0: byte[];
+
+        $i0 = lengthof r1;
+
+        $r2 = virtualinvoke r0.<sun.security.rsa.RSAPadding: byte[] pad(byte[],int,int)>(r1, 0, $i0);
+
+        return $r2;
+    }
+
+    public byte[] pad(byte[], int, int) throws javax.crypto.BadPaddingException
+    {
+        byte[] r1, $r2, $r3, $r4;
+        sun.security.rsa.RSAPadding r0;
+        java.lang.AssertionError $r5;
+        int i0, $i1, $i2, i3, $i4, $i5;
+        java.lang.String $r13;
+        javax.crypto.BadPaddingException $r6;
+        java.lang.StringBuilder $r7, $r8, $r9, $r10, $r11, $r12;
+
+        r0 := @this: sun.security.rsa.RSAPadding;
+
+        r1 := @parameter0: byte[];
+
+        i3 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        $i1 = r0.<sun.security.rsa.RSAPadding: int maxDataSize>;
+
+        if i0 <= $i1 goto label1;
+
+        $r6 = new javax.crypto.BadPaddingException;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Data must be shorter than ");
+
+        $i4 = r0.<sun.security.rsa.RSAPadding: int maxDataSize>;
+
+        $i5 = $i4 + 1;
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" bytes but received ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" bytes.");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<javax.crypto.BadPaddingException: void <init>(java.lang.String)>($r13);
+
+        throw $r6;
+
+     label1:
+        $i2 = r0.<sun.security.rsa.RSAPadding: int type>;
+
+        tableswitch($i2)
+        {
+            case 1: goto label3;
+            case 2: goto label3;
+            case 3: goto label2;
+            case 4: goto label4;
+            default: goto label5;
+        };
+
+     label2:
+        $r3 = staticinvoke <sun.security.rsa.RSACore: byte[] convert(byte[],int,int)>(r1, i3, i0);
+
+        return $r3;
+
+     label3:
+        $r4 = specialinvoke r0.<sun.security.rsa.RSAPadding: byte[] padV15(byte[],int,int)>(r1, i3, i0);
+
+        return $r4;
+
+     label4:
+        $r2 = specialinvoke r0.<sun.security.rsa.RSAPadding: byte[] padOAEP(byte[],int,int)>(r1, i3, i0);
+
+        return $r2;
+
+     label5:
+        $r5 = new java.lang.AssertionError;
+
+        specialinvoke $r5.<java.lang.AssertionError: void <init>()>();
+
+        throw $r5;
+    }
+
+    public byte[] unpad(byte[]) throws javax.crypto.BadPaddingException
+    {
+        byte[] r0, $r2, $r3;
+        sun.security.rsa.RSAPadding r1;
+        java.lang.AssertionError $r4;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.lang.String $r12;
+        javax.crypto.BadPaddingException $r5;
+        java.lang.StringBuilder $r6, $r7, $r8, $r9, $r10, $r11;
+
+        r1 := @this: sun.security.rsa.RSAPadding;
+
+        r0 := @parameter0: byte[];
+
+        $i1 = lengthof r0;
+
+        $i0 = r1.<sun.security.rsa.RSAPadding: int paddedSize>;
+
+        if $i1 == $i0 goto label1;
+
+        $r5 = new javax.crypto.BadPaddingException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Decryption error.The padded array length (");
+
+        $i3 = lengthof r0;
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") is not the specified padded size (");
+
+        $i4 = r1.<sun.security.rsa.RSAPadding: int paddedSize>;
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<javax.crypto.BadPaddingException: void <init>(java.lang.String)>($r12);
+
+        throw $r5;
+
+     label1:
+        $i2 = r1.<sun.security.rsa.RSAPadding: int type>;
+
+        tableswitch($i2)
+        {
+            case 1: goto label3;
+            case 2: goto label3;
+            case 3: goto label2;
+            case 4: goto label4;
+            default: goto label5;
+        };
+
+     label2:
+        return r0;
+
+     label3:
+        $r3 = specialinvoke r1.<sun.security.rsa.RSAPadding: byte[] unpadV15(byte[])>(r0);
+
+        return $r3;
+
+     label4:
+        $r2 = specialinvoke r1.<sun.security.rsa.RSAPadding: byte[] unpadOAEP(byte[])>(r0);
+
+        return $r2;
+
+     label5:
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>()>();
+
+        throw $r4;
+    }
+
+    private byte[] padV15(byte[], int, int) throws javax.crypto.BadPaddingException
+    {
+        byte[] r1, r2, $r6;
+        sun.security.rsa.RSAPadding r0;
+        java.security.SecureRandom $r3, $r4, $r5;
+        byte $b8, $b11, $b13;
+        short $s15, $s30;
+        int $i0, i1, i2, $i3, $i4, $i5, $i6, $i7, $i9, $i10, $i12, $i14, $i16, $i17, i18, i19, i20, $i21, $i23, $i25, $i27, $i29;
+
+        r0 := @this: sun.security.rsa.RSAPadding;
+
+        r2 := @parameter0: byte[];
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $i0 = r0.<sun.security.rsa.RSAPadding: int paddedSize>;
+
+        r1 = newarray (byte)[$i0];
+
+        $i3 = r0.<sun.security.rsa.RSAPadding: int paddedSize>;
+
+        $i4 = $i3 - i2;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r2, i1, r1, $i4, i2);
+
+        $i5 = r0.<sun.security.rsa.RSAPadding: int paddedSize>;
+
+        $i6 = $i5 - 3;
+
+        i18 = $i6 - i2;
+
+        r1[0] = 0;
+
+        i19 = 2;
+
+        $i7 = r0.<sun.security.rsa.RSAPadding: int type>;
+
+        $b8 = (byte) $i7;
+
+        r1[1] = $b8;
+
+        $i9 = r0.<sun.security.rsa.RSAPadding: int type>;
+
+        if $i9 != 1 goto label2;
+
+     label1:
+        $i16 = i18;
+
+        $i23 = (int) -1;
+
+        i18 = i18 + $i23;
+
+        if $i16 <= 0 goto label7;
+
+        $i17 = i19;
+
+        i19 = i19 + 1;
+
+        r1[$i17] = -1;
+
+        goto label1;
+
+     label2:
+        $r3 = r0.<sun.security.rsa.RSAPadding: java.security.SecureRandom random>;
+
+        if $r3 != null goto label3;
+
+        $r5 = staticinvoke <sun.security.jca.JCAUtil: java.security.SecureRandom getSecureRandom()>();
+
+        r0.<sun.security.rsa.RSAPadding: java.security.SecureRandom random> = $r5;
+
+     label3:
+        $r6 = newarray (byte)[64];
+
+        $i25 = (int) -1;
+
+        i20 = $i25;
+
+     label4:
+        $i21 = i18;
+
+        $i27 = (int) -1;
+
+        i18 = i18 + $i27;
+
+        if $i21 <= 0 goto label7;
+
+     label5:
+        if i20 >= 0 goto label6;
+
+        $r4 = r0.<sun.security.rsa.RSAPadding: java.security.SecureRandom random>;
+
+        virtualinvoke $r4.<java.security.SecureRandom: void nextBytes(byte[])>($r6);
+
+        $i14 = lengthof $r6;
+
+        i20 = $i14 - 1;
+
+     label6:
+        $i10 = i20;
+
+        $i29 = (int) -1;
+
+        i20 = i20 + $i29;
+
+        $b11 = $r6[$i10];
+
+        $s30 = (short) $b11;
+
+        $s15 = $s30 & 255;
+
+        if $s15 == 0 goto label5;
+
+        $i12 = i19;
+
+        i19 = i19 + 1;
+
+        $b13 = (byte) $s15;
+
+        r1[$i12] = $b13;
+
+        goto label4;
+
+     label7:
+        return r1;
+    }
+
+    private byte[] unpadV15(byte[]) throws javax.crypto.BadPaddingException
+    {
+        byte[] r0, $r3, $r4;
+        sun.security.rsa.RSAPadding r1;
+        short s10, $s15;
+        byte $b0, $b2, $b6;
+        int $i1, $i3, $i4, $i5, i7, i8, $i9, $i11, $i12, i13, $i14, $i16;
+        boolean z0;
+        javax.crypto.BadPaddingException $r5;
+
+        r1 := @this: sun.security.rsa.RSAPadding;
+
+        r0 := @parameter0: byte[];
+
+        z0 = 0;
+
+        $b0 = r0[0];
+
+        if $b0 == 0 goto label1;
+
+        z0 = 1;
+
+     label1:
+        i7 = 2;
+
+        $b2 = r0[1];
+
+        $i1 = r1.<sun.security.rsa.RSAPadding: int type>;
+
+        $i14 = (int) $b2;
+
+        if $i14 == $i1 goto label2;
+
+        z0 = 1;
+
+     label2:
+        i8 = 0;
+
+     label3:
+        $i9 = lengthof r0;
+
+        if i7 >= $i9 goto label7;
+
+        $i5 = i7;
+
+        i7 = i7 + 1;
+
+        $b6 = r0[$i5];
+
+        $s15 = (short) $b6;
+
+        s10 = $s15 & 255;
+
+        if s10 != 0 goto label4;
+
+        if i8 != 0 goto label4;
+
+        i8 = i7;
+
+     label4:
+        $i11 = lengthof r0;
+
+        if i7 != $i11 goto label5;
+
+        if i8 != 0 goto label5;
+
+        z0 = 1;
+
+     label5:
+        $i12 = r1.<sun.security.rsa.RSAPadding: int type>;
+
+        if $i12 != 1 goto label6;
+
+        $i16 = (int) s10;
+
+        if $i16 == 255 goto label6;
+
+        if i8 != 0 goto label6;
+
+        z0 = 1;
+
+     label6:
+        goto label3;
+
+     label7:
+        $i3 = lengthof r0;
+
+        i13 = $i3 - i8;
+
+        $i4 = r1.<sun.security.rsa.RSAPadding: int maxDataSize>;
+
+        if i13 <= $i4 goto label8;
+
+        z0 = 1;
+
+     label8:
+        $r3 = newarray (byte)[i8];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, 0, $r3, 0, i8);
+
+        $r4 = newarray (byte)[i13];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, i8, $r4, 0, i13);
+
+        $r5 = new javax.crypto.BadPaddingException;
+
+        specialinvoke $r5.<javax.crypto.BadPaddingException: void <init>(java.lang.String)>("Decryption error");
+
+        if z0 == 0 goto label9;
+
+        throw $r5;
+
+     label9:
+        return $r4;
+    }
+
+    private byte[] padOAEP(byte[], int, int) throws javax.crypto.BadPaddingException
+    {
+        byte[] $r2, $r4, r5, $r9, $r10;
+        sun.security.rsa.RSAPadding r0;
+        java.security.SecureRandom $r1, $r3, $r8;
+        sun.security.rsa.MGF1 $r6, $r7;
+        int $i0, $i1, i2, $i3, $i4, i5, $i6, $i7, $i8, $i9;
+
+        r0 := @this: sun.security.rsa.RSAPadding;
+
+        r5 := @parameter0: byte[];
+
+        i5 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $r1 = r0.<sun.security.rsa.RSAPadding: java.security.SecureRandom random>;
+
+        if $r1 != null goto label1;
+
+        $r8 = staticinvoke <sun.security.jca.JCAUtil: java.security.SecureRandom getSecureRandom()>();
+
+        r0.<sun.security.rsa.RSAPadding: java.security.SecureRandom random> = $r8;
+
+     label1:
+        $r2 = r0.<sun.security.rsa.RSAPadding: byte[] lHash>;
+
+        $i6 = lengthof $r2;
+
+        $r9 = newarray (byte)[$i6];
+
+        $r3 = r0.<sun.security.rsa.RSAPadding: java.security.SecureRandom random>;
+
+        virtualinvoke $r3.<java.security.SecureRandom: void nextBytes(byte[])>($r9);
+
+        $i0 = r0.<sun.security.rsa.RSAPadding: int paddedSize>;
+
+        $r10 = newarray (byte)[$i0];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r9, 0, $r10, 1, $i6);
+
+        $i7 = $i6 + 1;
+
+        $i1 = lengthof $r10;
+
+        $i8 = $i1 - $i7;
+
+        $i3 = r0.<sun.security.rsa.RSAPadding: int paddedSize>;
+
+        $i9 = $i3 - i2;
+
+        $r4 = r0.<sun.security.rsa.RSAPadding: byte[] lHash>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, $r10, $i7, $i6);
+
+        $i4 = $i9 - 1;
+
+        $r10[$i4] = 1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r5, i5, $r10, $i9, i2);
+
+        $r6 = r0.<sun.security.rsa.RSAPadding: sun.security.rsa.MGF1 mgf>;
+
+        virtualinvoke $r6.<sun.security.rsa.MGF1: void generateAndXor(byte[],int,int,int,byte[],int)>($r10, 1, $i6, $i8, $r10, $i7);
+
+        $r7 = r0.<sun.security.rsa.RSAPadding: sun.security.rsa.MGF1 mgf>;
+
+        virtualinvoke $r7.<sun.security.rsa.MGF1: void generateAndXor(byte[],int,int,int,byte[],int)>($r10, $i7, $i8, $i6, $r10, 1);
+
+        return $r10;
+    }
+
+    private byte[] unpadOAEP(byte[]) throws javax.crypto.BadPaddingException
+    {
+        byte[] r0, $r2, $r6, $r7, $r8;
+        sun.security.rsa.RSAPadding r1;
+        byte $b1, $b12, $b13, b20;
+        sun.security.rsa.MGF1 $r3, $r4;
+        boolean z0;
+        int i0, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i14, $i15, i16, i17, i18, i19, $i21, $i22, $i24, $i26, $i28;
+        javax.crypto.BadPaddingException $r9;
+
+        r1 := @this: sun.security.rsa.RSAPadding;
+
+        r0 := @parameter0: byte[];
+
+        z0 = 0;
+
+        $r2 = r1.<sun.security.rsa.RSAPadding: byte[] lHash>;
+
+        i0 = lengthof $r2;
+
+        $b1 = r0[0];
+
+        if $b1 == 0 goto label01;
+
+        z0 = 1;
+
+     label01:
+        $i14 = i0 + 1;
+
+        $i2 = lengthof r0;
+
+        $i15 = $i2 - $i14;
+
+        $r3 = r1.<sun.security.rsa.RSAPadding: sun.security.rsa.MGF1 mgf>;
+
+        virtualinvoke $r3.<sun.security.rsa.MGF1: void generateAndXor(byte[],int,int,int,byte[],int)>(r0, $i14, $i15, i0, r0, 1);
+
+        $r4 = r1.<sun.security.rsa.RSAPadding: sun.security.rsa.MGF1 mgf>;
+
+        virtualinvoke $r4.<sun.security.rsa.MGF1: void generateAndXor(byte[],int,int,int,byte[],int)>(r0, 1, i0, $i15, r0, $i14);
+
+        i16 = 0;
+
+     label02:
+        if i16 >= i0 goto label04;
+
+        $r8 = r1.<sun.security.rsa.RSAPadding: byte[] lHash>;
+
+        $b13 = $r8[i16];
+
+        $i11 = $i14 + i16;
+
+        $b12 = r0[$i11];
+
+        $i21 = (int) $b13;
+
+        $i22 = (int) $b12;
+
+        if $i21 == $i22 goto label03;
+
+        z0 = 1;
+
+     label03:
+        i16 = i16 + 1;
+
+        goto label02;
+
+     label04:
+        i17 = $i14 + i0;
+
+        $i24 = (int) -1;
+
+        i18 = $i24;
+
+        i19 = i17;
+
+     label05:
+        $i3 = lengthof r0;
+
+        if i19 >= $i3 goto label09;
+
+        b20 = r0[i19];
+
+        $i26 = (int) -1;
+
+        if i18 != $i26 goto label08;
+
+        if b20 != 0 goto label06;
+
+        goto label08;
+
+     label06:
+        if b20 != 1 goto label07;
+
+        i18 = i19;
+
+        goto label08;
+
+     label07:
+        z0 = 1;
+
+     label08:
+        i19 = i19 + 1;
+
+        goto label05;
+
+     label09:
+        $i28 = (int) -1;
+
+        if i18 != $i28 goto label10;
+
+        z0 = 1;
+
+        $i9 = lengthof r0;
+
+        i18 = $i9 - 1;
+
+     label10:
+        $i10 = i18 + 1;
+
+        $i4 = $i10 - i17;
+
+        $r6 = newarray (byte)[$i4];
+
+        $i5 = lengthof $r6;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, i17, $r6, 0, $i5);
+
+        $i6 = lengthof r0;
+
+        $i7 = $i6 - $i10;
+
+        $r7 = newarray (byte)[$i7];
+
+        $i8 = lengthof $r7;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, $i10, $r7, 0, $i8);
+
+        $r9 = new javax.crypto.BadPaddingException;
+
+        specialinvoke $r9.<javax.crypto.BadPaddingException: void <init>(java.lang.String)>("Decryption error");
+
+        if z0 == 0 goto label11;
+
+        throw $r9;
+
+     label11:
+        return $r7;
+    }
+
+    static void <clinit>()
+    {
+        java.util.HashMap $r0;
+        java.util.Map $r1;
+
+        <sun.security.rsa.RSAPadding: int PAD_OAEP_MGF1> = 4;
+
+        <sun.security.rsa.RSAPadding: int PAD_NONE> = 3;
+
+        <sun.security.rsa.RSAPadding: int PAD_BLOCKTYPE_2> = 2;
+
+        <sun.security.rsa.RSAPadding: int PAD_BLOCKTYPE_1> = 1;
+
+        $r0 = new java.util.HashMap;
+
+        specialinvoke $r0.<java.util.HashMap: void <init>()>();
+
+        $r1 = staticinvoke <java.util.Collections: java.util.Map synchronizedMap(java.util.Map)>($r0);
+
+        <sun.security.rsa.RSAPadding: java.util.Map emptyHashes> = $r1;
+
+        return;
+    }
+}

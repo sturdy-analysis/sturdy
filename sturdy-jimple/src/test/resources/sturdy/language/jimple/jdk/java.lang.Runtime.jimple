@@ -1,0 +1,522 @@
+public class java.lang.Runtime extends java.lang.Object
+{
+    private static java.lang.Runtime currentRuntime;
+
+    public static java.lang.Runtime getRuntime()
+    {
+        java.lang.Runtime $r0;
+
+        $r0 = <java.lang.Runtime: java.lang.Runtime currentRuntime>;
+
+        return $r0;
+    }
+
+    private void <init>()
+    {
+        java.lang.Runtime r0;
+
+        r0 := @this: java.lang.Runtime;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void exit(int)
+    {
+        int i0;
+        java.lang.SecurityManager $r0;
+        java.lang.Runtime r1;
+
+        r1 := @this: java.lang.Runtime;
+
+        i0 := @parameter0: int;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkExit(int)>(i0);
+
+     label1:
+        staticinvoke <java.lang.Shutdown: void exit(int)>(i0);
+
+        return;
+    }
+
+    public void addShutdownHook(java.lang.Thread)
+    {
+        java.lang.Thread r1;
+        java.lang.Runtime r3;
+        java.lang.RuntimePermission $r2;
+        java.lang.SecurityManager $r0;
+
+        r3 := @this: java.lang.Runtime;
+
+        r1 := @parameter0: java.lang.Thread;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r2 = new java.lang.RuntimePermission;
+
+        specialinvoke $r2.<java.lang.RuntimePermission: void <init>(java.lang.String)>("shutdownHooks");
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r2);
+
+     label1:
+        staticinvoke <java.lang.ApplicationShutdownHooks: void add(java.lang.Thread)>(r1);
+
+        return;
+    }
+
+    public boolean removeShutdownHook(java.lang.Thread)
+    {
+        java.lang.Thread r1;
+        java.lang.Runtime r3;
+        java.lang.RuntimePermission $r2;
+        java.lang.SecurityManager $r0;
+        boolean $z0;
+
+        r3 := @this: java.lang.Runtime;
+
+        r1 := @parameter0: java.lang.Thread;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r2 = new java.lang.RuntimePermission;
+
+        specialinvoke $r2.<java.lang.RuntimePermission: void <init>(java.lang.String)>("shutdownHooks");
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r2);
+
+     label1:
+        $z0 = staticinvoke <java.lang.ApplicationShutdownHooks: boolean remove(java.lang.Thread)>(r1);
+
+        return $z0;
+    }
+
+    public void halt(int)
+    {
+        int i0;
+        java.lang.SecurityManager $r0;
+        java.lang.Runtime r1;
+
+        r1 := @this: java.lang.Runtime;
+
+        i0 := @parameter0: int;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkExit(int)>(i0);
+
+     label1:
+        staticinvoke <java.lang.Shutdown: void beforeHalt()>();
+
+        staticinvoke <java.lang.Shutdown: void halt(int)>(i0);
+
+        return;
+    }
+
+    public static void runFinalizersOnExit(boolean)
+    {
+        java.lang.SecurityException $r1, $r2;
+        java.lang.SecurityManager $r0;
+        boolean z0;
+
+        z0 := @parameter0: boolean;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label4;
+
+     label1:
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkExit(int)>(0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r1 := @caughtexception;
+
+        $r2 = new java.lang.SecurityException;
+
+        specialinvoke $r2.<java.lang.SecurityException: void <init>(java.lang.String)>("runFinalizersOnExit");
+
+        throw $r2;
+
+     label4:
+        staticinvoke <java.lang.Shutdown: void setRunFinalizersOnExit(boolean)>(z0);
+
+        return;
+
+        catch java.lang.SecurityException from label1 to label2 with label3;
+    }
+
+    public java.lang.Process exec(java.lang.String) throws java.io.IOException
+    {
+        java.lang.String r1;
+        java.lang.Process $r2;
+        java.lang.Runtime r0;
+
+        r0 := @this: java.lang.Runtime;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = virtualinvoke r0.<java.lang.Runtime: java.lang.Process exec(java.lang.String,java.lang.String[],java.io.File)>(r1, null, null);
+
+        return $r2;
+    }
+
+    public java.lang.Process exec(java.lang.String, java.lang.String[]) throws java.io.IOException
+    {
+        java.lang.Process $r3;
+        java.lang.Runtime r0;
+        java.lang.String[] r2;
+        java.lang.String r1;
+
+        r0 := @this: java.lang.Runtime;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String[];
+
+        $r3 = virtualinvoke r0.<java.lang.Runtime: java.lang.Process exec(java.lang.String,java.lang.String[],java.io.File)>(r1, r2, null);
+
+        return $r3;
+    }
+
+    public java.lang.Process exec(java.lang.String, java.lang.String[], java.io.File) throws java.io.IOException
+    {
+        java.lang.Process $r6;
+        java.lang.Runtime r3;
+        java.lang.String[] r2, r4;
+        java.lang.IllegalArgumentException $r8;
+        java.io.File r5;
+        java.util.StringTokenizer $r1;
+        int $i0, i1;
+        java.lang.String r0, $r7;
+        boolean $z0, $z1;
+
+        r3 := @this: java.lang.Runtime;
+
+        r0 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.lang.String[];
+
+        r5 := @parameter2: java.io.File;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        $r8 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Empty command");
+
+        throw $r8;
+
+     label1:
+        $r1 = new java.util.StringTokenizer;
+
+        specialinvoke $r1.<java.util.StringTokenizer: void <init>(java.lang.String)>(r0);
+
+        $i0 = virtualinvoke $r1.<java.util.StringTokenizer: int countTokens()>();
+
+        r2 = newarray (java.lang.String)[$i0];
+
+        i1 = 0;
+
+     label2:
+        $z1 = virtualinvoke $r1.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z1 == 0 goto label3;
+
+        $r7 = virtualinvoke $r1.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        r2[i1] = $r7;
+
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label3:
+        $r6 = virtualinvoke r3.<java.lang.Runtime: java.lang.Process exec(java.lang.String[],java.lang.String[],java.io.File)>(r2, r4, r5);
+
+        return $r6;
+    }
+
+    public java.lang.Process exec(java.lang.String[]) throws java.io.IOException
+    {
+        java.lang.String[] r1;
+        java.lang.Process $r2;
+        java.lang.Runtime r0;
+
+        r0 := @this: java.lang.Runtime;
+
+        r1 := @parameter0: java.lang.String[];
+
+        $r2 = virtualinvoke r0.<java.lang.Runtime: java.lang.Process exec(java.lang.String[],java.lang.String[],java.io.File)>(r1, null, null);
+
+        return $r2;
+    }
+
+    public java.lang.Process exec(java.lang.String[], java.lang.String[]) throws java.io.IOException
+    {
+        java.lang.Process $r3;
+        java.lang.Runtime r0;
+        java.lang.String[] r1, r2;
+
+        r0 := @this: java.lang.Runtime;
+
+        r1 := @parameter0: java.lang.String[];
+
+        r2 := @parameter1: java.lang.String[];
+
+        $r3 = virtualinvoke r0.<java.lang.Runtime: java.lang.Process exec(java.lang.String[],java.lang.String[],java.io.File)>(r1, r2, null);
+
+        return $r3;
+    }
+
+    public java.lang.Process exec(java.lang.String[], java.lang.String[], java.io.File) throws java.io.IOException
+    {
+        java.lang.Process $r6;
+        java.lang.Runtime r7;
+        java.lang.String[] r1, r2;
+        java.io.File r4;
+        java.lang.ProcessBuilder $r0, $r3, $r5;
+
+        r7 := @this: java.lang.Runtime;
+
+        r1 := @parameter0: java.lang.String[];
+
+        r2 := @parameter1: java.lang.String[];
+
+        r4 := @parameter2: java.io.File;
+
+        $r0 = new java.lang.ProcessBuilder;
+
+        specialinvoke $r0.<java.lang.ProcessBuilder: void <init>(java.lang.String[])>(r1);
+
+        $r3 = virtualinvoke $r0.<java.lang.ProcessBuilder: java.lang.ProcessBuilder environment(java.lang.String[])>(r2);
+
+        $r5 = virtualinvoke $r3.<java.lang.ProcessBuilder: java.lang.ProcessBuilder directory(java.io.File)>(r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.ProcessBuilder: java.lang.Process start()>();
+
+        return $r6;
+    }
+
+    public native int availableProcessors();
+
+    public native long freeMemory();
+
+    public native long totalMemory();
+
+    public native long maxMemory();
+
+    public native void gc();
+
+    private static native void runFinalization0();
+
+    public void runFinalization()
+    {
+        java.lang.Runtime r0;
+
+        r0 := @this: java.lang.Runtime;
+
+        staticinvoke <java.lang.Runtime: void runFinalization0()>();
+
+        return;
+    }
+
+    public native void traceInstructions(boolean);
+
+    public native void traceMethodCalls(boolean);
+
+    public void load(java.lang.String)
+    {
+        java.lang.Class $r1;
+        java.lang.String r2;
+        java.lang.Runtime r0;
+
+        r0 := @this: java.lang.Runtime;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <sun.reflect.Reflection: java.lang.Class getCallerClass()>();
+
+        virtualinvoke r0.<java.lang.Runtime: void load0(java.lang.Class,java.lang.String)>($r1, r2);
+
+        return;
+    }
+
+    synchronized void load0(java.lang.Class, java.lang.String)
+    {
+        java.lang.Runtime r9;
+        java.lang.SecurityManager $r0;
+        java.io.File $r1;
+        java.lang.Class r3;
+        java.lang.StringBuilder $r5, $r6, $r7;
+        java.lang.String r2, $r8;
+        java.lang.UnsatisfiedLinkError $r4;
+        boolean $z0;
+
+        r9 := @this: java.lang.Runtime;
+
+        r3 := @parameter0: java.lang.Class;
+
+        r2 := @parameter1: java.lang.String;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkLink(java.lang.String)>(r2);
+
+     label1:
+        $r1 = new java.io.File;
+
+        specialinvoke $r1.<java.io.File: void <init>(java.lang.String)>(r2);
+
+        $z0 = virtualinvoke $r1.<java.io.File: boolean isAbsolute()>();
+
+        if $z0 != 0 goto label2;
+
+        $r4 = new java.lang.UnsatisfiedLinkError;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expecting an absolute path of the library: ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.UnsatisfiedLinkError: void <init>(java.lang.String)>($r8);
+
+        throw $r4;
+
+     label2:
+        staticinvoke <java.lang.ClassLoader: void loadLibrary(java.lang.Class,java.lang.String,boolean)>(r3, r2, 1);
+
+        return;
+    }
+
+    public void loadLibrary(java.lang.String)
+    {
+        java.lang.Class $r1;
+        java.lang.String r2;
+        java.lang.Runtime r0;
+
+        r0 := @this: java.lang.Runtime;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <sun.reflect.Reflection: java.lang.Class getCallerClass()>();
+
+        virtualinvoke r0.<java.lang.Runtime: void loadLibrary0(java.lang.Class,java.lang.String)>($r1, r2);
+
+        return;
+    }
+
+    synchronized void loadLibrary0(java.lang.Class, java.lang.String)
+    {
+        java.lang.Runtime r8;
+        char $c0;
+        java.lang.SecurityManager $r0;
+        int $i1, $i2, $i4;
+        java.lang.Class r2;
+        java.lang.StringBuilder $r5, $r6, $r9;
+        java.lang.String r1, $r7;
+        java.lang.UnsatisfiedLinkError $r10;
+
+        r8 := @this: java.lang.Runtime;
+
+        r2 := @parameter0: java.lang.Class;
+
+        r1 := @parameter1: java.lang.String;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkLink(java.lang.String)>(r1);
+
+     label1:
+        $c0 = <java.io.File: char separatorChar>;
+
+        $i2 = (int) $c0;
+
+        $i1 = virtualinvoke r1.<java.lang.String: int indexOf(int)>($i2);
+
+        $i4 = (int) -1;
+
+        if $i1 == $i4 goto label2;
+
+        $r10 = new java.lang.UnsatisfiedLinkError;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Directory separator should not appear in library name: ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r10.<java.lang.UnsatisfiedLinkError: void <init>(java.lang.String)>($r7);
+
+        throw $r10;
+
+     label2:
+        staticinvoke <java.lang.ClassLoader: void loadLibrary(java.lang.Class,java.lang.String,boolean)>(r2, r1, 0);
+
+        return;
+    }
+
+    public java.io.InputStream getLocalizedInputStream(java.io.InputStream)
+    {
+        java.io.InputStream r0;
+        java.lang.Runtime r1;
+
+        r1 := @this: java.lang.Runtime;
+
+        r0 := @parameter0: java.io.InputStream;
+
+        return r0;
+    }
+
+    public java.io.OutputStream getLocalizedOutputStream(java.io.OutputStream)
+    {
+        java.io.OutputStream r0;
+        java.lang.Runtime r1;
+
+        r1 := @this: java.lang.Runtime;
+
+        r0 := @parameter0: java.io.OutputStream;
+
+        return r0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Runtime $r0;
+
+        $r0 = new java.lang.Runtime;
+
+        specialinvoke $r0.<java.lang.Runtime: void <init>()>();
+
+        <java.lang.Runtime: java.lang.Runtime currentRuntime> = $r0;
+
+        return;
+    }
+}

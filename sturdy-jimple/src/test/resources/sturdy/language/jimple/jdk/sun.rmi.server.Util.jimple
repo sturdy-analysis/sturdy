@@ -1,0 +1,1104 @@
+public final class sun.rmi.server.Util extends java.lang.Object
+{
+    static final int logLevel;
+    public static final sun.rmi.runtime.Log serverRefLog;
+    private static final boolean ignoreStubClasses;
+    private static final java.util.Map withoutStubs;
+    private static final java.lang.Class[] stubConsParamTypes;
+
+    private void <init>()
+    {
+        sun.rmi.server.Util r0;
+
+        r0 := @this: sun.rmi.server.Util;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static java.rmi.Remote createProxy(java.lang.Class, java.rmi.server.RemoteRef, boolean) throws java.rmi.StubNotFoundException
+    {
+        java.rmi.server.RemoteObjectInvocationHandler $r6;
+        java.rmi.server.RemoteStub $r3;
+        java.lang.String $r16, $r18;
+        java.rmi.StubNotFoundException $r11, $r13;
+        boolean z0, $z1, $z2;
+        sun.rmi.server.Util$1 $r7;
+        java.rmi.Remote $r9;
+        java.lang.Class[] $r5;
+        java.lang.IllegalArgumentException $r10;
+        java.rmi.server.RemoteRef r2;
+        java.lang.Class r0, $r1;
+        java.lang.Object $r8;
+        java.lang.ClassNotFoundException $r12;
+        java.lang.StringBuilder $r14, $r15, $r17;
+        java.lang.ClassLoader $r4;
+
+        r0 := @parameter0: java.lang.Class;
+
+        r2 := @parameter1: java.rmi.server.RemoteRef;
+
+        z0 := @parameter2: boolean;
+
+     label1:
+        $r1 = staticinvoke <sun.rmi.server.Util: java.lang.Class getRemoteClass(java.lang.Class)>(r0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r12 := @caughtexception;
+
+        $r13 = new java.rmi.StubNotFoundException;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("object does not implement a remote interface: ");
+
+        $r16 = virtualinvoke r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r16);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<java.rmi.StubNotFoundException: void <init>(java.lang.String)>($r18);
+
+        throw $r13;
+
+     label4:
+        if z0 != 0 goto label5;
+
+        $z1 = <sun.rmi.server.Util: boolean ignoreStubClasses>;
+
+        if $z1 != 0 goto label6;
+
+        $z2 = staticinvoke <sun.rmi.server.Util: boolean stubClassExists(java.lang.Class)>($r1);
+
+        if $z2 == 0 goto label6;
+
+     label5:
+        $r3 = staticinvoke <sun.rmi.server.Util: java.rmi.server.RemoteStub createStub(java.lang.Class,java.rmi.server.RemoteRef)>($r1, r2);
+
+        return $r3;
+
+     label6:
+        $r4 = virtualinvoke r0.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $r5 = staticinvoke <sun.rmi.server.Util: java.lang.Class[] getRemoteInterfaces(java.lang.Class)>(r0);
+
+        $r6 = new java.rmi.server.RemoteObjectInvocationHandler;
+
+        specialinvoke $r6.<java.rmi.server.RemoteObjectInvocationHandler: void <init>(java.rmi.server.RemoteRef)>(r2);
+
+     label7:
+        $r7 = new sun.rmi.server.Util$1;
+
+        specialinvoke $r7.<sun.rmi.server.Util$1: void <init>(java.lang.ClassLoader,java.lang.Class[],java.lang.reflect.InvocationHandler)>($r4, $r5, $r6);
+
+        $r8 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r7);
+
+        $r9 = (java.rmi.Remote) $r8;
+
+     label8:
+        return $r9;
+
+     label9:
+        $r10 := @caughtexception;
+
+        $r11 = new java.rmi.StubNotFoundException;
+
+        specialinvoke $r11.<java.rmi.StubNotFoundException: void <init>(java.lang.String,java.lang.Exception)>("unable to create proxy", $r10);
+
+        throw $r11;
+
+        catch java.lang.ClassNotFoundException from label1 to label2 with label3;
+        catch java.lang.IllegalArgumentException from label7 to label8 with label9;
+    }
+
+    private static boolean stubClassExists(java.lang.Class)
+    {
+        java.util.Map $r1, $r9;
+        java.lang.Class r0;
+        java.lang.StringBuilder $r2, $r4, $r5;
+        java.lang.ClassNotFoundException $r8;
+        java.lang.String $r3, $r6;
+        java.lang.ClassLoader $r7;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.Class;
+
+        $r1 = <sun.rmi.server.Util: java.util.Map withoutStubs>;
+
+        $z0 = interfaceinvoke $r1.<java.util.Map: boolean containsKey(java.lang.Object)>(r0);
+
+        if $z0 != 0 goto label4;
+
+     label1:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("_Stub");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r7 = virtualinvoke r0.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>($r6, 0, $r7);
+
+     label2:
+        return 1;
+
+     label3:
+        $r8 := @caughtexception;
+
+        $r9 = <sun.rmi.server.Util: java.util.Map withoutStubs>;
+
+        interfaceinvoke $r9.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r0, null);
+
+     label4:
+        return 0;
+
+        catch java.lang.ClassNotFoundException from label1 to label2 with label3;
+    }
+
+    private static java.lang.Class getRemoteClass(java.lang.Class) throws java.lang.ClassNotFoundException
+    {
+        java.lang.Class[] $r1;
+        int $i0, i1, $i3;
+        java.lang.Class $r2, $r3, r4;
+        java.lang.ClassNotFoundException $r5;
+        boolean $z0;
+
+        r4 := @parameter0: java.lang.Class;
+
+     label1:
+        if r4 == null goto label5;
+
+        $r1 = virtualinvoke r4.<java.lang.Class: java.lang.Class[] getInterfaces()>();
+
+        $i0 = lengthof $r1;
+
+        i1 = $i0 - 1;
+
+     label2:
+        if i1 < 0 goto label4;
+
+        $r3 = class "Ljava/rmi/Remote;";
+
+        $r2 = $r1[i1];
+
+        $z0 = virtualinvoke $r3.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>($r2);
+
+        if $z0 == 0 goto label3;
+
+        return r4;
+
+     label3:
+        $i3 = (int) -1;
+
+        i1 = i1 + $i3;
+
+        goto label2;
+
+     label4:
+        r4 = virtualinvoke r4.<java.lang.Class: java.lang.Class getSuperclass()>();
+
+        goto label1;
+
+     label5:
+        $r5 = new java.lang.ClassNotFoundException;
+
+        specialinvoke $r5.<java.lang.ClassNotFoundException: void <init>(java.lang.String)>("class does not implement java.rmi.Remote");
+
+        throw $r5;
+    }
+
+    private static java.lang.Class[] getRemoteInterfaces(java.lang.Class)
+    {
+        java.lang.Object[] $r3;
+        int $i0;
+        java.lang.Class[] $r2, $r4;
+        java.lang.Class r1;
+        java.util.ArrayList $r0;
+
+        r1 := @parameter0: java.lang.Class;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+        staticinvoke <sun.rmi.server.Util: void getRemoteInterfaces(java.util.ArrayList,java.lang.Class)>($r0, r1);
+
+        $i0 = virtualinvoke $r0.<java.util.ArrayList: int size()>();
+
+        $r2 = newarray (java.lang.Class)[$i0];
+
+        $r3 = virtualinvoke $r0.<java.util.ArrayList: java.lang.Object[] toArray(java.lang.Object[])>($r2);
+
+        $r4 = (java.lang.Class[]) $r3;
+
+        return $r4;
+    }
+
+    private static void getRemoteInterfaces(java.util.ArrayList, java.lang.Class)
+    {
+        java.lang.Class[] $r2;
+        java.lang.reflect.Method[] $r6;
+        java.util.ArrayList r5;
+        int $i0, i1, $i2, i3;
+        java.lang.Class r0, $r1, r3, $r4;
+        java.lang.reflect.Method $r7;
+        boolean $z0, $z1;
+
+        r5 := @parameter0: java.util.ArrayList;
+
+        r0 := @parameter1: java.lang.Class;
+
+        $r1 = virtualinvoke r0.<java.lang.Class: java.lang.Class getSuperclass()>();
+
+        if $r1 == null goto label1;
+
+        staticinvoke <sun.rmi.server.Util: void getRemoteInterfaces(java.util.ArrayList,java.lang.Class)>(r5, $r1);
+
+     label1:
+        $r2 = virtualinvoke r0.<java.lang.Class: java.lang.Class[] getInterfaces()>();
+
+        i1 = 0;
+
+     label2:
+        $i2 = lengthof $r2;
+
+        if i1 >= $i2 goto label6;
+
+        r3 = $r2[i1];
+
+        $r4 = class "Ljava/rmi/Remote;";
+
+        $z0 = virtualinvoke $r4.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(r3);
+
+        if $z0 == 0 goto label5;
+
+        $z1 = virtualinvoke r5.<java.util.ArrayList: boolean contains(java.lang.Object)>(r3);
+
+        if $z1 != 0 goto label5;
+
+        $r6 = virtualinvoke r3.<java.lang.Class: java.lang.reflect.Method[] getMethods()>();
+
+        i3 = 0;
+
+     label3:
+        $i0 = lengthof $r6;
+
+        if i3 >= $i0 goto label4;
+
+        $r7 = $r6[i3];
+
+        staticinvoke <sun.rmi.server.Util: void checkMethod(java.lang.reflect.Method)>($r7);
+
+        i3 = i3 + 1;
+
+        goto label3;
+
+     label4:
+        virtualinvoke r5.<java.util.ArrayList: boolean add(java.lang.Object)>(r3);
+
+     label5:
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label6:
+        return;
+    }
+
+    private static void checkMethod(java.lang.reflect.Method)
+    {
+        java.lang.Class[] $r1;
+        java.lang.IllegalArgumentException $r2;
+        int $i0, i1;
+        java.lang.StringBuilder $r3, $r4, $r5;
+        java.lang.Class $r7;
+        java.lang.String $r6;
+        java.lang.reflect.Method r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.reflect.Method;
+
+        $r1 = virtualinvoke r0.<java.lang.reflect.Method: java.lang.Class[] getExceptionTypes()>();
+
+        i1 = 0;
+
+     label1:
+        $i0 = lengthof $r1;
+
+        if i1 >= $i0 goto label3;
+
+        $r7 = $r1[i1];
+
+        $z0 = virtualinvoke $r7.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(class "Ljava/rmi/RemoteException;");
+
+        if $z0 == 0 goto label2;
+
+        return;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("illegal remote method encountered: ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r6);
+
+        throw $r2;
+    }
+
+    private static java.rmi.server.RemoteStub createStub(java.lang.Class, java.rmi.server.RemoteRef) throws java.rmi.StubNotFoundException
+    {
+        java.lang.NoSuchMethodException $r38;
+        java.rmi.server.RemoteStub $r13;
+        java.lang.InstantiationException $r32;
+        java.rmi.StubNotFoundException $r15, $r21, $r27, $r33, $r39, $r45;
+        java.lang.IllegalAccessException $r26;
+        java.lang.reflect.InvocationTargetException $r20;
+        java.rmi.server.RemoteRef r11;
+        java.lang.StringBuilder $r0, $r3, $r4, $r16, $r17, $r18, $r22, $r23, $r24, $r28, $r29, $r30, $r34, $r35, $r36, $r40, $r41, $r42, $r46, $r47, $r48;
+        java.lang.ClassLoader $r6;
+        java.lang.Object[] $r10;
+        java.lang.reflect.Constructor $r9;
+        java.lang.ClassCastException $r14;
+        java.lang.String $r2, $r5, $r19, $r25, $r31, $r37, $r43, $r49;
+        java.lang.Class[] $r8;
+        java.lang.Class r1, $r7;
+        java.lang.Object $r12;
+        java.lang.ClassNotFoundException $r44;
+
+        r1 := @parameter0: java.lang.Class;
+
+        r11 := @parameter1: java.rmi.server.RemoteRef;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke r1.<java.lang.Class: java.lang.String getName()>();
+
+        $r3 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("_Stub");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label1:
+        $r6 = virtualinvoke r1.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $r7 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>($r5, 0, $r6);
+
+        $r8 = <sun.rmi.server.Util: java.lang.Class[] stubConsParamTypes>;
+
+        $r9 = virtualinvoke $r7.<java.lang.Class: java.lang.reflect.Constructor getConstructor(java.lang.Class[])>($r8);
+
+        $r10 = newarray (java.lang.Object)[1];
+
+        $r10[0] = r11;
+
+        $r12 = virtualinvoke $r9.<java.lang.reflect.Constructor: java.lang.Object newInstance(java.lang.Object[])>($r10);
+
+        $r13 = (java.rmi.server.RemoteStub) $r12;
+
+     label2:
+        return $r13;
+
+     label3:
+        $r44 := @caughtexception;
+
+        $r45 = new java.rmi.StubNotFoundException;
+
+        $r46 = new java.lang.StringBuilder;
+
+        specialinvoke $r46.<java.lang.StringBuilder: void <init>()>();
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Stub class not found: ");
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r45.<java.rmi.StubNotFoundException: void <init>(java.lang.String,java.lang.Exception)>($r49, $r44);
+
+        throw $r45;
+
+     label4:
+        $r38 := @caughtexception;
+
+        $r39 = new java.rmi.StubNotFoundException;
+
+        $r40 = new java.lang.StringBuilder;
+
+        specialinvoke $r40.<java.lang.StringBuilder: void <init>()>();
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Stub class missing constructor: ");
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r39.<java.rmi.StubNotFoundException: void <init>(java.lang.String,java.lang.Exception)>($r43, $r38);
+
+        throw $r39;
+
+     label5:
+        $r32 := @caughtexception;
+
+        $r33 = new java.rmi.StubNotFoundException;
+
+        $r34 = new java.lang.StringBuilder;
+
+        specialinvoke $r34.<java.lang.StringBuilder: void <init>()>();
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Can\'t create instance of stub class: ");
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r33.<java.rmi.StubNotFoundException: void <init>(java.lang.String,java.lang.Exception)>($r37, $r32);
+
+        throw $r33;
+
+     label6:
+        $r26 := @caughtexception;
+
+        $r27 = new java.rmi.StubNotFoundException;
+
+        $r28 = new java.lang.StringBuilder;
+
+        specialinvoke $r28.<java.lang.StringBuilder: void <init>()>();
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Stub class constructor not public: ");
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r27.<java.rmi.StubNotFoundException: void <init>(java.lang.String,java.lang.Exception)>($r31, $r26);
+
+        throw $r27;
+
+     label7:
+        $r20 := @caughtexception;
+
+        $r21 = new java.rmi.StubNotFoundException;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception creating instance of stub class: ");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r21.<java.rmi.StubNotFoundException: void <init>(java.lang.String,java.lang.Exception)>($r25, $r20);
+
+        throw $r21;
+
+     label8:
+        $r14 := @caughtexception;
+
+        $r15 = new java.rmi.StubNotFoundException;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Stub class not instance of RemoteStub: ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r15.<java.rmi.StubNotFoundException: void <init>(java.lang.String,java.lang.Exception)>($r19, $r14);
+
+        throw $r15;
+
+        catch java.lang.ClassNotFoundException from label1 to label2 with label3;
+        catch java.lang.NoSuchMethodException from label1 to label2 with label4;
+        catch java.lang.InstantiationException from label1 to label2 with label5;
+        catch java.lang.IllegalAccessException from label1 to label2 with label6;
+        catch java.lang.reflect.InvocationTargetException from label1 to label2 with label7;
+        catch java.lang.ClassCastException from label1 to label2 with label8;
+    }
+
+    static java.rmi.server.Skeleton createSkeleton(java.rmi.Remote) throws java.rmi.server.SkeletonNotFoundException
+    {
+        java.rmi.server.SkeletonNotFoundException $r13, $r19, $r25, $r31, $r37;
+        java.lang.InstantiationException $r24;
+        java.lang.IllegalAccessException $r18;
+        java.rmi.server.Skeleton $r11;
+        java.lang.StringBuilder $r3, $r5, $r6, $r14, $r15, $r16, $r20, $r21, $r22, $r26, $r27, $r28, $r32, $r33, $r34, $r38, $r39, $r42;
+        java.lang.ClassLoader $r8;
+        java.lang.ClassCastException $r12;
+        java.lang.String $r4, $r7, $r17, $r23, $r29, $r35, $r41, $r43;
+        java.rmi.Remote r0;
+        java.lang.Class $r1, $r2, $r9, $r40;
+        java.lang.Object $r10;
+        java.lang.ClassNotFoundException $r30, $r36;
+
+        r0 := @parameter0: java.rmi.Remote;
+
+     label01:
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r2 = staticinvoke <sun.rmi.server.Util: java.lang.Class getRemoteClass(java.lang.Class)>($r1);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r36 := @caughtexception;
+
+        $r37 = new java.rmi.server.SkeletonNotFoundException;
+
+        $r38 = new java.lang.StringBuilder;
+
+        specialinvoke $r38.<java.lang.StringBuilder: void <init>()>();
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("object does not implement a remote interface: ");
+
+        $r40 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r41 = virtualinvoke $r40.<java.lang.Class: java.lang.String getName()>();
+
+        $r42 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r41);
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r37.<java.rmi.server.SkeletonNotFoundException: void <init>(java.lang.String)>($r43);
+
+        throw $r37;
+
+     label04:
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("_Skel");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label05:
+        $r8 = virtualinvoke $r2.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $r9 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>($r7, 0, $r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.Class: java.lang.Object newInstance()>();
+
+        $r11 = (java.rmi.server.Skeleton) $r10;
+
+     label06:
+        return $r11;
+
+     label07:
+        $r30 := @caughtexception;
+
+        $r31 = new java.rmi.server.SkeletonNotFoundException;
+
+        $r32 = new java.lang.StringBuilder;
+
+        specialinvoke $r32.<java.lang.StringBuilder: void <init>()>();
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Skeleton class not found: ");
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r31.<java.rmi.server.SkeletonNotFoundException: void <init>(java.lang.String,java.lang.Exception)>($r35, $r30);
+
+        throw $r31;
+
+     label08:
+        $r24 := @caughtexception;
+
+        $r25 = new java.rmi.server.SkeletonNotFoundException;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Can\'t create skeleton: ");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r25.<java.rmi.server.SkeletonNotFoundException: void <init>(java.lang.String,java.lang.Exception)>($r29, $r24);
+
+        throw $r25;
+
+     label09:
+        $r18 := @caughtexception;
+
+        $r19 = new java.rmi.server.SkeletonNotFoundException;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No public constructor: ");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r19.<java.rmi.server.SkeletonNotFoundException: void <init>(java.lang.String,java.lang.Exception)>($r23, $r18);
+
+        throw $r19;
+
+     label10:
+        $r12 := @caughtexception;
+
+        $r13 = new java.rmi.server.SkeletonNotFoundException;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Skeleton not of correct class: ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<java.rmi.server.SkeletonNotFoundException: void <init>(java.lang.String,java.lang.Exception)>($r17, $r12);
+
+        throw $r13;
+
+        catch java.lang.ClassNotFoundException from label01 to label02 with label03;
+        catch java.lang.ClassNotFoundException from label05 to label06 with label07;
+        catch java.lang.InstantiationException from label05 to label06 with label08;
+        catch java.lang.IllegalAccessException from label05 to label06 with label09;
+        catch java.lang.ClassCastException from label05 to label06 with label10;
+    }
+
+    public static long computeMethodHash(java.lang.reflect.Method)
+    {
+        byte[] $r8;
+        java.io.ByteArrayOutputStream $r20;
+        java.security.MessageDigest $r1;
+        long $l3, $l4, l5;
+        java.util.logging.Level $r6, $r11;
+        short $s1, $s9;
+        byte $b0;
+        java.io.DataOutputStream $r22;
+        int $i2, i6, $i7, $i8;
+        java.lang.SecurityException $r24;
+        java.lang.String $r5, $r15, $r18;
+        java.lang.reflect.Method r4;
+        boolean $z0;
+        java.io.IOException $r19;
+        sun.rmi.runtime.Log $r7, $r10;
+        java.security.DigestOutputStream $r21;
+        java.security.NoSuchAlgorithmException $r16;
+        java.lang.StringBuilder $r12, $r13, $r14, $r23;
+
+        r4 := @parameter0: java.lang.reflect.Method;
+
+        l5 = 0L;
+
+        $r20 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r20.<java.io.ByteArrayOutputStream: void <init>(int)>(127);
+
+     label1:
+        $r1 = staticinvoke <java.security.MessageDigest: java.security.MessageDigest getInstance(java.lang.String)>("SHA");
+
+        $r22 = new java.io.DataOutputStream;
+
+        $r21 = new java.security.DigestOutputStream;
+
+        specialinvoke $r21.<java.security.DigestOutputStream: void <init>(java.io.OutputStream,java.security.MessageDigest)>($r20, $r1);
+
+        specialinvoke $r22.<java.io.DataOutputStream: void <init>(java.io.OutputStream)>($r21);
+
+        $r5 = staticinvoke <sun.rmi.server.Util: java.lang.String getMethodNameAndDescriptor(java.lang.reflect.Method)>(r4);
+
+        $r7 = <sun.rmi.server.Util: sun.rmi.runtime.Log serverRefLog>;
+
+        $r6 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z0 = virtualinvoke $r7.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r6);
+
+        if $z0 == 0 goto label2;
+
+        $r10 = <sun.rmi.server.Util: sun.rmi.runtime.Log serverRefLog>;
+
+        $r11 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("string used for method hash: \"");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r10.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r11, $r15);
+
+     label2:
+        virtualinvoke $r22.<java.io.DataOutputStream: void writeUTF(java.lang.String)>($r5);
+
+        virtualinvoke $r22.<java.io.DataOutputStream: void flush()>();
+
+        $r8 = virtualinvoke $r1.<java.security.MessageDigest: byte[] digest()>();
+
+        i6 = 0;
+
+     label3:
+        $i7 = lengthof $r8;
+
+        $i8 = staticinvoke <java.lang.Math: int min(int,int)>(8, $i7);
+
+        if i6 >= $i8 goto label4;
+
+        $b0 = $r8[i6];
+
+        $s9 = (short) $b0;
+
+        $s1 = $s9 & 255;
+
+        $l3 = (long) $s1;
+
+        $i2 = i6 * 8;
+
+        $l4 = $l3 << $i2;
+
+        l5 = l5 + $l4;
+
+        i6 = i6 + 1;
+
+        goto label3;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r19 := @caughtexception;
+
+        l5 = -1L;
+
+        goto label7;
+
+     label6:
+        $r16 := @caughtexception;
+
+        $r24 = new java.lang.SecurityException;
+
+        $r18 = virtualinvoke $r16.<java.security.NoSuchAlgorithmException: java.lang.String getMessage()>();
+
+        specialinvoke $r24.<java.lang.SecurityException: void <init>(java.lang.String)>($r18);
+
+        throw $r24;
+
+     label7:
+        return l5;
+
+        catch java.io.IOException from label1 to label4 with label5;
+        catch java.security.NoSuchAlgorithmException from label1 to label4 with label6;
+    }
+
+    private static java.lang.String getMethodNameAndDescriptor(java.lang.reflect.Method)
+    {
+        java.lang.Class[] $r3;
+        java.lang.StringBuffer $r0;
+        int $i0, i1;
+        java.lang.Class $r4, $r5, $r8;
+        java.lang.String $r2, $r6, $r7, $r9;
+        java.lang.reflect.Method r1;
+
+        r1 := @parameter0: java.lang.reflect.Method;
+
+        $r0 = new java.lang.StringBuffer;
+
+        $r2 = virtualinvoke r1.<java.lang.reflect.Method: java.lang.String getName()>();
+
+        specialinvoke $r0.<java.lang.StringBuffer: void <init>(java.lang.String)>($r2);
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(40);
+
+        $r3 = virtualinvoke r1.<java.lang.reflect.Method: java.lang.Class[] getParameterTypes()>();
+
+        i1 = 0;
+
+     label1:
+        $i0 = lengthof $r3;
+
+        if i1 >= $i0 goto label2;
+
+        $r8 = $r3[i1];
+
+        $r9 = staticinvoke <sun.rmi.server.Util: java.lang.String getTypeDescriptor(java.lang.Class)>($r8);
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r9);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(41);
+
+        $r4 = virtualinvoke r1.<java.lang.reflect.Method: java.lang.Class getReturnType()>();
+
+        $r5 = <java.lang.Void: java.lang.Class TYPE>;
+
+        if $r4 != $r5 goto label3;
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(86);
+
+        goto label4;
+
+     label3:
+        $r6 = staticinvoke <sun.rmi.server.Util: java.lang.String getTypeDescriptor(java.lang.Class)>($r4);
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r6);
+
+     label4:
+        $r7 = virtualinvoke $r0.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r7;
+    }
+
+    private static java.lang.String getTypeDescriptor(java.lang.Class)
+    {
+        java.lang.Error $r19;
+        java.lang.String $r3, $r4, $r7, $r8, $r9, $r23;
+        boolean $z0, $z1;
+        java.lang.Class r0, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18;
+        java.lang.StringBuilder $r1, $r2, $r5, $r6, $r20, $r21, $r22;
+
+        r0 := @parameter0: java.lang.Class;
+
+        $z0 = virtualinvoke r0.<java.lang.Class: boolean isPrimitive()>();
+
+        if $z0 == 0 goto label10;
+
+        $r10 = <java.lang.Integer: java.lang.Class TYPE>;
+
+        if r0 != $r10 goto label01;
+
+        return "I";
+
+     label01:
+        $r11 = <java.lang.Boolean: java.lang.Class TYPE>;
+
+        if r0 != $r11 goto label02;
+
+        return "Z";
+
+     label02:
+        $r12 = <java.lang.Byte: java.lang.Class TYPE>;
+
+        if r0 != $r12 goto label03;
+
+        return "B";
+
+     label03:
+        $r13 = <java.lang.Character: java.lang.Class TYPE>;
+
+        if r0 != $r13 goto label04;
+
+        return "C";
+
+     label04:
+        $r14 = <java.lang.Short: java.lang.Class TYPE>;
+
+        if r0 != $r14 goto label05;
+
+        return "S";
+
+     label05:
+        $r15 = <java.lang.Long: java.lang.Class TYPE>;
+
+        if r0 != $r15 goto label06;
+
+        return "J";
+
+     label06:
+        $r16 = <java.lang.Float: java.lang.Class TYPE>;
+
+        if r0 != $r16 goto label07;
+
+        return "F";
+
+     label07:
+        $r17 = <java.lang.Double: java.lang.Class TYPE>;
+
+        if r0 != $r17 goto label08;
+
+        return "D";
+
+     label08:
+        $r18 = <java.lang.Void: java.lang.Class TYPE>;
+
+        if r0 != $r18 goto label09;
+
+        return "V";
+
+     label09:
+        $r19 = new java.lang.Error;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unrecognized primitive type: ");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r19.<java.lang.Error: void <init>(java.lang.String)>($r23);
+
+        throw $r19;
+
+     label10:
+        $z1 = virtualinvoke r0.<java.lang.Class: boolean isArray()>();
+
+        if $z1 == 0 goto label11;
+
+        $r8 = virtualinvoke r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.String: java.lang.String replace(char,char)>(46, 47);
+
+        return $r9;
+
+     label11:
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("L");
+
+        $r3 = virtualinvoke r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.String: java.lang.String replace(char,char)>(46, 47);
+
+        $r5 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(";");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r7;
+    }
+
+    public static java.lang.String getUnqualifiedName(java.lang.Class)
+    {
+        int $i0, $i1;
+        java.lang.Class r0;
+        java.lang.String $r1, $r2;
+
+        r0 := @parameter0: java.lang.Class;
+
+        $r1 = virtualinvoke r0.<java.lang.Class: java.lang.String getName()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int lastIndexOf(int)>(46);
+
+        $i1 = $i0 + 1;
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>($i1);
+
+        return $r2;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class[] $r9;
+        sun.security.action.GetPropertyAction $r0;
+        sun.rmi.runtime.Log $r3;
+        java.util.Map $r8;
+        int $i0, $i1;
+        sun.security.action.GetBooleanAction $r4;
+        java.lang.Boolean $r6;
+        java.lang.Object $r1, $r5;
+        java.lang.String $r2;
+        java.util.WeakHashMap $r7;
+        boolean $z0;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("sun.rmi.server.logLevel");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r2 = (java.lang.String) $r1;
+
+        $i0 = staticinvoke <java.rmi.server.LogStream: int parseLevel(java.lang.String)>($r2);
+
+        <sun.rmi.server.Util: int logLevel> = $i0;
+
+        $i1 = <sun.rmi.server.Util: int logLevel>;
+
+        $r3 = staticinvoke <sun.rmi.runtime.Log: sun.rmi.runtime.Log getLog(java.lang.String,java.lang.String,int)>("sun.rmi.server.ref", "transport", $i1);
+
+        <sun.rmi.server.Util: sun.rmi.runtime.Log serverRefLog> = $r3;
+
+        $r4 = new sun.security.action.GetBooleanAction;
+
+        specialinvoke $r4.<sun.security.action.GetBooleanAction: void <init>(java.lang.String)>("java.rmi.server.ignoreStubClasses");
+
+        $r5 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r4);
+
+        $r6 = (java.lang.Boolean) $r5;
+
+        $z0 = virtualinvoke $r6.<java.lang.Boolean: boolean booleanValue()>();
+
+        <sun.rmi.server.Util: boolean ignoreStubClasses> = $z0;
+
+        $r7 = new java.util.WeakHashMap;
+
+        specialinvoke $r7.<java.util.WeakHashMap: void <init>(int)>(11);
+
+        $r8 = staticinvoke <java.util.Collections: java.util.Map synchronizedMap(java.util.Map)>($r7);
+
+        <sun.rmi.server.Util: java.util.Map withoutStubs> = $r8;
+
+        $r9 = newarray (java.lang.Class)[1];
+
+        $r9[0] = class "Ljava/rmi/server/RemoteRef;";
+
+        <sun.rmi.server.Util: java.lang.Class[] stubConsParamTypes> = $r9;
+
+        return;
+    }
+}

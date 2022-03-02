@@ -1,0 +1,727 @@
+class sun.net.httpserver.ServerImpl$Dispatcher extends java.lang.Object implements java.lang.Runnable
+{
+    final java.util.LinkedList connsToRegister;
+    static final boolean $assertionsDisabled;
+    final sun.net.httpserver.ServerImpl this$0;
+
+    void <init>(sun.net.httpserver.ServerImpl)
+    {
+        sun.net.httpserver.ServerImpl$Dispatcher r0;
+        java.util.LinkedList $r2;
+        sun.net.httpserver.ServerImpl r1;
+
+        r0 := @this: sun.net.httpserver.ServerImpl$Dispatcher;
+
+        r1 := @parameter0: sun.net.httpserver.ServerImpl;
+
+        r0.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0> = r1;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r2 = new java.util.LinkedList;
+
+        specialinvoke $r2.<java.util.LinkedList: void <init>()>();
+
+        r0.<sun.net.httpserver.ServerImpl$Dispatcher: java.util.LinkedList connsToRegister> = $r2;
+
+        return;
+    }
+
+    private void handleEvent(sun.net.httpserver.Event)
+    {
+        sun.net.httpserver.ExchangeImpl r1;
+        sun.net.httpserver.LeftOverInputStream $r24;
+        java.nio.channels.SocketChannel $r15;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        sun.net.httpserver.ServerImpl $r4, $r7, $r8, $r9, $r11, $r14, $r18, $r19, $r21, $r25;
+        sun.net.httpserver.HttpConnection $r2;
+        java.util.Set $r10, $r12;
+        sun.net.httpserver.HttpConnection$State $r16, $r17;
+        java.util.logging.Logger $r5, $r22;
+        sun.net.httpserver.ServerImpl$Dispatcher r3;
+        java.util.logging.Level $r6, $r23;
+        int $i0, $i1, $i2;
+        java.util.LinkedList $r13;
+        java.io.IOException $r20;
+        sun.net.httpserver.Event r0;
+
+        r3 := @this: sun.net.httpserver.ServerImpl$Dispatcher;
+
+        r0 := @parameter0: sun.net.httpserver.Event;
+
+        r1 = r0.<sun.net.httpserver.Event: sun.net.httpserver.ExchangeImpl exchange>;
+
+        $r2 = virtualinvoke r1.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.HttpConnection getConnection()>();
+
+     label1:
+        $z0 = r0 instanceof sun.net.httpserver.WriteFinishedEvent;
+
+        if $z0 == 0 goto label7;
+
+        $r4 = r3.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r5 = staticinvoke <sun.net.httpserver.ServerImpl: java.util.logging.Logger access$200(sun.net.httpserver.ServerImpl)>($r4);
+
+        $r6 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        virtualinvoke $r5.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String)>($r6, "Write Finished");
+
+        $r7 = r3.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $i0 = virtualinvoke $r7.<sun.net.httpserver.ServerImpl: int endExchange()>();
+
+        $r8 = r3.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $z1 = staticinvoke <sun.net.httpserver.ServerImpl: boolean access$300(sun.net.httpserver.ServerImpl)>($r8);
+
+        if $z1 == 0 goto label2;
+
+        if $i0 != 0 goto label2;
+
+        $r19 = r3.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        staticinvoke <sun.net.httpserver.ServerImpl: boolean access$402(sun.net.httpserver.ServerImpl,boolean)>($r19, 1);
+
+     label2:
+        $r24 = virtualinvoke r1.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.LeftOverInputStream getOriginalInputStream()>();
+
+        $z3 = virtualinvoke $r24.<sun.net.httpserver.LeftOverInputStream: boolean isEOF()>();
+
+        if $z3 != 0 goto label3;
+
+        r1.<sun.net.httpserver.ExchangeImpl: boolean close> = 1;
+
+        $r16 = virtualinvoke $r2.<sun.net.httpserver.HttpConnection: sun.net.httpserver.HttpConnection$State getState()>();
+
+        $r17 = <sun.net.httpserver.HttpConnection$State: sun.net.httpserver.HttpConnection$State REQUEST>;
+
+        if $r16 != $r17 goto label3;
+
+        $r18 = r3.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        virtualinvoke $r18.<sun.net.httpserver.ServerImpl: void requestCompleted(sun.net.httpserver.HttpConnection)>($r2);
+
+     label3:
+        $r25 = r3.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        virtualinvoke $r25.<sun.net.httpserver.ServerImpl: void responseCompleted(sun.net.httpserver.HttpConnection)>($r2);
+
+        $z4 = r1.<sun.net.httpserver.ExchangeImpl: boolean close>;
+
+        if $z4 != 0 goto label4;
+
+        $r11 = r3.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r12 = staticinvoke <sun.net.httpserver.ServerImpl: java.util.Set access$500(sun.net.httpserver.ServerImpl)>($r11);
+
+        $i1 = interfaceinvoke $r12.<java.util.Set: int size()>();
+
+        $i2 = <sun.net.httpserver.ServerImpl: int MAX_IDLE_CONNECTIONS>;
+
+        if $i1 < $i2 goto label5;
+
+     label4:
+        virtualinvoke $r2.<sun.net.httpserver.HttpConnection: void close()>();
+
+        $r9 = r3.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r10 = staticinvoke <sun.net.httpserver.ServerImpl: java.util.Set access$600(sun.net.httpserver.ServerImpl)>($r9);
+
+        interfaceinvoke $r10.<java.util.Set: boolean remove(java.lang.Object)>($r2);
+
+        goto label7;
+
+     label5:
+        $z2 = virtualinvoke $r24.<sun.net.httpserver.LeftOverInputStream: boolean isDataBuffered()>();
+
+        if $z2 == 0 goto label6;
+
+        $r14 = r3.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        virtualinvoke $r14.<sun.net.httpserver.ServerImpl: void requestStarted(sun.net.httpserver.HttpConnection)>($r2);
+
+        $r15 = virtualinvoke $r2.<sun.net.httpserver.HttpConnection: java.nio.channels.SocketChannel getChannel()>();
+
+        virtualinvoke r3.<sun.net.httpserver.ServerImpl$Dispatcher: void handle(java.nio.channels.SocketChannel,sun.net.httpserver.HttpConnection)>($r15, $r2);
+
+        goto label7;
+
+     label6:
+        $r13 = r3.<sun.net.httpserver.ServerImpl$Dispatcher: java.util.LinkedList connsToRegister>;
+
+        virtualinvoke $r13.<java.util.LinkedList: boolean add(java.lang.Object)>($r2);
+
+     label7:
+        goto label9;
+
+     label8:
+        $r20 := @caughtexception;
+
+        $r21 = r3.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r22 = staticinvoke <sun.net.httpserver.ServerImpl: java.util.logging.Logger access$200(sun.net.httpserver.ServerImpl)>($r21);
+
+        $r23 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        virtualinvoke $r22.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r23, "Dispatcher (1)", $r20);
+
+        virtualinvoke $r2.<sun.net.httpserver.HttpConnection: void close()>();
+
+     label9:
+        return;
+
+        catch java.io.IOException from label1 to label7 with label8;
+    }
+
+    void reRegister(sun.net.httpserver.HttpConnection)
+    {
+        java.nio.channels.Selector $r4;
+        sun.net.httpserver.ServerImpl$Dispatcher r2;
+        long $l0, $l1, $l2;
+        java.util.logging.Level $r12;
+        java.nio.channels.SocketChannel $r1;
+        sun.net.httpserver.ServerImpl $r3, $r6, $r7, $r10;
+        java.nio.channels.SelectionKey $r5;
+        sun.net.httpserver.HttpConnection r0;
+        java.util.Set $r8;
+        java.io.IOException $r9;
+        java.util.logging.Logger $r11;
+
+        r2 := @this: sun.net.httpserver.ServerImpl$Dispatcher;
+
+        r0 := @parameter0: sun.net.httpserver.HttpConnection;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.net.httpserver.HttpConnection: java.nio.channels.SocketChannel getChannel()>();
+
+        virtualinvoke $r1.<java.nio.channels.SocketChannel: java.nio.channels.SelectableChannel configureBlocking(boolean)>(0);
+
+        $r3 = r2.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r4 = staticinvoke <sun.net.httpserver.ServerImpl: java.nio.channels.Selector access$700(sun.net.httpserver.ServerImpl)>($r3);
+
+        $r5 = virtualinvoke $r1.<java.nio.channels.SocketChannel: java.nio.channels.SelectionKey register(java.nio.channels.Selector,int)>($r4, 1);
+
+        virtualinvoke $r5.<java.nio.channels.SelectionKey: java.lang.Object attach(java.lang.Object)>(r0);
+
+        r0.<sun.net.httpserver.HttpConnection: java.nio.channels.SelectionKey selectionKey> = $r5;
+
+        $r6 = r2.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $l0 = virtualinvoke $r6.<sun.net.httpserver.ServerImpl: long getTime()>();
+
+        $l1 = <sun.net.httpserver.ServerImpl: long IDLE_INTERVAL>;
+
+        $l2 = $l0 + $l1;
+
+        r0.<sun.net.httpserver.HttpConnection: long time> = $l2;
+
+        $r7 = r2.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r8 = staticinvoke <sun.net.httpserver.ServerImpl: java.util.Set access$500(sun.net.httpserver.ServerImpl)>($r7);
+
+        interfaceinvoke $r8.<java.util.Set: boolean add(java.lang.Object)>(r0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r9 := @caughtexception;
+
+        staticinvoke <sun.net.httpserver.ServerImpl: void dprint(java.lang.Exception)>($r9);
+
+        $r10 = r2.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r11 = staticinvoke <sun.net.httpserver.ServerImpl: java.util.logging.Logger access$200(sun.net.httpserver.ServerImpl)>($r10);
+
+        $r12 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        virtualinvoke $r11.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r12, "Dispatcher(8)", $r9);
+
+        virtualinvoke r0.<sun.net.httpserver.HttpConnection: void close()>();
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public void run()
+    {
+        sun.net.httpserver.ServerImpl $r1, $r3, $r5, $r10, $r12, $r16, $r20, $r25, $r27, $r28, $r29, $r32, $r36, $r37, $r43, $r45, $r48, $r52, $r58;
+        sun.net.httpserver.HttpConnection $r35, r61, r63;
+        java.util.Set $r14, $r26, $r38;
+        java.lang.Exception $r46, $r47;
+        java.lang.Throwable $r57;
+        java.nio.channels.CancelledKeyException $r56;
+        java.nio.channels.Selector $r2, $r11, $r13, $r17, $r33;
+        sun.net.httpserver.ServerImpl$Dispatcher r0;
+        java.lang.AssertionError $r22;
+        java.nio.channels.SelectionKey r19, $r21, $r34;
+        java.io.IOException $r51, $r55;
+        sun.net.httpserver.Event r60;
+        java.nio.channels.SocketChannel $r31, r62;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        java.util.logging.Logger $r49, $r53;
+        java.util.List $r6, r59;
+        java.net.Socket $r39;
+        java.util.logging.Level $r50, $r54;
+        int $i0;
+        java.util.LinkedList $r7, $r9, $r44;
+        java.util.Iterator $r8, $r15, $r41;
+        java.nio.channels.ServerSocketChannel $r30;
+        java.nio.channels.SelectableChannel $r23;
+        java.lang.Object $r4, $r18, $r24, $r40, $r42;
+
+        r0 := @this: sun.net.httpserver.ServerImpl$Dispatcher;
+
+     label01:
+        $r58 = r0.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $z7 = staticinvoke <sun.net.httpserver.ServerImpl: boolean access$400(sun.net.httpserver.ServerImpl)>($r58);
+
+        if $z7 != 0 goto label28;
+
+     label02:
+        r59 = null;
+
+        $r3 = r0.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r4 = staticinvoke <sun.net.httpserver.ServerImpl: java.lang.Object access$800(sun.net.httpserver.ServerImpl)>($r3);
+
+        entermonitor $r4;
+
+     label03:
+        $r5 = r0.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r6 = staticinvoke <sun.net.httpserver.ServerImpl: java.util.List access$900(sun.net.httpserver.ServerImpl)>($r5);
+
+        $i0 = interfaceinvoke $r6.<java.util.List: int size()>();
+
+        if $i0 <= 0 goto label04;
+
+        $r43 = r0.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        r59 = staticinvoke <sun.net.httpserver.ServerImpl: java.util.List access$900(sun.net.httpserver.ServerImpl)>($r43);
+
+        $r45 = r0.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r44 = new java.util.LinkedList;
+
+        specialinvoke $r44.<java.util.LinkedList: void <init>()>();
+
+        staticinvoke <sun.net.httpserver.ServerImpl: java.util.List access$902(sun.net.httpserver.ServerImpl,java.util.List)>($r45, $r44);
+
+     label04:
+        exitmonitor $r4;
+
+     label05:
+        goto label08;
+
+     label06:
+        $r57 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label07:
+        throw $r57;
+
+     label08:
+        if r59 == null goto label10;
+
+        $r41 = interfaceinvoke r59.<java.util.List: java.util.Iterator iterator()>();
+
+     label09:
+        $z6 = interfaceinvoke $r41.<java.util.Iterator: boolean hasNext()>();
+
+        if $z6 == 0 goto label10;
+
+        $r42 = interfaceinvoke $r41.<java.util.Iterator: java.lang.Object next()>();
+
+        r60 = (sun.net.httpserver.Event) $r42;
+
+        specialinvoke r0.<sun.net.httpserver.ServerImpl$Dispatcher: void handleEvent(sun.net.httpserver.Event)>(r60);
+
+        goto label09;
+
+     label10:
+        $r7 = r0.<sun.net.httpserver.ServerImpl$Dispatcher: java.util.LinkedList connsToRegister>;
+
+        $r8 = virtualinvoke $r7.<java.util.LinkedList: java.util.Iterator iterator()>();
+
+     label11:
+        $z8 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z8 == 0 goto label12;
+
+        $r40 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        r61 = (sun.net.httpserver.HttpConnection) $r40;
+
+        virtualinvoke r0.<sun.net.httpserver.ServerImpl$Dispatcher: void reRegister(sun.net.httpserver.HttpConnection)>(r61);
+
+        goto label11;
+
+     label12:
+        $r9 = r0.<sun.net.httpserver.ServerImpl$Dispatcher: java.util.LinkedList connsToRegister>;
+
+        virtualinvoke $r9.<java.util.LinkedList: void clear()>();
+
+        $r10 = r0.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r11 = staticinvoke <sun.net.httpserver.ServerImpl: java.nio.channels.Selector access$700(sun.net.httpserver.ServerImpl)>($r10);
+
+        virtualinvoke $r11.<java.nio.channels.Selector: int select(long)>(1000L);
+
+        $r12 = r0.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r13 = staticinvoke <sun.net.httpserver.ServerImpl: java.nio.channels.Selector access$700(sun.net.httpserver.ServerImpl)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.nio.channels.Selector: java.util.Set selectedKeys()>();
+
+        $r15 = interfaceinvoke $r14.<java.util.Set: java.util.Iterator iterator()>();
+
+     label13:
+        $z9 = interfaceinvoke $r15.<java.util.Iterator: boolean hasNext()>();
+
+        if $z9 == 0 goto label24;
+
+        $r18 = interfaceinvoke $r15.<java.util.Iterator: java.lang.Object next()>();
+
+        r19 = (java.nio.channels.SelectionKey) $r18;
+
+        interfaceinvoke $r15.<java.util.Iterator: void remove()>();
+
+        $r20 = r0.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r21 = staticinvoke <sun.net.httpserver.ServerImpl: java.nio.channels.SelectionKey access$1000(sun.net.httpserver.ServerImpl)>($r20);
+
+        $z0 = virtualinvoke r19.<java.lang.Object: boolean equals(java.lang.Object)>($r21);
+
+        if $z0 == 0 goto label17;
+
+        $r28 = r0.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $z4 = staticinvoke <sun.net.httpserver.ServerImpl: boolean access$300(sun.net.httpserver.ServerImpl)>($r28);
+
+        if $z4 == 0 goto label14;
+
+        goto label13;
+
+     label14:
+        $r29 = r0.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r30 = staticinvoke <sun.net.httpserver.ServerImpl: java.nio.channels.ServerSocketChannel access$100(sun.net.httpserver.ServerImpl)>($r29);
+
+        $r31 = virtualinvoke $r30.<java.nio.channels.ServerSocketChannel: java.nio.channels.SocketChannel accept()>();
+
+        $z5 = staticinvoke <sun.net.httpserver.ServerConfig: boolean noDelay()>();
+
+        if $z5 == 0 goto label15;
+
+        $r39 = virtualinvoke $r31.<java.nio.channels.SocketChannel: java.net.Socket socket()>();
+
+        virtualinvoke $r39.<java.net.Socket: void setTcpNoDelay(boolean)>(1);
+
+     label15:
+        if $r31 != null goto label16;
+
+        goto label13;
+
+     label16:
+        virtualinvoke $r31.<java.nio.channels.SocketChannel: java.nio.channels.SelectableChannel configureBlocking(boolean)>(0);
+
+        $r32 = r0.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r33 = staticinvoke <sun.net.httpserver.ServerImpl: java.nio.channels.Selector access$700(sun.net.httpserver.ServerImpl)>($r32);
+
+        $r34 = virtualinvoke $r31.<java.nio.channels.SocketChannel: java.nio.channels.SelectionKey register(java.nio.channels.Selector,int)>($r33, 1);
+
+        $r35 = new sun.net.httpserver.HttpConnection;
+
+        specialinvoke $r35.<sun.net.httpserver.HttpConnection: void <init>()>();
+
+        $r35.<sun.net.httpserver.HttpConnection: java.nio.channels.SelectionKey selectionKey> = $r34;
+
+        virtualinvoke $r35.<sun.net.httpserver.HttpConnection: void setChannel(java.nio.channels.SocketChannel)>($r31);
+
+        virtualinvoke $r34.<java.nio.channels.SelectionKey: java.lang.Object attach(java.lang.Object)>($r35);
+
+        $r36 = r0.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        virtualinvoke $r36.<sun.net.httpserver.ServerImpl: void requestStarted(sun.net.httpserver.HttpConnection)>($r35);
+
+        $r37 = r0.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r38 = staticinvoke <sun.net.httpserver.ServerImpl: java.util.Set access$600(sun.net.httpserver.ServerImpl)>($r37);
+
+        interfaceinvoke $r38.<java.util.Set: boolean add(java.lang.Object)>($r35);
+
+        goto label23;
+
+     label17:
+        $z1 = virtualinvoke r19.<java.nio.channels.SelectionKey: boolean isReadable()>();
+
+        if $z1 == 0 goto label19;
+
+        $r23 = virtualinvoke r19.<java.nio.channels.SelectionKey: java.nio.channels.SelectableChannel channel()>();
+
+        r62 = (java.nio.channels.SocketChannel) $r23;
+
+        $r24 = virtualinvoke r19.<java.nio.channels.SelectionKey: java.lang.Object attachment()>();
+
+        r63 = (sun.net.httpserver.HttpConnection) $r24;
+
+        virtualinvoke r19.<java.nio.channels.SelectionKey: void cancel()>();
+
+        virtualinvoke r62.<java.nio.channels.SocketChannel: java.nio.channels.SelectableChannel configureBlocking(boolean)>(1);
+
+        $r25 = r0.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r26 = staticinvoke <sun.net.httpserver.ServerImpl: java.util.Set access$500(sun.net.httpserver.ServerImpl)>($r25);
+
+        $z3 = interfaceinvoke $r26.<java.util.Set: boolean remove(java.lang.Object)>(r63);
+
+        if $z3 == 0 goto label18;
+
+        $r27 = r0.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        virtualinvoke $r27.<sun.net.httpserver.ServerImpl: void requestStarted(sun.net.httpserver.HttpConnection)>(r63);
+
+     label18:
+        virtualinvoke r0.<sun.net.httpserver.ServerImpl$Dispatcher: void handle(java.nio.channels.SocketChannel,sun.net.httpserver.HttpConnection)>(r62, r63);
+
+        goto label20;
+
+     label19:
+        $z2 = <sun.net.httpserver.ServerImpl$Dispatcher: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label20;
+
+        $r22 = new java.lang.AssertionError;
+
+        specialinvoke $r22.<java.lang.AssertionError: void <init>()>();
+
+        throw $r22;
+
+     label20:
+        goto label23;
+
+     label21:
+        $r56 := @caughtexception;
+
+        specialinvoke r0.<sun.net.httpserver.ServerImpl$Dispatcher: void handleException(java.nio.channels.SelectionKey,java.lang.Exception)>(r19, null);
+
+        goto label23;
+
+     label22:
+        $r55 := @caughtexception;
+
+        specialinvoke r0.<sun.net.httpserver.ServerImpl$Dispatcher: void handleException(java.nio.channels.SelectionKey,java.lang.Exception)>(r19, $r55);
+
+     label23:
+        goto label13;
+
+     label24:
+        $r16 = r0.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r17 = staticinvoke <sun.net.httpserver.ServerImpl: java.nio.channels.Selector access$700(sun.net.httpserver.ServerImpl)>($r16);
+
+        virtualinvoke $r17.<java.nio.channels.Selector: int selectNow()>();
+
+     label25:
+        goto label01;
+
+     label26:
+        $r51 := @caughtexception;
+
+        $r52 = r0.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r53 = staticinvoke <sun.net.httpserver.ServerImpl: java.util.logging.Logger access$200(sun.net.httpserver.ServerImpl)>($r52);
+
+        $r54 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        virtualinvoke $r53.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r54, "Dispatcher (4)", $r51);
+
+        goto label01;
+
+     label27:
+        $r47 := @caughtexception;
+
+        $r48 = r0.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r49 = staticinvoke <sun.net.httpserver.ServerImpl: java.util.logging.Logger access$200(sun.net.httpserver.ServerImpl)>($r48);
+
+        $r50 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        virtualinvoke $r49.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r50, "Dispatcher (7)", $r47);
+
+        goto label01;
+
+     label28:
+        $r1 = r0.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r2 = staticinvoke <sun.net.httpserver.ServerImpl: java.nio.channels.Selector access$700(sun.net.httpserver.ServerImpl)>($r1);
+
+        virtualinvoke $r2.<java.nio.channels.Selector: void close()>();
+
+     label29:
+        goto label31;
+
+     label30:
+        $r46 := @caughtexception;
+
+     label31:
+        return;
+
+        catch java.lang.Throwable from label03 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+        catch java.nio.channels.CancelledKeyException from label17 to label20 with label21;
+        catch java.io.IOException from label17 to label20 with label22;
+        catch java.io.IOException from label02 to label25 with label26;
+        catch java.lang.Exception from label02 to label25 with label27;
+        catch java.lang.Exception from label28 to label29 with label30;
+    }
+
+    private void handleException(java.nio.channels.SelectionKey, java.lang.Exception)
+    {
+        sun.net.httpserver.ServerImpl $r5, $r6;
+        java.nio.channels.SelectionKey r0;
+        sun.net.httpserver.HttpConnection r2;
+        sun.net.httpserver.ServerImpl$Dispatcher r4;
+        java.util.logging.Logger $r7;
+        java.lang.Exception r3;
+        java.util.logging.Level $r8;
+        java.lang.Object $r1;
+
+        r4 := @this: sun.net.httpserver.ServerImpl$Dispatcher;
+
+        r0 := @parameter0: java.nio.channels.SelectionKey;
+
+        r3 := @parameter1: java.lang.Exception;
+
+        $r1 = virtualinvoke r0.<java.nio.channels.SelectionKey: java.lang.Object attachment()>();
+
+        r2 = (sun.net.httpserver.HttpConnection) $r1;
+
+        if r3 == null goto label1;
+
+        $r6 = r4.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r7 = staticinvoke <sun.net.httpserver.ServerImpl: java.util.logging.Logger access$200(sun.net.httpserver.ServerImpl)>($r6);
+
+        $r8 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        virtualinvoke $r7.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r8, "Dispatcher (2)", r3);
+
+     label1:
+        $r5 = r4.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        staticinvoke <sun.net.httpserver.ServerImpl: void access$1100(sun.net.httpserver.ServerImpl,sun.net.httpserver.HttpConnection)>($r5, r2);
+
+        return;
+    }
+
+    public void handle(java.nio.channels.SocketChannel, sun.net.httpserver.HttpConnection) throws java.io.IOException
+    {
+        sun.net.httpserver.ServerImpl$Dispatcher r1;
+        java.util.logging.Level $r12, $r17;
+        java.nio.channels.SocketChannel r2;
+        java.lang.String $r5;
+        sun.net.httpserver.ServerImpl $r3, $r4, $r7, $r10, $r13, $r15, $r18;
+        java.util.concurrent.Executor $r8;
+        sun.net.httpserver.HttpConnection r6;
+        java.io.IOException $r9;
+        java.util.logging.Logger $r11, $r16;
+        sun.net.httpserver.ServerImpl$Exchange $r0;
+        sun.net.httpserver.HttpError $r14;
+
+        r1 := @this: sun.net.httpserver.ServerImpl$Dispatcher;
+
+        r2 := @parameter0: java.nio.channels.SocketChannel;
+
+        r6 := @parameter1: sun.net.httpserver.HttpConnection;
+
+     label1:
+        $r0 = new sun.net.httpserver.ServerImpl$Exchange;
+
+        $r4 = r1.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r3 = r1.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r5 = staticinvoke <sun.net.httpserver.ServerImpl: java.lang.String access$1200(sun.net.httpserver.ServerImpl)>($r3);
+
+        specialinvoke $r0.<sun.net.httpserver.ServerImpl$Exchange: void <init>(sun.net.httpserver.ServerImpl,java.nio.channels.SocketChannel,java.lang.String,sun.net.httpserver.HttpConnection)>($r4, r2, $r5, r6);
+
+        $r7 = r1.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r8 = staticinvoke <sun.net.httpserver.ServerImpl: java.util.concurrent.Executor access$1300(sun.net.httpserver.ServerImpl)>($r7);
+
+        interfaceinvoke $r8.<java.util.concurrent.Executor: void execute(java.lang.Runnable)>($r0);
+
+     label2:
+        goto label5;
+
+     label3:
+        $r14 := @caughtexception;
+
+        $r15 = r1.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r16 = staticinvoke <sun.net.httpserver.ServerImpl: java.util.logging.Logger access$200(sun.net.httpserver.ServerImpl)>($r15);
+
+        $r17 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        virtualinvoke $r16.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r17, "Dispatcher (4)", $r14);
+
+        $r18 = r1.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        staticinvoke <sun.net.httpserver.ServerImpl: void access$1100(sun.net.httpserver.ServerImpl,sun.net.httpserver.HttpConnection)>($r18, r6);
+
+        goto label5;
+
+     label4:
+        $r9 := @caughtexception;
+
+        $r10 = r1.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        $r11 = staticinvoke <sun.net.httpserver.ServerImpl: java.util.logging.Logger access$200(sun.net.httpserver.ServerImpl)>($r10);
+
+        $r12 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        virtualinvoke $r11.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r12, "Dispatcher (5)", $r9);
+
+        $r13 = r1.<sun.net.httpserver.ServerImpl$Dispatcher: sun.net.httpserver.ServerImpl this$0>;
+
+        staticinvoke <sun.net.httpserver.ServerImpl: void access$1100(sun.net.httpserver.ServerImpl,sun.net.httpserver.HttpConnection)>($r13, r6);
+
+     label5:
+        return;
+
+        catch sun.net.httpserver.HttpError from label1 to label2 with label3;
+        catch java.io.IOException from label1 to label2 with label4;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        $r0 = class "Lsun/net/httpserver/ServerImpl;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.net.httpserver.ServerImpl$Dispatcher: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

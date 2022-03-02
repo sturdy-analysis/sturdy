@@ -1,0 +1,4731 @@
+public class com.sun.imageio.plugins.png.PNGImageReader extends javax.imageio.ImageReader
+{
+    static final int IHDR_TYPE;
+    static final int PLTE_TYPE;
+    static final int IDAT_TYPE;
+    static final int IEND_TYPE;
+    static final int bKGD_TYPE;
+    static final int cHRM_TYPE;
+    static final int gAMA_TYPE;
+    static final int hIST_TYPE;
+    static final int iCCP_TYPE;
+    static final int iTXt_TYPE;
+    static final int pHYs_TYPE;
+    static final int sBIT_TYPE;
+    static final int sPLT_TYPE;
+    static final int sRGB_TYPE;
+    static final int tEXt_TYPE;
+    static final int tIME_TYPE;
+    static final int tRNS_TYPE;
+    static final int zTXt_TYPE;
+    static final int PNG_COLOR_GRAY;
+    static final int PNG_COLOR_RGB;
+    static final int PNG_COLOR_PALETTE;
+    static final int PNG_COLOR_GRAY_ALPHA;
+    static final int PNG_COLOR_RGB_ALPHA;
+    static final int[] inputBandsForColorType;
+    static final int PNG_FILTER_NONE;
+    static final int PNG_FILTER_SUB;
+    static final int PNG_FILTER_UP;
+    static final int PNG_FILTER_AVERAGE;
+    static final int PNG_FILTER_PAETH;
+    static final int[] adam7XOffset;
+    static final int[] adam7YOffset;
+    static final int[] adam7XSubsampling;
+    static final int[] adam7YSubsampling;
+    private static final boolean debug;
+    javax.imageio.stream.ImageInputStream stream;
+    boolean gotHeader;
+    boolean gotMetadata;
+    javax.imageio.ImageReadParam lastParam;
+    long imageStartPosition;
+    java.awt.Rectangle sourceRegion;
+    int sourceXSubsampling;
+    int sourceYSubsampling;
+    int sourceMinProgressivePass;
+    int sourceMaxProgressivePass;
+    int[] sourceBands;
+    int[] destinationBands;
+    java.awt.Point destinationOffset;
+    com.sun.imageio.plugins.png.PNGMetadata metadata;
+    java.io.DataInputStream pixelStream;
+    java.awt.image.BufferedImage theImage;
+    int pixelsDone;
+    int totalPixels;
+    private static final int[][] bandOffsets;
+
+    public void <init>(javax.imageio.spi.ImageReaderSpi)
+    {
+        javax.imageio.spi.ImageReaderSpi r1;
+        com.sun.imageio.plugins.png.PNGMetadata $r5;
+        int $i1, $i3;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        java.awt.Point $r4;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        r1 := @parameter0: javax.imageio.spi.ImageReaderSpi;
+
+        specialinvoke r0.<javax.imageio.ImageReader: void <init>(javax.imageio.spi.ImageReaderSpi)>(r1);
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream> = null;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: boolean gotHeader> = 0;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: boolean gotMetadata> = 0;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.ImageReadParam lastParam> = null;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: long imageStartPosition> = -1L;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.Rectangle sourceRegion> = null;
+
+        $i1 = (int) -1;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: int sourceXSubsampling> = $i1;
+
+        $i3 = (int) -1;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: int sourceYSubsampling> = $i3;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: int sourceMinProgressivePass> = 0;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: int sourceMaxProgressivePass> = 6;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: int[] sourceBands> = null;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: int[] destinationBands> = null;
+
+        $r4 = new java.awt.Point;
+
+        specialinvoke $r4.<java.awt.Point: void <init>(int,int)>(0, 0);
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.Point destinationOffset> = $r4;
+
+        $r5 = new com.sun.imageio.plugins.png.PNGMetadata;
+
+        specialinvoke $r5.<com.sun.imageio.plugins.png.PNGMetadata: void <init>()>();
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata> = $r5;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: java.io.DataInputStream pixelStream> = null;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.image.BufferedImage theImage> = null;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: int pixelsDone> = 0;
+
+        return;
+    }
+
+    public void setInput(java.lang.Object, boolean, boolean)
+    {
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        java.lang.Object r1;
+        boolean z0, z1;
+        javax.imageio.stream.ImageInputStream $r2;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        r1 := @parameter0: java.lang.Object;
+
+        z0 := @parameter1: boolean;
+
+        z1 := @parameter2: boolean;
+
+        specialinvoke r0.<javax.imageio.ImageReader: void setInput(java.lang.Object,boolean,boolean)>(r1, z0, z1);
+
+        $r2 = (javax.imageio.stream.ImageInputStream) r1;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream> = $r2;
+
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void resetStreamSettings()>();
+
+        return;
+    }
+
+    private java.lang.String readNullTerminatedString(java.lang.String, int) throws java.io.IOException
+    {
+        byte[] $r2;
+        java.io.ByteArrayOutputStream $r7;
+        com.sun.imageio.plugins.png.PNGImageReader r4;
+        java.io.EOFException $r8;
+        javax.imageio.stream.ImageInputStream $r5;
+        int i0, $i1, $i2, i3, $i5;
+        java.lang.String r3, $r9;
+
+        r4 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        r3 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $r7 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r7.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        i3 = 0;
+
+     label1:
+        $i1 = i3;
+
+        i3 = i3 + 1;
+
+        if i0 <= $i1 goto label3;
+
+        $r5 = r4.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i2 = interfaceinvoke $r5.<javax.imageio.stream.ImageInputStream: int read()>();
+
+        if $i2 == 0 goto label3;
+
+        $i5 = (int) -1;
+
+        if $i2 != $i5 goto label2;
+
+        $r8 = new java.io.EOFException;
+
+        specialinvoke $r8.<java.io.EOFException: void <init>()>();
+
+        throw $r8;
+
+     label2:
+        virtualinvoke $r7.<java.io.ByteArrayOutputStream: void write(int)>($i2);
+
+        goto label1;
+
+     label3:
+        $r9 = new java.lang.String;
+
+        $r2 = virtualinvoke $r7.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        specialinvoke $r9.<java.lang.String: void <init>(byte[],java.lang.String)>($r2, r3);
+
+        return $r9;
+    }
+
+    private void readHeader() throws javax.imageio.IIOException
+    {
+        byte[] r34;
+        byte $b0, $b1, $b2, $b3, $b4, $b5, $b6, $b7, $b12, $b14, $b16, $b18, $b20;
+        javax.imageio.stream.ImageInputStream $r1, $r2, $r3, $r4, $r6, $r7, $r8, $r9, $r10, $r11;
+        long $l22;
+        javax.imageio.IIOException $r37, $r38, $r39, $r41, $r42, $r43, $r44, $r45, $r46, $r47, $r48, $r49, $r50;
+        short s13, s15, s17, s19, s21, $s33, $s34, $s35, $s36, $s37;
+        java.io.IOException $r32;
+        java.lang.IllegalStateException $r36;
+        boolean $z0;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        int $i8, $i9, $i10, $i11, $i23, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57;
+        com.sun.imageio.plugins.png.PNGMetadata $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r40;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        $z0 = r0.<com.sun.imageio.plugins.png.PNGImageReader: boolean gotHeader>;
+
+        if $z0 == 0 goto label01;
+
+        return;
+
+     label01:
+        $r1 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        if $r1 != null goto label02;
+
+        $r36 = new java.lang.IllegalStateException;
+
+        specialinvoke $r36.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Input source not set!");
+
+        throw $r36;
+
+     label02:
+        r34 = newarray (byte)[8];
+
+        $r2 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r2.<javax.imageio.stream.ImageInputStream: void readFully(byte[])>(r34);
+
+        $b0 = r34[0];
+
+        $i23 = (int) $b0;
+
+        $i25 = (int) -119;
+
+        if $i23 != $i25 goto label03;
+
+        $b1 = r34[1];
+
+        $i26 = (int) $b1;
+
+        if $i26 != 80 goto label03;
+
+        $b2 = r34[2];
+
+        $i27 = (int) $b2;
+
+        if $i27 != 78 goto label03;
+
+        $b3 = r34[3];
+
+        $i28 = (int) $b3;
+
+        if $i28 != 71 goto label03;
+
+        $b4 = r34[4];
+
+        $i29 = (int) $b4;
+
+        if $i29 != 13 goto label03;
+
+        $b5 = r34[5];
+
+        $i30 = (int) $b5;
+
+        if $i30 != 10 goto label03;
+
+        $b6 = r34[6];
+
+        $i31 = (int) $b6;
+
+        if $i31 != 26 goto label03;
+
+        $b7 = r34[7];
+
+        $i32 = (int) $b7;
+
+        if $i32 == 10 goto label04;
+
+     label03:
+        $r37 = new javax.imageio.IIOException;
+
+        specialinvoke $r37.<javax.imageio.IIOException: void <init>(java.lang.String)>("Bad PNG signature!");
+
+        throw $r37;
+
+     label04:
+        $r3 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i8 = interfaceinvoke $r3.<javax.imageio.stream.ImageInputStream: int readInt()>();
+
+        if $i8 == 13 goto label05;
+
+        $r38 = new javax.imageio.IIOException;
+
+        specialinvoke $r38.<javax.imageio.IIOException: void <init>(java.lang.String)>("Bad length for IHDR chunk!");
+
+        throw $r38;
+
+     label05:
+        $r4 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i9 = interfaceinvoke $r4.<javax.imageio.stream.ImageInputStream: int readInt()>();
+
+        if $i9 == 1229472850 goto label06;
+
+        $r39 = new javax.imageio.IIOException;
+
+        specialinvoke $r39.<javax.imageio.IIOException: void <init>(java.lang.String)>("Bad type for IHDR chunk!");
+
+        throw $r39;
+
+     label06:
+        $r40 = new com.sun.imageio.plugins.png.PNGMetadata;
+
+        specialinvoke $r40.<com.sun.imageio.plugins.png.PNGMetadata: void <init>()>();
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata> = $r40;
+
+        $r6 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i10 = interfaceinvoke $r6.<javax.imageio.stream.ImageInputStream: int readInt()>();
+
+        $r7 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i11 = interfaceinvoke $r7.<javax.imageio.stream.ImageInputStream: int readInt()>();
+
+        $r8 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r8.<javax.imageio.stream.ImageInputStream: void readFully(byte[],int,int)>(r34, 0, 5);
+
+        $b12 = r34[0];
+
+        $s33 = (short) $b12;
+
+        s13 = $s33 & 255;
+
+        $b14 = r34[1];
+
+        $s34 = (short) $b14;
+
+        s15 = $s34 & 255;
+
+        $b16 = r34[2];
+
+        $s35 = (short) $b16;
+
+        s17 = $s35 & 255;
+
+        $b18 = r34[3];
+
+        $s36 = (short) $b18;
+
+        s19 = $s36 & 255;
+
+        $b20 = r34[4];
+
+        $s37 = (short) $b20;
+
+        s21 = $s37 & 255;
+
+        $r9 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r9.<javax.imageio.stream.ImageInputStream: int skipBytes(int)>(4);
+
+        $r11 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $r10 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $l22 = interfaceinvoke $r10.<javax.imageio.stream.ImageInputStream: long getStreamPosition()>();
+
+        interfaceinvoke $r11.<javax.imageio.stream.ImageInputStream: void flushBefore(long)>($l22);
+
+        if $i10 != 0 goto label07;
+
+        $r41 = new javax.imageio.IIOException;
+
+        specialinvoke $r41.<javax.imageio.IIOException: void <init>(java.lang.String)>("Image width == 0!");
+
+        throw $r41;
+
+     label07:
+        if $i11 != 0 goto label08;
+
+        $r42 = new javax.imageio.IIOException;
+
+        specialinvoke $r42.<javax.imageio.IIOException: void <init>(java.lang.String)>("Image height == 0!");
+
+        throw $r42;
+
+     label08:
+        if s13 == 1 goto label09;
+
+        $i38 = (int) s13;
+
+        if $i38 == 2 goto label09;
+
+        $i39 = (int) s13;
+
+        if $i39 == 4 goto label09;
+
+        $i40 = (int) s13;
+
+        if $i40 == 8 goto label09;
+
+        $i41 = (int) s13;
+
+        if $i41 == 16 goto label09;
+
+        $r43 = new javax.imageio.IIOException;
+
+        specialinvoke $r43.<javax.imageio.IIOException: void <init>(java.lang.String)>("Bit depth must be 1, 2, 4, 8, or 16!");
+
+        throw $r43;
+
+     label09:
+        if s15 == 0 goto label10;
+
+        $i42 = (int) s15;
+
+        if $i42 == 2 goto label10;
+
+        $i43 = (int) s15;
+
+        if $i43 == 3 goto label10;
+
+        $i44 = (int) s15;
+
+        if $i44 == 4 goto label10;
+
+        $i45 = (int) s15;
+
+        if $i45 == 6 goto label10;
+
+        $r44 = new javax.imageio.IIOException;
+
+        specialinvoke $r44.<javax.imageio.IIOException: void <init>(java.lang.String)>("Color type must be 0, 2, 3, 4, or 6!");
+
+        throw $r44;
+
+     label10:
+        $i46 = (int) s15;
+
+        if $i46 != 3 goto label11;
+
+        $i47 = (int) s13;
+
+        if $i47 != 16 goto label11;
+
+        $r45 = new javax.imageio.IIOException;
+
+        specialinvoke $r45.<javax.imageio.IIOException: void <init>(java.lang.String)>("Bad color type/bit depth combination!");
+
+        throw $r45;
+
+     label11:
+        $i48 = (int) s15;
+
+        if $i48 == 2 goto label12;
+
+        $i49 = (int) s15;
+
+        if $i49 == 6 goto label12;
+
+        $i50 = (int) s15;
+
+        if $i50 != 4 goto label13;
+
+     label12:
+        $i51 = (int) s13;
+
+        if $i51 == 8 goto label13;
+
+        $i52 = (int) s13;
+
+        if $i52 == 16 goto label13;
+
+        $r46 = new javax.imageio.IIOException;
+
+        specialinvoke $r46.<javax.imageio.IIOException: void <init>(java.lang.String)>("Bad color type/bit depth combination!");
+
+        throw $r46;
+
+     label13:
+        if s17 == 0 goto label14;
+
+        $r47 = new javax.imageio.IIOException;
+
+        specialinvoke $r47.<javax.imageio.IIOException: void <init>(java.lang.String)>("Unknown compression method (not 0)!");
+
+        throw $r47;
+
+     label14:
+        if s19 == 0 goto label15;
+
+        $r48 = new javax.imageio.IIOException;
+
+        specialinvoke $r48.<javax.imageio.IIOException: void <init>(java.lang.String)>("Unknown filter method (not 0)!");
+
+        throw $r48;
+
+     label15:
+        if s21 == 0 goto label16;
+
+        if s21 == 1 goto label16;
+
+        $r49 = new javax.imageio.IIOException;
+
+        specialinvoke $r49.<javax.imageio.IIOException: void <init>(java.lang.String)>("Unknown interlace method (not 0 or 1)!");
+
+        throw $r49;
+
+     label16:
+        $r12 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r12.<com.sun.imageio.plugins.png.PNGMetadata: boolean IHDR_present> = 1;
+
+        $r13 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r13.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_width> = $i10;
+
+        $r14 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r14.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_height> = $i11;
+
+        $r15 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $i53 = (int) s13;
+
+        $r15.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_bitDepth> = $i53;
+
+        $r16 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $i54 = (int) s15;
+
+        $r16.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_colorType> = $i54;
+
+        $r17 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $i55 = (int) s17;
+
+        $r17.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_compressionMethod> = $i55;
+
+        $r18 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $i56 = (int) s19;
+
+        $r18.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_filterMethod> = $i56;
+
+        $r19 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $i57 = (int) s21;
+
+        $r19.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_interlaceMethod> = $i57;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: boolean gotHeader> = 1;
+
+     label17:
+        goto label19;
+
+     label18:
+        $r32 := @caughtexception;
+
+        $r50 = new javax.imageio.IIOException;
+
+        specialinvoke $r50.<javax.imageio.IIOException: void <init>(java.lang.String,java.lang.Throwable)>("I/O error reading PNG header!", $r32);
+
+        throw $r50;
+
+     label19:
+        return;
+
+        catch java.io.IOException from label02 to label17 with label18;
+    }
+
+    private void parse_PLTE_chunk(int) throws java.io.IOException
+    {
+        byte[] r4, $r8, $r10, $r12, $r16, $r18, $r20;
+        byte $b4, $b5, $b6;
+        boolean $z0;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        javax.imageio.stream.ImageInputStream $r5;
+        short s10, s15, s16, s17;
+        int $i0, $i1, i2, $i3, $i7, i8, i9, i11, i12, i13, i14;
+        com.sun.imageio.plugins.png.PNGMetadata $r1, $r2, $r3, $r6, $r7, $r9, $r11, $r13, $r14, $r15, $r17, $r19;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        i2 := @parameter0: int;
+
+        $r1 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $z0 = $r1.<com.sun.imageio.plugins.png.PNGMetadata: boolean PLTE_present>;
+
+        if $z0 == 0 goto label01;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void processWarningOccurred(java.lang.String)>("A PNG image may not contain more than one PLTE chunk.\nThe chunk wil be ignored.");
+
+        return;
+
+     label01:
+        $r2 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $i0 = $r2.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_colorType>;
+
+        if $i0 == 0 goto label02;
+
+        $r3 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $i1 = $r3.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_colorType>;
+
+        if $i1 != 4 goto label03;
+
+     label02:
+        virtualinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void processWarningOccurred(java.lang.String)>("A PNG gray or gray alpha image cannot have a PLTE chunk.\nThe chunk wil be ignored.");
+
+        return;
+
+     label03:
+        r4 = newarray (byte)[i2];
+
+        $r5 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r5.<javax.imageio.stream.ImageInputStream: void readFully(byte[])>(r4);
+
+        i8 = i2 / 3;
+
+        $r6 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $i3 = $r6.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_colorType>;
+
+        if $i3 != 3 goto label05;
+
+        $r13 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $i7 = $r13.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_bitDepth>;
+
+        i9 = 1 << $i7;
+
+        if i8 <= i9 goto label04;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void processWarningOccurred(java.lang.String)>("PLTE chunk contains too many entries for bit depth, ignoring extras.");
+
+        i8 = i9;
+
+     label04:
+        i8 = staticinvoke <java.lang.Math: int min(int,int)>(i8, i9);
+
+     label05:
+        if i8 <= 16 goto label06;
+
+        s10 = 256;
+
+        s17 = 256;
+
+        s16 = 256;
+
+        s15 = 256;
+
+        goto label09;
+
+     label06:
+        if i8 <= 4 goto label07;
+
+        s10 = 16;
+
+        s17 = 16;
+
+        s16 = 16;
+
+        s15 = 16;
+
+        goto label09;
+
+     label07:
+        if i8 <= 2 goto label08;
+
+        s10 = 4;
+
+        s17 = 4;
+
+        s16 = 4;
+
+        s15 = 4;
+
+        goto label09;
+
+     label08:
+        s10 = 2;
+
+        s17 = 2;
+
+        s16 = 2;
+
+        s15 = 2;
+
+     label09:
+        $r14 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r14.<com.sun.imageio.plugins.png.PNGMetadata: boolean PLTE_present> = 1;
+
+        $r15 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r16 = newarray (byte)[s16];
+
+        $r15.<com.sun.imageio.plugins.png.PNGMetadata: byte[] PLTE_red> = $r16;
+
+        $r17 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r18 = newarray (byte)[s17];
+
+        $r17.<com.sun.imageio.plugins.png.PNGMetadata: byte[] PLTE_green> = $r18;
+
+        $r19 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r20 = newarray (byte)[s15];
+
+        $r19.<com.sun.imageio.plugins.png.PNGMetadata: byte[] PLTE_blue> = $r20;
+
+        i11 = 0;
+
+        i12 = 0;
+
+     label10:
+        if i12 >= i8 goto label11;
+
+        $r7 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r8 = $r7.<com.sun.imageio.plugins.png.PNGMetadata: byte[] PLTE_red>;
+
+        i13 = i11 + 1;
+
+        $b4 = r4[i11];
+
+        $r8[i12] = $b4;
+
+        $r9 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r10 = $r9.<com.sun.imageio.plugins.png.PNGMetadata: byte[] PLTE_green>;
+
+        i14 = i13 + 1;
+
+        $b5 = r4[i13];
+
+        $r10[i12] = $b5;
+
+        $r11 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r12 = $r11.<com.sun.imageio.plugins.png.PNGMetadata: byte[] PLTE_blue>;
+
+        i11 = i14 + 1;
+
+        $b6 = r4[i14];
+
+        $r12[i12] = $b6;
+
+        i12 = i12 + 1;
+
+        goto label10;
+
+     label11:
+        return;
+    }
+
+    private void parse_bKGD_chunk() throws java.io.IOException
+    {
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        javax.imageio.stream.ImageInputStream $r4, $r8, $r10, $r12, $r15;
+        com.sun.imageio.plugins.png.PNGMetadata $r1, $r2, $r3, $r5, $r6, $r7, $r9, $r11, $r13, $r14, $r16, $r17;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        $r1 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $i0 = $r1.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_colorType>;
+
+        if $i0 != 3 goto label1;
+
+        $r14 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r14.<com.sun.imageio.plugins.png.PNGMetadata: int bKGD_colorType> = 3;
+
+        $r16 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r15 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i7 = interfaceinvoke $r15.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r16.<com.sun.imageio.plugins.png.PNGMetadata: int bKGD_index> = $i7;
+
+        goto label4;
+
+     label1:
+        $r2 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $i1 = $r2.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_colorType>;
+
+        if $i1 == 0 goto label2;
+
+        $r6 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $i3 = $r6.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_colorType>;
+
+        if $i3 != 4 goto label3;
+
+     label2:
+        $r3 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r3.<com.sun.imageio.plugins.png.PNGMetadata: int bKGD_colorType> = 0;
+
+        $r5 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r4 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i2 = interfaceinvoke $r4.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r5.<com.sun.imageio.plugins.png.PNGMetadata: int bKGD_gray> = $i2;
+
+        goto label4;
+
+     label3:
+        $r7 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r7.<com.sun.imageio.plugins.png.PNGMetadata: int bKGD_colorType> = 2;
+
+        $r9 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r8 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i4 = interfaceinvoke $r8.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r9.<com.sun.imageio.plugins.png.PNGMetadata: int bKGD_red> = $i4;
+
+        $r11 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r10 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i5 = interfaceinvoke $r10.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r11.<com.sun.imageio.plugins.png.PNGMetadata: int bKGD_green> = $i5;
+
+        $r13 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r12 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i6 = interfaceinvoke $r12.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r13.<com.sun.imageio.plugins.png.PNGMetadata: int bKGD_blue> = $i6;
+
+     label4:
+        $r17 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r17.<com.sun.imageio.plugins.png.PNGMetadata: boolean bKGD_present> = 1;
+
+        return;
+    }
+
+    private void parse_cHRM_chunk() throws java.io.IOException
+    {
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        javax.imageio.stream.ImageInputStream $r1, $r3, $r5, $r7, $r9, $r11, $r13, $r15;
+        com.sun.imageio.plugins.png.PNGMetadata $r2, $r4, $r6, $r8, $r10, $r12, $r14, $r16, $r17;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        $r2 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r1 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i0 = interfaceinvoke $r1.<javax.imageio.stream.ImageInputStream: int readInt()>();
+
+        $r2.<com.sun.imageio.plugins.png.PNGMetadata: int cHRM_whitePointX> = $i0;
+
+        $r4 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r3 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i1 = interfaceinvoke $r3.<javax.imageio.stream.ImageInputStream: int readInt()>();
+
+        $r4.<com.sun.imageio.plugins.png.PNGMetadata: int cHRM_whitePointY> = $i1;
+
+        $r6 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r5 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i2 = interfaceinvoke $r5.<javax.imageio.stream.ImageInputStream: int readInt()>();
+
+        $r6.<com.sun.imageio.plugins.png.PNGMetadata: int cHRM_redX> = $i2;
+
+        $r8 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r7 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i3 = interfaceinvoke $r7.<javax.imageio.stream.ImageInputStream: int readInt()>();
+
+        $r8.<com.sun.imageio.plugins.png.PNGMetadata: int cHRM_redY> = $i3;
+
+        $r10 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r9 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i4 = interfaceinvoke $r9.<javax.imageio.stream.ImageInputStream: int readInt()>();
+
+        $r10.<com.sun.imageio.plugins.png.PNGMetadata: int cHRM_greenX> = $i4;
+
+        $r12 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r11 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i5 = interfaceinvoke $r11.<javax.imageio.stream.ImageInputStream: int readInt()>();
+
+        $r12.<com.sun.imageio.plugins.png.PNGMetadata: int cHRM_greenY> = $i5;
+
+        $r14 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r13 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i6 = interfaceinvoke $r13.<javax.imageio.stream.ImageInputStream: int readInt()>();
+
+        $r14.<com.sun.imageio.plugins.png.PNGMetadata: int cHRM_blueX> = $i6;
+
+        $r16 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r15 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i7 = interfaceinvoke $r15.<javax.imageio.stream.ImageInputStream: int readInt()>();
+
+        $r16.<com.sun.imageio.plugins.png.PNGMetadata: int cHRM_blueY> = $i7;
+
+        $r17 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r17.<com.sun.imageio.plugins.png.PNGMetadata: boolean cHRM_present> = 1;
+
+        return;
+    }
+
+    private void parse_gAMA_chunk() throws java.io.IOException
+    {
+        com.sun.imageio.plugins.png.PNGMetadata $r2, $r3;
+        int $i0;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        javax.imageio.stream.ImageInputStream $r1;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        $r1 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i0 = interfaceinvoke $r1.<javax.imageio.stream.ImageInputStream: int readInt()>();
+
+        $r2 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r2.<com.sun.imageio.plugins.png.PNGMetadata: int gAMA_gamma> = $i0;
+
+        $r3 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r3.<com.sun.imageio.plugins.png.PNGMetadata: boolean gAMA_present> = 1;
+
+        return;
+    }
+
+    private void parse_hIST_chunk(int) throws java.io.IOException, javax.imageio.IIOException
+    {
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        javax.imageio.IIOException $r10;
+        javax.imageio.stream.ImageInputStream $r8;
+        com.sun.imageio.plugins.png.PNGMetadata $r1, $r3, $r4, $r5, $r9;
+        int i0, $i1, $i2;
+        char[] $r2, $r6, $r7;
+        boolean $z0;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $z0 = $r1.<com.sun.imageio.plugins.png.PNGMetadata: boolean PLTE_present>;
+
+        if $z0 != 0 goto label1;
+
+        $r10 = new javax.imageio.IIOException;
+
+        specialinvoke $r10.<javax.imageio.IIOException: void <init>(java.lang.String)>("hIST chunk without prior PLTE chunk!");
+
+        throw $r10;
+
+     label1:
+        $r3 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $i1 = i0 / 2;
+
+        $r2 = newarray (char)[$i1];
+
+        $r3.<com.sun.imageio.plugins.png.PNGMetadata: char[] hIST_histogram> = $r2;
+
+        $r8 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $r4 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r7 = $r4.<com.sun.imageio.plugins.png.PNGMetadata: char[] hIST_histogram>;
+
+        $r5 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r6 = $r5.<com.sun.imageio.plugins.png.PNGMetadata: char[] hIST_histogram>;
+
+        $i2 = lengthof $r6;
+
+        interfaceinvoke $r8.<javax.imageio.stream.ImageInputStream: void readFully(char[],int,int)>($r7, 0, $i2);
+
+        $r9 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r9.<com.sun.imageio.plugins.png.PNGMetadata: boolean hIST_present> = 1;
+
+        return;
+    }
+
+    private void parse_iCCP_chunk(int) throws java.io.IOException
+    {
+        byte[] r5;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        javax.imageio.stream.ImageInputStream $r3, $r6;
+        com.sun.imageio.plugins.png.PNGMetadata $r2, $r4, $r7, $r8;
+        int $i0, i1, $i2, $i3, $i4;
+        java.lang.String $r1;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        i1 := @parameter0: int;
+
+        $r1 = specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: java.lang.String readNullTerminatedString(java.lang.String,int)>("ISO-8859-1", 80);
+
+        $r2 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r2.<com.sun.imageio.plugins.png.PNGMetadata: java.lang.String iCCP_profileName> = $r1;
+
+        $r4 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r3 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i0 = interfaceinvoke $r3.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r4.<com.sun.imageio.plugins.png.PNGMetadata: int iCCP_compressionMethod> = $i0;
+
+        $i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $i3 = i1 - $i2;
+
+        $i4 = $i3 - 2;
+
+        r5 = newarray (byte)[$i4];
+
+        $r6 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r6.<javax.imageio.stream.ImageInputStream: void readFully(byte[])>(r5);
+
+        $r7 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r7.<com.sun.imageio.plugins.png.PNGMetadata: byte[] iCCP_compressedProfile> = r5;
+
+        $r8 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r8.<com.sun.imageio.plugins.png.PNGMetadata: boolean iCCP_present> = 1;
+
+        return;
+    }
+
+    private void parse_iTXt_chunk(int) throws java.io.IOException
+    {
+        byte[] $r26, $r27;
+        java.lang.Integer $r12;
+        boolean $z0;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        javax.imageio.stream.ImageInputStream $r1, $r5, $r9, $r16, $r20, $r21;
+        long $l0, $l3, $l5, $l6, $l7, $l8, $l9, $l10, $l11;
+        java.util.ArrayList $r4, $r7, $r11, $r15, $r19, $r24;
+        int $i1, $i2, i4, $i12, $i13;
+        java.lang.Boolean $r8;
+        java.lang.String $r2, $r13, $r17, $r22, $r25, r28;
+        com.sun.imageio.plugins.png.PNGMetadata $r3, $r6, $r10, $r14, $r18, $r23;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        i4 := @parameter0: int;
+
+        $r1 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $l0 = interfaceinvoke $r1.<javax.imageio.stream.ImageInputStream: long getStreamPosition()>();
+
+        $r2 = specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: java.lang.String readNullTerminatedString(java.lang.String,int)>("ISO-8859-1", 80);
+
+        $r3 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r4 = $r3.<com.sun.imageio.plugins.png.PNGMetadata: java.util.ArrayList iTXt_keyword>;
+
+        virtualinvoke $r4.<java.util.ArrayList: boolean add(java.lang.Object)>($r2);
+
+        $r5 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i1 = interfaceinvoke $r5.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r6 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r7 = $r6.<com.sun.imageio.plugins.png.PNGMetadata: java.util.ArrayList iTXt_compressionFlag>;
+
+        if $i1 != 1 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        $r8 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z0);
+
+        virtualinvoke $r7.<java.util.ArrayList: boolean add(java.lang.Object)>($r8);
+
+        $r9 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i2 = interfaceinvoke $r9.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r10 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r11 = $r10.<com.sun.imageio.plugins.png.PNGMetadata: java.util.ArrayList iTXt_compressionMethod>;
+
+        $r12 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        virtualinvoke $r11.<java.util.ArrayList: boolean add(java.lang.Object)>($r12);
+
+        $r13 = specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: java.lang.String readNullTerminatedString(java.lang.String,int)>("UTF8", 80);
+
+        $r14 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r15 = $r14.<com.sun.imageio.plugins.png.PNGMetadata: java.util.ArrayList iTXt_languageTag>;
+
+        virtualinvoke $r15.<java.util.ArrayList: boolean add(java.lang.Object)>($r13);
+
+        $r16 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $l3 = interfaceinvoke $r16.<javax.imageio.stream.ImageInputStream: long getStreamPosition()>();
+
+        $l5 = (long) i4;
+
+        $l6 = $l0 + $l5;
+
+        $l7 = $l6 - $l3;
+
+        $i13 = (int) $l7;
+
+        $r17 = specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: java.lang.String readNullTerminatedString(java.lang.String,int)>("UTF8", $i13);
+
+        $r18 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r19 = $r18.<com.sun.imageio.plugins.png.PNGMetadata: java.util.ArrayList iTXt_translatedKeyword>;
+
+        virtualinvoke $r19.<java.util.ArrayList: boolean add(java.lang.Object)>($r17);
+
+        $r20 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $l8 = interfaceinvoke $r20.<javax.imageio.stream.ImageInputStream: long getStreamPosition()>();
+
+        $l9 = (long) i4;
+
+        $l10 = $l0 + $l9;
+
+        $l11 = $l10 - $l8;
+
+        $i12 = (int) $l11;
+
+        $r27 = newarray (byte)[$i12];
+
+        $r21 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r21.<javax.imageio.stream.ImageInputStream: void readFully(byte[])>($r27);
+
+        if $i1 != 1 goto label3;
+
+        $r25 = new java.lang.String;
+
+        $r26 = staticinvoke <com.sun.imageio.plugins.png.PNGImageReader: byte[] inflate(byte[])>($r27);
+
+        specialinvoke $r25.<java.lang.String: void <init>(byte[],java.lang.String)>($r26, "UTF8");
+
+        r28 = $r25;
+
+        goto label4;
+
+     label3:
+        $r22 = new java.lang.String;
+
+        specialinvoke $r22.<java.lang.String: void <init>(byte[],java.lang.String)>($r27, "UTF8");
+
+        r28 = $r22;
+
+     label4:
+        $r23 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r24 = $r23.<com.sun.imageio.plugins.png.PNGMetadata: java.util.ArrayList iTXt_text>;
+
+        virtualinvoke $r24.<java.util.ArrayList: boolean add(java.lang.Object)>(r28);
+
+        return;
+    }
+
+    private void parse_pHYs_chunk() throws java.io.IOException
+    {
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        javax.imageio.stream.ImageInputStream $r1, $r3, $r5;
+        com.sun.imageio.plugins.png.PNGMetadata $r2, $r4, $r6, $r7;
+        int $i0, $i1, $i2;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        $r2 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r1 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i0 = interfaceinvoke $r1.<javax.imageio.stream.ImageInputStream: int readInt()>();
+
+        $r2.<com.sun.imageio.plugins.png.PNGMetadata: int pHYs_pixelsPerUnitXAxis> = $i0;
+
+        $r4 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r3 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i1 = interfaceinvoke $r3.<javax.imageio.stream.ImageInputStream: int readInt()>();
+
+        $r4.<com.sun.imageio.plugins.png.PNGMetadata: int pHYs_pixelsPerUnitYAxis> = $i1;
+
+        $r6 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r5 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i2 = interfaceinvoke $r5.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r6.<com.sun.imageio.plugins.png.PNGMetadata: int pHYs_unitSpecifier> = $i2;
+
+        $r7 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r7.<com.sun.imageio.plugins.png.PNGMetadata: boolean pHYs_present> = 1;
+
+        return;
+    }
+
+    private void parse_sBIT_chunk() throws java.io.IOException
+    {
+        int i0, $i1, $i2, $i3, $i4, $i5;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        javax.imageio.stream.ImageInputStream $r2, $r4, $r7, $r9, $r11;
+        com.sun.imageio.plugins.png.PNGMetadata $r1, $r3, $r5, $r6, $r8, $r10, $r12, $r13;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        $r1 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        i0 = $r1.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_colorType>;
+
+        if i0 == 0 goto label1;
+
+        if i0 != 4 goto label2;
+
+     label1:
+        $r3 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r2 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i1 = interfaceinvoke $r2.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r3.<com.sun.imageio.plugins.png.PNGMetadata: int sBIT_grayBits> = $i1;
+
+        goto label4;
+
+     label2:
+        if i0 == 2 goto label3;
+
+        if i0 == 3 goto label3;
+
+        if i0 != 6 goto label4;
+
+     label3:
+        $r6 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r7 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i3 = interfaceinvoke $r7.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r6.<com.sun.imageio.plugins.png.PNGMetadata: int sBIT_redBits> = $i3;
+
+        $r8 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r9 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i4 = interfaceinvoke $r9.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r8.<com.sun.imageio.plugins.png.PNGMetadata: int sBIT_greenBits> = $i4;
+
+        $r10 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r11 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i5 = interfaceinvoke $r11.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r10.<com.sun.imageio.plugins.png.PNGMetadata: int sBIT_blueBits> = $i5;
+
+     label4:
+        if i0 == 4 goto label5;
+
+        if i0 != 6 goto label6;
+
+     label5:
+        $r5 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r4 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i2 = interfaceinvoke $r4.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r5.<com.sun.imageio.plugins.png.PNGMetadata: int sBIT_alphaBits> = $i2;
+
+     label6:
+        $r12 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r12.<com.sun.imageio.plugins.png.PNGMetadata: int sBIT_colorType> = i0;
+
+        $r13 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r13.<com.sun.imageio.plugins.png.PNGMetadata: boolean sBIT_present> = 1;
+
+        return;
+    }
+
+    private void parse_sPLT_chunk(int) throws java.io.IOException, javax.imageio.IIOException
+    {
+        javax.imageio.stream.ImageInputStream $r5, $r20, $r23, $r26, $r29, $r32, $r35, $r38, $r41, $r44, $r47;
+        javax.imageio.IIOException $r17;
+        java.lang.String $r2, $r4;
+        int[] $r7, $r9, $r11, $r13, $r15, $r21, $r24, $r27, $r30, $r33, $r36, $r39, $r42, $r45, $r48;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, i17, i18, i19, i20;
+        com.sun.imageio.plugins.png.PNGMetadata $r1, $r3, $r6, $r8, $r10, $r12, $r14, $r16, $r18, $r19, $r22, $r25, $r28, $r31, $r34, $r37, $r40, $r43, $r46;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        i17 := @parameter0: int;
+
+        $r1 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r2 = specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: java.lang.String readNullTerminatedString(java.lang.String,int)>("ISO-8859-1", 80);
+
+        $r1.<com.sun.imageio.plugins.png.PNGMetadata: java.lang.String sPLT_paletteName> = $r2;
+
+        $r3 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r4 = $r3.<com.sun.imageio.plugins.png.PNGMetadata: java.lang.String sPLT_paletteName>;
+
+        $i0 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        $i1 = $i0 + 1;
+
+        i18 = i17 - $i1;
+
+        $r5 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i2 = interfaceinvoke $r5.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r6 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r6.<com.sun.imageio.plugins.png.PNGMetadata: int sPLT_sampleDepth> = $i2;
+
+        $i3 = $i2 / 8;
+
+        $i4 = 4 * $i3;
+
+        $i5 = $i4 + 2;
+
+        i6 = i18 / $i5;
+
+        $r8 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r7 = newarray (int)[i6];
+
+        $r8.<com.sun.imageio.plugins.png.PNGMetadata: int[] sPLT_red> = $r7;
+
+        $r10 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r9 = newarray (int)[i6];
+
+        $r10.<com.sun.imageio.plugins.png.PNGMetadata: int[] sPLT_green> = $r9;
+
+        $r12 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r11 = newarray (int)[i6];
+
+        $r12.<com.sun.imageio.plugins.png.PNGMetadata: int[] sPLT_blue> = $r11;
+
+        $r14 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r13 = newarray (int)[i6];
+
+        $r14.<com.sun.imageio.plugins.png.PNGMetadata: int[] sPLT_alpha> = $r13;
+
+        $r16 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r15 = newarray (int)[i6];
+
+        $r16.<com.sun.imageio.plugins.png.PNGMetadata: int[] sPLT_frequency> = $r15;
+
+        if $i2 != 8 goto label3;
+
+        i19 = 0;
+
+     label1:
+        if i19 >= i6 goto label2;
+
+        $r34 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r36 = $r34.<com.sun.imageio.plugins.png.PNGMetadata: int[] sPLT_red>;
+
+        $r35 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i12 = interfaceinvoke $r35.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r36[i19] = $i12;
+
+        $r37 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r39 = $r37.<com.sun.imageio.plugins.png.PNGMetadata: int[] sPLT_green>;
+
+        $r38 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i13 = interfaceinvoke $r38.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r39[i19] = $i13;
+
+        $r40 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r42 = $r40.<com.sun.imageio.plugins.png.PNGMetadata: int[] sPLT_blue>;
+
+        $r41 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i14 = interfaceinvoke $r41.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r42[i19] = $i14;
+
+        $r43 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r45 = $r43.<com.sun.imageio.plugins.png.PNGMetadata: int[] sPLT_alpha>;
+
+        $r44 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i15 = interfaceinvoke $r44.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r45[i19] = $i15;
+
+        $r46 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r48 = $r46.<com.sun.imageio.plugins.png.PNGMetadata: int[] sPLT_frequency>;
+
+        $r47 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i16 = interfaceinvoke $r47.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r48[i19] = $i16;
+
+        i19 = i19 + 1;
+
+        goto label1;
+
+     label2:
+        goto label7;
+
+     label3:
+        if $i2 != 16 goto label6;
+
+        i20 = 0;
+
+     label4:
+        if i20 >= i6 goto label5;
+
+        $r19 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r21 = $r19.<com.sun.imageio.plugins.png.PNGMetadata: int[] sPLT_red>;
+
+        $r20 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i7 = interfaceinvoke $r20.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r21[i20] = $i7;
+
+        $r22 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r24 = $r22.<com.sun.imageio.plugins.png.PNGMetadata: int[] sPLT_green>;
+
+        $r23 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i8 = interfaceinvoke $r23.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r24[i20] = $i8;
+
+        $r25 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r27 = $r25.<com.sun.imageio.plugins.png.PNGMetadata: int[] sPLT_blue>;
+
+        $r26 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i9 = interfaceinvoke $r26.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r27[i20] = $i9;
+
+        $r28 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r30 = $r28.<com.sun.imageio.plugins.png.PNGMetadata: int[] sPLT_alpha>;
+
+        $r29 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i10 = interfaceinvoke $r29.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r30[i20] = $i10;
+
+        $r31 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r33 = $r31.<com.sun.imageio.plugins.png.PNGMetadata: int[] sPLT_frequency>;
+
+        $r32 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i11 = interfaceinvoke $r32.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r33[i20] = $i11;
+
+        i20 = i20 + 1;
+
+        goto label4;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r17 = new javax.imageio.IIOException;
+
+        specialinvoke $r17.<javax.imageio.IIOException: void <init>(java.lang.String)>("sPLT sample depth not 8 or 16!");
+
+        throw $r17;
+
+     label7:
+        $r18 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r18.<com.sun.imageio.plugins.png.PNGMetadata: boolean sPLT_present> = 1;
+
+        return;
+    }
+
+    private void parse_sRGB_chunk() throws java.io.IOException
+    {
+        com.sun.imageio.plugins.png.PNGMetadata $r2, $r3;
+        int $i0;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        javax.imageio.stream.ImageInputStream $r1;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        $r2 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r1 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i0 = interfaceinvoke $r1.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r2.<com.sun.imageio.plugins.png.PNGMetadata: int sRGB_renderingIntent> = $i0;
+
+        $r3 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r3.<com.sun.imageio.plugins.png.PNGMetadata: boolean sRGB_present> = 1;
+
+        return;
+    }
+
+    private void parse_tEXt_chunk(int) throws java.io.IOException
+    {
+        byte[] r4;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        java.util.ArrayList $r3, $r8;
+        javax.imageio.stream.ImageInputStream $r5;
+        com.sun.imageio.plugins.png.PNGMetadata $r2, $r6;
+        int i0, $i1, $i2, $i3;
+        java.lang.String $r1, $r7;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        i0 := @parameter0: int;
+
+        $r1 = specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: java.lang.String readNullTerminatedString(java.lang.String,int)>("ISO-8859-1", 80);
+
+        $r2 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r3 = $r2.<com.sun.imageio.plugins.png.PNGMetadata: java.util.ArrayList tEXt_keyword>;
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>($r1);
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $i2 = i0 - $i1;
+
+        $i3 = $i2 - 1;
+
+        r4 = newarray (byte)[$i3];
+
+        $r5 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r5.<javax.imageio.stream.ImageInputStream: void readFully(byte[])>(r4);
+
+        $r6 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r8 = $r6.<com.sun.imageio.plugins.png.PNGMetadata: java.util.ArrayList tEXt_text>;
+
+        $r7 = new java.lang.String;
+
+        specialinvoke $r7.<java.lang.String: void <init>(byte[],java.lang.String)>(r4, "ISO-8859-1");
+
+        virtualinvoke $r8.<java.util.ArrayList: boolean add(java.lang.Object)>($r7);
+
+        return;
+    }
+
+    private void parse_tIME_chunk() throws java.io.IOException
+    {
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        javax.imageio.stream.ImageInputStream $r1, $r3, $r5, $r7, $r9, $r11;
+        com.sun.imageio.plugins.png.PNGMetadata $r2, $r4, $r6, $r8, $r10, $r12, $r13;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        $r2 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r1 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i0 = interfaceinvoke $r1.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r2.<com.sun.imageio.plugins.png.PNGMetadata: int tIME_year> = $i0;
+
+        $r4 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r3 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i1 = interfaceinvoke $r3.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r4.<com.sun.imageio.plugins.png.PNGMetadata: int tIME_month> = $i1;
+
+        $r6 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r5 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i2 = interfaceinvoke $r5.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r6.<com.sun.imageio.plugins.png.PNGMetadata: int tIME_day> = $i2;
+
+        $r8 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r7 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i3 = interfaceinvoke $r7.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r8.<com.sun.imageio.plugins.png.PNGMetadata: int tIME_hour> = $i3;
+
+        $r10 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r9 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i4 = interfaceinvoke $r9.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r10.<com.sun.imageio.plugins.png.PNGMetadata: int tIME_minute> = $i4;
+
+        $r12 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r11 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i5 = interfaceinvoke $r11.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r12.<com.sun.imageio.plugins.png.PNGMetadata: int tIME_second> = $i5;
+
+        $r13 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r13.<com.sun.imageio.plugins.png.PNGMetadata: boolean tIME_present> = 1;
+
+        return;
+    }
+
+    private void parse_tRNS_chunk(int) throws java.io.IOException
+    {
+        byte[] $r16, $r17, $r21;
+        boolean $z0;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        javax.imageio.stream.ImageInputStream $r2, $r4, $r6, $r9, $r10, $r13, $r22, $r23;
+        int i0, i1, $i2, $i3, $i4, $i5, i6, $i7, i8;
+        com.sun.imageio.plugins.png.PNGMetadata $r1, $r3, $r5, $r7, $r8, $r11, $r12, $r14, $r15, $r18, $r19, $r20, $r24;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        i1 := @parameter0: int;
+
+        $r1 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        i0 = $r1.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_colorType>;
+
+        if i0 != 3 goto label3;
+
+        $r14 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $z0 = $r14.<com.sun.imageio.plugins.png.PNGMetadata: boolean PLTE_present>;
+
+        if $z0 != 0 goto label1;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void processWarningOccurred(java.lang.String)>("tRNS chunk without prior PLTE chunk, ignoring it.");
+
+        return;
+
+     label1:
+        $r15 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r16 = $r15.<com.sun.imageio.plugins.png.PNGMetadata: byte[] PLTE_red>;
+
+        i6 = lengthof $r16;
+
+        i8 = i1;
+
+        if i1 <= i6 goto label2;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void processWarningOccurred(java.lang.String)>("tRNS chunk has more entries than prior PLTE chunk, ignoring extras.");
+
+        i8 = i6;
+
+     label2:
+        $r18 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r17 = newarray (byte)[i8];
+
+        $r18.<com.sun.imageio.plugins.png.PNGMetadata: byte[] tRNS_alpha> = $r17;
+
+        $r19 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r19.<com.sun.imageio.plugins.png.PNGMetadata: int tRNS_colorType> = 3;
+
+        $r22 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $r20 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r21 = $r20.<com.sun.imageio.plugins.png.PNGMetadata: byte[] tRNS_alpha>;
+
+        interfaceinvoke $r22.<javax.imageio.stream.ImageInputStream: int read(byte[],int,int)>($r21, 0, i8);
+
+        $r23 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i7 = i1 - i8;
+
+        interfaceinvoke $r23.<javax.imageio.stream.ImageInputStream: int skipBytes(int)>($i7);
+
+        goto label8;
+
+     label3:
+        if i0 != 0 goto label5;
+
+        if i1 == 2 goto label4;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void processWarningOccurred(java.lang.String)>("tRNS chunk for gray image must have length 2, ignoring chunk.");
+
+        $r13 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r13.<javax.imageio.stream.ImageInputStream: int skipBytes(int)>(i1);
+
+        return;
+
+     label4:
+        $r11 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r10 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i5 = interfaceinvoke $r10.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r11.<com.sun.imageio.plugins.png.PNGMetadata: int tRNS_gray> = $i5;
+
+        $r12 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r12.<com.sun.imageio.plugins.png.PNGMetadata: int tRNS_colorType> = 0;
+
+        goto label8;
+
+     label5:
+        if i0 != 2 goto label7;
+
+        if i1 == 6 goto label6;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void processWarningOccurred(java.lang.String)>("tRNS chunk for RGB image must have length 6, ignoring chunk.");
+
+        $r9 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r9.<javax.imageio.stream.ImageInputStream: int skipBytes(int)>(i1);
+
+        return;
+
+     label6:
+        $r3 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r2 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i2 = interfaceinvoke $r2.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r3.<com.sun.imageio.plugins.png.PNGMetadata: int tRNS_red> = $i2;
+
+        $r5 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r4 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i3 = interfaceinvoke $r4.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r5.<com.sun.imageio.plugins.png.PNGMetadata: int tRNS_green> = $i3;
+
+        $r7 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r6 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i4 = interfaceinvoke $r6.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r7.<com.sun.imageio.plugins.png.PNGMetadata: int tRNS_blue> = $i4;
+
+        $r8 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r8.<com.sun.imageio.plugins.png.PNGMetadata: int tRNS_colorType> = 2;
+
+        goto label8;
+
+     label7:
+        virtualinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void processWarningOccurred(java.lang.String)>("Gray+Alpha and RGBS images may not have a tRNS chunk, ignoring it.");
+
+        return;
+
+     label8:
+        $r24 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r24.<com.sun.imageio.plugins.png.PNGMetadata: boolean tRNS_present> = 1;
+
+        return;
+    }
+
+    private static byte[] inflate(byte[]) throws java.io.IOException
+    {
+        java.lang.Throwable $r5;
+        byte[] r1, $r4;
+        java.io.ByteArrayOutputStream $r8;
+        java.util.zip.InflaterInputStream $r7;
+        java.io.ByteArrayInputStream $r6;
+        int $i0, $i2;
+
+        r1 := @parameter0: byte[];
+
+        $r6 = new java.io.ByteArrayInputStream;
+
+        specialinvoke $r6.<java.io.ByteArrayInputStream: void <init>(byte[])>(r1);
+
+        $r7 = new java.util.zip.InflaterInputStream;
+
+        specialinvoke $r7.<java.util.zip.InflaterInputStream: void <init>(java.io.InputStream)>($r6);
+
+        $r8 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r8.<java.io.ByteArrayOutputStream: void <init>()>();
+
+     label1:
+        $i0 = virtualinvoke $r7.<java.io.InputStream: int read()>();
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label2;
+
+        virtualinvoke $r8.<java.io.ByteArrayOutputStream: void write(int)>($i0);
+
+        goto label1;
+
+     label2:
+        virtualinvoke $r7.<java.io.InputStream: void close()>();
+
+        goto label5;
+
+     label3:
+        $r5 := @caughtexception;
+
+     label4:
+        virtualinvoke $r7.<java.io.InputStream: void close()>();
+
+        throw $r5;
+
+     label5:
+        $r4 = virtualinvoke $r8.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        return $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private void parse_zTXt_chunk(int) throws java.io.IOException
+    {
+        byte[] r8, $r13;
+        java.lang.Integer $r6;
+        java.util.ArrayList $r3, $r7, $r12;
+        int $i0, i1, $i2, $i3, $i4;
+        java.lang.String $r1, $r11;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        javax.imageio.stream.ImageInputStream $r4, $r9;
+        com.sun.imageio.plugins.png.PNGMetadata $r2, $r5, $r10;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        i1 := @parameter0: int;
+
+        $r1 = specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: java.lang.String readNullTerminatedString(java.lang.String,int)>("ISO-8859-1", 80);
+
+        $r2 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r3 = $r2.<com.sun.imageio.plugins.png.PNGMetadata: java.util.ArrayList zTXt_keyword>;
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>($r1);
+
+        $r4 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i0 = interfaceinvoke $r4.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r5 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r7 = $r5.<com.sun.imageio.plugins.png.PNGMetadata: java.util.ArrayList zTXt_compressionMethod>;
+
+        $r6 = new java.lang.Integer;
+
+        specialinvoke $r6.<java.lang.Integer: void <init>(int)>($i0);
+
+        virtualinvoke $r7.<java.util.ArrayList: boolean add(java.lang.Object)>($r6);
+
+        $i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $i3 = i1 - $i2;
+
+        $i4 = $i3 - 2;
+
+        r8 = newarray (byte)[$i4];
+
+        $r9 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r9.<javax.imageio.stream.ImageInputStream: void readFully(byte[])>(r8);
+
+        $r10 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r12 = $r10.<com.sun.imageio.plugins.png.PNGMetadata: java.util.ArrayList zTXt_text>;
+
+        $r11 = new java.lang.String;
+
+        $r13 = staticinvoke <com.sun.imageio.plugins.png.PNGImageReader: byte[] inflate(byte[])>(r8);
+
+        specialinvoke $r11.<java.lang.String: void <init>(byte[],java.lang.String)>($r13, "ISO-8859-1");
+
+        virtualinvoke $r12.<java.util.ArrayList: boolean add(java.lang.Object)>($r11);
+
+        return;
+    }
+
+    private void readMetadata() throws javax.imageio.IIOException
+    {
+        byte[] r47;
+        javax.imageio.stream.ImageInputStream $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r14, $r15, $r16, $r17, $r18, $r30, $r31, $r32, $r33, $r34, $r45, $r46, $r48;
+        java.lang.StringBuilder $r11, $r12, $r27, $r28, $r40, $r41, $r50, $r52, $r54, $r55;
+        long $l1, $l2, $l3, $l5, $l6, $l21;
+        javax.imageio.IIOException $r49, $r51, $r53, $r56, $r57;
+        java.util.ArrayList $r21, $r24;
+        java.lang.String $r13, $r22, $r29, $r42;
+        java.io.IOException $r35, $r37, $r43;
+        boolean $z0, $z1, $z2, $z3;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        int i0, $i4, $i7, $i9, $i10, $i12, $i13, $i15, i17, $i18, $i19, $i20, $i22, $i23, $i24, $i26, $i28;
+        char $c8, $c11, $c14, $c16;
+        com.sun.imageio.plugins.png.PNGMetadata $r1, $r20, $r23;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        $z0 = r0.<com.sun.imageio.plugins.png.PNGImageReader: boolean gotMetadata>;
+
+        if $z0 == 0 goto label01;
+
+        return;
+
+     label01:
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void readHeader()>();
+
+        $r1 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        i0 = $r1.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_colorType>;
+
+        $z1 = r0.<com.sun.imageio.plugins.png.PNGImageReader: boolean ignoreMetadata>;
+
+        if $z1 == 0 goto label07;
+
+        if i0 == 3 goto label07;
+
+     label02:
+        $r30 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i18 = interfaceinvoke $r30.<javax.imageio.stream.ImageInputStream: int readInt()>();
+
+        $r31 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i19 = interfaceinvoke $r31.<javax.imageio.stream.ImageInputStream: int readInt()>();
+
+        if $i19 != 1229209940 goto label03;
+
+        $r33 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i26 = (int) -8;
+
+        interfaceinvoke $r33.<javax.imageio.stream.ImageInputStream: int skipBytes(int)>($i26);
+
+        $r34 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $l21 = interfaceinvoke $r34.<javax.imageio.stream.ImageInputStream: long getStreamPosition()>();
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: long imageStartPosition> = $l21;
+
+        goto label04;
+
+     label03:
+        $r32 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i20 = $i18 + 4;
+
+        interfaceinvoke $r32.<javax.imageio.stream.ImageInputStream: int skipBytes(int)>($i20);
+
+        goto label02;
+
+     label04:
+        goto label06;
+
+     label05:
+        $r43 := @caughtexception;
+
+        $r49 = new javax.imageio.IIOException;
+
+        specialinvoke $r49.<javax.imageio.IIOException: void <init>(java.lang.String,java.lang.Throwable)>("Error skipping PNG metadata", $r43);
+
+        throw $r49;
+
+     label06:
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: boolean gotMetadata> = 1;
+
+        return;
+
+     label07:
+        $r45 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i22 = interfaceinvoke $r45.<javax.imageio.stream.ImageInputStream: int readInt()>();
+
+        $r46 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i23 = interfaceinvoke $r46.<javax.imageio.stream.ImageInputStream: int readInt()>();
+
+        if $i22 >= 0 goto label08;
+
+        $r51 = new javax.imageio.IIOException;
+
+        $r50 = new java.lang.StringBuilder;
+
+        specialinvoke $r50.<java.lang.StringBuilder: void <init>()>();
+
+        $r27 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid chunk lenght ");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i22);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r51.<javax.imageio.IIOException: void <init>(java.lang.String)>($r29);
+
+        throw $r51;
+
+     label08:
+        $r2 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r2.<javax.imageio.stream.ImageInputStream: void mark()>();
+
+        $r4 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $r3 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $l1 = interfaceinvoke $r3.<javax.imageio.stream.ImageInputStream: long getStreamPosition()>();
+
+        $l2 = (long) $i22;
+
+        $l3 = $l1 + $l2;
+
+        interfaceinvoke $r4.<javax.imageio.stream.ImageInputStream: void seek(long)>($l3);
+
+        $r5 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i4 = interfaceinvoke $r5.<javax.imageio.stream.ImageInputStream: int readInt()>();
+
+        $r6 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r6.<javax.imageio.stream.ImageInputStream: void reset()>();
+
+     label09:
+        goto label11;
+
+     label10:
+        $r37 := @caughtexception;
+
+        $r53 = new javax.imageio.IIOException;
+
+        $r52 = new java.lang.StringBuilder;
+
+        specialinvoke $r52.<java.lang.StringBuilder: void <init>()>();
+
+        $r40 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid chunk length ");
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i22);
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r53.<javax.imageio.IIOException: void <init>(java.lang.String)>($r42);
+
+        throw $r53;
+
+     label11:
+        lookupswitch($i23)
+        {
+            case 1229209940: goto label12;
+            case 1347179589: goto label13;
+            case 1649100612: goto label14;
+            case 1665684045: goto label15;
+            case 1732332865: goto label16;
+            case 1749635924: goto label17;
+            case 1766015824: goto label18;
+            case 1767135348: goto label19;
+            case 1883789683: goto label21;
+            case 1933723988: goto label22;
+            case 1934642260: goto label23;
+            case 1934772034: goto label24;
+            case 1950701684: goto label25;
+            case 1950960965: goto label26;
+            case 1951551059: goto label27;
+            case 2052348020: goto label28;
+            default: goto label30;
+        };
+
+     label12:
+        $r16 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i28 = (int) -8;
+
+        interfaceinvoke $r16.<javax.imageio.stream.ImageInputStream: int skipBytes(int)>($i28);
+
+        $r17 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $l6 = interfaceinvoke $r17.<javax.imageio.stream.ImageInputStream: long getStreamPosition()>();
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: long imageStartPosition> = $l6;
+
+        goto label34;
+
+     label13:
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void parse_PLTE_chunk(int)>($i22);
+
+        goto label32;
+
+     label14:
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void parse_bKGD_chunk()>();
+
+        goto label32;
+
+     label15:
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void parse_cHRM_chunk()>();
+
+        goto label32;
+
+     label16:
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void parse_gAMA_chunk()>();
+
+        goto label32;
+
+     label17:
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void parse_hIST_chunk(int)>($i22);
+
+        goto label32;
+
+     label18:
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void parse_iCCP_chunk(int)>($i22);
+
+        goto label32;
+
+     label19:
+        $z3 = r0.<com.sun.imageio.plugins.png.PNGImageReader: boolean ignoreMetadata>;
+
+        if $z3 == 0 goto label20;
+
+        $r15 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r15.<javax.imageio.stream.ImageInputStream: int skipBytes(int)>($i22);
+
+        goto label32;
+
+     label20:
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void parse_iTXt_chunk(int)>($i22);
+
+        goto label32;
+
+     label21:
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void parse_pHYs_chunk()>();
+
+        goto label32;
+
+     label22:
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void parse_sBIT_chunk()>();
+
+        goto label32;
+
+     label23:
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void parse_sPLT_chunk(int)>($i22);
+
+        goto label32;
+
+     label24:
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void parse_sRGB_chunk()>();
+
+        goto label32;
+
+     label25:
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void parse_tEXt_chunk(int)>($i22);
+
+        goto label32;
+
+     label26:
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void parse_tIME_chunk()>();
+
+        goto label32;
+
+     label27:
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void parse_tRNS_chunk(int)>($i22);
+
+        goto label32;
+
+     label28:
+        $z2 = r0.<com.sun.imageio.plugins.png.PNGImageReader: boolean ignoreMetadata>;
+
+        if $z2 == 0 goto label29;
+
+        $r14 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r14.<javax.imageio.stream.ImageInputStream: int skipBytes(int)>($i22);
+
+        goto label32;
+
+     label29:
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void parse_zTXt_chunk(int)>($i22);
+
+        goto label32;
+
+     label30:
+        r47 = newarray (byte)[$i22];
+
+        $r18 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r18.<javax.imageio.stream.ImageInputStream: void readFully(byte[])>(r47);
+
+        $r54 = new java.lang.StringBuilder;
+
+        specialinvoke $r54.<java.lang.StringBuilder: void <init>(int)>(4);
+
+        $i7 = $i23 >>> 24;
+
+        $c8 = (char) $i7;
+
+        virtualinvoke $r54.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c8);
+
+        $i9 = $i23 >> 16;
+
+        $i10 = $i9 & 255;
+
+        $c11 = (char) $i10;
+
+        virtualinvoke $r54.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c11);
+
+        $i12 = $i23 >> 8;
+
+        $i13 = $i12 & 255;
+
+        $c14 = (char) $i13;
+
+        virtualinvoke $r54.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c14);
+
+        $i15 = $i23 & 255;
+
+        $c16 = (char) $i15;
+
+        virtualinvoke $r54.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c16);
+
+        i17 = $i23 >>> 28;
+
+        if i17 != 0 goto label31;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void processWarningOccurred(java.lang.String)>("Encountered unknown chunk with critical bit set!");
+
+     label31:
+        $r20 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r21 = $r20.<com.sun.imageio.plugins.png.PNGMetadata: java.util.ArrayList unknownChunkType>;
+
+        $r22 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r21.<java.util.ArrayList: boolean add(java.lang.Object)>($r22);
+
+        $r23 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r24 = $r23.<com.sun.imageio.plugins.png.PNGMetadata: java.util.ArrayList unknownChunkData>;
+
+        virtualinvoke $r24.<java.util.ArrayList: boolean add(java.lang.Object)>(r47);
+
+     label32:
+        $r48 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i24 = interfaceinvoke $r48.<javax.imageio.stream.ImageInputStream: int readInt()>();
+
+        if $i4 == $i24 goto label33;
+
+        $r56 = new javax.imageio.IIOException;
+
+        $r55 = new java.lang.StringBuilder;
+
+        specialinvoke $r55.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to read a chunk of type ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i23);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r56.<javax.imageio.IIOException: void <init>(java.lang.String)>($r13);
+
+        throw $r56;
+
+     label33:
+        $r8 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $r7 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $l5 = interfaceinvoke $r7.<javax.imageio.stream.ImageInputStream: long getStreamPosition()>();
+
+        interfaceinvoke $r8.<javax.imageio.stream.ImageInputStream: void flushBefore(long)>($l5);
+
+        goto label07;
+
+     label34:
+        goto label36;
+
+     label35:
+        $r35 := @caughtexception;
+
+        $r57 = new javax.imageio.IIOException;
+
+        specialinvoke $r57.<javax.imageio.IIOException: void <init>(java.lang.String,java.lang.Throwable)>("Error reading PNG metadata", $r35);
+
+        throw $r57;
+
+     label36:
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: boolean gotMetadata> = 1;
+
+        return;
+
+        catch java.io.IOException from label02 to label04 with label05;
+        catch java.io.IOException from label08 to label09 with label10;
+        catch java.io.IOException from label07 to label34 with label35;
+    }
+
+    private static void decodeSubFilter(byte[], int, int, int)
+    {
+        byte[] r0;
+        short $s8, s12, $s14, $s15;
+        byte $b4, $b7, $b9;
+        int i0, i1, i2, $i3, $i5, $i6, $i10, i11, i13, $i16, $i17;
+
+        r0 := @parameter0: byte[];
+
+        i2 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        i11 = i0;
+
+     label1:
+        if i11 >= i1 goto label2;
+
+        $i3 = i11 + i2;
+
+        $b4 = r0[$i3];
+
+        $s14 = (short) $b4;
+
+        s12 = $s14 & 255;
+
+        $i5 = i11 + i2;
+
+        $i6 = $i5 - i0;
+
+        $b7 = r0[$i6];
+
+        $s15 = (short) $b7;
+
+        $s8 = $s15 & 255;
+
+        $i16 = (int) s12;
+
+        $i17 = (int) $s8;
+
+        i13 = $i16 + $i17;
+
+        $i10 = i11 + i2;
+
+        $b9 = (byte) i13;
+
+        r0[$i10] = $b9;
+
+        i11 = i11 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private static void decodeUpFilter(byte[], int, byte[], int, int)
+    {
+        byte[] r0, r1;
+        short s4, s8, $s13, $s14;
+        byte $b3, $b7, $b10;
+        int i0, i1, $i2, i5, $i6, $i9, $i11, i12, $i15, $i16;
+
+        r0 := @parameter0: byte[];
+
+        i1 := @parameter1: int;
+
+        r1 := @parameter2: byte[];
+
+        i5 := @parameter3: int;
+
+        i0 := @parameter4: int;
+
+        i12 = 0;
+
+     label1:
+        if i12 >= i0 goto label2;
+
+        $i2 = i12 + i1;
+
+        $b3 = r0[$i2];
+
+        $s13 = (short) $b3;
+
+        s4 = $s13 & 255;
+
+        $i6 = i12 + i5;
+
+        $b7 = r1[$i6];
+
+        $s14 = (short) $b7;
+
+        s8 = $s14 & 255;
+
+        $i11 = i12 + i1;
+
+        $i15 = (int) s4;
+
+        $i16 = (int) s8;
+
+        $i9 = $i15 + $i16;
+
+        $b10 = (byte) $i9;
+
+        r0[$i11] = $b10;
+
+        i12 = i12 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private static void decodeAverageFilter(byte[], int, byte[], int, int, int)
+    {
+        byte[] r0, r1;
+        byte $b4, $b7, $b11, $b15, $b18, $b20, $b23;
+        short s8, s26, s27, s29, s30, $s31, $s32, $s35, $s36, $s37;
+        int i0, i1, i2, $i3, $i5, $i6, i9, $i10, $i12, $i13, $i14, $i16, $i17, $i19, $i21, $i22, $i24, i25, i28, $i33, $i34, $i38, $i39, $i40;
+
+        r0 := @parameter0: byte[];
+
+        i2 := @parameter1: int;
+
+        r1 := @parameter2: byte[];
+
+        i9 := @parameter3: int;
+
+        i1 := @parameter4: int;
+
+        i0 := @parameter5: int;
+
+        i25 = 0;
+
+     label1:
+        if i25 >= i0 goto label2;
+
+        $i17 = i25 + i2;
+
+        $b18 = r0[$i17];
+
+        $s31 = (short) $b18;
+
+        s26 = $s31 & 255;
+
+        $i19 = i25 + i9;
+
+        $b20 = r1[$i19];
+
+        $s32 = (short) $b20;
+
+        s27 = $s32 & 255;
+
+        $i24 = i25 + i2;
+
+        $i33 = (int) s27;
+
+        $i21 = $i33 / 2;
+
+        $i34 = (int) s26;
+
+        $i22 = $i34 + $i21;
+
+        $b23 = (byte) $i22;
+
+        r0[$i24] = $b23;
+
+        i25 = i25 + 1;
+
+        goto label1;
+
+     label2:
+        i28 = i0;
+
+     label3:
+        if i28 >= i1 goto label4;
+
+        $i3 = i28 + i2;
+
+        $b4 = r0[$i3];
+
+        $s35 = (short) $b4;
+
+        s29 = $s35 & 255;
+
+        $i5 = i28 + i2;
+
+        $i6 = $i5 - i0;
+
+        $b7 = r0[$i6];
+
+        $s36 = (short) $b7;
+
+        s8 = $s36 & 255;
+
+        $i10 = i28 + i9;
+
+        $b11 = r1[$i10];
+
+        $s37 = (short) $b11;
+
+        s30 = $s37 & 255;
+
+        $i16 = i28 + i2;
+
+        $i38 = (int) s8;
+
+        $i39 = (int) s30;
+
+        $i12 = $i38 + $i39;
+
+        $i13 = $i12 / 2;
+
+        $i40 = (int) s29;
+
+        $i14 = $i40 + $i13;
+
+        $b15 = (byte) $i14;
+
+        r0[$i16] = $b15;
+
+        i28 = i28 + 1;
+
+        goto label3;
+
+     label4:
+        return;
+    }
+
+    private static int paethPredictor(int, int, int)
+    {
+        int i0, i1, i2, $i3, i4, $i5, $i6, $i7, $i8, $i9, $i10;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $i3 = i0 + i1;
+
+        i4 = $i3 - i2;
+
+        $i5 = i4 - i0;
+
+        $i6 = staticinvoke <java.lang.Math: int abs(int)>($i5);
+
+        $i7 = i4 - i1;
+
+        $i8 = staticinvoke <java.lang.Math: int abs(int)>($i7);
+
+        $i9 = i4 - i2;
+
+        $i10 = staticinvoke <java.lang.Math: int abs(int)>($i9);
+
+        if $i6 > $i8 goto label1;
+
+        if $i6 > $i10 goto label1;
+
+        return i0;
+
+     label1:
+        if $i8 > $i10 goto label2;
+
+        return i1;
+
+     label2:
+        return i2;
+    }
+
+    private static void decodePaethFilter(byte[], int, byte[], int, int, int)
+    {
+        byte[] r0, r1;
+        byte $b4, $b7, $b11, $b14, $b19, $b21, $b23, $b25;
+        short s8, s15, s28, s29, s31, s32, $s33, $s34, $s37, $s38, $s39, $s40;
+        int i0, i1, i2, $i3, $i5, $i6, i9, $i10, $i12, $i13, $i16, $i17, $i18, $i20, $i22, $i24, $i26, i27, i30, $i35, $i36, $i41, $i42, $i43, $i44;
+
+        r0 := @parameter0: byte[];
+
+        i2 := @parameter1: int;
+
+        r1 := @parameter2: byte[];
+
+        i9 := @parameter3: int;
+
+        i1 := @parameter4: int;
+
+        i0 := @parameter5: int;
+
+        i27 = 0;
+
+     label1:
+        if i27 >= i0 goto label2;
+
+        $i20 = i27 + i2;
+
+        $b21 = r0[$i20];
+
+        $s33 = (short) $b21;
+
+        s28 = $s33 & 255;
+
+        $i22 = i27 + i9;
+
+        $b23 = r1[$i22];
+
+        $s34 = (short) $b23;
+
+        s29 = $s34 & 255;
+
+        $i26 = i27 + i2;
+
+        $i35 = (int) s28;
+
+        $i36 = (int) s29;
+
+        $i24 = $i35 + $i36;
+
+        $b25 = (byte) $i24;
+
+        r0[$i26] = $b25;
+
+        i27 = i27 + 1;
+
+        goto label1;
+
+     label2:
+        i30 = i0;
+
+     label3:
+        if i30 >= i1 goto label4;
+
+        $i3 = i30 + i2;
+
+        $b4 = r0[$i3];
+
+        $s37 = (short) $b4;
+
+        s31 = $s37 & 255;
+
+        $i5 = i30 + i2;
+
+        $i6 = $i5 - i0;
+
+        $b7 = r0[$i6];
+
+        $s38 = (short) $b7;
+
+        s8 = $s38 & 255;
+
+        $i10 = i30 + i9;
+
+        $b11 = r1[$i10];
+
+        $s39 = (short) $b11;
+
+        s32 = $s39 & 255;
+
+        $i12 = i30 + i9;
+
+        $i13 = $i12 - i0;
+
+        $b14 = r1[$i13];
+
+        $s40 = (short) $b14;
+
+        s15 = $s40 & 255;
+
+        $i16 = i30 + i2;
+
+        $i41 = (int) s8;
+
+        $i42 = (int) s32;
+
+        $i43 = (int) s15;
+
+        $i17 = staticinvoke <com.sun.imageio.plugins.png.PNGImageReader: int paethPredictor(int,int,int)>($i41, $i42, $i43);
+
+        $i44 = (int) s31;
+
+        $i18 = $i44 + $i17;
+
+        $b19 = (byte) $i18;
+
+        r0[$i16] = $b19;
+
+        i30 = i30 + 1;
+
+        goto label3;
+
+     label4:
+        return;
+    }
+
+    private java.awt.image.WritableRaster createRaster(int, int, int, int, int)
+    {
+        int[][] $r2, $r5;
+        java.awt.Point $r0;
+        java.awt.image.DataBufferByte $r4, $r7;
+        java.awt.image.DataBufferUShort $r1;
+        int[] $r3, $r6;
+        int i0, i1, i2, $i3, i4, i5, $i6, $i7;
+        com.sun.imageio.plugins.png.PNGImageReader r8;
+        java.awt.image.WritableRaster r9;
+
+        r8 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        i4 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i5 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        i0 := @parameter4: int;
+
+        $r0 = new java.awt.Point;
+
+        specialinvoke $r0.<java.awt.Point: void <init>(int,int)>(0, 0);
+
+        if i0 >= 8 goto label1;
+
+        if i5 != 1 goto label1;
+
+        $r7 = new java.awt.image.DataBufferByte;
+
+        $i7 = i1 * i2;
+
+        specialinvoke $r7.<java.awt.image.DataBufferByte: void <init>(int)>($i7);
+
+        r9 = staticinvoke <java.awt.image.Raster: java.awt.image.WritableRaster createPackedRaster(java.awt.image.DataBuffer,int,int,int,java.awt.Point)>($r7, i4, i1, i0, $r0);
+
+        goto label3;
+
+     label1:
+        if i0 > 8 goto label2;
+
+        $r4 = new java.awt.image.DataBufferByte;
+
+        $i6 = i1 * i2;
+
+        specialinvoke $r4.<java.awt.image.DataBufferByte: void <init>(int)>($i6);
+
+        $r5 = <com.sun.imageio.plugins.png.PNGImageReader: int[][] bandOffsets>;
+
+        $r6 = $r5[i5];
+
+        r9 = staticinvoke <java.awt.image.Raster: java.awt.image.WritableRaster createInterleavedRaster(java.awt.image.DataBuffer,int,int,int,int,int[],java.awt.Point)>($r4, i4, i1, i2, i5, $r6, $r0);
+
+        goto label3;
+
+     label2:
+        $r1 = new java.awt.image.DataBufferUShort;
+
+        $i3 = i1 * i2;
+
+        specialinvoke $r1.<java.awt.image.DataBufferUShort: void <init>(int)>($i3);
+
+        $r2 = <com.sun.imageio.plugins.png.PNGImageReader: int[][] bandOffsets>;
+
+        $r3 = $r2[i5];
+
+        r9 = staticinvoke <java.awt.image.Raster: java.awt.image.WritableRaster createInterleavedRaster(java.awt.image.DataBuffer,int,int,int,int,int[],java.awt.Point)>($r1, i4, i1, i2, i5, $r3, $r0);
+
+     label3:
+        return r9;
+    }
+
+    private void skipPass(int, int) throws java.io.IOException, javax.imageio.IIOException
+    {
+        java.io.DataInputStream $r4;
+        int[] $r2;
+        int i0, i1, $i2, i3, $i4, $i5, $i6, $i7, i8, $i9, i10;
+        boolean $z0;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        com.sun.imageio.plugins.png.PNGMetadata $r1, $r3;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        if i0 == 0 goto label1;
+
+        if i1 != 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        $r2 = <com.sun.imageio.plugins.png.PNGImageReader: int[] inputBandsForColorType>;
+
+        $r1 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $i2 = $r1.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_colorType>;
+
+        i3 = $r2[$i2];
+
+        $i5 = i3 * i0;
+
+        $r3 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $i4 = $r3.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_bitDepth>;
+
+        $i6 = $i5 * $i4;
+
+        $i7 = $i6 + 7;
+
+        i8 = $i7 / 8;
+
+        i10 = 0;
+
+     label3:
+        if i10 >= i1 goto label5;
+
+        $r4 = r0.<com.sun.imageio.plugins.png.PNGImageReader: java.io.DataInputStream pixelStream>;
+
+        $i9 = 1 + i8;
+
+        virtualinvoke $r4.<java.io.DataInputStream: int skipBytes(int)>($i9);
+
+        $z0 = virtualinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: boolean abortRequested()>();
+
+        if $z0 == 0 goto label4;
+
+        return;
+
+     label4:
+        i10 = i10 + 1;
+
+        goto label3;
+
+     label5:
+        return;
+    }
+
+    private void updateImageProgress(int)
+    {
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        int i0, $i1, $i2, $i3, $i4;
+        float $f0, $f1, $f2, $f3;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        i0 := @parameter0: int;
+
+        $i1 = r0.<com.sun.imageio.plugins.png.PNGImageReader: int pixelsDone>;
+
+        $i2 = $i1 + i0;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: int pixelsDone> = $i2;
+
+        $i3 = r0.<com.sun.imageio.plugins.png.PNGImageReader: int pixelsDone>;
+
+        $f0 = (float) $i3;
+
+        $f2 = 100.0F * $f0;
+
+        $i4 = r0.<com.sun.imageio.plugins.png.PNGImageReader: int totalPixels>;
+
+        $f1 = (float) $i4;
+
+        $f3 = $f2 / $f1;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void processImageProgress(float)>($f3);
+
+        return;
+    }
+
+    private void decodePass(int, int, int, int, int, int, int) throws java.io.IOException
+    {
+        byte[] r48, r50, r51, r54;
+        java.awt.image.SampleModel $r20;
+        byte $b60, $b62, $b83;
+        java.lang.StringBuilder $r36, $r37, $r38, $r55;
+        short $s63, $s66, $s101;
+        int[] $r5, $r8, $r12, $r13, $r16, $r18, $r19, $r21, $r31, $r33, $r40, $r41, $r42, $r43;
+        java.util.zip.ZipException $r46;
+        java.io.DataInputStream $r23, $r24, $r45;
+        int i0, i1, $i2, $i3, $i4, i5, $i6, $i7, $i8, i9, i10, i11, i12, i13, $i14, $i15, i16, i17, i18, i19, i20, i21, $i22, i23, $i24, $i25, $i26, i27, $i28, $i29, $i30, $i31, $i32, $i33, i34, $i35, $i36, i37, $i38, i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57, $i58, $i59, $i61, $i64, $i65, $i67, $i68, $i69, $i70, $i71, $i72, $i73, $i74, $i75, $i76, $i77, $i78, $i79, $i80, $i81, $i82, $i84, i85, i86, i87, i88, i89, i90, i91, i92, i93, i94, i95, i96, i97, i98, i99, $i100, $i102;
+        java.awt.image.WritableRaster $r2, $r11, r47, r52;
+        java.awt.image.DataBufferByte $r44;
+        java.awt.image.DataBufferUShort $r15;
+        javax.imageio.IIOException $r56;
+        java.lang.String $r39;
+        int[][] r53;
+        java.awt.Point $r3, $r9, $r29;
+        boolean $z0, $z1, z2, z4, z5, z6, z7, $z8, $z9;
+        java.awt.image.BufferedImage $r1, $r17, $r22, $r32;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        short[] r49;
+        java.awt.image.DataBuffer $r14;
+        java.awt.Rectangle $r4, $r10, $r25, $r26, $r27, $r28, $r30;
+        com.sun.imageio.plugins.png.PNGMetadata $r6, $r7;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        i39 := @parameter0: int;
+
+        i10 := @parameter1: int;
+
+        i11 := @parameter2: int;
+
+        i12 := @parameter3: int;
+
+        i13 := @parameter4: int;
+
+        i0 := @parameter5: int;
+
+        i1 := @parameter6: int;
+
+        if i0 == 0 goto label01;
+
+        if i1 != 0 goto label02;
+
+     label01:
+        return;
+
+     label02:
+        $r1 = r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.image.BufferedImage theImage>;
+
+        $r2 = virtualinvoke $r1.<java.awt.image.BufferedImage: java.awt.image.WritableRaster getWritableTile(int,int)>(0, 0);
+
+        r47 = $r2;
+
+        $i2 = virtualinvoke $r2.<java.awt.image.WritableRaster: int getMinX()>();
+
+        $i3 = virtualinvoke $r2.<java.awt.image.WritableRaster: int getWidth()>();
+
+        $i4 = $i2 + $i3;
+
+        i5 = $i4 - 1;
+
+        $i6 = virtualinvoke $r2.<java.awt.image.WritableRaster: int getMinY()>();
+
+        $i7 = virtualinvoke $r2.<java.awt.image.WritableRaster: int getHeight()>();
+
+        $i8 = $i6 + $i7;
+
+        i9 = $i8 - 1;
+
+        $r4 = r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.Rectangle sourceRegion>;
+
+        $r3 = r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.Point destinationOffset>;
+
+        $i15 = r0.<com.sun.imageio.plugins.png.PNGImageReader: int sourceXSubsampling>;
+
+        $i14 = r0.<com.sun.imageio.plugins.png.PNGImageReader: int sourceYSubsampling>;
+
+        $r5 = staticinvoke <com.sun.imageio.plugins.common.ReaderUtil: int[] computeUpdatedPixels(java.awt.Rectangle,java.awt.Point,int,int,int,int,int,int,int,int,int,int,int,int)>($r4, $r3, $i2, $i6, i5, i9, $i15, $i14, i10, i11, i0, i1, i12, i13);
+
+        i16 = $r5[0];
+
+        i17 = $r5[1];
+
+        i18 = $r5[2];
+
+        i19 = $r5[4];
+
+        i20 = $r5[5];
+
+        $r6 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        i21 = $r6.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_bitDepth>;
+
+        $r8 = <com.sun.imageio.plugins.png.PNGImageReader: int[] inputBandsForColorType>;
+
+        $r7 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $i22 = $r7.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_colorType>;
+
+        i23 = $r8[$i22];
+
+        if i21 != 16 goto label03;
+
+        $b83 = 2;
+
+        goto label04;
+
+     label03:
+        $b83 = 1;
+
+     label04:
+        $i81 = $b83 * i23;
+
+        $i24 = i23 * i0;
+
+        $i25 = $i24 * i21;
+
+        $i26 = $i25 + 7;
+
+        $i82 = $i26 / 8;
+
+        if i21 != 16 goto label05;
+
+        $i84 = $i82 / 2;
+
+        goto label06;
+
+     label05:
+        $i84 = $i82;
+
+     label06:
+        i27 = $i84;
+
+        if i18 != 0 goto label09;
+
+        i85 = 0;
+
+     label07:
+        if i85 >= i1 goto label08;
+
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void updateImageProgress(int)>(i0);
+
+        $r45 = r0.<com.sun.imageio.plugins.png.PNGImageReader: java.io.DataInputStream pixelStream>;
+
+        $i80 = 1 + $i82;
+
+        virtualinvoke $r45.<java.io.DataInputStream: int skipBytes(int)>($i80);
+
+        i85 = i85 + 1;
+
+        goto label07;
+
+     label08:
+        return;
+
+     label09:
+        $r9 = r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.Point destinationOffset>;
+
+        $i28 = $r9.<java.awt.Point: int x>;
+
+        $i30 = i16 - $i28;
+
+        $i29 = r0.<com.sun.imageio.plugins.png.PNGImageReader: int sourceXSubsampling>;
+
+        $i32 = $i30 * $i29;
+
+        $r10 = r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.Rectangle sourceRegion>;
+
+        $i31 = $r10.<java.awt.Rectangle: int x>;
+
+        i86 = $i32 + $i31;
+
+        $i33 = i86 - i10;
+
+        i34 = $i33 / i12;
+
+        $i35 = r0.<com.sun.imageio.plugins.png.PNGImageReader: int sourceXSubsampling>;
+
+        $i36 = i19 * $i35;
+
+        i37 = $i36 / i12;
+
+        r48 = null;
+
+        r49 = null;
+
+        r50 = newarray (byte)[$i82];
+
+        r51 = newarray (byte)[$i82];
+
+        $r11 = specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.image.WritableRaster createRaster(int,int,int,int,int)>(i0, 1, i23, $i84, i21);
+
+        r52 = $r11;
+
+        $r12 = (int[]) null;
+
+        $r13 = virtualinvoke $r11.<java.awt.image.WritableRaster: int[] getPixel(int,int,int[])>(0, 0, $r12);
+
+        $r14 = virtualinvoke $r11.<java.awt.image.WritableRaster: java.awt.image.DataBuffer getDataBuffer()>();
+
+        $i38 = virtualinvoke $r14.<java.awt.image.DataBuffer: int getDataType()>();
+
+        if $i38 != 0 goto label10;
+
+        $r44 = (java.awt.image.DataBufferByte) $r14;
+
+        r48 = virtualinvoke $r44.<java.awt.image.DataBufferByte: byte[] getData()>();
+
+        goto label11;
+
+     label10:
+        $r15 = (java.awt.image.DataBufferUShort) $r14;
+
+        r49 = virtualinvoke $r15.<java.awt.image.DataBufferUShort: short[] getData()>();
+
+     label11:
+        $r17 = r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.image.BufferedImage theImage>;
+
+        $i41 = r0.<com.sun.imageio.plugins.png.PNGImageReader: int sourceMinProgressivePass>;
+
+        $i40 = r0.<com.sun.imageio.plugins.png.PNGImageReader: int sourceMaxProgressivePass>;
+
+        $r16 = r0.<com.sun.imageio.plugins.png.PNGImageReader: int[] destinationBands>;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void processPassStarted(java.awt.image.BufferedImage,int,int,int,int,int,int,int,int[])>($r17, i39, $i41, $i40, i16, i17, i19, i20, $r16);
+
+        $r18 = r0.<com.sun.imageio.plugins.png.PNGImageReader: int[] sourceBands>;
+
+        if $r18 == null goto label12;
+
+        $i79 = virtualinvoke $r11.<java.awt.image.WritableRaster: int getWidth()>();
+
+        $r43 = r0.<com.sun.imageio.plugins.png.PNGImageReader: int[] sourceBands>;
+
+        r52 = virtualinvoke $r11.<java.awt.image.WritableRaster: java.awt.image.WritableRaster createWritableChild(int,int,int,int,int,int,int[])>(0, 0, $i79, 1, 0, 0, $r43);
+
+     label12:
+        $r19 = r0.<com.sun.imageio.plugins.png.PNGImageReader: int[] destinationBands>;
+
+        if $r19 == null goto label13;
+
+        $i76 = virtualinvoke $r2.<java.awt.image.WritableRaster: int getWidth()>();
+
+        $i77 = virtualinvoke $r2.<java.awt.image.WritableRaster: int getHeight()>();
+
+        $r42 = r0.<com.sun.imageio.plugins.png.PNGImageReader: int[] destinationBands>;
+
+        r47 = virtualinvoke $r2.<java.awt.image.WritableRaster: java.awt.image.WritableRaster createWritableChild(int,int,int,int,int,int,int[])>(0, 0, $i76, $i77, 0, 0, $r42);
+
+     label13:
+        z2 = 0;
+
+        z7 = 0;
+
+        z6 = 0;
+
+        z5 = 0;
+
+        $r20 = virtualinvoke r47.<java.awt.image.WritableRaster: java.awt.image.SampleModel getSampleModel()>();
+
+        $r21 = virtualinvoke $r20.<java.awt.image.SampleModel: int[] getSampleSize()>();
+
+        $i78 = lengthof $r21;
+
+        i87 = 0;
+
+     label14:
+        if i87 >= $i78 goto label16;
+
+        $i75 = $r21[i87];
+
+        if $i75 == i21 goto label15;
+
+        z2 = 1;
+
+        z7 = 1;
+
+        z6 = 1;
+
+        z5 = 1;
+
+        goto label16;
+
+     label15:
+        i87 = i87 + 1;
+
+        goto label14;
+
+     label16:
+        r53 = (int[][]) null;
+
+        if z6 == 0 goto label20;
+
+        $i68 = 1 << i21;
+
+        i88 = $i68 - 1;
+
+        i89 = i88 / 2;
+
+        r53 = newarray (int[])[$i78];
+
+        i90 = 0;
+
+     label17:
+        if i90 >= $i78 goto label20;
+
+        $i69 = $r21[i90];
+
+        $i70 = 1 << $i69;
+
+        i91 = $i70 - 1;
+
+        $i71 = i88 + 1;
+
+        $r40 = newarray (int)[$i71];
+
+        r53[i90] = $r40;
+
+        i92 = 0;
+
+     label18:
+        if i92 > i88 goto label19;
+
+        $r41 = r53[i90];
+
+        $i72 = i92 * i91;
+
+        $i73 = $i72 + i89;
+
+        $i74 = $i73 / i88;
+
+        $r41[i92] = $i74;
+
+        i92 = i92 + 1;
+
+        goto label18;
+
+     label19:
+        i90 = i90 + 1;
+
+        goto label17;
+
+     label20:
+        if i37 != 1 goto label21;
+
+        if i19 != 1 goto label21;
+
+        if z7 != 0 goto label21;
+
+        $z1 = r47 instanceof sun.awt.image.ByteInterleavedRaster;
+
+        if $z1 == 0 goto label21;
+
+        $z9 = 1;
+
+        $z8 = 1;
+
+        goto label22;
+
+     label21:
+        $z9 = 0;
+
+        $z8 = 0;
+
+     label22:
+        z4 = $z8;
+
+        if $z9 == 0 goto label23;
+
+        r52 = virtualinvoke r52.<java.awt.image.WritableRaster: java.awt.image.WritableRaster createWritableChild(int,int,int,int,int,int,int[])>(i34, 0, i18, 1, 0, 0, null);
+
+     label23:
+        i93 = 0;
+
+     label24:
+        if i93 >= i1 goto label47;
+
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void updateImageProgress(int)>(i0);
+
+        $r23 = r0.<com.sun.imageio.plugins.png.PNGImageReader: java.io.DataInputStream pixelStream>;
+
+        $i42 = virtualinvoke $r23.<java.io.DataInputStream: int read()>();
+
+     label25:
+        r54 = r51;
+
+        r51 = r50;
+
+        r50 = r54;
+
+        $r24 = r0.<com.sun.imageio.plugins.png.PNGImageReader: java.io.DataInputStream pixelStream>;
+
+        virtualinvoke $r24.<java.io.DataInputStream: void readFully(byte[],int,int)>(r54, 0, $i82);
+
+     label26:
+        goto label28;
+
+     label27:
+        $r46 := @caughtexception;
+
+        throw $r46;
+
+     label28:
+        tableswitch($i42)
+        {
+            case 0: goto label29;
+            case 1: goto label30;
+            case 2: goto label31;
+            case 3: goto label32;
+            case 4: goto label33;
+            default: goto label34;
+        };
+
+     label29:
+        goto label35;
+
+     label30:
+        staticinvoke <com.sun.imageio.plugins.png.PNGImageReader: void decodeSubFilter(byte[],int,int,int)>(r54, 0, $i82, $i81);
+
+        goto label35;
+
+     label31:
+        staticinvoke <com.sun.imageio.plugins.png.PNGImageReader: void decodeUpFilter(byte[],int,byte[],int,int)>(r54, 0, r51, 0, $i82);
+
+        goto label35;
+
+     label32:
+        staticinvoke <com.sun.imageio.plugins.png.PNGImageReader: void decodeAverageFilter(byte[],int,byte[],int,int,int)>(r54, 0, r51, 0, $i82, $i81);
+
+        goto label35;
+
+     label33:
+        staticinvoke <com.sun.imageio.plugins.png.PNGImageReader: void decodePaethFilter(byte[],int,byte[],int,int,int)>(r54, 0, r51, 0, $i82, $i81);
+
+        goto label35;
+
+     label34:
+        $r56 = new javax.imageio.IIOException;
+
+        $r55 = new java.lang.StringBuilder;
+
+        specialinvoke $r55.<java.lang.StringBuilder: void <init>()>();
+
+        $r36 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown row filter type (= ");
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i42);
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")!");
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r56.<javax.imageio.IIOException: void <init>(java.lang.String)>($r39);
+
+        throw $r56;
+
+     label35:
+        if i21 >= 16 goto label36;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r54, 0, r48, 0, $i82);
+
+        goto label38;
+
+     label36:
+        i94 = 0;
+
+        i95 = 0;
+
+     label37:
+        if i95 >= i27 goto label38;
+
+        $b60 = r54[i94];
+
+        $i100 = (int) $b60;
+
+        $i64 = $i100 << 8;
+
+        $i61 = i94 + 1;
+
+        $b62 = r54[$i61];
+
+        $s101 = (short) $b62;
+
+        $s63 = $s101 & 255;
+
+        $i102 = (int) $s63;
+
+        $i65 = $i64 | $i102;
+
+        $s66 = (short) $i65;
+
+        r49[i95] = $s66;
+
+        i94 = i94 + 2;
+
+        i95 = i95 + 1;
+
+        goto label37;
+
+     label38:
+        $i43 = i93 * i13;
+
+        $i67 = $i43 + i11;
+
+        $r25 = r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.Rectangle sourceRegion>;
+
+        $i44 = $r25.<java.awt.Rectangle: int y>;
+
+        if $i67 < $i44 goto label46;
+
+        $r26 = r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.Rectangle sourceRegion>;
+
+        $i46 = $r26.<java.awt.Rectangle: int y>;
+
+        $r27 = r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.Rectangle sourceRegion>;
+
+        $i45 = $r27.<java.awt.Rectangle: int height>;
+
+        $i47 = $i46 + $i45;
+
+        if $i67 >= $i47 goto label46;
+
+        $r28 = r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.Rectangle sourceRegion>;
+
+        $i48 = $r28.<java.awt.Rectangle: int y>;
+
+        $i50 = $i67 - $i48;
+
+        $i49 = r0.<com.sun.imageio.plugins.png.PNGImageReader: int sourceYSubsampling>;
+
+        $i51 = $i50 % $i49;
+
+        if $i51 != 0 goto label46;
+
+        $r29 = r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.Point destinationOffset>;
+
+        $i56 = $r29.<java.awt.Point: int y>;
+
+        $r30 = r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.Rectangle sourceRegion>;
+
+        $i52 = $r30.<java.awt.Rectangle: int y>;
+
+        $i54 = $i67 - $i52;
+
+        $i53 = r0.<com.sun.imageio.plugins.png.PNGImageReader: int sourceYSubsampling>;
+
+        $i55 = $i54 / $i53;
+
+        i96 = $i56 + $i55;
+
+        if i96 >= $i6 goto label39;
+
+        goto label46;
+
+     label39:
+        if i96 <= i9 goto label40;
+
+        goto label47;
+
+     label40:
+        if z4 == 0 goto label41;
+
+        virtualinvoke r47.<java.awt.image.WritableRaster: void setRect(int,int,java.awt.image.Raster)>(i16, i96, r52);
+
+        goto label45;
+
+     label41:
+        i97 = i34;
+
+        i98 = i16;
+
+     label42:
+        $i57 = i16 + i18;
+
+        if i98 >= $i57 goto label45;
+
+        virtualinvoke r52.<java.awt.image.WritableRaster: int[] getPixel(int,int,int[])>(i97, 0, $r13);
+
+        if z5 == 0 goto label44;
+
+        i99 = 0;
+
+     label43:
+        if i99 >= $i78 goto label44;
+
+        $r33 = r53[i99];
+
+        $i58 = $r13[i99];
+
+        $i59 = $r33[$i58];
+
+        $r13[i99] = $i59;
+
+        i99 = i99 + 1;
+
+        goto label43;
+
+     label44:
+        virtualinvoke r47.<java.awt.image.WritableRaster: void setPixel(int,int,int[])>(i98, i96, $r13);
+
+        i97 = i97 + i37;
+
+        i98 = i98 + i19;
+
+        goto label42;
+
+     label45:
+        $r32 = r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.image.BufferedImage theImage>;
+
+        $r31 = r0.<com.sun.imageio.plugins.png.PNGImageReader: int[] destinationBands>;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void processImageUpdate(java.awt.image.BufferedImage,int,int,int,int,int,int,int[])>($r32, i16, i96, i18, 1, i19, i20, $r31);
+
+        $z0 = virtualinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: boolean abortRequested()>();
+
+        if $z0 == 0 goto label46;
+
+        return;
+
+     label46:
+        i93 = i93 + 1;
+
+        goto label24;
+
+     label47:
+        $r22 = r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.image.BufferedImage theImage>;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void processPassComplete(java.awt.image.BufferedImage)>($r22);
+
+        return;
+
+        catch java.util.zip.ZipException from label25 to label26 with label27;
+    }
+
+    private void decodeImage() throws java.io.IOException, javax.imageio.IIOException
+    {
+        int[] $r4, $r5, $r6, $r7, $r8, $r9;
+        boolean $z0;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        int i0, i1, $i2, $i3, $i4, i5, i6, i7, i8, $i9, $i10, i11, $i12, $i13, i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, i24;
+        com.sun.imageio.plugins.png.PNGMetadata $r1, $r2, $r3;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        $r1 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        i0 = $r1.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_width>;
+
+        $r2 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        i1 = $r2.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_height>;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: int pixelsDone> = 0;
+
+        $i2 = i0 * i1;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: int totalPixels> = $i2;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void clearAbortRequest()>();
+
+        $r3 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $i3 = $r3.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_interlaceMethod>;
+
+        if $i3 != 0 goto label1;
+
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void decodePass(int,int,int,int,int,int,int)>(0, 0, 0, 1, 1, i0, i1);
+
+        goto label6;
+
+     label1:
+        i24 = 0;
+
+     label2:
+        $i4 = r0.<com.sun.imageio.plugins.png.PNGImageReader: int sourceMaxProgressivePass>;
+
+        if i24 > $i4 goto label6;
+
+        $r4 = <com.sun.imageio.plugins.png.PNGImageReader: int[] adam7XOffset>;
+
+        i5 = $r4[i24];
+
+        $r5 = <com.sun.imageio.plugins.png.PNGImageReader: int[] adam7YOffset>;
+
+        i6 = $r5[i24];
+
+        $r6 = <com.sun.imageio.plugins.png.PNGImageReader: int[] adam7XSubsampling>;
+
+        i7 = $r6[i24];
+
+        $r7 = <com.sun.imageio.plugins.png.PNGImageReader: int[] adam7YSubsampling>;
+
+        i8 = $r7[i24];
+
+        $r8 = <com.sun.imageio.plugins.png.PNGImageReader: int[] adam7XSubsampling>;
+
+        $i9 = i24 + 1;
+
+        $i10 = $r8[$i9];
+
+        i11 = $i10 - 1;
+
+        $r9 = <com.sun.imageio.plugins.png.PNGImageReader: int[] adam7YSubsampling>;
+
+        $i12 = i24 + 1;
+
+        $i13 = $r9[$i12];
+
+        i14 = $i13 - 1;
+
+        $i15 = r0.<com.sun.imageio.plugins.png.PNGImageReader: int sourceMinProgressivePass>;
+
+        if i24 < $i15 goto label3;
+
+        $i20 = i0 + i11;
+
+        $i23 = $i20 / i7;
+
+        $i21 = i1 + i14;
+
+        $i22 = $i21 / i8;
+
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void decodePass(int,int,int,int,int,int,int)>(i24, i5, i6, i7, i8, $i23, $i22);
+
+        goto label4;
+
+     label3:
+        $i16 = i0 + i11;
+
+        $i19 = $i16 / i7;
+
+        $i17 = i1 + i14;
+
+        $i18 = $i17 / i8;
+
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void skipPass(int,int)>($i19, $i18);
+
+     label4:
+        $z0 = virtualinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: boolean abortRequested()>();
+
+        if $z0 == 0 goto label5;
+
+        return;
+
+     label5:
+        i24 = i24 + 1;
+
+        goto label2;
+
+     label6:
+        return;
+    }
+
+    private void readImage(javax.imageio.ImageReadParam) throws javax.imageio.IIOException
+    {
+        java.io.BufferedInputStream $r11;
+        java.util.zip.Inflater $r9, r31;
+        com.sun.imageio.plugins.png.PNGImageDataEnumeration $r6;
+        java.awt.Point $r3, $r19, $r20, $r27;
+        java.awt.image.SampleModel $r24;
+        int[] $r22, $r25, $r26;
+        boolean $z0;
+        java.awt.image.BufferedImage $r14, $r18, $r23;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        javax.imageio.stream.ImageInputStream $r5, $r7;
+        java.lang.Throwable $r28;
+        java.io.DataInputStream $r12;
+        java.awt.Rectangle $r15, $r16, $r17;
+        java.util.zip.InflaterInputStream $r10;
+        long $l2;
+        javax.imageio.IIOException $r30;
+        int i0, i1, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11;
+        java.util.Iterator $r13;
+        java.io.SequenceInputStream $r8;
+        java.io.IOException $r29;
+        javax.imageio.ImageReadParam r4;
+        com.sun.imageio.plugins.png.PNGMetadata $r1, $r2, $r21;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        r4 := @parameter0: javax.imageio.ImageReadParam;
+
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void readMetadata()>();
+
+        $r1 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        i0 = $r1.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_width>;
+
+        $r2 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        i1 = $r2.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_height>;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: int sourceXSubsampling> = 1;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: int sourceYSubsampling> = 1;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: int sourceMinProgressivePass> = 0;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: int sourceMaxProgressivePass> = 6;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: int[] sourceBands> = null;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: int[] destinationBands> = null;
+
+        $r3 = new java.awt.Point;
+
+        specialinvoke $r3.<java.awt.Point: void <init>(int,int)>(0, 0);
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.Point destinationOffset> = $r3;
+
+        if r4 == null goto label1;
+
+        $i5 = virtualinvoke r4.<javax.imageio.ImageReadParam: int getSourceXSubsampling()>();
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: int sourceXSubsampling> = $i5;
+
+        $i6 = virtualinvoke r4.<javax.imageio.ImageReadParam: int getSourceYSubsampling()>();
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: int sourceYSubsampling> = $i6;
+
+        $i7 = virtualinvoke r4.<javax.imageio.ImageReadParam: int getSourceMinProgressivePass()>();
+
+        $i8 = staticinvoke <java.lang.Math: int max(int,int)>($i7, 0);
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: int sourceMinProgressivePass> = $i8;
+
+        $i9 = virtualinvoke r4.<javax.imageio.ImageReadParam: int getSourceMaxProgressivePass()>();
+
+        $i10 = staticinvoke <java.lang.Math: int min(int,int)>($i9, 6);
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: int sourceMaxProgressivePass> = $i10;
+
+        $r25 = virtualinvoke r4.<javax.imageio.ImageReadParam: int[] getSourceBands()>();
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: int[] sourceBands> = $r25;
+
+        $r26 = virtualinvoke r4.<javax.imageio.ImageReadParam: int[] getDestinationBands()>();
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: int[] destinationBands> = $r26;
+
+        $r27 = virtualinvoke r4.<javax.imageio.ImageReadParam: java.awt.Point getDestinationOffset()>();
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.Point destinationOffset> = $r27;
+
+     label1:
+        r31 = null;
+
+     label2:
+        $r5 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $l2 = r0.<com.sun.imageio.plugins.png.PNGImageReader: long imageStartPosition>;
+
+        interfaceinvoke $r5.<javax.imageio.stream.ImageInputStream: void seek(long)>($l2);
+
+        $r6 = new com.sun.imageio.plugins.png.PNGImageDataEnumeration;
+
+        $r7 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        specialinvoke $r6.<com.sun.imageio.plugins.png.PNGImageDataEnumeration: void <init>(javax.imageio.stream.ImageInputStream)>($r7);
+
+        $r8 = new java.io.SequenceInputStream;
+
+        specialinvoke $r8.<java.io.SequenceInputStream: void <init>(java.util.Enumeration)>($r6);
+
+        $r9 = new java.util.zip.Inflater;
+
+        specialinvoke $r9.<java.util.zip.Inflater: void <init>()>();
+
+        r31 = $r9;
+
+        $r10 = new java.util.zip.InflaterInputStream;
+
+        specialinvoke $r10.<java.util.zip.InflaterInputStream: void <init>(java.io.InputStream,java.util.zip.Inflater)>($r8, $r9);
+
+        $r11 = new java.io.BufferedInputStream;
+
+        specialinvoke $r11.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>($r10);
+
+        $r12 = new java.io.DataInputStream;
+
+        specialinvoke $r12.<java.io.DataInputStream: void <init>(java.io.InputStream)>($r11);
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: java.io.DataInputStream pixelStream> = $r12;
+
+        $r13 = virtualinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: java.util.Iterator getImageTypes(int)>(0);
+
+        $r14 = staticinvoke <com.sun.imageio.plugins.png.PNGImageReader: java.awt.image.BufferedImage getDestination(javax.imageio.ImageReadParam,java.util.Iterator,int,int)>(r4, $r13, i0, i1);
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.image.BufferedImage theImage> = $r14;
+
+        $r15 = new java.awt.Rectangle;
+
+        specialinvoke $r15.<java.awt.Rectangle: void <init>(int,int,int,int)>(0, 0, 0, 0);
+
+        $r16 = new java.awt.Rectangle;
+
+        specialinvoke $r16.<java.awt.Rectangle: void <init>(int,int,int,int)>(0, 0, 0, 0);
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.Rectangle sourceRegion> = $r16;
+
+        $r18 = r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.image.BufferedImage theImage>;
+
+        $r17 = r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.Rectangle sourceRegion>;
+
+        staticinvoke <com.sun.imageio.plugins.png.PNGImageReader: void computeRegions(javax.imageio.ImageReadParam,int,int,java.awt.image.BufferedImage,java.awt.Rectangle,java.awt.Rectangle)>(r4, i0, i1, $r18, $r17, $r15);
+
+        $r19 = r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.Point destinationOffset>;
+
+        $r20 = virtualinvoke $r15.<java.awt.Rectangle: java.awt.Point getLocation()>();
+
+        virtualinvoke $r19.<java.awt.Point: void setLocation(java.awt.Point)>($r20);
+
+        $r21 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $i11 = $r21.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_colorType>;
+
+        $r22 = <com.sun.imageio.plugins.png.PNGImageReader: int[] inputBandsForColorType>;
+
+        $i3 = $r22[$i11];
+
+        $r23 = r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.image.BufferedImage theImage>;
+
+        $r24 = virtualinvoke $r23.<java.awt.image.BufferedImage: java.awt.image.SampleModel getSampleModel()>();
+
+        $i4 = virtualinvoke $r24.<java.awt.image.SampleModel: int getNumBands()>();
+
+        staticinvoke <com.sun.imageio.plugins.png.PNGImageReader: void checkReadParamBandSettings(javax.imageio.ImageReadParam,int,int)>(r4, $i3, $i4);
+
+        virtualinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void processImageStarted(int)>(0);
+
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void decodeImage()>();
+
+        $z0 = virtualinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: boolean abortRequested()>();
+
+        if $z0 == 0 goto label3;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void processReadAborted()>();
+
+        goto label4;
+
+     label3:
+        virtualinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void processImageComplete()>();
+
+     label4:
+        if $r9 == null goto label9;
+
+        virtualinvoke $r9.<java.util.zip.Inflater: void end()>();
+
+        goto label9;
+
+     label5:
+        $r29 := @caughtexception;
+
+        $r30 = new javax.imageio.IIOException;
+
+        specialinvoke $r30.<javax.imageio.IIOException: void <init>(java.lang.String,java.lang.Throwable)>("Error reading PNG image data", $r29);
+
+        throw $r30;
+
+     label6:
+        $r28 := @caughtexception;
+
+     label7:
+        if r31 == null goto label8;
+
+        virtualinvoke r31.<java.util.zip.Inflater: void end()>();
+
+     label8:
+        throw $r28;
+
+     label9:
+        return;
+
+        catch java.io.IOException from label2 to label4 with label5;
+        catch java.lang.Throwable from label2 to label4 with label6;
+        catch java.lang.Throwable from label5 to label7 with label6;
+    }
+
+    public int getNumImages(boolean) throws javax.imageio.IIOException
+    {
+        java.lang.IllegalStateException $r2, $r3;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        javax.imageio.stream.ImageInputStream $r1;
+        boolean $z0, z1;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        z1 := @parameter0: boolean;
+
+        $r1 = r0.<com.sun.imageio.plugins.png.PNGImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("No input source set!");
+
+        throw $r3;
+
+     label1:
+        $z0 = r0.<com.sun.imageio.plugins.png.PNGImageReader: boolean seekForwardOnly>;
+
+        if $z0 == 0 goto label2;
+
+        if z1 == 0 goto label2;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("seekForwardOnly and allowSearch can\'t both be true!");
+
+        throw $r2;
+
+     label2:
+        return 1;
+    }
+
+    public int getWidth(int) throws javax.imageio.IIOException
+    {
+        java.lang.IndexOutOfBoundsException $r2;
+        com.sun.imageio.plugins.png.PNGMetadata $r1;
+        int i0, $i1;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        i0 := @parameter0: int;
+
+        if i0 == 0 goto label1;
+
+        $r2 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r2.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("imageIndex != 0!");
+
+        throw $r2;
+
+     label1:
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void readHeader()>();
+
+        $r1 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $i1 = $r1.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_width>;
+
+        return $i1;
+    }
+
+    public int getHeight(int) throws javax.imageio.IIOException
+    {
+        java.lang.IndexOutOfBoundsException $r2;
+        com.sun.imageio.plugins.png.PNGMetadata $r1;
+        int i0, $i1;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        i0 := @parameter0: int;
+
+        if i0 == 0 goto label1;
+
+        $r2 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r2.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("imageIndex != 0!");
+
+        throw $r2;
+
+     label1:
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void readHeader()>();
+
+        $r1 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $i1 = $r1.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_height>;
+
+        return $i1;
+    }
+
+    public java.util.Iterator getImageTypes(int) throws javax.imageio.IIOException
+    {
+        byte[] $r15, $r18, $r20, $r22, $r23, $r25, $r28, $r29, $r31, $r34, $r35, $r37, $r38, $r40, $r43, $r44, $r46, $r47, $r49, $r52, $r53, r62, r63, r64, r65;
+        java.lang.IndexOutOfBoundsException $r61;
+        byte $b12, $b16, $b20, b22, b23, b24, b25;
+        javax.imageio.ImageTypeSpecifier $r5, $r6, $r7, $r10, $r55, $r56, $r57, $r58, $r60, $r66;
+        java.util.ArrayList $r1;
+        int[] $r8, $r59, r67;
+        boolean $z0, z1;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        java.awt.color.ColorSpace $r4, $r9, $r54;
+        int i0, i1, i2, i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i13, $i14, $i15, $i17, $i18, $i19, $i21;
+        java.util.Iterator $r68;
+        com.sun.imageio.plugins.png.PNGMetadata $r2, $r3, $r11, $r12, $r13, $r14, $r16, $r17, $r19, $r21, $r24, $r26, $r27, $r30, $r32, $r33, $r36, $r39, $r41, $r42, $r45, $r48, $r50, $r51;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        i0 := @parameter0: int;
+
+        if i0 == 0 goto label01;
+
+        $r61 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r61.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("imageIndex != 0!");
+
+        throw $r61;
+
+     label01:
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void readHeader()>();
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>(int)>(1);
+
+        $r2 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        i1 = $r2.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_bitDepth>;
+
+        $r3 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        i2 = $r3.<com.sun.imageio.plugins.png.PNGMetadata: int IHDR_colorType>;
+
+        if i1 > 8 goto label02;
+
+        z1 = 0;
+
+        b25 = 0;
+
+        b24 = 0;
+
+        b23 = 0;
+
+        b22 = 0;
+
+        goto label03;
+
+     label02:
+        z1 = 1;
+
+        b25 = 1;
+
+        b24 = 1;
+
+        b23 = 1;
+
+        b22 = 1;
+
+     label03:
+        tableswitch(i2)
+        {
+            case 0: goto label04;
+            case 1: goto label14;
+            case 2: goto label05;
+            case 3: goto label07;
+            case 4: goto label11;
+            case 5: goto label14;
+            case 6: goto label12;
+            default: goto label14;
+        };
+
+     label04:
+        $r60 = staticinvoke <javax.imageio.ImageTypeSpecifier: javax.imageio.ImageTypeSpecifier createGrayscale(int,int,boolean)>(i1, b23, 0);
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r60);
+
+        goto label14;
+
+     label05:
+        if i1 != 8 goto label06;
+
+        $r56 = staticinvoke <javax.imageio.ImageTypeSpecifier: javax.imageio.ImageTypeSpecifier createFromBufferedImageType(int)>(5);
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r56);
+
+        $r57 = staticinvoke <javax.imageio.ImageTypeSpecifier: javax.imageio.ImageTypeSpecifier createFromBufferedImageType(int)>(1);
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r57);
+
+        $r58 = staticinvoke <javax.imageio.ImageTypeSpecifier: javax.imageio.ImageTypeSpecifier createFromBufferedImageType(int)>(4);
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r58);
+
+     label06:
+        $r54 = staticinvoke <java.awt.color.ColorSpace: java.awt.color.ColorSpace getInstance(int)>(1000);
+
+        $r59 = newarray (int)[3];
+
+        $r59[0] = 0;
+
+        $r59[1] = 1;
+
+        $r59[2] = 2;
+
+        $r55 = staticinvoke <javax.imageio.ImageTypeSpecifier: javax.imageio.ImageTypeSpecifier createInterleaved(java.awt.color.ColorSpace,int[],int,boolean,boolean)>($r54, $r59, b24, 0, 0);
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r55);
+
+        goto label14;
+
+     label07:
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void readMetadata()>();
+
+        i3 = 1 << i1;
+
+        $r11 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        r62 = $r11.<com.sun.imageio.plugins.png.PNGMetadata: byte[] PLTE_red>;
+
+        $r12 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        r63 = $r12.<com.sun.imageio.plugins.png.PNGMetadata: byte[] PLTE_green>;
+
+        $r13 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        r64 = $r13.<com.sun.imageio.plugins.png.PNGMetadata: byte[] PLTE_blue>;
+
+        $r14 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r15 = $r14.<com.sun.imageio.plugins.png.PNGMetadata: byte[] PLTE_red>;
+
+        $i4 = lengthof $r15;
+
+        if $i4 >= i3 goto label08;
+
+        $r27 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r28 = $r27.<com.sun.imageio.plugins.png.PNGMetadata: byte[] PLTE_red>;
+
+        $r29 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>($r28, i3);
+
+        r62 = $r29;
+
+        $r30 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r31 = $r30.<com.sun.imageio.plugins.png.PNGMetadata: byte[] PLTE_red>;
+
+        $i13 = lengthof $r31;
+
+        $r32 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r35 = $r32.<com.sun.imageio.plugins.png.PNGMetadata: byte[] PLTE_red>;
+
+        $r33 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r34 = $r33.<com.sun.imageio.plugins.png.PNGMetadata: byte[] PLTE_red>;
+
+        $i10 = lengthof $r34;
+
+        $i11 = $i10 - 1;
+
+        $b12 = $r35[$i11];
+
+        staticinvoke <java.util.Arrays: void fill(byte[],int,int,byte)>($r29, $i13, i3, $b12);
+
+        $r36 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r37 = $r36.<com.sun.imageio.plugins.png.PNGMetadata: byte[] PLTE_green>;
+
+        $r38 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>($r37, i3);
+
+        r63 = $r38;
+
+        $r39 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r40 = $r39.<com.sun.imageio.plugins.png.PNGMetadata: byte[] PLTE_green>;
+
+        $i17 = lengthof $r40;
+
+        $r41 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r44 = $r41.<com.sun.imageio.plugins.png.PNGMetadata: byte[] PLTE_green>;
+
+        $r42 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r43 = $r42.<com.sun.imageio.plugins.png.PNGMetadata: byte[] PLTE_green>;
+
+        $i14 = lengthof $r43;
+
+        $i15 = $i14 - 1;
+
+        $b16 = $r44[$i15];
+
+        staticinvoke <java.util.Arrays: void fill(byte[],int,int,byte)>($r38, $i17, i3, $b16);
+
+        $r45 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r46 = $r45.<com.sun.imageio.plugins.png.PNGMetadata: byte[] PLTE_blue>;
+
+        $r47 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>($r46, i3);
+
+        r64 = $r47;
+
+        $r48 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r49 = $r48.<com.sun.imageio.plugins.png.PNGMetadata: byte[] PLTE_blue>;
+
+        $i21 = lengthof $r49;
+
+        $r50 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r53 = $r50.<com.sun.imageio.plugins.png.PNGMetadata: byte[] PLTE_blue>;
+
+        $r51 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r52 = $r51.<com.sun.imageio.plugins.png.PNGMetadata: byte[] PLTE_blue>;
+
+        $i18 = lengthof $r52;
+
+        $i19 = $i18 - 1;
+
+        $b20 = $r53[$i19];
+
+        staticinvoke <java.util.Arrays: void fill(byte[],int,int,byte)>($r47, $i21, i3, $b20);
+
+     label08:
+        r65 = null;
+
+        $r16 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $z0 = $r16.<com.sun.imageio.plugins.png.PNGMetadata: boolean tRNS_present>;
+
+        if $z0 == 0 goto label10;
+
+        $r17 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r18 = $r17.<com.sun.imageio.plugins.png.PNGMetadata: byte[] tRNS_alpha>;
+
+        if $r18 == null goto label10;
+
+        $r19 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r20 = $r19.<com.sun.imageio.plugins.png.PNGMetadata: byte[] tRNS_alpha>;
+
+        $i6 = lengthof $r20;
+
+        $i5 = lengthof r62;
+
+        if $i6 != $i5 goto label09;
+
+        $r26 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        r65 = $r26.<com.sun.imageio.plugins.png.PNGMetadata: byte[] tRNS_alpha>;
+
+        goto label10;
+
+     label09:
+        $r21 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r22 = $r21.<com.sun.imageio.plugins.png.PNGMetadata: byte[] tRNS_alpha>;
+
+        $i7 = lengthof r62;
+
+        $r23 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>($r22, $i7);
+
+        r65 = $r23;
+
+        $r24 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        $r25 = $r24.<com.sun.imageio.plugins.png.PNGMetadata: byte[] tRNS_alpha>;
+
+        $i9 = lengthof $r25;
+
+        $i8 = lengthof r62;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],int,int,byte)>($r23, $i9, $i8, -1);
+
+     label10:
+        $r66 = staticinvoke <javax.imageio.ImageTypeSpecifier: javax.imageio.ImageTypeSpecifier createIndexed(byte[],byte[],byte[],byte[],int,int)>(r62, r63, r64, r65, i1, 0);
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r66);
+
+        goto label14;
+
+     label11:
+        $r9 = staticinvoke <java.awt.color.ColorSpace: java.awt.color.ColorSpace getInstance(int)>(1003);
+
+        r67 = newarray (int)[2];
+
+        r67[0] = 0;
+
+        r67[1] = 1;
+
+        $r10 = staticinvoke <javax.imageio.ImageTypeSpecifier: javax.imageio.ImageTypeSpecifier createInterleaved(java.awt.color.ColorSpace,int[],int,boolean,boolean)>($r9, r67, b22, 1, 0);
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r10);
+
+        goto label14;
+
+     label12:
+        if i1 != 8 goto label13;
+
+        $r6 = staticinvoke <javax.imageio.ImageTypeSpecifier: javax.imageio.ImageTypeSpecifier createFromBufferedImageType(int)>(6);
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r6);
+
+        $r7 = staticinvoke <javax.imageio.ImageTypeSpecifier: javax.imageio.ImageTypeSpecifier createFromBufferedImageType(int)>(2);
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r7);
+
+     label13:
+        $r4 = staticinvoke <java.awt.color.ColorSpace: java.awt.color.ColorSpace getInstance(int)>(1000);
+
+        $r8 = newarray (int)[4];
+
+        $r8[0] = 0;
+
+        $r8[1] = 1;
+
+        $r8[2] = 2;
+
+        $r8[3] = 3;
+
+        $r5 = staticinvoke <javax.imageio.ImageTypeSpecifier: javax.imageio.ImageTypeSpecifier createInterleaved(java.awt.color.ColorSpace,int[],int,boolean,boolean)>($r4, $r8, b25, 1, 0);
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r5);
+
+        goto label14;
+
+     label14:
+        $r68 = virtualinvoke $r1.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+        return $r68;
+    }
+
+    public javax.imageio.ImageTypeSpecifier getRawImageType(int) throws java.io.IOException
+    {
+        java.util.Iterator $r1;
+        int i0;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+        javax.imageio.ImageTypeSpecifier $r3;
+        java.lang.Object $r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: java.util.Iterator getImageTypes(int)>(i0);
+
+     label1:
+        $r2 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        $r3 = (javax.imageio.ImageTypeSpecifier) $r2;
+
+        $z0 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 != 0 goto label1;
+
+        return $r3;
+    }
+
+    public javax.imageio.ImageReadParam getDefaultReadParam()
+    {
+        javax.imageio.ImageReadParam $r0;
+        com.sun.imageio.plugins.png.PNGImageReader r1;
+
+        r1 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        $r0 = new javax.imageio.ImageReadParam;
+
+        specialinvoke $r0.<javax.imageio.ImageReadParam: void <init>()>();
+
+        return $r0;
+    }
+
+    public javax.imageio.metadata.IIOMetadata getStreamMetadata() throws javax.imageio.IIOException
+    {
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        return null;
+    }
+
+    public javax.imageio.metadata.IIOMetadata getImageMetadata(int) throws javax.imageio.IIOException
+    {
+        java.lang.IndexOutOfBoundsException $r2;
+        com.sun.imageio.plugins.png.PNGMetadata $r1;
+        int i0;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        i0 := @parameter0: int;
+
+        if i0 == 0 goto label1;
+
+        $r2 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r2.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("imageIndex != 0!");
+
+        throw $r2;
+
+     label1:
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void readMetadata()>();
+
+        $r1 = r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata>;
+
+        return $r1;
+    }
+
+    public java.awt.image.BufferedImage read(int, javax.imageio.ImageReadParam) throws javax.imageio.IIOException
+    {
+        javax.imageio.ImageReadParam r1;
+        java.lang.IndexOutOfBoundsException $r3;
+        java.awt.image.BufferedImage $r2;
+        int i0;
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: javax.imageio.ImageReadParam;
+
+        if i0 == 0 goto label1;
+
+        $r3 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r3.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("imageIndex != 0!");
+
+        throw $r3;
+
+     label1:
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void readImage(javax.imageio.ImageReadParam)>(r1);
+
+        $r2 = r0.<com.sun.imageio.plugins.png.PNGImageReader: java.awt.image.BufferedImage theImage>;
+
+        return $r2;
+    }
+
+    public void reset()
+    {
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        specialinvoke r0.<javax.imageio.ImageReader: void reset()>();
+
+        specialinvoke r0.<com.sun.imageio.plugins.png.PNGImageReader: void resetStreamSettings()>();
+
+        return;
+    }
+
+    private void resetStreamSettings()
+    {
+        com.sun.imageio.plugins.png.PNGImageReader r0;
+
+        r0 := @this: com.sun.imageio.plugins.png.PNGImageReader;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: boolean gotHeader> = 0;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: boolean gotMetadata> = 0;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: com.sun.imageio.plugins.png.PNGMetadata metadata> = null;
+
+        r0.<com.sun.imageio.plugins.png.PNGImageReader: java.io.DataInputStream pixelStream> = null;
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        int[][] $r5;
+        int[] $r0, $r1, $r2, $r3, $r4, $r6, $r7, $r8, $r9;
+        int $i1, $i3;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: boolean debug> = 1;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int PNG_FILTER_PAETH> = 4;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int PNG_FILTER_AVERAGE> = 3;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int PNG_FILTER_UP> = 2;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int PNG_FILTER_SUB> = 1;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int PNG_FILTER_NONE> = 0;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int PNG_COLOR_RGB_ALPHA> = 6;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int PNG_COLOR_GRAY_ALPHA> = 4;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int PNG_COLOR_PALETTE> = 3;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int PNG_COLOR_RGB> = 2;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int PNG_COLOR_GRAY> = 0;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int zTXt_TYPE> = 2052348020;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int tRNS_TYPE> = 1951551059;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int tIME_TYPE> = 1950960965;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int tEXt_TYPE> = 1950701684;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int sRGB_TYPE> = 1934772034;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int sPLT_TYPE> = 1934642260;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int sBIT_TYPE> = 1933723988;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int pHYs_TYPE> = 1883789683;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int iTXt_TYPE> = 1767135348;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int iCCP_TYPE> = 1766015824;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int hIST_TYPE> = 1749635924;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int gAMA_TYPE> = 1732332865;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int cHRM_TYPE> = 1665684045;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int bKGD_TYPE> = 1649100612;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int IEND_TYPE> = 1229278788;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int IDAT_TYPE> = 1229209940;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int PLTE_TYPE> = 1347179589;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int IHDR_TYPE> = 1229472850;
+
+        $r0 = newarray (int)[7];
+
+        $r0[0] = 1;
+
+        $i1 = (int) -1;
+
+        $r0[1] = $i1;
+
+        $r0[2] = 3;
+
+        $r0[3] = 1;
+
+        $r0[4] = 2;
+
+        $i3 = (int) -1;
+
+        $r0[5] = $i3;
+
+        $r0[6] = 4;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int[] inputBandsForColorType> = $r0;
+
+        $r1 = newarray (int)[7];
+
+        $r1[0] = 0;
+
+        $r1[1] = 4;
+
+        $r1[2] = 0;
+
+        $r1[3] = 2;
+
+        $r1[4] = 0;
+
+        $r1[5] = 1;
+
+        $r1[6] = 0;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int[] adam7XOffset> = $r1;
+
+        $r2 = newarray (int)[7];
+
+        $r2[0] = 0;
+
+        $r2[1] = 0;
+
+        $r2[2] = 4;
+
+        $r2[3] = 0;
+
+        $r2[4] = 2;
+
+        $r2[5] = 0;
+
+        $r2[6] = 1;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int[] adam7YOffset> = $r2;
+
+        $r3 = newarray (int)[8];
+
+        $r3[0] = 8;
+
+        $r3[1] = 8;
+
+        $r3[2] = 4;
+
+        $r3[3] = 4;
+
+        $r3[4] = 2;
+
+        $r3[5] = 2;
+
+        $r3[6] = 1;
+
+        $r3[7] = 1;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int[] adam7XSubsampling> = $r3;
+
+        $r4 = newarray (int)[8];
+
+        $r4[0] = 8;
+
+        $r4[1] = 8;
+
+        $r4[2] = 8;
+
+        $r4[3] = 4;
+
+        $r4[4] = 4;
+
+        $r4[5] = 2;
+
+        $r4[6] = 2;
+
+        $r4[7] = 1;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int[] adam7YSubsampling> = $r4;
+
+        $r5 = newarray (int[])[5];
+
+        $r5[0] = null;
+
+        $r6 = newarray (int)[1];
+
+        $r6[0] = 0;
+
+        $r5[1] = $r6;
+
+        $r7 = newarray (int)[2];
+
+        $r7[0] = 0;
+
+        $r7[1] = 1;
+
+        $r5[2] = $r7;
+
+        $r8 = newarray (int)[3];
+
+        $r8[0] = 0;
+
+        $r8[1] = 1;
+
+        $r8[2] = 2;
+
+        $r5[3] = $r8;
+
+        $r9 = newarray (int)[4];
+
+        $r9[0] = 0;
+
+        $r9[1] = 1;
+
+        $r9[2] = 2;
+
+        $r9[3] = 3;
+
+        $r5[4] = $r9;
+
+        <com.sun.imageio.plugins.png.PNGImageReader: int[][] bandOffsets> = $r5;
+
+        return;
+    }
+}

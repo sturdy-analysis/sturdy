@@ -1,0 +1,257 @@
+public class java.lang.ThreadLocal extends java.lang.Object
+{
+    private final int threadLocalHashCode;
+    private static java.util.concurrent.atomic.AtomicInteger nextHashCode;
+    private static final int HASH_INCREMENT;
+
+    private static int nextHashCode()
+    {
+        int $i0;
+        java.util.concurrent.atomic.AtomicInteger $r0;
+
+        $r0 = <java.lang.ThreadLocal: java.util.concurrent.atomic.AtomicInteger nextHashCode>;
+
+        $i0 = virtualinvoke $r0.<java.util.concurrent.atomic.AtomicInteger: int getAndAdd(int)>(1640531527);
+
+        return $i0;
+    }
+
+    protected java.lang.Object initialValue()
+    {
+        java.lang.ThreadLocal r0;
+
+        r0 := @this: java.lang.ThreadLocal;
+
+        return null;
+    }
+
+    public static java.lang.ThreadLocal withInitial(java.util.function.Supplier)
+    {
+        java.util.function.Supplier r1;
+        java.lang.ThreadLocal$SuppliedThreadLocal $r0;
+
+        r1 := @parameter0: java.util.function.Supplier;
+
+        $r0 = new java.lang.ThreadLocal$SuppliedThreadLocal;
+
+        specialinvoke $r0.<java.lang.ThreadLocal$SuppliedThreadLocal: void <init>(java.util.function.Supplier)>(r1);
+
+        return $r0;
+    }
+
+    public void <init>()
+    {
+        int $i0;
+        java.lang.ThreadLocal r0;
+
+        r0 := @this: java.lang.ThreadLocal;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $i0 = staticinvoke <java.lang.ThreadLocal: int nextHashCode()>();
+
+        r0.<java.lang.ThreadLocal: int threadLocalHashCode> = $i0;
+
+        return;
+    }
+
+    public java.lang.Object get()
+    {
+        java.lang.ThreadLocal r1;
+        java.lang.Thread $r0;
+        java.lang.ThreadLocal$ThreadLocalMap$Entry $r4;
+        java.lang.Object $r3, r5;
+        java.lang.ThreadLocal$ThreadLocalMap $r2;
+
+        r1 := @this: java.lang.ThreadLocal;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = virtualinvoke r1.<java.lang.ThreadLocal: java.lang.ThreadLocal$ThreadLocalMap getMap(java.lang.Thread)>($r0);
+
+        if $r2 == null goto label1;
+
+        $r4 = staticinvoke <java.lang.ThreadLocal$ThreadLocalMap: java.lang.ThreadLocal$ThreadLocalMap$Entry access$000(java.lang.ThreadLocal$ThreadLocalMap,java.lang.ThreadLocal)>($r2, r1);
+
+        if $r4 == null goto label1;
+
+        r5 = $r4.<java.lang.ThreadLocal$ThreadLocalMap$Entry: java.lang.Object value>;
+
+        return r5;
+
+     label1:
+        $r3 = specialinvoke r1.<java.lang.ThreadLocal: java.lang.Object setInitialValue()>();
+
+        return $r3;
+    }
+
+    private java.lang.Object setInitialValue()
+    {
+        java.lang.ThreadLocal r0;
+        java.lang.Thread $r2;
+        java.lang.Object $r1;
+        java.lang.ThreadLocal$ThreadLocalMap $r3;
+
+        r0 := @this: java.lang.ThreadLocal;
+
+        $r1 = virtualinvoke r0.<java.lang.ThreadLocal: java.lang.Object initialValue()>();
+
+        $r2 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r3 = virtualinvoke r0.<java.lang.ThreadLocal: java.lang.ThreadLocal$ThreadLocalMap getMap(java.lang.Thread)>($r2);
+
+        if $r3 == null goto label1;
+
+        staticinvoke <java.lang.ThreadLocal$ThreadLocalMap: void access$100(java.lang.ThreadLocal$ThreadLocalMap,java.lang.ThreadLocal,java.lang.Object)>($r3, r0, $r1);
+
+        goto label2;
+
+     label1:
+        virtualinvoke r0.<java.lang.ThreadLocal: void createMap(java.lang.Thread,java.lang.Object)>($r2, $r1);
+
+     label2:
+        return $r1;
+    }
+
+    public void set(java.lang.Object)
+    {
+        java.lang.ThreadLocal r1;
+        java.lang.Thread $r0;
+        java.lang.Object r3;
+        java.lang.ThreadLocal$ThreadLocalMap $r2;
+
+        r1 := @this: java.lang.ThreadLocal;
+
+        r3 := @parameter0: java.lang.Object;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = virtualinvoke r1.<java.lang.ThreadLocal: java.lang.ThreadLocal$ThreadLocalMap getMap(java.lang.Thread)>($r0);
+
+        if $r2 == null goto label1;
+
+        staticinvoke <java.lang.ThreadLocal$ThreadLocalMap: void access$100(java.lang.ThreadLocal$ThreadLocalMap,java.lang.ThreadLocal,java.lang.Object)>($r2, r1, r3);
+
+        goto label2;
+
+     label1:
+        virtualinvoke r1.<java.lang.ThreadLocal: void createMap(java.lang.Thread,java.lang.Object)>($r0, r3);
+
+     label2:
+        return;
+    }
+
+    public void remove()
+    {
+        java.lang.ThreadLocal r0;
+        java.lang.ThreadLocal$ThreadLocalMap $r2;
+        java.lang.Thread $r1;
+
+        r0 := @this: java.lang.ThreadLocal;
+
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = virtualinvoke r0.<java.lang.ThreadLocal: java.lang.ThreadLocal$ThreadLocalMap getMap(java.lang.Thread)>($r1);
+
+        if $r2 == null goto label1;
+
+        staticinvoke <java.lang.ThreadLocal$ThreadLocalMap: void access$200(java.lang.ThreadLocal$ThreadLocalMap,java.lang.ThreadLocal)>($r2, r0);
+
+     label1:
+        return;
+    }
+
+    java.lang.ThreadLocal$ThreadLocalMap getMap(java.lang.Thread)
+    {
+        java.lang.ThreadLocal r2;
+        java.lang.ThreadLocal$ThreadLocalMap $r1;
+        java.lang.Thread r0;
+
+        r2 := @this: java.lang.ThreadLocal;
+
+        r0 := @parameter0: java.lang.Thread;
+
+        $r1 = r0.<java.lang.Thread: java.lang.ThreadLocal$ThreadLocalMap threadLocals>;
+
+        return $r1;
+    }
+
+    void createMap(java.lang.Thread, java.lang.Object)
+    {
+        java.lang.ThreadLocal r2;
+        java.lang.Thread r0;
+        java.lang.Object r3;
+        java.lang.ThreadLocal$ThreadLocalMap $r1;
+
+        r2 := @this: java.lang.ThreadLocal;
+
+        r0 := @parameter0: java.lang.Thread;
+
+        r3 := @parameter1: java.lang.Object;
+
+        $r1 = new java.lang.ThreadLocal$ThreadLocalMap;
+
+        specialinvoke $r1.<java.lang.ThreadLocal$ThreadLocalMap: void <init>(java.lang.ThreadLocal,java.lang.Object)>(r2, r3);
+
+        r0.<java.lang.Thread: java.lang.ThreadLocal$ThreadLocalMap threadLocals> = $r1;
+
+        return;
+    }
+
+    static java.lang.ThreadLocal$ThreadLocalMap createInheritedMap(java.lang.ThreadLocal$ThreadLocalMap)
+    {
+        java.lang.ThreadLocal$ThreadLocalMap $r0, r1;
+
+        r1 := @parameter0: java.lang.ThreadLocal$ThreadLocalMap;
+
+        $r0 = new java.lang.ThreadLocal$ThreadLocalMap;
+
+        specialinvoke $r0.<java.lang.ThreadLocal$ThreadLocalMap: void <init>(java.lang.ThreadLocal$ThreadLocalMap,java.lang.ThreadLocal$1)>(r1, null);
+
+        return $r0;
+    }
+
+    java.lang.Object childValue(java.lang.Object)
+    {
+        java.lang.UnsupportedOperationException $r0;
+        java.lang.ThreadLocal r1;
+        java.lang.Object r2;
+
+        r1 := @this: java.lang.ThreadLocal;
+
+        r2 := @parameter0: java.lang.Object;
+
+        $r0 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r0.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r0;
+    }
+
+    static int access$400(java.lang.ThreadLocal)
+    {
+        int $i0;
+        java.lang.ThreadLocal r0;
+
+        r0 := @parameter0: java.lang.ThreadLocal;
+
+        $i0 = r0.<java.lang.ThreadLocal: int threadLocalHashCode>;
+
+        return $i0;
+    }
+
+    static void <clinit>()
+    {
+        java.util.concurrent.atomic.AtomicInteger $r0;
+
+        <java.lang.ThreadLocal: int HASH_INCREMENT> = 1640531527;
+
+        $r0 = new java.util.concurrent.atomic.AtomicInteger;
+
+        specialinvoke $r0.<java.util.concurrent.atomic.AtomicInteger: void <init>()>();
+
+        <java.lang.ThreadLocal: java.util.concurrent.atomic.AtomicInteger nextHashCode> = $r0;
+
+        return;
+    }
+}

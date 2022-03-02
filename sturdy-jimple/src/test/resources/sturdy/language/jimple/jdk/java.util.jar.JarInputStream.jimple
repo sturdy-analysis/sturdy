@@ -1,0 +1,362 @@
+public class java.util.jar.JarInputStream extends java.util.zip.ZipInputStream
+{
+    private java.util.jar.Manifest man;
+    private java.util.jar.JarEntry first;
+    private java.util.jar.JarVerifier jv;
+    private sun.security.util.ManifestEntryVerifier mev;
+    private final boolean doVerify;
+    private boolean tryManifest;
+
+    public void <init>(java.io.InputStream) throws java.io.IOException
+    {
+        java.util.jar.JarInputStream r0;
+        java.io.InputStream r1;
+
+        r0 := @this: java.util.jar.JarInputStream;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        specialinvoke r0.<java.util.jar.JarInputStream: void <init>(java.io.InputStream,boolean)>(r1, 1);
+
+        return;
+    }
+
+    public void <init>(java.io.InputStream, boolean) throws java.io.IOException
+    {
+        java.util.jar.JarEntry r5, $r6;
+        java.util.jar.JarInputStream r0;
+        java.lang.String $r3;
+        java.util.zip.ZipEntry $r2, $r4;
+        java.io.InputStream r1;
+        boolean z0, $z1;
+
+        r0 := @this: java.util.jar.JarInputStream;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        z0 := @parameter1: boolean;
+
+        specialinvoke r0.<java.util.zip.ZipInputStream: void <init>(java.io.InputStream)>(r1);
+
+        r0.<java.util.jar.JarInputStream: boolean doVerify> = z0;
+
+        $r2 = specialinvoke r0.<java.util.zip.ZipInputStream: java.util.zip.ZipEntry getNextEntry()>();
+
+        r5 = (java.util.jar.JarEntry) $r2;
+
+        if r5 == null goto label1;
+
+        $r3 = virtualinvoke r5.<java.util.jar.JarEntry: java.lang.String getName()>();
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("META-INF/");
+
+        if $z1 == 0 goto label1;
+
+        $r4 = specialinvoke r0.<java.util.zip.ZipInputStream: java.util.zip.ZipEntry getNextEntry()>();
+
+        r5 = (java.util.jar.JarEntry) $r4;
+
+     label1:
+        $r6 = specialinvoke r0.<java.util.jar.JarInputStream: java.util.jar.JarEntry checkManifest(java.util.jar.JarEntry)>(r5);
+
+        r0.<java.util.jar.JarInputStream: java.util.jar.JarEntry first> = $r6;
+
+        return;
+    }
+
+    private java.util.jar.JarEntry checkManifest(java.util.jar.JarEntry) throws java.io.IOException
+    {
+        java.util.jar.Manifest $r4, $r8, $r14;
+        byte[] $r6;
+        java.io.BufferedInputStream $r5;
+        java.util.jar.JarEntry r0, $r10;
+        java.io.ByteArrayInputStream $r7;
+        java.util.jar.JarInputStream r3;
+        java.lang.String $r1, $r2, $r12;
+        java.util.zip.ZipEntry $r9;
+        boolean $z0, $z1;
+        sun.security.util.ManifestEntryVerifier $r13;
+        java.util.jar.JarVerifier $r11;
+
+        r3 := @this: java.util.jar.JarInputStream;
+
+        r0 := @parameter0: java.util.jar.JarEntry;
+
+        if r0 == null goto label2;
+
+        $r1 = "META-INF/MANIFEST.MF";
+
+        $r2 = virtualinvoke r0.<java.util.jar.JarEntry: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r2);
+
+        if $z0 == 0 goto label2;
+
+        $r4 = new java.util.jar.Manifest;
+
+        specialinvoke $r4.<java.util.jar.Manifest: void <init>()>();
+
+        r3.<java.util.jar.JarInputStream: java.util.jar.Manifest man> = $r4;
+
+        $r5 = new java.io.BufferedInputStream;
+
+        specialinvoke $r5.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>(r3);
+
+        $r6 = specialinvoke r3.<java.util.jar.JarInputStream: byte[] getBytes(java.io.InputStream)>($r5);
+
+        $r8 = r3.<java.util.jar.JarInputStream: java.util.jar.Manifest man>;
+
+        $r7 = new java.io.ByteArrayInputStream;
+
+        specialinvoke $r7.<java.io.ByteArrayInputStream: void <init>(byte[])>($r6);
+
+        virtualinvoke $r8.<java.util.jar.Manifest: void read(java.io.InputStream)>($r7);
+
+        virtualinvoke r3.<java.util.jar.JarInputStream: void closeEntry()>();
+
+        $z1 = r3.<java.util.jar.JarInputStream: boolean doVerify>;
+
+        if $z1 == 0 goto label1;
+
+        $r11 = new java.util.jar.JarVerifier;
+
+        $r12 = virtualinvoke r0.<java.util.jar.JarEntry: java.lang.String getName()>();
+
+        specialinvoke $r11.<java.util.jar.JarVerifier: void <init>(java.lang.String,byte[])>($r12, $r6);
+
+        r3.<java.util.jar.JarInputStream: java.util.jar.JarVerifier jv> = $r11;
+
+        $r13 = new sun.security.util.ManifestEntryVerifier;
+
+        $r14 = r3.<java.util.jar.JarInputStream: java.util.jar.Manifest man>;
+
+        specialinvoke $r13.<sun.security.util.ManifestEntryVerifier: void <init>(java.util.jar.Manifest)>($r14);
+
+        r3.<java.util.jar.JarInputStream: sun.security.util.ManifestEntryVerifier mev> = $r13;
+
+     label1:
+        $r9 = specialinvoke r3.<java.util.zip.ZipInputStream: java.util.zip.ZipEntry getNextEntry()>();
+
+        $r10 = (java.util.jar.JarEntry) $r9;
+
+        return $r10;
+
+     label2:
+        return r0;
+    }
+
+    private byte[] getBytes(java.io.InputStream) throws java.io.IOException
+    {
+        byte[] r0, $r3;
+        java.io.ByteArrayOutputStream $r5;
+        int $i0, $i1, $i3;
+        java.util.jar.JarInputStream r4;
+        java.io.InputStream r2;
+
+        r4 := @this: java.util.jar.JarInputStream;
+
+        r2 := @parameter0: java.io.InputStream;
+
+        r0 = newarray (byte)[8192];
+
+        $r5 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r5.<java.io.ByteArrayOutputStream: void <init>(int)>(2048);
+
+     label1:
+        $i0 = lengthof r0;
+
+        $i1 = virtualinvoke r2.<java.io.InputStream: int read(byte[],int,int)>(r0, 0, $i0);
+
+        $i3 = (int) -1;
+
+        if $i1 == $i3 goto label2;
+
+        virtualinvoke $r5.<java.io.ByteArrayOutputStream: void write(byte[],int,int)>(r0, 0, $i1);
+
+        goto label1;
+
+     label2:
+        $r3 = virtualinvoke $r5.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        return $r3;
+    }
+
+    public java.util.jar.Manifest getManifest()
+    {
+        java.util.jar.JarInputStream r0;
+        java.util.jar.Manifest $r1;
+
+        r0 := @this: java.util.jar.JarInputStream;
+
+        $r1 = r0.<java.util.jar.JarInputStream: java.util.jar.Manifest man>;
+
+        return $r1;
+    }
+
+    public java.util.zip.ZipEntry getNextEntry() throws java.io.IOException
+    {
+        sun.security.util.ManifestEntryVerifier $r5;
+        java.util.jar.JarEntry $r1, $r2, r8;
+        java.util.jar.JarInputStream r0;
+        java.util.jar.JarVerifier $r4, $r6, $r9;
+        java.lang.String $r3;
+        java.util.zip.ZipEntry $r7;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.util.jar.JarInputStream;
+
+        $r1 = r0.<java.util.jar.JarInputStream: java.util.jar.JarEntry first>;
+
+        if $r1 != null goto label1;
+
+        $r7 = specialinvoke r0.<java.util.zip.ZipInputStream: java.util.zip.ZipEntry getNextEntry()>();
+
+        r8 = (java.util.jar.JarEntry) $r7;
+
+        $z2 = r0.<java.util.jar.JarInputStream: boolean tryManifest>;
+
+        if $z2 == 0 goto label3;
+
+        r8 = specialinvoke r0.<java.util.jar.JarInputStream: java.util.jar.JarEntry checkManifest(java.util.jar.JarEntry)>(r8);
+
+        r0.<java.util.jar.JarInputStream: boolean tryManifest> = 0;
+
+        goto label3;
+
+     label1:
+        r8 = r0.<java.util.jar.JarInputStream: java.util.jar.JarEntry first>;
+
+        $r2 = r0.<java.util.jar.JarInputStream: java.util.jar.JarEntry first>;
+
+        $r3 = virtualinvoke $r2.<java.util.jar.JarEntry: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("META-INF/INDEX.LIST");
+
+        if $z0 == 0 goto label2;
+
+        r0.<java.util.jar.JarInputStream: boolean tryManifest> = 1;
+
+     label2:
+        r0.<java.util.jar.JarInputStream: java.util.jar.JarEntry first> = null;
+
+     label3:
+        $r9 = r0.<java.util.jar.JarInputStream: java.util.jar.JarVerifier jv>;
+
+        if $r9 == null goto label5;
+
+        if r8 == null goto label5;
+
+        $r4 = r0.<java.util.jar.JarInputStream: java.util.jar.JarVerifier jv>;
+
+        $z1 = virtualinvoke $r4.<java.util.jar.JarVerifier: boolean nothingToVerify()>();
+
+        if $z1 != 1 goto label4;
+
+        r0.<java.util.jar.JarInputStream: java.util.jar.JarVerifier jv> = null;
+
+        r0.<java.util.jar.JarInputStream: sun.security.util.ManifestEntryVerifier mev> = null;
+
+        goto label5;
+
+     label4:
+        $r6 = r0.<java.util.jar.JarInputStream: java.util.jar.JarVerifier jv>;
+
+        $r5 = r0.<java.util.jar.JarInputStream: sun.security.util.ManifestEntryVerifier mev>;
+
+        virtualinvoke $r6.<java.util.jar.JarVerifier: void beginEntry(java.util.jar.JarEntry,sun.security.util.ManifestEntryVerifier)>(r8, $r5);
+
+     label5:
+        return r8;
+    }
+
+    public java.util.jar.JarEntry getNextJarEntry() throws java.io.IOException
+    {
+        java.util.jar.JarInputStream r0;
+        java.util.jar.JarEntry $r2;
+        java.util.zip.ZipEntry $r1;
+
+        r0 := @this: java.util.jar.JarInputStream;
+
+        $r1 = virtualinvoke r0.<java.util.jar.JarInputStream: java.util.zip.ZipEntry getNextEntry()>();
+
+        $r2 = (java.util.jar.JarEntry) $r1;
+
+        return $r2;
+    }
+
+    public int read(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r3;
+        sun.security.util.ManifestEntryVerifier $r4;
+        java.util.jar.JarEntry $r1;
+        java.util.jar.JarInputStream r0;
+        int i0, i1, i2, $i4;
+        java.util.jar.JarVerifier $r2, $r5;
+
+        r0 := @this: java.util.jar.JarInputStream;
+
+        r3 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r1 = r0.<java.util.jar.JarInputStream: java.util.jar.JarEntry first>;
+
+        if $r1 != null goto label1;
+
+        i2 = specialinvoke r0.<java.util.zip.ZipInputStream: int read(byte[],int,int)>(r3, i0, i1);
+
+        goto label2;
+
+     label1:
+        $i4 = (int) -1;
+
+        i2 = $i4;
+
+     label2:
+        $r2 = r0.<java.util.jar.JarInputStream: java.util.jar.JarVerifier jv>;
+
+        if $r2 == null goto label3;
+
+        $r5 = r0.<java.util.jar.JarInputStream: java.util.jar.JarVerifier jv>;
+
+        $r4 = r0.<java.util.jar.JarInputStream: sun.security.util.ManifestEntryVerifier mev>;
+
+        virtualinvoke $r5.<java.util.jar.JarVerifier: void update(int,byte[],int,int,sun.security.util.ManifestEntryVerifier)>(i2, r3, i0, i1, $r4);
+
+     label3:
+        return i2;
+    }
+
+    protected java.util.zip.ZipEntry createZipEntry(java.lang.String)
+    {
+        java.util.jar.Manifest $r3, $r4;
+        java.util.jar.JarEntry $r0;
+        java.util.jar.JarInputStream r2;
+        java.lang.String r1;
+        java.util.jar.Attributes $r5;
+
+        r2 := @this: java.util.jar.JarInputStream;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = new java.util.jar.JarEntry;
+
+        specialinvoke $r0.<java.util.jar.JarEntry: void <init>(java.lang.String)>(r1);
+
+        $r3 = r2.<java.util.jar.JarInputStream: java.util.jar.Manifest man>;
+
+        if $r3 == null goto label1;
+
+        $r4 = r2.<java.util.jar.JarInputStream: java.util.jar.Manifest man>;
+
+        $r5 = virtualinvoke $r4.<java.util.jar.Manifest: java.util.jar.Attributes getAttributes(java.lang.String)>(r1);
+
+        $r0.<java.util.jar.JarEntry: java.util.jar.Attributes attr> = $r5;
+
+     label1:
+        return $r0;
+    }
+}

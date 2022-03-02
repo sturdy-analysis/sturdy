@@ -1,0 +1,2872 @@
+class java.util.prefs.WindowsPreferences extends java.util.prefs.AbstractPreferences
+{
+    private static sun.util.logging.PlatformLogger logger;
+    private static final byte[] WINDOWS_ROOT_PATH;
+    private static final int HKEY_CURRENT_USER;
+    private static final int HKEY_LOCAL_MACHINE;
+    private static final int USER_ROOT_NATIVE_HANDLE;
+    private static final int SYSTEM_ROOT_NATIVE_HANDLE;
+    private static final int MAX_WINDOWS_PATH_LENGTH;
+    private static volatile java.util.prefs.Preferences userRoot;
+    private static volatile java.util.prefs.Preferences systemRoot;
+    private static final int ERROR_SUCCESS;
+    private static final int ERROR_FILE_NOT_FOUND;
+    private static final int ERROR_ACCESS_DENIED;
+    private static final int NATIVE_HANDLE;
+    private static final int ERROR_CODE;
+    private static final int SUBKEYS_NUMBER;
+    private static final int VALUES_NUMBER;
+    private static final int MAX_KEY_LENGTH;
+    private static final int MAX_VALUE_NAME_LENGTH;
+    private static final int DISPOSITION;
+    private static final int REG_CREATED_NEW_KEY;
+    private static final int REG_OPENED_EXISTING_KEY;
+    private static final int NULL_NATIVE_HANDLE;
+    private static final int DELETE;
+    private static final int KEY_QUERY_VALUE;
+    private static final int KEY_SET_VALUE;
+    private static final int KEY_CREATE_SUB_KEY;
+    private static final int KEY_ENUMERATE_SUB_KEYS;
+    private static final int KEY_READ;
+    private static final int KEY_WRITE;
+    private static final int KEY_ALL_ACCESS;
+    private static int INIT_SLEEP_TIME;
+    private static int MAX_ATTEMPTS;
+    private boolean isBackingStoreAvailable;
+
+    static java.util.prefs.Preferences getUserRoot()
+    {
+        java.lang.Throwable $r2;
+        byte[] $r1;
+        java.util.prefs.WindowsPreferences $r0;
+        java.util.prefs.Preferences r3;
+
+        r3 = <java.util.prefs.WindowsPreferences: java.util.prefs.Preferences userRoot>;
+
+        if r3 != null goto label6;
+
+        entermonitor class "Ljava/util/prefs/WindowsPreferences;";
+
+     label1:
+        r3 = <java.util.prefs.WindowsPreferences: java.util.prefs.Preferences userRoot>;
+
+        if r3 != null goto label2;
+
+        $r0 = new java.util.prefs.WindowsPreferences;
+
+        $r1 = <java.util.prefs.WindowsPreferences: byte[] WINDOWS_ROOT_PATH>;
+
+        specialinvoke $r0.<java.util.prefs.WindowsPreferences: void <init>(int,byte[])>(-2147483647, $r1);
+
+        r3 = $r0;
+
+        <java.util.prefs.WindowsPreferences: java.util.prefs.Preferences userRoot> = $r0;
+
+     label2:
+        exitmonitor class "Ljava/util/prefs/WindowsPreferences;";
+
+     label3:
+        goto label6;
+
+     label4:
+        $r2 := @caughtexception;
+
+        exitmonitor class "Ljava/util/prefs/WindowsPreferences;";
+
+     label5:
+        throw $r2;
+
+     label6:
+        return r3;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    static java.util.prefs.Preferences getSystemRoot()
+    {
+        java.lang.Throwable $r2;
+        byte[] $r1;
+        java.util.prefs.WindowsPreferences $r0;
+        java.util.prefs.Preferences r3;
+
+        r3 = <java.util.prefs.WindowsPreferences: java.util.prefs.Preferences systemRoot>;
+
+        if r3 != null goto label6;
+
+        entermonitor class "Ljava/util/prefs/WindowsPreferences;";
+
+     label1:
+        r3 = <java.util.prefs.WindowsPreferences: java.util.prefs.Preferences systemRoot>;
+
+        if r3 != null goto label2;
+
+        $r0 = new java.util.prefs.WindowsPreferences;
+
+        $r1 = <java.util.prefs.WindowsPreferences: byte[] WINDOWS_ROOT_PATH>;
+
+        specialinvoke $r0.<java.util.prefs.WindowsPreferences: void <init>(int,byte[])>(-2147483646, $r1);
+
+        r3 = $r0;
+
+        <java.util.prefs.WindowsPreferences: java.util.prefs.Preferences systemRoot> = $r0;
+
+     label2:
+        exitmonitor class "Ljava/util/prefs/WindowsPreferences;";
+
+     label3:
+        goto label6;
+
+     label4:
+        $r2 := @caughtexception;
+
+        exitmonitor class "Ljava/util/prefs/WindowsPreferences;";
+
+     label5:
+        throw $r2;
+
+     label6:
+        return r3;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private static native int[] WindowsRegOpenKey(int, byte[], int);
+
+    private static int[] WindowsRegOpenKey1(int, byte[], int)
+    {
+        byte[] r0;
+        long l9;
+        int[] $r1, $r2, $r13, $r14, r16;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, i8, i10;
+        java.lang.String $r6, $r9, $r12;
+        sun.util.logging.PlatformLogger $r3;
+        java.lang.InterruptedException $r15;
+        java.lang.StringBuilder $r4, $r5, $r7, $r8, $r10, $r11;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: byte[];
+
+        i1 := @parameter2: int;
+
+        $r1 = staticinvoke <java.util.prefs.WindowsPreferences: int[] WindowsRegOpenKey(int,byte[],int)>(i0, r0, i1);
+
+        r16 = $r1;
+
+        $i2 = $r1[1];
+
+        if $i2 != 0 goto label1;
+
+        return $r1;
+
+     label1:
+        $i3 = $r1[1];
+
+        if $i3 != 2 goto label2;
+
+        $r3 = staticinvoke <java.util.prefs.WindowsPreferences: sun.util.logging.PlatformLogger logger()>();
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Trying to recreate Windows registry node ");
+
+        $r6 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String byteArrayToString(byte[])>(r0);
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at root 0x");
+
+        $r9 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>(i0);
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r3.<sun.util.logging.PlatformLogger: void warning(java.lang.String)>($r12);
+
+        $r13 = staticinvoke <java.util.prefs.WindowsPreferences: int[] WindowsRegCreateKeyEx(int,byte[])>(i0, r0);
+
+        i8 = $r13[0];
+
+        staticinvoke <java.util.prefs.WindowsPreferences: int WindowsRegCloseKey(int)>(i8);
+
+        $r14 = staticinvoke <java.util.prefs.WindowsPreferences: int[] WindowsRegOpenKey(int,byte[],int)>(i0, r0, i1);
+
+        return $r14;
+
+     label2:
+        $i4 = $r1[1];
+
+        if $i4 == 5 goto label9;
+
+        $i5 = <java.util.prefs.WindowsPreferences: int INIT_SLEEP_TIME>;
+
+        l9 = (long) $i5;
+
+        i10 = 0;
+
+     label3:
+        $i6 = <java.util.prefs.WindowsPreferences: int MAX_ATTEMPTS>;
+
+        if i10 >= $i6 goto label9;
+
+     label4:
+        staticinvoke <java.lang.Thread: void sleep(long)>(l9);
+
+     label5:
+        goto label7;
+
+     label6:
+        $r15 := @caughtexception;
+
+        return r16;
+
+     label7:
+        l9 = l9 * 2L;
+
+        $r2 = staticinvoke <java.util.prefs.WindowsPreferences: int[] WindowsRegOpenKey(int,byte[],int)>(i0, r0, i1);
+
+        r16 = $r2;
+
+        $i7 = $r2[1];
+
+        if $i7 != 0 goto label8;
+
+        return $r2;
+
+     label8:
+        i10 = i10 + 1;
+
+        goto label3;
+
+     label9:
+        return r16;
+
+        catch java.lang.InterruptedException from label4 to label5 with label6;
+    }
+
+    private static native int WindowsRegCloseKey(int);
+
+    private static native int[] WindowsRegCreateKeyEx(int, byte[]);
+
+    private static int[] WindowsRegCreateKeyEx1(int, byte[])
+    {
+        byte[] r0;
+        long l5;
+        int[] $r1, $r2, r4;
+        java.lang.InterruptedException $r3;
+        int i0, $i1, $i2, $i3, $i4, i6;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: byte[];
+
+        $r1 = staticinvoke <java.util.prefs.WindowsPreferences: int[] WindowsRegCreateKeyEx(int,byte[])>(i0, r0);
+
+        r4 = $r1;
+
+        $i1 = $r1[1];
+
+        if $i1 != 0 goto label1;
+
+        return $r1;
+
+     label1:
+        $i2 = <java.util.prefs.WindowsPreferences: int INIT_SLEEP_TIME>;
+
+        l5 = (long) $i2;
+
+        i6 = 0;
+
+     label2:
+        $i3 = <java.util.prefs.WindowsPreferences: int MAX_ATTEMPTS>;
+
+        if i6 >= $i3 goto label8;
+
+     label3:
+        staticinvoke <java.lang.Thread: void sleep(long)>(l5);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r3 := @caughtexception;
+
+        return r4;
+
+     label6:
+        l5 = l5 * 2L;
+
+        $r2 = staticinvoke <java.util.prefs.WindowsPreferences: int[] WindowsRegCreateKeyEx(int,byte[])>(i0, r0);
+
+        r4 = $r2;
+
+        $i4 = $r2[1];
+
+        if $i4 != 0 goto label7;
+
+        return $r2;
+
+     label7:
+        i6 = i6 + 1;
+
+        goto label2;
+
+     label8:
+        return r4;
+
+        catch java.lang.InterruptedException from label3 to label4 with label5;
+    }
+
+    private static native int WindowsRegDeleteKey(int, byte[]);
+
+    private static native int WindowsRegFlushKey(int);
+
+    private static int WindowsRegFlushKey1(int)
+    {
+        long l6;
+        java.lang.InterruptedException $r0;
+        int i0, $i1, $i2, $i3, $i4, i5, i7;
+
+        i0 := @parameter0: int;
+
+        $i1 = staticinvoke <java.util.prefs.WindowsPreferences: int WindowsRegFlushKey(int)>(i0);
+
+        i5 = $i1;
+
+        if $i1 != 0 goto label1;
+
+        return $i1;
+
+     label1:
+        $i2 = <java.util.prefs.WindowsPreferences: int INIT_SLEEP_TIME>;
+
+        l6 = (long) $i2;
+
+        i7 = 0;
+
+     label2:
+        $i3 = <java.util.prefs.WindowsPreferences: int MAX_ATTEMPTS>;
+
+        if i7 >= $i3 goto label8;
+
+     label3:
+        staticinvoke <java.lang.Thread: void sleep(long)>(l6);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r0 := @caughtexception;
+
+        return i5;
+
+     label6:
+        l6 = l6 * 2L;
+
+        $i4 = staticinvoke <java.util.prefs.WindowsPreferences: int WindowsRegFlushKey(int)>(i0);
+
+        i5 = $i4;
+
+        if $i4 != 0 goto label7;
+
+        return $i4;
+
+     label7:
+        i7 = i7 + 1;
+
+        goto label2;
+
+     label8:
+        return i5;
+
+        catch java.lang.InterruptedException from label3 to label4 with label5;
+    }
+
+    private static native byte[] WindowsRegQueryValueEx(int, byte[]);
+
+    private static native int WindowsRegSetValueEx(int, byte[], byte[]);
+
+    private static int WindowsRegSetValueEx1(int, byte[], byte[])
+    {
+        byte[] r0, r1;
+        long l6;
+        java.lang.InterruptedException $r2;
+        int i0, $i1, $i2, $i3, $i4, i5, i7;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: byte[];
+
+        r1 := @parameter2: byte[];
+
+        $i1 = staticinvoke <java.util.prefs.WindowsPreferences: int WindowsRegSetValueEx(int,byte[],byte[])>(i0, r0, r1);
+
+        i5 = $i1;
+
+        if $i1 != 0 goto label1;
+
+        return $i1;
+
+     label1:
+        $i2 = <java.util.prefs.WindowsPreferences: int INIT_SLEEP_TIME>;
+
+        l6 = (long) $i2;
+
+        i7 = 0;
+
+     label2:
+        $i3 = <java.util.prefs.WindowsPreferences: int MAX_ATTEMPTS>;
+
+        if i7 >= $i3 goto label8;
+
+     label3:
+        staticinvoke <java.lang.Thread: void sleep(long)>(l6);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r2 := @caughtexception;
+
+        return i5;
+
+     label6:
+        l6 = l6 * 2L;
+
+        $i4 = staticinvoke <java.util.prefs.WindowsPreferences: int WindowsRegSetValueEx(int,byte[],byte[])>(i0, r0, r1);
+
+        i5 = $i4;
+
+        if $i4 != 0 goto label7;
+
+        return $i4;
+
+     label7:
+        i7 = i7 + 1;
+
+        goto label2;
+
+     label8:
+        return i5;
+
+        catch java.lang.InterruptedException from label3 to label4 with label5;
+    }
+
+    private static native int WindowsRegDeleteValue(int, byte[]);
+
+    private static native int[] WindowsRegQueryInfoKey(int);
+
+    private static int[] WindowsRegQueryInfoKey1(int)
+    {
+        long l5;
+        int[] $r0, $r1, r3;
+        java.lang.InterruptedException $r2;
+        int i0, $i1, $i2, $i3, $i4, i6;
+
+        i0 := @parameter0: int;
+
+        $r0 = staticinvoke <java.util.prefs.WindowsPreferences: int[] WindowsRegQueryInfoKey(int)>(i0);
+
+        r3 = $r0;
+
+        $i1 = $r0[1];
+
+        if $i1 != 0 goto label1;
+
+        return $r0;
+
+     label1:
+        $i2 = <java.util.prefs.WindowsPreferences: int INIT_SLEEP_TIME>;
+
+        l5 = (long) $i2;
+
+        i6 = 0;
+
+     label2:
+        $i3 = <java.util.prefs.WindowsPreferences: int MAX_ATTEMPTS>;
+
+        if i6 >= $i3 goto label8;
+
+     label3:
+        staticinvoke <java.lang.Thread: void sleep(long)>(l5);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r2 := @caughtexception;
+
+        return r3;
+
+     label6:
+        l5 = l5 * 2L;
+
+        $r1 = staticinvoke <java.util.prefs.WindowsPreferences: int[] WindowsRegQueryInfoKey(int)>(i0);
+
+        r3 = $r1;
+
+        $i4 = $r1[1];
+
+        if $i4 != 0 goto label7;
+
+        return $r1;
+
+     label7:
+        i6 = i6 + 1;
+
+        goto label2;
+
+     label8:
+        return r3;
+
+        catch java.lang.InterruptedException from label3 to label4 with label5;
+    }
+
+    private static native byte[] WindowsRegEnumKeyEx(int, int, int);
+
+    private static byte[] WindowsRegEnumKeyEx1(int, int, int)
+    {
+        byte[] $r0, $r1, r3;
+        long l5;
+        java.lang.InterruptedException $r2;
+        int i0, i1, i2, $i3, $i4, i6;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $r0 = staticinvoke <java.util.prefs.WindowsPreferences: byte[] WindowsRegEnumKeyEx(int,int,int)>(i0, i1, i2);
+
+        r3 = $r0;
+
+        if $r0 == null goto label1;
+
+        return $r0;
+
+     label1:
+        $i3 = <java.util.prefs.WindowsPreferences: int INIT_SLEEP_TIME>;
+
+        l5 = (long) $i3;
+
+        i6 = 0;
+
+     label2:
+        $i4 = <java.util.prefs.WindowsPreferences: int MAX_ATTEMPTS>;
+
+        if i6 >= $i4 goto label8;
+
+     label3:
+        staticinvoke <java.lang.Thread: void sleep(long)>(l5);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r2 := @caughtexception;
+
+        return r3;
+
+     label6:
+        l5 = l5 * 2L;
+
+        $r1 = staticinvoke <java.util.prefs.WindowsPreferences: byte[] WindowsRegEnumKeyEx(int,int,int)>(i0, i1, i2);
+
+        r3 = $r1;
+
+        if $r1 == null goto label7;
+
+        return $r1;
+
+     label7:
+        i6 = i6 + 1;
+
+        goto label2;
+
+     label8:
+        return r3;
+
+        catch java.lang.InterruptedException from label3 to label4 with label5;
+    }
+
+    private static native byte[] WindowsRegEnumValue(int, int, int);
+
+    private static byte[] WindowsRegEnumValue1(int, int, int)
+    {
+        byte[] $r0, $r1, r3;
+        long l5;
+        java.lang.InterruptedException $r2;
+        int i0, i1, i2, $i3, $i4, i6;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $r0 = staticinvoke <java.util.prefs.WindowsPreferences: byte[] WindowsRegEnumValue(int,int,int)>(i0, i1, i2);
+
+        r3 = $r0;
+
+        if $r0 == null goto label1;
+
+        return $r0;
+
+     label1:
+        $i3 = <java.util.prefs.WindowsPreferences: int INIT_SLEEP_TIME>;
+
+        l5 = (long) $i3;
+
+        i6 = 0;
+
+     label2:
+        $i4 = <java.util.prefs.WindowsPreferences: int MAX_ATTEMPTS>;
+
+        if i6 >= $i4 goto label8;
+
+     label3:
+        staticinvoke <java.lang.Thread: void sleep(long)>(l5);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r2 := @caughtexception;
+
+        return r3;
+
+     label6:
+        l5 = l5 * 2L;
+
+        $r1 = staticinvoke <java.util.prefs.WindowsPreferences: byte[] WindowsRegEnumValue(int,int,int)>(i0, i1, i2);
+
+        r3 = $r1;
+
+        if $r1 == null goto label7;
+
+        return $r1;
+
+     label7:
+        i6 = i6 + 1;
+
+        goto label2;
+
+     label8:
+        return r3;
+
+        catch java.lang.InterruptedException from label3 to label4 with label5;
+    }
+
+    private void <init>(java.util.prefs.WindowsPreferences, java.lang.String)
+    {
+        byte[] $r3, $r8;
+        int[] $r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.lang.String r2, $r9, $r12, $r17;
+        boolean $z0;
+        sun.util.logging.PlatformLogger $r5;
+        java.util.prefs.WindowsPreferences r0, r1;
+        java.lang.StringBuilder $r6, $r7, $r10, $r11, $r13, $r14, $r15, $r16;
+
+        r0 := @this: java.util.prefs.WindowsPreferences;
+
+        r1 := @parameter0: java.util.prefs.WindowsPreferences;
+
+        r2 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<java.util.prefs.AbstractPreferences: void <init>(java.util.prefs.AbstractPreferences,java.lang.String)>(r1, r2);
+
+        r0.<java.util.prefs.WindowsPreferences: boolean isBackingStoreAvailable> = 1;
+
+        $i0 = specialinvoke r1.<java.util.prefs.WindowsPreferences: int openKey(int,int)>(4, 131097);
+
+        if $i0 != 0 goto label1;
+
+        r0.<java.util.prefs.WindowsPreferences: boolean isBackingStoreAvailable> = 0;
+
+        return;
+
+     label1:
+        $r3 = staticinvoke <java.util.prefs.WindowsPreferences: byte[] toWindowsName(java.lang.String)>(r2);
+
+        $r4 = staticinvoke <java.util.prefs.WindowsPreferences: int[] WindowsRegCreateKeyEx1(int,byte[])>($i0, $r3);
+
+        $i1 = $r4[1];
+
+        if $i1 == 0 goto label2;
+
+        $r5 = staticinvoke <java.util.prefs.WindowsPreferences: sun.util.logging.PlatformLogger logger()>();
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not create windows registry node ");
+
+        $r8 = specialinvoke r0.<java.util.prefs.WindowsPreferences: byte[] windowsAbsolutePath()>();
+
+        $r9 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String byteArrayToString(byte[])>($r8);
+
+        $r10 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at root 0x");
+
+        $i4 = specialinvoke r0.<java.util.prefs.WindowsPreferences: int rootNativeHandle()>();
+
+        $r12 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i4);
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(". Windows RegCreateKeyEx(...) returned error code ");
+
+        $i5 = $r4[1];
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<sun.util.logging.PlatformLogger: void warning(java.lang.String)>($r17);
+
+        r0.<java.util.prefs.WindowsPreferences: boolean isBackingStoreAvailable> = 0;
+
+        return;
+
+     label2:
+        $i2 = $r4[2];
+
+        if $i2 != 1 goto label3;
+
+        $z0 = 1;
+
+        goto label4;
+
+     label3:
+        $z0 = 0;
+
+     label4:
+        r0.<java.util.prefs.WindowsPreferences: boolean newNode> = $z0;
+
+        specialinvoke r0.<java.util.prefs.WindowsPreferences: void closeKey(int)>($i0);
+
+        $i3 = $r4[0];
+
+        specialinvoke r0.<java.util.prefs.WindowsPreferences: void closeKey(int)>($i3);
+
+        return;
+    }
+
+    private void <init>(int, byte[])
+    {
+        byte[] r1, $r6;
+        int[] $r2;
+        int i0, $i1, $i2, $i3, $i4, $i5;
+        java.lang.String $r7, $r10, $r15;
+        boolean $z0;
+        sun.util.logging.PlatformLogger $r3;
+        java.util.prefs.WindowsPreferences r0;
+        java.lang.StringBuilder $r4, $r5, $r8, $r9, $r11, $r12, $r13, $r14;
+
+        r0 := @this: java.util.prefs.WindowsPreferences;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: byte[];
+
+        specialinvoke r0.<java.util.prefs.AbstractPreferences: void <init>(java.util.prefs.AbstractPreferences,java.lang.String)>(null, "");
+
+        r0.<java.util.prefs.WindowsPreferences: boolean isBackingStoreAvailable> = 1;
+
+        $r2 = staticinvoke <java.util.prefs.WindowsPreferences: int[] WindowsRegCreateKeyEx1(int,byte[])>(i0, r1);
+
+        $i1 = $r2[1];
+
+        if $i1 == 0 goto label1;
+
+        $r3 = staticinvoke <java.util.prefs.WindowsPreferences: sun.util.logging.PlatformLogger logger()>();
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not open/create prefs root node ");
+
+        $r6 = specialinvoke r0.<java.util.prefs.WindowsPreferences: byte[] windowsAbsolutePath()>();
+
+        $r7 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String byteArrayToString(byte[])>($r6);
+
+        $r8 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at root 0x");
+
+        $i4 = specialinvoke r0.<java.util.prefs.WindowsPreferences: int rootNativeHandle()>();
+
+        $r10 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i4);
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(". Windows RegCreateKeyEx(...) returned error code ");
+
+        $i5 = $r2[1];
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r3.<sun.util.logging.PlatformLogger: void warning(java.lang.String)>($r15);
+
+        r0.<java.util.prefs.WindowsPreferences: boolean isBackingStoreAvailable> = 0;
+
+        return;
+
+     label1:
+        $i2 = $r2[2];
+
+        if $i2 != 1 goto label2;
+
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        r0.<java.util.prefs.WindowsPreferences: boolean newNode> = $z0;
+
+        $i3 = $r2[0];
+
+        specialinvoke r0.<java.util.prefs.WindowsPreferences: void closeKey(int)>($i3);
+
+        return;
+    }
+
+    private byte[] windowsAbsolutePath()
+    {
+        byte[] $r1, $r2, $r6, $r8;
+        java.io.ByteArrayOutputStream $r0;
+        java.util.prefs.WindowsPreferences r4;
+        java.util.StringTokenizer $r3;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String $r5, $r7;
+        boolean $z0;
+
+        r4 := @this: java.util.prefs.WindowsPreferences;
+
+        $r0 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r0.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $r2 = <java.util.prefs.WindowsPreferences: byte[] WINDOWS_ROOT_PATH>;
+
+        $r1 = <java.util.prefs.WindowsPreferences: byte[] WINDOWS_ROOT_PATH>;
+
+        $i0 = lengthof $r1;
+
+        $i1 = $i0 - 1;
+
+        virtualinvoke $r0.<java.io.ByteArrayOutputStream: void write(byte[],int,int)>($r2, 0, $i1);
+
+        $r3 = new java.util.StringTokenizer;
+
+        $r5 = virtualinvoke r4.<java.util.prefs.WindowsPreferences: java.lang.String absolutePath()>();
+
+        specialinvoke $r3.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>($r5, "/");
+
+     label1:
+        $z0 = virtualinvoke $r3.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label2;
+
+        virtualinvoke $r0.<java.io.ByteArrayOutputStream: void write(int)>(92);
+
+        $r7 = virtualinvoke $r3.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $r8 = staticinvoke <java.util.prefs.WindowsPreferences: byte[] toWindowsName(java.lang.String)>($r7);
+
+        $i2 = lengthof $r8;
+
+        $i3 = $i2 - 1;
+
+        virtualinvoke $r0.<java.io.ByteArrayOutputStream: void write(byte[],int,int)>($r8, 0, $i3);
+
+        goto label1;
+
+     label2:
+        virtualinvoke $r0.<java.io.ByteArrayOutputStream: void write(int)>(0);
+
+        $r6 = virtualinvoke $r0.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        return $r6;
+    }
+
+    private int openKey(int)
+    {
+        int i0, $i1;
+        java.util.prefs.WindowsPreferences r0;
+
+        r0 := @this: java.util.prefs.WindowsPreferences;
+
+        i0 := @parameter0: int;
+
+        $i1 = specialinvoke r0.<java.util.prefs.WindowsPreferences: int openKey(int,int)>(i0, i0);
+
+        return $i1;
+    }
+
+    private int openKey(int, int)
+    {
+        byte[] $r1;
+        java.util.prefs.WindowsPreferences r0;
+        int i0, i1, $i2;
+
+        r0 := @this: java.util.prefs.WindowsPreferences;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r1 = specialinvoke r0.<java.util.prefs.WindowsPreferences: byte[] windowsAbsolutePath()>();
+
+        $i2 = specialinvoke r0.<java.util.prefs.WindowsPreferences: int openKey(byte[],int,int)>($r1, i0, i1);
+
+        return $i2;
+    }
+
+    private int openKey(byte[], int, int)
+    {
+        byte[] r0, $r6, $r19;
+        int[] $r2, r27;
+        java.lang.SecurityException $r16;
+        java.util.prefs.WindowsPreferences r1;
+        java.lang.StringBuilder $r4, $r5, $r8, $r9, $r11, $r12, $r13, $r14, $r17, $r18, $r21, $r22, $r24, $r25;
+        int $i0, $i1, i2, i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13;
+        java.lang.String $r7, $r10, $r15, $r20, $r23, $r26;
+        sun.util.logging.PlatformLogger $r3;
+
+        r1 := @this: java.util.prefs.WindowsPreferences;
+
+        r0 := @parameter0: byte[];
+
+        i2 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        $i0 = lengthof r0;
+
+        if $i0 > 257 goto label3;
+
+        $i5 = specialinvoke r1.<java.util.prefs.WindowsPreferences: int rootNativeHandle()>();
+
+        $r2 = staticinvoke <java.util.prefs.WindowsPreferences: int[] WindowsRegOpenKey1(int,byte[],int)>($i5, r0, i2);
+
+        r27 = $r2;
+
+        $i6 = $r2[1];
+
+        if $i6 != 5 goto label1;
+
+        if i3 == i2 goto label1;
+
+        $i12 = specialinvoke r1.<java.util.prefs.WindowsPreferences: int rootNativeHandle()>();
+
+        r27 = staticinvoke <java.util.prefs.WindowsPreferences: int[] WindowsRegOpenKey1(int,byte[],int)>($i12, r0, i3);
+
+     label1:
+        $i13 = r27[1];
+
+        if $i13 == 0 goto label2;
+
+        $r3 = staticinvoke <java.util.prefs.WindowsPreferences: sun.util.logging.PlatformLogger logger()>();
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not open windows registry node ");
+
+        $r6 = specialinvoke r1.<java.util.prefs.WindowsPreferences: byte[] windowsAbsolutePath()>();
+
+        $r7 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String byteArrayToString(byte[])>($r6);
+
+        $r8 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at root 0x");
+
+        $i8 = specialinvoke r1.<java.util.prefs.WindowsPreferences: int rootNativeHandle()>();
+
+        $r10 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i8);
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(". Windows RegOpenKey(...) returned error code ");
+
+        $i9 = r27[1];
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i9);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r3.<sun.util.logging.PlatformLogger: void warning(java.lang.String)>($r15);
+
+        r27[0] = 0;
+
+        $i10 = r27[1];
+
+        if $i10 != 5 goto label2;
+
+        $r16 = new java.lang.SecurityException;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not open windows registry node ");
+
+        $r19 = specialinvoke r1.<java.util.prefs.WindowsPreferences: byte[] windowsAbsolutePath()>();
+
+        $r20 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String byteArrayToString(byte[])>($r19);
+
+        $r21 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at root 0x");
+
+        $i11 = specialinvoke r1.<java.util.prefs.WindowsPreferences: int rootNativeHandle()>();
+
+        $r23 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i11);
+
+        $r24 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r23);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": Access denied");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r16.<java.lang.SecurityException: void <init>(java.lang.String)>($r26);
+
+        throw $r16;
+
+     label2:
+        $i7 = r27[0];
+
+        return $i7;
+
+     label3:
+        $i1 = specialinvoke r1.<java.util.prefs.WindowsPreferences: int rootNativeHandle()>();
+
+        $i4 = specialinvoke r1.<java.util.prefs.WindowsPreferences: int openKey(int,byte[],int,int)>($i1, r0, i2, i3);
+
+        return $i4;
+    }
+
+    private int openKey(int, byte[], int, int)
+    {
+        byte[] r0, $r2, $r3, $r8;
+        byte $b12;
+        int[] $r4, r18;
+        java.util.prefs.WindowsPreferences r1;
+        java.lang.StringBuilder $r7, $r10, $r11, $r13, $r14, $r15, $r16, $r19;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, i7, i8, i9, $i10, $i11, $i13, $i14, $i15, $i16, i17, i18, $i20, $i21, $i23;
+        java.lang.String $r9, $r12, $r17;
+        sun.util.logging.PlatformLogger $r5;
+
+        r1 := @this: java.util.prefs.WindowsPreferences;
+
+        i7 := @parameter0: int;
+
+        r0 := @parameter1: byte[];
+
+        i8 := @parameter2: int;
+
+        i9 := @parameter3: int;
+
+        $i0 = lengthof r0;
+
+        if $i0 > 257 goto label3;
+
+        $r4 = staticinvoke <java.util.prefs.WindowsPreferences: int[] WindowsRegOpenKey1(int,byte[],int)>(i7, r0, i8);
+
+        r18 = $r4;
+
+        $i13 = $r4[1];
+
+        if $i13 != 5 goto label1;
+
+        if i9 == i8 goto label1;
+
+        r18 = staticinvoke <java.util.prefs.WindowsPreferences: int[] WindowsRegOpenKey1(int,byte[],int)>(i7, r0, i9);
+
+     label1:
+        $i16 = r18[1];
+
+        if $i16 == 0 goto label2;
+
+        $r5 = staticinvoke <java.util.prefs.WindowsPreferences: sun.util.logging.PlatformLogger logger()>();
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not open windows registry node ");
+
+        $r8 = specialinvoke r1.<java.util.prefs.WindowsPreferences: byte[] windowsAbsolutePath()>();
+
+        $r9 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String byteArrayToString(byte[])>($r8);
+
+        $r10 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at root 0x");
+
+        $r12 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>(i7);
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(". Windows RegOpenKey(...) returned error code ");
+
+        $i15 = r18[1];
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i15);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<sun.util.logging.PlatformLogger: void warning(java.lang.String)>($r17);
+
+        r18[0] = 0;
+
+     label2:
+        $i14 = r18[0];
+
+        return $i14;
+
+     label3:
+        $i20 = (int) -1;
+
+        i17 = $i20;
+
+        i18 = 256;
+
+     label4:
+        if i18 <= 0 goto label6;
+
+        $b12 = r0[i18];
+
+        $i21 = (int) $b12;
+
+        if $i21 != 92 goto label5;
+
+        i17 = i18;
+
+        goto label6;
+
+     label5:
+        $i23 = (int) -1;
+
+        i18 = i18 + $i23;
+
+        goto label4;
+
+     label6:
+        $i1 = i17 + 1;
+
+        $r2 = newarray (byte)[$i1];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, 0, $r2, 0, i17);
+
+        $r2[i17] = 0;
+
+        $i2 = lengthof r0;
+
+        $i3 = $i2 - i17;
+
+        $i4 = $i3 - 1;
+
+        $r3 = newarray (byte)[$i4];
+
+        $i6 = i17 + 1;
+
+        $i5 = lengthof $r3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, $i6, $r3, 0, $i5);
+
+        $i10 = specialinvoke r1.<java.util.prefs.WindowsPreferences: int openKey(int,byte[],int,int)>(i7, $r2, i8, i9);
+
+        if $i10 != 0 goto label7;
+
+        return 0;
+
+     label7:
+        $i11 = specialinvoke r1.<java.util.prefs.WindowsPreferences: int openKey(int,byte[],int,int)>($i10, $r3, i8, i9);
+
+        specialinvoke r1.<java.util.prefs.WindowsPreferences: void closeKey(int)>($i10);
+
+        return $i11;
+    }
+
+    private void closeKey(int)
+    {
+        byte[] $r4;
+        int i0, $i1, $i2;
+        java.lang.String $r5, $r8, $r13;
+        sun.util.logging.PlatformLogger $r0;
+        java.util.prefs.WindowsPreferences r3;
+        java.lang.StringBuilder $r1, $r2, $r6, $r7, $r9, $r10, $r11, $r12;
+
+        r3 := @this: java.util.prefs.WindowsPreferences;
+
+        i0 := @parameter0: int;
+
+        $i1 = staticinvoke <java.util.prefs.WindowsPreferences: int WindowsRegCloseKey(int)>(i0);
+
+        if $i1 == 0 goto label1;
+
+        $r0 = staticinvoke <java.util.prefs.WindowsPreferences: sun.util.logging.PlatformLogger logger()>();
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not close windows registry node ");
+
+        $r4 = specialinvoke r3.<java.util.prefs.WindowsPreferences: byte[] windowsAbsolutePath()>();
+
+        $r5 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String byteArrayToString(byte[])>($r4);
+
+        $r6 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at root 0x");
+
+        $i2 = specialinvoke r3.<java.util.prefs.WindowsPreferences: int rootNativeHandle()>();
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i2);
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(". Windows RegCloseKey(...) returned error code ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<sun.util.logging.PlatformLogger: void warning(java.lang.String)>($r13);
+
+     label1:
+        return;
+    }
+
+    protected void putSpi(java.lang.String, java.lang.String)
+    {
+        byte[] $r2, $r4, $r8, $r12;
+        int $i0, $i1, $i2;
+        java.lang.String r1, r3, $r9, $r13, $r16, $r21;
+        sun.util.logging.PlatformLogger $r5;
+        java.util.prefs.WindowsPreferences r0;
+        java.lang.StringBuilder $r6, $r7, $r10, $r11, $r14, $r15, $r17, $r18, $r19, $r20;
+
+        r0 := @this: java.util.prefs.WindowsPreferences;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        $i0 = specialinvoke r0.<java.util.prefs.WindowsPreferences: int openKey(int)>(2);
+
+        if $i0 != 0 goto label1;
+
+        r0.<java.util.prefs.WindowsPreferences: boolean isBackingStoreAvailable> = 0;
+
+        return;
+
+     label1:
+        $r2 = staticinvoke <java.util.prefs.WindowsPreferences: byte[] toWindowsName(java.lang.String)>(r1);
+
+        $r4 = staticinvoke <java.util.prefs.WindowsPreferences: byte[] toWindowsValueString(java.lang.String)>(r3);
+
+        $i1 = staticinvoke <java.util.prefs.WindowsPreferences: int WindowsRegSetValueEx1(int,byte[],byte[])>($i0, $r2, $r4);
+
+        if $i1 == 0 goto label2;
+
+        $r5 = staticinvoke <java.util.prefs.WindowsPreferences: sun.util.logging.PlatformLogger logger()>();
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not assign value to key ");
+
+        $r8 = staticinvoke <java.util.prefs.WindowsPreferences: byte[] toWindowsName(java.lang.String)>(r1);
+
+        $r9 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String byteArrayToString(byte[])>($r8);
+
+        $r10 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at Windows registry node ");
+
+        $r12 = specialinvoke r0.<java.util.prefs.WindowsPreferences: byte[] windowsAbsolutePath()>();
+
+        $r13 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String byteArrayToString(byte[])>($r12);
+
+        $r14 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at root 0x");
+
+        $i2 = specialinvoke r0.<java.util.prefs.WindowsPreferences: int rootNativeHandle()>();
+
+        $r16 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i2);
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r16);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(". Windows RegSetValueEx(...) returned error code ");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<sun.util.logging.PlatformLogger: void warning(java.lang.String)>($r21);
+
+        r0.<java.util.prefs.WindowsPreferences: boolean isBackingStoreAvailable> = 0;
+
+     label2:
+        specialinvoke r0.<java.util.prefs.WindowsPreferences: void closeKey(int)>($i0);
+
+        return;
+    }
+
+    protected java.lang.String getSpi(java.lang.String)
+    {
+        byte[] $r2, $r3, $r4, $r5;
+        java.util.prefs.WindowsPreferences r0;
+        int $i0;
+        java.lang.String r1, $r6;
+
+        r0 := @this: java.util.prefs.WindowsPreferences;
+
+        r1 := @parameter0: java.lang.String;
+
+        $i0 = specialinvoke r0.<java.util.prefs.WindowsPreferences: int openKey(int)>(1);
+
+        if $i0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r2 = staticinvoke <java.util.prefs.WindowsPreferences: byte[] toWindowsName(java.lang.String)>(r1);
+
+        $r3 = staticinvoke <java.util.prefs.WindowsPreferences: byte[] WindowsRegQueryValueEx(int,byte[])>($i0, $r2);
+
+        if $r3 != null goto label2;
+
+        specialinvoke r0.<java.util.prefs.WindowsPreferences: void closeKey(int)>($i0);
+
+        return null;
+
+     label2:
+        specialinvoke r0.<java.util.prefs.WindowsPreferences: void closeKey(int)>($i0);
+
+        $r4 = (byte[]) $r3;
+
+        $r5 = (byte[]) $r4;
+
+        $r6 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String toJavaValueString(byte[])>($r5);
+
+        return $r6;
+    }
+
+    protected void removeSpi(java.lang.String)
+    {
+        byte[] $r2, $r6, $r10;
+        int $i0, $i1, $i2;
+        java.lang.String r1, $r7, $r13, $r18;
+        sun.util.logging.PlatformLogger $r3;
+        java.util.prefs.WindowsPreferences r0;
+        java.lang.StringBuilder $r4, $r5, $r8, $r9, $r11, $r12, $r14, $r15, $r16, $r17;
+
+        r0 := @this: java.util.prefs.WindowsPreferences;
+
+        r1 := @parameter0: java.lang.String;
+
+        $i0 = specialinvoke r0.<java.util.prefs.WindowsPreferences: int openKey(int)>(2);
+
+        if $i0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r2 = staticinvoke <java.util.prefs.WindowsPreferences: byte[] toWindowsName(java.lang.String)>(r1);
+
+        $i1 = staticinvoke <java.util.prefs.WindowsPreferences: int WindowsRegDeleteValue(int,byte[])>($i0, $r2);
+
+        if $i1 == 0 goto label2;
+
+        if $i1 == 2 goto label2;
+
+        $r3 = staticinvoke <java.util.prefs.WindowsPreferences: sun.util.logging.PlatformLogger logger()>();
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not delete windows registry value ");
+
+        $r6 = specialinvoke r0.<java.util.prefs.WindowsPreferences: byte[] windowsAbsolutePath()>();
+
+        $r7 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String byteArrayToString(byte[])>($r6);
+
+        $r8 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\\");
+
+        $r10 = staticinvoke <java.util.prefs.WindowsPreferences: byte[] toWindowsName(java.lang.String)>(r1);
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at root 0x");
+
+        $i2 = specialinvoke r0.<java.util.prefs.WindowsPreferences: int rootNativeHandle()>();
+
+        $r13 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i2);
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(". Windows RegDeleteValue(...) returned error code ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r3.<sun.util.logging.PlatformLogger: void warning(java.lang.String)>($r18);
+
+        r0.<java.util.prefs.WindowsPreferences: boolean isBackingStoreAvailable> = 0;
+
+     label2:
+        specialinvoke r0.<java.util.prefs.WindowsPreferences: void closeKey(int)>($i0);
+
+        return;
+    }
+
+    protected java.lang.String[] keysSpi() throws java.util.prefs.BackingStoreException
+    {
+        byte[] $r3, $r9, $r22, $r37;
+        int[] $r1;
+        java.util.prefs.WindowsPreferences r0;
+        java.lang.StringBuilder $r5, $r6, $r7, $r8, $r11, $r12, $r14, $r15, $r20, $r21, $r24, $r25, $r27, $r28, $r29, $r30, $r35, $r36, $r39, $r40, $r42, $r43;
+        java.lang.String[] r2, $r19;
+        java.util.prefs.BackingStoreException $r18, $r33, $r34;
+        int $i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, i8, i9;
+        java.lang.String $r4, $r10, $r13, $r16, $r23, $r26, $r31, $r38, $r41, $r44;
+        sun.util.logging.PlatformLogger $r17, $r32;
+
+        r0 := @this: java.util.prefs.WindowsPreferences;
+
+        $i0 = specialinvoke r0.<java.util.prefs.WindowsPreferences: int openKey(int)>(1);
+
+        if $i0 != 0 goto label1;
+
+        $r34 = new java.util.prefs.BackingStoreException;
+
+        $r35 = new java.lang.StringBuilder;
+
+        specialinvoke $r35.<java.lang.StringBuilder: void <init>()>();
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not open windows registry node ");
+
+        $r37 = specialinvoke r0.<java.util.prefs.WindowsPreferences: byte[] windowsAbsolutePath()>();
+
+        $r38 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String byteArrayToString(byte[])>($r37);
+
+        $r39 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r38);
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at root 0x");
+
+        $i7 = specialinvoke r0.<java.util.prefs.WindowsPreferences: int rootNativeHandle()>();
+
+        $r41 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i7);
+
+        $r42 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r41);
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r34.<java.util.prefs.BackingStoreException: void <init>(java.lang.String)>($r44);
+
+        throw $r34;
+
+     label1:
+        $r1 = staticinvoke <java.util.prefs.WindowsPreferences: int[] WindowsRegQueryInfoKey1(int)>($i0);
+
+        $i1 = $r1[1];
+
+        if $i1 == 0 goto label2;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not query windows registry node ");
+
+        $r22 = specialinvoke r0.<java.util.prefs.WindowsPreferences: byte[] windowsAbsolutePath()>();
+
+        $r23 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String byteArrayToString(byte[])>($r22);
+
+        $r24 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r23);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at root 0x");
+
+        $i5 = specialinvoke r0.<java.util.prefs.WindowsPreferences: int rootNativeHandle()>();
+
+        $r26 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i5);
+
+        $r27 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r26);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(". Windows RegQueryInfoKeyEx(...) returned error code ");
+
+        $i6 = $r1[1];
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i6);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r32 = staticinvoke <java.util.prefs.WindowsPreferences: sun.util.logging.PlatformLogger logger()>();
+
+        virtualinvoke $r32.<sun.util.logging.PlatformLogger: void warning(java.lang.String)>($r31);
+
+        $r33 = new java.util.prefs.BackingStoreException;
+
+        specialinvoke $r33.<java.util.prefs.BackingStoreException: void <init>(java.lang.String)>($r31);
+
+        throw $r33;
+
+     label2:
+        i8 = $r1[4];
+
+        i2 = $r1[2];
+
+        if i2 != 0 goto label3;
+
+        specialinvoke r0.<java.util.prefs.WindowsPreferences: void closeKey(int)>($i0);
+
+        $r19 = newarray (java.lang.String)[0];
+
+        return $r19;
+
+     label3:
+        r2 = newarray (java.lang.String)[i2];
+
+        i9 = 0;
+
+     label4:
+        if i9 >= i2 goto label6;
+
+        $i3 = i8 + 1;
+
+        $r3 = staticinvoke <java.util.prefs.WindowsPreferences: byte[] WindowsRegEnumValue1(int,int,int)>($i0, i9, $i3);
+
+        if $r3 != null goto label5;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not enumerate value #");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i9);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  of windows node ");
+
+        $r9 = specialinvoke r0.<java.util.prefs.WindowsPreferences: byte[] windowsAbsolutePath()>();
+
+        $r10 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String byteArrayToString(byte[])>($r9);
+
+        $r11 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at root 0x");
+
+        $i4 = specialinvoke r0.<java.util.prefs.WindowsPreferences: int rootNativeHandle()>();
+
+        $r13 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i4);
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r17 = staticinvoke <java.util.prefs.WindowsPreferences: sun.util.logging.PlatformLogger logger()>();
+
+        virtualinvoke $r17.<sun.util.logging.PlatformLogger: void warning(java.lang.String)>($r16);
+
+        $r18 = new java.util.prefs.BackingStoreException;
+
+        specialinvoke $r18.<java.util.prefs.BackingStoreException: void <init>(java.lang.String)>($r16);
+
+        throw $r18;
+
+     label5:
+        $r4 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String toJavaName(byte[])>($r3);
+
+        r2[i9] = $r4;
+
+        i9 = i9 + 1;
+
+        goto label4;
+
+     label6:
+        specialinvoke r0.<java.util.prefs.WindowsPreferences: void closeKey(int)>($i0);
+
+        return r2;
+    }
+
+    protected java.lang.String[] childrenNamesSpi() throws java.util.prefs.BackingStoreException
+    {
+        byte[] $r4, $r10, $r23, $r38;
+        int[] $r1;
+        java.util.prefs.WindowsPreferences r0;
+        java.lang.StringBuilder $r6, $r7, $r8, $r9, $r12, $r13, $r15, $r16, $r21, $r22, $r25, $r26, $r28, $r29, $r30, $r31, $r36, $r37, $r40, $r41, $r43, $r44;
+        java.lang.String[] r2, r3, $r20;
+        java.util.prefs.BackingStoreException $r19, $r34, $r35;
+        int $i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, i8, i9;
+        java.lang.String $r5, $r11, $r14, $r17, $r24, $r27, $r32, $r39, $r42, $r45;
+        sun.util.logging.PlatformLogger $r18, $r33;
+
+        r0 := @this: java.util.prefs.WindowsPreferences;
+
+        $i0 = specialinvoke r0.<java.util.prefs.WindowsPreferences: int openKey(int)>(9);
+
+        if $i0 != 0 goto label1;
+
+        $r35 = new java.util.prefs.BackingStoreException;
+
+        $r36 = new java.lang.StringBuilder;
+
+        specialinvoke $r36.<java.lang.StringBuilder: void <init>()>();
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not open windows registry node ");
+
+        $r38 = specialinvoke r0.<java.util.prefs.WindowsPreferences: byte[] windowsAbsolutePath()>();
+
+        $r39 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String byteArrayToString(byte[])>($r38);
+
+        $r40 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r39);
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at root 0x");
+
+        $i7 = specialinvoke r0.<java.util.prefs.WindowsPreferences: int rootNativeHandle()>();
+
+        $r42 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i7);
+
+        $r43 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r42);
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r35.<java.util.prefs.BackingStoreException: void <init>(java.lang.String)>($r45);
+
+        throw $r35;
+
+     label1:
+        $r1 = staticinvoke <java.util.prefs.WindowsPreferences: int[] WindowsRegQueryInfoKey1(int)>($i0);
+
+        $i1 = $r1[1];
+
+        if $i1 == 0 goto label2;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not query windows registry node ");
+
+        $r23 = specialinvoke r0.<java.util.prefs.WindowsPreferences: byte[] windowsAbsolutePath()>();
+
+        $r24 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String byteArrayToString(byte[])>($r23);
+
+        $r25 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r24);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at root 0x");
+
+        $i5 = specialinvoke r0.<java.util.prefs.WindowsPreferences: int rootNativeHandle()>();
+
+        $r27 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i5);
+
+        $r28 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r27);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(". Windows RegQueryInfoKeyEx(...) returned error code ");
+
+        $i6 = $r1[1];
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i6);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r33 = staticinvoke <java.util.prefs.WindowsPreferences: sun.util.logging.PlatformLogger logger()>();
+
+        virtualinvoke $r33.<sun.util.logging.PlatformLogger: void warning(java.lang.String)>($r32);
+
+        $r34 = new java.util.prefs.BackingStoreException;
+
+        specialinvoke $r34.<java.util.prefs.BackingStoreException: void <init>(java.lang.String)>($r32);
+
+        throw $r34;
+
+     label2:
+        i8 = $r1[3];
+
+        i2 = $r1[0];
+
+        if i2 != 0 goto label3;
+
+        specialinvoke r0.<java.util.prefs.WindowsPreferences: void closeKey(int)>($i0);
+
+        $r20 = newarray (java.lang.String)[0];
+
+        return $r20;
+
+     label3:
+        r2 = newarray (java.lang.String)[i2];
+
+        r3 = newarray (java.lang.String)[i2];
+
+        i9 = 0;
+
+     label4:
+        if i9 >= i2 goto label6;
+
+        $i3 = i8 + 1;
+
+        $r4 = staticinvoke <java.util.prefs.WindowsPreferences: byte[] WindowsRegEnumKeyEx1(int,int,int)>($i0, i9, $i3);
+
+        if $r4 != null goto label5;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not enumerate key #");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i9);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  of windows node ");
+
+        $r10 = specialinvoke r0.<java.util.prefs.WindowsPreferences: byte[] windowsAbsolutePath()>();
+
+        $r11 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String byteArrayToString(byte[])>($r10);
+
+        $r12 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at root 0x");
+
+        $i4 = specialinvoke r0.<java.util.prefs.WindowsPreferences: int rootNativeHandle()>();
+
+        $r14 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i4);
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(". ");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r18 = staticinvoke <java.util.prefs.WindowsPreferences: sun.util.logging.PlatformLogger logger()>();
+
+        virtualinvoke $r18.<sun.util.logging.PlatformLogger: void warning(java.lang.String)>($r17);
+
+        $r19 = new java.util.prefs.BackingStoreException;
+
+        specialinvoke $r19.<java.util.prefs.BackingStoreException: void <init>(java.lang.String)>($r17);
+
+        throw $r19;
+
+     label5:
+        $r5 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String toJavaName(byte[])>($r4);
+
+        r3[i9] = $r5;
+
+        i9 = i9 + 1;
+
+        goto label4;
+
+     label6:
+        specialinvoke r0.<java.util.prefs.WindowsPreferences: void closeKey(int)>($i0);
+
+        return r3;
+    }
+
+    public void flush() throws java.util.prefs.BackingStoreException
+    {
+        byte[] $r3, $r18;
+        boolean $z0, $z1;
+        java.util.prefs.AbstractPreferences $r27;
+        java.util.prefs.WindowsPreferences r0;
+        java.lang.StringBuilder $r1, $r2, $r5, $r6, $r8, $r9, $r10, $r11, $r16, $r17, $r20, $r21, $r23, $r24;
+        java.util.prefs.BackingStoreException $r14, $r15, $r26;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String $r4, $r7, $r12, $r19, $r22, $r25;
+        sun.util.logging.PlatformLogger $r13;
+
+        r0 := @this: java.util.prefs.WindowsPreferences;
+
+        $z0 = virtualinvoke r0.<java.util.prefs.WindowsPreferences: boolean isRemoved()>();
+
+        if $z0 == 0 goto label1;
+
+        $r27 = r0.<java.util.prefs.WindowsPreferences: java.util.prefs.AbstractPreferences parent>;
+
+        virtualinvoke $r27.<java.util.prefs.AbstractPreferences: void flush()>();
+
+        return;
+
+     label1:
+        $z1 = r0.<java.util.prefs.WindowsPreferences: boolean isBackingStoreAvailable>;
+
+        if $z1 != 0 goto label2;
+
+        $r26 = new java.util.prefs.BackingStoreException;
+
+        specialinvoke $r26.<java.util.prefs.BackingStoreException: void <init>(java.lang.String)>("flush(): Backing store not available.");
+
+        throw $r26;
+
+     label2:
+        $i0 = specialinvoke r0.<java.util.prefs.WindowsPreferences: int openKey(int)>(131097);
+
+        if $i0 != 0 goto label3;
+
+        $r15 = new java.util.prefs.BackingStoreException;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not open windows registry node ");
+
+        $r18 = specialinvoke r0.<java.util.prefs.WindowsPreferences: byte[] windowsAbsolutePath()>();
+
+        $r19 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String byteArrayToString(byte[])>($r18);
+
+        $r20 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at root 0x");
+
+        $i3 = specialinvoke r0.<java.util.prefs.WindowsPreferences: int rootNativeHandle()>();
+
+        $r22 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i3);
+
+        $r23 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r15.<java.util.prefs.BackingStoreException: void <init>(java.lang.String)>($r25);
+
+        throw $r15;
+
+     label3:
+        $i1 = staticinvoke <java.util.prefs.WindowsPreferences: int WindowsRegFlushKey1(int)>($i0);
+
+        if $i1 == 0 goto label4;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not flush windows registry node ");
+
+        $r3 = specialinvoke r0.<java.util.prefs.WindowsPreferences: byte[] windowsAbsolutePath()>();
+
+        $r4 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String byteArrayToString(byte[])>($r3);
+
+        $r5 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at root 0x");
+
+        $i2 = specialinvoke r0.<java.util.prefs.WindowsPreferences: int rootNativeHandle()>();
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i2);
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(". Windows RegFlushKey(...) returned error code ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r13 = staticinvoke <java.util.prefs.WindowsPreferences: sun.util.logging.PlatformLogger logger()>();
+
+        virtualinvoke $r13.<sun.util.logging.PlatformLogger: void warning(java.lang.String)>($r12);
+
+        $r14 = new java.util.prefs.BackingStoreException;
+
+        specialinvoke $r14.<java.util.prefs.BackingStoreException: void <init>(java.lang.String)>($r12);
+
+        throw $r14;
+
+     label4:
+        specialinvoke r0.<java.util.prefs.WindowsPreferences: void closeKey(int)>($i0);
+
+        return;
+    }
+
+    public void sync() throws java.util.prefs.BackingStoreException
+    {
+        java.lang.IllegalStateException $r1;
+        java.util.prefs.WindowsPreferences r0;
+        boolean $z0;
+
+        r0 := @this: java.util.prefs.WindowsPreferences;
+
+        $z0 = virtualinvoke r0.<java.util.prefs.WindowsPreferences: boolean isRemoved()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Node has been removed");
+
+        throw $r1;
+
+     label1:
+        virtualinvoke r0.<java.util.prefs.WindowsPreferences: void flush()>();
+
+        return;
+    }
+
+    protected java.util.prefs.AbstractPreferences childSpi(java.lang.String)
+    {
+        java.lang.String r2;
+        java.util.prefs.WindowsPreferences $r0, r1;
+
+        r1 := @this: java.util.prefs.WindowsPreferences;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r0 = new java.util.prefs.WindowsPreferences;
+
+        specialinvoke $r0.<java.util.prefs.WindowsPreferences: void <init>(java.util.prefs.WindowsPreferences,java.lang.String)>(r1, r2);
+
+        return $r0;
+    }
+
+    public void removeNodeSpi() throws java.util.prefs.BackingStoreException
+    {
+        byte[] $r4, $r7, $r22;
+        java.util.prefs.WindowsPreferences r0, $r2;
+        java.lang.StringBuilder $r5, $r6, $r9, $r10, $r12, $r13, $r14, $r15, $r20, $r21, $r24, $r25, $r27, $r28;
+        java.util.prefs.BackingStoreException $r18, $r19;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String $r3, $r8, $r11, $r16, $r23, $r26, $r29;
+        sun.util.logging.PlatformLogger $r17;
+        java.util.prefs.Preferences $r1;
+
+        r0 := @this: java.util.prefs.WindowsPreferences;
+
+        $r1 = virtualinvoke r0.<java.util.prefs.WindowsPreferences: java.util.prefs.Preferences parent()>();
+
+        $r2 = (java.util.prefs.WindowsPreferences) $r1;
+
+        $i0 = specialinvoke $r2.<java.util.prefs.WindowsPreferences: int openKey(int)>(65536);
+
+        if $i0 != 0 goto label1;
+
+        $r19 = new java.util.prefs.BackingStoreException;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not open parent windows registry node of ");
+
+        $r22 = specialinvoke r0.<java.util.prefs.WindowsPreferences: byte[] windowsAbsolutePath()>();
+
+        $r23 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String byteArrayToString(byte[])>($r22);
+
+        $r24 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r23);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at root 0x");
+
+        $i3 = specialinvoke r0.<java.util.prefs.WindowsPreferences: int rootNativeHandle()>();
+
+        $r26 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i3);
+
+        $r27 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r26);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r19.<java.util.prefs.BackingStoreException: void <init>(java.lang.String)>($r29);
+
+        throw $r19;
+
+     label1:
+        $r3 = virtualinvoke r0.<java.util.prefs.WindowsPreferences: java.lang.String name()>();
+
+        $r4 = staticinvoke <java.util.prefs.WindowsPreferences: byte[] toWindowsName(java.lang.String)>($r3);
+
+        $i1 = staticinvoke <java.util.prefs.WindowsPreferences: int WindowsRegDeleteKey(int,byte[])>($i0, $r4);
+
+        if $i1 == 0 goto label2;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not delete windows registry node ");
+
+        $r7 = specialinvoke r0.<java.util.prefs.WindowsPreferences: byte[] windowsAbsolutePath()>();
+
+        $r8 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String byteArrayToString(byte[])>($r7);
+
+        $r9 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at root 0x");
+
+        $i2 = specialinvoke r0.<java.util.prefs.WindowsPreferences: int rootNativeHandle()>();
+
+        $r11 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i2);
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(". Windows RegDeleteKeyEx(...) returned error code ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r17 = staticinvoke <java.util.prefs.WindowsPreferences: sun.util.logging.PlatformLogger logger()>();
+
+        virtualinvoke $r17.<sun.util.logging.PlatformLogger: void warning(java.lang.String)>($r16);
+
+        $r18 = new java.util.prefs.BackingStoreException;
+
+        specialinvoke $r18.<java.util.prefs.BackingStoreException: void <init>(java.lang.String)>($r16);
+
+        throw $r18;
+
+     label2:
+        specialinvoke r0.<java.util.prefs.WindowsPreferences: void closeKey(int)>($i0);
+
+        return;
+    }
+
+    private static java.lang.String toJavaName(byte[])
+    {
+        byte[] r0;
+        int $i0, $i2, $i3, $i4, i6, $i7, i9, $i10, $i11, $i12, $i13, $i14, $i15;
+        java.lang.String $r1, $r3, $r4, $r5;
+        boolean $z0;
+        char $c1, $c5, c8;
+        java.lang.StringBuilder $r6;
+
+        r0 := @parameter0: byte[];
+
+        $r1 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String byteArrayToString(byte[])>(r0);
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 <= 1 goto label1;
+
+        $r4 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(0, 2);
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("/!");
+
+        if $z0 == 0 goto label1;
+
+        $r5 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String toJavaAlt64Name(java.lang.String)>($r1);
+
+        return $r5;
+
+     label1:
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        i6 = 0;
+
+     label2:
+        $i7 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if i6 >= $i7 goto label7;
+
+        $c1 = virtualinvoke $r1.<java.lang.String: char charAt(int)>(i6);
+
+        c8 = $c1;
+
+        $i12 = (int) $c1;
+
+        if $i12 != 47 goto label5;
+
+        i9 = 32;
+
+        $i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $i3 = i6 + 1;
+
+        if $i2 <= $i3 goto label3;
+
+        $i4 = i6 + 1;
+
+        $c5 = virtualinvoke $r1.<java.lang.String: char charAt(int)>($i4);
+
+        i9 = $c5;
+
+        $i13 = (int) $c5;
+
+        if $i13 < 65 goto label3;
+
+        $i14 = (int) $c5;
+
+        if $i14 > 90 goto label3;
+
+        c8 = $c5;
+
+        i6 = i6 + 1;
+
+        goto label4;
+
+     label3:
+        $i10 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $i11 = i6 + 1;
+
+        if $i10 <= $i11 goto label4;
+
+        if i9 != 47 goto label4;
+
+        c8 = 92;
+
+        i6 = i6 + 1;
+
+     label4:
+        goto label6;
+
+     label5:
+        $i15 = (int) $c1;
+
+        if $i15 != 92 goto label6;
+
+        c8 = 47;
+
+     label6:
+        virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(c8);
+
+        i6 = i6 + 1;
+
+        goto label2;
+
+     label7:
+        $r3 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+    }
+
+    private static java.lang.String toJavaAlt64Name(java.lang.String)
+    {
+        byte[] $r2;
+        short s2, s4, $s10, $s11;
+        byte $b1, $b3;
+        int $i0, $i5, $i6, i8, i9, $i12, $i13;
+        java.lang.String r0, $r1, $r4;
+        char $c7;
+        java.lang.StringBuilder $r5;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>(2);
+
+        $r2 = staticinvoke <java.util.prefs.Base64: byte[] altBase64ToByteArray(java.lang.String)>($r1);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        i8 = 0;
+
+     label1:
+        $i0 = lengthof $r2;
+
+        if i8 >= $i0 goto label2;
+
+        i9 = i8 + 1;
+
+        $b1 = $r2[i8];
+
+        $s10 = (short) $b1;
+
+        s2 = $s10 & 255;
+
+        $b3 = $r2[i9];
+
+        $s11 = (short) $b3;
+
+        s4 = $s11 & 255;
+
+        $i12 = (int) s2;
+
+        $i5 = $i12 << 8;
+
+        $i13 = (int) s4;
+
+        $i6 = $i5 + $i13;
+
+        $c7 = (char) $i6;
+
+        virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c7);
+
+        i8 = i9 + 1;
+
+        goto label1;
+
+     label2:
+        $r4 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r4;
+    }
+
+    private static byte[] toWindowsName(java.lang.String)
+    {
+        byte[] $r3, $r4;
+        char $c1;
+        int $i0, i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        java.lang.StringBuilder $r5, $r6;
+        java.lang.String r1, $r2;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        i2 = 0;
+
+     label1:
+        $i0 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if i2 >= $i0 goto label8;
+
+        $c1 = virtualinvoke r1.<java.lang.String: char charAt(int)>(i2);
+
+        $i3 = (int) $c1;
+
+        if $i3 < 32 goto label2;
+
+        $i4 = (int) $c1;
+
+        if $i4 <= 127 goto label3;
+
+     label2:
+        $r4 = staticinvoke <java.util.prefs.WindowsPreferences: byte[] toWindowsAlt64Name(java.lang.String)>(r1);
+
+        return $r4;
+
+     label3:
+        $i5 = (int) $c1;
+
+        if $i5 != 92 goto label4;
+
+        virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("//");
+
+        goto label7;
+
+     label4:
+        $i6 = (int) $c1;
+
+        if $i6 != 47 goto label5;
+
+        virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(92);
+
+        goto label7;
+
+     label5:
+        $i7 = (int) $c1;
+
+        if $i7 < 65 goto label6;
+
+        $i8 = (int) $c1;
+
+        if $i8 > 90 goto label6;
+
+        $r5 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(47);
+
+        virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c1);
+
+        goto label7;
+
+     label6:
+        virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c1);
+
+     label7:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label8:
+        $r2 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r3 = staticinvoke <java.util.prefs.WindowsPreferences: byte[] stringToByteArray(java.lang.String)>($r2);
+
+        return $r3;
+    }
+
+    private static byte[] toWindowsAlt64Name(java.lang.String)
+    {
+        byte[] r1, $r7;
+        byte $b5, $b6;
+        int $i0, $i1, $i2, $i4, i7, i8, i9, $i10;
+        java.lang.String r0, $r4, $r6;
+        char $c3;
+        java.lang.StringBuilder $r3, $r5, $r8;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $i1 = 2 * $i0;
+
+        r1 = newarray (byte)[$i1];
+
+        i7 = 0;
+
+        i8 = 0;
+
+     label1:
+        $i2 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if i8 >= $i2 goto label2;
+
+        $c3 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i8);
+
+        i9 = i7 + 1;
+
+        $i10 = (int) $c3;
+
+        $i4 = $i10 >>> 8;
+
+        $b5 = (byte) $i4;
+
+        r1[i7] = $b5;
+
+        i7 = i9 + 1;
+
+        $b6 = (byte) $c3;
+
+        r1[i9] = $b6;
+
+        i8 = i8 + 1;
+
+        goto label1;
+
+     label2:
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/!");
+
+        $r4 = staticinvoke <java.util.prefs.Base64: java.lang.String byteArrayToAltBase64(byte[])>(r1);
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r7 = staticinvoke <java.util.prefs.WindowsPreferences: byte[] stringToByteArray(java.lang.String)>($r6);
+
+        return $r7;
+    }
+
+    private static java.lang.String toJavaValueString(byte[])
+    {
+        byte[] r0;
+        int $i0, $i2, $i3, $i4, $i5, $i6, $i8, $i10, $i11, $i12, $i13, $i14, i15, $i18, $i19, $i20, $i21, $i22, $i23;
+        java.lang.String $r1, $r3, $r4;
+        char $c1, $c7, $c9, c16, c17;
+        java.lang.StringBuilder $r5;
+
+        r0 := @parameter0: byte[];
+
+        $r1 = staticinvoke <java.util.prefs.WindowsPreferences: java.lang.String byteArrayToString(byte[])>(r0);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        i15 = 0;
+
+     label1:
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if i15 >= $i0 goto label8;
+
+        $c1 = virtualinvoke $r1.<java.lang.String: char charAt(int)>(i15);
+
+        c16 = $c1;
+
+        $i20 = (int) $c1;
+
+        if $i20 != 47 goto label6;
+
+        c17 = 32;
+
+        $i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $i3 = i15 + 1;
+
+        if $i2 <= $i3 goto label3;
+
+        $i8 = i15 + 1;
+
+        $c9 = virtualinvoke $r1.<java.lang.String: char charAt(int)>($i8);
+
+        c17 = $c9;
+
+        $i21 = (int) $c9;
+
+        if $i21 != 117 goto label3;
+
+        $i10 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $i11 = i15 + 6;
+
+        if $i10 >= $i11 goto label2;
+
+        goto label8;
+
+     label2:
+        $i13 = i15 + 2;
+
+        $i12 = i15 + 6;
+
+        $r4 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>($i13, $i12);
+
+        $i14 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String,int)>($r4, 16);
+
+        c16 = (char) $i14;
+
+        i15 = i15 + 5;
+
+        goto label5;
+
+     label3:
+        $i4 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $i5 = i15 + 1;
+
+        if $i4 <= $i5 goto label4;
+
+        $i6 = i15 + 1;
+
+        $c7 = virtualinvoke $r1.<java.lang.String: char charAt(int)>($i6);
+
+        $i22 = (int) $c7;
+
+        if $i22 < 65 goto label4;
+
+        if c17 > 90 goto label4;
+
+        c16 = c17;
+
+        i15 = i15 + 1;
+
+        goto label5;
+
+     label4:
+        $i18 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $i19 = i15 + 1;
+
+        if $i18 <= $i19 goto label5;
+
+        if c17 != 47 goto label5;
+
+        c16 = 92;
+
+        i15 = i15 + 1;
+
+     label5:
+        goto label7;
+
+     label6:
+        $i23 = (int) $c1;
+
+        if $i23 != 92 goto label7;
+
+        c16 = 47;
+
+     label7:
+        virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(c16);
+
+        i15 = i15 + 1;
+
+        goto label1;
+
+     label8:
+        $r3 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+    }
+
+    private static byte[] toWindowsValueString(java.lang.String)
+    {
+        byte[] $r3;
+        int $i0, $i3, $i4, $i6, i7, i8, i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16;
+        java.lang.String r1, $r2, $r4;
+        char $c1, $c2, $c5;
+        java.lang.StringBuilder $r6, $r7, $r8;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        i7 = 0;
+
+     label01:
+        $i0 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if i7 >= $i0 goto label12;
+
+        $c1 = virtualinvoke r1.<java.lang.String: char charAt(int)>(i7);
+
+        $i10 = (int) $c1;
+
+        if $i10 < 32 goto label02;
+
+        $i11 = (int) $c1;
+
+        if $i11 <= 127 goto label07;
+
+     label02:
+        virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/u");
+
+        $c2 = virtualinvoke r1.<java.lang.String: char charAt(int)>(i7);
+
+        $i12 = (int) $c2;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i12);
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>(java.lang.String)>($r4);
+
+        virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder reverse()>();
+
+        $i3 = virtualinvoke $r8.<java.lang.StringBuilder: int length()>();
+
+        $i6 = 4 - $i3;
+
+        i8 = 0;
+
+     label03:
+        if i8 >= $i6 goto label04;
+
+        virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(48);
+
+        i8 = i8 + 1;
+
+        goto label03;
+
+     label04:
+        i9 = 0;
+
+     label05:
+        if i9 >= 4 goto label06;
+
+        $i4 = 3 - i9;
+
+        $c5 = virtualinvoke $r8.<java.lang.StringBuilder: char charAt(int)>($i4);
+
+        virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c5);
+
+        i9 = i9 + 1;
+
+        goto label05;
+
+     label06:
+        goto label11;
+
+     label07:
+        $i13 = (int) $c1;
+
+        if $i13 != 92 goto label08;
+
+        virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("//");
+
+        goto label11;
+
+     label08:
+        $i14 = (int) $c1;
+
+        if $i14 != 47 goto label09;
+
+        virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(92);
+
+        goto label11;
+
+     label09:
+        $i15 = (int) $c1;
+
+        if $i15 < 65 goto label10;
+
+        $i16 = (int) $c1;
+
+        if $i16 > 90 goto label10;
+
+        $r6 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(47);
+
+        virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c1);
+
+        goto label11;
+
+     label10:
+        virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c1);
+
+     label11:
+        i7 = i7 + 1;
+
+        goto label01;
+
+     label12:
+        $r2 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r3 = staticinvoke <java.util.prefs.WindowsPreferences: byte[] stringToByteArray(java.lang.String)>($r2);
+
+        return $r3;
+    }
+
+    private int rootNativeHandle()
+    {
+        int $i0;
+        java.util.prefs.WindowsPreferences r0;
+        boolean $z0;
+
+        r0 := @this: java.util.prefs.WindowsPreferences;
+
+        $z0 = virtualinvoke r0.<java.util.prefs.WindowsPreferences: boolean isUserNode()>();
+
+        if $z0 == 0 goto label1;
+
+        $i0 = -2147483647;
+
+        goto label2;
+
+     label1:
+        $i0 = -2147483646;
+
+     label2:
+        return $i0;
+    }
+
+    private static byte[] stringToByteArray(java.lang.String)
+    {
+        byte[] r1;
+        char $c4;
+        byte $b5;
+        int $i0, $i1, $i2, $i3, i6;
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $i1 = $i0 + 1;
+
+        r1 = newarray (byte)[$i1];
+
+        i6 = 0;
+
+     label1:
+        $i2 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if i6 >= $i2 goto label2;
+
+        $c4 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i6);
+
+        $b5 = (byte) $c4;
+
+        r1[i6] = $b5;
+
+        i6 = i6 + 1;
+
+        goto label1;
+
+     label2:
+        $i3 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        r1[$i3] = 0;
+
+        return r1;
+    }
+
+    private static java.lang.String byteArrayToString(byte[])
+    {
+        byte[] r1;
+        char $c3;
+        byte $b2;
+        int $i0, $i1, i4;
+        java.lang.StringBuilder $r0;
+        java.lang.String $r2;
+
+        r1 := @parameter0: byte[];
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        i4 = 0;
+
+     label1:
+        $i0 = lengthof r1;
+
+        $i1 = $i0 - 1;
+
+        if i4 >= $i1 goto label2;
+
+        $b2 = r1[i4];
+
+        $c3 = (char) $b2;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c3);
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label2:
+        $r2 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r2;
+    }
+
+    protected void flushSpi() throws java.util.prefs.BackingStoreException
+    {
+        java.util.prefs.WindowsPreferences r0;
+
+        r0 := @this: java.util.prefs.WindowsPreferences;
+
+        return;
+    }
+
+    protected void syncSpi() throws java.util.prefs.BackingStoreException
+    {
+        java.util.prefs.WindowsPreferences r0;
+
+        r0 := @this: java.util.prefs.WindowsPreferences;
+
+        return;
+    }
+
+    private static synchronized sun.util.logging.PlatformLogger logger()
+    {
+        sun.util.logging.PlatformLogger $r0, $r1, $r2;
+
+        $r0 = <java.util.prefs.WindowsPreferences: sun.util.logging.PlatformLogger logger>;
+
+        if $r0 != null goto label1;
+
+        $r2 = staticinvoke <sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger getLogger(java.lang.String)>("java.util.prefs");
+
+        <java.util.prefs.WindowsPreferences: sun.util.logging.PlatformLogger logger> = $r2;
+
+     label1:
+        $r1 = <java.util.prefs.WindowsPreferences: sun.util.logging.PlatformLogger logger>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        byte[] $r0;
+
+        <java.util.prefs.WindowsPreferences: int KEY_ALL_ACCESS> = 983103;
+
+        <java.util.prefs.WindowsPreferences: int KEY_WRITE> = 131078;
+
+        <java.util.prefs.WindowsPreferences: int KEY_READ> = 131097;
+
+        <java.util.prefs.WindowsPreferences: int KEY_ENUMERATE_SUB_KEYS> = 8;
+
+        <java.util.prefs.WindowsPreferences: int KEY_CREATE_SUB_KEY> = 4;
+
+        <java.util.prefs.WindowsPreferences: int KEY_SET_VALUE> = 2;
+
+        <java.util.prefs.WindowsPreferences: int KEY_QUERY_VALUE> = 1;
+
+        <java.util.prefs.WindowsPreferences: int DELETE> = 65536;
+
+        <java.util.prefs.WindowsPreferences: int NULL_NATIVE_HANDLE> = 0;
+
+        <java.util.prefs.WindowsPreferences: int REG_OPENED_EXISTING_KEY> = 2;
+
+        <java.util.prefs.WindowsPreferences: int REG_CREATED_NEW_KEY> = 1;
+
+        <java.util.prefs.WindowsPreferences: int DISPOSITION> = 2;
+
+        <java.util.prefs.WindowsPreferences: int MAX_VALUE_NAME_LENGTH> = 4;
+
+        <java.util.prefs.WindowsPreferences: int MAX_KEY_LENGTH> = 3;
+
+        <java.util.prefs.WindowsPreferences: int VALUES_NUMBER> = 2;
+
+        <java.util.prefs.WindowsPreferences: int SUBKEYS_NUMBER> = 0;
+
+        <java.util.prefs.WindowsPreferences: int ERROR_CODE> = 1;
+
+        <java.util.prefs.WindowsPreferences: int NATIVE_HANDLE> = 0;
+
+        <java.util.prefs.WindowsPreferences: int ERROR_ACCESS_DENIED> = 5;
+
+        <java.util.prefs.WindowsPreferences: int ERROR_FILE_NOT_FOUND> = 2;
+
+        <java.util.prefs.WindowsPreferences: int ERROR_SUCCESS> = 0;
+
+        <java.util.prefs.WindowsPreferences: int MAX_WINDOWS_PATH_LENGTH> = 256;
+
+        <java.util.prefs.WindowsPreferences: int SYSTEM_ROOT_NATIVE_HANDLE> = -2147483646;
+
+        <java.util.prefs.WindowsPreferences: int USER_ROOT_NATIVE_HANDLE> = -2147483647;
+
+        <java.util.prefs.WindowsPreferences: int HKEY_LOCAL_MACHINE> = -2147483646;
+
+        <java.util.prefs.WindowsPreferences: int HKEY_CURRENT_USER> = -2147483647;
+
+        $r0 = staticinvoke <java.util.prefs.WindowsPreferences: byte[] stringToByteArray(java.lang.String)>("Software\\JavaSoft\\Prefs");
+
+        <java.util.prefs.WindowsPreferences: byte[] WINDOWS_ROOT_PATH> = $r0;
+
+        <java.util.prefs.WindowsPreferences: int INIT_SLEEP_TIME> = 50;
+
+        <java.util.prefs.WindowsPreferences: int MAX_ATTEMPTS> = 5;
+
+        return;
+    }
+}

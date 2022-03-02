@@ -1,0 +1,4410 @@
+public class java.awt.GridBagLayout extends java.lang.Object implements java.awt.LayoutManager2, java.io.Serializable
+{
+    static final int EMPIRICMULTIPLIER;
+    protected static final int MAXGRIDSIZE;
+    protected static final int MINSIZE;
+    protected static final int PREFERREDSIZE;
+    protected java.util.Hashtable comptable;
+    protected java.awt.GridBagConstraints defaultConstraints;
+    protected java.awt.GridBagLayoutInfo layoutInfo;
+    public int[] columnWidths;
+    public int[] rowHeights;
+    public double[] columnWeights;
+    public double[] rowWeights;
+    private java.awt.Component componentAdjusting;
+    transient boolean rightToLeft;
+    static final long serialVersionUID;
+
+    public void <init>()
+    {
+        java.awt.GridBagLayout r0;
+        java.awt.GridBagConstraints $r2;
+        java.util.Hashtable $r1;
+
+        r0 := @this: java.awt.GridBagLayout;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.awt.GridBagLayout: boolean rightToLeft> = 0;
+
+        $r1 = new java.util.Hashtable;
+
+        specialinvoke $r1.<java.util.Hashtable: void <init>()>();
+
+        r0.<java.awt.GridBagLayout: java.util.Hashtable comptable> = $r1;
+
+        $r2 = new java.awt.GridBagConstraints;
+
+        specialinvoke $r2.<java.awt.GridBagConstraints: void <init>()>();
+
+        r0.<java.awt.GridBagLayout: java.awt.GridBagConstraints defaultConstraints> = $r2;
+
+        return;
+    }
+
+    public void setConstraints(java.awt.Component, java.awt.GridBagConstraints)
+    {
+        java.lang.Object $r4;
+        java.awt.GridBagLayout r0;
+        java.awt.GridBagConstraints r2, $r5;
+        java.awt.Component r1;
+        java.util.Hashtable $r3;
+
+        r0 := @this: java.awt.GridBagLayout;
+
+        r1 := @parameter0: java.awt.Component;
+
+        r2 := @parameter1: java.awt.GridBagConstraints;
+
+        $r3 = r0.<java.awt.GridBagLayout: java.util.Hashtable comptable>;
+
+        $r4 = virtualinvoke r2.<java.awt.GridBagConstraints: java.lang.Object clone()>();
+
+        $r5 = (java.awt.GridBagConstraints) $r4;
+
+        virtualinvoke $r3.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r5);
+
+        return;
+    }
+
+    public java.awt.GridBagConstraints getConstraints(java.awt.Component)
+    {
+        java.awt.GridBagConstraints $r5, $r6, r9;
+        java.awt.Component r1;
+        java.lang.Object $r3, $r4, $r8;
+        java.awt.GridBagLayout r0;
+        java.util.Hashtable $r2, $r7;
+
+        r0 := @this: java.awt.GridBagLayout;
+
+        r1 := @parameter0: java.awt.Component;
+
+        $r2 = r0.<java.awt.GridBagLayout: java.util.Hashtable comptable>;
+
+        $r3 = virtualinvoke $r2.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r1);
+
+        r9 = (java.awt.GridBagConstraints) $r3;
+
+        if r9 != null goto label1;
+
+        $r6 = r0.<java.awt.GridBagLayout: java.awt.GridBagConstraints defaultConstraints>;
+
+        virtualinvoke r0.<java.awt.GridBagLayout: void setConstraints(java.awt.Component,java.awt.GridBagConstraints)>(r1, $r6);
+
+        $r7 = r0.<java.awt.GridBagLayout: java.util.Hashtable comptable>;
+
+        $r8 = virtualinvoke $r7.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r1);
+
+        r9 = (java.awt.GridBagConstraints) $r8;
+
+     label1:
+        $r4 = virtualinvoke r9.<java.awt.GridBagConstraints: java.lang.Object clone()>();
+
+        $r5 = (java.awt.GridBagConstraints) $r4;
+
+        return $r5;
+    }
+
+    protected java.awt.GridBagConstraints lookupConstraints(java.awt.Component)
+    {
+        java.awt.GridBagConstraints $r4, r7;
+        java.awt.Component r1;
+        java.lang.Object $r3, $r6;
+        java.awt.GridBagLayout r0;
+        java.util.Hashtable $r2, $r5;
+
+        r0 := @this: java.awt.GridBagLayout;
+
+        r1 := @parameter0: java.awt.Component;
+
+        $r2 = r0.<java.awt.GridBagLayout: java.util.Hashtable comptable>;
+
+        $r3 = virtualinvoke $r2.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r1);
+
+        r7 = (java.awt.GridBagConstraints) $r3;
+
+        if r7 != null goto label1;
+
+        $r4 = r0.<java.awt.GridBagLayout: java.awt.GridBagConstraints defaultConstraints>;
+
+        virtualinvoke r0.<java.awt.GridBagLayout: void setConstraints(java.awt.Component,java.awt.GridBagConstraints)>(r1, $r4);
+
+        $r5 = r0.<java.awt.GridBagLayout: java.util.Hashtable comptable>;
+
+        $r6 = virtualinvoke $r5.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r1);
+
+        r7 = (java.awt.GridBagConstraints) $r6;
+
+     label1:
+        return r7;
+    }
+
+    private void removeConstraints(java.awt.Component)
+    {
+        java.awt.GridBagLayout r0;
+        java.awt.Component r1;
+        java.util.Hashtable $r2;
+
+        r0 := @this: java.awt.GridBagLayout;
+
+        r1 := @parameter0: java.awt.Component;
+
+        $r2 = r0.<java.awt.GridBagLayout: java.util.Hashtable comptable>;
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    public java.awt.Point getLayoutOrigin()
+    {
+        java.awt.GridBagLayoutInfo $r2, $r3, $r4;
+        int $i0, $i1;
+        java.awt.Point $r0;
+        java.awt.GridBagLayout r1;
+
+        r1 := @this: java.awt.GridBagLayout;
+
+        $r0 = new java.awt.Point;
+
+        specialinvoke $r0.<java.awt.Point: void <init>(int,int)>(0, 0);
+
+        $r2 = r1.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        if $r2 == null goto label1;
+
+        $r3 = r1.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $i0 = $r3.<java.awt.GridBagLayoutInfo: int startx>;
+
+        $r0.<java.awt.Point: int x> = $i0;
+
+        $r4 = r1.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $i1 = $r4.<java.awt.GridBagLayoutInfo: int starty>;
+
+        $r0.<java.awt.Point: int y> = $i1;
+
+     label1:
+        return $r0;
+    }
+
+    public int[][] getLayoutDimensions()
+    {
+        int[][] r2, $r15;
+        int[] $r4, $r6, $r9, $r10, $r13, $r14;
+        int $i0, $i1, $i2, $i3;
+        java.awt.GridBagLayoutInfo $r1, $r3, $r5, $r7, $r8, $r11, $r12;
+        java.awt.GridBagLayout r0;
+
+        r0 := @this: java.awt.GridBagLayout;
+
+        $r1 = r0.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        if $r1 != null goto label1;
+
+        $r15 = newmultiarray (int)[2][0];
+
+        return $r15;
+
+     label1:
+        r2 = newarray (int[])[2];
+
+        $r3 = r0.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $i0 = $r3.<java.awt.GridBagLayoutInfo: int width>;
+
+        $r4 = newarray (int)[$i0];
+
+        r2[0] = $r4;
+
+        $r5 = r0.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $i1 = $r5.<java.awt.GridBagLayoutInfo: int height>;
+
+        $r6 = newarray (int)[$i1];
+
+        r2[1] = $r6;
+
+        $r7 = r0.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $r10 = $r7.<java.awt.GridBagLayoutInfo: int[] minWidth>;
+
+        $r9 = r2[0];
+
+        $r8 = r0.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $i2 = $r8.<java.awt.GridBagLayoutInfo: int width>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r10, 0, $r9, 0, $i2);
+
+        $r11 = r0.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $r14 = $r11.<java.awt.GridBagLayoutInfo: int[] minHeight>;
+
+        $r13 = r2[1];
+
+        $r12 = r0.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $i3 = $r12.<java.awt.GridBagLayoutInfo: int height>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r14, 0, $r13, 0, $i3);
+
+        return r2;
+    }
+
+    public double[][] getLayoutWeights()
+    {
+        double[] $r4, $r6, $r9, $r10, $r13, $r14;
+        int $i0, $i1, $i2, $i3;
+        java.awt.GridBagLayoutInfo $r1, $r3, $r5, $r7, $r8, $r11, $r12;
+        java.awt.GridBagLayout r0;
+        double[][] r2, $r15;
+
+        r0 := @this: java.awt.GridBagLayout;
+
+        $r1 = r0.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        if $r1 != null goto label1;
+
+        $r15 = newmultiarray (double)[2][0];
+
+        return $r15;
+
+     label1:
+        r2 = newarray (double[])[2];
+
+        $r3 = r0.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $i0 = $r3.<java.awt.GridBagLayoutInfo: int width>;
+
+        $r4 = newarray (double)[$i0];
+
+        r2[0] = $r4;
+
+        $r5 = r0.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $i1 = $r5.<java.awt.GridBagLayoutInfo: int height>;
+
+        $r6 = newarray (double)[$i1];
+
+        r2[1] = $r6;
+
+        $r7 = r0.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $r10 = $r7.<java.awt.GridBagLayoutInfo: double[] weightX>;
+
+        $r9 = r2[0];
+
+        $r8 = r0.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $i2 = $r8.<java.awt.GridBagLayoutInfo: int width>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r10, 0, $r9, 0, $i2);
+
+        $r11 = r0.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $r14 = $r11.<java.awt.GridBagLayoutInfo: double[] weightY>;
+
+        $r13 = r2[1];
+
+        $r12 = r0.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $i3 = $r12.<java.awt.GridBagLayoutInfo: int height>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r14, 0, $r13, 0, $i3);
+
+        return r2;
+    }
+
+    public java.awt.Point location(int, int)
+    {
+        java.awt.Point $r14;
+        int[] $r6, $r8, $r11;
+        int $i0, $i1, i2, i3, $i4, $i5, $i6, i7, i8, i9, i10, i11, $i12, $i14;
+        boolean $z0;
+        java.awt.GridBagLayoutInfo $r2, $r3, $r4, $r5, $r7, $r9, $r10, $r12, $r13;
+        java.awt.GridBagLayout r1;
+
+        r1 := @this: java.awt.GridBagLayout;
+
+        i3 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        $r14 = new java.awt.Point;
+
+        specialinvoke $r14.<java.awt.Point: void <init>(int,int)>(0, 0);
+
+        $r2 = r1.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        if $r2 != null goto label01;
+
+        return $r14;
+
+     label01:
+        $r3 = r1.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        i7 = $r3.<java.awt.GridBagLayoutInfo: int startx>;
+
+        $z0 = r1.<java.awt.GridBagLayout: boolean rightToLeft>;
+
+        if $z0 != 0 goto label04;
+
+        i8 = 0;
+
+     label02:
+        $r9 = r1.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $i5 = $r9.<java.awt.GridBagLayoutInfo: int width>;
+
+        if i8 >= $i5 goto label08;
+
+        $r10 = r1.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $r11 = $r10.<java.awt.GridBagLayoutInfo: int[] minWidth>;
+
+        $i6 = $r11[i8];
+
+        i7 = i7 + $i6;
+
+        if i7 <= i3 goto label03;
+
+        goto label08;
+
+     label03:
+        i8 = i8 + 1;
+
+        goto label02;
+
+     label04:
+        $r4 = r1.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $i0 = $r4.<java.awt.GridBagLayoutInfo: int width>;
+
+        i9 = $i0 - 1;
+
+     label05:
+        if i9 < 0 goto label07;
+
+        if i7 <= i3 goto label06;
+
+        goto label07;
+
+     label06:
+        $r7 = r1.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $r8 = $r7.<java.awt.GridBagLayoutInfo: int[] minWidth>;
+
+        $i4 = $r8[i9];
+
+        i7 = i7 + $i4;
+
+        $i14 = (int) -1;
+
+        i9 = i9 + $i14;
+
+        goto label05;
+
+     label07:
+        i8 = i9 + 1;
+
+     label08:
+        $r14.<java.awt.Point: int x> = i8;
+
+        $r12 = r1.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        i10 = $r12.<java.awt.GridBagLayoutInfo: int starty>;
+
+        i11 = 0;
+
+     label09:
+        $r13 = r1.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $i12 = $r13.<java.awt.GridBagLayoutInfo: int height>;
+
+        if i11 >= $i12 goto label11;
+
+        $r5 = r1.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $r6 = $r5.<java.awt.GridBagLayoutInfo: int[] minHeight>;
+
+        $i1 = $r6[i11];
+
+        i10 = i10 + $i1;
+
+        if i10 <= i2 goto label10;
+
+        goto label11;
+
+     label10:
+        i11 = i11 + 1;
+
+        goto label09;
+
+     label11:
+        $r14.<java.awt.Point: int y> = i11;
+
+        return $r14;
+    }
+
+    public void addLayoutComponent(java.lang.String, java.awt.Component)
+    {
+        java.lang.String r1;
+        java.awt.GridBagLayout r0;
+        java.awt.Component r2;
+
+        r0 := @this: java.awt.GridBagLayout;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.awt.Component;
+
+        return;
+    }
+
+    public void addLayoutComponent(java.awt.Component, java.lang.Object)
+    {
+        java.lang.Object r0;
+        java.lang.IllegalArgumentException $r1;
+        java.awt.GridBagLayout r2;
+        java.awt.GridBagConstraints $r4;
+        java.awt.Component r3;
+        boolean $z0;
+
+        r2 := @this: java.awt.GridBagLayout;
+
+        r3 := @parameter0: java.awt.Component;
+
+        r0 := @parameter1: java.lang.Object;
+
+        $z0 = r0 instanceof java.awt.GridBagConstraints;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = (java.awt.GridBagConstraints) r0;
+
+        virtualinvoke r2.<java.awt.GridBagLayout: void setConstraints(java.awt.Component,java.awt.GridBagConstraints)>(r3, $r4);
+
+        goto label2;
+
+     label1:
+        if r0 == null goto label2;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("cannot add to layout: constraints must be a GridBagConstraint");
+
+        throw $r1;
+
+     label2:
+        return;
+    }
+
+    public void removeLayoutComponent(java.awt.Component)
+    {
+        java.awt.GridBagLayout r0;
+        java.awt.Component r1;
+
+        r0 := @this: java.awt.GridBagLayout;
+
+        r1 := @parameter0: java.awt.Component;
+
+        specialinvoke r0.<java.awt.GridBagLayout: void removeConstraints(java.awt.Component)>(r1);
+
+        return;
+    }
+
+    public java.awt.Dimension preferredLayoutSize(java.awt.Container)
+    {
+        java.awt.Dimension $r3;
+        java.awt.GridBagLayoutInfo $r2;
+        java.awt.Container r1;
+        java.awt.GridBagLayout r0;
+
+        r0 := @this: java.awt.GridBagLayout;
+
+        r1 := @parameter0: java.awt.Container;
+
+        $r2 = virtualinvoke r0.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo getLayoutInfo(java.awt.Container,int)>(r1, 2);
+
+        $r3 = virtualinvoke r0.<java.awt.GridBagLayout: java.awt.Dimension getMinSize(java.awt.Container,java.awt.GridBagLayoutInfo)>(r1, $r2);
+
+        return $r3;
+    }
+
+    public java.awt.Dimension minimumLayoutSize(java.awt.Container)
+    {
+        java.awt.Dimension $r3;
+        java.awt.GridBagLayoutInfo $r2;
+        java.awt.Container r1;
+        java.awt.GridBagLayout r0;
+
+        r0 := @this: java.awt.GridBagLayout;
+
+        r1 := @parameter0: java.awt.Container;
+
+        $r2 = virtualinvoke r0.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo getLayoutInfo(java.awt.Container,int)>(r1, 1);
+
+        $r3 = virtualinvoke r0.<java.awt.GridBagLayout: java.awt.Dimension getMinSize(java.awt.Container,java.awt.GridBagLayoutInfo)>(r1, $r2);
+
+        return $r3;
+    }
+
+    public java.awt.Dimension maximumLayoutSize(java.awt.Container)
+    {
+        java.awt.Dimension $r0;
+        java.awt.Container r2;
+        java.awt.GridBagLayout r1;
+
+        r1 := @this: java.awt.GridBagLayout;
+
+        r2 := @parameter0: java.awt.Container;
+
+        $r0 = new java.awt.Dimension;
+
+        specialinvoke $r0.<java.awt.Dimension: void <init>(int,int)>(2147483647, 2147483647);
+
+        return $r0;
+    }
+
+    public float getLayoutAlignmentX(java.awt.Container)
+    {
+        java.awt.Container r1;
+        java.awt.GridBagLayout r0;
+
+        r0 := @this: java.awt.GridBagLayout;
+
+        r1 := @parameter0: java.awt.Container;
+
+        return 0.5F;
+    }
+
+    public float getLayoutAlignmentY(java.awt.Container)
+    {
+        java.awt.Container r1;
+        java.awt.GridBagLayout r0;
+
+        r0 := @this: java.awt.GridBagLayout;
+
+        r1 := @parameter0: java.awt.Container;
+
+        return 0.5F;
+    }
+
+    public void invalidateLayout(java.awt.Container)
+    {
+        java.awt.Container r1;
+        java.awt.GridBagLayout r0;
+
+        r0 := @this: java.awt.GridBagLayout;
+
+        r1 := @parameter0: java.awt.Container;
+
+        return;
+    }
+
+    public void layoutContainer(java.awt.Container)
+    {
+        java.awt.Container r1;
+        java.awt.GridBagLayout r0;
+
+        r0 := @this: java.awt.GridBagLayout;
+
+        r1 := @parameter0: java.awt.Container;
+
+        virtualinvoke r0.<java.awt.GridBagLayout: void arrangeGrid(java.awt.Container)>(r1);
+
+        return;
+    }
+
+    public java.lang.String toString()
+    {
+        java.lang.Class $r1;
+        java.lang.String $r2;
+        java.awt.GridBagLayout r0;
+
+        r0 := @this: java.awt.GridBagLayout;
+
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.String getName()>();
+
+        return $r2;
+    }
+
+    protected java.awt.GridBagLayoutInfo getLayoutInfo(java.awt.Container, int)
+    {
+        int i0;
+        java.awt.GridBagLayoutInfo $r2;
+        java.awt.Container r1;
+        java.awt.GridBagLayout r0;
+
+        r0 := @this: java.awt.GridBagLayout;
+
+        r1 := @parameter0: java.awt.Container;
+
+        i0 := @parameter1: int;
+
+        $r2 = virtualinvoke r0.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo GetLayoutInfo(java.awt.Container,int)>(r1, i0);
+
+        return $r2;
+    }
+
+    private long[] preInitMaximumArraySizes(java.awt.Container)
+    {
+        long $l1, $l2;
+        long[] r2;
+        java.awt.Component[] $r1;
+        int $i0, $i3, $i4, i5, i6, i7, i8, i9, i10, i11;
+        java.awt.Container r0;
+        boolean $z0;
+        java.awt.GridBagConstraints $r5;
+        java.awt.Component r3;
+        java.awt.GridBagLayout r4;
+
+        r4 := @this: java.awt.GridBagLayout;
+
+        r0 := @parameter0: java.awt.Container;
+
+        $r1 = virtualinvoke r0.<java.awt.Container: java.awt.Component[] getComponents()>();
+
+        i5 = 0;
+
+        i6 = 0;
+
+        r2 = newarray (long)[2];
+
+        i7 = 0;
+
+     label1:
+        $i0 = lengthof $r1;
+
+        if i7 >= $i0 goto label8;
+
+        r3 = $r1[i7];
+
+        $z0 = virtualinvoke r3.<java.awt.Component: boolean isVisible()>();
+
+        if $z0 != 0 goto label2;
+
+        goto label7;
+
+     label2:
+        $r5 = virtualinvoke r4.<java.awt.GridBagLayout: java.awt.GridBagConstraints lookupConstraints(java.awt.Component)>(r3);
+
+        i8 = $r5.<java.awt.GridBagConstraints: int gridx>;
+
+        i9 = $r5.<java.awt.GridBagConstraints: int gridy>;
+
+        i10 = $r5.<java.awt.GridBagConstraints: int gridwidth>;
+
+        i11 = $r5.<java.awt.GridBagConstraints: int gridheight>;
+
+        if i8 >= 0 goto label3;
+
+        i6 = i6 + 1;
+
+        i8 = i6;
+
+     label3:
+        if i9 >= 0 goto label4;
+
+        i5 = i5 + 1;
+
+        i9 = i5;
+
+     label4:
+        if i10 > 0 goto label5;
+
+        i10 = 1;
+
+     label5:
+        if i11 > 0 goto label6;
+
+        i11 = 1;
+
+     label6:
+        $i3 = i9 + i11;
+
+        i5 = staticinvoke <java.lang.Math: int max(int,int)>($i3, i5);
+
+        $i4 = i8 + i10;
+
+        i6 = staticinvoke <java.lang.Math: int max(int,int)>($i4, i6);
+
+     label7:
+        i7 = i7 + 1;
+
+        goto label1;
+
+     label8:
+        $l1 = (long) i5;
+
+        r2[0] = $l1;
+
+        $l2 = (long) i6;
+
+        r2[1] = $l2;
+
+        return r2;
+    }
+
+    protected java.awt.GridBagLayoutInfo GetLayoutInfo(java.awt.Container, int)
+    {
+        java.awt.Container r0;
+        int[] $r5, $r6, $r7, $r10, $r11, $r12, $r13, $r17, $r19, $r21, $r33, $r35, $r37, $r51, $r52, $r53, $r54, $r55, $r56, $r66, $r67, $r69, $r70, $r71, $r72, $r74, $r75, $r76, $r77, $r81, r83, r84;
+        java.awt.Insets $r22, $r23, $r24, $r25, $r58, $r59, $r60, $r61, $r90, $r91;
+        int $i4, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57, $i58, $i59, $i60, $i62, $i63, $i64, $i65, $i68, $i69, $i70, $i71, $i72, $i73, $i75, $i76, $i77, $i78, $i79, $i80, $i81, $i82, $i83, $i84, $i85, $i86, $i87, $i88, $i89, $i90, $i91, $i92, $i93, $i94, $i95, $i96, $i97, $i98, $i99, $i100, $i101, $i102, $i103, $i104, $i105, $i106, $i107, $i108, $i110, $i111, $i112, $i114, $i115, $i117, $i118, $i119, $i121, $i122, $i123, $i124, $i125, $i126, $i127, $i128, $i129, $i130, $i131, $i132, $i133, $i134, $i135, $i136, $i137, $i138, $i139, $i140, $i141, $i142, $i143, $i144, $i145, $i146, $i147, $i148, $i149, i150, $i151, $i152, $i153, $i154, $i155, $i156, $i157, $i158, $i159, $i160, $i161, $i162, $i163, $i164, $i165, i166, i167, i168, i169, $i170, i171, $i172, i173, i174, $i175, i176, i177, i178, i179, i180, i181, i182, i183, $i184, i185, $i186, i187, $i188, i189, i190, i191, $i192, i193, i194, i195, i196, i197, i198, $i199, i200, i201, $i202, $i203, $i204, i205, $i206, i207, $i208, $i209, i210, i211, i212, i213, i214, i215, i216, i217, i218, $i219, $i220, $i221, $i222, $i223, $i224, i225, i226, i227, i228, i229, $i230, i231, i232, i233, i234, i235, i236, i237, i238, i239, $i241, $i243, $i244, $i245, $i247, $i249, $i251, $i253, $i255, $i257, $i258, $i259, $i260, $i261, $i262, $i263, $i264, $i266, $i268, $i269;
+        java.awt.Component$BaselineResizeBehavior $r26, $r27, $r62, $r63, $r64, $r65, $r87, $r88;
+        java.awt.GridBagLayout r3;
+        java.awt.Component[] $r2;
+        boolean $z0, $z1, $z2, $z3, z4, z5, z6, z7;
+        java.awt.GridBagConstraints $r16, $r57, $r73;
+        java.awt.Dimension r80;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15, $d16, $d17, $d18, $d19, $d20, $d21, d22, d23, d24, d25, d26, d27, d28, d29, d30, d31, d32, d33;
+        java.awt.GridBagLayoutInfo $r92;
+        byte $b2, $b7, $b17, $b18, $b61, $b66, $b67, $b74;
+        long $l0, $l1, $l3, $l5, $l6, $l8;
+        short $s109, $s113, $s116, $s120;
+        long[] $r4;
+        java.lang.Object $r1;
+        java.awt.Component r79, r86, r89;
+        java.lang.Throwable $r78;
+        double[] $r8, $r9, $r14, $r15, $r18, $r20, $r28, $r29, $r30, $r31, $r32, $r34, $r36, $r38, $r39, $r40, $r41, $r42, $r43, $r44, $r45, $r46, $r47, $r48, $r49, $r50;
+        short[] $r68, r85;
+
+        r3 := @this: java.awt.GridBagLayout;
+
+        r0 := @parameter0: java.awt.Container;
+
+        i150 := @parameter1: int;
+
+        $r1 = virtualinvoke r0.<java.awt.Container: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label001:
+        $r2 = virtualinvoke r0.<java.awt.Container: java.awt.Component[] getComponents()>();
+
+        i166 = 0;
+
+        i167 = 0;
+
+        $i241 = (int) -1;
+
+        i168 = $i241;
+
+        $i243 = (int) -1;
+
+        i169 = $i243;
+
+        $r4 = specialinvoke r3.<java.awt.GridBagLayout: long[] preInitMaximumArraySizes(java.awt.Container)>(r0);
+
+        $l0 = $r4[0];
+
+        $l1 = 2L * $l0;
+
+        $b2 = $l1 cmp 2147483647L;
+
+        $i244 = (int) $b2;
+
+        if $i244 <= 0 goto label002;
+
+        $i170 = 2147483647;
+
+        goto label003;
+
+     label002:
+        $l3 = $r4[0];
+
+        $i4 = (int) $l3;
+
+        $i170 = 2 * $i4;
+
+     label003:
+        i171 = $i170;
+
+        $l5 = $r4[1];
+
+        $l6 = 2L * $l5;
+
+        $b7 = $l6 cmp 2147483647L;
+
+        $i245 = (int) $b7;
+
+        if $i245 <= 0 goto label004;
+
+        $i172 = 2147483647;
+
+        goto label005;
+
+     label004:
+        $l8 = $r4[1];
+
+        $i9 = (int) $l8;
+
+        $i172 = 2 * $i9;
+
+     label005:
+        i173 = $i172;
+
+        $r5 = r3.<java.awt.GridBagLayout: int[] rowHeights>;
+
+        if $r5 == null goto label006;
+
+        $r77 = r3.<java.awt.GridBagLayout: int[] rowHeights>;
+
+        $i165 = lengthof $r77;
+
+        i171 = staticinvoke <java.lang.Math: int max(int,int)>(i171, $i165);
+
+     label006:
+        $r6 = r3.<java.awt.GridBagLayout: int[] columnWidths>;
+
+        if $r6 == null goto label007;
+
+        $r74 = r3.<java.awt.GridBagLayout: int[] columnWidths>;
+
+        $i164 = lengthof $r74;
+
+        i173 = staticinvoke <java.lang.Math: int max(int,int)>(i173, $i164);
+
+     label007:
+        $r75 = newarray (int)[i171];
+
+        $r76 = newarray (int)[i173];
+
+        z4 = 0;
+
+        z7 = 0;
+
+        z6 = 0;
+
+        z5 = 0;
+
+        i174 = 0;
+
+     label008:
+        $i175 = lengthof $r2;
+
+        if i174 >= $i175 goto label033;
+
+        r79 = $r2[i174];
+
+        $z2 = virtualinvoke r79.<java.awt.Component: boolean isVisible()>();
+
+        if $z2 != 0 goto label009;
+
+        goto label032;
+
+     label009:
+        $r73 = virtualinvoke r3.<java.awt.GridBagLayout: java.awt.GridBagConstraints lookupConstraints(java.awt.Component)>(r79);
+
+        i176 = $r73.<java.awt.GridBagConstraints: int gridx>;
+
+        i177 = $r73.<java.awt.GridBagConstraints: int gridy>;
+
+        i178 = $r73.<java.awt.GridBagConstraints: int gridwidth>;
+
+        if i178 > 0 goto label010;
+
+        i178 = 1;
+
+     label010:
+        $i163 = $r73.<java.awt.GridBagConstraints: int gridheight>;
+
+        i179 = $i163;
+
+        if $i163 > 0 goto label011;
+
+        i179 = 1;
+
+     label011:
+        if i176 >= 0 goto label014;
+
+        if i177 >= 0 goto label014;
+
+        if i169 < 0 goto label012;
+
+        i177 = i169;
+
+        goto label014;
+
+     label012:
+        if i168 < 0 goto label013;
+
+        i176 = i168;
+
+        goto label014;
+
+     label013:
+        i177 = 0;
+
+     label014:
+        if i176 >= 0 goto label017;
+
+        i180 = 0;
+
+        i181 = i177;
+
+     label015:
+        $i160 = i177 + i179;
+
+        if i181 >= $i160 goto label016;
+
+        $i162 = $r75[i181];
+
+        i180 = staticinvoke <java.lang.Math: int max(int,int)>(i180, $i162);
+
+        i181 = i181 + 1;
+
+        goto label015;
+
+     label016:
+        $i161 = i180 - i176;
+
+        i176 = $i161 - 1;
+
+        if i176 >= 0 goto label020;
+
+        i176 = 0;
+
+        goto label020;
+
+     label017:
+        if i177 >= 0 goto label020;
+
+        i182 = 0;
+
+        i183 = i176;
+
+     label018:
+        $i157 = i176 + i178;
+
+        if i183 >= $i157 goto label019;
+
+        $i159 = $r76[i183];
+
+        i182 = staticinvoke <java.lang.Math: int max(int,int)>(i182, $i159);
+
+        i183 = i183 + 1;
+
+        goto label018;
+
+     label019:
+        $i158 = i182 - i177;
+
+        i177 = $i158 - 1;
+
+        if i177 >= 0 goto label020;
+
+        i177 = 0;
+
+     label020:
+        $i184 = i176 + i178;
+
+        if i167 >= $i184 goto label021;
+
+        i167 = $i184;
+
+     label021:
+        $i156 = i177 + i179;
+
+        if i166 >= $i156 goto label022;
+
+        i166 = $i156;
+
+     label022:
+        i185 = i176;
+
+     label023:
+        $i186 = i176 + i178;
+
+        if i185 >= $i186 goto label024;
+
+        $r76[i185] = $i156;
+
+        i185 = i185 + 1;
+
+        goto label023;
+
+     label024:
+        i187 = i177;
+
+     label025:
+        $i149 = i177 + i179;
+
+        if i187 >= $i149 goto label026;
+
+        $r75[i187] = $i184;
+
+        i187 = i187 + 1;
+
+        goto label025;
+
+     label026:
+        if i150 != 2 goto label027;
+
+        r80 = virtualinvoke r79.<java.awt.Component: java.awt.Dimension getPreferredSize()>();
+
+        goto label028;
+
+     label027:
+        r80 = virtualinvoke r79.<java.awt.Component: java.awt.Dimension getMinimumSize()>();
+
+     label028:
+        $i151 = r80.<java.awt.Dimension: int width>;
+
+        $r73.<java.awt.GridBagConstraints: int minWidth> = $i151;
+
+        $i152 = r80.<java.awt.Dimension: int height>;
+
+        $r73.<java.awt.GridBagConstraints: int minHeight> = $i152;
+
+        $z3 = specialinvoke r3.<java.awt.GridBagLayout: boolean calculateBaseline(java.awt.Component,java.awt.GridBagConstraints,java.awt.Dimension)>(r79, $r73, r80);
+
+        if $z3 == 0 goto label029;
+
+        z4 = 1;
+
+        z7 = 1;
+
+        z6 = 1;
+
+        z5 = 1;
+
+     label029:
+        $i153 = $r73.<java.awt.GridBagConstraints: int gridheight>;
+
+        if $i153 != 0 goto label030;
+
+        $i155 = $r73.<java.awt.GridBagConstraints: int gridwidth>;
+
+        if $i155 != 0 goto label030;
+
+        $i247 = (int) -1;
+
+        i168 = $i247;
+
+        $i249 = (int) -1;
+
+        i169 = $i249;
+
+     label030:
+        $i188 = $r73.<java.awt.GridBagConstraints: int gridheight>;
+
+        if $i188 != 0 goto label031;
+
+        if i169 >= 0 goto label031;
+
+        i168 = i176 + i178;
+
+        goto label032;
+
+     label031:
+        $i154 = $r73.<java.awt.GridBagConstraints: int gridwidth>;
+
+        if $i154 != 0 goto label032;
+
+        if i168 >= 0 goto label032;
+
+        i169 = i177 + i179;
+
+     label032:
+        i174 = i174 + 1;
+
+        goto label008;
+
+     label033:
+        $r7 = r3.<java.awt.GridBagLayout: int[] columnWidths>;
+
+        if $r7 == null goto label034;
+
+        $r71 = r3.<java.awt.GridBagLayout: int[] columnWidths>;
+
+        $i148 = lengthof $r71;
+
+        if i167 >= $i148 goto label034;
+
+        $r72 = r3.<java.awt.GridBagLayout: int[] columnWidths>;
+
+        i167 = lengthof $r72;
+
+     label034:
+        $r81 = r3.<java.awt.GridBagLayout: int[] rowHeights>;
+
+        if $r81 == null goto label035;
+
+        $r69 = r3.<java.awt.GridBagLayout: int[] rowHeights>;
+
+        $i147 = lengthof $r69;
+
+        if i166 >= $i147 goto label035;
+
+        $r70 = r3.<java.awt.GridBagLayout: int[] rowHeights>;
+
+        i166 = lengthof $r70;
+
+     label035:
+        $r92 = new java.awt.GridBagLayoutInfo;
+
+        specialinvoke $r92.<java.awt.GridBagLayoutInfo: void <init>(int,int)>(i167, i166);
+
+        $i251 = (int) -1;
+
+        i189 = $i251;
+
+        $i253 = (int) -1;
+
+        i190 = $i253;
+
+        staticinvoke <java.util.Arrays: void fill(int[],int)>($r75, 0);
+
+        staticinvoke <java.util.Arrays: void fill(int[],int)>($r76, 0);
+
+        r83 = null;
+
+        r84 = null;
+
+        r85 = null;
+
+        if z5 == 0 goto label036;
+
+        $r66 = newarray (int)[i166];
+
+        r83 = $r66;
+
+        $r92.<java.awt.GridBagLayoutInfo: int[] maxAscent> = $r66;
+
+        $r67 = newarray (int)[i166];
+
+        r84 = $r67;
+
+        $r92.<java.awt.GridBagLayoutInfo: int[] maxDescent> = $r67;
+
+        $r68 = newarray (short)[i166];
+
+        r85 = $r68;
+
+        $r92.<java.awt.GridBagLayoutInfo: short[] baselineType> = $r68;
+
+        $r92.<java.awt.GridBagLayoutInfo: boolean hasBaseline> = 1;
+
+     label036:
+        i191 = 0;
+
+     label037:
+        $i192 = lengthof $r2;
+
+        if i191 >= $i192 goto label067;
+
+        r86 = $r2[i191];
+
+        $z1 = virtualinvoke r86.<java.awt.Component: boolean isVisible()>();
+
+        if $z1 != 0 goto label038;
+
+        goto label066;
+
+     label038:
+        $r57 = virtualinvoke r3.<java.awt.GridBagLayout: java.awt.GridBagConstraints lookupConstraints(java.awt.Component)>(r86);
+
+        i193 = $r57.<java.awt.GridBagConstraints: int gridx>;
+
+        i194 = $r57.<java.awt.GridBagConstraints: int gridy>;
+
+        i195 = $r57.<java.awt.GridBagConstraints: int gridwidth>;
+
+        i196 = $r57.<java.awt.GridBagConstraints: int gridheight>;
+
+        if i193 >= 0 goto label041;
+
+        if i194 >= 0 goto label041;
+
+        if i190 < 0 goto label039;
+
+        i194 = i190;
+
+        goto label041;
+
+     label039:
+        if i189 < 0 goto label040;
+
+        i193 = i189;
+
+        goto label041;
+
+     label040:
+        i194 = 0;
+
+     label041:
+        if i193 >= 0 goto label045;
+
+        if i196 > 0 goto label042;
+
+        $i145 = $r92.<java.awt.GridBagLayoutInfo: int height>;
+
+        $i146 = $i145 - i194;
+
+        i196 = i196 + $i146;
+
+        if i196 >= 1 goto label042;
+
+        i196 = 1;
+
+     label042:
+        i197 = 0;
+
+        i198 = i194;
+
+     label043:
+        $i199 = i194 + i196;
+
+        if i198 >= $i199 goto label044;
+
+        $i144 = $r75[i198];
+
+        i197 = staticinvoke <java.lang.Math: int max(int,int)>(i197, $i144);
+
+        i198 = i198 + 1;
+
+        goto label043;
+
+     label044:
+        $i143 = i197 - i193;
+
+        i193 = $i143 - 1;
+
+        if i193 >= 0 goto label049;
+
+        i193 = 0;
+
+        goto label049;
+
+     label045:
+        if i194 >= 0 goto label049;
+
+        if i195 > 0 goto label046;
+
+        $i141 = $r92.<java.awt.GridBagLayoutInfo: int width>;
+
+        $i142 = $i141 - i193;
+
+        i195 = i195 + $i142;
+
+        if i195 >= 1 goto label046;
+
+        i195 = 1;
+
+     label046:
+        i200 = 0;
+
+        i201 = i193;
+
+     label047:
+        $i202 = i193 + i195;
+
+        if i201 >= $i202 goto label048;
+
+        $i140 = $r76[i201];
+
+        i200 = staticinvoke <java.lang.Math: int max(int,int)>(i200, $i140);
+
+        i201 = i201 + 1;
+
+        goto label047;
+
+     label048:
+        $i139 = i200 - i194;
+
+        i194 = $i139 - 1;
+
+        if i194 >= 0 goto label049;
+
+        i194 = 0;
+
+     label049:
+        if i195 > 0 goto label050;
+
+        $i137 = $r92.<java.awt.GridBagLayoutInfo: int width>;
+
+        $i138 = $i137 - i193;
+
+        i195 = i195 + $i138;
+
+        if i195 >= 1 goto label050;
+
+        i195 = 1;
+
+     label050:
+        if i196 > 0 goto label051;
+
+        $i135 = $r92.<java.awt.GridBagLayoutInfo: int height>;
+
+        $i136 = $i135 - i194;
+
+        i196 = i196 + $i136;
+
+        if i196 >= 1 goto label051;
+
+        i196 = 1;
+
+     label051:
+        $i203 = i193 + i195;
+
+        $i204 = i194 + i196;
+
+        i205 = i193;
+
+     label052:
+        $i206 = i193 + i195;
+
+        if i205 >= $i206 goto label053;
+
+        $r76[i205] = $i204;
+
+        i205 = i205 + 1;
+
+        goto label052;
+
+     label053:
+        i207 = i194;
+
+     label054:
+        $i84 = i194 + i196;
+
+        if i207 >= $i84 goto label055;
+
+        $r75[i207] = $i203;
+
+        i207 = i207 + 1;
+
+        goto label054;
+
+     label055:
+        $i85 = $r57.<java.awt.GridBagConstraints: int gridheight>;
+
+        if $i85 != 0 goto label056;
+
+        $i134 = $r57.<java.awt.GridBagConstraints: int gridwidth>;
+
+        if $i134 != 0 goto label056;
+
+        $i255 = (int) -1;
+
+        i189 = $i255;
+
+        $i257 = (int) -1;
+
+        i190 = $i257;
+
+     label056:
+        $i208 = $r57.<java.awt.GridBagConstraints: int gridheight>;
+
+        if $i208 != 0 goto label057;
+
+        if i190 >= 0 goto label057;
+
+        i189 = i193 + i195;
+
+        goto label058;
+
+     label057:
+        $i86 = $r57.<java.awt.GridBagConstraints: int gridwidth>;
+
+        if $i86 != 0 goto label058;
+
+        if i189 >= 0 goto label058;
+
+        i190 = i194 + i196;
+
+     label058:
+        $r57.<java.awt.GridBagConstraints: int tempX> = i193;
+
+        $r57.<java.awt.GridBagConstraints: int tempY> = i194;
+
+        $r57.<java.awt.GridBagConstraints: int tempWidth> = i195;
+
+        $r57.<java.awt.GridBagConstraints: int tempHeight> = i196;
+
+        $i209 = $r57.<java.awt.GridBagConstraints: int anchor>;
+
+        if z6 == 0 goto label066;
+
+        lookupswitch($i209)
+        {
+            case 256: goto label059;
+            case 512: goto label059;
+            case 768: goto label059;
+            case 1024: goto label064;
+            case 1280: goto label064;
+            case 1536: goto label064;
+            case 1792: goto label065;
+            case 2048: goto label065;
+            case 2304: goto label065;
+            default: goto label066;
+        };
+
+     label059:
+        $i105 = $r57.<java.awt.GridBagConstraints: int ascent>;
+
+        if $i105 < 0 goto label066;
+
+        if i196 != 1 goto label060;
+
+        $i129 = r83[i194];
+
+        $i128 = $r57.<java.awt.GridBagConstraints: int ascent>;
+
+        $i130 = staticinvoke <java.lang.Math: int max(int,int)>($i129, $i128);
+
+        r83[i194] = $i130;
+
+        $i132 = r84[i194];
+
+        $i131 = $r57.<java.awt.GridBagConstraints: int descent>;
+
+        $i133 = staticinvoke <java.lang.Math: int max(int,int)>($i132, $i131);
+
+        r84[i194] = $i133;
+
+        goto label062;
+
+     label060:
+        $r63 = $r57.<java.awt.GridBagConstraints: java.awt.Component$BaselineResizeBehavior baselineResizeBehavior>;
+
+        $r62 = <java.awt.Component$BaselineResizeBehavior: java.awt.Component$BaselineResizeBehavior CONSTANT_DESCENT>;
+
+        if $r63 != $r62 goto label061;
+
+        $i121 = i194 + i196;
+
+        $i126 = $i121 - 1;
+
+        $i122 = i194 + i196;
+
+        $i123 = $i122 - 1;
+
+        $i125 = r84[$i123];
+
+        $i124 = $r57.<java.awt.GridBagConstraints: int descent>;
+
+        $i127 = staticinvoke <java.lang.Math: int max(int,int)>($i125, $i124);
+
+        r84[$i126] = $i127;
+
+        goto label062;
+
+     label061:
+        $i107 = r83[i194];
+
+        $i106 = $r57.<java.awt.GridBagConstraints: int ascent>;
+
+        $i108 = staticinvoke <java.lang.Math: int max(int,int)>($i107, $i106);
+
+        r83[i194] = $i108;
+
+     label062:
+        $r87 = $r57.<java.awt.GridBagConstraints: java.awt.Component$BaselineResizeBehavior baselineResizeBehavior>;
+
+        $r88 = <java.awt.Component$BaselineResizeBehavior: java.awt.Component$BaselineResizeBehavior CONSTANT_DESCENT>;
+
+        if $r87 != $r88 goto label063;
+
+        $i114 = i194 + i196;
+
+        $i115 = $i114 - 1;
+
+        $s116 = r85[$i115];
+
+        $r65 = $r57.<java.awt.GridBagConstraints: java.awt.Component$BaselineResizeBehavior baselineResizeBehavior>;
+
+        $i117 = virtualinvoke $r65.<java.awt.Component$BaselineResizeBehavior: int ordinal()>();
+
+        $i118 = 1 << $i117;
+
+        $i258 = (int) $s116;
+
+        $i119 = $i258 | $i118;
+
+        $s120 = (short) $i119;
+
+        r85[$i115] = $s120;
+
+        goto label066;
+
+     label063:
+        $s109 = r85[i194];
+
+        $r64 = $r57.<java.awt.GridBagConstraints: java.awt.Component$BaselineResizeBehavior baselineResizeBehavior>;
+
+        $i110 = virtualinvoke $r64.<java.awt.Component$BaselineResizeBehavior: int ordinal()>();
+
+        $i111 = 1 << $i110;
+
+        $i259 = (int) $s109;
+
+        $i112 = $i259 | $i111;
+
+        $s113 = (short) $i112;
+
+        r85[i194] = $s113;
+
+        goto label066;
+
+     label064:
+        $i97 = $r57.<java.awt.GridBagConstraints: int minHeight>;
+
+        $r60 = $r57.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i96 = $r60.<java.awt.Insets: int top>;
+
+        $i99 = $i97 + $i96;
+
+        $i98 = $r57.<java.awt.GridBagConstraints: int ipady>;
+
+        i210 = $i99 + $i98;
+
+        $i100 = r83[i194];
+
+        $i101 = staticinvoke <java.lang.Math: int max(int,int)>($i100, i210);
+
+        r83[i194] = $i101;
+
+        $i103 = r84[i194];
+
+        $r61 = $r57.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i102 = $r61.<java.awt.Insets: int bottom>;
+
+        $i104 = staticinvoke <java.lang.Math: int max(int,int)>($i103, $i102);
+
+        r84[i194] = $i104;
+
+        goto label066;
+
+     label065:
+        $i88 = $r57.<java.awt.GridBagConstraints: int minHeight>;
+
+        $r58 = $r57.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i87 = $r58.<java.awt.Insets: int bottom>;
+
+        $i90 = $i88 + $i87;
+
+        $i89 = $r57.<java.awt.GridBagConstraints: int ipady>;
+
+        i211 = $i90 + $i89;
+
+        $i91 = r84[i194];
+
+        $i92 = staticinvoke <java.lang.Math: int max(int,int)>($i91, i211);
+
+        r84[i194] = $i92;
+
+        $i94 = r83[i194];
+
+        $r59 = $r57.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i93 = $r59.<java.awt.Insets: int top>;
+
+        $i95 = staticinvoke <java.lang.Math: int max(int,int)>($i94, $i93);
+
+        r83[i194] = $i95;
+
+     label066:
+        i191 = i191 + 1;
+
+        goto label037;
+
+     label067:
+        $r8 = newarray (double)[i173];
+
+        $r92.<java.awt.GridBagLayoutInfo: double[] weightX> = $r8;
+
+        $r9 = newarray (double)[i171];
+
+        $r92.<java.awt.GridBagLayoutInfo: double[] weightY> = $r9;
+
+        $r10 = newarray (int)[i173];
+
+        $r92.<java.awt.GridBagLayoutInfo: int[] minWidth> = $r10;
+
+        $r11 = newarray (int)[i171];
+
+        $r92.<java.awt.GridBagLayoutInfo: int[] minHeight> = $r11;
+
+        $r12 = r3.<java.awt.GridBagLayout: int[] columnWidths>;
+
+        if $r12 == null goto label068;
+
+        $r56 = r3.<java.awt.GridBagLayout: int[] columnWidths>;
+
+        $r55 = $r92.<java.awt.GridBagLayoutInfo: int[] minWidth>;
+
+        $r54 = r3.<java.awt.GridBagLayout: int[] columnWidths>;
+
+        $i83 = lengthof $r54;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r56, 0, $r55, 0, $i83);
+
+     label068:
+        $r13 = r3.<java.awt.GridBagLayout: int[] rowHeights>;
+
+        if $r13 == null goto label069;
+
+        $r53 = r3.<java.awt.GridBagLayout: int[] rowHeights>;
+
+        $r52 = $r92.<java.awt.GridBagLayoutInfo: int[] minHeight>;
+
+        $r51 = r3.<java.awt.GridBagLayout: int[] rowHeights>;
+
+        $i82 = lengthof $r51;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r53, 0, $r52, 0, $i82);
+
+     label069:
+        $r14 = r3.<java.awt.GridBagLayout: double[] columnWeights>;
+
+        if $r14 == null goto label070;
+
+        $r49 = r3.<java.awt.GridBagLayout: double[] columnWeights>;
+
+        $r50 = $r92.<java.awt.GridBagLayoutInfo: double[] weightX>;
+
+        $r47 = $r92.<java.awt.GridBagLayoutInfo: double[] weightX>;
+
+        $i80 = lengthof $r47;
+
+        $r48 = r3.<java.awt.GridBagLayout: double[] columnWeights>;
+
+        $i79 = lengthof $r48;
+
+        $i81 = staticinvoke <java.lang.Math: int min(int,int)>($i80, $i79);
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r49, 0, $r50, 0, $i81);
+
+     label070:
+        $r15 = r3.<java.awt.GridBagLayout: double[] rowWeights>;
+
+        if $r15 == null goto label071;
+
+        $r45 = r3.<java.awt.GridBagLayout: double[] rowWeights>;
+
+        $r46 = $r92.<java.awt.GridBagLayoutInfo: double[] weightY>;
+
+        $r43 = $r92.<java.awt.GridBagLayoutInfo: double[] weightY>;
+
+        $i77 = lengthof $r43;
+
+        $r44 = r3.<java.awt.GridBagLayout: double[] rowWeights>;
+
+        $i76 = lengthof $r44;
+
+        $i78 = staticinvoke <java.lang.Math: int min(int,int)>($i77, $i76);
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r45, 0, $r46, 0, $i78);
+
+     label071:
+        i212 = 2147483647;
+
+        i213 = 1;
+
+     label072:
+        if i213 == 2147483647 goto label113;
+
+        i214 = 0;
+
+     label073:
+        $i10 = lengthof $r2;
+
+        if i214 >= $i10 goto label112;
+
+        r89 = $r2[i214];
+
+        $z0 = virtualinvoke r89.<java.awt.Component: boolean isVisible()>();
+
+        if $z0 != 0 goto label074;
+
+        goto label111;
+
+     label074:
+        $r16 = virtualinvoke r3.<java.awt.GridBagLayout: java.awt.GridBagConstraints lookupConstraints(java.awt.Component)>(r89);
+
+        $i11 = $r16.<java.awt.GridBagConstraints: int tempWidth>;
+
+        if $i11 != i213 goto label088;
+
+        $i65 = $r16.<java.awt.GridBagConstraints: int tempX>;
+
+        $i64 = $r16.<java.awt.GridBagConstraints: int tempWidth>;
+
+        i215 = $i65 + $i64;
+
+        d22 = $r16.<java.awt.GridBagConstraints: double weightx>;
+
+        i216 = $r16.<java.awt.GridBagConstraints: int tempX>;
+
+     label075:
+        if i216 >= i215 goto label076;
+
+        $r42 = $r92.<java.awt.GridBagLayoutInfo: double[] weightX>;
+
+        $d21 = $r42[i216];
+
+        d22 = d22 - $d21;
+
+        i216 = i216 + 1;
+
+        goto label075;
+
+     label076:
+        $b66 = d22 cmpl 0.0;
+
+        $i260 = (int) $b66;
+
+        if $i260 <= 0 goto label081;
+
+        d23 = 0.0;
+
+        i217 = $r16.<java.awt.GridBagConstraints: int tempX>;
+
+     label077:
+        if i217 >= i215 goto label078;
+
+        $r41 = $r92.<java.awt.GridBagLayoutInfo: double[] weightX>;
+
+        $d20 = $r41[i217];
+
+        d23 = d23 + $d20;
+
+        i217 = i217 + 1;
+
+        goto label077;
+
+     label078:
+        i218 = $r16.<java.awt.GridBagConstraints: int tempX>;
+
+     label079:
+        $b74 = d23 cmpl 0.0;
+
+        $i261 = (int) $b74;
+
+        if $i261 <= 0 goto label080;
+
+        if i218 >= i215 goto label080;
+
+        $r39 = $r92.<java.awt.GridBagLayoutInfo: double[] weightX>;
+
+        d24 = $r39[i218];
+
+        $d17 = d24 * d22;
+
+        d25 = $d17 / d23;
+
+        $r40 = $r92.<java.awt.GridBagLayoutInfo: double[] weightX>;
+
+        $d18 = $r40[i218];
+
+        $d19 = $d18 + d25;
+
+        $r40[i218] = $d19;
+
+        d22 = d22 - d25;
+
+        d23 = d23 - d24;
+
+        i218 = i218 + 1;
+
+        goto label079;
+
+     label080:
+        $r38 = $r92.<java.awt.GridBagLayoutInfo: double[] weightX>;
+
+        $i75 = i215 - 1;
+
+        $d15 = $r38[$i75];
+
+        $d16 = $d15 + d22;
+
+        $r38[$i75] = $d16;
+
+     label081:
+        $i219 = $r16.<java.awt.GridBagConstraints: int minWidth>;
+
+        $i220 = $r16.<java.awt.GridBagConstraints: int ipadx>;
+
+        $i221 = $i219 + $i220;
+
+        $r90 = $r16.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i222 = $r90.<java.awt.Insets: int left>;
+
+        $i223 = $i221 + $i222;
+
+        $r91 = $r16.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i224 = $r91.<java.awt.Insets: int right>;
+
+        i225 = $i223 + $i224;
+
+        i226 = $r16.<java.awt.GridBagConstraints: int tempX>;
+
+     label082:
+        if i226 >= i215 goto label083;
+
+        $r37 = $r92.<java.awt.GridBagLayoutInfo: int[] minWidth>;
+
+        $i73 = $r37[i226];
+
+        i225 = i225 - $i73;
+
+        i226 = i226 + 1;
+
+        goto label082;
+
+     label083:
+        if i225 <= 0 goto label089;
+
+        d26 = 0.0;
+
+        i227 = $r16.<java.awt.GridBagConstraints: int tempX>;
+
+     label084:
+        if i227 >= i215 goto label085;
+
+        $r36 = $r92.<java.awt.GridBagLayoutInfo: double[] weightX>;
+
+        $d14 = $r36[i227];
+
+        d26 = d26 + $d14;
+
+        i227 = i227 + 1;
+
+        goto label084;
+
+     label085:
+        i228 = $r16.<java.awt.GridBagConstraints: int tempX>;
+
+     label086:
+        $b67 = d26 cmpl 0.0;
+
+        $i262 = (int) $b67;
+
+        if $i262 <= 0 goto label087;
+
+        if i228 >= i215 goto label087;
+
+        $r34 = $r92.<java.awt.GridBagLayoutInfo: double[] weightX>;
+
+        d27 = $r34[i228];
+
+        $d11 = (double) i225;
+
+        $d12 = d27 * $d11;
+
+        $d13 = $d12 / d26;
+
+        i229 = (int) $d13;
+
+        $r35 = $r92.<java.awt.GridBagLayoutInfo: int[] minWidth>;
+
+        $i71 = $r35[i228];
+
+        $i72 = $i71 + i229;
+
+        $r35[i228] = $i72;
+
+        i225 = i225 - i229;
+
+        d26 = d26 - d27;
+
+        i228 = i228 + 1;
+
+        goto label086;
+
+     label087:
+        $r33 = $r92.<java.awt.GridBagLayoutInfo: int[] minWidth>;
+
+        $i68 = i215 - 1;
+
+        $i69 = $r33[$i68];
+
+        $i70 = $i69 + i225;
+
+        $r33[$i68] = $i70;
+
+        goto label089;
+
+     label088:
+        $i12 = $r16.<java.awt.GridBagConstraints: int tempWidth>;
+
+        if $i12 <= i213 goto label089;
+
+        $i63 = $r16.<java.awt.GridBagConstraints: int tempWidth>;
+
+        if $i63 >= i212 goto label089;
+
+        i212 = $r16.<java.awt.GridBagConstraints: int tempWidth>;
+
+     label089:
+        $i230 = $r16.<java.awt.GridBagConstraints: int tempHeight>;
+
+        if $i230 != i213 goto label110;
+
+        $i16 = $r16.<java.awt.GridBagConstraints: int tempY>;
+
+        $i15 = $r16.<java.awt.GridBagConstraints: int tempHeight>;
+
+        i231 = $i16 + $i15;
+
+        d28 = $r16.<java.awt.GridBagConstraints: double weighty>;
+
+        i232 = $r16.<java.awt.GridBagConstraints: int tempY>;
+
+     label090:
+        if i232 >= i231 goto label091;
+
+        $r32 = $r92.<java.awt.GridBagLayoutInfo: double[] weightY>;
+
+        $d10 = $r32[i232];
+
+        d28 = d28 - $d10;
+
+        i232 = i232 + 1;
+
+        goto label090;
+
+     label091:
+        $b17 = d28 cmpl 0.0;
+
+        $i263 = (int) $b17;
+
+        if $i263 <= 0 goto label096;
+
+        d29 = 0.0;
+
+        i233 = $r16.<java.awt.GridBagConstraints: int tempY>;
+
+     label092:
+        if i233 >= i231 goto label093;
+
+        $r31 = $r92.<java.awt.GridBagLayoutInfo: double[] weightY>;
+
+        $d9 = $r31[i233];
+
+        d29 = d29 + $d9;
+
+        i233 = i233 + 1;
+
+        goto label092;
+
+     label093:
+        i234 = $r16.<java.awt.GridBagConstraints: int tempY>;
+
+     label094:
+        $b61 = d29 cmpl 0.0;
+
+        $i264 = (int) $b61;
+
+        if $i264 <= 0 goto label095;
+
+        if i234 >= i231 goto label095;
+
+        $r29 = $r92.<java.awt.GridBagLayoutInfo: double[] weightY>;
+
+        d30 = $r29[i234];
+
+        $d6 = d30 * d28;
+
+        d31 = $d6 / d29;
+
+        $r30 = $r92.<java.awt.GridBagLayoutInfo: double[] weightY>;
+
+        $d7 = $r30[i234];
+
+        $d8 = $d7 + d31;
+
+        $r30[i234] = $d8;
+
+        d28 = d28 - d31;
+
+        d29 = d29 - d30;
+
+        i234 = i234 + 1;
+
+        goto label094;
+
+     label095:
+        $r28 = $r92.<java.awt.GridBagLayoutInfo: double[] weightY>;
+
+        $i62 = i231 - 1;
+
+        $d4 = $r28[$i62];
+
+        $d5 = $d4 + d28;
+
+        $r28[$i62] = $d5;
+
+     label096:
+        $i266 = (int) -1;
+
+        i235 = $i266;
+
+        if z7 == 0 goto label102;
+
+        $i31 = $r16.<java.awt.GridBagConstraints: int anchor>;
+
+        lookupswitch($i31)
+        {
+            case 256: goto label097;
+            case 512: goto label097;
+            case 768: goto label097;
+            case 1024: goto label100;
+            case 1280: goto label100;
+            case 1536: goto label100;
+            case 1792: goto label101;
+            case 2048: goto label101;
+            case 2304: goto label101;
+            default: goto label102;
+        };
+
+     label097:
+        $i46 = $r16.<java.awt.GridBagConstraints: int ascent>;
+
+        if $i46 < 0 goto label102;
+
+        $i47 = $r16.<java.awt.GridBagConstraints: int tempHeight>;
+
+        if $i47 != 1 goto label098;
+
+        $i57 = $r16.<java.awt.GridBagConstraints: int tempY>;
+
+        $i60 = r83[$i57];
+
+        $i58 = $r16.<java.awt.GridBagConstraints: int tempY>;
+
+        $i59 = r84[$i58];
+
+        i235 = $i60 + $i59;
+
+        goto label102;
+
+     label098:
+        $r27 = $r16.<java.awt.GridBagConstraints: java.awt.Component$BaselineResizeBehavior baselineResizeBehavior>;
+
+        $r26 = <java.awt.Component$BaselineResizeBehavior: java.awt.Component$BaselineResizeBehavior CONSTANT_DESCENT>;
+
+        if $r27 == $r26 goto label099;
+
+        $i54 = $r16.<java.awt.GridBagConstraints: int tempY>;
+
+        $i56 = r83[$i54];
+
+        $i55 = $r16.<java.awt.GridBagConstraints: int descent>;
+
+        i235 = $i56 + $i55;
+
+        goto label102;
+
+     label099:
+        $i53 = $r16.<java.awt.GridBagConstraints: int ascent>;
+
+        $i49 = $r16.<java.awt.GridBagConstraints: int tempY>;
+
+        $i48 = $r16.<java.awt.GridBagConstraints: int tempHeight>;
+
+        $i50 = $i49 + $i48;
+
+        $i51 = $i50 - 1;
+
+        $i52 = r84[$i51];
+
+        i235 = $i53 + $i52;
+
+        goto label102;
+
+     label100:
+        $r25 = $r16.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i40 = $r25.<java.awt.Insets: int top>;
+
+        $i39 = $r16.<java.awt.GridBagConstraints: int minHeight>;
+
+        $i42 = $i40 + $i39;
+
+        $i41 = $r16.<java.awt.GridBagConstraints: int ipady>;
+
+        $i45 = $i42 + $i41;
+
+        $i43 = $r16.<java.awt.GridBagConstraints: int tempY>;
+
+        $i44 = r84[$i43];
+
+        i235 = $i45 + $i44;
+
+        goto label102;
+
+     label101:
+        $i32 = $r16.<java.awt.GridBagConstraints: int tempY>;
+
+        $i34 = r83[$i32];
+
+        $i33 = $r16.<java.awt.GridBagConstraints: int minHeight>;
+
+        $i36 = $i34 + $i33;
+
+        $r24 = $r16.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i35 = $r24.<java.awt.Insets: int bottom>;
+
+        $i38 = $i36 + $i35;
+
+        $i37 = $r16.<java.awt.GridBagConstraints: int ipady>;
+
+        i235 = $i38 + $i37;
+
+     label102:
+        $i268 = (int) -1;
+
+        if i235 != $i268 goto label103;
+
+        $i26 = $r16.<java.awt.GridBagConstraints: int minHeight>;
+
+        $i25 = $r16.<java.awt.GridBagConstraints: int ipady>;
+
+        $i28 = $i26 + $i25;
+
+        $r22 = $r16.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i27 = $r22.<java.awt.Insets: int top>;
+
+        $i30 = $i28 + $i27;
+
+        $r23 = $r16.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i29 = $r23.<java.awt.Insets: int bottom>;
+
+        i235 = $i30 + $i29;
+
+     label103:
+        i236 = $r16.<java.awt.GridBagConstraints: int tempY>;
+
+     label104:
+        if i236 >= i231 goto label105;
+
+        $r21 = $r92.<java.awt.GridBagLayoutInfo: int[] minHeight>;
+
+        $i24 = $r21[i236];
+
+        i235 = i235 - $i24;
+
+        i236 = i236 + 1;
+
+        goto label104;
+
+     label105:
+        if i235 <= 0 goto label111;
+
+        d32 = 0.0;
+
+        i237 = $r16.<java.awt.GridBagConstraints: int tempY>;
+
+     label106:
+        if i237 >= i231 goto label107;
+
+        $r20 = $r92.<java.awt.GridBagLayoutInfo: double[] weightY>;
+
+        $d3 = $r20[i237];
+
+        d32 = d32 + $d3;
+
+        i237 = i237 + 1;
+
+        goto label106;
+
+     label107:
+        i238 = $r16.<java.awt.GridBagConstraints: int tempY>;
+
+     label108:
+        $b18 = d32 cmpl 0.0;
+
+        $i269 = (int) $b18;
+
+        if $i269 <= 0 goto label109;
+
+        if i238 >= i231 goto label109;
+
+        $r18 = $r92.<java.awt.GridBagLayoutInfo: double[] weightY>;
+
+        d33 = $r18[i238];
+
+        $d0 = (double) i235;
+
+        $d1 = d33 * $d0;
+
+        $d2 = $d1 / d32;
+
+        i239 = (int) $d2;
+
+        $r19 = $r92.<java.awt.GridBagLayoutInfo: int[] minHeight>;
+
+        $i22 = $r19[i238];
+
+        $i23 = $i22 + i239;
+
+        $r19[i238] = $i23;
+
+        i235 = i235 - i239;
+
+        d32 = d32 - d33;
+
+        i238 = i238 + 1;
+
+        goto label108;
+
+     label109:
+        $r17 = $r92.<java.awt.GridBagLayoutInfo: int[] minHeight>;
+
+        $i19 = i231 - 1;
+
+        $i20 = $r17[$i19];
+
+        $i21 = $i20 + i235;
+
+        $r17[$i19] = $i21;
+
+        goto label111;
+
+     label110:
+        $i13 = $r16.<java.awt.GridBagConstraints: int tempHeight>;
+
+        if $i13 <= i213 goto label111;
+
+        $i14 = $r16.<java.awt.GridBagConstraints: int tempHeight>;
+
+        if $i14 >= i212 goto label111;
+
+        i212 = $r16.<java.awt.GridBagConstraints: int tempHeight>;
+
+     label111:
+        i214 = i214 + 1;
+
+        goto label073;
+
+     label112:
+        i213 = i212;
+
+        i212 = 2147483647;
+
+        goto label072;
+
+     label113:
+        exitmonitor $r1;
+
+     label114:
+        return $r92;
+
+     label115:
+        $r78 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label116:
+        throw $r78;
+
+        catch java.lang.Throwable from label001 to label114 with label115;
+        catch java.lang.Throwable from label115 to label116 with label115;
+    }
+
+    private boolean calculateBaseline(java.awt.Component, java.awt.GridBagConstraints, java.awt.Dimension)
+    {
+        java.awt.GridBagConstraints r0;
+        java.awt.Component r2;
+        java.awt.Dimension r1;
+        java.awt.GridBagLayout r8;
+        java.awt.Insets $r3, $r4;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i25;
+        java.awt.Component$BaselineResizeBehavior $r5, $r6, $r7;
+
+        r8 := @this: java.awt.GridBagLayout;
+
+        r2 := @parameter0: java.awt.Component;
+
+        r0 := @parameter1: java.awt.GridBagConstraints;
+
+        r1 := @parameter2: java.awt.Dimension;
+
+        i0 = r0.<java.awt.GridBagConstraints: int anchor>;
+
+        if i0 == 256 goto label1;
+
+        if i0 == 512 goto label1;
+
+        if i0 != 768 goto label4;
+
+     label1:
+        $i16 = r1.<java.awt.Dimension: int width>;
+
+        $i17 = r0.<java.awt.GridBagConstraints: int ipadx>;
+
+        $i18 = $i16 + $i17;
+
+        $i19 = r1.<java.awt.Dimension: int height>;
+
+        $i20 = r0.<java.awt.GridBagConstraints: int ipady>;
+
+        $i21 = $i19 + $i20;
+
+        $i22 = virtualinvoke r2.<java.awt.Component: int getBaseline(int,int)>($i18, $i21);
+
+        r0.<java.awt.GridBagConstraints: int ascent> = $i22;
+
+        $i23 = r0.<java.awt.GridBagConstraints: int ascent>;
+
+        if $i23 < 0 goto label3;
+
+        i1 = r0.<java.awt.GridBagConstraints: int ascent>;
+
+        $i2 = r0.<java.awt.GridBagConstraints: int ascent>;
+
+        $i4 = $i21 - $i2;
+
+        $r3 = r0.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i3 = $r3.<java.awt.Insets: int bottom>;
+
+        $i5 = $i4 + $i3;
+
+        r0.<java.awt.GridBagConstraints: int descent> = $i5;
+
+        $i7 = r0.<java.awt.GridBagConstraints: int ascent>;
+
+        $r4 = r0.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i6 = $r4.<java.awt.Insets: int top>;
+
+        $i8 = $i7 + $i6;
+
+        r0.<java.awt.GridBagConstraints: int ascent> = $i8;
+
+        $r5 = virtualinvoke r2.<java.awt.Component: java.awt.Component$BaselineResizeBehavior getBaselineResizeBehavior()>();
+
+        r0.<java.awt.GridBagConstraints: java.awt.Component$BaselineResizeBehavior baselineResizeBehavior> = $r5;
+
+        r0.<java.awt.GridBagConstraints: int centerPadding> = 0;
+
+        $r7 = r0.<java.awt.GridBagConstraints: java.awt.Component$BaselineResizeBehavior baselineResizeBehavior>;
+
+        $r6 = <java.awt.Component$BaselineResizeBehavior: java.awt.Component$BaselineResizeBehavior CENTER_OFFSET>;
+
+        if $r7 != $r6 goto label3;
+
+        $i9 = $i21 + 1;
+
+        $i10 = virtualinvoke r2.<java.awt.Component: int getBaseline(int,int)>($i18, $i9);
+
+        $i11 = $i21 / 2;
+
+        $i12 = i1 - $i11;
+
+        r0.<java.awt.GridBagConstraints: int centerOffset> = $i12;
+
+        $i13 = $i21 % 2;
+
+        if $i13 != 0 goto label2;
+
+        if i1 == $i10 goto label3;
+
+        r0.<java.awt.GridBagConstraints: int centerPadding> = 1;
+
+        goto label3;
+
+     label2:
+        if i1 != $i10 goto label3;
+
+        $i14 = r0.<java.awt.GridBagConstraints: int centerOffset>;
+
+        $i15 = $i14 - 1;
+
+        r0.<java.awt.GridBagConstraints: int centerOffset> = $i15;
+
+        r0.<java.awt.GridBagConstraints: int centerPadding> = 1;
+
+     label3:
+        return 1;
+
+     label4:
+        $i25 = (int) -1;
+
+        r0.<java.awt.GridBagConstraints: int ascent> = $i25;
+
+        return 0;
+    }
+
+    protected void adjustForGravity(java.awt.GridBagConstraints, java.awt.Rectangle)
+    {
+        java.awt.Rectangle r2;
+        java.awt.GridBagLayout r0;
+        java.awt.GridBagConstraints r1;
+
+        r0 := @this: java.awt.GridBagLayout;
+
+        r1 := @parameter0: java.awt.GridBagConstraints;
+
+        r2 := @parameter1: java.awt.Rectangle;
+
+        virtualinvoke r0.<java.awt.GridBagLayout: void AdjustForGravity(java.awt.GridBagConstraints,java.awt.Rectangle)>(r1, r2);
+
+        return;
+    }
+
+    protected void AdjustForGravity(java.awt.GridBagConstraints, java.awt.Rectangle)
+    {
+        java.awt.Insets $r3, $r4, $r5, $r6, $r7, $r8, $r10;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57, $i58, $i59, $i60, $i61, $i62, $i63, $i64, $i65, $i66, $i67, $i68, $i69, $i70, $i71, $i72, $i73, $i74, $i75, $i76, $i77, $i78, $i79, $i80, $i81, $i82, $i83, $i84, $i85, $i86, $i87, $i88, $i89, $i90, $i91, $i92, $i93, $i94, $i95, $i96, $i97, $i98, $i99, $i100, $i101, $i102, $i103, $i104, $i105, $i106, $i107, $i108, $i109, $i110, $i111, $i112, $i113, $i114, $i115, $i116, $i117, $i118, $i119, $i120, i121, i122, $i123, $i124;
+        java.awt.GridBagLayout r1;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12;
+        java.awt.GridBagConstraints r2;
+        java.awt.Rectangle r0;
+        java.lang.IllegalArgumentException $r9;
+
+        r1 := @this: java.awt.GridBagLayout;
+
+        r2 := @parameter0: java.awt.GridBagConstraints;
+
+        r0 := @parameter1: java.awt.Rectangle;
+
+        i0 = r0.<java.awt.Rectangle: int y>;
+
+        i1 = r0.<java.awt.Rectangle: int height>;
+
+        $z0 = r1.<java.awt.GridBagLayout: boolean rightToLeft>;
+
+        if $z0 != 0 goto label01;
+
+        $i119 = r0.<java.awt.Rectangle: int x>;
+
+        $r10 = r2.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i118 = $r10.<java.awt.Insets: int left>;
+
+        $i120 = $i119 + $i118;
+
+        r0.<java.awt.Rectangle: int x> = $i120;
+
+        goto label02;
+
+     label01:
+        $i5 = r0.<java.awt.Rectangle: int x>;
+
+        $i3 = r0.<java.awt.Rectangle: int width>;
+
+        $r3 = r2.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i2 = $r3.<java.awt.Insets: int right>;
+
+        $i4 = $i3 - $i2;
+
+        $i6 = $i5 - $i4;
+
+        r0.<java.awt.Rectangle: int x> = $i6;
+
+     label02:
+        $i10 = r0.<java.awt.Rectangle: int width>;
+
+        $r4 = r2.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i8 = $r4.<java.awt.Insets: int left>;
+
+        $r5 = r2.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i7 = $r5.<java.awt.Insets: int right>;
+
+        $i9 = $i8 + $i7;
+
+        $i11 = $i10 - $i9;
+
+        r0.<java.awt.Rectangle: int width> = $i11;
+
+        $i13 = r0.<java.awt.Rectangle: int y>;
+
+        $r6 = r2.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i12 = $r6.<java.awt.Insets: int top>;
+
+        $i14 = $i13 + $i12;
+
+        r0.<java.awt.Rectangle: int y> = $i14;
+
+        $i18 = r0.<java.awt.Rectangle: int height>;
+
+        $r7 = r2.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i16 = $r7.<java.awt.Insets: int top>;
+
+        $r8 = r2.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i15 = $r8.<java.awt.Insets: int bottom>;
+
+        $i17 = $i16 + $i15;
+
+        $i19 = $i18 - $i17;
+
+        r0.<java.awt.Rectangle: int height> = $i19;
+
+        i121 = 0;
+
+        $i20 = r2.<java.awt.GridBagConstraints: int fill>;
+
+        if $i20 == 2 goto label03;
+
+        $i106 = r2.<java.awt.GridBagConstraints: int fill>;
+
+        if $i106 == 1 goto label03;
+
+        $i110 = r0.<java.awt.Rectangle: int width>;
+
+        $i108 = r2.<java.awt.GridBagConstraints: int minWidth>;
+
+        $i107 = r2.<java.awt.GridBagConstraints: int ipadx>;
+
+        $i109 = $i108 + $i107;
+
+        if $i110 <= $i109 goto label03;
+
+        $i114 = r0.<java.awt.Rectangle: int width>;
+
+        $i112 = r2.<java.awt.GridBagConstraints: int minWidth>;
+
+        $i111 = r2.<java.awt.GridBagConstraints: int ipadx>;
+
+        $i113 = $i112 + $i111;
+
+        i121 = $i114 - $i113;
+
+        $i116 = r2.<java.awt.GridBagConstraints: int minWidth>;
+
+        $i115 = r2.<java.awt.GridBagConstraints: int ipadx>;
+
+        $i117 = $i116 + $i115;
+
+        r0.<java.awt.Rectangle: int width> = $i117;
+
+     label03:
+        i122 = 0;
+
+        $i123 = r2.<java.awt.GridBagConstraints: int fill>;
+
+        if $i123 == 3 goto label04;
+
+        $i94 = r2.<java.awt.GridBagConstraints: int fill>;
+
+        if $i94 == 1 goto label04;
+
+        $i98 = r0.<java.awt.Rectangle: int height>;
+
+        $i96 = r2.<java.awt.GridBagConstraints: int minHeight>;
+
+        $i95 = r2.<java.awt.GridBagConstraints: int ipady>;
+
+        $i97 = $i96 + $i95;
+
+        if $i98 <= $i97 goto label04;
+
+        $i102 = r0.<java.awt.Rectangle: int height>;
+
+        $i100 = r2.<java.awt.GridBagConstraints: int minHeight>;
+
+        $i99 = r2.<java.awt.GridBagConstraints: int ipady>;
+
+        $i101 = $i100 + $i99;
+
+        i122 = $i102 - $i101;
+
+        $i104 = r2.<java.awt.GridBagConstraints: int minHeight>;
+
+        $i103 = r2.<java.awt.GridBagConstraints: int ipady>;
+
+        $i105 = $i104 + $i103;
+
+        r0.<java.awt.Rectangle: int height> = $i105;
+
+     label04:
+        $i124 = r2.<java.awt.GridBagConstraints: int anchor>;
+
+        lookupswitch($i124)
+        {
+            case 10: goto label20;
+            case 11: goto label21;
+            case 12: goto label22;
+            case 13: goto label23;
+            case 14: goto label24;
+            case 15: goto label25;
+            case 16: goto label26;
+            case 17: goto label27;
+            case 18: goto label28;
+            case 19: goto label21;
+            case 20: goto label25;
+            case 21: goto label29;
+            case 22: goto label31;
+            case 23: goto label33;
+            case 24: goto label34;
+            case 25: goto label35;
+            case 26: goto label37;
+            case 256: goto label05;
+            case 512: goto label06;
+            case 768: goto label08;
+            case 1024: goto label10;
+            case 1280: goto label11;
+            case 1536: goto label13;
+            case 1792: goto label15;
+            case 2048: goto label16;
+            case 2304: goto label18;
+            default: goto label39;
+        };
+
+     label05:
+        $i40 = r0.<java.awt.Rectangle: int x>;
+
+        $i39 = i121 / 2;
+
+        $i41 = $i40 + $i39;
+
+        r0.<java.awt.Rectangle: int x> = $i41;
+
+        specialinvoke r1.<java.awt.GridBagLayout: void alignOnBaseline(java.awt.GridBagConstraints,java.awt.Rectangle,int,int)>(r2, r0, i0, i1);
+
+        goto label40;
+
+     label06:
+        $z6 = r1.<java.awt.GridBagLayout: boolean rightToLeft>;
+
+        if $z6 == 0 goto label07;
+
+        $i37 = r0.<java.awt.Rectangle: int x>;
+
+        $i38 = $i37 + i121;
+
+        r0.<java.awt.Rectangle: int x> = $i38;
+
+     label07:
+        specialinvoke r1.<java.awt.GridBagLayout: void alignOnBaseline(java.awt.GridBagConstraints,java.awt.Rectangle,int,int)>(r2, r0, i0, i1);
+
+        goto label40;
+
+     label08:
+        $z5 = r1.<java.awt.GridBagLayout: boolean rightToLeft>;
+
+        if $z5 != 0 goto label09;
+
+        $i35 = r0.<java.awt.Rectangle: int x>;
+
+        $i36 = $i35 + i121;
+
+        r0.<java.awt.Rectangle: int x> = $i36;
+
+     label09:
+        specialinvoke r1.<java.awt.GridBagLayout: void alignOnBaseline(java.awt.GridBagConstraints,java.awt.Rectangle,int,int)>(r2, r0, i0, i1);
+
+        goto label40;
+
+     label10:
+        $i33 = r0.<java.awt.Rectangle: int x>;
+
+        $i32 = i121 / 2;
+
+        $i34 = $i33 + $i32;
+
+        r0.<java.awt.Rectangle: int x> = $i34;
+
+        specialinvoke r1.<java.awt.GridBagLayout: void alignAboveBaseline(java.awt.GridBagConstraints,java.awt.Rectangle,int,int)>(r2, r0, i0, i1);
+
+        goto label40;
+
+     label11:
+        $z4 = r1.<java.awt.GridBagLayout: boolean rightToLeft>;
+
+        if $z4 == 0 goto label12;
+
+        $i30 = r0.<java.awt.Rectangle: int x>;
+
+        $i31 = $i30 + i121;
+
+        r0.<java.awt.Rectangle: int x> = $i31;
+
+     label12:
+        specialinvoke r1.<java.awt.GridBagLayout: void alignAboveBaseline(java.awt.GridBagConstraints,java.awt.Rectangle,int,int)>(r2, r0, i0, i1);
+
+        goto label40;
+
+     label13:
+        $z3 = r1.<java.awt.GridBagLayout: boolean rightToLeft>;
+
+        if $z3 != 0 goto label14;
+
+        $i28 = r0.<java.awt.Rectangle: int x>;
+
+        $i29 = $i28 + i121;
+
+        r0.<java.awt.Rectangle: int x> = $i29;
+
+     label14:
+        specialinvoke r1.<java.awt.GridBagLayout: void alignAboveBaseline(java.awt.GridBagConstraints,java.awt.Rectangle,int,int)>(r2, r0, i0, i1);
+
+        goto label40;
+
+     label15:
+        $i26 = r0.<java.awt.Rectangle: int x>;
+
+        $i25 = i121 / 2;
+
+        $i27 = $i26 + $i25;
+
+        r0.<java.awt.Rectangle: int x> = $i27;
+
+        specialinvoke r1.<java.awt.GridBagLayout: void alignBelowBaseline(java.awt.GridBagConstraints,java.awt.Rectangle,int,int)>(r2, r0, i0, i1);
+
+        goto label40;
+
+     label16:
+        $z2 = r1.<java.awt.GridBagLayout: boolean rightToLeft>;
+
+        if $z2 == 0 goto label17;
+
+        $i23 = r0.<java.awt.Rectangle: int x>;
+
+        $i24 = $i23 + i121;
+
+        r0.<java.awt.Rectangle: int x> = $i24;
+
+     label17:
+        specialinvoke r1.<java.awt.GridBagLayout: void alignBelowBaseline(java.awt.GridBagConstraints,java.awt.Rectangle,int,int)>(r2, r0, i0, i1);
+
+        goto label40;
+
+     label18:
+        $z1 = r1.<java.awt.GridBagLayout: boolean rightToLeft>;
+
+        if $z1 != 0 goto label19;
+
+        $i21 = r0.<java.awt.Rectangle: int x>;
+
+        $i22 = $i21 + i121;
+
+        r0.<java.awt.Rectangle: int x> = $i22;
+
+     label19:
+        specialinvoke r1.<java.awt.GridBagLayout: void alignBelowBaseline(java.awt.GridBagConstraints,java.awt.Rectangle,int,int)>(r2, r0, i0, i1);
+
+        goto label40;
+
+     label20:
+        $i89 = r0.<java.awt.Rectangle: int x>;
+
+        $i88 = i121 / 2;
+
+        $i90 = $i89 + $i88;
+
+        r0.<java.awt.Rectangle: int x> = $i90;
+
+        $i92 = r0.<java.awt.Rectangle: int y>;
+
+        $i91 = i122 / 2;
+
+        $i93 = $i92 + $i91;
+
+        r0.<java.awt.Rectangle: int y> = $i93;
+
+        goto label40;
+
+     label21:
+        $i86 = r0.<java.awt.Rectangle: int x>;
+
+        $i85 = i121 / 2;
+
+        $i87 = $i86 + $i85;
+
+        r0.<java.awt.Rectangle: int x> = $i87;
+
+        goto label40;
+
+     label22:
+        $i83 = r0.<java.awt.Rectangle: int x>;
+
+        $i84 = $i83 + i121;
+
+        r0.<java.awt.Rectangle: int x> = $i84;
+
+        goto label40;
+
+     label23:
+        $i78 = r0.<java.awt.Rectangle: int x>;
+
+        $i79 = $i78 + i121;
+
+        r0.<java.awt.Rectangle: int x> = $i79;
+
+        $i81 = r0.<java.awt.Rectangle: int y>;
+
+        $i80 = i122 / 2;
+
+        $i82 = $i81 + $i80;
+
+        r0.<java.awt.Rectangle: int y> = $i82;
+
+        goto label40;
+
+     label24:
+        $i74 = r0.<java.awt.Rectangle: int x>;
+
+        $i75 = $i74 + i121;
+
+        r0.<java.awt.Rectangle: int x> = $i75;
+
+        $i76 = r0.<java.awt.Rectangle: int y>;
+
+        $i77 = $i76 + i122;
+
+        r0.<java.awt.Rectangle: int y> = $i77;
+
+        goto label40;
+
+     label25:
+        $i70 = r0.<java.awt.Rectangle: int x>;
+
+        $i69 = i121 / 2;
+
+        $i71 = $i70 + $i69;
+
+        r0.<java.awt.Rectangle: int x> = $i71;
+
+        $i72 = r0.<java.awt.Rectangle: int y>;
+
+        $i73 = $i72 + i122;
+
+        r0.<java.awt.Rectangle: int y> = $i73;
+
+        goto label40;
+
+     label26:
+        $i67 = r0.<java.awt.Rectangle: int y>;
+
+        $i68 = $i67 + i122;
+
+        r0.<java.awt.Rectangle: int y> = $i68;
+
+        goto label40;
+
+     label27:
+        $i65 = r0.<java.awt.Rectangle: int y>;
+
+        $i64 = i122 / 2;
+
+        $i66 = $i65 + $i64;
+
+        r0.<java.awt.Rectangle: int y> = $i66;
+
+        goto label40;
+
+     label28:
+        goto label40;
+
+     label29:
+        $z12 = r1.<java.awt.GridBagLayout: boolean rightToLeft>;
+
+        if $z12 == 0 goto label30;
+
+        $i62 = r0.<java.awt.Rectangle: int x>;
+
+        $i63 = $i62 + i121;
+
+        r0.<java.awt.Rectangle: int x> = $i63;
+
+     label30:
+        $i60 = r0.<java.awt.Rectangle: int y>;
+
+        $i59 = i122 / 2;
+
+        $i61 = $i60 + $i59;
+
+        r0.<java.awt.Rectangle: int y> = $i61;
+
+        goto label40;
+
+     label31:
+        $z11 = r1.<java.awt.GridBagLayout: boolean rightToLeft>;
+
+        if $z11 != 0 goto label32;
+
+        $i57 = r0.<java.awt.Rectangle: int x>;
+
+        $i58 = $i57 + i121;
+
+        r0.<java.awt.Rectangle: int x> = $i58;
+
+     label32:
+        $i55 = r0.<java.awt.Rectangle: int y>;
+
+        $i54 = i122 / 2;
+
+        $i56 = $i55 + $i54;
+
+        r0.<java.awt.Rectangle: int y> = $i56;
+
+        goto label40;
+
+     label33:
+        $z10 = r1.<java.awt.GridBagLayout: boolean rightToLeft>;
+
+        if $z10 == 0 goto label40;
+
+        $i52 = r0.<java.awt.Rectangle: int x>;
+
+        $i53 = $i52 + i121;
+
+        r0.<java.awt.Rectangle: int x> = $i53;
+
+        goto label40;
+
+     label34:
+        $z9 = r1.<java.awt.GridBagLayout: boolean rightToLeft>;
+
+        if $z9 != 0 goto label40;
+
+        $i50 = r0.<java.awt.Rectangle: int x>;
+
+        $i51 = $i50 + i121;
+
+        r0.<java.awt.Rectangle: int x> = $i51;
+
+        goto label40;
+
+     label35:
+        $z8 = r1.<java.awt.GridBagLayout: boolean rightToLeft>;
+
+        if $z8 == 0 goto label36;
+
+        $i48 = r0.<java.awt.Rectangle: int x>;
+
+        $i49 = $i48 + i121;
+
+        r0.<java.awt.Rectangle: int x> = $i49;
+
+     label36:
+        $i46 = r0.<java.awt.Rectangle: int y>;
+
+        $i47 = $i46 + i122;
+
+        r0.<java.awt.Rectangle: int y> = $i47;
+
+        goto label40;
+
+     label37:
+        $z7 = r1.<java.awt.GridBagLayout: boolean rightToLeft>;
+
+        if $z7 != 0 goto label38;
+
+        $i44 = r0.<java.awt.Rectangle: int x>;
+
+        $i45 = $i44 + i121;
+
+        r0.<java.awt.Rectangle: int x> = $i45;
+
+     label38:
+        $i42 = r0.<java.awt.Rectangle: int y>;
+
+        $i43 = $i42 + i122;
+
+        r0.<java.awt.Rectangle: int y> = $i43;
+
+        goto label40;
+
+     label39:
+        $r9 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r9.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("illegal anchor value");
+
+        throw $r9;
+
+     label40:
+        return;
+    }
+
+    private void alignOnBaseline(java.awt.GridBagConstraints, java.awt.Rectangle, int, int)
+    {
+        int[] $r7, $r11, $r24, $r26;
+        java.awt.Insets $r12, $r13, $r14, $r16, $r17, $r18, $r20, $r21, $r22, $r27, $r28, $r29;
+        int $i0, i1, $i2, $i3, i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57, $i58, $i59, $i60, $i61, $i62, $i63, $i64, $i65, $i66, $i67, $i68, $i69, $i70, $i71, $i72, i73, i74, i75, i76, $i77, $i78, $i79, $i80, i81, i82, i83, $i84, $i85, $i86, $i87, $i88, $i89, $i90, $i91, $i92, $i93, $i95;
+        java.awt.Component$BaselineResizeBehavior $r3, $r4, $r8, $r9, $r10;
+        java.awt.Component $r15, $r19;
+        java.awt.GridBagLayout r1;
+        boolean $z0, $z1, $z2, z3, $z4;
+        java.awt.GridBagConstraints r0;
+        java.awt.Rectangle r2;
+        java.awt.GridBagLayoutInfo $r5, $r6, $r23, $r25;
+
+        r1 := @this: java.awt.GridBagLayout;
+
+        r0 := @parameter0: java.awt.GridBagConstraints;
+
+        r2 := @parameter1: java.awt.Rectangle;
+
+        i4 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        $i0 = r0.<java.awt.GridBagConstraints: int ascent>;
+
+        if $i0 < 0 goto label16;
+
+        $r4 = r0.<java.awt.GridBagConstraints: java.awt.Component$BaselineResizeBehavior baselineResizeBehavior>;
+
+        $r3 = <java.awt.Component$BaselineResizeBehavior: java.awt.Component$BaselineResizeBehavior CONSTANT_DESCENT>;
+
+        if $r4 != $r3 goto label03;
+
+        $i62 = i4 + i1;
+
+        $r25 = r1.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $r26 = $r25.<java.awt.GridBagLayoutInfo: int[] maxDescent>;
+
+        $i58 = r0.<java.awt.GridBagConstraints: int tempY>;
+
+        $i57 = r0.<java.awt.GridBagConstraints: int tempHeight>;
+
+        $i59 = $i58 + $i57;
+
+        $i60 = $i59 - 1;
+
+        $i61 = $r26[$i60];
+
+        $i64 = $i62 - $i61;
+
+        $i63 = r0.<java.awt.GridBagConstraints: int descent>;
+
+        $i66 = $i64 + $i63;
+
+        $r27 = r0.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i65 = $r27.<java.awt.Insets: int bottom>;
+
+        i73 = $i66 - $i65;
+
+        $z2 = virtualinvoke r0.<java.awt.GridBagConstraints: boolean isVerticallyResizable()>();
+
+        if $z2 != 0 goto label01;
+
+        $i70 = r0.<java.awt.GridBagConstraints: int minHeight>;
+
+        $i71 = i73 - $i70;
+
+        r2.<java.awt.Rectangle: int y> = $i71;
+
+        $i72 = r0.<java.awt.GridBagConstraints: int minHeight>;
+
+        r2.<java.awt.Rectangle: int height> = $i72;
+
+        goto label02;
+
+     label01:
+        $i68 = i73 - i4;
+
+        $r28 = r0.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i67 = $r28.<java.awt.Insets: int top>;
+
+        $i69 = $i68 - $i67;
+
+        r2.<java.awt.Rectangle: int height> = $i69;
+
+     label02:
+        goto label17;
+
+     label03:
+        i74 = r0.<java.awt.GridBagConstraints: int ascent>;
+
+        $r5 = r1.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $i2 = r0.<java.awt.GridBagConstraints: int tempY>;
+
+        $z0 = virtualinvoke $r5.<java.awt.GridBagLayoutInfo: boolean hasConstantDescent(int)>($i2);
+
+        if $z0 == 0 goto label04;
+
+        $r23 = r1.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $r24 = $r23.<java.awt.GridBagLayoutInfo: int[] maxDescent>;
+
+        $i55 = r0.<java.awt.GridBagConstraints: int tempY>;
+
+        $i56 = $r24[$i55];
+
+        i75 = i1 - $i56;
+
+        goto label05;
+
+     label04:
+        $r6 = r1.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $r7 = $r6.<java.awt.GridBagLayoutInfo: int[] maxAscent>;
+
+        $i3 = r0.<java.awt.GridBagConstraints: int tempY>;
+
+        i75 = $r7[$i3];
+
+     label05:
+        $r9 = r0.<java.awt.GridBagConstraints: java.awt.Component$BaselineResizeBehavior baselineResizeBehavior>;
+
+        $r8 = <java.awt.Component$BaselineResizeBehavior: java.awt.Component$BaselineResizeBehavior OTHER>;
+
+        if $r9 != $r8 goto label10;
+
+        z3 = 0;
+
+        $r15 = r1.<java.awt.GridBagLayout: java.awt.Component componentAdjusting>;
+
+        $i32 = r2.<java.awt.Rectangle: int width>;
+
+        $i31 = r2.<java.awt.Rectangle: int height>;
+
+        $i33 = virtualinvoke $r15.<java.awt.Component: int getBaseline(int,int)>($i32, $i31);
+
+        i74 = $i33;
+
+        if $i33 < 0 goto label06;
+
+        $r22 = r0.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i54 = $r22.<java.awt.Insets: int top>;
+
+        i74 = $i33 + $i54;
+
+     label06:
+        if i74 < 0 goto label09;
+
+        if i74 > i75 goto label09;
+
+        $i36 = r2.<java.awt.Rectangle: int height>;
+
+        $i38 = $i36 - i74;
+
+        $r16 = r0.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i37 = $r16.<java.awt.Insets: int top>;
+
+        $i39 = $i38 - $i37;
+
+        $i42 = i75 + $i39;
+
+        $r17 = r0.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i40 = $r17.<java.awt.Insets: int bottom>;
+
+        $i41 = i1 - $i40;
+
+        if $i42 > $i41 goto label07;
+
+        z3 = 1;
+
+        goto label09;
+
+     label07:
+        $z1 = virtualinvoke r0.<java.awt.GridBagConstraints: boolean isVerticallyResizable()>();
+
+        if $z1 == 0 goto label09;
+
+        $r19 = r1.<java.awt.GridBagLayout: java.awt.Component componentAdjusting>;
+
+        $i47 = r2.<java.awt.Rectangle: int width>;
+
+        $r18 = r0.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i43 = $r18.<java.awt.Insets: int bottom>;
+
+        $i44 = i1 - $i43;
+
+        $i45 = $i44 - i75;
+
+        $i46 = $i45 + i74;
+
+        $i48 = virtualinvoke $r19.<java.awt.Component: int getBaseline(int,int)>($i47, $i46);
+
+        i76 = $i48;
+
+        if $i48 < 0 goto label08;
+
+        $r21 = r0.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i53 = $r21.<java.awt.Insets: int top>;
+
+        i76 = $i48 + $i53;
+
+     label08:
+        if i76 < 0 goto label09;
+
+        if i76 > i74 goto label09;
+
+        $r20 = r0.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i49 = $r20.<java.awt.Insets: int bottom>;
+
+        $i50 = i1 - $i49;
+
+        $i51 = $i50 - i75;
+
+        $i52 = $i51 + i74;
+
+        r2.<java.awt.Rectangle: int height> = $i52;
+
+        i74 = i76;
+
+        z3 = 1;
+
+     label09:
+        if z3 != 0 goto label10;
+
+        i74 = r0.<java.awt.GridBagConstraints: int ascent>;
+
+        $i34 = r0.<java.awt.GridBagConstraints: int minWidth>;
+
+        r2.<java.awt.Rectangle: int width> = $i34;
+
+        $i35 = r0.<java.awt.GridBagConstraints: int minHeight>;
+
+        r2.<java.awt.Rectangle: int height> = $i35;
+
+     label10:
+        $i77 = i4 + i75;
+
+        $i78 = $i77 - i74;
+
+        $r29 = r0.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i79 = $r29.<java.awt.Insets: int top>;
+
+        $i80 = $i78 + $i79;
+
+        r2.<java.awt.Rectangle: int y> = $i80;
+
+        $z4 = virtualinvoke r0.<java.awt.GridBagConstraints: boolean isVerticallyResizable()>();
+
+        if $z4 == 0 goto label15;
+
+        $r11 = <java.awt.GridBagLayout$1: int[] $SwitchMap$java$awt$Component$BaselineResizeBehavior>;
+
+        $r10 = r0.<java.awt.GridBagConstraints: java.awt.Component$BaselineResizeBehavior baselineResizeBehavior>;
+
+        $i5 = virtualinvoke $r10.<java.awt.Component$BaselineResizeBehavior: int ordinal()>();
+
+        $i6 = $r11[$i5];
+
+        tableswitch($i6)
+        {
+            case 1: goto label11;
+            case 2: goto label12;
+            case 3: goto label14;
+            default: goto label15;
+        };
+
+     label11:
+        $i29 = r0.<java.awt.GridBagConstraints: int minHeight>;
+
+        $i25 = i4 + i1;
+
+        $i24 = r2.<java.awt.Rectangle: int y>;
+
+        $i27 = $i25 - $i24;
+
+        $r14 = r0.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i26 = $r14.<java.awt.Insets: int bottom>;
+
+        $i28 = $i27 - $i26;
+
+        $i30 = staticinvoke <java.lang.Math: int max(int,int)>($i29, $i28);
+
+        r2.<java.awt.Rectangle: int height> = $i30;
+
+        goto label15;
+
+     label12:
+        $i7 = r2.<java.awt.Rectangle: int y>;
+
+        $i9 = $i7 - i4;
+
+        $r12 = r0.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i8 = $r12.<java.awt.Insets: int top>;
+
+        i81 = $i9 - $i8;
+
+        $i11 = i4 + i1;
+
+        $i10 = r2.<java.awt.Rectangle: int y>;
+
+        $i13 = $i11 - $i10;
+
+        $i12 = r0.<java.awt.GridBagConstraints: int minHeight>;
+
+        $i15 = $i13 - $i12;
+
+        $r13 = r0.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i14 = $r13.<java.awt.Insets: int bottom>;
+
+        i82 = $i15 - $i14;
+
+        $i16 = staticinvoke <java.lang.Math: int min(int,int)>(i81, i82);
+
+        i83 = $i16 + $i16;
+
+        if i83 <= 0 goto label13;
+
+        $i18 = r0.<java.awt.GridBagConstraints: int minHeight>;
+
+        $i17 = r0.<java.awt.GridBagConstraints: int centerPadding>;
+
+        $i19 = $i18 + $i17;
+
+        $i20 = $i19 + i83;
+
+        $i22 = $i20 / 2;
+
+        $i21 = r0.<java.awt.GridBagConstraints: int centerOffset>;
+
+        $i23 = $i22 + $i21;
+
+        if $i23 == i75 goto label13;
+
+        $i95 = (int) -1;
+
+        i83 = i83 + $i95;
+
+     label13:
+        $i84 = r0.<java.awt.GridBagConstraints: int minHeight>;
+
+        $i85 = $i84 + i83;
+
+        r2.<java.awt.Rectangle: int height> = $i85;
+
+        $i86 = i4 + i75;
+
+        $i87 = r2.<java.awt.Rectangle: int height>;
+
+        $i88 = r0.<java.awt.GridBagConstraints: int centerPadding>;
+
+        $i89 = $i87 + $i88;
+
+        $i90 = $i89 / 2;
+
+        $i91 = $i86 - $i90;
+
+        $i92 = r0.<java.awt.GridBagConstraints: int centerOffset>;
+
+        $i93 = $i91 - $i92;
+
+        r2.<java.awt.Rectangle: int y> = $i93;
+
+        goto label15;
+
+     label14:
+        goto label15;
+
+     label15:
+        goto label17;
+
+     label16:
+        specialinvoke r1.<java.awt.GridBagLayout: void centerVertically(java.awt.GridBagConstraints,java.awt.Rectangle,int)>(r0, r2, i1);
+
+     label17:
+        return;
+    }
+
+    private void alignAboveBaseline(java.awt.GridBagConstraints, java.awt.Rectangle, int, int)
+    {
+        int[] $r6, $r9;
+        boolean $z0, $z1, $z2;
+        java.awt.GridBagConstraints r1;
+        java.awt.GridBagLayout r0;
+        java.awt.Rectangle r3;
+        java.awt.Insets $r7;
+        int $i0, i1, $i2, i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, i18;
+        java.awt.GridBagLayoutInfo $r2, $r4, $r5, $r8;
+
+        r0 := @this: java.awt.GridBagLayout;
+
+        r1 := @parameter0: java.awt.GridBagConstraints;
+
+        r3 := @parameter1: java.awt.Rectangle;
+
+        i3 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        $r2 = r0.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $i0 = r1.<java.awt.GridBagConstraints: int tempY>;
+
+        $z0 = virtualinvoke $r2.<java.awt.GridBagLayoutInfo: boolean hasBaseline(int)>($i0);
+
+        if $z0 == 0 goto label5;
+
+        $r4 = r0.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $i2 = r1.<java.awt.GridBagConstraints: int tempY>;
+
+        $z1 = virtualinvoke $r4.<java.awt.GridBagLayoutInfo: boolean hasConstantDescent(int)>($i2);
+
+        if $z1 == 0 goto label1;
+
+        $i17 = i3 + i1;
+
+        $r8 = r0.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $r9 = $r8.<java.awt.GridBagLayoutInfo: int[] maxDescent>;
+
+        $i15 = r1.<java.awt.GridBagConstraints: int tempY>;
+
+        $i16 = $r9[$i15];
+
+        i18 = $i17 - $i16;
+
+        goto label2;
+
+     label1:
+        $r5 = r0.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $r6 = $r5.<java.awt.GridBagLayoutInfo: int[] maxAscent>;
+
+        $i4 = r1.<java.awt.GridBagConstraints: int tempY>;
+
+        $i5 = $r6[$i4];
+
+        i18 = i3 + $i5;
+
+     label2:
+        $z2 = virtualinvoke r1.<java.awt.GridBagConstraints: boolean isVerticallyResizable()>();
+
+        if $z2 == 0 goto label3;
+
+        $r7 = r1.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i11 = $r7.<java.awt.Insets: int top>;
+
+        $i12 = i3 + $i11;
+
+        r3.<java.awt.Rectangle: int y> = $i12;
+
+        $i13 = r3.<java.awt.Rectangle: int y>;
+
+        $i14 = i18 - $i13;
+
+        r3.<java.awt.Rectangle: int height> = $i14;
+
+        goto label4;
+
+     label3:
+        $i7 = r1.<java.awt.GridBagConstraints: int minHeight>;
+
+        $i6 = r1.<java.awt.GridBagConstraints: int ipady>;
+
+        $i8 = $i7 + $i6;
+
+        r3.<java.awt.Rectangle: int height> = $i8;
+
+        $i9 = r3.<java.awt.Rectangle: int height>;
+
+        $i10 = i18 - $i9;
+
+        r3.<java.awt.Rectangle: int y> = $i10;
+
+     label4:
+        goto label6;
+
+     label5:
+        specialinvoke r0.<java.awt.GridBagLayout: void centerVertically(java.awt.GridBagConstraints,java.awt.Rectangle,int)>(r1, r3, i1);
+
+     label6:
+        return;
+    }
+
+    private void alignBelowBaseline(java.awt.GridBagConstraints, java.awt.Rectangle, int, int)
+    {
+        java.awt.Rectangle r3;
+        java.awt.Insets $r7;
+        int[] $r6, $r9;
+        int $i0, i1, $i2, i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15;
+        boolean $z0, $z1, $z2;
+        java.awt.GridBagConstraints r1;
+        java.awt.GridBagLayoutInfo $r2, $r4, $r5, $r8;
+        java.awt.GridBagLayout r0;
+
+        r0 := @this: java.awt.GridBagLayout;
+
+        r1 := @parameter0: java.awt.GridBagConstraints;
+
+        r3 := @parameter1: java.awt.Rectangle;
+
+        i3 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        $r2 = r0.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $i0 = r1.<java.awt.GridBagConstraints: int tempY>;
+
+        $z0 = virtualinvoke $r2.<java.awt.GridBagLayoutInfo: boolean hasBaseline(int)>($i0);
+
+        if $z0 == 0 goto label3;
+
+        $r4 = r0.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $i2 = r1.<java.awt.GridBagConstraints: int tempY>;
+
+        $z1 = virtualinvoke $r4.<java.awt.GridBagLayoutInfo: boolean hasConstantDescent(int)>($i2);
+
+        if $z1 == 0 goto label1;
+
+        $i14 = i3 + i1;
+
+        $r8 = r0.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $r9 = $r8.<java.awt.GridBagLayoutInfo: int[] maxDescent>;
+
+        $i12 = r1.<java.awt.GridBagConstraints: int tempY>;
+
+        $i13 = $r9[$i12];
+
+        $i15 = $i14 - $i13;
+
+        r3.<java.awt.Rectangle: int y> = $i15;
+
+        goto label2;
+
+     label1:
+        $r5 = r0.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo>;
+
+        $r6 = $r5.<java.awt.GridBagLayoutInfo: int[] maxAscent>;
+
+        $i4 = r1.<java.awt.GridBagConstraints: int tempY>;
+
+        $i5 = $r6[$i4];
+
+        $i6 = i3 + $i5;
+
+        r3.<java.awt.Rectangle: int y> = $i6;
+
+     label2:
+        $z2 = virtualinvoke r1.<java.awt.GridBagConstraints: boolean isVerticallyResizable()>();
+
+        if $z2 == 0 goto label4;
+
+        $i8 = i3 + i1;
+
+        $i7 = r3.<java.awt.Rectangle: int y>;
+
+        $i10 = $i8 - $i7;
+
+        $r7 = r1.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i9 = $r7.<java.awt.Insets: int bottom>;
+
+        $i11 = $i10 - $i9;
+
+        r3.<java.awt.Rectangle: int height> = $i11;
+
+        goto label4;
+
+     label3:
+        specialinvoke r0.<java.awt.GridBagLayout: void centerVertically(java.awt.GridBagConstraints,java.awt.Rectangle,int)>(r1, r3, i1);
+
+     label4:
+        return;
+    }
+
+    private void centerVertically(java.awt.GridBagConstraints, java.awt.Rectangle, int)
+    {
+        java.awt.Rectangle r1;
+        java.awt.Insets $r2, $r3;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12;
+        boolean $z0;
+        java.awt.GridBagConstraints r0;
+        java.awt.GridBagLayout r4;
+
+        r4 := @this: java.awt.GridBagLayout;
+
+        r0 := @parameter0: java.awt.GridBagConstraints;
+
+        r1 := @parameter1: java.awt.Rectangle;
+
+        i0 := @parameter2: int;
+
+        $z0 = virtualinvoke r0.<java.awt.GridBagConstraints: boolean isVerticallyResizable()>();
+
+        if $z0 != 0 goto label1;
+
+        $i10 = r1.<java.awt.Rectangle: int y>;
+
+        $r2 = r0.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i1 = $r2.<java.awt.Insets: int top>;
+
+        $i3 = i0 - $i1;
+
+        $r3 = r0.<java.awt.GridBagConstraints: java.awt.Insets insets>;
+
+        $i2 = $r3.<java.awt.Insets: int bottom>;
+
+        $i5 = $i3 - $i2;
+
+        $i4 = r0.<java.awt.GridBagConstraints: int minHeight>;
+
+        $i7 = $i5 - $i4;
+
+        $i6 = r0.<java.awt.GridBagConstraints: int ipady>;
+
+        $i8 = $i7 - $i6;
+
+        $i9 = $i8 / 2;
+
+        $i11 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i9);
+
+        $i12 = $i10 + $i11;
+
+        r1.<java.awt.Rectangle: int y> = $i12;
+
+     label1:
+        return;
+    }
+
+    protected java.awt.Dimension getMinSize(java.awt.Container, java.awt.GridBagLayoutInfo)
+    {
+        java.awt.Dimension $r3;
+        java.awt.GridBagLayoutInfo r2;
+        java.awt.Container r1;
+        java.awt.GridBagLayout r0;
+
+        r0 := @this: java.awt.GridBagLayout;
+
+        r1 := @parameter0: java.awt.Container;
+
+        r2 := @parameter1: java.awt.GridBagLayoutInfo;
+
+        $r3 = virtualinvoke r0.<java.awt.GridBagLayout: java.awt.Dimension GetMinSize(java.awt.Container,java.awt.GridBagLayoutInfo)>(r1, r2);
+
+        return $r3;
+    }
+
+    protected java.awt.Dimension GetMinSize(java.awt.Container, java.awt.GridBagLayoutInfo)
+    {
+        java.awt.Insets $r2;
+        int[] $r4, $r5;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, i12, i13, i14, i15;
+        java.awt.Container r1;
+        java.awt.Dimension $r0;
+        java.awt.GridBagLayoutInfo r3;
+        java.awt.GridBagLayout r6;
+
+        r6 := @this: java.awt.GridBagLayout;
+
+        r1 := @parameter0: java.awt.Container;
+
+        r3 := @parameter1: java.awt.GridBagLayoutInfo;
+
+        $r0 = new java.awt.Dimension;
+
+        specialinvoke $r0.<java.awt.Dimension: void <init>()>();
+
+        $r2 = virtualinvoke r1.<java.awt.Container: java.awt.Insets getInsets()>();
+
+        i12 = 0;
+
+        i13 = 0;
+
+     label1:
+        $i0 = r3.<java.awt.GridBagLayoutInfo: int width>;
+
+        if i13 >= $i0 goto label2;
+
+        $r5 = r3.<java.awt.GridBagLayoutInfo: int[] minWidth>;
+
+        $i11 = $r5[i13];
+
+        i12 = i12 + $i11;
+
+        i13 = i13 + 1;
+
+        goto label1;
+
+     label2:
+        $i1 = $r2.<java.awt.Insets: int left>;
+
+        $i3 = i12 + $i1;
+
+        $i2 = $r2.<java.awt.Insets: int right>;
+
+        $i4 = $i3 + $i2;
+
+        $r0.<java.awt.Dimension: int width> = $i4;
+
+        i14 = 0;
+
+        i15 = 0;
+
+     label3:
+        $i5 = r3.<java.awt.GridBagLayoutInfo: int height>;
+
+        if i15 >= $i5 goto label4;
+
+        $r4 = r3.<java.awt.GridBagLayoutInfo: int[] minHeight>;
+
+        $i10 = $r4[i15];
+
+        i14 = i14 + $i10;
+
+        i15 = i15 + 1;
+
+        goto label3;
+
+     label4:
+        $i6 = $r2.<java.awt.Insets: int top>;
+
+        $i8 = i14 + $i6;
+
+        $i7 = $r2.<java.awt.Insets: int bottom>;
+
+        $i9 = $i8 + $i7;
+
+        $r0.<java.awt.Dimension: int height> = $i9;
+
+        return $r0;
+    }
+
+    protected void arrangeGrid(java.awt.Container)
+    {
+        java.awt.Container r1;
+        java.awt.GridBagLayout r0;
+
+        r0 := @this: java.awt.GridBagLayout;
+
+        r1 := @parameter0: java.awt.Container;
+
+        virtualinvoke r0.<java.awt.GridBagLayout: void ArrangeGrid(java.awt.Container)>(r1);
+
+        return;
+    }
+
+    protected void ArrangeGrid(java.awt.Container)
+    {
+        byte $b58, $b71;
+        java.awt.Container r0;
+        java.awt.ComponentOrientation $r5;
+        int[] $r9, $r10, $r11, $r12, $r13, $r15, $r16, $r17, $r18, $r21, $r22, $r23, $r24, $r26, $r27, $r28, $r29;
+        java.awt.Insets $r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57, $i59, $i60, $i61, $i62, $i63, $i64, $i65, $i66, $i67, $i68, $i69, $i70, $i72, $i73, $i74, $i75, $i76, $i77, $i78, $i79, $i80, $i81, $i82, $i83, $i84, $i85, $i86, $i87, $i88, $i89, $i90, $i91, $i92, $i93, $i94, i95, i96, i97, i98, i99, i100, i101, i102, i103, $i104, i105, i106, i107, $i108, i109, i110, $i111, $i112, $i113, $i114, $i115, $i116;
+        java.awt.Component r7;
+        java.awt.GridBagLayout r4;
+        double[] $r14, $r19, $r20, $r25;
+        java.awt.Component[] $r2;
+        boolean $z0, $z1, $z2, $z3;
+        java.awt.GridBagConstraints $r8;
+        java.awt.Dimension $r32, r33;
+        java.awt.Rectangle $r34;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, d10, d11;
+        java.awt.GridBagLayoutInfo $r6, $r30, r31;
+
+        r4 := @this: java.awt.GridBagLayout;
+
+        r0 := @parameter0: java.awt.Container;
+
+        $r1 = virtualinvoke r0.<java.awt.Container: java.awt.Insets getInsets()>();
+
+        $r2 = virtualinvoke r0.<java.awt.Container: java.awt.Component[] getComponents()>();
+
+        $r34 = new java.awt.Rectangle;
+
+        specialinvoke $r34.<java.awt.Rectangle: void <init>()>();
+
+        $r5 = virtualinvoke r0.<java.awt.Container: java.awt.ComponentOrientation getComponentOrientation()>();
+
+        $z0 = virtualinvoke $r5.<java.awt.ComponentOrientation: boolean isLeftToRight()>();
+
+        if $z0 != 0 goto label01;
+
+        $z3 = 1;
+
+        goto label02;
+
+     label01:
+        $z3 = 0;
+
+     label02:
+        r4.<java.awt.GridBagLayout: boolean rightToLeft> = $z3;
+
+        $i0 = lengthof $r2;
+
+        if $i0 != 0 goto label05;
+
+        $r26 = r4.<java.awt.GridBagLayout: int[] columnWidths>;
+
+        if $r26 == null goto label03;
+
+        $r29 = r4.<java.awt.GridBagLayout: int[] columnWidths>;
+
+        $i87 = lengthof $r29;
+
+        if $i87 != 0 goto label05;
+
+     label03:
+        $r27 = r4.<java.awt.GridBagLayout: int[] rowHeights>;
+
+        if $r27 == null goto label04;
+
+        $r28 = r4.<java.awt.GridBagLayout: int[] rowHeights>;
+
+        $i86 = lengthof $r28;
+
+        if $i86 != 0 goto label05;
+
+     label04:
+        return;
+
+     label05:
+        $r30 = virtualinvoke r4.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo getLayoutInfo(java.awt.Container,int)>(r0, 2);
+
+        r31 = $r30;
+
+        $r32 = virtualinvoke r4.<java.awt.GridBagLayout: java.awt.Dimension getMinSize(java.awt.Container,java.awt.GridBagLayoutInfo)>(r0, $r30);
+
+        r33 = $r32;
+
+        $i88 = r0.<java.awt.Container: int width>;
+
+        $i89 = $r32.<java.awt.Dimension: int width>;
+
+        if $i88 < $i89 goto label06;
+
+        $i85 = r0.<java.awt.Container: int height>;
+
+        $i84 = $r32.<java.awt.Dimension: int height>;
+
+        if $i85 >= $i84 goto label07;
+
+     label06:
+        $r6 = virtualinvoke r4.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo getLayoutInfo(java.awt.Container,int)>(r0, 1);
+
+        r31 = $r6;
+
+        r33 = virtualinvoke r4.<java.awt.GridBagLayout: java.awt.Dimension getMinSize(java.awt.Container,java.awt.GridBagLayoutInfo)>(r0, $r6);
+
+     label07:
+        r4.<java.awt.GridBagLayout: java.awt.GridBagLayoutInfo layoutInfo> = r31;
+
+        $i90 = r33.<java.awt.Dimension: int width>;
+
+        $r34.<java.awt.Rectangle: int width> = $i90;
+
+        $i91 = r33.<java.awt.Dimension: int height>;
+
+        $r34.<java.awt.Rectangle: int height> = $i91;
+
+        $i92 = r0.<java.awt.Container: int width>;
+
+        $i93 = $r34.<java.awt.Rectangle: int width>;
+
+        $i94 = $i92 - $i93;
+
+        if $i94 == 0 goto label13;
+
+        d10 = 0.0;
+
+        i95 = 0;
+
+     label08:
+        $i70 = r31.<java.awt.GridBagLayoutInfo: int width>;
+
+        if i95 >= $i70 goto label09;
+
+        $r25 = r31.<java.awt.GridBagLayoutInfo: double[] weightX>;
+
+        $d9 = $r25[i95];
+
+        d10 = d10 + $d9;
+
+        i95 = i95 + 1;
+
+        goto label08;
+
+     label09:
+        $b71 = d10 cmpl 0.0;
+
+        $i115 = (int) $b71;
+
+        if $i115 <= 0 goto label12;
+
+        i96 = 0;
+
+     label10:
+        $i75 = r31.<java.awt.GridBagLayoutInfo: int width>;
+
+        if i96 >= $i75 goto label12;
+
+        $d6 = (double) $i94;
+
+        $r20 = r31.<java.awt.GridBagLayoutInfo: double[] weightX>;
+
+        $d5 = $r20[i96];
+
+        $d7 = $d6 * $d5;
+
+        $d8 = $d7 / d10;
+
+        i97 = (int) $d8;
+
+        $r21 = r31.<java.awt.GridBagLayoutInfo: int[] minWidth>;
+
+        $i76 = $r21[i96];
+
+        $i77 = $i76 + i97;
+
+        $r21[i96] = $i77;
+
+        $i78 = $r34.<java.awt.Rectangle: int width>;
+
+        $i79 = $i78 + i97;
+
+        $r34.<java.awt.Rectangle: int width> = $i79;
+
+        $r22 = r31.<java.awt.GridBagLayoutInfo: int[] minWidth>;
+
+        $i80 = $r22[i96];
+
+        if $i80 >= 0 goto label11;
+
+        $i82 = $r34.<java.awt.Rectangle: int width>;
+
+        $r23 = r31.<java.awt.GridBagLayoutInfo: int[] minWidth>;
+
+        $i81 = $r23[i96];
+
+        $i83 = $i82 - $i81;
+
+        $r34.<java.awt.Rectangle: int width> = $i83;
+
+        $r24 = r31.<java.awt.GridBagLayoutInfo: int[] minWidth>;
+
+        $r24[i96] = 0;
+
+     label11:
+        i96 = i96 + 1;
+
+        goto label10;
+
+     label12:
+        $i73 = r0.<java.awt.Container: int width>;
+
+        $i72 = $r34.<java.awt.Rectangle: int width>;
+
+        i98 = $i73 - $i72;
+
+        goto label14;
+
+     label13:
+        i98 = 0;
+
+     label14:
+        $i2 = r0.<java.awt.Container: int height>;
+
+        $i1 = $r34.<java.awt.Rectangle: int height>;
+
+        $i74 = $i2 - $i1;
+
+        if $i74 == 0 goto label20;
+
+        d11 = 0.0;
+
+        i99 = 0;
+
+     label15:
+        $i57 = r31.<java.awt.GridBagLayoutInfo: int height>;
+
+        if i99 >= $i57 goto label16;
+
+        $r19 = r31.<java.awt.GridBagLayoutInfo: double[] weightY>;
+
+        $d4 = $r19[i99];
+
+        d11 = d11 + $d4;
+
+        i99 = i99 + 1;
+
+        goto label15;
+
+     label16:
+        $b58 = d11 cmpl 0.0;
+
+        $i116 = (int) $b58;
+
+        if $i116 <= 0 goto label19;
+
+        i100 = 0;
+
+     label17:
+        $i61 = r31.<java.awt.GridBagLayoutInfo: int height>;
+
+        if i100 >= $i61 goto label19;
+
+        $d1 = (double) $i74;
+
+        $r14 = r31.<java.awt.GridBagLayoutInfo: double[] weightY>;
+
+        $d0 = $r14[i100];
+
+        $d2 = $d1 * $d0;
+
+        $d3 = $d2 / d11;
+
+        i101 = (int) $d3;
+
+        $r15 = r31.<java.awt.GridBagLayoutInfo: int[] minHeight>;
+
+        $i62 = $r15[i100];
+
+        $i63 = $i62 + i101;
+
+        $r15[i100] = $i63;
+
+        $i64 = $r34.<java.awt.Rectangle: int height>;
+
+        $i65 = $i64 + i101;
+
+        $r34.<java.awt.Rectangle: int height> = $i65;
+
+        $r16 = r31.<java.awt.GridBagLayoutInfo: int[] minHeight>;
+
+        $i66 = $r16[i100];
+
+        if $i66 >= 0 goto label18;
+
+        $i68 = $r34.<java.awt.Rectangle: int height>;
+
+        $r17 = r31.<java.awt.GridBagLayoutInfo: int[] minHeight>;
+
+        $i67 = $r17[i100];
+
+        $i69 = $i68 - $i67;
+
+        $r34.<java.awt.Rectangle: int height> = $i69;
+
+        $r18 = r31.<java.awt.GridBagLayoutInfo: int[] minHeight>;
+
+        $r18[i100] = 0;
+
+     label18:
+        i100 = i100 + 1;
+
+        goto label17;
+
+     label19:
+        $i60 = r0.<java.awt.Container: int height>;
+
+        $i59 = $r34.<java.awt.Rectangle: int height>;
+
+        i102 = $i60 - $i59;
+
+        goto label21;
+
+     label20:
+        i102 = 0;
+
+     label21:
+        $i4 = i98 / 2;
+
+        $i3 = $r1.<java.awt.Insets: int left>;
+
+        $i5 = $i4 + $i3;
+
+        r31.<java.awt.GridBagLayoutInfo: int startx> = $i5;
+
+        $i7 = i102 / 2;
+
+        $i6 = $r1.<java.awt.Insets: int top>;
+
+        $i8 = $i7 + $i6;
+
+        r31.<java.awt.GridBagLayoutInfo: int starty> = $i8;
+
+        i103 = 0;
+
+     label22:
+        $i104 = lengthof $r2;
+
+        if i103 >= $i104 goto label40;
+
+        r7 = $r2[i103];
+
+        $z1 = virtualinvoke r7.<java.awt.Component: boolean isVisible()>();
+
+        if $z1 != 0 goto label23;
+
+        goto label39;
+
+     label23:
+        $r8 = virtualinvoke r4.<java.awt.GridBagLayout: java.awt.GridBagConstraints lookupConstraints(java.awt.Component)>(r7);
+
+        $z2 = r4.<java.awt.GridBagLayout: boolean rightToLeft>;
+
+        if $z2 != 0 goto label25;
+
+        $i52 = r31.<java.awt.GridBagLayoutInfo: int startx>;
+
+        $r34.<java.awt.Rectangle: int x> = $i52;
+
+        i105 = 0;
+
+     label24:
+        $i53 = $r8.<java.awt.GridBagConstraints: int tempX>;
+
+        if i105 >= $i53 goto label27;
+
+        $i55 = $r34.<java.awt.Rectangle: int x>;
+
+        $r13 = r31.<java.awt.GridBagLayoutInfo: int[] minWidth>;
+
+        $i54 = $r13[i105];
+
+        $i56 = $i55 + $i54;
+
+        $r34.<java.awt.Rectangle: int x> = $i56;
+
+        i105 = i105 + 1;
+
+        goto label24;
+
+     label25:
+        $i12 = r0.<java.awt.Container: int width>;
+
+        $i10 = i98 / 2;
+
+        $i9 = $r1.<java.awt.Insets: int right>;
+
+        $i11 = $i10 + $i9;
+
+        $i13 = $i12 - $i11;
+
+        $r34.<java.awt.Rectangle: int x> = $i13;
+
+        i106 = 0;
+
+     label26:
+        $i14 = $r8.<java.awt.GridBagConstraints: int tempX>;
+
+        if i106 >= $i14 goto label27;
+
+        $i50 = $r34.<java.awt.Rectangle: int x>;
+
+        $r12 = r31.<java.awt.GridBagLayoutInfo: int[] minWidth>;
+
+        $i49 = $r12[i106];
+
+        $i51 = $i50 - $i49;
+
+        $r34.<java.awt.Rectangle: int x> = $i51;
+
+        i106 = i106 + 1;
+
+        goto label26;
+
+     label27:
+        $i15 = r31.<java.awt.GridBagLayoutInfo: int starty>;
+
+        $r34.<java.awt.Rectangle: int y> = $i15;
+
+        i107 = 0;
+
+     label28:
+        $i108 = $r8.<java.awt.GridBagConstraints: int tempY>;
+
+        if i107 >= $i108 goto label29;
+
+        $i47 = $r34.<java.awt.Rectangle: int y>;
+
+        $r11 = r31.<java.awt.GridBagLayoutInfo: int[] minHeight>;
+
+        $i46 = $r11[i107];
+
+        $i48 = $i47 + $i46;
+
+        $r34.<java.awt.Rectangle: int y> = $i48;
+
+        i107 = i107 + 1;
+
+        goto label28;
+
+     label29:
+        $r34.<java.awt.Rectangle: int width> = 0;
+
+        i109 = $r8.<java.awt.GridBagConstraints: int tempX>;
+
+     label30:
+        $i17 = $r8.<java.awt.GridBagConstraints: int tempX>;
+
+        $i16 = $r8.<java.awt.GridBagConstraints: int tempWidth>;
+
+        $i18 = $i17 + $i16;
+
+        if i109 >= $i18 goto label31;
+
+        $i44 = $r34.<java.awt.Rectangle: int width>;
+
+        $r10 = r31.<java.awt.GridBagLayoutInfo: int[] minWidth>;
+
+        $i43 = $r10[i109];
+
+        $i45 = $i44 + $i43;
+
+        $r34.<java.awt.Rectangle: int width> = $i45;
+
+        i109 = i109 + 1;
+
+        goto label30;
+
+     label31:
+        $r34.<java.awt.Rectangle: int height> = 0;
+
+        i110 = $r8.<java.awt.GridBagConstraints: int tempY>;
+
+     label32:
+        $i20 = $r8.<java.awt.GridBagConstraints: int tempY>;
+
+        $i19 = $r8.<java.awt.GridBagConstraints: int tempHeight>;
+
+        $i21 = $i20 + $i19;
+
+        if i110 >= $i21 goto label33;
+
+        $i41 = $r34.<java.awt.Rectangle: int height>;
+
+        $r9 = r31.<java.awt.GridBagLayoutInfo: int[] minHeight>;
+
+        $i40 = $r9[i110];
+
+        $i42 = $i41 + $i40;
+
+        $r34.<java.awt.Rectangle: int height> = $i42;
+
+        i110 = i110 + 1;
+
+        goto label32;
+
+     label33:
+        r4.<java.awt.GridBagLayout: java.awt.Component componentAdjusting> = r7;
+
+        virtualinvoke r4.<java.awt.GridBagLayout: void adjustForGravity(java.awt.GridBagConstraints,java.awt.Rectangle)>($r8, $r34);
+
+        $i22 = $r34.<java.awt.Rectangle: int x>;
+
+        if $i22 >= 0 goto label34;
+
+        $i38 = $r34.<java.awt.Rectangle: int width>;
+
+        $i37 = $r34.<java.awt.Rectangle: int x>;
+
+        $i39 = $i38 + $i37;
+
+        $r34.<java.awt.Rectangle: int width> = $i39;
+
+        $r34.<java.awt.Rectangle: int x> = 0;
+
+     label34:
+        $i23 = $r34.<java.awt.Rectangle: int y>;
+
+        if $i23 >= 0 goto label35;
+
+        $i35 = $r34.<java.awt.Rectangle: int height>;
+
+        $i34 = $r34.<java.awt.Rectangle: int y>;
+
+        $i36 = $i35 + $i34;
+
+        $r34.<java.awt.Rectangle: int height> = $i36;
+
+        $r34.<java.awt.Rectangle: int y> = 0;
+
+     label35:
+        $i24 = $r34.<java.awt.Rectangle: int width>;
+
+        if $i24 <= 0 goto label36;
+
+        $i25 = $r34.<java.awt.Rectangle: int height>;
+
+        if $i25 > 0 goto label37;
+
+     label36:
+        virtualinvoke r7.<java.awt.Component: void setBounds(int,int,int,int)>(0, 0, 0, 0);
+
+        goto label39;
+
+     label37:
+        $i27 = r7.<java.awt.Component: int x>;
+
+        $i26 = $r34.<java.awt.Rectangle: int x>;
+
+        if $i27 != $i26 goto label38;
+
+        $i29 = r7.<java.awt.Component: int y>;
+
+        $i28 = $r34.<java.awt.Rectangle: int y>;
+
+        if $i29 != $i28 goto label38;
+
+        $i31 = r7.<java.awt.Component: int width>;
+
+        $i30 = $r34.<java.awt.Rectangle: int width>;
+
+        if $i31 != $i30 goto label38;
+
+        $i33 = r7.<java.awt.Component: int height>;
+
+        $i32 = $r34.<java.awt.Rectangle: int height>;
+
+        if $i33 == $i32 goto label39;
+
+     label38:
+        $i111 = $r34.<java.awt.Rectangle: int x>;
+
+        $i112 = $r34.<java.awt.Rectangle: int y>;
+
+        $i113 = $r34.<java.awt.Rectangle: int width>;
+
+        $i114 = $r34.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r7.<java.awt.Component: void setBounds(int,int,int,int)>($i111, $i112, $i113, $i114);
+
+     label39:
+        i103 = i103 + 1;
+
+        goto label22;
+
+     label40:
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <java.awt.GridBagLayout: long serialVersionUID> = 8838754796412211005L;
+
+        <java.awt.GridBagLayout: int PREFERREDSIZE> = 2;
+
+        <java.awt.GridBagLayout: int MINSIZE> = 1;
+
+        <java.awt.GridBagLayout: int MAXGRIDSIZE> = 512;
+
+        <java.awt.GridBagLayout: int EMPIRICMULTIPLIER> = 2;
+
+        return;
+    }
+}

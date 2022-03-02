@@ -1,0 +1,1446 @@
+public class com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader extends com.sun.org.apache.xml.internal.resolver.readers.SAXCatalogReader implements com.sun.org.apache.xml.internal.resolver.readers.SAXCatalogParser
+{
+    protected com.sun.org.apache.xml.internal.resolver.Catalog catalog;
+    public static final java.lang.String namespaceName;
+    public static final java.lang.String tr9401NamespaceName;
+    protected java.util.Stack baseURIStack;
+    protected java.util.Stack overrideStack;
+    protected java.util.Stack namespaceStack;
+
+    public void setCatalog(com.sun.org.apache.xml.internal.resolver.Catalog)
+    {
+        com.sun.org.apache.xml.internal.resolver.CatalogManager $r2;
+        com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader r0;
+        com.sun.org.apache.xml.internal.resolver.Catalog r1;
+        com.sun.org.apache.xml.internal.resolver.helpers.Debug $r3;
+
+        r0 := @this: com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader;
+
+        r1 := @parameter0: com.sun.org.apache.xml.internal.resolver.Catalog;
+
+        r0.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.Catalog catalog> = r1;
+
+        $r2 = virtualinvoke r1.<com.sun.org.apache.xml.internal.resolver.Catalog: com.sun.org.apache.xml.internal.resolver.CatalogManager getCatalogManager()>();
+
+        $r3 = $r2.<com.sun.org.apache.xml.internal.resolver.CatalogManager: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        r0.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug> = $r3;
+
+        return;
+    }
+
+    public com.sun.org.apache.xml.internal.resolver.Catalog getCatalog()
+    {
+        com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader r0;
+        com.sun.org.apache.xml.internal.resolver.Catalog $r1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader;
+
+        $r1 = r0.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.Catalog catalog>;
+
+        return $r1;
+    }
+
+    public void <init>()
+    {
+        com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader r0;
+        java.util.Stack $r1, $r2, $r3;
+
+        r0 := @this: com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.resolver.readers.SAXCatalogReader: void <init>()>();
+
+        r0.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.Catalog catalog> = null;
+
+        $r1 = new java.util.Stack;
+
+        specialinvoke $r1.<java.util.Stack: void <init>()>();
+
+        r0.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.util.Stack baseURIStack> = $r1;
+
+        $r2 = new java.util.Stack;
+
+        specialinvoke $r2.<java.util.Stack: void <init>()>();
+
+        r0.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.util.Stack overrideStack> = $r2;
+
+        $r3 = new java.util.Stack;
+
+        specialinvoke $r3.<java.util.Stack: void <init>()>();
+
+        r0.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.util.Stack namespaceStack> = $r3;
+
+        return;
+    }
+
+    public void <init>(javax.xml.parsers.SAXParserFactory, com.sun.org.apache.xml.internal.resolver.Catalog)
+    {
+        javax.xml.parsers.SAXParserFactory r1;
+        com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader r0;
+        com.sun.org.apache.xml.internal.resolver.Catalog r5;
+        java.util.Stack $r2, $r3, $r4;
+
+        r0 := @this: com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader;
+
+        r1 := @parameter0: javax.xml.parsers.SAXParserFactory;
+
+        r5 := @parameter1: com.sun.org.apache.xml.internal.resolver.Catalog;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.resolver.readers.SAXCatalogReader: void <init>(javax.xml.parsers.SAXParserFactory)>(r1);
+
+        r0.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.Catalog catalog> = null;
+
+        $r2 = new java.util.Stack;
+
+        specialinvoke $r2.<java.util.Stack: void <init>()>();
+
+        r0.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.util.Stack baseURIStack> = $r2;
+
+        $r3 = new java.util.Stack;
+
+        specialinvoke $r3.<java.util.Stack: void <init>()>();
+
+        r0.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.util.Stack overrideStack> = $r3;
+
+        $r4 = new java.util.Stack;
+
+        specialinvoke $r4.<java.util.Stack: void <init>()>();
+
+        r0.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.util.Stack namespaceStack> = $r4;
+
+        virtualinvoke r0.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: void setCatalog(com.sun.org.apache.xml.internal.resolver.Catalog)>(r5);
+
+        return;
+    }
+
+    protected boolean inExtensionNamespace()
+    {
+        java.util.Enumeration $r2;
+        com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader r0;
+        java.util.Stack $r1;
+        java.lang.Object $r3;
+        java.lang.String r4;
+        boolean $z0, $z1, $z2, z3, $z4;
+
+        r0 := @this: com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader;
+
+        z3 = 0;
+
+        $r1 = r0.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.util.Stack namespaceStack>;
+
+        $r2 = virtualinvoke $r1.<java.util.Stack: java.util.Enumeration elements()>();
+
+     label1:
+        if z3 != 0 goto label6;
+
+        $z0 = interfaceinvoke $r2.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label6;
+
+        $r3 = interfaceinvoke $r2.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r4 = (java.lang.String) $r3;
+
+        if r4 != null goto label2;
+
+        z3 = 1;
+
+        goto label5;
+
+     label2:
+        $z1 = virtualinvoke r4.<java.lang.String: boolean equals(java.lang.Object)>("urn:oasis:names:tc:entity:xmlns:tr9401:catalog");
+
+        if $z1 != 0 goto label3;
+
+        $z2 = virtualinvoke r4.<java.lang.String: boolean equals(java.lang.Object)>("urn:oasis:names:tc:entity:xmlns:xml:catalog");
+
+        if $z2 != 0 goto label3;
+
+        $z4 = 1;
+
+        goto label4;
+
+     label3:
+        $z4 = 0;
+
+     label4:
+        z3 = $z4;
+
+     label5:
+        goto label1;
+
+     label6:
+        return z3;
+    }
+
+    public void setDocumentLocator(org.xml.sax.Locator)
+    {
+        com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader r0;
+        org.xml.sax.Locator r1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader;
+
+        r1 := @parameter0: org.xml.sax.Locator;
+
+        return;
+    }
+
+    public void startDocument() throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader r0;
+        java.lang.String $r3, $r6;
+        com.sun.org.apache.xml.internal.resolver.Catalog $r1, $r4;
+        java.util.Stack $r2, $r5;
+
+        r0 := @this: com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader;
+
+        $r2 = r0.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.util.Stack baseURIStack>;
+
+        $r1 = r0.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.Catalog catalog>;
+
+        $r3 = virtualinvoke $r1.<com.sun.org.apache.xml.internal.resolver.Catalog: java.lang.String getCurrentBase()>();
+
+        virtualinvoke $r2.<java.util.Stack: java.lang.Object push(java.lang.Object)>($r3);
+
+        $r5 = r0.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.util.Stack overrideStack>;
+
+        $r4 = r0.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.Catalog catalog>;
+
+        $r6 = virtualinvoke $r4.<com.sun.org.apache.xml.internal.resolver.Catalog: java.lang.String getDefaultOverride()>();
+
+        virtualinvoke $r5.<java.util.Stack: java.lang.Object push(java.lang.Object)>($r6);
+
+        return;
+    }
+
+    public void endDocument() throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader;
+
+        return;
+    }
+
+    public void startElement(java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes) throws org.xml.sax.SAXException
+    {
+        java.util.Vector r122, $r131, $r133, $r135, $r138;
+        com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader r1;
+        com.sun.org.apache.xml.internal.resolver.Catalog $r13, $r30, $r42, $r100, $r105, $r128;
+        java.util.Stack $r3, $r7, $r8, $r27, $r33, $r34, $r37, $r38, $r102, $r125;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, i10, i11, $i12, i13, $i15, $i17, $i19, $i21;
+        java.lang.Object $r9, $r35, $r39;
+        com.sun.org.apache.xml.internal.resolver.CatalogEntry $r132, $r134, $r136, $r137, $r139;
+        java.lang.String r2, $r4, $r6, r10, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26, $r31, $r32, $r36, $r43, $r44, $r46, $r47, $r48, $r49, $r51, $r52, $r53, $r54, $r56, $r57, $r58, $r59, $r61, $r62, $r63, $r65, $r66, $r67, $r68, $r70, $r71, $r72, $r73, $r75, $r76, $r77, $r78, $r80, $r81, $r82, $r83, $r85, $r86, $r87, $r88, $r90, $r91, $r92, $r93, $r95, $r96, $r97, $r98, $r101, r121, r124;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19, $z20, $z21, $z22, $z23, $z24, $z25, $z26, $z27, $z28, $z29, $z30, $z31, $z32, $z33, $z34, $z35, $z36, $z37;
+        com.sun.org.apache.xml.internal.resolver.helpers.Debug $r11, $r28, $r40, $r45, $r50, $r55, $r60, $r64, $r69, $r74, $r79, $r84, $r89, $r94, $r99, $r103, $r107, $r108, $r110, $r111, $r113, $r114, $r116, $r117, $r119, $r120, $r126;
+        com.sun.org.apache.xml.internal.resolver.CatalogException $r106, $r109, $r112, $r115, $r118;
+        org.xml.sax.Attributes r5;
+
+        r1 := @this: com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader;
+
+        r2 := @parameter0: java.lang.String;
+
+        r10 := @parameter1: java.lang.String;
+
+        r121 := @parameter2: java.lang.String;
+
+        r5 := @parameter3: org.xml.sax.Attributes;
+
+        $i15 = (int) -1;
+
+        i10 = $i15;
+
+        $r131 = new java.util.Vector;
+
+        specialinvoke $r131.<java.util.Vector: void <init>()>();
+
+        r122 = $r131;
+
+        $r3 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.util.Stack namespaceStack>;
+
+        virtualinvoke $r3.<java.util.Stack: java.lang.Object push(java.lang.Object)>(r2);
+
+        $z0 = virtualinvoke r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: boolean inExtensionNamespace()>();
+
+        if r2 == null goto label37;
+
+        $r31 = "urn:oasis:names:tc:entity:xmlns:xml:catalog";
+
+        $z9 = virtualinvoke $r31.<java.lang.String: boolean equals(java.lang.Object)>(r2);
+
+        if $z9 == 0 goto label37;
+
+        if $z0 != 0 goto label37;
+
+        $r32 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("xml:base");
+
+        if $r32 == null goto label06;
+
+        $r101 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("xml:base");
+
+        i11 = <com.sun.org.apache.xml.internal.resolver.Catalog: int BASE>;
+
+        virtualinvoke $r131.<java.util.Vector: boolean add(java.lang.Object)>($r101);
+
+        $r102 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.util.Stack baseURIStack>;
+
+        virtualinvoke $r102.<java.util.Stack: java.lang.Object push(java.lang.Object)>($r101);
+
+        $r103 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        virtualinvoke $r103.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String)>(4, "xml:base", $r101);
+
+     label01:
+        $r132 = new com.sun.org.apache.xml.internal.resolver.CatalogEntry;
+
+        specialinvoke $r132.<com.sun.org.apache.xml.internal.resolver.CatalogEntry: void <init>(int,java.util.Vector)>(i11, $r131);
+
+        $r105 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.Catalog catalog>;
+
+        virtualinvoke $r105.<com.sun.org.apache.xml.internal.resolver.Catalog: void addEntry(com.sun.org.apache.xml.internal.resolver.CatalogEntry)>($r132);
+
+     label02:
+        goto label05;
+
+     label03:
+        $r118 := @caughtexception;
+
+        $i8 = virtualinvoke $r118.<com.sun.org.apache.xml.internal.resolver.CatalogException: int getExceptionType()>();
+
+        if $i8 != 3 goto label04;
+
+        $r120 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        virtualinvoke $r120.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String)>(1, "Invalid catalog entry type", r10);
+
+        goto label05;
+
+     label04:
+        $i9 = virtualinvoke $r118.<com.sun.org.apache.xml.internal.resolver.CatalogException: int getExceptionType()>();
+
+        if $i9 != 2 goto label05;
+
+        $r119 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        virtualinvoke $r119.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String)>(1, "Invalid catalog entry (base)", r10);
+
+     label05:
+        $i17 = (int) -1;
+
+        i10 = $i17;
+
+        $r133 = new java.util.Vector;
+
+        specialinvoke $r133.<java.util.Vector: void <init>()>();
+
+        r122 = $r133;
+
+        goto label07;
+
+     label06:
+        $r34 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.util.Stack baseURIStack>;
+
+        $r33 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.util.Stack baseURIStack>;
+
+        $r35 = virtualinvoke $r33.<java.util.Stack: java.lang.Object peek()>();
+
+        virtualinvoke $r34.<java.util.Stack: java.lang.Object push(java.lang.Object)>($r35);
+
+     label07:
+        $z10 = virtualinvoke r10.<java.lang.String: boolean equals(java.lang.Object)>("catalog");
+
+        if $z10 != 0 goto label08;
+
+        $z36 = virtualinvoke r10.<java.lang.String: boolean equals(java.lang.Object)>("group");
+
+        if $z36 == 0 goto label17;
+
+     label08:
+        $r36 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("prefer");
+
+        if $r36 == null goto label17;
+
+        $r98 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("prefer");
+
+        $z34 = virtualinvoke $r98.<java.lang.String: boolean equals(java.lang.Object)>("public");
+
+        if $z34 == 0 goto label09;
+
+        r124 = "yes";
+
+        goto label11;
+
+     label09:
+        $z35 = virtualinvoke $r98.<java.lang.String: boolean equals(java.lang.Object)>("system");
+
+        if $z35 == 0 goto label10;
+
+        r124 = "no";
+
+        goto label11;
+
+     label10:
+        $r99 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        virtualinvoke $r99.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String)>(1, "Invalid prefer: must be \'system\' or \'public\'", r10);
+
+        $r100 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.Catalog catalog>;
+
+        r124 = virtualinvoke $r100.<com.sun.org.apache.xml.internal.resolver.Catalog: java.lang.String getDefaultOverride()>();
+
+     label11:
+        $i12 = <com.sun.org.apache.xml.internal.resolver.Catalog: int OVERRIDE>;
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>(r124);
+
+        $r125 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.util.Stack overrideStack>;
+
+        virtualinvoke $r125.<java.util.Stack: java.lang.Object push(java.lang.Object)>(r124);
+
+        $r126 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        virtualinvoke $r126.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String)>(4, "override", r124);
+
+     label12:
+        $r134 = new com.sun.org.apache.xml.internal.resolver.CatalogEntry;
+
+        specialinvoke $r134.<com.sun.org.apache.xml.internal.resolver.CatalogEntry: void <init>(int,java.util.Vector)>($i12, r122);
+
+        $r128 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.Catalog catalog>;
+
+        virtualinvoke $r128.<com.sun.org.apache.xml.internal.resolver.Catalog: void addEntry(com.sun.org.apache.xml.internal.resolver.CatalogEntry)>($r134);
+
+     label13:
+        goto label16;
+
+     label14:
+        $r115 := @caughtexception;
+
+        $i6 = virtualinvoke $r115.<com.sun.org.apache.xml.internal.resolver.CatalogException: int getExceptionType()>();
+
+        if $i6 != 3 goto label15;
+
+        $r117 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        virtualinvoke $r117.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String)>(1, "Invalid catalog entry type", r10);
+
+        goto label16;
+
+     label15:
+        $i7 = virtualinvoke $r115.<com.sun.org.apache.xml.internal.resolver.CatalogException: int getExceptionType()>();
+
+        if $i7 != 2 goto label16;
+
+        $r116 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        virtualinvoke $r116.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String)>(1, "Invalid catalog entry (override)", r10);
+
+     label16:
+        $i19 = (int) -1;
+
+        i10 = $i19;
+
+        $r135 = new java.util.Vector;
+
+        specialinvoke $r135.<java.util.Vector: void <init>()>();
+
+        r122 = $r135;
+
+        goto label18;
+
+     label17:
+        $r38 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.util.Stack overrideStack>;
+
+        $r37 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.util.Stack overrideStack>;
+
+        $r39 = virtualinvoke $r37.<java.util.Stack: java.lang.Object peek()>();
+
+        virtualinvoke $r38.<java.util.Stack: java.lang.Object push(java.lang.Object)>($r39);
+
+     label18:
+        $z37 = virtualinvoke r10.<java.lang.String: boolean equals(java.lang.Object)>("delegatePublic");
+
+        if $z37 == 0 goto label19;
+
+        $z33 = virtualinvoke r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: boolean checkAttributes(org.xml.sax.Attributes,java.lang.String,java.lang.String)>(r5, "publicIdStartString", "catalog");
+
+        if $z33 == 0 goto label32;
+
+        i10 = <com.sun.org.apache.xml.internal.resolver.Catalog: int DELEGATE_PUBLIC>;
+
+        $r92 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("publicIdStartString");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r92);
+
+        $r93 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("catalog");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r93);
+
+        $r94 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        $r95 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("publicIdStartString");
+
+        $r96 = staticinvoke <com.sun.org.apache.xml.internal.resolver.helpers.PublicId: java.lang.String normalize(java.lang.String)>($r95);
+
+        $r97 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("catalog");
+
+        virtualinvoke $r94.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String,java.lang.String)>(4, "delegatePublic", $r96, $r97);
+
+        goto label32;
+
+     label19:
+        $z11 = virtualinvoke r10.<java.lang.String: boolean equals(java.lang.Object)>("delegateSystem");
+
+        if $z11 == 0 goto label20;
+
+        $z32 = virtualinvoke r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: boolean checkAttributes(org.xml.sax.Attributes,java.lang.String,java.lang.String)>(r5, "systemIdStartString", "catalog");
+
+        if $z32 == 0 goto label32;
+
+        i10 = <com.sun.org.apache.xml.internal.resolver.Catalog: int DELEGATE_SYSTEM>;
+
+        $r87 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("systemIdStartString");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r87);
+
+        $r88 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("catalog");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r88);
+
+        $r89 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        $r90 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("systemIdStartString");
+
+        $r91 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("catalog");
+
+        virtualinvoke $r89.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String,java.lang.String)>(4, "delegateSystem", $r90, $r91);
+
+        goto label32;
+
+     label20:
+        $z12 = virtualinvoke r10.<java.lang.String: boolean equals(java.lang.Object)>("delegateURI");
+
+        if $z12 == 0 goto label21;
+
+        $z31 = virtualinvoke r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: boolean checkAttributes(org.xml.sax.Attributes,java.lang.String,java.lang.String)>(r5, "uriStartString", "catalog");
+
+        if $z31 == 0 goto label32;
+
+        i10 = <com.sun.org.apache.xml.internal.resolver.Catalog: int DELEGATE_URI>;
+
+        $r82 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("uriStartString");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r82);
+
+        $r83 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("catalog");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r83);
+
+        $r84 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        $r85 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("uriStartString");
+
+        $r86 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("catalog");
+
+        virtualinvoke $r84.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String,java.lang.String)>(4, "delegateURI", $r85, $r86);
+
+        goto label32;
+
+     label21:
+        $z13 = virtualinvoke r10.<java.lang.String: boolean equals(java.lang.Object)>("rewriteSystem");
+
+        if $z13 == 0 goto label22;
+
+        $z30 = virtualinvoke r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: boolean checkAttributes(org.xml.sax.Attributes,java.lang.String,java.lang.String)>(r5, "systemIdStartString", "rewritePrefix");
+
+        if $z30 == 0 goto label32;
+
+        i10 = <com.sun.org.apache.xml.internal.resolver.Catalog: int REWRITE_SYSTEM>;
+
+        $r77 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("systemIdStartString");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r77);
+
+        $r78 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("rewritePrefix");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r78);
+
+        $r79 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        $r80 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("systemIdStartString");
+
+        $r81 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("rewritePrefix");
+
+        virtualinvoke $r79.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String,java.lang.String)>(4, "rewriteSystem", $r80, $r81);
+
+        goto label32;
+
+     label22:
+        $z14 = virtualinvoke r10.<java.lang.String: boolean equals(java.lang.Object)>("systemSuffix");
+
+        if $z14 == 0 goto label23;
+
+        $z29 = virtualinvoke r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: boolean checkAttributes(org.xml.sax.Attributes,java.lang.String,java.lang.String)>(r5, "systemIdSuffix", "uri");
+
+        if $z29 == 0 goto label32;
+
+        i10 = <com.sun.org.apache.xml.internal.resolver.Catalog: int SYSTEM_SUFFIX>;
+
+        $r72 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("systemIdSuffix");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r72);
+
+        $r73 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("uri");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r73);
+
+        $r74 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        $r75 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("systemIdSuffix");
+
+        $r76 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("uri");
+
+        virtualinvoke $r74.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String,java.lang.String)>(4, "systemSuffix", $r75, $r76);
+
+        goto label32;
+
+     label23:
+        $z15 = virtualinvoke r10.<java.lang.String: boolean equals(java.lang.Object)>("rewriteURI");
+
+        if $z15 == 0 goto label24;
+
+        $z28 = virtualinvoke r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: boolean checkAttributes(org.xml.sax.Attributes,java.lang.String,java.lang.String)>(r5, "uriStartString", "rewritePrefix");
+
+        if $z28 == 0 goto label32;
+
+        i10 = <com.sun.org.apache.xml.internal.resolver.Catalog: int REWRITE_URI>;
+
+        $r67 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("uriStartString");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r67);
+
+        $r68 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("rewritePrefix");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r68);
+
+        $r69 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        $r70 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("uriStartString");
+
+        $r71 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("rewritePrefix");
+
+        virtualinvoke $r69.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String,java.lang.String)>(4, "rewriteURI", $r70, $r71);
+
+        goto label32;
+
+     label24:
+        $z16 = virtualinvoke r10.<java.lang.String: boolean equals(java.lang.Object)>("uriSuffix");
+
+        if $z16 == 0 goto label25;
+
+        $z27 = virtualinvoke r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: boolean checkAttributes(org.xml.sax.Attributes,java.lang.String,java.lang.String)>(r5, "uriSuffix", "uri");
+
+        if $z27 == 0 goto label32;
+
+        i10 = <com.sun.org.apache.xml.internal.resolver.Catalog: int URI_SUFFIX>;
+
+        $r62 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("uriSuffix");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r62);
+
+        $r63 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("uri");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r63);
+
+        $r64 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        $r65 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("uriSuffix");
+
+        $r66 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("uri");
+
+        virtualinvoke $r64.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String,java.lang.String)>(4, "uriSuffix", $r65, $r66);
+
+        goto label32;
+
+     label25:
+        $z17 = virtualinvoke r10.<java.lang.String: boolean equals(java.lang.Object)>("nextCatalog");
+
+        if $z17 == 0 goto label26;
+
+        $z26 = virtualinvoke r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: boolean checkAttributes(org.xml.sax.Attributes,java.lang.String)>(r5, "catalog");
+
+        if $z26 == 0 goto label32;
+
+        i10 = <com.sun.org.apache.xml.internal.resolver.Catalog: int CATALOG>;
+
+        $r59 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("catalog");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r59);
+
+        $r60 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        $r61 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("catalog");
+
+        virtualinvoke $r60.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String)>(4, "nextCatalog", $r61);
+
+        goto label32;
+
+     label26:
+        $z18 = virtualinvoke r10.<java.lang.String: boolean equals(java.lang.Object)>("public");
+
+        if $z18 == 0 goto label27;
+
+        $z25 = virtualinvoke r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: boolean checkAttributes(org.xml.sax.Attributes,java.lang.String,java.lang.String)>(r5, "publicId", "uri");
+
+        if $z25 == 0 goto label32;
+
+        i10 = <com.sun.org.apache.xml.internal.resolver.Catalog: int PUBLIC>;
+
+        $r53 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("publicId");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r53);
+
+        $r54 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("uri");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r54);
+
+        $r55 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        $r56 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("publicId");
+
+        $r57 = staticinvoke <com.sun.org.apache.xml.internal.resolver.helpers.PublicId: java.lang.String normalize(java.lang.String)>($r56);
+
+        $r58 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("uri");
+
+        virtualinvoke $r55.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String,java.lang.String)>(4, "public", $r57, $r58);
+
+        goto label32;
+
+     label27:
+        $z19 = virtualinvoke r10.<java.lang.String: boolean equals(java.lang.Object)>("system");
+
+        if $z19 == 0 goto label28;
+
+        $z24 = virtualinvoke r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: boolean checkAttributes(org.xml.sax.Attributes,java.lang.String,java.lang.String)>(r5, "systemId", "uri");
+
+        if $z24 == 0 goto label32;
+
+        i10 = <com.sun.org.apache.xml.internal.resolver.Catalog: int SYSTEM>;
+
+        $r48 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("systemId");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r48);
+
+        $r49 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("uri");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r49);
+
+        $r50 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        $r51 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("systemId");
+
+        $r52 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("uri");
+
+        virtualinvoke $r50.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String,java.lang.String)>(4, "system", $r51, $r52);
+
+        goto label32;
+
+     label28:
+        $z20 = virtualinvoke r10.<java.lang.String: boolean equals(java.lang.Object)>("uri");
+
+        if $z20 == 0 goto label29;
+
+        $z23 = virtualinvoke r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: boolean checkAttributes(org.xml.sax.Attributes,java.lang.String,java.lang.String)>(r5, "name", "uri");
+
+        if $z23 == 0 goto label32;
+
+        i10 = <com.sun.org.apache.xml.internal.resolver.Catalog: int URI>;
+
+        $r43 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("name");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r43);
+
+        $r44 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("uri");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r44);
+
+        $r45 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        $r46 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("name");
+
+        $r47 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("uri");
+
+        virtualinvoke $r45.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String,java.lang.String)>(4, "uri", $r46, $r47);
+
+        goto label32;
+
+     label29:
+        $z21 = virtualinvoke r10.<java.lang.String: boolean equals(java.lang.Object)>("catalog");
+
+        if $z21 == 0 goto label30;
+
+        goto label32;
+
+     label30:
+        $z22 = virtualinvoke r10.<java.lang.String: boolean equals(java.lang.Object)>("group");
+
+        if $z22 == 0 goto label31;
+
+        goto label32;
+
+     label31:
+        $r40 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        virtualinvoke $r40.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String)>(1, "Invalid catalog entry type", r10);
+
+     label32:
+        if i10 < 0 goto label37;
+
+     label33:
+        $r136 = new com.sun.org.apache.xml.internal.resolver.CatalogEntry;
+
+        specialinvoke $r136.<com.sun.org.apache.xml.internal.resolver.CatalogEntry: void <init>(int,java.util.Vector)>(i10, r122);
+
+        $r42 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.Catalog catalog>;
+
+        virtualinvoke $r42.<com.sun.org.apache.xml.internal.resolver.Catalog: void addEntry(com.sun.org.apache.xml.internal.resolver.CatalogEntry)>($r136);
+
+     label34:
+        goto label37;
+
+     label35:
+        $r112 := @caughtexception;
+
+        $i4 = virtualinvoke $r112.<com.sun.org.apache.xml.internal.resolver.CatalogException: int getExceptionType()>();
+
+        if $i4 != 3 goto label36;
+
+        $r114 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        virtualinvoke $r114.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String)>(1, "Invalid catalog entry type", r10);
+
+        goto label37;
+
+     label36:
+        $i5 = virtualinvoke $r112.<com.sun.org.apache.xml.internal.resolver.CatalogException: int getExceptionType()>();
+
+        if $i5 != 2 goto label37;
+
+        $r113 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        virtualinvoke $r113.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String)>(1, "Invalid catalog entry", r10);
+
+     label37:
+        if r2 == null goto label57;
+
+        $r4 = "urn:oasis:names:tc:entity:xmlns:tr9401:catalog";
+
+        $z1 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>(r2);
+
+        if $z1 == 0 goto label57;
+
+        if $z0 != 0 goto label57;
+
+        $r6 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("xml:base");
+
+        if $r6 == null goto label43;
+
+        $r26 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("xml:base");
+
+        i13 = <com.sun.org.apache.xml.internal.resolver.Catalog: int BASE>;
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r26);
+
+        $r27 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.util.Stack baseURIStack>;
+
+        virtualinvoke $r27.<java.util.Stack: java.lang.Object push(java.lang.Object)>($r26);
+
+        $r28 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        virtualinvoke $r28.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String)>(4, "xml:base", $r26);
+
+     label38:
+        $r137 = new com.sun.org.apache.xml.internal.resolver.CatalogEntry;
+
+        specialinvoke $r137.<com.sun.org.apache.xml.internal.resolver.CatalogEntry: void <init>(int,java.util.Vector)>(i13, r122);
+
+        $r30 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.Catalog catalog>;
+
+        virtualinvoke $r30.<com.sun.org.apache.xml.internal.resolver.Catalog: void addEntry(com.sun.org.apache.xml.internal.resolver.CatalogEntry)>($r137);
+
+     label39:
+        goto label42;
+
+     label40:
+        $r109 := @caughtexception;
+
+        $i2 = virtualinvoke $r109.<com.sun.org.apache.xml.internal.resolver.CatalogException: int getExceptionType()>();
+
+        if $i2 != 3 goto label41;
+
+        $r111 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        virtualinvoke $r111.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String)>(1, "Invalid catalog entry type", r10);
+
+        goto label42;
+
+     label41:
+        $i3 = virtualinvoke $r109.<com.sun.org.apache.xml.internal.resolver.CatalogException: int getExceptionType()>();
+
+        if $i3 != 2 goto label42;
+
+        $r110 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        virtualinvoke $r110.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String)>(1, "Invalid catalog entry (base)", r10);
+
+     label42:
+        $i21 = (int) -1;
+
+        i10 = $i21;
+
+        $r138 = new java.util.Vector;
+
+        specialinvoke $r138.<java.util.Vector: void <init>()>();
+
+        r122 = $r138;
+
+        goto label44;
+
+     label43:
+        $r8 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.util.Stack baseURIStack>;
+
+        $r7 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.util.Stack baseURIStack>;
+
+        $r9 = virtualinvoke $r7.<java.util.Stack: java.lang.Object peek()>();
+
+        virtualinvoke $r8.<java.util.Stack: java.lang.Object push(java.lang.Object)>($r9);
+
+     label44:
+        $z2 = virtualinvoke r10.<java.lang.String: boolean equals(java.lang.Object)>("doctype");
+
+        if $z2 == 0 goto label45;
+
+        i10 = <com.sun.org.apache.xml.internal.resolver.Catalog: int DOCTYPE>;
+
+        $r24 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("name");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r24);
+
+        $r25 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("uri");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r25);
+
+        goto label52;
+
+     label45:
+        $z3 = virtualinvoke r10.<java.lang.String: boolean equals(java.lang.Object)>("document");
+
+        if $z3 == 0 goto label46;
+
+        i10 = <com.sun.org.apache.xml.internal.resolver.Catalog: int DOCUMENT>;
+
+        $r23 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("uri");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r23);
+
+        goto label52;
+
+     label46:
+        $z4 = virtualinvoke r10.<java.lang.String: boolean equals(java.lang.Object)>("dtddecl");
+
+        if $z4 == 0 goto label47;
+
+        i10 = <com.sun.org.apache.xml.internal.resolver.Catalog: int DTDDECL>;
+
+        $r21 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("publicId");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r21);
+
+        $r22 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("uri");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r22);
+
+        goto label52;
+
+     label47:
+        $z5 = virtualinvoke r10.<java.lang.String: boolean equals(java.lang.Object)>("entity");
+
+        if $z5 == 0 goto label48;
+
+        i10 = <com.sun.org.apache.xml.internal.resolver.Catalog: int ENTITY>;
+
+        $r19 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("name");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r19);
+
+        $r20 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("uri");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r20);
+
+        goto label52;
+
+     label48:
+        $z6 = virtualinvoke r10.<java.lang.String: boolean equals(java.lang.Object)>("linktype");
+
+        if $z6 == 0 goto label49;
+
+        i10 = <com.sun.org.apache.xml.internal.resolver.Catalog: int LINKTYPE>;
+
+        $r17 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("name");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r17);
+
+        $r18 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("uri");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r18);
+
+        goto label52;
+
+     label49:
+        $z7 = virtualinvoke r10.<java.lang.String: boolean equals(java.lang.Object)>("notation");
+
+        if $z7 == 0 goto label50;
+
+        i10 = <com.sun.org.apache.xml.internal.resolver.Catalog: int NOTATION>;
+
+        $r15 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("name");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r15);
+
+        $r16 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("uri");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r16);
+
+        goto label52;
+
+     label50:
+        $z8 = virtualinvoke r10.<java.lang.String: boolean equals(java.lang.Object)>("sgmldecl");
+
+        if $z8 == 0 goto label51;
+
+        i10 = <com.sun.org.apache.xml.internal.resolver.Catalog: int SGMLDECL>;
+
+        $r14 = interfaceinvoke r5.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("uri");
+
+        virtualinvoke r122.<java.util.Vector: boolean add(java.lang.Object)>($r14);
+
+        goto label52;
+
+     label51:
+        $r11 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        virtualinvoke $r11.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String)>(1, "Invalid catalog entry type", r10);
+
+     label52:
+        if i10 < 0 goto label57;
+
+     label53:
+        $r139 = new com.sun.org.apache.xml.internal.resolver.CatalogEntry;
+
+        specialinvoke $r139.<com.sun.org.apache.xml.internal.resolver.CatalogEntry: void <init>(int,java.util.Vector)>(i10, r122);
+
+        $r13 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.Catalog catalog>;
+
+        virtualinvoke $r13.<com.sun.org.apache.xml.internal.resolver.Catalog: void addEntry(com.sun.org.apache.xml.internal.resolver.CatalogEntry)>($r139);
+
+     label54:
+        goto label57;
+
+     label55:
+        $r106 := @caughtexception;
+
+        $i0 = virtualinvoke $r106.<com.sun.org.apache.xml.internal.resolver.CatalogException: int getExceptionType()>();
+
+        if $i0 != 3 goto label56;
+
+        $r108 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        virtualinvoke $r108.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String)>(1, "Invalid catalog entry type", r10);
+
+        goto label57;
+
+     label56:
+        $i1 = virtualinvoke $r106.<com.sun.org.apache.xml.internal.resolver.CatalogException: int getExceptionType()>();
+
+        if $i1 != 2 goto label57;
+
+        $r107 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        virtualinvoke $r107.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String)>(1, "Invalid catalog entry", r10);
+
+     label57:
+        return;
+
+        catch com.sun.org.apache.xml.internal.resolver.CatalogException from label01 to label02 with label03;
+        catch com.sun.org.apache.xml.internal.resolver.CatalogException from label12 to label13 with label14;
+        catch com.sun.org.apache.xml.internal.resolver.CatalogException from label33 to label34 with label35;
+        catch com.sun.org.apache.xml.internal.resolver.CatalogException from label38 to label39 with label40;
+        catch com.sun.org.apache.xml.internal.resolver.CatalogException from label53 to label54 with label55;
+    }
+
+    public boolean checkAttributes(org.xml.sax.Attributes, java.lang.String)
+    {
+        com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader r3;
+        com.sun.org.apache.xml.internal.resolver.helpers.Debug $r5;
+        org.xml.sax.Attributes r0;
+        java.lang.StringBuilder $r4, $r6, $r7, $r8;
+        java.lang.String r1, $r2, $r9;
+
+        r3 := @this: com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader;
+
+        r0 := @parameter0: org.xml.sax.Attributes;
+
+        r1 := @parameter1: java.lang.String;
+
+        $r2 = interfaceinvoke r0.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>(r1);
+
+        if $r2 != null goto label1;
+
+        $r5 = r3.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error: required attribute ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" missing.");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String)>(1, $r9);
+
+        return 0;
+
+     label1:
+        return 1;
+    }
+
+    public boolean checkAttributes(org.xml.sax.Attributes, java.lang.String, java.lang.String)
+    {
+        org.xml.sax.Attributes r1;
+        com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader r0;
+        java.lang.String r2, r3;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader;
+
+        r1 := @parameter0: org.xml.sax.Attributes;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.String;
+
+        $z0 = virtualinvoke r0.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: boolean checkAttributes(org.xml.sax.Attributes,java.lang.String)>(r1, r2);
+
+        if $z0 == 0 goto label1;
+
+        $z1 = virtualinvoke r0.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: boolean checkAttributes(org.xml.sax.Attributes,java.lang.String)>(r1, r3);
+
+        if $z1 == 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+    }
+
+    public void endElement(java.lang.String, java.lang.String, java.lang.String) throws org.xml.sax.SAXException
+    {
+        java.util.Vector $r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        com.sun.org.apache.xml.internal.resolver.Catalog $r12, $r22;
+        com.sun.org.apache.xml.internal.resolver.helpers.Debug $r10, $r20, $r27, $r28, $r30, $r31;
+        java.util.Stack $r5, $r7, $r9, $r16, $r18, $r33;
+        com.sun.org.apache.xml.internal.resolver.CatalogException $r26, $r29;
+        com.sun.org.apache.xml.internal.resolver.CatalogEntry $r11, $r21;
+        int $i0, $i1, $i2, $i3, i4, i5;
+        java.lang.String r2, $r3, r4, $r13, $r14, $r15, $r23, $r24, $r25, r32;
+        com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader r1;
+        java.lang.Object $r6, $r8, $r17, $r19;
+
+        r1 := @this: com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader;
+
+        r2 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.lang.String;
+
+        r32 := @parameter2: java.lang.String;
+
+        $r0 = new java.util.Vector;
+
+        specialinvoke $r0.<java.util.Vector: void <init>()>();
+
+        $z0 = virtualinvoke r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: boolean inExtensionNamespace()>();
+
+        if r2 == null goto label06;
+
+        if $z0 != 0 goto label06;
+
+        $r15 = "urn:oasis:names:tc:entity:xmlns:xml:catalog";
+
+        $z5 = virtualinvoke $r15.<java.lang.String: boolean equals(java.lang.Object)>(r2);
+
+        if $z5 != 0 goto label01;
+
+        $r23 = "urn:oasis:names:tc:entity:xmlns:tr9401:catalog";
+
+        $z7 = virtualinvoke $r23.<java.lang.String: boolean equals(java.lang.Object)>(r2);
+
+        if $z7 == 0 goto label06;
+
+     label01:
+        $r16 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.util.Stack baseURIStack>;
+
+        $r17 = virtualinvoke $r16.<java.util.Stack: java.lang.Object pop()>();
+
+        $r24 = (java.lang.String) $r17;
+
+        $r18 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.util.Stack baseURIStack>;
+
+        $r19 = virtualinvoke $r18.<java.util.Stack: java.lang.Object peek()>();
+
+        $r25 = (java.lang.String) $r19;
+
+        $z6 = virtualinvoke $r25.<java.lang.String: boolean equals(java.lang.Object)>($r24);
+
+        if $z6 != 0 goto label06;
+
+        i4 = <com.sun.org.apache.xml.internal.resolver.Catalog: int BASE>;
+
+        virtualinvoke $r0.<java.util.Vector: boolean add(java.lang.Object)>($r25);
+
+        $r20 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        virtualinvoke $r20.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String)>(4, "(reset) xml:base", $r25);
+
+     label02:
+        $r21 = new com.sun.org.apache.xml.internal.resolver.CatalogEntry;
+
+        specialinvoke $r21.<com.sun.org.apache.xml.internal.resolver.CatalogEntry: void <init>(int,java.util.Vector)>(i4, $r0);
+
+        $r22 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.Catalog catalog>;
+
+        virtualinvoke $r22.<com.sun.org.apache.xml.internal.resolver.Catalog: void addEntry(com.sun.org.apache.xml.internal.resolver.CatalogEntry)>($r21);
+
+     label03:
+        goto label06;
+
+     label04:
+        $r29 := @caughtexception;
+
+        $i2 = virtualinvoke $r29.<com.sun.org.apache.xml.internal.resolver.CatalogException: int getExceptionType()>();
+
+        if $i2 != 3 goto label05;
+
+        $r31 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        virtualinvoke $r31.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String)>(1, "Invalid catalog entry type", r4);
+
+        goto label06;
+
+     label05:
+        $i3 = virtualinvoke $r29.<com.sun.org.apache.xml.internal.resolver.CatalogException: int getExceptionType()>();
+
+        if $i3 != 2 goto label06;
+
+        $r30 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        virtualinvoke $r30.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String)>(1, "Invalid catalog entry (rbase)", r4);
+
+     label06:
+        if r2 == null goto label12;
+
+        $r3 = "urn:oasis:names:tc:entity:xmlns:xml:catalog";
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>(r2);
+
+        if $z1 == 0 goto label12;
+
+        if $z0 != 0 goto label12;
+
+        $z2 = virtualinvoke r4.<java.lang.String: boolean equals(java.lang.Object)>("catalog");
+
+        if $z2 != 0 goto label07;
+
+        $z4 = virtualinvoke r4.<java.lang.String: boolean equals(java.lang.Object)>("group");
+
+        if $z4 == 0 goto label12;
+
+     label07:
+        $r5 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.util.Stack overrideStack>;
+
+        $r6 = virtualinvoke $r5.<java.util.Stack: java.lang.Object pop()>();
+
+        $r13 = (java.lang.String) $r6;
+
+        $r7 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.util.Stack overrideStack>;
+
+        $r8 = virtualinvoke $r7.<java.util.Stack: java.lang.Object peek()>();
+
+        $r14 = (java.lang.String) $r8;
+
+        $z3 = virtualinvoke $r14.<java.lang.String: boolean equals(java.lang.Object)>($r13);
+
+        if $z3 != 0 goto label12;
+
+        i5 = <com.sun.org.apache.xml.internal.resolver.Catalog: int OVERRIDE>;
+
+        virtualinvoke $r0.<java.util.Vector: boolean add(java.lang.Object)>($r14);
+
+        $r9 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.util.Stack overrideStack>;
+
+        virtualinvoke $r9.<java.util.Stack: java.lang.Object push(java.lang.Object)>($r14);
+
+        $r10 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        virtualinvoke $r10.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String)>(4, "(reset) override", $r14);
+
+     label08:
+        $r11 = new com.sun.org.apache.xml.internal.resolver.CatalogEntry;
+
+        specialinvoke $r11.<com.sun.org.apache.xml.internal.resolver.CatalogEntry: void <init>(int,java.util.Vector)>(i5, $r0);
+
+        $r12 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.Catalog catalog>;
+
+        virtualinvoke $r12.<com.sun.org.apache.xml.internal.resolver.Catalog: void addEntry(com.sun.org.apache.xml.internal.resolver.CatalogEntry)>($r11);
+
+     label09:
+        goto label12;
+
+     label10:
+        $r26 := @caughtexception;
+
+        $i0 = virtualinvoke $r26.<com.sun.org.apache.xml.internal.resolver.CatalogException: int getExceptionType()>();
+
+        if $i0 != 3 goto label11;
+
+        $r28 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        virtualinvoke $r28.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String)>(1, "Invalid catalog entry type", r4);
+
+        goto label12;
+
+     label11:
+        $i1 = virtualinvoke $r26.<com.sun.org.apache.xml.internal.resolver.CatalogException: int getExceptionType()>();
+
+        if $i1 != 2 goto label12;
+
+        $r27 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: com.sun.org.apache.xml.internal.resolver.helpers.Debug debug>;
+
+        virtualinvoke $r27.<com.sun.org.apache.xml.internal.resolver.helpers.Debug: void message(int,java.lang.String,java.lang.String)>(1, "Invalid catalog entry (roverride)", r4);
+
+     label12:
+        $r33 = r1.<com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.util.Stack namespaceStack>;
+
+        virtualinvoke $r33.<java.util.Stack: java.lang.Object pop()>();
+
+        return;
+
+        catch com.sun.org.apache.xml.internal.resolver.CatalogException from label02 to label03 with label04;
+        catch com.sun.org.apache.xml.internal.resolver.CatalogException from label08 to label09 with label10;
+    }
+
+    public void characters(char[], int, int) throws org.xml.sax.SAXException
+    {
+        int i0, i1;
+        com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader r0;
+        char[] r1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader;
+
+        r1 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        return;
+    }
+
+    public void ignorableWhitespace(char[], int, int) throws org.xml.sax.SAXException
+    {
+        int i0, i1;
+        com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader r0;
+        char[] r1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader;
+
+        r1 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        return;
+    }
+
+    public void processingInstruction(java.lang.String, java.lang.String) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader r0;
+        java.lang.String r1, r2;
+
+        r0 := @this: com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        return;
+    }
+
+    public void skippedEntity(java.lang.String) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader r0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader;
+
+        r1 := @parameter0: java.lang.String;
+
+        return;
+    }
+
+    public void startPrefixMapping(java.lang.String, java.lang.String) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader r0;
+        java.lang.String r1, r2;
+
+        r0 := @this: com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        return;
+    }
+
+    public void endPrefixMapping(java.lang.String) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader r0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader;
+
+        r1 := @parameter0: java.lang.String;
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.lang.String tr9401NamespaceName> = "urn:oasis:names:tc:entity:xmlns:tr9401:catalog";
+
+        <com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader: java.lang.String namespaceName> = "urn:oasis:names:tc:entity:xmlns:xml:catalog";
+
+        return;
+    }
+}

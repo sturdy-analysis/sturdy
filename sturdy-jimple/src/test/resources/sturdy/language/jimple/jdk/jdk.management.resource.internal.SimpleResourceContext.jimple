@@ -1,0 +1,943 @@
+public class jdk.management.resource.internal.SimpleResourceContext extends java.lang.Object implements jdk.management.resource.ResourceContext
+{
+    private final java.util.concurrent.ConcurrentHashMap meters;
+    private static final jdk.management.resource.internal.WeakKeyConcurrentHashMap currContext;
+    private static final java.util.concurrent.ConcurrentHashMap contexts;
+    private final java.lang.String name;
+    private final int contextId;
+    private volatile boolean closed;
+
+    void <init>(java.lang.String)
+    {
+        jdk.management.resource.internal.SimpleResourceContext r0;
+        int $i0;
+        java.lang.Object $r2;
+        java.lang.String r1, $r3;
+
+        r0 := @this: jdk.management.resource.internal.SimpleResourceContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r1, "name");
+
+        $r3 = (java.lang.String) $r2;
+
+        $i0 = staticinvoke <jdk.management.resource.internal.ResourceNatives: int createResourceContext(java.lang.String)>(r1);
+
+        specialinvoke r0.<jdk.management.resource.internal.SimpleResourceContext: void <init>(java.lang.String,int)>($r3, $i0);
+
+        return;
+    }
+
+    void <init>(java.lang.String, int)
+    {
+        jdk.management.resource.internal.SimpleResourceContext r0;
+        java.util.concurrent.ConcurrentHashMap $r1;
+        int i0;
+        java.lang.Object $r3;
+        java.lang.String r2, $r4;
+
+        r0 := @this: jdk.management.resource.internal.SimpleResourceContext;
+
+        r2 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r1.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r0.<jdk.management.resource.internal.SimpleResourceContext: java.util.concurrent.ConcurrentHashMap meters> = $r1;
+
+        $r3 = staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r2, "name");
+
+        $r4 = (java.lang.String) $r3;
+
+        r0.<jdk.management.resource.internal.SimpleResourceContext: java.lang.String name> = $r4;
+
+        r0.<jdk.management.resource.internal.SimpleResourceContext: int contextId> = i0;
+
+        r0.<jdk.management.resource.internal.SimpleResourceContext: boolean closed> = 0;
+
+        return;
+    }
+
+    public java.lang.String getName()
+    {
+        jdk.management.resource.internal.SimpleResourceContext r0;
+        java.lang.String $r1;
+
+        r0 := @this: jdk.management.resource.internal.SimpleResourceContext;
+
+        $r1 = r0.<jdk.management.resource.internal.SimpleResourceContext: java.lang.String name>;
+
+        return $r1;
+    }
+
+    public static jdk.management.resource.ResourceContext create(java.lang.String)
+    {
+        jdk.management.resource.internal.SimpleResourceContext $r7;
+        java.util.concurrent.ConcurrentHashMap $r1, $r8;
+        java.lang.IllegalArgumentException $r2;
+        jdk.management.resource.ResourceContext r10;
+        int $i0;
+        java.lang.StringBuilder $r3, $r4, $r5;
+        java.lang.Object $r9;
+        java.lang.String r0, $r6;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = <jdk.management.resource.internal.SimpleResourceContext: java.util.concurrent.ConcurrentHashMap contexts>;
+
+        $z0 = virtualinvoke $r1.<java.util.concurrent.ConcurrentHashMap: boolean containsKey(java.lang.Object)>(r0);
+
+        if $z0 != 0 goto label2;
+
+        $r7 = new jdk.management.resource.internal.SimpleResourceContext;
+
+        specialinvoke $r7.<jdk.management.resource.internal.SimpleResourceContext: void <init>(java.lang.String)>(r0);
+
+        $r8 = <jdk.management.resource.internal.SimpleResourceContext: java.util.concurrent.ConcurrentHashMap contexts>;
+
+        $r9 = virtualinvoke $r8.<java.util.concurrent.ConcurrentHashMap: java.lang.Object putIfAbsent(java.lang.Object,java.lang.Object)>(r0, $r7);
+
+        r10 = (jdk.management.resource.ResourceContext) $r9;
+
+        if r10 != null goto label1;
+
+        return $r7;
+
+     label1:
+        $i0 = $r7.<jdk.management.resource.internal.SimpleResourceContext: int contextId>;
+
+        staticinvoke <jdk.management.resource.internal.ResourceNatives: void destroyResourceContext(int,int)>($i0, 0);
+
+     label2:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ResourceContext already exists for name: ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r6);
+
+        throw $r2;
+    }
+
+    public static jdk.management.resource.ResourceContext get(java.lang.String)
+    {
+        java.util.concurrent.ConcurrentHashMap $r1;
+        java.lang.Object $r2;
+        java.lang.String r0;
+        jdk.management.resource.ResourceContext $r3;
+
+        r0 := @parameter0: java.lang.String;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "name");
+
+        $r1 = <jdk.management.resource.internal.SimpleResourceContext: java.util.concurrent.ConcurrentHashMap contexts>;
+
+        $r2 = virtualinvoke $r1.<java.util.concurrent.ConcurrentHashMap: java.lang.Object get(java.lang.Object)>(r0);
+
+        $r3 = (jdk.management.resource.ResourceContext) $r2;
+
+        return $r3;
+    }
+
+    public void close()
+    {
+        java.lang.Throwable $r8;
+        jdk.management.resource.internal.SimpleResourceContext r0;
+        java.util.concurrent.ConcurrentHashMap $r1, $r6;
+        jdk.management.resource.internal.UnassignedContext $r3;
+        java.util.function.Consumer $r5;
+        java.util.stream.Stream $r4;
+        int $i0, $i1;
+        java.util.function.BiConsumer $r7;
+        java.lang.String $r2;
+        boolean $z0;
+
+        r0 := @this: jdk.management.resource.internal.SimpleResourceContext;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<jdk.management.resource.internal.SimpleResourceContext: boolean closed>;
+
+        if $z0 != 0 goto label2;
+
+        r0.<jdk.management.resource.internal.SimpleResourceContext: boolean closed> = 1;
+
+        $r1 = <jdk.management.resource.internal.SimpleResourceContext: java.util.concurrent.ConcurrentHashMap contexts>;
+
+        $r2 = virtualinvoke r0.<jdk.management.resource.internal.SimpleResourceContext: java.lang.String getName()>();
+
+        virtualinvoke $r1.<java.util.concurrent.ConcurrentHashMap: java.lang.Object remove(java.lang.Object)>($r2);
+
+        $r3 = staticinvoke <jdk.management.resource.internal.UnassignedContext: jdk.management.resource.internal.UnassignedContext getUnassignedContext()>();
+
+        $i0 = r0.<jdk.management.resource.internal.SimpleResourceContext: int contextId>;
+
+        $i1 = virtualinvoke $r3.<jdk.management.resource.internal.UnassignedContext: int nativeThreadContext()>();
+
+        staticinvoke <jdk.management.resource.internal.ResourceNatives: void destroyResourceContext(int,int)>($i0, $i1);
+
+        $r4 = virtualinvoke r0.<jdk.management.resource.internal.SimpleResourceContext: java.util.stream.Stream boundThreads()>();
+
+        $r5 = staticinvoke <jdk.management.resource.internal.SimpleResourceContext$lambda_close_0__341: java.util.function.Consumer bootstrap$(jdk.management.resource.internal.UnassignedContext)>($r3);
+
+        interfaceinvoke $r4.<java.util.stream.Stream: void forEach(java.util.function.Consumer)>($r5);
+
+        $r6 = r0.<jdk.management.resource.internal.SimpleResourceContext: java.util.concurrent.ConcurrentHashMap meters>;
+
+        $r7 = staticinvoke <jdk.management.resource.internal.SimpleResourceContext$lambda_close_1__343: java.util.function.BiConsumer bootstrap$(jdk.management.resource.internal.SimpleResourceContext)>(r0);
+
+        virtualinvoke $r6.<java.util.concurrent.ConcurrentHashMap: void forEach(java.util.function.BiConsumer)>($r7);
+
+     label2:
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r8 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r8;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    static java.util.concurrent.ConcurrentHashMap getContexts()
+    {
+        java.util.concurrent.ConcurrentHashMap $r0;
+
+        $r0 = <jdk.management.resource.internal.SimpleResourceContext: java.util.concurrent.ConcurrentHashMap contexts>;
+
+        return $r0;
+    }
+
+    public static java.util.stream.Stream contexts()
+    {
+        java.util.stream.Stream $r2, $r4;
+        java.util.Collection $r1;
+        java.util.concurrent.ConcurrentHashMap $r0;
+        java.util.function.Function $r3;
+
+        $r0 = staticinvoke <jdk.management.resource.internal.SimpleResourceContext: java.util.concurrent.ConcurrentHashMap getContexts()>();
+
+        $r1 = virtualinvoke $r0.<java.util.concurrent.ConcurrentHashMap: java.util.Collection values()>();
+
+        $r2 = interfaceinvoke $r1.<java.util.Collection: java.util.stream.Stream stream()>();
+
+        $r3 = staticinvoke <jdk.management.resource.internal.SimpleResourceContext$lambda_contexts_2__342: java.util.function.Function bootstrap$()>();
+
+        $r4 = interfaceinvoke $r2.<java.util.stream.Stream: java.util.stream.Stream map(java.util.function.Function)>($r3);
+
+        return $r4;
+    }
+
+    public static jdk.management.resource.ResourceContext getThreadContext(java.lang.Thread)
+    {
+        jdk.management.resource.internal.WeakKeyConcurrentHashMap $r1;
+        java.lang.Thread r0;
+        java.lang.Object $r2;
+        jdk.management.resource.ResourceContext r3;
+
+        r0 := @parameter0: java.lang.Thread;
+
+        $r1 = <jdk.management.resource.internal.SimpleResourceContext: jdk.management.resource.internal.WeakKeyConcurrentHashMap currContext>;
+
+        $r2 = virtualinvoke $r1.<jdk.management.resource.internal.WeakKeyConcurrentHashMap: java.lang.Object get(java.lang.Object)>(r0);
+
+        r3 = (jdk.management.resource.ResourceContext) $r2;
+
+        if r3 != null goto label1;
+
+        r3 = staticinvoke <jdk.management.resource.internal.UnassignedContext: jdk.management.resource.internal.UnassignedContext getUnassignedContext()>();
+
+     label1:
+        return r3;
+    }
+
+    public jdk.management.resource.ResourceContext bindThreadContext()
+    {
+        jdk.management.resource.internal.WeakKeyConcurrentHashMap $r2;
+        jdk.management.resource.internal.SimpleResourceContext r0;
+        java.lang.Thread $r1;
+        int $i0;
+        java.lang.Object $r3;
+        jdk.management.resource.ResourceContext r4;
+
+        r0 := @this: jdk.management.resource.internal.SimpleResourceContext;
+
+        specialinvoke r0.<jdk.management.resource.internal.SimpleResourceContext: void illegalStateIfClosed()>();
+
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = <jdk.management.resource.internal.SimpleResourceContext: jdk.management.resource.internal.WeakKeyConcurrentHashMap currContext>;
+
+        $r3 = virtualinvoke $r2.<jdk.management.resource.internal.WeakKeyConcurrentHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, r0);
+
+        r4 = (jdk.management.resource.ResourceContext) $r3;
+
+        if r4 != null goto label1;
+
+        r4 = staticinvoke <jdk.management.resource.internal.UnassignedContext: jdk.management.resource.internal.UnassignedContext getUnassignedContext()>();
+
+     label1:
+        staticinvoke <jdk.management.resource.internal.ThreadMetrics: void updateCurrentThreadMetrics(jdk.management.resource.ResourceContext)>(r4);
+
+        $i0 = r0.<jdk.management.resource.internal.SimpleResourceContext: int contextId>;
+
+        staticinvoke <jdk.management.resource.internal.ResourceNatives: int setThreadResourceContext(int)>($i0);
+
+        return r4;
+    }
+
+    public jdk.management.resource.ResourceContext bindThreadContext(java.lang.Thread)
+    {
+        jdk.management.resource.internal.WeakKeyConcurrentHashMap $r2, $r4, $r7;
+        jdk.management.resource.internal.SimpleResourceContext r0;
+        long $l0;
+        java.lang.IllegalArgumentException $r6;
+        jdk.management.resource.ResourceContext $r8, r9;
+        java.lang.Thread r1;
+        int $i1;
+        java.lang.Object $r3, $r5;
+        boolean $z0;
+
+        r0 := @this: jdk.management.resource.internal.SimpleResourceContext;
+
+        r1 := @parameter0: java.lang.Thread;
+
+        specialinvoke r0.<jdk.management.resource.internal.SimpleResourceContext: void illegalStateIfClosed()>();
+
+        $z0 = virtualinvoke r1.<java.lang.Thread: boolean isAlive()>();
+
+        if $z0 == 0 goto label1;
+
+        $r4 = <jdk.management.resource.internal.SimpleResourceContext: jdk.management.resource.internal.WeakKeyConcurrentHashMap currContext>;
+
+        $r5 = virtualinvoke $r4.<jdk.management.resource.internal.WeakKeyConcurrentHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, r0);
+
+        $r8 = (jdk.management.resource.ResourceContext) $r5;
+
+        goto label2;
+
+     label1:
+        $r2 = <jdk.management.resource.internal.SimpleResourceContext: jdk.management.resource.internal.WeakKeyConcurrentHashMap currContext>;
+
+        $r3 = virtualinvoke $r2.<jdk.management.resource.internal.WeakKeyConcurrentHashMap: java.lang.Object remove(java.lang.Object)>(r1);
+
+        $r8 = (jdk.management.resource.ResourceContext) $r3;
+
+     label2:
+        r9 = $r8;
+
+        if $r8 != null goto label3;
+
+        r9 = staticinvoke <jdk.management.resource.internal.UnassignedContext: jdk.management.resource.internal.UnassignedContext getUnassignedContext()>();
+
+     label3:
+        staticinvoke <jdk.management.resource.internal.ThreadMetrics: void updateThreadMetrics(jdk.management.resource.ResourceContext,java.lang.Thread)>(r9, r1);
+
+        $l0 = virtualinvoke r1.<java.lang.Thread: long getId()>();
+
+        $i1 = r0.<jdk.management.resource.internal.SimpleResourceContext: int contextId>;
+
+        staticinvoke <jdk.management.resource.internal.ResourceNatives: int setThreadResourceContext(long,int)>($l0, $i1);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r6 := @caughtexception;
+
+        $r7 = <jdk.management.resource.internal.SimpleResourceContext: jdk.management.resource.internal.WeakKeyConcurrentHashMap currContext>;
+
+        virtualinvoke $r7.<jdk.management.resource.internal.WeakKeyConcurrentHashMap: java.lang.Object remove(java.lang.Object)>(r1);
+
+     label6:
+        return r9;
+
+        catch java.lang.IllegalArgumentException from label3 to label4 with label5;
+    }
+
+    public void bindNewThreadContext(java.lang.Thread)
+    {
+        jdk.management.resource.internal.WeakKeyConcurrentHashMap $r2;
+        jdk.management.resource.internal.SimpleResourceContext r1;
+        java.lang.Thread r0;
+
+        r1 := @this: jdk.management.resource.internal.SimpleResourceContext;
+
+        r0 := @parameter0: java.lang.Thread;
+
+        $r2 = <jdk.management.resource.internal.SimpleResourceContext: jdk.management.resource.internal.WeakKeyConcurrentHashMap currContext>;
+
+        virtualinvoke $r2.<jdk.management.resource.internal.WeakKeyConcurrentHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r0, r1);
+
+        return;
+    }
+
+    public static void removeThreadContext()
+    {
+        jdk.management.resource.internal.WeakKeyConcurrentHashMap $r0;
+        java.lang.Thread $r1;
+
+        $r0 = <jdk.management.resource.internal.SimpleResourceContext: jdk.management.resource.internal.WeakKeyConcurrentHashMap currContext>;
+
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r0.<jdk.management.resource.internal.WeakKeyConcurrentHashMap: java.lang.Object remove(java.lang.Object)>($r1);
+
+        return;
+    }
+
+    public static jdk.management.resource.ResourceContext unbindThreadContext()
+    {
+        jdk.management.resource.internal.UnassignedContext $r0;
+        jdk.management.resource.ResourceContext $r1;
+
+        $r0 = staticinvoke <jdk.management.resource.internal.UnassignedContext: jdk.management.resource.internal.UnassignedContext getUnassignedContext()>();
+
+        $r1 = virtualinvoke $r0.<jdk.management.resource.internal.UnassignedContext: jdk.management.resource.ResourceContext bindThreadContext()>();
+
+        return $r1;
+    }
+
+    int nativeThreadContext()
+    {
+        int $i0;
+        jdk.management.resource.internal.SimpleResourceContext r0;
+
+        r0 := @this: jdk.management.resource.internal.SimpleResourceContext;
+
+        $i0 = r0.<jdk.management.resource.internal.SimpleResourceContext: int contextId>;
+
+        return $i0;
+    }
+
+    public java.util.stream.Stream boundThreads()
+    {
+        jdk.management.resource.internal.WeakKeyConcurrentHashMap $r1;
+        jdk.management.resource.internal.SimpleResourceContext r0;
+        java.util.stream.Stream $r2, $r4;
+        java.util.function.Predicate $r3;
+
+        r0 := @this: jdk.management.resource.internal.SimpleResourceContext;
+
+        $r1 = <jdk.management.resource.internal.SimpleResourceContext: jdk.management.resource.internal.WeakKeyConcurrentHashMap currContext>;
+
+        $r2 = virtualinvoke $r1.<jdk.management.resource.internal.WeakKeyConcurrentHashMap: java.util.stream.Stream keysForValue(java.lang.Object)>(r0);
+
+        $r3 = staticinvoke <jdk.management.resource.internal.SimpleResourceContext$lambda_boundThreads_3__344: java.util.function.Predicate bootstrap$()>();
+
+        $r4 = interfaceinvoke $r2.<java.util.stream.Stream: java.util.stream.Stream filter(java.util.function.Predicate)>($r3);
+
+        return $r4;
+    }
+
+    public jdk.management.resource.ResourceRequest getResourceRequest(jdk.management.resource.ResourceType)
+    {
+        jdk.management.resource.internal.SimpleResourceContext r0;
+        jdk.management.resource.ResourceRequest $r5;
+        jdk.management.resource.ResourceMeter r4;
+        java.util.concurrent.ConcurrentHashMap $r2;
+        jdk.management.resource.ResourceType r1;
+        java.lang.Object $r3;
+        boolean $z0;
+
+        r0 := @this: jdk.management.resource.internal.SimpleResourceContext;
+
+        r1 := @parameter0: jdk.management.resource.ResourceType;
+
+        $r2 = r0.<jdk.management.resource.internal.SimpleResourceContext: java.util.concurrent.ConcurrentHashMap meters>;
+
+        $r3 = virtualinvoke $r2.<java.util.concurrent.ConcurrentHashMap: java.lang.Object get(java.lang.Object)>(r1);
+
+        r4 = (jdk.management.resource.ResourceMeter) $r3;
+
+        $z0 = r4 instanceof jdk.management.resource.ResourceRequest;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = (jdk.management.resource.ResourceRequest) r4;
+
+        goto label2;
+
+     label1:
+        $r5 = null;
+
+     label2:
+        return $r5;
+    }
+
+    public void addResourceMeter(jdk.management.resource.ResourceMeter)
+    {
+        jdk.management.resource.internal.SimpleResourceContext r0;
+        jdk.management.resource.ResourceMeter r1, $r19;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.util.concurrent.ConcurrentHashMap $r4;
+        java.lang.StringBuilder $r13, $r14, $r17, $r21, $r22, $r24;
+        jdk.management.resource.ResourceType $r2, $r3, $r5, $r7, $r8, $r9, $r10, $r11, $r15, $r23, $r26, $r27;
+        java.lang.String $r16, $r18, $r25;
+        java.lang.UnsupportedOperationException $r20;
+        java.lang.IllegalArgumentException $r12;
+        java.lang.Object $r6;
+
+        r0 := @this: jdk.management.resource.internal.SimpleResourceContext;
+
+        r1 := @parameter0: jdk.management.resource.ResourceMeter;
+
+        specialinvoke r0.<jdk.management.resource.internal.SimpleResourceContext: void illegalStateIfClosed()>();
+
+        $r2 = interfaceinvoke r1.<jdk.management.resource.ResourceMeter: jdk.management.resource.ResourceType getType()>();
+
+        $r3 = <jdk.management.resource.ResourceType: jdk.management.resource.ResourceType HEAP_RETAINED>;
+
+        $z0 = virtualinvoke $r2.<jdk.management.resource.ResourceType: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label1;
+
+        $z3 = staticinvoke <jdk.management.resource.internal.ResourceNatives: boolean isHeapRetainedEnabled()>();
+
+        if $z3 != 0 goto label1;
+
+        $r20 = new java.lang.UnsupportedOperationException;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ResourceType not supported by the current garbage collector: ");
+
+        $r23 = <jdk.management.resource.ResourceType: jdk.management.resource.ResourceType HEAP_RETAINED>;
+
+        $r24 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r23);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r20.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>($r25);
+
+        throw $r20;
+
+     label1:
+        $r4 = r0.<jdk.management.resource.internal.SimpleResourceContext: java.util.concurrent.ConcurrentHashMap meters>;
+
+        $r5 = interfaceinvoke r1.<jdk.management.resource.ResourceMeter: jdk.management.resource.ResourceType getType()>();
+
+        $r6 = virtualinvoke $r4.<java.util.concurrent.ConcurrentHashMap: java.lang.Object putIfAbsent(java.lang.Object,java.lang.Object)>($r5, r1);
+
+        $r19 = (jdk.management.resource.ResourceMeter) $r6;
+
+        if $r19 == null goto label2;
+
+        $r12 = new java.lang.IllegalArgumentException;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ResourceType already added to meter: ");
+
+        $r15 = interfaceinvoke r1.<jdk.management.resource.ResourceMeter: jdk.management.resource.ResourceType getType()>();
+
+        $r16 = virtualinvoke $r15.<jdk.management.resource.ResourceType: java.lang.String getName()>();
+
+        $r17 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r16);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r12.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r18);
+
+        throw $r12;
+
+     label2:
+        $r7 = interfaceinvoke r1.<jdk.management.resource.ResourceMeter: jdk.management.resource.ResourceType getType()>();
+
+        $r8 = <jdk.management.resource.ResourceType: jdk.management.resource.ResourceType THREAD_CPU>;
+
+        $z1 = virtualinvoke $r7.<jdk.management.resource.ResourceType: boolean equals(java.lang.Object)>($r8);
+
+        if $z1 != 0 goto label3;
+
+        $r10 = interfaceinvoke r1.<jdk.management.resource.ResourceMeter: jdk.management.resource.ResourceType getType()>();
+
+        $r11 = <jdk.management.resource.ResourceType: jdk.management.resource.ResourceType HEAP_ALLOCATED>;
+
+        $z2 = virtualinvoke $r10.<jdk.management.resource.ResourceType: boolean equals(java.lang.Object)>($r11);
+
+        if $z2 == 0 goto label4;
+
+     label3:
+        staticinvoke <jdk.management.resource.internal.ThreadMetrics: void init()>();
+
+     label4:
+        $r26 = interfaceinvoke r1.<jdk.management.resource.ResourceMeter: jdk.management.resource.ResourceType getType()>();
+
+        $r27 = <jdk.management.resource.ResourceType: jdk.management.resource.ResourceType HEAP_RETAINED>;
+
+        $z4 = virtualinvoke $r26.<jdk.management.resource.ResourceType: boolean equals(java.lang.Object)>($r27);
+
+        if $z4 == 0 goto label5;
+
+        staticinvoke <jdk.management.resource.internal.HeapMetrics: void init()>();
+
+     label5:
+        $r9 = interfaceinvoke r1.<jdk.management.resource.ResourceMeter: jdk.management.resource.ResourceType getType()>();
+
+        staticinvoke <jdk.management.resource.internal.TotalResourceContext: void validateMeter(jdk.management.resource.ResourceType)>($r9);
+
+        return;
+    }
+
+    public boolean removeResourceMeter(jdk.management.resource.ResourceMeter)
+    {
+        jdk.management.resource.internal.SimpleResourceContext r0;
+        jdk.management.resource.ResourceMeter r1, r5;
+        java.util.concurrent.ConcurrentHashMap $r2;
+        jdk.management.resource.ResourceType $r3, $r7;
+        long $l0, $l1;
+        jdk.management.resource.internal.TotalResourceContext $r6;
+        java.lang.Object $r4;
+        jdk.management.resource.internal.TotalResourceContext$TotalMeter $r8;
+
+        r0 := @this: jdk.management.resource.internal.SimpleResourceContext;
+
+        r1 := @parameter0: jdk.management.resource.ResourceMeter;
+
+        $r2 = r0.<jdk.management.resource.internal.SimpleResourceContext: java.util.concurrent.ConcurrentHashMap meters>;
+
+        $r3 = interfaceinvoke r1.<jdk.management.resource.ResourceMeter: jdk.management.resource.ResourceType getType()>();
+
+        $r4 = virtualinvoke $r2.<java.util.concurrent.ConcurrentHashMap: java.lang.Object remove(java.lang.Object)>($r3);
+
+        r5 = (jdk.management.resource.ResourceMeter) $r4;
+
+        if r5 == null goto label1;
+
+        $r6 = staticinvoke <jdk.management.resource.internal.TotalResourceContext: jdk.management.resource.internal.TotalResourceContext getTotalContext()>();
+
+        $r7 = interfaceinvoke r5.<jdk.management.resource.ResourceMeter: jdk.management.resource.ResourceType getType()>();
+
+        $r8 = virtualinvoke $r6.<jdk.management.resource.internal.TotalResourceContext: jdk.management.resource.internal.TotalResourceContext$TotalMeter getMeter(jdk.management.resource.ResourceType)>($r7);
+
+        $l0 = interfaceinvoke r5.<jdk.management.resource.ResourceMeter: long getValue()>();
+
+        virtualinvoke $r8.<jdk.management.resource.internal.TotalResourceContext$TotalMeter: void addValue(long)>($l0);
+
+        $l1 = interfaceinvoke r5.<jdk.management.resource.ResourceMeter: long getAllocated()>();
+
+        virtualinvoke $r8.<jdk.management.resource.internal.TotalResourceContext$TotalMeter: void addAllocated(long)>($l1);
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    public jdk.management.resource.ResourceMeter getMeter(jdk.management.resource.ResourceType)
+    {
+        jdk.management.resource.internal.SimpleResourceContext r0;
+        jdk.management.resource.ResourceMeter $r4;
+        java.util.concurrent.ConcurrentHashMap $r2;
+        jdk.management.resource.ResourceType r1;
+        java.lang.Object $r3;
+
+        r0 := @this: jdk.management.resource.internal.SimpleResourceContext;
+
+        r1 := @parameter0: jdk.management.resource.ResourceType;
+
+        $r2 = r0.<jdk.management.resource.internal.SimpleResourceContext: java.util.concurrent.ConcurrentHashMap meters>;
+
+        $r3 = virtualinvoke $r2.<java.util.concurrent.ConcurrentHashMap: java.lang.Object get(java.lang.Object)>(r1);
+
+        $r4 = (jdk.management.resource.ResourceMeter) $r3;
+
+        return $r4;
+    }
+
+    public java.util.stream.Stream meters()
+    {
+        jdk.management.resource.internal.SimpleResourceContext r0;
+        java.util.stream.Stream $r3, $r5;
+        java.util.concurrent.ConcurrentHashMap $r1;
+        java.util.Set $r2;
+        java.util.function.Function $r4;
+
+        r0 := @this: jdk.management.resource.internal.SimpleResourceContext;
+
+        $r1 = r0.<jdk.management.resource.internal.SimpleResourceContext: java.util.concurrent.ConcurrentHashMap meters>;
+
+        $r2 = virtualinvoke $r1.<java.util.concurrent.ConcurrentHashMap: java.util.Set entrySet()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Set: java.util.stream.Stream stream()>();
+
+        $r4 = staticinvoke <jdk.management.resource.internal.SimpleResourceContext$lambda_meters_4__345: java.util.function.Function bootstrap$()>();
+
+        $r5 = interfaceinvoke $r3.<java.util.stream.Stream: java.util.stream.Stream map(java.util.function.Function)>($r4);
+
+        return $r5;
+    }
+
+    public void requestAccurateUpdate(jdk.management.resource.ResourceAccuracy)
+    {
+        java.lang.UnsupportedOperationException $r3;
+        jdk.management.resource.internal.SimpleResourceContext r2;
+        jdk.management.resource.ResourceType $r6;
+        jdk.management.resource.ResourceAccuracy r0;
+        int[] r1;
+        int $i0, $i1;
+        java.lang.StringBuilder $r4, $r5, $r7;
+        java.lang.String $r8;
+        boolean $z0;
+
+        r2 := @this: jdk.management.resource.internal.SimpleResourceContext;
+
+        r0 := @parameter0: jdk.management.resource.ResourceAccuracy;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "accuracy");
+
+        $z0 = staticinvoke <jdk.management.resource.internal.ResourceNatives: boolean isHeapRetainedEnabled()>();
+
+        if $z0 != 0 goto label1;
+
+        $r3 = new java.lang.UnsupportedOperationException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ResourceType not supported by the current garbage collector: ");
+
+        $r6 = <jdk.management.resource.ResourceType: jdk.management.resource.ResourceType HEAP_RETAINED>;
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>($r8);
+
+        throw $r3;
+
+     label1:
+        r1 = newarray (int)[1];
+
+        $i0 = r2.<jdk.management.resource.internal.SimpleResourceContext: int contextId>;
+
+        r1[0] = $i0;
+
+        $i1 = virtualinvoke r0.<jdk.management.resource.ResourceAccuracy: int ordinal()>();
+
+        staticinvoke <jdk.management.resource.internal.ResourceNatives: void computeRetainedMemory(int[],int)>(r1, $i1);
+
+        return;
+    }
+
+    private synchronized void illegalStateIfClosed()
+    {
+        java.lang.IllegalStateException $r1;
+        jdk.management.resource.internal.SimpleResourceContext r0;
+        java.lang.StringBuilder $r2, $r3, $r5;
+        java.lang.String $r4, $r6;
+        boolean $z0;
+
+        r0 := @this: jdk.management.resource.internal.SimpleResourceContext;
+
+        $z0 = r0.<jdk.management.resource.internal.SimpleResourceContext: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ResourceContext is closed: ");
+
+        $r4 = virtualinvoke r0.<jdk.management.resource.internal.SimpleResourceContext: java.lang.String getName()>();
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r6);
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+
+    public java.lang.String toString()
+    {
+        jdk.management.resource.internal.SimpleResourceContext r2;
+        java.util.concurrent.ConcurrentHashMap $r7;
+        java.util.StringJoiner $r0;
+        java.util.function.BiConsumer $r8;
+        java.lang.StringBuilder $r1, $r4, $r5;
+        java.lang.String $r3, $r6, $r9;
+
+        r2 := @this: jdk.management.resource.internal.SimpleResourceContext;
+
+        $r0 = new java.util.StringJoiner;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = r2.<jdk.management.resource.internal.SimpleResourceContext: java.lang.String name>;
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<java.util.StringJoiner: void <init>(java.lang.CharSequence,java.lang.CharSequence,java.lang.CharSequence)>("; ", $r6, "]");
+
+        $r7 = r2.<jdk.management.resource.internal.SimpleResourceContext: java.util.concurrent.ConcurrentHashMap meters>;
+
+        $r8 = staticinvoke <jdk.management.resource.internal.SimpleResourceContext$lambda_toString_5__346: java.util.function.BiConsumer bootstrap$(java.util.StringJoiner)>($r0);
+
+        virtualinvoke $r7.<java.util.concurrent.ConcurrentHashMap: void forEach(java.util.function.BiConsumer)>($r8);
+
+        $r9 = virtualinvoke $r0.<java.util.StringJoiner: java.lang.String toString()>();
+
+        return $r9;
+    }
+
+    public static void lambda$toString$5(java.util.StringJoiner, jdk.management.resource.ResourceType, jdk.management.resource.ResourceMeter)
+    {
+        java.util.StringJoiner r0;
+        jdk.management.resource.ResourceMeter r1;
+        jdk.management.resource.ResourceType r3;
+        java.lang.String $r2;
+
+        r0 := @parameter0: java.util.StringJoiner;
+
+        r3 := @parameter1: jdk.management.resource.ResourceType;
+
+        r1 := @parameter2: jdk.management.resource.ResourceMeter;
+
+        $r2 = virtualinvoke r1.<java.lang.Object: java.lang.String toString()>();
+
+        virtualinvoke r0.<java.util.StringJoiner: java.util.StringJoiner add(java.lang.CharSequence)>($r2);
+
+        return;
+    }
+
+    public static jdk.management.resource.ResourceMeter lambda$meters$4(java.util.Map$Entry)
+    {
+        java.util.Map$Entry r0;
+        java.lang.Object $r1;
+        jdk.management.resource.ResourceMeter $r2;
+
+        r0 := @parameter0: java.util.Map$Entry;
+
+        $r1 = interfaceinvoke r0.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r2 = (jdk.management.resource.ResourceMeter) $r1;
+
+        return $r2;
+    }
+
+    public static boolean lambda$boundThreads$3(java.lang.Thread)
+    {
+        java.lang.Thread r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.Thread;
+
+        $z0 = virtualinvoke r0.<java.lang.Thread: boolean isAlive()>();
+
+        return $z0;
+    }
+
+    public static jdk.management.resource.ResourceContext lambda$contexts$2(jdk.management.resource.internal.SimpleResourceContext)
+    {
+        jdk.management.resource.internal.SimpleResourceContext r0;
+
+        r0 := @parameter0: jdk.management.resource.internal.SimpleResourceContext;
+
+        return r0;
+    }
+
+    public void lambda$close$1(jdk.management.resource.ResourceType, jdk.management.resource.ResourceMeter)
+    {
+        jdk.management.resource.internal.SimpleResourceContext r0;
+        jdk.management.resource.ResourceMeter r1;
+        jdk.management.resource.ResourceType r2;
+        jdk.management.resource.internal.ApproverGroup $r3;
+
+        r0 := @this: jdk.management.resource.internal.SimpleResourceContext;
+
+        r2 := @parameter0: jdk.management.resource.ResourceType;
+
+        r1 := @parameter1: jdk.management.resource.ResourceMeter;
+
+        virtualinvoke r0.<jdk.management.resource.internal.SimpleResourceContext: boolean removeResourceMeter(jdk.management.resource.ResourceMeter)>(r1);
+
+        $r3 = staticinvoke <jdk.management.resource.internal.ApproverGroup: jdk.management.resource.internal.ApproverGroup getGroup(jdk.management.resource.ResourceType)>(r2);
+
+        if $r3 == null goto label1;
+
+        virtualinvoke $r3.<jdk.management.resource.internal.ApproverGroup: void purgeResourceContext(jdk.management.resource.ResourceContext)>(r0);
+
+     label1:
+        return;
+    }
+
+    public static void lambda$close$0(jdk.management.resource.internal.UnassignedContext, java.lang.Thread)
+    {
+        jdk.management.resource.internal.UnassignedContext r0;
+        java.lang.Thread r1;
+
+        r0 := @parameter0: jdk.management.resource.internal.UnassignedContext;
+
+        r1 := @parameter1: java.lang.Thread;
+
+        virtualinvoke r0.<jdk.management.resource.internal.UnassignedContext: jdk.management.resource.ResourceContext bindThreadContext(java.lang.Thread)>(r1);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        jdk.management.resource.internal.WeakKeyConcurrentHashMap $r0;
+        java.util.concurrent.ConcurrentHashMap $r1;
+
+        $r0 = new jdk.management.resource.internal.WeakKeyConcurrentHashMap;
+
+        specialinvoke $r0.<jdk.management.resource.internal.WeakKeyConcurrentHashMap: void <init>()>();
+
+        <jdk.management.resource.internal.SimpleResourceContext: jdk.management.resource.internal.WeakKeyConcurrentHashMap currContext> = $r0;
+
+        $r1 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r1.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        <jdk.management.resource.internal.SimpleResourceContext: java.util.concurrent.ConcurrentHashMap contexts> = $r1;
+
+        return;
+    }
+}

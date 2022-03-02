@@ -1,0 +1,4754 @@
+public class com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl extends com.sun.corba.se.impl.transport.EventHandlerBase implements com.sun.corba.se.spi.transport.CorbaConnection, com.sun.corba.se.spi.orbutil.threadpool.Work
+{
+    public static boolean dprintWriteLocks;
+    protected long enqueueTime;
+    protected java.nio.channels.SocketChannel socketChannel;
+    protected com.sun.corba.se.spi.transport.CorbaContactInfo contactInfo;
+    protected com.sun.corba.se.pept.transport.Acceptor acceptor;
+    protected com.sun.corba.se.pept.transport.ConnectionCache connectionCache;
+    protected java.net.Socket socket;
+    protected long timeStamp;
+    protected boolean isServer;
+    protected int requestId;
+    protected com.sun.corba.se.spi.transport.CorbaResponseWaitingRoom responseWaitingRoom;
+    protected int state;
+    protected java.lang.Object stateEvent;
+    protected java.lang.Object writeEvent;
+    protected boolean writeLocked;
+    protected int serverRequestCount;
+    java.util.Map serverRequestMap;
+    protected boolean postInitialContexts;
+    protected com.sun.corba.se.spi.ior.IOR codeBaseServerIOR;
+    protected com.sun.corba.se.impl.encoding.CachedCodeBase cachedCodeBase;
+    protected com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper;
+    protected com.sun.corba.se.spi.transport.ReadTimeouts readTimeouts;
+    protected boolean shouldReadGiopHeaderOnly;
+    protected com.sun.corba.se.spi.protocol.CorbaMessageMediator partialMessageMediator;
+    protected com.sun.corba.se.impl.encoding.CodeSetComponentInfo$CodeSetContext codeSetContext;
+    protected com.sun.corba.se.pept.protocol.MessageMediator clientReply_1_1;
+    protected com.sun.corba.se.pept.protocol.MessageMediator serverRequest_1_1;
+
+    public java.nio.channels.SocketChannel getSocketChannel()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        java.nio.channels.SocketChannel $r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.nio.channels.SocketChannel socketChannel>;
+
+        return $r1;
+    }
+
+    protected void <init>(com.sun.corba.se.spi.orb.ORB)
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r5;
+        com.sun.corba.se.impl.transport.CorbaResponseWaitingRoomImpl $r6;
+        com.sun.corba.se.spi.orb.ORB r4;
+        com.sun.corba.se.impl.encoding.CachedCodeBase $r3;
+        com.sun.corba.se.spi.transport.ReadTimeouts $r8;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        java.lang.Object $r1, $r2;
+        com.sun.corba.se.spi.orb.ORBData $r7;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r4 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.EventHandlerBase: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: long timeStamp> = 0L;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean isServer> = 0;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: int requestId> = 5;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.lang.Object stateEvent> = $r1;
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.lang.Object writeEvent> = $r2;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: int serverRequestCount> = 0;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.util.Map serverRequestMap> = null;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean postInitialContexts> = 0;
+
+        $r3 = new com.sun.corba.se.impl.encoding.CachedCodeBase;
+
+        specialinvoke $r3.<com.sun.corba.se.impl.encoding.CachedCodeBase: void <init>(com.sun.corba.se.spi.transport.CorbaConnection)>(r0);
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.encoding.CachedCodeBase cachedCodeBase> = $r3;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator partialMessageMediator> = null;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.encoding.CodeSetComponentInfo$CodeSetContext codeSetContext> = null;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb> = r4;
+
+        $r5 = staticinvoke <com.sun.corba.se.impl.logging.ORBUtilSystemException: com.sun.corba.se.impl.logging.ORBUtilSystemException get(com.sun.corba.se.spi.orb.ORB,java.lang.String)>(r4, "rpc.transport");
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper> = $r5;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void setWork(com.sun.corba.se.spi.orbutil.threadpool.Work)>(r0);
+
+        $r6 = new com.sun.corba.se.impl.transport.CorbaResponseWaitingRoomImpl;
+
+        specialinvoke $r6.<com.sun.corba.se.impl.transport.CorbaResponseWaitingRoomImpl: void <init>(com.sun.corba.se.spi.orb.ORB,com.sun.corba.se.spi.transport.CorbaConnection)>(r4, r0);
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.transport.CorbaResponseWaitingRoom responseWaitingRoom> = $r6;
+
+        $r7 = virtualinvoke r4.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $r8 = interfaceinvoke $r7.<com.sun.corba.se.spi.orb.ORBData: com.sun.corba.se.spi.transport.ReadTimeouts getTransportTCPReadTimeouts()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void setReadTimeouts(com.sun.corba.se.spi.transport.ReadTimeouts)>($r8);
+
+        return;
+    }
+
+    protected void <init>(com.sun.corba.se.spi.orb.ORB, boolean, boolean)
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        com.sun.corba.se.spi.orb.ORB r1;
+        boolean z0, z1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        z0 := @parameter1: boolean;
+
+        z1 := @parameter2: boolean;
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void <init>(com.sun.corba.se.spi.orb.ORB)>(r1);
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void setUseSelectThreadToWait(boolean)>(z0);
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void setUseWorkerThreadForEvent(boolean)>(z1);
+
+        return;
+    }
+
+    public void <init>(com.sun.corba.se.spi.orb.ORB, com.sun.corba.se.spi.transport.CorbaContactInfo, boolean, boolean, java.lang.String, java.lang.String, int)
+    {
+        java.lang.Throwable $r18;
+        java.net.Socket $r8, $r9, $r14;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r19;
+        com.sun.corba.se.spi.transport.CorbaContactInfo r2;
+        java.nio.channels.SocketChannel $r10, $r11, $r17;
+        int i0;
+        java.lang.String r5, r7, $r16, $r20;
+        org.omg.CORBA.COMM_FAILURE $r21;
+        boolean z0, z1, $z2, $z3;
+        com.sun.corba.se.spi.transport.ORBSocketFactory $r4;
+        java.net.InetSocketAddress $r6;
+        com.sun.corba.se.spi.orb.ORB r1;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        java.lang.StringBuilder $r12, $r13, $r15;
+        com.sun.corba.se.spi.orb.ORBData $r3;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        r2 := @parameter1: com.sun.corba.se.spi.transport.CorbaContactInfo;
+
+        z0 := @parameter2: boolean;
+
+        z1 := @parameter3: boolean;
+
+        r5 := @parameter4: java.lang.String;
+
+        r7 := @parameter5: java.lang.String;
+
+        i0 := @parameter6: int;
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void <init>(com.sun.corba.se.spi.orb.ORB,boolean,boolean)>(r1, z0, z1);
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.transport.CorbaContactInfo contactInfo> = r2;
+
+     label1:
+        $r3 = virtualinvoke r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $r4 = interfaceinvoke $r3.<com.sun.corba.se.spi.orb.ORBData: com.sun.corba.se.spi.transport.ORBSocketFactory getSocketFactory()>();
+
+        $r6 = new java.net.InetSocketAddress;
+
+        specialinvoke $r6.<java.net.InetSocketAddress: void <init>(java.lang.String,int)>(r7, i0);
+
+        $r8 = interfaceinvoke $r4.<com.sun.corba.se.spi.transport.ORBSocketFactory: java.net.Socket createSocket(java.lang.String,java.net.InetSocketAddress)>(r5, $r6);
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.net.Socket socket> = $r8;
+
+        $r9 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.net.Socket socket>;
+
+        $r10 = virtualinvoke $r9.<java.net.Socket: java.nio.channels.SocketChannel getChannel()>();
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.nio.channels.SocketChannel socketChannel> = $r10;
+
+        $r11 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.nio.channels.SocketChannel socketChannel>;
+
+        if $r11 == null goto label4;
+
+        if z0 != 0 goto label2;
+
+        $z3 = 1;
+
+        goto label3;
+
+     label2:
+        $z3 = 0;
+
+     label3:
+        $r17 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.nio.channels.SocketChannel socketChannel>;
+
+        virtualinvoke $r17.<java.nio.channels.SocketChannel: java.nio.channels.SelectableChannel configureBlocking(boolean)>($z3);
+
+        goto label5;
+
+     label4:
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void setUseSelectThreadToWait(boolean)>(0);
+
+     label5:
+        $z2 = r1.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z2 == 0 goto label6;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".initialize: connection created: ");
+
+        $r14 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.net.Socket socket>;
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r16);
+
+     label6:
+        goto label8;
+
+     label7:
+        $r18 := @caughtexception;
+
+        $r19 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r20 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>(i0);
+
+        $r21 = virtualinvoke $r19.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.COMM_FAILURE connectFailure(java.lang.Throwable,java.lang.Object,java.lang.Object,java.lang.Object)>($r18, r5, r7, $r20);
+
+        throw $r21;
+
+     label8:
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: int state> = 1;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label6 with label7;
+    }
+
+    public void <init>(com.sun.corba.se.spi.orb.ORB, com.sun.corba.se.spi.transport.CorbaContactInfo, java.lang.String, java.lang.String, int)
+    {
+        com.sun.corba.se.spi.transport.CorbaContactInfo r2;
+        com.sun.corba.se.spi.orb.ORB r1;
+        int i0;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        java.lang.String r5, r6;
+        com.sun.corba.se.spi.orb.ORBData $r3, $r4;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        r2 := @parameter1: com.sun.corba.se.spi.transport.CorbaContactInfo;
+
+        r5 := @parameter2: java.lang.String;
+
+        r6 := @parameter3: java.lang.String;
+
+        i0 := @parameter4: int;
+
+        $r3 = virtualinvoke r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $z0 = interfaceinvoke $r3.<com.sun.corba.se.spi.orb.ORBData: boolean connectionSocketUseSelectThreadToWait()>();
+
+        $r4 = virtualinvoke r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $z1 = interfaceinvoke $r4.<com.sun.corba.se.spi.orb.ORBData: boolean connectionSocketUseWorkerThreadForEvent()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void <init>(com.sun.corba.se.spi.orb.ORB,com.sun.corba.se.spi.transport.CorbaContactInfo,boolean,boolean,java.lang.String,java.lang.String,int)>(r1, r2, $z0, $z1, r5, r6, i0);
+
+        return;
+    }
+
+    public void <init>(com.sun.corba.se.spi.orb.ORB, com.sun.corba.se.pept.transport.Acceptor, java.net.Socket, boolean, boolean)
+    {
+        java.net.Socket r2;
+        java.util.HashMap $r6;
+        java.io.IOException $r9;
+        java.lang.RuntimeException $r10;
+        com.sun.corba.se.spi.orb.ORB r1;
+        com.sun.corba.se.pept.transport.Acceptor r5;
+        java.nio.channels.SocketChannel $r3, $r4, $r8;
+        java.util.Map $r7;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        boolean z0, z1, $z2;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        r5 := @parameter1: com.sun.corba.se.pept.transport.Acceptor;
+
+        r2 := @parameter2: java.net.Socket;
+
+        z0 := @parameter3: boolean;
+
+        z1 := @parameter4: boolean;
+
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void <init>(com.sun.corba.se.spi.orb.ORB,boolean,boolean)>(r1, z0, z1);
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.net.Socket socket> = r2;
+
+        $r3 = virtualinvoke r2.<java.net.Socket: java.nio.channels.SocketChannel getChannel()>();
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.nio.channels.SocketChannel socketChannel> = $r3;
+
+        $r4 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.nio.channels.SocketChannel socketChannel>;
+
+        if $r4 == null goto label6;
+
+     label1:
+        if z0 != 0 goto label2;
+
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        $r8 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.nio.channels.SocketChannel socketChannel>;
+
+        virtualinvoke $r8.<java.nio.channels.SocketChannel: java.nio.channels.SelectableChannel configureBlocking(boolean)>($z2);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r9 := @caughtexception;
+
+        $r10 = new java.lang.RuntimeException;
+
+        specialinvoke $r10.<java.lang.RuntimeException: void <init>()>();
+
+        virtualinvoke $r10.<java.lang.RuntimeException: java.lang.Throwable initCause(java.lang.Throwable)>($r9);
+
+        throw $r10;
+
+     label6:
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.transport.Acceptor acceptor> = r5;
+
+        $r6 = new java.util.HashMap;
+
+        specialinvoke $r6.<java.util.HashMap: void <init>()>();
+
+        $r7 = staticinvoke <java.util.Collections: java.util.Map synchronizedMap(java.util.Map)>($r6);
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.util.Map serverRequestMap> = $r7;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean isServer> = 1;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: int state> = 2;
+
+        return;
+
+        catch java.io.IOException from label1 to label4 with label5;
+    }
+
+    public void <init>(com.sun.corba.se.spi.orb.ORB, com.sun.corba.se.pept.transport.Acceptor, java.net.Socket)
+    {
+        java.net.Socket r3;
+        com.sun.corba.se.spi.orb.ORB r1;
+        com.sun.corba.se.pept.transport.Acceptor r2;
+        java.nio.channels.SocketChannel $r4, $r6;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        com.sun.corba.se.spi.orb.ORBData $r5, $r7;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        r2 := @parameter1: com.sun.corba.se.pept.transport.Acceptor;
+
+        r3 := @parameter2: java.net.Socket;
+
+        $r4 = virtualinvoke r3.<java.net.Socket: java.nio.channels.SocketChannel getChannel()>();
+
+        if $r4 != null goto label1;
+
+        $z0 = 0;
+
+        goto label2;
+
+     label1:
+        $r5 = virtualinvoke r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $z0 = interfaceinvoke $r5.<com.sun.corba.se.spi.orb.ORBData: boolean connectionSocketUseSelectThreadToWait()>();
+
+     label2:
+        $r6 = virtualinvoke r3.<java.net.Socket: java.nio.channels.SocketChannel getChannel()>();
+
+        if $r6 != null goto label3;
+
+        $z1 = 0;
+
+        goto label4;
+
+     label3:
+        $r7 = virtualinvoke r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $z1 = interfaceinvoke $r7.<com.sun.corba.se.spi.orb.ORBData: boolean connectionSocketUseWorkerThreadForEvent()>();
+
+     label4:
+        specialinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void <init>(com.sun.corba.se.spi.orb.ORB,com.sun.corba.se.pept.transport.Acceptor,java.net.Socket,boolean,boolean)>(r1, r2, r3, $z0, $z1);
+
+        return;
+    }
+
+    public boolean shouldRegisterReadEvent()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        return 1;
+    }
+
+    public boolean shouldRegisterServerReadEvent()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        return 1;
+    }
+
+    public boolean read()
+    {
+        java.lang.Throwable $r17;
+        java.lang.String $r7, $r12, $r16, $r22;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        com.sun.corba.se.spi.orb.ORB $r1, $r3, $r8, $r18;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator $r2;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        java.lang.StringBuilder $r4, $r5, $r6, $r9, $r10, $r11, $r13, $r14, $r15, $r19, $r20, $r21;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r1.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label2;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".read->: ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r16);
+
+     label2:
+        $r2 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator readBits()>();
+
+        if $r2 == null goto label5;
+
+        $z2 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean dispatch(com.sun.corba.se.spi.protocol.CorbaMessageMediator)>($r2);
+
+     label3:
+        $r8 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z3 = $r8.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z3 == 0 goto label4;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".read<-: ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r12);
+
+     label4:
+        return $z2;
+
+     label5:
+        $r3 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z1 = $r3.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z1 == 0 goto label6;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".read<-: ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r7);
+
+     label6:
+        return 1;
+
+     label7:
+        $r17 := @caughtexception;
+
+        $r18 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z4 = $r18.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z4 == 0 goto label8;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".read<-: ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r22);
+
+     label8:
+        throw $r17;
+
+        catch java.lang.Throwable from label1 to label3 with label7;
+    }
+
+    protected com.sun.corba.se.spi.protocol.CorbaMessageMediator readBits()
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r27, $r59;
+        com.sun.corba.se.spi.transport.CorbaContactInfo $r2, $r13;
+        com.sun.corba.se.pept.transport.Acceptor $r3, $r6;
+        java.lang.ThreadDeath $r57;
+        com.sun.corba.se.pept.transport.Selector $r70;
+        java.lang.StringBuilder $r8, $r9, $r10, $r15, $r16, $r17, $r21, $r22, $r23, $r30, $r31, $r32, $r34, $r35, $r36, $r37, $r38, $r43, $r44, $r45, $r46, $r47, $r51, $r52, $r53, $r54, $r55, $r61, $r62, $r63, $r64, $r65;
+        java.lang.Throwable $r19, $r40, $r49;
+        java.lang.String $r11, $r18, $r24, $r33, $r39, $r48, $r56, $r66;
+        org.omg.CORBA.COMM_FAILURE $r28, $r60;
+        com.sun.corba.se.pept.transport.TransportManager $r69;
+        java.io.IOException $r25;
+        java.lang.RuntimeException $r4;
+        com.sun.corba.se.spi.orb.ORB $r1, $r5, $r7, $r12, $r20, $r26, $r29, $r41, $r50, $r58, $r68;
+        com.sun.corba.se.pept.protocol.MessageMediator r67;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        com.sun.corba.se.spi.ior.iiop.GIOPVersion $r42;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator $r14;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+     label01:
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r1.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label02;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".readBits->: ");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r18);
+
+     label02:
+        $r2 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.transport.CorbaContactInfo contactInfo>;
+
+        if $r2 == null goto label03;
+
+        $r13 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.transport.CorbaContactInfo contactInfo>;
+
+        $r12 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        r67 = interfaceinvoke $r13.<com.sun.corba.se.spi.transport.CorbaContactInfo: com.sun.corba.se.pept.protocol.MessageMediator createMessageMediator(com.sun.corba.se.pept.broker.Broker,com.sun.corba.se.pept.transport.Connection)>($r12, r0);
+
+        goto label05;
+
+     label03:
+        $r3 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.transport.Acceptor acceptor>;
+
+        if $r3 == null goto label04;
+
+        $r6 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.transport.Acceptor acceptor>;
+
+        $r5 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        r67 = interfaceinvoke $r6.<com.sun.corba.se.pept.transport.Acceptor: com.sun.corba.se.pept.protocol.MessageMediator createMessageMediator(com.sun.corba.se.pept.broker.Broker,com.sun.corba.se.pept.transport.Connection)>($r5, r0);
+
+        goto label05;
+
+     label04:
+        $r4 = new java.lang.RuntimeException;
+
+        specialinvoke $r4.<java.lang.RuntimeException: void <init>(java.lang.String)>("SocketOrChannelConnectionImpl.readBits");
+
+        throw $r4;
+
+     label05:
+        $r14 = (com.sun.corba.se.spi.protocol.CorbaMessageMediator) r67;
+
+     label06:
+        $r7 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z1 = $r7.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z1 == 0 goto label07;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".readBits<-: ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r11);
+
+     label07:
+        return $r14;
+
+     label08:
+        $r57 := @caughtexception;
+
+        $r58 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z8 = $r58.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z8 == 0 goto label09;
+
+        $r61 = new java.lang.StringBuilder;
+
+        specialinvoke $r61.<java.lang.StringBuilder: void <init>()>();
+
+        $r62 = virtualinvoke $r61.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".readBits: ");
+
+        $r63 = virtualinvoke $r62.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r64 = virtualinvoke $r63.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ThreadDeath: ");
+
+        $r65 = virtualinvoke $r64.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r57);
+
+        $r66 = virtualinvoke $r65.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String,java.lang.Throwable)>($r66, $r57);
+
+     label09:
+        $r59 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r60 = virtualinvoke $r59.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.COMM_FAILURE connectionAbort(java.lang.Throwable)>($r57);
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void purgeCalls(org.omg.CORBA.SystemException,boolean,boolean)>($r60, 0, 0);
+
+     label10:
+        goto label12;
+
+     label11:
+        $r49 := @caughtexception;
+
+        $r50 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z7 = $r50.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z7 == 0 goto label12;
+
+        $r51 = new java.lang.StringBuilder;
+
+        specialinvoke $r51.<java.lang.StringBuilder: void <init>()>();
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".readBits: ");
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": purgeCalls: Throwable: ");
+
+        $r55 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r49);
+
+        $r56 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String,java.lang.Throwable)>($r56, $r49);
+
+     label12:
+        throw $r57;
+
+     label13:
+        $r40 := @caughtexception;
+
+        $r41 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z5 = $r41.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z5 == 0 goto label14;
+
+        $r43 = new java.lang.StringBuilder;
+
+        specialinvoke $r43.<java.lang.StringBuilder: void <init>()>();
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".readBits: ");
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": Throwable: ");
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r40);
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String,java.lang.Throwable)>($r48, $r40);
+
+     label14:
+        $z6 = $r40 instanceof org.omg.CORBA.INTERNAL;
+
+        if $z6 == 0 goto label15;
+
+        $r42 = <com.sun.corba.se.spi.ior.iiop.GIOPVersion: com.sun.corba.se.spi.ior.iiop.GIOPVersion DEFAULT_VERSION>;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void sendMessageError(com.sun.corba.se.spi.ior.iiop.GIOPVersion)>($r42);
+
+     label15:
+        goto label17;
+
+     label16:
+        $r25 := @caughtexception;
+
+        $r26 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z3 = $r26.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z3 == 0 goto label17;
+
+        $r34 = new java.lang.StringBuilder;
+
+        specialinvoke $r34.<java.lang.StringBuilder: void <init>()>();
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".readBits: ");
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": sendMessageError: IOException: ");
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r25);
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String,java.lang.Throwable)>($r39, $r25);
+
+     label17:
+        $r68 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r69 = virtualinvoke $r68.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.pept.transport.TransportManager getTransportManager()>();
+
+        $r70 = interfaceinvoke $r69.<com.sun.corba.se.pept.transport.TransportManager: com.sun.corba.se.pept.transport.Selector getSelector(int)>(0);
+
+        if $r70 == null goto label18;
+
+        interfaceinvoke $r70.<com.sun.corba.se.pept.transport.Selector: void unregisterForEvent(com.sun.corba.se.pept.transport.EventHandler)>(r0);
+
+     label18:
+        $r27 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r28 = virtualinvoke $r27.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.COMM_FAILURE connectionAbort(java.lang.Throwable)>($r40);
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void purgeCalls(org.omg.CORBA.SystemException,boolean,boolean)>($r28, 1, 0);
+
+     label19:
+        $r29 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z4 = $r29.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z4 == 0 goto label22;
+
+        $r30 = new java.lang.StringBuilder;
+
+        specialinvoke $r30.<java.lang.StringBuilder: void <init>()>();
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".readBits<-: ");
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r33);
+
+        goto label22;
+
+     label20:
+        $r19 := @caughtexception;
+
+        $r20 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z2 = $r20.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z2 == 0 goto label21;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".readBits<-: ");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r24);
+
+     label21:
+        throw $r19;
+
+     label22:
+        return null;
+
+        catch java.lang.ThreadDeath from label01 to label06 with label08;
+        catch java.lang.Throwable from label09 to label10 with label11;
+        catch java.lang.Throwable from label01 to label06 with label13;
+        catch java.io.IOException from label14 to label15 with label16;
+        catch java.lang.Throwable from label08 to label19 with label20;
+    }
+
+    protected com.sun.corba.se.spi.protocol.CorbaMessageMediator finishReadingBits(com.sun.corba.se.pept.protocol.MessageMediator)
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r56, $r69;
+        com.sun.corba.se.spi.transport.CorbaContactInfo $r2, $r13;
+        com.sun.corba.se.pept.transport.Acceptor $r3, $r6;
+        java.lang.ThreadDeath $r54;
+        com.sun.corba.se.pept.transport.Selector $r68;
+        java.lang.StringBuilder $r8, $r9, $r10, $r15, $r16, $r17, $r21, $r22, $r23, $r27, $r28, $r29, $r31, $r32, $r33, $r34, $r35, $r40, $r41, $r42, $r43, $r44, $r48, $r49, $r50, $r51, $r52, $r58, $r59, $r60, $r61, $r62;
+        java.lang.Throwable $r19, $r37, $r46;
+        java.lang.String $r11, $r18, $r24, $r30, $r36, $r45, $r53, $r63;
+        org.omg.CORBA.COMM_FAILURE $r57, $r70;
+        com.sun.corba.se.pept.transport.TransportManager $r67;
+        java.io.IOException $r25;
+        java.lang.RuntimeException $r4;
+        com.sun.corba.se.spi.orb.ORB $r1, $r5, $r7, $r12, $r20, $r26, $r38, $r47, $r55, $r66, $r71;
+        com.sun.corba.se.pept.protocol.MessageMediator r64, r65;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        com.sun.corba.se.spi.ior.iiop.GIOPVersion $r39;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator $r14;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r64 := @parameter0: com.sun.corba.se.pept.protocol.MessageMediator;
+
+     label01:
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r1.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label02;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".finishReadingBits->: ");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r18);
+
+     label02:
+        $r2 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.transport.CorbaContactInfo contactInfo>;
+
+        if $r2 == null goto label03;
+
+        $r13 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.transport.CorbaContactInfo contactInfo>;
+
+        $r12 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        r65 = interfaceinvoke $r13.<com.sun.corba.se.spi.transport.CorbaContactInfo: com.sun.corba.se.pept.protocol.MessageMediator finishCreatingMessageMediator(com.sun.corba.se.pept.broker.Broker,com.sun.corba.se.pept.transport.Connection,com.sun.corba.se.pept.protocol.MessageMediator)>($r12, r0, r64);
+
+        goto label05;
+
+     label03:
+        $r3 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.transport.Acceptor acceptor>;
+
+        if $r3 == null goto label04;
+
+        $r6 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.transport.Acceptor acceptor>;
+
+        $r5 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        r65 = interfaceinvoke $r6.<com.sun.corba.se.pept.transport.Acceptor: com.sun.corba.se.pept.protocol.MessageMediator finishCreatingMessageMediator(com.sun.corba.se.pept.broker.Broker,com.sun.corba.se.pept.transport.Connection,com.sun.corba.se.pept.protocol.MessageMediator)>($r5, r0, r64);
+
+        goto label05;
+
+     label04:
+        $r4 = new java.lang.RuntimeException;
+
+        specialinvoke $r4.<java.lang.RuntimeException: void <init>(java.lang.String)>("SocketOrChannelConnectionImpl.finishReadingBits");
+
+        throw $r4;
+
+     label05:
+        $r14 = (com.sun.corba.se.spi.protocol.CorbaMessageMediator) r65;
+
+     label06:
+        $r7 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z1 = $r7.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z1 == 0 goto label07;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".finishReadingBits<-: ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r11);
+
+     label07:
+        return $r14;
+
+     label08:
+        $r54 := @caughtexception;
+
+        $r55 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z7 = $r55.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z7 == 0 goto label09;
+
+        $r58 = new java.lang.StringBuilder;
+
+        specialinvoke $r58.<java.lang.StringBuilder: void <init>()>();
+
+        $r59 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".finishReadingBits: ");
+
+        $r60 = virtualinvoke $r59.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r61 = virtualinvoke $r60.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ThreadDeath: ");
+
+        $r62 = virtualinvoke $r61.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r54);
+
+        $r63 = virtualinvoke $r62.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String,java.lang.Throwable)>($r63, $r54);
+
+     label09:
+        $r56 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r57 = virtualinvoke $r56.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.COMM_FAILURE connectionAbort(java.lang.Throwable)>($r54);
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void purgeCalls(org.omg.CORBA.SystemException,boolean,boolean)>($r57, 0, 0);
+
+     label10:
+        goto label12;
+
+     label11:
+        $r46 := @caughtexception;
+
+        $r47 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z6 = $r47.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z6 == 0 goto label12;
+
+        $r48 = new java.lang.StringBuilder;
+
+        specialinvoke $r48.<java.lang.StringBuilder: void <init>()>();
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".finishReadingBits: ");
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": purgeCalls: Throwable: ");
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r46);
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String,java.lang.Throwable)>($r53, $r46);
+
+     label12:
+        throw $r54;
+
+     label13:
+        $r37 := @caughtexception;
+
+        $r38 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z4 = $r38.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z4 == 0 goto label14;
+
+        $r40 = new java.lang.StringBuilder;
+
+        specialinvoke $r40.<java.lang.StringBuilder: void <init>()>();
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".finishReadingBits: ");
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": Throwable: ");
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r37);
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String,java.lang.Throwable)>($r45, $r37);
+
+     label14:
+        $z5 = $r37 instanceof org.omg.CORBA.INTERNAL;
+
+        if $z5 == 0 goto label15;
+
+        $r39 = <com.sun.corba.se.spi.ior.iiop.GIOPVersion: com.sun.corba.se.spi.ior.iiop.GIOPVersion DEFAULT_VERSION>;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void sendMessageError(com.sun.corba.se.spi.ior.iiop.GIOPVersion)>($r39);
+
+     label15:
+        goto label17;
+
+     label16:
+        $r25 := @caughtexception;
+
+        $r26 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z3 = $r26.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z3 == 0 goto label17;
+
+        $r31 = new java.lang.StringBuilder;
+
+        specialinvoke $r31.<java.lang.StringBuilder: void <init>()>();
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".finishReadingBits: ");
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": sendMessageError: IOException: ");
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r25);
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String,java.lang.Throwable)>($r36, $r25);
+
+     label17:
+        $r66 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r67 = virtualinvoke $r66.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.pept.transport.TransportManager getTransportManager()>();
+
+        $r68 = interfaceinvoke $r67.<com.sun.corba.se.pept.transport.TransportManager: com.sun.corba.se.pept.transport.Selector getSelector(int)>(0);
+
+        interfaceinvoke $r68.<com.sun.corba.se.pept.transport.Selector: void unregisterForEvent(com.sun.corba.se.pept.transport.EventHandler)>(r0);
+
+        $r69 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r70 = virtualinvoke $r69.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.COMM_FAILURE connectionAbort(java.lang.Throwable)>($r37);
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void purgeCalls(org.omg.CORBA.SystemException,boolean,boolean)>($r70, 1, 0);
+
+     label18:
+        $r71 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z8 = $r71.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z8 == 0 goto label22;
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".finishReadingBits<-: ");
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r30);
+
+        goto label22;
+
+     label19:
+        $r19 := @caughtexception;
+
+     label20:
+        $r20 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z2 = $r20.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z2 == 0 goto label21;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".finishReadingBits<-: ");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r24);
+
+     label21:
+        throw $r19;
+
+     label22:
+        return null;
+
+        catch java.lang.ThreadDeath from label01 to label06 with label08;
+        catch java.lang.Throwable from label09 to label10 with label11;
+        catch java.lang.Throwable from label01 to label06 with label13;
+        catch java.io.IOException from label14 to label15 with label16;
+        catch java.lang.Throwable from label08 to label18 with label19;
+        catch java.lang.Throwable from label19 to label20 with label19;
+    }
+
+    protected boolean dispatch(com.sun.corba.se.spi.protocol.CorbaMessageMediator)
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r32, $r34;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        com.sun.corba.se.spi.ior.iiop.GIOPVersion $r27;
+        java.lang.ThreadDeath $r30;
+        java.lang.StringBuilder $r5, $r6, $r7, $r9, $r10, $r11, $r15, $r16, $r17, $r21, $r22, $r23;
+        com.sun.corba.se.spi.protocol.CorbaProtocolHandler $r3;
+        java.lang.Throwable $r13, $r25, $r28;
+        java.lang.String $r8, $r12, $r18, $r24;
+        org.omg.CORBA.COMM_FAILURE $r33, $r35;
+        java.io.IOException $r19;
+        com.sun.corba.se.spi.orb.ORB $r1, $r4, $r14, $r20, $r26, $r29, $r31, $r36;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator r2;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r2 := @parameter0: com.sun.corba.se.spi.protocol.CorbaMessageMediator;
+
+     label01:
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r1.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label02;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".dispatch->: ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r12);
+
+     label02:
+        $r3 = interfaceinvoke r2.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.spi.protocol.CorbaProtocolHandler getProtocolHandler()>();
+
+        $z1 = interfaceinvoke $r3.<com.sun.corba.se.spi.protocol.CorbaProtocolHandler: boolean handleRequest(com.sun.corba.se.pept.protocol.MessageMediator)>(r2);
+
+     label03:
+        $r4 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z2 = $r4.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z2 == 0 goto label04;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".dispatch<-: ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r8);
+
+     label04:
+        return $z1;
+
+     label05:
+        $r30 := @caughtexception;
+
+        $r31 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z8 = $r31.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z8 == 0 goto label06;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String,java.lang.Throwable)>(".dispatch: ThreadDeath", $r30);
+
+     label06:
+        $r32 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r33 = virtualinvoke $r32.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.COMM_FAILURE connectionAbort(java.lang.Throwable)>($r30);
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void purgeCalls(org.omg.CORBA.SystemException,boolean,boolean)>($r33, 0, 0);
+
+     label07:
+        goto label09;
+
+     label08:
+        $r28 := @caughtexception;
+
+        $r29 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z7 = $r29.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z7 == 0 goto label09;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String,java.lang.Throwable)>(".dispatch: purgeCalls: Throwable", $r28);
+
+     label09:
+        throw $r30;
+
+     label10:
+        $r25 := @caughtexception;
+
+        $r26 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z5 = $r26.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z5 == 0 goto label11;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String,java.lang.Throwable)>(".dispatch: Throwable", $r25);
+
+     label11:
+        $z6 = $r25 instanceof org.omg.CORBA.INTERNAL;
+
+        if $z6 == 0 goto label12;
+
+        $r27 = <com.sun.corba.se.spi.ior.iiop.GIOPVersion: com.sun.corba.se.spi.ior.iiop.GIOPVersion DEFAULT_VERSION>;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void sendMessageError(com.sun.corba.se.spi.ior.iiop.GIOPVersion)>($r27);
+
+     label12:
+        goto label14;
+
+     label13:
+        $r19 := @caughtexception;
+
+        $r20 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z4 = $r20.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z4 == 0 goto label14;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String,java.lang.Throwable)>(".dispatch: sendMessageError: IOException", $r19);
+
+     label14:
+        $r34 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r35 = virtualinvoke $r34.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.COMM_FAILURE connectionAbort(java.lang.Throwable)>($r25);
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void purgeCalls(org.omg.CORBA.SystemException,boolean,boolean)>($r35, 0, 0);
+
+     label15:
+        $r36 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z9 = $r36.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z9 == 0 goto label19;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".dispatch<-: ");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r24);
+
+        goto label19;
+
+     label16:
+        $r13 := @caughtexception;
+
+     label17:
+        $r14 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z3 = $r14.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z3 == 0 goto label18;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".dispatch<-: ");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r18);
+
+     label18:
+        throw $r13;
+
+     label19:
+        return 1;
+
+        catch java.lang.ThreadDeath from label01 to label03 with label05;
+        catch java.lang.Throwable from label06 to label07 with label08;
+        catch java.lang.Throwable from label01 to label03 with label10;
+        catch java.io.IOException from label11 to label12 with label13;
+        catch java.lang.Throwable from label05 to label15 with label16;
+        catch java.lang.Throwable from label16 to label17 with label16;
+    }
+
+    public boolean shouldUseDirectByteBuffers()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        java.nio.channels.SocketChannel $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.nio.channels.SocketChannel getSocketChannel()>();
+
+        if $r1 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public java.nio.ByteBuffer read(int, int, int, long) throws java.io.IOException
+    {
+        byte[] r11;
+        java.net.Socket $r1;
+        long l3;
+        java.nio.ByteBuffer $r3, $r6;
+        java.lang.StringBuffer $r8, $r9;
+        int i0, i1, i2, $i4;
+        java.lang.String $r10;
+        boolean $z0, $z1;
+        com.sun.corba.se.spi.orb.ORB $r4, $r7;
+        com.sun.corba.se.pept.transport.ByteBufferPool $r5;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        java.io.InputStream $r2;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        l3 := @parameter3: long;
+
+        $z0 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean shouldUseDirectByteBuffers()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r5 = virtualinvoke $r4.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.pept.transport.ByteBufferPool getByteBufferPool()>();
+
+        $r6 = interfaceinvoke $r5.<com.sun.corba.se.pept.transport.ByteBufferPool: java.nio.ByteBuffer getByteBuffer(int)>(i0);
+
+        $r7 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z1 = $r7.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z1 == 0 goto label1;
+
+        $i4 = staticinvoke <java.lang.System: int identityHashCode(java.lang.Object)>($r6);
+
+        $r8 = new java.lang.StringBuffer;
+
+        specialinvoke $r8.<java.lang.StringBuffer: void <init>(int)>(80);
+
+        virtualinvoke $r8.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>(".read: got ByteBuffer id (");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuffer: java.lang.StringBuffer append(int)>($i4);
+
+        virtualinvoke $r9.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>(") from ByteBufferPool.");
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r10);
+
+     label1:
+        virtualinvoke $r6.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i1);
+
+        virtualinvoke $r6.<java.nio.ByteBuffer: java.nio.Buffer limit(int)>(i0);
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void readFully(java.nio.ByteBuffer,int,long)>($r6, i2, l3);
+
+        return $r6;
+
+     label2:
+        r11 = newarray (byte)[i0];
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.net.Socket getSocket()>();
+
+        $r2 = virtualinvoke $r1.<java.net.Socket: java.io.InputStream getInputStream()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void readFully(java.io.InputStream,byte[],int,int,long)>($r2, r11, i1, i2, l3);
+
+        $r3 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>(r11);
+
+        virtualinvoke $r3.<java.nio.ByteBuffer: java.nio.Buffer limit(int)>(i0);
+
+        return $r3;
+    }
+
+    public java.nio.ByteBuffer read(java.nio.ByteBuffer, int, int, long) throws java.io.IOException
+    {
+        org.omg.CORBA.INTERNAL $r5, $r16;
+        byte[] r18;
+        java.net.Socket $r1;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r4, $r15;
+        long l3;
+        java.nio.ByteBuffer $r3, r17;
+        java.lang.StringBuffer $r11, $r12, $r13;
+        int i0, i1, i2, $i4, $i5;
+        java.lang.String $r14;
+        boolean $z0, $z1, $z2, $z3;
+        com.sun.corba.se.spi.orb.ORB $r6, $r7, $r9;
+        com.sun.corba.se.pept.transport.ByteBufferPool $r8, $r10;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        java.io.InputStream $r2;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r17 := @parameter0: java.nio.ByteBuffer;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        l3 := @parameter3: long;
+
+        i2 = i0 + i1;
+
+        $z0 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean shouldUseDirectByteBuffers()>();
+
+        if $z0 == 0 goto label4;
+
+        $z2 = virtualinvoke r17.<java.nio.ByteBuffer: boolean isDirect()>();
+
+        if $z2 != 0 goto label1;
+
+        $r15 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r16 = virtualinvoke $r15.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL unexpectedNonDirectByteBufferWithChannelSocket()>();
+
+        throw $r16;
+
+     label1:
+        $i4 = virtualinvoke r17.<java.nio.ByteBuffer: int capacity()>();
+
+        if i2 <= $i4 goto label3;
+
+        $r6 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z3 = $r6.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z3 == 0 goto label2;
+
+        $i5 = staticinvoke <java.lang.System: int identityHashCode(java.lang.Object)>(r17);
+
+        $r11 = new java.lang.StringBuffer;
+
+        specialinvoke $r11.<java.lang.StringBuffer: void <init>(int)>(80);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>(".read: releasing ByteBuffer id (");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuffer: java.lang.StringBuffer append(int)>($i5);
+
+        virtualinvoke $r13.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>(") to ByteBufferPool.");
+
+        $r14 = virtualinvoke $r11.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r14);
+
+     label2:
+        $r7 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r8 = virtualinvoke $r7.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.pept.transport.ByteBufferPool getByteBufferPool()>();
+
+        interfaceinvoke $r8.<com.sun.corba.se.pept.transport.ByteBufferPool: void releaseByteBuffer(java.nio.ByteBuffer)>(r17);
+
+        $r9 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r10 = virtualinvoke $r9.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.pept.transport.ByteBufferPool getByteBufferPool()>();
+
+        r17 = interfaceinvoke $r10.<com.sun.corba.se.pept.transport.ByteBufferPool: java.nio.ByteBuffer getByteBuffer(int)>(i2);
+
+     label3:
+        virtualinvoke r17.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i0);
+
+        virtualinvoke r17.<java.nio.ByteBuffer: java.nio.Buffer limit(int)>(i2);
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void readFully(java.nio.ByteBuffer,int,long)>(r17, i1, l3);
+
+        virtualinvoke r17.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(0);
+
+        virtualinvoke r17.<java.nio.ByteBuffer: java.nio.Buffer limit(int)>(i2);
+
+        return r17;
+
+     label4:
+        $z1 = virtualinvoke r17.<java.nio.ByteBuffer: boolean isDirect()>();
+
+        if $z1 == 0 goto label5;
+
+        $r4 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r5 = virtualinvoke $r4.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL unexpectedDirectByteBufferWithNonChannelSocket()>();
+
+        throw $r5;
+
+     label5:
+        r18 = newarray (byte)[i2];
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.net.Socket getSocket()>();
+
+        $r2 = virtualinvoke $r1.<java.net.Socket: java.io.InputStream getInputStream()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void readFully(java.io.InputStream,byte[],int,int,long)>($r2, r18, i0, i1, l3);
+
+        $r3 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>(r18);
+
+        return $r3;
+    }
+
+    public void readFully(java.nio.ByteBuffer, int, long) throws java.io.IOException
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r6;
+        java.lang.Integer $r22, $r23;
+        java.nio.ByteBuffer r3;
+        java.nio.channels.SocketChannel $r2;
+        byte $b4, $b5;
+        java.lang.Long $r24, $r25;
+        boolean $z0;
+        com.sun.corba.se.spi.transport.ReadTimeouts $r1, $r11;
+        java.lang.StringBuilder $r16, $r18, $r21;
+        long l3, l7, l8;
+        int $i0, $i1, i2, i6, $i9, $i10;
+        java.lang.String $r17, $r19;
+        org.omg.CORBA.COMM_FAILURE $r10;
+        double $d0, $d1, $d2;
+        java.io.IOException $r20;
+        com.sun.corba.se.pept.transport.ConnectionCache $r4;
+        com.sun.corba.se.spi.orb.ORB $r14;
+        java.lang.InterruptedException $r13;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r3 := @parameter0: java.nio.ByteBuffer;
+
+        i2 := @parameter1: int;
+
+        l3 := @parameter2: long;
+
+        i6 = 0;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.transport.ReadTimeouts readTimeouts>;
+
+        $i0 = interfaceinvoke $r1.<com.sun.corba.se.spi.transport.ReadTimeouts: int get_initial_time_to_wait()>();
+
+        l7 = (long) $i0;
+
+        l8 = 0L;
+
+     label01:
+        $r2 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.nio.channels.SocketChannel getSocketChannel()>();
+
+        $i1 = virtualinvoke $r2.<java.nio.channels.SocketChannel: int read(java.nio.ByteBuffer)>(r3);
+
+        if $i1 >= 0 goto label02;
+
+        $r20 = new java.io.IOException;
+
+        specialinvoke $r20.<java.io.IOException: void <init>(java.lang.String)>("End-of-stream");
+
+        throw $r20;
+
+     label02:
+        if $i1 != 0 goto label07;
+
+     label03:
+        staticinvoke <java.lang.Thread: void sleep(long)>(l7);
+
+        l8 = l8 + l7;
+
+        $d0 = (double) l7;
+
+        $r11 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.transport.ReadTimeouts readTimeouts>;
+
+        $d1 = interfaceinvoke $r11.<com.sun.corba.se.spi.transport.ReadTimeouts: double get_backoff_factor()>();
+
+        $d2 = $d0 * $d1;
+
+        l7 = (long) $d2;
+
+     label04:
+        goto label08;
+
+     label05:
+        $r13 := @caughtexception;
+
+        $r14 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r14.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label06;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("readFully(): unexpected exception ");
+
+        $r17 = virtualinvoke $r13.<java.lang.InterruptedException: java.lang.String toString()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r19);
+
+     label06:
+        goto label08;
+
+     label07:
+        i6 = i6 + $i1;
+
+     label08:
+        if i6 >= i2 goto label09;
+
+        $b5 = l8 cmp l3;
+
+        $i9 = (int) $b5;
+
+        if $i9 < 0 goto label01;
+
+     label09:
+        if i6 >= i2 goto label10;
+
+        $b4 = l8 cmp l3;
+
+        $i10 = (int) $b4;
+
+        if $i10 < 0 goto label10;
+
+        $r6 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r22 = new java.lang.Integer;
+
+        specialinvoke $r22.<java.lang.Integer: void <init>(int)>(i2);
+
+        $r23 = new java.lang.Integer;
+
+        specialinvoke $r23.<java.lang.Integer: void <init>(int)>(i6);
+
+        $r24 = new java.lang.Long;
+
+        specialinvoke $r24.<java.lang.Long: void <init>(long)>(l3);
+
+        $r25 = new java.lang.Long;
+
+        specialinvoke $r25.<java.lang.Long: void <init>(long)>(l8);
+
+        $r10 = virtualinvoke $r6.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.COMM_FAILURE transportReadTimeoutExceeded(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)>($r22, $r23, $r24, $r25);
+
+        throw $r10;
+
+     label10:
+        $r4 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.transport.ConnectionCache getConnectionCache()>();
+
+        interfaceinvoke $r4.<com.sun.corba.se.pept.transport.ConnectionCache: void stampTime(com.sun.corba.se.pept.transport.Connection)>(r0);
+
+        return;
+
+        catch java.lang.InterruptedException from label03 to label04 with label05;
+    }
+
+    public void readFully(java.io.InputStream, byte[], int, int, long) throws java.io.IOException
+    {
+        byte[] r3;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r6;
+        java.lang.Integer $r22, $r23;
+        byte $b7, $b8;
+        java.lang.Long $r24, $r25;
+        boolean $z0;
+        com.sun.corba.se.spi.transport.ReadTimeouts $r1, $r11;
+        java.lang.StringBuilder $r16, $r18, $r21;
+        long l6, l10, l11;
+        int $i0, i1, i2, $i3, $i4, $i5, i9, $i12, $i13;
+        java.lang.String $r17, $r19;
+        org.omg.CORBA.COMM_FAILURE $r10;
+        double $d0, $d1, $d2;
+        java.io.IOException $r20;
+        com.sun.corba.se.pept.transport.ConnectionCache $r4;
+        com.sun.corba.se.spi.orb.ORB $r14;
+        java.lang.InterruptedException $r13;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        java.io.InputStream r2;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r2 := @parameter0: java.io.InputStream;
+
+        r3 := @parameter1: byte[];
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        l6 := @parameter4: long;
+
+        i9 = 0;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.transport.ReadTimeouts readTimeouts>;
+
+        $i0 = interfaceinvoke $r1.<com.sun.corba.se.spi.transport.ReadTimeouts: int get_initial_time_to_wait()>();
+
+        l10 = (long) $i0;
+
+        l11 = 0L;
+
+     label01:
+        $i4 = i1 + i9;
+
+        $i3 = i2 - i9;
+
+        $i5 = virtualinvoke r2.<java.io.InputStream: int read(byte[],int,int)>(r3, $i4, $i3);
+
+        if $i5 >= 0 goto label02;
+
+        $r20 = new java.io.IOException;
+
+        specialinvoke $r20.<java.io.IOException: void <init>(java.lang.String)>("End-of-stream");
+
+        throw $r20;
+
+     label02:
+        if $i5 != 0 goto label07;
+
+     label03:
+        staticinvoke <java.lang.Thread: void sleep(long)>(l10);
+
+        l11 = l11 + l10;
+
+        $d0 = (double) l10;
+
+        $r11 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.transport.ReadTimeouts readTimeouts>;
+
+        $d1 = interfaceinvoke $r11.<com.sun.corba.se.spi.transport.ReadTimeouts: double get_backoff_factor()>();
+
+        $d2 = $d0 * $d1;
+
+        l10 = (long) $d2;
+
+     label04:
+        goto label08;
+
+     label05:
+        $r13 := @caughtexception;
+
+        $r14 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r14.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label06;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("readFully(): unexpected exception ");
+
+        $r17 = virtualinvoke $r13.<java.lang.InterruptedException: java.lang.String toString()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r19);
+
+     label06:
+        goto label08;
+
+     label07:
+        i9 = i9 + $i5;
+
+     label08:
+        if i9 >= i2 goto label09;
+
+        $b8 = l11 cmp l6;
+
+        $i12 = (int) $b8;
+
+        if $i12 < 0 goto label01;
+
+     label09:
+        if i9 >= i2 goto label10;
+
+        $b7 = l11 cmp l6;
+
+        $i13 = (int) $b7;
+
+        if $i13 < 0 goto label10;
+
+        $r6 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r22 = new java.lang.Integer;
+
+        specialinvoke $r22.<java.lang.Integer: void <init>(int)>(i2);
+
+        $r23 = new java.lang.Integer;
+
+        specialinvoke $r23.<java.lang.Integer: void <init>(int)>(i9);
+
+        $r24 = new java.lang.Long;
+
+        specialinvoke $r24.<java.lang.Long: void <init>(long)>(l6);
+
+        $r25 = new java.lang.Long;
+
+        specialinvoke $r25.<java.lang.Long: void <init>(long)>(l11);
+
+        $r10 = virtualinvoke $r6.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.COMM_FAILURE transportReadTimeoutExceeded(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)>($r22, $r23, $r24, $r25);
+
+        throw $r10;
+
+     label10:
+        $r4 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.transport.ConnectionCache getConnectionCache()>();
+
+        interfaceinvoke $r4.<com.sun.corba.se.pept.transport.ConnectionCache: void stampTime(com.sun.corba.se.pept.transport.Connection)>(r0);
+
+        return;
+
+        catch java.lang.InterruptedException from label03 to label04 with label05;
+    }
+
+    public void write(java.nio.ByteBuffer) throws java.io.IOException
+    {
+        java.io.OutputStream $r4, $r6;
+        org.omg.CORBA.INTERNAL $r9;
+        byte[] $r2;
+        java.net.Socket $r3, $r5;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r8;
+        com.sun.corba.se.pept.transport.ConnectionCache $r7;
+        java.nio.ByteBuffer r1;
+        java.nio.channels.SocketChannel $r10;
+        int $i0;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r1 := @parameter0: java.nio.ByteBuffer;
+
+        $z0 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean shouldUseDirectByteBuffers()>();
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        $r10 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.nio.channels.SocketChannel getSocketChannel()>();
+
+        virtualinvoke $r10.<java.nio.channels.SocketChannel: int write(java.nio.ByteBuffer)>(r1);
+
+        $z2 = virtualinvoke r1.<java.nio.ByteBuffer: boolean hasRemaining()>();
+
+        if $z2 != 0 goto label1;
+
+        goto label4;
+
+     label2:
+        $z1 = virtualinvoke r1.<java.nio.ByteBuffer: boolean hasArray()>();
+
+        if $z1 != 0 goto label3;
+
+        $r8 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r9 = virtualinvoke $r8.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL unexpectedDirectByteBufferWithNonChannelSocket()>();
+
+        throw $r9;
+
+     label3:
+        $r2 = virtualinvoke r1.<java.nio.ByteBuffer: byte[] array()>();
+
+        $r3 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.net.Socket getSocket()>();
+
+        $r4 = virtualinvoke $r3.<java.net.Socket: java.io.OutputStream getOutputStream()>();
+
+        $i0 = virtualinvoke r1.<java.nio.ByteBuffer: int limit()>();
+
+        virtualinvoke $r4.<java.io.OutputStream: void write(byte[],int,int)>($r2, 0, $i0);
+
+        $r5 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.net.Socket getSocket()>();
+
+        $r6 = virtualinvoke $r5.<java.net.Socket: java.io.OutputStream getOutputStream()>();
+
+        virtualinvoke $r6.<java.io.OutputStream: void flush()>();
+
+     label4:
+        $r7 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.transport.ConnectionCache getConnectionCache()>();
+
+        interfaceinvoke $r7.<com.sun.corba.se.pept.transport.ConnectionCache: void stampTime(com.sun.corba.se.pept.transport.Connection)>(r0);
+
+        return;
+    }
+
+    public synchronized void close()
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r5, $r48;
+        java.nio.channels.SocketChannel $r7, $r13;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        com.sun.corba.se.spi.ior.iiop.GIOPVersion $r2;
+        java.lang.Exception $r40;
+        com.sun.corba.se.pept.transport.Selector $r51;
+        java.lang.StringBuilder $r9, $r10, $r11, $r16, $r17, $r18, $r20, $r21, $r22, $r24, $r25, $r26, $r30, $r31, $r32, $r36, $r37, $r38, $r42, $r43, $r44;
+        java.lang.Throwable $r28, $r46, $r47;
+        java.net.Socket $r8;
+        java.lang.String $r12, $r19, $r23, $r27, $r33, $r39, $r45;
+        org.omg.CORBA.COMM_FAILURE $r6;
+        com.sun.corba.se.pept.transport.TransportManager $r50;
+        java.io.IOException $r34;
+        com.sun.corba.se.spi.orb.ORB $r1, $r14, $r15, $r29, $r35, $r41, $r49, $r52;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        java.lang.Object $r3, $r4;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+     label01:
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r1.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label02;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".close->: ");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r27);
+
+     label02:
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void writeLock()>();
+
+        $z1 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean isBusy()>();
+
+        if $z1 == 0 goto label05;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void writeUnlock()>();
+
+        $r14 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z2 = $r14.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z2 == 0 goto label03;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".close: isBusy so no close: ");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r23);
+
+     label03:
+        $r15 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z3 = $r15.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z3 == 0 goto label04;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".close<-: ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r19);
+
+     label04:
+        return;
+
+     label05:
+        $r2 = <com.sun.corba.se.spi.ior.iiop.GIOPVersion: com.sun.corba.se.spi.ior.iiop.GIOPVersion V1_0>;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void sendCloseConnection(com.sun.corba.se.spi.ior.iiop.GIOPVersion)>($r2);
+
+     label06:
+        goto label08;
+
+     label07:
+        $r47 := @caughtexception;
+
+        $r48 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        virtualinvoke $r48.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL exceptionWhenSendingCloseConnection(java.lang.Throwable)>($r47);
+
+     label08:
+        $r3 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.lang.Object stateEvent>;
+
+        entermonitor $r3;
+
+     label09:
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: int state> = 3;
+
+        $r4 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.lang.Object stateEvent>;
+
+        virtualinvoke $r4.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor $r3;
+
+     label10:
+        goto label13;
+
+     label11:
+        $r46 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label12:
+        throw $r46;
+
+     label13:
+        $r5 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r6 = virtualinvoke $r5.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.COMM_FAILURE connectionRebind()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void purgeCalls(org.omg.CORBA.SystemException,boolean,boolean)>($r6, 0, 1);
+
+     label14:
+        goto label16;
+
+     label15:
+        $r40 := @caughtexception;
+
+        $r41 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z6 = $r41.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z6 == 0 goto label16;
+
+        $r42 = new java.lang.StringBuilder;
+
+        specialinvoke $r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".close: exception: ");
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String,java.lang.Throwable)>($r45, $r40);
+
+     label16:
+        $r49 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r50 = virtualinvoke $r49.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.pept.transport.TransportManager getTransportManager()>();
+
+        $r51 = interfaceinvoke $r50.<com.sun.corba.se.pept.transport.TransportManager: com.sun.corba.se.pept.transport.Selector getSelector(int)>(0);
+
+        if $r51 == null goto label17;
+
+        interfaceinvoke $r51.<com.sun.corba.se.pept.transport.Selector: void unregisterForEvent(com.sun.corba.se.pept.transport.EventHandler)>(r0);
+
+     label17:
+        $r7 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.nio.channels.SocketChannel socketChannel>;
+
+        if $r7 == null goto label18;
+
+        $r13 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.nio.channels.SocketChannel socketChannel>;
+
+        virtualinvoke $r13.<java.nio.channels.SocketChannel: void close()>();
+
+     label18:
+        $r8 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.net.Socket socket>;
+
+        virtualinvoke $r8.<java.net.Socket: void close()>();
+
+     label19:
+        goto label21;
+
+     label20:
+        $r34 := @caughtexception;
+
+        $r35 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z5 = $r35.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z5 == 0 goto label21;
+
+        $r36 = new java.lang.StringBuilder;
+
+        specialinvoke $r36.<java.lang.StringBuilder: void <init>()>();
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".close: ");
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String,java.lang.Throwable)>($r39, $r34);
+
+     label21:
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void closeConnectionResources()>();
+
+     label22:
+        $r52 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z7 = $r52.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z7 == 0 goto label25;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".close<-: ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r12);
+
+        goto label25;
+
+     label23:
+        $r28 := @caughtexception;
+
+        $r29 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z4 = $r29.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z4 == 0 goto label24;
+
+        $r30 = new java.lang.StringBuilder;
+
+        specialinvoke $r30.<java.lang.StringBuilder: void <init>()>();
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".close<-: ");
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r33);
+
+     label24:
+        throw $r28;
+
+     label25:
+        return;
+
+        catch java.lang.Throwable from label05 to label06 with label07;
+        catch java.lang.Throwable from label09 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+        catch java.lang.Exception from label05 to label14 with label15;
+        catch java.io.IOException from label16 to label19 with label20;
+        catch java.lang.Throwable from label01 to label03 with label23;
+        catch java.lang.Throwable from label05 to label22 with label23;
+    }
+
+    public void closeConnectionResources()
+    {
+        java.net.Socket $r6, $r11, $r12;
+        java.nio.channels.SocketChannel $r5, $r13;
+        java.lang.String $r10, $r17, $r23;
+        boolean $z0, $z1, $z2, $z3;
+        com.sun.corba.se.pept.transport.TransportManager $r3;
+        java.io.IOException $r18;
+        com.sun.corba.se.spi.orb.ORB $r1, $r2, $r19, $r24;
+        com.sun.corba.se.pept.transport.Selector $r4;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        java.lang.StringBuilder $r7, $r8, $r9, $r14, $r15, $r16, $r20, $r21, $r22;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r1.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label1;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".closeConnectionResources->: ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r17);
+
+     label1:
+        $r2 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r3 = virtualinvoke $r2.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.pept.transport.TransportManager getTransportManager()>();
+
+        $r4 = interfaceinvoke $r3.<com.sun.corba.se.pept.transport.TransportManager: com.sun.corba.se.pept.transport.Selector getSelector(int)>(0);
+
+        if $r4 == null goto label2;
+
+        interfaceinvoke $r4.<com.sun.corba.se.pept.transport.Selector: void unregisterForEvent(com.sun.corba.se.pept.transport.EventHandler)>(r0);
+
+     label2:
+        $r5 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.nio.channels.SocketChannel socketChannel>;
+
+        if $r5 == null goto label3;
+
+        $r13 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.nio.channels.SocketChannel socketChannel>;
+
+        virtualinvoke $r13.<java.nio.channels.SocketChannel: void close()>();
+
+     label3:
+        $r6 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.net.Socket socket>;
+
+        if $r6 == null goto label4;
+
+        $r11 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.net.Socket socket>;
+
+        $z1 = virtualinvoke $r11.<java.net.Socket: boolean isClosed()>();
+
+        if $z1 != 0 goto label4;
+
+        $r12 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.net.Socket socket>;
+
+        virtualinvoke $r12.<java.net.Socket: void close()>();
+
+     label4:
+        goto label6;
+
+     label5:
+        $r18 := @caughtexception;
+
+        $r19 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z2 = $r19.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z2 == 0 goto label6;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".closeConnectionResources: ");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String,java.lang.Throwable)>($r23, $r18);
+
+     label6:
+        $r24 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z3 = $r24.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z3 == 0 goto label7;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".closeConnectionResources<-: ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r10);
+
+     label7:
+        return;
+
+        catch java.io.IOException from label2 to label4 with label5;
+    }
+
+    public com.sun.corba.se.pept.transport.Acceptor getAcceptor()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        com.sun.corba.se.pept.transport.Acceptor $r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.transport.Acceptor acceptor>;
+
+        return $r1;
+    }
+
+    public com.sun.corba.se.pept.transport.ContactInfo getContactInfo()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        com.sun.corba.se.spi.transport.CorbaContactInfo $r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.transport.CorbaContactInfo contactInfo>;
+
+        return $r1;
+    }
+
+    public com.sun.corba.se.pept.transport.EventHandler getEventHandler()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        return r0;
+    }
+
+    public com.sun.corba.se.pept.encoding.OutputObject createOutputObject(com.sun.corba.se.pept.protocol.MessageMediator)
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r1;
+        java.lang.RuntimeException $r0;
+        com.sun.corba.se.pept.protocol.MessageMediator r2;
+
+        r1 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r2 := @parameter0: com.sun.corba.se.pept.protocol.MessageMediator;
+
+        $r0 = new java.lang.RuntimeException;
+
+        specialinvoke $r0.<java.lang.RuntimeException: void <init>(java.lang.String)>("*****SocketOrChannelConnectionImpl.createOutputObject - should not be called.");
+
+        throw $r0;
+    }
+
+    public boolean isServer()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $z0 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean isServer>;
+
+        return $z0;
+    }
+
+    public boolean isBusy()
+    {
+        int $i0, $i1;
+        com.sun.corba.se.pept.transport.ResponseWaitingRoom $r1;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $i0 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: int serverRequestCount>;
+
+        if $i0 > 0 goto label1;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.transport.ResponseWaitingRoom getResponseWaitingRoom()>();
+
+        $i1 = interfaceinvoke $r1.<com.sun.corba.se.pept.transport.ResponseWaitingRoom: int numberRegistered()>();
+
+        if $i1 <= 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    public long getTimeStamp()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        long $l0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $l0 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: long timeStamp>;
+
+        return $l0;
+    }
+
+    public void setTimeStamp(long)
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        long l0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        l0 := @parameter0: long;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: long timeStamp> = l0;
+
+        return;
+    }
+
+    public void setState(java.lang.String)
+    {
+        java.lang.Throwable $r4;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        java.lang.Object $r1, $r3;
+        java.lang.String r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.lang.Object stateEvent>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = virtualinvoke r2.<java.lang.String: boolean equals(java.lang.Object)>("ESTABLISHED");
+
+        if $z0 == 0 goto label2;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: int state> = 2;
+
+        $r3 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.lang.Object stateEvent>;
+
+        virtualinvoke $r3.<java.lang.Object: void notifyAll()>();
+
+     label2:
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r4;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void writeLock()
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r2, $r5;
+        java.lang.StringBuilder $r10, $r11, $r12, $r18, $r19, $r20, $r23, $r24, $r25, $r29, $r30, $r31, $r38, $r39, $r40, $r45, $r46, $r47;
+        java.lang.Throwable $r27, $r33, $r34, $r35, $r42;
+        java.lang.String $r13, $r21, $r26, $r32, $r41, $r48;
+        org.omg.CORBA.COMM_FAILURE $r3, $r6;
+        java.lang.RuntimeException $r17;
+        com.sun.corba.se.spi.orb.ORB $r9, $r16, $r22, $r28, $r37, $r44;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.lang.InterruptedException $r36, $r43;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        java.lang.Object $r1, $r4, $r7, $r8, $r14, $r15;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+     label01:
+        $z0 = <com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean dprintWriteLocks>;
+
+        if $z0 == 0 goto label02;
+
+        $r22 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z6 = $r22.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z6 == 0 goto label02;
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".writeLock->: ");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r26);
+
+     label02:
+        $i4 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: int state>;
+
+        tableswitch($i4)
+        {
+            case 1: goto label03;
+            case 2: goto label14;
+            case 3: goto label38;
+            case 4: goto label32;
+            case 5: goto label26;
+            default: goto label38;
+        };
+
+     label03:
+        $r14 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.lang.Object stateEvent>;
+
+        entermonitor $r14;
+
+     label04:
+        $i3 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: int state>;
+
+        if $i3 == 1 goto label06;
+
+        exitmonitor $r14;
+
+     label05:
+        goto label40;
+
+     label06:
+        $r15 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.lang.Object stateEvent>;
+
+        virtualinvoke $r15.<java.lang.Object: void wait()>();
+
+     label07:
+        goto label09;
+
+     label08:
+        $r43 := @caughtexception;
+
+        $r44 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z10 = $r44.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z10 == 0 goto label09;
+
+        $r45 = new java.lang.StringBuilder;
+
+        specialinvoke $r45.<java.lang.StringBuilder: void <init>()>();
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".writeLock: OPENING InterruptedException: ");
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r48);
+
+     label09:
+        exitmonitor $r14;
+
+     label10:
+        goto label13;
+
+     label11:
+        $r42 := @caughtexception;
+
+        exitmonitor $r14;
+
+     label12:
+        throw $r42;
+
+     label13:
+        goto label40;
+
+     label14:
+        $r7 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.lang.Object writeEvent>;
+
+        entermonitor $r7;
+
+     label15:
+        $z1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean writeLocked>;
+
+        if $z1 != 0 goto label18;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean writeLocked> = 1;
+
+        exitmonitor $r7;
+
+     label16:
+        $z3 = <com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean dprintWriteLocks>;
+
+        if $z3 == 0 goto label17;
+
+        $r9 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z4 = $r9.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z4 == 0 goto label17;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".writeLock<-: ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r13);
+
+     label17:
+        return;
+
+     label18:
+        $i2 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: int state>;
+
+        if $i2 != 2 goto label19;
+
+        $z2 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean writeLocked>;
+
+        if $z2 == 0 goto label19;
+
+        $r8 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.lang.Object writeEvent>;
+
+        virtualinvoke $r8.<java.lang.Object: void wait(long)>(100L);
+
+        goto label18;
+
+     label19:
+        goto label21;
+
+     label20:
+        $r36 := @caughtexception;
+
+        $r37 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z9 = $r37.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z9 == 0 goto label21;
+
+        $r38 = new java.lang.StringBuilder;
+
+        specialinvoke $r38.<java.lang.StringBuilder: void <init>()>();
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".writeLock: ESTABLISHED InterruptedException: ");
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r41);
+
+     label21:
+        exitmonitor $r7;
+
+     label22:
+        goto label25;
+
+     label23:
+        $r35 := @caughtexception;
+
+        exitmonitor $r7;
+
+     label24:
+        throw $r35;
+
+     label25:
+        goto label40;
+
+     label26:
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.lang.Object stateEvent>;
+
+        entermonitor $r1;
+
+     label27:
+        $i0 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: int state>;
+
+        if $i0 == 5 goto label29;
+
+        exitmonitor $r1;
+
+     label28:
+        goto label40;
+
+     label29:
+        $r2 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r3 = virtualinvoke $r2.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.COMM_FAILURE writeErrorSend()>();
+
+        throw $r3;
+
+     label30:
+        $r34 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label31:
+        throw $r34;
+
+     label32:
+        $r4 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.lang.Object stateEvent>;
+
+        entermonitor $r4;
+
+     label33:
+        $i1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: int state>;
+
+        if $i1 == 4 goto label35;
+
+        exitmonitor $r4;
+
+     label34:
+        goto label40;
+
+     label35:
+        $r5 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r6 = virtualinvoke $r5.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.COMM_FAILURE connectionCloseRebind()>();
+
+        throw $r6;
+
+     label36:
+        $r33 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label37:
+        throw $r33;
+
+     label38:
+        $r16 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z5 = $r16.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z5 == 0 goto label39;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".writeLock: default: ");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r21);
+
+     label39:
+        $r17 = new java.lang.RuntimeException;
+
+        specialinvoke $r17.<java.lang.RuntimeException: void <init>(java.lang.String)>(".writeLock: bad state");
+
+        throw $r17;
+
+     label40:
+        goto label02;
+
+     label41:
+        $r27 := @caughtexception;
+
+     label42:
+        $z7 = <com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean dprintWriteLocks>;
+
+        if $z7 == 0 goto label43;
+
+        $r28 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z8 = $r28.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z8 == 0 goto label43;
+
+        $r29 = new java.lang.StringBuilder;
+
+        specialinvoke $r29.<java.lang.StringBuilder: void <init>()>();
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".writeLock<-: ");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r32);
+
+     label43:
+        throw $r27;
+
+        catch java.lang.InterruptedException from label06 to label07 with label08;
+        catch java.lang.Throwable from label04 to label05 with label11;
+        catch java.lang.Throwable from label06 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+        catch java.lang.InterruptedException from label18 to label19 with label20;
+        catch java.lang.Throwable from label15 to label16 with label23;
+        catch java.lang.Throwable from label18 to label22 with label23;
+        catch java.lang.Throwable from label23 to label24 with label23;
+        catch java.lang.Throwable from label27 to label28 with label30;
+        catch java.lang.Throwable from label29 to label31 with label30;
+        catch java.lang.Throwable from label33 to label34 with label36;
+        catch java.lang.Throwable from label35 to label37 with label36;
+        catch java.lang.Throwable from label01 to label16 with label41;
+        catch java.lang.Throwable from label18 to label42 with label41;
+    }
+
+    public void writeUnlock()
+    {
+        java.lang.Throwable $r11, $r17;
+        java.lang.String $r5, $r10, $r16;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        com.sun.corba.se.spi.orb.ORB $r1, $r6, $r12;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        java.lang.StringBuilder $r2, $r3, $r4, $r7, $r8, $r9, $r13, $r14, $r15;
+        java.lang.Object $r18, $r19;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+     label01:
+        $z0 = <com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean dprintWriteLocks>;
+
+        if $z0 == 0 goto label02;
+
+        $r6 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z3 = $r6.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z3 == 0 goto label02;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".writeUnlock->: ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r10);
+
+     label02:
+        $r18 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.lang.Object writeEvent>;
+
+        entermonitor $r18;
+
+     label03:
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean writeLocked> = 0;
+
+        $r19 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.lang.Object writeEvent>;
+
+        virtualinvoke $r19.<java.lang.Object: void notify()>();
+
+        exitmonitor $r18;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r17 := @caughtexception;
+
+        exitmonitor $r18;
+
+     label06:
+        throw $r17;
+
+     label07:
+        $z1 = <com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean dprintWriteLocks>;
+
+        if $z1 == 0 goto label10;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z2 = $r1.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z2 == 0 goto label10;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".writeUnlock<-: ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r5);
+
+        goto label10;
+
+     label08:
+        $r11 := @caughtexception;
+
+        $z4 = <com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean dprintWriteLocks>;
+
+        if $z4 == 0 goto label09;
+
+        $r12 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z5 = $r12.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z5 == 0 goto label09;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".writeUnlock<-: ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r16);
+
+     label09:
+        throw $r11;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label03 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.lang.Throwable from label01 to label07 with label08;
+    }
+
+    public void sendWithoutLock(com.sun.corba.se.pept.encoding.OutputObject)
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r3;
+        com.sun.corba.se.pept.encoding.OutputObject r0;
+        com.sun.corba.se.impl.encoding.CDROutputObject r5;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r1;
+        java.io.IOException $r2;
+        org.omg.CORBA.COMM_FAILURE $r4;
+
+        r1 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r0 := @parameter0: com.sun.corba.se.pept.encoding.OutputObject;
+
+     label1:
+        r5 = (com.sun.corba.se.impl.encoding.CDROutputObject) r0;
+
+        virtualinvoke r5.<com.sun.corba.se.impl.encoding.CDROutputObject: void writeTo(com.sun.corba.se.spi.transport.CorbaConnection)>(r1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r4 = virtualinvoke $r3.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.COMM_FAILURE writeErrorSend(java.lang.Throwable)>($r2);
+
+        virtualinvoke r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void purgeCalls(org.omg.CORBA.SystemException,boolean,boolean)>($r4, 0, 1);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public void registerWaiter(com.sun.corba.se.pept.protocol.MessageMediator)
+    {
+        com.sun.corba.se.spi.transport.CorbaResponseWaitingRoom $r2;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        com.sun.corba.se.pept.protocol.MessageMediator r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r1 := @parameter0: com.sun.corba.se.pept.protocol.MessageMediator;
+
+        $r2 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.transport.CorbaResponseWaitingRoom responseWaitingRoom>;
+
+        interfaceinvoke $r2.<com.sun.corba.se.spi.transport.CorbaResponseWaitingRoom: void registerWaiter(com.sun.corba.se.pept.protocol.MessageMediator)>(r1);
+
+        return;
+    }
+
+    public void unregisterWaiter(com.sun.corba.se.pept.protocol.MessageMediator)
+    {
+        com.sun.corba.se.spi.transport.CorbaResponseWaitingRoom $r2;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        com.sun.corba.se.pept.protocol.MessageMediator r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r1 := @parameter0: com.sun.corba.se.pept.protocol.MessageMediator;
+
+        $r2 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.transport.CorbaResponseWaitingRoom responseWaitingRoom>;
+
+        interfaceinvoke $r2.<com.sun.corba.se.spi.transport.CorbaResponseWaitingRoom: void unregisterWaiter(com.sun.corba.se.pept.protocol.MessageMediator)>(r1);
+
+        return;
+    }
+
+    public com.sun.corba.se.pept.encoding.InputObject waitForResponse(com.sun.corba.se.pept.protocol.MessageMediator)
+    {
+        com.sun.corba.se.pept.encoding.InputObject $r3;
+        com.sun.corba.se.pept.protocol.MessageMediator r1;
+        com.sun.corba.se.spi.transport.CorbaResponseWaitingRoom $r2;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r1 := @parameter0: com.sun.corba.se.pept.protocol.MessageMediator;
+
+        $r2 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.transport.CorbaResponseWaitingRoom responseWaitingRoom>;
+
+        $r3 = interfaceinvoke $r2.<com.sun.corba.se.spi.transport.CorbaResponseWaitingRoom: com.sun.corba.se.pept.encoding.InputObject waitForResponse(com.sun.corba.se.pept.protocol.MessageMediator)>(r1);
+
+        return $r3;
+    }
+
+    public void setConnectionCache(com.sun.corba.se.pept.transport.ConnectionCache)
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        com.sun.corba.se.pept.transport.ConnectionCache r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r1 := @parameter0: com.sun.corba.se.pept.transport.ConnectionCache;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.transport.ConnectionCache connectionCache> = r1;
+
+        return;
+    }
+
+    public com.sun.corba.se.pept.transport.ConnectionCache getConnectionCache()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        com.sun.corba.se.pept.transport.ConnectionCache $r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.transport.ConnectionCache connectionCache>;
+
+        return $r1;
+    }
+
+    public void setUseSelectThreadToWait(boolean)
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        boolean z0, $z1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        z0 := @parameter0: boolean;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean useSelectThreadToWait> = z0;
+
+        $z1 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean shouldUseSelectThreadToWait()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void setReadGiopHeaderOnly(boolean)>($z1);
+
+        return;
+    }
+
+    public void handleEvent()
+    {
+        org.omg.CORBA.INTERNAL $r39;
+        com.sun.corba.se.spi.orbutil.threadpool.ThreadPool $r13;
+        com.sun.corba.se.spi.orbutil.threadpool.NoSuchThreadPoolException $r33;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.lang.Exception r34;
+        com.sun.corba.se.spi.orbutil.threadpool.WorkQueue $r14;
+        com.sun.corba.se.spi.orbutil.threadpool.NoSuchWorkQueueException $r32;
+        java.lang.StringBuilder $r7, $r8, $r19, $r20, $r23, $r24, $r29, $r30, $r36, $r37, $r38, $r40;
+        int $i0, $i1, $i2, $i3, i4, $i6;
+        com.sun.corba.se.spi.orbutil.threadpool.ThreadPoolManager $r12;
+        java.lang.String $r9, $r21, $r25, $r31;
+        com.sun.corba.se.spi.orbutil.threadpool.Work $r5, $r15;
+        java.nio.channels.SelectionKey $r2, $r3;
+        com.sun.corba.se.spi.orb.ORB $r1, $r4, $r10, $r11, $r16, $r35;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator $r26, $r27;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r1.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label01;
+
+        $r36 = new java.lang.StringBuilder;
+
+        specialinvoke $r36.<java.lang.StringBuilder: void <init>()>();
+
+        $r29 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".handleEvent->: ");
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r31);
+
+     label01:
+        $r2 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.nio.channels.SelectionKey getSelectionKey()>();
+
+        $r3 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.nio.channels.SelectionKey getSelectionKey()>();
+
+        $i0 = virtualinvoke $r3.<java.nio.channels.SelectionKey: int interestOps()>();
+
+        $i1 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: int getInterestOps()>();
+
+        $i6 = (int) -1;
+
+        $i2 = $i1 ^ $i6;
+
+        $i3 = $i0 & $i2;
+
+        virtualinvoke $r2.<java.nio.channels.SelectionKey: java.nio.channels.SelectionKey interestOps(int)>($i3);
+
+        $z1 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean shouldUseWorkerThreadForEvent()>();
+
+        if $z1 == 0 goto label11;
+
+        r34 = null;
+
+     label02:
+        i4 = 0;
+
+        $z3 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean shouldReadGiopHeaderOnly()>();
+
+        if $z3 == 0 goto label03;
+
+        $r26 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator readBits()>();
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator partialMessageMediator> = $r26;
+
+        $r27 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator partialMessageMediator>;
+
+        i4 = interfaceinvoke $r27.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: int getThreadPoolToUse()>();
+
+     label03:
+        $r10 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z4 = $r10.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z4 == 0 goto label04;
+
+        $r37 = new java.lang.StringBuilder;
+
+        specialinvoke $r37.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".handleEvent: addWork to pool: ");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i4);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r25);
+
+     label04:
+        $r11 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r12 = virtualinvoke $r11.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orbutil.threadpool.ThreadPoolManager getThreadPoolManager()>();
+
+        $r13 = interfaceinvoke $r12.<com.sun.corba.se.spi.orbutil.threadpool.ThreadPoolManager: com.sun.corba.se.spi.orbutil.threadpool.ThreadPool getThreadPool(int)>(i4);
+
+        $r14 = interfaceinvoke $r13.<com.sun.corba.se.spi.orbutil.threadpool.ThreadPool: com.sun.corba.se.spi.orbutil.threadpool.WorkQueue getWorkQueue(int)>(0);
+
+        $r15 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orbutil.threadpool.Work getWork()>();
+
+        interfaceinvoke $r14.<com.sun.corba.se.spi.orbutil.threadpool.WorkQueue: void addWork(com.sun.corba.se.spi.orbutil.threadpool.Work)>($r15);
+
+     label05:
+        goto label08;
+
+     label06:
+        $r33 := @caughtexception;
+
+        r34 = $r33;
+
+        goto label08;
+
+     label07:
+        $r32 := @caughtexception;
+
+        r34 = $r32;
+
+     label08:
+        if r34 == null goto label10;
+
+        $r16 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z5 = $r16.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z5 == 0 goto label09;
+
+        $r38 = new java.lang.StringBuilder;
+
+        specialinvoke $r38.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".handleEvent: ");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r34);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r21);
+
+     label09:
+        $r39 = new org.omg.CORBA.INTERNAL;
+
+        specialinvoke $r39.<org.omg.CORBA.INTERNAL: void <init>(java.lang.String)>("NoSuchThreadPoolException");
+
+        virtualinvoke $r39.<org.omg.CORBA.INTERNAL: java.lang.Throwable initCause(java.lang.Throwable)>(r34);
+
+        throw $r39;
+
+     label10:
+        goto label13;
+
+     label11:
+        $r4 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z2 = $r4.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z2 == 0 goto label12;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>(".handleEvent: doWork");
+
+     label12:
+        $r5 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orbutil.threadpool.Work getWork()>();
+
+        interfaceinvoke $r5.<com.sun.corba.se.spi.orbutil.threadpool.Work: void doWork()>();
+
+     label13:
+        $r35 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z6 = $r35.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z6 == 0 goto label14;
+
+        $r40 = new java.lang.StringBuilder;
+
+        specialinvoke $r40.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".handleEvent<-: ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r9);
+
+     label14:
+        return;
+
+        catch com.sun.corba.se.spi.orbutil.threadpool.NoSuchThreadPoolException from label02 to label05 with label06;
+        catch com.sun.corba.se.spi.orbutil.threadpool.NoSuchWorkQueueException from label02 to label05 with label07;
+    }
+
+    public java.nio.channels.SelectableChannel getChannel()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        java.nio.channels.SocketChannel $r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.nio.channels.SocketChannel socketChannel>;
+
+        return $r1;
+    }
+
+    public int getInterestOps()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        return 1;
+    }
+
+    public com.sun.corba.se.pept.transport.Connection getConnection()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        return r0;
+    }
+
+    public java.lang.String getName()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        java.lang.String $r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.lang.String toString()>();
+
+        return $r1;
+    }
+
+    public void doWork()
+    {
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.lang.StringBuilder $r4, $r5, $r6, $r8, $r9, $r10, $r14, $r15, $r16, $r21, $r22, $r23, $r25, $r26, $r27, $r28, $r29;
+        java.lang.Throwable $r12, $r18;
+        java.lang.String $r7, $r11, $r17, $r24, $r30;
+        com.sun.corba.se.spi.orb.ORB $r1, $r13, $r19, $r20, $r31;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator $r2, $r3;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r1.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label2;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".doWork->: ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r11);
+
+     label2:
+        $z1 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean shouldReadGiopHeaderOnly()>();
+
+        if $z1 != 0 goto label3;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean read()>();
+
+        goto label4;
+
+     label3:
+        $r2 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator getPartialMessageMediator()>();
+
+        $r3 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator finishReadingBits(com.sun.corba.se.pept.protocol.MessageMediator)>($r2);
+
+        if $r3 == null goto label4;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean dispatch(com.sun.corba.se.spi.protocol.CorbaMessageMediator)>($r3);
+
+     label4:
+        $r31 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z5 = $r31.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z5 == 0 goto label9;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".doWork<-: ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r7);
+
+        goto label9;
+
+     label5:
+        $r18 := @caughtexception;
+
+        $r19 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z3 = $r19.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z3 == 0 goto label6;
+
+        $r25 = new java.lang.StringBuilder;
+
+        specialinvoke $r25.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".doWork: ignoring Throwable: ");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r18);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r30);
+
+     label6:
+        $r20 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z4 = $r20.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z4 == 0 goto label9;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".doWork<-: ");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r24);
+
+        goto label9;
+
+     label7:
+        $r12 := @caughtexception;
+
+        $r13 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z2 = $r13.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z2 == 0 goto label8;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".doWork<-: ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r17);
+
+     label8:
+        throw $r12;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label7;
+    }
+
+    public void setEnqueueTime(long)
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        long l0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        l0 := @parameter0: long;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: long enqueueTime> = l0;
+
+        return;
+    }
+
+    public long getEnqueueTime()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        long $l0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $l0 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: long enqueueTime>;
+
+        return $l0;
+    }
+
+    public boolean shouldReadGiopHeaderOnly()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $z0 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean shouldReadGiopHeaderOnly>;
+
+        return $z0;
+    }
+
+    protected void setReadGiopHeaderOnly(boolean)
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        boolean z0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        z0 := @parameter0: boolean;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean shouldReadGiopHeaderOnly> = z0;
+
+        return;
+    }
+
+    public com.sun.corba.se.pept.transport.ResponseWaitingRoom getResponseWaitingRoom()
+    {
+        com.sun.corba.se.spi.transport.CorbaResponseWaitingRoom $r1;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.transport.CorbaResponseWaitingRoom responseWaitingRoom>;
+
+        return $r1;
+    }
+
+    public void serverRequestMapPut(int, com.sun.corba.se.spi.protocol.CorbaMessageMediator)
+    {
+        java.util.Map $r2;
+        int i0;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        java.lang.Integer $r1;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator r3;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        i0 := @parameter0: int;
+
+        r3 := @parameter1: com.sun.corba.se.spi.protocol.CorbaMessageMediator;
+
+        $r2 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.util.Map serverRequestMap>;
+
+        $r1 = new java.lang.Integer;
+
+        specialinvoke $r1.<java.lang.Integer: void <init>(int)>(i0);
+
+        interfaceinvoke $r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, r3);
+
+        return;
+    }
+
+    public com.sun.corba.se.spi.protocol.CorbaMessageMediator serverRequestMapGet(int)
+    {
+        java.util.Map $r2;
+        int i0;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        java.lang.Object $r3;
+        java.lang.Integer $r1;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator $r4;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        i0 := @parameter0: int;
+
+        $r2 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.util.Map serverRequestMap>;
+
+        $r1 = new java.lang.Integer;
+
+        specialinvoke $r1.<java.lang.Integer: void <init>(int)>(i0);
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r4 = (com.sun.corba.se.spi.protocol.CorbaMessageMediator) $r3;
+
+        return $r4;
+    }
+
+    public void serverRequestMapRemove(int)
+    {
+        java.util.Map $r2;
+        int i0;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        java.lang.Integer $r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        i0 := @parameter0: int;
+
+        $r2 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.util.Map serverRequestMap>;
+
+        $r1 = new java.lang.Integer;
+
+        specialinvoke $r1.<java.lang.Integer: void <init>(int)>(i0);
+
+        interfaceinvoke $r2.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r1);
+
+        return;
+    }
+
+    public java.net.Socket getSocket()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        java.net.Socket $r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.net.Socket socket>;
+
+        return $r1;
+    }
+
+    public synchronized void serverRequestProcessingBegins()
+    {
+        int $i0, $i1;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $i0 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: int serverRequestCount>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: int serverRequestCount> = $i1;
+
+        return;
+    }
+
+    public synchronized void serverRequestProcessingEnds()
+    {
+        int $i0, $i1;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $i0 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: int serverRequestCount>;
+
+        $i1 = $i0 - 1;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: int serverRequestCount> = $i1;
+
+        return;
+    }
+
+    public synchronized int getNextRequestId()
+    {
+        int $i0, $i1;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $i0 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: int requestId>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: int requestId> = $i1;
+
+        return $i0;
+    }
+
+    public com.sun.corba.se.spi.orb.ORB getBroker()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        com.sun.corba.se.spi.orb.ORB $r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        return $r1;
+    }
+
+    public com.sun.corba.se.impl.encoding.CodeSetComponentInfo$CodeSetContext getCodeSetContext()
+    {
+        java.lang.Throwable $r4;
+        com.sun.corba.se.impl.encoding.CodeSetComponentInfo$CodeSetContext $r1, $r2, $r3;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.encoding.CodeSetComponentInfo$CodeSetContext codeSetContext>;
+
+        if $r1 != null goto label5;
+
+        entermonitor r0;
+
+     label1:
+        $r3 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.encoding.CodeSetComponentInfo$CodeSetContext codeSetContext>;
+
+        exitmonitor r0;
+
+     label2:
+        return $r3;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r4;
+
+     label5:
+        $r2 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.encoding.CodeSetComponentInfo$CodeSetContext codeSetContext>;
+
+        return $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public synchronized void setCodeSetContext(com.sun.corba.se.impl.encoding.CodeSetComponentInfo$CodeSetContext)
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r4;
+        com.sun.corba.se.impl.encoding.OSFCodeSetRegistry$Entry $r3, $r6;
+        org.omg.CORBA.DATA_CONVERSION $r5;
+        com.sun.corba.se.impl.encoding.CodeSetComponentInfo$CodeSetContext $r1, r2;
+        int $i0, $i1;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r2 := @parameter0: com.sun.corba.se.impl.encoding.CodeSetComponentInfo$CodeSetContext;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.encoding.CodeSetComponentInfo$CodeSetContext codeSetContext>;
+
+        if $r1 != null goto label3;
+
+        $i0 = virtualinvoke r2.<com.sun.corba.se.impl.encoding.CodeSetComponentInfo$CodeSetContext: int getCharCodeSet()>();
+
+        $r3 = staticinvoke <com.sun.corba.se.impl.encoding.OSFCodeSetRegistry: com.sun.corba.se.impl.encoding.OSFCodeSetRegistry$Entry lookupEntry(int)>($i0);
+
+        if $r3 == null goto label1;
+
+        $i1 = virtualinvoke r2.<com.sun.corba.se.impl.encoding.CodeSetComponentInfo$CodeSetContext: int getWCharCodeSet()>();
+
+        $r6 = staticinvoke <com.sun.corba.se.impl.encoding.OSFCodeSetRegistry: com.sun.corba.se.impl.encoding.OSFCodeSetRegistry$Entry lookupEntry(int)>($i1);
+
+        if $r6 != null goto label2;
+
+     label1:
+        $r4 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r5 = virtualinvoke $r4.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.DATA_CONVERSION badCodesetsFromClient()>();
+
+        throw $r5;
+
+     label2:
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.encoding.CodeSetComponentInfo$CodeSetContext codeSetContext> = r2;
+
+     label3:
+        return;
+    }
+
+    public com.sun.corba.se.pept.protocol.MessageMediator clientRequestMapGet(int)
+    {
+        com.sun.corba.se.pept.protocol.MessageMediator $r2;
+        int i0;
+        com.sun.corba.se.spi.transport.CorbaResponseWaitingRoom $r1;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.transport.CorbaResponseWaitingRoom responseWaitingRoom>;
+
+        $r2 = interfaceinvoke $r1.<com.sun.corba.se.spi.transport.CorbaResponseWaitingRoom: com.sun.corba.se.pept.protocol.MessageMediator getMessageMediator(int)>(i0);
+
+        return $r2;
+    }
+
+    public void clientReply_1_1_Put(com.sun.corba.se.pept.protocol.MessageMediator)
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        com.sun.corba.se.pept.protocol.MessageMediator r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r1 := @parameter0: com.sun.corba.se.pept.protocol.MessageMediator;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.protocol.MessageMediator clientReply_1_1> = r1;
+
+        return;
+    }
+
+    public com.sun.corba.se.pept.protocol.MessageMediator clientReply_1_1_Get()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        com.sun.corba.se.pept.protocol.MessageMediator $r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.protocol.MessageMediator clientReply_1_1>;
+
+        return $r1;
+    }
+
+    public void clientReply_1_1_Remove()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.protocol.MessageMediator clientReply_1_1> = null;
+
+        return;
+    }
+
+    public void serverRequest_1_1_Put(com.sun.corba.se.pept.protocol.MessageMediator)
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        com.sun.corba.se.pept.protocol.MessageMediator r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r1 := @parameter0: com.sun.corba.se.pept.protocol.MessageMediator;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.protocol.MessageMediator serverRequest_1_1> = r1;
+
+        return;
+    }
+
+    public com.sun.corba.se.pept.protocol.MessageMediator serverRequest_1_1_Get()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        com.sun.corba.se.pept.protocol.MessageMediator $r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.protocol.MessageMediator serverRequest_1_1>;
+
+        return $r1;
+    }
+
+    public void serverRequest_1_1_Remove()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.protocol.MessageMediator serverRequest_1_1> = null;
+
+        return;
+    }
+
+    protected java.lang.String getStateString(int)
+    {
+        java.lang.Throwable $r2;
+        int i0;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        java.lang.Object $r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.lang.Object stateEvent>;
+
+        entermonitor $r1;
+
+     label01:
+        tableswitch(i0)
+        {
+            case 1: goto label02;
+            case 2: goto label04;
+            case 3: goto label06;
+            case 4: goto label08;
+            case 5: goto label10;
+            default: goto label12;
+        };
+
+     label02:
+        exitmonitor $r1;
+
+     label03:
+        return "OPENING";
+
+     label04:
+        exitmonitor $r1;
+
+     label05:
+        return "ESTABLISHED";
+
+     label06:
+        exitmonitor $r1;
+
+     label07:
+        return "CLOSE_SENT";
+
+     label08:
+        exitmonitor $r1;
+
+     label09:
+        return "CLOSE_RECVD";
+
+     label10:
+        exitmonitor $r1;
+
+     label11:
+        return "ABORT";
+
+     label12:
+        exitmonitor $r1;
+
+     label13:
+        return "???";
+
+     label14:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label15:
+        throw $r2;
+
+        catch java.lang.Throwable from label01 to label03 with label14;
+        catch java.lang.Throwable from label04 to label05 with label14;
+        catch java.lang.Throwable from label06 to label07 with label14;
+        catch java.lang.Throwable from label08 to label09 with label14;
+        catch java.lang.Throwable from label10 to label11 with label14;
+        catch java.lang.Throwable from label12 to label13 with label14;
+        catch java.lang.Throwable from label14 to label15 with label14;
+    }
+
+    public synchronized boolean isPostInitialContexts()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $z0 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean postInitialContexts>;
+
+        return $z0;
+    }
+
+    public synchronized void setPostInitialContexts()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean postInitialContexts> = 1;
+
+        return;
+    }
+
+    public void purgeCalls(org.omg.CORBA.SystemException, boolean, boolean)
+    {
+        com.sun.corba.se.spi.transport.CorbaContactInfo $r5, $r20, $r50, $r64, $r79, $r102;
+        com.sun.corba.se.pept.transport.Acceptor $r6, $r36, $r65;
+        org.omg.CORBA.CompletionStatus $r29, $r52;
+        java.lang.Exception $r81;
+        java.lang.StringBuilder $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r22, $r23, $r25, $r26, $r27, $r37, $r38, $r39, $r40, $r41, $r42, $r43, $r44, $r45, $r53, $r54, $r55, $r56, $r57, $r58, $r59, $r60, $r61, $r66, $r67, $r68, $r69, $r70, $r71, $r72, $r73, $r74, $r83, $r84, $r85, $r86, $r87, $r92, $r93, $r94, $r95, $r96;
+        java.lang.Throwable $r63, $r89, $r98;
+        java.lang.String $r16, $r24, $r28, $r46, $r62, $r75, $r88, $r97;
+        com.sun.corba.se.spi.transport.CorbaResponseWaitingRoom $r101;
+        com.sun.corba.se.pept.transport.ConnectionCache $r17, $r19, $r47, $r49, $r76, $r78;
+        com.sun.corba.se.spi.orb.ORB $r2, $r4, $r82, $r91, $r99, $r103, $r104;
+        org.omg.CORBA.SystemException r0, $r90;
+        com.sun.corba.se.pept.transport.OutboundConnectionCache $r21, $r51, $r80;
+        boolean $z0, $z1, z2, z3, $z4, $z5, $z6, $z7, $z8;
+        java.net.Socket $r31, $r33, $r35;
+        com.sun.corba.se.pept.transport.InboundConnectionCache $r18, $r48, $r77;
+        int i0, $i1, $i2, $i3;
+        java.io.OutputStream $r34;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r1;
+        java.lang.Object $r3, $r30, $r100;
+        java.io.InputStream $r32;
+
+        r1 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r0 := @parameter0: org.omg.CORBA.SystemException;
+
+        z2 := @parameter1: boolean;
+
+        z3 := @parameter2: boolean;
+
+        i0 = r0.<org.omg.CORBA.SystemException: int minor>;
+
+     label01:
+        $r2 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z0 = $r2.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z0 == 0 goto label02;
+
+        $r53 = new java.lang.StringBuilder;
+
+        specialinvoke $r53.<java.lang.StringBuilder: void <init>()>();
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".purgeCalls->: ");
+
+        $r55 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r56 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r57 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>(z2);
+
+        $r58 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r59 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>(z3);
+
+        $r60 = virtualinvoke $r59.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r61 = virtualinvoke $r60.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r62 = virtualinvoke $r61.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r62);
+
+     label02:
+        $r3 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.lang.Object stateEvent>;
+
+        entermonitor $r3;
+
+     label03:
+        $i1 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: int state>;
+
+        if $i1 == 5 goto label04;
+
+        $i3 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: int state>;
+
+        if $i3 != 4 goto label10;
+
+     label04:
+        $r4 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z1 = $r4.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z1 == 0 goto label05;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".purgeCalls: exiting since state is: ");
+
+        $i2 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: int state>;
+
+        $r24 = virtualinvoke r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.lang.String getStateString(int)>($i2);
+
+        $r25 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r24);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r28);
+
+     label05:
+        exitmonitor $r3;
+
+     label06:
+        $r5 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.transport.CorbaContactInfo contactInfo>;
+
+        if $r5 == null goto label07;
+
+        $r19 = virtualinvoke r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.transport.ConnectionCache getConnectionCache()>();
+
+        $r21 = (com.sun.corba.se.pept.transport.OutboundConnectionCache) $r19;
+
+        $r20 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.transport.CorbaContactInfo contactInfo>;
+
+        interfaceinvoke $r21.<com.sun.corba.se.pept.transport.OutboundConnectionCache: void remove(com.sun.corba.se.pept.transport.ContactInfo)>($r20);
+
+        goto label08;
+
+     label07:
+        $r6 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.transport.Acceptor acceptor>;
+
+        if $r6 == null goto label08;
+
+        $r17 = virtualinvoke r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.transport.ConnectionCache getConnectionCache()>();
+
+        $r18 = (com.sun.corba.se.pept.transport.InboundConnectionCache) $r17;
+
+        interfaceinvoke $r18.<com.sun.corba.se.pept.transport.InboundConnectionCache: void remove(com.sun.corba.se.pept.transport.Connection)>(r1);
+
+     label08:
+        virtualinvoke r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void writeUnlock()>();
+
+        $r99 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z6 = $r99.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z6 == 0 goto label09;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".purgeCalls<-: ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>(z2);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>(z3);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r16);
+
+     label09:
+        return;
+
+     label10:
+        exitmonitor $r3;
+
+     label11:
+        goto label14;
+
+     label12:
+        $r98 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label13:
+        throw $r98;
+
+     label14:
+        if z3 != 0 goto label15;
+
+        virtualinvoke r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void writeLock()>();
+
+     label15:
+        goto label17;
+
+     label16:
+        $r90 := @caughtexception;
+
+        $r91 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z5 = $r91.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z5 == 0 goto label17;
+
+        $r92 = new java.lang.StringBuilder;
+
+        specialinvoke $r92.<java.lang.StringBuilder: void <init>()>();
+
+        $r93 = virtualinvoke $r92.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".purgeCalls: SystemException");
+
+        $r94 = virtualinvoke $r93.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r90);
+
+        $r95 = virtualinvoke $r94.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("; continuing ");
+
+        $r96 = virtualinvoke $r95.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r97 = virtualinvoke $r96.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r97);
+
+     label17:
+        $r100 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.lang.Object stateEvent>;
+
+        entermonitor $r100;
+
+     label18:
+        if i0 != 1398079697 goto label19;
+
+        r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: int state> = 4;
+
+        $r52 = <org.omg.CORBA.CompletionStatus: org.omg.CORBA.CompletionStatus COMPLETED_NO>;
+
+        r0.<org.omg.CORBA.SystemException: org.omg.CORBA.CompletionStatus completed> = $r52;
+
+        goto label20;
+
+     label19:
+        r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: int state> = 5;
+
+        $r29 = <org.omg.CORBA.CompletionStatus: org.omg.CORBA.CompletionStatus COMPLETED_MAYBE>;
+
+        r0.<org.omg.CORBA.SystemException: org.omg.CORBA.CompletionStatus completed> = $r29;
+
+     label20:
+        $r30 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.lang.Object stateEvent>;
+
+        virtualinvoke $r30.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor $r100;
+
+     label21:
+        goto label24;
+
+     label22:
+        $r89 := @caughtexception;
+
+        exitmonitor $r100;
+
+     label23:
+        throw $r89;
+
+     label24:
+        $r31 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.net.Socket socket>;
+
+        $r32 = virtualinvoke $r31.<java.net.Socket: java.io.InputStream getInputStream()>();
+
+        virtualinvoke $r32.<java.io.InputStream: void close()>();
+
+        $r33 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.net.Socket socket>;
+
+        $r34 = virtualinvoke $r33.<java.net.Socket: java.io.OutputStream getOutputStream()>();
+
+        virtualinvoke $r34.<java.io.OutputStream: void close()>();
+
+        $r35 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.net.Socket socket>;
+
+        virtualinvoke $r35.<java.net.Socket: void close()>();
+
+     label25:
+        goto label27;
+
+     label26:
+        $r81 := @caughtexception;
+
+        $r82 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z4 = $r82.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z4 == 0 goto label27;
+
+        $r83 = new java.lang.StringBuilder;
+
+        specialinvoke $r83.<java.lang.StringBuilder: void <init>()>();
+
+        $r84 = virtualinvoke $r83.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".purgeCalls: Exception closing socket: ");
+
+        $r85 = virtualinvoke $r84.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r81);
+
+        $r86 = virtualinvoke $r85.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r87 = virtualinvoke $r86.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r88 = virtualinvoke $r87.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r88);
+
+     label27:
+        $r101 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.transport.CorbaResponseWaitingRoom responseWaitingRoom>;
+
+        interfaceinvoke $r101.<com.sun.corba.se.spi.transport.CorbaResponseWaitingRoom: void signalExceptionToAllWaiters(org.omg.CORBA.SystemException)>(r0);
+
+     label28:
+        $r102 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.transport.CorbaContactInfo contactInfo>;
+
+        if $r102 == null goto label29;
+
+        $r49 = virtualinvoke r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.transport.ConnectionCache getConnectionCache()>();
+
+        $r51 = (com.sun.corba.se.pept.transport.OutboundConnectionCache) $r49;
+
+        $r50 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.transport.CorbaContactInfo contactInfo>;
+
+        interfaceinvoke $r51.<com.sun.corba.se.pept.transport.OutboundConnectionCache: void remove(com.sun.corba.se.pept.transport.ContactInfo)>($r50);
+
+        goto label30;
+
+     label29:
+        $r36 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.transport.Acceptor acceptor>;
+
+        if $r36 == null goto label30;
+
+        $r47 = virtualinvoke r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.transport.ConnectionCache getConnectionCache()>();
+
+        $r48 = (com.sun.corba.se.pept.transport.InboundConnectionCache) $r47;
+
+        interfaceinvoke $r48.<com.sun.corba.se.pept.transport.InboundConnectionCache: void remove(com.sun.corba.se.pept.transport.Connection)>(r1);
+
+     label30:
+        virtualinvoke r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void writeUnlock()>();
+
+        $r103 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z7 = $r103.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z7 == 0 goto label36;
+
+        $r37 = new java.lang.StringBuilder;
+
+        specialinvoke $r37.<java.lang.StringBuilder: void <init>()>();
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".purgeCalls<-: ");
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>(z2);
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>(z3);
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r46);
+
+        goto label36;
+
+     label31:
+        $r63 := @caughtexception;
+
+     label32:
+        $r64 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.transport.CorbaContactInfo contactInfo>;
+
+        if $r64 == null goto label33;
+
+        $r78 = virtualinvoke r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.transport.ConnectionCache getConnectionCache()>();
+
+        $r80 = (com.sun.corba.se.pept.transport.OutboundConnectionCache) $r78;
+
+        $r79 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.transport.CorbaContactInfo contactInfo>;
+
+        interfaceinvoke $r80.<com.sun.corba.se.pept.transport.OutboundConnectionCache: void remove(com.sun.corba.se.pept.transport.ContactInfo)>($r79);
+
+        goto label34;
+
+     label33:
+        $r65 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.transport.Acceptor acceptor>;
+
+        if $r65 == null goto label34;
+
+        $r76 = virtualinvoke r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.pept.transport.ConnectionCache getConnectionCache()>();
+
+        $r77 = (com.sun.corba.se.pept.transport.InboundConnectionCache) $r76;
+
+        interfaceinvoke $r77.<com.sun.corba.se.pept.transport.InboundConnectionCache: void remove(com.sun.corba.se.pept.transport.Connection)>(r1);
+
+     label34:
+        virtualinvoke r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void writeUnlock()>();
+
+        $r104 = r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $z8 = $r104.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        if $z8 == 0 goto label35;
+
+        $r66 = new java.lang.StringBuilder;
+
+        specialinvoke $r66.<java.lang.StringBuilder: void <init>()>();
+
+        $r67 = virtualinvoke $r66.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".purgeCalls<-: ");
+
+        $r68 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r69 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r70 = virtualinvoke $r69.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>(z2);
+
+        $r71 = virtualinvoke $r70.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r72 = virtualinvoke $r71.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>(z3);
+
+        $r73 = virtualinvoke $r72.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r74 = virtualinvoke $r73.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r75 = virtualinvoke $r74.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r1.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>($r75);
+
+     label35:
+        throw $r63;
+
+     label36:
+        return;
+
+        catch java.lang.Throwable from label03 to label06 with label12;
+        catch java.lang.Throwable from label10 to label11 with label12;
+        catch java.lang.Throwable from label12 to label13 with label12;
+        catch org.omg.CORBA.SystemException from label14 to label15 with label16;
+        catch java.lang.Throwable from label18 to label21 with label22;
+        catch java.lang.Throwable from label22 to label23 with label22;
+        catch java.lang.Exception from label24 to label25 with label26;
+        catch java.lang.Throwable from label01 to label06 with label31;
+        catch java.lang.Throwable from label10 to label28 with label31;
+        catch java.lang.Throwable from label31 to label32 with label31;
+    }
+
+    public void sendCloseConnection(com.sun.corba.se.spi.ior.iiop.GIOPVersion) throws java.io.IOException
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r2;
+        com.sun.corba.se.spi.ior.iiop.GIOPVersion r0;
+        com.sun.corba.se.impl.protocol.giopmsgheaders.Message $r1;
+
+        r2 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r0 := @parameter0: com.sun.corba.se.spi.ior.iiop.GIOPVersion;
+
+        $r1 = staticinvoke <com.sun.corba.se.impl.protocol.giopmsgheaders.MessageBase: com.sun.corba.se.impl.protocol.giopmsgheaders.Message createCloseConnection(com.sun.corba.se.spi.ior.iiop.GIOPVersion)>(r0);
+
+        virtualinvoke r2.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void sendHelper(com.sun.corba.se.spi.ior.iiop.GIOPVersion,com.sun.corba.se.impl.protocol.giopmsgheaders.Message)>(r0, $r1);
+
+        return;
+    }
+
+    public void sendMessageError(com.sun.corba.se.spi.ior.iiop.GIOPVersion) throws java.io.IOException
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r2;
+        com.sun.corba.se.spi.ior.iiop.GIOPVersion r0;
+        com.sun.corba.se.impl.protocol.giopmsgheaders.Message $r1;
+
+        r2 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r0 := @parameter0: com.sun.corba.se.spi.ior.iiop.GIOPVersion;
+
+        $r1 = staticinvoke <com.sun.corba.se.impl.protocol.giopmsgheaders.MessageBase: com.sun.corba.se.impl.protocol.giopmsgheaders.Message createMessageError(com.sun.corba.se.spi.ior.iiop.GIOPVersion)>(r0);
+
+        virtualinvoke r2.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void sendHelper(com.sun.corba.se.spi.ior.iiop.GIOPVersion,com.sun.corba.se.impl.protocol.giopmsgheaders.Message)>(r0, $r1);
+
+        return;
+    }
+
+    public void sendCancelRequest(com.sun.corba.se.spi.ior.iiop.GIOPVersion, int) throws java.io.IOException
+    {
+        com.sun.corba.se.spi.ior.iiop.GIOPVersion r0;
+        com.sun.corba.se.impl.protocol.giopmsgheaders.CancelRequestMessage $r1;
+        int i0;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r2;
+
+        r2 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r0 := @parameter0: com.sun.corba.se.spi.ior.iiop.GIOPVersion;
+
+        i0 := @parameter1: int;
+
+        $r1 = staticinvoke <com.sun.corba.se.impl.protocol.giopmsgheaders.MessageBase: com.sun.corba.se.impl.protocol.giopmsgheaders.CancelRequestMessage createCancelRequest(com.sun.corba.se.spi.ior.iiop.GIOPVersion,int)>(r0, i0);
+
+        virtualinvoke r2.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void sendHelper(com.sun.corba.se.spi.ior.iiop.GIOPVersion,com.sun.corba.se.impl.protocol.giopmsgheaders.Message)>(r0, $r1);
+
+        return;
+    }
+
+    protected void sendHelper(com.sun.corba.se.spi.ior.iiop.GIOPVersion, com.sun.corba.se.impl.protocol.giopmsgheaders.Message) throws java.io.IOException
+    {
+        com.sun.corba.se.spi.ior.iiop.GIOPVersion r1;
+        com.sun.corba.se.impl.encoding.CDROutputObject $r4;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        com.sun.corba.se.spi.orb.ORB $r3;
+        com.sun.corba.se.impl.protocol.giopmsgheaders.Message r2;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r1 := @parameter0: com.sun.corba.se.spi.ior.iiop.GIOPVersion;
+
+        r2 := @parameter1: com.sun.corba.se.impl.protocol.giopmsgheaders.Message;
+
+        $r3 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r4 = staticinvoke <sun.corba.OutputStreamFactory: com.sun.corba.se.impl.encoding.CDROutputObject newCDROutputObject(com.sun.corba.se.spi.orb.ORB,com.sun.corba.se.spi.protocol.CorbaMessageMediator,com.sun.corba.se.spi.ior.iiop.GIOPVersion,com.sun.corba.se.spi.transport.CorbaConnection,com.sun.corba.se.impl.protocol.giopmsgheaders.Message,byte)>($r3, null, r1, r0, r2, 1);
+
+        interfaceinvoke r2.<com.sun.corba.se.impl.protocol.giopmsgheaders.Message: void write(org.omg.CORBA.portable.OutputStream)>($r4);
+
+        virtualinvoke $r4.<com.sun.corba.se.impl.encoding.CDROutputObject: void writeTo(com.sun.corba.se.spi.transport.CorbaConnection)>(r0);
+
+        return;
+    }
+
+    public void sendCancelRequestWithLock(com.sun.corba.se.spi.ior.iiop.GIOPVersion, int) throws java.io.IOException
+    {
+        java.lang.Throwable $r2;
+        com.sun.corba.se.spi.ior.iiop.GIOPVersion r1;
+        int i0;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r1 := @parameter0: com.sun.corba.se.spi.ior.iiop.GIOPVersion;
+
+        i0 := @parameter1: int;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void writeLock()>();
+
+     label1:
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void sendCancelRequest(com.sun.corba.se.spi.ior.iiop.GIOPVersion,int)>(r1, i0);
+
+     label2:
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void writeUnlock()>();
+
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void writeUnlock()>();
+
+        throw $r2;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public final void setCodeBaseIOR(com.sun.corba.se.spi.ior.IOR)
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        com.sun.corba.se.spi.ior.IOR r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r1 := @parameter0: com.sun.corba.se.spi.ior.IOR;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.ior.IOR codeBaseServerIOR> = r1;
+
+        return;
+    }
+
+    public final com.sun.corba.se.spi.ior.IOR getCodeBaseIOR()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        com.sun.corba.se.spi.ior.IOR $r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.ior.IOR codeBaseServerIOR>;
+
+        return $r1;
+    }
+
+    public final com.sun.org.omg.SendingContext.CodeBase getCodeBase()
+    {
+        com.sun.corba.se.impl.encoding.CachedCodeBase $r1;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.impl.encoding.CachedCodeBase cachedCodeBase>;
+
+        return $r1;
+    }
+
+    protected void setReadTimeouts(com.sun.corba.se.spi.transport.ReadTimeouts)
+    {
+        com.sun.corba.se.spi.transport.ReadTimeouts r1;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r1 := @parameter0: com.sun.corba.se.spi.transport.ReadTimeouts;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.transport.ReadTimeouts readTimeouts> = r1;
+
+        return;
+    }
+
+    protected void setPartialMessageMediator(com.sun.corba.se.spi.protocol.CorbaMessageMediator)
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r1 := @parameter0: com.sun.corba.se.spi.protocol.CorbaMessageMediator;
+
+        r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator partialMessageMediator> = r1;
+
+        return;
+    }
+
+    protected com.sun.corba.se.spi.protocol.CorbaMessageMediator getPartialMessageMediator()
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator $r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: com.sun.corba.se.spi.protocol.CorbaMessageMediator partialMessageMediator>;
+
+        return $r1;
+    }
+
+    public java.lang.String toString()
+    {
+        java.lang.Throwable $r19;
+        java.net.Socket $r18;
+        java.nio.channels.SocketChannel $r4, $r5;
+        int $i0;
+        java.lang.String $r8, $r17, $r20;
+        boolean $z0, $z1, $z2;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        java.lang.Object $r1;
+        java.lang.StringBuilder $r2, $r3, $r6, $r7, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.lang.Object stateEvent>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SocketOrChannelConnectionImpl[ ");
+
+        $r4 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.nio.channels.SocketChannel socketChannel>;
+
+        if $r4 != null goto label2;
+
+        $r18 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.net.Socket socket>;
+
+        $r20 = virtualinvoke $r18.<java.net.Socket: java.lang.String toString()>();
+
+        goto label3;
+
+     label2:
+        $r5 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.nio.channels.SocketChannel socketChannel>;
+
+        $r20 = virtualinvoke $r5.<java.lang.Object: java.lang.String toString()>();
+
+     label3:
+        $r6 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $i0 = r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: int state>;
+
+        $r8 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: java.lang.String getStateString(int)>($i0);
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $z0 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean shouldUseSelectThreadToWait()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $z1 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean shouldUseWorkerThreadForEvent()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z1);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $z2 = virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean shouldReadGiopHeaderOnly()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z2);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        exitmonitor $r1;
+
+     label4:
+        return $r17;
+
+     label5:
+        $r19 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r19;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public void dprint(java.lang.String)
+    {
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r1;
+        java.lang.String r0;
+
+        r1 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.String,java.lang.String)>("SocketOrChannelConnectionImpl", r0);
+
+        return;
+    }
+
+    protected void dprint(java.lang.String, java.lang.Throwable)
+    {
+        java.lang.Throwable r2;
+        java.io.PrintStream $r3;
+        com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl r0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Throwable;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: void dprint(java.lang.String)>(r1);
+
+        $r3 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke r2.<java.lang.Throwable: void printStackTrace(java.io.PrintStream)>($r3);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        <com.sun.corba.se.impl.transport.SocketOrChannelConnectionImpl: boolean dprintWriteLocks> = 0;
+
+        return;
+    }
+}

@@ -1,0 +1,776 @@
+class javax.swing.KeyboardManager extends java.lang.Object
+{
+    static javax.swing.KeyboardManager currentManager;
+    java.util.Hashtable containerMap;
+    java.util.Hashtable componentKeyStrokeMap;
+
+    void <init>()
+    {
+        java.util.Hashtable $r1, $r2;
+        javax.swing.KeyboardManager r0;
+
+        r0 := @this: javax.swing.KeyboardManager;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.Hashtable;
+
+        specialinvoke $r1.<java.util.Hashtable: void <init>()>();
+
+        r0.<javax.swing.KeyboardManager: java.util.Hashtable containerMap> = $r1;
+
+        $r2 = new java.util.Hashtable;
+
+        specialinvoke $r2.<java.util.Hashtable: void <init>()>();
+
+        r0.<javax.swing.KeyboardManager: java.util.Hashtable componentKeyStrokeMap> = $r2;
+
+        return;
+    }
+
+    public static javax.swing.KeyboardManager getCurrentManager()
+    {
+        javax.swing.KeyboardManager $r0;
+
+        $r0 = <javax.swing.KeyboardManager: javax.swing.KeyboardManager currentManager>;
+
+        return $r0;
+    }
+
+    public static void setCurrentManager(javax.swing.KeyboardManager)
+    {
+        javax.swing.KeyboardManager r0;
+
+        r0 := @parameter0: javax.swing.KeyboardManager;
+
+        <javax.swing.KeyboardManager: javax.swing.KeyboardManager currentManager> = r0;
+
+        return;
+    }
+
+    public void registerKeyStroke(javax.swing.KeyStroke, javax.swing.JComponent)
+    {
+        sun.awt.EmbeddedFrame $r8;
+        java.util.Vector $r9, r12;
+        java.awt.Container $r1;
+        java.util.Hashtable $r3, r11, $r13;
+        javax.swing.KeyboardManager r2;
+        boolean $z0, $z1, $z2, $z3;
+        javax.swing.JComponent r0, $r10;
+        javax.swing.KeyStroke r5;
+        java.io.PrintStream $r7;
+        java.lang.Object $r4, $r6;
+        javax.swing.KeyboardManager$ComponentKeyStrokePair $r14;
+
+        r2 := @this: javax.swing.KeyboardManager;
+
+        r5 := @parameter0: javax.swing.KeyStroke;
+
+        r0 := @parameter1: javax.swing.JComponent;
+
+        $r1 = staticinvoke <javax.swing.KeyboardManager: java.awt.Container getTopAncestor(javax.swing.JComponent)>(r0);
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        $r3 = r2.<javax.swing.KeyboardManager: java.util.Hashtable containerMap>;
+
+        $r4 = virtualinvoke $r3.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r1);
+
+        r11 = (java.util.Hashtable) $r4;
+
+        if r11 != null goto label2;
+
+        r11 = virtualinvoke r2.<javax.swing.KeyboardManager: java.util.Hashtable registerNewTopContainer(java.awt.Container)>($r1);
+
+     label2:
+        $r6 = virtualinvoke r11.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r5);
+
+        if $r6 != null goto label3;
+
+        virtualinvoke r11.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>(r5, r0);
+
+        goto label7;
+
+     label3:
+        $z0 = $r6 instanceof java.util.Vector;
+
+        if $z0 == 0 goto label5;
+
+        r12 = (java.util.Vector) $r6;
+
+        $z2 = virtualinvoke r12.<java.util.Vector: boolean contains(java.lang.Object)>(r0);
+
+        if $z2 != 0 goto label4;
+
+        virtualinvoke r12.<java.util.Vector: void addElement(java.lang.Object)>(r0);
+
+     label4:
+        goto label7;
+
+     label5:
+        $z1 = $r6 instanceof javax.swing.JComponent;
+
+        if $z1 == 0 goto label6;
+
+        if $r6 == r0 goto label7;
+
+        $r9 = new java.util.Vector;
+
+        specialinvoke $r9.<java.util.Vector: void <init>()>();
+
+        $r10 = (javax.swing.JComponent) $r6;
+
+        virtualinvoke $r9.<java.util.Vector: void addElement(java.lang.Object)>($r10);
+
+        virtualinvoke $r9.<java.util.Vector: void addElement(java.lang.Object)>(r0);
+
+        virtualinvoke r11.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>(r5, $r9);
+
+        goto label7;
+
+     label6:
+        $r7 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r7.<java.io.PrintStream: void println(java.lang.String)>("Unexpected condition in registerKeyStroke");
+
+        staticinvoke <java.lang.Thread: void dumpStack()>();
+
+     label7:
+        $r13 = r2.<javax.swing.KeyboardManager: java.util.Hashtable componentKeyStrokeMap>;
+
+        $r14 = new javax.swing.KeyboardManager$ComponentKeyStrokePair;
+
+        specialinvoke $r14.<javax.swing.KeyboardManager$ComponentKeyStrokePair: void <init>(javax.swing.KeyboardManager,java.lang.Object,java.lang.Object)>(r2, r0, r5);
+
+        virtualinvoke $r13.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r14, $r1);
+
+        $z3 = $r1 instanceof sun.awt.EmbeddedFrame;
+
+        if $z3 == 0 goto label8;
+
+        $r8 = (sun.awt.EmbeddedFrame) $r1;
+
+        virtualinvoke $r8.<sun.awt.EmbeddedFrame: void registerAccelerator(java.awt.AWTKeyStroke)>(r5);
+
+     label8:
+        return;
+    }
+
+    private static java.awt.Container getTopAncestor(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r0;
+        java.awt.Window $r1;
+        java.awt.Container r2;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @parameter0: javax.swing.JComponent;
+
+        r2 = virtualinvoke r0.<javax.swing.JComponent: java.awt.Container getParent()>();
+
+     label1:
+        if r2 == null goto label5;
+
+        $z0 = r2 instanceof java.awt.Window;
+
+        if $z0 == 0 goto label2;
+
+        $r1 = (java.awt.Window) r2;
+
+        $z3 = virtualinvoke $r1.<java.awt.Window: boolean isFocusableWindow()>();
+
+        if $z3 != 0 goto label3;
+
+     label2:
+        $z1 = r2 instanceof java.applet.Applet;
+
+        if $z1 != 0 goto label3;
+
+        $z2 = r2 instanceof javax.swing.JInternalFrame;
+
+        if $z2 == 0 goto label4;
+
+     label3:
+        return r2;
+
+     label4:
+        r2 = virtualinvoke r2.<java.awt.Container: java.awt.Container getParent()>();
+
+        goto label1;
+
+     label5:
+        return null;
+    }
+
+    public void unregisterKeyStroke(javax.swing.KeyStroke, javax.swing.JComponent)
+    {
+        sun.awt.EmbeddedFrame $r12;
+        java.util.Vector r14;
+        java.awt.Container r6;
+        java.util.Hashtable $r4, $r7, r9, $r11, $r13;
+        javax.swing.KeyboardManager r1;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        javax.swing.JComponent r2;
+        javax.swing.KeyStroke r3;
+        java.lang.Object $r5, $r8, $r10;
+        javax.swing.KeyboardManager$ComponentKeyStrokePair $r0;
+
+        r1 := @this: javax.swing.KeyboardManager;
+
+        r3 := @parameter0: javax.swing.KeyStroke;
+
+        r2 := @parameter1: javax.swing.JComponent;
+
+        $r0 = new javax.swing.KeyboardManager$ComponentKeyStrokePair;
+
+        specialinvoke $r0.<javax.swing.KeyboardManager$ComponentKeyStrokePair: void <init>(javax.swing.KeyboardManager,java.lang.Object,java.lang.Object)>(r1, r2, r3);
+
+        $r4 = r1.<javax.swing.KeyboardManager: java.util.Hashtable componentKeyStrokeMap>;
+
+        $r5 = virtualinvoke $r4.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r0);
+
+        r6 = (java.awt.Container) $r5;
+
+        if r6 != null goto label1;
+
+        return;
+
+     label1:
+        $r7 = r1.<javax.swing.KeyboardManager: java.util.Hashtable containerMap>;
+
+        $r8 = virtualinvoke $r7.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r6);
+
+        r9 = (java.util.Hashtable) $r8;
+
+        if r9 != null goto label2;
+
+        staticinvoke <java.lang.Thread: void dumpStack()>();
+
+        return;
+
+     label2:
+        $r10 = virtualinvoke r9.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r3);
+
+        if $r10 != null goto label3;
+
+        staticinvoke <java.lang.Thread: void dumpStack()>();
+
+        return;
+
+     label3:
+        $z0 = $r10 instanceof javax.swing.JComponent;
+
+        if $z0 == 0 goto label4;
+
+        if $r10 != r2 goto label4;
+
+        virtualinvoke r9.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>(r3);
+
+        goto label5;
+
+     label4:
+        $z1 = $r10 instanceof java.util.Vector;
+
+        if $z1 == 0 goto label5;
+
+        r14 = (java.util.Vector) $r10;
+
+        virtualinvoke r14.<java.util.Vector: boolean removeElement(java.lang.Object)>(r2);
+
+        $z3 = virtualinvoke r14.<java.util.Vector: boolean isEmpty()>();
+
+        if $z3 == 0 goto label5;
+
+        virtualinvoke r9.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>(r3);
+
+     label5:
+        $z4 = virtualinvoke r9.<java.util.Hashtable: boolean isEmpty()>();
+
+        if $z4 == 0 goto label6;
+
+        $r13 = r1.<javax.swing.KeyboardManager: java.util.Hashtable containerMap>;
+
+        virtualinvoke $r13.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>(r6);
+
+     label6:
+        $r11 = r1.<javax.swing.KeyboardManager: java.util.Hashtable componentKeyStrokeMap>;
+
+        virtualinvoke $r11.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>($r0);
+
+        $z2 = r6 instanceof sun.awt.EmbeddedFrame;
+
+        if $z2 == 0 goto label7;
+
+        $r12 = (sun.awt.EmbeddedFrame) r6;
+
+        virtualinvoke $r12.<sun.awt.EmbeddedFrame: void unregisterAccelerator(java.awt.AWTKeyStroke)>(r3);
+
+     label7:
+        return;
+    }
+
+    public boolean fireKeyboardAction(java.awt.event.KeyEvent, boolean, java.awt.Container)
+    {
+        java.util.Enumeration $r4;
+        java.util.Vector r21, r23;
+        boolean $z0, z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, z18, $z19, $z20, $z21, $z22;
+        javax.swing.KeyboardManager r1;
+        javax.swing.KeyStroke r14, r15;
+        javax.swing.JMenuBar r24;
+        java.awt.event.KeyEvent r0;
+        java.lang.StringBuilder $r8, $r9, $r25;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, i9, $i11;
+        java.awt.Container r2;
+        java.lang.String $r10;
+        java.util.Hashtable $r16, $r18;
+        java.io.PrintStream $r7, $r13;
+        javax.swing.JComponent r20, r22;
+        char $c8;
+        java.lang.Object $r3, $r5, $r11, $r12, $r17, r19;
+
+        r1 := @this: javax.swing.KeyboardManager;
+
+        r0 := @parameter0: java.awt.event.KeyEvent;
+
+        z1 := @parameter1: boolean;
+
+        r2 := @parameter2: java.awt.Container;
+
+        $z0 = virtualinvoke r0.<java.awt.event.KeyEvent: boolean isConsumed()>();
+
+        if $z0 == 0 goto label01;
+
+        $r13 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r13.<java.io.PrintStream: void println(java.lang.String)>("Acquired pre-used event!");
+
+        staticinvoke <java.lang.Thread: void dumpStack()>();
+
+     label01:
+        r14 = null;
+
+        $i0 = virtualinvoke r0.<java.awt.event.KeyEvent: int getID()>();
+
+        if $i0 != 400 goto label02;
+
+        $c8 = virtualinvoke r0.<java.awt.event.KeyEvent: char getKeyChar()>();
+
+        r15 = staticinvoke <javax.swing.KeyStroke: javax.swing.KeyStroke getKeyStroke(char)>($c8);
+
+        goto label08;
+
+     label02:
+        $i1 = virtualinvoke r0.<java.awt.event.KeyEvent: int getKeyCode()>();
+
+        $i2 = virtualinvoke r0.<java.awt.event.KeyEvent: int getExtendedKeyCode()>();
+
+        if $i1 == $i2 goto label05;
+
+        $i6 = virtualinvoke r0.<java.awt.event.KeyEvent: int getExtendedKeyCode()>();
+
+        $i7 = virtualinvoke r0.<java.awt.event.KeyEvent: int getModifiers()>();
+
+        if z1 != 0 goto label03;
+
+        $z14 = 1;
+
+        goto label04;
+
+     label03:
+        $z14 = 0;
+
+     label04:
+        r14 = staticinvoke <javax.swing.KeyStroke: javax.swing.KeyStroke getKeyStroke(int,int,boolean)>($i6, $i7, $z14);
+
+     label05:
+        $i3 = virtualinvoke r0.<java.awt.event.KeyEvent: int getKeyCode()>();
+
+        $i4 = virtualinvoke r0.<java.awt.event.KeyEvent: int getModifiers()>();
+
+        if z1 != 0 goto label06;
+
+        $z15 = 1;
+
+        goto label07;
+
+     label06:
+        $z15 = 0;
+
+     label07:
+        r15 = staticinvoke <javax.swing.KeyStroke: javax.swing.KeyStroke getKeyStroke(int,int,boolean)>($i3, $i4, $z15);
+
+     label08:
+        $r16 = r1.<javax.swing.KeyboardManager: java.util.Hashtable containerMap>;
+
+        $r17 = virtualinvoke $r16.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r2);
+
+        $r18 = (java.util.Hashtable) $r17;
+
+        if $r18 == null goto label18;
+
+        r19 = null;
+
+        if r14 == null goto label09;
+
+        $r12 = virtualinvoke $r18.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r14);
+
+        r19 = $r12;
+
+        if $r12 == null goto label09;
+
+        r15 = r14;
+
+     label09:
+        if r19 != null goto label10;
+
+        r19 = virtualinvoke $r18.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r15);
+
+     label10:
+        if r19 != null goto label11;
+
+        goto label18;
+
+     label11:
+        $z7 = r19 instanceof javax.swing.JComponent;
+
+        if $z7 == 0 goto label13;
+
+        r20 = (javax.swing.JComponent) r19;
+
+        $z12 = virtualinvoke r20.<javax.swing.JComponent: boolean isShowing()>();
+
+        if $z12 == 0 goto label12;
+
+        $z13 = virtualinvoke r20.<javax.swing.JComponent: boolean isEnabled()>();
+
+        if $z13 == 0 goto label12;
+
+        virtualinvoke r1.<javax.swing.KeyboardManager: void fireBinding(javax.swing.JComponent,javax.swing.KeyStroke,java.awt.event.KeyEvent,boolean)>(r20, r15, r0, z1);
+
+     label12:
+        goto label18;
+
+     label13:
+        $z8 = r19 instanceof java.util.Vector;
+
+        if $z8 == 0 goto label17;
+
+        r21 = (java.util.Vector) r19;
+
+        $i5 = virtualinvoke r21.<java.util.Vector: int size()>();
+
+        i9 = $i5 - 1;
+
+     label14:
+        if i9 < 0 goto label16;
+
+        $r11 = virtualinvoke r21.<java.util.Vector: java.lang.Object elementAt(int)>(i9);
+
+        r22 = (javax.swing.JComponent) $r11;
+
+        $z9 = virtualinvoke r22.<javax.swing.JComponent: boolean isShowing()>();
+
+        if $z9 == 0 goto label15;
+
+        $z10 = virtualinvoke r22.<javax.swing.JComponent: boolean isEnabled()>();
+
+        if $z10 == 0 goto label15;
+
+        virtualinvoke r1.<javax.swing.KeyboardManager: void fireBinding(javax.swing.JComponent,javax.swing.KeyStroke,java.awt.event.KeyEvent,boolean)>(r22, r15, r0, z1);
+
+        $z11 = virtualinvoke r0.<java.awt.event.KeyEvent: boolean isConsumed()>();
+
+        if $z11 == 0 goto label15;
+
+        return 1;
+
+     label15:
+        $i11 = (int) -1;
+
+        i9 = i9 + $i11;
+
+        goto label14;
+
+     label16:
+        goto label18;
+
+     label17:
+        $r7 = <java.lang.System: java.io.PrintStream out>;
+
+        $r25 = new java.lang.StringBuilder;
+
+        specialinvoke $r25.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unexpected condition in fireKeyboardAction ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r19);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<java.io.PrintStream: void println(java.lang.String)>($r10);
+
+        staticinvoke <java.lang.Thread: void dumpStack()>();
+
+     label18:
+        $z16 = virtualinvoke r0.<java.awt.event.KeyEvent: boolean isConsumed()>();
+
+        if $z16 == 0 goto label19;
+
+        return 1;
+
+     label19:
+        if $r18 == null goto label27;
+
+        $r3 = virtualinvoke $r18.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(class "Ljavax/swing/JMenuBar;");
+
+        r23 = (java.util.Vector) $r3;
+
+        if r23 == null goto label27;
+
+        $r4 = virtualinvoke r23.<java.util.Vector: java.util.Enumeration elements()>();
+
+     label20:
+        $z2 = interfaceinvoke $r4.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z2 == 0 goto label27;
+
+        $r5 = interfaceinvoke $r4.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r24 = (javax.swing.JMenuBar) $r5;
+
+        $z3 = virtualinvoke r24.<javax.swing.JMenuBar: boolean isShowing()>();
+
+        if $z3 == 0 goto label26;
+
+        $z4 = virtualinvoke r24.<javax.swing.JMenuBar: boolean isEnabled()>();
+
+        if $z4 == 0 goto label26;
+
+        if r14 == null goto label21;
+
+        $z6 = virtualinvoke r14.<javax.swing.KeyStroke: boolean equals(java.lang.Object)>(r15);
+
+        if $z6 != 0 goto label21;
+
+        $z22 = 1;
+
+        $z21 = 1;
+
+        goto label22;
+
+     label21:
+        $z22 = 0;
+
+        $z21 = 0;
+
+     label22:
+        z18 = $z21;
+
+        if $z22 == 0 goto label23;
+
+        virtualinvoke r1.<javax.swing.KeyboardManager: void fireBinding(javax.swing.JComponent,javax.swing.KeyStroke,java.awt.event.KeyEvent,boolean)>(r24, r14, r0, z1);
+
+     label23:
+        if z18 == 0 goto label24;
+
+        $z5 = virtualinvoke r0.<java.awt.event.KeyEvent: boolean isConsumed()>();
+
+        if $z5 != 0 goto label25;
+
+     label24:
+        virtualinvoke r1.<javax.swing.KeyboardManager: void fireBinding(javax.swing.JComponent,javax.swing.KeyStroke,java.awt.event.KeyEvent,boolean)>(r24, r15, r0, z1);
+
+     label25:
+        $z19 = virtualinvoke r0.<java.awt.event.KeyEvent: boolean isConsumed()>();
+
+        if $z19 == 0 goto label26;
+
+        return 1;
+
+     label26:
+        goto label20;
+
+     label27:
+        $z20 = virtualinvoke r0.<java.awt.event.KeyEvent: boolean isConsumed()>();
+
+        return $z20;
+    }
+
+    void fireBinding(javax.swing.JComponent, javax.swing.KeyStroke, java.awt.event.KeyEvent, boolean)
+    {
+        javax.swing.JComponent r0;
+        javax.swing.KeyStroke r1;
+        java.awt.event.KeyEvent r2;
+        boolean z0, $z1;
+        javax.swing.KeyboardManager r3;
+
+        r3 := @this: javax.swing.KeyboardManager;
+
+        r0 := @parameter0: javax.swing.JComponent;
+
+        r1 := @parameter1: javax.swing.KeyStroke;
+
+        r2 := @parameter2: java.awt.event.KeyEvent;
+
+        z0 := @parameter3: boolean;
+
+        $z1 = virtualinvoke r0.<javax.swing.JComponent: boolean processKeyBinding(javax.swing.KeyStroke,java.awt.event.KeyEvent,int,boolean)>(r1, r2, 2, z0);
+
+        if $z1 == 0 goto label1;
+
+        virtualinvoke r2.<java.awt.event.KeyEvent: void consume()>();
+
+     label1:
+        return;
+    }
+
+    public void registerMenuBar(javax.swing.JMenuBar)
+    {
+        javax.swing.JMenuBar r0;
+        java.util.Vector $r6, $r7, r9;
+        java.lang.Object $r4, $r5;
+        java.awt.Container $r1;
+        java.util.Hashtable $r3, r8;
+        javax.swing.KeyboardManager r2;
+        boolean $z0;
+
+        r2 := @this: javax.swing.KeyboardManager;
+
+        r0 := @parameter0: javax.swing.JMenuBar;
+
+        $r1 = staticinvoke <javax.swing.KeyboardManager: java.awt.Container getTopAncestor(javax.swing.JComponent)>(r0);
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        $r3 = r2.<javax.swing.KeyboardManager: java.util.Hashtable containerMap>;
+
+        $r4 = virtualinvoke $r3.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r1);
+
+        r8 = (java.util.Hashtable) $r4;
+
+        if r8 != null goto label2;
+
+        r8 = virtualinvoke r2.<javax.swing.KeyboardManager: java.util.Hashtable registerNewTopContainer(java.awt.Container)>($r1);
+
+     label2:
+        $r5 = virtualinvoke r8.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(class "Ljavax/swing/JMenuBar;");
+
+        $r7 = (java.util.Vector) $r5;
+
+        r9 = $r7;
+
+        if $r7 != null goto label3;
+
+        $r6 = new java.util.Vector;
+
+        specialinvoke $r6.<java.util.Vector: void <init>()>();
+
+        r9 = $r6;
+
+        virtualinvoke r8.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>(class "Ljavax/swing/JMenuBar;", $r6);
+
+     label3:
+        $z0 = virtualinvoke r9.<java.util.Vector: boolean contains(java.lang.Object)>(r0);
+
+        if $z0 != 0 goto label4;
+
+        virtualinvoke r9.<java.util.Vector: void addElement(java.lang.Object)>(r0);
+
+     label4:
+        return;
+    }
+
+    public void unregisterMenuBar(javax.swing.JMenuBar)
+    {
+        javax.swing.JMenuBar r0;
+        java.util.Vector r7;
+        java.lang.Object $r4, $r6;
+        java.awt.Container $r1;
+        java.util.Hashtable $r3, r5, $r8;
+        javax.swing.KeyboardManager r2;
+        boolean $z0, $z1;
+
+        r2 := @this: javax.swing.KeyboardManager;
+
+        r0 := @parameter0: javax.swing.JMenuBar;
+
+        $r1 = staticinvoke <javax.swing.KeyboardManager: java.awt.Container getTopAncestor(javax.swing.JComponent)>(r0);
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        $r3 = r2.<javax.swing.KeyboardManager: java.util.Hashtable containerMap>;
+
+        $r4 = virtualinvoke $r3.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r1);
+
+        r5 = (java.util.Hashtable) $r4;
+
+        if r5 == null goto label2;
+
+        $r6 = virtualinvoke r5.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(class "Ljavax/swing/JMenuBar;");
+
+        r7 = (java.util.Vector) $r6;
+
+        if r7 == null goto label2;
+
+        virtualinvoke r7.<java.util.Vector: boolean removeElement(java.lang.Object)>(r0);
+
+        $z0 = virtualinvoke r7.<java.util.Vector: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+        virtualinvoke r5.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>(class "Ljavax/swing/JMenuBar;");
+
+        $z1 = virtualinvoke r5.<java.util.Hashtable: boolean isEmpty()>();
+
+        if $z1 == 0 goto label2;
+
+        $r8 = r2.<javax.swing.KeyboardManager: java.util.Hashtable containerMap>;
+
+        virtualinvoke $r8.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>($r1);
+
+     label2:
+        return;
+    }
+
+    protected java.util.Hashtable registerNewTopContainer(java.awt.Container)
+    {
+        java.awt.Container r2;
+        java.util.Hashtable $r0, $r3;
+        javax.swing.KeyboardManager r1;
+
+        r1 := @this: javax.swing.KeyboardManager;
+
+        r2 := @parameter0: java.awt.Container;
+
+        $r0 = new java.util.Hashtable;
+
+        specialinvoke $r0.<java.util.Hashtable: void <init>()>();
+
+        $r3 = r1.<javax.swing.KeyboardManager: java.util.Hashtable containerMap>;
+
+        virtualinvoke $r3.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>(r2, $r0);
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        javax.swing.KeyboardManager $r0;
+
+        $r0 = new javax.swing.KeyboardManager;
+
+        specialinvoke $r0.<javax.swing.KeyboardManager: void <init>()>();
+
+        <javax.swing.KeyboardManager: javax.swing.KeyboardManager currentManager> = $r0;
+
+        return;
+    }
+}

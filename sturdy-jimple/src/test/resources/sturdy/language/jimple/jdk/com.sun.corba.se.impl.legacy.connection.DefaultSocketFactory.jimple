@@ -1,0 +1,216 @@
+public class com.sun.corba.se.impl.legacy.connection.DefaultSocketFactory extends java.lang.Object implements com.sun.corba.se.spi.legacy.connection.ORBSocketFactory
+{
+    private com.sun.corba.se.spi.orb.ORB orb;
+    private static com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper;
+
+    public void <init>()
+    {
+        com.sun.corba.se.impl.legacy.connection.DefaultSocketFactory r0;
+
+        r0 := @this: com.sun.corba.se.impl.legacy.connection.DefaultSocketFactory;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void setORB(com.sun.corba.se.spi.orb.ORB)
+    {
+        com.sun.corba.se.impl.legacy.connection.DefaultSocketFactory r0;
+        com.sun.corba.se.spi.orb.ORB r1;
+
+        r0 := @this: com.sun.corba.se.impl.legacy.connection.DefaultSocketFactory;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        r0.<com.sun.corba.se.impl.legacy.connection.DefaultSocketFactory: com.sun.corba.se.spi.orb.ORB orb> = r1;
+
+        return;
+    }
+
+    public java.net.ServerSocket createServerSocket(java.lang.String, int) throws java.io.IOException
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r8;
+        java.net.InetSocketAddress $r6;
+        com.sun.corba.se.spi.orb.ORB $r2;
+        java.nio.channels.ServerSocketChannel $r7;
+        java.net.ServerSocket $r5, r10;
+        int i0;
+        java.lang.String r0, $r4;
+        com.sun.corba.se.impl.legacy.connection.DefaultSocketFactory r1;
+        com.sun.corba.se.spi.orb.ORBData $r3;
+        org.omg.CORBA.COMM_FAILURE $r9;
+        boolean $z0, $z1;
+
+        r1 := @this: com.sun.corba.se.impl.legacy.connection.DefaultSocketFactory;
+
+        r0 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("IIOP_CLEAR_TEXT");
+
+        if $z0 != 0 goto label1;
+
+        $r8 = <com.sun.corba.se.impl.legacy.connection.DefaultSocketFactory: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r9 = virtualinvoke $r8.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.COMM_FAILURE defaultCreateServerSocketGivenNonIiopClearText(java.lang.Object)>(r0);
+
+        throw $r9;
+
+     label1:
+        $r2 = r1.<com.sun.corba.se.impl.legacy.connection.DefaultSocketFactory: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r3 = virtualinvoke $r2.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $r4 = interfaceinvoke $r3.<com.sun.corba.se.spi.orb.ORBData: java.lang.String acceptorSocketType()>();
+
+        $z1 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("SocketChannel");
+
+        if $z1 == 0 goto label2;
+
+        $r7 = staticinvoke <java.nio.channels.ServerSocketChannel: java.nio.channels.ServerSocketChannel open()>();
+
+        r10 = virtualinvoke $r7.<java.nio.channels.ServerSocketChannel: java.net.ServerSocket socket()>();
+
+        goto label3;
+
+     label2:
+        $r5 = new java.net.ServerSocket;
+
+        specialinvoke $r5.<java.net.ServerSocket: void <init>()>();
+
+        r10 = $r5;
+
+     label3:
+        $r6 = new java.net.InetSocketAddress;
+
+        specialinvoke $r6.<java.net.InetSocketAddress: void <init>(int)>(i0);
+
+        virtualinvoke r10.<java.net.ServerSocket: void bind(java.net.SocketAddress)>($r6);
+
+        return r10;
+    }
+
+    public com.sun.corba.se.spi.transport.SocketInfo getEndPointInfo(org.omg.CORBA.ORB, com.sun.corba.se.spi.ior.IOR, com.sun.corba.se.spi.transport.SocketInfo)
+    {
+        com.sun.corba.se.spi.ior.IOR r0;
+        com.sun.corba.se.spi.ior.TaggedProfileTemplate $r2;
+        com.sun.corba.se.spi.ior.iiop.IIOPProfileTemplate r3;
+        com.sun.corba.se.impl.legacy.connection.EndPointInfoImpl $r5;
+        com.sun.corba.se.spi.ior.iiop.IIOPAddress $r4;
+        org.omg.CORBA.ORB r9;
+        com.sun.corba.se.spi.ior.iiop.IIOPProfile $r1;
+        int $i0;
+        java.lang.String $r6, $r7;
+        com.sun.corba.se.impl.legacy.connection.DefaultSocketFactory r8;
+        com.sun.corba.se.spi.transport.SocketInfo r10;
+
+        r8 := @this: com.sun.corba.se.impl.legacy.connection.DefaultSocketFactory;
+
+        r9 := @parameter0: org.omg.CORBA.ORB;
+
+        r0 := @parameter1: com.sun.corba.se.spi.ior.IOR;
+
+        r10 := @parameter2: com.sun.corba.se.spi.transport.SocketInfo;
+
+        $r1 = interfaceinvoke r0.<com.sun.corba.se.spi.ior.IOR: com.sun.corba.se.spi.ior.iiop.IIOPProfile getProfile()>();
+
+        $r2 = interfaceinvoke $r1.<com.sun.corba.se.spi.ior.iiop.IIOPProfile: com.sun.corba.se.spi.ior.TaggedProfileTemplate getTaggedProfileTemplate()>();
+
+        r3 = (com.sun.corba.se.spi.ior.iiop.IIOPProfileTemplate) $r2;
+
+        $r4 = interfaceinvoke r3.<com.sun.corba.se.spi.ior.iiop.IIOPProfileTemplate: com.sun.corba.se.spi.ior.iiop.IIOPAddress getPrimaryAddress()>();
+
+        $r5 = new com.sun.corba.se.impl.legacy.connection.EndPointInfoImpl;
+
+        $i0 = interfaceinvoke $r4.<com.sun.corba.se.spi.ior.iiop.IIOPAddress: int getPort()>();
+
+        $r6 = interfaceinvoke $r4.<com.sun.corba.se.spi.ior.iiop.IIOPAddress: java.lang.String getHost()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.String: java.lang.String toLowerCase()>();
+
+        specialinvoke $r5.<com.sun.corba.se.impl.legacy.connection.EndPointInfoImpl: void <init>(java.lang.String,int,java.lang.String)>("IIOP_CLEAR_TEXT", $i0, $r7);
+
+        return $r5;
+    }
+
+    public java.net.Socket createSocket(com.sun.corba.se.spi.transport.SocketInfo) throws java.io.IOException, com.sun.corba.se.spi.legacy.connection.GetEndPointInfoAgainException
+    {
+        java.net.Socket $r4, r11;
+        java.net.InetSocketAddress $r7;
+        com.sun.corba.se.spi.orb.ORB $r1;
+        java.lang.Exception $r10;
+        java.nio.channels.SocketChannel $r9;
+        int $i0, $i1;
+        com.sun.corba.se.impl.legacy.connection.DefaultSocketFactory r0;
+        java.lang.String $r3, $r6, $r8;
+        com.sun.corba.se.spi.orb.ORBData $r2;
+        boolean $z0;
+        com.sun.corba.se.spi.transport.SocketInfo r5;
+
+        r0 := @this: com.sun.corba.se.impl.legacy.connection.DefaultSocketFactory;
+
+        r5 := @parameter0: com.sun.corba.se.spi.transport.SocketInfo;
+
+        $r1 = r0.<com.sun.corba.se.impl.legacy.connection.DefaultSocketFactory: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $r3 = interfaceinvoke $r2.<com.sun.corba.se.spi.orb.ORBData: java.lang.String acceptorSocketType()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("SocketChannel");
+
+        if $z0 == 0 goto label1;
+
+        $r7 = new java.net.InetSocketAddress;
+
+        $r8 = interfaceinvoke r5.<com.sun.corba.se.spi.transport.SocketInfo: java.lang.String getHost()>();
+
+        $i1 = interfaceinvoke r5.<com.sun.corba.se.spi.transport.SocketInfo: int getPort()>();
+
+        specialinvoke $r7.<java.net.InetSocketAddress: void <init>(java.lang.String,int)>($r8, $i1);
+
+        $r9 = staticinvoke <java.nio.channels.SocketChannel: java.nio.channels.SocketChannel open(java.net.SocketAddress)>($r7);
+
+        r11 = virtualinvoke $r9.<java.nio.channels.SocketChannel: java.net.Socket socket()>();
+
+        goto label2;
+
+     label1:
+        $r4 = new java.net.Socket;
+
+        $r6 = interfaceinvoke r5.<com.sun.corba.se.spi.transport.SocketInfo: java.lang.String getHost()>();
+
+        $i0 = interfaceinvoke r5.<com.sun.corba.se.spi.transport.SocketInfo: int getPort()>();
+
+        specialinvoke $r4.<java.net.Socket: void <init>(java.lang.String,int)>($r6, $i0);
+
+        r11 = $r4;
+
+     label2:
+        virtualinvoke r11.<java.net.Socket: void setTcpNoDelay(boolean)>(1);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r10 := @caughtexception;
+
+     label5:
+        return r11;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    static void <clinit>()
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r0;
+
+        $r0 = staticinvoke <com.sun.corba.se.impl.logging.ORBUtilSystemException: com.sun.corba.se.impl.logging.ORBUtilSystemException get(java.lang.String)>("rpc.transport");
+
+        <com.sun.corba.se.impl.legacy.connection.DefaultSocketFactory: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper> = $r0;
+
+        return;
+    }
+}

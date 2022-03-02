@@ -1,0 +1,940 @@
+public class sun.security.x509.X509Key extends java.lang.Object implements java.security.PublicKey
+{
+    private static final long serialVersionUID;
+    protected sun.security.x509.AlgorithmId algid;
+    protected byte[] key;
+    private int unusedBits;
+    private sun.security.util.BitArray bitStringKey;
+    protected byte[] encodedKey;
+
+    public void <init>()
+    {
+        sun.security.x509.X509Key r0;
+
+        r0 := @this: sun.security.x509.X509Key;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.x509.X509Key: byte[] key> = null;
+
+        r0.<sun.security.x509.X509Key: int unusedBits> = 0;
+
+        r0.<sun.security.x509.X509Key: sun.security.util.BitArray bitStringKey> = null;
+
+        return;
+    }
+
+    private void <init>(sun.security.x509.AlgorithmId, sun.security.util.BitArray) throws java.security.InvalidKeyException
+    {
+        sun.security.x509.X509Key r0;
+        sun.security.util.BitArray r2;
+        sun.security.x509.AlgorithmId r1;
+
+        r0 := @this: sun.security.x509.X509Key;
+
+        r1 := @parameter0: sun.security.x509.AlgorithmId;
+
+        r2 := @parameter1: sun.security.util.BitArray;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.x509.X509Key: byte[] key> = null;
+
+        r0.<sun.security.x509.X509Key: int unusedBits> = 0;
+
+        r0.<sun.security.x509.X509Key: sun.security.util.BitArray bitStringKey> = null;
+
+        r0.<sun.security.x509.X509Key: sun.security.x509.AlgorithmId algid> = r1;
+
+        virtualinvoke r0.<sun.security.x509.X509Key: void setKey(sun.security.util.BitArray)>(r2);
+
+        virtualinvoke r0.<sun.security.x509.X509Key: byte[] encode()>();
+
+        return;
+    }
+
+    protected void setKey(sun.security.util.BitArray)
+    {
+        byte[] $r4;
+        sun.security.util.BitArray r1, $r3;
+        sun.security.x509.X509Key r0;
+        int $i0, i1, $i2;
+        java.lang.Object $r2;
+
+        r0 := @this: sun.security.x509.X509Key;
+
+        r1 := @parameter0: sun.security.util.BitArray;
+
+        $r2 = virtualinvoke r1.<sun.security.util.BitArray: java.lang.Object clone()>();
+
+        $r3 = (sun.security.util.BitArray) $r2;
+
+        r0.<sun.security.x509.X509Key: sun.security.util.BitArray bitStringKey> = $r3;
+
+        $r4 = virtualinvoke r1.<sun.security.util.BitArray: byte[] toByteArray()>();
+
+        r0.<sun.security.x509.X509Key: byte[] key> = $r4;
+
+        $i0 = virtualinvoke r1.<sun.security.util.BitArray: int length()>();
+
+        i1 = $i0 % 8;
+
+        if i1 != 0 goto label1;
+
+        $i2 = 0;
+
+        goto label2;
+
+     label1:
+        $i2 = 8 - i1;
+
+     label2:
+        r0.<sun.security.x509.X509Key: int unusedBits> = $i2;
+
+        return;
+    }
+
+    protected sun.security.util.BitArray getKey()
+    {
+        byte[] $r2, $r3;
+        sun.security.util.BitArray $r1, $r4, $r6;
+        sun.security.x509.X509Key r0;
+        int $i0, $i1, $i2, $i3;
+        java.lang.Object $r5;
+
+        r0 := @this: sun.security.x509.X509Key;
+
+        $r1 = new sun.security.util.BitArray;
+
+        $r2 = r0.<sun.security.x509.X509Key: byte[] key>;
+
+        $i0 = lengthof $r2;
+
+        $i2 = $i0 * 8;
+
+        $i1 = r0.<sun.security.x509.X509Key: int unusedBits>;
+
+        $i3 = $i2 - $i1;
+
+        $r3 = r0.<sun.security.x509.X509Key: byte[] key>;
+
+        specialinvoke $r1.<sun.security.util.BitArray: void <init>(int,byte[])>($i3, $r3);
+
+        r0.<sun.security.x509.X509Key: sun.security.util.BitArray bitStringKey> = $r1;
+
+        $r4 = r0.<sun.security.x509.X509Key: sun.security.util.BitArray bitStringKey>;
+
+        $r5 = virtualinvoke $r4.<sun.security.util.BitArray: java.lang.Object clone()>();
+
+        $r6 = (sun.security.util.BitArray) $r5;
+
+        return $r6;
+    }
+
+    public static java.security.PublicKey parse(sun.security.util.DerValue) throws java.io.IOException
+    {
+        sun.security.util.DerInputStream $r1, $r4, $r7;
+        byte $b0;
+        int $i1, $i2;
+        java.lang.String $r14, $r16;
+        sun.security.util.DerValue r0, $r2;
+        java.security.PublicKey $r6;
+        java.io.IOException $r17, $r19, $r20;
+        sun.security.util.BitArray $r5;
+        java.security.InvalidKeyException $r10;
+        java.lang.StringBuilder $r13, $r15, $r18;
+        sun.security.x509.AlgorithmId $r3;
+
+        r0 := @parameter0: sun.security.util.DerValue;
+
+        $b0 = r0.<sun.security.util.DerValue: byte tag>;
+
+        $i2 = (int) $b0;
+
+        if $i2 == 48 goto label1;
+
+        $r17 = new java.io.IOException;
+
+        specialinvoke $r17.<java.io.IOException: void <init>(java.lang.String)>("corrupt subject key");
+
+        throw $r17;
+
+     label1:
+        $r1 = r0.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $r2 = virtualinvoke $r1.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+        $r3 = staticinvoke <sun.security.x509.AlgorithmId: sun.security.x509.AlgorithmId parse(sun.security.util.DerValue)>($r2);
+
+     label2:
+        $r4 = r0.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $r5 = virtualinvoke $r4.<sun.security.util.DerInputStream: sun.security.util.BitArray getUnalignedBitString()>();
+
+        $r6 = staticinvoke <sun.security.x509.X509Key: java.security.PublicKey buildX509Key(sun.security.x509.AlgorithmId,sun.security.util.BitArray)>($r3, $r5);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r10 := @caughtexception;
+
+        $r19 = new java.io.IOException;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("subject key, ");
+
+        $r14 = virtualinvoke $r10.<java.security.InvalidKeyException: java.lang.String getMessage()>();
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r19.<java.io.IOException: void <init>(java.lang.String,java.lang.Throwable)>($r16, $r10);
+
+        throw $r19;
+
+     label5:
+        $r7 = r0.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $i1 = virtualinvoke $r7.<sun.security.util.DerInputStream: int available()>();
+
+        if $i1 == 0 goto label6;
+
+        $r20 = new java.io.IOException;
+
+        specialinvoke $r20.<java.io.IOException: void <init>(java.lang.String)>("excess subject key");
+
+        throw $r20;
+
+     label6:
+        return $r6;
+
+        catch java.security.InvalidKeyException from label2 to label3 with label4;
+    }
+
+    protected void parseKeyBits() throws java.io.IOException, java.security.InvalidKeyException
+    {
+        sun.security.x509.X509Key r0;
+
+        r0 := @this: sun.security.x509.X509Key;
+
+        virtualinvoke r0.<sun.security.x509.X509Key: byte[] encode()>();
+
+        return;
+    }
+
+    static java.security.PublicKey buildX509Key(sun.security.x509.AlgorithmId, sun.security.util.BitArray) throws java.io.IOException, java.security.InvalidKeyException
+    {
+        byte[] $r4;
+        java.lang.InstantiationException $r14, $r29, $r30;
+        boolean $z0;
+        java.lang.IllegalAccessException $r8;
+        sun.security.util.BitArray r2;
+        java.security.spec.X509EncodedKeySpec $r3;
+        java.security.KeyFactory $r6;
+        java.security.Provider $r22;
+        sun.security.x509.X509Key r34, $r35;
+        sun.security.util.DerOutputStream $r0;
+        java.security.NoSuchAlgorithmException $r21;
+        java.lang.StringBuilder $r10, $r11, $r12, $r23, $r24, $r26;
+        java.security.InvalidKeyException $r19;
+        java.lang.ClassLoader $r17;
+        sun.security.x509.AlgorithmId r1;
+        java.security.spec.InvalidKeySpecException $r18;
+        java.lang.String $r5, $r13, $r20, $r25, $r27, $r28, r31;
+        java.security.PublicKey $r7;
+        java.io.IOException $r9;
+        java.lang.ClassNotFoundException $r15, $r16;
+        java.lang.Class r32;
+        java.lang.Object r33;
+
+        r1 := @parameter0: sun.security.x509.AlgorithmId;
+
+        r2 := @parameter1: sun.security.util.BitArray;
+
+        $r0 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r0.<sun.security.util.DerOutputStream: void <init>()>();
+
+        staticinvoke <sun.security.x509.X509Key: void encode(sun.security.util.DerOutputStream,sun.security.x509.AlgorithmId,sun.security.util.BitArray)>($r0, r1, r2);
+
+        $r3 = new java.security.spec.X509EncodedKeySpec;
+
+        $r4 = virtualinvoke $r0.<sun.security.util.DerOutputStream: byte[] toByteArray()>();
+
+        specialinvoke $r3.<java.security.spec.X509EncodedKeySpec: void <init>(byte[])>($r4);
+
+     label01:
+        $r5 = virtualinvoke r1.<sun.security.x509.AlgorithmId: java.lang.String getName()>();
+
+        $r6 = staticinvoke <java.security.KeyFactory: java.security.KeyFactory getInstance(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.security.KeyFactory: java.security.PublicKey generatePublic(java.security.spec.KeySpec)>($r3);
+
+     label02:
+        return $r7;
+
+     label03:
+        $r21 := @caughtexception;
+
+        goto label05;
+
+     label04:
+        $r18 := @caughtexception;
+
+        $r19 = new java.security.InvalidKeyException;
+
+        $r20 = virtualinvoke $r18.<java.security.spec.InvalidKeySpecException: java.lang.String getMessage()>();
+
+        specialinvoke $r19.<java.security.InvalidKeyException: void <init>(java.lang.String,java.lang.Throwable)>($r20, $r18);
+
+        throw $r19;
+
+     label05:
+        r31 = "";
+
+     label06:
+        $r22 = staticinvoke <java.security.Security: java.security.Provider getProvider(java.lang.String)>("SUN");
+
+        if $r22 != null goto label07;
+
+        $r30 = new java.lang.InstantiationException;
+
+        specialinvoke $r30.<java.lang.InstantiationException: void <init>()>();
+
+        throw $r30;
+
+     label07:
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PublicKey.X.509.");
+
+        $r25 = virtualinvoke r1.<sun.security.x509.AlgorithmId: java.lang.String getName()>();
+
+        $r26 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r25);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r28 = virtualinvoke $r22.<java.security.Provider: java.lang.String getProperty(java.lang.String)>($r27);
+
+        r31 = $r28;
+
+        if $r28 != null goto label08;
+
+        $r29 = new java.lang.InstantiationException;
+
+        specialinvoke $r29.<java.lang.InstantiationException: void <init>()>();
+
+        throw $r29;
+
+     label08:
+        r32 = null;
+
+     label09:
+        r32 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String)>($r28);
+
+     label10:
+        goto label12;
+
+     label11:
+        $r16 := @caughtexception;
+
+        $r17 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getSystemClassLoader()>();
+
+        if $r17 == null goto label12;
+
+        r32 = virtualinvoke $r17.<java.lang.ClassLoader: java.lang.Class loadClass(java.lang.String)>($r28);
+
+     label12:
+        r33 = null;
+
+        if r32 == null goto label13;
+
+        r33 = virtualinvoke r32.<java.lang.Class: java.lang.Object newInstance()>();
+
+     label13:
+        $z0 = r33 instanceof sun.security.x509.X509Key;
+
+        if $z0 == 0 goto label15;
+
+        r34 = (sun.security.x509.X509Key) r33;
+
+        r34.<sun.security.x509.X509Key: sun.security.x509.AlgorithmId algid> = r1;
+
+        virtualinvoke r34.<sun.security.x509.X509Key: void setKey(sun.security.util.BitArray)>(r2);
+
+        virtualinvoke r34.<sun.security.x509.X509Key: void parseKeyBits()>();
+
+     label14:
+        return r34;
+
+     label15:
+        goto label19;
+
+     label16:
+        $r15 := @caughtexception;
+
+        goto label19;
+
+     label17:
+        $r14 := @caughtexception;
+
+        goto label19;
+
+     label18:
+        $r8 := @caughtexception;
+
+        $r9 = new java.io.IOException;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r31);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" [internal error]");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<java.io.IOException: void <init>(java.lang.String)>($r13);
+
+        throw $r9;
+
+     label19:
+        $r35 = new sun.security.x509.X509Key;
+
+        specialinvoke $r35.<sun.security.x509.X509Key: void <init>(sun.security.x509.AlgorithmId,sun.security.util.BitArray)>(r1, r2);
+
+        return $r35;
+
+        catch java.security.NoSuchAlgorithmException from label01 to label02 with label03;
+        catch java.security.spec.InvalidKeySpecException from label01 to label02 with label04;
+        catch java.lang.ClassNotFoundException from label09 to label10 with label11;
+        catch java.lang.ClassNotFoundException from label06 to label14 with label16;
+        catch java.lang.InstantiationException from label06 to label14 with label17;
+        catch java.lang.IllegalAccessException from label06 to label14 with label18;
+    }
+
+    public java.lang.String getAlgorithm()
+    {
+        sun.security.x509.X509Key r0;
+        java.lang.String $r2;
+        sun.security.x509.AlgorithmId $r1;
+
+        r0 := @this: sun.security.x509.X509Key;
+
+        $r1 = r0.<sun.security.x509.X509Key: sun.security.x509.AlgorithmId algid>;
+
+        $r2 = virtualinvoke $r1.<sun.security.x509.AlgorithmId: java.lang.String getName()>();
+
+        return $r2;
+    }
+
+    public sun.security.x509.AlgorithmId getAlgorithmId()
+    {
+        sun.security.x509.X509Key r0;
+        sun.security.x509.AlgorithmId $r1;
+
+        r0 := @this: sun.security.x509.X509Key;
+
+        $r1 = r0.<sun.security.x509.X509Key: sun.security.x509.AlgorithmId algid>;
+
+        return $r1;
+    }
+
+    public final void encode(sun.security.util.DerOutputStream) throws java.io.IOException
+    {
+        sun.security.x509.X509Key r1;
+        sun.security.util.DerOutputStream r0;
+        sun.security.util.BitArray $r3;
+        sun.security.x509.AlgorithmId $r2;
+
+        r1 := @this: sun.security.x509.X509Key;
+
+        r0 := @parameter0: sun.security.util.DerOutputStream;
+
+        $r2 = r1.<sun.security.x509.X509Key: sun.security.x509.AlgorithmId algid>;
+
+        $r3 = virtualinvoke r1.<sun.security.x509.X509Key: sun.security.util.BitArray getKey()>();
+
+        staticinvoke <sun.security.x509.X509Key: void encode(sun.security.util.DerOutputStream,sun.security.x509.AlgorithmId,sun.security.util.BitArray)>(r0, $r2, $r3);
+
+        return;
+    }
+
+    public byte[] getEncoded()
+    {
+        byte[] $r1, $r3;
+        sun.security.x509.X509Key r0;
+        java.lang.Object $r2;
+        java.security.InvalidKeyException $r4;
+
+        r0 := @this: sun.security.x509.X509Key;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.security.x509.X509Key: byte[] getEncodedInternal()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.Object: java.lang.Object clone()>();
+
+        $r3 = (byte[]) $r2;
+
+     label2:
+        return $r3;
+
+     label3:
+        $r4 := @caughtexception;
+
+        return null;
+
+        catch java.security.InvalidKeyException from label1 to label2 with label3;
+    }
+
+    public byte[] getEncodedInternal() throws java.security.InvalidKeyException
+    {
+        byte[] $r2, r10;
+        java.io.IOException $r3;
+        sun.security.x509.X509Key r0;
+        sun.security.util.DerOutputStream $r1;
+        java.security.InvalidKeyException $r4;
+        java.lang.StringBuilder $r5, $r6, $r8;
+        java.lang.String $r7, $r9;
+
+        r0 := @this: sun.security.x509.X509Key;
+
+        r10 = r0.<sun.security.x509.X509Key: byte[] encodedKey>;
+
+        if r10 != null goto label5;
+
+     label1:
+        $r1 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r1.<sun.security.util.DerOutputStream: void <init>()>();
+
+        virtualinvoke r0.<sun.security.x509.X509Key: void encode(sun.security.util.DerOutputStream)>($r1);
+
+        $r2 = virtualinvoke $r1.<sun.security.util.DerOutputStream: byte[] toByteArray()>();
+
+        r10 = $r2;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.security.InvalidKeyException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("IOException : ");
+
+        $r7 = virtualinvoke $r3.<java.io.IOException: java.lang.String getMessage()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.security.InvalidKeyException: void <init>(java.lang.String)>($r9);
+
+        throw $r4;
+
+     label4:
+        r0.<sun.security.x509.X509Key: byte[] encodedKey> = $r2;
+
+     label5:
+        return r10;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public java.lang.String getFormat()
+    {
+        sun.security.x509.X509Key r0;
+
+        r0 := @this: sun.security.x509.X509Key;
+
+        return "X.509";
+    }
+
+    public byte[] encode() throws java.security.InvalidKeyException
+    {
+        byte[] $r1, $r3;
+        sun.security.x509.X509Key r0;
+        java.lang.Object $r2;
+
+        r0 := @this: sun.security.x509.X509Key;
+
+        $r1 = virtualinvoke r0.<sun.security.x509.X509Key: byte[] getEncodedInternal()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.Object: java.lang.Object clone()>();
+
+        $r3 = (byte[]) $r2;
+
+        return $r3;
+    }
+
+    public java.lang.String toString()
+    {
+        byte[] $r8;
+        sun.security.x509.X509Key r3;
+        java.lang.StringBuilder $r1, $r2, $r6, $r7, $r10;
+        java.lang.String $r5, $r9, $r11;
+        sun.misc.HexDumpEncoder $r0;
+        sun.security.x509.AlgorithmId $r4;
+
+        r3 := @this: sun.security.x509.X509Key;
+
+        $r0 = new sun.misc.HexDumpEncoder;
+
+        specialinvoke $r0.<sun.misc.HexDumpEncoder: void <init>()>();
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("algorithm = ");
+
+        $r4 = r3.<sun.security.x509.X509Key: sun.security.x509.AlgorithmId algid>;
+
+        $r5 = virtualinvoke $r4.<sun.security.x509.AlgorithmId: java.lang.String toString()>();
+
+        $r6 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", unparsed keybits = \n");
+
+        $r8 = r3.<sun.security.x509.X509Key: byte[] key>;
+
+        $r9 = virtualinvoke $r0.<sun.misc.HexDumpEncoder: java.lang.String encodeBuffer(byte[])>($r8);
+
+        $r10 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r11;
+    }
+
+    public void decode(java.io.InputStream) throws java.security.InvalidKeyException
+    {
+        sun.security.util.DerInputStream $r3, $r6, $r8;
+        byte $b0;
+        int $i1, $i2;
+        java.lang.String $r15, $r17;
+        sun.security.util.DerValue $r4, $r18;
+        java.io.IOException $r11;
+        sun.security.util.BitArray $r7;
+        sun.security.x509.X509Key r2;
+        java.lang.StringBuilder $r14, $r16, $r21;
+        java.security.InvalidKeyException $r19, $r20, $r22;
+        sun.security.x509.AlgorithmId $r5;
+        java.io.InputStream r1;
+
+        r2 := @this: sun.security.x509.X509Key;
+
+        r1 := @parameter0: java.io.InputStream;
+
+     label1:
+        $r18 = new sun.security.util.DerValue;
+
+        specialinvoke $r18.<sun.security.util.DerValue: void <init>(java.io.InputStream)>(r1);
+
+        $b0 = $r18.<sun.security.util.DerValue: byte tag>;
+
+        $i2 = (int) $b0;
+
+        if $i2 == 48 goto label2;
+
+        $r19 = new java.security.InvalidKeyException;
+
+        specialinvoke $r19.<java.security.InvalidKeyException: void <init>(java.lang.String)>("invalid key format");
+
+        throw $r19;
+
+     label2:
+        $r3 = $r18.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $r4 = virtualinvoke $r3.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+        $r5 = staticinvoke <sun.security.x509.AlgorithmId: sun.security.x509.AlgorithmId parse(sun.security.util.DerValue)>($r4);
+
+        r2.<sun.security.x509.X509Key: sun.security.x509.AlgorithmId algid> = $r5;
+
+        $r6 = $r18.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $r7 = virtualinvoke $r6.<sun.security.util.DerInputStream: sun.security.util.BitArray getUnalignedBitString()>();
+
+        virtualinvoke r2.<sun.security.x509.X509Key: void setKey(sun.security.util.BitArray)>($r7);
+
+        virtualinvoke r2.<sun.security.x509.X509Key: void parseKeyBits()>();
+
+        $r8 = $r18.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $i1 = virtualinvoke $r8.<sun.security.util.DerInputStream: int available()>();
+
+        if $i1 == 0 goto label3;
+
+        $r20 = new java.security.InvalidKeyException;
+
+        specialinvoke $r20.<java.security.InvalidKeyException: void <init>(java.lang.String)>("excess key data");
+
+        throw $r20;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r11 := @caughtexception;
+
+        $r22 = new java.security.InvalidKeyException;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("IOException: ");
+
+        $r15 = virtualinvoke $r11.<java.io.IOException: java.lang.String getMessage()>();
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r22.<java.security.InvalidKeyException: void <init>(java.lang.String)>($r17);
+
+        throw $r22;
+
+     label5:
+        return;
+
+        catch java.io.IOException from label1 to label3 with label4;
+    }
+
+    public void decode(byte[]) throws java.security.InvalidKeyException
+    {
+        byte[] r2;
+        sun.security.x509.X509Key r0;
+        java.io.ByteArrayInputStream $r1;
+
+        r0 := @this: sun.security.x509.X509Key;
+
+        r2 := @parameter0: byte[];
+
+        $r1 = new java.io.ByteArrayInputStream;
+
+        specialinvoke $r1.<java.io.ByteArrayInputStream: void <init>(byte[])>(r2);
+
+        virtualinvoke r0.<sun.security.x509.X509Key: void decode(java.io.InputStream)>($r1);
+
+        return;
+    }
+
+    private void writeObject(java.io.ObjectOutputStream) throws java.io.IOException
+    {
+        byte[] $r2;
+        java.io.ObjectOutputStream r0;
+        sun.security.x509.X509Key r1;
+
+        r1 := @this: sun.security.x509.X509Key;
+
+        r0 := @parameter0: java.io.ObjectOutputStream;
+
+        $r2 = virtualinvoke r1.<sun.security.x509.X509Key: byte[] getEncoded()>();
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void write(byte[])>($r2);
+
+        return;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException
+    {
+        java.io.ObjectInputStream r1;
+        java.io.IOException $r3;
+        sun.security.x509.X509Key r0;
+        java.security.InvalidKeyException $r2;
+        java.lang.StringBuilder $r4, $r5, $r7;
+        java.lang.String $r6, $r8;
+
+        r0 := @this: sun.security.x509.X509Key;
+
+        r1 := @parameter0: java.io.ObjectInputStream;
+
+     label1:
+        virtualinvoke r0.<sun.security.x509.X509Key: void decode(java.io.InputStream)>(r1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        virtualinvoke $r2.<java.security.InvalidKeyException: void printStackTrace()>();
+
+        $r3 = new java.io.IOException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("deserialized key is invalid: ");
+
+        $r6 = virtualinvoke $r2.<java.security.InvalidKeyException: java.lang.String getMessage()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.io.IOException: void <init>(java.lang.String)>($r8);
+
+        throw $r3;
+
+     label4:
+        return;
+
+        catch java.security.InvalidKeyException from label1 to label2 with label3;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        byte[] $r2, r6;
+        java.security.Key $r3;
+        sun.security.x509.X509Key r0, $r4;
+        java.lang.Object r1;
+        java.security.InvalidKeyException $r5;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.security.x509.X509Key;
+
+        r1 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        $z0 = r1 instanceof java.security.Key;
+
+        if $z0 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        $r2 = virtualinvoke r0.<sun.security.x509.X509Key: byte[] getEncodedInternal()>();
+
+        $z1 = r1 instanceof sun.security.x509.X509Key;
+
+        if $z1 == 0 goto label3;
+
+        $r4 = (sun.security.x509.X509Key) r1;
+
+        r6 = virtualinvoke $r4.<sun.security.x509.X509Key: byte[] getEncodedInternal()>();
+
+        goto label4;
+
+     label3:
+        $r3 = (java.security.Key) r1;
+
+        r6 = interfaceinvoke $r3.<java.security.Key: byte[] getEncoded()>();
+
+     label4:
+        $z2 = staticinvoke <java.util.Arrays: boolean equals(byte[],byte[])>($r2, r6);
+
+     label5:
+        return $z2;
+
+     label6:
+        $r5 := @caughtexception;
+
+        return 0;
+
+        catch java.security.InvalidKeyException from label2 to label5 with label6;
+    }
+
+    public int hashCode()
+    {
+        byte[] $r1;
+        sun.security.x509.X509Key r0;
+        short $s2, $s6;
+        byte $b1;
+        int $i0, $i3, i4, i5, $i7;
+        java.security.InvalidKeyException $r2;
+
+        r0 := @this: sun.security.x509.X509Key;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.security.x509.X509Key: byte[] getEncodedInternal()>();
+
+        i4 = lengthof $r1;
+
+        i5 = 0;
+
+     label2:
+        $i0 = lengthof $r1;
+
+        if i5 >= $i0 goto label3;
+
+        $b1 = $r1[i5];
+
+        $s6 = (short) $b1;
+
+        $s2 = $s6 & 255;
+
+        $i7 = (int) $s2;
+
+        $i3 = $i7 * 37;
+
+        i4 = i4 + $i3;
+
+        i5 = i5 + 1;
+
+        goto label2;
+
+     label3:
+        return i4;
+
+     label4:
+        $r2 := @caughtexception;
+
+        return 0;
+
+        catch java.security.InvalidKeyException from label1 to label3 with label4;
+    }
+
+    static void encode(sun.security.util.DerOutputStream, sun.security.x509.AlgorithmId, sun.security.util.BitArray) throws java.io.IOException
+    {
+        sun.security.util.DerOutputStream $r0, r3;
+        sun.security.util.BitArray r2;
+        sun.security.x509.AlgorithmId r1;
+
+        r3 := @parameter0: sun.security.util.DerOutputStream;
+
+        r1 := @parameter1: sun.security.x509.AlgorithmId;
+
+        r2 := @parameter2: sun.security.util.BitArray;
+
+        $r0 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r0.<sun.security.util.DerOutputStream: void <init>()>();
+
+        virtualinvoke r1.<sun.security.x509.AlgorithmId: void encode(sun.security.util.DerOutputStream)>($r0);
+
+        virtualinvoke $r0.<sun.security.util.DerOutputStream: void putUnalignedBitString(sun.security.util.BitArray)>(r2);
+
+        virtualinvoke r3.<sun.security.util.DerOutputStream: void write(byte,sun.security.util.DerOutputStream)>(48, $r0);
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.security.x509.X509Key: long serialVersionUID> = -5359250853002055002L;
+
+        return;
+    }
+}

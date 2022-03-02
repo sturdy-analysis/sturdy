@@ -1,0 +1,4001 @@
+public class sun.security.provider.PolicyFile extends java.security.Policy
+{
+    private static final sun.security.util.Debug debug;
+    private static final java.lang.String NONE;
+    private static final java.lang.String P11KEYSTORE;
+    private static final java.lang.String SELF;
+    private static final java.lang.String X500PRINCIPAL;
+    private static final java.lang.String POLICY;
+    private static final java.lang.String SECURITY_MANAGER;
+    private static final java.lang.String POLICY_URL;
+    private static final java.lang.String AUTH_POLICY;
+    private static final java.lang.String AUTH_POLICY_URL;
+    private static final int DEFAULT_CACHE_SIZE;
+    private volatile sun.security.provider.PolicyFile$PolicyInfo policyInfo;
+    private boolean constructed;
+    private boolean expandProperties;
+    private boolean ignoreIdentityScope;
+    private boolean allowSystemProperties;
+    private boolean notUtf8;
+    private java.net.URL url;
+    private static final java.lang.Class[] PARAMS0;
+    private static final java.lang.Class[] PARAMS1;
+    private static final java.lang.Class[] PARAMS2;
+
+    public void <init>()
+    {
+        sun.security.provider.PolicyFile r0;
+
+        r0 := @this: sun.security.provider.PolicyFile;
+
+        specialinvoke r0.<java.security.Policy: void <init>()>();
+
+        r0.<sun.security.provider.PolicyFile: boolean constructed> = 0;
+
+        r0.<sun.security.provider.PolicyFile: boolean expandProperties> = 1;
+
+        r0.<sun.security.provider.PolicyFile: boolean ignoreIdentityScope> = 1;
+
+        r0.<sun.security.provider.PolicyFile: boolean allowSystemProperties> = 1;
+
+        r0.<sun.security.provider.PolicyFile: boolean notUtf8> = 0;
+
+        specialinvoke r0.<sun.security.provider.PolicyFile: void init(java.net.URL)>(null);
+
+        return;
+    }
+
+    public void <init>(java.net.URL)
+    {
+        sun.security.provider.PolicyFile r0;
+        java.net.URL r1;
+
+        r0 := @this: sun.security.provider.PolicyFile;
+
+        r1 := @parameter0: java.net.URL;
+
+        specialinvoke r0.<java.security.Policy: void <init>()>();
+
+        r0.<sun.security.provider.PolicyFile: boolean constructed> = 0;
+
+        r0.<sun.security.provider.PolicyFile: boolean expandProperties> = 1;
+
+        r0.<sun.security.provider.PolicyFile: boolean ignoreIdentityScope> = 1;
+
+        r0.<sun.security.provider.PolicyFile: boolean allowSystemProperties> = 1;
+
+        r0.<sun.security.provider.PolicyFile: boolean notUtf8> = 0;
+
+        r0.<sun.security.provider.PolicyFile: java.net.URL url> = r1;
+
+        specialinvoke r0.<sun.security.provider.PolicyFile: void init(java.net.URL)>(r1);
+
+        return;
+    }
+
+    private void init(java.net.URL)
+    {
+        java.net.URL r4;
+        java.lang.NumberFormatException $r5;
+        sun.security.provider.PolicyFile$PolicyInfo $r6;
+        sun.security.provider.PolicyFile r1;
+        sun.security.provider.PolicyFile$1 $r0;
+        int i0;
+        java.lang.Object $r2;
+        java.lang.String r3;
+
+        r1 := @this: sun.security.provider.PolicyFile;
+
+        r4 := @parameter0: java.net.URL;
+
+        $r0 = new sun.security.provider.PolicyFile$1;
+
+        specialinvoke $r0.<sun.security.provider.PolicyFile$1: void <init>(sun.security.provider.PolicyFile)>(r1);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r3 = (java.lang.String) $r2;
+
+        if r3 == null goto label4;
+
+     label1:
+        i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>(r3);
+
+     label2:
+        goto label5;
+
+     label3:
+        $r5 := @caughtexception;
+
+        i0 = 1;
+
+        goto label5;
+
+     label4:
+        i0 = 1;
+
+     label5:
+        $r6 = new sun.security.provider.PolicyFile$PolicyInfo;
+
+        specialinvoke $r6.<sun.security.provider.PolicyFile$PolicyInfo: void <init>(int)>(i0);
+
+        specialinvoke r1.<sun.security.provider.PolicyFile: void initPolicyFile(sun.security.provider.PolicyFile$PolicyInfo,java.net.URL)>($r6, r4);
+
+        r1.<sun.security.provider.PolicyFile: sun.security.provider.PolicyFile$PolicyInfo policyInfo> = $r6;
+
+        return;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label3;
+    }
+
+    private void initPolicyFile(sun.security.provider.PolicyFile$PolicyInfo, java.net.URL)
+    {
+        java.net.URL r0;
+        sun.security.provider.PolicyFile$PolicyInfo r2;
+        sun.security.provider.PolicyFile r1;
+        sun.security.util.Debug $r3, $r6;
+        sun.security.provider.PolicyFile$2 $r4;
+        java.lang.StringBuilder $r5, $r7, $r8;
+        java.lang.String $r9;
+        boolean $z0;
+
+        r1 := @this: sun.security.provider.PolicyFile;
+
+        r2 := @parameter0: sun.security.provider.PolicyFile$PolicyInfo;
+
+        r0 := @parameter1: java.net.URL;
+
+        if r0 == null goto label2;
+
+        $r3 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r3 == null goto label1;
+
+        $r6 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("reading ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<sun.security.util.Debug: void println(java.lang.String)>($r9);
+
+     label1:
+        $r4 = new sun.security.provider.PolicyFile$2;
+
+        specialinvoke $r4.<sun.security.provider.PolicyFile$2: void <init>(sun.security.provider.PolicyFile,java.net.URL,sun.security.provider.PolicyFile$PolicyInfo)>(r1, r0, r2);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r4);
+
+        goto label4;
+
+     label2:
+        $z0 = specialinvoke r1.<sun.security.provider.PolicyFile: boolean initPolicyFile(java.lang.String,java.lang.String,sun.security.provider.PolicyFile$PolicyInfo)>("java.security.policy", "policy.url.", r2);
+
+        if $z0 != 0 goto label3;
+
+        specialinvoke r1.<sun.security.provider.PolicyFile: void initStaticPolicy(sun.security.provider.PolicyFile$PolicyInfo)>(r2);
+
+     label3:
+        specialinvoke r1.<sun.security.provider.PolicyFile: boolean initPolicyFile(java.lang.String,java.lang.String,sun.security.provider.PolicyFile$PolicyInfo)>("java.security.auth.policy", "auth.policy.url.", r2);
+
+     label4:
+        return;
+    }
+
+    private boolean initPolicyFile(java.lang.String, java.lang.String, sun.security.provider.PolicyFile$PolicyInfo)
+    {
+        sun.security.provider.PolicyFile$PolicyInfo r3;
+        sun.security.provider.PolicyFile r1;
+        sun.security.provider.PolicyFile$3 $r0;
+        java.lang.Boolean r6;
+        java.lang.Object $r5;
+        java.lang.String r2, r4;
+        boolean $z0;
+
+        r1 := @this: sun.security.provider.PolicyFile;
+
+        r2 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: sun.security.provider.PolicyFile$PolicyInfo;
+
+        $r0 = new sun.security.provider.PolicyFile$3;
+
+        specialinvoke $r0.<sun.security.provider.PolicyFile$3: void <init>(sun.security.provider.PolicyFile,java.lang.String,sun.security.provider.PolicyFile$PolicyInfo,java.lang.String)>(r1, r2, r3, r4);
+
+        $r5 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r6 = (java.lang.Boolean) $r5;
+
+        $z0 = virtualinvoke r6.<java.lang.Boolean: boolean booleanValue()>();
+
+        return $z0;
+    }
+
+    private boolean init(java.net.URL, sun.security.provider.PolicyFile$PolicyInfo)
+    {
+        java.util.Enumeration $r41;
+        java.net.URL r3;
+        boolean $z0, $z1, z2, $z3;
+        sun.security.provider.PolicyParser$ParsingException $r27;
+        sun.security.provider.PolicyFile$PolicyInfo r11;
+        java.security.KeyStore r40;
+        sun.security.util.Debug $r9, $r18, $r20, $r24, $r34, $r37, $r38;
+        java.lang.Exception $r17, $r36;
+        java.lang.StringBuilder $r19, $r21, $r22;
+        java.lang.Throwable $r15;
+        java.lang.Object[] $r30;
+        java.text.MessageFormat $r28;
+        java.lang.String $r5, $r6, $r7, $r8, $r23, $r25, $r29, $r31, $r33;
+        sun.security.provider.PolicyParser $r0;
+        java.io.PrintStream $r32;
+        sun.security.provider.PolicyParser$GrantEntry r42;
+        java.io.IOException $r14, $r16, $r26, $r35;
+        sun.security.provider.PolicyFile r1;
+        java.io.InputStreamReader $r2, $r12, r39;
+        java.lang.Object $r10;
+        java.io.InputStream $r4, $r13;
+
+        r1 := @this: sun.security.provider.PolicyFile;
+
+        r3 := @parameter0: java.net.URL;
+
+        r11 := @parameter1: sun.security.provider.PolicyFile$PolicyInfo;
+
+        z2 = 0;
+
+        $r0 = new sun.security.provider.PolicyParser;
+
+        $z0 = r1.<sun.security.provider.PolicyFile: boolean expandProperties>;
+
+        specialinvoke $r0.<sun.security.provider.PolicyParser: void <init>(boolean)>($z0);
+
+        r39 = null;
+
+     label01:
+        $z1 = r1.<sun.security.provider.PolicyFile: boolean notUtf8>;
+
+        if $z1 == 0 goto label02;
+
+        $r12 = new java.io.InputStreamReader;
+
+        $r13 = staticinvoke <sun.security.util.PolicyUtil: java.io.InputStream getInputStream(java.net.URL)>(r3);
+
+        specialinvoke $r12.<java.io.InputStreamReader: void <init>(java.io.InputStream)>($r13);
+
+        r39 = $r12;
+
+        goto label03;
+
+     label02:
+        $r2 = new java.io.InputStreamReader;
+
+        $r4 = staticinvoke <sun.security.util.PolicyUtil: java.io.InputStream getInputStream(java.net.URL)>(r3);
+
+        specialinvoke $r2.<java.io.InputStreamReader: void <init>(java.io.InputStream,java.lang.String)>($r4, "UTF-8");
+
+        r39 = $r2;
+
+     label03:
+        virtualinvoke $r0.<sun.security.provider.PolicyParser: void read(java.io.Reader)>(r39);
+
+        r40 = null;
+
+     label04:
+        $r5 = virtualinvoke $r0.<sun.security.provider.PolicyParser: java.lang.String getKeyStoreUrl()>();
+
+        $r6 = virtualinvoke $r0.<sun.security.provider.PolicyParser: java.lang.String getKeyStoreType()>();
+
+        $r7 = virtualinvoke $r0.<sun.security.provider.PolicyParser: java.lang.String getKeyStoreProvider()>();
+
+        $r8 = virtualinvoke $r0.<sun.security.provider.PolicyParser: java.lang.String getStorePassURL()>();
+
+        $r9 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        r40 = staticinvoke <sun.security.util.PolicyUtil: java.security.KeyStore getKeyStore(java.net.URL,java.lang.String,java.lang.String,java.lang.String,java.lang.String,sun.security.util.Debug)>(r3, $r5, $r6, $r7, $r8, $r9);
+
+     label05:
+        goto label07;
+
+     label06:
+        $r36 := @caughtexception;
+
+        $r37 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r37 == null goto label07;
+
+        $r38 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        virtualinvoke $r38.<sun.security.util.Debug: void println(java.lang.String)>("Debug info only. Ignoring exception.");
+
+        virtualinvoke $r36.<java.lang.Exception: void printStackTrace()>();
+
+     label07:
+        $r41 = virtualinvoke $r0.<sun.security.provider.PolicyParser: java.util.Enumeration grantElements()>();
+
+     label08:
+        $z3 = interfaceinvoke $r41.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z3 == 0 goto label09;
+
+        $r10 = interfaceinvoke $r41.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r42 = (sun.security.provider.PolicyParser$GrantEntry) $r10;
+
+        specialinvoke r1.<sun.security.provider.PolicyFile: void addGrantEntry(sun.security.provider.PolicyParser$GrantEntry,java.security.KeyStore,sun.security.provider.PolicyFile$PolicyInfo)>(r42, r40, r11);
+
+        goto label08;
+
+     label09:
+        if r39 == null goto label13;
+
+     label10:
+        virtualinvoke r39.<java.io.InputStreamReader: void close()>();
+
+        z2 = 1;
+
+     label11:
+        goto label32;
+
+     label12:
+        $r35 := @caughtexception;
+
+        goto label32;
+
+     label13:
+        z2 = 1;
+
+        goto label32;
+
+     label14:
+        $r27 := @caughtexception;
+
+        $r28 = new java.text.MessageFormat;
+
+        $r29 = staticinvoke <sun.security.util.ResourcesMgr: java.lang.String getString(java.lang.String)>("java.security.policy.error.parsing.policy.message");
+
+        specialinvoke $r28.<java.text.MessageFormat: void <init>(java.lang.String)>($r29);
+
+        $r30 = newarray (java.lang.Object)[2];
+
+        $r30[0] = r3;
+
+        $r31 = virtualinvoke $r27.<sun.security.provider.PolicyParser$ParsingException: java.lang.String getLocalizedMessage()>();
+
+        $r30[1] = $r31;
+
+        $r32 = <java.lang.System: java.io.PrintStream err>;
+
+        $r33 = virtualinvoke $r28.<java.text.MessageFormat: java.lang.String format(java.lang.Object)>($r30);
+
+        virtualinvoke $r32.<java.io.PrintStream: void println(java.lang.String)>($r33);
+
+        $r34 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r34 == null goto label15;
+
+        virtualinvoke $r27.<sun.security.provider.PolicyParser$ParsingException: void printStackTrace()>();
+
+     label15:
+        if r39 == null goto label19;
+
+     label16:
+        virtualinvoke r39.<java.io.InputStreamReader: void close()>();
+
+        z2 = 1;
+
+     label17:
+        goto label32;
+
+     label18:
+        $r26 := @caughtexception;
+
+        goto label32;
+
+     label19:
+        z2 = 1;
+
+        goto label32;
+
+     label20:
+        $r17 := @caughtexception;
+
+        $r18 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r18 == null goto label21;
+
+        $r20 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("error parsing ");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r3);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r20.<sun.security.util.Debug: void println(java.lang.String)>($r23);
+
+        $r24 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        $r25 = virtualinvoke $r17.<java.lang.Exception: java.lang.String toString()>();
+
+        virtualinvoke $r24.<sun.security.util.Debug: void println(java.lang.String)>($r25);
+
+        virtualinvoke $r17.<java.lang.Exception: void printStackTrace()>();
+
+     label21:
+        if r39 == null goto label25;
+
+     label22:
+        virtualinvoke r39.<java.io.InputStreamReader: void close()>();
+
+        z2 = 1;
+
+     label23:
+        goto label32;
+
+     label24:
+        $r16 := @caughtexception;
+
+        goto label32;
+
+     label25:
+        z2 = 1;
+
+        goto label32;
+
+     label26:
+        $r15 := @caughtexception;
+
+     label27:
+        if r39 == null goto label31;
+
+     label28:
+        virtualinvoke r39.<java.io.InputStreamReader: void close()>();
+
+     label29:
+        goto label31;
+
+     label30:
+        $r14 := @caughtexception;
+
+        goto label31;
+
+     label31:
+        throw $r15;
+
+     label32:
+        return z2;
+
+        catch java.lang.Exception from label04 to label05 with label06;
+        catch java.io.IOException from label10 to label11 with label12;
+        catch sun.security.provider.PolicyParser$ParsingException from label01 to label09 with label14;
+        catch java.io.IOException from label16 to label17 with label18;
+        catch java.lang.Exception from label01 to label09 with label20;
+        catch java.io.IOException from label22 to label23 with label24;
+        catch java.lang.Throwable from label01 to label09 with label26;
+        catch java.lang.Throwable from label14 to label15 with label26;
+        catch java.lang.Throwable from label20 to label21 with label26;
+        catch java.io.IOException from label28 to label29 with label30;
+        catch java.lang.Throwable from label26 to label27 with label26;
+    }
+
+    private void initStaticPolicy(sun.security.provider.PolicyFile$PolicyInfo)
+    {
+        sun.security.provider.PolicyFile$PolicyInfo r2;
+        sun.security.provider.PolicyFile$4 $r0;
+        sun.security.provider.PolicyFile r1;
+
+        r1 := @this: sun.security.provider.PolicyFile;
+
+        r2 := @parameter0: sun.security.provider.PolicyFile$PolicyInfo;
+
+        $r0 = new sun.security.provider.PolicyFile$4;
+
+        specialinvoke $r0.<sun.security.provider.PolicyFile$4: void <init>(sun.security.provider.PolicyFile,sun.security.provider.PolicyFile$PolicyInfo)>(r1, r2);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        return;
+    }
+
+    private java.security.CodeSource getCodeSource(sun.security.provider.PolicyParser$GrantEntry, java.security.KeyStore, sun.security.provider.PolicyFile$PolicyInfo) throws java.net.MalformedURLException
+    {
+        java.net.URL $r6, r21;
+        java.lang.String $r1, $r2, $r7, $r10, $r16, $r19;
+        sun.security.provider.PolicyParser$GrantEntry r0;
+        java.security.KeyStore r8;
+        sun.security.provider.PolicyFile$PolicyInfo r9;
+        sun.security.provider.PolicyFile r3;
+        sun.security.util.Debug $r12, $r14;
+        java.security.cert.Certificate[] $r11, r20;
+        java.lang.StringBuilder $r13, $r15, $r17, $r18;
+        java.security.CodeSource $r4, $r5;
+
+        r3 := @this: sun.security.provider.PolicyFile;
+
+        r0 := @parameter0: sun.security.provider.PolicyParser$GrantEntry;
+
+        r8 := @parameter1: java.security.KeyStore;
+
+        r9 := @parameter2: sun.security.provider.PolicyFile$PolicyInfo;
+
+        r20 = null;
+
+        $r1 = r0.<sun.security.provider.PolicyParser$GrantEntry: java.lang.String signedBy>;
+
+        if $r1 == null goto label2;
+
+        $r10 = r0.<sun.security.provider.PolicyParser$GrantEntry: java.lang.String signedBy>;
+
+        $r11 = specialinvoke r3.<sun.security.provider.PolicyFile: java.security.cert.Certificate[] getCertificates(java.security.KeyStore,java.lang.String,sun.security.provider.PolicyFile$PolicyInfo)>(r8, $r10, r9);
+
+        r20 = $r11;
+
+        if $r11 != null goto label2;
+
+        $r12 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r12 == null goto label1;
+
+        $r14 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  -- No certs for alias \'");
+
+        $r16 = r0.<sun.security.provider.PolicyParser$GrantEntry: java.lang.String signedBy>;
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r16);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' - ignoring entry");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r14.<sun.security.util.Debug: void println(java.lang.String)>($r19);
+
+     label1:
+        return null;
+
+     label2:
+        $r2 = r0.<sun.security.provider.PolicyParser$GrantEntry: java.lang.String codeBase>;
+
+        if $r2 == null goto label3;
+
+        $r6 = new java.net.URL;
+
+        $r7 = r0.<sun.security.provider.PolicyParser$GrantEntry: java.lang.String codeBase>;
+
+        specialinvoke $r6.<java.net.URL: void <init>(java.lang.String)>($r7);
+
+        r21 = $r6;
+
+        goto label4;
+
+     label3:
+        r21 = null;
+
+     label4:
+        $r4 = new java.security.CodeSource;
+
+        specialinvoke $r4.<java.security.CodeSource: void <init>(java.net.URL,java.security.cert.Certificate[])>(r21, r20);
+
+        $r5 = specialinvoke r3.<sun.security.provider.PolicyFile: java.security.CodeSource canonicalizeCodebase(java.security.CodeSource,boolean)>($r4, 0);
+
+        return $r5;
+    }
+
+    private void addGrantEntry(sun.security.provider.PolicyParser$GrantEntry, java.security.KeyStore, sun.security.provider.PolicyFile$PolicyInfo)
+    {
+        java.util.Enumeration $r8;
+        java.security.UnresolvedPermission $r113;
+        sun.security.provider.PolicyFile$PolicyInfo r4;
+        sun.security.util.Debug $r0, $r10, $r11, $r19, $r38, $r40, $r46, $r56, $r91, $r93, $r104;
+        java.lang.Exception $r61, $r68;
+        java.lang.reflect.InvocationTargetException $r76;
+        java.security.Permission r103;
+        java.lang.StringBuilder $r20, $r21, $r35, $r36, $r41, $r43, $r47, $r49, $r57, $r59, $r94, $r95, $r106, $r107, $r108, $r110, $r112, $r114;
+        java.lang.Throwable $r81;
+        java.lang.Object[] $r64, $r71, $r79;
+        sun.security.provider.PolicyFile$PolicyEntry $r109;
+        java.lang.String $r14, $r15, $r16, $r17, $r22, $r23, $r24, $r26, $r27, $r28, $r29, $r30, $r32, $r33, $r34, $r37, $r42, $r44, $r48, $r50, $r58, $r60, $r63, $r65, $r67, $r70, $r72, $r73, $r75, $r78, $r80, $r82, $r84, $r86, $r88, $r89, $r90, $r96, $r97, $r98, $r101;
+        sun.security.provider.PolicyParser$GrantEntry r2;
+        java.lang.ClassNotFoundException $r85;
+        java.security.CodeSource $r100;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        sun.security.provider.PolicyParser$PermissionEntry r13;
+        java.security.KeyStore r3;
+        java.util.List $r9;
+        java.security.cert.Certificate[] r102, r105;
+        sun.security.provider.PolicyFile$SelfPermission $r111;
+        java.text.MessageFormat $r115, $r116, $r117;
+        int $i0, $i1, $i3;
+        java.util.LinkedList $r5, $r7, $r51, $r52;
+        java.io.PrintStream $r66, $r74, $r83;
+        java.util.Iterator $r53;
+        sun.security.provider.PolicyParser$PrincipalEntry r99;
+        sun.security.provider.PolicyFile r1;
+        java.lang.Object $r12, $r54;
+
+        r1 := @this: sun.security.provider.PolicyFile;
+
+        r2 := @parameter0: sun.security.provider.PolicyParser$GrantEntry;
+
+        r3 := @parameter1: java.security.KeyStore;
+
+        r4 := @parameter2: sun.security.provider.PolicyFile$PolicyInfo;
+
+        $r0 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r0 == null goto label02;
+
+        $r38 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        virtualinvoke $r38.<sun.security.util.Debug: void println(java.lang.String)>("Adding policy entry: ");
+
+        $r40 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        $r106 = new java.lang.StringBuilder;
+
+        specialinvoke $r106.<java.lang.StringBuilder: void <init>()>();
+
+        $r41 = virtualinvoke $r106.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  signedBy ");
+
+        $r42 = r2.<sun.security.provider.PolicyParser$GrantEntry: java.lang.String signedBy>;
+
+        $r43 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r42);
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r40.<sun.security.util.Debug: void println(java.lang.String)>($r44);
+
+        $r46 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        $r107 = new java.lang.StringBuilder;
+
+        specialinvoke $r107.<java.lang.StringBuilder: void <init>()>();
+
+        $r47 = virtualinvoke $r107.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  codeBase ");
+
+        $r48 = r2.<sun.security.provider.PolicyParser$GrantEntry: java.lang.String codeBase>;
+
+        $r49 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r48);
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r46.<sun.security.util.Debug: void println(java.lang.String)>($r50);
+
+        $r51 = r2.<sun.security.provider.PolicyParser$GrantEntry: java.util.LinkedList principals>;
+
+        if $r51 == null goto label02;
+
+        $r52 = r2.<sun.security.provider.PolicyParser$GrantEntry: java.util.LinkedList principals>;
+
+        $r53 = virtualinvoke $r52.<java.util.LinkedList: java.util.Iterator iterator()>();
+
+     label01:
+        $z4 = interfaceinvoke $r53.<java.util.Iterator: boolean hasNext()>();
+
+        if $z4 == 0 goto label02;
+
+        $r54 = interfaceinvoke $r53.<java.util.Iterator: java.lang.Object next()>();
+
+        r99 = (sun.security.provider.PolicyParser$PrincipalEntry) $r54;
+
+        $r56 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        $r108 = new java.lang.StringBuilder;
+
+        specialinvoke $r108.<java.lang.StringBuilder: void <init>()>();
+
+        $r57 = virtualinvoke $r108.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  ");
+
+        $r58 = virtualinvoke r99.<sun.security.provider.PolicyParser$PrincipalEntry: java.lang.String toString()>();
+
+        $r59 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r58);
+
+        $r60 = virtualinvoke $r59.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r56.<sun.security.util.Debug: void println(java.lang.String)>($r60);
+
+        goto label01;
+
+     label02:
+        $r100 = specialinvoke r1.<sun.security.provider.PolicyFile: java.security.CodeSource getCodeSource(sun.security.provider.PolicyParser$GrantEntry,java.security.KeyStore,sun.security.provider.PolicyFile$PolicyInfo)>(r2, r3, r4);
+
+        if $r100 != null goto label04;
+
+     label03:
+        return;
+
+     label04:
+        $r5 = r2.<sun.security.provider.PolicyParser$GrantEntry: java.util.LinkedList principals>;
+
+        $z0 = specialinvoke r1.<sun.security.provider.PolicyFile: boolean replacePrincipals(java.util.List,java.security.KeyStore)>($r5, r3);
+
+        if $z0 != 0 goto label06;
+
+     label05:
+        return;
+
+     label06:
+        $r109 = new sun.security.provider.PolicyFile$PolicyEntry;
+
+        $r7 = r2.<sun.security.provider.PolicyParser$GrantEntry: java.util.LinkedList principals>;
+
+        specialinvoke $r109.<sun.security.provider.PolicyFile$PolicyEntry: void <init>(java.security.CodeSource,java.util.List)>($r100, $r7);
+
+        $r8 = virtualinvoke r2.<sun.security.provider.PolicyParser$GrantEntry: java.util.Enumeration permissionElements()>();
+
+     label07:
+        $z1 = interfaceinvoke $r8.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z1 == 0 goto label23;
+
+        $r12 = interfaceinvoke $r8.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r13 = (sun.security.provider.PolicyParser$PermissionEntry) $r12;
+
+     label08:
+        specialinvoke r1.<sun.security.provider.PolicyFile: void expandPermissionName(sun.security.provider.PolicyParser$PermissionEntry,java.security.KeyStore)>(r13, r3);
+
+        $r14 = r13.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String permission>;
+
+        $z2 = virtualinvoke $r14.<java.lang.String: boolean equals(java.lang.Object)>("javax.security.auth.PrivateCredentialPermission");
+
+        if $z2 == 0 goto label09;
+
+        $r30 = r13.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String name>;
+
+        $z3 = virtualinvoke $r30.<java.lang.String: boolean endsWith(java.lang.String)>(" self");
+
+        if $z3 == 0 goto label09;
+
+        $r110 = new java.lang.StringBuilder;
+
+        specialinvoke $r110.<java.lang.StringBuilder: void <init>()>();
+
+        $r33 = r13.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String name>;
+
+        $r32 = r13.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String name>;
+
+        $i1 = virtualinvoke $r32.<java.lang.String: int indexOf(java.lang.String)>("self");
+
+        $r34 = virtualinvoke $r33.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+        $r35 = virtualinvoke $r110.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r34);
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("${{self}}");
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r13.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String name> = $r37;
+
+     label09:
+        $r101 = r13.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String name>;
+
+        if $r101 == null goto label12;
+
+        $r23 = r13.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String name>;
+
+        $i0 = virtualinvoke $r23.<java.lang.String: int indexOf(java.lang.String)>("${{self}}");
+
+        $i3 = (int) -1;
+
+        if $i0 == $i3 goto label12;
+
+        $r24 = r13.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String signedBy>;
+
+        if $r24 == null goto label10;
+
+        $r29 = r13.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String signedBy>;
+
+        r102 = specialinvoke r1.<sun.security.provider.PolicyFile: java.security.cert.Certificate[] getCertificates(java.security.KeyStore,java.lang.String,sun.security.provider.PolicyFile$PolicyInfo)>(r3, $r29, r4);
+
+        goto label11;
+
+     label10:
+        r102 = null;
+
+     label11:
+        $r111 = new sun.security.provider.PolicyFile$SelfPermission;
+
+        $r28 = r13.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String permission>;
+
+        $r27 = r13.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String name>;
+
+        $r26 = r13.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String action>;
+
+        specialinvoke $r111.<sun.security.provider.PolicyFile$SelfPermission: void <init>(java.lang.String,java.lang.String,java.lang.String,java.security.cert.Certificate[])>($r28, $r27, $r26, r102);
+
+        r103 = $r111;
+
+        goto label13;
+
+     label12:
+        $r17 = r13.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String permission>;
+
+        $r16 = r13.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String name>;
+
+        $r15 = r13.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String action>;
+
+        r103 = staticinvoke <sun.security.provider.PolicyFile: java.security.Permission getInstance(java.lang.String,java.lang.String,java.lang.String)>($r17, $r16, $r15);
+
+     label13:
+        virtualinvoke $r109.<sun.security.provider.PolicyFile$PolicyEntry: void add(java.security.Permission)>(r103);
+
+        $r104 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r104 == null goto label14;
+
+        $r19 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        $r112 = new java.lang.StringBuilder;
+
+        specialinvoke $r112.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r112.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r103);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r19.<sun.security.util.Debug: void println(java.lang.String)>($r22);
+
+     label14:
+        goto label22;
+
+     label15:
+        $r85 := @caughtexception;
+
+        $r86 = r13.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String signedBy>;
+
+        if $r86 == null goto label16;
+
+        $r98 = r13.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String signedBy>;
+
+        r105 = specialinvoke r1.<sun.security.provider.PolicyFile: java.security.cert.Certificate[] getCertificates(java.security.KeyStore,java.lang.String,sun.security.provider.PolicyFile$PolicyInfo)>(r3, $r98, r4);
+
+        goto label17;
+
+     label16:
+        r105 = null;
+
+     label17:
+        if r105 != null goto label18;
+
+        $r97 = r13.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String signedBy>;
+
+        if $r97 != null goto label19;
+
+     label18:
+        $r113 = new java.security.UnresolvedPermission;
+
+        $r90 = r13.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String permission>;
+
+        $r89 = r13.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String name>;
+
+        $r88 = r13.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String action>;
+
+        specialinvoke $r113.<java.security.UnresolvedPermission: void <init>(java.lang.String,java.lang.String,java.lang.String,java.security.cert.Certificate[])>($r90, $r89, $r88, r105);
+
+        virtualinvoke $r109.<sun.security.provider.PolicyFile$PolicyEntry: void add(java.security.Permission)>($r113);
+
+        $r91 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r91 == null goto label19;
+
+        $r93 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        $r114 = new java.lang.StringBuilder;
+
+        specialinvoke $r114.<java.lang.StringBuilder: void <init>()>();
+
+        $r94 = virtualinvoke $r114.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  ");
+
+        $r95 = virtualinvoke $r94.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r113);
+
+        $r96 = virtualinvoke $r95.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r93.<sun.security.util.Debug: void println(java.lang.String)>($r96);
+
+     label19:
+        goto label22;
+
+     label20:
+        $r76 := @caughtexception;
+
+        $r115 = new java.text.MessageFormat;
+
+        $r78 = staticinvoke <sun.security.util.ResourcesMgr: java.lang.String getString(java.lang.String)>("java.security.policy.error.adding.Permission.perm.message");
+
+        specialinvoke $r115.<java.text.MessageFormat: void <init>(java.lang.String)>($r78);
+
+        $r79 = newarray (java.lang.Object)[2];
+
+        $r80 = r13.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String permission>;
+
+        $r79[0] = $r80;
+
+        $r81 = virtualinvoke $r76.<java.lang.reflect.InvocationTargetException: java.lang.Throwable getTargetException()>();
+
+        $r82 = virtualinvoke $r81.<java.lang.Throwable: java.lang.String toString()>();
+
+        $r79[1] = $r82;
+
+        $r83 = <java.lang.System: java.io.PrintStream err>;
+
+        $r84 = virtualinvoke $r115.<java.text.MessageFormat: java.lang.String format(java.lang.Object)>($r79);
+
+        virtualinvoke $r83.<java.io.PrintStream: void println(java.lang.String)>($r84);
+
+        goto label22;
+
+     label21:
+        $r68 := @caughtexception;
+
+        $r116 = new java.text.MessageFormat;
+
+        $r70 = staticinvoke <sun.security.util.ResourcesMgr: java.lang.String getString(java.lang.String)>("java.security.policy.error.adding.Permission.perm.message");
+
+        specialinvoke $r116.<java.text.MessageFormat: void <init>(java.lang.String)>($r70);
+
+        $r71 = newarray (java.lang.Object)[2];
+
+        $r72 = r13.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String permission>;
+
+        $r71[0] = $r72;
+
+        $r73 = virtualinvoke $r68.<java.lang.Exception: java.lang.String toString()>();
+
+        $r71[1] = $r73;
+
+        $r74 = <java.lang.System: java.io.PrintStream err>;
+
+        $r75 = virtualinvoke $r116.<java.text.MessageFormat: java.lang.String format(java.lang.Object)>($r71);
+
+        virtualinvoke $r74.<java.io.PrintStream: void println(java.lang.String)>($r75);
+
+     label22:
+        goto label07;
+
+     label23:
+        $r9 = r4.<sun.security.provider.PolicyFile$PolicyInfo: java.util.List policyEntries>;
+
+        interfaceinvoke $r9.<java.util.List: boolean add(java.lang.Object)>($r109);
+
+     label24:
+        goto label26;
+
+     label25:
+        $r61 := @caughtexception;
+
+        $r117 = new java.text.MessageFormat;
+
+        $r63 = staticinvoke <sun.security.util.ResourcesMgr: java.lang.String getString(java.lang.String)>("java.security.policy.error.adding.Entry.message");
+
+        specialinvoke $r117.<java.text.MessageFormat: void <init>(java.lang.String)>($r63);
+
+        $r64 = newarray (java.lang.Object)[1];
+
+        $r65 = virtualinvoke $r61.<java.lang.Exception: java.lang.String toString()>();
+
+        $r64[0] = $r65;
+
+        $r66 = <java.lang.System: java.io.PrintStream err>;
+
+        $r67 = virtualinvoke $r117.<java.text.MessageFormat: java.lang.String format(java.lang.Object)>($r64);
+
+        virtualinvoke $r66.<java.io.PrintStream: void println(java.lang.String)>($r67);
+
+     label26:
+        $r10 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r10 == null goto label27;
+
+        $r11 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        virtualinvoke $r11.<sun.security.util.Debug: void println()>();
+
+     label27:
+        return;
+
+        catch java.lang.ClassNotFoundException from label08 to label14 with label15;
+        catch java.lang.reflect.InvocationTargetException from label08 to label14 with label20;
+        catch java.lang.Exception from label08 to label14 with label21;
+        catch java.lang.Exception from label02 to label03 with label25;
+        catch java.lang.Exception from label04 to label05 with label25;
+        catch java.lang.Exception from label06 to label24 with label25;
+    }
+
+    private static final java.security.Permission getInstance(java.lang.String, java.lang.String, java.lang.String) throws java.lang.ClassNotFoundException, java.lang.InstantiationException, java.lang.IllegalAccessException, java.lang.NoSuchMethodException, java.lang.reflect.InvocationTargetException
+    {
+        java.lang.NoSuchMethodException $r26, $r32, $r38;
+        boolean $z0;
+        java.security.Permission $r4, $r10, $r15, $r20, $r31, $r37, $r43;
+        java.lang.StringBuilder $r22, $r23, $r24;
+        java.lang.Object[] $r8, $r13, $r18, $r29, $r35, $r41;
+        java.lang.reflect.Constructor $r7, $r12, $r17, $r28, $r34, $r40;
+        java.lang.ClassCastException $r21;
+        java.lang.String r0, r2, r3, $r25;
+        java.lang.Class[] $r6, $r11, $r16, $r27, $r33, $r39;
+        java.lang.Class $r1, $r5;
+        java.lang.Object $r9, $r14, $r19, $r30, $r36, $r42;
+
+        r0 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.String;
+
+        $r1 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>(r0, 0, null);
+
+        $r4 = staticinvoke <sun.security.provider.PolicyFile: java.security.Permission getKnownInstance(java.lang.Class,java.lang.String,java.lang.String)>($r1, r2, r3);
+
+        if $r4 == null goto label01;
+
+        return $r4;
+
+     label01:
+        $r5 = class "Ljava/security/Permission;";
+
+        $z0 = virtualinvoke $r5.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>($r1);
+
+        if $z0 != 0 goto label02;
+
+        $r21 = new java.lang.ClassCastException;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is not a Permission");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r21.<java.lang.ClassCastException: void <init>(java.lang.String)>($r25);
+
+        throw $r21;
+
+     label02:
+        if r2 != null goto label09;
+
+        if r3 != null goto label09;
+
+     label03:
+        $r16 = <sun.security.provider.PolicyFile: java.lang.Class[] PARAMS0>;
+
+        $r17 = virtualinvoke $r1.<java.lang.Class: java.lang.reflect.Constructor getConstructor(java.lang.Class[])>($r16);
+
+        $r18 = newarray (java.lang.Object)[0];
+
+        $r19 = virtualinvoke $r17.<java.lang.reflect.Constructor: java.lang.Object newInstance(java.lang.Object[])>($r18);
+
+        $r20 = (java.security.Permission) $r19;
+
+     label04:
+        return $r20;
+
+     label05:
+        $r38 := @caughtexception;
+
+     label06:
+        $r39 = <sun.security.provider.PolicyFile: java.lang.Class[] PARAMS1>;
+
+        $r40 = virtualinvoke $r1.<java.lang.Class: java.lang.reflect.Constructor getConstructor(java.lang.Class[])>($r39);
+
+        $r41 = newarray (java.lang.Object)[1];
+
+        $r41[0] = r2;
+
+        $r42 = virtualinvoke $r40.<java.lang.reflect.Constructor: java.lang.Object newInstance(java.lang.Object[])>($r41);
+
+        $r43 = (java.security.Permission) $r42;
+
+     label07:
+        return $r43;
+
+     label08:
+        $r32 := @caughtexception;
+
+        $r33 = <sun.security.provider.PolicyFile: java.lang.Class[] PARAMS2>;
+
+        $r34 = virtualinvoke $r1.<java.lang.Class: java.lang.reflect.Constructor getConstructor(java.lang.Class[])>($r33);
+
+        $r35 = newarray (java.lang.Object)[2];
+
+        $r35[0] = r2;
+
+        $r35[1] = r3;
+
+        $r36 = virtualinvoke $r34.<java.lang.reflect.Constructor: java.lang.Object newInstance(java.lang.Object[])>($r35);
+
+        $r37 = (java.security.Permission) $r36;
+
+        return $r37;
+
+     label09:
+        if r2 == null goto label13;
+
+        if r3 != null goto label13;
+
+     label10:
+        $r11 = <sun.security.provider.PolicyFile: java.lang.Class[] PARAMS1>;
+
+        $r12 = virtualinvoke $r1.<java.lang.Class: java.lang.reflect.Constructor getConstructor(java.lang.Class[])>($r11);
+
+        $r13 = newarray (java.lang.Object)[1];
+
+        $r13[0] = r2;
+
+        $r14 = virtualinvoke $r12.<java.lang.reflect.Constructor: java.lang.Object newInstance(java.lang.Object[])>($r13);
+
+        $r15 = (java.security.Permission) $r14;
+
+     label11:
+        return $r15;
+
+     label12:
+        $r26 := @caughtexception;
+
+        $r27 = <sun.security.provider.PolicyFile: java.lang.Class[] PARAMS2>;
+
+        $r28 = virtualinvoke $r1.<java.lang.Class: java.lang.reflect.Constructor getConstructor(java.lang.Class[])>($r27);
+
+        $r29 = newarray (java.lang.Object)[2];
+
+        $r29[0] = r2;
+
+        $r29[1] = r3;
+
+        $r30 = virtualinvoke $r28.<java.lang.reflect.Constructor: java.lang.Object newInstance(java.lang.Object[])>($r29);
+
+        $r31 = (java.security.Permission) $r30;
+
+        return $r31;
+
+     label13:
+        $r6 = <sun.security.provider.PolicyFile: java.lang.Class[] PARAMS2>;
+
+        $r7 = virtualinvoke $r1.<java.lang.Class: java.lang.reflect.Constructor getConstructor(java.lang.Class[])>($r6);
+
+        $r8 = newarray (java.lang.Object)[2];
+
+        $r8[0] = r2;
+
+        $r8[1] = r3;
+
+        $r9 = virtualinvoke $r7.<java.lang.reflect.Constructor: java.lang.Object newInstance(java.lang.Object[])>($r8);
+
+        $r10 = (java.security.Permission) $r9;
+
+        return $r10;
+
+        catch java.lang.NoSuchMethodException from label03 to label04 with label05;
+        catch java.lang.NoSuchMethodException from label06 to label07 with label08;
+        catch java.lang.NoSuchMethodException from label10 to label11 with label12;
+    }
+
+    private static final java.security.Permission getKnownInstance(java.lang.Class, java.lang.String, java.lang.String)
+    {
+        java.security.AllPermission $r1;
+        java.util.PropertyPermission $r5;
+        java.net.NetPermission $r2;
+        java.io.FilePermission $r8;
+        java.lang.Class r0;
+        java.lang.RuntimePermission $r6;
+        java.lang.String r3, r4;
+        java.net.SocketPermission $r7;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+
+        r0 := @parameter0: java.lang.Class;
+
+        r3 := @parameter1: java.lang.String;
+
+        r4 := @parameter2: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.Object: boolean equals(java.lang.Object)>(class "Ljava/io/FilePermission;");
+
+        if $z0 == 0 goto label1;
+
+        $r8 = new java.io.FilePermission;
+
+        specialinvoke $r8.<java.io.FilePermission: void <init>(java.lang.String,java.lang.String)>(r3, r4);
+
+        return $r8;
+
+     label1:
+        $z1 = virtualinvoke r0.<java.lang.Object: boolean equals(java.lang.Object)>(class "Ljava/net/SocketPermission;");
+
+        if $z1 == 0 goto label2;
+
+        $r7 = new java.net.SocketPermission;
+
+        specialinvoke $r7.<java.net.SocketPermission: void <init>(java.lang.String,java.lang.String)>(r3, r4);
+
+        return $r7;
+
+     label2:
+        $z2 = virtualinvoke r0.<java.lang.Object: boolean equals(java.lang.Object)>(class "Ljava/lang/RuntimePermission;");
+
+        if $z2 == 0 goto label3;
+
+        $r6 = new java.lang.RuntimePermission;
+
+        specialinvoke $r6.<java.lang.RuntimePermission: void <init>(java.lang.String,java.lang.String)>(r3, r4);
+
+        return $r6;
+
+     label3:
+        $z3 = virtualinvoke r0.<java.lang.Object: boolean equals(java.lang.Object)>(class "Ljava/util/PropertyPermission;");
+
+        if $z3 == 0 goto label4;
+
+        $r5 = new java.util.PropertyPermission;
+
+        specialinvoke $r5.<java.util.PropertyPermission: void <init>(java.lang.String,java.lang.String)>(r3, r4);
+
+        return $r5;
+
+     label4:
+        $z4 = virtualinvoke r0.<java.lang.Object: boolean equals(java.lang.Object)>(class "Ljava/net/NetPermission;");
+
+        if $z4 == 0 goto label5;
+
+        $r2 = new java.net.NetPermission;
+
+        specialinvoke $r2.<java.net.NetPermission: void <init>(java.lang.String,java.lang.String)>(r3, r4);
+
+        return $r2;
+
+     label5:
+        $z5 = virtualinvoke r0.<java.lang.Object: boolean equals(java.lang.Object)>(class "Ljava/security/AllPermission;");
+
+        if $z5 == 0 goto label6;
+
+        $r1 = <sun.security.util.SecurityConstants: java.security.AllPermission ALL_PERMISSION>;
+
+        return $r1;
+
+     label6:
+        return null;
+    }
+
+    private java.security.cert.Certificate[] getCertificates(java.security.KeyStore, java.lang.String, sun.security.provider.PolicyFile$PolicyInfo)
+    {
+        java.lang.Throwable $r12;
+        java.security.KeyStoreException $r13;
+        java.util.ArrayList $r8, r15;
+        java.util.StringTokenizer $r0;
+        java.util.Map $r5, $r6, $r10, $r11;
+        int $i0, $i1, i2;
+        java.lang.String r1, $r2, $r3;
+        boolean $z0;
+        sun.security.provider.PolicyFile$PolicyInfo r4;
+        java.security.KeyStore r9;
+        sun.security.provider.PolicyFile r14;
+        java.security.cert.Certificate r16;
+        java.lang.Object $r7;
+        java.security.cert.Certificate[] r17;
+
+        r14 := @this: sun.security.provider.PolicyFile;
+
+        r9 := @parameter0: java.security.KeyStore;
+
+        r1 := @parameter1: java.lang.String;
+
+        r4 := @parameter2: sun.security.provider.PolicyFile$PolicyInfo;
+
+        r15 = null;
+
+        $r0 = new java.util.StringTokenizer;
+
+        specialinvoke $r0.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>(r1, ",");
+
+        i2 = 0;
+
+     label01:
+        $z0 = virtualinvoke $r0.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label14;
+
+        $r2 = virtualinvoke $r0.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.String: java.lang.String trim()>();
+
+        i2 = i2 + 1;
+
+        $r5 = r4.<sun.security.provider.PolicyFile$PolicyInfo: java.util.Map aliasMapping>;
+
+        entermonitor $r5;
+
+     label02:
+        $r6 = r4.<sun.security.provider.PolicyFile$PolicyInfo: java.util.Map aliasMapping>;
+
+        $r7 = interfaceinvoke $r6.<java.util.Map: java.lang.Object get(java.lang.Object)>($r3);
+
+        r16 = (java.security.cert.Certificate) $r7;
+
+        if r16 != null goto label07;
+
+        if r9 == null goto label07;
+
+     label03:
+        r16 = virtualinvoke r9.<java.security.KeyStore: java.security.cert.Certificate getCertificate(java.lang.String)>($r3);
+
+     label04:
+        goto label06;
+
+     label05:
+        $r13 := @caughtexception;
+
+     label06:
+        if r16 == null goto label07;
+
+        $r10 = r4.<sun.security.provider.PolicyFile$PolicyInfo: java.util.Map aliasMapping>;
+
+        interfaceinvoke $r10.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, r16);
+
+        $r11 = r4.<sun.security.provider.PolicyFile$PolicyInfo: java.util.Map aliasMapping>;
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r16, $r3);
+
+     label07:
+        exitmonitor $r5;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r12 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label10:
+        throw $r12;
+
+     label11:
+        if r16 == null goto label13;
+
+        if r15 != null goto label12;
+
+        $r8 = new java.util.ArrayList;
+
+        specialinvoke $r8.<java.util.ArrayList: void <init>()>();
+
+        r15 = $r8;
+
+     label12:
+        interfaceinvoke r15.<java.util.List: boolean add(java.lang.Object)>(r16);
+
+     label13:
+        goto label01;
+
+     label14:
+        if r15 == null goto label15;
+
+        $i0 = interfaceinvoke r15.<java.util.List: int size()>();
+
+        if i2 != $i0 goto label15;
+
+        $i1 = interfaceinvoke r15.<java.util.List: int size()>();
+
+        r17 = newarray (java.security.cert.Certificate)[$i1];
+
+        interfaceinvoke r15.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>(r17);
+
+        return r17;
+
+     label15:
+        return null;
+
+        catch java.security.KeyStoreException from label03 to label04 with label05;
+        catch java.lang.Throwable from label02 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    public void refresh()
+    {
+        sun.security.provider.PolicyFile r0;
+        java.net.URL $r1;
+
+        r0 := @this: sun.security.provider.PolicyFile;
+
+        $r1 = r0.<sun.security.provider.PolicyFile: java.net.URL url>;
+
+        specialinvoke r0.<sun.security.provider.PolicyFile: void init(java.net.URL)>($r1);
+
+        return;
+    }
+
+    public boolean implies(java.security.ProtectionDomain, java.security.Permission)
+    {
+        sun.misc.JavaSecurityProtectionDomainAccess$ProtectionDomainCache $r2;
+        sun.security.provider.PolicyFile$PolicyInfo $r1;
+        java.security.PermissionCollection $r4, $r5;
+        sun.security.provider.PolicyFile r0;
+        java.security.Permission r6;
+        java.security.ProtectionDomain r3;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.security.provider.PolicyFile;
+
+        r3 := @parameter0: java.security.ProtectionDomain;
+
+        r6 := @parameter1: java.security.Permission;
+
+        $r1 = r0.<sun.security.provider.PolicyFile: sun.security.provider.PolicyFile$PolicyInfo policyInfo>;
+
+        $r2 = virtualinvoke $r1.<sun.security.provider.PolicyFile$PolicyInfo: sun.misc.JavaSecurityProtectionDomainAccess$ProtectionDomainCache getPdMapping()>();
+
+        $r4 = interfaceinvoke $r2.<sun.misc.JavaSecurityProtectionDomainAccess$ProtectionDomainCache: java.security.PermissionCollection get(java.security.ProtectionDomain)>(r3);
+
+        if $r4 == null goto label1;
+
+        $z1 = virtualinvoke $r4.<java.security.PermissionCollection: boolean implies(java.security.Permission)>(r6);
+
+        return $z1;
+
+     label1:
+        $r5 = virtualinvoke r0.<sun.security.provider.PolicyFile: java.security.PermissionCollection getPermissions(java.security.ProtectionDomain)>(r3);
+
+        if $r5 != null goto label2;
+
+        return 0;
+
+     label2:
+        interfaceinvoke $r2.<sun.misc.JavaSecurityProtectionDomainAccess$ProtectionDomainCache: void put(java.security.ProtectionDomain,java.security.PermissionCollection)>(r3, $r5);
+
+        $z0 = virtualinvoke $r5.<java.security.PermissionCollection: boolean implies(java.security.Permission)>(r6);
+
+        return $z0;
+    }
+
+    public java.security.PermissionCollection getPermissions(java.security.ProtectionDomain)
+    {
+        java.lang.Throwable $r7;
+        java.util.Enumeration $r4;
+        java.security.PermissionCollection $r3;
+        sun.security.provider.PolicyFile r2;
+        java.security.Permission $r6;
+        java.security.ProtectionDomain r1;
+        java.lang.Object $r5;
+        java.security.Permissions $r0;
+        boolean $z0;
+
+        r2 := @this: sun.security.provider.PolicyFile;
+
+        r1 := @parameter0: java.security.ProtectionDomain;
+
+        $r0 = new java.security.Permissions;
+
+        specialinvoke $r0.<java.security.Permissions: void <init>()>();
+
+        if r1 != null goto label1;
+
+        return $r0;
+
+     label1:
+        specialinvoke r2.<sun.security.provider.PolicyFile: java.security.PermissionCollection getPermissions(java.security.Permissions,java.security.ProtectionDomain)>($r0, r1);
+
+        $r3 = virtualinvoke r1.<java.security.ProtectionDomain: java.security.PermissionCollection getPermissions()>();
+
+        if $r3 == null goto label8;
+
+        entermonitor $r3;
+
+     label2:
+        $r4 = virtualinvoke $r3.<java.security.PermissionCollection: java.util.Enumeration elements()>();
+
+     label3:
+        $z0 = interfaceinvoke $r4.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label4;
+
+        $r5 = interfaceinvoke $r4.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        $r6 = (java.security.Permission) $r5;
+
+        virtualinvoke $r0.<java.security.Permissions: void add(java.security.Permission)>($r6);
+
+        goto label3;
+
+     label4:
+        exitmonitor $r3;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r7 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label7:
+        throw $r7;
+
+     label8:
+        return $r0;
+
+        catch java.lang.Throwable from label2 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public java.security.PermissionCollection getPermissions(java.security.CodeSource)
+    {
+        java.security.CodeSource r2;
+        java.security.PermissionCollection $r3;
+        sun.security.provider.PolicyFile r0;
+        java.security.Permissions $r1;
+
+        r0 := @this: sun.security.provider.PolicyFile;
+
+        r2 := @parameter0: java.security.CodeSource;
+
+        $r1 = new java.security.Permissions;
+
+        specialinvoke $r1.<java.security.Permissions: void <init>()>();
+
+        $r3 = specialinvoke r0.<sun.security.provider.PolicyFile: java.security.PermissionCollection getPermissions(java.security.Permissions,java.security.CodeSource)>($r1, r2);
+
+        return $r3;
+    }
+
+    private java.security.PermissionCollection getPermissions(java.security.Permissions, java.security.ProtectionDomain)
+    {
+        sun.security.provider.PolicyFile$5 $r3;
+        java.lang.String $r13, $r15;
+        java.security.Permissions r7, $r9;
+        java.security.Principal[] $r8;
+        sun.security.util.Debug $r0, $r11;
+        sun.security.provider.PolicyFile r4;
+        java.security.ProtectionDomain r1;
+        java.lang.Object $r5;
+        java.lang.StringBuilder $r10, $r12, $r14;
+        java.security.CodeSource $r2, r6;
+
+        r4 := @this: sun.security.provider.PolicyFile;
+
+        r7 := @parameter0: java.security.Permissions;
+
+        r1 := @parameter1: java.security.ProtectionDomain;
+
+        $r0 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r0 == null goto label1;
+
+        $r11 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getPermissions:\n\t");
+
+        $r13 = specialinvoke r4.<sun.security.provider.PolicyFile: java.lang.String printPD(java.security.ProtectionDomain)>(r1);
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r11.<sun.security.util.Debug: void println(java.lang.String)>($r15);
+
+     label1:
+        $r2 = virtualinvoke r1.<java.security.ProtectionDomain: java.security.CodeSource getCodeSource()>();
+
+        if $r2 != null goto label2;
+
+        return r7;
+
+     label2:
+        $r3 = new sun.security.provider.PolicyFile$5;
+
+        specialinvoke $r3.<sun.security.provider.PolicyFile$5: void <init>(sun.security.provider.PolicyFile,java.security.CodeSource)>(r4, $r2);
+
+        $r5 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r3);
+
+        r6 = (java.security.CodeSource) $r5;
+
+        $r8 = virtualinvoke r1.<java.security.ProtectionDomain: java.security.Principal[] getPrincipals()>();
+
+        $r9 = specialinvoke r4.<sun.security.provider.PolicyFile: java.security.Permissions getPermissions(java.security.Permissions,java.security.CodeSource,java.security.Principal[])>(r7, r6, $r8);
+
+        return $r9;
+    }
+
+    private java.security.PermissionCollection getPermissions(java.security.Permissions, java.security.CodeSource)
+    {
+        java.lang.Object $r3;
+        java.security.CodeSource r0, r4;
+        sun.security.provider.PolicyFile$6 $r1;
+        sun.security.provider.PolicyFile r2;
+        java.security.Permissions r5, $r6;
+
+        r2 := @this: sun.security.provider.PolicyFile;
+
+        r5 := @parameter0: java.security.Permissions;
+
+        r0 := @parameter1: java.security.CodeSource;
+
+        if r0 != null goto label1;
+
+        return r5;
+
+     label1:
+        $r1 = new sun.security.provider.PolicyFile$6;
+
+        specialinvoke $r1.<sun.security.provider.PolicyFile$6: void <init>(sun.security.provider.PolicyFile,java.security.CodeSource)>(r2, r0);
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        r4 = (java.security.CodeSource) $r3;
+
+        $r6 = specialinvoke r2.<sun.security.provider.PolicyFile: java.security.Permissions getPermissions(java.security.Permissions,java.security.CodeSource,java.security.Principal[])>(r5, r4, null);
+
+        return $r6;
+    }
+
+    private java.security.Permissions getPermissions(java.security.Permissions, java.security.CodeSource, java.security.Principal[])
+    {
+        java.lang.Throwable $r18;
+        sun.security.provider.PolicyFile$PolicyEntry r19, r20;
+        java.security.AllPermission $r14;
+        java.util.Map $r11;
+        int $i0, i1;
+        boolean $z0, $z1, $z2, $z3;
+        java.security.Permissions r7;
+        java.security.Principal[] r16;
+        java.util.Iterator $r3, $r6;
+        sun.security.provider.PolicyFile$PolicyInfo r1;
+        sun.security.provider.PolicyFile r0;
+        java.util.List $r2, $r4, $r5;
+        java.security.cert.Certificate $r10, $r13;
+        java.security.cert.Certificate[] $r9;
+        java.lang.Object $r12, $r15, $r17;
+        java.security.CodeSource r8;
+
+        r0 := @this: sun.security.provider.PolicyFile;
+
+        r7 := @parameter0: java.security.Permissions;
+
+        r8 := @parameter1: java.security.CodeSource;
+
+        r16 := @parameter2: java.security.Principal[];
+
+        r1 = r0.<sun.security.provider.PolicyFile: sun.security.provider.PolicyFile$PolicyInfo policyInfo>;
+
+        $r2 = r1.<sun.security.provider.PolicyFile$PolicyInfo: java.util.List policyEntries>;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label01:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label02;
+
+        $r17 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r19 = (sun.security.provider.PolicyFile$PolicyEntry) $r17;
+
+        specialinvoke r0.<sun.security.provider.PolicyFile: void addPermissions(java.security.Permissions,java.security.CodeSource,java.security.Principal[],sun.security.provider.PolicyFile$PolicyEntry)>(r7, r8, r16, r19);
+
+        goto label01;
+
+     label02:
+        $r4 = r1.<sun.security.provider.PolicyFile$PolicyInfo: java.util.List identityPolicyEntries>;
+
+        entermonitor $r4;
+
+     label03:
+        $r5 = r1.<sun.security.provider.PolicyFile$PolicyInfo: java.util.List identityPolicyEntries>;
+
+        $r6 = interfaceinvoke $r5.<java.util.List: java.util.Iterator iterator()>();
+
+     label04:
+        $z1 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label05;
+
+        $r15 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r20 = (sun.security.provider.PolicyFile$PolicyEntry) $r15;
+
+        specialinvoke r0.<sun.security.provider.PolicyFile: void addPermissions(java.security.Permissions,java.security.CodeSource,java.security.Principal[],sun.security.provider.PolicyFile$PolicyEntry)>(r7, r8, r16, r20);
+
+        goto label04;
+
+     label05:
+        exitmonitor $r4;
+
+     label06:
+        goto label09;
+
+     label07:
+        $r18 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label08:
+        throw $r18;
+
+     label09:
+        $z2 = r0.<sun.security.provider.PolicyFile: boolean ignoreIdentityScope>;
+
+        if $z2 != 0 goto label12;
+
+        $r9 = virtualinvoke r8.<java.security.CodeSource: java.security.cert.Certificate[] getCertificates()>();
+
+        if $r9 == null goto label12;
+
+        i1 = 0;
+
+     label10:
+        $i0 = lengthof $r9;
+
+        if i1 >= $i0 goto label12;
+
+        $r11 = r1.<sun.security.provider.PolicyFile$PolicyInfo: java.util.Map aliasMapping>;
+
+        $r10 = $r9[i1];
+
+        $r12 = interfaceinvoke $r11.<java.util.Map: java.lang.Object get(java.lang.Object)>($r10);
+
+        if $r12 != null goto label11;
+
+        $r13 = $r9[i1];
+
+        $z3 = specialinvoke r0.<sun.security.provider.PolicyFile: boolean checkForTrustedIdentity(java.security.cert.Certificate,sun.security.provider.PolicyFile$PolicyInfo)>($r13, r1);
+
+        if $z3 == 0 goto label11;
+
+        $r14 = <sun.security.util.SecurityConstants: java.security.AllPermission ALL_PERMISSION>;
+
+        virtualinvoke r7.<java.security.Permissions: void add(java.security.Permission)>($r14);
+
+     label11:
+        i1 = i1 + 1;
+
+        goto label10;
+
+     label12:
+        return r7;
+
+        catch java.lang.Throwable from label03 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+    }
+
+    private void addPermissions(java.security.Permissions, java.security.CodeSource, java.security.Principal[], sun.security.provider.PolicyFile$PolicyEntry)
+    {
+        java.lang.Thread $r23;
+        java.util.Set $r21, $r22;
+        sun.security.util.Debug $r0, $r7, $r10, $r11, $r12, $r13, $r15, $r16, $r34, $r35, $r36, $r38, $r51, $r52, $r55, $r67, $r68, $r70, $r79, $r80, $r81;
+        java.lang.Exception $r78;
+        java.lang.StringBuilder $r37, $r39, $r42, $r45, $r47, $r48, $r54, $r56, $r57, $r58, $r59, $r69, $r71, $r73, $r74, $r75;
+        java.lang.ClassLoader $r24;
+        java.lang.Object[] $r30;
+        sun.security.provider.PolicyFile$PolicyEntry r3;
+        sun.security.provider.PolicyFile$7 $r1;
+        java.lang.reflect.Constructor $r29;
+        java.lang.ClassCastException $r44;
+        java.util.ArrayList $r53;
+        java.lang.String $r25, $r31, $r41, $r43, $r46, $r49, $r50, $r60, $r64, $r66, $r76;
+        java.lang.Class[] $r28;
+        java.security.CodeSource r4, $r72;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        java.security.Principal[] r9;
+        java.util.List $r6, $r19;
+        java.security.Principal r33, $r62, $r65;
+        java.util.HashSet $r18;
+        int $i0, $i1, i2;
+        java.lang.Boolean $r77;
+        java.security.Permissions r8;
+        java.util.Iterator $r14;
+        sun.security.provider.PolicyParser$PrincipalEntry $r61, r82;
+        sun.security.provider.PolicyFile r2;
+        javax.security.auth.Subject $r20;
+        java.lang.Object $r5, $r17, $r32;
+        java.lang.Class $r26, $r27, $r40, $r63;
+
+        r2 := @this: sun.security.provider.PolicyFile;
+
+        r8 := @parameter0: java.security.Permissions;
+
+        r4 := @parameter1: java.security.CodeSource;
+
+        r9 := @parameter2: java.security.Principal[];
+
+        r3 := @parameter3: sun.security.provider.PolicyFile$PolicyEntry;
+
+        $r0 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r0 == null goto label01;
+
+        $r70 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        $r69 = new java.lang.StringBuilder;
+
+        specialinvoke $r69.<java.lang.StringBuilder: void <init>()>();
+
+        $r71 = virtualinvoke $r69.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("evaluate codesources:\n\tPolicy CodeSource: ");
+
+        $r72 = virtualinvoke r3.<sun.security.provider.PolicyFile$PolicyEntry: java.security.CodeSource getCodeSource()>();
+
+        $r73 = virtualinvoke $r71.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r72);
+
+        $r74 = virtualinvoke $r73.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n\tActive CodeSource: ");
+
+        $r75 = virtualinvoke $r74.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r4);
+
+        $r76 = virtualinvoke $r75.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r70.<sun.security.util.Debug: void println(java.lang.String)>($r76);
+
+     label01:
+        $r1 = new sun.security.provider.PolicyFile$7;
+
+        specialinvoke $r1.<sun.security.provider.PolicyFile$7: void <init>(sun.security.provider.PolicyFile,sun.security.provider.PolicyFile$PolicyEntry,java.security.CodeSource)>(r2, r3, r4);
+
+        $r5 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        $r77 = (java.lang.Boolean) $r5;
+
+        $z0 = virtualinvoke $r77.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z0 != 0 goto label03;
+
+        $r67 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r67 == null goto label02;
+
+        $r68 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        virtualinvoke $r68.<sun.security.util.Debug: void println(java.lang.String)>("evaluation (codesource) failed");
+
+     label02:
+        return;
+
+     label03:
+        $r6 = virtualinvoke r3.<sun.security.provider.PolicyFile$PolicyEntry: java.util.List getPrincipals()>();
+
+        $r7 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r7 == null goto label06;
+
+        $r53 = new java.util.ArrayList;
+
+        specialinvoke $r53.<java.util.ArrayList: void <init>()>();
+
+        if r9 == null goto label05;
+
+        i2 = 0;
+
+     label04:
+        $i1 = lengthof r9;
+
+        if i2 >= $i1 goto label05;
+
+        $r61 = new sun.security.provider.PolicyParser$PrincipalEntry;
+
+        $r62 = r9[i2];
+
+        $r63 = virtualinvoke $r62.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r64 = virtualinvoke $r63.<java.lang.Class: java.lang.String getName()>();
+
+        $r65 = r9[i2];
+
+        $r66 = interfaceinvoke $r65.<java.security.Principal: java.lang.String getName()>();
+
+        specialinvoke $r61.<sun.security.provider.PolicyParser$PrincipalEntry: void <init>(java.lang.String,java.lang.String)>($r64, $r66);
+
+        interfaceinvoke $r53.<java.util.List: boolean add(java.lang.Object)>($r61);
+
+        i2 = i2 + 1;
+
+        goto label04;
+
+     label05:
+        $r55 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        $r54 = new java.lang.StringBuilder;
+
+        specialinvoke $r54.<java.lang.StringBuilder: void <init>()>();
+
+        $r56 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("evaluate principals:\n\tPolicy Principals: ");
+
+        $r57 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        $r58 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n\tActive Principals: ");
+
+        $r59 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r53);
+
+        $r60 = virtualinvoke $r59.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r55.<sun.security.util.Debug: void println(java.lang.String)>($r60);
+
+     label06:
+        if $r6 == null goto label07;
+
+        $z1 = interfaceinvoke $r6.<java.util.List: boolean isEmpty()>();
+
+        if $z1 == 0 goto label09;
+
+     label07:
+        specialinvoke r2.<sun.security.provider.PolicyFile: void addPerms(java.security.Permissions,java.security.Principal[],sun.security.provider.PolicyFile$PolicyEntry)>(r8, r9, r3);
+
+        $r10 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r10 == null goto label08;
+
+        $r11 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        virtualinvoke $r11.<sun.security.util.Debug: void println(java.lang.String)>("evaluation (codesource/principals) passed");
+
+     label08:
+        return;
+
+     label09:
+        if r9 == null goto label10;
+
+        $i0 = lengthof r9;
+
+        if $i0 != 0 goto label12;
+
+     label10:
+        $r12 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r12 == null goto label11;
+
+        $r13 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        virtualinvoke $r13.<sun.security.util.Debug: void println(java.lang.String)>("evaluation (principals) failed");
+
+     label11:
+        return;
+
+     label12:
+        $r14 = interfaceinvoke $r6.<java.util.List: java.util.Iterator iterator()>();
+
+     label13:
+        $z8 = interfaceinvoke $r14.<java.util.Iterator: boolean hasNext()>();
+
+        if $z8 == 0 goto label27;
+
+        $r17 = interfaceinvoke $r14.<java.util.Iterator: java.lang.Object next()>();
+
+        r82 = (sun.security.provider.PolicyParser$PrincipalEntry) $r17;
+
+        $z2 = virtualinvoke r82.<sun.security.provider.PolicyParser$PrincipalEntry: boolean isWildcardClass()>();
+
+        if $z2 == 0 goto label14;
+
+        goto label13;
+
+     label14:
+        $z3 = virtualinvoke r82.<sun.security.provider.PolicyParser$PrincipalEntry: boolean isWildcardName()>();
+
+        if $z3 == 0 goto label17;
+
+        $r50 = r82.<sun.security.provider.PolicyParser$PrincipalEntry: java.lang.String principalClass>;
+
+        $z6 = staticinvoke <sun.security.provider.PolicyFile: boolean wildcardPrincipalNameImplies(java.lang.String,java.security.Principal[])>($r50, r9);
+
+        if $z6 == 0 goto label15;
+
+        goto label13;
+
+     label15:
+        $r51 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r51 == null goto label16;
+
+        $r52 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        virtualinvoke $r52.<sun.security.util.Debug: void println(java.lang.String)>("evaluation (principal name wildcard) failed");
+
+     label16:
+        return;
+
+     label17:
+        $r18 = new java.util.HashSet;
+
+        $r19 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>(r9);
+
+        specialinvoke $r18.<java.util.HashSet: void <init>(java.util.Collection)>($r19);
+
+        $r20 = new javax.security.auth.Subject;
+
+        $r22 = <java.util.Collections: java.util.Set EMPTY_SET>;
+
+        $r21 = <java.util.Collections: java.util.Set EMPTY_SET>;
+
+        specialinvoke $r20.<javax.security.auth.Subject: void <init>(boolean,java.util.Set,java.util.Set,java.util.Set)>(1, $r18, $r22, $r21);
+
+     label18:
+        $r23 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r24 = virtualinvoke $r23.<java.lang.Thread: java.lang.ClassLoader getContextClassLoader()>();
+
+        $r25 = r82.<sun.security.provider.PolicyParser$PrincipalEntry: java.lang.String principalClass>;
+
+        $r26 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>($r25, 0, $r24);
+
+        $r27 = class "Ljava/security/Principal;";
+
+        $z4 = virtualinvoke $r27.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>($r26);
+
+        if $z4 != 0 goto label19;
+
+        $r44 = new java.lang.ClassCastException;
+
+        $r45 = new java.lang.StringBuilder;
+
+        specialinvoke $r45.<java.lang.StringBuilder: void <init>()>();
+
+        $r46 = r82.<sun.security.provider.PolicyParser$PrincipalEntry: java.lang.String principalClass>;
+
+        $r47 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r46);
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is not a Principal");
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r44.<java.lang.ClassCastException: void <init>(java.lang.String)>($r49);
+
+        throw $r44;
+
+     label19:
+        $r28 = <sun.security.provider.PolicyFile: java.lang.Class[] PARAMS1>;
+
+        $r29 = virtualinvoke $r26.<java.lang.Class: java.lang.reflect.Constructor getConstructor(java.lang.Class[])>($r28);
+
+        $r30 = newarray (java.lang.Object)[1];
+
+        $r31 = r82.<sun.security.provider.PolicyParser$PrincipalEntry: java.lang.String principalName>;
+
+        $r30[0] = $r31;
+
+        $r32 = virtualinvoke $r29.<java.lang.reflect.Constructor: java.lang.Object newInstance(java.lang.Object[])>($r30);
+
+        r33 = (java.security.Principal) $r32;
+
+        $r34 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r34 == null goto label20;
+
+        $r38 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        $r37 = new java.lang.StringBuilder;
+
+        specialinvoke $r37.<java.lang.StringBuilder: void <init>()>();
+
+        $r39 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("found Principal ");
+
+        $r40 = virtualinvoke r33.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r41 = virtualinvoke $r40.<java.lang.Class: java.lang.String getName()>();
+
+        $r42 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r41);
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r38.<sun.security.util.Debug: void println(java.lang.String)>($r43);
+
+     label20:
+        $z5 = interfaceinvoke r33.<java.security.Principal: boolean implies(javax.security.auth.Subject)>($r20);
+
+        if $z5 != 0 goto label22;
+
+        $r35 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r35 == null goto label21;
+
+        $r36 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        virtualinvoke $r36.<sun.security.util.Debug: void println(java.lang.String)>("evaluation (principal implies) failed");
+
+     label21:
+        return;
+
+     label22:
+        goto label26;
+
+     label23:
+        $r78 := @caughtexception;
+
+        $r79 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r79 == null goto label24;
+
+        virtualinvoke $r78.<java.lang.Exception: void printStackTrace()>();
+
+     label24:
+        $z7 = virtualinvoke r82.<sun.security.provider.PolicyParser$PrincipalEntry: boolean implies(javax.security.auth.Subject)>($r20);
+
+        if $z7 != 0 goto label26;
+
+        $r80 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r80 == null goto label25;
+
+        $r81 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        virtualinvoke $r81.<sun.security.util.Debug: void println(java.lang.String)>("evaluation (default principal implies) failed");
+
+     label25:
+        return;
+
+     label26:
+        goto label13;
+
+     label27:
+        $r15 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r15 == null goto label28;
+
+        $r16 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        virtualinvoke $r16.<sun.security.util.Debug: void println(java.lang.String)>("evaluation (codesource/principals) passed");
+
+     label28:
+        specialinvoke r2.<sun.security.provider.PolicyFile: void addPerms(java.security.Permissions,java.security.Principal[],sun.security.provider.PolicyFile$PolicyEntry)>(r8, r9, r3);
+
+        return;
+
+        catch java.lang.Exception from label18 to label21 with label23;
+    }
+
+    private static boolean wildcardPrincipalNameImplies(java.lang.String, java.security.Principal[])
+    {
+        java.security.Principal[] r0;
+        java.security.Principal r1;
+        int i0, i1;
+        java.lang.Class $r3;
+        java.lang.String r2, $r4;
+        boolean $z0;
+
+        r2 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.security.Principal[];
+
+        i0 = lengthof r0;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label3;
+
+        r1 = r0[i1];
+
+        $r3 = virtualinvoke r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.Class: java.lang.String getName()>();
+
+        $z0 = virtualinvoke r2.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label2;
+
+        return 1;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    private void addPerms(java.security.Permissions, java.security.Principal[], sun.security.provider.PolicyFile$PolicyEntry)
+    {
+        sun.security.provider.PolicyFile$PolicyEntry r0;
+        int $i0, i1;
+        java.lang.String $r15;
+        boolean $z0;
+        java.security.Permissions r6;
+        java.security.Principal[] r10;
+        sun.security.util.Debug $r5, $r12;
+        sun.security.provider.PolicyFile r7;
+        java.util.List $r1, $r2, $r9;
+        java.security.Permission r4;
+        java.lang.Object $r3;
+        sun.security.provider.PolicyFile$SelfPermission $r8;
+        java.lang.StringBuilder $r11, $r13, $r14;
+
+        r7 := @this: sun.security.provider.PolicyFile;
+
+        r6 := @parameter0: java.security.Permissions;
+
+        r10 := @parameter1: java.security.Principal[];
+
+        r0 := @parameter2: sun.security.provider.PolicyFile$PolicyEntry;
+
+        i1 = 0;
+
+     label1:
+        $r1 = r0.<sun.security.provider.PolicyFile$PolicyEntry: java.util.List permissions>;
+
+        $i0 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        if i1 >= $i0 goto label5;
+
+        $r2 = r0.<sun.security.provider.PolicyFile$PolicyEntry: java.util.List permissions>;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.lang.Object get(int)>(i1);
+
+        r4 = (java.security.Permission) $r3;
+
+        $r5 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r5 == null goto label2;
+
+        $r12 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  granting ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r4);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r12.<sun.security.util.Debug: void println(java.lang.String)>($r15);
+
+     label2:
+        $z0 = r4 instanceof sun.security.provider.PolicyFile$SelfPermission;
+
+        if $z0 == 0 goto label3;
+
+        $r8 = (sun.security.provider.PolicyFile$SelfPermission) r4;
+
+        $r9 = virtualinvoke r0.<sun.security.provider.PolicyFile$PolicyEntry: java.util.List getPrincipals()>();
+
+        specialinvoke r7.<sun.security.provider.PolicyFile: void expandSelf(sun.security.provider.PolicyFile$SelfPermission,java.util.List,java.security.Principal[],java.security.Permissions)>($r8, $r9, r10, r6);
+
+        goto label4;
+
+     label3:
+        virtualinvoke r6.<java.security.Permissions: void add(java.security.Permission)>(r4);
+
+     label4:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label5:
+        return;
+    }
+
+    private void expandSelf(sun.security.provider.PolicyFile$SelfPermission, java.util.List, java.security.Principal[], java.security.Permissions)
+    {
+        java.util.Enumeration $r72;
+        java.security.UnresolvedPermission $r103;
+        sun.security.util.Debug $r1, $r3, $r17, $r24, $r51, $r52, $r55, $r57;
+        java.lang.Exception $r50, $r54;
+        java.security.Permission $r22, $r69, $r80, $r86, r93;
+        java.lang.StringBuilder $r4, $r7, $r8, $r10, $r11, $r25, $r27, $r28, $r30, $r43, $r44, $r47, $r48, $r58, $r60, $r99, $r100, $r101, $r102, $r104;
+        java.lang.Throwable $r70;
+        java.lang.Object[] $r65, $r76, $r83;
+        java.lang.reflect.Constructor $r64, $r75, $r82;
+        java.lang.String $r6, $r9, $r12, $r14, $r15, $r16, $r19, $r20, $r21, $r26, $r29, $r31, $r32, $r33, $r35, $r42, $r46, $r49, $r53, $r59, $r61, $r66, $r67, $r73, $r77, $r78, $r84, $r88, $r89, $r90, $r95, $r96;
+        java.lang.Class[] $r63, $r74, $r81;
+        java.lang.ClassNotFoundException $r71;
+        java.lang.String[][] $r39;
+        java.lang.NoSuchMethodException $r62;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.security.Principal[] r38;
+        java.util.List r0;
+        sun.security.provider.PolicyFile$SelfPermission r5;
+        java.security.cert.Certificate[] $r91;
+        java.lang.String[] $r41, $r45;
+        int $i0, $i1, $i2, i3, i4, $i6;
+        java.security.Permissions r18;
+        java.util.Iterator $r34;
+        sun.security.provider.PolicyParser$PrincipalEntry r97;
+        sun.security.provider.PolicyFile r37;
+        java.lang.Object $r36, $r68, $r79, $r85, $r92;
+        java.lang.Class $r94, r98;
+
+        r37 := @this: sun.security.provider.PolicyFile;
+
+        r5 := @parameter0: sun.security.provider.PolicyFile$SelfPermission;
+
+        r0 := @parameter1: java.util.List;
+
+        r38 := @parameter2: java.security.Principal[];
+
+        r18 := @parameter3: java.security.Permissions;
+
+        if r0 == null goto label01;
+
+        $z0 = interfaceinvoke r0.<java.util.List: boolean isEmpty()>();
+
+        if $z0 == 0 goto label03;
+
+     label01:
+        $r1 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r1 == null goto label02;
+
+        $r3 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        $r99 = new java.lang.StringBuilder;
+
+        specialinvoke $r99.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r99.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignoring permission ");
+
+        $r6 = virtualinvoke r5.<sun.security.provider.PolicyFile$SelfPermission: java.lang.String getSelfType()>();
+
+        $r7 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" with target name (");
+
+        $r9 = virtualinvoke r5.<sun.security.provider.PolicyFile$SelfPermission: java.lang.String getSelfName()>();
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(").  No Principal(s) specified in the grant clause.  SELF-based target names are only valid in the context of a Principal-based grant entry.");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r3.<sun.security.util.Debug: void println(java.lang.String)>($r12);
+
+     label02:
+        return;
+
+     label03:
+        i3 = 0;
+
+        $r100 = new java.lang.StringBuilder;
+
+        specialinvoke $r100.<java.lang.StringBuilder: void <init>()>();
+
+     label04:
+        $r14 = virtualinvoke r5.<sun.security.provider.PolicyFile$SelfPermission: java.lang.String getSelfName()>();
+
+        $i0 = virtualinvoke $r14.<java.lang.String: int indexOf(java.lang.String,int)>("${{self}}", i3);
+
+        $i6 = (int) -1;
+
+        if $i0 == $i6 goto label11;
+
+        $r32 = virtualinvoke r5.<sun.security.provider.PolicyFile$SelfPermission: java.lang.String getSelfName()>();
+
+        $r33 = virtualinvoke $r32.<java.lang.String: java.lang.String substring(int,int)>(i3, $i0);
+
+        virtualinvoke $r100.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r33);
+
+        $r34 = interfaceinvoke r0.<java.util.List: java.util.Iterator iterator()>();
+
+     label05:
+        $z1 = interfaceinvoke $r34.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label10;
+
+        $r36 = interfaceinvoke $r34.<java.util.Iterator: java.lang.Object next()>();
+
+        r97 = (sun.security.provider.PolicyParser$PrincipalEntry) $r36;
+
+        $r39 = specialinvoke r37.<sun.security.provider.PolicyFile: java.lang.String[][] getPrincipalInfo(sun.security.provider.PolicyParser$PrincipalEntry,java.security.Principal[])>(r97, r38);
+
+        i4 = 0;
+
+     label06:
+        $i2 = lengthof $r39;
+
+        if i4 >= $i2 goto label08;
+
+        if i4 == 0 goto label07;
+
+        virtualinvoke $r100.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+     label07:
+        $r101 = new java.lang.StringBuilder;
+
+        specialinvoke $r101.<java.lang.StringBuilder: void <init>()>();
+
+        $r41 = $r39[i4];
+
+        $r42 = $r41[0];
+
+        $r43 = virtualinvoke $r101.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r42);
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" \"");
+
+        $r45 = $r39[i4];
+
+        $r46 = $r45[1];
+
+        $r47 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r46);
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r100.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r49);
+
+        i4 = i4 + 1;
+
+        goto label06;
+
+     label08:
+        $z2 = interfaceinvoke $r34.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label09;
+
+        virtualinvoke $r100.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+     label09:
+        goto label05;
+
+     label10:
+        $r35 = "${{self}}";
+
+        $i1 = virtualinvoke $r35.<java.lang.String: int length()>();
+
+        i3 = $i0 + $i1;
+
+        goto label04;
+
+     label11:
+        $r15 = virtualinvoke r5.<sun.security.provider.PolicyFile$SelfPermission: java.lang.String getSelfName()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.String: java.lang.String substring(int)>(i3);
+
+        virtualinvoke $r100.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r16);
+
+        $r17 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r17 == null goto label12;
+
+        $r24 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        $r102 = new java.lang.StringBuilder;
+
+        specialinvoke $r102.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r102.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  expanded:\n\t");
+
+        $r26 = virtualinvoke r5.<sun.security.provider.PolicyFile$SelfPermission: java.lang.String getSelfName()>();
+
+        $r27 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r26);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n  into:\n\t");
+
+        $r29 = virtualinvoke $r100.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r30 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r29);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r24.<sun.security.util.Debug: void println(java.lang.String)>($r31);
+
+     label12:
+        $r19 = virtualinvoke r5.<sun.security.provider.PolicyFile$SelfPermission: java.lang.String getSelfType()>();
+
+        $r20 = virtualinvoke $r100.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r21 = virtualinvoke r5.<sun.security.provider.PolicyFile$SelfPermission: java.lang.String getSelfActions()>();
+
+        $r22 = staticinvoke <sun.security.provider.PolicyFile: java.security.Permission getInstance(java.lang.String,java.lang.String,java.lang.String)>($r19, $r20, $r21);
+
+        virtualinvoke r18.<java.security.Permissions: void add(java.security.Permission)>($r22);
+
+     label13:
+        goto label32;
+
+     label14:
+        $r71 := @caughtexception;
+
+        r98 = null;
+
+        entermonitor r18;
+
+     label15:
+        $r72 = virtualinvoke r18.<java.security.Permissions: java.util.Enumeration elements()>();
+
+     label16:
+        $z3 = interfaceinvoke $r72.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z3 == 0 goto label18;
+
+        $r92 = interfaceinvoke $r72.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r93 = (java.security.Permission) $r92;
+
+        $r94 = virtualinvoke r93.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r95 = virtualinvoke $r94.<java.lang.Class: java.lang.String getName()>();
+
+        $r96 = virtualinvoke r5.<sun.security.provider.PolicyFile$SelfPermission: java.lang.String getSelfType()>();
+
+        $z4 = virtualinvoke $r95.<java.lang.String: boolean equals(java.lang.Object)>($r96);
+
+        if $z4 == 0 goto label17;
+
+        r98 = virtualinvoke r93.<java.lang.Object: java.lang.Class getClass()>();
+
+        goto label18;
+
+     label17:
+        goto label16;
+
+     label18:
+        exitmonitor r18;
+
+     label19:
+        goto label22;
+
+     label20:
+        $r70 := @caughtexception;
+
+        exitmonitor r18;
+
+     label21:
+        throw $r70;
+
+     label22:
+        if r98 != null goto label23;
+
+        $r103 = new java.security.UnresolvedPermission;
+
+        $r88 = virtualinvoke r5.<sun.security.provider.PolicyFile$SelfPermission: java.lang.String getSelfType()>();
+
+        $r89 = virtualinvoke $r100.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r90 = virtualinvoke r5.<sun.security.provider.PolicyFile$SelfPermission: java.lang.String getSelfActions()>();
+
+        $r91 = virtualinvoke r5.<sun.security.provider.PolicyFile$SelfPermission: java.security.cert.Certificate[] getCerts()>();
+
+        specialinvoke $r103.<java.security.UnresolvedPermission: void <init>(java.lang.String,java.lang.String,java.lang.String,java.security.cert.Certificate[])>($r88, $r89, $r90, $r91);
+
+        virtualinvoke r18.<java.security.Permissions: void add(java.security.Permission)>($r103);
+
+        goto label30;
+
+     label23:
+        $r73 = virtualinvoke r5.<sun.security.provider.PolicyFile$SelfPermission: java.lang.String getSelfActions()>();
+
+        if $r73 != null goto label27;
+
+     label24:
+        $r81 = <sun.security.provider.PolicyFile: java.lang.Class[] PARAMS1>;
+
+        $r82 = virtualinvoke r98.<java.lang.Class: java.lang.reflect.Constructor getConstructor(java.lang.Class[])>($r81);
+
+        $r83 = newarray (java.lang.Object)[1];
+
+        $r84 = virtualinvoke $r100.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r83[0] = $r84;
+
+        $r85 = virtualinvoke $r82.<java.lang.reflect.Constructor: java.lang.Object newInstance(java.lang.Object[])>($r83);
+
+        $r86 = (java.security.Permission) $r85;
+
+        virtualinvoke r18.<java.security.Permissions: void add(java.security.Permission)>($r86);
+
+     label25:
+        goto label28;
+
+     label26:
+        $r62 := @caughtexception;
+
+        $r63 = <sun.security.provider.PolicyFile: java.lang.Class[] PARAMS2>;
+
+        $r64 = virtualinvoke r98.<java.lang.Class: java.lang.reflect.Constructor getConstructor(java.lang.Class[])>($r63);
+
+        $r65 = newarray (java.lang.Object)[2];
+
+        $r66 = virtualinvoke $r100.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r65[0] = $r66;
+
+        $r67 = virtualinvoke r5.<sun.security.provider.PolicyFile$SelfPermission: java.lang.String getSelfActions()>();
+
+        $r65[1] = $r67;
+
+        $r68 = virtualinvoke $r64.<java.lang.reflect.Constructor: java.lang.Object newInstance(java.lang.Object[])>($r65);
+
+        $r69 = (java.security.Permission) $r68;
+
+        virtualinvoke r18.<java.security.Permissions: void add(java.security.Permission)>($r69);
+
+        goto label28;
+
+     label27:
+        $r74 = <sun.security.provider.PolicyFile: java.lang.Class[] PARAMS2>;
+
+        $r75 = virtualinvoke r98.<java.lang.Class: java.lang.reflect.Constructor getConstructor(java.lang.Class[])>($r74);
+
+        $r76 = newarray (java.lang.Object)[2];
+
+        $r77 = virtualinvoke $r100.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r76[0] = $r77;
+
+        $r78 = virtualinvoke r5.<sun.security.provider.PolicyFile$SelfPermission: java.lang.String getSelfActions()>();
+
+        $r76[1] = $r78;
+
+        $r79 = virtualinvoke $r75.<java.lang.reflect.Constructor: java.lang.Object newInstance(java.lang.Object[])>($r76);
+
+        $r80 = (java.security.Permission) $r79;
+
+        virtualinvoke r18.<java.security.Permissions: void add(java.security.Permission)>($r80);
+
+     label28:
+        goto label30;
+
+     label29:
+        $r54 := @caughtexception;
+
+        $r55 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r55 == null goto label30;
+
+        $r57 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        $r104 = new java.lang.StringBuilder;
+
+        specialinvoke $r104.<java.lang.StringBuilder: void <init>()>();
+
+        $r58 = virtualinvoke $r104.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("self entry expansion  instantiation failed: ");
+
+        $r59 = virtualinvoke $r54.<java.lang.Exception: java.lang.String toString()>();
+
+        $r60 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r59);
+
+        $r61 = virtualinvoke $r60.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r57.<sun.security.util.Debug: void println(java.lang.String)>($r61);
+
+     label30:
+        goto label32;
+
+     label31:
+        $r50 := @caughtexception;
+
+        $r51 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r51 == null goto label32;
+
+        $r52 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        $r53 = virtualinvoke $r50.<java.lang.Exception: java.lang.String toString()>();
+
+        virtualinvoke $r52.<sun.security.util.Debug: void println(java.lang.String)>($r53);
+
+     label32:
+        return;
+
+        catch java.lang.ClassNotFoundException from label12 to label13 with label14;
+        catch java.lang.Throwable from label15 to label19 with label20;
+        catch java.lang.Throwable from label20 to label21 with label20;
+        catch java.lang.NoSuchMethodException from label24 to label25 with label26;
+        catch java.lang.Exception from label23 to label28 with label29;
+        catch java.lang.Exception from label12 to label13 with label31;
+    }
+
+    private java.lang.String[][] getPrincipalInfo(sun.security.provider.PolicyParser$PrincipalEntry, java.security.Principal[])
+    {
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.security.Principal[] r1;
+        java.security.Principal $r2, $r6, r13, $r19, $r23;
+        java.lang.String[] $r3, $r7, $r14, $r17, $r25, $r27;
+        java.util.ArrayList $r10;
+        int $i0, $i1, $i2, i3, i4, i5, $i6;
+        java.lang.String $r5, $r8, $r16, $r18, $r20, $r22, $r24, $r26;
+        java.util.Iterator $r11;
+        sun.security.provider.PolicyParser$PrincipalEntry r0;
+        sun.security.provider.PolicyFile r28;
+        java.lang.Class $r4, $r15, $r21;
+        java.lang.Object $r12;
+        java.lang.String[][] $r9, r29, r30;
+
+        r28 := @this: sun.security.provider.PolicyFile;
+
+        r0 := @parameter0: sun.security.provider.PolicyParser$PrincipalEntry;
+
+        r1 := @parameter1: java.security.Principal[];
+
+        $z0 = virtualinvoke r0.<sun.security.provider.PolicyParser$PrincipalEntry: boolean isWildcardClass()>();
+
+        if $z0 != 0 goto label1;
+
+        $z5 = virtualinvoke r0.<sun.security.provider.PolicyParser$PrincipalEntry: boolean isWildcardName()>();
+
+        if $z5 != 0 goto label1;
+
+        r29 = newmultiarray (java.lang.String)[1][2];
+
+        $r25 = r29[0];
+
+        $r24 = r0.<sun.security.provider.PolicyParser$PrincipalEntry: java.lang.String principalClass>;
+
+        $r25[0] = $r24;
+
+        $r27 = r29[0];
+
+        $r26 = r0.<sun.security.provider.PolicyParser$PrincipalEntry: java.lang.String principalName>;
+
+        $r27[1] = $r26;
+
+        return r29;
+
+     label1:
+        $z1 = virtualinvoke r0.<sun.security.provider.PolicyParser$PrincipalEntry: boolean isWildcardClass()>();
+
+        if $z1 != 0 goto label7;
+
+        $z2 = virtualinvoke r0.<sun.security.provider.PolicyParser$PrincipalEntry: boolean isWildcardName()>();
+
+        if $z2 == 0 goto label7;
+
+        $r10 = new java.util.ArrayList;
+
+        specialinvoke $r10.<java.util.ArrayList: void <init>()>();
+
+        i3 = 0;
+
+     label2:
+        $i1 = lengthof r1;
+
+        if i3 >= $i1 goto label4;
+
+        $r20 = r0.<sun.security.provider.PolicyParser$PrincipalEntry: java.lang.String principalClass>;
+
+        $r19 = r1[i3];
+
+        $r21 = virtualinvoke $r19.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r22 = virtualinvoke $r21.<java.lang.Class: java.lang.String getName()>();
+
+        $z4 = virtualinvoke $r20.<java.lang.String: boolean equals(java.lang.Object)>($r22);
+
+        if $z4 == 0 goto label3;
+
+        $r23 = r1[i3];
+
+        interfaceinvoke $r10.<java.util.List: boolean add(java.lang.Object)>($r23);
+
+     label3:
+        i3 = i3 + 1;
+
+        goto label2;
+
+     label4:
+        $i2 = interfaceinvoke $r10.<java.util.List: int size()>();
+
+        r30 = newmultiarray (java.lang.String)[$i2][2];
+
+        i4 = 0;
+
+        $r11 = interfaceinvoke $r10.<java.util.List: java.util.Iterator iterator()>();
+
+     label5:
+        $z3 = interfaceinvoke $r11.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label6;
+
+        $r12 = interfaceinvoke $r11.<java.util.Iterator: java.lang.Object next()>();
+
+        r13 = (java.security.Principal) $r12;
+
+        $r14 = r30[i4];
+
+        $r15 = virtualinvoke r13.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.Class: java.lang.String getName()>();
+
+        $r14[0] = $r16;
+
+        $r17 = r30[i4];
+
+        $r18 = interfaceinvoke r13.<java.security.Principal: java.lang.String getName()>();
+
+        $r17[1] = $r18;
+
+        i4 = i4 + 1;
+
+        goto label5;
+
+     label6:
+        return r30;
+
+     label7:
+        $i0 = lengthof r1;
+
+        $r9 = newmultiarray (java.lang.String)[$i0][2];
+
+        i5 = 0;
+
+     label8:
+        $i6 = lengthof r1;
+
+        if i5 >= $i6 goto label9;
+
+        $r3 = $r9[i5];
+
+        $r2 = r1[i5];
+
+        $r4 = virtualinvoke $r2.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.Class: java.lang.String getName()>();
+
+        $r3[0] = $r5;
+
+        $r7 = $r9[i5];
+
+        $r6 = r1[i5];
+
+        $r8 = interfaceinvoke $r6.<java.security.Principal: java.lang.String getName()>();
+
+        $r7[1] = $r8;
+
+        i5 = i5 + 1;
+
+        goto label8;
+
+     label9:
+        return $r9;
+    }
+
+    protected java.security.cert.Certificate[] getSignerCertificates(java.security.CodeSource)
+    {
+        java.security.cert.X509Certificate $r6, $r9, $r12, $r15;
+        boolean $z0, $z1, $z2;
+        java.security.cert.Certificate $r4, $r5, $r8, $r11, $r14, $r17;
+        java.security.Principal $r7, $r10, $r13, $r16;
+        java.security.cert.Certificate[] $r1, r3, $r18;
+        java.util.ArrayList $r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, i11, i12, i13, i14;
+        sun.security.provider.PolicyFile r19;
+        java.security.CodeSource r0;
+
+        r19 := @this: sun.security.provider.PolicyFile;
+
+        r0 := @parameter0: java.security.CodeSource;
+
+        $r1 = virtualinvoke r0.<java.security.CodeSource: java.security.cert.Certificate[] getCertificates()>();
+
+        if $r1 != null goto label01;
+
+        return null;
+
+     label01:
+        i11 = 0;
+
+     label02:
+        $i0 = lengthof $r1;
+
+        if i11 >= $i0 goto label04;
+
+        $r17 = $r1[i11];
+
+        $z2 = $r17 instanceof java.security.cert.X509Certificate;
+
+        if $z2 != 0 goto label03;
+
+        $r18 = virtualinvoke r0.<java.security.CodeSource: java.security.cert.Certificate[] getCertificates()>();
+
+        return $r18;
+
+     label03:
+        i11 = i11 + 1;
+
+        goto label02;
+
+     label04:
+        i12 = 0;
+
+        i13 = 0;
+
+     label05:
+        $i1 = lengthof $r1;
+
+        if i12 >= $i1 goto label08;
+
+        i13 = i13 + 1;
+
+     label06:
+        $i9 = i12 + 1;
+
+        $i8 = lengthof $r1;
+
+        if $i9 >= $i8 goto label07;
+
+        $r11 = $r1[i12];
+
+        $r12 = (java.security.cert.X509Certificate) $r11;
+
+        $r13 = virtualinvoke $r12.<java.security.cert.X509Certificate: java.security.Principal getIssuerDN()>();
+
+        $i10 = i12 + 1;
+
+        $r14 = $r1[$i10];
+
+        $r15 = (java.security.cert.X509Certificate) $r14;
+
+        $r16 = virtualinvoke $r15.<java.security.cert.X509Certificate: java.security.Principal getSubjectDN()>();
+
+        $z1 = interfaceinvoke $r13.<java.security.Principal: boolean equals(java.lang.Object)>($r16);
+
+        if $z1 == 0 goto label07;
+
+        i12 = i12 + 1;
+
+        goto label06;
+
+     label07:
+        i12 = i12 + 1;
+
+        goto label05;
+
+     label08:
+        $i2 = lengthof $r1;
+
+        if i13 != $i2 goto label09;
+
+        return $r1;
+
+     label09:
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        i14 = 0;
+
+     label10:
+        $i3 = lengthof $r1;
+
+        if i14 >= $i3 goto label13;
+
+        $r4 = $r1[i14];
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>($r4);
+
+     label11:
+        $i6 = i14 + 1;
+
+        $i5 = lengthof $r1;
+
+        if $i6 >= $i5 goto label12;
+
+        $r5 = $r1[i14];
+
+        $r6 = (java.security.cert.X509Certificate) $r5;
+
+        $r7 = virtualinvoke $r6.<java.security.cert.X509Certificate: java.security.Principal getIssuerDN()>();
+
+        $i7 = i14 + 1;
+
+        $r8 = $r1[$i7];
+
+        $r9 = (java.security.cert.X509Certificate) $r8;
+
+        $r10 = virtualinvoke $r9.<java.security.cert.X509Certificate: java.security.Principal getSubjectDN()>();
+
+        $z0 = interfaceinvoke $r7.<java.security.Principal: boolean equals(java.lang.Object)>($r10);
+
+        if $z0 == 0 goto label12;
+
+        i14 = i14 + 1;
+
+        goto label11;
+
+     label12:
+        i14 = i14 + 1;
+
+        goto label10;
+
+     label13:
+        $i4 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        r3 = newarray (java.security.cert.Certificate)[$i4];
+
+        interfaceinvoke $r2.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>(r3);
+
+        return r3;
+    }
+
+    private java.security.CodeSource canonicalizeCodebase(java.security.CodeSource, boolean)
+    {
+        java.net.URL $r1, $r3, $r8, $r22, r27, $r29;
+        boolean z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.security.cert.Certificate[] $r5, $r10, $r12, $r23;
+        int $i1, $i3;
+        java.lang.String $r6, $r13, $r14, $r15, $r16, $r17, $r19, r25, $r28;
+        java.net.MalformedURLException $r24;
+        char $c0;
+        java.io.IOException $r20;
+        sun.security.provider.PolicyFile r4;
+        java.io.File $r30;
+        java.security.CodeSource r0, r26, $r31, $r32, $r33, $r34;
+
+        r4 := @this: sun.security.provider.PolicyFile;
+
+        r0 := @parameter0: java.security.CodeSource;
+
+        z0 := @parameter1: boolean;
+
+        r25 = null;
+
+        r26 = r0;
+
+        $r1 = virtualinvoke r0.<java.security.CodeSource: java.net.URL getLocation()>();
+
+        r27 = $r1;
+
+        if $r1 == null goto label08;
+
+        $r13 = virtualinvoke $r1.<java.net.URL: java.lang.String getProtocol()>();
+
+        $z1 = virtualinvoke $r13.<java.lang.String: boolean equals(java.lang.Object)>("jar");
+
+        if $z1 == 0 goto label04;
+
+        $r17 = virtualinvoke $r1.<java.net.URL: java.lang.String getFile()>();
+
+        $i1 = virtualinvoke $r17.<java.lang.String: int indexOf(java.lang.String)>("!/");
+
+        $i3 = (int) -1;
+
+        if $i1 == $i3 goto label04;
+
+     label01:
+        $r29 = new java.net.URL;
+
+        $r19 = virtualinvoke $r17.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+        specialinvoke $r29.<java.net.URL: void <init>(java.lang.String)>($r19);
+
+        r27 = $r29;
+
+     label02:
+        goto label04;
+
+     label03:
+        $r24 := @caughtexception;
+
+     label04:
+        $r28 = virtualinvoke r27.<java.net.URL: java.lang.String getProtocol()>();
+
+        $z5 = virtualinvoke $r28.<java.lang.String: boolean equals(java.lang.Object)>("file");
+
+        if $z5 == 0 goto label08;
+
+        $r14 = virtualinvoke r27.<java.net.URL: java.lang.String getHost()>();
+
+        if $r14 == null goto label05;
+
+        $z2 = virtualinvoke $r14.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z2 != 0 goto label05;
+
+        $z3 = virtualinvoke $r14.<java.lang.String: boolean equals(java.lang.Object)>("~");
+
+        if $z3 != 0 goto label05;
+
+        $z4 = virtualinvoke $r14.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("localhost");
+
+        if $z4 == 0 goto label06;
+
+     label05:
+        $z6 = 1;
+
+        goto label07;
+
+     label06:
+        $z6 = 0;
+
+     label07:
+        if $z6 == 0 goto label08;
+
+        $r15 = virtualinvoke r27.<java.net.URL: java.lang.String getFile()>();
+
+        $c0 = <java.io.File: char separatorChar>;
+
+        $r16 = virtualinvoke $r15.<java.lang.String: java.lang.String replace(char,char)>(47, $c0);
+
+        r25 = staticinvoke <sun.net.www.ParseUtil: java.lang.String decode(java.lang.String)>($r16);
+
+     label08:
+        if r25 == null goto label14;
+
+     label09:
+        $r6 = staticinvoke <sun.security.provider.PolicyFile: java.lang.String canonPath(java.lang.String)>(r25);
+
+        $r30 = new java.io.File;
+
+        specialinvoke $r30.<java.io.File: void <init>(java.lang.String)>($r6);
+
+        $r8 = staticinvoke <sun.net.www.ParseUtil: java.net.URL fileToEncodedURL(java.io.File)>($r30);
+
+        if z0 == 0 goto label10;
+
+        $r31 = new java.security.CodeSource;
+
+        $r12 = virtualinvoke r4.<sun.security.provider.PolicyFile: java.security.cert.Certificate[] getSignerCertificates(java.security.CodeSource)>(r0);
+
+        specialinvoke $r31.<java.security.CodeSource: void <init>(java.net.URL,java.security.cert.Certificate[])>($r8, $r12);
+
+        r26 = $r31;
+
+        goto label11;
+
+     label10:
+        $r32 = new java.security.CodeSource;
+
+        $r10 = virtualinvoke r0.<java.security.CodeSource: java.security.cert.Certificate[] getCertificates()>();
+
+        specialinvoke $r32.<java.security.CodeSource: void <init>(java.net.URL,java.security.cert.Certificate[])>($r8, $r10);
+
+        r26 = $r32;
+
+     label11:
+        goto label15;
+
+     label12:
+        $r20 := @caughtexception;
+
+        if z0 == 0 goto label13;
+
+        $r33 = new java.security.CodeSource;
+
+        $r22 = virtualinvoke r0.<java.security.CodeSource: java.net.URL getLocation()>();
+
+        $r23 = virtualinvoke r4.<sun.security.provider.PolicyFile: java.security.cert.Certificate[] getSignerCertificates(java.security.CodeSource)>(r0);
+
+        specialinvoke $r33.<java.security.CodeSource: void <init>(java.net.URL,java.security.cert.Certificate[])>($r22, $r23);
+
+        r26 = $r33;
+
+     label13:
+        goto label15;
+
+     label14:
+        if z0 == 0 goto label15;
+
+        $r34 = new java.security.CodeSource;
+
+        $r3 = virtualinvoke r0.<java.security.CodeSource: java.net.URL getLocation()>();
+
+        $r5 = virtualinvoke r4.<sun.security.provider.PolicyFile: java.security.cert.Certificate[] getSignerCertificates(java.security.CodeSource)>(r0);
+
+        specialinvoke $r34.<java.security.CodeSource: void <init>(java.net.URL,java.security.cert.Certificate[])>($r3, $r5);
+
+        r26 = $r34;
+
+     label15:
+        return r26;
+
+        catch java.net.MalformedURLException from label01 to label02 with label03;
+        catch java.io.IOException from label09 to label11 with label12;
+    }
+
+    private static java.lang.String canonPath(java.lang.String) throws java.io.IOException
+    {
+        int $i0, $i1, $i2, $i3;
+        java.lang.String $r1, $r3, $r6, $r8, $r10, $r13, r14;
+        boolean $z0;
+        java.io.File $r0, $r7;
+        java.lang.StringBuilder $r2, $r4, $r5, $r9, $r11, $r12;
+
+        r14 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r14.<java.lang.String: boolean endsWith(java.lang.String)>("*");
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $i0 = virtualinvoke r14.<java.lang.String: int length()>();
+
+        $i1 = $i0 - 1;
+
+        $r3 = virtualinvoke r14.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r7 = new java.io.File;
+
+        specialinvoke $r7.<java.io.File: void <init>(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.io.File: java.lang.String getCanonicalPath()>();
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $i2 = virtualinvoke $r8.<java.lang.String: int length()>();
+
+        $i3 = $i2 - 1;
+
+        $r10 = virtualinvoke $r8.<java.lang.String: java.lang.String substring(int,int)>(0, $i3);
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("*");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r13;
+
+     label1:
+        $r0 = new java.io.File;
+
+        specialinvoke $r0.<java.io.File: void <init>(java.lang.String)>(r14);
+
+        $r1 = virtualinvoke $r0.<java.io.File: java.lang.String getCanonicalPath()>();
+
+        return $r1;
+    }
+
+    private java.lang.String printPD(java.security.ProtectionDomain)
+    {
+        int $i0, $i1, $i2, $i3, i4;
+        java.lang.String $r6, $r10, $r13, r15, $r25;
+        java.security.Principal[] $r1;
+        sun.security.provider.PolicyFile r14;
+        java.security.Principal $r4, $r9;
+        java.security.ProtectionDomain r0;
+        java.lang.StringBuilder $r2, $r3, $r7, $r8, $r11, $r12, $r16, $r17, $r19, $r20, $r22, $r23, $r24;
+        java.lang.Class $r5;
+        java.security.CodeSource $r18;
+        java.lang.ClassLoader $r21;
+
+        r14 := @this: sun.security.provider.PolicyFile;
+
+        r0 := @parameter0: java.security.ProtectionDomain;
+
+        $r1 = virtualinvoke r0.<java.security.ProtectionDomain: java.security.Principal[] getPrincipals()>();
+
+        r15 = "<no principals>";
+
+        if $r1 == null goto label5;
+
+        $i0 = lengthof $r1;
+
+        if $i0 <= 0 goto label5;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>(java.lang.String)>("(principals ");
+
+        i4 = 0;
+
+     label1:
+        $i1 = lengthof $r1;
+
+        if i4 >= $i1 goto label4;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = $r1[i4];
+
+        $r5 = virtualinvoke $r4.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.Class: java.lang.String getName()>();
+
+        $r7 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" \"");
+
+        $r9 = $r1[i4];
+
+        $r10 = interfaceinvoke $r9.<java.security.Principal: java.lang.String getName()>();
+
+        $r11 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $i2 = lengthof $r1;
+
+        $i3 = $i2 - 1;
+
+        if i4 >= $i3 goto label2;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        goto label3;
+
+     label2:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+     label3:
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label4:
+        r15 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label5:
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PD CodeSource: ");
+
+        $r18 = virtualinvoke r0.<java.security.ProtectionDomain: java.security.CodeSource getCodeSource()>();
+
+        $r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r18);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n\tPD ClassLoader: ");
+
+        $r21 = virtualinvoke r0.<java.security.ProtectionDomain: java.lang.ClassLoader getClassLoader()>();
+
+        $r22 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r21);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n\tPD Principals: ");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r15);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r25;
+    }
+
+    private boolean replacePrincipals(java.util.List, java.security.KeyStore)
+    {
+        java.lang.String $r6, $r7, $r12, $r19;
+        boolean $z0, $z1, $z2;
+        java.util.Iterator $r2;
+        sun.security.provider.PolicyParser$PrincipalEntry r4;
+        java.security.KeyStore r1;
+        sun.security.provider.PolicyFile r5;
+        sun.security.util.Debug $r8, $r10;
+        java.util.List r0;
+        java.lang.Object $r3;
+        java.lang.StringBuilder $r9, $r11, $r13, $r14, $r15, $r16, $r17, $r18;
+
+        r5 := @this: sun.security.provider.PolicyFile;
+
+        r0 := @parameter0: java.util.List;
+
+        r1 := @parameter1: java.security.KeyStore;
+
+        if r0 == null goto label1;
+
+        $z0 = interfaceinvoke r0.<java.util.List: boolean isEmpty()>();
+
+        if $z0 != 0 goto label1;
+
+        if r1 != null goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        $r2 = interfaceinvoke r0.<java.util.List: java.util.Iterator iterator()>();
+
+     label3:
+        $z1 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label7;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (sun.security.provider.PolicyParser$PrincipalEntry) $r3;
+
+        $z2 = virtualinvoke r4.<sun.security.provider.PolicyParser$PrincipalEntry: boolean isReplaceName()>();
+
+        if $z2 == 0 goto label6;
+
+        $r6 = r4.<sun.security.provider.PolicyParser$PrincipalEntry: java.lang.String principalName>;
+
+        $r7 = specialinvoke r5.<sun.security.provider.PolicyFile: java.lang.String getDN(java.lang.String,java.security.KeyStore)>($r6, r1);
+
+        if $r7 != null goto label4;
+
+        return 0;
+
+     label4:
+        $r8 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r8 == null goto label5;
+
+        $r10 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  Replacing \"");
+
+        $r12 = r4.<sun.security.provider.PolicyParser$PrincipalEntry: java.lang.String principalName>;
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\" with ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("javax.security.auth.x500.X500Principal");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/\"");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r10.<sun.security.util.Debug: void println(java.lang.String)>($r19);
+
+     label5:
+        r4.<sun.security.provider.PolicyParser$PrincipalEntry: java.lang.String principalClass> = "javax.security.auth.x500.X500Principal";
+
+        r4.<sun.security.provider.PolicyParser$PrincipalEntry: java.lang.String principalName> = $r7;
+
+     label6:
+        goto label3;
+
+     label7:
+        return 1;
+    }
+
+    private void expandPermissionName(sun.security.provider.PolicyParser$PermissionEntry, java.security.KeyStore) throws java.lang.Exception
+    {
+        sun.security.util.Debug $r6, $r9;
+        java.lang.Exception $r54, $r56, $r59;
+        java.lang.StringBuilder $r10, $r12, $r13, $r15, $r32, $r33, $r34, $r52, $r57, $r60;
+        java.lang.Object[] $r24, $r38, $r44;
+        java.lang.String $r1, $r2, $r4, $r5, $r7, $r11, $r14, $r16, $r17, $r18, $r19, $r20, $r21, $r23, $r26, $r27, $r30, $r35, $r37, $r39, $r41, $r43, $r45, $r47, $r48, $r49, $r50, r51;
+        boolean $z0, $z1;
+        sun.security.provider.PolicyParser$PermissionEntry r0;
+        java.security.KeyStore r29;
+        java.text.MessageFormat $r53, $r55, $r58;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, i7, $i8, $i10, $i12, $i14, $i16;
+        sun.security.provider.PolicyFile r28;
+
+        r28 := @this: sun.security.provider.PolicyFile;
+
+        r0 := @parameter0: sun.security.provider.PolicyParser$PermissionEntry;
+
+        r29 := @parameter1: java.security.KeyStore;
+
+        $r1 = r0.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String name>;
+
+        if $r1 == null goto label01;
+
+        $r2 = r0.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String name>;
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int indexOf(java.lang.String,int)>("${{", 0);
+
+        $i10 = (int) -1;
+
+        if $i0 != $i10 goto label02;
+
+     label01:
+        return;
+
+     label02:
+        i7 = 0;
+
+        $r52 = new java.lang.StringBuilder;
+
+        specialinvoke $r52.<java.lang.StringBuilder: void <init>()>();
+
+     label03:
+        $r50 = r0.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String name>;
+
+        $i8 = virtualinvoke $r50.<java.lang.String: int indexOf(java.lang.String,int)>("${{", i7);
+
+        $i12 = (int) -1;
+
+        if $i8 == $i12 goto label11;
+
+        $r17 = r0.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String name>;
+
+        $i1 = virtualinvoke $r17.<java.lang.String: int indexOf(java.lang.String,int)>("}}", $i8);
+
+        if $i1 >= 1 goto label04;
+
+        goto label11;
+
+     label04:
+        $r18 = r0.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String name>;
+
+        $r19 = virtualinvoke $r18.<java.lang.String: java.lang.String substring(int,int)>(i7, $i8);
+
+        virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r20 = r0.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String name>;
+
+        $i2 = $i8 + 3;
+
+        $r21 = virtualinvoke $r20.<java.lang.String: java.lang.String substring(int,int)>($i2, $i1);
+
+        r51 = $r21;
+
+        $i3 = virtualinvoke $r21.<java.lang.String: int indexOf(java.lang.String)>(":");
+
+        $i14 = (int) -1;
+
+        if $i3 == $i14 goto label05;
+
+        r51 = virtualinvoke $r21.<java.lang.String: java.lang.String substring(int,int)>(0, $i3);
+
+     label05:
+        $z0 = virtualinvoke r51.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("self");
+
+        if $z0 == 0 goto label06;
+
+        $r48 = r0.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String name>;
+
+        $i6 = $i1 + 2;
+
+        $r49 = virtualinvoke $r48.<java.lang.String: java.lang.String substring(int,int)>($i8, $i6);
+
+        virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r49);
+
+        i7 = $i1 + 2;
+
+        goto label03;
+
+     label06:
+        $z1 = virtualinvoke r51.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("alias");
+
+        if $z1 == 0 goto label09;
+
+        $i16 = (int) -1;
+
+        if $i3 != $i16 goto label07;
+
+        $r53 = new java.text.MessageFormat;
+
+        $r43 = staticinvoke <sun.security.util.ResourcesMgr: java.lang.String getString(java.lang.String)>("alias.name.not.provided.pe.name.");
+
+        specialinvoke $r53.<java.text.MessageFormat: void <init>(java.lang.String)>($r43);
+
+        $r44 = newarray (java.lang.Object)[1];
+
+        $r45 = r0.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String name>;
+
+        $r44[0] = $r45;
+
+        $r54 = new java.lang.Exception;
+
+        $r47 = virtualinvoke $r53.<java.text.MessageFormat: java.lang.String format(java.lang.Object)>($r44);
+
+        specialinvoke $r54.<java.lang.Exception: void <init>(java.lang.String)>($r47);
+
+        throw $r54;
+
+     label07:
+        $i4 = $i3 + 1;
+
+        $r27 = virtualinvoke $r21.<java.lang.String: java.lang.String substring(int)>($i4);
+
+        $r30 = specialinvoke r28.<sun.security.provider.PolicyFile: java.lang.String getDN(java.lang.String,java.security.KeyStore)>($r27, r29);
+
+        if $r30 != null goto label08;
+
+        $r55 = new java.text.MessageFormat;
+
+        $r37 = staticinvoke <sun.security.util.ResourcesMgr: java.lang.String getString(java.lang.String)>("unable.to.perform.substitution.on.alias.suffix");
+
+        specialinvoke $r55.<java.text.MessageFormat: void <init>(java.lang.String)>($r37);
+
+        $r38 = newarray (java.lang.Object)[1];
+
+        $i5 = $i3 + 1;
+
+        $r39 = virtualinvoke $r21.<java.lang.String: java.lang.String substring(int)>($i5);
+
+        $r38[0] = $r39;
+
+        $r56 = new java.lang.Exception;
+
+        $r41 = virtualinvoke $r55.<java.text.MessageFormat: java.lang.String format(java.lang.Object)>($r38);
+
+        specialinvoke $r56.<java.lang.Exception: void <init>(java.lang.String)>($r41);
+
+        throw $r56;
+
+     label08:
+        $r57 = new java.lang.StringBuilder;
+
+        specialinvoke $r57.<java.lang.StringBuilder: void <init>()>();
+
+        $r32 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("javax.security.auth.x500.X500Principal \"");
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r30);
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r35);
+
+        i7 = $i1 + 2;
+
+        goto label10;
+
+     label09:
+        $r58 = new java.text.MessageFormat;
+
+        $r23 = staticinvoke <sun.security.util.ResourcesMgr: java.lang.String getString(java.lang.String)>("substitution.value.prefix.unsupported");
+
+        specialinvoke $r58.<java.text.MessageFormat: void <init>(java.lang.String)>($r23);
+
+        $r24 = newarray (java.lang.Object)[1];
+
+        $r24[0] = r51;
+
+        $r59 = new java.lang.Exception;
+
+        $r26 = virtualinvoke $r58.<java.text.MessageFormat: java.lang.String format(java.lang.Object)>($r24);
+
+        specialinvoke $r59.<java.lang.Exception: void <init>(java.lang.String)>($r26);
+
+        throw $r59;
+
+     label10:
+        goto label03;
+
+     label11:
+        $r4 = r0.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String name>;
+
+        $r5 = virtualinvoke $r4.<java.lang.String: java.lang.String substring(int)>(i7);
+
+        virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r6 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r6 == null goto label12;
+
+        $r9 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        $r60 = new java.lang.StringBuilder;
+
+        specialinvoke $r60.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r60.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  Permission name expanded from:\n\t");
+
+        $r11 = r0.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String name>;
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\nto\n\t");
+
+        $r14 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r9.<sun.security.util.Debug: void println(java.lang.String)>($r16);
+
+     label12:
+        $r7 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r0.<sun.security.provider.PolicyParser$PermissionEntry: java.lang.String name> = $r7;
+
+        return;
+    }
+
+    private java.lang.String getDN(java.lang.String, java.security.KeyStore)
+    {
+        java.security.cert.X509Certificate r25;
+        javax.security.auth.x500.X500Principal $r10, $r11;
+        java.lang.String r1, $r9, $r12, $r13, $r21, $r23;
+        boolean $z0;
+        java.security.KeyStore r0;
+        sun.security.util.Debug $r3, $r5, $r15, $r17;
+        sun.security.provider.PolicyFile r24;
+        java.lang.Exception $r14;
+        java.security.cert.Certificate $r2;
+        java.lang.StringBuilder $r4, $r6, $r7, $r8, $r16, $r18, $r19, $r20, $r22;
+
+        r24 := @this: sun.security.provider.PolicyFile;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.security.KeyStore;
+
+     label1:
+        $r2 = virtualinvoke r0.<java.security.KeyStore: java.security.cert.Certificate getCertificate(java.lang.String)>(r1);
+
+     label2:
+        goto label5;
+
+     label3:
+        $r14 := @caughtexception;
+
+        $r15 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r15 == null goto label4;
+
+        $r17 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  Error retrieving certificate for \'");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\': ");
+
+        $r21 = virtualinvoke $r14.<java.lang.Exception: java.lang.String toString()>();
+
+        $r22 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r21);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r17.<sun.security.util.Debug: void println(java.lang.String)>($r23);
+
+     label4:
+        return null;
+
+     label5:
+        if $r2 == null goto label6;
+
+        $z0 = $r2 instanceof java.security.cert.X509Certificate;
+
+        if $z0 != 0 goto label8;
+
+     label6:
+        $r3 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        if $r3 == null goto label7;
+
+        $r5 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  -- No certificate for \'");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' - ignoring entry");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<sun.security.util.Debug: void println(java.lang.String)>($r9);
+
+     label7:
+        return null;
+
+     label8:
+        r25 = (java.security.cert.X509Certificate) $r2;
+
+        $r10 = new javax.security.auth.x500.X500Principal;
+
+        $r11 = virtualinvoke r25.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        $r12 = virtualinvoke $r11.<javax.security.auth.x500.X500Principal: java.lang.String toString()>();
+
+        specialinvoke $r10.<javax.security.auth.x500.X500Principal: void <init>(java.lang.String)>($r12);
+
+        $r13 = virtualinvoke $r10.<javax.security.auth.x500.X500Principal: java.lang.String getName()>();
+
+        return $r13;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    private boolean checkForTrustedIdentity(java.security.cert.Certificate, sun.security.provider.PolicyFile$PolicyInfo)
+    {
+        sun.security.provider.PolicyFile$PolicyInfo r2;
+        java.security.cert.Certificate r1;
+        sun.security.provider.PolicyFile r0;
+
+        r0 := @this: sun.security.provider.PolicyFile;
+
+        r1 := @parameter0: java.security.cert.Certificate;
+
+        r2 := @parameter1: sun.security.provider.PolicyFile$PolicyInfo;
+
+        return 0;
+    }
+
+    static boolean access$002(sun.security.provider.PolicyFile, boolean)
+    {
+        sun.security.provider.PolicyFile r0;
+        boolean z0;
+
+        r0 := @parameter0: sun.security.provider.PolicyFile;
+
+        z0 := @parameter1: boolean;
+
+        r0.<sun.security.provider.PolicyFile: boolean expandProperties> = z0;
+
+        return z0;
+    }
+
+    static boolean access$102(sun.security.provider.PolicyFile, boolean)
+    {
+        sun.security.provider.PolicyFile r0;
+        boolean z0;
+
+        r0 := @parameter0: sun.security.provider.PolicyFile;
+
+        z0 := @parameter1: boolean;
+
+        r0.<sun.security.provider.PolicyFile: boolean ignoreIdentityScope> = z0;
+
+        return z0;
+    }
+
+    static boolean access$202(sun.security.provider.PolicyFile, boolean)
+    {
+        sun.security.provider.PolicyFile r0;
+        boolean z0;
+
+        r0 := @parameter0: sun.security.provider.PolicyFile;
+
+        z0 := @parameter1: boolean;
+
+        r0.<sun.security.provider.PolicyFile: boolean allowSystemProperties> = z0;
+
+        return z0;
+    }
+
+    static boolean access$302(sun.security.provider.PolicyFile, boolean)
+    {
+        sun.security.provider.PolicyFile r0;
+        boolean z0;
+
+        r0 := @parameter0: sun.security.provider.PolicyFile;
+
+        z0 := @parameter1: boolean;
+
+        r0.<sun.security.provider.PolicyFile: boolean notUtf8> = z0;
+
+        return z0;
+    }
+
+    static boolean access$400(sun.security.provider.PolicyFile, java.net.URL, sun.security.provider.PolicyFile$PolicyInfo)
+    {
+        java.net.URL r1;
+        sun.security.provider.PolicyFile$PolicyInfo r2;
+        sun.security.provider.PolicyFile r0;
+        boolean $z0;
+
+        r0 := @parameter0: sun.security.provider.PolicyFile;
+
+        r1 := @parameter1: java.net.URL;
+
+        r2 := @parameter2: sun.security.provider.PolicyFile$PolicyInfo;
+
+        $z0 = specialinvoke r0.<sun.security.provider.PolicyFile: boolean init(java.net.URL,sun.security.provider.PolicyFile$PolicyInfo)>(r1, r2);
+
+        return $z0;
+    }
+
+    static void access$500(sun.security.provider.PolicyFile, sun.security.provider.PolicyFile$PolicyInfo)
+    {
+        sun.security.provider.PolicyFile$PolicyInfo r1;
+        sun.security.provider.PolicyFile r0;
+
+        r0 := @parameter0: sun.security.provider.PolicyFile;
+
+        r1 := @parameter1: sun.security.provider.PolicyFile$PolicyInfo;
+
+        specialinvoke r0.<sun.security.provider.PolicyFile: void initStaticPolicy(sun.security.provider.PolicyFile$PolicyInfo)>(r1);
+
+        return;
+    }
+
+    static boolean access$200(sun.security.provider.PolicyFile)
+    {
+        sun.security.provider.PolicyFile r0;
+        boolean $z0;
+
+        r0 := @parameter0: sun.security.provider.PolicyFile;
+
+        $z0 = r0.<sun.security.provider.PolicyFile: boolean allowSystemProperties>;
+
+        return $z0;
+    }
+
+    static sun.security.util.Debug access$600()
+    {
+        sun.security.util.Debug $r0;
+
+        $r0 = <sun.security.provider.PolicyFile: sun.security.util.Debug debug>;
+
+        return $r0;
+    }
+
+    static java.security.CodeSource access$700(sun.security.provider.PolicyFile, java.security.CodeSource, boolean)
+    {
+        java.security.CodeSource r1, $r2;
+        sun.security.provider.PolicyFile r0;
+        boolean z0;
+
+        r0 := @parameter0: sun.security.provider.PolicyFile;
+
+        r1 := @parameter1: java.security.CodeSource;
+
+        z0 := @parameter2: boolean;
+
+        $r2 = specialinvoke r0.<sun.security.provider.PolicyFile: java.security.CodeSource canonicalizeCodebase(java.security.CodeSource,boolean)>(r1, z0);
+
+        return $r2;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class[] $r1, $r2, $r3;
+        sun.security.util.Debug $r0;
+
+        <sun.security.provider.PolicyFile: int DEFAULT_CACHE_SIZE> = 1;
+
+        <sun.security.provider.PolicyFile: java.lang.String AUTH_POLICY_URL> = "auth.policy.url.";
+
+        <sun.security.provider.PolicyFile: java.lang.String AUTH_POLICY> = "java.security.auth.policy";
+
+        <sun.security.provider.PolicyFile: java.lang.String POLICY_URL> = "policy.url.";
+
+        <sun.security.provider.PolicyFile: java.lang.String SECURITY_MANAGER> = "java.security.manager";
+
+        <sun.security.provider.PolicyFile: java.lang.String POLICY> = "java.security.policy";
+
+        <sun.security.provider.PolicyFile: java.lang.String X500PRINCIPAL> = "javax.security.auth.x500.X500Principal";
+
+        <sun.security.provider.PolicyFile: java.lang.String SELF> = "${{self}}";
+
+        <sun.security.provider.PolicyFile: java.lang.String P11KEYSTORE> = "PKCS11";
+
+        <sun.security.provider.PolicyFile: java.lang.String NONE> = "NONE";
+
+        $r0 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String)>("policy");
+
+        <sun.security.provider.PolicyFile: sun.security.util.Debug debug> = $r0;
+
+        $r1 = newarray (java.lang.Class)[0];
+
+        <sun.security.provider.PolicyFile: java.lang.Class[] PARAMS0> = $r1;
+
+        $r2 = newarray (java.lang.Class)[1];
+
+        $r2[0] = class "Ljava/lang/String;";
+
+        <sun.security.provider.PolicyFile: java.lang.Class[] PARAMS1> = $r2;
+
+        $r3 = newarray (java.lang.Class)[2];
+
+        $r3[0] = class "Ljava/lang/String;";
+
+        $r3[1] = class "Ljava/lang/String;";
+
+        <sun.security.provider.PolicyFile: java.lang.Class[] PARAMS2> = $r3;
+
+        return;
+    }
+}

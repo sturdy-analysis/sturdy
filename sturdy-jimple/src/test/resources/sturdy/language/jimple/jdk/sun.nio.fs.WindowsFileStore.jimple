@@ -1,0 +1,766 @@
+class sun.nio.fs.WindowsFileStore extends java.nio.file.FileStore
+{
+    private final java.lang.String root;
+    private final sun.nio.fs.WindowsNativeDispatcher$VolumeInformation volInfo;
+    private final int volType;
+    private final java.lang.String displayName;
+    static final boolean $assertionsDisabled;
+
+    private void <init>(java.lang.String) throws sun.nio.fs.WindowsException
+    {
+        char $c4;
+        java.lang.AssertionError $r7;
+        sun.nio.fs.WindowsNativeDispatcher$VolumeInformation $r2, $r3;
+        int $i0, $i1, $i2, $i3, $i5;
+        sun.nio.fs.WindowsFileStore r0;
+        java.lang.String r1, $r4, $r6;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.nio.fs.WindowsFileStore;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.nio.file.FileStore: void <init>()>();
+
+        $z0 = <sun.nio.fs.WindowsFileStore: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $i2 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        $i3 = $i2 - 1;
+
+        $c4 = virtualinvoke r1.<java.lang.String: char charAt(int)>($i3);
+
+        $i5 = (int) $c4;
+
+        if $i5 == 92 goto label1;
+
+        $r7 = new java.lang.AssertionError;
+
+        specialinvoke $r7.<java.lang.AssertionError: void <init>()>();
+
+        throw $r7;
+
+     label1:
+        r0.<sun.nio.fs.WindowsFileStore: java.lang.String root> = r1;
+
+        $r2 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: sun.nio.fs.WindowsNativeDispatcher$VolumeInformation GetVolumeInformation(java.lang.String)>(r1);
+
+        r0.<sun.nio.fs.WindowsFileStore: sun.nio.fs.WindowsNativeDispatcher$VolumeInformation volInfo> = $r2;
+
+        $i0 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: int GetDriveType(java.lang.String)>(r1);
+
+        r0.<sun.nio.fs.WindowsFileStore: int volType> = $i0;
+
+        $r3 = r0.<sun.nio.fs.WindowsFileStore: sun.nio.fs.WindowsNativeDispatcher$VolumeInformation volInfo>;
+
+        $r4 = virtualinvoke $r3.<sun.nio.fs.WindowsNativeDispatcher$VolumeInformation: java.lang.String volumeName()>();
+
+        $z1 = virtualinvoke $r4.<java.lang.String: boolean isEmpty()>();
+
+        if $z1 != 0 goto label2;
+
+        r0.<sun.nio.fs.WindowsFileStore: java.lang.String displayName> = $r4;
+
+        goto label5;
+
+     label2:
+        $i1 = r0.<sun.nio.fs.WindowsFileStore: int volType>;
+
+        if $i1 != 2 goto label3;
+
+        $r6 = "Removable Disk";
+
+        goto label4;
+
+     label3:
+        $r6 = "";
+
+     label4:
+        r0.<sun.nio.fs.WindowsFileStore: java.lang.String displayName> = $r6;
+
+     label5:
+        return;
+    }
+
+    static sun.nio.fs.WindowsFileStore create(java.lang.String, boolean) throws java.io.IOException
+    {
+        sun.nio.fs.WindowsException $r2;
+        int $i0;
+        sun.nio.fs.WindowsFileStore $r0;
+        java.lang.String r1;
+        boolean z0;
+
+        r1 := @parameter0: java.lang.String;
+
+        z0 := @parameter1: boolean;
+
+     label1:
+        $r0 = new sun.nio.fs.WindowsFileStore;
+
+        specialinvoke $r0.<sun.nio.fs.WindowsFileStore: void <init>(java.lang.String)>(r1);
+
+     label2:
+        return $r0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        if z0 == 0 goto label4;
+
+        $i0 = virtualinvoke $r2.<sun.nio.fs.WindowsException: int lastError()>();
+
+        if $i0 != 21 goto label4;
+
+        return null;
+
+     label4:
+        virtualinvoke $r2.<sun.nio.fs.WindowsException: void rethrowAsIOException(java.lang.String)>(r1);
+
+        return null;
+
+        catch sun.nio.fs.WindowsException from label1 to label2 with label3;
+    }
+
+    static sun.nio.fs.WindowsFileStore create(sun.nio.fs.WindowsPath) throws java.io.IOException
+    {
+        sun.nio.fs.WindowsPath r0;
+        sun.nio.fs.WindowsFileSystem $r1;
+        java.nio.file.FileSystemException $r7;
+        sun.nio.fs.WindowsException $r3, $r4;
+        int $i0;
+        sun.nio.fs.WindowsFileStore $r2, $r6;
+        java.lang.String $r5, $r8, r9;
+        boolean $z0;
+
+        r0 := @parameter0: sun.nio.fs.WindowsPath;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.nio.fs.WindowsPath: sun.nio.fs.WindowsFileSystem getFileSystem()>();
+
+        $z0 = virtualinvoke $r1.<sun.nio.fs.WindowsFileSystem: boolean supportsLinks()>();
+
+        if $z0 == 0 goto label2;
+
+        r9 = staticinvoke <sun.nio.fs.WindowsLinkSupport: java.lang.String getFinalPath(sun.nio.fs.WindowsPath,boolean)>(r0, 1);
+
+        goto label3;
+
+     label2:
+        staticinvoke <sun.nio.fs.WindowsFileAttributes: sun.nio.fs.WindowsFileAttributes get(sun.nio.fs.WindowsPath,boolean)>(r0, 1);
+
+        r9 = virtualinvoke r0.<sun.nio.fs.WindowsPath: java.lang.String getPathForWin32Calls()>();
+
+     label3:
+        $r2 = staticinvoke <sun.nio.fs.WindowsFileStore: sun.nio.fs.WindowsFileStore createFromPath(java.lang.String)>(r9);
+
+     label4:
+        return $r2;
+
+     label5:
+        $r4 := @caughtexception;
+
+        $i0 = virtualinvoke $r4.<sun.nio.fs.WindowsException: int lastError()>();
+
+        if $i0 == 144 goto label6;
+
+        throw $r4;
+
+     label6:
+        $r5 = staticinvoke <sun.nio.fs.WindowsLinkSupport: java.lang.String getFinalPath(sun.nio.fs.WindowsPath)>(r0);
+
+        if $r5 != null goto label7;
+
+        $r7 = new java.nio.file.FileSystemException;
+
+        $r8 = virtualinvoke r0.<sun.nio.fs.WindowsPath: java.lang.String getPathForExceptionMessage()>();
+
+        specialinvoke $r7.<java.nio.file.FileSystemException: void <init>(java.lang.String,java.lang.String,java.lang.String)>($r8, null, "Couldn\'t resolve path");
+
+        throw $r7;
+
+     label7:
+        $r6 = staticinvoke <sun.nio.fs.WindowsFileStore: sun.nio.fs.WindowsFileStore createFromPath(java.lang.String)>($r5);
+
+     label8:
+        return $r6;
+
+     label9:
+        $r3 := @caughtexception;
+
+        virtualinvoke $r3.<sun.nio.fs.WindowsException: void rethrowAsIOException(sun.nio.fs.WindowsPath)>(r0);
+
+        return null;
+
+        catch sun.nio.fs.WindowsException from label3 to label4 with label5;
+        catch sun.nio.fs.WindowsException from label1 to label4 with label9;
+        catch sun.nio.fs.WindowsException from label5 to label8 with label9;
+    }
+
+    private static sun.nio.fs.WindowsFileStore createFromPath(java.lang.String) throws sun.nio.fs.WindowsException
+    {
+        java.lang.String r0, $r1;
+        sun.nio.fs.WindowsFileStore $r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: java.lang.String GetVolumePathName(java.lang.String)>(r0);
+
+        $r2 = new sun.nio.fs.WindowsFileStore;
+
+        specialinvoke $r2.<sun.nio.fs.WindowsFileStore: void <init>(java.lang.String)>($r1);
+
+        return $r2;
+    }
+
+    sun.nio.fs.WindowsNativeDispatcher$VolumeInformation volumeInformation()
+    {
+        sun.nio.fs.WindowsFileStore r0;
+        sun.nio.fs.WindowsNativeDispatcher$VolumeInformation $r1;
+
+        r0 := @this: sun.nio.fs.WindowsFileStore;
+
+        $r1 = r0.<sun.nio.fs.WindowsFileStore: sun.nio.fs.WindowsNativeDispatcher$VolumeInformation volInfo>;
+
+        return $r1;
+    }
+
+    int volumeType()
+    {
+        int $i0;
+        sun.nio.fs.WindowsFileStore r0;
+
+        r0 := @this: sun.nio.fs.WindowsFileStore;
+
+        $i0 = r0.<sun.nio.fs.WindowsFileStore: int volType>;
+
+        return $i0;
+    }
+
+    public java.lang.String name()
+    {
+        sun.nio.fs.WindowsFileStore r0;
+        java.lang.String $r2;
+        sun.nio.fs.WindowsNativeDispatcher$VolumeInformation $r1;
+
+        r0 := @this: sun.nio.fs.WindowsFileStore;
+
+        $r1 = r0.<sun.nio.fs.WindowsFileStore: sun.nio.fs.WindowsNativeDispatcher$VolumeInformation volInfo>;
+
+        $r2 = virtualinvoke $r1.<sun.nio.fs.WindowsNativeDispatcher$VolumeInformation: java.lang.String volumeName()>();
+
+        return $r2;
+    }
+
+    public java.lang.String type()
+    {
+        sun.nio.fs.WindowsFileStore r0;
+        java.lang.String $r2;
+        sun.nio.fs.WindowsNativeDispatcher$VolumeInformation $r1;
+
+        r0 := @this: sun.nio.fs.WindowsFileStore;
+
+        $r1 = r0.<sun.nio.fs.WindowsFileStore: sun.nio.fs.WindowsNativeDispatcher$VolumeInformation volInfo>;
+
+        $r2 = virtualinvoke $r1.<sun.nio.fs.WindowsNativeDispatcher$VolumeInformation: java.lang.String fileSystemName()>();
+
+        return $r2;
+    }
+
+    public boolean isReadOnly()
+    {
+        int $i0, $i1;
+        sun.nio.fs.WindowsFileStore r0;
+        sun.nio.fs.WindowsNativeDispatcher$VolumeInformation $r1;
+        boolean $z0;
+
+        r0 := @this: sun.nio.fs.WindowsFileStore;
+
+        $r1 = r0.<sun.nio.fs.WindowsFileStore: sun.nio.fs.WindowsNativeDispatcher$VolumeInformation volInfo>;
+
+        $i0 = virtualinvoke $r1.<sun.nio.fs.WindowsNativeDispatcher$VolumeInformation: int flags()>();
+
+        $i1 = $i0 & 524288;
+
+        if $i1 == 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private sun.nio.fs.WindowsNativeDispatcher$DiskFreeSpace readDiskFreeSpace() throws java.io.IOException
+    {
+        sun.nio.fs.WindowsNativeDispatcher$DiskFreeSpace $r2;
+        sun.nio.fs.WindowsException $r3;
+        sun.nio.fs.WindowsFileStore r0;
+        java.lang.String $r1, $r4;
+
+        r0 := @this: sun.nio.fs.WindowsFileStore;
+
+     label1:
+        $r1 = r0.<sun.nio.fs.WindowsFileStore: java.lang.String root>;
+
+        $r2 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: sun.nio.fs.WindowsNativeDispatcher$DiskFreeSpace GetDiskFreeSpaceEx(java.lang.String)>($r1);
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = r0.<sun.nio.fs.WindowsFileStore: java.lang.String root>;
+
+        virtualinvoke $r3.<sun.nio.fs.WindowsException: void rethrowAsIOException(java.lang.String)>($r4);
+
+        return null;
+
+        catch sun.nio.fs.WindowsException from label1 to label2 with label3;
+    }
+
+    public long getTotalSpace() throws java.io.IOException
+    {
+        long $l0;
+        sun.nio.fs.WindowsFileStore r0;
+        sun.nio.fs.WindowsNativeDispatcher$DiskFreeSpace $r1;
+
+        r0 := @this: sun.nio.fs.WindowsFileStore;
+
+        $r1 = specialinvoke r0.<sun.nio.fs.WindowsFileStore: sun.nio.fs.WindowsNativeDispatcher$DiskFreeSpace readDiskFreeSpace()>();
+
+        $l0 = virtualinvoke $r1.<sun.nio.fs.WindowsNativeDispatcher$DiskFreeSpace: long totalNumberOfBytes()>();
+
+        return $l0;
+    }
+
+    public long getUsableSpace() throws java.io.IOException
+    {
+        long $l0;
+        sun.nio.fs.WindowsFileStore r0;
+        sun.nio.fs.WindowsNativeDispatcher$DiskFreeSpace $r1;
+
+        r0 := @this: sun.nio.fs.WindowsFileStore;
+
+        $r1 = specialinvoke r0.<sun.nio.fs.WindowsFileStore: sun.nio.fs.WindowsNativeDispatcher$DiskFreeSpace readDiskFreeSpace()>();
+
+        $l0 = virtualinvoke $r1.<sun.nio.fs.WindowsNativeDispatcher$DiskFreeSpace: long freeBytesAvailable()>();
+
+        return $l0;
+    }
+
+    public long getUnallocatedSpace() throws java.io.IOException
+    {
+        long $l0;
+        sun.nio.fs.WindowsFileStore r0;
+        sun.nio.fs.WindowsNativeDispatcher$DiskFreeSpace $r1;
+
+        r0 := @this: sun.nio.fs.WindowsFileStore;
+
+        $r1 = specialinvoke r0.<sun.nio.fs.WindowsFileStore: sun.nio.fs.WindowsNativeDispatcher$DiskFreeSpace readDiskFreeSpace()>();
+
+        $l0 = virtualinvoke $r1.<sun.nio.fs.WindowsNativeDispatcher$DiskFreeSpace: long freeBytesAvailable()>();
+
+        return $l0;
+    }
+
+    public java.nio.file.attribute.FileStoreAttributeView getFileStoreAttributeView(java.lang.Class)
+    {
+        java.lang.Class r0;
+        sun.nio.fs.WindowsFileStore r2;
+        java.lang.NullPointerException $r1;
+
+        r2 := @this: sun.nio.fs.WindowsFileStore;
+
+        r0 := @parameter0: java.lang.Class;
+
+        if r0 != null goto label1;
+
+        $r1 = new java.lang.NullPointerException;
+
+        specialinvoke $r1.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        return null;
+    }
+
+    public java.lang.Object getAttribute(java.lang.String) throws java.io.IOException
+    {
+        long $l3, $l4, $l5;
+        java.lang.Integer $r11;
+        java.lang.Long $r12, $r13, $r14;
+        int $i0, $i1, $i2;
+        java.lang.Boolean $r8, $r9;
+        java.lang.String r0, $r6;
+        sun.nio.fs.WindowsFileStore r7;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        java.lang.UnsupportedOperationException $r1;
+        sun.nio.fs.WindowsNativeDispatcher$VolumeInformation $r10;
+        java.lang.StringBuilder $r2, $r3, $r4, $r5;
+
+        r7 := @this: sun.nio.fs.WindowsFileStore;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("totalSpace");
+
+        if $z0 == 0 goto label01;
+
+        $l5 = virtualinvoke r7.<sun.nio.fs.WindowsFileStore: long getTotalSpace()>();
+
+        $r14 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l5);
+
+        return $r14;
+
+     label01:
+        $z1 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("usableSpace");
+
+        if $z1 == 0 goto label02;
+
+        $l4 = virtualinvoke r7.<sun.nio.fs.WindowsFileStore: long getUsableSpace()>();
+
+        $r13 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l4);
+
+        return $r13;
+
+     label02:
+        $z2 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("unallocatedSpace");
+
+        if $z2 == 0 goto label03;
+
+        $l3 = virtualinvoke r7.<sun.nio.fs.WindowsFileStore: long getUnallocatedSpace()>();
+
+        $r12 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l3);
+
+        return $r12;
+
+     label03:
+        $z3 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("volume:vsn");
+
+        if $z3 == 0 goto label04;
+
+        $r10 = r7.<sun.nio.fs.WindowsFileStore: sun.nio.fs.WindowsNativeDispatcher$VolumeInformation volInfo>;
+
+        $i2 = virtualinvoke $r10.<sun.nio.fs.WindowsNativeDispatcher$VolumeInformation: int volumeSerialNumber()>();
+
+        $r11 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        return $r11;
+
+     label04:
+        $z4 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("volume:isRemovable");
+
+        if $z4 == 0 goto label07;
+
+        $i1 = r7.<sun.nio.fs.WindowsFileStore: int volType>;
+
+        if $i1 != 2 goto label05;
+
+        $z6 = 1;
+
+        goto label06;
+
+     label05:
+        $z6 = 0;
+
+     label06:
+        $r9 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z6);
+
+        return $r9;
+
+     label07:
+        $z5 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("volume:isCdrom");
+
+        if $z5 == 0 goto label10;
+
+        $i0 = r7.<sun.nio.fs.WindowsFileStore: int volType>;
+
+        if $i0 != 5 goto label08;
+
+        $z7 = 1;
+
+        goto label09;
+
+     label08:
+        $z7 = 0;
+
+     label09:
+        $r8 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z7);
+
+        return $r8;
+
+     label10:
+        $r1 = new java.lang.UnsupportedOperationException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' not recognized");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>($r6);
+
+        throw $r1;
+    }
+
+    public boolean supportsFileAttributeView(java.lang.Class)
+    {
+        java.lang.NullPointerException $r4;
+        sun.nio.fs.WindowsNativeDispatcher$VolumeInformation $r2, $r3;
+        int $i0, $i1, $i2, $i3;
+        java.lang.Class r0;
+        sun.nio.fs.WindowsFileStore r1;
+        boolean $z0, $z1;
+
+        r1 := @this: sun.nio.fs.WindowsFileStore;
+
+        r0 := @parameter0: java.lang.Class;
+
+        if r0 != null goto label01;
+
+        $r4 = new java.lang.NullPointerException;
+
+        specialinvoke $r4.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r4;
+
+     label01:
+        if r0 == class "Ljava/nio/file/attribute/BasicFileAttributeView;" goto label02;
+
+        if r0 != class "Ljava/nio/file/attribute/DosFileAttributeView;" goto label03;
+
+     label02:
+        return 1;
+
+     label03:
+        if r0 == class "Ljava/nio/file/attribute/AclFileAttributeView;" goto label04;
+
+        if r0 != class "Ljava/nio/file/attribute/FileOwnerAttributeView;" goto label07;
+
+     label04:
+        $r2 = r1.<sun.nio.fs.WindowsFileStore: sun.nio.fs.WindowsNativeDispatcher$VolumeInformation volInfo>;
+
+        $i0 = virtualinvoke $r2.<sun.nio.fs.WindowsNativeDispatcher$VolumeInformation: int flags()>();
+
+        $i1 = $i0 & 8;
+
+        if $i1 == 0 goto label05;
+
+        $z0 = 1;
+
+        goto label06;
+
+     label05:
+        $z0 = 0;
+
+     label06:
+        return $z0;
+
+     label07:
+        if r0 != class "Ljava/nio/file/attribute/UserDefinedFileAttributeView;" goto label10;
+
+        $r3 = r1.<sun.nio.fs.WindowsFileStore: sun.nio.fs.WindowsNativeDispatcher$VolumeInformation volInfo>;
+
+        $i2 = virtualinvoke $r3.<sun.nio.fs.WindowsNativeDispatcher$VolumeInformation: int flags()>();
+
+        $i3 = $i2 & 262144;
+
+        if $i3 == 0 goto label08;
+
+        $z1 = 1;
+
+        goto label09;
+
+     label08:
+        $z1 = 0;
+
+     label09:
+        return $z1;
+
+     label10:
+        return 0;
+    }
+
+    public boolean supportsFileAttributeView(java.lang.String)
+    {
+        java.lang.String r0;
+        sun.nio.fs.WindowsFileStore r1;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+
+        r1 := @this: sun.nio.fs.WindowsFileStore;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("basic");
+
+        if $z0 != 0 goto label1;
+
+        $z1 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("dos");
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        $z2 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("acl");
+
+        if $z2 == 0 goto label3;
+
+        $z7 = virtualinvoke r1.<sun.nio.fs.WindowsFileStore: boolean supportsFileAttributeView(java.lang.Class)>(class "Ljava/nio/file/attribute/AclFileAttributeView;");
+
+        return $z7;
+
+     label3:
+        $z3 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("owner");
+
+        if $z3 == 0 goto label4;
+
+        $z6 = virtualinvoke r1.<sun.nio.fs.WindowsFileStore: boolean supportsFileAttributeView(java.lang.Class)>(class "Ljava/nio/file/attribute/FileOwnerAttributeView;");
+
+        return $z6;
+
+     label4:
+        $z4 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("user");
+
+        if $z4 == 0 goto label5;
+
+        $z5 = virtualinvoke r1.<sun.nio.fs.WindowsFileStore: boolean supportsFileAttributeView(java.lang.Class)>(class "Ljava/nio/file/attribute/UserDefinedFileAttributeView;");
+
+        return $z5;
+
+     label5:
+        return 0;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        java.lang.Object r0;
+        sun.nio.fs.WindowsFileStore r1, r2;
+        java.lang.String $r3, $r4;
+        boolean $z0, $z1;
+
+        r1 := @this: sun.nio.fs.WindowsFileStore;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        $z0 = r0 instanceof sun.nio.fs.WindowsFileStore;
+
+        if $z0 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        r2 = (sun.nio.fs.WindowsFileStore) r0;
+
+        $r4 = r1.<sun.nio.fs.WindowsFileStore: java.lang.String root>;
+
+        $r3 = r2.<sun.nio.fs.WindowsFileStore: java.lang.String root>;
+
+        $z1 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        return $z1;
+    }
+
+    public int hashCode()
+    {
+        int $i0;
+        sun.nio.fs.WindowsFileStore r0;
+        java.lang.String $r1;
+
+        r0 := @this: sun.nio.fs.WindowsFileStore;
+
+        $r1 = r0.<sun.nio.fs.WindowsFileStore: java.lang.String root>;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int hashCode()>();
+
+        return $i0;
+    }
+
+    public java.lang.String toString()
+    {
+        java.lang.CharSequence $r5;
+        int $i0, $i1, $i2;
+        java.lang.StringBuilder $r0;
+        sun.nio.fs.WindowsFileStore r1;
+        java.lang.String $r2, $r3, $r4, $r6;
+
+        r1 := @this: sun.nio.fs.WindowsFileStore;
+
+        $r0 = new java.lang.StringBuilder;
+
+        $r2 = r1.<sun.nio.fs.WindowsFileStore: java.lang.String displayName>;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>(java.lang.String)>($r2);
+
+        $i0 = virtualinvoke $r0.<java.lang.StringBuilder: int length()>();
+
+        if $i0 <= 0 goto label1;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+     label1:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(");
+
+        $r4 = r1.<sun.nio.fs.WindowsFileStore: java.lang.String root>;
+
+        $r3 = r1.<sun.nio.fs.WindowsFileStore: java.lang.String root>;
+
+        $i1 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        $i2 = $i1 - 1;
+
+        $r5 = virtualinvoke $r4.<java.lang.String: java.lang.CharSequence subSequence(int,int)>(0, $i2);
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.CharSequence)>($r5);
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r6 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r6;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        $r0 = class "Lsun/nio/fs/WindowsFileStore;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.nio.fs.WindowsFileStore: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

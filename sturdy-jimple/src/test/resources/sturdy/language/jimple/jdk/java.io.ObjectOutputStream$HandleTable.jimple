@@ -1,0 +1,353 @@
+class java.io.ObjectOutputStream$HandleTable extends java.lang.Object
+{
+    private int size;
+    private int threshold;
+    private final float loadFactor;
+    private int[] spine;
+    private int[] next;
+    private java.lang.Object[] objs;
+
+    void <init>(int, float)
+    {
+        java.lang.Object[] $r3;
+        java.io.ObjectOutputStream$HandleTable r0;
+        int[] $r1, $r2;
+        int i0, $i1;
+        float f0, $f1, $f2;
+
+        r0 := @this: java.io.ObjectOutputStream$HandleTable;
+
+        i0 := @parameter0: int;
+
+        f0 := @parameter1: float;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.io.ObjectOutputStream$HandleTable: float loadFactor> = f0;
+
+        $r1 = newarray (int)[i0];
+
+        r0.<java.io.ObjectOutputStream$HandleTable: int[] spine> = $r1;
+
+        $r2 = newarray (int)[i0];
+
+        r0.<java.io.ObjectOutputStream$HandleTable: int[] next> = $r2;
+
+        $r3 = newarray (java.lang.Object)[i0];
+
+        r0.<java.io.ObjectOutputStream$HandleTable: java.lang.Object[] objs> = $r3;
+
+        $f1 = (float) i0;
+
+        $f2 = $f1 * f0;
+
+        $i1 = (int) $f2;
+
+        r0.<java.io.ObjectOutputStream$HandleTable: int threshold> = $i1;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream$HandleTable: void clear()>();
+
+        return;
+    }
+
+    int assign(java.lang.Object)
+    {
+        java.io.ObjectOutputStream$HandleTable r0;
+        int[] $r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        java.lang.Object r2;
+
+        r0 := @this: java.io.ObjectOutputStream$HandleTable;
+
+        r2 := @parameter0: java.lang.Object;
+
+        $i1 = r0.<java.io.ObjectOutputStream$HandleTable: int size>;
+
+        $r1 = r0.<java.io.ObjectOutputStream$HandleTable: int[] next>;
+
+        $i0 = lengthof $r1;
+
+        if $i1 < $i0 goto label1;
+
+        specialinvoke r0.<java.io.ObjectOutputStream$HandleTable: void growEntries()>();
+
+     label1:
+        $i3 = r0.<java.io.ObjectOutputStream$HandleTable: int size>;
+
+        $i2 = r0.<java.io.ObjectOutputStream$HandleTable: int threshold>;
+
+        if $i3 < $i2 goto label2;
+
+        specialinvoke r0.<java.io.ObjectOutputStream$HandleTable: void growSpine()>();
+
+     label2:
+        $i4 = r0.<java.io.ObjectOutputStream$HandleTable: int size>;
+
+        specialinvoke r0.<java.io.ObjectOutputStream$HandleTable: void insert(java.lang.Object,int)>(r2, $i4);
+
+        $i5 = r0.<java.io.ObjectOutputStream$HandleTable: int size>;
+
+        $i6 = $i5 + 1;
+
+        r0.<java.io.ObjectOutputStream$HandleTable: int size> = $i6;
+
+        return $i5;
+    }
+
+    int lookup(java.lang.Object)
+    {
+        java.lang.Object[] $r4;
+        java.io.ObjectOutputStream$HandleTable r0;
+        int[] $r2, $r3, $r6;
+        int $i0, $i1, $i2, i3, i4, $i6, $i8;
+        java.lang.Object r1, $r5;
+
+        r0 := @this: java.io.ObjectOutputStream$HandleTable;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $i0 = r0.<java.io.ObjectOutputStream$HandleTable: int size>;
+
+        if $i0 != 0 goto label1;
+
+        $i6 = (int) -1;
+
+        return $i6;
+
+     label1:
+        $i1 = specialinvoke r0.<java.io.ObjectOutputStream$HandleTable: int hash(java.lang.Object)>(r1);
+
+        $r2 = r0.<java.io.ObjectOutputStream$HandleTable: int[] spine>;
+
+        $i2 = lengthof $r2;
+
+        i3 = $i1 % $i2;
+
+        $r3 = r0.<java.io.ObjectOutputStream$HandleTable: int[] spine>;
+
+        i4 = $r3[i3];
+
+     label2:
+        if i4 < 0 goto label4;
+
+        $r4 = r0.<java.io.ObjectOutputStream$HandleTable: java.lang.Object[] objs>;
+
+        $r5 = $r4[i4];
+
+        if $r5 != r1 goto label3;
+
+        return i4;
+
+     label3:
+        $r6 = r0.<java.io.ObjectOutputStream$HandleTable: int[] next>;
+
+        i4 = $r6[i4];
+
+        goto label2;
+
+     label4:
+        $i8 = (int) -1;
+
+        return $i8;
+    }
+
+    void clear()
+    {
+        java.lang.Object[] $r2;
+        int[] $r1;
+        int $i0, $i2;
+        java.io.ObjectOutputStream$HandleTable r0;
+
+        r0 := @this: java.io.ObjectOutputStream$HandleTable;
+
+        $r1 = r0.<java.io.ObjectOutputStream$HandleTable: int[] spine>;
+
+        $i2 = (int) -1;
+
+        staticinvoke <java.util.Arrays: void fill(int[],int)>($r1, $i2);
+
+        $r2 = r0.<java.io.ObjectOutputStream$HandleTable: java.lang.Object[] objs>;
+
+        $i0 = r0.<java.io.ObjectOutputStream$HandleTable: int size>;
+
+        staticinvoke <java.util.Arrays: void fill(java.lang.Object[],int,int,java.lang.Object)>($r2, 0, $i0, null);
+
+        r0.<java.io.ObjectOutputStream$HandleTable: int size> = 0;
+
+        return;
+    }
+
+    int size()
+    {
+        int $i0;
+        java.io.ObjectOutputStream$HandleTable r0;
+
+        r0 := @this: java.io.ObjectOutputStream$HandleTable;
+
+        $i0 = r0.<java.io.ObjectOutputStream$HandleTable: int size>;
+
+        return $i0;
+    }
+
+    private void insert(java.lang.Object, int)
+    {
+        java.lang.Object[] $r3;
+        java.io.ObjectOutputStream$HandleTable r0;
+        int[] $r2, $r4, $r5, $r6;
+        int $i0, $i1, i2, i3, $i4;
+        java.lang.Object r1;
+
+        r0 := @this: java.io.ObjectOutputStream$HandleTable;
+
+        r1 := @parameter0: java.lang.Object;
+
+        i3 := @parameter1: int;
+
+        $i0 = specialinvoke r0.<java.io.ObjectOutputStream$HandleTable: int hash(java.lang.Object)>(r1);
+
+        $r2 = r0.<java.io.ObjectOutputStream$HandleTable: int[] spine>;
+
+        $i1 = lengthof $r2;
+
+        i2 = $i0 % $i1;
+
+        $r3 = r0.<java.io.ObjectOutputStream$HandleTable: java.lang.Object[] objs>;
+
+        $r3[i3] = r1;
+
+        $r5 = r0.<java.io.ObjectOutputStream$HandleTable: int[] next>;
+
+        $r4 = r0.<java.io.ObjectOutputStream$HandleTable: int[] spine>;
+
+        $i4 = $r4[i2];
+
+        $r5[i3] = $i4;
+
+        $r6 = r0.<java.io.ObjectOutputStream$HandleTable: int[] spine>;
+
+        $r6[i2] = i3;
+
+        return;
+    }
+
+    private void growSpine()
+    {
+        java.lang.Object[] $r5;
+        java.io.ObjectOutputStream$HandleTable r0;
+        int[] $r1, $r2, $r3, $r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, $i8;
+        float $f0, $f1, $f2;
+        java.lang.Object $r6;
+
+        r0 := @this: java.io.ObjectOutputStream$HandleTable;
+
+        $r1 = r0.<java.io.ObjectOutputStream$HandleTable: int[] spine>;
+
+        $i0 = lengthof $r1;
+
+        $i1 = $i0 << 1;
+
+        $i2 = $i1 + 1;
+
+        $r2 = newarray (int)[$i2];
+
+        r0.<java.io.ObjectOutputStream$HandleTable: int[] spine> = $r2;
+
+        $r3 = r0.<java.io.ObjectOutputStream$HandleTable: int[] spine>;
+
+        $i3 = lengthof $r3;
+
+        $f1 = (float) $i3;
+
+        $f0 = r0.<java.io.ObjectOutputStream$HandleTable: float loadFactor>;
+
+        $f2 = $f1 * $f0;
+
+        $i4 = (int) $f2;
+
+        r0.<java.io.ObjectOutputStream$HandleTable: int threshold> = $i4;
+
+        $r4 = r0.<java.io.ObjectOutputStream$HandleTable: int[] spine>;
+
+        $i8 = (int) -1;
+
+        staticinvoke <java.util.Arrays: void fill(int[],int)>($r4, $i8);
+
+        i6 = 0;
+
+     label1:
+        $i5 = r0.<java.io.ObjectOutputStream$HandleTable: int size>;
+
+        if i6 >= $i5 goto label2;
+
+        $r5 = r0.<java.io.ObjectOutputStream$HandleTable: java.lang.Object[] objs>;
+
+        $r6 = $r5[i6];
+
+        specialinvoke r0.<java.io.ObjectOutputStream$HandleTable: void insert(java.lang.Object,int)>($r6, i6);
+
+        i6 = i6 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private void growEntries()
+    {
+        java.lang.Object[] r4, $r5;
+        java.io.ObjectOutputStream$HandleTable r0;
+        int[] $r1, r2, $r3;
+        int $i0, $i1, i2, $i3, $i4;
+
+        r0 := @this: java.io.ObjectOutputStream$HandleTable;
+
+        $r1 = r0.<java.io.ObjectOutputStream$HandleTable: int[] next>;
+
+        $i0 = lengthof $r1;
+
+        $i1 = $i0 << 1;
+
+        i2 = $i1 + 1;
+
+        r2 = newarray (int)[i2];
+
+        $r3 = r0.<java.io.ObjectOutputStream$HandleTable: int[] next>;
+
+        $i3 = r0.<java.io.ObjectOutputStream$HandleTable: int size>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, 0, r2, 0, $i3);
+
+        r0.<java.io.ObjectOutputStream$HandleTable: int[] next> = r2;
+
+        r4 = newarray (java.lang.Object)[i2];
+
+        $r5 = r0.<java.io.ObjectOutputStream$HandleTable: java.lang.Object[] objs>;
+
+        $i4 = r0.<java.io.ObjectOutputStream$HandleTable: int size>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r5, 0, r4, 0, $i4);
+
+        r0.<java.io.ObjectOutputStream$HandleTable: java.lang.Object[] objs> = r4;
+
+        return;
+    }
+
+    private int hash(java.lang.Object)
+    {
+        int $i0, $i1;
+        java.lang.Object r0;
+        java.io.ObjectOutputStream$HandleTable r1;
+
+        r1 := @this: java.io.ObjectOutputStream$HandleTable;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $i0 = staticinvoke <java.lang.System: int identityHashCode(java.lang.Object)>(r0);
+
+        $i1 = $i0 & 2147483647;
+
+        return $i1;
+    }
+}

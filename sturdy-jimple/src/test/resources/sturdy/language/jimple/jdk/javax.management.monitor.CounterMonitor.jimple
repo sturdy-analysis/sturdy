@@ -1,0 +1,1613 @@
+public class javax.management.monitor.CounterMonitor extends javax.management.monitor.Monitor implements javax.management.monitor.CounterMonitorMBean
+{
+    private java.lang.Number modulus;
+    private java.lang.Number offset;
+    private boolean notify;
+    private boolean differenceMode;
+    private java.lang.Number initThreshold;
+    private static final java.lang.String[] types;
+    private static final javax.management.MBeanNotificationInfo[] notifsInfo;
+
+    public void <init>()
+    {
+        javax.management.monitor.CounterMonitor r0;
+        java.lang.Integer $r1, $r2, $r3;
+
+        r0 := @this: javax.management.monitor.CounterMonitor;
+
+        specialinvoke r0.<javax.management.monitor.Monitor: void <init>()>();
+
+        $r1 = <javax.management.monitor.CounterMonitor: java.lang.Integer INTEGER_ZERO>;
+
+        r0.<javax.management.monitor.CounterMonitor: java.lang.Number modulus> = $r1;
+
+        $r2 = <javax.management.monitor.CounterMonitor: java.lang.Integer INTEGER_ZERO>;
+
+        r0.<javax.management.monitor.CounterMonitor: java.lang.Number offset> = $r2;
+
+        r0.<javax.management.monitor.CounterMonitor: boolean notify> = 0;
+
+        r0.<javax.management.monitor.CounterMonitor: boolean differenceMode> = 0;
+
+        $r3 = <javax.management.monitor.CounterMonitor: java.lang.Integer INTEGER_ZERO>;
+
+        r0.<javax.management.monitor.CounterMonitor: java.lang.Number initThreshold> = $r3;
+
+        return;
+    }
+
+    public synchronized void start()
+    {
+        javax.management.monitor.CounterMonitor r0;
+        java.util.Iterator $r2;
+        java.util.logging.Logger $r8;
+        javax.management.monitor.CounterMonitor$CounterMonitorObservedObject r5;
+        java.util.logging.Level $r9;
+        java.util.List $r1;
+        javax.management.monitor.Monitor$ObservedObject r4;
+        java.lang.Object $r3;
+        java.lang.Class $r7;
+        java.lang.String $r10;
+        java.lang.Number $r6;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.management.monitor.CounterMonitor;
+
+        $z0 = virtualinvoke r0.<javax.management.monitor.CounterMonitor: boolean isActive()>();
+
+        if $z0 == 0 goto label1;
+
+        $r8 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger MONITOR_LOGGER>;
+
+        $r9 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r7 = class "Ljavax/management/monitor/CounterMonitor;";
+
+        $r10 = virtualinvoke $r7.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r8.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r9, $r10, "start", "the monitor is already active");
+
+        return;
+
+     label1:
+        $r1 = r0.<javax.management.monitor.CounterMonitor: java.util.List observedObjects>;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z1 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label3;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (javax.management.monitor.Monitor$ObservedObject) $r3;
+
+        r5 = (javax.management.monitor.CounterMonitor$CounterMonitorObservedObject) r4;
+
+        $r6 = r0.<javax.management.monitor.CounterMonitor: java.lang.Number initThreshold>;
+
+        virtualinvoke r5.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setThreshold(java.lang.Number)>($r6);
+
+        virtualinvoke r5.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setModulusExceeded(boolean)>(0);
+
+        virtualinvoke r5.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setEventAlreadyNotified(boolean)>(0);
+
+        virtualinvoke r5.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setPreviousScanCounter(java.lang.Number)>(null);
+
+        goto label2;
+
+     label3:
+        virtualinvoke r0.<javax.management.monitor.CounterMonitor: void doStart()>();
+
+        return;
+    }
+
+    public synchronized void stop()
+    {
+        javax.management.monitor.CounterMonitor r0;
+
+        r0 := @this: javax.management.monitor.CounterMonitor;
+
+        virtualinvoke r0.<javax.management.monitor.CounterMonitor: void doStop()>();
+
+        return;
+    }
+
+    public synchronized java.lang.Number getDerivedGauge(javax.management.ObjectName)
+    {
+        javax.management.monitor.CounterMonitor r0;
+        java.lang.Object $r2;
+        javax.management.ObjectName r1;
+        java.lang.Number $r3;
+
+        r0 := @this: javax.management.monitor.CounterMonitor;
+
+        r1 := @parameter0: javax.management.ObjectName;
+
+        $r2 = specialinvoke r0.<javax.management.monitor.Monitor: java.lang.Object getDerivedGauge(javax.management.ObjectName)>(r1);
+
+        $r3 = (java.lang.Number) $r2;
+
+        return $r3;
+    }
+
+    public synchronized long getDerivedGaugeTimeStamp(javax.management.ObjectName)
+    {
+        long $l0;
+        javax.management.ObjectName r1;
+        javax.management.monitor.CounterMonitor r0;
+
+        r0 := @this: javax.management.monitor.CounterMonitor;
+
+        r1 := @parameter0: javax.management.ObjectName;
+
+        $l0 = specialinvoke r0.<javax.management.monitor.Monitor: long getDerivedGaugeTimeStamp(javax.management.ObjectName)>(r1);
+
+        return $l0;
+    }
+
+    public synchronized java.lang.Number getThreshold(javax.management.ObjectName)
+    {
+        long $l0, $l2, $l4, $l5;
+        byte $b1, $b3, $b6;
+        javax.management.monitor.Monitor$ObservedObject $r2;
+        int $i7, $i8, $i9;
+        java.lang.Number $r4, $r5, $r6, $r7, $r8, $r9;
+        javax.management.monitor.CounterMonitor r0;
+        javax.management.ObjectName r1;
+        javax.management.monitor.CounterMonitor$CounterMonitorObservedObject r3;
+
+        r0 := @this: javax.management.monitor.CounterMonitor;
+
+        r1 := @parameter0: javax.management.ObjectName;
+
+        $r2 = virtualinvoke r0.<javax.management.monitor.CounterMonitor: javax.management.monitor.Monitor$ObservedObject getObservedObject(javax.management.ObjectName)>(r1);
+
+        r3 = (javax.management.monitor.CounterMonitor$CounterMonitorObservedObject) $r2;
+
+        if r3 != null goto label1;
+
+        return null;
+
+     label1:
+        $r4 = r0.<javax.management.monitor.CounterMonitor: java.lang.Number offset>;
+
+        $l0 = virtualinvoke $r4.<java.lang.Number: long longValue()>();
+
+        $b1 = $l0 cmp 0L;
+
+        $i7 = (int) $b1;
+
+        if $i7 <= 0 goto label2;
+
+        $r5 = r0.<javax.management.monitor.CounterMonitor: java.lang.Number modulus>;
+
+        $l2 = virtualinvoke $r5.<java.lang.Number: long longValue()>();
+
+        $b3 = $l2 cmp 0L;
+
+        $i8 = (int) $b3;
+
+        if $i8 <= 0 goto label2;
+
+        $r6 = virtualinvoke r3.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: java.lang.Number getThreshold()>();
+
+        $l4 = virtualinvoke $r6.<java.lang.Number: long longValue()>();
+
+        $r7 = r0.<javax.management.monitor.CounterMonitor: java.lang.Number modulus>;
+
+        $l5 = virtualinvoke $r7.<java.lang.Number: long longValue()>();
+
+        $b6 = $l4 cmp $l5;
+
+        $i9 = (int) $b6;
+
+        if $i9 <= 0 goto label2;
+
+        $r8 = r0.<javax.management.monitor.CounterMonitor: java.lang.Number initThreshold>;
+
+        return $r8;
+
+     label2:
+        $r9 = virtualinvoke r3.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: java.lang.Number getThreshold()>();
+
+        return $r9;
+    }
+
+    public synchronized java.lang.Number getInitThreshold()
+    {
+        javax.management.monitor.CounterMonitor r0;
+        java.lang.Number $r1;
+
+        r0 := @this: javax.management.monitor.CounterMonitor;
+
+        $r1 = r0.<javax.management.monitor.CounterMonitor: java.lang.Number initThreshold>;
+
+        return $r1;
+    }
+
+    public synchronized void setInitThreshold(java.lang.Number) throws java.lang.IllegalArgumentException
+    {
+        long $l0;
+        byte $b1;
+        javax.management.monitor.Monitor$ObservedObject r6;
+        int $i2, i3, $i4;
+        java.lang.Number r0, $r2;
+        boolean $z0, $z1;
+        javax.management.monitor.CounterMonitor r1;
+        java.util.Iterator $r4;
+        java.lang.IllegalArgumentException $r10, $r11;
+        javax.management.monitor.CounterMonitor$CounterMonitorObservedObject r7;
+        java.util.List $r3;
+        java.lang.Object $r5;
+
+        r1 := @this: javax.management.monitor.CounterMonitor;
+
+        r0 := @parameter0: java.lang.Number;
+
+        if r0 != null goto label1;
+
+        $r10 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r10.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Null threshold");
+
+        throw $r10;
+
+     label1:
+        $l0 = virtualinvoke r0.<java.lang.Number: long longValue()>();
+
+        $b1 = $l0 cmp 0L;
+
+        $i4 = (int) $b1;
+
+        if $i4 >= 0 goto label2;
+
+        $r11 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r11.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Negative threshold");
+
+        throw $r11;
+
+     label2:
+        $r2 = r1.<javax.management.monitor.CounterMonitor: java.lang.Number initThreshold>;
+
+        $z0 = virtualinvoke $r2.<java.lang.Object: boolean equals(java.lang.Object)>(r0);
+
+        if $z0 == 0 goto label3;
+
+        return;
+
+     label3:
+        r1.<javax.management.monitor.CounterMonitor: java.lang.Number initThreshold> = r0;
+
+        i3 = 0;
+
+        $r3 = r1.<javax.management.monitor.CounterMonitor: java.util.List observedObjects>;
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+     label4:
+        $z1 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label5;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (javax.management.monitor.Monitor$ObservedObject) $r5;
+
+        $i2 = i3;
+
+        i3 = i3 + 1;
+
+        virtualinvoke r1.<javax.management.monitor.CounterMonitor: void resetAlreadyNotified(javax.management.monitor.Monitor$ObservedObject,int,int)>(r6, $i2, 16);
+
+        r7 = (javax.management.monitor.CounterMonitor$CounterMonitorObservedObject) r6;
+
+        virtualinvoke r7.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setThreshold(java.lang.Number)>(r0);
+
+        virtualinvoke r7.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setModulusExceeded(boolean)>(0);
+
+        virtualinvoke r7.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setEventAlreadyNotified(boolean)>(0);
+
+        goto label4;
+
+     label5:
+        return;
+    }
+
+    public synchronized java.lang.Number getDerivedGauge()
+    {
+        javax.management.monitor.CounterMonitor r0;
+        java.util.List $r1, $r2;
+        javax.management.monitor.Monitor$ObservedObject $r4;
+        java.lang.Object $r3, $r5;
+        java.lang.Number $r6;
+        boolean $z0;
+
+        r0 := @this: javax.management.monitor.CounterMonitor;
+
+        $r1 = r0.<javax.management.monitor.CounterMonitor: java.util.List observedObjects>;
+
+        $z0 = interfaceinvoke $r1.<java.util.List: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<javax.management.monitor.CounterMonitor: java.util.List observedObjects>;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r4 = (javax.management.monitor.Monitor$ObservedObject) $r3;
+
+        $r5 = virtualinvoke $r4.<javax.management.monitor.Monitor$ObservedObject: java.lang.Object getDerivedGauge()>();
+
+        $r6 = (java.lang.Number) $r5;
+
+        return $r6;
+    }
+
+    public synchronized long getDerivedGaugeTimeStamp()
+    {
+        java.util.List $r1, $r2;
+        javax.management.monitor.CounterMonitor r0;
+        javax.management.monitor.Monitor$ObservedObject $r4;
+        java.lang.Object $r3;
+        long $l0;
+        boolean $z0;
+
+        r0 := @this: javax.management.monitor.CounterMonitor;
+
+        $r1 = r0.<javax.management.monitor.CounterMonitor: java.util.List observedObjects>;
+
+        $z0 = interfaceinvoke $r1.<java.util.List: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        return 0L;
+
+     label1:
+        $r2 = r0.<javax.management.monitor.CounterMonitor: java.util.List observedObjects>;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r4 = (javax.management.monitor.Monitor$ObservedObject) $r3;
+
+        $l0 = virtualinvoke $r4.<javax.management.monitor.Monitor$ObservedObject: long getDerivedGaugeTimeStamp()>();
+
+        return $l0;
+    }
+
+    public synchronized java.lang.Number getThreshold()
+    {
+        javax.management.ObjectName $r1;
+        javax.management.monitor.CounterMonitor r0;
+        java.lang.Number $r2;
+
+        r0 := @this: javax.management.monitor.CounterMonitor;
+
+        $r1 = virtualinvoke r0.<javax.management.monitor.CounterMonitor: javax.management.ObjectName getObservedObject()>();
+
+        $r2 = virtualinvoke r0.<javax.management.monitor.CounterMonitor: java.lang.Number getThreshold(javax.management.ObjectName)>($r1);
+
+        return $r2;
+    }
+
+    public synchronized void setThreshold(java.lang.Number) throws java.lang.IllegalArgumentException
+    {
+        javax.management.monitor.CounterMonitor r0;
+        java.lang.Number r1;
+
+        r0 := @this: javax.management.monitor.CounterMonitor;
+
+        r1 := @parameter0: java.lang.Number;
+
+        virtualinvoke r0.<javax.management.monitor.CounterMonitor: void setInitThreshold(java.lang.Number)>(r1);
+
+        return;
+    }
+
+    public synchronized java.lang.Number getOffset()
+    {
+        javax.management.monitor.CounterMonitor r0;
+        java.lang.Number $r1;
+
+        r0 := @this: javax.management.monitor.CounterMonitor;
+
+        $r1 = r0.<javax.management.monitor.CounterMonitor: java.lang.Number offset>;
+
+        return $r1;
+    }
+
+    public synchronized void setOffset(java.lang.Number) throws java.lang.IllegalArgumentException
+    {
+        long $l0;
+        byte $b1;
+        javax.management.monitor.Monitor$ObservedObject r6;
+        int $i2, i3, $i4;
+        java.lang.Number r0, $r2;
+        boolean $z0, $z1;
+        javax.management.monitor.CounterMonitor r1;
+        java.util.Iterator $r4;
+        java.lang.IllegalArgumentException $r9, $r10;
+        java.util.List $r3;
+        java.lang.Object $r5;
+
+        r1 := @this: javax.management.monitor.CounterMonitor;
+
+        r0 := @parameter0: java.lang.Number;
+
+        if r0 != null goto label1;
+
+        $r9 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r9.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Null offset");
+
+        throw $r9;
+
+     label1:
+        $l0 = virtualinvoke r0.<java.lang.Number: long longValue()>();
+
+        $b1 = $l0 cmp 0L;
+
+        $i4 = (int) $b1;
+
+        if $i4 >= 0 goto label2;
+
+        $r10 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r10.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Negative offset");
+
+        throw $r10;
+
+     label2:
+        $r2 = r1.<javax.management.monitor.CounterMonitor: java.lang.Number offset>;
+
+        $z0 = virtualinvoke $r2.<java.lang.Object: boolean equals(java.lang.Object)>(r0);
+
+        if $z0 == 0 goto label3;
+
+        return;
+
+     label3:
+        r1.<javax.management.monitor.CounterMonitor: java.lang.Number offset> = r0;
+
+        i3 = 0;
+
+        $r3 = r1.<javax.management.monitor.CounterMonitor: java.util.List observedObjects>;
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+     label4:
+        $z1 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label5;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (javax.management.monitor.Monitor$ObservedObject) $r5;
+
+        $i2 = i3;
+
+        i3 = i3 + 1;
+
+        virtualinvoke r1.<javax.management.monitor.CounterMonitor: void resetAlreadyNotified(javax.management.monitor.Monitor$ObservedObject,int,int)>(r6, $i2, 16);
+
+        goto label4;
+
+     label5:
+        return;
+    }
+
+    public synchronized java.lang.Number getModulus()
+    {
+        javax.management.monitor.CounterMonitor r0;
+        java.lang.Number $r1;
+
+        r0 := @this: javax.management.monitor.CounterMonitor;
+
+        $r1 = r0.<javax.management.monitor.CounterMonitor: java.lang.Number modulus>;
+
+        return $r1;
+    }
+
+    public synchronized void setModulus(java.lang.Number) throws java.lang.IllegalArgumentException
+    {
+        long $l0;
+        byte $b1;
+        javax.management.monitor.Monitor$ObservedObject r6;
+        int $i2, i3, $i4;
+        java.lang.Number r0, $r2;
+        boolean $z0, $z1;
+        javax.management.monitor.CounterMonitor r1;
+        java.util.Iterator $r4;
+        java.lang.IllegalArgumentException $r10, $r11;
+        javax.management.monitor.CounterMonitor$CounterMonitorObservedObject r7;
+        java.util.List $r3;
+        java.lang.Object $r5;
+
+        r1 := @this: javax.management.monitor.CounterMonitor;
+
+        r0 := @parameter0: java.lang.Number;
+
+        if r0 != null goto label1;
+
+        $r10 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r10.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Null modulus");
+
+        throw $r10;
+
+     label1:
+        $l0 = virtualinvoke r0.<java.lang.Number: long longValue()>();
+
+        $b1 = $l0 cmp 0L;
+
+        $i4 = (int) $b1;
+
+        if $i4 >= 0 goto label2;
+
+        $r11 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r11.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Negative modulus");
+
+        throw $r11;
+
+     label2:
+        $r2 = r1.<javax.management.monitor.CounterMonitor: java.lang.Number modulus>;
+
+        $z0 = virtualinvoke $r2.<java.lang.Object: boolean equals(java.lang.Object)>(r0);
+
+        if $z0 == 0 goto label3;
+
+        return;
+
+     label3:
+        r1.<javax.management.monitor.CounterMonitor: java.lang.Number modulus> = r0;
+
+        i3 = 0;
+
+        $r3 = r1.<javax.management.monitor.CounterMonitor: java.util.List observedObjects>;
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+     label4:
+        $z1 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label5;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (javax.management.monitor.Monitor$ObservedObject) $r5;
+
+        $i2 = i3;
+
+        i3 = i3 + 1;
+
+        virtualinvoke r1.<javax.management.monitor.CounterMonitor: void resetAlreadyNotified(javax.management.monitor.Monitor$ObservedObject,int,int)>(r6, $i2, 16);
+
+        r7 = (javax.management.monitor.CounterMonitor$CounterMonitorObservedObject) r6;
+
+        virtualinvoke r7.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setModulusExceeded(boolean)>(0);
+
+        goto label4;
+
+     label5:
+        return;
+    }
+
+    public synchronized boolean getNotify()
+    {
+        javax.management.monitor.CounterMonitor r0;
+        boolean $z0;
+
+        r0 := @this: javax.management.monitor.CounterMonitor;
+
+        $z0 = r0.<javax.management.monitor.CounterMonitor: boolean notify>;
+
+        return $z0;
+    }
+
+    public synchronized void setNotify(boolean)
+    {
+        javax.management.monitor.CounterMonitor r0;
+        boolean z0, $z1;
+
+        r0 := @this: javax.management.monitor.CounterMonitor;
+
+        z0 := @parameter0: boolean;
+
+        $z1 = r0.<javax.management.monitor.CounterMonitor: boolean notify>;
+
+        if $z1 != z0 goto label1;
+
+        return;
+
+     label1:
+        r0.<javax.management.monitor.CounterMonitor: boolean notify> = z0;
+
+        return;
+    }
+
+    public synchronized boolean getDifferenceMode()
+    {
+        javax.management.monitor.CounterMonitor r0;
+        boolean $z0;
+
+        r0 := @this: javax.management.monitor.CounterMonitor;
+
+        $z0 = r0.<javax.management.monitor.CounterMonitor: boolean differenceMode>;
+
+        return $z0;
+    }
+
+    public synchronized void setDifferenceMode(boolean)
+    {
+        javax.management.monitor.CounterMonitor r0;
+        java.util.Iterator $r2;
+        javax.management.monitor.CounterMonitor$CounterMonitorObservedObject r5;
+        java.util.List $r1;
+        javax.management.monitor.Monitor$ObservedObject r4;
+        java.lang.Object $r3;
+        java.lang.Number $r6;
+        boolean z0, $z1, $z2;
+
+        r0 := @this: javax.management.monitor.CounterMonitor;
+
+        z0 := @parameter0: boolean;
+
+        $z1 = r0.<javax.management.monitor.CounterMonitor: boolean differenceMode>;
+
+        if $z1 != z0 goto label1;
+
+        return;
+
+     label1:
+        r0.<javax.management.monitor.CounterMonitor: boolean differenceMode> = z0;
+
+        $r1 = r0.<javax.management.monitor.CounterMonitor: java.util.List observedObjects>;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z2 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label3;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (javax.management.monitor.Monitor$ObservedObject) $r3;
+
+        r5 = (javax.management.monitor.CounterMonitor$CounterMonitorObservedObject) r4;
+
+        $r6 = r0.<javax.management.monitor.CounterMonitor: java.lang.Number initThreshold>;
+
+        virtualinvoke r5.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setThreshold(java.lang.Number)>($r6);
+
+        virtualinvoke r5.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setModulusExceeded(boolean)>(0);
+
+        virtualinvoke r5.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setEventAlreadyNotified(boolean)>(0);
+
+        virtualinvoke r5.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setPreviousScanCounter(java.lang.Number)>(null);
+
+        goto label2;
+
+     label3:
+        return;
+    }
+
+    public javax.management.MBeanNotificationInfo[] getNotificationInfo()
+    {
+        javax.management.monitor.CounterMonitor r3;
+        java.lang.Object $r1;
+        javax.management.MBeanNotificationInfo[] $r0, $r2;
+
+        r3 := @this: javax.management.monitor.CounterMonitor;
+
+        $r0 = <javax.management.monitor.CounterMonitor: javax.management.MBeanNotificationInfo[] notifsInfo>;
+
+        $r1 = virtualinvoke $r0.<java.lang.Object: java.lang.Object clone()>();
+
+        $r2 = (javax.management.MBeanNotificationInfo[]) $r1;
+
+        return $r2;
+    }
+
+    private synchronized boolean updateDerivedGauge(java.lang.Object, javax.management.monitor.CounterMonitor$CounterMonitorObservedObject)
+    {
+        long $l0, $l2;
+        byte $b1, $b3;
+        int $i4, $i5;
+        java.lang.Number $r3, $r4, $r5, $r6, $r8, $r9, $r10, $r11, $r12;
+        boolean $z0, z1;
+        javax.management.monitor.CounterMonitor r0;
+        javax.management.monitor.CounterMonitor$CounterMonitorObservedObject r1;
+        java.lang.Object r2, $r7;
+
+        r0 := @this: javax.management.monitor.CounterMonitor;
+
+        r2 := @parameter0: java.lang.Object;
+
+        r1 := @parameter1: javax.management.monitor.CounterMonitor$CounterMonitorObservedObject;
+
+        $z0 = r0.<javax.management.monitor.CounterMonitor: boolean differenceMode>;
+
+        if $z0 == 0 goto label5;
+
+        $r4 = virtualinvoke r1.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: java.lang.Number getPreviousScanCounter()>();
+
+        if $r4 == null goto label3;
+
+        $r6 = (java.lang.Number) r2;
+
+        specialinvoke r0.<javax.management.monitor.CounterMonitor: void setDerivedGaugeWithDifference(java.lang.Number,java.lang.Number,javax.management.monitor.CounterMonitor$CounterMonitorObservedObject)>($r6, null, r1);
+
+        $r7 = virtualinvoke r1.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: java.lang.Object getDerivedGauge()>();
+
+        $r8 = (java.lang.Number) $r7;
+
+        $l0 = virtualinvoke $r8.<java.lang.Number: long longValue()>();
+
+        $b1 = $l0 cmp 0L;
+
+        $i4 = (int) $b1;
+
+        if $i4 >= 0 goto label2;
+
+        $r9 = r0.<javax.management.monitor.CounterMonitor: java.lang.Number modulus>;
+
+        $l2 = virtualinvoke $r9.<java.lang.Number: long longValue()>();
+
+        $b3 = $l2 cmp 0L;
+
+        $i5 = (int) $b3;
+
+        if $i5 <= 0 goto label1;
+
+        $r12 = (java.lang.Number) r2;
+
+        $r11 = r0.<javax.management.monitor.CounterMonitor: java.lang.Number modulus>;
+
+        specialinvoke r0.<javax.management.monitor.CounterMonitor: void setDerivedGaugeWithDifference(java.lang.Number,java.lang.Number,javax.management.monitor.CounterMonitor$CounterMonitorObservedObject)>($r12, $r11, r1);
+
+     label1:
+        $r10 = r0.<javax.management.monitor.CounterMonitor: java.lang.Number initThreshold>;
+
+        virtualinvoke r1.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setThreshold(java.lang.Number)>($r10);
+
+        virtualinvoke r1.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setEventAlreadyNotified(boolean)>(0);
+
+     label2:
+        z1 = 1;
+
+        goto label4;
+
+     label3:
+        z1 = 0;
+
+     label4:
+        $r5 = (java.lang.Number) r2;
+
+        virtualinvoke r1.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setPreviousScanCounter(java.lang.Number)>($r5);
+
+        goto label6;
+
+     label5:
+        $r3 = (java.lang.Number) r2;
+
+        virtualinvoke r1.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setDerivedGauge(java.lang.Object)>($r3);
+
+        z1 = 1;
+
+     label6:
+        return z1;
+    }
+
+    private synchronized javax.management.monitor.MonitorNotification updateNotifications(javax.management.monitor.CounterMonitor$CounterMonitorObservedObject)
+    {
+        javax.management.monitor.MonitorNotification r29, $r30;
+        byte $b2;
+        boolean $z0, $z1, $z2, $z3;
+        javax.management.ObjectName $r6;
+        java.util.logging.Logger $r2, $r20;
+        javax.management.monitor.CounterMonitor$CounterMonitorObservedObject r0;
+        java.lang.StringBuilder $r4, $r5, $r7, $r8, $r11, $r12, $r14, $r15, $r17, $r18, $r31;
+        long $l0, $l1;
+        java.util.logging.Level $r1, $r21;
+        int $i3;
+        java.lang.String $r10, $r22, $r23;
+        java.lang.Number $r13, $r25, $r26, $r28;
+        javax.management.monitor.CounterMonitor r9;
+        java.lang.Object $r16, $r24;
+        java.lang.Class $r19;
+
+        r9 := @this: javax.management.monitor.CounterMonitor;
+
+        r0 := @parameter0: javax.management.monitor.CounterMonitor$CounterMonitorObservedObject;
+
+        r29 = null;
+
+        $z0 = virtualinvoke r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: boolean getEventAlreadyNotified()>();
+
+        if $z0 != 0 goto label2;
+
+        $r24 = virtualinvoke r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: java.lang.Object getDerivedGauge()>();
+
+        $r25 = (java.lang.Number) $r24;
+
+        $l0 = virtualinvoke $r25.<java.lang.Number: long longValue()>();
+
+        $r26 = virtualinvoke r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: java.lang.Number getThreshold()>();
+
+        $l1 = virtualinvoke $r26.<java.lang.Number: long longValue()>();
+
+        $b2 = $l0 cmp $l1;
+
+        $i3 = (int) $b2;
+
+        if $i3 < 0 goto label3;
+
+        $z2 = r9.<javax.management.monitor.CounterMonitor: boolean notify>;
+
+        if $z2 == 0 goto label1;
+
+        $r30 = new javax.management.monitor.MonitorNotification;
+
+        $r28 = virtualinvoke r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: java.lang.Number getThreshold()>();
+
+        specialinvoke $r30.<javax.management.monitor.MonitorNotification: void <init>(java.lang.String,java.lang.Object,long,long,java.lang.String,javax.management.ObjectName,java.lang.String,java.lang.Object,java.lang.Object)>("jmx.monitor.counter.threshold", r9, 0L, 0L, "", null, null, null, $r28);
+
+        r29 = $r30;
+
+     label1:
+        $z3 = r9.<javax.management.monitor.CounterMonitor: boolean differenceMode>;
+
+        if $z3 != 0 goto label3;
+
+        virtualinvoke r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setEventAlreadyNotified(boolean)>(1);
+
+        goto label3;
+
+     label2:
+        $r2 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger MONITOR_LOGGER>;
+
+        $r1 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z1 = virtualinvoke $r2.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r1);
+
+        if $z1 == 0 goto label3;
+
+        $r31 = new java.lang.StringBuilder;
+
+        specialinvoke $r31.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("The notification:");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n\tNotification observed object = ");
+
+        $r6 = virtualinvoke r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: javax.management.ObjectName getObservedObject()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n\tNotification observed attribute = ");
+
+        $r10 = virtualinvoke r9.<javax.management.monitor.CounterMonitor: java.lang.String getObservedAttribute()>();
+
+        $r11 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n\tNotification threshold level = ");
+
+        $r13 = virtualinvoke r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: java.lang.Number getThreshold()>();
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n\tNotification derived gauge = ");
+
+        $r16 = virtualinvoke r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: java.lang.Object getDerivedGauge()>();
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r16);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\nhas already been sent");
+
+        $r20 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger MONITOR_LOGGER>;
+
+        $r21 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r19 = class "Ljavax/management/monitor/CounterMonitor;";
+
+        $r22 = virtualinvoke $r19.<java.lang.Class: java.lang.String getName()>();
+
+        $r23 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r20.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r21, $r22, "updateNotifications", $r23);
+
+     label3:
+        return r29;
+    }
+
+    private synchronized void updateThreshold(javax.management.monitor.CounterMonitor$CounterMonitorObservedObject)
+    {
+        java.lang.Integer $r21;
+        byte $b2, $b4, $b6, $b10, $b13, $b17;
+        int[] $r11;
+        java.lang.Long $r13;
+        java.lang.Short $r19;
+        java.lang.Byte $r20;
+        boolean $z0;
+        javax.management.monitor.Monitor$NumericalType $r12;
+        java.util.logging.Logger $r23;
+        javax.management.monitor.CounterMonitor$CounterMonitorObservedObject r0;
+        long $l0, $l1, $l3, $l5, $l9, $l11, $l12, $l19, l20;
+        java.util.logging.Level $r24;
+        short $s15;
+        int $i7, $i8, $i14, $i16, $i18, $i21, $i22, $i23, $i24, $i25;
+        java.lang.String $r25;
+        java.lang.Number $r2, $r3, $r5, $r7, $r8, $r10, $r14, $r15, $r16, $r18, $r26;
+        javax.management.monitor.CounterMonitor r4;
+        java.lang.Object $r1, $r6, $r9, $r17;
+        java.lang.Class $r22;
+
+        r4 := @this: javax.management.monitor.CounterMonitor;
+
+        r0 := @parameter0: javax.management.monitor.CounterMonitor$CounterMonitorObservedObject;
+
+        $r1 = virtualinvoke r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: java.lang.Object getDerivedGauge()>();
+
+        $r2 = (java.lang.Number) $r1;
+
+        $l0 = virtualinvoke $r2.<java.lang.Number: long longValue()>();
+
+        $r3 = virtualinvoke r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: java.lang.Number getThreshold()>();
+
+        $l1 = virtualinvoke $r3.<java.lang.Number: long longValue()>();
+
+        $b2 = $l0 cmp $l1;
+
+        $i21 = (int) $b2;
+
+        if $i21 < 0 goto label11;
+
+        $r5 = r4.<javax.management.monitor.CounterMonitor: java.lang.Number offset>;
+
+        $l3 = virtualinvoke $r5.<java.lang.Number: long longValue()>();
+
+        $b4 = $l3 cmp 0L;
+
+        $i22 = (int) $b4;
+
+        if $i22 <= 0 goto label10;
+
+        $r8 = virtualinvoke r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: java.lang.Number getThreshold()>();
+
+        l20 = virtualinvoke $r8.<java.lang.Number: long longValue()>();
+
+     label01:
+        $r9 = virtualinvoke r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: java.lang.Object getDerivedGauge()>();
+
+        $r10 = (java.lang.Number) $r9;
+
+        $l5 = virtualinvoke $r10.<java.lang.Number: long longValue()>();
+
+        $b6 = $l5 cmp l20;
+
+        $i23 = (int) $b6;
+
+        if $i23 < 0 goto label02;
+
+        $r26 = r4.<javax.management.monitor.CounterMonitor: java.lang.Number offset>;
+
+        $l19 = virtualinvoke $r26.<java.lang.Number: long longValue()>();
+
+        l20 = l20 + $l19;
+
+        goto label01;
+
+     label02:
+        $r11 = <javax.management.monitor.CounterMonitor$1: int[] $SwitchMap$javax$management$monitor$Monitor$NumericalType>;
+
+        $r12 = virtualinvoke r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: javax.management.monitor.Monitor$NumericalType getType()>();
+
+        $i7 = virtualinvoke $r12.<javax.management.monitor.Monitor$NumericalType: int ordinal()>();
+
+        $i8 = $r11[$i7];
+
+        tableswitch($i8)
+        {
+            case 1: goto label03;
+            case 2: goto label04;
+            case 3: goto label05;
+            case 4: goto label06;
+            default: goto label07;
+        };
+
+     label03:
+        $i18 = (int) l20;
+
+        $r21 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i18);
+
+        virtualinvoke r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setThreshold(java.lang.Number)>($r21);
+
+        goto label08;
+
+     label04:
+        $i16 = (int) l20;
+
+        $b17 = (byte) $i16;
+
+        $r20 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b17);
+
+        virtualinvoke r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setThreshold(java.lang.Number)>($r20);
+
+        goto label08;
+
+     label05:
+        $i14 = (int) l20;
+
+        $s15 = (short) $i14;
+
+        $r19 = staticinvoke <java.lang.Short: java.lang.Short valueOf(short)>($s15);
+
+        virtualinvoke r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setThreshold(java.lang.Number)>($r19);
+
+        goto label08;
+
+     label06:
+        $r13 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>(l20);
+
+        virtualinvoke r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setThreshold(java.lang.Number)>($r13);
+
+        goto label08;
+
+     label07:
+        $r23 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger MONITOR_LOGGER>;
+
+        $r24 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r22 = class "Ljavax/management/monitor/CounterMonitor;";
+
+        $r25 = virtualinvoke $r22.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r23.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r24, $r25, "updateThreshold", "the threshold type is invalid");
+
+     label08:
+        $z0 = r4.<javax.management.monitor.CounterMonitor: boolean differenceMode>;
+
+        if $z0 != 0 goto label09;
+
+        $r14 = r4.<javax.management.monitor.CounterMonitor: java.lang.Number modulus>;
+
+        $l9 = virtualinvoke $r14.<java.lang.Number: long longValue()>();
+
+        $b10 = $l9 cmp 0L;
+
+        $i24 = (int) $b10;
+
+        if $i24 <= 0 goto label09;
+
+        $r15 = virtualinvoke r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: java.lang.Number getThreshold()>();
+
+        $l11 = virtualinvoke $r15.<java.lang.Number: long longValue()>();
+
+        $r16 = r4.<javax.management.monitor.CounterMonitor: java.lang.Number modulus>;
+
+        $l12 = virtualinvoke $r16.<java.lang.Number: long longValue()>();
+
+        $b13 = $l11 cmp $l12;
+
+        $i25 = (int) $b13;
+
+        if $i25 <= 0 goto label09;
+
+        virtualinvoke r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setModulusExceeded(boolean)>(1);
+
+        $r17 = virtualinvoke r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: java.lang.Object getDerivedGauge()>();
+
+        $r18 = (java.lang.Number) $r17;
+
+        virtualinvoke r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setDerivedGaugeExceeded(java.lang.Number)>($r18);
+
+     label09:
+        virtualinvoke r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setEventAlreadyNotified(boolean)>(0);
+
+        goto label11;
+
+     label10:
+        virtualinvoke r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setModulusExceeded(boolean)>(1);
+
+        $r6 = virtualinvoke r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: java.lang.Object getDerivedGauge()>();
+
+        $r7 = (java.lang.Number) $r6;
+
+        virtualinvoke r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setDerivedGaugeExceeded(java.lang.Number)>($r7);
+
+     label11:
+        return;
+    }
+
+    private synchronized void setDerivedGaugeWithDifference(java.lang.Number, java.lang.Number, javax.management.monitor.CounterMonitor$CounterMonitorObservedObject)
+    {
+        long $l0, $l1, $l9, l10;
+        java.lang.Integer $r9;
+        java.util.logging.Level $r12;
+        short $s5;
+        byte $b7;
+        int[] $r4;
+        java.lang.Long $r6;
+        java.lang.Short $r7;
+        int $i2, $i3, $i4, $i6, $i8;
+        java.lang.String $r13;
+        java.lang.Number r0, $r2, r3, $r15;
+        java.lang.Byte $r8;
+        javax.management.monitor.Monitor$NumericalType $r5;
+        javax.management.monitor.CounterMonitor r14;
+        java.util.logging.Logger $r11;
+        javax.management.monitor.CounterMonitor$CounterMonitorObservedObject r1;
+        java.lang.Class $r10;
+
+        r14 := @this: javax.management.monitor.CounterMonitor;
+
+        r0 := @parameter0: java.lang.Number;
+
+        r3 := @parameter1: java.lang.Number;
+
+        r1 := @parameter2: javax.management.monitor.CounterMonitor$CounterMonitorObservedObject;
+
+        $l0 = virtualinvoke r0.<java.lang.Number: long longValue()>();
+
+        $r2 = virtualinvoke r1.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: java.lang.Number getPreviousScanCounter()>();
+
+        $l1 = virtualinvoke $r2.<java.lang.Number: long longValue()>();
+
+        l10 = $l0 - $l1;
+
+        if r3 == null goto label1;
+
+        $r15 = r14.<javax.management.monitor.CounterMonitor: java.lang.Number modulus>;
+
+        $l9 = virtualinvoke $r15.<java.lang.Number: long longValue()>();
+
+        l10 = l10 + $l9;
+
+     label1:
+        $r4 = <javax.management.monitor.CounterMonitor$1: int[] $SwitchMap$javax$management$monitor$Monitor$NumericalType>;
+
+        $r5 = virtualinvoke r1.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: javax.management.monitor.Monitor$NumericalType getType()>();
+
+        $i2 = virtualinvoke $r5.<javax.management.monitor.Monitor$NumericalType: int ordinal()>();
+
+        $i3 = $r4[$i2];
+
+        tableswitch($i3)
+        {
+            case 1: goto label2;
+            case 2: goto label3;
+            case 3: goto label4;
+            case 4: goto label5;
+            default: goto label6;
+        };
+
+     label2:
+        $i8 = (int) l10;
+
+        $r9 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i8);
+
+        virtualinvoke r1.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setDerivedGauge(java.lang.Object)>($r9);
+
+        goto label7;
+
+     label3:
+        $i6 = (int) l10;
+
+        $b7 = (byte) $i6;
+
+        $r8 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b7);
+
+        virtualinvoke r1.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setDerivedGauge(java.lang.Object)>($r8);
+
+        goto label7;
+
+     label4:
+        $i4 = (int) l10;
+
+        $s5 = (short) $i4;
+
+        $r7 = staticinvoke <java.lang.Short: java.lang.Short valueOf(short)>($s5);
+
+        virtualinvoke r1.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setDerivedGauge(java.lang.Object)>($r7);
+
+        goto label7;
+
+     label5:
+        $r6 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>(l10);
+
+        virtualinvoke r1.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setDerivedGauge(java.lang.Object)>($r6);
+
+        goto label7;
+
+     label6:
+        $r11 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger MONITOR_LOGGER>;
+
+        $r12 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r10 = class "Ljavax/management/monitor/CounterMonitor;";
+
+        $r13 = virtualinvoke $r10.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r11.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r12, $r13, "setDerivedGaugeWithDifference", "the threshold type is invalid");
+
+     label7:
+        return;
+    }
+
+    javax.management.monitor.Monitor$ObservedObject createObservedObject(javax.management.ObjectName)
+    {
+        javax.management.monitor.CounterMonitor r2;
+        javax.management.ObjectName r1;
+        java.lang.Number $r3;
+        javax.management.monitor.CounterMonitor$CounterMonitorObservedObject $r0;
+
+        r2 := @this: javax.management.monitor.CounterMonitor;
+
+        r1 := @parameter0: javax.management.ObjectName;
+
+        $r0 = new javax.management.monitor.CounterMonitor$CounterMonitorObservedObject;
+
+        specialinvoke $r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void <init>(javax.management.ObjectName)>(r1);
+
+        $r3 = r2.<javax.management.monitor.CounterMonitor: java.lang.Number initThreshold>;
+
+        virtualinvoke $r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setThreshold(java.lang.Number)>($r3);
+
+        virtualinvoke $r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setModulusExceeded(boolean)>(0);
+
+        virtualinvoke $r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setEventAlreadyNotified(boolean)>(0);
+
+        virtualinvoke $r0.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setPreviousScanCounter(java.lang.Number)>(null);
+
+        return $r0;
+    }
+
+    synchronized boolean isComparableTypeValid(javax.management.ObjectName, java.lang.String, java.lang.Comparable)
+    {
+        javax.management.monitor.CounterMonitor r0;
+        javax.management.monitor.Monitor$NumericalType $r5, $r6, $r7, $r8;
+        javax.management.ObjectName r1;
+        javax.management.monitor.CounterMonitor$CounterMonitorObservedObject r3;
+        javax.management.monitor.Monitor$ObservedObject $r2;
+        java.lang.Comparable r4;
+        java.lang.String r9;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: javax.management.monitor.CounterMonitor;
+
+        r1 := @parameter0: javax.management.ObjectName;
+
+        r9 := @parameter1: java.lang.String;
+
+        r4 := @parameter2: java.lang.Comparable;
+
+        $r2 = virtualinvoke r0.<javax.management.monitor.CounterMonitor: javax.management.monitor.Monitor$ObservedObject getObservedObject(javax.management.ObjectName)>(r1);
+
+        r3 = (javax.management.monitor.CounterMonitor$CounterMonitorObservedObject) $r2;
+
+        if r3 != null goto label1;
+
+        return 0;
+
+     label1:
+        $z0 = r4 instanceof java.lang.Integer;
+
+        if $z0 == 0 goto label2;
+
+        $r8 = <javax.management.monitor.Monitor$NumericalType: javax.management.monitor.Monitor$NumericalType INTEGER>;
+
+        virtualinvoke r3.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setType(javax.management.monitor.Monitor$NumericalType)>($r8);
+
+        goto label6;
+
+     label2:
+        $z1 = r4 instanceof java.lang.Byte;
+
+        if $z1 == 0 goto label3;
+
+        $r7 = <javax.management.monitor.Monitor$NumericalType: javax.management.monitor.Monitor$NumericalType BYTE>;
+
+        virtualinvoke r3.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setType(javax.management.monitor.Monitor$NumericalType)>($r7);
+
+        goto label6;
+
+     label3:
+        $z2 = r4 instanceof java.lang.Short;
+
+        if $z2 == 0 goto label4;
+
+        $r6 = <javax.management.monitor.Monitor$NumericalType: javax.management.monitor.Monitor$NumericalType SHORT>;
+
+        virtualinvoke r3.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setType(javax.management.monitor.Monitor$NumericalType)>($r6);
+
+        goto label6;
+
+     label4:
+        $z3 = r4 instanceof java.lang.Long;
+
+        if $z3 == 0 goto label5;
+
+        $r5 = <javax.management.monitor.Monitor$NumericalType: javax.management.monitor.Monitor$NumericalType LONG>;
+
+        virtualinvoke r3.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setType(javax.management.monitor.Monitor$NumericalType)>($r5);
+
+        goto label6;
+
+     label5:
+        return 0;
+
+     label6:
+        return 1;
+    }
+
+    synchronized java.lang.Comparable getDerivedGaugeFromComparable(javax.management.ObjectName, java.lang.String, java.lang.Comparable)
+    {
+        long $l0, $l1;
+        byte $b2;
+        javax.management.monitor.Monitor$ObservedObject $r2;
+        int $i3;
+        java.lang.String r9;
+        java.lang.Number $r6, $r7, $r8;
+        boolean $z0, $z1;
+        javax.management.monitor.CounterMonitor r0;
+        javax.management.ObjectName r1;
+        javax.management.monitor.CounterMonitor$CounterMonitorObservedObject r3;
+        java.lang.Comparable r4, $r11;
+        java.lang.Object $r5, $r10;
+
+        r0 := @this: javax.management.monitor.CounterMonitor;
+
+        r1 := @parameter0: javax.management.ObjectName;
+
+        r9 := @parameter1: java.lang.String;
+
+        r4 := @parameter2: java.lang.Comparable;
+
+        $r2 = virtualinvoke r0.<javax.management.monitor.CounterMonitor: javax.management.monitor.Monitor$ObservedObject getObservedObject(javax.management.ObjectName)>(r1);
+
+        r3 = (javax.management.monitor.CounterMonitor$CounterMonitorObservedObject) $r2;
+
+        if r3 != null goto label1;
+
+        return null;
+
+     label1:
+        $z0 = virtualinvoke r3.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: boolean getModulusExceeded()>();
+
+        if $z0 == 0 goto label2;
+
+        $r5 = virtualinvoke r3.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: java.lang.Object getDerivedGauge()>();
+
+        $r6 = (java.lang.Number) $r5;
+
+        $l0 = virtualinvoke $r6.<java.lang.Number: long longValue()>();
+
+        $r7 = virtualinvoke r3.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: java.lang.Number getDerivedGaugeExceeded()>();
+
+        $l1 = virtualinvoke $r7.<java.lang.Number: long longValue()>();
+
+        $b2 = $l0 cmp $l1;
+
+        $i3 = (int) $b2;
+
+        if $i3 >= 0 goto label2;
+
+        $r8 = r0.<javax.management.monitor.CounterMonitor: java.lang.Number initThreshold>;
+
+        virtualinvoke r3.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setThreshold(java.lang.Number)>($r8);
+
+        virtualinvoke r3.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setModulusExceeded(boolean)>(0);
+
+        virtualinvoke r3.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setEventAlreadyNotified(boolean)>(0);
+
+     label2:
+        $z1 = specialinvoke r0.<javax.management.monitor.CounterMonitor: boolean updateDerivedGauge(java.lang.Object,javax.management.monitor.CounterMonitor$CounterMonitorObservedObject)>(r4, r3);
+
+        virtualinvoke r3.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setDerivedGaugeValid(boolean)>($z1);
+
+        $r10 = virtualinvoke r3.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: java.lang.Object getDerivedGauge()>();
+
+        $r11 = (java.lang.Comparable) $r10;
+
+        return $r11;
+    }
+
+    synchronized void onErrorNotification(javax.management.monitor.MonitorNotification)
+    {
+        javax.management.monitor.CounterMonitor r0;
+        javax.management.monitor.Monitor$ObservedObject $r3;
+        javax.management.monitor.MonitorNotification r1;
+        javax.management.ObjectName $r2;
+        javax.management.monitor.CounterMonitor$CounterMonitorObservedObject r4;
+
+        r0 := @this: javax.management.monitor.CounterMonitor;
+
+        r1 := @parameter0: javax.management.monitor.MonitorNotification;
+
+        $r2 = virtualinvoke r1.<javax.management.monitor.MonitorNotification: javax.management.ObjectName getObservedObject()>();
+
+        $r3 = virtualinvoke r0.<javax.management.monitor.CounterMonitor: javax.management.monitor.Monitor$ObservedObject getObservedObject(javax.management.ObjectName)>($r2);
+
+        r4 = (javax.management.monitor.CounterMonitor$CounterMonitorObservedObject) $r3;
+
+        if r4 != null goto label1;
+
+        return;
+
+     label1:
+        virtualinvoke r4.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setModulusExceeded(boolean)>(0);
+
+        virtualinvoke r4.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setEventAlreadyNotified(boolean)>(0);
+
+        virtualinvoke r4.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: void setPreviousScanCounter(java.lang.Number)>(null);
+
+        return;
+    }
+
+    synchronized javax.management.monitor.MonitorNotification buildAlarmNotification(javax.management.ObjectName, java.lang.String, java.lang.Comparable)
+    {
+        javax.management.monitor.CounterMonitor r0;
+        javax.management.monitor.MonitorNotification r6;
+        javax.management.ObjectName r1;
+        javax.management.monitor.CounterMonitor$CounterMonitorObservedObject r3;
+        javax.management.monitor.Monitor$ObservedObject $r2;
+        java.lang.Comparable r5;
+        java.lang.String r4;
+        boolean $z0;
+
+        r0 := @this: javax.management.monitor.CounterMonitor;
+
+        r1 := @parameter0: javax.management.ObjectName;
+
+        r4 := @parameter1: java.lang.String;
+
+        r5 := @parameter2: java.lang.Comparable;
+
+        $r2 = virtualinvoke r0.<javax.management.monitor.CounterMonitor: javax.management.monitor.Monitor$ObservedObject getObservedObject(javax.management.ObjectName)>(r1);
+
+        r3 = (javax.management.monitor.CounterMonitor$CounterMonitorObservedObject) $r2;
+
+        if r3 != null goto label1;
+
+        return null;
+
+     label1:
+        $z0 = virtualinvoke r3.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: boolean getDerivedGaugeValid()>();
+
+        if $z0 == 0 goto label2;
+
+        r6 = specialinvoke r0.<javax.management.monitor.CounterMonitor: javax.management.monitor.MonitorNotification updateNotifications(javax.management.monitor.CounterMonitor$CounterMonitorObservedObject)>(r3);
+
+        specialinvoke r0.<javax.management.monitor.CounterMonitor: void updateThreshold(javax.management.monitor.CounterMonitor$CounterMonitorObservedObject)>(r3);
+
+        goto label3;
+
+     label2:
+        r6 = null;
+
+     label3:
+        return r6;
+    }
+
+    synchronized boolean isThresholdTypeValid(javax.management.ObjectName, java.lang.String, java.lang.Comparable)
+    {
+        javax.management.monitor.CounterMonitor r0;
+        javax.management.monitor.Monitor$NumericalType $r4;
+        javax.management.ObjectName r1;
+        javax.management.monitor.CounterMonitor$CounterMonitorObservedObject r3;
+        javax.management.monitor.Monitor$ObservedObject $r2;
+        java.lang.Class $r5;
+        java.lang.Comparable r10;
+        java.lang.String r9;
+        java.lang.Number $r6, $r7, $r8;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: javax.management.monitor.CounterMonitor;
+
+        r1 := @parameter0: javax.management.ObjectName;
+
+        r9 := @parameter1: java.lang.String;
+
+        r10 := @parameter2: java.lang.Comparable;
+
+        $r2 = virtualinvoke r0.<javax.management.monitor.CounterMonitor: javax.management.monitor.Monitor$ObservedObject getObservedObject(javax.management.ObjectName)>(r1);
+
+        r3 = (javax.management.monitor.CounterMonitor$CounterMonitorObservedObject) $r2;
+
+        if r3 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r4 = virtualinvoke r3.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: javax.management.monitor.Monitor$NumericalType getType()>();
+
+        $r5 = staticinvoke <javax.management.monitor.CounterMonitor: java.lang.Class classForType(javax.management.monitor.Monitor$NumericalType)>($r4);
+
+        $r6 = virtualinvoke r3.<javax.management.monitor.CounterMonitor$CounterMonitorObservedObject: java.lang.Number getThreshold()>();
+
+        $z0 = virtualinvoke $r5.<java.lang.Class: boolean isInstance(java.lang.Object)>($r6);
+
+        if $z0 == 0 goto label2;
+
+        $r7 = r0.<javax.management.monitor.CounterMonitor: java.lang.Number offset>;
+
+        $z1 = staticinvoke <javax.management.monitor.CounterMonitor: boolean isValidForType(java.lang.Object,java.lang.Class)>($r7, $r5);
+
+        if $z1 == 0 goto label2;
+
+        $r8 = r0.<javax.management.monitor.CounterMonitor: java.lang.Number modulus>;
+
+        $z2 = staticinvoke <javax.management.monitor.CounterMonitor: boolean isValidForType(java.lang.Object,java.lang.Class)>($r8, $r5);
+
+        if $z2 == 0 goto label2;
+
+        $z3 = 1;
+
+        goto label3;
+
+     label2:
+        $z3 = 0;
+
+     label3:
+        return $z3;
+    }
+
+    public volatile java.lang.Object getDerivedGauge(javax.management.ObjectName)
+    {
+        javax.management.ObjectName r1;
+        javax.management.monitor.CounterMonitor r0;
+        java.lang.Number $r2;
+
+        r0 := @this: javax.management.monitor.CounterMonitor;
+
+        r1 := @parameter0: javax.management.ObjectName;
+
+        $r2 = virtualinvoke r0.<javax.management.monitor.CounterMonitor: java.lang.Number getDerivedGauge(javax.management.ObjectName)>(r1);
+
+        return $r2;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.String[] $r0, $r3;
+        javax.management.MBeanNotificationInfo[] $r1;
+        javax.management.MBeanNotificationInfo $r2;
+
+        $r0 = newarray (java.lang.String)[6];
+
+        $r0[0] = "jmx.monitor.error.runtime";
+
+        $r0[1] = "jmx.monitor.error.mbean";
+
+        $r0[2] = "jmx.monitor.error.attribute";
+
+        $r0[3] = "jmx.monitor.error.type";
+
+        $r0[4] = "jmx.monitor.error.threshold";
+
+        $r0[5] = "jmx.monitor.counter.threshold";
+
+        <javax.management.monitor.CounterMonitor: java.lang.String[] types> = $r0;
+
+        $r1 = newarray (javax.management.MBeanNotificationInfo)[1];
+
+        $r2 = new javax.management.MBeanNotificationInfo;
+
+        $r3 = <javax.management.monitor.CounterMonitor: java.lang.String[] types>;
+
+        specialinvoke $r2.<javax.management.MBeanNotificationInfo: void <init>(java.lang.String[],java.lang.String,java.lang.String)>($r3, "javax.management.monitor.MonitorNotification", "Notifications sent by the CounterMonitor MBean");
+
+        $r1[0] = $r2;
+
+        <javax.management.monitor.CounterMonitor: javax.management.MBeanNotificationInfo[] notifsInfo> = $r1;
+
+        return;
+    }
+}

@@ -1,0 +1,1210 @@
+public class sun.net.www.http.ChunkedInputStream extends java.io.InputStream implements sun.net.www.http.Hurryable
+{
+    private java.io.InputStream in;
+    private sun.net.www.http.HttpClient hc;
+    private sun.net.www.MessageHeader responses;
+    private int chunkSize;
+    private int chunkRead;
+    private byte[] chunkData;
+    private int chunkPos;
+    private int chunkCount;
+    private byte[] rawData;
+    private int rawPos;
+    private int rawCount;
+    private boolean error;
+    private boolean closed;
+    private static final int MAX_CHUNK_HEADER_SIZE;
+    static final int STATE_AWAITING_CHUNK_HEADER;
+    static final int STATE_READING_CHUNK;
+    static final int STATE_AWAITING_CHUNK_EOL;
+    static final int STATE_AWAITING_TRAILERS;
+    static final int STATE_DONE;
+    private int state;
+
+    private void ensureOpen() throws java.io.IOException
+    {
+        sun.net.www.http.ChunkedInputStream r0;
+        java.io.IOException $r1;
+        boolean $z0;
+
+        r0 := @this: sun.net.www.http.ChunkedInputStream;
+
+        $z0 = r0.<sun.net.www.http.ChunkedInputStream: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new java.io.IOException;
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>("stream is closed");
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+
+    private void ensureRawAvailable(int)
+    {
+        byte[] $r1, $r2, $r3, $r4, r5, $r6;
+        sun.net.www.http.ChunkedInputStream r0;
+        int i0, $i1, $i2, $i3, $i4, $i5, i6, $i7, $i8, $i9, $i10, $i11;
+
+        r0 := @this: sun.net.www.http.ChunkedInputStream;
+
+        i0 := @parameter0: int;
+
+        $i1 = r0.<sun.net.www.http.ChunkedInputStream: int rawCount>;
+
+        $i3 = $i1 + i0;
+
+        $r1 = r0.<sun.net.www.http.ChunkedInputStream: byte[] rawData>;
+
+        $i2 = lengthof $r1;
+
+        if $i3 <= $i2 goto label4;
+
+        $i5 = r0.<sun.net.www.http.ChunkedInputStream: int rawCount>;
+
+        $i4 = r0.<sun.net.www.http.ChunkedInputStream: int rawPos>;
+
+        i6 = $i5 - $i4;
+
+        $i8 = i6 + i0;
+
+        $r2 = r0.<sun.net.www.http.ChunkedInputStream: byte[] rawData>;
+
+        $i7 = lengthof $r2;
+
+        if $i8 <= $i7 goto label2;
+
+        $i10 = i6 + i0;
+
+        r5 = newarray (byte)[$i10];
+
+        if i6 <= 0 goto label1;
+
+        $r6 = r0.<sun.net.www.http.ChunkedInputStream: byte[] rawData>;
+
+        $i11 = r0.<sun.net.www.http.ChunkedInputStream: int rawPos>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r6, $i11, r5, 0, i6);
+
+     label1:
+        r0.<sun.net.www.http.ChunkedInputStream: byte[] rawData> = r5;
+
+        goto label3;
+
+     label2:
+        if i6 <= 0 goto label3;
+
+        $r4 = r0.<sun.net.www.http.ChunkedInputStream: byte[] rawData>;
+
+        $i9 = r0.<sun.net.www.http.ChunkedInputStream: int rawPos>;
+
+        $r3 = r0.<sun.net.www.http.ChunkedInputStream: byte[] rawData>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, $i9, $r3, 0, i6);
+
+     label3:
+        r0.<sun.net.www.http.ChunkedInputStream: int rawCount> = i6;
+
+        r0.<sun.net.www.http.ChunkedInputStream: int rawPos> = 0;
+
+     label4:
+        return;
+    }
+
+    private void closeUnderlying() throws java.io.IOException
+    {
+        sun.net.www.http.ChunkedInputStream r0;
+        int $i0;
+        sun.net.www.http.HttpClient $r2, $r3;
+        java.io.InputStream $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.net.www.http.ChunkedInputStream;
+
+        $r1 = r0.<sun.net.www.http.ChunkedInputStream: java.io.InputStream in>;
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        $z0 = r0.<sun.net.www.http.ChunkedInputStream: boolean error>;
+
+        if $z0 != 0 goto label2;
+
+        $i0 = r0.<sun.net.www.http.ChunkedInputStream: int state>;
+
+        if $i0 != 5 goto label2;
+
+        $r3 = r0.<sun.net.www.http.ChunkedInputStream: sun.net.www.http.HttpClient hc>;
+
+        virtualinvoke $r3.<sun.net.www.http.HttpClient: void finished()>();
+
+        goto label3;
+
+     label2:
+        $z1 = virtualinvoke r0.<sun.net.www.http.ChunkedInputStream: boolean hurry()>();
+
+        if $z1 != 0 goto label3;
+
+        $r2 = r0.<sun.net.www.http.ChunkedInputStream: sun.net.www.http.HttpClient hc>;
+
+        virtualinvoke $r2.<sun.net.www.http.HttpClient: void closeServer()>();
+
+     label3:
+        r0.<sun.net.www.http.ChunkedInputStream: java.io.InputStream in> = null;
+
+        return;
+    }
+
+    private int fastRead(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r1;
+        sun.net.www.http.ChunkedInputStream r0;
+        int $i0, $i1, i2, i3, i4, $i5, $i6, $i7, $i8, $i9, $i10;
+        java.io.IOException $r3, $r4;
+        java.io.InputStream $r2;
+
+        r0 := @this: sun.net.www.http.ChunkedInputStream;
+
+        r1 := @parameter0: byte[];
+
+        i4 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        $i1 = r0.<sun.net.www.http.ChunkedInputStream: int chunkSize>;
+
+        $i0 = r0.<sun.net.www.http.ChunkedInputStream: int chunkRead>;
+
+        i2 = $i1 - $i0;
+
+        if i2 >= i3 goto label1;
+
+        $i10 = i2;
+
+        goto label2;
+
+     label1:
+        $i10 = i3;
+
+     label2:
+        if $i10 <= 0 goto label9;
+
+     label3:
+        $r2 = r0.<sun.net.www.http.ChunkedInputStream: java.io.InputStream in>;
+
+        $i5 = virtualinvoke $r2.<java.io.InputStream: int read(byte[],int,int)>(r1, i4, $i10);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r4 := @caughtexception;
+
+        r0.<sun.net.www.http.ChunkedInputStream: boolean error> = 1;
+
+        throw $r4;
+
+     label6:
+        if $i5 <= 0 goto label8;
+
+        $i6 = r0.<sun.net.www.http.ChunkedInputStream: int chunkRead>;
+
+        $i7 = $i6 + $i5;
+
+        r0.<sun.net.www.http.ChunkedInputStream: int chunkRead> = $i7;
+
+        $i9 = r0.<sun.net.www.http.ChunkedInputStream: int chunkRead>;
+
+        $i8 = r0.<sun.net.www.http.ChunkedInputStream: int chunkSize>;
+
+        if $i9 < $i8 goto label7;
+
+        r0.<sun.net.www.http.ChunkedInputStream: int state> = 3;
+
+     label7:
+        return $i5;
+
+     label8:
+        r0.<sun.net.www.http.ChunkedInputStream: boolean error> = 1;
+
+        $r3 = new java.io.IOException;
+
+        specialinvoke $r3.<java.io.IOException: void <init>(java.lang.String)>("Premature EOF");
+
+        throw $r3;
+
+     label9:
+        return 0;
+
+        catch java.io.IOException from label3 to label4 with label5;
+    }
+
+    private void processRaw() throws java.io.IOException
+    {
+        byte[] $r1, $r3, $r12, $r13, $r14, $r17, $r18, $r19, $r20, $r21, $r23, $r25, r29, $r30, $r31;
+        byte $b6, $b16, $b21, $b24, $b58;
+        java.lang.String $r4, $r5, $r6, $r7, $r24, $r33, $r39;
+        java.lang.NumberFormatException $r27;
+        java.io.IOException $r32, $r34, $r35, $r36, $r37, $r38, $r40;
+        sun.net.www.MessageHeader $r8;
+        sun.net.www.http.ChunkedInputStream r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i17, $i18, $i19, $i20, $i22, $i23, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i57, $i59, $i60, i61, i62, i63, $i64, $i65, $i66, $i67, $i68, $i69, $i70, $i71, $i72, $i73, $i74, i75, $i76, $i78, $i79, $i80, $i81, $i82, $i84;
+        char $c56;
+
+        r0 := @this: sun.net.www.http.ChunkedInputStream;
+
+     label01:
+        $i0 = r0.<sun.net.www.http.ChunkedInputStream: int state>;
+
+        if $i0 == 5 goto label34;
+
+        $i1 = r0.<sun.net.www.http.ChunkedInputStream: int state>;
+
+        tableswitch($i1)
+        {
+            case 1: goto label02;
+            case 2: goto label14;
+            case 3: goto label20;
+            case 4: goto label24;
+            default: goto label33;
+        };
+
+     label02:
+        i61 = r0.<sun.net.www.http.ChunkedInputStream: int rawPos>;
+
+     label03:
+        $i46 = r0.<sun.net.www.http.ChunkedInputStream: int rawCount>;
+
+        if i61 >= $i46 goto label05;
+
+        $r25 = r0.<sun.net.www.http.ChunkedInputStream: byte[] rawData>;
+
+        $b58 = $r25[i61];
+
+        $i76 = (int) $b58;
+
+        if $i76 != 10 goto label04;
+
+        goto label05;
+
+     label04:
+        i61 = i61 + 1;
+
+        $i59 = r0.<sun.net.www.http.ChunkedInputStream: int rawPos>;
+
+        $i60 = i61 - $i59;
+
+        if $i60 < 2050 goto label03;
+
+        r0.<sun.net.www.http.ChunkedInputStream: boolean error> = 1;
+
+        $r32 = new java.io.IOException;
+
+        specialinvoke $r32.<java.io.IOException: void <init>(java.lang.String)>("Chunk header too long");
+
+        throw $r32;
+
+     label05:
+        $i47 = r0.<sun.net.www.http.ChunkedInputStream: int rawCount>;
+
+        if i61 < $i47 goto label06;
+
+        return;
+
+     label06:
+        $r33 = new java.lang.String;
+
+        $r23 = r0.<sun.net.www.http.ChunkedInputStream: byte[] rawData>;
+
+        $i51 = r0.<sun.net.www.http.ChunkedInputStream: int rawPos>;
+
+        $i48 = r0.<sun.net.www.http.ChunkedInputStream: int rawPos>;
+
+        $i49 = i61 - $i48;
+
+        $i50 = $i49 + 1;
+
+        specialinvoke $r33.<java.lang.String: void <init>(byte[],int,int,java.lang.String)>($r23, $i51, $i50, "US-ASCII");
+
+        i62 = 0;
+
+     label07:
+        $i52 = virtualinvoke $r33.<java.lang.String: int length()>();
+
+        if i62 >= $i52 goto label09;
+
+        $c56 = virtualinvoke $r33.<java.lang.String: char charAt(int)>(i62);
+
+        $i57 = staticinvoke <java.lang.Character: int digit(char,int)>($c56, 16);
+
+        $i78 = (int) -1;
+
+        if $i57 != $i78 goto label08;
+
+        goto label09;
+
+     label08:
+        i62 = i62 + 1;
+
+        goto label07;
+
+     label09:
+        $r24 = virtualinvoke $r33.<java.lang.String: java.lang.String substring(int,int)>(0, i62);
+
+        $i53 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String,int)>($r24, 16);
+
+        r0.<sun.net.www.http.ChunkedInputStream: int chunkSize> = $i53;
+
+     label10:
+        goto label12;
+
+     label11:
+        $r27 := @caughtexception;
+
+        r0.<sun.net.www.http.ChunkedInputStream: boolean error> = 1;
+
+        $r34 = new java.io.IOException;
+
+        specialinvoke $r34.<java.io.IOException: void <init>(java.lang.String)>("Bogus chunk size");
+
+        throw $r34;
+
+     label12:
+        $i54 = i61 + 1;
+
+        r0.<sun.net.www.http.ChunkedInputStream: int rawPos> = $i54;
+
+        r0.<sun.net.www.http.ChunkedInputStream: int chunkRead> = 0;
+
+        $i55 = r0.<sun.net.www.http.ChunkedInputStream: int chunkSize>;
+
+        if $i55 <= 0 goto label13;
+
+        r0.<sun.net.www.http.ChunkedInputStream: int state> = 2;
+
+        goto label33;
+
+     label13:
+        r0.<sun.net.www.http.ChunkedInputStream: int state> = 4;
+
+        goto label33;
+
+     label14:
+        $i28 = r0.<sun.net.www.http.ChunkedInputStream: int rawPos>;
+
+        $i27 = r0.<sun.net.www.http.ChunkedInputStream: int rawCount>;
+
+        if $i28 < $i27 goto label15;
+
+        return;
+
+     label15:
+        $i30 = r0.<sun.net.www.http.ChunkedInputStream: int chunkSize>;
+
+        $i29 = r0.<sun.net.www.http.ChunkedInputStream: int chunkRead>;
+
+        $i34 = $i30 - $i29;
+
+        $i32 = r0.<sun.net.www.http.ChunkedInputStream: int rawCount>;
+
+        $i31 = r0.<sun.net.www.http.ChunkedInputStream: int rawPos>;
+
+        $i33 = $i32 - $i31;
+
+        $i35 = staticinvoke <java.lang.Math: int min(int,int)>($i34, $i33);
+
+        $r17 = r0.<sun.net.www.http.ChunkedInputStream: byte[] chunkData>;
+
+        $i38 = lengthof $r17;
+
+        $i36 = r0.<sun.net.www.http.ChunkedInputStream: int chunkCount>;
+
+        $i37 = $i36 + $i35;
+
+        if $i38 >= $i37 goto label18;
+
+        $i40 = r0.<sun.net.www.http.ChunkedInputStream: int chunkCount>;
+
+        $i39 = r0.<sun.net.www.http.ChunkedInputStream: int chunkPos>;
+
+        i63 = $i40 - $i39;
+
+        $r18 = r0.<sun.net.www.http.ChunkedInputStream: byte[] chunkData>;
+
+        $i42 = lengthof $r18;
+
+        $i41 = i63 + $i35;
+
+        if $i42 >= $i41 goto label16;
+
+        $i44 = i63 + $i35;
+
+        r29 = newarray (byte)[$i44];
+
+        $r21 = r0.<sun.net.www.http.ChunkedInputStream: byte[] chunkData>;
+
+        $i45 = r0.<sun.net.www.http.ChunkedInputStream: int chunkPos>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r21, $i45, r29, 0, i63);
+
+        r0.<sun.net.www.http.ChunkedInputStream: byte[] chunkData> = r29;
+
+        goto label17;
+
+     label16:
+        $r20 = r0.<sun.net.www.http.ChunkedInputStream: byte[] chunkData>;
+
+        $i43 = r0.<sun.net.www.http.ChunkedInputStream: int chunkPos>;
+
+        $r19 = r0.<sun.net.www.http.ChunkedInputStream: byte[] chunkData>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r20, $i43, $r19, 0, i63);
+
+     label17:
+        r0.<sun.net.www.http.ChunkedInputStream: int chunkPos> = 0;
+
+        r0.<sun.net.www.http.ChunkedInputStream: int chunkCount> = i63;
+
+     label18:
+        $r30 = r0.<sun.net.www.http.ChunkedInputStream: byte[] rawData>;
+
+        $i64 = r0.<sun.net.www.http.ChunkedInputStream: int rawPos>;
+
+        $r31 = r0.<sun.net.www.http.ChunkedInputStream: byte[] chunkData>;
+
+        $i65 = r0.<sun.net.www.http.ChunkedInputStream: int chunkCount>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r30, $i64, $r31, $i65, $i35);
+
+        $i66 = r0.<sun.net.www.http.ChunkedInputStream: int rawPos>;
+
+        $i67 = $i66 + $i35;
+
+        r0.<sun.net.www.http.ChunkedInputStream: int rawPos> = $i67;
+
+        $i68 = r0.<sun.net.www.http.ChunkedInputStream: int chunkCount>;
+
+        $i69 = $i68 + $i35;
+
+        r0.<sun.net.www.http.ChunkedInputStream: int chunkCount> = $i69;
+
+        $i70 = r0.<sun.net.www.http.ChunkedInputStream: int chunkRead>;
+
+        $i71 = $i70 + $i35;
+
+        r0.<sun.net.www.http.ChunkedInputStream: int chunkRead> = $i71;
+
+        $i72 = r0.<sun.net.www.http.ChunkedInputStream: int chunkSize>;
+
+        $i73 = r0.<sun.net.www.http.ChunkedInputStream: int chunkRead>;
+
+        $i74 = $i72 - $i73;
+
+        if $i74 > 0 goto label19;
+
+        r0.<sun.net.www.http.ChunkedInputStream: int state> = 3;
+
+        goto label33;
+
+     label19:
+        return;
+
+     label20:
+        $i17 = r0.<sun.net.www.http.ChunkedInputStream: int rawPos>;
+
+        $i19 = $i17 + 1;
+
+        $i18 = r0.<sun.net.www.http.ChunkedInputStream: int rawCount>;
+
+        if $i19 < $i18 goto label21;
+
+        return;
+
+     label21:
+        $r13 = r0.<sun.net.www.http.ChunkedInputStream: byte[] rawData>;
+
+        $i20 = r0.<sun.net.www.http.ChunkedInputStream: int rawPos>;
+
+        $b21 = $r13[$i20];
+
+        $i79 = (int) $b21;
+
+        if $i79 == 13 goto label22;
+
+        r0.<sun.net.www.http.ChunkedInputStream: boolean error> = 1;
+
+        $r35 = new java.io.IOException;
+
+        specialinvoke $r35.<java.io.IOException: void <init>(java.lang.String)>("missing CR");
+
+        throw $r35;
+
+     label22:
+        $r14 = r0.<sun.net.www.http.ChunkedInputStream: byte[] rawData>;
+
+        $i22 = r0.<sun.net.www.http.ChunkedInputStream: int rawPos>;
+
+        $i23 = $i22 + 1;
+
+        $b24 = $r14[$i23];
+
+        $i80 = (int) $b24;
+
+        if $i80 == 10 goto label23;
+
+        r0.<sun.net.www.http.ChunkedInputStream: boolean error> = 1;
+
+        $r36 = new java.io.IOException;
+
+        specialinvoke $r36.<java.io.IOException: void <init>(java.lang.String)>("missing LF");
+
+        throw $r36;
+
+     label23:
+        $i25 = r0.<sun.net.www.http.ChunkedInputStream: int rawPos>;
+
+        $i26 = $i25 + 2;
+
+        r0.<sun.net.www.http.ChunkedInputStream: int rawPos> = $i26;
+
+        r0.<sun.net.www.http.ChunkedInputStream: int state> = 1;
+
+        goto label33;
+
+     label24:
+        i75 = r0.<sun.net.www.http.ChunkedInputStream: int rawPos>;
+
+     label25:
+        $i2 = r0.<sun.net.www.http.ChunkedInputStream: int rawCount>;
+
+        if i75 >= $i2 goto label27;
+
+        $r12 = r0.<sun.net.www.http.ChunkedInputStream: byte[] rawData>;
+
+        $b16 = $r12[i75];
+
+        $i81 = (int) $b16;
+
+        if $i81 != 10 goto label26;
+
+        goto label27;
+
+     label26:
+        i75 = i75 + 1;
+
+        goto label25;
+
+     label27:
+        $i3 = r0.<sun.net.www.http.ChunkedInputStream: int rawCount>;
+
+        if i75 < $i3 goto label28;
+
+        return;
+
+     label28:
+        $i4 = r0.<sun.net.www.http.ChunkedInputStream: int rawPos>;
+
+        if i75 != $i4 goto label29;
+
+        r0.<sun.net.www.http.ChunkedInputStream: boolean error> = 1;
+
+        $r37 = new java.io.IOException;
+
+        specialinvoke $r37.<java.io.IOException: void <init>(java.lang.String)>("LF should be proceeded by CR");
+
+        throw $r37;
+
+     label29:
+        $r1 = r0.<sun.net.www.http.ChunkedInputStream: byte[] rawData>;
+
+        $i5 = i75 - 1;
+
+        $b6 = $r1[$i5];
+
+        $i82 = (int) $b6;
+
+        if $i82 == 13 goto label30;
+
+        r0.<sun.net.www.http.ChunkedInputStream: boolean error> = 1;
+
+        $r38 = new java.io.IOException;
+
+        specialinvoke $r38.<java.io.IOException: void <init>(java.lang.String)>("LF should be proceeded by CR");
+
+        throw $r38;
+
+     label30:
+        $i7 = r0.<sun.net.www.http.ChunkedInputStream: int rawPos>;
+
+        $i8 = $i7 + 1;
+
+        if i75 != $i8 goto label31;
+
+        r0.<sun.net.www.http.ChunkedInputStream: int state> = 5;
+
+        specialinvoke r0.<sun.net.www.http.ChunkedInputStream: void closeUnderlying()>();
+
+        return;
+
+     label31:
+        $r39 = new java.lang.String;
+
+        $r3 = r0.<sun.net.www.http.ChunkedInputStream: byte[] rawData>;
+
+        $i11 = r0.<sun.net.www.http.ChunkedInputStream: int rawPos>;
+
+        $i9 = r0.<sun.net.www.http.ChunkedInputStream: int rawPos>;
+
+        $i10 = i75 - $i9;
+
+        specialinvoke $r39.<java.lang.String: void <init>(byte[],int,int,java.lang.String)>($r3, $i11, $i10, "US-ASCII");
+
+        $i12 = virtualinvoke $r39.<java.lang.String: int indexOf(int)>(58);
+
+        $i84 = (int) -1;
+
+        if $i12 != $i84 goto label32;
+
+        $r40 = new java.io.IOException;
+
+        specialinvoke $r40.<java.io.IOException: void <init>(java.lang.String)>("Malformed tailer - format should be key:value");
+
+        throw $r40;
+
+     label32:
+        $r4 = virtualinvoke $r39.<java.lang.String: java.lang.String substring(int,int)>(0, $i12);
+
+        $r5 = virtualinvoke $r4.<java.lang.String: java.lang.String trim()>();
+
+        $i13 = $i12 + 1;
+
+        $i14 = virtualinvoke $r39.<java.lang.String: int length()>();
+
+        $r6 = virtualinvoke $r39.<java.lang.String: java.lang.String substring(int,int)>($i13, $i14);
+
+        $r7 = virtualinvoke $r6.<java.lang.String: java.lang.String trim()>();
+
+        $r8 = r0.<sun.net.www.http.ChunkedInputStream: sun.net.www.MessageHeader responses>;
+
+        virtualinvoke $r8.<sun.net.www.MessageHeader: void add(java.lang.String,java.lang.String)>($r5, $r7);
+
+        $i15 = i75 + 1;
+
+        r0.<sun.net.www.http.ChunkedInputStream: int rawPos> = $i15;
+
+     label33:
+        goto label01;
+
+     label34:
+        return;
+
+        catch java.lang.NumberFormatException from label09 to label10 with label11;
+    }
+
+    private int readAheadNonBlocking() throws java.io.IOException
+    {
+        byte[] $r2;
+        java.io.IOException $r4;
+        sun.net.www.http.ChunkedInputStream r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i9;
+        java.io.InputStream $r1, $r3;
+
+        r0 := @this: sun.net.www.http.ChunkedInputStream;
+
+        $r1 = r0.<sun.net.www.http.ChunkedInputStream: java.io.InputStream in>;
+
+        $i0 = virtualinvoke $r1.<java.io.InputStream: int available()>();
+
+        if $i0 <= 0 goto label6;
+
+        specialinvoke r0.<sun.net.www.http.ChunkedInputStream: void ensureRawAvailable(int)>($i0);
+
+     label1:
+        $r3 = r0.<sun.net.www.http.ChunkedInputStream: java.io.InputStream in>;
+
+        $r2 = r0.<sun.net.www.http.ChunkedInputStream: byte[] rawData>;
+
+        $i4 = r0.<sun.net.www.http.ChunkedInputStream: int rawCount>;
+
+        $i5 = virtualinvoke $r3.<java.io.InputStream: int read(byte[],int,int)>($r2, $i4, $i0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        r0.<sun.net.www.http.ChunkedInputStream: boolean error> = 1;
+
+        throw $r4;
+
+     label4:
+        if $i5 >= 0 goto label5;
+
+        r0.<sun.net.www.http.ChunkedInputStream: boolean error> = 1;
+
+        $i9 = (int) -1;
+
+        return $i9;
+
+     label5:
+        $i6 = r0.<sun.net.www.http.ChunkedInputStream: int rawCount>;
+
+        $i7 = $i6 + $i5;
+
+        r0.<sun.net.www.http.ChunkedInputStream: int rawCount> = $i7;
+
+        specialinvoke r0.<sun.net.www.http.ChunkedInputStream: void processRaw()>();
+
+     label6:
+        $i2 = r0.<sun.net.www.http.ChunkedInputStream: int chunkCount>;
+
+        $i1 = r0.<sun.net.www.http.ChunkedInputStream: int chunkPos>;
+
+        $i3 = $i2 - $i1;
+
+        return $i3;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    private int readAheadBlocking() throws java.io.IOException
+    {
+        byte[] $r1, $r2;
+        sun.net.www.http.ChunkedInputStream r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i13;
+        java.io.IOException $r5, $r6;
+        java.io.InputStream $r3;
+
+        r0 := @this: sun.net.www.http.ChunkedInputStream;
+
+     label1:
+        $i0 = r0.<sun.net.www.http.ChunkedInputStream: int state>;
+
+        if $i0 != 5 goto label2;
+
+        $i13 = (int) -1;
+
+        return $i13;
+
+     label2:
+        specialinvoke r0.<sun.net.www.http.ChunkedInputStream: void ensureRawAvailable(int)>(32);
+
+     label3:
+        $r3 = r0.<sun.net.www.http.ChunkedInputStream: java.io.InputStream in>;
+
+        $r2 = r0.<sun.net.www.http.ChunkedInputStream: byte[] rawData>;
+
+        $i4 = r0.<sun.net.www.http.ChunkedInputStream: int rawCount>;
+
+        $r1 = r0.<sun.net.www.http.ChunkedInputStream: byte[] rawData>;
+
+        $i2 = lengthof $r1;
+
+        $i1 = r0.<sun.net.www.http.ChunkedInputStream: int rawCount>;
+
+        $i3 = $i2 - $i1;
+
+        $i5 = virtualinvoke $r3.<java.io.InputStream: int read(byte[],int,int)>($r2, $i4, $i3);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r5 := @caughtexception;
+
+        r0.<sun.net.www.http.ChunkedInputStream: boolean error> = 1;
+
+        throw $r5;
+
+     label6:
+        if $i5 >= 0 goto label7;
+
+        r0.<sun.net.www.http.ChunkedInputStream: boolean error> = 1;
+
+        $r6 = new java.io.IOException;
+
+        specialinvoke $r6.<java.io.IOException: void <init>(java.lang.String)>("Premature EOF");
+
+        throw $r6;
+
+     label7:
+        $i6 = r0.<sun.net.www.http.ChunkedInputStream: int rawCount>;
+
+        $i7 = $i6 + $i5;
+
+        r0.<sun.net.www.http.ChunkedInputStream: int rawCount> = $i7;
+
+        specialinvoke r0.<sun.net.www.http.ChunkedInputStream: void processRaw()>();
+
+        $i8 = r0.<sun.net.www.http.ChunkedInputStream: int chunkCount>;
+
+        if $i8 <= 0 goto label1;
+
+        $i10 = r0.<sun.net.www.http.ChunkedInputStream: int chunkCount>;
+
+        $i9 = r0.<sun.net.www.http.ChunkedInputStream: int chunkPos>;
+
+        $i11 = $i10 - $i9;
+
+        return $i11;
+
+        catch java.io.IOException from label3 to label4 with label5;
+    }
+
+    private int readAhead(boolean) throws java.io.IOException
+    {
+        sun.net.www.http.ChunkedInputStream r0;
+        int $i0, $i1, $i2, $i3, $i4, $i6;
+        boolean z0;
+
+        r0 := @this: sun.net.www.http.ChunkedInputStream;
+
+        z0 := @parameter0: boolean;
+
+        $i0 = r0.<sun.net.www.http.ChunkedInputStream: int state>;
+
+        if $i0 != 5 goto label1;
+
+        $i6 = (int) -1;
+
+        return $i6;
+
+     label1:
+        $i2 = r0.<sun.net.www.http.ChunkedInputStream: int chunkPos>;
+
+        $i1 = r0.<sun.net.www.http.ChunkedInputStream: int chunkCount>;
+
+        if $i2 < $i1 goto label2;
+
+        r0.<sun.net.www.http.ChunkedInputStream: int chunkCount> = 0;
+
+        r0.<sun.net.www.http.ChunkedInputStream: int chunkPos> = 0;
+
+     label2:
+        if z0 == 0 goto label3;
+
+        $i4 = specialinvoke r0.<sun.net.www.http.ChunkedInputStream: int readAheadBlocking()>();
+
+        return $i4;
+
+     label3:
+        $i3 = specialinvoke r0.<sun.net.www.http.ChunkedInputStream: int readAheadNonBlocking()>();
+
+        return $i3;
+    }
+
+    public void <init>(java.io.InputStream, sun.net.www.http.HttpClient, sun.net.www.MessageHeader) throws java.io.IOException
+    {
+        sun.net.www.MessageHeader r4;
+        sun.net.www.http.ChunkedInputStream r0;
+        byte[] $r1, $r2;
+        sun.net.www.http.HttpClient r5;
+        java.io.InputStream r3;
+
+        r0 := @this: sun.net.www.http.ChunkedInputStream;
+
+        r3 := @parameter0: java.io.InputStream;
+
+        r5 := @parameter1: sun.net.www.http.HttpClient;
+
+        r4 := @parameter2: sun.net.www.MessageHeader;
+
+        specialinvoke r0.<java.io.InputStream: void <init>()>();
+
+        $r1 = newarray (byte)[4096];
+
+        r0.<sun.net.www.http.ChunkedInputStream: byte[] chunkData> = $r1;
+
+        $r2 = newarray (byte)[32];
+
+        r0.<sun.net.www.http.ChunkedInputStream: byte[] rawData> = $r2;
+
+        r0.<sun.net.www.http.ChunkedInputStream: java.io.InputStream in> = r3;
+
+        r0.<sun.net.www.http.ChunkedInputStream: sun.net.www.MessageHeader responses> = r4;
+
+        r0.<sun.net.www.http.ChunkedInputStream: sun.net.www.http.HttpClient hc> = r5;
+
+        r0.<sun.net.www.http.ChunkedInputStream: int state> = 1;
+
+        return;
+    }
+
+    public synchronized int read() throws java.io.IOException
+    {
+        byte[] $r1;
+        sun.net.www.http.ChunkedInputStream r0;
+        short $s5, $s9;
+        byte $b4;
+        int $i0, $i1, $i2, $i3, $i6, $i8, $i10;
+
+        r0 := @this: sun.net.www.http.ChunkedInputStream;
+
+        specialinvoke r0.<sun.net.www.http.ChunkedInputStream: void ensureOpen()>();
+
+        $i1 = r0.<sun.net.www.http.ChunkedInputStream: int chunkPos>;
+
+        $i0 = r0.<sun.net.www.http.ChunkedInputStream: int chunkCount>;
+
+        if $i1 < $i0 goto label1;
+
+        $i6 = specialinvoke r0.<sun.net.www.http.ChunkedInputStream: int readAhead(boolean)>(1);
+
+        if $i6 > 0 goto label1;
+
+        $i8 = (int) -1;
+
+        return $i8;
+
+     label1:
+        $r1 = r0.<sun.net.www.http.ChunkedInputStream: byte[] chunkData>;
+
+        $i2 = r0.<sun.net.www.http.ChunkedInputStream: int chunkPos>;
+
+        $i3 = $i2 + 1;
+
+        r0.<sun.net.www.http.ChunkedInputStream: int chunkPos> = $i3;
+
+        $b4 = $r1[$i2];
+
+        $s9 = (short) $b4;
+
+        $s5 = $s9 & 255;
+
+        $i10 = (int) $s5;
+
+        return $i10;
+    }
+
+    public synchronized int read(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r1, $r2;
+        java.lang.IndexOutOfBoundsException $r4;
+        sun.net.www.http.ChunkedInputStream r0;
+        int i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, i14, $i15, $i17;
+
+        r0 := @this: sun.net.www.http.ChunkedInputStream;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        specialinvoke r0.<sun.net.www.http.ChunkedInputStream: void ensureOpen()>();
+
+        if i0 < 0 goto label1;
+
+        $i1 = lengthof r1;
+
+        if i0 > $i1 goto label1;
+
+        if i2 < 0 goto label1;
+
+        $i4 = i0 + i2;
+
+        $i3 = lengthof r1;
+
+        if $i4 > $i3 goto label1;
+
+        $i5 = i0 + i2;
+
+        if $i5 >= 0 goto label2;
+
+     label1:
+        $r4 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r4.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r4;
+
+     label2:
+        if i2 != 0 goto label3;
+
+        return 0;
+
+     label3:
+        $i7 = r0.<sun.net.www.http.ChunkedInputStream: int chunkCount>;
+
+        $i6 = r0.<sun.net.www.http.ChunkedInputStream: int chunkPos>;
+
+        i14 = $i7 - $i6;
+
+        if i14 > 0 goto label5;
+
+        $i11 = r0.<sun.net.www.http.ChunkedInputStream: int state>;
+
+        if $i11 != 2 goto label4;
+
+        $i13 = specialinvoke r0.<sun.net.www.http.ChunkedInputStream: int fastRead(byte[],int,int)>(r1, i0, i2);
+
+        return $i13;
+
+     label4:
+        $i12 = specialinvoke r0.<sun.net.www.http.ChunkedInputStream: int readAhead(boolean)>(1);
+
+        i14 = $i12;
+
+        if $i12 >= 0 goto label5;
+
+        $i17 = (int) -1;
+
+        return $i17;
+
+     label5:
+        if i14 >= i2 goto label6;
+
+        $i15 = i14;
+
+        goto label7;
+
+     label6:
+        $i15 = i2;
+
+     label7:
+        $r2 = r0.<sun.net.www.http.ChunkedInputStream: byte[] chunkData>;
+
+        $i8 = r0.<sun.net.www.http.ChunkedInputStream: int chunkPos>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, $i8, r1, i0, $i15);
+
+        $i9 = r0.<sun.net.www.http.ChunkedInputStream: int chunkPos>;
+
+        $i10 = $i9 + $i15;
+
+        r0.<sun.net.www.http.ChunkedInputStream: int chunkPos> = $i10;
+
+        return $i15;
+    }
+
+    public synchronized int available() throws java.io.IOException
+    {
+        sun.net.www.http.ChunkedInputStream r0;
+        int $i0, $i1, $i2, i3;
+
+        r0 := @this: sun.net.www.http.ChunkedInputStream;
+
+        specialinvoke r0.<sun.net.www.http.ChunkedInputStream: void ensureOpen()>();
+
+        $i1 = r0.<sun.net.www.http.ChunkedInputStream: int chunkCount>;
+
+        $i0 = r0.<sun.net.www.http.ChunkedInputStream: int chunkPos>;
+
+        i3 = $i1 - $i0;
+
+        if i3 <= 0 goto label1;
+
+        return i3;
+
+     label1:
+        $i2 = specialinvoke r0.<sun.net.www.http.ChunkedInputStream: int readAhead(boolean)>(0);
+
+        if $i2 >= 0 goto label2;
+
+        return 0;
+
+     label2:
+        return $i2;
+    }
+
+    public synchronized void close() throws java.io.IOException
+    {
+        sun.net.www.http.ChunkedInputStream r0;
+        boolean $z0;
+
+        r0 := @this: sun.net.www.http.ChunkedInputStream;
+
+        $z0 = r0.<sun.net.www.http.ChunkedInputStream: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        specialinvoke r0.<sun.net.www.http.ChunkedInputStream: void closeUnderlying()>();
+
+        r0.<sun.net.www.http.ChunkedInputStream: boolean closed> = 1;
+
+        return;
+    }
+
+    public synchronized boolean hurry()
+    {
+        sun.net.www.http.ChunkedInputStream r0;
+        int $i0;
+        java.lang.Exception $r2;
+        java.io.InputStream $r1;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.net.www.http.ChunkedInputStream;
+
+        $r1 = r0.<sun.net.www.http.ChunkedInputStream: java.io.InputStream in>;
+
+        if $r1 == null goto label1;
+
+        $z0 = r0.<sun.net.www.http.ChunkedInputStream: boolean error>;
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        specialinvoke r0.<sun.net.www.http.ChunkedInputStream: int readAhead(boolean)>(0);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r2 := @caughtexception;
+
+        return 0;
+
+     label5:
+        $z1 = r0.<sun.net.www.http.ChunkedInputStream: boolean error>;
+
+        if $z1 == 0 goto label6;
+
+        return 0;
+
+     label6:
+        $i0 = r0.<sun.net.www.http.ChunkedInputStream: int state>;
+
+        if $i0 != 5 goto label7;
+
+        $z2 = 1;
+
+        goto label8;
+
+     label7:
+        $z2 = 0;
+
+     label8:
+        return $z2;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.net.www.http.ChunkedInputStream: int STATE_DONE> = 5;
+
+        <sun.net.www.http.ChunkedInputStream: int STATE_AWAITING_TRAILERS> = 4;
+
+        <sun.net.www.http.ChunkedInputStream: int STATE_AWAITING_CHUNK_EOL> = 3;
+
+        <sun.net.www.http.ChunkedInputStream: int STATE_READING_CHUNK> = 2;
+
+        <sun.net.www.http.ChunkedInputStream: int STATE_AWAITING_CHUNK_HEADER> = 1;
+
+        <sun.net.www.http.ChunkedInputStream: int MAX_CHUNK_HEADER_SIZE> = 2050;
+
+        return;
+    }
+}

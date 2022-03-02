@@ -1,0 +1,423 @@
+public class sun.awt.image.MultiResolutionCachedImage extends sun.awt.image.AbstractMultiResolutionImage
+{
+    private final int baseImageWidth;
+    private final int baseImageHeight;
+    private final java.awt.geom.Dimension2D[] sizes;
+    private final java.util.function.BiFunction mapper;
+    private int availableInfo;
+
+    public void <init>(int, int, java.util.function.BiFunction)
+    {
+        sun.awt.image.MultiResolutionCachedImage r0;
+        java.awt.Dimension $r2;
+        java.util.function.BiFunction r3;
+        int i0, i1;
+        java.awt.Dimension[] $r1;
+
+        r0 := @this: sun.awt.image.MultiResolutionCachedImage;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        r3 := @parameter2: java.util.function.BiFunction;
+
+        $r1 = newarray (java.awt.Dimension)[1];
+
+        $r2 = new java.awt.Dimension;
+
+        specialinvoke $r2.<java.awt.Dimension: void <init>(int,int)>(i0, i1);
+
+        $r1[0] = $r2;
+
+        specialinvoke r0.<sun.awt.image.MultiResolutionCachedImage: void <init>(int,int,java.awt.geom.Dimension2D[],java.util.function.BiFunction)>(i0, i1, $r1, r3);
+
+        return;
+    }
+
+    public void <init>(int, int, java.awt.geom.Dimension2D[], java.util.function.BiFunction)
+    {
+        java.lang.Object[] $r2;
+        java.util.function.BiFunction r3;
+        java.awt.geom.Dimension2D[] r1, $r4;
+        sun.awt.image.MultiResolutionCachedImage r0;
+        int i0, i1, $i2;
+
+        r0 := @this: sun.awt.image.MultiResolutionCachedImage;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        r1 := @parameter2: java.awt.geom.Dimension2D[];
+
+        r3 := @parameter3: java.util.function.BiFunction;
+
+        specialinvoke r0.<sun.awt.image.AbstractMultiResolutionImage: void <init>()>();
+
+        r0.<sun.awt.image.MultiResolutionCachedImage: int baseImageWidth> = i0;
+
+        r0.<sun.awt.image.MultiResolutionCachedImage: int baseImageHeight> = i1;
+
+        if r1 != null goto label1;
+
+        $r4 = null;
+
+        goto label2;
+
+     label1:
+        $i2 = lengthof r1;
+
+        $r2 = staticinvoke <java.util.Arrays: java.lang.Object[] copyOf(java.lang.Object[],int)>(r1, $i2);
+
+        $r4 = (java.awt.geom.Dimension2D[]) $r2;
+
+     label2:
+        r0.<sun.awt.image.MultiResolutionCachedImage: java.awt.geom.Dimension2D[] sizes> = $r4;
+
+        r0.<sun.awt.image.MultiResolutionCachedImage: java.util.function.BiFunction mapper> = r3;
+
+        return;
+    }
+
+    public java.awt.Image getResolutionVariant(int, int)
+    {
+        java.awt.Image $r3, r8;
+        sun.awt.image.MultiResolutionCachedImage$ImageCacheKey $r1;
+        java.util.function.BiFunction $r4;
+        sun.awt.image.ImageCache $r0;
+        java.lang.Integer $r5, $r6;
+        sun.awt.image.MultiResolutionCachedImage r2;
+        int i0, i1, $i2;
+        java.lang.Object $r7;
+
+        r2 := @this: sun.awt.image.MultiResolutionCachedImage;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r0 = staticinvoke <sun.awt.image.ImageCache: sun.awt.image.ImageCache getInstance()>();
+
+        $r1 = new sun.awt.image.MultiResolutionCachedImage$ImageCacheKey;
+
+        specialinvoke $r1.<sun.awt.image.MultiResolutionCachedImage$ImageCacheKey: void <init>(java.awt.Image,int,int)>(r2, i0, i1);
+
+        $r3 = virtualinvoke $r0.<sun.awt.image.ImageCache: java.awt.Image getImage(sun.awt.image.ImageCache$PixelsKey)>($r1);
+
+        r8 = $r3;
+
+        if $r3 != null goto label1;
+
+        $r4 = r2.<sun.awt.image.MultiResolutionCachedImage: java.util.function.BiFunction mapper>;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i1);
+
+        $r7 = interfaceinvoke $r4.<java.util.function.BiFunction: java.lang.Object apply(java.lang.Object,java.lang.Object)>($r5, $r6);
+
+        r8 = (java.awt.Image) $r7;
+
+        virtualinvoke $r0.<sun.awt.image.ImageCache: void setImage(sun.awt.image.ImageCache$PixelsKey,java.awt.Image)>($r1, r8);
+
+     label1:
+        $i2 = r2.<sun.awt.image.MultiResolutionCachedImage: int availableInfo>;
+
+        staticinvoke <sun.awt.image.MultiResolutionCachedImage: void preload(java.awt.Image,int)>(r8, $i2);
+
+        return r8;
+    }
+
+    public java.util.List getResolutionVariants()
+    {
+        java.awt.geom.Dimension2D[] $r1;
+        java.util.function.Function $r3;
+        sun.awt.image.MultiResolutionCachedImage r0;
+        java.util.List $r7;
+        java.util.stream.Stream $r2, $r4;
+        java.lang.Object $r6;
+        java.util.stream.Collector $r5;
+
+        r0 := @this: sun.awt.image.MultiResolutionCachedImage;
+
+        $r1 = r0.<sun.awt.image.MultiResolutionCachedImage: java.awt.geom.Dimension2D[] sizes>;
+
+        $r2 = staticinvoke <java.util.Arrays: java.util.stream.Stream stream(java.lang.Object[])>($r1);
+
+        $r3 = staticinvoke <sun.awt.image.MultiResolutionCachedImage$lambda_getResolutionVariants_0__370: java.util.function.Function bootstrap$(sun.awt.image.MultiResolutionCachedImage)>(r0);
+
+        $r4 = interfaceinvoke $r2.<java.util.stream.Stream: java.util.stream.Stream map(java.util.function.Function)>($r3);
+
+        $r5 = staticinvoke <java.util.stream.Collectors: java.util.stream.Collector toList()>();
+
+        $r6 = interfaceinvoke $r4.<java.util.stream.Stream: java.lang.Object collect(java.util.stream.Collector)>($r5);
+
+        $r7 = (java.util.List) $r6;
+
+        return $r7;
+    }
+
+    public sun.awt.image.MultiResolutionCachedImage map(java.util.function.Function)
+    {
+        sun.awt.image.MultiResolutionCachedImage $r0, r1;
+        java.util.function.BiFunction $r4;
+        int $i0, $i1;
+        java.awt.geom.Dimension2D[] $r3;
+        java.util.function.Function r2;
+
+        r1 := @this: sun.awt.image.MultiResolutionCachedImage;
+
+        r2 := @parameter0: java.util.function.Function;
+
+        $r0 = new sun.awt.image.MultiResolutionCachedImage;
+
+        $i0 = r1.<sun.awt.image.MultiResolutionCachedImage: int baseImageWidth>;
+
+        $i1 = r1.<sun.awt.image.MultiResolutionCachedImage: int baseImageHeight>;
+
+        $r3 = r1.<sun.awt.image.MultiResolutionCachedImage: java.awt.geom.Dimension2D[] sizes>;
+
+        $r4 = staticinvoke <sun.awt.image.MultiResolutionCachedImage$lambda_map_1__371: java.util.function.BiFunction bootstrap$(sun.awt.image.MultiResolutionCachedImage,java.util.function.Function)>(r1, r2);
+
+        specialinvoke $r0.<sun.awt.image.MultiResolutionCachedImage: void <init>(int,int,java.awt.geom.Dimension2D[],java.util.function.BiFunction)>($i0, $i1, $r3, $r4);
+
+        return $r0;
+    }
+
+    public int getWidth(java.awt.image.ImageObserver)
+    {
+        sun.awt.image.MultiResolutionCachedImage r0;
+        int $i0;
+        java.awt.image.ImageObserver r1;
+
+        r0 := @this: sun.awt.image.MultiResolutionCachedImage;
+
+        r1 := @parameter0: java.awt.image.ImageObserver;
+
+        specialinvoke r0.<sun.awt.image.MultiResolutionCachedImage: void updateInfo(java.awt.image.ImageObserver,int)>(r1, 1);
+
+        $i0 = specialinvoke r0.<sun.awt.image.AbstractMultiResolutionImage: int getWidth(java.awt.image.ImageObserver)>(r1);
+
+        return $i0;
+    }
+
+    public int getHeight(java.awt.image.ImageObserver)
+    {
+        sun.awt.image.MultiResolutionCachedImage r0;
+        int $i0;
+        java.awt.image.ImageObserver r1;
+
+        r0 := @this: sun.awt.image.MultiResolutionCachedImage;
+
+        r1 := @parameter0: java.awt.image.ImageObserver;
+
+        specialinvoke r0.<sun.awt.image.MultiResolutionCachedImage: void updateInfo(java.awt.image.ImageObserver,int)>(r1, 2);
+
+        $i0 = specialinvoke r0.<sun.awt.image.AbstractMultiResolutionImage: int getHeight(java.awt.image.ImageObserver)>(r1);
+
+        return $i0;
+    }
+
+    public java.lang.Object getProperty(java.lang.String, java.awt.image.ImageObserver)
+    {
+        sun.awt.image.MultiResolutionCachedImage r0;
+        java.lang.Object $r3;
+        java.lang.String r2;
+        java.awt.image.ImageObserver r1;
+
+        r0 := @this: sun.awt.image.MultiResolutionCachedImage;
+
+        r2 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.awt.image.ImageObserver;
+
+        specialinvoke r0.<sun.awt.image.MultiResolutionCachedImage: void updateInfo(java.awt.image.ImageObserver,int)>(r1, 4);
+
+        $r3 = specialinvoke r0.<sun.awt.image.AbstractMultiResolutionImage: java.lang.Object getProperty(java.lang.String,java.awt.image.ImageObserver)>(r2, r1);
+
+        return $r3;
+    }
+
+    protected java.awt.Image getBaseImage()
+    {
+        sun.awt.image.MultiResolutionCachedImage r0;
+        java.awt.Image $r1;
+        int $i0, $i1;
+
+        r0 := @this: sun.awt.image.MultiResolutionCachedImage;
+
+        $i1 = r0.<sun.awt.image.MultiResolutionCachedImage: int baseImageWidth>;
+
+        $i0 = r0.<sun.awt.image.MultiResolutionCachedImage: int baseImageHeight>;
+
+        $r1 = virtualinvoke r0.<sun.awt.image.MultiResolutionCachedImage: java.awt.Image getResolutionVariant(int,int)>($i1, $i0);
+
+        return $r1;
+    }
+
+    private void updateInfo(java.awt.image.ImageObserver, int)
+    {
+        sun.awt.image.MultiResolutionCachedImage r0;
+        int i0, $i1, $i2, $i3;
+        java.awt.image.ImageObserver r1;
+
+        r0 := @this: sun.awt.image.MultiResolutionCachedImage;
+
+        r1 := @parameter0: java.awt.image.ImageObserver;
+
+        i0 := @parameter1: int;
+
+        $i1 = r0.<sun.awt.image.MultiResolutionCachedImage: int availableInfo>;
+
+        if r1 != null goto label1;
+
+        $i3 = 32;
+
+        goto label2;
+
+     label1:
+        $i3 = i0;
+
+     label2:
+        $i2 = $i1 | $i3;
+
+        r0.<sun.awt.image.MultiResolutionCachedImage: int availableInfo> = $i2;
+
+        return;
+    }
+
+    private static int getInfo(java.awt.Image)
+    {
+        sun.awt.image.ToolkitImage $r1;
+        java.awt.Image r0;
+        sun.awt.image.ImageRepresentation $r2;
+        int $i0;
+        java.awt.image.ImageObserver $r3;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.Image;
+
+        $z0 = r0 instanceof sun.awt.image.ToolkitImage;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = (sun.awt.image.ToolkitImage) r0;
+
+        $r2 = virtualinvoke $r1.<sun.awt.image.ToolkitImage: sun.awt.image.ImageRepresentation getImageRep()>();
+
+        $r3 = staticinvoke <sun.awt.image.MultiResolutionCachedImage$lambda_getInfo_2__372: java.awt.image.ImageObserver bootstrap$()>();
+
+        $i0 = virtualinvoke $r2.<sun.awt.image.ImageRepresentation: int check(java.awt.image.ImageObserver)>($r3);
+
+        return $i0;
+
+     label1:
+        return 0;
+    }
+
+    private static void preload(java.awt.Image, int)
+    {
+        sun.awt.image.ToolkitImage $r2;
+        java.awt.Image r0;
+        sun.awt.image.MultiResolutionCachedImage$1 $r1;
+        int i0;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.Image;
+
+        i0 := @parameter1: int;
+
+        if i0 == 0 goto label1;
+
+        $z0 = r0 instanceof sun.awt.image.ToolkitImage;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = (sun.awt.image.ToolkitImage) r0;
+
+        $r1 = new sun.awt.image.MultiResolutionCachedImage$1;
+
+        specialinvoke $r1.<sun.awt.image.MultiResolutionCachedImage$1: void <init>(int)>(i0);
+
+        virtualinvoke $r2.<sun.awt.image.ToolkitImage: void preload(java.awt.image.ImageObserver)>($r1);
+
+     label1:
+        return;
+    }
+
+    public static boolean lambda$getInfo$2(java.awt.Image, int, int, int, int, int)
+    {
+        java.awt.Image r0;
+        int i0, i1, i2, i3, i4;
+
+        r0 := @parameter0: java.awt.Image;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        i3 := @parameter4: int;
+
+        i4 := @parameter5: int;
+
+        return 0;
+    }
+
+    public java.awt.Image lambda$map$1(java.util.function.Function, java.lang.Integer, java.lang.Integer)
+    {
+        java.awt.Image $r4, $r6;
+        java.util.function.Function r0;
+        java.lang.Integer r2, r3;
+        sun.awt.image.MultiResolutionCachedImage r1;
+        int $i0, $i1;
+        java.lang.Object $r5;
+
+        r1 := @this: sun.awt.image.MultiResolutionCachedImage;
+
+        r0 := @parameter0: java.util.function.Function;
+
+        r2 := @parameter1: java.lang.Integer;
+
+        r3 := @parameter2: java.lang.Integer;
+
+        $i0 = virtualinvoke r2.<java.lang.Integer: int intValue()>();
+
+        $i1 = virtualinvoke r3.<java.lang.Integer: int intValue()>();
+
+        $r4 = virtualinvoke r1.<sun.awt.image.MultiResolutionCachedImage: java.awt.Image getResolutionVariant(int,int)>($i0, $i1);
+
+        $r5 = interfaceinvoke r0.<java.util.function.Function: java.lang.Object apply(java.lang.Object)>($r4);
+
+        $r6 = (java.awt.Image) $r5;
+
+        return $r6;
+    }
+
+    public java.awt.Image lambda$getResolutionVariants$0(java.awt.geom.Dimension2D)
+    {
+        sun.awt.image.MultiResolutionCachedImage r0;
+        java.awt.geom.Dimension2D r1;
+        java.awt.Image $r2;
+        int $i0, $i1;
+        double $d0, $d1;
+
+        r0 := @this: sun.awt.image.MultiResolutionCachedImage;
+
+        r1 := @parameter0: java.awt.geom.Dimension2D;
+
+        $d0 = virtualinvoke r1.<java.awt.geom.Dimension2D: double getWidth()>();
+
+        $i0 = (int) $d0;
+
+        $d1 = virtualinvoke r1.<java.awt.geom.Dimension2D: double getHeight()>();
+
+        $i1 = (int) $d1;
+
+        $r2 = virtualinvoke r0.<sun.awt.image.MultiResolutionCachedImage: java.awt.Image getResolutionVariant(int,int)>($i0, $i1);
+
+        return $r2;
+    }
+}

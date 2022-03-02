@@ -1,0 +1,1560 @@
+class com.sun.org.apache.bcel.internal.util.BCELFactory extends com.sun.org.apache.bcel.internal.generic.EmptyVisitor
+{
+    private static final java.lang.String CONSTANT_PREFIX;
+    private final com.sun.org.apache.bcel.internal.generic.MethodGen _mg;
+    private final java.io.PrintWriter _out;
+    private final com.sun.org.apache.bcel.internal.generic.ConstantPoolGen _cp;
+    private final java.util.Map branch_map;
+    private final java.util.List branches;
+
+    void <init>(com.sun.org.apache.bcel.internal.generic.MethodGen, java.io.PrintWriter)
+    {
+        java.io.PrintWriter r5;
+        java.util.HashMap $r1;
+        com.sun.org.apache.bcel.internal.util.BCELFactory r0;
+        com.sun.org.apache.bcel.internal.generic.MethodGen r3;
+        com.sun.org.apache.bcel.internal.generic.ConstantPoolGen $r4;
+        java.util.ArrayList $r2;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.util.BCELFactory;
+
+        r3 := @parameter0: com.sun.org.apache.bcel.internal.generic.MethodGen;
+
+        r5 := @parameter1: java.io.PrintWriter;
+
+        specialinvoke r0.<com.sun.org.apache.bcel.internal.generic.EmptyVisitor: void <init>()>();
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.util.Map branch_map> = $r1;
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.util.List branches> = $r2;
+
+        r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: com.sun.org.apache.bcel.internal.generic.MethodGen _mg> = r3;
+
+        $r4 = virtualinvoke r3.<com.sun.org.apache.bcel.internal.generic.MethodGen: com.sun.org.apache.bcel.internal.generic.ConstantPoolGen getConstantPool()>();
+
+        r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: com.sun.org.apache.bcel.internal.generic.ConstantPoolGen _cp> = $r4;
+
+        r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out> = r5;
+
+        return;
+    }
+
+    public void start()
+    {
+        com.sun.org.apache.bcel.internal.util.BCELFactory r0;
+        com.sun.org.apache.bcel.internal.generic.MethodGen $r1, $r2, $r3;
+        java.util.Map $r19;
+        com.sun.org.apache.bcel.internal.generic.InstructionHandle r20;
+        int $i0, $i1;
+        java.lang.String $r12, $r18;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.io.PrintWriter $r6, $r8, $r14;
+        com.sun.org.apache.bcel.internal.generic.Instruction $r5;
+        com.sun.org.apache.bcel.internal.generic.InstructionList $r4;
+        java.lang.StringBuilder $r7, $r9, $r10, $r11, $r13, $r15, $r16, $r17;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.util.BCELFactory;
+
+        $r1 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: com.sun.org.apache.bcel.internal.generic.MethodGen _mg>;
+
+        $z0 = virtualinvoke $r1.<com.sun.org.apache.bcel.internal.generic.MethodGen: boolean isAbstract()>();
+
+        if $z0 != 0 goto label8;
+
+        $r2 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: com.sun.org.apache.bcel.internal.generic.MethodGen _mg>;
+
+        $z1 = virtualinvoke $r2.<com.sun.org.apache.bcel.internal.generic.MethodGen: boolean isNative()>();
+
+        if $z1 != 0 goto label8;
+
+        $r3 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: com.sun.org.apache.bcel.internal.generic.MethodGen _mg>;
+
+        $r4 = virtualinvoke $r3.<com.sun.org.apache.bcel.internal.generic.MethodGen: com.sun.org.apache.bcel.internal.generic.InstructionList getInstructionList()>();
+
+        r20 = virtualinvoke $r4.<com.sun.org.apache.bcel.internal.generic.InstructionList: com.sun.org.apache.bcel.internal.generic.InstructionHandle getStart()>();
+
+     label1:
+        if r20 == null goto label7;
+
+        $r5 = virtualinvoke r20.<com.sun.org.apache.bcel.internal.generic.InstructionHandle: com.sun.org.apache.bcel.internal.generic.Instruction getInstruction()>();
+
+        $z2 = $r5 instanceof com.sun.org.apache.bcel.internal.generic.BranchInstruction;
+
+        if $z2 == 0 goto label2;
+
+        $r19 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.util.Map branch_map>;
+
+        interfaceinvoke $r19.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r5, r20);
+
+     label2:
+        $z3 = virtualinvoke r20.<com.sun.org.apache.bcel.internal.generic.InstructionHandle: boolean hasTargeters()>();
+
+        if $z3 == 0 goto label4;
+
+        $z4 = $r5 instanceof com.sun.org.apache.bcel.internal.generic.BranchInstruction;
+
+        if $z4 == 0 goto label3;
+
+        $r14 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("    InstructionHandle ih_");
+
+        $i1 = virtualinvoke r20.<com.sun.org.apache.bcel.internal.generic.InstructionHandle: int getPosition()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(";");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r14.<java.io.PrintWriter: void println(java.lang.String)>($r18);
+
+        goto label5;
+
+     label3:
+        $r8 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("    InstructionHandle ih_");
+
+        $i0 = virtualinvoke r20.<com.sun.org.apache.bcel.internal.generic.InstructionHandle: int getPosition()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" = ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r8.<java.io.PrintWriter: void print(java.lang.String)>($r12);
+
+        goto label5;
+
+     label4:
+        $r6 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        virtualinvoke $r6.<java.io.PrintWriter: void print(java.lang.String)>("    ");
+
+     label5:
+        $z5 = specialinvoke r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: boolean visitInstruction(com.sun.org.apache.bcel.internal.generic.Instruction)>($r5);
+
+        if $z5 != 0 goto label6;
+
+        virtualinvoke $r5.<com.sun.org.apache.bcel.internal.generic.Instruction: void accept(com.sun.org.apache.bcel.internal.generic.Visitor)>(r0);
+
+     label6:
+        r20 = virtualinvoke r20.<com.sun.org.apache.bcel.internal.generic.InstructionHandle: com.sun.org.apache.bcel.internal.generic.InstructionHandle getNext()>();
+
+        goto label1;
+
+     label7:
+        specialinvoke r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: void updateBranchTargets()>();
+
+        specialinvoke r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: void updateExceptionHandlers()>();
+
+     label8:
+        return;
+    }
+
+    private boolean visitInstruction(com.sun.org.apache.bcel.internal.generic.Instruction)
+    {
+        com.sun.org.apache.bcel.internal.util.BCELFactory r2;
+        short $s0;
+        java.util.Locale $r7;
+        int $i1;
+        java.lang.String $r6, $r8, $r11;
+        boolean $z0, $z1;
+        java.io.PrintWriter $r4;
+        com.sun.org.apache.bcel.internal.generic.Instruction r0, $r1;
+        java.lang.StringBuilder $r5, $r9, $r10, $r12;
+
+        r2 := @this: com.sun.org.apache.bcel.internal.util.BCELFactory;
+
+        r0 := @parameter0: com.sun.org.apache.bcel.internal.generic.Instruction;
+
+        $s0 = virtualinvoke r0.<com.sun.org.apache.bcel.internal.generic.Instruction: short getOpcode()>();
+
+        $i1 = (int) $s0;
+
+        $r1 = staticinvoke <com.sun.org.apache.bcel.internal.generic.InstructionConst: com.sun.org.apache.bcel.internal.generic.Instruction getInstruction(int)>($i1);
+
+        if $r1 == null goto label1;
+
+        $z0 = r0 instanceof com.sun.org.apache.bcel.internal.generic.ConstantPushInstruction;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = r0 instanceof com.sun.org.apache.bcel.internal.generic.ReturnInstruction;
+
+        if $z1 != 0 goto label1;
+
+        $r4 = r2.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("il.append(InstructionConst.");
+
+        $r6 = virtualinvoke r0.<com.sun.org.apache.bcel.internal.generic.Instruction: java.lang.String getName()>();
+
+        $r7 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r8 = virtualinvoke $r6.<java.lang.String: java.lang.String toUpperCase(java.util.Locale)>($r7);
+
+        $r9 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(");");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<java.io.PrintWriter: void println(java.lang.String)>($r11);
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    public void visitLocalVariableInstruction(com.sun.org.apache.bcel.internal.generic.LocalVariableInstruction)
+    {
+        com.sun.org.apache.bcel.internal.util.BCELFactory r1;
+        com.sun.org.apache.bcel.internal.generic.Type $r3;
+        short $s0;
+        int $i1, $i2, $i3, $i4, $i5;
+        java.lang.String $r9, $r14, $r23, $r24;
+        java.io.PrintWriter $r5, $r16;
+        com.sun.org.apache.bcel.internal.generic.LocalVariableInstruction r0;
+        java.lang.StringBuilder $r6, $r7, $r8, $r10, $r11, $r12, $r13, $r17, $r18, $r19, $r21, $r22, $r25, $r26;
+        com.sun.org.apache.bcel.internal.generic.IINC $r20;
+        com.sun.org.apache.bcel.internal.generic.ConstantPoolGen $r2;
+
+        r1 := @this: com.sun.org.apache.bcel.internal.util.BCELFactory;
+
+        r0 := @parameter0: com.sun.org.apache.bcel.internal.generic.LocalVariableInstruction;
+
+        $s0 = virtualinvoke r0.<com.sun.org.apache.bcel.internal.generic.LocalVariableInstruction: short getOpcode()>();
+
+        $r2 = r1.<com.sun.org.apache.bcel.internal.util.BCELFactory: com.sun.org.apache.bcel.internal.generic.ConstantPoolGen _cp>;
+
+        $r3 = virtualinvoke r0.<com.sun.org.apache.bcel.internal.generic.LocalVariableInstruction: com.sun.org.apache.bcel.internal.generic.Type getType(com.sun.org.apache.bcel.internal.generic.ConstantPoolGen)>($r2);
+
+        $i4 = (int) $s0;
+
+        if $i4 != 132 goto label1;
+
+        $r16 = r1.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        $r25 = new java.lang.StringBuilder;
+
+        specialinvoke $r25.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("il.append(new IINC(");
+
+        $i2 = virtualinvoke r0.<com.sun.org.apache.bcel.internal.generic.LocalVariableInstruction: int getIndex()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $r20 = (com.sun.org.apache.bcel.internal.generic.IINC) r0;
+
+        $i3 = virtualinvoke $r20.<com.sun.org.apache.bcel.internal.generic.IINC: int getIncrement()>();
+
+        $r21 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("));");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r16.<java.io.PrintWriter: void println(java.lang.String)>($r23);
+
+        goto label4;
+
+     label1:
+        $i5 = (int) $s0;
+
+        if $i5 >= 54 goto label2;
+
+        $r24 = "Load";
+
+        goto label3;
+
+     label2:
+        $r24 = "Store";
+
+     label3:
+        $r5 = r1.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("il.append(_factory.create");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r24);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(");
+
+        $r9 = staticinvoke <com.sun.org.apache.bcel.internal.util.BCELifier: java.lang.String printType(com.sun.org.apache.bcel.internal.generic.Type)>($r3);
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $i1 = virtualinvoke r0.<com.sun.org.apache.bcel.internal.generic.LocalVariableInstruction: int getIndex()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("));");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintWriter: void println(java.lang.String)>($r14);
+
+     label4:
+        return;
+    }
+
+    public void visitArrayInstruction(com.sun.org.apache.bcel.internal.generic.ArrayInstruction)
+    {
+        com.sun.org.apache.bcel.internal.util.BCELFactory r1;
+        com.sun.org.apache.bcel.internal.generic.Type $r3;
+        short $s0;
+        int $i1;
+        java.lang.String $r9, $r12, $r13;
+        java.io.PrintWriter $r5;
+        com.sun.org.apache.bcel.internal.generic.ArrayInstruction r0;
+        java.lang.StringBuilder $r6, $r7, $r8, $r10, $r11, $r14;
+        com.sun.org.apache.bcel.internal.generic.ConstantPoolGen $r2;
+
+        r1 := @this: com.sun.org.apache.bcel.internal.util.BCELFactory;
+
+        r0 := @parameter0: com.sun.org.apache.bcel.internal.generic.ArrayInstruction;
+
+        $s0 = virtualinvoke r0.<com.sun.org.apache.bcel.internal.generic.ArrayInstruction: short getOpcode()>();
+
+        $r2 = r1.<com.sun.org.apache.bcel.internal.util.BCELFactory: com.sun.org.apache.bcel.internal.generic.ConstantPoolGen _cp>;
+
+        $r3 = virtualinvoke r0.<com.sun.org.apache.bcel.internal.generic.ArrayInstruction: com.sun.org.apache.bcel.internal.generic.Type getType(com.sun.org.apache.bcel.internal.generic.ConstantPoolGen)>($r2);
+
+        $i1 = (int) $s0;
+
+        if $i1 >= 79 goto label1;
+
+        $r13 = "Load";
+
+        goto label2;
+
+     label1:
+        $r13 = "Store";
+
+     label2:
+        $r5 = r1.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("il.append(_factory.createArray");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(");
+
+        $r9 = staticinvoke <com.sun.org.apache.bcel.internal.util.BCELifier: java.lang.String printType(com.sun.org.apache.bcel.internal.generic.Type)>($r3);
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("));");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintWriter: void println(java.lang.String)>($r12);
+
+        return;
+    }
+
+    public void visitFieldInstruction(com.sun.org.apache.bcel.internal.generic.FieldInstruction)
+    {
+        com.sun.org.apache.bcel.internal.generic.FieldInstruction r0;
+        com.sun.org.apache.bcel.internal.generic.ReferenceType $r3;
+        com.sun.org.apache.bcel.internal.util.BCELFactory r1;
+        com.sun.org.apache.bcel.internal.generic.Type $r8;
+        short $s0;
+        java.util.Locale $r22;
+        int $i1;
+        java.lang.String $r4, $r6, $r16, $r19, $r21, $r23, $r26;
+        java.io.PrintWriter $r10;
+        java.lang.StringBuilder $r11, $r12, $r13, $r14, $r15, $r17, $r18, $r20, $r24, $r25, $r27;
+        com.sun.org.apache.bcel.internal.generic.ConstantPoolGen $r2, $r5, $r7;
+
+        r1 := @this: com.sun.org.apache.bcel.internal.util.BCELFactory;
+
+        r0 := @parameter0: com.sun.org.apache.bcel.internal.generic.FieldInstruction;
+
+        $s0 = virtualinvoke r0.<com.sun.org.apache.bcel.internal.generic.FieldInstruction: short getOpcode()>();
+
+        $r2 = r1.<com.sun.org.apache.bcel.internal.util.BCELFactory: com.sun.org.apache.bcel.internal.generic.ConstantPoolGen _cp>;
+
+        $r3 = virtualinvoke r0.<com.sun.org.apache.bcel.internal.generic.FieldInstruction: com.sun.org.apache.bcel.internal.generic.ReferenceType getReferenceType(com.sun.org.apache.bcel.internal.generic.ConstantPoolGen)>($r2);
+
+        $r4 = virtualinvoke $r3.<com.sun.org.apache.bcel.internal.generic.ReferenceType: java.lang.String getSignature()>();
+
+        $r5 = r1.<com.sun.org.apache.bcel.internal.util.BCELFactory: com.sun.org.apache.bcel.internal.generic.ConstantPoolGen _cp>;
+
+        $r6 = virtualinvoke r0.<com.sun.org.apache.bcel.internal.generic.FieldInstruction: java.lang.String getFieldName(com.sun.org.apache.bcel.internal.generic.ConstantPoolGen)>($r5);
+
+        $r7 = r1.<com.sun.org.apache.bcel.internal.util.BCELFactory: com.sun.org.apache.bcel.internal.generic.ConstantPoolGen _cp>;
+
+        $r8 = virtualinvoke r0.<com.sun.org.apache.bcel.internal.generic.FieldInstruction: com.sun.org.apache.bcel.internal.generic.Type getFieldType(com.sun.org.apache.bcel.internal.generic.ConstantPoolGen)>($r7);
+
+        $r10 = r1.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("il.append(_factory.createFieldAccess(\"");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\", \"");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\", ");
+
+        $r16 = staticinvoke <com.sun.org.apache.bcel.internal.util.BCELifier: java.lang.String printType(com.sun.org.apache.bcel.internal.generic.Type)>($r8);
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r16);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $r19 = <com.sun.org.apache.bcel.internal.util.BCELFactory: java.lang.String CONSTANT_PREFIX>;
+
+        $r20 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $i1 = (int) $s0;
+
+        $r21 = staticinvoke <com.sun.org.apache.bcel.internal.Const: java.lang.String getOpcodeName(int)>($i1);
+
+        $r22 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r23 = virtualinvoke $r21.<java.lang.String: java.lang.String toUpperCase(java.util.Locale)>($r22);
+
+        $r24 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r23);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("));");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r10.<java.io.PrintWriter: void println(java.lang.String)>($r26);
+
+        return;
+    }
+
+    public void visitInvokeInstruction(com.sun.org.apache.bcel.internal.generic.InvokeInstruction)
+    {
+        com.sun.org.apache.bcel.internal.generic.ReferenceType $r3;
+        com.sun.org.apache.bcel.internal.util.BCELFactory r1;
+        java.util.Locale $r27;
+        java.io.PrintWriter $r12;
+        com.sun.org.apache.bcel.internal.generic.InvokeInstruction r0;
+        java.lang.StringBuilder $r13, $r14, $r15, $r16, $r17, $r19, $r20, $r22, $r23, $r25, $r29, $r30, $r32;
+        com.sun.org.apache.bcel.internal.generic.ConstantPoolGen $r2, $r5, $r7, $r9;
+        com.sun.org.apache.bcel.internal.generic.Type $r8;
+        short $s0;
+        int $i1;
+        java.lang.String $r4, $r6, $r18, $r21, $r24, $r26, $r28, $r31;
+        com.sun.org.apache.bcel.internal.generic.Type[] $r10;
+
+        r1 := @this: com.sun.org.apache.bcel.internal.util.BCELFactory;
+
+        r0 := @parameter0: com.sun.org.apache.bcel.internal.generic.InvokeInstruction;
+
+        $s0 = virtualinvoke r0.<com.sun.org.apache.bcel.internal.generic.InvokeInstruction: short getOpcode()>();
+
+        $r2 = r1.<com.sun.org.apache.bcel.internal.util.BCELFactory: com.sun.org.apache.bcel.internal.generic.ConstantPoolGen _cp>;
+
+        $r3 = virtualinvoke r0.<com.sun.org.apache.bcel.internal.generic.InvokeInstruction: com.sun.org.apache.bcel.internal.generic.ReferenceType getReferenceType(com.sun.org.apache.bcel.internal.generic.ConstantPoolGen)>($r2);
+
+        $r4 = virtualinvoke $r3.<com.sun.org.apache.bcel.internal.generic.ReferenceType: java.lang.String getSignature()>();
+
+        $r5 = r1.<com.sun.org.apache.bcel.internal.util.BCELFactory: com.sun.org.apache.bcel.internal.generic.ConstantPoolGen _cp>;
+
+        $r6 = virtualinvoke r0.<com.sun.org.apache.bcel.internal.generic.InvokeInstruction: java.lang.String getMethodName(com.sun.org.apache.bcel.internal.generic.ConstantPoolGen)>($r5);
+
+        $r7 = r1.<com.sun.org.apache.bcel.internal.util.BCELFactory: com.sun.org.apache.bcel.internal.generic.ConstantPoolGen _cp>;
+
+        $r8 = virtualinvoke r0.<com.sun.org.apache.bcel.internal.generic.InvokeInstruction: com.sun.org.apache.bcel.internal.generic.Type getReturnType(com.sun.org.apache.bcel.internal.generic.ConstantPoolGen)>($r7);
+
+        $r9 = r1.<com.sun.org.apache.bcel.internal.util.BCELFactory: com.sun.org.apache.bcel.internal.generic.ConstantPoolGen _cp>;
+
+        $r10 = virtualinvoke r0.<com.sun.org.apache.bcel.internal.generic.InvokeInstruction: com.sun.org.apache.bcel.internal.generic.Type[] getArgumentTypes(com.sun.org.apache.bcel.internal.generic.ConstantPoolGen)>($r9);
+
+        $r12 = r1.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        $r32 = new java.lang.StringBuilder;
+
+        specialinvoke $r32.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("il.append(_factory.createInvoke(\"");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\", \"");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\", ");
+
+        $r18 = staticinvoke <com.sun.org.apache.bcel.internal.util.BCELifier: java.lang.String printType(com.sun.org.apache.bcel.internal.generic.Type)>($r8);
+
+        $r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $r21 = staticinvoke <com.sun.org.apache.bcel.internal.util.BCELifier: java.lang.String printArgumentTypes(com.sun.org.apache.bcel.internal.generic.Type[])>($r10);
+
+        $r22 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r21);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $r24 = <com.sun.org.apache.bcel.internal.util.BCELFactory: java.lang.String CONSTANT_PREFIX>;
+
+        $r25 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r24);
+
+        $i1 = (int) $s0;
+
+        $r26 = staticinvoke <com.sun.org.apache.bcel.internal.Const: java.lang.String getOpcodeName(int)>($i1);
+
+        $r27 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r28 = virtualinvoke $r26.<java.lang.String: java.lang.String toUpperCase(java.util.Locale)>($r27);
+
+        $r29 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r28);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("));");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r12.<java.io.PrintWriter: void println(java.lang.String)>($r31);
+
+        return;
+    }
+
+    public void visitAllocationInstruction(com.sun.org.apache.bcel.internal.generic.AllocationInstruction)
+    {
+        com.sun.org.apache.bcel.internal.util.BCELFactory r4;
+        boolean $z0, $z1;
+        java.io.PrintWriter $r6, $r16;
+        com.sun.org.apache.bcel.internal.generic.Instruction $r2;
+        com.sun.org.apache.bcel.internal.generic.NEWARRAY $r1;
+        com.sun.org.apache.bcel.internal.generic.CPInstruction $r29;
+        java.lang.StringBuilder $r7, $r9, $r10, $r11, $r12, $r17, $r20, $r21, $r25, $r26, $r31, $r32, $r33;
+        com.sun.org.apache.bcel.internal.generic.ConstantPoolGen $r28;
+        com.sun.org.apache.bcel.internal.generic.ArrayType $r14;
+        com.sun.org.apache.bcel.internal.generic.Type r30;
+        short $s0, s1;
+        int $i2, $i3;
+        java.lang.String $r8, $r13, $r19, $r22, $r27;
+        com.sun.org.apache.bcel.internal.generic.MULTIANEWARRAY $r3;
+        com.sun.org.apache.bcel.internal.generic.AllocationInstruction r0;
+        com.sun.org.apache.bcel.internal.generic.ObjectType $r18;
+        java.lang.RuntimeException $r34;
+
+        r4 := @this: com.sun.org.apache.bcel.internal.util.BCELFactory;
+
+        r0 := @parameter0: com.sun.org.apache.bcel.internal.generic.AllocationInstruction;
+
+        $z0 = r0 instanceof com.sun.org.apache.bcel.internal.generic.CPInstruction;
+
+        if $z0 == 0 goto label1;
+
+        $r29 = (com.sun.org.apache.bcel.internal.generic.CPInstruction) r0;
+
+        $r28 = r4.<com.sun.org.apache.bcel.internal.util.BCELFactory: com.sun.org.apache.bcel.internal.generic.ConstantPoolGen _cp>;
+
+        r30 = virtualinvoke $r29.<com.sun.org.apache.bcel.internal.generic.CPInstruction: com.sun.org.apache.bcel.internal.generic.Type getType(com.sun.org.apache.bcel.internal.generic.ConstantPoolGen)>($r28);
+
+        goto label2;
+
+     label1:
+        $r1 = (com.sun.org.apache.bcel.internal.generic.NEWARRAY) r0;
+
+        r30 = virtualinvoke $r1.<com.sun.org.apache.bcel.internal.generic.NEWARRAY: com.sun.org.apache.bcel.internal.generic.Type getType()>();
+
+     label2:
+        $r2 = (com.sun.org.apache.bcel.internal.generic.Instruction) r0;
+
+        $s0 = virtualinvoke $r2.<com.sun.org.apache.bcel.internal.generic.Instruction: short getOpcode()>();
+
+        s1 = 1;
+
+        $i2 = (int) $s0;
+
+        lookupswitch($i2)
+        {
+            case 187: goto label3;
+            case 188: goto label5;
+            case 189: goto label5;
+            case 197: goto label4;
+            default: goto label7;
+        };
+
+     label3:
+        $r16 = r4.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        $r31 = new java.lang.StringBuilder;
+
+        specialinvoke $r31.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("il.append(_factory.createNew(\"");
+
+        $r18 = (com.sun.org.apache.bcel.internal.generic.ObjectType) r30;
+
+        $r19 = virtualinvoke $r18.<com.sun.org.apache.bcel.internal.generic.ObjectType: java.lang.String getClassName()>();
+
+        $r20 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"));");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r16.<java.io.PrintWriter: void println(java.lang.String)>($r22);
+
+        goto label8;
+
+     label4:
+        $r3 = (com.sun.org.apache.bcel.internal.generic.MULTIANEWARRAY) r0;
+
+        s1 = virtualinvoke $r3.<com.sun.org.apache.bcel.internal.generic.MULTIANEWARRAY: short getDimensions()>();
+
+     label5:
+        $z1 = r30 instanceof com.sun.org.apache.bcel.internal.generic.ArrayType;
+
+        if $z1 == 0 goto label6;
+
+        $r14 = (com.sun.org.apache.bcel.internal.generic.ArrayType) r30;
+
+        r30 = virtualinvoke $r14.<com.sun.org.apache.bcel.internal.generic.ArrayType: com.sun.org.apache.bcel.internal.generic.Type getBasicType()>();
+
+     label6:
+        $r6 = r4.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        $r32 = new java.lang.StringBuilder;
+
+        specialinvoke $r32.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("il.append(_factory.createNewArray(");
+
+        $r8 = staticinvoke <com.sun.org.apache.bcel.internal.util.BCELifier: java.lang.String printType(com.sun.org.apache.bcel.internal.generic.Type)>(r30);
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", (short) ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(s1);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("));");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<java.io.PrintWriter: void println(java.lang.String)>($r13);
+
+        goto label8;
+
+     label7:
+        $r34 = new java.lang.RuntimeException;
+
+        $r33 = new java.lang.StringBuilder;
+
+        specialinvoke $r33.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Oops: ");
+
+        $i3 = (int) $s0;
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r34.<java.lang.RuntimeException: void <init>(java.lang.String)>($r27);
+
+        throw $r34;
+
+     label8:
+        return;
+    }
+
+    private void createConstant(java.lang.Object)
+    {
+        com.sun.org.apache.bcel.internal.util.BCELFactory r2;
+        java.lang.Character $r17;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.io.PrintWriter $r26;
+        java.lang.StringBuilder $r5, $r7, $r8, $r10, $r11, $r13, $r14, $r16, $r19, $r21, $r23, $r24, $r28, $r29, $r30, $r32, $r33, $r34, $r35, $r36, $r37;
+        int $i1;
+        java.lang.String $r1, $r6, $r18, $r22, r25, $r31;
+        com.sun.org.apache.bcel.internal.generic.ObjectType r3;
+        char $c0;
+        java.lang.Object r0;
+
+        r2 := @this: com.sun.org.apache.bcel.internal.util.BCELFactory;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.String toString()>();
+
+        r25 = $r1;
+
+        $z0 = r0 instanceof java.lang.String;
+
+        if $z0 == 0 goto label1;
+
+        $r32 = new java.lang.StringBuilder;
+
+        specialinvoke $r32.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(34);
+
+        $r22 = staticinvoke <com.sun.org.apache.bcel.internal.classfile.Utility: java.lang.String convertString(java.lang.String)>($r1);
+
+        $r23 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(34);
+
+        r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label5;
+
+     label1:
+        $z1 = r0 instanceof java.lang.Character;
+
+        if $z1 == 0 goto label2;
+
+        $r33 = new java.lang.StringBuilder;
+
+        specialinvoke $r33.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(char)0x");
+
+        $r17 = (java.lang.Character) r0;
+
+        $c0 = virtualinvoke $r17.<java.lang.Character: char charValue()>();
+
+        $i1 = (int) $c0;
+
+        $r18 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i1);
+
+        $r19 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        r25 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label5;
+
+     label2:
+        $z2 = r0 instanceof java.lang.Float;
+
+        if $z2 == 0 goto label3;
+
+        $r34 = new java.lang.StringBuilder;
+
+        specialinvoke $r34.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("f");
+
+        r25 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label5;
+
+     label3:
+        $z3 = r0 instanceof java.lang.Long;
+
+        if $z3 == 0 goto label4;
+
+        $r35 = new java.lang.StringBuilder;
+
+        specialinvoke $r35.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("L");
+
+        r25 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label5;
+
+     label4:
+        $z4 = r0 instanceof com.sun.org.apache.bcel.internal.generic.ObjectType;
+
+        if $z4 == 0 goto label5;
+
+        r3 = (com.sun.org.apache.bcel.internal.generic.ObjectType) r0;
+
+        $r36 = new java.lang.StringBuilder;
+
+        specialinvoke $r36.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("new ObjectType(\"");
+
+        $r6 = virtualinvoke r3.<com.sun.org.apache.bcel.internal.generic.ObjectType: java.lang.String getClassName()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\")");
+
+        r25 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label5:
+        $r26 = r2.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        $r37 = new java.lang.StringBuilder;
+
+        specialinvoke $r37.<java.lang.StringBuilder: void <init>()>();
+
+        $r28 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("il.append(new PUSH(_cp, ");
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r25);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("));");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r26.<java.io.PrintWriter: void println(java.lang.String)>($r31);
+
+        return;
+    }
+
+    public void visitLDC(com.sun.org.apache.bcel.internal.generic.LDC)
+    {
+        java.lang.Object $r3;
+        com.sun.org.apache.bcel.internal.util.BCELFactory r0;
+        com.sun.org.apache.bcel.internal.generic.ConstantPoolGen $r2;
+        com.sun.org.apache.bcel.internal.generic.LDC r1;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.util.BCELFactory;
+
+        r1 := @parameter0: com.sun.org.apache.bcel.internal.generic.LDC;
+
+        $r2 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: com.sun.org.apache.bcel.internal.generic.ConstantPoolGen _cp>;
+
+        $r3 = virtualinvoke r1.<com.sun.org.apache.bcel.internal.generic.LDC: java.lang.Object getValue(com.sun.org.apache.bcel.internal.generic.ConstantPoolGen)>($r2);
+
+        specialinvoke r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: void createConstant(java.lang.Object)>($r3);
+
+        return;
+    }
+
+    public void visitLDC2_W(com.sun.org.apache.bcel.internal.generic.LDC2_W)
+    {
+        com.sun.org.apache.bcel.internal.generic.LDC2_W r1;
+        com.sun.org.apache.bcel.internal.util.BCELFactory r0;
+        java.lang.Number $r3;
+        com.sun.org.apache.bcel.internal.generic.ConstantPoolGen $r2;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.util.BCELFactory;
+
+        r1 := @parameter0: com.sun.org.apache.bcel.internal.generic.LDC2_W;
+
+        $r2 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: com.sun.org.apache.bcel.internal.generic.ConstantPoolGen _cp>;
+
+        $r3 = virtualinvoke r1.<com.sun.org.apache.bcel.internal.generic.LDC2_W: java.lang.Number getValue(com.sun.org.apache.bcel.internal.generic.ConstantPoolGen)>($r2);
+
+        specialinvoke r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: void createConstant(java.lang.Object)>($r3);
+
+        return;
+    }
+
+    public void visitConstantPushInstruction(com.sun.org.apache.bcel.internal.generic.ConstantPushInstruction)
+    {
+        com.sun.org.apache.bcel.internal.generic.ConstantPushInstruction r1;
+        com.sun.org.apache.bcel.internal.util.BCELFactory r0;
+        java.lang.Number $r2;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.util.BCELFactory;
+
+        r1 := @parameter0: com.sun.org.apache.bcel.internal.generic.ConstantPushInstruction;
+
+        $r2 = interfaceinvoke r1.<com.sun.org.apache.bcel.internal.generic.ConstantPushInstruction: java.lang.Number getValue()>();
+
+        specialinvoke r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: void createConstant(java.lang.Object)>($r2);
+
+        return;
+    }
+
+    public void visitINSTANCEOF(com.sun.org.apache.bcel.internal.generic.INSTANCEOF)
+    {
+        java.io.PrintWriter $r5;
+        com.sun.org.apache.bcel.internal.util.BCELFactory r1;
+        com.sun.org.apache.bcel.internal.generic.Type $r3;
+        com.sun.org.apache.bcel.internal.generic.INSTANCEOF r0;
+        java.lang.StringBuilder $r4, $r6, $r8, $r9;
+        java.lang.String $r7, $r10;
+        com.sun.org.apache.bcel.internal.generic.ConstantPoolGen $r2;
+
+        r1 := @this: com.sun.org.apache.bcel.internal.util.BCELFactory;
+
+        r0 := @parameter0: com.sun.org.apache.bcel.internal.generic.INSTANCEOF;
+
+        $r2 = r1.<com.sun.org.apache.bcel.internal.util.BCELFactory: com.sun.org.apache.bcel.internal.generic.ConstantPoolGen _cp>;
+
+        $r3 = virtualinvoke r0.<com.sun.org.apache.bcel.internal.generic.INSTANCEOF: com.sun.org.apache.bcel.internal.generic.Type getType(com.sun.org.apache.bcel.internal.generic.ConstantPoolGen)>($r2);
+
+        $r5 = r1.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("il.append(new INSTANCEOF(_cp.addClass(");
+
+        $r7 = staticinvoke <com.sun.org.apache.bcel.internal.util.BCELifier: java.lang.String printType(com.sun.org.apache.bcel.internal.generic.Type)>($r3);
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")));");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintWriter: void println(java.lang.String)>($r10);
+
+        return;
+    }
+
+    public void visitCHECKCAST(com.sun.org.apache.bcel.internal.generic.CHECKCAST)
+    {
+        java.io.PrintWriter $r5;
+        com.sun.org.apache.bcel.internal.util.BCELFactory r1;
+        com.sun.org.apache.bcel.internal.generic.Type $r3;
+        com.sun.org.apache.bcel.internal.generic.CHECKCAST r0;
+        java.lang.StringBuilder $r4, $r6, $r8, $r9;
+        java.lang.String $r7, $r10;
+        com.sun.org.apache.bcel.internal.generic.ConstantPoolGen $r2;
+
+        r1 := @this: com.sun.org.apache.bcel.internal.util.BCELFactory;
+
+        r0 := @parameter0: com.sun.org.apache.bcel.internal.generic.CHECKCAST;
+
+        $r2 = r1.<com.sun.org.apache.bcel.internal.util.BCELFactory: com.sun.org.apache.bcel.internal.generic.ConstantPoolGen _cp>;
+
+        $r3 = virtualinvoke r0.<com.sun.org.apache.bcel.internal.generic.CHECKCAST: com.sun.org.apache.bcel.internal.generic.Type getType(com.sun.org.apache.bcel.internal.generic.ConstantPoolGen)>($r2);
+
+        $r5 = r1.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("il.append(_factory.createCheckCast(");
+
+        $r7 = staticinvoke <com.sun.org.apache.bcel.internal.util.BCELifier: java.lang.String printType(com.sun.org.apache.bcel.internal.generic.Type)>($r3);
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("));");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintWriter: void println(java.lang.String)>($r10);
+
+        return;
+    }
+
+    public void visitReturnInstruction(com.sun.org.apache.bcel.internal.generic.ReturnInstruction)
+    {
+        java.io.PrintWriter $r5;
+        com.sun.org.apache.bcel.internal.generic.ReturnInstruction r0;
+        com.sun.org.apache.bcel.internal.util.BCELFactory r1;
+        com.sun.org.apache.bcel.internal.generic.Type $r3;
+        java.lang.StringBuilder $r4, $r6, $r8, $r9;
+        java.lang.String $r7, $r10;
+        com.sun.org.apache.bcel.internal.generic.ConstantPoolGen $r2;
+
+        r1 := @this: com.sun.org.apache.bcel.internal.util.BCELFactory;
+
+        r0 := @parameter0: com.sun.org.apache.bcel.internal.generic.ReturnInstruction;
+
+        $r2 = r1.<com.sun.org.apache.bcel.internal.util.BCELFactory: com.sun.org.apache.bcel.internal.generic.ConstantPoolGen _cp>;
+
+        $r3 = virtualinvoke r0.<com.sun.org.apache.bcel.internal.generic.ReturnInstruction: com.sun.org.apache.bcel.internal.generic.Type getType(com.sun.org.apache.bcel.internal.generic.ConstantPoolGen)>($r2);
+
+        $r5 = r1.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("il.append(_factory.createReturn(");
+
+        $r7 = staticinvoke <com.sun.org.apache.bcel.internal.util.BCELifier: java.lang.String printType(com.sun.org.apache.bcel.internal.generic.Type)>($r3);
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("));");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintWriter: void println(java.lang.String)>($r10);
+
+        return;
+    }
+
+    public void visitBranchInstruction(com.sun.org.apache.bcel.internal.generic.BranchInstruction)
+    {
+        com.sun.org.apache.bcel.internal.generic.Select r64;
+        com.sun.org.apache.bcel.internal.util.BCELFactory r0;
+        java.util.Map $r2;
+        java.io.PrintWriter $r14, $r29, $r35, $r49, $r61, $r62, $r63;
+        java.lang.StringBuilder $r5, $r7, $r8, $r9, $r13, $r15, $r16, $r17, $r19, $r23, $r24, $r25, $r26, $r28, $r30, $r31, $r32, $r34, $r36, $r37, $r38, $r39, $r40, $r42, $r43, $r44, $r46, $r48, $r50, $r51, $r52, $r56, $r57, $r58, $r59;
+        java.lang.String $r6, $r10, $r18, $r20, $r22, $r27, $r33, $r41, $r53, $r55, $r60, r65;
+        com.sun.org.apache.bcel.internal.generic.BranchInstruction r1;
+        com.sun.org.apache.bcel.internal.generic.BranchHandle r4;
+        int[] $r47;
+        java.util.Locale $r21, $r54;
+        boolean $z0, $z1;
+        java.util.List $r12, $r45;
+        com.sun.org.apache.bcel.internal.generic.InstructionHandle $r11;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, i10;
+        java.lang.Object $r3;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.util.BCELFactory;
+
+        r1 := @parameter0: com.sun.org.apache.bcel.internal.generic.BranchInstruction;
+
+        $r2 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.util.Map branch_map>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r4 = (com.sun.org.apache.bcel.internal.generic.BranchHandle) $r3;
+
+        $i0 = virtualinvoke r4.<com.sun.org.apache.bcel.internal.generic.BranchHandle: int getPosition()>();
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke r1.<com.sun.org.apache.bcel.internal.generic.BranchInstruction: java.lang.String getName()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("_");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $z0 = r1 instanceof com.sun.org.apache.bcel.internal.generic.Select;
+
+        if $z0 == 0 goto label07;
+
+        r64 = (com.sun.org.apache.bcel.internal.generic.Select) r1;
+
+        $r45 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.util.List branches>;
+
+        interfaceinvoke $r45.<java.util.List: boolean add(java.lang.Object)>(r1);
+
+        $r46 = new java.lang.StringBuilder;
+
+        specialinvoke $r46.<java.lang.StringBuilder: void <init>(java.lang.String)>("new int[] { ");
+
+        $r47 = virtualinvoke r64.<com.sun.org.apache.bcel.internal.generic.Select: int[] getMatchs()>();
+
+        i9 = 0;
+
+     label01:
+        $i2 = lengthof $r47;
+
+        if i9 >= $i2 goto label03;
+
+        $i6 = $r47[i9];
+
+        virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i6);
+
+        $i7 = lengthof $r47;
+
+        $i8 = $i7 - 1;
+
+        if i9 >= $i8 goto label02;
+
+        virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+     label02:
+        i9 = i9 + 1;
+
+        goto label01;
+
+     label03:
+        virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" }");
+
+        $r49 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        $r48 = new java.lang.StringBuilder;
+
+        specialinvoke $r48.<java.lang.StringBuilder: void <init>()>();
+
+        $r50 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Select ");
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" = new ");
+
+        $r53 = virtualinvoke r1.<com.sun.org.apache.bcel.internal.generic.BranchInstruction: java.lang.String getName()>();
+
+        $r54 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r55 = virtualinvoke $r53.<java.lang.String: java.lang.String toUpperCase(java.util.Locale)>($r54);
+
+        $r56 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r55);
+
+        $r57 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(");
+
+        $r58 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r46);
+
+        $r59 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", new InstructionHandle[] { ");
+
+        $r60 = virtualinvoke $r59.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r49.<java.io.PrintWriter: void print(java.lang.String)>($r60);
+
+        i10 = 0;
+
+     label04:
+        $i3 = lengthof $r47;
+
+        if i10 >= $i3 goto label06;
+
+        $r62 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        virtualinvoke $r62.<java.io.PrintWriter: void print(java.lang.String)>("null");
+
+        $i4 = lengthof $r47;
+
+        $i5 = $i4 - 1;
+
+        if i10 >= $i5 goto label05;
+
+        $r63 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        virtualinvoke $r63.<java.io.PrintWriter: void print(java.lang.String)>(", ");
+
+     label05:
+        i10 = i10 + 1;
+
+        goto label04;
+
+     label06:
+        $r61 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        virtualinvoke $r61.<java.io.PrintWriter: void println(java.lang.String)>(" }, null);");
+
+        goto label10;
+
+     label07:
+        $r11 = virtualinvoke r4.<com.sun.org.apache.bcel.internal.generic.BranchHandle: com.sun.org.apache.bcel.internal.generic.InstructionHandle getTarget()>();
+
+        $i1 = virtualinvoke $r11.<com.sun.org.apache.bcel.internal.generic.InstructionHandle: int getPosition()>();
+
+        if $i0 <= $i1 goto label08;
+
+        $r42 = new java.lang.StringBuilder;
+
+        specialinvoke $r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ih_");
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        r65 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label09;
+
+     label08:
+        $r12 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.util.List branches>;
+
+        interfaceinvoke $r12.<java.util.List: boolean add(java.lang.Object)>(r1);
+
+        r65 = "null";
+
+     label09:
+        $r14 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("    BranchInstruction ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" = _factory.createBranchInstruction(");
+
+        $r18 = <com.sun.org.apache.bcel.internal.util.BCELFactory: java.lang.String CONSTANT_PREFIX>;
+
+        $r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        $r20 = virtualinvoke r1.<com.sun.org.apache.bcel.internal.generic.BranchInstruction: java.lang.String getName()>();
+
+        $r21 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r22 = virtualinvoke $r20.<java.lang.String: java.lang.String toUpperCase(java.util.Locale)>($r21);
+
+        $r23 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r65);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(");");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r14.<java.io.PrintWriter: void println(java.lang.String)>($r27);
+
+     label10:
+        $z1 = virtualinvoke r4.<com.sun.org.apache.bcel.internal.generic.BranchHandle: boolean hasTargeters()>();
+
+        if $z1 == 0 goto label11;
+
+        $r35 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        $r34 = new java.lang.StringBuilder;
+
+        specialinvoke $r34.<java.lang.StringBuilder: void <init>()>();
+
+        $r36 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("    ih_");
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" = il.append(");
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(");");
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r35.<java.io.PrintWriter: void println(java.lang.String)>($r41);
+
+        goto label12;
+
+     label11:
+        $r29 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        $r28 = new java.lang.StringBuilder;
+
+        specialinvoke $r28.<java.lang.StringBuilder: void <init>()>();
+
+        $r30 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("    il.append(");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(");");
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r29.<java.io.PrintWriter: void println(java.lang.String)>($r33);
+
+     label12:
+        return;
+    }
+
+    public void visitRET(com.sun.org.apache.bcel.internal.generic.RET)
+    {
+        java.io.PrintWriter $r2;
+        com.sun.org.apache.bcel.internal.util.BCELFactory r0;
+        com.sun.org.apache.bcel.internal.generic.RET r4;
+        int $i0;
+        java.lang.StringBuilder $r1, $r3, $r5, $r6;
+        java.lang.String $r7;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.util.BCELFactory;
+
+        r4 := @parameter0: com.sun.org.apache.bcel.internal.generic.RET;
+
+        $r2 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("il.append(new RET(");
+
+        $i0 = virtualinvoke r4.<com.sun.org.apache.bcel.internal.generic.RET: int getIndex()>();
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")));");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r7);
+
+        return;
+    }
+
+    private void updateBranchTargets()
+    {
+        com.sun.org.apache.bcel.internal.generic.Select $r23;
+        com.sun.org.apache.bcel.internal.generic.BranchInstruction r4;
+        com.sun.org.apache.bcel.internal.util.BCELFactory r0;
+        com.sun.org.apache.bcel.internal.generic.BranchHandle r7;
+        java.util.Map $r5;
+        boolean $z0, $z1;
+        java.io.PrintWriter $r16, $r27;
+        java.util.List $r1;
+        java.lang.StringBuilder $r8, $r10, $r11, $r12, $r15, $r17, $r18, $r19, $r20, $r21, $r26, $r28, $r29, $r30, $r31, $r32, $r33, $r34;
+        com.sun.org.apache.bcel.internal.generic.InstructionHandle[] $r24;
+        com.sun.org.apache.bcel.internal.generic.InstructionHandle $r14, $r25;
+        int $i0, $i1, $i2, $i3, i4;
+        java.lang.String $r9, $r13, $r22, $r35;
+        java.util.Iterator $r2;
+        java.lang.Object $r3, $r6;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.util.BCELFactory;
+
+        $r1 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.util.List branches>;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (com.sun.org.apache.bcel.internal.generic.BranchInstruction) $r3;
+
+        $r5 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.util.Map branch_map>;
+
+        $r6 = interfaceinvoke $r5.<java.util.Map: java.lang.Object get(java.lang.Object)>(r4);
+
+        r7 = (com.sun.org.apache.bcel.internal.generic.BranchHandle) $r6;
+
+        $i0 = virtualinvoke r7.<com.sun.org.apache.bcel.internal.generic.BranchHandle: int getPosition()>();
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke r4.<com.sun.org.apache.bcel.internal.generic.BranchInstruction: java.lang.String getName()>();
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("_");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r14 = virtualinvoke r7.<com.sun.org.apache.bcel.internal.generic.BranchHandle: com.sun.org.apache.bcel.internal.generic.InstructionHandle getTarget()>();
+
+        $i1 = virtualinvoke $r14.<com.sun.org.apache.bcel.internal.generic.InstructionHandle: int getPosition()>();
+
+        $r16 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("    ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".setTarget(ih_");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(");");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r16.<java.io.PrintWriter: void println(java.lang.String)>($r22);
+
+        $z1 = r4 instanceof com.sun.org.apache.bcel.internal.generic.Select;
+
+        if $z1 == 0 goto label3;
+
+        $r23 = (com.sun.org.apache.bcel.internal.generic.Select) r4;
+
+        $r24 = virtualinvoke $r23.<com.sun.org.apache.bcel.internal.generic.Select: com.sun.org.apache.bcel.internal.generic.InstructionHandle[] getTargets()>();
+
+        i4 = 0;
+
+     label2:
+        $i2 = lengthof $r24;
+
+        if i4 >= $i2 goto label3;
+
+        $r25 = $r24[i4];
+
+        $i3 = virtualinvoke $r25.<com.sun.org.apache.bcel.internal.generic.InstructionHandle: int getPosition()>();
+
+        $r27 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r28 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("    ");
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".setTarget(");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i4);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ih_");
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(");");
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r27.<java.io.PrintWriter: void println(java.lang.String)>($r35);
+
+        i4 = i4 + 1;
+
+        goto label2;
+
+     label3:
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    private void updateExceptionHandlers()
+    {
+        com.sun.org.apache.bcel.internal.util.BCELFactory r0;
+        com.sun.org.apache.bcel.internal.generic.MethodGen $r1;
+        com.sun.org.apache.bcel.internal.generic.CodeExceptionGen r3;
+        com.sun.org.apache.bcel.internal.generic.InstructionHandle $r9, $r12, $r15;
+        int i0, $i1, $i2, $i3, i4;
+        java.lang.String $r20, $r21;
+        java.io.PrintWriter $r7;
+        com.sun.org.apache.bcel.internal.generic.ObjectType $r4, $r5;
+        com.sun.org.apache.bcel.internal.generic.CodeExceptionGen[] $r2;
+        java.lang.StringBuilder $r6, $r8, $r10, $r11, $r13, $r14, $r16, $r17, $r18, $r19;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.util.BCELFactory;
+
+        $r1 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: com.sun.org.apache.bcel.internal.generic.MethodGen _mg>;
+
+        $r2 = virtualinvoke $r1.<com.sun.org.apache.bcel.internal.generic.MethodGen: com.sun.org.apache.bcel.internal.generic.CodeExceptionGen[] getExceptionHandlers()>();
+
+        i0 = lengthof $r2;
+
+        i4 = 0;
+
+     label1:
+        if i4 >= i0 goto label4;
+
+        r3 = $r2[i4];
+
+        $r4 = virtualinvoke r3.<com.sun.org.apache.bcel.internal.generic.CodeExceptionGen: com.sun.org.apache.bcel.internal.generic.ObjectType getCatchType()>();
+
+        if $r4 != null goto label2;
+
+        $r21 = "null";
+
+        goto label3;
+
+     label2:
+        $r5 = virtualinvoke r3.<com.sun.org.apache.bcel.internal.generic.CodeExceptionGen: com.sun.org.apache.bcel.internal.generic.ObjectType getCatchType()>();
+
+        $r21 = staticinvoke <com.sun.org.apache.bcel.internal.util.BCELifier: java.lang.String printType(com.sun.org.apache.bcel.internal.generic.Type)>($r5);
+
+     label3:
+        $r7 = r0.<com.sun.org.apache.bcel.internal.util.BCELFactory: java.io.PrintWriter _out>;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("    method.addExceptionHandler(ih_");
+
+        $r9 = virtualinvoke r3.<com.sun.org.apache.bcel.internal.generic.CodeExceptionGen: com.sun.org.apache.bcel.internal.generic.InstructionHandle getStartPC()>();
+
+        $i1 = virtualinvoke $r9.<com.sun.org.apache.bcel.internal.generic.InstructionHandle: int getPosition()>();
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ih_");
+
+        $r12 = virtualinvoke r3.<com.sun.org.apache.bcel.internal.generic.CodeExceptionGen: com.sun.org.apache.bcel.internal.generic.InstructionHandle getEndPC()>();
+
+        $i2 = virtualinvoke $r12.<com.sun.org.apache.bcel.internal.generic.InstructionHandle: int getPosition()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ih_");
+
+        $r15 = virtualinvoke r3.<com.sun.org.apache.bcel.internal.generic.CodeExceptionGen: com.sun.org.apache.bcel.internal.generic.InstructionHandle getHandlerPC()>();
+
+        $i3 = virtualinvoke $r15.<com.sun.org.apache.bcel.internal.generic.InstructionHandle: int getPosition()>();
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r21);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(");");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<java.io.PrintWriter: void println(java.lang.String)>($r20);
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.StringBuilder $r0, $r3, $r4;
+        java.lang.Class $r1;
+        java.lang.String $r2, $r5;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = class "Lcom/sun/org/apache/bcel/internal/Const;";
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.String getSimpleName()>();
+
+        $r3 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        <com.sun.org.apache.bcel.internal.util.BCELFactory: java.lang.String CONSTANT_PREFIX> = $r5;
+
+        return;
+    }
+}

@@ -1,0 +1,2329 @@
+public class sun.print.Win32PrintJob extends java.lang.Object implements javax.print.CancelablePrintJob
+{
+    private transient java.util.Vector jobListeners;
+    private transient java.util.Vector attrListeners;
+    private transient java.util.Vector listenedAttributeSets;
+    private sun.print.Win32PrintService service;
+    private boolean fidelity;
+    private boolean printing;
+    private boolean printReturned;
+    private javax.print.attribute.PrintRequestAttributeSet reqAttrSet;
+    private javax.print.attribute.PrintJobAttributeSet jobAttrSet;
+    private java.awt.print.PrinterJob job;
+    private javax.print.Doc doc;
+    private java.lang.String mDestination;
+    private java.io.InputStream instream;
+    private java.io.Reader reader;
+    private java.lang.String jobName;
+    private int copies;
+    private javax.print.attribute.standard.MediaSizeName mediaName;
+    private javax.print.attribute.standard.MediaSize mediaSize;
+    private javax.print.attribute.standard.OrientationRequested orient;
+    private long hPrintJob;
+    private static final int PRINTBUFFERLEN;
+
+    void <init>(sun.print.Win32PrintService)
+    {
+        sun.print.Win32PrintJob r0;
+        sun.print.Win32PrintService r1;
+
+        r0 := @this: sun.print.Win32PrintJob;
+
+        r1 := @parameter0: sun.print.Win32PrintService;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.print.Win32PrintJob: boolean printing> = 0;
+
+        r0.<sun.print.Win32PrintJob: boolean printReturned> = 0;
+
+        r0.<sun.print.Win32PrintJob: javax.print.attribute.PrintRequestAttributeSet reqAttrSet> = null;
+
+        r0.<sun.print.Win32PrintJob: javax.print.attribute.PrintJobAttributeSet jobAttrSet> = null;
+
+        r0.<sun.print.Win32PrintJob: java.lang.String mDestination> = null;
+
+        r0.<sun.print.Win32PrintJob: java.io.InputStream instream> = null;
+
+        r0.<sun.print.Win32PrintJob: java.io.Reader reader> = null;
+
+        r0.<sun.print.Win32PrintJob: java.lang.String jobName> = "Java Printing";
+
+        r0.<sun.print.Win32PrintJob: int copies> = 0;
+
+        r0.<sun.print.Win32PrintJob: javax.print.attribute.standard.MediaSizeName mediaName> = null;
+
+        r0.<sun.print.Win32PrintJob: javax.print.attribute.standard.MediaSize mediaSize> = null;
+
+        r0.<sun.print.Win32PrintJob: javax.print.attribute.standard.OrientationRequested orient> = null;
+
+        r0.<sun.print.Win32PrintJob: sun.print.Win32PrintService service> = r1;
+
+        return;
+    }
+
+    public javax.print.PrintService getPrintService()
+    {
+        sun.print.Win32PrintJob r0;
+        sun.print.Win32PrintService $r1;
+
+        r0 := @this: sun.print.Win32PrintJob;
+
+        $r1 = r0.<sun.print.Win32PrintJob: sun.print.Win32PrintService service>;
+
+        return $r1;
+    }
+
+    public javax.print.attribute.PrintJobAttributeSet getAttributes()
+    {
+        java.lang.Throwable $r5;
+        sun.print.Win32PrintJob r0;
+        javax.print.attribute.PrintJobAttributeSet $r1, $r2, $r4;
+        javax.print.attribute.HashPrintJobAttributeSet $r3;
+
+        r0 := @this: sun.print.Win32PrintJob;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = r0.<sun.print.Win32PrintJob: javax.print.attribute.PrintJobAttributeSet jobAttrSet>;
+
+        if $r1 != null goto label3;
+
+        $r3 = new javax.print.attribute.HashPrintJobAttributeSet;
+
+        specialinvoke $r3.<javax.print.attribute.HashPrintJobAttributeSet: void <init>()>();
+
+        $r4 = staticinvoke <javax.print.attribute.AttributeSetUtilities: javax.print.attribute.PrintJobAttributeSet unmodifiableView(javax.print.attribute.PrintJobAttributeSet)>($r3);
+
+        exitmonitor r0;
+
+     label2:
+        return $r4;
+
+     label3:
+        $r2 = r0.<sun.print.Win32PrintJob: javax.print.attribute.PrintJobAttributeSet jobAttrSet>;
+
+        exitmonitor r0;
+
+     label4:
+        return $r2;
+
+     label5:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+     label6:
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public void addPrintJobListener(javax.print.event.PrintJobListener)
+    {
+        java.lang.Throwable $r5;
+        javax.print.event.PrintJobListener r1;
+        java.util.Vector $r2, $r3, $r4;
+        sun.print.Win32PrintJob r0;
+
+        r0 := @this: sun.print.Win32PrintJob;
+
+        r1 := @parameter0: javax.print.event.PrintJobListener;
+
+        entermonitor r0;
+
+     label1:
+        if r1 != null goto label3;
+
+        exitmonitor r0;
+
+     label2:
+        return;
+
+     label3:
+        $r2 = r0.<sun.print.Win32PrintJob: java.util.Vector jobListeners>;
+
+        if $r2 != null goto label4;
+
+        $r4 = new java.util.Vector;
+
+        specialinvoke $r4.<java.util.Vector: void <init>()>();
+
+        r0.<sun.print.Win32PrintJob: java.util.Vector jobListeners> = $r4;
+
+     label4:
+        $r3 = r0.<sun.print.Win32PrintJob: java.util.Vector jobListeners>;
+
+        virtualinvoke $r3.<java.util.Vector: boolean add(java.lang.Object)>(r1);
+
+        exitmonitor r0;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+     label7:
+        throw $r5;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label3 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public void removePrintJobListener(javax.print.event.PrintJobListener)
+    {
+        java.lang.Throwable $r5;
+        javax.print.event.PrintJobListener r1;
+        java.util.Vector $r2, $r3, $r4;
+        sun.print.Win32PrintJob r0;
+        boolean $z0;
+
+        r0 := @this: sun.print.Win32PrintJob;
+
+        r1 := @parameter0: javax.print.event.PrintJobListener;
+
+        entermonitor r0;
+
+     label1:
+        if r1 == null goto label2;
+
+        $r2 = r0.<sun.print.Win32PrintJob: java.util.Vector jobListeners>;
+
+        if $r2 != null goto label4;
+
+     label2:
+        exitmonitor r0;
+
+     label3:
+        return;
+
+     label4:
+        $r3 = r0.<sun.print.Win32PrintJob: java.util.Vector jobListeners>;
+
+        virtualinvoke $r3.<java.util.Vector: boolean remove(java.lang.Object)>(r1);
+
+        $r4 = r0.<sun.print.Win32PrintJob: java.util.Vector jobListeners>;
+
+        $z0 = virtualinvoke $r4.<java.util.Vector: boolean isEmpty()>();
+
+        if $z0 == 0 goto label5;
+
+        r0.<sun.print.Win32PrintJob: java.util.Vector jobListeners> = null;
+
+     label5:
+        exitmonitor r0;
+
+     label6:
+        goto label9;
+
+     label7:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+     label8:
+        throw $r5;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label7;
+        catch java.lang.Throwable from label4 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    private void closeDataStreams()
+    {
+        java.lang.Throwable $r12, $r14;
+        boolean $z0, $z1;
+        java.io.IOException $r10, $r11, $r13, $r15, $r16;
+        java.io.Reader $r5, $r6, $r8;
+        javax.print.Doc $r1, $r2;
+        sun.print.Win32PrintJob r0;
+        java.lang.Object $r3;
+        java.io.InputStream $r4, $r7, $r9;
+
+        r0 := @this: sun.print.Win32PrintJob;
+
+        $r1 = r0.<sun.print.Win32PrintJob: javax.print.Doc doc>;
+
+        if $r1 != null goto label01;
+
+        return;
+
+     label01:
+        $r2 = r0.<sun.print.Win32PrintJob: javax.print.Doc doc>;
+
+        $r3 = interfaceinvoke $r2.<javax.print.Doc: java.lang.Object getPrintData()>();
+
+     label02:
+        goto label04;
+
+     label03:
+        $r16 := @caughtexception;
+
+        return;
+
+     label04:
+        $r4 = r0.<sun.print.Win32PrintJob: java.io.InputStream instream>;
+
+        if $r4 == null goto label10;
+
+     label05:
+        $r9 = r0.<sun.print.Win32PrintJob: java.io.InputStream instream>;
+
+        virtualinvoke $r9.<java.io.InputStream: void close()>();
+
+     label06:
+        r0.<sun.print.Win32PrintJob: java.io.InputStream instream> = null;
+
+        goto label09;
+
+     label07:
+        $r15 := @caughtexception;
+
+        r0.<sun.print.Win32PrintJob: java.io.InputStream instream> = null;
+
+        goto label09;
+
+     label08:
+        $r14 := @caughtexception;
+
+        r0.<sun.print.Win32PrintJob: java.io.InputStream instream> = null;
+
+        throw $r14;
+
+     label09:
+        goto label25;
+
+     label10:
+        $r5 = r0.<sun.print.Win32PrintJob: java.io.Reader reader>;
+
+        if $r5 == null goto label17;
+
+     label11:
+        $r8 = r0.<sun.print.Win32PrintJob: java.io.Reader reader>;
+
+        virtualinvoke $r8.<java.io.Reader: void close()>();
+
+     label12:
+        r0.<sun.print.Win32PrintJob: java.io.Reader reader> = null;
+
+        goto label16;
+
+     label13:
+        $r13 := @caughtexception;
+
+        r0.<sun.print.Win32PrintJob: java.io.Reader reader> = null;
+
+        goto label16;
+
+     label14:
+        $r12 := @caughtexception;
+
+     label15:
+        r0.<sun.print.Win32PrintJob: java.io.Reader reader> = null;
+
+        throw $r12;
+
+     label16:
+        goto label25;
+
+     label17:
+        $z0 = $r3 instanceof java.io.InputStream;
+
+        if $z0 == 0 goto label21;
+
+     label18:
+        $r7 = (java.io.InputStream) $r3;
+
+        virtualinvoke $r7.<java.io.InputStream: void close()>();
+
+     label19:
+        goto label25;
+
+     label20:
+        $r11 := @caughtexception;
+
+        goto label25;
+
+     label21:
+        $z1 = $r3 instanceof java.io.Reader;
+
+        if $z1 == 0 goto label25;
+
+     label22:
+        $r6 = (java.io.Reader) $r3;
+
+        virtualinvoke $r6.<java.io.Reader: void close()>();
+
+     label23:
+        goto label25;
+
+     label24:
+        $r10 := @caughtexception;
+
+     label25:
+        return;
+
+        catch java.io.IOException from label01 to label02 with label03;
+        catch java.io.IOException from label05 to label06 with label07;
+        catch java.lang.Throwable from label05 to label06 with label08;
+        catch java.io.IOException from label11 to label12 with label13;
+        catch java.lang.Throwable from label11 to label12 with label14;
+        catch java.lang.Throwable from label14 to label15 with label14;
+        catch java.io.IOException from label18 to label19 with label20;
+        catch java.io.IOException from label22 to label23 with label24;
+    }
+
+    private void notifyEvent(int)
+    {
+        java.lang.Throwable $r8;
+        javax.print.event.PrintJobListener $r6, r7;
+        javax.print.event.PrintJobEvent $r2;
+        java.util.Vector $r1, $r3, $r4;
+        int i0, $i1, i2;
+        sun.print.Win32PrintJob r0;
+        java.lang.Object $r5;
+
+        r0 := @this: sun.print.Win32PrintJob;
+
+        i0 := @parameter0: int;
+
+        tableswitch(i0)
+        {
+            case 101: goto label01;
+            case 102: goto label01;
+            case 103: goto label01;
+            case 104: goto label02;
+            case 105: goto label01;
+            case 106: goto label01;
+            default: goto label02;
+        };
+
+     label01:
+        specialinvoke r0.<sun.print.Win32PrintJob: void closeDataStreams()>();
+
+     label02:
+        entermonitor r0;
+
+     label03:
+        $r1 = r0.<sun.print.Win32PrintJob: java.util.Vector jobListeners>;
+
+        if $r1 == null goto label11;
+
+        $r2 = new javax.print.event.PrintJobEvent;
+
+        specialinvoke $r2.<javax.print.event.PrintJobEvent: void <init>(javax.print.DocPrintJob,int)>(r0, i0);
+
+        i2 = 0;
+
+     label04:
+        $r3 = r0.<sun.print.Win32PrintJob: java.util.Vector jobListeners>;
+
+        $i1 = virtualinvoke $r3.<java.util.Vector: int size()>();
+
+        if i2 >= $i1 goto label11;
+
+        $r4 = r0.<sun.print.Win32PrintJob: java.util.Vector jobListeners>;
+
+        $r5 = virtualinvoke $r4.<java.util.Vector: java.lang.Object elementAt(int)>(i2);
+
+        $r6 = (javax.print.event.PrintJobListener) $r5;
+
+        r7 = (javax.print.event.PrintJobListener) $r6;
+
+        tableswitch(i0)
+        {
+            case 101: goto label06;
+            case 102: goto label05;
+            case 103: goto label07;
+            case 104: goto label10;
+            case 105: goto label09;
+            case 106: goto label08;
+            default: goto label10;
+        };
+
+     label05:
+        interfaceinvoke r7.<javax.print.event.PrintJobListener: void printJobCompleted(javax.print.event.PrintJobEvent)>($r2);
+
+        goto label10;
+
+     label06:
+        interfaceinvoke r7.<javax.print.event.PrintJobListener: void printJobCanceled(javax.print.event.PrintJobEvent)>($r2);
+
+        goto label10;
+
+     label07:
+        interfaceinvoke r7.<javax.print.event.PrintJobListener: void printJobFailed(javax.print.event.PrintJobEvent)>($r2);
+
+        goto label10;
+
+     label08:
+        interfaceinvoke r7.<javax.print.event.PrintJobListener: void printDataTransferCompleted(javax.print.event.PrintJobEvent)>($r2);
+
+        goto label10;
+
+     label09:
+        interfaceinvoke r7.<javax.print.event.PrintJobListener: void printJobNoMoreEvents(javax.print.event.PrintJobEvent)>($r2);
+
+        goto label10;
+
+     label10:
+        i2 = i2 + 1;
+
+        goto label04;
+
+     label11:
+        exitmonitor r0;
+
+     label12:
+        goto label15;
+
+     label13:
+        $r8 := @caughtexception;
+
+        exitmonitor r0;
+
+     label14:
+        throw $r8;
+
+     label15:
+        return;
+
+        catch java.lang.Throwable from label03 to label12 with label13;
+        catch java.lang.Throwable from label13 to label14 with label13;
+    }
+
+    public void addPrintJobAttributeListener(javax.print.event.PrintJobAttributeListener, javax.print.attribute.PrintJobAttributeSet)
+    {
+        java.lang.Throwable $r8;
+        javax.print.event.PrintJobAttributeListener r1;
+        javax.print.attribute.PrintJobAttributeSet r9;
+        java.util.Vector $r2, $r3, $r4, $r6, $r7;
+        sun.print.Win32PrintJob r0;
+        javax.print.attribute.HashPrintJobAttributeSet $r5;
+
+        r0 := @this: sun.print.Win32PrintJob;
+
+        r1 := @parameter0: javax.print.event.PrintJobAttributeListener;
+
+        r9 := @parameter1: javax.print.attribute.PrintJobAttributeSet;
+
+        entermonitor r0;
+
+     label1:
+        if r1 != null goto label3;
+
+        exitmonitor r0;
+
+     label2:
+        return;
+
+     label3:
+        $r2 = r0.<sun.print.Win32PrintJob: java.util.Vector attrListeners>;
+
+        if $r2 != null goto label4;
+
+        $r6 = new java.util.Vector;
+
+        specialinvoke $r6.<java.util.Vector: void <init>()>();
+
+        r0.<sun.print.Win32PrintJob: java.util.Vector attrListeners> = $r6;
+
+        $r7 = new java.util.Vector;
+
+        specialinvoke $r7.<java.util.Vector: void <init>()>();
+
+        r0.<sun.print.Win32PrintJob: java.util.Vector listenedAttributeSets> = $r7;
+
+     label4:
+        $r3 = r0.<sun.print.Win32PrintJob: java.util.Vector attrListeners>;
+
+        virtualinvoke $r3.<java.util.Vector: boolean add(java.lang.Object)>(r1);
+
+        if r9 != null goto label5;
+
+        $r5 = new javax.print.attribute.HashPrintJobAttributeSet;
+
+        specialinvoke $r5.<javax.print.attribute.HashPrintJobAttributeSet: void <init>()>();
+
+        r9 = $r5;
+
+     label5:
+        $r4 = r0.<sun.print.Win32PrintJob: java.util.Vector listenedAttributeSets>;
+
+        virtualinvoke $r4.<java.util.Vector: boolean add(java.lang.Object)>(r9);
+
+        exitmonitor r0;
+
+     label6:
+        goto label9;
+
+     label7:
+        $r8 := @caughtexception;
+
+        exitmonitor r0;
+
+     label8:
+        throw $r8;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label3 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public void removePrintJobAttributeListener(javax.print.event.PrintJobAttributeListener)
+    {
+        java.lang.Throwable $r7;
+        javax.print.event.PrintJobAttributeListener r1;
+        java.util.Vector $r2, $r3, $r4, $r5, $r6;
+        int $i0, $i2;
+        sun.print.Win32PrintJob r0;
+        boolean $z0;
+
+        r0 := @this: sun.print.Win32PrintJob;
+
+        r1 := @parameter0: javax.print.event.PrintJobAttributeListener;
+
+        entermonitor r0;
+
+     label01:
+        if r1 == null goto label02;
+
+        $r2 = r0.<sun.print.Win32PrintJob: java.util.Vector attrListeners>;
+
+        if $r2 != null goto label04;
+
+     label02:
+        exitmonitor r0;
+
+     label03:
+        return;
+
+     label04:
+        $r3 = r0.<sun.print.Win32PrintJob: java.util.Vector attrListeners>;
+
+        $i0 = virtualinvoke $r3.<java.util.Vector: int indexOf(java.lang.Object)>(r1);
+
+        $i2 = (int) -1;
+
+        if $i0 != $i2 goto label06;
+
+        exitmonitor r0;
+
+     label05:
+        return;
+
+     label06:
+        $r4 = r0.<sun.print.Win32PrintJob: java.util.Vector attrListeners>;
+
+        virtualinvoke $r4.<java.util.Vector: java.lang.Object remove(int)>($i0);
+
+        $r5 = r0.<sun.print.Win32PrintJob: java.util.Vector listenedAttributeSets>;
+
+        virtualinvoke $r5.<java.util.Vector: java.lang.Object remove(int)>($i0);
+
+        $r6 = r0.<sun.print.Win32PrintJob: java.util.Vector attrListeners>;
+
+        $z0 = virtualinvoke $r6.<java.util.Vector: boolean isEmpty()>();
+
+        if $z0 == 0 goto label07;
+
+        r0.<sun.print.Win32PrintJob: java.util.Vector attrListeners> = null;
+
+        r0.<sun.print.Win32PrintJob: java.util.Vector listenedAttributeSets> = null;
+
+     label07:
+        exitmonitor r0;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r7 := @caughtexception;
+
+        exitmonitor r0;
+
+     label10:
+        throw $r7;
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label01 to label03 with label09;
+        catch java.lang.Throwable from label04 to label05 with label09;
+        catch java.lang.Throwable from label06 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    public void print(javax.print.Doc, javax.print.attribute.PrintRequestAttributeSet) throws javax.print.PrintException
+    {
+        byte[] r110, r111;
+        java.io.BufferedInputStream $r30;
+        java.awt.print.Printable $r48;
+        javax.print.DocFlavor $r5;
+        javax.print.attribute.PrintRequestAttributeSet r9;
+        javax.print.PrintException $r15, $r33, $r34, $r35, $r40, $r42, $r53, $r54, $r58, $r59, $r62, $r65, $r68, $r71, $r74, $r77, $r79, $r81, $r83, $r85, $r87, $r89, $r91;
+        java.lang.StringBuilder $r43, $r44, $r45, $r92, $r93, $r95;
+        javax.print.attribute.standard.PrinterState $r3, r98;
+        java.lang.ClassCastException $r78, $r82, $r84, $r88;
+        java.io.IOException $r61, $r64, $r70, $r73, $r76, $r80, $r86, $r90;
+        java.awt.print.Pageable $r51;
+        javax.print.DocFlavor$INPUT_STREAM $r11, $r16, $r17;
+        javax.print.attribute.standard.PrinterStateReasons r99;
+        int $i0, $i1, $i2;
+        sun.print.Win32PrintService $r1, $r8, $r14, $r27, $r32, $r39, $r49, $r52, $r55, $r100, $r108;
+        javax.print.DocFlavor$URL $r21, $r22, $r23;
+        javax.print.attribute.standard.PrinterIsAcceptingJobs $r102, $r103;
+        java.lang.Object $r6, $r47, $r50;
+        sun.print.PrintJobFlavorException $r7;
+        javax.print.Doc r4;
+        java.lang.Throwable $r60, $r97;
+        javax.print.attribute.PrintServiceAttribute $r2, $r56, $r101;
+        java.lang.String $r10, $r26, $r28, $r29, $r37, $r46, $r63, $r66, $r69, $r72, $r75, $r94, $r96;
+        java.io.FileOutputStream $r36;
+        java.net.URL $r107, r109;
+        sun.print.ImagePrinter $r12, $r106;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19, $z20;
+        javax.print.DocFlavor$BYTE_ARRAY $r18, $r19, $r20;
+        java.io.FileNotFoundException $r67;
+        sun.print.Win32PrintJob r0;
+        javax.print.attribute.standard.PrinterStateReason $r57;
+        java.io.InputStream $r13, $r24, $r25, $r31, $r38, $r41, $r104, $r105;
+
+        r0 := @this: sun.print.Win32PrintJob;
+
+        r4 := @parameter0: javax.print.Doc;
+
+        r9 := @parameter1: javax.print.attribute.PrintRequestAttributeSet;
+
+        entermonitor r0;
+
+     label01:
+        $z0 = r0.<sun.print.Win32PrintJob: boolean printing>;
+
+        if $z0 == 0 goto label02;
+
+        $r59 = new javax.print.PrintException;
+
+        specialinvoke $r59.<javax.print.PrintException: void <init>(java.lang.String)>("already printing");
+
+        throw $r59;
+
+     label02:
+        r0.<sun.print.Win32PrintJob: boolean printing> = 1;
+
+        exitmonitor r0;
+
+     label03:
+        goto label06;
+
+     label04:
+        $r97 := @caughtexception;
+
+        exitmonitor r0;
+
+     label05:
+        throw $r97;
+
+     label06:
+        $r1 = r0.<sun.print.Win32PrintJob: sun.print.Win32PrintService service>;
+
+        $r2 = virtualinvoke $r1.<sun.print.Win32PrintService: javax.print.attribute.PrintServiceAttribute getAttribute(java.lang.Class)>(class "Ljavax/print/attribute/standard/PrinterState;");
+
+        r98 = (javax.print.attribute.standard.PrinterState) $r2;
+
+        $r3 = <javax.print.attribute.standard.PrinterState: javax.print.attribute.standard.PrinterState STOPPED>;
+
+        if r98 != $r3 goto label07;
+
+        $r55 = r0.<sun.print.Win32PrintJob: sun.print.Win32PrintService service>;
+
+        $r56 = virtualinvoke $r55.<sun.print.Win32PrintService: javax.print.attribute.PrintServiceAttribute getAttribute(java.lang.Class)>(class "Ljavax/print/attribute/standard/PrinterStateReasons;");
+
+        r99 = (javax.print.attribute.standard.PrinterStateReasons) $r56;
+
+        if r99 == null goto label07;
+
+        $r57 = <javax.print.attribute.standard.PrinterStateReason: javax.print.attribute.standard.PrinterStateReason SHUTDOWN>;
+
+        $z19 = virtualinvoke r99.<javax.print.attribute.standard.PrinterStateReasons: boolean containsKey(java.lang.Object)>($r57);
+
+        if $z19 == 0 goto label07;
+
+        $r58 = new javax.print.PrintException;
+
+        specialinvoke $r58.<javax.print.PrintException: void <init>(java.lang.String)>("PrintService is no longer available.");
+
+        throw $r58;
+
+     label07:
+        $r100 = r0.<sun.print.Win32PrintJob: sun.print.Win32PrintService service>;
+
+        $r101 = virtualinvoke $r100.<sun.print.Win32PrintService: javax.print.attribute.PrintServiceAttribute getAttribute(java.lang.Class)>(class "Ljavax/print/attribute/standard/PrinterIsAcceptingJobs;");
+
+        $r102 = (javax.print.attribute.standard.PrinterIsAcceptingJobs) $r101;
+
+        $r103 = <javax.print.attribute.standard.PrinterIsAcceptingJobs: javax.print.attribute.standard.PrinterIsAcceptingJobs NOT_ACCEPTING_JOBS>;
+
+        if $r102 != $r103 goto label08;
+
+        $r54 = new javax.print.PrintException;
+
+        specialinvoke $r54.<javax.print.PrintException: void <init>(java.lang.String)>("Printer is not accepting job.");
+
+        throw $r54;
+
+     label08:
+        r0.<sun.print.Win32PrintJob: javax.print.Doc doc> = r4;
+
+        $r5 = interfaceinvoke r4.<javax.print.Doc: javax.print.DocFlavor getDocFlavor()>();
+
+     label09:
+        $r6 = interfaceinvoke r4.<javax.print.Doc: java.lang.Object getPrintData()>();
+
+     label10:
+        goto label12;
+
+     label11:
+        $r90 := @caughtexception;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r91 = new javax.print.PrintException;
+
+        $r92 = new java.lang.StringBuilder;
+
+        specialinvoke $r92.<java.lang.StringBuilder: void <init>()>();
+
+        $r93 = virtualinvoke $r92.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("can\'t get print data: ");
+
+        $r94 = virtualinvoke $r90.<java.io.IOException: java.lang.String toString()>();
+
+        $r95 = virtualinvoke $r93.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r94);
+
+        $r96 = virtualinvoke $r95.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r91.<javax.print.PrintException: void <init>(java.lang.String)>($r96);
+
+        throw $r91;
+
+     label12:
+        if $r6 != null goto label13;
+
+        $r53 = new javax.print.PrintException;
+
+        specialinvoke $r53.<javax.print.PrintException: void <init>(java.lang.String)>("Null print data.");
+
+        throw $r53;
+
+     label13:
+        if $r5 == null goto label14;
+
+        $r8 = r0.<sun.print.Win32PrintJob: sun.print.Win32PrintService service>;
+
+        $z1 = virtualinvoke $r8.<sun.print.Win32PrintService: boolean isDocFlavorSupported(javax.print.DocFlavor)>($r5);
+
+        if $z1 != 0 goto label15;
+
+     label14:
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r7 = new sun.print.PrintJobFlavorException;
+
+        specialinvoke $r7.<sun.print.PrintJobFlavorException: void <init>(java.lang.String,javax.print.DocFlavor)>("invalid flavor", $r5);
+
+        throw $r7;
+
+     label15:
+        specialinvoke r0.<sun.print.Win32PrintJob: void initializeAttributeSets(javax.print.Doc,javax.print.attribute.PrintRequestAttributeSet)>(r4, r9);
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void getAttributeValues(javax.print.DocFlavor)>($r5);
+
+        $r10 = virtualinvoke $r5.<javax.print.DocFlavor: java.lang.String getRepresentationClassName()>();
+
+        $r11 = <javax.print.DocFlavor$INPUT_STREAM: javax.print.DocFlavor$INPUT_STREAM GIF>;
+
+        $z2 = virtualinvoke $r5.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r11);
+
+        if $z2 != 0 goto label16;
+
+        $r16 = <javax.print.DocFlavor$INPUT_STREAM: javax.print.DocFlavor$INPUT_STREAM JPEG>;
+
+        $z3 = virtualinvoke $r5.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r16);
+
+        if $z3 != 0 goto label16;
+
+        $r17 = <javax.print.DocFlavor$INPUT_STREAM: javax.print.DocFlavor$INPUT_STREAM PNG>;
+
+        $z4 = virtualinvoke $r5.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r17);
+
+        if $z4 != 0 goto label16;
+
+        $r18 = <javax.print.DocFlavor$BYTE_ARRAY: javax.print.DocFlavor$BYTE_ARRAY GIF>;
+
+        $z5 = virtualinvoke $r5.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r18);
+
+        if $z5 != 0 goto label16;
+
+        $r19 = <javax.print.DocFlavor$BYTE_ARRAY: javax.print.DocFlavor$BYTE_ARRAY JPEG>;
+
+        $z6 = virtualinvoke $r5.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r19);
+
+        if $z6 != 0 goto label16;
+
+        $r20 = <javax.print.DocFlavor$BYTE_ARRAY: javax.print.DocFlavor$BYTE_ARRAY PNG>;
+
+        $z7 = virtualinvoke $r5.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r20);
+
+        if $z7 == 0 goto label21;
+
+     label16:
+        $r104 = interfaceinvoke r4.<javax.print.Doc: java.io.InputStream getStreamForBytes()>();
+
+        r0.<sun.print.Win32PrintJob: java.io.InputStream instream> = $r104;
+
+        $r105 = r0.<sun.print.Win32PrintJob: java.io.InputStream instream>;
+
+        if $r105 != null goto label17;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r15 = new javax.print.PrintException;
+
+        specialinvoke $r15.<javax.print.PrintException: void <init>(java.lang.String)>("No stream for data");
+
+        throw $r15;
+
+     label17:
+        $r12 = new sun.print.ImagePrinter;
+
+        $r13 = r0.<sun.print.Win32PrintJob: java.io.InputStream instream>;
+
+        specialinvoke $r12.<sun.print.ImagePrinter: void <init>(java.io.InputStream)>($r13);
+
+        virtualinvoke r0.<sun.print.Win32PrintJob: void printableJob(java.awt.print.Printable)>($r12);
+
+        $r14 = r0.<sun.print.Win32PrintJob: sun.print.Win32PrintService service>;
+
+        virtualinvoke $r14.<sun.print.Win32PrintService: void wakeNotifier()>();
+
+     label18:
+        return;
+
+     label19:
+        $r88 := @caughtexception;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r89 = new javax.print.PrintException;
+
+        specialinvoke $r89.<javax.print.PrintException: void <init>(java.lang.Exception)>($r88);
+
+        throw $r89;
+
+     label20:
+        $r86 := @caughtexception;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r87 = new javax.print.PrintException;
+
+        specialinvoke $r87.<javax.print.PrintException: void <init>(java.lang.Exception)>($r86);
+
+        throw $r87;
+
+     label21:
+        $r21 = <javax.print.DocFlavor$URL: javax.print.DocFlavor$URL GIF>;
+
+        $z8 = virtualinvoke $r5.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r21);
+
+        if $z8 != 0 goto label22;
+
+        $r22 = <javax.print.DocFlavor$URL: javax.print.DocFlavor$URL JPEG>;
+
+        $z9 = virtualinvoke $r5.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r22);
+
+        if $z9 != 0 goto label22;
+
+        $r23 = <javax.print.DocFlavor$URL: javax.print.DocFlavor$URL PNG>;
+
+        $z10 = virtualinvoke $r5.<javax.print.DocFlavor: boolean equals(java.lang.Object)>($r23);
+
+        if $z10 == 0 goto label25;
+
+     label22:
+        $r106 = new sun.print.ImagePrinter;
+
+        $r107 = (java.net.URL) $r6;
+
+        specialinvoke $r106.<sun.print.ImagePrinter: void <init>(java.net.URL)>($r107);
+
+        virtualinvoke r0.<sun.print.Win32PrintJob: void printableJob(java.awt.print.Printable)>($r106);
+
+        $r108 = r0.<sun.print.Win32PrintJob: sun.print.Win32PrintService service>;
+
+        virtualinvoke $r108.<sun.print.Win32PrintService: void wakeNotifier()>();
+
+     label23:
+        return;
+
+     label24:
+        $r84 := @caughtexception;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r85 = new javax.print.PrintException;
+
+        specialinvoke $r85.<javax.print.PrintException: void <init>(java.lang.Exception)>($r84);
+
+        throw $r85;
+
+     label25:
+        $z11 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>("java.awt.print.Pageable");
+
+        if $z11 == 0 goto label30;
+
+     label26:
+        $r50 = interfaceinvoke r4.<javax.print.Doc: java.lang.Object getPrintData()>();
+
+        $r51 = (java.awt.print.Pageable) $r50;
+
+        virtualinvoke r0.<sun.print.Win32PrintJob: void pageableJob(java.awt.print.Pageable)>($r51);
+
+        $r52 = r0.<sun.print.Win32PrintJob: sun.print.Win32PrintService service>;
+
+        virtualinvoke $r52.<sun.print.Win32PrintService: void wakeNotifier()>();
+
+     label27:
+        return;
+
+     label28:
+        $r82 := @caughtexception;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r83 = new javax.print.PrintException;
+
+        specialinvoke $r83.<javax.print.PrintException: void <init>(java.lang.Exception)>($r82);
+
+        throw $r83;
+
+     label29:
+        $r80 := @caughtexception;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r81 = new javax.print.PrintException;
+
+        specialinvoke $r81.<javax.print.PrintException: void <init>(java.lang.Exception)>($r80);
+
+        throw $r81;
+
+     label30:
+        $z12 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>("java.awt.print.Printable");
+
+        if $z12 == 0 goto label35;
+
+     label31:
+        $r47 = interfaceinvoke r4.<javax.print.Doc: java.lang.Object getPrintData()>();
+
+        $r48 = (java.awt.print.Printable) $r47;
+
+        virtualinvoke r0.<sun.print.Win32PrintJob: void printableJob(java.awt.print.Printable)>($r48);
+
+        $r49 = r0.<sun.print.Win32PrintJob: sun.print.Win32PrintService service>;
+
+        virtualinvoke $r49.<sun.print.Win32PrintService: void wakeNotifier()>();
+
+     label32:
+        return;
+
+     label33:
+        $r78 := @caughtexception;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r79 = new javax.print.PrintException;
+
+        specialinvoke $r79.<javax.print.PrintException: void <init>(java.lang.Exception)>($r78);
+
+        throw $r79;
+
+     label34:
+        $r76 := @caughtexception;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r77 = new javax.print.PrintException;
+
+        specialinvoke $r77.<javax.print.PrintException: void <init>(java.lang.Exception)>($r76);
+
+        throw $r77;
+
+     label35:
+        $z13 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>("[B");
+
+        if $z13 != 0 goto label36;
+
+        $z17 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>("java.io.InputStream");
+
+        if $z17 != 0 goto label36;
+
+        $z18 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>("java.net.URL");
+
+        if $z18 == 0 goto label64;
+
+     label36:
+        $z20 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>("java.net.URL");
+
+        if $z20 == 0 goto label41;
+
+        r109 = (java.net.URL) $r6;
+
+     label37:
+        $r41 = virtualinvoke r109.<java.net.URL: java.io.InputStream openStream()>();
+
+        r0.<sun.print.Win32PrintJob: java.io.InputStream instream> = $r41;
+
+     label38:
+        goto label40;
+
+     label39:
+        $r73 := @caughtexception;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r74 = new javax.print.PrintException;
+
+        $r75 = virtualinvoke $r73.<java.io.IOException: java.lang.String toString()>();
+
+        specialinvoke $r74.<javax.print.PrintException: void <init>(java.lang.String)>($r75);
+
+        throw $r74;
+
+     label40:
+        goto label44;
+
+     label41:
+        $r24 = interfaceinvoke r4.<javax.print.Doc: java.io.InputStream getStreamForBytes()>();
+
+        r0.<sun.print.Win32PrintJob: java.io.InputStream instream> = $r24;
+
+     label42:
+        goto label44;
+
+     label43:
+        $r70 := @caughtexception;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r71 = new javax.print.PrintException;
+
+        $r72 = virtualinvoke $r70.<java.io.IOException: java.lang.String toString()>();
+
+        specialinvoke $r71.<javax.print.PrintException: void <init>(java.lang.String)>($r72);
+
+        throw $r71;
+
+     label44:
+        $r25 = r0.<sun.print.Win32PrintJob: java.io.InputStream instream>;
+
+        if $r25 != null goto label45;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r40 = new javax.print.PrintException;
+
+        specialinvoke $r40.<javax.print.PrintException: void <init>(java.lang.String)>("No stream for data");
+
+        throw $r40;
+
+     label45:
+        $r26 = r0.<sun.print.Win32PrintJob: java.lang.String mDestination>;
+
+        if $r26 == null goto label53;
+
+     label46:
+        $r36 = new java.io.FileOutputStream;
+
+        $r37 = r0.<sun.print.Win32PrintJob: java.lang.String mDestination>;
+
+        specialinvoke $r36.<java.io.FileOutputStream: void <init>(java.lang.String)>($r37);
+
+        r110 = newarray (byte)[1024];
+
+     label47:
+        $r38 = r0.<sun.print.Win32PrintJob: java.io.InputStream instream>;
+
+        $i1 = lengthof r110;
+
+        $i2 = virtualinvoke $r38.<java.io.InputStream: int read(byte[],int,int)>(r110, 0, $i1);
+
+        if $i2 < 0 goto label48;
+
+        virtualinvoke $r36.<java.io.FileOutputStream: void write(byte[],int,int)>(r110, 0, $i2);
+
+        goto label47;
+
+     label48:
+        virtualinvoke $r36.<java.io.FileOutputStream: void flush()>();
+
+        virtualinvoke $r36.<java.io.FileOutputStream: void close()>();
+
+     label49:
+        goto label52;
+
+     label50:
+        $r67 := @caughtexception;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r68 = new javax.print.PrintException;
+
+        $r69 = virtualinvoke $r67.<java.io.FileNotFoundException: java.lang.String toString()>();
+
+        specialinvoke $r68.<javax.print.PrintException: void <init>(java.lang.String)>($r69);
+
+        throw $r68;
+
+     label51:
+        $r64 := @caughtexception;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r65 = new javax.print.PrintException;
+
+        $r66 = virtualinvoke $r64.<java.io.IOException: java.lang.String toString()>();
+
+        specialinvoke $r65.<javax.print.PrintException: void <init>(java.lang.String)>($r66);
+
+        throw $r65;
+
+     label52:
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(106);
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(102);
+
+        $r39 = r0.<sun.print.Win32PrintJob: sun.print.Win32PrintService service>;
+
+        virtualinvoke $r39.<sun.print.Win32PrintService: void wakeNotifier()>();
+
+        return;
+
+     label53:
+        $r27 = r0.<sun.print.Win32PrintJob: sun.print.Win32PrintService service>;
+
+        $r28 = virtualinvoke $r27.<sun.print.Win32PrintService: java.lang.String getName()>();
+
+        $r29 = r0.<sun.print.Win32PrintJob: java.lang.String jobName>;
+
+        $z14 = specialinvoke r0.<sun.print.Win32PrintJob: boolean startPrintRawData(java.lang.String,java.lang.String)>($r28, $r29);
+
+        if $z14 != 0 goto label54;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r35 = new javax.print.PrintException;
+
+        specialinvoke $r35.<javax.print.PrintException: void <init>(java.lang.String)>("Print job failed to start.");
+
+        throw $r35;
+
+     label54:
+        $r30 = new java.io.BufferedInputStream;
+
+        $r31 = r0.<sun.print.Win32PrintJob: java.io.InputStream instream>;
+
+        specialinvoke $r30.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>($r31);
+
+     label55:
+        r111 = newarray (byte)[8192];
+
+     label56:
+        $i0 = virtualinvoke $r30.<java.io.BufferedInputStream: int read(byte[],int,int)>(r111, 0, 8192);
+
+        if $i0 < 0 goto label57;
+
+        $z16 = specialinvoke r0.<sun.print.Win32PrintJob: boolean printRawData(byte[],int)>(r111, $i0);
+
+        if $z16 != 0 goto label56;
+
+        virtualinvoke $r30.<java.io.BufferedInputStream: void close()>();
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r34 = new javax.print.PrintException;
+
+        specialinvoke $r34.<javax.print.PrintException: void <init>(java.lang.String)>("Problem while spooling data");
+
+        throw $r34;
+
+     label57:
+        virtualinvoke $r30.<java.io.BufferedInputStream: void close()>();
+
+        $z15 = specialinvoke r0.<sun.print.Win32PrintJob: boolean endPrintRawData()>();
+
+        if $z15 != 0 goto label58;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r33 = new javax.print.PrintException;
+
+        specialinvoke $r33.<javax.print.PrintException: void <init>(java.lang.String)>("Print job failed to close properly.");
+
+        throw $r33;
+
+     label58:
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(106);
+
+     label59:
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(105);
+
+        goto label63;
+
+     label60:
+        $r61 := @caughtexception;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r62 = new javax.print.PrintException;
+
+        $r63 = virtualinvoke $r61.<java.io.IOException: java.lang.String toString()>();
+
+        specialinvoke $r62.<javax.print.PrintException: void <init>(java.lang.String)>($r63);
+
+        throw $r62;
+
+     label61:
+        $r60 := @caughtexception;
+
+     label62:
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(105);
+
+        throw $r60;
+
+     label63:
+        goto label65;
+
+     label64:
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r42 = new javax.print.PrintException;
+
+        $r43 = new java.lang.StringBuilder;
+
+        specialinvoke $r43.<java.lang.StringBuilder: void <init>()>();
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unrecognized class: ");
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r42.<javax.print.PrintException: void <init>(java.lang.String)>($r46);
+
+        throw $r42;
+
+     label65:
+        $r32 = r0.<sun.print.Win32PrintJob: sun.print.Win32PrintService service>;
+
+        virtualinvoke $r32.<sun.print.Win32PrintService: void wakeNotifier()>();
+
+        return;
+
+        catch java.lang.Throwable from label01 to label03 with label04;
+        catch java.lang.Throwable from label04 to label05 with label04;
+        catch java.io.IOException from label09 to label10 with label11;
+        catch java.lang.ClassCastException from label16 to label18 with label19;
+        catch java.io.IOException from label16 to label18 with label20;
+        catch java.lang.ClassCastException from label22 to label23 with label24;
+        catch java.lang.ClassCastException from label26 to label27 with label28;
+        catch java.io.IOException from label26 to label27 with label29;
+        catch java.lang.ClassCastException from label31 to label32 with label33;
+        catch java.io.IOException from label31 to label32 with label34;
+        catch java.io.IOException from label37 to label38 with label39;
+        catch java.io.IOException from label41 to label42 with label43;
+        catch java.io.FileNotFoundException from label46 to label49 with label50;
+        catch java.io.IOException from label46 to label49 with label51;
+        catch java.io.IOException from label55 to label59 with label60;
+        catch java.lang.Throwable from label55 to label59 with label61;
+        catch java.lang.Throwable from label60 to label62 with label61;
+    }
+
+    public void printableJob(java.awt.print.Printable) throws javax.print.PrintException
+    {
+        java.awt.print.PrinterJob $r1, $r4, $r6, $r8, $r33, $r34;
+        java.awt.print.Printable r15;
+        java.awt.print.PageFormat $r9;
+        boolean $z0;
+        javax.print.attribute.PrintRequestAttributeSet $r35;
+        javax.print.attribute.standard.MediaSize $r10, $r17, $r18, $r24;
+        javax.print.PrintException $r26, $r29;
+        sun.awt.windows.WPrinterJob $r2;
+        java.awt.print.PrinterException $r28;
+        float $f0, $f1;
+        sun.print.Win32PrintJob r0;
+        java.lang.Throwable $r27, $r30;
+        javax.print.attribute.standard.MediaSizeName $r5, $r22, $r23;
+        javax.print.attribute.standard.Copies r31;
+        java.awt.print.Paper $r16;
+        int $i0, $i1, $i2;
+        java.lang.String $r7;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7;
+        javax.print.attribute.standard.OrientationRequested $r11, $r12, $r13, $r14, $r20, $r32;
+        javax.print.PrintService $r3;
+        java.lang.Object $r19, $r21, $r25;
+
+        r0 := @this: sun.print.Win32PrintJob;
+
+        r15 := @parameter0: java.awt.print.Printable;
+
+     label01:
+        entermonitor r0;
+
+     label02:
+        $r1 = r0.<sun.print.Win32PrintJob: java.awt.print.PrinterJob job>;
+
+        if $r1 == null goto label03;
+
+        $r26 = new javax.print.PrintException;
+
+        specialinvoke $r26.<javax.print.PrintException: void <init>(java.lang.String)>("already printing");
+
+        throw $r26;
+
+     label03:
+        $r2 = new sun.awt.windows.WPrinterJob;
+
+        specialinvoke $r2.<sun.awt.windows.WPrinterJob: void <init>()>();
+
+        r0.<sun.print.Win32PrintJob: java.awt.print.PrinterJob job> = $r2;
+
+        exitmonitor r0;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r30 := @caughtexception;
+
+        exitmonitor r0;
+
+     label06:
+        throw $r30;
+
+     label07:
+        $r3 = virtualinvoke r0.<sun.print.Win32PrintJob: javax.print.PrintService getPrintService()>();
+
+        $r4 = r0.<sun.print.Win32PrintJob: java.awt.print.PrinterJob job>;
+
+        virtualinvoke $r4.<java.awt.print.PrinterJob: void setPrintService(javax.print.PrintService)>($r3);
+
+        $i0 = r0.<sun.print.Win32PrintJob: int copies>;
+
+        if $i0 != 0 goto label08;
+
+        $r25 = interfaceinvoke $r3.<javax.print.PrintService: java.lang.Object getDefaultAttributeValue(java.lang.Class)>(class "Ljavax/print/attribute/standard/Copies;");
+
+        r31 = (javax.print.attribute.standard.Copies) $r25;
+
+        $i2 = virtualinvoke r31.<javax.print.attribute.standard.Copies: int getValue()>();
+
+        r0.<sun.print.Win32PrintJob: int copies> = $i2;
+
+     label08:
+        $r5 = r0.<sun.print.Win32PrintJob: javax.print.attribute.standard.MediaSizeName mediaName>;
+
+        if $r5 != null goto label09;
+
+        $r21 = interfaceinvoke $r3.<javax.print.PrintService: java.lang.Object getDefaultAttributeValue(java.lang.Class)>(class "Ljavax/print/attribute/standard/Media;");
+
+        $z0 = $r21 instanceof javax.print.attribute.standard.MediaSizeName;
+
+        if $z0 == 0 goto label09;
+
+        $r22 = (javax.print.attribute.standard.MediaSizeName) $r21;
+
+        r0.<sun.print.Win32PrintJob: javax.print.attribute.standard.MediaSizeName mediaName> = $r22;
+
+        $r23 = r0.<sun.print.Win32PrintJob: javax.print.attribute.standard.MediaSizeName mediaName>;
+
+        $r24 = staticinvoke <javax.print.attribute.standard.MediaSize: javax.print.attribute.standard.MediaSize getMediaSizeForName(javax.print.attribute.standard.MediaSizeName)>($r23);
+
+        r0.<sun.print.Win32PrintJob: javax.print.attribute.standard.MediaSize mediaSize> = $r24;
+
+     label09:
+        $r32 = r0.<sun.print.Win32PrintJob: javax.print.attribute.standard.OrientationRequested orient>;
+
+        if $r32 != null goto label10;
+
+        $r19 = interfaceinvoke $r3.<javax.print.PrintService: java.lang.Object getDefaultAttributeValue(java.lang.Class)>(class "Ljavax/print/attribute/standard/OrientationRequested;");
+
+        $r20 = (javax.print.attribute.standard.OrientationRequested) $r19;
+
+        r0.<sun.print.Win32PrintJob: javax.print.attribute.standard.OrientationRequested orient> = $r20;
+
+     label10:
+        $r6 = r0.<sun.print.Win32PrintJob: java.awt.print.PrinterJob job>;
+
+        $i1 = r0.<sun.print.Win32PrintJob: int copies>;
+
+        virtualinvoke $r6.<java.awt.print.PrinterJob: void setCopies(int)>($i1);
+
+        $r8 = r0.<sun.print.Win32PrintJob: java.awt.print.PrinterJob job>;
+
+        $r7 = r0.<sun.print.Win32PrintJob: java.lang.String jobName>;
+
+        virtualinvoke $r8.<java.awt.print.PrinterJob: void setJobName(java.lang.String)>($r7);
+
+        $r9 = new java.awt.print.PageFormat;
+
+        specialinvoke $r9.<java.awt.print.PageFormat: void <init>()>();
+
+        $r10 = r0.<sun.print.Win32PrintJob: javax.print.attribute.standard.MediaSize mediaSize>;
+
+        if $r10 == null goto label11;
+
+        $r16 = new java.awt.print.Paper;
+
+        specialinvoke $r16.<java.awt.print.Paper: void <init>()>();
+
+        $r17 = r0.<sun.print.Win32PrintJob: javax.print.attribute.standard.MediaSize mediaSize>;
+
+        $f0 = virtualinvoke $r17.<javax.print.attribute.standard.MediaSize: float getX(int)>(25400);
+
+        $d0 = (double) $f0;
+
+        $d1 = $d0 * 72.0;
+
+        $r18 = r0.<sun.print.Win32PrintJob: javax.print.attribute.standard.MediaSize mediaSize>;
+
+        $f1 = virtualinvoke $r18.<javax.print.attribute.standard.MediaSize: float getY(int)>(25400);
+
+        $d2 = (double) $f1;
+
+        $d3 = $d2 * 72.0;
+
+        virtualinvoke $r16.<java.awt.print.Paper: void setSize(double,double)>($d1, $d3);
+
+        $d4 = virtualinvoke $r16.<java.awt.print.Paper: double getWidth()>();
+
+        $d5 = $d4 - 144.0;
+
+        $d6 = virtualinvoke $r16.<java.awt.print.Paper: double getHeight()>();
+
+        $d7 = $d6 - 144.0;
+
+        virtualinvoke $r16.<java.awt.print.Paper: void setImageableArea(double,double,double,double)>(72.0, 72.0, $d5, $d7);
+
+        virtualinvoke $r9.<java.awt.print.PageFormat: void setPaper(java.awt.print.Paper)>($r16);
+
+     label11:
+        $r12 = r0.<sun.print.Win32PrintJob: javax.print.attribute.standard.OrientationRequested orient>;
+
+        $r11 = <javax.print.attribute.standard.OrientationRequested: javax.print.attribute.standard.OrientationRequested REVERSE_LANDSCAPE>;
+
+        if $r12 != $r11 goto label12;
+
+        virtualinvoke $r9.<java.awt.print.PageFormat: void setOrientation(int)>(2);
+
+        goto label13;
+
+     label12:
+        $r14 = r0.<sun.print.Win32PrintJob: javax.print.attribute.standard.OrientationRequested orient>;
+
+        $r13 = <javax.print.attribute.standard.OrientationRequested: javax.print.attribute.standard.OrientationRequested LANDSCAPE>;
+
+        if $r14 != $r13 goto label13;
+
+        virtualinvoke $r9.<java.awt.print.PageFormat: void setOrientation(int)>(0);
+
+     label13:
+        $r33 = r0.<sun.print.Win32PrintJob: java.awt.print.PrinterJob job>;
+
+        virtualinvoke $r33.<java.awt.print.PrinterJob: void setPrintable(java.awt.print.Printable,java.awt.print.PageFormat)>(r15, $r9);
+
+        $r34 = r0.<sun.print.Win32PrintJob: java.awt.print.PrinterJob job>;
+
+        $r35 = r0.<sun.print.Win32PrintJob: javax.print.attribute.PrintRequestAttributeSet reqAttrSet>;
+
+        virtualinvoke $r34.<java.awt.print.PrinterJob: void print(javax.print.attribute.PrintRequestAttributeSet)>($r35);
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(106);
+
+     label14:
+        r0.<sun.print.Win32PrintJob: boolean printReturned> = 1;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(105);
+
+        return;
+
+     label15:
+        $r28 := @caughtexception;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r29 = new javax.print.PrintException;
+
+        specialinvoke $r29.<javax.print.PrintException: void <init>(java.lang.Exception)>($r28);
+
+        throw $r29;
+
+     label16:
+        $r27 := @caughtexception;
+
+     label17:
+        r0.<sun.print.Win32PrintJob: boolean printReturned> = 1;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(105);
+
+        throw $r27;
+
+        catch java.lang.Throwable from label02 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.awt.print.PrinterException from label01 to label14 with label15;
+        catch java.lang.Throwable from label01 to label14 with label16;
+        catch java.lang.Throwable from label15 to label17 with label16;
+    }
+
+    public void pageableJob(java.awt.print.Pageable) throws javax.print.PrintException
+    {
+        java.lang.Throwable $r14, $r17;
+        javax.print.attribute.standard.Copies r18;
+        java.awt.print.PrinterJob $r1, $r4, $r5, $r7, $r9, $r11;
+        int $i0, $i1, $i2;
+        java.lang.String $r6;
+        javax.print.attribute.PrintRequestAttributeSet $r10;
+        javax.print.PrintService $r3;
+        javax.print.PrintException $r13, $r16;
+        sun.awt.windows.WPrinterJob $r2;
+        java.awt.print.PrinterException $r15;
+        sun.print.Win32PrintJob r0;
+        java.lang.Object $r12;
+        java.awt.print.Pageable r8;
+
+        r0 := @this: sun.print.Win32PrintJob;
+
+        r8 := @parameter0: java.awt.print.Pageable;
+
+     label01:
+        entermonitor r0;
+
+     label02:
+        $r1 = r0.<sun.print.Win32PrintJob: java.awt.print.PrinterJob job>;
+
+        if $r1 == null goto label03;
+
+        $r13 = new javax.print.PrintException;
+
+        specialinvoke $r13.<javax.print.PrintException: void <init>(java.lang.String)>("already printing");
+
+        throw $r13;
+
+     label03:
+        $r2 = new sun.awt.windows.WPrinterJob;
+
+        specialinvoke $r2.<sun.awt.windows.WPrinterJob: void <init>()>();
+
+        r0.<sun.print.Win32PrintJob: java.awt.print.PrinterJob job> = $r2;
+
+        exitmonitor r0;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r17 := @caughtexception;
+
+        exitmonitor r0;
+
+     label06:
+        throw $r17;
+
+     label07:
+        $r3 = virtualinvoke r0.<sun.print.Win32PrintJob: javax.print.PrintService getPrintService()>();
+
+        $r4 = r0.<sun.print.Win32PrintJob: java.awt.print.PrinterJob job>;
+
+        virtualinvoke $r4.<java.awt.print.PrinterJob: void setPrintService(javax.print.PrintService)>($r3);
+
+        $i0 = r0.<sun.print.Win32PrintJob: int copies>;
+
+        if $i0 != 0 goto label08;
+
+        $r12 = interfaceinvoke $r3.<javax.print.PrintService: java.lang.Object getDefaultAttributeValue(java.lang.Class)>(class "Ljavax/print/attribute/standard/Copies;");
+
+        r18 = (javax.print.attribute.standard.Copies) $r12;
+
+        $i2 = virtualinvoke r18.<javax.print.attribute.standard.Copies: int getValue()>();
+
+        r0.<sun.print.Win32PrintJob: int copies> = $i2;
+
+     label08:
+        $r5 = r0.<sun.print.Win32PrintJob: java.awt.print.PrinterJob job>;
+
+        $i1 = r0.<sun.print.Win32PrintJob: int copies>;
+
+        virtualinvoke $r5.<java.awt.print.PrinterJob: void setCopies(int)>($i1);
+
+        $r7 = r0.<sun.print.Win32PrintJob: java.awt.print.PrinterJob job>;
+
+        $r6 = r0.<sun.print.Win32PrintJob: java.lang.String jobName>;
+
+        virtualinvoke $r7.<java.awt.print.PrinterJob: void setJobName(java.lang.String)>($r6);
+
+        $r9 = r0.<sun.print.Win32PrintJob: java.awt.print.PrinterJob job>;
+
+        virtualinvoke $r9.<java.awt.print.PrinterJob: void setPageable(java.awt.print.Pageable)>(r8);
+
+        $r11 = r0.<sun.print.Win32PrintJob: java.awt.print.PrinterJob job>;
+
+        $r10 = r0.<sun.print.Win32PrintJob: javax.print.attribute.PrintRequestAttributeSet reqAttrSet>;
+
+        virtualinvoke $r11.<java.awt.print.PrinterJob: void print(javax.print.attribute.PrintRequestAttributeSet)>($r10);
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(106);
+
+     label09:
+        r0.<sun.print.Win32PrintJob: boolean printReturned> = 1;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(105);
+
+        return;
+
+     label10:
+        $r15 := @caughtexception;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r16 = new javax.print.PrintException;
+
+        specialinvoke $r16.<javax.print.PrintException: void <init>(java.lang.Exception)>($r15);
+
+        throw $r16;
+
+     label11:
+        $r14 := @caughtexception;
+
+     label12:
+        r0.<sun.print.Win32PrintJob: boolean printReturned> = 1;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(105);
+
+        throw $r14;
+
+        catch java.lang.Throwable from label02 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.awt.print.PrinterException from label01 to label09 with label10;
+        catch java.lang.Throwable from label01 to label09 with label11;
+        catch java.lang.Throwable from label10 to label12 with label11;
+    }
+
+    private synchronized void initializeAttributeSets(javax.print.Doc, javax.print.attribute.PrintRequestAttributeSet)
+    {
+        java.net.URL $r18, $r19;
+        javax.print.attribute.HashPrintRequestAttributeSet $r1;
+        javax.print.attribute.PrintJobAttributeSet $r8, $r9, $r16, $r25, $r27, $r31, $r37, $r44, $r50, $r51;
+        java.util.Locale $r24, $r29;
+        java.lang.SecurityException $r46;
+        javax.print.attribute.HashPrintJobAttributeSet $r2;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        javax.print.attribute.PrintRequestAttributeSet r3, $r39, $r40;
+        javax.print.Doc r4;
+        javax.print.attribute.standard.JobName $r15, $r22;
+        javax.print.attribute.standard.RequestingUserName $r32;
+        sun.print.Win32PrintJob r0;
+        java.lang.StringBuilder $r11, $r12, $r13;
+        javax.print.attribute.DocAttributeSet $r5;
+        javax.print.attribute.standard.JobOriginatingUserName $r7, $r26, $r30;
+        javax.print.attribute.standard.DocumentName r48;
+        javax.print.attribute.Attribute[] $r33, $r41;
+        int $i0, $i1, i2, i3;
+        java.lang.String $r23, $r28, r47, r49;
+        java.io.IOException $r45;
+        java.lang.Object $r14, $r17;
+        javax.print.attribute.Attribute $r6, $r10, $r20, $r21, $r34, $r35, $r36, $r38, $r42, $r43;
+
+        r0 := @this: sun.print.Win32PrintJob;
+
+        r4 := @parameter0: javax.print.Doc;
+
+        r3 := @parameter1: javax.print.attribute.PrintRequestAttributeSet;
+
+        $r1 = new javax.print.attribute.HashPrintRequestAttributeSet;
+
+        specialinvoke $r1.<javax.print.attribute.HashPrintRequestAttributeSet: void <init>()>();
+
+        r0.<sun.print.Win32PrintJob: javax.print.attribute.PrintRequestAttributeSet reqAttrSet> = $r1;
+
+        $r2 = new javax.print.attribute.HashPrintJobAttributeSet;
+
+        specialinvoke $r2.<javax.print.attribute.HashPrintJobAttributeSet: void <init>()>();
+
+        r0.<sun.print.Win32PrintJob: javax.print.attribute.PrintJobAttributeSet jobAttrSet> = $r2;
+
+        if r3 == null goto label03;
+
+        $r40 = r0.<sun.print.Win32PrintJob: javax.print.attribute.PrintRequestAttributeSet reqAttrSet>;
+
+        interfaceinvoke $r40.<javax.print.attribute.PrintRequestAttributeSet: boolean addAll(javax.print.attribute.AttributeSet)>(r3);
+
+        $r41 = interfaceinvoke r3.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute[] toArray()>();
+
+        i2 = 0;
+
+     label01:
+        $i1 = lengthof $r41;
+
+        if i2 >= $i1 goto label03;
+
+        $r42 = $r41[i2];
+
+        $z4 = $r42 instanceof javax.print.attribute.PrintJobAttribute;
+
+        if $z4 == 0 goto label02;
+
+        $r44 = r0.<sun.print.Win32PrintJob: javax.print.attribute.PrintJobAttributeSet jobAttrSet>;
+
+        $r43 = $r41[i2];
+
+        interfaceinvoke $r44.<javax.print.attribute.PrintJobAttributeSet: boolean add(javax.print.attribute.Attribute)>($r43);
+
+     label02:
+        i2 = i2 + 1;
+
+        goto label01;
+
+     label03:
+        $r5 = interfaceinvoke r4.<javax.print.Doc: javax.print.attribute.DocAttributeSet getAttributes()>();
+
+        if $r5 == null goto label07;
+
+        $r33 = interfaceinvoke $r5.<javax.print.attribute.DocAttributeSet: javax.print.attribute.Attribute[] toArray()>();
+
+        i3 = 0;
+
+     label04:
+        $i0 = lengthof $r33;
+
+        if i3 >= $i0 goto label07;
+
+        $r34 = $r33[i3];
+
+        $z2 = $r34 instanceof javax.print.attribute.PrintRequestAttribute;
+
+        if $z2 == 0 goto label05;
+
+        $r39 = r0.<sun.print.Win32PrintJob: javax.print.attribute.PrintRequestAttributeSet reqAttrSet>;
+
+        $r38 = $r33[i3];
+
+        interfaceinvoke $r39.<javax.print.attribute.PrintRequestAttributeSet: boolean add(javax.print.attribute.Attribute)>($r38);
+
+     label05:
+        $r35 = $r33[i3];
+
+        $z3 = $r35 instanceof javax.print.attribute.PrintJobAttribute;
+
+        if $z3 == 0 goto label06;
+
+        $r37 = r0.<sun.print.Win32PrintJob: javax.print.attribute.PrintJobAttributeSet jobAttrSet>;
+
+        $r36 = $r33[i3];
+
+        interfaceinvoke $r37.<javax.print.attribute.PrintJobAttributeSet: boolean add(javax.print.attribute.Attribute)>($r36);
+
+     label06:
+        i3 = i3 + 1;
+
+        goto label04;
+
+     label07:
+        r47 = "";
+
+     label08:
+        r47 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("user.name");
+
+     label09:
+        goto label11;
+
+     label10:
+        $r46 := @caughtexception;
+
+     label11:
+        if r47 == null goto label12;
+
+        $z1 = virtualinvoke r47.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z1 == 0 goto label15;
+
+     label12:
+        $r6 = interfaceinvoke r3.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/RequestingUserName;");
+
+        $r32 = (javax.print.attribute.standard.RequestingUserName) $r6;
+
+        if $r32 == null goto label13;
+
+        $r27 = r0.<sun.print.Win32PrintJob: javax.print.attribute.PrintJobAttributeSet jobAttrSet>;
+
+        $r26 = new javax.print.attribute.standard.JobOriginatingUserName;
+
+        $r28 = virtualinvoke $r32.<javax.print.attribute.standard.RequestingUserName: java.lang.String getValue()>();
+
+        $r29 = virtualinvoke $r32.<javax.print.attribute.standard.RequestingUserName: java.util.Locale getLocale()>();
+
+        specialinvoke $r26.<javax.print.attribute.standard.JobOriginatingUserName: void <init>(java.lang.String,java.util.Locale)>($r28, $r29);
+
+        interfaceinvoke $r27.<javax.print.attribute.PrintJobAttributeSet: boolean add(javax.print.attribute.Attribute)>($r26);
+
+        goto label14;
+
+     label13:
+        $r8 = r0.<sun.print.Win32PrintJob: javax.print.attribute.PrintJobAttributeSet jobAttrSet>;
+
+        $r7 = new javax.print.attribute.standard.JobOriginatingUserName;
+
+        specialinvoke $r7.<javax.print.attribute.standard.JobOriginatingUserName: void <init>(java.lang.String,java.util.Locale)>("", null);
+
+        interfaceinvoke $r8.<javax.print.attribute.PrintJobAttributeSet: boolean add(javax.print.attribute.Attribute)>($r7);
+
+     label14:
+        goto label16;
+
+     label15:
+        $r31 = r0.<sun.print.Win32PrintJob: javax.print.attribute.PrintJobAttributeSet jobAttrSet>;
+
+        $r30 = new javax.print.attribute.standard.JobOriginatingUserName;
+
+        specialinvoke $r30.<javax.print.attribute.standard.JobOriginatingUserName: void <init>(java.lang.String,java.util.Locale)>(r47, null);
+
+        interfaceinvoke $r31.<javax.print.attribute.PrintJobAttributeSet: boolean add(javax.print.attribute.Attribute)>($r30);
+
+     label16:
+        $r9 = r0.<sun.print.Win32PrintJob: javax.print.attribute.PrintJobAttributeSet jobAttrSet>;
+
+        $r10 = interfaceinvoke $r9.<javax.print.attribute.PrintJobAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/JobName;");
+
+        if $r10 != null goto label22;
+
+        if $r5 == null goto label17;
+
+        $r20 = interfaceinvoke $r5.<javax.print.attribute.DocAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/DocumentName;");
+
+        if $r20 == null goto label17;
+
+        $r21 = interfaceinvoke $r5.<javax.print.attribute.DocAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/DocumentName;");
+
+        r48 = (javax.print.attribute.standard.DocumentName) $r21;
+
+        $r22 = new javax.print.attribute.standard.JobName;
+
+        $r23 = virtualinvoke r48.<javax.print.attribute.standard.DocumentName: java.lang.String getValue()>();
+
+        $r24 = virtualinvoke r48.<javax.print.attribute.standard.DocumentName: java.util.Locale getLocale()>();
+
+        specialinvoke $r22.<javax.print.attribute.standard.JobName: void <init>(java.lang.String,java.util.Locale)>($r23, $r24);
+
+        $r25 = r0.<sun.print.Win32PrintJob: javax.print.attribute.PrintJobAttributeSet jobAttrSet>;
+
+        interfaceinvoke $r25.<javax.print.attribute.PrintJobAttributeSet: boolean add(javax.print.attribute.Attribute)>($r22);
+
+        goto label22;
+
+     label17:
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("JPS Job:");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r4);
+
+        r49 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label18:
+        $r14 = interfaceinvoke r4.<javax.print.Doc: java.lang.Object getPrintData()>();
+
+        $z0 = $r14 instanceof java.net.URL;
+
+        if $z0 == 0 goto label19;
+
+        $r17 = interfaceinvoke r4.<javax.print.Doc: java.lang.Object getPrintData()>();
+
+        $r18 = (java.net.URL) $r17;
+
+        $r19 = (java.net.URL) $r18;
+
+        r49 = virtualinvoke $r19.<java.net.URL: java.lang.String toString()>();
+
+     label19:
+        goto label21;
+
+     label20:
+        $r45 := @caughtexception;
+
+     label21:
+        $r15 = new javax.print.attribute.standard.JobName;
+
+        specialinvoke $r15.<javax.print.attribute.standard.JobName: void <init>(java.lang.String,java.util.Locale)>(r49, null);
+
+        $r16 = r0.<sun.print.Win32PrintJob: javax.print.attribute.PrintJobAttributeSet jobAttrSet>;
+
+        interfaceinvoke $r16.<javax.print.attribute.PrintJobAttributeSet: boolean add(javax.print.attribute.Attribute)>($r15);
+
+     label22:
+        $r50 = r0.<sun.print.Win32PrintJob: javax.print.attribute.PrintJobAttributeSet jobAttrSet>;
+
+        $r51 = staticinvoke <javax.print.attribute.AttributeSetUtilities: javax.print.attribute.PrintJobAttributeSet unmodifiableView(javax.print.attribute.PrintJobAttributeSet)>($r50);
+
+        r0.<sun.print.Win32PrintJob: javax.print.attribute.PrintJobAttributeSet jobAttrSet> = $r51;
+
+        return;
+
+        catch java.lang.SecurityException from label08 to label09 with label10;
+        catch java.io.IOException from label18 to label19 with label20;
+    }
+
+    private void getAttributeValues(javax.print.DocFlavor) throws javax.print.PrintException
+    {
+        java.lang.SecurityException $r38;
+        java.net.URI $r17;
+        javax.print.DocFlavor r26;
+        javax.print.attribute.standard.Destination $r16;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        javax.print.attribute.PrintRequestAttributeSet $r1, $r4;
+        javax.print.attribute.standard.Fidelity $r3;
+        javax.print.attribute.standard.MediaSize $r12;
+        javax.print.PrintException $r24, $r39, $r41;
+        java.lang.Exception $r40;
+        javax.print.attribute.standard.JobName $r14;
+        sun.print.Win32PrintJob r0;
+        java.lang.StringBuilder $r29, $r30, $r31, $r34, $r35, $r36;
+        sun.print.PrintJobAttributeException $r28, $r33;
+        javax.print.attribute.standard.MediaSizeName $r9, $r11;
+        javax.print.attribute.standard.Copies $r13;
+        javax.print.attribute.Attribute[] $r5;
+        int $i0, i1, $i2;
+        sun.print.Win32PrintService $r10, $r25, $r27;
+        java.lang.String $r15, $r18, $r19, $r21, $r23, $r32, $r37;
+        javax.print.attribute.standard.OrientationRequested $r8;
+        java.io.File $r20;
+        java.lang.SecurityManager $r22;
+        java.lang.Class $r7;
+        javax.print.attribute.Attribute $r2, r6;
+
+        r0 := @this: sun.print.Win32PrintJob;
+
+        r26 := @parameter0: javax.print.DocFlavor;
+
+        $r1 = r0.<sun.print.Win32PrintJob: javax.print.attribute.PrintRequestAttributeSet reqAttrSet>;
+
+        $r2 = interfaceinvoke $r1.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute get(java.lang.Class)>(class "Ljavax/print/attribute/standard/Fidelity;");
+
+        $r3 = <javax.print.attribute.standard.Fidelity: javax.print.attribute.standard.Fidelity FIDELITY_TRUE>;
+
+        if $r2 != $r3 goto label01;
+
+        r0.<sun.print.Win32PrintJob: boolean fidelity> = 1;
+
+        goto label02;
+
+     label01:
+        r0.<sun.print.Win32PrintJob: boolean fidelity> = 0;
+
+     label02:
+        $r4 = r0.<sun.print.Win32PrintJob: javax.print.attribute.PrintRequestAttributeSet reqAttrSet>;
+
+        $r5 = interfaceinvoke $r4.<javax.print.attribute.PrintRequestAttributeSet: javax.print.attribute.Attribute[] toArray()>();
+
+        i1 = 0;
+
+     label03:
+        $i2 = lengthof $r5;
+
+        if i1 >= $i2 goto label19;
+
+        r6 = $r5[i1];
+
+        $r7 = interfaceinvoke r6.<javax.print.attribute.Attribute: java.lang.Class getCategory()>();
+
+        $z0 = r0.<sun.print.Win32PrintJob: boolean fidelity>;
+
+        if $z0 != 1 goto label05;
+
+        $r25 = r0.<sun.print.Win32PrintJob: sun.print.Win32PrintService service>;
+
+        $z4 = virtualinvoke $r25.<sun.print.Win32PrintService: boolean isAttributeCategorySupported(java.lang.Class)>($r7);
+
+        if $z4 != 0 goto label04;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r33 = new sun.print.PrintJobAttributeException;
+
+        $r34 = new java.lang.StringBuilder;
+
+        specialinvoke $r34.<java.lang.StringBuilder: void <init>()>();
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unsupported category: ");
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r7);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r33.<sun.print.PrintJobAttributeException: void <init>(java.lang.String,java.lang.Class,javax.print.attribute.Attribute)>($r37, $r7, null);
+
+        throw $r33;
+
+     label04:
+        $r27 = r0.<sun.print.Win32PrintJob: sun.print.Win32PrintService service>;
+
+        $z5 = virtualinvoke $r27.<sun.print.Win32PrintService: boolean isAttributeValueSupported(javax.print.attribute.Attribute,javax.print.DocFlavor,javax.print.attribute.AttributeSet)>(r6, r26, null);
+
+        if $z5 != 0 goto label05;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r28 = new sun.print.PrintJobAttributeException;
+
+        $r29 = new java.lang.StringBuilder;
+
+        specialinvoke $r29.<java.lang.StringBuilder: void <init>()>();
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unsupported attribute: ");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r6);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r28.<sun.print.PrintJobAttributeException: void <init>(java.lang.String,java.lang.Class,javax.print.attribute.Attribute)>($r32, null, r6);
+
+        throw $r28;
+
+     label05:
+        if $r7 != class "Ljavax/print/attribute/standard/Destination;" goto label14;
+
+        $r16 = (javax.print.attribute.standard.Destination) r6;
+
+        $r17 = virtualinvoke $r16.<javax.print.attribute.standard.Destination: java.net.URI getURI()>();
+
+        $r18 = "file";
+
+        $r19 = virtualinvoke $r17.<java.net.URI: java.lang.String getScheme()>();
+
+        $z3 = virtualinvoke $r18.<java.lang.String: boolean equals(java.lang.Object)>($r19);
+
+        if $z3 != 0 goto label06;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r24 = new javax.print.PrintException;
+
+        specialinvoke $r24.<javax.print.PrintException: void <init>(java.lang.String)>("Not a file: URI");
+
+        throw $r24;
+
+     label06:
+        $r20 = new java.io.File;
+
+        specialinvoke $r20.<java.io.File: void <init>(java.net.URI)>($r17);
+
+        $r21 = virtualinvoke $r20.<java.io.File: java.lang.String getPath()>();
+
+        r0.<sun.print.Win32PrintJob: java.lang.String mDestination> = $r21;
+
+     label07:
+        goto label09;
+
+     label08:
+        $r40 := @caughtexception;
+
+        $r41 = new javax.print.PrintException;
+
+        specialinvoke $r41.<javax.print.PrintException: void <init>(java.lang.Exception)>($r40);
+
+        throw $r41;
+
+     label09:
+        $r22 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r22 == null goto label13;
+
+     label10:
+        $r23 = r0.<sun.print.Win32PrintJob: java.lang.String mDestination>;
+
+        virtualinvoke $r22.<java.lang.SecurityManager: void checkWrite(java.lang.String)>($r23);
+
+     label11:
+        goto label13;
+
+     label12:
+        $r38 := @caughtexception;
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(103);
+
+        $r39 = new javax.print.PrintException;
+
+        specialinvoke $r39.<javax.print.PrintException: void <init>(java.lang.Exception)>($r38);
+
+        throw $r39;
+
+     label13:
+        goto label18;
+
+     label14:
+        if $r7 != class "Ljavax/print/attribute/standard/JobName;" goto label15;
+
+        $r14 = (javax.print.attribute.standard.JobName) r6;
+
+        $r15 = virtualinvoke $r14.<javax.print.attribute.standard.JobName: java.lang.String getValue()>();
+
+        r0.<sun.print.Win32PrintJob: java.lang.String jobName> = $r15;
+
+        goto label18;
+
+     label15:
+        if $r7 != class "Ljavax/print/attribute/standard/Copies;" goto label16;
+
+        $r13 = (javax.print.attribute.standard.Copies) r6;
+
+        $i0 = virtualinvoke $r13.<javax.print.attribute.standard.Copies: int getValue()>();
+
+        r0.<sun.print.Win32PrintJob: int copies> = $i0;
+
+        goto label18;
+
+     label16:
+        if $r7 != class "Ljavax/print/attribute/standard/Media;" goto label17;
+
+        $z1 = r6 instanceof javax.print.attribute.standard.MediaSizeName;
+
+        if $z1 == 0 goto label18;
+
+        $r9 = (javax.print.attribute.standard.MediaSizeName) r6;
+
+        r0.<sun.print.Win32PrintJob: javax.print.attribute.standard.MediaSizeName mediaName> = $r9;
+
+        $r10 = r0.<sun.print.Win32PrintJob: sun.print.Win32PrintService service>;
+
+        $z2 = virtualinvoke $r10.<sun.print.Win32PrintService: boolean isAttributeValueSupported(javax.print.attribute.Attribute,javax.print.DocFlavor,javax.print.attribute.AttributeSet)>(r6, null, null);
+
+        if $z2 != 0 goto label18;
+
+        $r11 = r0.<sun.print.Win32PrintJob: javax.print.attribute.standard.MediaSizeName mediaName>;
+
+        $r12 = staticinvoke <javax.print.attribute.standard.MediaSize: javax.print.attribute.standard.MediaSize getMediaSizeForName(javax.print.attribute.standard.MediaSizeName)>($r11);
+
+        r0.<sun.print.Win32PrintJob: javax.print.attribute.standard.MediaSize mediaSize> = $r12;
+
+        goto label18;
+
+     label17:
+        if $r7 != class "Ljavax/print/attribute/standard/OrientationRequested;" goto label18;
+
+        $r8 = (javax.print.attribute.standard.OrientationRequested) r6;
+
+        r0.<sun.print.Win32PrintJob: javax.print.attribute.standard.OrientationRequested orient> = $r8;
+
+     label18:
+        i1 = i1 + 1;
+
+        goto label03;
+
+     label19:
+        return;
+
+        catch java.lang.Exception from label06 to label07 with label08;
+        catch java.lang.SecurityException from label10 to label11 with label12;
+    }
+
+    private native boolean startPrintRawData(java.lang.String, java.lang.String);
+
+    private native boolean printRawData(byte[], int);
+
+    private native boolean endPrintRawData();
+
+    public void cancel() throws javax.print.PrintException
+    {
+        java.lang.Throwable $r5;
+        javax.print.PrintException $r2, $r4;
+        java.awt.print.PrinterJob $r1, $r3;
+        sun.print.Win32PrintJob r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.print.Win32PrintJob;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<sun.print.Win32PrintJob: boolean printing>;
+
+        if $z0 != 0 goto label2;
+
+        $r4 = new javax.print.PrintException;
+
+        specialinvoke $r4.<javax.print.PrintException: void <init>(java.lang.String)>("Job is not yet submitted.");
+
+        throw $r4;
+
+     label2:
+        $r1 = r0.<sun.print.Win32PrintJob: java.awt.print.PrinterJob job>;
+
+        if $r1 == null goto label4;
+
+        $z1 = r0.<sun.print.Win32PrintJob: boolean printReturned>;
+
+        if $z1 != 0 goto label4;
+
+        $r3 = r0.<sun.print.Win32PrintJob: java.awt.print.PrinterJob job>;
+
+        virtualinvoke $r3.<java.awt.print.PrinterJob: void cancel()>();
+
+        specialinvoke r0.<sun.print.Win32PrintJob: void notifyEvent(int)>(101);
+
+        exitmonitor r0;
+
+     label3:
+        return;
+
+     label4:
+        $r2 = new javax.print.PrintException;
+
+        specialinvoke $r2.<javax.print.PrintException: void <init>(java.lang.String)>("Job could not be cancelled.");
+
+        throw $r2;
+
+     label5:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+     label6:
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label3 with label5;
+        catch java.lang.Throwable from label4 to label6 with label5;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.print.Win32PrintJob: int PRINTBUFFERLEN> = 8192;
+
+        return;
+    }
+}

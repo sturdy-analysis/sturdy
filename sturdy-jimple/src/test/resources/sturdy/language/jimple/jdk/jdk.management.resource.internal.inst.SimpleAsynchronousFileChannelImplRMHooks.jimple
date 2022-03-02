@@ -1,0 +1,592 @@
+public final class jdk.management.resource.internal.inst.SimpleAsynchronousFileChannelImplRMHooks extends java.lang.Object
+{
+    protected final java.io.FileDescriptor fdObj;
+    protected volatile boolean closed;
+
+    public void <init>()
+    {
+        jdk.management.resource.internal.inst.SimpleAsynchronousFileChannelImplRMHooks r0;
+
+        r0 := @this: jdk.management.resource.internal.inst.SimpleAsynchronousFileChannelImplRMHooks;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<jdk.management.resource.internal.inst.SimpleAsynchronousFileChannelImplRMHooks: java.io.FileDescriptor fdObj> = null;
+
+        return;
+    }
+
+    public static java.nio.channels.AsynchronousFileChannel open(java.io.FileDescriptor, boolean, boolean, sun.nio.ch.ThreadPool)
+    {
+        java.lang.Throwable $r11, $r15;
+        java.nio.channels.AsynchronousFileChannel $r2;
+        long $l0, $l2, l6, $l7;
+        jdk.management.resource.ResourceRequestDeniedException $r20, $r21;
+        byte $b1, $b3, $b8;
+        sun.nio.ch.ThreadPool r1;
+        java.lang.Long $r4;
+        int $i4, $i5, $i9, $i10;
+        jdk.management.resource.internal.ApproverGroup $r6, $r18;
+        boolean z0, z1;
+        java.lang.UnsupportedOperationException $r17;
+        jdk.management.resource.internal.ResourceIdImpl $r5;
+        java.io.IOException $r10, $r13, $r14;
+        sun.misc.JavaIOFileDescriptorAccess $r3;
+        jdk.management.resource.ResourceRequest $r7, $r19;
+        java.io.FileDescriptor r0;
+
+        r0 := @parameter0: java.io.FileDescriptor;
+
+        z0 := @parameter1: boolean;
+
+        z1 := @parameter2: boolean;
+
+        r1 := @parameter3: sun.nio.ch.ThreadPool;
+
+        $r2 = staticinvoke <jdk.management.resource.internal.inst.SimpleAsynchronousFileChannelImplRMHooks: java.nio.channels.AsynchronousFileChannel open(java.io.FileDescriptor,boolean,boolean,sun.nio.ch.ThreadPool)>(r0, z0, z1, r1);
+
+        $r3 = staticinvoke <sun.misc.SharedSecrets: sun.misc.JavaIOFileDescriptorAccess getJavaIOFileDescriptorAccess()>();
+
+     label01:
+        $l0 = interfaceinvoke $r3.<sun.misc.JavaIOFileDescriptorAccess: long getHandle(java.io.FileDescriptor)>(r0);
+
+        l6 = $l0;
+
+        $b1 = $l0 cmp -1L;
+
+        if $b1 != 0 goto label02;
+
+        $i4 = interfaceinvoke $r3.<sun.misc.JavaIOFileDescriptorAccess: int get(java.io.FileDescriptor)>(r0);
+
+        l6 = (long) $i4;
+
+     label02:
+        goto label04;
+
+     label03:
+        $r17 := @caughtexception;
+
+        $i5 = interfaceinvoke $r3.<sun.misc.JavaIOFileDescriptorAccess: int get(java.io.FileDescriptor)>(r0);
+
+        l6 = (long) $i5;
+
+     label04:
+        $r4 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>(l6);
+
+        $r5 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.lang.Object)>($r4);
+
+        $r6 = <jdk.management.resource.internal.ApproverGroup: jdk.management.resource.internal.ApproverGroup FILEDESCRIPTOR_OPEN_GROUP>;
+
+        $r7 = virtualinvoke $r6.<jdk.management.resource.internal.ApproverGroup: jdk.management.resource.ResourceRequest getApprover(java.lang.Object)>(r0);
+
+     label05:
+        $l2 = interfaceinvoke $r7.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>(1L, $r5);
+
+        $b3 = $l2 cmp 1L;
+
+        $i9 = (int) $b3;
+
+        if $i9 >= 0 goto label06;
+
+        $r20 = new jdk.management.resource.ResourceRequestDeniedException;
+
+        specialinvoke $r20.<jdk.management.resource.ResourceRequestDeniedException: void <init>(java.lang.String)>("Resource limited: too many open file descriptors");
+
+        throw $r20;
+
+     label06:
+        goto label13;
+
+     label07:
+        $r15 := @caughtexception;
+
+     label08:
+        interfaceinvoke $r7.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>(-1L, $r5);
+
+     label09:
+        virtualinvoke $r2.<java.nio.channels.AsynchronousFileChannel: void close()>();
+
+     label10:
+        goto label12;
+
+     label11:
+        $r14 := @caughtexception;
+
+     label12:
+        throw $r15;
+
+     label13:
+        $r18 = <jdk.management.resource.internal.ApproverGroup: jdk.management.resource.internal.ApproverGroup FILE_OPEN_GROUP>;
+
+        $r19 = virtualinvoke $r18.<jdk.management.resource.internal.ApproverGroup: jdk.management.resource.ResourceRequest getApprover(java.lang.Object)>($r2);
+
+     label14:
+        $l7 = interfaceinvoke $r19.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>(1L, $r5);
+
+        $b8 = $l7 cmp 1L;
+
+        $i10 = (int) $b8;
+
+        if $i10 >= 0 goto label19;
+
+     label15:
+        virtualinvoke $r2.<java.nio.channels.AsynchronousFileChannel: void close()>();
+
+     label16:
+        goto label18;
+
+     label17:
+        $r13 := @caughtexception;
+
+     label18:
+        $r21 = new jdk.management.resource.ResourceRequestDeniedException;
+
+        specialinvoke $r21.<jdk.management.resource.ResourceRequestDeniedException: void <init>(java.lang.String)>("Resource limited: too many open files");
+
+        throw $r21;
+
+     label19:
+        goto label26;
+
+     label20:
+        $r11 := @caughtexception;
+
+     label21:
+        interfaceinvoke $r19.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>(-1L, $r5);
+
+     label22:
+        virtualinvoke $r2.<java.nio.channels.AsynchronousFileChannel: void close()>();
+
+     label23:
+        goto label25;
+
+     label24:
+        $r10 := @caughtexception;
+
+     label25:
+        throw $r11;
+
+     label26:
+        return $r2;
+
+        catch java.lang.UnsupportedOperationException from label01 to label02 with label03;
+        catch java.lang.Throwable from label05 to label06 with label07;
+        catch java.io.IOException from label09 to label10 with label11;
+        catch java.lang.Throwable from label07 to label08 with label07;
+        catch java.io.IOException from label15 to label16 with label17;
+        catch java.lang.Throwable from label14 to label19 with label20;
+        catch java.io.IOException from label22 to label23 with label24;
+        catch java.lang.Throwable from label20 to label21 with label20;
+    }
+
+    java.util.concurrent.Future implRead(java.nio.ByteBuffer, long, java.lang.Object, java.nio.channels.CompletionHandler)
+    {
+        java.lang.Integer $r11;
+        java.nio.ByteBuffer r5;
+        java.util.concurrent.Future $r8, r18;
+        byte $b5;
+        boolean $z0;
+        jdk.management.resource.internal.ResourceIdImpl $r2;
+        java.lang.Exception $r14;
+        jdk.management.resource.internal.CompletionHandlerWrapper r17, $r21;
+        long $l1, $l2, $l3, $l4, l6, $l8, $l9, $l10;
+        java.util.concurrent.CompletableFuture $r20;
+        jdk.management.resource.ResourceRequestDeniedException $r15, $r19;
+        int $i0, $i7, i11, $i12;
+        jdk.management.resource.internal.FutureWrapper $r22;
+        jdk.management.resource.internal.ApproverGroup $r3;
+        jdk.management.resource.internal.inst.SimpleAsynchronousFileChannelImplRMHooks r0;
+        java.nio.channels.CompletionHandler r6;
+        jdk.management.resource.ResourceRequest $r4;
+        java.io.FileDescriptor $r1;
+        java.lang.Object r7, $r10;
+
+        r0 := @this: jdk.management.resource.internal.inst.SimpleAsynchronousFileChannelImplRMHooks;
+
+        r5 := @parameter0: java.nio.ByteBuffer;
+
+        l6 := @parameter1: long;
+
+        r7 := @parameter2: java.lang.Object;
+
+        r6 := @parameter3: java.nio.channels.CompletionHandler;
+
+        $r1 = r0.<jdk.management.resource.internal.inst.SimpleAsynchronousFileChannelImplRMHooks: java.io.FileDescriptor fdObj>;
+
+        $r2 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.io.FileDescriptor)>($r1);
+
+        $r3 = <jdk.management.resource.internal.ApproverGroup: jdk.management.resource.internal.ApproverGroup FILE_READ_GROUP>;
+
+        $r4 = virtualinvoke $r3.<jdk.management.resource.internal.ApproverGroup: jdk.management.resource.ResourceRequest getApprover(java.lang.Object)>(r0);
+
+        $i0 = virtualinvoke r5.<java.nio.ByteBuffer: int remaining()>();
+
+     label01:
+        $l1 = (long) $i0;
+
+        $l2 = interfaceinvoke $r4.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>($l1, $r2);
+
+        $l3 = staticinvoke <java.lang.Math: long max(long,long)>($l2, 0L);
+
+        $l4 = (long) $i0;
+
+        $b5 = $l3 cmp $l4;
+
+        $i12 = (int) $b5;
+
+        if $i12 >= 0 goto label02;
+
+        $r19 = new jdk.management.resource.ResourceRequestDeniedException;
+
+        specialinvoke $r19.<jdk.management.resource.ResourceRequestDeniedException: void <init>(java.lang.String)>("Resource limited: insufficient bytes approved");
+
+        throw $r19;
+
+     label02:
+        goto label05;
+
+     label03:
+        $r15 := @caughtexception;
+
+        if r6 == null goto label04;
+
+        interfaceinvoke r6.<java.nio.channels.CompletionHandler: void failed(java.lang.Throwable,java.lang.Object)>($r15, r7);
+
+        return null;
+
+     label04:
+        $r20 = new java.util.concurrent.CompletableFuture;
+
+        specialinvoke $r20.<java.util.concurrent.CompletableFuture: void <init>()>();
+
+        virtualinvoke $r20.<java.util.concurrent.CompletableFuture: boolean completeExceptionally(java.lang.Throwable)>($r15);
+
+        return $r20;
+
+     label05:
+        r17 = null;
+
+        if r6 == null goto label06;
+
+        $r21 = new jdk.management.resource.internal.CompletionHandlerWrapper;
+
+        specialinvoke $r21.<jdk.management.resource.internal.CompletionHandlerWrapper: void <init>(java.nio.channels.CompletionHandler,jdk.management.resource.ResourceId,jdk.management.resource.ResourceRequest,long)>(r6, $r2, $r4, $l3);
+
+        r17 = $r21;
+
+     label06:
+        $r8 = virtualinvoke r0.<jdk.management.resource.internal.inst.SimpleAsynchronousFileChannelImplRMHooks: java.util.concurrent.Future implRead(java.nio.ByteBuffer,long,java.lang.Object,java.nio.channels.CompletionHandler)>(r5, l6, r7, r17);
+
+        r18 = $r8;
+
+        if r6 != null goto label12;
+
+        $z0 = interfaceinvoke $r8.<java.util.concurrent.Future: boolean isDone()>();
+
+        if $z0 == 0 goto label11;
+
+        i11 = 0;
+
+     label07:
+        $r10 = interfaceinvoke $r8.<java.util.concurrent.Future: java.lang.Object get()>();
+
+        $r11 = (java.lang.Integer) $r10;
+
+        i11 = virtualinvoke $r11.<java.lang.Integer: int intValue()>();
+
+     label08:
+        goto label10;
+
+     label09:
+        $r14 := @caughtexception;
+
+     label10:
+        $i7 = staticinvoke <java.lang.Math: int max(int,int)>(0, i11);
+
+        $l8 = (long) $i7;
+
+        $l9 = $l3 - $l8;
+
+        $l10 = neg $l9;
+
+        interfaceinvoke $r4.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>($l10, $r2);
+
+        goto label12;
+
+     label11:
+        $r22 = new jdk.management.resource.internal.FutureWrapper;
+
+        specialinvoke $r22.<jdk.management.resource.internal.FutureWrapper: void <init>(java.util.concurrent.Future,jdk.management.resource.ResourceId,jdk.management.resource.ResourceRequest,long)>($r8, $r2, $r4, $l3);
+
+        r18 = $r22;
+
+     label12:
+        return r18;
+
+        catch jdk.management.resource.ResourceRequestDeniedException from label01 to label02 with label03;
+        catch java.lang.InterruptedException from label07 to label08 with label09;
+        catch java.util.concurrent.ExecutionException from label07 to label08 with label09;
+    }
+
+    java.util.concurrent.Future implWrite(java.nio.ByteBuffer, long, java.lang.Object, java.nio.channels.CompletionHandler)
+    {
+        java.lang.Integer $r11;
+        java.nio.ByteBuffer r5;
+        java.util.concurrent.Future $r8, r18;
+        byte $b5;
+        boolean $z0;
+        jdk.management.resource.internal.ResourceIdImpl $r2;
+        java.lang.Exception $r14;
+        jdk.management.resource.internal.CompletionHandlerWrapper r17, $r21;
+        long $l1, $l2, $l3, $l4, l6, $l8, $l9, $l10;
+        java.util.concurrent.CompletableFuture $r20;
+        jdk.management.resource.ResourceRequestDeniedException $r15, $r19;
+        int $i0, $i7, i11, $i12;
+        jdk.management.resource.internal.FutureWrapper $r22;
+        jdk.management.resource.internal.ApproverGroup $r3;
+        jdk.management.resource.internal.inst.SimpleAsynchronousFileChannelImplRMHooks r0;
+        java.nio.channels.CompletionHandler r6;
+        jdk.management.resource.ResourceRequest $r4;
+        java.io.FileDescriptor $r1;
+        java.lang.Object r7, $r10;
+
+        r0 := @this: jdk.management.resource.internal.inst.SimpleAsynchronousFileChannelImplRMHooks;
+
+        r5 := @parameter0: java.nio.ByteBuffer;
+
+        l6 := @parameter1: long;
+
+        r7 := @parameter2: java.lang.Object;
+
+        r6 := @parameter3: java.nio.channels.CompletionHandler;
+
+        $r1 = r0.<jdk.management.resource.internal.inst.SimpleAsynchronousFileChannelImplRMHooks: java.io.FileDescriptor fdObj>;
+
+        $r2 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.io.FileDescriptor)>($r1);
+
+        $r3 = <jdk.management.resource.internal.ApproverGroup: jdk.management.resource.internal.ApproverGroup FILE_WRITE_GROUP>;
+
+        $r4 = virtualinvoke $r3.<jdk.management.resource.internal.ApproverGroup: jdk.management.resource.ResourceRequest getApprover(java.lang.Object)>(r0);
+
+        $i0 = virtualinvoke r5.<java.nio.ByteBuffer: int remaining()>();
+
+     label01:
+        $l1 = (long) $i0;
+
+        $l2 = interfaceinvoke $r4.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>($l1, $r2);
+
+        $l3 = staticinvoke <java.lang.Math: long max(long,long)>($l2, 0L);
+
+        $l4 = (long) $i0;
+
+        $b5 = $l3 cmp $l4;
+
+        $i12 = (int) $b5;
+
+        if $i12 >= 0 goto label02;
+
+        $r19 = new jdk.management.resource.ResourceRequestDeniedException;
+
+        specialinvoke $r19.<jdk.management.resource.ResourceRequestDeniedException: void <init>(java.lang.String)>("Resource limited: insufficient bytes approved");
+
+        throw $r19;
+
+     label02:
+        goto label05;
+
+     label03:
+        $r15 := @caughtexception;
+
+        if r6 == null goto label04;
+
+        interfaceinvoke r6.<java.nio.channels.CompletionHandler: void failed(java.lang.Throwable,java.lang.Object)>($r15, r7);
+
+        return null;
+
+     label04:
+        $r20 = new java.util.concurrent.CompletableFuture;
+
+        specialinvoke $r20.<java.util.concurrent.CompletableFuture: void <init>()>();
+
+        virtualinvoke $r20.<java.util.concurrent.CompletableFuture: boolean completeExceptionally(java.lang.Throwable)>($r15);
+
+        return $r20;
+
+     label05:
+        r17 = null;
+
+        if r6 == null goto label06;
+
+        $r21 = new jdk.management.resource.internal.CompletionHandlerWrapper;
+
+        specialinvoke $r21.<jdk.management.resource.internal.CompletionHandlerWrapper: void <init>(java.nio.channels.CompletionHandler,jdk.management.resource.ResourceId,jdk.management.resource.ResourceRequest,long)>(r6, $r2, $r4, $l3);
+
+        r17 = $r21;
+
+     label06:
+        $r8 = virtualinvoke r0.<jdk.management.resource.internal.inst.SimpleAsynchronousFileChannelImplRMHooks: java.util.concurrent.Future implWrite(java.nio.ByteBuffer,long,java.lang.Object,java.nio.channels.CompletionHandler)>(r5, l6, r7, r17);
+
+        r18 = $r8;
+
+        if r6 != null goto label12;
+
+        $z0 = interfaceinvoke $r8.<java.util.concurrent.Future: boolean isDone()>();
+
+        if $z0 == 0 goto label11;
+
+        i11 = 0;
+
+     label07:
+        $r10 = interfaceinvoke $r8.<java.util.concurrent.Future: java.lang.Object get()>();
+
+        $r11 = (java.lang.Integer) $r10;
+
+        i11 = virtualinvoke $r11.<java.lang.Integer: int intValue()>();
+
+     label08:
+        goto label10;
+
+     label09:
+        $r14 := @caughtexception;
+
+     label10:
+        $i7 = staticinvoke <java.lang.Math: int max(int,int)>(0, i11);
+
+        $l8 = (long) $i7;
+
+        $l9 = $l3 - $l8;
+
+        $l10 = neg $l9;
+
+        interfaceinvoke $r4.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>($l10, $r2);
+
+        goto label12;
+
+     label11:
+        $r22 = new jdk.management.resource.internal.FutureWrapper;
+
+        specialinvoke $r22.<jdk.management.resource.internal.FutureWrapper: void <init>(java.util.concurrent.Future,jdk.management.resource.ResourceId,jdk.management.resource.ResourceRequest,long)>($r8, $r2, $r4, $l3);
+
+        r18 = $r22;
+
+     label12:
+        return r18;
+
+        catch jdk.management.resource.ResourceRequestDeniedException from label01 to label02 with label03;
+        catch java.lang.InterruptedException from label07 to label08 with label09;
+        catch java.util.concurrent.ExecutionException from label07 to label08 with label09;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        java.lang.Throwable $r11, $r21;
+        java.lang.Integer $r4, $r14;
+        int $i0, $i1;
+        jdk.management.resource.internal.ApproverGroup $r7, $r9, $r17, $r19;
+        boolean $z0;
+        jdk.management.resource.internal.inst.SimpleAsynchronousFileChannelImplRMHooks r0;
+        jdk.management.resource.internal.ResourceIdImpl $r5, $r15;
+        sun.misc.JavaIOFileDescriptorAccess $r2, $r12;
+        jdk.management.resource.ResourceRequest $r8, $r10, $r18, $r20;
+        java.io.FileDescriptor $r1, $r3, $r6, $r13, $r16;
+
+        r0 := @this: jdk.management.resource.internal.inst.SimpleAsynchronousFileChannelImplRMHooks;
+
+        $r1 = r0.<jdk.management.resource.internal.inst.SimpleAsynchronousFileChannelImplRMHooks: java.io.FileDescriptor fdObj>;
+
+        entermonitor $r1;
+
+     label01:
+        $z0 = r0.<jdk.management.resource.internal.inst.SimpleAsynchronousFileChannelImplRMHooks: boolean closed>;
+
+        if $z0 == 0 goto label03;
+
+        exitmonitor $r1;
+
+     label02:
+        return;
+
+     label03:
+        exitmonitor $r1;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r21 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label06:
+        throw $r21;
+
+     label07:
+        virtualinvoke r0.<jdk.management.resource.internal.inst.SimpleAsynchronousFileChannelImplRMHooks: void close()>();
+
+     label08:
+        $r2 = staticinvoke <sun.misc.SharedSecrets: sun.misc.JavaIOFileDescriptorAccess getJavaIOFileDescriptorAccess()>();
+
+        $r3 = r0.<jdk.management.resource.internal.inst.SimpleAsynchronousFileChannelImplRMHooks: java.io.FileDescriptor fdObj>;
+
+        $i0 = interfaceinvoke $r2.<sun.misc.JavaIOFileDescriptorAccess: int get(java.io.FileDescriptor)>($r3);
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r5 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.lang.Object)>($r4);
+
+        $r7 = <jdk.management.resource.internal.ApproverGroup: jdk.management.resource.internal.ApproverGroup FILEDESCRIPTOR_OPEN_GROUP>;
+
+        $r6 = r0.<jdk.management.resource.internal.inst.SimpleAsynchronousFileChannelImplRMHooks: java.io.FileDescriptor fdObj>;
+
+        $r8 = virtualinvoke $r7.<jdk.management.resource.internal.ApproverGroup: jdk.management.resource.ResourceRequest getApprover(java.lang.Object)>($r6);
+
+        interfaceinvoke $r8.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>(-1L, $r5);
+
+        $r9 = <jdk.management.resource.internal.ApproverGroup: jdk.management.resource.internal.ApproverGroup FILE_OPEN_GROUP>;
+
+        $r10 = virtualinvoke $r9.<jdk.management.resource.internal.ApproverGroup: jdk.management.resource.ResourceRequest getApprover(java.lang.Object)>(r0);
+
+        interfaceinvoke $r10.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>(-1L, $r5);
+
+        goto label11;
+
+     label09:
+        $r11 := @caughtexception;
+
+     label10:
+        $r12 = staticinvoke <sun.misc.SharedSecrets: sun.misc.JavaIOFileDescriptorAccess getJavaIOFileDescriptorAccess()>();
+
+        $r13 = r0.<jdk.management.resource.internal.inst.SimpleAsynchronousFileChannelImplRMHooks: java.io.FileDescriptor fdObj>;
+
+        $i1 = interfaceinvoke $r12.<sun.misc.JavaIOFileDescriptorAccess: int get(java.io.FileDescriptor)>($r13);
+
+        $r14 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r15 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.lang.Object)>($r14);
+
+        $r17 = <jdk.management.resource.internal.ApproverGroup: jdk.management.resource.internal.ApproverGroup FILEDESCRIPTOR_OPEN_GROUP>;
+
+        $r16 = r0.<jdk.management.resource.internal.inst.SimpleAsynchronousFileChannelImplRMHooks: java.io.FileDescriptor fdObj>;
+
+        $r18 = virtualinvoke $r17.<jdk.management.resource.internal.ApproverGroup: jdk.management.resource.ResourceRequest getApprover(java.lang.Object)>($r16);
+
+        interfaceinvoke $r18.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>(-1L, $r15);
+
+        $r19 = <jdk.management.resource.internal.ApproverGroup: jdk.management.resource.internal.ApproverGroup FILE_OPEN_GROUP>;
+
+        $r20 = virtualinvoke $r19.<jdk.management.resource.internal.ApproverGroup: jdk.management.resource.ResourceRequest getApprover(java.lang.Object)>(r0);
+
+        interfaceinvoke $r20.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>(-1L, $r15);
+
+        throw $r11;
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label05;
+        catch java.lang.Throwable from label03 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.lang.Throwable from label07 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+}

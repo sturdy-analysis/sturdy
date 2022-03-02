@@ -1,0 +1,109 @@
+class sun.tracing.dtrace.SystemResource extends java.lang.ref.WeakReference
+{
+    private long handle;
+    private static java.lang.ref.ReferenceQueue referenceQueue;
+    static java.util.HashSet resources;
+
+    void <init>(sun.tracing.dtrace.Activation, long)
+    {
+        java.util.HashSet $r3;
+        sun.tracing.dtrace.Activation r1;
+        long l0;
+        java.lang.ref.ReferenceQueue $r2;
+        sun.tracing.dtrace.SystemResource r0;
+
+        r0 := @this: sun.tracing.dtrace.SystemResource;
+
+        r1 := @parameter0: sun.tracing.dtrace.Activation;
+
+        l0 := @parameter1: long;
+
+        $r2 = <sun.tracing.dtrace.SystemResource: java.lang.ref.ReferenceQueue referenceQueue>;
+
+        specialinvoke r0.<java.lang.ref.WeakReference: void <init>(java.lang.Object,java.lang.ref.ReferenceQueue)>(r1, $r2);
+
+        r0.<sun.tracing.dtrace.SystemResource: long handle> = l0;
+
+        staticinvoke <sun.tracing.dtrace.SystemResource: void flush()>();
+
+        $r3 = <sun.tracing.dtrace.SystemResource: java.util.HashSet resources>;
+
+        virtualinvoke $r3.<java.util.HashSet: boolean add(java.lang.Object)>(r0);
+
+        return;
+    }
+
+    void dispose()
+    {
+        java.util.HashSet $r1;
+        long $l0;
+        sun.tracing.dtrace.SystemResource r0;
+
+        r0 := @this: sun.tracing.dtrace.SystemResource;
+
+        $l0 = r0.<sun.tracing.dtrace.SystemResource: long handle>;
+
+        staticinvoke <sun.tracing.dtrace.JVM: void dispose(long)>($l0);
+
+        $r1 = <sun.tracing.dtrace.SystemResource: java.util.HashSet resources>;
+
+        virtualinvoke $r1.<java.util.HashSet: boolean remove(java.lang.Object)>(r0);
+
+        r0.<sun.tracing.dtrace.SystemResource: long handle> = 0L;
+
+        return;
+    }
+
+    static void flush()
+    {
+        java.lang.ref.Reference $r1;
+        byte $b1;
+        long $l0;
+        java.lang.ref.ReferenceQueue $r0;
+        sun.tracing.dtrace.SystemResource $r2;
+
+     label1:
+        $r0 = <sun.tracing.dtrace.SystemResource: java.lang.ref.ReferenceQueue referenceQueue>;
+
+        $r1 = virtualinvoke $r0.<java.lang.ref.ReferenceQueue: java.lang.ref.Reference poll()>();
+
+        $r2 = (sun.tracing.dtrace.SystemResource) $r1;
+
+        if $r2 == null goto label2;
+
+        $l0 = $r2.<sun.tracing.dtrace.SystemResource: long handle>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 == 0 goto label1;
+
+        virtualinvoke $r2.<sun.tracing.dtrace.SystemResource: void dispose()>();
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.util.HashSet $r1;
+        java.lang.ref.ReferenceQueue $r0;
+
+        $r0 = new java.lang.ref.ReferenceQueue;
+
+        specialinvoke $r0.<java.lang.ref.ReferenceQueue: void <init>()>();
+
+        <sun.tracing.dtrace.SystemResource: java.lang.ref.ReferenceQueue referenceQueue> = $r0;
+
+        <sun.tracing.dtrace.SystemResource: java.lang.ref.ReferenceQueue referenceQueue> = $r0;
+
+        $r1 = new java.util.HashSet;
+
+        specialinvoke $r1.<java.util.HashSet: void <init>()>();
+
+        <sun.tracing.dtrace.SystemResource: java.util.HashSet resources> = $r1;
+
+        return;
+    }
+}

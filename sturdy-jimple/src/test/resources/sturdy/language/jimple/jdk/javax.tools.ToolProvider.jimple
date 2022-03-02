@@ -1,0 +1,502 @@
+public class javax.tools.ToolProvider extends java.lang.Object
+{
+    private static final java.lang.String propertyName;
+    private static final java.lang.String loggerName;
+    private static final java.lang.String defaultJavaCompilerName;
+    private static final java.lang.String defaultDocumentationToolName;
+    private static javax.tools.ToolProvider instance;
+    private java.util.Map toolClasses;
+    private java.lang.ref.Reference refToolClassLoader;
+    private static final java.lang.String[] defaultToolsLocation;
+
+    static java.lang.Object trace(java.util.logging.Level, java.lang.Object)
+    {
+        java.lang.Throwable $r10;
+        java.lang.Object[] $r11, $r16;
+        java.lang.Integer $r14;
+        java.util.logging.Level r6;
+        java.lang.Thread $r1;
+        int $i0, $i1;
+        java.lang.SecurityException $r15;
+        java.lang.StackTraceElement r23;
+        java.lang.String $r0, $r7, $r9, $r12, $r13, $r19, $r20, r21, r22;
+        boolean $z0;
+        java.io.PrintStream $r18;
+        java.util.logging.Logger $r4;
+        java.lang.StackTraceElement[] $r2;
+        java.lang.Class $r3, $r8, $r17;
+        java.lang.Object r5;
+
+        r6 := @parameter0: java.util.logging.Level;
+
+        r5 := @parameter1: java.lang.Object;
+
+     label1:
+        $r0 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("sun.tools.ToolProvider");
+
+        if $r0 == null goto label4;
+
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.Thread: java.lang.StackTraceElement[] getStackTrace()>();
+
+        r21 = "???";
+
+        $r3 = class "Ljavax/tools/ToolProvider;";
+
+        r22 = virtualinvoke $r3.<java.lang.Class: java.lang.String getName()>();
+
+        $i0 = lengthof $r2;
+
+        if $i0 <= 2 goto label2;
+
+        r23 = $r2[2];
+
+        $r11 = newarray (java.lang.Object)[3];
+
+        $r12 = virtualinvoke r23.<java.lang.StackTraceElement: java.lang.String getMethodName()>();
+
+        $r11[0] = $r12;
+
+        $r13 = virtualinvoke r23.<java.lang.StackTraceElement: java.lang.String getFileName()>();
+
+        $r11[1] = $r13;
+
+        $i1 = virtualinvoke r23.<java.lang.StackTraceElement: int getLineNumber()>();
+
+        $r14 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r11[2] = $r14;
+
+        r21 = staticinvoke <java.lang.String: java.lang.String format(java.util.Locale,java.lang.String,java.lang.Object[])>(null, "%s(%s:%s)", $r11);
+
+        r22 = virtualinvoke r23.<java.lang.StackTraceElement: java.lang.String getClassName()>();
+
+     label2:
+        $r4 = staticinvoke <java.util.logging.Logger: java.util.logging.Logger getLogger(java.lang.String)>("javax.tools");
+
+        $z0 = r5 instanceof java.lang.Throwable;
+
+        if $z0 == 0 goto label3;
+
+        $r8 = virtualinvoke r5.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.Class: java.lang.String getName()>();
+
+        $r10 = (java.lang.Throwable) r5;
+
+        virtualinvoke $r4.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Throwable)>(r6, r22, r21, $r9, $r10);
+
+        goto label4;
+
+     label3:
+        $r7 = staticinvoke <java.lang.String: java.lang.String valueOf(java.lang.Object)>(r5);
+
+        virtualinvoke $r4.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>(r6, r22, r21, $r7);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r15 := @caughtexception;
+
+        $r18 = <java.lang.System: java.io.PrintStream err>;
+
+        $r16 = newarray (java.lang.Object)[3];
+
+        $r17 = class "Ljavax/tools/ToolProvider;";
+
+        $r19 = virtualinvoke $r17.<java.lang.Class: java.lang.String getName()>();
+
+        $r16[0] = $r19;
+
+        $r16[1] = r5;
+
+        $r20 = virtualinvoke $r15.<java.lang.SecurityException: java.lang.String getLocalizedMessage()>();
+
+        $r16[2] = $r20;
+
+        virtualinvoke $r18.<java.io.PrintStream: java.io.PrintStream format(java.util.Locale,java.lang.String,java.lang.Object[])>(null, "%s: %s; %s%n", $r16);
+
+     label6:
+        return null;
+
+        catch java.lang.SecurityException from label1 to label4 with label5;
+    }
+
+    public static javax.tools.JavaCompiler getSystemJavaCompiler()
+    {
+        java.lang.Object $r1;
+        javax.tools.JavaCompiler $r2;
+        javax.tools.ToolProvider $r0;
+
+        $r0 = staticinvoke <javax.tools.ToolProvider: javax.tools.ToolProvider instance()>();
+
+        $r1 = specialinvoke $r0.<javax.tools.ToolProvider: java.lang.Object getSystemTool(java.lang.Class,java.lang.String)>(class "Ljavax/tools/JavaCompiler;", "com.sun.tools.javac.api.JavacTool");
+
+        $r2 = (javax.tools.JavaCompiler) $r1;
+
+        return $r2;
+    }
+
+    public static javax.tools.DocumentationTool getSystemDocumentationTool()
+    {
+        javax.tools.DocumentationTool $r2;
+        java.lang.Object $r1;
+        javax.tools.ToolProvider $r0;
+
+        $r0 = staticinvoke <javax.tools.ToolProvider: javax.tools.ToolProvider instance()>();
+
+        $r1 = specialinvoke $r0.<javax.tools.ToolProvider: java.lang.Object getSystemTool(java.lang.Class,java.lang.String)>(class "Ljavax/tools/DocumentationTool;", "com.sun.tools.javadoc.api.JavadocTool");
+
+        $r2 = (javax.tools.DocumentationTool) $r1;
+
+        return $r2;
+    }
+
+    public static java.lang.ClassLoader getSystemToolClassLoader()
+    {
+        java.lang.Throwable $r3;
+        java.lang.Class $r1;
+        java.lang.Object $r5;
+        java.lang.ClassLoader $r2, $r6;
+        javax.tools.ToolProvider $r0;
+        java.util.logging.Level $r4;
+
+     label1:
+        $r0 = staticinvoke <javax.tools.ToolProvider: javax.tools.ToolProvider instance()>();
+
+        $r1 = specialinvoke $r0.<javax.tools.ToolProvider: java.lang.Class getSystemToolClass(java.lang.Class,java.lang.String)>(class "Ljavax/tools/JavaCompiler;", "com.sun.tools.javac.api.JavacTool");
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = <java.util.logging.Level: java.util.logging.Level WARNING>;
+
+        $r5 = staticinvoke <javax.tools.ToolProvider: java.lang.Object trace(java.util.logging.Level,java.lang.Object)>($r4, $r3);
+
+        $r6 = (java.lang.ClassLoader) $r5;
+
+        return $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private static synchronized javax.tools.ToolProvider instance()
+    {
+        javax.tools.ToolProvider $r0, $r1, $r2;
+
+        $r0 = <javax.tools.ToolProvider: javax.tools.ToolProvider instance>;
+
+        if $r0 != null goto label1;
+
+        $r2 = new javax.tools.ToolProvider;
+
+        specialinvoke $r2.<javax.tools.ToolProvider: void <init>()>();
+
+        <javax.tools.ToolProvider: javax.tools.ToolProvider instance> = $r2;
+
+     label1:
+        $r1 = <javax.tools.ToolProvider: javax.tools.ToolProvider instance>;
+
+        return $r1;
+    }
+
+    private void <init>()
+    {
+        java.util.HashMap $r1;
+        javax.tools.ToolProvider r0;
+
+        r0 := @this: javax.tools.ToolProvider;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>()>();
+
+        r0.<javax.tools.ToolProvider: java.util.Map toolClasses> = $r1;
+
+        r0.<javax.tools.ToolProvider: java.lang.ref.Reference refToolClassLoader> = null;
+
+        return;
+    }
+
+    private java.lang.Object getSystemTool(java.lang.Class, java.lang.String)
+    {
+        java.lang.Throwable $r6;
+        java.util.logging.Level $r7;
+        java.lang.Class r1, $r3, $r4;
+        java.lang.Object $r5;
+        java.lang.String r2;
+        javax.tools.ToolProvider r0;
+
+        r0 := @this: javax.tools.ToolProvider;
+
+        r1 := @parameter0: java.lang.Class;
+
+        r2 := @parameter1: java.lang.String;
+
+        $r3 = specialinvoke r0.<javax.tools.ToolProvider: java.lang.Class getSystemToolClass(java.lang.Class,java.lang.String)>(r1, r2);
+
+     label1:
+        $r4 = virtualinvoke $r3.<java.lang.Class: java.lang.Class asSubclass(java.lang.Class)>(r1);
+
+        $r5 = virtualinvoke $r4.<java.lang.Class: java.lang.Object newInstance()>();
+
+     label2:
+        return $r5;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = <java.util.logging.Level: java.util.logging.Level WARNING>;
+
+        staticinvoke <javax.tools.ToolProvider: java.lang.Object trace(java.util.logging.Level,java.lang.Object)>($r7, $r6);
+
+        return null;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private java.lang.Class getSystemToolClass(java.lang.Class, java.lang.String)
+    {
+        java.lang.Throwable $r11;
+        java.util.logging.Level $r12;
+        java.util.Map $r2, $r10;
+        java.lang.String r1;
+        java.lang.ref.WeakReference $r9;
+        java.lang.ref.Reference r4;
+        java.lang.Object $r3, $r5, $r13;
+        java.lang.Class r6, $r7, $r8, $r14, $r15, r16;
+        javax.tools.ToolProvider r0;
+
+        r0 := @this: javax.tools.ToolProvider;
+
+        r6 := @parameter0: java.lang.Class;
+
+        r1 := @parameter1: java.lang.String;
+
+        $r2 = r0.<javax.tools.ToolProvider: java.util.Map toolClasses>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r4 = (java.lang.ref.Reference) $r3;
+
+        if r4 != null goto label1;
+
+        $r15 = null;
+
+        goto label2;
+
+     label1:
+        $r5 = virtualinvoke r4.<java.lang.ref.Reference: java.lang.Object get()>();
+
+        $r15 = (java.lang.Class) $r5;
+
+     label2:
+        r16 = $r15;
+
+        if $r15 != null goto label7;
+
+     label3:
+        $r8 = specialinvoke r0.<javax.tools.ToolProvider: java.lang.Class findSystemToolClass(java.lang.String)>(r1);
+
+        r16 = $r8;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r11 := @caughtexception;
+
+        $r12 = <java.util.logging.Level: java.util.logging.Level WARNING>;
+
+        $r13 = staticinvoke <javax.tools.ToolProvider: java.lang.Object trace(java.util.logging.Level,java.lang.Object)>($r12, $r11);
+
+        $r14 = (java.lang.Class) $r13;
+
+        return $r14;
+
+     label6:
+        $r10 = r0.<javax.tools.ToolProvider: java.util.Map toolClasses>;
+
+        $r9 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r9.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>($r8);
+
+        interfaceinvoke $r10.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r9);
+
+     label7:
+        $r7 = virtualinvoke r16.<java.lang.Class: java.lang.Class asSubclass(java.lang.Class)>(r6);
+
+        return $r7;
+
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+
+    private java.lang.Class findSystemToolClass(java.lang.String) throws java.net.MalformedURLException, java.lang.ClassNotFoundException
+    {
+        java.net.URL $r14, $r15;
+        java.lang.String[] $r22;
+        java.util.logging.Level $r3, $r16;
+        java.net.URL[] $r12;
+        java.net.URLClassLoader $r18;
+        int $i0, i1;
+        java.lang.String r0, $r10, $r11, $r17, r20;
+        java.net.URI $r13;
+        java.lang.ref.WeakReference $r19;
+        boolean $z0, $z1;
+        java.io.File $r9, $r21, r25;
+        java.lang.ref.Reference $r5, $r6;
+        java.lang.Class $r1, $r8;
+        java.lang.ClassNotFoundException $r2;
+        java.lang.Object $r7;
+        java.lang.ClassLoader $r23, r24;
+        javax.tools.ToolProvider r4;
+
+        r4 := @this: javax.tools.ToolProvider;
+
+        r0 := @parameter0: java.lang.String;
+
+     label01:
+        $r1 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>(r0, 0, null);
+
+     label02:
+        return $r1;
+
+     label03:
+        $r2 := @caughtexception;
+
+        $r3 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        staticinvoke <javax.tools.ToolProvider: java.lang.Object trace(java.util.logging.Level,java.lang.Object)>($r3, $r2);
+
+        $r5 = r4.<javax.tools.ToolProvider: java.lang.ref.Reference refToolClassLoader>;
+
+        if $r5 != null goto label04;
+
+        $r23 = null;
+
+        goto label05;
+
+     label04:
+        $r6 = r4.<javax.tools.ToolProvider: java.lang.ref.Reference refToolClassLoader>;
+
+        $r7 = virtualinvoke $r6.<java.lang.ref.Reference: java.lang.Object get()>();
+
+        $r23 = (java.lang.ClassLoader) $r7;
+
+     label05:
+        r24 = $r23;
+
+        if $r23 != null goto label10;
+
+        $r9 = new java.io.File;
+
+        $r10 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.home");
+
+        specialinvoke $r9.<java.io.File: void <init>(java.lang.String)>($r10);
+
+        r25 = $r9;
+
+        $r11 = virtualinvoke $r9.<java.io.File: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r11.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("jre");
+
+        if $z0 == 0 goto label06;
+
+        r25 = virtualinvoke $r9.<java.io.File: java.io.File getParentFile()>();
+
+     label06:
+        $r22 = <javax.tools.ToolProvider: java.lang.String[] defaultToolsLocation>;
+
+        $i0 = lengthof $r22;
+
+        i1 = 0;
+
+     label07:
+        if i1 >= $i0 goto label08;
+
+        r20 = $r22[i1];
+
+        $r21 = new java.io.File;
+
+        specialinvoke $r21.<java.io.File: void <init>(java.io.File,java.lang.String)>(r25, r20);
+
+        r25 = $r21;
+
+        i1 = i1 + 1;
+
+        goto label07;
+
+     label08:
+        $z1 = virtualinvoke r25.<java.io.File: boolean exists()>();
+
+        if $z1 != 0 goto label09;
+
+        throw $r2;
+
+     label09:
+        $r12 = newarray (java.net.URL)[1];
+
+        $r13 = virtualinvoke r25.<java.io.File: java.net.URI toURI()>();
+
+        $r14 = virtualinvoke $r13.<java.net.URI: java.net.URL toURL()>();
+
+        $r12[0] = $r14;
+
+        $r16 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r15 = $r12[0];
+
+        $r17 = virtualinvoke $r15.<java.net.URL: java.lang.String toString()>();
+
+        staticinvoke <javax.tools.ToolProvider: java.lang.Object trace(java.util.logging.Level,java.lang.Object)>($r16, $r17);
+
+        $r18 = staticinvoke <java.net.URLClassLoader: java.net.URLClassLoader newInstance(java.net.URL[])>($r12);
+
+        r24 = $r18;
+
+        $r19 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r19.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>($r18);
+
+        r4.<javax.tools.ToolProvider: java.lang.ref.Reference refToolClassLoader> = $r19;
+
+     label10:
+        $r8 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>(r0, 0, r24);
+
+        return $r8;
+
+        catch java.lang.ClassNotFoundException from label01 to label02 with label03;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.String[] $r0;
+
+        <javax.tools.ToolProvider: java.lang.String defaultDocumentationToolName> = "com.sun.tools.javadoc.api.JavadocTool";
+
+        <javax.tools.ToolProvider: java.lang.String defaultJavaCompilerName> = "com.sun.tools.javac.api.JavacTool";
+
+        <javax.tools.ToolProvider: java.lang.String loggerName> = "javax.tools";
+
+        <javax.tools.ToolProvider: java.lang.String propertyName> = "sun.tools.ToolProvider";
+
+        $r0 = newarray (java.lang.String)[2];
+
+        $r0[0] = "lib";
+
+        $r0[1] = "tools.jar";
+
+        <javax.tools.ToolProvider: java.lang.String[] defaultToolsLocation> = $r0;
+
+        return;
+    }
+}

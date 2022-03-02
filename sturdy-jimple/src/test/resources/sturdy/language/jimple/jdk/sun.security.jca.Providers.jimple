@@ -1,0 +1,405 @@
+public class sun.security.jca.Providers extends java.lang.Object
+{
+    private static final java.lang.ThreadLocal threadLists;
+    private static volatile int threadListsUsed;
+    private static volatile sun.security.jca.ProviderList providerList;
+    private static final java.lang.String BACKUP_PROVIDER_CLASSNAME;
+    private static final java.lang.String[] jarVerificationProviders;
+
+    private void <init>()
+    {
+        sun.security.jca.Providers r0;
+
+        r0 := @this: sun.security.jca.Providers;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static java.security.Provider getSunProvider()
+    {
+        java.lang.String[] $r0;
+        java.lang.RuntimeException $r6;
+        java.lang.Exception $r5, $r7;
+        java.security.Provider $r4, $r10;
+        java.lang.Class $r2, $r8;
+        java.lang.Object $r3, $r9;
+        java.lang.String $r1;
+
+     label1:
+        $r0 = <sun.security.jca.Providers: java.lang.String[] jarVerificationProviders>;
+
+        $r1 = $r0[0];
+
+        $r2 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.Object newInstance()>();
+
+        $r4 = (java.security.Provider) $r3;
+
+     label2:
+        return $r4;
+
+     label3:
+        $r7 := @caughtexception;
+
+     label4:
+        $r8 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String)>("sun.security.provider.VerificationProvider");
+
+        $r9 = virtualinvoke $r8.<java.lang.Class: java.lang.Object newInstance()>();
+
+        $r10 = (java.security.Provider) $r9;
+
+     label5:
+        return $r10;
+
+     label6:
+        $r5 := @caughtexception;
+
+        $r6 = new java.lang.RuntimeException;
+
+        specialinvoke $r6.<java.lang.RuntimeException: void <init>(java.lang.String,java.lang.Throwable)>("Sun provider not found", $r7);
+
+        throw $r6;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+        catch java.lang.Exception from label4 to label5 with label6;
+    }
+
+    public static java.lang.Object startJarVerification()
+    {
+        sun.security.jca.ProviderList $r0, $r2, $r3;
+        java.lang.String[] $r1;
+
+        $r0 = staticinvoke <sun.security.jca.Providers: sun.security.jca.ProviderList getProviderList()>();
+
+        $r1 = <sun.security.jca.Providers: java.lang.String[] jarVerificationProviders>;
+
+        $r2 = virtualinvoke $r0.<sun.security.jca.ProviderList: sun.security.jca.ProviderList getJarList(java.lang.String[])>($r1);
+
+        $r3 = staticinvoke <sun.security.jca.Providers: sun.security.jca.ProviderList beginThreadProviderList(sun.security.jca.ProviderList)>($r2);
+
+        return $r3;
+    }
+
+    public static void stopJarVerification(java.lang.Object)
+    {
+        sun.security.jca.ProviderList $r1;
+        java.lang.Object r0;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $r1 = (sun.security.jca.ProviderList) r0;
+
+        staticinvoke <sun.security.jca.Providers: void endThreadProviderList(sun.security.jca.ProviderList)>($r1);
+
+        return;
+    }
+
+    public static sun.security.jca.ProviderList getProviderList()
+    {
+        sun.security.jca.ProviderList $r0, r1;
+
+        $r0 = staticinvoke <sun.security.jca.Providers: sun.security.jca.ProviderList getThreadProviderList()>();
+
+        r1 = $r0;
+
+        if $r0 != null goto label1;
+
+        r1 = staticinvoke <sun.security.jca.Providers: sun.security.jca.ProviderList getSystemProviderList()>();
+
+     label1:
+        return r1;
+    }
+
+    public static void setProviderList(sun.security.jca.ProviderList)
+    {
+        sun.security.jca.ProviderList $r0, r1;
+
+        r1 := @parameter0: sun.security.jca.ProviderList;
+
+        $r0 = staticinvoke <sun.security.jca.Providers: sun.security.jca.ProviderList getThreadProviderList()>();
+
+        if $r0 != null goto label1;
+
+        staticinvoke <sun.security.jca.Providers: void setSystemProviderList(sun.security.jca.ProviderList)>(r1);
+
+        goto label2;
+
+     label1:
+        staticinvoke <sun.security.jca.Providers: void changeThreadProviderList(sun.security.jca.ProviderList)>(r1);
+
+     label2:
+        return;
+    }
+
+    public static sun.security.jca.ProviderList getFullProviderList()
+    {
+        java.lang.Throwable $r4;
+        sun.security.jca.ProviderList $r0, $r1, $r2, $r3, r5, r6;
+
+        entermonitor class "Lsun/security/jca/Providers;";
+
+     label1:
+        $r0 = staticinvoke <sun.security.jca.Providers: sun.security.jca.ProviderList getThreadProviderList()>();
+
+        r5 = $r0;
+
+        if $r0 == null goto label4;
+
+        $r3 = virtualinvoke $r0.<sun.security.jca.ProviderList: sun.security.jca.ProviderList removeInvalid()>();
+
+        if $r3 == $r0 goto label2;
+
+        staticinvoke <sun.security.jca.Providers: void changeThreadProviderList(sun.security.jca.ProviderList)>($r3);
+
+        r5 = $r3;
+
+     label2:
+        exitmonitor class "Lsun/security/jca/Providers;";
+
+     label3:
+        return r5;
+
+     label4:
+        exitmonitor class "Lsun/security/jca/Providers;";
+
+     label5:
+        goto label8;
+
+     label6:
+        $r4 := @caughtexception;
+
+        exitmonitor class "Lsun/security/jca/Providers;";
+
+     label7:
+        throw $r4;
+
+     label8:
+        $r1 = staticinvoke <sun.security.jca.Providers: sun.security.jca.ProviderList getSystemProviderList()>();
+
+        r6 = $r1;
+
+        $r2 = virtualinvoke $r1.<sun.security.jca.ProviderList: sun.security.jca.ProviderList removeInvalid()>();
+
+        if $r2 == $r1 goto label9;
+
+        staticinvoke <sun.security.jca.Providers: void setSystemProviderList(sun.security.jca.ProviderList)>($r2);
+
+        r6 = $r2;
+
+     label9:
+        return r6;
+
+        catch java.lang.Throwable from label1 to label3 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    private static sun.security.jca.ProviderList getSystemProviderList()
+    {
+        sun.security.jca.ProviderList $r0;
+
+        $r0 = <sun.security.jca.Providers: sun.security.jca.ProviderList providerList>;
+
+        return $r0;
+    }
+
+    private static void setSystemProviderList(sun.security.jca.ProviderList)
+    {
+        sun.security.jca.ProviderList r0;
+
+        r0 := @parameter0: sun.security.jca.ProviderList;
+
+        <sun.security.jca.Providers: sun.security.jca.ProviderList providerList> = r0;
+
+        return;
+    }
+
+    public static sun.security.jca.ProviderList getThreadProviderList()
+    {
+        java.lang.ThreadLocal $r0;
+        int $i0;
+        sun.security.jca.ProviderList $r2;
+        java.lang.Object $r1;
+
+        $i0 = <sun.security.jca.Providers: int threadListsUsed>;
+
+        if $i0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r0 = <sun.security.jca.Providers: java.lang.ThreadLocal threadLists>;
+
+        $r1 = virtualinvoke $r0.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        $r2 = (sun.security.jca.ProviderList) $r1;
+
+        return $r2;
+    }
+
+    private static void changeThreadProviderList(sun.security.jca.ProviderList)
+    {
+        sun.security.jca.ProviderList r0;
+        java.lang.ThreadLocal $r1;
+
+        r0 := @parameter0: sun.security.jca.ProviderList;
+
+        $r1 = <sun.security.jca.Providers: java.lang.ThreadLocal threadLists>;
+
+        virtualinvoke $r1.<java.lang.ThreadLocal: void set(java.lang.Object)>(r0);
+
+        return;
+    }
+
+    public static synchronized sun.security.jca.ProviderList beginThreadProviderList(sun.security.jca.ProviderList)
+    {
+        java.lang.ThreadLocal $r1, $r4;
+        sun.security.util.Debug $r0, $r6;
+        int $i0, $i1;
+        sun.security.jca.ProviderList r3, $r10;
+        java.lang.Object $r2;
+        java.lang.StringBuilder $r5, $r7, $r8;
+        java.lang.String $r9;
+
+        r3 := @parameter0: sun.security.jca.ProviderList;
+
+        $r0 = <sun.security.jca.ProviderList: sun.security.util.Debug debug>;
+
+        if $r0 == null goto label1;
+
+        $r6 = <sun.security.jca.ProviderList: sun.security.util.Debug debug>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ThreadLocal providers: ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r3);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<sun.security.util.Debug: void println(java.lang.String)>($r9);
+
+     label1:
+        $r1 = <sun.security.jca.Providers: java.lang.ThreadLocal threadLists>;
+
+        $r2 = virtualinvoke $r1.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        $r10 = (sun.security.jca.ProviderList) $r2;
+
+        $i0 = <sun.security.jca.Providers: int threadListsUsed>;
+
+        $i1 = $i0 + 1;
+
+        <sun.security.jca.Providers: int threadListsUsed> = $i1;
+
+        $r4 = <sun.security.jca.Providers: java.lang.ThreadLocal threadLists>;
+
+        virtualinvoke $r4.<java.lang.ThreadLocal: void set(java.lang.Object)>(r3);
+
+        return $r10;
+    }
+
+    public static synchronized void endThreadProviderList(sun.security.jca.ProviderList)
+    {
+        java.lang.ThreadLocal $r2, $r9;
+        sun.security.util.Debug $r1, $r4, $r8, $r10;
+        int $i0, $i1;
+        sun.security.jca.ProviderList r0;
+        java.lang.StringBuilder $r3, $r5, $r6;
+        java.lang.String $r7;
+
+        r0 := @parameter0: sun.security.jca.ProviderList;
+
+        if r0 != null goto label2;
+
+        $r8 = <sun.security.jca.ProviderList: sun.security.util.Debug debug>;
+
+        if $r8 == null goto label1;
+
+        $r10 = <sun.security.jca.ProviderList: sun.security.util.Debug debug>;
+
+        virtualinvoke $r10.<sun.security.util.Debug: void println(java.lang.String)>("Disabling ThreadLocal providers");
+
+     label1:
+        $r9 = <sun.security.jca.Providers: java.lang.ThreadLocal threadLists>;
+
+        virtualinvoke $r9.<java.lang.ThreadLocal: void remove()>();
+
+        goto label4;
+
+     label2:
+        $r1 = <sun.security.jca.ProviderList: sun.security.util.Debug debug>;
+
+        if $r1 == null goto label3;
+
+        $r4 = <sun.security.jca.ProviderList: sun.security.util.Debug debug>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Restoring previous ThreadLocal providers: ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<sun.security.util.Debug: void println(java.lang.String)>($r7);
+
+     label3:
+        $r2 = <sun.security.jca.Providers: java.lang.ThreadLocal threadLists>;
+
+        virtualinvoke $r2.<java.lang.ThreadLocal: void set(java.lang.Object)>(r0);
+
+     label4:
+        $i0 = <sun.security.jca.Providers: int threadListsUsed>;
+
+        $i1 = $i0 - 1;
+
+        <sun.security.jca.Providers: int threadListsUsed> = $i1;
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.jca.ProviderList $r1, $r2;
+        java.lang.String[] $r3;
+        java.lang.InheritableThreadLocal $r0;
+
+        <sun.security.jca.Providers: java.lang.String BACKUP_PROVIDER_CLASSNAME> = "sun.security.provider.VerificationProvider";
+
+        $r0 = new java.lang.InheritableThreadLocal;
+
+        specialinvoke $r0.<java.lang.InheritableThreadLocal: void <init>()>();
+
+        <sun.security.jca.Providers: java.lang.ThreadLocal threadLists> = $r0;
+
+        $r1 = <sun.security.jca.ProviderList: sun.security.jca.ProviderList EMPTY>;
+
+        <sun.security.jca.Providers: sun.security.jca.ProviderList providerList> = $r1;
+
+        $r2 = staticinvoke <sun.security.jca.ProviderList: sun.security.jca.ProviderList fromSecurityProperties()>();
+
+        <sun.security.jca.Providers: sun.security.jca.ProviderList providerList> = $r2;
+
+        $r3 = newarray (java.lang.String)[4];
+
+        $r3[0] = "sun.security.provider.Sun";
+
+        $r3[1] = "sun.security.rsa.SunRsaSign";
+
+        $r3[2] = "sun.security.ec.SunEC";
+
+        $r3[3] = "sun.security.provider.VerificationProvider";
+
+        <sun.security.jca.Providers: java.lang.String[] jarVerificationProviders> = $r3;
+
+        return;
+    }
+}

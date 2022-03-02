@@ -1,0 +1,254 @@
+class com.sun.jndi.dns.Header extends java.lang.Object
+{
+    static final int HEADER_SIZE;
+    static final short QR_BIT;
+    static final short OPCODE_MASK;
+    static final int OPCODE_SHIFT;
+    static final short AA_BIT;
+    static final short TC_BIT;
+    static final short RD_BIT;
+    static final short RA_BIT;
+    static final short RCODE_MASK;
+    int xid;
+    boolean query;
+    int opcode;
+    boolean authoritative;
+    boolean truncated;
+    boolean recursionDesired;
+    boolean recursionAvail;
+    int rcode;
+    int numQuestions;
+    int numAnswers;
+    int numAuthorities;
+    int numAdditionals;
+
+    void <init>(byte[], int) throws javax.naming.NamingException
+    {
+        int i0;
+        byte[] r1;
+        com.sun.jndi.dns.Header r0;
+
+        r0 := @this: com.sun.jndi.dns.Header;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        specialinvoke r0.<com.sun.jndi.dns.Header: void decode(byte[],int)>(r1, i0);
+
+        return;
+    }
+
+    private void decode(byte[], int) throws javax.naming.NamingException
+    {
+        byte[] r1;
+        java.lang.IndexOutOfBoundsException $r3;
+        com.sun.jndi.dns.Header r0;
+        short s3, $s4, $s5, $s7, $s8, $s9, $s10, $s11;
+        int i0, $i1, $i2, $i6, $i12, $i13, $i14, $i15, $i16, $i17;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        javax.naming.CommunicationException $r5, $r6;
+
+        r0 := @this: com.sun.jndi.dns.Header;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+     label01:
+        if i0 >= 12 goto label02;
+
+        $r5 = new javax.naming.CommunicationException;
+
+        specialinvoke $r5.<javax.naming.CommunicationException: void <init>(java.lang.String)>("DNS error: corrupted message header");
+
+        throw $r5;
+
+     label02:
+        $i1 = staticinvoke <com.sun.jndi.dns.Header: int getShort(byte[],int)>(r1, 0);
+
+        r0.<com.sun.jndi.dns.Header: int xid> = $i1;
+
+        $i2 = staticinvoke <com.sun.jndi.dns.Header: int getShort(byte[],int)>(r1, 2);
+
+        s3 = (short) $i2;
+
+        $s4 = s3 & -32768;
+
+        if $s4 != 0 goto label03;
+
+        $z0 = 1;
+
+        goto label04;
+
+     label03:
+        $z0 = 0;
+
+     label04:
+        r0.<com.sun.jndi.dns.Header: boolean query> = $z0;
+
+        $s5 = s3 & 30720;
+
+        $i16 = (int) $s5;
+
+        $i6 = $i16 >>> 11;
+
+        r0.<com.sun.jndi.dns.Header: int opcode> = $i6;
+
+        $s7 = s3 & 1024;
+
+        if $s7 == 0 goto label05;
+
+        $z1 = 1;
+
+        goto label06;
+
+     label05:
+        $z1 = 0;
+
+     label06:
+        r0.<com.sun.jndi.dns.Header: boolean authoritative> = $z1;
+
+        $s8 = s3 & 512;
+
+        if $s8 == 0 goto label07;
+
+        $z2 = 1;
+
+        goto label08;
+
+     label07:
+        $z2 = 0;
+
+     label08:
+        r0.<com.sun.jndi.dns.Header: boolean truncated> = $z2;
+
+        $s9 = s3 & 256;
+
+        if $s9 == 0 goto label09;
+
+        $z3 = 1;
+
+        goto label10;
+
+     label09:
+        $z3 = 0;
+
+     label10:
+        r0.<com.sun.jndi.dns.Header: boolean recursionDesired> = $z3;
+
+        $s10 = s3 & 128;
+
+        if $s10 == 0 goto label11;
+
+        $z4 = 1;
+
+        goto label12;
+
+     label11:
+        $z4 = 0;
+
+     label12:
+        r0.<com.sun.jndi.dns.Header: boolean recursionAvail> = $z4;
+
+        $s11 = s3 & 15;
+
+        $i17 = (int) $s11;
+
+        r0.<com.sun.jndi.dns.Header: int rcode> = $i17;
+
+        $i12 = staticinvoke <com.sun.jndi.dns.Header: int getShort(byte[],int)>(r1, 4);
+
+        r0.<com.sun.jndi.dns.Header: int numQuestions> = $i12;
+
+        $i13 = staticinvoke <com.sun.jndi.dns.Header: int getShort(byte[],int)>(r1, 6);
+
+        r0.<com.sun.jndi.dns.Header: int numAnswers> = $i13;
+
+        $i14 = staticinvoke <com.sun.jndi.dns.Header: int getShort(byte[],int)>(r1, 8);
+
+        r0.<com.sun.jndi.dns.Header: int numAuthorities> = $i14;
+
+        $i15 = staticinvoke <com.sun.jndi.dns.Header: int getShort(byte[],int)>(r1, 10);
+
+        r0.<com.sun.jndi.dns.Header: int numAdditionals> = $i15;
+
+     label13:
+        goto label15;
+
+     label14:
+        $r3 := @caughtexception;
+
+        $r6 = new javax.naming.CommunicationException;
+
+        specialinvoke $r6.<javax.naming.CommunicationException: void <init>(java.lang.String)>("DNS error: corrupted message header");
+
+        throw $r6;
+
+     label15:
+        return;
+
+        catch java.lang.IndexOutOfBoundsException from label01 to label13 with label14;
+    }
+
+    private static int getShort(byte[], int)
+    {
+        byte[] r0;
+        short $s2, $s5, $s8, $s10;
+        byte $b1, $b4;
+        int i0, $i3, $i6, $i7, $i9, $i11;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        $b1 = r0[i0];
+
+        $s8 = (short) $b1;
+
+        $s2 = $s8 & 255;
+
+        $i9 = (int) $s2;
+
+        $i6 = $i9 << 8;
+
+        $i3 = i0 + 1;
+
+        $b4 = r0[$i3];
+
+        $s10 = (short) $b4;
+
+        $s5 = $s10 & 255;
+
+        $i11 = (int) $s5;
+
+        $i7 = $i6 | $i11;
+
+        return $i7;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.jndi.dns.Header: short RCODE_MASK> = 15;
+
+        <com.sun.jndi.dns.Header: short RA_BIT> = 128;
+
+        <com.sun.jndi.dns.Header: short RD_BIT> = 256;
+
+        <com.sun.jndi.dns.Header: short TC_BIT> = 512;
+
+        <com.sun.jndi.dns.Header: short AA_BIT> = 1024;
+
+        <com.sun.jndi.dns.Header: int OPCODE_SHIFT> = 11;
+
+        <com.sun.jndi.dns.Header: short OPCODE_MASK> = 30720;
+
+        <com.sun.jndi.dns.Header: short QR_BIT> = -32768;
+
+        <com.sun.jndi.dns.Header: int HEADER_SIZE> = 12;
+
+        return;
+    }
+}

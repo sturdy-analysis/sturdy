@@ -1,0 +1,1154 @@
+public final class sun.font.FontDesignMetrics extends java.awt.FontMetrics
+{
+    static final long serialVersionUID;
+    private static final float UNKNOWN_WIDTH;
+    private static final int CURRENT_VERSION;
+    private static float roundingUpValue;
+    private java.awt.Font font;
+    private float ascent;
+    private float descent;
+    private float leading;
+    private float maxAdvance;
+    private double[] matrix;
+    private int[] cache;
+    private int serVersion;
+    private boolean isAntiAliased;
+    private boolean usesFractionalMetrics;
+    private java.awt.geom.AffineTransform frcTx;
+    private transient float[] advCache;
+    private transient int height;
+    private transient java.awt.font.FontRenderContext frc;
+    private transient double[] devmatrix;
+    private transient sun.font.FontStrike fontStrike;
+    private static java.awt.font.FontRenderContext DEFAULT_FRC;
+    private static final java.util.concurrent.ConcurrentHashMap metricsCache;
+    private static final int MAXRECENT;
+    private static final sun.font.FontDesignMetrics[] recentMetrics;
+    private static int recentIndex;
+
+    private static java.awt.font.FontRenderContext getDefaultFrc()
+    {
+        java.awt.GraphicsConfiguration $r3;
+        java.awt.GraphicsDevice $r2;
+        java.awt.geom.AffineTransform $r5, r6;
+        java.awt.GraphicsEnvironment $r1;
+        java.awt.font.FontRenderContext $r0, $r4, $r7;
+        boolean $z0;
+
+        $r0 = <sun.font.FontDesignMetrics: java.awt.font.FontRenderContext DEFAULT_FRC>;
+
+        if $r0 != null goto label3;
+
+        $z0 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        if $z0 == 0 goto label1;
+
+        $r5 = new java.awt.geom.AffineTransform;
+
+        specialinvoke $r5.<java.awt.geom.AffineTransform: void <init>()>();
+
+        r6 = $r5;
+
+        goto label2;
+
+     label1:
+        $r1 = staticinvoke <java.awt.GraphicsEnvironment: java.awt.GraphicsEnvironment getLocalGraphicsEnvironment()>();
+
+        $r2 = virtualinvoke $r1.<java.awt.GraphicsEnvironment: java.awt.GraphicsDevice getDefaultScreenDevice()>();
+
+        $r3 = virtualinvoke $r2.<java.awt.GraphicsDevice: java.awt.GraphicsConfiguration getDefaultConfiguration()>();
+
+        r6 = virtualinvoke $r3.<java.awt.GraphicsConfiguration: java.awt.geom.AffineTransform getDefaultTransform()>();
+
+     label2:
+        $r4 = new java.awt.font.FontRenderContext;
+
+        specialinvoke $r4.<java.awt.font.FontRenderContext: void <init>(java.awt.geom.AffineTransform,boolean,boolean)>(r6, 0, 0);
+
+        <sun.font.FontDesignMetrics: java.awt.font.FontRenderContext DEFAULT_FRC> = $r4;
+
+     label3:
+        $r7 = <sun.font.FontDesignMetrics: java.awt.font.FontRenderContext DEFAULT_FRC>;
+
+        return $r7;
+    }
+
+    public static sun.font.FontDesignMetrics getMetrics(java.awt.Font)
+    {
+        java.awt.font.FontRenderContext $r1;
+        sun.font.FontDesignMetrics $r2;
+        java.awt.Font r0;
+
+        r0 := @parameter0: java.awt.Font;
+
+        $r1 = staticinvoke <sun.font.FontDesignMetrics: java.awt.font.FontRenderContext getDefaultFrc()>();
+
+        $r2 = staticinvoke <sun.font.FontDesignMetrics: sun.font.FontDesignMetrics getMetrics(java.awt.Font,java.awt.font.FontRenderContext)>(r0, $r1);
+
+        return $r2;
+    }
+
+    public static sun.font.FontDesignMetrics getMetrics(java.awt.Font, java.awt.font.FontRenderContext)
+    {
+        sun.font.FontDesignMetrics[] $r8, $r9, $r10, $r27;
+        sun.font.FontDesignMetrics$KeyReference $r14, $r16, r26;
+        boolean $z0, $z1, $z2;
+        sun.font.SunFontManager $r0;
+        java.awt.Font r3;
+        java.util.concurrent.ConcurrentHashMap $r6, $r15, $r17, $r19;
+        java.lang.Throwable $r23, $r24;
+        int $i0, $i1, $i2, i3, $i4;
+        sun.font.FontDesignMetrics$MetricsKey $r4, $r5, $r13;
+        sun.font.Font2D $r21;
+        java.awt.font.FontRenderContext r1, $r2;
+        sun.font.FontDesignMetrics $r11, $r12, $r22, r25;
+        java.lang.Object $r7, $r18, $r20;
+
+        r3 := @parameter0: java.awt.Font;
+
+        r1 := @parameter1: java.awt.font.FontRenderContext;
+
+        $r0 = staticinvoke <sun.font.SunFontManager: sun.font.SunFontManager getInstance()>();
+
+        $z0 = virtualinvoke $r0.<sun.font.SunFontManager: boolean maybeUsingAlternateCompositeFonts()>();
+
+        if $z0 == 0 goto label01;
+
+        $r21 = staticinvoke <sun.font.FontUtilities: sun.font.Font2D getFont2D(java.awt.Font)>(r3);
+
+        $z2 = $r21 instanceof sun.font.CompositeFont;
+
+        if $z2 == 0 goto label01;
+
+        $r22 = new sun.font.FontDesignMetrics;
+
+        specialinvoke $r22.<sun.font.FontDesignMetrics: void <init>(java.awt.Font,java.awt.font.FontRenderContext)>(r3, r1);
+
+        return $r22;
+
+     label01:
+        r25 = null;
+
+        $r2 = staticinvoke <sun.font.FontDesignMetrics: java.awt.font.FontRenderContext getDefaultFrc()>();
+
+        $z1 = virtualinvoke r1.<java.awt.font.FontRenderContext: boolean equals(java.awt.font.FontRenderContext)>($r2);
+
+        if $z1 == 0 goto label02;
+
+        $r19 = <sun.font.FontDesignMetrics: java.util.concurrent.ConcurrentHashMap metricsCache>;
+
+        $r20 = virtualinvoke $r19.<java.util.concurrent.ConcurrentHashMap: java.lang.Object get(java.lang.Object)>(r3);
+
+        r26 = (sun.font.FontDesignMetrics$KeyReference) $r20;
+
+        goto label07;
+
+     label02:
+        entermonitor class "Lsun/font/FontDesignMetrics$MetricsKey;";
+
+     label03:
+        $r4 = <sun.font.FontDesignMetrics$MetricsKey: sun.font.FontDesignMetrics$MetricsKey key>;
+
+        virtualinvoke $r4.<sun.font.FontDesignMetrics$MetricsKey: void init(java.awt.Font,java.awt.font.FontRenderContext)>(r3, r1);
+
+        $r6 = <sun.font.FontDesignMetrics: java.util.concurrent.ConcurrentHashMap metricsCache>;
+
+        $r5 = <sun.font.FontDesignMetrics$MetricsKey: sun.font.FontDesignMetrics$MetricsKey key>;
+
+        $r7 = virtualinvoke $r6.<java.util.concurrent.ConcurrentHashMap: java.lang.Object get(java.lang.Object)>($r5);
+
+        r26 = (sun.font.FontDesignMetrics$KeyReference) $r7;
+
+        exitmonitor class "Lsun/font/FontDesignMetrics$MetricsKey;";
+
+     label04:
+        goto label07;
+
+     label05:
+        $r24 := @caughtexception;
+
+        exitmonitor class "Lsun/font/FontDesignMetrics$MetricsKey;";
+
+     label06:
+        throw $r24;
+
+     label07:
+        if r26 == null goto label08;
+
+        $r18 = virtualinvoke r26.<sun.font.FontDesignMetrics$KeyReference: java.lang.Object get()>();
+
+        r25 = (sun.font.FontDesignMetrics) $r18;
+
+     label08:
+        if r25 != null goto label10;
+
+        $r12 = new sun.font.FontDesignMetrics;
+
+        specialinvoke $r12.<sun.font.FontDesignMetrics: void <init>(java.awt.Font,java.awt.font.FontRenderContext)>(r3, r1);
+
+        r25 = $r12;
+
+        if $z1 == 0 goto label09;
+
+        $r17 = <sun.font.FontDesignMetrics: java.util.concurrent.ConcurrentHashMap metricsCache>;
+
+        $r16 = new sun.font.FontDesignMetrics$KeyReference;
+
+        specialinvoke $r16.<sun.font.FontDesignMetrics$KeyReference: void <init>(java.lang.Object,java.lang.Object)>(r3, $r12);
+
+        virtualinvoke $r17.<java.util.concurrent.ConcurrentHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r3, $r16);
+
+        goto label10;
+
+     label09:
+        $r13 = new sun.font.FontDesignMetrics$MetricsKey;
+
+        specialinvoke $r13.<sun.font.FontDesignMetrics$MetricsKey: void <init>(java.awt.Font,java.awt.font.FontRenderContext)>(r3, r1);
+
+        $r15 = <sun.font.FontDesignMetrics: java.util.concurrent.ConcurrentHashMap metricsCache>;
+
+        $r14 = new sun.font.FontDesignMetrics$KeyReference;
+
+        specialinvoke $r14.<sun.font.FontDesignMetrics$KeyReference: void <init>(java.lang.Object,java.lang.Object)>($r13, $r12);
+
+        virtualinvoke $r15.<java.util.concurrent.ConcurrentHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r13, $r14);
+
+     label10:
+        i3 = 0;
+
+     label11:
+        $r27 = <sun.font.FontDesignMetrics: sun.font.FontDesignMetrics[] recentMetrics>;
+
+        $i4 = lengthof $r27;
+
+        if i3 >= $i4 goto label13;
+
+        $r10 = <sun.font.FontDesignMetrics: sun.font.FontDesignMetrics[] recentMetrics>;
+
+        $r11 = $r10[i3];
+
+        if $r11 != r25 goto label12;
+
+        return r25;
+
+     label12:
+        i3 = i3 + 1;
+
+        goto label11;
+
+     label13:
+        $r8 = <sun.font.FontDesignMetrics: sun.font.FontDesignMetrics[] recentMetrics>;
+
+        entermonitor $r8;
+
+     label14:
+        $r9 = <sun.font.FontDesignMetrics: sun.font.FontDesignMetrics[] recentMetrics>;
+
+        $i0 = <sun.font.FontDesignMetrics: int recentIndex>;
+
+        $i1 = $i0 + 1;
+
+        <sun.font.FontDesignMetrics: int recentIndex> = $i1;
+
+        $r9[$i0] = r25;
+
+        $i2 = <sun.font.FontDesignMetrics: int recentIndex>;
+
+        if $i2 != 5 goto label15;
+
+        <sun.font.FontDesignMetrics: int recentIndex> = 0;
+
+     label15:
+        exitmonitor $r8;
+
+     label16:
+        goto label19;
+
+     label17:
+        $r23 := @caughtexception;
+
+        exitmonitor $r8;
+
+     label18:
+        throw $r23;
+
+     label19:
+        return r25;
+
+        catch java.lang.Throwable from label03 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.lang.Throwable from label14 to label16 with label17;
+        catch java.lang.Throwable from label17 to label18 with label17;
+    }
+
+    private void <init>(java.awt.Font)
+    {
+        java.awt.font.FontRenderContext $r2;
+        sun.font.FontDesignMetrics r0;
+        java.awt.Font r1;
+
+        r0 := @this: sun.font.FontDesignMetrics;
+
+        r1 := @parameter0: java.awt.Font;
+
+        $r2 = staticinvoke <sun.font.FontDesignMetrics: java.awt.font.FontRenderContext getDefaultFrc()>();
+
+        specialinvoke r0.<sun.font.FontDesignMetrics: void <init>(java.awt.Font,java.awt.font.FontRenderContext)>(r1, $r2);
+
+        return;
+    }
+
+    private void <init>(java.awt.Font, java.awt.font.FontRenderContext)
+    {
+        java.awt.Font r1;
+        double[] $r4;
+        java.awt.geom.AffineTransform $r3;
+        java.awt.font.FontRenderContext r2;
+        sun.font.FontDesignMetrics r0;
+        int $i1;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.font.FontDesignMetrics;
+
+        r1 := @parameter0: java.awt.Font;
+
+        r2 := @parameter1: java.awt.font.FontRenderContext;
+
+        specialinvoke r0.<java.awt.FontMetrics: void <init>(java.awt.Font)>(r1);
+
+        r0.<sun.font.FontDesignMetrics: int serVersion> = 0;
+
+        $i1 = (int) -1;
+
+        r0.<sun.font.FontDesignMetrics: int height> = $i1;
+
+        r0.<sun.font.FontDesignMetrics: double[] devmatrix> = null;
+
+        r0.<sun.font.FontDesignMetrics: java.awt.Font font> = r1;
+
+        r0.<sun.font.FontDesignMetrics: java.awt.font.FontRenderContext frc> = r2;
+
+        $z0 = virtualinvoke r2.<java.awt.font.FontRenderContext: boolean isAntiAliased()>();
+
+        r0.<sun.font.FontDesignMetrics: boolean isAntiAliased> = $z0;
+
+        $z1 = virtualinvoke r2.<java.awt.font.FontRenderContext: boolean usesFractionalMetrics()>();
+
+        r0.<sun.font.FontDesignMetrics: boolean usesFractionalMetrics> = $z1;
+
+        $r3 = virtualinvoke r2.<java.awt.font.FontRenderContext: java.awt.geom.AffineTransform getTransform()>();
+
+        r0.<sun.font.FontDesignMetrics: java.awt.geom.AffineTransform frcTx> = $r3;
+
+        $r4 = newarray (double)[4];
+
+        r0.<sun.font.FontDesignMetrics: double[] matrix> = $r4;
+
+        specialinvoke r0.<sun.font.FontDesignMetrics: void initMatrixAndMetrics()>();
+
+        specialinvoke r0.<sun.font.FontDesignMetrics: void initAdvCache()>();
+
+        return;
+    }
+
+    private void initMatrixAndMetrics()
+    {
+        sun.font.StrikeMetrics $r7;
+        java.awt.Font $r1, $r4;
+        double[] $r8, $r9;
+        java.awt.geom.AffineTransform $r10;
+        sun.font.FontStrike $r5, $r6;
+        sun.font.Font2D $r2;
+        java.awt.font.FontRenderContext $r3;
+        sun.font.FontDesignMetrics r0;
+        float $f0, $f1, $f2, $f3;
+
+        r0 := @this: sun.font.FontDesignMetrics;
+
+        $r1 = r0.<sun.font.FontDesignMetrics: java.awt.Font font>;
+
+        $r2 = staticinvoke <sun.font.FontUtilities: sun.font.Font2D getFont2D(java.awt.Font)>($r1);
+
+        $r4 = r0.<sun.font.FontDesignMetrics: java.awt.Font font>;
+
+        $r3 = r0.<sun.font.FontDesignMetrics: java.awt.font.FontRenderContext frc>;
+
+        $r5 = virtualinvoke $r2.<sun.font.Font2D: sun.font.FontStrike getStrike(java.awt.Font,java.awt.font.FontRenderContext)>($r4, $r3);
+
+        r0.<sun.font.FontDesignMetrics: sun.font.FontStrike fontStrike> = $r5;
+
+        $r6 = r0.<sun.font.FontDesignMetrics: sun.font.FontStrike fontStrike>;
+
+        $r7 = virtualinvoke $r6.<sun.font.FontStrike: sun.font.StrikeMetrics getFontMetrics()>();
+
+        $f0 = virtualinvoke $r7.<sun.font.StrikeMetrics: float getAscent()>();
+
+        r0.<sun.font.FontDesignMetrics: float ascent> = $f0;
+
+        $f1 = virtualinvoke $r7.<sun.font.StrikeMetrics: float getDescent()>();
+
+        r0.<sun.font.FontDesignMetrics: float descent> = $f1;
+
+        $f2 = virtualinvoke $r7.<sun.font.StrikeMetrics: float getLeading()>();
+
+        r0.<sun.font.FontDesignMetrics: float leading> = $f2;
+
+        $f3 = virtualinvoke $r7.<sun.font.StrikeMetrics: float getMaxAdvance()>();
+
+        r0.<sun.font.FontDesignMetrics: float maxAdvance> = $f3;
+
+        $r8 = newarray (double)[4];
+
+        r0.<sun.font.FontDesignMetrics: double[] devmatrix> = $r8;
+
+        $r10 = r0.<sun.font.FontDesignMetrics: java.awt.geom.AffineTransform frcTx>;
+
+        $r9 = r0.<sun.font.FontDesignMetrics: double[] devmatrix>;
+
+        virtualinvoke $r10.<java.awt.geom.AffineTransform: void getMatrix(double[])>($r9);
+
+        return;
+    }
+
+    private void initAdvCache()
+    {
+        sun.font.FontDesignMetrics r0;
+        int i0;
+        float[] $r1, $r2;
+
+        r0 := @this: sun.font.FontDesignMetrics;
+
+        $r1 = newarray (float)[256];
+
+        r0.<sun.font.FontDesignMetrics: float[] advCache> = $r1;
+
+        i0 = 0;
+
+     label1:
+        if i0 >= 256 goto label2;
+
+        $r2 = r0.<sun.font.FontDesignMetrics: float[] advCache>;
+
+        $r2[i0] = -1.0F;
+
+        i0 = i0 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.ObjectInputStream r0;
+        java.awt.geom.AffineTransform $r3, $r8;
+        java.awt.font.FontRenderContext $r4, $r5, $r6, $r7, $r9;
+        sun.font.FontDesignMetrics r1;
+        int $i0, $i2;
+        boolean $z0, $z1, $z2, $z3;
+
+        r1 := @this: sun.font.FontDesignMetrics;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        $i0 = r1.<sun.font.FontDesignMetrics: int serVersion>;
+
+        if $i0 == 1 goto label1;
+
+        $r4 = staticinvoke <sun.font.FontDesignMetrics: java.awt.font.FontRenderContext getDefaultFrc()>();
+
+        r1.<sun.font.FontDesignMetrics: java.awt.font.FontRenderContext frc> = $r4;
+
+        $r5 = r1.<sun.font.FontDesignMetrics: java.awt.font.FontRenderContext frc>;
+
+        $z2 = virtualinvoke $r5.<java.awt.font.FontRenderContext: boolean isAntiAliased()>();
+
+        r1.<sun.font.FontDesignMetrics: boolean isAntiAliased> = $z2;
+
+        $r6 = r1.<sun.font.FontDesignMetrics: java.awt.font.FontRenderContext frc>;
+
+        $z3 = virtualinvoke $r6.<java.awt.font.FontRenderContext: boolean usesFractionalMetrics()>();
+
+        r1.<sun.font.FontDesignMetrics: boolean usesFractionalMetrics> = $z3;
+
+        $r7 = r1.<sun.font.FontDesignMetrics: java.awt.font.FontRenderContext frc>;
+
+        $r8 = virtualinvoke $r7.<java.awt.font.FontRenderContext: java.awt.geom.AffineTransform getTransform()>();
+
+        r1.<sun.font.FontDesignMetrics: java.awt.geom.AffineTransform frcTx> = $r8;
+
+        goto label2;
+
+     label1:
+        $r9 = new java.awt.font.FontRenderContext;
+
+        $r3 = r1.<sun.font.FontDesignMetrics: java.awt.geom.AffineTransform frcTx>;
+
+        $z1 = r1.<sun.font.FontDesignMetrics: boolean isAntiAliased>;
+
+        $z0 = r1.<sun.font.FontDesignMetrics: boolean usesFractionalMetrics>;
+
+        specialinvoke $r9.<java.awt.font.FontRenderContext: void <init>(java.awt.geom.AffineTransform,boolean,boolean)>($r3, $z1, $z0);
+
+        r1.<sun.font.FontDesignMetrics: java.awt.font.FontRenderContext frc> = $r9;
+
+     label2:
+        $i2 = (int) -1;
+
+        r1.<sun.font.FontDesignMetrics: int height> = $i2;
+
+        r1.<sun.font.FontDesignMetrics: int[] cache> = null;
+
+        specialinvoke r1.<sun.font.FontDesignMetrics: void initMatrixAndMetrics()>();
+
+        specialinvoke r1.<sun.font.FontDesignMetrics: void initAdvCache()>();
+
+        return;
+    }
+
+    private void writeObject(java.io.ObjectOutputStream) throws java.io.IOException
+    {
+        sun.font.FontDesignMetrics r0;
+        int[] $r1, $r3;
+        int i0, $i2;
+        java.io.ObjectOutputStream r2;
+
+        r0 := @this: sun.font.FontDesignMetrics;
+
+        r2 := @parameter0: java.io.ObjectOutputStream;
+
+        $r1 = newarray (int)[256];
+
+        r0.<sun.font.FontDesignMetrics: int[] cache> = $r1;
+
+        i0 = 0;
+
+     label1:
+        if i0 >= 256 goto label2;
+
+        $r3 = r0.<sun.font.FontDesignMetrics: int[] cache>;
+
+        $i2 = (int) -1;
+
+        $r3[i0] = $i2;
+
+        i0 = i0 + 1;
+
+        goto label1;
+
+     label2:
+        r0.<sun.font.FontDesignMetrics: int serVersion> = 1;
+
+        virtualinvoke r2.<java.io.ObjectOutputStream: void defaultWriteObject()>();
+
+        r0.<sun.font.FontDesignMetrics: int[] cache> = null;
+
+        return;
+    }
+
+    private float handleCharWidth(int)
+    {
+        sun.font.FontDesignMetrics r0;
+        int i0;
+        float $f0;
+        sun.font.FontStrike $r1;
+
+        r0 := @this: sun.font.FontDesignMetrics;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.font.FontDesignMetrics: sun.font.FontStrike fontStrike>;
+
+        $f0 = virtualinvoke $r1.<sun.font.FontStrike: float getCodePointAdvance(int)>(i0);
+
+        return $f0;
+    }
+
+    private float getLatinCharWidth(char)
+    {
+        char c0;
+        float[] $r1, $r2;
+        byte $b1;
+        sun.font.FontDesignMetrics r0;
+        int $i2, $i3, $i4;
+        float $f0, f1;
+
+        r0 := @this: sun.font.FontDesignMetrics;
+
+        c0 := @parameter0: char;
+
+        $r1 = r0.<sun.font.FontDesignMetrics: float[] advCache>;
+
+        $i2 = (int) c0;
+
+        f1 = $r1[$i2];
+
+        $b1 = f1 cmpl -1.0F;
+
+        if $b1 != 0 goto label1;
+
+        $i3 = (int) c0;
+
+        $f0 = specialinvoke r0.<sun.font.FontDesignMetrics: float handleCharWidth(int)>($i3);
+
+        f1 = $f0;
+
+        $r2 = r0.<sun.font.FontDesignMetrics: float[] advCache>;
+
+        $i4 = (int) c0;
+
+        $r2[$i4] = $f0;
+
+     label1:
+        return f1;
+    }
+
+    public java.awt.font.FontRenderContext getFontRenderContext()
+    {
+        java.awt.font.FontRenderContext $r1;
+        sun.font.FontDesignMetrics r0;
+
+        r0 := @this: sun.font.FontDesignMetrics;
+
+        $r1 = r0.<sun.font.FontDesignMetrics: java.awt.font.FontRenderContext frc>;
+
+        return $r1;
+    }
+
+    public int charWidth(char)
+    {
+        char c0;
+        sun.font.FontDesignMetrics r0;
+        int $i1, $i2, $i3;
+        float f0;
+        double $d0, $d1;
+
+        r0 := @this: sun.font.FontDesignMetrics;
+
+        c0 := @parameter0: char;
+
+        $i2 = (int) c0;
+
+        if $i2 >= 256 goto label1;
+
+        f0 = specialinvoke r0.<sun.font.FontDesignMetrics: float getLatinCharWidth(char)>(c0);
+
+        goto label2;
+
+     label1:
+        $i3 = (int) c0;
+
+        f0 = specialinvoke r0.<sun.font.FontDesignMetrics: float handleCharWidth(int)>($i3);
+
+     label2:
+        $d0 = (double) f0;
+
+        $d1 = 0.5 + $d0;
+
+        $i1 = (int) $d1;
+
+        return $i1;
+    }
+
+    public int charWidth(int)
+    {
+        sun.font.FontDesignMetrics r0;
+        int $i0, i1, $i3;
+        float $f0;
+        boolean $z0;
+        double $d0, $d1;
+
+        r0 := @this: sun.font.FontDesignMetrics;
+
+        i1 := @parameter0: int;
+
+        $z0 = staticinvoke <java.lang.Character: boolean isValidCodePoint(int)>(i1);
+
+        if $z0 != 0 goto label1;
+
+        $i3 = (int) 65535;
+
+        i1 = $i3;
+
+     label1:
+        $f0 = specialinvoke r0.<sun.font.FontDesignMetrics: float handleCharWidth(int)>(i1);
+
+        $d0 = (double) $f0;
+
+        $d1 = 0.5 + $d0;
+
+        $i0 = (int) $d1;
+
+        return $i0;
+    }
+
+    public int stringWidth(java.lang.String)
+    {
+        java.awt.font.TextLayout $r11, $r12;
+        java.lang.NullPointerException $r10;
+        int $i0, $i2, i3, $i4, $i5, $i6;
+        java.lang.String r2;
+        boolean $z0, $z1;
+        double $d0, $d1;
+        java.awt.Font $r1, $r5, $r8;
+        char $c1;
+        java.awt.font.FontRenderContext $r4, $r7;
+        sun.font.FontDesignMetrics r0;
+        float $f0, $f1, f2;
+
+        r0 := @this: sun.font.FontDesignMetrics;
+
+        r2 := @parameter0: java.lang.String;
+
+        f2 = 0.0F;
+
+        $r1 = r0.<sun.font.FontDesignMetrics: java.awt.Font font>;
+
+        $z0 = virtualinvoke $r1.<java.awt.Font: boolean hasLayoutAttributes()>();
+
+        if $z0 == 0 goto label3;
+
+        if r2 != null goto label1;
+
+        $r10 = new java.lang.NullPointerException;
+
+        specialinvoke $r10.<java.lang.NullPointerException: void <init>(java.lang.String)>("str is null");
+
+        throw $r10;
+
+     label1:
+        $i2 = virtualinvoke r2.<java.lang.String: int length()>();
+
+        if $i2 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        $r11 = new java.awt.font.TextLayout;
+
+        $r8 = r0.<sun.font.FontDesignMetrics: java.awt.Font font>;
+
+        $r7 = r0.<sun.font.FontDesignMetrics: java.awt.font.FontRenderContext frc>;
+
+        specialinvoke $r11.<java.awt.font.TextLayout: void <init>(java.lang.String,java.awt.Font,java.awt.font.FontRenderContext)>(r2, $r8, $r7);
+
+        f2 = virtualinvoke $r11.<java.awt.font.TextLayout: float getAdvance()>();
+
+        goto label8;
+
+     label3:
+        $i0 = virtualinvoke r2.<java.lang.String: int length()>();
+
+        i3 = 0;
+
+     label4:
+        if i3 >= $i0 goto label8;
+
+        $c1 = virtualinvoke r2.<java.lang.String: char charAt(int)>(i3);
+
+        $i5 = (int) $c1;
+
+        if $i5 >= 256 goto label5;
+
+        $f1 = specialinvoke r0.<sun.font.FontDesignMetrics: float getLatinCharWidth(char)>($c1);
+
+        f2 = f2 + $f1;
+
+        goto label7;
+
+     label5:
+        $z1 = staticinvoke <sun.font.FontUtilities: boolean isNonSimpleChar(char)>($c1);
+
+        if $z1 == 0 goto label6;
+
+        $r12 = new java.awt.font.TextLayout;
+
+        $r5 = r0.<sun.font.FontDesignMetrics: java.awt.Font font>;
+
+        $r4 = r0.<sun.font.FontDesignMetrics: java.awt.font.FontRenderContext frc>;
+
+        specialinvoke $r12.<java.awt.font.TextLayout: void <init>(java.lang.String,java.awt.Font,java.awt.font.FontRenderContext)>(r2, $r5, $r4);
+
+        f2 = virtualinvoke $r12.<java.awt.font.TextLayout: float getAdvance()>();
+
+        goto label8;
+
+     label6:
+        $i6 = (int) $c1;
+
+        $f0 = specialinvoke r0.<sun.font.FontDesignMetrics: float handleCharWidth(int)>($i6);
+
+        f2 = f2 + $f0;
+
+     label7:
+        i3 = i3 + 1;
+
+        goto label4;
+
+     label8:
+        $d0 = (double) f2;
+
+        $d1 = 0.5 + $d0;
+
+        $i4 = (int) $d1;
+
+        return $i4;
+    }
+
+    public int charsWidth(char[], int, int)
+    {
+        java.lang.IndexOutOfBoundsException $r19;
+        java.awt.font.TextLayout $r17, $r21;
+        int i0, i1, i3, i4, $i5, $i6, $i7;
+        java.lang.String $r11, $r16, $r20;
+        boolean $z0, $z1;
+        double $d0, $d1;
+        java.awt.Font $r1, $r6, $r15;
+        char c2;
+        java.awt.font.FontRenderContext $r5, $r14;
+        sun.font.FontDesignMetrics r0;
+        char[] r2;
+        float $f0, $f1, f2;
+        java.lang.StringBuilder $r9, $r10, $r18;
+
+        r0 := @this: sun.font.FontDesignMetrics;
+
+        r2 := @parameter0: char[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        f2 = 0.0F;
+
+        $r1 = r0.<sun.font.FontDesignMetrics: java.awt.Font font>;
+
+        $z0 = virtualinvoke $r1.<java.awt.Font: boolean hasLayoutAttributes()>();
+
+        if $z0 == 0 goto label2;
+
+        if i0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r16 = new java.lang.String;
+
+        specialinvoke $r16.<java.lang.String: void <init>(char[],int,int)>(r2, i1, i0);
+
+        $r17 = new java.awt.font.TextLayout;
+
+        $r15 = r0.<sun.font.FontDesignMetrics: java.awt.Font font>;
+
+        $r14 = r0.<sun.font.FontDesignMetrics: java.awt.font.FontRenderContext frc>;
+
+        specialinvoke $r17.<java.awt.font.TextLayout: void <init>(java.lang.String,java.awt.Font,java.awt.font.FontRenderContext)>($r16, $r15, $r14);
+
+        f2 = virtualinvoke $r17.<java.awt.font.TextLayout: float getAdvance()>();
+
+        goto label8;
+
+     label2:
+        if i0 >= 0 goto label3;
+
+        $r19 = new java.lang.IndexOutOfBoundsException;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("len=");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r19.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>($r11);
+
+        throw $r19;
+
+     label3:
+        i3 = i1 + i0;
+
+        i4 = i1;
+
+     label4:
+        if i4 >= i3 goto label8;
+
+        c2 = r2[i4];
+
+        $i6 = (int) c2;
+
+        if $i6 >= 256 goto label5;
+
+        $f1 = specialinvoke r0.<sun.font.FontDesignMetrics: float getLatinCharWidth(char)>(c2);
+
+        f2 = f2 + $f1;
+
+        goto label7;
+
+     label5:
+        $z1 = staticinvoke <sun.font.FontUtilities: boolean isNonSimpleChar(char)>(c2);
+
+        if $z1 == 0 goto label6;
+
+        $r20 = new java.lang.String;
+
+        specialinvoke $r20.<java.lang.String: void <init>(char[],int,int)>(r2, i1, i0);
+
+        $r21 = new java.awt.font.TextLayout;
+
+        $r6 = r0.<sun.font.FontDesignMetrics: java.awt.Font font>;
+
+        $r5 = r0.<sun.font.FontDesignMetrics: java.awt.font.FontRenderContext frc>;
+
+        specialinvoke $r21.<java.awt.font.TextLayout: void <init>(java.lang.String,java.awt.Font,java.awt.font.FontRenderContext)>($r20, $r6, $r5);
+
+        f2 = virtualinvoke $r21.<java.awt.font.TextLayout: float getAdvance()>();
+
+        goto label8;
+
+     label6:
+        $i7 = (int) c2;
+
+        $f0 = specialinvoke r0.<sun.font.FontDesignMetrics: float handleCharWidth(int)>($i7);
+
+        f2 = f2 + $f0;
+
+     label7:
+        i4 = i4 + 1;
+
+        goto label4;
+
+     label8:
+        $d0 = (double) f2;
+
+        $d1 = 0.5 + $d0;
+
+        $i5 = (int) $d1;
+
+        return $i5;
+    }
+
+    public int[] getWidths()
+    {
+        float[] $r2, $r3;
+        byte $b0;
+        int[] r0;
+        sun.font.FontDesignMetrics r1;
+        int $i1, $i2, i3;
+        float $f0, f1;
+        double $d0, $d1;
+
+        r1 := @this: sun.font.FontDesignMetrics;
+
+        r0 = newarray (int)[256];
+
+        i3 = 0;
+
+     label1:
+        if i3 >= 256 goto label3;
+
+        $r2 = r1.<sun.font.FontDesignMetrics: float[] advCache>;
+
+        f1 = $r2[i3];
+
+        $b0 = f1 cmpl -1.0F;
+
+        if $b0 != 0 goto label2;
+
+        $r3 = r1.<sun.font.FontDesignMetrics: float[] advCache>;
+
+        $f0 = specialinvoke r1.<sun.font.FontDesignMetrics: float handleCharWidth(int)>(i3);
+
+        $r3[i3] = $f0;
+
+        f1 = $f0;
+
+     label2:
+        $d0 = (double) f1;
+
+        $d1 = 0.5 + $d0;
+
+        $i1 = (int) $d1;
+
+        r0[i3] = $i1;
+
+        $i2 = i3 + 1;
+
+        i3 = (char) $i2;
+
+        goto label1;
+
+     label3:
+        return r0;
+    }
+
+    public int getMaxAdvance()
+    {
+        sun.font.FontDesignMetrics r0;
+        int $i0;
+        float $f0, $f1;
+
+        r0 := @this: sun.font.FontDesignMetrics;
+
+        $f0 = r0.<sun.font.FontDesignMetrics: float maxAdvance>;
+
+        $f1 = 0.99F + $f0;
+
+        $i0 = (int) $f1;
+
+        return $i0;
+    }
+
+    public int getAscent()
+    {
+        sun.font.FontDesignMetrics r0;
+        int $i0;
+        float $f0, $f1, $f2;
+
+        r0 := @this: sun.font.FontDesignMetrics;
+
+        $f1 = <sun.font.FontDesignMetrics: float roundingUpValue>;
+
+        $f0 = r0.<sun.font.FontDesignMetrics: float ascent>;
+
+        $f2 = $f1 + $f0;
+
+        $i0 = (int) $f2;
+
+        return $i0;
+    }
+
+    public int getDescent()
+    {
+        sun.font.FontDesignMetrics r0;
+        int $i0;
+        float $f0, $f1, $f2;
+
+        r0 := @this: sun.font.FontDesignMetrics;
+
+        $f1 = <sun.font.FontDesignMetrics: float roundingUpValue>;
+
+        $f0 = r0.<sun.font.FontDesignMetrics: float descent>;
+
+        $f2 = $f1 + $f0;
+
+        $i0 = (int) $f2;
+
+        return $i0;
+    }
+
+    public int getLeading()
+    {
+        sun.font.FontDesignMetrics r0;
+        int $i0, $i1, $i2;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7;
+
+        r0 := @this: sun.font.FontDesignMetrics;
+
+        $f1 = <sun.font.FontDesignMetrics: float roundingUpValue>;
+
+        $f0 = r0.<sun.font.FontDesignMetrics: float descent>;
+
+        $f3 = $f1 + $f0;
+
+        $f2 = r0.<sun.font.FontDesignMetrics: float leading>;
+
+        $f4 = $f3 + $f2;
+
+        $i1 = (int) $f4;
+
+        $f6 = <sun.font.FontDesignMetrics: float roundingUpValue>;
+
+        $f5 = r0.<sun.font.FontDesignMetrics: float descent>;
+
+        $f7 = $f6 + $f5;
+
+        $i0 = (int) $f7;
+
+        $i2 = $i1 - $i0;
+
+        return $i2;
+    }
+
+    public int getHeight()
+    {
+        sun.font.FontDesignMetrics r0;
+        int $i0, $i1, $i2, $i3, $i4;
+        float $f0, $f1, $f2, $f3, $f4;
+
+        r0 := @this: sun.font.FontDesignMetrics;
+
+        $i0 = r0.<sun.font.FontDesignMetrics: int height>;
+
+        if $i0 >= 0 goto label1;
+
+        $i2 = virtualinvoke r0.<sun.font.FontDesignMetrics: int getAscent()>();
+
+        $f1 = <sun.font.FontDesignMetrics: float roundingUpValue>;
+
+        $f0 = r0.<sun.font.FontDesignMetrics: float descent>;
+
+        $f3 = $f1 + $f0;
+
+        $f2 = r0.<sun.font.FontDesignMetrics: float leading>;
+
+        $f4 = $f3 + $f2;
+
+        $i3 = (int) $f4;
+
+        $i4 = $i2 + $i3;
+
+        r0.<sun.font.FontDesignMetrics: int height> = $i4;
+
+     label1:
+        $i1 = r0.<sun.font.FontDesignMetrics: int height>;
+
+        return $i1;
+    }
+
+    static java.util.concurrent.ConcurrentHashMap access$000()
+    {
+        java.util.concurrent.ConcurrentHashMap $r0;
+
+        $r0 = <sun.font.FontDesignMetrics: java.util.concurrent.ConcurrentHashMap metricsCache>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.util.concurrent.ConcurrentHashMap $r0;
+        sun.font.FontDesignMetrics[] $r1;
+
+        <sun.font.FontDesignMetrics: int MAXRECENT> = 5;
+
+        <sun.font.FontDesignMetrics: int CURRENT_VERSION> = 1;
+
+        <sun.font.FontDesignMetrics: float UNKNOWN_WIDTH> = -1.0F;
+
+        <sun.font.FontDesignMetrics: long serialVersionUID> = 4480069578560887773L;
+
+        <sun.font.FontDesignMetrics: float roundingUpValue> = 0.95F;
+
+        <sun.font.FontDesignMetrics: java.awt.font.FontRenderContext DEFAULT_FRC> = null;
+
+        $r0 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r0.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        <sun.font.FontDesignMetrics: java.util.concurrent.ConcurrentHashMap metricsCache> = $r0;
+
+        $r1 = newarray (sun.font.FontDesignMetrics)[5];
+
+        <sun.font.FontDesignMetrics: sun.font.FontDesignMetrics[] recentMetrics> = $r1;
+
+        <sun.font.FontDesignMetrics: int recentIndex> = 0;
+
+        return;
+    }
+}

@@ -1,0 +1,453 @@
+public class java.io.StringReader extends java.io.Reader
+{
+    private java.lang.String str;
+    private int length;
+    private int next;
+    private int mark;
+
+    public void <init>(java.lang.String)
+    {
+        int $i0;
+        java.lang.String r1;
+        java.io.StringReader r0;
+
+        r0 := @this: java.io.StringReader;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.io.Reader: void <init>()>();
+
+        r0.<java.io.StringReader: int next> = 0;
+
+        r0.<java.io.StringReader: int mark> = 0;
+
+        r0.<java.io.StringReader: java.lang.String str> = r1;
+
+        $i0 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        r0.<java.io.StringReader: int length> = $i0;
+
+        return;
+    }
+
+    private void ensureOpen() throws java.io.IOException
+    {
+        java.io.IOException $r2;
+        java.lang.String $r1;
+        java.io.StringReader r0;
+
+        r0 := @this: java.io.StringReader;
+
+        $r1 = r0.<java.io.StringReader: java.lang.String str>;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.io.IOException;
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>("Stream closed");
+
+        throw $r2;
+
+     label1:
+        return;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        java.lang.Throwable $r3;
+        char $c4;
+        java.io.StringReader r0;
+        int $i0, $i1, $i2, $i3, $i6, $i7;
+        java.lang.Object $r1;
+        java.lang.String $r2;
+
+        r0 := @this: java.io.StringReader;
+
+        $r1 = r0.<java.io.StringReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label1:
+        specialinvoke r0.<java.io.StringReader: void ensureOpen()>();
+
+        $i1 = r0.<java.io.StringReader: int next>;
+
+        $i0 = r0.<java.io.StringReader: int length>;
+
+        if $i1 < $i0 goto label3;
+
+        exitmonitor $r1;
+
+     label2:
+        $i6 = (int) -1;
+
+        return $i6;
+
+     label3:
+        $r2 = r0.<java.io.StringReader: java.lang.String str>;
+
+        $i2 = r0.<java.io.StringReader: int next>;
+
+        $i3 = $i2 + 1;
+
+        r0.<java.io.StringReader: int next> = $i3;
+
+        $c4 = virtualinvoke $r2.<java.lang.String: char charAt(int)>($i2);
+
+        exitmonitor $r1;
+
+     label4:
+        $i7 = (int) $c4;
+
+        return $i7;
+
+     label5:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public int read(char[], int, int) throws java.io.IOException
+    {
+        java.lang.Throwable $r4;
+        java.lang.IndexOutOfBoundsException $r6;
+        int i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i18;
+        java.lang.String $r3;
+        java.io.StringReader r0;
+        char[] r2;
+        java.lang.Object $r1;
+
+        r0 := @this: java.io.StringReader;
+
+        r2 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $r1 = r0.<java.io.StringReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label01:
+        specialinvoke r0.<java.io.StringReader: void ensureOpen()>();
+
+        if i0 < 0 goto label02;
+
+        $i1 = lengthof r2;
+
+        if i0 > $i1 goto label02;
+
+        if i2 < 0 goto label02;
+
+        $i4 = i0 + i2;
+
+        $i3 = lengthof r2;
+
+        if $i4 > $i3 goto label02;
+
+        $i5 = i0 + i2;
+
+        if $i5 >= 0 goto label03;
+
+     label02:
+        $r6 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r6.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r6;
+
+     label03:
+        if i2 != 0 goto label05;
+
+        exitmonitor $r1;
+
+     label04:
+        return 0;
+
+     label05:
+        $i7 = r0.<java.io.StringReader: int next>;
+
+        $i6 = r0.<java.io.StringReader: int length>;
+
+        if $i7 < $i6 goto label07;
+
+        exitmonitor $r1;
+
+     label06:
+        $i18 = (int) -1;
+
+        return $i18;
+
+     label07:
+        $i9 = r0.<java.io.StringReader: int length>;
+
+        $i8 = r0.<java.io.StringReader: int next>;
+
+        $i10 = $i9 - $i8;
+
+        $i11 = staticinvoke <java.lang.Math: int min(int,int)>($i10, i2);
+
+        $r3 = r0.<java.io.StringReader: java.lang.String str>;
+
+        $i14 = r0.<java.io.StringReader: int next>;
+
+        $i12 = r0.<java.io.StringReader: int next>;
+
+        $i13 = $i12 + $i11;
+
+        virtualinvoke $r3.<java.lang.String: void getChars(int,int,char[],int)>($i14, $i13, r2, i0);
+
+        $i15 = r0.<java.io.StringReader: int next>;
+
+        $i16 = $i15 + $i11;
+
+        r0.<java.io.StringReader: int next> = $i16;
+
+        exitmonitor $r1;
+
+     label08:
+        return $i11;
+
+     label09:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label10:
+        throw $r4;
+
+        catch java.lang.Throwable from label01 to label04 with label09;
+        catch java.lang.Throwable from label05 to label06 with label09;
+        catch java.lang.Throwable from label07 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    public long skip(long) throws java.io.IOException
+    {
+        java.lang.Throwable $r2;
+        long l5, $l6, $l7, $l10, $l11, $l13, $l14;
+        int $i0, $i1, $i2, $i3, $i4, $i8, $i9, $i12, $i15;
+        java.io.StringReader r0;
+        java.lang.Object $r1;
+
+        r0 := @this: java.io.StringReader;
+
+        l5 := @parameter0: long;
+
+        $r1 = r0.<java.io.StringReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label1:
+        specialinvoke r0.<java.io.StringReader: void ensureOpen()>();
+
+        $i1 = r0.<java.io.StringReader: int next>;
+
+        $i0 = r0.<java.io.StringReader: int length>;
+
+        if $i1 < $i0 goto label3;
+
+        exitmonitor $r1;
+
+     label2:
+        return 0L;
+
+     label3:
+        $i3 = r0.<java.io.StringReader: int length>;
+
+        $i2 = r0.<java.io.StringReader: int next>;
+
+        $i4 = $i3 - $i2;
+
+        $l6 = (long) $i4;
+
+        $l7 = staticinvoke <java.lang.Math: long min(long,long)>($l6, l5);
+
+        $i8 = r0.<java.io.StringReader: int next>;
+
+        $i9 = neg $i8;
+
+        $l10 = (long) $i9;
+
+        $l11 = staticinvoke <java.lang.Math: long max(long,long)>($l10, $l7);
+
+        $i12 = r0.<java.io.StringReader: int next>;
+
+        $l13 = (long) $i12;
+
+        $l14 = $l13 + $l11;
+
+        $i15 = (int) $l14;
+
+        r0.<java.io.StringReader: int next> = $i15;
+
+        exitmonitor $r1;
+
+     label4:
+        return $l11;
+
+     label5:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public boolean ready() throws java.io.IOException
+    {
+        java.lang.Throwable $r2;
+        java.lang.Object $r1;
+        java.io.StringReader r0;
+
+        r0 := @this: java.io.StringReader;
+
+        $r1 = r0.<java.io.StringReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label1:
+        specialinvoke r0.<java.io.StringReader: void ensureOpen()>();
+
+        exitmonitor $r1;
+
+     label2:
+        return 1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public boolean markSupported()
+    {
+        java.io.StringReader r0;
+
+        r0 := @this: java.io.StringReader;
+
+        return 1;
+    }
+
+    public void mark(int) throws java.io.IOException
+    {
+        java.lang.Throwable $r3;
+        java.io.StringReader r0;
+        int i0, $i1;
+        java.lang.Object $r1;
+        java.lang.IllegalArgumentException $r2;
+
+        r0 := @this: java.io.StringReader;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 0 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Read-ahead limit < 0");
+
+        throw $r2;
+
+     label1:
+        $r1 = r0.<java.io.StringReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label2:
+        specialinvoke r0.<java.io.StringReader: void ensureOpen()>();
+
+        $i1 = r0.<java.io.StringReader: int next>;
+
+        r0.<java.io.StringReader: int mark> = $i1;
+
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r3;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void reset() throws java.io.IOException
+    {
+        java.lang.Throwable $r2;
+        java.io.StringReader r0;
+        int $i0;
+        java.lang.Object $r1;
+
+        r0 := @this: java.io.StringReader;
+
+        $r1 = r0.<java.io.StringReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label1:
+        specialinvoke r0.<java.io.StringReader: void ensureOpen()>();
+
+        $i0 = r0.<java.io.StringReader: int mark>;
+
+        r0.<java.io.StringReader: int next> = $i0;
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void close()
+    {
+        java.io.StringReader r0;
+
+        r0 := @this: java.io.StringReader;
+
+        r0.<java.io.StringReader: java.lang.String str> = null;
+
+        return;
+    }
+}

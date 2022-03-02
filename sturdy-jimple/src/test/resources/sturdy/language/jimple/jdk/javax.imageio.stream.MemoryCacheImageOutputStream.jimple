@@ -1,0 +1,356 @@
+public class javax.imageio.stream.MemoryCacheImageOutputStream extends javax.imageio.stream.ImageOutputStreamImpl
+{
+    private java.io.OutputStream stream;
+    private javax.imageio.stream.MemoryCache cache;
+
+    public void <init>(java.io.OutputStream)
+    {
+        java.io.OutputStream r2;
+        javax.imageio.stream.MemoryCache $r1;
+        javax.imageio.stream.MemoryCacheImageOutputStream r0;
+        java.lang.IllegalArgumentException $r3;
+
+        r0 := @this: javax.imageio.stream.MemoryCacheImageOutputStream;
+
+        r2 := @parameter0: java.io.OutputStream;
+
+        specialinvoke r0.<javax.imageio.stream.ImageOutputStreamImpl: void <init>()>();
+
+        $r1 = new javax.imageio.stream.MemoryCache;
+
+        specialinvoke $r1.<javax.imageio.stream.MemoryCache: void <init>()>();
+
+        r0.<javax.imageio.stream.MemoryCacheImageOutputStream: javax.imageio.stream.MemoryCache cache> = $r1;
+
+        if r2 != null goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("stream == null!");
+
+        throw $r3;
+
+     label1:
+        r0.<javax.imageio.stream.MemoryCacheImageOutputStream: java.io.OutputStream stream> = r2;
+
+        return;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        javax.imageio.stream.MemoryCache $r1;
+        int $i1, $i5;
+        javax.imageio.stream.MemoryCacheImageOutputStream r0;
+        long $l0, $l2, $l3;
+
+        r0 := @this: javax.imageio.stream.MemoryCacheImageOutputStream;
+
+        virtualinvoke r0.<javax.imageio.stream.MemoryCacheImageOutputStream: void checkClosed()>();
+
+        r0.<javax.imageio.stream.MemoryCacheImageOutputStream: int bitOffset> = 0;
+
+        $r1 = r0.<javax.imageio.stream.MemoryCacheImageOutputStream: javax.imageio.stream.MemoryCache cache>;
+
+        $l0 = r0.<javax.imageio.stream.MemoryCacheImageOutputStream: long streamPos>;
+
+        $i1 = virtualinvoke $r1.<javax.imageio.stream.MemoryCache: int read(long)>($l0);
+
+        $i5 = (int) -1;
+
+        if $i1 == $i5 goto label1;
+
+        $l2 = r0.<javax.imageio.stream.MemoryCacheImageOutputStream: long streamPos>;
+
+        $l3 = $l2 + 1L;
+
+        r0.<javax.imageio.stream.MemoryCacheImageOutputStream: long streamPos> = $l3;
+
+     label1:
+        return $i1;
+    }
+
+    public int read(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r1;
+        java.lang.IndexOutOfBoundsException $r7;
+        long $l4, $l5, l6, $l8, $l9, $l10, $l11, $l12, $l13;
+        java.lang.NullPointerException $r6;
+        byte $b7;
+        javax.imageio.stream.MemoryCache $r2, $r3;
+        int i0, $i1, $i2, $i3, i14, i15, $i16, $i18;
+        javax.imageio.stream.MemoryCacheImageOutputStream r0;
+
+        r0 := @this: javax.imageio.stream.MemoryCacheImageOutputStream;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i14 := @parameter2: int;
+
+        virtualinvoke r0.<javax.imageio.stream.MemoryCacheImageOutputStream: void checkClosed()>();
+
+        if r1 != null goto label1;
+
+        $r6 = new java.lang.NullPointerException;
+
+        specialinvoke $r6.<java.lang.NullPointerException: void <init>(java.lang.String)>("b == null!");
+
+        throw $r6;
+
+     label1:
+        if i0 < 0 goto label2;
+
+        if i14 < 0 goto label2;
+
+        $i2 = i0 + i14;
+
+        $i1 = lengthof r1;
+
+        if $i2 > $i1 goto label2;
+
+        $i3 = i0 + i14;
+
+        if $i3 >= 0 goto label3;
+
+     label2:
+        $r7 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r7.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("off < 0 || len < 0 || off+len > b.length || off+len < 0!");
+
+        throw $r7;
+
+     label3:
+        r0.<javax.imageio.stream.MemoryCacheImageOutputStream: int bitOffset> = 0;
+
+        if i14 != 0 goto label4;
+
+        return 0;
+
+     label4:
+        $r2 = r0.<javax.imageio.stream.MemoryCacheImageOutputStream: javax.imageio.stream.MemoryCache cache>;
+
+        $l4 = virtualinvoke $r2.<javax.imageio.stream.MemoryCache: long getLength()>();
+
+        $l5 = r0.<javax.imageio.stream.MemoryCacheImageOutputStream: long streamPos>;
+
+        l6 = $l4 - $l5;
+
+        $b7 = l6 cmp 0L;
+
+        $i16 = (int) $b7;
+
+        if $i16 > 0 goto label5;
+
+        $i18 = (int) -1;
+
+        return $i18;
+
+     label5:
+        $l8 = (long) i14;
+
+        $l9 = staticinvoke <java.lang.Math: long min(long,long)>(l6, $l8);
+
+        i15 = (int) $l9;
+
+        $r3 = r0.<javax.imageio.stream.MemoryCacheImageOutputStream: javax.imageio.stream.MemoryCache cache>;
+
+        $l10 = r0.<javax.imageio.stream.MemoryCacheImageOutputStream: long streamPos>;
+
+        virtualinvoke $r3.<javax.imageio.stream.MemoryCache: void read(byte[],int,int,long)>(r1, i0, i15, $l10);
+
+        $l12 = r0.<javax.imageio.stream.MemoryCacheImageOutputStream: long streamPos>;
+
+        $l11 = (long) i15;
+
+        $l13 = $l12 + $l11;
+
+        r0.<javax.imageio.stream.MemoryCacheImageOutputStream: long streamPos> = $l13;
+
+        return i15;
+    }
+
+    public void write(int) throws java.io.IOException
+    {
+        javax.imageio.stream.MemoryCache $r1;
+        int i0;
+        javax.imageio.stream.MemoryCacheImageOutputStream r0;
+        long $l1, $l2, $l3;
+
+        r0 := @this: javax.imageio.stream.MemoryCacheImageOutputStream;
+
+        i0 := @parameter0: int;
+
+        virtualinvoke r0.<javax.imageio.stream.MemoryCacheImageOutputStream: void flushBits()>();
+
+        $r1 = r0.<javax.imageio.stream.MemoryCacheImageOutputStream: javax.imageio.stream.MemoryCache cache>;
+
+        $l1 = r0.<javax.imageio.stream.MemoryCacheImageOutputStream: long streamPos>;
+
+        virtualinvoke $r1.<javax.imageio.stream.MemoryCache: void write(int,long)>(i0, $l1);
+
+        $l2 = r0.<javax.imageio.stream.MemoryCacheImageOutputStream: long streamPos>;
+
+        $l3 = $l2 + 1L;
+
+        r0.<javax.imageio.stream.MemoryCacheImageOutputStream: long streamPos> = $l3;
+
+        return;
+    }
+
+    public void write(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r1;
+        long $l2, $l3, $l4, $l5;
+        javax.imageio.stream.MemoryCache $r2;
+        int i0, i1;
+        javax.imageio.stream.MemoryCacheImageOutputStream r0;
+
+        r0 := @this: javax.imageio.stream.MemoryCacheImageOutputStream;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        virtualinvoke r0.<javax.imageio.stream.MemoryCacheImageOutputStream: void flushBits()>();
+
+        $r2 = r0.<javax.imageio.stream.MemoryCacheImageOutputStream: javax.imageio.stream.MemoryCache cache>;
+
+        $l2 = r0.<javax.imageio.stream.MemoryCacheImageOutputStream: long streamPos>;
+
+        virtualinvoke $r2.<javax.imageio.stream.MemoryCache: void write(byte[],int,int,long)>(r1, i0, i1, $l2);
+
+        $l4 = r0.<javax.imageio.stream.MemoryCacheImageOutputStream: long streamPos>;
+
+        $l3 = (long) i1;
+
+        $l5 = $l4 + $l3;
+
+        r0.<javax.imageio.stream.MemoryCacheImageOutputStream: long streamPos> = $l5;
+
+        return;
+    }
+
+    public long length()
+    {
+        javax.imageio.stream.MemoryCache $r1;
+        javax.imageio.stream.MemoryCacheImageOutputStream r0;
+        long $l0;
+        java.io.IOException $r2;
+
+        r0 := @this: javax.imageio.stream.MemoryCacheImageOutputStream;
+
+     label1:
+        virtualinvoke r0.<javax.imageio.stream.MemoryCacheImageOutputStream: void checkClosed()>();
+
+        $r1 = r0.<javax.imageio.stream.MemoryCacheImageOutputStream: javax.imageio.stream.MemoryCache cache>;
+
+        $l0 = virtualinvoke $r1.<javax.imageio.stream.MemoryCache: long getLength()>();
+
+     label2:
+        return $l0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        return -1L;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public boolean isCached()
+    {
+        javax.imageio.stream.MemoryCacheImageOutputStream r0;
+
+        r0 := @this: javax.imageio.stream.MemoryCacheImageOutputStream;
+
+        return 1;
+    }
+
+    public boolean isCachedFile()
+    {
+        javax.imageio.stream.MemoryCacheImageOutputStream r0;
+
+        r0 := @this: javax.imageio.stream.MemoryCacheImageOutputStream;
+
+        return 0;
+    }
+
+    public boolean isCachedMemory()
+    {
+        javax.imageio.stream.MemoryCacheImageOutputStream r0;
+
+        r0 := @this: javax.imageio.stream.MemoryCacheImageOutputStream;
+
+        return 1;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        javax.imageio.stream.MemoryCache $r1, $r2;
+        javax.imageio.stream.MemoryCacheImageOutputStream r0;
+        long $l0;
+
+        r0 := @this: javax.imageio.stream.MemoryCacheImageOutputStream;
+
+        $r1 = r0.<javax.imageio.stream.MemoryCacheImageOutputStream: javax.imageio.stream.MemoryCache cache>;
+
+        $l0 = virtualinvoke $r1.<javax.imageio.stream.MemoryCache: long getLength()>();
+
+        virtualinvoke r0.<javax.imageio.stream.MemoryCacheImageOutputStream: void seek(long)>($l0);
+
+        virtualinvoke r0.<javax.imageio.stream.MemoryCacheImageOutputStream: void flushBefore(long)>($l0);
+
+        specialinvoke r0.<javax.imageio.stream.ImageOutputStreamImpl: void close()>();
+
+        $r2 = r0.<javax.imageio.stream.MemoryCacheImageOutputStream: javax.imageio.stream.MemoryCache cache>;
+
+        virtualinvoke $r2.<javax.imageio.stream.MemoryCache: void reset()>();
+
+        r0.<javax.imageio.stream.MemoryCacheImageOutputStream: javax.imageio.stream.MemoryCache cache> = null;
+
+        r0.<javax.imageio.stream.MemoryCacheImageOutputStream: java.io.OutputStream stream> = null;
+
+        return;
+    }
+
+    public void flushBefore(long) throws java.io.IOException
+    {
+        java.io.OutputStream $r1, $r4;
+        long l0, l1, $l2, l3, $l4;
+        javax.imageio.stream.MemoryCache $r2, $r3;
+        javax.imageio.stream.MemoryCacheImageOutputStream r0;
+
+        r0 := @this: javax.imageio.stream.MemoryCacheImageOutputStream;
+
+        l1 := @parameter0: long;
+
+        l0 = r0.<javax.imageio.stream.MemoryCacheImageOutputStream: long flushedPos>;
+
+        specialinvoke r0.<javax.imageio.stream.ImageOutputStreamImpl: void flushBefore(long)>(l1);
+
+        $l2 = r0.<javax.imageio.stream.MemoryCacheImageOutputStream: long flushedPos>;
+
+        l3 = $l2 - l0;
+
+        $r2 = r0.<javax.imageio.stream.MemoryCacheImageOutputStream: javax.imageio.stream.MemoryCache cache>;
+
+        $r1 = r0.<javax.imageio.stream.MemoryCacheImageOutputStream: java.io.OutputStream stream>;
+
+        virtualinvoke $r2.<javax.imageio.stream.MemoryCache: void writeToStream(java.io.OutputStream,long,long)>($r1, l0, l3);
+
+        $r3 = r0.<javax.imageio.stream.MemoryCacheImageOutputStream: javax.imageio.stream.MemoryCache cache>;
+
+        $l4 = r0.<javax.imageio.stream.MemoryCacheImageOutputStream: long flushedPos>;
+
+        virtualinvoke $r3.<javax.imageio.stream.MemoryCache: void disposeBefore(long)>($l4);
+
+        $r4 = r0.<javax.imageio.stream.MemoryCacheImageOutputStream: java.io.OutputStream stream>;
+
+        virtualinvoke $r4.<java.io.OutputStream: void flush()>();
+
+        return;
+    }
+}

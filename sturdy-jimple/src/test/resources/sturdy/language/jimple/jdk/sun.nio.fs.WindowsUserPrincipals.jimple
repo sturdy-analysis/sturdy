@@ -1,0 +1,303 @@
+class sun.nio.fs.WindowsUserPrincipals extends java.lang.Object
+{
+    static final boolean $assertionsDisabled;
+
+    private void <init>()
+    {
+        sun.nio.fs.WindowsUserPrincipals r0;
+
+        r0 := @this: sun.nio.fs.WindowsUserPrincipals;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    static java.nio.file.attribute.UserPrincipal fromSid(long) throws java.io.IOException
+    {
+        sun.nio.fs.WindowsUserPrincipals$Group $r20;
+        long l0;
+        java.lang.AssertionError $r9;
+        sun.nio.fs.WindowsNativeDispatcher$Account $r1, r18;
+        sun.nio.fs.WindowsException $r10, $r11;
+        int $i1, i2;
+        java.lang.String $r0, $r3, $r6, $r15, $r17, r19;
+        java.io.IOException $r12;
+        sun.nio.fs.WindowsUserPrincipals$User $r8;
+        java.lang.StringBuilder $r2, $r4, $r5, $r7, $r13, $r14, $r16;
+
+        l0 := @parameter0: long;
+
+     label01:
+        $r0 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: java.lang.String ConvertSidToStringSid(long)>(l0);
+
+        if $r0 != null goto label02;
+
+        $r9 = new java.lang.AssertionError;
+
+        specialinvoke $r9.<java.lang.AssertionError: void <init>()>();
+
+        throw $r9;
+
+     label02:
+        goto label04;
+
+     label03:
+        $r11 := @caughtexception;
+
+        $r12 = new java.io.IOException;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to convert SID to String: ");
+
+        $r15 = virtualinvoke $r11.<sun.nio.fs.WindowsException: java.lang.String errorString()>();
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r12.<java.io.IOException: void <init>(java.lang.String)>($r17);
+
+        throw $r12;
+
+     label04:
+        r18 = null;
+
+     label05:
+        $r1 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: sun.nio.fs.WindowsNativeDispatcher$Account LookupAccountSid(long)>(l0);
+
+        r18 = $r1;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r1.<sun.nio.fs.WindowsNativeDispatcher$Account: java.lang.String domain()>();
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\\");
+
+        $r6 = virtualinvoke $r1.<sun.nio.fs.WindowsNativeDispatcher$Account: java.lang.String name()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        r19 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label06:
+        goto label08;
+
+     label07:
+        $r10 := @caughtexception;
+
+        r19 = $r0;
+
+     label08:
+        if r18 != null goto label09;
+
+        $i1 = 8;
+
+        goto label10;
+
+     label09:
+        $i1 = virtualinvoke r18.<sun.nio.fs.WindowsNativeDispatcher$Account: int use()>();
+
+     label10:
+        i2 = $i1;
+
+        if $i1 == 2 goto label11;
+
+        if $i1 == 5 goto label11;
+
+        if $i1 != 4 goto label12;
+
+     label11:
+        $r20 = new sun.nio.fs.WindowsUserPrincipals$Group;
+
+        specialinvoke $r20.<sun.nio.fs.WindowsUserPrincipals$Group: void <init>(java.lang.String,int,java.lang.String)>($r0, i2, r19);
+
+        return $r20;
+
+     label12:
+        $r8 = new sun.nio.fs.WindowsUserPrincipals$User;
+
+        specialinvoke $r8.<sun.nio.fs.WindowsUserPrincipals$User: void <init>(java.lang.String,int,java.lang.String)>($r0, $i1, r19);
+
+        return $r8;
+
+        catch sun.nio.fs.WindowsException from label01 to label02 with label03;
+        catch sun.nio.fs.WindowsException from label05 to label06 with label07;
+    }
+
+    static java.nio.file.attribute.UserPrincipal lookup(java.lang.String) throws java.io.IOException
+    {
+        java.lang.Throwable $r7;
+        java.nio.file.attribute.UserPrincipalNotFoundException $r24;
+        long $l1, $l3;
+        java.lang.AssertionError $r4, $r5;
+        java.nio.file.attribute.UserPrincipal $r3;
+        int $i0, $i2, $i4;
+        sun.nio.fs.WindowsException $r8, $r16;
+        java.lang.String r1, $r13, $r15, $r21, $r23;
+        boolean $z0;
+        java.io.IOException $r9, $r17;
+        sun.nio.fs.NativeBuffer $r2;
+        java.lang.SecurityManager $r0;
+        java.lang.RuntimePermission $r6;
+        java.lang.StringBuilder $r10, $r11, $r12, $r14, $r18, $r19, $r20, $r22;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label01;
+
+        $r6 = new java.lang.RuntimePermission;
+
+        specialinvoke $r6.<java.lang.RuntimePermission: void <init>(java.lang.String)>("lookupUserInformation");
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r6);
+
+     label01:
+        $i0 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: int LookupAccountName(java.lang.String,long,int)>(r1, 0L, 0);
+
+     label02:
+        goto label05;
+
+     label03:
+        $r16 := @caughtexception;
+
+        $i4 = virtualinvoke $r16.<sun.nio.fs.WindowsException: int lastError()>();
+
+        if $i4 != 1332 goto label04;
+
+        $r24 = new java.nio.file.attribute.UserPrincipalNotFoundException;
+
+        specialinvoke $r24.<java.nio.file.attribute.UserPrincipalNotFoundException: void <init>(java.lang.String)>(r1);
+
+        throw $r24;
+
+     label04:
+        $r17 = new java.io.IOException;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r21 = virtualinvoke $r16.<sun.nio.fs.WindowsException: java.lang.String errorString()>();
+
+        $r22 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r21);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r17.<java.io.IOException: void <init>(java.lang.String)>($r23);
+
+        throw $r17;
+
+     label05:
+        $z0 = <sun.nio.fs.WindowsUserPrincipals: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label06;
+
+        if $i0 > 0 goto label06;
+
+        $r5 = new java.lang.AssertionError;
+
+        specialinvoke $r5.<java.lang.AssertionError: void <init>()>();
+
+        throw $r5;
+
+     label06:
+        $r2 = staticinvoke <sun.nio.fs.NativeBuffers: sun.nio.fs.NativeBuffer getNativeBuffer(int)>($i0);
+
+     label07:
+        $l1 = virtualinvoke $r2.<sun.nio.fs.NativeBuffer: long address()>();
+
+        $i2 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: int LookupAccountName(java.lang.String,long,int)>(r1, $l1, $i0);
+
+        if $i2 == $i0 goto label08;
+
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>(java.lang.Object)>("SID change during lookup");
+
+        throw $r4;
+
+     label08:
+        $l3 = virtualinvoke $r2.<sun.nio.fs.NativeBuffer: long address()>();
+
+        $r3 = staticinvoke <sun.nio.fs.WindowsUserPrincipals: java.nio.file.attribute.UserPrincipal fromSid(long)>($l3);
+
+     label09:
+        virtualinvoke $r2.<sun.nio.fs.NativeBuffer: void release()>();
+
+        return $r3;
+
+     label10:
+        $r8 := @caughtexception;
+
+        $r9 = new java.io.IOException;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r13 = virtualinvoke $r8.<sun.nio.fs.WindowsException: java.lang.String errorString()>();
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<java.io.IOException: void <init>(java.lang.String)>($r15);
+
+        throw $r9;
+
+     label11:
+        $r7 := @caughtexception;
+
+     label12:
+        virtualinvoke $r2.<sun.nio.fs.NativeBuffer: void release()>();
+
+        throw $r7;
+
+        catch sun.nio.fs.WindowsException from label01 to label02 with label03;
+        catch sun.nio.fs.WindowsException from label07 to label09 with label10;
+        catch java.lang.Throwable from label07 to label09 with label11;
+        catch java.lang.Throwable from label10 to label12 with label11;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        $r0 = class "Lsun/nio/fs/WindowsUserPrincipals;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.nio.fs.WindowsUserPrincipals: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

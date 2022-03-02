@@ -1,0 +1,761 @@
+final class sun.security.ssl.Finished$T13FinishedConsumer extends java.lang.Object implements sun.security.ssl.SSLConsumer
+{
+
+    private void <init>()
+    {
+        sun.security.ssl.Finished$T13FinishedConsumer r0;
+
+        r0 := @this: sun.security.ssl.Finished$T13FinishedConsumer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void consume(sun.security.ssl.ConnectionContext, java.nio.ByteBuffer) throws java.io.IOException
+    {
+        sun.security.ssl.ServerHandshakeContext $r5;
+        sun.security.ssl.ClientHandshakeContext $r6;
+        java.nio.ByteBuffer r4;
+        sun.security.ssl.ConnectionContext r0;
+        sun.security.ssl.Finished$T13FinishedConsumer r3;
+        sun.security.ssl.SSLConfiguration $r2;
+        sun.security.ssl.HandshakeContext r1;
+        boolean $z0;
+
+        r3 := @this: sun.security.ssl.Finished$T13FinishedConsumer;
+
+        r0 := @parameter0: sun.security.ssl.ConnectionContext;
+
+        r4 := @parameter1: java.nio.ByteBuffer;
+
+        r1 = (sun.security.ssl.HandshakeContext) r0;
+
+        $r2 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $z0 = $r2.<sun.security.ssl.SSLConfiguration: boolean isClientMode>;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = (sun.security.ssl.ClientHandshakeContext) r0;
+
+        specialinvoke r3.<sun.security.ssl.Finished$T13FinishedConsumer: void onConsumeFinished(sun.security.ssl.ClientHandshakeContext,java.nio.ByteBuffer)>($r6, r4);
+
+        goto label2;
+
+     label1:
+        $r5 = (sun.security.ssl.ServerHandshakeContext) r0;
+
+        specialinvoke r3.<sun.security.ssl.Finished$T13FinishedConsumer: void onConsumeFinished(sun.security.ssl.ServerHandshakeContext,java.nio.ByteBuffer)>($r5, r4);
+
+     label2:
+        return;
+    }
+
+    private void onConsumeFinished(sun.security.ssl.ClientHandshakeContext, java.nio.ByteBuffer) throws java.io.IOException
+    {
+        byte[] $r51, $r75, $r84;
+        javax.crypto.spec.SecretKeySpec $r76;
+        java.security.SecureRandom $r91;
+        java.security.GeneralSecurityException $r63;
+        sun.security.ssl.ContentType $r4;
+        byte $b0, $b1, $b2, $b3, $b4;
+        java.util.Map $r5;
+        sun.security.ssl.InputRecord $r11;
+        javax.net.ssl.SSLException $r34, $r46, $r49, $r59, $r66;
+        sun.security.ssl.SSLSecretDerivation $r78;
+        sun.security.ssl.HandshakeHash $r7;
+        sun.security.ssl.Finished$T13FinishedConsumer r67;
+        java.lang.StringBuilder $r23, $r26, $r28, $r29, $r31, $r32, $r39, $r42, $r44;
+        sun.security.ssl.CipherSuite $r27, $r71, $r85;
+        javax.crypto.SecretKey $r70, $r77, $r79, $r81, $r82;
+        java.lang.Object[] $r53;
+        sun.security.ssl.ProtocolVersion $r8, $r30, $r43, $r87, $r89;
+        java.util.LinkedHashMap $r55, $r61;
+        sun.security.ssl.CipherSuite$HashAlg $r72;
+        javax.crypto.spec.IvParameterSpec $r83;
+        java.lang.String $r33, $r45, $r74;
+        sun.security.ssl.TransportContext $r3, $r10, $r24, $r40, $r48, $r50, $r58, $r65, $r68;
+        sun.security.ssl.Authenticator $r88;
+        sun.security.ssl.Alert $r25, $r41, $r47, $r57, $r64;
+        sun.security.ssl.SSLSessionImpl $r35, $r38;
+        java.nio.ByteBuffer r2;
+        java.lang.Byte $r6, $r14, $r21, $r56, $r62;
+        javax.net.ssl.SSLSessionContext $r37;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        sun.security.ssl.SSLHandshake $r12, $r15, $r17, $r18, $r19, $r54, $r60, r93;
+        sun.security.ssl.SSLContextImpl $r36, $r90;
+        sun.security.ssl.SSLCipher$SSLReadCipher $r92;
+        sun.security.ssl.SSLHandshake[] $r16;
+        sun.security.ssl.SSLSessionContextImpl r69;
+        sun.security.ssl.SSLTrafficKeyDerivation $r9;
+        sun.security.ssl.HKDF $r73;
+        java.util.HashMap $r13, $r20;
+        sun.security.ssl.SSLCipher $r86;
+        sun.security.ssl.HandshakeProducer r94;
+        sun.security.ssl.Finished$FinishedMessage $r1;
+        int $i5, i6, i7;
+        sun.security.ssl.ClientHandshakeContext r0;
+        sun.security.ssl.SSLKeyDerivation $r52, $r80;
+        java.lang.Object $r22;
+
+        r67 := @this: sun.security.ssl.Finished$T13FinishedConsumer;
+
+        r0 := @parameter0: sun.security.ssl.ClientHandshakeContext;
+
+        r2 := @parameter1: java.nio.ByteBuffer;
+
+        $z0 = r0.<sun.security.ssl.ClientHandshakeContext: boolean isResumption>;
+
+        if $z0 != 0 goto label02;
+
+        $r55 = r0.<sun.security.ssl.ClientHandshakeContext: java.util.LinkedHashMap handshakeConsumers>;
+
+        $r54 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake CERTIFICATE>;
+
+        $b3 = $r54.<sun.security.ssl.SSLHandshake: byte id>;
+
+        $r56 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b3);
+
+        $z5 = virtualinvoke $r55.<java.util.LinkedHashMap: boolean containsKey(java.lang.Object)>($r56);
+
+        if $z5 != 0 goto label01;
+
+        $r61 = r0.<sun.security.ssl.ClientHandshakeContext: java.util.LinkedHashMap handshakeConsumers>;
+
+        $r60 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake CERTIFICATE_VERIFY>;
+
+        $b4 = $r60.<sun.security.ssl.SSLHandshake: byte id>;
+
+        $r62 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b4);
+
+        $z6 = virtualinvoke $r61.<java.util.LinkedHashMap: boolean containsKey(java.lang.Object)>($r62);
+
+        if $z6 == 0 goto label02;
+
+     label01:
+        $r58 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r57 = <sun.security.ssl.Alert: sun.security.ssl.Alert UNEXPECTED_MESSAGE>;
+
+        $r59 = virtualinvoke $r58.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r57, "Unexpected Finished handshake message");
+
+        throw $r59;
+
+     label02:
+        $r1 = new sun.security.ssl.Finished$FinishedMessage;
+
+        specialinvoke $r1.<sun.security.ssl.Finished$FinishedMessage: void <init>(sun.security.ssl.HandshakeContext,java.nio.ByteBuffer)>(r0, r2);
+
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label03;
+
+        $z4 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z4 == 0 goto label03;
+
+        $r53 = newarray (java.lang.Object)[1];
+
+        $r53[0] = $r1;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Consuming server Finished handshake message", $r53);
+
+     label03:
+        $r68 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $z7 = $r68.<sun.security.ssl.TransportContext: boolean secureRenegotiation>;
+
+        if $z7 == 0 goto label04;
+
+        $r50 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r51 = staticinvoke <sun.security.ssl.Finished$FinishedMessage: byte[] access$800(sun.security.ssl.Finished$FinishedMessage)>($r1);
+
+        $r50.<sun.security.ssl.TransportContext: byte[] serverVerifyData> = $r51;
+
+     label04:
+        $r3 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r5 = $r3.<sun.security.ssl.TransportContext: java.util.Map consumers>;
+
+        $r4 = <sun.security.ssl.ContentType: sun.security.ssl.ContentType CHANGE_CIPHER_SPEC>;
+
+        $b0 = $r4.<sun.security.ssl.ContentType: byte id>;
+
+        $r6 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b0);
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r6);
+
+        $r7 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.HandshakeHash handshakeHash>;
+
+        virtualinvoke $r7.<sun.security.ssl.HandshakeHash: void update()>();
+
+        $r52 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLKeyDerivation handshakeKeyDerivation>;
+
+        if $r52 != null goto label05;
+
+        $r48 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r47 = <sun.security.ssl.Alert: sun.security.ssl.Alert INTERNAL_ERROR>;
+
+        $r49 = virtualinvoke $r48.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r47, "no key derivation");
+
+        throw $r49;
+
+     label05:
+        $r8 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r9 = staticinvoke <sun.security.ssl.SSLTrafficKeyDerivation: sun.security.ssl.SSLTrafficKeyDerivation valueOf(sun.security.ssl.ProtocolVersion)>($r8);
+
+        if $r9 != null goto label06;
+
+        $r40 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r41 = <sun.security.ssl.Alert: sun.security.ssl.Alert INTERNAL_ERROR>;
+
+        $r39 = new java.lang.StringBuilder;
+
+        specialinvoke $r39.<java.lang.StringBuilder: void <init>()>();
+
+        $r42 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Not supported key derivation: ");
+
+        $r43 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r44 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r43);
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r46 = virtualinvoke $r40.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r41, $r45);
+
+        throw $r46;
+
+     label06:
+        $z2 = r0.<sun.security.ssl.ClientHandshakeContext: boolean isResumption>;
+
+        if $z2 != 0 goto label07;
+
+        $r35 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        $z3 = virtualinvoke $r35.<sun.security.ssl.SSLSessionImpl: boolean isRejoinable()>();
+
+        if $z3 == 0 goto label07;
+
+        $r36 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLContextImpl sslContext>;
+
+        $r37 = virtualinvoke $r36.<sun.security.ssl.SSLContextImpl: javax.net.ssl.SSLSessionContext engineGetClientSessionContext()>();
+
+        r69 = (sun.security.ssl.SSLSessionContextImpl) $r37;
+
+        $r38 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        virtualinvoke r69.<sun.security.ssl.SSLSessionContextImpl: void put(sun.security.ssl.SSLSessionImpl)>($r38);
+
+     label07:
+        $r70 = interfaceinvoke $r52.<sun.security.ssl.SSLKeyDerivation: javax.crypto.SecretKey deriveKey(java.lang.String,java.security.spec.AlgorithmParameterSpec)>("TlsSaltSecret", null);
+
+        $r71 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.CipherSuite negotiatedCipherSuite>;
+
+        $r72 = $r71.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$HashAlg hashAlg>;
+
+        $r73 = new sun.security.ssl.HKDF;
+
+        $r74 = $r72.<sun.security.ssl.CipherSuite$HashAlg: java.lang.String name>;
+
+        specialinvoke $r73.<sun.security.ssl.HKDF: void <init>(java.lang.String)>($r74);
+
+        $i5 = $r72.<sun.security.ssl.CipherSuite$HashAlg: int hashLength>;
+
+        $r75 = newarray (byte)[$i5];
+
+        $r76 = new javax.crypto.spec.SecretKeySpec;
+
+        specialinvoke $r76.<javax.crypto.spec.SecretKeySpec: void <init>(byte[],java.lang.String)>($r75, "TlsZeroSecret");
+
+        $r77 = virtualinvoke $r73.<sun.security.ssl.HKDF: javax.crypto.SecretKey extract(javax.crypto.SecretKey,javax.crypto.SecretKey,java.lang.String)>($r70, $r76, "TlsMasterSecret");
+
+        $r78 = new sun.security.ssl.SSLSecretDerivation;
+
+        specialinvoke $r78.<sun.security.ssl.SSLSecretDerivation: void <init>(sun.security.ssl.HandshakeContext,javax.crypto.SecretKey)>(r0, $r77);
+
+        $r79 = interfaceinvoke $r78.<sun.security.ssl.SSLKeyDerivation: javax.crypto.SecretKey deriveKey(java.lang.String,java.security.spec.AlgorithmParameterSpec)>("TlsServerAppTrafficSecret", null);
+
+        $r80 = virtualinvoke $r9.<sun.security.ssl.SSLTrafficKeyDerivation: sun.security.ssl.SSLKeyDerivation createKeyDerivation(sun.security.ssl.HandshakeContext,javax.crypto.SecretKey)>(r0, $r79);
+
+        $r81 = interfaceinvoke $r80.<sun.security.ssl.SSLKeyDerivation: javax.crypto.SecretKey deriveKey(java.lang.String,java.security.spec.AlgorithmParameterSpec)>("TlsKey", null);
+
+        $r82 = interfaceinvoke $r80.<sun.security.ssl.SSLKeyDerivation: javax.crypto.SecretKey deriveKey(java.lang.String,java.security.spec.AlgorithmParameterSpec)>("TlsIv", null);
+
+        $r83 = new javax.crypto.spec.IvParameterSpec;
+
+        $r84 = interfaceinvoke $r82.<javax.crypto.SecretKey: byte[] getEncoded()>();
+
+        specialinvoke $r83.<javax.crypto.spec.IvParameterSpec: void <init>(byte[])>($r84);
+
+        $r85 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.CipherSuite negotiatedCipherSuite>;
+
+        $r86 = $r85.<sun.security.ssl.CipherSuite: sun.security.ssl.SSLCipher bulkCipher>;
+
+        $r87 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r88 = staticinvoke <sun.security.ssl.Authenticator: sun.security.ssl.Authenticator valueOf(sun.security.ssl.ProtocolVersion)>($r87);
+
+        $r89 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r90 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLContextImpl sslContext>;
+
+        $r91 = virtualinvoke $r90.<sun.security.ssl.SSLContextImpl: java.security.SecureRandom getSecureRandom()>();
+
+        $r92 = virtualinvoke $r86.<sun.security.ssl.SSLCipher: sun.security.ssl.SSLCipher$SSLReadCipher createReadCipher(sun.security.ssl.Authenticator,sun.security.ssl.ProtocolVersion,javax.crypto.SecretKey,javax.crypto.spec.IvParameterSpec,java.security.SecureRandom)>($r88, $r89, $r81, $r83, $r91);
+
+        if $r92 != null goto label08;
+
+        $r24 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r25 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Illegal cipher suite (");
+
+        $r27 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.CipherSuite negotiatedCipherSuite>;
+
+        $r28 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r27);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") and protocol version (");
+
+        $r30 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r31 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r30);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r34 = virtualinvoke $r24.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r25, $r33);
+
+        throw $r34;
+
+     label08:
+        r0.<sun.security.ssl.ClientHandshakeContext: javax.crypto.SecretKey baseReadSecret> = $r79;
+
+        $r10 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r11 = $r10.<sun.security.ssl.TransportContext: sun.security.ssl.InputRecord inputRecord>;
+
+        virtualinvoke $r11.<sun.security.ssl.InputRecord: void changeReadCiphers(sun.security.ssl.SSLCipher$SSLReadCipher)>($r92);
+
+        r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLKeyDerivation handshakeKeyDerivation> = $r78;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r63 := @caughtexception;
+
+        $r65 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r64 = <sun.security.ssl.Alert: sun.security.ssl.Alert INTERNAL_ERROR>;
+
+        $r66 = virtualinvoke $r65.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String,java.lang.Throwable)>($r64, "Failure to derive application secrets", $r63);
+
+        throw $r66;
+
+     label11:
+        $r13 = r0.<sun.security.ssl.ClientHandshakeContext: java.util.HashMap handshakeProducers>;
+
+        $r12 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake FINISHED>;
+
+        $b1 = $r12.<sun.security.ssl.SSLHandshake: byte id>;
+
+        $r14 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b1);
+
+        $r15 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake FINISHED>;
+
+        virtualinvoke $r13.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r14, $r15);
+
+        $r16 = newarray (sun.security.ssl.SSLHandshake)[3];
+
+        $r17 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake CERTIFICATE>;
+
+        $r16[0] = $r17;
+
+        $r18 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake CERTIFICATE_VERIFY>;
+
+        $r16[1] = $r18;
+
+        $r19 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake FINISHED>;
+
+        $r16[2] = $r19;
+
+        i6 = lengthof $r16;
+
+        i7 = 0;
+
+     label12:
+        if i7 >= i6 goto label14;
+
+        r93 = $r16[i7];
+
+        $r20 = r0.<sun.security.ssl.ClientHandshakeContext: java.util.HashMap handshakeProducers>;
+
+        $b2 = r93.<sun.security.ssl.SSLHandshake: byte id>;
+
+        $r21 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b2);
+
+        $r22 = virtualinvoke $r20.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>($r21);
+
+        r94 = (sun.security.ssl.HandshakeProducer) $r22;
+
+        if r94 == null goto label13;
+
+        interfaceinvoke r94.<sun.security.ssl.HandshakeProducer: byte[] produce(sun.security.ssl.ConnectionContext,sun.security.ssl.SSLHandshake$HandshakeMessage)>(r0, null);
+
+     label13:
+        i7 = i7 + 1;
+
+        goto label12;
+
+     label14:
+        return;
+
+        catch java.security.GeneralSecurityException from label07 to label09 with label10;
+    }
+
+    private void onConsumeFinished(sun.security.ssl.ServerHandshakeContext, java.nio.ByteBuffer) throws java.io.IOException
+    {
+        byte[] $r49, $r73;
+        java.security.SecureRandom $r80;
+        java.security.GeneralSecurityException $r61;
+        byte $b0, $b1;
+        sun.security.ssl.InputRecord $r6;
+        sun.security.ssl.ServerHandshakeContext r0;
+        sun.security.ssl.SSLSecretDerivation $r8, $r9;
+        javax.net.ssl.SSLException $r32, $r44, $r47, $r57, $r64;
+        sun.security.ssl.HandshakeHash $r7;
+        sun.security.ssl.Finished$T13FinishedConsumer r65;
+        java.lang.StringBuilder $r21, $r24, $r26, $r27, $r29, $r30, $r37, $r40, $r42;
+        javax.crypto.SecretKey $r10, $r68, $r70, $r71;
+        sun.security.ssl.CipherSuite $r25, $r74;
+        java.lang.Object[] $r20, $r51;
+        sun.security.ssl.ProtocolVersion $r3, $r15, $r28, $r41, $r76, $r78;
+        java.util.LinkedHashMap $r53, $r59;
+        javax.crypto.spec.IvParameterSpec $r72;
+        sun.security.ssl.SSLProducer $r82;
+        java.lang.String $r31, $r43;
+        sun.security.ssl.TransportContext $r5, $r13, $r16, $r17, $r18, $r22, $r38, $r46, $r48, $r56, $r63, $r66;
+        sun.security.ssl.Authenticator $r77;
+        sun.security.ssl.Alert $r23, $r39, $r45, $r55, $r62;
+        sun.security.ssl.SSLSessionImpl $r11, $r12, $r14, $r19, $r33, $r36;
+        java.nio.ByteBuffer r2;
+        javax.net.ssl.SSLSessionContext $r35;
+        java.lang.Byte $r54, $r60;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        sun.security.ssl.SSLHandshake $r52, $r58;
+        sun.security.ssl.SSLContextImpl $r34, $r79;
+        sun.security.ssl.SSLCipher$SSLReadCipher $r81;
+        sun.security.ssl.SSLSessionContextImpl r67;
+        sun.security.ssl.SSLTrafficKeyDerivation $r4;
+        sun.security.ssl.SSLCipher $r75;
+        sun.security.ssl.Finished$FinishedMessage $r1;
+        sun.security.ssl.SSLKeyDerivation $r50, $r69;
+
+        r65 := @this: sun.security.ssl.Finished$T13FinishedConsumer;
+
+        r0 := @parameter0: sun.security.ssl.ServerHandshakeContext;
+
+        r2 := @parameter1: java.nio.ByteBuffer;
+
+        $z0 = r0.<sun.security.ssl.ServerHandshakeContext: boolean isResumption>;
+
+        if $z0 != 0 goto label02;
+
+        $r53 = r0.<sun.security.ssl.ServerHandshakeContext: java.util.LinkedHashMap handshakeConsumers>;
+
+        $r52 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake CERTIFICATE>;
+
+        $b0 = $r52.<sun.security.ssl.SSLHandshake: byte id>;
+
+        $r54 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b0);
+
+        $z7 = virtualinvoke $r53.<java.util.LinkedHashMap: boolean containsKey(java.lang.Object)>($r54);
+
+        if $z7 != 0 goto label01;
+
+        $r59 = r0.<sun.security.ssl.ServerHandshakeContext: java.util.LinkedHashMap handshakeConsumers>;
+
+        $r58 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake CERTIFICATE_VERIFY>;
+
+        $b1 = $r58.<sun.security.ssl.SSLHandshake: byte id>;
+
+        $r60 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b1);
+
+        $z8 = virtualinvoke $r59.<java.util.LinkedHashMap: boolean containsKey(java.lang.Object)>($r60);
+
+        if $z8 == 0 goto label02;
+
+     label01:
+        $r56 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r55 = <sun.security.ssl.Alert: sun.security.ssl.Alert UNEXPECTED_MESSAGE>;
+
+        $r57 = virtualinvoke $r56.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r55, "Unexpected Finished handshake message");
+
+        throw $r57;
+
+     label02:
+        $r1 = new sun.security.ssl.Finished$FinishedMessage;
+
+        specialinvoke $r1.<sun.security.ssl.Finished$FinishedMessage: void <init>(sun.security.ssl.HandshakeContext,java.nio.ByteBuffer)>(r0, r2);
+
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label03;
+
+        $z6 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z6 == 0 goto label03;
+
+        $r51 = newarray (java.lang.Object)[1];
+
+        $r51[0] = $r1;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Consuming client Finished handshake message", $r51);
+
+     label03:
+        $r66 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $z9 = $r66.<sun.security.ssl.TransportContext: boolean secureRenegotiation>;
+
+        if $z9 == 0 goto label04;
+
+        $r48 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r49 = staticinvoke <sun.security.ssl.Finished$FinishedMessage: byte[] access$800(sun.security.ssl.Finished$FinishedMessage)>($r1);
+
+        $r48.<sun.security.ssl.TransportContext: byte[] clientVerifyData> = $r49;
+
+     label04:
+        $r50 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLKeyDerivation handshakeKeyDerivation>;
+
+        if $r50 != null goto label05;
+
+        $r46 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r45 = <sun.security.ssl.Alert: sun.security.ssl.Alert INTERNAL_ERROR>;
+
+        $r47 = virtualinvoke $r46.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r45, "no key derivation");
+
+        throw $r47;
+
+     label05:
+        $r3 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r4 = staticinvoke <sun.security.ssl.SSLTrafficKeyDerivation: sun.security.ssl.SSLTrafficKeyDerivation valueOf(sun.security.ssl.ProtocolVersion)>($r3);
+
+        if $r4 != null goto label06;
+
+        $r38 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r39 = <sun.security.ssl.Alert: sun.security.ssl.Alert INTERNAL_ERROR>;
+
+        $r37 = new java.lang.StringBuilder;
+
+        specialinvoke $r37.<java.lang.StringBuilder: void <init>()>();
+
+        $r40 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Not supported key derivation: ");
+
+        $r41 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r42 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r41);
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r44 = virtualinvoke $r38.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r39, $r43);
+
+        throw $r44;
+
+     label06:
+        $z2 = r0.<sun.security.ssl.ServerHandshakeContext: boolean isResumption>;
+
+        if $z2 != 0 goto label07;
+
+        $r33 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        $z5 = virtualinvoke $r33.<sun.security.ssl.SSLSessionImpl: boolean isRejoinable()>();
+
+        if $z5 == 0 goto label07;
+
+        $r34 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLContextImpl sslContext>;
+
+        $r35 = virtualinvoke $r34.<sun.security.ssl.SSLContextImpl: javax.net.ssl.SSLSessionContext engineGetServerSessionContext()>();
+
+        r67 = (sun.security.ssl.SSLSessionContextImpl) $r35;
+
+        $r36 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        virtualinvoke r67.<sun.security.ssl.SSLSessionContextImpl: void put(sun.security.ssl.SSLSessionImpl)>($r36);
+
+     label07:
+        $r68 = interfaceinvoke $r50.<sun.security.ssl.SSLKeyDerivation: javax.crypto.SecretKey deriveKey(java.lang.String,java.security.spec.AlgorithmParameterSpec)>("TlsClientAppTrafficSecret", null);
+
+        $r69 = virtualinvoke $r4.<sun.security.ssl.SSLTrafficKeyDerivation: sun.security.ssl.SSLKeyDerivation createKeyDerivation(sun.security.ssl.HandshakeContext,javax.crypto.SecretKey)>(r0, $r68);
+
+        $r70 = interfaceinvoke $r69.<sun.security.ssl.SSLKeyDerivation: javax.crypto.SecretKey deriveKey(java.lang.String,java.security.spec.AlgorithmParameterSpec)>("TlsKey", null);
+
+        $r71 = interfaceinvoke $r69.<sun.security.ssl.SSLKeyDerivation: javax.crypto.SecretKey deriveKey(java.lang.String,java.security.spec.AlgorithmParameterSpec)>("TlsIv", null);
+
+        $r72 = new javax.crypto.spec.IvParameterSpec;
+
+        $r73 = interfaceinvoke $r71.<javax.crypto.SecretKey: byte[] getEncoded()>();
+
+        specialinvoke $r72.<javax.crypto.spec.IvParameterSpec: void <init>(byte[])>($r73);
+
+        $r74 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.CipherSuite negotiatedCipherSuite>;
+
+        $r75 = $r74.<sun.security.ssl.CipherSuite: sun.security.ssl.SSLCipher bulkCipher>;
+
+        $r76 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r77 = staticinvoke <sun.security.ssl.Authenticator: sun.security.ssl.Authenticator valueOf(sun.security.ssl.ProtocolVersion)>($r76);
+
+        $r78 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r79 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLContextImpl sslContext>;
+
+        $r80 = virtualinvoke $r79.<sun.security.ssl.SSLContextImpl: java.security.SecureRandom getSecureRandom()>();
+
+        $r81 = virtualinvoke $r75.<sun.security.ssl.SSLCipher: sun.security.ssl.SSLCipher$SSLReadCipher createReadCipher(sun.security.ssl.Authenticator,sun.security.ssl.ProtocolVersion,javax.crypto.SecretKey,javax.crypto.spec.IvParameterSpec,java.security.SecureRandom)>($r77, $r78, $r70, $r72, $r80);
+
+        if $r81 != null goto label08;
+
+        $r22 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r23 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Illegal cipher suite (");
+
+        $r25 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.CipherSuite negotiatedCipherSuite>;
+
+        $r26 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r25);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") and protocol version (");
+
+        $r28 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r29 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r28);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r32 = virtualinvoke $r22.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r23, $r31);
+
+        throw $r32;
+
+     label08:
+        r0.<sun.security.ssl.ServerHandshakeContext: javax.crypto.SecretKey baseReadSecret> = $r68;
+
+        $r5 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r6 = $r5.<sun.security.ssl.TransportContext: sun.security.ssl.InputRecord inputRecord>;
+
+        virtualinvoke $r6.<sun.security.ssl.InputRecord: void changeReadCiphers(sun.security.ssl.SSLCipher$SSLReadCipher)>($r81);
+
+        $r7 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.HandshakeHash handshakeHash>;
+
+        virtualinvoke $r7.<sun.security.ssl.HandshakeHash: void update()>();
+
+        $r8 = (sun.security.ssl.SSLSecretDerivation) $r50;
+
+        $r9 = virtualinvoke $r8.<sun.security.ssl.SSLSecretDerivation: sun.security.ssl.SSLSecretDerivation forContext(sun.security.ssl.HandshakeContext)>(r0);
+
+        $r10 = virtualinvoke $r9.<sun.security.ssl.SSLSecretDerivation: javax.crypto.SecretKey deriveKey(java.lang.String,java.security.spec.AlgorithmParameterSpec)>("TlsResumptionMasterSecret", null);
+
+        $r11 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        virtualinvoke $r11.<sun.security.ssl.SSLSessionImpl: void setResumptionMasterSecret(javax.crypto.SecretKey)>($r10);
+
+     label09:
+        goto label11;
+
+     label10:
+        $r61 := @caughtexception;
+
+        $r63 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r62 = <sun.security.ssl.Alert: sun.security.ssl.Alert INTERNAL_ERROR>;
+
+        $r64 = virtualinvoke $r63.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String,java.lang.Throwable)>($r62, "Failure to derive application secrets", $r61);
+
+        throw $r64;
+
+     label11:
+        $r13 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r12 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        $r14 = virtualinvoke $r12.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.SSLSessionImpl finish()>();
+
+        $r13.<sun.security.ssl.TransportContext: sun.security.ssl.SSLSessionImpl conSession> = $r14;
+
+        $r16 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r15 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r16.<sun.security.ssl.TransportContext: sun.security.ssl.ProtocolVersion protocolVersion> = $r15;
+
+        r0.<sun.security.ssl.ServerHandshakeContext: boolean handshakeFinished> = 1;
+
+        $r17 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        virtualinvoke $r17.<sun.security.ssl.TransportContext: javax.net.ssl.SSLEngineResult$HandshakeStatus finishHandshake()>();
+
+        $r18 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r19 = $r18.<sun.security.ssl.TransportContext: sun.security.ssl.SSLSessionImpl conSession>;
+
+        staticinvoke <sun.security.ssl.Finished: void captureEvent(sun.security.ssl.SSLSessionImpl)>($r19);
+
+        $z3 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z3 == 0 goto label12;
+
+        $z4 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z4 == 0 goto label12;
+
+        $r20 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Sending new session ticket", $r20);
+
+     label12:
+        $r82 = <sun.security.ssl.NewSessionTicket: sun.security.ssl.SSLProducer t13PosthandshakeProducer>;
+
+        interfaceinvoke $r82.<sun.security.ssl.SSLProducer: byte[] produce(sun.security.ssl.ConnectionContext)>(r0);
+
+        return;
+
+        catch java.security.GeneralSecurityException from label07 to label09 with label10;
+    }
+
+    void <init>(sun.security.ssl.Finished$1)
+    {
+        sun.security.ssl.Finished$1 r1;
+        sun.security.ssl.Finished$T13FinishedConsumer r0;
+
+        r0 := @this: sun.security.ssl.Finished$T13FinishedConsumer;
+
+        r1 := @parameter0: sun.security.ssl.Finished$1;
+
+        specialinvoke r0.<sun.security.ssl.Finished$T13FinishedConsumer: void <init>()>();
+
+        return;
+    }
+}

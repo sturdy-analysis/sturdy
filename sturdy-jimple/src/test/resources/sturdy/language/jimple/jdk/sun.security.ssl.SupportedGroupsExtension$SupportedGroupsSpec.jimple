@@ -1,0 +1,308 @@
+final class sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec extends java.lang.Object implements sun.security.ssl.SSLExtension$SSLExtensionSpec
+{
+    final int[] namedGroupsIds;
+
+    private void <init>(int[])
+    {
+        sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec r0;
+        int[] r1;
+
+        r0 := @this: sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec;
+
+        r1 := @parameter0: int[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec: int[] namedGroupsIds> = r1;
+
+        return;
+    }
+
+    private void <init>(java.util.List)
+    {
+        sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec r0;
+        java.util.Iterator $r3;
+        java.util.List r1;
+        int[] $r2, $r6;
+        int $i0, $i1, $i2, i3;
+        java.lang.Object $r4;
+        sun.security.ssl.SupportedGroupsExtension$NamedGroup r5;
+        boolean $z0;
+
+        r0 := @this: sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec;
+
+        r1 := @parameter0: java.util.List;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $i0 = interfaceinvoke r1.<java.util.List: int size()>();
+
+        $r2 = newarray (int)[$i0];
+
+        r0.<sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec: int[] namedGroupsIds> = $r2;
+
+        i3 = 0;
+
+        $r3 = interfaceinvoke r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (sun.security.ssl.SupportedGroupsExtension$NamedGroup) $r4;
+
+        $r6 = r0.<sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec: int[] namedGroupsIds>;
+
+        $i1 = i3;
+
+        i3 = i3 + 1;
+
+        $i2 = r5.<sun.security.ssl.SupportedGroupsExtension$NamedGroup: int id>;
+
+        $r6[$i1] = $i2;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private void <init>(java.nio.ByteBuffer) throws java.io.IOException
+    {
+        byte[] $r2;
+        sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec r0;
+        java.nio.ByteBuffer r1;
+        short $s9, $s11, $s17, $s19;
+        byte $b8, $b10;
+        int[] r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i12, $i13, i14, i15, i16, $i18, $i20;
+        boolean $z0;
+        javax.net.ssl.SSLProtocolException $r7, $r8, $r9;
+
+        r0 := @this: sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec;
+
+        r1 := @parameter0: java.nio.ByteBuffer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $i0 = virtualinvoke r1.<java.nio.ByteBuffer: int remaining()>();
+
+        if $i0 >= 2 goto label1;
+
+        $r7 = new javax.net.ssl.SSLProtocolException;
+
+        specialinvoke $r7.<javax.net.ssl.SSLProtocolException: void <init>(java.lang.String)>("Invalid supported_groups extension: insufficient data");
+
+        throw $r7;
+
+     label1:
+        $r2 = staticinvoke <sun.security.ssl.Record: byte[] getBytes16(java.nio.ByteBuffer)>(r1);
+
+        $z0 = virtualinvoke r1.<java.nio.ByteBuffer: boolean hasRemaining()>();
+
+        if $z0 == 0 goto label2;
+
+        $r8 = new javax.net.ssl.SSLProtocolException;
+
+        specialinvoke $r8.<javax.net.ssl.SSLProtocolException: void <init>(java.lang.String)>("Invalid supported_groups extension: unknown extra data");
+
+        throw $r8;
+
+     label2:
+        if $r2 == null goto label3;
+
+        $i1 = lengthof $r2;
+
+        if $i1 == 0 goto label3;
+
+        $i2 = lengthof $r2;
+
+        $i3 = $i2 % 2;
+
+        if $i3 == 0 goto label4;
+
+     label3:
+        $r9 = new javax.net.ssl.SSLProtocolException;
+
+        specialinvoke $r9.<javax.net.ssl.SSLProtocolException: void <init>(java.lang.String)>("Invalid supported_groups extension: incomplete data");
+
+        throw $r9;
+
+     label4:
+        $i4 = lengthof $r2;
+
+        $i5 = $i4 / 2;
+
+        r3 = newarray (int)[$i5];
+
+        i14 = 0;
+
+        i15 = 0;
+
+     label5:
+        $i6 = lengthof $r2;
+
+        if i14 >= $i6 goto label6;
+
+        $i7 = i15;
+
+        i15 = i15 + 1;
+
+        i16 = i14 + 1;
+
+        $b8 = $r2[i14];
+
+        $s17 = (short) $b8;
+
+        $s9 = $s17 & 255;
+
+        $i18 = (int) $s9;
+
+        $i12 = $i18 << 8;
+
+        i14 = i16 + 1;
+
+        $b10 = $r2[i16];
+
+        $s19 = (short) $b10;
+
+        $s11 = $s19 & 255;
+
+        $i20 = (int) $s11;
+
+        $i13 = $i12 | $i20;
+
+        r3[$i7] = $i13;
+
+        goto label5;
+
+     label6:
+        r0.<sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec: int[] namedGroupsIds> = r3;
+
+        return;
+    }
+
+    public java.lang.String toString()
+    {
+        sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec r2;
+        java.lang.Object[] $r4, $r8;
+        java.text.MessageFormat $r0;
+        int[] $r3, $r6, r12;
+        java.util.Locale $r1;
+        int $i0, i1, i2, i3;
+        java.lang.String $r5, $r9, $r10, $r11;
+        boolean z0;
+        java.lang.StringBuilder $r7;
+
+        r2 := @this: sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec;
+
+        $r0 = new java.text.MessageFormat;
+
+        $r1 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        specialinvoke $r0.<java.text.MessageFormat: void <init>(java.lang.String,java.util.Locale)>("\"versions\": \'[\'{0}\']\'", $r1);
+
+        $r3 = r2.<sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec: int[] namedGroupsIds>;
+
+        if $r3 == null goto label1;
+
+        $r6 = r2.<sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec: int[] namedGroupsIds>;
+
+        $i0 = lengthof $r6;
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        $r4 = newarray (java.lang.Object)[1];
+
+        $r4[0] = "<no supported named group specified>";
+
+        $r5 = virtualinvoke $r0.<java.text.MessageFormat: java.lang.String format(java.lang.Object)>($r4);
+
+        return $r5;
+
+     label2:
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>(int)>(512);
+
+        z0 = 1;
+
+        r12 = r2.<sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec: int[] namedGroupsIds>;
+
+        i1 = lengthof r12;
+
+        i3 = 0;
+
+     label3:
+        if i3 >= i1 goto label6;
+
+        i2 = r12[i3];
+
+        if z0 == 0 goto label4;
+
+        z0 = 0;
+
+        goto label5;
+
+     label4:
+        virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+     label5:
+        $r11 = staticinvoke <sun.security.ssl.SupportedGroupsExtension$NamedGroup: java.lang.String nameOf(int)>(i2);
+
+        virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        i3 = i3 + 1;
+
+        goto label3;
+
+     label6:
+        $r8 = newarray (java.lang.Object)[1];
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r8[0] = $r9;
+
+        $r10 = virtualinvoke $r0.<java.text.MessageFormat: java.lang.String format(java.lang.Object)>($r8);
+
+        return $r10;
+    }
+
+    void <init>(java.nio.ByteBuffer, sun.security.ssl.SupportedGroupsExtension$1) throws java.io.IOException
+    {
+        sun.security.ssl.SupportedGroupsExtension$1 r2;
+        sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec r0;
+        java.nio.ByteBuffer r1;
+
+        r0 := @this: sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec;
+
+        r1 := @parameter0: java.nio.ByteBuffer;
+
+        r2 := @parameter1: sun.security.ssl.SupportedGroupsExtension$1;
+
+        specialinvoke r0.<sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec: void <init>(java.nio.ByteBuffer)>(r1);
+
+        return;
+    }
+
+    void <init>(java.util.List, sun.security.ssl.SupportedGroupsExtension$1)
+    {
+        sun.security.ssl.SupportedGroupsExtension$1 r2;
+        sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec r0;
+        java.util.List r1;
+
+        r0 := @this: sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec;
+
+        r1 := @parameter0: java.util.List;
+
+        r2 := @parameter1: sun.security.ssl.SupportedGroupsExtension$1;
+
+        specialinvoke r0.<sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec: void <init>(java.util.List)>(r1);
+
+        return;
+    }
+}

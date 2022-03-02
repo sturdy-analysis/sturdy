@@ -1,0 +1,734 @@
+class sun.net.www.protocol.jar.JarFileFactory extends java.lang.Object implements sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController
+{
+    private static final java.util.HashMap fileCache;
+    private static final java.util.HashMap urlCache;
+    private static final sun.net.www.protocol.jar.JarFileFactory instance;
+    static final boolean $assertionsDisabled;
+
+    private void <init>()
+    {
+        sun.net.www.protocol.jar.JarFileFactory r0;
+
+        r0 := @this: sun.net.www.protocol.jar.JarFileFactory;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static sun.net.www.protocol.jar.JarFileFactory getInstance()
+    {
+        sun.net.www.protocol.jar.JarFileFactory $r0;
+
+        $r0 = <sun.net.www.protocol.jar.JarFileFactory: sun.net.www.protocol.jar.JarFileFactory instance>;
+
+        return $r0;
+    }
+
+    java.net.URLConnection getConnection(java.util.jar.JarFile) throws java.io.IOException
+    {
+        java.lang.Throwable $r6;
+        java.net.URL r4;
+        java.util.jar.JarFile r1;
+        java.util.HashMap $r2;
+        java.net.URLConnection $r5;
+        sun.net.www.protocol.jar.JarFileFactory $r0, r7;
+        java.lang.Object $r3;
+
+        r7 := @this: sun.net.www.protocol.jar.JarFileFactory;
+
+        r1 := @parameter0: java.util.jar.JarFile;
+
+        $r0 = <sun.net.www.protocol.jar.JarFileFactory: sun.net.www.protocol.jar.JarFileFactory instance>;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = <sun.net.www.protocol.jar.JarFileFactory: java.util.HashMap urlCache>;
+
+        $r3 = virtualinvoke $r2.<java.util.HashMap: java.lang.Object get(java.lang.Object)>(r1);
+
+        r4 = (java.net.URL) $r3;
+
+        exitmonitor $r0;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r6 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label4:
+        throw $r6;
+
+     label5:
+        if r4 == null goto label6;
+
+        $r5 = virtualinvoke r4.<java.net.URL: java.net.URLConnection openConnection()>();
+
+        return $r5;
+
+     label6:
+        return null;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public java.util.jar.JarFile get(java.net.URL) throws java.io.IOException
+    {
+        java.util.jar.JarFile $r2;
+        java.net.URL r1;
+        sun.net.www.protocol.jar.JarFileFactory r0;
+
+        r0 := @this: sun.net.www.protocol.jar.JarFileFactory;
+
+        r1 := @parameter0: java.net.URL;
+
+        $r2 = virtualinvoke r0.<sun.net.www.protocol.jar.JarFileFactory: java.util.jar.JarFile get(java.net.URL,boolean)>(r1, 1);
+
+        return $r2;
+    }
+
+    java.util.jar.JarFile getOrCreate(java.net.URL, boolean) throws java.io.IOException
+    {
+        java.lang.Throwable $r9;
+        java.net.URL r1, $r2;
+        java.util.jar.JarFile $r4, $r7, $r8, r10;
+        java.io.FileNotFoundException $r5;
+        sun.net.www.protocol.jar.JarFileFactory r0, $r3;
+        java.lang.String $r6;
+        boolean z0, $z1;
+
+        r0 := @this: sun.net.www.protocol.jar.JarFileFactory;
+
+        r1 := @parameter0: java.net.URL;
+
+        z0 := @parameter1: boolean;
+
+        if z0 != 0 goto label1;
+
+        $r8 = virtualinvoke r0.<sun.net.www.protocol.jar.JarFileFactory: java.util.jar.JarFile get(java.net.URL,boolean)>(r1, 0);
+
+        return $r8;
+
+     label1:
+        $r2 = specialinvoke r0.<sun.net.www.protocol.jar.JarFileFactory: java.net.URL urlFor(java.net.URL)>(r1);
+
+        $z1 = staticinvoke <sun.net.www.protocol.jar.URLJarFile: boolean isFileURL(java.net.URL)>($r2);
+
+        if $z1 != 0 goto label2;
+
+        $r7 = virtualinvoke r0.<sun.net.www.protocol.jar.JarFileFactory: java.util.jar.JarFile get(java.net.URL,boolean)>(r1, z0);
+
+        return $r7;
+
+     label2:
+        $r3 = <sun.net.www.protocol.jar.JarFileFactory: sun.net.www.protocol.jar.JarFileFactory instance>;
+
+        entermonitor $r3;
+
+     label3:
+        $r4 = specialinvoke r0.<sun.net.www.protocol.jar.JarFileFactory: java.util.jar.JarFile getCachedJarFile(java.net.URL)>($r2);
+
+        r10 = $r4;
+
+        exitmonitor $r3;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r9 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label6:
+        throw $r9;
+
+     label7:
+        if $r4 != null goto label8;
+
+        r10 = staticinvoke <sun.net.www.protocol.jar.URLJarFile: java.util.jar.JarFile getJarFile(java.net.URL,sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController)>($r2, r0);
+
+     label8:
+        if r10 != null goto label9;
+
+        $r5 = new java.io.FileNotFoundException;
+
+        $r6 = virtualinvoke r1.<java.net.URL: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.io.FileNotFoundException: void <init>(java.lang.String)>($r6);
+
+        throw $r5;
+
+     label9:
+        return r10;
+
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    boolean closeIfNotCached(java.net.URL, java.util.jar.JarFile) throws java.io.IOException
+    {
+        java.lang.Throwable $r5;
+        java.net.URL $r1, r6;
+        java.util.jar.JarFile $r3, r4;
+        sun.net.www.protocol.jar.JarFileFactory r0, $r2;
+        boolean $z0;
+
+        r0 := @this: sun.net.www.protocol.jar.JarFileFactory;
+
+        r6 := @parameter0: java.net.URL;
+
+        r4 := @parameter1: java.util.jar.JarFile;
+
+        $r1 = specialinvoke r0.<sun.net.www.protocol.jar.JarFileFactory: java.net.URL urlFor(java.net.URL)>(r6);
+
+        $r2 = <sun.net.www.protocol.jar.JarFileFactory: sun.net.www.protocol.jar.JarFileFactory instance>;
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = specialinvoke r0.<sun.net.www.protocol.jar.JarFileFactory: java.util.jar.JarFile getCachedJarFile(java.net.URL)>($r1);
+
+        exitmonitor $r2;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label4:
+        throw $r5;
+
+     label5:
+        if $r3 == r4 goto label6;
+
+        virtualinvoke r4.<java.util.jar.JarFile: void close()>();
+
+     label6:
+        if $r3 == r4 goto label7;
+
+        $z0 = 1;
+
+        goto label8;
+
+     label7:
+        $z0 = 0;
+
+     label8:
+        return $z0;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    boolean cacheIfAbsent(java.net.URL, java.util.jar.JarFile)
+    {
+        java.lang.Throwable $r9;
+        java.net.URL $r1, r11;
+        java.util.HashMap $r4, $r7, $r8;
+        java.util.jar.JarFile r6, r12;
+        java.io.IOException $r10;
+        sun.net.www.protocol.jar.JarFileFactory r0, $r2;
+        java.lang.Object $r5;
+        java.lang.String $r3;
+        boolean $z0;
+
+        r0 := @this: sun.net.www.protocol.jar.JarFileFactory;
+
+        r11 := @parameter0: java.net.URL;
+
+        r6 := @parameter1: java.util.jar.JarFile;
+
+     label01:
+        $r1 = specialinvoke r0.<sun.net.www.protocol.jar.JarFileFactory: java.net.URL urlFor(java.net.URL)>(r11);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r10 := @caughtexception;
+
+        return 0;
+
+     label04:
+        $r2 = <sun.net.www.protocol.jar.JarFileFactory: sun.net.www.protocol.jar.JarFileFactory instance>;
+
+        entermonitor $r2;
+
+     label05:
+        $r3 = staticinvoke <sun.net.util.URLUtil: java.lang.String urlNoFragString(java.net.URL)>($r1);
+
+        $r4 = <sun.net.www.protocol.jar.JarFileFactory: java.util.HashMap fileCache>;
+
+        $r5 = virtualinvoke $r4.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r3);
+
+        r12 = (java.util.jar.JarFile) $r5;
+
+        if r12 != null goto label06;
+
+        $r7 = <sun.net.www.protocol.jar.JarFileFactory: java.util.HashMap fileCache>;
+
+        virtualinvoke $r7.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, r6);
+
+        $r8 = <sun.net.www.protocol.jar.JarFileFactory: java.util.HashMap urlCache>;
+
+        virtualinvoke $r8.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r6, $r1);
+
+     label06:
+        exitmonitor $r2;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r9 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label09:
+        throw $r9;
+
+     label10:
+        if r12 == null goto label11;
+
+        if r12 != r6 goto label12;
+
+     label11:
+        $z0 = 1;
+
+        goto label13;
+
+     label12:
+        $z0 = 0;
+
+     label13:
+        return $z0;
+
+        catch java.io.IOException from label01 to label02 with label03;
+        catch java.lang.Throwable from label05 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    private java.net.URL urlFor(java.net.URL) throws java.io.IOException
+    {
+        java.net.URL $r2, r10;
+        sun.net.www.protocol.jar.JarFileFactory r9;
+        java.lang.StringBuilder $r3, $r4, $r5, $r7;
+        java.lang.String $r0, $r1, $r6, $r8;
+        boolean $z0, $z1, $z2;
+
+        r9 := @this: sun.net.www.protocol.jar.JarFileFactory;
+
+        r10 := @parameter0: java.net.URL;
+
+        $r0 = virtualinvoke r10.<java.net.URL: java.lang.String getProtocol()>();
+
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("file");
+
+        if $z0 == 0 goto label1;
+
+        $r1 = virtualinvoke r10.<java.net.URL: java.lang.String getHost()>();
+
+        if $r1 == null goto label1;
+
+        $z1 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z1 != 0 goto label1;
+
+        $z2 = virtualinvoke $r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("localhost");
+
+        if $z2 != 0 goto label1;
+
+        $r2 = new java.net.URL;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("//");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r6 = virtualinvoke r10.<java.net.URL: java.lang.String getPath()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.net.URL: void <init>(java.lang.String,java.lang.String,java.lang.String)>("file", "", $r8);
+
+        r10 = $r2;
+
+     label1:
+        return r10;
+    }
+
+    java.util.jar.JarFile get(java.net.URL, boolean) throws java.io.IOException
+    {
+        java.lang.Throwable $r12, $r13;
+        java.net.URL $r1, r14;
+        java.util.jar.JarFile $r5, $r6, $r8, r15;
+        java.util.HashMap $r9, $r11;
+        java.lang.String $r3, $r10;
+        boolean z0;
+        java.io.FileNotFoundException $r2;
+        sun.net.www.protocol.jar.JarFileFactory r0, $r4, $r7;
+
+        r0 := @this: sun.net.www.protocol.jar.JarFileFactory;
+
+        r14 := @parameter0: java.net.URL;
+
+        z0 := @parameter1: boolean;
+
+        $r1 = specialinvoke r0.<sun.net.www.protocol.jar.JarFileFactory: java.net.URL urlFor(java.net.URL)>(r14);
+
+        if z0 == 0 goto label13;
+
+        $r4 = <sun.net.www.protocol.jar.JarFileFactory: sun.net.www.protocol.jar.JarFileFactory instance>;
+
+        entermonitor $r4;
+
+     label01:
+        $r5 = specialinvoke r0.<sun.net.www.protocol.jar.JarFileFactory: java.util.jar.JarFile getCachedJarFile(java.net.URL)>($r1);
+
+        r15 = $r5;
+
+        exitmonitor $r4;
+
+     label02:
+        goto label05;
+
+     label03:
+        $r13 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label04:
+        throw $r13;
+
+     label05:
+        if $r5 != null goto label14;
+
+        $r6 = staticinvoke <sun.net.www.protocol.jar.URLJarFile: java.util.jar.JarFile getJarFile(java.net.URL,sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController)>($r1, r0);
+
+        $r7 = <sun.net.www.protocol.jar.JarFileFactory: sun.net.www.protocol.jar.JarFileFactory instance>;
+
+        entermonitor $r7;
+
+     label06:
+        $r8 = specialinvoke r0.<sun.net.www.protocol.jar.JarFileFactory: java.util.jar.JarFile getCachedJarFile(java.net.URL)>($r1);
+
+        r15 = $r8;
+
+        if $r8 != null goto label07;
+
+        $r9 = <sun.net.www.protocol.jar.JarFileFactory: java.util.HashMap fileCache>;
+
+        $r10 = staticinvoke <sun.net.util.URLUtil: java.lang.String urlNoFragString(java.net.URL)>($r1);
+
+        virtualinvoke $r9.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r10, $r6);
+
+        $r11 = <sun.net.www.protocol.jar.JarFileFactory: java.util.HashMap urlCache>;
+
+        virtualinvoke $r11.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r6, $r1);
+
+        r15 = $r6;
+
+        goto label08;
+
+     label07:
+        if $r6 == null goto label08;
+
+        virtualinvoke $r6.<java.util.jar.JarFile: void close()>();
+
+     label08:
+        exitmonitor $r7;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r12 := @caughtexception;
+
+        exitmonitor $r7;
+
+     label11:
+        throw $r12;
+
+     label12:
+        goto label14;
+
+     label13:
+        r15 = staticinvoke <sun.net.www.protocol.jar.URLJarFile: java.util.jar.JarFile getJarFile(java.net.URL,sun.net.www.protocol.jar.URLJarFile$URLJarFileCloseController)>($r1, r0);
+
+     label14:
+        if r15 != null goto label15;
+
+        $r2 = new java.io.FileNotFoundException;
+
+        $r3 = virtualinvoke $r1.<java.net.URL: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.io.FileNotFoundException: void <init>(java.lang.String)>($r3);
+
+        throw $r2;
+
+     label15:
+        return r15;
+
+        catch java.lang.Throwable from label01 to label02 with label03;
+        catch java.lang.Throwable from label03 to label04 with label03;
+        catch java.lang.Throwable from label06 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    public void close(java.util.jar.JarFile)
+    {
+        java.lang.Throwable $r7;
+        java.net.URL r4;
+        java.util.jar.JarFile r1;
+        java.util.HashMap $r2, $r5;
+        sun.net.www.protocol.jar.JarFileFactory $r0, r8;
+        java.lang.Object $r3;
+        java.lang.String $r6;
+
+        r8 := @this: sun.net.www.protocol.jar.JarFileFactory;
+
+        r1 := @parameter0: java.util.jar.JarFile;
+
+        $r0 = <sun.net.www.protocol.jar.JarFileFactory: sun.net.www.protocol.jar.JarFileFactory instance>;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = <sun.net.www.protocol.jar.JarFileFactory: java.util.HashMap urlCache>;
+
+        $r3 = virtualinvoke $r2.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>(r1);
+
+        r4 = (java.net.URL) $r3;
+
+        if r4 == null goto label2;
+
+        $r5 = <sun.net.www.protocol.jar.JarFileFactory: java.util.HashMap fileCache>;
+
+        $r6 = staticinvoke <sun.net.util.URLUtil: java.lang.String urlNoFragString(java.net.URL)>(r4);
+
+        virtualinvoke $r5.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>($r6);
+
+     label2:
+        exitmonitor $r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r7 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r7;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private java.util.jar.JarFile getCachedJarFile(java.net.URL)
+    {
+        java.net.URL r0;
+        java.util.HashMap $r1;
+        java.util.jar.JarFile $r8;
+        java.lang.AssertionError $r15;
+        int $i0, $i1, $i2, $i4, $i6;
+        java.lang.SecurityException $r10;
+        java.lang.String $r2, $r11, $r12, $r13, $r14;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.SecurityManager $r6;
+        java.security.Permission $r5;
+        sun.net.www.protocol.jar.JarFileFactory r4, $r7;
+        java.lang.Object $r3;
+
+        r4 := @this: sun.net.www.protocol.jar.JarFileFactory;
+
+        r0 := @parameter0: java.net.URL;
+
+        $z0 = <sun.net.www.protocol.jar.JarFileFactory: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $r7 = <sun.net.www.protocol.jar.JarFileFactory: sun.net.www.protocol.jar.JarFileFactory instance>;
+
+        $z1 = staticinvoke <java.lang.Thread: boolean holdsLock(java.lang.Object)>($r7);
+
+        if $z1 != 0 goto label1;
+
+        $r15 = new java.lang.AssertionError;
+
+        specialinvoke $r15.<java.lang.AssertionError: void <init>()>();
+
+        throw $r15;
+
+     label1:
+        $r1 = <sun.net.www.protocol.jar.JarFileFactory: java.util.HashMap fileCache>;
+
+        $r2 = staticinvoke <sun.net.util.URLUtil: java.lang.String urlNoFragString(java.net.URL)>(r0);
+
+        $r3 = virtualinvoke $r1.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r2);
+
+        $r8 = (java.util.jar.JarFile) $r3;
+
+        if $r8 == null goto label7;
+
+        $r5 = specialinvoke r4.<sun.net.www.protocol.jar.JarFileFactory: java.security.Permission getPermission(java.util.jar.JarFile)>($r8);
+
+        if $r5 == null goto label7;
+
+        $r6 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r6 == null goto label7;
+
+     label2:
+        virtualinvoke $r6.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r5);
+
+     label3:
+        goto label7;
+
+     label4:
+        $r10 := @caughtexception;
+
+        $z2 = $r5 instanceof java.io.FilePermission;
+
+        if $z2 == 0 goto label5;
+
+        $r13 = virtualinvoke $r5.<java.security.Permission: java.lang.String getActions()>();
+
+        $i2 = virtualinvoke $r13.<java.lang.String: int indexOf(java.lang.String)>("read");
+
+        $i4 = (int) -1;
+
+        if $i2 == $i4 goto label5;
+
+        $r14 = virtualinvoke $r5.<java.security.Permission: java.lang.String getName()>();
+
+        virtualinvoke $r6.<java.lang.SecurityManager: void checkRead(java.lang.String)>($r14);
+
+        goto label7;
+
+     label5:
+        $z3 = $r5 instanceof java.net.SocketPermission;
+
+        if $z3 == 0 goto label6;
+
+        $r11 = virtualinvoke $r5.<java.security.Permission: java.lang.String getActions()>();
+
+        $i0 = virtualinvoke $r11.<java.lang.String: int indexOf(java.lang.String)>("connect");
+
+        $i6 = (int) -1;
+
+        if $i0 == $i6 goto label6;
+
+        $r12 = virtualinvoke r0.<java.net.URL: java.lang.String getHost()>();
+
+        $i1 = virtualinvoke r0.<java.net.URL: int getPort()>();
+
+        virtualinvoke $r6.<java.lang.SecurityManager: void checkConnect(java.lang.String,int)>($r12, $i1);
+
+        goto label7;
+
+     label6:
+        throw $r10;
+
+     label7:
+        return $r8;
+
+        catch java.lang.SecurityException from label2 to label3 with label4;
+    }
+
+    private java.security.Permission getPermission(java.util.jar.JarFile)
+    {
+        java.security.Permission $r3;
+        java.net.URLConnection $r2;
+        sun.net.www.protocol.jar.JarFileFactory r0;
+        java.util.jar.JarFile r1;
+        java.io.IOException $r4;
+
+        r0 := @this: sun.net.www.protocol.jar.JarFileFactory;
+
+        r1 := @parameter0: java.util.jar.JarFile;
+
+     label1:
+        $r2 = virtualinvoke r0.<sun.net.www.protocol.jar.JarFileFactory: java.net.URLConnection getConnection(java.util.jar.JarFile)>(r1);
+
+        if $r2 == null goto label3;
+
+        $r3 = virtualinvoke $r2.<java.net.URLConnection: java.security.Permission getPermission()>();
+
+     label2:
+        return $r3;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r4 := @caughtexception;
+
+     label5:
+        return null;
+
+        catch java.io.IOException from label1 to label2 with label4;
+    }
+
+    static void <clinit>()
+    {
+        sun.net.www.protocol.jar.JarFileFactory $r3;
+        java.lang.Class $r0;
+        java.util.HashMap $r1, $r2;
+        boolean $z0, $z1;
+
+        $r0 = class "Lsun/net/www/protocol/jar/JarFileFactory;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.net.www.protocol.jar.JarFileFactory: boolean $assertionsDisabled> = $z1;
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>()>();
+
+        <sun.net.www.protocol.jar.JarFileFactory: java.util.HashMap fileCache> = $r1;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        <sun.net.www.protocol.jar.JarFileFactory: java.util.HashMap urlCache> = $r2;
+
+        $r3 = new sun.net.www.protocol.jar.JarFileFactory;
+
+        specialinvoke $r3.<sun.net.www.protocol.jar.JarFileFactory: void <init>()>();
+
+        <sun.net.www.protocol.jar.JarFileFactory: sun.net.www.protocol.jar.JarFileFactory instance> = $r3;
+
+        return;
+    }
+}

@@ -1,0 +1,1409 @@
+public class javax.management.monitor.GaugeMonitor extends javax.management.monitor.Monitor implements javax.management.monitor.GaugeMonitorMBean
+{
+    private java.lang.Number highThreshold;
+    private java.lang.Number lowThreshold;
+    private boolean notifyHigh;
+    private boolean notifyLow;
+    private boolean differenceMode;
+    private static final java.lang.String[] types;
+    private static final javax.management.MBeanNotificationInfo[] notifsInfo;
+    private static final int RISING;
+    private static final int FALLING;
+    private static final int RISING_OR_FALLING;
+
+    public void <init>()
+    {
+        javax.management.monitor.GaugeMonitor r0;
+        java.lang.Integer $r1, $r2;
+
+        r0 := @this: javax.management.monitor.GaugeMonitor;
+
+        specialinvoke r0.<javax.management.monitor.Monitor: void <init>()>();
+
+        $r1 = <javax.management.monitor.GaugeMonitor: java.lang.Integer INTEGER_ZERO>;
+
+        r0.<javax.management.monitor.GaugeMonitor: java.lang.Number highThreshold> = $r1;
+
+        $r2 = <javax.management.monitor.GaugeMonitor: java.lang.Integer INTEGER_ZERO>;
+
+        r0.<javax.management.monitor.GaugeMonitor: java.lang.Number lowThreshold> = $r2;
+
+        r0.<javax.management.monitor.GaugeMonitor: boolean notifyHigh> = 0;
+
+        r0.<javax.management.monitor.GaugeMonitor: boolean notifyLow> = 0;
+
+        r0.<javax.management.monitor.GaugeMonitor: boolean differenceMode> = 0;
+
+        return;
+    }
+
+    public synchronized void start()
+    {
+        java.util.Iterator $r2;
+        javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject r5;
+        javax.management.monitor.GaugeMonitor r0;
+        java.util.logging.Logger $r7;
+        java.util.logging.Level $r8;
+        java.util.List $r1;
+        javax.management.monitor.Monitor$ObservedObject r4;
+        java.lang.Object $r3;
+        java.lang.Class $r6;
+        java.lang.String $r9;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.management.monitor.GaugeMonitor;
+
+        $z0 = virtualinvoke r0.<javax.management.monitor.GaugeMonitor: boolean isActive()>();
+
+        if $z0 == 0 goto label1;
+
+        $r7 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger MONITOR_LOGGER>;
+
+        $r8 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r6 = class "Ljavax/management/monitor/GaugeMonitor;";
+
+        $r9 = virtualinvoke $r6.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r7.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r8, $r9, "start", "the monitor is already active");
+
+        return;
+
+     label1:
+        $r1 = r0.<javax.management.monitor.GaugeMonitor: java.util.List observedObjects>;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z1 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label3;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (javax.management.monitor.Monitor$ObservedObject) $r3;
+
+        r5 = (javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject) r4;
+
+        virtualinvoke r5.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: void setStatus(int)>(2);
+
+        virtualinvoke r5.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: void setPreviousScanGauge(java.lang.Number)>(null);
+
+        goto label2;
+
+     label3:
+        virtualinvoke r0.<javax.management.monitor.GaugeMonitor: void doStart()>();
+
+        return;
+    }
+
+    public synchronized void stop()
+    {
+        javax.management.monitor.GaugeMonitor r0;
+
+        r0 := @this: javax.management.monitor.GaugeMonitor;
+
+        virtualinvoke r0.<javax.management.monitor.GaugeMonitor: void doStop()>();
+
+        return;
+    }
+
+    public synchronized java.lang.Number getDerivedGauge(javax.management.ObjectName)
+    {
+        java.lang.Object $r2;
+        javax.management.ObjectName r1;
+        javax.management.monitor.GaugeMonitor r0;
+        java.lang.Number $r3;
+
+        r0 := @this: javax.management.monitor.GaugeMonitor;
+
+        r1 := @parameter0: javax.management.ObjectName;
+
+        $r2 = specialinvoke r0.<javax.management.monitor.Monitor: java.lang.Object getDerivedGauge(javax.management.ObjectName)>(r1);
+
+        $r3 = (java.lang.Number) $r2;
+
+        return $r3;
+    }
+
+    public synchronized long getDerivedGaugeTimeStamp(javax.management.ObjectName)
+    {
+        long $l0;
+        javax.management.ObjectName r1;
+        javax.management.monitor.GaugeMonitor r0;
+
+        r0 := @this: javax.management.monitor.GaugeMonitor;
+
+        r1 := @parameter0: javax.management.ObjectName;
+
+        $l0 = specialinvoke r0.<javax.management.monitor.Monitor: long getDerivedGaugeTimeStamp(javax.management.ObjectName)>(r1);
+
+        return $l0;
+    }
+
+    public synchronized java.lang.Number getDerivedGauge()
+    {
+        javax.management.monitor.GaugeMonitor r0;
+        java.util.List $r1, $r2;
+        javax.management.monitor.Monitor$ObservedObject $r4;
+        java.lang.Object $r3, $r5;
+        java.lang.Number $r6;
+        boolean $z0;
+
+        r0 := @this: javax.management.monitor.GaugeMonitor;
+
+        $r1 = r0.<javax.management.monitor.GaugeMonitor: java.util.List observedObjects>;
+
+        $z0 = interfaceinvoke $r1.<java.util.List: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<javax.management.monitor.GaugeMonitor: java.util.List observedObjects>;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r4 = (javax.management.monitor.Monitor$ObservedObject) $r3;
+
+        $r5 = virtualinvoke $r4.<javax.management.monitor.Monitor$ObservedObject: java.lang.Object getDerivedGauge()>();
+
+        $r6 = (java.lang.Number) $r5;
+
+        return $r6;
+    }
+
+    public synchronized long getDerivedGaugeTimeStamp()
+    {
+        java.util.List $r1, $r2;
+        javax.management.monitor.Monitor$ObservedObject $r4;
+        java.lang.Object $r3;
+        long $l0;
+        javax.management.monitor.GaugeMonitor r0;
+        boolean $z0;
+
+        r0 := @this: javax.management.monitor.GaugeMonitor;
+
+        $r1 = r0.<javax.management.monitor.GaugeMonitor: java.util.List observedObjects>;
+
+        $z0 = interfaceinvoke $r1.<java.util.List: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        return 0L;
+
+     label1:
+        $r2 = r0.<javax.management.monitor.GaugeMonitor: java.util.List observedObjects>;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r4 = (javax.management.monitor.Monitor$ObservedObject) $r3;
+
+        $l0 = virtualinvoke $r4.<javax.management.monitor.Monitor$ObservedObject: long getDerivedGaugeTimeStamp()>();
+
+        return $l0;
+    }
+
+    public synchronized java.lang.Number getHighThreshold()
+    {
+        javax.management.monitor.GaugeMonitor r0;
+        java.lang.Number $r1;
+
+        r0 := @this: javax.management.monitor.GaugeMonitor;
+
+        $r1 = r0.<javax.management.monitor.GaugeMonitor: java.lang.Number highThreshold>;
+
+        return $r1;
+    }
+
+    public synchronized java.lang.Number getLowThreshold()
+    {
+        javax.management.monitor.GaugeMonitor r0;
+        java.lang.Number $r1;
+
+        r0 := @this: javax.management.monitor.GaugeMonitor;
+
+        $r1 = r0.<javax.management.monitor.GaugeMonitor: java.lang.Number lowThreshold>;
+
+        return $r1;
+    }
+
+    public synchronized void setThresholds(java.lang.Number, java.lang.Number) throws java.lang.IllegalArgumentException
+    {
+        javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject r13;
+        javax.management.monitor.Monitor$ObservedObject r12;
+        int $i0, i1;
+        java.lang.String $r7;
+        java.lang.Number r0, r2, $r8, $r14;
+        boolean $z0, $z1, $z2, $z3;
+        java.util.Iterator $r10;
+        java.lang.IllegalArgumentException $r1, $r15, $r16;
+        javax.management.monitor.GaugeMonitor r5;
+        java.util.List $r9;
+        java.lang.Class $r3, $r4, $r6;
+        java.lang.Object $r11;
+
+        r5 := @this: javax.management.monitor.GaugeMonitor;
+
+        r0 := @parameter0: java.lang.Number;
+
+        r2 := @parameter1: java.lang.Number;
+
+        if r0 == null goto label1;
+
+        if r2 != null goto label2;
+
+     label1:
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Null threshold value");
+
+        throw $r1;
+
+     label2:
+        $r3 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r4 = virtualinvoke r2.<java.lang.Object: java.lang.Class getClass()>();
+
+        if $r3 == $r4 goto label3;
+
+        $r16 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r16.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Different type threshold values");
+
+        throw $r16;
+
+     label3:
+        $r6 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.Class: java.lang.String getName()>();
+
+        $z0 = specialinvoke r5.<javax.management.monitor.GaugeMonitor: boolean isFirstStrictlyGreaterThanLast(java.lang.Number,java.lang.Number,java.lang.String)>(r2, r0, $r7);
+
+        if $z0 == 0 goto label4;
+
+        $r15 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r15.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("High threshold less than low threshold");
+
+        throw $r15;
+
+     label4:
+        $r8 = r5.<javax.management.monitor.GaugeMonitor: java.lang.Number highThreshold>;
+
+        $z1 = virtualinvoke $r8.<java.lang.Object: boolean equals(java.lang.Object)>(r0);
+
+        if $z1 == 0 goto label5;
+
+        $r14 = r5.<javax.management.monitor.GaugeMonitor: java.lang.Number lowThreshold>;
+
+        $z2 = virtualinvoke $r14.<java.lang.Object: boolean equals(java.lang.Object)>(r2);
+
+        if $z2 == 0 goto label5;
+
+        return;
+
+     label5:
+        r5.<javax.management.monitor.GaugeMonitor: java.lang.Number highThreshold> = r0;
+
+        r5.<javax.management.monitor.GaugeMonitor: java.lang.Number lowThreshold> = r2;
+
+        i1 = 0;
+
+        $r9 = r5.<javax.management.monitor.GaugeMonitor: java.util.List observedObjects>;
+
+        $r10 = interfaceinvoke $r9.<java.util.List: java.util.Iterator iterator()>();
+
+     label6:
+        $z3 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label7;
+
+        $r11 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        r12 = (javax.management.monitor.Monitor$ObservedObject) $r11;
+
+        $i0 = i1;
+
+        i1 = i1 + 1;
+
+        virtualinvoke r5.<javax.management.monitor.GaugeMonitor: void resetAlreadyNotified(javax.management.monitor.Monitor$ObservedObject,int,int)>(r12, $i0, 16);
+
+        r13 = (javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject) r12;
+
+        virtualinvoke r13.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: void setStatus(int)>(2);
+
+        goto label6;
+
+     label7:
+        return;
+    }
+
+    public synchronized boolean getNotifyHigh()
+    {
+        javax.management.monitor.GaugeMonitor r0;
+        boolean $z0;
+
+        r0 := @this: javax.management.monitor.GaugeMonitor;
+
+        $z0 = r0.<javax.management.monitor.GaugeMonitor: boolean notifyHigh>;
+
+        return $z0;
+    }
+
+    public synchronized void setNotifyHigh(boolean)
+    {
+        javax.management.monitor.GaugeMonitor r0;
+        boolean z0, $z1;
+
+        r0 := @this: javax.management.monitor.GaugeMonitor;
+
+        z0 := @parameter0: boolean;
+
+        $z1 = r0.<javax.management.monitor.GaugeMonitor: boolean notifyHigh>;
+
+        if $z1 != z0 goto label1;
+
+        return;
+
+     label1:
+        r0.<javax.management.monitor.GaugeMonitor: boolean notifyHigh> = z0;
+
+        return;
+    }
+
+    public synchronized boolean getNotifyLow()
+    {
+        javax.management.monitor.GaugeMonitor r0;
+        boolean $z0;
+
+        r0 := @this: javax.management.monitor.GaugeMonitor;
+
+        $z0 = r0.<javax.management.monitor.GaugeMonitor: boolean notifyLow>;
+
+        return $z0;
+    }
+
+    public synchronized void setNotifyLow(boolean)
+    {
+        javax.management.monitor.GaugeMonitor r0;
+        boolean z0, $z1;
+
+        r0 := @this: javax.management.monitor.GaugeMonitor;
+
+        z0 := @parameter0: boolean;
+
+        $z1 = r0.<javax.management.monitor.GaugeMonitor: boolean notifyLow>;
+
+        if $z1 != z0 goto label1;
+
+        return;
+
+     label1:
+        r0.<javax.management.monitor.GaugeMonitor: boolean notifyLow> = z0;
+
+        return;
+    }
+
+    public synchronized boolean getDifferenceMode()
+    {
+        javax.management.monitor.GaugeMonitor r0;
+        boolean $z0;
+
+        r0 := @this: javax.management.monitor.GaugeMonitor;
+
+        $z0 = r0.<javax.management.monitor.GaugeMonitor: boolean differenceMode>;
+
+        return $z0;
+    }
+
+    public synchronized void setDifferenceMode(boolean)
+    {
+        java.util.Iterator $r2;
+        javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject r5;
+        javax.management.monitor.GaugeMonitor r0;
+        java.util.List $r1;
+        javax.management.monitor.Monitor$ObservedObject r4;
+        java.lang.Object $r3;
+        boolean z0, $z1, $z2;
+
+        r0 := @this: javax.management.monitor.GaugeMonitor;
+
+        z0 := @parameter0: boolean;
+
+        $z1 = r0.<javax.management.monitor.GaugeMonitor: boolean differenceMode>;
+
+        if $z1 != z0 goto label1;
+
+        return;
+
+     label1:
+        r0.<javax.management.monitor.GaugeMonitor: boolean differenceMode> = z0;
+
+        $r1 = r0.<javax.management.monitor.GaugeMonitor: java.util.List observedObjects>;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z2 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label3;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (javax.management.monitor.Monitor$ObservedObject) $r3;
+
+        r5 = (javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject) r4;
+
+        virtualinvoke r5.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: void setStatus(int)>(2);
+
+        virtualinvoke r5.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: void setPreviousScanGauge(java.lang.Number)>(null);
+
+        goto label2;
+
+     label3:
+        return;
+    }
+
+    public javax.management.MBeanNotificationInfo[] getNotificationInfo()
+    {
+        java.lang.Object $r1;
+        javax.management.monitor.GaugeMonitor r3;
+        javax.management.MBeanNotificationInfo[] $r0, $r2;
+
+        r3 := @this: javax.management.monitor.GaugeMonitor;
+
+        $r0 = <javax.management.monitor.GaugeMonitor: javax.management.MBeanNotificationInfo[] notifsInfo>;
+
+        $r1 = virtualinvoke $r0.<java.lang.Object: java.lang.Object clone()>();
+
+        $r2 = (javax.management.MBeanNotificationInfo[]) $r1;
+
+        return $r2;
+    }
+
+    private synchronized boolean updateDerivedGauge(java.lang.Object, javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject)
+    {
+        javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject r1;
+        javax.management.monitor.GaugeMonitor r0;
+        java.lang.Object r2;
+        java.lang.Number $r3, $r4, $r5, $r6;
+        boolean $z0, z1;
+
+        r0 := @this: javax.management.monitor.GaugeMonitor;
+
+        r2 := @parameter0: java.lang.Object;
+
+        r1 := @parameter1: javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject;
+
+        $z0 = r0.<javax.management.monitor.GaugeMonitor: boolean differenceMode>;
+
+        if $z0 == 0 goto label3;
+
+        $r4 = virtualinvoke r1.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: java.lang.Number getPreviousScanGauge()>();
+
+        if $r4 == null goto label1;
+
+        $r6 = (java.lang.Number) r2;
+
+        specialinvoke r0.<javax.management.monitor.GaugeMonitor: void setDerivedGaugeWithDifference(java.lang.Number,javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject)>($r6, r1);
+
+        z1 = 1;
+
+        goto label2;
+
+     label1:
+        z1 = 0;
+
+     label2:
+        $r5 = (java.lang.Number) r2;
+
+        virtualinvoke r1.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: void setPreviousScanGauge(java.lang.Number)>($r5);
+
+        goto label4;
+
+     label3:
+        $r3 = (java.lang.Number) r2;
+
+        virtualinvoke r1.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: void setDerivedGauge(java.lang.Object)>($r3);
+
+        z1 = 1;
+
+     label4:
+        return z1;
+    }
+
+    private synchronized javax.management.monitor.MonitorNotification updateNotifications(javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject)
+    {
+        javax.management.monitor.MonitorNotification $r6, $r12, $r22, $r24, r26;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        javax.management.monitor.Monitor$NumericalType $r5, $r11, $r17, $r21;
+        javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject r0;
+        int $i0, $i1, $i2;
+        java.lang.Number $r2, $r4, $r7, $r9, $r10, $r13, $r15, $r16, $r18, $r20, $r23, $r25;
+        javax.management.monitor.GaugeMonitor r1;
+        java.lang.Object $r3, $r8, $r14, $r19;
+
+        r1 := @this: javax.management.monitor.GaugeMonitor;
+
+        r0 := @parameter0: javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject;
+
+        r26 = null;
+
+        $i0 = virtualinvoke r0.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: int getStatus()>();
+
+        if $i0 != 2 goto label4;
+
+        $r14 = virtualinvoke r0.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: java.lang.Object getDerivedGauge()>();
+
+        $r15 = (java.lang.Number) $r14;
+
+        $r16 = r1.<javax.management.monitor.GaugeMonitor: java.lang.Number highThreshold>;
+
+        $r17 = virtualinvoke r0.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: javax.management.monitor.Monitor$NumericalType getType()>();
+
+        $z4 = specialinvoke r1.<javax.management.monitor.GaugeMonitor: boolean isFirstGreaterThanLast(java.lang.Number,java.lang.Number,javax.management.monitor.Monitor$NumericalType)>($r15, $r16, $r17);
+
+        if $z4 == 0 goto label2;
+
+        $z7 = r1.<javax.management.monitor.GaugeMonitor: boolean notifyHigh>;
+
+        if $z7 == 0 goto label1;
+
+        $r24 = new javax.management.monitor.MonitorNotification;
+
+        $r25 = r1.<javax.management.monitor.GaugeMonitor: java.lang.Number highThreshold>;
+
+        specialinvoke $r24.<javax.management.monitor.MonitorNotification: void <init>(java.lang.String,java.lang.Object,long,long,java.lang.String,javax.management.ObjectName,java.lang.String,java.lang.Object,java.lang.Object)>("jmx.monitor.gauge.high", r1, 0L, 0L, "", null, null, null, $r25);
+
+        r26 = $r24;
+
+     label1:
+        virtualinvoke r0.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: void setStatus(int)>(1);
+
+        goto label8;
+
+     label2:
+        $r18 = r1.<javax.management.monitor.GaugeMonitor: java.lang.Number lowThreshold>;
+
+        $r19 = virtualinvoke r0.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: java.lang.Object getDerivedGauge()>();
+
+        $r20 = (java.lang.Number) $r19;
+
+        $r21 = virtualinvoke r0.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: javax.management.monitor.Monitor$NumericalType getType()>();
+
+        $z5 = specialinvoke r1.<javax.management.monitor.GaugeMonitor: boolean isFirstGreaterThanLast(java.lang.Number,java.lang.Number,javax.management.monitor.Monitor$NumericalType)>($r18, $r20, $r21);
+
+        if $z5 == 0 goto label8;
+
+        $z6 = r1.<javax.management.monitor.GaugeMonitor: boolean notifyLow>;
+
+        if $z6 == 0 goto label3;
+
+        $r22 = new javax.management.monitor.MonitorNotification;
+
+        $r23 = r1.<javax.management.monitor.GaugeMonitor: java.lang.Number lowThreshold>;
+
+        specialinvoke $r22.<javax.management.monitor.MonitorNotification: void <init>(java.lang.String,java.lang.Object,long,long,java.lang.String,javax.management.ObjectName,java.lang.String,java.lang.Object,java.lang.Object)>("jmx.monitor.gauge.low", r1, 0L, 0L, "", null, null, null, $r23);
+
+        r26 = $r22;
+
+     label3:
+        virtualinvoke r0.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: void setStatus(int)>(0);
+
+        goto label8;
+
+     label4:
+        $i1 = virtualinvoke r0.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: int getStatus()>();
+
+        if $i1 != 0 goto label6;
+
+        $r8 = virtualinvoke r0.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: java.lang.Object getDerivedGauge()>();
+
+        $r9 = (java.lang.Number) $r8;
+
+        $r10 = r1.<javax.management.monitor.GaugeMonitor: java.lang.Number highThreshold>;
+
+        $r11 = virtualinvoke r0.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: javax.management.monitor.Monitor$NumericalType getType()>();
+
+        $z2 = specialinvoke r1.<javax.management.monitor.GaugeMonitor: boolean isFirstGreaterThanLast(java.lang.Number,java.lang.Number,javax.management.monitor.Monitor$NumericalType)>($r9, $r10, $r11);
+
+        if $z2 == 0 goto label8;
+
+        $z3 = r1.<javax.management.monitor.GaugeMonitor: boolean notifyHigh>;
+
+        if $z3 == 0 goto label5;
+
+        $r12 = new javax.management.monitor.MonitorNotification;
+
+        $r13 = r1.<javax.management.monitor.GaugeMonitor: java.lang.Number highThreshold>;
+
+        specialinvoke $r12.<javax.management.monitor.MonitorNotification: void <init>(java.lang.String,java.lang.Object,long,long,java.lang.String,javax.management.ObjectName,java.lang.String,java.lang.Object,java.lang.Object)>("jmx.monitor.gauge.high", r1, 0L, 0L, "", null, null, null, $r13);
+
+        r26 = $r12;
+
+     label5:
+        virtualinvoke r0.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: void setStatus(int)>(1);
+
+        goto label8;
+
+     label6:
+        $i2 = virtualinvoke r0.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: int getStatus()>();
+
+        if $i2 != 1 goto label8;
+
+        $r2 = r1.<javax.management.monitor.GaugeMonitor: java.lang.Number lowThreshold>;
+
+        $r3 = virtualinvoke r0.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: java.lang.Object getDerivedGauge()>();
+
+        $r4 = (java.lang.Number) $r3;
+
+        $r5 = virtualinvoke r0.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: javax.management.monitor.Monitor$NumericalType getType()>();
+
+        $z0 = specialinvoke r1.<javax.management.monitor.GaugeMonitor: boolean isFirstGreaterThanLast(java.lang.Number,java.lang.Number,javax.management.monitor.Monitor$NumericalType)>($r2, $r4, $r5);
+
+        if $z0 == 0 goto label8;
+
+        $z1 = r1.<javax.management.monitor.GaugeMonitor: boolean notifyLow>;
+
+        if $z1 == 0 goto label7;
+
+        $r6 = new javax.management.monitor.MonitorNotification;
+
+        $r7 = r1.<javax.management.monitor.GaugeMonitor: java.lang.Number lowThreshold>;
+
+        specialinvoke $r6.<javax.management.monitor.MonitorNotification: void <init>(java.lang.String,java.lang.Object,long,long,java.lang.String,javax.management.ObjectName,java.lang.String,java.lang.Object,java.lang.Object)>("jmx.monitor.gauge.low", r1, 0L, 0L, "", null, null, null, $r7);
+
+        r26 = $r6;
+
+     label7:
+        virtualinvoke r0.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: void setStatus(int)>(0);
+
+     label8:
+        return r26;
+    }
+
+    private synchronized void setDerivedGaugeWithDifference(java.lang.Number, javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject)
+    {
+        java.lang.Float $r7, $r8;
+        java.lang.Integer $r15, $r16;
+        byte $b9, $b10, $b12;
+        int[] $r2;
+        java.lang.Long $r9, $r10;
+        java.lang.Short $r11, $r12;
+        java.lang.Byte $r13, $r14;
+        javax.management.monitor.Monitor$NumericalType $r3;
+        java.util.logging.Logger $r18;
+        float $f0, $f1, $f2;
+        java.lang.Double $r5, $r6;
+        javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject r0;
+        long $l2, $l3, $l4;
+        java.util.logging.Level $r19;
+        short $s5, $s6, $s8;
+        int $i0, $i1, $i7, $i11, $i13, $i14, $i15, $i16, $i17, $i18, $i19;
+        java.lang.String $r20;
+        java.lang.Number $r1, r4;
+        double $d0, $d1, $d2;
+        javax.management.monitor.GaugeMonitor r21;
+        java.lang.Class $r17;
+        java.lang.Comparable r22;
+
+        r21 := @this: javax.management.monitor.GaugeMonitor;
+
+        r4 := @parameter0: java.lang.Number;
+
+        r0 := @parameter1: javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject;
+
+        $r1 = virtualinvoke r0.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: java.lang.Number getPreviousScanGauge()>();
+
+        $r2 = <javax.management.monitor.GaugeMonitor$1: int[] $SwitchMap$javax$management$monitor$Monitor$NumericalType>;
+
+        $r3 = virtualinvoke r0.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: javax.management.monitor.Monitor$NumericalType getType()>();
+
+        $i0 = virtualinvoke $r3.<javax.management.monitor.Monitor$NumericalType: int ordinal()>();
+
+        $i1 = $r2[$i0];
+
+        tableswitch($i1)
+        {
+            case 1: goto label1;
+            case 2: goto label2;
+            case 3: goto label3;
+            case 4: goto label4;
+            case 5: goto label5;
+            case 6: goto label6;
+            default: goto label7;
+        };
+
+     label1:
+        $r15 = (java.lang.Integer) r4;
+
+        $i13 = virtualinvoke $r15.<java.lang.Integer: int intValue()>();
+
+        $r16 = (java.lang.Integer) $r1;
+
+        $i14 = virtualinvoke $r16.<java.lang.Integer: int intValue()>();
+
+        $i15 = $i13 - $i14;
+
+        r22 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i15);
+
+        goto label8;
+
+     label2:
+        $r13 = (java.lang.Byte) r4;
+
+        $b9 = virtualinvoke $r13.<java.lang.Byte: byte byteValue()>();
+
+        $r14 = (java.lang.Byte) $r1;
+
+        $b10 = virtualinvoke $r14.<java.lang.Byte: byte byteValue()>();
+
+        $i16 = (int) $b9;
+
+        $i17 = (int) $b10;
+
+        $i11 = $i16 - $i17;
+
+        $b12 = (byte) $i11;
+
+        r22 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b12);
+
+        goto label8;
+
+     label3:
+        $r11 = (java.lang.Short) r4;
+
+        $s5 = virtualinvoke $r11.<java.lang.Short: short shortValue()>();
+
+        $r12 = (java.lang.Short) $r1;
+
+        $s6 = virtualinvoke $r12.<java.lang.Short: short shortValue()>();
+
+        $i18 = (int) $s5;
+
+        $i19 = (int) $s6;
+
+        $i7 = $i18 - $i19;
+
+        $s8 = (short) $i7;
+
+        r22 = staticinvoke <java.lang.Short: java.lang.Short valueOf(short)>($s8);
+
+        goto label8;
+
+     label4:
+        $r9 = (java.lang.Long) r4;
+
+        $l2 = virtualinvoke $r9.<java.lang.Long: long longValue()>();
+
+        $r10 = (java.lang.Long) $r1;
+
+        $l3 = virtualinvoke $r10.<java.lang.Long: long longValue()>();
+
+        $l4 = $l2 - $l3;
+
+        r22 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l4);
+
+        goto label8;
+
+     label5:
+        $r7 = (java.lang.Float) r4;
+
+        $f0 = virtualinvoke $r7.<java.lang.Float: float floatValue()>();
+
+        $r8 = (java.lang.Float) $r1;
+
+        $f1 = virtualinvoke $r8.<java.lang.Float: float floatValue()>();
+
+        $f2 = $f0 - $f1;
+
+        r22 = staticinvoke <java.lang.Float: java.lang.Float valueOf(float)>($f2);
+
+        goto label8;
+
+     label6:
+        $r5 = (java.lang.Double) r4;
+
+        $d0 = virtualinvoke $r5.<java.lang.Double: double doubleValue()>();
+
+        $r6 = (java.lang.Double) $r1;
+
+        $d1 = virtualinvoke $r6.<java.lang.Double: double doubleValue()>();
+
+        $d2 = $d0 - $d1;
+
+        r22 = staticinvoke <java.lang.Double: java.lang.Double valueOf(double)>($d2);
+
+        goto label8;
+
+     label7:
+        $r18 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger MONITOR_LOGGER>;
+
+        $r19 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r17 = class "Ljavax/management/monitor/GaugeMonitor;";
+
+        $r20 = virtualinvoke $r17.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r18.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r19, $r20, "setDerivedGaugeWithDifference", "the threshold type is invalid");
+
+        return;
+
+     label8:
+        virtualinvoke r0.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: void setDerivedGauge(java.lang.Object)>(r22);
+
+        return;
+    }
+
+    private boolean isFirstGreaterThanLast(java.lang.Number, java.lang.Number, javax.management.monitor.Monitor$NumericalType)
+    {
+        long $l3, $l4;
+        java.util.logging.Level $r6;
+        byte $b2, $b5;
+        int[] $r1;
+        int $i0, $i1, $i6, $i7;
+        java.lang.String $r7;
+        java.lang.Number r2, r3;
+        double $d0, $d1;
+        boolean $z0, $z1;
+        javax.management.monitor.Monitor$NumericalType r0;
+        java.util.logging.Logger $r5;
+        javax.management.monitor.GaugeMonitor r8;
+        java.lang.Class $r4;
+
+        r8 := @this: javax.management.monitor.GaugeMonitor;
+
+        r2 := @parameter0: java.lang.Number;
+
+        r3 := @parameter1: java.lang.Number;
+
+        r0 := @parameter2: javax.management.monitor.Monitor$NumericalType;
+
+        $r1 = <javax.management.monitor.GaugeMonitor$1: int[] $SwitchMap$javax$management$monitor$Monitor$NumericalType>;
+
+        $i0 = virtualinvoke r0.<javax.management.monitor.Monitor$NumericalType: int ordinal()>();
+
+        $i1 = $r1[$i0];
+
+        tableswitch($i1)
+        {
+            case 1: goto label1;
+            case 2: goto label1;
+            case 3: goto label1;
+            case 4: goto label1;
+            case 5: goto label4;
+            case 6: goto label4;
+            default: goto label7;
+        };
+
+     label1:
+        $l3 = virtualinvoke r2.<java.lang.Number: long longValue()>();
+
+        $l4 = virtualinvoke r3.<java.lang.Number: long longValue()>();
+
+        $b5 = $l3 cmp $l4;
+
+        $i6 = (int) $b5;
+
+        if $i6 < 0 goto label2;
+
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+
+     label4:
+        $d0 = virtualinvoke r2.<java.lang.Number: double doubleValue()>();
+
+        $d1 = virtualinvoke r3.<java.lang.Number: double doubleValue()>();
+
+        $b2 = $d0 cmpl $d1;
+
+        $i7 = (int) $b2;
+
+        if $i7 < 0 goto label5;
+
+        $z1 = 1;
+
+        goto label6;
+
+     label5:
+        $z1 = 0;
+
+     label6:
+        return $z1;
+
+     label7:
+        $r5 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger MONITOR_LOGGER>;
+
+        $r6 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r4 = class "Ljavax/management/monitor/GaugeMonitor;";
+
+        $r7 = virtualinvoke $r4.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r5.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r6, $r7, "isFirstGreaterThanLast", "the threshold type is invalid");
+
+        return 0;
+    }
+
+    private boolean isFirstStrictlyGreaterThanLast(java.lang.Number, java.lang.Number, java.lang.String)
+    {
+        long $l1, $l2;
+        java.util.logging.Level $r5;
+        byte $b0, $b3;
+        int $i4, $i5;
+        java.lang.String r0, $r6;
+        java.lang.Number r1, r2;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        double $d0, $d1;
+        java.util.logging.Logger $r4;
+        javax.management.monitor.GaugeMonitor r7;
+        java.lang.Class $r3;
+
+        r7 := @this: javax.management.monitor.GaugeMonitor;
+
+        r1 := @parameter0: java.lang.Number;
+
+        r2 := @parameter1: java.lang.Number;
+
+        r0 := @parameter2: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("java.lang.Integer");
+
+        if $z0 != 0 goto label1;
+
+        $z1 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("java.lang.Byte");
+
+        if $z1 != 0 goto label1;
+
+        $z2 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("java.lang.Short");
+
+        if $z2 != 0 goto label1;
+
+        $z3 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("java.lang.Long");
+
+        if $z3 == 0 goto label4;
+
+     label1:
+        $l1 = virtualinvoke r1.<java.lang.Number: long longValue()>();
+
+        $l2 = virtualinvoke r2.<java.lang.Number: long longValue()>();
+
+        $b3 = $l1 cmp $l2;
+
+        $i4 = (int) $b3;
+
+        if $i4 <= 0 goto label2;
+
+        $z6 = 1;
+
+        goto label3;
+
+     label2:
+        $z6 = 0;
+
+     label3:
+        return $z6;
+
+     label4:
+        $z4 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("java.lang.Float");
+
+        if $z4 != 0 goto label5;
+
+        $z5 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("java.lang.Double");
+
+        if $z5 == 0 goto label8;
+
+     label5:
+        $d0 = virtualinvoke r1.<java.lang.Number: double doubleValue()>();
+
+        $d1 = virtualinvoke r2.<java.lang.Number: double doubleValue()>();
+
+        $b0 = $d0 cmpl $d1;
+
+        $i5 = (int) $b0;
+
+        if $i5 <= 0 goto label6;
+
+        $z7 = 1;
+
+        goto label7;
+
+     label6:
+        $z7 = 0;
+
+     label7:
+        return $z7;
+
+     label8:
+        $r4 = <com.sun.jmx.defaults.JmxProperties: java.util.logging.Logger MONITOR_LOGGER>;
+
+        $r5 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r3 = class "Ljavax/management/monitor/GaugeMonitor;";
+
+        $r6 = virtualinvoke $r3.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r4.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String)>($r5, $r6, "isFirstStrictlyGreaterThanLast", "the threshold type is invalid");
+
+        return 0;
+    }
+
+    javax.management.monitor.Monitor$ObservedObject createObservedObject(javax.management.ObjectName)
+    {
+        javax.management.ObjectName r1;
+        javax.management.monitor.GaugeMonitor r2;
+        javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject $r0;
+
+        r2 := @this: javax.management.monitor.GaugeMonitor;
+
+        r1 := @parameter0: javax.management.ObjectName;
+
+        $r0 = new javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject;
+
+        specialinvoke $r0.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: void <init>(javax.management.ObjectName)>(r1);
+
+        virtualinvoke $r0.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: void setStatus(int)>(2);
+
+        virtualinvoke $r0.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: void setPreviousScanGauge(java.lang.Number)>(null);
+
+        return $r0;
+    }
+
+    synchronized boolean isComparableTypeValid(javax.management.ObjectName, java.lang.String, java.lang.Comparable)
+    {
+        javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject r3;
+        javax.management.monitor.Monitor$ObservedObject $r2;
+        java.lang.String r11;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        javax.management.monitor.Monitor$NumericalType $r5, $r6, $r7, $r8, $r9, $r10;
+        javax.management.ObjectName r1;
+        javax.management.monitor.GaugeMonitor r0;
+        java.lang.Comparable r4;
+
+        r0 := @this: javax.management.monitor.GaugeMonitor;
+
+        r1 := @parameter0: javax.management.ObjectName;
+
+        r11 := @parameter1: java.lang.String;
+
+        r4 := @parameter2: java.lang.Comparable;
+
+        $r2 = virtualinvoke r0.<javax.management.monitor.GaugeMonitor: javax.management.monitor.Monitor$ObservedObject getObservedObject(javax.management.ObjectName)>(r1);
+
+        r3 = (javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject) $r2;
+
+        if r3 != null goto label1;
+
+        return 0;
+
+     label1:
+        $z0 = r4 instanceof java.lang.Integer;
+
+        if $z0 == 0 goto label2;
+
+        $r10 = <javax.management.monitor.Monitor$NumericalType: javax.management.monitor.Monitor$NumericalType INTEGER>;
+
+        virtualinvoke r3.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: void setType(javax.management.monitor.Monitor$NumericalType)>($r10);
+
+        goto label8;
+
+     label2:
+        $z1 = r4 instanceof java.lang.Byte;
+
+        if $z1 == 0 goto label3;
+
+        $r9 = <javax.management.monitor.Monitor$NumericalType: javax.management.monitor.Monitor$NumericalType BYTE>;
+
+        virtualinvoke r3.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: void setType(javax.management.monitor.Monitor$NumericalType)>($r9);
+
+        goto label8;
+
+     label3:
+        $z2 = r4 instanceof java.lang.Short;
+
+        if $z2 == 0 goto label4;
+
+        $r8 = <javax.management.monitor.Monitor$NumericalType: javax.management.monitor.Monitor$NumericalType SHORT>;
+
+        virtualinvoke r3.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: void setType(javax.management.monitor.Monitor$NumericalType)>($r8);
+
+        goto label8;
+
+     label4:
+        $z3 = r4 instanceof java.lang.Long;
+
+        if $z3 == 0 goto label5;
+
+        $r7 = <javax.management.monitor.Monitor$NumericalType: javax.management.monitor.Monitor$NumericalType LONG>;
+
+        virtualinvoke r3.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: void setType(javax.management.monitor.Monitor$NumericalType)>($r7);
+
+        goto label8;
+
+     label5:
+        $z4 = r4 instanceof java.lang.Float;
+
+        if $z4 == 0 goto label6;
+
+        $r6 = <javax.management.monitor.Monitor$NumericalType: javax.management.monitor.Monitor$NumericalType FLOAT>;
+
+        virtualinvoke r3.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: void setType(javax.management.monitor.Monitor$NumericalType)>($r6);
+
+        goto label8;
+
+     label6:
+        $z5 = r4 instanceof java.lang.Double;
+
+        if $z5 == 0 goto label7;
+
+        $r5 = <javax.management.monitor.Monitor$NumericalType: javax.management.monitor.Monitor$NumericalType DOUBLE>;
+
+        virtualinvoke r3.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: void setType(javax.management.monitor.Monitor$NumericalType)>($r5);
+
+        goto label8;
+
+     label7:
+        return 0;
+
+     label8:
+        return 1;
+    }
+
+    synchronized java.lang.Comparable getDerivedGaugeFromComparable(javax.management.ObjectName, java.lang.String, java.lang.Comparable)
+    {
+        javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject r3;
+        javax.management.ObjectName r1;
+        javax.management.monitor.GaugeMonitor r0;
+        javax.management.monitor.Monitor$ObservedObject $r2;
+        java.lang.Comparable r4, $r6;
+        java.lang.Object $r5;
+        java.lang.String r7;
+        boolean $z0;
+
+        r0 := @this: javax.management.monitor.GaugeMonitor;
+
+        r1 := @parameter0: javax.management.ObjectName;
+
+        r7 := @parameter1: java.lang.String;
+
+        r4 := @parameter2: java.lang.Comparable;
+
+        $r2 = virtualinvoke r0.<javax.management.monitor.GaugeMonitor: javax.management.monitor.Monitor$ObservedObject getObservedObject(javax.management.ObjectName)>(r1);
+
+        r3 = (javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject) $r2;
+
+        if r3 != null goto label1;
+
+        return null;
+
+     label1:
+        $z0 = specialinvoke r0.<javax.management.monitor.GaugeMonitor: boolean updateDerivedGauge(java.lang.Object,javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject)>(r4, r3);
+
+        virtualinvoke r3.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: void setDerivedGaugeValid(boolean)>($z0);
+
+        $r5 = virtualinvoke r3.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: java.lang.Object getDerivedGauge()>();
+
+        $r6 = (java.lang.Comparable) $r5;
+
+        return $r6;
+    }
+
+    synchronized void onErrorNotification(javax.management.monitor.MonitorNotification)
+    {
+        javax.management.monitor.Monitor$ObservedObject $r3;
+        javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject r4;
+        javax.management.monitor.MonitorNotification r1;
+        javax.management.ObjectName $r2;
+        javax.management.monitor.GaugeMonitor r0;
+
+        r0 := @this: javax.management.monitor.GaugeMonitor;
+
+        r1 := @parameter0: javax.management.monitor.MonitorNotification;
+
+        $r2 = virtualinvoke r1.<javax.management.monitor.MonitorNotification: javax.management.ObjectName getObservedObject()>();
+
+        $r3 = virtualinvoke r0.<javax.management.monitor.GaugeMonitor: javax.management.monitor.Monitor$ObservedObject getObservedObject(javax.management.ObjectName)>($r2);
+
+        r4 = (javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject) $r3;
+
+        if r4 != null goto label1;
+
+        return;
+
+     label1:
+        virtualinvoke r4.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: void setStatus(int)>(2);
+
+        virtualinvoke r4.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: void setPreviousScanGauge(java.lang.Number)>(null);
+
+        return;
+    }
+
+    synchronized javax.management.monitor.MonitorNotification buildAlarmNotification(javax.management.ObjectName, java.lang.String, java.lang.Comparable)
+    {
+        javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject r3;
+        javax.management.monitor.MonitorNotification r6;
+        javax.management.ObjectName r1;
+        javax.management.monitor.GaugeMonitor r0;
+        javax.management.monitor.Monitor$ObservedObject $r2;
+        java.lang.Comparable r5;
+        java.lang.String r4;
+        boolean $z0;
+
+        r0 := @this: javax.management.monitor.GaugeMonitor;
+
+        r1 := @parameter0: javax.management.ObjectName;
+
+        r4 := @parameter1: java.lang.String;
+
+        r5 := @parameter2: java.lang.Comparable;
+
+        $r2 = virtualinvoke r0.<javax.management.monitor.GaugeMonitor: javax.management.monitor.Monitor$ObservedObject getObservedObject(javax.management.ObjectName)>(r1);
+
+        r3 = (javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject) $r2;
+
+        if r3 != null goto label1;
+
+        return null;
+
+     label1:
+        $z0 = virtualinvoke r3.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: boolean getDerivedGaugeValid()>();
+
+        if $z0 == 0 goto label2;
+
+        r6 = specialinvoke r0.<javax.management.monitor.GaugeMonitor: javax.management.monitor.MonitorNotification updateNotifications(javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject)>(r3);
+
+        goto label3;
+
+     label2:
+        r6 = null;
+
+     label3:
+        return r6;
+    }
+
+    synchronized boolean isThresholdTypeValid(javax.management.ObjectName, java.lang.String, java.lang.Comparable)
+    {
+        javax.management.monitor.Monitor$NumericalType $r4;
+        javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject r3;
+        javax.management.ObjectName r1;
+        javax.management.monitor.GaugeMonitor r0;
+        javax.management.monitor.Monitor$ObservedObject $r2;
+        java.lang.Class $r5;
+        java.lang.Comparable r9;
+        java.lang.String r8;
+        java.lang.Number $r6, $r7;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: javax.management.monitor.GaugeMonitor;
+
+        r1 := @parameter0: javax.management.ObjectName;
+
+        r8 := @parameter1: java.lang.String;
+
+        r9 := @parameter2: java.lang.Comparable;
+
+        $r2 = virtualinvoke r0.<javax.management.monitor.GaugeMonitor: javax.management.monitor.Monitor$ObservedObject getObservedObject(javax.management.ObjectName)>(r1);
+
+        r3 = (javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject) $r2;
+
+        if r3 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r4 = virtualinvoke r3.<javax.management.monitor.GaugeMonitor$GaugeMonitorObservedObject: javax.management.monitor.Monitor$NumericalType getType()>();
+
+        $r5 = staticinvoke <javax.management.monitor.GaugeMonitor: java.lang.Class classForType(javax.management.monitor.Monitor$NumericalType)>($r4);
+
+        $r6 = r0.<javax.management.monitor.GaugeMonitor: java.lang.Number highThreshold>;
+
+        $z0 = staticinvoke <javax.management.monitor.GaugeMonitor: boolean isValidForType(java.lang.Object,java.lang.Class)>($r6, $r5);
+
+        if $z0 == 0 goto label2;
+
+        $r7 = r0.<javax.management.monitor.GaugeMonitor: java.lang.Number lowThreshold>;
+
+        $z1 = staticinvoke <javax.management.monitor.GaugeMonitor: boolean isValidForType(java.lang.Object,java.lang.Class)>($r7, $r5);
+
+        if $z1 == 0 goto label2;
+
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+    }
+
+    public volatile java.lang.Object getDerivedGauge(javax.management.ObjectName)
+    {
+        javax.management.ObjectName r1;
+        javax.management.monitor.GaugeMonitor r0;
+        java.lang.Number $r2;
+
+        r0 := @this: javax.management.monitor.GaugeMonitor;
+
+        r1 := @parameter0: javax.management.ObjectName;
+
+        $r2 = virtualinvoke r0.<javax.management.monitor.GaugeMonitor: java.lang.Number getDerivedGauge(javax.management.ObjectName)>(r1);
+
+        return $r2;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.String[] $r0, $r3;
+        javax.management.MBeanNotificationInfo[] $r1;
+        javax.management.MBeanNotificationInfo $r2;
+
+        <javax.management.monitor.GaugeMonitor: int RISING_OR_FALLING> = 2;
+
+        <javax.management.monitor.GaugeMonitor: int FALLING> = 1;
+
+        <javax.management.monitor.GaugeMonitor: int RISING> = 0;
+
+        $r0 = newarray (java.lang.String)[7];
+
+        $r0[0] = "jmx.monitor.error.runtime";
+
+        $r0[1] = "jmx.monitor.error.mbean";
+
+        $r0[2] = "jmx.monitor.error.attribute";
+
+        $r0[3] = "jmx.monitor.error.type";
+
+        $r0[4] = "jmx.monitor.error.threshold";
+
+        $r0[5] = "jmx.monitor.gauge.high";
+
+        $r0[6] = "jmx.monitor.gauge.low";
+
+        <javax.management.monitor.GaugeMonitor: java.lang.String[] types> = $r0;
+
+        $r1 = newarray (javax.management.MBeanNotificationInfo)[1];
+
+        $r2 = new javax.management.MBeanNotificationInfo;
+
+        $r3 = <javax.management.monitor.GaugeMonitor: java.lang.String[] types>;
+
+        specialinvoke $r2.<javax.management.MBeanNotificationInfo: void <init>(java.lang.String[],java.lang.String,java.lang.String)>($r3, "javax.management.monitor.MonitorNotification", "Notifications sent by the GaugeMonitor MBean");
+
+        $r1[0] = $r2;
+
+        <javax.management.monitor.GaugeMonitor: javax.management.MBeanNotificationInfo[] notifsInfo> = $r1;
+
+        return;
+    }
+}

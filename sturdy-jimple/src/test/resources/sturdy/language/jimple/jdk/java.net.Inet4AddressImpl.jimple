@@ -1,0 +1,149 @@
+class java.net.Inet4AddressImpl extends java.lang.Object implements java.net.InetAddressImpl
+{
+    private java.net.InetAddress anyLocalAddress;
+    private java.net.InetAddress loopbackAddress;
+
+    void <init>()
+    {
+        java.net.Inet4AddressImpl r0;
+
+        r0 := @this: java.net.Inet4AddressImpl;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public native java.lang.String getLocalHostName() throws java.net.UnknownHostException;
+
+    public native java.net.InetAddress[] lookupAllHostAddr(java.lang.String) throws java.net.UnknownHostException;
+
+    public native java.lang.String getHostByAddr(byte[]) throws java.net.UnknownHostException;
+
+    private native boolean isReachable0(byte[], int, byte[], int) throws java.io.IOException;
+
+    public synchronized java.net.InetAddress anyLocalAddress()
+    {
+        java.net.InetAddress $r1, $r2, $r4;
+        java.net.Inet4AddressImpl r0;
+        java.net.InetAddress$InetAddressHolder $r5;
+        java.net.Inet4Address $r3;
+
+        r0 := @this: java.net.Inet4AddressImpl;
+
+        $r1 = r0.<java.net.Inet4AddressImpl: java.net.InetAddress anyLocalAddress>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.net.Inet4Address;
+
+        specialinvoke $r3.<java.net.Inet4Address: void <init>()>();
+
+        r0.<java.net.Inet4AddressImpl: java.net.InetAddress anyLocalAddress> = $r3;
+
+        $r4 = r0.<java.net.Inet4AddressImpl: java.net.InetAddress anyLocalAddress>;
+
+        $r5 = virtualinvoke $r4.<java.net.InetAddress: java.net.InetAddress$InetAddressHolder holder()>();
+
+        $r5.<java.net.InetAddress$InetAddressHolder: java.lang.String hostName> = "0.0.0.0";
+
+     label1:
+        $r2 = r0.<java.net.Inet4AddressImpl: java.net.InetAddress anyLocalAddress>;
+
+        return $r2;
+    }
+
+    public synchronized java.net.InetAddress loopbackAddress()
+    {
+        java.net.InetAddress $r1, $r2;
+        java.net.Inet4AddressImpl r0;
+        byte[] $r3;
+        java.net.Inet4Address $r4;
+
+        r0 := @this: java.net.Inet4AddressImpl;
+
+        $r1 = r0.<java.net.Inet4AddressImpl: java.net.InetAddress loopbackAddress>;
+
+        if $r1 != null goto label1;
+
+        $r3 = newarray (byte)[4];
+
+        $r3[0] = 127;
+
+        $r3[1] = 0;
+
+        $r3[2] = 0;
+
+        $r3[3] = 1;
+
+        $r4 = new java.net.Inet4Address;
+
+        specialinvoke $r4.<java.net.Inet4Address: void <init>(java.lang.String,byte[])>("localhost", $r3);
+
+        r0.<java.net.Inet4AddressImpl: java.net.InetAddress loopbackAddress> = $r4;
+
+     label1:
+        $r2 = r0.<java.net.Inet4AddressImpl: java.net.InetAddress loopbackAddress>;
+
+        return $r2;
+    }
+
+    public boolean isReachable(java.net.InetAddress, int, java.net.NetworkInterface, int) throws java.io.IOException
+    {
+        byte[] r5, $r7;
+        java.util.Enumeration $r3;
+        java.net.NetworkInterface r0;
+        java.net.InetAddress r2, r6;
+        java.net.Inet4AddressImpl r1;
+        int i0, i1;
+        java.lang.Object $r4;
+        boolean $z0, $z1, $z2, $z3;
+
+        r1 := @this: java.net.Inet4AddressImpl;
+
+        r2 := @parameter0: java.net.InetAddress;
+
+        i0 := @parameter1: int;
+
+        r0 := @parameter2: java.net.NetworkInterface;
+
+        i1 := @parameter3: int;
+
+        r5 = null;
+
+        if r0 == null goto label3;
+
+        $r3 = virtualinvoke r0.<java.net.NetworkInterface: java.util.Enumeration getInetAddresses()>();
+
+        r6 = null;
+
+     label1:
+        $z0 = r6 instanceof java.net.Inet4Address;
+
+        if $z0 != 0 goto label2;
+
+        $z2 = interfaceinvoke $r3.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z2 == 0 goto label2;
+
+        $r4 = interfaceinvoke $r3.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r6 = (java.net.InetAddress) $r4;
+
+        goto label1;
+
+     label2:
+        $z1 = r6 instanceof java.net.Inet4Address;
+
+        if $z1 == 0 goto label3;
+
+        r5 = virtualinvoke r6.<java.net.InetAddress: byte[] getAddress()>();
+
+     label3:
+        $r7 = virtualinvoke r2.<java.net.InetAddress: byte[] getAddress()>();
+
+        $z3 = specialinvoke r1.<java.net.Inet4AddressImpl: boolean isReachable0(byte[],int,byte[],int)>($r7, i0, r5, i1);
+
+        return $z3;
+    }
+}

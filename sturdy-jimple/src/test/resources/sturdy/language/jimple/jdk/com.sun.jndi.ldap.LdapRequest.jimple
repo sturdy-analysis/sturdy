@@ -1,0 +1,386 @@
+final class com.sun.jndi.ldap.LdapRequest extends java.lang.Object
+{
+    private static final com.sun.jndi.ldap.BerDecoder EOF;
+    private static final java.lang.String CLOSE_MSG;
+    private static final java.lang.String TIMEOUT_MSG_FMT;
+    com.sun.jndi.ldap.LdapRequest next;
+    final int msgId;
+    private final java.util.concurrent.BlockingQueue replies;
+    private volatile boolean cancelled;
+    private volatile boolean closed;
+    private volatile boolean completed;
+    private final boolean pauseAfterReceipt;
+
+    void <init>(int, boolean, int)
+    {
+        java.util.concurrent.LinkedBlockingQueue $r3, $r4;
+        com.sun.jndi.ldap.LdapRequest r0;
+        int i0, i1, $i2, $i3, $i5;
+        boolean z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapRequest;
+
+        i0 := @parameter0: int;
+
+        z0 := @parameter1: boolean;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.jndi.ldap.LdapRequest: int msgId> = i0;
+
+        r0.<com.sun.jndi.ldap.LdapRequest: boolean pauseAfterReceipt> = z0;
+
+        $i5 = (int) -1;
+
+        if i1 != $i5 goto label1;
+
+        $r3 = new java.util.concurrent.LinkedBlockingQueue;
+
+        specialinvoke $r3.<java.util.concurrent.LinkedBlockingQueue: void <init>()>();
+
+        r0.<com.sun.jndi.ldap.LdapRequest: java.util.concurrent.BlockingQueue replies> = $r3;
+
+        goto label2;
+
+     label1:
+        $r4 = new java.util.concurrent.LinkedBlockingQueue;
+
+        $i2 = 8 * i1;
+
+        $i3 = $i2 / 10;
+
+        specialinvoke $r4.<java.util.concurrent.LinkedBlockingQueue: void <init>(int)>($i3);
+
+        r0.<com.sun.jndi.ldap.LdapRequest: java.util.concurrent.BlockingQueue replies> = $r4;
+
+     label2:
+        return;
+    }
+
+    void cancel()
+    {
+        java.util.concurrent.BlockingQueue $r2;
+        com.sun.jndi.ldap.BerDecoder $r1;
+        com.sun.jndi.ldap.LdapRequest r0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapRequest;
+
+        r0.<com.sun.jndi.ldap.LdapRequest: boolean cancelled> = 1;
+
+        $r2 = r0.<com.sun.jndi.ldap.LdapRequest: java.util.concurrent.BlockingQueue replies>;
+
+        $r1 = <com.sun.jndi.ldap.LdapRequest: com.sun.jndi.ldap.BerDecoder EOF>;
+
+        interfaceinvoke $r2.<java.util.concurrent.BlockingQueue: boolean offer(java.lang.Object)>($r1);
+
+        return;
+    }
+
+    synchronized void close()
+    {
+        java.util.concurrent.BlockingQueue $r2;
+        com.sun.jndi.ldap.BerDecoder $r1;
+        com.sun.jndi.ldap.LdapRequest r0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapRequest;
+
+        r0.<com.sun.jndi.ldap.LdapRequest: boolean closed> = 1;
+
+        $r2 = r0.<com.sun.jndi.ldap.LdapRequest: java.util.concurrent.BlockingQueue replies>;
+
+        $r1 = <com.sun.jndi.ldap.LdapRequest: com.sun.jndi.ldap.BerDecoder EOF>;
+
+        interfaceinvoke $r2.<java.util.concurrent.BlockingQueue: boolean offer(java.lang.Object)>($r1);
+
+        return;
+    }
+
+    private boolean isClosed()
+    {
+        com.sun.jndi.ldap.BerDecoder $r4;
+        java.util.concurrent.BlockingQueue $r1, $r2;
+        com.sun.jndi.ldap.LdapRequest r0;
+        int $i0;
+        java.lang.Object $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.jndi.ldap.LdapRequest;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapRequest: boolean closed>;
+
+        if $z0 == 0 goto label2;
+
+        $r1 = r0.<com.sun.jndi.ldap.LdapRequest: java.util.concurrent.BlockingQueue replies>;
+
+        $i0 = interfaceinvoke $r1.<java.util.concurrent.BlockingQueue: int size()>();
+
+        if $i0 == 0 goto label1;
+
+        $r2 = r0.<com.sun.jndi.ldap.LdapRequest: java.util.concurrent.BlockingQueue replies>;
+
+        $r3 = interfaceinvoke $r2.<java.util.concurrent.BlockingQueue: java.lang.Object peek()>();
+
+        $r4 = <com.sun.jndi.ldap.LdapRequest: com.sun.jndi.ldap.BerDecoder EOF>;
+
+        if $r3 != $r4 goto label2;
+
+     label1:
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        return $z1;
+    }
+
+    synchronized boolean addReplyBer(com.sun.jndi.ldap.BerDecoder)
+    {
+        com.sun.jndi.ldap.BerDecoder r1;
+        java.util.concurrent.BlockingQueue $r2;
+        java.io.IOException $r4;
+        com.sun.jndi.ldap.LdapRequest r0;
+        java.lang.InterruptedException $r3;
+        int $i0;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: com.sun.jndi.ldap.LdapRequest;
+
+        r1 := @parameter0: com.sun.jndi.ldap.BerDecoder;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapRequest: boolean cancelled>;
+
+        if $z0 != 0 goto label01;
+
+        $z1 = r0.<com.sun.jndi.ldap.LdapRequest: boolean closed>;
+
+        if $z1 == 0 goto label02;
+
+     label01:
+        return 0;
+
+     label02:
+        virtualinvoke r1.<com.sun.jndi.ldap.BerDecoder: int parseSeq(int[])>(null);
+
+        virtualinvoke r1.<com.sun.jndi.ldap.BerDecoder: int parseInt()>();
+
+        $i0 = virtualinvoke r1.<com.sun.jndi.ldap.BerDecoder: int peekByte()>();
+
+        if $i0 != 101 goto label03;
+
+        $z3 = 1;
+
+        goto label04;
+
+     label03:
+        $z3 = 0;
+
+     label04:
+        r0.<com.sun.jndi.ldap.LdapRequest: boolean completed> = $z3;
+
+     label05:
+        goto label07;
+
+     label06:
+        $r4 := @caughtexception;
+
+     label07:
+        virtualinvoke r1.<com.sun.jndi.ldap.BerDecoder: void reset()>();
+
+     label08:
+        $r2 = r0.<com.sun.jndi.ldap.LdapRequest: java.util.concurrent.BlockingQueue replies>;
+
+        interfaceinvoke $r2.<java.util.concurrent.BlockingQueue: void put(java.lang.Object)>(r1);
+
+     label09:
+        goto label11;
+
+     label10:
+        $r3 := @caughtexception;
+
+     label11:
+        $z2 = r0.<com.sun.jndi.ldap.LdapRequest: boolean pauseAfterReceipt>;
+
+        return $z2;
+
+        catch java.io.IOException from label02 to label05 with label06;
+        catch java.lang.InterruptedException from label08 to label09 with label10;
+    }
+
+    com.sun.jndi.ldap.BerDecoder getReplyBer(long) throws javax.naming.NamingException, java.lang.InterruptedException
+    {
+        javax.naming.NamingException $r28, $r31, $r32;
+        com.sun.jndi.ldap.LdapRequest r0;
+        byte $b1;
+        java.lang.Long $r7;
+        boolean $z0, $z1, $z2;
+        com.sun.jndi.ldap.BerDecoder $r3, $r25;
+        java.util.concurrent.BlockingQueue $r1, $r16;
+        java.lang.StringBuilder $r11, $r12, $r13, $r21, $r22, $r23, $r26, $r29;
+        java.lang.Object[] $r6;
+        long l0;
+        int $i2, $i3, $i4;
+        java.lang.String $r8, $r14, $r24;
+        java.util.concurrent.TimeUnit $r15;
+        java.lang.Object $r2, $r17;
+        javax.naming.CommunicationException $r27, $r30;
+
+        r0 := @this: com.sun.jndi.ldap.LdapRequest;
+
+        l0 := @parameter0: long;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapRequest: boolean cancelled>;
+
+        if $z0 == 0 goto label1;
+
+        $r27 = new javax.naming.CommunicationException;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Request: ");
+
+        $i3 = r0.<com.sun.jndi.ldap.LdapRequest: int msgId>;
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" cancelled");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r27.<javax.naming.CommunicationException: void <init>(java.lang.String)>($r24);
+
+        throw $r27;
+
+     label1:
+        $z1 = specialinvoke r0.<com.sun.jndi.ldap.LdapRequest: boolean isClosed()>();
+
+        if $z1 == 0 goto label2;
+
+        $r28 = new javax.naming.NamingException;
+
+        specialinvoke $r28.<javax.naming.NamingException: void <init>(java.lang.String)>("LDAP connection has been closed");
+
+        throw $r28;
+
+     label2:
+        $b1 = l0 cmp 0L;
+
+        $i4 = (int) $b1;
+
+        if $i4 <= 0 goto label3;
+
+        $r16 = r0.<com.sun.jndi.ldap.LdapRequest: java.util.concurrent.BlockingQueue replies>;
+
+        $r15 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MILLISECONDS>;
+
+        $r17 = interfaceinvoke $r16.<java.util.concurrent.BlockingQueue: java.lang.Object poll(long,java.util.concurrent.TimeUnit)>(l0, $r15);
+
+        $r25 = (com.sun.jndi.ldap.BerDecoder) $r17;
+
+        goto label4;
+
+     label3:
+        $r1 = r0.<com.sun.jndi.ldap.LdapRequest: java.util.concurrent.BlockingQueue replies>;
+
+        $r2 = interfaceinvoke $r1.<java.util.concurrent.BlockingQueue: java.lang.Object take()>();
+
+        $r25 = (com.sun.jndi.ldap.BerDecoder) $r2;
+
+     label4:
+        $z2 = r0.<com.sun.jndi.ldap.LdapRequest: boolean cancelled>;
+
+        if $z2 == 0 goto label5;
+
+        $r30 = new javax.naming.CommunicationException;
+
+        $r29 = new java.lang.StringBuilder;
+
+        specialinvoke $r29.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Request: ");
+
+        $i2 = r0.<com.sun.jndi.ldap.LdapRequest: int msgId>;
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" cancelled");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r30.<javax.naming.CommunicationException: void <init>(java.lang.String)>($r14);
+
+        throw $r30;
+
+     label5:
+        if $r25 != null goto label6;
+
+        $r31 = new javax.naming.NamingException;
+
+        $r6 = newarray (java.lang.Object)[1];
+
+        $r7 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>(l0);
+
+        $r6[0] = $r7;
+
+        $r8 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("LDAP response read timed out, timeout used: %d ms.", $r6);
+
+        specialinvoke $r31.<javax.naming.NamingException: void <init>(java.lang.String)>($r8);
+
+        throw $r31;
+
+     label6:
+        $r3 = <com.sun.jndi.ldap.LdapRequest: com.sun.jndi.ldap.BerDecoder EOF>;
+
+        if $r25 != $r3 goto label7;
+
+        $r32 = new javax.naming.NamingException;
+
+        specialinvoke $r32.<javax.naming.NamingException: void <init>(java.lang.String)>("LDAP connection has been closed");
+
+        throw $r32;
+
+     label7:
+        return $r25;
+    }
+
+    boolean hasSearchCompleted()
+    {
+        com.sun.jndi.ldap.LdapRequest r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapRequest;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapRequest: boolean completed>;
+
+        return $z0;
+    }
+
+    static void <clinit>()
+    {
+        int $i1;
+        byte[] $r1;
+        com.sun.jndi.ldap.BerDecoder $r2;
+
+        <com.sun.jndi.ldap.LdapRequest: java.lang.String TIMEOUT_MSG_FMT> = "LDAP response read timed out, timeout used: %d ms.";
+
+        <com.sun.jndi.ldap.LdapRequest: java.lang.String CLOSE_MSG> = "LDAP connection has been closed";
+
+        $r2 = new com.sun.jndi.ldap.BerDecoder;
+
+        $r1 = newarray (byte)[0];
+
+        $i1 = (int) -1;
+
+        specialinvoke $r2.<com.sun.jndi.ldap.BerDecoder: void <init>(byte[],int,int)>($r1, $i1, 0);
+
+        <com.sun.jndi.ldap.LdapRequest: com.sun.jndi.ldap.BerDecoder EOF> = $r2;
+
+        return;
+    }
+}

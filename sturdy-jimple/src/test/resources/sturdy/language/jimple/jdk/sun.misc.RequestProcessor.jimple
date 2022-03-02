@@ -1,0 +1,122 @@
+public class sun.misc.RequestProcessor extends java.lang.Object implements java.lang.Runnable
+{
+    private static sun.misc.Queue requestQueue;
+    private static java.lang.Thread dispatcher;
+
+    public void <init>()
+    {
+        sun.misc.RequestProcessor r0;
+
+        r0 := @this: sun.misc.RequestProcessor;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static void postRequest(sun.misc.Request)
+    {
+        sun.misc.Queue $r1;
+        sun.misc.Request r0;
+
+        r0 := @parameter0: sun.misc.Request;
+
+        staticinvoke <sun.misc.RequestProcessor: void lazyInitialize()>();
+
+        $r1 = <sun.misc.RequestProcessor: sun.misc.Queue requestQueue>;
+
+        virtualinvoke $r1.<sun.misc.Queue: void enqueue(java.lang.Object)>(r0);
+
+        return;
+    }
+
+    public void run()
+    {
+        java.lang.Throwable $r1;
+        sun.misc.Queue $r3;
+        java.lang.InterruptedException $r0;
+        sun.misc.Request $r5;
+        sun.misc.RequestProcessor r2;
+        java.lang.Object $r4;
+
+        r2 := @this: sun.misc.RequestProcessor;
+
+        staticinvoke <sun.misc.RequestProcessor: void lazyInitialize()>();
+
+     label1:
+        $r3 = <sun.misc.RequestProcessor: sun.misc.Queue requestQueue>;
+
+        $r4 = virtualinvoke $r3.<sun.misc.Queue: java.lang.Object dequeue()>();
+
+        $r5 = (sun.misc.Request) $r4;
+
+     label2:
+        virtualinvoke $r5.<sun.misc.Request: void execute()>();
+
+     label3:
+        goto label5;
+
+     label4:
+        $r1 := @caughtexception;
+
+     label5:
+        goto label1;
+
+     label6:
+        $r0 := @caughtexception;
+
+        goto label1;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.InterruptedException from label1 to label5 with label6;
+    }
+
+    public static synchronized void startProcessing()
+    {
+        java.lang.Thread $r0, $r1, $r3, $r4;
+        sun.misc.RequestProcessor $r2;
+
+        $r0 = <sun.misc.RequestProcessor: java.lang.Thread dispatcher>;
+
+        if $r0 != null goto label1;
+
+        $r1 = new java.lang.Thread;
+
+        $r2 = new sun.misc.RequestProcessor;
+
+        specialinvoke $r2.<sun.misc.RequestProcessor: void <init>()>();
+
+        specialinvoke $r1.<java.lang.Thread: void <init>(java.lang.Runnable,java.lang.String)>($r2, "Request Processor");
+
+        <sun.misc.RequestProcessor: java.lang.Thread dispatcher> = $r1;
+
+        $r3 = <sun.misc.RequestProcessor: java.lang.Thread dispatcher>;
+
+        virtualinvoke $r3.<java.lang.Thread: void setPriority(int)>(7);
+
+        $r4 = <sun.misc.RequestProcessor: java.lang.Thread dispatcher>;
+
+        virtualinvoke $r4.<java.lang.Thread: void start()>();
+
+     label1:
+        return;
+    }
+
+    private static synchronized void lazyInitialize()
+    {
+        sun.misc.Queue $r0, $r1;
+
+        $r0 = <sun.misc.RequestProcessor: sun.misc.Queue requestQueue>;
+
+        if $r0 != null goto label1;
+
+        $r1 = new sun.misc.Queue;
+
+        specialinvoke $r1.<sun.misc.Queue: void <init>()>();
+
+        <sun.misc.RequestProcessor: sun.misc.Queue requestQueue> = $r1;
+
+     label1:
+        return;
+    }
+}

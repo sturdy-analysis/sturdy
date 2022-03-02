@@ -1,0 +1,557 @@
+final class com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos extends java.lang.Object
+{
+    private final java.util.Map _encodingTableKeyJava;
+    private final java.util.Map _encodingTableKeyMime;
+    private final java.util.Map _encodingDynamicTable;
+
+    private void <init>()
+    {
+        com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos r0;
+        java.util.Map $r4;
+        java.util.HashMap $r1, $r2, $r3;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos: java.util.Map _encodingTableKeyJava> = $r1;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos: java.util.Map _encodingTableKeyMime> = $r2;
+
+        $r3 = new java.util.HashMap;
+
+        specialinvoke $r3.<java.util.HashMap: void <init>()>();
+
+        $r4 = staticinvoke <java.util.Collections: java.util.Map synchronizedMap(java.util.Map)>($r3);
+
+        r0.<com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos: java.util.Map _encodingDynamicTable> = $r4;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos: void loadEncodingInfo()>();
+
+        return;
+    }
+
+    private java.io.InputStream openEncodingsFileStream() throws java.net.MalformedURLException, java.io.IOException
+    {
+        java.net.URL $r0;
+        com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos r2;
+        int $i0;
+        java.lang.SecurityException $r1;
+        java.lang.String r3;
+        java.io.InputStream r4;
+
+        r2 := @this: com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos;
+
+        r3 = null;
+
+        r4 = null;
+
+     label1:
+        r3 = staticinvoke <com.sun.org.apache.xalan.internal.utils.SecuritySupport: java.lang.String getSystemProperty(java.lang.String,java.lang.String)>("com.sun.org.apache.xalan.internal.serialize.encodings", "");
+
+     label2:
+        goto label4;
+
+     label3:
+        $r1 := @caughtexception;
+
+     label4:
+        if r3 == null goto label5;
+
+        $i0 = virtualinvoke r3.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label5;
+
+        $r0 = new java.net.URL;
+
+        specialinvoke $r0.<java.net.URL: void <init>(java.lang.String)>(r3);
+
+        r4 = virtualinvoke $r0.<java.net.URL: java.io.InputStream openStream()>();
+
+     label5:
+        if r4 != null goto label6;
+
+        r4 = staticinvoke <com.sun.org.apache.xalan.internal.utils.SecuritySupport: java.io.InputStream getResourceAsStream(java.lang.String)>("com/sun/org/apache/xml/internal/serializer/Encodings.properties");
+
+     label6:
+        return r4;
+
+        catch java.lang.SecurityException from label1 to label2 with label3;
+    }
+
+    private java.util.Properties loadProperties() throws java.net.MalformedURLException, java.io.IOException
+    {
+        java.lang.Throwable $r3, $r4, $r5, r7;
+        java.util.Properties $r0;
+        com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos r1;
+        java.io.InputStream $r2;
+
+        r1 := @this: com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos;
+
+        $r0 = new java.util.Properties;
+
+        specialinvoke $r0.<java.util.Properties: void <init>()>();
+
+        $r2 = specialinvoke r1.<com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos: java.io.InputStream openEncodingsFileStream()>();
+
+        r7 = null;
+
+     label01:
+        if $r2 == null goto label02;
+
+        virtualinvoke $r0.<java.util.Properties: void load(java.io.InputStream)>($r2);
+
+     label02:
+        if $r2 == null goto label12;
+
+        goto label03;
+
+     label03:
+        virtualinvoke $r2.<java.io.InputStream: void close()>();
+
+        goto label12;
+
+     label04:
+        $r5 := @caughtexception;
+
+        r7 = $r5;
+
+        throw $r5;
+
+     label05:
+        $r4 := @caughtexception;
+
+     label06:
+        if $r2 == null goto label11;
+
+        if r7 == null goto label10;
+
+     label07:
+        virtualinvoke $r2.<java.io.InputStream: void close()>();
+
+     label08:
+        goto label11;
+
+     label09:
+        $r3 := @caughtexception;
+
+        virtualinvoke r7.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r3);
+
+        goto label11;
+
+     label10:
+        virtualinvoke $r2.<java.io.InputStream: void close()>();
+
+     label11:
+        throw $r4;
+
+     label12:
+        return $r0;
+
+        catch java.lang.Throwable from label01 to label02 with label04;
+        catch java.lang.Throwable from label07 to label08 with label09;
+        catch java.lang.Throwable from label04 to label06 with label05;
+    }
+
+    private java.lang.String[] parseMimeTypes(java.lang.String)
+    {
+        com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos r6;
+        java.lang.String[] r3, $r5;
+        java.util.StringTokenizer $r1;
+        int $i0, $i1, i2;
+        java.lang.String r0, $r2, $r4;
+        boolean $z0;
+
+        r6 := @this: com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int indexOf(int)>(32);
+
+        if $i0 >= 0 goto label1;
+
+        $r5 = newarray (java.lang.String)[1];
+
+        $r5[0] = r0;
+
+        return $r5;
+
+     label1:
+        $r1 = new java.util.StringTokenizer;
+
+        $r2 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        specialinvoke $r1.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>($r2, ",");
+
+        $i1 = virtualinvoke $r1.<java.util.StringTokenizer: int countTokens()>();
+
+        r3 = newarray (java.lang.String)[$i1];
+
+        i2 = 0;
+
+     label2:
+        $z0 = virtualinvoke $r1.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label3;
+
+        $r4 = virtualinvoke $r1.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        r3[i2] = $r4;
+
+        i2 = i2 + 1;
+
+        goto label2;
+
+     label3:
+        return r3;
+    }
+
+    private java.lang.String findCharsetNameFor(java.lang.String)
+    {
+        java.nio.charset.Charset $r1;
+        com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos r4;
+        java.lang.String r0, $r2;
+        java.lang.Exception $r3;
+
+        r4 := @this: com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos;
+
+        r0 := @parameter0: java.lang.String;
+
+     label1:
+        $r1 = staticinvoke <java.nio.charset.Charset: java.nio.charset.Charset forName(java.lang.String)>(r0);
+
+        $r2 = virtualinvoke $r1.<java.nio.charset.Charset: java.lang.String name()>();
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    private java.lang.String findCharsetNameFor(java.lang.String, java.lang.String[])
+    {
+        com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos r0;
+        java.lang.String[] r3;
+        int i0, i1;
+        java.lang.String r1, $r2, r4, $r5, r6;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String[];
+
+        $r2 = specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos: java.lang.String findCharsetNameFor(java.lang.String)>(r1);
+
+        r6 = $r2;
+
+        if $r2 == null goto label1;
+
+        return r1;
+
+     label1:
+        i0 = lengthof r3;
+
+        i1 = 0;
+
+     label2:
+        if i1 >= i0 goto label4;
+
+        r4 = r3[i1];
+
+        $r5 = specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos: java.lang.String findCharsetNameFor(java.lang.String)>(r4);
+
+        r6 = $r5;
+
+        if $r5 == null goto label3;
+
+        goto label4;
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label4:
+        return r6;
+    }
+
+    private void loadEncodingInfo()
+    {
+        java.util.Enumeration $r2;
+        java.util.Map $r4, $r22, $r23, $r24;
+        boolean $z0, $z1, $z2;
+        com.sun.org.apache.xml.internal.serializer.EncodingInfo $r9, $r21;
+        java.util.Set $r5;
+        com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos r0;
+        java.util.HashMap $r3;
+        java.lang.String[] $r15;
+        int $i0, i1;
+        java.lang.String $r10, $r11, $r14, $r16, $r17, $r18, r19, $r20, r29;
+        java.util.Map$Entry r30;
+        java.util.Properties $r1;
+        com.sun.org.apache.xml.internal.serializer.utils.WrappedRuntimeException $r26, $r28;
+        java.util.Iterator $r6;
+        java.net.MalformedURLException $r27;
+        java.io.IOException $r25;
+        java.lang.Object $r7, $r8, $r12, $r13;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos;
+
+     label01:
+        $r1 = specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos: java.util.Properties loadProperties()>();
+
+        $r2 = virtualinvoke $r1.<java.util.Properties: java.util.Enumeration keys()>();
+
+        $r3 = new java.util.HashMap;
+
+        specialinvoke $r3.<java.util.HashMap: void <init>()>();
+
+     label02:
+        $z0 = interfaceinvoke $r2.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label06;
+
+        $r13 = interfaceinvoke $r2.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r29 = (java.lang.String) $r13;
+
+        $r14 = virtualinvoke $r1.<java.util.Properties: java.lang.String getProperty(java.lang.String)>(r29);
+
+        $r15 = specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos: java.lang.String[] parseMimeTypes(java.lang.String)>($r14);
+
+        $r16 = specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos: java.lang.String findCharsetNameFor(java.lang.String,java.lang.String[])>(r29, $r15);
+
+        if $r16 == null goto label05;
+
+        $r17 = staticinvoke <com.sun.org.apache.xml.internal.serializer.Encodings: java.lang.String access$000(java.lang.String)>(r29);
+
+        $r18 = staticinvoke <com.sun.org.apache.xml.internal.serializer.Encodings: java.lang.String access$000(java.lang.String)>($r16);
+
+        i1 = 0;
+
+     label03:
+        $i0 = lengthof $r15;
+
+        if i1 >= $i0 goto label05;
+
+        r19 = $r15[i1];
+
+        $r20 = staticinvoke <com.sun.org.apache.xml.internal.serializer.Encodings: java.lang.String access$000(java.lang.String)>(r19);
+
+        $r21 = new com.sun.org.apache.xml.internal.serializer.EncodingInfo;
+
+        specialinvoke $r21.<com.sun.org.apache.xml.internal.serializer.EncodingInfo: void <init>(java.lang.String,java.lang.String)>(r19, $r16);
+
+        $r22 = r0.<com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos: java.util.Map _encodingTableKeyMime>;
+
+        interfaceinvoke $r22.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r20, $r21);
+
+        $z2 = interfaceinvoke $r3.<java.util.Map: boolean containsKey(java.lang.Object)>($r18);
+
+        if $z2 != 0 goto label04;
+
+        interfaceinvoke $r3.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r18, $r21);
+
+        $r24 = r0.<com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos: java.util.Map _encodingTableKeyJava>;
+
+        interfaceinvoke $r24.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r18, $r21);
+
+     label04:
+        $r23 = r0.<com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos: java.util.Map _encodingTableKeyJava>;
+
+        interfaceinvoke $r23.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r17, $r21);
+
+        i1 = i1 + 1;
+
+        goto label03;
+
+     label05:
+        goto label02;
+
+     label06:
+        $r4 = r0.<com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos: java.util.Map _encodingTableKeyJava>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Map: java.util.Set entrySet()>();
+
+        $r6 = interfaceinvoke $r5.<java.util.Set: java.util.Iterator iterator()>();
+
+     label07:
+        $z1 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label08;
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r30 = (java.util.Map$Entry) $r7;
+
+        $r8 = interfaceinvoke r30.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r9 = (com.sun.org.apache.xml.internal.serializer.EncodingInfo) $r8;
+
+        $r10 = $r9.<com.sun.org.apache.xml.internal.serializer.EncodingInfo: java.lang.String javaName>;
+
+        $r11 = staticinvoke <com.sun.org.apache.xml.internal.serializer.Encodings: java.lang.String access$000(java.lang.String)>($r10);
+
+        $r12 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>($r11);
+
+        interfaceinvoke r30.<java.util.Map$Entry: java.lang.Object setValue(java.lang.Object)>($r12);
+
+        goto label07;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r27 := @caughtexception;
+
+        $r28 = new com.sun.org.apache.xml.internal.serializer.utils.WrappedRuntimeException;
+
+        specialinvoke $r28.<com.sun.org.apache.xml.internal.serializer.utils.WrappedRuntimeException: void <init>(java.lang.Exception)>($r27);
+
+        throw $r28;
+
+     label10:
+        $r25 := @caughtexception;
+
+        $r26 = new com.sun.org.apache.xml.internal.serializer.utils.WrappedRuntimeException;
+
+        specialinvoke $r26.<com.sun.org.apache.xml.internal.serializer.utils.WrappedRuntimeException: void <init>(java.lang.Exception)>($r25);
+
+        throw $r26;
+
+     label11:
+        return;
+
+        catch java.net.MalformedURLException from label01 to label08 with label09;
+        catch java.io.IOException from label01 to label08 with label10;
+    }
+
+    com.sun.org.apache.xml.internal.serializer.EncodingInfo findEncoding(java.lang.String)
+    {
+        com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos r0;
+        com.sun.org.apache.xml.internal.serializer.EncodingInfo r8;
+        java.util.Map $r2, $r4, $r6;
+        java.lang.Object $r3, $r5, $r7;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos: java.util.Map _encodingTableKeyJava>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r8 = (com.sun.org.apache.xml.internal.serializer.EncodingInfo) $r3;
+
+        if r8 != null goto label1;
+
+        $r6 = r0.<com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos: java.util.Map _encodingTableKeyMime>;
+
+        $r7 = interfaceinvoke $r6.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r8 = (com.sun.org.apache.xml.internal.serializer.EncodingInfo) $r7;
+
+     label1:
+        if r8 != null goto label2;
+
+        $r4 = r0.<com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos: java.util.Map _encodingDynamicTable>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r8 = (com.sun.org.apache.xml.internal.serializer.EncodingInfo) $r5;
+
+     label2:
+        return r8;
+    }
+
+    com.sun.org.apache.xml.internal.serializer.EncodingInfo getEncodingFromMimeKey(java.lang.String)
+    {
+        com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos r0;
+        java.util.Map $r2;
+        com.sun.org.apache.xml.internal.serializer.EncodingInfo $r4;
+        java.lang.Object $r3;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos: java.util.Map _encodingTableKeyMime>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        $r4 = (com.sun.org.apache.xml.internal.serializer.EncodingInfo) $r3;
+
+        return $r4;
+    }
+
+    com.sun.org.apache.xml.internal.serializer.EncodingInfo getEncodingFromJavaKey(java.lang.String)
+    {
+        com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos r0;
+        java.util.Map $r2;
+        com.sun.org.apache.xml.internal.serializer.EncodingInfo $r4;
+        java.lang.Object $r3;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos: java.util.Map _encodingTableKeyJava>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        $r4 = (com.sun.org.apache.xml.internal.serializer.EncodingInfo) $r3;
+
+        return $r4;
+    }
+
+    void putEncoding(java.lang.String, com.sun.org.apache.xml.internal.serializer.EncodingInfo)
+    {
+        com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos r0;
+        java.util.Map $r3;
+        com.sun.org.apache.xml.internal.serializer.EncodingInfo r2;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: com.sun.org.apache.xml.internal.serializer.EncodingInfo;
+
+        $r3 = r0.<com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos: java.util.Map _encodingDynamicTable>;
+
+        interfaceinvoke $r3.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, r2);
+
+        return;
+    }
+
+    void <init>(com.sun.org.apache.xml.internal.serializer.Encodings$1)
+    {
+        com.sun.org.apache.xml.internal.serializer.Encodings$1 r1;
+        com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos;
+
+        r1 := @parameter0: com.sun.org.apache.xml.internal.serializer.Encodings$1;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.serializer.Encodings$EncodingInfos: void <init>()>();
+
+        return;
+    }
+}

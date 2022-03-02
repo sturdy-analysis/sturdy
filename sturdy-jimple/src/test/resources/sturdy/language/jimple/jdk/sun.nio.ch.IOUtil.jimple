@@ -1,0 +1,987 @@
+public class sun.nio.ch.IOUtil extends java.lang.Object
+{
+    static final int IOV_MAX;
+    static final boolean $assertionsDisabled;
+
+    private void <init>()
+    {
+        sun.nio.ch.IOUtil r0;
+
+        r0 := @this: sun.nio.ch.IOUtil;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    static int write(java.io.FileDescriptor, java.nio.ByteBuffer, long, sun.nio.ch.NativeDispatcher) throws java.io.IOException
+    {
+        java.lang.Throwable $r5;
+        long l2;
+        java.lang.AssertionError $r4;
+        java.nio.ByteBuffer r0, $r1;
+        sun.nio.ch.NativeDispatcher r3;
+        java.io.FileDescriptor r2;
+        int $i0, $i1, $i3, $i4, $i5, $i6;
+        boolean $z0, $z1;
+
+        r2 := @parameter0: java.io.FileDescriptor;
+
+        r0 := @parameter1: java.nio.ByteBuffer;
+
+        l2 := @parameter2: long;
+
+        r3 := @parameter3: sun.nio.ch.NativeDispatcher;
+
+        $z0 = r0 instanceof sun.nio.ch.DirectBuffer;
+
+        if $z0 == 0 goto label1;
+
+        $i5 = staticinvoke <sun.nio.ch.IOUtil: int writeFromNativeBuffer(java.io.FileDescriptor,java.nio.ByteBuffer,long,sun.nio.ch.NativeDispatcher)>(r2, r0, l2, r3);
+
+        return $i5;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.nio.ByteBuffer: int position()>();
+
+        $i1 = virtualinvoke r0.<java.nio.ByteBuffer: int limit()>();
+
+        $z1 = <sun.nio.ch.IOUtil: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label2;
+
+        if $i0 <= $i1 goto label2;
+
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>()>();
+
+        throw $r4;
+
+     label2:
+        if $i0 > $i1 goto label3;
+
+        $i6 = $i1 - $i0;
+
+        goto label4;
+
+     label3:
+        $i6 = 0;
+
+     label4:
+        $r1 = staticinvoke <sun.nio.ch.Util: java.nio.ByteBuffer getTemporaryDirectBuffer(int)>($i6);
+
+     label5:
+        virtualinvoke $r1.<java.nio.ByteBuffer: java.nio.ByteBuffer put(java.nio.ByteBuffer)>(r0);
+
+        virtualinvoke $r1.<java.nio.ByteBuffer: java.nio.Buffer flip()>();
+
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i0);
+
+        $i3 = staticinvoke <sun.nio.ch.IOUtil: int writeFromNativeBuffer(java.io.FileDescriptor,java.nio.ByteBuffer,long,sun.nio.ch.NativeDispatcher)>(r2, $r1, l2, r3);
+
+        if $i3 <= 0 goto label6;
+
+        $i4 = $i0 + $i3;
+
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i4);
+
+     label6:
+        staticinvoke <sun.nio.ch.Util: void offerFirstTemporaryDirectBuffer(java.nio.ByteBuffer)>($r1);
+
+        return $i3;
+
+     label7:
+        $r5 := @caughtexception;
+
+     label8:
+        staticinvoke <sun.nio.ch.Util: void offerFirstTemporaryDirectBuffer(java.nio.ByteBuffer)>($r1);
+
+        throw $r5;
+
+        catch java.lang.Throwable from label5 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    private static int writeFromNativeBuffer(java.io.FileDescriptor, java.nio.ByteBuffer, long, sun.nio.ch.NativeDispatcher) throws java.io.IOException
+    {
+        long l2, $l4, $l5, $l6, $l8, $l9, $l10;
+        java.lang.AssertionError $r5;
+        java.nio.ByteBuffer r0;
+        byte $b3;
+        sun.nio.ch.NativeDispatcher r1;
+        int $i0, $i1, $i7, $i11, i12;
+        boolean $z0;
+        sun.nio.ch.DirectBuffer $r3, $r4;
+        java.io.FileDescriptor r2;
+
+        r2 := @parameter0: java.io.FileDescriptor;
+
+        r0 := @parameter1: java.nio.ByteBuffer;
+
+        l2 := @parameter2: long;
+
+        r1 := @parameter3: sun.nio.ch.NativeDispatcher;
+
+        $i0 = virtualinvoke r0.<java.nio.ByteBuffer: int position()>();
+
+        $i1 = virtualinvoke r0.<java.nio.ByteBuffer: int limit()>();
+
+        $z0 = <sun.nio.ch.IOUtil: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        if $i0 <= $i1 goto label1;
+
+        $r5 = new java.lang.AssertionError;
+
+        specialinvoke $r5.<java.lang.AssertionError: void <init>()>();
+
+        throw $r5;
+
+     label1:
+        if $i0 > $i1 goto label2;
+
+        $i11 = $i1 - $i0;
+
+        goto label3;
+
+     label2:
+        $i11 = 0;
+
+     label3:
+        if $i11 != 0 goto label4;
+
+        return 0;
+
+     label4:
+        $b3 = l2 cmp -1L;
+
+        if $b3 == 0 goto label5;
+
+        $r4 = (sun.nio.ch.DirectBuffer) r0;
+
+        $l8 = interfaceinvoke $r4.<sun.nio.ch.DirectBuffer: long address()>();
+
+        $l9 = (long) $i0;
+
+        $l10 = $l8 + $l9;
+
+        i12 = virtualinvoke r1.<sun.nio.ch.NativeDispatcher: int pwrite(java.io.FileDescriptor,long,int,long)>(r2, $l10, $i11, l2);
+
+        goto label6;
+
+     label5:
+        $r3 = (sun.nio.ch.DirectBuffer) r0;
+
+        $l4 = interfaceinvoke $r3.<sun.nio.ch.DirectBuffer: long address()>();
+
+        $l5 = (long) $i0;
+
+        $l6 = $l4 + $l5;
+
+        i12 = virtualinvoke r1.<sun.nio.ch.NativeDispatcher: int write(java.io.FileDescriptor,long,int)>(r2, $l6, $i11);
+
+     label6:
+        if i12 <= 0 goto label7;
+
+        $i7 = $i0 + i12;
+
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i7);
+
+     label7:
+        return i12;
+    }
+
+    static long write(java.io.FileDescriptor, java.nio.ByteBuffer[], sun.nio.ch.NativeDispatcher) throws java.io.IOException
+    {
+        java.nio.ByteBuffer[] r1;
+        sun.nio.ch.NativeDispatcher r2;
+        java.io.FileDescriptor r0;
+        int $i0;
+        long $l1;
+
+        r0 := @parameter0: java.io.FileDescriptor;
+
+        r1 := @parameter1: java.nio.ByteBuffer[];
+
+        r2 := @parameter2: sun.nio.ch.NativeDispatcher;
+
+        $i0 = lengthof r1;
+
+        $l1 = staticinvoke <sun.nio.ch.IOUtil: long write(java.io.FileDescriptor,java.nio.ByteBuffer[],int,int,sun.nio.ch.NativeDispatcher)>(r0, r1, 0, $i0, r2);
+
+        return $l1;
+    }
+
+    static long write(java.io.FileDescriptor, java.nio.ByteBuffer[], int, int, sun.nio.ch.NativeDispatcher) throws java.io.IOException
+    {
+        java.nio.ByteBuffer $r4, $r5, $r8, $r11, r12, $r13;
+        byte $b5, $b9;
+        boolean $z0, $z1, z2;
+        java.nio.ByteBuffer[] r6;
+        java.lang.Throwable $r10;
+        long $l3, $l4, $l8, $l11, $l15, $l16, $l17, $l18, l25;
+        java.lang.AssertionError $r14;
+        sun.nio.ch.NativeDispatcher r1;
+        int i0, i1, i2, $i6, $i7, $i10, $i12, $i13, $i14, i19, i20, i21, $i22, i23, i24, i26, $i27, i29, $i30, $i31;
+        sun.nio.ch.DirectBuffer $r7;
+        java.io.FileDescriptor r2;
+        sun.nio.ch.IOVecWrapper $r0;
+
+        r2 := @parameter0: java.io.FileDescriptor;
+
+        r6 := @parameter1: java.nio.ByteBuffer[];
+
+        i1 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        r1 := @parameter4: sun.nio.ch.NativeDispatcher;
+
+        $r0 = staticinvoke <sun.nio.ch.IOVecWrapper: sun.nio.ch.IOVecWrapper get(int)>(i0);
+
+        z2 = 0;
+
+        i19 = 0;
+
+     label01:
+        i2 = i1 + i0;
+
+        i20 = i1;
+
+     label02:
+        if i20 >= i2 goto label08;
+
+        $i12 = <sun.nio.ch.IOUtil: int IOV_MAX>;
+
+        if i19 >= $i12 goto label08;
+
+        r12 = r6[i20];
+
+        $i13 = virtualinvoke r12.<java.nio.ByteBuffer: int position()>();
+
+        i21 = $i13;
+
+        $i14 = virtualinvoke r12.<java.nio.ByteBuffer: int limit()>();
+
+        $z0 = <sun.nio.ch.IOUtil: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label03;
+
+        if $i13 <= $i14 goto label03;
+
+        $r14 = new java.lang.AssertionError;
+
+        specialinvoke $r14.<java.lang.AssertionError: void <init>()>();
+
+        throw $r14;
+
+     label03:
+        if $i13 > $i14 goto label04;
+
+        $i22 = $i14 - $i13;
+
+        goto label05;
+
+     label04:
+        $i22 = 0;
+
+     label05:
+        i23 = $i22;
+
+        if $i22 <= 0 goto label07;
+
+        virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: void setBuffer(int,java.nio.ByteBuffer,int,int)>(i19, r12, $i13, $i22);
+
+        $z1 = r12 instanceof sun.nio.ch.DirectBuffer;
+
+        if $z1 != 0 goto label06;
+
+        $r8 = staticinvoke <sun.nio.ch.Util: java.nio.ByteBuffer getTemporaryDirectBuffer(int)>($i22);
+
+        virtualinvoke $r8.<java.nio.ByteBuffer: java.nio.ByteBuffer put(java.nio.ByteBuffer)>(r12);
+
+        virtualinvoke $r8.<java.nio.ByteBuffer: java.nio.Buffer flip()>();
+
+        virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: void setShadow(int,java.nio.ByteBuffer)>(i19, $r8);
+
+        virtualinvoke r12.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i13);
+
+        r12 = $r8;
+
+        i21 = virtualinvoke $r8.<java.nio.ByteBuffer: int position()>();
+
+     label06:
+        $r7 = (sun.nio.ch.DirectBuffer) r12;
+
+        $l15 = interfaceinvoke $r7.<sun.nio.ch.DirectBuffer: long address()>();
+
+        $l16 = (long) i21;
+
+        $l17 = $l15 + $l16;
+
+        virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: void putBase(int,long)>(i19, $l17);
+
+        $l18 = (long) i23;
+
+        virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: void putLen(int,long)>(i19, $l18);
+
+        i19 = i19 + 1;
+
+     label07:
+        i20 = i20 + 1;
+
+        goto label02;
+
+     label08:
+        if i19 != 0 goto label13;
+
+     label09:
+        i24 = 0;
+
+     label10:
+        if i24 >= i19 goto label12;
+
+        $r5 = virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: java.nio.ByteBuffer getShadow(int)>(i24);
+
+        if $r5 == null goto label11;
+
+        staticinvoke <sun.nio.ch.Util: void offerLastTemporaryDirectBuffer(java.nio.ByteBuffer)>($r5);
+
+     label11:
+        virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: void clearRefs(int)>(i24);
+
+        i24 = i24 + 1;
+
+        goto label10;
+
+     label12:
+        return 0L;
+
+     label13:
+        $l3 = $r0.<sun.nio.ch.IOVecWrapper: long address>;
+
+        $l4 = virtualinvoke r1.<sun.nio.ch.NativeDispatcher: long writev(java.io.FileDescriptor,long,int)>(r2, $l3, i19);
+
+        l25 = $l4;
+
+        i26 = 0;
+
+     label14:
+        if i26 >= i19 goto label19;
+
+        $b5 = l25 cmp 0L;
+
+        $i30 = (int) $b5;
+
+        if $i30 <= 0 goto label17;
+
+        $r4 = virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: java.nio.ByteBuffer getBuffer(int)>(i26);
+
+        $i6 = virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: int getPosition(int)>(i26);
+
+        $i7 = virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: int getRemaining(int)>(i26);
+
+        $l8 = (long) $i7;
+
+        $b9 = l25 cmp $l8;
+
+        $i31 = (int) $b9;
+
+        if $i31 <= 0 goto label15;
+
+        $i27 = $i7;
+
+        goto label16;
+
+     label15:
+        $i27 = (int) l25;
+
+     label16:
+        $i10 = $i6 + $i27;
+
+        virtualinvoke $r4.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i10);
+
+        $l11 = (long) $i27;
+
+        l25 = l25 - $l11;
+
+     label17:
+        $r13 = virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: java.nio.ByteBuffer getShadow(int)>(i26);
+
+        if $r13 == null goto label18;
+
+        staticinvoke <sun.nio.ch.Util: void offerLastTemporaryDirectBuffer(java.nio.ByteBuffer)>($r13);
+
+     label18:
+        virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: void clearRefs(int)>(i26);
+
+        i26 = i26 + 1;
+
+        goto label14;
+
+     label19:
+        z2 = 1;
+
+     label20:
+        goto label21;
+
+     label21:
+        return $l4;
+
+     label22:
+        $r10 := @caughtexception;
+
+     label23:
+        i29 = 0;
+
+     label24:
+        if i29 >= i19 goto label26;
+
+        $r11 = virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: java.nio.ByteBuffer getShadow(int)>(i29);
+
+        if $r11 == null goto label25;
+
+        staticinvoke <sun.nio.ch.Util: void offerLastTemporaryDirectBuffer(java.nio.ByteBuffer)>($r11);
+
+     label25:
+        virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: void clearRefs(int)>(i29);
+
+        i29 = i29 + 1;
+
+        goto label24;
+
+     label26:
+        throw $r10;
+
+        catch java.lang.Throwable from label01 to label09 with label22;
+        catch java.lang.Throwable from label13 to label20 with label22;
+        catch java.lang.Throwable from label22 to label23 with label22;
+    }
+
+    static int read(java.io.FileDescriptor, java.nio.ByteBuffer, long, sun.nio.ch.NativeDispatcher) throws java.io.IOException
+    {
+        java.lang.Throwable $r5;
+        long l1;
+        java.lang.IllegalArgumentException $r4;
+        java.nio.ByteBuffer r0, $r1;
+        sun.nio.ch.NativeDispatcher r3;
+        java.io.FileDescriptor r2;
+        int $i0, $i2, $i3;
+        boolean $z0, $z1;
+
+        r2 := @parameter0: java.io.FileDescriptor;
+
+        r0 := @parameter1: java.nio.ByteBuffer;
+
+        l1 := @parameter2: long;
+
+        r3 := @parameter3: sun.nio.ch.NativeDispatcher;
+
+        $z0 = virtualinvoke r0.<java.nio.ByteBuffer: boolean isReadOnly()>();
+
+        if $z0 == 0 goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Read-only buffer");
+
+        throw $r4;
+
+     label1:
+        $z1 = r0 instanceof sun.nio.ch.DirectBuffer;
+
+        if $z1 == 0 goto label2;
+
+        $i3 = staticinvoke <sun.nio.ch.IOUtil: int readIntoNativeBuffer(java.io.FileDescriptor,java.nio.ByteBuffer,long,sun.nio.ch.NativeDispatcher)>(r2, r0, l1, r3);
+
+        return $i3;
+
+     label2:
+        $i0 = virtualinvoke r0.<java.nio.ByteBuffer: int remaining()>();
+
+        $r1 = staticinvoke <sun.nio.ch.Util: java.nio.ByteBuffer getTemporaryDirectBuffer(int)>($i0);
+
+     label3:
+        $i2 = staticinvoke <sun.nio.ch.IOUtil: int readIntoNativeBuffer(java.io.FileDescriptor,java.nio.ByteBuffer,long,sun.nio.ch.NativeDispatcher)>(r2, $r1, l1, r3);
+
+        virtualinvoke $r1.<java.nio.ByteBuffer: java.nio.Buffer flip()>();
+
+        if $i2 <= 0 goto label4;
+
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.ByteBuffer put(java.nio.ByteBuffer)>($r1);
+
+     label4:
+        staticinvoke <sun.nio.ch.Util: void offerFirstTemporaryDirectBuffer(java.nio.ByteBuffer)>($r1);
+
+        return $i2;
+
+     label5:
+        $r5 := @caughtexception;
+
+     label6:
+        staticinvoke <sun.nio.ch.Util: void offerFirstTemporaryDirectBuffer(java.nio.ByteBuffer)>($r1);
+
+        throw $r5;
+
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    private static int readIntoNativeBuffer(java.io.FileDescriptor, java.nio.ByteBuffer, long, sun.nio.ch.NativeDispatcher) throws java.io.IOException
+    {
+        long l2, $l4, $l5, $l6, $l8, $l9, $l10;
+        java.lang.AssertionError $r5;
+        java.nio.ByteBuffer r0;
+        byte $b3;
+        sun.nio.ch.NativeDispatcher r1;
+        int $i0, $i1, $i7, $i11, i12;
+        boolean $z0;
+        sun.nio.ch.DirectBuffer $r3, $r4;
+        java.io.FileDescriptor r2;
+
+        r2 := @parameter0: java.io.FileDescriptor;
+
+        r0 := @parameter1: java.nio.ByteBuffer;
+
+        l2 := @parameter2: long;
+
+        r1 := @parameter3: sun.nio.ch.NativeDispatcher;
+
+        $i0 = virtualinvoke r0.<java.nio.ByteBuffer: int position()>();
+
+        $i1 = virtualinvoke r0.<java.nio.ByteBuffer: int limit()>();
+
+        $z0 = <sun.nio.ch.IOUtil: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        if $i0 <= $i1 goto label1;
+
+        $r5 = new java.lang.AssertionError;
+
+        specialinvoke $r5.<java.lang.AssertionError: void <init>()>();
+
+        throw $r5;
+
+     label1:
+        if $i0 > $i1 goto label2;
+
+        $i11 = $i1 - $i0;
+
+        goto label3;
+
+     label2:
+        $i11 = 0;
+
+     label3:
+        if $i11 != 0 goto label4;
+
+        return 0;
+
+     label4:
+        $b3 = l2 cmp -1L;
+
+        if $b3 == 0 goto label5;
+
+        $r4 = (sun.nio.ch.DirectBuffer) r0;
+
+        $l8 = interfaceinvoke $r4.<sun.nio.ch.DirectBuffer: long address()>();
+
+        $l9 = (long) $i0;
+
+        $l10 = $l8 + $l9;
+
+        i12 = virtualinvoke r1.<sun.nio.ch.NativeDispatcher: int pread(java.io.FileDescriptor,long,int,long)>(r2, $l10, $i11, l2);
+
+        goto label6;
+
+     label5:
+        $r3 = (sun.nio.ch.DirectBuffer) r0;
+
+        $l4 = interfaceinvoke $r3.<sun.nio.ch.DirectBuffer: long address()>();
+
+        $l5 = (long) $i0;
+
+        $l6 = $l4 + $l5;
+
+        i12 = virtualinvoke r1.<sun.nio.ch.NativeDispatcher: int read(java.io.FileDescriptor,long,int)>(r2, $l6, $i11);
+
+     label6:
+        if i12 <= 0 goto label7;
+
+        $i7 = $i0 + i12;
+
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i7);
+
+     label7:
+        return i12;
+    }
+
+    static long read(java.io.FileDescriptor, java.nio.ByteBuffer[], sun.nio.ch.NativeDispatcher) throws java.io.IOException
+    {
+        java.nio.ByteBuffer[] r1;
+        sun.nio.ch.NativeDispatcher r2;
+        java.io.FileDescriptor r0;
+        int $i0;
+        long $l1;
+
+        r0 := @parameter0: java.io.FileDescriptor;
+
+        r1 := @parameter1: java.nio.ByteBuffer[];
+
+        r2 := @parameter2: sun.nio.ch.NativeDispatcher;
+
+        $i0 = lengthof r1;
+
+        $l1 = staticinvoke <sun.nio.ch.IOUtil: long read(java.io.FileDescriptor,java.nio.ByteBuffer[],int,int,sun.nio.ch.NativeDispatcher)>(r0, r1, 0, $i0, r2);
+
+        return $l1;
+    }
+
+    static long read(java.io.FileDescriptor, java.nio.ByteBuffer[], int, int, sun.nio.ch.NativeDispatcher) throws java.io.IOException
+    {
+        java.nio.ByteBuffer $r4, $r5, $r6, $r9, $r13, r14;
+        byte $b5, $b8;
+        boolean $z0, $z1, $z2, z3;
+        java.nio.ByteBuffer[] r7;
+        java.lang.Throwable $r12;
+        long $l3, $l4, $l7, $l12, $l18, $l19, $l20, $l21, l28;
+        java.lang.AssertionError $r16;
+        sun.nio.ch.NativeDispatcher r1;
+        int i0, i1, i2, $i6, i9, $i10, $i11, $i13, $i14, $i15, $i16, $i17, i22, i23, i24, $i25, i26, i27, i29, $i30, i32, $i33, $i34;
+        sun.nio.ch.DirectBuffer $r8;
+        java.lang.IllegalArgumentException $r15;
+        java.io.FileDescriptor r2;
+        sun.nio.ch.IOVecWrapper $r0;
+
+        r2 := @parameter0: java.io.FileDescriptor;
+
+        r7 := @parameter1: java.nio.ByteBuffer[];
+
+        i1 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        r1 := @parameter4: sun.nio.ch.NativeDispatcher;
+
+        $r0 = staticinvoke <sun.nio.ch.IOVecWrapper: sun.nio.ch.IOVecWrapper get(int)>(i0);
+
+        z3 = 0;
+
+        i22 = 0;
+
+     label01:
+        i2 = i1 + i0;
+
+        i23 = i1;
+
+     label02:
+        if i23 >= i2 goto label09;
+
+        $i15 = <sun.nio.ch.IOUtil: int IOV_MAX>;
+
+        if i22 >= $i15 goto label09;
+
+        r14 = r7[i23];
+
+        $z0 = virtualinvoke r14.<java.nio.ByteBuffer: boolean isReadOnly()>();
+
+        if $z0 == 0 goto label03;
+
+        $r15 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r15.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Read-only buffer");
+
+        throw $r15;
+
+     label03:
+        $i16 = virtualinvoke r14.<java.nio.ByteBuffer: int position()>();
+
+        i24 = $i16;
+
+        $i17 = virtualinvoke r14.<java.nio.ByteBuffer: int limit()>();
+
+        $z1 = <sun.nio.ch.IOUtil: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label04;
+
+        if $i16 <= $i17 goto label04;
+
+        $r16 = new java.lang.AssertionError;
+
+        specialinvoke $r16.<java.lang.AssertionError: void <init>()>();
+
+        throw $r16;
+
+     label04:
+        if $i16 > $i17 goto label05;
+
+        $i25 = $i17 - $i16;
+
+        goto label06;
+
+     label05:
+        $i25 = 0;
+
+     label06:
+        i26 = $i25;
+
+        if $i25 <= 0 goto label08;
+
+        virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: void setBuffer(int,java.nio.ByteBuffer,int,int)>(i22, r14, $i16, $i25);
+
+        $z2 = r14 instanceof sun.nio.ch.DirectBuffer;
+
+        if $z2 != 0 goto label07;
+
+        $r9 = staticinvoke <sun.nio.ch.Util: java.nio.ByteBuffer getTemporaryDirectBuffer(int)>($i25);
+
+        virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: void setShadow(int,java.nio.ByteBuffer)>(i22, $r9);
+
+        r14 = $r9;
+
+        i24 = virtualinvoke $r9.<java.nio.ByteBuffer: int position()>();
+
+     label07:
+        $r8 = (sun.nio.ch.DirectBuffer) r14;
+
+        $l18 = interfaceinvoke $r8.<sun.nio.ch.DirectBuffer: long address()>();
+
+        $l19 = (long) i24;
+
+        $l20 = $l18 + $l19;
+
+        virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: void putBase(int,long)>(i22, $l20);
+
+        $l21 = (long) i26;
+
+        virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: void putLen(int,long)>(i22, $l21);
+
+        i22 = i22 + 1;
+
+     label08:
+        i23 = i23 + 1;
+
+        goto label02;
+
+     label09:
+        if i22 != 0 goto label14;
+
+     label10:
+        i27 = 0;
+
+     label11:
+        if i27 >= i22 goto label13;
+
+        $r6 = virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: java.nio.ByteBuffer getShadow(int)>(i27);
+
+        if $r6 == null goto label12;
+
+        staticinvoke <sun.nio.ch.Util: void offerLastTemporaryDirectBuffer(java.nio.ByteBuffer)>($r6);
+
+     label12:
+        virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: void clearRefs(int)>(i27);
+
+        i27 = i27 + 1;
+
+        goto label11;
+
+     label13:
+        return 0L;
+
+     label14:
+        $l3 = $r0.<sun.nio.ch.IOVecWrapper: long address>;
+
+        $l4 = virtualinvoke r1.<sun.nio.ch.NativeDispatcher: long readv(java.io.FileDescriptor,long,int)>(r2, $l3, i22);
+
+        l28 = $l4;
+
+        i29 = 0;
+
+     label15:
+        if i29 >= i22 goto label22;
+
+        $r4 = virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: java.nio.ByteBuffer getShadow(int)>(i29);
+
+        $b5 = l28 cmp 0L;
+
+        $i33 = (int) $b5;
+
+        if $i33 <= 0 goto label20;
+
+        $r5 = virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: java.nio.ByteBuffer getBuffer(int)>(i29);
+
+        $i6 = virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: int getRemaining(int)>(i29);
+
+        $l7 = (long) $i6;
+
+        $b8 = l28 cmp $l7;
+
+        $i34 = (int) $b8;
+
+        if $i34 <= 0 goto label16;
+
+        $i30 = $i6;
+
+        goto label17;
+
+     label16:
+        $i30 = (int) l28;
+
+     label17:
+        i9 = $i30;
+
+        if $r4 != null goto label18;
+
+        $i13 = virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: int getPosition(int)>(i29);
+
+        $i14 = $i13 + $i30;
+
+        virtualinvoke $r5.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i14);
+
+        goto label19;
+
+     label18:
+        $i10 = virtualinvoke $r4.<java.nio.ByteBuffer: int position()>();
+
+        $i11 = $i10 + $i30;
+
+        virtualinvoke $r4.<java.nio.ByteBuffer: java.nio.Buffer limit(int)>($i11);
+
+        virtualinvoke $r5.<java.nio.ByteBuffer: java.nio.ByteBuffer put(java.nio.ByteBuffer)>($r4);
+
+     label19:
+        $l12 = (long) i9;
+
+        l28 = l28 - $l12;
+
+     label20:
+        if $r4 == null goto label21;
+
+        staticinvoke <sun.nio.ch.Util: void offerLastTemporaryDirectBuffer(java.nio.ByteBuffer)>($r4);
+
+     label21:
+        virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: void clearRefs(int)>(i29);
+
+        i29 = i29 + 1;
+
+        goto label15;
+
+     label22:
+        z3 = 1;
+
+     label23:
+        goto label24;
+
+     label24:
+        return $l4;
+
+     label25:
+        $r12 := @caughtexception;
+
+     label26:
+        i32 = 0;
+
+     label27:
+        if i32 >= i22 goto label29;
+
+        $r13 = virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: java.nio.ByteBuffer getShadow(int)>(i32);
+
+        if $r13 == null goto label28;
+
+        staticinvoke <sun.nio.ch.Util: void offerLastTemporaryDirectBuffer(java.nio.ByteBuffer)>($r13);
+
+     label28:
+        virtualinvoke $r0.<sun.nio.ch.IOVecWrapper: void clearRefs(int)>(i32);
+
+        i32 = i32 + 1;
+
+        goto label27;
+
+     label29:
+        throw $r12;
+
+        catch java.lang.Throwable from label01 to label10 with label25;
+        catch java.lang.Throwable from label14 to label23 with label25;
+        catch java.lang.Throwable from label25 to label26 with label25;
+    }
+
+    public static java.io.FileDescriptor newFD(int)
+    {
+        int i0;
+        java.io.FileDescriptor $r0;
+
+        i0 := @parameter0: int;
+
+        $r0 = new java.io.FileDescriptor;
+
+        specialinvoke $r0.<java.io.FileDescriptor: void <init>()>();
+
+        staticinvoke <sun.nio.ch.IOUtil: void setfdVal(java.io.FileDescriptor,int)>($r0, i0);
+
+        return $r0;
+    }
+
+    static native boolean randomBytes(byte[]);
+
+    static native long makePipe(boolean);
+
+    static native boolean drain(int) throws java.io.IOException;
+
+    public static native void configureBlocking(java.io.FileDescriptor, boolean) throws java.io.IOException;
+
+    public static native int fdVal(java.io.FileDescriptor);
+
+    static native void setfdVal(java.io.FileDescriptor, int);
+
+    static native int fdLimit();
+
+    static native int iovMax();
+
+    static native void initIDs();
+
+    public static void load()
+    {
+        return;
+    }
+
+    static void <clinit>()
+    {
+        int $i0;
+        java.lang.Class $r0;
+        sun.nio.ch.IOUtil$1 $r1;
+        boolean $z0, $z1;
+
+        $r0 = class "Lsun/nio/ch/IOUtil;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.nio.ch.IOUtil: boolean $assertionsDisabled> = $z1;
+
+        $r1 = new sun.nio.ch.IOUtil$1;
+
+        specialinvoke $r1.<sun.nio.ch.IOUtil$1: void <init>()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        staticinvoke <sun.nio.ch.IOUtil: void initIDs()>();
+
+        $i0 = staticinvoke <sun.nio.ch.IOUtil: int iovMax()>();
+
+        <sun.nio.ch.IOUtil: int IOV_MAX> = $i0;
+
+        return;
+    }
+}

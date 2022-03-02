@@ -1,0 +1,580 @@
+class sun.nio.fs.WindowsFileSystem extends java.nio.file.FileSystem
+{
+    private final sun.nio.fs.WindowsFileSystemProvider provider;
+    private final java.lang.String defaultDirectory;
+    private final java.lang.String defaultRoot;
+    private final boolean supportsLinks;
+    private final boolean supportsStreamEnumeration;
+    private static final java.util.Set supportedFileAttributeViews;
+    private static final java.lang.String GLOB_SYNTAX;
+    private static final java.lang.String REGEX_SYNTAX;
+
+    void <init>(sun.nio.fs.WindowsFileSystemProvider, java.lang.String)
+    {
+        sun.nio.fs.WindowsPathType $r4, $r5, $r13, $r14;
+        java.lang.String[] $r10;
+        java.lang.AssertionError $r16;
+        sun.security.action.GetPropertyAction $r8;
+        int $i0, $i1;
+        java.lang.String r2, $r6, $r7, $r11, $r12, $r15;
+        boolean $z0, $z1;
+        sun.nio.fs.WindowsFileSystem r0;
+        sun.nio.fs.WindowsPathParser$Result $r3;
+        sun.nio.fs.WindowsFileSystemProvider r1;
+        java.lang.Object $r9;
+
+        r0 := @this: sun.nio.fs.WindowsFileSystem;
+
+        r1 := @parameter0: sun.nio.fs.WindowsFileSystemProvider;
+
+        r2 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<java.nio.file.FileSystem: void <init>()>();
+
+        r0.<sun.nio.fs.WindowsFileSystem: sun.nio.fs.WindowsFileSystemProvider provider> = r1;
+
+        $r3 = staticinvoke <sun.nio.fs.WindowsPathParser: sun.nio.fs.WindowsPathParser$Result parse(java.lang.String)>(r2);
+
+        $r4 = virtualinvoke $r3.<sun.nio.fs.WindowsPathParser$Result: sun.nio.fs.WindowsPathType type()>();
+
+        $r5 = <sun.nio.fs.WindowsPathType: sun.nio.fs.WindowsPathType ABSOLUTE>;
+
+        if $r4 == $r5 goto label1;
+
+        $r13 = virtualinvoke $r3.<sun.nio.fs.WindowsPathParser$Result: sun.nio.fs.WindowsPathType type()>();
+
+        $r14 = <sun.nio.fs.WindowsPathType: sun.nio.fs.WindowsPathType UNC>;
+
+        if $r13 == $r14 goto label1;
+
+        $r16 = new java.lang.AssertionError;
+
+        specialinvoke $r16.<java.lang.AssertionError: void <init>(java.lang.Object)>("Default directory is not an absolute path");
+
+        throw $r16;
+
+     label1:
+        $r6 = virtualinvoke $r3.<sun.nio.fs.WindowsPathParser$Result: java.lang.String path()>();
+
+        r0.<sun.nio.fs.WindowsFileSystem: java.lang.String defaultDirectory> = $r6;
+
+        $r7 = virtualinvoke $r3.<sun.nio.fs.WindowsPathParser$Result: java.lang.String root()>();
+
+        r0.<sun.nio.fs.WindowsFileSystem: java.lang.String defaultRoot> = $r7;
+
+        $r8 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r8.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("os.version");
+
+        $r9 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r8);
+
+        $r15 = (java.lang.String) $r9;
+
+        $r10 = staticinvoke <sun.nio.fs.Util: java.lang.String[] split(java.lang.String,char)>($r15, 46);
+
+        $r11 = $r10[0];
+
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r11);
+
+        $r12 = $r10[1];
+
+        $i1 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r12);
+
+        if $i0 < 6 goto label2;
+
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        r0.<sun.nio.fs.WindowsFileSystem: boolean supportsLinks> = $z0;
+
+        if $i0 >= 6 goto label4;
+
+        if $i0 != 5 goto label5;
+
+        if $i1 < 2 goto label5;
+
+     label4:
+        $z1 = 1;
+
+        goto label6;
+
+     label5:
+        $z1 = 0;
+
+     label6:
+        r0.<sun.nio.fs.WindowsFileSystem: boolean supportsStreamEnumeration> = $z1;
+
+        return;
+    }
+
+    java.lang.String defaultDirectory()
+    {
+        java.lang.String $r1;
+        sun.nio.fs.WindowsFileSystem r0;
+
+        r0 := @this: sun.nio.fs.WindowsFileSystem;
+
+        $r1 = r0.<sun.nio.fs.WindowsFileSystem: java.lang.String defaultDirectory>;
+
+        return $r1;
+    }
+
+    java.lang.String defaultRoot()
+    {
+        java.lang.String $r1;
+        sun.nio.fs.WindowsFileSystem r0;
+
+        r0 := @this: sun.nio.fs.WindowsFileSystem;
+
+        $r1 = r0.<sun.nio.fs.WindowsFileSystem: java.lang.String defaultRoot>;
+
+        return $r1;
+    }
+
+    boolean supportsLinks()
+    {
+        sun.nio.fs.WindowsFileSystem r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.fs.WindowsFileSystem;
+
+        $z0 = r0.<sun.nio.fs.WindowsFileSystem: boolean supportsLinks>;
+
+        return $z0;
+    }
+
+    boolean supportsStreamEnumeration()
+    {
+        sun.nio.fs.WindowsFileSystem r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.fs.WindowsFileSystem;
+
+        $z0 = r0.<sun.nio.fs.WindowsFileSystem: boolean supportsStreamEnumeration>;
+
+        return $z0;
+    }
+
+    public java.nio.file.spi.FileSystemProvider provider()
+    {
+        sun.nio.fs.WindowsFileSystemProvider $r1;
+        sun.nio.fs.WindowsFileSystem r0;
+
+        r0 := @this: sun.nio.fs.WindowsFileSystem;
+
+        $r1 = r0.<sun.nio.fs.WindowsFileSystem: sun.nio.fs.WindowsFileSystemProvider provider>;
+
+        return $r1;
+    }
+
+    public java.lang.String getSeparator()
+    {
+        sun.nio.fs.WindowsFileSystem r0;
+
+        r0 := @this: sun.nio.fs.WindowsFileSystem;
+
+        return "\\";
+    }
+
+    public boolean isOpen()
+    {
+        sun.nio.fs.WindowsFileSystem r0;
+
+        r0 := @this: sun.nio.fs.WindowsFileSystem;
+
+        return 1;
+    }
+
+    public boolean isReadOnly()
+    {
+        sun.nio.fs.WindowsFileSystem r0;
+
+        r0 := @this: sun.nio.fs.WindowsFileSystem;
+
+        return 0;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        java.lang.UnsupportedOperationException $r0;
+        sun.nio.fs.WindowsFileSystem r1;
+
+        r1 := @this: sun.nio.fs.WindowsFileSystem;
+
+        $r0 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r0.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r0;
+    }
+
+    public java.lang.Iterable getRootDirectories()
+    {
+        java.lang.AssertionError $r9;
+        java.util.ArrayList $r0;
+        int $i0, $i1, $i2, $i3, i5;
+        sun.nio.fs.WindowsException $r8;
+        java.lang.SecurityException $r7;
+        java.lang.String $r4, $r10;
+        sun.nio.fs.WindowsFileSystem r5;
+        sun.nio.fs.WindowsPath $r6;
+        char $c4;
+        java.lang.SecurityManager $r1;
+        java.util.List $r2;
+        java.lang.StringBuilder $r3;
+
+        r5 := @this: sun.nio.fs.WindowsFileSystem;
+
+     label01:
+        $i0 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: int GetLogicalDrives()>();
+
+     label02:
+        goto label04;
+
+     label03:
+        $r8 := @caughtexception;
+
+        $r9 = new java.lang.AssertionError;
+
+        $r10 = virtualinvoke $r8.<sun.nio.fs.WindowsException: java.lang.String getMessage()>();
+
+        specialinvoke $r9.<java.lang.AssertionError: void <init>(java.lang.Object)>($r10);
+
+        throw $r9;
+
+     label04:
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+        $r1 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        i5 = 0;
+
+     label05:
+        if i5 > 25 goto label11;
+
+        $i1 = 1 << i5;
+
+        $i2 = $i0 & $i1;
+
+        if $i2 == 0 goto label10;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>(int)>(3);
+
+        $i3 = 65 + i5;
+
+        $c4 = (char) $i3;
+
+        virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c4);
+
+        virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":\\");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        if $r1 == null goto label09;
+
+     label06:
+        virtualinvoke $r1.<java.lang.SecurityManager: void checkRead(java.lang.String)>($r4);
+
+     label07:
+        goto label09;
+
+     label08:
+        $r7 := @caughtexception;
+
+        goto label10;
+
+     label09:
+        $r6 = staticinvoke <sun.nio.fs.WindowsPath: sun.nio.fs.WindowsPath createFromNormalizedPath(sun.nio.fs.WindowsFileSystem,java.lang.String)>(r5, $r4);
+
+        virtualinvoke $r0.<java.util.ArrayList: boolean add(java.lang.Object)>($r6);
+
+     label10:
+        i5 = i5 + 1;
+
+        goto label05;
+
+     label11:
+        $r2 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r0);
+
+        return $r2;
+
+        catch sun.nio.fs.WindowsException from label01 to label02 with label03;
+        catch java.lang.SecurityException from label06 to label07 with label08;
+    }
+
+    public java.lang.Iterable getFileStores()
+    {
+        java.util.List $r5;
+        sun.nio.fs.WindowsFileSystem r2;
+        java.lang.RuntimePermission $r3;
+        java.lang.SecurityException $r4;
+        sun.nio.fs.WindowsFileSystem$1 $r1;
+        java.lang.SecurityManager $r0;
+
+        r2 := @this: sun.nio.fs.WindowsFileSystem;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label4;
+
+     label1:
+        $r3 = new java.lang.RuntimePermission;
+
+        specialinvoke $r3.<java.lang.RuntimePermission: void <init>(java.lang.String)>("getFileStoreAttributes");
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r3);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+        return $r5;
+
+     label4:
+        $r1 = new sun.nio.fs.WindowsFileSystem$1;
+
+        specialinvoke $r1.<sun.nio.fs.WindowsFileSystem$1: void <init>(sun.nio.fs.WindowsFileSystem)>(r2);
+
+        return $r1;
+
+        catch java.lang.SecurityException from label1 to label2 with label3;
+    }
+
+    public java.util.Set supportedFileAttributeViews()
+    {
+        java.util.Set $r0;
+        sun.nio.fs.WindowsFileSystem r1;
+
+        r1 := @this: sun.nio.fs.WindowsFileSystem;
+
+        $r0 = <sun.nio.fs.WindowsFileSystem: java.util.Set supportedFileAttributeViews>;
+
+        return $r0;
+    }
+
+    public final transient java.nio.file.Path getPath(java.lang.String, java.lang.String[])
+    {
+        sun.nio.fs.WindowsFileSystem r3;
+        sun.nio.fs.WindowsPath $r4;
+        java.lang.String[] r0;
+        int $i0, i1, $i2, i3;
+        java.lang.StringBuilder $r1;
+        java.lang.String r2, r5, r6;
+        boolean $z0;
+
+        r3 := @this: sun.nio.fs.WindowsFileSystem;
+
+        r2 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.lang.String[];
+
+        $i0 = lengthof r0;
+
+        if $i0 != 0 goto label1;
+
+        r6 = r2;
+
+        goto label6;
+
+     label1:
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        i1 = lengthof r0;
+
+        i3 = 0;
+
+     label2:
+        if i3 >= i1 goto label5;
+
+        r5 = r0[i3];
+
+        $z0 = virtualinvoke r5.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 != 0 goto label4;
+
+        $i2 = virtualinvoke $r1.<java.lang.StringBuilder: int length()>();
+
+        if $i2 <= 0 goto label3;
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(92);
+
+     label3:
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+     label4:
+        i3 = i3 + 1;
+
+        goto label2;
+
+     label5:
+        r6 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label6:
+        $r4 = staticinvoke <sun.nio.fs.WindowsPath: sun.nio.fs.WindowsPath parse(sun.nio.fs.WindowsFileSystem,java.lang.String)>(r3, r6);
+
+        return $r4;
+    }
+
+    public java.nio.file.attribute.UserPrincipalLookupService getUserPrincipalLookupService()
+    {
+        java.nio.file.attribute.UserPrincipalLookupService $r0;
+        sun.nio.fs.WindowsFileSystem r1;
+
+        r1 := @this: sun.nio.fs.WindowsFileSystem;
+
+        $r0 = <sun.nio.fs.WindowsFileSystem$LookupService: java.nio.file.attribute.UserPrincipalLookupService instance>;
+
+        return $r0;
+    }
+
+    public java.nio.file.PathMatcher getPathMatcher(java.lang.String)
+    {
+        int $i0, $i1, $i2;
+        java.lang.String r0, $r2, $r3, $r9, r13;
+        boolean $z0, $z1;
+        java.lang.UnsupportedOperationException $r4;
+        sun.nio.fs.WindowsFileSystem r12;
+        sun.nio.fs.WindowsFileSystem$2 $r11;
+        java.lang.IllegalArgumentException $r1;
+        java.lang.StringBuilder $r5, $r6, $r7, $r8;
+        java.util.regex.Pattern $r10;
+
+        r12 := @this: sun.nio.fs.WindowsFileSystem;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int indexOf(int)>(58);
+
+        if $i0 <= 0 goto label1;
+
+        $i1 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i0 != $i1 goto label2;
+
+     label1:
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r1;
+
+     label2:
+        $r2 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $i2 = $i0 + 1;
+
+        $r3 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>($i2);
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("glob");
+
+        if $z0 == 0 goto label3;
+
+        r13 = staticinvoke <sun.nio.fs.Globs: java.lang.String toWindowsRegexPattern(java.lang.String)>($r3);
+
+        goto label5;
+
+     label3:
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("regex");
+
+        if $z1 == 0 goto label4;
+
+        r13 = $r3;
+
+        goto label5;
+
+     label4:
+        $r4 = new java.lang.UnsupportedOperationException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Syntax \'");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' not recognized");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>($r9);
+
+        throw $r4;
+
+     label5:
+        $r10 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String,int)>(r13, 66);
+
+        $r11 = new sun.nio.fs.WindowsFileSystem$2;
+
+        specialinvoke $r11.<sun.nio.fs.WindowsFileSystem$2: void <init>(sun.nio.fs.WindowsFileSystem,java.util.regex.Pattern)>(r12, $r10);
+
+        return $r11;
+    }
+
+    public java.nio.file.WatchService newWatchService() throws java.io.IOException
+    {
+        sun.nio.fs.WindowsWatchService $r0;
+        sun.nio.fs.WindowsFileSystem r1;
+
+        r1 := @this: sun.nio.fs.WindowsFileSystem;
+
+        $r0 = new sun.nio.fs.WindowsWatchService;
+
+        specialinvoke $r0.<sun.nio.fs.WindowsWatchService: void <init>(sun.nio.fs.WindowsFileSystem)>(r1);
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.util.HashSet $r0;
+        java.util.List $r2;
+        java.util.Set $r3;
+        java.lang.String[] $r1;
+
+        <sun.nio.fs.WindowsFileSystem: java.lang.String REGEX_SYNTAX> = "regex";
+
+        <sun.nio.fs.WindowsFileSystem: java.lang.String GLOB_SYNTAX> = "glob";
+
+        $r0 = new java.util.HashSet;
+
+        $r1 = newarray (java.lang.String)[5];
+
+        $r1[0] = "basic";
+
+        $r1[1] = "dos";
+
+        $r1[2] = "acl";
+
+        $r1[3] = "owner";
+
+        $r1[4] = "user";
+
+        $r2 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r1);
+
+        specialinvoke $r0.<java.util.HashSet: void <init>(java.util.Collection)>($r2);
+
+        $r3 = staticinvoke <java.util.Collections: java.util.Set unmodifiableSet(java.util.Set)>($r0);
+
+        <sun.nio.fs.WindowsFileSystem: java.util.Set supportedFileAttributeViews> = $r3;
+
+        return;
+    }
+}

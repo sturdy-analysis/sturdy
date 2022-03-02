@@ -1,0 +1,510 @@
+public class javax.imageio.stream.FileCacheImageOutputStream extends javax.imageio.stream.ImageOutputStreamImpl
+{
+    private java.io.OutputStream stream;
+    private java.io.File cacheFile;
+    private java.io.RandomAccessFile cache;
+    private long maxStreamPos;
+    private final com.sun.imageio.stream.StreamCloser$CloseAction closeAction;
+
+    public void <init>(java.io.OutputStream, java.io.File) throws java.io.IOException
+    {
+        java.io.RandomAccessFile $r7;
+        javax.imageio.stream.FileCacheImageOutputStream r0;
+        java.nio.file.attribute.FileAttribute[] $r4, $r11;
+        java.nio.file.Path $r3, $r5, $r12;
+        boolean $z0;
+        java.io.OutputStream r1;
+        java.lang.IllegalArgumentException $r14, $r15;
+        java.io.File r2, $r6, $r8, $r13;
+        com.sun.imageio.stream.StreamCloser$CloseAction $r9, $r10;
+
+        r0 := @this: javax.imageio.stream.FileCacheImageOutputStream;
+
+        r1 := @parameter0: java.io.OutputStream;
+
+        r2 := @parameter1: java.io.File;
+
+        specialinvoke r0.<javax.imageio.stream.ImageOutputStreamImpl: void <init>()>();
+
+        r0.<javax.imageio.stream.FileCacheImageOutputStream: long maxStreamPos> = 0L;
+
+        if r1 != null goto label1;
+
+        $r15 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r15.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("stream == null!");
+
+        throw $r15;
+
+     label1:
+        if r2 == null goto label2;
+
+        $z0 = virtualinvoke r2.<java.io.File: boolean isDirectory()>();
+
+        if $z0 != 0 goto label2;
+
+        $r14 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r14.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Not a directory!");
+
+        throw $r14;
+
+     label2:
+        r0.<javax.imageio.stream.FileCacheImageOutputStream: java.io.OutputStream stream> = r1;
+
+        if r2 != null goto label3;
+
+        $r11 = newarray (java.nio.file.attribute.FileAttribute)[0];
+
+        $r12 = staticinvoke <java.nio.file.Files: java.nio.file.Path createTempFile(java.lang.String,java.lang.String,java.nio.file.attribute.FileAttribute[])>("imageio", ".tmp", $r11);
+
+        $r13 = interfaceinvoke $r12.<java.nio.file.Path: java.io.File toFile()>();
+
+        r0.<javax.imageio.stream.FileCacheImageOutputStream: java.io.File cacheFile> = $r13;
+
+        goto label4;
+
+     label3:
+        $r3 = virtualinvoke r2.<java.io.File: java.nio.file.Path toPath()>();
+
+        $r4 = newarray (java.nio.file.attribute.FileAttribute)[0];
+
+        $r5 = staticinvoke <java.nio.file.Files: java.nio.file.Path createTempFile(java.nio.file.Path,java.lang.String,java.lang.String,java.nio.file.attribute.FileAttribute[])>($r3, "imageio", ".tmp", $r4);
+
+        $r6 = interfaceinvoke $r5.<java.nio.file.Path: java.io.File toFile()>();
+
+        r0.<javax.imageio.stream.FileCacheImageOutputStream: java.io.File cacheFile> = $r6;
+
+     label4:
+        $r7 = new java.io.RandomAccessFile;
+
+        $r8 = r0.<javax.imageio.stream.FileCacheImageOutputStream: java.io.File cacheFile>;
+
+        specialinvoke $r7.<java.io.RandomAccessFile: void <init>(java.io.File,java.lang.String)>($r8, "rw");
+
+        r0.<javax.imageio.stream.FileCacheImageOutputStream: java.io.RandomAccessFile cache> = $r7;
+
+        $r9 = staticinvoke <com.sun.imageio.stream.StreamCloser: com.sun.imageio.stream.StreamCloser$CloseAction createCloseAction(javax.imageio.stream.ImageInputStream)>(r0);
+
+        r0.<javax.imageio.stream.FileCacheImageOutputStream: com.sun.imageio.stream.StreamCloser$CloseAction closeAction> = $r9;
+
+        $r10 = r0.<javax.imageio.stream.FileCacheImageOutputStream: com.sun.imageio.stream.StreamCloser$CloseAction closeAction>;
+
+        staticinvoke <com.sun.imageio.stream.StreamCloser: void addToQueue(com.sun.imageio.stream.StreamCloser$CloseAction)>($r10);
+
+        return;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        java.io.RandomAccessFile $r1;
+        javax.imageio.stream.FileCacheImageOutputStream r0;
+        int $i0, $i4;
+        long $l1, $l2;
+
+        r0 := @this: javax.imageio.stream.FileCacheImageOutputStream;
+
+        virtualinvoke r0.<javax.imageio.stream.FileCacheImageOutputStream: void checkClosed()>();
+
+        r0.<javax.imageio.stream.FileCacheImageOutputStream: int bitOffset> = 0;
+
+        $r1 = r0.<javax.imageio.stream.FileCacheImageOutputStream: java.io.RandomAccessFile cache>;
+
+        $i0 = virtualinvoke $r1.<java.io.RandomAccessFile: int read()>();
+
+        $i4 = (int) -1;
+
+        if $i0 == $i4 goto label1;
+
+        $l1 = r0.<javax.imageio.stream.FileCacheImageOutputStream: long streamPos>;
+
+        $l2 = $l1 + 1L;
+
+        r0.<javax.imageio.stream.FileCacheImageOutputStream: long streamPos> = $l2;
+
+     label1:
+        return $i0;
+    }
+
+    public int read(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r1;
+        java.io.RandomAccessFile $r2;
+        java.lang.IndexOutOfBoundsException $r6;
+        javax.imageio.stream.FileCacheImageOutputStream r0;
+        long $l6, $l7, $l8;
+        java.lang.NullPointerException $r5;
+        int i0, i1, $i2, $i3, $i4, $i5, $i10;
+
+        r0 := @this: javax.imageio.stream.FileCacheImageOutputStream;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        virtualinvoke r0.<javax.imageio.stream.FileCacheImageOutputStream: void checkClosed()>();
+
+        if r1 != null goto label1;
+
+        $r5 = new java.lang.NullPointerException;
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>(java.lang.String)>("b == null!");
+
+        throw $r5;
+
+     label1:
+        if i0 < 0 goto label2;
+
+        if i1 < 0 goto label2;
+
+        $i3 = i0 + i1;
+
+        $i2 = lengthof r1;
+
+        if $i3 > $i2 goto label2;
+
+        $i4 = i0 + i1;
+
+        if $i4 >= 0 goto label3;
+
+     label2:
+        $r6 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r6.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("off < 0 || len < 0 || off+len > b.length || off+len < 0!");
+
+        throw $r6;
+
+     label3:
+        r0.<javax.imageio.stream.FileCacheImageOutputStream: int bitOffset> = 0;
+
+        if i1 != 0 goto label4;
+
+        return 0;
+
+     label4:
+        $r2 = r0.<javax.imageio.stream.FileCacheImageOutputStream: java.io.RandomAccessFile cache>;
+
+        $i5 = virtualinvoke $r2.<java.io.RandomAccessFile: int read(byte[],int,int)>(r1, i0, i1);
+
+        $i10 = (int) -1;
+
+        if $i5 == $i10 goto label5;
+
+        $l7 = r0.<javax.imageio.stream.FileCacheImageOutputStream: long streamPos>;
+
+        $l6 = (long) $i5;
+
+        $l8 = $l7 + $l6;
+
+        r0.<javax.imageio.stream.FileCacheImageOutputStream: long streamPos> = $l8;
+
+     label5:
+        return $i5;
+    }
+
+    public void write(int) throws java.io.IOException
+    {
+        java.io.RandomAccessFile $r1;
+        javax.imageio.stream.FileCacheImageOutputStream r0;
+        long $l1, $l2, $l3, $l4, $l5;
+        int i0;
+
+        r0 := @this: javax.imageio.stream.FileCacheImageOutputStream;
+
+        i0 := @parameter0: int;
+
+        virtualinvoke r0.<javax.imageio.stream.FileCacheImageOutputStream: void flushBits()>();
+
+        $r1 = r0.<javax.imageio.stream.FileCacheImageOutputStream: java.io.RandomAccessFile cache>;
+
+        virtualinvoke $r1.<java.io.RandomAccessFile: void write(int)>(i0);
+
+        $l1 = r0.<javax.imageio.stream.FileCacheImageOutputStream: long streamPos>;
+
+        $l2 = $l1 + 1L;
+
+        r0.<javax.imageio.stream.FileCacheImageOutputStream: long streamPos> = $l2;
+
+        $l4 = r0.<javax.imageio.stream.FileCacheImageOutputStream: long maxStreamPos>;
+
+        $l3 = r0.<javax.imageio.stream.FileCacheImageOutputStream: long streamPos>;
+
+        $l5 = staticinvoke <java.lang.Math: long max(long,long)>($l4, $l3);
+
+        r0.<javax.imageio.stream.FileCacheImageOutputStream: long maxStreamPos> = $l5;
+
+        return;
+    }
+
+    public void write(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r1;
+        java.io.RandomAccessFile $r2;
+        javax.imageio.stream.FileCacheImageOutputStream r0;
+        long $l2, $l3, $l4, $l5, $l6, $l7;
+        int i0, i1;
+
+        r0 := @this: javax.imageio.stream.FileCacheImageOutputStream;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        virtualinvoke r0.<javax.imageio.stream.FileCacheImageOutputStream: void flushBits()>();
+
+        $r2 = r0.<javax.imageio.stream.FileCacheImageOutputStream: java.io.RandomAccessFile cache>;
+
+        virtualinvoke $r2.<java.io.RandomAccessFile: void write(byte[],int,int)>(r1, i0, i1);
+
+        $l3 = r0.<javax.imageio.stream.FileCacheImageOutputStream: long streamPos>;
+
+        $l2 = (long) i1;
+
+        $l4 = $l3 + $l2;
+
+        r0.<javax.imageio.stream.FileCacheImageOutputStream: long streamPos> = $l4;
+
+        $l6 = r0.<javax.imageio.stream.FileCacheImageOutputStream: long maxStreamPos>;
+
+        $l5 = r0.<javax.imageio.stream.FileCacheImageOutputStream: long streamPos>;
+
+        $l7 = staticinvoke <java.lang.Math: long max(long,long)>($l6, $l5);
+
+        r0.<javax.imageio.stream.FileCacheImageOutputStream: long maxStreamPos> = $l7;
+
+        return;
+    }
+
+    public long length()
+    {
+        java.io.RandomAccessFile $r1;
+        javax.imageio.stream.FileCacheImageOutputStream r0;
+        long $l0;
+        java.io.IOException $r2;
+
+        r0 := @this: javax.imageio.stream.FileCacheImageOutputStream;
+
+     label1:
+        virtualinvoke r0.<javax.imageio.stream.FileCacheImageOutputStream: void checkClosed()>();
+
+        $r1 = r0.<javax.imageio.stream.FileCacheImageOutputStream: java.io.RandomAccessFile cache>;
+
+        $l0 = virtualinvoke $r1.<java.io.RandomAccessFile: long length()>();
+
+     label2:
+        return $l0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        return -1L;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public void seek(long) throws java.io.IOException
+    {
+        java.io.RandomAccessFile $r1, $r2;
+        java.lang.IndexOutOfBoundsException $r4;
+        javax.imageio.stream.FileCacheImageOutputStream r0;
+        long l0, $l1, $l3, $l4, $l5, $l6;
+        byte $b2;
+        int $i7;
+
+        r0 := @this: javax.imageio.stream.FileCacheImageOutputStream;
+
+        l0 := @parameter0: long;
+
+        virtualinvoke r0.<javax.imageio.stream.FileCacheImageOutputStream: void checkClosed()>();
+
+        $l1 = r0.<javax.imageio.stream.FileCacheImageOutputStream: long flushedPos>;
+
+        $b2 = l0 cmp $l1;
+
+        $i7 = (int) $b2;
+
+        if $i7 >= 0 goto label1;
+
+        $r4 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r4.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r4;
+
+     label1:
+        $r1 = r0.<javax.imageio.stream.FileCacheImageOutputStream: java.io.RandomAccessFile cache>;
+
+        virtualinvoke $r1.<java.io.RandomAccessFile: void seek(long)>(l0);
+
+        $r2 = r0.<javax.imageio.stream.FileCacheImageOutputStream: java.io.RandomAccessFile cache>;
+
+        $l3 = virtualinvoke $r2.<java.io.RandomAccessFile: long getFilePointer()>();
+
+        r0.<javax.imageio.stream.FileCacheImageOutputStream: long streamPos> = $l3;
+
+        $l5 = r0.<javax.imageio.stream.FileCacheImageOutputStream: long maxStreamPos>;
+
+        $l4 = r0.<javax.imageio.stream.FileCacheImageOutputStream: long streamPos>;
+
+        $l6 = staticinvoke <java.lang.Math: long max(long,long)>($l5, $l4);
+
+        r0.<javax.imageio.stream.FileCacheImageOutputStream: long maxStreamPos> = $l6;
+
+        r0.<javax.imageio.stream.FileCacheImageOutputStream: int bitOffset> = 0;
+
+        return;
+    }
+
+    public boolean isCached()
+    {
+        javax.imageio.stream.FileCacheImageOutputStream r0;
+
+        r0 := @this: javax.imageio.stream.FileCacheImageOutputStream;
+
+        return 1;
+    }
+
+    public boolean isCachedFile()
+    {
+        javax.imageio.stream.FileCacheImageOutputStream r0;
+
+        r0 := @this: javax.imageio.stream.FileCacheImageOutputStream;
+
+        return 1;
+    }
+
+    public boolean isCachedMemory()
+    {
+        javax.imageio.stream.FileCacheImageOutputStream r0;
+
+        r0 := @this: javax.imageio.stream.FileCacheImageOutputStream;
+
+        return 0;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        java.io.OutputStream $r4;
+        java.io.RandomAccessFile $r1, $r2;
+        javax.imageio.stream.FileCacheImageOutputStream r0;
+        long $l0, $l1, $l2;
+        java.io.File $r3;
+        com.sun.imageio.stream.StreamCloser$CloseAction $r5;
+
+        r0 := @this: javax.imageio.stream.FileCacheImageOutputStream;
+
+        $r1 = r0.<javax.imageio.stream.FileCacheImageOutputStream: java.io.RandomAccessFile cache>;
+
+        $l0 = virtualinvoke $r1.<java.io.RandomAccessFile: long length()>();
+
+        r0.<javax.imageio.stream.FileCacheImageOutputStream: long maxStreamPos> = $l0;
+
+        $l1 = r0.<javax.imageio.stream.FileCacheImageOutputStream: long maxStreamPos>;
+
+        virtualinvoke r0.<javax.imageio.stream.FileCacheImageOutputStream: void seek(long)>($l1);
+
+        $l2 = r0.<javax.imageio.stream.FileCacheImageOutputStream: long maxStreamPos>;
+
+        virtualinvoke r0.<javax.imageio.stream.FileCacheImageOutputStream: void flushBefore(long)>($l2);
+
+        specialinvoke r0.<javax.imageio.stream.ImageOutputStreamImpl: void close()>();
+
+        $r2 = r0.<javax.imageio.stream.FileCacheImageOutputStream: java.io.RandomAccessFile cache>;
+
+        virtualinvoke $r2.<java.io.RandomAccessFile: void close()>();
+
+        r0.<javax.imageio.stream.FileCacheImageOutputStream: java.io.RandomAccessFile cache> = null;
+
+        $r3 = r0.<javax.imageio.stream.FileCacheImageOutputStream: java.io.File cacheFile>;
+
+        virtualinvoke $r3.<java.io.File: boolean delete()>();
+
+        r0.<javax.imageio.stream.FileCacheImageOutputStream: java.io.File cacheFile> = null;
+
+        $r4 = r0.<javax.imageio.stream.FileCacheImageOutputStream: java.io.OutputStream stream>;
+
+        virtualinvoke $r4.<java.io.OutputStream: void flush()>();
+
+        r0.<javax.imageio.stream.FileCacheImageOutputStream: java.io.OutputStream stream> = null;
+
+        $r5 = r0.<javax.imageio.stream.FileCacheImageOutputStream: com.sun.imageio.stream.StreamCloser$CloseAction closeAction>;
+
+        staticinvoke <com.sun.imageio.stream.StreamCloser: void removeFromQueue(com.sun.imageio.stream.StreamCloser$CloseAction)>($r5);
+
+        return;
+    }
+
+    public void flushBefore(long) throws java.io.IOException
+    {
+        byte[] r1;
+        java.io.RandomAccessFile $r2, $r4;
+        javax.imageio.stream.FileCacheImageOutputStream r0;
+        long l0, l1, $l2, $l5, $l6, $l8, l9;
+        byte $b3, $b4;
+        int i7, $i10, $i11;
+        java.io.OutputStream $r3, $r5;
+
+        r0 := @this: javax.imageio.stream.FileCacheImageOutputStream;
+
+        l1 := @parameter0: long;
+
+        l0 = r0.<javax.imageio.stream.FileCacheImageOutputStream: long flushedPos>;
+
+        specialinvoke r0.<javax.imageio.stream.ImageOutputStreamImpl: void flushBefore(long)>(l1);
+
+        $l2 = r0.<javax.imageio.stream.FileCacheImageOutputStream: long flushedPos>;
+
+        l9 = $l2 - l0;
+
+        $b3 = l9 cmp 0L;
+
+        $i10 = (int) $b3;
+
+        if $i10 <= 0 goto label3;
+
+        r1 = newarray (byte)[512];
+
+        $r2 = r0.<javax.imageio.stream.FileCacheImageOutputStream: java.io.RandomAccessFile cache>;
+
+        virtualinvoke $r2.<java.io.RandomAccessFile: void seek(long)>(l0);
+
+     label1:
+        $b4 = l9 cmp 0L;
+
+        $i11 = (int) $b4;
+
+        if $i11 <= 0 goto label2;
+
+        $l5 = (long) 512;
+
+        $l6 = staticinvoke <java.lang.Math: long min(long,long)>(l9, $l5);
+
+        i7 = (int) $l6;
+
+        $r4 = r0.<javax.imageio.stream.FileCacheImageOutputStream: java.io.RandomAccessFile cache>;
+
+        virtualinvoke $r4.<java.io.RandomAccessFile: void readFully(byte[],int,int)>(r1, 0, i7);
+
+        $r5 = r0.<javax.imageio.stream.FileCacheImageOutputStream: java.io.OutputStream stream>;
+
+        virtualinvoke $r5.<java.io.OutputStream: void write(byte[],int,int)>(r1, 0, i7);
+
+        $l8 = (long) i7;
+
+        l9 = l9 - $l8;
+
+        goto label1;
+
+     label2:
+        $r3 = r0.<javax.imageio.stream.FileCacheImageOutputStream: java.io.OutputStream stream>;
+
+        virtualinvoke $r3.<java.io.OutputStream: void flush()>();
+
+     label3:
+        return;
+    }
+}

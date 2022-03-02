@@ -1,0 +1,366 @@
+public class java.awt.PopupMenu extends java.awt.Menu
+{
+    private static final java.lang.String base;
+    static int nameCounter;
+    transient boolean isTrayIconPopup;
+    private static final long serialVersionUID;
+
+    public void <init>() throws java.awt.HeadlessException
+    {
+        java.awt.PopupMenu r0;
+
+        r0 := @this: java.awt.PopupMenu;
+
+        specialinvoke r0.<java.awt.PopupMenu: void <init>(java.lang.String)>("");
+
+        return;
+    }
+
+    public void <init>(java.lang.String) throws java.awt.HeadlessException
+    {
+        java.lang.String r1;
+        java.awt.PopupMenu r0;
+
+        r0 := @this: java.awt.PopupMenu;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.awt.Menu: void <init>(java.lang.String)>(r1);
+
+        r0.<java.awt.PopupMenu: boolean isTrayIconPopup> = 0;
+
+        return;
+    }
+
+    public java.awt.MenuContainer getParent()
+    {
+        java.awt.MenuContainer $r1;
+        java.awt.PopupMenu r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.PopupMenu;
+
+        $z0 = r0.<java.awt.PopupMenu: boolean isTrayIconPopup>;
+
+        if $z0 == 0 goto label1;
+
+        return null;
+
+     label1:
+        $r1 = specialinvoke r0.<java.awt.Menu: java.awt.MenuContainer getParent()>();
+
+        return $r1;
+    }
+
+    java.lang.String constructComponentName()
+    {
+        java.lang.Throwable $r4;
+        java.awt.PopupMenu r5;
+        int $i0, $i1;
+        java.lang.StringBuilder $r0, $r1, $r2;
+        java.lang.String $r3;
+
+        r5 := @this: java.awt.PopupMenu;
+
+        entermonitor class "Ljava/awt/PopupMenu;";
+
+     label1:
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("popup");
+
+        $i0 = <java.awt.PopupMenu: int nameCounter>;
+
+        $i1 = $i0 + 1;
+
+        <java.awt.PopupMenu: int nameCounter> = $i1;
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        exitmonitor class "Ljava/awt/PopupMenu;";
+
+     label2:
+        return $r3;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/PopupMenu;";
+
+     label4:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void addNotify()
+    {
+        java.awt.peer.PopupMenuPeer $r6;
+        java.lang.Throwable $r8;
+        java.awt.peer.MenuComponentPeer $r3;
+        java.awt.MenuContainer $r2, $r7;
+        java.awt.PopupMenu r0;
+        java.awt.MenuItem $r4;
+        int $i0, i1;
+        java.lang.Object $r1;
+        java.awt.Toolkit $r5;
+        boolean $z0;
+
+        r0 := @this: java.awt.PopupMenu;
+
+        $r1 = virtualinvoke r0.<java.awt.PopupMenu: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<java.awt.PopupMenu: java.awt.MenuContainer parent>;
+
+        if $r2 == null goto label2;
+
+        $r7 = r0.<java.awt.PopupMenu: java.awt.MenuContainer parent>;
+
+        $z0 = $r7 instanceof java.awt.Component;
+
+        if $z0 != 0 goto label2;
+
+        specialinvoke r0.<java.awt.Menu: void addNotify()>();
+
+        goto label5;
+
+     label2:
+        $r3 = r0.<java.awt.PopupMenu: java.awt.peer.MenuComponentPeer peer>;
+
+        if $r3 != null goto label3;
+
+        $r5 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r6 = virtualinvoke $r5.<java.awt.Toolkit: java.awt.peer.PopupMenuPeer createPopupMenu(java.awt.PopupMenu)>(r0);
+
+        r0.<java.awt.PopupMenu: java.awt.peer.MenuComponentPeer peer> = $r6;
+
+     label3:
+        $i0 = virtualinvoke r0.<java.awt.PopupMenu: int getItemCount()>();
+
+        i1 = 0;
+
+     label4:
+        if i1 >= $i0 goto label5;
+
+        $r4 = virtualinvoke r0.<java.awt.PopupMenu: java.awt.MenuItem getItem(int)>(i1);
+
+        $r4.<java.awt.MenuItem: java.awt.MenuContainer parent> = r0;
+
+        virtualinvoke $r4.<java.awt.MenuItem: void addNotify()>();
+
+        i1 = i1 + 1;
+
+        goto label4;
+
+     label5:
+        exitmonitor $r1;
+
+     label6:
+        goto label9;
+
+     label7:
+        $r8 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label8:
+        throw $r8;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public void show(java.awt.Component, int, int)
+    {
+        java.awt.peer.PopupMenuPeer $r11;
+        java.lang.Throwable $r17;
+        java.awt.peer.MenuComponentPeer $r6, $r8, $r9;
+        java.lang.NullPointerException $r16;
+        java.awt.PopupMenu r0;
+        java.awt.Event $r10;
+        int i0, i1;
+        java.awt.Container $r13;
+        boolean $z0, $z1, $z2, $z3;
+        java.awt.peer.ComponentPeer $r4;
+        java.awt.MenuContainer r1;
+        java.lang.RuntimeException $r5;
+        java.lang.IllegalArgumentException $r12, $r14, $r15;
+        java.awt.Component r2, r3;
+        java.lang.Object $r7;
+
+        r0 := @this: java.awt.PopupMenu;
+
+        r3 := @parameter0: java.awt.Component;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r1 = r0.<java.awt.PopupMenu: java.awt.MenuContainer parent>;
+
+        if r1 != null goto label01;
+
+        $r16 = new java.lang.NullPointerException;
+
+        specialinvoke $r16.<java.lang.NullPointerException: void <init>(java.lang.String)>("parent is null");
+
+        throw $r16;
+
+     label01:
+        $z0 = r1 instanceof java.awt.Component;
+
+        if $z0 != 0 goto label02;
+
+        $r15 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r15.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("PopupMenus with non-Component parents cannot be shown");
+
+        throw $r15;
+
+     label02:
+        r2 = (java.awt.Component) r1;
+
+        if r2 == r3 goto label04;
+
+        $z2 = r2 instanceof java.awt.Container;
+
+        if $z2 == 0 goto label03;
+
+        $r13 = (java.awt.Container) r2;
+
+        $z3 = virtualinvoke $r13.<java.awt.Container: boolean isAncestorOf(java.awt.Component)>(r3);
+
+        if $z3 != 0 goto label04;
+
+        $r14 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r14.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("origin not in parent\'s hierarchy");
+
+        throw $r14;
+
+     label03:
+        $r12 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r12.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("origin not in parent\'s hierarchy");
+
+        throw $r12;
+
+     label04:
+        $r4 = virtualinvoke r2.<java.awt.Component: java.awt.peer.ComponentPeer getPeer()>();
+
+        if $r4 == null goto label05;
+
+        $z1 = virtualinvoke r2.<java.awt.Component: boolean isShowing()>();
+
+        if $z1 != 0 goto label06;
+
+     label05:
+        $r5 = new java.lang.RuntimeException;
+
+        specialinvoke $r5.<java.lang.RuntimeException: void <init>(java.lang.String)>("parent not showing on screen");
+
+        throw $r5;
+
+     label06:
+        $r6 = r0.<java.awt.PopupMenu: java.awt.peer.MenuComponentPeer peer>;
+
+        if $r6 != null goto label07;
+
+        virtualinvoke r0.<java.awt.PopupMenu: void addNotify()>();
+
+     label07:
+        $r7 = virtualinvoke r0.<java.awt.PopupMenu: java.lang.Object getTreeLock()>();
+
+        entermonitor $r7;
+
+     label08:
+        $r8 = r0.<java.awt.PopupMenu: java.awt.peer.MenuComponentPeer peer>;
+
+        if $r8 == null goto label09;
+
+        $r9 = r0.<java.awt.PopupMenu: java.awt.peer.MenuComponentPeer peer>;
+
+        $r11 = (java.awt.peer.PopupMenuPeer) $r9;
+
+        $r10 = new java.awt.Event;
+
+        specialinvoke $r10.<java.awt.Event: void <init>(java.lang.Object,long,int,int,int,int,int)>(r3, 0L, 501, i0, i1, 0, 0);
+
+        interfaceinvoke $r11.<java.awt.peer.PopupMenuPeer: void show(java.awt.Event)>($r10);
+
+     label09:
+        exitmonitor $r7;
+
+     label10:
+        goto label13;
+
+     label11:
+        $r17 := @caughtexception;
+
+        exitmonitor $r7;
+
+     label12:
+        throw $r17;
+
+     label13:
+        return;
+
+        catch java.lang.Throwable from label08 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+    }
+
+    public javax.accessibility.AccessibleContext getAccessibleContext()
+    {
+        java.awt.PopupMenu$AccessibleAWTPopupMenu $r3;
+        javax.accessibility.AccessibleContext $r1, $r2;
+        java.awt.PopupMenu r0;
+
+        r0 := @this: java.awt.PopupMenu;
+
+        $r1 = r0.<java.awt.PopupMenu: javax.accessibility.AccessibleContext accessibleContext>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.awt.PopupMenu$AccessibleAWTPopupMenu;
+
+        specialinvoke $r3.<java.awt.PopupMenu$AccessibleAWTPopupMenu: void <init>(java.awt.PopupMenu)>(r0);
+
+        r0.<java.awt.PopupMenu: javax.accessibility.AccessibleContext accessibleContext> = $r3;
+
+     label1:
+        $r2 = r0.<java.awt.PopupMenu: javax.accessibility.AccessibleContext accessibleContext>;
+
+        return $r2;
+    }
+
+    static void <clinit>()
+    {
+        java.awt.PopupMenu$1 $r0;
+
+        <java.awt.PopupMenu: long serialVersionUID> = -4620452533522760060L;
+
+        <java.awt.PopupMenu: java.lang.String base> = "popup";
+
+        <java.awt.PopupMenu: int nameCounter> = 0;
+
+        $r0 = new java.awt.PopupMenu$1;
+
+        specialinvoke $r0.<java.awt.PopupMenu$1: void <init>()>();
+
+        staticinvoke <sun.awt.AWTAccessor: void setPopupMenuAccessor(sun.awt.AWTAccessor$PopupMenuAccessor)>($r0);
+
+        return;
+    }
+}

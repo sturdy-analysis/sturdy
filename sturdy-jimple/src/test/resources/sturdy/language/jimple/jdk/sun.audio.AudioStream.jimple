@@ -1,0 +1,203 @@
+public final class sun.audio.AudioStream extends java.io.FilterInputStream
+{
+    javax.sound.sampled.AudioInputStream ais;
+    javax.sound.sampled.AudioFormat format;
+    javax.sound.midi.MidiFileFormat midiformat;
+    java.io.InputStream stream;
+
+    public void <init>(java.io.InputStream) throws java.io.IOException
+    {
+        java.io.BufferedInputStream $r7;
+        javax.sound.midi.InvalidMidiDataException $r8;
+        javax.sound.sampled.UnsupportedAudioFileException $r10;
+        javax.sound.sampled.AudioFormat $r5;
+        java.io.IOException $r9;
+        sun.audio.AudioStream r0;
+        javax.sound.midi.MidiFileFormat $r12;
+        javax.sound.sampled.AudioInputStream $r3, $r4, $r6;
+        java.io.InputStream r1, $r2, $r11;
+        boolean $z0;
+
+        r0 := @this: sun.audio.AudioStream;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        specialinvoke r0.<java.io.FilterInputStream: void <init>(java.io.InputStream)>(r1);
+
+        r0.<sun.audio.AudioStream: javax.sound.sampled.AudioInputStream ais> = null;
+
+        r0.<sun.audio.AudioStream: javax.sound.sampled.AudioFormat format> = null;
+
+        r0.<sun.audio.AudioStream: javax.sound.midi.MidiFileFormat midiformat> = null;
+
+        r0.<sun.audio.AudioStream: java.io.InputStream stream> = null;
+
+        r0.<sun.audio.AudioStream: java.io.InputStream stream> = r1;
+
+        $z0 = virtualinvoke r1.<java.io.InputStream: boolean markSupported()>();
+
+        if $z0 != 0 goto label1;
+
+        $r7 = new java.io.BufferedInputStream;
+
+        specialinvoke $r7.<java.io.BufferedInputStream: void <init>(java.io.InputStream,int)>(r1, 1024);
+
+        r0.<sun.audio.AudioStream: java.io.InputStream stream> = $r7;
+
+     label1:
+        $r2 = r0.<sun.audio.AudioStream: java.io.InputStream stream>;
+
+        $r3 = staticinvoke <javax.sound.sampled.AudioSystem: javax.sound.sampled.AudioInputStream getAudioInputStream(java.io.InputStream)>($r2);
+
+        r0.<sun.audio.AudioStream: javax.sound.sampled.AudioInputStream ais> = $r3;
+
+        $r4 = r0.<sun.audio.AudioStream: javax.sound.sampled.AudioInputStream ais>;
+
+        $r5 = virtualinvoke $r4.<javax.sound.sampled.AudioInputStream: javax.sound.sampled.AudioFormat getFormat()>();
+
+        r0.<sun.audio.AudioStream: javax.sound.sampled.AudioFormat format> = $r5;
+
+        $r6 = r0.<sun.audio.AudioStream: javax.sound.sampled.AudioInputStream ais>;
+
+        r0.<sun.audio.AudioStream: java.io.InputStream in> = $r6;
+
+     label2:
+        goto label7;
+
+     label3:
+        $r10 := @caughtexception;
+
+     label4:
+        $r11 = r0.<sun.audio.AudioStream: java.io.InputStream stream>;
+
+        $r12 = staticinvoke <javax.sound.midi.MidiSystem: javax.sound.midi.MidiFileFormat getMidiFileFormat(java.io.InputStream)>($r11);
+
+        r0.<sun.audio.AudioStream: javax.sound.midi.MidiFileFormat midiformat> = $r12;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r8 := @caughtexception;
+
+        $r9 = new java.io.IOException;
+
+        specialinvoke $r9.<java.io.IOException: void <init>(java.lang.String)>("could not create audio stream from input stream");
+
+        throw $r9;
+
+     label7:
+        return;
+
+        catch javax.sound.sampled.UnsupportedAudioFileException from label1 to label2 with label3;
+        catch javax.sound.midi.InvalidMidiDataException from label4 to label5 with label6;
+    }
+
+    public sun.audio.AudioData getData() throws java.io.IOException
+    {
+        byte[] r2;
+        javax.sound.sampled.AudioFormat $r5;
+        java.io.IOException $r1, $r6, $r7;
+        sun.audio.AudioStream r0;
+        sun.audio.AudioData $r4;
+        int $i0;
+        javax.sound.sampled.AudioInputStream $r3;
+
+        r0 := @this: sun.audio.AudioStream;
+
+        $i0 = virtualinvoke r0.<sun.audio.AudioStream: int getLength()>();
+
+        if $i0 >= 1048576 goto label5;
+
+        r2 = newarray (byte)[$i0];
+
+     label1:
+        $r3 = r0.<sun.audio.AudioStream: javax.sound.sampled.AudioInputStream ais>;
+
+        virtualinvoke $r3.<javax.sound.sampled.AudioInputStream: int read(byte[],int,int)>(r2, 0, $i0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = new java.io.IOException;
+
+        specialinvoke $r7.<java.io.IOException: void <init>(java.lang.String)>("Could not create AudioData Object");
+
+        throw $r7;
+
+     label4:
+        $r4 = new sun.audio.AudioData;
+
+        $r5 = r0.<sun.audio.AudioStream: javax.sound.sampled.AudioFormat format>;
+
+        specialinvoke $r4.<sun.audio.AudioData: void <init>(javax.sound.sampled.AudioFormat,byte[])>($r5, r2);
+
+        return $r4;
+
+     label5:
+        $r1 = new java.io.IOException;
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>("could not create AudioData object");
+
+        throw $r1;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public int getLength()
+    {
+        javax.sound.sampled.AudioFormat $r4, $r7;
+        long $l1, $l3, $l4;
+        sun.audio.AudioStream r0;
+        javax.sound.midi.MidiFileFormat $r2, $r3;
+        javax.sound.sampled.AudioInputStream $r1, $r5, $r6;
+        int $i0, $i2, $i5, $i7;
+
+        r0 := @this: sun.audio.AudioStream;
+
+        $r1 = r0.<sun.audio.AudioStream: javax.sound.sampled.AudioInputStream ais>;
+
+        if $r1 == null goto label1;
+
+        $r4 = r0.<sun.audio.AudioStream: javax.sound.sampled.AudioFormat format>;
+
+        if $r4 == null goto label1;
+
+        $r5 = r0.<sun.audio.AudioStream: javax.sound.sampled.AudioInputStream ais>;
+
+        $l1 = virtualinvoke $r5.<javax.sound.sampled.AudioInputStream: long getFrameLength()>();
+
+        $r6 = r0.<sun.audio.AudioStream: javax.sound.sampled.AudioInputStream ais>;
+
+        $r7 = virtualinvoke $r6.<javax.sound.sampled.AudioInputStream: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $i2 = virtualinvoke $r7.<javax.sound.sampled.AudioFormat: int getFrameSize()>();
+
+        $l3 = (long) $i2;
+
+        $l4 = $l1 * $l3;
+
+        $i5 = (int) $l4;
+
+        return $i5;
+
+     label1:
+        $r2 = r0.<sun.audio.AudioStream: javax.sound.midi.MidiFileFormat midiformat>;
+
+        if $r2 == null goto label2;
+
+        $r3 = r0.<sun.audio.AudioStream: javax.sound.midi.MidiFileFormat midiformat>;
+
+        $i0 = virtualinvoke $r3.<javax.sound.midi.MidiFileFormat: int getByteLength()>();
+
+        return $i0;
+
+     label2:
+        $i7 = (int) -1;
+
+        return $i7;
+    }
+}

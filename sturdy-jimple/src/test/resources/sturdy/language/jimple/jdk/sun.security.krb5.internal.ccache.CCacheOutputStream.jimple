@@ -1,0 +1,379 @@
+public class sun.security.krb5.internal.ccache.CCacheOutputStream extends sun.security.krb5.internal.util.KrbDataOutputStream implements sun.security.krb5.internal.ccache.FileCCacheConstants
+{
+
+    public void <init>(java.io.OutputStream)
+    {
+        java.io.OutputStream r1;
+        sun.security.krb5.internal.ccache.CCacheOutputStream r0;
+
+        r0 := @this: sun.security.krb5.internal.ccache.CCacheOutputStream;
+
+        r1 := @parameter0: java.io.OutputStream;
+
+        specialinvoke r0.<sun.security.krb5.internal.util.KrbDataOutputStream: void <init>(java.io.OutputStream)>(r1);
+
+        return;
+    }
+
+    public void writeHeader(sun.security.krb5.PrincipalName, int) throws java.io.IOException
+    {
+        sun.security.krb5.PrincipalName r1;
+        int i0, $i1, $i2, $i3, $i5;
+        sun.security.krb5.internal.ccache.CCacheOutputStream r0;
+
+        r0 := @this: sun.security.krb5.internal.ccache.CCacheOutputStream;
+
+        r1 := @parameter0: sun.security.krb5.PrincipalName;
+
+        i0 := @parameter1: int;
+
+        $i5 = (int) 65280;
+
+        $i1 = i0 & $i5;
+
+        $i2 = $i1 >> 8;
+
+        virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write(int)>($i2);
+
+        $i3 = i0 & 255;
+
+        virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write(int)>($i3);
+
+        virtualinvoke r1.<sun.security.krb5.PrincipalName: void writePrincipal(sun.security.krb5.internal.ccache.CCacheOutputStream)>(r0);
+
+        return;
+    }
+
+    public void addCreds(sun.security.krb5.internal.ccache.Credentials) throws java.io.IOException, sun.security.krb5.Asn1Exception
+    {
+        sun.security.krb5.PrincipalName $r2, $r3;
+        long $l0, $l1, $l3, $l4, $l6, $l7, $l9, $l10;
+        sun.security.krb5.internal.Ticket $r14, $r15;
+        sun.security.krb5.internal.HostAddresses $r10, $r11;
+        sun.security.krb5.internal.KerberosTime $r5, $r6, $r7, $r8, $r16, $r17;
+        sun.security.krb5.internal.ccache.CCacheOutputStream r1;
+        sun.security.krb5.internal.ccache.Credentials r0;
+        sun.security.krb5.internal.TicketFlags $r9;
+        int $i2, $i5, $i8, $i11;
+        boolean $z0;
+        sun.security.krb5.internal.AuthorizationData $r12, $r13;
+        sun.security.krb5.EncryptionKey $r4;
+
+        r1 := @this: sun.security.krb5.internal.ccache.CCacheOutputStream;
+
+        r0 := @parameter0: sun.security.krb5.internal.ccache.Credentials;
+
+        $r2 = r0.<sun.security.krb5.internal.ccache.Credentials: sun.security.krb5.PrincipalName cname>;
+
+        virtualinvoke $r2.<sun.security.krb5.PrincipalName: void writePrincipal(sun.security.krb5.internal.ccache.CCacheOutputStream)>(r1);
+
+        $r3 = r0.<sun.security.krb5.internal.ccache.Credentials: sun.security.krb5.PrincipalName sname>;
+
+        virtualinvoke $r3.<sun.security.krb5.PrincipalName: void writePrincipal(sun.security.krb5.internal.ccache.CCacheOutputStream)>(r1);
+
+        $r4 = r0.<sun.security.krb5.internal.ccache.Credentials: sun.security.krb5.EncryptionKey key>;
+
+        virtualinvoke $r4.<sun.security.krb5.EncryptionKey: void writeKey(sun.security.krb5.internal.ccache.CCacheOutputStream)>(r1);
+
+        $r5 = r0.<sun.security.krb5.internal.ccache.Credentials: sun.security.krb5.internal.KerberosTime authtime>;
+
+        $l0 = virtualinvoke $r5.<sun.security.krb5.internal.KerberosTime: long getTime()>();
+
+        $l1 = $l0 / 1000L;
+
+        $i2 = (int) $l1;
+
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write32(int)>($i2);
+
+        $r6 = r0.<sun.security.krb5.internal.ccache.Credentials: sun.security.krb5.internal.KerberosTime starttime>;
+
+        if $r6 == null goto label01;
+
+        $r17 = r0.<sun.security.krb5.internal.ccache.Credentials: sun.security.krb5.internal.KerberosTime starttime>;
+
+        $l9 = virtualinvoke $r17.<sun.security.krb5.internal.KerberosTime: long getTime()>();
+
+        $l10 = $l9 / 1000L;
+
+        $i11 = (int) $l10;
+
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write32(int)>($i11);
+
+        goto label02;
+
+     label01:
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write32(int)>(0);
+
+     label02:
+        $r7 = r0.<sun.security.krb5.internal.ccache.Credentials: sun.security.krb5.internal.KerberosTime endtime>;
+
+        $l3 = virtualinvoke $r7.<sun.security.krb5.internal.KerberosTime: long getTime()>();
+
+        $l4 = $l3 / 1000L;
+
+        $i5 = (int) $l4;
+
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write32(int)>($i5);
+
+        $r8 = r0.<sun.security.krb5.internal.ccache.Credentials: sun.security.krb5.internal.KerberosTime renewTill>;
+
+        if $r8 == null goto label03;
+
+        $r16 = r0.<sun.security.krb5.internal.ccache.Credentials: sun.security.krb5.internal.KerberosTime renewTill>;
+
+        $l6 = virtualinvoke $r16.<sun.security.krb5.internal.KerberosTime: long getTime()>();
+
+        $l7 = $l6 / 1000L;
+
+        $i8 = (int) $l7;
+
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write32(int)>($i8);
+
+        goto label04;
+
+     label03:
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write32(int)>(0);
+
+     label04:
+        $z0 = r0.<sun.security.krb5.internal.ccache.Credentials: boolean isEncInSKey>;
+
+        if $z0 == 0 goto label05;
+
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write8(int)>(1);
+
+        goto label06;
+
+     label05:
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write8(int)>(0);
+
+     label06:
+        $r9 = r0.<sun.security.krb5.internal.ccache.Credentials: sun.security.krb5.internal.TicketFlags flags>;
+
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void writeFlags(sun.security.krb5.internal.TicketFlags)>($r9);
+
+        $r10 = r0.<sun.security.krb5.internal.ccache.Credentials: sun.security.krb5.internal.HostAddresses caddr>;
+
+        if $r10 != null goto label07;
+
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write32(int)>(0);
+
+        goto label08;
+
+     label07:
+        $r11 = r0.<sun.security.krb5.internal.ccache.Credentials: sun.security.krb5.internal.HostAddresses caddr>;
+
+        virtualinvoke $r11.<sun.security.krb5.internal.HostAddresses: void writeAddrs(sun.security.krb5.internal.ccache.CCacheOutputStream)>(r1);
+
+     label08:
+        $r12 = r0.<sun.security.krb5.internal.ccache.Credentials: sun.security.krb5.internal.AuthorizationData authorizationData>;
+
+        if $r12 != null goto label09;
+
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write32(int)>(0);
+
+        goto label10;
+
+     label09:
+        $r13 = r0.<sun.security.krb5.internal.ccache.Credentials: sun.security.krb5.internal.AuthorizationData authorizationData>;
+
+        virtualinvoke $r13.<sun.security.krb5.internal.AuthorizationData: void writeAuth(sun.security.krb5.internal.ccache.CCacheOutputStream)>(r1);
+
+     label10:
+        $r14 = r0.<sun.security.krb5.internal.ccache.Credentials: sun.security.krb5.internal.Ticket ticket>;
+
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void writeTicket(sun.security.krb5.internal.Ticket)>($r14);
+
+        $r15 = r0.<sun.security.krb5.internal.ccache.Credentials: sun.security.krb5.internal.Ticket secondTicket>;
+
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void writeTicket(sun.security.krb5.internal.Ticket)>($r15);
+
+        return;
+    }
+
+    public void addConfigEntry(sun.security.krb5.PrincipalName, sun.security.krb5.internal.ccache.CredentialsCache$ConfigEntry) throws java.io.IOException
+    {
+        byte[] $r4, $r5;
+        sun.security.krb5.PrincipalName r0, $r3;
+        int $i0;
+        sun.security.krb5.internal.ccache.CCacheOutputStream r1;
+        sun.security.krb5.internal.ccache.CredentialsCache$ConfigEntry r2;
+
+        r1 := @this: sun.security.krb5.internal.ccache.CCacheOutputStream;
+
+        r0 := @parameter0: sun.security.krb5.PrincipalName;
+
+        r2 := @parameter1: sun.security.krb5.internal.ccache.CredentialsCache$ConfigEntry;
+
+        virtualinvoke r0.<sun.security.krb5.PrincipalName: void writePrincipal(sun.security.krb5.internal.ccache.CCacheOutputStream)>(r1);
+
+        $r3 = virtualinvoke r2.<sun.security.krb5.internal.ccache.CredentialsCache$ConfigEntry: sun.security.krb5.PrincipalName getSName()>();
+
+        virtualinvoke $r3.<sun.security.krb5.PrincipalName: void writePrincipal(sun.security.krb5.internal.ccache.CCacheOutputStream)>(r1);
+
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write16(int)>(0);
+
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write16(int)>(0);
+
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write32(int)>(0);
+
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write32(int)>(0);
+
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write32(int)>(0);
+
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write32(int)>(0);
+
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write32(int)>(0);
+
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write8(int)>(0);
+
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write32(int)>(0);
+
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write32(int)>(0);
+
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write32(int)>(0);
+
+        $r4 = virtualinvoke r2.<sun.security.krb5.internal.ccache.CredentialsCache$ConfigEntry: byte[] getData()>();
+
+        $i0 = lengthof $r4;
+
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write32(int)>($i0);
+
+        $r5 = virtualinvoke r2.<sun.security.krb5.internal.ccache.CredentialsCache$ConfigEntry: byte[] getData()>();
+
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write(byte[])>($r5);
+
+        virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write32(int)>(0);
+
+        return;
+    }
+
+    void writeTicket(sun.security.krb5.internal.Ticket) throws java.io.IOException, sun.security.krb5.Asn1Exception
+    {
+        byte[] $r1;
+        int $i0, $i1;
+        sun.security.krb5.internal.Ticket r0;
+        sun.security.krb5.internal.ccache.CCacheOutputStream r2;
+
+        r2 := @this: sun.security.krb5.internal.ccache.CCacheOutputStream;
+
+        r0 := @parameter0: sun.security.krb5.internal.Ticket;
+
+        if r0 != null goto label1;
+
+        virtualinvoke r2.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write32(int)>(0);
+
+        goto label2;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.security.krb5.internal.Ticket: byte[] asn1Encode()>();
+
+        $i0 = lengthof $r1;
+
+        virtualinvoke r2.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write32(int)>($i0);
+
+        $i1 = lengthof $r1;
+
+        virtualinvoke r2.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write(byte[],int,int)>($r1, 0, $i1);
+
+     label2:
+        return;
+    }
+
+    void writeFlags(sun.security.krb5.internal.TicketFlags) throws java.io.IOException
+    {
+        boolean[] $r1;
+        sun.security.krb5.internal.ccache.CCacheOutputStream r2;
+        sun.security.krb5.internal.TicketFlags r0;
+        int i0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10;
+
+        r2 := @this: sun.security.krb5.internal.ccache.CCacheOutputStream;
+
+        r0 := @parameter0: sun.security.krb5.internal.TicketFlags;
+
+        i0 = 0;
+
+        $r1 = virtualinvoke r0.<sun.security.krb5.internal.TicketFlags: boolean[] toBooleanArray()>();
+
+        $z0 = $r1[1];
+
+        if $z0 != 1 goto label01;
+
+        i0 = 1073741824;
+
+     label01:
+        $z1 = $r1[2];
+
+        if $z1 != 1 goto label02;
+
+        i0 = i0 | 536870912;
+
+     label02:
+        $z2 = $r1[3];
+
+        if $z2 != 1 goto label03;
+
+        i0 = i0 | 268435456;
+
+     label03:
+        $z3 = $r1[4];
+
+        if $z3 != 1 goto label04;
+
+        i0 = i0 | 134217728;
+
+     label04:
+        $z4 = $r1[5];
+
+        if $z4 != 1 goto label05;
+
+        i0 = i0 | 67108864;
+
+     label05:
+        $z5 = $r1[6];
+
+        if $z5 != 1 goto label06;
+
+        i0 = i0 | 33554432;
+
+     label06:
+        $z6 = $r1[7];
+
+        if $z6 != 1 goto label07;
+
+        i0 = i0 | 16777216;
+
+     label07:
+        $z7 = $r1[8];
+
+        if $z7 != 1 goto label08;
+
+        i0 = i0 | 8388608;
+
+     label08:
+        $z8 = $r1[9];
+
+        if $z8 != 1 goto label09;
+
+        i0 = i0 | 4194304;
+
+     label09:
+        $z9 = $r1[10];
+
+        if $z9 != 1 goto label10;
+
+        i0 = i0 | 2097152;
+
+     label10:
+        $z10 = $r1[11];
+
+        if $z10 != 1 goto label11;
+
+        i0 = i0 | 1048576;
+
+     label11:
+        virtualinvoke r2.<sun.security.krb5.internal.ccache.CCacheOutputStream: void write32(int)>(i0);
+
+        return;
+    }
+}

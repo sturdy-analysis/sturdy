@@ -1,0 +1,304 @@
+class sun.nio.ch.PollArrayWrapper extends java.lang.Object
+{
+    private sun.nio.ch.AllocatedNativeObject pollArray;
+    long pollArrayAddress;
+    private static final short FD_OFFSET;
+    private static final short EVENT_OFFSET;
+    static short SIZE_POLLFD;
+    private int size;
+
+    void <init>(int)
+    {
+        sun.nio.ch.AllocatedNativeObject $r2, $r3;
+        long $l3;
+        sun.nio.ch.PollArrayWrapper r0;
+        short $s1;
+        int i0, i2, $i4;
+
+        r0 := @this: sun.nio.ch.PollArrayWrapper;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $s1 = <sun.nio.ch.PollArrayWrapper: short SIZE_POLLFD>;
+
+        $i4 = (int) $s1;
+
+        i2 = i0 * $i4;
+
+        $r3 = new sun.nio.ch.AllocatedNativeObject;
+
+        specialinvoke $r3.<sun.nio.ch.AllocatedNativeObject: void <init>(int,boolean)>(i2, 1);
+
+        r0.<sun.nio.ch.PollArrayWrapper: sun.nio.ch.AllocatedNativeObject pollArray> = $r3;
+
+        $r2 = r0.<sun.nio.ch.PollArrayWrapper: sun.nio.ch.AllocatedNativeObject pollArray>;
+
+        $l3 = virtualinvoke $r2.<sun.nio.ch.AllocatedNativeObject: long address()>();
+
+        r0.<sun.nio.ch.PollArrayWrapper: long pollArrayAddress> = $l3;
+
+        r0.<sun.nio.ch.PollArrayWrapper: int size> = i0;
+
+        return;
+    }
+
+    void addEntry(int, sun.nio.ch.SelectionKeyImpl)
+    {
+        int i0, $i1;
+        sun.nio.ch.SelectionKeyImpl r1;
+        sun.nio.ch.SelChImpl $r2;
+        sun.nio.ch.PollArrayWrapper r0;
+
+        r0 := @this: sun.nio.ch.PollArrayWrapper;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: sun.nio.ch.SelectionKeyImpl;
+
+        $r2 = r1.<sun.nio.ch.SelectionKeyImpl: sun.nio.ch.SelChImpl channel>;
+
+        $i1 = interfaceinvoke $r2.<sun.nio.ch.SelChImpl: int getFDVal()>();
+
+        virtualinvoke r0.<sun.nio.ch.PollArrayWrapper: void putDescriptor(int,int)>(i0, $i1);
+
+        return;
+    }
+
+    void replaceEntry(sun.nio.ch.PollArrayWrapper, int, sun.nio.ch.PollArrayWrapper, int)
+    {
+        int i0, i1, $i2, $i3;
+        sun.nio.ch.PollArrayWrapper r0, r1, r2;
+
+        r2 := @this: sun.nio.ch.PollArrayWrapper;
+
+        r1 := @parameter0: sun.nio.ch.PollArrayWrapper;
+
+        i1 := @parameter1: int;
+
+        r0 := @parameter2: sun.nio.ch.PollArrayWrapper;
+
+        i0 := @parameter3: int;
+
+        $i2 = virtualinvoke r1.<sun.nio.ch.PollArrayWrapper: int getDescriptor(int)>(i1);
+
+        virtualinvoke r0.<sun.nio.ch.PollArrayWrapper: void putDescriptor(int,int)>(i0, $i2);
+
+        $i3 = virtualinvoke r1.<sun.nio.ch.PollArrayWrapper: int getEventOps(int)>(i1);
+
+        virtualinvoke r0.<sun.nio.ch.PollArrayWrapper: void putEventOps(int,int)>(i0, $i3);
+
+        return;
+    }
+
+    void grow(int)
+    {
+        sun.nio.ch.AllocatedNativeObject $r2, $r3, $r4;
+        long $l3;
+        sun.nio.ch.PollArrayWrapper $r0, r1;
+        int i0, $i1, $i2, i4;
+
+        r1 := @this: sun.nio.ch.PollArrayWrapper;
+
+        i0 := @parameter0: int;
+
+        $r0 = new sun.nio.ch.PollArrayWrapper;
+
+        specialinvoke $r0.<sun.nio.ch.PollArrayWrapper: void <init>(int)>(i0);
+
+        i4 = 0;
+
+     label1:
+        $i1 = r1.<sun.nio.ch.PollArrayWrapper: int size>;
+
+        if i4 >= $i1 goto label2;
+
+        virtualinvoke r1.<sun.nio.ch.PollArrayWrapper: void replaceEntry(sun.nio.ch.PollArrayWrapper,int,sun.nio.ch.PollArrayWrapper,int)>(r1, i4, $r0, i4);
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label2:
+        $r2 = r1.<sun.nio.ch.PollArrayWrapper: sun.nio.ch.AllocatedNativeObject pollArray>;
+
+        virtualinvoke $r2.<sun.nio.ch.AllocatedNativeObject: void free()>();
+
+        $r3 = $r0.<sun.nio.ch.PollArrayWrapper: sun.nio.ch.AllocatedNativeObject pollArray>;
+
+        r1.<sun.nio.ch.PollArrayWrapper: sun.nio.ch.AllocatedNativeObject pollArray> = $r3;
+
+        $i2 = $r0.<sun.nio.ch.PollArrayWrapper: int size>;
+
+        r1.<sun.nio.ch.PollArrayWrapper: int size> = $i2;
+
+        $r4 = r1.<sun.nio.ch.PollArrayWrapper: sun.nio.ch.AllocatedNativeObject pollArray>;
+
+        $l3 = virtualinvoke $r4.<sun.nio.ch.AllocatedNativeObject: long address()>();
+
+        r1.<sun.nio.ch.PollArrayWrapper: long pollArrayAddress> = $l3;
+
+        return;
+    }
+
+    void free()
+    {
+        sun.nio.ch.AllocatedNativeObject $r1;
+        sun.nio.ch.PollArrayWrapper r0;
+
+        r0 := @this: sun.nio.ch.PollArrayWrapper;
+
+        $r1 = r0.<sun.nio.ch.PollArrayWrapper: sun.nio.ch.AllocatedNativeObject pollArray>;
+
+        virtualinvoke $r1.<sun.nio.ch.AllocatedNativeObject: void free()>();
+
+        return;
+    }
+
+    void putDescriptor(int, int)
+    {
+        sun.nio.ch.AllocatedNativeObject $r1;
+        sun.nio.ch.PollArrayWrapper r0;
+        short $s1;
+        int i0, $i2, i3, $i4, $i5;
+
+        r0 := @this: sun.nio.ch.PollArrayWrapper;
+
+        i0 := @parameter0: int;
+
+        i3 := @parameter1: int;
+
+        $r1 = r0.<sun.nio.ch.PollArrayWrapper: sun.nio.ch.AllocatedNativeObject pollArray>;
+
+        $s1 = <sun.nio.ch.PollArrayWrapper: short SIZE_POLLFD>;
+
+        $i5 = (int) $s1;
+
+        $i2 = $i5 * i0;
+
+        $i4 = $i2 + 0;
+
+        virtualinvoke $r1.<sun.nio.ch.AllocatedNativeObject: void putInt(int,int)>($i4, i3);
+
+        return;
+    }
+
+    void putEventOps(int, int)
+    {
+        sun.nio.ch.AllocatedNativeObject $r1;
+        sun.nio.ch.PollArrayWrapper r0;
+        short $s1, $s4;
+        int i0, $i2, i3, $i5, $i6;
+
+        r0 := @this: sun.nio.ch.PollArrayWrapper;
+
+        i0 := @parameter0: int;
+
+        i3 := @parameter1: int;
+
+        $r1 = r0.<sun.nio.ch.PollArrayWrapper: sun.nio.ch.AllocatedNativeObject pollArray>;
+
+        $s1 = <sun.nio.ch.PollArrayWrapper: short SIZE_POLLFD>;
+
+        $i6 = (int) $s1;
+
+        $i2 = $i6 * i0;
+
+        $i5 = $i2 + 4;
+
+        $s4 = (short) i3;
+
+        virtualinvoke $r1.<sun.nio.ch.AllocatedNativeObject: void putShort(int,short)>($i5, $s4);
+
+        return;
+    }
+
+    int getEventOps(int)
+    {
+        sun.nio.ch.AllocatedNativeObject $r1;
+        sun.nio.ch.PollArrayWrapper r0;
+        short $s1, $s4;
+        int i0, $i2, $i3, $i5, $i6;
+
+        r0 := @this: sun.nio.ch.PollArrayWrapper;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.nio.ch.PollArrayWrapper: sun.nio.ch.AllocatedNativeObject pollArray>;
+
+        $s1 = <sun.nio.ch.PollArrayWrapper: short SIZE_POLLFD>;
+
+        $i5 = (int) $s1;
+
+        $i2 = $i5 * i0;
+
+        $i3 = $i2 + 4;
+
+        $s4 = virtualinvoke $r1.<sun.nio.ch.AllocatedNativeObject: short getShort(int)>($i3);
+
+        $i6 = (int) $s4;
+
+        return $i6;
+    }
+
+    int getDescriptor(int)
+    {
+        sun.nio.ch.AllocatedNativeObject $r1;
+        sun.nio.ch.PollArrayWrapper r0;
+        short $s1;
+        int i0, $i2, $i3, $i4, $i5;
+
+        r0 := @this: sun.nio.ch.PollArrayWrapper;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.nio.ch.PollArrayWrapper: sun.nio.ch.AllocatedNativeObject pollArray>;
+
+        $s1 = <sun.nio.ch.PollArrayWrapper: short SIZE_POLLFD>;
+
+        $i5 = (int) $s1;
+
+        $i2 = $i5 * i0;
+
+        $i3 = $i2 + 0;
+
+        $i4 = virtualinvoke $r1.<sun.nio.ch.AllocatedNativeObject: int getInt(int)>($i3);
+
+        return $i4;
+    }
+
+    void addWakeupSocket(int, int)
+    {
+        short $s2;
+        int i0, i1, $i3;
+        sun.nio.ch.PollArrayWrapper r0;
+
+        r0 := @this: sun.nio.ch.PollArrayWrapper;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        virtualinvoke r0.<sun.nio.ch.PollArrayWrapper: void putDescriptor(int,int)>(i0, i1);
+
+        $s2 = <sun.nio.ch.Net: short POLLIN>;
+
+        $i3 = (int) $s2;
+
+        virtualinvoke r0.<sun.nio.ch.PollArrayWrapper: void putEventOps(int,int)>(i0, $i3);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        <sun.nio.ch.PollArrayWrapper: short EVENT_OFFSET> = 4;
+
+        <sun.nio.ch.PollArrayWrapper: short FD_OFFSET> = 0;
+
+        <sun.nio.ch.PollArrayWrapper: short SIZE_POLLFD> = 8;
+
+        return;
+    }
+}

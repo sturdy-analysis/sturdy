@@ -1,0 +1,3629 @@
+public abstract class javax.sql.rowset.BaseRowSet extends java.lang.Object implements java.io.Serializable, java.lang.Cloneable
+{
+    public static final int UNICODE_STREAM_PARAM;
+    public static final int BINARY_STREAM_PARAM;
+    public static final int ASCII_STREAM_PARAM;
+    protected java.io.InputStream binaryStream;
+    protected java.io.InputStream unicodeStream;
+    protected java.io.InputStream asciiStream;
+    protected java.io.Reader charStream;
+    private java.lang.String command;
+    private java.lang.String URL;
+    private java.lang.String dataSource;
+    private transient java.lang.String username;
+    private transient java.lang.String password;
+    private int rowSetType;
+    private boolean showDeleted;
+    private int queryTimeout;
+    private int maxRows;
+    private int maxFieldSize;
+    private int concurrency;
+    private boolean readOnly;
+    private boolean escapeProcessing;
+    private int isolation;
+    private int fetchDir;
+    private int fetchSize;
+    private java.util.Map map;
+    private java.util.Vector listeners;
+    private java.util.Hashtable params;
+    static final long serialVersionUID;
+
+    public void <init>()
+    {
+        java.util.Vector $r1;
+        javax.sql.rowset.BaseRowSet r0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<javax.sql.rowset.BaseRowSet: int rowSetType> = 1004;
+
+        r0.<javax.sql.rowset.BaseRowSet: boolean showDeleted> = 0;
+
+        r0.<javax.sql.rowset.BaseRowSet: int queryTimeout> = 0;
+
+        r0.<javax.sql.rowset.BaseRowSet: int maxRows> = 0;
+
+        r0.<javax.sql.rowset.BaseRowSet: int maxFieldSize> = 0;
+
+        r0.<javax.sql.rowset.BaseRowSet: int concurrency> = 1008;
+
+        r0.<javax.sql.rowset.BaseRowSet: boolean escapeProcessing> = 1;
+
+        r0.<javax.sql.rowset.BaseRowSet: int fetchDir> = 1000;
+
+        r0.<javax.sql.rowset.BaseRowSet: int fetchSize> = 0;
+
+        $r1 = new java.util.Vector;
+
+        specialinvoke $r1.<java.util.Vector: void <init>()>();
+
+        r0.<javax.sql.rowset.BaseRowSet: java.util.Vector listeners> = $r1;
+
+        return;
+    }
+
+    protected void initParams()
+    {
+        java.util.Hashtable $r1;
+        javax.sql.rowset.BaseRowSet r0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        $r1 = new java.util.Hashtable;
+
+        specialinvoke $r1.<java.util.Hashtable: void <init>()>();
+
+        r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params> = $r1;
+
+        return;
+    }
+
+    public void addRowSetListener(javax.sql.RowSetListener)
+    {
+        javax.sql.RowSetListener r1;
+        java.util.Vector $r2;
+        javax.sql.rowset.BaseRowSet r0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        r1 := @parameter0: javax.sql.RowSetListener;
+
+        $r2 = r0.<javax.sql.rowset.BaseRowSet: java.util.Vector listeners>;
+
+        virtualinvoke $r2.<java.util.Vector: boolean add(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    public void removeRowSetListener(javax.sql.RowSetListener)
+    {
+        javax.sql.RowSetListener r1;
+        java.util.Vector $r2;
+        javax.sql.rowset.BaseRowSet r0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        r1 := @parameter0: javax.sql.RowSetListener;
+
+        $r2 = r0.<javax.sql.rowset.BaseRowSet: java.util.Vector listeners>;
+
+        virtualinvoke $r2.<java.util.Vector: boolean remove(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    private void checkforRowSetInterface() throws java.sql.SQLException
+    {
+        java.sql.SQLException $r1;
+        javax.sql.rowset.BaseRowSet r0;
+        boolean $z0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        $z0 = r0 instanceof javax.sql.RowSet;
+
+        if $z0 != 0 goto label1;
+
+        $r1 = new java.sql.SQLException;
+
+        specialinvoke $r1.<java.sql.SQLException: void <init>(java.lang.String)>("The class extending abstract class BaseRowSet must implement javax.sql.RowSet or one of it\'s sub-interfaces.");
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+
+    protected void notifyCursorMoved() throws java.sql.SQLException
+    {
+        java.util.Iterator $r5;
+        javax.sql.RowSetListener r7;
+        java.util.Vector $r1, $r4;
+        javax.sql.RowSetEvent $r2;
+        javax.sql.rowset.BaseRowSet r0;
+        javax.sql.RowSet $r3;
+        java.lang.Object $r6;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkforRowSetInterface()>();
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.util.Vector listeners>;
+
+        $z0 = virtualinvoke $r1.<java.util.Vector: boolean isEmpty()>();
+
+        if $z0 != 0 goto label2;
+
+        $r2 = new javax.sql.RowSetEvent;
+
+        $r3 = (javax.sql.RowSet) r0;
+
+        specialinvoke $r2.<javax.sql.RowSetEvent: void <init>(javax.sql.RowSet)>($r3);
+
+        $r4 = r0.<javax.sql.rowset.BaseRowSet: java.util.Vector listeners>;
+
+        $r5 = virtualinvoke $r4.<java.util.Vector: java.util.Iterator iterator()>();
+
+     label1:
+        $z1 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label2;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (javax.sql.RowSetListener) $r6;
+
+        interfaceinvoke r7.<javax.sql.RowSetListener: void cursorMoved(javax.sql.RowSetEvent)>($r2);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    protected void notifyRowChanged() throws java.sql.SQLException
+    {
+        java.util.Iterator $r5;
+        javax.sql.RowSetListener r7;
+        java.util.Vector $r1, $r4;
+        javax.sql.RowSetEvent $r2;
+        javax.sql.rowset.BaseRowSet r0;
+        javax.sql.RowSet $r3;
+        java.lang.Object $r6;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkforRowSetInterface()>();
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.util.Vector listeners>;
+
+        $z0 = virtualinvoke $r1.<java.util.Vector: boolean isEmpty()>();
+
+        if $z0 != 0 goto label2;
+
+        $r2 = new javax.sql.RowSetEvent;
+
+        $r3 = (javax.sql.RowSet) r0;
+
+        specialinvoke $r2.<javax.sql.RowSetEvent: void <init>(javax.sql.RowSet)>($r3);
+
+        $r4 = r0.<javax.sql.rowset.BaseRowSet: java.util.Vector listeners>;
+
+        $r5 = virtualinvoke $r4.<java.util.Vector: java.util.Iterator iterator()>();
+
+     label1:
+        $z1 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label2;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (javax.sql.RowSetListener) $r6;
+
+        interfaceinvoke r7.<javax.sql.RowSetListener: void rowChanged(javax.sql.RowSetEvent)>($r2);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    protected void notifyRowSetChanged() throws java.sql.SQLException
+    {
+        java.util.Iterator $r5;
+        javax.sql.RowSetListener r7;
+        java.util.Vector $r1, $r4;
+        javax.sql.RowSetEvent $r2;
+        javax.sql.rowset.BaseRowSet r0;
+        javax.sql.RowSet $r3;
+        java.lang.Object $r6;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkforRowSetInterface()>();
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.util.Vector listeners>;
+
+        $z0 = virtualinvoke $r1.<java.util.Vector: boolean isEmpty()>();
+
+        if $z0 != 0 goto label2;
+
+        $r2 = new javax.sql.RowSetEvent;
+
+        $r3 = (javax.sql.RowSet) r0;
+
+        specialinvoke $r2.<javax.sql.RowSetEvent: void <init>(javax.sql.RowSet)>($r3);
+
+        $r4 = r0.<javax.sql.rowset.BaseRowSet: java.util.Vector listeners>;
+
+        $r5 = virtualinvoke $r4.<java.util.Vector: java.util.Iterator iterator()>();
+
+     label1:
+        $z1 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label2;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (javax.sql.RowSetListener) $r6;
+
+        interfaceinvoke r7.<javax.sql.RowSetListener: void rowSetChanged(javax.sql.RowSetEvent)>($r2);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public java.lang.String getCommand()
+    {
+        java.lang.String $r1;
+        javax.sql.rowset.BaseRowSet r0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.lang.String command>;
+
+        return $r1;
+    }
+
+    public void setCommand(java.lang.String) throws java.sql.SQLException
+    {
+        java.sql.SQLException $r4, $r5;
+        javax.sql.rowset.BaseRowSet r1;
+        int $i0;
+        java.lang.String r0;
+        java.util.Hashtable $r2, $r3;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        r1.<javax.sql.rowset.BaseRowSet: java.lang.String command> = null;
+
+        goto label4;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label2;
+
+        $r5 = new java.sql.SQLException;
+
+        specialinvoke $r5.<java.sql.SQLException: void <init>(java.lang.String)>("Invalid command string detected. Cannot be of length less than 0");
+
+        throw $r5;
+
+     label2:
+        $r2 = r1.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r2 != null goto label3;
+
+        $r4 = new java.sql.SQLException;
+
+        specialinvoke $r4.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setCommand");
+
+        throw $r4;
+
+     label3:
+        $r3 = r1.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        virtualinvoke $r3.<java.util.Hashtable: void clear()>();
+
+        r1.<javax.sql.rowset.BaseRowSet: java.lang.String command> = r0;
+
+     label4:
+        return;
+    }
+
+    public java.lang.String getUrl() throws java.sql.SQLException
+    {
+        java.lang.String $r1;
+        javax.sql.rowset.BaseRowSet r0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.lang.String URL>;
+
+        return $r1;
+    }
+
+    public void setUrl(java.lang.String) throws java.sql.SQLException
+    {
+        java.sql.SQLException $r1;
+        javax.sql.rowset.BaseRowSet r0;
+        int $i0;
+        java.lang.String r2;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        if r2 != null goto label1;
+
+        goto label3;
+
+     label1:
+        $i0 = virtualinvoke r2.<java.lang.String: int length()>();
+
+        if $i0 >= 1 goto label2;
+
+        $r1 = new java.sql.SQLException;
+
+        specialinvoke $r1.<java.sql.SQLException: void <init>(java.lang.String)>("Invalid url string detected. Cannot be of length less than 1");
+
+        throw $r1;
+
+     label2:
+        r0.<javax.sql.rowset.BaseRowSet: java.lang.String URL> = r2;
+
+     label3:
+        r0.<javax.sql.rowset.BaseRowSet: java.lang.String dataSource> = null;
+
+        return;
+    }
+
+    public java.lang.String getDataSourceName()
+    {
+        java.lang.String $r1;
+        javax.sql.rowset.BaseRowSet r0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.lang.String dataSource>;
+
+        return $r1;
+    }
+
+    public void setDataSourceName(java.lang.String) throws java.sql.SQLException
+    {
+        java.sql.SQLException $r2;
+        javax.sql.rowset.BaseRowSet r1;
+        java.lang.String r0;
+        boolean $z0;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        r1.<javax.sql.rowset.BaseRowSet: java.lang.String dataSource> = null;
+
+        goto label3;
+
+     label1:
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z0 == 0 goto label2;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("DataSource name cannot be empty string");
+
+        throw $r2;
+
+     label2:
+        r1.<javax.sql.rowset.BaseRowSet: java.lang.String dataSource> = r0;
+
+     label3:
+        r1.<javax.sql.rowset.BaseRowSet: java.lang.String URL> = null;
+
+        return;
+    }
+
+    public java.lang.String getUsername()
+    {
+        java.lang.String $r1;
+        javax.sql.rowset.BaseRowSet r0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.lang.String username>;
+
+        return $r1;
+    }
+
+    public void setUsername(java.lang.String)
+    {
+        java.lang.String r0;
+        javax.sql.rowset.BaseRowSet r1;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        r1.<javax.sql.rowset.BaseRowSet: java.lang.String username> = null;
+
+        goto label2;
+
+     label1:
+        r1.<javax.sql.rowset.BaseRowSet: java.lang.String username> = r0;
+
+     label2:
+        return;
+    }
+
+    public java.lang.String getPassword()
+    {
+        java.lang.String $r1;
+        javax.sql.rowset.BaseRowSet r0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.lang.String password>;
+
+        return $r1;
+    }
+
+    public void setPassword(java.lang.String)
+    {
+        java.lang.String r0;
+        javax.sql.rowset.BaseRowSet r1;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        r1.<javax.sql.rowset.BaseRowSet: java.lang.String password> = null;
+
+        goto label2;
+
+     label1:
+        r1.<javax.sql.rowset.BaseRowSet: java.lang.String password> = r0;
+
+     label2:
+        return;
+    }
+
+    public void setType(int) throws java.sql.SQLException
+    {
+        int i0;
+        java.sql.SQLException $r1;
+        javax.sql.rowset.BaseRowSet r0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        if i0 == 1003 goto label1;
+
+        if i0 == 1004 goto label1;
+
+        if i0 == 1005 goto label1;
+
+        $r1 = new java.sql.SQLException;
+
+        specialinvoke $r1.<java.sql.SQLException: void <init>(java.lang.String)>("Invalid type of RowSet set. Must be either ResultSet.TYPE_FORWARD_ONLY or ResultSet.TYPE_SCROLL_INSENSITIVE or ResultSet.TYPE_SCROLL_SENSITIVE.");
+
+        throw $r1;
+
+     label1:
+        r0.<javax.sql.rowset.BaseRowSet: int rowSetType> = i0;
+
+        return;
+    }
+
+    public int getType() throws java.sql.SQLException
+    {
+        int $i0;
+        javax.sql.rowset.BaseRowSet r0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        $i0 = r0.<javax.sql.rowset.BaseRowSet: int rowSetType>;
+
+        return $i0;
+    }
+
+    public void setConcurrency(int) throws java.sql.SQLException
+    {
+        int i0;
+        java.sql.SQLException $r1;
+        javax.sql.rowset.BaseRowSet r0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        if i0 == 1007 goto label1;
+
+        if i0 == 1008 goto label1;
+
+        $r1 = new java.sql.SQLException;
+
+        specialinvoke $r1.<java.sql.SQLException: void <init>(java.lang.String)>("Invalid concurrency set. Must be either ResultSet.CONCUR_READ_ONLY or ResultSet.CONCUR_UPDATABLE.");
+
+        throw $r1;
+
+     label1:
+        r0.<javax.sql.rowset.BaseRowSet: int concurrency> = i0;
+
+        return;
+    }
+
+    public boolean isReadOnly()
+    {
+        javax.sql.rowset.BaseRowSet r0;
+        boolean $z0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        $z0 = r0.<javax.sql.rowset.BaseRowSet: boolean readOnly>;
+
+        return $z0;
+    }
+
+    public void setReadOnly(boolean)
+    {
+        javax.sql.rowset.BaseRowSet r0;
+        boolean z0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        z0 := @parameter0: boolean;
+
+        r0.<javax.sql.rowset.BaseRowSet: boolean readOnly> = z0;
+
+        return;
+    }
+
+    public int getTransactionIsolation()
+    {
+        int $i0;
+        javax.sql.rowset.BaseRowSet r0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        $i0 = r0.<javax.sql.rowset.BaseRowSet: int isolation>;
+
+        return $i0;
+    }
+
+    public void setTransactionIsolation(int) throws java.sql.SQLException
+    {
+        int i0;
+        java.sql.SQLException $r1;
+        javax.sql.rowset.BaseRowSet r0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        if i0 == 0 goto label1;
+
+        if i0 == 2 goto label1;
+
+        if i0 == 1 goto label1;
+
+        if i0 == 4 goto label1;
+
+        if i0 == 8 goto label1;
+
+        $r1 = new java.sql.SQLException;
+
+        specialinvoke $r1.<java.sql.SQLException: void <init>(java.lang.String)>("Invalid transaction isolation set. Must be either Connection.TRANSACTION_NONE or Connection.TRANSACTION_READ_UNCOMMITTED or Connection.TRANSACTION_READ_COMMITTED or Connection.RRANSACTION_REPEATABLE_READ or Connection.TRANSACTION_SERIALIZABLE");
+
+        throw $r1;
+
+     label1:
+        r0.<javax.sql.rowset.BaseRowSet: int isolation> = i0;
+
+        return;
+    }
+
+    public java.util.Map getTypeMap()
+    {
+        javax.sql.rowset.BaseRowSet r0;
+        java.util.Map $r1;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.util.Map map>;
+
+        return $r1;
+    }
+
+    public void setTypeMap(java.util.Map)
+    {
+        javax.sql.rowset.BaseRowSet r0;
+        java.util.Map r1;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        r1 := @parameter0: java.util.Map;
+
+        r0.<javax.sql.rowset.BaseRowSet: java.util.Map map> = r1;
+
+        return;
+    }
+
+    public int getMaxFieldSize() throws java.sql.SQLException
+    {
+        int $i0;
+        javax.sql.rowset.BaseRowSet r0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        $i0 = r0.<javax.sql.rowset.BaseRowSet: int maxFieldSize>;
+
+        return $i0;
+    }
+
+    public void setMaxFieldSize(int) throws java.sql.SQLException
+    {
+        java.sql.SQLException $r1;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0;
+        java.lang.StringBuilder $r2, $r3, $r4;
+        java.lang.String $r5;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 0 goto label1;
+
+        $r1 = new java.sql.SQLException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid max field size set. Cannot be of value: ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.sql.SQLException: void <init>(java.lang.String)>($r5);
+
+        throw $r1;
+
+     label1:
+        r0.<javax.sql.rowset.BaseRowSet: int maxFieldSize> = i0;
+
+        return;
+    }
+
+    public int getMaxRows() throws java.sql.SQLException
+    {
+        int $i0;
+        javax.sql.rowset.BaseRowSet r0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        $i0 = r0.<javax.sql.rowset.BaseRowSet: int maxRows>;
+
+        return $i0;
+    }
+
+    public void setMaxRows(int) throws java.sql.SQLException
+    {
+        java.sql.SQLException $r1, $r2;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, $i1;
+        java.lang.StringBuilder $r3, $r4, $r5;
+        java.lang.String $r6;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 0 goto label1;
+
+        $r2 = new java.sql.SQLException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid max row size set. Cannot be of value: ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>($r6);
+
+        throw $r2;
+
+     label1:
+        $i1 = virtualinvoke r0.<javax.sql.rowset.BaseRowSet: int getFetchSize()>();
+
+        if i0 >= $i1 goto label2;
+
+        $r1 = new java.sql.SQLException;
+
+        specialinvoke $r1.<java.sql.SQLException: void <init>(java.lang.String)>("Invalid max row size set. Cannot be less than the fetchSize.");
+
+        throw $r1;
+
+     label2:
+        r0.<javax.sql.rowset.BaseRowSet: int maxRows> = i0;
+
+        return;
+    }
+
+    public void setEscapeProcessing(boolean) throws java.sql.SQLException
+    {
+        javax.sql.rowset.BaseRowSet r0;
+        boolean z0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        z0 := @parameter0: boolean;
+
+        r0.<javax.sql.rowset.BaseRowSet: boolean escapeProcessing> = z0;
+
+        return;
+    }
+
+    public int getQueryTimeout() throws java.sql.SQLException
+    {
+        int $i0;
+        javax.sql.rowset.BaseRowSet r0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        $i0 = r0.<javax.sql.rowset.BaseRowSet: int queryTimeout>;
+
+        return $i0;
+    }
+
+    public void setQueryTimeout(int) throws java.sql.SQLException
+    {
+        java.sql.SQLException $r1;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0;
+        java.lang.StringBuilder $r2, $r3, $r4;
+        java.lang.String $r5;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 0 goto label1;
+
+        $r1 = new java.sql.SQLException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid query timeout value set. Cannot be of value: ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.sql.SQLException: void <init>(java.lang.String)>($r5);
+
+        throw $r1;
+
+     label1:
+        r0.<javax.sql.rowset.BaseRowSet: int queryTimeout> = i0;
+
+        return;
+    }
+
+    public boolean getShowDeleted() throws java.sql.SQLException
+    {
+        javax.sql.rowset.BaseRowSet r0;
+        boolean $z0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        $z0 = r0.<javax.sql.rowset.BaseRowSet: boolean showDeleted>;
+
+        return $z0;
+    }
+
+    public void setShowDeleted(boolean) throws java.sql.SQLException
+    {
+        javax.sql.rowset.BaseRowSet r0;
+        boolean z0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        z0 := @parameter0: boolean;
+
+        r0.<javax.sql.rowset.BaseRowSet: boolean showDeleted> = z0;
+
+        return;
+    }
+
+    public boolean getEscapeProcessing() throws java.sql.SQLException
+    {
+        javax.sql.rowset.BaseRowSet r0;
+        boolean $z0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        $z0 = r0.<javax.sql.rowset.BaseRowSet: boolean escapeProcessing>;
+
+        return $z0;
+    }
+
+    public void setFetchDirection(int) throws java.sql.SQLException
+    {
+        java.sql.SQLException $r1;
+        javax.sql.rowset.BaseRowSet r0;
+        int $i0, i1;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i1 := @parameter0: int;
+
+        $i0 = virtualinvoke r0.<javax.sql.rowset.BaseRowSet: int getType()>();
+
+        if $i0 != 1003 goto label1;
+
+        if i1 != 1000 goto label2;
+
+     label1:
+        if i1 == 1000 goto label3;
+
+        if i1 == 1001 goto label3;
+
+        if i1 == 1002 goto label3;
+
+     label2:
+        $r1 = new java.sql.SQLException;
+
+        specialinvoke $r1.<java.sql.SQLException: void <init>(java.lang.String)>("Invalid Fetch Direction");
+
+        throw $r1;
+
+     label3:
+        r0.<javax.sql.rowset.BaseRowSet: int fetchDir> = i1;
+
+        return;
+    }
+
+    public int getFetchDirection() throws java.sql.SQLException
+    {
+        int $i0;
+        javax.sql.rowset.BaseRowSet r0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        $i0 = r0.<javax.sql.rowset.BaseRowSet: int fetchDir>;
+
+        return $i0;
+    }
+
+    public void setFetchSize(int) throws java.sql.SQLException
+    {
+        java.sql.SQLException $r1;
+        javax.sql.rowset.BaseRowSet r0;
+        int $i0, i1, $i2;
+        java.lang.StringBuilder $r2, $r3, $r4;
+        java.lang.String $r5;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i1 := @parameter0: int;
+
+        $i0 = virtualinvoke r0.<javax.sql.rowset.BaseRowSet: int getMaxRows()>();
+
+        if $i0 != 0 goto label1;
+
+        if i1 < 0 goto label1;
+
+        r0.<javax.sql.rowset.BaseRowSet: int fetchSize> = i1;
+
+        return;
+
+     label1:
+        if i1 < 0 goto label2;
+
+        $i2 = virtualinvoke r0.<javax.sql.rowset.BaseRowSet: int getMaxRows()>();
+
+        if i1 <= $i2 goto label3;
+
+     label2:
+        $r1 = new java.sql.SQLException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid fetch size set. Cannot be of value: ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.sql.SQLException: void <init>(java.lang.String)>($r5);
+
+        throw $r1;
+
+     label3:
+        r0.<javax.sql.rowset.BaseRowSet: int fetchSize> = i1;
+
+        return;
+    }
+
+    public int getFetchSize() throws java.sql.SQLException
+    {
+        int $i0;
+        javax.sql.rowset.BaseRowSet r0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        $i0 = r0.<javax.sql.rowset.BaseRowSet: int fetchSize>;
+
+        return $i0;
+    }
+
+    public int getConcurrency() throws java.sql.SQLException
+    {
+        int $i0;
+        javax.sql.rowset.BaseRowSet r0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        $i0 = r0.<javax.sql.rowset.BaseRowSet: int concurrency>;
+
+        return $i0;
+    }
+
+    private void checkParamIndex(int) throws java.sql.SQLException
+    {
+        int i0;
+        java.sql.SQLException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 1 goto label1;
+
+        $r0 = new java.sql.SQLException;
+
+        specialinvoke $r0.<java.sql.SQLException: void <init>(java.lang.String)>("Invalid Parameter Index");
+
+        throw $r0;
+
+     label1:
+        return;
+    }
+
+    public void setNull(int, int) throws java.sql.SQLException
+    {
+        java.lang.Object[] r1;
+        java.lang.Integer $r2, $r5;
+        java.sql.SQLException $r6;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, i1, $i2;
+        java.util.Hashtable $r3, $r4;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        r1 = newarray (java.lang.Object)[2];
+
+        r1[0] = null;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i1);
+
+        r1[1] = $r2;
+
+        $r3 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r3 != null goto label1;
+
+        $r6 = new java.sql.SQLException;
+
+        specialinvoke $r6.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setNull");
+
+        throw $r6;
+
+     label1:
+        $r4 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i2 = i0 - 1;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        virtualinvoke $r4.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r5, r1);
+
+        return;
+    }
+
+    public void setNull(int, int, java.lang.String) throws java.sql.SQLException
+    {
+        java.lang.Object[] r1;
+        java.lang.Integer $r2, $r6;
+        java.sql.SQLException $r7;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, i1, $i2;
+        java.lang.String r3;
+        java.util.Hashtable $r4, $r5;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        r3 := @parameter2: java.lang.String;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        r1 = newarray (java.lang.Object)[3];
+
+        r1[0] = null;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i1);
+
+        r1[1] = $r2;
+
+        r1[2] = r3;
+
+        $r4 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r4 != null goto label1;
+
+        $r7 = new java.sql.SQLException;
+
+        specialinvoke $r7.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setNull");
+
+        throw $r7;
+
+     label1:
+        $r5 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i2 = i0 - 1;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        virtualinvoke $r5.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r6, r1);
+
+        return;
+    }
+
+    public void setBoolean(int, boolean) throws java.sql.SQLException
+    {
+        java.lang.Integer $r3;
+        java.sql.SQLException $r5;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, $i1;
+        java.lang.Boolean $r4;
+        java.util.Hashtable $r1, $r2;
+        boolean z0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        z0 := @parameter1: boolean;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.sql.SQLException;
+
+        specialinvoke $r5.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setNull");
+
+        throw $r5;
+
+     label1:
+        $r2 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i1 = i0 - 1;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r4 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(z0);
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, $r4);
+
+        return;
+    }
+
+    public void setByte(int, byte) throws java.sql.SQLException
+    {
+        java.lang.Integer $r3;
+        java.sql.SQLException $r5;
+        byte b2;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, $i1;
+        java.lang.Byte $r4;
+        java.util.Hashtable $r1, $r2;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        b2 := @parameter1: byte;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.sql.SQLException;
+
+        specialinvoke $r5.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setByte");
+
+        throw $r5;
+
+     label1:
+        $r2 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i1 = i0 - 1;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r4 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>(b2);
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, $r4);
+
+        return;
+    }
+
+    public void setShort(int, short) throws java.sql.SQLException
+    {
+        java.lang.Integer $r3;
+        short s2;
+        java.sql.SQLException $r5;
+        java.lang.Short $r4;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, $i1;
+        java.util.Hashtable $r1, $r2;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        s2 := @parameter1: short;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.sql.SQLException;
+
+        specialinvoke $r5.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setShort");
+
+        throw $r5;
+
+     label1:
+        $r2 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i1 = i0 - 1;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r4 = staticinvoke <java.lang.Short: java.lang.Short valueOf(short)>(s2);
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, $r4);
+
+        return;
+    }
+
+    public void setInt(int, int) throws java.sql.SQLException
+    {
+        java.lang.Integer $r3, $r4;
+        java.sql.SQLException $r5;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, $i1, i2;
+        java.util.Hashtable $r1, $r2;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.sql.SQLException;
+
+        specialinvoke $r5.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setInt");
+
+        throw $r5;
+
+     label1:
+        $r2 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i1 = i0 - 1;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i2);
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, $r4);
+
+        return;
+    }
+
+    public void setLong(int, long) throws java.sql.SQLException
+    {
+        long l2;
+        java.lang.Integer $r3;
+        java.sql.SQLException $r5;
+        java.lang.Long $r4;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, $i1;
+        java.util.Hashtable $r1, $r2;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        l2 := @parameter1: long;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.sql.SQLException;
+
+        specialinvoke $r5.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setLong");
+
+        throw $r5;
+
+     label1:
+        $r2 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i1 = i0 - 1;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r4 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>(l2);
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, $r4);
+
+        return;
+    }
+
+    public void setFloat(int, float) throws java.sql.SQLException
+    {
+        java.lang.Float $r4;
+        java.lang.Integer $r3;
+        java.sql.SQLException $r5;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, $i1;
+        float f0;
+        java.util.Hashtable $r1, $r2;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        f0 := @parameter1: float;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.sql.SQLException;
+
+        specialinvoke $r5.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setFloat");
+
+        throw $r5;
+
+     label1:
+        $r2 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i1 = i0 - 1;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r4 = staticinvoke <java.lang.Float: java.lang.Float valueOf(float)>(f0);
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, $r4);
+
+        return;
+    }
+
+    public void setDouble(int, double) throws java.sql.SQLException
+    {
+        java.lang.Double $r4;
+        java.lang.Integer $r3;
+        java.sql.SQLException $r5;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, $i1;
+        java.util.Hashtable $r1, $r2;
+        double d0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        d0 := @parameter1: double;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.sql.SQLException;
+
+        specialinvoke $r5.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setDouble");
+
+        throw $r5;
+
+     label1:
+        $r2 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i1 = i0 - 1;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r4 = staticinvoke <java.lang.Double: java.lang.Double valueOf(double)>(d0);
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, $r4);
+
+        return;
+    }
+
+    public void setBigDecimal(int, java.math.BigDecimal) throws java.sql.SQLException
+    {
+        java.lang.Integer $r3;
+        java.math.BigDecimal r4;
+        java.sql.SQLException $r5;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, $i1;
+        java.util.Hashtable $r1, $r2;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r4 := @parameter1: java.math.BigDecimal;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.sql.SQLException;
+
+        specialinvoke $r5.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setBigDecimal");
+
+        throw $r5;
+
+     label1:
+        $r2 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i1 = i0 - 1;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, r4);
+
+        return;
+    }
+
+    public void setString(int, java.lang.String) throws java.sql.SQLException
+    {
+        java.lang.Integer $r3;
+        java.sql.SQLException $r5;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, $i1;
+        java.lang.String r4;
+        java.util.Hashtable $r1, $r2;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r4 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.sql.SQLException;
+
+        specialinvoke $r5.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setString");
+
+        throw $r5;
+
+     label1:
+        $r2 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i1 = i0 - 1;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, r4);
+
+        return;
+    }
+
+    public void setBytes(int, byte[]) throws java.sql.SQLException
+    {
+        byte[] r4;
+        java.lang.Integer $r3;
+        java.sql.SQLException $r5;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, $i1;
+        java.util.Hashtable $r1, $r2;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r4 := @parameter1: byte[];
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.sql.SQLException;
+
+        specialinvoke $r5.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setBytes");
+
+        throw $r5;
+
+     label1:
+        $r2 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i1 = i0 - 1;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, r4);
+
+        return;
+    }
+
+    public void setDate(int, java.sql.Date) throws java.sql.SQLException
+    {
+        java.lang.Integer $r3;
+        java.sql.Date r4;
+        java.sql.SQLException $r5;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, $i1;
+        java.util.Hashtable $r1, $r2;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r4 := @parameter1: java.sql.Date;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.sql.SQLException;
+
+        specialinvoke $r5.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setDate");
+
+        throw $r5;
+
+     label1:
+        $r2 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i1 = i0 - 1;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, r4);
+
+        return;
+    }
+
+    public void setTime(int, java.sql.Time) throws java.sql.SQLException
+    {
+        java.sql.Time r4;
+        java.lang.Integer $r3;
+        java.sql.SQLException $r5;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, $i1;
+        java.util.Hashtable $r1, $r2;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r4 := @parameter1: java.sql.Time;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.sql.SQLException;
+
+        specialinvoke $r5.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setTime");
+
+        throw $r5;
+
+     label1:
+        $r2 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i1 = i0 - 1;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, r4);
+
+        return;
+    }
+
+    public void setTimestamp(int, java.sql.Timestamp) throws java.sql.SQLException
+    {
+        java.sql.Timestamp r4;
+        java.lang.Integer $r3;
+        java.sql.SQLException $r5;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, $i1;
+        java.util.Hashtable $r1, $r2;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r4 := @parameter1: java.sql.Timestamp;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.sql.SQLException;
+
+        specialinvoke $r5.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setTimestamp");
+
+        throw $r5;
+
+     label1:
+        $r2 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i1 = i0 - 1;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, r4);
+
+        return;
+    }
+
+    public void setAsciiStream(int, java.io.InputStream, int) throws java.sql.SQLException
+    {
+        java.lang.Object[] r1;
+        java.lang.Integer $r3, $r4, $r7;
+        java.sql.SQLException $r8;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, i1, $i2;
+        java.util.Hashtable $r5, $r6;
+        java.io.InputStream r2;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.io.InputStream;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        r1 = newarray (java.lang.Object)[3];
+
+        r1[0] = r2;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i1);
+
+        r1[1] = $r3;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(2);
+
+        r1[2] = $r4;
+
+        $r5 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r5 != null goto label1;
+
+        $r8 = new java.sql.SQLException;
+
+        specialinvoke $r8.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setAsciiStream");
+
+        throw $r8;
+
+     label1:
+        $r6 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i2 = i0 - 1;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        virtualinvoke $r6.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r7, r1);
+
+        return;
+    }
+
+    public void setAsciiStream(int, java.io.InputStream) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        int i0;
+        java.io.InputStream r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.io.InputStream;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setBinaryStream(int, java.io.InputStream, int) throws java.sql.SQLException
+    {
+        java.lang.Object[] r1;
+        java.lang.Integer $r3, $r4, $r7;
+        java.sql.SQLException $r8;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, i1, $i2;
+        java.util.Hashtable $r5, $r6;
+        java.io.InputStream r2;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.io.InputStream;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        r1 = newarray (java.lang.Object)[3];
+
+        r1[0] = r2;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i1);
+
+        r1[1] = $r3;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(1);
+
+        r1[2] = $r4;
+
+        $r5 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r5 != null goto label1;
+
+        $r8 = new java.sql.SQLException;
+
+        specialinvoke $r8.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setBinaryStream");
+
+        throw $r8;
+
+     label1:
+        $r6 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i2 = i0 - 1;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        virtualinvoke $r6.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r7, r1);
+
+        return;
+    }
+
+    public void setBinaryStream(int, java.io.InputStream) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        int i0;
+        java.io.InputStream r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.io.InputStream;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setUnicodeStream(int, java.io.InputStream, int) throws java.sql.SQLException
+    {
+        java.lang.Object[] r1;
+        java.lang.Integer $r3, $r4, $r7;
+        java.sql.SQLException $r8;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, i1, $i2;
+        java.util.Hashtable $r5, $r6;
+        java.io.InputStream r2;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.io.InputStream;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        r1 = newarray (java.lang.Object)[3];
+
+        r1[0] = r2;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i1);
+
+        r1[1] = $r3;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        r1[2] = $r4;
+
+        $r5 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r5 != null goto label1;
+
+        $r8 = new java.sql.SQLException;
+
+        specialinvoke $r8.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setUnicodeStream");
+
+        throw $r8;
+
+     label1:
+        $r6 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i2 = i0 - 1;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        virtualinvoke $r6.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r7, r1);
+
+        return;
+    }
+
+    public void setCharacterStream(int, java.io.Reader, int) throws java.sql.SQLException
+    {
+        java.lang.Object[] r1;
+        java.io.Reader r2;
+        java.lang.Integer $r3, $r6;
+        java.sql.SQLException $r7;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, i1, $i2;
+        java.util.Hashtable $r4, $r5;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.io.Reader;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        r1 = newarray (java.lang.Object)[2];
+
+        r1[0] = r2;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i1);
+
+        r1[1] = $r3;
+
+        $r4 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r4 != null goto label1;
+
+        $r7 = new java.sql.SQLException;
+
+        specialinvoke $r7.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setCharacterStream");
+
+        throw $r7;
+
+     label1:
+        $r5 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i2 = i0 - 1;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        virtualinvoke $r5.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r6, r1);
+
+        return;
+    }
+
+    public void setCharacterStream(int, java.io.Reader) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        int i0;
+        java.io.Reader r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.io.Reader;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setObject(int, java.lang.Object, int, int) throws java.sql.SQLException
+    {
+        java.lang.Object[] r1;
+        java.lang.Integer $r3, $r4, $r7;
+        java.sql.SQLException $r8;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, i1, i2, $i3;
+        java.lang.Object r2;
+        java.util.Hashtable $r5, $r6;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.lang.Object;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        r1 = newarray (java.lang.Object)[3];
+
+        r1[0] = r2;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i1);
+
+        r1[1] = $r3;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i2);
+
+        r1[2] = $r4;
+
+        $r5 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r5 != null goto label1;
+
+        $r8 = new java.sql.SQLException;
+
+        specialinvoke $r8.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setObject");
+
+        throw $r8;
+
+     label1:
+        $r6 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i3 = i0 - 1;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i3);
+
+        virtualinvoke $r6.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r7, r1);
+
+        return;
+    }
+
+    public void setObject(int, java.lang.Object, int) throws java.sql.SQLException
+    {
+        java.lang.Object[] r1;
+        java.lang.Integer $r3, $r6;
+        java.sql.SQLException $r7;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, i1, $i2;
+        java.lang.Object r2;
+        java.util.Hashtable $r4, $r5;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.lang.Object;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        r1 = newarray (java.lang.Object)[2];
+
+        r1[0] = r2;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i1);
+
+        r1[1] = $r3;
+
+        $r4 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r4 != null goto label1;
+
+        $r7 = new java.sql.SQLException;
+
+        specialinvoke $r7.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setObject");
+
+        throw $r7;
+
+     label1:
+        $r5 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i2 = i0 - 1;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        virtualinvoke $r5.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r6, r1);
+
+        return;
+    }
+
+    public void setObject(int, java.lang.Object) throws java.sql.SQLException
+    {
+        java.lang.Integer $r3;
+        java.sql.SQLException $r5;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, $i1;
+        java.lang.Object r4;
+        java.util.Hashtable $r1, $r2;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r4 := @parameter1: java.lang.Object;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.sql.SQLException;
+
+        specialinvoke $r5.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setObject");
+
+        throw $r5;
+
+     label1:
+        $r2 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i1 = i0 - 1;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, r4);
+
+        return;
+    }
+
+    public void setRef(int, java.sql.Ref) throws java.sql.SQLException
+    {
+        java.lang.Integer $r3;
+        java.sql.SQLException $r6;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, $i1;
+        javax.sql.rowset.serial.SerialRef $r4;
+        java.sql.Ref r5;
+        java.util.Hashtable $r1, $r2;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r5 := @parameter1: java.sql.Ref;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r1 != null goto label1;
+
+        $r6 = new java.sql.SQLException;
+
+        specialinvoke $r6.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setRef");
+
+        throw $r6;
+
+     label1:
+        $r2 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i1 = i0 - 1;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r4 = new javax.sql.rowset.serial.SerialRef;
+
+        specialinvoke $r4.<javax.sql.rowset.serial.SerialRef: void <init>(java.sql.Ref)>(r5);
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, $r4);
+
+        return;
+    }
+
+    public void setBlob(int, java.sql.Blob) throws java.sql.SQLException
+    {
+        javax.sql.rowset.serial.SerialBlob $r4;
+        java.lang.Integer $r3;
+        java.sql.SQLException $r6;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, $i1;
+        java.sql.Blob r5;
+        java.util.Hashtable $r1, $r2;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r5 := @parameter1: java.sql.Blob;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r1 != null goto label1;
+
+        $r6 = new java.sql.SQLException;
+
+        specialinvoke $r6.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setBlob");
+
+        throw $r6;
+
+     label1:
+        $r2 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i1 = i0 - 1;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r4 = new javax.sql.rowset.serial.SerialBlob;
+
+        specialinvoke $r4.<javax.sql.rowset.serial.SerialBlob: void <init>(java.sql.Blob)>(r5);
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, $r4);
+
+        return;
+    }
+
+    public void setClob(int, java.sql.Clob) throws java.sql.SQLException
+    {
+        javax.sql.rowset.serial.SerialClob $r4;
+        java.lang.Integer $r3;
+        java.sql.SQLException $r6;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, $i1;
+        java.sql.Clob r5;
+        java.util.Hashtable $r1, $r2;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r5 := @parameter1: java.sql.Clob;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r1 != null goto label1;
+
+        $r6 = new java.sql.SQLException;
+
+        specialinvoke $r6.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setClob");
+
+        throw $r6;
+
+     label1:
+        $r2 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i1 = i0 - 1;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r4 = new javax.sql.rowset.serial.SerialClob;
+
+        specialinvoke $r4.<javax.sql.rowset.serial.SerialClob: void <init>(java.sql.Clob)>(r5);
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, $r4);
+
+        return;
+    }
+
+    public void setArray(int, java.sql.Array) throws java.sql.SQLException
+    {
+        java.lang.Integer $r3;
+        java.sql.Array r5;
+        java.sql.SQLException $r6;
+        javax.sql.rowset.serial.SerialArray $r4;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, $i1;
+        java.util.Hashtable $r1, $r2;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r5 := @parameter1: java.sql.Array;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r1 != null goto label1;
+
+        $r6 = new java.sql.SQLException;
+
+        specialinvoke $r6.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setArray");
+
+        throw $r6;
+
+     label1:
+        $r2 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i1 = i0 - 1;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r4 = new javax.sql.rowset.serial.SerialArray;
+
+        specialinvoke $r4.<javax.sql.rowset.serial.SerialArray: void <init>(java.sql.Array)>(r5);
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, $r4);
+
+        return;
+    }
+
+    public void setDate(int, java.sql.Date, java.util.Calendar) throws java.sql.SQLException
+    {
+        java.lang.Object[] r1;
+        java.lang.Integer $r6;
+        java.sql.Date r2;
+        java.sql.SQLException $r7;
+        java.util.Calendar r3;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, $i1;
+        java.util.Hashtable $r4, $r5;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.sql.Date;
+
+        r3 := @parameter2: java.util.Calendar;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        r1 = newarray (java.lang.Object)[2];
+
+        r1[0] = r2;
+
+        r1[1] = r3;
+
+        $r4 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r4 != null goto label1;
+
+        $r7 = new java.sql.SQLException;
+
+        specialinvoke $r7.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setDate");
+
+        throw $r7;
+
+     label1:
+        $r5 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i1 = i0 - 1;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        virtualinvoke $r5.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r6, r1);
+
+        return;
+    }
+
+    public void setTime(int, java.sql.Time, java.util.Calendar) throws java.sql.SQLException
+    {
+        java.lang.Object[] r1;
+        java.sql.Time r2;
+        java.lang.Integer $r6;
+        java.sql.SQLException $r7;
+        java.util.Calendar r3;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, $i1;
+        java.util.Hashtable $r4, $r5;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.sql.Time;
+
+        r3 := @parameter2: java.util.Calendar;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        r1 = newarray (java.lang.Object)[2];
+
+        r1[0] = r2;
+
+        r1[1] = r3;
+
+        $r4 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r4 != null goto label1;
+
+        $r7 = new java.sql.SQLException;
+
+        specialinvoke $r7.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setTime");
+
+        throw $r7;
+
+     label1:
+        $r5 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i1 = i0 - 1;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        virtualinvoke $r5.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r6, r1);
+
+        return;
+    }
+
+    public void setTimestamp(int, java.sql.Timestamp, java.util.Calendar) throws java.sql.SQLException
+    {
+        java.lang.Object[] r1;
+        java.sql.Timestamp r2;
+        java.lang.Integer $r6;
+        java.sql.SQLException $r7;
+        java.util.Calendar r3;
+        javax.sql.rowset.BaseRowSet r0;
+        int i0, $i1;
+        java.util.Hashtable $r4, $r5;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.sql.Timestamp;
+
+        r3 := @parameter2: java.util.Calendar;
+
+        specialinvoke r0.<javax.sql.rowset.BaseRowSet: void checkParamIndex(int)>(i0);
+
+        r1 = newarray (java.lang.Object)[2];
+
+        r1[0] = r2;
+
+        r1[1] = r3;
+
+        $r4 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r4 != null goto label1;
+
+        $r7 = new java.sql.SQLException;
+
+        specialinvoke $r7.<java.sql.SQLException: void <init>(java.lang.String)>("Set initParams() before setTimestamp");
+
+        throw $r7;
+
+     label1:
+        $r5 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i1 = i0 - 1;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        virtualinvoke $r5.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r6, r1);
+
+        return;
+    }
+
+    public void clearParameters() throws java.sql.SQLException
+    {
+        java.util.Hashtable $r1;
+        javax.sql.rowset.BaseRowSet r0;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        virtualinvoke $r1.<java.util.Hashtable: void clear()>();
+
+        return;
+    }
+
+    public java.lang.Object[] getParams() throws java.sql.SQLException
+    {
+        java.lang.Object[] r14, r15;
+        java.lang.Integer $r5;
+        java.sql.SQLException $r8;
+        javax.sql.rowset.BaseRowSet r0;
+        int $i0, $i1, $i2, $i3, i4;
+        java.lang.String $r12;
+        java.util.Hashtable $r1, $r2, $r3, $r4, $r13;
+        java.lang.Object $r6, $r7;
+        java.lang.StringBuilder $r9, $r10, $r11;
+
+        r0 := @this: javax.sql.rowset.BaseRowSet;
+
+        $r1 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        if $r1 != null goto label1;
+
+        virtualinvoke r0.<javax.sql.rowset.BaseRowSet: void initParams()>();
+
+        $r13 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i3 = virtualinvoke $r13.<java.util.Hashtable: int size()>();
+
+        r14 = newarray (java.lang.Object)[$i3];
+
+        return r14;
+
+     label1:
+        $r2 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i0 = virtualinvoke $r2.<java.util.Hashtable: int size()>();
+
+        r15 = newarray (java.lang.Object)[$i0];
+
+        i4 = 0;
+
+     label2:
+        $r3 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $i1 = virtualinvoke $r3.<java.util.Hashtable: int size()>();
+
+        if i4 >= $i1 goto label4;
+
+        $r4 = r0.<javax.sql.rowset.BaseRowSet: java.util.Hashtable params>;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i4);
+
+        $r6 = virtualinvoke $r4.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r5);
+
+        r15[i4] = $r6;
+
+        $r7 = r15[i4];
+
+        if $r7 != null goto label3;
+
+        $r8 = new java.sql.SQLException;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("missing parameter: ");
+
+        $i2 = i4 + 1;
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<java.sql.SQLException: void <init>(java.lang.String)>($r12);
+
+        throw $r8;
+
+     label3:
+        i4 = i4 + 1;
+
+        goto label2;
+
+     label4:
+        return r15;
+    }
+
+    public void setNull(java.lang.String, int) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        int i0;
+        java.lang.String r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setNull(java.lang.String, int, java.lang.String) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        int i0;
+        java.lang.String r2, r3;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        r3 := @parameter2: java.lang.String;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setBoolean(java.lang.String, boolean) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.lang.String r2;
+        boolean z0;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        z0 := @parameter1: boolean;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setByte(java.lang.String, byte) throws java.sql.SQLException
+    {
+        byte b0;
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.lang.String r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        b0 := @parameter1: byte;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setShort(java.lang.String, short) throws java.sql.SQLException
+    {
+        short s0;
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.lang.String r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        s0 := @parameter1: short;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setInt(java.lang.String, int) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        int i0;
+        java.lang.String r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setLong(java.lang.String, long) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        long l0;
+        java.lang.String r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        l0 := @parameter1: long;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setFloat(java.lang.String, float) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        float f0;
+        java.lang.String r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        f0 := @parameter1: float;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setDouble(java.lang.String, double) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.lang.String r2;
+        double d0;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        d0 := @parameter1: double;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setBigDecimal(java.lang.String, java.math.BigDecimal) throws java.sql.SQLException
+    {
+        java.math.BigDecimal r3;
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.lang.String r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.math.BigDecimal;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setString(java.lang.String, java.lang.String) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.lang.String r2, r3;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setBytes(java.lang.String, byte[]) throws java.sql.SQLException
+    {
+        byte[] r3;
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.lang.String r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: byte[];
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setTimestamp(java.lang.String, java.sql.Timestamp) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.sql.Timestamp r3;
+        java.lang.String r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.sql.Timestamp;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setAsciiStream(java.lang.String, java.io.InputStream, int) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        int i0;
+        java.lang.String r2;
+        java.io.InputStream r3;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.io.InputStream;
+
+        i0 := @parameter2: int;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setBinaryStream(java.lang.String, java.io.InputStream, int) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        int i0;
+        java.lang.String r2;
+        java.io.InputStream r3;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.io.InputStream;
+
+        i0 := @parameter2: int;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setCharacterStream(java.lang.String, java.io.Reader, int) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        int i0;
+        java.lang.String r2;
+        java.io.Reader r3;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.io.Reader;
+
+        i0 := @parameter2: int;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setAsciiStream(java.lang.String, java.io.InputStream) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.lang.String r2;
+        java.io.InputStream r3;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.io.InputStream;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setBinaryStream(java.lang.String, java.io.InputStream) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.lang.String r2;
+        java.io.InputStream r3;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.io.InputStream;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setCharacterStream(java.lang.String, java.io.Reader) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.lang.String r2;
+        java.io.Reader r3;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.io.Reader;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setNCharacterStream(int, java.io.Reader) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        int i0;
+        java.io.Reader r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.io.Reader;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setObject(java.lang.String, java.lang.Object, int, int) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        int i0, i1;
+        java.lang.Object r3;
+        java.lang.String r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.Object;
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setObject(java.lang.String, java.lang.Object, int) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        int i0;
+        java.lang.Object r3;
+        java.lang.String r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.Object;
+
+        i0 := @parameter2: int;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setObject(java.lang.String, java.lang.Object) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.lang.Object r3;
+        java.lang.String r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.Object;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setBlob(int, java.io.InputStream, long) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        int i0;
+        long l1;
+        java.io.InputStream r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.io.InputStream;
+
+        l1 := @parameter2: long;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setBlob(int, java.io.InputStream) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        int i0;
+        java.io.InputStream r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.io.InputStream;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setBlob(java.lang.String, java.io.InputStream, long) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        long l0;
+        java.lang.String r2;
+        java.io.InputStream r3;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.io.InputStream;
+
+        l0 := @parameter2: long;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setBlob(java.lang.String, java.sql.Blob) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.lang.String r2;
+        java.sql.Blob r3;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.sql.Blob;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setBlob(java.lang.String, java.io.InputStream) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.lang.String r2;
+        java.io.InputStream r3;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.io.InputStream;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setClob(int, java.io.Reader, long) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        int i0;
+        long l1;
+        java.io.Reader r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.io.Reader;
+
+        l1 := @parameter2: long;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setClob(int, java.io.Reader) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        int i0;
+        java.io.Reader r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.io.Reader;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setClob(java.lang.String, java.io.Reader, long) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        long l0;
+        java.lang.String r2;
+        java.io.Reader r3;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.io.Reader;
+
+        l0 := @parameter2: long;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setClob(java.lang.String, java.sql.Clob) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.lang.String r2;
+        java.sql.Clob r3;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.sql.Clob;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setClob(java.lang.String, java.io.Reader) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.lang.String r2;
+        java.io.Reader r3;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.io.Reader;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setDate(java.lang.String, java.sql.Date) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.lang.String r2;
+        java.sql.Date r3;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.sql.Date;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setDate(java.lang.String, java.sql.Date, java.util.Calendar) throws java.sql.SQLException
+    {
+        java.util.Calendar r4;
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.lang.String r2;
+        java.sql.Date r3;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.sql.Date;
+
+        r4 := @parameter2: java.util.Calendar;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setTime(java.lang.String, java.sql.Time) throws java.sql.SQLException
+    {
+        java.sql.Time r3;
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.lang.String r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.sql.Time;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setTime(java.lang.String, java.sql.Time, java.util.Calendar) throws java.sql.SQLException
+    {
+        java.util.Calendar r4;
+        java.sql.Time r3;
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.lang.String r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.sql.Time;
+
+        r4 := @parameter2: java.util.Calendar;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setTimestamp(java.lang.String, java.sql.Timestamp, java.util.Calendar) throws java.sql.SQLException
+    {
+        java.util.Calendar r4;
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.sql.Timestamp r3;
+        java.lang.String r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.sql.Timestamp;
+
+        r4 := @parameter2: java.util.Calendar;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setSQLXML(int, java.sql.SQLXML) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        int i0;
+        java.sql.SQLXML r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.sql.SQLXML;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setSQLXML(java.lang.String, java.sql.SQLXML) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.sql.SQLXML r3;
+        java.lang.String r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.sql.SQLXML;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setRowId(int, java.sql.RowId) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        int i0;
+        java.sql.RowId r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.sql.RowId;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setRowId(java.lang.String, java.sql.RowId) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.sql.RowId r3;
+        java.lang.String r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.sql.RowId;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setNString(int, java.lang.String) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        int i0;
+        java.lang.String r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.lang.String;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setNString(java.lang.String, java.lang.String) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.lang.String r2, r3;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setNCharacterStream(int, java.io.Reader, long) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        int i0;
+        long l1;
+        java.io.Reader r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.io.Reader;
+
+        l1 := @parameter2: long;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setNCharacterStream(java.lang.String, java.io.Reader, long) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        long l0;
+        java.lang.String r2;
+        java.io.Reader r3;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.io.Reader;
+
+        l0 := @parameter2: long;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setNCharacterStream(java.lang.String, java.io.Reader) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.lang.String r2;
+        java.io.Reader r3;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.io.Reader;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setNClob(java.lang.String, java.sql.NClob) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.lang.String r2;
+        java.sql.NClob r3;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.sql.NClob;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setNClob(java.lang.String, java.io.Reader, long) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        long l0;
+        java.lang.String r2;
+        java.io.Reader r3;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.io.Reader;
+
+        l0 := @parameter2: long;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setNClob(java.lang.String, java.io.Reader) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        java.lang.String r2;
+        java.io.Reader r3;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.io.Reader;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setNClob(int, java.io.Reader, long) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        int i0;
+        long l1;
+        java.io.Reader r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.io.Reader;
+
+        l1 := @parameter2: long;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setNClob(int, java.sql.NClob) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        int i0;
+        java.sql.NClob r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.sql.NClob;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setNClob(int, java.io.Reader) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        javax.sql.rowset.BaseRowSet r1;
+        int i0;
+        java.io.Reader r2;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.io.Reader;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public void setURL(int, java.net.URL) throws java.sql.SQLException
+    {
+        java.sql.SQLFeatureNotSupportedException $r0;
+        java.net.URL r2;
+        javax.sql.rowset.BaseRowSet r1;
+        int i0;
+
+        r1 := @this: javax.sql.rowset.BaseRowSet;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.net.URL;
+
+        $r0 = new java.sql.SQLFeatureNotSupportedException;
+
+        specialinvoke $r0.<java.sql.SQLFeatureNotSupportedException: void <init>(java.lang.String)>("Feature not supported");
+
+        throw $r0;
+    }
+
+    public static void <clinit>()
+    {
+        <javax.sql.rowset.BaseRowSet: long serialVersionUID> = 4886719666485113312L;
+
+        <javax.sql.rowset.BaseRowSet: int ASCII_STREAM_PARAM> = 2;
+
+        <javax.sql.rowset.BaseRowSet: int BINARY_STREAM_PARAM> = 1;
+
+        <javax.sql.rowset.BaseRowSet: int UNICODE_STREAM_PARAM> = 0;
+
+        return;
+    }
+}

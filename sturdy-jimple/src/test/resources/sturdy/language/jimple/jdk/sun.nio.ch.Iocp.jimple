@@ -1,0 +1,947 @@
+class sun.nio.ch.Iocp extends sun.nio.ch.AsynchronousChannelGroupImpl
+{
+    private static final sun.misc.Unsafe unsafe;
+    private static final long INVALID_HANDLE_VALUE;
+    private static final boolean supportsThreadAgnosticIo;
+    private final java.util.concurrent.locks.ReadWriteLock keyToChannelLock;
+    private final java.util.Map keyToChannel;
+    private int nextCompletionKey;
+    private final long port;
+    private boolean closed;
+    private final java.util.Set staleIoSet;
+
+    void <init>(java.nio.channels.spi.AsynchronousChannelProvider, sun.nio.ch.ThreadPool) throws java.io.IOException
+    {
+        java.util.HashMap $r4;
+        long $l1;
+        java.util.concurrent.locks.ReentrantReadWriteLock $r3;
+        java.util.HashSet $r5;
+        sun.nio.ch.ThreadPool r2;
+        sun.nio.ch.Iocp r0;
+        int $i0;
+        java.nio.channels.spi.AsynchronousChannelProvider r1;
+
+        r0 := @this: sun.nio.ch.Iocp;
+
+        r1 := @parameter0: java.nio.channels.spi.AsynchronousChannelProvider;
+
+        r2 := @parameter1: sun.nio.ch.ThreadPool;
+
+        specialinvoke r0.<sun.nio.ch.AsynchronousChannelGroupImpl: void <init>(java.nio.channels.spi.AsynchronousChannelProvider,sun.nio.ch.ThreadPool)>(r1, r2);
+
+        $r3 = new java.util.concurrent.locks.ReentrantReadWriteLock;
+
+        specialinvoke $r3.<java.util.concurrent.locks.ReentrantReadWriteLock: void <init>()>();
+
+        r0.<sun.nio.ch.Iocp: java.util.concurrent.locks.ReadWriteLock keyToChannelLock> = $r3;
+
+        $r4 = new java.util.HashMap;
+
+        specialinvoke $r4.<java.util.HashMap: void <init>()>();
+
+        r0.<sun.nio.ch.Iocp: java.util.Map keyToChannel> = $r4;
+
+        $r5 = new java.util.HashSet;
+
+        specialinvoke $r5.<java.util.HashSet: void <init>()>();
+
+        r0.<sun.nio.ch.Iocp: java.util.Set staleIoSet> = $r5;
+
+        $i0 = virtualinvoke r0.<sun.nio.ch.Iocp: int fixedThreadCount()>();
+
+        $l1 = staticinvoke <sun.nio.ch.Iocp: long createIoCompletionPort(long,long,int,int)>(-1L, 0L, 0, $i0);
+
+        r0.<sun.nio.ch.Iocp: long port> = $l1;
+
+        r0.<sun.nio.ch.Iocp: int nextCompletionKey> = 1;
+
+        return;
+    }
+
+    sun.nio.ch.Iocp start()
+    {
+        sun.nio.ch.Iocp r0;
+        sun.nio.ch.Iocp$EventHandlerTask $r1;
+
+        r0 := @this: sun.nio.ch.Iocp;
+
+        $r1 = new sun.nio.ch.Iocp$EventHandlerTask;
+
+        specialinvoke $r1.<sun.nio.ch.Iocp$EventHandlerTask: void <init>(sun.nio.ch.Iocp,sun.nio.ch.Iocp$1)>(r0, null);
+
+        virtualinvoke r0.<sun.nio.ch.Iocp: void startThreads(java.lang.Runnable)>($r1);
+
+        return r0;
+    }
+
+    static boolean supportsThreadAgnosticIo()
+    {
+        boolean $z0;
+
+        $z0 = <sun.nio.ch.Iocp: boolean supportsThreadAgnosticIo>;
+
+        return $z0;
+    }
+
+    void implClose()
+    {
+        sun.misc.Unsafe $r7;
+        java.lang.Throwable $r8, $r9;
+        java.util.Iterator $r3;
+        java.util.Set $r1, $r2, $r4;
+        long $l0, $l1;
+        java.lang.Long r6;
+        sun.nio.ch.Iocp r0;
+        java.lang.Object $r5;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.nio.ch.Iocp;
+
+        entermonitor r0;
+
+     label01:
+        $z0 = r0.<sun.nio.ch.Iocp: boolean closed>;
+
+        if $z0 == 0 goto label03;
+
+        exitmonitor r0;
+
+     label02:
+        return;
+
+     label03:
+        r0.<sun.nio.ch.Iocp: boolean closed> = 1;
+
+        exitmonitor r0;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r9 := @caughtexception;
+
+        exitmonitor r0;
+
+     label06:
+        throw $r9;
+
+     label07:
+        $l0 = r0.<sun.nio.ch.Iocp: long port>;
+
+        staticinvoke <sun.nio.ch.Iocp: void close0(long)>($l0);
+
+        $r1 = r0.<sun.nio.ch.Iocp: java.util.Set staleIoSet>;
+
+        entermonitor $r1;
+
+     label08:
+        $r2 = r0.<sun.nio.ch.Iocp: java.util.Set staleIoSet>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Set: java.util.Iterator iterator()>();
+
+     label09:
+        $z1 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label10;
+
+        $r5 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (java.lang.Long) $r5;
+
+        $r7 = <sun.nio.ch.Iocp: sun.misc.Unsafe unsafe>;
+
+        $l1 = virtualinvoke r6.<java.lang.Long: long longValue()>();
+
+        virtualinvoke $r7.<sun.misc.Unsafe: void freeMemory(long)>($l1);
+
+        goto label09;
+
+     label10:
+        $r4 = r0.<sun.nio.ch.Iocp: java.util.Set staleIoSet>;
+
+        interfaceinvoke $r4.<java.util.Set: void clear()>();
+
+        exitmonitor $r1;
+
+     label11:
+        goto label14;
+
+     label12:
+        $r8 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label13:
+        throw $r8;
+
+     label14:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label05;
+        catch java.lang.Throwable from label03 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.lang.Throwable from label08 to label11 with label12;
+        catch java.lang.Throwable from label12 to label13 with label12;
+    }
+
+    boolean isEmpty()
+    {
+        java.lang.Throwable $r6;
+        java.util.concurrent.locks.Lock $r2, $r5, $r8;
+        java.util.Map $r3;
+        sun.nio.ch.Iocp r0;
+        java.util.concurrent.locks.ReadWriteLock $r1, $r4, $r7;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.Iocp;
+
+        $r1 = r0.<sun.nio.ch.Iocp: java.util.concurrent.locks.ReadWriteLock keyToChannelLock>;
+
+        $r2 = interfaceinvoke $r1.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock writeLock()>();
+
+        interfaceinvoke $r2.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $r3 = r0.<sun.nio.ch.Iocp: java.util.Map keyToChannel>;
+
+        $z0 = interfaceinvoke $r3.<java.util.Map: boolean isEmpty()>();
+
+     label2:
+        $r4 = r0.<sun.nio.ch.Iocp: java.util.concurrent.locks.ReadWriteLock keyToChannelLock>;
+
+        $r5 = interfaceinvoke $r4.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock writeLock()>();
+
+        interfaceinvoke $r5.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return $z0;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = r0.<sun.nio.ch.Iocp: java.util.concurrent.locks.ReadWriteLock keyToChannelLock>;
+
+        $r8 = interfaceinvoke $r7.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock writeLock()>();
+
+        interfaceinvoke $r8.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    final java.lang.Object attachForeignChannel(java.nio.channels.Channel, java.io.FileDescriptor) throws java.io.IOException
+    {
+        sun.nio.ch.Iocp$1 $r1;
+        java.io.FileDescriptor r4;
+        sun.nio.ch.Iocp r0;
+        int $i0;
+        java.lang.Integer $r3;
+        java.nio.channels.Channel r2;
+
+        r0 := @this: sun.nio.ch.Iocp;
+
+        r2 := @parameter0: java.nio.channels.Channel;
+
+        r4 := @parameter1: java.io.FileDescriptor;
+
+        $r1 = new sun.nio.ch.Iocp$1;
+
+        specialinvoke $r1.<sun.nio.ch.Iocp$1: void <init>(sun.nio.ch.Iocp,java.nio.channels.Channel)>(r0, r2);
+
+        $i0 = virtualinvoke r0.<sun.nio.ch.Iocp: int associate(sun.nio.ch.Iocp$OverlappedChannel,long)>($r1, 0L);
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        return $r3;
+    }
+
+    final void detachForeignChannel(java.lang.Object)
+    {
+        sun.nio.ch.Iocp r0;
+        int $i0;
+        java.lang.Object r1;
+        java.lang.Integer $r2;
+
+        r0 := @this: sun.nio.ch.Iocp;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = (java.lang.Integer) r1;
+
+        $i0 = virtualinvoke $r2.<java.lang.Integer: int intValue()>();
+
+        virtualinvoke r0.<sun.nio.ch.Iocp: void disassociate(int)>($i0);
+
+        return;
+    }
+
+    void closeAllChannels()
+    {
+        java.lang.Throwable $r15;
+        sun.nio.ch.Iocp$OverlappedChannel $r9, $r13;
+        java.lang.Integer r18;
+        java.util.Map $r4, $r11;
+        int $i0, i1, i2;
+        sun.nio.ch.Iocp$OverlappedChannel[] r0;
+        java.util.concurrent.locks.ReadWriteLock $r2, $r7, $r16;
+        boolean $z0;
+        java.util.Iterator $r6;
+        java.util.Set $r5;
+        java.io.IOException $r14;
+        java.util.concurrent.locks.Lock $r3, $r8, $r17;
+        sun.nio.ch.Iocp r1;
+        java.lang.Object $r10, $r12;
+
+        r1 := @this: sun.nio.ch.Iocp;
+
+        r0 = newarray (sun.nio.ch.Iocp$OverlappedChannel)[32];
+
+     label01:
+        $r2 = r1.<sun.nio.ch.Iocp: java.util.concurrent.locks.ReadWriteLock keyToChannelLock>;
+
+        $r3 = interfaceinvoke $r2.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock writeLock()>();
+
+        interfaceinvoke $r3.<java.util.concurrent.locks.Lock: void lock()>();
+
+        i1 = 0;
+
+     label02:
+        $r4 = r1.<sun.nio.ch.Iocp: java.util.Map keyToChannel>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Map: java.util.Set keySet()>();
+
+        $r6 = interfaceinvoke $r5.<java.util.Set: java.util.Iterator iterator()>();
+
+     label03:
+        $z0 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label05;
+
+        $r10 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r18 = (java.lang.Integer) $r10;
+
+        $i0 = i1;
+
+        i1 = i1 + 1;
+
+        $r11 = r1.<sun.nio.ch.Iocp: java.util.Map keyToChannel>;
+
+        $r12 = interfaceinvoke $r11.<java.util.Map: java.lang.Object get(java.lang.Object)>(r18);
+
+        $r13 = (sun.nio.ch.Iocp$OverlappedChannel) $r12;
+
+        r0[$i0] = $r13;
+
+        if i1 < 32 goto label04;
+
+        goto label05;
+
+     label04:
+        goto label03;
+
+     label05:
+        $r7 = r1.<sun.nio.ch.Iocp: java.util.concurrent.locks.ReadWriteLock keyToChannelLock>;
+
+        $r8 = interfaceinvoke $r7.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock writeLock()>();
+
+        interfaceinvoke $r8.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label08;
+
+     label06:
+        $r15 := @caughtexception;
+
+     label07:
+        $r16 = r1.<sun.nio.ch.Iocp: java.util.concurrent.locks.ReadWriteLock keyToChannelLock>;
+
+        $r17 = interfaceinvoke $r16.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock writeLock()>();
+
+        interfaceinvoke $r17.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r15;
+
+     label08:
+        i2 = 0;
+
+     label09:
+        if i2 >= i1 goto label14;
+
+     label10:
+        $r9 = r0[i2];
+
+        interfaceinvoke $r9.<sun.nio.ch.Iocp$OverlappedChannel: void close()>();
+
+     label11:
+        goto label13;
+
+     label12:
+        $r14 := @caughtexception;
+
+     label13:
+        i2 = i2 + 1;
+
+        goto label09;
+
+     label14:
+        if i1 > 0 goto label01;
+
+        return;
+
+        catch java.lang.Throwable from label02 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+        catch java.io.IOException from label10 to label11 with label12;
+    }
+
+    private void wakeup()
+    {
+        sun.nio.ch.Iocp r0;
+        long $l0;
+        java.io.IOException $r1;
+        java.lang.AssertionError $r2;
+
+        r0 := @this: sun.nio.ch.Iocp;
+
+     label1:
+        $l0 = r0.<sun.nio.ch.Iocp: long port>;
+
+        staticinvoke <sun.nio.ch.Iocp: void postQueuedCompletionStatus(long,int)>($l0, 0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r1 := @caughtexception;
+
+        $r2 = new java.lang.AssertionError;
+
+        specialinvoke $r2.<java.lang.AssertionError: void <init>(java.lang.Object)>($r1);
+
+        throw $r2;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    void executeOnHandlerTask(java.lang.Runnable)
+    {
+        java.lang.Throwable $r3;
+        java.util.concurrent.RejectedExecutionException $r2;
+        sun.nio.ch.Iocp r0;
+        java.lang.Runnable r1;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.Iocp;
+
+        r1 := @parameter0: java.lang.Runnable;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<sun.nio.ch.Iocp: boolean closed>;
+
+        if $z0 == 0 goto label2;
+
+        $r2 = new java.util.concurrent.RejectedExecutionException;
+
+        specialinvoke $r2.<java.util.concurrent.RejectedExecutionException: void <init>()>();
+
+        throw $r2;
+
+     label2:
+        virtualinvoke r0.<sun.nio.ch.Iocp: void offerTask(java.lang.Runnable)>(r1);
+
+        specialinvoke r0.<sun.nio.ch.Iocp: void wakeup()>();
+
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r3;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    void shutdownHandlerTasks()
+    {
+        sun.nio.ch.Iocp r0;
+        int $i0, i1, $i3;
+
+        r0 := @this: sun.nio.ch.Iocp;
+
+        i1 = virtualinvoke r0.<sun.nio.ch.Iocp: int threadCount()>();
+
+     label1:
+        $i0 = i1;
+
+        $i3 = (int) -1;
+
+        i1 = i1 + $i3;
+
+        if $i0 <= 0 goto label2;
+
+        specialinvoke r0.<sun.nio.ch.Iocp: void wakeup()>();
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    int associate(sun.nio.ch.Iocp$OverlappedChannel, long) throws java.io.IOException
+    {
+        java.lang.Throwable $r11;
+        sun.nio.ch.Iocp$OverlappedChannel r7;
+        long l0, $l2;
+        java.lang.Integer $r4, $r6;
+        java.nio.channels.ShutdownChannelGroupException $r10;
+        byte $b1;
+        java.util.Map $r3, $r5;
+        int $i3, $i4;
+        java.util.concurrent.locks.ReadWriteLock $r1, $r8, $r12;
+        boolean $z0, $z1;
+        java.util.concurrent.locks.Lock $r2, $r9, $r13;
+        sun.nio.ch.Iocp r0;
+
+        r0 := @this: sun.nio.ch.Iocp;
+
+        r7 := @parameter0: sun.nio.ch.Iocp$OverlappedChannel;
+
+        l0 := @parameter1: long;
+
+        $r1 = r0.<sun.nio.ch.Iocp: java.util.concurrent.locks.ReadWriteLock keyToChannelLock>;
+
+        $r2 = interfaceinvoke $r1.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock writeLock()>();
+
+        interfaceinvoke $r2.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $z0 = virtualinvoke r0.<sun.nio.ch.Iocp: boolean isShutdown()>();
+
+        if $z0 == 0 goto label2;
+
+        $r10 = new java.nio.channels.ShutdownChannelGroupException;
+
+        specialinvoke $r10.<java.nio.channels.ShutdownChannelGroupException: void <init>()>();
+
+        throw $r10;
+
+     label2:
+        $i3 = r0.<sun.nio.ch.Iocp: int nextCompletionKey>;
+
+        $i4 = $i3 + 1;
+
+        r0.<sun.nio.ch.Iocp: int nextCompletionKey> = $i4;
+
+        if $i3 == 0 goto label2;
+
+        $r3 = r0.<sun.nio.ch.Iocp: java.util.Map keyToChannel>;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i3);
+
+        $z1 = interfaceinvoke $r3.<java.util.Map: boolean containsKey(java.lang.Object)>($r4);
+
+        if $z1 != 0 goto label2;
+
+        $b1 = l0 cmp 0L;
+
+        if $b1 == 0 goto label3;
+
+        $l2 = r0.<sun.nio.ch.Iocp: long port>;
+
+        staticinvoke <sun.nio.ch.Iocp: long createIoCompletionPort(long,long,int,int)>(l0, $l2, $i3, 0);
+
+     label3:
+        $r5 = r0.<sun.nio.ch.Iocp: java.util.Map keyToChannel>;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i3);
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r6, r7);
+
+     label4:
+        $r8 = r0.<sun.nio.ch.Iocp: java.util.concurrent.locks.ReadWriteLock keyToChannelLock>;
+
+        $r9 = interfaceinvoke $r8.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock writeLock()>();
+
+        interfaceinvoke $r9.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label7;
+
+     label5:
+        $r11 := @caughtexception;
+
+     label6:
+        $r12 = r0.<sun.nio.ch.Iocp: java.util.concurrent.locks.ReadWriteLock keyToChannelLock>;
+
+        $r13 = interfaceinvoke $r12.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock writeLock()>();
+
+        interfaceinvoke $r13.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r11;
+
+     label7:
+        return $i3;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    void disassociate(int)
+    {
+        java.lang.Throwable $r9;
+        java.lang.Integer $r4;
+        java.util.Map $r3, $r5;
+        int i0;
+        java.util.concurrent.locks.ReadWriteLock $r1, $r6, $r10;
+        boolean $z0, $z1, z2;
+        java.io.IOException $r8;
+        java.util.concurrent.locks.Lock $r2, $r7, $r11;
+        sun.nio.ch.Iocp r0;
+
+        r0 := @this: sun.nio.ch.Iocp;
+
+        i0 := @parameter0: int;
+
+        z2 = 0;
+
+        $r1 = r0.<sun.nio.ch.Iocp: java.util.concurrent.locks.ReadWriteLock keyToChannelLock>;
+
+        $r2 = interfaceinvoke $r1.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock writeLock()>();
+
+        interfaceinvoke $r2.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $r3 = r0.<sun.nio.ch.Iocp: java.util.Map keyToChannel>;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        interfaceinvoke $r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r4);
+
+        $r5 = r0.<sun.nio.ch.Iocp: java.util.Map keyToChannel>;
+
+        $z0 = interfaceinvoke $r5.<java.util.Map: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+        z2 = 1;
+
+     label2:
+        $r6 = r0.<sun.nio.ch.Iocp: java.util.concurrent.locks.ReadWriteLock keyToChannelLock>;
+
+        $r7 = interfaceinvoke $r6.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock writeLock()>();
+
+        interfaceinvoke $r7.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label4;
+
+     label3:
+        $r9 := @caughtexception;
+
+        $r10 = r0.<sun.nio.ch.Iocp: java.util.concurrent.locks.ReadWriteLock keyToChannelLock>;
+
+        $r11 = interfaceinvoke $r10.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock writeLock()>();
+
+        interfaceinvoke $r11.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r9;
+
+     label4:
+        if z2 == 0 goto label8;
+
+        $z1 = virtualinvoke r0.<sun.nio.ch.Iocp: boolean isShutdown()>();
+
+        if $z1 == 0 goto label8;
+
+     label5:
+        virtualinvoke r0.<sun.nio.ch.Iocp: void shutdownNow()>();
+
+     label6:
+        goto label8;
+
+     label7:
+        $r8 := @caughtexception;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.io.IOException from label5 to label6 with label7;
+    }
+
+    void makeStale(java.lang.Long)
+    {
+        java.lang.Throwable $r4;
+        java.lang.Long r2;
+        sun.nio.ch.Iocp r0;
+        java.util.Set $r1, $r3;
+
+        r0 := @this: sun.nio.ch.Iocp;
+
+        r2 := @parameter0: java.lang.Long;
+
+        $r1 = r0.<sun.nio.ch.Iocp: java.util.Set staleIoSet>;
+
+        entermonitor $r1;
+
+     label1:
+        $r3 = r0.<sun.nio.ch.Iocp: java.util.Set staleIoSet>;
+
+        interfaceinvoke $r3.<java.util.Set: boolean add(java.lang.Object)>(r2);
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r4;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private void checkIfStale(long)
+    {
+        sun.misc.Unsafe $r4;
+        java.lang.Throwable $r5;
+        java.util.Set $r1, $r2;
+        long l0;
+        java.lang.Long $r3;
+        sun.nio.ch.Iocp r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.Iocp;
+
+        l0 := @parameter0: long;
+
+        $r1 = r0.<sun.nio.ch.Iocp: java.util.Set staleIoSet>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<sun.nio.ch.Iocp: java.util.Set staleIoSet>;
+
+        $r3 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>(l0);
+
+        $z0 = interfaceinvoke $r2.<java.util.Set: boolean remove(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label2;
+
+        $r4 = <sun.nio.ch.Iocp: sun.misc.Unsafe unsafe>;
+
+        virtualinvoke $r4.<sun.misc.Unsafe: void freeMemory(long)>(l0);
+
+     label2:
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r5;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private static java.io.IOException translateErrorToIOException(int)
+    {
+        java.io.IOException $r1;
+        int i0;
+        java.lang.StringBuilder $r2, $r3, $r5;
+        java.lang.String $r0, $r4, r6;
+
+        i0 := @parameter0: int;
+
+        $r0 = staticinvoke <sun.nio.ch.Iocp: java.lang.String getErrorMessage(int)>(i0);
+
+        r6 = $r0;
+
+        if $r0 != null goto label1;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown error: 0x0");
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>(i0);
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label1:
+        $r1 = new java.io.IOException;
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>(r6);
+
+        return $r1;
+    }
+
+    private static native void initIDs();
+
+    private static native long createIoCompletionPort(long, long, int, int) throws java.io.IOException;
+
+    private static native void close0(long);
+
+    private static native void getQueuedCompletionStatus(long, sun.nio.ch.Iocp$CompletionStatus) throws java.io.IOException;
+
+    private static native void postQueuedCompletionStatus(long, int) throws java.io.IOException;
+
+    private static native java.lang.String getErrorMessage(int);
+
+    static long access$200(sun.nio.ch.Iocp)
+    {
+        sun.nio.ch.Iocp r0;
+        long $l0;
+
+        r0 := @parameter0: sun.nio.ch.Iocp;
+
+        $l0 = r0.<sun.nio.ch.Iocp: long port>;
+
+        return $l0;
+    }
+
+    static void access$300(long, sun.nio.ch.Iocp$CompletionStatus) throws java.io.IOException
+    {
+        long l0;
+        sun.nio.ch.Iocp$CompletionStatus r0;
+
+        l0 := @parameter0: long;
+
+        r0 := @parameter1: sun.nio.ch.Iocp$CompletionStatus;
+
+        staticinvoke <sun.nio.ch.Iocp: void getQueuedCompletionStatus(long,sun.nio.ch.Iocp$CompletionStatus)>(l0, r0);
+
+        return;
+    }
+
+    static java.util.concurrent.locks.ReadWriteLock access$400(sun.nio.ch.Iocp)
+    {
+        sun.nio.ch.Iocp r0;
+        java.util.concurrent.locks.ReadWriteLock $r1;
+
+        r0 := @parameter0: sun.nio.ch.Iocp;
+
+        $r1 = r0.<sun.nio.ch.Iocp: java.util.concurrent.locks.ReadWriteLock keyToChannelLock>;
+
+        return $r1;
+    }
+
+    static java.util.Map access$500(sun.nio.ch.Iocp)
+    {
+        sun.nio.ch.Iocp r0;
+        java.util.Map $r1;
+
+        r0 := @parameter0: sun.nio.ch.Iocp;
+
+        $r1 = r0.<sun.nio.ch.Iocp: java.util.Map keyToChannel>;
+
+        return $r1;
+    }
+
+    static void access$600(sun.nio.ch.Iocp, long)
+    {
+        sun.nio.ch.Iocp r0;
+        long l0;
+
+        r0 := @parameter0: sun.nio.ch.Iocp;
+
+        l0 := @parameter1: long;
+
+        specialinvoke r0.<sun.nio.ch.Iocp: void checkIfStale(long)>(l0);
+
+        return;
+    }
+
+    static java.io.IOException access$700(int)
+    {
+        int i0;
+        java.io.IOException $r0;
+
+        i0 := @parameter0: int;
+
+        $r0 = staticinvoke <sun.nio.ch.Iocp: java.io.IOException translateErrorToIOException(int)>(i0);
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        sun.misc.Unsafe $r0;
+        java.lang.String[] $r4;
+        sun.security.action.GetPropertyAction $r1;
+        int $i0;
+        java.lang.Object $r2;
+        java.lang.String r3, $r5;
+        boolean $z0;
+
+        <sun.nio.ch.Iocp: long INVALID_HANDLE_VALUE> = -1L;
+
+        $r0 = staticinvoke <sun.misc.Unsafe: sun.misc.Unsafe getUnsafe()>();
+
+        <sun.nio.ch.Iocp: sun.misc.Unsafe unsafe> = $r0;
+
+        staticinvoke <sun.nio.ch.IOUtil: void load()>();
+
+        staticinvoke <sun.nio.ch.Iocp: void initIDs()>();
+
+        $r1 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r1.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("os.version");
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        r3 = (java.lang.String) $r2;
+
+        $r4 = virtualinvoke r3.<java.lang.String: java.lang.String[] split(java.lang.String)>("\\.");
+
+        $r5 = $r4[0];
+
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r5);
+
+        if $i0 < 6 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        <sun.nio.ch.Iocp: boolean supportsThreadAgnosticIo> = $z0;
+
+        return;
+    }
+}

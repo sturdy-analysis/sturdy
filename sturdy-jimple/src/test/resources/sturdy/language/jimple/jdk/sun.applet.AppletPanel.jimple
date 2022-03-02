@@ -1,0 +1,2903 @@
+public abstract class sun.applet.AppletPanel extends java.awt.Panel implements java.applet.AppletStub, java.lang.Runnable
+{
+    java.applet.Applet applet;
+    protected boolean doInit;
+    protected sun.applet.AppletClassLoader loader;
+    public static final int APPLET_DISPOSE;
+    public static final int APPLET_LOAD;
+    public static final int APPLET_INIT;
+    public static final int APPLET_START;
+    public static final int APPLET_STOP;
+    public static final int APPLET_DESTROY;
+    public static final int APPLET_QUIT;
+    public static final int APPLET_ERROR;
+    public static final int APPLET_RESIZE;
+    public static final int APPLET_LOADING;
+    public static final int APPLET_LOADING_COMPLETED;
+    protected int status;
+    protected java.lang.Thread handler;
+    java.awt.Dimension defaultAppletSize;
+    java.awt.Dimension currentAppletSize;
+    sun.misc.MessageUtils mu;
+    java.lang.Thread loaderThread;
+    boolean loadAbortRequest;
+    private static int threadGroupNumber;
+    private sun.applet.AppletListener listeners;
+    private sun.misc.Queue queue;
+    private java.awt.EventQueue appEvtQ;
+    private static java.util.HashMap classloaders;
+    private boolean jdk11Applet;
+    private boolean jdk12Applet;
+    private static sun.applet.AppletMessageHandler amh;
+
+    public void <init>()
+    {
+        java.awt.Dimension $r1, $r2;
+        sun.misc.MessageUtils $r3;
+        sun.applet.AppletPanel r0;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        specialinvoke r0.<java.awt.Panel: void <init>()>();
+
+        r0.<sun.applet.AppletPanel: boolean doInit> = 1;
+
+        $r1 = new java.awt.Dimension;
+
+        specialinvoke $r1.<java.awt.Dimension: void <init>(int,int)>(10, 10);
+
+        r0.<sun.applet.AppletPanel: java.awt.Dimension defaultAppletSize> = $r1;
+
+        $r2 = new java.awt.Dimension;
+
+        specialinvoke $r2.<java.awt.Dimension: void <init>(int,int)>(10, 10);
+
+        r0.<sun.applet.AppletPanel: java.awt.Dimension currentAppletSize> = $r2;
+
+        $r3 = new sun.misc.MessageUtils;
+
+        specialinvoke $r3.<sun.misc.MessageUtils: void <init>()>();
+
+        r0.<sun.applet.AppletPanel: sun.misc.MessageUtils mu> = $r3;
+
+        r0.<sun.applet.AppletPanel: java.lang.Thread loaderThread> = null;
+
+        r0.<sun.applet.AppletPanel: boolean loadAbortRequest> = 0;
+
+        r0.<sun.applet.AppletPanel: sun.misc.Queue queue> = null;
+
+        r0.<sun.applet.AppletPanel: java.awt.EventQueue appEvtQ> = null;
+
+        r0.<sun.applet.AppletPanel: boolean jdk11Applet> = 0;
+
+        r0.<sun.applet.AppletPanel: boolean jdk12Applet> = 0;
+
+        return;
+    }
+
+    protected abstract java.lang.String getCode();
+
+    protected abstract java.lang.String getJarFiles();
+
+    protected abstract java.lang.String getSerializedObject();
+
+    public abstract int getWidth();
+
+    public abstract int getHeight();
+
+    public abstract boolean hasInitialFocus();
+
+    protected void setupAppletAppContext()
+    {
+        sun.applet.AppletPanel r0;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        return;
+    }
+
+    synchronized void createAppletThread()
+    {
+        sun.applet.AppletClassLoader $r8, $r9, $r11, $r12, $r13;
+        java.net.URL $r6;
+        sun.applet.AppletPanel$1 $r20;
+        java.lang.ThreadGroup $r14;
+        java.lang.Thread $r15, $r21;
+        java.lang.String $r3, $r5, $r7, $r10, $r19;
+        sun.applet.AppletPanel r2;
+        boolean $z0;
+        java.lang.StringBuilder $r0, $r1, $r4, $r16, $r17, $r18;
+
+        r2 := @this: sun.applet.AppletPanel;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("applet-");
+
+        $r3 = virtualinvoke r2.<sun.applet.AppletPanel: java.lang.String getCode()>();
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = virtualinvoke r2.<sun.applet.AppletPanel: java.net.URL getCodeBase()>();
+
+        $r7 = virtualinvoke r2.<sun.applet.AppletPanel: java.lang.String getClassLoaderCacheKey()>();
+
+        $r8 = virtualinvoke r2.<sun.applet.AppletPanel: sun.applet.AppletClassLoader getClassLoader(java.net.URL,java.lang.String)>($r6, $r7);
+
+        r2.<sun.applet.AppletPanel: sun.applet.AppletClassLoader loader> = $r8;
+
+        $r9 = r2.<sun.applet.AppletPanel: sun.applet.AppletClassLoader loader>;
+
+        virtualinvoke $r9.<sun.applet.AppletClassLoader: void grab()>();
+
+        $r10 = virtualinvoke r2.<sun.applet.AppletPanel: java.lang.String getParameter(java.lang.String)>("codebase_lookup");
+
+        if $r10 == null goto label1;
+
+        $z0 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>("false");
+
+        if $z0 == 0 goto label1;
+
+        $r12 = r2.<sun.applet.AppletPanel: sun.applet.AppletClassLoader loader>;
+
+        virtualinvoke $r12.<sun.applet.AppletClassLoader: void setCodebaseLookup(boolean)>(0);
+
+        goto label2;
+
+     label1:
+        $r11 = r2.<sun.applet.AppletPanel: sun.applet.AppletClassLoader loader>;
+
+        virtualinvoke $r11.<sun.applet.AppletClassLoader: void setCodebaseLookup(boolean)>(1);
+
+     label2:
+        $r13 = r2.<sun.applet.AppletPanel: sun.applet.AppletClassLoader loader>;
+
+        $r14 = virtualinvoke $r13.<sun.applet.AppletClassLoader: java.lang.ThreadGroup getThreadGroup()>();
+
+        $r15 = new java.lang.Thread;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("thread ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r15.<java.lang.Thread: void <init>(java.lang.ThreadGroup,java.lang.Runnable,java.lang.String)>($r14, r2, $r19);
+
+        r2.<sun.applet.AppletPanel: java.lang.Thread handler> = $r15;
+
+        $r20 = new sun.applet.AppletPanel$1;
+
+        specialinvoke $r20.<sun.applet.AppletPanel$1: void <init>(sun.applet.AppletPanel)>(r2);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r20);
+
+        $r21 = r2.<sun.applet.AppletPanel: java.lang.Thread handler>;
+
+        virtualinvoke $r21.<java.lang.Thread: void start()>();
+
+        return;
+    }
+
+    void joinAppletThread() throws java.lang.InterruptedException
+    {
+        sun.applet.AppletPanel r0;
+        java.lang.Thread $r1, $r2;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        $r1 = r0.<sun.applet.AppletPanel: java.lang.Thread handler>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.applet.AppletPanel: java.lang.Thread handler>;
+
+        virtualinvoke $r2.<java.lang.Thread: void join()>();
+
+        r0.<sun.applet.AppletPanel: java.lang.Thread handler> = null;
+
+     label1:
+        return;
+    }
+
+    void release()
+    {
+        sun.applet.AppletClassLoader $r1, $r2;
+        sun.applet.AppletPanel r0;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        $r1 = r0.<sun.applet.AppletPanel: sun.applet.AppletClassLoader loader>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.applet.AppletPanel: sun.applet.AppletClassLoader loader>;
+
+        virtualinvoke $r2.<sun.applet.AppletClassLoader: void release()>();
+
+        r0.<sun.applet.AppletPanel: sun.applet.AppletClassLoader loader> = null;
+
+     label1:
+        return;
+    }
+
+    public void init()
+    {
+        java.lang.NumberFormatException $r8;
+        java.awt.Dimension $r1, $r2, $r3, $r4, $r5, $r6;
+        int $i0, $i1, $i2, $i3;
+        java.awt.BorderLayout $r7;
+        sun.applet.AppletPanel r0;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+     label1:
+        $r1 = r0.<sun.applet.AppletPanel: java.awt.Dimension defaultAppletSize>;
+
+        $i0 = virtualinvoke r0.<sun.applet.AppletPanel: int getWidth()>();
+
+        $r1.<java.awt.Dimension: int width> = $i0;
+
+        $r3 = r0.<sun.applet.AppletPanel: java.awt.Dimension currentAppletSize>;
+
+        $r2 = r0.<sun.applet.AppletPanel: java.awt.Dimension defaultAppletSize>;
+
+        $i1 = $r2.<java.awt.Dimension: int width>;
+
+        $r3.<java.awt.Dimension: int width> = $i1;
+
+        $r4 = r0.<sun.applet.AppletPanel: java.awt.Dimension defaultAppletSize>;
+
+        $i2 = virtualinvoke r0.<sun.applet.AppletPanel: int getHeight()>();
+
+        $r4.<java.awt.Dimension: int height> = $i2;
+
+        $r6 = r0.<sun.applet.AppletPanel: java.awt.Dimension currentAppletSize>;
+
+        $r5 = r0.<sun.applet.AppletPanel: java.awt.Dimension defaultAppletSize>;
+
+        $i3 = $r5.<java.awt.Dimension: int height>;
+
+        $r6.<java.awt.Dimension: int height> = $i3;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r8 := @caughtexception;
+
+        r0.<sun.applet.AppletPanel: int status> = 7;
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String)>("badattribute.exception");
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void showAppletLog(java.lang.String)>("badattribute.exception");
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void showAppletException(java.lang.Throwable)>($r8);
+
+     label4:
+        $r7 = new java.awt.BorderLayout;
+
+        specialinvoke $r7.<java.awt.BorderLayout: void <init>()>();
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void setLayout(java.awt.LayoutManager)>($r7);
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void createAppletThread()>();
+
+        return;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label3;
+    }
+
+    public java.awt.Dimension minimumSize()
+    {
+        java.awt.Dimension $r0, $r2, $r3;
+        int $i0, $i1;
+        sun.applet.AppletPanel r1;
+
+        r1 := @this: sun.applet.AppletPanel;
+
+        $r0 = new java.awt.Dimension;
+
+        $r2 = r1.<sun.applet.AppletPanel: java.awt.Dimension defaultAppletSize>;
+
+        $i1 = $r2.<java.awt.Dimension: int width>;
+
+        $r3 = r1.<sun.applet.AppletPanel: java.awt.Dimension defaultAppletSize>;
+
+        $i0 = $r3.<java.awt.Dimension: int height>;
+
+        specialinvoke $r0.<java.awt.Dimension: void <init>(int,int)>($i1, $i0);
+
+        return $r0;
+    }
+
+    public java.awt.Dimension preferredSize()
+    {
+        java.awt.Dimension $r0, $r2, $r3;
+        int $i0, $i1;
+        sun.applet.AppletPanel r1;
+
+        r1 := @this: sun.applet.AppletPanel;
+
+        $r0 = new java.awt.Dimension;
+
+        $r2 = r1.<sun.applet.AppletPanel: java.awt.Dimension currentAppletSize>;
+
+        $i1 = $r2.<java.awt.Dimension: int width>;
+
+        $r3 = r1.<sun.applet.AppletPanel: java.awt.Dimension currentAppletSize>;
+
+        $i0 = $r3.<java.awt.Dimension: int height>;
+
+        specialinvoke $r0.<java.awt.Dimension: void <init>(int,int)>($i1, $i0);
+
+        return $r0;
+    }
+
+    public synchronized void addAppletListener(sun.applet.AppletListener)
+    {
+        sun.applet.AppletListener r1, $r2, $r3;
+        sun.applet.AppletPanel r0;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        r1 := @parameter0: sun.applet.AppletListener;
+
+        $r2 = r0.<sun.applet.AppletPanel: sun.applet.AppletListener listeners>;
+
+        $r3 = staticinvoke <sun.applet.AppletEventMulticaster: sun.applet.AppletListener add(sun.applet.AppletListener,sun.applet.AppletListener)>($r2, r1);
+
+        r0.<sun.applet.AppletPanel: sun.applet.AppletListener listeners> = $r3;
+
+        return;
+    }
+
+    public synchronized void removeAppletListener(sun.applet.AppletListener)
+    {
+        sun.applet.AppletListener r1, $r2, $r3;
+        sun.applet.AppletPanel r0;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        r1 := @parameter0: sun.applet.AppletListener;
+
+        $r2 = r0.<sun.applet.AppletPanel: sun.applet.AppletListener listeners>;
+
+        $r3 = staticinvoke <sun.applet.AppletEventMulticaster: sun.applet.AppletListener remove(sun.applet.AppletListener,sun.applet.AppletListener)>($r2, r1);
+
+        r0.<sun.applet.AppletPanel: sun.applet.AppletListener listeners> = $r3;
+
+        return;
+    }
+
+    public void dispatchAppletEvent(int, java.lang.Object)
+    {
+        int i0;
+        java.lang.Object r3;
+        sun.applet.AppletEvent $r2;
+        sun.applet.AppletListener $r1, $r4;
+        sun.applet.AppletPanel r0;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        i0 := @parameter0: int;
+
+        r3 := @parameter1: java.lang.Object;
+
+        $r1 = r0.<sun.applet.AppletPanel: sun.applet.AppletListener listeners>;
+
+        if $r1 == null goto label1;
+
+        $r2 = new sun.applet.AppletEvent;
+
+        specialinvoke $r2.<sun.applet.AppletEvent: void <init>(java.lang.Object,int,java.lang.Object)>(r0, i0, r3);
+
+        $r4 = r0.<sun.applet.AppletPanel: sun.applet.AppletListener listeners>;
+
+        interfaceinvoke $r4.<sun.applet.AppletListener: void appletStateChanged(sun.applet.AppletEvent)>($r2);
+
+     label1:
+        return;
+    }
+
+    public void sendEvent(int)
+    {
+        sun.applet.AppletClassLoader $r4, $r7;
+        java.lang.Throwable $r10;
+        java.net.URL $r5;
+        java.lang.Integer $r2;
+        sun.misc.Queue $r1, $r3, $r8;
+        java.lang.InterruptedException $r9;
+        int i0;
+        java.lang.String $r6;
+        sun.applet.AppletPanel r0;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        i0 := @parameter0: int;
+
+        entermonitor r0;
+
+     label01:
+        $r1 = r0.<sun.applet.AppletPanel: sun.misc.Queue queue>;
+
+        if $r1 != null goto label02;
+
+        $r8 = new sun.misc.Queue;
+
+        specialinvoke $r8.<sun.misc.Queue: void <init>()>();
+
+        r0.<sun.applet.AppletPanel: sun.misc.Queue queue> = $r8;
+
+     label02:
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        $r3 = r0.<sun.applet.AppletPanel: sun.misc.Queue queue>;
+
+        virtualinvoke $r3.<sun.misc.Queue: void enqueue(java.lang.Object)>($r2);
+
+        virtualinvoke r0.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor r0;
+
+     label03:
+        goto label06;
+
+     label04:
+        $r10 := @caughtexception;
+
+        exitmonitor r0;
+
+     label05:
+        throw $r10;
+
+     label06:
+        if i0 != 6 goto label12;
+
+     label07:
+        virtualinvoke r0.<sun.applet.AppletPanel: void joinAppletThread()>();
+
+     label08:
+        goto label10;
+
+     label09:
+        $r9 := @caughtexception;
+
+     label10:
+        $r4 = r0.<sun.applet.AppletPanel: sun.applet.AppletClassLoader loader>;
+
+        if $r4 != null goto label11;
+
+        $r5 = virtualinvoke r0.<sun.applet.AppletPanel: java.net.URL getCodeBase()>();
+
+        $r6 = virtualinvoke r0.<sun.applet.AppletPanel: java.lang.String getClassLoaderCacheKey()>();
+
+        $r7 = virtualinvoke r0.<sun.applet.AppletPanel: sun.applet.AppletClassLoader getClassLoader(java.net.URL,java.lang.String)>($r5, $r6);
+
+        r0.<sun.applet.AppletPanel: sun.applet.AppletClassLoader loader> = $r7;
+
+     label11:
+        virtualinvoke r0.<sun.applet.AppletPanel: void release()>();
+
+     label12:
+        return;
+
+        catch java.lang.Throwable from label01 to label03 with label04;
+        catch java.lang.Throwable from label04 to label05 with label04;
+        catch java.lang.InterruptedException from label07 to label08 with label09;
+    }
+
+    synchronized sun.applet.AppletEvent getNextEvent() throws java.lang.InterruptedException
+    {
+        java.lang.Integer r5;
+        sun.misc.Queue $r1, $r2, $r3;
+        int $i0;
+        java.lang.Object $r4;
+        sun.applet.AppletEvent $r6;
+        sun.applet.AppletPanel r0;
+        boolean $z0;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+     label1:
+        $r1 = r0.<sun.applet.AppletPanel: sun.misc.Queue queue>;
+
+        if $r1 == null goto label2;
+
+        $r2 = r0.<sun.applet.AppletPanel: sun.misc.Queue queue>;
+
+        $z0 = virtualinvoke $r2.<sun.misc.Queue: boolean isEmpty()>();
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        virtualinvoke r0.<java.lang.Object: void wait()>();
+
+        goto label1;
+
+     label3:
+        $r3 = r0.<sun.applet.AppletPanel: sun.misc.Queue queue>;
+
+        $r4 = virtualinvoke $r3.<sun.misc.Queue: java.lang.Object dequeue()>();
+
+        r5 = (java.lang.Integer) $r4;
+
+        $r6 = new sun.applet.AppletEvent;
+
+        $i0 = virtualinvoke r5.<java.lang.Integer: int intValue()>();
+
+        specialinvoke $r6.<sun.applet.AppletEvent: void <init>(java.lang.Object,int,java.lang.Object)>(r0, $i0, null);
+
+        return $r6;
+    }
+
+    boolean emptyEventQueue()
+    {
+        sun.misc.Queue $r1, $r2;
+        sun.applet.AppletPanel r0;
+        boolean $z0;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        $r1 = r0.<sun.applet.AppletPanel: sun.misc.Queue queue>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.applet.AppletPanel: sun.misc.Queue queue>;
+
+        $z0 = virtualinvoke $r2.<sun.misc.Queue: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    private void setExceptionStatus(java.security.AccessControlException)
+    {
+        sun.applet.AppletClassLoader $r4, $r5, $r8;
+        java.net.URL $r6;
+        java.security.Permission $r1;
+        java.security.AccessControlException r0;
+        java.lang.String $r2, $r7;
+        sun.applet.AppletPanel r3;
+        boolean $z0, $z1;
+
+        r3 := @this: sun.applet.AppletPanel;
+
+        r0 := @parameter0: java.security.AccessControlException;
+
+        $r1 = virtualinvoke r0.<java.security.AccessControlException: java.security.Permission getPermission()>();
+
+        $z0 = $r1 instanceof java.lang.RuntimePermission;
+
+        if $z0 == 0 goto label2;
+
+        $r2 = virtualinvoke $r1.<java.security.Permission: java.lang.String getName()>();
+
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>("modifyThread");
+
+        if $z1 == 0 goto label2;
+
+        $r4 = r3.<sun.applet.AppletPanel: sun.applet.AppletClassLoader loader>;
+
+        if $r4 != null goto label1;
+
+        $r6 = virtualinvoke r3.<sun.applet.AppletPanel: java.net.URL getCodeBase()>();
+
+        $r7 = virtualinvoke r3.<sun.applet.AppletPanel: java.lang.String getClassLoaderCacheKey()>();
+
+        $r8 = virtualinvoke r3.<sun.applet.AppletPanel: sun.applet.AppletClassLoader getClassLoader(java.net.URL,java.lang.String)>($r6, $r7);
+
+        r3.<sun.applet.AppletPanel: sun.applet.AppletClassLoader loader> = $r8;
+
+     label1:
+        $r5 = r3.<sun.applet.AppletPanel: sun.applet.AppletClassLoader loader>;
+
+        virtualinvoke $r5.<sun.applet.AppletClassLoader: void setExceptionStatus()>();
+
+     label2:
+        return;
+    }
+
+    public void run()
+    {
+        java.lang.Thread $r0, $r2, $r23, $r24, $r25, $r26;
+        java.lang.Exception $r39;
+        java.lang.ThreadDeath $r38;
+        java.lang.reflect.InvocationTargetException $r46, $r50, $r52, $r54;
+        java.lang.Error $r31;
+        sun.applet.AppletEvent $r3;
+        java.lang.String $r18, $r19, $r21, $r32, $r34, $r36, $r37, $r40, $r42, $r44, $r45;
+        java.util.Locale $r20;
+        sun.applet.AppletPanel r1;
+        boolean $z0, $z1, $z2, $z3, $z4, z5;
+        java.awt.Font $r17, $r57;
+        java.awt.Dimension $r8, $r15;
+        java.security.AccessControlException $r48, $r49;
+        sun.applet.AppletPanel$2 $r58;
+        sun.applet.AppletPanel$3 $r11;
+        sun.applet.AppletPanel$4 $r5;
+        sun.applet.AppletPanel$5 $r27;
+        java.applet.Applet $r4, $r7, $r9, $r10, $r13, $r14, $r16, $r22, $r29, $r30, $r60, r61, $r62;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11;
+        sun.awt.AWTAccessor$EventQueueAccessor $r6, $r12, $r28, $r59;
+        java.lang.InterruptedException $r47, $r51, $r53, $r55, $r56;
+        java.lang.Class $r33, $r35, $r41, $r43;
+
+        r1 := @this: sun.applet.AppletPanel;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = r1.<sun.applet.AppletPanel: java.lang.Thread loaderThread>;
+
+        if $r0 != $r2 goto label01;
+
+        specialinvoke r1.<sun.applet.AppletPanel: void runLoader()>();
+
+        return;
+
+     label01:
+        z5 = 0;
+
+     label02:
+        if z5 != 0 goto label60;
+
+        $z0 = virtualinvoke $r0.<java.lang.Thread: boolean isInterrupted()>();
+
+        if $z0 != 0 goto label60;
+
+     label03:
+        $r3 = virtualinvoke r1.<sun.applet.AppletPanel: sun.applet.AppletEvent getNextEvent()>();
+
+     label04:
+        goto label06;
+
+     label05:
+        $r56 := @caughtexception;
+
+        virtualinvoke r1.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String)>("bail");
+
+        return;
+
+     label06:
+        $i0 = virtualinvoke $r3.<sun.applet.AppletEvent: int getID()>();
+
+        tableswitch($i0)
+        {
+            case 0: goto label43;
+            case 1: goto label07;
+            case 2: goto label09;
+            case 3: goto label20;
+            case 4: goto label27;
+            case 5: goto label37;
+            case 6: goto label50;
+            default: goto label51;
+        };
+
+     label07:
+        $z4 = virtualinvoke r1.<sun.applet.AppletPanel: boolean okToLoad()>();
+
+        if $z4 != 0 goto label08;
+
+        goto label51;
+
+     label08:
+        $r23 = r1.<sun.applet.AppletPanel: java.lang.Thread loaderThread>;
+
+        if $r23 != null goto label51;
+
+        $r24 = new java.lang.Thread;
+
+        specialinvoke $r24.<java.lang.Thread: void <init>(java.lang.Runnable)>(r1);
+
+        specialinvoke r1.<sun.applet.AppletPanel: void setLoaderThread(java.lang.Thread)>($r24);
+
+        $r25 = r1.<sun.applet.AppletPanel: java.lang.Thread loaderThread>;
+
+        virtualinvoke $r25.<java.lang.Thread: void start()>();
+
+        $r26 = r1.<sun.applet.AppletPanel: java.lang.Thread loaderThread>;
+
+        virtualinvoke $r26.<java.lang.Thread: void join()>();
+
+        specialinvoke r1.<sun.applet.AppletPanel: void setLoaderThread(java.lang.Thread)>(null);
+
+        goto label51;
+
+     label09:
+        $i6 = r1.<sun.applet.AppletPanel: int status>;
+
+        if $i6 == 1 goto label10;
+
+        $i9 = r1.<sun.applet.AppletPanel: int status>;
+
+        if $i9 == 5 goto label10;
+
+        virtualinvoke r1.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String)>("notloaded");
+
+        goto label51;
+
+     label10:
+        $r16 = r1.<sun.applet.AppletPanel: java.applet.Applet applet>;
+
+        $r15 = r1.<sun.applet.AppletPanel: java.awt.Dimension defaultAppletSize>;
+
+        virtualinvoke $r16.<java.applet.Applet: void resize(java.awt.Dimension)>($r15);
+
+        $z1 = r1.<sun.applet.AppletPanel: boolean doInit>;
+
+        if $z1 == 0 goto label12;
+
+        $z3 = staticinvoke <sun.misc.PerformanceLogger: boolean loggingEnabled()>();
+
+        if $z3 == 0 goto label11;
+
+        staticinvoke <sun.misc.PerformanceLogger: int setTime(java.lang.String)>("Applet Init");
+
+        staticinvoke <sun.misc.PerformanceLogger: void outputLog()>();
+
+     label11:
+        $r22 = r1.<sun.applet.AppletPanel: java.applet.Applet applet>;
+
+        virtualinvoke $r22.<java.applet.Applet: void init()>();
+
+     label12:
+        $r57 = virtualinvoke r1.<sun.applet.AppletPanel: java.awt.Font getFont()>();
+
+        if $r57 == null goto label13;
+
+        $r18 = "dialog";
+
+        $r19 = virtualinvoke $r57.<java.awt.Font: java.lang.String getFamily()>();
+
+        $r20 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r21 = virtualinvoke $r19.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r20);
+
+        $z2 = virtualinvoke $r18.<java.lang.String: boolean equals(java.lang.Object)>($r21);
+
+        if $z2 == 0 goto label14;
+
+        $i7 = virtualinvoke $r57.<java.awt.Font: int getSize()>();
+
+        if $i7 != 12 goto label14;
+
+        $i8 = virtualinvoke $r57.<java.awt.Font: int getStyle()>();
+
+        if $i8 != 0 goto label14;
+
+     label13:
+        $r17 = new java.awt.Font;
+
+        specialinvoke $r17.<java.awt.Font: void <init>(java.lang.String,int,int)>("Dialog", 0, 12);
+
+        virtualinvoke r1.<sun.applet.AppletPanel: void setFont(java.awt.Font)>($r17);
+
+     label14:
+        r1.<sun.applet.AppletPanel: boolean doInit> = 1;
+
+     label15:
+        $r58 = new sun.applet.AppletPanel$2;
+
+        specialinvoke $r58.<sun.applet.AppletPanel$2: void <init>(sun.applet.AppletPanel,sun.applet.AppletPanel)>(r1, r1);
+
+        $r59 = staticinvoke <sun.awt.AWTAccessor: sun.awt.AWTAccessor$EventQueueAccessor getEventQueueAccessor()>();
+
+        $r60 = r1.<sun.applet.AppletPanel: java.applet.Applet applet>;
+
+        interfaceinvoke $r59.<sun.awt.AWTAccessor$EventQueueAccessor: void invokeAndWait(java.lang.Object,java.lang.Runnable)>($r60, $r58);
+
+     label16:
+        goto label19;
+
+     label17:
+        $r55 := @caughtexception;
+
+        goto label19;
+
+     label18:
+        $r54 := @caughtexception;
+
+     label19:
+        r1.<sun.applet.AppletPanel: int status> = 2;
+
+        virtualinvoke r1.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String)>("inited");
+
+        goto label51;
+
+     label20:
+        $i4 = r1.<sun.applet.AppletPanel: int status>;
+
+        if $i4 == 2 goto label21;
+
+        $i5 = r1.<sun.applet.AppletPanel: int status>;
+
+        if $i5 == 4 goto label21;
+
+        virtualinvoke r1.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String)>("notinited");
+
+        goto label51;
+
+     label21:
+        $r9 = r1.<sun.applet.AppletPanel: java.applet.Applet applet>;
+
+        $r8 = r1.<sun.applet.AppletPanel: java.awt.Dimension currentAppletSize>;
+
+        virtualinvoke $r9.<java.applet.Applet: void resize(java.awt.Dimension)>($r8);
+
+        $r10 = r1.<sun.applet.AppletPanel: java.applet.Applet applet>;
+
+        virtualinvoke $r10.<java.applet.Applet: void start()>();
+
+     label22:
+        $r14 = r1.<sun.applet.AppletPanel: java.applet.Applet applet>;
+
+        $r11 = new sun.applet.AppletPanel$3;
+
+        specialinvoke $r11.<sun.applet.AppletPanel$3: void <init>(sun.applet.AppletPanel,sun.applet.AppletPanel,java.applet.Applet)>(r1, r1, $r14);
+
+        $r12 = staticinvoke <sun.awt.AWTAccessor: sun.awt.AWTAccessor$EventQueueAccessor getEventQueueAccessor()>();
+
+        $r13 = r1.<sun.applet.AppletPanel: java.applet.Applet applet>;
+
+        interfaceinvoke $r12.<sun.awt.AWTAccessor$EventQueueAccessor: void invokeAndWait(java.lang.Object,java.lang.Runnable)>($r13, $r11);
+
+     label23:
+        goto label26;
+
+     label24:
+        $r53 := @caughtexception;
+
+        goto label26;
+
+     label25:
+        $r52 := @caughtexception;
+
+     label26:
+        r1.<sun.applet.AppletPanel: int status> = 3;
+
+        virtualinvoke r1.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String)>("started");
+
+        goto label51;
+
+     label27:
+        $i3 = r1.<sun.applet.AppletPanel: int status>;
+
+        if $i3 == 3 goto label28;
+
+        virtualinvoke r1.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String)>("notstarted");
+
+        goto label51;
+
+     label28:
+        r1.<sun.applet.AppletPanel: int status> = 4;
+
+     label29:
+        r61 = r1.<sun.applet.AppletPanel: java.applet.Applet applet>;
+
+        $r5 = new sun.applet.AppletPanel$4;
+
+        specialinvoke $r5.<sun.applet.AppletPanel$4: void <init>(sun.applet.AppletPanel,java.applet.Applet)>(r1, r61);
+
+        $r6 = staticinvoke <sun.awt.AWTAccessor: sun.awt.AWTAccessor$EventQueueAccessor getEventQueueAccessor()>();
+
+        $r7 = r1.<sun.applet.AppletPanel: java.applet.Applet applet>;
+
+        interfaceinvoke $r6.<sun.awt.AWTAccessor$EventQueueAccessor: void invokeAndWait(java.lang.Object,java.lang.Runnable)>($r7, $r5);
+
+     label30:
+        goto label33;
+
+     label31:
+        $r51 := @caughtexception;
+
+        goto label33;
+
+     label32:
+        $r50 := @caughtexception;
+
+     label33:
+        $r62 = r1.<sun.applet.AppletPanel: java.applet.Applet applet>;
+
+        virtualinvoke $r62.<java.applet.Applet: void stop()>();
+
+     label34:
+        goto label36;
+
+     label35:
+        $r49 := @caughtexception;
+
+        specialinvoke r1.<sun.applet.AppletPanel: void setExceptionStatus(java.security.AccessControlException)>($r49);
+
+        throw $r49;
+
+     label36:
+        virtualinvoke r1.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String)>("stopped");
+
+        goto label51;
+
+     label37:
+        $i1 = r1.<sun.applet.AppletPanel: int status>;
+
+        if $i1 == 4 goto label38;
+
+        $i2 = r1.<sun.applet.AppletPanel: int status>;
+
+        if $i2 == 2 goto label38;
+
+        virtualinvoke r1.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String)>("notstopped");
+
+        goto label51;
+
+     label38:
+        r1.<sun.applet.AppletPanel: int status> = 5;
+
+     label39:
+        $r4 = r1.<sun.applet.AppletPanel: java.applet.Applet applet>;
+
+        virtualinvoke $r4.<java.applet.Applet: void destroy()>();
+
+     label40:
+        goto label42;
+
+     label41:
+        $r48 := @caughtexception;
+
+        specialinvoke r1.<sun.applet.AppletPanel: void setExceptionStatus(java.security.AccessControlException)>($r48);
+
+        throw $r48;
+
+     label42:
+        virtualinvoke r1.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String)>("destroyed");
+
+        goto label51;
+
+     label43:
+        $i10 = r1.<sun.applet.AppletPanel: int status>;
+
+        if $i10 == 5 goto label44;
+
+        $i11 = r1.<sun.applet.AppletPanel: int status>;
+
+        if $i11 == 1 goto label44;
+
+        virtualinvoke r1.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String)>("notdestroyed");
+
+        goto label51;
+
+     label44:
+        r1.<sun.applet.AppletPanel: int status> = 0;
+
+     label45:
+        $r30 = r1.<sun.applet.AppletPanel: java.applet.Applet applet>;
+
+        $r27 = new sun.applet.AppletPanel$5;
+
+        specialinvoke $r27.<sun.applet.AppletPanel$5: void <init>(sun.applet.AppletPanel,java.applet.Applet)>(r1, $r30);
+
+        $r28 = staticinvoke <sun.awt.AWTAccessor: sun.awt.AWTAccessor$EventQueueAccessor getEventQueueAccessor()>();
+
+        $r29 = r1.<sun.applet.AppletPanel: java.applet.Applet applet>;
+
+        interfaceinvoke $r28.<sun.awt.AWTAccessor$EventQueueAccessor: void invokeAndWait(java.lang.Object,java.lang.Runnable)>($r29, $r27);
+
+     label46:
+        goto label49;
+
+     label47:
+        $r47 := @caughtexception;
+
+        goto label49;
+
+     label48:
+        $r46 := @caughtexception;
+
+     label49:
+        r1.<sun.applet.AppletPanel: java.applet.Applet applet> = null;
+
+        virtualinvoke r1.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String)>("disposed");
+
+        z5 = 1;
+
+        goto label51;
+
+     label50:
+        return;
+
+     label51:
+        goto label59;
+
+     label52:
+        $r39 := @caughtexception;
+
+        r1.<sun.applet.AppletPanel: int status> = 7;
+
+        $r40 = virtualinvoke $r39.<java.lang.Exception: java.lang.String getMessage()>();
+
+        if $r40 == null goto label53;
+
+        $r43 = virtualinvoke $r39.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r44 = virtualinvoke $r43.<java.lang.Class: java.lang.String getName()>();
+
+        $r45 = virtualinvoke $r39.<java.lang.Exception: java.lang.String getMessage()>();
+
+        virtualinvoke r1.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String,java.lang.Object,java.lang.Object)>("exception2", $r44, $r45);
+
+        goto label54;
+
+     label53:
+        $r41 = virtualinvoke $r39.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r42 = virtualinvoke $r41.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke r1.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String,java.lang.Object)>("exception", $r42);
+
+     label54:
+        virtualinvoke r1.<sun.applet.AppletPanel: void showAppletException(java.lang.Throwable)>($r39);
+
+        goto label59;
+
+     label55:
+        $r38 := @caughtexception;
+
+        virtualinvoke r1.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String)>("death");
+
+        return;
+
+     label56:
+        $r31 := @caughtexception;
+
+        r1.<sun.applet.AppletPanel: int status> = 7;
+
+        $r32 = virtualinvoke $r31.<java.lang.Error: java.lang.String getMessage()>();
+
+        if $r32 == null goto label57;
+
+        $r35 = virtualinvoke $r31.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r36 = virtualinvoke $r35.<java.lang.Class: java.lang.String getName()>();
+
+        $r37 = virtualinvoke $r31.<java.lang.Error: java.lang.String getMessage()>();
+
+        virtualinvoke r1.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String,java.lang.Object,java.lang.Object)>("error2", $r36, $r37);
+
+        goto label58;
+
+     label57:
+        $r33 = virtualinvoke $r31.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r34 = virtualinvoke $r33.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke r1.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String,java.lang.Object)>("error", $r34);
+
+     label58:
+        virtualinvoke r1.<sun.applet.AppletPanel: void showAppletException(java.lang.Throwable)>($r31);
+
+     label59:
+        virtualinvoke r1.<sun.applet.AppletPanel: void clearLoadAbortRequest()>();
+
+        goto label02;
+
+     label60:
+        return;
+
+        catch java.lang.InterruptedException from label03 to label04 with label05;
+        catch java.lang.InterruptedException from label15 to label16 with label17;
+        catch java.lang.reflect.InvocationTargetException from label15 to label16 with label18;
+        catch java.lang.InterruptedException from label22 to label23 with label24;
+        catch java.lang.reflect.InvocationTargetException from label22 to label23 with label25;
+        catch java.lang.InterruptedException from label29 to label30 with label31;
+        catch java.lang.reflect.InvocationTargetException from label29 to label30 with label32;
+        catch java.security.AccessControlException from label33 to label34 with label35;
+        catch java.security.AccessControlException from label39 to label40 with label41;
+        catch java.lang.InterruptedException from label45 to label46 with label47;
+        catch java.lang.reflect.InvocationTargetException from label45 to label46 with label48;
+        catch java.lang.Exception from label06 to label50 with label52;
+        catch java.lang.ThreadDeath from label06 to label50 with label55;
+        catch java.lang.Error from label06 to label50 with label56;
+    }
+
+    private java.awt.Component getMostRecentFocusOwnerForWindow(java.awt.Window)
+    {
+        java.lang.Object[] $r6;
+        java.awt.Window r4;
+        sun.applet.AppletPanel$6 $r0;
+        java.awt.Component $r5, $r8;
+        java.lang.Exception $r9;
+        java.lang.Object $r2, $r7;
+        java.lang.reflect.Method r3;
+        sun.applet.AppletPanel r1;
+
+        r1 := @this: sun.applet.AppletPanel;
+
+        r4 := @parameter0: java.awt.Window;
+
+        $r0 = new sun.applet.AppletPanel$6;
+
+        specialinvoke $r0.<sun.applet.AppletPanel$6: void <init>(sun.applet.AppletPanel)>(r1);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r3 = (java.lang.reflect.Method) $r2;
+
+        if r3 == null goto label4;
+
+     label1:
+        $r6 = newarray (java.lang.Object)[1];
+
+        $r6[0] = r4;
+
+        $r7 = virtualinvoke r3.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>(null, $r6);
+
+        $r8 = (java.awt.Component) $r7;
+
+     label2:
+        return $r8;
+
+     label3:
+        $r9 := @caughtexception;
+
+        virtualinvoke $r9.<java.lang.Exception: void printStackTrace()>();
+
+     label4:
+        $r5 = virtualinvoke r4.<java.awt.Window: java.awt.Component getMostRecentFocusOwner()>();
+
+        return $r5;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    private void setDefaultFocus()
+    {
+        java.awt.FocusTraversalPolicy $r3, $r6;
+        java.awt.Window $r4, $r7;
+        java.awt.Component $r5, r8;
+        sun.awt.EmbeddedFrame $r2;
+        java.awt.Container $r1;
+        sun.applet.AppletPanel r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        r8 = null;
+
+        $r1 = virtualinvoke r0.<sun.applet.AppletPanel: java.awt.Container getParent()>();
+
+        if $r1 == null goto label3;
+
+        $z1 = $r1 instanceof java.awt.Window;
+
+        if $z1 == 0 goto label2;
+
+        $r4 = (java.awt.Window) $r1;
+
+        $r5 = specialinvoke r0.<sun.applet.AppletPanel: java.awt.Component getMostRecentFocusOwnerForWindow(java.awt.Window)>($r4);
+
+        r8 = $r5;
+
+        if $r5 == $r1 goto label1;
+
+        if $r5 != null goto label3;
+
+     label1:
+        $r6 = virtualinvoke $r1.<java.awt.Container: java.awt.FocusTraversalPolicy getFocusTraversalPolicy()>();
+
+        $r7 = (java.awt.Window) $r1;
+
+        r8 = virtualinvoke $r6.<java.awt.FocusTraversalPolicy: java.awt.Component getInitialComponent(java.awt.Window)>($r7);
+
+        goto label3;
+
+     label2:
+        $z2 = virtualinvoke $r1.<java.awt.Container: boolean isFocusCycleRoot()>();
+
+        if $z2 == 0 goto label3;
+
+        $r3 = virtualinvoke $r1.<java.awt.Container: java.awt.FocusTraversalPolicy getFocusTraversalPolicy()>();
+
+        r8 = virtualinvoke $r3.<java.awt.FocusTraversalPolicy: java.awt.Component getDefaultComponent(java.awt.Container)>($r1);
+
+     label3:
+        if r8 == null goto label5;
+
+        $z0 = $r1 instanceof sun.awt.EmbeddedFrame;
+
+        if $z0 == 0 goto label4;
+
+        $r2 = (sun.awt.EmbeddedFrame) $r1;
+
+        virtualinvoke $r2.<sun.awt.EmbeddedFrame: void synthesizeWindowActivation(boolean)>(1);
+
+     label4:
+        virtualinvoke r8.<java.awt.Component: boolean requestFocusInWindow()>();
+
+     label5:
+        return;
+    }
+
+    private void runLoader()
+    {
+        sun.applet.AppletClassLoader $r3, $r5, $r6;
+        java.lang.Throwable $r12;
+        java.net.URL $r1;
+        java.lang.Error $r13;
+        java.applet.Applet $r7, $r8, $r9, $r10, $r11;
+        int $i0, $i2, $i4, $i6, $i8, $i10, $i12, $i14, $i16, $i18;
+        java.lang.InstantiationException $r19;
+        java.lang.String $r2, $r4, $r14, $r17;
+        sun.applet.AppletPanel r0;
+        java.lang.IllegalAccessException $r18;
+        java.lang.Exception $r16;
+        java.lang.ThreadDeath $r15;
+        java.lang.ClassNotFoundException $r20;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        $i0 = r0.<sun.applet.AppletPanel: int status>;
+
+        if $i0 == 0 goto label01;
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String)>("notdisposed");
+
+        return;
+
+     label01:
+        $i2 = (int) 51235;
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void dispatchAppletEvent(int,java.lang.Object)>($i2, null);
+
+        r0.<sun.applet.AppletPanel: int status> = 1;
+
+        $r1 = virtualinvoke r0.<sun.applet.AppletPanel: java.net.URL getCodeBase()>();
+
+        $r2 = virtualinvoke r0.<sun.applet.AppletPanel: java.lang.String getClassLoaderCacheKey()>();
+
+        $r3 = virtualinvoke r0.<sun.applet.AppletPanel: sun.applet.AppletClassLoader getClassLoader(java.net.URL,java.lang.String)>($r1, $r2);
+
+        r0.<sun.applet.AppletPanel: sun.applet.AppletClassLoader loader> = $r3;
+
+        $r4 = virtualinvoke r0.<sun.applet.AppletPanel: java.lang.String getCode()>();
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void setupAppletAppContext()>();
+
+     label02:
+        $r5 = r0.<sun.applet.AppletPanel: sun.applet.AppletClassLoader loader>;
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void loadJarFiles(sun.applet.AppletClassLoader)>($r5);
+
+        $r6 = r0.<sun.applet.AppletPanel: sun.applet.AppletClassLoader loader>;
+
+        $r7 = virtualinvoke r0.<sun.applet.AppletPanel: java.applet.Applet createApplet(sun.applet.AppletClassLoader)>($r6);
+
+        r0.<sun.applet.AppletPanel: java.applet.Applet applet> = $r7;
+
+     label03:
+        $i4 = (int) 51236;
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void dispatchAppletEvent(int,java.lang.Object)>($i4, null);
+
+        goto label17;
+
+     label04:
+        $r20 := @caughtexception;
+
+        r0.<sun.applet.AppletPanel: int status> = 7;
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String,java.lang.Object)>("notfound", $r4);
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void showAppletLog(java.lang.String,java.lang.Object)>("notfound", $r4);
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void showAppletException(java.lang.Throwable)>($r20);
+
+     label05:
+        $i6 = (int) 51236;
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void dispatchAppletEvent(int,java.lang.Object)>($i6, null);
+
+        return;
+
+     label06:
+        $r19 := @caughtexception;
+
+        r0.<sun.applet.AppletPanel: int status> = 7;
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String,java.lang.Object)>("nocreate", $r4);
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void showAppletLog(java.lang.String,java.lang.Object)>("nocreate", $r4);
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void showAppletException(java.lang.Throwable)>($r19);
+
+     label07:
+        $i8 = (int) 51236;
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void dispatchAppletEvent(int,java.lang.Object)>($i8, null);
+
+        return;
+
+     label08:
+        $r18 := @caughtexception;
+
+        r0.<sun.applet.AppletPanel: int status> = 7;
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String,java.lang.Object)>("noconstruct", $r4);
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void showAppletLog(java.lang.String,java.lang.Object)>("noconstruct", $r4);
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void showAppletException(java.lang.Throwable)>($r18);
+
+     label09:
+        $i10 = (int) 51236;
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void dispatchAppletEvent(int,java.lang.Object)>($i10, null);
+
+        return;
+
+     label10:
+        $r16 := @caughtexception;
+
+        r0.<sun.applet.AppletPanel: int status> = 7;
+
+        $r17 = virtualinvoke $r16.<java.lang.Exception: java.lang.String getMessage()>();
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String,java.lang.Object)>("exception", $r17);
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void showAppletException(java.lang.Throwable)>($r16);
+
+     label11:
+        $i12 = (int) 51236;
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void dispatchAppletEvent(int,java.lang.Object)>($i12, null);
+
+        return;
+
+     label12:
+        $r15 := @caughtexception;
+
+        r0.<sun.applet.AppletPanel: int status> = 7;
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String)>("death");
+
+     label13:
+        $i14 = (int) 51236;
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void dispatchAppletEvent(int,java.lang.Object)>($i14, null);
+
+        return;
+
+     label14:
+        $r13 := @caughtexception;
+
+        r0.<sun.applet.AppletPanel: int status> = 7;
+
+        $r14 = virtualinvoke $r13.<java.lang.Error: java.lang.String getMessage()>();
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String,java.lang.Object)>("error", $r14);
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void showAppletException(java.lang.Throwable)>($r13);
+
+     label15:
+        $i16 = (int) 51236;
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void dispatchAppletEvent(int,java.lang.Object)>($i16, null);
+
+        return;
+
+     label16:
+        $r12 := @caughtexception;
+
+        $i18 = (int) 51236;
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void dispatchAppletEvent(int,java.lang.Object)>($i18, null);
+
+        throw $r12;
+
+     label17:
+        $r8 = r0.<sun.applet.AppletPanel: java.applet.Applet applet>;
+
+        if $r8 == null goto label18;
+
+        $r9 = r0.<sun.applet.AppletPanel: java.applet.Applet applet>;
+
+        virtualinvoke $r9.<java.applet.Applet: void setStub(java.applet.AppletStub)>(r0);
+
+        $r10 = r0.<sun.applet.AppletPanel: java.applet.Applet applet>;
+
+        virtualinvoke $r10.<java.applet.Applet: void hide()>();
+
+        $r11 = r0.<sun.applet.AppletPanel: java.applet.Applet applet>;
+
+        virtualinvoke r0.<sun.applet.AppletPanel: java.awt.Component add(java.lang.String,java.awt.Component)>("Center", $r11);
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String)>("loaded");
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void validate()>();
+
+     label18:
+        return;
+
+        catch java.lang.ClassNotFoundException from label02 to label03 with label04;
+        catch java.lang.InstantiationException from label02 to label03 with label06;
+        catch java.lang.IllegalAccessException from label02 to label03 with label08;
+        catch java.lang.Exception from label02 to label03 with label10;
+        catch java.lang.ThreadDeath from label02 to label03 with label12;
+        catch java.lang.Error from label02 to label03 with label14;
+        catch java.lang.Throwable from label02 to label03 with label16;
+        catch java.lang.Throwable from label04 to label05 with label16;
+        catch java.lang.Throwable from label06 to label07 with label16;
+        catch java.lang.Throwable from label08 to label09 with label16;
+        catch java.lang.Throwable from label10 to label11 with label16;
+        catch java.lang.Throwable from label12 to label13 with label16;
+        catch java.lang.Throwable from label14 to label15 with label16;
+    }
+
+    protected java.applet.Applet createApplet(sun.applet.AppletClassLoader) throws java.lang.ClassNotFoundException, java.lang.IllegalAccessException, java.io.IOException, java.lang.InstantiationException, java.lang.InterruptedException
+    {
+        sun.applet.AppletClassLoader r3;
+        java.lang.Throwable $r18, $r20, $r21, $r22, $r24, $r25, $r26, r29, r30;
+        java.applet.Applet $r8, $r9, $r13, $r31;
+        sun.applet.AppletMessageHandler $r14;
+        java.lang.Thread $r10, $r19;
+        java.lang.InstantiationException $r17;
+        java.lang.String $r1, $r2, $r16;
+        sun.applet.AppletPanel r0;
+        boolean $z0;
+        java.io.PrintStream $r15;
+        java.security.PrivilegedAction $r4;
+        sun.applet.AppletObjectInputStream $r6;
+        java.lang.Object $r5, $r7, $r12;
+        java.lang.Class $r11;
+        java.io.InputStream r28;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        r3 := @parameter0: sun.applet.AppletClassLoader;
+
+        $r1 = virtualinvoke r0.<sun.applet.AppletPanel: java.lang.String getSerializedObject()>();
+
+        $r2 = virtualinvoke r0.<sun.applet.AppletPanel: java.lang.String getCode()>();
+
+        if $r2 == null goto label01;
+
+        if $r1 == null goto label01;
+
+        $r15 = <java.lang.System: java.io.PrintStream err>;
+
+        $r14 = <sun.applet.AppletPanel: sun.applet.AppletMessageHandler amh>;
+
+        $r16 = virtualinvoke $r14.<sun.applet.AppletMessageHandler: java.lang.String getMessage(java.lang.String)>("runloader.err");
+
+        virtualinvoke $r15.<java.io.PrintStream: void println(java.lang.String)>($r16);
+
+        $r17 = new java.lang.InstantiationException;
+
+        specialinvoke $r17.<java.lang.InstantiationException: void <init>(java.lang.String)>("Either \"code\" or \"object\" should be specified, but not both.");
+
+        throw $r17;
+
+     label01:
+        if $r2 != null goto label02;
+
+        if $r1 != null goto label02;
+
+        r0.<sun.applet.AppletPanel: int status> = 7;
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String)>("nocode");
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void showAppletLog(java.lang.String)>("nocode");
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void repaint()>();
+
+     label02:
+        if $r2 == null goto label03;
+
+        $r11 = virtualinvoke r3.<sun.applet.AppletClassLoader: java.lang.Class loadCode(java.lang.String)>($r2);
+
+        $r12 = virtualinvoke $r11.<java.lang.Class: java.lang.Object newInstance()>();
+
+        $r13 = (java.applet.Applet) $r12;
+
+        r0.<sun.applet.AppletPanel: java.applet.Applet applet> = $r13;
+
+        r0.<sun.applet.AppletPanel: boolean doInit> = 1;
+
+        goto label26;
+
+     label03:
+        $r4 = staticinvoke <sun.applet.AppletPanel$lambda_createApplet_0__366: java.security.PrivilegedAction bootstrap$(sun.applet.AppletClassLoader,java.lang.String)>(r3, $r1);
+
+        $r5 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r4);
+
+        r28 = (java.io.InputStream) $r5;
+
+        r29 = null;
+
+     label04:
+        $r6 = new sun.applet.AppletObjectInputStream;
+
+        specialinvoke $r6.<sun.applet.AppletObjectInputStream: void <init>(java.io.InputStream,sun.applet.AppletClassLoader)>(r28, r3);
+
+        r30 = null;
+
+     label05:
+        $r7 = virtualinvoke $r6.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        $r8 = (java.applet.Applet) $r7;
+
+        r0.<sun.applet.AppletPanel: java.applet.Applet applet> = $r8;
+
+        r0.<sun.applet.AppletPanel: boolean doInit> = 0;
+
+     label06:
+        if $r6 == null goto label16;
+
+        goto label07;
+
+     label07:
+        virtualinvoke $r6.<java.io.ObjectInputStream: void close()>();
+
+        goto label16;
+
+     label08:
+        $r26 := @caughtexception;
+
+        r30 = $r26;
+
+        throw $r26;
+
+     label09:
+        $r25 := @caughtexception;
+
+     label10:
+        if $r6 == null goto label15;
+
+        if r30 == null goto label14;
+
+     label11:
+        virtualinvoke $r6.<java.io.ObjectInputStream: void close()>();
+
+     label12:
+        goto label15;
+
+     label13:
+        $r24 := @caughtexception;
+
+        virtualinvoke r30.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r24);
+
+        goto label15;
+
+     label14:
+        virtualinvoke $r6.<java.io.ObjectInputStream: void close()>();
+
+     label15:
+        throw $r25;
+
+     label16:
+        if r28 == null goto label26;
+
+        goto label17;
+
+     label17:
+        virtualinvoke r28.<java.io.InputStream: void close()>();
+
+        goto label26;
+
+     label18:
+        $r22 := @caughtexception;
+
+        r29 = $r22;
+
+        throw $r22;
+
+     label19:
+        $r21 := @caughtexception;
+
+     label20:
+        if r28 == null goto label25;
+
+        if r29 == null goto label24;
+
+     label21:
+        virtualinvoke r28.<java.io.InputStream: void close()>();
+
+     label22:
+        goto label25;
+
+     label23:
+        $r20 := @caughtexception;
+
+        virtualinvoke r29.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r20);
+
+        goto label25;
+
+     label24:
+        virtualinvoke r28.<java.io.InputStream: void close()>();
+
+     label25:
+        throw $r21;
+
+     label26:
+        $r31 = r0.<sun.applet.AppletPanel: java.applet.Applet applet>;
+
+        specialinvoke r0.<sun.applet.AppletPanel: void findAppletJDKLevel(java.applet.Applet)>($r31);
+
+        $z0 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z0 == 0 goto label32;
+
+     label27:
+        r0.<sun.applet.AppletPanel: int status> = 0;
+
+        r0.<sun.applet.AppletPanel: java.applet.Applet applet> = null;
+
+        virtualinvoke r0.<sun.applet.AppletPanel: void showAppletStatus(java.lang.String)>("death");
+
+     label28:
+        $r10 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r10.<java.lang.Thread: void interrupt()>();
+
+        goto label31;
+
+     label29:
+        $r18 := @caughtexception;
+
+     label30:
+        $r19 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r19.<java.lang.Thread: void interrupt()>();
+
+        throw $r18;
+
+     label31:
+        return null;
+
+     label32:
+        $r9 = r0.<sun.applet.AppletPanel: java.applet.Applet applet>;
+
+        return $r9;
+
+        catch java.lang.Throwable from label05 to label06 with label08;
+        catch java.lang.Throwable from label11 to label12 with label13;
+        catch java.lang.Throwable from label08 to label10 with label09;
+        catch java.lang.Throwable from label04 to label16 with label18;
+        catch java.lang.Throwable from label21 to label22 with label23;
+        catch java.lang.Throwable from label18 to label20 with label19;
+        catch java.lang.Throwable from label27 to label28 with label29;
+        catch java.lang.Throwable from label29 to label30 with label29;
+    }
+
+    protected void loadJarFiles(sun.applet.AppletClassLoader) throws java.io.IOException, java.lang.InterruptedException
+    {
+        sun.applet.AppletClassLoader r5;
+        java.lang.IllegalArgumentException $r6;
+        java.util.StringTokenizer $r2;
+        java.lang.String $r1, $r3, $r4;
+        sun.applet.AppletPanel r0;
+        boolean $z0;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        r5 := @parameter0: sun.applet.AppletClassLoader;
+
+        $r1 = virtualinvoke r0.<sun.applet.AppletPanel: java.lang.String getJarFiles()>();
+
+        if $r1 == null goto label6;
+
+        $r2 = new java.util.StringTokenizer;
+
+        specialinvoke $r2.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String,boolean)>($r1, ",", 0);
+
+     label1:
+        $z0 = virtualinvoke $r2.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label6;
+
+        $r3 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.String: java.lang.String trim()>();
+
+     label2:
+        virtualinvoke r5.<sun.applet.AppletClassLoader: void addJar(java.lang.String)>($r4);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r6 := @caughtexception;
+
+        goto label1;
+
+     label5:
+        goto label1;
+
+     label6:
+        return;
+
+        catch java.lang.IllegalArgumentException from label2 to label3 with label4;
+    }
+
+    protected synchronized void stopLoading()
+    {
+        sun.applet.AppletPanel r0;
+        java.lang.Thread $r1, $r2;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        $r1 = r0.<sun.applet.AppletPanel: java.lang.Thread loaderThread>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.applet.AppletPanel: java.lang.Thread loaderThread>;
+
+        virtualinvoke $r2.<java.lang.Thread: void interrupt()>();
+
+        goto label2;
+
+     label1:
+        virtualinvoke r0.<sun.applet.AppletPanel: void setLoadAbortRequest()>();
+
+     label2:
+        return;
+    }
+
+    protected synchronized boolean okToLoad()
+    {
+        sun.applet.AppletPanel r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        $z0 = r0.<sun.applet.AppletPanel: boolean loadAbortRequest>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    protected synchronized void clearLoadAbortRequest()
+    {
+        sun.applet.AppletPanel r0;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        r0.<sun.applet.AppletPanel: boolean loadAbortRequest> = 0;
+
+        return;
+    }
+
+    protected synchronized void setLoadAbortRequest()
+    {
+        sun.applet.AppletPanel r0;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        r0.<sun.applet.AppletPanel: boolean loadAbortRequest> = 1;
+
+        return;
+    }
+
+    private synchronized void setLoaderThread(java.lang.Thread)
+    {
+        sun.applet.AppletPanel r0;
+        java.lang.Thread r1;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        r1 := @parameter0: java.lang.Thread;
+
+        r0.<sun.applet.AppletPanel: java.lang.Thread loaderThread> = r1;
+
+        return;
+    }
+
+    public boolean isActive()
+    {
+        int $i0;
+        sun.applet.AppletPanel r0;
+        boolean $z0;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        $i0 = r0.<sun.applet.AppletPanel: int status>;
+
+        if $i0 != 3 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public void appletResize(int, int)
+    {
+        sun.applet.AppletClassLoader $r6, $r11;
+        sun.applet.AppletPanel$7 $r10;
+        java.awt.event.InvocationEvent $r7;
+        sun.awt.AppContext $r12;
+        int i0, i1, $i2, $i3;
+        sun.applet.AppletPanel r0;
+        java.awt.EventQueue $r8, $r15, $r16;
+        java.awt.Dimension $r1, $r2, $r3, $r4, $r5;
+        java.lang.Object $r13, $r14;
+        java.awt.Toolkit $r9;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r1 = r0.<sun.applet.AppletPanel: java.awt.Dimension currentAppletSize>;
+
+        $r1.<java.awt.Dimension: int width> = i0;
+
+        $r2 = r0.<sun.applet.AppletPanel: java.awt.Dimension currentAppletSize>;
+
+        $r2.<java.awt.Dimension: int height> = i1;
+
+        $r3 = new java.awt.Dimension;
+
+        $r4 = r0.<sun.applet.AppletPanel: java.awt.Dimension currentAppletSize>;
+
+        $i3 = $r4.<java.awt.Dimension: int width>;
+
+        $r5 = r0.<sun.applet.AppletPanel: java.awt.Dimension currentAppletSize>;
+
+        $i2 = $r5.<java.awt.Dimension: int height>;
+
+        specialinvoke $r3.<java.awt.Dimension: void <init>(int,int)>($i3, $i2);
+
+        $r6 = r0.<sun.applet.AppletPanel: sun.applet.AppletClassLoader loader>;
+
+        if $r6 == null goto label1;
+
+        $r11 = r0.<sun.applet.AppletPanel: sun.applet.AppletClassLoader loader>;
+
+        $r12 = virtualinvoke $r11.<sun.applet.AppletClassLoader: sun.awt.AppContext getAppContext()>();
+
+        if $r12 == null goto label1;
+
+        $r13 = <sun.awt.AppContext: java.lang.Object EVENT_QUEUE_KEY>;
+
+        $r14 = virtualinvoke $r12.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>($r13);
+
+        $r15 = (java.awt.EventQueue) $r14;
+
+        r0.<sun.applet.AppletPanel: java.awt.EventQueue appEvtQ> = $r15;
+
+     label1:
+        $r16 = r0.<sun.applet.AppletPanel: java.awt.EventQueue appEvtQ>;
+
+        if $r16 == null goto label2;
+
+        $r8 = r0.<sun.applet.AppletPanel: java.awt.EventQueue appEvtQ>;
+
+        $r7 = new java.awt.event.InvocationEvent;
+
+        $r9 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r10 = new sun.applet.AppletPanel$7;
+
+        specialinvoke $r10.<sun.applet.AppletPanel$7: void <init>(sun.applet.AppletPanel,sun.applet.AppletPanel,java.awt.Dimension)>(r0, r0, $r3);
+
+        specialinvoke $r7.<java.awt.event.InvocationEvent: void <init>(java.lang.Object,java.lang.Runnable)>($r9, $r10);
+
+        virtualinvoke $r8.<java.awt.EventQueue: void postEvent(java.awt.AWTEvent)>($r7);
+
+     label2:
+        return;
+    }
+
+    public void setBounds(int, int, int, int)
+    {
+        java.awt.Dimension $r1, $r2;
+        int i0, i1, i2, i3;
+        sun.applet.AppletPanel r0;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        specialinvoke r0.<java.awt.Panel: void setBounds(int,int,int,int)>(i0, i1, i2, i3);
+
+        $r1 = r0.<sun.applet.AppletPanel: java.awt.Dimension currentAppletSize>;
+
+        $r1.<java.awt.Dimension: int width> = i2;
+
+        $r2 = r0.<sun.applet.AppletPanel: java.awt.Dimension currentAppletSize>;
+
+        $r2.<java.awt.Dimension: int height> = i3;
+
+        return;
+    }
+
+    public java.applet.Applet getApplet()
+    {
+        java.applet.Applet $r1;
+        sun.applet.AppletPanel r0;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        $r1 = r0.<sun.applet.AppletPanel: java.applet.Applet applet>;
+
+        return $r1;
+    }
+
+    protected void showAppletStatus(java.lang.String)
+    {
+        sun.applet.AppletMessageHandler $r3;
+        java.applet.AppletContext $r1;
+        java.lang.String r2, $r4;
+        sun.applet.AppletPanel r0;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = virtualinvoke r0.<sun.applet.AppletPanel: java.applet.AppletContext getAppletContext()>();
+
+        $r3 = <sun.applet.AppletPanel: sun.applet.AppletMessageHandler amh>;
+
+        $r4 = virtualinvoke $r3.<sun.applet.AppletMessageHandler: java.lang.String getMessage(java.lang.String)>(r2);
+
+        interfaceinvoke $r1.<java.applet.AppletContext: void showStatus(java.lang.String)>($r4);
+
+        return;
+    }
+
+    protected void showAppletStatus(java.lang.String, java.lang.Object)
+    {
+        sun.applet.AppletMessageHandler $r4;
+        java.lang.Object r3;
+        java.applet.AppletContext $r1;
+        java.lang.String r2, $r5;
+        sun.applet.AppletPanel r0;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.Object;
+
+        $r1 = virtualinvoke r0.<sun.applet.AppletPanel: java.applet.AppletContext getAppletContext()>();
+
+        $r4 = <sun.applet.AppletPanel: sun.applet.AppletMessageHandler amh>;
+
+        $r5 = virtualinvoke $r4.<sun.applet.AppletMessageHandler: java.lang.String getMessage(java.lang.String,java.lang.Object)>(r2, r3);
+
+        interfaceinvoke $r1.<java.applet.AppletContext: void showStatus(java.lang.String)>($r5);
+
+        return;
+    }
+
+    protected void showAppletStatus(java.lang.String, java.lang.Object, java.lang.Object)
+    {
+        sun.applet.AppletMessageHandler $r5;
+        java.lang.Object r3, r4;
+        java.applet.AppletContext $r1;
+        java.lang.String r2, $r6;
+        sun.applet.AppletPanel r0;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.Object;
+
+        r4 := @parameter2: java.lang.Object;
+
+        $r1 = virtualinvoke r0.<sun.applet.AppletPanel: java.applet.AppletContext getAppletContext()>();
+
+        $r5 = <sun.applet.AppletPanel: sun.applet.AppletMessageHandler amh>;
+
+        $r6 = virtualinvoke $r5.<sun.applet.AppletMessageHandler: java.lang.String getMessage(java.lang.String,java.lang.Object,java.lang.Object)>(r2, r3, r4);
+
+        interfaceinvoke $r1.<java.applet.AppletContext: void showStatus(java.lang.String)>($r6);
+
+        return;
+    }
+
+    protected void showAppletLog(java.lang.String)
+    {
+        java.io.PrintStream $r2;
+        sun.applet.AppletMessageHandler $r1;
+        java.lang.String r0, $r3;
+        sun.applet.AppletPanel r4;
+
+        r4 := @this: sun.applet.AppletPanel;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r2 = <java.lang.System: java.io.PrintStream out>;
+
+        $r1 = <sun.applet.AppletPanel: sun.applet.AppletMessageHandler amh>;
+
+        $r3 = virtualinvoke $r1.<sun.applet.AppletMessageHandler: java.lang.String getMessage(java.lang.String)>(r0);
+
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>($r3);
+
+        return;
+    }
+
+    protected void showAppletLog(java.lang.String, java.lang.Object)
+    {
+        java.io.PrintStream $r3;
+        sun.applet.AppletMessageHandler $r2;
+        java.lang.Object r1;
+        java.lang.String r0, $r4;
+        sun.applet.AppletPanel r5;
+
+        r5 := @this: sun.applet.AppletPanel;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.Object;
+
+        $r3 = <java.lang.System: java.io.PrintStream out>;
+
+        $r2 = <sun.applet.AppletPanel: sun.applet.AppletMessageHandler amh>;
+
+        $r4 = virtualinvoke $r2.<sun.applet.AppletMessageHandler: java.lang.String getMessage(java.lang.String,java.lang.Object)>(r0, r1);
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>($r4);
+
+        return;
+    }
+
+    protected void showAppletException(java.lang.Throwable)
+    {
+        java.lang.Throwable r0;
+        sun.applet.AppletPanel r1;
+
+        r1 := @this: sun.applet.AppletPanel;
+
+        r0 := @parameter0: java.lang.Throwable;
+
+        virtualinvoke r0.<java.lang.Throwable: void printStackTrace()>();
+
+        virtualinvoke r1.<sun.applet.AppletPanel: void repaint()>();
+
+        return;
+    }
+
+    public java.lang.String getClassLoaderCacheKey()
+    {
+        java.lang.String $r2;
+        sun.applet.AppletPanel r0;
+        java.net.URL $r1;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        $r1 = virtualinvoke r0.<sun.applet.AppletPanel: java.net.URL getCodeBase()>();
+
+        $r2 = virtualinvoke $r1.<java.net.URL: java.lang.String toString()>();
+
+        return $r2;
+    }
+
+    public static synchronized void flushClassLoader(java.lang.String)
+    {
+        java.util.HashMap $r1;
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = <sun.applet.AppletPanel: java.util.HashMap classloaders>;
+
+        virtualinvoke $r1.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>(r0);
+
+        return;
+    }
+
+    public static synchronized void flushClassLoaders()
+    {
+        java.util.HashMap $r0;
+
+        $r0 = new java.util.HashMap;
+
+        specialinvoke $r0.<java.util.HashMap: void <init>()>();
+
+        <sun.applet.AppletPanel: java.util.HashMap classloaders> = $r0;
+
+        return;
+    }
+
+    protected sun.applet.AppletClassLoader createClassLoader(java.net.URL)
+    {
+        sun.applet.AppletClassLoader $r0;
+        java.net.URL r1;
+        sun.applet.AppletPanel r2;
+
+        r2 := @this: sun.applet.AppletPanel;
+
+        r1 := @parameter0: java.net.URL;
+
+        $r0 = new sun.applet.AppletClassLoader;
+
+        specialinvoke $r0.<sun.applet.AppletClassLoader: void <init>(java.net.URL)>(r1);
+
+        return $r0;
+    }
+
+    synchronized sun.applet.AppletClassLoader getClassLoader(java.net.URL, java.lang.String)
+    {
+        java.security.AccessControlContext $r5;
+        sun.applet.AppletClassLoader r8;
+        java.net.URL r4;
+        java.util.HashMap $r1;
+        sun.applet.AppletPanel$8 $r6;
+        java.lang.Object $r2, $r7;
+        java.lang.String r0;
+        sun.applet.AppletPanel r3;
+
+        r3 := @this: sun.applet.AppletPanel;
+
+        r4 := @parameter0: java.net.URL;
+
+        r0 := @parameter1: java.lang.String;
+
+        $r1 = <sun.applet.AppletPanel: java.util.HashMap classloaders>;
+
+        $r2 = virtualinvoke $r1.<java.util.HashMap: java.lang.Object get(java.lang.Object)>(r0);
+
+        r8 = (sun.applet.AppletClassLoader) $r2;
+
+        if r8 != null goto label1;
+
+        $r5 = specialinvoke r3.<sun.applet.AppletPanel: java.security.AccessControlContext getAccessControlContext(java.net.URL)>(r4);
+
+        $r6 = new sun.applet.AppletPanel$8;
+
+        specialinvoke $r6.<sun.applet.AppletPanel$8: void <init>(sun.applet.AppletPanel,java.net.URL,java.lang.String)>(r3, r4, r0);
+
+        $r7 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction,java.security.AccessControlContext)>($r6, $r5);
+
+        r8 = (sun.applet.AppletClassLoader) $r7;
+
+     label1:
+        return r8;
+    }
+
+    private java.security.AccessControlContext getAccessControlContext(java.net.URL)
+    {
+        java.security.AccessControlContext $r35;
+        java.net.URL r4, r22;
+        java.io.FilePermission $r31;
+        java.net.SocketPermission $r32;
+        java.net.JarURLConnection $r8;
+        sun.applet.AppletPanel r1;
+        boolean $z0, $z1, $z2;
+        java.security.Permission r20;
+        java.lang.RuntimePermission $r3;
+        java.lang.StringBuilder $r14, $r15, $r30;
+        java.security.cert.Certificate[] $r25;
+        sun.applet.AppletPanel$9 $r28;
+        java.net.URLConnection $r5, r19;
+        int $i0, $i2, $i3, $i4, $i6;
+        java.lang.String $r6, $r9, $r10, $r11, r21;
+        java.security.Permissions $r29;
+        char $c1;
+        java.io.IOException $r17;
+        java.security.PermissionCollection r18;
+        java.security.ProtectionDomain[] $r27;
+        java.security.ProtectionDomain $r34;
+        java.lang.Object $r2;
+        java.security.CodeSource $r33;
+
+        r1 := @this: sun.applet.AppletPanel;
+
+        r4 := @parameter0: java.net.URL;
+
+        $r28 = new sun.applet.AppletPanel$9;
+
+        specialinvoke $r28.<sun.applet.AppletPanel$9: void <init>(sun.applet.AppletPanel)>(r1);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r28);
+
+        r18 = (java.security.PermissionCollection) $r2;
+
+        if r18 != null goto label01;
+
+        $r29 = new java.security.Permissions;
+
+        specialinvoke $r29.<java.security.Permissions: void <init>()>();
+
+        r18 = $r29;
+
+     label01:
+        $r3 = <sun.security.util.SecurityConstants: java.lang.RuntimePermission CREATE_CLASSLOADER_PERMISSION>;
+
+        virtualinvoke r18.<java.security.PermissionCollection: void add(java.security.Permission)>($r3);
+
+        r19 = null;
+
+     label02:
+        $r5 = virtualinvoke r4.<java.net.URL: java.net.URLConnection openConnection()>();
+
+        r19 = $r5;
+
+        r20 = virtualinvoke $r5.<java.net.URLConnection: java.security.Permission getPermission()>();
+
+     label03:
+        goto label05;
+
+     label04:
+        $r17 := @caughtexception;
+
+        r20 = null;
+
+     label05:
+        if r20 == null goto label06;
+
+        virtualinvoke r18.<java.security.PermissionCollection: void add(java.security.Permission)>(r20);
+
+     label06:
+        $z0 = r20 instanceof java.io.FilePermission;
+
+        if $z0 == 0 goto label09;
+
+        $r9 = virtualinvoke r20.<java.security.Permission: java.lang.String getName()>();
+
+        $c1 = <java.io.File: char separatorChar>;
+
+        $i4 = (int) $c1;
+
+        $i2 = virtualinvoke $r9.<java.lang.String: int lastIndexOf(int)>($i4);
+
+        $i6 = (int) -1;
+
+        if $i2 == $i6 goto label08;
+
+        $i3 = $i2 + 1;
+
+        $r10 = virtualinvoke $r9.<java.lang.String: java.lang.String substring(int,int)>(0, $i3);
+
+        r21 = $r10;
+
+        $r11 = <java.io.File: java.lang.String separator>;
+
+        $z2 = virtualinvoke $r10.<java.lang.String: boolean endsWith(java.lang.String)>($r11);
+
+        if $z2 == 0 goto label07;
+
+        $r30 = new java.lang.StringBuilder;
+
+        specialinvoke $r30.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-");
+
+        r21 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label07:
+        $r31 = new java.io.FilePermission;
+
+        specialinvoke $r31.<java.io.FilePermission: void <init>(java.lang.String,java.lang.String)>(r21, "read");
+
+        virtualinvoke r18.<java.security.PermissionCollection: void add(java.security.Permission)>($r31);
+
+     label08:
+        goto label11;
+
+     label09:
+        r22 = r4;
+
+        $z1 = r19 instanceof java.net.JarURLConnection;
+
+        if $z1 == 0 goto label10;
+
+        $r8 = (java.net.JarURLConnection) r19;
+
+        r22 = virtualinvoke $r8.<java.net.JarURLConnection: java.net.URL getJarFileURL()>();
+
+     label10:
+        $r6 = virtualinvoke r22.<java.net.URL: java.lang.String getHost()>();
+
+        if $r6 == null goto label11;
+
+        $i0 = virtualinvoke $r6.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label11;
+
+        $r32 = new java.net.SocketPermission;
+
+        specialinvoke $r32.<java.net.SocketPermission: void <init>(java.lang.String,java.lang.String)>($r6, "connect,accept");
+
+        virtualinvoke r18.<java.security.PermissionCollection: void add(java.security.Permission)>($r32);
+
+     label11:
+        $r34 = new java.security.ProtectionDomain;
+
+        $r33 = new java.security.CodeSource;
+
+        $r25 = (java.security.cert.Certificate[]) null;
+
+        specialinvoke $r33.<java.security.CodeSource: void <init>(java.net.URL,java.security.cert.Certificate[])>(r4, $r25);
+
+        specialinvoke $r34.<java.security.ProtectionDomain: void <init>(java.security.CodeSource,java.security.PermissionCollection)>($r33, r18);
+
+        $r35 = new java.security.AccessControlContext;
+
+        $r27 = newarray (java.security.ProtectionDomain)[1];
+
+        $r27[0] = $r34;
+
+        specialinvoke $r35.<java.security.AccessControlContext: void <init>(java.security.ProtectionDomain[])>($r27);
+
+        return $r35;
+
+        catch java.io.IOException from label02 to label03 with label04;
+    }
+
+    public java.lang.Thread getAppletHandlerThread()
+    {
+        sun.applet.AppletPanel r0;
+        java.lang.Thread $r1;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        $r1 = r0.<sun.applet.AppletPanel: java.lang.Thread handler>;
+
+        return $r1;
+    }
+
+    public int getAppletWidth()
+    {
+        int $i0;
+        java.awt.Dimension $r1;
+        sun.applet.AppletPanel r0;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        $r1 = r0.<sun.applet.AppletPanel: java.awt.Dimension currentAppletSize>;
+
+        $i0 = $r1.<java.awt.Dimension: int width>;
+
+        return $i0;
+    }
+
+    public int getAppletHeight()
+    {
+        int $i0;
+        java.awt.Dimension $r1;
+        sun.applet.AppletPanel r0;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        $r1 = r0.<sun.applet.AppletPanel: java.awt.Dimension currentAppletSize>;
+
+        $i0 = $r1.<java.awt.Dimension: int height>;
+
+        return $i0;
+    }
+
+    public static void changeFrameAppContext(java.awt.Frame, sun.awt.AppContext)
+    {
+        java.lang.Throwable $r9;
+        java.util.Vector $r4, r11, $r13, r14;
+        sun.awt.AppContext $r1, r2;
+        java.lang.ref.WeakReference r7, r10;
+        boolean $z0;
+        java.awt.Frame r0;
+        java.util.Iterator $r5;
+        java.lang.Object $r3, $r6, $r8, $r12;
+
+        r0 := @parameter0: java.awt.Frame;
+
+        r2 := @parameter1: sun.awt.AppContext;
+
+        $r1 = staticinvoke <sun.awt.SunToolkit: sun.awt.AppContext targetToAppContext(java.lang.Object)>(r0);
+
+        if $r1 != r2 goto label01;
+
+        return;
+
+     label01:
+        entermonitor class "Ljava/awt/Window;";
+
+     label02:
+        r10 = null;
+
+        $r3 = virtualinvoke $r1.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>(class "Ljava/awt/Window;");
+
+        r11 = (java.util.Vector) $r3;
+
+        if r11 == null goto label06;
+
+        $r5 = virtualinvoke r11.<java.util.Vector: java.util.Iterator iterator()>();
+
+     label03:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label05;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (java.lang.ref.WeakReference) $r6;
+
+        $r8 = virtualinvoke r7.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        if $r8 != r0 goto label04;
+
+        r10 = r7;
+
+        goto label05;
+
+     label04:
+        goto label03;
+
+     label05:
+        if r10 == null goto label06;
+
+        virtualinvoke r11.<java.util.Vector: boolean remove(java.lang.Object)>(r10);
+
+     label06:
+        staticinvoke <sun.awt.SunToolkit: void insertTargetMapping(java.lang.Object,sun.awt.AppContext)>(r0, r2);
+
+        $r12 = virtualinvoke r2.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>(class "Ljava/awt/Window;");
+
+        $r13 = (java.util.Vector) $r12;
+
+        r14 = $r13;
+
+        if $r13 != null goto label07;
+
+        $r4 = new java.util.Vector;
+
+        specialinvoke $r4.<java.util.Vector: void <init>()>();
+
+        r14 = $r4;
+
+        virtualinvoke r2.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>(class "Ljava/awt/Window;", $r4);
+
+     label07:
+        virtualinvoke r14.<java.util.Vector: boolean add(java.lang.Object)>(r10);
+
+        exitmonitor class "Ljava/awt/Window;";
+
+     label08:
+        goto label11;
+
+     label09:
+        $r9 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/Window;";
+
+     label10:
+        throw $r9;
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label02 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    private void findAppletJDKLevel(java.applet.Applet)
+    {
+        sun.applet.AppletClassLoader $r3, $r5, $r25, $r26;
+        java.lang.Throwable $r16, $r18, $r19, $r20, r24;
+        byte[] r13;
+        java.applet.Applet r0;
+        int $i0, $i1;
+        java.lang.Boolean $r4, $r6;
+        java.lang.String $r7, $r8, $r12;
+        sun.applet.AppletPanel r2;
+        boolean $z0, $z1, $z2, $z3;
+        java.io.IOException $r17;
+        java.security.PrivilegedAction $r14;
+        java.lang.Class $r1;
+        java.lang.StringBuilder $r9, $r10, $r11;
+        java.lang.Object $r15;
+        java.io.InputStream r23;
+
+        r2 := @this: sun.applet.AppletPanel;
+
+        r0 := @parameter0: java.applet.Applet;
+
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        entermonitor $r1;
+
+     label01:
+        $r3 = r2.<sun.applet.AppletPanel: sun.applet.AppletClassLoader loader>;
+
+        $r4 = virtualinvoke $r3.<sun.applet.AppletClassLoader: java.lang.Boolean isJDK11Target(java.lang.Class)>($r1);
+
+        $r5 = r2.<sun.applet.AppletPanel: sun.applet.AppletClassLoader loader>;
+
+        $r6 = virtualinvoke $r5.<sun.applet.AppletClassLoader: java.lang.Boolean isJDK12Target(java.lang.Class)>($r1);
+
+        if $r4 != null goto label02;
+
+        if $r6 == null goto label08;
+
+     label02:
+        if $r4 != null goto label03;
+
+        $z0 = 0;
+
+        goto label04;
+
+     label03:
+        $z0 = virtualinvoke $r4.<java.lang.Boolean: boolean booleanValue()>();
+
+     label04:
+        r2.<sun.applet.AppletPanel: boolean jdk11Applet> = $z0;
+
+        if $r6 != null goto label05;
+
+        $z1 = 0;
+
+        goto label06;
+
+     label05:
+        $z1 = virtualinvoke $r6.<java.lang.Boolean: boolean booleanValue()>();
+
+     label06:
+        r2.<sun.applet.AppletPanel: boolean jdk12Applet> = $z1;
+
+        exitmonitor $r1;
+
+     label07:
+        return;
+
+     label08:
+        $r7 = virtualinvoke $r1.<java.lang.Class: java.lang.String getName()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.String: java.lang.String replace(char,char)>(46, 47);
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".class");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r13 = newarray (byte)[8];
+
+     label09:
+        $r14 = staticinvoke <sun.applet.AppletPanel$lambda_findAppletJDKLevel_1__367: java.security.PrivilegedAction bootstrap$(sun.applet.AppletPanel,java.lang.String)>(r2, $r12);
+
+        $r15 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r14);
+
+        r23 = (java.io.InputStream) $r15;
+
+        r24 = null;
+
+     label10:
+        $i0 = virtualinvoke r23.<java.io.InputStream: int read(byte[],int,int)>(r13, 0, 8);
+
+        if $i0 == 8 goto label15;
+
+     label11:
+        if r23 == null goto label13;
+
+        goto label12;
+
+     label12:
+        virtualinvoke r23.<java.io.InputStream: void close()>();
+
+     label13:
+        exitmonitor $r1;
+
+     label14:
+        return;
+
+     label15:
+        if r23 == null goto label25;
+
+        goto label16;
+
+     label16:
+        virtualinvoke r23.<java.io.InputStream: void close()>();
+
+        goto label25;
+
+     label17:
+        $r20 := @caughtexception;
+
+        r24 = $r20;
+
+        throw $r20;
+
+     label18:
+        $r19 := @caughtexception;
+
+     label19:
+        if r23 == null goto label24;
+
+        if r24 == null goto label23;
+
+     label20:
+        virtualinvoke r23.<java.io.InputStream: void close()>();
+
+     label21:
+        goto label24;
+
+     label22:
+        $r18 := @caughtexception;
+
+        virtualinvoke r24.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r18);
+
+        goto label24;
+
+     label23:
+        virtualinvoke r23.<java.io.InputStream: void close()>();
+
+     label24:
+        throw $r19;
+
+     label25:
+        goto label28;
+
+     label26:
+        $r17 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label27:
+        return;
+
+     label28:
+        $i1 = specialinvoke r2.<sun.applet.AppletPanel: int readShort(byte[],int)>(r13, 6);
+
+        if $i1 >= 46 goto label29;
+
+        r2.<sun.applet.AppletPanel: boolean jdk11Applet> = 1;
+
+        goto label30;
+
+     label29:
+        if $i1 != 46 goto label30;
+
+        r2.<sun.applet.AppletPanel: boolean jdk12Applet> = 1;
+
+     label30:
+        $r25 = r2.<sun.applet.AppletPanel: sun.applet.AppletClassLoader loader>;
+
+        $z2 = r2.<sun.applet.AppletPanel: boolean jdk11Applet>;
+
+        virtualinvoke $r25.<sun.applet.AppletClassLoader: void setJDK11Target(java.lang.Class,boolean)>($r1, $z2);
+
+        $r26 = r2.<sun.applet.AppletPanel: sun.applet.AppletClassLoader loader>;
+
+        $z3 = r2.<sun.applet.AppletPanel: boolean jdk12Applet>;
+
+        virtualinvoke $r26.<sun.applet.AppletClassLoader: void setJDK12Target(java.lang.Class,boolean)>($r1, $z3);
+
+        exitmonitor $r1;
+
+     label31:
+        goto label34;
+
+     label32:
+        $r16 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label33:
+        throw $r16;
+
+     label34:
+        return;
+
+        catch java.lang.Throwable from label10 to label11 with label17;
+        catch java.lang.Throwable from label20 to label21 with label22;
+        catch java.lang.Throwable from label17 to label19 with label18;
+        catch java.io.IOException from label09 to label13 with label26;
+        catch java.io.IOException from label15 to label25 with label26;
+        catch java.lang.Throwable from label01 to label07 with label32;
+        catch java.lang.Throwable from label08 to label14 with label32;
+        catch java.lang.Throwable from label15 to label27 with label32;
+        catch java.lang.Throwable from label28 to label31 with label32;
+        catch java.lang.Throwable from label32 to label33 with label32;
+    }
+
+    protected boolean isJDK11Applet()
+    {
+        sun.applet.AppletPanel r0;
+        boolean $z0;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        $z0 = r0.<sun.applet.AppletPanel: boolean jdk11Applet>;
+
+        return $z0;
+    }
+
+    protected boolean isJDK12Applet()
+    {
+        sun.applet.AppletPanel r0;
+        boolean $z0;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        $z0 = r0.<sun.applet.AppletPanel: boolean jdk12Applet>;
+
+        return $z0;
+    }
+
+    private int readShort(byte[], int)
+    {
+        byte[] r1;
+        byte $b1, $b4;
+        int i0, $i2, $i3, $i5, $i6, $i7;
+        sun.applet.AppletPanel r0;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        $b1 = r1[i0];
+
+        $i2 = specialinvoke r0.<sun.applet.AppletPanel: int readByte(byte)>($b1);
+
+        $i3 = i0 + 1;
+
+        $b4 = r1[$i3];
+
+        $i5 = specialinvoke r0.<sun.applet.AppletPanel: int readByte(byte)>($b4);
+
+        $i6 = $i2 << 8;
+
+        $i7 = $i6 | $i5;
+
+        return $i7;
+    }
+
+    private int readByte(byte)
+    {
+        short $s1, $s2;
+        byte b0;
+        int $i3;
+        sun.applet.AppletPanel r0;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        b0 := @parameter0: byte;
+
+        $s2 = (short) b0;
+
+        $s1 = $s2 & 255;
+
+        $i3 = (int) $s1;
+
+        return $i3;
+    }
+
+    public java.io.InputStream lambda$findAppletJDKLevel$1(java.lang.String)
+    {
+        sun.applet.AppletClassLoader $r2;
+        java.lang.String r1;
+        sun.applet.AppletPanel r0;
+        java.io.InputStream $r3;
+
+        r0 := @this: sun.applet.AppletPanel;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<sun.applet.AppletPanel: sun.applet.AppletClassLoader loader>;
+
+        $r3 = virtualinvoke $r2.<sun.applet.AppletClassLoader: java.io.InputStream getResourceAsStream(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    public static java.io.InputStream lambda$createApplet$0(sun.applet.AppletClassLoader, java.lang.String)
+    {
+        sun.applet.AppletClassLoader r0;
+        java.lang.String r1;
+        java.io.InputStream $r2;
+
+        r0 := @parameter0: sun.applet.AppletClassLoader;
+
+        r1 := @parameter1: java.lang.String;
+
+        $r2 = virtualinvoke r0.<sun.applet.AppletClassLoader: java.io.InputStream getResourceAsStream(java.lang.String)>(r1);
+
+        return $r2;
+    }
+
+    static void access$000(sun.applet.AppletPanel)
+    {
+        sun.applet.AppletPanel r0;
+
+        r0 := @parameter0: sun.applet.AppletPanel;
+
+        specialinvoke r0.<sun.applet.AppletPanel: void setDefaultFocus()>();
+
+        return;
+    }
+
+    static java.util.HashMap access$100()
+    {
+        java.util.HashMap $r0;
+
+        $r0 = <sun.applet.AppletPanel: java.util.HashMap classloaders>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.util.HashMap $r0;
+        sun.applet.AppletMessageHandler $r1;
+
+        <sun.applet.AppletPanel: int APPLET_LOADING_COMPLETED> = 51236;
+
+        <sun.applet.AppletPanel: int APPLET_LOADING> = 51235;
+
+        <sun.applet.AppletPanel: int APPLET_RESIZE> = 51234;
+
+        <sun.applet.AppletPanel: int APPLET_ERROR> = 7;
+
+        <sun.applet.AppletPanel: int APPLET_QUIT> = 6;
+
+        <sun.applet.AppletPanel: int APPLET_DESTROY> = 5;
+
+        <sun.applet.AppletPanel: int APPLET_STOP> = 4;
+
+        <sun.applet.AppletPanel: int APPLET_START> = 3;
+
+        <sun.applet.AppletPanel: int APPLET_INIT> = 2;
+
+        <sun.applet.AppletPanel: int APPLET_LOAD> = 1;
+
+        <sun.applet.AppletPanel: int APPLET_DISPOSE> = 0;
+
+        <sun.applet.AppletPanel: int threadGroupNumber> = 0;
+
+        $r0 = new java.util.HashMap;
+
+        specialinvoke $r0.<java.util.HashMap: void <init>()>();
+
+        <sun.applet.AppletPanel: java.util.HashMap classloaders> = $r0;
+
+        $r1 = new sun.applet.AppletMessageHandler;
+
+        specialinvoke $r1.<sun.applet.AppletMessageHandler: void <init>(java.lang.String)>("appletpanel");
+
+        <sun.applet.AppletPanel: sun.applet.AppletMessageHandler amh> = $r1;
+
+        return;
+    }
+}

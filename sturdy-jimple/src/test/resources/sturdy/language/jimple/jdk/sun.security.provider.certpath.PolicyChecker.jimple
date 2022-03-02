@@ -1,0 +1,2012 @@
+class sun.security.provider.certpath.PolicyChecker extends java.security.cert.PKIXCertPathChecker
+{
+    private final java.util.Set initPolicies;
+    private final int certPathLen;
+    private final boolean expPolicyRequired;
+    private final boolean polMappingInhibited;
+    private final boolean anyPolicyInhibited;
+    private final boolean rejectPolicyQualifiers;
+    private sun.security.provider.certpath.PolicyNodeImpl rootNode;
+    private int explicitPolicy;
+    private int policyMapping;
+    private int inhibitAnyPolicy;
+    private int certIndex;
+    private java.util.Set supportedExts;
+    private static final sun.security.util.Debug debug;
+    static final java.lang.String ANY_POLICY;
+
+    void <init>(java.util.Set, int, boolean, boolean, boolean, boolean, sun.security.provider.certpath.PolicyNodeImpl)
+    {
+        java.util.Set r1, $r5;
+        sun.security.provider.certpath.PolicyNodeImpl r3;
+        sun.security.provider.certpath.PolicyChecker r0;
+        java.util.HashSet $r2, $r4;
+        int i0;
+        boolean $z0, z1, z2, z3, z4;
+
+        r0 := @this: sun.security.provider.certpath.PolicyChecker;
+
+        r1 := @parameter0: java.util.Set;
+
+        i0 := @parameter1: int;
+
+        z1 := @parameter2: boolean;
+
+        z2 := @parameter3: boolean;
+
+        z3 := @parameter4: boolean;
+
+        z4 := @parameter5: boolean;
+
+        r3 := @parameter6: sun.security.provider.certpath.PolicyNodeImpl;
+
+        specialinvoke r0.<java.security.cert.PKIXCertPathChecker: void <init>()>();
+
+        $z0 = interfaceinvoke r1.<java.util.Set: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        $r4 = new java.util.HashSet;
+
+        specialinvoke $r4.<java.util.HashSet: void <init>(int)>(1);
+
+        r0.<sun.security.provider.certpath.PolicyChecker: java.util.Set initPolicies> = $r4;
+
+        $r5 = r0.<sun.security.provider.certpath.PolicyChecker: java.util.Set initPolicies>;
+
+        interfaceinvoke $r5.<java.util.Set: boolean add(java.lang.Object)>("2.5.29.32.0");
+
+        goto label2;
+
+     label1:
+        $r2 = new java.util.HashSet;
+
+        specialinvoke $r2.<java.util.HashSet: void <init>(java.util.Collection)>(r1);
+
+        r0.<sun.security.provider.certpath.PolicyChecker: java.util.Set initPolicies> = $r2;
+
+     label2:
+        r0.<sun.security.provider.certpath.PolicyChecker: int certPathLen> = i0;
+
+        r0.<sun.security.provider.certpath.PolicyChecker: boolean expPolicyRequired> = z1;
+
+        r0.<sun.security.provider.certpath.PolicyChecker: boolean polMappingInhibited> = z2;
+
+        r0.<sun.security.provider.certpath.PolicyChecker: boolean anyPolicyInhibited> = z3;
+
+        r0.<sun.security.provider.certpath.PolicyChecker: boolean rejectPolicyQualifiers> = z4;
+
+        r0.<sun.security.provider.certpath.PolicyChecker: sun.security.provider.certpath.PolicyNodeImpl rootNode> = r3;
+
+        return;
+    }
+
+    public void init(boolean) throws java.security.cert.CertPathValidatorException
+    {
+        sun.security.provider.certpath.PolicyChecker r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.security.cert.CertPathValidatorException $r1;
+        boolean z0, $z1, $z2, $z3;
+
+        r0 := @this: sun.security.provider.certpath.PolicyChecker;
+
+        z0 := @parameter0: boolean;
+
+        if z0 == 0 goto label1;
+
+        $r1 = new java.security.cert.CertPathValidatorException;
+
+        specialinvoke $r1.<java.security.cert.CertPathValidatorException: void <init>(java.lang.String)>("forward checking not supported");
+
+        throw $r1;
+
+     label1:
+        r0.<sun.security.provider.certpath.PolicyChecker: int certIndex> = 1;
+
+        $z1 = r0.<sun.security.provider.certpath.PolicyChecker: boolean expPolicyRequired>;
+
+        if $z1 == 0 goto label2;
+
+        $i3 = 0;
+
+        goto label3;
+
+     label2:
+        $i0 = r0.<sun.security.provider.certpath.PolicyChecker: int certPathLen>;
+
+        $i3 = $i0 + 1;
+
+     label3:
+        r0.<sun.security.provider.certpath.PolicyChecker: int explicitPolicy> = $i3;
+
+        $z2 = r0.<sun.security.provider.certpath.PolicyChecker: boolean polMappingInhibited>;
+
+        if $z2 == 0 goto label4;
+
+        $i4 = 0;
+
+        goto label5;
+
+     label4:
+        $i1 = r0.<sun.security.provider.certpath.PolicyChecker: int certPathLen>;
+
+        $i4 = $i1 + 1;
+
+     label5:
+        r0.<sun.security.provider.certpath.PolicyChecker: int policyMapping> = $i4;
+
+        $z3 = r0.<sun.security.provider.certpath.PolicyChecker: boolean anyPolicyInhibited>;
+
+        if $z3 == 0 goto label6;
+
+        $i5 = 0;
+
+        goto label7;
+
+     label6:
+        $i2 = r0.<sun.security.provider.certpath.PolicyChecker: int certPathLen>;
+
+        $i5 = $i2 + 1;
+
+     label7:
+        r0.<sun.security.provider.certpath.PolicyChecker: int inhibitAnyPolicy> = $i5;
+
+        return;
+    }
+
+    public boolean isForwardCheckingSupported()
+    {
+        sun.security.provider.certpath.PolicyChecker r0;
+
+        r0 := @this: sun.security.provider.certpath.PolicyChecker;
+
+        return 0;
+    }
+
+    public java.util.Set getSupportedExtensions()
+    {
+        java.util.HashSet $r3;
+        sun.security.util.ObjectIdentifier $r4, $r7, $r10, $r13;
+        java.lang.String $r6, $r9, $r12, $r15;
+        java.util.Set $r1, $r2, $r5, $r8, $r11, $r14, $r16, $r17;
+        sun.security.provider.certpath.PolicyChecker r0;
+
+        r0 := @this: sun.security.provider.certpath.PolicyChecker;
+
+        $r1 = r0.<sun.security.provider.certpath.PolicyChecker: java.util.Set supportedExts>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.util.HashSet;
+
+        specialinvoke $r3.<java.util.HashSet: void <init>(int)>(4);
+
+        r0.<sun.security.provider.certpath.PolicyChecker: java.util.Set supportedExts> = $r3;
+
+        $r5 = r0.<sun.security.provider.certpath.PolicyChecker: java.util.Set supportedExts>;
+
+        $r4 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier CertificatePolicies_Id>;
+
+        $r6 = virtualinvoke $r4.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        interfaceinvoke $r5.<java.util.Set: boolean add(java.lang.Object)>($r6);
+
+        $r8 = r0.<sun.security.provider.certpath.PolicyChecker: java.util.Set supportedExts>;
+
+        $r7 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier PolicyMappings_Id>;
+
+        $r9 = virtualinvoke $r7.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        interfaceinvoke $r8.<java.util.Set: boolean add(java.lang.Object)>($r9);
+
+        $r11 = r0.<sun.security.provider.certpath.PolicyChecker: java.util.Set supportedExts>;
+
+        $r10 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier PolicyConstraints_Id>;
+
+        $r12 = virtualinvoke $r10.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        interfaceinvoke $r11.<java.util.Set: boolean add(java.lang.Object)>($r12);
+
+        $r14 = r0.<sun.security.provider.certpath.PolicyChecker: java.util.Set supportedExts>;
+
+        $r13 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier InhibitAnyPolicy_Id>;
+
+        $r15 = virtualinvoke $r13.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        interfaceinvoke $r14.<java.util.Set: boolean add(java.lang.Object)>($r15);
+
+        $r16 = r0.<sun.security.provider.certpath.PolicyChecker: java.util.Set supportedExts>;
+
+        $r17 = staticinvoke <java.util.Collections: java.util.Set unmodifiableSet(java.util.Set)>($r16);
+
+        r0.<sun.security.provider.certpath.PolicyChecker: java.util.Set supportedExts> = $r17;
+
+     label1:
+        $r2 = r0.<sun.security.provider.certpath.PolicyChecker: java.util.Set supportedExts>;
+
+        return $r2;
+    }
+
+    public void check(java.security.cert.Certificate, java.util.Collection) throws java.security.cert.CertPathValidatorException
+    {
+        java.security.cert.X509Certificate $r2;
+        java.util.Collection r3;
+        sun.security.provider.certpath.PolicyChecker r0;
+        java.security.cert.Certificate r1;
+        sun.security.util.ObjectIdentifier $r4, $r6, $r8, $r10;
+        java.lang.String $r5, $r7, $r9, $r11;
+        boolean $z0;
+
+        r0 := @this: sun.security.provider.certpath.PolicyChecker;
+
+        r1 := @parameter0: java.security.cert.Certificate;
+
+        r3 := @parameter1: java.util.Collection;
+
+        $r2 = (java.security.cert.X509Certificate) r1;
+
+        specialinvoke r0.<sun.security.provider.certpath.PolicyChecker: void checkPolicy(java.security.cert.X509Certificate)>($r2);
+
+        if r3 == null goto label1;
+
+        $z0 = interfaceinvoke r3.<java.util.Collection: boolean isEmpty()>();
+
+        if $z0 != 0 goto label1;
+
+        $r4 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier CertificatePolicies_Id>;
+
+        $r5 = virtualinvoke $r4.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        interfaceinvoke r3.<java.util.Collection: boolean remove(java.lang.Object)>($r5);
+
+        $r6 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier PolicyMappings_Id>;
+
+        $r7 = virtualinvoke $r6.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        interfaceinvoke r3.<java.util.Collection: boolean remove(java.lang.Object)>($r7);
+
+        $r8 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier PolicyConstraints_Id>;
+
+        $r9 = virtualinvoke $r8.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        interfaceinvoke r3.<java.util.Collection: boolean remove(java.lang.Object)>($r9);
+
+        $r10 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier InhibitAnyPolicy_Id>;
+
+        $r11 = virtualinvoke $r10.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        interfaceinvoke r3.<java.util.Collection: boolean remove(java.lang.Object)>($r11);
+
+     label1:
+        return;
+    }
+
+    private void checkPolicy(java.security.cert.X509Certificate) throws java.security.cert.CertPathValidatorException
+    {
+        sun.security.provider.certpath.PolicyNodeImpl $r4, $r6, $r26, $r64;
+        java.util.Set $r5;
+        sun.security.util.Debug $r0, $r7, $r9, $r14, $r19, $r24, $r30, $r36, $r42, $r47, $r52, $r57, $r62;
+        java.lang.StringBuilder $r8, $r10, $r11, $r13, $r15, $r16, $r18, $r20, $r21, $r23, $r25, $r27, $r29, $r31, $r32, $r33, $r35, $r37, $r38, $r39, $r41, $r43, $r44, $r46, $r48, $r49, $r51, $r53, $r54, $r56, $r58, $r59, $r61, $r63, $r65;
+        java.lang.String $r12, $r17, $r22, $r28, $r34, $r40, $r45, $r50, $r55, $r60, $r66;
+        sun.security.provider.certpath.PolicyChecker r3;
+        java.security.cert.X509Certificate r1;
+        java.security.cert.CertPathValidatorException $r68;
+        boolean $z0, $z2, $z3, $z4;
+        sun.security.x509.X509CertImpl $r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20;
+        java.security.cert.CertificateException $r67;
+
+        r3 := @this: sun.security.provider.certpath.PolicyChecker;
+
+        r1 := @parameter0: java.security.cert.X509Certificate;
+
+        $r0 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        if $r0 == null goto label1;
+
+        $r36 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r35 = new java.lang.StringBuilder;
+
+        specialinvoke $r35.<java.lang.StringBuilder: void <init>()>();
+
+        $r37 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.checkPolicy() ---checking ");
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("certificate policies");
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("...");
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r36.<sun.security.util.Debug: void println(java.lang.String)>($r40);
+
+        $r42 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r41 = new java.lang.StringBuilder;
+
+        specialinvoke $r41.<java.lang.StringBuilder: void <init>()>();
+
+        $r43 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.checkPolicy() certIndex = ");
+
+        $i17 = r3.<sun.security.provider.certpath.PolicyChecker: int certIndex>;
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i17);
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r42.<sun.security.util.Debug: void println(java.lang.String)>($r45);
+
+        $r47 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r46 = new java.lang.StringBuilder;
+
+        specialinvoke $r46.<java.lang.StringBuilder: void <init>()>();
+
+        $r48 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.checkPolicy() BEFORE PROCESSING: explicitPolicy = ");
+
+        $i18 = r3.<sun.security.provider.certpath.PolicyChecker: int explicitPolicy>;
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i18);
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r47.<sun.security.util.Debug: void println(java.lang.String)>($r50);
+
+        $r52 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r51 = new java.lang.StringBuilder;
+
+        specialinvoke $r51.<java.lang.StringBuilder: void <init>()>();
+
+        $r53 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.checkPolicy() BEFORE PROCESSING: policyMapping = ");
+
+        $i19 = r3.<sun.security.provider.certpath.PolicyChecker: int policyMapping>;
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i19);
+
+        $r55 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r52.<sun.security.util.Debug: void println(java.lang.String)>($r55);
+
+        $r57 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r56 = new java.lang.StringBuilder;
+
+        specialinvoke $r56.<java.lang.StringBuilder: void <init>()>();
+
+        $r58 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.checkPolicy() BEFORE PROCESSING: inhibitAnyPolicy = ");
+
+        $i20 = r3.<sun.security.provider.certpath.PolicyChecker: int inhibitAnyPolicy>;
+
+        $r59 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i20);
+
+        $r60 = virtualinvoke $r59.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r57.<sun.security.util.Debug: void println(java.lang.String)>($r60);
+
+        $r62 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r61 = new java.lang.StringBuilder;
+
+        specialinvoke $r61.<java.lang.StringBuilder: void <init>()>();
+
+        $r63 = virtualinvoke $r61.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.checkPolicy() BEFORE PROCESSING: policyTree = ");
+
+        $r64 = r3.<sun.security.provider.certpath.PolicyChecker: sun.security.provider.certpath.PolicyNodeImpl rootNode>;
+
+        $r65 = virtualinvoke $r63.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r64);
+
+        $r66 = virtualinvoke $r65.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r62.<sun.security.util.Debug: void println(java.lang.String)>($r66);
+
+     label1:
+        $r2 = staticinvoke <sun.security.x509.X509CertImpl: sun.security.x509.X509CertImpl toImpl(java.security.cert.X509Certificate)>(r1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r67 := @caughtexception;
+
+        $r68 = new java.security.cert.CertPathValidatorException;
+
+        specialinvoke $r68.<java.security.cert.CertPathValidatorException: void <init>(java.lang.Throwable)>($r67);
+
+        throw $r68;
+
+     label4:
+        $i1 = r3.<sun.security.provider.certpath.PolicyChecker: int certIndex>;
+
+        $i0 = r3.<sun.security.provider.certpath.PolicyChecker: int certPathLen>;
+
+        if $i1 != $i0 goto label5;
+
+        $z4 = 1;
+
+        $z3 = 1;
+
+        $z2 = 1;
+
+        goto label6;
+
+     label5:
+        $z4 = 0;
+
+        $z3 = 0;
+
+        $z2 = 0;
+
+     label6:
+        $i5 = r3.<sun.security.provider.certpath.PolicyChecker: int certIndex>;
+
+        $r5 = r3.<sun.security.provider.certpath.PolicyChecker: java.util.Set initPolicies>;
+
+        $i4 = r3.<sun.security.provider.certpath.PolicyChecker: int explicitPolicy>;
+
+        $i3 = r3.<sun.security.provider.certpath.PolicyChecker: int policyMapping>;
+
+        $i2 = r3.<sun.security.provider.certpath.PolicyChecker: int inhibitAnyPolicy>;
+
+        $z0 = r3.<sun.security.provider.certpath.PolicyChecker: boolean rejectPolicyQualifiers>;
+
+        $r4 = r3.<sun.security.provider.certpath.PolicyChecker: sun.security.provider.certpath.PolicyNodeImpl rootNode>;
+
+        $r6 = staticinvoke <sun.security.provider.certpath.PolicyChecker: sun.security.provider.certpath.PolicyNodeImpl processPolicies(int,java.util.Set,int,int,int,boolean,sun.security.provider.certpath.PolicyNodeImpl,sun.security.x509.X509CertImpl,boolean)>($i5, $r5, $i4, $i3, $i2, $z0, $r4, $r2, $z3);
+
+        r3.<sun.security.provider.certpath.PolicyChecker: sun.security.provider.certpath.PolicyNodeImpl rootNode> = $r6;
+
+        if $z2 != 0 goto label7;
+
+        $i11 = r3.<sun.security.provider.certpath.PolicyChecker: int explicitPolicy>;
+
+        $i12 = staticinvoke <sun.security.provider.certpath.PolicyChecker: int mergeExplicitPolicy(int,sun.security.x509.X509CertImpl,boolean)>($i11, $r2, $z4);
+
+        r3.<sun.security.provider.certpath.PolicyChecker: int explicitPolicy> = $i12;
+
+        $i13 = r3.<sun.security.provider.certpath.PolicyChecker: int policyMapping>;
+
+        $i14 = staticinvoke <sun.security.provider.certpath.PolicyChecker: int mergePolicyMapping(int,sun.security.x509.X509CertImpl)>($i13, $r2);
+
+        r3.<sun.security.provider.certpath.PolicyChecker: int policyMapping> = $i14;
+
+        $i15 = r3.<sun.security.provider.certpath.PolicyChecker: int inhibitAnyPolicy>;
+
+        $i16 = staticinvoke <sun.security.provider.certpath.PolicyChecker: int mergeInhibitAnyPolicy(int,sun.security.x509.X509CertImpl)>($i15, $r2);
+
+        r3.<sun.security.provider.certpath.PolicyChecker: int inhibitAnyPolicy> = $i16;
+
+     label7:
+        $i6 = r3.<sun.security.provider.certpath.PolicyChecker: int certIndex>;
+
+        $i7 = $i6 + 1;
+
+        r3.<sun.security.provider.certpath.PolicyChecker: int certIndex> = $i7;
+
+        $r7 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        if $r7 == null goto label8;
+
+        $r9 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.checkPolicy() AFTER PROCESSING: explicitPolicy = ");
+
+        $i8 = r3.<sun.security.provider.certpath.PolicyChecker: int explicitPolicy>;
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i8);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r9.<sun.security.util.Debug: void println(java.lang.String)>($r12);
+
+        $r14 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.checkPolicy() AFTER PROCESSING: policyMapping = ");
+
+        $i9 = r3.<sun.security.provider.certpath.PolicyChecker: int policyMapping>;
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i9);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r14.<sun.security.util.Debug: void println(java.lang.String)>($r17);
+
+        $r19 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.checkPolicy() AFTER PROCESSING: inhibitAnyPolicy = ");
+
+        $i10 = r3.<sun.security.provider.certpath.PolicyChecker: int inhibitAnyPolicy>;
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i10);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r19.<sun.security.util.Debug: void println(java.lang.String)>($r22);
+
+        $r24 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.checkPolicy() AFTER PROCESSING: policyTree = ");
+
+        $r26 = r3.<sun.security.provider.certpath.PolicyChecker: sun.security.provider.certpath.PolicyNodeImpl rootNode>;
+
+        $r27 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r26);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r24.<sun.security.util.Debug: void println(java.lang.String)>($r28);
+
+        $r30 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r29 = new java.lang.StringBuilder;
+
+        specialinvoke $r29.<java.lang.StringBuilder: void <init>()>();
+
+        $r31 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.checkPolicy() ");
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("certificate policies");
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" verified");
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r30.<sun.security.util.Debug: void println(java.lang.String)>($r34);
+
+     label8:
+        return;
+
+        catch java.security.cert.CertificateException from label1 to label2 with label3;
+    }
+
+    static int mergeExplicitPolicy(int, sun.security.x509.X509CertImpl, boolean) throws java.security.cert.CertPathValidatorException
+    {
+        sun.security.x509.PolicyConstraintsExtension $r12;
+        java.lang.Integer $r1;
+        int $i0, i1, $i3, $i5, $i7;
+        java.lang.String $r7;
+        java.security.cert.CertPathValidatorException $r14;
+        boolean z0, $z1;
+        java.io.IOException $r8;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.util.Debug $r2, $r4, $r9, $r11;
+        java.lang.StringBuilder $r5, $r6, $r13;
+
+        i1 := @parameter0: int;
+
+        r0 := @parameter1: sun.security.x509.X509CertImpl;
+
+        z0 := @parameter2: boolean;
+
+        if i1 <= 0 goto label01;
+
+        $z1 = staticinvoke <sun.security.x509.X509CertImpl: boolean isSelfIssued(java.security.cert.X509Certificate)>(r0);
+
+        if $z1 != 0 goto label01;
+
+        $i3 = (int) -1;
+
+        i1 = i1 + $i3;
+
+     label01:
+        $r12 = virtualinvoke r0.<sun.security.x509.X509CertImpl: sun.security.x509.PolicyConstraintsExtension getPolicyConstraintsExtension()>();
+
+        if $r12 != null goto label03;
+
+     label02:
+        return i1;
+
+     label03:
+        $r1 = virtualinvoke $r12.<sun.security.x509.PolicyConstraintsExtension: java.lang.Integer get(java.lang.String)>("require");
+
+        $i0 = virtualinvoke $r1.<java.lang.Integer: int intValue()>();
+
+        $r2 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        if $r2 == null goto label04;
+
+        $r4 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.mergeExplicitPolicy() require Index from cert = ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<sun.security.util.Debug: void println(java.lang.String)>($r7);
+
+     label04:
+        if z0 != 0 goto label06;
+
+        $i5 = (int) -1;
+
+        if $i0 == $i5 goto label07;
+
+        $i7 = (int) -1;
+
+        if i1 == $i7 goto label05;
+
+        if $i0 >= i1 goto label07;
+
+     label05:
+        i1 = $i0;
+
+        goto label07;
+
+     label06:
+        if $i0 != 0 goto label07;
+
+        i1 = $i0;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r8 := @caughtexception;
+
+        $r9 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        if $r9 == null goto label09;
+
+        $r11 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        virtualinvoke $r11.<sun.security.util.Debug: void println(java.lang.String)>("PolicyChecker.mergeExplicitPolicy unexpected exception");
+
+        virtualinvoke $r8.<java.io.IOException: void printStackTrace()>();
+
+     label09:
+        $r14 = new java.security.cert.CertPathValidatorException;
+
+        specialinvoke $r14.<java.security.cert.CertPathValidatorException: void <init>(java.lang.Throwable)>($r8);
+
+        throw $r14;
+
+     label10:
+        return i1;
+
+        catch java.io.IOException from label01 to label02 with label08;
+        catch java.io.IOException from label03 to label07 with label08;
+    }
+
+    static int mergePolicyMapping(int, sun.security.x509.X509CertImpl) throws java.security.cert.CertPathValidatorException
+    {
+        sun.security.x509.PolicyConstraintsExtension $r12;
+        java.lang.Integer $r1;
+        int $i0, i1, $i3, $i5, $i7;
+        java.lang.String $r7;
+        java.security.cert.CertPathValidatorException $r14;
+        boolean $z0;
+        java.io.IOException $r8;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.util.Debug $r2, $r4, $r9, $r11;
+        java.lang.StringBuilder $r5, $r6, $r13;
+
+        i1 := @parameter0: int;
+
+        r0 := @parameter1: sun.security.x509.X509CertImpl;
+
+        if i1 <= 0 goto label1;
+
+        $z0 = staticinvoke <sun.security.x509.X509CertImpl: boolean isSelfIssued(java.security.cert.X509Certificate)>(r0);
+
+        if $z0 != 0 goto label1;
+
+        $i3 = (int) -1;
+
+        i1 = i1 + $i3;
+
+     label1:
+        $r12 = virtualinvoke r0.<sun.security.x509.X509CertImpl: sun.security.x509.PolicyConstraintsExtension getPolicyConstraintsExtension()>();
+
+        if $r12 != null goto label3;
+
+     label2:
+        return i1;
+
+     label3:
+        $r1 = virtualinvoke $r12.<sun.security.x509.PolicyConstraintsExtension: java.lang.Integer get(java.lang.String)>("inhibit");
+
+        $i0 = virtualinvoke $r1.<java.lang.Integer: int intValue()>();
+
+        $r2 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        if $r2 == null goto label4;
+
+        $r4 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.mergePolicyMapping() inhibit Index from cert = ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<sun.security.util.Debug: void println(java.lang.String)>($r7);
+
+     label4:
+        $i5 = (int) -1;
+
+        if $i0 == $i5 goto label6;
+
+        $i7 = (int) -1;
+
+        if i1 == $i7 goto label5;
+
+        if $i0 >= i1 goto label6;
+
+     label5:
+        i1 = $i0;
+
+     label6:
+        goto label9;
+
+     label7:
+        $r8 := @caughtexception;
+
+        $r9 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        if $r9 == null goto label8;
+
+        $r11 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        virtualinvoke $r11.<sun.security.util.Debug: void println(java.lang.String)>("PolicyChecker.mergePolicyMapping unexpected exception");
+
+        virtualinvoke $r8.<java.io.IOException: void printStackTrace()>();
+
+     label8:
+        $r14 = new java.security.cert.CertPathValidatorException;
+
+        specialinvoke $r14.<java.security.cert.CertPathValidatorException: void <init>(java.lang.Throwable)>($r8);
+
+        throw $r14;
+
+     label9:
+        return i1;
+
+        catch java.io.IOException from label1 to label2 with label7;
+        catch java.io.IOException from label3 to label6 with label7;
+    }
+
+    static int mergeInhibitAnyPolicy(int, sun.security.x509.X509CertImpl) throws java.security.cert.CertPathValidatorException
+    {
+        sun.security.x509.InhibitAnyPolicyExtension $r14;
+        java.lang.Integer $r1;
+        int $i0, i1, $i3, $i5;
+        sun.security.util.ObjectIdentifier $r12;
+        java.lang.String $r7;
+        java.security.cert.CertPathValidatorException $r16;
+        boolean $z0;
+        java.io.IOException $r8;
+        sun.security.x509.X509CertImpl r0;
+        sun.security.util.Debug $r2, $r4, $r9, $r11;
+        sun.security.x509.Extension $r13;
+        java.lang.StringBuilder $r5, $r6, $r15;
+
+        i1 := @parameter0: int;
+
+        r0 := @parameter1: sun.security.x509.X509CertImpl;
+
+        if i1 <= 0 goto label1;
+
+        $z0 = staticinvoke <sun.security.x509.X509CertImpl: boolean isSelfIssued(java.security.cert.X509Certificate)>(r0);
+
+        if $z0 != 0 goto label1;
+
+        $i3 = (int) -1;
+
+        i1 = i1 + $i3;
+
+     label1:
+        $r12 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier InhibitAnyPolicy_Id>;
+
+        $r13 = virtualinvoke r0.<sun.security.x509.X509CertImpl: sun.security.x509.Extension getExtension(sun.security.util.ObjectIdentifier)>($r12);
+
+        $r14 = (sun.security.x509.InhibitAnyPolicyExtension) $r13;
+
+        if $r14 != null goto label3;
+
+     label2:
+        return i1;
+
+     label3:
+        $r1 = virtualinvoke $r14.<sun.security.x509.InhibitAnyPolicyExtension: java.lang.Integer get(java.lang.String)>("skip_certs");
+
+        $i0 = virtualinvoke $r1.<java.lang.Integer: int intValue()>();
+
+        $r2 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        if $r2 == null goto label4;
+
+        $r4 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.mergeInhibitAnyPolicy() skipCerts Index from cert = ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<sun.security.util.Debug: void println(java.lang.String)>($r7);
+
+     label4:
+        $i5 = (int) -1;
+
+        if $i0 == $i5 goto label5;
+
+        if $i0 >= i1 goto label5;
+
+        i1 = $i0;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r8 := @caughtexception;
+
+        $r9 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        if $r9 == null goto label7;
+
+        $r11 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        virtualinvoke $r11.<sun.security.util.Debug: void println(java.lang.String)>("PolicyChecker.mergeInhibitAnyPolicy unexpected exception");
+
+        virtualinvoke $r8.<java.io.IOException: void printStackTrace()>();
+
+     label7:
+        $r16 = new java.security.cert.CertPathValidatorException;
+
+        specialinvoke $r16.<java.security.cert.CertPathValidatorException: void <init>(java.lang.Throwable)>($r8);
+
+        throw $r16;
+
+     label8:
+        return i1;
+
+        catch java.io.IOException from label1 to label2 with label6;
+        catch java.io.IOException from label3 to label5 with label6;
+    }
+
+    static sun.security.provider.certpath.PolicyNodeImpl processPolicies(int, java.util.Set, int, int, int, boolean, sun.security.provider.certpath.PolicyNodeImpl, sun.security.x509.X509CertImpl, boolean) throws java.security.cert.CertPathValidatorException
+    {
+        sun.security.provider.certpath.PolicyNodeImpl r1, $r7, r43;
+        sun.security.util.ObjectIdentifier $r19;
+        java.security.cert.PKIXReason $r5, $r24;
+        java.security.cert.CertPathValidatorException $r47, $r50, $r51;
+        boolean z0, $z1, $z2, z3, $z4, $z5, $z6, z7, z8, $z9, $z10, $z11;
+        sun.security.x509.CertificatePoliciesExtension $r3;
+        java.util.Set r6, $r22, r42;
+        sun.security.x509.X509CertImpl r2;
+        sun.security.util.Debug $r8, $r9, $r10, $r12, $r14, $r15, $r21, $r26, $r31, $r36;
+        java.util.List $r11;
+        java.lang.StringBuilder $r27, $r28, $r32, $r33, $r37, $r38, $r46, $r48, $r49;
+        java.util.HashSet $r45;
+        sun.security.x509.CertificatePolicyId $r18;
+        int i0, i1, i2, i3, $i5, $i7;
+        java.lang.String $r20, $r29, $r34, $r39;
+        sun.security.x509.PolicyInformation r17;
+        java.util.Iterator $r13, $r44;
+        java.io.IOException $r40;
+        java.lang.Object $r16;
+
+        i0 := @parameter0: int;
+
+        r6 := @parameter1: java.util.Set;
+
+        i3 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        i2 := @parameter4: int;
+
+        z3 := @parameter5: boolean;
+
+        r1 := @parameter6: sun.security.provider.certpath.PolicyNodeImpl;
+
+        r2 := @parameter7: sun.security.x509.X509CertImpl;
+
+        z0 := @parameter8: boolean;
+
+        z7 = 0;
+
+        $r45 = new java.util.HashSet;
+
+        specialinvoke $r45.<java.util.HashSet: void <init>()>();
+
+        r42 = $r45;
+
+        if r1 != null goto label01;
+
+        r43 = null;
+
+        goto label02;
+
+     label01:
+        r43 = virtualinvoke r1.<sun.security.provider.certpath.PolicyNodeImpl: sun.security.provider.certpath.PolicyNodeImpl copyTree()>();
+
+     label02:
+        $r3 = virtualinvoke r2.<sun.security.x509.X509CertImpl: sun.security.x509.CertificatePoliciesExtension getCertificatePoliciesExtension()>();
+
+        if $r3 == null goto label18;
+
+        if r43 == null goto label18;
+
+        $z2 = virtualinvoke $r3.<sun.security.x509.CertificatePoliciesExtension: boolean isCritical()>();
+
+        z7 = $z2;
+
+        $r10 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        if $r10 == null goto label03;
+
+        $r36 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r46 = new java.lang.StringBuilder;
+
+        specialinvoke $r46.<java.lang.StringBuilder: void <init>()>();
+
+        $r37 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.processPolicies() policiesCritical = ");
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z2);
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r36.<sun.security.util.Debug: void println(java.lang.String)>($r39);
+
+     label03:
+        $r11 = virtualinvoke $r3.<sun.security.x509.CertificatePoliciesExtension: java.util.List get(java.lang.String)>("policies");
+
+     label04:
+        goto label06;
+
+     label05:
+        $r40 := @caughtexception;
+
+        $r47 = new java.security.cert.CertPathValidatorException;
+
+        specialinvoke $r47.<java.security.cert.CertPathValidatorException: void <init>(java.lang.String,java.lang.Throwable)>("Exception while retrieving policyOIDs", $r40);
+
+        throw $r47;
+
+     label06:
+        $r12 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        if $r12 == null goto label07;
+
+        $r31 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r48 = new java.lang.StringBuilder;
+
+        specialinvoke $r48.<java.lang.StringBuilder: void <init>()>();
+
+        $r32 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.processPolicies() rejectPolicyQualifiers = ");
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>(z3);
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r31.<sun.security.util.Debug: void println(java.lang.String)>($r34);
+
+     label07:
+        z8 = 0;
+
+        $r13 = interfaceinvoke $r11.<java.util.List: java.util.Iterator iterator()>();
+
+     label08:
+        $z9 = interfaceinvoke $r13.<java.util.Iterator: boolean hasNext()>();
+
+        if $z9 == 0 goto label13;
+
+        $r16 = interfaceinvoke $r13.<java.util.Iterator: java.lang.Object next()>();
+
+        r17 = (sun.security.x509.PolicyInformation) $r16;
+
+        $r18 = virtualinvoke r17.<sun.security.x509.PolicyInformation: sun.security.x509.CertificatePolicyId getPolicyIdentifier()>();
+
+        $r19 = virtualinvoke $r18.<sun.security.x509.CertificatePolicyId: sun.security.util.ObjectIdentifier getIdentifier()>();
+
+        $r20 = virtualinvoke $r19.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        $z5 = virtualinvoke $r20.<java.lang.String: boolean equals(java.lang.Object)>("2.5.29.32.0");
+
+        if $z5 == 0 goto label09;
+
+        z8 = 1;
+
+        r42 = virtualinvoke r17.<sun.security.x509.PolicyInformation: java.util.Set getPolicyQualifiers()>();
+
+        goto label12;
+
+     label09:
+        $r21 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        if $r21 == null goto label10;
+
+        $r26 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r49 = new java.lang.StringBuilder;
+
+        specialinvoke $r49.<java.lang.StringBuilder: void <init>()>();
+
+        $r27 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.processPolicies() processing policy: ");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r26.<sun.security.util.Debug: void println(java.lang.String)>($r29);
+
+     label10:
+        $r22 = virtualinvoke r17.<sun.security.x509.PolicyInformation: java.util.Set getPolicyQualifiers()>();
+
+        $z6 = interfaceinvoke $r22.<java.util.Set: boolean isEmpty()>();
+
+        if $z6 != 0 goto label11;
+
+        if z3 == 0 goto label11;
+
+        if $z2 == 0 goto label11;
+
+        $r50 = new java.security.cert.CertPathValidatorException;
+
+        $r24 = <java.security.cert.PKIXReason: java.security.cert.PKIXReason INVALID_POLICY>;
+
+        $i5 = (int) -1;
+
+        specialinvoke $r50.<java.security.cert.CertPathValidatorException: void <init>(java.lang.String,java.lang.Throwable,java.security.cert.CertPath,int,java.security.cert.CertPathValidatorException$Reason)>("critical policy qualifiers present in certificate", null, null, $i5, $r24);
+
+        throw $r50;
+
+     label11:
+        $z10 = staticinvoke <sun.security.provider.certpath.PolicyChecker: boolean processParents(int,boolean,boolean,sun.security.provider.certpath.PolicyNodeImpl,java.lang.String,java.util.Set,boolean)>(i0, $z2, z3, r43, $r20, $r22, 0);
+
+        if $z10 != 0 goto label12;
+
+        staticinvoke <sun.security.provider.certpath.PolicyChecker: boolean processParents(int,boolean,boolean,sun.security.provider.certpath.PolicyNodeImpl,java.lang.String,java.util.Set,boolean)>(i0, $z2, z3, r43, $r20, $r22, 1);
+
+     label12:
+        goto label08;
+
+     label13:
+        if z8 == 0 goto label16;
+
+        if i2 > 0 goto label14;
+
+        if z0 != 0 goto label16;
+
+        $z4 = staticinvoke <sun.security.x509.X509CertImpl: boolean isSelfIssued(java.security.cert.X509Certificate)>(r2);
+
+        if $z4 == 0 goto label16;
+
+     label14:
+        $r14 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        if $r14 == null goto label15;
+
+        $r15 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        virtualinvoke $r15.<sun.security.util.Debug: void println(java.lang.String)>("PolicyChecker.processPolicies() processing policy: 2.5.29.32.0");
+
+     label15:
+        staticinvoke <sun.security.provider.certpath.PolicyChecker: boolean processParents(int,boolean,boolean,sun.security.provider.certpath.PolicyNodeImpl,java.lang.String,java.util.Set,boolean)>(i0, $z2, z3, r43, "2.5.29.32.0", r42, 1);
+
+     label16:
+        virtualinvoke r43.<sun.security.provider.certpath.PolicyNodeImpl: void prune(int)>(i0);
+
+        $r44 = virtualinvoke r43.<sun.security.provider.certpath.PolicyNodeImpl: java.util.Iterator getChildren()>();
+
+        $z11 = interfaceinvoke $r44.<java.util.Iterator: boolean hasNext()>();
+
+        if $z11 != 0 goto label17;
+
+        r43 = null;
+
+     label17:
+        goto label20;
+
+     label18:
+        if $r3 != null goto label20;
+
+        $r8 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        if $r8 == null goto label19;
+
+        $r9 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        virtualinvoke $r9.<sun.security.util.Debug: void println(java.lang.String)>("PolicyChecker.processPolicies() no policies present in cert");
+
+     label19:
+        r43 = null;
+
+     label20:
+        if r43 == null goto label21;
+
+        if z0 != 0 goto label21;
+
+        r43 = staticinvoke <sun.security.provider.certpath.PolicyChecker: sun.security.provider.certpath.PolicyNodeImpl processPolicyMappings(sun.security.x509.X509CertImpl,int,int,sun.security.provider.certpath.PolicyNodeImpl,boolean,java.util.Set)>(r2, i0, i1, r43, z7, r42);
+
+     label21:
+        if r43 == null goto label22;
+
+        $z1 = interfaceinvoke r6.<java.util.Set: boolean contains(java.lang.Object)>("2.5.29.32.0");
+
+        if $z1 != 0 goto label22;
+
+        if $r3 == null goto label22;
+
+        $r7 = staticinvoke <sun.security.provider.certpath.PolicyChecker: sun.security.provider.certpath.PolicyNodeImpl removeInvalidNodes(sun.security.provider.certpath.PolicyNodeImpl,int,java.util.Set,sun.security.x509.CertificatePoliciesExtension)>(r43, i0, r6, $r3);
+
+        r43 = $r7;
+
+        if $r7 == null goto label22;
+
+        if z0 == 0 goto label22;
+
+        r43 = staticinvoke <sun.security.provider.certpath.PolicyChecker: sun.security.provider.certpath.PolicyNodeImpl rewriteLeafNodes(int,java.util.Set,sun.security.provider.certpath.PolicyNodeImpl)>(i0, r6, $r7);
+
+     label22:
+        if z0 == 0 goto label23;
+
+        i3 = staticinvoke <sun.security.provider.certpath.PolicyChecker: int mergeExplicitPolicy(int,sun.security.x509.X509CertImpl,boolean)>(i3, r2, z0);
+
+     label23:
+        if i3 != 0 goto label24;
+
+        if r43 != null goto label24;
+
+        $r51 = new java.security.cert.CertPathValidatorException;
+
+        $r5 = <java.security.cert.PKIXReason: java.security.cert.PKIXReason INVALID_POLICY>;
+
+        $i7 = (int) -1;
+
+        specialinvoke $r51.<java.security.cert.CertPathValidatorException: void <init>(java.lang.String,java.lang.Throwable,java.security.cert.CertPath,int,java.security.cert.CertPathValidatorException$Reason)>("non-null policy tree required and policy tree is null", null, null, $i7, $r5);
+
+        throw $r51;
+
+     label24:
+        return r43;
+
+        catch java.io.IOException from label03 to label04 with label05;
+    }
+
+    private static sun.security.provider.certpath.PolicyNodeImpl rewriteLeafNodes(int, java.util.Set, sun.security.provider.certpath.PolicyNodeImpl)
+    {
+        sun.security.provider.certpath.PolicyNodeImpl r3, r5, $r15, r19, r20;
+        java.util.HashSet $r6;
+        int i0;
+        java.lang.String r13, $r18;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.util.Iterator $r1, $r9, $r11, $r16;
+        java.util.Set $r0, r7, $r8, $r10, $r14;
+        java.security.cert.PolicyNode $r4;
+        java.lang.Object $r2, $r12, $r17;
+
+        i0 := @parameter0: int;
+
+        r7 := @parameter1: java.util.Set;
+
+        r19 := @parameter2: sun.security.provider.certpath.PolicyNodeImpl;
+
+        $r0 = virtualinvoke r19.<sun.security.provider.certpath.PolicyNodeImpl: java.util.Set getPolicyNodesValid(int,java.lang.String)>(i0, "2.5.29.32.0");
+
+        $z0 = interfaceinvoke $r0.<java.util.Set: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        return r19;
+
+     label1:
+        $r1 = interfaceinvoke $r0.<java.util.Set: java.util.Iterator iterator()>();
+
+        $r2 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        r3 = (sun.security.provider.certpath.PolicyNodeImpl) $r2;
+
+        $r4 = virtualinvoke r3.<sun.security.provider.certpath.PolicyNodeImpl: java.security.cert.PolicyNode getParent()>();
+
+        r5 = (sun.security.provider.certpath.PolicyNodeImpl) $r4;
+
+        virtualinvoke r5.<sun.security.provider.certpath.PolicyNodeImpl: void deleteChild(java.security.cert.PolicyNode)>(r3);
+
+        $r6 = new java.util.HashSet;
+
+        specialinvoke $r6.<java.util.HashSet: void <init>(java.util.Collection)>(r7);
+
+        $r8 = virtualinvoke r19.<sun.security.provider.certpath.PolicyNodeImpl: java.util.Set getPolicyNodes(int)>(i0);
+
+        $r9 = interfaceinvoke $r8.<java.util.Set: java.util.Iterator iterator()>();
+
+     label2:
+        $z1 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label3;
+
+        $r17 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        r20 = (sun.security.provider.certpath.PolicyNodeImpl) $r17;
+
+        $r18 = virtualinvoke r20.<sun.security.provider.certpath.PolicyNodeImpl: java.lang.String getValidPolicy()>();
+
+        interfaceinvoke $r6.<java.util.Set: boolean remove(java.lang.Object)>($r18);
+
+        goto label2;
+
+     label3:
+        $z2 = interfaceinvoke $r6.<java.util.Set: boolean isEmpty()>();
+
+        if $z2 == 0 goto label4;
+
+        virtualinvoke r19.<sun.security.provider.certpath.PolicyNodeImpl: void prune(int)>(i0);
+
+        $r16 = virtualinvoke r19.<sun.security.provider.certpath.PolicyNodeImpl: java.util.Iterator getChildren()>();
+
+        $z5 = interfaceinvoke $r16.<java.util.Iterator: boolean hasNext()>();
+
+        if $z5 != 0 goto label6;
+
+        r19 = null;
+
+        goto label6;
+
+     label4:
+        $z3 = virtualinvoke r3.<sun.security.provider.certpath.PolicyNodeImpl: boolean isCritical()>();
+
+        $r10 = virtualinvoke r3.<sun.security.provider.certpath.PolicyNodeImpl: java.util.Set getPolicyQualifiers()>();
+
+        $r11 = interfaceinvoke $r6.<java.util.Set: java.util.Iterator iterator()>();
+
+     label5:
+        $z4 = interfaceinvoke $r11.<java.util.Iterator: boolean hasNext()>();
+
+        if $z4 == 0 goto label6;
+
+        $r12 = interfaceinvoke $r11.<java.util.Iterator: java.lang.Object next()>();
+
+        r13 = (java.lang.String) $r12;
+
+        $r14 = staticinvoke <java.util.Collections: java.util.Set singleton(java.lang.Object)>(r13);
+
+        $r15 = new sun.security.provider.certpath.PolicyNodeImpl;
+
+        specialinvoke $r15.<sun.security.provider.certpath.PolicyNodeImpl: void <init>(sun.security.provider.certpath.PolicyNodeImpl,java.lang.String,java.util.Set,boolean,java.util.Set,boolean)>(r5, r13, $r10, $z3, $r14, 0);
+
+        goto label5;
+
+     label6:
+        return r19;
+    }
+
+    private static boolean processParents(int, boolean, boolean, sun.security.provider.certpath.PolicyNodeImpl, java.lang.String, java.util.Set, boolean) throws java.security.cert.CertPathValidatorException
+    {
+        sun.security.provider.certpath.PolicyNodeImpl r1, r6, $r9, $r17, r37;
+        boolean z0, $z1, z2, $z3, $z4, z5, z6, $z7, $z8;
+        java.util.Set $r3, r10, $r11;
+        sun.security.util.Debug $r0, $r7, $r20, $r22, $r27, $r33;
+        java.lang.StringBuilder $r21, $r23, $r24, $r26, $r28, $r30, $r32, $r34, $r35;
+        java.util.HashSet $r8, $r16;
+        int i0, $i1;
+        java.lang.String r2, r14, $r19, $r25, $r29, $r31, $r36;
+        java.util.Iterator $r4, $r12, $r15;
+        java.lang.Object $r5, $r13, $r18;
+
+        i0 := @parameter0: int;
+
+        z2 := @parameter1: boolean;
+
+        z5 := @parameter2: boolean;
+
+        r1 := @parameter3: sun.security.provider.certpath.PolicyNodeImpl;
+
+        r2 := @parameter4: java.lang.String;
+
+        r10 := @parameter5: java.util.Set;
+
+        z0 := @parameter6: boolean;
+
+        z6 = 0;
+
+        $r0 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        if $r0 == null goto label01;
+
+        $r33 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r32 = new java.lang.StringBuilder;
+
+        specialinvoke $r32.<java.lang.StringBuilder: void <init>()>();
+
+        $r34 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.processParents(): matchAny = ");
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>(z0);
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r33.<sun.security.util.Debug: void println(java.lang.String)>($r36);
+
+     label01:
+        $i1 = i0 - 1;
+
+        $r3 = virtualinvoke r1.<sun.security.provider.certpath.PolicyNodeImpl: java.util.Set getPolicyNodesExpected(int,java.lang.String,boolean)>($i1, r2, z0);
+
+        $r4 = interfaceinvoke $r3.<java.util.Set: java.util.Iterator iterator()>();
+
+     label02:
+        $z7 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z7 == 0 goto label11;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (sun.security.provider.certpath.PolicyNodeImpl) $r5;
+
+        $r7 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        if $r7 == null goto label03;
+
+        $r27 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r28 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.processParents() found parent:\n");
+
+        $r29 = virtualinvoke r6.<sun.security.provider.certpath.PolicyNodeImpl: java.lang.String asString()>();
+
+        $r30 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r29);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r27.<sun.security.util.Debug: void println(java.lang.String)>($r31);
+
+     label03:
+        z6 = 1;
+
+        virtualinvoke r6.<sun.security.provider.certpath.PolicyNodeImpl: java.lang.String getValidPolicy()>();
+
+        $z1 = virtualinvoke r2.<java.lang.String: boolean equals(java.lang.Object)>("2.5.29.32.0");
+
+        if $z1 == 0 goto label09;
+
+        $r11 = virtualinvoke r6.<sun.security.provider.certpath.PolicyNodeImpl: java.util.Set getExpectedPolicies()>();
+
+        $r12 = interfaceinvoke $r11.<java.util.Set: java.util.Iterator iterator()>();
+
+     label04:
+        $z8 = interfaceinvoke $r12.<java.util.Iterator: boolean hasNext()>();
+
+        if $z8 == 0 goto label08;
+
+        $r13 = interfaceinvoke $r12.<java.util.Iterator: java.lang.Object next()>();
+
+        r14 = (java.lang.String) $r13;
+
+        $r15 = virtualinvoke r6.<sun.security.provider.certpath.PolicyNodeImpl: java.util.Iterator getChildren()>();
+
+     label05:
+        $z3 = interfaceinvoke $r15.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label07;
+
+        $r18 = interfaceinvoke $r15.<java.util.Iterator: java.lang.Object next()>();
+
+        r37 = (sun.security.provider.certpath.PolicyNodeImpl) $r18;
+
+        $r19 = virtualinvoke r37.<sun.security.provider.certpath.PolicyNodeImpl: java.lang.String getValidPolicy()>();
+
+        $z4 = virtualinvoke r14.<java.lang.String: boolean equals(java.lang.Object)>($r19);
+
+        if $z4 == 0 goto label06;
+
+        $r20 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        if $r20 == null goto label04;
+
+        $r22 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" in parent\'s expected policy set already appears in child node");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r22.<sun.security.util.Debug: void println(java.lang.String)>($r25);
+
+        goto label04;
+
+     label06:
+        goto label05;
+
+     label07:
+        $r16 = new java.util.HashSet;
+
+        specialinvoke $r16.<java.util.HashSet: void <init>()>();
+
+        interfaceinvoke $r16.<java.util.Set: boolean add(java.lang.Object)>(r14);
+
+        $r17 = new sun.security.provider.certpath.PolicyNodeImpl;
+
+        specialinvoke $r17.<sun.security.provider.certpath.PolicyNodeImpl: void <init>(sun.security.provider.certpath.PolicyNodeImpl,java.lang.String,java.util.Set,boolean,java.util.Set,boolean)>(r6, r14, r10, z2, $r16, 0);
+
+        goto label04;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r8 = new java.util.HashSet;
+
+        specialinvoke $r8.<java.util.HashSet: void <init>()>();
+
+        interfaceinvoke $r8.<java.util.Set: boolean add(java.lang.Object)>(r2);
+
+        $r9 = new sun.security.provider.certpath.PolicyNodeImpl;
+
+        specialinvoke $r9.<sun.security.provider.certpath.PolicyNodeImpl: void <init>(sun.security.provider.certpath.PolicyNodeImpl,java.lang.String,java.util.Set,boolean,java.util.Set,boolean)>(r6, r2, r10, z2, $r8, 0);
+
+     label10:
+        goto label02;
+
+     label11:
+        return z6;
+    }
+
+    private static sun.security.provider.certpath.PolicyNodeImpl processPolicyMappings(sun.security.x509.X509CertImpl, int, int, sun.security.provider.certpath.PolicyNodeImpl, boolean, java.util.Set) throws java.security.cert.CertPathValidatorException
+    {
+        sun.security.provider.certpath.PolicyNodeImpl r22, r60, r61, r62, r63, $r72;
+        sun.security.util.ObjectIdentifier $r11, $r14;
+        java.util.Set $r17, $r18, r25;
+        sun.security.util.Debug $r2, $r6, $r7, $r16, $r29, $r30, $r32, $r37, $r46, $r51, $r55, $r57, $r59;
+        java.security.cert.PolicyNode $r21, $r28;
+        java.lang.StringBuilder $r33, $r34, $r38, $r39, $r47, $r48, $r52, $r53, $r65, $r66, $r69, $r70;
+        sun.security.x509.CertificatePolicyId $r10, $r13;
+        java.lang.String $r12, $r15, $r35, $r40, $r49, $r54;
+        java.io.IOException $r56;
+        sun.security.x509.PolicyMappingsExtension $r1;
+        java.security.cert.PKIXReason $r42, $r44;
+        java.security.cert.CertPathValidatorException $r64, $r67, $r68;
+        boolean $z0, $z1, $z2, $z3, $z4, z5, $z6, z7, $z8;
+        sun.security.x509.X509CertImpl r0;
+        java.util.List $r3;
+        sun.security.x509.CertificatePolicyMap r9;
+        java.util.HashSet $r71;
+        int i0, i1, $i3, $i5, $i7, $i9;
+        java.util.Iterator $r4, $r5, $r19, $r26;
+        java.lang.Object $r8, $r20, $r27;
+
+        r0 := @parameter0: sun.security.x509.X509CertImpl;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r60 := @parameter3: sun.security.provider.certpath.PolicyNodeImpl;
+
+        z5 := @parameter4: boolean;
+
+        r25 := @parameter5: java.util.Set;
+
+        $r1 = virtualinvoke r0.<sun.security.x509.X509CertImpl: sun.security.x509.PolicyMappingsExtension getPolicyMappingsExtension()>();
+
+        if $r1 != null goto label01;
+
+        return r60;
+
+     label01:
+        $r2 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        if $r2 == null goto label02;
+
+        $r55 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        virtualinvoke $r55.<sun.security.util.Debug: void println(java.lang.String)>("PolicyChecker.processPolicyMappings() inside policyMapping check");
+
+     label02:
+        $r3 = virtualinvoke $r1.<sun.security.x509.PolicyMappingsExtension: java.util.List get(java.lang.String)>("map");
+
+     label03:
+        goto label06;
+
+     label04:
+        $r56 := @caughtexception;
+
+        $r57 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        if $r57 == null goto label05;
+
+        $r59 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        virtualinvoke $r59.<sun.security.util.Debug: void println(java.lang.String)>("PolicyChecker.processPolicyMappings() mapping exception");
+
+        virtualinvoke $r56.<java.io.IOException: void printStackTrace()>();
+
+     label05:
+        $r64 = new java.security.cert.CertPathValidatorException;
+
+        specialinvoke $r64.<java.security.cert.CertPathValidatorException: void <init>(java.lang.String,java.lang.Throwable)>("Exception while checking mapping", $r56);
+
+        throw $r64;
+
+     label06:
+        z7 = 0;
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+     label07:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label21;
+
+        $r8 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (sun.security.x509.CertificatePolicyMap) $r8;
+
+        $r10 = virtualinvoke r9.<sun.security.x509.CertificatePolicyMap: sun.security.x509.CertificatePolicyId getIssuerIdentifier()>();
+
+        $r11 = virtualinvoke $r10.<sun.security.x509.CertificatePolicyId: sun.security.util.ObjectIdentifier getIdentifier()>();
+
+        $r12 = virtualinvoke $r11.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        $r13 = virtualinvoke r9.<sun.security.x509.CertificatePolicyMap: sun.security.x509.CertificatePolicyId getSubjectIdentifier()>();
+
+        $r14 = virtualinvoke $r13.<sun.security.x509.CertificatePolicyId: sun.security.util.ObjectIdentifier getIdentifier()>();
+
+        $r15 = virtualinvoke $r14.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        $r16 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        if $r16 == null goto label08;
+
+        $r46 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r65 = new java.lang.StringBuilder;
+
+        specialinvoke $r65.<java.lang.StringBuilder: void <init>()>();
+
+        $r47 = virtualinvoke $r65.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.processPolicyMappings() issuerDomain = ");
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r46.<sun.security.util.Debug: void println(java.lang.String)>($r49);
+
+        $r51 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r66 = new java.lang.StringBuilder;
+
+        specialinvoke $r66.<java.lang.StringBuilder: void <init>()>();
+
+        $r52 = virtualinvoke $r66.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.processPolicyMappings() subjectDomain = ");
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r51.<sun.security.util.Debug: void println(java.lang.String)>($r54);
+
+     label08:
+        $z2 = virtualinvoke $r12.<java.lang.String: boolean equals(java.lang.Object)>("2.5.29.32.0");
+
+        if $z2 == 0 goto label09;
+
+        $r67 = new java.security.cert.CertPathValidatorException;
+
+        $r44 = <java.security.cert.PKIXReason: java.security.cert.PKIXReason INVALID_POLICY>;
+
+        $i3 = (int) -1;
+
+        specialinvoke $r67.<java.security.cert.CertPathValidatorException: void <init>(java.lang.String,java.lang.Throwable,java.security.cert.CertPath,int,java.security.cert.CertPathValidatorException$Reason)>("encountered an issuerDomainPolicy of ANY_POLICY", null, null, $i3, $r44);
+
+        throw $r67;
+
+     label09:
+        $z3 = virtualinvoke $r15.<java.lang.String: boolean equals(java.lang.Object)>("2.5.29.32.0");
+
+        if $z3 == 0 goto label10;
+
+        $r68 = new java.security.cert.CertPathValidatorException;
+
+        $r42 = <java.security.cert.PKIXReason: java.security.cert.PKIXReason INVALID_POLICY>;
+
+        $i5 = (int) -1;
+
+        specialinvoke $r68.<java.security.cert.CertPathValidatorException: void <init>(java.lang.String,java.lang.Throwable,java.security.cert.CertPath,int,java.security.cert.CertPathValidatorException$Reason)>("encountered a subjectDomainPolicy of ANY_POLICY", null, null, $i5, $r42);
+
+        throw $r68;
+
+     label10:
+        $r17 = virtualinvoke r60.<sun.security.provider.certpath.PolicyNodeImpl: java.util.Set getPolicyNodesValid(int,java.lang.String)>(i0, $r12);
+
+        $z4 = interfaceinvoke $r17.<java.util.Set: boolean isEmpty()>();
+
+        if $z4 != 0 goto label17;
+
+        $r26 = interfaceinvoke $r17.<java.util.Set: java.util.Iterator iterator()>();
+
+     label11:
+        $z6 = interfaceinvoke $r26.<java.util.Iterator: boolean hasNext()>();
+
+        if $z6 == 0 goto label16;
+
+        $r27 = interfaceinvoke $r26.<java.util.Iterator: java.lang.Object next()>();
+
+        r61 = (sun.security.provider.certpath.PolicyNodeImpl) $r27;
+
+        if i1 > 0 goto label12;
+
+        $i7 = (int) -1;
+
+        if i1 != $i7 goto label13;
+
+     label12:
+        virtualinvoke r61.<sun.security.provider.certpath.PolicyNodeImpl: void addExpectedPolicy(java.lang.String)>($r15);
+
+        goto label15;
+
+     label13:
+        if i1 != 0 goto label15;
+
+        $r28 = virtualinvoke r61.<sun.security.provider.certpath.PolicyNodeImpl: java.security.cert.PolicyNode getParent()>();
+
+        r62 = (sun.security.provider.certpath.PolicyNodeImpl) $r28;
+
+        $r29 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        if $r29 == null goto label14;
+
+        $r37 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r69 = new java.lang.StringBuilder;
+
+        specialinvoke $r69.<java.lang.StringBuilder: void <init>()>();
+
+        $r38 = virtualinvoke $r69.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.processPolicyMappings() before deleting: policy tree = ");
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r60);
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r37.<sun.security.util.Debug: void println(java.lang.String)>($r40);
+
+     label14:
+        virtualinvoke r62.<sun.security.provider.certpath.PolicyNodeImpl: void deleteChild(java.security.cert.PolicyNode)>(r61);
+
+        z7 = 1;
+
+        $r30 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        if $r30 == null goto label15;
+
+        $r32 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r70 = new java.lang.StringBuilder;
+
+        specialinvoke $r70.<java.lang.StringBuilder: void <init>()>();
+
+        $r33 = virtualinvoke $r70.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.processPolicyMappings() after deleting: policy tree = ");
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r60);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r32.<sun.security.util.Debug: void println(java.lang.String)>($r35);
+
+     label15:
+        goto label11;
+
+     label16:
+        goto label20;
+
+     label17:
+        if i1 > 0 goto label18;
+
+        $i9 = (int) -1;
+
+        if i1 != $i9 goto label20;
+
+     label18:
+        $r18 = virtualinvoke r60.<sun.security.provider.certpath.PolicyNodeImpl: java.util.Set getPolicyNodesValid(int,java.lang.String)>(i0, "2.5.29.32.0");
+
+        $r19 = interfaceinvoke $r18.<java.util.Set: java.util.Iterator iterator()>();
+
+     label19:
+        $z8 = interfaceinvoke $r19.<java.util.Iterator: boolean hasNext()>();
+
+        if $z8 == 0 goto label20;
+
+        $r20 = interfaceinvoke $r19.<java.util.Iterator: java.lang.Object next()>();
+
+        r63 = (sun.security.provider.certpath.PolicyNodeImpl) $r20;
+
+        $r21 = virtualinvoke r63.<sun.security.provider.certpath.PolicyNodeImpl: java.security.cert.PolicyNode getParent()>();
+
+        r22 = (sun.security.provider.certpath.PolicyNodeImpl) $r21;
+
+        $r71 = new java.util.HashSet;
+
+        specialinvoke $r71.<java.util.HashSet: void <init>()>();
+
+        interfaceinvoke $r71.<java.util.Set: boolean add(java.lang.Object)>($r15);
+
+        $r72 = new sun.security.provider.certpath.PolicyNodeImpl;
+
+        specialinvoke $r72.<sun.security.provider.certpath.PolicyNodeImpl: void <init>(sun.security.provider.certpath.PolicyNodeImpl,java.lang.String,java.util.Set,boolean,java.util.Set,boolean)>(r22, $r12, r25, z5, $r71, 1);
+
+        goto label19;
+
+     label20:
+        goto label07;
+
+     label21:
+        if z7 == 0 goto label23;
+
+        virtualinvoke r60.<sun.security.provider.certpath.PolicyNodeImpl: void prune(int)>(i0);
+
+        $r5 = virtualinvoke r60.<sun.security.provider.certpath.PolicyNodeImpl: java.util.Iterator getChildren()>();
+
+        $z1 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 != 0 goto label23;
+
+        $r6 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        if $r6 == null goto label22;
+
+        $r7 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        virtualinvoke $r7.<sun.security.util.Debug: void println(java.lang.String)>("setting rootNode to null");
+
+     label22:
+        r60 = null;
+
+     label23:
+        return r60;
+
+        catch java.io.IOException from label02 to label03 with label04;
+    }
+
+    private static sun.security.provider.certpath.PolicyNodeImpl removeInvalidNodes(sun.security.provider.certpath.PolicyNodeImpl, int, java.util.Set, sun.security.x509.CertificatePoliciesExtension) throws java.security.cert.CertPathValidatorException
+    {
+        sun.security.provider.certpath.PolicyNodeImpl r13, r15, r37;
+        sun.security.util.ObjectIdentifier $r7;
+        java.security.cert.CertPathValidatorException $r36;
+        boolean $z0, $z1, $z2, $z3, $z4, z5, $z6;
+        sun.security.x509.CertificatePoliciesExtension r0;
+        java.util.Set $r10, r17;
+        sun.security.util.Debug $r9, $r18, $r19, $r21, $r26, $r31;
+        java.security.cert.PolicyNode $r14;
+        java.util.List $r1;
+        java.lang.StringBuilder $r20, $r22, $r23, $r25, $r27, $r28, $r30, $r32, $r33;
+        sun.security.x509.CertificatePolicyId $r6;
+        int i0;
+        java.lang.String $r8, $r16, $r24, $r29, $r34;
+        sun.security.x509.PolicyInformation r5;
+        java.util.Iterator $r2, $r3, $r11;
+        java.io.IOException $r35;
+        java.lang.Object $r4, $r12;
+
+        r37 := @parameter0: sun.security.provider.certpath.PolicyNodeImpl;
+
+        i0 := @parameter1: int;
+
+        r17 := @parameter2: java.util.Set;
+
+        r0 := @parameter3: sun.security.x509.CertificatePoliciesExtension;
+
+     label01:
+        $r1 = virtualinvoke r0.<sun.security.x509.CertificatePoliciesExtension: java.util.List get(java.lang.String)>("policies");
+
+     label02:
+        goto label04;
+
+     label03:
+        $r35 := @caughtexception;
+
+        $r36 = new java.security.cert.CertPathValidatorException;
+
+        specialinvoke $r36.<java.security.cert.CertPathValidatorException: void <init>(java.lang.String,java.lang.Throwable)>("Exception while retrieving policyOIDs", $r35);
+
+        throw $r36;
+
+     label04:
+        z5 = 0;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label05:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label11;
+
+        $r4 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (sun.security.x509.PolicyInformation) $r4;
+
+        $r6 = virtualinvoke r5.<sun.security.x509.PolicyInformation: sun.security.x509.CertificatePolicyId getPolicyIdentifier()>();
+
+        $r7 = virtualinvoke $r6.<sun.security.x509.CertificatePolicyId: sun.security.util.ObjectIdentifier getIdentifier()>();
+
+        $r8 = virtualinvoke $r7.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        $r9 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        if $r9 == null goto label06;
+
+        $r31 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r30 = new java.lang.StringBuilder;
+
+        specialinvoke $r30.<java.lang.StringBuilder: void <init>()>();
+
+        $r32 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.processPolicies() processing policy second time: ");
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r31.<sun.security.util.Debug: void println(java.lang.String)>($r34);
+
+     label06:
+        $r10 = virtualinvoke r37.<sun.security.provider.certpath.PolicyNodeImpl: java.util.Set getPolicyNodesValid(int,java.lang.String)>(i0, $r8);
+
+        $r11 = interfaceinvoke $r10.<java.util.Set: java.util.Iterator iterator()>();
+
+     label07:
+        $z6 = interfaceinvoke $r11.<java.util.Iterator: boolean hasNext()>();
+
+        if $z6 == 0 goto label10;
+
+        $r12 = interfaceinvoke $r11.<java.util.Iterator: java.lang.Object next()>();
+
+        r13 = (sun.security.provider.certpath.PolicyNodeImpl) $r12;
+
+        $r14 = virtualinvoke r13.<sun.security.provider.certpath.PolicyNodeImpl: java.security.cert.PolicyNode getParent()>();
+
+        r15 = (sun.security.provider.certpath.PolicyNodeImpl) $r14;
+
+        $r16 = virtualinvoke r15.<sun.security.provider.certpath.PolicyNodeImpl: java.lang.String getValidPolicy()>();
+
+        $z2 = virtualinvoke $r16.<java.lang.String: boolean equals(java.lang.Object)>("2.5.29.32.0");
+
+        if $z2 == 0 goto label09;
+
+        $z3 = interfaceinvoke r17.<java.util.Set: boolean contains(java.lang.Object)>($r8);
+
+        if $z3 != 0 goto label09;
+
+        $z4 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>("2.5.29.32.0");
+
+        if $z4 != 0 goto label09;
+
+        $r18 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        if $r18 == null goto label08;
+
+        $r26 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r25 = new java.lang.StringBuilder;
+
+        specialinvoke $r25.<java.lang.StringBuilder: void <init>()>();
+
+        $r27 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.processPolicies() before deleting: policy tree = ");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r37);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r26.<sun.security.util.Debug: void println(java.lang.String)>($r29);
+
+     label08:
+        virtualinvoke r15.<sun.security.provider.certpath.PolicyNodeImpl: void deleteChild(java.security.cert.PolicyNode)>(r13);
+
+        z5 = 1;
+
+        $r19 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        if $r19 == null goto label09;
+
+        $r21 = <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug>;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PolicyChecker.processPolicies() after deleting: policy tree = ");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r37);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r21.<sun.security.util.Debug: void println(java.lang.String)>($r24);
+
+     label09:
+        goto label07;
+
+     label10:
+        goto label05;
+
+     label11:
+        if z5 == 0 goto label12;
+
+        virtualinvoke r37.<sun.security.provider.certpath.PolicyNodeImpl: void prune(int)>(i0);
+
+        $r3 = virtualinvoke r37.<sun.security.provider.certpath.PolicyNodeImpl: java.util.Iterator getChildren()>();
+
+        $z1 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 != 0 goto label12;
+
+        r37 = null;
+
+     label12:
+        return r37;
+
+        catch java.io.IOException from label01 to label02 with label03;
+    }
+
+    java.security.cert.PolicyNode getPolicyTree()
+    {
+        sun.security.provider.certpath.PolicyNodeImpl $r1, $r2, $r3;
+        sun.security.provider.certpath.PolicyChecker r0;
+
+        r0 := @this: sun.security.provider.certpath.PolicyChecker;
+
+        $r1 = r0.<sun.security.provider.certpath.PolicyChecker: sun.security.provider.certpath.PolicyNodeImpl rootNode>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<sun.security.provider.certpath.PolicyChecker: sun.security.provider.certpath.PolicyNodeImpl rootNode>;
+
+        $r3 = virtualinvoke $r2.<sun.security.provider.certpath.PolicyNodeImpl: sun.security.provider.certpath.PolicyNodeImpl copyTree()>();
+
+        virtualinvoke $r3.<sun.security.provider.certpath.PolicyNodeImpl: void setImmutable()>();
+
+        return $r3;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.util.Debug $r0;
+
+        <sun.security.provider.certpath.PolicyChecker: java.lang.String ANY_POLICY> = "2.5.29.32.0";
+
+        $r0 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String)>("certpath");
+
+        <sun.security.provider.certpath.PolicyChecker: sun.security.util.Debug debug> = $r0;
+
+        return;
+    }
+}

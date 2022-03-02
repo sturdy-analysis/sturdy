@@ -1,0 +1,2546 @@
+public class java.awt.image.ColorConvertOp extends java.lang.Object implements java.awt.image.BufferedImageOp, java.awt.image.RasterOp
+{
+    java.awt.color.ICC_Profile[] profileList;
+    java.awt.color.ColorSpace[] CSList;
+    sun.java2d.cmm.ColorTransform thisTransform;
+    sun.java2d.cmm.ColorTransform thisRasterTransform;
+    java.awt.color.ICC_Profile thisSrcProfile;
+    java.awt.color.ICC_Profile thisDestProfile;
+    java.awt.RenderingHints hints;
+    boolean gotProfiles;
+    float[] srcMinVals;
+    float[] srcMaxVals;
+    float[] dstMinVals;
+    float[] dstMaxVals;
+
+    public void <init>(java.awt.RenderingHints)
+    {
+        java.awt.image.ColorConvertOp r0;
+        java.awt.RenderingHints r2;
+        java.awt.color.ICC_Profile[] $r1;
+
+        r0 := @this: java.awt.image.ColorConvertOp;
+
+        r2 := @parameter0: java.awt.RenderingHints;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = newarray (java.awt.color.ICC_Profile)[0];
+
+        r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList> = $r1;
+
+        r0.<java.awt.image.ColorConvertOp: java.awt.RenderingHints hints> = r2;
+
+        return;
+    }
+
+    public void <init>(java.awt.color.ColorSpace, java.awt.RenderingHints)
+    {
+        java.awt.color.ICC_Profile $r8;
+        java.awt.RenderingHints r4;
+        java.awt.color.ColorSpace r1;
+        java.lang.NullPointerException $r9;
+        java.awt.image.ColorConvertOp r0;
+        java.awt.color.ICC_Profile[] $r5, $r7;
+        java.awt.color.ICC_ColorSpace $r6;
+        java.awt.color.ColorSpace[] $r2, $r3;
+        boolean $z0;
+
+        r0 := @this: java.awt.image.ColorConvertOp;
+
+        r1 := @parameter0: java.awt.color.ColorSpace;
+
+        r4 := @parameter1: java.awt.RenderingHints;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        if r1 != null goto label1;
+
+        $r9 = new java.lang.NullPointerException;
+
+        specialinvoke $r9.<java.lang.NullPointerException: void <init>(java.lang.String)>("ColorSpace cannot be null");
+
+        throw $r9;
+
+     label1:
+        $z0 = r1 instanceof java.awt.color.ICC_ColorSpace;
+
+        if $z0 == 0 goto label2;
+
+        $r5 = newarray (java.awt.color.ICC_Profile)[1];
+
+        r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList> = $r5;
+
+        $r7 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        $r6 = (java.awt.color.ICC_ColorSpace) r1;
+
+        $r8 = virtualinvoke $r6.<java.awt.color.ICC_ColorSpace: java.awt.color.ICC_Profile getProfile()>();
+
+        $r7[0] = $r8;
+
+        goto label3;
+
+     label2:
+        $r2 = newarray (java.awt.color.ColorSpace)[1];
+
+        r0.<java.awt.image.ColorConvertOp: java.awt.color.ColorSpace[] CSList> = $r2;
+
+        $r3 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ColorSpace[] CSList>;
+
+        $r3[0] = r1;
+
+     label3:
+        r0.<java.awt.image.ColorConvertOp: java.awt.RenderingHints hints> = r4;
+
+        return;
+    }
+
+    public void <init>(java.awt.color.ColorSpace, java.awt.color.ColorSpace, java.awt.RenderingHints)
+    {
+        java.awt.RenderingHints r7;
+        java.awt.color.ColorSpace r1, r3;
+        java.lang.NullPointerException $r2;
+        java.awt.image.ColorConvertOp r0;
+        java.awt.color.ICC_Profile[] $r8, $r10, $r13;
+        java.awt.color.ICC_ColorSpace $r9, $r12;
+        boolean $z0, $z1;
+        java.awt.color.ICC_Profile $r11, $r14;
+        java.awt.color.ColorSpace[] $r4, $r5, $r6;
+
+        r0 := @this: java.awt.image.ColorConvertOp;
+
+        r1 := @parameter0: java.awt.color.ColorSpace;
+
+        r3 := @parameter1: java.awt.color.ColorSpace;
+
+        r7 := @parameter2: java.awt.RenderingHints;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        if r1 == null goto label1;
+
+        if r3 != null goto label2;
+
+     label1:
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>(java.lang.String)>("ColorSpaces cannot be null");
+
+        throw $r2;
+
+     label2:
+        $z0 = r1 instanceof java.awt.color.ICC_ColorSpace;
+
+        if $z0 == 0 goto label3;
+
+        $z1 = r3 instanceof java.awt.color.ICC_ColorSpace;
+
+        if $z1 == 0 goto label3;
+
+        $r8 = newarray (java.awt.color.ICC_Profile)[2];
+
+        r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList> = $r8;
+
+        $r10 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        $r9 = (java.awt.color.ICC_ColorSpace) r1;
+
+        $r11 = virtualinvoke $r9.<java.awt.color.ICC_ColorSpace: java.awt.color.ICC_Profile getProfile()>();
+
+        $r10[0] = $r11;
+
+        $r13 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        $r12 = (java.awt.color.ICC_ColorSpace) r3;
+
+        $r14 = virtualinvoke $r12.<java.awt.color.ICC_ColorSpace: java.awt.color.ICC_Profile getProfile()>();
+
+        $r13[1] = $r14;
+
+        specialinvoke r0.<java.awt.image.ColorConvertOp: void getMinMaxValsFromColorSpaces(java.awt.color.ColorSpace,java.awt.color.ColorSpace)>(r1, r3);
+
+        goto label4;
+
+     label3:
+        $r4 = newarray (java.awt.color.ColorSpace)[2];
+
+        r0.<java.awt.image.ColorConvertOp: java.awt.color.ColorSpace[] CSList> = $r4;
+
+        $r5 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ColorSpace[] CSList>;
+
+        $r5[0] = r1;
+
+        $r6 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ColorSpace[] CSList>;
+
+        $r6[1] = r3;
+
+     label4:
+        r0.<java.awt.image.ColorConvertOp: java.awt.RenderingHints hints> = r7;
+
+        return;
+    }
+
+    public void <init>(java.awt.color.ICC_Profile[], java.awt.RenderingHints)
+    {
+        java.awt.color.ICC_Profile $r4;
+        java.awt.RenderingHints r3;
+        java.lang.NullPointerException $r6;
+        java.awt.image.ColorConvertOp r0;
+        java.awt.color.ICC_Profile[] r1, $r2, $r5;
+        int $i0, $i1, i2;
+
+        r0 := @this: java.awt.image.ColorConvertOp;
+
+        r1 := @parameter0: java.awt.color.ICC_Profile[];
+
+        r3 := @parameter1: java.awt.RenderingHints;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        if r1 != null goto label1;
+
+        $r6 = new java.lang.NullPointerException;
+
+        specialinvoke $r6.<java.lang.NullPointerException: void <init>(java.lang.String)>("Profiles cannot be null");
+
+        throw $r6;
+
+     label1:
+        r0.<java.awt.image.ColorConvertOp: boolean gotProfiles> = 1;
+
+        $i0 = lengthof r1;
+
+        $r2 = newarray (java.awt.color.ICC_Profile)[$i0];
+
+        r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList> = $r2;
+
+        i2 = 0;
+
+     label2:
+        $i1 = lengthof r1;
+
+        if i2 >= $i1 goto label3;
+
+        $r5 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        $r4 = r1[i2];
+
+        $r5[i2] = $r4;
+
+        i2 = i2 + 1;
+
+        goto label2;
+
+     label3:
+        r0.<java.awt.image.ColorConvertOp: java.awt.RenderingHints hints> = r3;
+
+        return;
+    }
+
+    public final java.awt.color.ICC_Profile[] getICC_Profiles()
+    {
+        java.awt.color.ICC_Profile $r5;
+        java.awt.image.ColorConvertOp r0;
+        java.awt.color.ICC_Profile[] $r1, r2, $r3, $r4;
+        int $i0, $i1, i2;
+        boolean $z0;
+
+        r0 := @this: java.awt.image.ColorConvertOp;
+
+        $z0 = r0.<java.awt.image.ColorConvertOp: boolean gotProfiles>;
+
+        if $z0 == 0 goto label3;
+
+        $r1 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        $i0 = lengthof $r1;
+
+        r2 = newarray (java.awt.color.ICC_Profile)[$i0];
+
+        i2 = 0;
+
+     label1:
+        $r3 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        $i1 = lengthof $r3;
+
+        if i2 >= $i1 goto label2;
+
+        $r4 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        $r5 = $r4[i2];
+
+        r2[i2] = $r5;
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return r2;
+
+     label3:
+        return null;
+    }
+
+    public final java.awt.image.BufferedImage filter(java.awt.image.BufferedImage, java.awt.image.BufferedImage)
+    {
+        java.lang.Throwable $r9;
+        java.awt.color.ColorSpace $r2, r14;
+        java.awt.image.ColorConvertOp r3;
+        java.awt.Graphics2D $r4;
+        java.awt.image.IndexColorModel r13;
+        boolean $z0, $z1, $z2, $z3;
+        java.awt.image.BufferedImage r10, r11, r12, r16;
+        java.awt.image.ColorModel $r0, $r1, $r5, $r6, $r7;
+        java.awt.image.WritableRaster $r8;
+        java.awt.color.ColorSpace[] $r15;
+
+        r3 := @this: java.awt.image.ColorConvertOp;
+
+        r10 := @parameter0: java.awt.image.BufferedImage;
+
+        r11 := @parameter1: java.awt.image.BufferedImage;
+
+        r12 = null;
+
+        $r0 = virtualinvoke r10.<java.awt.image.BufferedImage: java.awt.image.ColorModel getColorModel()>();
+
+        $z0 = $r0 instanceof java.awt.image.IndexColorModel;
+
+        if $z0 == 0 goto label01;
+
+        $r7 = virtualinvoke r10.<java.awt.image.BufferedImage: java.awt.image.ColorModel getColorModel()>();
+
+        r13 = (java.awt.image.IndexColorModel) $r7;
+
+        $r8 = virtualinvoke r10.<java.awt.image.BufferedImage: java.awt.image.WritableRaster getRaster()>();
+
+        r10 = virtualinvoke r13.<java.awt.image.IndexColorModel: java.awt.image.BufferedImage convertToIntDiscrete(java.awt.image.Raster,boolean)>($r8, 1);
+
+     label01:
+        $r1 = virtualinvoke r10.<java.awt.image.BufferedImage: java.awt.image.ColorModel getColorModel()>();
+
+        $r2 = virtualinvoke $r1.<java.awt.image.ColorModel: java.awt.color.ColorSpace getColorSpace()>();
+
+        if r11 == null goto label03;
+
+        $r5 = virtualinvoke r11.<java.awt.image.BufferedImage: java.awt.image.ColorModel getColorModel()>();
+
+        $z3 = $r5 instanceof java.awt.image.IndexColorModel;
+
+        if $z3 == 0 goto label02;
+
+        r12 = r11;
+
+        r11 = null;
+
+        r14 = null;
+
+        goto label04;
+
+     label02:
+        $r6 = virtualinvoke r11.<java.awt.image.BufferedImage: java.awt.image.ColorModel getColorModel()>();
+
+        r14 = virtualinvoke $r6.<java.awt.image.ColorModel: java.awt.color.ColorSpace getColorSpace()>();
+
+        goto label04;
+
+     label03:
+        r14 = null;
+
+     label04:
+        $r15 = r3.<java.awt.image.ColorConvertOp: java.awt.color.ColorSpace[] CSList>;
+
+        if $r15 != null goto label05;
+
+        $z1 = $r2 instanceof java.awt.color.ICC_ColorSpace;
+
+        if $z1 == 0 goto label05;
+
+        if r11 == null goto label06;
+
+        $z2 = r14 instanceof java.awt.color.ICC_ColorSpace;
+
+        if $z2 != 0 goto label06;
+
+     label05:
+        r16 = specialinvoke r3.<java.awt.image.ColorConvertOp: java.awt.image.BufferedImage nonICCBIFilter(java.awt.image.BufferedImage,java.awt.color.ColorSpace,java.awt.image.BufferedImage,java.awt.color.ColorSpace)>(r10, $r2, r11, r14);
+
+        goto label07;
+
+     label06:
+        r16 = specialinvoke r3.<java.awt.image.ColorConvertOp: java.awt.image.BufferedImage ICCBIFilter(java.awt.image.BufferedImage,java.awt.color.ColorSpace,java.awt.image.BufferedImage,java.awt.color.ColorSpace)>(r10, $r2, r11, r14);
+
+     label07:
+        if r12 == null goto label13;
+
+        $r4 = virtualinvoke r12.<java.awt.image.BufferedImage: java.awt.Graphics2D createGraphics()>();
+
+     label08:
+        virtualinvoke $r4.<java.awt.Graphics2D: boolean drawImage(java.awt.Image,int,int,java.awt.image.ImageObserver)>(r16, 0, 0, null);
+
+     label09:
+        virtualinvoke $r4.<java.awt.Graphics2D: void dispose()>();
+
+        goto label12;
+
+     label10:
+        $r9 := @caughtexception;
+
+     label11:
+        virtualinvoke $r4.<java.awt.Graphics2D: void dispose()>();
+
+        throw $r9;
+
+     label12:
+        return r12;
+
+     label13:
+        return r16;
+
+        catch java.lang.Throwable from label08 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    private final java.awt.image.BufferedImage ICCBIFilter(java.awt.image.BufferedImage, java.awt.color.ColorSpace, java.awt.image.BufferedImage, java.awt.color.ColorSpace)
+    {
+        java.lang.Throwable $r17;
+        java.awt.color.ColorSpace r2, r7;
+        java.awt.image.ColorConvertOp r0;
+        java.awt.Graphics2D $r12;
+        java.awt.color.ICC_Profile[] $r1, $r13, $r15;
+        int i0, $i1, $i2, $i3, $i4, $i5, i6;
+        java.awt.color.ICC_ColorSpace $r3, $r8;
+        boolean z0;
+        java.awt.color.ICC_Profile $r4, $r10, $r11, $r14, r19;
+        java.awt.image.BufferedImage r5, r18;
+        sun.java2d.cmm.ColorTransform $r9, $r20;
+        java.lang.IllegalArgumentException $r6, $r16;
+
+        r0 := @this: java.awt.image.ColorConvertOp;
+
+        r5 := @parameter0: java.awt.image.BufferedImage;
+
+        r2 := @parameter1: java.awt.color.ColorSpace;
+
+        r18 := @parameter2: java.awt.image.BufferedImage;
+
+        r7 := @parameter3: java.awt.color.ColorSpace;
+
+        $r1 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        i0 = lengthof $r1;
+
+        $r3 = (java.awt.color.ICC_ColorSpace) r2;
+
+        $r4 = virtualinvoke $r3.<java.awt.color.ICC_ColorSpace: java.awt.color.ICC_Profile getProfile()>();
+
+        if r18 != null goto label02;
+
+        if i0 != 0 goto label01;
+
+        $r16 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r16.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Destination ColorSpace is undefined");
+
+        throw $r16;
+
+     label01:
+        $r15 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        $i5 = i0 - 1;
+
+        r19 = $r15[$i5];
+
+        r18 = virtualinvoke r0.<java.awt.image.ColorConvertOp: java.awt.image.BufferedImage createCompatibleDestImage(java.awt.image.BufferedImage,java.awt.image.ColorModel)>(r5, null);
+
+        goto label05;
+
+     label02:
+        $i1 = virtualinvoke r5.<java.awt.image.BufferedImage: int getHeight()>();
+
+        $i2 = virtualinvoke r18.<java.awt.image.BufferedImage: int getHeight()>();
+
+        if $i1 != $i2 goto label03;
+
+        $i3 = virtualinvoke r5.<java.awt.image.BufferedImage: int getWidth()>();
+
+        $i4 = virtualinvoke r18.<java.awt.image.BufferedImage: int getWidth()>();
+
+        if $i3 == $i4 goto label04;
+
+     label03:
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Width or height of BufferedImages do not match");
+
+        throw $r6;
+
+     label04:
+        $r8 = (java.awt.color.ICC_ColorSpace) r7;
+
+        r19 = virtualinvoke $r8.<java.awt.color.ICC_ColorSpace: java.awt.color.ICC_Profile getProfile()>();
+
+     label05:
+        if $r4 != r19 goto label14;
+
+        z0 = 1;
+
+        i6 = 0;
+
+     label06:
+        if i6 >= i0 goto label08;
+
+        $r13 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        $r14 = $r13[i6];
+
+        if $r4 == $r14 goto label07;
+
+        z0 = 0;
+
+        goto label08;
+
+     label07:
+        i6 = i6 + 1;
+
+        goto label06;
+
+     label08:
+        if z0 == 0 goto label14;
+
+        $r12 = virtualinvoke r18.<java.awt.image.BufferedImage: java.awt.Graphics2D createGraphics()>();
+
+     label09:
+        virtualinvoke $r12.<java.awt.Graphics2D: boolean drawImage(java.awt.Image,int,int,java.awt.image.ImageObserver)>(r5, 0, 0, null);
+
+     label10:
+        virtualinvoke $r12.<java.awt.Graphics2D: void dispose()>();
+
+        goto label13;
+
+     label11:
+        $r17 := @caughtexception;
+
+     label12:
+        virtualinvoke $r12.<java.awt.Graphics2D: void dispose()>();
+
+        throw $r17;
+
+     label13:
+        return r18;
+
+     label14:
+        $r9 = r0.<java.awt.image.ColorConvertOp: sun.java2d.cmm.ColorTransform thisTransform>;
+
+        if $r9 == null goto label15;
+
+        $r10 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile thisSrcProfile>;
+
+        if $r10 != $r4 goto label15;
+
+        $r11 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile thisDestProfile>;
+
+        if $r11 == r19 goto label16;
+
+     label15:
+        specialinvoke r0.<java.awt.image.ColorConvertOp: void updateBITransform(java.awt.color.ICC_Profile,java.awt.color.ICC_Profile)>($r4, r19);
+
+     label16:
+        $r20 = r0.<java.awt.image.ColorConvertOp: sun.java2d.cmm.ColorTransform thisTransform>;
+
+        interfaceinvoke $r20.<sun.java2d.cmm.ColorTransform: void colorConvert(java.awt.image.BufferedImage,java.awt.image.BufferedImage)>(r5, r18);
+
+        return r18;
+
+        catch java.lang.Throwable from label09 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+    }
+
+    private void updateBITransform(java.awt.color.ICC_Profile, java.awt.color.ICC_Profile)
+    {
+        java.awt.image.ColorConvertOp r0;
+        byte b10, b12, b13;
+        java.awt.color.ICC_Profile[] $r1, $r9, $r11, $r13, $r15;
+        boolean z0, z1;
+        sun.java2d.cmm.ColorTransform $r4, $r17;
+        int i0, $i1, $i2, $i3, $i4, $i5, i6, i7, i8, i9, i11;
+        sun.java2d.cmm.ColorTransform[] $r8;
+        java.awt.color.ICC_Profile $r2, r5, r6, $r7, $r10, $r12, $r14, $r16, $r18;
+        sun.java2d.cmm.PCMM $r3;
+
+        r0 := @this: java.awt.image.ColorConvertOp;
+
+        r5 := @parameter0: java.awt.color.ICC_Profile;
+
+        r6 := @parameter1: java.awt.color.ICC_Profile;
+
+        z0 = 0;
+
+        z1 = 0;
+
+        $r1 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        i0 = lengthof $r1;
+
+        i6 = i0;
+
+        if i0 == 0 goto label01;
+
+        $r13 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        $r14 = $r13[0];
+
+        if r5 == $r14 goto label02;
+
+     label01:
+        i6 = i0 + 1;
+
+        z0 = 1;
+
+     label02:
+        if i0 == 0 goto label03;
+
+        $r11 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        $i5 = i0 - 1;
+
+        $r12 = $r11[$i5];
+
+        if r6 != $r12 goto label03;
+
+        if i6 >= 2 goto label04;
+
+     label03:
+        i6 = i6 + 1;
+
+        z1 = 1;
+
+     label04:
+        $r15 = newarray (java.awt.color.ICC_Profile)[i6];
+
+        i7 = 0;
+
+        if z0 == 0 goto label05;
+
+        i7 = 1;
+
+        $r15[0] = r5;
+
+     label05:
+        i8 = 0;
+
+     label06:
+        if i8 >= i0 goto label07;
+
+        $i4 = i7;
+
+        i7 = i7 + 1;
+
+        $r9 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        $r10 = $r9[i8];
+
+        $r15[$i4] = $r10;
+
+        i8 = i8 + 1;
+
+        goto label06;
+
+     label07:
+        if z1 == 0 goto label08;
+
+        $r15[i7] = r6;
+
+     label08:
+        $r8 = newarray (sun.java2d.cmm.ColorTransform)[i6];
+
+        $r2 = $r15[0];
+
+        $i1 = virtualinvoke $r2.<java.awt.color.ICC_Profile: int getProfileClass()>();
+
+        if $i1 != 2 goto label09;
+
+        i9 = 1;
+
+        goto label10;
+
+     label09:
+        i9 = 0;
+
+     label10:
+        b10 = 1;
+
+        b13 = 1;
+
+        b12 = 1;
+
+        $r3 = staticinvoke <sun.java2d.cmm.CMSManager: sun.java2d.cmm.PCMM getModule()>();
+
+        i11 = 0;
+
+     label11:
+        if i11 >= i6 goto label14;
+
+        $i2 = i6 - 1;
+
+        if i11 != $i2 goto label12;
+
+        b10 = 2;
+
+        b13 = 2;
+
+        goto label13;
+
+     label12:
+        if b12 != 4 goto label13;
+
+        $r7 = $r15[i11];
+
+        $i3 = virtualinvoke $r7.<java.awt.color.ICC_Profile: int getProfileClass()>();
+
+        if $i3 != 5 goto label13;
+
+        i9 = 0;
+
+        b10 = 1;
+
+        b13 = 1;
+
+     label13:
+        $r16 = $r15[i11];
+
+        $r17 = interfaceinvoke $r3.<sun.java2d.cmm.PCMM: sun.java2d.cmm.ColorTransform createTransform(java.awt.color.ICC_Profile,int,int)>($r16, i9, b13);
+
+        $r8[i11] = $r17;
+
+        $r18 = $r15[i11];
+
+        i9 = specialinvoke r0.<java.awt.image.ColorConvertOp: int getRenderingIntent(java.awt.color.ICC_Profile)>($r18);
+
+        b10 = 4;
+
+        b13 = 4;
+
+        b12 = 4;
+
+        i11 = i11 + 1;
+
+        goto label11;
+
+     label14:
+        $r4 = interfaceinvoke $r3.<sun.java2d.cmm.PCMM: sun.java2d.cmm.ColorTransform createTransform(sun.java2d.cmm.ColorTransform[])>($r8);
+
+        r0.<java.awt.image.ColorConvertOp: sun.java2d.cmm.ColorTransform thisTransform> = $r4;
+
+        r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile thisSrcProfile> = r5;
+
+        r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile thisDestProfile> = r6;
+
+        return;
+    }
+
+    public final java.awt.image.WritableRaster filter(java.awt.image.Raster, java.awt.image.WritableRaster)
+    {
+        java.awt.image.ColorConvertOp r0;
+        byte b17, b19, b20;
+        java.awt.color.ICC_Profile[] $r2, $r4, $r7, $r15, $r16, $r21, $r25, $r32, $r35;
+        sun.java2d.cmm.ColorTransform $r9, $r14, $r19, $r24, $r34;
+        float[] $r10, $r11, $r12, $r13, $r37;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, i16, i18;
+        java.awt.image.Raster r3;
+        sun.java2d.cmm.ColorTransform[] r20;
+        java.awt.color.ICC_Profile $r5, $r8, $r17, $r18, $r22, $r26, $r33, $r36;
+        sun.java2d.cmm.PCMM $r23;
+        java.lang.IllegalArgumentException $r6, $r27, $r28, $r29;
+        java.awt.image.WritableRaster $r30, r31;
+        java.awt.color.ColorSpace[] $r1;
+
+        r0 := @this: java.awt.image.ColorConvertOp;
+
+        r3 := @parameter0: java.awt.image.Raster;
+
+        r31 := @parameter1: java.awt.image.WritableRaster;
+
+        $r1 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ColorSpace[] CSList>;
+
+        if $r1 == null goto label01;
+
+        $r30 = specialinvoke r0.<java.awt.image.ColorConvertOp: java.awt.image.WritableRaster nonICCRasterFilter(java.awt.image.Raster,java.awt.image.WritableRaster)>(r3, r31);
+
+        return $r30;
+
+     label01:
+        $r2 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        i0 = lengthof $r2;
+
+        if i0 >= 2 goto label02;
+
+        $r29 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r29.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Source or Destination ColorSpace is undefined");
+
+        throw $r29;
+
+     label02:
+        $i1 = virtualinvoke r3.<java.awt.image.Raster: int getNumBands()>();
+
+        $r4 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        $r5 = $r4[0];
+
+        $i2 = virtualinvoke $r5.<java.awt.color.ICC_Profile: int getNumComponents()>();
+
+        if $i1 == $i2 goto label03;
+
+        $r28 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r28.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Numbers of source Raster bands and source color space components do not match");
+
+        throw $r28;
+
+     label03:
+        if r31 != null goto label04;
+
+        r31 = virtualinvoke r0.<java.awt.image.ColorConvertOp: java.awt.image.WritableRaster createCompatibleDestRaster(java.awt.image.Raster)>(r3);
+
+        goto label07;
+
+     label04:
+        $i3 = virtualinvoke r3.<java.awt.image.Raster: int getHeight()>();
+
+        $i4 = virtualinvoke r31.<java.awt.image.WritableRaster: int getHeight()>();
+
+        if $i3 != $i4 goto label05;
+
+        $i5 = virtualinvoke r3.<java.awt.image.Raster: int getWidth()>();
+
+        $i6 = virtualinvoke r31.<java.awt.image.WritableRaster: int getWidth()>();
+
+        if $i5 == $i6 goto label06;
+
+     label05:
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Width or height of Rasters do not match");
+
+        throw $r6;
+
+     label06:
+        $i7 = virtualinvoke r31.<java.awt.image.WritableRaster: int getNumBands()>();
+
+        $r7 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        $i8 = i0 - 1;
+
+        $r8 = $r7[$i8];
+
+        $i9 = virtualinvoke $r8.<java.awt.color.ICC_Profile: int getNumComponents()>();
+
+        if $i7 == $i9 goto label07;
+
+        $r27 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r27.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Numbers of destination Raster bands and destination color space components do not match");
+
+        throw $r27;
+
+     label07:
+        $r9 = r0.<java.awt.image.ColorConvertOp: sun.java2d.cmm.ColorTransform thisRasterTransform>;
+
+        if $r9 != null goto label14;
+
+        r20 = newarray (sun.java2d.cmm.ColorTransform)[i0];
+
+        $r21 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        $r22 = $r21[0];
+
+        $i13 = virtualinvoke $r22.<java.awt.color.ICC_Profile: int getProfileClass()>();
+
+        if $i13 != 2 goto label08;
+
+        i16 = 1;
+
+        goto label09;
+
+     label08:
+        i16 = 0;
+
+     label09:
+        b17 = 1;
+
+        b20 = 1;
+
+        b19 = 1;
+
+        $r23 = staticinvoke <sun.java2d.cmm.CMSManager: sun.java2d.cmm.PCMM getModule()>();
+
+        i18 = 0;
+
+     label10:
+        if i18 >= i0 goto label13;
+
+        $i14 = i0 - 1;
+
+        if i18 != $i14 goto label11;
+
+        b17 = 2;
+
+        b19 = 2;
+
+        goto label12;
+
+     label11:
+        if b20 != 4 goto label12;
+
+        $r25 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        $r26 = $r25[i18];
+
+        $i15 = virtualinvoke $r26.<java.awt.color.ICC_Profile: int getProfileClass()>();
+
+        if $i15 != 5 goto label12;
+
+        i16 = 0;
+
+        b17 = 1;
+
+        b19 = 1;
+
+     label12:
+        $r32 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        $r33 = $r32[i18];
+
+        $r34 = interfaceinvoke $r23.<sun.java2d.cmm.PCMM: sun.java2d.cmm.ColorTransform createTransform(java.awt.color.ICC_Profile,int,int)>($r33, i16, b19);
+
+        r20[i18] = $r34;
+
+        $r35 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        $r36 = $r35[i18];
+
+        i16 = specialinvoke r0.<java.awt.image.ColorConvertOp: int getRenderingIntent(java.awt.color.ICC_Profile)>($r36);
+
+        b17 = 4;
+
+        b20 = 4;
+
+        b19 = 4;
+
+        i18 = i18 + 1;
+
+        goto label10;
+
+     label13:
+        $r24 = interfaceinvoke $r23.<sun.java2d.cmm.PCMM: sun.java2d.cmm.ColorTransform createTransform(sun.java2d.cmm.ColorTransform[])>(r20);
+
+        r0.<java.awt.image.ColorConvertOp: sun.java2d.cmm.ColorTransform thisRasterTransform> = $r24;
+
+     label14:
+        $i10 = virtualinvoke r3.<java.awt.image.Raster: int getTransferType()>();
+
+        $i11 = virtualinvoke r31.<java.awt.image.WritableRaster: int getTransferType()>();
+
+        if $i10 == 4 goto label15;
+
+        if $i10 == 5 goto label15;
+
+        if $i11 == 4 goto label15;
+
+        if $i11 != 5 goto label17;
+
+     label15:
+        $r37 = r0.<java.awt.image.ColorConvertOp: float[] srcMinVals>;
+
+        if $r37 != null goto label16;
+
+        $r15 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        $r18 = $r15[0];
+
+        $r16 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        $i12 = i0 - 1;
+
+        $r17 = $r16[$i12];
+
+        specialinvoke r0.<java.awt.image.ColorConvertOp: void getMinMaxValsFromProfiles(java.awt.color.ICC_Profile,java.awt.color.ICC_Profile)>($r18, $r17);
+
+     label16:
+        $r14 = r0.<java.awt.image.ColorConvertOp: sun.java2d.cmm.ColorTransform thisRasterTransform>;
+
+        $r13 = r0.<java.awt.image.ColorConvertOp: float[] srcMinVals>;
+
+        $r12 = r0.<java.awt.image.ColorConvertOp: float[] srcMaxVals>;
+
+        $r11 = r0.<java.awt.image.ColorConvertOp: float[] dstMinVals>;
+
+        $r10 = r0.<java.awt.image.ColorConvertOp: float[] dstMaxVals>;
+
+        interfaceinvoke $r14.<sun.java2d.cmm.ColorTransform: void colorConvert(java.awt.image.Raster,java.awt.image.WritableRaster,float[],float[],float[],float[])>(r3, r31, $r13, $r12, $r11, $r10);
+
+        goto label18;
+
+     label17:
+        $r19 = r0.<java.awt.image.ColorConvertOp: sun.java2d.cmm.ColorTransform thisRasterTransform>;
+
+        interfaceinvoke $r19.<sun.java2d.cmm.ColorTransform: void colorConvert(java.awt.image.Raster,java.awt.image.WritableRaster)>(r3, r31);
+
+     label18:
+        return r31;
+    }
+
+    public final java.awt.geom.Rectangle2D getBounds2D(java.awt.image.BufferedImage)
+    {
+        java.awt.image.ColorConvertOp r0;
+        java.awt.image.BufferedImage r1;
+        java.awt.geom.Rectangle2D $r3;
+        java.awt.image.WritableRaster $r2;
+
+        r0 := @this: java.awt.image.ColorConvertOp;
+
+        r1 := @parameter0: java.awt.image.BufferedImage;
+
+        $r2 = virtualinvoke r1.<java.awt.image.BufferedImage: java.awt.image.WritableRaster getRaster()>();
+
+        $r3 = virtualinvoke r0.<java.awt.image.ColorConvertOp: java.awt.geom.Rectangle2D getBounds2D(java.awt.image.Raster)>($r2);
+
+        return $r3;
+    }
+
+    public final java.awt.geom.Rectangle2D getBounds2D(java.awt.image.Raster)
+    {
+        java.awt.image.Raster r0;
+        java.awt.image.ColorConvertOp r2;
+        java.awt.Rectangle $r1;
+
+        r2 := @this: java.awt.image.ColorConvertOp;
+
+        r0 := @parameter0: java.awt.image.Raster;
+
+        $r1 = virtualinvoke r0.<java.awt.image.Raster: java.awt.Rectangle getBounds()>();
+
+        return $r1;
+    }
+
+    public java.awt.image.BufferedImage createCompatibleDestImage(java.awt.image.BufferedImage, java.awt.image.ColorModel)
+    {
+        java.awt.color.ColorSpace r11;
+        java.awt.image.ColorConvertOp r1;
+        java.awt.color.ICC_Profile[] $r6, $r7;
+        int $i0, $i1, i2, i3;
+        java.awt.color.ICC_ColorSpace $r9;
+        java.awt.color.ICC_Profile r8;
+        java.awt.image.BufferedImage r2, $r12;
+        java.lang.IllegalArgumentException $r10;
+        java.awt.image.ColorModel r0;
+        java.awt.color.ColorSpace[] $r3, $r4, $r5;
+
+        r1 := @this: java.awt.image.ColorConvertOp;
+
+        r2 := @parameter0: java.awt.image.BufferedImage;
+
+        r0 := @parameter1: java.awt.image.ColorModel;
+
+        r11 = null;
+
+        if r0 != null goto label3;
+
+        $r3 = r1.<java.awt.image.ColorConvertOp: java.awt.color.ColorSpace[] CSList>;
+
+        if $r3 != null goto label2;
+
+        $r6 = r1.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        i2 = lengthof $r6;
+
+        if i2 != 0 goto label1;
+
+        $r10 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r10.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Destination ColorSpace is undefined");
+
+        throw $r10;
+
+     label1:
+        $r7 = r1.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        $i1 = i2 - 1;
+
+        r8 = $r7[$i1];
+
+        $r9 = new java.awt.color.ICC_ColorSpace;
+
+        specialinvoke $r9.<java.awt.color.ICC_ColorSpace: void <init>(java.awt.color.ICC_Profile)>(r8);
+
+        r11 = $r9;
+
+        goto label3;
+
+     label2:
+        $r4 = r1.<java.awt.image.ColorConvertOp: java.awt.color.ColorSpace[] CSList>;
+
+        i3 = lengthof $r4;
+
+        $r5 = r1.<java.awt.image.ColorConvertOp: java.awt.color.ColorSpace[] CSList>;
+
+        $i0 = i3 - 1;
+
+        r11 = $r5[$i0];
+
+     label3:
+        $r12 = specialinvoke r1.<java.awt.image.ColorConvertOp: java.awt.image.BufferedImage createCompatibleDestImage(java.awt.image.BufferedImage,java.awt.image.ColorModel,java.awt.color.ColorSpace)>(r2, r0, r11);
+
+        return $r12;
+    }
+
+    private java.awt.image.BufferedImage createCompatibleDestImage(java.awt.image.BufferedImage, java.awt.image.ColorModel, java.awt.color.ColorSpace)
+    {
+        java.awt.color.ColorSpace r4;
+        java.awt.image.ColorConvertOp r7;
+        int[] $r6;
+        int $i0, $i1, $i2, $i3, i4, i5;
+        boolean $z0, $z1, $z2;
+        java.awt.image.BufferedImage r0, $r1;
+        java.awt.image.ComponentColorModel $r5;
+        java.awt.image.ColorModel $r3, r8;
+        java.awt.image.WritableRaster $r2;
+
+        r7 := @this: java.awt.image.ColorConvertOp;
+
+        r0 := @parameter0: java.awt.image.BufferedImage;
+
+        r8 := @parameter1: java.awt.image.ColorModel;
+
+        r4 := @parameter2: java.awt.color.ColorSpace;
+
+        if r8 != null goto label4;
+
+        $r3 = virtualinvoke r0.<java.awt.image.BufferedImage: java.awt.image.ColorModel getColorModel()>();
+
+        $i2 = virtualinvoke r4.<java.awt.color.ColorSpace: int getNumComponents()>();
+
+        i4 = $i2;
+
+        $z1 = virtualinvoke $r3.<java.awt.image.ColorModel: boolean hasAlpha()>();
+
+        if $z1 == 0 goto label1;
+
+        i4 = $i2 + 1;
+
+     label1:
+        $r6 = newarray (int)[i4];
+
+        i5 = 0;
+
+     label2:
+        if i5 >= i4 goto label3;
+
+        $r6[i5] = 8;
+
+        i5 = i5 + 1;
+
+        goto label2;
+
+     label3:
+        $r5 = new java.awt.image.ComponentColorModel;
+
+        $z2 = virtualinvoke $r3.<java.awt.image.ColorModel: boolean isAlphaPremultiplied()>();
+
+        $i3 = virtualinvoke $r3.<java.awt.image.ColorModel: int getTransparency()>();
+
+        specialinvoke $r5.<java.awt.image.ComponentColorModel: void <init>(java.awt.color.ColorSpace,int[],boolean,boolean,int,int)>(r4, $r6, $z1, $z2, $i3, 0);
+
+        r8 = $r5;
+
+     label4:
+        $i0 = virtualinvoke r0.<java.awt.image.BufferedImage: int getWidth()>();
+
+        $i1 = virtualinvoke r0.<java.awt.image.BufferedImage: int getHeight()>();
+
+        $r1 = new java.awt.image.BufferedImage;
+
+        $r2 = virtualinvoke r8.<java.awt.image.ColorModel: java.awt.image.WritableRaster createCompatibleWritableRaster(int,int)>($i0, $i1);
+
+        $z0 = virtualinvoke r8.<java.awt.image.ColorModel: boolean isAlphaPremultiplied()>();
+
+        specialinvoke $r1.<java.awt.image.BufferedImage: void <init>(java.awt.image.ColorModel,java.awt.image.WritableRaster,boolean,java.util.Hashtable)>(r8, $r2, $z0, null);
+
+        return $r1;
+    }
+
+    public java.awt.image.WritableRaster createCompatibleDestRaster(java.awt.image.Raster)
+    {
+        java.awt.Point $r6;
+        java.awt.color.ColorSpace $r11;
+        java.awt.image.ColorConvertOp r0;
+        java.awt.color.ICC_Profile[] $r2, $r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, i7;
+        java.awt.image.Raster r5;
+        java.awt.color.ICC_Profile $r4;
+        java.lang.IllegalArgumentException $r8, $r12;
+        java.awt.image.WritableRaster $r7;
+        java.awt.color.ColorSpace[] $r1, $r9, $r10;
+
+        r0 := @this: java.awt.image.ColorConvertOp;
+
+        r5 := @parameter0: java.awt.image.Raster;
+
+        $r1 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ColorSpace[] CSList>;
+
+        if $r1 == null goto label2;
+
+        $r9 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ColorSpace[] CSList>;
+
+        $i5 = lengthof $r9;
+
+        if $i5 == 2 goto label1;
+
+        $r12 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r12.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Destination ColorSpace is undefined");
+
+        throw $r12;
+
+     label1:
+        $r10 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ColorSpace[] CSList>;
+
+        $r11 = $r10[1];
+
+        i6 = virtualinvoke $r11.<java.awt.color.ColorSpace: int getNumComponents()>();
+
+        goto label4;
+
+     label2:
+        $r2 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        i7 = lengthof $r2;
+
+        if i7 >= 2 goto label3;
+
+        $r8 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Destination ColorSpace is undefined");
+
+        throw $r8;
+
+     label3:
+        $r3 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        $i0 = i7 - 1;
+
+        $r4 = $r3[$i0];
+
+        i6 = virtualinvoke $r4.<java.awt.color.ICC_Profile: int getNumComponents()>();
+
+     label4:
+        $i1 = virtualinvoke r5.<java.awt.image.Raster: int getWidth()>();
+
+        $i2 = virtualinvoke r5.<java.awt.image.Raster: int getHeight()>();
+
+        $r6 = new java.awt.Point;
+
+        $i3 = virtualinvoke r5.<java.awt.image.Raster: int getMinX()>();
+
+        $i4 = virtualinvoke r5.<java.awt.image.Raster: int getMinY()>();
+
+        specialinvoke $r6.<java.awt.Point: void <init>(int,int)>($i3, $i4);
+
+        $r7 = staticinvoke <java.awt.image.Raster: java.awt.image.WritableRaster createInterleavedRaster(int,int,int,int,java.awt.Point)>(0, $i1, $i2, i6, $r6);
+
+        return $r7;
+    }
+
+    public final java.awt.geom.Point2D getPoint2D(java.awt.geom.Point2D, java.awt.geom.Point2D)
+    {
+        java.awt.image.ColorConvertOp r2;
+        java.awt.geom.Point2D$Float $r1;
+        java.awt.geom.Point2D r0, r3;
+        double $d0, $d1;
+
+        r2 := @this: java.awt.image.ColorConvertOp;
+
+        r0 := @parameter0: java.awt.geom.Point2D;
+
+        r3 := @parameter1: java.awt.geom.Point2D;
+
+        if r3 != null goto label1;
+
+        $r1 = new java.awt.geom.Point2D$Float;
+
+        specialinvoke $r1.<java.awt.geom.Point2D$Float: void <init>()>();
+
+        r3 = $r1;
+
+     label1:
+        $d0 = virtualinvoke r0.<java.awt.geom.Point2D: double getX()>();
+
+        $d1 = virtualinvoke r0.<java.awt.geom.Point2D: double getY()>();
+
+        virtualinvoke r3.<java.awt.geom.Point2D: void setLocation(double,double)>($d0, $d1);
+
+        return r3;
+    }
+
+    private int getRenderingIntent(java.awt.color.ICC_Profile)
+    {
+        java.awt.color.ICC_Profile r0;
+        byte[] $r1;
+        java.awt.image.ColorConvertOp r2;
+        short $s1, $s3, $s6, $s8;
+        byte $b0, $b2;
+        int $i4, $i5, $i7, $i9;
+
+        r2 := @this: java.awt.image.ColorConvertOp;
+
+        r0 := @parameter0: java.awt.color.ICC_Profile;
+
+        $r1 = virtualinvoke r0.<java.awt.color.ICC_Profile: byte[] getData(int)>(1751474532);
+
+        $b0 = $r1[66];
+
+        $s6 = (short) $b0;
+
+        $s1 = $s6 & 255;
+
+        $i7 = (int) $s1;
+
+        $i4 = $i7 << 8;
+
+        $b2 = $r1[67];
+
+        $s8 = (short) $b2;
+
+        $s3 = $s8 & 255;
+
+        $i9 = (int) $s3;
+
+        $i5 = $i4 | $i9;
+
+        return $i5;
+    }
+
+    public final java.awt.RenderingHints getRenderingHints()
+    {
+        java.awt.image.ColorConvertOp r0;
+        java.awt.RenderingHints $r1;
+
+        r0 := @this: java.awt.image.ColorConvertOp;
+
+        $r1 = r0.<java.awt.image.ColorConvertOp: java.awt.RenderingHints hints>;
+
+        return $r1;
+    }
+
+    private final java.awt.image.BufferedImage nonICCBIFilter(java.awt.image.BufferedImage, java.awt.color.ColorSpace, java.awt.image.BufferedImage, java.awt.color.ColorSpace)
+    {
+        java.awt.image.ColorConvertOp r8;
+        sun.java2d.cmm.ColorTransform $r23, $r24;
+        float[] $r12, $r14, $r17, $r25, $r27, $r28, $r29, $r30, $r31, r43, r46, r48, r51, r54, r55;
+        short $s9, $s13;
+        java.awt.color.ColorSpace[] $r9, $r10, $r15, $r18, $r38;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i10, $i11, $i12, $i14, i15, i16, i17, i18, $i19, $i20, $i21, $i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34, i35, $i36, $i38;
+        java.awt.color.ICC_Profile $r32, $r33, r39, r40;
+        java.awt.image.WritableRaster $r4, $r5;
+        java.lang.Object $r11, $r26, r47, r49, $r50, r52, r53, $r56;
+        java.awt.color.ICC_Profile[] $r20;
+        java.awt.color.ICC_ColorSpace r2, $r21, $r22;
+        boolean $z0, $z1, z2, $z3, $z4, $z5, z6, z7, z8, z9, z10, z11;
+        java.awt.image.BufferedImage r0, $r34, r36;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $f10, $f11, $f12, $f13, $f14, $f15, $f16, $f17, $f18, $f19, $f20, $f21, $f22, $f23, $f24, $f25;
+        short[] $r44, $r45;
+        java.awt.color.ColorSpace $r1, r13, $r16, $r19, r37, r41, r42;
+        java.lang.IllegalArgumentException $r57;
+        java.awt.image.ColorModel $r6, $r7, $r35;
+
+        r8 := @this: java.awt.image.ColorConvertOp;
+
+        r0 := @parameter0: java.awt.image.BufferedImage;
+
+        r13 := @parameter1: java.awt.color.ColorSpace;
+
+        r36 := @parameter2: java.awt.image.BufferedImage;
+
+        r37 := @parameter3: java.awt.color.ColorSpace;
+
+        $i0 = virtualinvoke r0.<java.awt.image.BufferedImage: int getWidth()>();
+
+        $i1 = virtualinvoke r0.<java.awt.image.BufferedImage: int getHeight()>();
+
+        $r1 = staticinvoke <java.awt.color.ColorSpace: java.awt.color.ColorSpace getInstance(int)>(1001);
+
+        r2 = (java.awt.color.ICC_ColorSpace) $r1;
+
+        if r36 != null goto label01;
+
+        $r34 = virtualinvoke r8.<java.awt.image.ColorConvertOp: java.awt.image.BufferedImage createCompatibleDestImage(java.awt.image.BufferedImage,java.awt.image.ColorModel)>(r0, null);
+
+        r36 = $r34;
+
+        $r35 = virtualinvoke $r34.<java.awt.image.BufferedImage: java.awt.image.ColorModel getColorModel()>();
+
+        r37 = virtualinvoke $r35.<java.awt.image.ColorModel: java.awt.color.ColorSpace getColorSpace()>();
+
+        goto label03;
+
+     label01:
+        $i2 = virtualinvoke r36.<java.awt.image.BufferedImage: int getHeight()>();
+
+        if $i1 != $i2 goto label02;
+
+        $i3 = virtualinvoke r36.<java.awt.image.BufferedImage: int getWidth()>();
+
+        if $i0 == $i3 goto label03;
+
+     label02:
+        $r57 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r57.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Width or height of BufferedImages do not match");
+
+        throw $r57;
+
+     label03:
+        $r4 = virtualinvoke r0.<java.awt.image.BufferedImage: java.awt.image.WritableRaster getRaster()>();
+
+        $r5 = virtualinvoke r36.<java.awt.image.BufferedImage: java.awt.image.WritableRaster getRaster()>();
+
+        $r6 = virtualinvoke r0.<java.awt.image.BufferedImage: java.awt.image.ColorModel getColorModel()>();
+
+        $r7 = virtualinvoke r36.<java.awt.image.BufferedImage: java.awt.image.ColorModel getColorModel()>();
+
+        $i4 = virtualinvoke $r6.<java.awt.image.ColorModel: int getNumColorComponents()>();
+
+        $i5 = virtualinvoke $r7.<java.awt.image.ColorModel: int getNumColorComponents()>();
+
+        $z0 = virtualinvoke $r7.<java.awt.image.ColorModel: boolean hasAlpha()>();
+
+        $z1 = virtualinvoke $r6.<java.awt.image.ColorModel: boolean hasAlpha()>();
+
+        if $z1 == 0 goto label04;
+
+        if $z0 == 0 goto label04;
+
+        $z5 = 1;
+
+        goto label05;
+
+     label04:
+        $z5 = 0;
+
+     label05:
+        z2 = $z5;
+
+        $r38 = r8.<java.awt.image.ColorConvertOp: java.awt.color.ColorSpace[] CSList>;
+
+        if $r38 != null goto label43;
+
+        $r20 = r8.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile[] profileList>;
+
+        $i7 = lengthof $r20;
+
+        if $i7 == 0 goto label43;
+
+        $z3 = r13 instanceof java.awt.color.ICC_ColorSpace;
+
+        if $z3 != 0 goto label06;
+
+        z6 = 1;
+
+        z9 = 1;
+
+        z8 = 1;
+
+        r39 = virtualinvoke r2.<java.awt.color.ICC_ColorSpace: java.awt.color.ICC_Profile getProfile()>();
+
+        goto label07;
+
+     label06:
+        z6 = 0;
+
+        z9 = 0;
+
+        z8 = 0;
+
+        $r21 = (java.awt.color.ICC_ColorSpace) r13;
+
+        r39 = virtualinvoke $r21.<java.awt.color.ICC_ColorSpace: java.awt.color.ICC_Profile getProfile()>();
+
+     label07:
+        $z4 = r37 instanceof java.awt.color.ICC_ColorSpace;
+
+        if $z4 != 0 goto label08;
+
+        z7 = 1;
+
+        z11 = 1;
+
+        z10 = 1;
+
+        r40 = virtualinvoke r2.<java.awt.color.ICC_ColorSpace: java.awt.color.ICC_Profile getProfile()>();
+
+        goto label09;
+
+     label08:
+        z7 = 0;
+
+        z11 = 0;
+
+        z10 = 0;
+
+        $r22 = (java.awt.color.ICC_ColorSpace) r37;
+
+        r40 = virtualinvoke $r22.<java.awt.color.ICC_ColorSpace: java.awt.color.ICC_Profile getProfile()>();
+
+     label09:
+        $r23 = r8.<java.awt.image.ColorConvertOp: sun.java2d.cmm.ColorTransform thisTransform>;
+
+        if $r23 == null goto label10;
+
+        $r32 = r8.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile thisSrcProfile>;
+
+        if $r32 != r39 goto label10;
+
+        $r33 = r8.<java.awt.image.ColorConvertOp: java.awt.color.ICC_Profile thisDestProfile>;
+
+        if $r33 == r40 goto label11;
+
+     label10:
+        specialinvoke r8.<java.awt.image.ColorConvertOp: void updateBITransform(java.awt.color.ICC_Profile,java.awt.color.ICC_Profile)>(r39, r40);
+
+     label11:
+        if z8 == 0 goto label12;
+
+        r41 = r2;
+
+        i15 = 3;
+
+        goto label13;
+
+     label12:
+        r41 = r13;
+
+        i15 = $i4;
+
+     label13:
+        $r30 = newarray (float)[i15];
+
+        $r31 = newarray (float)[i15];
+
+        i16 = 0;
+
+     label14:
+        if i16 >= $i4 goto label15;
+
+        $f21 = virtualinvoke r41.<java.awt.color.ColorSpace: float getMinValue(int)>(i16);
+
+        $r30[i16] = $f21;
+
+        $f22 = virtualinvoke r41.<java.awt.color.ColorSpace: float getMaxValue(int)>(i16);
+
+        $f23 = $r30[i16];
+
+        $f24 = $f22 - $f23;
+
+        $f25 = 65535.0F / $f24;
+
+        $r31[i16] = $f25;
+
+        i16 = i16 + 1;
+
+        goto label14;
+
+     label15:
+        if z10 == 0 goto label16;
+
+        r42 = r2;
+
+        i17 = 3;
+
+        goto label17;
+
+     label16:
+        r42 = r37;
+
+        i17 = $i5;
+
+     label17:
+        $r28 = newarray (float)[i17];
+
+        $r29 = newarray (float)[i17];
+
+        i18 = 0;
+
+     label18:
+        if i18 >= $i5 goto label19;
+
+        $f16 = virtualinvoke r42.<java.awt.color.ColorSpace: float getMinValue(int)>(i18);
+
+        $r28[i18] = $f16;
+
+        $f17 = virtualinvoke r42.<java.awt.color.ColorSpace: float getMaxValue(int)>(i18);
+
+        $f18 = $r28[i18];
+
+        $f19 = $f17 - $f18;
+
+        $f20 = $f19 / 65535.0F;
+
+        $r29[i18] = $f20;
+
+        i18 = i18 + 1;
+
+        goto label18;
+
+     label19:
+        if $z0 == 0 goto label22;
+
+        $i14 = $i5 + 1;
+
+        if $i14 <= 3 goto label20;
+
+        $i19 = $i5 + 1;
+
+        goto label21;
+
+     label20:
+        $i19 = 3;
+
+     label21:
+        r43 = newarray (float)[$i19];
+
+        goto label25;
+
+     label22:
+        if $i5 <= 3 goto label23;
+
+        $i20 = $i5;
+
+        goto label24;
+
+     label23:
+        $i20 = 3;
+
+     label24:
+        r43 = newarray (float)[$i20];
+
+     label25:
+        $i21 = $i0 * i15;
+
+        $r44 = newarray (short)[$i21];
+
+        $i22 = $i0 * i17;
+
+        $r45 = newarray (short)[$i22];
+
+        r46 = null;
+
+        if z2 == 0 goto label26;
+
+        r46 = newarray (float)[$i0];
+
+     label26:
+        i23 = 0;
+
+     label27:
+        if i23 >= $i1 goto label42;
+
+        r47 = null;
+
+        r48 = null;
+
+        i24 = 0;
+
+        i25 = 0;
+
+     label28:
+        if i25 >= $i0 goto label33;
+
+        $r26 = virtualinvoke $r4.<java.awt.image.Raster: java.lang.Object getDataElements(int,int,java.lang.Object)>(i25, i23, r47);
+
+        r47 = $r26;
+
+        $r27 = virtualinvoke $r6.<java.awt.image.ColorModel: float[] getNormalizedComponents(java.lang.Object,float[],int)>($r26, r48, 0);
+
+        r48 = $r27;
+
+        if z2 == 0 goto label29;
+
+        $f15 = $r27[$i4];
+
+        r46[i25] = $f15;
+
+     label29:
+        if z9 == 0 goto label30;
+
+        r48 = virtualinvoke r13.<java.awt.color.ColorSpace: float[] toCIEXYZ(float[])>($r27);
+
+     label30:
+        i26 = 0;
+
+     label31:
+        if i26 >= i15 goto label32;
+
+        $i11 = i24;
+
+        i24 = i24 + 1;
+
+        $f10 = r48[i26];
+
+        $f9 = $r30[i26];
+
+        $f12 = $f10 - $f9;
+
+        $f11 = $r31[i26];
+
+        $f13 = $f12 * $f11;
+
+        $f14 = $f13 + 0.5F;
+
+        $i12 = (int) $f14;
+
+        $s13 = (short) $i12;
+
+        $r44[$i11] = $s13;
+
+        i26 = i26 + 1;
+
+        goto label31;
+
+     label32:
+        i25 = i25 + 1;
+
+        goto label28;
+
+     label33:
+        $r24 = r8.<java.awt.image.ColorConvertOp: sun.java2d.cmm.ColorTransform thisTransform>;
+
+        interfaceinvoke $r24.<sun.java2d.cmm.ColorTransform: short[] colorConvert(short[],short[])>($r44, $r45);
+
+        r49 = null;
+
+        i27 = 0;
+
+        i28 = 0;
+
+     label34:
+        if i28 >= $i0 goto label41;
+
+        i29 = 0;
+
+     label35:
+        if i29 >= i17 goto label36;
+
+        $i8 = i27;
+
+        i27 = i27 + 1;
+
+        $s9 = $r45[$i8];
+
+        $i36 = (int) $s9;
+
+        $i38 = (int) 65535;
+
+        $i10 = $i36 & $i38;
+
+        $f5 = (float) $i10;
+
+        $f4 = $r29[i29];
+
+        $f7 = $f5 * $f4;
+
+        $f6 = $r28[i29];
+
+        $f8 = $f7 + $f6;
+
+        r43[i29] = $f8;
+
+        i29 = i29 + 1;
+
+        goto label35;
+
+     label36:
+        if z11 == 0 goto label38;
+
+        $r25 = virtualinvoke r13.<java.awt.color.ColorSpace: float[] fromCIEXYZ(float[])>(r43);
+
+        i30 = 0;
+
+     label37:
+        if i30 >= $i5 goto label38;
+
+        $f3 = $r25[i30];
+
+        r43[i30] = $f3;
+
+        i30 = i30 + 1;
+
+        goto label37;
+
+     label38:
+        if z2 == 0 goto label39;
+
+        $f2 = r46[i28];
+
+        r43[$i5] = $f2;
+
+        goto label40;
+
+     label39:
+        if $z0 == 0 goto label40;
+
+        r43[$i5] = 1.0F;
+
+     label40:
+        $r50 = virtualinvoke $r7.<java.awt.image.ColorModel: java.lang.Object getDataElements(float[],int,java.lang.Object)>(r43, 0, r49);
+
+        r49 = $r50;
+
+        virtualinvoke $r5.<java.awt.image.WritableRaster: void setDataElements(int,int,java.lang.Object)>(i28, i23, $r50);
+
+        i28 = i28 + 1;
+
+        goto label34;
+
+     label41:
+        i23 = i23 + 1;
+
+        goto label27;
+
+     label42:
+        goto label57;
+
+     label43:
+        $r9 = r8.<java.awt.image.ColorConvertOp: java.awt.color.ColorSpace[] CSList>;
+
+        if $r9 != null goto label44;
+
+        i31 = 0;
+
+        goto label45;
+
+     label44:
+        $r10 = r8.<java.awt.image.ColorConvertOp: java.awt.color.ColorSpace[] CSList>;
+
+        i31 = lengthof $r10;
+
+     label45:
+        if $z0 == 0 goto label46;
+
+        $i6 = $i5 + 1;
+
+        r51 = newarray (float)[$i6];
+
+        goto label47;
+
+     label46:
+        r51 = newarray (float)[$i5];
+
+     label47:
+        r52 = null;
+
+        r53 = null;
+
+        r54 = null;
+
+        i32 = 0;
+
+     label48:
+        if i32 >= $i1 goto label57;
+
+        i33 = 0;
+
+     label49:
+        if i33 >= $i0 goto label56;
+
+        $r11 = virtualinvoke $r4.<java.awt.image.Raster: java.lang.Object getDataElements(int,int,java.lang.Object)>(i33, i32, r52);
+
+        r52 = $r11;
+
+        $r12 = virtualinvoke $r6.<java.awt.image.ColorModel: float[] getNormalizedComponents(java.lang.Object,float[],int)>($r11, r54, 0);
+
+        r54 = $r12;
+
+        r55 = virtualinvoke r13.<java.awt.color.ColorSpace: float[] toCIEXYZ(float[])>($r12);
+
+        i34 = 0;
+
+     label50:
+        if i34 >= i31 goto label51;
+
+        $r15 = r8.<java.awt.image.ColorConvertOp: java.awt.color.ColorSpace[] CSList>;
+
+        $r16 = $r15[i34];
+
+        $r17 = virtualinvoke $r16.<java.awt.color.ColorSpace: float[] fromCIEXYZ(float[])>(r55);
+
+        $r18 = r8.<java.awt.image.ColorConvertOp: java.awt.color.ColorSpace[] CSList>;
+
+        $r19 = $r18[i34];
+
+        r55 = virtualinvoke $r19.<java.awt.color.ColorSpace: float[] toCIEXYZ(float[])>($r17);
+
+        i34 = i34 + 1;
+
+        goto label50;
+
+     label51:
+        $r14 = virtualinvoke r37.<java.awt.color.ColorSpace: float[] fromCIEXYZ(float[])>(r55);
+
+        i35 = 0;
+
+     label52:
+        if i35 >= $i5 goto label53;
+
+        $f1 = $r14[i35];
+
+        r51[i35] = $f1;
+
+        i35 = i35 + 1;
+
+        goto label52;
+
+     label53:
+        if z2 == 0 goto label54;
+
+        $f0 = $r12[$i4];
+
+        r51[$i5] = $f0;
+
+        goto label55;
+
+     label54:
+        if $z0 == 0 goto label55;
+
+        r51[$i5] = 1.0F;
+
+     label55:
+        $r56 = virtualinvoke $r7.<java.awt.image.ColorModel: java.lang.Object getDataElements(float[],int,java.lang.Object)>(r51, 0, r53);
+
+        r53 = $r56;
+
+        virtualinvoke $r5.<java.awt.image.WritableRaster: void setDataElements(int,int,java.lang.Object)>(i33, i32, $r56);
+
+        i33 = i33 + 1;
+
+        goto label49;
+
+     label56:
+        i32 = i32 + 1;
+
+        goto label48;
+
+     label57:
+        return r36;
+    }
+
+    private final java.awt.image.WritableRaster nonICCRasterFilter(java.awt.image.Raster, java.awt.image.WritableRaster)
+    {
+        java.awt.image.SampleModel $r9, $r10;
+        java.awt.image.ColorConvertOp r0;
+        float[] $r8, $r13, $r14, $r15, $r16, $r17, $r20, $r21, $r22, $r23, $r24, $r25, $r26, $r27, r36, r37;
+        java.awt.image.Raster r2;
+        java.awt.color.ColorSpace[] $r1, $r3, $r6, $r11, $r12, $r28, $r29;
+        boolean z0, z1, z2, z3, z4, z5;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $f10, $f11, $f12, $f13, $f14, $f15, $f16, $f17, $f18, $f19, $f20, $f21, $f22, $f23, $f24, f25, f26;
+        java.awt.color.ColorSpace $r4, $r7, $r18, $r19, $r30, $r31;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30;
+        java.lang.IllegalArgumentException $r5, $r32, $r33, $r34;
+        java.awt.image.WritableRaster r35;
+
+        r0 := @this: java.awt.image.ColorConvertOp;
+
+        r2 := @parameter0: java.awt.image.Raster;
+
+        r35 := @parameter1: java.awt.image.WritableRaster;
+
+        $r1 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ColorSpace[] CSList>;
+
+        $i0 = lengthof $r1;
+
+        if $i0 == 2 goto label01;
+
+        $r34 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r34.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Destination ColorSpace is undefined");
+
+        throw $r34;
+
+     label01:
+        $i1 = virtualinvoke r2.<java.awt.image.Raster: int getNumBands()>();
+
+        $r3 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ColorSpace[] CSList>;
+
+        $r4 = $r3[0];
+
+        $i2 = virtualinvoke $r4.<java.awt.color.ColorSpace: int getNumComponents()>();
+
+        if $i1 == $i2 goto label02;
+
+        $r33 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r33.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Numbers of source Raster bands and source color space components do not match");
+
+        throw $r33;
+
+     label02:
+        if r35 != null goto label03;
+
+        r35 = virtualinvoke r0.<java.awt.image.ColorConvertOp: java.awt.image.WritableRaster createCompatibleDestRaster(java.awt.image.Raster)>(r2);
+
+        goto label06;
+
+     label03:
+        $i3 = virtualinvoke r2.<java.awt.image.Raster: int getHeight()>();
+
+        $i4 = virtualinvoke r35.<java.awt.image.WritableRaster: int getHeight()>();
+
+        if $i3 != $i4 goto label04;
+
+        $i5 = virtualinvoke r2.<java.awt.image.Raster: int getWidth()>();
+
+        $i6 = virtualinvoke r35.<java.awt.image.WritableRaster: int getWidth()>();
+
+        if $i5 == $i6 goto label05;
+
+     label04:
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Width or height of Rasters do not match");
+
+        throw $r5;
+
+     label05:
+        $i7 = virtualinvoke r35.<java.awt.image.WritableRaster: int getNumBands()>();
+
+        $r6 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ColorSpace[] CSList>;
+
+        $r7 = $r6[1];
+
+        $i8 = virtualinvoke $r7.<java.awt.color.ColorSpace: int getNumComponents()>();
+
+        if $i7 == $i8 goto label06;
+
+        $r32 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r32.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Numbers of destination Raster bands and destination color space components do not match");
+
+        throw $r32;
+
+     label06:
+        $r8 = r0.<java.awt.image.ColorConvertOp: float[] srcMinVals>;
+
+        if $r8 != null goto label07;
+
+        $r28 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ColorSpace[] CSList>;
+
+        $r31 = $r28[0];
+
+        $r29 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ColorSpace[] CSList>;
+
+        $r30 = $r29[1];
+
+        specialinvoke r0.<java.awt.image.ColorConvertOp: void getMinMaxValsFromColorSpaces(java.awt.color.ColorSpace,java.awt.color.ColorSpace)>($r31, $r30);
+
+     label07:
+        $r9 = virtualinvoke r2.<java.awt.image.Raster: java.awt.image.SampleModel getSampleModel()>();
+
+        $r10 = virtualinvoke r35.<java.awt.image.WritableRaster: java.awt.image.SampleModel getSampleModel()>();
+
+        $i9 = virtualinvoke r2.<java.awt.image.Raster: int getTransferType()>();
+
+        $i10 = virtualinvoke r35.<java.awt.image.WritableRaster: int getTransferType()>();
+
+        if $i9 == 4 goto label08;
+
+        if $i9 != 5 goto label09;
+
+     label08:
+        z0 = 1;
+
+        z3 = 1;
+
+        z2 = 1;
+
+        goto label10;
+
+     label09:
+        z0 = 0;
+
+        z3 = 0;
+
+        z2 = 0;
+
+     label10:
+        if $i10 == 4 goto label11;
+
+        if $i10 != 5 goto label12;
+
+     label11:
+        z1 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+        goto label13;
+
+     label12:
+        z1 = 0;
+
+        z5 = 0;
+
+        z4 = 0;
+
+     label13:
+        $i11 = virtualinvoke r2.<java.awt.image.Raster: int getWidth()>();
+
+        $i12 = virtualinvoke r2.<java.awt.image.Raster: int getHeight()>();
+
+        $i13 = virtualinvoke r2.<java.awt.image.Raster: int getNumBands()>();
+
+        $i14 = virtualinvoke r35.<java.awt.image.WritableRaster: int getNumBands()>();
+
+        r36 = null;
+
+        r37 = null;
+
+        if z2 != 0 goto label17;
+
+        r36 = newarray (float)[$i13];
+
+        i21 = 0;
+
+     label14:
+        if i21 >= $i13 goto label17;
+
+        if $i9 != 2 goto label15;
+
+        $r26 = r0.<java.awt.image.ColorConvertOp: float[] srcMaxVals>;
+
+        $f22 = $r26[i21];
+
+        $r27 = r0.<java.awt.image.ColorConvertOp: float[] srcMinVals>;
+
+        $f21 = $r27[i21];
+
+        $f23 = $f22 - $f21;
+
+        $f24 = $f23 / 32767.0F;
+
+        r36[i21] = $f24;
+
+        goto label16;
+
+     label15:
+        $r24 = r0.<java.awt.image.ColorConvertOp: float[] srcMaxVals>;
+
+        $f17 = $r24[i21];
+
+        $r25 = r0.<java.awt.image.ColorConvertOp: float[] srcMinVals>;
+
+        $f16 = $r25[i21];
+
+        $f18 = $f17 - $f16;
+
+        $i18 = virtualinvoke $r9.<java.awt.image.SampleModel: int getSampleSize(int)>(i21);
+
+        $i19 = 1 << $i18;
+
+        $i20 = $i19 - 1;
+
+        $f19 = (float) $i20;
+
+        $f20 = $f18 / $f19;
+
+        r36[i21] = $f20;
+
+     label16:
+        i21 = i21 + 1;
+
+        goto label14;
+
+     label17:
+        if z4 != 0 goto label21;
+
+        r37 = newarray (float)[$i14];
+
+        i22 = 0;
+
+     label18:
+        if i22 >= $i14 goto label21;
+
+        if $i10 != 2 goto label19;
+
+        $r22 = r0.<java.awt.image.ColorConvertOp: float[] dstMaxVals>;
+
+        $f13 = $r22[i22];
+
+        $r23 = r0.<java.awt.image.ColorConvertOp: float[] dstMinVals>;
+
+        $f12 = $r23[i22];
+
+        $f14 = $f13 - $f12;
+
+        $f15 = 32767.0F / $f14;
+
+        r37[i22] = $f15;
+
+        goto label20;
+
+     label19:
+        $i15 = virtualinvoke $r10.<java.awt.image.SampleModel: int getSampleSize(int)>(i22);
+
+        $i16 = 1 << $i15;
+
+        $i17 = $i16 - 1;
+
+        $f10 = (float) $i17;
+
+        $r20 = r0.<java.awt.image.ColorConvertOp: float[] dstMaxVals>;
+
+        $f8 = $r20[i22];
+
+        $r21 = r0.<java.awt.image.ColorConvertOp: float[] dstMinVals>;
+
+        $f7 = $r21[i22];
+
+        $f9 = $f8 - $f7;
+
+        $f11 = $f10 / $f9;
+
+        r37[i22] = $f11;
+
+     label20:
+        i22 = i22 + 1;
+
+        goto label18;
+
+     label21:
+        i23 = virtualinvoke r2.<java.awt.image.Raster: int getMinY()>();
+
+        i24 = virtualinvoke r35.<java.awt.image.WritableRaster: int getMinY()>();
+
+        $r17 = newarray (float)[$i13];
+
+        $r11 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ColorSpace[] CSList>;
+
+        $r18 = $r11[0];
+
+        $r12 = r0.<java.awt.image.ColorConvertOp: java.awt.color.ColorSpace[] CSList>;
+
+        $r19 = $r12[1];
+
+        i25 = 0;
+
+     label22:
+        if i25 >= $i12 goto label31;
+
+        i26 = virtualinvoke r2.<java.awt.image.Raster: int getMinX()>();
+
+        i27 = virtualinvoke r35.<java.awt.image.WritableRaster: int getMinX()>();
+
+        i28 = 0;
+
+     label23:
+        if i28 >= $i11 goto label30;
+
+        i29 = 0;
+
+     label24:
+        if i29 >= $i13 goto label26;
+
+        $f3 = virtualinvoke r2.<java.awt.image.Raster: float getSampleFloat(int,int,int)>(i26, i23, i29);
+
+        f25 = $f3;
+
+        if z3 != 0 goto label25;
+
+        $f4 = r36[i29];
+
+        $f6 = $f3 * $f4;
+
+        $r16 = r0.<java.awt.image.ColorConvertOp: float[] srcMinVals>;
+
+        $f5 = $r16[i29];
+
+        f25 = $f6 + $f5;
+
+     label25:
+        $r17[i29] = f25;
+
+        i29 = i29 + 1;
+
+        goto label24;
+
+     label26:
+        $r13 = virtualinvoke $r18.<java.awt.color.ColorSpace: float[] toCIEXYZ(float[])>($r17);
+
+        $r14 = virtualinvoke $r19.<java.awt.color.ColorSpace: float[] fromCIEXYZ(float[])>($r13);
+
+        i30 = 0;
+
+     label27:
+        if i30 >= $i14 goto label29;
+
+        f26 = $r14[i30];
+
+        if z5 != 0 goto label28;
+
+        $r15 = r0.<java.awt.image.ColorConvertOp: float[] dstMinVals>;
+
+        $f0 = $r15[i30];
+
+        $f2 = f26 - $f0;
+
+        $f1 = r37[i30];
+
+        f26 = $f2 * $f1;
+
+     label28:
+        virtualinvoke r35.<java.awt.image.WritableRaster: void setSample(int,int,int,float)>(i27, i24, i30, f26);
+
+        i30 = i30 + 1;
+
+        goto label27;
+
+     label29:
+        i28 = i28 + 1;
+
+        i26 = i26 + 1;
+
+        i27 = i27 + 1;
+
+        goto label23;
+
+     label30:
+        i25 = i25 + 1;
+
+        i23 = i23 + 1;
+
+        i24 = i24 + 1;
+
+        goto label22;
+
+     label31:
+        return r35;
+    }
+
+    private void getMinMaxValsFromProfiles(java.awt.color.ICC_Profile, java.awt.color.ICC_Profile)
+    {
+        java.awt.color.ICC_Profile r0, r6;
+        float[] $r2, $r3, $r4, $r5, $r7, $r8, $r9, $r10;
+        java.awt.image.ColorConvertOp r1;
+        int $i0, $i1, $i2, $i3;
+
+        r1 := @this: java.awt.image.ColorConvertOp;
+
+        r0 := @parameter0: java.awt.color.ICC_Profile;
+
+        r6 := @parameter1: java.awt.color.ICC_Profile;
+
+        $i0 = virtualinvoke r0.<java.awt.color.ICC_Profile: int getColorSpaceType()>();
+
+        $i1 = virtualinvoke r0.<java.awt.color.ICC_Profile: int getNumComponents()>();
+
+        $r2 = newarray (float)[$i1];
+
+        r1.<java.awt.image.ColorConvertOp: float[] srcMinVals> = $r2;
+
+        $r3 = newarray (float)[$i1];
+
+        r1.<java.awt.image.ColorConvertOp: float[] srcMaxVals> = $r3;
+
+        $r5 = r1.<java.awt.image.ColorConvertOp: float[] srcMinVals>;
+
+        $r4 = r1.<java.awt.image.ColorConvertOp: float[] srcMaxVals>;
+
+        specialinvoke r1.<java.awt.image.ColorConvertOp: void setMinMax(int,int,float[],float[])>($i0, $i1, $r5, $r4);
+
+        $i2 = virtualinvoke r6.<java.awt.color.ICC_Profile: int getColorSpaceType()>();
+
+        $i3 = virtualinvoke r6.<java.awt.color.ICC_Profile: int getNumComponents()>();
+
+        $r7 = newarray (float)[$i3];
+
+        r1.<java.awt.image.ColorConvertOp: float[] dstMinVals> = $r7;
+
+        $r8 = newarray (float)[$i3];
+
+        r1.<java.awt.image.ColorConvertOp: float[] dstMaxVals> = $r8;
+
+        $r10 = r1.<java.awt.image.ColorConvertOp: float[] dstMinVals>;
+
+        $r9 = r1.<java.awt.image.ColorConvertOp: float[] dstMaxVals>;
+
+        specialinvoke r1.<java.awt.image.ColorConvertOp: void setMinMax(int,int,float[],float[])>($i2, $i3, $r10, $r9);
+
+        return;
+    }
+
+    private void setMinMax(int, int, float[], float[])
+    {
+        java.awt.image.ColorConvertOp r2;
+        int i0, i1, i2;
+        float[] r0, r1;
+
+        r2 := @this: java.awt.image.ColorConvertOp;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        r0 := @parameter2: float[];
+
+        r1 := @parameter3: float[];
+
+        if i0 != 1 goto label1;
+
+        r0[0] = 0.0F;
+
+        r1[0] = 100.0F;
+
+        r0[1] = -128.0F;
+
+        r1[1] = 127.0F;
+
+        r0[2] = -128.0F;
+
+        r1[2] = 127.0F;
+
+        goto label4;
+
+     label1:
+        if i0 != 0 goto label2;
+
+        r0[2] = 0.0F;
+
+        r0[1] = 0.0F;
+
+        r0[0] = 0.0F;
+
+        r1[2] = 1.9999695F;
+
+        r1[1] = 1.9999695F;
+
+        r1[0] = 1.9999695F;
+
+        goto label4;
+
+     label2:
+        i2 = 0;
+
+     label3:
+        if i2 >= i1 goto label4;
+
+        r0[i2] = 0.0F;
+
+        r1[i2] = 1.0F;
+
+        i2 = i2 + 1;
+
+        goto label3;
+
+     label4:
+        return;
+    }
+
+    private void getMinMaxValsFromColorSpaces(java.awt.color.ColorSpace, java.awt.color.ColorSpace)
+    {
+        float[] $r2, $r3, $r5, $r6, $r7, $r8, $r9, $r10;
+        java.awt.color.ColorSpace r0, r4;
+        java.awt.image.ColorConvertOp r1;
+        int $i0, $i1, i2, i3;
+        float $f0, $f1, $f2, $f3;
+
+        r1 := @this: java.awt.image.ColorConvertOp;
+
+        r0 := @parameter0: java.awt.color.ColorSpace;
+
+        r4 := @parameter1: java.awt.color.ColorSpace;
+
+        $i0 = virtualinvoke r0.<java.awt.color.ColorSpace: int getNumComponents()>();
+
+        $r2 = newarray (float)[$i0];
+
+        r1.<java.awt.image.ColorConvertOp: float[] srcMinVals> = $r2;
+
+        $r3 = newarray (float)[$i0];
+
+        r1.<java.awt.image.ColorConvertOp: float[] srcMaxVals> = $r3;
+
+        i2 = 0;
+
+     label1:
+        if i2 >= $i0 goto label2;
+
+        $r9 = r1.<java.awt.image.ColorConvertOp: float[] srcMinVals>;
+
+        $f2 = virtualinvoke r0.<java.awt.color.ColorSpace: float getMinValue(int)>(i2);
+
+        $r9[i2] = $f2;
+
+        $r10 = r1.<java.awt.image.ColorConvertOp: float[] srcMaxVals>;
+
+        $f3 = virtualinvoke r0.<java.awt.color.ColorSpace: float getMaxValue(int)>(i2);
+
+        $r10[i2] = $f3;
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        $i1 = virtualinvoke r4.<java.awt.color.ColorSpace: int getNumComponents()>();
+
+        $r5 = newarray (float)[$i1];
+
+        r1.<java.awt.image.ColorConvertOp: float[] dstMinVals> = $r5;
+
+        $r6 = newarray (float)[$i1];
+
+        r1.<java.awt.image.ColorConvertOp: float[] dstMaxVals> = $r6;
+
+        i3 = 0;
+
+     label3:
+        if i3 >= $i1 goto label4;
+
+        $r7 = r1.<java.awt.image.ColorConvertOp: float[] dstMinVals>;
+
+        $f0 = virtualinvoke r4.<java.awt.color.ColorSpace: float getMinValue(int)>(i3);
+
+        $r7[i3] = $f0;
+
+        $r8 = r1.<java.awt.image.ColorConvertOp: float[] dstMaxVals>;
+
+        $f1 = virtualinvoke r4.<java.awt.color.ColorSpace: float getMaxValue(int)>(i3);
+
+        $r8[i3] = $f1;
+
+        i3 = i3 + 1;
+
+        goto label3;
+
+     label4:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        boolean $z0;
+
+        $z0 = <sun.java2d.cmm.ProfileDeferralMgr: boolean deferring>;
+
+        if $z0 == 0 goto label1;
+
+        staticinvoke <sun.java2d.cmm.ProfileDeferralMgr: void activateProfiles()>();
+
+     label1:
+        return;
+    }
+}

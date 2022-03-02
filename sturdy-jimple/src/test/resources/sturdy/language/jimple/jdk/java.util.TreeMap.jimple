@@ -1,0 +1,3153 @@
+public class java.util.TreeMap extends java.util.AbstractMap implements java.util.NavigableMap, java.lang.Cloneable, java.io.Serializable
+{
+    private final java.util.Comparator comparator;
+    private transient java.util.TreeMap$Entry root;
+    private transient int size;
+    private transient int modCount;
+    private transient java.util.TreeMap$EntrySet entrySet;
+    private transient java.util.TreeMap$KeySet navigableKeySet;
+    private transient java.util.NavigableMap descendingMap;
+    private static final java.lang.Object UNBOUNDED;
+    private static final boolean RED;
+    private static final boolean BLACK;
+    private static final long serialVersionUID;
+
+    public void <init>()
+    {
+        java.util.TreeMap r0;
+
+        r0 := @this: java.util.TreeMap;
+
+        specialinvoke r0.<java.util.AbstractMap: void <init>()>();
+
+        r0.<java.util.TreeMap: int size> = 0;
+
+        r0.<java.util.TreeMap: int modCount> = 0;
+
+        r0.<java.util.TreeMap: java.util.Comparator comparator> = null;
+
+        return;
+    }
+
+    public void <init>(java.util.Comparator)
+    {
+        java.util.TreeMap r0;
+        java.util.Comparator r1;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 := @parameter0: java.util.Comparator;
+
+        specialinvoke r0.<java.util.AbstractMap: void <init>()>();
+
+        r0.<java.util.TreeMap: int size> = 0;
+
+        r0.<java.util.TreeMap: int modCount> = 0;
+
+        r0.<java.util.TreeMap: java.util.Comparator comparator> = r1;
+
+        return;
+    }
+
+    public void <init>(java.util.Map)
+    {
+        java.util.TreeMap r0;
+        java.util.Map r1;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 := @parameter0: java.util.Map;
+
+        specialinvoke r0.<java.util.AbstractMap: void <init>()>();
+
+        r0.<java.util.TreeMap: int size> = 0;
+
+        r0.<java.util.TreeMap: int modCount> = 0;
+
+        r0.<java.util.TreeMap: java.util.Comparator comparator> = null;
+
+        virtualinvoke r0.<java.util.TreeMap: void putAll(java.util.Map)>(r1);
+
+        return;
+    }
+
+    public void <init>(java.util.SortedMap)
+    {
+        java.util.Iterator $r4;
+        java.util.Set $r3;
+        java.io.IOException $r6;
+        java.util.TreeMap r0;
+        int $i0;
+        java.lang.ClassNotFoundException $r5;
+        java.util.Comparator $r2;
+        java.util.SortedMap r1;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 := @parameter0: java.util.SortedMap;
+
+        specialinvoke r0.<java.util.AbstractMap: void <init>()>();
+
+        r0.<java.util.TreeMap: int size> = 0;
+
+        r0.<java.util.TreeMap: int modCount> = 0;
+
+        $r2 = interfaceinvoke r1.<java.util.SortedMap: java.util.Comparator comparator()>();
+
+        r0.<java.util.TreeMap: java.util.Comparator comparator> = $r2;
+
+     label1:
+        $i0 = interfaceinvoke r1.<java.util.SortedMap: int size()>();
+
+        $r3 = interfaceinvoke r1.<java.util.SortedMap: java.util.Set entrySet()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.Set: java.util.Iterator iterator()>();
+
+        specialinvoke r0.<java.util.TreeMap: void buildFromSorted(int,java.util.Iterator,java.io.ObjectInputStream,java.lang.Object)>($i0, $r4, null, null);
+
+     label2:
+        goto label5;
+
+     label3:
+        $r6 := @caughtexception;
+
+        goto label5;
+
+     label4:
+        $r5 := @caughtexception;
+
+     label5:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+        catch java.lang.ClassNotFoundException from label1 to label2 with label4;
+    }
+
+    public int size()
+    {
+        int $i0;
+        java.util.TreeMap r0;
+
+        r0 := @this: java.util.TreeMap;
+
+        $i0 = r0.<java.util.TreeMap: int size>;
+
+        return $i0;
+    }
+
+    public boolean containsKey(java.lang.Object)
+    {
+        java.util.TreeMap r0;
+        java.lang.Object r1;
+        java.util.TreeMap$Entry $r2;
+        boolean $z0;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.TreeMap: java.util.TreeMap$Entry getEntry(java.lang.Object)>(r1);
+
+        if $r2 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean containsValue(java.lang.Object)
+    {
+        java.util.TreeMap r0;
+        java.lang.Object r1, $r2;
+        java.util.TreeMap$Entry r3;
+        boolean $z0;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r3 = virtualinvoke r0.<java.util.TreeMap: java.util.TreeMap$Entry getFirstEntry()>();
+
+     label1:
+        if r3 == null goto label3;
+
+        $r2 = r3.<java.util.TreeMap$Entry: java.lang.Object value>;
+
+        $z0 = staticinvoke <java.util.TreeMap: boolean valEquals(java.lang.Object,java.lang.Object)>(r1, $r2);
+
+        if $z0 == 0 goto label2;
+
+        return 1;
+
+     label2:
+        r3 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry successor(java.util.TreeMap$Entry)>(r3);
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    public java.lang.Object get(java.lang.Object)
+    {
+        java.util.TreeMap r0;
+        java.lang.Object r1, $r3;
+        java.util.TreeMap$Entry $r2;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.TreeMap: java.util.TreeMap$Entry getEntry(java.lang.Object)>(r1);
+
+        if $r2 != null goto label1;
+
+        $r3 = null;
+
+        goto label2;
+
+     label1:
+        $r3 = $r2.<java.util.TreeMap$Entry: java.lang.Object value>;
+
+     label2:
+        return $r3;
+    }
+
+    public java.util.Comparator comparator()
+    {
+        java.util.TreeMap r0;
+        java.util.Comparator $r1;
+
+        r0 := @this: java.util.TreeMap;
+
+        $r1 = r0.<java.util.TreeMap: java.util.Comparator comparator>;
+
+        return $r1;
+    }
+
+    public java.lang.Object firstKey()
+    {
+        java.lang.Object $r2;
+        java.util.TreeMap$Entry $r1;
+        java.util.TreeMap r0;
+
+        r0 := @this: java.util.TreeMap;
+
+        $r1 = virtualinvoke r0.<java.util.TreeMap: java.util.TreeMap$Entry getFirstEntry()>();
+
+        $r2 = staticinvoke <java.util.TreeMap: java.lang.Object key(java.util.TreeMap$Entry)>($r1);
+
+        return $r2;
+    }
+
+    public java.lang.Object lastKey()
+    {
+        java.lang.Object $r2;
+        java.util.TreeMap$Entry $r1;
+        java.util.TreeMap r0;
+
+        r0 := @this: java.util.TreeMap;
+
+        $r1 = virtualinvoke r0.<java.util.TreeMap: java.util.TreeMap$Entry getLastEntry()>();
+
+        $r2 = staticinvoke <java.util.TreeMap: java.lang.Object key(java.util.TreeMap$Entry)>($r1);
+
+        return $r2;
+    }
+
+    public void putAll(java.util.Map)
+    {
+        java.util.Map r0;
+        int $i0, $i1, $i2, $i3;
+        boolean $z0, $z1;
+        java.util.Iterator $r6;
+        java.util.Set $r5;
+        java.io.IOException $r9;
+        java.util.TreeMap r1;
+        java.lang.ClassNotFoundException $r8;
+        java.util.Comparator $r3, $r4, $r7;
+        java.util.SortedMap $r2;
+
+        r1 := @this: java.util.TreeMap;
+
+        r0 := @parameter0: java.util.Map;
+
+        $i0 = interfaceinvoke r0.<java.util.Map: int size()>();
+
+        $i1 = r1.<java.util.TreeMap: int size>;
+
+        if $i1 != 0 goto label7;
+
+        if $i0 == 0 goto label7;
+
+        $z0 = r0 instanceof java.util.SortedMap;
+
+        if $z0 == 0 goto label7;
+
+        $r2 = (java.util.SortedMap) r0;
+
+        $r3 = interfaceinvoke $r2.<java.util.SortedMap: java.util.Comparator comparator()>();
+
+        $r4 = r1.<java.util.TreeMap: java.util.Comparator comparator>;
+
+        if $r3 == $r4 goto label1;
+
+        if $r3 == null goto label7;
+
+        $r7 = r1.<java.util.TreeMap: java.util.Comparator comparator>;
+
+        $z1 = interfaceinvoke $r3.<java.util.Comparator: boolean equals(java.lang.Object)>($r7);
+
+        if $z1 == 0 goto label7;
+
+     label1:
+        $i2 = r1.<java.util.TreeMap: int modCount>;
+
+        $i3 = $i2 + 1;
+
+        r1.<java.util.TreeMap: int modCount> = $i3;
+
+     label2:
+        $r5 = interfaceinvoke r0.<java.util.Map: java.util.Set entrySet()>();
+
+        $r6 = interfaceinvoke $r5.<java.util.Set: java.util.Iterator iterator()>();
+
+        specialinvoke r1.<java.util.TreeMap: void buildFromSorted(int,java.util.Iterator,java.io.ObjectInputStream,java.lang.Object)>($i0, $r6, null, null);
+
+     label3:
+        goto label6;
+
+     label4:
+        $r9 := @caughtexception;
+
+        goto label6;
+
+     label5:
+        $r8 := @caughtexception;
+
+     label6:
+        return;
+
+     label7:
+        specialinvoke r1.<java.util.AbstractMap: void putAll(java.util.Map)>(r0);
+
+        return;
+
+        catch java.io.IOException from label2 to label3 with label4;
+        catch java.lang.ClassNotFoundException from label2 to label3 with label5;
+    }
+
+    final java.util.TreeMap$Entry getEntry(java.lang.Object)
+    {
+        java.util.TreeMap$Entry $r6, r7;
+        java.lang.NullPointerException $r5;
+        java.util.TreeMap r0;
+        int $i0;
+        java.lang.Object r2, $r4;
+        java.lang.Comparable r3;
+        java.util.Comparator $r1;
+
+        r0 := @this: java.util.TreeMap;
+
+        r2 := @parameter0: java.lang.Object;
+
+        $r1 = r0.<java.util.TreeMap: java.util.Comparator comparator>;
+
+        if $r1 == null goto label1;
+
+        $r6 = virtualinvoke r0.<java.util.TreeMap: java.util.TreeMap$Entry getEntryUsingComparator(java.lang.Object)>(r2);
+
+        return $r6;
+
+     label1:
+        if r2 != null goto label2;
+
+        $r5 = new java.lang.NullPointerException;
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r5;
+
+     label2:
+        r3 = (java.lang.Comparable) r2;
+
+        r7 = r0.<java.util.TreeMap: java.util.TreeMap$Entry root>;
+
+     label3:
+        if r7 == null goto label7;
+
+        $r4 = r7.<java.util.TreeMap$Entry: java.lang.Object key>;
+
+        $i0 = interfaceinvoke r3.<java.lang.Comparable: int compareTo(java.lang.Object)>($r4);
+
+        if $i0 >= 0 goto label4;
+
+        r7 = r7.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        goto label6;
+
+     label4:
+        if $i0 <= 0 goto label5;
+
+        r7 = r7.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        goto label6;
+
+     label5:
+        return r7;
+
+     label6:
+        goto label3;
+
+     label7:
+        return null;
+    }
+
+    final java.util.TreeMap$Entry getEntryUsingComparator(java.lang.Object)
+    {
+        java.util.TreeMap r1;
+        int $i0;
+        java.lang.Object r0, $r3;
+        java.util.TreeMap$Entry r4;
+        java.util.Comparator r2;
+
+        r1 := @this: java.util.TreeMap;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r2 = r1.<java.util.TreeMap: java.util.Comparator comparator>;
+
+        if r2 == null goto label5;
+
+        r4 = r1.<java.util.TreeMap: java.util.TreeMap$Entry root>;
+
+     label1:
+        if r4 == null goto label5;
+
+        $r3 = r4.<java.util.TreeMap$Entry: java.lang.Object key>;
+
+        $i0 = interfaceinvoke r2.<java.util.Comparator: int compare(java.lang.Object,java.lang.Object)>(r0, $r3);
+
+        if $i0 >= 0 goto label2;
+
+        r4 = r4.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        goto label4;
+
+     label2:
+        if $i0 <= 0 goto label3;
+
+        r4 = r4.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        goto label4;
+
+     label3:
+        return r4;
+
+     label4:
+        goto label1;
+
+     label5:
+        return null;
+    }
+
+    final java.util.TreeMap$Entry getCeilingEntry(java.lang.Object)
+    {
+        java.util.TreeMap$Entry $r3, $r4, $r5, r6, r7, r8;
+        java.util.TreeMap r0;
+        int $i0;
+        java.lang.Object r1, $r2;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r6 = r0.<java.util.TreeMap: java.util.TreeMap$Entry root>;
+
+     label1:
+        if r6 == null goto label9;
+
+        $r2 = r6.<java.util.TreeMap$Entry: java.lang.Object key>;
+
+        $i0 = virtualinvoke r0.<java.util.TreeMap: int compare(java.lang.Object,java.lang.Object)>(r1, $r2);
+
+        if $i0 >= 0 goto label3;
+
+        $r5 = r6.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        if $r5 == null goto label2;
+
+        r6 = r6.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        goto label8;
+
+     label2:
+        return r6;
+
+     label3:
+        if $i0 <= 0 goto label7;
+
+        $r3 = r6.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        if $r3 == null goto label4;
+
+        r6 = r6.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        goto label8;
+
+     label4:
+        r7 = r6.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        r8 = r6;
+
+     label5:
+        if r7 == null goto label6;
+
+        $r4 = r7.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        if r8 != $r4 goto label6;
+
+        r8 = r7;
+
+        r7 = r7.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        goto label5;
+
+     label6:
+        return r7;
+
+     label7:
+        return r6;
+
+     label8:
+        goto label1;
+
+     label9:
+        return null;
+    }
+
+    final java.util.TreeMap$Entry getFloorEntry(java.lang.Object)
+    {
+        java.util.TreeMap$Entry $r3, $r4, $r5, r6, r7, r8;
+        java.util.TreeMap r0;
+        int $i0;
+        java.lang.Object r1, $r2;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r6 = r0.<java.util.TreeMap: java.util.TreeMap$Entry root>;
+
+     label1:
+        if r6 == null goto label9;
+
+        $r2 = r6.<java.util.TreeMap$Entry: java.lang.Object key>;
+
+        $i0 = virtualinvoke r0.<java.util.TreeMap: int compare(java.lang.Object,java.lang.Object)>(r1, $r2);
+
+        if $i0 <= 0 goto label3;
+
+        $r5 = r6.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        if $r5 == null goto label2;
+
+        r6 = r6.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        goto label8;
+
+     label2:
+        return r6;
+
+     label3:
+        if $i0 >= 0 goto label7;
+
+        $r3 = r6.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        if $r3 == null goto label4;
+
+        r6 = r6.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        goto label8;
+
+     label4:
+        r7 = r6.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        r8 = r6;
+
+     label5:
+        if r7 == null goto label6;
+
+        $r4 = r7.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        if r8 != $r4 goto label6;
+
+        r8 = r7;
+
+        r7 = r7.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        goto label5;
+
+     label6:
+        return r7;
+
+     label7:
+        return r6;
+
+     label8:
+        goto label1;
+
+     label9:
+        return null;
+    }
+
+    final java.util.TreeMap$Entry getHigherEntry(java.lang.Object)
+    {
+        java.util.TreeMap$Entry $r3, $r4, $r5, r6, r7, r8;
+        java.util.TreeMap r0;
+        int $i0;
+        java.lang.Object r1, $r2;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r6 = r0.<java.util.TreeMap: java.util.TreeMap$Entry root>;
+
+     label1:
+        if r6 == null goto label8;
+
+        $r2 = r6.<java.util.TreeMap$Entry: java.lang.Object key>;
+
+        $i0 = virtualinvoke r0.<java.util.TreeMap: int compare(java.lang.Object,java.lang.Object)>(r1, $r2);
+
+        if $i0 >= 0 goto label3;
+
+        $r5 = r6.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        if $r5 == null goto label2;
+
+        r6 = r6.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        goto label7;
+
+     label2:
+        return r6;
+
+     label3:
+        $r3 = r6.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        if $r3 == null goto label4;
+
+        r6 = r6.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        goto label7;
+
+     label4:
+        r7 = r6.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        r8 = r6;
+
+     label5:
+        if r7 == null goto label6;
+
+        $r4 = r7.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        if r8 != $r4 goto label6;
+
+        r8 = r7;
+
+        r7 = r7.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        goto label5;
+
+     label6:
+        return r7;
+
+     label7:
+        goto label1;
+
+     label8:
+        return null;
+    }
+
+    final java.util.TreeMap$Entry getLowerEntry(java.lang.Object)
+    {
+        java.util.TreeMap$Entry $r3, $r4, $r5, r6, r7, r8;
+        java.util.TreeMap r0;
+        int $i0;
+        java.lang.Object r1, $r2;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r6 = r0.<java.util.TreeMap: java.util.TreeMap$Entry root>;
+
+     label1:
+        if r6 == null goto label8;
+
+        $r2 = r6.<java.util.TreeMap$Entry: java.lang.Object key>;
+
+        $i0 = virtualinvoke r0.<java.util.TreeMap: int compare(java.lang.Object,java.lang.Object)>(r1, $r2);
+
+        if $i0 <= 0 goto label3;
+
+        $r5 = r6.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        if $r5 == null goto label2;
+
+        r6 = r6.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        goto label7;
+
+     label2:
+        return r6;
+
+     label3:
+        $r3 = r6.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        if $r3 == null goto label4;
+
+        r6 = r6.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        goto label7;
+
+     label4:
+        r7 = r6.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        r8 = r6;
+
+     label5:
+        if r7 == null goto label6;
+
+        $r4 = r7.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        if r8 != $r4 goto label6;
+
+        r8 = r7;
+
+        r7 = r7.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        goto label5;
+
+     label6:
+        return r7;
+
+     label7:
+        goto label1;
+
+     label8:
+        return null;
+    }
+
+    public java.lang.Object put(java.lang.Object, java.lang.Object)
+    {
+        java.lang.NullPointerException $r7;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, i8;
+        java.util.TreeMap$Entry $r6, $r10, r11, r12;
+        java.util.TreeMap r0;
+        java.lang.Object r2, $r3, r4, $r5, $r8, $r9;
+        java.lang.Comparable r13;
+        java.util.Comparator r1;
+
+        r0 := @this: java.util.TreeMap;
+
+        r2 := @parameter0: java.lang.Object;
+
+        r4 := @parameter1: java.lang.Object;
+
+        r11 = r0.<java.util.TreeMap: java.util.TreeMap$Entry root>;
+
+        if r11 != null goto label01;
+
+        virtualinvoke r0.<java.util.TreeMap: int compare(java.lang.Object,java.lang.Object)>(r2, r2);
+
+        $r10 = new java.util.TreeMap$Entry;
+
+        specialinvoke $r10.<java.util.TreeMap$Entry: void <init>(java.lang.Object,java.lang.Object,java.util.TreeMap$Entry)>(r2, r4, null);
+
+        r0.<java.util.TreeMap: java.util.TreeMap$Entry root> = $r10;
+
+        r0.<java.util.TreeMap: int size> = 1;
+
+        $i6 = r0.<java.util.TreeMap: int modCount>;
+
+        $i7 = $i6 + 1;
+
+        r0.<java.util.TreeMap: int modCount> = $i7;
+
+        return null;
+
+     label01:
+        r1 = r0.<java.util.TreeMap: java.util.Comparator comparator>;
+
+        if r1 == null goto label06;
+
+     label02:
+        r12 = r11;
+
+        $r8 = r11.<java.util.TreeMap$Entry: java.lang.Object key>;
+
+        $i5 = interfaceinvoke r1.<java.util.Comparator: int compare(java.lang.Object,java.lang.Object)>(r2, $r8);
+
+        i8 = $i5;
+
+        if $i5 >= 0 goto label03;
+
+        r11 = r11.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        goto label05;
+
+     label03:
+        if $i5 <= 0 goto label04;
+
+        r11 = r11.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        goto label05;
+
+     label04:
+        $r9 = virtualinvoke r11.<java.util.TreeMap$Entry: java.lang.Object setValue(java.lang.Object)>(r4);
+
+        return $r9;
+
+     label05:
+        if r11 != null goto label02;
+
+        goto label12;
+
+     label06:
+        if r2 != null goto label07;
+
+        $r7 = new java.lang.NullPointerException;
+
+        specialinvoke $r7.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r7;
+
+     label07:
+        r13 = (java.lang.Comparable) r2;
+
+     label08:
+        r12 = r11;
+
+        $r3 = r11.<java.util.TreeMap$Entry: java.lang.Object key>;
+
+        $i0 = interfaceinvoke r13.<java.lang.Comparable: int compareTo(java.lang.Object)>($r3);
+
+        i8 = $i0;
+
+        if $i0 >= 0 goto label09;
+
+        r11 = r11.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        goto label11;
+
+     label09:
+        if $i0 <= 0 goto label10;
+
+        r11 = r11.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        goto label11;
+
+     label10:
+        $r5 = virtualinvoke r11.<java.util.TreeMap$Entry: java.lang.Object setValue(java.lang.Object)>(r4);
+
+        return $r5;
+
+     label11:
+        if r11 != null goto label08;
+
+     label12:
+        $r6 = new java.util.TreeMap$Entry;
+
+        specialinvoke $r6.<java.util.TreeMap$Entry: void <init>(java.lang.Object,java.lang.Object,java.util.TreeMap$Entry)>(r2, r4, r12);
+
+        if i8 >= 0 goto label13;
+
+        r12.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left> = $r6;
+
+        goto label14;
+
+     label13:
+        r12.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right> = $r6;
+
+     label14:
+        specialinvoke r0.<java.util.TreeMap: void fixAfterInsertion(java.util.TreeMap$Entry)>($r6);
+
+        $i1 = r0.<java.util.TreeMap: int size>;
+
+        $i2 = $i1 + 1;
+
+        r0.<java.util.TreeMap: int size> = $i2;
+
+        $i3 = r0.<java.util.TreeMap: int modCount>;
+
+        $i4 = $i3 + 1;
+
+        r0.<java.util.TreeMap: int modCount> = $i4;
+
+        return null;
+    }
+
+    public java.lang.Object remove(java.lang.Object)
+    {
+        java.util.TreeMap r0;
+        java.lang.Object r1, r3;
+        java.util.TreeMap$Entry $r2;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.TreeMap: java.util.TreeMap$Entry getEntry(java.lang.Object)>(r1);
+
+        if $r2 != null goto label1;
+
+        return null;
+
+     label1:
+        r3 = $r2.<java.util.TreeMap$Entry: java.lang.Object value>;
+
+        specialinvoke r0.<java.util.TreeMap: void deleteEntry(java.util.TreeMap$Entry)>($r2);
+
+        return r3;
+    }
+
+    public void clear()
+    {
+        int $i0, $i1;
+        java.util.TreeMap r0;
+
+        r0 := @this: java.util.TreeMap;
+
+        $i0 = r0.<java.util.TreeMap: int modCount>;
+
+        $i1 = $i0 + 1;
+
+        r0.<java.util.TreeMap: int modCount> = $i1;
+
+        r0.<java.util.TreeMap: int size> = 0;
+
+        r0.<java.util.TreeMap: java.util.TreeMap$Entry root> = null;
+
+        return;
+    }
+
+    public java.lang.Object clone()
+    {
+        java.util.Iterator $r4;
+        java.util.Set $r3;
+        java.io.IOException $r6;
+        java.lang.CloneNotSupportedException $r7;
+        java.util.TreeMap r0, r2;
+        int $i0;
+        java.lang.InternalError $r8;
+        java.lang.Object $r1;
+        java.lang.ClassNotFoundException $r5;
+
+        r0 := @this: java.util.TreeMap;
+
+     label1:
+        $r1 = specialinvoke r0.<java.util.AbstractMap: java.lang.Object clone()>();
+
+        r2 = (java.util.TreeMap) $r1;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $r8 = new java.lang.InternalError;
+
+        specialinvoke $r8.<java.lang.InternalError: void <init>(java.lang.Throwable)>($r7);
+
+        throw $r8;
+
+     label4:
+        r2.<java.util.TreeMap: java.util.TreeMap$Entry root> = null;
+
+        r2.<java.util.TreeMap: int size> = 0;
+
+        r2.<java.util.TreeMap: int modCount> = 0;
+
+        r2.<java.util.TreeMap: java.util.TreeMap$EntrySet entrySet> = null;
+
+        r2.<java.util.TreeMap: java.util.TreeMap$KeySet navigableKeySet> = null;
+
+        r2.<java.util.TreeMap: java.util.NavigableMap descendingMap> = null;
+
+     label5:
+        $i0 = r0.<java.util.TreeMap: int size>;
+
+        $r3 = virtualinvoke r0.<java.util.TreeMap: java.util.Set entrySet()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.Set: java.util.Iterator iterator()>();
+
+        specialinvoke r2.<java.util.TreeMap: void buildFromSorted(int,java.util.Iterator,java.io.ObjectInputStream,java.lang.Object)>($i0, $r4, null, null);
+
+     label6:
+        goto label9;
+
+     label7:
+        $r6 := @caughtexception;
+
+        goto label9;
+
+     label8:
+        $r5 := @caughtexception;
+
+     label9:
+        return r2;
+
+        catch java.lang.CloneNotSupportedException from label1 to label2 with label3;
+        catch java.io.IOException from label5 to label6 with label7;
+        catch java.lang.ClassNotFoundException from label5 to label6 with label8;
+    }
+
+    public java.util.Map$Entry firstEntry()
+    {
+        java.util.Map$Entry $r2;
+        java.util.TreeMap$Entry $r1;
+        java.util.TreeMap r0;
+
+        r0 := @this: java.util.TreeMap;
+
+        $r1 = virtualinvoke r0.<java.util.TreeMap: java.util.TreeMap$Entry getFirstEntry()>();
+
+        $r2 = staticinvoke <java.util.TreeMap: java.util.Map$Entry exportEntry(java.util.TreeMap$Entry)>($r1);
+
+        return $r2;
+    }
+
+    public java.util.Map$Entry lastEntry()
+    {
+        java.util.Map$Entry $r2;
+        java.util.TreeMap$Entry $r1;
+        java.util.TreeMap r0;
+
+        r0 := @this: java.util.TreeMap;
+
+        $r1 = virtualinvoke r0.<java.util.TreeMap: java.util.TreeMap$Entry getLastEntry()>();
+
+        $r2 = staticinvoke <java.util.TreeMap: java.util.Map$Entry exportEntry(java.util.TreeMap$Entry)>($r1);
+
+        return $r2;
+    }
+
+    public java.util.Map$Entry pollFirstEntry()
+    {
+        java.util.Map$Entry $r2;
+        java.util.TreeMap$Entry $r1;
+        java.util.TreeMap r0;
+
+        r0 := @this: java.util.TreeMap;
+
+        $r1 = virtualinvoke r0.<java.util.TreeMap: java.util.TreeMap$Entry getFirstEntry()>();
+
+        $r2 = staticinvoke <java.util.TreeMap: java.util.Map$Entry exportEntry(java.util.TreeMap$Entry)>($r1);
+
+        if $r1 == null goto label1;
+
+        specialinvoke r0.<java.util.TreeMap: void deleteEntry(java.util.TreeMap$Entry)>($r1);
+
+     label1:
+        return $r2;
+    }
+
+    public java.util.Map$Entry pollLastEntry()
+    {
+        java.util.Map$Entry $r2;
+        java.util.TreeMap$Entry $r1;
+        java.util.TreeMap r0;
+
+        r0 := @this: java.util.TreeMap;
+
+        $r1 = virtualinvoke r0.<java.util.TreeMap: java.util.TreeMap$Entry getLastEntry()>();
+
+        $r2 = staticinvoke <java.util.TreeMap: java.util.Map$Entry exportEntry(java.util.TreeMap$Entry)>($r1);
+
+        if $r1 == null goto label1;
+
+        specialinvoke r0.<java.util.TreeMap: void deleteEntry(java.util.TreeMap$Entry)>($r1);
+
+     label1:
+        return $r2;
+    }
+
+    public java.util.Map$Entry lowerEntry(java.lang.Object)
+    {
+        java.util.Map$Entry $r3;
+        java.util.TreeMap r0;
+        java.lang.Object r1;
+        java.util.TreeMap$Entry $r2;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.TreeMap: java.util.TreeMap$Entry getLowerEntry(java.lang.Object)>(r1);
+
+        $r3 = staticinvoke <java.util.TreeMap: java.util.Map$Entry exportEntry(java.util.TreeMap$Entry)>($r2);
+
+        return $r3;
+    }
+
+    public java.lang.Object lowerKey(java.lang.Object)
+    {
+        java.util.TreeMap r0;
+        java.lang.Object r1, $r3;
+        java.util.TreeMap$Entry $r2;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.TreeMap: java.util.TreeMap$Entry getLowerEntry(java.lang.Object)>(r1);
+
+        $r3 = staticinvoke <java.util.TreeMap: java.lang.Object keyOrNull(java.util.TreeMap$Entry)>($r2);
+
+        return $r3;
+    }
+
+    public java.util.Map$Entry floorEntry(java.lang.Object)
+    {
+        java.util.Map$Entry $r3;
+        java.util.TreeMap r0;
+        java.lang.Object r1;
+        java.util.TreeMap$Entry $r2;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.TreeMap: java.util.TreeMap$Entry getFloorEntry(java.lang.Object)>(r1);
+
+        $r3 = staticinvoke <java.util.TreeMap: java.util.Map$Entry exportEntry(java.util.TreeMap$Entry)>($r2);
+
+        return $r3;
+    }
+
+    public java.lang.Object floorKey(java.lang.Object)
+    {
+        java.util.TreeMap r0;
+        java.lang.Object r1, $r3;
+        java.util.TreeMap$Entry $r2;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.TreeMap: java.util.TreeMap$Entry getFloorEntry(java.lang.Object)>(r1);
+
+        $r3 = staticinvoke <java.util.TreeMap: java.lang.Object keyOrNull(java.util.TreeMap$Entry)>($r2);
+
+        return $r3;
+    }
+
+    public java.util.Map$Entry ceilingEntry(java.lang.Object)
+    {
+        java.util.Map$Entry $r3;
+        java.util.TreeMap r0;
+        java.lang.Object r1;
+        java.util.TreeMap$Entry $r2;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.TreeMap: java.util.TreeMap$Entry getCeilingEntry(java.lang.Object)>(r1);
+
+        $r3 = staticinvoke <java.util.TreeMap: java.util.Map$Entry exportEntry(java.util.TreeMap$Entry)>($r2);
+
+        return $r3;
+    }
+
+    public java.lang.Object ceilingKey(java.lang.Object)
+    {
+        java.util.TreeMap r0;
+        java.lang.Object r1, $r3;
+        java.util.TreeMap$Entry $r2;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.TreeMap: java.util.TreeMap$Entry getCeilingEntry(java.lang.Object)>(r1);
+
+        $r3 = staticinvoke <java.util.TreeMap: java.lang.Object keyOrNull(java.util.TreeMap$Entry)>($r2);
+
+        return $r3;
+    }
+
+    public java.util.Map$Entry higherEntry(java.lang.Object)
+    {
+        java.util.Map$Entry $r3;
+        java.util.TreeMap r0;
+        java.lang.Object r1;
+        java.util.TreeMap$Entry $r2;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.TreeMap: java.util.TreeMap$Entry getHigherEntry(java.lang.Object)>(r1);
+
+        $r3 = staticinvoke <java.util.TreeMap: java.util.Map$Entry exportEntry(java.util.TreeMap$Entry)>($r2);
+
+        return $r3;
+    }
+
+    public java.lang.Object higherKey(java.lang.Object)
+    {
+        java.util.TreeMap r0;
+        java.lang.Object r1, $r3;
+        java.util.TreeMap$Entry $r2;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.TreeMap: java.util.TreeMap$Entry getHigherEntry(java.lang.Object)>(r1);
+
+        $r3 = staticinvoke <java.util.TreeMap: java.lang.Object keyOrNull(java.util.TreeMap$Entry)>($r2);
+
+        return $r3;
+    }
+
+    public java.util.Set keySet()
+    {
+        java.util.NavigableSet $r1;
+        java.util.TreeMap r0;
+
+        r0 := @this: java.util.TreeMap;
+
+        $r1 = virtualinvoke r0.<java.util.TreeMap: java.util.NavigableSet navigableKeySet()>();
+
+        return $r1;
+    }
+
+    public java.util.NavigableSet navigableKeySet()
+    {
+        java.util.TreeMap r0;
+        java.util.TreeMap$KeySet r1, $r2;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 = r0.<java.util.TreeMap: java.util.TreeMap$KeySet navigableKeySet>;
+
+        if r1 == null goto label1;
+
+        $r2 = r1;
+
+        goto label2;
+
+     label1:
+        $r2 = new java.util.TreeMap$KeySet;
+
+        specialinvoke $r2.<java.util.TreeMap$KeySet: void <init>(java.util.NavigableMap)>(r0);
+
+        r0.<java.util.TreeMap: java.util.TreeMap$KeySet navigableKeySet> = $r2;
+
+     label2:
+        return $r2;
+    }
+
+    public java.util.NavigableSet descendingKeySet()
+    {
+        java.util.NavigableSet $r2;
+        java.util.TreeMap r0;
+        java.util.NavigableMap $r1;
+
+        r0 := @this: java.util.TreeMap;
+
+        $r1 = virtualinvoke r0.<java.util.TreeMap: java.util.NavigableMap descendingMap()>();
+
+        $r2 = interfaceinvoke $r1.<java.util.NavigableMap: java.util.NavigableSet navigableKeySet()>();
+
+        return $r2;
+    }
+
+    public java.util.Collection values()
+    {
+        java.util.TreeMap r0;
+        java.util.TreeMap$Values $r1;
+        java.util.Collection r2;
+
+        r0 := @this: java.util.TreeMap;
+
+        r2 = r0.<java.util.TreeMap: java.util.Collection values>;
+
+        if r2 != null goto label1;
+
+        $r1 = new java.util.TreeMap$Values;
+
+        specialinvoke $r1.<java.util.TreeMap$Values: void <init>(java.util.TreeMap)>(r0);
+
+        r2 = $r1;
+
+        r0.<java.util.TreeMap: java.util.Collection values> = $r1;
+
+     label1:
+        return r2;
+    }
+
+    public java.util.Set entrySet()
+    {
+        java.util.TreeMap r0;
+        java.util.TreeMap$EntrySet r1, $r2;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 = r0.<java.util.TreeMap: java.util.TreeMap$EntrySet entrySet>;
+
+        if r1 == null goto label1;
+
+        $r2 = r1;
+
+        goto label2;
+
+     label1:
+        $r2 = new java.util.TreeMap$EntrySet;
+
+        specialinvoke $r2.<java.util.TreeMap$EntrySet: void <init>(java.util.TreeMap)>(r0);
+
+        r0.<java.util.TreeMap: java.util.TreeMap$EntrySet entrySet> = $r2;
+
+     label2:
+        return $r2;
+    }
+
+    public java.util.NavigableMap descendingMap()
+    {
+        java.util.TreeMap$DescendingSubMap $r3;
+        java.util.TreeMap r0;
+        java.util.NavigableMap r1, $r2;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 = r0.<java.util.TreeMap: java.util.NavigableMap descendingMap>;
+
+        if r1 == null goto label1;
+
+        $r2 = r1;
+
+        goto label2;
+
+     label1:
+        $r3 = new java.util.TreeMap$DescendingSubMap;
+
+        $r2 = $r3;
+
+        specialinvoke $r3.<java.util.TreeMap$DescendingSubMap: void <init>(java.util.TreeMap,boolean,java.lang.Object,boolean,boolean,java.lang.Object,boolean)>(r0, 1, null, 1, 1, null, 1);
+
+        r0.<java.util.TreeMap: java.util.NavigableMap descendingMap> = $r3;
+
+     label2:
+        return $r2;
+    }
+
+    public java.util.NavigableMap subMap(java.lang.Object, boolean, java.lang.Object, boolean)
+    {
+        java.util.TreeMap r1;
+        java.lang.Object r2, r3;
+        java.util.TreeMap$AscendingSubMap $r0;
+        boolean z0, z1;
+
+        r1 := @this: java.util.TreeMap;
+
+        r2 := @parameter0: java.lang.Object;
+
+        z0 := @parameter1: boolean;
+
+        r3 := @parameter2: java.lang.Object;
+
+        z1 := @parameter3: boolean;
+
+        $r0 = new java.util.TreeMap$AscendingSubMap;
+
+        specialinvoke $r0.<java.util.TreeMap$AscendingSubMap: void <init>(java.util.TreeMap,boolean,java.lang.Object,boolean,boolean,java.lang.Object,boolean)>(r1, 0, r2, z0, 0, r3, z1);
+
+        return $r0;
+    }
+
+    public java.util.NavigableMap headMap(java.lang.Object, boolean)
+    {
+        java.util.TreeMap r1;
+        java.lang.Object r2;
+        java.util.TreeMap$AscendingSubMap $r0;
+        boolean z0;
+
+        r1 := @this: java.util.TreeMap;
+
+        r2 := @parameter0: java.lang.Object;
+
+        z0 := @parameter1: boolean;
+
+        $r0 = new java.util.TreeMap$AscendingSubMap;
+
+        specialinvoke $r0.<java.util.TreeMap$AscendingSubMap: void <init>(java.util.TreeMap,boolean,java.lang.Object,boolean,boolean,java.lang.Object,boolean)>(r1, 1, null, 1, 0, r2, z0);
+
+        return $r0;
+    }
+
+    public java.util.NavigableMap tailMap(java.lang.Object, boolean)
+    {
+        java.util.TreeMap r1;
+        java.lang.Object r2;
+        java.util.TreeMap$AscendingSubMap $r0;
+        boolean z0;
+
+        r1 := @this: java.util.TreeMap;
+
+        r2 := @parameter0: java.lang.Object;
+
+        z0 := @parameter1: boolean;
+
+        $r0 = new java.util.TreeMap$AscendingSubMap;
+
+        specialinvoke $r0.<java.util.TreeMap$AscendingSubMap: void <init>(java.util.TreeMap,boolean,java.lang.Object,boolean,boolean,java.lang.Object,boolean)>(r1, 0, r2, z0, 1, null, 1);
+
+        return $r0;
+    }
+
+    public java.util.SortedMap subMap(java.lang.Object, java.lang.Object)
+    {
+        java.util.TreeMap r0;
+        java.lang.Object r1, r2;
+        java.util.NavigableMap $r3;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.lang.Object;
+
+        $r3 = virtualinvoke r0.<java.util.TreeMap: java.util.NavigableMap subMap(java.lang.Object,boolean,java.lang.Object,boolean)>(r1, 1, r2, 0);
+
+        return $r3;
+    }
+
+    public java.util.SortedMap headMap(java.lang.Object)
+    {
+        java.lang.Object r1;
+        java.util.TreeMap r0;
+        java.util.NavigableMap $r2;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.TreeMap: java.util.NavigableMap headMap(java.lang.Object,boolean)>(r1, 0);
+
+        return $r2;
+    }
+
+    public java.util.SortedMap tailMap(java.lang.Object)
+    {
+        java.lang.Object r1;
+        java.util.TreeMap r0;
+        java.util.NavigableMap $r2;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.TreeMap: java.util.NavigableMap tailMap(java.lang.Object,boolean)>(r1, 1);
+
+        return $r2;
+    }
+
+    public boolean replace(java.lang.Object, java.lang.Object, java.lang.Object)
+    {
+        java.util.TreeMap r0;
+        java.lang.Object r1, r3, $r4, r5;
+        java.util.TreeMap$Entry $r2;
+        boolean $z0;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r3 := @parameter1: java.lang.Object;
+
+        r5 := @parameter2: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.TreeMap: java.util.TreeMap$Entry getEntry(java.lang.Object)>(r1);
+
+        if $r2 == null goto label1;
+
+        $r4 = $r2.<java.util.TreeMap$Entry: java.lang.Object value>;
+
+        $z0 = staticinvoke <java.util.Objects: boolean equals(java.lang.Object,java.lang.Object)>(r3, $r4);
+
+        if $z0 == 0 goto label1;
+
+        $r2.<java.util.TreeMap$Entry: java.lang.Object value> = r5;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    public java.lang.Object replace(java.lang.Object, java.lang.Object)
+    {
+        java.util.TreeMap r0;
+        java.lang.Object r1, r3, r4;
+        java.util.TreeMap$Entry $r2;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r4 := @parameter1: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.TreeMap: java.util.TreeMap$Entry getEntry(java.lang.Object)>(r1);
+
+        if $r2 == null goto label1;
+
+        r3 = $r2.<java.util.TreeMap$Entry: java.lang.Object value>;
+
+        $r2.<java.util.TreeMap$Entry: java.lang.Object value> = r4;
+
+        return r3;
+
+     label1:
+        return null;
+    }
+
+    public void forEach(java.util.function.BiConsumer)
+    {
+        java.util.TreeMap$Entry r5;
+        java.util.TreeMap r1;
+        java.util.function.BiConsumer r0;
+        int i0, $i1;
+        java.lang.Object $r2, $r3;
+        java.util.ConcurrentModificationException $r4;
+
+        r1 := @this: java.util.TreeMap;
+
+        r0 := @parameter0: java.util.function.BiConsumer;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r0);
+
+        i0 = r1.<java.util.TreeMap: int modCount>;
+
+        r5 = virtualinvoke r1.<java.util.TreeMap: java.util.TreeMap$Entry getFirstEntry()>();
+
+     label1:
+        if r5 == null goto label3;
+
+        $r3 = r5.<java.util.TreeMap$Entry: java.lang.Object key>;
+
+        $r2 = r5.<java.util.TreeMap$Entry: java.lang.Object value>;
+
+        interfaceinvoke r0.<java.util.function.BiConsumer: void accept(java.lang.Object,java.lang.Object)>($r3, $r2);
+
+        $i1 = r1.<java.util.TreeMap: int modCount>;
+
+        if i0 == $i1 goto label2;
+
+        $r4 = new java.util.ConcurrentModificationException;
+
+        specialinvoke $r4.<java.util.ConcurrentModificationException: void <init>()>();
+
+        throw $r4;
+
+     label2:
+        r5 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry successor(java.util.TreeMap$Entry)>(r5);
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    public void replaceAll(java.util.function.BiFunction)
+    {
+        java.util.function.BiFunction r0;
+        java.util.TreeMap$Entry r6;
+        java.util.TreeMap r1;
+        int i0, $i1;
+        java.lang.Object $r2, $r3, $r4;
+        java.util.ConcurrentModificationException $r5;
+
+        r1 := @this: java.util.TreeMap;
+
+        r0 := @parameter0: java.util.function.BiFunction;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r0);
+
+        i0 = r1.<java.util.TreeMap: int modCount>;
+
+        r6 = virtualinvoke r1.<java.util.TreeMap: java.util.TreeMap$Entry getFirstEntry()>();
+
+     label1:
+        if r6 == null goto label3;
+
+        $r3 = r6.<java.util.TreeMap$Entry: java.lang.Object key>;
+
+        $r2 = r6.<java.util.TreeMap$Entry: java.lang.Object value>;
+
+        $r4 = interfaceinvoke r0.<java.util.function.BiFunction: java.lang.Object apply(java.lang.Object,java.lang.Object)>($r3, $r2);
+
+        r6.<java.util.TreeMap$Entry: java.lang.Object value> = $r4;
+
+        $i1 = r1.<java.util.TreeMap: int modCount>;
+
+        if i0 == $i1 goto label2;
+
+        $r5 = new java.util.ConcurrentModificationException;
+
+        specialinvoke $r5.<java.util.ConcurrentModificationException: void <init>()>();
+
+        throw $r5;
+
+     label2:
+        r6 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry successor(java.util.TreeMap$Entry)>(r6);
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    java.util.Iterator keyIterator()
+    {
+        java.util.TreeMap$Entry $r2;
+        java.util.TreeMap r1;
+        java.util.TreeMap$KeyIterator $r0;
+
+        r1 := @this: java.util.TreeMap;
+
+        $r0 = new java.util.TreeMap$KeyIterator;
+
+        $r2 = virtualinvoke r1.<java.util.TreeMap: java.util.TreeMap$Entry getFirstEntry()>();
+
+        specialinvoke $r0.<java.util.TreeMap$KeyIterator: void <init>(java.util.TreeMap,java.util.TreeMap$Entry)>(r1, $r2);
+
+        return $r0;
+    }
+
+    java.util.Iterator descendingKeyIterator()
+    {
+        java.util.TreeMap$DescendingKeyIterator $r0;
+        java.util.TreeMap$Entry $r2;
+        java.util.TreeMap r1;
+
+        r1 := @this: java.util.TreeMap;
+
+        $r0 = new java.util.TreeMap$DescendingKeyIterator;
+
+        $r2 = virtualinvoke r1.<java.util.TreeMap: java.util.TreeMap$Entry getLastEntry()>();
+
+        specialinvoke $r0.<java.util.TreeMap$DescendingKeyIterator: void <init>(java.util.TreeMap,java.util.TreeMap$Entry)>(r1, $r2);
+
+        return $r0;
+    }
+
+    final int compare(java.lang.Object, java.lang.Object)
+    {
+        java.util.TreeMap r0;
+        int $i0;
+        java.lang.Object r2, r3;
+        java.lang.Comparable $r5;
+        java.util.Comparator $r1, $r4;
+
+        r0 := @this: java.util.TreeMap;
+
+        r2 := @parameter0: java.lang.Object;
+
+        r3 := @parameter1: java.lang.Object;
+
+        $r1 = r0.<java.util.TreeMap: java.util.Comparator comparator>;
+
+        if $r1 != null goto label1;
+
+        $r5 = (java.lang.Comparable) r2;
+
+        $i0 = interfaceinvoke $r5.<java.lang.Comparable: int compareTo(java.lang.Object)>(r3);
+
+        goto label2;
+
+     label1:
+        $r4 = r0.<java.util.TreeMap: java.util.Comparator comparator>;
+
+        $i0 = interfaceinvoke $r4.<java.util.Comparator: int compare(java.lang.Object,java.lang.Object)>(r2, r3);
+
+     label2:
+        return $i0;
+    }
+
+    static final boolean valEquals(java.lang.Object, java.lang.Object)
+    {
+        java.lang.Object r0, r1;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r1 := @parameter1: java.lang.Object;
+
+        if r0 != null goto label2;
+
+        if r1 != null goto label1;
+
+        $z0 = 1;
+
+        goto label3;
+
+     label1:
+        $z0 = 0;
+
+        goto label3;
+
+     label2:
+        $z0 = virtualinvoke r0.<java.lang.Object: boolean equals(java.lang.Object)>(r1);
+
+     label3:
+        return $z0;
+    }
+
+    static java.util.Map$Entry exportEntry(java.util.TreeMap$Entry)
+    {
+        java.util.TreeMap$Entry r0;
+        java.util.AbstractMap$SimpleImmutableEntry $r1;
+
+        r0 := @parameter0: java.util.TreeMap$Entry;
+
+        if r0 != null goto label1;
+
+        $r1 = null;
+
+        goto label2;
+
+     label1:
+        $r1 = new java.util.AbstractMap$SimpleImmutableEntry;
+
+        specialinvoke $r1.<java.util.AbstractMap$SimpleImmutableEntry: void <init>(java.util.Map$Entry)>(r0);
+
+     label2:
+        return $r1;
+    }
+
+    static java.lang.Object keyOrNull(java.util.TreeMap$Entry)
+    {
+        java.lang.Object $r1;
+        java.util.TreeMap$Entry r0;
+
+        r0 := @parameter0: java.util.TreeMap$Entry;
+
+        if r0 != null goto label1;
+
+        $r1 = null;
+
+        goto label2;
+
+     label1:
+        $r1 = r0.<java.util.TreeMap$Entry: java.lang.Object key>;
+
+     label2:
+        return $r1;
+    }
+
+    static java.lang.Object key(java.util.TreeMap$Entry)
+    {
+        java.lang.Object $r1;
+        java.util.TreeMap$Entry r0;
+        java.util.NoSuchElementException $r2;
+
+        r0 := @parameter0: java.util.TreeMap$Entry;
+
+        if r0 != null goto label1;
+
+        $r2 = new java.util.NoSuchElementException;
+
+        specialinvoke $r2.<java.util.NoSuchElementException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        $r1 = r0.<java.util.TreeMap$Entry: java.lang.Object key>;
+
+        return $r1;
+    }
+
+    final java.util.TreeMap$Entry getFirstEntry()
+    {
+        java.util.TreeMap$Entry $r1, r2;
+        java.util.TreeMap r0;
+
+        r0 := @this: java.util.TreeMap;
+
+        r2 = r0.<java.util.TreeMap: java.util.TreeMap$Entry root>;
+
+        if r2 == null goto label2;
+
+     label1:
+        $r1 = r2.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        if $r1 == null goto label2;
+
+        r2 = r2.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        goto label1;
+
+     label2:
+        return r2;
+    }
+
+    final java.util.TreeMap$Entry getLastEntry()
+    {
+        java.util.TreeMap$Entry $r1, r2;
+        java.util.TreeMap r0;
+
+        r0 := @this: java.util.TreeMap;
+
+        r2 = r0.<java.util.TreeMap: java.util.TreeMap$Entry root>;
+
+        if r2 == null goto label2;
+
+     label1:
+        $r1 = r2.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        if $r1 == null goto label2;
+
+        r2 = r2.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        goto label1;
+
+     label2:
+        return r2;
+    }
+
+    static java.util.TreeMap$Entry successor(java.util.TreeMap$Entry)
+    {
+        java.util.TreeMap$Entry r0, $r1, $r2, $r3, r4, r5, r6;
+
+        r0 := @parameter0: java.util.TreeMap$Entry;
+
+        if r0 != null goto label1;
+
+        return null;
+
+     label1:
+        $r1 = r0.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        if $r1 == null goto label4;
+
+        r4 = r0.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+     label2:
+        $r3 = r4.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        if $r3 == null goto label3;
+
+        r4 = r4.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        goto label2;
+
+     label3:
+        return r4;
+
+     label4:
+        r5 = r0.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        r6 = r0;
+
+     label5:
+        if r5 == null goto label6;
+
+        $r2 = r5.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        if r6 != $r2 goto label6;
+
+        r6 = r5;
+
+        r5 = r5.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        goto label5;
+
+     label6:
+        return r5;
+    }
+
+    static java.util.TreeMap$Entry predecessor(java.util.TreeMap$Entry)
+    {
+        java.util.TreeMap$Entry r0, $r1, $r2, $r3, r4, r5, r6;
+
+        r0 := @parameter0: java.util.TreeMap$Entry;
+
+        if r0 != null goto label1;
+
+        return null;
+
+     label1:
+        $r1 = r0.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        if $r1 == null goto label4;
+
+        r4 = r0.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+     label2:
+        $r3 = r4.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        if $r3 == null goto label3;
+
+        r4 = r4.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        goto label2;
+
+     label3:
+        return r4;
+
+     label4:
+        r5 = r0.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        r6 = r0;
+
+     label5:
+        if r5 == null goto label6;
+
+        $r2 = r5.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        if r6 != $r2 goto label6;
+
+        r6 = r5;
+
+        r5 = r5.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        goto label5;
+
+     label6:
+        return r5;
+    }
+
+    private static boolean colorOf(java.util.TreeMap$Entry)
+    {
+        java.util.TreeMap$Entry r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.util.TreeMap$Entry;
+
+        if r0 != null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = r0.<java.util.TreeMap$Entry: boolean color>;
+
+     label2:
+        return $z0;
+    }
+
+    private static java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)
+    {
+        java.util.TreeMap$Entry r0, $r1;
+
+        r0 := @parameter0: java.util.TreeMap$Entry;
+
+        if r0 != null goto label1;
+
+        $r1 = null;
+
+        goto label2;
+
+     label1:
+        $r1 = r0.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+     label2:
+        return $r1;
+    }
+
+    private static void setColor(java.util.TreeMap$Entry, boolean)
+    {
+        java.util.TreeMap$Entry r0;
+        boolean z0;
+
+        r0 := @parameter0: java.util.TreeMap$Entry;
+
+        z0 := @parameter1: boolean;
+
+        if r0 == null goto label1;
+
+        r0.<java.util.TreeMap$Entry: boolean color> = z0;
+
+     label1:
+        return;
+    }
+
+    private static java.util.TreeMap$Entry leftOf(java.util.TreeMap$Entry)
+    {
+        java.util.TreeMap$Entry r0, $r1;
+
+        r0 := @parameter0: java.util.TreeMap$Entry;
+
+        if r0 != null goto label1;
+
+        $r1 = null;
+
+        goto label2;
+
+     label1:
+        $r1 = r0.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+     label2:
+        return $r1;
+    }
+
+    private static java.util.TreeMap$Entry rightOf(java.util.TreeMap$Entry)
+    {
+        java.util.TreeMap$Entry r0, $r1;
+
+        r0 := @parameter0: java.util.TreeMap$Entry;
+
+        if r0 != null goto label1;
+
+        $r1 = null;
+
+        goto label2;
+
+     label1:
+        $r1 = r0.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+     label2:
+        return $r1;
+    }
+
+    private void rotateLeft(java.util.TreeMap$Entry)
+    {
+        java.util.TreeMap$Entry r0, r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r11;
+        java.util.TreeMap r10;
+
+        r10 := @this: java.util.TreeMap;
+
+        r0 := @parameter0: java.util.TreeMap$Entry;
+
+        if r0 == null goto label5;
+
+        r1 = r0.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        $r2 = r1.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        r0.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right> = $r2;
+
+        $r3 = r1.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        if $r3 == null goto label1;
+
+        $r11 = r1.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        $r11.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent> = r0;
+
+     label1:
+        $r4 = r0.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        r1.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent> = $r4;
+
+        $r5 = r0.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        if $r5 != null goto label2;
+
+        r10.<java.util.TreeMap: java.util.TreeMap$Entry root> = r1;
+
+        goto label4;
+
+     label2:
+        $r6 = r0.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        $r7 = $r6.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        if $r7 != r0 goto label3;
+
+        $r9 = r0.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        $r9.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left> = r1;
+
+        goto label4;
+
+     label3:
+        $r8 = r0.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        $r8.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right> = r1;
+
+     label4:
+        r1.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left> = r0;
+
+        r0.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent> = r1;
+
+     label5:
+        return;
+    }
+
+    private void rotateRight(java.util.TreeMap$Entry)
+    {
+        java.util.TreeMap$Entry r0, r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r11;
+        java.util.TreeMap r10;
+
+        r10 := @this: java.util.TreeMap;
+
+        r0 := @parameter0: java.util.TreeMap$Entry;
+
+        if r0 == null goto label5;
+
+        r1 = r0.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        $r2 = r1.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        r0.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left> = $r2;
+
+        $r3 = r1.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        if $r3 == null goto label1;
+
+        $r11 = r1.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        $r11.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent> = r0;
+
+     label1:
+        $r4 = r0.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        r1.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent> = $r4;
+
+        $r5 = r0.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        if $r5 != null goto label2;
+
+        r10.<java.util.TreeMap: java.util.TreeMap$Entry root> = r1;
+
+        goto label4;
+
+     label2:
+        $r6 = r0.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        $r7 = $r6.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        if $r7 != r0 goto label3;
+
+        $r9 = r0.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        $r9.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right> = r1;
+
+        goto label4;
+
+     label3:
+        $r8 = r0.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        $r8.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left> = r1;
+
+     label4:
+        r1.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right> = r0;
+
+        r0.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent> = r1;
+
+     label5:
+        return;
+    }
+
+    private void fixAfterInsertion(java.util.TreeMap$Entry)
+    {
+        boolean $z0, $z1, $z2;
+        java.util.TreeMap$Entry $r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26, $r27, $r28, $r29, $r30, $r31, $r32, $r33, $r34, $r35, $r36, r37, $r38;
+        java.util.TreeMap r0;
+
+        r0 := @this: java.util.TreeMap;
+
+        r37 := @parameter0: java.util.TreeMap$Entry;
+
+        r37.<java.util.TreeMap$Entry: boolean color> = 0;
+
+     label1:
+        if r37 == null goto label9;
+
+        $r1 = r0.<java.util.TreeMap: java.util.TreeMap$Entry root>;
+
+        if r37 == $r1 goto label9;
+
+        $r2 = r37.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        $z0 = $r2.<java.util.TreeMap$Entry: boolean color>;
+
+        if $z0 != 0 goto label9;
+
+        $r3 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r37);
+
+        $r4 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r37);
+
+        $r5 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>($r4);
+
+        $r6 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry leftOf(java.util.TreeMap$Entry)>($r5);
+
+        if $r3 != $r6 goto label5;
+
+        $r22 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r37);
+
+        $r23 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>($r22);
+
+        $r24 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry rightOf(java.util.TreeMap$Entry)>($r23);
+
+        $z2 = staticinvoke <java.util.TreeMap: boolean colorOf(java.util.TreeMap$Entry)>($r24);
+
+        if $z2 != 0 goto label2;
+
+        $r33 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r37);
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>($r33, 1);
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>($r24, 1);
+
+        $r34 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r37);
+
+        $r35 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>($r34);
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>($r35, 0);
+
+        $r36 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r37);
+
+        r37 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>($r36);
+
+        goto label4;
+
+     label2:
+        $r25 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r37);
+
+        $r26 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry rightOf(java.util.TreeMap$Entry)>($r25);
+
+        if r37 != $r26 goto label3;
+
+        $r32 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r37);
+
+        r37 = $r32;
+
+        specialinvoke r0.<java.util.TreeMap: void rotateLeft(java.util.TreeMap$Entry)>($r32);
+
+     label3:
+        $r27 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r37);
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>($r27, 1);
+
+        $r28 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r37);
+
+        $r29 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>($r28);
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>($r29, 0);
+
+        $r30 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r37);
+
+        $r31 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>($r30);
+
+        specialinvoke r0.<java.util.TreeMap: void rotateRight(java.util.TreeMap$Entry)>($r31);
+
+     label4:
+        goto label1;
+
+     label5:
+        $r7 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r37);
+
+        $r8 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>($r7);
+
+        $r9 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry leftOf(java.util.TreeMap$Entry)>($r8);
+
+        $z1 = staticinvoke <java.util.TreeMap: boolean colorOf(java.util.TreeMap$Entry)>($r9);
+
+        if $z1 != 0 goto label6;
+
+        $r18 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r37);
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>($r18, 1);
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>($r9, 1);
+
+        $r19 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r37);
+
+        $r20 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>($r19);
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>($r20, 0);
+
+        $r21 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r37);
+
+        r37 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>($r21);
+
+        goto label8;
+
+     label6:
+        $r10 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r37);
+
+        $r11 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry leftOf(java.util.TreeMap$Entry)>($r10);
+
+        if r37 != $r11 goto label7;
+
+        $r17 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r37);
+
+        r37 = $r17;
+
+        specialinvoke r0.<java.util.TreeMap: void rotateRight(java.util.TreeMap$Entry)>($r17);
+
+     label7:
+        $r12 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r37);
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>($r12, 1);
+
+        $r13 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r37);
+
+        $r14 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>($r13);
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>($r14, 0);
+
+        $r15 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r37);
+
+        $r16 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>($r15);
+
+        specialinvoke r0.<java.util.TreeMap: void rotateLeft(java.util.TreeMap$Entry)>($r16);
+
+     label8:
+        goto label1;
+
+     label9:
+        $r38 = r0.<java.util.TreeMap: java.util.TreeMap$Entry root>;
+
+        $r38.<java.util.TreeMap$Entry: boolean color> = 1;
+
+        return;
+    }
+
+    private void deleteEntry(java.util.TreeMap$Entry)
+    {
+        int $i0, $i1, $i2, $i3;
+        boolean $z0, $z1;
+        java.util.TreeMap$Entry $r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, r20, $r21, $r22, r23;
+        java.util.TreeMap r0;
+        java.lang.Object $r18, $r19;
+
+        r0 := @this: java.util.TreeMap;
+
+        r20 := @parameter0: java.util.TreeMap$Entry;
+
+        $i0 = r0.<java.util.TreeMap: int modCount>;
+
+        $i1 = $i0 + 1;
+
+        r0.<java.util.TreeMap: int modCount> = $i1;
+
+        $i2 = r0.<java.util.TreeMap: int size>;
+
+        $i3 = $i2 - 1;
+
+        r0.<java.util.TreeMap: int size> = $i3;
+
+        $r1 = r20.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        if $r1 == null goto label01;
+
+        $r16 = r20.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        if $r16 == null goto label01;
+
+        $r17 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry successor(java.util.TreeMap$Entry)>(r20);
+
+        $r18 = $r17.<java.util.TreeMap$Entry: java.lang.Object key>;
+
+        r20.<java.util.TreeMap$Entry: java.lang.Object key> = $r18;
+
+        $r19 = $r17.<java.util.TreeMap$Entry: java.lang.Object value>;
+
+        r20.<java.util.TreeMap$Entry: java.lang.Object value> = $r19;
+
+        r20 = $r17;
+
+     label01:
+        $r21 = r20.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        if $r21 == null goto label02;
+
+        $r22 = r20.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        goto label03;
+
+     label02:
+        $r22 = r20.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+     label03:
+        r23 = $r22;
+
+        if $r22 == null goto label07;
+
+        $r10 = r20.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        $r22.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent> = $r10;
+
+        $r11 = r20.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        if $r11 != null goto label04;
+
+        r0.<java.util.TreeMap: java.util.TreeMap$Entry root> = $r22;
+
+        goto label06;
+
+     label04:
+        $r12 = r20.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        $r13 = $r12.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        if r20 != $r13 goto label05;
+
+        $r15 = r20.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        $r15.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left> = $r22;
+
+        goto label06;
+
+     label05:
+        $r14 = r20.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        $r14.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right> = $r22;
+
+     label06:
+        r20.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent> = null;
+
+        r20.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right> = null;
+
+        r20.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left> = null;
+
+        $z1 = r20.<java.util.TreeMap$Entry: boolean color>;
+
+        if $z1 != 1 goto label12;
+
+        specialinvoke r0.<java.util.TreeMap: void fixAfterDeletion(java.util.TreeMap$Entry)>(r23);
+
+        goto label12;
+
+     label07:
+        $r2 = r20.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        if $r2 != null goto label08;
+
+        r0.<java.util.TreeMap: java.util.TreeMap$Entry root> = null;
+
+        goto label12;
+
+     label08:
+        $z0 = r20.<java.util.TreeMap$Entry: boolean color>;
+
+        if $z0 != 1 goto label09;
+
+        specialinvoke r0.<java.util.TreeMap: void fixAfterDeletion(java.util.TreeMap$Entry)>(r20);
+
+     label09:
+        $r3 = r20.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        if $r3 == null goto label12;
+
+        $r4 = r20.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        $r5 = $r4.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left>;
+
+        if r20 != $r5 goto label10;
+
+        $r9 = r20.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        $r9.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left> = null;
+
+        goto label11;
+
+     label10:
+        $r6 = r20.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        $r7 = $r6.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right>;
+
+        if r20 != $r7 goto label11;
+
+        $r8 = r20.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent>;
+
+        $r8.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right> = null;
+
+     label11:
+        r20.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent> = null;
+
+     label12:
+        return;
+    }
+
+    private void fixAfterDeletion(java.util.TreeMap$Entry)
+    {
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10;
+        java.util.TreeMap$Entry $r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26, $r27, $r28, $r29, $r30, r31, $r32, r33, r34;
+        java.util.TreeMap r0;
+
+        r0 := @this: java.util.TreeMap;
+
+        r31 := @parameter0: java.util.TreeMap$Entry;
+
+     label01:
+        $r32 = r0.<java.util.TreeMap: java.util.TreeMap$Entry root>;
+
+        if r31 == $r32 goto label11;
+
+        $z0 = staticinvoke <java.util.TreeMap: boolean colorOf(java.util.TreeMap$Entry)>(r31);
+
+        if $z0 != 1 goto label11;
+
+        $r1 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r31);
+
+        $r2 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry leftOf(java.util.TreeMap$Entry)>($r1);
+
+        if r31 != $r2 goto label06;
+
+        $r17 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r31);
+
+        $r18 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry rightOf(java.util.TreeMap$Entry)>($r17);
+
+        r33 = $r18;
+
+        $z6 = staticinvoke <java.util.TreeMap: boolean colorOf(java.util.TreeMap$Entry)>($r18);
+
+        if $z6 != 0 goto label02;
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>($r18, 1);
+
+        $r28 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r31);
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>($r28, 0);
+
+        $r29 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r31);
+
+        specialinvoke r0.<java.util.TreeMap: void rotateLeft(java.util.TreeMap$Entry)>($r29);
+
+        $r30 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r31);
+
+        r33 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry rightOf(java.util.TreeMap$Entry)>($r30);
+
+     label02:
+        $r19 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry leftOf(java.util.TreeMap$Entry)>(r33);
+
+        $z7 = staticinvoke <java.util.TreeMap: boolean colorOf(java.util.TreeMap$Entry)>($r19);
+
+        if $z7 != 1 goto label03;
+
+        $r27 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry rightOf(java.util.TreeMap$Entry)>(r33);
+
+        $z10 = staticinvoke <java.util.TreeMap: boolean colorOf(java.util.TreeMap$Entry)>($r27);
+
+        if $z10 != 1 goto label03;
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>(r33, 0);
+
+        r31 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r31);
+
+        goto label05;
+
+     label03:
+        $r20 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry rightOf(java.util.TreeMap$Entry)>(r33);
+
+        $z8 = staticinvoke <java.util.TreeMap: boolean colorOf(java.util.TreeMap$Entry)>($r20);
+
+        if $z8 != 1 goto label04;
+
+        $r25 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry leftOf(java.util.TreeMap$Entry)>(r33);
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>($r25, 1);
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>(r33, 0);
+
+        specialinvoke r0.<java.util.TreeMap: void rotateRight(java.util.TreeMap$Entry)>(r33);
+
+        $r26 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r31);
+
+        r33 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry rightOf(java.util.TreeMap$Entry)>($r26);
+
+     label04:
+        $r21 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r31);
+
+        $z9 = staticinvoke <java.util.TreeMap: boolean colorOf(java.util.TreeMap$Entry)>($r21);
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>(r33, $z9);
+
+        $r22 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r31);
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>($r22, 1);
+
+        $r23 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry rightOf(java.util.TreeMap$Entry)>(r33);
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>($r23, 1);
+
+        $r24 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r31);
+
+        specialinvoke r0.<java.util.TreeMap: void rotateLeft(java.util.TreeMap$Entry)>($r24);
+
+        r31 = r0.<java.util.TreeMap: java.util.TreeMap$Entry root>;
+
+     label05:
+        goto label01;
+
+     label06:
+        $r3 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r31);
+
+        $r4 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry leftOf(java.util.TreeMap$Entry)>($r3);
+
+        r34 = $r4;
+
+        $z1 = staticinvoke <java.util.TreeMap: boolean colorOf(java.util.TreeMap$Entry)>($r4);
+
+        if $z1 != 0 goto label07;
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>($r4, 1);
+
+        $r14 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r31);
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>($r14, 0);
+
+        $r15 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r31);
+
+        specialinvoke r0.<java.util.TreeMap: void rotateRight(java.util.TreeMap$Entry)>($r15);
+
+        $r16 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r31);
+
+        r34 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry leftOf(java.util.TreeMap$Entry)>($r16);
+
+     label07:
+        $r5 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry rightOf(java.util.TreeMap$Entry)>(r34);
+
+        $z2 = staticinvoke <java.util.TreeMap: boolean colorOf(java.util.TreeMap$Entry)>($r5);
+
+        if $z2 != 1 goto label08;
+
+        $r13 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry leftOf(java.util.TreeMap$Entry)>(r34);
+
+        $z5 = staticinvoke <java.util.TreeMap: boolean colorOf(java.util.TreeMap$Entry)>($r13);
+
+        if $z5 != 1 goto label08;
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>(r34, 0);
+
+        r31 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r31);
+
+        goto label10;
+
+     label08:
+        $r6 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry leftOf(java.util.TreeMap$Entry)>(r34);
+
+        $z3 = staticinvoke <java.util.TreeMap: boolean colorOf(java.util.TreeMap$Entry)>($r6);
+
+        if $z3 != 1 goto label09;
+
+        $r11 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry rightOf(java.util.TreeMap$Entry)>(r34);
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>($r11, 1);
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>(r34, 0);
+
+        specialinvoke r0.<java.util.TreeMap: void rotateLeft(java.util.TreeMap$Entry)>(r34);
+
+        $r12 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r31);
+
+        r34 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry leftOf(java.util.TreeMap$Entry)>($r12);
+
+     label09:
+        $r7 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r31);
+
+        $z4 = staticinvoke <java.util.TreeMap: boolean colorOf(java.util.TreeMap$Entry)>($r7);
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>(r34, $z4);
+
+        $r8 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r31);
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>($r8, 1);
+
+        $r9 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry leftOf(java.util.TreeMap$Entry)>(r34);
+
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>($r9, 1);
+
+        $r10 = staticinvoke <java.util.TreeMap: java.util.TreeMap$Entry parentOf(java.util.TreeMap$Entry)>(r31);
+
+        specialinvoke r0.<java.util.TreeMap: void rotateRight(java.util.TreeMap$Entry)>($r10);
+
+        r31 = r0.<java.util.TreeMap: java.util.TreeMap$Entry root>;
+
+     label10:
+        goto label01;
+
+     label11:
+        staticinvoke <java.util.TreeMap: void setColor(java.util.TreeMap$Entry,boolean)>(r31, 1);
+
+        return;
+    }
+
+    private void writeObject(java.io.ObjectOutputStream) throws java.io.IOException
+    {
+        java.util.Map$Entry r5;
+        java.util.Iterator $r3;
+        java.util.Set $r2;
+        java.util.TreeMap r1;
+        int $i0;
+        java.io.ObjectOutputStream r0;
+        java.lang.Object $r4, $r6, $r7;
+        boolean $z0;
+
+        r1 := @this: java.util.TreeMap;
+
+        r0 := @parameter0: java.io.ObjectOutputStream;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void defaultWriteObject()>();
+
+        $i0 = r1.<java.util.TreeMap: int size>;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeInt(int)>($i0);
+
+        $r2 = virtualinvoke r1.<java.util.TreeMap: java.util.Set entrySet()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (java.util.Map$Entry) $r4;
+
+        $r6 = interfaceinvoke r5.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeObject(java.lang.Object)>($r6);
+
+        $r7 = interfaceinvoke r5.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeObject(java.lang.Object)>($r7);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.ObjectInputStream r0;
+        int $i0;
+        java.util.TreeMap r1;
+
+        r1 := @this: java.util.TreeMap;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        $i0 = virtualinvoke r0.<java.io.ObjectInputStream: int readInt()>();
+
+        specialinvoke r1.<java.util.TreeMap: void buildFromSorted(int,java.util.Iterator,java.io.ObjectInputStream,java.lang.Object)>($i0, null, r0, null);
+
+        return;
+    }
+
+    void readTreeSet(int, java.io.ObjectInputStream, java.lang.Object) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.util.TreeMap r0;
+        int i0;
+        java.io.ObjectInputStream r1;
+        java.lang.Object r2;
+
+        r0 := @this: java.util.TreeMap;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.io.ObjectInputStream;
+
+        r2 := @parameter2: java.lang.Object;
+
+        specialinvoke r0.<java.util.TreeMap: void buildFromSorted(int,java.util.Iterator,java.io.ObjectInputStream,java.lang.Object)>(i0, null, r1, r2);
+
+        return;
+    }
+
+    void addAllForTreeSet(java.util.SortedSet, java.lang.Object)
+    {
+        java.util.TreeMap r0;
+        java.util.SortedSet r1;
+        java.util.Iterator $r2;
+        int $i0;
+        java.lang.Object r3;
+        java.lang.ClassNotFoundException $r4;
+        java.io.IOException $r5;
+
+        r0 := @this: java.util.TreeMap;
+
+        r1 := @parameter0: java.util.SortedSet;
+
+        r3 := @parameter1: java.lang.Object;
+
+     label1:
+        $i0 = interfaceinvoke r1.<java.util.SortedSet: int size()>();
+
+        $r2 = interfaceinvoke r1.<java.util.SortedSet: java.util.Iterator iterator()>();
+
+        specialinvoke r0.<java.util.TreeMap: void buildFromSorted(int,java.util.Iterator,java.io.ObjectInputStream,java.lang.Object)>($i0, $r2, null, r3);
+
+     label2:
+        goto label5;
+
+     label3:
+        $r5 := @caughtexception;
+
+        goto label5;
+
+     label4:
+        $r4 := @caughtexception;
+
+     label5:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+        catch java.lang.ClassNotFoundException from label1 to label2 with label4;
+    }
+
+    private void buildFromSorted(int, java.util.Iterator, java.io.ObjectInputStream, java.lang.Object) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.util.Iterator r1;
+        java.io.ObjectInputStream r2;
+        java.util.TreeMap$Entry $r4;
+        java.util.TreeMap r0;
+        int i0, $i1, $i2;
+        java.lang.Object r3;
+
+        r0 := @this: java.util.TreeMap;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.util.Iterator;
+
+        r2 := @parameter2: java.io.ObjectInputStream;
+
+        r3 := @parameter3: java.lang.Object;
+
+        r0.<java.util.TreeMap: int size> = i0;
+
+        $i1 = i0 - 1;
+
+        $i2 = staticinvoke <java.util.TreeMap: int computeRedLevel(int)>(i0);
+
+        $r4 = specialinvoke r0.<java.util.TreeMap: java.util.TreeMap$Entry buildFromSorted(int,int,int,int,java.util.Iterator,java.io.ObjectInputStream,java.lang.Object)>(0, 0, $i1, $i2, r1, r2, r3);
+
+        r0.<java.util.TreeMap: java.util.TreeMap$Entry root> = $r4;
+
+        return;
+    }
+
+    private final java.util.TreeMap$Entry buildFromSorted(int, int, int, int, java.util.Iterator, java.io.ObjectInputStream, java.lang.Object) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.ObjectInputStream r1;
+        int i0, i1, $i2, i3, i4, i5, $i6, $i7, $i8, $i9;
+        java.util.Map$Entry r7;
+        java.util.Iterator r0;
+        java.util.TreeMap$Entry $r4, r6, $r11;
+        java.util.TreeMap r3;
+        java.lang.Object r2, $r5, r8, r9, $r10;
+
+        r3 := @this: java.util.TreeMap;
+
+        i4 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i5 := @parameter3: int;
+
+        r0 := @parameter4: java.util.Iterator;
+
+        r1 := @parameter5: java.io.ObjectInputStream;
+
+        r2 := @parameter6: java.lang.Object;
+
+        if i0 >= i1 goto label01;
+
+        return null;
+
+     label01:
+        $i2 = i1 + i0;
+
+        i3 = $i2 >>> 1;
+
+        r6 = null;
+
+        if i1 >= i3 goto label02;
+
+        $i9 = i4 + 1;
+
+        $i8 = i3 - 1;
+
+        r6 = specialinvoke r3.<java.util.TreeMap: java.util.TreeMap$Entry buildFromSorted(int,int,int,int,java.util.Iterator,java.io.ObjectInputStream,java.lang.Object)>($i9, i1, $i8, i5, r0, r1, r2);
+
+     label02:
+        if r0 == null goto label04;
+
+        if r2 != null goto label03;
+
+        $r5 = interfaceinvoke r0.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (java.util.Map$Entry) $r5;
+
+        r8 = interfaceinvoke r7.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        r9 = interfaceinvoke r7.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        goto label07;
+
+     label03:
+        r8 = interfaceinvoke r0.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = r2;
+
+        goto label07;
+
+     label04:
+        r8 = virtualinvoke r1.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        if r2 == null goto label05;
+
+        $r10 = r2;
+
+        goto label06;
+
+     label05:
+        $r10 = virtualinvoke r1.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+     label06:
+        r9 = $r10;
+
+     label07:
+        $r11 = new java.util.TreeMap$Entry;
+
+        specialinvoke $r11.<java.util.TreeMap$Entry: void <init>(java.lang.Object,java.lang.Object,java.util.TreeMap$Entry)>(r8, r9, null);
+
+        if i4 != i5 goto label08;
+
+        $r11.<java.util.TreeMap$Entry: boolean color> = 0;
+
+     label08:
+        if r6 == null goto label09;
+
+        $r11.<java.util.TreeMap$Entry: java.util.TreeMap$Entry left> = r6;
+
+        r6.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent> = $r11;
+
+     label09:
+        if i3 >= i0 goto label10;
+
+        $i7 = i4 + 1;
+
+        $i6 = i3 + 1;
+
+        $r4 = specialinvoke r3.<java.util.TreeMap: java.util.TreeMap$Entry buildFromSorted(int,int,int,int,java.util.Iterator,java.io.ObjectInputStream,java.lang.Object)>($i7, $i6, i0, i5, r0, r1, r2);
+
+        $r11.<java.util.TreeMap$Entry: java.util.TreeMap$Entry right> = $r4;
+
+        $r4.<java.util.TreeMap$Entry: java.util.TreeMap$Entry parent> = $r11;
+
+     label10:
+        return $r11;
+    }
+
+    private static int computeRedLevel(int)
+    {
+        int i0, $i1, i2, i3;
+
+        i0 := @parameter0: int;
+
+        i2 = 0;
+
+        i3 = i0 - 1;
+
+     label1:
+        if i3 < 0 goto label2;
+
+        i2 = i2 + 1;
+
+        $i1 = i3 / 2;
+
+        i3 = $i1 - 1;
+
+        goto label1;
+
+     label2:
+        return i2;
+    }
+
+    static java.util.Spliterator keySpliteratorFor(java.util.NavigableMap)
+    {
+        java.util.TreeMap$DescendingSubMap r8;
+        java.util.NavigableMap r0, $r3;
+        java.util.TreeMap r2, r7;
+        java.util.TreeMap$NavigableSubMap $r4;
+        java.util.Spliterator $r1, $r5, $r6;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.util.NavigableMap;
+
+        $z0 = r0 instanceof java.util.TreeMap;
+
+        if $z0 == 0 goto label1;
+
+        r7 = (java.util.TreeMap) r0;
+
+        $r6 = virtualinvoke r7.<java.util.TreeMap: java.util.Spliterator keySpliterator()>();
+
+        return $r6;
+
+     label1:
+        $z1 = r0 instanceof java.util.TreeMap$DescendingSubMap;
+
+        if $z1 == 0 goto label2;
+
+        r8 = (java.util.TreeMap$DescendingSubMap) r0;
+
+        r2 = r8.<java.util.TreeMap$DescendingSubMap: java.util.TreeMap m>;
+
+        $r3 = r2.<java.util.TreeMap: java.util.NavigableMap descendingMap>;
+
+        if r8 != $r3 goto label2;
+
+        $r5 = virtualinvoke r2.<java.util.TreeMap: java.util.Spliterator descendingKeySpliterator()>();
+
+        return $r5;
+
+     label2:
+        $r4 = (java.util.TreeMap$NavigableSubMap) r0;
+
+        $r1 = virtualinvoke $r4.<java.util.TreeMap$NavigableSubMap: java.util.Spliterator keySpliterator()>();
+
+        return $r1;
+    }
+
+    final java.util.Spliterator keySpliterator()
+    {
+        int $i1;
+        java.util.TreeMap r1;
+        java.util.TreeMap$KeySpliterator $r2;
+
+        r1 := @this: java.util.TreeMap;
+
+        $r2 = new java.util.TreeMap$KeySpliterator;
+
+        $i1 = (int) -1;
+
+        specialinvoke $r2.<java.util.TreeMap$KeySpliterator: void <init>(java.util.TreeMap,java.util.TreeMap$Entry,java.util.TreeMap$Entry,int,int,int)>(r1, null, null, 0, $i1, 0);
+
+        return $r2;
+    }
+
+    final java.util.Spliterator descendingKeySpliterator()
+    {
+        int $i1;
+        java.util.TreeMap$DescendingKeySpliterator $r2;
+        java.util.TreeMap r1;
+
+        r1 := @this: java.util.TreeMap;
+
+        $r2 = new java.util.TreeMap$DescendingKeySpliterator;
+
+        $i1 = (int) -2;
+
+        specialinvoke $r2.<java.util.TreeMap$DescendingKeySpliterator: void <init>(java.util.TreeMap,java.util.TreeMap$Entry,java.util.TreeMap$Entry,int,int,int)>(r1, null, null, 0, $i1, 0);
+
+        return $r2;
+    }
+
+    static void access$000(java.util.TreeMap, java.util.TreeMap$Entry)
+    {
+        java.util.TreeMap$Entry r1;
+        java.util.TreeMap r0;
+
+        r0 := @parameter0: java.util.TreeMap;
+
+        r1 := @parameter1: java.util.TreeMap$Entry;
+
+        specialinvoke r0.<java.util.TreeMap: void deleteEntry(java.util.TreeMap$Entry)>(r1);
+
+        return;
+    }
+
+    static int access$100(java.util.TreeMap)
+    {
+        int $i0;
+        java.util.TreeMap r0;
+
+        r0 := @parameter0: java.util.TreeMap;
+
+        $i0 = r0.<java.util.TreeMap: int modCount>;
+
+        return $i0;
+    }
+
+    static java.lang.Object access$200()
+    {
+        java.lang.Object $r0;
+
+        $r0 = <java.util.TreeMap: java.lang.Object UNBOUNDED>;
+
+        return $r0;
+    }
+
+    static java.util.Comparator access$300(java.util.TreeMap)
+    {
+        java.util.TreeMap r0;
+        java.util.Comparator $r1;
+
+        r0 := @parameter0: java.util.TreeMap;
+
+        $r1 = r0.<java.util.TreeMap: java.util.Comparator comparator>;
+
+        return $r1;
+    }
+
+    static int access$400(java.util.TreeMap)
+    {
+        int $i0;
+        java.util.TreeMap r0;
+
+        r0 := @parameter0: java.util.TreeMap;
+
+        $i0 = r0.<java.util.TreeMap: int size>;
+
+        return $i0;
+    }
+
+    static java.util.TreeMap$Entry access$500(java.util.TreeMap)
+    {
+        java.util.TreeMap$Entry $r1;
+        java.util.TreeMap r0;
+
+        r0 := @parameter0: java.util.TreeMap;
+
+        $r1 = r0.<java.util.TreeMap: java.util.TreeMap$Entry root>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Object $r0;
+
+        <java.util.TreeMap: long serialVersionUID> = 919286545866124006L;
+
+        <java.util.TreeMap: boolean BLACK> = 1;
+
+        <java.util.TreeMap: boolean RED> = 0;
+
+        $r0 = new java.lang.Object;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        <java.util.TreeMap: java.lang.Object UNBOUNDED> = $r0;
+
+        return;
+    }
+}

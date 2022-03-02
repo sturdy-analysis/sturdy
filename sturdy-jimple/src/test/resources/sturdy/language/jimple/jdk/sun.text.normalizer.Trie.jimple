@@ -1,0 +1,475 @@
+public abstract class sun.text.normalizer.Trie extends java.lang.Object
+{
+    protected static final int LEAD_INDEX_OFFSET_;
+    protected static final int INDEX_STAGE_1_SHIFT_;
+    protected static final int INDEX_STAGE_2_SHIFT_;
+    protected static final int DATA_BLOCK_LENGTH;
+    protected static final int INDEX_STAGE_3_MASK_;
+    protected static final int SURROGATE_BLOCK_BITS;
+    protected static final int SURROGATE_BLOCK_COUNT;
+    protected static final int BMP_INDEX_LENGTH;
+    protected static final int SURROGATE_MASK_;
+    protected char[] m_index_;
+    protected sun.text.normalizer.Trie$DataManipulate m_dataManipulate_;
+    protected int m_dataOffset_;
+    protected int m_dataLength_;
+    protected static final int HEADER_OPTIONS_LATIN1_IS_LINEAR_MASK_;
+    protected static final int HEADER_SIGNATURE_;
+    private static final int HEADER_OPTIONS_SHIFT_MASK_;
+    protected static final int HEADER_OPTIONS_INDEX_SHIFT_;
+    protected static final int HEADER_OPTIONS_DATA_IS_32_BIT_;
+    private boolean m_isLatin1Linear_;
+    private int m_options_;
+
+    protected void <init>(java.io.InputStream, sun.text.normalizer.Trie$DataManipulate) throws java.io.IOException
+    {
+        java.io.DataInputStream $r1;
+        sun.text.normalizer.Trie$DefaultGetFoldingOffset $r4;
+        sun.text.normalizer.Trie r0;
+        java.lang.IllegalArgumentException $r5;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        sun.text.normalizer.Trie$DataManipulate r3;
+        java.io.InputStream r2;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.text.normalizer.Trie;
+
+        r2 := @parameter0: java.io.InputStream;
+
+        r3 := @parameter1: sun.text.normalizer.Trie$DataManipulate;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.io.DataInputStream;
+
+        specialinvoke $r1.<java.io.DataInputStream: void <init>(java.io.InputStream)>(r2);
+
+        $i0 = virtualinvoke $r1.<java.io.DataInputStream: int readInt()>();
+
+        $i1 = virtualinvoke $r1.<java.io.DataInputStream: int readInt()>();
+
+        r0.<sun.text.normalizer.Trie: int m_options_> = $i1;
+
+        $z0 = specialinvoke r0.<sun.text.normalizer.Trie: boolean checkHeader(int)>($i0);
+
+        if $z0 != 0 goto label1;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("ICU data file error: Trie header authentication failed, please check if you have the most updated ICU data file");
+
+        throw $r5;
+
+     label1:
+        if r3 == null goto label2;
+
+        r0.<sun.text.normalizer.Trie: sun.text.normalizer.Trie$DataManipulate m_dataManipulate_> = r3;
+
+        goto label3;
+
+     label2:
+        $r4 = new sun.text.normalizer.Trie$DefaultGetFoldingOffset;
+
+        specialinvoke $r4.<sun.text.normalizer.Trie$DefaultGetFoldingOffset: void <init>(sun.text.normalizer.Trie$1)>(null);
+
+        r0.<sun.text.normalizer.Trie: sun.text.normalizer.Trie$DataManipulate m_dataManipulate_> = $r4;
+
+     label3:
+        $i2 = r0.<sun.text.normalizer.Trie: int m_options_>;
+
+        $i3 = $i2 & 512;
+
+        if $i3 == 0 goto label4;
+
+        $z1 = 1;
+
+        goto label5;
+
+     label4:
+        $z1 = 0;
+
+     label5:
+        r0.<sun.text.normalizer.Trie: boolean m_isLatin1Linear_> = $z1;
+
+        $i4 = virtualinvoke $r1.<java.io.DataInputStream: int readInt()>();
+
+        r0.<sun.text.normalizer.Trie: int m_dataOffset_> = $i4;
+
+        $i5 = virtualinvoke $r1.<java.io.DataInputStream: int readInt()>();
+
+        r0.<sun.text.normalizer.Trie: int m_dataLength_> = $i5;
+
+        virtualinvoke r0.<sun.text.normalizer.Trie: void unserialize(java.io.InputStream)>(r2);
+
+        return;
+    }
+
+    protected void <init>(char[], int, sun.text.normalizer.Trie$DataManipulate)
+    {
+        sun.text.normalizer.Trie$DefaultGetFoldingOffset $r2;
+        sun.text.normalizer.Trie r0;
+        int i0, $i1, $i2, $i3;
+        sun.text.normalizer.Trie$DataManipulate r1;
+        char[] r3, $r4;
+        boolean $z0;
+
+        r0 := @this: sun.text.normalizer.Trie;
+
+        r3 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        r1 := @parameter2: sun.text.normalizer.Trie$DataManipulate;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.text.normalizer.Trie: int m_options_> = i0;
+
+        if r1 == null goto label1;
+
+        r0.<sun.text.normalizer.Trie: sun.text.normalizer.Trie$DataManipulate m_dataManipulate_> = r1;
+
+        goto label2;
+
+     label1:
+        $r2 = new sun.text.normalizer.Trie$DefaultGetFoldingOffset;
+
+        specialinvoke $r2.<sun.text.normalizer.Trie$DefaultGetFoldingOffset: void <init>(sun.text.normalizer.Trie$1)>(null);
+
+        r0.<sun.text.normalizer.Trie: sun.text.normalizer.Trie$DataManipulate m_dataManipulate_> = $r2;
+
+     label2:
+        $i1 = r0.<sun.text.normalizer.Trie: int m_options_>;
+
+        $i2 = $i1 & 512;
+
+        if $i2 == 0 goto label3;
+
+        $z0 = 1;
+
+        goto label4;
+
+     label3:
+        $z0 = 0;
+
+     label4:
+        r0.<sun.text.normalizer.Trie: boolean m_isLatin1Linear_> = $z0;
+
+        r0.<sun.text.normalizer.Trie: char[] m_index_> = r3;
+
+        $r4 = r0.<sun.text.normalizer.Trie: char[] m_index_>;
+
+        $i3 = lengthof $r4;
+
+        r0.<sun.text.normalizer.Trie: int m_dataOffset_> = $i3;
+
+        return;
+    }
+
+    protected abstract int getSurrogateOffset(char, char);
+
+    protected abstract int getValue(int);
+
+    protected abstract int getInitialValue();
+
+    protected final int getRawOffset(int, char)
+    {
+        char c1, $c4, $c5;
+        sun.text.normalizer.Trie r0;
+        int i0, $i2, $i3, $i6, $i7, $i8, $i9, $i10;
+        char[] $r1;
+
+        r0 := @this: sun.text.normalizer.Trie;
+
+        i0 := @parameter0: int;
+
+        c1 := @parameter1: char;
+
+        $r1 = r0.<sun.text.normalizer.Trie: char[] m_index_>;
+
+        $i8 = (int) c1;
+
+        $i2 = $i8 >> 5;
+
+        $i3 = i0 + $i2;
+
+        $c4 = $r1[$i3];
+
+        $i9 = (int) $c4;
+
+        $i6 = $i9 << 2;
+
+        $c5 = c1 & 31;
+
+        $i10 = (int) $c5;
+
+        $i7 = $i6 + $i10;
+
+        return $i7;
+    }
+
+    protected final int getBMPOffset(char)
+    {
+        int $i1, $i2, $i4, $i5, $i7;
+        char c0;
+        sun.text.normalizer.Trie r0;
+
+        r0 := @this: sun.text.normalizer.Trie;
+
+        c0 := @parameter0: char;
+
+        $i2 = (int) c0;
+
+        $i4 = (int) 55296;
+
+        if $i2 < $i4 goto label1;
+
+        $i5 = (int) c0;
+
+        $i7 = (int) 56319;
+
+        if $i5 > $i7 goto label1;
+
+        $i1 = virtualinvoke r0.<sun.text.normalizer.Trie: int getRawOffset(int,char)>(320, c0);
+
+        goto label2;
+
+     label1:
+        $i1 = virtualinvoke r0.<sun.text.normalizer.Trie: int getRawOffset(int,char)>(0, c0);
+
+     label2:
+        return $i1;
+    }
+
+    protected final int getLeadOffset(char)
+    {
+        int $i1;
+        char c0;
+        sun.text.normalizer.Trie r0;
+
+        r0 := @this: sun.text.normalizer.Trie;
+
+        c0 := @parameter0: char;
+
+        $i1 = virtualinvoke r0.<sun.text.normalizer.Trie: int getRawOffset(int,char)>(0, c0);
+
+        return $i1;
+    }
+
+    protected final int getCodePointOffset(int)
+    {
+        char $c1, $c3, $c5, $c7;
+        sun.text.normalizer.Trie r0;
+        int i0, $i2, $i4, $i6, $i8, $i10, $i12, $i14;
+
+        r0 := @this: sun.text.normalizer.Trie;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 0 goto label1;
+
+        $i10 = (int) -1;
+
+        return $i10;
+
+     label1:
+        $i12 = (int) 55296;
+
+        if i0 >= $i12 goto label2;
+
+        $c7 = (char) i0;
+
+        $i8 = virtualinvoke r0.<sun.text.normalizer.Trie: int getRawOffset(int,char)>(0, $c7);
+
+        return $i8;
+
+     label2:
+        if i0 >= 65536 goto label3;
+
+        $c5 = (char) i0;
+
+        $i6 = virtualinvoke r0.<sun.text.normalizer.Trie: int getBMPOffset(char)>($c5);
+
+        return $i6;
+
+     label3:
+        if i0 > 1114111 goto label4;
+
+        $c1 = staticinvoke <sun.text.normalizer.UTF16: char getLeadSurrogate(int)>(i0);
+
+        $i2 = i0 & 1023;
+
+        $c3 = (char) $i2;
+
+        $i4 = virtualinvoke r0.<sun.text.normalizer.Trie: int getSurrogateOffset(char,char)>($c1, $c3);
+
+        return $i4;
+
+     label4:
+        $i14 = (int) -1;
+
+        return $i14;
+    }
+
+    protected void unserialize(java.io.InputStream) throws java.io.IOException
+    {
+        java.io.DataInputStream $r2;
+        char $c2;
+        sun.text.normalizer.Trie r0;
+        int $i0, $i1, i3;
+        char[] $r1, $r4;
+        java.io.InputStream r3;
+
+        r0 := @this: sun.text.normalizer.Trie;
+
+        r3 := @parameter0: java.io.InputStream;
+
+        $i0 = r0.<sun.text.normalizer.Trie: int m_dataOffset_>;
+
+        $r1 = newarray (char)[$i0];
+
+        r0.<sun.text.normalizer.Trie: char[] m_index_> = $r1;
+
+        $r2 = new java.io.DataInputStream;
+
+        specialinvoke $r2.<java.io.DataInputStream: void <init>(java.io.InputStream)>(r3);
+
+        i3 = 0;
+
+     label1:
+        $i1 = r0.<sun.text.normalizer.Trie: int m_dataOffset_>;
+
+        if i3 >= $i1 goto label2;
+
+        $r4 = r0.<sun.text.normalizer.Trie: char[] m_index_>;
+
+        $c2 = virtualinvoke $r2.<java.io.DataInputStream: char readChar()>();
+
+        $r4[i3] = $c2;
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    protected final boolean isIntTrie()
+    {
+        int $i0, $i1;
+        sun.text.normalizer.Trie r0;
+        boolean $z0;
+
+        r0 := @this: sun.text.normalizer.Trie;
+
+        $i0 = r0.<sun.text.normalizer.Trie: int m_options_>;
+
+        $i1 = $i0 & 256;
+
+        if $i1 == 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    protected final boolean isCharTrie()
+    {
+        int $i0, $i1;
+        sun.text.normalizer.Trie r0;
+        boolean $z0;
+
+        r0 := @this: sun.text.normalizer.Trie;
+
+        $i0 = r0.<sun.text.normalizer.Trie: int m_options_>;
+
+        $i1 = $i0 & 256;
+
+        if $i1 != 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private final boolean checkHeader(int)
+    {
+        int i0, $i1, $i2, $i3, $i4, $i5;
+        sun.text.normalizer.Trie r0;
+
+        r0 := @this: sun.text.normalizer.Trie;
+
+        i0 := @parameter0: int;
+
+        if i0 == 1416784229 goto label1;
+
+        return 0;
+
+     label1:
+        $i1 = r0.<sun.text.normalizer.Trie: int m_options_>;
+
+        $i2 = $i1 & 15;
+
+        if $i2 != 5 goto label2;
+
+        $i3 = r0.<sun.text.normalizer.Trie: int m_options_>;
+
+        $i4 = $i3 >> 4;
+
+        $i5 = $i4 & 15;
+
+        if $i5 == 2 goto label3;
+
+     label2:
+        return 0;
+
+     label3:
+        return 1;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.text.normalizer.Trie: int HEADER_OPTIONS_DATA_IS_32_BIT_> = 256;
+
+        <sun.text.normalizer.Trie: int HEADER_OPTIONS_INDEX_SHIFT_> = 4;
+
+        <sun.text.normalizer.Trie: int HEADER_OPTIONS_SHIFT_MASK_> = 15;
+
+        <sun.text.normalizer.Trie: int HEADER_SIGNATURE_> = 1416784229;
+
+        <sun.text.normalizer.Trie: int HEADER_OPTIONS_LATIN1_IS_LINEAR_MASK_> = 512;
+
+        <sun.text.normalizer.Trie: int SURROGATE_MASK_> = 1023;
+
+        <sun.text.normalizer.Trie: int BMP_INDEX_LENGTH> = 2048;
+
+        <sun.text.normalizer.Trie: int SURROGATE_BLOCK_COUNT> = 32;
+
+        <sun.text.normalizer.Trie: int SURROGATE_BLOCK_BITS> = 5;
+
+        <sun.text.normalizer.Trie: int INDEX_STAGE_3_MASK_> = 31;
+
+        <sun.text.normalizer.Trie: int DATA_BLOCK_LENGTH> = 32;
+
+        <sun.text.normalizer.Trie: int INDEX_STAGE_2_SHIFT_> = 2;
+
+        <sun.text.normalizer.Trie: int INDEX_STAGE_1_SHIFT_> = 5;
+
+        <sun.text.normalizer.Trie: int LEAD_INDEX_OFFSET_> = 320;
+
+        return;
+    }
+}

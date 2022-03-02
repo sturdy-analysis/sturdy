@@ -1,0 +1,537 @@
+public final class com.sun.security.ntlm.Client extends com.sun.security.ntlm.NTLM
+{
+    private final java.lang.String hostname;
+    private final java.lang.String username;
+    private java.lang.String domain;
+    private byte[] pw1;
+    private byte[] pw2;
+
+    public void <init>(java.lang.String, java.lang.String, java.lang.String, java.lang.String, char[]) throws com.sun.security.ntlm.NTLMException
+    {
+        byte[] $r7, $r8;
+        java.lang.Object[] $r9;
+        com.sun.security.ntlm.Version $r10;
+        com.sun.security.ntlm.NTLMException $r3;
+        char[] r4;
+        com.sun.security.ntlm.Client r0;
+        java.lang.String r1, r2, r5, r6, $r11, $r12;
+
+        r0 := @this: com.sun.security.ntlm.Client;
+
+        r1 := @parameter0: java.lang.String;
+
+        r5 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r6 := @parameter3: java.lang.String;
+
+        r4 := @parameter4: char[];
+
+        specialinvoke r0.<com.sun.security.ntlm.NTLM: void <init>(java.lang.String)>(r1);
+
+        if r2 == null goto label1;
+
+        if r4 != null goto label2;
+
+     label1:
+        $r3 = new com.sun.security.ntlm.NTLMException;
+
+        specialinvoke $r3.<com.sun.security.ntlm.NTLMException: void <init>(int,java.lang.String)>(6, "username/password cannot be null");
+
+        throw $r3;
+
+     label2:
+        r0.<com.sun.security.ntlm.Client: java.lang.String hostname> = r5;
+
+        r0.<com.sun.security.ntlm.Client: java.lang.String username> = r2;
+
+        if r6 != null goto label3;
+
+        $r12 = "";
+
+        goto label4;
+
+     label3:
+        $r12 = r6;
+
+     label4:
+        r0.<com.sun.security.ntlm.Client: java.lang.String domain> = $r12;
+
+        $r7 = staticinvoke <com.sun.security.ntlm.Client: byte[] getP1(char[])>(r4);
+
+        r0.<com.sun.security.ntlm.Client: byte[] pw1> = $r7;
+
+        $r8 = staticinvoke <com.sun.security.ntlm.Client: byte[] getP2(char[])>(r4);
+
+        r0.<com.sun.security.ntlm.Client: byte[] pw2> = $r8;
+
+        $r9 = newarray (java.lang.Object)[5];
+
+        $r9[0] = r5;
+
+        $r9[1] = r2;
+
+        $r9[2] = r6;
+
+        $r9[3] = r1;
+
+        $r10 = r0.<com.sun.security.ntlm.Client: com.sun.security.ntlm.Version v>;
+
+        $r11 = virtualinvoke $r10.<com.sun.security.ntlm.Version: java.lang.String toString()>();
+
+        $r9[4] = $r11;
+
+        virtualinvoke r0.<com.sun.security.ntlm.Client: void debug(java.lang.String,java.lang.Object[])>("NTLM Client: (h,u,t,version(v)) = (%s,%s,%s,%s(%s))\n", $r9);
+
+        return;
+    }
+
+    public byte[] type1()
+    {
+        byte[] $r5, $r6;
+        java.lang.Object[] $r4;
+        com.sun.security.ntlm.Version $r2, $r3;
+        int i0, $i2;
+        com.sun.security.ntlm.Client r1;
+        com.sun.security.ntlm.NTLM$Writer $r7;
+
+        r1 := @this: com.sun.security.ntlm.Client;
+
+        $r7 = new com.sun.security.ntlm.NTLM$Writer;
+
+        specialinvoke $r7.<com.sun.security.ntlm.NTLM$Writer: void <init>(int,int)>(1, 32);
+
+        $i2 = (int) 33287;
+
+        i0 = $i2;
+
+        $r3 = r1.<com.sun.security.ntlm.Client: com.sun.security.ntlm.Version v>;
+
+        $r2 = <com.sun.security.ntlm.Version: com.sun.security.ntlm.Version NTLM>;
+
+        if $r3 == $r2 goto label1;
+
+        i0 = 557575;
+
+     label1:
+        virtualinvoke $r7.<com.sun.security.ntlm.NTLM$Writer: void writeInt(int,int)>(12, i0);
+
+        $r4 = newarray (java.lang.Object)[0];
+
+        virtualinvoke r1.<com.sun.security.ntlm.Client: void debug(java.lang.String,java.lang.Object[])>("NTLM Client: Type 1 created\n", $r4);
+
+        $r5 = virtualinvoke $r7.<com.sun.security.ntlm.NTLM$Writer: byte[] getBytes()>();
+
+        virtualinvoke r1.<com.sun.security.ntlm.Client: void debug(byte[])>($r5);
+
+        $r6 = virtualinvoke $r7.<com.sun.security.ntlm.NTLM$Writer: byte[] getBytes()>();
+
+        return $r6;
+    }
+
+    public byte[] type3(byte[], byte[]) throws com.sun.security.ntlm.NTLMException
+    {
+        byte[] r0, $r7, $r16, $r17, $r18, $r25, r26, $r27, $r28, $r37, $r46, $r47, $r48, $r49, $r50, $r51, r52, r53, $r54, r55, $r56, $r58, $r59;
+        com.sun.security.ntlm.NTLM$Reader $r6;
+        com.sun.security.ntlm.NTLMException $r1;
+        byte $b13;
+        java.math.BigInteger $r20, $r21, $r22, $r23, $r24;
+        java.lang.StringBuilder $r29, $r33, $r35, $r38, $r42, $r44;
+        java.lang.Object[] $r5, $r57;
+        long $l6;
+        java.lang.String $r9, $r10, $r11, $r31, $r32, $r34, $r36, $r40, $r41, $r43, $r45;
+        java.util.Date $r19;
+        java.util.Locale $r30, $r39;
+        com.sun.security.ntlm.Client r2;
+        com.sun.security.ntlm.NTLM$Writer $r8;
+        boolean $z0, $z1, $z2, $z3, $z5, $z6, $z7;
+        com.sun.security.ntlm.Version $r3, $r4, $r12, $r13, $r14, $r15;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i7, $i8, $i9, $i10, $i11, $i12, $i14, $i15, i16, $i17;
+
+        r2 := @this: com.sun.security.ntlm.Client;
+
+        r0 := @parameter0: byte[];
+
+        r26 := @parameter1: byte[];
+
+        if r0 == null goto label01;
+
+        $r4 = r2.<com.sun.security.ntlm.Client: com.sun.security.ntlm.Version v>;
+
+        $r3 = <com.sun.security.ntlm.Version: com.sun.security.ntlm.Version NTLM>;
+
+        if $r4 == $r3 goto label02;
+
+        if r26 != null goto label02;
+
+     label01:
+        $r1 = new com.sun.security.ntlm.NTLMException;
+
+        specialinvoke $r1.<com.sun.security.ntlm.NTLMException: void <init>(int,java.lang.String)>(6, "type2 and nonce cannot be null");
+
+        throw $r1;
+
+     label02:
+        $r5 = newarray (java.lang.Object)[0];
+
+        virtualinvoke r2.<com.sun.security.ntlm.Client: void debug(java.lang.String,java.lang.Object[])>("NTLM Client: Type 2 received\n", $r5);
+
+        virtualinvoke r2.<com.sun.security.ntlm.Client: void debug(byte[])>(r0);
+
+        $r6 = new com.sun.security.ntlm.NTLM$Reader;
+
+        specialinvoke $r6.<com.sun.security.ntlm.NTLM$Reader: void <init>(byte[])>(r0);
+
+        $r7 = virtualinvoke $r6.<com.sun.security.ntlm.NTLM$Reader: byte[] readBytes(int,int)>(24, 8);
+
+        $i0 = virtualinvoke $r6.<com.sun.security.ntlm.NTLM$Reader: int readInt(int)>(20);
+
+        $i1 = $i0 & 1;
+
+        if $i1 != 1 goto label03;
+
+        $z7 = 1;
+
+        $z6 = 1;
+
+        $z5 = 1;
+
+        goto label04;
+
+     label03:
+        $z7 = 0;
+
+        $z6 = 0;
+
+        $z5 = 0;
+
+     label04:
+        $i2 = $i0 & 3;
+
+        $i15 = 557568 | $i2;
+
+        $r8 = new com.sun.security.ntlm.NTLM$Writer;
+
+        specialinvoke $r8.<com.sun.security.ntlm.NTLM$Writer: void <init>(int,int)>(3, 64);
+
+        r52 = null;
+
+        r53 = null;
+
+        $r9 = r2.<com.sun.security.ntlm.Client: java.lang.String domain>;
+
+        virtualinvoke $r8.<com.sun.security.ntlm.NTLM$Writer: void writeSecurityBuffer(int,java.lang.String,boolean)>(28, $r9, $z6);
+
+        $r10 = r2.<com.sun.security.ntlm.Client: java.lang.String username>;
+
+        virtualinvoke $r8.<com.sun.security.ntlm.NTLM$Writer: void writeSecurityBuffer(int,java.lang.String,boolean)>(36, $r10, $z7);
+
+        $r11 = r2.<com.sun.security.ntlm.Client: java.lang.String hostname>;
+
+        virtualinvoke $r8.<com.sun.security.ntlm.NTLM$Writer: void writeSecurityBuffer(int,java.lang.String,boolean)>(44, $r11, $z5);
+
+        $r13 = r2.<com.sun.security.ntlm.Client: com.sun.security.ntlm.Version v>;
+
+        $r12 = <com.sun.security.ntlm.Version: com.sun.security.ntlm.Version NTLM>;
+
+        if $r13 != $r12 goto label07;
+
+        $r48 = r2.<com.sun.security.ntlm.Client: byte[] pw1>;
+
+        $r49 = virtualinvoke r2.<com.sun.security.ntlm.Client: byte[] calcLMHash(byte[])>($r48);
+
+        $r50 = r2.<com.sun.security.ntlm.Client: byte[] pw2>;
+
+        $r51 = virtualinvoke r2.<com.sun.security.ntlm.Client: byte[] calcNTHash(byte[])>($r50);
+
+        $z2 = r2.<com.sun.security.ntlm.Client: boolean writeLM>;
+
+        if $z2 == 0 goto label05;
+
+        r52 = virtualinvoke r2.<com.sun.security.ntlm.Client: byte[] calcResponse(byte[],byte[])>($r49, $r7);
+
+     label05:
+        $z3 = r2.<com.sun.security.ntlm.Client: boolean writeNTLM>;
+
+        if $z3 == 0 goto label06;
+
+        r53 = virtualinvoke r2.<com.sun.security.ntlm.Client: byte[] calcResponse(byte[],byte[])>($r51, $r7);
+
+     label06:
+        goto label14;
+
+     label07:
+        $r15 = r2.<com.sun.security.ntlm.Client: com.sun.security.ntlm.Version v>;
+
+        $r14 = <com.sun.security.ntlm.Version: com.sun.security.ntlm.Version NTLM2>;
+
+        if $r15 != $r14 goto label08;
+
+        $r46 = r2.<com.sun.security.ntlm.Client: byte[] pw2>;
+
+        $r47 = virtualinvoke r2.<com.sun.security.ntlm.Client: byte[] calcNTHash(byte[])>($r46);
+
+        r52 = staticinvoke <com.sun.security.ntlm.Client: byte[] ntlm2LM(byte[])>(r26);
+
+        r53 = virtualinvoke r2.<com.sun.security.ntlm.Client: byte[] ntlm2NTLM(byte[],byte[],byte[])>($r47, r26, $r7);
+
+        goto label14;
+
+     label08:
+        $r16 = r2.<com.sun.security.ntlm.Client: byte[] pw2>;
+
+        $r17 = virtualinvoke r2.<com.sun.security.ntlm.Client: byte[] calcNTHash(byte[])>($r16);
+
+        $z0 = r2.<com.sun.security.ntlm.Client: boolean writeLM>;
+
+        if $z0 == 0 goto label09;
+
+        $r38 = new java.lang.StringBuilder;
+
+        specialinvoke $r38.<java.lang.StringBuilder: void <init>()>();
+
+        $r40 = r2.<com.sun.security.ntlm.Client: java.lang.String username>;
+
+        $r39 = <java.util.Locale: java.util.Locale US>;
+
+        $r41 = virtualinvoke $r40.<java.lang.String: java.lang.String toUpperCase(java.util.Locale)>($r39);
+
+        $r42 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r41);
+
+        $r43 = r2.<com.sun.security.ntlm.Client: java.lang.String domain>;
+
+        $r44 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r43);
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r52 = virtualinvoke r2.<com.sun.security.ntlm.Client: byte[] calcV2(byte[],java.lang.String,byte[],byte[])>($r17, $r45, r26, $r7);
+
+     label09:
+        $z1 = r2.<com.sun.security.ntlm.Client: boolean writeNTLM>;
+
+        if $z1 == 0 goto label14;
+
+        $i3 = $i0 & 8388608;
+
+        if $i3 == 0 goto label10;
+
+        $r54 = virtualinvoke $r6.<com.sun.security.ntlm.NTLM$Reader: byte[] readSecurityBuffer(int)>(40);
+
+        goto label11;
+
+     label10:
+        $r54 = newarray (byte)[0];
+
+     label11:
+        r55 = $r54;
+
+        $i4 = lengthof $r54;
+
+        $i5 = 32 + $i4;
+
+        $r37 = newarray (byte)[$i5];
+
+        $r18 = newarray (byte)[8];
+
+        $r18[0] = 1;
+
+        $r18[1] = 1;
+
+        $r18[2] = 0;
+
+        $r18[3] = 0;
+
+        $r18[4] = 0;
+
+        $r18[5] = 0;
+
+        $r18[6] = 0;
+
+        $r18[7] = 0;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r18, 0, $r37, 0, 8);
+
+        $r19 = new java.util.Date;
+
+        specialinvoke $r19.<java.util.Date: void <init>()>();
+
+        $l6 = virtualinvoke $r19.<java.util.Date: long getTime()>();
+
+        $r20 = staticinvoke <java.math.BigInteger: java.math.BigInteger valueOf(long)>($l6);
+
+        $r21 = new java.math.BigInteger;
+
+        specialinvoke $r21.<java.math.BigInteger: void <init>(java.lang.String)>("11644473600000");
+
+        $r22 = virtualinvoke $r20.<java.math.BigInteger: java.math.BigInteger add(java.math.BigInteger)>($r21);
+
+        $r23 = staticinvoke <java.math.BigInteger: java.math.BigInteger valueOf(long)>(10000L);
+
+        $r24 = virtualinvoke $r22.<java.math.BigInteger: java.math.BigInteger multiply(java.math.BigInteger)>($r23);
+
+        $r25 = virtualinvoke $r24.<java.math.BigInteger: byte[] toByteArray()>();
+
+        i16 = 0;
+
+     label12:
+        $i17 = lengthof $r25;
+
+        if i16 >= $i17 goto label13;
+
+        $i10 = lengthof $r25;
+
+        $i11 = 8 + $i10;
+
+        $i12 = $i11 - i16;
+
+        $i14 = $i12 - 1;
+
+        $b13 = $r25[i16];
+
+        $r37[$i14] = $b13;
+
+        i16 = i16 + 1;
+
+        goto label12;
+
+     label13:
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r26, 0, $r37, 16, 8);
+
+        $r27 = newarray (byte)[4];
+
+        $r27[0] = 0;
+
+        $r27[1] = 0;
+
+        $r27[2] = 0;
+
+        $r27[3] = 0;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r27, 0, $r37, 24, 4);
+
+        $i7 = lengthof r55;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r55, 0, $r37, 28, $i7);
+
+        $r28 = newarray (byte)[4];
+
+        $r28[0] = 0;
+
+        $r28[1] = 0;
+
+        $r28[2] = 0;
+
+        $r28[3] = 0;
+
+        $i8 = lengthof r55;
+
+        $i9 = 28 + $i8;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r28, 0, $r37, $i9, 4);
+
+        $r29 = new java.lang.StringBuilder;
+
+        specialinvoke $r29.<java.lang.StringBuilder: void <init>()>();
+
+        $r31 = r2.<com.sun.security.ntlm.Client: java.lang.String username>;
+
+        $r30 = <java.util.Locale: java.util.Locale US>;
+
+        $r32 = virtualinvoke $r31.<java.lang.String: java.lang.String toUpperCase(java.util.Locale)>($r30);
+
+        $r33 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r32);
+
+        $r34 = r2.<com.sun.security.ntlm.Client: java.lang.String domain>;
+
+        $r35 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r34);
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r53 = virtualinvoke r2.<com.sun.security.ntlm.Client: byte[] calcV2(byte[],java.lang.String,byte[],byte[])>($r17, $r36, $r37, $r7);
+
+     label14:
+        virtualinvoke $r8.<com.sun.security.ntlm.NTLM$Writer: void writeSecurityBuffer(int,byte[])>(12, r52);
+
+        virtualinvoke $r8.<com.sun.security.ntlm.NTLM$Writer: void writeSecurityBuffer(int,byte[])>(20, r53);
+
+        $r56 = newarray (byte)[0];
+
+        virtualinvoke $r8.<com.sun.security.ntlm.NTLM$Writer: void writeSecurityBuffer(int,byte[])>(52, $r56);
+
+        virtualinvoke $r8.<com.sun.security.ntlm.NTLM$Writer: void writeInt(int,int)>(60, $i15);
+
+        $r57 = newarray (java.lang.Object)[0];
+
+        virtualinvoke r2.<com.sun.security.ntlm.Client: void debug(java.lang.String,java.lang.Object[])>("NTLM Client: Type 3 created\n", $r57);
+
+        $r58 = virtualinvoke $r8.<com.sun.security.ntlm.NTLM$Writer: byte[] getBytes()>();
+
+        virtualinvoke r2.<com.sun.security.ntlm.Client: void debug(byte[])>($r58);
+
+        $r59 = virtualinvoke $r8.<com.sun.security.ntlm.NTLM$Writer: byte[] getBytes()>();
+
+        return $r59;
+    }
+
+    public java.lang.String getDomain()
+    {
+        com.sun.security.ntlm.Client r0;
+        java.lang.String $r1;
+
+        r0 := @this: com.sun.security.ntlm.Client;
+
+        $r1 = r0.<com.sun.security.ntlm.Client: java.lang.String domain>;
+
+        return $r1;
+    }
+
+    public void dispose()
+    {
+        byte[] $r1, $r2;
+        com.sun.security.ntlm.Client r0;
+
+        r0 := @this: com.sun.security.ntlm.Client;
+
+        $r1 = r0.<com.sun.security.ntlm.Client: byte[] pw1>;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],byte)>($r1, 0);
+
+        $r2 = r0.<com.sun.security.ntlm.Client: byte[] pw2>;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],byte)>($r2, 0);
+
+        return;
+    }
+
+    public volatile void debug(byte[])
+    {
+        byte[] r1;
+        com.sun.security.ntlm.Client r0;
+
+        r0 := @this: com.sun.security.ntlm.Client;
+
+        r1 := @parameter0: byte[];
+
+        specialinvoke r0.<com.sun.security.ntlm.NTLM: void debug(byte[])>(r1);
+
+        return;
+    }
+
+    public volatile void debug(java.lang.String, java.lang.Object[])
+    {
+        com.sun.security.ntlm.Client r0;
+        java.lang.String r1;
+        java.lang.Object[] r2;
+
+        r0 := @this: com.sun.security.ntlm.Client;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Object[];
+
+        specialinvoke r0.<com.sun.security.ntlm.NTLM: void debug(java.lang.String,java.lang.Object[])>(r1, r2);
+
+        return;
+    }
+}

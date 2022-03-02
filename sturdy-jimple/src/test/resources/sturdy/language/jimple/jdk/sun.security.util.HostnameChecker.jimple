@@ -1,0 +1,786 @@
+public class sun.security.util.HostnameChecker extends java.lang.Object
+{
+    public static final byte TYPE_TLS;
+    private static final sun.security.util.HostnameChecker INSTANCE_TLS;
+    public static final byte TYPE_LDAP;
+    private static final sun.security.util.HostnameChecker INSTANCE_LDAP;
+    private static final int ALTNAME_DNS;
+    private static final int ALTNAME_IP;
+    private final byte checkType;
+
+    private void <init>(byte)
+    {
+        sun.security.util.HostnameChecker r0;
+        byte b0;
+
+        r0 := @this: sun.security.util.HostnameChecker;
+
+        b0 := @parameter0: byte;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.util.HostnameChecker: byte checkType> = b0;
+
+        return;
+    }
+
+    public static sun.security.util.HostnameChecker getInstance(byte)
+    {
+        sun.security.util.HostnameChecker $r5, $r6;
+        java.lang.IllegalArgumentException $r8;
+        byte b0;
+        int $i1, $i2;
+        java.lang.StringBuilder $r2, $r3, $r7;
+        java.lang.String $r4;
+
+        b0 := @parameter0: byte;
+
+        if b0 != 1 goto label1;
+
+        $r6 = <sun.security.util.HostnameChecker: sun.security.util.HostnameChecker INSTANCE_TLS>;
+
+        return $r6;
+
+     label1:
+        $i1 = (int) b0;
+
+        if $i1 != 2 goto label2;
+
+        $r5 = <sun.security.util.HostnameChecker: sun.security.util.HostnameChecker INSTANCE_LDAP>;
+
+        return $r5;
+
+     label2:
+        $r8 = new java.lang.IllegalArgumentException;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown check type: ");
+
+        $i2 = (int) b0;
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r4);
+
+        throw $r8;
+    }
+
+    public void match(java.lang.String, java.security.cert.X509Certificate) throws java.security.cert.CertificateException
+    {
+        java.security.cert.X509Certificate r2;
+        sun.security.util.HostnameChecker r1;
+        java.lang.String r0;
+        java.security.cert.CertificateException $r3;
+        boolean $z0;
+
+        r1 := @this: sun.security.util.HostnameChecker;
+
+        r0 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.security.cert.X509Certificate;
+
+        if r0 != null goto label1;
+
+        $r3 = new java.security.cert.CertificateException;
+
+        specialinvoke $r3.<java.security.cert.CertificateException: void <init>(java.lang.String)>("Hostname or IP address is undefined.");
+
+        throw $r3;
+
+     label1:
+        $z0 = staticinvoke <sun.security.util.HostnameChecker: boolean isIpAddress(java.lang.String)>(r0);
+
+        if $z0 == 0 goto label2;
+
+        staticinvoke <sun.security.util.HostnameChecker: void matchIP(java.lang.String,java.security.cert.X509Certificate)>(r0, r2);
+
+        goto label3;
+
+     label2:
+        specialinvoke r1.<sun.security.util.HostnameChecker: void matchDNS(java.lang.String,java.security.cert.X509Certificate)>(r0, r2);
+
+     label3:
+        return;
+    }
+
+    public static boolean match(java.lang.String, java.security.Principal)
+    {
+        java.security.Principal r0;
+        java.lang.String $r1, r2;
+        boolean $z0;
+
+        r2 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.security.Principal;
+
+        $r1 = staticinvoke <sun.security.util.HostnameChecker: java.lang.String getServerName(java.security.Principal)>(r0);
+
+        $z0 = virtualinvoke r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r1);
+
+        return $z0;
+    }
+
+    public static java.lang.String getServerName(java.security.Principal)
+    {
+        java.security.Principal r0;
+        java.lang.String $r1;
+
+        r0 := @parameter0: java.security.Principal;
+
+        $r1 = staticinvoke <sun.security.ssl.Krb5Helper: java.lang.String getPrincipalHostName(java.security.Principal)>(r0);
+
+        return $r1;
+    }
+
+    private static boolean isIpAddress(java.lang.String)
+    {
+        java.lang.String r0;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = staticinvoke <sun.net.util.IPAddressUtil: boolean isIPv4LiteralAddress(java.lang.String)>(r0);
+
+        if $z0 != 0 goto label1;
+
+        $z1 = staticinvoke <sun.net.util.IPAddressUtil: boolean isIPv6LiteralAddress(java.lang.String)>(r0);
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    private static void matchIP(java.lang.String, java.security.cert.X509Certificate) throws java.security.cert.CertificateException
+    {
+        java.security.cert.X509Certificate r0;
+        java.lang.Integer $r13;
+        java.net.InetAddress $r16, $r17;
+        int $i0;
+        java.lang.SecurityException $r19;
+        java.lang.String r6, $r9, r15;
+        boolean $z0, $z1, $z2;
+        java.util.Iterator $r2;
+        java.util.Collection $r1;
+        java.security.cert.CertificateException $r3, $r18;
+        java.net.UnknownHostException $r20;
+        java.util.List r11;
+        java.lang.StringBuilder $r4, $r5, $r7, $r8;
+        java.lang.Object $r10, $r12, $r14;
+
+        r6 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.security.cert.X509Certificate;
+
+        $r1 = virtualinvoke r0.<java.security.cert.X509Certificate: java.util.Collection getSubjectAlternativeNames()>();
+
+        if $r1 != null goto label1;
+
+        $r18 = new java.security.cert.CertificateException;
+
+        specialinvoke $r18.<java.security.cert.CertificateException: void <init>(java.lang.String)>("No subject alternative names present");
+
+        throw $r18;
+
+     label1:
+        $r2 = interfaceinvoke $r1.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label9;
+
+        $r10 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r11 = (java.util.List) $r10;
+
+        $r12 = interfaceinvoke r11.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r13 = (java.lang.Integer) $r12;
+
+        $i0 = virtualinvoke $r13.<java.lang.Integer: int intValue()>();
+
+        if $i0 != 7 goto label8;
+
+        $r14 = interfaceinvoke r11.<java.util.List: java.lang.Object get(int)>(1);
+
+        r15 = (java.lang.String) $r14;
+
+        $z1 = virtualinvoke r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r15);
+
+        if $z1 == 0 goto label3;
+
+        return;
+
+     label3:
+        $r16 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByName(java.lang.String)>(r6);
+
+        $r17 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByName(java.lang.String)>(r15);
+
+        $z2 = virtualinvoke $r16.<java.net.InetAddress: boolean equals(java.lang.Object)>($r17);
+
+        if $z2 == 0 goto label5;
+
+     label4:
+        return;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r20 := @caughtexception;
+
+        goto label8;
+
+     label7:
+        $r19 := @caughtexception;
+
+     label8:
+        goto label2;
+
+     label9:
+        $r3 = new java.security.cert.CertificateException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No subject alternative names matching IP address ");
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" found");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.security.cert.CertificateException: void <init>(java.lang.String)>($r9);
+
+        throw $r3;
+
+        catch java.net.UnknownHostException from label3 to label4 with label6;
+        catch java.lang.SecurityException from label3 to label4 with label7;
+    }
+
+    private void matchDNS(java.lang.String, java.security.cert.X509Certificate) throws java.security.cert.CertificateException
+    {
+        java.security.cert.X509Certificate r2;
+        javax.net.ssl.SNIHostName $r0;
+        java.lang.Integer $r24;
+        sun.security.x509.X500Name $r4;
+        sun.security.util.ObjectIdentifier $r5;
+        boolean $z0, $z1, $z2, $z3, z4;
+        sun.security.util.DerValue $r6;
+        java.util.Collection $r3;
+        java.util.List r34;
+        java.text.Normalizer$Form $r8;
+        java.lang.StringBuilder $r11, $r12, $r13, $r17, $r18, $r19, $r20, $r30, $r31, $r32, $r35, $r36, $r37, $r38;
+        sun.security.util.HostnameChecker r9;
+        int $i0;
+        java.lang.String r1, $r7, $r14, $r21, r26, $r33, $r39;
+        java.util.Iterator $r15;
+        java.io.IOException $r27;
+        java.security.cert.CertificateException $r10, $r16, $r29, $r40;
+        java.lang.IllegalArgumentException $r28;
+        java.lang.Object $r22, $r23, $r25;
+
+        r9 := @this: sun.security.util.HostnameChecker;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.security.cert.X509Certificate;
+
+     label01:
+        $r0 = new javax.net.ssl.SNIHostName;
+
+        specialinvoke $r0.<javax.net.ssl.SNIHostName: void <init>(java.lang.String)>(r1);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r28 := @caughtexception;
+
+        $r29 = new java.security.cert.CertificateException;
+
+        $r30 = new java.lang.StringBuilder;
+
+        specialinvoke $r30.<java.lang.StringBuilder: void <init>()>();
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Illegal given domain name: ");
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r29.<java.security.cert.CertificateException: void <init>(java.lang.String,java.lang.Throwable)>($r33, $r28);
+
+        throw $r29;
+
+     label04:
+        $r3 = virtualinvoke r2.<java.security.cert.X509Certificate: java.util.Collection getSubjectAlternativeNames()>();
+
+        if $r3 == null goto label08;
+
+        z4 = 0;
+
+        $r15 = interfaceinvoke $r3.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label05:
+        $z2 = interfaceinvoke $r15.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label07;
+
+        $r22 = interfaceinvoke $r15.<java.util.Iterator: java.lang.Object next()>();
+
+        r34 = (java.util.List) $r22;
+
+        $r23 = interfaceinvoke r34.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r24 = (java.lang.Integer) $r23;
+
+        $i0 = virtualinvoke $r24.<java.lang.Integer: int intValue()>();
+
+        if $i0 != 2 goto label06;
+
+        z4 = 1;
+
+        $r25 = interfaceinvoke r34.<java.util.List: java.lang.Object get(int)>(1);
+
+        r26 = (java.lang.String) $r25;
+
+        $z3 = specialinvoke r9.<sun.security.util.HostnameChecker: boolean isMatched(java.lang.String,java.lang.String)>(r1, r26);
+
+        if $z3 == 0 goto label06;
+
+        return;
+
+     label06:
+        goto label05;
+
+     label07:
+        if z4 == 0 goto label08;
+
+        $r16 = new java.security.cert.CertificateException;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No subject alternative DNS name matching ");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" found.");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r16.<java.security.cert.CertificateException: void <init>(java.lang.String)>($r21);
+
+        throw $r16;
+
+     label08:
+        $r4 = staticinvoke <sun.security.util.HostnameChecker: sun.security.x509.X500Name getSubjectX500Name(java.security.cert.X509Certificate)>(r2);
+
+        $r5 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier commonName_oid>;
+
+        $r6 = virtualinvoke $r4.<sun.security.x509.X500Name: sun.security.util.DerValue findMostSpecificAttribute(sun.security.util.ObjectIdentifier)>($r5);
+
+        if $r6 == null goto label14;
+
+     label09:
+        $r7 = virtualinvoke $r6.<sun.security.util.DerValue: java.lang.String getAsString()>();
+
+        $r8 = <java.text.Normalizer$Form: java.text.Normalizer$Form NFKC>;
+
+        $z0 = staticinvoke <java.text.Normalizer: boolean isNormalized(java.lang.CharSequence,java.text.Normalizer$Form)>($r7, $r8);
+
+        if $z0 != 0 goto label10;
+
+        $r10 = new java.security.cert.CertificateException;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Not a formal name ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r10.<java.security.cert.CertificateException: void <init>(java.lang.String)>($r14);
+
+        throw $r10;
+
+     label10:
+        $z1 = specialinvoke r9.<sun.security.util.HostnameChecker: boolean isMatched(java.lang.String,java.lang.String)>(r1, $r7);
+
+        if $z1 == 0 goto label12;
+
+     label11:
+        return;
+
+     label12:
+        goto label14;
+
+     label13:
+        $r27 := @caughtexception;
+
+     label14:
+        $r35 = new java.lang.StringBuilder;
+
+        specialinvoke $r35.<java.lang.StringBuilder: void <init>()>();
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No name matching ");
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" found");
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r40 = new java.security.cert.CertificateException;
+
+        specialinvoke $r40.<java.security.cert.CertificateException: void <init>(java.lang.String)>($r39);
+
+        throw $r40;
+
+        catch java.lang.IllegalArgumentException from label01 to label02 with label03;
+        catch java.io.IOException from label09 to label11 with label13;
+    }
+
+    public static sun.security.x509.X500Name getSubjectX500Name(java.security.cert.X509Certificate) throws java.security.cert.CertificateParsingException
+    {
+        java.security.cert.X509Certificate r0;
+        java.lang.Throwable $r8;
+        byte[] $r4;
+        javax.security.auth.x500.X500Principal $r2;
+        java.security.cert.CertificateParsingException $r7, $r9;
+        java.io.IOException $r6;
+        java.security.Principal $r1;
+        sun.security.x509.X500Name $r3, $r5;
+        boolean $z0;
+
+        r0 := @parameter0: java.security.cert.X509Certificate;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.security.cert.X509Certificate: java.security.Principal getSubjectDN()>();
+
+        $z0 = $r1 instanceof sun.security.x509.X500Name;
+
+        if $z0 == 0 goto label3;
+
+        $r5 = (sun.security.x509.X500Name) $r1;
+
+     label2:
+        return $r5;
+
+     label3:
+        $r2 = virtualinvoke r0.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        $r3 = new sun.security.x509.X500Name;
+
+        $r4 = virtualinvoke $r2.<javax.security.auth.x500.X500Principal: byte[] getEncoded()>();
+
+        specialinvoke $r3.<sun.security.x509.X500Name: void <init>(byte[])>($r4);
+
+     label4:
+        return $r3;
+
+     label5:
+        $r6 := @caughtexception;
+
+        $r7 = new java.security.cert.CertificateParsingException;
+
+        specialinvoke $r7.<java.security.cert.CertificateParsingException: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.security.cert.CertificateParsingException: java.lang.Throwable initCause(java.lang.Throwable)>($r6);
+
+        $r9 = (java.security.cert.CertificateParsingException) $r8;
+
+        throw $r9;
+
+        catch java.io.IOException from label1 to label2 with label5;
+        catch java.io.IOException from label3 to label4 with label5;
+    }
+
+    private boolean isMatched(java.lang.String, java.lang.String)
+    {
+        sun.security.util.HostnameChecker r3;
+        javax.net.ssl.SNIHostName $r6;
+        java.lang.IllegalArgumentException $r5;
+        byte $b0, $b1;
+        int $i2;
+        java.lang.String r1, $r2, r4;
+        boolean $z0, $z1;
+
+        r3 := @this: sun.security.util.HostnameChecker;
+
+        r4 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+     label1:
+        $r6 = new javax.net.ssl.SNIHostName;
+
+        $r2 = virtualinvoke r1.<java.lang.String: java.lang.String replace(char,char)>(42, 120);
+
+        specialinvoke $r6.<javax.net.ssl.SNIHostName: void <init>(java.lang.String)>($r2);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        return 0;
+
+     label4:
+        $b0 = r3.<sun.security.util.HostnameChecker: byte checkType>;
+
+        if $b0 != 1 goto label5;
+
+        $z1 = staticinvoke <sun.security.util.HostnameChecker: boolean matchAllWildcards(java.lang.String,java.lang.String)>(r4, r1);
+
+        return $z1;
+
+     label5:
+        $b1 = r3.<sun.security.util.HostnameChecker: byte checkType>;
+
+        $i2 = (int) $b1;
+
+        if $i2 != 2 goto label6;
+
+        $z0 = staticinvoke <sun.security.util.HostnameChecker: boolean matchLeftmostWildcard(java.lang.String,java.lang.String)>(r4, r1);
+
+        return $z0;
+
+     label6:
+        return 0;
+
+        catch java.lang.IllegalArgumentException from label1 to label2 with label3;
+    }
+
+    private static boolean matchAllWildcards(java.lang.String, java.lang.String)
+    {
+        java.util.Locale $r0, $r2;
+        java.util.StringTokenizer $r4, $r5;
+        int $i0, $i1;
+        java.lang.String $r1, $r3, $r6, $r7, r8, r9;
+        boolean $z0, $z1;
+
+        r8 := @parameter0: java.lang.String;
+
+        r9 := @parameter1: java.lang.String;
+
+        $r0 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r1 = virtualinvoke r8.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r0);
+
+        $r2 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r3 = virtualinvoke r9.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r2);
+
+        $r4 = new java.util.StringTokenizer;
+
+        specialinvoke $r4.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>($r1, ".");
+
+        $r5 = new java.util.StringTokenizer;
+
+        specialinvoke $r5.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>($r3, ".");
+
+        $i0 = virtualinvoke $r4.<java.util.StringTokenizer: int countTokens()>();
+
+        $i1 = virtualinvoke $r5.<java.util.StringTokenizer: int countTokens()>();
+
+        if $i0 == $i1 goto label1;
+
+        return 0;
+
+     label1:
+        $z0 = virtualinvoke $r4.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label2;
+
+        $r6 = virtualinvoke $r4.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $r7 = virtualinvoke $r5.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $z1 = staticinvoke <sun.security.util.HostnameChecker: boolean matchWildCards(java.lang.String,java.lang.String)>($r6, $r7);
+
+        if $z1 != 0 goto label1;
+
+        return 0;
+
+     label2:
+        return 1;
+    }
+
+    private static boolean matchLeftmostWildcard(java.lang.String, java.lang.String)
+    {
+        java.util.Locale $r0, $r2;
+        int $i0, $i1, i2, i3, $i5, $i7;
+        java.lang.String $r1, $r3, $r4, $r5, $r6, $r7, r8, r9;
+        boolean $z0, $z1;
+
+        r8 := @parameter0: java.lang.String;
+
+        r9 := @parameter1: java.lang.String;
+
+        $r0 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r1 = virtualinvoke r8.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r0);
+
+        $r2 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r3 = virtualinvoke r9.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r2);
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int indexOf(java.lang.String)>(".");
+
+        i2 = $i0;
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int indexOf(java.lang.String)>(".");
+
+        i3 = $i1;
+
+        $i5 = (int) -1;
+
+        if $i0 != $i5 goto label1;
+
+        i2 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+     label1:
+        $i7 = (int) -1;
+
+        if $i1 != $i7 goto label2;
+
+        i3 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+     label2:
+        $r4 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(0, i3);
+
+        $r5 = virtualinvoke $r3.<java.lang.String: java.lang.String substring(int,int)>(0, i2);
+
+        $z0 = staticinvoke <sun.security.util.HostnameChecker: boolean matchWildCards(java.lang.String,java.lang.String)>($r4, $r5);
+
+        if $z0 == 0 goto label3;
+
+        $r6 = virtualinvoke $r3.<java.lang.String: java.lang.String substring(int)>(i2);
+
+        $r7 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>(i3);
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r7);
+
+        return $z1;
+
+     label3:
+        return 0;
+    }
+
+    private static boolean matchWildCards(java.lang.String, java.lang.String)
+    {
+        int $i0, $i1, $i2, $i3, $i4, i5, $i7, $i9, $i11;
+        java.lang.String r0, $r1, $r2, r3, r4;
+        boolean $z0, $z1, z2;
+
+        r3 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int indexOf(java.lang.String)>("*");
+
+        i5 = $i0;
+
+        $i7 = (int) -1;
+
+        if $i0 != $i7 goto label1;
+
+        $z1 = virtualinvoke r3.<java.lang.String: boolean equals(java.lang.Object)>(r0);
+
+        return $z1;
+
+     label1:
+        z2 = 1;
+
+        r4 = r0;
+
+     label2:
+        $i9 = (int) -1;
+
+        if i5 == $i9 goto label5;
+
+        $r1 = virtualinvoke r4.<java.lang.String: java.lang.String substring(int,int)>(0, i5);
+
+        $i1 = i5 + 1;
+
+        $r2 = virtualinvoke r4.<java.lang.String: java.lang.String substring(int)>($i1);
+
+        r4 = $r2;
+
+        $i2 = virtualinvoke r3.<java.lang.String: int indexOf(java.lang.String)>($r1);
+
+        $i11 = (int) -1;
+
+        if $i2 == $i11 goto label3;
+
+        if z2 == 0 goto label4;
+
+        if $i2 == 0 goto label4;
+
+     label3:
+        return 0;
+
+     label4:
+        z2 = 0;
+
+        $i3 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $i4 = $i2 + $i3;
+
+        r3 = virtualinvoke r3.<java.lang.String: java.lang.String substring(int)>($i4);
+
+        i5 = virtualinvoke $r2.<java.lang.String: int indexOf(java.lang.String)>("*");
+
+        goto label2;
+
+     label5:
+        $z0 = virtualinvoke r3.<java.lang.String: boolean endsWith(java.lang.String)>(r4);
+
+        return $z0;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.util.HostnameChecker $r0, $r1;
+
+        <sun.security.util.HostnameChecker: int ALTNAME_IP> = 7;
+
+        <sun.security.util.HostnameChecker: int ALTNAME_DNS> = 2;
+
+        <sun.security.util.HostnameChecker: byte TYPE_LDAP> = 2;
+
+        <sun.security.util.HostnameChecker: byte TYPE_TLS> = 1;
+
+        $r0 = new sun.security.util.HostnameChecker;
+
+        specialinvoke $r0.<sun.security.util.HostnameChecker: void <init>(byte)>(1);
+
+        <sun.security.util.HostnameChecker: sun.security.util.HostnameChecker INSTANCE_TLS> = $r0;
+
+        $r1 = new sun.security.util.HostnameChecker;
+
+        specialinvoke $r1.<sun.security.util.HostnameChecker: void <init>(byte)>(2);
+
+        <sun.security.util.HostnameChecker: sun.security.util.HostnameChecker INSTANCE_LDAP> = $r1;
+
+        return;
+    }
+}

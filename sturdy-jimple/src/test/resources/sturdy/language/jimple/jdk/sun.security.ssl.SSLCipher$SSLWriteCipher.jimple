@@ -1,0 +1,126 @@
+abstract class sun.security.ssl.SSLCipher$SSLWriteCipher extends java.lang.Object
+{
+    final sun.security.ssl.Authenticator authenticator;
+    final sun.security.ssl.ProtocolVersion protocolVersion;
+    boolean keyLimitEnabled;
+    long keyLimitCountdown;
+    javax.crypto.SecretKey baseSecret;
+
+    void <init>(sun.security.ssl.Authenticator, sun.security.ssl.ProtocolVersion)
+    {
+        sun.security.ssl.SSLCipher$SSLWriteCipher r0;
+        sun.security.ssl.Authenticator r1;
+        sun.security.ssl.ProtocolVersion r2;
+
+        r0 := @this: sun.security.ssl.SSLCipher$SSLWriteCipher;
+
+        r1 := @parameter0: sun.security.ssl.Authenticator;
+
+        r2 := @parameter1: sun.security.ssl.ProtocolVersion;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.ssl.SSLCipher$SSLWriteCipher: boolean keyLimitEnabled> = 0;
+
+        r0.<sun.security.ssl.SSLCipher$SSLWriteCipher: long keyLimitCountdown> = 0L;
+
+        r0.<sun.security.ssl.SSLCipher$SSLWriteCipher: sun.security.ssl.Authenticator authenticator> = r1;
+
+        r0.<sun.security.ssl.SSLCipher$SSLWriteCipher: sun.security.ssl.ProtocolVersion protocolVersion> = r2;
+
+        return;
+    }
+
+    abstract int encrypt(byte, java.nio.ByteBuffer);
+
+    static final sun.security.ssl.SSLCipher$SSLWriteCipher nullTlsWriteCipher()
+    {
+        sun.security.ssl.Authenticator $r1;
+        java.security.GeneralSecurityException $r4;
+        sun.security.ssl.SSLCipher$SSLWriteCipher $r3;
+        java.lang.RuntimeException $r5;
+        sun.security.ssl.ProtocolVersion $r2;
+        sun.security.ssl.SSLCipher $r0;
+
+     label1:
+        $r0 = <sun.security.ssl.SSLCipher: sun.security.ssl.SSLCipher B_NULL>;
+
+        $r1 = staticinvoke <sun.security.ssl.Authenticator: sun.security.ssl.Authenticator nullTlsMac()>();
+
+        $r2 = <sun.security.ssl.ProtocolVersion: sun.security.ssl.ProtocolVersion NONE>;
+
+        $r3 = virtualinvoke $r0.<sun.security.ssl.SSLCipher: sun.security.ssl.SSLCipher$SSLWriteCipher createWriteCipher(sun.security.ssl.Authenticator,sun.security.ssl.ProtocolVersion,javax.crypto.SecretKey,javax.crypto.spec.IvParameterSpec,java.security.SecureRandom)>($r1, $r2, null, null, null);
+
+     label2:
+        return $r3;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = new java.lang.RuntimeException;
+
+        specialinvoke $r5.<java.lang.RuntimeException: void <init>(java.lang.String,java.lang.Throwable)>("Cannot create NULL SSL write Cipher", $r4);
+
+        throw $r5;
+
+        catch java.security.GeneralSecurityException from label1 to label2 with label3;
+    }
+
+    void dispose()
+    {
+        sun.security.ssl.SSLCipher$SSLWriteCipher r0;
+
+        r0 := @this: sun.security.ssl.SSLCipher$SSLWriteCipher;
+
+        return;
+    }
+
+    abstract int getExplicitNonceSize();
+
+    abstract int calculateFragmentSize(int, int);
+
+    abstract int calculatePacketSize(int, int);
+
+    boolean isCBCMode()
+    {
+        sun.security.ssl.SSLCipher$SSLWriteCipher r0;
+
+        r0 := @this: sun.security.ssl.SSLCipher$SSLWriteCipher;
+
+        return 0;
+    }
+
+    boolean isNullCipher()
+    {
+        sun.security.ssl.SSLCipher$SSLWriteCipher r0;
+
+        r0 := @this: sun.security.ssl.SSLCipher$SSLWriteCipher;
+
+        return 0;
+    }
+
+    public boolean atKeyLimit()
+    {
+        byte $b1;
+        int $i2;
+        sun.security.ssl.SSLCipher$SSLWriteCipher r0;
+        long $l0;
+
+        r0 := @this: sun.security.ssl.SSLCipher$SSLWriteCipher;
+
+        $l0 = r0.<sun.security.ssl.SSLCipher$SSLWriteCipher: long keyLimitCountdown>;
+
+        $b1 = $l0 cmp 0L;
+
+        $i2 = (int) $b1;
+
+        if $i2 < 0 goto label1;
+
+        return 0;
+
+     label1:
+        r0.<sun.security.ssl.SSLCipher$SSLWriteCipher: boolean keyLimitEnabled> = 0;
+
+        return 1;
+    }
+}

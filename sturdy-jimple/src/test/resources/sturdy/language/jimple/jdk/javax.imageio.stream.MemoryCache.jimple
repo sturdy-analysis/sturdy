@@ -1,0 +1,835 @@
+class javax.imageio.stream.MemoryCache extends java.lang.Object
+{
+    private static final int BUFFER_LENGTH;
+    private java.util.ArrayList cache;
+    private long cacheStart;
+    private long length;
+
+    void <init>()
+    {
+        javax.imageio.stream.MemoryCache r0;
+        java.util.ArrayList $r1;
+
+        r0 := @this: javax.imageio.stream.MemoryCache;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        r0.<javax.imageio.stream.MemoryCache: java.util.ArrayList cache> = $r1;
+
+        r0.<javax.imageio.stream.MemoryCache: long cacheStart> = 0L;
+
+        r0.<javax.imageio.stream.MemoryCache: long length> = 0L;
+
+        return;
+    }
+
+    private byte[] getCacheBlock(long) throws java.io.IOException
+    {
+        byte[] $r3, $r4;
+        long l0, $l1, l2;
+        java.io.IOException $r6;
+        java.util.ArrayList $r1;
+        byte $b3;
+        javax.imageio.stream.MemoryCache r0;
+        int $i4, $i5;
+        java.lang.Object $r2;
+
+        r0 := @this: javax.imageio.stream.MemoryCache;
+
+        l0 := @parameter0: long;
+
+        $l1 = r0.<javax.imageio.stream.MemoryCache: long cacheStart>;
+
+        l2 = l0 - $l1;
+
+        $b3 = l2 cmp 2147483647L;
+
+        $i5 = (int) $b3;
+
+        if $i5 <= 0 goto label1;
+
+        $r6 = new java.io.IOException;
+
+        specialinvoke $r6.<java.io.IOException: void <init>(java.lang.String)>("Cache addressing limit exceeded!");
+
+        throw $r6;
+
+     label1:
+        $r1 = r0.<javax.imageio.stream.MemoryCache: java.util.ArrayList cache>;
+
+        $i4 = (int) l2;
+
+        $r2 = virtualinvoke $r1.<java.util.ArrayList: java.lang.Object get(int)>($i4);
+
+        $r3 = (byte[]) $r2;
+
+        $r4 = (byte[]) $r3;
+
+        return $r4;
+    }
+
+    public long loadFromStream(java.io.InputStream, long) throws java.io.IOException
+    {
+        byte[] r5;
+        long l0, $l1, $l3, $l4, $l5, $l6, $l7, $l9, $l10, $l11, $l12, $l14, $l17, $l18, l20;
+        java.util.ArrayList $r2;
+        byte $b2, $b21;
+        javax.imageio.stream.MemoryCache r0;
+        int $i8, $i13, $i15, $i16, i19, $i22, $i23, $i25;
+        java.io.IOException $r6;
+        java.lang.OutOfMemoryError $r3;
+        java.io.InputStream r1;
+
+        r0 := @this: javax.imageio.stream.MemoryCache;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        l0 := @parameter1: long;
+
+        $l1 = r0.<javax.imageio.stream.MemoryCache: long length>;
+
+        $b2 = l0 cmp $l1;
+
+        $i22 = (int) $b2;
+
+        if $i22 >= 0 goto label01;
+
+        return l0;
+
+     label01:
+        $l3 = r0.<javax.imageio.stream.MemoryCache: long length>;
+
+        $l4 = $l3 % 8192L;
+
+        i19 = (int) $l4;
+
+        r5 = null;
+
+        $l5 = r0.<javax.imageio.stream.MemoryCache: long length>;
+
+        l20 = l0 - $l5;
+
+        if i19 == 0 goto label02;
+
+        $l17 = r0.<javax.imageio.stream.MemoryCache: long length>;
+
+        $l18 = $l17 / 8192L;
+
+        r5 = specialinvoke r0.<javax.imageio.stream.MemoryCache: byte[] getCacheBlock(long)>($l18);
+
+     label02:
+        $b21 = l20 cmp 0L;
+
+        $i23 = (int) $b21;
+
+        if $i23 <= 0 goto label11;
+
+        if r5 != null goto label07;
+
+     label03:
+        r5 = newarray (byte)[8192];
+
+     label04:
+        goto label06;
+
+     label05:
+        $r3 := @caughtexception;
+
+        $r6 = new java.io.IOException;
+
+        specialinvoke $r6.<java.io.IOException: void <init>(java.lang.String)>("No memory left for cache!");
+
+        throw $r6;
+
+     label06:
+        i19 = 0;
+
+     label07:
+        $i15 = 8192 - i19;
+
+        $l6 = (long) $i15;
+
+        $l7 = staticinvoke <java.lang.Math: long min(long,long)>(l20, $l6);
+
+        $i16 = (int) $l7;
+
+        $i8 = virtualinvoke r1.<java.io.InputStream: int read(byte[],int,int)>(r5, i19, $i16);
+
+        $i25 = (int) -1;
+
+        if $i8 != $i25 goto label08;
+
+        $l14 = r0.<javax.imageio.stream.MemoryCache: long length>;
+
+        return $l14;
+
+     label08:
+        if i19 != 0 goto label09;
+
+        $r2 = r0.<javax.imageio.stream.MemoryCache: java.util.ArrayList cache>;
+
+        virtualinvoke $r2.<java.util.ArrayList: boolean add(java.lang.Object)>(r5);
+
+     label09:
+        $l9 = (long) $i8;
+
+        l20 = l20 - $l9;
+
+        $l11 = r0.<javax.imageio.stream.MemoryCache: long length>;
+
+        $l10 = (long) $i8;
+
+        $l12 = $l11 + $l10;
+
+        r0.<javax.imageio.stream.MemoryCache: long length> = $l12;
+
+        $i13 = i19 + $i8;
+
+        i19 = $i13;
+
+        if $i13 < 8192 goto label10;
+
+        r5 = null;
+
+     label10:
+        goto label02;
+
+     label11:
+        return l0;
+
+        catch java.lang.OutOfMemoryError from label03 to label04 with label05;
+    }
+
+    public void writeToStream(java.io.OutputStream, long, long) throws java.io.IOException
+    {
+        byte[] r5;
+        java.lang.IndexOutOfBoundsException $r6, $r7, $r8;
+        byte $b3, $b4, $b5, $b6, $b8, $b10;
+        long l0, $l1, $l2, $l7, $l9, $l12, $l13, $l14, $l15, l17, l18, l20;
+        javax.imageio.stream.MemoryCache r0;
+        int $i11, $i16, i19, $i21, $i22, $i23, $i24, $i25;
+        java.io.OutputStream r2;
+
+        r0 := @this: javax.imageio.stream.MemoryCache;
+
+        r2 := @parameter0: java.io.OutputStream;
+
+        l0 := @parameter1: long;
+
+        l17 := @parameter2: long;
+
+        $l2 = l0 + l17;
+
+        $l1 = r0.<javax.imageio.stream.MemoryCache: long length>;
+
+        $b3 = $l2 cmp $l1;
+
+        $i21 = (int) $b3;
+
+        if $i21 <= 0 goto label1;
+
+        $r6 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r6.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("Argument out of cache");
+
+        throw $r6;
+
+     label1:
+        $b4 = l0 cmp 0L;
+
+        $i22 = (int) $b4;
+
+        if $i22 < 0 goto label2;
+
+        $b5 = l17 cmp 0L;
+
+        $i23 = (int) $b5;
+
+        if $i23 >= 0 goto label3;
+
+     label2:
+        $r7 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r7.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("Negative pos or len");
+
+        throw $r7;
+
+     label3:
+        $b6 = l17 cmp 0L;
+
+        if $b6 != 0 goto label4;
+
+        return;
+
+     label4:
+        l18 = l0 / 8192L;
+
+        $l7 = r0.<javax.imageio.stream.MemoryCache: long cacheStart>;
+
+        $b8 = l18 cmp $l7;
+
+        $i24 = (int) $b8;
+
+        if $i24 >= 0 goto label5;
+
+        $r8 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r8.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("pos already disposed");
+
+        throw $r8;
+
+     label5:
+        $l9 = l0 % 8192L;
+
+        i19 = (int) $l9;
+
+        l20 = l18 + 1L;
+
+        r5 = specialinvoke r0.<javax.imageio.stream.MemoryCache: byte[] getCacheBlock(long)>(l18);
+
+     label6:
+        $b10 = l17 cmp 0L;
+
+        $i25 = (int) $b10;
+
+        if $i25 <= 0 goto label8;
+
+        if r5 != null goto label7;
+
+        $l15 = l20;
+
+        l20 = l20 + 1L;
+
+        r5 = specialinvoke r0.<javax.imageio.stream.MemoryCache: byte[] getCacheBlock(long)>($l15);
+
+        i19 = 0;
+
+     label7:
+        $i11 = 8192 - i19;
+
+        $l12 = (long) $i11;
+
+        $l13 = staticinvoke <java.lang.Math: long min(long,long)>(l17, $l12);
+
+        $i16 = (int) $l13;
+
+        virtualinvoke r2.<java.io.OutputStream: void write(byte[],int,int)>(r5, i19, $i16);
+
+        r5 = null;
+
+        $l14 = (long) $i16;
+
+        l17 = l17 - $l14;
+
+        goto label6;
+
+     label8:
+        return;
+    }
+
+    private void pad(long) throws java.io.IOException
+    {
+        byte[] $r2;
+        long $l0, $l2, $l3, l4, l5, l6, l7, l9;
+        java.util.ArrayList $r1, $r3;
+        byte $b8;
+        javax.imageio.stream.MemoryCache r0;
+        int $i1, $i10;
+        java.io.IOException $r6;
+        java.lang.OutOfMemoryError $r4;
+
+        r0 := @this: javax.imageio.stream.MemoryCache;
+
+        l5 := @parameter0: long;
+
+        $l0 = r0.<javax.imageio.stream.MemoryCache: long cacheStart>;
+
+        $r1 = r0.<javax.imageio.stream.MemoryCache: java.util.ArrayList cache>;
+
+        $i1 = virtualinvoke $r1.<java.util.ArrayList: int size()>();
+
+        $l2 = (long) $i1;
+
+        $l3 = $l0 + $l2;
+
+        l4 = $l3 - 1L;
+
+        l6 = l5 / 8192L;
+
+        l7 = l6 - l4;
+
+        l9 = 0L;
+
+     label1:
+        $b8 = l9 cmp l7;
+
+        $i10 = (int) $b8;
+
+        if $i10 >= 0 goto label6;
+
+     label2:
+        $r3 = r0.<javax.imageio.stream.MemoryCache: java.util.ArrayList cache>;
+
+        $r2 = newarray (byte)[8192];
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>($r2);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r4 := @caughtexception;
+
+        $r6 = new java.io.IOException;
+
+        specialinvoke $r6.<java.io.IOException: void <init>(java.lang.String)>("No memory left for cache!");
+
+        throw $r6;
+
+     label5:
+        l9 = l9 + 1L;
+
+        goto label1;
+
+     label6:
+        return;
+
+        catch java.lang.OutOfMemoryError from label2 to label3 with label4;
+    }
+
+    public void write(byte[], int, int, long) throws java.io.IOException
+    {
+        byte[] r0, $r2;
+        java.lang.IndexOutOfBoundsException $r6;
+        long $l4, $l5, l6, $l7, $l9, $l10, $l13, $l14, l17;
+        java.lang.NullPointerException $r5;
+        byte $b0, $b8;
+        javax.imageio.stream.MemoryCache r1;
+        int $i1, $i2, $i3, $i11, $i12, i15, i16, i18, $i19, $i20;
+
+        r1 := @this: javax.imageio.stream.MemoryCache;
+
+        r0 := @parameter0: byte[];
+
+        i15 := @parameter1: int;
+
+        i16 := @parameter2: int;
+
+        l17 := @parameter3: long;
+
+        if r0 != null goto label1;
+
+        $r5 = new java.lang.NullPointerException;
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>(java.lang.String)>("b == null!");
+
+        throw $r5;
+
+     label1:
+        if i15 < 0 goto label2;
+
+        if i16 < 0 goto label2;
+
+        $b0 = l17 cmp 0L;
+
+        $i19 = (int) $b0;
+
+        if $i19 < 0 goto label2;
+
+        $i2 = i15 + i16;
+
+        $i1 = lengthof r0;
+
+        if $i2 > $i1 goto label2;
+
+        $i3 = i15 + i16;
+
+        if $i3 >= 0 goto label3;
+
+     label2:
+        $r6 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r6.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r6;
+
+     label3:
+        $l4 = (long) i16;
+
+        $l5 = l17 + $l4;
+
+        l6 = $l5 - 1L;
+
+        $l7 = r1.<javax.imageio.stream.MemoryCache: long length>;
+
+        $b8 = l6 cmp $l7;
+
+        $i20 = (int) $b8;
+
+        if $i20 < 0 goto label4;
+
+        specialinvoke r1.<javax.imageio.stream.MemoryCache: void pad(long)>(l6);
+
+        $l14 = l6 + 1L;
+
+        r1.<javax.imageio.stream.MemoryCache: long length> = $l14;
+
+     label4:
+        $l9 = l17 % 8192L;
+
+        i18 = (int) $l9;
+
+     label5:
+        if i16 <= 0 goto label6;
+
+        $l10 = l17 / 8192L;
+
+        $r2 = specialinvoke r1.<javax.imageio.stream.MemoryCache: byte[] getCacheBlock(long)>($l10);
+
+        $i11 = 8192 - i18;
+
+        $i12 = staticinvoke <java.lang.Math: int min(int,int)>(i16, $i11);
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, i15, $r2, i18, $i12);
+
+        $l13 = (long) $i12;
+
+        l17 = l17 + $l13;
+
+        i15 = i15 + $i12;
+
+        i16 = i16 - $i12;
+
+        i18 = 0;
+
+        goto label5;
+
+     label6:
+        return;
+    }
+
+    public void write(int, long) throws java.io.IOException
+    {
+        byte[] $r1;
+        long l0, $l2, $l4, $l5, $l8;
+        java.lang.ArrayIndexOutOfBoundsException $r3;
+        byte $b1, $b3, $b7;
+        javax.imageio.stream.MemoryCache r0;
+        int i6, $i9, $i10, $i11;
+
+        r0 := @this: javax.imageio.stream.MemoryCache;
+
+        i6 := @parameter0: int;
+
+        l0 := @parameter1: long;
+
+        $b1 = l0 cmp 0L;
+
+        $i10 = (int) $b1;
+
+        if $i10 >= 0 goto label1;
+
+        $r3 = new java.lang.ArrayIndexOutOfBoundsException;
+
+        specialinvoke $r3.<java.lang.ArrayIndexOutOfBoundsException: void <init>(java.lang.String)>("pos < 0");
+
+        throw $r3;
+
+     label1:
+        $l2 = r0.<javax.imageio.stream.MemoryCache: long length>;
+
+        $b3 = l0 cmp $l2;
+
+        $i11 = (int) $b3;
+
+        if $i11 < 0 goto label2;
+
+        specialinvoke r0.<javax.imageio.stream.MemoryCache: void pad(long)>(l0);
+
+        $l8 = l0 + 1L;
+
+        r0.<javax.imageio.stream.MemoryCache: long length> = $l8;
+
+     label2:
+        $l4 = l0 / 8192L;
+
+        $r1 = specialinvoke r0.<javax.imageio.stream.MemoryCache: byte[] getCacheBlock(long)>($l4);
+
+        $l5 = l0 % 8192L;
+
+        $i9 = (int) $l5;
+
+        $b7 = (byte) i6;
+
+        $r1[$i9] = $b7;
+
+        return;
+    }
+
+    public long getLength()
+    {
+        long $l0;
+        javax.imageio.stream.MemoryCache r0;
+
+        r0 := @this: javax.imageio.stream.MemoryCache;
+
+        $l0 = r0.<javax.imageio.stream.MemoryCache: long length>;
+
+        return $l0;
+    }
+
+    public int read(long) throws java.io.IOException
+    {
+        byte[] $r1;
+        long l0, $l1, $l3, $l4;
+        short $s7, $s13;
+        byte $b2, $b6;
+        javax.imageio.stream.MemoryCache r0;
+        int $i5, $i8, $i10, $i12, $i14;
+
+        r0 := @this: javax.imageio.stream.MemoryCache;
+
+        l0 := @parameter0: long;
+
+        $l1 = r0.<javax.imageio.stream.MemoryCache: long length>;
+
+        $b2 = l0 cmp $l1;
+
+        $i8 = (int) $b2;
+
+        if $i8 < 0 goto label1;
+
+        $i10 = (int) -1;
+
+        return $i10;
+
+     label1:
+        $l3 = l0 / 8192L;
+
+        $r1 = specialinvoke r0.<javax.imageio.stream.MemoryCache: byte[] getCacheBlock(long)>($l3);
+
+        if $r1 != null goto label2;
+
+        $i12 = (int) -1;
+
+        return $i12;
+
+     label2:
+        $l4 = l0 % 8192L;
+
+        $i5 = (int) $l4;
+
+        $b6 = $r1[$i5];
+
+        $s13 = (short) $b6;
+
+        $s7 = $s13 & 255;
+
+        $i14 = (int) $s7;
+
+        return $i14;
+    }
+
+    public void read(byte[], int, int, long) throws java.io.IOException
+    {
+        byte[] r0, $r2;
+        java.lang.IndexOutOfBoundsException $r7, $r8;
+        long l0, $l5, $l6, $l7, $l12, l15;
+        java.lang.NullPointerException $r6;
+        byte $b1, $b8;
+        javax.imageio.stream.MemoryCache r1;
+        int $i2, $i3, $i4, $i9, $i10, $i11, i13, i14, i16, $i17, $i18;
+
+        r1 := @this: javax.imageio.stream.MemoryCache;
+
+        r0 := @parameter0: byte[];
+
+        i13 := @parameter1: int;
+
+        i14 := @parameter2: int;
+
+        l0 := @parameter3: long;
+
+        if r0 != null goto label1;
+
+        $r6 = new java.lang.NullPointerException;
+
+        specialinvoke $r6.<java.lang.NullPointerException: void <init>(java.lang.String)>("b == null!");
+
+        throw $r6;
+
+     label1:
+        if i13 < 0 goto label2;
+
+        if i14 < 0 goto label2;
+
+        $b1 = l0 cmp 0L;
+
+        $i17 = (int) $b1;
+
+        if $i17 < 0 goto label2;
+
+        $i3 = i13 + i14;
+
+        $i2 = lengthof r0;
+
+        if $i3 > $i2 goto label2;
+
+        $i4 = i13 + i14;
+
+        if $i4 >= 0 goto label3;
+
+     label2:
+        $r7 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r7.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r7;
+
+     label3:
+        $l5 = (long) i14;
+
+        $l7 = l0 + $l5;
+
+        $l6 = r1.<javax.imageio.stream.MemoryCache: long length>;
+
+        $b8 = $l7 cmp $l6;
+
+        $i18 = (int) $b8;
+
+        if $i18 <= 0 goto label4;
+
+        $r8 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r8.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r8;
+
+     label4:
+        l15 = l0 / 8192L;
+
+        $i9 = (int) l0;
+
+        i16 = $i9 % 8192;
+
+     label5:
+        if i14 <= 0 goto label6;
+
+        $i10 = 8192 - i16;
+
+        $i11 = staticinvoke <java.lang.Math: int min(int,int)>(i14, $i10);
+
+        $l12 = l15;
+
+        l15 = l15 + 1L;
+
+        $r2 = specialinvoke r1.<javax.imageio.stream.MemoryCache: byte[] getCacheBlock(long)>($l12);
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, i16, r0, i13, $i11);
+
+        i14 = i14 - $i11;
+
+        i13 = i13 + $i11;
+
+        i16 = 0;
+
+        goto label5;
+
+     label6:
+        return;
+    }
+
+    public void disposeBefore(long)
+    {
+        java.lang.IndexOutOfBoundsException $r4;
+        long l0, l1, $l2, $l4, $l5, $l7, $l8, l10;
+        java.util.ArrayList $r1, $r2;
+        byte $b3, $b9;
+        javax.imageio.stream.MemoryCache r0;
+        int $i6, $i11, $i12;
+
+        r0 := @this: javax.imageio.stream.MemoryCache;
+
+        l0 := @parameter0: long;
+
+        l1 = l0 / 8192L;
+
+        $l2 = r0.<javax.imageio.stream.MemoryCache: long cacheStart>;
+
+        $b3 = l1 cmp $l2;
+
+        $i11 = (int) $b3;
+
+        if $i11 >= 0 goto label1;
+
+        $r4 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r4.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("pos already disposed");
+
+        throw $r4;
+
+     label1:
+        $l4 = r0.<javax.imageio.stream.MemoryCache: long cacheStart>;
+
+        $l5 = l1 - $l4;
+
+        $r1 = r0.<javax.imageio.stream.MemoryCache: java.util.ArrayList cache>;
+
+        $i6 = virtualinvoke $r1.<java.util.ArrayList: int size()>();
+
+        $l7 = (long) $i6;
+
+        $l8 = staticinvoke <java.lang.Math: long min(long,long)>($l5, $l7);
+
+        l10 = 0L;
+
+     label2:
+        $b9 = l10 cmp $l8;
+
+        $i12 = (int) $b9;
+
+        if $i12 >= 0 goto label3;
+
+        $r2 = r0.<javax.imageio.stream.MemoryCache: java.util.ArrayList cache>;
+
+        virtualinvoke $r2.<java.util.ArrayList: java.lang.Object remove(int)>(0);
+
+        l10 = l10 + 1L;
+
+        goto label2;
+
+     label3:
+        r0.<javax.imageio.stream.MemoryCache: long cacheStart> = l1;
+
+        return;
+    }
+
+    public void reset()
+    {
+        javax.imageio.stream.MemoryCache r0;
+        java.util.ArrayList $r1;
+
+        r0 := @this: javax.imageio.stream.MemoryCache;
+
+        $r1 = r0.<javax.imageio.stream.MemoryCache: java.util.ArrayList cache>;
+
+        virtualinvoke $r1.<java.util.ArrayList: void clear()>();
+
+        r0.<javax.imageio.stream.MemoryCache: long cacheStart> = 0L;
+
+        r0.<javax.imageio.stream.MemoryCache: long length> = 0L;
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <javax.imageio.stream.MemoryCache: int BUFFER_LENGTH> = 8192;
+
+        return;
+    }
+}

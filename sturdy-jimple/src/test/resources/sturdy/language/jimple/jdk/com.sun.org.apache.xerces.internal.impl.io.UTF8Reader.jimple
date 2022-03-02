@@ -1,0 +1,1706 @@
+public class com.sun.org.apache.xerces.internal.impl.io.UTF8Reader extends java.io.Reader
+{
+    public static final int DEFAULT_BUFFER_SIZE;
+    private static final boolean DEBUG_READ;
+    protected java.io.InputStream fInputStream;
+    protected byte[] fBuffer;
+    protected int fOffset;
+    private int fSurrogate;
+    private com.sun.org.apache.xerces.internal.util.MessageFormatter fFormatter;
+    private java.util.Locale fLocale;
+
+    public void <init>(java.io.InputStream)
+    {
+        com.sun.org.apache.xerces.internal.impl.msg.XMLMessageFormatter $r2;
+        com.sun.org.apache.xerces.internal.impl.io.UTF8Reader r0;
+        java.util.Locale $r3;
+        java.io.InputStream r1;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.io.UTF8Reader;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        $r2 = new com.sun.org.apache.xerces.internal.impl.msg.XMLMessageFormatter;
+
+        specialinvoke $r2.<com.sun.org.apache.xerces.internal.impl.msg.XMLMessageFormatter: void <init>()>();
+
+        $r3 = staticinvoke <java.util.Locale: java.util.Locale getDefault()>();
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void <init>(java.io.InputStream,int,com.sun.org.apache.xerces.internal.util.MessageFormatter,java.util.Locale)>(r1, 2048, $r2, $r3);
+
+        return;
+    }
+
+    public void <init>(java.io.InputStream, com.sun.org.apache.xerces.internal.util.MessageFormatter, java.util.Locale)
+    {
+        com.sun.org.apache.xerces.internal.impl.io.UTF8Reader r0;
+        java.util.Locale r3;
+        com.sun.org.apache.xerces.internal.util.MessageFormatter r2;
+        java.io.InputStream r1;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.io.UTF8Reader;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        r2 := @parameter1: com.sun.org.apache.xerces.internal.util.MessageFormatter;
+
+        r3 := @parameter2: java.util.Locale;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void <init>(java.io.InputStream,int,com.sun.org.apache.xerces.internal.util.MessageFormatter,java.util.Locale)>(r1, 2048, r2, r3);
+
+        return;
+    }
+
+    public void <init>(java.io.InputStream, int, com.sun.org.apache.xerces.internal.util.MessageFormatter, java.util.Locale)
+    {
+        byte[] $r3, $r4, $r7;
+        com.sun.xml.internal.stream.util.BufferAllocator $r2;
+        com.sun.org.apache.xerces.internal.impl.io.UTF8Reader r0;
+        java.util.Locale r6;
+        int i0, $i2;
+        com.sun.org.apache.xerces.internal.util.MessageFormatter r5;
+        java.io.InputStream r1;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.io.UTF8Reader;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        i0 := @parameter1: int;
+
+        r5 := @parameter2: com.sun.org.apache.xerces.internal.util.MessageFormatter;
+
+        r6 := @parameter3: java.util.Locale;
+
+        specialinvoke r0.<java.io.Reader: void <init>()>();
+
+        $i2 = (int) -1;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fSurrogate> = $i2;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: com.sun.org.apache.xerces.internal.util.MessageFormatter fFormatter> = null;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: java.util.Locale fLocale> = null;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: java.io.InputStream fInputStream> = r1;
+
+        $r2 = staticinvoke <com.sun.xml.internal.stream.util.ThreadLocalBufferAllocator: com.sun.xml.internal.stream.util.BufferAllocator getBufferAllocator()>();
+
+        $r3 = virtualinvoke $r2.<com.sun.xml.internal.stream.util.BufferAllocator: byte[] getByteBuffer(int)>(i0);
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer> = $r3;
+
+        $r4 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        if $r4 != null goto label1;
+
+        $r7 = newarray (byte)[i0];
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer> = $r7;
+
+     label1:
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: com.sun.org.apache.xerces.internal.util.MessageFormatter fFormatter> = r5;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: java.util.Locale fLocale> = r6;
+
+        return;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        byte[] $r1, $r2, $r3, $r4, $r8, $r9, $r12;
+        byte $b2, $b8, $b11, $b14, $b39, $b41, $b53, b74, b75, b76;
+        com.sun.org.apache.xerces.internal.impl.io.UTF8Reader r0;
+        boolean z0, z1, z2, z3, z4;
+        int $i0, $i1, i3, $i4, $i5, $i6, $i7, $i9, $i10, $i12, $i13, i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i40, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i54, $i55, $i56, $i57, i58, i59, $i60, $i61, i62, $i63, i64, $i65, $i66, i67, $i68, i69, $i70, $i71, i72, $i73, $i78, $i79, $i81, $i83, $i85, $i86, $i88, $i89, $i91, $i92, $i94, $i96, $i97, $i99, $i100, $i102, $i103, $i105, $i107, $i109, $i111;
+        char $c84;
+        java.io.InputStream $r5, $r6, $r7, $r10, $r11, $r13, $r14;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.io.UTF8Reader;
+
+        i58 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fSurrogate>;
+
+        $i0 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fSurrogate>;
+
+        $i78 = (int) -1;
+
+        if $i0 != $i78 goto label37;
+
+        i59 = 0;
+
+        z4 = 0;
+
+        b76 = 0;
+
+        z3 = 0;
+
+        z2 = 0;
+
+        b75 = 0;
+
+        b74 = 0;
+
+        z1 = 0;
+
+        z0 = 0;
+
+        $i1 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fOffset>;
+
+        if 0 != $i1 goto label01;
+
+        $r14 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: java.io.InputStream fInputStream>;
+
+        $i60 = virtualinvoke $r14.<java.io.InputStream: int read()>();
+
+        goto label02;
+
+     label01:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        i59 = 1;
+
+        z4 = 1;
+
+        b76 = 1;
+
+        z3 = 1;
+
+        z2 = 1;
+
+        b75 = 1;
+
+        b74 = 1;
+
+        z1 = 1;
+
+        z0 = 1;
+
+        $b2 = $r1[0];
+
+        $i79 = (int) $b2;
+
+        $i60 = $i79 & 255;
+
+     label02:
+        i3 = $i60;
+
+        $i81 = (int) -1;
+
+        if $i60 != $i81 goto label03;
+
+        $i83 = (int) -1;
+
+        return $i83;
+
+     label03:
+        if $i60 >= 128 goto label04;
+
+        $c84 = (char) $i60;
+
+        $i85 = (int) $c84;
+
+        i58 = $i85;
+
+        goto label36;
+
+     label04:
+        $i4 = $i60 & 224;
+
+        if $i4 != 192 goto label09;
+
+        $i51 = $i60 & 30;
+
+        if $i51 == 0 goto label09;
+
+        $i52 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fOffset>;
+
+        if z4 != $i52 goto label05;
+
+        $r13 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: java.io.InputStream fInputStream>;
+
+        $i61 = virtualinvoke $r13.<java.io.InputStream: int read()>();
+
+        goto label06;
+
+     label05:
+        $r12 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b53 = $r12[b74];
+
+        $i86 = (int) $b53;
+
+        $i61 = $i86 & 255;
+
+     label06:
+        i62 = $i61;
+
+        $i88 = (int) -1;
+
+        if $i61 != $i88 goto label07;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void expectedByte(int,int)>(2, 2);
+
+     label07:
+        $i54 = i62 & 192;
+
+        if $i54 == 128 goto label08;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void invalidByte(int,int,int)>(2, 2, i62);
+
+     label08:
+        $i55 = i3 << 6;
+
+        $i57 = $i55 & 1984;
+
+        $i56 = i62 & 63;
+
+        i58 = $i57 | $i56;
+
+        goto label36;
+
+     label09:
+        $i5 = i3 & 240;
+
+        if $i5 != 224 goto label20;
+
+        $i38 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fOffset>;
+
+        if z3 != $i38 goto label10;
+
+        $r11 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: java.io.InputStream fInputStream>;
+
+        $i63 = virtualinvoke $r11.<java.io.InputStream: int read()>();
+
+        goto label11;
+
+     label10:
+        $r8 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        i59 = z2 + 1;
+
+        $b39 = $r8[b76];
+
+        $i89 = (int) $b39;
+
+        $i63 = $i89 & 255;
+
+     label11:
+        i64 = $i63;
+
+        $i91 = (int) -1;
+
+        if $i63 != $i91 goto label12;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void expectedByte(int,int)>(2, 3);
+
+     label12:
+        $i40 = i64 & 192;
+
+        if $i40 != 128 goto label14;
+
+        if i3 != 237 goto label13;
+
+        if i64 >= 160 goto label14;
+
+     label13:
+        $i49 = i3 & 15;
+
+        if $i49 != 0 goto label15;
+
+        $i50 = i64 & 32;
+
+        if $i50 != 0 goto label15;
+
+     label14:
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void invalidByte(int,int,int)>(2, 3, i64);
+
+     label15:
+        $i65 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fOffset>;
+
+        if i59 != $i65 goto label16;
+
+        $r10 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: java.io.InputStream fInputStream>;
+
+        $i66 = virtualinvoke $r10.<java.io.InputStream: int read()>();
+
+        goto label17;
+
+     label16:
+        $r9 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b41 = $r9[i59];
+
+        $i92 = (int) $b41;
+
+        $i66 = $i92 & 255;
+
+     label17:
+        i67 = $i66;
+
+        $i94 = (int) -1;
+
+        if $i66 != $i94 goto label18;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void expectedByte(int,int)>(3, 3);
+
+     label18:
+        $i42 = i67 & 192;
+
+        if $i42 == 128 goto label19;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void invalidByte(int,int,int)>(3, 3, i67);
+
+     label19:
+        $i43 = i3 << 12;
+
+        $i96 = (int) 61440;
+
+        $i46 = $i43 & $i96;
+
+        $i44 = i64 << 6;
+
+        $i45 = $i44 & 4032;
+
+        $i48 = $i46 | $i45;
+
+        $i47 = i67 & 63;
+
+        i58 = $i48 | $i47;
+
+        goto label36;
+
+     label20:
+        $i6 = i3 & 248;
+
+        if $i6 != 240 goto label35;
+
+        $i7 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fOffset>;
+
+        if z0 != $i7 goto label21;
+
+        $r7 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: java.io.InputStream fInputStream>;
+
+        $i68 = virtualinvoke $r7.<java.io.InputStream: int read()>();
+
+        goto label22;
+
+     label21:
+        $r2 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        i59 = z1 + 1;
+
+        $b8 = $r2[b75];
+
+        $i97 = (int) $b8;
+
+        $i68 = $i97 & 255;
+
+     label22:
+        i69 = $i68;
+
+        $i99 = (int) -1;
+
+        if $i68 != $i99 goto label23;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void expectedByte(int,int)>(2, 4);
+
+     label23:
+        $i9 = i69 & 192;
+
+        if $i9 != 128 goto label24;
+
+        $i36 = i69 & 48;
+
+        if $i36 != 0 goto label25;
+
+        $i37 = i3 & 7;
+
+        if $i37 != 0 goto label25;
+
+     label24:
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void invalidByte(int,int,int)>(2, 3, i69);
+
+     label25:
+        $i70 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fOffset>;
+
+        if i59 != $i70 goto label26;
+
+        $r6 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: java.io.InputStream fInputStream>;
+
+        $i71 = virtualinvoke $r6.<java.io.InputStream: int read()>();
+
+        goto label27;
+
+     label26:
+        $r3 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $i10 = i59;
+
+        i59 = i59 + 1;
+
+        $b11 = $r3[$i10];
+
+        $i100 = (int) $b11;
+
+        $i71 = $i100 & 255;
+
+     label27:
+        i72 = $i71;
+
+        $i102 = (int) -1;
+
+        if $i71 != $i102 goto label28;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void expectedByte(int,int)>(3, 4);
+
+     label28:
+        $i12 = i72 & 192;
+
+        if $i12 == 128 goto label29;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void invalidByte(int,int,int)>(3, 3, i72);
+
+     label29:
+        $i13 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fOffset>;
+
+        if i59 != $i13 goto label30;
+
+        $r5 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: java.io.InputStream fInputStream>;
+
+        $i73 = virtualinvoke $r5.<java.io.InputStream: int read()>();
+
+        goto label31;
+
+     label30:
+        $r4 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b14 = $r4[i59];
+
+        $i103 = (int) $b14;
+
+        $i73 = $i103 & 255;
+
+     label31:
+        i15 = $i73;
+
+        $i105 = (int) -1;
+
+        if $i73 != $i105 goto label32;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void expectedByte(int,int)>(4, 4);
+
+     label32:
+        $i16 = i15 & 192;
+
+        if $i16 == 128 goto label33;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void invalidByte(int,int,int)>(4, 4, i15);
+
+     label33:
+        $i17 = i3 << 2;
+
+        $i20 = $i17 & 28;
+
+        $i18 = i69 >> 4;
+
+        $i19 = $i18 & 3;
+
+        $i35 = $i20 | $i19;
+
+        if $i35 <= 16 goto label34;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void invalidSurrogate(int)>($i35);
+
+     label34:
+        $i33 = $i35 - 1;
+
+        $i21 = $i33 << 6;
+
+        $i22 = $i21 & 960;
+
+        $i107 = (int) 55296;
+
+        $i25 = $i107 | $i22;
+
+        $i23 = i69 << 2;
+
+        $i24 = $i23 & 60;
+
+        $i28 = $i25 | $i24;
+
+        $i26 = i72 >> 4;
+
+        $i27 = $i26 & 3;
+
+        $i29 = i72 << 6;
+
+        $i30 = $i29 & 960;
+
+        $i109 = (int) 56320;
+
+        $i32 = $i109 | $i30;
+
+        $i31 = i15 & 63;
+
+        $i34 = $i32 | $i31;
+
+        i58 = $i28 | $i27;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fSurrogate> = $i34;
+
+        goto label36;
+
+     label35:
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void invalidByte(int,int,int)>(1, 1, i3);
+
+     label36:
+        goto label38;
+
+     label37:
+        $i111 = (int) -1;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fSurrogate> = $i111;
+
+     label38:
+        return i58;
+    }
+
+    public int read(char[], int, int) throws java.io.IOException
+    {
+        byte[] $r1, $r2, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26, $r27, $r28, $r31, $r32, $r33, $r34, $r35, $r36, $r37, $r38, $r39, $r40, $r42, $r43, $r44, $r45, $r46, $r47, $r48, $r50;
+        byte $b8, $b37, $b38, $b39, $b40, $b42, $b43, $b44, $b45, $b47, $b48, $b49, $b51, $b52, $b53, $b54, $b56, $b57, $b59, $b60, $b61, $b65, $b67, $b79, $b80, $b81, $b83, $b84, $b86, $b87, $b88, $b92, $b94, $b103, $b104, $b106, $b108, b123, b124;
+        short s4, $s5, $s6, $s7, $s64, $s90, $s95, $s153;
+        com.sun.org.apache.xerces.internal.impl.io.UTF8Reader r0;
+        int i0, $i1, $i2, i3, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i31, $i32, $i33, $i34, $i35, $i36, $i41, $i46, $i50, $i55, $i58, $i62, $i63, $i66, $i68, $i69, $i70, $i71, $i72, $i73, $i74, $i75, $i76, $i78, $i82, $i85, $i89, $i91, $i93, $i96, $i97, $i98, $i99, $i100, $i102, $i105, $i107, $i109, $i111, $i113, $i114, $i115, $i116, $i118, i119, i120, i121, i122, i125, $i126, i127, i128, $i129, i130, $i131, i132, i133, $i134, i135, i136, $i137, i138, $i139, i140, $i142, $i144, $i146, $i148, $i150, $i151, $i152, $i154, $i155, $i157, $i158, $i160, $i161, $i162, $i164, $i165, $i166, $i168, $i169, $i171, $i173, $i174, $i175, $i177, $i178, $i180, $i181, $i183, $i184, $i186, $i188, $i190, $i191;
+        char[] r6;
+        char $c29, $c30, $c77, $c101, $c110, $c112, $c117;
+        java.io.InputStream $r3, $r4, $r5, $r29, $r30, $r41, $r49;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.io.UTF8Reader;
+
+        r6 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i119 := @parameter2: int;
+
+        i120 = i0;
+
+        $i1 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fSurrogate>;
+
+        $i142 = (int) -1;
+
+        if $i1 == $i142 goto label01;
+
+        $i118 = i0 + 1;
+
+        $i116 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fSurrogate>;
+
+        $c117 = (char) $i116;
+
+        r6[$i118] = $c117;
+
+        $i144 = (int) -1;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fSurrogate> = $i144;
+
+        $i146 = (int) -1;
+
+        i119 = i119 + $i146;
+
+        i120 = i0 + 1;
+
+     label01:
+        $i2 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fOffset>;
+
+        if $i2 != 0 goto label04;
+
+        $r47 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $i113 = lengthof $r47;
+
+        if i119 <= $i113 goto label02;
+
+        $r50 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        i119 = lengthof $r50;
+
+     label02:
+        $r49 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: java.io.InputStream fInputStream>;
+
+        $r48 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $i114 = virtualinvoke $r49.<java.io.InputStream: int read(byte[],int,int)>($r48, 0, i119);
+
+        $i148 = (int) -1;
+
+        if $i114 != $i148 goto label03;
+
+        $i150 = (int) -1;
+
+        return $i150;
+
+     label03:
+        $i115 = i120 - i0;
+
+        i121 = $i114 + $i115;
+
+        goto label05;
+
+     label04:
+        i121 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fOffset>;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fOffset> = 0;
+
+     label05:
+        i3 = i121;
+
+        i122 = 0;
+
+     label06:
+        if i122 >= i3 goto label07;
+
+        $r46 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        b123 = $r46[i122];
+
+        $i151 = (int) b123;
+
+        if $i151 < 0 goto label07;
+
+        $i111 = i120;
+
+        i120 = i120 + 1;
+
+        $c112 = (char) b123;
+
+        r6[$i111] = $c112;
+
+        i122 = i122 + 1;
+
+        goto label06;
+
+     label07:
+        if i122 >= i3 goto label55;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        b124 = $r1[i122];
+
+        $i152 = (int) b124;
+
+        if $i152 < 0 goto label08;
+
+        $i109 = i120;
+
+        i120 = i120 + 1;
+
+        $c110 = (char) b124;
+
+        r6[$i109] = $c110;
+
+        goto label54;
+
+     label08:
+        $s153 = (short) b124;
+
+        s4 = $s153 & 255;
+
+        $s5 = s4 & 224;
+
+        $i154 = (int) $s5;
+
+        if $i154 != 192 goto label15;
+
+        $s95 = s4 & 30;
+
+        if $s95 == 0 goto label15;
+
+        i122 = i122 + 1;
+
+        if i122 >= i3 goto label09;
+
+        $r45 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b108 = $r45[i122];
+
+        $i155 = (int) $b108;
+
+        i125 = $i155 & 255;
+
+        goto label12;
+
+     label09:
+        $r41 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: java.io.InputStream fInputStream>;
+
+        $i96 = virtualinvoke $r41.<java.io.InputStream: int read()>();
+
+        i125 = $i96;
+
+        $i157 = (int) -1;
+
+        if $i96 != $i157 goto label11;
+
+        if i120 <= i0 goto label10;
+
+        $r44 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b106 = (byte) s4;
+
+        $r44[0] = $b106;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fOffset> = 1;
+
+        $i107 = i120 - i0;
+
+        return $i107;
+
+     label10:
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void expectedByte(int,int)>(2, 2);
+
+     label11:
+        i121 = i121 + 1;
+
+     label12:
+        $i126 = i125 & 192;
+
+        if $i126 == 128 goto label14;
+
+        if i120 <= i0 goto label13;
+
+        $r42 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b103 = (byte) s4;
+
+        $r42[0] = $b103;
+
+        $r43 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b104 = (byte) i125;
+
+        $r43[1] = $b104;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fOffset> = 2;
+
+        $i105 = i120 - i0;
+
+        return $i105;
+
+     label13:
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void invalidByte(int,int,int)>(2, 2, i125);
+
+     label14:
+        $i158 = (int) s4;
+
+        $i97 = $i158 << 6;
+
+        $i99 = $i97 & 1984;
+
+        $i98 = i125 & 63;
+
+        $i102 = $i99 | $i98;
+
+        $i100 = i120;
+
+        i120 = i120 + 1;
+
+        $c101 = (char) $i102;
+
+        r6[$i100] = $c101;
+
+        $i160 = (int) -1;
+
+        i121 = i121 + $i160;
+
+        goto label54;
+
+     label15:
+        $s6 = s4 & 240;
+
+        $i161 = (int) $s6;
+
+        if $i161 != 224 goto label30;
+
+        i127 = i122 + 1;
+
+        if i127 >= i3 goto label16;
+
+        $r40 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b94 = $r40[i127];
+
+        $i162 = (int) $b94;
+
+        i128 = $i162 & 255;
+
+        goto label19;
+
+     label16:
+        $r29 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: java.io.InputStream fInputStream>;
+
+        $i68 = virtualinvoke $r29.<java.io.InputStream: int read()>();
+
+        i128 = $i68;
+
+        $i164 = (int) -1;
+
+        if $i68 != $i164 goto label18;
+
+        if i120 <= i0 goto label17;
+
+        $r39 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b92 = (byte) s4;
+
+        $r39[0] = $b92;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fOffset> = 1;
+
+        $i93 = i120 - i0;
+
+        return $i93;
+
+     label17:
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void expectedByte(int,int)>(2, 3);
+
+     label18:
+        i121 = i121 + 1;
+
+     label19:
+        $i129 = i128 & 192;
+
+        if $i129 != 128 goto label21;
+
+        $i165 = (int) s4;
+
+        if $i165 != 237 goto label20;
+
+        if i128 >= 160 goto label21;
+
+     label20:
+        $s90 = s4 & 15;
+
+        if $s90 != 0 goto label23;
+
+        $i91 = i128 & 32;
+
+        if $i91 != 0 goto label23;
+
+     label21:
+        if i120 <= i0 goto label22;
+
+        $r37 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b87 = (byte) s4;
+
+        $r37[0] = $b87;
+
+        $r38 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b88 = (byte) i128;
+
+        $r38[1] = $b88;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fOffset> = 2;
+
+        $i89 = i120 - i0;
+
+        return $i89;
+
+     label22:
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void invalidByte(int,int,int)>(2, 3, i128);
+
+     label23:
+        i122 = i127 + 1;
+
+        if i122 >= i3 goto label24;
+
+        $r36 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b86 = $r36[i122];
+
+        $i166 = (int) $b86;
+
+        i130 = $i166 & 255;
+
+        goto label27;
+
+     label24:
+        $r30 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: java.io.InputStream fInputStream>;
+
+        $i69 = virtualinvoke $r30.<java.io.InputStream: int read()>();
+
+        i130 = $i69;
+
+        $i168 = (int) -1;
+
+        if $i69 != $i168 goto label26;
+
+        if i120 <= i0 goto label25;
+
+        $r34 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b83 = (byte) s4;
+
+        $r34[0] = $b83;
+
+        $r35 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b84 = (byte) i128;
+
+        $r35[1] = $b84;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fOffset> = 2;
+
+        $i85 = i120 - i0;
+
+        return $i85;
+
+     label25:
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void expectedByte(int,int)>(3, 3);
+
+     label26:
+        i121 = i121 + 1;
+
+     label27:
+        $i131 = i130 & 192;
+
+        if $i131 == 128 goto label29;
+
+        if i120 <= i0 goto label28;
+
+        $r31 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b79 = (byte) s4;
+
+        $r31[0] = $b79;
+
+        $r32 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b80 = (byte) i128;
+
+        $r32[1] = $b80;
+
+        $r33 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b81 = (byte) i130;
+
+        $r33[2] = $b81;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fOffset> = 3;
+
+        $i82 = i120 - i0;
+
+        return $i82;
+
+     label28:
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void invalidByte(int,int,int)>(3, 3, i130);
+
+     label29:
+        $i169 = (int) s4;
+
+        $i70 = $i169 << 12;
+
+        $i171 = (int) 61440;
+
+        $i73 = $i70 & $i171;
+
+        $i71 = i128 << 6;
+
+        $i72 = $i71 & 4032;
+
+        $i75 = $i73 | $i72;
+
+        $i74 = i130 & 63;
+
+        $i78 = $i75 | $i74;
+
+        $i76 = i120;
+
+        i120 = i120 + 1;
+
+        $c77 = (char) $i78;
+
+        r6[$i76] = $c77;
+
+        $i173 = (int) -2;
+
+        i121 = i121 + $i173;
+
+        goto label54;
+
+     label30:
+        $s7 = s4 & 248;
+
+        $i174 = (int) $s7;
+
+        if $i174 != 240 goto label52;
+
+        i132 = i122 + 1;
+
+        if i132 >= i3 goto label31;
+
+        $r28 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b67 = $r28[i132];
+
+        $i175 = (int) $b67;
+
+        i133 = $i175 & 255;
+
+        goto label34;
+
+     label31:
+        $r3 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: java.io.InputStream fInputStream>;
+
+        $i10 = virtualinvoke $r3.<java.io.InputStream: int read()>();
+
+        i133 = $i10;
+
+        $i177 = (int) -1;
+
+        if $i10 != $i177 goto label33;
+
+        if i120 <= i0 goto label32;
+
+        $r27 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b65 = (byte) s4;
+
+        $r27[0] = $b65;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fOffset> = 1;
+
+        $i66 = i120 - i0;
+
+        return $i66;
+
+     label32:
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void expectedByte(int,int)>(2, 4);
+
+     label33:
+        i121 = i121 + 1;
+
+     label34:
+        $i134 = i133 & 192;
+
+        if $i134 != 128 goto label35;
+
+        $i63 = i133 & 48;
+
+        if $i63 != 0 goto label37;
+
+        $s64 = s4 & 7;
+
+        if $s64 != 0 goto label37;
+
+     label35:
+        if i120 <= i0 goto label36;
+
+        $r25 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b60 = (byte) s4;
+
+        $r25[0] = $b60;
+
+        $r26 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b61 = (byte) i133;
+
+        $r26[1] = $b61;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fOffset> = 2;
+
+        $i62 = i120 - i0;
+
+        return $i62;
+
+     label36:
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void invalidByte(int,int,int)>(2, 4, i133);
+
+     label37:
+        i135 = i132 + 1;
+
+        if i135 >= i3 goto label38;
+
+        $r24 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b59 = $r24[i135];
+
+        $i178 = (int) $b59;
+
+        i136 = $i178 & 255;
+
+        goto label41;
+
+     label38:
+        $r4 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: java.io.InputStream fInputStream>;
+
+        $i11 = virtualinvoke $r4.<java.io.InputStream: int read()>();
+
+        i136 = $i11;
+
+        $i180 = (int) -1;
+
+        if $i11 != $i180 goto label40;
+
+        if i120 <= i0 goto label39;
+
+        $r22 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b56 = (byte) s4;
+
+        $r22[0] = $b56;
+
+        $r23 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b57 = (byte) i133;
+
+        $r23[1] = $b57;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fOffset> = 2;
+
+        $i58 = i120 - i0;
+
+        return $i58;
+
+     label39:
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void expectedByte(int,int)>(3, 4);
+
+     label40:
+        i121 = i121 + 1;
+
+     label41:
+        $i137 = i136 & 192;
+
+        if $i137 == 128 goto label43;
+
+        if i120 <= i0 goto label42;
+
+        $r19 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b52 = (byte) s4;
+
+        $r19[0] = $b52;
+
+        $r20 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b53 = (byte) i133;
+
+        $r20[1] = $b53;
+
+        $r21 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b54 = (byte) i136;
+
+        $r21[2] = $b54;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fOffset> = 3;
+
+        $i55 = i120 - i0;
+
+        return $i55;
+
+     label42:
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void invalidByte(int,int,int)>(3, 4, i136);
+
+     label43:
+        i122 = i135 + 1;
+
+        if i122 >= i3 goto label44;
+
+        $r18 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b51 = $r18[i122];
+
+        $i181 = (int) $b51;
+
+        i138 = $i181 & 255;
+
+        goto label47;
+
+     label44:
+        $r5 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: java.io.InputStream fInputStream>;
+
+        $i12 = virtualinvoke $r5.<java.io.InputStream: int read()>();
+
+        i138 = $i12;
+
+        $i183 = (int) -1;
+
+        if $i12 != $i183 goto label46;
+
+        if i120 <= i0 goto label45;
+
+        $r15 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b47 = (byte) s4;
+
+        $r15[0] = $b47;
+
+        $r16 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b48 = (byte) i133;
+
+        $r16[1] = $b48;
+
+        $r17 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b49 = (byte) i136;
+
+        $r17[2] = $b49;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fOffset> = 3;
+
+        $i50 = i120 - i0;
+
+        return $i50;
+
+     label45:
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void expectedByte(int,int)>(4, 4);
+
+     label46:
+        i121 = i121 + 1;
+
+     label47:
+        $i139 = i138 & 192;
+
+        if $i139 == 128 goto label49;
+
+        if i120 <= i0 goto label48;
+
+        $r11 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b42 = (byte) s4;
+
+        $r11[0] = $b42;
+
+        $r12 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b43 = (byte) i133;
+
+        $r12[1] = $b43;
+
+        $r13 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b44 = (byte) i136;
+
+        $r13[2] = $b44;
+
+        $r14 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b45 = (byte) i138;
+
+        $r14[3] = $b45;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fOffset> = 4;
+
+        $i46 = i120 - i0;
+
+        return $i46;
+
+     label48:
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void invalidByte(int,int,int)>(4, 4, i136);
+
+     label49:
+        $i14 = i120 + 1;
+
+        $i13 = lengthof r6;
+
+        if $i14 < $i13 goto label50;
+
+        $r7 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b37 = (byte) s4;
+
+        $r7[0] = $b37;
+
+        $r8 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b38 = (byte) i133;
+
+        $r8[1] = $b38;
+
+        $r9 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b39 = (byte) i136;
+
+        $r9[2] = $b39;
+
+        $r10 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b40 = (byte) i138;
+
+        $r10[3] = $b40;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fOffset> = 4;
+
+        $i41 = i120 - i0;
+
+        return $i41;
+
+     label50:
+        $i184 = (int) s4;
+
+        $i15 = $i184 << 2;
+
+        $i18 = $i15 & 28;
+
+        $i16 = i133 >> 4;
+
+        $i17 = $i16 & 3;
+
+        i19 = $i18 | $i17;
+
+        if i19 <= 16 goto label51;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void invalidSurrogate(int)>(i19);
+
+     label51:
+        $i31 = i19 - 1;
+
+        $i32 = i133 & 15;
+
+        $i33 = i136 & 63;
+
+        $i34 = i138 & 63;
+
+        $i20 = $i31 << 6;
+
+        $i21 = $i20 & 960;
+
+        $i186 = (int) 55296;
+
+        $i23 = $i186 | $i21;
+
+        $i22 = $i32 << 2;
+
+        $i25 = $i23 | $i22;
+
+        $i24 = $i33 >> 4;
+
+        $i35 = $i25 | $i24;
+
+        $i26 = $i33 << 6;
+
+        $i27 = $i26 & 960;
+
+        $i188 = (int) 56320;
+
+        $i28 = $i188 | $i27;
+
+        $i36 = $i28 | $i34;
+
+        i140 = i120 + 1;
+
+        $c29 = (char) $i35;
+
+        r6[i120] = $c29;
+
+        i120 = i140 + 1;
+
+        $c30 = (char) $i36;
+
+        r6[i140] = $c30;
+
+        $i190 = (int) -2;
+
+        i121 = i121 + $i190;
+
+        goto label54;
+
+     label52:
+        if i120 <= i0 goto label53;
+
+        $r2 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $b8 = (byte) s4;
+
+        $r2[0] = $b8;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fOffset> = 1;
+
+        $i9 = i120 - i0;
+
+        return $i9;
+
+     label53:
+        $i191 = (int) s4;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: void invalidByte(int,int,int)>(1, 1, $i191);
+
+     label54:
+        i122 = i122 + 1;
+
+        goto label07;
+
+     label55:
+        return i121;
+    }
+
+    public long skip(long) throws java.io.IOException
+    {
+        byte[] $r1;
+        long l0, $l3, $l6, $l8, l9;
+        byte $b4, $b7;
+        com.sun.org.apache.xerces.internal.impl.io.UTF8Reader r0;
+        int $i1, $i2, $i5, $i10, $i11, $i12;
+        char[] r2;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.io.UTF8Reader;
+
+        l0 := @parameter0: long;
+
+        l9 = l0;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        $i1 = lengthof $r1;
+
+        r2 = newarray (char)[$i1];
+
+     label1:
+        $i2 = lengthof r2;
+
+        $l3 = (long) $i2;
+
+        $b4 = $l3 cmp l9;
+
+        $i11 = (int) $b4;
+
+        if $i11 >= 0 goto label2;
+
+        $i10 = lengthof r2;
+
+        goto label3;
+
+     label2:
+        $i10 = (int) l9;
+
+     label3:
+        $i5 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int read(char[],int,int)>(r2, 0, $i10);
+
+        if $i5 <= 0 goto label4;
+
+        $l6 = (long) $i5;
+
+        l9 = l9 - $l6;
+
+        $b7 = l9 cmp 0L;
+
+        $i12 = (int) $b7;
+
+        if $i12 > 0 goto label1;
+
+     label4:
+        $l8 = l0 - l9;
+
+        return $l8;
+    }
+
+    public boolean ready() throws java.io.IOException
+    {
+        com.sun.org.apache.xerces.internal.impl.io.UTF8Reader r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.io.UTF8Reader;
+
+        return 0;
+    }
+
+    public boolean markSupported()
+    {
+        com.sun.org.apache.xerces.internal.impl.io.UTF8Reader r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.io.UTF8Reader;
+
+        return 0;
+    }
+
+    public void mark(int) throws java.io.IOException
+    {
+        java.lang.Object[] $r2;
+        com.sun.org.apache.xerces.internal.impl.io.UTF8Reader r1;
+        java.util.Locale $r3;
+        int i0;
+        java.io.IOException $r0;
+        com.sun.org.apache.xerces.internal.util.MessageFormatter $r4;
+        java.lang.String $r5;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.impl.io.UTF8Reader;
+
+        i0 := @parameter0: int;
+
+        $r0 = new java.io.IOException;
+
+        $r4 = r1.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: com.sun.org.apache.xerces.internal.util.MessageFormatter fFormatter>;
+
+        $r3 = r1.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: java.util.Locale fLocale>;
+
+        $r2 = newarray (java.lang.Object)[2];
+
+        $r2[0] = "mark()";
+
+        $r2[1] = "UTF-8";
+
+        $r5 = interfaceinvoke $r4.<com.sun.org.apache.xerces.internal.util.MessageFormatter: java.lang.String formatMessage(java.util.Locale,java.lang.String,java.lang.Object[])>($r3, "OperationNotSupported", $r2);
+
+        specialinvoke $r0.<java.io.IOException: void <init>(java.lang.String)>($r5);
+
+        throw $r0;
+    }
+
+    public void reset() throws java.io.IOException
+    {
+        int $i1;
+        com.sun.org.apache.xerces.internal.impl.io.UTF8Reader r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.io.UTF8Reader;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fOffset> = 0;
+
+        $i1 = (int) -1;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int fSurrogate> = $i1;
+
+        return;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        byte[] $r2;
+        com.sun.xml.internal.stream.util.BufferAllocator $r0;
+        com.sun.org.apache.xerces.internal.impl.io.UTF8Reader r1;
+        java.io.InputStream $r3;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.impl.io.UTF8Reader;
+
+        $r0 = staticinvoke <com.sun.xml.internal.stream.util.ThreadLocalBufferAllocator: com.sun.xml.internal.stream.util.BufferAllocator getBufferAllocator()>();
+
+        $r2 = r1.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer>;
+
+        virtualinvoke $r0.<com.sun.xml.internal.stream.util.BufferAllocator: void returnByteBuffer(byte[])>($r2);
+
+        r1.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: byte[] fBuffer> = null;
+
+        $r3 = r1.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: java.io.InputStream fInputStream>;
+
+        virtualinvoke $r3.<java.io.InputStream: void close()>();
+
+        return;
+    }
+
+    private void expectedByte(int, int) throws com.sun.org.apache.xerces.internal.impl.io.MalformedByteSequenceException
+    {
+        java.lang.Object[] $r2;
+        com.sun.org.apache.xerces.internal.impl.io.UTF8Reader r1;
+        java.util.Locale $r4;
+        int i0, i1;
+        com.sun.org.apache.xerces.internal.impl.io.MalformedByteSequenceException $r0;
+        com.sun.org.apache.xerces.internal.util.MessageFormatter $r3;
+        java.lang.String $r5, $r6;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.impl.io.UTF8Reader;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r0 = new com.sun.org.apache.xerces.internal.impl.io.MalformedByteSequenceException;
+
+        $r3 = r1.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: com.sun.org.apache.xerces.internal.util.MessageFormatter fFormatter>;
+
+        $r4 = r1.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: java.util.Locale fLocale>;
+
+        $r2 = newarray (java.lang.Object)[2];
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>(i0);
+
+        $r2[0] = $r5;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>(i1);
+
+        $r2[1] = $r6;
+
+        specialinvoke $r0.<com.sun.org.apache.xerces.internal.impl.io.MalformedByteSequenceException: void <init>(com.sun.org.apache.xerces.internal.util.MessageFormatter,java.util.Locale,java.lang.String,java.lang.String,java.lang.Object[])>($r3, $r4, "http://www.w3.org/TR/1998/REC-xml-19980210", "ExpectedByte", $r2);
+
+        throw $r0;
+    }
+
+    private void invalidByte(int, int, int) throws com.sun.org.apache.xerces.internal.impl.io.MalformedByteSequenceException
+    {
+        java.lang.Object[] $r2;
+        com.sun.org.apache.xerces.internal.impl.io.UTF8Reader r1;
+        java.util.Locale $r4;
+        int i0, i1, i2;
+        com.sun.org.apache.xerces.internal.impl.io.MalformedByteSequenceException $r0;
+        com.sun.org.apache.xerces.internal.util.MessageFormatter $r3;
+        java.lang.String $r5, $r6;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.impl.io.UTF8Reader;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $r0 = new com.sun.org.apache.xerces.internal.impl.io.MalformedByteSequenceException;
+
+        $r3 = r1.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: com.sun.org.apache.xerces.internal.util.MessageFormatter fFormatter>;
+
+        $r4 = r1.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: java.util.Locale fLocale>;
+
+        $r2 = newarray (java.lang.Object)[2];
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>(i0);
+
+        $r2[0] = $r5;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>(i1);
+
+        $r2[1] = $r6;
+
+        specialinvoke $r0.<com.sun.org.apache.xerces.internal.impl.io.MalformedByteSequenceException: void <init>(com.sun.org.apache.xerces.internal.util.MessageFormatter,java.util.Locale,java.lang.String,java.lang.String,java.lang.Object[])>($r3, $r4, "http://www.w3.org/TR/1998/REC-xml-19980210", "InvalidByte", $r2);
+
+        throw $r0;
+    }
+
+    private void invalidSurrogate(int) throws com.sun.org.apache.xerces.internal.impl.io.MalformedByteSequenceException
+    {
+        java.lang.Object[] $r2;
+        com.sun.org.apache.xerces.internal.impl.io.UTF8Reader r1;
+        java.util.Locale $r4;
+        int i0;
+        com.sun.org.apache.xerces.internal.impl.io.MalformedByteSequenceException $r0;
+        com.sun.org.apache.xerces.internal.util.MessageFormatter $r3;
+        java.lang.String $r5;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.impl.io.UTF8Reader;
+
+        i0 := @parameter0: int;
+
+        $r0 = new com.sun.org.apache.xerces.internal.impl.io.MalformedByteSequenceException;
+
+        $r3 = r1.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: com.sun.org.apache.xerces.internal.util.MessageFormatter fFormatter>;
+
+        $r4 = r1.<com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: java.util.Locale fLocale>;
+
+        $r2 = newarray (java.lang.Object)[1];
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>(i0);
+
+        $r2[0] = $r5;
+
+        specialinvoke $r0.<com.sun.org.apache.xerces.internal.impl.io.MalformedByteSequenceException: void <init>(com.sun.org.apache.xerces.internal.util.MessageFormatter,java.util.Locale,java.lang.String,java.lang.String,java.lang.Object[])>($r3, $r4, "http://www.w3.org/TR/1998/REC-xml-19980210", "InvalidHighSurrogate", $r2);
+
+        throw $r0;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: boolean DEBUG_READ> = 0;
+
+        <com.sun.org.apache.xerces.internal.impl.io.UTF8Reader: int DEFAULT_BUFFER_SIZE> = 2048;
+
+        return;
+    }
+}

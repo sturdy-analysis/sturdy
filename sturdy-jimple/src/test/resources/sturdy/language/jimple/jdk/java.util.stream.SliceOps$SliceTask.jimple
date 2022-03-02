@@ -1,0 +1,625 @@
+final class java.util.stream.SliceOps$SliceTask extends java.util.stream.AbstractShortCircuitTask
+{
+    private final java.util.stream.AbstractPipeline op;
+    private final java.util.function.IntFunction generator;
+    private final long targetOffset;
+    private final long targetSize;
+    private long thisNodeSize;
+    private volatile boolean completed;
+
+    void <init>(java.util.stream.AbstractPipeline, java.util.stream.PipelineHelper, java.util.Spliterator, java.util.function.IntFunction, long, long)
+    {
+        java.util.stream.PipelineHelper r1;
+        java.util.stream.AbstractPipeline r3;
+        long l0, l1;
+        java.util.stream.SliceOps$SliceTask r0;
+        java.util.Spliterator r2;
+        java.util.function.IntFunction r4;
+
+        r0 := @this: java.util.stream.SliceOps$SliceTask;
+
+        r3 := @parameter0: java.util.stream.AbstractPipeline;
+
+        r1 := @parameter1: java.util.stream.PipelineHelper;
+
+        r2 := @parameter2: java.util.Spliterator;
+
+        r4 := @parameter3: java.util.function.IntFunction;
+
+        l0 := @parameter4: long;
+
+        l1 := @parameter5: long;
+
+        specialinvoke r0.<java.util.stream.AbstractShortCircuitTask: void <init>(java.util.stream.PipelineHelper,java.util.Spliterator)>(r1, r2);
+
+        r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.AbstractPipeline op> = r3;
+
+        r0.<java.util.stream.SliceOps$SliceTask: java.util.function.IntFunction generator> = r4;
+
+        r0.<java.util.stream.SliceOps$SliceTask: long targetOffset> = l0;
+
+        r0.<java.util.stream.SliceOps$SliceTask: long targetSize> = l1;
+
+        return;
+    }
+
+    void <init>(java.util.stream.SliceOps$SliceTask, java.util.Spliterator)
+    {
+        java.util.stream.AbstractPipeline $r3;
+        long $l0, $l1;
+        java.util.stream.SliceOps$SliceTask r0, r1;
+        java.util.Spliterator r2;
+        java.util.function.IntFunction $r4;
+
+        r0 := @this: java.util.stream.SliceOps$SliceTask;
+
+        r1 := @parameter0: java.util.stream.SliceOps$SliceTask;
+
+        r2 := @parameter1: java.util.Spliterator;
+
+        specialinvoke r0.<java.util.stream.AbstractShortCircuitTask: void <init>(java.util.stream.AbstractShortCircuitTask,java.util.Spliterator)>(r1, r2);
+
+        $r3 = r1.<java.util.stream.SliceOps$SliceTask: java.util.stream.AbstractPipeline op>;
+
+        r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.AbstractPipeline op> = $r3;
+
+        $r4 = r1.<java.util.stream.SliceOps$SliceTask: java.util.function.IntFunction generator>;
+
+        r0.<java.util.stream.SliceOps$SliceTask: java.util.function.IntFunction generator> = $r4;
+
+        $l0 = r1.<java.util.stream.SliceOps$SliceTask: long targetOffset>;
+
+        r0.<java.util.stream.SliceOps$SliceTask: long targetOffset> = $l0;
+
+        $l1 = r1.<java.util.stream.SliceOps$SliceTask: long targetSize>;
+
+        r0.<java.util.stream.SliceOps$SliceTask: long targetSize> = $l1;
+
+        return;
+    }
+
+    protected java.util.stream.SliceOps$SliceTask makeChild(java.util.Spliterator)
+    {
+        java.util.stream.SliceOps$SliceTask $r0, r1;
+        java.util.Spliterator r2;
+
+        r1 := @this: java.util.stream.SliceOps$SliceTask;
+
+        r2 := @parameter0: java.util.Spliterator;
+
+        $r0 = new java.util.stream.SliceOps$SliceTask;
+
+        specialinvoke $r0.<java.util.stream.SliceOps$SliceTask: void <init>(java.util.stream.SliceOps$SliceTask,java.util.Spliterator)>(r1, r2);
+
+        return $r0;
+    }
+
+    protected final java.util.stream.Node getEmptyResult()
+    {
+        java.util.stream.AbstractPipeline $r1;
+        java.util.stream.SliceOps$SliceTask r0;
+        java.util.stream.Node $r3;
+        java.util.stream.StreamShape $r2;
+
+        r0 := @this: java.util.stream.SliceOps$SliceTask;
+
+        $r1 = r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.AbstractPipeline op>;
+
+        $r2 = virtualinvoke $r1.<java.util.stream.AbstractPipeline: java.util.stream.StreamShape getOutputShape()>();
+
+        $r3 = staticinvoke <java.util.stream.Nodes: java.util.stream.Node emptyNode(java.util.stream.StreamShape)>($r2);
+
+        return $r3;
+    }
+
+    protected final java.util.stream.Node doLeaf()
+    {
+        java.util.stream.PipelineHelper $r2, $r3, $r14, $r17, $r18;
+        long $l0, $l3;
+        java.util.stream.Node $r8, $r21;
+        int $i1, $i2;
+        java.util.stream.StreamOpFlag $r10;
+        boolean $z0, $z1;
+        java.util.function.IntFunction $r1, $r11;
+        java.util.stream.Node$Builder $r4, $r7, $r13;
+        java.util.stream.SliceOps$SliceTask r0;
+        java.util.stream.AbstractPipeline $r9, $r12, $r15, $r23;
+        java.util.Spliterator $r5, $r20, $r22;
+        java.util.stream.Sink $r6, $r16, $r19;
+
+        r0 := @this: java.util.stream.SliceOps$SliceTask;
+
+        $z0 = virtualinvoke r0.<java.util.stream.SliceOps$SliceTask: boolean isRoot()>();
+
+        if $z0 == 0 goto label3;
+
+        $r10 = <java.util.stream.StreamOpFlag: java.util.stream.StreamOpFlag SIZED>;
+
+        $r9 = r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.AbstractPipeline op>;
+
+        $i1 = $r9.<java.util.stream.AbstractPipeline: int sourceOrOpFlags>;
+
+        $z1 = virtualinvoke $r10.<java.util.stream.StreamOpFlag: boolean isPreserved(int)>($i1);
+
+        if $z1 == 0 goto label1;
+
+        $r23 = r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.AbstractPipeline op>;
+
+        $r22 = r0.<java.util.stream.SliceOps$SliceTask: java.util.Spliterator spliterator>;
+
+        $l3 = virtualinvoke $r23.<java.util.stream.AbstractPipeline: long exactOutputSizeIfKnown(java.util.Spliterator)>($r22);
+
+        goto label2;
+
+     label1:
+        $l3 = -1L;
+
+     label2:
+        $r12 = r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.AbstractPipeline op>;
+
+        $r11 = r0.<java.util.stream.SliceOps$SliceTask: java.util.function.IntFunction generator>;
+
+        $r13 = virtualinvoke $r12.<java.util.stream.AbstractPipeline: java.util.stream.Node$Builder makeNodeBuilder(long,java.util.function.IntFunction)>($l3, $r11);
+
+        $r15 = r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.AbstractPipeline op>;
+
+        $r14 = r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.PipelineHelper helper>;
+
+        $i2 = virtualinvoke $r14.<java.util.stream.PipelineHelper: int getStreamAndOpFlags()>();
+
+        $r16 = virtualinvoke $r15.<java.util.stream.AbstractPipeline: java.util.stream.Sink opWrapSink(int,java.util.stream.Sink)>($i2, $r13);
+
+        $r18 = r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.PipelineHelper helper>;
+
+        $r17 = r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.PipelineHelper helper>;
+
+        $r19 = virtualinvoke $r17.<java.util.stream.PipelineHelper: java.util.stream.Sink wrapSink(java.util.stream.Sink)>($r16);
+
+        $r20 = r0.<java.util.stream.SliceOps$SliceTask: java.util.Spliterator spliterator>;
+
+        virtualinvoke $r18.<java.util.stream.PipelineHelper: void copyIntoWithCancel(java.util.stream.Sink,java.util.Spliterator)>($r19, $r20);
+
+        $r21 = interfaceinvoke $r13.<java.util.stream.Node$Builder: java.util.stream.Node build()>();
+
+        return $r21;
+
+     label3:
+        $r3 = r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.PipelineHelper helper>;
+
+        $r2 = r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.PipelineHelper helper>;
+
+        $r1 = r0.<java.util.stream.SliceOps$SliceTask: java.util.function.IntFunction generator>;
+
+        $r4 = virtualinvoke $r2.<java.util.stream.PipelineHelper: java.util.stream.Node$Builder makeNodeBuilder(long,java.util.function.IntFunction)>(-1L, $r1);
+
+        $r5 = r0.<java.util.stream.SliceOps$SliceTask: java.util.Spliterator spliterator>;
+
+        $r6 = virtualinvoke $r3.<java.util.stream.PipelineHelper: java.util.stream.Sink wrapAndCopyInto(java.util.stream.Sink,java.util.Spliterator)>($r4, $r5);
+
+        $r7 = (java.util.stream.Node$Builder) $r6;
+
+        $r8 = interfaceinvoke $r7.<java.util.stream.Node$Builder: java.util.stream.Node build()>();
+
+        $l0 = interfaceinvoke $r8.<java.util.stream.Node: long count()>();
+
+        r0.<java.util.stream.SliceOps$SliceTask: long thisNodeSize> = $l0;
+
+        r0.<java.util.stream.SliceOps$SliceTask: boolean completed> = 1;
+
+        r0.<java.util.stream.SliceOps$SliceTask: java.util.Spliterator spliterator> = null;
+
+        return $r8;
+    }
+
+    public final void onCompletion(java.util.concurrent.CountedCompleter)
+    {
+        java.util.concurrent.CountedCompleter r1;
+        byte $b7, $b9, $b11;
+        java.util.stream.AbstractTask $r2, $r4, $r6, $r10, $r13, $r18;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.util.stream.SliceOps$SliceTask r0, $r3, $r5, $r7, $r11, $r14, $r19;
+        java.util.stream.AbstractPipeline $r8;
+        long $l0, $l1, $l2, $l3, $l4, $l5, $l6, $l8, $l10;
+        java.util.stream.Node $r15, $r17, r21, $r22;
+        int $i12;
+        java.lang.Object $r12, $r16, $r20;
+        java.util.stream.StreamShape $r9;
+
+        r0 := @this: java.util.stream.SliceOps$SliceTask;
+
+        r1 := @parameter0: java.util.concurrent.CountedCompleter;
+
+        $z0 = virtualinvoke r0.<java.util.stream.SliceOps$SliceTask: boolean isLeaf()>();
+
+        if $z0 != 0 goto label7;
+
+        $r2 = r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.AbstractTask leftChild>;
+
+        $r3 = (java.util.stream.SliceOps$SliceTask) $r2;
+
+        $l4 = $r3.<java.util.stream.SliceOps$SliceTask: long thisNodeSize>;
+
+        $r4 = r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.AbstractTask rightChild>;
+
+        $r5 = (java.util.stream.SliceOps$SliceTask) $r4;
+
+        $l3 = $r5.<java.util.stream.SliceOps$SliceTask: long thisNodeSize>;
+
+        $l5 = $l4 + $l3;
+
+        r0.<java.util.stream.SliceOps$SliceTask: long thisNodeSize> = $l5;
+
+        $z3 = r0.<java.util.stream.SliceOps$SliceTask: boolean canceled>;
+
+        if $z3 == 0 goto label1;
+
+        r0.<java.util.stream.SliceOps$SliceTask: long thisNodeSize> = 0L;
+
+        r21 = virtualinvoke r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.Node getEmptyResult()>();
+
+        goto label4;
+
+     label1:
+        $l6 = r0.<java.util.stream.SliceOps$SliceTask: long thisNodeSize>;
+
+        $b7 = $l6 cmp 0L;
+
+        if $b7 != 0 goto label2;
+
+        r21 = virtualinvoke r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.Node getEmptyResult()>();
+
+        goto label4;
+
+     label2:
+        $r6 = r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.AbstractTask leftChild>;
+
+        $r7 = (java.util.stream.SliceOps$SliceTask) $r6;
+
+        $l8 = $r7.<java.util.stream.SliceOps$SliceTask: long thisNodeSize>;
+
+        $b9 = $l8 cmp 0L;
+
+        if $b9 != 0 goto label3;
+
+        $r18 = r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.AbstractTask rightChild>;
+
+        $r19 = (java.util.stream.SliceOps$SliceTask) $r18;
+
+        $r20 = virtualinvoke $r19.<java.util.stream.SliceOps$SliceTask: java.lang.Object getLocalResult()>();
+
+        r21 = (java.util.stream.Node) $r20;
+
+        goto label4;
+
+     label3:
+        $r8 = r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.AbstractPipeline op>;
+
+        $r9 = virtualinvoke $r8.<java.util.stream.AbstractPipeline: java.util.stream.StreamShape getOutputShape()>();
+
+        $r10 = r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.AbstractTask leftChild>;
+
+        $r11 = (java.util.stream.SliceOps$SliceTask) $r10;
+
+        $r12 = virtualinvoke $r11.<java.util.stream.SliceOps$SliceTask: java.lang.Object getLocalResult()>();
+
+        $r15 = (java.util.stream.Node) $r12;
+
+        $r13 = r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.AbstractTask rightChild>;
+
+        $r14 = (java.util.stream.SliceOps$SliceTask) $r13;
+
+        $r16 = virtualinvoke $r14.<java.util.stream.SliceOps$SliceTask: java.lang.Object getLocalResult()>();
+
+        $r17 = (java.util.stream.Node) $r16;
+
+        r21 = staticinvoke <java.util.stream.Nodes: java.util.stream.Node conc(java.util.stream.StreamShape,java.util.stream.Node,java.util.stream.Node)>($r9, $r15, $r17);
+
+     label4:
+        $z4 = virtualinvoke r0.<java.util.stream.SliceOps$SliceTask: boolean isRoot()>();
+
+        if $z4 == 0 goto label5;
+
+        $r22 = specialinvoke r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.Node doTruncate(java.util.stream.Node)>(r21);
+
+        goto label6;
+
+     label5:
+        $r22 = r21;
+
+     label6:
+        virtualinvoke r0.<java.util.stream.SliceOps$SliceTask: void setLocalResult(java.lang.Object)>($r22);
+
+        r0.<java.util.stream.SliceOps$SliceTask: boolean completed> = 1;
+
+     label7:
+        $l10 = r0.<java.util.stream.SliceOps$SliceTask: long targetSize>;
+
+        $b11 = $l10 cmp 0L;
+
+        $i12 = (int) $b11;
+
+        if $i12 < 0 goto label8;
+
+        $z1 = virtualinvoke r0.<java.util.stream.SliceOps$SliceTask: boolean isRoot()>();
+
+        if $z1 != 0 goto label8;
+
+        $l1 = r0.<java.util.stream.SliceOps$SliceTask: long targetOffset>;
+
+        $l0 = r0.<java.util.stream.SliceOps$SliceTask: long targetSize>;
+
+        $l2 = $l1 + $l0;
+
+        $z2 = specialinvoke r0.<java.util.stream.SliceOps$SliceTask: boolean isLeftCompleted(long)>($l2);
+
+        if $z2 == 0 goto label8;
+
+        virtualinvoke r0.<java.util.stream.SliceOps$SliceTask: void cancelLaterNodes()>();
+
+     label8:
+        specialinvoke r0.<java.util.stream.AbstractShortCircuitTask: void onCompletion(java.util.concurrent.CountedCompleter)>(r1);
+
+        return;
+    }
+
+    protected void cancel()
+    {
+        java.util.stream.SliceOps$SliceTask r0;
+        java.util.stream.Node $r1;
+        boolean $z0;
+
+        r0 := @this: java.util.stream.SliceOps$SliceTask;
+
+        specialinvoke r0.<java.util.stream.AbstractShortCircuitTask: void cancel()>();
+
+        $z0 = r0.<java.util.stream.SliceOps$SliceTask: boolean completed>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.Node getEmptyResult()>();
+
+        virtualinvoke r0.<java.util.stream.SliceOps$SliceTask: void setLocalResult(java.lang.Object)>($r1);
+
+     label1:
+        return;
+    }
+
+    private java.util.stream.Node doTruncate(java.util.stream.Node)
+    {
+        long $l0, $l2, $l3, $l4, $l5, $l6, $l7;
+        java.util.stream.SliceOps$SliceTask r0;
+        java.util.stream.Node r1, $r3;
+        byte $b1;
+        int $i8;
+        java.util.function.IntFunction $r2;
+
+        r0 := @this: java.util.stream.SliceOps$SliceTask;
+
+        r1 := @parameter0: java.util.stream.Node;
+
+        $l0 = r0.<java.util.stream.SliceOps$SliceTask: long targetSize>;
+
+        $b1 = $l0 cmp 0L;
+
+        $i8 = (int) $b1;
+
+        if $i8 < 0 goto label1;
+
+        $l3 = interfaceinvoke r1.<java.util.stream.Node: long count()>();
+
+        $l5 = r0.<java.util.stream.SliceOps$SliceTask: long targetOffset>;
+
+        $l4 = r0.<java.util.stream.SliceOps$SliceTask: long targetSize>;
+
+        $l6 = $l5 + $l4;
+
+        $l7 = staticinvoke <java.lang.Math: long min(long,long)>($l3, $l6);
+
+        goto label2;
+
+     label1:
+        $l7 = r0.<java.util.stream.SliceOps$SliceTask: long thisNodeSize>;
+
+     label2:
+        $l2 = r0.<java.util.stream.SliceOps$SliceTask: long targetOffset>;
+
+        $r2 = r0.<java.util.stream.SliceOps$SliceTask: java.util.function.IntFunction generator>;
+
+        $r3 = interfaceinvoke r1.<java.util.stream.Node: java.util.stream.Node truncate(long,long,java.util.function.IntFunction)>($l2, $l7, $r2);
+
+        return $r3;
+    }
+
+    private boolean isLeftCompleted(long)
+    {
+        long l0, $l3, $l5, l6;
+        byte $b1, $b2, $b4;
+        int $i7, $i8, $i9;
+        java.util.stream.AbstractTask $r1, $r2, $r3, $r7;
+        boolean $z0, $z1;
+        java.util.stream.SliceOps$SliceTask r0, r4, r5, r6;
+
+        r0 := @this: java.util.stream.SliceOps$SliceTask;
+
+        l0 := @parameter0: long;
+
+        $z0 = r0.<java.util.stream.SliceOps$SliceTask: boolean completed>;
+
+        if $z0 == 0 goto label1;
+
+        $l5 = r0.<java.util.stream.SliceOps$SliceTask: long thisNodeSize>;
+
+        goto label2;
+
+     label1:
+        $l5 = specialinvoke r0.<java.util.stream.SliceOps$SliceTask: long completedSize(long)>(l0);
+
+     label2:
+        l6 = $l5;
+
+        $b1 = $l5 cmp l0;
+
+        $i7 = (int) $b1;
+
+        if $i7 < 0 goto label3;
+
+        return 1;
+
+     label3:
+        $r1 = virtualinvoke r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.AbstractTask getParent()>();
+
+        r5 = (java.util.stream.SliceOps$SliceTask) $r1;
+
+        r6 = r0;
+
+     label4:
+        if r5 == null goto label6;
+
+        $r2 = r5.<java.util.stream.SliceOps$SliceTask: java.util.stream.AbstractTask rightChild>;
+
+        if r6 != $r2 goto label5;
+
+        $r3 = r5.<java.util.stream.SliceOps$SliceTask: java.util.stream.AbstractTask leftChild>;
+
+        r4 = (java.util.stream.SliceOps$SliceTask) $r3;
+
+        if r4 == null goto label5;
+
+        $l3 = specialinvoke r4.<java.util.stream.SliceOps$SliceTask: long completedSize(long)>(l0);
+
+        l6 = l6 + $l3;
+
+        $b4 = l6 cmp l0;
+
+        $i8 = (int) $b4;
+
+        if $i8 < 0 goto label5;
+
+        return 1;
+
+     label5:
+        r6 = r5;
+
+        $r7 = virtualinvoke r5.<java.util.stream.SliceOps$SliceTask: java.util.stream.AbstractTask getParent()>();
+
+        r5 = (java.util.stream.SliceOps$SliceTask) $r7;
+
+        goto label4;
+
+     label6:
+        $b2 = l6 cmp l0;
+
+        $i9 = (int) $b2;
+
+        if $i9 < 0 goto label7;
+
+        $z1 = 1;
+
+        goto label8;
+
+     label7:
+        $z1 = 0;
+
+     label8:
+        return $z1;
+    }
+
+    private long completedSize(long)
+    {
+        long $l0, l1, $l2, $l4, $l5, $l6;
+        java.util.stream.SliceOps$SliceTask r0, r2, r4;
+        byte $b3;
+        int $i7;
+        java.util.stream.AbstractTask $r1, $r3;
+        boolean $z0;
+
+        r0 := @this: java.util.stream.SliceOps$SliceTask;
+
+        l1 := @parameter0: long;
+
+        $z0 = r0.<java.util.stream.SliceOps$SliceTask: boolean completed>;
+
+        if $z0 == 0 goto label1;
+
+        $l5 = r0.<java.util.stream.SliceOps$SliceTask: long thisNodeSize>;
+
+        return $l5;
+
+     label1:
+        $r1 = r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.AbstractTask leftChild>;
+
+        r2 = (java.util.stream.SliceOps$SliceTask) $r1;
+
+        $r3 = r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.AbstractTask rightChild>;
+
+        r4 = (java.util.stream.SliceOps$SliceTask) $r3;
+
+        if r2 == null goto label2;
+
+        if r4 != null goto label3;
+
+     label2:
+        $l0 = r0.<java.util.stream.SliceOps$SliceTask: long thisNodeSize>;
+
+        return $l0;
+
+     label3:
+        $l2 = specialinvoke r2.<java.util.stream.SliceOps$SliceTask: long completedSize(long)>(l1);
+
+        $b3 = $l2 cmp l1;
+
+        $i7 = (int) $b3;
+
+        if $i7 < 0 goto label4;
+
+        $l6 = $l2;
+
+        goto label5;
+
+     label4:
+        $l4 = specialinvoke r4.<java.util.stream.SliceOps$SliceTask: long completedSize(long)>(l1);
+
+        $l6 = $l2 + $l4;
+
+     label5:
+        return $l6;
+    }
+
+    protected volatile java.lang.Object getEmptyResult()
+    {
+        java.util.stream.SliceOps$SliceTask r0;
+        java.util.stream.Node $r1;
+
+        r0 := @this: java.util.stream.SliceOps$SliceTask;
+
+        $r1 = virtualinvoke r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.Node getEmptyResult()>();
+
+        return $r1;
+    }
+
+    protected volatile java.lang.Object doLeaf()
+    {
+        java.util.stream.SliceOps$SliceTask r0;
+        java.util.stream.Node $r1;
+
+        r0 := @this: java.util.stream.SliceOps$SliceTask;
+
+        $r1 = virtualinvoke r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.Node doLeaf()>();
+
+        return $r1;
+    }
+
+    protected volatile java.util.stream.AbstractTask makeChild(java.util.Spliterator)
+    {
+        java.util.stream.SliceOps$SliceTask r0, $r2;
+        java.util.Spliterator r1;
+
+        r0 := @this: java.util.stream.SliceOps$SliceTask;
+
+        r1 := @parameter0: java.util.Spliterator;
+
+        $r2 = virtualinvoke r0.<java.util.stream.SliceOps$SliceTask: java.util.stream.SliceOps$SliceTask makeChild(java.util.Spliterator)>(r1);
+
+        return $r2;
+    }
+}

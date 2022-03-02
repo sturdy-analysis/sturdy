@@ -1,0 +1,650 @@
+final class sun.security.smartcardio.PCSCTerminals extends javax.smartcardio.CardTerminals
+{
+    private static long contextId;
+    private java.util.Map stateMap;
+    private static final java.util.Map terminals;
+
+    void <init>()
+    {
+        sun.security.smartcardio.PCSCTerminals r0;
+
+        r0 := @this: sun.security.smartcardio.PCSCTerminals;
+
+        specialinvoke r0.<javax.smartcardio.CardTerminals: void <init>()>();
+
+        return;
+    }
+
+    static synchronized void initContext() throws sun.security.smartcardio.PCSCException
+    {
+        long $l0, $l2;
+        byte $b1;
+
+        $l0 = <sun.security.smartcardio.PCSCTerminals: long contextId>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        $l2 = staticinvoke <sun.security.smartcardio.PCSC: long SCardEstablishContext(int)>(0);
+
+        <sun.security.smartcardio.PCSCTerminals: long contextId> = $l2;
+
+     label1:
+        return;
+    }
+
+    private static synchronized sun.security.smartcardio.TerminalImpl implGetTerminal(java.lang.String)
+    {
+        long $l0;
+        java.lang.ref.Reference r3;
+        sun.security.smartcardio.TerminalImpl $r4, $r8;
+        java.util.Map $r1, $r6;
+        java.lang.Object $r2, $r7;
+        java.lang.String r0;
+        java.lang.ref.WeakReference $r5;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = <sun.security.smartcardio.PCSCTerminals: java.util.Map terminals>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.lang.Object get(java.lang.Object)>(r0);
+
+        r3 = (java.lang.ref.Reference) $r2;
+
+        if r3 == null goto label1;
+
+        $r7 = virtualinvoke r3.<java.lang.ref.Reference: java.lang.Object get()>();
+
+        $r8 = (sun.security.smartcardio.TerminalImpl) $r7;
+
+        goto label2;
+
+     label1:
+        $r8 = null;
+
+     label2:
+        if $r8 == null goto label3;
+
+        return $r8;
+
+     label3:
+        $r4 = new sun.security.smartcardio.TerminalImpl;
+
+        $l0 = <sun.security.smartcardio.PCSCTerminals: long contextId>;
+
+        specialinvoke $r4.<sun.security.smartcardio.TerminalImpl: void <init>(long,java.lang.String)>($l0, r0);
+
+        $r6 = <sun.security.smartcardio.PCSCTerminals: java.util.Map terminals>;
+
+        $r5 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r5.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>($r4);
+
+        interfaceinvoke $r6.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r0, $r5);
+
+        return $r4;
+    }
+
+    public synchronized java.util.List list(javax.smartcardio.CardTerminals$State) throws javax.smartcardio.CardException
+    {
+        java.lang.NullPointerException $r19;
+        int[] $r7;
+        java.util.Map $r3, $r8, $r10;
+        boolean $z0, $z1, $z2, $z3;
+        sun.security.smartcardio.PCSCException $r20;
+        javax.smartcardio.CardException $r12, $r21;
+        java.util.List $r4;
+        java.lang.StringBuilder $r13, $r14, $r15;
+        javax.smartcardio.CardTerminals$State $r17, $r18, r22;
+        long $l0;
+        java.lang.String[] $r0;
+        java.util.ArrayList $r1;
+        sun.security.smartcardio.TerminalImpl $r6;
+        int $i1, $i2, $i3, $i4, i5;
+        java.lang.String r5, $r16;
+        sun.security.smartcardio.PCSCTerminals$ReaderState r23, r24;
+        sun.security.smartcardio.PCSCTerminals r2;
+        java.lang.Object $r9, $r11;
+
+        r2 := @this: sun.security.smartcardio.PCSCTerminals;
+
+        r22 := @parameter0: javax.smartcardio.CardTerminals$State;
+
+        if r22 != null goto label01;
+
+        $r19 = new java.lang.NullPointerException;
+
+        specialinvoke $r19.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r19;
+
+     label01:
+        $l0 = <sun.security.smartcardio.PCSCTerminals: long contextId>;
+
+        $r0 = staticinvoke <sun.security.smartcardio.PCSC: java.lang.String[] SCardListReaders(long)>($l0);
+
+        $r1 = new java.util.ArrayList;
+
+        $i1 = lengthof $r0;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>(int)>($i1);
+
+        $r3 = r2.<sun.security.smartcardio.PCSCTerminals: java.util.Map stateMap>;
+
+        if $r3 != null goto label03;
+
+        $r17 = <javax.smartcardio.CardTerminals$State: javax.smartcardio.CardTerminals$State CARD_INSERTION>;
+
+        if r22 != $r17 goto label02;
+
+        r22 = <javax.smartcardio.CardTerminals$State: javax.smartcardio.CardTerminals$State CARD_PRESENT>;
+
+        goto label03;
+
+     label02:
+        $r18 = <javax.smartcardio.CardTerminals$State: javax.smartcardio.CardTerminals$State CARD_REMOVAL>;
+
+        if r22 != $r18 goto label03;
+
+        r22 = <javax.smartcardio.CardTerminals$State: javax.smartcardio.CardTerminals$State CARD_ABSENT>;
+
+     label03:
+        $i4 = lengthof $r0;
+
+        i5 = 0;
+
+     label04:
+        if i5 >= $i4 goto label12;
+
+        r5 = $r0[i5];
+
+        $r6 = staticinvoke <sun.security.smartcardio.PCSCTerminals: sun.security.smartcardio.TerminalImpl implGetTerminal(java.lang.String)>(r5);
+
+        $r7 = <sun.security.smartcardio.PCSCTerminals$1: int[] $SwitchMap$javax$smartcardio$CardTerminals$State>;
+
+        $i2 = virtualinvoke r22.<javax.smartcardio.CardTerminals$State: int ordinal()>();
+
+        $i3 = $r7[$i2];
+
+        tableswitch($i3)
+        {
+            case 1: goto label05;
+            case 2: goto label06;
+            case 3: goto label07;
+            case 4: goto label08;
+            case 5: goto label09;
+            default: goto label10;
+        };
+
+     label05:
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>($r6);
+
+        goto label11;
+
+     label06:
+        $z3 = virtualinvoke $r6.<javax.smartcardio.CardTerminal: boolean isCardPresent()>();
+
+        if $z3 == 0 goto label11;
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>($r6);
+
+        goto label11;
+
+     label07:
+        $z2 = virtualinvoke $r6.<javax.smartcardio.CardTerminal: boolean isCardPresent()>();
+
+        if $z2 != 0 goto label11;
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>($r6);
+
+        goto label11;
+
+     label08:
+        $r10 = r2.<sun.security.smartcardio.PCSCTerminals: java.util.Map stateMap>;
+
+        $r11 = interfaceinvoke $r10.<java.util.Map: java.lang.Object get(java.lang.Object)>(r5);
+
+        r23 = (sun.security.smartcardio.PCSCTerminals$ReaderState) $r11;
+
+        if r23 == null goto label11;
+
+        $z1 = virtualinvoke r23.<sun.security.smartcardio.PCSCTerminals$ReaderState: boolean isInsertion()>();
+
+        if $z1 == 0 goto label11;
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>($r6);
+
+        goto label11;
+
+     label09:
+        $r8 = r2.<sun.security.smartcardio.PCSCTerminals: java.util.Map stateMap>;
+
+        $r9 = interfaceinvoke $r8.<java.util.Map: java.lang.Object get(java.lang.Object)>(r5);
+
+        r24 = (sun.security.smartcardio.PCSCTerminals$ReaderState) $r9;
+
+        if r24 == null goto label11;
+
+        $z0 = virtualinvoke r24.<sun.security.smartcardio.PCSCTerminals$ReaderState: boolean isRemoval()>();
+
+        if $z0 == 0 goto label11;
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>($r6);
+
+        goto label11;
+
+     label10:
+        $r12 = new javax.smartcardio.CardException;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown state: ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r22);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r12.<javax.smartcardio.CardException: void <init>(java.lang.String)>($r16);
+
+        throw $r12;
+
+     label11:
+        i5 = i5 + 1;
+
+        goto label04;
+
+     label12:
+        $r4 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r1);
+
+     label13:
+        return $r4;
+
+     label14:
+        $r20 := @caughtexception;
+
+        $r21 = new javax.smartcardio.CardException;
+
+        specialinvoke $r21.<javax.smartcardio.CardException: void <init>(java.lang.String,java.lang.Throwable)>("list() failed", $r20);
+
+        throw $r21;
+
+        catch sun.security.smartcardio.PCSCException from label01 to label13 with label14;
+    }
+
+    public synchronized boolean waitForChange(long) throws javax.smartcardio.CardException
+    {
+        java.lang.IllegalStateException $r27;
+        byte $b0, $b1;
+        int[] $r4, r20;
+        java.util.Map $r1, $r5, $r7, $r8;
+        sun.security.smartcardio.PCSCException $r18;
+        javax.smartcardio.CardException $r29;
+        java.lang.StringBuilder $r15, $r16, $r24;
+        long $l2, $l4, l9;
+        java.lang.String[] $r2;
+        java.util.HashMap $r26;
+        int $i3, $i5, $i6, $i7, $i8, i10, i11, $i12;
+        java.lang.String $r6, $r17, r21;
+        sun.security.smartcardio.PCSCTerminals$ReaderState[] r3;
+        java.lang.IllegalArgumentException $r25;
+        sun.security.smartcardio.PCSCTerminals$ReaderState r22, r23, $r28;
+        sun.security.smartcardio.PCSCTerminals r0;
+        java.lang.Object $r9;
+
+        r0 := @this: sun.security.smartcardio.PCSCTerminals;
+
+        l9 := @parameter0: long;
+
+        $b0 = l9 cmp 0L;
+
+        $i12 = (int) $b0;
+
+        if $i12 >= 0 goto label01;
+
+        $r25 = new java.lang.IllegalArgumentException;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Timeout must not be negative: ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>(l9);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r25.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r17);
+
+        throw $r25;
+
+     label01:
+        $r1 = r0.<sun.security.smartcardio.PCSCTerminals: java.util.Map stateMap>;
+
+        if $r1 != null goto label02;
+
+        $r26 = new java.util.HashMap;
+
+        specialinvoke $r26.<java.util.HashMap: void <init>()>();
+
+        r0.<sun.security.smartcardio.PCSCTerminals: java.util.Map stateMap> = $r26;
+
+        virtualinvoke r0.<sun.security.smartcardio.PCSCTerminals: boolean waitForChange(long)>(0L);
+
+     label02:
+        $b1 = l9 cmp 0L;
+
+        if $b1 != 0 goto label03;
+
+        l9 = -1L;
+
+     label03:
+        $l2 = <sun.security.smartcardio.PCSCTerminals: long contextId>;
+
+        $r2 = staticinvoke <sun.security.smartcardio.PCSC: java.lang.String[] SCardListReaders(long)>($l2);
+
+        $i7 = lengthof $r2;
+
+        if $i7 != 0 goto label04;
+
+        $r27 = new java.lang.IllegalStateException;
+
+        specialinvoke $r27.<java.lang.IllegalStateException: void <init>(java.lang.String)>("No terminals available");
+
+        throw $r27;
+
+     label04:
+        r20 = newarray (int)[$i7];
+
+        r3 = newarray (sun.security.smartcardio.PCSCTerminals$ReaderState)[$i7];
+
+        i10 = 0;
+
+     label05:
+        $i3 = lengthof $r2;
+
+        if i10 >= $i3 goto label07;
+
+        r21 = $r2[i10];
+
+        $r8 = r0.<sun.security.smartcardio.PCSCTerminals: java.util.Map stateMap>;
+
+        $r9 = interfaceinvoke $r8.<java.util.Map: java.lang.Object get(java.lang.Object)>(r21);
+
+        r22 = (sun.security.smartcardio.PCSCTerminals$ReaderState) $r9;
+
+        if r22 != null goto label06;
+
+        $r28 = new sun.security.smartcardio.PCSCTerminals$ReaderState;
+
+        specialinvoke $r28.<sun.security.smartcardio.PCSCTerminals$ReaderState: void <init>()>();
+
+        r22 = $r28;
+
+     label06:
+        r3[i10] = r22;
+
+        $i6 = virtualinvoke r22.<sun.security.smartcardio.PCSCTerminals$ReaderState: int get()>();
+
+        r20[i10] = $i6;
+
+        i10 = i10 + 1;
+
+        goto label05;
+
+     label07:
+        $l4 = <sun.security.smartcardio.PCSCTerminals: long contextId>;
+
+        $r4 = staticinvoke <sun.security.smartcardio.PCSC: int[] SCardGetStatusChange(long,long,int[],java.lang.String[])>($l4, l9, r20, $r2);
+
+        $r5 = r0.<sun.security.smartcardio.PCSCTerminals: java.util.Map stateMap>;
+
+        interfaceinvoke $r5.<java.util.Map: void clear()>();
+
+        i11 = 0;
+
+     label08:
+        if i11 >= $i7 goto label09;
+
+        r23 = r3[i11];
+
+        $i5 = $r4[i11];
+
+        virtualinvoke r23.<sun.security.smartcardio.PCSCTerminals$ReaderState: void update(int)>($i5);
+
+        $r7 = r0.<sun.security.smartcardio.PCSCTerminals: java.util.Map stateMap>;
+
+        $r6 = $r2[i11];
+
+        interfaceinvoke $r7.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r6, r23);
+
+        i11 = i11 + 1;
+
+        goto label08;
+
+     label09:
+        return 1;
+
+     label10:
+        $r18 := @caughtexception;
+
+        $i8 = $r18.<sun.security.smartcardio.PCSCException: int code>;
+
+        if $i8 != -2146435062 goto label11;
+
+        return 0;
+
+     label11:
+        $r29 = new javax.smartcardio.CardException;
+
+        specialinvoke $r29.<javax.smartcardio.CardException: void <init>(java.lang.String,java.lang.Throwable)>("waitForChange() failed", $r18);
+
+        throw $r29;
+
+        catch sun.security.smartcardio.PCSCException from label03 to label09 with label10;
+    }
+
+    static java.util.List waitForCards(java.util.List, long, boolean) throws javax.smartcardio.CardException
+    {
+        byte $b0;
+        int[] $r2, r22;
+        boolean z0, $z1, $z2, $z3;
+        sun.security.smartcardio.PCSCException $r17;
+        javax.smartcardio.CardTerminal r20;
+        javax.smartcardio.CardException $r18;
+        java.util.List r0, $r3, $r19;
+        java.lang.StringBuilder $r10, $r11, $r14;
+        long $l3, l8, l9;
+        java.lang.String[] $r16;
+        java.util.ArrayList $r6, r23;
+        sun.security.smartcardio.TerminalImpl $r5, r21;
+        int $i1, $i2, $i4, $i5, $i6, $i7, i10, i11, $i12;
+        java.lang.String $r4, $r8, $r13, $r15;
+        java.util.Iterator $r1;
+        java.lang.IllegalArgumentException $r9;
+        java.lang.Object $r7;
+        java.lang.Class $r12;
+
+        r0 := @parameter0: java.util.List;
+
+        l8 := @parameter1: long;
+
+        z0 := @parameter2: boolean;
+
+        $b0 = l8 cmp 0L;
+
+        if $b0 != 0 goto label01;
+
+        l8 = -1L;
+
+        l9 = -1L;
+
+        goto label02;
+
+     label01:
+        l9 = 0L;
+
+     label02:
+        $i1 = interfaceinvoke r0.<java.util.List: int size()>();
+
+        $r16 = newarray (java.lang.String)[$i1];
+
+        i10 = 0;
+
+        $r1 = interfaceinvoke r0.<java.util.List: java.util.Iterator iterator()>();
+
+     label03:
+        $z2 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label05;
+
+        $r7 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        r20 = (javax.smartcardio.CardTerminal) $r7;
+
+        $z1 = r20 instanceof sun.security.smartcardio.TerminalImpl;
+
+        if $z1 != 0 goto label04;
+
+        $r9 = new java.lang.IllegalArgumentException;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid terminal type: ");
+
+        $r12 = virtualinvoke r20.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.Class: java.lang.String getName()>();
+
+        $r14 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r15);
+
+        throw $r9;
+
+     label04:
+        r21 = (sun.security.smartcardio.TerminalImpl) r20;
+
+        $i6 = i10;
+
+        i10 = i10 + 1;
+
+        $r8 = r21.<sun.security.smartcardio.TerminalImpl: java.lang.String name>;
+
+        $r16[$i6] = $r8;
+
+        goto label03;
+
+     label05:
+        $i2 = lengthof $r16;
+
+        r22 = newarray (int)[$i2];
+
+        staticinvoke <java.util.Arrays: void fill(int[],int)>(r22, 0);
+
+     label06:
+        $l3 = <sun.security.smartcardio.PCSCTerminals: long contextId>;
+
+        $r2 = staticinvoke <sun.security.smartcardio.PCSC: int[] SCardGetStatusChange(long,long,int[],java.lang.String[])>($l3, l9, r22, $r16);
+
+        r22 = $r2;
+
+        l9 = l8;
+
+        r23 = null;
+
+        i11 = 0;
+
+     label07:
+        $i12 = lengthof $r16;
+
+        if i11 >= $i12 goto label12;
+
+        $i4 = $r2[i11];
+
+        $i5 = $i4 & 32;
+
+        if $i5 == 0 goto label08;
+
+        $z3 = 1;
+
+        goto label09;
+
+     label08:
+        $z3 = 0;
+
+     label09:
+        if $z3 != z0 goto label11;
+
+        if r23 != null goto label10;
+
+        $r6 = new java.util.ArrayList;
+
+        specialinvoke $r6.<java.util.ArrayList: void <init>()>();
+
+        r23 = $r6;
+
+     label10:
+        $r4 = $r16[i11];
+
+        $r5 = staticinvoke <sun.security.smartcardio.PCSCTerminals: sun.security.smartcardio.TerminalImpl implGetTerminal(java.lang.String)>($r4);
+
+        interfaceinvoke r23.<java.util.List: boolean add(java.lang.Object)>($r5);
+
+     label11:
+        i11 = i11 + 1;
+
+        goto label07;
+
+     label12:
+        if r23 == null goto label14;
+
+        $r3 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>(r23);
+
+     label13:
+        return $r3;
+
+     label14:
+        goto label06;
+
+     label15:
+        $r17 := @caughtexception;
+
+        $i7 = $r17.<sun.security.smartcardio.PCSCException: int code>;
+
+        if $i7 != -2146435062 goto label16;
+
+        $r19 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+        return $r19;
+
+     label16:
+        $r18 = new javax.smartcardio.CardException;
+
+        specialinvoke $r18.<javax.smartcardio.CardException: void <init>(java.lang.String,java.lang.Throwable)>("waitForCard() failed", $r17);
+
+        throw $r18;
+
+        catch sun.security.smartcardio.PCSCException from label06 to label13 with label15;
+        catch sun.security.smartcardio.PCSCException from label14 to label15 with label15;
+    }
+
+    static void <clinit>()
+    {
+        java.util.HashMap $r0;
+
+        $r0 = new java.util.HashMap;
+
+        specialinvoke $r0.<java.util.HashMap: void <init>()>();
+
+        <sun.security.smartcardio.PCSCTerminals: java.util.Map terminals> = $r0;
+
+        return;
+    }
+}

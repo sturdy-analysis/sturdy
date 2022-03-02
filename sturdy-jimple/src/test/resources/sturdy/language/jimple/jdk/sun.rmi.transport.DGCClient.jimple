@@ -1,0 +1,258 @@
+final class sun.rmi.transport.DGCClient extends java.lang.Object
+{
+    private static long nextSequenceNum;
+    private static java.rmi.dgc.VMID vmid;
+    private static final long leaseValue;
+    private static final long cleanInterval;
+    private static final long gcInterval;
+    private static final int dirtyFailureRetries;
+    private static final int cleanFailureRetries;
+    private static final java.rmi.server.ObjID[] emptyObjIDArray;
+    private static final java.rmi.server.ObjID dgcID;
+    private static final java.security.AccessControlContext SOCKET_ACC;
+
+    private void <init>()
+    {
+        sun.rmi.transport.DGCClient r0;
+
+        r0 := @this: sun.rmi.transport.DGCClient;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    static void registerRefs(sun.rmi.transport.Endpoint, java.util.List)
+    {
+        java.util.List r2;
+        sun.rmi.transport.Endpoint r0;
+        sun.rmi.transport.DGCClient$EndpointEntry $r1;
+        boolean $z0;
+
+        r0 := @parameter0: sun.rmi.transport.Endpoint;
+
+        r2 := @parameter1: java.util.List;
+
+     label1:
+        $r1 = staticinvoke <sun.rmi.transport.DGCClient$EndpointEntry: sun.rmi.transport.DGCClient$EndpointEntry lookup(sun.rmi.transport.Endpoint)>(r0);
+
+        $z0 = virtualinvoke $r1.<sun.rmi.transport.DGCClient$EndpointEntry: boolean registerRefs(java.util.List)>(r2);
+
+        if $z0 == 0 goto label1;
+
+        return;
+    }
+
+    private static synchronized long getNextSequenceNum()
+    {
+        long $l0, $l1;
+
+        $l0 = <sun.rmi.transport.DGCClient: long nextSequenceNum>;
+
+        $l1 = $l0 + 1L;
+
+        <sun.rmi.transport.DGCClient: long nextSequenceNum> = $l1;
+
+        return $l0;
+    }
+
+    private static long computeRenewTime(long, long)
+    {
+        long l0, l1, $l2, $l3;
+
+        l0 := @parameter0: long;
+
+        l1 := @parameter1: long;
+
+        $l2 = l1 / 2L;
+
+        $l3 = l0 + $l2;
+
+        return $l3;
+    }
+
+    static long access$000()
+    {
+        long $l0;
+
+        $l0 = <sun.rmi.transport.DGCClient: long gcInterval>;
+
+        return $l0;
+    }
+
+    static java.rmi.server.ObjID access$100()
+    {
+        java.rmi.server.ObjID $r0;
+
+        $r0 = <sun.rmi.transport.DGCClient: java.rmi.server.ObjID dgcID>;
+
+        return $r0;
+    }
+
+    static long access$300()
+    {
+        long $l0;
+
+        $l0 = staticinvoke <sun.rmi.transport.DGCClient: long getNextSequenceNum()>();
+
+        return $l0;
+    }
+
+    static java.rmi.server.ObjID[] access$400()
+    {
+        java.rmi.server.ObjID[] $r0;
+
+        $r0 = <sun.rmi.transport.DGCClient: java.rmi.server.ObjID[] emptyObjIDArray>;
+
+        return $r0;
+    }
+
+    static java.rmi.dgc.VMID access$500()
+    {
+        java.rmi.dgc.VMID $r0;
+
+        $r0 = <sun.rmi.transport.DGCClient: java.rmi.dgc.VMID vmid>;
+
+        return $r0;
+    }
+
+    static long access$600()
+    {
+        long $l0;
+
+        $l0 = <sun.rmi.transport.DGCClient: long leaseValue>;
+
+        return $l0;
+    }
+
+    static long access$700(long, long)
+    {
+        long l0, l1, $l2;
+
+        l0 := @parameter0: long;
+
+        l1 := @parameter1: long;
+
+        $l2 = staticinvoke <sun.rmi.transport.DGCClient: long computeRenewTime(long,long)>(l0, l1);
+
+        return $l2;
+    }
+
+    static long access$1100()
+    {
+        long $l0;
+
+        $l0 = <sun.rmi.transport.DGCClient: long cleanInterval>;
+
+        return $l0;
+    }
+
+    static java.security.AccessControlContext access$1800()
+    {
+        java.security.AccessControlContext $r0;
+
+        $r0 = <sun.rmi.transport.DGCClient: java.security.AccessControlContext SOCKET_ACC>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.security.AccessControlContext $r16;
+        sun.security.action.GetLongAction $r1, $r4, $r7;
+        long $l0, $l1, $l2;
+        java.rmi.server.ObjID[] $r10;
+        java.lang.Long $r3, $r6, $r9;
+        java.net.SocketPermission $r13;
+        java.rmi.dgc.VMID $r0;
+        java.security.Permissions $r12;
+        java.security.ProtectionDomain[] $r14;
+        java.security.ProtectionDomain $r15;
+        java.lang.Object $r2, $r5, $r8;
+        java.rmi.server.ObjID $r11;
+
+        <sun.rmi.transport.DGCClient: int cleanFailureRetries> = 5;
+
+        <sun.rmi.transport.DGCClient: int dirtyFailureRetries> = 5;
+
+        <sun.rmi.transport.DGCClient: long nextSequenceNum> = -9223372036854775808L;
+
+        $r0 = new java.rmi.dgc.VMID;
+
+        specialinvoke $r0.<java.rmi.dgc.VMID: void <init>()>();
+
+        <sun.rmi.transport.DGCClient: java.rmi.dgc.VMID vmid> = $r0;
+
+        $r1 = new sun.security.action.GetLongAction;
+
+        specialinvoke $r1.<sun.security.action.GetLongAction: void <init>(java.lang.String,long)>("java.rmi.dgc.leaseValue", 600000L);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        $r3 = (java.lang.Long) $r2;
+
+        $l0 = virtualinvoke $r3.<java.lang.Long: long longValue()>();
+
+        <sun.rmi.transport.DGCClient: long leaseValue> = $l0;
+
+        $r4 = new sun.security.action.GetLongAction;
+
+        specialinvoke $r4.<sun.security.action.GetLongAction: void <init>(java.lang.String,long)>("sun.rmi.dgc.cleanInterval", 180000L);
+
+        $r5 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r4);
+
+        $r6 = (java.lang.Long) $r5;
+
+        $l1 = virtualinvoke $r6.<java.lang.Long: long longValue()>();
+
+        <sun.rmi.transport.DGCClient: long cleanInterval> = $l1;
+
+        $r7 = new sun.security.action.GetLongAction;
+
+        specialinvoke $r7.<sun.security.action.GetLongAction: void <init>(java.lang.String,long)>("sun.rmi.dgc.client.gcInterval", 3600000L);
+
+        $r8 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r7);
+
+        $r9 = (java.lang.Long) $r8;
+
+        $l2 = virtualinvoke $r9.<java.lang.Long: long longValue()>();
+
+        <sun.rmi.transport.DGCClient: long gcInterval> = $l2;
+
+        $r10 = newarray (java.rmi.server.ObjID)[0];
+
+        <sun.rmi.transport.DGCClient: java.rmi.server.ObjID[] emptyObjIDArray> = $r10;
+
+        $r11 = new java.rmi.server.ObjID;
+
+        specialinvoke $r11.<java.rmi.server.ObjID: void <init>(int)>(2);
+
+        <sun.rmi.transport.DGCClient: java.rmi.server.ObjID dgcID> = $r11;
+
+        $r12 = new java.security.Permissions;
+
+        specialinvoke $r12.<java.security.Permissions: void <init>()>();
+
+        $r13 = new java.net.SocketPermission;
+
+        specialinvoke $r13.<java.net.SocketPermission: void <init>(java.lang.String,java.lang.String)>("*", "connect,resolve");
+
+        virtualinvoke $r12.<java.security.Permissions: void add(java.security.Permission)>($r13);
+
+        $r14 = newarray (java.security.ProtectionDomain)[1];
+
+        $r15 = new java.security.ProtectionDomain;
+
+        specialinvoke $r15.<java.security.ProtectionDomain: void <init>(java.security.CodeSource,java.security.PermissionCollection)>(null, $r12);
+
+        $r14[0] = $r15;
+
+        $r16 = new java.security.AccessControlContext;
+
+        specialinvoke $r16.<java.security.AccessControlContext: void <init>(java.security.ProtectionDomain[])>($r14);
+
+        <sun.rmi.transport.DGCClient: java.security.AccessControlContext SOCKET_ACC> = $r16;
+
+        return;
+    }
+}

@@ -1,0 +1,1707 @@
+public final class com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart extends java.lang.Object
+{
+    public static final java.lang.String ATTACHMENT;
+    public static final java.lang.String INLINE;
+    private static boolean setDefaultTextCharset;
+    private javax.activation.DataHandler dh;
+    private byte[] content;
+    private int contentLength;
+    private int start;
+    private java.io.InputStream contentStream;
+    private final com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders headers;
+    private com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart parent;
+    private com.sun.xml.internal.org.jvnet.mimepull.MIMEPart mimePart;
+
+    public void <init>()
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders $r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: int start> = 0;
+
+        $r1 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders;
+
+        specialinvoke $r1.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders: void <init>()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders headers> = $r1;
+
+        return;
+    }
+
+    public void <init>(java.io.InputStream) throws com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException
+    {
+        byte[] $r2;
+        java.io.BufferedInputStream $r4;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        long $l1;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.SharedInputStream r9;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders $r8;
+        com.sun.xml.internal.messaging.saaj.util.ByteOutputStream $r1;
+        int $i0;
+        boolean $z0, $z1, $z2, $z3;
+        java.io.IOException $r5;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException $r6;
+        java.io.InputStream $r3, r7;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r7 := @parameter0: java.io.InputStream;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: int start> = 0;
+
+        $z0 = r7 instanceof java.io.ByteArrayInputStream;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = r7 instanceof java.io.BufferedInputStream;
+
+        if $z1 != 0 goto label1;
+
+        $z2 = r7 instanceof com.sun.xml.internal.messaging.saaj.packaging.mime.internet.SharedInputStream;
+
+        if $z2 != 0 goto label1;
+
+        $r4 = new java.io.BufferedInputStream;
+
+        specialinvoke $r4.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>(r7);
+
+        r7 = $r4;
+
+     label1:
+        $r8 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders;
+
+        specialinvoke $r8.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders: void <init>(java.io.InputStream)>(r7);
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders headers> = $r8;
+
+        $z3 = r7 instanceof com.sun.xml.internal.messaging.saaj.packaging.mime.internet.SharedInputStream;
+
+        if $z3 == 0 goto label2;
+
+        r9 = (com.sun.xml.internal.messaging.saaj.packaging.mime.internet.SharedInputStream) r7;
+
+        $l1 = interfaceinvoke r9.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.SharedInputStream: long getPosition()>();
+
+        $r3 = interfaceinvoke r9.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.SharedInputStream: java.io.InputStream newStream(long,long)>($l1, -1L);
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.io.InputStream contentStream> = $r3;
+
+        goto label5;
+
+     label2:
+        $r1 = new com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
+
+        specialinvoke $r1.<com.sun.xml.internal.messaging.saaj.util.ByteOutputStream: void <init>()>();
+
+        virtualinvoke $r1.<com.sun.xml.internal.messaging.saaj.util.ByteOutputStream: void write(java.io.InputStream)>(r7);
+
+        $r2 = virtualinvoke $r1.<com.sun.xml.internal.messaging.saaj.util.ByteOutputStream: byte[] getBytes()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: byte[] content> = $r2;
+
+        $i0 = virtualinvoke $r1.<com.sun.xml.internal.messaging.saaj.util.ByteOutputStream: int getCount()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: int contentLength> = $i0;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r5 := @caughtexception;
+
+        $r6 = new com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException;
+
+        specialinvoke $r6.<com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException: void <init>(java.lang.String,java.lang.Exception)>("Error reading input stream", $r5);
+
+        throw $r6;
+
+     label5:
+        return;
+
+        catch java.io.IOException from label2 to label3 with label4;
+    }
+
+    public void <init>(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders, byte[], int)
+    {
+        byte[] r2;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders r1;
+        int i0;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r1 := @parameter0: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders;
+
+        r2 := @parameter1: byte[];
+
+        i0 := @parameter2: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: int start> = 0;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders headers> = r1;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: byte[] content> = r2;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: int contentLength> = i0;
+
+        return;
+    }
+
+    public void <init>(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders, byte[], int, int)
+    {
+        byte[] r2;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders r1;
+        int i0, i1;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r1 := @parameter0: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders;
+
+        r2 := @parameter1: byte[];
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: int start> = 0;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders headers> = r1;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: byte[] content> = r2;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: int start> = i0;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: int contentLength> = i1;
+
+        return;
+    }
+
+    public void <init>(com.sun.xml.internal.org.jvnet.mimepull.MIMEPart)
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.Header r7;
+        java.util.Iterator $r5;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        java.util.List $r4;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEPart r1, $r3;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders $r2, $r8;
+        java.lang.Object $r6;
+        java.lang.String $r9, $r10;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r1 := @parameter0: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: int start> = 0;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart mimePart> = r1;
+
+        $r2 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders;
+
+        specialinvoke $r2.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders: void <init>()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders headers> = $r2;
+
+        $r3 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart mimePart>;
+
+        $r4 = virtualinvoke $r3.<com.sun.xml.internal.org.jvnet.mimepull.MIMEPart: java.util.List getAllHeaders()>();
+
+        $r5 = interfaceinvoke $r4.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (com.sun.xml.internal.org.jvnet.mimepull.Header) $r6;
+
+        $r8 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders headers>;
+
+        $r9 = interfaceinvoke r7.<com.sun.xml.internal.org.jvnet.mimepull.Header: java.lang.String getName()>();
+
+        $r10 = interfaceinvoke r7.<com.sun.xml.internal.org.jvnet.mimepull.Header: java.lang.String getValue()>();
+
+        virtualinvoke $r8.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders: void addHeader(java.lang.String,java.lang.String)>($r9, $r10);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart getParent()
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart $r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart parent>;
+
+        return $r1;
+    }
+
+    public void setParent(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart)
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r1 := @parameter0: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart parent> = r1;
+
+        return;
+    }
+
+    public int getSize()
+    {
+        byte[] $r2;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        java.io.IOException $r7, $r8;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEPart $r1, $r5;
+        int $i0, $i1, $i2, $i4, $i6;
+        java.io.InputStream $r3, $r4, $r6;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart mimePart>;
+
+        if $r1 == null goto label04;
+
+     label01:
+        $r5 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart mimePart>;
+
+        $r6 = virtualinvoke $r5.<com.sun.xml.internal.org.jvnet.mimepull.MIMEPart: java.io.InputStream read()>();
+
+        $i2 = virtualinvoke $r6.<java.io.InputStream: int available()>();
+
+     label02:
+        return $i2;
+
+     label03:
+        $r8 := @caughtexception;
+
+        $i4 = (int) -1;
+
+        return $i4;
+
+     label04:
+        $r2 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: byte[] content>;
+
+        if $r2 == null goto label05;
+
+        $i1 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: int contentLength>;
+
+        return $i1;
+
+     label05:
+        $r3 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.io.InputStream contentStream>;
+
+        if $r3 == null goto label10;
+
+     label06:
+        $r4 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.io.InputStream contentStream>;
+
+        $i0 = virtualinvoke $r4.<java.io.InputStream: int available()>();
+
+        if $i0 <= 0 goto label08;
+
+     label07:
+        return $i0;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r7 := @caughtexception;
+
+     label10:
+        $i6 = (int) -1;
+
+        return $i6;
+
+        catch java.io.IOException from label01 to label02 with label03;
+        catch java.io.IOException from label06 to label07 with label09;
+    }
+
+    public int getLineCount()
+    {
+        int $i1;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        $i1 = (int) -1;
+
+        return $i1;
+    }
+
+    public java.lang.String getContentType()
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEPart $r1, $r3;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        java.lang.String $r2, $r4, r5;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart mimePart>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart mimePart>;
+
+        $r4 = virtualinvoke $r3.<com.sun.xml.internal.org.jvnet.mimepull.MIMEPart: java.lang.String getContentType()>();
+
+        return $r4;
+
+     label1:
+        $r2 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.lang.String getHeader(java.lang.String,java.lang.String)>("Content-Type", null);
+
+        r5 = $r2;
+
+        if $r2 != null goto label2;
+
+        r5 = "text/plain";
+
+     label2:
+        return r5;
+    }
+
+    public boolean isMimeType(java.lang.String)
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ParseException $r4;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r1;
+        java.lang.String $r2, r3, $r5;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType $r0;
+        boolean z0;
+
+        r1 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r3 := @parameter0: java.lang.String;
+
+     label1:
+        $r0 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType;
+
+        $r2 = virtualinvoke r1.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.lang.String getContentType()>();
+
+        specialinvoke $r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void <init>(java.lang.String)>($r2);
+
+        z0 = virtualinvoke $r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: boolean match(java.lang.String)>(r3);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = virtualinvoke r1.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.lang.String getContentType()>();
+
+        z0 = virtualinvoke $r5.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r3);
+
+     label4:
+        return z0;
+
+        catch com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ParseException from label1 to label2 with label3;
+    }
+
+    public java.lang.String getDisposition() throws com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentDisposition $r2;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        java.lang.String $r1, $r3;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.lang.String getHeader(java.lang.String,java.lang.String)>("Content-Disposition", null);
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentDisposition;
+
+        specialinvoke $r2.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentDisposition: void <init>(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r2.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentDisposition: java.lang.String getDisposition()>();
+
+        return $r3;
+    }
+
+    public void setDisposition(java.lang.String) throws com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentDisposition $r2;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        java.lang.String $r1, r3;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r3 := @parameter0: java.lang.String;
+
+        if r3 != null goto label1;
+
+        virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: void removeHeader(java.lang.String)>("Content-Disposition");
+
+        goto label3;
+
+     label1:
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.lang.String getHeader(java.lang.String,java.lang.String)>("Content-Disposition", null);
+
+        if $r1 == null goto label2;
+
+        $r2 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentDisposition;
+
+        specialinvoke $r2.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentDisposition: void <init>(java.lang.String)>($r1);
+
+        virtualinvoke $r2.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentDisposition: void setDisposition(java.lang.String)>(r3);
+
+        r3 = virtualinvoke $r2.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentDisposition: java.lang.String toString()>();
+
+     label2:
+        virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: void setHeader(java.lang.String,java.lang.String)>("Content-Disposition", r3);
+
+     label3:
+        return;
+    }
+
+    public java.lang.String getEncoding() throws com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.HeaderTokenizer $r6;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.HeaderTokenizer$Token $r4;
+        int $i0, $i2, $i4;
+        java.lang.String $r1, $r2, $r5;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.lang.String getHeader(java.lang.String,java.lang.String)>("Content-Transfer-Encoding", null);
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String trim()>();
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("7bit");
+
+        if $z0 != 0 goto label2;
+
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("8bit");
+
+        if $z1 != 0 goto label2;
+
+        $z2 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("quoted-printable");
+
+        if $z2 != 0 goto label2;
+
+        $z3 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("base64");
+
+        if $z3 == 0 goto label3;
+
+     label2:
+        return $r2;
+
+     label3:
+        $r6 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.HeaderTokenizer;
+
+        specialinvoke $r6.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.HeaderTokenizer: void <init>(java.lang.String,java.lang.String)>($r2, "()<>@,;:\\\"\t []/?=");
+
+     label4:
+        $r4 = virtualinvoke $r6.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.HeaderTokenizer: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.HeaderTokenizer$Token next()>();
+
+        $i0 = virtualinvoke $r4.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.HeaderTokenizer$Token: int getType()>();
+
+        $i2 = (int) -4;
+
+        if $i0 != $i2 goto label5;
+
+        goto label6;
+
+     label5:
+        $i4 = (int) -1;
+
+        if $i0 != $i4 goto label4;
+
+        $r5 = virtualinvoke $r4.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.HeaderTokenizer$Token: java.lang.String getValue()>();
+
+        return $r5;
+
+     label6:
+        return $r2;
+    }
+
+    public java.lang.String getContentID()
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        java.lang.String $r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.lang.String getHeader(java.lang.String,java.lang.String)>("Content-ID", null);
+
+        return $r1;
+    }
+
+    public void setContentID(java.lang.String)
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r1;
+        java.lang.String r0;
+
+        r1 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        virtualinvoke r1.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: void removeHeader(java.lang.String)>("Content-ID");
+
+        goto label2;
+
+     label1:
+        virtualinvoke r1.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: void setHeader(java.lang.String,java.lang.String)>("Content-ID", r0);
+
+     label2:
+        return;
+    }
+
+    public java.lang.String getContentMD5()
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        java.lang.String $r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.lang.String getHeader(java.lang.String,java.lang.String)>("Content-MD5", null);
+
+        return $r1;
+    }
+
+    public void setContentMD5(java.lang.String)
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r1 := @parameter0: java.lang.String;
+
+        virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: void setHeader(java.lang.String,java.lang.String)>("Content-MD5", r1);
+
+        return;
+    }
+
+    public java.lang.String[] getContentLanguage() throws com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException
+    {
+        java.lang.Object[] $r6;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.HeaderTokenizer $r10;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        java.lang.String[] $r5, $r7, $r8;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.HeaderTokenizer$Token $r9;
+        com.sun.xml.internal.messaging.saaj.util.FinalArrayList $r11;
+        int $i0, $i1, $i2, $i4, $i6;
+        java.lang.String $r1, $r4;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.lang.String getHeader(java.lang.String,java.lang.String)>("Content-Language", null);
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r10 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.HeaderTokenizer;
+
+        specialinvoke $r10.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.HeaderTokenizer: void <init>(java.lang.String,java.lang.String)>($r1, "()<>@,;:\\\"\t []/?=");
+
+        $r11 = new com.sun.xml.internal.messaging.saaj.util.FinalArrayList;
+
+        specialinvoke $r11.<com.sun.xml.internal.messaging.saaj.util.FinalArrayList: void <init>()>();
+
+     label2:
+        $r9 = virtualinvoke $r10.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.HeaderTokenizer: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.HeaderTokenizer$Token next()>();
+
+        $i2 = virtualinvoke $r9.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.HeaderTokenizer$Token: int getType()>();
+
+        $i4 = (int) -4;
+
+        if $i2 != $i4 goto label3;
+
+        goto label4;
+
+     label3:
+        $i6 = (int) -1;
+
+        if $i2 != $i6 goto label2;
+
+        $r4 = virtualinvoke $r9.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.HeaderTokenizer$Token: java.lang.String getValue()>();
+
+        virtualinvoke $r11.<com.sun.xml.internal.messaging.saaj.util.FinalArrayList: boolean add(java.lang.Object)>($r4);
+
+        goto label2;
+
+     label4:
+        $i0 = virtualinvoke $r11.<com.sun.xml.internal.messaging.saaj.util.FinalArrayList: int size()>();
+
+        if $i0 != 0 goto label5;
+
+        return null;
+
+     label5:
+        $i1 = virtualinvoke $r11.<com.sun.xml.internal.messaging.saaj.util.FinalArrayList: int size()>();
+
+        $r5 = newarray (java.lang.String)[$i1];
+
+        $r6 = virtualinvoke $r11.<com.sun.xml.internal.messaging.saaj.util.FinalArrayList: java.lang.Object[] toArray(java.lang.Object[])>($r5);
+
+        $r7 = (java.lang.String[]) $r6;
+
+        $r8 = (java.lang.String[]) $r7;
+
+        return $r8;
+    }
+
+    public void setContentLanguage(java.lang.String[])
+    {
+        java.lang.String[] r1;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r3;
+        java.lang.StringBuffer $r0, $r5;
+        int $i0, i1;
+        java.lang.String $r2, $r4, $r6;
+
+        r3 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r1 := @parameter0: java.lang.String[];
+
+        $r0 = new java.lang.StringBuffer;
+
+        $r2 = r1[0];
+
+        specialinvoke $r0.<java.lang.StringBuffer: void <init>(java.lang.String)>($r2);
+
+        i1 = 1;
+
+     label1:
+        $i0 = lengthof r1;
+
+        if i1 >= $i0 goto label2;
+
+        $r5 = virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(44);
+
+        $r6 = r1[i1];
+
+        virtualinvoke $r5.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r6);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        $r4 = virtualinvoke $r0.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        virtualinvoke r3.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: void setHeader(java.lang.String,java.lang.String)>("Content-Language", $r4);
+
+        return;
+    }
+
+    public java.lang.String getDescription()
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        java.lang.String $r1, $r2, $r3;
+        java.io.UnsupportedEncodingException $r4;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.lang.String getHeader(java.lang.String,java.lang.String)>("Content-Description", null);
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = staticinvoke <com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeUtility: java.lang.String unfold(java.lang.String)>($r1);
+
+        $r3 = staticinvoke <com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeUtility: java.lang.String decodeText(java.lang.String)>($r2);
+
+     label2:
+        return $r3;
+
+     label3:
+        $r4 := @caughtexception;
+
+        return $r1;
+
+        catch java.io.UnsupportedEncodingException from label1 to label2 with label3;
+    }
+
+    public void setDescription(java.lang.String) throws com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r1 := @parameter0: java.lang.String;
+
+        virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: void setDescription(java.lang.String,java.lang.String)>(r1, null);
+
+        return;
+    }
+
+    public void setDescription(java.lang.String, java.lang.String) throws com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException $r6;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r1;
+        java.lang.String r0, r2, $r3, $r4;
+        java.io.UnsupportedEncodingException $r5;
+
+        r1 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r0 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        if r0 != null goto label1;
+
+        virtualinvoke r1.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: void removeHeader(java.lang.String)>("Content-Description");
+
+        return;
+
+     label1:
+        $r3 = staticinvoke <com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeUtility: java.lang.String encodeText(java.lang.String,java.lang.String,java.lang.String)>(r0, r2, null);
+
+        $r4 = staticinvoke <com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeUtility: java.lang.String fold(int,java.lang.String)>(21, $r3);
+
+        virtualinvoke r1.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: void setHeader(java.lang.String,java.lang.String)>("Content-Description", $r4);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException;
+
+        specialinvoke $r6.<com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException: void <init>(java.lang.String,java.lang.Exception)>("Encoding error", $r5);
+
+        throw $r6;
+
+     label4:
+        return;
+
+        catch java.io.UnsupportedEncodingException from label1 to label2 with label3;
+    }
+
+    public java.lang.String getFileName() throws com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ParseException $r5;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentDisposition $r4;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        java.lang.String $r1, $r2, r6;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType $r3;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r6 = null;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.lang.String getHeader(java.lang.String,java.lang.String)>("Content-Disposition", null);
+
+        if $r1 == null goto label1;
+
+        $r4 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentDisposition;
+
+        specialinvoke $r4.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentDisposition: void <init>(java.lang.String)>($r1);
+
+        r6 = virtualinvoke $r4.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentDisposition: java.lang.String getParameter(java.lang.String)>("filename");
+
+     label1:
+        if r6 != null goto label5;
+
+        $r2 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.lang.String getHeader(java.lang.String,java.lang.String)>("Content-Type", null);
+
+        if $r2 == null goto label5;
+
+     label2:
+        $r3 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType;
+
+        specialinvoke $r3.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void <init>(java.lang.String)>($r2);
+
+        r6 = virtualinvoke $r3.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String getParameter(java.lang.String)>("name");
+
+     label3:
+        goto label5;
+
+     label4:
+        $r5 := @caughtexception;
+
+     label5:
+        return r6;
+
+        catch com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ParseException from label2 to label3 with label4;
+    }
+
+    public void setFileName(java.lang.String) throws com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType $r6;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ParseException $r8;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentDisposition $r2;
+        java.lang.String $r1, r3, $r4, $r5, $r7, $r9;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r3 := @parameter0: java.lang.String;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.lang.String getHeader(java.lang.String,java.lang.String)>("Content-Disposition", null);
+
+        $r2 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentDisposition;
+
+        if $r1 != null goto label1;
+
+        $r9 = "attachment";
+
+        goto label2;
+
+     label1:
+        $r9 = $r1;
+
+     label2:
+        specialinvoke $r2.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentDisposition: void <init>(java.lang.String)>($r9);
+
+        virtualinvoke $r2.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentDisposition: void setParameter(java.lang.String,java.lang.String)>("filename", r3);
+
+        $r4 = virtualinvoke $r2.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentDisposition: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: void setHeader(java.lang.String,java.lang.String)>("Content-Disposition", $r4);
+
+        $r5 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.lang.String getHeader(java.lang.String,java.lang.String)>("Content-Type", null);
+
+        if $r5 == null goto label6;
+
+     label3:
+        $r6 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType;
+
+        specialinvoke $r6.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void <init>(java.lang.String)>($r5);
+
+        virtualinvoke $r6.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void setParameter(java.lang.String,java.lang.String)>("name", r3);
+
+        $r7 = virtualinvoke $r6.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: void setHeader(java.lang.String,java.lang.String)>("Content-Type", $r7);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r8 := @caughtexception;
+
+     label6:
+        return;
+
+        catch com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ParseException from label3 to label4 with label5;
+    }
+
+    public java.io.InputStream getInputStream() throws java.io.IOException
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        javax.activation.DataHandler $r1;
+        java.io.InputStream $r2;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: javax.activation.DataHandler getDataHandler()>();
+
+        $r2 = virtualinvoke $r1.<javax.activation.DataHandler: java.io.InputStream getInputStream()>();
+
+        return $r2;
+    }
+
+    java.io.InputStream getContentStream() throws com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException
+    {
+        byte[] $r3, $r6;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.SharedInputStream $r8;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEPart $r1, $r10;
+        java.io.ByteArrayInputStream $r5;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException $r4;
+        int $i0, $i1;
+        java.io.InputStream $r2, $r7, $r9, $r11;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart mimePart>;
+
+        if $r1 == null goto label1;
+
+        $r10 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart mimePart>;
+
+        $r11 = virtualinvoke $r10.<com.sun.xml.internal.org.jvnet.mimepull.MIMEPart: java.io.InputStream read()>();
+
+        return $r11;
+
+     label1:
+        $r2 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.io.InputStream contentStream>;
+
+        if $r2 == null goto label2;
+
+        $r7 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.io.InputStream contentStream>;
+
+        $r8 = (com.sun.xml.internal.messaging.saaj.packaging.mime.internet.SharedInputStream) $r7;
+
+        $r9 = interfaceinvoke $r8.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.SharedInputStream: java.io.InputStream newStream(long,long)>(0L, -1L);
+
+        return $r9;
+
+     label2:
+        $r3 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: byte[] content>;
+
+        if $r3 == null goto label3;
+
+        $r5 = new java.io.ByteArrayInputStream;
+
+        $r6 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: byte[] content>;
+
+        $i1 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: int start>;
+
+        $i0 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: int contentLength>;
+
+        specialinvoke $r5.<java.io.ByteArrayInputStream: void <init>(byte[],int,int)>($r6, $i1, $i0);
+
+        return $r5;
+
+     label3:
+        $r4 = new com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException;
+
+        specialinvoke $r4.<com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException: void <init>(java.lang.String)>("No content");
+
+        throw $r4;
+    }
+
+    public java.io.InputStream getRawInputStream() throws com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        java.io.InputStream $r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.io.InputStream getContentStream()>();
+
+        return $r1;
+    }
+
+    public javax.activation.DataHandler getDataHandler()
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        javax.activation.DataHandler $r2, $r3, $r4, $r6;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEPart $r1;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimePartDataSource $r5;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart$1 $r7;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart mimePart>;
+
+        if $r1 == null goto label1;
+
+        $r6 = new javax.activation.DataHandler;
+
+        $r7 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart$1;
+
+        specialinvoke $r7.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart$1: void <init>(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart)>(r0);
+
+        specialinvoke $r6.<javax.activation.DataHandler: void <init>(javax.activation.DataSource)>($r7);
+
+        return $r6;
+
+     label1:
+        $r2 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: javax.activation.DataHandler dh>;
+
+        if $r2 != null goto label2;
+
+        $r4 = new javax.activation.DataHandler;
+
+        $r5 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimePartDataSource;
+
+        specialinvoke $r5.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimePartDataSource: void <init>(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart)>(r0);
+
+        specialinvoke $r4.<javax.activation.DataHandler: void <init>(javax.activation.DataSource)>($r5);
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: javax.activation.DataHandler dh> = $r4;
+
+     label2:
+        $r3 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: javax.activation.DataHandler dh>;
+
+        return $r3;
+    }
+
+    public java.lang.Object getContent() throws java.io.IOException
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        java.lang.Object $r2;
+        javax.activation.DataHandler $r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: javax.activation.DataHandler getDataHandler()>();
+
+        $r2 = virtualinvoke $r1.<javax.activation.DataHandler: java.lang.Object getContent()>();
+
+        return $r2;
+    }
+
+    public void setDataHandler(javax.activation.DataHandler)
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEPart $r1;
+        javax.activation.DataHandler r2;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r2 := @parameter0: javax.activation.DataHandler;
+
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart mimePart>;
+
+        if $r1 == null goto label1;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart mimePart> = null;
+
+     label1:
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: javax.activation.DataHandler dh> = r2;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: byte[] content> = null;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.io.InputStream contentStream> = null;
+
+        virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: void removeHeader(java.lang.String)>("Content-Type");
+
+        virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: void removeHeader(java.lang.String)>("Content-Transfer-Encoding");
+
+        return;
+    }
+
+    public void setContent(java.lang.Object, java.lang.String)
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEPart $r1;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart $r5;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        java.lang.Object r2;
+        java.lang.String r4;
+        javax.activation.DataHandler $r3;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r2 := @parameter0: java.lang.Object;
+
+        r4 := @parameter1: java.lang.String;
+
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart mimePart>;
+
+        if $r1 == null goto label1;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart mimePart> = null;
+
+     label1:
+        $z0 = r2 instanceof com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart;
+
+        if $z0 == 0 goto label2;
+
+        $r5 = (com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart) r2;
+
+        virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: void setContent(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart)>($r5);
+
+        goto label3;
+
+     label2:
+        $r3 = new javax.activation.DataHandler;
+
+        specialinvoke $r3.<javax.activation.DataHandler: void <init>(java.lang.Object,java.lang.String)>(r2, r4);
+
+        virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: void setDataHandler(javax.activation.DataHandler)>($r3);
+
+     label3:
+        return;
+    }
+
+    public void setText(java.lang.String)
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r1 := @parameter0: java.lang.String;
+
+        virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: void setText(java.lang.String,java.lang.String)>(r1, null);
+
+        return;
+    }
+
+    public void setText(java.lang.String, java.lang.String)
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        int $i0;
+        java.lang.StringBuilder $r3, $r4, $r6;
+        java.lang.String r1, r2, $r5, $r7;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        if r2 != null goto label2;
+
+        $i0 = staticinvoke <com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeUtility: int checkAscii(java.lang.String)>(r1);
+
+        if $i0 == 1 goto label1;
+
+        r2 = staticinvoke <com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeUtility: java.lang.String getDefaultMIMECharset()>();
+
+        goto label2;
+
+     label1:
+        r2 = "us-ascii";
+
+     label2:
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("text/plain; charset=");
+
+        $r5 = staticinvoke <com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeUtility: java.lang.String quote(java.lang.String,java.lang.String)>(r2, "()<>@,;:\\\"\t []/?=");
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: void setContent(java.lang.Object,java.lang.String)>(r1, $r7);
+
+        return;
+    }
+
+    public void setContent(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart)
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEPart $r1;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart r3;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        java.lang.String $r5;
+        javax.activation.DataHandler $r2;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType $r4;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r3 := @parameter0: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart;
+
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart mimePart>;
+
+        if $r1 == null goto label1;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart mimePart> = null;
+
+     label1:
+        $r2 = new javax.activation.DataHandler;
+
+        $r4 = virtualinvoke r3.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType getContentType()>();
+
+        $r5 = virtualinvoke $r4.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String toString()>();
+
+        specialinvoke $r2.<javax.activation.DataHandler: void <init>(java.lang.Object,java.lang.String)>(r3, $r5);
+
+        virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: void setDataHandler(javax.activation.DataHandler)>($r2);
+
+        virtualinvoke r3.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart: void setParent(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart)>(r0);
+
+        return;
+    }
+
+    public void writeTo(java.io.OutputStream) throws java.io.IOException, com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException
+    {
+        byte[] $r5, $r15;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        javax.activation.DataHandler $r6, $r11, $r14;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.SharedInputStream $r17;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders $r1;
+        int $i0, $i1, $i2, i3;
+        java.lang.String $r9, $r12, $r19;
+        java.io.OutputStream r3, $r10, $r13;
+        java.util.List $r2;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEPart $r7;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException $r8;
+        java.lang.Object $r18;
+        java.io.InputStream $r4, $r16;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r3 := @parameter0: java.io.OutputStream;
+
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders headers>;
+
+        $r2 = virtualinvoke $r1.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders: java.util.List getAllHeaderLines()>();
+
+        $i0 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        i3 = 0;
+
+     label1:
+        if i3 >= $i0 goto label2;
+
+        $r18 = interfaceinvoke $r2.<java.util.List: java.lang.Object get(int)>(i3);
+
+        $r19 = (java.lang.String) $r18;
+
+        staticinvoke <com.sun.xml.internal.messaging.saaj.packaging.mime.util.OutputUtil: void writeln(java.lang.String,java.io.OutputStream)>($r19, r3);
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label2:
+        staticinvoke <com.sun.xml.internal.messaging.saaj.packaging.mime.util.OutputUtil: void writeln(java.io.OutputStream)>(r3);
+
+        $r4 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.io.InputStream contentStream>;
+
+        if $r4 == null goto label3;
+
+        $r16 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.io.InputStream contentStream>;
+
+        $r17 = (com.sun.xml.internal.messaging.saaj.packaging.mime.internet.SharedInputStream) $r16;
+
+        interfaceinvoke $r17.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.SharedInputStream: void writeTo(long,long,java.io.OutputStream)>(0L, -1L, r3);
+
+        goto label9;
+
+     label3:
+        $r5 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: byte[] content>;
+
+        if $r5 == null goto label4;
+
+        $r15 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: byte[] content>;
+
+        $i2 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: int start>;
+
+        $i1 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: int contentLength>;
+
+        virtualinvoke r3.<java.io.OutputStream: void write(byte[],int,int)>($r15, $i2, $i1);
+
+        goto label9;
+
+     label4:
+        $r6 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: javax.activation.DataHandler dh>;
+
+        if $r6 == null goto label6;
+
+        $r12 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.lang.String getEncoding()>();
+
+        $r13 = staticinvoke <com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeUtility: java.io.OutputStream encode(java.io.OutputStream,java.lang.String)>(r3, $r12);
+
+        $r14 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: javax.activation.DataHandler getDataHandler()>();
+
+        virtualinvoke $r14.<javax.activation.DataHandler: void writeTo(java.io.OutputStream)>($r13);
+
+        if r3 == $r13 goto label5;
+
+        virtualinvoke $r13.<java.io.OutputStream: void flush()>();
+
+     label5:
+        goto label9;
+
+     label6:
+        $r7 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart mimePart>;
+
+        if $r7 == null goto label8;
+
+        $r9 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.lang.String getEncoding()>();
+
+        $r10 = staticinvoke <com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeUtility: java.io.OutputStream encode(java.io.OutputStream,java.lang.String)>(r3, $r9);
+
+        $r11 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: javax.activation.DataHandler getDataHandler()>();
+
+        virtualinvoke $r11.<javax.activation.DataHandler: void writeTo(java.io.OutputStream)>($r10);
+
+        if r3 == $r10 goto label7;
+
+        virtualinvoke $r10.<java.io.OutputStream: void flush()>();
+
+     label7:
+        goto label9;
+
+     label8:
+        $r8 = new com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException;
+
+        specialinvoke $r8.<com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException: void <init>(java.lang.String)>("no content");
+
+        throw $r8;
+
+     label9:
+        return;
+    }
+
+    public java.lang.String[] getHeader(java.lang.String)
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders $r2;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        java.lang.String[] $r3;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders headers>;
+
+        $r3 = virtualinvoke $r2.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders: java.lang.String[] getHeader(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    public java.lang.String getHeader(java.lang.String, java.lang.String)
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders $r3;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        java.lang.String r1, r2, $r4;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        $r3 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders headers>;
+
+        $r4 = virtualinvoke $r3.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders: java.lang.String getHeader(java.lang.String,java.lang.String)>(r1, r2);
+
+        return $r4;
+    }
+
+    public void setHeader(java.lang.String, java.lang.String)
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders $r3;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        java.lang.String r1, r2;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        $r3 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders headers>;
+
+        virtualinvoke $r3.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders: void setHeader(java.lang.String,java.lang.String)>(r1, r2);
+
+        return;
+    }
+
+    public void addHeader(java.lang.String, java.lang.String)
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders $r3;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        java.lang.String r1, r2;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        $r3 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders headers>;
+
+        virtualinvoke $r3.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders: void addHeader(java.lang.String,java.lang.String)>(r1, r2);
+
+        return;
+    }
+
+    public void removeHeader(java.lang.String)
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        java.lang.String r1;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders $r2;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders headers>;
+
+        virtualinvoke $r2.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders: void removeHeader(java.lang.String)>(r1);
+
+        return;
+    }
+
+    public com.sun.xml.internal.messaging.saaj.util.FinalArrayList getAllHeaders()
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        com.sun.xml.internal.messaging.saaj.util.FinalArrayList $r2;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders $r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders headers>;
+
+        $r2 = virtualinvoke $r1.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders: com.sun.xml.internal.messaging.saaj.util.FinalArrayList getAllHeaders()>();
+
+        return $r2;
+    }
+
+    public void addHeaderLine(java.lang.String)
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        java.lang.String r1;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders $r2;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders headers>;
+
+        virtualinvoke $r2.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.InternetHeaders: void addHeaderLine(java.lang.String)>(r1);
+
+        return;
+    }
+
+    protected void updateHeaders() throws com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        java.lang.String[] $r3, $r8;
+        javax.activation.DataHandler $r1;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType $r4;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentDisposition $r6;
+        java.lang.String $r2, $r5, $r7, $r9, $r10, $r11, r16, r17;
+        boolean z0, $z1, $z2, $z3, $z4, $z5, z6, $z7;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart $r13;
+        java.io.IOException $r14;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException $r15;
+        java.lang.Object $r12;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: javax.activation.DataHandler getDataHandler()>();
+
+        if $r1 != null goto label01;
+
+        return;
+
+     label01:
+        $r2 = virtualinvoke $r1.<javax.activation.DataHandler: java.lang.String getContentType()>();
+
+        r16 = $r2;
+
+        z6 = 0;
+
+        $r3 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.lang.String[] getHeader(java.lang.String)>("Content-Type");
+
+        if $r3 != null goto label02;
+
+        $z7 = 1;
+
+        goto label03;
+
+     label02:
+        $z7 = 0;
+
+     label03:
+        z0 = $z7;
+
+        $r4 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType;
+
+        specialinvoke $r4.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void <init>(java.lang.String)>($r2);
+
+        $z1 = virtualinvoke $r4.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: boolean match(java.lang.String)>("multipart/*");
+
+        if $z1 == 0 goto label04;
+
+        z6 = 1;
+
+        $r12 = virtualinvoke $r1.<javax.activation.DataHandler: java.lang.Object getContent()>();
+
+        $r13 = (com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart) $r12;
+
+        virtualinvoke $r13.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeMultipart: void updateHeaders()>();
+
+        goto label05;
+
+     label04:
+        $z2 = virtualinvoke $r4.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: boolean match(java.lang.String)>("message/rfc822");
+
+        if $z2 == 0 goto label05;
+
+        z6 = 1;
+
+     label05:
+        if z6 != 0 goto label09;
+
+        $r8 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.lang.String[] getHeader(java.lang.String)>("Content-Transfer-Encoding");
+
+        if $r8 != null goto label06;
+
+        $r11 = staticinvoke <com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeUtility: java.lang.String getEncoding(javax.activation.DataHandler)>($r1);
+
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: void setEncoding(java.lang.String)>($r11);
+
+     label06:
+        if z0 == 0 goto label09;
+
+        $z3 = <com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: boolean setDefaultTextCharset>;
+
+        if $z3 == 0 goto label09;
+
+        $z4 = virtualinvoke $r4.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: boolean match(java.lang.String)>("text/*");
+
+        if $z4 == 0 goto label09;
+
+        $r9 = virtualinvoke $r4.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String getParameter(java.lang.String)>("charset");
+
+        if $r9 != null goto label09;
+
+        $r10 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.lang.String getEncoding()>();
+
+        if $r10 == null goto label07;
+
+        $z5 = virtualinvoke $r10.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("7bit");
+
+        if $z5 == 0 goto label07;
+
+        r17 = "us-ascii";
+
+        goto label08;
+
+     label07:
+        r17 = staticinvoke <com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeUtility: java.lang.String getDefaultMIMECharset()>();
+
+     label08:
+        virtualinvoke $r4.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void setParameter(java.lang.String,java.lang.String)>("charset", r17);
+
+        r16 = virtualinvoke $r4.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String toString()>();
+
+     label09:
+        if z0 == 0 goto label11;
+
+        $r5 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.lang.String getHeader(java.lang.String,java.lang.String)>("Content-Disposition", null);
+
+        if $r5 == null goto label10;
+
+        $r6 = new com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentDisposition;
+
+        specialinvoke $r6.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentDisposition: void <init>(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentDisposition: java.lang.String getParameter(java.lang.String)>("filename");
+
+        if $r7 == null goto label10;
+
+        virtualinvoke $r4.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: void setParameter(java.lang.String,java.lang.String)>("name", $r7);
+
+        r16 = virtualinvoke $r4.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ContentType: java.lang.String toString()>();
+
+     label10:
+        virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: void setHeader(java.lang.String,java.lang.String)>("Content-Type", r16);
+
+     label11:
+        goto label13;
+
+     label12:
+        $r14 := @caughtexception;
+
+        $r15 = new com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException;
+
+        specialinvoke $r15.<com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException: void <init>(java.lang.String,java.lang.Exception)>("IOException updating headers", $r14);
+
+        throw $r15;
+
+     label13:
+        return;
+
+        catch java.io.IOException from label01 to label11 with label12;
+    }
+
+    private void setEncoding(java.lang.String)
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        r1 := @parameter0: java.lang.String;
+
+        virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: void setHeader(java.lang.String,java.lang.String)>("Content-Transfer-Encoding", r1);
+
+        return;
+    }
+
+    static com.sun.xml.internal.org.jvnet.mimepull.MIMEPart access$000(com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart)
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart r0;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEPart $r1;
+
+        r0 := @parameter0: com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart;
+
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart mimePart>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.SecurityException $r1;
+        java.lang.String $r0;
+        boolean $z0, $z1;
+
+        <com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.lang.String INLINE> = "inline";
+
+        <com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: java.lang.String ATTACHMENT> = "attachment";
+
+        <com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: boolean setDefaultTextCharset> = 1;
+
+     label1:
+        $r0 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("mail.mime.setdefaulttextcharset");
+
+        if $r0 == null goto label2;
+
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("false");
+
+        if $z0 != 0 goto label3;
+
+     label2:
+        $z1 = 1;
+
+        goto label4;
+
+     label3:
+        $z1 = 0;
+
+     label4:
+        <com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeBodyPart: boolean setDefaultTextCharset> = $z1;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r1 := @caughtexception;
+
+     label7:
+        return;
+
+        catch java.lang.SecurityException from label1 to label5 with label6;
+    }
+}

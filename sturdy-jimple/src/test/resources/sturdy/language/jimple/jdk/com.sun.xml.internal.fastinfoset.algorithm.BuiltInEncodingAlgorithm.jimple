@@ -1,0 +1,148 @@
+public abstract class com.sun.xml.internal.fastinfoset.algorithm.BuiltInEncodingAlgorithm extends java.lang.Object implements com.sun.xml.internal.org.jvnet.fastinfoset.EncodingAlgorithm
+{
+    protected static final java.util.regex.Pattern SPACE_PATTERN;
+
+    public void <init>()
+    {
+        com.sun.xml.internal.fastinfoset.algorithm.BuiltInEncodingAlgorithm r0;
+
+        r0 := @this: com.sun.xml.internal.fastinfoset.algorithm.BuiltInEncodingAlgorithm;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public abstract int getPrimtiveLengthFromOctetLength(int) throws com.sun.xml.internal.org.jvnet.fastinfoset.EncodingAlgorithmException;
+
+    public abstract int getOctetLengthFromPrimitiveLength(int);
+
+    public abstract void encodeToBytes(java.lang.Object, int, int, byte[], int);
+
+    public void matchWhiteSpaceDelimnatedWords(java.nio.CharBuffer, com.sun.xml.internal.fastinfoset.algorithm.BuiltInEncodingAlgorithm$WordListener)
+    {
+        java.nio.CharBuffer r0;
+        com.sun.xml.internal.fastinfoset.algorithm.BuiltInEncodingAlgorithm r4;
+        java.util.regex.Matcher $r2;
+        int $i0, $i1, $i2, i3;
+        java.util.regex.Pattern $r1;
+        boolean $z0;
+        com.sun.xml.internal.fastinfoset.algorithm.BuiltInEncodingAlgorithm$WordListener r3;
+
+        r4 := @this: com.sun.xml.internal.fastinfoset.algorithm.BuiltInEncodingAlgorithm;
+
+        r0 := @parameter0: java.nio.CharBuffer;
+
+        r3 := @parameter1: com.sun.xml.internal.fastinfoset.algorithm.BuiltInEncodingAlgorithm$WordListener;
+
+        $r1 = <com.sun.xml.internal.fastinfoset.algorithm.BuiltInEncodingAlgorithm: java.util.regex.Pattern SPACE_PATTERN>;
+
+        $r2 = virtualinvoke $r1.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>(r0);
+
+        i3 = 0;
+
+     label1:
+        $z0 = virtualinvoke $r2.<java.util.regex.Matcher: boolean find()>();
+
+        if $z0 == 0 goto label3;
+
+        $i2 = virtualinvoke $r2.<java.util.regex.Matcher: int start()>();
+
+        if $i2 == i3 goto label2;
+
+        interfaceinvoke r3.<com.sun.xml.internal.fastinfoset.algorithm.BuiltInEncodingAlgorithm$WordListener: void word(int,int)>(i3, $i2);
+
+     label2:
+        i3 = virtualinvoke $r2.<java.util.regex.Matcher: int end()>();
+
+        goto label1;
+
+     label3:
+        $i0 = virtualinvoke r0.<java.nio.CharBuffer: int length()>();
+
+        if i3 == $i0 goto label4;
+
+        $i1 = virtualinvoke r0.<java.nio.CharBuffer: int length()>();
+
+        interfaceinvoke r3.<com.sun.xml.internal.fastinfoset.algorithm.BuiltInEncodingAlgorithm$WordListener: void word(int,int)>(i3, $i1);
+
+     label4:
+        return;
+    }
+
+    public java.lang.StringBuilder removeWhitespace(char[], int, int)
+    {
+        com.sun.xml.internal.fastinfoset.algorithm.BuiltInEncodingAlgorithm r2;
+        char $c5;
+        int i0, i1, $i2, $i3, $i4, $i6, $i7, i8, i9;
+        char[] r1;
+        java.lang.StringBuilder $r0;
+        boolean $z0;
+
+        r2 := @this: com.sun.xml.internal.fastinfoset.algorithm.BuiltInEncodingAlgorithm;
+
+        r1 := @parameter0: char[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        i8 = 0;
+
+        i9 = 0;
+
+     label1:
+        if i9 >= i0 goto label4;
+
+        $i4 = i9 + i1;
+
+        $c5 = r1[$i4];
+
+        $z0 = staticinvoke <java.lang.Character: boolean isWhitespace(char)>($c5);
+
+        if $z0 == 0 goto label3;
+
+        if i8 >= i9 goto label2;
+
+        $i7 = i8 + i1;
+
+        $i6 = i9 - i8;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char[],int,int)>(r1, $i7, $i6);
+
+     label2:
+        i8 = i9 + 1;
+
+     label3:
+        i9 = i9 + 1;
+
+        goto label1;
+
+     label4:
+        if i8 >= i9 goto label5;
+
+        $i3 = i8 + i1;
+
+        $i2 = i9 - i8;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char[],int,int)>(r1, $i3, $i2);
+
+     label5:
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.util.regex.Pattern $r0;
+
+        $r0 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("\\s");
+
+        <com.sun.xml.internal.fastinfoset.algorithm.BuiltInEncodingAlgorithm: java.util.regex.Pattern SPACE_PATTERN> = $r0;
+
+        return;
+    }
+}

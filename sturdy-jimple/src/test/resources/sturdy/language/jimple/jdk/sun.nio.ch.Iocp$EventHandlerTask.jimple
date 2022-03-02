@@ -1,0 +1,335 @@
+class sun.nio.ch.Iocp$EventHandlerTask extends java.lang.Object implements java.lang.Runnable
+{
+    final sun.nio.ch.Iocp this$0;
+
+    private void <init>(sun.nio.ch.Iocp)
+    {
+        sun.nio.ch.Iocp r1;
+        sun.nio.ch.Iocp$EventHandlerTask r0;
+
+        r0 := @this: sun.nio.ch.Iocp$EventHandlerTask;
+
+        r1 := @parameter0: sun.nio.ch.Iocp;
+
+        r0.<sun.nio.ch.Iocp$EventHandlerTask: sun.nio.ch.Iocp this$0> = r1;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void run()
+    {
+        java.lang.Integer $r9;
+        java.lang.Runnable $r24;
+        sun.nio.ch.Iocp$CompletionStatus $r1;
+        byte $b9;
+        java.util.Map $r8;
+        sun.nio.ch.Iocp$ResultHandler r41;
+        java.util.concurrent.locks.ReadWriteLock $r5, $r12, $r20, $r35;
+        boolean z0, $z1, $z2, $z3, $z4, $z5, z6;
+        sun.nio.ch.PendingFuture $r14;
+        java.lang.Throwable $r28, $r32, $r33;
+        sun.nio.ch.Iocp$OverlappedChannel $r22;
+        long $l0, $l3, $l6, $l7, $l8;
+        sun.nio.ch.Invoker$GroupAndInvokeCount $r0;
+        int $i1, $i2, $i4, $i5, $i10, $i11, $i12;
+        java.io.IOException $r16, $r37;
+        java.util.concurrent.locks.Lock $r6, $r13, $r21, $r36;
+        sun.nio.ch.Iocp$EventHandlerTask r2;
+        sun.nio.ch.Iocp $r3, $r4, $r7, $r11, $r17, $r18, $r19, $r23, $r25, $r26, $r27, $r29, $r30, $r31, $r34, $r38, $r39, $r40;
+        java.lang.Object $r10, $r15;
+
+        r2 := @this: sun.nio.ch.Iocp$EventHandlerTask;
+
+        $r0 = staticinvoke <sun.nio.ch.Invoker: sun.nio.ch.Invoker$GroupAndInvokeCount getGroupAndInvokeCount()>();
+
+        if $r0 == null goto label01;
+
+        $z5 = 1;
+
+        goto label02;
+
+     label01:
+        $z5 = 0;
+
+     label02:
+        z0 = $z5;
+
+        $r1 = new sun.nio.ch.Iocp$CompletionStatus;
+
+        specialinvoke $r1.<sun.nio.ch.Iocp$CompletionStatus: void <init>(sun.nio.ch.Iocp$1)>(null);
+
+        z6 = 0;
+
+     label03:
+        if $r0 == null goto label04;
+
+        virtualinvoke $r0.<sun.nio.ch.Invoker$GroupAndInvokeCount: void resetInvokeCount()>();
+
+     label04:
+        z6 = 0;
+
+     label05:
+        $r3 = r2.<sun.nio.ch.Iocp$EventHandlerTask: sun.nio.ch.Iocp this$0>;
+
+        $l0 = staticinvoke <sun.nio.ch.Iocp: long access$200(sun.nio.ch.Iocp)>($r3);
+
+        staticinvoke <sun.nio.ch.Iocp: void access$300(long,sun.nio.ch.Iocp$CompletionStatus)>($l0, $r1);
+
+     label06:
+        goto label10;
+
+     label07:
+        $r37 := @caughtexception;
+
+        virtualinvoke $r37.<java.io.IOException: void printStackTrace()>();
+
+     label08:
+        $r38 = r2.<sun.nio.ch.Iocp$EventHandlerTask: sun.nio.ch.Iocp this$0>;
+
+        $i12 = virtualinvoke $r38.<sun.nio.ch.Iocp: int threadExit(java.lang.Runnable,boolean)>(r2, 0);
+
+        if $i12 != 0 goto label09;
+
+        $r39 = r2.<sun.nio.ch.Iocp$EventHandlerTask: sun.nio.ch.Iocp this$0>;
+
+        $z4 = virtualinvoke $r39.<sun.nio.ch.Iocp: boolean isShutdown()>();
+
+        if $z4 == 0 goto label09;
+
+        $r40 = r2.<sun.nio.ch.Iocp$EventHandlerTask: sun.nio.ch.Iocp this$0>;
+
+        virtualinvoke $r40.<sun.nio.ch.Iocp: void implClose()>();
+
+     label09:
+        return;
+
+     label10:
+        $i1 = virtualinvoke $r1.<sun.nio.ch.Iocp$CompletionStatus: int completionKey()>();
+
+        if $i1 != 0 goto label14;
+
+        $l8 = virtualinvoke $r1.<sun.nio.ch.Iocp$CompletionStatus: long overlapped()>();
+
+        $b9 = $l8 cmp 0L;
+
+        if $b9 != 0 goto label14;
+
+        $r23 = r2.<sun.nio.ch.Iocp$EventHandlerTask: sun.nio.ch.Iocp this$0>;
+
+        $r24 = virtualinvoke $r23.<sun.nio.ch.Iocp: java.lang.Runnable pollTask()>();
+
+        if $r24 != null goto label13;
+
+     label11:
+        $r25 = r2.<sun.nio.ch.Iocp$EventHandlerTask: sun.nio.ch.Iocp this$0>;
+
+        $i10 = virtualinvoke $r25.<sun.nio.ch.Iocp: int threadExit(java.lang.Runnable,boolean)>(r2, 0);
+
+        if $i10 != 0 goto label12;
+
+        $r26 = r2.<sun.nio.ch.Iocp$EventHandlerTask: sun.nio.ch.Iocp this$0>;
+
+        $z2 = virtualinvoke $r26.<sun.nio.ch.Iocp: boolean isShutdown()>();
+
+        if $z2 == 0 goto label12;
+
+        $r27 = r2.<sun.nio.ch.Iocp$EventHandlerTask: sun.nio.ch.Iocp this$0>;
+
+        virtualinvoke $r27.<sun.nio.ch.Iocp: void implClose()>();
+
+     label12:
+        return;
+
+     label13:
+        z6 = 1;
+
+        interfaceinvoke $r24.<java.lang.Runnable: void run()>();
+
+        goto label03;
+
+     label14:
+        $r4 = r2.<sun.nio.ch.Iocp$EventHandlerTask: sun.nio.ch.Iocp this$0>;
+
+        $r5 = staticinvoke <sun.nio.ch.Iocp: java.util.concurrent.locks.ReadWriteLock access$400(sun.nio.ch.Iocp)>($r4);
+
+        $r6 = interfaceinvoke $r5.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock readLock()>();
+
+        interfaceinvoke $r6.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label15:
+        $r7 = r2.<sun.nio.ch.Iocp$EventHandlerTask: sun.nio.ch.Iocp this$0>;
+
+        $r8 = staticinvoke <sun.nio.ch.Iocp: java.util.Map access$500(sun.nio.ch.Iocp)>($r7);
+
+        $i2 = virtualinvoke $r1.<sun.nio.ch.Iocp$CompletionStatus: int completionKey()>();
+
+        $r9 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r10 = interfaceinvoke $r8.<java.util.Map: java.lang.Object get(java.lang.Object)>($r9);
+
+        $r22 = (sun.nio.ch.Iocp$OverlappedChannel) $r10;
+
+        if $r22 != null goto label17;
+
+        $r18 = r2.<sun.nio.ch.Iocp$EventHandlerTask: sun.nio.ch.Iocp this$0>;
+
+        $l7 = virtualinvoke $r1.<sun.nio.ch.Iocp$CompletionStatus: long overlapped()>();
+
+        staticinvoke <sun.nio.ch.Iocp: void access$600(sun.nio.ch.Iocp,long)>($r18, $l7);
+
+     label16:
+        $r19 = r2.<sun.nio.ch.Iocp$EventHandlerTask: sun.nio.ch.Iocp this$0>;
+
+        $r20 = staticinvoke <sun.nio.ch.Iocp: java.util.concurrent.locks.ReadWriteLock access$400(sun.nio.ch.Iocp)>($r19);
+
+        $r21 = interfaceinvoke $r20.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock readLock()>();
+
+        interfaceinvoke $r21.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label03;
+
+     label17:
+        $r11 = r2.<sun.nio.ch.Iocp$EventHandlerTask: sun.nio.ch.Iocp this$0>;
+
+        $r12 = staticinvoke <sun.nio.ch.Iocp: java.util.concurrent.locks.ReadWriteLock access$400(sun.nio.ch.Iocp)>($r11);
+
+        $r13 = interfaceinvoke $r12.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock readLock()>();
+
+        interfaceinvoke $r13.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label20;
+
+     label18:
+        $r33 := @caughtexception;
+
+     label19:
+        $r34 = r2.<sun.nio.ch.Iocp$EventHandlerTask: sun.nio.ch.Iocp this$0>;
+
+        $r35 = staticinvoke <sun.nio.ch.Iocp: java.util.concurrent.locks.ReadWriteLock access$400(sun.nio.ch.Iocp)>($r34);
+
+        $r36 = interfaceinvoke $r35.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock readLock()>();
+
+        interfaceinvoke $r36.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r33;
+
+     label20:
+        $l3 = virtualinvoke $r1.<sun.nio.ch.Iocp$CompletionStatus: long overlapped()>();
+
+        $r14 = interfaceinvoke $r22.<sun.nio.ch.Iocp$OverlappedChannel: sun.nio.ch.PendingFuture getByOverlapped(long)>($l3);
+
+        if $r14 != null goto label21;
+
+        $r17 = r2.<sun.nio.ch.Iocp$EventHandlerTask: sun.nio.ch.Iocp this$0>;
+
+        $l6 = virtualinvoke $r1.<sun.nio.ch.Iocp$CompletionStatus: long overlapped()>();
+
+        staticinvoke <sun.nio.ch.Iocp: void access$600(sun.nio.ch.Iocp,long)>($r17, $l6);
+
+        goto label03;
+
+     label21:
+        entermonitor $r14;
+
+     label22:
+        $z1 = virtualinvoke $r14.<sun.nio.ch.PendingFuture: boolean isDone()>();
+
+        if $z1 == 0 goto label24;
+
+        exitmonitor $r14;
+
+     label23:
+        goto label03;
+
+     label24:
+        exitmonitor $r14;
+
+     label25:
+        goto label28;
+
+     label26:
+        $r32 := @caughtexception;
+
+        exitmonitor $r14;
+
+     label27:
+        throw $r32;
+
+     label28:
+        $i4 = virtualinvoke $r1.<sun.nio.ch.Iocp$CompletionStatus: int error()>();
+
+        $r15 = virtualinvoke $r14.<sun.nio.ch.PendingFuture: java.lang.Object getContext()>();
+
+        r41 = (sun.nio.ch.Iocp$ResultHandler) $r15;
+
+        z6 = 1;
+
+        if $i4 != 0 goto label29;
+
+        $i5 = virtualinvoke $r1.<sun.nio.ch.Iocp$CompletionStatus: int bytesTransferred()>();
+
+        interfaceinvoke r41.<sun.nio.ch.Iocp$ResultHandler: void completed(int,boolean)>($i5, z0);
+
+        goto label30;
+
+     label29:
+        $r16 = staticinvoke <sun.nio.ch.Iocp: java.io.IOException access$700(int)>($i4);
+
+        interfaceinvoke r41.<sun.nio.ch.Iocp$ResultHandler: void failed(int,java.io.IOException)>($i4, $r16);
+
+     label30:
+        goto label03;
+
+     label31:
+        $r28 := @caughtexception;
+
+     label32:
+        $r29 = r2.<sun.nio.ch.Iocp$EventHandlerTask: sun.nio.ch.Iocp this$0>;
+
+        $i11 = virtualinvoke $r29.<sun.nio.ch.Iocp: int threadExit(java.lang.Runnable,boolean)>(r2, z6);
+
+        if $i11 != 0 goto label33;
+
+        $r30 = r2.<sun.nio.ch.Iocp$EventHandlerTask: sun.nio.ch.Iocp this$0>;
+
+        $z3 = virtualinvoke $r30.<sun.nio.ch.Iocp: boolean isShutdown()>();
+
+        if $z3 == 0 goto label33;
+
+        $r31 = r2.<sun.nio.ch.Iocp$EventHandlerTask: sun.nio.ch.Iocp this$0>;
+
+        virtualinvoke $r31.<sun.nio.ch.Iocp: void implClose()>();
+
+     label33:
+        throw $r28;
+
+        catch java.io.IOException from label05 to label06 with label07;
+        catch java.lang.Throwable from label15 to label16 with label18;
+        catch java.lang.Throwable from label18 to label19 with label18;
+        catch java.lang.Throwable from label22 to label23 with label26;
+        catch java.lang.Throwable from label24 to label25 with label26;
+        catch java.lang.Throwable from label26 to label27 with label26;
+        catch java.lang.Throwable from label03 to label08 with label31;
+        catch java.lang.Throwable from label10 to label11 with label31;
+        catch java.lang.Throwable from label13 to label32 with label31;
+    }
+
+    void <init>(sun.nio.ch.Iocp, sun.nio.ch.Iocp$1)
+    {
+        sun.nio.ch.Iocp r1;
+        sun.nio.ch.Iocp$1 r2;
+        sun.nio.ch.Iocp$EventHandlerTask r0;
+
+        r0 := @this: sun.nio.ch.Iocp$EventHandlerTask;
+
+        r1 := @parameter0: sun.nio.ch.Iocp;
+
+        r2 := @parameter1: sun.nio.ch.Iocp$1;
+
+        specialinvoke r0.<sun.nio.ch.Iocp$EventHandlerTask: void <init>(sun.nio.ch.Iocp)>(r1);
+
+        return;
+    }
+}

@@ -1,0 +1,565 @@
+final class sun.java2d.marlin.RendererContext extends sun.java2d.ReentrantContext implements sun.java2d.marlin.IRendererContext
+{
+    private static final java.util.concurrent.atomic.AtomicInteger CTX_COUNT;
+    private final java.lang.Object cleanerObj;
+    boolean dirty;
+    final float[] float6;
+    final sun.java2d.marlin.Curve curve;
+    final sun.java2d.marlin.MarlinRenderingEngine$NormalizingPathIterator nPCPathIterator;
+    final sun.java2d.marlin.MarlinRenderingEngine$NormalizingPathIterator nPQPathIterator;
+    final sun.java2d.marlin.TransformingPathConsumer2D transformerPC2D;
+    private java.lang.ref.WeakReference refPath2D;
+    final sun.java2d.marlin.Renderer renderer;
+    final sun.java2d.marlin.Stroker stroker;
+    final sun.java2d.marlin.CollinearSimplifier simplifier;
+    final sun.java2d.marlin.PathSimplifier pathSimplifier;
+    final sun.java2d.marlin.Dasher dasher;
+    final sun.java2d.marlin.MarlinTileGenerator ptg;
+    final sun.java2d.marlin.MarlinCache cache;
+    int stroking;
+    boolean doClip;
+    boolean closedPath;
+    final float[] clipRect;
+    float clipInvScale;
+    final sun.java2d.marlin.TransformingPathConsumer2D$CurveBasicMonotonizer monotonizer;
+    final sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter curveClipSplitter;
+    private final sun.java2d.marlin.IntArrayCache cleanIntCache;
+    private final sun.java2d.marlin.IntArrayCache dirtyIntCache;
+    private final sun.java2d.marlin.FloatArrayCache dirtyFloatCache;
+    private final sun.java2d.marlin.ByteArrayCache dirtyByteCache;
+    final sun.java2d.marlin.RendererStats stats;
+
+    static sun.java2d.marlin.RendererContext createContext()
+    {
+        java.util.concurrent.atomic.AtomicInteger $r3;
+        int $i0;
+        java.lang.StringBuilder $r1, $r2, $r5;
+        java.lang.String $r4, $r6;
+        sun.java2d.marlin.RendererContext $r0;
+
+        $r0 = new sun.java2d.marlin.RendererContext;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ctx");
+
+        $r3 = <sun.java2d.marlin.RendererContext: java.util.concurrent.atomic.AtomicInteger CTX_COUNT>;
+
+        $i0 = virtualinvoke $r3.<java.util.concurrent.atomic.AtomicInteger: int getAndIncrement()>();
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i0);
+
+        $r5 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<sun.java2d.marlin.RendererContext: void <init>(java.lang.String)>($r6);
+
+        return $r0;
+    }
+
+    void <init>(java.lang.String)
+    {
+        sun.java2d.marlin.Stroker $r37;
+        sun.java2d.marlin.Renderer $r32, $r35;
+        sun.java2d.marlin.MarlinRenderingEngine$NormalizingPathIterator$NearestPixelCenter $r24;
+        sun.java2d.marlin.CollinearSimplifier $r3;
+        boolean $z0, $z1;
+        sun.java2d.marlin.PathSimplifier $r4;
+        sun.java2d.marlin.FloatArrayCache $r8, $r19;
+        sun.java2d.marlin.Curve $r2;
+        sun.java2d.marlin.ArrayCacheConst$CacheStats[] $r14;
+        sun.java2d.marlin.TransformingPathConsumer2D$CurveBasicMonotonizer $r28;
+        sun.java2d.marlin.MarlinTileGenerator $r33;
+        sun.java2d.marlin.RendererStats $r13, $r23, $r36;
+        sun.java2d.marlin.MarlinRenderingEngine$NormalizingPathIterator$NearestPixelQuarter $r26;
+        java.lang.StringBuilder $r39, $r40, $r41;
+        sun.java2d.marlin.RendererContext r0;
+        sun.java2d.marlin.MarlinCache $r31, $r34;
+        float[] $r1, $r5, $r25, $r27;
+        sun.java2d.marlin.ArrayCacheConst$CacheStats $r16, $r18, $r20, $r22;
+        sun.java2d.marlin.ByteArrayCache $r9, $r21;
+        java.lang.String r11, $r42;
+        sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter $r29;
+        sun.java2d.marlin.IntArrayCache $r6, $r7, $r15, $r17;
+        sun.java2d.marlin.TransformingPathConsumer2D $r30;
+        java.lang.Object $r10, $r12;
+        sun.java2d.marlin.Dasher $r38;
+
+        r0 := @this: sun.java2d.marlin.RendererContext;
+
+        r11 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<sun.java2d.ReentrantContext: void <init>()>();
+
+        r0.<sun.java2d.marlin.RendererContext: boolean dirty> = 0;
+
+        $r1 = newarray (float)[6];
+
+        r0.<sun.java2d.marlin.RendererContext: float[] float6> = $r1;
+
+        $r2 = new sun.java2d.marlin.Curve;
+
+        specialinvoke $r2.<sun.java2d.marlin.Curve: void <init>()>();
+
+        r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.Curve curve> = $r2;
+
+        r0.<sun.java2d.marlin.RendererContext: java.lang.ref.WeakReference refPath2D> = null;
+
+        $r3 = new sun.java2d.marlin.CollinearSimplifier;
+
+        specialinvoke $r3.<sun.java2d.marlin.CollinearSimplifier: void <init>()>();
+
+        r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.CollinearSimplifier simplifier> = $r3;
+
+        $r4 = new sun.java2d.marlin.PathSimplifier;
+
+        specialinvoke $r4.<sun.java2d.marlin.PathSimplifier: void <init>()>();
+
+        r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.PathSimplifier pathSimplifier> = $r4;
+
+        r0.<sun.java2d.marlin.RendererContext: int stroking> = 0;
+
+        r0.<sun.java2d.marlin.RendererContext: boolean doClip> = 0;
+
+        r0.<sun.java2d.marlin.RendererContext: boolean closedPath> = 0;
+
+        $r5 = newarray (float)[4];
+
+        r0.<sun.java2d.marlin.RendererContext: float[] clipRect> = $r5;
+
+        r0.<sun.java2d.marlin.RendererContext: float clipInvScale> = 0.0F;
+
+        $r6 = new sun.java2d.marlin.IntArrayCache;
+
+        specialinvoke $r6.<sun.java2d.marlin.IntArrayCache: void <init>(boolean,int)>(1, 5);
+
+        r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.IntArrayCache cleanIntCache> = $r6;
+
+        $r7 = new sun.java2d.marlin.IntArrayCache;
+
+        specialinvoke $r7.<sun.java2d.marlin.IntArrayCache: void <init>(boolean,int)>(0, 5);
+
+        r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.IntArrayCache dirtyIntCache> = $r7;
+
+        $r8 = new sun.java2d.marlin.FloatArrayCache;
+
+        specialinvoke $r8.<sun.java2d.marlin.FloatArrayCache: void <init>(boolean,int)>(0, 4);
+
+        r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.FloatArrayCache dirtyFloatCache> = $r8;
+
+        $r9 = new sun.java2d.marlin.ByteArrayCache;
+
+        specialinvoke $r9.<sun.java2d.marlin.ByteArrayCache: void <init>(boolean,int)>(0, 2);
+
+        r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.ByteArrayCache dirtyByteCache> = $r9;
+
+        $z0 = <sun.java2d.marlin.RendererContext: boolean LOG_CREATE_CONTEXT>;
+
+        if $z0 == 0 goto label1;
+
+        $r39 = new java.lang.StringBuilder;
+
+        specialinvoke $r39.<java.lang.StringBuilder: void <init>()>();
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("new RendererContext = ");
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r11);
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.java2d.marlin.MarlinUtils: void logInfo(java.lang.String)>($r42);
+
+     label1:
+        $r10 = new java.lang.Object;
+
+        specialinvoke $r10.<java.lang.Object: void <init>()>();
+
+        r0.<sun.java2d.marlin.RendererContext: java.lang.Object cleanerObj> = $r10;
+
+        $z1 = <sun.java2d.marlin.RendererContext: boolean DO_STATS>;
+
+        if $z1 != 0 goto label2;
+
+        goto label3;
+
+     label2:
+        $r12 = r0.<sun.java2d.marlin.RendererContext: java.lang.Object cleanerObj>;
+
+        $r13 = staticinvoke <sun.java2d.marlin.RendererStats: sun.java2d.marlin.RendererStats createInstance(java.lang.Object,java.lang.String)>($r12, r11);
+
+        r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.RendererStats stats> = $r13;
+
+        $r23 = r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r14 = newarray (sun.java2d.marlin.ArrayCacheConst$CacheStats)[4];
+
+        $r15 = r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.IntArrayCache cleanIntCache>;
+
+        $r16 = $r15.<sun.java2d.marlin.IntArrayCache: sun.java2d.marlin.ArrayCacheConst$CacheStats stats>;
+
+        $r14[0] = $r16;
+
+        $r17 = r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.IntArrayCache dirtyIntCache>;
+
+        $r18 = $r17.<sun.java2d.marlin.IntArrayCache: sun.java2d.marlin.ArrayCacheConst$CacheStats stats>;
+
+        $r14[1] = $r18;
+
+        $r19 = r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.FloatArrayCache dirtyFloatCache>;
+
+        $r20 = $r19.<sun.java2d.marlin.FloatArrayCache: sun.java2d.marlin.ArrayCacheConst$CacheStats stats>;
+
+        $r14[2] = $r20;
+
+        $r21 = r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.ByteArrayCache dirtyByteCache>;
+
+        $r22 = $r21.<sun.java2d.marlin.ByteArrayCache: sun.java2d.marlin.ArrayCacheConst$CacheStats stats>;
+
+        $r14[3] = $r22;
+
+        $r23.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.ArrayCacheConst$CacheStats[] cacheStats> = $r14;
+
+        goto label4;
+
+     label3:
+        r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.RendererStats stats> = null;
+
+     label4:
+        $r24 = new sun.java2d.marlin.MarlinRenderingEngine$NormalizingPathIterator$NearestPixelCenter;
+
+        $r25 = r0.<sun.java2d.marlin.RendererContext: float[] float6>;
+
+        specialinvoke $r24.<sun.java2d.marlin.MarlinRenderingEngine$NormalizingPathIterator$NearestPixelCenter: void <init>(float[])>($r25);
+
+        r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.MarlinRenderingEngine$NormalizingPathIterator nPCPathIterator> = $r24;
+
+        $r26 = new sun.java2d.marlin.MarlinRenderingEngine$NormalizingPathIterator$NearestPixelQuarter;
+
+        $r27 = r0.<sun.java2d.marlin.RendererContext: float[] float6>;
+
+        specialinvoke $r26.<sun.java2d.marlin.MarlinRenderingEngine$NormalizingPathIterator$NearestPixelQuarter: void <init>(float[])>($r27);
+
+        r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.MarlinRenderingEngine$NormalizingPathIterator nPQPathIterator> = $r26;
+
+        $r28 = new sun.java2d.marlin.TransformingPathConsumer2D$CurveBasicMonotonizer;
+
+        specialinvoke $r28.<sun.java2d.marlin.TransformingPathConsumer2D$CurveBasicMonotonizer: void <init>(sun.java2d.marlin.RendererContext)>(r0);
+
+        r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.TransformingPathConsumer2D$CurveBasicMonotonizer monotonizer> = $r28;
+
+        $r29 = new sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter;
+
+        specialinvoke $r29.<sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter: void <init>(sun.java2d.marlin.RendererContext)>(r0);
+
+        r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.TransformingPathConsumer2D$CurveClipSplitter curveClipSplitter> = $r29;
+
+        $r30 = new sun.java2d.marlin.TransformingPathConsumer2D;
+
+        specialinvoke $r30.<sun.java2d.marlin.TransformingPathConsumer2D: void <init>(sun.java2d.marlin.RendererContext)>(r0);
+
+        r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.TransformingPathConsumer2D transformerPC2D> = $r30;
+
+        $r31 = new sun.java2d.marlin.MarlinCache;
+
+        specialinvoke $r31.<sun.java2d.marlin.MarlinCache: void <init>(sun.java2d.marlin.IRendererContext)>(r0);
+
+        r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.MarlinCache cache> = $r31;
+
+        $r32 = new sun.java2d.marlin.Renderer;
+
+        specialinvoke $r32.<sun.java2d.marlin.Renderer: void <init>(sun.java2d.marlin.RendererContext)>(r0);
+
+        r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.Renderer renderer> = $r32;
+
+        $r33 = new sun.java2d.marlin.MarlinTileGenerator;
+
+        $r36 = r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r35 = r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.Renderer renderer>;
+
+        $r34 = r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.MarlinCache cache>;
+
+        specialinvoke $r33.<sun.java2d.marlin.MarlinTileGenerator: void <init>(sun.java2d.marlin.RendererStats,sun.java2d.marlin.MarlinRenderer,sun.java2d.marlin.MarlinCache)>($r36, $r35, $r34);
+
+        r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.MarlinTileGenerator ptg> = $r33;
+
+        $r37 = new sun.java2d.marlin.Stroker;
+
+        specialinvoke $r37.<sun.java2d.marlin.Stroker: void <init>(sun.java2d.marlin.RendererContext)>(r0);
+
+        r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.Stroker stroker> = $r37;
+
+        $r38 = new sun.java2d.marlin.Dasher;
+
+        specialinvoke $r38.<sun.java2d.marlin.Dasher: void <init>(sun.java2d.marlin.RendererContext)>(r0);
+
+        r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.Dasher dasher> = $r38;
+
+        return;
+    }
+
+    void dispose()
+    {
+        long $l0, $l1, $l3;
+        sun.java2d.marlin.MarlinRenderingEngine$NormalizingPathIterator $r1, $r2;
+        sun.java2d.marlin.Stroker $r4;
+        byte $b2;
+        int $i4;
+        boolean $z0, $z1;
+        sun.java2d.marlin.RendererStats $r5, $r6, $r7, $r8, $r9;
+        sun.java2d.marlin.Dasher $r3;
+        sun.java2d.marlin.RendererContext r0;
+
+        r0 := @this: sun.java2d.marlin.RendererContext;
+
+        $z0 = <sun.java2d.marlin.RendererContext: boolean DO_STATS>;
+
+        if $z0 == 0 goto label2;
+
+        $r5 = r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $l1 = $r5.<sun.java2d.marlin.RendererStats: long totalOffHeap>;
+
+        $r6 = r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $l0 = $r6.<sun.java2d.marlin.RendererStats: long totalOffHeapMax>;
+
+        $b2 = $l1 cmp $l0;
+
+        $i4 = (int) $b2;
+
+        if $i4 <= 0 goto label1;
+
+        $r9 = r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r8 = r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $l3 = $r8.<sun.java2d.marlin.RendererStats: long totalOffHeap>;
+
+        $r9.<sun.java2d.marlin.RendererStats: long totalOffHeapMax> = $l3;
+
+     label1:
+        $r7 = r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r7.<sun.java2d.marlin.RendererStats: long totalOffHeap> = 0L;
+
+     label2:
+        r0.<sun.java2d.marlin.RendererContext: int stroking> = 0;
+
+        r0.<sun.java2d.marlin.RendererContext: boolean doClip> = 0;
+
+        r0.<sun.java2d.marlin.RendererContext: boolean closedPath> = 0;
+
+        r0.<sun.java2d.marlin.RendererContext: float clipInvScale> = 0.0F;
+
+        $z1 = r0.<sun.java2d.marlin.RendererContext: boolean dirty>;
+
+        if $z1 == 0 goto label3;
+
+        $r1 = r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.MarlinRenderingEngine$NormalizingPathIterator nPCPathIterator>;
+
+        virtualinvoke $r1.<sun.java2d.marlin.MarlinRenderingEngine$NormalizingPathIterator: void dispose()>();
+
+        $r2 = r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.MarlinRenderingEngine$NormalizingPathIterator nPQPathIterator>;
+
+        virtualinvoke $r2.<sun.java2d.marlin.MarlinRenderingEngine$NormalizingPathIterator: void dispose()>();
+
+        $r3 = r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.Dasher dasher>;
+
+        virtualinvoke $r3.<sun.java2d.marlin.Dasher: void dispose()>();
+
+        $r4 = r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.Stroker stroker>;
+
+        virtualinvoke $r4.<sun.java2d.marlin.Stroker: void dispose()>();
+
+        r0.<sun.java2d.marlin.RendererContext: boolean dirty> = 0;
+
+     label3:
+        return;
+    }
+
+    java.awt.geom.Path2D$Float getPath2D()
+    {
+        java.awt.geom.Path2D$Float $r2, $r6, r7;
+        int $i0;
+        java.lang.Object $r5;
+        java.lang.ref.WeakReference $r1, $r3, $r4;
+        sun.java2d.marlin.RendererContext r0;
+
+        r0 := @this: sun.java2d.marlin.RendererContext;
+
+        $r1 = r0.<sun.java2d.marlin.RendererContext: java.lang.ref.WeakReference refPath2D>;
+
+        if $r1 == null goto label1;
+
+        $r4 = r0.<sun.java2d.marlin.RendererContext: java.lang.ref.WeakReference refPath2D>;
+
+        $r5 = virtualinvoke $r4.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        $r6 = (java.awt.geom.Path2D$Float) $r5;
+
+        goto label2;
+
+     label1:
+        $r6 = null;
+
+     label2:
+        r7 = $r6;
+
+        if $r6 != null goto label3;
+
+        $r2 = new java.awt.geom.Path2D$Float;
+
+        $i0 = <sun.java2d.marlin.RendererContext: int INITIAL_EDGES_COUNT>;
+
+        specialinvoke $r2.<java.awt.geom.Path2D$Float: void <init>(int,int)>(1, $i0);
+
+        r7 = $r2;
+
+        $r3 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r3.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>($r2);
+
+        r0.<sun.java2d.marlin.RendererContext: java.lang.ref.WeakReference refPath2D> = $r3;
+
+     label3:
+        virtualinvoke r7.<java.awt.geom.Path2D$Float: void reset()>();
+
+        return r7;
+    }
+
+    public sun.java2d.marlin.RendererStats stats()
+    {
+        sun.java2d.marlin.RendererStats $r1;
+        sun.java2d.marlin.RendererContext r0;
+
+        r0 := @this: sun.java2d.marlin.RendererContext;
+
+        $r1 = r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        return $r1;
+    }
+
+    public sun.java2d.marlin.OffHeapArray newOffHeapArray(long)
+    {
+        long l0, $l1, $l2;
+        sun.java2d.marlin.RendererStats $r3;
+        java.lang.Object $r2;
+        sun.java2d.marlin.OffHeapArray $r0;
+        boolean $z0;
+        sun.java2d.marlin.RendererContext r1;
+
+        r1 := @this: sun.java2d.marlin.RendererContext;
+
+        l0 := @parameter0: long;
+
+        $z0 = <sun.java2d.marlin.RendererContext: boolean DO_STATS>;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = r1.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $l1 = $r3.<sun.java2d.marlin.RendererStats: long totalOffHeapInitial>;
+
+        $l2 = $l1 + l0;
+
+        $r3.<sun.java2d.marlin.RendererStats: long totalOffHeapInitial> = $l2;
+
+     label1:
+        $r0 = new sun.java2d.marlin.OffHeapArray;
+
+        $r2 = r1.<sun.java2d.marlin.RendererContext: java.lang.Object cleanerObj>;
+
+        specialinvoke $r0.<sun.java2d.marlin.OffHeapArray: void <init>(java.lang.Object,long)>($r2, l0);
+
+        return $r0;
+    }
+
+    public sun.java2d.marlin.IntArrayCache$Reference newCleanIntArrayRef(int)
+    {
+        sun.java2d.marlin.IntArrayCache $r1;
+        int i0;
+        sun.java2d.marlin.IntArrayCache$Reference $r2;
+        sun.java2d.marlin.RendererContext r0;
+
+        r0 := @this: sun.java2d.marlin.RendererContext;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.IntArrayCache cleanIntCache>;
+
+        $r2 = virtualinvoke $r1.<sun.java2d.marlin.IntArrayCache: sun.java2d.marlin.IntArrayCache$Reference createRef(int)>(i0);
+
+        return $r2;
+    }
+
+    sun.java2d.marlin.IntArrayCache$Reference newDirtyIntArrayRef(int)
+    {
+        sun.java2d.marlin.IntArrayCache $r1;
+        int i0;
+        sun.java2d.marlin.IntArrayCache$Reference $r2;
+        sun.java2d.marlin.RendererContext r0;
+
+        r0 := @this: sun.java2d.marlin.RendererContext;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.IntArrayCache dirtyIntCache>;
+
+        $r2 = virtualinvoke $r1.<sun.java2d.marlin.IntArrayCache: sun.java2d.marlin.IntArrayCache$Reference createRef(int)>(i0);
+
+        return $r2;
+    }
+
+    sun.java2d.marlin.FloatArrayCache$Reference newDirtyFloatArrayRef(int)
+    {
+        sun.java2d.marlin.FloatArrayCache $r1;
+        int i0;
+        sun.java2d.marlin.FloatArrayCache$Reference $r2;
+        sun.java2d.marlin.RendererContext r0;
+
+        r0 := @this: sun.java2d.marlin.RendererContext;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.FloatArrayCache dirtyFloatCache>;
+
+        $r2 = virtualinvoke $r1.<sun.java2d.marlin.FloatArrayCache: sun.java2d.marlin.FloatArrayCache$Reference createRef(int)>(i0);
+
+        return $r2;
+    }
+
+    sun.java2d.marlin.ByteArrayCache$Reference newDirtyByteArrayRef(int)
+    {
+        sun.java2d.marlin.ByteArrayCache $r1;
+        int i0;
+        sun.java2d.marlin.ByteArrayCache$Reference $r2;
+        sun.java2d.marlin.RendererContext r0;
+
+        r0 := @this: sun.java2d.marlin.RendererContext;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.java2d.marlin.RendererContext: sun.java2d.marlin.ByteArrayCache dirtyByteCache>;
+
+        $r2 = virtualinvoke $r1.<sun.java2d.marlin.ByteArrayCache: sun.java2d.marlin.ByteArrayCache$Reference createRef(int)>(i0);
+
+        return $r2;
+    }
+
+    static void <clinit>()
+    {
+        java.util.concurrent.atomic.AtomicInteger $r0;
+
+        $r0 = new java.util.concurrent.atomic.AtomicInteger;
+
+        specialinvoke $r0.<java.util.concurrent.atomic.AtomicInteger: void <init>(int)>(1);
+
+        <sun.java2d.marlin.RendererContext: java.util.concurrent.atomic.AtomicInteger CTX_COUNT> = $r0;
+
+        return;
+    }
+}

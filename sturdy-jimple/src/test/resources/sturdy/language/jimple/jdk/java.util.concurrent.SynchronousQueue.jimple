@@ -1,0 +1,717 @@
+public class java.util.concurrent.SynchronousQueue extends java.util.AbstractQueue implements java.util.concurrent.BlockingQueue, java.io.Serializable
+{
+    private static final long serialVersionUID;
+    static final int NCPUS;
+    static final int maxTimedSpins;
+    static final int maxUntimedSpins;
+    static final long spinForTimeoutThreshold;
+    private transient volatile java.util.concurrent.SynchronousQueue$Transferer transferer;
+    private java.util.concurrent.locks.ReentrantLock qlock;
+    private java.util.concurrent.SynchronousQueue$WaitQueue waitingProducers;
+    private java.util.concurrent.SynchronousQueue$WaitQueue waitingConsumers;
+
+    public void <init>()
+    {
+        java.util.concurrent.SynchronousQueue r0;
+
+        r0 := @this: java.util.concurrent.SynchronousQueue;
+
+        specialinvoke r0.<java.util.concurrent.SynchronousQueue: void <init>(boolean)>(0);
+
+        return;
+    }
+
+    public void <init>(boolean)
+    {
+        java.util.concurrent.SynchronousQueue$Transferer $r1;
+        java.util.concurrent.SynchronousQueue r0;
+        java.util.concurrent.SynchronousQueue$TransferQueue $r2;
+        java.util.concurrent.SynchronousQueue$TransferStack $r3;
+        boolean z0;
+
+        r0 := @this: java.util.concurrent.SynchronousQueue;
+
+        z0 := @parameter0: boolean;
+
+        specialinvoke r0.<java.util.AbstractQueue: void <init>()>();
+
+        if z0 == 0 goto label1;
+
+        $r2 = new java.util.concurrent.SynchronousQueue$TransferQueue;
+
+        $r1 = $r2;
+
+        specialinvoke $r2.<java.util.concurrent.SynchronousQueue$TransferQueue: void <init>()>();
+
+        goto label2;
+
+     label1:
+        $r3 = new java.util.concurrent.SynchronousQueue$TransferStack;
+
+        $r1 = $r3;
+
+        specialinvoke $r3.<java.util.concurrent.SynchronousQueue$TransferStack: void <init>()>();
+
+     label2:
+        r0.<java.util.concurrent.SynchronousQueue: java.util.concurrent.SynchronousQueue$Transferer transferer> = $r1;
+
+        return;
+    }
+
+    public void put(java.lang.Object) throws java.lang.InterruptedException
+    {
+        java.util.concurrent.SynchronousQueue$Transferer $r2;
+        java.util.concurrent.SynchronousQueue r1;
+        java.lang.InterruptedException $r4;
+        java.lang.Object r0, $r3;
+        java.lang.NullPointerException $r5;
+
+        r1 := @this: java.util.concurrent.SynchronousQueue;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        $r5 = new java.lang.NullPointerException;
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r5;
+
+     label1:
+        $r2 = r1.<java.util.concurrent.SynchronousQueue: java.util.concurrent.SynchronousQueue$Transferer transferer>;
+
+        $r3 = virtualinvoke $r2.<java.util.concurrent.SynchronousQueue$Transferer: java.lang.Object transfer(java.lang.Object,boolean,long)>(r0, 0, 0L);
+
+        if $r3 != null goto label2;
+
+        staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        $r4 = new java.lang.InterruptedException;
+
+        specialinvoke $r4.<java.lang.InterruptedException: void <init>()>();
+
+        throw $r4;
+
+     label2:
+        return;
+    }
+
+    public boolean offer(java.lang.Object, long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException
+    {
+        java.util.concurrent.SynchronousQueue$Transferer $r3;
+        java.util.concurrent.SynchronousQueue r1;
+        long l0, $l1;
+        java.lang.NullPointerException $r6;
+        java.util.concurrent.TimeUnit r2;
+        java.lang.InterruptedException $r5;
+        java.lang.Object r0, $r4;
+        boolean $z0;
+
+        r1 := @this: java.util.concurrent.SynchronousQueue;
+
+        r0 := @parameter0: java.lang.Object;
+
+        l0 := @parameter1: long;
+
+        r2 := @parameter2: java.util.concurrent.TimeUnit;
+
+        if r0 != null goto label1;
+
+        $r6 = new java.lang.NullPointerException;
+
+        specialinvoke $r6.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r6;
+
+     label1:
+        $r3 = r1.<java.util.concurrent.SynchronousQueue: java.util.concurrent.SynchronousQueue$Transferer transferer>;
+
+        $l1 = virtualinvoke r2.<java.util.concurrent.TimeUnit: long toNanos(long)>(l0);
+
+        $r4 = virtualinvoke $r3.<java.util.concurrent.SynchronousQueue$Transferer: java.lang.Object transfer(java.lang.Object,boolean,long)>(r0, 1, $l1);
+
+        if $r4 == null goto label2;
+
+        return 1;
+
+     label2:
+        $z0 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z0 != 0 goto label3;
+
+        return 0;
+
+     label3:
+        $r5 = new java.lang.InterruptedException;
+
+        specialinvoke $r5.<java.lang.InterruptedException: void <init>()>();
+
+        throw $r5;
+    }
+
+    public boolean offer(java.lang.Object)
+    {
+        java.util.concurrent.SynchronousQueue$Transferer $r2;
+        java.util.concurrent.SynchronousQueue r1;
+        java.lang.Object r0, $r3;
+        java.lang.NullPointerException $r4;
+        boolean $z0;
+
+        r1 := @this: java.util.concurrent.SynchronousQueue;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        $r4 = new java.lang.NullPointerException;
+
+        specialinvoke $r4.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r4;
+
+     label1:
+        $r2 = r1.<java.util.concurrent.SynchronousQueue: java.util.concurrent.SynchronousQueue$Transferer transferer>;
+
+        $r3 = virtualinvoke $r2.<java.util.concurrent.SynchronousQueue$Transferer: java.lang.Object transfer(java.lang.Object,boolean,long)>(r0, 1, 0L);
+
+        if $r3 == null goto label2;
+
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+    }
+
+    public java.lang.Object take() throws java.lang.InterruptedException
+    {
+        java.util.concurrent.SynchronousQueue$Transferer $r1;
+        java.util.concurrent.SynchronousQueue r0;
+        java.lang.InterruptedException $r3;
+        java.lang.Object $r2;
+
+        r0 := @this: java.util.concurrent.SynchronousQueue;
+
+        $r1 = r0.<java.util.concurrent.SynchronousQueue: java.util.concurrent.SynchronousQueue$Transferer transferer>;
+
+        $r2 = virtualinvoke $r1.<java.util.concurrent.SynchronousQueue$Transferer: java.lang.Object transfer(java.lang.Object,boolean,long)>(null, 0, 0L);
+
+        if $r2 == null goto label1;
+
+        return $r2;
+
+     label1:
+        staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        $r3 = new java.lang.InterruptedException;
+
+        specialinvoke $r3.<java.lang.InterruptedException: void <init>()>();
+
+        throw $r3;
+    }
+
+    public java.lang.Object poll(long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException
+    {
+        java.util.concurrent.SynchronousQueue$Transferer $r2;
+        java.util.concurrent.SynchronousQueue r0;
+        long l0, $l1;
+        java.util.concurrent.TimeUnit r1;
+        java.lang.InterruptedException $r4;
+        java.lang.Object $r3;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.SynchronousQueue;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: java.util.concurrent.TimeUnit;
+
+        $r2 = r0.<java.util.concurrent.SynchronousQueue: java.util.concurrent.SynchronousQueue$Transferer transferer>;
+
+        $l1 = virtualinvoke r1.<java.util.concurrent.TimeUnit: long toNanos(long)>(l0);
+
+        $r3 = virtualinvoke $r2.<java.util.concurrent.SynchronousQueue$Transferer: java.lang.Object transfer(java.lang.Object,boolean,long)>(null, 1, $l1);
+
+        if $r3 != null goto label1;
+
+        $z0 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z0 != 0 goto label2;
+
+     label1:
+        return $r3;
+
+     label2:
+        $r4 = new java.lang.InterruptedException;
+
+        specialinvoke $r4.<java.lang.InterruptedException: void <init>()>();
+
+        throw $r4;
+    }
+
+    public java.lang.Object poll()
+    {
+        java.lang.Object $r2;
+        java.util.concurrent.SynchronousQueue$Transferer $r1;
+        java.util.concurrent.SynchronousQueue r0;
+
+        r0 := @this: java.util.concurrent.SynchronousQueue;
+
+        $r1 = r0.<java.util.concurrent.SynchronousQueue: java.util.concurrent.SynchronousQueue$Transferer transferer>;
+
+        $r2 = virtualinvoke $r1.<java.util.concurrent.SynchronousQueue$Transferer: java.lang.Object transfer(java.lang.Object,boolean,long)>(null, 1, 0L);
+
+        return $r2;
+    }
+
+    public boolean isEmpty()
+    {
+        java.util.concurrent.SynchronousQueue r0;
+
+        r0 := @this: java.util.concurrent.SynchronousQueue;
+
+        return 1;
+    }
+
+    public int size()
+    {
+        java.util.concurrent.SynchronousQueue r0;
+
+        r0 := @this: java.util.concurrent.SynchronousQueue;
+
+        return 0;
+    }
+
+    public int remainingCapacity()
+    {
+        java.util.concurrent.SynchronousQueue r0;
+
+        r0 := @this: java.util.concurrent.SynchronousQueue;
+
+        return 0;
+    }
+
+    public void clear()
+    {
+        java.util.concurrent.SynchronousQueue r0;
+
+        r0 := @this: java.util.concurrent.SynchronousQueue;
+
+        return;
+    }
+
+    public boolean contains(java.lang.Object)
+    {
+        java.lang.Object r1;
+        java.util.concurrent.SynchronousQueue r0;
+
+        r0 := @this: java.util.concurrent.SynchronousQueue;
+
+        r1 := @parameter0: java.lang.Object;
+
+        return 0;
+    }
+
+    public boolean remove(java.lang.Object)
+    {
+        java.lang.Object r1;
+        java.util.concurrent.SynchronousQueue r0;
+
+        r0 := @this: java.util.concurrent.SynchronousQueue;
+
+        r1 := @parameter0: java.lang.Object;
+
+        return 0;
+    }
+
+    public boolean containsAll(java.util.Collection)
+    {
+        java.util.concurrent.SynchronousQueue r1;
+        java.util.Collection r0;
+        boolean $z0;
+
+        r1 := @this: java.util.concurrent.SynchronousQueue;
+
+        r0 := @parameter0: java.util.Collection;
+
+        $z0 = interfaceinvoke r0.<java.util.Collection: boolean isEmpty()>();
+
+        return $z0;
+    }
+
+    public boolean removeAll(java.util.Collection)
+    {
+        java.util.concurrent.SynchronousQueue r0;
+        java.util.Collection r1;
+
+        r0 := @this: java.util.concurrent.SynchronousQueue;
+
+        r1 := @parameter0: java.util.Collection;
+
+        return 0;
+    }
+
+    public boolean retainAll(java.util.Collection)
+    {
+        java.util.concurrent.SynchronousQueue r0;
+        java.util.Collection r1;
+
+        r0 := @this: java.util.concurrent.SynchronousQueue;
+
+        r1 := @parameter0: java.util.Collection;
+
+        return 0;
+    }
+
+    public java.lang.Object peek()
+    {
+        java.util.concurrent.SynchronousQueue r0;
+
+        r0 := @this: java.util.concurrent.SynchronousQueue;
+
+        return null;
+    }
+
+    public java.util.Iterator iterator()
+    {
+        java.util.Iterator $r0;
+        java.util.concurrent.SynchronousQueue r1;
+
+        r1 := @this: java.util.concurrent.SynchronousQueue;
+
+        $r0 = staticinvoke <java.util.Collections: java.util.Iterator emptyIterator()>();
+
+        return $r0;
+    }
+
+    public java.util.Spliterator spliterator()
+    {
+        java.util.Spliterator $r0;
+        java.util.concurrent.SynchronousQueue r1;
+
+        r1 := @this: java.util.concurrent.SynchronousQueue;
+
+        $r0 = staticinvoke <java.util.Spliterators: java.util.Spliterator emptySpliterator()>();
+
+        return $r0;
+    }
+
+    public java.lang.Object[] toArray()
+    {
+        java.lang.Object[] $r0;
+        java.util.concurrent.SynchronousQueue r1;
+
+        r1 := @this: java.util.concurrent.SynchronousQueue;
+
+        $r0 = newarray (java.lang.Object)[0];
+
+        return $r0;
+    }
+
+    public java.lang.Object[] toArray(java.lang.Object[])
+    {
+        int $i0;
+        java.lang.Object[] r0;
+        java.util.concurrent.SynchronousQueue r1;
+
+        r1 := @this: java.util.concurrent.SynchronousQueue;
+
+        r0 := @parameter0: java.lang.Object[];
+
+        $i0 = lengthof r0;
+
+        if $i0 <= 0 goto label1;
+
+        r0[0] = null;
+
+     label1:
+        return r0;
+    }
+
+    public int drainTo(java.util.Collection)
+    {
+        java.util.concurrent.SynchronousQueue r1;
+        java.util.Collection r0;
+        int i0;
+        java.lang.Object $r2;
+        java.lang.IllegalArgumentException $r3;
+        java.lang.NullPointerException $r4;
+
+        r1 := @this: java.util.concurrent.SynchronousQueue;
+
+        r0 := @parameter0: java.util.Collection;
+
+        if r0 != null goto label1;
+
+        $r4 = new java.lang.NullPointerException;
+
+        specialinvoke $r4.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r4;
+
+     label1:
+        if r0 != r1 goto label2;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r3;
+
+     label2:
+        i0 = 0;
+
+     label3:
+        $r2 = virtualinvoke r1.<java.util.concurrent.SynchronousQueue: java.lang.Object poll()>();
+
+        if $r2 == null goto label4;
+
+        interfaceinvoke r0.<java.util.Collection: boolean add(java.lang.Object)>($r2);
+
+        i0 = i0 + 1;
+
+        goto label3;
+
+     label4:
+        return i0;
+    }
+
+    public int drainTo(java.util.Collection, int)
+    {
+        java.util.concurrent.SynchronousQueue r1;
+        java.util.Collection r0;
+        int i0, i1;
+        java.lang.Object $r2;
+        java.lang.IllegalArgumentException $r3;
+        java.lang.NullPointerException $r4;
+
+        r1 := @this: java.util.concurrent.SynchronousQueue;
+
+        r0 := @parameter0: java.util.Collection;
+
+        i0 := @parameter1: int;
+
+        if r0 != null goto label1;
+
+        $r4 = new java.lang.NullPointerException;
+
+        specialinvoke $r4.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r4;
+
+     label1:
+        if r0 != r1 goto label2;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r3;
+
+     label2:
+        i1 = 0;
+
+     label3:
+        if i1 >= i0 goto label4;
+
+        $r2 = virtualinvoke r1.<java.util.concurrent.SynchronousQueue: java.lang.Object poll()>();
+
+        if $r2 == null goto label4;
+
+        interfaceinvoke r0.<java.util.Collection: boolean add(java.lang.Object)>($r2);
+
+        i1 = i1 + 1;
+
+        goto label3;
+
+     label4:
+        return i1;
+    }
+
+    private void writeObject(java.io.ObjectOutputStream) throws java.io.IOException
+    {
+        java.util.concurrent.SynchronousQueue$Transferer $r1;
+        java.util.concurrent.locks.ReentrantLock $r2, $r6;
+        java.util.concurrent.SynchronousQueue r0;
+        java.util.concurrent.SynchronousQueue$LifoWaitQueue $r3, $r4;
+        java.util.concurrent.SynchronousQueue$FifoWaitQueue $r7, $r8;
+        java.io.ObjectOutputStream r5;
+        boolean z0;
+
+        r0 := @this: java.util.concurrent.SynchronousQueue;
+
+        r5 := @parameter0: java.io.ObjectOutputStream;
+
+        $r1 = r0.<java.util.concurrent.SynchronousQueue: java.util.concurrent.SynchronousQueue$Transferer transferer>;
+
+        z0 = $r1 instanceof java.util.concurrent.SynchronousQueue$TransferQueue;
+
+        if z0 == 0 goto label1;
+
+        $r6 = new java.util.concurrent.locks.ReentrantLock;
+
+        specialinvoke $r6.<java.util.concurrent.locks.ReentrantLock: void <init>(boolean)>(1);
+
+        r0.<java.util.concurrent.SynchronousQueue: java.util.concurrent.locks.ReentrantLock qlock> = $r6;
+
+        $r7 = new java.util.concurrent.SynchronousQueue$FifoWaitQueue;
+
+        specialinvoke $r7.<java.util.concurrent.SynchronousQueue$FifoWaitQueue: void <init>()>();
+
+        r0.<java.util.concurrent.SynchronousQueue: java.util.concurrent.SynchronousQueue$WaitQueue waitingProducers> = $r7;
+
+        $r8 = new java.util.concurrent.SynchronousQueue$FifoWaitQueue;
+
+        specialinvoke $r8.<java.util.concurrent.SynchronousQueue$FifoWaitQueue: void <init>()>();
+
+        r0.<java.util.concurrent.SynchronousQueue: java.util.concurrent.SynchronousQueue$WaitQueue waitingConsumers> = $r8;
+
+        goto label2;
+
+     label1:
+        $r2 = new java.util.concurrent.locks.ReentrantLock;
+
+        specialinvoke $r2.<java.util.concurrent.locks.ReentrantLock: void <init>()>();
+
+        r0.<java.util.concurrent.SynchronousQueue: java.util.concurrent.locks.ReentrantLock qlock> = $r2;
+
+        $r3 = new java.util.concurrent.SynchronousQueue$LifoWaitQueue;
+
+        specialinvoke $r3.<java.util.concurrent.SynchronousQueue$LifoWaitQueue: void <init>()>();
+
+        r0.<java.util.concurrent.SynchronousQueue: java.util.concurrent.SynchronousQueue$WaitQueue waitingProducers> = $r3;
+
+        $r4 = new java.util.concurrent.SynchronousQueue$LifoWaitQueue;
+
+        specialinvoke $r4.<java.util.concurrent.SynchronousQueue$LifoWaitQueue: void <init>()>();
+
+        r0.<java.util.concurrent.SynchronousQueue: java.util.concurrent.SynchronousQueue$WaitQueue waitingConsumers> = $r4;
+
+     label2:
+        virtualinvoke r5.<java.io.ObjectOutputStream: void defaultWriteObject()>();
+
+        return;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.util.concurrent.SynchronousQueue r1;
+        java.io.ObjectInputStream r0;
+        java.util.concurrent.SynchronousQueue$WaitQueue $r2;
+        java.util.concurrent.SynchronousQueue$TransferQueue $r4;
+        java.util.concurrent.SynchronousQueue$TransferStack $r3;
+        boolean $z0;
+
+        r1 := @this: java.util.concurrent.SynchronousQueue;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        $r2 = r1.<java.util.concurrent.SynchronousQueue: java.util.concurrent.SynchronousQueue$WaitQueue waitingProducers>;
+
+        $z0 = $r2 instanceof java.util.concurrent.SynchronousQueue$FifoWaitQueue;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = new java.util.concurrent.SynchronousQueue$TransferQueue;
+
+        specialinvoke $r4.<java.util.concurrent.SynchronousQueue$TransferQueue: void <init>()>();
+
+        r1.<java.util.concurrent.SynchronousQueue: java.util.concurrent.SynchronousQueue$Transferer transferer> = $r4;
+
+        goto label2;
+
+     label1:
+        $r3 = new java.util.concurrent.SynchronousQueue$TransferStack;
+
+        specialinvoke $r3.<java.util.concurrent.SynchronousQueue$TransferStack: void <init>()>();
+
+        r1.<java.util.concurrent.SynchronousQueue: java.util.concurrent.SynchronousQueue$Transferer transferer> = $r3;
+
+     label2:
+        return;
+    }
+
+    static long objectFieldOffset(sun.misc.Unsafe, java.lang.String, java.lang.Class)
+    {
+        sun.misc.Unsafe r0;
+        java.lang.NoSuchFieldError $r5;
+        java.lang.NoSuchFieldException $r4;
+        java.lang.Class r1;
+        long $l0;
+        java.lang.String r2;
+        java.lang.reflect.Field $r3;
+
+        r0 := @parameter0: sun.misc.Unsafe;
+
+        r2 := @parameter1: java.lang.String;
+
+        r1 := @parameter2: java.lang.Class;
+
+     label1:
+        $r3 = virtualinvoke r1.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>(r2);
+
+        $l0 = virtualinvoke r0.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r3);
+
+     label2:
+        return $l0;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = new java.lang.NoSuchFieldError;
+
+        specialinvoke $r5.<java.lang.NoSuchFieldError: void <init>(java.lang.String)>(r2);
+
+        virtualinvoke $r5.<java.lang.NoSuchFieldError: java.lang.Throwable initCause(java.lang.Throwable)>($r4);
+
+        throw $r5;
+
+        catch java.lang.NoSuchFieldException from label1 to label2 with label3;
+    }
+
+    static void <clinit>()
+    {
+        byte $b4;
+        java.lang.Runtime $r0;
+        int $i0, $i1, $i2, $i3;
+
+        <java.util.concurrent.SynchronousQueue: long spinForTimeoutThreshold> = 1000L;
+
+        <java.util.concurrent.SynchronousQueue: long serialVersionUID> = -3223113410248163686L;
+
+        $r0 = staticinvoke <java.lang.Runtime: java.lang.Runtime getRuntime()>();
+
+        $i0 = virtualinvoke $r0.<java.lang.Runtime: int availableProcessors()>();
+
+        <java.util.concurrent.SynchronousQueue: int NCPUS> = $i0;
+
+        $i1 = <java.util.concurrent.SynchronousQueue: int NCPUS>;
+
+        if $i1 >= 2 goto label1;
+
+        $b4 = 0;
+
+        goto label2;
+
+     label1:
+        $b4 = 32;
+
+     label2:
+        <java.util.concurrent.SynchronousQueue: int maxTimedSpins> = $b4;
+
+        $i2 = <java.util.concurrent.SynchronousQueue: int maxTimedSpins>;
+
+        $i3 = $i2 * 16;
+
+        <java.util.concurrent.SynchronousQueue: int maxUntimedSpins> = $i3;
+
+        return;
+    }
+}

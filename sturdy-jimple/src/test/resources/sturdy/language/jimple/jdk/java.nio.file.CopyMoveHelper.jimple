@@ -1,0 +1,286 @@
+class java.nio.file.CopyMoveHelper extends java.lang.Object
+{
+
+    private void <init>()
+    {
+        java.nio.file.CopyMoveHelper r0;
+
+        r0 := @this: java.nio.file.CopyMoveHelper;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static transient java.nio.file.CopyOption[] convertMoveToCopyOptions(java.nio.file.CopyOption[]) throws java.nio.file.AtomicMoveNotSupportedException
+    {
+        java.nio.file.CopyOption[] r0, r1;
+        java.nio.file.StandardCopyOption $r3, $r5;
+        java.nio.file.LinkOption $r2;
+        int i0, $i1, $i2, i3;
+        java.nio.file.AtomicMoveNotSupportedException $r6;
+        java.nio.file.CopyOption r4;
+
+        r0 := @parameter0: java.nio.file.CopyOption[];
+
+        i0 = lengthof r0;
+
+        $i1 = i0 + 2;
+
+        r1 = newarray (java.nio.file.CopyOption)[$i1];
+
+        i3 = 0;
+
+     label1:
+        if i3 >= i0 goto label3;
+
+        r4 = r0[i3];
+
+        $r5 = <java.nio.file.StandardCopyOption: java.nio.file.StandardCopyOption ATOMIC_MOVE>;
+
+        if r4 != $r5 goto label2;
+
+        $r6 = new java.nio.file.AtomicMoveNotSupportedException;
+
+        specialinvoke $r6.<java.nio.file.AtomicMoveNotSupportedException: void <init>(java.lang.String,java.lang.String,java.lang.String)>(null, null, "Atomic move between providers is not supported");
+
+        throw $r6;
+
+     label2:
+        r1[i3] = r4;
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        $r2 = <java.nio.file.LinkOption: java.nio.file.LinkOption NOFOLLOW_LINKS>;
+
+        r1[i0] = $r2;
+
+        $i2 = i0 + 1;
+
+        $r3 = <java.nio.file.StandardCopyOption: java.nio.file.StandardCopyOption COPY_ATTRIBUTES>;
+
+        r1[$i2] = $r3;
+
+        return r1;
+    }
+
+    static transient void copyToForeignTarget(java.nio.file.Path, java.nio.file.Path, java.nio.file.CopyOption[]) throws java.io.IOException
+    {
+        java.nio.file.CopyMoveHelper$CopyOptions $r1;
+        java.nio.file.attribute.FileTime $r12, $r13, $r14;
+        java.nio.file.attribute.FileAttribute[] $r15;
+        java.nio.file.attribute.BasicFileAttributeView r27;
+        java.nio.file.Path r3, r5;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.nio.file.attribute.FileAttributeView $r11;
+        java.nio.file.CopyOption[] r0, $r9;
+        java.lang.Throwable $r19, $r20, $r21, $r22, $r23, r26;
+        java.nio.file.LinkOption $r2;
+        java.nio.file.OpenOption[] $r7;
+        java.lang.String $r17;
+        java.nio.file.LinkOption[] $r6, $r10, $r25;
+        java.io.IOException $r18;
+        java.nio.file.attribute.BasicFileAttributes $r4;
+        java.nio.file.FileAlreadyExistsException $r16;
+        java.io.InputStream $r8;
+
+        r3 := @parameter0: java.nio.file.Path;
+
+        r5 := @parameter1: java.nio.file.Path;
+
+        r0 := @parameter2: java.nio.file.CopyOption[];
+
+        $r1 = staticinvoke <java.nio.file.CopyMoveHelper$CopyOptions: java.nio.file.CopyMoveHelper$CopyOptions parse(java.nio.file.CopyOption[])>(r0);
+
+        $z0 = $r1.<java.nio.file.CopyMoveHelper$CopyOptions: boolean followLinks>;
+
+        if $z0 == 0 goto label01;
+
+        $r25 = newarray (java.nio.file.LinkOption)[0];
+
+        goto label02;
+
+     label01:
+        $r25 = newarray (java.nio.file.LinkOption)[1];
+
+        $r2 = <java.nio.file.LinkOption: java.nio.file.LinkOption NOFOLLOW_LINKS>;
+
+        $r25[0] = $r2;
+
+     label02:
+        $r4 = staticinvoke <java.nio.file.Files: java.nio.file.attribute.BasicFileAttributes readAttributes(java.nio.file.Path,java.lang.Class,java.nio.file.LinkOption[])>(r3, class "Ljava/nio/file/attribute/BasicFileAttributes;", $r25);
+
+        $z1 = interfaceinvoke $r4.<java.nio.file.attribute.BasicFileAttributes: boolean isSymbolicLink()>();
+
+        if $z1 == 0 goto label03;
+
+        $r18 = new java.io.IOException;
+
+        specialinvoke $r18.<java.io.IOException: void <init>(java.lang.String)>("Copying of symbolic links not supported");
+
+        throw $r18;
+
+     label03:
+        $z2 = $r1.<java.nio.file.CopyMoveHelper$CopyOptions: boolean replaceExisting>;
+
+        if $z2 == 0 goto label04;
+
+        staticinvoke <java.nio.file.Files: boolean deleteIfExists(java.nio.file.Path)>(r5);
+
+        goto label05;
+
+     label04:
+        $r6 = newarray (java.nio.file.LinkOption)[0];
+
+        $z3 = staticinvoke <java.nio.file.Files: boolean exists(java.nio.file.Path,java.nio.file.LinkOption[])>(r5, $r6);
+
+        if $z3 == 0 goto label05;
+
+        $r16 = new java.nio.file.FileAlreadyExistsException;
+
+        $r17 = interfaceinvoke r5.<java.nio.file.Path: java.lang.String toString()>();
+
+        specialinvoke $r16.<java.nio.file.FileAlreadyExistsException: void <init>(java.lang.String)>($r17);
+
+        throw $r16;
+
+     label05:
+        $z4 = interfaceinvoke $r4.<java.nio.file.attribute.BasicFileAttributes: boolean isDirectory()>();
+
+        if $z4 == 0 goto label06;
+
+        $r15 = newarray (java.nio.file.attribute.FileAttribute)[0];
+
+        staticinvoke <java.nio.file.Files: java.nio.file.Path createDirectory(java.nio.file.Path,java.nio.file.attribute.FileAttribute[])>(r5, $r15);
+
+        goto label18;
+
+     label06:
+        $r7 = newarray (java.nio.file.OpenOption)[0];
+
+        $r8 = staticinvoke <java.nio.file.Files: java.io.InputStream newInputStream(java.nio.file.Path,java.nio.file.OpenOption[])>(r3, $r7);
+
+        r26 = null;
+
+     label07:
+        $r9 = newarray (java.nio.file.CopyOption)[0];
+
+        staticinvoke <java.nio.file.Files: long copy(java.io.InputStream,java.nio.file.Path,java.nio.file.CopyOption[])>($r8, r5, $r9);
+
+     label08:
+        if $r8 == null goto label18;
+
+        goto label09;
+
+     label09:
+        virtualinvoke $r8.<java.io.InputStream: void close()>();
+
+        goto label18;
+
+     label10:
+        $r23 := @caughtexception;
+
+        r26 = $r23;
+
+        throw $r23;
+
+     label11:
+        $r22 := @caughtexception;
+
+     label12:
+        if $r8 == null goto label17;
+
+        if r26 == null goto label16;
+
+     label13:
+        virtualinvoke $r8.<java.io.InputStream: void close()>();
+
+     label14:
+        goto label17;
+
+     label15:
+        $r21 := @caughtexception;
+
+        virtualinvoke r26.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r21);
+
+        goto label17;
+
+     label16:
+        virtualinvoke $r8.<java.io.InputStream: void close()>();
+
+     label17:
+        throw $r22;
+
+     label18:
+        $z5 = $r1.<java.nio.file.CopyMoveHelper$CopyOptions: boolean copyAttributes>;
+
+        if $z5 == 0 goto label26;
+
+        $r10 = newarray (java.nio.file.LinkOption)[0];
+
+        $r11 = staticinvoke <java.nio.file.Files: java.nio.file.attribute.FileAttributeView getFileAttributeView(java.nio.file.Path,java.lang.Class,java.nio.file.LinkOption[])>(r5, class "Ljava/nio/file/attribute/BasicFileAttributeView;", $r10);
+
+        r27 = (java.nio.file.attribute.BasicFileAttributeView) $r11;
+
+     label19:
+        $r12 = interfaceinvoke $r4.<java.nio.file.attribute.BasicFileAttributes: java.nio.file.attribute.FileTime lastModifiedTime()>();
+
+        $r13 = interfaceinvoke $r4.<java.nio.file.attribute.BasicFileAttributes: java.nio.file.attribute.FileTime lastAccessTime()>();
+
+        $r14 = interfaceinvoke $r4.<java.nio.file.attribute.BasicFileAttributes: java.nio.file.attribute.FileTime creationTime()>();
+
+        interfaceinvoke r27.<java.nio.file.attribute.BasicFileAttributeView: void setTimes(java.nio.file.attribute.FileTime,java.nio.file.attribute.FileTime,java.nio.file.attribute.FileTime)>($r12, $r13, $r14);
+
+     label20:
+        goto label26;
+
+     label21:
+        $r20 := @caughtexception;
+
+     label22:
+        staticinvoke <java.nio.file.Files: void delete(java.nio.file.Path)>(r5);
+
+     label23:
+        goto label25;
+
+     label24:
+        $r19 := @caughtexception;
+
+        virtualinvoke $r20.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r19);
+
+     label25:
+        throw $r20;
+
+     label26:
+        return;
+
+        catch java.lang.Throwable from label07 to label08 with label10;
+        catch java.lang.Throwable from label13 to label14 with label15;
+        catch java.lang.Throwable from label10 to label12 with label11;
+        catch java.lang.Throwable from label19 to label20 with label21;
+        catch java.lang.Throwable from label22 to label23 with label24;
+    }
+
+    static transient void moveToForeignTarget(java.nio.file.Path, java.nio.file.Path, java.nio.file.CopyOption[]) throws java.io.IOException
+    {
+        java.nio.file.CopyOption[] r2, $r3;
+        java.nio.file.Path r0, r1;
+
+        r0 := @parameter0: java.nio.file.Path;
+
+        r1 := @parameter1: java.nio.file.Path;
+
+        r2 := @parameter2: java.nio.file.CopyOption[];
+
+        $r3 = staticinvoke <java.nio.file.CopyMoveHelper: java.nio.file.CopyOption[] convertMoveToCopyOptions(java.nio.file.CopyOption[])>(r2);
+
+        staticinvoke <java.nio.file.CopyMoveHelper: void copyToForeignTarget(java.nio.file.Path,java.nio.file.Path,java.nio.file.CopyOption[])>(r0, r1, $r3);
+
+        staticinvoke <java.nio.file.Files: void delete(java.nio.file.Path)>(r0);
+
+        return;
+    }
+}

@@ -1,0 +1,737 @@
+abstract class sun.security.provider.SHA5 extends sun.security.provider.DigestBase
+{
+    private static final int ITERATION;
+    private static final long[] ROUND_CONSTS;
+    private long[] W;
+    private long[] state;
+    private final long[] initialHashes;
+
+    void <init>(java.lang.String, int, long[])
+    {
+        sun.security.provider.SHA5 r0;
+        long[] r2, $r3, $r4;
+        int i0;
+        java.lang.String r1;
+
+        r0 := @this: sun.security.provider.SHA5;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        r2 := @parameter2: long[];
+
+        specialinvoke r0.<sun.security.provider.DigestBase: void <init>(java.lang.String,int,int)>(r1, i0, 128);
+
+        r0.<sun.security.provider.SHA5: long[] initialHashes> = r2;
+
+        $r3 = newarray (long)[8];
+
+        r0.<sun.security.provider.SHA5: long[] state> = $r3;
+
+        $r4 = newarray (long)[80];
+
+        r0.<sun.security.provider.SHA5: long[] W> = $r4;
+
+        specialinvoke r0.<sun.security.provider.SHA5: void resetHashes()>();
+
+        return;
+    }
+
+    final void implReset()
+    {
+        sun.security.provider.SHA5 r0;
+        long[] $r1;
+
+        r0 := @this: sun.security.provider.SHA5;
+
+        specialinvoke r0.<sun.security.provider.SHA5: void resetHashes()>();
+
+        $r1 = r0.<sun.security.provider.SHA5: long[] W>;
+
+        staticinvoke <java.util.Arrays: void fill(long[],long)>($r1, 0L);
+
+        return;
+    }
+
+    private void resetHashes()
+    {
+        sun.security.provider.SHA5 r0;
+        long[] $r1, $r2, $r3;
+        int $i0;
+
+        r0 := @this: sun.security.provider.SHA5;
+
+        $r3 = r0.<sun.security.provider.SHA5: long[] initialHashes>;
+
+        $r2 = r0.<sun.security.provider.SHA5: long[] state>;
+
+        $r1 = r0.<sun.security.provider.SHA5: long[] state>;
+
+        $i0 = lengthof $r1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, 0, $r2, 0, $i0);
+
+        return;
+    }
+
+    final void implDigest(byte[], int)
+    {
+        byte[] $r1, $r2, $r3, $r4, r5;
+        sun.security.provider.SHA5 r0;
+        long $l0, l1, $l2, $l6, $l11, $l12;
+        long[] $r6, $r7, $r8;
+        int $i3, i4, $i5, $i7, $i8, $i9, i10, $i13, $i14, $i15;
+
+        r0 := @this: sun.security.provider.SHA5;
+
+        r5 := @parameter0: byte[];
+
+        i10 := @parameter1: int;
+
+        $l0 = r0.<sun.security.provider.SHA5: long bytesProcessed>;
+
+        l1 = $l0 << 3;
+
+        $l2 = r0.<sun.security.provider.SHA5: long bytesProcessed>;
+
+        $i3 = (int) $l2;
+
+        i4 = $i3 & 127;
+
+        if i4 >= 112 goto label1;
+
+        $i15 = 112 - i4;
+
+        goto label2;
+
+     label1:
+        $i15 = 240 - i4;
+
+     label2:
+        $r1 = <sun.security.provider.SHA5: byte[] padding>;
+
+        $i5 = $i15 + 8;
+
+        virtualinvoke r0.<sun.security.provider.SHA5: void engineUpdate(byte[],int,int)>($r1, 0, $i5);
+
+        $l6 = l1 >>> 32;
+
+        $i7 = (int) $l6;
+
+        $r2 = r0.<sun.security.provider.SHA5: byte[] buffer>;
+
+        staticinvoke <sun.security.provider.ByteArrayAccess: void i2bBig4(int,byte[],int)>($i7, $r2, 120);
+
+        $i8 = (int) l1;
+
+        $r3 = r0.<sun.security.provider.SHA5: byte[] buffer>;
+
+        staticinvoke <sun.security.provider.ByteArrayAccess: void i2bBig4(int,byte[],int)>($i8, $r3, 124);
+
+        $r4 = r0.<sun.security.provider.SHA5: byte[] buffer>;
+
+        virtualinvoke r0.<sun.security.provider.SHA5: void implCompress(byte[],int)>($r4, 0);
+
+        $i9 = virtualinvoke r0.<sun.security.provider.SHA5: int engineGetDigestLength()>();
+
+        if $i9 != 28 goto label3;
+
+        $r7 = r0.<sun.security.provider.SHA5: long[] state>;
+
+        staticinvoke <sun.security.provider.ByteArrayAccess: void l2bBig(long[],int,byte[],int,int)>($r7, 0, r5, i10, 24);
+
+        $r8 = r0.<sun.security.provider.SHA5: long[] state>;
+
+        $l11 = $r8[3];
+
+        $l12 = $l11 >> 32;
+
+        $i14 = (int) $l12;
+
+        $i13 = i10 + 24;
+
+        staticinvoke <sun.security.provider.ByteArrayAccess: void i2bBig4(int,byte[],int)>($i14, r5, $i13);
+
+        goto label4;
+
+     label3:
+        $r6 = r0.<sun.security.provider.SHA5: long[] state>;
+
+        staticinvoke <sun.security.provider.ByteArrayAccess: void l2bBig(long[],int,byte[],int,int)>($r6, 0, r5, i10, $i9);
+
+     label4:
+        return;
+    }
+
+    private static long lf_ch(long, long, long)
+    {
+        long l0, l1, l2, $l3, $l4, $l5, $l6;
+
+        l0 := @parameter0: long;
+
+        l1 := @parameter1: long;
+
+        l2 := @parameter2: long;
+
+        $l5 = l0 & l1;
+
+        $l3 = l0 ^ -1L;
+
+        $l4 = $l3 & l2;
+
+        $l6 = $l5 ^ $l4;
+
+        return $l6;
+    }
+
+    private static long lf_maj(long, long, long)
+    {
+        long l0, l1, l2, $l3, $l4, $l5, $l6, $l7;
+
+        l0 := @parameter0: long;
+
+        l1 := @parameter1: long;
+
+        l2 := @parameter2: long;
+
+        $l4 = l0 & l1;
+
+        $l3 = l0 & l2;
+
+        $l6 = $l4 ^ $l3;
+
+        $l5 = l1 & l2;
+
+        $l7 = $l6 ^ $l5;
+
+        return $l7;
+    }
+
+    private static long lf_R(long, int)
+    {
+        int i1;
+        long l0, $l2;
+
+        l0 := @parameter0: long;
+
+        i1 := @parameter1: int;
+
+        $l2 = l0 >>> i1;
+
+        return $l2;
+    }
+
+    private static long lf_S(long, int)
+    {
+        int i1, $i2;
+        long l0, $l3, $l4, $l5;
+
+        l0 := @parameter0: long;
+
+        i1 := @parameter1: int;
+
+        $l4 = l0 >>> i1;
+
+        $i2 = 64 - i1;
+
+        $l3 = l0 << $i2;
+
+        $l5 = $l4 | $l3;
+
+        return $l5;
+    }
+
+    private static long lf_sigma0(long)
+    {
+        long l0, $l1, $l2, $l3, $l4, $l5;
+
+        l0 := @parameter0: long;
+
+        $l1 = staticinvoke <sun.security.provider.SHA5: long lf_S(long,int)>(l0, 28);
+
+        $l2 = staticinvoke <sun.security.provider.SHA5: long lf_S(long,int)>(l0, 34);
+
+        $l3 = $l1 ^ $l2;
+
+        $l4 = staticinvoke <sun.security.provider.SHA5: long lf_S(long,int)>(l0, 39);
+
+        $l5 = $l3 ^ $l4;
+
+        return $l5;
+    }
+
+    private static long lf_sigma1(long)
+    {
+        long l0, $l1, $l2, $l3, $l4, $l5;
+
+        l0 := @parameter0: long;
+
+        $l1 = staticinvoke <sun.security.provider.SHA5: long lf_S(long,int)>(l0, 14);
+
+        $l2 = staticinvoke <sun.security.provider.SHA5: long lf_S(long,int)>(l0, 18);
+
+        $l3 = $l1 ^ $l2;
+
+        $l4 = staticinvoke <sun.security.provider.SHA5: long lf_S(long,int)>(l0, 41);
+
+        $l5 = $l3 ^ $l4;
+
+        return $l5;
+    }
+
+    private static long lf_delta0(long)
+    {
+        long l0, $l1, $l2, $l3, $l4, $l5;
+
+        l0 := @parameter0: long;
+
+        $l1 = staticinvoke <sun.security.provider.SHA5: long lf_S(long,int)>(l0, 1);
+
+        $l2 = staticinvoke <sun.security.provider.SHA5: long lf_S(long,int)>(l0, 8);
+
+        $l3 = $l1 ^ $l2;
+
+        $l4 = staticinvoke <sun.security.provider.SHA5: long lf_R(long,int)>(l0, 7);
+
+        $l5 = $l3 ^ $l4;
+
+        return $l5;
+    }
+
+    private static long lf_delta1(long)
+    {
+        long l0, $l1, $l2, $l3, $l4, $l5;
+
+        l0 := @parameter0: long;
+
+        $l1 = staticinvoke <sun.security.provider.SHA5: long lf_S(long,int)>(l0, 19);
+
+        $l2 = staticinvoke <sun.security.provider.SHA5: long lf_S(long,int)>(l0, 61);
+
+        $l3 = $l1 ^ $l2;
+
+        $l4 = staticinvoke <sun.security.provider.SHA5: long lf_R(long,int)>(l0, 6);
+
+        $l5 = $l3 ^ $l4;
+
+        return $l5;
+    }
+
+    final void implCompress(byte[], int)
+    {
+        byte[] r0;
+        sun.security.provider.SHA5 r1;
+        long $l1, $l2, $l3, $l4, $l5, $l6, $l7, $l8, $l9, $l10, $l11, $l12, $l13, $l14, $l15, $l16, $l17, $l18, $l19, $l20, $l21, $l22, $l23, l24, $l25, $l26, l27, $l29, $l30, $l32, $l34, $l35, $l36, $l38, $l39, $l40, l42, l43, l44, l45, l46, l47, l48, l49;
+        long[] $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25;
+        int i0, $i28, $i31, $i33, $i37, i41, i50;
+
+        r1 := @this: sun.security.provider.SHA5;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        $r2 = r1.<sun.security.provider.SHA5: long[] W>;
+
+        staticinvoke <sun.security.provider.ByteArrayAccess: void b2lBig128(byte[],int,long[])>(r0, i0, $r2);
+
+        i41 = 16;
+
+     label1:
+        if i41 >= 80 goto label2;
+
+        $r22 = r1.<sun.security.provider.SHA5: long[] W>;
+
+        $r21 = r1.<sun.security.provider.SHA5: long[] W>;
+
+        $i28 = i41 - 2;
+
+        $l29 = $r21[$i28];
+
+        $l30 = staticinvoke <sun.security.provider.SHA5: long lf_delta1(long)>($l29);
+
+        $r23 = r1.<sun.security.provider.SHA5: long[] W>;
+
+        $i31 = i41 - 7;
+
+        $l32 = $r23[$i31];
+
+        $l35 = $l30 + $l32;
+
+        $r24 = r1.<sun.security.provider.SHA5: long[] W>;
+
+        $i33 = i41 - 15;
+
+        $l34 = $r24[$i33];
+
+        $l36 = staticinvoke <sun.security.provider.SHA5: long lf_delta0(long)>($l34);
+
+        $l39 = $l35 + $l36;
+
+        $r25 = r1.<sun.security.provider.SHA5: long[] W>;
+
+        $i37 = i41 - 16;
+
+        $l38 = $r25[$i37];
+
+        $l40 = $l39 + $l38;
+
+        $r22[i41] = $l40;
+
+        i41 = i41 + 1;
+
+        goto label1;
+
+     label2:
+        $r3 = r1.<sun.security.provider.SHA5: long[] state>;
+
+        l42 = $r3[0];
+
+        $r4 = r1.<sun.security.provider.SHA5: long[] state>;
+
+        l43 = $r4[1];
+
+        $r5 = r1.<sun.security.provider.SHA5: long[] state>;
+
+        l44 = $r5[2];
+
+        $r6 = r1.<sun.security.provider.SHA5: long[] state>;
+
+        l45 = $r6[3];
+
+        $r7 = r1.<sun.security.provider.SHA5: long[] state>;
+
+        l46 = $r7[4];
+
+        $r8 = r1.<sun.security.provider.SHA5: long[] state>;
+
+        l47 = $r8[5];
+
+        $r9 = r1.<sun.security.provider.SHA5: long[] state>;
+
+        l48 = $r9[6];
+
+        $r10 = r1.<sun.security.provider.SHA5: long[] state>;
+
+        l49 = $r10[7];
+
+        i50 = 0;
+
+     label3:
+        if i50 >= 80 goto label4;
+
+        $l17 = staticinvoke <sun.security.provider.SHA5: long lf_sigma1(long)>(l46);
+
+        $l18 = l49 + $l17;
+
+        $l19 = staticinvoke <sun.security.provider.SHA5: long lf_ch(long,long,long)>(l46, l47, l48);
+
+        $l21 = $l18 + $l19;
+
+        $r19 = <sun.security.provider.SHA5: long[] ROUND_CONSTS>;
+
+        $l20 = $r19[i50];
+
+        $l23 = $l21 + $l20;
+
+        $r20 = r1.<sun.security.provider.SHA5: long[] W>;
+
+        $l22 = $r20[i50];
+
+        l24 = $l23 + $l22;
+
+        $l25 = staticinvoke <sun.security.provider.SHA5: long lf_sigma0(long)>(l42);
+
+        $l26 = staticinvoke <sun.security.provider.SHA5: long lf_maj(long,long,long)>(l42, l43, l44);
+
+        l27 = $l25 + $l26;
+
+        l49 = l48;
+
+        l48 = l47;
+
+        l47 = l46;
+
+        l46 = l45 + l24;
+
+        l45 = l44;
+
+        l44 = l43;
+
+        l43 = l42;
+
+        l42 = l24 + l27;
+
+        i50 = i50 + 1;
+
+        goto label3;
+
+     label4:
+        $r11 = r1.<sun.security.provider.SHA5: long[] state>;
+
+        $l1 = $r11[0];
+
+        $l2 = $l1 + l42;
+
+        $r11[0] = $l2;
+
+        $r12 = r1.<sun.security.provider.SHA5: long[] state>;
+
+        $l3 = $r12[1];
+
+        $l4 = $l3 + l43;
+
+        $r12[1] = $l4;
+
+        $r13 = r1.<sun.security.provider.SHA5: long[] state>;
+
+        $l5 = $r13[2];
+
+        $l6 = $l5 + l44;
+
+        $r13[2] = $l6;
+
+        $r14 = r1.<sun.security.provider.SHA5: long[] state>;
+
+        $l7 = $r14[3];
+
+        $l8 = $l7 + l45;
+
+        $r14[3] = $l8;
+
+        $r15 = r1.<sun.security.provider.SHA5: long[] state>;
+
+        $l9 = $r15[4];
+
+        $l10 = $l9 + l46;
+
+        $r15[4] = $l10;
+
+        $r16 = r1.<sun.security.provider.SHA5: long[] state>;
+
+        $l11 = $r16[5];
+
+        $l12 = $l11 + l47;
+
+        $r16[5] = $l12;
+
+        $r17 = r1.<sun.security.provider.SHA5: long[] state>;
+
+        $l13 = $r17[6];
+
+        $l14 = $l13 + l48;
+
+        $r17[6] = $l14;
+
+        $r18 = r1.<sun.security.provider.SHA5: long[] state>;
+
+        $l15 = $r18[7];
+
+        $l16 = $l15 + l49;
+
+        $r18[7] = $l16;
+
+        return;
+    }
+
+    public java.lang.Object clone() throws java.lang.CloneNotSupportedException
+    {
+        sun.security.provider.SHA5 r0, r2;
+        long[] $r3, $r5, $r6;
+        java.lang.Object $r1, $r4;
+
+        r0 := @this: sun.security.provider.SHA5;
+
+        $r1 = specialinvoke r0.<sun.security.provider.DigestBase: java.lang.Object clone()>();
+
+        r2 = (sun.security.provider.SHA5) $r1;
+
+        $r3 = r2.<sun.security.provider.SHA5: long[] state>;
+
+        $r4 = virtualinvoke $r3.<java.lang.Object: java.lang.Object clone()>();
+
+        $r5 = (long[]) $r4;
+
+        r2.<sun.security.provider.SHA5: long[] state> = $r5;
+
+        $r6 = newarray (long)[80];
+
+        r2.<sun.security.provider.SHA5: long[] W> = $r6;
+
+        return r2;
+    }
+
+    static void <clinit>()
+    {
+        long[] $r0;
+
+        <sun.security.provider.SHA5: int ITERATION> = 80;
+
+        $r0 = newarray (long)[80];
+
+        $r0[0] = 4794697086780616226L;
+
+        $r0[1] = 8158064640168781261L;
+
+        $r0[2] = -5349999486874862801L;
+
+        $r0[3] = -1606136188198331460L;
+
+        $r0[4] = 4131703408338449720L;
+
+        $r0[5] = 6480981068601479193L;
+
+        $r0[6] = -7908458776815382629L;
+
+        $r0[7] = -6116909921290321640L;
+
+        $r0[8] = -2880145864133508542L;
+
+        $r0[9] = 1334009975649890238L;
+
+        $r0[10] = 2608012711638119052L;
+
+        $r0[11] = 6128411473006802146L;
+
+        $r0[12] = 8268148722764581231L;
+
+        $r0[13] = -9160688886553864527L;
+
+        $r0[14] = -7215885187991268811L;
+
+        $r0[15] = -4495734319001033068L;
+
+        $r0[16] = -1973867731355612462L;
+
+        $r0[17] = -1171420211273849373L;
+
+        $r0[18] = 1135362057144423861L;
+
+        $r0[19] = 2597628984639134821L;
+
+        $r0[20] = 3308224258029322869L;
+
+        $r0[21] = 5365058923640841347L;
+
+        $r0[22] = 6679025012923562964L;
+
+        $r0[23] = 8573033837759648693L;
+
+        $r0[24] = -7476448914759557205L;
+
+        $r0[25] = -6327057829258317296L;
+
+        $r0[26] = -5763719355590565569L;
+
+        $r0[27] = -4658551843659510044L;
+
+        $r0[28] = -4116276920077217854L;
+
+        $r0[29] = -3051310485924567259L;
+
+        $r0[30] = 489312712824947311L;
+
+        $r0[31] = 1452737877330783856L;
+
+        $r0[32] = 2861767655752347644L;
+
+        $r0[33] = 3322285676063803686L;
+
+        $r0[34] = 5560940570517711597L;
+
+        $r0[35] = 5996557281743188959L;
+
+        $r0[36] = 7280758554555802590L;
+
+        $r0[37] = 8532644243296465576L;
+
+        $r0[38] = -9096487096722542874L;
+
+        $r0[39] = -7894198246740708037L;
+
+        $r0[40] = -6719396339535248540L;
+
+        $r0[41] = -6333637450476146687L;
+
+        $r0[42] = -4446306890439682159L;
+
+        $r0[43] = -4076793802049405392L;
+
+        $r0[44] = -3345356375505022440L;
+
+        $r0[45] = -2983346525034927856L;
+
+        $r0[46] = -860691631967231958L;
+
+        $r0[47] = 1182934255886127544L;
+
+        $r0[48] = 1847814050463011016L;
+
+        $r0[49] = 2177327727835720531L;
+
+        $r0[50] = 2830643537854262169L;
+
+        $r0[51] = 3796741975233480872L;
+
+        $r0[52] = 4115178125766777443L;
+
+        $r0[53] = 5681478168544905931L;
+
+        $r0[54] = 6601373596472566643L;
+
+        $r0[55] = 7507060721942968483L;
+
+        $r0[56] = 8399075790359081724L;
+
+        $r0[57] = 8693463985226723168L;
+
+        $r0[58] = -8878714635349349518L;
+
+        $r0[59] = -8302665154208450068L;
+
+        $r0[60] = -8016688836872298968L;
+
+        $r0[61] = -6606660893046293015L;
+
+        $r0[62] = -4685533653050689259L;
+
+        $r0[63] = -4147400797238176981L;
+
+        $r0[64] = -3880063495543823972L;
+
+        $r0[65] = -3348786107499101689L;
+
+        $r0[66] = -1523767162380948706L;
+
+        $r0[67] = -757361751448694408L;
+
+        $r0[68] = 500013540394364858L;
+
+        $r0[69] = 748580250866718886L;
+
+        $r0[70] = 1242879168328830382L;
+
+        $r0[71] = 1977374033974150939L;
+
+        $r0[72] = 2944078676154940804L;
+
+        $r0[73] = 3659926193048069267L;
+
+        $r0[74] = 4368137639120453308L;
+
+        $r0[75] = 4836135668995329356L;
+
+        $r0[76] = 5532061633213252278L;
+
+        $r0[77] = 6448918945643986474L;
+
+        $r0[78] = 6902733635092675308L;
+
+        $r0[79] = 7801388544844847127L;
+
+        <sun.security.provider.SHA5: long[] ROUND_CONSTS> = $r0;
+
+        return;
+    }
+}

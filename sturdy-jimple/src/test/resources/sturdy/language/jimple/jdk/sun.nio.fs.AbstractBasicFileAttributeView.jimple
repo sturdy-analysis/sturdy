@@ -1,0 +1,295 @@
+abstract class sun.nio.fs.AbstractBasicFileAttributeView extends java.lang.Object implements java.nio.file.attribute.BasicFileAttributeView, sun.nio.fs.DynamicFileAttributeView
+{
+    private static final java.lang.String SIZE_NAME;
+    private static final java.lang.String CREATION_TIME_NAME;
+    private static final java.lang.String LAST_ACCESS_TIME_NAME;
+    private static final java.lang.String LAST_MODIFIED_TIME_NAME;
+    private static final java.lang.String FILE_KEY_NAME;
+    private static final java.lang.String IS_DIRECTORY_NAME;
+    private static final java.lang.String IS_REGULAR_FILE_NAME;
+    private static final java.lang.String IS_SYMBOLIC_LINK_NAME;
+    private static final java.lang.String IS_OTHER_NAME;
+    static final java.util.Set basicAttributeNames;
+
+    protected void <init>()
+    {
+        sun.nio.fs.AbstractBasicFileAttributeView r0;
+
+        r0 := @this: sun.nio.fs.AbstractBasicFileAttributeView;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public java.lang.String name()
+    {
+        sun.nio.fs.AbstractBasicFileAttributeView r0;
+
+        r0 := @this: sun.nio.fs.AbstractBasicFileAttributeView;
+
+        return "basic";
+    }
+
+    public void setAttribute(java.lang.String, java.lang.Object) throws java.io.IOException
+    {
+        java.nio.file.attribute.FileTime $r12, $r13, $r14;
+        sun.nio.fs.AbstractBasicFileAttributeView r4;
+        java.lang.String r0, $r5, $r10;
+        boolean $z0, $z1, $z2;
+        java.lang.IllegalArgumentException $r1;
+        java.lang.StringBuilder $r2, $r3, $r6, $r7, $r8, $r9;
+        java.lang.Object r11;
+
+        r4 := @this: sun.nio.fs.AbstractBasicFileAttributeView;
+
+        r0 := @parameter0: java.lang.String;
+
+        r11 := @parameter1: java.lang.Object;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("lastModifiedTime");
+
+        if $z0 == 0 goto label1;
+
+        $r14 = (java.nio.file.attribute.FileTime) r11;
+
+        virtualinvoke r4.<sun.nio.fs.AbstractBasicFileAttributeView: void setTimes(java.nio.file.attribute.FileTime,java.nio.file.attribute.FileTime,java.nio.file.attribute.FileTime)>($r14, null, null);
+
+        return;
+
+     label1:
+        $z1 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("lastAccessTime");
+
+        if $z1 == 0 goto label2;
+
+        $r13 = (java.nio.file.attribute.FileTime) r11;
+
+        virtualinvoke r4.<sun.nio.fs.AbstractBasicFileAttributeView: void setTimes(java.nio.file.attribute.FileTime,java.nio.file.attribute.FileTime,java.nio.file.attribute.FileTime)>(null, $r13, null);
+
+        return;
+
+     label2:
+        $z2 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("creationTime");
+
+        if $z2 == 0 goto label3;
+
+        $r12 = (java.nio.file.attribute.FileTime) r11;
+
+        virtualinvoke r4.<sun.nio.fs.AbstractBasicFileAttributeView: void setTimes(java.nio.file.attribute.FileTime,java.nio.file.attribute.FileTime,java.nio.file.attribute.FileTime)>(null, null, $r12);
+
+        return;
+
+     label3:
+        $r1 = new java.lang.IllegalArgumentException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r5 = virtualinvoke r4.<sun.nio.fs.AbstractBasicFileAttributeView: java.lang.String name()>();
+
+        $r6 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' not recognized");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r10);
+
+        throw $r1;
+    }
+
+    final void addRequestedBasicAttributes(java.nio.file.attribute.BasicFileAttributes, sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder)
+    {
+        java.nio.file.attribute.FileTime $r7, $r8, $r9;
+        long $l0;
+        sun.nio.fs.AbstractBasicFileAttributeView r11;
+        java.lang.Long $r10;
+        java.lang.Boolean $r2, $r3, $r4, $r5;
+        sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12;
+        java.nio.file.attribute.BasicFileAttributes r1;
+        java.lang.Object $r6;
+
+        r11 := @this: sun.nio.fs.AbstractBasicFileAttributeView;
+
+        r1 := @parameter0: java.nio.file.attribute.BasicFileAttributes;
+
+        r0 := @parameter1: sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder;
+
+        $z0 = virtualinvoke r0.<sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder: boolean match(java.lang.String)>("size");
+
+        if $z0 == 0 goto label1;
+
+        $l0 = interfaceinvoke r1.<java.nio.file.attribute.BasicFileAttributes: long size()>();
+
+        $r10 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+        virtualinvoke r0.<sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder: void add(java.lang.String,java.lang.Object)>("size", $r10);
+
+     label1:
+        $z1 = virtualinvoke r0.<sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder: boolean match(java.lang.String)>("creationTime");
+
+        if $z1 == 0 goto label2;
+
+        $r9 = interfaceinvoke r1.<java.nio.file.attribute.BasicFileAttributes: java.nio.file.attribute.FileTime creationTime()>();
+
+        virtualinvoke r0.<sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder: void add(java.lang.String,java.lang.Object)>("creationTime", $r9);
+
+     label2:
+        $z2 = virtualinvoke r0.<sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder: boolean match(java.lang.String)>("lastAccessTime");
+
+        if $z2 == 0 goto label3;
+
+        $r8 = interfaceinvoke r1.<java.nio.file.attribute.BasicFileAttributes: java.nio.file.attribute.FileTime lastAccessTime()>();
+
+        virtualinvoke r0.<sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder: void add(java.lang.String,java.lang.Object)>("lastAccessTime", $r8);
+
+     label3:
+        $z3 = virtualinvoke r0.<sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder: boolean match(java.lang.String)>("lastModifiedTime");
+
+        if $z3 == 0 goto label4;
+
+        $r7 = interfaceinvoke r1.<java.nio.file.attribute.BasicFileAttributes: java.nio.file.attribute.FileTime lastModifiedTime()>();
+
+        virtualinvoke r0.<sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder: void add(java.lang.String,java.lang.Object)>("lastModifiedTime", $r7);
+
+     label4:
+        $z4 = virtualinvoke r0.<sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder: boolean match(java.lang.String)>("fileKey");
+
+        if $z4 == 0 goto label5;
+
+        $r6 = interfaceinvoke r1.<java.nio.file.attribute.BasicFileAttributes: java.lang.Object fileKey()>();
+
+        virtualinvoke r0.<sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder: void add(java.lang.String,java.lang.Object)>("fileKey", $r6);
+
+     label5:
+        $z5 = virtualinvoke r0.<sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder: boolean match(java.lang.String)>("isDirectory");
+
+        if $z5 == 0 goto label6;
+
+        $z12 = interfaceinvoke r1.<java.nio.file.attribute.BasicFileAttributes: boolean isDirectory()>();
+
+        $r5 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z12);
+
+        virtualinvoke r0.<sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder: void add(java.lang.String,java.lang.Object)>("isDirectory", $r5);
+
+     label6:
+        $z6 = virtualinvoke r0.<sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder: boolean match(java.lang.String)>("isRegularFile");
+
+        if $z6 == 0 goto label7;
+
+        $z11 = interfaceinvoke r1.<java.nio.file.attribute.BasicFileAttributes: boolean isRegularFile()>();
+
+        $r4 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z11);
+
+        virtualinvoke r0.<sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder: void add(java.lang.String,java.lang.Object)>("isRegularFile", $r4);
+
+     label7:
+        $z7 = virtualinvoke r0.<sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder: boolean match(java.lang.String)>("isSymbolicLink");
+
+        if $z7 == 0 goto label8;
+
+        $z10 = interfaceinvoke r1.<java.nio.file.attribute.BasicFileAttributes: boolean isSymbolicLink()>();
+
+        $r3 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z10);
+
+        virtualinvoke r0.<sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder: void add(java.lang.String,java.lang.Object)>("isSymbolicLink", $r3);
+
+     label8:
+        $z8 = virtualinvoke r0.<sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder: boolean match(java.lang.String)>("isOther");
+
+        if $z8 == 0 goto label9;
+
+        $z9 = interfaceinvoke r1.<java.nio.file.attribute.BasicFileAttributes: boolean isOther()>();
+
+        $r2 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z9);
+
+        virtualinvoke r0.<sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder: void add(java.lang.String,java.lang.Object)>("isOther", $r2);
+
+     label9:
+        return;
+    }
+
+    public java.util.Map readAttributes(java.lang.String[]) throws java.io.IOException
+    {
+        java.util.Map $r5;
+        java.util.Set $r1;
+        java.lang.String[] r0;
+        sun.nio.fs.AbstractBasicFileAttributeView r3;
+        java.nio.file.attribute.BasicFileAttributes $r4;
+        sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder $r2;
+
+        r3 := @this: sun.nio.fs.AbstractBasicFileAttributeView;
+
+        r0 := @parameter0: java.lang.String[];
+
+        $r1 = <sun.nio.fs.AbstractBasicFileAttributeView: java.util.Set basicAttributeNames>;
+
+        $r2 = staticinvoke <sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder: sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder create(java.util.Set,java.lang.String[])>($r1, r0);
+
+        $r4 = virtualinvoke r3.<sun.nio.fs.AbstractBasicFileAttributeView: java.nio.file.attribute.BasicFileAttributes readAttributes()>();
+
+        virtualinvoke r3.<sun.nio.fs.AbstractBasicFileAttributeView: void addRequestedBasicAttributes(java.nio.file.attribute.BasicFileAttributes,sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder)>($r4, $r2);
+
+        $r5 = virtualinvoke $r2.<sun.nio.fs.AbstractBasicFileAttributeView$AttributesBuilder: java.util.Map unmodifiableMap()>();
+
+        return $r5;
+    }
+
+    static void <clinit>()
+    {
+        java.util.Set $r1;
+        java.lang.String[] $r0;
+
+        <sun.nio.fs.AbstractBasicFileAttributeView: java.lang.String IS_OTHER_NAME> = "isOther";
+
+        <sun.nio.fs.AbstractBasicFileAttributeView: java.lang.String IS_SYMBOLIC_LINK_NAME> = "isSymbolicLink";
+
+        <sun.nio.fs.AbstractBasicFileAttributeView: java.lang.String IS_REGULAR_FILE_NAME> = "isRegularFile";
+
+        <sun.nio.fs.AbstractBasicFileAttributeView: java.lang.String IS_DIRECTORY_NAME> = "isDirectory";
+
+        <sun.nio.fs.AbstractBasicFileAttributeView: java.lang.String FILE_KEY_NAME> = "fileKey";
+
+        <sun.nio.fs.AbstractBasicFileAttributeView: java.lang.String LAST_MODIFIED_TIME_NAME> = "lastModifiedTime";
+
+        <sun.nio.fs.AbstractBasicFileAttributeView: java.lang.String LAST_ACCESS_TIME_NAME> = "lastAccessTime";
+
+        <sun.nio.fs.AbstractBasicFileAttributeView: java.lang.String CREATION_TIME_NAME> = "creationTime";
+
+        <sun.nio.fs.AbstractBasicFileAttributeView: java.lang.String SIZE_NAME> = "size";
+
+        $r0 = newarray (java.lang.String)[9];
+
+        $r0[0] = "size";
+
+        $r0[1] = "creationTime";
+
+        $r0[2] = "lastAccessTime";
+
+        $r0[3] = "lastModifiedTime";
+
+        $r0[4] = "fileKey";
+
+        $r0[5] = "isDirectory";
+
+        $r0[6] = "isRegularFile";
+
+        $r0[7] = "isSymbolicLink";
+
+        $r0[8] = "isOther";
+
+        $r1 = staticinvoke <sun.nio.fs.Util: java.util.Set newSet(java.lang.Object[])>($r0);
+
+        <sun.nio.fs.AbstractBasicFileAttributeView: java.util.Set basicAttributeNames> = $r1;
+
+        return;
+    }
+}

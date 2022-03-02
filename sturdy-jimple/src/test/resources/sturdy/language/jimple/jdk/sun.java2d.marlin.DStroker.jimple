@@ -1,0 +1,3811 @@
+final class sun.java2d.marlin.DStroker extends java.lang.Object implements sun.java2d.marlin.DPathConsumer2D, sun.java2d.marlin.MarlinConst
+{
+    private static final int MOVE_TO;
+    private static final int DRAWING_OP_TO;
+    private static final int CLOSE;
+    private static final double ERR_JOIN;
+    private static final double ROUND_JOIN_THRESHOLD;
+    private static final double C;
+    private static final double SQRT_2;
+    private sun.java2d.marlin.DPathConsumer2D out;
+    private int capStyle;
+    private int joinStyle;
+    private double lineWidth2;
+    private double invHalfLineWidth2Sq;
+    private final double[] offset0;
+    private final double[] offset1;
+    private final double[] offset2;
+    private final double[] miter;
+    private double miterLimitSq;
+    private int prev;
+    private double sx0;
+    private double sy0;
+    private double sdx;
+    private double sdy;
+    private double cx0;
+    private double cy0;
+    private double cdx;
+    private double cdy;
+    private double smx;
+    private double smy;
+    private double cmx;
+    private double cmy;
+    private final sun.java2d.marlin.DHelpers$PolyStack reverse;
+    private final double[] lp;
+    private final double[] rp;
+    final sun.java2d.marlin.DRendererContext rdrCtx;
+    final sun.java2d.marlin.DCurve curve;
+    private double[] clipRect;
+    private int cOutCode;
+    private int sOutCode;
+    private boolean opened;
+    private boolean capStart;
+    private boolean monotonize;
+    private boolean subdivide;
+    private final sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter curveSplitter;
+    static final boolean $assertionsDisabled;
+
+    void <init>(sun.java2d.marlin.DRendererContext)
+    {
+        double[] $r1, $r2, $r3, $r4, $r5, $r6;
+        sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter $r10;
+        sun.java2d.marlin.DRendererContext r7;
+        sun.java2d.marlin.DStroker r0;
+        sun.java2d.marlin.DHelpers$PolyStack $r21;
+        sun.java2d.marlin.RendererStats $r8, $r11, $r12, $r13, $r14, $r15;
+        sun.java2d.marlin.stats.StatLong $r16, $r17, $r19, $r20;
+        sun.java2d.marlin.stats.Histogram $r18;
+        sun.java2d.marlin.DCurve $r9;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        r7 := @parameter0: sun.java2d.marlin.DRendererContext;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = newarray (double)[2];
+
+        r0.<sun.java2d.marlin.DStroker: double[] offset0> = $r1;
+
+        $r2 = newarray (double)[2];
+
+        r0.<sun.java2d.marlin.DStroker: double[] offset1> = $r2;
+
+        $r3 = newarray (double)[2];
+
+        r0.<sun.java2d.marlin.DStroker: double[] offset2> = $r3;
+
+        $r4 = newarray (double)[2];
+
+        r0.<sun.java2d.marlin.DStroker: double[] miter> = $r4;
+
+        $r5 = newarray (double)[8];
+
+        r0.<sun.java2d.marlin.DStroker: double[] lp> = $r5;
+
+        $r6 = newarray (double)[8];
+
+        r0.<sun.java2d.marlin.DStroker: double[] rp> = $r6;
+
+        r0.<sun.java2d.marlin.DStroker: int cOutCode> = 0;
+
+        r0.<sun.java2d.marlin.DStroker: int sOutCode> = 0;
+
+        r0.<sun.java2d.marlin.DStroker: boolean opened> = 0;
+
+        r0.<sun.java2d.marlin.DStroker: boolean capStart> = 0;
+
+        r0.<sun.java2d.marlin.DStroker: boolean subdivide> = 0;
+
+        r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DRendererContext rdrCtx> = r7;
+
+        $r8 = r7.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        if $r8 == null goto label1;
+
+        $r21 = new sun.java2d.marlin.DHelpers$PolyStack;
+
+        $r11 = r7.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r20 = $r11.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_str_polystack_types>;
+
+        $r12 = r7.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r19 = $r12.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_str_polystack_curves>;
+
+        $r13 = r7.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r18 = $r13.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.Histogram hist_str_polystack_curves>;
+
+        $r14 = r7.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r17 = $r14.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_array_str_polystack_curves>;
+
+        $r15 = r7.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r16 = $r15.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_array_str_polystack_types>;
+
+        specialinvoke $r21.<sun.java2d.marlin.DHelpers$PolyStack: void <init>(sun.java2d.marlin.DRendererContext,sun.java2d.marlin.stats.StatLong,sun.java2d.marlin.stats.StatLong,sun.java2d.marlin.stats.Histogram,sun.java2d.marlin.stats.StatLong,sun.java2d.marlin.stats.StatLong)>(r7, $r20, $r19, $r18, $r17, $r16);
+
+        goto label2;
+
+     label1:
+        $r21 = new sun.java2d.marlin.DHelpers$PolyStack;
+
+        specialinvoke $r21.<sun.java2d.marlin.DHelpers$PolyStack: void <init>(sun.java2d.marlin.DRendererContext)>(r7);
+
+     label2:
+        r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DHelpers$PolyStack reverse> = $r21;
+
+        $r9 = r7.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.DCurve curve>;
+
+        r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DCurve curve> = $r9;
+
+        $r10 = r7.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter curveClipSplitter>;
+
+        r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter curveSplitter> = $r10;
+
+        return;
+    }
+
+    sun.java2d.marlin.DStroker init(sun.java2d.marlin.DPathConsumer2D, double, int, int, double, boolean)
+    {
+        byte $b2;
+        boolean z0, $z1, $z2, $z3;
+        java.lang.StringBuilder $r6, $r10, $r14;
+        double[] $r8, $r13;
+        sun.java2d.marlin.DPathConsumer2D r1;
+        sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter $r4;
+        sun.java2d.marlin.DRendererContext $r2, $r3, $r7, $r12;
+        int i0, i1, $i3;
+        java.lang.String $r9, $r11;
+        double d0, $d1, $d2, $d3, $d4, $d5, $d6, d7, $d8, d9, $d10, $d11, d12, $d13, $d14, $d15, $d16, $d17, $d18, $d19, $d20;
+        sun.java2d.marlin.DStroker r0;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        r1 := @parameter0: sun.java2d.marlin.DPathConsumer2D;
+
+        d0 := @parameter1: double;
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        d7 := @parameter4: double;
+
+        z0 := @parameter5: boolean;
+
+        r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DPathConsumer2D out> = r1;
+
+        $d1 = d0 / 2.0;
+
+        r0.<sun.java2d.marlin.DStroker: double lineWidth2> = $d1;
+
+        $d2 = r0.<sun.java2d.marlin.DStroker: double lineWidth2>;
+
+        $d4 = 2.0 * $d2;
+
+        $d3 = r0.<sun.java2d.marlin.DStroker: double lineWidth2>;
+
+        $d5 = $d4 * $d3;
+
+        $d6 = 1.0 / $d5;
+
+        r0.<sun.java2d.marlin.DStroker: double invHalfLineWidth2Sq> = $d6;
+
+        r0.<sun.java2d.marlin.DStroker: boolean monotonize> = z0;
+
+        r0.<sun.java2d.marlin.DStroker: int capStyle> = i0;
+
+        r0.<sun.java2d.marlin.DStroker: int joinStyle> = i1;
+
+        $d8 = r0.<sun.java2d.marlin.DStroker: double lineWidth2>;
+
+        d9 = d7 * $d8;
+
+        $d10 = d9 * d9;
+
+        r0.<sun.java2d.marlin.DStroker: double miterLimitSq> = $d10;
+
+        r0.<sun.java2d.marlin.DStroker: int prev> = 2;
+
+        $r2 = r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r2.<sun.java2d.marlin.DRendererContext: int stroking> = 1;
+
+        $r3 = r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $z1 = $r3.<sun.java2d.marlin.DRendererContext: boolean doClip>;
+
+        if $z1 == 0 goto label6;
+
+        d12 = r0.<sun.java2d.marlin.DStroker: double lineWidth2>;
+
+        if i0 != 2 goto label1;
+
+        $d11 = <sun.java2d.marlin.DStroker: double SQRT_2>;
+
+        d12 = d12 * $d11;
+
+     label1:
+        if i1 != 0 goto label2;
+
+        $b2 = d12 cmpg d9;
+
+        $i3 = (int) $b2;
+
+        if $i3 >= 0 goto label2;
+
+        d12 = d9;
+
+     label2:
+        $r12 = r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r13 = $r12.<sun.java2d.marlin.DRendererContext: double[] clipRect>;
+
+        $d13 = $r13[0];
+
+        $d14 = $d13 - d12;
+
+        $r13[0] = $d14;
+
+        $d15 = $r13[1];
+
+        $d16 = $d15 + d12;
+
+        $r13[1] = $d16;
+
+        $d17 = $r13[2];
+
+        $d18 = $d17 - d12;
+
+        $r13[2] = $d18;
+
+        $d19 = $r13[3];
+
+        $d20 = $d19 + d12;
+
+        $r13[3] = $d20;
+
+        r0.<sun.java2d.marlin.DStroker: double[] clipRect> = $r13;
+
+        $z3 = <sun.java2d.marlin.MarlinConst: boolean DO_LOG_CLIP>;
+
+        if $z3 == 0 goto label3;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("clipRect (stroker): ");
+
+        $r7 = r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r8 = $r7.<sun.java2d.marlin.DRendererContext: double[] clipRect>;
+
+        $r9 = staticinvoke <java.util.Arrays: java.lang.String toString(double[])>($r8);
+
+        $r10 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.java2d.marlin.MarlinUtils: void logInfo(java.lang.String)>($r11);
+
+     label3:
+        $z2 = <sun.java2d.marlin.DStroker: boolean DO_CLIP_SUBDIVIDER>;
+
+        if $z2 == 0 goto label4;
+
+        r0.<sun.java2d.marlin.DStroker: boolean subdivide> = z0;
+
+        $r4 = r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter curveSplitter>;
+
+        virtualinvoke $r4.<sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter: void init()>();
+
+        goto label5;
+
+     label4:
+        r0.<sun.java2d.marlin.DStroker: boolean subdivide> = 0;
+
+     label5:
+        goto label7;
+
+     label6:
+        r0.<sun.java2d.marlin.DStroker: double[] clipRect> = null;
+
+        r0.<sun.java2d.marlin.DStroker: int cOutCode> = 0;
+
+        r0.<sun.java2d.marlin.DStroker: int sOutCode> = 0;
+
+     label7:
+        return r0;
+    }
+
+    void disableClipping()
+    {
+        sun.java2d.marlin.DStroker r0;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        r0.<sun.java2d.marlin.DStroker: double[] clipRect> = null;
+
+        r0.<sun.java2d.marlin.DStroker: int cOutCode> = 0;
+
+        r0.<sun.java2d.marlin.DStroker: int sOutCode> = 0;
+
+        return;
+    }
+
+    void dispose()
+    {
+        sun.java2d.marlin.DHelpers$PolyStack $r1;
+        sun.java2d.marlin.DStroker r0;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        $r1 = r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DHelpers$PolyStack reverse>;
+
+        virtualinvoke $r1.<sun.java2d.marlin.DHelpers$PolyStack: void dispose()>();
+
+        r0.<sun.java2d.marlin.DStroker: boolean opened> = 0;
+
+        r0.<sun.java2d.marlin.DStroker: boolean capStart> = 0;
+
+        return;
+    }
+
+    private static void computeOffset(double, double, double, double[])
+    {
+        double[] r0;
+        byte $b0;
+        double d0, d1, $d2, $d3, $d4, d5, $d6, $d7, $d8, $d9, $d10, d11;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        d5 := @parameter2: double;
+
+        r0 := @parameter3: double[];
+
+        $d3 = d0 * d0;
+
+        $d2 = d1 * d1;
+
+        d11 = $d3 + $d2;
+
+        $b0 = d11 cmpl 0.0;
+
+        if $b0 != 0 goto label1;
+
+        r0[0] = 0.0;
+
+        r0[1] = 0.0;
+
+        goto label2;
+
+     label1:
+        $d4 = staticinvoke <java.lang.Math: double sqrt(double)>(d11);
+
+        $d6 = d1 * d5;
+
+        $d7 = $d6 / $d4;
+
+        r0[0] = $d7;
+
+        $d8 = d0 * d5;
+
+        $d9 = neg $d8;
+
+        $d10 = $d9 / $d4;
+
+        r0[1] = $d10;
+
+     label2:
+        return;
+    }
+
+    private static boolean isCW(double, double, double, double)
+    {
+        byte $b0;
+        int $i1;
+        double d0, d1, d2, d3, $d4, $d5;
+        boolean $z0;
+
+        d0 := @parameter0: double;
+
+        d2 := @parameter1: double;
+
+        d3 := @parameter2: double;
+
+        d1 := @parameter3: double;
+
+        $d5 = d0 * d1;
+
+        $d4 = d2 * d3;
+
+        $b0 = $d5 cmpg $d4;
+
+        $i1 = (int) $b0;
+
+        if $i1 > 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private void mayDrawRoundJoin(double, double, double, double, double, double, boolean)
+    {
+        byte $b0, $b1, $b2, $b3, $b4;
+        int $i5;
+        double $d0, $d1, $d2, d3, d4, $d5, $d6, $d7, d8, d9, d10, d11;
+        boolean z0;
+        sun.java2d.marlin.DStroker r0;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        d3 := @parameter0: double;
+
+        d4 := @parameter1: double;
+
+        d8 := @parameter2: double;
+
+        d9 := @parameter3: double;
+
+        d10 := @parameter4: double;
+
+        d11 := @parameter5: double;
+
+        z0 := @parameter6: boolean;
+
+        $b0 = d8 cmpl 0.0;
+
+        if $b0 != 0 goto label1;
+
+        $b4 = d9 cmpl 0.0;
+
+        if $b4 == 0 goto label2;
+
+     label1:
+        $b1 = d10 cmpl 0.0;
+
+        if $b1 != 0 goto label3;
+
+        $b3 = d11 cmpl 0.0;
+
+        if $b3 != 0 goto label3;
+
+     label2:
+        return;
+
+     label3:
+        $d5 = d8 - d10;
+
+        $d6 = d9 - d11;
+
+        $d1 = $d5 * $d5;
+
+        $d0 = $d6 * $d6;
+
+        $d7 = $d1 + $d0;
+
+        $d2 = <sun.java2d.marlin.DStroker: double ROUND_JOIN_THRESHOLD>;
+
+        $b2 = $d7 cmpg $d2;
+
+        $i5 = (int) $b2;
+
+        if $i5 >= 0 goto label4;
+
+        return;
+
+     label4:
+        if z0 == 0 goto label5;
+
+        d8 = neg d8;
+
+        d9 = neg d9;
+
+        d10 = neg d10;
+
+        d11 = neg d11;
+
+     label5:
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void drawRoundJoin(double,double,double,double,double,double,boolean)>(d3, d4, d8, d9, d10, d11, z0);
+
+        return;
+    }
+
+    private void drawRoundJoin(double, double, double, double, double, double, boolean)
+    {
+        byte $b0;
+        int $i1;
+        double d0, d1, d2, d3, $d4, $d5, d6, d7, d8, $d9, $d10, $d11, $d12, $d13, d14, d15, d16, d17, d18;
+        boolean z0;
+        sun.java2d.marlin.DStroker r0;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        d15 := @parameter0: double;
+
+        d16 := @parameter1: double;
+
+        d0 := @parameter2: double;
+
+        d2 := @parameter3: double;
+
+        d1 := @parameter4: double;
+
+        d3 := @parameter5: double;
+
+        z0 := @parameter6: boolean;
+
+        $d5 = d0 * d1;
+
+        $d4 = d2 * d3;
+
+        d6 = $d5 + $d4;
+
+        $b0 = d6 cmpl 0.0;
+
+        $i1 = (int) $b0;
+
+        if $i1 < 0 goto label1;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void drawBezApproxForArc(double,double,double,double,double,double,boolean)>(d15, d16, d0, d2, d1, d3, z0);
+
+        goto label3;
+
+     label1:
+        d7 = d3 - d2;
+
+        d8 = d0 - d1;
+
+        $d10 = d7 * d7;
+
+        $d9 = d8 * d8;
+
+        $d11 = $d10 + $d9;
+
+        $d12 = staticinvoke <java.lang.Math: double sqrt(double)>($d11);
+
+        $d13 = r0.<sun.java2d.marlin.DStroker: double lineWidth2>;
+
+        d14 = $d13 / $d12;
+
+        d17 = d7 * d14;
+
+        d18 = d8 * d14;
+
+        if z0 == 0 goto label2;
+
+        d17 = neg d17;
+
+        d18 = neg d18;
+
+     label2:
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void drawBezApproxForArc(double,double,double,double,double,double,boolean)>(d15, d16, d0, d2, d17, d18, z0);
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void drawBezApproxForArc(double,double,double,double,double,double,boolean)>(d15, d16, d17, d18, d1, d3, z0);
+
+     label3:
+        return;
+    }
+
+    private void drawBezApproxForArc(double, double, double, double, double, double, boolean)
+    {
+        byte $b0;
+        boolean z0;
+        int $i1;
+        double d0, d1, d2, d3, $d4, $d5, $d6, $d7, d8, $d9, $d10, $d11, $d12, $d13, $d14, d15, d16, $d17, $d18, $d19, $d20, $d21, $d22, $d23, $d24, $d25, $d26, $d27, $d28, d29;
+        sun.java2d.marlin.DStroker r0;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        d15 := @parameter0: double;
+
+        d16 := @parameter1: double;
+
+        d0 := @parameter2: double;
+
+        d2 := @parameter3: double;
+
+        d1 := @parameter4: double;
+
+        d3 := @parameter5: double;
+
+        z0 := @parameter6: boolean;
+
+        $d5 = d0 * d1;
+
+        $d4 = d2 * d3;
+
+        $d7 = $d5 + $d4;
+
+        $d6 = r0.<sun.java2d.marlin.DStroker: double invHalfLineWidth2Sq>;
+
+        d8 = $d7 * $d6;
+
+        $b0 = d8 cmpl 0.5;
+
+        $i1 = (int) $b0;
+
+        if $i1 < 0 goto label1;
+
+        return;
+
+     label1:
+        $d9 = 0.5 - d8;
+
+        $d10 = staticinvoke <java.lang.Math: double sqrt(double)>($d9);
+
+        $d12 = 1.3333333333333333 * $d10;
+
+        $d11 = d8 + 0.5;
+
+        $d13 = staticinvoke <java.lang.Math: double sqrt(double)>($d11);
+
+        $d14 = 1.0 + $d13;
+
+        d29 = $d12 / $d14;
+
+        if z0 == 0 goto label2;
+
+        d29 = neg d29;
+
+     label2:
+        $d21 = d15 + d0;
+
+        $d22 = d16 + d2;
+
+        $d17 = d29 * d2;
+
+        $d23 = $d21 - $d17;
+
+        $d18 = d29 * d0;
+
+        $d24 = $d22 + $d18;
+
+        $d25 = d15 + d1;
+
+        $d26 = d16 + d3;
+
+        $d19 = d29 * d3;
+
+        $d27 = $d25 + $d19;
+
+        $d20 = d29 * d1;
+
+        $d28 = $d26 - $d20;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitCurveTo(double,double,double,double,double,double,double,double,boolean)>($d21, $d22, $d23, $d24, $d27, $d28, $d25, $d26, z0);
+
+        return;
+    }
+
+    private void drawRoundCap(double, double, double, double)
+    {
+        double d0, $d1, d2, d3, $d4, d5, d6, $d7, d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15, $d16, $d17, $d18, $d19, $d20, $d21, $d22, $d23, $d24, $d25, $d26, $d27;
+        sun.java2d.marlin.DStroker r0;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        d6 := @parameter0: double;
+
+        d8 := @parameter1: double;
+
+        d0 := @parameter2: double;
+
+        d3 := @parameter3: double;
+
+        $d1 = <sun.java2d.marlin.DStroker: double C>;
+
+        d2 = $d1 * d0;
+
+        $d4 = <sun.java2d.marlin.DStroker: double C>;
+
+        d5 = $d4 * d3;
+
+        $d7 = d6 + d0;
+
+        $d17 = $d7 - d5;
+
+        $d9 = d8 + d3;
+
+        $d16 = $d9 + d2;
+
+        $d10 = d6 - d3;
+
+        $d15 = $d10 + d2;
+
+        $d11 = d8 + d0;
+
+        $d14 = $d11 + d5;
+
+        $d13 = d6 - d3;
+
+        $d12 = d8 + d0;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitCurveTo(double,double,double,double,double,double)>($d17, $d16, $d15, $d14, $d13, $d12);
+
+        $d18 = d6 - d3;
+
+        $d27 = $d18 - d2;
+
+        $d19 = d8 + d0;
+
+        $d26 = $d19 - d5;
+
+        $d20 = d6 - d0;
+
+        $d25 = $d20 - d5;
+
+        $d21 = d8 - d3;
+
+        $d24 = $d21 + d2;
+
+        $d23 = d6 - d0;
+
+        $d22 = d8 - d3;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitCurveTo(double,double,double,double,double,double)>($d27, $d26, $d25, $d24, $d23, $d22);
+
+        return;
+    }
+
+    private static void computeMiter(double, double, double, double, double, double, double, double, double[])
+    {
+        double[] r0;
+        double d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, $d12, $d13, d14, $d15, $d16, $d17, $d18, $d19, $d20, $d21, $d22, d23, d24;
+
+        d1 := @parameter0: double;
+
+        d4 := @parameter1: double;
+
+        d0 := @parameter2: double;
+
+        d3 := @parameter3: double;
+
+        d7 := @parameter4: double;
+
+        d10 := @parameter5: double;
+
+        d6 := @parameter6: double;
+
+        d9 := @parameter7: double;
+
+        r0 := @parameter8: double[];
+
+        d2 = d0 - d1;
+
+        d5 = d3 - d4;
+
+        d8 = d6 - d7;
+
+        d11 = d9 - d10;
+
+        $d13 = d2 * d11;
+
+        $d12 = d8 * d5;
+
+        d14 = $d13 - $d12;
+
+        $d15 = d4 - d10;
+
+        $d18 = d8 * $d15;
+
+        $d16 = d1 - d7;
+
+        $d17 = d11 * $d16;
+
+        d23 = $d18 - $d17;
+
+        d24 = d23 / d14;
+
+        $d19 = d24 * d2;
+
+        $d20 = d1 + $d19;
+
+        r0[0] = $d20;
+
+        $d21 = d24 * d5;
+
+        $d22 = d4 + $d21;
+
+        r0[1] = $d22;
+
+        return;
+    }
+
+    private static void safeComputeMiter(double, double, double, double, double, double, double, double, double[])
+    {
+        double[] r0;
+        byte $b0;
+        double d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, $d12, $d13, d14, $d15, $d16, $d17, $d18, $d19, $d20, $d21, $d22, $d23, $d24, $d25, $d26, d27, d28;
+
+        d1 := @parameter0: double;
+
+        d4 := @parameter1: double;
+
+        d0 := @parameter2: double;
+
+        d3 := @parameter3: double;
+
+        d7 := @parameter4: double;
+
+        d10 := @parameter5: double;
+
+        d6 := @parameter6: double;
+
+        d9 := @parameter7: double;
+
+        r0 := @parameter8: double[];
+
+        d2 = d0 - d1;
+
+        d5 = d3 - d4;
+
+        d8 = d6 - d7;
+
+        d11 = d9 - d10;
+
+        $d13 = d2 * d11;
+
+        $d12 = d8 * d5;
+
+        d14 = $d13 - $d12;
+
+        $b0 = d14 cmpl 0.0;
+
+        if $b0 != 0 goto label1;
+
+        $d23 = d1 + d7;
+
+        $d24 = $d23 / 2.0;
+
+        r0[2] = $d24;
+
+        $d25 = d4 + d10;
+
+        $d26 = $d25 / 2.0;
+
+        r0[3] = $d26;
+
+        goto label2;
+
+     label1:
+        $d15 = d4 - d10;
+
+        $d18 = d8 * $d15;
+
+        $d16 = d1 - d7;
+
+        $d17 = d11 * $d16;
+
+        d27 = $d18 - $d17;
+
+        d28 = d27 / d14;
+
+        $d19 = d28 * d2;
+
+        $d20 = d1 + $d19;
+
+        r0[2] = $d20;
+
+        $d21 = d28 * d5;
+
+        $d22 = d4 + $d21;
+
+        r0[3] = $d22;
+
+     label2:
+        return;
+    }
+
+    private void drawMiter(double, double, double, double, double, double, double, double, double, double, boolean)
+    {
+        byte $b0, $b1, $b2, $b3, $b4, $b5, $b6;
+        boolean z0;
+        double[] $r1, $r2, $r3;
+        int $i7;
+        double d0, d1, d2, $d3, d4, d5, $d6, $d7, d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15, $d16, $d17, $d18, $d19, $d20, $d21, $d22, $d23, $d24, $d25, $d26, $d27, d28, d29, d30, d31;
+        sun.java2d.marlin.DStroker r0;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        d0 := @parameter0: double;
+
+        d5 := @parameter1: double;
+
+        d2 := @parameter2: double;
+
+        d4 := @parameter3: double;
+
+        d1 := @parameter4: double;
+
+        d8 := @parameter5: double;
+
+        d28 := @parameter6: double;
+
+        d29 := @parameter7: double;
+
+        d30 := @parameter8: double;
+
+        d31 := @parameter9: double;
+
+        z0 := @parameter10: boolean;
+
+        $b0 = d30 cmpl d28;
+
+        if $b0 != 0 goto label1;
+
+        $b6 = d31 cmpl d29;
+
+        if $b6 == 0 goto label3;
+
+     label1:
+        $b1 = d0 cmpl 0.0;
+
+        if $b1 != 0 goto label2;
+
+        $b5 = d5 cmpl 0.0;
+
+        if $b5 == 0 goto label3;
+
+     label2:
+        $b2 = d1 cmpl 0.0;
+
+        if $b2 != 0 goto label4;
+
+        $b4 = d8 cmpl 0.0;
+
+        if $b4 != 0 goto label4;
+
+     label3:
+        return;
+
+     label4:
+        if z0 == 0 goto label5;
+
+        d28 = neg d28;
+
+        d29 = neg d29;
+
+        d30 = neg d30;
+
+        d31 = neg d31;
+
+     label5:
+        $d3 = d2 - d0;
+
+        $d17 = $d3 + d28;
+
+        $d6 = d4 - d5;
+
+        $d16 = $d6 + d29;
+
+        $d15 = d2 + d28;
+
+        $d14 = d4 + d29;
+
+        $d7 = d1 + d2;
+
+        $d13 = $d7 + d30;
+
+        $d9 = d8 + d4;
+
+        $d12 = $d9 + d31;
+
+        $d11 = d2 + d30;
+
+        $d10 = d4 + d31;
+
+        $r1 = r0.<sun.java2d.marlin.DStroker: double[] miter>;
+
+        staticinvoke <sun.java2d.marlin.DStroker: void computeMiter(double,double,double,double,double,double,double,double,double[])>($d17, $d16, $d15, $d14, $d13, $d12, $d11, $d10, $r1);
+
+        $r2 = r0.<sun.java2d.marlin.DStroker: double[] miter>;
+
+        $d25 = $r2[0];
+
+        $r3 = r0.<sun.java2d.marlin.DStroker: double[] miter>;
+
+        $d26 = $r3[1];
+
+        $d19 = $d25 - d2;
+
+        $d18 = $d25 - d2;
+
+        $d23 = $d19 * $d18;
+
+        $d21 = $d26 - d4;
+
+        $d20 = $d26 - d4;
+
+        $d22 = $d21 * $d20;
+
+        $d27 = $d23 + $d22;
+
+        $d24 = r0.<sun.java2d.marlin.DStroker: double miterLimitSq>;
+
+        $b3 = $d27 cmpg $d24;
+
+        $i7 = (int) $b3;
+
+        if $i7 >= 0 goto label6;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitLineTo(double,double,boolean)>($d25, $d26, z0);
+
+     label6:
+        return;
+    }
+
+    public void moveTo(double, double)
+    {
+        sun.java2d.marlin.DStroker r0;
+        int $i0, $i1;
+        double[] $r1, $r2;
+        double d0, d1;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        $i0 = r0.<sun.java2d.marlin.DStroker: int cOutCode>;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void _moveTo(double,double,int)>(d0, d1, $i0);
+
+        r0.<sun.java2d.marlin.DStroker: double sx0> = d0;
+
+        r0.<sun.java2d.marlin.DStroker: double sy0> = d1;
+
+        r0.<sun.java2d.marlin.DStroker: double sdx> = 1.0;
+
+        r0.<sun.java2d.marlin.DStroker: double sdy> = 0.0;
+
+        r0.<sun.java2d.marlin.DStroker: boolean opened> = 0;
+
+        r0.<sun.java2d.marlin.DStroker: boolean capStart> = 0;
+
+        $r1 = r0.<sun.java2d.marlin.DStroker: double[] clipRect>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.java2d.marlin.DStroker: double[] clipRect>;
+
+        $i1 = staticinvoke <sun.java2d.marlin.DHelpers: int outcode(double,double,double[])>(d0, d1, $r2);
+
+        r0.<sun.java2d.marlin.DStroker: int cOutCode> = $i1;
+
+        r0.<sun.java2d.marlin.DStroker: int sOutCode> = $i1;
+
+     label1:
+        return;
+    }
+
+    private void _moveTo(double, double, int)
+    {
+        sun.java2d.marlin.DStroker r0;
+        int $i0, $i1, i2;
+        double d0, d1;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        i2 := @parameter2: int;
+
+        $i0 = r0.<sun.java2d.marlin.DStroker: int prev>;
+
+        if $i0 != 0 goto label1;
+
+        r0.<sun.java2d.marlin.DStroker: double cx0> = d0;
+
+        r0.<sun.java2d.marlin.DStroker: double cy0> = d1;
+
+        goto label3;
+
+     label1:
+        $i1 = r0.<sun.java2d.marlin.DStroker: int prev>;
+
+        if $i1 != 1 goto label2;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void finish(int)>(i2);
+
+     label2:
+        r0.<sun.java2d.marlin.DStroker: int prev> = 0;
+
+        r0.<sun.java2d.marlin.DStroker: double cx0> = d0;
+
+        r0.<sun.java2d.marlin.DStroker: double cy0> = d1;
+
+        r0.<sun.java2d.marlin.DStroker: double cdx> = 1.0;
+
+        r0.<sun.java2d.marlin.DStroker: double cdy> = 0.0;
+
+     label3:
+        return;
+    }
+
+    public void lineTo(double, double)
+    {
+        sun.java2d.marlin.DStroker r0;
+        double d0, d1;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void lineTo(double,double,boolean)>(d0, d1, 0);
+
+        return;
+    }
+
+    private void lineTo(double, double, boolean)
+    {
+        byte $b1, $b5;
+        boolean z0, $z1, $z2;
+        double[] $r1, $r2, $r4, $r5, $r6;
+        sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter $r3;
+        int i0, $i2, i3, i4;
+        double d0, d1, $d2, $d3, $d4, $d5, d6, $d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15, $d16, $d17, $d18, $d19, $d20, $d21, $d22, $d23, $d24, $d25, $d26, $d27, $d28, $d29;
+        sun.java2d.marlin.DStroker r0;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        z0 := @parameter2: boolean;
+
+        i0 = r0.<sun.java2d.marlin.DStroker: int cOutCode>;
+
+        if z0 != 0 goto label4;
+
+        $r1 = r0.<sun.java2d.marlin.DStroker: double[] clipRect>;
+
+        if $r1 == null goto label4;
+
+        $r2 = r0.<sun.java2d.marlin.DStroker: double[] clipRect>;
+
+        $i2 = staticinvoke <sun.java2d.marlin.DHelpers: int outcode(double,double,double[])>(d0, d1, $r2);
+
+        i3 = i0 | $i2;
+
+        if i3 == 0 goto label3;
+
+        i4 = i0 & $i2;
+
+        if i4 != 0 goto label2;
+
+        $z1 = r0.<sun.java2d.marlin.DStroker: boolean subdivide>;
+
+        if $z1 == 0 goto label3;
+
+        r0.<sun.java2d.marlin.DStroker: boolean subdivide> = 0;
+
+        $r3 = r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter curveSplitter>;
+
+        $d3 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        $d2 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        $z2 = virtualinvoke $r3.<sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter: boolean splitLine(double,double,double,double,int,sun.java2d.marlin.DPathConsumer2D)>($d3, $d2, d0, d1, i3, r0);
+
+        r0.<sun.java2d.marlin.DStroker: boolean subdivide> = 1;
+
+        if $z2 == 0 goto label1;
+
+        return;
+
+     label1:
+        goto label3;
+
+     label2:
+        r0.<sun.java2d.marlin.DStroker: int cOutCode> = $i2;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void _moveTo(double,double,int)>(d0, d1, i0);
+
+        r0.<sun.java2d.marlin.DStroker: boolean opened> = 1;
+
+        return;
+
+     label3:
+        r0.<sun.java2d.marlin.DStroker: int cOutCode> = $i2;
+
+     label4:
+        $d4 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        $d5 = d0 - $d4;
+
+        d6 = $d5;
+
+        $d7 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        $d8 = d1 - $d7;
+
+        $b5 = $d5 cmpl 0.0;
+
+        if $b5 != 0 goto label5;
+
+        $b1 = $d8 cmpl 0.0;
+
+        if $b1 != 0 goto label5;
+
+        d6 = 1.0;
+
+     label5:
+        $d9 = r0.<sun.java2d.marlin.DStroker: double lineWidth2>;
+
+        $r4 = r0.<sun.java2d.marlin.DStroker: double[] offset0>;
+
+        staticinvoke <sun.java2d.marlin.DStroker: void computeOffset(double,double,double,double[])>(d6, $d8, $d9, $r4);
+
+        $r5 = r0.<sun.java2d.marlin.DStroker: double[] offset0>;
+
+        $d10 = $r5[0];
+
+        $r6 = r0.<sun.java2d.marlin.DStroker: double[] offset0>;
+
+        $d11 = $r6[1];
+
+        $d12 = r0.<sun.java2d.marlin.DStroker: double cdx>;
+
+        $d13 = r0.<sun.java2d.marlin.DStroker: double cdy>;
+
+        $d14 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        $d15 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        $d16 = r0.<sun.java2d.marlin.DStroker: double cmx>;
+
+        $d17 = r0.<sun.java2d.marlin.DStroker: double cmy>;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void drawJoin(double,double,double,double,double,double,double,double,double,double,int)>($d12, $d13, $d14, $d15, d6, $d8, $d16, $d17, $d10, $d11, i0);
+
+        $d18 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        $d19 = $d18 + $d10;
+
+        $d20 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        $d21 = $d20 + $d11;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitLineTo(double,double)>($d19, $d21);
+
+        $d22 = d0 + $d10;
+
+        $d23 = d1 + $d11;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitLineTo(double,double)>($d22, $d23);
+
+        $d24 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        $d25 = $d24 - $d10;
+
+        $d26 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        $d27 = $d26 - $d11;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitLineToRev(double,double)>($d25, $d27);
+
+        $d28 = d0 - $d10;
+
+        $d29 = d1 - $d11;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitLineToRev(double,double)>($d28, $d29);
+
+        r0.<sun.java2d.marlin.DStroker: int prev> = 1;
+
+        r0.<sun.java2d.marlin.DStroker: double cx0> = d0;
+
+        r0.<sun.java2d.marlin.DStroker: double cy0> = d1;
+
+        r0.<sun.java2d.marlin.DStroker: double cdx> = d6;
+
+        r0.<sun.java2d.marlin.DStroker: double cdy> = $d8;
+
+        r0.<sun.java2d.marlin.DStroker: double cmx> = $d10;
+
+        r0.<sun.java2d.marlin.DStroker: double cmy> = $d11;
+
+        return;
+    }
+
+    public void closePath()
+    {
+        byte $b4, $b5;
+        boolean $z0, $z1, $z2;
+        int $i0, $i1, $i2, $i3, $i6, $i7, $i8, $i9;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15, $d16, $d17, $d18, $d19, $d20, $d21, $d22, $d23, $d24, $d25, $d26, $d27, $d28, $d29, $d30, $d31, $d32, $d33, $d34, $d35, $d36, $d37, $d38, $d39, $d40, $d41, $d42, $d43;
+        sun.java2d.marlin.DStroker r0;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        $i0 = r0.<sun.java2d.marlin.DStroker: int prev>;
+
+        if $i0 == 1 goto label2;
+
+        $z0 = r0.<sun.java2d.marlin.DStroker: boolean opened>;
+
+        if $z0 != 0 goto label2;
+
+        $i6 = r0.<sun.java2d.marlin.DStroker: int prev>;
+
+        if $i6 != 2 goto label1;
+
+        return;
+
+     label1:
+        $d21 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        $d19 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        $d18 = r0.<sun.java2d.marlin.DStroker: double lineWidth2>;
+
+        $d20 = $d19 - $d18;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitMoveTo(double,double)>($d21, $d20);
+
+        r0.<sun.java2d.marlin.DStroker: double sdx> = 1.0;
+
+        r0.<sun.java2d.marlin.DStroker: double sdy> = 0.0;
+
+        r0.<sun.java2d.marlin.DStroker: double cdx> = 1.0;
+
+        r0.<sun.java2d.marlin.DStroker: double cdy> = 0.0;
+
+        r0.<sun.java2d.marlin.DStroker: double smx> = 0.0;
+
+        $d22 = r0.<sun.java2d.marlin.DStroker: double lineWidth2>;
+
+        $d23 = neg $d22;
+
+        r0.<sun.java2d.marlin.DStroker: double smy> = $d23;
+
+        r0.<sun.java2d.marlin.DStroker: double cmx> = 0.0;
+
+        $d24 = r0.<sun.java2d.marlin.DStroker: double lineWidth2>;
+
+        $d25 = neg $d24;
+
+        r0.<sun.java2d.marlin.DStroker: double cmy> = $d25;
+
+        $i7 = r0.<sun.java2d.marlin.DStroker: int cOutCode>;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void finish(int)>($i7);
+
+        return;
+
+     label2:
+        $i2 = r0.<sun.java2d.marlin.DStroker: int sOutCode>;
+
+        $i1 = r0.<sun.java2d.marlin.DStroker: int cOutCode>;
+
+        $i3 = $i2 & $i1;
+
+        if $i3 != 0 goto label6;
+
+        $d1 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        $d0 = r0.<sun.java2d.marlin.DStroker: double sx0>;
+
+        $b4 = $d1 cmpl $d0;
+
+        if $b4 != 0 goto label3;
+
+        $d17 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        $d16 = r0.<sun.java2d.marlin.DStroker: double sy0>;
+
+        $b5 = $d17 cmpl $d16;
+
+        if $b5 == 0 goto label4;
+
+     label3:
+        $d3 = r0.<sun.java2d.marlin.DStroker: double sx0>;
+
+        $d2 = r0.<sun.java2d.marlin.DStroker: double sy0>;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void lineTo(double,double,boolean)>($d3, $d2, 1);
+
+     label4:
+        $d26 = r0.<sun.java2d.marlin.DStroker: double cdx>;
+
+        $d27 = r0.<sun.java2d.marlin.DStroker: double cdy>;
+
+        $d28 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        $d29 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        $d30 = r0.<sun.java2d.marlin.DStroker: double sdx>;
+
+        $d31 = r0.<sun.java2d.marlin.DStroker: double sdy>;
+
+        $d32 = r0.<sun.java2d.marlin.DStroker: double cmx>;
+
+        $d33 = r0.<sun.java2d.marlin.DStroker: double cmy>;
+
+        $d34 = r0.<sun.java2d.marlin.DStroker: double smx>;
+
+        $d35 = r0.<sun.java2d.marlin.DStroker: double smy>;
+
+        $i8 = r0.<sun.java2d.marlin.DStroker: int sOutCode>;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void drawJoin(double,double,double,double,double,double,double,double,double,double,int)>($d26, $d27, $d28, $d29, $d30, $d31, $d32, $d33, $d34, $d35, $i8);
+
+        $d36 = r0.<sun.java2d.marlin.DStroker: double sx0>;
+
+        $d37 = r0.<sun.java2d.marlin.DStroker: double smx>;
+
+        $d38 = $d36 + $d37;
+
+        $d39 = r0.<sun.java2d.marlin.DStroker: double sy0>;
+
+        $d40 = r0.<sun.java2d.marlin.DStroker: double smy>;
+
+        $d41 = $d39 + $d40;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitLineTo(double,double)>($d38, $d41);
+
+        $z1 = r0.<sun.java2d.marlin.DStroker: boolean opened>;
+
+        if $z1 == 0 goto label5;
+
+        $d11 = r0.<sun.java2d.marlin.DStroker: double sx0>;
+
+        $d10 = r0.<sun.java2d.marlin.DStroker: double smx>;
+
+        $d15 = $d11 - $d10;
+
+        $d13 = r0.<sun.java2d.marlin.DStroker: double sy0>;
+
+        $d12 = r0.<sun.java2d.marlin.DStroker: double smy>;
+
+        $d14 = $d13 - $d12;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitLineTo(double,double)>($d15, $d14);
+
+        goto label6;
+
+     label5:
+        $d5 = r0.<sun.java2d.marlin.DStroker: double sx0>;
+
+        $d4 = r0.<sun.java2d.marlin.DStroker: double smx>;
+
+        $d9 = $d5 - $d4;
+
+        $d7 = r0.<sun.java2d.marlin.DStroker: double sy0>;
+
+        $d6 = r0.<sun.java2d.marlin.DStroker: double smy>;
+
+        $d8 = $d7 - $d6;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitMoveTo(double,double)>($d9, $d8);
+
+     label6:
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitReverse()>();
+
+        r0.<sun.java2d.marlin.DStroker: int prev> = 2;
+
+        $d42 = r0.<sun.java2d.marlin.DStroker: double sx0>;
+
+        r0.<sun.java2d.marlin.DStroker: double cx0> = $d42;
+
+        $d43 = r0.<sun.java2d.marlin.DStroker: double sy0>;
+
+        r0.<sun.java2d.marlin.DStroker: double cy0> = $d43;
+
+        $i9 = r0.<sun.java2d.marlin.DStroker: int sOutCode>;
+
+        r0.<sun.java2d.marlin.DStroker: int cOutCode> = $i9;
+
+        $z2 = r0.<sun.java2d.marlin.DStroker: boolean opened>;
+
+        if $z2 == 0 goto label7;
+
+        r0.<sun.java2d.marlin.DStroker: boolean opened> = 0;
+
+        goto label8;
+
+     label7:
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitClose()>();
+
+     label8:
+        return;
+    }
+
+    private void emitReverse()
+    {
+        sun.java2d.marlin.DHelpers$PolyStack $r2;
+        sun.java2d.marlin.DPathConsumer2D $r1;
+        sun.java2d.marlin.DStroker r0;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        $r2 = r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DHelpers$PolyStack reverse>;
+
+        $r1 = r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DPathConsumer2D out>;
+
+        virtualinvoke $r2.<sun.java2d.marlin.DHelpers$PolyStack: void popAll(sun.java2d.marlin.DPathConsumer2D)>($r1);
+
+        return;
+    }
+
+    public void pathDone()
+    {
+        sun.java2d.marlin.DStroker r0;
+        int $i0, $i1;
+        sun.java2d.marlin.DPathConsumer2D $r1;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        $i0 = r0.<sun.java2d.marlin.DStroker: int prev>;
+
+        if $i0 != 1 goto label1;
+
+        $i1 = r0.<sun.java2d.marlin.DStroker: int cOutCode>;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void finish(int)>($i1);
+
+     label1:
+        $r1 = r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DPathConsumer2D out>;
+
+        interfaceinvoke $r1.<sun.java2d.marlin.DPathConsumer2D: void pathDone()>();
+
+        r0.<sun.java2d.marlin.DStroker: int prev> = 2;
+
+        virtualinvoke r0.<sun.java2d.marlin.DStroker: void dispose()>();
+
+        return;
+    }
+
+    private void finish(int)
+    {
+        boolean $z0, $z1;
+        sun.java2d.marlin.DRendererContext $r1;
+        int i0, $i1, $i2, $i3, $i4, $i5;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15, $d16, $d17, $d18, $d19, $d20, $d21, $d22, $d23, $d24, $d25, $d26, $d27, $d28, $d29, $d30, $d31, $d32, $d33, $d34, $d35, $d36, $d37, $d38, $d39, $d40, $d41, $d42, $d43, $d44, $d45, $d46, $d47, $d48, $d49;
+        sun.java2d.marlin.DStroker r0;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $z0 = $r1.<sun.java2d.marlin.DRendererContext: boolean closedPath>;
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitReverse()>();
+
+        goto label5;
+
+     label1:
+        if i0 != 0 goto label3;
+
+        $i4 = r0.<sun.java2d.marlin.DStroker: int capStyle>;
+
+        if $i4 != 1 goto label2;
+
+        $d49 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        $d48 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        $d47 = r0.<sun.java2d.marlin.DStroker: double cmx>;
+
+        $d46 = r0.<sun.java2d.marlin.DStroker: double cmy>;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void drawRoundCap(double,double,double,double)>($d49, $d48, $d47, $d46);
+
+        goto label3;
+
+     label2:
+        $i5 = r0.<sun.java2d.marlin.DStroker: int capStyle>;
+
+        if $i5 != 2 goto label3;
+
+        $d27 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        $d26 = r0.<sun.java2d.marlin.DStroker: double cmy>;
+
+        $d29 = $d27 - $d26;
+
+        $d28 = r0.<sun.java2d.marlin.DStroker: double cmx>;
+
+        $d35 = $d29 + $d28;
+
+        $d31 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        $d30 = r0.<sun.java2d.marlin.DStroker: double cmx>;
+
+        $d33 = $d31 + $d30;
+
+        $d32 = r0.<sun.java2d.marlin.DStroker: double cmy>;
+
+        $d34 = $d33 + $d32;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitLineTo(double,double)>($d35, $d34);
+
+        $d37 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        $d36 = r0.<sun.java2d.marlin.DStroker: double cmy>;
+
+        $d39 = $d37 - $d36;
+
+        $d38 = r0.<sun.java2d.marlin.DStroker: double cmx>;
+
+        $d45 = $d39 - $d38;
+
+        $d41 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        $d40 = r0.<sun.java2d.marlin.DStroker: double cmx>;
+
+        $d43 = $d41 + $d40;
+
+        $d42 = r0.<sun.java2d.marlin.DStroker: double cmy>;
+
+        $d44 = $d43 - $d42;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitLineTo(double,double)>($d45, $d44);
+
+     label3:
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitReverse()>();
+
+        $z1 = r0.<sun.java2d.marlin.DStroker: boolean capStart>;
+
+        if $z1 != 0 goto label5;
+
+        r0.<sun.java2d.marlin.DStroker: boolean capStart> = 1;
+
+        $i1 = r0.<sun.java2d.marlin.DStroker: int sOutCode>;
+
+        if $i1 != 0 goto label5;
+
+        $i2 = r0.<sun.java2d.marlin.DStroker: int capStyle>;
+
+        if $i2 != 1 goto label4;
+
+        $d25 = r0.<sun.java2d.marlin.DStroker: double sx0>;
+
+        $d24 = r0.<sun.java2d.marlin.DStroker: double sy0>;
+
+        $d20 = r0.<sun.java2d.marlin.DStroker: double smx>;
+
+        $d23 = neg $d20;
+
+        $d21 = r0.<sun.java2d.marlin.DStroker: double smy>;
+
+        $d22 = neg $d21;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void drawRoundCap(double,double,double,double)>($d25, $d24, $d23, $d22);
+
+        goto label5;
+
+     label4:
+        $i3 = r0.<sun.java2d.marlin.DStroker: int capStyle>;
+
+        if $i3 != 2 goto label5;
+
+        $d1 = r0.<sun.java2d.marlin.DStroker: double sx0>;
+
+        $d0 = r0.<sun.java2d.marlin.DStroker: double smy>;
+
+        $d3 = $d1 + $d0;
+
+        $d2 = r0.<sun.java2d.marlin.DStroker: double smx>;
+
+        $d9 = $d3 - $d2;
+
+        $d5 = r0.<sun.java2d.marlin.DStroker: double sy0>;
+
+        $d4 = r0.<sun.java2d.marlin.DStroker: double smx>;
+
+        $d7 = $d5 - $d4;
+
+        $d6 = r0.<sun.java2d.marlin.DStroker: double smy>;
+
+        $d8 = $d7 - $d6;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitLineTo(double,double)>($d9, $d8);
+
+        $d11 = r0.<sun.java2d.marlin.DStroker: double sx0>;
+
+        $d10 = r0.<sun.java2d.marlin.DStroker: double smy>;
+
+        $d13 = $d11 + $d10;
+
+        $d12 = r0.<sun.java2d.marlin.DStroker: double smx>;
+
+        $d19 = $d13 + $d12;
+
+        $d15 = r0.<sun.java2d.marlin.DStroker: double sy0>;
+
+        $d14 = r0.<sun.java2d.marlin.DStroker: double smx>;
+
+        $d17 = $d15 - $d14;
+
+        $d16 = r0.<sun.java2d.marlin.DStroker: double smy>;
+
+        $d18 = $d17 + $d16;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitLineTo(double,double)>($d19, $d18);
+
+     label5:
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitClose()>();
+
+        return;
+    }
+
+    private void emitMoveTo(double, double)
+    {
+        sun.java2d.marlin.DStroker r0;
+        sun.java2d.marlin.DPathConsumer2D $r1;
+        double d0, d1;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        $r1 = r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DPathConsumer2D out>;
+
+        interfaceinvoke $r1.<sun.java2d.marlin.DPathConsumer2D: void moveTo(double,double)>(d0, d1);
+
+        return;
+    }
+
+    private void emitLineTo(double, double)
+    {
+        sun.java2d.marlin.DStroker r0;
+        sun.java2d.marlin.DPathConsumer2D $r1;
+        double d0, d1;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        $r1 = r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DPathConsumer2D out>;
+
+        interfaceinvoke $r1.<sun.java2d.marlin.DPathConsumer2D: void lineTo(double,double)>(d0, d1);
+
+        return;
+    }
+
+    private void emitLineToRev(double, double)
+    {
+        sun.java2d.marlin.DStroker r0;
+        sun.java2d.marlin.DHelpers$PolyStack $r1;
+        double d0, d1;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        $r1 = r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DHelpers$PolyStack reverse>;
+
+        virtualinvoke $r1.<sun.java2d.marlin.DHelpers$PolyStack: void pushLine(double,double)>(d0, d1);
+
+        return;
+    }
+
+    private void emitLineTo(double, double, boolean)
+    {
+        sun.java2d.marlin.DStroker r0;
+        boolean z0;
+        double d0, d1;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        z0 := @parameter2: boolean;
+
+        if z0 == 0 goto label1;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitLineToRev(double,double)>(d0, d1);
+
+        goto label2;
+
+     label1:
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitLineTo(double,double)>(d0, d1);
+
+     label2:
+        return;
+    }
+
+    private void emitQuadTo(double, double, double, double)
+    {
+        sun.java2d.marlin.DStroker r0;
+        sun.java2d.marlin.DPathConsumer2D $r1;
+        double d0, d1, d2, d3;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        d2 := @parameter2: double;
+
+        d3 := @parameter3: double;
+
+        $r1 = r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DPathConsumer2D out>;
+
+        interfaceinvoke $r1.<sun.java2d.marlin.DPathConsumer2D: void quadTo(double,double,double,double)>(d0, d1, d2, d3);
+
+        return;
+    }
+
+    private void emitQuadToRev(double, double, double, double)
+    {
+        sun.java2d.marlin.DStroker r0;
+        sun.java2d.marlin.DHelpers$PolyStack $r1;
+        double d0, d1, d2, d3;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        d2 := @parameter2: double;
+
+        d3 := @parameter3: double;
+
+        $r1 = r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DHelpers$PolyStack reverse>;
+
+        virtualinvoke $r1.<sun.java2d.marlin.DHelpers$PolyStack: void pushQuad(double,double,double,double)>(d0, d1, d2, d3);
+
+        return;
+    }
+
+    private void emitCurveTo(double, double, double, double, double, double)
+    {
+        sun.java2d.marlin.DStroker r0;
+        sun.java2d.marlin.DPathConsumer2D $r1;
+        double d0, d1, d2, d3, d4, d5;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        d2 := @parameter2: double;
+
+        d3 := @parameter3: double;
+
+        d4 := @parameter4: double;
+
+        d5 := @parameter5: double;
+
+        $r1 = r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DPathConsumer2D out>;
+
+        interfaceinvoke $r1.<sun.java2d.marlin.DPathConsumer2D: void curveTo(double,double,double,double,double,double)>(d0, d1, d2, d3, d4, d5);
+
+        return;
+    }
+
+    private void emitCurveToRev(double, double, double, double, double, double)
+    {
+        sun.java2d.marlin.DStroker r0;
+        sun.java2d.marlin.DHelpers$PolyStack $r1;
+        double d0, d1, d2, d3, d4, d5;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        d2 := @parameter2: double;
+
+        d3 := @parameter3: double;
+
+        d4 := @parameter4: double;
+
+        d5 := @parameter5: double;
+
+        $r1 = r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DHelpers$PolyStack reverse>;
+
+        virtualinvoke $r1.<sun.java2d.marlin.DHelpers$PolyStack: void pushCubic(double,double,double,double,double,double)>(d0, d1, d2, d3, d4, d5);
+
+        return;
+    }
+
+    private void emitCurveTo(double, double, double, double, double, double, double, double, boolean)
+    {
+        sun.java2d.marlin.DStroker r0;
+        sun.java2d.marlin.DHelpers$PolyStack $r2;
+        sun.java2d.marlin.DPathConsumer2D $r1;
+        boolean z0;
+        double d0, d1, d2, d3, d4, d5, d6, d7;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        d6 := @parameter0: double;
+
+        d7 := @parameter1: double;
+
+        d0 := @parameter2: double;
+
+        d1 := @parameter3: double;
+
+        d2 := @parameter4: double;
+
+        d3 := @parameter5: double;
+
+        d4 := @parameter6: double;
+
+        d5 := @parameter7: double;
+
+        z0 := @parameter8: boolean;
+
+        if z0 == 0 goto label1;
+
+        $r2 = r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DHelpers$PolyStack reverse>;
+
+        virtualinvoke $r2.<sun.java2d.marlin.DHelpers$PolyStack: void pushCubic(double,double,double,double,double,double)>(d6, d7, d0, d1, d2, d3);
+
+        goto label2;
+
+     label1:
+        $r1 = r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DPathConsumer2D out>;
+
+        interfaceinvoke $r1.<sun.java2d.marlin.DPathConsumer2D: void curveTo(double,double,double,double,double,double)>(d0, d1, d2, d3, d4, d5);
+
+     label2:
+        return;
+    }
+
+    private void emitClose()
+    {
+        sun.java2d.marlin.DPathConsumer2D $r1;
+        sun.java2d.marlin.DStroker r0;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        $r1 = r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DPathConsumer2D out>;
+
+        interfaceinvoke $r1.<sun.java2d.marlin.DPathConsumer2D: void closePath()>();
+
+        return;
+    }
+
+    private void drawJoin(double, double, double, double, double, double, double, double, double, double, int)
+    {
+        int $i0, i1, $i2, $i3;
+        double d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, $d10, $d11;
+        boolean $z0, $z1, $z2;
+        sun.java2d.marlin.DStroker r0;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        d4 := @parameter2: double;
+
+        d5 := @parameter3: double;
+
+        d2 := @parameter4: double;
+
+        d3 := @parameter5: double;
+
+        d6 := @parameter6: double;
+
+        d7 := @parameter7: double;
+
+        d8 := @parameter8: double;
+
+        d9 := @parameter9: double;
+
+        i1 := @parameter10: int;
+
+        $i0 = r0.<sun.java2d.marlin.DStroker: int prev>;
+
+        if $i0 == 1 goto label1;
+
+        $d11 = d4 + d8;
+
+        $d10 = d5 + d9;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitMoveTo(double,double)>($d11, $d10);
+
+        $z1 = r0.<sun.java2d.marlin.DStroker: boolean opened>;
+
+        if $z1 != 0 goto label6;
+
+        r0.<sun.java2d.marlin.DStroker: double sdx> = d2;
+
+        r0.<sun.java2d.marlin.DStroker: double sdy> = d3;
+
+        r0.<sun.java2d.marlin.DStroker: double smx> = d8;
+
+        r0.<sun.java2d.marlin.DStroker: double smy> = d9;
+
+        goto label6;
+
+     label1:
+        $z0 = staticinvoke <sun.java2d.marlin.DStroker: boolean isCW(double,double,double,double)>(d0, d1, d2, d3);
+
+        if i1 != 0 goto label3;
+
+        $i2 = r0.<sun.java2d.marlin.DStroker: int joinStyle>;
+
+        if $i2 != 0 goto label2;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void drawMiter(double,double,double,double,double,double,double,double,double,double,boolean)>(d0, d1, d4, d5, d2, d3, d6, d7, d8, d9, $z0);
+
+        goto label3;
+
+     label2:
+        $i3 = r0.<sun.java2d.marlin.DStroker: int joinStyle>;
+
+        if $i3 != 1 goto label3;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void mayDrawRoundJoin(double,double,double,double,double,double,boolean)>(d4, d5, d6, d7, d8, d9, $z0);
+
+     label3:
+        if $z0 != 0 goto label4;
+
+        $z2 = 1;
+
+        goto label5;
+
+     label4:
+        $z2 = 0;
+
+     label5:
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitLineTo(double,double,boolean)>(d4, d5, $z2);
+
+     label6:
+        r0.<sun.java2d.marlin.DStroker: int prev> = 1;
+
+        return;
+    }
+
+    private static boolean within(double, double, double, double, double)
+    {
+        java.lang.AssertionError $r1;
+        byte $b0;
+        int $i1;
+        boolean $z0, $z1, $z2, $z3;
+        double d0, d1, d2, d3, d4;
+
+        d0 := @parameter0: double;
+
+        d3 := @parameter1: double;
+
+        d1 := @parameter2: double;
+
+        d4 := @parameter3: double;
+
+        d2 := @parameter4: double;
+
+        $z0 = <sun.java2d.marlin.DStroker: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $b0 = d2 cmpl 0.0;
+
+        $i1 = (int) $b0;
+
+        if $i1 > 0 goto label1;
+
+        $r1 = new java.lang.AssertionError;
+
+        specialinvoke $r1.<java.lang.AssertionError: void <init>(java.lang.Object)>("");
+
+        throw $r1;
+
+     label1:
+        $z1 = staticinvoke <sun.java2d.marlin.DHelpers: boolean within(double,double,double)>(d0, d1, d2);
+
+        if $z1 == 0 goto label2;
+
+        $z2 = staticinvoke <sun.java2d.marlin.DHelpers: boolean within(double,double,double)>(d3, d4, d2);
+
+        if $z2 == 0 goto label2;
+
+        $z3 = 1;
+
+        goto label3;
+
+     label2:
+        $z3 = 0;
+
+     label3:
+        return $z3;
+    }
+
+    private void getLineOffsets(double, double, double, double, double[], double[])
+    {
+        double[] $r1, $r2, $r3, r4, r5;
+        double d0, d1, d2, d3, $d4, $d5, $d6, d7, d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15, $d16;
+        sun.java2d.marlin.DStroker r0;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        d1 := @parameter0: double;
+
+        d3 := @parameter1: double;
+
+        d0 := @parameter2: double;
+
+        d2 := @parameter3: double;
+
+        r4 := @parameter4: double[];
+
+        r5 := @parameter5: double[];
+
+        $d6 = d0 - d1;
+
+        $d5 = d2 - d3;
+
+        $d4 = r0.<sun.java2d.marlin.DStroker: double lineWidth2>;
+
+        $r1 = r0.<sun.java2d.marlin.DStroker: double[] offset0>;
+
+        staticinvoke <sun.java2d.marlin.DStroker: void computeOffset(double,double,double,double[])>($d6, $d5, $d4, $r1);
+
+        $r2 = r0.<sun.java2d.marlin.DStroker: double[] offset0>;
+
+        d7 = $r2[0];
+
+        $r3 = r0.<sun.java2d.marlin.DStroker: double[] offset0>;
+
+        d8 = $r3[1];
+
+        $d9 = d1 + d7;
+
+        r4[0] = $d9;
+
+        $d10 = d3 + d8;
+
+        r4[1] = $d10;
+
+        $d11 = d0 + d7;
+
+        r4[2] = $d11;
+
+        $d12 = d2 + d8;
+
+        r4[3] = $d12;
+
+        $d13 = d1 - d7;
+
+        r5[0] = $d13;
+
+        $d14 = d3 - d8;
+
+        r5[1] = $d14;
+
+        $d15 = d0 - d7;
+
+        r5[2] = $d15;
+
+        $d16 = d2 - d8;
+
+        r5[3] = $d16;
+
+        return;
+    }
+
+    private int computeOffsetCubic(double[], int, double[], double[])
+    {
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7;
+        double[] r0, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, r11, $r12, $r13, $r14, $r15, $r16, $r17, r18;
+        sun.java2d.marlin.DStroker r1;
+        boolean $z0, $z1, $z2;
+        double d0, d1, d2, d3, d4, d5, d6, d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15, d16, $d17, $d18, $d19, $d20, d21, $d22, $d23, d24, $d25, $d26, d27, $d28, $d29, $d30, $d31, $d32, $d33, $d34, $d35, $d36, $d37, $d38, $d39, $d40, d41, $d42, $d43, $d44, $d45, $d46, $d47, $d48, $d49, $d50, $d51, $d52, $d53, $d54, $d55, $d56, $d57, $d58, $d59, $d60, $d61, $d62, $d63, $d64, $d65, $d66, $d67, $d68, $d69, $d70, $d71, $d72, $d73, $d74, $d75, $d76, $d77, d78, d79, d80, d81, $d82, $d83, $d84, $d85, $d86, $d87, $d88, $d89, $d90, $d91, $d92, $d93, $d94, d95, d96, d97, d98, d99, d100, d101, d102, d103, d104, d105, d106, d107, d108, d109, d110, d111, d112, d113, d114, d115, d116, d117, d118, d119, d120, d121, d122;
+
+        r1 := @this: sun.java2d.marlin.DStroker;
+
+        r0 := @parameter0: double[];
+
+        i0 := @parameter1: int;
+
+        r11 := @parameter2: double[];
+
+        r18 := @parameter3: double[];
+
+        d0 = r0[i0];
+
+        $i1 = i0 + 1;
+
+        d1 = r0[$i1];
+
+        $i2 = i0 + 2;
+
+        d2 = r0[$i2];
+
+        $i3 = i0 + 3;
+
+        d3 = r0[$i3];
+
+        $i4 = i0 + 4;
+
+        d4 = r0[$i4];
+
+        $i5 = i0 + 5;
+
+        d5 = r0[$i5];
+
+        $i6 = i0 + 6;
+
+        d6 = r0[$i6];
+
+        $i7 = i0 + 7;
+
+        d7 = r0[$i7];
+
+        d78 = d6 - d4;
+
+        d79 = d7 - d5;
+
+        d80 = d2 - d0;
+
+        d81 = d3 - d1;
+
+        $d8 = staticinvoke <java.lang.Math: double ulp(double)>(d3);
+
+        $d9 = 6.0 * $d8;
+
+        $z0 = staticinvoke <sun.java2d.marlin.DStroker: boolean within(double,double,double,double,double)>(d0, d1, d2, d3, $d9);
+
+        $d10 = staticinvoke <java.lang.Math: double ulp(double)>(d7);
+
+        $d11 = 6.0 * $d10;
+
+        $z1 = staticinvoke <sun.java2d.marlin.DStroker: boolean within(double,double,double,double,double)>(d4, d5, d6, d7, $d11);
+
+        if $z0 == 0 goto label1;
+
+        if $z1 == 0 goto label1;
+
+        specialinvoke r1.<sun.java2d.marlin.DStroker: void getLineOffsets(double,double,double,double,double[],double[])>(d0, d1, d6, d7, r11, r18);
+
+        return 4;
+
+     label1:
+        if $z0 == 0 goto label2;
+
+        d80 = d4 - d0;
+
+        d81 = d5 - d1;
+
+        goto label3;
+
+     label2:
+        if $z1 == 0 goto label3;
+
+        d78 = d6 - d2;
+
+        d79 = d7 - d3;
+
+     label3:
+        $d82 = d80 * d78;
+
+        $d83 = d81 * d79;
+
+        $d84 = $d82 + $d83;
+
+        $d85 = $d84 * $d84;
+
+        $d86 = d80 * d80;
+
+        $d87 = d81 * d81;
+
+        $d88 = $d86 + $d87;
+
+        $d89 = d78 * d78;
+
+        $d90 = d79 * d79;
+
+        $d91 = $d89 + $d90;
+
+        $d92 = $d88 * $d91;
+
+        $d93 = staticinvoke <java.lang.Math: double ulp(double)>($d85);
+
+        $d94 = 4.0 * $d93;
+
+        $z2 = staticinvoke <sun.java2d.marlin.DHelpers: boolean within(double,double,double)>($d85, $d92, $d94);
+
+        if $z2 == 0 goto label4;
+
+        specialinvoke r1.<sun.java2d.marlin.DStroker: void getLineOffsets(double,double,double,double,double[],double[])>(d0, d1, d6, d7, r11, r18);
+
+        return 4;
+
+     label4:
+        $d12 = d2 + d4;
+
+        $d13 = 3.0 * $d12;
+
+        $d14 = d0 + $d13;
+
+        $d15 = $d14 + d6;
+
+        d16 = $d15 / 8.0;
+
+        $d17 = d3 + d5;
+
+        $d18 = 3.0 * $d17;
+
+        $d19 = d1 + $d18;
+
+        $d20 = $d19 + d7;
+
+        d21 = $d20 / 8.0;
+
+        $d22 = d4 + d6;
+
+        $d23 = $d22 - d0;
+
+        d24 = $d23 - d2;
+
+        $d25 = d5 + d7;
+
+        $d26 = $d25 - d1;
+
+        d27 = $d26 - d3;
+
+        $d28 = r1.<sun.java2d.marlin.DStroker: double lineWidth2>;
+
+        $r2 = r1.<sun.java2d.marlin.DStroker: double[] offset0>;
+
+        staticinvoke <sun.java2d.marlin.DStroker: void computeOffset(double,double,double,double[])>(d80, d81, $d28, $r2);
+
+        $d29 = r1.<sun.java2d.marlin.DStroker: double lineWidth2>;
+
+        $r3 = r1.<sun.java2d.marlin.DStroker: double[] offset1>;
+
+        staticinvoke <sun.java2d.marlin.DStroker: void computeOffset(double,double,double,double[])>(d24, d27, $d29, $r3);
+
+        $d30 = r1.<sun.java2d.marlin.DStroker: double lineWidth2>;
+
+        $r4 = r1.<sun.java2d.marlin.DStroker: double[] offset2>;
+
+        staticinvoke <sun.java2d.marlin.DStroker: void computeOffset(double,double,double,double[])>(d78, d79, $d30, $r4);
+
+        $r5 = r1.<sun.java2d.marlin.DStroker: double[] offset0>;
+
+        $d31 = $r5[0];
+
+        d95 = d0 + $d31;
+
+        $r6 = r1.<sun.java2d.marlin.DStroker: double[] offset0>;
+
+        $d32 = $r6[1];
+
+        d96 = d1 + $d32;
+
+        $r7 = r1.<sun.java2d.marlin.DStroker: double[] offset1>;
+
+        $d33 = $r7[0];
+
+        d97 = d16 + $d33;
+
+        $r8 = r1.<sun.java2d.marlin.DStroker: double[] offset1>;
+
+        $d34 = $r8[1];
+
+        d98 = d21 + $d34;
+
+        $r9 = r1.<sun.java2d.marlin.DStroker: double[] offset2>;
+
+        $d35 = $r9[0];
+
+        d99 = d6 + $d35;
+
+        $r10 = r1.<sun.java2d.marlin.DStroker: double[] offset2>;
+
+        $d36 = $r10[1];
+
+        d100 = d7 + $d36;
+
+        $d38 = d80 * d79;
+
+        $d37 = d81 * d78;
+
+        $d39 = $d38 - $d37;
+
+        $d40 = 3.0 * $d39;
+
+        d41 = 4.0 / $d40;
+
+        $d42 = 2.0 * d97;
+
+        $d43 = $d42 - d95;
+
+        d101 = $d43 - d99;
+
+        $d44 = 2.0 * d98;
+
+        $d45 = $d44 - d96;
+
+        d102 = $d45 - d100;
+
+        $d47 = d79 * d101;
+
+        $d46 = d78 * d102;
+
+        $d48 = $d47 - $d46;
+
+        d103 = d41 * $d48;
+
+        $d50 = d80 * d102;
+
+        $d49 = d81 * d101;
+
+        $d51 = $d50 - $d49;
+
+        d104 = d41 * $d51;
+
+        $d52 = d103 * d80;
+
+        d105 = d95 + $d52;
+
+        $d53 = d103 * d81;
+
+        d106 = d96 + $d53;
+
+        $d54 = d104 * d78;
+
+        d107 = d99 + $d54;
+
+        $d55 = d104 * d79;
+
+        d108 = d100 + $d55;
+
+        r11[0] = d95;
+
+        r11[1] = d96;
+
+        r11[2] = d105;
+
+        r11[3] = d106;
+
+        r11[4] = d107;
+
+        r11[5] = d108;
+
+        r11[6] = d99;
+
+        r11[7] = d100;
+
+        $r12 = r1.<sun.java2d.marlin.DStroker: double[] offset0>;
+
+        $d56 = $r12[0];
+
+        d109 = d0 - $d56;
+
+        $r13 = r1.<sun.java2d.marlin.DStroker: double[] offset0>;
+
+        $d57 = $r13[1];
+
+        d110 = d1 - $d57;
+
+        $r14 = r1.<sun.java2d.marlin.DStroker: double[] offset1>;
+
+        $d58 = $r14[0];
+
+        $d59 = 2.0 * $d58;
+
+        d111 = d97 - $d59;
+
+        $r15 = r1.<sun.java2d.marlin.DStroker: double[] offset1>;
+
+        $d60 = $r15[1];
+
+        $d61 = 2.0 * $d60;
+
+        d112 = d98 - $d61;
+
+        $r16 = r1.<sun.java2d.marlin.DStroker: double[] offset2>;
+
+        $d62 = $r16[0];
+
+        d113 = d6 - $d62;
+
+        $r17 = r1.<sun.java2d.marlin.DStroker: double[] offset2>;
+
+        $d63 = $r17[1];
+
+        d114 = d7 - $d63;
+
+        $d64 = 2.0 * d111;
+
+        $d65 = $d64 - d109;
+
+        d115 = $d65 - d113;
+
+        $d66 = 2.0 * d112;
+
+        $d67 = $d66 - d110;
+
+        d116 = $d67 - d114;
+
+        $d69 = d79 * d115;
+
+        $d68 = d78 * d116;
+
+        $d70 = $d69 - $d68;
+
+        d117 = d41 * $d70;
+
+        $d72 = d80 * d116;
+
+        $d71 = d81 * d115;
+
+        $d73 = $d72 - $d71;
+
+        d118 = d41 * $d73;
+
+        $d74 = d117 * d80;
+
+        d119 = d109 + $d74;
+
+        $d75 = d117 * d81;
+
+        d120 = d110 + $d75;
+
+        $d76 = d118 * d78;
+
+        d121 = d113 + $d76;
+
+        $d77 = d118 * d79;
+
+        d122 = d114 + $d77;
+
+        r18[0] = d109;
+
+        r18[1] = d110;
+
+        r18[2] = d119;
+
+        r18[3] = d120;
+
+        r18[4] = d121;
+
+        r18[5] = d122;
+
+        r18[6] = d113;
+
+        r18[7] = d114;
+
+        return 8;
+    }
+
+    private int computeOffsetQuad(double[], int, double[], double[])
+    {
+        double[] r0, r2, r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13;
+        sun.java2d.marlin.DStroker r1;
+        boolean $z0, $z1, $z2;
+        int i0, $i1, $i2, $i3, $i4, $i5;
+        double d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, $d10, $d11, $d12, $d13, $d14, $d15, $d16, $d17, d18, $d19, $d20, d21, $d22, $d23, $d24, $d25, $d26, $d27, $d28, $d29, $d30, $d31, $d32, $d33, $d34, $d35, $d36, $d37, $d38, $d39, $d40, $d41, $d42, d43, d44, d45, d46, d47, d48, d49, d50, d51, d52;
+
+        r1 := @this: sun.java2d.marlin.DStroker;
+
+        r0 := @parameter0: double[];
+
+        i0 := @parameter1: int;
+
+        r2 := @parameter2: double[];
+
+        r3 := @parameter3: double[];
+
+        d0 = r0[i0];
+
+        $i1 = i0 + 1;
+
+        d1 = r0[$i1];
+
+        $i2 = i0 + 2;
+
+        d2 = r0[$i2];
+
+        $i3 = i0 + 3;
+
+        d3 = r0[$i3];
+
+        $i4 = i0 + 4;
+
+        d4 = r0[$i4];
+
+        $i5 = i0 + 5;
+
+        d5 = r0[$i5];
+
+        d6 = d4 - d2;
+
+        d7 = d5 - d3;
+
+        d8 = d2 - d0;
+
+        d9 = d3 - d1;
+
+        $d10 = staticinvoke <java.lang.Math: double ulp(double)>(d3);
+
+        $d11 = 6.0 * $d10;
+
+        $z0 = staticinvoke <sun.java2d.marlin.DStroker: boolean within(double,double,double,double,double)>(d0, d1, d2, d3, $d11);
+
+        $d12 = staticinvoke <java.lang.Math: double ulp(double)>(d5);
+
+        $d13 = 6.0 * $d12;
+
+        $z1 = staticinvoke <sun.java2d.marlin.DStroker: boolean within(double,double,double,double,double)>(d2, d3, d4, d5, $d13);
+
+        if $z0 != 0 goto label1;
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        specialinvoke r1.<sun.java2d.marlin.DStroker: void getLineOffsets(double,double,double,double,double[],double[])>(d0, d1, d4, d5, r2, r3);
+
+        return 4;
+
+     label2:
+        $d15 = d8 * d6;
+
+        $d14 = d9 * d7;
+
+        d43 = $d15 + $d14;
+
+        d44 = d43 * d43;
+
+        $d17 = d8 * d8;
+
+        $d16 = d9 * d9;
+
+        d18 = $d17 + $d16;
+
+        $d20 = d6 * d6;
+
+        $d19 = d7 * d7;
+
+        d21 = $d20 + $d19;
+
+        $d22 = d18 * d21;
+
+        $d23 = staticinvoke <java.lang.Math: double ulp(double)>(d44);
+
+        $d24 = 4.0 * $d23;
+
+        $z2 = staticinvoke <sun.java2d.marlin.DHelpers: boolean within(double,double,double)>(d44, $d22, $d24);
+
+        if $z2 == 0 goto label3;
+
+        specialinvoke r1.<sun.java2d.marlin.DStroker: void getLineOffsets(double,double,double,double,double[],double[])>(d0, d1, d4, d5, r2, r3);
+
+        return 4;
+
+     label3:
+        $d25 = r1.<sun.java2d.marlin.DStroker: double lineWidth2>;
+
+        $r4 = r1.<sun.java2d.marlin.DStroker: double[] offset0>;
+
+        staticinvoke <sun.java2d.marlin.DStroker: void computeOffset(double,double,double,double[])>(d8, d9, $d25, $r4);
+
+        $d26 = r1.<sun.java2d.marlin.DStroker: double lineWidth2>;
+
+        $r5 = r1.<sun.java2d.marlin.DStroker: double[] offset1>;
+
+        staticinvoke <sun.java2d.marlin.DStroker: void computeOffset(double,double,double,double[])>(d6, d7, $d26, $r5);
+
+        $r6 = r1.<sun.java2d.marlin.DStroker: double[] offset0>;
+
+        $d27 = $r6[0];
+
+        d45 = d0 + $d27;
+
+        $r7 = r1.<sun.java2d.marlin.DStroker: double[] offset0>;
+
+        $d28 = $r7[1];
+
+        d46 = d1 + $d28;
+
+        $r8 = r1.<sun.java2d.marlin.DStroker: double[] offset1>;
+
+        $d29 = $r8[0];
+
+        d47 = d4 + $d29;
+
+        $r9 = r1.<sun.java2d.marlin.DStroker: double[] offset1>;
+
+        $d30 = $r9[1];
+
+        d48 = d5 + $d30;
+
+        $d34 = d45 + d8;
+
+        $d33 = d46 + d9;
+
+        $d32 = d47 - d6;
+
+        $d31 = d48 - d7;
+
+        staticinvoke <sun.java2d.marlin.DStroker: void safeComputeMiter(double,double,double,double,double,double,double,double,double[])>(d45, d46, $d34, $d33, d47, d48, $d32, $d31, r2);
+
+        r2[0] = d45;
+
+        r2[1] = d46;
+
+        r2[4] = d47;
+
+        r2[5] = d48;
+
+        $r10 = r1.<sun.java2d.marlin.DStroker: double[] offset0>;
+
+        $d35 = $r10[0];
+
+        d49 = d0 - $d35;
+
+        $r11 = r1.<sun.java2d.marlin.DStroker: double[] offset0>;
+
+        $d36 = $r11[1];
+
+        d50 = d1 - $d36;
+
+        $r12 = r1.<sun.java2d.marlin.DStroker: double[] offset1>;
+
+        $d37 = $r12[0];
+
+        d51 = d4 - $d37;
+
+        $r13 = r1.<sun.java2d.marlin.DStroker: double[] offset1>;
+
+        $d38 = $r13[1];
+
+        d52 = d5 - $d38;
+
+        $d42 = d49 + d8;
+
+        $d41 = d50 + d9;
+
+        $d40 = d51 - d6;
+
+        $d39 = d52 - d7;
+
+        staticinvoke <sun.java2d.marlin.DStroker: void safeComputeMiter(double,double,double,double,double,double,double,double,double[])>(d49, d50, $d42, $d41, d51, d52, $d40, $d39, r3);
+
+        r3[0] = d49;
+
+        r3[1] = d50;
+
+        r3[4] = d51;
+
+        r3[5] = d52;
+
+        return 6;
+    }
+
+    public void curveTo(double, double, double, double, double, double)
+    {
+        double[] $r1, $r2, $r3, $r4;
+        sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter $r5;
+        int i0, $i1, $i2, $i3, $i4, $i5, i6, $i7, $i8, i9;
+        double d0, d1, d2, d3, d4, d5, $d6, $d7;
+        boolean $z0, $z1;
+        sun.java2d.marlin.DStroker r0;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        d2 := @parameter2: double;
+
+        d3 := @parameter3: double;
+
+        d4 := @parameter4: double;
+
+        d5 := @parameter5: double;
+
+        i0 = r0.<sun.java2d.marlin.DStroker: int cOutCode>;
+
+        $r1 = r0.<sun.java2d.marlin.DStroker: double[] clipRect>;
+
+        if $r1 == null goto label4;
+
+        $r2 = r0.<sun.java2d.marlin.DStroker: double[] clipRect>;
+
+        $i1 = staticinvoke <sun.java2d.marlin.DHelpers: int outcode(double,double,double[])>(d0, d1, $r2);
+
+        $r3 = r0.<sun.java2d.marlin.DStroker: double[] clipRect>;
+
+        $i2 = staticinvoke <sun.java2d.marlin.DHelpers: int outcode(double,double,double[])>(d2, d3, $r3);
+
+        $r4 = r0.<sun.java2d.marlin.DStroker: double[] clipRect>;
+
+        $i3 = staticinvoke <sun.java2d.marlin.DHelpers: int outcode(double,double,double[])>(d4, d5, $r4);
+
+        $i4 = i0 | $i1;
+
+        $i5 = $i4 | $i2;
+
+        i6 = $i5 | $i3;
+
+        if i6 == 0 goto label3;
+
+        $i7 = i0 & $i1;
+
+        $i8 = $i7 & $i2;
+
+        i9 = $i8 & $i3;
+
+        if i9 != 0 goto label2;
+
+        $z0 = r0.<sun.java2d.marlin.DStroker: boolean subdivide>;
+
+        if $z0 == 0 goto label3;
+
+        r0.<sun.java2d.marlin.DStroker: boolean subdivide> = 0;
+
+        $r5 = r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter curveSplitter>;
+
+        $d7 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        $d6 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        $z1 = virtualinvoke $r5.<sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter: boolean splitCurve(double,double,double,double,double,double,double,double,int,sun.java2d.marlin.DPathConsumer2D)>($d7, $d6, d0, d1, d2, d3, d4, d5, i6, r0);
+
+        r0.<sun.java2d.marlin.DStroker: boolean subdivide> = 1;
+
+        if $z1 == 0 goto label1;
+
+        return;
+
+     label1:
+        goto label3;
+
+     label2:
+        r0.<sun.java2d.marlin.DStroker: int cOutCode> = $i3;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void _moveTo(double,double,int)>(d4, d5, i0);
+
+        r0.<sun.java2d.marlin.DStroker: boolean opened> = 1;
+
+        return;
+
+     label3:
+        r0.<sun.java2d.marlin.DStroker: int cOutCode> = $i3;
+
+     label4:
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void _curveTo(double,double,double,double,double,double,int)>(d0, d1, d2, d3, d4, d5, i0);
+
+        return;
+    }
+
+    private void _curveTo(double, double, double, double, double, double, int)
+    {
+        byte $b0, $b1, $b8, $b9, $b10, $b11, $b12, $b13, $b14, $b15, $b16, $b17, $b18, $b19;
+        sun.java2d.marlin.DTransformingPathConsumer2D$CurveBasicMonotonizer $r2, $r3;
+        double[] $r4, $r5, $r6, $r7, $r8, $r9, r10;
+        sun.java2d.marlin.DStroker r0;
+        boolean $z0;
+        sun.java2d.marlin.DRendererContext $r1;
+        int i2, $i3, $i4, $i5, $i6, $i7, i20, i21, i22, i23, $i24, $i25, $i26, $i27, $i28, $i29;
+        double d0, $d1, d2, $d3, d4, d5, d6, d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15, $d16, $d17, $d18, $d19, $d20, $d21, $d22, $d23, $d24, $d25, $d26, $d27, $d28, $d29, $d30, $d31, $d32, $d33, $d34, $d35, $d36, $d37, $d38, $d39, $d40, $d41, $d42, $d43, $d44, $d45, $d46, $d47, $d48, $d49, $d50, $d51, $d52, $d53, $d54, $d55, $d56, d57, d58, d59, d60, $d61, $d62, $d63, $d64, $d65, $d66, $d67, $d68, $d69, $d70, $d71, $d72;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        d0 := @parameter0: double;
+
+        d2 := @parameter1: double;
+
+        d5 := @parameter2: double;
+
+        d7 := @parameter3: double;
+
+        d4 := @parameter4: double;
+
+        d6 := @parameter5: double;
+
+        i2 := @parameter6: int;
+
+        $d1 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        d57 = d0 - $d1;
+
+        $d3 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        d58 = d2 - $d3;
+
+        d59 = d4 - d5;
+
+        d60 = d6 - d7;
+
+        $b0 = d57 cmpl 0.0;
+
+        if $b0 != 0 goto label01;
+
+        $b14 = d58 cmpl 0.0;
+
+        if $b14 != 0 goto label01;
+
+        $d53 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        d57 = d5 - $d53;
+
+        $d54 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        d58 = d7 - $d54;
+
+        $b15 = d57 cmpl 0.0;
+
+        if $b15 != 0 goto label01;
+
+        $b16 = d58 cmpl 0.0;
+
+        if $b16 != 0 goto label01;
+
+        $d55 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        d57 = d4 - $d55;
+
+        $d56 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        d58 = d6 - $d56;
+
+     label01:
+        $b17 = d59 cmpl 0.0;
+
+        if $b17 != 0 goto label02;
+
+        $b11 = d60 cmpl 0.0;
+
+        if $b11 != 0 goto label02;
+
+        d59 = d4 - d0;
+
+        d60 = d6 - d2;
+
+        $b12 = d59 cmpl 0.0;
+
+        if $b12 != 0 goto label02;
+
+        $b13 = d60 cmpl 0.0;
+
+        if $b13 != 0 goto label02;
+
+        $d51 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        d59 = d4 - $d51;
+
+        $d52 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        d60 = d6 - $d52;
+
+     label02:
+        $b18 = d57 cmpl 0.0;
+
+        if $b18 != 0 goto label04;
+
+        $b10 = d58 cmpl 0.0;
+
+        if $b10 != 0 goto label04;
+
+        $r5 = r0.<sun.java2d.marlin.DStroker: double[] clipRect>;
+
+        if $r5 == null goto label03;
+
+        r0.<sun.java2d.marlin.DStroker: int cOutCode> = i2;
+
+     label03:
+        $d50 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        $d49 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        virtualinvoke r0.<sun.java2d.marlin.DStroker: void lineTo(double,double)>($d50, $d49);
+
+        return;
+
+     label04:
+        $d8 = staticinvoke <java.lang.Math: double abs(double)>(d57);
+
+        $b1 = $d8 cmpg 0.1;
+
+        $i26 = (int) $b1;
+
+        if $i26 >= 0 goto label05;
+
+        $d44 = staticinvoke <java.lang.Math: double abs(double)>(d58);
+
+        $b9 = $d44 cmpg 0.1;
+
+        $i27 = (int) $b9;
+
+        if $i27 >= 0 goto label05;
+
+        $d46 = d57 * d57;
+
+        $d45 = d58 * d58;
+
+        $d47 = $d46 + $d45;
+
+        $d48 = staticinvoke <java.lang.Math: double sqrt(double)>($d47);
+
+        d57 = d57 / $d48;
+
+        d58 = d58 / $d48;
+
+     label05:
+        $d61 = staticinvoke <java.lang.Math: double abs(double)>(d59);
+
+        $b19 = $d61 cmpg 0.1;
+
+        $i28 = (int) $b19;
+
+        if $i28 >= 0 goto label06;
+
+        $d39 = staticinvoke <java.lang.Math: double abs(double)>(d60);
+
+        $b8 = $d39 cmpg 0.1;
+
+        $i29 = (int) $b8;
+
+        if $i29 >= 0 goto label06;
+
+        $d41 = d59 * d59;
+
+        $d40 = d60 * d60;
+
+        $d42 = $d41 + $d40;
+
+        $d43 = staticinvoke <java.lang.Math: double sqrt(double)>($d42);
+
+        d59 = d59 / $d43;
+
+        d60 = d60 / $d43;
+
+     label06:
+        $d62 = r0.<sun.java2d.marlin.DStroker: double lineWidth2>;
+
+        $r6 = r0.<sun.java2d.marlin.DStroker: double[] offset0>;
+
+        staticinvoke <sun.java2d.marlin.DStroker: void computeOffset(double,double,double,double[])>(d57, d58, $d62, $r6);
+
+        $d63 = r0.<sun.java2d.marlin.DStroker: double cdx>;
+
+        $d64 = r0.<sun.java2d.marlin.DStroker: double cdy>;
+
+        $d65 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        $d66 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        $d67 = r0.<sun.java2d.marlin.DStroker: double cmx>;
+
+        $d68 = r0.<sun.java2d.marlin.DStroker: double cmy>;
+
+        $r7 = r0.<sun.java2d.marlin.DStroker: double[] offset0>;
+
+        $d69 = $r7[0];
+
+        $r8 = r0.<sun.java2d.marlin.DStroker: double[] offset0>;
+
+        $d70 = $r8[1];
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void drawJoin(double,double,double,double,double,double,double,double,double,double,int)>($d63, $d64, $d65, $d66, d57, d58, $d67, $d68, $d69, $d70, i2);
+
+        i20 = 0;
+
+        $r9 = r0.<sun.java2d.marlin.DStroker: double[] lp>;
+
+        $z0 = r0.<sun.java2d.marlin.DStroker: boolean monotonize>;
+
+        if $z0 == 0 goto label07;
+
+        $r1 = r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r2 = $r1.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.DTransformingPathConsumer2D$CurveBasicMonotonizer monotonizer>;
+
+        $d38 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        $d37 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        $r3 = virtualinvoke $r2.<sun.java2d.marlin.DTransformingPathConsumer2D$CurveBasicMonotonizer: sun.java2d.marlin.DTransformingPathConsumer2D$CurveBasicMonotonizer curve(double,double,double,double,double,double,double,double)>($d38, $d37, d0, d2, d5, d7, d4, d6);
+
+        i20 = $r3.<sun.java2d.marlin.DTransformingPathConsumer2D$CurveBasicMonotonizer: int nbSplits>;
+
+        r10 = $r3.<sun.java2d.marlin.DTransformingPathConsumer2D$CurveBasicMonotonizer: double[] middle>;
+
+        goto label08;
+
+     label07:
+        r10 = $r9;
+
+        $d9 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        $r9[0] = $d9;
+
+        $d10 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        $r9[1] = $d10;
+
+        $r9[2] = d0;
+
+        $r9[3] = d2;
+
+        $r9[4] = d5;
+
+        $r9[5] = d7;
+
+        $r9[6] = d4;
+
+        $r9[7] = d6;
+
+     label08:
+        $r4 = r0.<sun.java2d.marlin.DStroker: double[] rp>;
+
+        i21 = 0;
+
+        i22 = 0;
+
+        i23 = 0;
+
+     label09:
+        if i22 > i20 goto label13;
+
+        $i7 = specialinvoke r0.<sun.java2d.marlin.DStroker: int computeOffsetCubic(double[],int,double[],double[])>(r10, i23, $r9, $r4);
+
+        i21 = $i7;
+
+        $d20 = $r9[0];
+
+        $d19 = $r9[1];
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitLineTo(double,double)>($d20, $d19);
+
+        lookupswitch($i7)
+        {
+            case 4: goto label11;
+            case 8: goto label10;
+            default: goto label12;
+        };
+
+     label10:
+        $d26 = $r9[2];
+
+        $d25 = $r9[3];
+
+        $d24 = $r9[4];
+
+        $d23 = $r9[5];
+
+        $d22 = $r9[6];
+
+        $d21 = $r9[7];
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitCurveTo(double,double,double,double,double,double)>($d26, $d25, $d24, $d23, $d22, $d21);
+
+        $d32 = $r4[0];
+
+        $d31 = $r4[1];
+
+        $d30 = $r4[2];
+
+        $d29 = $r4[3];
+
+        $d28 = $r4[4];
+
+        $d27 = $r4[5];
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitCurveToRev(double,double,double,double,double,double)>($d32, $d31, $d30, $d29, $d28, $d27);
+
+        goto label12;
+
+     label11:
+        $d34 = $r9[2];
+
+        $d33 = $r9[3];
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitLineTo(double,double)>($d34, $d33);
+
+        $d36 = $r4[0];
+
+        $d35 = $r4[1];
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitLineToRev(double,double)>($d36, $d35);
+
+        goto label12;
+
+     label12:
+        $i24 = $i7 - 2;
+
+        $d71 = $r4[$i24];
+
+        $i25 = $i7 - 1;
+
+        $d72 = $r4[$i25];
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitLineToRev(double,double)>($d71, $d72);
+
+        i22 = i22 + 1;
+
+        i23 = i23 + 6;
+
+        goto label09;
+
+     label13:
+        r0.<sun.java2d.marlin.DStroker: int prev> = 1;
+
+        r0.<sun.java2d.marlin.DStroker: double cx0> = d4;
+
+        r0.<sun.java2d.marlin.DStroker: double cy0> = d6;
+
+        r0.<sun.java2d.marlin.DStroker: double cdx> = d59;
+
+        r0.<sun.java2d.marlin.DStroker: double cdy> = d60;
+
+        $i3 = i21 - 2;
+
+        $d12 = $r9[$i3];
+
+        $i4 = i21 - 2;
+
+        $d11 = $r4[$i4];
+
+        $d13 = $d12 - $d11;
+
+        $d14 = $d13 / 2.0;
+
+        r0.<sun.java2d.marlin.DStroker: double cmx> = $d14;
+
+        $i5 = i21 - 1;
+
+        $d16 = $r9[$i5];
+
+        $i6 = i21 - 1;
+
+        $d15 = $r4[$i6];
+
+        $d17 = $d16 - $d15;
+
+        $d18 = $d17 / 2.0;
+
+        r0.<sun.java2d.marlin.DStroker: double cmy> = $d18;
+
+        return;
+    }
+
+    public void quadTo(double, double, double, double)
+    {
+        double[] $r1, $r2, $r3;
+        sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter $r4;
+        int i0, $i1, $i2, $i3, i4, $i5, i6;
+        double d0, d1, d2, d3, $d4, $d5;
+        boolean $z0, $z1;
+        sun.java2d.marlin.DStroker r0;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        d2 := @parameter2: double;
+
+        d3 := @parameter3: double;
+
+        i0 = r0.<sun.java2d.marlin.DStroker: int cOutCode>;
+
+        $r1 = r0.<sun.java2d.marlin.DStroker: double[] clipRect>;
+
+        if $r1 == null goto label4;
+
+        $r2 = r0.<sun.java2d.marlin.DStroker: double[] clipRect>;
+
+        $i1 = staticinvoke <sun.java2d.marlin.DHelpers: int outcode(double,double,double[])>(d0, d1, $r2);
+
+        $r3 = r0.<sun.java2d.marlin.DStroker: double[] clipRect>;
+
+        $i2 = staticinvoke <sun.java2d.marlin.DHelpers: int outcode(double,double,double[])>(d2, d3, $r3);
+
+        $i3 = i0 | $i1;
+
+        i4 = $i3 | $i2;
+
+        if i4 == 0 goto label3;
+
+        $i5 = i0 & $i1;
+
+        i6 = $i5 & $i2;
+
+        if i6 != 0 goto label2;
+
+        $z0 = r0.<sun.java2d.marlin.DStroker: boolean subdivide>;
+
+        if $z0 == 0 goto label3;
+
+        r0.<sun.java2d.marlin.DStroker: boolean subdivide> = 0;
+
+        $r4 = r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter curveSplitter>;
+
+        $d5 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        $d4 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        $z1 = virtualinvoke $r4.<sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter: boolean splitQuad(double,double,double,double,double,double,int,sun.java2d.marlin.DPathConsumer2D)>($d5, $d4, d0, d1, d2, d3, i4, r0);
+
+        r0.<sun.java2d.marlin.DStroker: boolean subdivide> = 1;
+
+        if $z1 == 0 goto label1;
+
+        return;
+
+     label1:
+        goto label3;
+
+     label2:
+        r0.<sun.java2d.marlin.DStroker: int cOutCode> = $i2;
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void _moveTo(double,double,int)>(d2, d3, i0);
+
+        r0.<sun.java2d.marlin.DStroker: boolean opened> = 1;
+
+        return;
+
+     label3:
+        r0.<sun.java2d.marlin.DStroker: int cOutCode> = $i2;
+
+     label4:
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void _quadTo(double,double,double,double,int)>(d0, d1, d2, d3, i0);
+
+        return;
+    }
+
+    private void _quadTo(double, double, double, double, int)
+    {
+        byte $b0, $b1, $b2, $b9, $b10, $b11, $b12, $b13, $b14, $b15;
+        sun.java2d.marlin.DTransformingPathConsumer2D$CurveBasicMonotonizer $r2, $r3;
+        double[] $r4, $r5, $r6, $r7, $r8, $r9, r10;
+        sun.java2d.marlin.DStroker r0;
+        boolean $z0;
+        sun.java2d.marlin.DRendererContext $r1;
+        int i3, $i4, $i5, $i6, $i7, $i8, i16, i17, i18, i19, $i20, $i21, $i22, $i23, $i24, $i25;
+        double d0, $d1, d2, $d3, d4, d5, $d6, $d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15, $d16, $d17, $d18, $d19, $d20, $d21, $d22, $d23, $d24, $d25, $d26, $d27, $d28, $d29, $d30, $d31, $d32, $d33, $d34, $d35, $d36, $d37, $d38, $d39, $d40, $d41, $d42, $d43, $d44, $d45, $d46, $d47, $d48, d49, d50, d51, d52, $d53, $d54, $d55, $d56, $d57, $d58, $d59, $d60, $d61, $d62, $d63, $d64;
+
+        r0 := @this: sun.java2d.marlin.DStroker;
+
+        d0 := @parameter0: double;
+
+        d2 := @parameter1: double;
+
+        d4 := @parameter2: double;
+
+        d5 := @parameter3: double;
+
+        i3 := @parameter4: int;
+
+        $d1 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        d49 = d0 - $d1;
+
+        $d3 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        d50 = d2 - $d3;
+
+        d51 = d4 - d0;
+
+        d52 = d5 - d2;
+
+        $b0 = d49 cmpl 0.0;
+
+        if $b0 != 0 goto label01;
+
+        $b13 = d50 cmpl 0.0;
+
+        if $b13 == 0 goto label02;
+
+     label01:
+        $b1 = d51 cmpl 0.0;
+
+        if $b1 != 0 goto label03;
+
+        $b12 = d52 cmpl 0.0;
+
+        if $b12 != 0 goto label03;
+
+     label02:
+        $d45 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        $d46 = d4 - $d45;
+
+        d51 = $d46;
+
+        d49 = $d46;
+
+        $d47 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        $d48 = d5 - $d47;
+
+        d52 = $d48;
+
+        d50 = $d48;
+
+     label03:
+        $b14 = d49 cmpl 0.0;
+
+        if $b14 != 0 goto label05;
+
+        $b11 = d50 cmpl 0.0;
+
+        if $b11 != 0 goto label05;
+
+        $r5 = r0.<sun.java2d.marlin.DStroker: double[] clipRect>;
+
+        if $r5 == null goto label04;
+
+        r0.<sun.java2d.marlin.DStroker: int cOutCode> = i3;
+
+     label04:
+        $d44 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        $d43 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        virtualinvoke r0.<sun.java2d.marlin.DStroker: void lineTo(double,double)>($d44, $d43);
+
+        return;
+
+     label05:
+        $d6 = staticinvoke <java.lang.Math: double abs(double)>(d49);
+
+        $b2 = $d6 cmpg 0.1;
+
+        $i22 = (int) $b2;
+
+        if $i22 >= 0 goto label06;
+
+        $d38 = staticinvoke <java.lang.Math: double abs(double)>(d50);
+
+        $b10 = $d38 cmpg 0.1;
+
+        $i23 = (int) $b10;
+
+        if $i23 >= 0 goto label06;
+
+        $d40 = d49 * d49;
+
+        $d39 = d50 * d50;
+
+        $d41 = $d40 + $d39;
+
+        $d42 = staticinvoke <java.lang.Math: double sqrt(double)>($d41);
+
+        d49 = d49 / $d42;
+
+        d50 = d50 / $d42;
+
+     label06:
+        $d53 = staticinvoke <java.lang.Math: double abs(double)>(d51);
+
+        $b15 = $d53 cmpg 0.1;
+
+        $i24 = (int) $b15;
+
+        if $i24 >= 0 goto label07;
+
+        $d33 = staticinvoke <java.lang.Math: double abs(double)>(d52);
+
+        $b9 = $d33 cmpg 0.1;
+
+        $i25 = (int) $b9;
+
+        if $i25 >= 0 goto label07;
+
+        $d35 = d51 * d51;
+
+        $d34 = d52 * d52;
+
+        $d36 = $d35 + $d34;
+
+        $d37 = staticinvoke <java.lang.Math: double sqrt(double)>($d36);
+
+        d51 = d51 / $d37;
+
+        d52 = d52 / $d37;
+
+     label07:
+        $d54 = r0.<sun.java2d.marlin.DStroker: double lineWidth2>;
+
+        $r6 = r0.<sun.java2d.marlin.DStroker: double[] offset0>;
+
+        staticinvoke <sun.java2d.marlin.DStroker: void computeOffset(double,double,double,double[])>(d49, d50, $d54, $r6);
+
+        $d55 = r0.<sun.java2d.marlin.DStroker: double cdx>;
+
+        $d56 = r0.<sun.java2d.marlin.DStroker: double cdy>;
+
+        $d57 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        $d58 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        $d59 = r0.<sun.java2d.marlin.DStroker: double cmx>;
+
+        $d60 = r0.<sun.java2d.marlin.DStroker: double cmy>;
+
+        $r7 = r0.<sun.java2d.marlin.DStroker: double[] offset0>;
+
+        $d61 = $r7[0];
+
+        $r8 = r0.<sun.java2d.marlin.DStroker: double[] offset0>;
+
+        $d62 = $r8[1];
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void drawJoin(double,double,double,double,double,double,double,double,double,double,int)>($d55, $d56, $d57, $d58, d49, d50, $d59, $d60, $d61, $d62, i3);
+
+        i16 = 0;
+
+        $r9 = r0.<sun.java2d.marlin.DStroker: double[] lp>;
+
+        $z0 = r0.<sun.java2d.marlin.DStroker: boolean monotonize>;
+
+        if $z0 == 0 goto label08;
+
+        $r1 = r0.<sun.java2d.marlin.DStroker: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r2 = $r1.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.DTransformingPathConsumer2D$CurveBasicMonotonizer monotonizer>;
+
+        $d32 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        $d31 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        $r3 = virtualinvoke $r2.<sun.java2d.marlin.DTransformingPathConsumer2D$CurveBasicMonotonizer: sun.java2d.marlin.DTransformingPathConsumer2D$CurveBasicMonotonizer quad(double,double,double,double,double,double)>($d32, $d31, d0, d2, d4, d5);
+
+        i16 = $r3.<sun.java2d.marlin.DTransformingPathConsumer2D$CurveBasicMonotonizer: int nbSplits>;
+
+        r10 = $r3.<sun.java2d.marlin.DTransformingPathConsumer2D$CurveBasicMonotonizer: double[] middle>;
+
+        goto label09;
+
+     label08:
+        r10 = $r9;
+
+        $d7 = r0.<sun.java2d.marlin.DStroker: double cx0>;
+
+        $r9[0] = $d7;
+
+        $d8 = r0.<sun.java2d.marlin.DStroker: double cy0>;
+
+        $r9[1] = $d8;
+
+        $r9[2] = d0;
+
+        $r9[3] = d2;
+
+        $r9[4] = d4;
+
+        $r9[5] = d5;
+
+     label09:
+        $r4 = r0.<sun.java2d.marlin.DStroker: double[] rp>;
+
+        i17 = 0;
+
+        i18 = 0;
+
+        i19 = 0;
+
+     label10:
+        if i18 > i16 goto label14;
+
+        $i8 = specialinvoke r0.<sun.java2d.marlin.DStroker: int computeOffsetQuad(double[],int,double[],double[])>(r10, i19, $r9, $r4);
+
+        i17 = $i8;
+
+        $d18 = $r9[0];
+
+        $d17 = $r9[1];
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitLineTo(double,double)>($d18, $d17);
+
+        lookupswitch($i8)
+        {
+            case 4: goto label12;
+            case 6: goto label11;
+            default: goto label13;
+        };
+
+     label11:
+        $d22 = $r9[2];
+
+        $d21 = $r9[3];
+
+        $d20 = $r9[4];
+
+        $d19 = $r9[5];
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitQuadTo(double,double,double,double)>($d22, $d21, $d20, $d19);
+
+        $d26 = $r4[0];
+
+        $d25 = $r4[1];
+
+        $d24 = $r4[2];
+
+        $d23 = $r4[3];
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitQuadToRev(double,double,double,double)>($d26, $d25, $d24, $d23);
+
+        goto label13;
+
+     label12:
+        $d28 = $r9[2];
+
+        $d27 = $r9[3];
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitLineTo(double,double)>($d28, $d27);
+
+        $d30 = $r4[0];
+
+        $d29 = $r4[1];
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitLineToRev(double,double)>($d30, $d29);
+
+        goto label13;
+
+     label13:
+        $i20 = $i8 - 2;
+
+        $d63 = $r4[$i20];
+
+        $i21 = $i8 - 1;
+
+        $d64 = $r4[$i21];
+
+        specialinvoke r0.<sun.java2d.marlin.DStroker: void emitLineToRev(double,double)>($d63, $d64);
+
+        i18 = i18 + 1;
+
+        i19 = i19 + 4;
+
+        goto label10;
+
+     label14:
+        r0.<sun.java2d.marlin.DStroker: int prev> = 1;
+
+        r0.<sun.java2d.marlin.DStroker: double cx0> = d4;
+
+        r0.<sun.java2d.marlin.DStroker: double cy0> = d5;
+
+        r0.<sun.java2d.marlin.DStroker: double cdx> = d51;
+
+        r0.<sun.java2d.marlin.DStroker: double cdy> = d52;
+
+        $i4 = i17 - 2;
+
+        $d10 = $r9[$i4];
+
+        $i5 = i17 - 2;
+
+        $d9 = $r4[$i5];
+
+        $d11 = $d10 - $d9;
+
+        $d12 = $d11 / 2.0;
+
+        r0.<sun.java2d.marlin.DStroker: double cmx> = $d12;
+
+        $i6 = i17 - 1;
+
+        $d14 = $r9[$i6];
+
+        $i7 = i17 - 1;
+
+        $d13 = $r4[$i7];
+
+        $d15 = $d14 - $d13;
+
+        $d16 = $d15 / 2.0;
+
+        r0.<sun.java2d.marlin.DStroker: double cmy> = $d16;
+
+        return;
+    }
+
+    public long getNativeConsumer()
+    {
+        java.lang.InternalError $r0;
+        sun.java2d.marlin.DStroker r1;
+
+        r1 := @this: sun.java2d.marlin.DStroker;
+
+        $r0 = new java.lang.InternalError;
+
+        specialinvoke $r0.<java.lang.InternalError: void <init>(java.lang.String)>("Stroker doesn\'t use a native consumer");
+
+        throw $r0;
+    }
+
+    static void <clinit>()
+    {
+        float $f0, $f1;
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8;
+
+        <sun.java2d.marlin.DStroker: int CLOSE> = 2;
+
+        <sun.java2d.marlin.DStroker: int DRAWING_OP_TO> = 1;
+
+        <sun.java2d.marlin.DStroker: int MOVE_TO> = 0;
+
+        $r0 = class "Lsun/java2d/marlin/DStroker;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.java2d.marlin.DStroker: boolean $assertionsDisabled> = $z1;
+
+        $f0 = <sun.java2d.marlin.DStroker: float MIN_SUBPIXELS>;
+
+        $f1 = 1.0F / $f0;
+
+        $d0 = (double) $f1;
+
+        <sun.java2d.marlin.DStroker: double ERR_JOIN> = $d0;
+
+        $d2 = <sun.java2d.marlin.DStroker: double ERR_JOIN>;
+
+        $d1 = <sun.java2d.marlin.DStroker: double ERR_JOIN>;
+
+        $d3 = $d2 * $d1;
+
+        <sun.java2d.marlin.DStroker: double ROUND_JOIN_THRESHOLD> = $d3;
+
+        $d4 = staticinvoke <java.lang.Math: double sqrt(double)>(2.0);
+
+        $d5 = $d4 - 1.0;
+
+        $d6 = 4.0 * $d5;
+
+        $d7 = $d6 / 3.0;
+
+        <sun.java2d.marlin.DStroker: double C> = $d7;
+
+        $d8 = staticinvoke <java.lang.Math: double sqrt(double)>(2.0);
+
+        <sun.java2d.marlin.DStroker: double SQRT_2> = $d8;
+
+        return;
+    }
+}

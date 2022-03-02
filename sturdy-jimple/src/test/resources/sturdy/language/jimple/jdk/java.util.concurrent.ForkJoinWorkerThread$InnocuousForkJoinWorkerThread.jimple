@@ -1,0 +1,164 @@
+final class java.util.concurrent.ForkJoinWorkerThread$InnocuousForkJoinWorkerThread extends java.util.concurrent.ForkJoinWorkerThread
+{
+    private static final java.lang.ThreadGroup innocuousThreadGroup;
+
+    void <init>(java.util.concurrent.ForkJoinPool)
+    {
+        java.security.AccessControlContext $r3;
+        java.util.concurrent.ForkJoinPool r1;
+        java.util.concurrent.ForkJoinWorkerThread$InnocuousForkJoinWorkerThread r0;
+        java.lang.ThreadGroup $r2;
+
+        r0 := @this: java.util.concurrent.ForkJoinWorkerThread$InnocuousForkJoinWorkerThread;
+
+        r1 := @parameter0: java.util.concurrent.ForkJoinPool;
+
+        $r2 = <java.util.concurrent.ForkJoinWorkerThread$InnocuousForkJoinWorkerThread: java.lang.ThreadGroup innocuousThreadGroup>;
+
+        $r3 = staticinvoke <java.util.concurrent.ForkJoinWorkerThread: java.security.AccessControlContext access$000()>();
+
+        specialinvoke r0.<java.util.concurrent.ForkJoinWorkerThread: void <init>(java.util.concurrent.ForkJoinPool,java.lang.ThreadGroup,java.security.AccessControlContext)>(r1, $r2, $r3);
+
+        return;
+    }
+
+    void afterTopLevelExec()
+    {
+        java.util.concurrent.ForkJoinWorkerThread$InnocuousForkJoinWorkerThread r0;
+
+        r0 := @this: java.util.concurrent.ForkJoinWorkerThread$InnocuousForkJoinWorkerThread;
+
+        virtualinvoke r0.<java.util.concurrent.ForkJoinWorkerThread$InnocuousForkJoinWorkerThread: void eraseThreadLocals()>();
+
+        return;
+    }
+
+    public java.lang.ClassLoader getContextClassLoader()
+    {
+        java.util.concurrent.ForkJoinWorkerThread$InnocuousForkJoinWorkerThread r1;
+        java.lang.ClassLoader $r0;
+
+        r1 := @this: java.util.concurrent.ForkJoinWorkerThread$InnocuousForkJoinWorkerThread;
+
+        $r0 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getSystemClassLoader()>();
+
+        return $r0;
+    }
+
+    public void setUncaughtExceptionHandler(java.lang.Thread$UncaughtExceptionHandler)
+    {
+        java.util.concurrent.ForkJoinWorkerThread$InnocuousForkJoinWorkerThread r0;
+        java.lang.Thread$UncaughtExceptionHandler r1;
+
+        r0 := @this: java.util.concurrent.ForkJoinWorkerThread$InnocuousForkJoinWorkerThread;
+
+        r1 := @parameter0: java.lang.Thread$UncaughtExceptionHandler;
+
+        return;
+    }
+
+    public void setContextClassLoader(java.lang.ClassLoader)
+    {
+        java.lang.SecurityException $r0;
+        java.util.concurrent.ForkJoinWorkerThread$InnocuousForkJoinWorkerThread r1;
+        java.lang.ClassLoader r2;
+
+        r1 := @this: java.util.concurrent.ForkJoinWorkerThread$InnocuousForkJoinWorkerThread;
+
+        r2 := @parameter0: java.lang.ClassLoader;
+
+        $r0 = new java.lang.SecurityException;
+
+        specialinvoke $r0.<java.lang.SecurityException: void <init>(java.lang.String)>("setContextClassLoader");
+
+        throw $r0;
+    }
+
+    private static java.lang.ThreadGroup createThreadGroup()
+    {
+        sun.misc.Unsafe $r0;
+        java.lang.Error $r7, $r12;
+        long $l0, $l1;
+        java.lang.ThreadGroup r9, $r10, r13;
+        java.lang.Thread $r5;
+        java.lang.reflect.Field $r3, $r4;
+        java.lang.Exception $r11;
+        java.lang.Class r1, r2;
+        java.lang.Object $r6, $r8;
+
+     label1:
+        $r0 = staticinvoke <sun.misc.Unsafe: sun.misc.Unsafe getUnsafe()>();
+
+        r1 = class "Ljava/lang/Thread;";
+
+        r2 = class "Ljava/lang/ThreadGroup;";
+
+        $r3 = virtualinvoke r1.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("group");
+
+        $l0 = virtualinvoke $r0.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r3);
+
+        $r4 = virtualinvoke r2.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("parent");
+
+        $l1 = virtualinvoke $r0.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r4);
+
+        $r5 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r6 = virtualinvoke $r0.<sun.misc.Unsafe: java.lang.Object getObject(java.lang.Object,long)>($r5, $l0);
+
+        r13 = (java.lang.ThreadGroup) $r6;
+
+     label2:
+        if r13 == null goto label5;
+
+        $r8 = virtualinvoke $r0.<sun.misc.Unsafe: java.lang.Object getObject(java.lang.Object,long)>(r13, $l1);
+
+        r9 = (java.lang.ThreadGroup) $r8;
+
+        if r9 != null goto label4;
+
+        $r10 = new java.lang.ThreadGroup;
+
+        specialinvoke $r10.<java.lang.ThreadGroup: void <init>(java.lang.ThreadGroup,java.lang.String)>(r13, "InnocuousForkJoinWorkerThreadGroup");
+
+     label3:
+        return $r10;
+
+     label4:
+        r13 = r9;
+
+        goto label2;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r11 := @caughtexception;
+
+        $r12 = new java.lang.Error;
+
+        specialinvoke $r12.<java.lang.Error: void <init>(java.lang.Throwable)>($r11);
+
+        throw $r12;
+
+     label7:
+        $r7 = new java.lang.Error;
+
+        specialinvoke $r7.<java.lang.Error: void <init>(java.lang.String)>("Cannot create ThreadGroup");
+
+        throw $r7;
+
+        catch java.lang.Exception from label1 to label3 with label6;
+        catch java.lang.Exception from label4 to label5 with label6;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.ThreadGroup $r0;
+
+        $r0 = staticinvoke <java.util.concurrent.ForkJoinWorkerThread$InnocuousForkJoinWorkerThread: java.lang.ThreadGroup createThreadGroup()>();
+
+        <java.util.concurrent.ForkJoinWorkerThread$InnocuousForkJoinWorkerThread: java.lang.ThreadGroup innocuousThreadGroup> = $r0;
+
+        return;
+    }
+}

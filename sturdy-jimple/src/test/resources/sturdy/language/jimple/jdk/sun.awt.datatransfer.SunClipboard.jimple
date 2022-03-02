@@ -1,0 +1,1001 @@
+public abstract class sun.awt.datatransfer.SunClipboard extends java.awt.datatransfer.Clipboard implements java.beans.PropertyChangeListener
+{
+    private sun.awt.AppContext contentsContext;
+    private final java.lang.Object CLIPBOARD_FLAVOR_LISTENER_KEY;
+    private volatile int numberOfFlavorListeners;
+    private volatile long[] currentFormats;
+
+    public void <init>(java.lang.String)
+    {
+        java.lang.StringBuffer $r2;
+        java.lang.StringBuilder $r3, $r4, $r5;
+        java.lang.String r1, $r6;
+        sun.awt.datatransfer.SunClipboard r0;
+
+        r0 := @this: sun.awt.datatransfer.SunClipboard;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.awt.datatransfer.Clipboard: void <init>(java.lang.String)>(r1);
+
+        r0.<sun.awt.datatransfer.SunClipboard: sun.awt.AppContext contentsContext> = null;
+
+        r0.<sun.awt.datatransfer.SunClipboard: int numberOfFlavorListeners> = 0;
+
+        $r2 = new java.lang.StringBuffer;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("_CLIPBOARD_FLAVOR_LISTENER_KEY");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.StringBuffer: void <init>(java.lang.String)>($r6);
+
+        r0.<sun.awt.datatransfer.SunClipboard: java.lang.Object CLIPBOARD_FLAVOR_LISTENER_KEY> = $r2;
+
+        return;
+    }
+
+    public synchronized void setContents(java.awt.datatransfer.Transferable, java.awt.datatransfer.ClipboardOwner)
+    {
+        java.lang.Throwable $r8;
+        java.awt.datatransfer.ClipboardOwner r2, r4;
+        java.awt.datatransfer.Transferable r0, r3;
+        sun.awt.datatransfer.SunClipboard r1;
+        sun.awt.datatransfer.SunClipboard$1 $r6, $r9;
+        java.lang.NullPointerException $r7;
+        sun.awt.datatransfer.TransferableProxy $r5;
+
+        r1 := @this: sun.awt.datatransfer.SunClipboard;
+
+        r0 := @parameter0: java.awt.datatransfer.Transferable;
+
+        r4 := @parameter1: java.awt.datatransfer.ClipboardOwner;
+
+        if r0 != null goto label1;
+
+        $r7 = new java.lang.NullPointerException;
+
+        specialinvoke $r7.<java.lang.NullPointerException: void <init>(java.lang.String)>("contents");
+
+        throw $r7;
+
+     label1:
+        specialinvoke r1.<sun.awt.datatransfer.SunClipboard: void initContext()>();
+
+        r2 = r1.<sun.awt.datatransfer.SunClipboard: java.awt.datatransfer.ClipboardOwner owner>;
+
+        r3 = r1.<sun.awt.datatransfer.SunClipboard: java.awt.datatransfer.Transferable contents>;
+
+     label2:
+        r1.<sun.awt.datatransfer.SunClipboard: java.awt.datatransfer.ClipboardOwner owner> = r4;
+
+        $r5 = new sun.awt.datatransfer.TransferableProxy;
+
+        specialinvoke $r5.<sun.awt.datatransfer.TransferableProxy: void <init>(java.awt.datatransfer.Transferable,boolean)>(r0, 1);
+
+        r1.<sun.awt.datatransfer.SunClipboard: java.awt.datatransfer.Transferable contents> = $r5;
+
+        virtualinvoke r1.<sun.awt.datatransfer.SunClipboard: void setContentsNative(java.awt.datatransfer.Transferable)>(r0);
+
+     label3:
+        if r2 == null goto label7;
+
+        if r2 == r4 goto label7;
+
+        $r6 = new sun.awt.datatransfer.SunClipboard$1;
+
+        specialinvoke $r6.<sun.awt.datatransfer.SunClipboard$1: void <init>(sun.awt.datatransfer.SunClipboard,java.awt.datatransfer.ClipboardOwner,java.awt.datatransfer.Transferable)>(r1, r2, r3);
+
+        staticinvoke <java.awt.EventQueue: void invokeLater(java.lang.Runnable)>($r6);
+
+        goto label7;
+
+     label4:
+        $r8 := @caughtexception;
+
+     label5:
+        if r2 == null goto label6;
+
+        if r2 == r4 goto label6;
+
+        $r9 = new sun.awt.datatransfer.SunClipboard$1;
+
+        specialinvoke $r9.<sun.awt.datatransfer.SunClipboard$1: void <init>(sun.awt.datatransfer.SunClipboard,java.awt.datatransfer.ClipboardOwner,java.awt.datatransfer.Transferable)>(r1, r2, r3);
+
+        staticinvoke <java.awt.EventQueue: void invokeLater(java.lang.Runnable)>($r9);
+
+     label6:
+        throw $r8;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private synchronized void initContext()
+    {
+        java.lang.Throwable $r6;
+        java.lang.IllegalStateException $r5;
+        sun.awt.datatransfer.SunClipboard r1;
+        sun.awt.AppContext $r0, $r2, $r3, $r4;
+        boolean $z0;
+
+        r1 := @this: sun.awt.datatransfer.SunClipboard;
+
+        $r0 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r2 = r1.<sun.awt.datatransfer.SunClipboard: sun.awt.AppContext contentsContext>;
+
+        if $r2 == $r0 goto label8;
+
+        entermonitor $r0;
+
+     label1:
+        $z0 = virtualinvoke $r0.<sun.awt.AppContext: boolean isDisposed()>();
+
+        if $z0 == 0 goto label2;
+
+        $r5 = new java.lang.IllegalStateException;
+
+        specialinvoke $r5.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Can\'t set contents from disposed AppContext");
+
+        throw $r5;
+
+     label2:
+        virtualinvoke $r0.<sun.awt.AppContext: void addPropertyChangeListener(java.lang.String,java.beans.PropertyChangeListener)>("disposed", r1);
+
+        exitmonitor $r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r6 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r6;
+
+     label6:
+        $r3 = r1.<sun.awt.datatransfer.SunClipboard: sun.awt.AppContext contentsContext>;
+
+        if $r3 == null goto label7;
+
+        $r4 = r1.<sun.awt.datatransfer.SunClipboard: sun.awt.AppContext contentsContext>;
+
+        virtualinvoke $r4.<sun.awt.AppContext: void removePropertyChangeListener(java.lang.String,java.beans.PropertyChangeListener)>("disposed", r1);
+
+     label7:
+        r1.<sun.awt.datatransfer.SunClipboard: sun.awt.AppContext contentsContext> = $r0;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public synchronized java.awt.datatransfer.Transferable getContents(java.lang.Object)
+    {
+        sun.awt.datatransfer.ClipboardTransferable $r2;
+        java.awt.datatransfer.Transferable $r1, $r3;
+        java.lang.Object r4;
+        sun.awt.datatransfer.SunClipboard r0;
+
+        r0 := @this: sun.awt.datatransfer.SunClipboard;
+
+        r4 := @parameter0: java.lang.Object;
+
+        $r1 = r0.<sun.awt.datatransfer.SunClipboard: java.awt.datatransfer.Transferable contents>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<sun.awt.datatransfer.SunClipboard: java.awt.datatransfer.Transferable contents>;
+
+        return $r3;
+
+     label1:
+        $r2 = new sun.awt.datatransfer.ClipboardTransferable;
+
+        specialinvoke $r2.<sun.awt.datatransfer.ClipboardTransferable: void <init>(sun.awt.datatransfer.SunClipboard)>(r0);
+
+        return $r2;
+    }
+
+    protected synchronized java.awt.datatransfer.Transferable getContextContents()
+    {
+        sun.awt.AppContext $r0, $r2;
+        java.awt.datatransfer.Transferable $r3;
+        sun.awt.datatransfer.SunClipboard r1;
+
+        r1 := @this: sun.awt.datatransfer.SunClipboard;
+
+        $r0 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r2 = r1.<sun.awt.datatransfer.SunClipboard: sun.awt.AppContext contentsContext>;
+
+        if $r0 != $r2 goto label1;
+
+        $r3 = r1.<sun.awt.datatransfer.SunClipboard: java.awt.datatransfer.Transferable contents>;
+
+        goto label2;
+
+     label1:
+        $r3 = null;
+
+     label2:
+        return $r3;
+    }
+
+    public java.awt.datatransfer.DataFlavor[] getAvailableDataFlavors()
+    {
+        long[] $r2;
+        java.awt.datatransfer.FlavorTable $r4;
+        java.awt.datatransfer.Transferable $r1;
+        java.awt.datatransfer.DataFlavor[] $r5, $r6;
+        sun.awt.datatransfer.DataTransferer $r3;
+        sun.awt.datatransfer.SunClipboard r0;
+
+        r0 := @this: sun.awt.datatransfer.SunClipboard;
+
+        $r1 = virtualinvoke r0.<sun.awt.datatransfer.SunClipboard: java.awt.datatransfer.Transferable getContextContents()>();
+
+        if $r1 == null goto label1;
+
+        $r6 = interfaceinvoke $r1.<java.awt.datatransfer.Transferable: java.awt.datatransfer.DataFlavor[] getTransferDataFlavors()>();
+
+        return $r6;
+
+     label1:
+        $r2 = virtualinvoke r0.<sun.awt.datatransfer.SunClipboard: long[] getClipboardFormatsOpenClose()>();
+
+        $r3 = staticinvoke <sun.awt.datatransfer.DataTransferer: sun.awt.datatransfer.DataTransferer getInstance()>();
+
+        $r4 = staticinvoke <sun.awt.datatransfer.SunClipboard: java.awt.datatransfer.FlavorTable getDefaultFlavorTable()>();
+
+        $r5 = virtualinvoke $r3.<sun.awt.datatransfer.DataTransferer: java.awt.datatransfer.DataFlavor[] getFlavorsForFormatsAsArray(long[],java.awt.datatransfer.FlavorTable)>($r2, $r4);
+
+        return $r5;
+    }
+
+    public boolean isDataFlavorAvailable(java.awt.datatransfer.DataFlavor)
+    {
+        java.awt.datatransfer.DataFlavor r0;
+        java.awt.datatransfer.Transferable $r2;
+        java.util.Set $r4;
+        sun.awt.datatransfer.SunClipboard r1;
+        java.lang.NullPointerException $r5;
+        long[] $r3;
+        boolean $z0, $z1;
+
+        r1 := @this: sun.awt.datatransfer.SunClipboard;
+
+        r0 := @parameter0: java.awt.datatransfer.DataFlavor;
+
+        if r0 != null goto label1;
+
+        $r5 = new java.lang.NullPointerException;
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>(java.lang.String)>("flavor");
+
+        throw $r5;
+
+     label1:
+        $r2 = virtualinvoke r1.<sun.awt.datatransfer.SunClipboard: java.awt.datatransfer.Transferable getContextContents()>();
+
+        if $r2 == null goto label2;
+
+        $z1 = interfaceinvoke $r2.<java.awt.datatransfer.Transferable: boolean isDataFlavorSupported(java.awt.datatransfer.DataFlavor)>(r0);
+
+        return $z1;
+
+     label2:
+        $r3 = virtualinvoke r1.<sun.awt.datatransfer.SunClipboard: long[] getClipboardFormatsOpenClose()>();
+
+        $r4 = staticinvoke <sun.awt.datatransfer.SunClipboard: java.util.Set formatArrayAsDataFlavorSet(long[])>($r3);
+
+        $z0 = interfaceinvoke $r4.<java.util.Set: boolean contains(java.lang.Object)>(r0);
+
+        return $z0;
+    }
+
+    public java.lang.Object getData(java.awt.datatransfer.DataFlavor) throws java.awt.datatransfer.UnsupportedFlavorException, java.io.IOException
+    {
+        java.lang.Throwable $r16;
+        byte[] $r9;
+        java.awt.datatransfer.DataFlavor r0;
+        java.awt.datatransfer.Transferable $r2, r17;
+        sun.awt.datatransfer.DataTransferer $r4, $r10, $r11;
+        long $l0;
+        sun.awt.datatransfer.SunClipboard r1;
+        java.lang.NullPointerException $r15;
+        long[] $r3;
+        java.awt.datatransfer.FlavorTable $r5;
+        java.lang.Long r8;
+        java.util.Map $r6;
+        boolean $z0;
+        java.awt.datatransfer.UnsupportedFlavorException $r13;
+        java.lang.Object $r7, $r12, $r14;
+
+        r1 := @this: sun.awt.datatransfer.SunClipboard;
+
+        r0 := @parameter0: java.awt.datatransfer.DataFlavor;
+
+        if r0 != null goto label1;
+
+        $r15 = new java.lang.NullPointerException;
+
+        specialinvoke $r15.<java.lang.NullPointerException: void <init>(java.lang.String)>("flavor");
+
+        throw $r15;
+
+     label1:
+        $r2 = virtualinvoke r1.<sun.awt.datatransfer.SunClipboard: java.awt.datatransfer.Transferable getContextContents()>();
+
+        if $r2 == null goto label2;
+
+        $r14 = interfaceinvoke $r2.<java.awt.datatransfer.Transferable: java.lang.Object getTransferData(java.awt.datatransfer.DataFlavor)>(r0);
+
+        return $r14;
+
+     label2:
+        r17 = null;
+
+     label3:
+        virtualinvoke r1.<sun.awt.datatransfer.SunClipboard: void openClipboard(sun.awt.datatransfer.SunClipboard)>(null);
+
+        $r3 = virtualinvoke r1.<sun.awt.datatransfer.SunClipboard: long[] getClipboardFormats()>();
+
+        $r4 = staticinvoke <sun.awt.datatransfer.DataTransferer: sun.awt.datatransfer.DataTransferer getInstance()>();
+
+        $r5 = staticinvoke <sun.awt.datatransfer.SunClipboard: java.awt.datatransfer.FlavorTable getDefaultFlavorTable()>();
+
+        $r6 = virtualinvoke $r4.<sun.awt.datatransfer.DataTransferer: java.util.Map getFlavorsForFormats(long[],java.awt.datatransfer.FlavorTable)>($r3, $r5);
+
+        $r7 = interfaceinvoke $r6.<java.util.Map: java.lang.Object get(java.lang.Object)>(r0);
+
+        r8 = (java.lang.Long) $r7;
+
+        if r8 != null goto label4;
+
+        $r13 = new java.awt.datatransfer.UnsupportedFlavorException;
+
+        specialinvoke $r13.<java.awt.datatransfer.UnsupportedFlavorException: void <init>(java.awt.datatransfer.DataFlavor)>(r0);
+
+        throw $r13;
+
+     label4:
+        $l0 = virtualinvoke r8.<java.lang.Long: long longValue()>();
+
+        $r9 = virtualinvoke r1.<sun.awt.datatransfer.SunClipboard: byte[] getClipboardData(long)>($l0);
+
+        $r10 = staticinvoke <sun.awt.datatransfer.DataTransferer: sun.awt.datatransfer.DataTransferer getInstance()>();
+
+        $z0 = virtualinvoke $r10.<sun.awt.datatransfer.DataTransferer: boolean isLocaleDependentTextFormat(long)>($l0);
+
+        if $z0 == 0 goto label5;
+
+        r17 = virtualinvoke r1.<sun.awt.datatransfer.SunClipboard: java.awt.datatransfer.Transferable createLocaleTransferable(long[])>($r3);
+
+     label5:
+        virtualinvoke r1.<sun.awt.datatransfer.SunClipboard: void closeClipboard()>();
+
+        goto label8;
+
+     label6:
+        $r16 := @caughtexception;
+
+     label7:
+        virtualinvoke r1.<sun.awt.datatransfer.SunClipboard: void closeClipboard()>();
+
+        throw $r16;
+
+     label8:
+        $r11 = staticinvoke <sun.awt.datatransfer.DataTransferer: sun.awt.datatransfer.DataTransferer getInstance()>();
+
+        $r12 = virtualinvoke $r11.<sun.awt.datatransfer.DataTransferer: java.lang.Object translateBytes(byte[],java.awt.datatransfer.DataFlavor,long,java.awt.datatransfer.Transferable)>($r9, r0, $l0, r17);
+
+        return $r12;
+
+        catch java.lang.Throwable from label3 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    protected java.awt.datatransfer.Transferable createLocaleTransferable(long[]) throws java.io.IOException
+    {
+        long[] r1;
+        sun.awt.datatransfer.SunClipboard r0;
+
+        r0 := @this: sun.awt.datatransfer.SunClipboard;
+
+        r1 := @parameter0: long[];
+
+        return null;
+    }
+
+    public void openClipboard(sun.awt.datatransfer.SunClipboard)
+    {
+        sun.awt.datatransfer.SunClipboard r0, r1;
+
+        r0 := @this: sun.awt.datatransfer.SunClipboard;
+
+        r1 := @parameter0: sun.awt.datatransfer.SunClipboard;
+
+        return;
+    }
+
+    public void closeClipboard()
+    {
+        sun.awt.datatransfer.SunClipboard r0;
+
+        r0 := @this: sun.awt.datatransfer.SunClipboard;
+
+        return;
+    }
+
+    public abstract long getID();
+
+    public void propertyChange(java.beans.PropertyChangeEvent)
+    {
+        sun.awt.datatransfer.SunClipboard r7;
+        sun.awt.AppContext r6;
+        java.lang.Boolean $r3;
+        java.lang.Object $r4, $r5;
+        java.lang.String $r1, $r2;
+        java.beans.PropertyChangeEvent r0;
+        boolean $z0, $z1;
+
+        r7 := @this: sun.awt.datatransfer.SunClipboard;
+
+        r0 := @parameter0: java.beans.PropertyChangeEvent;
+
+        $r1 = "disposed";
+
+        $r2 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.String getPropertyName()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        $r3 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r4 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.Object getNewValue()>();
+
+        $z1 = virtualinvoke $r3.<java.lang.Boolean: boolean equals(java.lang.Object)>($r4);
+
+        if $z1 == 0 goto label1;
+
+        $r5 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.Object getSource()>();
+
+        r6 = (sun.awt.AppContext) $r5;
+
+        virtualinvoke r7.<sun.awt.datatransfer.SunClipboard: void lostOwnershipLater(sun.awt.AppContext)>(r6);
+
+     label1:
+        return;
+    }
+
+    protected void lostOwnershipImpl()
+    {
+        sun.awt.datatransfer.SunClipboard r0;
+
+        r0 := @this: sun.awt.datatransfer.SunClipboard;
+
+        virtualinvoke r0.<sun.awt.datatransfer.SunClipboard: void lostOwnershipLater(sun.awt.AppContext)>(null);
+
+        return;
+    }
+
+    protected void lostOwnershipLater(sun.awt.AppContext)
+    {
+        sun.awt.PeerEvent $r2;
+        sun.awt.AppContext r1, r3;
+        sun.awt.datatransfer.SunClipboard r0;
+        java.lang.Runnable $r4;
+
+        r0 := @this: sun.awt.datatransfer.SunClipboard;
+
+        r3 := @parameter0: sun.awt.AppContext;
+
+        r1 = r0.<sun.awt.datatransfer.SunClipboard: sun.awt.AppContext contentsContext>;
+
+        if r1 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = new sun.awt.PeerEvent;
+
+        $r4 = staticinvoke <sun.awt.datatransfer.SunClipboard$lambda_lostOwnershipLater_0__368: java.lang.Runnable bootstrap$(sun.awt.datatransfer.SunClipboard,sun.awt.AppContext)>(r0, r3);
+
+        specialinvoke $r2.<sun.awt.PeerEvent: void <init>(java.lang.Object,java.lang.Runnable,long)>(r0, $r4, 1L);
+
+        staticinvoke <sun.awt.SunToolkit: void postEvent(sun.awt.AppContext,java.awt.AWTEvent)>(r1, $r2);
+
+        return;
+    }
+
+    protected void lostOwnershipNow(sun.awt.AppContext)
+    {
+        java.lang.Throwable $r5;
+        java.awt.datatransfer.ClipboardOwner $r3;
+        sun.awt.AppContext r1, r2;
+        java.awt.datatransfer.Transferable $r4;
+        sun.awt.datatransfer.SunClipboard r0;
+
+        r0 := @this: sun.awt.datatransfer.SunClipboard;
+
+        r2 := @parameter0: sun.awt.AppContext;
+
+        entermonitor r0;
+
+     label01:
+        r1 = r0.<sun.awt.datatransfer.SunClipboard: sun.awt.AppContext contentsContext>;
+
+        if r1 != null goto label03;
+
+        exitmonitor r0;
+
+     label02:
+        return;
+
+     label03:
+        if r2 == null goto label04;
+
+        if r1 != r2 goto label05;
+
+     label04:
+        $r3 = r0.<sun.awt.datatransfer.SunClipboard: java.awt.datatransfer.ClipboardOwner owner>;
+
+        $r4 = r0.<sun.awt.datatransfer.SunClipboard: java.awt.datatransfer.Transferable contents>;
+
+        r0.<sun.awt.datatransfer.SunClipboard: sun.awt.AppContext contentsContext> = null;
+
+        r0.<sun.awt.datatransfer.SunClipboard: java.awt.datatransfer.ClipboardOwner owner> = null;
+
+        r0.<sun.awt.datatransfer.SunClipboard: java.awt.datatransfer.Transferable contents> = null;
+
+        virtualinvoke r0.<sun.awt.datatransfer.SunClipboard: void clearNativeContext()>();
+
+        virtualinvoke r1.<sun.awt.AppContext: void removePropertyChangeListener(java.lang.String,java.beans.PropertyChangeListener)>("disposed", r0);
+
+        goto label07;
+
+     label05:
+        exitmonitor r0;
+
+     label06:
+        return;
+
+     label07:
+        exitmonitor r0;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+     label10:
+        throw $r5;
+
+     label11:
+        if $r3 == null goto label12;
+
+        interfaceinvoke $r3.<java.awt.datatransfer.ClipboardOwner: void lostOwnership(java.awt.datatransfer.Clipboard,java.awt.datatransfer.Transferable)>(r0, $r4);
+
+     label12:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label09;
+        catch java.lang.Throwable from label03 to label06 with label09;
+        catch java.lang.Throwable from label07 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    protected abstract void clearNativeContext();
+
+    protected abstract void setContentsNative(java.awt.datatransfer.Transferable);
+
+    protected long[] getClipboardFormatsOpenClose()
+    {
+        java.lang.Throwable $r2;
+        long[] $r1;
+        sun.awt.datatransfer.SunClipboard r0;
+
+        r0 := @this: sun.awt.datatransfer.SunClipboard;
+
+     label1:
+        virtualinvoke r0.<sun.awt.datatransfer.SunClipboard: void openClipboard(sun.awt.datatransfer.SunClipboard)>(null);
+
+        $r1 = virtualinvoke r0.<sun.awt.datatransfer.SunClipboard: long[] getClipboardFormats()>();
+
+     label2:
+        virtualinvoke r0.<sun.awt.datatransfer.SunClipboard: void closeClipboard()>();
+
+        return $r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        virtualinvoke r0.<sun.awt.datatransfer.SunClipboard: void closeClipboard()>();
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    protected abstract long[] getClipboardFormats();
+
+    protected abstract byte[] getClipboardData(long) throws java.io.IOException;
+
+    private static java.util.Set formatArrayAsDataFlavorSet(long[])
+    {
+        long[] r0;
+        java.awt.datatransfer.FlavorTable $r2;
+        sun.awt.datatransfer.DataTransferer $r1;
+        java.util.Set $r3;
+
+        r0 := @parameter0: long[];
+
+        if r0 != null goto label1;
+
+        $r3 = null;
+
+        goto label2;
+
+     label1:
+        $r1 = staticinvoke <sun.awt.datatransfer.DataTransferer: sun.awt.datatransfer.DataTransferer getInstance()>();
+
+        $r2 = staticinvoke <sun.awt.datatransfer.SunClipboard: java.awt.datatransfer.FlavorTable getDefaultFlavorTable()>();
+
+        $r3 = virtualinvoke $r1.<sun.awt.datatransfer.DataTransferer: java.util.Set getFlavorsForFormatsAsSet(long[],java.awt.datatransfer.FlavorTable)>(r0, $r2);
+
+     label2:
+        return $r3;
+    }
+
+    public synchronized void addFlavorListener(java.awt.datatransfer.FlavorListener)
+    {
+        java.lang.Throwable $r7;
+        sun.awt.EventListenerAggregate $r5, r9;
+        java.lang.IllegalStateException $r8;
+        sun.awt.datatransfer.SunClipboard r2;
+        long[] r10;
+        java.awt.datatransfer.FlavorListener r0;
+        sun.awt.AppContext $r1;
+        int $i0, $i1;
+        java.lang.Object $r3, $r4, $r6;
+
+        r2 := @this: sun.awt.datatransfer.SunClipboard;
+
+        r0 := @parameter0: java.awt.datatransfer.FlavorListener;
+
+        if r0 != null goto label01;
+
+        return;
+
+     label01:
+        $r1 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r3 = r2.<sun.awt.datatransfer.SunClipboard: java.lang.Object CLIPBOARD_FLAVOR_LISTENER_KEY>;
+
+        $r4 = virtualinvoke $r1.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>($r3);
+
+        r9 = (sun.awt.EventListenerAggregate) $r4;
+
+        if r9 != null goto label02;
+
+        $r5 = new sun.awt.EventListenerAggregate;
+
+        specialinvoke $r5.<sun.awt.EventListenerAggregate: void <init>(java.lang.Class)>(class "Ljava/awt/datatransfer/FlavorListener;");
+
+        r9 = $r5;
+
+        $r6 = r2.<sun.awt.datatransfer.SunClipboard: java.lang.Object CLIPBOARD_FLAVOR_LISTENER_KEY>;
+
+        virtualinvoke $r1.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>($r6, $r5);
+
+     label02:
+        virtualinvoke r9.<sun.awt.EventListenerAggregate: void add(java.util.EventListener)>(r0);
+
+        $i0 = r2.<sun.awt.datatransfer.SunClipboard: int numberOfFlavorListeners>;
+
+        $i1 = $i0 + 1;
+
+        r2.<sun.awt.datatransfer.SunClipboard: int numberOfFlavorListeners> = $i1;
+
+        if $i0 != 0 goto label10;
+
+        r10 = null;
+
+     label03:
+        virtualinvoke r2.<sun.awt.datatransfer.SunClipboard: void openClipboard(sun.awt.datatransfer.SunClipboard)>(null);
+
+        r10 = virtualinvoke r2.<sun.awt.datatransfer.SunClipboard: long[] getClipboardFormats()>();
+
+     label04:
+        virtualinvoke r2.<sun.awt.datatransfer.SunClipboard: void closeClipboard()>();
+
+        goto label09;
+
+     label05:
+        $r8 := @caughtexception;
+
+     label06:
+        virtualinvoke r2.<sun.awt.datatransfer.SunClipboard: void closeClipboard()>();
+
+        goto label09;
+
+     label07:
+        $r7 := @caughtexception;
+
+     label08:
+        virtualinvoke r2.<sun.awt.datatransfer.SunClipboard: void closeClipboard()>();
+
+        throw $r7;
+
+     label09:
+        r2.<sun.awt.datatransfer.SunClipboard: long[] currentFormats> = r10;
+
+        virtualinvoke r2.<sun.awt.datatransfer.SunClipboard: void registerClipboardViewerChecked()>();
+
+     label10:
+        return;
+
+        catch java.lang.IllegalStateException from label03 to label04 with label05;
+        catch java.lang.Throwable from label03 to label04 with label07;
+        catch java.lang.Throwable from label05 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+    }
+
+    public synchronized void removeFlavorListener(java.awt.datatransfer.FlavorListener)
+    {
+        sun.awt.EventListenerAggregate r5;
+        sun.awt.datatransfer.SunClipboard r2;
+        java.awt.datatransfer.FlavorListener r0;
+        sun.awt.AppContext $r1;
+        int $i0, $i1;
+        java.lang.Object $r3, $r4;
+        boolean $z0;
+
+        r2 := @this: sun.awt.datatransfer.SunClipboard;
+
+        r0 := @parameter0: java.awt.datatransfer.FlavorListener;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $r1 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r3 = r2.<sun.awt.datatransfer.SunClipboard: java.lang.Object CLIPBOARD_FLAVOR_LISTENER_KEY>;
+
+        $r4 = virtualinvoke $r1.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>($r3);
+
+        r5 = (sun.awt.EventListenerAggregate) $r4;
+
+        if r5 != null goto label2;
+
+        return;
+
+     label2:
+        $z0 = virtualinvoke r5.<sun.awt.EventListenerAggregate: boolean remove(java.util.EventListener)>(r0);
+
+        if $z0 == 0 goto label3;
+
+        $i0 = r2.<sun.awt.datatransfer.SunClipboard: int numberOfFlavorListeners>;
+
+        $i1 = $i0 - 1;
+
+        r2.<sun.awt.datatransfer.SunClipboard: int numberOfFlavorListeners> = $i1;
+
+        if $i1 != 0 goto label3;
+
+        virtualinvoke r2.<sun.awt.datatransfer.SunClipboard: void unregisterClipboardViewerChecked()>();
+
+        r2.<sun.awt.datatransfer.SunClipboard: long[] currentFormats> = null;
+
+     label3:
+        return;
+    }
+
+    public synchronized java.awt.datatransfer.FlavorListener[] getFlavorListeners()
+    {
+        sun.awt.EventListenerAggregate r4;
+        java.util.EventListener[] $r5;
+        sun.awt.datatransfer.SunClipboard r1;
+        java.awt.datatransfer.FlavorListener[] $r6, $r7;
+        sun.awt.AppContext $r0;
+        java.lang.Object $r2, $r3;
+
+        r1 := @this: sun.awt.datatransfer.SunClipboard;
+
+        $r0 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r2 = r1.<sun.awt.datatransfer.SunClipboard: java.lang.Object CLIPBOARD_FLAVOR_LISTENER_KEY>;
+
+        $r3 = virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>($r2);
+
+        r4 = (sun.awt.EventListenerAggregate) $r3;
+
+        if r4 != null goto label1;
+
+        $r7 = newarray (java.awt.datatransfer.FlavorListener)[0];
+
+        goto label2;
+
+     label1:
+        $r5 = virtualinvoke r4.<sun.awt.EventListenerAggregate: java.util.EventListener[] getListenersCopy()>();
+
+        $r6 = (java.awt.datatransfer.FlavorListener[]) $r5;
+
+        $r7 = (java.awt.datatransfer.FlavorListener[]) $r6;
+
+     label2:
+        return $r7;
+    }
+
+    public boolean areFlavorListenersRegistered()
+    {
+        int $i0;
+        sun.awt.datatransfer.SunClipboard r0;
+        boolean $z0;
+
+        r0 := @this: sun.awt.datatransfer.SunClipboard;
+
+        $i0 = r0.<sun.awt.datatransfer.SunClipboard: int numberOfFlavorListeners>;
+
+        if $i0 <= 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    protected abstract void registerClipboardViewerChecked();
+
+    protected abstract void unregisterClipboardViewerChecked();
+
+    protected final void checkChange(long[])
+    {
+        sun.awt.datatransfer.SunClipboard r1;
+        long[] r0, $r2;
+        sun.awt.AppContext r6;
+        int $i0, i1;
+        sun.awt.datatransfer.SunClipboard$1SunFlavorChangeNotifier $r14;
+        boolean $z0, $z1, $z2;
+        sun.awt.EventListenerAggregate r9;
+        java.util.EventListener[] $r10;
+        java.util.Iterator $r4;
+        sun.awt.PeerEvent $r13;
+        java.util.Set $r3;
+        java.awt.datatransfer.FlavorListener[] $r11, r12;
+        java.awt.datatransfer.FlavorListener $r15;
+        java.lang.Object $r5, $r7, $r8;
+
+        r1 := @this: sun.awt.datatransfer.SunClipboard;
+
+        r0 := @parameter0: long[];
+
+        $r2 = r1.<sun.awt.datatransfer.SunClipboard: long[] currentFormats>;
+
+        $z0 = staticinvoke <java.util.Arrays: boolean equals(long[],long[])>(r0, $r2);
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        r1.<sun.awt.datatransfer.SunClipboard: long[] currentFormats> = r0;
+
+        $r3 = staticinvoke <sun.awt.AppContext: java.util.Set getAppContexts()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.Set: java.util.Iterator iterator()>();
+
+     label2:
+        $z2 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label6;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (sun.awt.AppContext) $r5;
+
+        if r6 == null goto label2;
+
+        $z1 = virtualinvoke r6.<sun.awt.AppContext: boolean isDisposed()>();
+
+        if $z1 == 0 goto label3;
+
+        goto label2;
+
+     label3:
+        $r7 = r1.<sun.awt.datatransfer.SunClipboard: java.lang.Object CLIPBOARD_FLAVOR_LISTENER_KEY>;
+
+        $r8 = virtualinvoke r6.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>($r7);
+
+        r9 = (sun.awt.EventListenerAggregate) $r8;
+
+        if r9 == null goto label5;
+
+        $r10 = virtualinvoke r9.<sun.awt.EventListenerAggregate: java.util.EventListener[] getListenersInternal()>();
+
+        $r11 = (java.awt.datatransfer.FlavorListener[]) $r10;
+
+        r12 = (java.awt.datatransfer.FlavorListener[]) $r11;
+
+        i1 = 0;
+
+     label4:
+        $i0 = lengthof r12;
+
+        if i1 >= $i0 goto label5;
+
+        $r13 = new sun.awt.PeerEvent;
+
+        $r14 = new sun.awt.datatransfer.SunClipboard$1SunFlavorChangeNotifier;
+
+        $r15 = r12[i1];
+
+        specialinvoke $r14.<sun.awt.datatransfer.SunClipboard$1SunFlavorChangeNotifier: void <init>(sun.awt.datatransfer.SunClipboard,java.awt.datatransfer.FlavorListener)>(r1, $r15);
+
+        specialinvoke $r13.<sun.awt.PeerEvent: void <init>(java.lang.Object,java.lang.Runnable,long)>(r1, $r14, 1L);
+
+        staticinvoke <sun.awt.SunToolkit: void postEvent(sun.awt.AppContext,java.awt.AWTEvent)>(r6, $r13);
+
+        i1 = i1 + 1;
+
+        goto label4;
+
+     label5:
+        goto label2;
+
+     label6:
+        return;
+    }
+
+    public static java.awt.datatransfer.FlavorTable getDefaultFlavorTable()
+    {
+        java.awt.datatransfer.FlavorMap $r0;
+        java.awt.datatransfer.FlavorTable $r1;
+
+        $r0 = staticinvoke <java.awt.datatransfer.SystemFlavorMap: java.awt.datatransfer.FlavorMap getDefaultFlavorMap()>();
+
+        $r1 = (java.awt.datatransfer.FlavorTable) $r0;
+
+        return $r1;
+    }
+
+    public void lambda$lostOwnershipLater$0(sun.awt.AppContext)
+    {
+        sun.awt.datatransfer.SunClipboard r0;
+        sun.awt.AppContext r1;
+
+        r0 := @this: sun.awt.datatransfer.SunClipboard;
+
+        r1 := @parameter0: sun.awt.AppContext;
+
+        virtualinvoke r0.<sun.awt.datatransfer.SunClipboard: void lostOwnershipNow(sun.awt.AppContext)>(r1);
+
+        return;
+    }
+}

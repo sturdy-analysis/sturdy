@@ -1,0 +1,2093 @@
+public class java.lang.ThreadGroup extends java.lang.Object implements java.lang.Thread$UncaughtExceptionHandler
+{
+    private final java.lang.ThreadGroup parent;
+    java.lang.String name;
+    int maxPriority;
+    boolean destroyed;
+    boolean daemon;
+    boolean vmAllowSuspension;
+    int nUnstartedThreads;
+    int nthreads;
+    java.lang.Thread[] threads;
+    int ngroups;
+    java.lang.ThreadGroup[] groups;
+
+    private void <init>()
+    {
+        java.lang.ThreadGroup r0;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.lang.ThreadGroup: int nUnstartedThreads> = 0;
+
+        r0.<java.lang.ThreadGroup: java.lang.String name> = "system";
+
+        r0.<java.lang.ThreadGroup: int maxPriority> = 10;
+
+        r0.<java.lang.ThreadGroup: java.lang.ThreadGroup parent> = null;
+
+        return;
+    }
+
+    public void <init>(java.lang.String)
+    {
+        java.lang.Thread $r1;
+        java.lang.ThreadGroup r0, $r2;
+        java.lang.String r3;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        r3 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.Thread: java.lang.ThreadGroup getThreadGroup()>();
+
+        specialinvoke r0.<java.lang.ThreadGroup: void <init>(java.lang.ThreadGroup,java.lang.String)>($r2, r3);
+
+        return;
+    }
+
+    public void <init>(java.lang.ThreadGroup, java.lang.String)
+    {
+        java.lang.Void $r2;
+        java.lang.ThreadGroup r0, r1;
+        java.lang.String r3;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        r1 := @parameter0: java.lang.ThreadGroup;
+
+        r3 := @parameter1: java.lang.String;
+
+        $r2 = staticinvoke <java.lang.ThreadGroup: java.lang.Void checkParentAccess(java.lang.ThreadGroup)>(r1);
+
+        specialinvoke r0.<java.lang.ThreadGroup: void <init>(java.lang.Void,java.lang.ThreadGroup,java.lang.String)>($r2, r1, r3);
+
+        return;
+    }
+
+    private void <init>(java.lang.Void, java.lang.ThreadGroup, java.lang.String)
+    {
+        java.lang.Void r3;
+        int $i0;
+        java.lang.ThreadGroup r0, r2;
+        java.lang.String r1;
+        boolean $z0, $z1;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        r3 := @parameter0: java.lang.Void;
+
+        r2 := @parameter1: java.lang.ThreadGroup;
+
+        r1 := @parameter2: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.lang.ThreadGroup: int nUnstartedThreads> = 0;
+
+        r0.<java.lang.ThreadGroup: java.lang.String name> = r1;
+
+        $i0 = r2.<java.lang.ThreadGroup: int maxPriority>;
+
+        r0.<java.lang.ThreadGroup: int maxPriority> = $i0;
+
+        $z0 = r2.<java.lang.ThreadGroup: boolean daemon>;
+
+        r0.<java.lang.ThreadGroup: boolean daemon> = $z0;
+
+        $z1 = r2.<java.lang.ThreadGroup: boolean vmAllowSuspension>;
+
+        r0.<java.lang.ThreadGroup: boolean vmAllowSuspension> = $z1;
+
+        r0.<java.lang.ThreadGroup: java.lang.ThreadGroup parent> = r2;
+
+        specialinvoke r2.<java.lang.ThreadGroup: void add(java.lang.ThreadGroup)>(r0);
+
+        return;
+    }
+
+    private static java.lang.Void checkParentAccess(java.lang.ThreadGroup)
+    {
+        java.lang.ThreadGroup r0;
+
+        r0 := @parameter0: java.lang.ThreadGroup;
+
+        virtualinvoke r0.<java.lang.ThreadGroup: void checkAccess()>();
+
+        return null;
+    }
+
+    public final java.lang.String getName()
+    {
+        java.lang.ThreadGroup r0;
+        java.lang.String $r1;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        $r1 = r0.<java.lang.ThreadGroup: java.lang.String name>;
+
+        return $r1;
+    }
+
+    public final java.lang.ThreadGroup getParent()
+    {
+        java.lang.ThreadGroup r0, $r1, $r2, $r3;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        $r1 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup parent>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup parent>;
+
+        virtualinvoke $r3.<java.lang.ThreadGroup: void checkAccess()>();
+
+     label1:
+        $r2 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup parent>;
+
+        return $r2;
+    }
+
+    public final int getMaxPriority()
+    {
+        int $i0;
+        java.lang.ThreadGroup r0;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        $i0 = r0.<java.lang.ThreadGroup: int maxPriority>;
+
+        return $i0;
+    }
+
+    public final boolean isDaemon()
+    {
+        java.lang.ThreadGroup r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        $z0 = r0.<java.lang.ThreadGroup: boolean daemon>;
+
+        return $z0;
+    }
+
+    public synchronized boolean isDestroyed()
+    {
+        java.lang.ThreadGroup r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        $z0 = r0.<java.lang.ThreadGroup: boolean destroyed>;
+
+        return $z0;
+    }
+
+    public final void setDaemon(boolean)
+    {
+        java.lang.ThreadGroup r0;
+        boolean z0;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        z0 := @parameter0: boolean;
+
+        virtualinvoke r0.<java.lang.ThreadGroup: void checkAccess()>();
+
+        r0.<java.lang.ThreadGroup: boolean daemon> = z0;
+
+        return;
+    }
+
+    public final void setMaxPriority(int)
+    {
+        java.lang.Throwable $r7;
+        java.lang.Object[] $r5;
+        java.lang.ThreadGroup r0, $r1, $r3, $r6;
+        int i0, $i1, $i2, $i3, i4;
+        java.lang.ThreadGroup[] $r2, $r4, r8;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        i0 := @parameter0: int;
+
+        entermonitor r0;
+
+     label01:
+        virtualinvoke r0.<java.lang.ThreadGroup: void checkAccess()>();
+
+        if i0 < 1 goto label02;
+
+        if i0 <= 10 goto label04;
+
+     label02:
+        exitmonitor r0;
+
+     label03:
+        return;
+
+     label04:
+        $r1 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup parent>;
+
+        if $r1 == null goto label05;
+
+        $r6 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup parent>;
+
+        $i1 = $r6.<java.lang.ThreadGroup: int maxPriority>;
+
+        $i3 = staticinvoke <java.lang.Math: int min(int,int)>(i0, $i1);
+
+        goto label06;
+
+     label05:
+        $i3 = i0;
+
+     label06:
+        r0.<java.lang.ThreadGroup: int maxPriority> = $i3;
+
+        $i2 = r0.<java.lang.ThreadGroup: int ngroups>;
+
+        $r2 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        if $r2 == null goto label07;
+
+        $r4 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        $r5 = staticinvoke <java.util.Arrays: java.lang.Object[] copyOf(java.lang.Object[],int)>($r4, $i2);
+
+        r8 = (java.lang.ThreadGroup[]) $r5;
+
+        goto label08;
+
+     label07:
+        r8 = null;
+
+     label08:
+        exitmonitor r0;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r7 := @caughtexception;
+
+        exitmonitor r0;
+
+     label11:
+        throw $r7;
+
+     label12:
+        i4 = 0;
+
+     label13:
+        if i4 >= $i2 goto label14;
+
+        $r3 = r8[i4];
+
+        virtualinvoke $r3.<java.lang.ThreadGroup: void setMaxPriority(int)>(i0);
+
+        i4 = i4 + 1;
+
+        goto label13;
+
+     label14:
+        return;
+
+        catch java.lang.Throwable from label01 to label03 with label10;
+        catch java.lang.Throwable from label04 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    public final boolean parentOf(java.lang.ThreadGroup)
+    {
+        java.lang.ThreadGroup r0, r1;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        r1 := @parameter0: java.lang.ThreadGroup;
+
+     label1:
+        if r1 == null goto label3;
+
+        if r1 != r0 goto label2;
+
+        return 1;
+
+     label2:
+        r1 = r1.<java.lang.ThreadGroup: java.lang.ThreadGroup parent>;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    public final void checkAccess()
+    {
+        java.lang.ThreadGroup r1;
+        java.lang.SecurityManager $r0;
+
+        r1 := @this: java.lang.ThreadGroup;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkAccess(java.lang.ThreadGroup)>(r1);
+
+     label1:
+        return;
+    }
+
+    public int activeCount()
+    {
+        java.lang.Throwable $r5;
+        java.lang.Object[] $r4;
+        java.lang.ThreadGroup r0, $r2;
+        int i0, $i1, i2, i3;
+        java.lang.ThreadGroup[] $r1, $r3, r6;
+        boolean $z0;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        entermonitor r0;
+
+     label01:
+        $z0 = r0.<java.lang.ThreadGroup: boolean destroyed>;
+
+        if $z0 == 0 goto label03;
+
+        exitmonitor r0;
+
+     label02:
+        return 0;
+
+     label03:
+        i2 = r0.<java.lang.ThreadGroup: int nthreads>;
+
+        i0 = r0.<java.lang.ThreadGroup: int ngroups>;
+
+        $r1 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        if $r1 == null goto label04;
+
+        $r3 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        $r4 = staticinvoke <java.util.Arrays: java.lang.Object[] copyOf(java.lang.Object[],int)>($r3, i0);
+
+        r6 = (java.lang.ThreadGroup[]) $r4;
+
+        goto label05;
+
+     label04:
+        r6 = null;
+
+     label05:
+        exitmonitor r0;
+
+     label06:
+        goto label09;
+
+     label07:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+     label08:
+        throw $r5;
+
+     label09:
+        i3 = 0;
+
+     label10:
+        if i3 >= i0 goto label11;
+
+        $r2 = r6[i3];
+
+        $i1 = virtualinvoke $r2.<java.lang.ThreadGroup: int activeCount()>();
+
+        i2 = i2 + $i1;
+
+        i3 = i3 + 1;
+
+        goto label10;
+
+     label11:
+        return i2;
+
+        catch java.lang.Throwable from label01 to label02 with label07;
+        catch java.lang.Throwable from label03 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+    }
+
+    public int enumerate(java.lang.Thread[])
+    {
+        java.lang.Thread[] r1;
+        int $i0;
+        java.lang.ThreadGroup r0;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        r1 := @parameter0: java.lang.Thread[];
+
+        virtualinvoke r0.<java.lang.ThreadGroup: void checkAccess()>();
+
+        $i0 = specialinvoke r0.<java.lang.ThreadGroup: int enumerate(java.lang.Thread[],int,boolean)>(r1, 0, 1);
+
+        return $i0;
+    }
+
+    public int enumerate(java.lang.Thread[], boolean)
+    {
+        java.lang.Thread[] r1;
+        int $i0;
+        java.lang.ThreadGroup r0;
+        boolean z0;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        r1 := @parameter0: java.lang.Thread[];
+
+        z0 := @parameter1: boolean;
+
+        virtualinvoke r0.<java.lang.ThreadGroup: void checkAccess()>();
+
+        $i0 = specialinvoke r0.<java.lang.ThreadGroup: int enumerate(java.lang.Thread[],int,boolean)>(r1, 0, z0);
+
+        return $i0;
+    }
+
+    private int enumerate(java.lang.Thread[], int, boolean)
+    {
+        java.lang.Throwable $r10;
+        java.lang.Object[] $r5;
+        java.lang.ThreadGroup r0, $r2;
+        java.lang.Thread $r7, $r9;
+        int $i0, $i1, $i2, $i3, i4, i5, i6, i7, i8;
+        boolean $z0, z1, $z2;
+        java.lang.Thread[] r1, $r6, $r8;
+        java.lang.ThreadGroup[] $r3, $r4, r11;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        r1 := @parameter0: java.lang.Thread[];
+
+        i4 := @parameter1: int;
+
+        z1 := @parameter2: boolean;
+
+        i5 = 0;
+
+        r11 = null;
+
+        entermonitor r0;
+
+     label01:
+        $z0 = r0.<java.lang.ThreadGroup: boolean destroyed>;
+
+        if $z0 == 0 goto label03;
+
+        exitmonitor r0;
+
+     label02:
+        return 0;
+
+     label03:
+        i6 = r0.<java.lang.ThreadGroup: int nthreads>;
+
+        $i0 = lengthof r1;
+
+        $i1 = $i0 - i4;
+
+        if i6 <= $i1 goto label04;
+
+        $i3 = lengthof r1;
+
+        i6 = $i3 - i4;
+
+     label04:
+        i7 = 0;
+
+     label05:
+        if i7 >= i6 goto label07;
+
+        $r6 = r0.<java.lang.ThreadGroup: java.lang.Thread[] threads>;
+
+        $r7 = $r6[i7];
+
+        $z2 = virtualinvoke $r7.<java.lang.Thread: boolean isAlive()>();
+
+        if $z2 == 0 goto label06;
+
+        $i2 = i4;
+
+        i4 = i4 + 1;
+
+        $r8 = r0.<java.lang.ThreadGroup: java.lang.Thread[] threads>;
+
+        $r9 = $r8[i7];
+
+        r1[$i2] = $r9;
+
+     label06:
+        i7 = i7 + 1;
+
+        goto label05;
+
+     label07:
+        if z1 == 0 goto label09;
+
+        i5 = r0.<java.lang.ThreadGroup: int ngroups>;
+
+        $r3 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        if $r3 == null goto label08;
+
+        $r4 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        $r5 = staticinvoke <java.util.Arrays: java.lang.Object[] copyOf(java.lang.Object[],int)>($r4, i5);
+
+        r11 = (java.lang.ThreadGroup[]) $r5;
+
+        goto label09;
+
+     label08:
+        r11 = null;
+
+     label09:
+        exitmonitor r0;
+
+     label10:
+        goto label13;
+
+     label11:
+        $r10 := @caughtexception;
+
+        exitmonitor r0;
+
+     label12:
+        throw $r10;
+
+     label13:
+        if z1 == 0 goto label15;
+
+        i8 = 0;
+
+     label14:
+        if i8 >= i5 goto label15;
+
+        $r2 = r11[i8];
+
+        i4 = specialinvoke $r2.<java.lang.ThreadGroup: int enumerate(java.lang.Thread[],int,boolean)>(r1, i4, 1);
+
+        i8 = i8 + 1;
+
+        goto label14;
+
+     label15:
+        return i4;
+
+        catch java.lang.Throwable from label01 to label02 with label11;
+        catch java.lang.Throwable from label03 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+    }
+
+    public int activeGroupCount()
+    {
+        java.lang.Throwable $r5;
+        java.lang.Object[] $r4;
+        java.lang.ThreadGroup r0, $r2;
+        int i0, $i1, i2, i3;
+        java.lang.ThreadGroup[] $r1, $r3, r6;
+        boolean $z0;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        entermonitor r0;
+
+     label01:
+        $z0 = r0.<java.lang.ThreadGroup: boolean destroyed>;
+
+        if $z0 == 0 goto label03;
+
+        exitmonitor r0;
+
+     label02:
+        return 0;
+
+     label03:
+        i0 = r0.<java.lang.ThreadGroup: int ngroups>;
+
+        $r1 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        if $r1 == null goto label04;
+
+        $r3 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        $r4 = staticinvoke <java.util.Arrays: java.lang.Object[] copyOf(java.lang.Object[],int)>($r3, i0);
+
+        r6 = (java.lang.ThreadGroup[]) $r4;
+
+        goto label05;
+
+     label04:
+        r6 = null;
+
+     label05:
+        exitmonitor r0;
+
+     label06:
+        goto label09;
+
+     label07:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+     label08:
+        throw $r5;
+
+     label09:
+        i2 = i0;
+
+        i3 = 0;
+
+     label10:
+        if i3 >= i0 goto label11;
+
+        $r2 = r6[i3];
+
+        $i1 = virtualinvoke $r2.<java.lang.ThreadGroup: int activeGroupCount()>();
+
+        i2 = i2 + $i1;
+
+        i3 = i3 + 1;
+
+        goto label10;
+
+     label11:
+        return i2;
+
+        catch java.lang.Throwable from label01 to label02 with label07;
+        catch java.lang.Throwable from label03 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+    }
+
+    public int enumerate(java.lang.ThreadGroup[])
+    {
+        int $i0;
+        java.lang.ThreadGroup[] r1;
+        java.lang.ThreadGroup r0;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        r1 := @parameter0: java.lang.ThreadGroup[];
+
+        virtualinvoke r0.<java.lang.ThreadGroup: void checkAccess()>();
+
+        $i0 = specialinvoke r0.<java.lang.ThreadGroup: int enumerate(java.lang.ThreadGroup[],int,boolean)>(r1, 0, 1);
+
+        return $i0;
+    }
+
+    public int enumerate(java.lang.ThreadGroup[], boolean)
+    {
+        int $i0;
+        java.lang.ThreadGroup[] r1;
+        java.lang.ThreadGroup r0;
+        boolean z0;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        r1 := @parameter0: java.lang.ThreadGroup[];
+
+        z0 := @parameter1: boolean;
+
+        virtualinvoke r0.<java.lang.ThreadGroup: void checkAccess()>();
+
+        $i0 = specialinvoke r0.<java.lang.ThreadGroup: int enumerate(java.lang.ThreadGroup[],int,boolean)>(r1, 0, z0);
+
+        return $i0;
+    }
+
+    private int enumerate(java.lang.ThreadGroup[], int, boolean)
+    {
+        java.lang.Throwable $r7;
+        java.lang.Object[] $r5;
+        java.lang.ThreadGroup r0, $r2;
+        int $i0, $i1, $i2, i3, i4, i5, i6;
+        boolean $z0, z1;
+        java.lang.ThreadGroup[] r1, $r3, $r4, $r6, r8;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        r1 := @parameter0: java.lang.ThreadGroup[];
+
+        i3 := @parameter1: int;
+
+        z1 := @parameter2: boolean;
+
+        i4 = 0;
+
+        r8 = null;
+
+        entermonitor r0;
+
+     label01:
+        $z0 = r0.<java.lang.ThreadGroup: boolean destroyed>;
+
+        if $z0 == 0 goto label03;
+
+        exitmonitor r0;
+
+     label02:
+        return 0;
+
+     label03:
+        i5 = r0.<java.lang.ThreadGroup: int ngroups>;
+
+        $i0 = lengthof r1;
+
+        $i1 = $i0 - i3;
+
+        if i5 <= $i1 goto label04;
+
+        $i2 = lengthof r1;
+
+        i5 = $i2 - i3;
+
+     label04:
+        if i5 <= 0 goto label05;
+
+        $r6 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r6, 0, r1, i3, i5);
+
+        i3 = i3 + i5;
+
+     label05:
+        if z1 == 0 goto label07;
+
+        i4 = r0.<java.lang.ThreadGroup: int ngroups>;
+
+        $r3 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        if $r3 == null goto label06;
+
+        $r4 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        $r5 = staticinvoke <java.util.Arrays: java.lang.Object[] copyOf(java.lang.Object[],int)>($r4, i4);
+
+        r8 = (java.lang.ThreadGroup[]) $r5;
+
+        goto label07;
+
+     label06:
+        r8 = null;
+
+     label07:
+        exitmonitor r0;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r7 := @caughtexception;
+
+        exitmonitor r0;
+
+     label10:
+        throw $r7;
+
+     label11:
+        if z1 == 0 goto label13;
+
+        i6 = 0;
+
+     label12:
+        if i6 >= i4 goto label13;
+
+        $r2 = r8[i6];
+
+        i3 = specialinvoke $r2.<java.lang.ThreadGroup: int enumerate(java.lang.ThreadGroup[],int,boolean)>(r1, i3, 1);
+
+        i6 = i6 + 1;
+
+        goto label12;
+
+     label13:
+        return i3;
+
+        catch java.lang.Throwable from label01 to label02 with label09;
+        catch java.lang.Throwable from label03 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    public final void stop()
+    {
+        java.lang.ThreadGroup r0;
+        boolean $z0;
+        java.lang.Thread $r1;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        $z0 = specialinvoke r0.<java.lang.ThreadGroup: boolean stopOrSuspend(boolean)>(0);
+
+        if $z0 == 0 goto label1;
+
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r1.<java.lang.Thread: void stop()>();
+
+     label1:
+        return;
+    }
+
+    public final void interrupt()
+    {
+        java.lang.Throwable $r7;
+        java.lang.Object[] $r4;
+        java.lang.Thread[] $r5;
+        java.lang.ThreadGroup r0, $r2;
+        java.lang.Thread $r6;
+        int $i0, i1, i2, i3;
+        java.lang.ThreadGroup[] $r1, $r3, r8;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        entermonitor r0;
+
+     label01:
+        virtualinvoke r0.<java.lang.ThreadGroup: void checkAccess()>();
+
+        i2 = 0;
+
+     label02:
+        $i0 = r0.<java.lang.ThreadGroup: int nthreads>;
+
+        if i2 >= $i0 goto label03;
+
+        $r5 = r0.<java.lang.ThreadGroup: java.lang.Thread[] threads>;
+
+        $r6 = $r5[i2];
+
+        virtualinvoke $r6.<java.lang.Thread: void interrupt()>();
+
+        i2 = i2 + 1;
+
+        goto label02;
+
+     label03:
+        i1 = r0.<java.lang.ThreadGroup: int ngroups>;
+
+        $r1 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        if $r1 == null goto label04;
+
+        $r3 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        $r4 = staticinvoke <java.util.Arrays: java.lang.Object[] copyOf(java.lang.Object[],int)>($r3, i1);
+
+        r8 = (java.lang.ThreadGroup[]) $r4;
+
+        goto label05;
+
+     label04:
+        r8 = null;
+
+     label05:
+        exitmonitor r0;
+
+     label06:
+        goto label09;
+
+     label07:
+        $r7 := @caughtexception;
+
+        exitmonitor r0;
+
+     label08:
+        throw $r7;
+
+     label09:
+        i3 = 0;
+
+     label10:
+        if i3 >= i1 goto label11;
+
+        $r2 = r8[i3];
+
+        virtualinvoke $r2.<java.lang.ThreadGroup: void interrupt()>();
+
+        i3 = i3 + 1;
+
+        goto label10;
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label01 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+    }
+
+    public final void suspend()
+    {
+        java.lang.ThreadGroup r0;
+        boolean $z0;
+        java.lang.Thread $r1;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        $z0 = specialinvoke r0.<java.lang.ThreadGroup: boolean stopOrSuspend(boolean)>(1);
+
+        if $z0 == 0 goto label1;
+
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r1.<java.lang.Thread: void suspend()>();
+
+     label1:
+        return;
+    }
+
+    private boolean stopOrSuspend(boolean)
+    {
+        java.lang.Throwable $r12;
+        java.lang.Object[] $r5;
+        java.lang.ThreadGroup r1, $r3;
+        java.lang.Thread $r0, $r7, $r9, $r11;
+        int $i0, i1, i2, i3;
+        boolean z0, $z1, z2, $z3;
+        java.lang.Thread[] $r6, $r8, $r10;
+        java.lang.ThreadGroup[] $r2, $r4, r13;
+
+        r1 := @this: java.lang.ThreadGroup;
+
+        z0 := @parameter0: boolean;
+
+        z2 = 0;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        r13 = null;
+
+        entermonitor r1;
+
+     label01:
+        virtualinvoke r1.<java.lang.ThreadGroup: void checkAccess()>();
+
+        i2 = 0;
+
+     label02:
+        $i0 = r1.<java.lang.ThreadGroup: int nthreads>;
+
+        if i2 >= $i0 goto label06;
+
+        $r6 = r1.<java.lang.ThreadGroup: java.lang.Thread[] threads>;
+
+        $r7 = $r6[i2];
+
+        if $r7 != $r0 goto label03;
+
+        z2 = 1;
+
+        goto label05;
+
+     label03:
+        if z0 == 0 goto label04;
+
+        $r10 = r1.<java.lang.ThreadGroup: java.lang.Thread[] threads>;
+
+        $r11 = $r10[i2];
+
+        virtualinvoke $r11.<java.lang.Thread: void suspend()>();
+
+        goto label05;
+
+     label04:
+        $r8 = r1.<java.lang.ThreadGroup: java.lang.Thread[] threads>;
+
+        $r9 = $r8[i2];
+
+        virtualinvoke $r9.<java.lang.Thread: void stop()>();
+
+     label05:
+        i2 = i2 + 1;
+
+        goto label02;
+
+     label06:
+        i1 = r1.<java.lang.ThreadGroup: int ngroups>;
+
+        $r2 = r1.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        if $r2 == null goto label07;
+
+        $r4 = r1.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        $r5 = staticinvoke <java.util.Arrays: java.lang.Object[] copyOf(java.lang.Object[],int)>($r4, i1);
+
+        r13 = (java.lang.ThreadGroup[]) $r5;
+
+     label07:
+        exitmonitor r1;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r12 := @caughtexception;
+
+        exitmonitor r1;
+
+     label10:
+        throw $r12;
+
+     label11:
+        i3 = 0;
+
+     label12:
+        if i3 >= i1 goto label16;
+
+        $r3 = r13[i3];
+
+        $z1 = specialinvoke $r3.<java.lang.ThreadGroup: boolean stopOrSuspend(boolean)>(z0);
+
+        if $z1 != 0 goto label13;
+
+        if z2 == 0 goto label14;
+
+     label13:
+        $z3 = 1;
+
+        goto label15;
+
+     label14:
+        $z3 = 0;
+
+     label15:
+        z2 = $z3;
+
+        i3 = i3 + 1;
+
+        goto label12;
+
+     label16:
+        return z2;
+
+        catch java.lang.Throwable from label01 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    public final void resume()
+    {
+        java.lang.Throwable $r7;
+        java.lang.Object[] $r4;
+        java.lang.Thread[] $r5;
+        java.lang.ThreadGroup r0, $r2;
+        java.lang.Thread $r6;
+        int $i0, i1, i2, i3;
+        java.lang.ThreadGroup[] $r1, $r3, r8;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        entermonitor r0;
+
+     label01:
+        virtualinvoke r0.<java.lang.ThreadGroup: void checkAccess()>();
+
+        i2 = 0;
+
+     label02:
+        $i0 = r0.<java.lang.ThreadGroup: int nthreads>;
+
+        if i2 >= $i0 goto label03;
+
+        $r5 = r0.<java.lang.ThreadGroup: java.lang.Thread[] threads>;
+
+        $r6 = $r5[i2];
+
+        virtualinvoke $r6.<java.lang.Thread: void resume()>();
+
+        i2 = i2 + 1;
+
+        goto label02;
+
+     label03:
+        i1 = r0.<java.lang.ThreadGroup: int ngroups>;
+
+        $r1 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        if $r1 == null goto label04;
+
+        $r3 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        $r4 = staticinvoke <java.util.Arrays: java.lang.Object[] copyOf(java.lang.Object[],int)>($r3, i1);
+
+        r8 = (java.lang.ThreadGroup[]) $r4;
+
+        goto label05;
+
+     label04:
+        r8 = null;
+
+     label05:
+        exitmonitor r0;
+
+     label06:
+        goto label09;
+
+     label07:
+        $r7 := @caughtexception;
+
+        exitmonitor r0;
+
+     label08:
+        throw $r7;
+
+     label09:
+        i3 = 0;
+
+     label10:
+        if i3 >= i1 goto label11;
+
+        $r2 = r8[i3];
+
+        virtualinvoke $r2.<java.lang.ThreadGroup: void resume()>();
+
+        i3 = i3 + 1;
+
+        goto label10;
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label01 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+    }
+
+    public final void destroy()
+    {
+        java.lang.IllegalThreadStateException $r1;
+        java.lang.Throwable $r9;
+        java.lang.Object[] $r8;
+        java.lang.ThreadGroup r0, $r3, $r4, $r5, $r6;
+        int $i0, i1, i2;
+        java.lang.ThreadGroup[] $r2, $r7, r10;
+        boolean $z0;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        entermonitor r0;
+
+     label01:
+        virtualinvoke r0.<java.lang.ThreadGroup: void checkAccess()>();
+
+        $z0 = r0.<java.lang.ThreadGroup: boolean destroyed>;
+
+        if $z0 != 0 goto label02;
+
+        $i0 = r0.<java.lang.ThreadGroup: int nthreads>;
+
+        if $i0 <= 0 goto label03;
+
+     label02:
+        $r1 = new java.lang.IllegalThreadStateException;
+
+        specialinvoke $r1.<java.lang.IllegalThreadStateException: void <init>()>();
+
+        throw $r1;
+
+     label03:
+        i1 = r0.<java.lang.ThreadGroup: int ngroups>;
+
+        $r2 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        if $r2 == null goto label04;
+
+        $r7 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        $r8 = staticinvoke <java.util.Arrays: java.lang.Object[] copyOf(java.lang.Object[],int)>($r7, i1);
+
+        r10 = (java.lang.ThreadGroup[]) $r8;
+
+        goto label05;
+
+     label04:
+        r10 = null;
+
+     label05:
+        $r3 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup parent>;
+
+        if $r3 == null goto label06;
+
+        r0.<java.lang.ThreadGroup: boolean destroyed> = 1;
+
+        r0.<java.lang.ThreadGroup: int ngroups> = 0;
+
+        r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups> = null;
+
+        r0.<java.lang.ThreadGroup: int nthreads> = 0;
+
+        r0.<java.lang.ThreadGroup: java.lang.Thread[] threads> = null;
+
+     label06:
+        exitmonitor r0;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r9 := @caughtexception;
+
+        exitmonitor r0;
+
+     label09:
+        throw $r9;
+
+     label10:
+        i2 = 0;
+
+     label11:
+        if i2 >= i1 goto label12;
+
+        $r6 = r10[i2];
+
+        virtualinvoke $r6.<java.lang.ThreadGroup: void destroy()>();
+
+        i2 = i2 + 1;
+
+        goto label11;
+
+     label12:
+        $r4 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup parent>;
+
+        if $r4 == null goto label13;
+
+        $r5 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup parent>;
+
+        specialinvoke $r5.<java.lang.ThreadGroup: void remove(java.lang.ThreadGroup)>(r0);
+
+     label13:
+        return;
+
+        catch java.lang.Throwable from label01 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    private final void add(java.lang.ThreadGroup)
+    {
+        java.lang.Throwable $r9;
+        java.lang.Object[] $r5;
+        java.lang.ThreadGroup r0, r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        boolean $z0;
+        java.lang.IllegalThreadStateException $r8;
+        java.lang.ThreadGroup[] $r1, $r2, $r4, $r6, $r7, $r10;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        r3 := @parameter0: java.lang.ThreadGroup;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<java.lang.ThreadGroup: boolean destroyed>;
+
+        if $z0 == 0 goto label2;
+
+        $r8 = new java.lang.IllegalThreadStateException;
+
+        specialinvoke $r8.<java.lang.IllegalThreadStateException: void <init>()>();
+
+        throw $r8;
+
+     label2:
+        $r1 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        if $r1 != null goto label3;
+
+        $r7 = newarray (java.lang.ThreadGroup)[4];
+
+        r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups> = $r7;
+
+        goto label4;
+
+     label3:
+        $i1 = r0.<java.lang.ThreadGroup: int ngroups>;
+
+        $r2 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        $i0 = lengthof $r2;
+
+        if $i1 != $i0 goto label4;
+
+        $r4 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        $i2 = r0.<java.lang.ThreadGroup: int ngroups>;
+
+        $i3 = $i2 * 2;
+
+        $r5 = staticinvoke <java.util.Arrays: java.lang.Object[] copyOf(java.lang.Object[],int)>($r4, $i3);
+
+        $r6 = (java.lang.ThreadGroup[]) $r5;
+
+        r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups> = $r6;
+
+     label4:
+        $r10 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        $i4 = r0.<java.lang.ThreadGroup: int ngroups>;
+
+        $r10[$i4] = r3;
+
+        $i5 = r0.<java.lang.ThreadGroup: int ngroups>;
+
+        $i6 = $i5 + 1;
+
+        r0.<java.lang.ThreadGroup: int ngroups> = $i6;
+
+        exitmonitor r0;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r9 := @caughtexception;
+
+        exitmonitor r0;
+
+     label7:
+        throw $r9;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    private void remove(java.lang.ThreadGroup)
+    {
+        java.lang.Throwable $r7;
+        java.lang.ThreadGroup r0, r2, $r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, i11;
+        boolean $z0, $z1;
+        java.lang.ThreadGroup[] $r1, $r4, $r5, $r6;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        r2 := @parameter0: java.lang.ThreadGroup;
+
+        entermonitor r0;
+
+     label01:
+        $z0 = r0.<java.lang.ThreadGroup: boolean destroyed>;
+
+        if $z0 == 0 goto label03;
+
+        exitmonitor r0;
+
+     label02:
+        return;
+
+     label03:
+        i11 = 0;
+
+     label04:
+        $i0 = r0.<java.lang.ThreadGroup: int ngroups>;
+
+        if i11 >= $i0 goto label06;
+
+        $r1 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        $r3 = $r1[i11];
+
+        if $r3 != r2 goto label05;
+
+        $i5 = r0.<java.lang.ThreadGroup: int ngroups>;
+
+        $i6 = $i5 - 1;
+
+        r0.<java.lang.ThreadGroup: int ngroups> = $i6;
+
+        $r5 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        $i9 = i11 + 1;
+
+        $r4 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        $i7 = r0.<java.lang.ThreadGroup: int ngroups>;
+
+        $i8 = $i7 - i11;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r5, $i9, $r4, i11, $i8);
+
+        $r6 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        $i10 = r0.<java.lang.ThreadGroup: int ngroups>;
+
+        $r6[$i10] = null;
+
+        goto label06;
+
+     label05:
+        i11 = i11 + 1;
+
+        goto label04;
+
+     label06:
+        $i1 = r0.<java.lang.ThreadGroup: int nthreads>;
+
+        if $i1 != 0 goto label07;
+
+        virtualinvoke r0.<java.lang.Object: void notifyAll()>();
+
+     label07:
+        $z1 = r0.<java.lang.ThreadGroup: boolean daemon>;
+
+        if $z1 == 0 goto label08;
+
+        $i2 = r0.<java.lang.ThreadGroup: int nthreads>;
+
+        if $i2 != 0 goto label08;
+
+        $i3 = r0.<java.lang.ThreadGroup: int nUnstartedThreads>;
+
+        if $i3 != 0 goto label08;
+
+        $i4 = r0.<java.lang.ThreadGroup: int ngroups>;
+
+        if $i4 != 0 goto label08;
+
+        virtualinvoke r0.<java.lang.ThreadGroup: void destroy()>();
+
+     label08:
+        exitmonitor r0;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r7 := @caughtexception;
+
+        exitmonitor r0;
+
+     label11:
+        throw $r7;
+
+     label12:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label10;
+        catch java.lang.Throwable from label03 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    void addUnstarted()
+    {
+        java.lang.IllegalThreadStateException $r1;
+        java.lang.Throwable $r2;
+        int $i0, $i1;
+        java.lang.ThreadGroup r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<java.lang.ThreadGroup: boolean destroyed>;
+
+        if $z0 == 0 goto label2;
+
+        $r1 = new java.lang.IllegalThreadStateException;
+
+        specialinvoke $r1.<java.lang.IllegalThreadStateException: void <init>()>();
+
+        throw $r1;
+
+     label2:
+        $i0 = r0.<java.lang.ThreadGroup: int nUnstartedThreads>;
+
+        $i1 = $i0 + 1;
+
+        r0.<java.lang.ThreadGroup: int nUnstartedThreads> = $i1;
+
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r2;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    void add(java.lang.Thread)
+    {
+        java.lang.Throwable $r9;
+        java.lang.Object[] $r5;
+        java.lang.ThreadGroup r0;
+        java.lang.Thread r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        boolean $z0;
+        java.lang.IllegalThreadStateException $r8;
+        java.lang.Thread[] $r1, $r2, $r4, $r6, $r7, $r10;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        r3 := @parameter0: java.lang.Thread;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<java.lang.ThreadGroup: boolean destroyed>;
+
+        if $z0 == 0 goto label2;
+
+        $r8 = new java.lang.IllegalThreadStateException;
+
+        specialinvoke $r8.<java.lang.IllegalThreadStateException: void <init>()>();
+
+        throw $r8;
+
+     label2:
+        $r1 = r0.<java.lang.ThreadGroup: java.lang.Thread[] threads>;
+
+        if $r1 != null goto label3;
+
+        $r7 = newarray (java.lang.Thread)[4];
+
+        r0.<java.lang.ThreadGroup: java.lang.Thread[] threads> = $r7;
+
+        goto label4;
+
+     label3:
+        $i1 = r0.<java.lang.ThreadGroup: int nthreads>;
+
+        $r2 = r0.<java.lang.ThreadGroup: java.lang.Thread[] threads>;
+
+        $i0 = lengthof $r2;
+
+        if $i1 != $i0 goto label4;
+
+        $r4 = r0.<java.lang.ThreadGroup: java.lang.Thread[] threads>;
+
+        $i2 = r0.<java.lang.ThreadGroup: int nthreads>;
+
+        $i3 = $i2 * 2;
+
+        $r5 = staticinvoke <java.util.Arrays: java.lang.Object[] copyOf(java.lang.Object[],int)>($r4, $i3);
+
+        $r6 = (java.lang.Thread[]) $r5;
+
+        r0.<java.lang.ThreadGroup: java.lang.Thread[] threads> = $r6;
+
+     label4:
+        $r10 = r0.<java.lang.ThreadGroup: java.lang.Thread[] threads>;
+
+        $i4 = r0.<java.lang.ThreadGroup: int nthreads>;
+
+        $r10[$i4] = r3;
+
+        $i5 = r0.<java.lang.ThreadGroup: int nthreads>;
+
+        $i6 = $i5 + 1;
+
+        r0.<java.lang.ThreadGroup: int nthreads> = $i6;
+
+        $i7 = r0.<java.lang.ThreadGroup: int nUnstartedThreads>;
+
+        $i8 = $i7 - 1;
+
+        r0.<java.lang.ThreadGroup: int nUnstartedThreads> = $i8;
+
+        exitmonitor r0;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r9 := @caughtexception;
+
+        exitmonitor r0;
+
+     label7:
+        throw $r9;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    void threadStartFailed(java.lang.Thread)
+    {
+        java.lang.Throwable $r2;
+        java.lang.Thread r1;
+        int $i0, $i1;
+        java.lang.ThreadGroup r0;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        r1 := @parameter0: java.lang.Thread;
+
+        entermonitor r0;
+
+     label1:
+        specialinvoke r0.<java.lang.ThreadGroup: void remove(java.lang.Thread)>(r1);
+
+        $i0 = r0.<java.lang.ThreadGroup: int nUnstartedThreads>;
+
+        $i1 = $i0 + 1;
+
+        r0.<java.lang.ThreadGroup: int nUnstartedThreads> = $i1;
+
+        exitmonitor r0;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r2;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    void threadTerminated(java.lang.Thread)
+    {
+        java.lang.Throwable $r2;
+        java.lang.ThreadGroup r0;
+        java.lang.Thread r1;
+        int $i0, $i1, $i2, $i3;
+        boolean $z0;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        r1 := @parameter0: java.lang.Thread;
+
+        entermonitor r0;
+
+     label1:
+        specialinvoke r0.<java.lang.ThreadGroup: void remove(java.lang.Thread)>(r1);
+
+        $i0 = r0.<java.lang.ThreadGroup: int nthreads>;
+
+        if $i0 != 0 goto label2;
+
+        virtualinvoke r0.<java.lang.Object: void notifyAll()>();
+
+     label2:
+        $z0 = r0.<java.lang.ThreadGroup: boolean daemon>;
+
+        if $z0 == 0 goto label3;
+
+        $i1 = r0.<java.lang.ThreadGroup: int nthreads>;
+
+        if $i1 != 0 goto label3;
+
+        $i2 = r0.<java.lang.ThreadGroup: int nUnstartedThreads>;
+
+        if $i2 != 0 goto label3;
+
+        $i3 = r0.<java.lang.ThreadGroup: int ngroups>;
+
+        if $i3 != 0 goto label3;
+
+        virtualinvoke r0.<java.lang.ThreadGroup: void destroy()>();
+
+     label3:
+        exitmonitor r0;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+     label6:
+        throw $r2;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    private void remove(java.lang.Thread)
+    {
+        java.lang.Throwable $r7;
+        java.lang.ThreadGroup r0;
+        java.lang.Thread r2, $r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6;
+        boolean $z0;
+        java.lang.Thread[] $r1, $r4, $r5, $r6;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        r2 := @parameter0: java.lang.Thread;
+
+        entermonitor r0;
+
+     label01:
+        $z0 = r0.<java.lang.ThreadGroup: boolean destroyed>;
+
+        if $z0 == 0 goto label03;
+
+        exitmonitor r0;
+
+     label02:
+        return;
+
+     label03:
+        i6 = 0;
+
+     label04:
+        $i0 = r0.<java.lang.ThreadGroup: int nthreads>;
+
+        if i6 >= $i0 goto label06;
+
+        $r1 = r0.<java.lang.ThreadGroup: java.lang.Thread[] threads>;
+
+        $r3 = $r1[i6];
+
+        if $r3 != r2 goto label05;
+
+        $r4 = r0.<java.lang.ThreadGroup: java.lang.Thread[] threads>;
+
+        $i3 = i6 + 1;
+
+        $r5 = r0.<java.lang.ThreadGroup: java.lang.Thread[] threads>;
+
+        $i1 = r0.<java.lang.ThreadGroup: int nthreads>;
+
+        $i2 = $i1 - 1;
+
+        r0.<java.lang.ThreadGroup: int nthreads> = $i2;
+
+        $i4 = $i2 - i6;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, $i3, $r5, i6, $i4);
+
+        $r6 = r0.<java.lang.ThreadGroup: java.lang.Thread[] threads>;
+
+        $i5 = r0.<java.lang.ThreadGroup: int nthreads>;
+
+        $r6[$i5] = null;
+
+        goto label06;
+
+     label05:
+        i6 = i6 + 1;
+
+        goto label04;
+
+     label06:
+        exitmonitor r0;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r7 := @caughtexception;
+
+        exitmonitor r0;
+
+     label09:
+        throw $r7;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label08;
+        catch java.lang.Throwable from label03 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    public void list()
+    {
+        java.io.PrintStream $r1;
+        java.lang.ThreadGroup r0;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        $r1 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke r0.<java.lang.ThreadGroup: void list(java.io.PrintStream,int)>($r1, 0);
+
+        return;
+    }
+
+    void list(java.io.PrintStream, int)
+    {
+        java.lang.Throwable $r8;
+        java.lang.Object[] $r5;
+        java.lang.ThreadGroup r0, $r3;
+        java.lang.Thread $r7;
+        int $i0, i1, i2, i3, i4, i5, i6, i7;
+        java.io.PrintStream r1;
+        java.lang.Thread[] $r6;
+        java.lang.ThreadGroup[] $r2, $r4, r9;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        r1 := @parameter0: java.io.PrintStream;
+
+        i2 := @parameter1: int;
+
+        entermonitor r0;
+
+     label01:
+        i3 = 0;
+
+     label02:
+        if i3 >= i2 goto label03;
+
+        virtualinvoke r1.<java.io.PrintStream: void print(java.lang.String)>(" ");
+
+        i3 = i3 + 1;
+
+        goto label02;
+
+     label03:
+        virtualinvoke r1.<java.io.PrintStream: void println(java.lang.Object)>(r0);
+
+        i4 = i2 + 4;
+
+        i5 = 0;
+
+     label04:
+        $i0 = r0.<java.lang.ThreadGroup: int nthreads>;
+
+        if i5 >= $i0 goto label07;
+
+        i6 = 0;
+
+     label05:
+        if i6 >= i4 goto label06;
+
+        virtualinvoke r1.<java.io.PrintStream: void print(java.lang.String)>(" ");
+
+        i6 = i6 + 1;
+
+        goto label05;
+
+     label06:
+        $r6 = r0.<java.lang.ThreadGroup: java.lang.Thread[] threads>;
+
+        $r7 = $r6[i5];
+
+        virtualinvoke r1.<java.io.PrintStream: void println(java.lang.Object)>($r7);
+
+        i5 = i5 + 1;
+
+        goto label04;
+
+     label07:
+        i1 = r0.<java.lang.ThreadGroup: int ngroups>;
+
+        $r2 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        if $r2 == null goto label08;
+
+        $r4 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup[] groups>;
+
+        $r5 = staticinvoke <java.util.Arrays: java.lang.Object[] copyOf(java.lang.Object[],int)>($r4, i1);
+
+        r9 = (java.lang.ThreadGroup[]) $r5;
+
+        goto label09;
+
+     label08:
+        r9 = null;
+
+     label09:
+        exitmonitor r0;
+
+     label10:
+        goto label13;
+
+     label11:
+        $r8 := @caughtexception;
+
+        exitmonitor r0;
+
+     label12:
+        throw $r8;
+
+     label13:
+        i7 = 0;
+
+     label14:
+        if i7 >= i1 goto label15;
+
+        $r3 = r9[i7];
+
+        virtualinvoke $r3.<java.lang.ThreadGroup: void list(java.io.PrintStream,int)>(r1, i4);
+
+        i7 = i7 + 1;
+
+        goto label14;
+
+     label15:
+        return;
+
+        catch java.lang.Throwable from label01 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+    }
+
+    public void uncaughtException(java.lang.Thread, java.lang.Throwable)
+    {
+        java.lang.Throwable r3;
+        java.io.PrintStream $r5, $r12;
+        java.lang.ThreadGroup r0, $r1, $r13;
+        java.lang.Thread$UncaughtExceptionHandler $r2;
+        java.lang.Thread r7;
+        java.lang.StringBuilder $r4, $r6, $r9, $r10;
+        java.lang.String $r8, $r11;
+        boolean $z0;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        r7 := @parameter0: java.lang.Thread;
+
+        r3 := @parameter1: java.lang.Throwable;
+
+        $r1 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup parent>;
+
+        if $r1 == null goto label1;
+
+        $r13 = r0.<java.lang.ThreadGroup: java.lang.ThreadGroup parent>;
+
+        virtualinvoke $r13.<java.lang.ThreadGroup: void uncaughtException(java.lang.Thread,java.lang.Throwable)>(r7, r3);
+
+        goto label3;
+
+     label1:
+        $r2 = staticinvoke <java.lang.Thread: java.lang.Thread$UncaughtExceptionHandler getDefaultUncaughtExceptionHandler()>();
+
+        if $r2 == null goto label2;
+
+        interfaceinvoke $r2.<java.lang.Thread$UncaughtExceptionHandler: void uncaughtException(java.lang.Thread,java.lang.Throwable)>(r7, r3);
+
+        goto label3;
+
+     label2:
+        $z0 = r3 instanceof java.lang.ThreadDeath;
+
+        if $z0 != 0 goto label3;
+
+        $r5 = <java.lang.System: java.io.PrintStream err>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception in thread \"");
+
+        $r8 = virtualinvoke r7.<java.lang.Thread: java.lang.String getName()>();
+
+        $r9 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\" ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintStream: void print(java.lang.String)>($r11);
+
+        $r12 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke r3.<java.lang.Throwable: void printStackTrace(java.io.PrintStream)>($r12);
+
+     label3:
+        return;
+    }
+
+    public boolean allowThreadSuspension(boolean)
+    {
+        java.lang.ThreadGroup r0;
+        boolean z0;
+
+        r0 := @this: java.lang.ThreadGroup;
+
+        z0 := @parameter0: boolean;
+
+        r0.<java.lang.ThreadGroup: boolean vmAllowSuspension> = z0;
+
+        if z0 != 0 goto label1;
+
+        staticinvoke <sun.misc.VM: void unsuspendSomeThreads()>();
+
+     label1:
+        return 1;
+    }
+
+    public java.lang.String toString()
+    {
+        java.lang.ThreadGroup r1;
+        int $i0;
+        java.lang.StringBuilder $r0, $r4, $r5, $r7, $r8, $r9, $r10;
+        java.lang.Class $r2;
+        java.lang.String $r3, $r6, $r11;
+
+        r1 := @this: java.lang.ThreadGroup;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        $r4 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[name=");
+
+        $r6 = virtualinvoke r1.<java.lang.ThreadGroup: java.lang.String getName()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",maxpri=");
+
+        $i0 = r1.<java.lang.ThreadGroup: int maxPriority>;
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r11;
+    }
+}

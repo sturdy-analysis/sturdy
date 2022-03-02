@@ -1,0 +1,777 @@
+public abstract class com.sun.beans.util.Cache extends java.lang.Object
+{
+    private static final int MAXIMUM_CAPACITY;
+    private final boolean identity;
+    private final com.sun.beans.util.Cache$Kind keyKind;
+    private final com.sun.beans.util.Cache$Kind valueKind;
+    private final java.lang.ref.ReferenceQueue queue;
+    private volatile com.sun.beans.util.Cache$CacheEntry[] table;
+    private int threshold;
+    private int size;
+
+    public abstract java.lang.Object create(java.lang.Object);
+
+    public void <init>(com.sun.beans.util.Cache$Kind, com.sun.beans.util.Cache$Kind)
+    {
+        com.sun.beans.util.Cache$Kind r1, r2;
+        com.sun.beans.util.Cache r0;
+
+        r0 := @this: com.sun.beans.util.Cache;
+
+        r1 := @parameter0: com.sun.beans.util.Cache$Kind;
+
+        r2 := @parameter1: com.sun.beans.util.Cache$Kind;
+
+        specialinvoke r0.<com.sun.beans.util.Cache: void <init>(com.sun.beans.util.Cache$Kind,com.sun.beans.util.Cache$Kind,boolean)>(r1, r2, 0);
+
+        return;
+    }
+
+    public void <init>(com.sun.beans.util.Cache$Kind, com.sun.beans.util.Cache$Kind, boolean)
+    {
+        com.sun.beans.util.Cache$CacheEntry[] $r2;
+        com.sun.beans.util.Cache$Kind r3, r4;
+        com.sun.beans.util.Cache r0;
+        java.lang.ref.ReferenceQueue $r1;
+        boolean z0;
+
+        r0 := @this: com.sun.beans.util.Cache;
+
+        r3 := @parameter0: com.sun.beans.util.Cache$Kind;
+
+        r4 := @parameter1: com.sun.beans.util.Cache$Kind;
+
+        z0 := @parameter2: boolean;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.lang.ref.ReferenceQueue;
+
+        specialinvoke $r1.<java.lang.ref.ReferenceQueue: void <init>()>();
+
+        r0.<com.sun.beans.util.Cache: java.lang.ref.ReferenceQueue queue> = $r1;
+
+        $r2 = specialinvoke r0.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$CacheEntry[] newTable(int)>(8);
+
+        r0.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$CacheEntry[] table> = $r2;
+
+        r0.<com.sun.beans.util.Cache: int threshold> = 6;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r3, "keyKind");
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r4, "valueKind");
+
+        r0.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$Kind keyKind> = r3;
+
+        r0.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$Kind valueKind> = r4;
+
+        r0.<com.sun.beans.util.Cache: boolean identity> = z0;
+
+        return;
+    }
+
+    public final java.lang.Object get(java.lang.Object)
+    {
+        java.lang.Throwable $r20;
+        com.sun.beans.util.Cache$CacheEntry $r2, $r7, $r11, $r13;
+        java.lang.ref.ReferenceQueue $r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14;
+        com.sun.beans.util.Cache r1;
+        com.sun.beans.util.Cache$CacheEntry[] $r5, $r6, $r10, $r12, $r14, $r15, $r16, $r17, $r18, $r19, r21;
+        java.lang.Object r0, $r3, $r8, $r9;
+
+        r1 := @this: com.sun.beans.util.Cache;
+
+        r0 := @parameter0: java.lang.Object;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "key");
+
+        specialinvoke r1.<com.sun.beans.util.Cache: void removeStaleEntries()>();
+
+        $i0 = specialinvoke r1.<com.sun.beans.util.Cache: int hash(java.lang.Object)>(r0);
+
+        r21 = r1.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$CacheEntry[] table>;
+
+        $i1 = staticinvoke <com.sun.beans.util.Cache: int index(int,java.lang.Object[])>($i0, r21);
+
+        $r2 = r21[$i1];
+
+        $r3 = specialinvoke r1.<com.sun.beans.util.Cache: java.lang.Object getEntryValue(java.lang.Object,int,com.sun.beans.util.Cache$CacheEntry)>(r0, $i0, $r2);
+
+        if $r3 == null goto label01;
+
+        return $r3;
+
+     label01:
+        $r4 = r1.<com.sun.beans.util.Cache: java.lang.ref.ReferenceQueue queue>;
+
+        entermonitor $r4;
+
+     label02:
+        $r6 = r1.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$CacheEntry[] table>;
+
+        $r5 = r1.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$CacheEntry[] table>;
+
+        $i2 = staticinvoke <com.sun.beans.util.Cache: int index(int,java.lang.Object[])>($i0, $r5);
+
+        $r7 = $r6[$i2];
+
+        $r8 = specialinvoke r1.<com.sun.beans.util.Cache: java.lang.Object getEntryValue(java.lang.Object,int,com.sun.beans.util.Cache$CacheEntry)>(r0, $i0, $r7);
+
+        if $r8 == null goto label04;
+
+        exitmonitor $r4;
+
+     label03:
+        return $r8;
+
+     label04:
+        $r9 = virtualinvoke r1.<com.sun.beans.util.Cache: java.lang.Object create(java.lang.Object)>(r0);
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>($r9, "value");
+
+        $r10 = r1.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$CacheEntry[] table>;
+
+        $i3 = staticinvoke <com.sun.beans.util.Cache: int index(int,java.lang.Object[])>($i0, $r10);
+
+        $r14 = r1.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$CacheEntry[] table>;
+
+        $r11 = new com.sun.beans.util.Cache$CacheEntry;
+
+        $r12 = r1.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$CacheEntry[] table>;
+
+        $r13 = $r12[$i3];
+
+        specialinvoke $r11.<com.sun.beans.util.Cache$CacheEntry: void <init>(com.sun.beans.util.Cache,int,java.lang.Object,java.lang.Object,com.sun.beans.util.Cache$CacheEntry,com.sun.beans.util.Cache$1)>(r1, $i0, r0, $r9, $r13, null);
+
+        $r14[$i3] = $r11;
+
+        $i4 = r1.<com.sun.beans.util.Cache: int size>;
+
+        $i5 = $i4 + 1;
+
+        r1.<com.sun.beans.util.Cache: int size> = $i5;
+
+        $i6 = r1.<com.sun.beans.util.Cache: int threshold>;
+
+        if $i5 < $i6 goto label08;
+
+        $r15 = r1.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$CacheEntry[] table>;
+
+        $i7 = lengthof $r15;
+
+        if $i7 != 1073741824 goto label05;
+
+        r1.<com.sun.beans.util.Cache: int threshold> = 2147483647;
+
+        goto label08;
+
+     label05:
+        specialinvoke r1.<com.sun.beans.util.Cache: void removeStaleEntries()>();
+
+        $r16 = r1.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$CacheEntry[] table>;
+
+        $i8 = lengthof $r16;
+
+        $i9 = $i8 << 1;
+
+        $r17 = specialinvoke r1.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$CacheEntry[] newTable(int)>($i9);
+
+        $r18 = r1.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$CacheEntry[] table>;
+
+        specialinvoke r1.<com.sun.beans.util.Cache: void transfer(com.sun.beans.util.Cache$CacheEntry[],com.sun.beans.util.Cache$CacheEntry[])>($r18, $r17);
+
+        $i12 = r1.<com.sun.beans.util.Cache: int size>;
+
+        $i10 = r1.<com.sun.beans.util.Cache: int threshold>;
+
+        $i11 = $i10 / 2;
+
+        if $i12 < $i11 goto label06;
+
+        r1.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$CacheEntry[] table> = $r17;
+
+        $i13 = r1.<com.sun.beans.util.Cache: int threshold>;
+
+        $i14 = $i13 << 1;
+
+        r1.<com.sun.beans.util.Cache: int threshold> = $i14;
+
+        goto label07;
+
+     label06:
+        $r19 = r1.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$CacheEntry[] table>;
+
+        specialinvoke r1.<com.sun.beans.util.Cache: void transfer(com.sun.beans.util.Cache$CacheEntry[],com.sun.beans.util.Cache$CacheEntry[])>($r17, $r19);
+
+     label07:
+        specialinvoke r1.<com.sun.beans.util.Cache: void removeStaleEntries()>();
+
+     label08:
+        exitmonitor $r4;
+
+     label09:
+        return $r9;
+
+     label10:
+        $r20 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label11:
+        throw $r20;
+
+        catch java.lang.Throwable from label02 to label03 with label10;
+        catch java.lang.Throwable from label04 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    public final void remove(java.lang.Object)
+    {
+        java.lang.Throwable $r7;
+        com.sun.beans.util.Cache$CacheEntry $r5, r8, r9;
+        com.sun.beans.util.Cache r1;
+        java.lang.ref.ReferenceQueue $r2;
+        com.sun.beans.util.Cache$CacheEntry[] $r3, $r4, $r6;
+        int $i0, $i1;
+        java.lang.Object r0;
+        boolean $z0;
+
+        r1 := @this: com.sun.beans.util.Cache;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 == null goto label10;
+
+        $r2 = r1.<com.sun.beans.util.Cache: java.lang.ref.ReferenceQueue queue>;
+
+        entermonitor $r2;
+
+     label01:
+        specialinvoke r1.<com.sun.beans.util.Cache: void removeStaleEntries()>();
+
+        $i0 = specialinvoke r1.<com.sun.beans.util.Cache: int hash(java.lang.Object)>(r0);
+
+        $r3 = r1.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$CacheEntry[] table>;
+
+        $i1 = staticinvoke <com.sun.beans.util.Cache: int index(int,java.lang.Object[])>($i0, $r3);
+
+        $r4 = r1.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$CacheEntry[] table>;
+
+        r8 = $r4[$i1];
+
+        r9 = r8;
+
+     label02:
+        if r9 == null goto label06;
+
+        $r5 = staticinvoke <com.sun.beans.util.Cache$CacheEntry: com.sun.beans.util.Cache$CacheEntry access$100(com.sun.beans.util.Cache$CacheEntry)>(r9);
+
+        $z0 = staticinvoke <com.sun.beans.util.Cache$CacheEntry: boolean access$200(com.sun.beans.util.Cache$CacheEntry,int,java.lang.Object)>(r9, $i0, r0);
+
+        if $z0 == 0 goto label05;
+
+        if r9 != r8 goto label03;
+
+        $r6 = r1.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$CacheEntry[] table>;
+
+        $r6[$i1] = $r5;
+
+        goto label04;
+
+     label03:
+        staticinvoke <com.sun.beans.util.Cache$CacheEntry: com.sun.beans.util.Cache$CacheEntry access$102(com.sun.beans.util.Cache$CacheEntry,com.sun.beans.util.Cache$CacheEntry)>(r8, $r5);
+
+     label04:
+        staticinvoke <com.sun.beans.util.Cache$CacheEntry: void access$300(com.sun.beans.util.Cache$CacheEntry)>(r9);
+
+        goto label06;
+
+     label05:
+        r8 = r9;
+
+        r9 = $r5;
+
+        goto label02;
+
+     label06:
+        exitmonitor $r2;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r7 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label09:
+        throw $r7;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label01 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    public final void clear()
+    {
+        java.lang.Throwable $r8;
+        com.sun.beans.util.Cache$CacheEntry $r7, r9;
+        com.sun.beans.util.Cache r0;
+        java.lang.ref.ReferenceQueue $r1, $r3;
+        java.lang.ref.Reference $r4;
+        com.sun.beans.util.Cache$CacheEntry[] $r2, $r5, $r6;
+        int $i0, i1, $i3;
+
+        r0 := @this: com.sun.beans.util.Cache;
+
+        $r1 = r0.<com.sun.beans.util.Cache: java.lang.ref.ReferenceQueue queue>;
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = r0.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$CacheEntry[] table>;
+
+        i1 = lengthof $r2;
+
+     label02:
+        $i0 = i1;
+
+        $i3 = (int) -1;
+
+        i1 = i1 + $i3;
+
+        if 0 >= $i0 goto label05;
+
+        $r5 = r0.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$CacheEntry[] table>;
+
+        r9 = $r5[i1];
+
+     label03:
+        if r9 == null goto label04;
+
+        $r7 = staticinvoke <com.sun.beans.util.Cache$CacheEntry: com.sun.beans.util.Cache$CacheEntry access$100(com.sun.beans.util.Cache$CacheEntry)>(r9);
+
+        staticinvoke <com.sun.beans.util.Cache$CacheEntry: void access$300(com.sun.beans.util.Cache$CacheEntry)>(r9);
+
+        r9 = $r7;
+
+        goto label03;
+
+     label04:
+        $r6 = r0.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$CacheEntry[] table>;
+
+        $r6[i1] = null;
+
+        goto label02;
+
+     label05:
+        $r3 = r0.<com.sun.beans.util.Cache: java.lang.ref.ReferenceQueue queue>;
+
+        $r4 = virtualinvoke $r3.<java.lang.ref.ReferenceQueue: java.lang.ref.Reference poll()>();
+
+        if null == $r4 goto label06;
+
+        goto label05;
+
+     label06:
+        exitmonitor $r1;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r8 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label09:
+        throw $r8;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label01 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    private int hash(java.lang.Object)
+    {
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, i12;
+        boolean $z0;
+        com.sun.beans.util.Cache r0;
+        java.lang.Object r1;
+
+        r0 := @this: com.sun.beans.util.Cache;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $z0 = r0.<com.sun.beans.util.Cache: boolean identity>;
+
+        if $z0 == 0 goto label1;
+
+        $i8 = staticinvoke <java.lang.System: int identityHashCode(java.lang.Object)>(r1);
+
+        $i10 = $i8 << 1;
+
+        $i9 = $i8 << 8;
+
+        $i11 = $i10 - $i9;
+
+        return $i11;
+
+     label1:
+        $i0 = virtualinvoke r1.<java.lang.Object: int hashCode()>();
+
+        $i2 = $i0 >>> 20;
+
+        $i1 = $i0 >>> 12;
+
+        $i3 = $i2 ^ $i1;
+
+        i12 = $i0 ^ $i3;
+
+        $i4 = i12 >>> 7;
+
+        $i6 = i12 ^ $i4;
+
+        $i5 = i12 >>> 4;
+
+        $i7 = $i6 ^ $i5;
+
+        return $i7;
+    }
+
+    private static int index(int, java.lang.Object[])
+    {
+        java.lang.Object[] r0;
+        int i0, $i1, $i2, $i3;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: java.lang.Object[];
+
+        $i1 = lengthof r0;
+
+        $i2 = $i1 - 1;
+
+        $i3 = i0 & $i2;
+
+        return $i3;
+    }
+
+    private com.sun.beans.util.Cache$CacheEntry[] newTable(int)
+    {
+        com.sun.beans.util.Cache$CacheEntry[] $r0, $r1;
+        int i0;
+        com.sun.beans.util.Cache r2;
+
+        r2 := @this: com.sun.beans.util.Cache;
+
+        i0 := @parameter0: int;
+
+        $r0 = newarray (com.sun.beans.util.Cache$CacheEntry)[i0];
+
+        $r1 = (com.sun.beans.util.Cache$CacheEntry[]) $r0;
+
+        return $r1;
+    }
+
+    private java.lang.Object getEntryValue(java.lang.Object, int, com.sun.beans.util.Cache$CacheEntry)
+    {
+        com.sun.beans.util.Cache$Ref $r1;
+        int i0;
+        java.lang.Object r0, $r2;
+        com.sun.beans.util.Cache$CacheEntry r4;
+        com.sun.beans.util.Cache r3;
+        boolean $z0;
+
+        r3 := @this: com.sun.beans.util.Cache;
+
+        r0 := @parameter0: java.lang.Object;
+
+        i0 := @parameter1: int;
+
+        r4 := @parameter2: com.sun.beans.util.Cache$CacheEntry;
+
+     label1:
+        if r4 == null goto label3;
+
+        $z0 = staticinvoke <com.sun.beans.util.Cache$CacheEntry: boolean access$200(com.sun.beans.util.Cache$CacheEntry,int,java.lang.Object)>(r4, i0, r0);
+
+        if $z0 == 0 goto label2;
+
+        $r1 = staticinvoke <com.sun.beans.util.Cache$CacheEntry: com.sun.beans.util.Cache$Ref access$400(com.sun.beans.util.Cache$CacheEntry)>(r4);
+
+        $r2 = interfaceinvoke $r1.<com.sun.beans.util.Cache$Ref: java.lang.Object getReferent()>();
+
+        return $r2;
+
+     label2:
+        r4 = staticinvoke <com.sun.beans.util.Cache$CacheEntry: com.sun.beans.util.Cache$CacheEntry access$100(com.sun.beans.util.Cache$CacheEntry)>(r4);
+
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    private void removeStaleEntries()
+    {
+        java.lang.Throwable $r11;
+        com.sun.beans.util.Cache$CacheEntry r6, $r9, r13, r14;
+        java.lang.ref.ReferenceQueue $r1, $r3, $r15;
+        int $i0, $i1;
+        boolean $z0;
+        com.sun.beans.util.Cache r0;
+        java.lang.ref.Reference $r2, r12, $r16;
+        com.sun.beans.util.Cache$CacheEntry[] $r7, $r8, $r10;
+        com.sun.beans.util.Cache$Ref r4;
+        java.lang.Object $r5;
+
+        r0 := @this: com.sun.beans.util.Cache;
+
+        $r1 = r0.<com.sun.beans.util.Cache: java.lang.ref.ReferenceQueue queue>;
+
+        $r2 = virtualinvoke $r1.<java.lang.ref.ReferenceQueue: java.lang.ref.Reference poll()>();
+
+        r12 = $r2;
+
+        if $r2 == null goto label10;
+
+        $r3 = r0.<com.sun.beans.util.Cache: java.lang.ref.ReferenceQueue queue>;
+
+        entermonitor $r3;
+
+     label01:
+        $z0 = r12 instanceof com.sun.beans.util.Cache$Ref;
+
+        if $z0 == 0 goto label06;
+
+        r4 = (com.sun.beans.util.Cache$Ref) r12;
+
+        $r5 = interfaceinvoke r4.<com.sun.beans.util.Cache$Ref: java.lang.Object getOwner()>();
+
+        r6 = (com.sun.beans.util.Cache$CacheEntry) $r5;
+
+        if r6 == null goto label06;
+
+        $i0 = staticinvoke <com.sun.beans.util.Cache$CacheEntry: int access$500(com.sun.beans.util.Cache$CacheEntry)>(r6);
+
+        $r7 = r0.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$CacheEntry[] table>;
+
+        $i1 = staticinvoke <com.sun.beans.util.Cache: int index(int,java.lang.Object[])>($i0, $r7);
+
+        $r8 = r0.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$CacheEntry[] table>;
+
+        r13 = $r8[$i1];
+
+        r14 = r13;
+
+     label02:
+        if r14 == null goto label06;
+
+        $r9 = staticinvoke <com.sun.beans.util.Cache$CacheEntry: com.sun.beans.util.Cache$CacheEntry access$100(com.sun.beans.util.Cache$CacheEntry)>(r14);
+
+        if r14 != r6 goto label05;
+
+        if r14 != r13 goto label03;
+
+        $r10 = r0.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$CacheEntry[] table>;
+
+        $r10[$i1] = $r9;
+
+        goto label04;
+
+     label03:
+        staticinvoke <com.sun.beans.util.Cache$CacheEntry: com.sun.beans.util.Cache$CacheEntry access$102(com.sun.beans.util.Cache$CacheEntry,com.sun.beans.util.Cache$CacheEntry)>(r13, $r9);
+
+     label04:
+        staticinvoke <com.sun.beans.util.Cache$CacheEntry: void access$300(com.sun.beans.util.Cache$CacheEntry)>(r14);
+
+        goto label06;
+
+     label05:
+        r13 = r14;
+
+        r14 = $r9;
+
+        goto label02;
+
+     label06:
+        $r15 = r0.<com.sun.beans.util.Cache: java.lang.ref.ReferenceQueue queue>;
+
+        $r16 = virtualinvoke $r15.<java.lang.ref.ReferenceQueue: java.lang.ref.Reference poll()>();
+
+        r12 = $r16;
+
+        if $r16 != null goto label01;
+
+        exitmonitor $r3;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r11 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label09:
+        throw $r11;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label01 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    private void transfer(com.sun.beans.util.Cache$CacheEntry[], com.sun.beans.util.Cache$CacheEntry[])
+    {
+        com.sun.beans.util.Cache$CacheEntry $r1, $r5, r7;
+        com.sun.beans.util.Cache r6;
+        com.sun.beans.util.Cache$CacheEntry[] r0, r4;
+        com.sun.beans.util.Cache$Ref $r2, $r3;
+        int $i0, $i1, $i2, i3, $i5;
+        boolean $z0, $z1;
+
+        r6 := @this: com.sun.beans.util.Cache;
+
+        r0 := @parameter0: com.sun.beans.util.Cache$CacheEntry[];
+
+        r4 := @parameter1: com.sun.beans.util.Cache$CacheEntry[];
+
+        i3 = lengthof r0;
+
+     label1:
+        $i0 = i3;
+
+        $i5 = (int) -1;
+
+        i3 = i3 + $i5;
+
+        if 0 >= $i0 goto label7;
+
+        r7 = r0[i3];
+
+        r0[i3] = null;
+
+     label2:
+        if r7 == null goto label6;
+
+        $r1 = staticinvoke <com.sun.beans.util.Cache$CacheEntry: com.sun.beans.util.Cache$CacheEntry access$100(com.sun.beans.util.Cache$CacheEntry)>(r7);
+
+        $r2 = staticinvoke <com.sun.beans.util.Cache$CacheEntry: com.sun.beans.util.Cache$Ref access$600(com.sun.beans.util.Cache$CacheEntry)>(r7);
+
+        $z0 = interfaceinvoke $r2.<com.sun.beans.util.Cache$Ref: boolean isStale()>();
+
+        if $z0 != 0 goto label3;
+
+        $r3 = staticinvoke <com.sun.beans.util.Cache$CacheEntry: com.sun.beans.util.Cache$Ref access$400(com.sun.beans.util.Cache$CacheEntry)>(r7);
+
+        $z1 = interfaceinvoke $r3.<com.sun.beans.util.Cache$Ref: boolean isStale()>();
+
+        if $z1 == 0 goto label4;
+
+     label3:
+        staticinvoke <com.sun.beans.util.Cache$CacheEntry: void access$300(com.sun.beans.util.Cache$CacheEntry)>(r7);
+
+        goto label5;
+
+     label4:
+        $i1 = staticinvoke <com.sun.beans.util.Cache$CacheEntry: int access$500(com.sun.beans.util.Cache$CacheEntry)>(r7);
+
+        $i2 = staticinvoke <com.sun.beans.util.Cache: int index(int,java.lang.Object[])>($i1, r4);
+
+        $r5 = r4[$i2];
+
+        staticinvoke <com.sun.beans.util.Cache$CacheEntry: com.sun.beans.util.Cache$CacheEntry access$102(com.sun.beans.util.Cache$CacheEntry,com.sun.beans.util.Cache$CacheEntry)>(r7, $r5);
+
+        r4[$i2] = r7;
+
+     label5:
+        r7 = $r1;
+
+        goto label2;
+
+     label6:
+        goto label1;
+
+     label7:
+        return;
+    }
+
+    static java.lang.ref.ReferenceQueue access$700(com.sun.beans.util.Cache)
+    {
+        com.sun.beans.util.Cache r0;
+        java.lang.ref.ReferenceQueue $r1;
+
+        r0 := @parameter0: com.sun.beans.util.Cache;
+
+        $r1 = r0.<com.sun.beans.util.Cache: java.lang.ref.ReferenceQueue queue>;
+
+        return $r1;
+    }
+
+    static com.sun.beans.util.Cache$Kind access$800(com.sun.beans.util.Cache)
+    {
+        com.sun.beans.util.Cache$Kind $r1;
+        com.sun.beans.util.Cache r0;
+
+        r0 := @parameter0: com.sun.beans.util.Cache;
+
+        $r1 = r0.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$Kind keyKind>;
+
+        return $r1;
+    }
+
+    static com.sun.beans.util.Cache$Kind access$900(com.sun.beans.util.Cache)
+    {
+        com.sun.beans.util.Cache$Kind $r1;
+        com.sun.beans.util.Cache r0;
+
+        r0 := @parameter0: com.sun.beans.util.Cache;
+
+        $r1 = r0.<com.sun.beans.util.Cache: com.sun.beans.util.Cache$Kind valueKind>;
+
+        return $r1;
+    }
+
+    static boolean access$1000(com.sun.beans.util.Cache)
+    {
+        com.sun.beans.util.Cache r0;
+        boolean $z0;
+
+        r0 := @parameter0: com.sun.beans.util.Cache;
+
+        $z0 = r0.<com.sun.beans.util.Cache: boolean identity>;
+
+        return $z0;
+    }
+
+    static int access$1110(com.sun.beans.util.Cache)
+    {
+        int $i0, $i1;
+        com.sun.beans.util.Cache r0;
+
+        r0 := @parameter0: com.sun.beans.util.Cache;
+
+        $i0 = r0.<com.sun.beans.util.Cache: int size>;
+
+        $i1 = $i0 - 1;
+
+        r0.<com.sun.beans.util.Cache: int size> = $i1;
+
+        return $i0;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.beans.util.Cache: int MAXIMUM_CAPACITY> = 1073741824;
+
+        return;
+    }
+}

@@ -1,0 +1,627 @@
+public class sun.security.jgss.GSSHeader extends java.lang.Object
+{
+    private sun.security.util.ObjectIdentifier mechOid;
+    private byte[] mechOidBytes;
+    private int mechTokenLength;
+    public static final int TOKEN_ID;
+
+    public void <init>(sun.security.util.ObjectIdentifier, int) throws java.io.IOException
+    {
+        sun.security.jgss.GSSHeader r0;
+        byte[] $r3;
+        sun.security.util.DerOutputStream $r2;
+        int i0;
+        sun.security.util.ObjectIdentifier r1;
+
+        r0 := @this: sun.security.jgss.GSSHeader;
+
+        r1 := @parameter0: sun.security.util.ObjectIdentifier;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.jgss.GSSHeader: sun.security.util.ObjectIdentifier mechOid> = null;
+
+        r0.<sun.security.jgss.GSSHeader: byte[] mechOidBytes> = null;
+
+        r0.<sun.security.jgss.GSSHeader: int mechTokenLength> = 0;
+
+        r0.<sun.security.jgss.GSSHeader: sun.security.util.ObjectIdentifier mechOid> = r1;
+
+        $r2 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r2.<sun.security.util.DerOutputStream: void <init>()>();
+
+        virtualinvoke $r2.<sun.security.util.DerOutputStream: void putOID(sun.security.util.ObjectIdentifier)>(r1);
+
+        $r3 = virtualinvoke $r2.<sun.security.util.DerOutputStream: byte[] toByteArray()>();
+
+        r0.<sun.security.jgss.GSSHeader: byte[] mechOidBytes> = $r3;
+
+        r0.<sun.security.jgss.GSSHeader: int mechTokenLength> = i0;
+
+        return;
+    }
+
+    public void <init>(java.io.InputStream) throws java.io.IOException, org.ietf.jgss.GSSException
+    {
+        sun.security.util.DerValue $r8;
+        byte[] $r3, $r5;
+        org.ietf.jgss.GSSException $r7;
+        sun.security.jgss.GSSHeader r0;
+        int $i0, $i1, $i2, $i3, $i5;
+        sun.security.util.ObjectIdentifier $r4;
+        java.io.InputStream r1;
+
+        r0 := @this: sun.security.jgss.GSSHeader;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.jgss.GSSHeader: sun.security.util.ObjectIdentifier mechOid> = null;
+
+        r0.<sun.security.jgss.GSSHeader: byte[] mechOidBytes> = null;
+
+        r0.<sun.security.jgss.GSSHeader: int mechTokenLength> = 0;
+
+        $i0 = virtualinvoke r1.<java.io.InputStream: int read()>();
+
+        if $i0 == 96 goto label1;
+
+        $r7 = new org.ietf.jgss.GSSException;
+
+        $i5 = (int) -1;
+
+        specialinvoke $r7.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(10, $i5, "GSSHeader did not find the right tag");
+
+        throw $r7;
+
+     label1:
+        $i1 = specialinvoke r0.<sun.security.jgss.GSSHeader: int getLength(java.io.InputStream)>(r1);
+
+        $r8 = new sun.security.util.DerValue;
+
+        specialinvoke $r8.<sun.security.util.DerValue: void <init>(java.io.InputStream)>(r1);
+
+        $r3 = virtualinvoke $r8.<sun.security.util.DerValue: byte[] toByteArray()>();
+
+        r0.<sun.security.jgss.GSSHeader: byte[] mechOidBytes> = $r3;
+
+        $r4 = virtualinvoke $r8.<sun.security.util.DerValue: sun.security.util.ObjectIdentifier getOID()>();
+
+        r0.<sun.security.jgss.GSSHeader: sun.security.util.ObjectIdentifier mechOid> = $r4;
+
+        $r5 = r0.<sun.security.jgss.GSSHeader: byte[] mechOidBytes>;
+
+        $i2 = lengthof $r5;
+
+        $i3 = $i1 - $i2;
+
+        r0.<sun.security.jgss.GSSHeader: int mechTokenLength> = $i3;
+
+        return;
+    }
+
+    public sun.security.util.ObjectIdentifier getOid()
+    {
+        sun.security.jgss.GSSHeader r0;
+        sun.security.util.ObjectIdentifier $r1;
+
+        r0 := @this: sun.security.jgss.GSSHeader;
+
+        $r1 = r0.<sun.security.jgss.GSSHeader: sun.security.util.ObjectIdentifier mechOid>;
+
+        return $r1;
+    }
+
+    public int getMechTokenLength()
+    {
+        sun.security.jgss.GSSHeader r0;
+        int $i0;
+
+        r0 := @this: sun.security.jgss.GSSHeader;
+
+        $i0 = r0.<sun.security.jgss.GSSHeader: int mechTokenLength>;
+
+        return $i0;
+    }
+
+    public int getLength()
+    {
+        byte[] $r1, $r2;
+        sun.security.jgss.GSSHeader r0;
+        int $i0, $i1, i2, $i3, $i4, $i5, $i6;
+
+        r0 := @this: sun.security.jgss.GSSHeader;
+
+        $r1 = r0.<sun.security.jgss.GSSHeader: byte[] mechOidBytes>;
+
+        $i1 = lengthof $r1;
+
+        $i0 = r0.<sun.security.jgss.GSSHeader: int mechTokenLength>;
+
+        i2 = $i1 + $i0;
+
+        $i3 = specialinvoke r0.<sun.security.jgss.GSSHeader: int getLenFieldSize(int)>(i2);
+
+        $i5 = 1 + $i3;
+
+        $r2 = r0.<sun.security.jgss.GSSHeader: byte[] mechOidBytes>;
+
+        $i4 = lengthof $r2;
+
+        $i6 = $i5 + $i4;
+
+        return $i6;
+    }
+
+    public static int getMaxMechTokenSize(sun.security.util.ObjectIdentifier, int)
+    {
+        byte[] $r2;
+        java.io.IOException $r3;
+        sun.security.util.DerOutputStream $r4;
+        int $i0, $i1, i2, i3, i4, $i6;
+        sun.security.util.ObjectIdentifier r1;
+
+        r1 := @parameter0: sun.security.util.ObjectIdentifier;
+
+        i2 := @parameter1: int;
+
+        i3 = 0;
+
+     label1:
+        $r4 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r4.<sun.security.util.DerOutputStream: void <init>()>();
+
+        virtualinvoke $r4.<sun.security.util.DerOutputStream: void putOID(sun.security.util.ObjectIdentifier)>(r1);
+
+        $r2 = virtualinvoke $r4.<sun.security.util.DerOutputStream: byte[] toByteArray()>();
+
+        i3 = lengthof $r2;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+     label4:
+        $i0 = 1 + i3;
+
+        $i1 = i2 - $i0;
+
+        $i6 = (int) -5;
+
+        i4 = $i1 + $i6;
+
+        return i4;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    private int getLenFieldSize(int)
+    {
+        int i0;
+        sun.security.jgss.GSSHeader r0;
+        byte b1;
+
+        r0 := @this: sun.security.jgss.GSSHeader;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 128 goto label1;
+
+        b1 = 1;
+
+        goto label5;
+
+     label1:
+        if i0 >= 256 goto label2;
+
+        b1 = 2;
+
+        goto label5;
+
+     label2:
+        if i0 >= 65536 goto label3;
+
+        b1 = 3;
+
+        goto label5;
+
+     label3:
+        if i0 >= 16777216 goto label4;
+
+        b1 = 4;
+
+        goto label5;
+
+     label4:
+        b1 = 5;
+
+     label5:
+        return b1;
+    }
+
+    public int encode(java.io.OutputStream) throws java.io.IOException
+    {
+        java.io.OutputStream r2;
+        byte[] $r1, $r3, $r4;
+        sun.security.jgss.GSSHeader r0;
+        int $i0, $i1, $i2, i3, $i4, i5, i6;
+
+        r0 := @this: sun.security.jgss.GSSHeader;
+
+        r2 := @parameter0: java.io.OutputStream;
+
+        $r1 = r0.<sun.security.jgss.GSSHeader: byte[] mechOidBytes>;
+
+        $i0 = lengthof $r1;
+
+        i5 = 1 + $i0;
+
+        virtualinvoke r2.<java.io.OutputStream: void write(int)>(96);
+
+        $r3 = r0.<sun.security.jgss.GSSHeader: byte[] mechOidBytes>;
+
+        $i2 = lengthof $r3;
+
+        $i1 = r0.<sun.security.jgss.GSSHeader: int mechTokenLength>;
+
+        i3 = $i2 + $i1;
+
+        $i4 = specialinvoke r0.<sun.security.jgss.GSSHeader: int putLength(int,java.io.OutputStream)>(i3, r2);
+
+        i6 = i5 + $i4;
+
+        $r4 = r0.<sun.security.jgss.GSSHeader: byte[] mechOidBytes>;
+
+        virtualinvoke r2.<java.io.OutputStream: void write(byte[])>($r4);
+
+        return i6;
+    }
+
+    private int getLength(java.io.InputStream) throws java.io.IOException
+    {
+        sun.security.jgss.GSSHeader r0;
+        int $i0, $i1;
+        java.io.InputStream r1;
+
+        r0 := @this: sun.security.jgss.GSSHeader;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        $i0 = virtualinvoke r1.<java.io.InputStream: int read()>();
+
+        $i1 = specialinvoke r0.<sun.security.jgss.GSSHeader: int getLength(int,java.io.InputStream)>($i0, r1);
+
+        return $i1;
+    }
+
+    private int getLength(int, java.io.InputStream) throws java.io.IOException
+    {
+        int i0, $i1, $i2, $i3, i4, i5, i6, $i8, $i10;
+        java.lang.String $r6, $r10;
+        java.io.IOException $r12, $r13;
+        sun.security.jgss.GSSHeader r9;
+        java.lang.StringBuilder $r2, $r3, $r4, $r5, $r11;
+        java.io.InputStream r8;
+
+        r9 := @this: sun.security.jgss.GSSHeader;
+
+        i0 := @parameter0: int;
+
+        r8 := @parameter1: java.io.InputStream;
+
+        $i1 = i0 & 128;
+
+        if $i1 != 0 goto label1;
+
+        i4 = i0;
+
+        goto label9;
+
+     label1:
+        i5 = i0 & 127;
+
+        if i5 != 0 goto label2;
+
+        $i8 = (int) -1;
+
+        return $i8;
+
+     label2:
+        if i5 < 0 goto label3;
+
+        if i5 <= 4 goto label6;
+
+     label3:
+        $r12 = new java.io.IOException;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DerInputStream.getLength(): lengthTag=");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i5);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        if i5 >= 0 goto label4;
+
+        $r10 = "incorrect DER encoding.";
+
+        goto label5;
+
+     label4:
+        $r10 = "too big.";
+
+     label5:
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r12.<java.io.IOException: void <init>(java.lang.String)>($r6);
+
+        throw $r12;
+
+     label6:
+        i4 = 0;
+
+     label7:
+        if i5 <= 0 goto label8;
+
+        i6 = i4 << 8;
+
+        $i2 = virtualinvoke r8.<java.io.InputStream: int read()>();
+
+        $i3 = 255 & $i2;
+
+        i4 = i6 + $i3;
+
+        $i10 = (int) -1;
+
+        i5 = i5 + $i10;
+
+        goto label7;
+
+     label8:
+        if i4 >= 0 goto label9;
+
+        $r13 = new java.io.IOException;
+
+        specialinvoke $r13.<java.io.IOException: void <init>(java.lang.String)>("Invalid length bytes");
+
+        throw $r13;
+
+     label9:
+        return i4;
+    }
+
+    private int putLength(int, java.io.OutputStream) throws java.io.IOException
+    {
+        byte $b2, $b4, $b6, $b7, $b9, $b11, $b12, $b14, $b15, $b16, $b17, b18;
+        sun.security.jgss.GSSHeader r1;
+        int i0, $i1, $i3, $i5, $i8, $i10, $i13, $i19, $i21, $i22, $i24, $i25, $i26, $i28, $i29, $i30, $i31, $i33, $i34, $i35, $i36, $i37;
+        java.io.OutputStream r0;
+
+        r1 := @this: sun.security.jgss.GSSHeader;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: java.io.OutputStream;
+
+        if i0 >= 128 goto label1;
+
+        $b17 = (byte) i0;
+
+        $i19 = (int) $b17;
+
+        virtualinvoke r0.<java.io.OutputStream: void write(int)>($i19);
+
+        b18 = 1;
+
+        goto label5;
+
+     label1:
+        if i0 >= 256 goto label2;
+
+        $i21 = (int) -127;
+
+        virtualinvoke r0.<java.io.OutputStream: void write(int)>($i21);
+
+        $b16 = (byte) i0;
+
+        $i22 = (int) $b16;
+
+        virtualinvoke r0.<java.io.OutputStream: void write(int)>($i22);
+
+        b18 = 2;
+
+        goto label5;
+
+     label2:
+        if i0 >= 65536 goto label3;
+
+        $i24 = (int) -126;
+
+        virtualinvoke r0.<java.io.OutputStream: void write(int)>($i24);
+
+        $i13 = i0 >> 8;
+
+        $b14 = (byte) $i13;
+
+        $i25 = (int) $b14;
+
+        virtualinvoke r0.<java.io.OutputStream: void write(int)>($i25);
+
+        $b15 = (byte) i0;
+
+        $i26 = (int) $b15;
+
+        virtualinvoke r0.<java.io.OutputStream: void write(int)>($i26);
+
+        b18 = 3;
+
+        goto label5;
+
+     label3:
+        if i0 >= 16777216 goto label4;
+
+        $i28 = (int) -125;
+
+        virtualinvoke r0.<java.io.OutputStream: void write(int)>($i28);
+
+        $i8 = i0 >> 16;
+
+        $b9 = (byte) $i8;
+
+        $i29 = (int) $b9;
+
+        virtualinvoke r0.<java.io.OutputStream: void write(int)>($i29);
+
+        $i10 = i0 >> 8;
+
+        $b11 = (byte) $i10;
+
+        $i30 = (int) $b11;
+
+        virtualinvoke r0.<java.io.OutputStream: void write(int)>($i30);
+
+        $b12 = (byte) i0;
+
+        $i31 = (int) $b12;
+
+        virtualinvoke r0.<java.io.OutputStream: void write(int)>($i31);
+
+        b18 = 4;
+
+        goto label5;
+
+     label4:
+        $i33 = (int) -124;
+
+        virtualinvoke r0.<java.io.OutputStream: void write(int)>($i33);
+
+        $i1 = i0 >> 24;
+
+        $b2 = (byte) $i1;
+
+        $i34 = (int) $b2;
+
+        virtualinvoke r0.<java.io.OutputStream: void write(int)>($i34);
+
+        $i3 = i0 >> 16;
+
+        $b4 = (byte) $i3;
+
+        $i35 = (int) $b4;
+
+        virtualinvoke r0.<java.io.OutputStream: void write(int)>($i35);
+
+        $i5 = i0 >> 8;
+
+        $b6 = (byte) $i5;
+
+        $i36 = (int) $b6;
+
+        virtualinvoke r0.<java.io.OutputStream: void write(int)>($i36);
+
+        $b7 = (byte) i0;
+
+        $i37 = (int) $b7;
+
+        virtualinvoke r0.<java.io.OutputStream: void write(int)>($i37);
+
+        b18 = 5;
+
+     label5:
+        return b18;
+    }
+
+    private void debug(java.lang.String)
+    {
+        java.io.PrintStream $r1;
+        sun.security.jgss.GSSHeader r2;
+        java.lang.String r0;
+
+        r2 := @this: sun.security.jgss.GSSHeader;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r1.<java.io.PrintStream: void print(java.lang.String)>(r0);
+
+        return;
+    }
+
+    private java.lang.String getHexBytes(byte[], int) throws java.io.IOException
+    {
+        byte[] r2;
+        sun.security.jgss.GSSHeader r5;
+        byte $b1, $b4, b5;
+        java.lang.StringBuffer $r6;
+        int i0, $i2, i3, i6, $i7, $i8;
+        java.lang.String $r1, $r3, $r4;
+
+        r5 := @this: sun.security.jgss.GSSHeader;
+
+        r2 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        $r6 = new java.lang.StringBuffer;
+
+        specialinvoke $r6.<java.lang.StringBuffer: void <init>()>();
+
+        i6 = 0;
+
+     label1:
+        if i6 >= i0 goto label2;
+
+        $b1 = r2[i6];
+
+        $i7 = (int) $b1;
+
+        $i2 = $i7 >> 4;
+
+        i3 = $i2 & 15;
+
+        $b4 = r2[i6];
+
+        b5 = $b4 & 15;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>(i3);
+
+        virtualinvoke $r6.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r3);
+
+        $i8 = (int) b5;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i8);
+
+        virtualinvoke $r6.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r4);
+
+        virtualinvoke $r6.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(32);
+
+        i6 = i6 + 1;
+
+        goto label1;
+
+     label2:
+        $r1 = virtualinvoke $r6.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r1;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.security.jgss.GSSHeader: int TOKEN_ID> = 96;
+
+        return;
+    }
+}

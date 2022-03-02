@@ -1,0 +1,6446 @@
+public class java.awt.Window extends java.awt.Container implements javax.accessibility.Accessible
+{
+    java.lang.String warningString;
+    transient java.util.List icons;
+    private transient java.awt.Component temporaryLostComponent;
+    static boolean systemSyncLWRequests;
+    boolean syncLWRequests;
+    transient boolean beforeFirstShow;
+    private transient boolean disposing;
+    transient java.awt.Window$WindowDisposerRecord disposerRecord;
+    static final int OPENED;
+    int state;
+    private boolean alwaysOnTop;
+    private static final sun.awt.util.IdentityArrayList allWindows;
+    transient java.util.Vector ownedWindowList;
+    private transient java.lang.ref.WeakReference weakThis;
+    transient boolean showWithParent;
+    transient java.awt.Dialog modalBlocker;
+    java.awt.Dialog$ModalExclusionType modalExclusionType;
+    transient java.awt.event.WindowListener windowListener;
+    transient java.awt.event.WindowStateListener windowStateListener;
+    transient java.awt.event.WindowFocusListener windowFocusListener;
+    transient java.awt.im.InputContext inputContext;
+    private transient java.lang.Object inputContextLock;
+    private java.awt.FocusManager focusMgr;
+    private boolean focusableWindowState;
+    private volatile boolean autoRequestFocus;
+    transient boolean isInShow;
+    private volatile float opacity;
+    private java.awt.Shape shape;
+    private static final java.lang.String base;
+    private static int nameCounter;
+    private static final long serialVersionUID;
+    private static final sun.util.logging.PlatformLogger log;
+    private static final boolean locationByPlatformProp;
+    transient boolean isTrayIconWindow;
+    private transient volatile int securityWarningWidth;
+    private transient volatile int securityWarningHeight;
+    private transient double securityWarningPointX;
+    private transient double securityWarningPointY;
+    private transient float securityWarningAlignmentX;
+    private transient float securityWarningAlignmentY;
+    transient java.lang.Object anchor;
+    private static final java.util.concurrent.atomic.AtomicBoolean beforeFirstWindowShown;
+    private java.awt.Window$Type type;
+    private int windowSerializedDataVersion;
+    private volatile boolean locationByPlatform;
+
+    private static native void initIDs();
+
+    void <init>(java.awt.GraphicsConfiguration)
+    {
+        java.awt.GraphicsConfiguration r5;
+        java.util.Vector $r1;
+        java.awt.Window$Type $r4;
+        java.awt.Window r0;
+        java.lang.Object $r2, $r3;
+        boolean $z0;
+
+        r0 := @this: java.awt.Window;
+
+        r5 := @parameter0: java.awt.GraphicsConfiguration;
+
+        specialinvoke r0.<java.awt.Container: void <init>()>();
+
+        r0.<java.awt.Window: boolean syncLWRequests> = 0;
+
+        r0.<java.awt.Window: boolean beforeFirstShow> = 1;
+
+        r0.<java.awt.Window: boolean disposing> = 0;
+
+        r0.<java.awt.Window: java.awt.Window$WindowDisposerRecord disposerRecord> = null;
+
+        $r1 = new java.util.Vector;
+
+        specialinvoke $r1.<java.util.Vector: void <init>()>();
+
+        r0.<java.awt.Window: java.util.Vector ownedWindowList> = $r1;
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        r0.<java.awt.Window: java.lang.Object inputContextLock> = $r2;
+
+        r0.<java.awt.Window: boolean focusableWindowState> = 1;
+
+        r0.<java.awt.Window: boolean autoRequestFocus> = 1;
+
+        r0.<java.awt.Window: boolean isInShow> = 0;
+
+        r0.<java.awt.Window: float opacity> = 1.0F;
+
+        r0.<java.awt.Window: java.awt.Shape shape> = null;
+
+        r0.<java.awt.Window: boolean isTrayIconWindow> = 0;
+
+        r0.<java.awt.Window: int securityWarningWidth> = 0;
+
+        r0.<java.awt.Window: int securityWarningHeight> = 0;
+
+        r0.<java.awt.Window: double securityWarningPointX> = 2.0;
+
+        r0.<java.awt.Window: double securityWarningPointY> = 0.0;
+
+        r0.<java.awt.Window: float securityWarningAlignmentX> = 1.0F;
+
+        r0.<java.awt.Window: float securityWarningAlignmentY> = 0.0F;
+
+        $r3 = new java.lang.Object;
+
+        specialinvoke $r3.<java.lang.Object: void <init>()>();
+
+        r0.<java.awt.Window: java.lang.Object anchor> = $r3;
+
+        $r4 = <java.awt.Window$Type: java.awt.Window$Type NORMAL>;
+
+        r0.<java.awt.Window: java.awt.Window$Type type> = $r4;
+
+        r0.<java.awt.Window: int windowSerializedDataVersion> = 2;
+
+        $z0 = <java.awt.Window: boolean locationByPlatformProp>;
+
+        r0.<java.awt.Window: boolean locationByPlatform> = $z0;
+
+        specialinvoke r0.<java.awt.Window: void init(java.awt.GraphicsConfiguration)>(r5);
+
+        return;
+    }
+
+    private java.awt.GraphicsConfiguration initGC(java.awt.GraphicsConfiguration)
+    {
+        java.awt.GraphicsConfiguration r3;
+        java.awt.Window r0;
+        java.awt.GraphicsDevice $r2;
+        java.awt.GraphicsEnvironment $r1;
+
+        r0 := @this: java.awt.Window;
+
+        r3 := @parameter0: java.awt.GraphicsConfiguration;
+
+        staticinvoke <java.awt.GraphicsEnvironment: void checkHeadless()>();
+
+        if r3 != null goto label1;
+
+        $r1 = staticinvoke <java.awt.GraphicsEnvironment: java.awt.GraphicsEnvironment getLocalGraphicsEnvironment()>();
+
+        $r2 = virtualinvoke $r1.<java.awt.GraphicsEnvironment: java.awt.GraphicsDevice getDefaultScreenDevice()>();
+
+        r3 = virtualinvoke $r2.<java.awt.GraphicsDevice: java.awt.GraphicsConfiguration getDefaultConfiguration()>();
+
+     label1:
+        virtualinvoke r0.<java.awt.Window: void setGraphicsConfiguration(java.awt.GraphicsConfiguration)>(r3);
+
+        return r3;
+    }
+
+    private void init(java.awt.GraphicsConfiguration)
+    {
+        java.awt.Rectangle $r6;
+        java.awt.Insets $r8;
+        java.awt.Cursor $r2;
+        java.awt.GraphicsDevice $r4;
+        sun.awt.AppContext $r13;
+        int $i0, $i1, $i2, $i3, $i4, i5, $i6, $i7, $i8, $i9, i10, $i11, $i12;
+        java.lang.ref.WeakReference $r1;
+        java.awt.BorderLayout $r5;
+        boolean $z0, $z1;
+        java.awt.GraphicsConfiguration $r3, r10;
+        java.awt.Window r0;
+        java.lang.IllegalArgumentException $r9;
+        java.awt.Window$WindowDisposerRecord $r12, $r15;
+        java.lang.Object $r14;
+        java.awt.Dialog$ModalExclusionType $r11;
+        java.awt.Toolkit $r7;
+
+        r0 := @this: java.awt.Window;
+
+        r10 := @parameter0: java.awt.GraphicsConfiguration;
+
+        staticinvoke <java.awt.GraphicsEnvironment: void checkHeadless()>();
+
+        $z0 = <java.awt.Window: boolean systemSyncLWRequests>;
+
+        r0.<java.awt.Window: boolean syncLWRequests> = $z0;
+
+        $r1 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r1.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>(r0);
+
+        r0.<java.awt.Window: java.lang.ref.WeakReference weakThis> = $r1;
+
+        specialinvoke r0.<java.awt.Window: void addToWindowList()>();
+
+        specialinvoke r0.<java.awt.Window: void setWarningString()>();
+
+        $r2 = staticinvoke <java.awt.Cursor: java.awt.Cursor getPredefinedCursor(int)>(0);
+
+        r0.<java.awt.Window: java.awt.Cursor cursor> = $r2;
+
+        r0.<java.awt.Window: boolean visible> = 0;
+
+        $r3 = specialinvoke r0.<java.awt.Window: java.awt.GraphicsConfiguration initGC(java.awt.GraphicsConfiguration)>(r10);
+
+        $r4 = virtualinvoke $r3.<java.awt.GraphicsConfiguration: java.awt.GraphicsDevice getDevice()>();
+
+        $i0 = virtualinvoke $r4.<java.awt.GraphicsDevice: int getType()>();
+
+        if $i0 == 0 goto label1;
+
+        $r9 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r9.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("not a screen device");
+
+        throw $r9;
+
+     label1:
+        $r5 = new java.awt.BorderLayout;
+
+        specialinvoke $r5.<java.awt.BorderLayout: void <init>()>();
+
+        virtualinvoke r0.<java.awt.Window: void setLayout(java.awt.LayoutManager)>($r5);
+
+        $r6 = virtualinvoke $r3.<java.awt.GraphicsConfiguration: java.awt.Rectangle getBounds()>();
+
+        $r7 = virtualinvoke r0.<java.awt.Window: java.awt.Toolkit getToolkit()>();
+
+        $r8 = virtualinvoke $r7.<java.awt.Toolkit: java.awt.Insets getScreenInsets(java.awt.GraphicsConfiguration)>($r3);
+
+        $i1 = virtualinvoke r0.<java.awt.Window: int getX()>();
+
+        $i2 = $r6.<java.awt.Rectangle: int x>;
+
+        $i4 = $i1 + $i2;
+
+        $i3 = $r8.<java.awt.Insets: int left>;
+
+        i5 = $i4 + $i3;
+
+        $i6 = virtualinvoke r0.<java.awt.Window: int getY()>();
+
+        $i7 = $r6.<java.awt.Rectangle: int y>;
+
+        $i9 = $i6 + $i7;
+
+        $i8 = $r8.<java.awt.Insets: int top>;
+
+        i10 = $i9 + $i8;
+
+        $i11 = r0.<java.awt.Window: int x>;
+
+        if i5 != $i11 goto label2;
+
+        $i12 = r0.<java.awt.Window: int y>;
+
+        if i10 == $i12 goto label3;
+
+     label2:
+        virtualinvoke r0.<java.awt.Window: void setLocation(int,int)>(i5, i10);
+
+        $z1 = <java.awt.Window: boolean locationByPlatformProp>;
+
+        virtualinvoke r0.<java.awt.Window: void setLocationByPlatform(boolean)>($z1);
+
+     label3:
+        $r11 = <java.awt.Dialog$ModalExclusionType: java.awt.Dialog$ModalExclusionType NO_EXCLUDE>;
+
+        r0.<java.awt.Window: java.awt.Dialog$ModalExclusionType modalExclusionType> = $r11;
+
+        $r12 = new java.awt.Window$WindowDisposerRecord;
+
+        $r13 = r0.<java.awt.Window: sun.awt.AppContext appContext>;
+
+        specialinvoke $r12.<java.awt.Window$WindowDisposerRecord: void <init>(sun.awt.AppContext,java.awt.Window)>($r13, r0);
+
+        r0.<java.awt.Window: java.awt.Window$WindowDisposerRecord disposerRecord> = $r12;
+
+        $r14 = r0.<java.awt.Window: java.lang.Object anchor>;
+
+        $r15 = r0.<java.awt.Window: java.awt.Window$WindowDisposerRecord disposerRecord>;
+
+        staticinvoke <sun.java2d.Disposer: void addRecord(java.lang.Object,sun.java2d.DisposerRecord)>($r14, $r15);
+
+        staticinvoke <sun.awt.SunToolkit: void checkAndSetPolicy(java.awt.Container)>(r0);
+
+        return;
+    }
+
+    void <init>() throws java.awt.HeadlessException
+    {
+        java.util.Vector $r1;
+        java.awt.Window$Type $r4;
+        java.awt.Window r0;
+        java.lang.Object $r2, $r3;
+        boolean $z0;
+
+        r0 := @this: java.awt.Window;
+
+        specialinvoke r0.<java.awt.Container: void <init>()>();
+
+        r0.<java.awt.Window: boolean syncLWRequests> = 0;
+
+        r0.<java.awt.Window: boolean beforeFirstShow> = 1;
+
+        r0.<java.awt.Window: boolean disposing> = 0;
+
+        r0.<java.awt.Window: java.awt.Window$WindowDisposerRecord disposerRecord> = null;
+
+        $r1 = new java.util.Vector;
+
+        specialinvoke $r1.<java.util.Vector: void <init>()>();
+
+        r0.<java.awt.Window: java.util.Vector ownedWindowList> = $r1;
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        r0.<java.awt.Window: java.lang.Object inputContextLock> = $r2;
+
+        r0.<java.awt.Window: boolean focusableWindowState> = 1;
+
+        r0.<java.awt.Window: boolean autoRequestFocus> = 1;
+
+        r0.<java.awt.Window: boolean isInShow> = 0;
+
+        r0.<java.awt.Window: float opacity> = 1.0F;
+
+        r0.<java.awt.Window: java.awt.Shape shape> = null;
+
+        r0.<java.awt.Window: boolean isTrayIconWindow> = 0;
+
+        r0.<java.awt.Window: int securityWarningWidth> = 0;
+
+        r0.<java.awt.Window: int securityWarningHeight> = 0;
+
+        r0.<java.awt.Window: double securityWarningPointX> = 2.0;
+
+        r0.<java.awt.Window: double securityWarningPointY> = 0.0;
+
+        r0.<java.awt.Window: float securityWarningAlignmentX> = 1.0F;
+
+        r0.<java.awt.Window: float securityWarningAlignmentY> = 0.0F;
+
+        $r3 = new java.lang.Object;
+
+        specialinvoke $r3.<java.lang.Object: void <init>()>();
+
+        r0.<java.awt.Window: java.lang.Object anchor> = $r3;
+
+        $r4 = <java.awt.Window$Type: java.awt.Window$Type NORMAL>;
+
+        r0.<java.awt.Window: java.awt.Window$Type type> = $r4;
+
+        r0.<java.awt.Window: int windowSerializedDataVersion> = 2;
+
+        $z0 = <java.awt.Window: boolean locationByPlatformProp>;
+
+        r0.<java.awt.Window: boolean locationByPlatform> = $z0;
+
+        staticinvoke <java.awt.GraphicsEnvironment: void checkHeadless()>();
+
+        specialinvoke r0.<java.awt.Window: void init(java.awt.GraphicsConfiguration)>(null);
+
+        return;
+    }
+
+    public void <init>(java.awt.Frame)
+    {
+        java.awt.GraphicsConfiguration $r2;
+        java.awt.Frame r1;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        r1 := @parameter0: java.awt.Frame;
+
+        if r1 != null goto label1;
+
+        $r2 = (java.awt.GraphicsConfiguration) null;
+
+        goto label2;
+
+     label1:
+        $r2 = virtualinvoke r1.<java.awt.Frame: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+     label2:
+        specialinvoke r0.<java.awt.Window: void <init>(java.awt.GraphicsConfiguration)>($r2);
+
+        specialinvoke r0.<java.awt.Window: void ownedInit(java.awt.Window)>(r1);
+
+        return;
+    }
+
+    public void <init>(java.awt.Window)
+    {
+        java.awt.GraphicsConfiguration $r2;
+        java.awt.Window r0, r1;
+
+        r0 := @this: java.awt.Window;
+
+        r1 := @parameter0: java.awt.Window;
+
+        if r1 != null goto label1;
+
+        $r2 = (java.awt.GraphicsConfiguration) null;
+
+        goto label2;
+
+     label1:
+        $r2 = virtualinvoke r1.<java.awt.Window: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+     label2:
+        specialinvoke r0.<java.awt.Window: void <init>(java.awt.GraphicsConfiguration)>($r2);
+
+        specialinvoke r0.<java.awt.Window: void ownedInit(java.awt.Window)>(r1);
+
+        return;
+    }
+
+    public void <init>(java.awt.Window, java.awt.GraphicsConfiguration)
+    {
+        java.awt.GraphicsConfiguration r1;
+        java.awt.Window r0, r2;
+
+        r0 := @this: java.awt.Window;
+
+        r2 := @parameter0: java.awt.Window;
+
+        r1 := @parameter1: java.awt.GraphicsConfiguration;
+
+        specialinvoke r0.<java.awt.Window: void <init>(java.awt.GraphicsConfiguration)>(r1);
+
+        specialinvoke r0.<java.awt.Window: void ownedInit(java.awt.Window)>(r2);
+
+        return;
+    }
+
+    private void ownedInit(java.awt.Window)
+    {
+        java.awt.Window r0, r1;
+        java.awt.Window$WindowDisposerRecord $r4;
+        java.lang.SecurityException $r3;
+        java.lang.ref.WeakReference $r2;
+        boolean $z0;
+
+        r0 := @this: java.awt.Window;
+
+        r1 := @parameter0: java.awt.Window;
+
+        r0.<java.awt.Window: java.awt.Container parent> = r1;
+
+        if r1 == null goto label4;
+
+        $r2 = r0.<java.awt.Window: java.lang.ref.WeakReference weakThis>;
+
+        virtualinvoke r1.<java.awt.Window: void addOwnedWindow(java.lang.ref.WeakReference)>($r2);
+
+        $z0 = virtualinvoke r1.<java.awt.Window: boolean isAlwaysOnTop()>();
+
+        if $z0 == 0 goto label4;
+
+     label1:
+        virtualinvoke r0.<java.awt.Window: void setAlwaysOnTop(boolean)>(1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+     label4:
+        $r4 = r0.<java.awt.Window: java.awt.Window$WindowDisposerRecord disposerRecord>;
+
+        virtualinvoke $r4.<java.awt.Window$WindowDisposerRecord: void updateOwner()>();
+
+        return;
+
+        catch java.lang.SecurityException from label1 to label2 with label3;
+    }
+
+    java.lang.String constructComponentName()
+    {
+        java.lang.Throwable $r4;
+        java.awt.Window r5;
+        int $i0, $i1;
+        java.lang.StringBuilder $r0, $r1, $r2;
+        java.lang.String $r3;
+
+        r5 := @this: java.awt.Window;
+
+        entermonitor class "Ljava/awt/Window;";
+
+     label1:
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("win");
+
+        $i0 = <java.awt.Window: int nameCounter>;
+
+        $i1 = $i0 + 1;
+
+        <java.awt.Window: int nameCounter> = $i1;
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        exitmonitor class "Ljava/awt/Window;";
+
+     label2:
+        return $r3;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/Window;";
+
+     label4:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public java.util.List getIconImages()
+    {
+        java.util.List r1;
+        java.awt.Window r0;
+        int $i0;
+        java.util.ArrayList $r2, $r3;
+
+        r0 := @this: java.awt.Window;
+
+        r1 = r0.<java.awt.Window: java.util.List icons>;
+
+        if r1 == null goto label1;
+
+        $i0 = interfaceinvoke r1.<java.util.List: int size()>();
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        return $r2;
+
+     label2:
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>(java.util.Collection)>(r1);
+
+        return $r3;
+    }
+
+    public synchronized void setIconImages(java.util.List)
+    {
+        java.awt.peer.WindowPeer $r3;
+        java.util.List r1;
+        java.awt.peer.ComponentPeer $r2;
+        java.awt.Window r0;
+        java.util.ArrayList $r4;
+
+        r0 := @this: java.awt.Window;
+
+        r1 := @parameter0: java.util.List;
+
+        if r1 != null goto label1;
+
+        $r4 = new java.util.ArrayList;
+
+        specialinvoke $r4.<java.util.ArrayList: void <init>()>();
+
+        goto label2;
+
+     label1:
+        $r4 = new java.util.ArrayList;
+
+        specialinvoke $r4.<java.util.ArrayList: void <init>(java.util.Collection)>(r1);
+
+     label2:
+        r0.<java.awt.Window: java.util.List icons> = $r4;
+
+        $r2 = r0.<java.awt.Window: java.awt.peer.ComponentPeer peer>;
+
+        $r3 = (java.awt.peer.WindowPeer) $r2;
+
+        if $r3 == null goto label3;
+
+        interfaceinvoke $r3.<java.awt.peer.WindowPeer: void updateIconImages()>();
+
+     label3:
+        virtualinvoke r0.<java.awt.Window: void firePropertyChange(java.lang.String,java.lang.Object,java.lang.Object)>("iconImage", null, null);
+
+        return;
+    }
+
+    public void setIconImage(java.awt.Image)
+    {
+        java.awt.Image r1;
+        java.util.ArrayList $r0;
+        java.awt.Window r2;
+
+        r2 := @this: java.awt.Window;
+
+        r1 := @parameter0: java.awt.Image;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+        if r1 == null goto label1;
+
+        virtualinvoke $r0.<java.util.ArrayList: boolean add(java.lang.Object)>(r1);
+
+     label1:
+        virtualinvoke r2.<java.awt.Window: void setIconImages(java.util.List)>($r0);
+
+        return;
+    }
+
+    public void addNotify()
+    {
+        java.lang.Throwable $r8, $r9;
+        java.awt.peer.WindowPeer $r6;
+        java.awt.peer.ComponentPeer $r7, $r10;
+        java.awt.Window r0;
+        java.lang.Object $r1;
+        java.awt.Container r2;
+        sun.awt.util.IdentityArrayList $r3, $r4;
+        java.awt.Toolkit $r5;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label01:
+        r2 = r0.<java.awt.Window: java.awt.Container parent>;
+
+        if r2 == null goto label02;
+
+        $r7 = virtualinvoke r2.<java.awt.Container: java.awt.peer.ComponentPeer getPeer()>();
+
+        if $r7 != null goto label02;
+
+        virtualinvoke r2.<java.awt.Container: void addNotify()>();
+
+     label02:
+        $r10 = r0.<java.awt.Window: java.awt.peer.ComponentPeer peer>;
+
+        if $r10 != null goto label03;
+
+        $r5 = virtualinvoke r0.<java.awt.Window: java.awt.Toolkit getToolkit()>();
+
+        $r6 = virtualinvoke $r5.<java.awt.Toolkit: java.awt.peer.WindowPeer createWindow(java.awt.Window)>(r0);
+
+        r0.<java.awt.Window: java.awt.peer.ComponentPeer peer> = $r6;
+
+     label03:
+        $r3 = <java.awt.Window: sun.awt.util.IdentityArrayList allWindows>;
+
+        entermonitor $r3;
+
+     label04:
+        $r4 = <java.awt.Window: sun.awt.util.IdentityArrayList allWindows>;
+
+        virtualinvoke $r4.<sun.awt.util.IdentityArrayList: boolean add(java.lang.Object)>(r0);
+
+        exitmonitor $r3;
+
+     label05:
+        goto label08;
+
+     label06:
+        $r9 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label07:
+        throw $r9;
+
+     label08:
+        specialinvoke r0.<java.awt.Container: void addNotify()>();
+
+        exitmonitor $r1;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r8 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label11:
+        throw $r8;
+
+     label12:
+        return;
+
+        catch java.lang.Throwable from label04 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+        catch java.lang.Throwable from label01 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    public void removeNotify()
+    {
+        java.lang.Throwable $r4, $r5;
+        java.awt.Window r0;
+        java.lang.Object $r1;
+        sun.awt.util.IdentityArrayList $r2, $r3;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = <java.awt.Window: sun.awt.util.IdentityArrayList allWindows>;
+
+        entermonitor $r2;
+
+     label02:
+        $r3 = <java.awt.Window: sun.awt.util.IdentityArrayList allWindows>;
+
+        virtualinvoke $r3.<sun.awt.util.IdentityArrayList: boolean remove(java.lang.Object)>(r0);
+
+        exitmonitor $r2;
+
+     label03:
+        goto label06;
+
+     label04:
+        $r5 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label05:
+        throw $r5;
+
+     label06:
+        specialinvoke r0.<java.awt.Container: void removeNotify()>();
+
+        exitmonitor $r1;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label09:
+        throw $r4;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label02 to label03 with label04;
+        catch java.lang.Throwable from label04 to label05 with label04;
+        catch java.lang.Throwable from label01 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    public void pack()
+    {
+        java.awt.peer.ComponentPeer $r3, $r4, $r5;
+        java.awt.Window r0;
+        java.awt.Dimension $r2;
+        int $i0, $i1;
+        java.awt.Container r1;
+        boolean $z0;
+
+        r0 := @this: java.awt.Window;
+
+        r1 = r0.<java.awt.Window: java.awt.Container parent>;
+
+        if r1 == null goto label1;
+
+        $r4 = virtualinvoke r1.<java.awt.Container: java.awt.peer.ComponentPeer getPeer()>();
+
+        if $r4 != null goto label1;
+
+        virtualinvoke r1.<java.awt.Container: void addNotify()>();
+
+     label1:
+        $r5 = r0.<java.awt.Window: java.awt.peer.ComponentPeer peer>;
+
+        if $r5 != null goto label2;
+
+        virtualinvoke r0.<java.awt.Window: void addNotify()>();
+
+     label2:
+        $r2 = virtualinvoke r0.<java.awt.Window: java.awt.Dimension getPreferredSize()>();
+
+        $r3 = r0.<java.awt.Window: java.awt.peer.ComponentPeer peer>;
+
+        if $r3 == null goto label3;
+
+        $i1 = $r2.<java.awt.Dimension: int width>;
+
+        $i0 = $r2.<java.awt.Dimension: int height>;
+
+        virtualinvoke r0.<java.awt.Window: void setClientSize(int,int)>($i1, $i0);
+
+     label3:
+        $z0 = r0.<java.awt.Window: boolean beforeFirstShow>;
+
+        if $z0 == 0 goto label4;
+
+        r0.<java.awt.Window: boolean isPacked> = 1;
+
+     label4:
+        virtualinvoke r0.<java.awt.Window: void validateUnconditionally()>();
+
+        return;
+    }
+
+    public void setMinimumSize(java.awt.Dimension)
+    {
+        java.lang.Throwable $r6;
+        java.awt.peer.WindowPeer $r5;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9;
+        boolean $z0;
+        java.awt.peer.ComponentPeer $r4, $r7;
+        java.awt.Window r0;
+        java.awt.Dimension r2, $r3;
+        java.lang.Object $r1;
+
+        r0 := @this: java.awt.Window;
+
+        r2 := @parameter0: java.awt.Dimension;
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label1:
+        specialinvoke r0.<java.awt.Container: void setMinimumSize(java.awt.Dimension)>(r2);
+
+        $r3 = virtualinvoke r0.<java.awt.Window: java.awt.Dimension getSize()>();
+
+        $z0 = virtualinvoke r0.<java.awt.Window: boolean isMinimumSizeSet()>();
+
+        if $z0 == 0 goto label3;
+
+        $i1 = $r3.<java.awt.Dimension: int width>;
+
+        $i0 = r2.<java.awt.Dimension: int width>;
+
+        if $i1 < $i0 goto label2;
+
+        $i9 = $r3.<java.awt.Dimension: int height>;
+
+        $i8 = r2.<java.awt.Dimension: int height>;
+
+        if $i9 >= $i8 goto label3;
+
+     label2:
+        $i3 = r0.<java.awt.Window: int width>;
+
+        $i2 = r2.<java.awt.Dimension: int width>;
+
+        $i4 = staticinvoke <java.lang.Math: int max(int,int)>($i3, $i2);
+
+        $i6 = r0.<java.awt.Window: int height>;
+
+        $i5 = r2.<java.awt.Dimension: int height>;
+
+        $i7 = staticinvoke <java.lang.Math: int max(int,int)>($i6, $i5);
+
+        virtualinvoke r0.<java.awt.Window: void setSize(int,int)>($i4, $i7);
+
+     label3:
+        $r7 = r0.<java.awt.Window: java.awt.peer.ComponentPeer peer>;
+
+        if $r7 == null goto label4;
+
+        $r4 = r0.<java.awt.Window: java.awt.peer.ComponentPeer peer>;
+
+        $r5 = (java.awt.peer.WindowPeer) $r4;
+
+        interfaceinvoke $r5.<java.awt.peer.WindowPeer: void updateMinimumSize()>();
+
+     label4:
+        exitmonitor $r1;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r6 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label7:
+        throw $r6;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public void setSize(java.awt.Dimension)
+    {
+        java.awt.Dimension r1;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        r1 := @parameter0: java.awt.Dimension;
+
+        specialinvoke r0.<java.awt.Container: void setSize(java.awt.Dimension)>(r1);
+
+        return;
+    }
+
+    public void setSize(int, int)
+    {
+        int i0, i1;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        specialinvoke r0.<java.awt.Container: void setSize(int,int)>(i0, i1);
+
+        return;
+    }
+
+    public void setLocation(int, int)
+    {
+        int i0, i1;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        specialinvoke r0.<java.awt.Container: void setLocation(int,int)>(i0, i1);
+
+        return;
+    }
+
+    public void setLocation(java.awt.Point)
+    {
+        java.awt.Point r1;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        r1 := @parameter0: java.awt.Point;
+
+        specialinvoke r0.<java.awt.Container: void setLocation(java.awt.Point)>(r1);
+
+        return;
+    }
+
+    public void reshape(int, int, int, int)
+    {
+        java.awt.Window r0;
+        java.awt.Dimension $r1;
+        int i0, i1, $i2, $i3, i4, i5;
+        boolean $z0;
+
+        r0 := @this: java.awt.Window;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i4 := @parameter2: int;
+
+        i5 := @parameter3: int;
+
+        $z0 = virtualinvoke r0.<java.awt.Window: boolean isMinimumSizeSet()>();
+
+        if $z0 == 0 goto label2;
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.awt.Dimension getMinimumSize()>();
+
+        $i2 = $r1.<java.awt.Dimension: int width>;
+
+        if i4 >= $i2 goto label1;
+
+        i4 = $r1.<java.awt.Dimension: int width>;
+
+     label1:
+        $i3 = $r1.<java.awt.Dimension: int height>;
+
+        if i5 >= $i3 goto label2;
+
+        i5 = $r1.<java.awt.Dimension: int height>;
+
+     label2:
+        specialinvoke r0.<java.awt.Container: void reshape(int,int,int,int)>(i0, i1, i4, i5);
+
+        return;
+    }
+
+    void setClientSize(int, int)
+    {
+        java.lang.Throwable $r2;
+        java.awt.Window r0;
+        int i0, i1, $i2, $i3;
+        java.lang.Object $r1;
+
+        r0 := @this: java.awt.Window;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label1:
+        virtualinvoke r0.<java.awt.Window: void setBoundsOp(int)>(4);
+
+        $i3 = r0.<java.awt.Window: int x>;
+
+        $i2 = r0.<java.awt.Window: int y>;
+
+        virtualinvoke r0.<java.awt.Window: void setBounds(int,int,int,int)>($i3, $i2, i0, i1);
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    final void closeSplashScreen()
+    {
+        java.awt.Window r0;
+        java.util.concurrent.atomic.AtomicBoolean $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: java.awt.Window;
+
+        $z0 = r0.<java.awt.Window: boolean isTrayIconWindow>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = <java.awt.Window: java.util.concurrent.atomic.AtomicBoolean beforeFirstWindowShown>;
+
+        $z1 = virtualinvoke $r1.<java.util.concurrent.atomic.AtomicBoolean: boolean getAndSet(boolean)>(0);
+
+        if $z1 == 0 goto label2;
+
+        staticinvoke <sun.awt.SunToolkit: void closeSplashScreen()>();
+
+        staticinvoke <java.awt.SplashScreen: void markClosed()>();
+
+     label2:
+        return;
+    }
+
+    public void setVisible(boolean)
+    {
+        java.awt.Window r0;
+        boolean z0;
+
+        r0 := @this: java.awt.Window;
+
+        z0 := @parameter0: boolean;
+
+        specialinvoke r0.<java.awt.Container: void setVisible(boolean)>(z0);
+
+        return;
+    }
+
+    public void show()
+    {
+        java.util.Vector $r2, $r4;
+        int $i0, $i1, $i2, i3, $i4, $i5;
+        java.lang.ref.WeakReference $r6;
+        java.awt.Dialog $r3;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.awt.peer.ComponentPeer $r1;
+        java.awt.Window r0, r8;
+        java.lang.Object $r5, $r7;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = r0.<java.awt.Window: java.awt.peer.ComponentPeer peer>;
+
+        if $r1 != null goto label01;
+
+        virtualinvoke r0.<java.awt.Window: void addNotify()>();
+
+     label01:
+        virtualinvoke r0.<java.awt.Window: void validateUnconditionally()>();
+
+        r0.<java.awt.Window: boolean isInShow> = 1;
+
+        $z0 = r0.<java.awt.Window: boolean visible>;
+
+        if $z0 == 0 goto label02;
+
+        virtualinvoke r0.<java.awt.Window: void toFront()>();
+
+        goto label09;
+
+     label02:
+        r0.<java.awt.Window: boolean beforeFirstShow> = 0;
+
+        virtualinvoke r0.<java.awt.Window: void closeSplashScreen()>();
+
+        staticinvoke <java.awt.Dialog: void checkShouldBeBlocked(java.awt.Window)>(r0);
+
+        specialinvoke r0.<java.awt.Container: void show()>();
+
+        r0.<java.awt.Window: boolean locationByPlatform> = 0;
+
+        i3 = 0;
+
+     label03:
+        $r2 = r0.<java.awt.Window: java.util.Vector ownedWindowList>;
+
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        if i3 >= $i0 goto label05;
+
+        $r4 = r0.<java.awt.Window: java.util.Vector ownedWindowList>;
+
+        $r5 = virtualinvoke $r4.<java.util.Vector: java.lang.Object elementAt(int)>(i3);
+
+        $r6 = (java.lang.ref.WeakReference) $r5;
+
+        $r7 = virtualinvoke $r6.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        r8 = (java.awt.Window) $r7;
+
+        if r8 == null goto label04;
+
+        $z4 = r8.<java.awt.Window: boolean showWithParent>;
+
+        if $z4 == 0 goto label04;
+
+        virtualinvoke r8.<java.awt.Window: void show()>();
+
+        r8.<java.awt.Window: boolean showWithParent> = 0;
+
+     label04:
+        i3 = i3 + 1;
+
+        goto label03;
+
+     label05:
+        $z1 = virtualinvoke r0.<java.awt.Window: boolean isModalBlocked()>();
+
+        if $z1 != 0 goto label06;
+
+        virtualinvoke r0.<java.awt.Window: void updateChildrenBlocking()>();
+
+        goto label07;
+
+     label06:
+        $r3 = r0.<java.awt.Window: java.awt.Dialog modalBlocker>;
+
+        virtualinvoke $r3.<java.awt.Dialog: void toFront_NoClientCode()>();
+
+     label07:
+        $z2 = r0 instanceof java.awt.Frame;
+
+        if $z2 != 0 goto label08;
+
+        $z3 = r0 instanceof java.awt.Dialog;
+
+        if $z3 == 0 goto label09;
+
+     label08:
+        staticinvoke <java.awt.Window: void updateChildFocusableWindowState(java.awt.Window)>(r0);
+
+     label09:
+        r0.<java.awt.Window: boolean isInShow> = 0;
+
+        $i4 = r0.<java.awt.Window: int state>;
+
+        $i5 = $i4 & 1;
+
+        if $i5 != 0 goto label10;
+
+        virtualinvoke r0.<java.awt.Window: void postWindowEvent(int)>(200);
+
+        $i1 = r0.<java.awt.Window: int state>;
+
+        $i2 = $i1 | 1;
+
+        r0.<java.awt.Window: int state> = $i2;
+
+     label10:
+        return;
+    }
+
+    static void updateChildFocusableWindowState(java.awt.Window)
+    {
+        java.awt.peer.WindowPeer $r8;
+        java.awt.peer.ComponentPeer $r1, $r7;
+        java.awt.Window r0, r6;
+        java.util.Vector $r2, $r9;
+        int i0, $i1;
+        java.lang.Object $r3, $r5;
+        java.lang.ref.WeakReference $r4;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.Window;
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.awt.peer.ComponentPeer getPeer()>();
+
+        if $r1 == null goto label1;
+
+        $z0 = virtualinvoke r0.<java.awt.Window: boolean isShowing()>();
+
+        if $z0 == 0 goto label1;
+
+        $r7 = virtualinvoke r0.<java.awt.Window: java.awt.peer.ComponentPeer getPeer()>();
+
+        $r8 = (java.awt.peer.WindowPeer) $r7;
+
+        interfaceinvoke $r8.<java.awt.peer.WindowPeer: void updateFocusableWindowState()>();
+
+     label1:
+        i0 = 0;
+
+     label2:
+        $r9 = r0.<java.awt.Window: java.util.Vector ownedWindowList>;
+
+        $i1 = virtualinvoke $r9.<java.util.Vector: int size()>();
+
+        if i0 >= $i1 goto label4;
+
+        $r2 = r0.<java.awt.Window: java.util.Vector ownedWindowList>;
+
+        $r3 = virtualinvoke $r2.<java.util.Vector: java.lang.Object elementAt(int)>(i0);
+
+        $r4 = (java.lang.ref.WeakReference) $r3;
+
+        $r5 = virtualinvoke $r4.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        r6 = (java.awt.Window) $r5;
+
+        if r6 == null goto label3;
+
+        staticinvoke <java.awt.Window: void updateChildFocusableWindowState(java.awt.Window)>(r6);
+
+     label3:
+        i0 = i0 + 1;
+
+        goto label2;
+
+     label4:
+        return;
+    }
+
+    synchronized void postWindowEvent(int)
+    {
+        java.awt.EventQueue $r3;
+        java.awt.Window r0;
+        long $l1, $l2;
+        java.awt.event.WindowEvent $r2;
+        byte $b3;
+        java.awt.event.WindowListener $r1;
+        int i0;
+        boolean $z0;
+
+        r0 := @this: java.awt.Window;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.awt.Window: java.awt.event.WindowListener windowListener>;
+
+        if $r1 != null goto label1;
+
+        $l1 = r0.<java.awt.Window: long eventMask>;
+
+        $l2 = $l1 & 64L;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 != 0 goto label1;
+
+        $z0 = staticinvoke <java.awt.Toolkit: boolean enabledOnToolkit(long)>(64L);
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        $r2 = new java.awt.event.WindowEvent;
+
+        specialinvoke $r2.<java.awt.event.WindowEvent: void <init>(java.awt.Window,int)>(r0, i0);
+
+        $r3 = staticinvoke <java.awt.Toolkit: java.awt.EventQueue getEventQueue()>();
+
+        virtualinvoke $r3.<java.awt.EventQueue: void postEvent(java.awt.AWTEvent)>($r2);
+
+     label2:
+        return;
+    }
+
+    public void hide()
+    {
+        java.lang.Throwable $r9;
+        java.awt.Window r0, r8;
+        java.util.Vector $r1, $r2, $r4;
+        int $i0, i1;
+        java.lang.Object $r5, $r7;
+        java.lang.ref.WeakReference $r6;
+        java.awt.Dialog $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = r0.<java.awt.Window: java.util.Vector ownedWindowList>;
+
+        entermonitor $r1;
+
+     label1:
+        i1 = 0;
+
+     label2:
+        $r2 = r0.<java.awt.Window: java.util.Vector ownedWindowList>;
+
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        if i1 >= $i0 goto label4;
+
+        $r4 = r0.<java.awt.Window: java.util.Vector ownedWindowList>;
+
+        $r5 = virtualinvoke $r4.<java.util.Vector: java.lang.Object elementAt(int)>(i1);
+
+        $r6 = (java.lang.ref.WeakReference) $r5;
+
+        $r7 = virtualinvoke $r6.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        r8 = (java.awt.Window) $r7;
+
+        if r8 == null goto label3;
+
+        $z1 = r8.<java.awt.Window: boolean visible>;
+
+        if $z1 == 0 goto label3;
+
+        virtualinvoke r8.<java.awt.Window: void hide()>();
+
+        r8.<java.awt.Window: boolean showWithParent> = 1;
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label4:
+        exitmonitor $r1;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r9 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label7:
+        throw $r9;
+
+     label8:
+        $z0 = virtualinvoke r0.<java.awt.Window: boolean isModalBlocked()>();
+
+        if $z0 == 0 goto label9;
+
+        $r3 = r0.<java.awt.Window: java.awt.Dialog modalBlocker>;
+
+        virtualinvoke $r3.<java.awt.Dialog: void unblockWindow(java.awt.Window)>(r0);
+
+     label9:
+        specialinvoke r0.<java.awt.Container: void hide()>();
+
+        r0.<java.awt.Window: boolean locationByPlatform> = 0;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    final void clearMostRecentFocusOwnerOnHide()
+    {
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        return;
+    }
+
+    public void dispose()
+    {
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        virtualinvoke r0.<java.awt.Window: void doDispose()>();
+
+        return;
+    }
+
+    void disposeImpl()
+    {
+        java.awt.peer.ComponentPeer $r1;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        virtualinvoke r0.<java.awt.Window: void dispose()>();
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.awt.peer.ComponentPeer getPeer()>();
+
+        if $r1 == null goto label1;
+
+        virtualinvoke r0.<java.awt.Window: void doDispose()>();
+
+     label1:
+        return;
+    }
+
+    void doDispose()
+    {
+        java.io.PrintStream $r3, $r5;
+        java.awt.Window r0;
+        java.lang.reflect.InvocationTargetException $r2;
+        java.lang.InterruptedException $r4;
+        java.awt.Window$1DisposeAction $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: java.awt.Window;
+
+        $z0 = virtualinvoke r0.<java.awt.Window: boolean isDisplayable()>();
+
+        $r1 = new java.awt.Window$1DisposeAction;
+
+        specialinvoke $r1.<java.awt.Window$1DisposeAction: void <init>(java.awt.Window)>(r0);
+
+        $z1 = staticinvoke <java.awt.EventQueue: boolean isDispatchThread()>();
+
+        if $z1 == 0 goto label1;
+
+        virtualinvoke $r1.<java.awt.Window$1DisposeAction: void run()>();
+
+        goto label5;
+
+     label1:
+        staticinvoke <java.awt.EventQueue: void invokeAndWait(java.lang.Object,java.lang.Runnable)>(r0, $r1);
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>("Disposal was interrupted:");
+
+        virtualinvoke $r4.<java.lang.InterruptedException: void printStackTrace()>();
+
+        goto label5;
+
+     label4:
+        $r2 := @caughtexception;
+
+        $r3 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>("Exception during disposal:");
+
+        virtualinvoke $r2.<java.lang.reflect.InvocationTargetException: void printStackTrace()>();
+
+     label5:
+        if $z0 == 0 goto label6;
+
+        virtualinvoke r0.<java.awt.Window: void postWindowEvent(int)>(202);
+
+     label6:
+        return;
+
+        catch java.lang.InterruptedException from label1 to label2 with label3;
+        catch java.lang.reflect.InvocationTargetException from label1 to label2 with label4;
+    }
+
+    void adjustListeningChildrenOnParent(long, int)
+    {
+        int i1;
+        long l0;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        l0 := @parameter0: long;
+
+        i1 := @parameter1: int;
+
+        return;
+    }
+
+    void adjustDecendantsOnParent(int)
+    {
+        int i0;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        i0 := @parameter0: int;
+
+        return;
+    }
+
+    public void toFront()
+    {
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        virtualinvoke r0.<java.awt.Window: void toFront_NoClientCode()>();
+
+        return;
+    }
+
+    final void toFront_NoClientCode()
+    {
+        java.awt.peer.WindowPeer r2;
+        java.awt.peer.ComponentPeer $r1;
+        java.awt.Window r0;
+        java.awt.Dialog $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: java.awt.Window;
+
+        $z0 = r0.<java.awt.Window: boolean visible>;
+
+        if $z0 == 0 goto label2;
+
+        $r1 = r0.<java.awt.Window: java.awt.peer.ComponentPeer peer>;
+
+        r2 = (java.awt.peer.WindowPeer) $r1;
+
+        if r2 == null goto label1;
+
+        interfaceinvoke r2.<java.awt.peer.WindowPeer: void toFront()>();
+
+     label1:
+        $z1 = virtualinvoke r0.<java.awt.Window: boolean isModalBlocked()>();
+
+        if $z1 == 0 goto label2;
+
+        $r3 = r0.<java.awt.Window: java.awt.Dialog modalBlocker>;
+
+        virtualinvoke $r3.<java.awt.Dialog: void toFront_NoClientCode()>();
+
+     label2:
+        return;
+    }
+
+    public void toBack()
+    {
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        virtualinvoke r0.<java.awt.Window: void toBack_NoClientCode()>();
+
+        return;
+    }
+
+    final void toBack_NoClientCode()
+    {
+        java.awt.peer.WindowPeer r3;
+        java.awt.peer.ComponentPeer $r1;
+        java.awt.Window r0;
+        java.lang.SecurityException $r2;
+        boolean $z0, $z1;
+
+        r0 := @this: java.awt.Window;
+
+        $z0 = virtualinvoke r0.<java.awt.Window: boolean isAlwaysOnTop()>();
+
+        if $z0 == 0 goto label4;
+
+     label1:
+        virtualinvoke r0.<java.awt.Window: void setAlwaysOnTop(boolean)>(0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+     label4:
+        $z1 = r0.<java.awt.Window: boolean visible>;
+
+        if $z1 == 0 goto label5;
+
+        $r1 = r0.<java.awt.Window: java.awt.peer.ComponentPeer peer>;
+
+        r3 = (java.awt.peer.WindowPeer) $r1;
+
+        if r3 == null goto label5;
+
+        interfaceinvoke r3.<java.awt.peer.WindowPeer: void toBack()>();
+
+     label5:
+        return;
+
+        catch java.lang.SecurityException from label1 to label2 with label3;
+    }
+
+    public java.awt.Toolkit getToolkit()
+    {
+        java.awt.Toolkit $r0;
+        java.awt.Window r1;
+
+        r1 := @this: java.awt.Window;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        return $r0;
+    }
+
+    public final java.lang.String getWarningString()
+    {
+        java.lang.String $r1;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = r0.<java.awt.Window: java.lang.String warningString>;
+
+        return $r1;
+    }
+
+    private void setWarningString()
+    {
+        java.security.Permission $r2;
+        java.awt.Window r0;
+        java.lang.SecurityException $r3;
+        java.lang.Object $r5;
+        java.lang.String $r6;
+        java.lang.SecurityManager $r1;
+        sun.security.action.GetPropertyAction $r4;
+
+        r0 := @this: java.awt.Window;
+
+        r0.<java.awt.Window: java.lang.String warningString> = null;
+
+        $r1 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r1 == null goto label4;
+
+     label1:
+        $r2 = <sun.security.util.SecurityConstants$AWT: java.security.Permission TOPLEVEL_WINDOW_PERMISSION>;
+
+        virtualinvoke $r1.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r2);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r4.<sun.security.action.GetPropertyAction: void <init>(java.lang.String,java.lang.String)>("awt.appletWarning", "Java Applet Window");
+
+        $r5 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r4);
+
+        $r6 = (java.lang.String) $r5;
+
+        r0.<java.awt.Window: java.lang.String warningString> = $r6;
+
+     label4:
+        return;
+
+        catch java.lang.SecurityException from label1 to label2 with label3;
+    }
+
+    public java.util.Locale getLocale()
+    {
+        java.util.Locale $r1, $r2, $r3;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = r0.<java.awt.Window: java.util.Locale locale>;
+
+        if $r1 != null goto label1;
+
+        $r3 = staticinvoke <java.util.Locale: java.util.Locale getDefault()>();
+
+        return $r3;
+
+     label1:
+        $r2 = r0.<java.awt.Window: java.util.Locale locale>;
+
+        return $r2;
+    }
+
+    public java.awt.im.InputContext getInputContext()
+    {
+        java.lang.Throwable $r5;
+        java.awt.im.InputContext $r2, $r3, $r4;
+        java.awt.Window r0;
+        java.lang.Object $r1;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = r0.<java.awt.Window: java.lang.Object inputContextLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<java.awt.Window: java.awt.im.InputContext inputContext>;
+
+        if $r2 != null goto label2;
+
+        $r4 = staticinvoke <java.awt.im.InputContext: java.awt.im.InputContext getInstance()>();
+
+        r0.<java.awt.Window: java.awt.im.InputContext inputContext> = $r4;
+
+     label2:
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r5;
+
+     label6:
+        $r3 = r0.<java.awt.Window: java.awt.im.InputContext inputContext>;
+
+        return $r3;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void setCursor(java.awt.Cursor)
+    {
+        java.awt.Window r0;
+        java.awt.Cursor r1;
+
+        r0 := @this: java.awt.Window;
+
+        r1 := @parameter0: java.awt.Cursor;
+
+        if r1 != null goto label1;
+
+        r1 = staticinvoke <java.awt.Cursor: java.awt.Cursor getPredefinedCursor(int)>(0);
+
+     label1:
+        specialinvoke r0.<java.awt.Container: void setCursor(java.awt.Cursor)>(r1);
+
+        return;
+    }
+
+    public java.awt.Window getOwner()
+    {
+        java.awt.Window r0, $r1;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.awt.Window getOwner_NoClientCode()>();
+
+        return $r1;
+    }
+
+    final java.awt.Window getOwner_NoClientCode()
+    {
+        java.awt.Container $r1;
+        java.awt.Window r0, $r2;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = r0.<java.awt.Window: java.awt.Container parent>;
+
+        $r2 = (java.awt.Window) $r1;
+
+        return $r2;
+    }
+
+    public java.awt.Window[] getOwnedWindows()
+    {
+        java.awt.Window[] $r1;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.awt.Window[] getOwnedWindows_NoClientCode()>();
+
+        return $r1;
+    }
+
+    final java.awt.Window[] getOwnedWindows_NoClientCode()
+    {
+        java.lang.Throwable $r11;
+        java.lang.Object[] $r4;
+        java.util.Vector $r1, $r2, $r5;
+        java.awt.Window[] r3, r12;
+        int $i0, i1, i2;
+        java.lang.ref.WeakReference $r7;
+        java.awt.Window r0, $r9, $r10;
+        java.lang.Object $r6, $r8;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = r0.<java.awt.Window: java.util.Vector ownedWindowList>;
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = r0.<java.awt.Window: java.util.Vector ownedWindowList>;
+
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        i1 = 0;
+
+        r3 = newarray (java.awt.Window)[$i0];
+
+        i2 = 0;
+
+     label02:
+        if i2 >= $i0 goto label04;
+
+        $r5 = r0.<java.awt.Window: java.util.Vector ownedWindowList>;
+
+        $r6 = virtualinvoke $r5.<java.util.Vector: java.lang.Object elementAt(int)>(i2);
+
+        $r7 = (java.lang.ref.WeakReference) $r6;
+
+        $r8 = virtualinvoke $r7.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        $r9 = (java.awt.Window) $r8;
+
+        r3[i1] = $r9;
+
+        $r10 = r3[i1];
+
+        if $r10 == null goto label03;
+
+        i1 = i1 + 1;
+
+     label03:
+        i2 = i2 + 1;
+
+        goto label02;
+
+     label04:
+        if $i0 == i1 goto label05;
+
+        $r4 = staticinvoke <java.util.Arrays: java.lang.Object[] copyOf(java.lang.Object[],int)>(r3, i1);
+
+        r12 = (java.awt.Window[]) $r4;
+
+        goto label06;
+
+     label05:
+        r12 = r3;
+
+     label06:
+        exitmonitor $r1;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r11 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label09:
+        throw $r11;
+
+     label10:
+        return r12;
+
+        catch java.lang.Throwable from label01 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    boolean isModalBlocked()
+    {
+        java.awt.Dialog $r1;
+        java.awt.Window r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = r0.<java.awt.Window: java.awt.Dialog modalBlocker>;
+
+        if $r1 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    void setModalBlocked(java.awt.Dialog, boolean, boolean)
+    {
+        java.awt.peer.WindowPeer r2;
+        java.awt.peer.ComponentPeer $r1;
+        java.awt.Window r0;
+        java.awt.Dialog r3, $r4;
+        boolean z0, z1;
+
+        r0 := @this: java.awt.Window;
+
+        r3 := @parameter0: java.awt.Dialog;
+
+        z0 := @parameter1: boolean;
+
+        z1 := @parameter2: boolean;
+
+        if z0 == 0 goto label1;
+
+        $r4 = r3;
+
+        goto label2;
+
+     label1:
+        $r4 = null;
+
+     label2:
+        r0.<java.awt.Window: java.awt.Dialog modalBlocker> = $r4;
+
+        if z1 == 0 goto label3;
+
+        $r1 = r0.<java.awt.Window: java.awt.peer.ComponentPeer peer>;
+
+        r2 = (java.awt.peer.WindowPeer) $r1;
+
+        if r2 == null goto label3;
+
+        interfaceinvoke r2.<java.awt.peer.WindowPeer: void setModalBlocked(java.awt.Dialog,boolean)>(r3, z0);
+
+     label3:
+        return;
+    }
+
+    java.awt.Dialog getModalBlocker()
+    {
+        java.awt.Dialog $r1;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = r0.<java.awt.Window: java.awt.Dialog modalBlocker>;
+
+        return $r1;
+    }
+
+    static sun.awt.util.IdentityArrayList getAllWindows()
+    {
+        java.lang.Throwable $r3;
+        sun.awt.util.IdentityArrayList $r0, $r1, $r2;
+
+        $r0 = <java.awt.Window: sun.awt.util.IdentityArrayList allWindows>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = new sun.awt.util.IdentityArrayList;
+
+        specialinvoke $r1.<sun.awt.util.IdentityArrayList: void <init>()>();
+
+        $r2 = <java.awt.Window: sun.awt.util.IdentityArrayList allWindows>;
+
+        virtualinvoke $r1.<sun.awt.util.IdentityArrayList: boolean addAll(java.util.Collection)>($r2);
+
+        exitmonitor $r0;
+
+     label2:
+        return $r1;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label4:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    static sun.awt.util.IdentityArrayList getAllUnblockedWindows()
+    {
+        java.lang.Throwable $r6;
+        java.awt.Window r5;
+        int $i0, i1;
+        java.lang.Object $r4;
+        sun.awt.util.IdentityArrayList $r0, $r1, $r2, $r3;
+        boolean $z0;
+
+        $r0 = <java.awt.Window: sun.awt.util.IdentityArrayList allWindows>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = new sun.awt.util.IdentityArrayList;
+
+        specialinvoke $r1.<sun.awt.util.IdentityArrayList: void <init>()>();
+
+        i1 = 0;
+
+     label2:
+        $r2 = <java.awt.Window: sun.awt.util.IdentityArrayList allWindows>;
+
+        $i0 = virtualinvoke $r2.<sun.awt.util.IdentityArrayList: int size()>();
+
+        if i1 >= $i0 goto label4;
+
+        $r3 = <java.awt.Window: sun.awt.util.IdentityArrayList allWindows>;
+
+        $r4 = virtualinvoke $r3.<sun.awt.util.IdentityArrayList: java.lang.Object get(int)>(i1);
+
+        r5 = (java.awt.Window) $r4;
+
+        $z0 = virtualinvoke r5.<java.awt.Window: boolean isModalBlocked()>();
+
+        if $z0 != 0 goto label3;
+
+        virtualinvoke $r1.<sun.awt.util.IdentityArrayList: boolean add(java.lang.Object)>(r5);
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label4:
+        exitmonitor $r0;
+
+     label5:
+        return $r1;
+
+     label6:
+        $r6 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label7:
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    private static java.awt.Window[] getWindows(sun.awt.AppContext)
+    {
+        java.lang.Throwable $r9;
+        java.lang.Object[] $r4;
+        java.awt.Window r8;
+        java.util.Vector r2;
+        java.awt.Window[] r3, r10;
+        sun.awt.AppContext r0;
+        int $i0, $i1, i2, i3;
+        java.lang.Object $r1, $r5, $r7;
+        java.lang.ref.WeakReference $r6;
+
+        r0 := @parameter0: sun.awt.AppContext;
+
+        entermonitor class "Ljava/awt/Window;";
+
+     label01:
+        $r1 = virtualinvoke r0.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>(class "Ljava/awt/Window;");
+
+        r2 = (java.util.Vector) $r1;
+
+        if r2 == null goto label07;
+
+        $i0 = virtualinvoke r2.<java.util.Vector: int size()>();
+
+        i2 = 0;
+
+        r3 = newarray (java.awt.Window)[$i0];
+
+        i3 = 0;
+
+     label02:
+        if i3 >= $i0 goto label04;
+
+        $r5 = virtualinvoke r2.<java.util.Vector: java.lang.Object get(int)>(i3);
+
+        $r6 = (java.lang.ref.WeakReference) $r5;
+
+        $r7 = virtualinvoke $r6.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        r8 = (java.awt.Window) $r7;
+
+        if r8 == null goto label03;
+
+        $i1 = i2;
+
+        i2 = i2 + 1;
+
+        r3[$i1] = r8;
+
+     label03:
+        i3 = i3 + 1;
+
+        goto label02;
+
+     label04:
+        if $i0 == i2 goto label05;
+
+        $r4 = staticinvoke <java.util.Arrays: java.lang.Object[] copyOf(java.lang.Object[],int)>(r3, i2);
+
+        r10 = (java.awt.Window[]) $r4;
+
+        goto label06;
+
+     label05:
+        r10 = r3;
+
+     label06:
+        goto label08;
+
+     label07:
+        r10 = newarray (java.awt.Window)[0];
+
+     label08:
+        exitmonitor class "Ljava/awt/Window;";
+
+     label09:
+        return r10;
+
+     label10:
+        $r9 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/Window;";
+
+     label11:
+        throw $r9;
+
+        catch java.lang.Throwable from label01 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    public static java.awt.Window[] getWindows()
+    {
+        java.awt.Window[] $r1;
+        sun.awt.AppContext $r0;
+
+        $r0 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r1 = staticinvoke <java.awt.Window: java.awt.Window[] getWindows(sun.awt.AppContext)>($r0);
+
+        return $r1;
+    }
+
+    public static java.awt.Window[] getOwnerlessWindows()
+    {
+        java.awt.Window r1, $r2, $r3, r4;
+        java.awt.Window[] $r0, r5;
+        int $i0, i1, i2, i3, i4, i5, i6;
+
+        $r0 = staticinvoke <java.awt.Window: java.awt.Window[] getWindows()>();
+
+        i1 = 0;
+
+        i2 = lengthof $r0;
+
+        i3 = 0;
+
+     label1:
+        if i3 >= i2 goto label3;
+
+        r4 = $r0[i3];
+
+        $r3 = virtualinvoke r4.<java.awt.Window: java.awt.Window getOwner()>();
+
+        if $r3 != null goto label2;
+
+        i1 = i1 + 1;
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        r5 = newarray (java.awt.Window)[i1];
+
+        i4 = 0;
+
+        i5 = lengthof $r0;
+
+        i6 = 0;
+
+     label4:
+        if i6 >= i5 goto label6;
+
+        r1 = $r0[i6];
+
+        $r2 = virtualinvoke r1.<java.awt.Window: java.awt.Window getOwner()>();
+
+        if $r2 != null goto label5;
+
+        $i0 = i4;
+
+        i4 = i4 + 1;
+
+        r5[$i0] = r1;
+
+     label5:
+        i6 = i6 + 1;
+
+        goto label4;
+
+     label6:
+        return r5;
+    }
+
+    java.awt.Window getDocumentRoot()
+    {
+        java.lang.Throwable $r3;
+        java.awt.Window r0, $r2, r4;
+        java.lang.Object $r1;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label1:
+        r4 = r0;
+
+     label2:
+        $r2 = virtualinvoke r4.<java.awt.Window: java.awt.Window getOwner()>();
+
+        if $r2 == null goto label3;
+
+        r4 = virtualinvoke r4.<java.awt.Window: java.awt.Window getOwner()>();
+
+        goto label2;
+
+     label3:
+        exitmonitor $r1;
+
+     label4:
+        return r4;
+
+     label5:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public void setModalExclusionType(java.awt.Dialog$ModalExclusionType)
+    {
+        java.awt.Window r1;
+        java.lang.SecurityManager $r4;
+        java.security.Permission $r5;
+        java.awt.Dialog$ModalExclusionType $r2, $r3, r6;
+        java.awt.Toolkit $r0;
+        boolean $z0;
+
+        r1 := @this: java.awt.Window;
+
+        r6 := @parameter0: java.awt.Dialog$ModalExclusionType;
+
+        if r6 != null goto label1;
+
+        r6 = <java.awt.Dialog$ModalExclusionType: java.awt.Dialog$ModalExclusionType NO_EXCLUDE>;
+
+     label1:
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $z0 = virtualinvoke $r0.<java.awt.Toolkit: boolean isModalExclusionTypeSupported(java.awt.Dialog$ModalExclusionType)>(r6);
+
+        if $z0 != 0 goto label2;
+
+        r6 = <java.awt.Dialog$ModalExclusionType: java.awt.Dialog$ModalExclusionType NO_EXCLUDE>;
+
+     label2:
+        $r2 = r1.<java.awt.Window: java.awt.Dialog$ModalExclusionType modalExclusionType>;
+
+        if $r2 != r6 goto label3;
+
+        return;
+
+     label3:
+        $r3 = <java.awt.Dialog$ModalExclusionType: java.awt.Dialog$ModalExclusionType TOOLKIT_EXCLUDE>;
+
+        if r6 != $r3 goto label4;
+
+        $r4 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r4 == null goto label4;
+
+        $r5 = <sun.security.util.SecurityConstants$AWT: java.security.Permission TOOLKIT_MODALITY_PERMISSION>;
+
+        virtualinvoke $r4.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r5);
+
+     label4:
+        r1.<java.awt.Window: java.awt.Dialog$ModalExclusionType modalExclusionType> = r6;
+
+        return;
+    }
+
+    public java.awt.Dialog$ModalExclusionType getModalExclusionType()
+    {
+        java.awt.Dialog$ModalExclusionType $r1;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = r0.<java.awt.Window: java.awt.Dialog$ModalExclusionType modalExclusionType>;
+
+        return $r1;
+    }
+
+    boolean isModalExcluded(java.awt.Dialog$ModalExclusionType)
+    {
+        java.awt.Window r0, $r2;
+        int $i0;
+        java.awt.Dialog$ModalExclusionType $r1, r3, $r4;
+        boolean $z0, $z1;
+
+        r0 := @this: java.awt.Window;
+
+        r3 := @parameter0: java.awt.Dialog$ModalExclusionType;
+
+        $r1 = r0.<java.awt.Window: java.awt.Dialog$ModalExclusionType modalExclusionType>;
+
+        if $r1 == null goto label1;
+
+        $r4 = r0.<java.awt.Window: java.awt.Dialog$ModalExclusionType modalExclusionType>;
+
+        $i0 = virtualinvoke $r4.<java.awt.Dialog$ModalExclusionType: int compareTo(java.lang.Enum)>(r3);
+
+        if $i0 < 0 goto label1;
+
+        return 1;
+
+     label1:
+        $r2 = virtualinvoke r0.<java.awt.Window: java.awt.Window getOwner_NoClientCode()>();
+
+        if $r2 == null goto label2;
+
+        $z0 = virtualinvoke $r2.<java.awt.Window: boolean isModalExcluded(java.awt.Dialog$ModalExclusionType)>(r3);
+
+        if $z0 == 0 goto label2;
+
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        return $z1;
+    }
+
+    void updateChildrenBlocking()
+    {
+        java.util.Vector $r0;
+        java.awt.Window[] $r2, $r5;
+        int $i0, $i1, i2, i3, i4, $i5;
+        java.awt.Dialog $r7;
+        boolean $z0, $z1;
+        java.awt.Window r1, r4, $r6, $r8;
+        java.lang.Object $r3;
+
+        r1 := @this: java.awt.Window;
+
+        $r0 = new java.util.Vector;
+
+        specialinvoke $r0.<java.util.Vector: void <init>()>();
+
+        $r2 = virtualinvoke r1.<java.awt.Window: java.awt.Window[] getOwnedWindows()>();
+
+        i2 = 0;
+
+     label1:
+        $i0 = lengthof $r2;
+
+        if i2 >= $i0 goto label2;
+
+        $r8 = $r2[i2];
+
+        virtualinvoke $r0.<java.util.Vector: boolean add(java.lang.Object)>($r8);
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        i3 = 0;
+
+     label3:
+        $i1 = virtualinvoke $r0.<java.util.Vector: int size()>();
+
+        if i3 >= $i1 goto label7;
+
+        $r3 = virtualinvoke $r0.<java.util.Vector: java.lang.Object get(int)>(i3);
+
+        r4 = (java.awt.Window) $r3;
+
+        $z0 = virtualinvoke r4.<java.awt.Window: boolean isVisible()>();
+
+        if $z0 == 0 goto label6;
+
+        $z1 = virtualinvoke r4.<java.awt.Window: boolean isModalBlocked()>();
+
+        if $z1 == 0 goto label4;
+
+        $r7 = virtualinvoke r4.<java.awt.Window: java.awt.Dialog getModalBlocker()>();
+
+        virtualinvoke $r7.<java.awt.Dialog: void unblockWindow(java.awt.Window)>(r4);
+
+     label4:
+        staticinvoke <java.awt.Dialog: void checkShouldBeBlocked(java.awt.Window)>(r4);
+
+        $r5 = virtualinvoke r4.<java.awt.Window: java.awt.Window[] getOwnedWindows()>();
+
+        i4 = 0;
+
+     label5:
+        $i5 = lengthof $r5;
+
+        if i4 >= $i5 goto label6;
+
+        $r6 = $r5[i4];
+
+        virtualinvoke $r0.<java.util.Vector: boolean add(java.lang.Object)>($r6);
+
+        i4 = i4 + 1;
+
+        goto label5;
+
+     label6:
+        i3 = i3 + 1;
+
+        goto label3;
+
+     label7:
+        return;
+    }
+
+    public synchronized void addWindowListener(java.awt.event.WindowListener)
+    {
+        java.awt.event.WindowListener r0, $r2, $r3;
+        java.awt.Window r1;
+
+        r1 := @this: java.awt.Window;
+
+        r0 := @parameter0: java.awt.event.WindowListener;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        r1.<java.awt.Window: boolean newEventsOnly> = 1;
+
+        $r2 = r1.<java.awt.Window: java.awt.event.WindowListener windowListener>;
+
+        $r3 = staticinvoke <java.awt.AWTEventMulticaster: java.awt.event.WindowListener add(java.awt.event.WindowListener,java.awt.event.WindowListener)>($r2, r0);
+
+        r1.<java.awt.Window: java.awt.event.WindowListener windowListener> = $r3;
+
+        return;
+    }
+
+    public synchronized void addWindowStateListener(java.awt.event.WindowStateListener)
+    {
+        java.awt.Window r1;
+        java.awt.event.WindowStateListener r0, $r2, $r3;
+
+        r1 := @this: java.awt.Window;
+
+        r0 := @parameter0: java.awt.event.WindowStateListener;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = r1.<java.awt.Window: java.awt.event.WindowStateListener windowStateListener>;
+
+        $r3 = staticinvoke <java.awt.AWTEventMulticaster: java.awt.event.WindowStateListener add(java.awt.event.WindowStateListener,java.awt.event.WindowStateListener)>($r2, r0);
+
+        r1.<java.awt.Window: java.awt.event.WindowStateListener windowStateListener> = $r3;
+
+        r1.<java.awt.Window: boolean newEventsOnly> = 1;
+
+        return;
+    }
+
+    public synchronized void addWindowFocusListener(java.awt.event.WindowFocusListener)
+    {
+        java.awt.event.WindowFocusListener r0, $r2, $r3;
+        java.awt.Window r1;
+
+        r1 := @this: java.awt.Window;
+
+        r0 := @parameter0: java.awt.event.WindowFocusListener;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = r1.<java.awt.Window: java.awt.event.WindowFocusListener windowFocusListener>;
+
+        $r3 = staticinvoke <java.awt.AWTEventMulticaster: java.awt.event.WindowFocusListener add(java.awt.event.WindowFocusListener,java.awt.event.WindowFocusListener)>($r2, r0);
+
+        r1.<java.awt.Window: java.awt.event.WindowFocusListener windowFocusListener> = $r3;
+
+        r1.<java.awt.Window: boolean newEventsOnly> = 1;
+
+        return;
+    }
+
+    public synchronized void removeWindowListener(java.awt.event.WindowListener)
+    {
+        java.awt.event.WindowListener r0, $r2, $r3;
+        java.awt.Window r1;
+
+        r1 := @this: java.awt.Window;
+
+        r0 := @parameter0: java.awt.event.WindowListener;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = r1.<java.awt.Window: java.awt.event.WindowListener windowListener>;
+
+        $r3 = staticinvoke <java.awt.AWTEventMulticaster: java.awt.event.WindowListener remove(java.awt.event.WindowListener,java.awt.event.WindowListener)>($r2, r0);
+
+        r1.<java.awt.Window: java.awt.event.WindowListener windowListener> = $r3;
+
+        return;
+    }
+
+    public synchronized void removeWindowStateListener(java.awt.event.WindowStateListener)
+    {
+        java.awt.Window r1;
+        java.awt.event.WindowStateListener r0, $r2, $r3;
+
+        r1 := @this: java.awt.Window;
+
+        r0 := @parameter0: java.awt.event.WindowStateListener;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = r1.<java.awt.Window: java.awt.event.WindowStateListener windowStateListener>;
+
+        $r3 = staticinvoke <java.awt.AWTEventMulticaster: java.awt.event.WindowStateListener remove(java.awt.event.WindowStateListener,java.awt.event.WindowStateListener)>($r2, r0);
+
+        r1.<java.awt.Window: java.awt.event.WindowStateListener windowStateListener> = $r3;
+
+        return;
+    }
+
+    public synchronized void removeWindowFocusListener(java.awt.event.WindowFocusListener)
+    {
+        java.awt.event.WindowFocusListener r0, $r2, $r3;
+        java.awt.Window r1;
+
+        r1 := @this: java.awt.Window;
+
+        r0 := @parameter0: java.awt.event.WindowFocusListener;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = r1.<java.awt.Window: java.awt.event.WindowFocusListener windowFocusListener>;
+
+        $r3 = staticinvoke <java.awt.AWTEventMulticaster: java.awt.event.WindowFocusListener remove(java.awt.event.WindowFocusListener,java.awt.event.WindowFocusListener)>($r2, r0);
+
+        r1.<java.awt.Window: java.awt.event.WindowFocusListener windowFocusListener> = $r3;
+
+        return;
+    }
+
+    public synchronized java.awt.event.WindowListener[] getWindowListeners()
+    {
+        java.util.EventListener[] $r1;
+        java.awt.event.WindowListener[] $r2;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.util.EventListener[] getListeners(java.lang.Class)>(class "Ljava/awt/event/WindowListener;");
+
+        $r2 = (java.awt.event.WindowListener[]) $r1;
+
+        return $r2;
+    }
+
+    public synchronized java.awt.event.WindowFocusListener[] getWindowFocusListeners()
+    {
+        java.util.EventListener[] $r1;
+        java.awt.event.WindowFocusListener[] $r2;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.util.EventListener[] getListeners(java.lang.Class)>(class "Ljava/awt/event/WindowFocusListener;");
+
+        $r2 = (java.awt.event.WindowFocusListener[]) $r1;
+
+        return $r2;
+    }
+
+    public synchronized java.awt.event.WindowStateListener[] getWindowStateListeners()
+    {
+        java.awt.event.WindowStateListener[] $r2;
+        java.util.EventListener[] $r1;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.util.EventListener[] getListeners(java.lang.Class)>(class "Ljava/awt/event/WindowStateListener;");
+
+        $r2 = (java.awt.event.WindowStateListener[]) $r1;
+
+        return $r2;
+    }
+
+    public java.util.EventListener[] getListeners(java.lang.Class)
+    {
+        java.util.EventListener r3;
+        java.util.EventListener[] $r2, $r4;
+        java.awt.Window r1;
+        java.lang.Class r0;
+
+        r1 := @this: java.awt.Window;
+
+        r0 := @parameter0: java.lang.Class;
+
+        if r0 != class "Ljava/awt/event/WindowFocusListener;" goto label1;
+
+        r3 = r1.<java.awt.Window: java.awt.event.WindowFocusListener windowFocusListener>;
+
+        goto label4;
+
+     label1:
+        if r0 != class "Ljava/awt/event/WindowStateListener;" goto label2;
+
+        r3 = r1.<java.awt.Window: java.awt.event.WindowStateListener windowStateListener>;
+
+        goto label4;
+
+     label2:
+        if r0 != class "Ljava/awt/event/WindowListener;" goto label3;
+
+        r3 = r1.<java.awt.Window: java.awt.event.WindowListener windowListener>;
+
+        goto label4;
+
+     label3:
+        $r2 = specialinvoke r1.<java.awt.Container: java.util.EventListener[] getListeners(java.lang.Class)>(r0);
+
+        return $r2;
+
+     label4:
+        $r4 = staticinvoke <java.awt.AWTEventMulticaster: java.util.EventListener[] getListeners(java.util.EventListener,java.lang.Class)>(r3, r0);
+
+        return $r4;
+    }
+
+    boolean eventEnabled(java.awt.AWTEvent)
+    {
+        java.awt.event.WindowFocusListener $r3;
+        long $l1, $l2, $l4, $l5, $l7, $l8;
+        java.awt.AWTEvent r0;
+        byte $b3, $b6, $b9;
+        java.awt.event.WindowListener $r4;
+        int $i0;
+        java.awt.event.WindowStateListener $r2;
+        boolean $z0;
+        java.awt.Window r1;
+
+        r1 := @this: java.awt.Window;
+
+        r0 := @parameter0: java.awt.AWTEvent;
+
+        $i0 = r0.<java.awt.AWTEvent: int id>;
+
+        tableswitch($i0)
+        {
+            case 200: goto label01;
+            case 201: goto label01;
+            case 202: goto label01;
+            case 203: goto label01;
+            case 204: goto label01;
+            case 205: goto label01;
+            case 206: goto label01;
+            case 207: goto label04;
+            case 208: goto label04;
+            case 209: goto label07;
+            default: goto label10;
+        };
+
+     label01:
+        $l7 = r1.<java.awt.Window: long eventMask>;
+
+        $l8 = $l7 & 64L;
+
+        $b9 = $l8 cmp 0L;
+
+        if $b9 != 0 goto label02;
+
+        $r4 = r1.<java.awt.Window: java.awt.event.WindowListener windowListener>;
+
+        if $r4 == null goto label03;
+
+     label02:
+        return 1;
+
+     label03:
+        return 0;
+
+     label04:
+        $l4 = r1.<java.awt.Window: long eventMask>;
+
+        $l5 = $l4 & 524288L;
+
+        $b6 = $l5 cmp 0L;
+
+        if $b6 != 0 goto label05;
+
+        $r3 = r1.<java.awt.Window: java.awt.event.WindowFocusListener windowFocusListener>;
+
+        if $r3 == null goto label06;
+
+     label05:
+        return 1;
+
+     label06:
+        return 0;
+
+     label07:
+        $l1 = r1.<java.awt.Window: long eventMask>;
+
+        $l2 = $l1 & 262144L;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 != 0 goto label08;
+
+        $r2 = r1.<java.awt.Window: java.awt.event.WindowStateListener windowStateListener>;
+
+        if $r2 == null goto label09;
+
+     label08:
+        return 1;
+
+     label09:
+        return 0;
+
+     label10:
+        $z0 = specialinvoke r1.<java.awt.Container: boolean eventEnabled(java.awt.AWTEvent)>(r0);
+
+        return $z0;
+    }
+
+    protected void processEvent(java.awt.AWTEvent)
+    {
+        java.awt.AWTEvent r0;
+        java.awt.Window r1;
+        int $i0;
+        java.awt.event.WindowEvent $r2, $r3, $r4;
+        boolean $z0;
+
+        r1 := @this: java.awt.Window;
+
+        r0 := @parameter0: java.awt.AWTEvent;
+
+        $z0 = r0 instanceof java.awt.event.WindowEvent;
+
+        if $z0 == 0 goto label5;
+
+        $i0 = virtualinvoke r0.<java.awt.AWTEvent: int getID()>();
+
+        tableswitch($i0)
+        {
+            case 200: goto label1;
+            case 201: goto label1;
+            case 202: goto label1;
+            case 203: goto label1;
+            case 204: goto label1;
+            case 205: goto label1;
+            case 206: goto label1;
+            case 207: goto label2;
+            case 208: goto label2;
+            case 209: goto label3;
+            default: goto label4;
+        };
+
+     label1:
+        $r4 = (java.awt.event.WindowEvent) r0;
+
+        virtualinvoke r1.<java.awt.Window: void processWindowEvent(java.awt.event.WindowEvent)>($r4);
+
+        goto label4;
+
+     label2:
+        $r3 = (java.awt.event.WindowEvent) r0;
+
+        virtualinvoke r1.<java.awt.Window: void processWindowFocusEvent(java.awt.event.WindowEvent)>($r3);
+
+        goto label4;
+
+     label3:
+        $r2 = (java.awt.event.WindowEvent) r0;
+
+        virtualinvoke r1.<java.awt.Window: void processWindowStateEvent(java.awt.event.WindowEvent)>($r2);
+
+     label4:
+        return;
+
+     label5:
+        specialinvoke r1.<java.awt.Container: void processEvent(java.awt.AWTEvent)>(r0);
+
+        return;
+    }
+
+    protected void processWindowEvent(java.awt.event.WindowEvent)
+    {
+        java.awt.event.WindowListener r1;
+        java.awt.Window r0;
+        int $i0;
+        java.awt.event.WindowEvent r2;
+
+        r0 := @this: java.awt.Window;
+
+        r2 := @parameter0: java.awt.event.WindowEvent;
+
+        r1 = r0.<java.awt.Window: java.awt.event.WindowListener windowListener>;
+
+        if r1 == null goto label8;
+
+        $i0 = virtualinvoke r2.<java.awt.event.WindowEvent: int getID()>();
+
+        tableswitch($i0)
+        {
+            case 200: goto label1;
+            case 201: goto label2;
+            case 202: goto label3;
+            case 203: goto label4;
+            case 204: goto label5;
+            case 205: goto label6;
+            case 206: goto label7;
+            default: goto label8;
+        };
+
+     label1:
+        interfaceinvoke r1.<java.awt.event.WindowListener: void windowOpened(java.awt.event.WindowEvent)>(r2);
+
+        goto label8;
+
+     label2:
+        interfaceinvoke r1.<java.awt.event.WindowListener: void windowClosing(java.awt.event.WindowEvent)>(r2);
+
+        goto label8;
+
+     label3:
+        interfaceinvoke r1.<java.awt.event.WindowListener: void windowClosed(java.awt.event.WindowEvent)>(r2);
+
+        goto label8;
+
+     label4:
+        interfaceinvoke r1.<java.awt.event.WindowListener: void windowIconified(java.awt.event.WindowEvent)>(r2);
+
+        goto label8;
+
+     label5:
+        interfaceinvoke r1.<java.awt.event.WindowListener: void windowDeiconified(java.awt.event.WindowEvent)>(r2);
+
+        goto label8;
+
+     label6:
+        interfaceinvoke r1.<java.awt.event.WindowListener: void windowActivated(java.awt.event.WindowEvent)>(r2);
+
+        goto label8;
+
+     label7:
+        interfaceinvoke r1.<java.awt.event.WindowListener: void windowDeactivated(java.awt.event.WindowEvent)>(r2);
+
+        goto label8;
+
+     label8:
+        return;
+    }
+
+    protected void processWindowFocusEvent(java.awt.event.WindowEvent)
+    {
+        java.awt.event.WindowFocusListener r1;
+        java.awt.Window r0;
+        int $i0;
+        java.awt.event.WindowEvent r2;
+
+        r0 := @this: java.awt.Window;
+
+        r2 := @parameter0: java.awt.event.WindowEvent;
+
+        r1 = r0.<java.awt.Window: java.awt.event.WindowFocusListener windowFocusListener>;
+
+        if r1 == null goto label3;
+
+        $i0 = virtualinvoke r2.<java.awt.event.WindowEvent: int getID()>();
+
+        lookupswitch($i0)
+        {
+            case 207: goto label1;
+            case 208: goto label2;
+            default: goto label3;
+        };
+
+     label1:
+        interfaceinvoke r1.<java.awt.event.WindowFocusListener: void windowGainedFocus(java.awt.event.WindowEvent)>(r2);
+
+        goto label3;
+
+     label2:
+        interfaceinvoke r1.<java.awt.event.WindowFocusListener: void windowLostFocus(java.awt.event.WindowEvent)>(r2);
+
+        goto label3;
+
+     label3:
+        return;
+    }
+
+    protected void processWindowStateEvent(java.awt.event.WindowEvent)
+    {
+        java.awt.Window r0;
+        int $i0;
+        java.awt.event.WindowStateListener r1;
+        java.awt.event.WindowEvent r2;
+
+        r0 := @this: java.awt.Window;
+
+        r2 := @parameter0: java.awt.event.WindowEvent;
+
+        r1 = r0.<java.awt.Window: java.awt.event.WindowStateListener windowStateListener>;
+
+        if r1 == null goto label2;
+
+        $i0 = virtualinvoke r2.<java.awt.event.WindowEvent: int getID()>();
+
+        lookupswitch($i0)
+        {
+            case 209: goto label1;
+            default: goto label2;
+        };
+
+     label1:
+        interfaceinvoke r1.<java.awt.event.WindowStateListener: void windowStateChanged(java.awt.event.WindowEvent)>(r2);
+
+        goto label2;
+
+     label2:
+        return;
+    }
+
+    void preProcessKeyEvent(java.awt.event.KeyEvent)
+    {
+        java.io.PrintStream $r2;
+        java.awt.Window r1;
+        java.awt.event.KeyEvent r0;
+        int $i0, $i1;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: java.awt.Window;
+
+        r0 := @parameter0: java.awt.event.KeyEvent;
+
+        $z0 = virtualinvoke r0.<java.awt.event.KeyEvent: boolean isActionKey()>();
+
+        if $z0 == 0 goto label1;
+
+        $i0 = virtualinvoke r0.<java.awt.event.KeyEvent: int getKeyCode()>();
+
+        if $i0 != 112 goto label1;
+
+        $z1 = virtualinvoke r0.<java.awt.event.KeyEvent: boolean isControlDown()>();
+
+        if $z1 == 0 goto label1;
+
+        $z2 = virtualinvoke r0.<java.awt.event.KeyEvent: boolean isShiftDown()>();
+
+        if $z2 == 0 goto label1;
+
+        $i1 = virtualinvoke r0.<java.awt.event.KeyEvent: int getID()>();
+
+        if $i1 != 401 goto label1;
+
+        $r2 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke r1.<java.awt.Window: void list(java.io.PrintStream,int)>($r2, 0);
+
+     label1:
+        return;
+    }
+
+    void postProcessKeyEvent(java.awt.event.KeyEvent)
+    {
+        java.awt.event.KeyEvent r1;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        r1 := @parameter0: java.awt.event.KeyEvent;
+
+        return;
+    }
+
+    public final void setAlwaysOnTop(boolean) throws java.lang.SecurityException
+    {
+        java.lang.Throwable $r5, $r6;
+        java.awt.peer.WindowPeer r7;
+        java.awt.peer.ComponentPeer $r2;
+        java.awt.Window r1;
+        java.lang.SecurityManager $r0;
+        java.security.Permission $r4;
+        java.lang.Object $r3;
+        boolean z0, $z1, $z2;
+
+        r1 := @this: java.awt.Window;
+
+        z0 := @parameter0: boolean;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label01;
+
+        $r4 = <sun.security.util.SecurityConstants$AWT: java.security.Permission SET_WINDOW_ALWAYS_ON_TOP_PERMISSION>;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r4);
+
+     label01:
+        entermonitor r1;
+
+     label02:
+        $z2 = r1.<java.awt.Window: boolean alwaysOnTop>;
+
+        r1.<java.awt.Window: boolean alwaysOnTop> = z0;
+
+        exitmonitor r1;
+
+     label03:
+        goto label06;
+
+     label04:
+        $r6 := @caughtexception;
+
+        exitmonitor r1;
+
+     label05:
+        throw $r6;
+
+     label06:
+        if $z2 == z0 goto label13;
+
+        $z1 = virtualinvoke r1.<java.awt.Window: boolean isAlwaysOnTopSupported()>();
+
+        if $z1 == 0 goto label12;
+
+        $r2 = r1.<java.awt.Window: java.awt.peer.ComponentPeer peer>;
+
+        r7 = (java.awt.peer.WindowPeer) $r2;
+
+        $r3 = virtualinvoke r1.<java.awt.Window: java.lang.Object getTreeLock()>();
+
+        entermonitor $r3;
+
+     label07:
+        if r7 == null goto label08;
+
+        interfaceinvoke r7.<java.awt.peer.WindowPeer: void updateAlwaysOnTopState()>();
+
+     label08:
+        exitmonitor $r3;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r5 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label11:
+        throw $r5;
+
+     label12:
+        virtualinvoke r1.<java.awt.Window: void firePropertyChange(java.lang.String,boolean,boolean)>("alwaysOnTop", $z2, z0);
+
+     label13:
+        specialinvoke r1.<java.awt.Window: void setOwnedWindowsAlwaysOnTop(boolean)>(z0);
+
+        return;
+
+        catch java.lang.Throwable from label02 to label03 with label04;
+        catch java.lang.Throwable from label04 to label05 with label04;
+        catch java.lang.Throwable from label07 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    private void setOwnedWindowsAlwaysOnTop(boolean)
+    {
+        java.lang.Throwable $r9;
+        java.lang.ref.WeakReference[] r3;
+        java.awt.Window r0, r7;
+        java.util.Vector $r1, $r2, $r4;
+        int $i0, i1, i2;
+        java.lang.Object $r6;
+        java.lang.SecurityException $r8;
+        java.lang.ref.WeakReference r5;
+        boolean z0;
+
+        r0 := @this: java.awt.Window;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = r0.<java.awt.Window: java.util.Vector ownedWindowList>;
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = r0.<java.awt.Window: java.util.Vector ownedWindowList>;
+
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        r3 = newarray (java.lang.ref.WeakReference)[$i0];
+
+        $r4 = r0.<java.awt.Window: java.util.Vector ownedWindowList>;
+
+        virtualinvoke $r4.<java.util.Vector: void copyInto(java.lang.Object[])>(r3);
+
+        exitmonitor $r1;
+
+     label02:
+        goto label05;
+
+     label03:
+        $r9 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label04:
+        throw $r9;
+
+     label05:
+        i1 = lengthof r3;
+
+        i2 = 0;
+
+     label06:
+        if i2 >= i1 goto label11;
+
+        r5 = r3[i2];
+
+        $r6 = virtualinvoke r5.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        r7 = (java.awt.Window) $r6;
+
+        if r7 == null goto label10;
+
+     label07:
+        virtualinvoke r7.<java.awt.Window: void setAlwaysOnTop(boolean)>(z0);
+
+     label08:
+        goto label10;
+
+     label09:
+        $r8 := @caughtexception;
+
+     label10:
+        i2 = i2 + 1;
+
+        goto label06;
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label03;
+        catch java.lang.Throwable from label03 to label04 with label03;
+        catch java.lang.SecurityException from label07 to label08 with label09;
+    }
+
+    public boolean isAlwaysOnTopSupported()
+    {
+        java.awt.Toolkit $r0;
+        boolean $z0;
+        java.awt.Window r1;
+
+        r1 := @this: java.awt.Window;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $z0 = virtualinvoke $r0.<java.awt.Toolkit: boolean isAlwaysOnTopSupported()>();
+
+        return $z0;
+    }
+
+    public final boolean isAlwaysOnTop()
+    {
+        java.awt.Window r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.Window;
+
+        $z0 = r0.<java.awt.Window: boolean alwaysOnTop>;
+
+        return $z0;
+    }
+
+    public java.awt.Component getFocusOwner()
+    {
+        java.awt.KeyboardFocusManager $r1;
+        java.awt.Window r0;
+        java.awt.Component $r2;
+        boolean $z0;
+
+        r0 := @this: java.awt.Window;
+
+        $z0 = virtualinvoke r0.<java.awt.Window: boolean isFocused()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager()>();
+
+        $r2 = virtualinvoke $r1.<java.awt.KeyboardFocusManager: java.awt.Component getFocusOwner()>();
+
+        goto label2;
+
+     label1:
+        $r2 = null;
+
+     label2:
+        return $r2;
+    }
+
+    public java.awt.Component getMostRecentFocusOwner()
+    {
+        java.awt.FocusTraversalPolicy $r2;
+        java.awt.Window r0;
+        java.awt.Component $r1, $r3, $r4;
+        boolean $z0, $z1;
+
+        r0 := @this: java.awt.Window;
+
+        $z0 = virtualinvoke r0.<java.awt.Window: boolean isFocused()>();
+
+        if $z0 == 0 goto label1;
+
+        $r3 = virtualinvoke r0.<java.awt.Window: java.awt.Component getFocusOwner()>();
+
+        return $r3;
+
+     label1:
+        $r1 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.Component getMostRecentFocusOwner(java.awt.Window)>(r0);
+
+        if $r1 == null goto label2;
+
+        return $r1;
+
+     label2:
+        $z1 = virtualinvoke r0.<java.awt.Window: boolean isFocusableWindow()>();
+
+        if $z1 == 0 goto label3;
+
+        $r2 = virtualinvoke r0.<java.awt.Window: java.awt.FocusTraversalPolicy getFocusTraversalPolicy()>();
+
+        $r4 = virtualinvoke $r2.<java.awt.FocusTraversalPolicy: java.awt.Component getInitialComponent(java.awt.Window)>(r0);
+
+        goto label4;
+
+     label3:
+        $r4 = null;
+
+     label4:
+        return $r4;
+    }
+
+    public boolean isActive()
+    {
+        java.awt.KeyboardFocusManager $r0;
+        java.awt.Window $r1, r2;
+        boolean $z0;
+
+        r2 := @this: java.awt.Window;
+
+        $r0 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager()>();
+
+        $r1 = virtualinvoke $r0.<java.awt.KeyboardFocusManager: java.awt.Window getActiveWindow()>();
+
+        if $r1 != r2 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean isFocused()
+    {
+        java.awt.KeyboardFocusManager $r0;
+        java.awt.Window $r1, r2;
+        boolean $z0;
+
+        r2 := @this: java.awt.Window;
+
+        $r0 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager()>();
+
+        $r1 = virtualinvoke $r0.<java.awt.KeyboardFocusManager: java.awt.Window getGlobalFocusedWindow()>();
+
+        if $r1 != r2 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public java.util.Set getFocusTraversalKeys(int)
+    {
+        java.awt.Window r1;
+        java.util.Set $r4, $r6;
+        java.lang.IllegalArgumentException $r0;
+        java.awt.KeyboardFocusManager $r3;
+        int i0;
+        java.util.Set[] $r2, $r5;
+
+        r1 := @this: java.awt.Window;
+
+        i0 := @parameter0: int;
+
+        if i0 < 0 goto label1;
+
+        if i0 < 4 goto label2;
+
+     label1:
+        $r0 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r0.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("invalid focus traversal key identifier");
+
+        throw $r0;
+
+     label2:
+        $r2 = r1.<java.awt.Window: java.util.Set[] focusTraversalKeys>;
+
+        if $r2 == null goto label3;
+
+        $r5 = r1.<java.awt.Window: java.util.Set[] focusTraversalKeys>;
+
+        $r6 = $r5[i0];
+
+        goto label4;
+
+     label3:
+        $r6 = null;
+
+     label4:
+        if $r6 == null goto label5;
+
+        return $r6;
+
+     label5:
+        $r3 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager()>();
+
+        $r4 = virtualinvoke $r3.<java.awt.KeyboardFocusManager: java.util.Set getDefaultFocusTraversalKeys(int)>(i0);
+
+        return $r4;
+    }
+
+    public final void setFocusCycleRoot(boolean)
+    {
+        java.awt.Window r0;
+        boolean z0;
+
+        r0 := @this: java.awt.Window;
+
+        z0 := @parameter0: boolean;
+
+        return;
+    }
+
+    public final boolean isFocusCycleRoot()
+    {
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        return 1;
+    }
+
+    public final java.awt.Container getFocusCycleRootAncestor()
+    {
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        return null;
+    }
+
+    public final boolean isFocusableWindow()
+    {
+        java.awt.FocusTraversalPolicy $r1;
+        java.awt.Window r0, r3;
+        java.awt.Component $r2;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+
+        r0 := @this: java.awt.Window;
+
+        $z0 = virtualinvoke r0.<java.awt.Window: boolean getFocusableWindowState()>();
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $z1 = r0 instanceof java.awt.Frame;
+
+        if $z1 != 0 goto label2;
+
+        $z2 = r0 instanceof java.awt.Dialog;
+
+        if $z2 == 0 goto label3;
+
+     label2:
+        return 1;
+
+     label3:
+        $r1 = virtualinvoke r0.<java.awt.Window: java.awt.FocusTraversalPolicy getFocusTraversalPolicy()>();
+
+        $r2 = virtualinvoke $r1.<java.awt.FocusTraversalPolicy: java.awt.Component getDefaultComponent(java.awt.Container)>(r0);
+
+        if $r2 != null goto label4;
+
+        return 0;
+
+     label4:
+        r3 = virtualinvoke r0.<java.awt.Window: java.awt.Window getOwner()>();
+
+     label5:
+        if r3 == null goto label8;
+
+        $z3 = r3 instanceof java.awt.Frame;
+
+        if $z3 != 0 goto label6;
+
+        $z5 = r3 instanceof java.awt.Dialog;
+
+        if $z5 == 0 goto label7;
+
+     label6:
+        $z4 = virtualinvoke r3.<java.awt.Window: boolean isShowing()>();
+
+        return $z4;
+
+     label7:
+        r3 = virtualinvoke r3.<java.awt.Window: java.awt.Window getOwner()>();
+
+        goto label5;
+
+     label8:
+        return 0;
+    }
+
+    public boolean getFocusableWindowState()
+    {
+        java.awt.Window r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.Window;
+
+        $z0 = r0.<java.awt.Window: boolean focusableWindowState>;
+
+        return $z0;
+    }
+
+    public void setFocusableWindowState(boolean)
+    {
+        java.lang.Throwable $r5;
+        java.awt.peer.WindowPeer r6;
+        java.awt.peer.ComponentPeer $r1;
+        java.awt.Window r0, r7;
+        sun.awt.CausedFocusEvent$Cause $r4;
+        java.awt.Component $r3;
+        java.awt.KeyboardFocusManager $r2;
+        boolean z0, z1, $z2, $z3;
+
+        r0 := @this: java.awt.Window;
+
+        z1 := @parameter0: boolean;
+
+        entermonitor r0;
+
+     label01:
+        z0 = r0.<java.awt.Window: boolean focusableWindowState>;
+
+        r0.<java.awt.Window: boolean focusableWindowState> = z1;
+
+        exitmonitor r0;
+
+     label02:
+        goto label05;
+
+     label03:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+     label04:
+        throw $r5;
+
+     label05:
+        $r1 = r0.<java.awt.Window: java.awt.peer.ComponentPeer peer>;
+
+        r6 = (java.awt.peer.WindowPeer) $r1;
+
+        if r6 == null goto label06;
+
+        interfaceinvoke r6.<java.awt.peer.WindowPeer: void updateFocusableWindowState()>();
+
+     label06:
+        virtualinvoke r0.<java.awt.Window: void firePropertyChange(java.lang.String,boolean,boolean)>("focusableWindowState", z0, z1);
+
+        if z0 == 0 goto label10;
+
+        if z1 != 0 goto label10;
+
+        $z2 = virtualinvoke r0.<java.awt.Window: boolean isFocused()>();
+
+        if $z2 == 0 goto label10;
+
+        r7 = virtualinvoke r0.<java.awt.Window: java.awt.Window getOwner()>();
+
+     label07:
+        if r7 == null goto label09;
+
+        $r3 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.Component getMostRecentFocusOwner(java.awt.Window)>(r7);
+
+        if $r3 == null goto label08;
+
+        $r4 = <sun.awt.CausedFocusEvent$Cause: sun.awt.CausedFocusEvent$Cause ACTIVATION>;
+
+        $z3 = virtualinvoke $r3.<java.awt.Component: boolean requestFocus(boolean,sun.awt.CausedFocusEvent$Cause)>(0, $r4);
+
+        if $z3 == 0 goto label08;
+
+        return;
+
+     label08:
+        r7 = virtualinvoke r7.<java.awt.Window: java.awt.Window getOwner()>();
+
+        goto label07;
+
+     label09:
+        $r2 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager()>();
+
+        virtualinvoke $r2.<java.awt.KeyboardFocusManager: void clearGlobalFocusOwnerPriv()>();
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label03;
+        catch java.lang.Throwable from label03 to label04 with label03;
+    }
+
+    public void setAutoRequestFocus(boolean)
+    {
+        java.awt.Window r0;
+        boolean z0;
+
+        r0 := @this: java.awt.Window;
+
+        z0 := @parameter0: boolean;
+
+        r0.<java.awt.Window: boolean autoRequestFocus> = z0;
+
+        return;
+    }
+
+    public boolean isAutoRequestFocus()
+    {
+        java.awt.Window r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.Window;
+
+        $z0 = r0.<java.awt.Window: boolean autoRequestFocus>;
+
+        return $z0;
+    }
+
+    public void addPropertyChangeListener(java.beans.PropertyChangeListener)
+    {
+        java.beans.PropertyChangeListener r1;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        r1 := @parameter0: java.beans.PropertyChangeListener;
+
+        specialinvoke r0.<java.awt.Container: void addPropertyChangeListener(java.beans.PropertyChangeListener)>(r1);
+
+        return;
+    }
+
+    public void addPropertyChangeListener(java.lang.String, java.beans.PropertyChangeListener)
+    {
+        java.lang.String r1;
+        java.beans.PropertyChangeListener r2;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.beans.PropertyChangeListener;
+
+        specialinvoke r0.<java.awt.Container: void addPropertyChangeListener(java.lang.String,java.beans.PropertyChangeListener)>(r1, r2);
+
+        return;
+    }
+
+    public boolean isValidateRoot()
+    {
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        return 1;
+    }
+
+    void dispatchEventImpl(java.awt.AWTEvent)
+    {
+        int $i0;
+        java.awt.AWTEvent r0;
+        java.awt.Window r1;
+
+        r1 := @this: java.awt.Window;
+
+        r0 := @parameter0: java.awt.AWTEvent;
+
+        $i0 = virtualinvoke r0.<java.awt.AWTEvent: int getID()>();
+
+        if $i0 != 101 goto label1;
+
+        virtualinvoke r1.<java.awt.Window: void invalidate()>();
+
+        virtualinvoke r1.<java.awt.Window: void validate()>();
+
+     label1:
+        specialinvoke r1.<java.awt.Container: void dispatchEventImpl(java.awt.AWTEvent)>(r0);
+
+        return;
+    }
+
+    public boolean postEvent(java.awt.Event)
+    {
+        java.awt.Event r1;
+        java.awt.Window r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.Window;
+
+        r1 := @parameter0: java.awt.Event;
+
+        $z0 = virtualinvoke r0.<java.awt.Window: boolean handleEvent(java.awt.Event)>(r1);
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r1.<java.awt.Event: void consume()>();
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    public boolean isShowing()
+    {
+        java.awt.Window r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.Window;
+
+        $z0 = r0.<java.awt.Window: boolean visible>;
+
+        return $z0;
+    }
+
+    boolean isDisposing()
+    {
+        java.awt.Window r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.Window;
+
+        $z0 = r0.<java.awt.Window: boolean disposing>;
+
+        return $z0;
+    }
+
+    public void applyResourceBundle(java.util.ResourceBundle)
+    {
+        java.util.ResourceBundle r1;
+        java.awt.Window r0;
+        java.awt.ComponentOrientation $r2;
+
+        r0 := @this: java.awt.Window;
+
+        r1 := @parameter0: java.util.ResourceBundle;
+
+        $r2 = staticinvoke <java.awt.ComponentOrientation: java.awt.ComponentOrientation getOrientation(java.util.ResourceBundle)>(r1);
+
+        virtualinvoke r0.<java.awt.Window: void applyComponentOrientation(java.awt.ComponentOrientation)>($r2);
+
+        return;
+    }
+
+    public void applyResourceBundle(java.lang.String)
+    {
+        java.util.ResourceBundle $r4;
+        java.util.Locale $r2;
+        java.awt.Window r0;
+        java.lang.String r1;
+        java.lang.ClassLoader $r3;
+
+        r0 := @this: java.awt.Window;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = staticinvoke <java.util.Locale: java.util.Locale getDefault()>();
+
+        $r3 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getSystemClassLoader()>();
+
+        $r4 = staticinvoke <java.util.ResourceBundle: java.util.ResourceBundle getBundle(java.lang.String,java.util.Locale,java.lang.ClassLoader)>(r1, $r2, $r3);
+
+        virtualinvoke r0.<java.awt.Window: void applyResourceBundle(java.util.ResourceBundle)>($r4);
+
+        return;
+    }
+
+    void addOwnedWindow(java.lang.ref.WeakReference)
+    {
+        java.lang.Throwable $r5;
+        java.util.Vector $r2, $r3, $r4;
+        java.awt.Window r1;
+        java.lang.ref.WeakReference r0;
+        boolean $z0;
+
+        r1 := @this: java.awt.Window;
+
+        r0 := @parameter0: java.lang.ref.WeakReference;
+
+        if r0 == null goto label6;
+
+        $r2 = r1.<java.awt.Window: java.util.Vector ownedWindowList>;
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = r1.<java.awt.Window: java.util.Vector ownedWindowList>;
+
+        $z0 = virtualinvoke $r3.<java.util.Vector: boolean contains(java.lang.Object)>(r0);
+
+        if $z0 != 0 goto label2;
+
+        $r4 = r1.<java.awt.Window: java.util.Vector ownedWindowList>;
+
+        virtualinvoke $r4.<java.util.Vector: void addElement(java.lang.Object)>(r0);
+
+     label2:
+        exitmonitor $r2;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label5:
+        throw $r5;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    void removeOwnedWindow(java.lang.ref.WeakReference)
+    {
+        java.util.Vector $r2;
+        java.lang.ref.WeakReference r0;
+        java.awt.Window r1;
+
+        r1 := @this: java.awt.Window;
+
+        r0 := @parameter0: java.lang.ref.WeakReference;
+
+        if r0 == null goto label1;
+
+        $r2 = r1.<java.awt.Window: java.util.Vector ownedWindowList>;
+
+        virtualinvoke $r2.<java.util.Vector: boolean removeElement(java.lang.Object)>(r0);
+
+     label1:
+        return;
+    }
+
+    void connectOwnedWindow(java.awt.Window)
+    {
+        java.awt.Window r0, r1;
+        java.awt.Window$WindowDisposerRecord $r3;
+        java.lang.ref.WeakReference $r2;
+
+        r1 := @this: java.awt.Window;
+
+        r0 := @parameter0: java.awt.Window;
+
+        r0.<java.awt.Window: java.awt.Container parent> = r1;
+
+        $r2 = r0.<java.awt.Window: java.lang.ref.WeakReference weakThis>;
+
+        virtualinvoke r1.<java.awt.Window: void addOwnedWindow(java.lang.ref.WeakReference)>($r2);
+
+        $r3 = r0.<java.awt.Window: java.awt.Window$WindowDisposerRecord disposerRecord>;
+
+        virtualinvoke $r3.<java.awt.Window$WindowDisposerRecord: void updateOwner()>();
+
+        return;
+    }
+
+    private void addToWindowList()
+    {
+        java.lang.Throwable $r6;
+        java.awt.Window r0;
+        java.util.Vector $r4, r7;
+        sun.awt.AppContext $r1, $r5;
+        java.lang.Object $r2;
+        java.lang.ref.WeakReference $r3;
+
+        r0 := @this: java.awt.Window;
+
+        entermonitor class "Ljava/awt/Window;";
+
+     label1:
+        $r1 = r0.<java.awt.Window: sun.awt.AppContext appContext>;
+
+        $r2 = virtualinvoke $r1.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>(class "Ljava/awt/Window;");
+
+        r7 = (java.util.Vector) $r2;
+
+        if r7 != null goto label2;
+
+        $r4 = new java.util.Vector;
+
+        specialinvoke $r4.<java.util.Vector: void <init>()>();
+
+        r7 = $r4;
+
+        $r5 = r0.<java.awt.Window: sun.awt.AppContext appContext>;
+
+        virtualinvoke $r5.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>(class "Ljava/awt/Window;", $r4);
+
+     label2:
+        $r3 = r0.<java.awt.Window: java.lang.ref.WeakReference weakThis>;
+
+        virtualinvoke r7.<java.util.Vector: boolean add(java.lang.Object)>($r3);
+
+        exitmonitor class "Ljava/awt/Window;";
+
+     label3:
+        goto label6;
+
+     label4:
+        $r6 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/Window;";
+
+     label5:
+        throw $r6;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private static void removeFromWindowList(sun.awt.AppContext, java.lang.ref.WeakReference)
+    {
+        java.lang.Throwable $r4;
+        java.util.Vector r2;
+        sun.awt.AppContext r0;
+        java.lang.Object $r1;
+        java.lang.ref.WeakReference r3;
+
+        r0 := @parameter0: sun.awt.AppContext;
+
+        r3 := @parameter1: java.lang.ref.WeakReference;
+
+        entermonitor class "Ljava/awt/Window;";
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>(class "Ljava/awt/Window;");
+
+        r2 = (java.util.Vector) $r1;
+
+        if r2 == null goto label2;
+
+        virtualinvoke r2.<java.util.Vector: boolean remove(java.lang.Object)>(r3);
+
+     label2:
+        exitmonitor class "Ljava/awt/Window;";
+
+     label3:
+        goto label6;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/Window;";
+
+     label5:
+        throw $r4;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private void removeFromWindowList()
+    {
+        java.lang.ref.WeakReference $r1;
+        java.awt.Window r0;
+        sun.awt.AppContext $r2;
+
+        r0 := @this: java.awt.Window;
+
+        $r2 = r0.<java.awt.Window: sun.awt.AppContext appContext>;
+
+        $r1 = r0.<java.awt.Window: java.lang.ref.WeakReference weakThis>;
+
+        staticinvoke <java.awt.Window: void removeFromWindowList(sun.awt.AppContext,java.lang.ref.WeakReference)>($r2, $r1);
+
+        return;
+    }
+
+    public void setType(java.awt.Window$Type)
+    {
+        java.awt.IllegalComponentStateException $r4;
+        java.lang.Throwable $r6, $r7;
+        java.awt.Window r1;
+        java.lang.IllegalArgumentException $r5;
+        java.awt.Window$Type r0;
+        java.lang.Object $r2, $r3;
+        boolean $z0;
+
+        r1 := @this: java.awt.Window;
+
+        r0 := @parameter0: java.awt.Window$Type;
+
+        if r0 != null goto label01;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("type should not be null.");
+
+        throw $r5;
+
+     label01:
+        $r2 = virtualinvoke r1.<java.awt.Window: java.lang.Object getTreeLock()>();
+
+        entermonitor $r2;
+
+     label02:
+        $z0 = virtualinvoke r1.<java.awt.Window: boolean isDisplayable()>();
+
+        if $z0 == 0 goto label03;
+
+        $r4 = new java.awt.IllegalComponentStateException;
+
+        specialinvoke $r4.<java.awt.IllegalComponentStateException: void <init>(java.lang.String)>("The window is displayable.");
+
+        throw $r4;
+
+     label03:
+        $r3 = virtualinvoke r1.<java.awt.Window: java.lang.Object getObjectLock()>();
+
+        entermonitor $r3;
+
+     label04:
+        r1.<java.awt.Window: java.awt.Window$Type type> = r0;
+
+        exitmonitor $r3;
+
+     label05:
+        goto label08;
+
+     label06:
+        $r7 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label07:
+        throw $r7;
+
+     label08:
+        exitmonitor $r2;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r6 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label11:
+        throw $r6;
+
+     label12:
+        return;
+
+        catch java.lang.Throwable from label04 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+        catch java.lang.Throwable from label02 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    public java.awt.Window$Type getType()
+    {
+        java.lang.Throwable $r3;
+        java.awt.Window$Type $r2;
+        java.awt.Window r0;
+        java.lang.Object $r1;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.lang.Object getObjectLock()>();
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<java.awt.Window: java.awt.Window$Type type>;
+
+        exitmonitor $r1;
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private void writeObject(java.io.ObjectOutputStream) throws java.io.IOException
+    {
+        java.lang.Throwable $r20, $r21;
+        java.awt.event.WindowFocusListener $r7;
+        java.awt.FocusManager $r1, $r2, $r3;
+        java.util.Vector $r9, $r10, $r15;
+        java.awt.event.WindowListener $r6;
+        int $i0, i1;
+        java.io.ObjectOutputStream r5;
+        java.lang.ref.WeakReference $r17;
+        java.awt.event.WindowStateListener $r8;
+        boolean $z0, $z1;
+        java.util.Iterator $r13;
+        java.awt.Image r22;
+        java.awt.Window r0, r19;
+        java.awt.Component $r4;
+        java.util.List $r11, $r12;
+        java.lang.Object $r14, $r16, $r18;
+
+        r0 := @this: java.awt.Window;
+
+        r5 := @parameter0: java.io.ObjectOutputStream;
+
+        entermonitor r0;
+
+     label01:
+        $r1 = new java.awt.FocusManager;
+
+        specialinvoke $r1.<java.awt.FocusManager: void <init>()>();
+
+        r0.<java.awt.Window: java.awt.FocusManager focusMgr> = $r1;
+
+        $r2 = r0.<java.awt.Window: java.awt.FocusManager focusMgr>;
+
+        $r2.<java.awt.FocusManager: java.awt.Container focusRoot> = r0;
+
+        $r3 = r0.<java.awt.Window: java.awt.FocusManager focusMgr>;
+
+        $r4 = virtualinvoke r0.<java.awt.Window: java.awt.Component getMostRecentFocusOwner()>();
+
+        $r3.<java.awt.FocusManager: java.awt.Component focusOwner> = $r4;
+
+        virtualinvoke r5.<java.io.ObjectOutputStream: void defaultWriteObject()>();
+
+        r0.<java.awt.Window: java.awt.FocusManager focusMgr> = null;
+
+        $r6 = r0.<java.awt.Window: java.awt.event.WindowListener windowListener>;
+
+        staticinvoke <java.awt.AWTEventMulticaster: void save(java.io.ObjectOutputStream,java.lang.String,java.util.EventListener)>(r5, "windowL", $r6);
+
+        $r7 = r0.<java.awt.Window: java.awt.event.WindowFocusListener windowFocusListener>;
+
+        staticinvoke <java.awt.AWTEventMulticaster: void save(java.io.ObjectOutputStream,java.lang.String,java.util.EventListener)>(r5, "windowFocusL", $r7);
+
+        $r8 = r0.<java.awt.Window: java.awt.event.WindowStateListener windowStateListener>;
+
+        staticinvoke <java.awt.AWTEventMulticaster: void save(java.io.ObjectOutputStream,java.lang.String,java.util.EventListener)>(r5, "windowStateL", $r8);
+
+        exitmonitor r0;
+
+     label02:
+        goto label05;
+
+     label03:
+        $r21 := @caughtexception;
+
+        exitmonitor r0;
+
+     label04:
+        throw $r21;
+
+     label05:
+        virtualinvoke r5.<java.io.ObjectOutputStream: void writeObject(java.lang.Object)>(null);
+
+        $r9 = r0.<java.awt.Window: java.util.Vector ownedWindowList>;
+
+        entermonitor $r9;
+
+     label06:
+        i1 = 0;
+
+     label07:
+        $r10 = r0.<java.awt.Window: java.util.Vector ownedWindowList>;
+
+        $i0 = virtualinvoke $r10.<java.util.Vector: int size()>();
+
+        if i1 >= $i0 goto label09;
+
+        $r15 = r0.<java.awt.Window: java.util.Vector ownedWindowList>;
+
+        $r16 = virtualinvoke $r15.<java.util.Vector: java.lang.Object elementAt(int)>(i1);
+
+        $r17 = (java.lang.ref.WeakReference) $r16;
+
+        $r18 = virtualinvoke $r17.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        r19 = (java.awt.Window) $r18;
+
+        if r19 == null goto label08;
+
+        virtualinvoke r5.<java.io.ObjectOutputStream: void writeObject(java.lang.Object)>("ownedL");
+
+        virtualinvoke r5.<java.io.ObjectOutputStream: void writeObject(java.lang.Object)>(r19);
+
+     label08:
+        i1 = i1 + 1;
+
+        goto label07;
+
+     label09:
+        exitmonitor $r9;
+
+     label10:
+        goto label13;
+
+     label11:
+        $r20 := @caughtexception;
+
+        exitmonitor $r9;
+
+     label12:
+        throw $r20;
+
+     label13:
+        virtualinvoke r5.<java.io.ObjectOutputStream: void writeObject(java.lang.Object)>(null);
+
+        $r11 = r0.<java.awt.Window: java.util.List icons>;
+
+        if $r11 == null goto label16;
+
+        $r12 = r0.<java.awt.Window: java.util.List icons>;
+
+        $r13 = interfaceinvoke $r12.<java.util.List: java.util.Iterator iterator()>();
+
+     label14:
+        $z0 = interfaceinvoke $r13.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label16;
+
+        $r14 = interfaceinvoke $r13.<java.util.Iterator: java.lang.Object next()>();
+
+        r22 = (java.awt.Image) $r14;
+
+        $z1 = r22 instanceof java.io.Serializable;
+
+        if $z1 == 0 goto label15;
+
+        virtualinvoke r5.<java.io.ObjectOutputStream: void writeObject(java.lang.Object)>(r22);
+
+     label15:
+        goto label14;
+
+     label16:
+        virtualinvoke r5.<java.io.ObjectOutputStream: void writeObject(java.lang.Object)>(null);
+
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label03;
+        catch java.lang.Throwable from label03 to label04 with label03;
+        catch java.lang.Throwable from label06 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+    }
+
+    private void initDeserializedWindow()
+    {
+        java.awt.Window r0;
+        java.util.Vector $r8;
+        java.awt.Window$WindowDisposerRecord $r4, $r6;
+        sun.awt.AppContext $r5;
+        java.lang.Object $r1, $r3, $r7;
+        java.lang.ref.WeakReference $r2;
+
+        r0 := @this: java.awt.Window;
+
+        specialinvoke r0.<java.awt.Window: void setWarningString()>();
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<java.awt.Window: java.lang.Object inputContextLock> = $r1;
+
+        r0.<java.awt.Window: boolean visible> = 0;
+
+        $r2 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r2.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>(r0);
+
+        r0.<java.awt.Window: java.lang.ref.WeakReference weakThis> = $r2;
+
+        $r3 = new java.lang.Object;
+
+        specialinvoke $r3.<java.lang.Object: void <init>()>();
+
+        r0.<java.awt.Window: java.lang.Object anchor> = $r3;
+
+        $r4 = new java.awt.Window$WindowDisposerRecord;
+
+        $r5 = r0.<java.awt.Window: sun.awt.AppContext appContext>;
+
+        specialinvoke $r4.<java.awt.Window$WindowDisposerRecord: void <init>(sun.awt.AppContext,java.awt.Window)>($r5, r0);
+
+        r0.<java.awt.Window: java.awt.Window$WindowDisposerRecord disposerRecord> = $r4;
+
+        $r7 = r0.<java.awt.Window: java.lang.Object anchor>;
+
+        $r6 = r0.<java.awt.Window: java.awt.Window$WindowDisposerRecord disposerRecord>;
+
+        staticinvoke <sun.java2d.Disposer: void addRecord(java.lang.Object,sun.java2d.DisposerRecord)>($r7, $r6);
+
+        specialinvoke r0.<java.awt.Window: void addToWindowList()>();
+
+        specialinvoke r0.<java.awt.Window: java.awt.GraphicsConfiguration initGC(java.awt.GraphicsConfiguration)>(null);
+
+        $r8 = new java.util.Vector;
+
+        specialinvoke $r8.<java.util.Vector: void <init>()>();
+
+        r0.<java.awt.Window: java.util.Vector ownedWindowList> = $r8;
+
+        return;
+    }
+
+    private void deserializeResources(java.io.ObjectInputStream) throws java.lang.ClassNotFoundException, java.io.IOException, java.awt.HeadlessException
+    {
+        java.awt.event.WindowFocusListener $r16, $r17;
+        java.io.ObjectInputStream r1;
+        java.util.ArrayList $r3;
+        java.awt.FocusManager $r21, $r22, $r24;
+        java.awt.event.WindowListener $r19, $r20;
+        int $i0;
+        java.lang.String $r6, $r7, $r10, $r11;
+        java.awt.event.WindowStateListener $r13, $r14;
+        boolean $z0;
+        java.awt.Image $r4;
+        java.awt.Window r0, $r9;
+        java.io.OptionalDataException $r26;
+        java.awt.Component $r23, $r25;
+        java.util.List $r5;
+        java.lang.Object $r2, $r8, $r12, $r15, $r18, $r27, r28;
+
+        r0 := @this: java.awt.Window;
+
+        r1 := @parameter0: java.io.ObjectInputStream;
+
+        $i0 = r0.<java.awt.Window: int windowSerializedDataVersion>;
+
+        if $i0 >= 2 goto label02;
+
+        $r21 = r0.<java.awt.Window: java.awt.FocusManager focusMgr>;
+
+        if $r21 == null goto label01;
+
+        $r22 = r0.<java.awt.Window: java.awt.FocusManager focusMgr>;
+
+        $r23 = $r22.<java.awt.FocusManager: java.awt.Component focusOwner>;
+
+        if $r23 == null goto label01;
+
+        $r24 = r0.<java.awt.Window: java.awt.FocusManager focusMgr>;
+
+        $r25 = $r24.<java.awt.FocusManager: java.awt.Component focusOwner>;
+
+        staticinvoke <java.awt.KeyboardFocusManager: void setMostRecentFocusOwner(java.awt.Window,java.awt.Component)>(r0, $r25);
+
+     label01:
+        r0.<java.awt.Window: boolean focusableWindowState> = 1;
+
+     label02:
+        $r27 = virtualinvoke r1.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        if null == $r27 goto label07;
+
+        $r10 = (java.lang.String) $r27;
+
+        $r11 = virtualinvoke $r10.<java.lang.String: java.lang.String intern()>();
+
+        if "windowL" != $r11 goto label03;
+
+        $r18 = virtualinvoke r1.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        $r19 = (java.awt.event.WindowListener) $r18;
+
+        $r20 = (java.awt.event.WindowListener) $r19;
+
+        virtualinvoke r0.<java.awt.Window: void addWindowListener(java.awt.event.WindowListener)>($r20);
+
+        goto label06;
+
+     label03:
+        if "windowFocusL" != $r11 goto label04;
+
+        $r15 = virtualinvoke r1.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        $r16 = (java.awt.event.WindowFocusListener) $r15;
+
+        $r17 = (java.awt.event.WindowFocusListener) $r16;
+
+        virtualinvoke r0.<java.awt.Window: void addWindowFocusListener(java.awt.event.WindowFocusListener)>($r17);
+
+        goto label06;
+
+     label04:
+        if "windowStateL" != $r11 goto label05;
+
+        $r12 = virtualinvoke r1.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        $r13 = (java.awt.event.WindowStateListener) $r12;
+
+        $r14 = (java.awt.event.WindowStateListener) $r13;
+
+        virtualinvoke r0.<java.awt.Window: void addWindowStateListener(java.awt.event.WindowStateListener)>($r14);
+
+        goto label06;
+
+     label05:
+        virtualinvoke r1.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+     label06:
+        goto label02;
+
+     label07:
+        $r2 = virtualinvoke r1.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        if null == $r2 goto label10;
+
+        $r6 = (java.lang.String) $r2;
+
+        $r7 = virtualinvoke $r6.<java.lang.String: java.lang.String intern()>();
+
+        if "ownedL" != $r7 goto label08;
+
+        $r8 = virtualinvoke r1.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        $r9 = (java.awt.Window) $r8;
+
+        virtualinvoke r0.<java.awt.Window: void connectOwnedWindow(java.awt.Window)>($r9);
+
+        goto label09;
+
+     label08:
+        virtualinvoke r1.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+     label09:
+        goto label07;
+
+     label10:
+        r28 = virtualinvoke r1.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>()>();
+
+        r0.<java.awt.Window: java.util.List icons> = $r3;
+
+     label11:
+        if r28 == null goto label13;
+
+        $z0 = r28 instanceof java.awt.Image;
+
+        if $z0 == 0 goto label12;
+
+        $r5 = r0.<java.awt.Window: java.util.List icons>;
+
+        $r4 = (java.awt.Image) r28;
+
+        interfaceinvoke $r5.<java.util.List: boolean add(java.lang.Object)>($r4);
+
+     label12:
+        r28 = virtualinvoke r1.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        goto label11;
+
+     label13:
+        goto label15;
+
+     label14:
+        $r26 := @caughtexception;
+
+     label15:
+        return;
+
+        catch java.io.OptionalDataException from label07 to label13 with label14;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.lang.ClassNotFoundException, java.io.IOException, java.awt.HeadlessException
+    {
+        java.lang.Float $r10;
+        java.io.ObjectInputStream r1;
+        java.awt.FocusManager $r4;
+        int $i0, $i1;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.awt.Shape $r9;
+        java.awt.Window r0;
+        java.io.ObjectInputStream$GetField $r2;
+        float $f0, $f1;
+        java.lang.Object $r3, $r6, $r8;
+        java.awt.Dialog$ModalExclusionType $r5, r7;
+
+        r0 := @this: java.awt.Window;
+
+        r1 := @parameter0: java.io.ObjectInputStream;
+
+        staticinvoke <java.awt.GraphicsEnvironment: void checkHeadless()>();
+
+        specialinvoke r0.<java.awt.Window: void initDeserializedWindow()>();
+
+        $r2 = virtualinvoke r1.<java.io.ObjectInputStream: java.io.ObjectInputStream$GetField readFields()>();
+
+        $z0 = <java.awt.Window: boolean systemSyncLWRequests>;
+
+        $z1 = virtualinvoke $r2.<java.io.ObjectInputStream$GetField: boolean get(java.lang.String,boolean)>("syncLWRequests", $z0);
+
+        r0.<java.awt.Window: boolean syncLWRequests> = $z1;
+
+        $i0 = virtualinvoke $r2.<java.io.ObjectInputStream$GetField: int get(java.lang.String,int)>("state", 0);
+
+        r0.<java.awt.Window: int state> = $i0;
+
+        $z2 = virtualinvoke $r2.<java.io.ObjectInputStream$GetField: boolean get(java.lang.String,boolean)>("focusableWindowState", 1);
+
+        r0.<java.awt.Window: boolean focusableWindowState> = $z2;
+
+        $i1 = virtualinvoke $r2.<java.io.ObjectInputStream$GetField: int get(java.lang.String,int)>("windowSerializedDataVersion", 1);
+
+        r0.<java.awt.Window: int windowSerializedDataVersion> = $i1;
+
+        $z3 = <java.awt.Window: boolean locationByPlatformProp>;
+
+        $z4 = virtualinvoke $r2.<java.io.ObjectInputStream$GetField: boolean get(java.lang.String,boolean)>("locationByPlatform", $z3);
+
+        r0.<java.awt.Window: boolean locationByPlatform> = $z4;
+
+        $r3 = virtualinvoke $r2.<java.io.ObjectInputStream$GetField: java.lang.Object get(java.lang.String,java.lang.Object)>("focusMgr", null);
+
+        $r4 = (java.awt.FocusManager) $r3;
+
+        r0.<java.awt.Window: java.awt.FocusManager focusMgr> = $r4;
+
+        $r5 = <java.awt.Dialog$ModalExclusionType: java.awt.Dialog$ModalExclusionType NO_EXCLUDE>;
+
+        $r6 = virtualinvoke $r2.<java.io.ObjectInputStream$GetField: java.lang.Object get(java.lang.String,java.lang.Object)>("modalExclusionType", $r5);
+
+        r7 = (java.awt.Dialog$ModalExclusionType) $r6;
+
+        virtualinvoke r0.<java.awt.Window: void setModalExclusionType(java.awt.Dialog$ModalExclusionType)>(r7);
+
+        $z5 = virtualinvoke $r2.<java.io.ObjectInputStream$GetField: boolean get(java.lang.String,boolean)>("alwaysOnTop", 0);
+
+        if $z5 == 0 goto label1;
+
+        virtualinvoke r0.<java.awt.Window: void setAlwaysOnTop(boolean)>($z5);
+
+     label1:
+        $r8 = virtualinvoke $r2.<java.io.ObjectInputStream$GetField: java.lang.Object get(java.lang.String,java.lang.Object)>("shape", null);
+
+        $r9 = (java.awt.Shape) $r8;
+
+        r0.<java.awt.Window: java.awt.Shape shape> = $r9;
+
+        $f0 = virtualinvoke $r2.<java.io.ObjectInputStream$GetField: float get(java.lang.String,float)>("opacity", 1.0F);
+
+        $r10 = staticinvoke <java.lang.Float: java.lang.Float valueOf(float)>($f0);
+
+        $f1 = virtualinvoke $r10.<java.lang.Float: float floatValue()>();
+
+        r0.<java.awt.Window: float opacity> = $f1;
+
+        r0.<java.awt.Window: int securityWarningWidth> = 0;
+
+        r0.<java.awt.Window: int securityWarningHeight> = 0;
+
+        r0.<java.awt.Window: double securityWarningPointX> = 2.0;
+
+        r0.<java.awt.Window: double securityWarningPointY> = 0.0;
+
+        r0.<java.awt.Window: float securityWarningAlignmentX> = 1.0F;
+
+        r0.<java.awt.Window: float securityWarningAlignmentY> = 0.0F;
+
+        specialinvoke r0.<java.awt.Window: void deserializeResources(java.io.ObjectInputStream)>(r1);
+
+        return;
+    }
+
+    public javax.accessibility.AccessibleContext getAccessibleContext()
+    {
+        java.awt.Window$AccessibleAWTWindow $r3;
+        java.awt.Window r0;
+        javax.accessibility.AccessibleContext $r1, $r2;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = r0.<java.awt.Window: javax.accessibility.AccessibleContext accessibleContext>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.awt.Window$AccessibleAWTWindow;
+
+        specialinvoke $r3.<java.awt.Window$AccessibleAWTWindow: void <init>(java.awt.Window)>(r0);
+
+        r0.<java.awt.Window: javax.accessibility.AccessibleContext accessibleContext> = $r3;
+
+     label1:
+        $r2 = r0.<java.awt.Window: javax.accessibility.AccessibleContext accessibleContext>;
+
+        return $r2;
+    }
+
+    void setGraphicsConfiguration(java.awt.GraphicsConfiguration)
+    {
+        java.lang.Throwable $r14;
+        java.awt.GraphicsDevice $r13;
+        java.awt.GraphicsEnvironment $r12;
+        java.lang.String $r11;
+        boolean $z0;
+        sun.util.logging.PlatformLogger$Level $r2;
+        java.awt.GraphicsConfiguration $r7, r15;
+        sun.util.logging.PlatformLogger $r3, $r5;
+        java.awt.Window r0;
+        java.lang.Object $r1;
+        java.lang.StringBuilder $r4, $r6, $r8, $r9, $r10;
+
+        r0 := @this: java.awt.Window;
+
+        r15 := @parameter0: java.awt.GraphicsConfiguration;
+
+        if r15 != null goto label1;
+
+        $r12 = staticinvoke <java.awt.GraphicsEnvironment: java.awt.GraphicsEnvironment getLocalGraphicsEnvironment()>();
+
+        $r13 = virtualinvoke $r12.<java.awt.GraphicsEnvironment: java.awt.GraphicsDevice getDefaultScreenDevice()>();
+
+        r15 = virtualinvoke $r13.<java.awt.GraphicsDevice: java.awt.GraphicsConfiguration getDefaultConfiguration()>();
+
+     label1:
+        $r1 = virtualinvoke r0.<java.awt.Window: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label2:
+        specialinvoke r0.<java.awt.Container: void setGraphicsConfiguration(java.awt.GraphicsConfiguration)>(r15);
+
+        $r3 = <java.awt.Window: sun.util.logging.PlatformLogger log>;
+
+        $r2 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINER>;
+
+        $z0 = virtualinvoke $r3.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r2);
+
+        if $z0 == 0 goto label3;
+
+        $r5 = <java.awt.Window: sun.util.logging.PlatformLogger log>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("+ Window.setGraphicsConfiguration(): new GC is \n+ ");
+
+        $r7 = virtualinvoke r0.<java.awt.Window: java.awt.GraphicsConfiguration getGraphicsConfiguration_NoClientCode()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n+ this is ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<sun.util.logging.PlatformLogger: void finer(java.lang.String)>($r11);
+
+     label3:
+        exitmonitor $r1;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r14 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r14;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label2 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public void setLocationRelativeTo(java.awt.Component)
+    {
+        java.awt.GraphicsEnvironment $r5;
+        java.awt.GraphicsConfiguration $r1, $r7, $r9, $r13;
+        java.awt.Component r3;
+        java.awt.Window r0, $r4;
+        java.awt.Point $r8, $r12;
+        boolean $z0;
+        java.awt.Dimension $r2, $r11;
+        java.awt.Rectangle $r10, $r14, r15;
+        java.awt.GraphicsDevice $r6;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57, $i58, $i59, $i60, $i61, i62, i63, $i64, $i65, $i66, $i67, $i68;
+
+        r0 := @this: java.awt.Window;
+
+        r3 := @parameter0: java.awt.Component;
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.awt.GraphicsConfiguration getGraphicsConfiguration_NoClientCode()>();
+
+        virtualinvoke $r1.<java.awt.GraphicsConfiguration: java.awt.Rectangle getBounds()>();
+
+        $r2 = virtualinvoke r0.<java.awt.Window: java.awt.Dimension getSize()>();
+
+        $r4 = staticinvoke <sun.awt.SunToolkit: java.awt.Window getContainingWindow(java.awt.Component)>(r3);
+
+        if r3 == null goto label1;
+
+        if $r4 != null goto label2;
+
+     label1:
+        $r5 = staticinvoke <java.awt.GraphicsEnvironment: java.awt.GraphicsEnvironment getLocalGraphicsEnvironment()>();
+
+        $r6 = virtualinvoke $r5.<java.awt.GraphicsEnvironment: java.awt.GraphicsDevice getDefaultScreenDevice()>();
+
+        $r7 = virtualinvoke $r6.<java.awt.GraphicsDevice: java.awt.GraphicsConfiguration getDefaultConfiguration()>();
+
+        r15 = virtualinvoke $r7.<java.awt.GraphicsConfiguration: java.awt.Rectangle getBounds()>();
+
+        $r8 = virtualinvoke $r5.<java.awt.GraphicsEnvironment: java.awt.Point getCenterPoint()>();
+
+        $i2 = $r8.<java.awt.Point: int x>;
+
+        $i0 = $r2.<java.awt.Dimension: int width>;
+
+        $i1 = $i0 / 2;
+
+        i62 = $i2 - $i1;
+
+        $i5 = $r8.<java.awt.Point: int y>;
+
+        $i3 = $r2.<java.awt.Dimension: int height>;
+
+        $i4 = $i3 / 2;
+
+        i63 = $i5 - $i4;
+
+        goto label5;
+
+     label2:
+        $z0 = virtualinvoke r3.<java.awt.Component: boolean isShowing()>();
+
+        if $z0 != 0 goto label3;
+
+        $r13 = virtualinvoke $r4.<java.awt.Window: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+        $r14 = virtualinvoke $r13.<java.awt.GraphicsConfiguration: java.awt.Rectangle getBounds()>();
+
+        r15 = $r14;
+
+        $i56 = $r14.<java.awt.Rectangle: int x>;
+
+        $i53 = $r14.<java.awt.Rectangle: int width>;
+
+        $i52 = $r2.<java.awt.Dimension: int width>;
+
+        $i54 = $i53 - $i52;
+
+        $i55 = $i54 / 2;
+
+        i62 = $i56 + $i55;
+
+        $i61 = $r14.<java.awt.Rectangle: int y>;
+
+        $i58 = $r14.<java.awt.Rectangle: int height>;
+
+        $i57 = $r2.<java.awt.Dimension: int height>;
+
+        $i59 = $i58 - $i57;
+
+        $i60 = $i59 / 2;
+
+        i63 = $i61 + $i60;
+
+        goto label5;
+
+     label3:
+        $r9 = virtualinvoke $r4.<java.awt.Window: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+        $r10 = virtualinvoke $r9.<java.awt.GraphicsConfiguration: java.awt.Rectangle getBounds()>();
+
+        r15 = $r10;
+
+        $r11 = virtualinvoke r3.<java.awt.Component: java.awt.Dimension getSize()>();
+
+        $r12 = virtualinvoke r3.<java.awt.Component: java.awt.Point getLocationOnScreen()>();
+
+        $i25 = $r12.<java.awt.Point: int x>;
+
+        $i22 = $r11.<java.awt.Dimension: int width>;
+
+        $i21 = $r2.<java.awt.Dimension: int width>;
+
+        $i23 = $i22 - $i21;
+
+        $i24 = $i23 / 2;
+
+        i62 = $i25 + $i24;
+
+        $i30 = $r12.<java.awt.Point: int y>;
+
+        $i27 = $r11.<java.awt.Dimension: int height>;
+
+        $i26 = $r2.<java.awt.Dimension: int height>;
+
+        $i28 = $i27 - $i26;
+
+        $i29 = $i28 / 2;
+
+        i63 = $i30 + $i29;
+
+        $i31 = $r2.<java.awt.Dimension: int height>;
+
+        $i35 = i63 + $i31;
+
+        $i33 = $r10.<java.awt.Rectangle: int y>;
+
+        $i32 = $r10.<java.awt.Rectangle: int height>;
+
+        $i34 = $i33 + $i32;
+
+        if $i35 <= $i34 goto label5;
+
+        $i37 = $r10.<java.awt.Rectangle: int y>;
+
+        $i36 = $r10.<java.awt.Rectangle: int height>;
+
+        $i39 = $i37 + $i36;
+
+        $i38 = $r2.<java.awt.Dimension: int height>;
+
+        i63 = $i39 - $i38;
+
+        $i41 = $r12.<java.awt.Point: int x>;
+
+        $i40 = $r10.<java.awt.Rectangle: int x>;
+
+        $i44 = $i41 - $i40;
+
+        $i42 = $r11.<java.awt.Dimension: int width>;
+
+        $i43 = $i42 / 2;
+
+        $i47 = $i44 + $i43;
+
+        $i45 = $r10.<java.awt.Rectangle: int width>;
+
+        $i46 = $i45 / 2;
+
+        if $i47 >= $i46 goto label4;
+
+        $i51 = $r12.<java.awt.Point: int x>;
+
+        $i50 = $r11.<java.awt.Dimension: int width>;
+
+        i62 = $i51 + $i50;
+
+        goto label5;
+
+     label4:
+        $i49 = $r12.<java.awt.Point: int x>;
+
+        $i48 = $r2.<java.awt.Dimension: int width>;
+
+        i62 = $i49 - $i48;
+
+     label5:
+        $i64 = $r2.<java.awt.Dimension: int height>;
+
+        $i65 = i63 + $i64;
+
+        $i66 = r15.<java.awt.Rectangle: int y>;
+
+        $i67 = r15.<java.awt.Rectangle: int height>;
+
+        $i68 = $i66 + $i67;
+
+        if $i65 <= $i68 goto label6;
+
+        $i18 = r15.<java.awt.Rectangle: int y>;
+
+        $i17 = r15.<java.awt.Rectangle: int height>;
+
+        $i20 = $i18 + $i17;
+
+        $i19 = $r2.<java.awt.Dimension: int height>;
+
+        i63 = $i20 - $i19;
+
+     label6:
+        $i6 = r15.<java.awt.Rectangle: int y>;
+
+        if i63 >= $i6 goto label7;
+
+        i63 = r15.<java.awt.Rectangle: int y>;
+
+     label7:
+        $i7 = $r2.<java.awt.Dimension: int width>;
+
+        $i11 = i62 + $i7;
+
+        $i9 = r15.<java.awt.Rectangle: int x>;
+
+        $i8 = r15.<java.awt.Rectangle: int width>;
+
+        $i10 = $i9 + $i8;
+
+        if $i11 <= $i10 goto label8;
+
+        $i14 = r15.<java.awt.Rectangle: int x>;
+
+        $i13 = r15.<java.awt.Rectangle: int width>;
+
+        $i16 = $i14 + $i13;
+
+        $i15 = $r2.<java.awt.Dimension: int width>;
+
+        i62 = $i16 - $i15;
+
+     label8:
+        $i12 = r15.<java.awt.Rectangle: int x>;
+
+        if i62 >= $i12 goto label9;
+
+        i62 = r15.<java.awt.Rectangle: int x>;
+
+     label9:
+        virtualinvoke r0.<java.awt.Window: void setLocation(int,int)>(i62, i63);
+
+        return;
+    }
+
+    void deliverMouseWheelToAncestor(java.awt.event.MouseWheelEvent)
+    {
+        java.awt.event.MouseWheelEvent r1;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        r1 := @parameter0: java.awt.event.MouseWheelEvent;
+
+        return;
+    }
+
+    boolean dispatchMouseWheelToAncestor(java.awt.event.MouseWheelEvent)
+    {
+        java.awt.event.MouseWheelEvent r1;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        r1 := @parameter0: java.awt.event.MouseWheelEvent;
+
+        return 0;
+    }
+
+    public void createBufferStrategy(int)
+    {
+        int i0;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.awt.Container: void createBufferStrategy(int)>(i0);
+
+        return;
+    }
+
+    public void createBufferStrategy(int, java.awt.BufferCapabilities) throws java.awt.AWTException
+    {
+        int i0;
+        java.awt.BufferCapabilities r1;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.awt.BufferCapabilities;
+
+        specialinvoke r0.<java.awt.Container: void createBufferStrategy(int,java.awt.BufferCapabilities)>(i0, r1);
+
+        return;
+    }
+
+    public java.awt.image.BufferStrategy getBufferStrategy()
+    {
+        java.awt.image.BufferStrategy $r1;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = specialinvoke r0.<java.awt.Container: java.awt.image.BufferStrategy getBufferStrategy()>();
+
+        return $r1;
+    }
+
+    java.awt.Component getTemporaryLostComponent()
+    {
+        java.awt.Component $r1;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = r0.<java.awt.Window: java.awt.Component temporaryLostComponent>;
+
+        return $r1;
+    }
+
+    java.awt.Component setTemporaryLostComponent(java.awt.Component)
+    {
+        java.awt.Window r0;
+        java.awt.Component r1, r2;
+        boolean $z0;
+
+        r0 := @this: java.awt.Window;
+
+        r2 := @parameter0: java.awt.Component;
+
+        r1 = r0.<java.awt.Window: java.awt.Component temporaryLostComponent>;
+
+        if r2 == null goto label1;
+
+        $z0 = virtualinvoke r2.<java.awt.Component: boolean canBeFocusOwner()>();
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        r0.<java.awt.Window: java.awt.Component temporaryLostComponent> = r2;
+
+        goto label3;
+
+     label2:
+        r0.<java.awt.Window: java.awt.Component temporaryLostComponent> = null;
+
+     label3:
+        return r1;
+    }
+
+    boolean canContainFocusOwner(java.awt.Component)
+    {
+        java.awt.Window r0;
+        java.awt.Component r1;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.awt.Window;
+
+        r1 := @parameter0: java.awt.Component;
+
+        $z0 = specialinvoke r0.<java.awt.Container: boolean canContainFocusOwner(java.awt.Component)>(r1);
+
+        if $z0 == 0 goto label1;
+
+        $z1 = virtualinvoke r0.<java.awt.Window: boolean isFocusableWindow()>();
+
+        if $z1 == 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+    }
+
+    public void setLocationByPlatform(boolean)
+    {
+        java.awt.IllegalComponentStateException $r2;
+        java.lang.Throwable $r3;
+        java.awt.Window r0;
+        java.lang.Object $r1;
+        boolean z0, $z1;
+
+        r0 := @this: java.awt.Window;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label1:
+        if z0 == 0 goto label2;
+
+        $z1 = virtualinvoke r0.<java.awt.Window: boolean isShowing()>();
+
+        if $z1 == 0 goto label2;
+
+        $r2 = new java.awt.IllegalComponentStateException;
+
+        specialinvoke $r2.<java.awt.IllegalComponentStateException: void <init>(java.lang.String)>("The window is showing on screen.");
+
+        throw $r2;
+
+     label2:
+        r0.<java.awt.Window: boolean locationByPlatform> = z0;
+
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r3;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public boolean isLocationByPlatform()
+    {
+        java.awt.Window r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.Window;
+
+        $z0 = r0.<java.awt.Window: boolean locationByPlatform>;
+
+        return $z0;
+    }
+
+    public void setBounds(int, int, int, int)
+    {
+        java.lang.Throwable $r2;
+        java.awt.Window r0;
+        int $i0, i1, i2, i3, i4, $i5;
+        java.lang.Object $r1;
+
+        r0 := @this: java.awt.Window;
+
+        i1 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        i4 := @parameter3: int;
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.awt.Window: int getBoundsOp()>();
+
+        if $i0 == 1 goto label2;
+
+        $i5 = virtualinvoke r0.<java.awt.Window: int getBoundsOp()>();
+
+        if $i5 != 3 goto label3;
+
+     label2:
+        r0.<java.awt.Window: boolean locationByPlatform> = 0;
+
+     label3:
+        specialinvoke r0.<java.awt.Container: void setBounds(int,int,int,int)>(i1, i2, i3, i4);
+
+        exitmonitor $r1;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r2;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public void setBounds(java.awt.Rectangle)
+    {
+        java.awt.Rectangle r1;
+        java.awt.Window r0;
+        int $i0, $i1, $i2, $i3;
+
+        r0 := @this: java.awt.Window;
+
+        r1 := @parameter0: java.awt.Rectangle;
+
+        $i3 = r1.<java.awt.Rectangle: int x>;
+
+        $i2 = r1.<java.awt.Rectangle: int y>;
+
+        $i1 = r1.<java.awt.Rectangle: int width>;
+
+        $i0 = r1.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r0.<java.awt.Window: void setBounds(int,int,int,int)>($i3, $i2, $i1, $i0);
+
+        return;
+    }
+
+    boolean isRecursivelyVisible()
+    {
+        java.awt.Window r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.Window;
+
+        $z0 = r0.<java.awt.Window: boolean visible>;
+
+        return $z0;
+    }
+
+    public float getOpacity()
+    {
+        float $f0;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        $f0 = r0.<java.awt.Window: float opacity>;
+
+        return $f0;
+    }
+
+    public void setOpacity(float)
+    {
+        java.lang.Throwable $r12;
+        java.awt.peer.WindowPeer $r9;
+        java.awt.GraphicsDevice $r5, $r6;
+        byte $b0, $b1, $b2;
+        int $i3, $i4, $i5;
+        boolean $z0;
+        java.awt.IllegalComponentStateException $r14;
+        java.lang.UnsupportedOperationException $r15;
+        java.awt.peer.ComponentPeer $r3;
+        java.awt.GraphicsConfiguration $r4;
+        java.awt.Window r0, $r7;
+        java.lang.IllegalArgumentException $r13;
+        java.awt.GraphicsDevice$WindowTranslucency $r8;
+        float f0;
+        java.lang.Object $r1;
+
+        r0 := @this: java.awt.Window;
+
+        f0 := @parameter0: float;
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label01:
+        $b0 = f0 cmpg 0.0F;
+
+        $i3 = (int) $b0;
+
+        if $i3 < 0 goto label02;
+
+        $b1 = f0 cmpl 1.0F;
+
+        $i4 = (int) $b1;
+
+        if $i4 <= 0 goto label03;
+
+     label02:
+        $r13 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r13.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("The value of opacity should be in the range [0.0f .. 1.0f].");
+
+        throw $r13;
+
+     label03:
+        $b2 = f0 cmpg 1.0F;
+
+        $i5 = (int) $b2;
+
+        if $i5 >= 0 goto label05;
+
+        $r4 = virtualinvoke r0.<java.awt.Window: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+        $r5 = virtualinvoke $r4.<java.awt.GraphicsConfiguration: java.awt.GraphicsDevice getDevice()>();
+
+        $r6 = virtualinvoke $r4.<java.awt.GraphicsConfiguration: java.awt.GraphicsDevice getDevice()>();
+
+        $r7 = virtualinvoke $r6.<java.awt.GraphicsDevice: java.awt.Window getFullScreenWindow()>();
+
+        if $r7 != r0 goto label04;
+
+        $r14 = new java.awt.IllegalComponentStateException;
+
+        specialinvoke $r14.<java.awt.IllegalComponentStateException: void <init>(java.lang.String)>("Setting opacity for full-screen window is not supported.");
+
+        throw $r14;
+
+     label04:
+        $r8 = <java.awt.GraphicsDevice$WindowTranslucency: java.awt.GraphicsDevice$WindowTranslucency TRANSLUCENT>;
+
+        $z0 = virtualinvoke $r5.<java.awt.GraphicsDevice: boolean isWindowTranslucencySupported(java.awt.GraphicsDevice$WindowTranslucency)>($r8);
+
+        if $z0 != 0 goto label05;
+
+        $r15 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r15.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("TRANSLUCENT translucency is not supported.");
+
+        throw $r15;
+
+     label05:
+        r0.<java.awt.Window: float opacity> = f0;
+
+        $r3 = virtualinvoke r0.<java.awt.Window: java.awt.peer.ComponentPeer getPeer()>();
+
+        $r9 = (java.awt.peer.WindowPeer) $r3;
+
+        if $r9 == null goto label06;
+
+        interfaceinvoke $r9.<java.awt.peer.WindowPeer: void setOpacity(float)>(f0);
+
+     label06:
+        exitmonitor $r1;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r12 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label09:
+        throw $r12;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label01 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    public java.awt.Shape getShape()
+    {
+        java.awt.Shape $r2, $r3;
+        java.lang.Throwable $r4;
+        java.awt.Window r0;
+        java.lang.Object $r1;
+        java.awt.geom.Path2D$Float $r5;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<java.awt.Window: java.awt.Shape shape>;
+
+        if $r2 != null goto label2;
+
+        $r5 = null;
+
+        goto label3;
+
+     label2:
+        $r5 = new java.awt.geom.Path2D$Float;
+
+        $r3 = r0.<java.awt.Window: java.awt.Shape shape>;
+
+        specialinvoke $r5.<java.awt.geom.Path2D$Float: void <init>(java.awt.Shape)>($r3);
+
+     label3:
+        exitmonitor $r1;
+
+     label4:
+        return $r5;
+
+     label5:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public void setShape(java.awt.Shape)
+    {
+        java.lang.Throwable $r12;
+        java.awt.peer.WindowPeer $r4;
+        java.awt.GraphicsDevice $r6, $r7;
+        boolean $z0;
+        java.awt.Shape r2;
+        java.awt.IllegalComponentStateException $r11;
+        java.lang.UnsupportedOperationException $r10;
+        java.awt.peer.ComponentPeer $r3;
+        java.awt.GraphicsConfiguration $r5;
+        java.awt.Window r0, $r8;
+        java.awt.geom.Path2D$Float $r13;
+        sun.java2d.pipe.Region $r14;
+        java.awt.GraphicsDevice$WindowTranslucency $r9;
+        java.lang.Object $r1;
+
+        r0 := @this: java.awt.Window;
+
+        r2 := @parameter0: java.awt.Shape;
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label01:
+        if r2 == null goto label03;
+
+        $r5 = virtualinvoke r0.<java.awt.Window: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+        $r6 = virtualinvoke $r5.<java.awt.GraphicsConfiguration: java.awt.GraphicsDevice getDevice()>();
+
+        $r7 = virtualinvoke $r5.<java.awt.GraphicsConfiguration: java.awt.GraphicsDevice getDevice()>();
+
+        $r8 = virtualinvoke $r7.<java.awt.GraphicsDevice: java.awt.Window getFullScreenWindow()>();
+
+        if $r8 != r0 goto label02;
+
+        $r11 = new java.awt.IllegalComponentStateException;
+
+        specialinvoke $r11.<java.awt.IllegalComponentStateException: void <init>(java.lang.String)>("Setting shape for full-screen window is not supported.");
+
+        throw $r11;
+
+     label02:
+        $r9 = <java.awt.GraphicsDevice$WindowTranslucency: java.awt.GraphicsDevice$WindowTranslucency PERPIXEL_TRANSPARENT>;
+
+        $z0 = virtualinvoke $r6.<java.awt.GraphicsDevice: boolean isWindowTranslucencySupported(java.awt.GraphicsDevice$WindowTranslucency)>($r9);
+
+        if $z0 != 0 goto label03;
+
+        $r10 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r10.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("PERPIXEL_TRANSPARENT translucency is not supported.");
+
+        throw $r10;
+
+     label03:
+        if r2 != null goto label04;
+
+        $r13 = null;
+
+        goto label05;
+
+     label04:
+        $r13 = new java.awt.geom.Path2D$Float;
+
+        specialinvoke $r13.<java.awt.geom.Path2D$Float: void <init>(java.awt.Shape)>(r2);
+
+     label05:
+        r0.<java.awt.Window: java.awt.Shape shape> = $r13;
+
+        $r3 = virtualinvoke r0.<java.awt.Window: java.awt.peer.ComponentPeer getPeer()>();
+
+        $r4 = (java.awt.peer.WindowPeer) $r3;
+
+        if $r4 == null goto label08;
+
+        if r2 != null goto label06;
+
+        $r14 = null;
+
+        goto label07;
+
+     label06:
+        $r14 = staticinvoke <sun.java2d.pipe.Region: sun.java2d.pipe.Region getInstance(java.awt.Shape,java.awt.geom.AffineTransform)>(r2, null);
+
+     label07:
+        interfaceinvoke $r4.<java.awt.peer.WindowPeer: void applyShape(sun.java2d.pipe.Region)>($r14);
+
+     label08:
+        exitmonitor $r1;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r12 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label11:
+        throw $r12;
+
+     label12:
+        return;
+
+        catch java.lang.Throwable from label01 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    public java.awt.Color getBackground()
+    {
+        java.awt.Color $r1;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = specialinvoke r0.<java.awt.Container: java.awt.Color getBackground()>();
+
+        return $r1;
+    }
+
+    public void setBackground(java.awt.Color)
+    {
+        java.awt.Color $r1, r2;
+        java.awt.peer.WindowPeer $r11;
+        java.awt.GraphicsDevice $r4, $r5;
+        int i0, i1, $i2, $i3;
+        boolean $z0, $z1, $z2;
+        java.awt.IllegalComponentStateException $r9;
+        java.lang.UnsupportedOperationException $r8;
+        java.awt.GraphicsConfiguration $r3, $r7;
+        java.awt.peer.ComponentPeer $r10;
+        java.awt.Window r0, $r6;
+
+        r0 := @this: java.awt.Window;
+
+        r2 := @parameter0: java.awt.Color;
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.awt.Color getBackground()>();
+
+        specialinvoke r0.<java.awt.Container: void setBackground(java.awt.Color)>(r2);
+
+        if $r1 == null goto label01;
+
+        $z1 = virtualinvoke $r1.<java.awt.Color: boolean equals(java.lang.Object)>(r2);
+
+        if $z1 == 0 goto label01;
+
+        return;
+
+     label01:
+        if $r1 == null goto label02;
+
+        $i2 = virtualinvoke $r1.<java.awt.Color: int getAlpha()>();
+
+        goto label03;
+
+     label02:
+        $i2 = 255;
+
+     label03:
+        i0 = $i2;
+
+        if r2 == null goto label04;
+
+        $i3 = virtualinvoke r2.<java.awt.Color: int getAlpha()>();
+
+        goto label05;
+
+     label04:
+        $i3 = 255;
+
+     label05:
+        i1 = $i3;
+
+        if i0 != 255 goto label09;
+
+        if $i3 >= 255 goto label09;
+
+        $r3 = virtualinvoke r0.<java.awt.Window: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+        $r4 = virtualinvoke $r3.<java.awt.GraphicsConfiguration: java.awt.GraphicsDevice getDevice()>();
+
+        $r5 = virtualinvoke $r3.<java.awt.GraphicsConfiguration: java.awt.GraphicsDevice getDevice()>();
+
+        $r6 = virtualinvoke $r5.<java.awt.GraphicsDevice: java.awt.Window getFullScreenWindow()>();
+
+        if $r6 != r0 goto label06;
+
+        $r9 = new java.awt.IllegalComponentStateException;
+
+        specialinvoke $r9.<java.awt.IllegalComponentStateException: void <init>(java.lang.String)>("Making full-screen window non opaque is not supported.");
+
+        throw $r9;
+
+     label06:
+        $z0 = virtualinvoke $r3.<java.awt.GraphicsConfiguration: boolean isTranslucencyCapable()>();
+
+        if $z0 != 0 goto label08;
+
+        $r7 = virtualinvoke $r4.<java.awt.GraphicsDevice: java.awt.GraphicsConfiguration getTranslucencyCapableGC()>();
+
+        if $r7 != null goto label07;
+
+        $r8 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r8.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("PERPIXEL_TRANSLUCENT translucency is not supported");
+
+        throw $r8;
+
+     label07:
+        virtualinvoke r0.<java.awt.Window: void setGraphicsConfiguration(java.awt.GraphicsConfiguration)>($r7);
+
+     label08:
+        staticinvoke <java.awt.Window: void setLayersOpaque(java.awt.Component,boolean)>(r0, 0);
+
+        goto label10;
+
+     label09:
+        if i0 >= 255 goto label10;
+
+        if i1 != 255 goto label10;
+
+        staticinvoke <java.awt.Window: void setLayersOpaque(java.awt.Component,boolean)>(r0, 1);
+
+     label10:
+        $r10 = virtualinvoke r0.<java.awt.Window: java.awt.peer.ComponentPeer getPeer()>();
+
+        $r11 = (java.awt.peer.WindowPeer) $r10;
+
+        if $r11 == null goto label13;
+
+        if i1 != 255 goto label11;
+
+        $z2 = 1;
+
+        goto label12;
+
+     label11:
+        $z2 = 0;
+
+     label12:
+        interfaceinvoke $r11.<java.awt.peer.WindowPeer: void setOpaque(boolean)>($z2);
+
+     label13:
+        return;
+    }
+
+    public boolean isOpaque()
+    {
+        java.awt.Color $r1;
+        java.awt.Window r0;
+        int $i0;
+        boolean $z0;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.awt.Color getBackground()>();
+
+        if $r1 == null goto label2;
+
+        $i0 = virtualinvoke $r1.<java.awt.Color: int getAlpha()>();
+
+        if $i0 != 255 goto label1;
+
+        $z0 = 1;
+
+        goto label3;
+
+     label1:
+        $z0 = 0;
+
+        goto label3;
+
+     label2:
+        $z0 = 1;
+
+     label3:
+        return $z0;
+    }
+
+    private void updateWindow()
+    {
+        java.lang.Throwable $r4;
+        java.awt.peer.WindowPeer r3;
+        java.awt.peer.ComponentPeer $r2;
+        java.awt.Window r0;
+        java.lang.Object $r1;
+
+        r0 := @this: java.awt.Window;
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = virtualinvoke r0.<java.awt.Window: java.awt.peer.ComponentPeer getPeer()>();
+
+        r3 = (java.awt.peer.WindowPeer) $r2;
+
+        if r3 == null goto label2;
+
+        interfaceinvoke r3.<java.awt.peer.WindowPeer: void updateWindow()>();
+
+     label2:
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r4;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void paint(java.awt.Graphics)
+    {
+        java.awt.Color $r3;
+        java.lang.Throwable $r6;
+        java.awt.Window r0;
+        java.awt.AlphaComposite $r5;
+        java.awt.Graphics2D $r4;
+        java.awt.Graphics r1, $r2;
+        int $i0, $i1;
+        boolean $z0, $z1;
+
+        r0 := @this: java.awt.Window;
+
+        r1 := @parameter0: java.awt.Graphics;
+
+        $z0 = virtualinvoke r0.<java.awt.Window: boolean isOpaque()>();
+
+        if $z0 != 0 goto label4;
+
+        $r2 = virtualinvoke r1.<java.awt.Graphics: java.awt.Graphics create()>();
+
+     label1:
+        $z1 = $r2 instanceof java.awt.Graphics2D;
+
+        if $z1 == 0 goto label2;
+
+        $r3 = virtualinvoke r0.<java.awt.Window: java.awt.Color getBackground()>();
+
+        virtualinvoke $r2.<java.awt.Graphics: void setColor(java.awt.Color)>($r3);
+
+        $r4 = (java.awt.Graphics2D) $r2;
+
+        $r5 = staticinvoke <java.awt.AlphaComposite: java.awt.AlphaComposite getInstance(int)>(2);
+
+        virtualinvoke $r4.<java.awt.Graphics2D: void setComposite(java.awt.Composite)>($r5);
+
+        $i0 = virtualinvoke r0.<java.awt.Window: int getWidth()>();
+
+        $i1 = virtualinvoke r0.<java.awt.Window: int getHeight()>();
+
+        virtualinvoke $r2.<java.awt.Graphics: void fillRect(int,int,int,int)>(0, 0, $i0, $i1);
+
+     label2:
+        virtualinvoke $r2.<java.awt.Graphics: void dispose()>();
+
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        virtualinvoke $r2.<java.awt.Graphics: void dispose()>();
+
+        throw $r6;
+
+     label4:
+        specialinvoke r0.<java.awt.Container: void paint(java.awt.Graphics)>(r1);
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private static void setLayersOpaque(java.awt.Component, boolean)
+    {
+        javax.swing.JComponent $r6;
+        javax.swing.JRootPane $r2;
+        javax.swing.RootPaneContainer r1;
+        java.awt.Component r0, $r5;
+        int $i0;
+        javax.swing.JLayeredPane $r3;
+        java.awt.Container $r4;
+        boolean $z0, $z1, z2, $z3;
+
+        r0 := @parameter0: java.awt.Component;
+
+        z2 := @parameter1: boolean;
+
+        $z0 = staticinvoke <sun.awt.SunToolkit: boolean isInstanceOf(java.lang.Object,java.lang.String)>(r0, "javax.swing.RootPaneContainer");
+
+        if $z0 == 0 goto label3;
+
+        r1 = (javax.swing.RootPaneContainer) r0;
+
+        $r2 = interfaceinvoke r1.<javax.swing.RootPaneContainer: javax.swing.JRootPane getRootPane()>();
+
+        $r3 = virtualinvoke $r2.<javax.swing.JRootPane: javax.swing.JLayeredPane getLayeredPane()>();
+
+        $r4 = virtualinvoke $r2.<javax.swing.JRootPane: java.awt.Container getContentPane()>();
+
+        $z1 = $r4 instanceof javax.swing.JComponent;
+
+        if $z1 == 0 goto label1;
+
+        $r6 = (javax.swing.JComponent) $r4;
+
+        goto label2;
+
+     label1:
+        $r6 = null;
+
+     label2:
+        virtualinvoke $r3.<javax.swing.JLayeredPane: void setOpaque(boolean)>(z2);
+
+        virtualinvoke $r2.<javax.swing.JRootPane: void setOpaque(boolean)>(z2);
+
+        if $r6 == null goto label3;
+
+        virtualinvoke $r6.<javax.swing.JComponent: void setOpaque(boolean)>(z2);
+
+        $i0 = virtualinvoke $r6.<javax.swing.JComponent: int getComponentCount()>();
+
+        if $i0 <= 0 goto label3;
+
+        $r5 = virtualinvoke $r6.<javax.swing.JComponent: java.awt.Component getComponent(int)>(0);
+
+        $z3 = $r5 instanceof javax.swing.RootPaneContainer;
+
+        if $z3 == 0 goto label3;
+
+        staticinvoke <java.awt.Window: void setLayersOpaque(java.awt.Component,boolean)>($r5, z2);
+
+     label3:
+        return;
+    }
+
+    final java.awt.Container getContainer()
+    {
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        return null;
+    }
+
+    final void applyCompoundShape(sun.java2d.pipe.Region)
+    {
+        java.awt.Window r0;
+        sun.java2d.pipe.Region r1;
+
+        r0 := @this: java.awt.Window;
+
+        r1 := @parameter0: sun.java2d.pipe.Region;
+
+        return;
+    }
+
+    final void applyCurrentShape()
+    {
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        return;
+    }
+
+    final void mixOnReshaping()
+    {
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        return;
+    }
+
+    final java.awt.Point getLocationOnWindow()
+    {
+        java.awt.Point $r0;
+        java.awt.Window r1;
+
+        r1 := @this: java.awt.Window;
+
+        $r0 = new java.awt.Point;
+
+        specialinvoke $r0.<java.awt.Point: void <init>(int,int)>(0, 0);
+
+        return $r0;
+    }
+
+    private static double limit(double, double, double)
+    {
+        double d0, $d1, d2, $d3, d4;
+
+        d4 := @parameter0: double;
+
+        d0 := @parameter1: double;
+
+        d2 := @parameter2: double;
+
+        $d1 = staticinvoke <java.lang.Math: double max(double,double)>(d4, d0);
+
+        $d3 = staticinvoke <java.lang.Math: double min(double,double)>($d1, d2);
+
+        return $d3;
+    }
+
+    private java.awt.geom.Point2D calculateSecurityWarningPosition(double, double, double, double)
+    {
+        java.awt.GraphicsConfiguration $r1;
+        float $f0, $f1;
+        java.awt.Toolkit $r3;
+        java.awt.Rectangle $r2;
+        java.awt.Insets $r4;
+        java.awt.geom.Point2D$Double $r5;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21;
+        double d0, d1, $d2, $d3, $d4, $d5, d6, d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15, $d16, $d17, $d18, $d19, $d20, $d21, $d22, $d23, $d24, $d25, $d26, $d27, $d28, $d29, d30, d31;
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        d0 := @parameter0: double;
+
+        d6 := @parameter1: double;
+
+        d1 := @parameter2: double;
+
+        d7 := @parameter3: double;
+
+        $f0 = r0.<java.awt.Window: float securityWarningAlignmentX>;
+
+        $d2 = (double) $f0;
+
+        $d3 = d1 * $d2;
+
+        $d5 = d0 + $d3;
+
+        $d4 = r0.<java.awt.Window: double securityWarningPointX>;
+
+        d30 = $d5 + $d4;
+
+        $f1 = r0.<java.awt.Window: float securityWarningAlignmentY>;
+
+        $d8 = (double) $f1;
+
+        $d9 = d7 * $d8;
+
+        $d11 = d6 + $d9;
+
+        $d10 = r0.<java.awt.Window: double securityWarningPointY>;
+
+        d31 = $d11 + $d10;
+
+        $i0 = r0.<java.awt.Window: int securityWarningWidth>;
+
+        $d12 = (double) $i0;
+
+        $d13 = d0 - $d12;
+
+        $d16 = $d13 - 2.0;
+
+        $d14 = d0 + d1;
+
+        $d15 = $d14 + 2.0;
+
+        $d17 = staticinvoke <java.awt.Window: double limit(double,double,double)>(d30, $d16, $d15);
+
+        $i1 = r0.<java.awt.Window: int securityWarningHeight>;
+
+        $d18 = (double) $i1;
+
+        $d19 = d6 - $d18;
+
+        $d22 = $d19 - 2.0;
+
+        $d20 = d6 + d7;
+
+        $d21 = $d20 + 2.0;
+
+        $d23 = staticinvoke <java.awt.Window: double limit(double,double,double)>(d31, $d22, $d21);
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.awt.GraphicsConfiguration getGraphicsConfiguration_NoClientCode()>();
+
+        $r2 = virtualinvoke $r1.<java.awt.GraphicsConfiguration: java.awt.Rectangle getBounds()>();
+
+        $r3 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r4 = virtualinvoke $r3.<java.awt.Toolkit: java.awt.Insets getScreenInsets(java.awt.GraphicsConfiguration)>($r1);
+
+        $i3 = $r2.<java.awt.Rectangle: int x>;
+
+        $i2 = $r4.<java.awt.Insets: int left>;
+
+        $i4 = $i3 + $i2;
+
+        $d25 = (double) $i4;
+
+        $i6 = $r2.<java.awt.Rectangle: int x>;
+
+        $i5 = $r2.<java.awt.Rectangle: int width>;
+
+        $i8 = $i6 + $i5;
+
+        $i7 = $r4.<java.awt.Insets: int right>;
+
+        $i10 = $i8 - $i7;
+
+        $i9 = r0.<java.awt.Window: int securityWarningWidth>;
+
+        $i11 = $i10 - $i9;
+
+        $d24 = (double) $i11;
+
+        $d26 = staticinvoke <java.awt.Window: double limit(double,double,double)>($d17, $d25, $d24);
+
+        $i13 = $r2.<java.awt.Rectangle: int y>;
+
+        $i12 = $r4.<java.awt.Insets: int top>;
+
+        $i14 = $i13 + $i12;
+
+        $d28 = (double) $i14;
+
+        $i16 = $r2.<java.awt.Rectangle: int y>;
+
+        $i15 = $r2.<java.awt.Rectangle: int height>;
+
+        $i18 = $i16 + $i15;
+
+        $i17 = $r4.<java.awt.Insets: int bottom>;
+
+        $i20 = $i18 - $i17;
+
+        $i19 = r0.<java.awt.Window: int securityWarningHeight>;
+
+        $i21 = $i20 - $i19;
+
+        $d27 = (double) $i21;
+
+        $d29 = staticinvoke <java.awt.Window: double limit(double,double,double)>($d23, $d28, $d27);
+
+        $r5 = new java.awt.geom.Point2D$Double;
+
+        specialinvoke $r5.<java.awt.geom.Point2D$Double: void <init>(double,double)>($d26, $d29);
+
+        return $r5;
+    }
+
+    void updateZOrder()
+    {
+        java.awt.Window r0;
+
+        r0 := @this: java.awt.Window;
+
+        return;
+    }
+
+    static java.lang.ref.WeakReference access$000(java.awt.Window)
+    {
+        java.lang.ref.WeakReference $r1;
+        java.awt.Window r0;
+
+        r0 := @parameter0: java.awt.Window;
+
+        $r1 = r0.<java.awt.Window: java.lang.ref.WeakReference weakThis>;
+
+        return $r1;
+    }
+
+    static void access$100(sun.awt.AppContext, java.lang.ref.WeakReference)
+    {
+        java.lang.ref.WeakReference r1;
+        sun.awt.AppContext r0;
+
+        r0 := @parameter0: sun.awt.AppContext;
+
+        r1 := @parameter1: java.lang.ref.WeakReference;
+
+        staticinvoke <java.awt.Window: void removeFromWindowList(sun.awt.AppContext,java.lang.ref.WeakReference)>(r0, r1);
+
+        return;
+    }
+
+    static boolean access$202(java.awt.Window, boolean)
+    {
+        java.awt.Window r0;
+        boolean z0;
+
+        r0 := @parameter0: java.awt.Window;
+
+        z0 := @parameter1: boolean;
+
+        r0.<java.awt.Window: boolean disposing> = z0;
+
+        return z0;
+    }
+
+    static java.lang.Object access$300(java.awt.Window)
+    {
+        java.lang.Object $r1;
+        java.awt.Window r0;
+
+        r0 := @parameter0: java.awt.Window;
+
+        $r1 = r0.<java.awt.Window: java.lang.Object inputContextLock>;
+
+        return $r1;
+    }
+
+    static float access$400(java.awt.Window)
+    {
+        float $f0;
+        java.awt.Window r0;
+
+        r0 := @parameter0: java.awt.Window;
+
+        $f0 = r0.<java.awt.Window: float opacity>;
+
+        return $f0;
+    }
+
+    static void access$500(java.awt.Window)
+    {
+        java.awt.Window r0;
+
+        r0 := @parameter0: java.awt.Window;
+
+        specialinvoke r0.<java.awt.Window: void updateWindow()>();
+
+        return;
+    }
+
+    static int access$600(java.awt.Window)
+    {
+        int $i0;
+        java.awt.Window r0;
+
+        r0 := @parameter0: java.awt.Window;
+
+        $i0 = r0.<java.awt.Window: int securityWarningWidth>;
+
+        return $i0;
+    }
+
+    static int access$700(java.awt.Window)
+    {
+        int $i0;
+        java.awt.Window r0;
+
+        r0 := @parameter0: java.awt.Window;
+
+        $i0 = r0.<java.awt.Window: int securityWarningHeight>;
+
+        return $i0;
+    }
+
+    static int access$602(java.awt.Window, int)
+    {
+        int i0;
+        java.awt.Window r0;
+
+        r0 := @parameter0: java.awt.Window;
+
+        i0 := @parameter1: int;
+
+        r0.<java.awt.Window: int securityWarningWidth> = i0;
+
+        return i0;
+    }
+
+    static int access$702(java.awt.Window, int)
+    {
+        int i0;
+        java.awt.Window r0;
+
+        r0 := @parameter0: java.awt.Window;
+
+        i0 := @parameter1: int;
+
+        r0.<java.awt.Window: int securityWarningHeight> = i0;
+
+        return i0;
+    }
+
+    static double access$802(java.awt.Window, double)
+    {
+        java.awt.Window r0;
+        double d0;
+
+        r0 := @parameter0: java.awt.Window;
+
+        d0 := @parameter1: double;
+
+        r0.<java.awt.Window: double securityWarningPointX> = d0;
+
+        return d0;
+    }
+
+    static double access$902(java.awt.Window, double)
+    {
+        java.awt.Window r0;
+        double d0;
+
+        r0 := @parameter0: java.awt.Window;
+
+        d0 := @parameter1: double;
+
+        r0.<java.awt.Window: double securityWarningPointY> = d0;
+
+        return d0;
+    }
+
+    static float access$1002(java.awt.Window, float)
+    {
+        float f0;
+        java.awt.Window r0;
+
+        r0 := @parameter0: java.awt.Window;
+
+        f0 := @parameter1: float;
+
+        r0.<java.awt.Window: float securityWarningAlignmentX> = f0;
+
+        return f0;
+    }
+
+    static float access$1102(java.awt.Window, float)
+    {
+        float f0;
+        java.awt.Window r0;
+
+        r0 := @parameter0: java.awt.Window;
+
+        f0 := @parameter1: float;
+
+        r0.<java.awt.Window: float securityWarningAlignmentY> = f0;
+
+        return f0;
+    }
+
+    static java.awt.geom.Point2D access$1200(java.awt.Window, double, double, double, double)
+    {
+        java.awt.geom.Point2D $r1;
+        java.awt.Window r0;
+        double d0, d1, d2, d3;
+
+        r0 := @parameter0: java.awt.Window;
+
+        d0 := @parameter1: double;
+
+        d1 := @parameter2: double;
+
+        d2 := @parameter3: double;
+
+        d3 := @parameter4: double;
+
+        $r1 = specialinvoke r0.<java.awt.Window: java.awt.geom.Point2D calculateSecurityWarningPosition(double,double,double,double)>(d0, d1, d2, d3);
+
+        return $r1;
+    }
+
+    static boolean access$1300(java.awt.Window)
+    {
+        java.awt.Window r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.Window;
+
+        $z0 = r0.<java.awt.Window: boolean autoRequestFocus>;
+
+        return $z0;
+    }
+
+    static void <clinit>()
+    {
+        sun.util.logging.PlatformLogger $r1;
+        java.util.concurrent.atomic.AtomicBoolean $r8;
+        sun.security.action.GetPropertyAction $r2, $r5;
+        java.lang.Object $r3, $r6;
+        java.awt.Window$1 $r9;
+        java.lang.String $r4, $r7;
+        sun.awt.util.IdentityArrayList $r0;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        <java.awt.Window: long serialVersionUID> = 4497834738069338734L;
+
+        <java.awt.Window: java.lang.String base> = "win";
+
+        <java.awt.Window: int OPENED> = 1;
+
+        <java.awt.Window: boolean systemSyncLWRequests> = 0;
+
+        $r0 = new sun.awt.util.IdentityArrayList;
+
+        specialinvoke $r0.<sun.awt.util.IdentityArrayList: void <init>()>();
+
+        <java.awt.Window: sun.awt.util.IdentityArrayList allWindows> = $r0;
+
+        <java.awt.Window: int nameCounter> = 0;
+
+        $r1 = staticinvoke <sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger getLogger(java.lang.String)>("java.awt.Window");
+
+        <java.awt.Window: sun.util.logging.PlatformLogger log> = $r1;
+
+        staticinvoke <java.awt.Toolkit: void loadLibraries()>();
+
+        $z0 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        if $z0 != 0 goto label1;
+
+        staticinvoke <java.awt.Window: void initIDs()>();
+
+     label1:
+        $r2 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r2.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("java.awt.syncLWRequests");
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        $r4 = (java.lang.String) $r3;
+
+        if $r4 == null goto label2;
+
+        $z2 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("true");
+
+        if $z2 == 0 goto label2;
+
+        $z3 = 1;
+
+        goto label3;
+
+     label2:
+        $z3 = 0;
+
+     label3:
+        <java.awt.Window: boolean systemSyncLWRequests> = $z3;
+
+        $r5 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r5.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("java.awt.Window.locationByPlatform");
+
+        $r6 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r5);
+
+        $r7 = (java.lang.String) $r6;
+
+        if $r7 == null goto label4;
+
+        $z1 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>("true");
+
+        if $z1 == 0 goto label4;
+
+        $z4 = 1;
+
+        goto label5;
+
+     label4:
+        $z4 = 0;
+
+     label5:
+        <java.awt.Window: boolean locationByPlatformProp> = $z4;
+
+        $r8 = new java.util.concurrent.atomic.AtomicBoolean;
+
+        specialinvoke $r8.<java.util.concurrent.atomic.AtomicBoolean: void <init>(boolean)>(1);
+
+        <java.awt.Window: java.util.concurrent.atomic.AtomicBoolean beforeFirstWindowShown> = $r8;
+
+        $r9 = new java.awt.Window$1;
+
+        specialinvoke $r9.<java.awt.Window$1: void <init>()>();
+
+        staticinvoke <sun.awt.AWTAccessor: void setWindowAccessor(sun.awt.AWTAccessor$WindowAccessor)>($r9);
+
+        return;
+    }
+}

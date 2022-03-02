@@ -1,0 +1,447 @@
+public final class sun.text.normalizer.UCharacterProperty extends java.lang.Object
+{
+    public sun.text.normalizer.CharTrie m_trie_;
+    public char[] m_trieIndex_;
+    public char[] m_trieData_;
+    public int m_trieInitialValue_;
+    public sun.text.normalizer.VersionInfo m_unicodeVersion_;
+    public static final int SRC_PROPSVEC;
+    public static final int SRC_COUNT;
+    sun.text.normalizer.CharTrie m_additionalTrie_;
+    int[] m_additionalVectors_;
+    int m_additionalColumnsCount_;
+    int m_maxBlockScriptValue_;
+    int m_maxJTGValue_;
+    private static sun.text.normalizer.UCharacterProperty INSTANCE_;
+    private static final java.lang.String DATA_FILE_NAME_;
+    private static final int DATA_BUFFER_SIZE_;
+    private static final int VALUE_SHIFT_;
+    private static final int UNSIGNED_VALUE_MASK_AFTER_SHIFT_;
+    private static final int LEAD_SURROGATE_SHIFT_;
+    private static final int SURROGATE_OFFSET_;
+    private static final int FIRST_NIBBLE_SHIFT_;
+    private static final int LAST_NIBBLE_MASK_;
+    private static final int AGE_SHIFT_;
+
+    public void setIndexData(sun.text.normalizer.CharTrie$FriendAgent)
+    {
+        sun.text.normalizer.CharTrie$FriendAgent r1;
+        int $i0;
+        char[] $r2, $r3;
+        sun.text.normalizer.UCharacterProperty r0;
+
+        r0 := @this: sun.text.normalizer.UCharacterProperty;
+
+        r1 := @parameter0: sun.text.normalizer.CharTrie$FriendAgent;
+
+        $r2 = virtualinvoke r1.<sun.text.normalizer.CharTrie$FriendAgent: char[] getPrivateIndex()>();
+
+        r0.<sun.text.normalizer.UCharacterProperty: char[] m_trieIndex_> = $r2;
+
+        $r3 = virtualinvoke r1.<sun.text.normalizer.CharTrie$FriendAgent: char[] getPrivateData()>();
+
+        r0.<sun.text.normalizer.UCharacterProperty: char[] m_trieData_> = $r3;
+
+        $i0 = virtualinvoke r1.<sun.text.normalizer.CharTrie$FriendAgent: int getPrivateInitialValue()>();
+
+        r0.<sun.text.normalizer.UCharacterProperty: int m_trieInitialValue_> = $i0;
+
+        return;
+    }
+
+    public final int getProperty(int)
+    {
+        sun.text.normalizer.CharTrie $r3;
+        int i0, $i1, $i3, $i4, $i5, $i7, $i9, $i12, $i13, $i15, $i16, $i17, $i19, $i21, $i23, $i24, $i25, $i27, $i28, $i29, $i30;
+        sun.text.normalizer.UCharacterProperty r0;
+        char $c2, $c6, $c8, $c10, $c11, $c14, $c18;
+        java.lang.ArrayIndexOutOfBoundsException $r6;
+        char[] $r1, $r2, $r4, $r5;
+
+        r0 := @this: sun.text.normalizer.UCharacterProperty;
+
+        i0 := @parameter0: int;
+
+        $i21 = (int) 55296;
+
+        if i0 < $i21 goto label1;
+
+        $i23 = (int) 56319;
+
+        if i0 <= $i23 goto label4;
+
+        if i0 >= 65536 goto label4;
+
+     label1:
+        $r2 = r0.<sun.text.normalizer.UCharacterProperty: char[] m_trieData_>;
+
+        $r1 = r0.<sun.text.normalizer.UCharacterProperty: char[] m_trieIndex_>;
+
+        $i1 = i0 >> 5;
+
+        $c2 = $r1[$i1];
+
+        $i24 = (int) $c2;
+
+        $i4 = $i24 << 2;
+
+        $i3 = i0 & 31;
+
+        $i5 = $i4 + $i3;
+
+        $c6 = $r2[$i5];
+
+     label2:
+        $i25 = (int) $c6;
+
+        return $i25;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $i19 = r0.<sun.text.normalizer.UCharacterProperty: int m_trieInitialValue_>;
+
+        return $i19;
+
+     label4:
+        $i27 = (int) 56319;
+
+        if i0 > $i27 goto label5;
+
+        $r5 = r0.<sun.text.normalizer.UCharacterProperty: char[] m_trieData_>;
+
+        $r4 = r0.<sun.text.normalizer.UCharacterProperty: char[] m_trieIndex_>;
+
+        $i12 = i0 >> 5;
+
+        $i13 = 320 + $i12;
+
+        $c14 = $r4[$i13];
+
+        $i28 = (int) $c14;
+
+        $i16 = $i28 << 2;
+
+        $i15 = i0 & 31;
+
+        $i17 = $i16 + $i15;
+
+        $c18 = $r5[$i17];
+
+        $i29 = (int) $c18;
+
+        return $i29;
+
+     label5:
+        if i0 > 1114111 goto label6;
+
+        $r3 = r0.<sun.text.normalizer.UCharacterProperty: sun.text.normalizer.CharTrie m_trie_>;
+
+        $c8 = staticinvoke <sun.text.normalizer.UTF16: char getLeadSurrogate(int)>(i0);
+
+        $i9 = i0 & 1023;
+
+        $c10 = (char) $i9;
+
+        $c11 = virtualinvoke $r3.<sun.text.normalizer.CharTrie: char getSurrogateValue(char,char)>($c8, $c10);
+
+        $i30 = (int) $c11;
+
+        return $i30;
+
+     label6:
+        $i7 = r0.<sun.text.normalizer.UCharacterProperty: int m_trieInitialValue_>;
+
+        return $i7;
+
+        catch java.lang.ArrayIndexOutOfBoundsException from label1 to label2 with label3;
+    }
+
+    public static int getUnsignedValue(int)
+    {
+        int i0, $i1, $i2;
+
+        i0 := @parameter0: int;
+
+        $i1 = i0 >> 8;
+
+        $i2 = $i1 & 255;
+
+        return $i2;
+    }
+
+    public int getAdditional(int, int)
+    {
+        sun.text.normalizer.UCharacterProperty r0;
+        char $c3;
+        sun.text.normalizer.CharTrie $r1;
+        int[] $r2;
+        int i0, $i1, i2, $i4, $i5, $i6, $i8, $i9;
+
+        r0 := @this: sun.text.normalizer.UCharacterProperty;
+
+        i2 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        $i8 = (int) -1;
+
+        if i0 != $i8 goto label1;
+
+        $i6 = virtualinvoke r0.<sun.text.normalizer.UCharacterProperty: int getProperty(int)>(i2);
+
+        return $i6;
+
+     label1:
+        if i0 < 0 goto label2;
+
+        $i1 = r0.<sun.text.normalizer.UCharacterProperty: int m_additionalColumnsCount_>;
+
+        if i0 < $i1 goto label3;
+
+     label2:
+        return 0;
+
+     label3:
+        $r2 = r0.<sun.text.normalizer.UCharacterProperty: int[] m_additionalVectors_>;
+
+        $r1 = r0.<sun.text.normalizer.UCharacterProperty: sun.text.normalizer.CharTrie m_additionalTrie_>;
+
+        $c3 = virtualinvoke $r1.<sun.text.normalizer.CharTrie: char getCodePointValue(int)>(i2);
+
+        $i9 = (int) $c3;
+
+        $i4 = $i9 + i0;
+
+        $i5 = $r2[$i4];
+
+        return $i5;
+    }
+
+    public sun.text.normalizer.VersionInfo getAge(int)
+    {
+        sun.text.normalizer.UCharacterProperty r0;
+        sun.text.normalizer.VersionInfo $r1;
+        int i0, $i1, i2, $i3, $i4, $i5;
+
+        r0 := @this: sun.text.normalizer.UCharacterProperty;
+
+        i0 := @parameter0: int;
+
+        $i1 = virtualinvoke r0.<sun.text.normalizer.UCharacterProperty: int getAdditional(int,int)>(i0, 0);
+
+        i2 = $i1 >> 24;
+
+        $i3 = i2 >> 4;
+
+        $i5 = $i3 & 15;
+
+        $i4 = i2 & 15;
+
+        $r1 = staticinvoke <sun.text.normalizer.VersionInfo: sun.text.normalizer.VersionInfo getInstance(int,int,int,int)>($i5, $i4, 0, 0);
+
+        return $r1;
+    }
+
+    public static int getRawSupplementary(char, char)
+    {
+        int $i2, $i3, $i4, $i5, $i6;
+        char c0, c1;
+
+        c0 := @parameter0: char;
+
+        c1 := @parameter1: char;
+
+        $i5 = (int) c0;
+
+        $i2 = $i5 << 10;
+
+        $i6 = (int) c1;
+
+        $i3 = $i2 + $i6;
+
+        $i4 = $i3 + -56613888;
+
+        return $i4;
+    }
+
+    public static sun.text.normalizer.UCharacterProperty getInstance()
+    {
+        java.util.MissingResourceException $r4;
+        sun.text.normalizer.UCharacterProperty $r0, $r1, $r2;
+        java.lang.String $r5;
+        java.lang.Exception $r3;
+
+        $r0 = <sun.text.normalizer.UCharacterProperty: sun.text.normalizer.UCharacterProperty INSTANCE_>;
+
+        if $r0 != null goto label4;
+
+     label1:
+        $r2 = new sun.text.normalizer.UCharacterProperty;
+
+        specialinvoke $r2.<sun.text.normalizer.UCharacterProperty: void <init>()>();
+
+        <sun.text.normalizer.UCharacterProperty: sun.text.normalizer.UCharacterProperty INSTANCE_> = $r2;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.util.MissingResourceException;
+
+        $r5 = virtualinvoke $r3.<java.lang.Exception: java.lang.String getMessage()>();
+
+        specialinvoke $r4.<java.util.MissingResourceException: void <init>(java.lang.String,java.lang.String,java.lang.String)>($r5, "", "");
+
+        throw $r4;
+
+     label4:
+        $r1 = <sun.text.normalizer.UCharacterProperty: sun.text.normalizer.UCharacterProperty INSTANCE_>;
+
+        return $r1;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public static boolean isRuleWhiteSpace(int)
+    {
+        int i0;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        if i0 < 9 goto label2;
+
+        if i0 > 8233 goto label2;
+
+        if i0 <= 13 goto label1;
+
+        if i0 == 32 goto label1;
+
+        if i0 == 133 goto label1;
+
+        if i0 == 8206 goto label1;
+
+        if i0 == 8207 goto label1;
+
+        if i0 < 8232 goto label2;
+
+     label1:
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+    }
+
+    private void <init>() throws java.io.IOException
+    {
+        java.io.BufferedInputStream $r2;
+        sun.text.normalizer.UCharacterProperty r0;
+        sun.text.normalizer.UCharacterPropertyReader $r3;
+        sun.text.normalizer.CharTrie $r4;
+        java.io.InputStream $r1;
+
+        r0 := @this: sun.text.normalizer.UCharacterProperty;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = staticinvoke <sun.text.normalizer.ICUData: java.io.InputStream getRequiredStream(java.lang.String)>("/sun/text/resources/uprops.icu");
+
+        $r2 = new java.io.BufferedInputStream;
+
+        specialinvoke $r2.<java.io.BufferedInputStream: void <init>(java.io.InputStream,int)>($r1, 25000);
+
+        $r3 = new sun.text.normalizer.UCharacterPropertyReader;
+
+        specialinvoke $r3.<sun.text.normalizer.UCharacterPropertyReader: void <init>(java.io.InputStream)>($r2);
+
+        virtualinvoke $r3.<sun.text.normalizer.UCharacterPropertyReader: void read(sun.text.normalizer.UCharacterProperty)>(r0);
+
+        virtualinvoke $r2.<java.io.BufferedInputStream: void close()>();
+
+        $r4 = r0.<sun.text.normalizer.UCharacterProperty: sun.text.normalizer.CharTrie m_trie_>;
+
+        virtualinvoke $r4.<sun.text.normalizer.CharTrie: void putIndexData(sun.text.normalizer.UCharacterProperty)>(r0);
+
+        return;
+    }
+
+    public void upropsvec_addPropertyStarts(sun.text.normalizer.UnicodeSet)
+    {
+        sun.text.normalizer.UCharacterProperty r0;
+        sun.text.normalizer.UnicodeSet r4;
+        sun.text.normalizer.CharTrie $r2;
+        sun.text.normalizer.RangeValueIterator$Element $r3;
+        int $i0, $i1;
+        sun.text.normalizer.TrieIterator $r1;
+        boolean $z0;
+
+        r0 := @this: sun.text.normalizer.UCharacterProperty;
+
+        r4 := @parameter0: sun.text.normalizer.UnicodeSet;
+
+        $i0 = r0.<sun.text.normalizer.UCharacterProperty: int m_additionalColumnsCount_>;
+
+        if $i0 <= 0 goto label2;
+
+        $r1 = new sun.text.normalizer.TrieIterator;
+
+        $r2 = r0.<sun.text.normalizer.UCharacterProperty: sun.text.normalizer.CharTrie m_additionalTrie_>;
+
+        specialinvoke $r1.<sun.text.normalizer.TrieIterator: void <init>(sun.text.normalizer.Trie)>($r2);
+
+        $r3 = new sun.text.normalizer.RangeValueIterator$Element;
+
+        specialinvoke $r3.<sun.text.normalizer.RangeValueIterator$Element: void <init>()>();
+
+     label1:
+        $z0 = virtualinvoke $r1.<sun.text.normalizer.TrieIterator: boolean next(sun.text.normalizer.RangeValueIterator$Element)>($r3);
+
+        if $z0 == 0 goto label2;
+
+        $i1 = $r3.<sun.text.normalizer.RangeValueIterator$Element: int start>;
+
+        virtualinvoke r4.<sun.text.normalizer.UnicodeSet: sun.text.normalizer.UnicodeSet add(int)>($i1);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        <sun.text.normalizer.UCharacterProperty: int AGE_SHIFT_> = 24;
+
+        <sun.text.normalizer.UCharacterProperty: int LAST_NIBBLE_MASK_> = 15;
+
+        <sun.text.normalizer.UCharacterProperty: int FIRST_NIBBLE_SHIFT_> = 4;
+
+        <sun.text.normalizer.UCharacterProperty: int SURROGATE_OFFSET_> = -56613888;
+
+        <sun.text.normalizer.UCharacterProperty: int LEAD_SURROGATE_SHIFT_> = 10;
+
+        <sun.text.normalizer.UCharacterProperty: int UNSIGNED_VALUE_MASK_AFTER_SHIFT_> = 255;
+
+        <sun.text.normalizer.UCharacterProperty: int VALUE_SHIFT_> = 8;
+
+        <sun.text.normalizer.UCharacterProperty: int DATA_BUFFER_SIZE_> = 25000;
+
+        <sun.text.normalizer.UCharacterProperty: java.lang.String DATA_FILE_NAME_> = "/sun/text/resources/uprops.icu";
+
+        <sun.text.normalizer.UCharacterProperty: int SRC_COUNT> = 9;
+
+        <sun.text.normalizer.UCharacterProperty: int SRC_PROPSVEC> = 2;
+
+        <sun.text.normalizer.UCharacterProperty: sun.text.normalizer.UCharacterProperty INSTANCE_> = null;
+
+        return;
+    }
+}

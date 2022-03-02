@@ -1,0 +1,2843 @@
+public class javax.swing.JViewport extends javax.swing.JComponent implements javax.accessibility.Accessible
+{
+    private static final java.lang.String uiClassID;
+    static final java.lang.Object EnableWindowBlit;
+    protected boolean isViewSizeSet;
+    protected java.awt.Point lastPaintPosition;
+    protected boolean backingStore;
+    protected transient java.awt.Image backingStoreImage;
+    protected boolean scrollUnderway;
+    private java.awt.event.ComponentListener viewListener;
+    private transient javax.swing.event.ChangeEvent changeEvent;
+    public static final int BLIT_SCROLL_MODE;
+    public static final int BACKINGSTORE_SCROLL_MODE;
+    public static final int SIMPLE_SCROLL_MODE;
+    private int scrollMode;
+    private transient boolean repaintAll;
+    private transient boolean waitingForRepaint;
+    private transient javax.swing.Timer repaintTimer;
+    private transient boolean inBlitPaint;
+    private boolean hasHadValidView;
+    private boolean viewChanged;
+
+    public void <init>()
+    {
+        java.awt.LayoutManager $r1;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        specialinvoke r0.<javax.swing.JComponent: void <init>()>();
+
+        r0.<javax.swing.JViewport: boolean isViewSizeSet> = 0;
+
+        r0.<javax.swing.JViewport: java.awt.Point lastPaintPosition> = null;
+
+        r0.<javax.swing.JViewport: boolean backingStore> = 0;
+
+        r0.<javax.swing.JViewport: java.awt.Image backingStoreImage> = null;
+
+        r0.<javax.swing.JViewport: boolean scrollUnderway> = 0;
+
+        r0.<javax.swing.JViewport: java.awt.event.ComponentListener viewListener> = null;
+
+        r0.<javax.swing.JViewport: javax.swing.event.ChangeEvent changeEvent> = null;
+
+        r0.<javax.swing.JViewport: int scrollMode> = 1;
+
+        $r1 = virtualinvoke r0.<javax.swing.JViewport: java.awt.LayoutManager createLayoutManager()>();
+
+        virtualinvoke r0.<javax.swing.JViewport: void setLayout(java.awt.LayoutManager)>($r1);
+
+        virtualinvoke r0.<javax.swing.JViewport: void setOpaque(boolean)>(1);
+
+        virtualinvoke r0.<javax.swing.JViewport: void updateUI()>();
+
+        virtualinvoke r0.<javax.swing.JViewport: void setInheritsPopupMenu(boolean)>(1);
+
+        return;
+    }
+
+    public javax.swing.plaf.ViewportUI getUI()
+    {
+        javax.swing.plaf.ComponentUI $r1;
+        javax.swing.plaf.ViewportUI $r2;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        $r1 = r0.<javax.swing.JViewport: javax.swing.plaf.ComponentUI ui>;
+
+        $r2 = (javax.swing.plaf.ViewportUI) $r1;
+
+        return $r2;
+    }
+
+    public void setUI(javax.swing.plaf.ViewportUI)
+    {
+        javax.swing.plaf.ViewportUI r1;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        r1 := @parameter0: javax.swing.plaf.ViewportUI;
+
+        specialinvoke r0.<javax.swing.JComponent: void setUI(javax.swing.plaf.ComponentUI)>(r1);
+
+        return;
+    }
+
+    public void updateUI()
+    {
+        javax.swing.plaf.ComponentUI $r1;
+        javax.swing.plaf.ViewportUI $r2;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        $r1 = staticinvoke <javax.swing.UIManager: javax.swing.plaf.ComponentUI getUI(javax.swing.JComponent)>(r0);
+
+        $r2 = (javax.swing.plaf.ViewportUI) $r1;
+
+        virtualinvoke r0.<javax.swing.JViewport: void setUI(javax.swing.plaf.ViewportUI)>($r2);
+
+        return;
+    }
+
+    public java.lang.String getUIClassID()
+    {
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        return "ViewportUI";
+    }
+
+    protected void addImpl(java.awt.Component, java.lang.Object, int)
+    {
+        int i0;
+        java.lang.Object r2;
+        java.awt.Component r1;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        r1 := @parameter0: java.awt.Component;
+
+        r2 := @parameter1: java.lang.Object;
+
+        i0 := @parameter2: int;
+
+        virtualinvoke r0.<javax.swing.JViewport: void setView(java.awt.Component)>(r1);
+
+        return;
+    }
+
+    public void remove(java.awt.Component)
+    {
+        java.awt.event.ComponentListener $r2;
+        java.awt.Component r0;
+        javax.swing.JViewport r1;
+
+        r1 := @this: javax.swing.JViewport;
+
+        r0 := @parameter0: java.awt.Component;
+
+        $r2 = r1.<javax.swing.JViewport: java.awt.event.ComponentListener viewListener>;
+
+        virtualinvoke r0.<java.awt.Component: void removeComponentListener(java.awt.event.ComponentListener)>($r2);
+
+        specialinvoke r1.<javax.swing.JComponent: void remove(java.awt.Component)>(r0);
+
+        return;
+    }
+
+    public void scrollRectToVisible(java.awt.Rectangle)
+    {
+        java.awt.Point $r3;
+        boolean $z0, $z1, $z2;
+        java.awt.Component $r1;
+        java.awt.Dimension $r4, $r5;
+        java.awt.Rectangle r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44;
+        java.awt.Container $r6;
+        java.awt.ComponentOrientation $r7;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        r2 := @parameter0: java.awt.Rectangle;
+
+        $r1 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Component getView()>();
+
+        if $r1 != null goto label01;
+
+        return;
+
+     label01:
+        $z0 = virtualinvoke $r1.<java.awt.Component: boolean isValid()>();
+
+        if $z0 != 0 goto label02;
+
+        specialinvoke r0.<javax.swing.JViewport: void validateView()>();
+
+     label02:
+        $i0 = virtualinvoke r0.<javax.swing.JViewport: int getWidth()>();
+
+        $i2 = r2.<java.awt.Rectangle: int width>;
+
+        $i1 = r2.<java.awt.Rectangle: int x>;
+
+        $i3 = specialinvoke r0.<javax.swing.JViewport: int positionAdjustment(int,int,int)>($i0, $i2, $i1);
+
+        $i4 = virtualinvoke r0.<javax.swing.JViewport: int getHeight()>();
+
+        $i6 = r2.<java.awt.Rectangle: int height>;
+
+        $i5 = r2.<java.awt.Rectangle: int y>;
+
+        $i7 = specialinvoke r0.<javax.swing.JViewport: int positionAdjustment(int,int,int)>($i4, $i6, $i5);
+
+        if $i3 != 0 goto label03;
+
+        if $i7 == 0 goto label11;
+
+     label03:
+        $r3 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Point getViewPosition()>();
+
+        $r4 = virtualinvoke $r1.<java.awt.Component: java.awt.Dimension getSize()>();
+
+        $i38 = $r3.<java.awt.Point: int x>;
+
+        $i39 = $r3.<java.awt.Point: int y>;
+
+        $r5 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Dimension getExtentSize()>();
+
+        $i8 = $r3.<java.awt.Point: int x>;
+
+        $i9 = $i8 - $i3;
+
+        $r3.<java.awt.Point: int x> = $i9;
+
+        $i10 = $r3.<java.awt.Point: int y>;
+
+        $i11 = $i10 - $i7;
+
+        $r3.<java.awt.Point: int y> = $i11;
+
+        $z1 = virtualinvoke $r1.<java.awt.Component: boolean isValid()>();
+
+        if $z1 == 0 goto label09;
+
+        $r6 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Container getParent()>();
+
+        $r7 = virtualinvoke $r6.<java.awt.Container: java.awt.ComponentOrientation getComponentOrientation()>();
+
+        $z2 = virtualinvoke $r7.<java.awt.ComponentOrientation: boolean isLeftToRight()>();
+
+        if $z2 == 0 goto label05;
+
+        $i30 = $r3.<java.awt.Point: int x>;
+
+        $i29 = $r5.<java.awt.Dimension: int width>;
+
+        $i32 = $i30 + $i29;
+
+        $i31 = $r4.<java.awt.Dimension: int width>;
+
+        if $i32 <= $i31 goto label04;
+
+        $i35 = $r4.<java.awt.Dimension: int width>;
+
+        $i34 = $r5.<java.awt.Dimension: int width>;
+
+        $i36 = $i35 - $i34;
+
+        $i37 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i36);
+
+        $r3.<java.awt.Point: int x> = $i37;
+
+        goto label07;
+
+     label04:
+        $i33 = $r3.<java.awt.Point: int x>;
+
+        if $i33 >= 0 goto label07;
+
+        $r3.<java.awt.Point: int x> = 0;
+
+        goto label07;
+
+     label05:
+        $i14 = $r5.<java.awt.Dimension: int width>;
+
+        $i13 = $r4.<java.awt.Dimension: int width>;
+
+        if $i14 <= $i13 goto label06;
+
+        $i27 = $r4.<java.awt.Dimension: int width>;
+
+        $i26 = $r5.<java.awt.Dimension: int width>;
+
+        $i28 = $i27 - $i26;
+
+        $r3.<java.awt.Point: int x> = $i28;
+
+        goto label07;
+
+     label06:
+        $i16 = $r4.<java.awt.Dimension: int width>;
+
+        $i15 = $r5.<java.awt.Dimension: int width>;
+
+        $i18 = $i16 - $i15;
+
+        $i17 = $r3.<java.awt.Point: int x>;
+
+        $i19 = staticinvoke <java.lang.Math: int min(int,int)>($i18, $i17);
+
+        $i20 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i19);
+
+        $r3.<java.awt.Point: int x> = $i20;
+
+     label07:
+        $i40 = $r3.<java.awt.Point: int y>;
+
+        $i41 = $r5.<java.awt.Dimension: int height>;
+
+        $i42 = $i40 + $i41;
+
+        $i43 = $r4.<java.awt.Dimension: int height>;
+
+        if $i42 <= $i43 goto label08;
+
+        $i23 = $r4.<java.awt.Dimension: int height>;
+
+        $i22 = $r5.<java.awt.Dimension: int height>;
+
+        $i24 = $i23 - $i22;
+
+        $i25 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i24);
+
+        $r3.<java.awt.Point: int y> = $i25;
+
+        goto label09;
+
+     label08:
+        $i21 = $r3.<java.awt.Point: int y>;
+
+        if $i21 >= 0 goto label09;
+
+        $r3.<java.awt.Point: int y> = 0;
+
+     label09:
+        $i44 = $r3.<java.awt.Point: int x>;
+
+        if $i44 != $i38 goto label10;
+
+        $i12 = $r3.<java.awt.Point: int y>;
+
+        if $i12 == $i39 goto label11;
+
+     label10:
+        virtualinvoke r0.<javax.swing.JViewport: void setViewPosition(java.awt.Point)>($r3);
+
+        r0.<javax.swing.JViewport: boolean scrollUnderway> = 0;
+
+     label11:
+        return;
+    }
+
+    private void validateView()
+    {
+        javax.swing.JComponent $r3;
+        javax.swing.RepaintManager $r2;
+        java.awt.Container $r1;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        $r1 = staticinvoke <javax.swing.SwingUtilities: java.awt.Container getValidateRoot(java.awt.Container,boolean)>(r0, 0);
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        virtualinvoke $r1.<java.awt.Component: void validate()>();
+
+        $r2 = staticinvoke <javax.swing.RepaintManager: javax.swing.RepaintManager currentManager(javax.swing.JComponent)>(r0);
+
+        if $r2 == null goto label2;
+
+        $r3 = (javax.swing.JComponent) $r1;
+
+        virtualinvoke $r2.<javax.swing.RepaintManager: void removeInvalidComponent(javax.swing.JComponent)>($r3);
+
+     label2:
+        return;
+    }
+
+    private int positionAdjustment(int, int, int)
+    {
+        int i0, i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        i2 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        if i0 < 0 goto label1;
+
+        $i12 = i1 + i0;
+
+        if $i12 > i2 goto label1;
+
+        return 0;
+
+     label1:
+        if i0 > 0 goto label2;
+
+        $i11 = i1 + i0;
+
+        if $i11 < i2 goto label2;
+
+        return 0;
+
+     label2:
+        if i0 <= 0 goto label3;
+
+        if i1 > i2 goto label3;
+
+        $i8 = neg i0;
+
+        $i9 = $i8 + i2;
+
+        $i10 = $i9 - i1;
+
+        return $i10;
+
+     label3:
+        if i0 < 0 goto label4;
+
+        if i1 < i2 goto label4;
+
+        $i7 = neg i0;
+
+        return $i7;
+
+     label4:
+        if i0 > 0 goto label5;
+
+        if i1 > i2 goto label5;
+
+        $i6 = neg i0;
+
+        return $i6;
+
+     label5:
+        if i0 >= 0 goto label6;
+
+        if i1 < i2 goto label6;
+
+        $i3 = neg i0;
+
+        $i4 = $i3 + i2;
+
+        $i5 = $i4 - i1;
+
+        return $i5;
+
+     label6:
+        return 0;
+    }
+
+    public final void setBorder(javax.swing.border.Border)
+    {
+        java.lang.IllegalArgumentException $r1;
+        javax.swing.JViewport r2;
+        javax.swing.border.Border r0;
+
+        r2 := @this: javax.swing.JViewport;
+
+        r0 := @parameter0: javax.swing.border.Border;
+
+        if r0 == null goto label1;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("JViewport.setBorder() not supported");
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+
+    public final java.awt.Insets getInsets()
+    {
+        java.awt.Insets $r0;
+        javax.swing.JViewport r1;
+
+        r1 := @this: javax.swing.JViewport;
+
+        $r0 = new java.awt.Insets;
+
+        specialinvoke $r0.<java.awt.Insets: void <init>(int,int,int,int)>(0, 0, 0, 0);
+
+        return $r0;
+    }
+
+    public final java.awt.Insets getInsets(java.awt.Insets)
+    {
+        java.awt.Insets r0;
+        javax.swing.JViewport r1;
+
+        r1 := @this: javax.swing.JViewport;
+
+        r0 := @parameter0: java.awt.Insets;
+
+        r0.<java.awt.Insets: int bottom> = 0;
+
+        r0.<java.awt.Insets: int right> = 0;
+
+        r0.<java.awt.Insets: int top> = 0;
+
+        r0.<java.awt.Insets: int left> = 0;
+
+        return r0;
+    }
+
+    private java.awt.Graphics getBackingStoreGraphics(java.awt.Graphics)
+    {
+        java.awt.Color $r4;
+        java.awt.Rectangle $r6;
+        java.awt.Image $r1;
+        java.awt.Font $r5;
+        java.awt.Graphics $r2, r3;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        r3 := @parameter0: java.awt.Graphics;
+
+        $r1 = r0.<javax.swing.JViewport: java.awt.Image backingStoreImage>;
+
+        $r2 = virtualinvoke $r1.<java.awt.Image: java.awt.Graphics getGraphics()>();
+
+        $r4 = virtualinvoke r3.<java.awt.Graphics: java.awt.Color getColor()>();
+
+        virtualinvoke $r2.<java.awt.Graphics: void setColor(java.awt.Color)>($r4);
+
+        $r5 = virtualinvoke r3.<java.awt.Graphics: java.awt.Font getFont()>();
+
+        virtualinvoke $r2.<java.awt.Graphics: void setFont(java.awt.Font)>($r5);
+
+        $r6 = virtualinvoke r3.<java.awt.Graphics: java.awt.Rectangle getClipBounds()>();
+
+        virtualinvoke $r2.<java.awt.Graphics: void setClip(java.awt.Shape)>($r6);
+
+        return $r2;
+    }
+
+    private void paintViaBackingStore(java.awt.Graphics)
+    {
+        java.lang.Throwable $r4;
+        java.awt.Image $r3;
+        java.awt.Graphics r1, $r2;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        r1 := @parameter0: java.awt.Graphics;
+
+        $r2 = specialinvoke r0.<javax.swing.JViewport: java.awt.Graphics getBackingStoreGraphics(java.awt.Graphics)>(r1);
+
+     label1:
+        specialinvoke r0.<javax.swing.JComponent: void paint(java.awt.Graphics)>($r2);
+
+        $r3 = r0.<javax.swing.JViewport: java.awt.Image backingStoreImage>;
+
+        virtualinvoke r1.<java.awt.Graphics: boolean drawImage(java.awt.Image,int,int,java.awt.image.ImageObserver)>($r3, 0, 0, r0);
+
+     label2:
+        virtualinvoke $r2.<java.awt.Graphics: void dispose()>();
+
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        virtualinvoke $r2.<java.awt.Graphics: void dispose()>();
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private void paintViaBackingStore(java.awt.Graphics, java.awt.Rectangle)
+    {
+        java.lang.Throwable $r5;
+        java.awt.Rectangle r3;
+        java.awt.Image $r4;
+        java.awt.Graphics r1, $r2;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        r1 := @parameter0: java.awt.Graphics;
+
+        r3 := @parameter1: java.awt.Rectangle;
+
+        $r2 = specialinvoke r0.<javax.swing.JViewport: java.awt.Graphics getBackingStoreGraphics(java.awt.Graphics)>(r1);
+
+     label1:
+        specialinvoke r0.<javax.swing.JComponent: void paint(java.awt.Graphics)>($r2);
+
+        virtualinvoke r1.<java.awt.Graphics: void setClip(java.awt.Shape)>(r3);
+
+        $r4 = r0.<javax.swing.JViewport: java.awt.Image backingStoreImage>;
+
+        virtualinvoke r1.<java.awt.Graphics: boolean drawImage(java.awt.Image,int,int,java.awt.image.ImageObserver)>($r4, 0, 0, r0);
+
+     label2:
+        virtualinvoke $r2.<java.awt.Graphics: void dispose()>();
+
+        goto label5;
+
+     label3:
+        $r5 := @caughtexception;
+
+     label4:
+        virtualinvoke $r2.<java.awt.Graphics: void dispose()>();
+
+        throw $r5;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public boolean isOptimizedDrawingEnabled()
+    {
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        return 0;
+    }
+
+    protected boolean isPaintingOrigin()
+    {
+        int $i0;
+        javax.swing.JViewport r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        $i0 = r0.<javax.swing.JViewport: int scrollMode>;
+
+        if $i0 != 2 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private java.awt.Point getViewLocation()
+    {
+        java.awt.Point $r2, $r3;
+        java.awt.Component $r1;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        $r1 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Component getView()>();
+
+        if $r1 == null goto label1;
+
+        $r3 = virtualinvoke $r1.<java.awt.Component: java.awt.Point getLocation()>();
+
+        return $r3;
+
+     label1:
+        $r2 = new java.awt.Point;
+
+        specialinvoke $r2.<java.awt.Point: void <init>(int,int)>(0, 0);
+
+        return $r2;
+    }
+
+    public void paint(java.awt.Graphics)
+    {
+        javax.swing.Timer $r22, $r24, $r25, $r26, $r27, $r28, $r29;
+        java.awt.Component $r2, $r3;
+        java.lang.Throwable $r30;
+        java.awt.Point $r6, $r7, $r8, $r9, $r12, $r13, $r14, $r31, $r32;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        java.awt.Image $r5, $r18, $r19;
+        java.awt.Dimension $r10;
+        java.awt.Graphics r1, $r16;
+        java.awt.Rectangle $r4, $r11, $r15, $r17, $r20, $r21, $r23;
+        int $i0, $i1, $i2, $i3, i4, $i5, $i6, i7, $i8, $i9, i10, $i11, $i12, i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        r1 := @parameter0: java.awt.Graphics;
+
+        $i0 = virtualinvoke r0.<javax.swing.JViewport: int getWidth()>();
+
+        $i1 = virtualinvoke r0.<javax.swing.JViewport: int getHeight()>();
+
+        if $i0 <= 0 goto label01;
+
+        if $i1 > 0 goto label02;
+
+     label01:
+        return;
+
+     label02:
+        $z0 = r0.<javax.swing.JViewport: boolean inBlitPaint>;
+
+        if $z0 == 0 goto label03;
+
+        specialinvoke r0.<javax.swing.JComponent: void paint(java.awt.Graphics)>(r1);
+
+        return;
+
+     label03:
+        $z1 = r0.<javax.swing.JViewport: boolean repaintAll>;
+
+        if $z1 == 0 goto label09;
+
+        r0.<javax.swing.JViewport: boolean repaintAll> = 0;
+
+        $r23 = virtualinvoke r1.<java.awt.Graphics: java.awt.Rectangle getClipBounds()>();
+
+        $i34 = $r23.<java.awt.Rectangle: int width>;
+
+        $i35 = virtualinvoke r0.<javax.swing.JViewport: int getWidth()>();
+
+        if $i34 < $i35 goto label04;
+
+        $i36 = $r23.<java.awt.Rectangle: int height>;
+
+        $i37 = virtualinvoke r0.<javax.swing.JViewport: int getHeight()>();
+
+        if $i36 >= $i37 goto label06;
+
+     label04:
+        r0.<javax.swing.JViewport: boolean waitingForRepaint> = 1;
+
+        $r24 = r0.<javax.swing.JViewport: javax.swing.Timer repaintTimer>;
+
+        if $r24 != null goto label05;
+
+        $r27 = specialinvoke r0.<javax.swing.JViewport: javax.swing.Timer createRepaintTimer()>();
+
+        r0.<javax.swing.JViewport: javax.swing.Timer repaintTimer> = $r27;
+
+     label05:
+        $r25 = r0.<javax.swing.JViewport: javax.swing.Timer repaintTimer>;
+
+        virtualinvoke $r25.<javax.swing.Timer: void stop()>();
+
+        $r26 = r0.<javax.swing.JViewport: javax.swing.Timer repaintTimer>;
+
+        virtualinvoke $r26.<javax.swing.Timer: void start()>();
+
+        goto label08;
+
+     label06:
+        $r28 = r0.<javax.swing.JViewport: javax.swing.Timer repaintTimer>;
+
+        if $r28 == null goto label07;
+
+        $r29 = r0.<javax.swing.JViewport: javax.swing.Timer repaintTimer>;
+
+        virtualinvoke $r29.<javax.swing.Timer: void stop()>();
+
+     label07:
+        r0.<javax.swing.JViewport: boolean waitingForRepaint> = 0;
+
+     label08:
+        goto label10;
+
+     label09:
+        $z2 = r0.<javax.swing.JViewport: boolean waitingForRepaint>;
+
+        if $z2 == 0 goto label10;
+
+        $r21 = virtualinvoke r1.<java.awt.Graphics: java.awt.Rectangle getClipBounds()>();
+
+        $i30 = $r21.<java.awt.Rectangle: int width>;
+
+        $i31 = virtualinvoke r0.<javax.swing.JViewport: int getWidth()>();
+
+        if $i30 < $i31 goto label10;
+
+        $i32 = $r21.<java.awt.Rectangle: int height>;
+
+        $i33 = virtualinvoke r0.<javax.swing.JViewport: int getHeight()>();
+
+        if $i32 < $i33 goto label10;
+
+        r0.<javax.swing.JViewport: boolean waitingForRepaint> = 0;
+
+        $r22 = r0.<javax.swing.JViewport: javax.swing.Timer repaintTimer>;
+
+        virtualinvoke $r22.<javax.swing.Timer: void stop()>();
+
+     label10:
+        $z9 = r0.<javax.swing.JViewport: boolean backingStore>;
+
+        if $z9 == 0 goto label11;
+
+        $z3 = specialinvoke r0.<javax.swing.JViewport: boolean isBlitting()>();
+
+        if $z3 != 0 goto label11;
+
+        $r2 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Component getView()>();
+
+        if $r2 != null goto label12;
+
+     label11:
+        specialinvoke r0.<javax.swing.JComponent: void paint(java.awt.Graphics)>(r1);
+
+        $r31 = specialinvoke r0.<javax.swing.JViewport: java.awt.Point getViewLocation()>();
+
+        r0.<javax.swing.JViewport: java.awt.Point lastPaintPosition> = $r31;
+
+        return;
+
+     label12:
+        $r3 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Component getView()>();
+
+        $r4 = virtualinvoke $r3.<java.awt.Component: java.awt.Rectangle getBounds()>();
+
+        $z4 = virtualinvoke r0.<javax.swing.JViewport: boolean isOpaque()>();
+
+        if $z4 != 0 goto label13;
+
+        $i29 = $r4.<java.awt.Rectangle: int width>;
+
+        $i28 = $r4.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r1.<java.awt.Graphics: void clipRect(int,int,int,int)>(0, 0, $i29, $i28);
+
+     label13:
+        $r5 = r0.<javax.swing.JViewport: java.awt.Image backingStoreImage>;
+
+        if $r5 != null goto label19;
+
+        $r19 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Image createImage(int,int)>($i0, $i1);
+
+        r0.<javax.swing.JViewport: java.awt.Image backingStoreImage> = $r19;
+
+        $r20 = virtualinvoke r1.<java.awt.Graphics: java.awt.Rectangle getClipBounds()>();
+
+        $i22 = $r20.<java.awt.Rectangle: int width>;
+
+        if $i22 != $i0 goto label14;
+
+        $i27 = $r20.<java.awt.Rectangle: int height>;
+
+        if $i27 == $i1 goto label17;
+
+     label14:
+        $z8 = virtualinvoke r0.<javax.swing.JViewport: boolean isOpaque()>();
+
+        if $z8 != 0 goto label15;
+
+        $i23 = $r4.<java.awt.Rectangle: int width>;
+
+        $i24 = staticinvoke <java.lang.Math: int min(int,int)>($i23, $i0);
+
+        $i25 = $r4.<java.awt.Rectangle: int height>;
+
+        $i26 = staticinvoke <java.lang.Math: int min(int,int)>($i25, $i1);
+
+        virtualinvoke r1.<java.awt.Graphics: void setClip(int,int,int,int)>(0, 0, $i24, $i26);
+
+        goto label16;
+
+     label15:
+        virtualinvoke r1.<java.awt.Graphics: void setClip(int,int,int,int)>(0, 0, $i0, $i1);
+
+     label16:
+        specialinvoke r0.<javax.swing.JViewport: void paintViaBackingStore(java.awt.Graphics,java.awt.Rectangle)>(r1, $r20);
+
+        goto label18;
+
+     label17:
+        specialinvoke r0.<javax.swing.JViewport: void paintViaBackingStore(java.awt.Graphics)>(r1);
+
+     label18:
+        goto label27;
+
+     label19:
+        $z5 = r0.<javax.swing.JViewport: boolean scrollUnderway>;
+
+        if $z5 == 0 goto label20;
+
+        $r6 = r0.<javax.swing.JViewport: java.awt.Point lastPaintPosition>;
+
+        $r7 = specialinvoke r0.<javax.swing.JViewport: java.awt.Point getViewLocation()>();
+
+        $z6 = virtualinvoke $r6.<java.awt.Point: boolean equals(java.lang.Object)>($r7);
+
+        if $z6 == 0 goto label21;
+
+     label20:
+        specialinvoke r0.<javax.swing.JViewport: void paintViaBackingStore(java.awt.Graphics)>(r1);
+
+        goto label27;
+
+     label21:
+        $r8 = new java.awt.Point;
+
+        specialinvoke $r8.<java.awt.Point: void <init>()>();
+
+        $r9 = new java.awt.Point;
+
+        specialinvoke $r9.<java.awt.Point: void <init>()>();
+
+        $r10 = new java.awt.Dimension;
+
+        specialinvoke $r10.<java.awt.Dimension: void <init>()>();
+
+        $r11 = new java.awt.Rectangle;
+
+        specialinvoke $r11.<java.awt.Rectangle: void <init>()>();
+
+        $r12 = specialinvoke r0.<javax.swing.JViewport: java.awt.Point getViewLocation()>();
+
+        $i3 = $r12.<java.awt.Point: int x>;
+
+        $r13 = r0.<javax.swing.JViewport: java.awt.Point lastPaintPosition>;
+
+        $i2 = $r13.<java.awt.Point: int x>;
+
+        i4 = $i3 - $i2;
+
+        $i6 = $r12.<java.awt.Point: int y>;
+
+        $r14 = r0.<javax.swing.JViewport: java.awt.Point lastPaintPosition>;
+
+        $i5 = $r14.<java.awt.Point: int y>;
+
+        i7 = $i6 - $i5;
+
+        $z7 = virtualinvoke r0.<javax.swing.JViewport: boolean computeBlit(int,int,java.awt.Point,java.awt.Point,java.awt.Dimension,java.awt.Rectangle)>(i4, i7, $r8, $r9, $r10, $r11);
+
+        if $z7 != 0 goto label22;
+
+        specialinvoke r0.<javax.swing.JViewport: void paintViaBackingStore(java.awt.Graphics)>(r1);
+
+        goto label27;
+
+     label22:
+        $i9 = $r9.<java.awt.Point: int x>;
+
+        $i8 = $r8.<java.awt.Point: int x>;
+
+        i10 = $i9 - $i8;
+
+        $i12 = $r9.<java.awt.Point: int y>;
+
+        $i11 = $r8.<java.awt.Point: int y>;
+
+        i13 = $i12 - $i11;
+
+        $r15 = virtualinvoke r1.<java.awt.Graphics: java.awt.Rectangle getClipBounds()>();
+
+        virtualinvoke r1.<java.awt.Graphics: void setClip(int,int,int,int)>(0, 0, $i0, $i1);
+
+        $r16 = specialinvoke r0.<javax.swing.JViewport: java.awt.Graphics getBackingStoreGraphics(java.awt.Graphics)>(r1);
+
+     label23:
+        $i17 = $r8.<java.awt.Point: int x>;
+
+        $i16 = $r8.<java.awt.Point: int y>;
+
+        $i15 = $r10.<java.awt.Dimension: int width>;
+
+        $i14 = $r10.<java.awt.Dimension: int height>;
+
+        virtualinvoke $r16.<java.awt.Graphics: void copyArea(int,int,int,int,int,int)>($i17, $i16, $i15, $i14, i10, i13);
+
+        $i21 = $r15.<java.awt.Rectangle: int x>;
+
+        $i20 = $r15.<java.awt.Rectangle: int y>;
+
+        $i19 = $r15.<java.awt.Rectangle: int width>;
+
+        $i18 = $r15.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r1.<java.awt.Graphics: void setClip(int,int,int,int)>($i21, $i20, $i19, $i18);
+
+        $r17 = virtualinvoke $r4.<java.awt.Rectangle: java.awt.Rectangle intersection(java.awt.Rectangle)>($r11);
+
+        virtualinvoke $r16.<java.awt.Graphics: void setClip(java.awt.Shape)>($r17);
+
+        specialinvoke r0.<javax.swing.JComponent: void paint(java.awt.Graphics)>($r16);
+
+        $r18 = r0.<javax.swing.JViewport: java.awt.Image backingStoreImage>;
+
+        virtualinvoke r1.<java.awt.Graphics: boolean drawImage(java.awt.Image,int,int,java.awt.image.ImageObserver)>($r18, 0, 0, r0);
+
+     label24:
+        virtualinvoke $r16.<java.awt.Graphics: void dispose()>();
+
+        goto label27;
+
+     label25:
+        $r30 := @caughtexception;
+
+     label26:
+        virtualinvoke $r16.<java.awt.Graphics: void dispose()>();
+
+        throw $r30;
+
+     label27:
+        $r32 = specialinvoke r0.<javax.swing.JViewport: java.awt.Point getViewLocation()>();
+
+        r0.<javax.swing.JViewport: java.awt.Point lastPaintPosition> = $r32;
+
+        r0.<javax.swing.JViewport: boolean scrollUnderway> = 0;
+
+        return;
+
+        catch java.lang.Throwable from label23 to label24 with label25;
+        catch java.lang.Throwable from label25 to label26 with label25;
+    }
+
+    public void reshape(int, int, int, int)
+    {
+        int $i0, i1, i2, i3, i4, $i5;
+        javax.swing.JViewport r0;
+        boolean z0, $z1, $z3, $z4;
+
+        r0 := @this: javax.swing.JViewport;
+
+        i2 := @parameter0: int;
+
+        i3 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i4 := @parameter3: int;
+
+        $i0 = virtualinvoke r0.<javax.swing.JViewport: int getWidth()>();
+
+        if $i0 != i1 goto label1;
+
+        $i5 = virtualinvoke r0.<javax.swing.JViewport: int getHeight()>();
+
+        if $i5 == i4 goto label2;
+
+     label1:
+        $z4 = 1;
+
+        $z3 = 1;
+
+        goto label3;
+
+     label2:
+        $z4 = 0;
+
+        $z3 = 0;
+
+     label3:
+        z0 = $z4;
+
+        if $z3 == 0 goto label4;
+
+        r0.<javax.swing.JViewport: java.awt.Image backingStoreImage> = null;
+
+     label4:
+        specialinvoke r0.<javax.swing.JComponent: void reshape(int,int,int,int)>(i2, i3, i1, i4);
+
+        if z0 != 0 goto label5;
+
+        $z1 = r0.<javax.swing.JViewport: boolean viewChanged>;
+
+        if $z1 == 0 goto label6;
+
+     label5:
+        r0.<javax.swing.JViewport: boolean viewChanged> = 0;
+
+        virtualinvoke r0.<javax.swing.JViewport: void fireStateChanged()>();
+
+     label6:
+        return;
+    }
+
+    public void setScrollMode(int)
+    {
+        int i0;
+        javax.swing.JViewport r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        i0 := @parameter0: int;
+
+        r0.<javax.swing.JViewport: int scrollMode> = i0;
+
+        if i0 != 2 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        r0.<javax.swing.JViewport: boolean backingStore> = $z0;
+
+        return;
+    }
+
+    public int getScrollMode()
+    {
+        int $i0;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        $i0 = r0.<javax.swing.JViewport: int scrollMode>;
+
+        return $i0;
+    }
+
+    public boolean isBackingStoreEnabled()
+    {
+        int $i0;
+        javax.swing.JViewport r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        $i0 = r0.<javax.swing.JViewport: int scrollMode>;
+
+        if $i0 != 2 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public void setBackingStoreEnabled(boolean)
+    {
+        javax.swing.JViewport r0;
+        boolean z0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        z0 := @parameter0: boolean;
+
+        if z0 == 0 goto label1;
+
+        virtualinvoke r0.<javax.swing.JViewport: void setScrollMode(int)>(2);
+
+        goto label2;
+
+     label1:
+        virtualinvoke r0.<javax.swing.JViewport: void setScrollMode(int)>(1);
+
+     label2:
+        return;
+    }
+
+    private boolean isBlitting()
+    {
+        int $i0;
+        java.awt.Component $r1;
+        javax.swing.JViewport r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: javax.swing.JViewport;
+
+        $r1 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Component getView()>();
+
+        $i0 = r0.<javax.swing.JViewport: int scrollMode>;
+
+        if $i0 != 1 goto label1;
+
+        $z0 = $r1 instanceof javax.swing.JComponent;
+
+        if $z0 == 0 goto label1;
+
+        $z1 = virtualinvoke $r1.<java.awt.Component: boolean isOpaque()>();
+
+        if $z1 == 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+    }
+
+    public java.awt.Component getView()
+    {
+        int $i0;
+        java.awt.Component $r1;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        $i0 = virtualinvoke r0.<javax.swing.JViewport: int getComponentCount()>();
+
+        if $i0 <= 0 goto label1;
+
+        $r1 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Component getComponent(int)>(0);
+
+        goto label2;
+
+     label1:
+        $r1 = null;
+
+     label2:
+        return $r1;
+    }
+
+    public void setView(java.awt.Component)
+    {
+        java.awt.Component r1, $r4;
+        javax.swing.JViewport$ViewListener $r2;
+        java.awt.event.ComponentListener $r3;
+        int $i0, i1, $i3, $i5;
+        javax.swing.JViewport r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        r1 := @parameter0: java.awt.Component;
+
+        $i0 = virtualinvoke r0.<javax.swing.JViewport: int getComponentCount()>();
+
+        i1 = $i0 - 1;
+
+     label1:
+        if i1 < 0 goto label2;
+
+        $r4 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Component getComponent(int)>(i1);
+
+        virtualinvoke r0.<javax.swing.JViewport: void remove(java.awt.Component)>($r4);
+
+        $i3 = (int) -1;
+
+        i1 = i1 + $i3;
+
+        goto label1;
+
+     label2:
+        r0.<javax.swing.JViewport: boolean isViewSizeSet> = 0;
+
+        if r1 == null goto label3;
+
+        $i5 = (int) -1;
+
+        specialinvoke r0.<javax.swing.JComponent: void addImpl(java.awt.Component,java.lang.Object,int)>(r1, null, $i5);
+
+        $r2 = virtualinvoke r0.<javax.swing.JViewport: javax.swing.JViewport$ViewListener createViewListener()>();
+
+        r0.<javax.swing.JViewport: java.awt.event.ComponentListener viewListener> = $r2;
+
+        $r3 = r0.<javax.swing.JViewport: java.awt.event.ComponentListener viewListener>;
+
+        virtualinvoke r1.<java.awt.Component: void addComponentListener(java.awt.event.ComponentListener)>($r3);
+
+     label3:
+        $z0 = r0.<javax.swing.JViewport: boolean hasHadValidView>;
+
+        if $z0 == 0 goto label4;
+
+        virtualinvoke r0.<javax.swing.JViewport: void fireStateChanged()>();
+
+        goto label5;
+
+     label4:
+        if r1 == null goto label5;
+
+        r0.<javax.swing.JViewport: boolean hasHadValidView> = 1;
+
+     label5:
+        r0.<javax.swing.JViewport: boolean viewChanged> = 1;
+
+        virtualinvoke r0.<javax.swing.JViewport: void revalidate()>();
+
+        virtualinvoke r0.<javax.swing.JViewport: void repaint()>();
+
+        return;
+    }
+
+    public java.awt.Dimension getViewSize()
+    {
+        java.awt.Dimension $r2, $r3, $r4;
+        java.awt.Component $r1;
+        javax.swing.JViewport r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        $r1 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Component getView()>();
+
+        if $r1 != null goto label1;
+
+        $r4 = new java.awt.Dimension;
+
+        specialinvoke $r4.<java.awt.Dimension: void <init>(int,int)>(0, 0);
+
+        return $r4;
+
+     label1:
+        $z0 = r0.<javax.swing.JViewport: boolean isViewSizeSet>;
+
+        if $z0 == 0 goto label2;
+
+        $r3 = virtualinvoke $r1.<java.awt.Component: java.awt.Dimension getSize()>();
+
+        return $r3;
+
+     label2:
+        $r2 = virtualinvoke $r1.<java.awt.Component: java.awt.Dimension getPreferredSize()>();
+
+        return $r2;
+    }
+
+    public void setViewSize(java.awt.Dimension)
+    {
+        java.awt.Dimension $r2, r3;
+        java.awt.Component $r1;
+        javax.swing.JViewport r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        r3 := @parameter0: java.awt.Dimension;
+
+        $r1 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Component getView()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = virtualinvoke $r1.<java.awt.Component: java.awt.Dimension getSize()>();
+
+        $z0 = virtualinvoke r3.<java.awt.Dimension: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 != 0 goto label1;
+
+        r0.<javax.swing.JViewport: boolean scrollUnderway> = 0;
+
+        virtualinvoke $r1.<java.awt.Component: void setSize(java.awt.Dimension)>(r3);
+
+        r0.<javax.swing.JViewport: boolean isViewSizeSet> = 1;
+
+        virtualinvoke r0.<javax.swing.JViewport: void fireStateChanged()>();
+
+     label1:
+        return;
+    }
+
+    public java.awt.Point getViewPosition()
+    {
+        java.awt.Point $r2, $r3;
+        java.awt.Component $r1;
+        int $i0, $i1, $i2, $i3;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        $r1 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Component getView()>();
+
+        if $r1 == null goto label1;
+
+        $r3 = virtualinvoke $r1.<java.awt.Component: java.awt.Point getLocation()>();
+
+        $i0 = $r3.<java.awt.Point: int x>;
+
+        $i1 = neg $i0;
+
+        $r3.<java.awt.Point: int x> = $i1;
+
+        $i2 = $r3.<java.awt.Point: int y>;
+
+        $i3 = neg $i2;
+
+        $r3.<java.awt.Point: int y> = $i3;
+
+        return $r3;
+
+     label1:
+        $r2 = new java.awt.Point;
+
+        specialinvoke $r2.<java.awt.Point: void <init>(int,int)>(0, 0);
+
+        return $r2;
+    }
+
+    public void setViewPosition(java.awt.Point)
+    {
+        java.awt.Point r2;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        java.awt.Component $r1;
+        java.awt.Graphics $r7;
+        java.lang.Throwable $r10;
+        java.awt.Rectangle $r3, $r6, $r8, $r9;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, i8, i9, $i10, $i11, $i12, $i13;
+        java.awt.Container $r12;
+        javax.swing.JComponent r5, r11, $r13;
+        javax.swing.RepaintManager $r4;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        r2 := @parameter0: java.awt.Point;
+
+        $r1 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Component getView()>();
+
+        if $r1 != null goto label01;
+
+        return;
+
+     label01:
+        i0 = r2.<java.awt.Point: int x>;
+
+        i1 = r2.<java.awt.Point: int y>;
+
+        $z0 = $r1 instanceof javax.swing.JComponent;
+
+        if $z0 == 0 goto label02;
+
+        r11 = (javax.swing.JComponent) $r1;
+
+        i8 = virtualinvoke r11.<javax.swing.JComponent: int getX()>();
+
+        i9 = virtualinvoke r11.<javax.swing.JComponent: int getY()>();
+
+        goto label03;
+
+     label02:
+        $r3 = virtualinvoke $r1.<java.awt.Component: java.awt.Rectangle getBounds()>();
+
+        i8 = $r3.<java.awt.Rectangle: int x>;
+
+        i9 = $r3.<java.awt.Rectangle: int y>;
+
+     label03:
+        $i6 = neg i0;
+
+        $i7 = neg i1;
+
+        if i8 != $i6 goto label04;
+
+        if i9 == $i7 goto label17;
+
+     label04:
+        $z1 = r0.<javax.swing.JViewport: boolean waitingForRepaint>;
+
+        if $z1 != 0 goto label15;
+
+        $z2 = specialinvoke r0.<javax.swing.JViewport: boolean isBlitting()>();
+
+        if $z2 == 0 goto label15;
+
+        $z3 = specialinvoke r0.<javax.swing.JViewport: boolean canUseWindowBlitter()>();
+
+        if $z3 == 0 goto label15;
+
+        $r4 = staticinvoke <javax.swing.RepaintManager: javax.swing.RepaintManager currentManager(javax.swing.JComponent)>(r0);
+
+        r5 = (javax.swing.JComponent) $r1;
+
+        $r6 = virtualinvoke $r4.<javax.swing.RepaintManager: java.awt.Rectangle getDirtyRegion(javax.swing.JComponent)>(r5);
+
+        if $r6 == null goto label05;
+
+        $r9 = virtualinvoke r5.<javax.swing.JComponent: java.awt.Rectangle getVisibleRect()>();
+
+        $z6 = virtualinvoke $r6.<java.awt.Rectangle: boolean contains(java.awt.Rectangle)>($r9);
+
+        if $z6 != 0 goto label13;
+
+     label05:
+        virtualinvoke $r4.<javax.swing.RepaintManager: void beginPaint()>();
+
+     label06:
+        $r7 = staticinvoke <javax.swing.JComponent: java.awt.Graphics safelyGetGraphics(java.awt.Component)>(r0);
+
+        specialinvoke r0.<javax.swing.JViewport: void flushViewDirtyRegion(java.awt.Graphics,java.awt.Rectangle)>($r7, $r6);
+
+        virtualinvoke $r1.<java.awt.Component: void setLocation(int,int)>($i6, $i7);
+
+        $r8 = new java.awt.Rectangle;
+
+        $i2 = virtualinvoke r0.<javax.swing.JViewport: int getWidth()>();
+
+        $i3 = virtualinvoke r0.<javax.swing.JViewport: int getHeight()>();
+
+        $i4 = virtualinvoke r5.<javax.swing.JComponent: int getHeight()>();
+
+        $i5 = staticinvoke <java.lang.Math: int min(int,int)>($i3, $i4);
+
+        specialinvoke $r8.<java.awt.Rectangle: void <init>(int,int,int,int)>(0, 0, $i2, $i5);
+
+        virtualinvoke $r7.<java.awt.Graphics: void setClip(java.awt.Shape)>($r8);
+
+        $z4 = specialinvoke r0.<javax.swing.JViewport: boolean windowBlitPaint(java.awt.Graphics)>($r7);
+
+        if $z4 == 0 goto label07;
+
+        $z5 = specialinvoke r0.<javax.swing.JViewport: boolean needsRepaintAfterBlit()>();
+
+        if $z5 == 0 goto label07;
+
+        $z7 = 1;
+
+        goto label08;
+
+     label07:
+        $z7 = 0;
+
+     label08:
+        r0.<javax.swing.JViewport: boolean repaintAll> = $z7;
+
+        virtualinvoke $r7.<java.awt.Graphics: void dispose()>();
+
+        $i10 = $r8.<java.awt.Rectangle: int x>;
+
+        $i11 = $r8.<java.awt.Rectangle: int y>;
+
+        $i12 = $r8.<java.awt.Rectangle: int width>;
+
+        $i13 = $r8.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r4.<javax.swing.RepaintManager: void notifyRepaintPerformed(javax.swing.JComponent,int,int,int,int)>(r0, $i10, $i11, $i12, $i13);
+
+        $r12 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Container getParent()>();
+
+        $r13 = (javax.swing.JComponent) $r12;
+
+        virtualinvoke $r4.<javax.swing.RepaintManager: void markCompletelyClean(javax.swing.JComponent)>($r13);
+
+        virtualinvoke $r4.<javax.swing.RepaintManager: void markCompletelyClean(javax.swing.JComponent)>(r0);
+
+        virtualinvoke $r4.<javax.swing.RepaintManager: void markCompletelyClean(javax.swing.JComponent)>(r5);
+
+     label09:
+        virtualinvoke $r4.<javax.swing.RepaintManager: void endPaint()>();
+
+        goto label12;
+
+     label10:
+        $r10 := @caughtexception;
+
+     label11:
+        virtualinvoke $r4.<javax.swing.RepaintManager: void endPaint()>();
+
+        throw $r10;
+
+     label12:
+        goto label14;
+
+     label13:
+        virtualinvoke $r1.<java.awt.Component: void setLocation(int,int)>($i6, $i7);
+
+        r0.<javax.swing.JViewport: boolean repaintAll> = 0;
+
+     label14:
+        goto label16;
+
+     label15:
+        r0.<javax.swing.JViewport: boolean scrollUnderway> = 1;
+
+        virtualinvoke $r1.<java.awt.Component: void setLocation(int,int)>($i6, $i7);
+
+        r0.<javax.swing.JViewport: boolean repaintAll> = 0;
+
+     label16:
+        virtualinvoke r0.<javax.swing.JViewport: void revalidate()>();
+
+        virtualinvoke r0.<javax.swing.JViewport: void fireStateChanged()>();
+
+     label17:
+        return;
+
+        catch java.lang.Throwable from label06 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    public java.awt.Rectangle getViewRect()
+    {
+        java.awt.Rectangle $r0;
+        java.awt.Dimension $r3;
+        java.awt.Point $r2;
+        javax.swing.JViewport r1;
+
+        r1 := @this: javax.swing.JViewport;
+
+        $r0 = new java.awt.Rectangle;
+
+        $r2 = virtualinvoke r1.<javax.swing.JViewport: java.awt.Point getViewPosition()>();
+
+        $r3 = virtualinvoke r1.<javax.swing.JViewport: java.awt.Dimension getExtentSize()>();
+
+        specialinvoke $r0.<java.awt.Rectangle: void <init>(java.awt.Point,java.awt.Dimension)>($r2, $r3);
+
+        return $r0;
+    }
+
+    protected boolean computeBlit(int, int, java.awt.Point, java.awt.Point, java.awt.Dimension, java.awt.Rectangle)
+    {
+        java.awt.Rectangle r4;
+        java.awt.Point r2, r3;
+        int i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19;
+        java.awt.Dimension $r1, r5;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        r2 := @parameter2: java.awt.Point;
+
+        r3 := @parameter3: java.awt.Point;
+
+        r5 := @parameter4: java.awt.Dimension;
+
+        r4 := @parameter5: java.awt.Rectangle;
+
+        $i1 = staticinvoke <java.lang.Math: int abs(int)>(i0);
+
+        $i3 = staticinvoke <java.lang.Math: int abs(int)>(i2);
+
+        $r1 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Dimension getExtentSize()>();
+
+        if i0 != 0 goto label3;
+
+        if i2 == 0 goto label3;
+
+        $i12 = $r1.<java.awt.Dimension: int height>;
+
+        if $i3 >= $i12 goto label3;
+
+        if i2 >= 0 goto label1;
+
+        $i17 = neg i2;
+
+        r2.<java.awt.Point: int y> = $i17;
+
+        r3.<java.awt.Point: int y> = 0;
+
+        $i18 = $r1.<java.awt.Dimension: int height>;
+
+        $i19 = $i18 + i2;
+
+        r4.<java.awt.Rectangle: int y> = $i19;
+
+        goto label2;
+
+     label1:
+        r2.<java.awt.Point: int y> = 0;
+
+        r3.<java.awt.Point: int y> = i2;
+
+        r4.<java.awt.Rectangle: int y> = 0;
+
+     label2:
+        r3.<java.awt.Point: int x> = 0;
+
+        r2.<java.awt.Point: int x> = 0;
+
+        r4.<java.awt.Rectangle: int x> = 0;
+
+        $i13 = $r1.<java.awt.Dimension: int width>;
+
+        r5.<java.awt.Dimension: int width> = $i13;
+
+        $i14 = $r1.<java.awt.Dimension: int height>;
+
+        $i15 = $i14 - $i3;
+
+        r5.<java.awt.Dimension: int height> = $i15;
+
+        $i16 = $r1.<java.awt.Dimension: int width>;
+
+        r4.<java.awt.Rectangle: int width> = $i16;
+
+        r4.<java.awt.Rectangle: int height> = $i3;
+
+        return 1;
+
+     label3:
+        if i2 != 0 goto label6;
+
+        if i0 == 0 goto label6;
+
+        $i4 = $r1.<java.awt.Dimension: int width>;
+
+        if $i1 >= $i4 goto label6;
+
+        if i0 >= 0 goto label4;
+
+        $i9 = neg i0;
+
+        r2.<java.awt.Point: int x> = $i9;
+
+        r3.<java.awt.Point: int x> = 0;
+
+        $i10 = $r1.<java.awt.Dimension: int width>;
+
+        $i11 = $i10 + i0;
+
+        r4.<java.awt.Rectangle: int x> = $i11;
+
+        goto label5;
+
+     label4:
+        r2.<java.awt.Point: int x> = 0;
+
+        r3.<java.awt.Point: int x> = i0;
+
+        r4.<java.awt.Rectangle: int x> = 0;
+
+     label5:
+        r3.<java.awt.Point: int y> = 0;
+
+        r2.<java.awt.Point: int y> = 0;
+
+        r4.<java.awt.Rectangle: int y> = 0;
+
+        $i5 = $r1.<java.awt.Dimension: int width>;
+
+        $i6 = $i5 - $i1;
+
+        r5.<java.awt.Dimension: int width> = $i6;
+
+        $i7 = $r1.<java.awt.Dimension: int height>;
+
+        r5.<java.awt.Dimension: int height> = $i7;
+
+        r4.<java.awt.Rectangle: int width> = $i1;
+
+        $i8 = $r1.<java.awt.Dimension: int height>;
+
+        r4.<java.awt.Rectangle: int height> = $i8;
+
+        return 1;
+
+     label6:
+        return 0;
+    }
+
+    public java.awt.Dimension getExtentSize()
+    {
+        java.awt.Dimension $r1;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        $r1 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Dimension getSize()>();
+
+        return $r1;
+    }
+
+    public java.awt.Dimension toViewCoordinates(java.awt.Dimension)
+    {
+        java.awt.Dimension $r0, r1;
+        javax.swing.JViewport r2;
+
+        r2 := @this: javax.swing.JViewport;
+
+        r1 := @parameter0: java.awt.Dimension;
+
+        $r0 = new java.awt.Dimension;
+
+        specialinvoke $r0.<java.awt.Dimension: void <init>(java.awt.Dimension)>(r1);
+
+        return $r0;
+    }
+
+    public java.awt.Point toViewCoordinates(java.awt.Point)
+    {
+        java.awt.Point $r0, r1;
+        javax.swing.JViewport r2;
+
+        r2 := @this: javax.swing.JViewport;
+
+        r1 := @parameter0: java.awt.Point;
+
+        $r0 = new java.awt.Point;
+
+        specialinvoke $r0.<java.awt.Point: void <init>(java.awt.Point)>(r1);
+
+        return $r0;
+    }
+
+    public void setExtentSize(java.awt.Dimension)
+    {
+        java.awt.Dimension $r1, r2;
+        javax.swing.JViewport r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        r2 := @parameter0: java.awt.Dimension;
+
+        $r1 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Dimension getExtentSize()>();
+
+        $z0 = virtualinvoke r2.<java.awt.Dimension: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label1;
+
+        virtualinvoke r0.<javax.swing.JViewport: void setSize(java.awt.Dimension)>(r2);
+
+        virtualinvoke r0.<javax.swing.JViewport: void fireStateChanged()>();
+
+     label1:
+        return;
+    }
+
+    protected javax.swing.JViewport$ViewListener createViewListener()
+    {
+        javax.swing.JViewport$ViewListener $r0;
+        javax.swing.JViewport r1;
+
+        r1 := @this: javax.swing.JViewport;
+
+        $r0 = new javax.swing.JViewport$ViewListener;
+
+        specialinvoke $r0.<javax.swing.JViewport$ViewListener: void <init>(javax.swing.JViewport)>(r1);
+
+        return $r0;
+    }
+
+    protected java.awt.LayoutManager createLayoutManager()
+    {
+        javax.swing.ViewportLayout $r0;
+        javax.swing.JViewport r1;
+
+        r1 := @this: javax.swing.JViewport;
+
+        $r0 = <javax.swing.ViewportLayout: javax.swing.ViewportLayout SHARED_INSTANCE>;
+
+        return $r0;
+    }
+
+    public void addChangeListener(javax.swing.event.ChangeListener)
+    {
+        javax.swing.event.ChangeListener r1;
+        javax.swing.event.EventListenerList $r2;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        r1 := @parameter0: javax.swing.event.ChangeListener;
+
+        $r2 = r0.<javax.swing.JViewport: javax.swing.event.EventListenerList listenerList>;
+
+        virtualinvoke $r2.<javax.swing.event.EventListenerList: void add(java.lang.Class,java.util.EventListener)>(class "Ljavax/swing/event/ChangeListener;", r1);
+
+        return;
+    }
+
+    public void removeChangeListener(javax.swing.event.ChangeListener)
+    {
+        javax.swing.event.ChangeListener r1;
+        javax.swing.event.EventListenerList $r2;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        r1 := @parameter0: javax.swing.event.ChangeListener;
+
+        $r2 = r0.<javax.swing.JViewport: javax.swing.event.EventListenerList listenerList>;
+
+        virtualinvoke $r2.<javax.swing.event.EventListenerList: void remove(java.lang.Class,java.util.EventListener)>(class "Ljavax/swing/event/ChangeListener;", r1);
+
+        return;
+    }
+
+    public javax.swing.event.ChangeListener[] getChangeListeners()
+    {
+        java.util.EventListener[] $r2;
+        javax.swing.event.EventListenerList $r1;
+        javax.swing.event.ChangeListener[] $r3;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        $r1 = r0.<javax.swing.JViewport: javax.swing.event.EventListenerList listenerList>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.event.EventListenerList: java.util.EventListener[] getListeners(java.lang.Class)>(class "Ljavax/swing/event/ChangeListener;");
+
+        $r3 = (javax.swing.event.ChangeListener[]) $r2;
+
+        return $r3;
+    }
+
+    protected void fireStateChanged()
+    {
+        javax.swing.event.ChangeEvent $r4, $r6, $r9;
+        java.lang.Object[] $r2;
+        javax.swing.event.EventListenerList $r1;
+        int $i0, $i1, i2, $i4;
+        java.lang.Object $r3, $r5;
+        javax.swing.event.ChangeListener $r7;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        $r1 = r0.<javax.swing.JViewport: javax.swing.event.EventListenerList listenerList>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.event.EventListenerList: java.lang.Object[] getListenerList()>();
+
+        $i0 = lengthof $r2;
+
+        i2 = $i0 - 2;
+
+     label1:
+        if i2 < 0 goto label4;
+
+        $r3 = $r2[i2];
+
+        if $r3 != class "Ljavax/swing/event/ChangeListener;" goto label3;
+
+        $r4 = r0.<javax.swing.JViewport: javax.swing.event.ChangeEvent changeEvent>;
+
+        if $r4 != null goto label2;
+
+        $r9 = new javax.swing.event.ChangeEvent;
+
+        specialinvoke $r9.<javax.swing.event.ChangeEvent: void <init>(java.lang.Object)>(r0);
+
+        r0.<javax.swing.JViewport: javax.swing.event.ChangeEvent changeEvent> = $r9;
+
+     label2:
+        $i1 = i2 + 1;
+
+        $r5 = $r2[$i1];
+
+        $r7 = (javax.swing.event.ChangeListener) $r5;
+
+        $r6 = r0.<javax.swing.JViewport: javax.swing.event.ChangeEvent changeEvent>;
+
+        interfaceinvoke $r7.<javax.swing.event.ChangeListener: void stateChanged(javax.swing.event.ChangeEvent)>($r6);
+
+     label3:
+        $i4 = (int) -2;
+
+        i2 = i2 + $i4;
+
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    public void repaint(long, int, int, int, int)
+    {
+        long l0;
+        int i1, i2, i3, i4, $i5, $i6, $i7, $i8;
+        java.awt.Container $r1;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        l0 := @parameter0: long;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        i4 := @parameter4: int;
+
+        $r1 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Container getParent()>();
+
+        if $r1 == null goto label1;
+
+        $i5 = virtualinvoke r0.<javax.swing.JViewport: int getX()>();
+
+        $i6 = i1 + $i5;
+
+        $i7 = virtualinvoke r0.<javax.swing.JViewport: int getY()>();
+
+        $i8 = i2 + $i7;
+
+        virtualinvoke $r1.<java.awt.Container: void repaint(long,int,int,int,int)>(l0, $i6, $i8, i3, i4);
+
+        goto label2;
+
+     label1:
+        specialinvoke r0.<javax.swing.JComponent: void repaint(long,int,int,int,int)>(l0, i1, i2, i3, i4);
+
+     label2:
+        return;
+    }
+
+    protected java.lang.String paramString()
+    {
+        java.awt.Point $r2, $r14;
+        java.lang.String r1, r3, $r5, $r13, $r15, $r16, $r17;
+        boolean $z0, $z1;
+        java.lang.StringBuilder $r4, $r6, $r7, $r8, $r9, $r10, $r11, $r12;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        $z0 = r0.<javax.swing.JViewport: boolean isViewSizeSet>;
+
+        if $z0 == 0 goto label1;
+
+        $r15 = "true";
+
+        goto label2;
+
+     label1:
+        $r15 = "false";
+
+     label2:
+        r1 = $r15;
+
+        $r2 = r0.<javax.swing.JViewport: java.awt.Point lastPaintPosition>;
+
+        if $r2 == null goto label3;
+
+        $r14 = r0.<javax.swing.JViewport: java.awt.Point lastPaintPosition>;
+
+        $r16 = virtualinvoke $r14.<java.awt.Point: java.lang.String toString()>();
+
+        goto label4;
+
+     label3:
+        $r16 = "";
+
+     label4:
+        r3 = $r16;
+
+        $z1 = r0.<javax.swing.JViewport: boolean scrollUnderway>;
+
+        if $z1 == 0 goto label5;
+
+        $r17 = "true";
+
+        goto label6;
+
+     label5:
+        $r17 = "false";
+
+     label6:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = specialinvoke r0.<javax.swing.JComponent: java.lang.String paramString()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",isViewSizeSet=");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",lastPaintPosition=");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",scrollUnderway=");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r13;
+    }
+
+    protected void firePropertyChange(java.lang.String, java.lang.Object, java.lang.Object)
+    {
+        java.lang.Object r2, r3, $r4;
+        java.lang.String r1;
+        javax.swing.JViewport r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Object;
+
+        r3 := @parameter2: java.lang.Object;
+
+        specialinvoke r0.<javax.swing.JComponent: void firePropertyChange(java.lang.String,java.lang.Object,java.lang.Object)>(r1, r2, r3);
+
+        $r4 = <javax.swing.JViewport: java.lang.Object EnableWindowBlit>;
+
+        $z0 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label2;
+
+        if r3 == null goto label1;
+
+        virtualinvoke r0.<javax.swing.JViewport: void setScrollMode(int)>(1);
+
+        goto label2;
+
+     label1:
+        virtualinvoke r0.<javax.swing.JViewport: void setScrollMode(int)>(0);
+
+     label2:
+        return;
+    }
+
+    private boolean needsRepaintAfterBlit()
+    {
+        java.awt.peer.ComponentPeer $r1;
+        java.awt.Container r2;
+        javax.swing.JViewport r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: javax.swing.JViewport;
+
+        r2 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Container getParent()>();
+
+     label1:
+        if r2 == null goto label2;
+
+        $z2 = virtualinvoke r2.<java.awt.Component: boolean isLightweight()>();
+
+        if $z2 == 0 goto label2;
+
+        r2 = virtualinvoke r2.<java.awt.Component: java.awt.Container getParent()>();
+
+        goto label1;
+
+     label2:
+        if r2 == null goto label3;
+
+        $r1 = virtualinvoke r2.<java.awt.Component: java.awt.peer.ComponentPeer getPeer()>();
+
+        if $r1 == null goto label3;
+
+        $z0 = interfaceinvoke $r1.<java.awt.peer.ComponentPeer: boolean canDetermineObscurity()>();
+
+        if $z0 == 0 goto label3;
+
+        $z1 = interfaceinvoke $r1.<java.awt.peer.ComponentPeer: boolean isObscured()>();
+
+        if $z1 != 0 goto label3;
+
+        return 0;
+
+     label3:
+        return 1;
+    }
+
+    private javax.swing.Timer createRepaintTimer()
+    {
+        javax.swing.JViewport$1 $r1;
+        javax.swing.JViewport r2;
+        javax.swing.Timer $r0;
+
+        r2 := @this: javax.swing.JViewport;
+
+        $r0 = new javax.swing.Timer;
+
+        $r1 = new javax.swing.JViewport$1;
+
+        specialinvoke $r1.<javax.swing.JViewport$1: void <init>(javax.swing.JViewport)>(r2);
+
+        specialinvoke $r0.<javax.swing.Timer: void <init>(int,java.awt.event.ActionListener)>(300, $r1);
+
+        virtualinvoke $r0.<javax.swing.Timer: void setRepeats(boolean)>(0);
+
+        return $r0;
+    }
+
+    private void flushViewDirtyRegion(java.awt.Graphics, java.awt.Rectangle)
+    {
+        java.awt.Rectangle r3, $r5, $r6;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15;
+        javax.swing.JComponent r2;
+        java.awt.Component $r1;
+        java.awt.Graphics r4;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        r4 := @parameter0: java.awt.Graphics;
+
+        r3 := @parameter1: java.awt.Rectangle;
+
+        $r1 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Component getView()>();
+
+        r2 = (javax.swing.JComponent) $r1;
+
+        if r3 == null goto label2;
+
+        $i0 = r3.<java.awt.Rectangle: int width>;
+
+        if $i0 <= 0 goto label2;
+
+        $i1 = r3.<java.awt.Rectangle: int height>;
+
+        if $i1 <= 0 goto label2;
+
+        $i2 = r3.<java.awt.Rectangle: int x>;
+
+        $i3 = virtualinvoke r2.<javax.swing.JComponent: int getX()>();
+
+        $i4 = $i2 + $i3;
+
+        r3.<java.awt.Rectangle: int x> = $i4;
+
+        $i5 = r3.<java.awt.Rectangle: int y>;
+
+        $i6 = virtualinvoke r2.<javax.swing.JComponent: int getY()>();
+
+        $i7 = $i5 + $i6;
+
+        r3.<java.awt.Rectangle: int y> = $i7;
+
+        $r5 = virtualinvoke r4.<java.awt.Graphics: java.awt.Rectangle getClipBounds()>();
+
+        if $r5 != null goto label1;
+
+        $i14 = virtualinvoke r0.<javax.swing.JViewport: int getWidth()>();
+
+        $i15 = virtualinvoke r0.<javax.swing.JViewport: int getHeight()>();
+
+        virtualinvoke r4.<java.awt.Graphics: void setClip(int,int,int,int)>(0, 0, $i14, $i15);
+
+     label1:
+        $i11 = r3.<java.awt.Rectangle: int x>;
+
+        $i10 = r3.<java.awt.Rectangle: int y>;
+
+        $i9 = r3.<java.awt.Rectangle: int width>;
+
+        $i8 = r3.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r4.<java.awt.Graphics: void clipRect(int,int,int,int)>($i11, $i10, $i9, $i8);
+
+        $r6 = virtualinvoke r4.<java.awt.Graphics: java.awt.Rectangle getClipBounds()>();
+
+        $i12 = $r6.<java.awt.Rectangle: int width>;
+
+        if $i12 <= 0 goto label2;
+
+        $i13 = $r6.<java.awt.Rectangle: int height>;
+
+        if $i13 <= 0 goto label2;
+
+        specialinvoke r0.<javax.swing.JViewport: void paintView(java.awt.Graphics)>(r4);
+
+     label2:
+        return;
+    }
+
+    private boolean windowBlitPaint(java.awt.Graphics)
+    {
+        java.awt.Point $r3, $r5, $r6, $r7, $r8, $r11, $r12, $r13, $r16;
+        boolean $z0, $z1, z2;
+        java.awt.Component $r1;
+        java.awt.Dimension $r9;
+        java.awt.Graphics r4;
+        java.awt.Rectangle $r10, $r14, $r15;
+        int $i0, $i1, $i2, $i3, i4, $i5, $i6, i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23;
+        javax.swing.JComponent r2;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        r4 := @parameter0: java.awt.Graphics;
+
+        $i0 = virtualinvoke r0.<javax.swing.JViewport: int getWidth()>();
+
+        $i1 = virtualinvoke r0.<javax.swing.JViewport: int getHeight()>();
+
+        if $i0 == 0 goto label1;
+
+        if $i1 != 0 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        staticinvoke <javax.swing.RepaintManager: javax.swing.RepaintManager currentManager(javax.swing.JComponent)>(r0);
+
+        $r1 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Component getView()>();
+
+        r2 = (javax.swing.JComponent) $r1;
+
+        $r3 = r0.<javax.swing.JViewport: java.awt.Point lastPaintPosition>;
+
+        if $r3 == null goto label3;
+
+        $r5 = r0.<javax.swing.JViewport: java.awt.Point lastPaintPosition>;
+
+        $r6 = specialinvoke r0.<javax.swing.JViewport: java.awt.Point getViewLocation()>();
+
+        $z0 = virtualinvoke $r5.<java.awt.Point: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 == 0 goto label4;
+
+     label3:
+        specialinvoke r0.<javax.swing.JViewport: void paintView(java.awt.Graphics)>(r4);
+
+        z2 = 0;
+
+        goto label6;
+
+     label4:
+        $r7 = new java.awt.Point;
+
+        specialinvoke $r7.<java.awt.Point: void <init>()>();
+
+        $r8 = new java.awt.Point;
+
+        specialinvoke $r8.<java.awt.Point: void <init>()>();
+
+        $r9 = new java.awt.Dimension;
+
+        specialinvoke $r9.<java.awt.Dimension: void <init>()>();
+
+        $r10 = new java.awt.Rectangle;
+
+        specialinvoke $r10.<java.awt.Rectangle: void <init>()>();
+
+        $r11 = specialinvoke r0.<javax.swing.JViewport: java.awt.Point getViewLocation()>();
+
+        $i3 = $r11.<java.awt.Point: int x>;
+
+        $r12 = r0.<javax.swing.JViewport: java.awt.Point lastPaintPosition>;
+
+        $i2 = $r12.<java.awt.Point: int x>;
+
+        i4 = $i3 - $i2;
+
+        $i6 = $r11.<java.awt.Point: int y>;
+
+        $r13 = r0.<javax.swing.JViewport: java.awt.Point lastPaintPosition>;
+
+        $i5 = $r13.<java.awt.Point: int y>;
+
+        i7 = $i6 - $i5;
+
+        $z1 = virtualinvoke r0.<javax.swing.JViewport: boolean computeBlit(int,int,java.awt.Point,java.awt.Point,java.awt.Dimension,java.awt.Rectangle)>(i4, i7, $r7, $r8, $r9, $r10);
+
+        if $z1 != 0 goto label5;
+
+        specialinvoke r0.<javax.swing.JViewport: void paintView(java.awt.Graphics)>(r4);
+
+        z2 = 0;
+
+        goto label6;
+
+     label5:
+        $r14 = virtualinvoke r2.<javax.swing.JComponent: java.awt.Rectangle getBounds()>();
+
+        $r15 = virtualinvoke $r14.<java.awt.Rectangle: java.awt.Rectangle intersection(java.awt.Rectangle)>($r10);
+
+        $i8 = $r15.<java.awt.Rectangle: int x>;
+
+        $i9 = virtualinvoke r2.<javax.swing.JComponent: int getX()>();
+
+        $i10 = $i8 - $i9;
+
+        $r15.<java.awt.Rectangle: int x> = $i10;
+
+        $i11 = $r15.<java.awt.Rectangle: int y>;
+
+        $i12 = virtualinvoke r2.<javax.swing.JComponent: int getY()>();
+
+        $i13 = $i11 - $i12;
+
+        $r15.<java.awt.Rectangle: int y> = $i13;
+
+        $i23 = $r15.<java.awt.Rectangle: int x>;
+
+        $i22 = $r15.<java.awt.Rectangle: int y>;
+
+        $i21 = $r15.<java.awt.Rectangle: int width>;
+
+        $i20 = $r15.<java.awt.Rectangle: int height>;
+
+        $i19 = $r7.<java.awt.Point: int x>;
+
+        $i18 = $r7.<java.awt.Point: int y>;
+
+        $i17 = $r8.<java.awt.Point: int x>;
+
+        $i16 = $r8.<java.awt.Point: int y>;
+
+        $i15 = $r9.<java.awt.Dimension: int width>;
+
+        $i14 = $r9.<java.awt.Dimension: int height>;
+
+        specialinvoke r0.<javax.swing.JViewport: void blitDoubleBuffered(javax.swing.JComponent,java.awt.Graphics,int,int,int,int,int,int,int,int,int,int)>(r2, r4, $i23, $i22, $i21, $i20, $i19, $i18, $i17, $i16, $i15, $i14);
+
+        z2 = 1;
+
+     label6:
+        $r16 = specialinvoke r0.<javax.swing.JViewport: java.awt.Point getViewLocation()>();
+
+        r0.<javax.swing.JViewport: java.awt.Point lastPaintPosition> = $r16;
+
+        return z2;
+    }
+
+    private void blitDoubleBuffered(javax.swing.JComponent, java.awt.Graphics, int, int, int, int, int, int, int, int, int, int)
+    {
+        java.awt.AlphaComposite $r5;
+        java.awt.Graphics2D $r4, r7;
+        int i0, i1, i2, i3, i4, i5, i6, i7, $i8, $i9, i10, i11, i12, i13, $i14, $i15;
+        boolean $z0;
+        javax.swing.JComponent r3;
+        java.awt.Composite r6;
+        javax.swing.RepaintManager $r1;
+        java.awt.Graphics r2;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        r3 := @parameter0: javax.swing.JComponent;
+
+        r2 := @parameter1: java.awt.Graphics;
+
+        i10 := @parameter2: int;
+
+        i11 := @parameter3: int;
+
+        i12 := @parameter4: int;
+
+        i13 := @parameter5: int;
+
+        i1 := @parameter6: int;
+
+        i4 := @parameter7: int;
+
+        i0 := @parameter8: int;
+
+        i3 := @parameter9: int;
+
+        i6 := @parameter10: int;
+
+        i7 := @parameter11: int;
+
+        $r1 = staticinvoke <javax.swing.RepaintManager: javax.swing.RepaintManager currentManager(javax.swing.JComponent)>(r0);
+
+        i2 = i0 - i1;
+
+        i5 = i3 - i4;
+
+        r6 = null;
+
+        $z0 = r2 instanceof java.awt.Graphics2D;
+
+        if $z0 == 0 goto label1;
+
+        r7 = (java.awt.Graphics2D) r2;
+
+        r6 = virtualinvoke r7.<java.awt.Graphics2D: java.awt.Composite getComposite()>();
+
+        $r5 = <java.awt.AlphaComposite: java.awt.AlphaComposite Src>;
+
+        virtualinvoke r7.<java.awt.Graphics2D: void setComposite(java.awt.Composite)>($r5);
+
+     label1:
+        virtualinvoke $r1.<javax.swing.RepaintManager: void copyArea(javax.swing.JComponent,java.awt.Graphics,int,int,int,int,int,int,boolean)>(r0, r2, i1, i4, i6, i7, i2, i5, 0);
+
+        if r6 == null goto label2;
+
+        $r4 = (java.awt.Graphics2D) r2;
+
+        virtualinvoke $r4.<java.awt.Graphics2D: void setComposite(java.awt.Composite)>(r6);
+
+     label2:
+        $i8 = virtualinvoke r3.<javax.swing.JComponent: int getX()>();
+
+        $i9 = virtualinvoke r3.<javax.swing.JComponent: int getY()>();
+
+        virtualinvoke r2.<java.awt.Graphics: void translate(int,int)>($i8, $i9);
+
+        virtualinvoke r2.<java.awt.Graphics: void setClip(int,int,int,int)>(i10, i11, i12, i13);
+
+        virtualinvoke r3.<javax.swing.JComponent: void paintForceDoubleBuffered(java.awt.Graphics)>(r2);
+
+        $i15 = neg $i8;
+
+        $i14 = neg $i9;
+
+        virtualinvoke r2.<java.awt.Graphics: void translate(int,int)>($i15, $i14);
+
+        return;
+    }
+
+    private void paintView(java.awt.Graphics)
+    {
+        java.lang.Throwable $r5;
+        java.awt.Rectangle $r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15;
+        javax.swing.JComponent r4;
+        java.awt.Component $r3;
+        java.awt.Graphics r0;
+        javax.swing.JViewport r2;
+
+        r2 := @this: javax.swing.JViewport;
+
+        r0 := @parameter0: java.awt.Graphics;
+
+        $r1 = virtualinvoke r0.<java.awt.Graphics: java.awt.Rectangle getClipBounds()>();
+
+        $r3 = virtualinvoke r2.<javax.swing.JViewport: java.awt.Component getView()>();
+
+        r4 = (javax.swing.JComponent) $r3;
+
+        $i0 = virtualinvoke r4.<javax.swing.JComponent: int getWidth()>();
+
+        $i1 = virtualinvoke r2.<javax.swing.JViewport: int getWidth()>();
+
+        if $i0 < $i1 goto label1;
+
+        $i2 = virtualinvoke r4.<javax.swing.JComponent: int getX()>();
+
+        $i3 = virtualinvoke r4.<javax.swing.JComponent: int getY()>();
+
+        virtualinvoke r0.<java.awt.Graphics: void translate(int,int)>($i2, $i3);
+
+        $i4 = $r1.<java.awt.Rectangle: int x>;
+
+        $i9 = $i4 - $i2;
+
+        $i5 = $r1.<java.awt.Rectangle: int y>;
+
+        $i8 = $i5 - $i3;
+
+        $i7 = $r1.<java.awt.Rectangle: int width>;
+
+        $i6 = $r1.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r0.<java.awt.Graphics: void setClip(int,int,int,int)>($i9, $i8, $i7, $i6);
+
+        virtualinvoke r4.<javax.swing.JComponent: void paintForceDoubleBuffered(java.awt.Graphics)>(r0);
+
+        $i11 = neg $i2;
+
+        $i10 = neg $i3;
+
+        virtualinvoke r0.<java.awt.Graphics: void translate(int,int)>($i11, $i10);
+
+        $i15 = $r1.<java.awt.Rectangle: int x>;
+
+        $i14 = $r1.<java.awt.Rectangle: int y>;
+
+        $i13 = $r1.<java.awt.Rectangle: int width>;
+
+        $i12 = $r1.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r0.<java.awt.Graphics: void setClip(int,int,int,int)>($i15, $i14, $i13, $i12);
+
+        goto label5;
+
+     label1:
+        r2.<javax.swing.JViewport: boolean inBlitPaint> = 1;
+
+        virtualinvoke r2.<javax.swing.JViewport: void paintForceDoubleBuffered(java.awt.Graphics)>(r0);
+
+     label2:
+        r2.<javax.swing.JViewport: boolean inBlitPaint> = 0;
+
+        goto label5;
+
+     label3:
+        $r5 := @caughtexception;
+
+     label4:
+        r2.<javax.swing.JViewport: boolean inBlitPaint> = 0;
+
+        throw $r5;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private boolean canUseWindowBlitter()
+    {
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        java.awt.Component $r8, $r10, $r11;
+        java.awt.Rectangle $r5, $r9, r14, $r17, $r18;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, i10, $i11, $i12, $i13, $i14, $i16, $i18;
+        java.awt.Component[] $r7;
+        java.awt.Container $r1, $r3, r15, r16;
+        javax.swing.JComponent $r4, $r6;
+        javax.swing.RepaintManager $r2;
+        javax.swing.JViewport r0;
+
+        r0 := @this: javax.swing.JViewport;
+
+        $z0 = virtualinvoke r0.<javax.swing.JViewport: boolean isShowing()>();
+
+        if $z0 == 0 goto label01;
+
+        $r1 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Container getParent()>();
+
+        $z1 = $r1 instanceof javax.swing.JComponent;
+
+        if $z1 != 0 goto label02;
+
+        $r11 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Component getView()>();
+
+        $z8 = $r11 instanceof javax.swing.JComponent;
+
+        if $z8 != 0 goto label02;
+
+     label01:
+        return 0;
+
+     label02:
+        $z2 = virtualinvoke r0.<javax.swing.JViewport: boolean isPainting()>();
+
+        if $z2 == 0 goto label03;
+
+        return 0;
+
+     label03:
+        $r2 = staticinvoke <javax.swing.RepaintManager: javax.swing.RepaintManager currentManager(javax.swing.JComponent)>(r0);
+
+        $r3 = virtualinvoke r0.<javax.swing.JViewport: java.awt.Container getParent()>();
+
+        $r4 = (javax.swing.JComponent) $r3;
+
+        $r5 = virtualinvoke $r2.<javax.swing.RepaintManager: java.awt.Rectangle getDirtyRegion(javax.swing.JComponent)>($r4);
+
+        if $r5 == null goto label04;
+
+        $i5 = $r5.<java.awt.Rectangle: int width>;
+
+        if $i5 <= 0 goto label04;
+
+        $i6 = $r5.<java.awt.Rectangle: int height>;
+
+        if $i6 <= 0 goto label04;
+
+        return 0;
+
+     label04:
+        $r17 = new java.awt.Rectangle;
+
+        $i7 = virtualinvoke r0.<javax.swing.JViewport: int getWidth()>();
+
+        $i8 = virtualinvoke r0.<javax.swing.JViewport: int getHeight()>();
+
+        specialinvoke $r17.<java.awt.Rectangle: void <init>(int,int,int,int)>(0, 0, $i7, $i8);
+
+        $r18 = new java.awt.Rectangle;
+
+        specialinvoke $r18.<java.awt.Rectangle: void <init>()>();
+
+        r14 = null;
+
+        r15 = null;
+
+        r16 = r0;
+
+     label05:
+        if r16 == null goto label12;
+
+        $z3 = staticinvoke <javax.swing.JViewport: boolean isLightweightComponent(java.awt.Component)>(r16);
+
+        if $z3 == 0 goto label12;
+
+        $i0 = virtualinvoke r16.<java.awt.Container: int getX()>();
+
+        $i1 = virtualinvoke r16.<java.awt.Container: int getY()>();
+
+        $i2 = virtualinvoke r16.<java.awt.Container: int getWidth()>();
+
+        $i3 = virtualinvoke r16.<java.awt.Container: int getHeight()>();
+
+        virtualinvoke $r18.<java.awt.Rectangle: void setBounds(java.awt.Rectangle)>($r17);
+
+        staticinvoke <javax.swing.SwingUtilities: java.awt.Rectangle computeIntersection(int,int,int,int,java.awt.Rectangle)>(0, 0, $i2, $i3, $r17);
+
+        $z4 = virtualinvoke $r17.<java.awt.Rectangle: boolean equals(java.lang.Object)>($r18);
+
+        if $z4 != 0 goto label06;
+
+        return 0;
+
+     label06:
+        if r15 == null goto label11;
+
+        $z5 = r16 instanceof javax.swing.JComponent;
+
+        if $z5 == 0 goto label11;
+
+        $r6 = (javax.swing.JComponent) r16;
+
+        $z6 = virtualinvoke $r6.<javax.swing.JComponent: boolean isOptimizedDrawingEnabled()>();
+
+        if $z6 != 0 goto label11;
+
+        $r7 = virtualinvoke r16.<java.awt.Container: java.awt.Component[] getComponents()>();
+
+        i9 = 0;
+
+        $i4 = lengthof $r7;
+
+        i10 = $i4 - 1;
+
+     label07:
+        if i10 < 0 goto label09;
+
+        $r10 = $r7[i10];
+
+        if $r10 != r15 goto label08;
+
+        i9 = i10 - 1;
+
+        goto label09;
+
+     label08:
+        $i16 = (int) -1;
+
+        i10 = i10 + $i16;
+
+        goto label07;
+
+     label09:
+        if i9 < 0 goto label11;
+
+        $r8 = $r7[i9];
+
+        $r9 = virtualinvoke $r8.<java.awt.Component: java.awt.Rectangle getBounds(java.awt.Rectangle)>(r14);
+
+        r14 = $r9;
+
+        $z7 = virtualinvoke $r9.<java.awt.Rectangle: boolean intersects(java.awt.Rectangle)>($r17);
+
+        if $z7 == 0 goto label10;
+
+        return 0;
+
+     label10:
+        $i18 = (int) -1;
+
+        i9 = i9 + $i18;
+
+        goto label09;
+
+     label11:
+        $i11 = $r17.<java.awt.Rectangle: int x>;
+
+        $i12 = $i11 + $i0;
+
+        $r17.<java.awt.Rectangle: int x> = $i12;
+
+        $i13 = $r17.<java.awt.Rectangle: int y>;
+
+        $i14 = $i13 + $i1;
+
+        $r17.<java.awt.Rectangle: int y> = $i14;
+
+        r15 = r16;
+
+        r16 = virtualinvoke r16.<java.awt.Container: java.awt.Container getParent()>();
+
+        goto label05;
+
+     label12:
+        if r16 != null goto label13;
+
+        return 0;
+
+     label13:
+        return 1;
+    }
+
+    public javax.accessibility.AccessibleContext getAccessibleContext()
+    {
+        javax.accessibility.AccessibleContext $r1, $r2;
+        javax.swing.JViewport r0;
+        javax.swing.JViewport$AccessibleJViewport $r3;
+
+        r0 := @this: javax.swing.JViewport;
+
+        $r1 = r0.<javax.swing.JViewport: javax.accessibility.AccessibleContext accessibleContext>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new javax.swing.JViewport$AccessibleJViewport;
+
+        specialinvoke $r3.<javax.swing.JViewport$AccessibleJViewport: void <init>(javax.swing.JViewport)>(r0);
+
+        r0.<javax.swing.JViewport: javax.accessibility.AccessibleContext accessibleContext> = $r3;
+
+     label1:
+        $r2 = r0.<javax.swing.JViewport: javax.accessibility.AccessibleContext accessibleContext>;
+
+        return $r2;
+    }
+
+    static boolean access$000(javax.swing.JViewport)
+    {
+        javax.swing.JViewport r0;
+        boolean $z0;
+
+        r0 := @parameter0: javax.swing.JViewport;
+
+        $z0 = r0.<javax.swing.JViewport: boolean waitingForRepaint>;
+
+        return $z0;
+    }
+
+    static void <clinit>()
+    {
+        <javax.swing.JViewport: int SIMPLE_SCROLL_MODE> = 0;
+
+        <javax.swing.JViewport: int BACKINGSTORE_SCROLL_MODE> = 2;
+
+        <javax.swing.JViewport: int BLIT_SCROLL_MODE> = 1;
+
+        <javax.swing.JViewport: java.lang.String uiClassID> = "ViewportUI";
+
+        <javax.swing.JViewport: java.lang.Object EnableWindowBlit> = "EnableWindowBlit";
+
+        return;
+    }
+}

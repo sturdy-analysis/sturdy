@@ -1,0 +1,708 @@
+class sun.security.krb5.internal.rcache.DflCache$Storage extends java.lang.Object implements java.io.Closeable
+{
+    java.nio.channels.SeekableByteChannel chan;
+
+    private void <init>()
+    {
+        sun.security.krb5.internal.rcache.DflCache$Storage r0;
+
+        r0 := @this: sun.security.krb5.internal.rcache.DflCache$Storage;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static void create(java.nio.file.Path) throws java.io.IOException
+    {
+        java.nio.channels.SeekableByteChannel $r1;
+        java.nio.file.Path r0;
+
+        r0 := @parameter0: java.nio.file.Path;
+
+        $r1 = staticinvoke <sun.security.krb5.internal.rcache.DflCache$Storage: java.nio.channels.SeekableByteChannel createNoClose(java.nio.file.Path)>(r0);
+
+        if $r1 == null goto label2;
+
+        goto label1;
+
+     label1:
+        interfaceinvoke $r1.<java.nio.channels.SeekableByteChannel: void close()>();
+
+     label2:
+        staticinvoke <sun.security.krb5.internal.rcache.DflCache$Storage: void makeMine(java.nio.file.Path)>(r0);
+
+        return;
+    }
+
+    private static void makeMine(java.nio.file.Path) throws java.io.IOException
+    {
+        java.util.HashSet $r0;
+        java.lang.UnsupportedOperationException $r4;
+        java.nio.file.attribute.PosixFilePermission $r1, $r2;
+        java.nio.file.Path r3;
+
+        r3 := @parameter0: java.nio.file.Path;
+
+     label1:
+        $r0 = new java.util.HashSet;
+
+        specialinvoke $r0.<java.util.HashSet: void <init>()>();
+
+        $r1 = <java.nio.file.attribute.PosixFilePermission: java.nio.file.attribute.PosixFilePermission OWNER_READ>;
+
+        interfaceinvoke $r0.<java.util.Set: boolean add(java.lang.Object)>($r1);
+
+        $r2 = <java.nio.file.attribute.PosixFilePermission: java.nio.file.attribute.PosixFilePermission OWNER_WRITE>;
+
+        interfaceinvoke $r0.<java.util.Set: boolean add(java.lang.Object)>($r2);
+
+        staticinvoke <java.nio.file.Files: java.nio.file.Path setPosixFilePermissions(java.nio.file.Path,java.util.Set)>(r3, $r0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+     label4:
+        return;
+
+        catch java.lang.UnsupportedOperationException from label1 to label2 with label3;
+    }
+
+    private static java.nio.channels.SeekableByteChannel createNoClose(java.nio.file.Path) throws java.io.IOException
+    {
+        java.nio.file.StandardOpenOption $r2, $r3, $r4;
+        java.nio.ByteBuffer $r6;
+        java.nio.channels.SeekableByteChannel $r5;
+        java.nio.ByteOrder $r7;
+        java.nio.file.OpenOption[] $r1;
+        int $i0;
+        java.nio.file.Path r0;
+
+        r0 := @parameter0: java.nio.file.Path;
+
+        $r1 = newarray (java.nio.file.OpenOption)[3];
+
+        $r2 = <java.nio.file.StandardOpenOption: java.nio.file.StandardOpenOption CREATE>;
+
+        $r1[0] = $r2;
+
+        $r3 = <java.nio.file.StandardOpenOption: java.nio.file.StandardOpenOption TRUNCATE_EXISTING>;
+
+        $r1[1] = $r3;
+
+        $r4 = <java.nio.file.StandardOpenOption: java.nio.file.StandardOpenOption WRITE>;
+
+        $r1[2] = $r4;
+
+        $r5 = staticinvoke <java.nio.file.Files: java.nio.channels.SeekableByteChannel newByteChannel(java.nio.file.Path,java.nio.file.OpenOption[])>(r0, $r1);
+
+        $r6 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer allocate(int)>(6);
+
+        virtualinvoke $r6.<java.nio.ByteBuffer: java.nio.ByteBuffer putShort(short)>(1281);
+
+        $r7 = staticinvoke <java.nio.ByteOrder: java.nio.ByteOrder nativeOrder()>();
+
+        virtualinvoke $r6.<java.nio.ByteBuffer: java.nio.ByteBuffer order(java.nio.ByteOrder)>($r7);
+
+        $i0 = staticinvoke <sun.security.krb5.internal.KerberosTime: int getDefaultSkew()>();
+
+        virtualinvoke $r6.<java.nio.ByteBuffer: java.nio.ByteBuffer putInt(int)>($i0);
+
+        virtualinvoke $r6.<java.nio.ByteBuffer: java.nio.Buffer flip()>();
+
+        interfaceinvoke $r5.<java.nio.channels.SeekableByteChannel: int write(java.nio.ByteBuffer)>($r6);
+
+        return $r5;
+    }
+
+    private static void expunge(java.nio.file.Path, sun.security.krb5.internal.KerberosTime) throws java.io.IOException
+    {
+        java.lang.Throwable $r11, $r12, $r13, $r15, $r16, $r17, r20, r21;
+        java.nio.file.CopyOption[] $r22;
+        byte[] $r9;
+        long $l4, l6;
+        sun.security.krb5.internal.KerberosTime r7;
+        java.nio.ByteBuffer $r10;
+        java.nio.file.StandardCopyOption $r23, $r24;
+        byte $b5;
+        java.nio.file.attribute.FileAttribute[] $r2;
+        java.nio.file.OpenOption[] $r4;
+        int $i0, $i1, $i2, $i3, $i7;
+        sun.security.krb5.internal.rcache.AuthTime $r8;
+        java.nio.file.Path r0, $r1, $r3;
+        java.nio.BufferUnderflowException $r19;
+        java.nio.channels.SeekableByteChannel $r5, $r6;
+
+        r0 := @parameter0: java.nio.file.Path;
+
+        r7 := @parameter1: sun.security.krb5.internal.KerberosTime;
+
+        $r1 = interfaceinvoke r0.<java.nio.file.Path: java.nio.file.Path getParent()>();
+
+        $r2 = newarray (java.nio.file.attribute.FileAttribute)[0];
+
+        $r3 = staticinvoke <java.nio.file.Files: java.nio.file.Path createTempFile(java.nio.file.Path,java.lang.String,java.lang.String,java.nio.file.attribute.FileAttribute[])>($r1, "rcache", null, $r2);
+
+        $r4 = newarray (java.nio.file.OpenOption)[0];
+
+        $r5 = staticinvoke <java.nio.file.Files: java.nio.channels.SeekableByteChannel newByteChannel(java.nio.file.Path,java.nio.file.OpenOption[])>(r0, $r4);
+
+        r20 = null;
+
+     label01:
+        $r6 = staticinvoke <sun.security.krb5.internal.rcache.DflCache$Storage: java.nio.channels.SeekableByteChannel createNoClose(java.nio.file.Path)>($r3);
+
+        r21 = null;
+
+     label02:
+        $i0 = virtualinvoke r7.<sun.security.krb5.internal.KerberosTime: int getSeconds()>();
+
+        $i1 = staticinvoke <sun.security.krb5.internal.rcache.DflCache$Storage: int readHeader(java.nio.channels.SeekableByteChannel)>($r5);
+
+        $i2 = $i0 - $i1;
+
+        l6 = (long) $i2;
+
+     label03:
+        $r8 = staticinvoke <sun.security.krb5.internal.rcache.AuthTime: sun.security.krb5.internal.rcache.AuthTime readFrom(java.nio.channels.SeekableByteChannel)>($r5);
+
+        $i3 = $r8.<sun.security.krb5.internal.rcache.AuthTime: int ctime>;
+
+        $l4 = (long) $i3;
+
+        $b5 = $l4 cmp l6;
+
+        $i7 = (int) $b5;
+
+        if $i7 <= 0 goto label04;
+
+        $r9 = virtualinvoke $r8.<sun.security.krb5.internal.rcache.AuthTime: byte[] encode(boolean)>(1);
+
+        $r10 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>($r9);
+
+        interfaceinvoke $r6.<java.nio.channels.SeekableByteChannel: int write(java.nio.ByteBuffer)>($r10);
+
+     label04:
+        goto label03;
+
+     label05:
+        $r19 := @caughtexception;
+
+        goto label06;
+
+     label06:
+        if $r6 == null goto label16;
+
+        goto label07;
+
+     label07:
+        interfaceinvoke $r6.<java.nio.channels.SeekableByteChannel: void close()>();
+
+        goto label16;
+
+     label08:
+        $r17 := @caughtexception;
+
+        r21 = $r17;
+
+        throw $r17;
+
+     label09:
+        $r16 := @caughtexception;
+
+     label10:
+        if $r6 == null goto label15;
+
+        if r21 == null goto label14;
+
+     label11:
+        interfaceinvoke $r6.<java.nio.channels.SeekableByteChannel: void close()>();
+
+     label12:
+        goto label15;
+
+     label13:
+        $r15 := @caughtexception;
+
+        virtualinvoke r21.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r15);
+
+        goto label15;
+
+     label14:
+        interfaceinvoke $r6.<java.nio.channels.SeekableByteChannel: void close()>();
+
+     label15:
+        throw $r16;
+
+     label16:
+        if $r5 == null goto label26;
+
+        goto label17;
+
+     label17:
+        interfaceinvoke $r5.<java.nio.channels.SeekableByteChannel: void close()>();
+
+        goto label26;
+
+     label18:
+        $r13 := @caughtexception;
+
+        r20 = $r13;
+
+        throw $r13;
+
+     label19:
+        $r12 := @caughtexception;
+
+     label20:
+        if $r5 == null goto label25;
+
+        if r20 == null goto label24;
+
+     label21:
+        interfaceinvoke $r5.<java.nio.channels.SeekableByteChannel: void close()>();
+
+     label22:
+        goto label25;
+
+     label23:
+        $r11 := @caughtexception;
+
+        virtualinvoke r20.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r11);
+
+        goto label25;
+
+     label24:
+        interfaceinvoke $r5.<java.nio.channels.SeekableByteChannel: void close()>();
+
+     label25:
+        throw $r12;
+
+     label26:
+        staticinvoke <sun.security.krb5.internal.rcache.DflCache$Storage: void makeMine(java.nio.file.Path)>($r3);
+
+        $r22 = newarray (java.nio.file.CopyOption)[2];
+
+        $r23 = <java.nio.file.StandardCopyOption: java.nio.file.StandardCopyOption REPLACE_EXISTING>;
+
+        $r22[0] = $r23;
+
+        $r24 = <java.nio.file.StandardCopyOption: java.nio.file.StandardCopyOption ATOMIC_MOVE>;
+
+        $r22[1] = $r24;
+
+        staticinvoke <java.nio.file.Files: java.nio.file.Path move(java.nio.file.Path,java.nio.file.Path,java.nio.file.CopyOption[])>($r3, r0, $r22);
+
+        return;
+
+        catch java.nio.BufferUnderflowException from label03 to label04 with label05;
+        catch java.lang.Throwable from label02 to label06 with label08;
+        catch java.lang.Throwable from label11 to label12 with label13;
+        catch java.lang.Throwable from label08 to label10 with label09;
+        catch java.lang.Throwable from label01 to label16 with label18;
+        catch java.lang.Throwable from label21 to label22 with label23;
+        catch java.lang.Throwable from label18 to label20 with label19;
+    }
+
+    private int loadAndCheck(java.nio.file.Path, sun.security.krb5.internal.rcache.AuthTimeWithHash, sun.security.krb5.internal.KerberosTime) throws java.io.IOException, sun.security.krb5.internal.KrbApErrException
+    {
+        java.lang.Integer $r21;
+        byte $b11;
+        sun.security.krb5.internal.rcache.AuthTime $r30;
+        java.nio.file.Path r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, z10, $z11;
+        java.nio.file.attribute.PosixFilePermission $r3, $r4, $r5, $r6, $r7, $r8;
+        java.nio.file.StandardOpenOption $r11, $r12;
+        java.util.Set $r2;
+        java.nio.channels.SeekableByteChannel $r13, $r15, $r25, $r28, $r29;
+        sun.security.krb5.internal.KrbApErrException $r34, $r35;
+        sun.security.krb5.internal.rcache.AuthTimeWithHash r16;
+        sun.security.krb5.internal.rcache.DflCache$Storage r9;
+        long $l6, l8, $l10;
+        sun.security.krb5.internal.KerberosTime r14;
+        java.nio.file.OpenOption[] $r10;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i7, $i9, $i13, $i14, $i16;
+        java.lang.UnsupportedOperationException $r26;
+        java.nio.file.LinkOption[] $r1, $r19;
+        java.io.IOException $r31, $r32, $r33;
+        java.nio.BufferUnderflowException $r24;
+        java.lang.Object $r20;
+
+        r9 := @this: sun.security.krb5.internal.rcache.DflCache$Storage;
+
+        r0 := @parameter0: java.nio.file.Path;
+
+        r16 := @parameter1: sun.security.krb5.internal.rcache.AuthTimeWithHash;
+
+        r14 := @parameter2: sun.security.krb5.internal.KerberosTime;
+
+        i7 = 0;
+
+        $z0 = staticinvoke <java.nio.file.Files: boolean isSymbolicLink(java.nio.file.Path)>(r0);
+
+        if $z0 == 0 goto label01;
+
+        $r31 = new java.io.IOException;
+
+        specialinvoke $r31.<java.io.IOException: void <init>(java.lang.String)>("Symlink not accepted");
+
+        throw $r31;
+
+     label01:
+        $r1 = newarray (java.nio.file.LinkOption)[0];
+
+        $r2 = staticinvoke <java.nio.file.Files: java.util.Set getPosixFilePermissions(java.nio.file.Path,java.nio.file.LinkOption[])>(r0, $r1);
+
+        $i0 = staticinvoke <sun.security.krb5.internal.rcache.DflCache: int access$500()>();
+
+        $i13 = (int) -1;
+
+        if $i0 == $i13 goto label02;
+
+        $r19 = newarray (java.nio.file.LinkOption)[0];
+
+        $r20 = staticinvoke <java.nio.file.Files: java.lang.Object getAttribute(java.nio.file.Path,java.lang.String,java.nio.file.LinkOption[])>(r0, "unix:uid", $r19);
+
+        $r21 = (java.lang.Integer) $r20;
+
+        $i4 = virtualinvoke $r21.<java.lang.Integer: int intValue()>();
+
+        $i5 = staticinvoke <sun.security.krb5.internal.rcache.DflCache: int access$500()>();
+
+        if $i4 == $i5 goto label02;
+
+        $r32 = new java.io.IOException;
+
+        specialinvoke $r32.<java.io.IOException: void <init>(java.lang.String)>("Not mine");
+
+        throw $r32;
+
+     label02:
+        $r3 = <java.nio.file.attribute.PosixFilePermission: java.nio.file.attribute.PosixFilePermission GROUP_READ>;
+
+        $z1 = interfaceinvoke $r2.<java.util.Set: boolean contains(java.lang.Object)>($r3);
+
+        if $z1 != 0 goto label03;
+
+        $r4 = <java.nio.file.attribute.PosixFilePermission: java.nio.file.attribute.PosixFilePermission GROUP_WRITE>;
+
+        $z2 = interfaceinvoke $r2.<java.util.Set: boolean contains(java.lang.Object)>($r4);
+
+        if $z2 != 0 goto label03;
+
+        $r5 = <java.nio.file.attribute.PosixFilePermission: java.nio.file.attribute.PosixFilePermission GROUP_EXECUTE>;
+
+        $z3 = interfaceinvoke $r2.<java.util.Set: boolean contains(java.lang.Object)>($r5);
+
+        if $z3 != 0 goto label03;
+
+        $r6 = <java.nio.file.attribute.PosixFilePermission: java.nio.file.attribute.PosixFilePermission OTHERS_READ>;
+
+        $z4 = interfaceinvoke $r2.<java.util.Set: boolean contains(java.lang.Object)>($r6);
+
+        if $z4 != 0 goto label03;
+
+        $r7 = <java.nio.file.attribute.PosixFilePermission: java.nio.file.attribute.PosixFilePermission OTHERS_WRITE>;
+
+        $z5 = interfaceinvoke $r2.<java.util.Set: boolean contains(java.lang.Object)>($r7);
+
+        if $z5 != 0 goto label03;
+
+        $r8 = <java.nio.file.attribute.PosixFilePermission: java.nio.file.attribute.PosixFilePermission OTHERS_EXECUTE>;
+
+        $z6 = interfaceinvoke $r2.<java.util.Set: boolean contains(java.lang.Object)>($r8);
+
+        if $z6 == 0 goto label04;
+
+     label03:
+        $r33 = new java.io.IOException;
+
+        specialinvoke $r33.<java.io.IOException: void <init>(java.lang.String)>("Accessible by someone else");
+
+        throw $r33;
+
+     label04:
+        goto label06;
+
+     label05:
+        $r26 := @caughtexception;
+
+     label06:
+        $r10 = newarray (java.nio.file.OpenOption)[2];
+
+        $r11 = <java.nio.file.StandardOpenOption: java.nio.file.StandardOpenOption WRITE>;
+
+        $r10[0] = $r11;
+
+        $r12 = <java.nio.file.StandardOpenOption: java.nio.file.StandardOpenOption READ>;
+
+        $r10[1] = $r12;
+
+        $r13 = staticinvoke <java.nio.file.Files: java.nio.channels.SeekableByteChannel newByteChannel(java.nio.file.Path,java.nio.file.OpenOption[])>(r0, $r10);
+
+        r9.<sun.security.krb5.internal.rcache.DflCache$Storage: java.nio.channels.SeekableByteChannel chan> = $r13;
+
+        $i1 = virtualinvoke r14.<sun.security.krb5.internal.KerberosTime: int getSeconds()>();
+
+        $r15 = r9.<sun.security.krb5.internal.rcache.DflCache$Storage: java.nio.channels.SeekableByteChannel chan>;
+
+        $i2 = staticinvoke <sun.security.krb5.internal.rcache.DflCache$Storage: int readHeader(java.nio.channels.SeekableByteChannel)>($r15);
+
+        $i3 = $i1 - $i2;
+
+        $l6 = (long) $i3;
+
+        l8 = 0L;
+
+        z10 = 0;
+
+     label07:
+        $r28 = r9.<sun.security.krb5.internal.rcache.DflCache$Storage: java.nio.channels.SeekableByteChannel chan>;
+
+        l8 = interfaceinvoke $r28.<java.nio.channels.SeekableByteChannel: long position()>();
+
+        $r29 = r9.<sun.security.krb5.internal.rcache.DflCache$Storage: java.nio.channels.SeekableByteChannel chan>;
+
+        $r30 = staticinvoke <sun.security.krb5.internal.rcache.AuthTime: sun.security.krb5.internal.rcache.AuthTime readFrom(java.nio.channels.SeekableByteChannel)>($r29);
+
+        $z11 = $r30 instanceof sun.security.krb5.internal.rcache.AuthTimeWithHash;
+
+        if $z11 == 0 goto label09;
+
+        $z8 = virtualinvoke r16.<sun.security.krb5.internal.rcache.AuthTimeWithHash: boolean equals(java.lang.Object)>($r30);
+
+        if $z8 == 0 goto label08;
+
+        $r34 = new sun.security.krb5.internal.KrbApErrException;
+
+        specialinvoke $r34.<sun.security.krb5.internal.KrbApErrException: void <init>(int)>(34);
+
+        throw $r34;
+
+     label08:
+        $z9 = virtualinvoke r16.<sun.security.krb5.internal.rcache.AuthTimeWithHash: boolean isSameIgnoresHash(sun.security.krb5.internal.rcache.AuthTime)>($r30);
+
+        if $z9 == 0 goto label10;
+
+        z10 = 1;
+
+        goto label10;
+
+     label09:
+        $z7 = virtualinvoke r16.<sun.security.krb5.internal.rcache.AuthTimeWithHash: boolean isSameIgnoresHash(sun.security.krb5.internal.rcache.AuthTime)>($r30);
+
+        if $z7 == 0 goto label10;
+
+        if z10 != 0 goto label10;
+
+        $r35 = new sun.security.krb5.internal.KrbApErrException;
+
+        specialinvoke $r35.<sun.security.krb5.internal.KrbApErrException: void <init>(int)>(34);
+
+        throw $r35;
+
+     label10:
+        $i9 = $r30.<sun.security.krb5.internal.rcache.AuthTime: int ctime>;
+
+        $l10 = (long) $i9;
+
+        $b11 = $l10 cmp $l6;
+
+        $i14 = (int) $b11;
+
+        if $i14 >= 0 goto label11;
+
+        i7 = i7 + 1;
+
+        goto label12;
+
+     label11:
+        $i16 = (int) -1;
+
+        i7 = i7 + $i16;
+
+     label12:
+        goto label07;
+
+     label13:
+        $r24 := @caughtexception;
+
+        $r25 = r9.<sun.security.krb5.internal.rcache.DflCache$Storage: java.nio.channels.SeekableByteChannel chan>;
+
+        interfaceinvoke $r25.<java.nio.channels.SeekableByteChannel: java.nio.channels.SeekableByteChannel position(long)>(l8);
+
+        goto label14;
+
+     label14:
+        return i7;
+
+        catch java.lang.UnsupportedOperationException from label01 to label04 with label05;
+        catch java.nio.BufferUnderflowException from label07 to label12 with label13;
+    }
+
+    private static int readHeader(java.nio.channels.SeekableByteChannel) throws java.io.IOException
+    {
+        java.nio.channels.SeekableByteChannel r1;
+        java.nio.ByteOrder $r2;
+        short $s0;
+        int $i1, $i2;
+        java.io.IOException $r4;
+        java.nio.ByteBuffer $r0;
+
+        r1 := @parameter0: java.nio.channels.SeekableByteChannel;
+
+        $r0 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer allocate(int)>(6);
+
+        interfaceinvoke r1.<java.nio.channels.SeekableByteChannel: int read(java.nio.ByteBuffer)>($r0);
+
+        $s0 = virtualinvoke $r0.<java.nio.ByteBuffer: short getShort(int)>(0);
+
+        $i2 = (int) $s0;
+
+        if $i2 == 1281 goto label1;
+
+        $r4 = new java.io.IOException;
+
+        specialinvoke $r4.<java.io.IOException: void <init>(java.lang.String)>("Not correct rcache version");
+
+        throw $r4;
+
+     label1:
+        $r2 = staticinvoke <java.nio.ByteOrder: java.nio.ByteOrder nativeOrder()>();
+
+        virtualinvoke $r0.<java.nio.ByteBuffer: java.nio.ByteBuffer order(java.nio.ByteOrder)>($r2);
+
+        $i1 = virtualinvoke $r0.<java.nio.ByteBuffer: int getInt(int)>(2);
+
+        return $i1;
+    }
+
+    private void append(sun.security.krb5.internal.rcache.AuthTimeWithHash) throws java.io.IOException
+    {
+        sun.security.krb5.internal.rcache.AuthTimeWithHash r0;
+        byte[] $r1, $r5;
+        sun.security.krb5.internal.rcache.DflCache$Storage r3;
+        java.nio.ByteBuffer $r2, $r6;
+        java.nio.channels.SeekableByteChannel $r4, $r7;
+
+        r3 := @this: sun.security.krb5.internal.rcache.DflCache$Storage;
+
+        r0 := @parameter0: sun.security.krb5.internal.rcache.AuthTimeWithHash;
+
+        $r1 = virtualinvoke r0.<sun.security.krb5.internal.rcache.AuthTimeWithHash: byte[] encode(boolean)>(1);
+
+        $r2 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>($r1);
+
+        $r4 = r3.<sun.security.krb5.internal.rcache.DflCache$Storage: java.nio.channels.SeekableByteChannel chan>;
+
+        interfaceinvoke $r4.<java.nio.channels.SeekableByteChannel: int write(java.nio.ByteBuffer)>($r2);
+
+        $r5 = virtualinvoke r0.<sun.security.krb5.internal.rcache.AuthTimeWithHash: byte[] encode(boolean)>(0);
+
+        $r6 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>($r5);
+
+        $r7 = r3.<sun.security.krb5.internal.rcache.DflCache$Storage: java.nio.channels.SeekableByteChannel chan>;
+
+        interfaceinvoke $r7.<java.nio.channels.SeekableByteChannel: int write(java.nio.ByteBuffer)>($r6);
+
+        return;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        sun.security.krb5.internal.rcache.DflCache$Storage r0;
+        java.nio.channels.SeekableByteChannel $r1, $r2;
+
+        r0 := @this: sun.security.krb5.internal.rcache.DflCache$Storage;
+
+        $r1 = r0.<sun.security.krb5.internal.rcache.DflCache$Storage: java.nio.channels.SeekableByteChannel chan>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.security.krb5.internal.rcache.DflCache$Storage: java.nio.channels.SeekableByteChannel chan>;
+
+        interfaceinvoke $r2.<java.nio.channels.SeekableByteChannel: void close()>();
+
+     label1:
+        r0.<sun.security.krb5.internal.rcache.DflCache$Storage: java.nio.channels.SeekableByteChannel chan> = null;
+
+        return;
+    }
+
+    void <init>(sun.security.krb5.internal.rcache.DflCache$1)
+    {
+        sun.security.krb5.internal.rcache.DflCache$Storage r0;
+        sun.security.krb5.internal.rcache.DflCache$1 r1;
+
+        r0 := @this: sun.security.krb5.internal.rcache.DflCache$Storage;
+
+        r1 := @parameter0: sun.security.krb5.internal.rcache.DflCache$1;
+
+        specialinvoke r0.<sun.security.krb5.internal.rcache.DflCache$Storage: void <init>()>();
+
+        return;
+    }
+
+    static int access$100(sun.security.krb5.internal.rcache.DflCache$Storage, java.nio.file.Path, sun.security.krb5.internal.rcache.AuthTimeWithHash, sun.security.krb5.internal.KerberosTime) throws java.io.IOException, sun.security.krb5.internal.KrbApErrException
+    {
+        sun.security.krb5.internal.rcache.AuthTimeWithHash r2;
+        sun.security.krb5.internal.rcache.DflCache$Storage r0;
+        int $i0;
+        java.nio.file.Path r1;
+        sun.security.krb5.internal.KerberosTime r3;
+
+        r0 := @parameter0: sun.security.krb5.internal.rcache.DflCache$Storage;
+
+        r1 := @parameter1: java.nio.file.Path;
+
+        r2 := @parameter2: sun.security.krb5.internal.rcache.AuthTimeWithHash;
+
+        r3 := @parameter3: sun.security.krb5.internal.KerberosTime;
+
+        $i0 = specialinvoke r0.<sun.security.krb5.internal.rcache.DflCache$Storage: int loadAndCheck(java.nio.file.Path,sun.security.krb5.internal.rcache.AuthTimeWithHash,sun.security.krb5.internal.KerberosTime)>(r1, r2, r3);
+
+        return $i0;
+    }
+
+    static void access$200(java.nio.file.Path) throws java.io.IOException
+    {
+        java.nio.file.Path r0;
+
+        r0 := @parameter0: java.nio.file.Path;
+
+        staticinvoke <sun.security.krb5.internal.rcache.DflCache$Storage: void create(java.nio.file.Path)>(r0);
+
+        return;
+    }
+
+    static void access$300(sun.security.krb5.internal.rcache.DflCache$Storage, sun.security.krb5.internal.rcache.AuthTimeWithHash) throws java.io.IOException
+    {
+        sun.security.krb5.internal.rcache.AuthTimeWithHash r1;
+        sun.security.krb5.internal.rcache.DflCache$Storage r0;
+
+        r0 := @parameter0: sun.security.krb5.internal.rcache.DflCache$Storage;
+
+        r1 := @parameter1: sun.security.krb5.internal.rcache.AuthTimeWithHash;
+
+        specialinvoke r0.<sun.security.krb5.internal.rcache.DflCache$Storage: void append(sun.security.krb5.internal.rcache.AuthTimeWithHash)>(r1);
+
+        return;
+    }
+
+    static void access$400(java.nio.file.Path, sun.security.krb5.internal.KerberosTime) throws java.io.IOException
+    {
+        java.nio.file.Path r0;
+        sun.security.krb5.internal.KerberosTime r1;
+
+        r0 := @parameter0: java.nio.file.Path;
+
+        r1 := @parameter1: sun.security.krb5.internal.KerberosTime;
+
+        staticinvoke <sun.security.krb5.internal.rcache.DflCache$Storage: void expunge(java.nio.file.Path,sun.security.krb5.internal.KerberosTime)>(r0, r1);
+
+        return;
+    }
+}

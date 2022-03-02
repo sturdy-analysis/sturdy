@@ -1,0 +1,360 @@
+abstract class sun.security.provider.SeedGenerator extends java.lang.Object
+{
+    private static sun.security.provider.SeedGenerator instance;
+    private static final sun.security.util.Debug debug;
+
+    void <init>()
+    {
+        sun.security.provider.SeedGenerator r0;
+
+        r0 := @this: sun.security.provider.SeedGenerator;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static void generateSeed(byte[])
+    {
+        byte[] r0;
+        sun.security.provider.SeedGenerator $r1;
+
+        r0 := @parameter0: byte[];
+
+        $r1 = <sun.security.provider.SeedGenerator: sun.security.provider.SeedGenerator instance>;
+
+        virtualinvoke $r1.<sun.security.provider.SeedGenerator: void getSeedBytes(byte[])>(r0);
+
+        return;
+    }
+
+    abstract void getSeedBytes(byte[]);
+
+    static byte[] getSystemEntropy()
+    {
+        byte[] $r2;
+        java.security.MessageDigest $r0;
+        long $l0;
+        sun.security.provider.SeedGenerator$1 $r1;
+        byte b2;
+        java.security.NoSuchAlgorithmException $r3;
+        int $i1;
+        java.lang.InternalError $r4;
+
+     label1:
+        $r0 = staticinvoke <java.security.MessageDigest: java.security.MessageDigest getInstance(java.lang.String)>("SHA");
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.lang.InternalError;
+
+        specialinvoke $r4.<java.lang.InternalError: void <init>(java.lang.String,java.lang.Throwable)>("internal error: SHA-1 not available.", $r3);
+
+        throw $r4;
+
+     label4:
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $i1 = (int) $l0;
+
+        b2 = (byte) $i1;
+
+        virtualinvoke $r0.<java.security.MessageDigest: void update(byte)>(b2);
+
+        $r1 = new sun.security.provider.SeedGenerator$1;
+
+        specialinvoke $r1.<sun.security.provider.SeedGenerator$1: void <init>(java.security.MessageDigest)>($r0);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        $r2 = virtualinvoke $r0.<java.security.MessageDigest: byte[] digest()>();
+
+        return $r2;
+
+        catch java.security.NoSuchAlgorithmException from label1 to label2 with label3;
+    }
+
+    private static void addNetworkAdapterInfo(java.security.MessageDigest)
+    {
+        byte[] $r5, $r6;
+        java.util.Enumeration $r0;
+        java.security.MessageDigest r3;
+        java.net.NetworkInterface r2;
+        java.lang.Exception $r7;
+        java.lang.Object $r1;
+        java.lang.String $r4;
+        boolean $z0, $z1;
+
+        r3 := @parameter0: java.security.MessageDigest;
+
+     label1:
+        $r0 = staticinvoke <java.net.NetworkInterface: java.util.Enumeration getNetworkInterfaces()>();
+
+     label2:
+        $z0 = interfaceinvoke $r0.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label4;
+
+        $r1 = interfaceinvoke $r0.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r2 = (java.net.NetworkInterface) $r1;
+
+        $r4 = virtualinvoke r2.<java.net.NetworkInterface: java.lang.String toString()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.String: byte[] getBytes()>();
+
+        virtualinvoke r3.<java.security.MessageDigest: void update(byte[])>($r5);
+
+        $z1 = virtualinvoke r2.<java.net.NetworkInterface: boolean isVirtual()>();
+
+        if $z1 != 0 goto label3;
+
+        $r6 = virtualinvoke r2.<java.net.NetworkInterface: byte[] getHardwareAddress()>();
+
+        if $r6 == null goto label3;
+
+        virtualinvoke r3.<java.security.MessageDigest: void update(byte[])>($r6);
+
+        goto label4;
+
+     label3:
+        goto label2;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r7 := @caughtexception;
+
+     label6:
+        return;
+
+        catch java.lang.Exception from label1 to label4 with label5;
+    }
+
+    private static byte[] longToByteArray(long)
+    {
+        byte[] r0;
+        byte $b1;
+        int $i0, i3;
+        long l2;
+
+        l2 := @parameter0: long;
+
+        r0 = newarray (byte)[8];
+
+        i3 = 0;
+
+     label1:
+        if i3 >= 8 goto label2;
+
+        $i0 = (int) l2;
+
+        $b1 = (byte) $i0;
+
+        r0[i3] = $b1;
+
+        l2 = l2 >> 8;
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label2:
+        return r0;
+    }
+
+    static void access$000(java.security.MessageDigest)
+    {
+        java.security.MessageDigest r0;
+
+        r0 := @parameter0: java.security.MessageDigest;
+
+        staticinvoke <sun.security.provider.SeedGenerator: void addNetworkAdapterInfo(java.security.MessageDigest)>(r0);
+
+        return;
+    }
+
+    static byte[] access$100(long)
+    {
+        byte[] $r0;
+        long l0;
+
+        l0 := @parameter0: long;
+
+        $r0 = staticinvoke <sun.security.provider.SeedGenerator: byte[] longToByteArray(long)>(l0);
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.provider.SeedGenerator$ThreadedSeedGenerator $r5;
+        sun.security.provider.SeedGenerator $r37;
+        boolean $z0, $z1, $z2;
+        sun.security.util.Debug $r0, $r3, $r4, $r6, $r8, $r13, $r15, $r20, $r22, $r30, $r32;
+        sun.security.provider.NativeSeedGenerator $r2;
+        java.lang.StringBuilder $r7, $r9, $r10, $r14, $r16, $r17, $r21, $r23, $r24, $r25, $r27, $r31, $r33, $r35;
+        java.lang.String $r1, $r11, $r18, $r26, $r28, $r34, $r36;
+        java.io.IOException $r19, $r29;
+        sun.security.provider.SeedGenerator$URLSeedGenerator $r12;
+
+        $r0 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String)>("provider");
+
+        <sun.security.provider.SeedGenerator: sun.security.util.Debug debug> = $r0;
+
+        $r1 = staticinvoke <sun.security.provider.SunEntries: java.lang.String getSeedSource()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("file:/dev/random");
+
+        if $z0 != 0 goto label01;
+
+        $z1 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("file:/dev/urandom");
+
+        if $z1 == 0 goto label05;
+
+     label01:
+        $r2 = new sun.security.provider.NativeSeedGenerator;
+
+        specialinvoke $r2.<sun.security.provider.NativeSeedGenerator: void <init>(java.lang.String)>($r1);
+
+        <sun.security.provider.SeedGenerator: sun.security.provider.SeedGenerator instance> = $r2;
+
+        $r3 = <sun.security.provider.SeedGenerator: sun.security.util.Debug debug>;
+
+        if $r3 == null goto label02;
+
+        $r8 = <sun.security.provider.SeedGenerator: sun.security.util.Debug debug>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Using operating system seed generator");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r8.<sun.security.util.Debug: void println(java.lang.String)>($r11);
+
+     label02:
+        goto label09;
+
+     label03:
+        $r29 := @caughtexception;
+
+        $r30 = <sun.security.provider.SeedGenerator: sun.security.util.Debug debug>;
+
+        if $r30 == null goto label04;
+
+        $r32 = <sun.security.provider.SeedGenerator: sun.security.util.Debug debug>;
+
+        $r31 = new java.lang.StringBuilder;
+
+        specialinvoke $r31.<java.lang.StringBuilder: void <init>()>();
+
+        $r33 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to use operating system seed generator: ");
+
+        $r34 = virtualinvoke $r29.<java.io.IOException: java.lang.String toString()>();
+
+        $r35 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r34);
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r32.<sun.security.util.Debug: void println(java.lang.String)>($r36);
+
+     label04:
+        goto label09;
+
+     label05:
+        $z2 = virtualinvoke $r1.<java.lang.String: boolean isEmpty()>();
+
+        if $z2 != 0 goto label09;
+
+     label06:
+        $r12 = new sun.security.provider.SeedGenerator$URLSeedGenerator;
+
+        specialinvoke $r12.<sun.security.provider.SeedGenerator$URLSeedGenerator: void <init>(java.lang.String)>($r1);
+
+        <sun.security.provider.SeedGenerator: sun.security.provider.SeedGenerator instance> = $r12;
+
+        $r13 = <sun.security.provider.SeedGenerator: sun.security.util.Debug debug>;
+
+        if $r13 == null goto label07;
+
+        $r15 = <sun.security.provider.SeedGenerator: sun.security.util.Debug debug>;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Using URL seed generator reading from ");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r15.<sun.security.util.Debug: void println(java.lang.String)>($r18);
+
+     label07:
+        goto label09;
+
+     label08:
+        $r19 := @caughtexception;
+
+        $r20 = <sun.security.provider.SeedGenerator: sun.security.util.Debug debug>;
+
+        if $r20 == null goto label09;
+
+        $r22 = <sun.security.provider.SeedGenerator: sun.security.util.Debug debug>;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to create seed generator with ");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r26 = virtualinvoke $r19.<java.io.IOException: java.lang.String toString()>();
+
+        $r27 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r26);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r22.<sun.security.util.Debug: void println(java.lang.String)>($r28);
+
+     label09:
+        $r37 = <sun.security.provider.SeedGenerator: sun.security.provider.SeedGenerator instance>;
+
+        if $r37 != null goto label11;
+
+        $r4 = <sun.security.provider.SeedGenerator: sun.security.util.Debug debug>;
+
+        if $r4 == null goto label10;
+
+        $r6 = <sun.security.provider.SeedGenerator: sun.security.util.Debug debug>;
+
+        virtualinvoke $r6.<sun.security.util.Debug: void println(java.lang.String)>("Using default threaded seed generator");
+
+     label10:
+        $r5 = new sun.security.provider.SeedGenerator$ThreadedSeedGenerator;
+
+        specialinvoke $r5.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: void <init>()>();
+
+        <sun.security.provider.SeedGenerator: sun.security.provider.SeedGenerator instance> = $r5;
+
+     label11:
+        return;
+
+        catch java.io.IOException from label01 to label02 with label03;
+        catch java.io.IOException from label06 to label07 with label08;
+    }
+}

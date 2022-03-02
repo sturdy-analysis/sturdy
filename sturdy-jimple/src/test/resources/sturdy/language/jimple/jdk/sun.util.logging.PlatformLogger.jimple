@@ -1,0 +1,852 @@
+public class sun.util.logging.PlatformLogger extends java.lang.Object
+{
+    private static final int OFF;
+    private static final int SEVERE;
+    private static final int WARNING;
+    private static final int INFO;
+    private static final int CONFIG;
+    private static final int FINE;
+    private static final int FINER;
+    private static final int FINEST;
+    private static final int ALL;
+    private static final sun.util.logging.PlatformLogger$Level DEFAULT_LEVEL;
+    private static boolean loggingEnabled;
+    private static java.util.Map loggers;
+    private volatile sun.util.logging.PlatformLogger$LoggerProxy loggerProxy;
+    private volatile sun.util.logging.PlatformLogger$JavaLoggerProxy javaLoggerProxy;
+
+    public static synchronized sun.util.logging.PlatformLogger getLogger(java.lang.String)
+    {
+        sun.util.logging.PlatformLogger $r4, r8;
+        java.util.Map $r1, $r6;
+        java.lang.Object $r2, $r7;
+        java.lang.String r0;
+        java.lang.ref.WeakReference r3, $r5;
+
+        r0 := @parameter0: java.lang.String;
+
+        r8 = null;
+
+        $r1 = <sun.util.logging.PlatformLogger: java.util.Map loggers>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.lang.Object get(java.lang.Object)>(r0);
+
+        r3 = (java.lang.ref.WeakReference) $r2;
+
+        if r3 == null goto label1;
+
+        $r7 = virtualinvoke r3.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        r8 = (sun.util.logging.PlatformLogger) $r7;
+
+     label1:
+        if r8 != null goto label2;
+
+        $r4 = new sun.util.logging.PlatformLogger;
+
+        specialinvoke $r4.<sun.util.logging.PlatformLogger: void <init>(java.lang.String)>(r0);
+
+        r8 = $r4;
+
+        $r6 = <sun.util.logging.PlatformLogger: java.util.Map loggers>;
+
+        $r5 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r5.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>($r4);
+
+        interfaceinvoke $r6.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r0, $r5);
+
+     label2:
+        return r8;
+    }
+
+    public static synchronized void redirectPlatformLoggers()
+    {
+        java.util.Map$Entry r4;
+        sun.util.logging.PlatformLogger r8;
+        java.util.Iterator $r2;
+        java.util.Set $r1;
+        java.util.Map $r0;
+        java.lang.Object $r3, $r5, $r7;
+        java.lang.ref.WeakReference r6;
+        boolean $z0, $z1, $z2;
+
+        $z0 = <sun.util.logging.PlatformLogger: boolean loggingEnabled>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = staticinvoke <sun.util.logging.LoggingSupport: boolean isAvailable()>();
+
+        if $z1 != 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        <sun.util.logging.PlatformLogger: boolean loggingEnabled> = 1;
+
+        $r0 = <sun.util.logging.PlatformLogger: java.util.Map loggers>;
+
+        $r1 = interfaceinvoke $r0.<java.util.Map: java.util.Set entrySet()>();
+
+        $r2 = interfaceinvoke $r1.<java.util.Set: java.util.Iterator iterator()>();
+
+     label3:
+        $z2 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label5;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (java.util.Map$Entry) $r3;
+
+        $r5 = interfaceinvoke r4.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        r6 = (java.lang.ref.WeakReference) $r5;
+
+        $r7 = virtualinvoke r6.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        r8 = (sun.util.logging.PlatformLogger) $r7;
+
+        if r8 == null goto label4;
+
+        specialinvoke r8.<sun.util.logging.PlatformLogger: void redirectToJavaLoggerProxy()>();
+
+     label4:
+        goto label3;
+
+     label5:
+        return;
+    }
+
+    private void redirectToJavaLoggerProxy()
+    {
+        sun.util.logging.PlatformLogger$Level $r6;
+        sun.util.logging.PlatformLogger r0;
+        sun.util.logging.PlatformLogger$LoggerProxy $r1;
+        sun.util.logging.PlatformLogger$DefaultLoggerProxy r4;
+        sun.util.logging.PlatformLogger$JavaLoggerProxy $r5;
+        java.lang.Class $r2;
+        java.lang.Object $r3;
+        java.lang.String $r7;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        $r2 = class "Lsun/util/logging/PlatformLogger$DefaultLoggerProxy;";
+
+        $r1 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.Object cast(java.lang.Object)>($r1);
+
+        r4 = (sun.util.logging.PlatformLogger$DefaultLoggerProxy) $r3;
+
+        $r5 = new sun.util.logging.PlatformLogger$JavaLoggerProxy;
+
+        $r7 = r4.<sun.util.logging.PlatformLogger$DefaultLoggerProxy: java.lang.String name>;
+
+        $r6 = r4.<sun.util.logging.PlatformLogger$DefaultLoggerProxy: sun.util.logging.PlatformLogger$Level level>;
+
+        specialinvoke $r5.<sun.util.logging.PlatformLogger$JavaLoggerProxy: void <init>(java.lang.String,sun.util.logging.PlatformLogger$Level)>($r7, $r6);
+
+        r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$JavaLoggerProxy javaLoggerProxy> = $r5;
+
+        r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy> = $r5;
+
+        return;
+    }
+
+    private void <init>(java.lang.String)
+    {
+        sun.util.logging.PlatformLogger r0;
+        sun.util.logging.PlatformLogger$DefaultLoggerProxy $r1;
+        sun.util.logging.PlatformLogger$JavaLoggerProxy $r3;
+        java.lang.String r2;
+        boolean $z0;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        r2 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $z0 = <sun.util.logging.PlatformLogger: boolean loggingEnabled>;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = new sun.util.logging.PlatformLogger$JavaLoggerProxy;
+
+        specialinvoke $r3.<sun.util.logging.PlatformLogger$JavaLoggerProxy: void <init>(java.lang.String)>(r2);
+
+        r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$JavaLoggerProxy javaLoggerProxy> = $r3;
+
+        r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy> = $r3;
+
+        goto label2;
+
+     label1:
+        $r1 = new sun.util.logging.PlatformLogger$DefaultLoggerProxy;
+
+        specialinvoke $r1.<sun.util.logging.PlatformLogger$DefaultLoggerProxy: void <init>(java.lang.String)>(r2);
+
+        r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy> = $r1;
+
+     label2:
+        return;
+    }
+
+    public boolean isEnabled()
+    {
+        sun.util.logging.PlatformLogger r0;
+        sun.util.logging.PlatformLogger$LoggerProxy $r1;
+        boolean $z0;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        $r1 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $z0 = virtualinvoke $r1.<sun.util.logging.PlatformLogger$LoggerProxy: boolean isEnabled()>();
+
+        return $z0;
+    }
+
+    public java.lang.String getName()
+    {
+        sun.util.logging.PlatformLogger r0;
+        java.lang.String $r2;
+        sun.util.logging.PlatformLogger$LoggerProxy $r1;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        $r1 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $r2 = $r1.<sun.util.logging.PlatformLogger$LoggerProxy: java.lang.String name>;
+
+        return $r2;
+    }
+
+    public boolean isLoggable(sun.util.logging.PlatformLogger$Level)
+    {
+        sun.util.logging.PlatformLogger$Level r0;
+        sun.util.logging.PlatformLogger r1;
+        sun.util.logging.PlatformLogger$LoggerProxy $r3;
+        sun.util.logging.PlatformLogger$JavaLoggerProxy r2;
+        java.lang.NullPointerException $r4;
+        boolean $z0;
+
+        r1 := @this: sun.util.logging.PlatformLogger;
+
+        r0 := @parameter0: sun.util.logging.PlatformLogger$Level;
+
+        if r0 != null goto label1;
+
+        $r4 = new java.lang.NullPointerException;
+
+        specialinvoke $r4.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r4;
+
+     label1:
+        r2 = r1.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$JavaLoggerProxy javaLoggerProxy>;
+
+        if r2 == null goto label2;
+
+        $z0 = virtualinvoke r2.<sun.util.logging.PlatformLogger$JavaLoggerProxy: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>(r0);
+
+        goto label3;
+
+     label2:
+        $r3 = r1.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $z0 = virtualinvoke $r3.<sun.util.logging.PlatformLogger$LoggerProxy: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>(r0);
+
+     label3:
+        return $z0;
+    }
+
+    public sun.util.logging.PlatformLogger$Level level()
+    {
+        sun.util.logging.PlatformLogger$Level $r2;
+        sun.util.logging.PlatformLogger r0;
+        sun.util.logging.PlatformLogger$LoggerProxy $r1;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        $r1 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $r2 = virtualinvoke $r1.<sun.util.logging.PlatformLogger$LoggerProxy: sun.util.logging.PlatformLogger$Level getLevel()>();
+
+        return $r2;
+    }
+
+    public void setLevel(sun.util.logging.PlatformLogger$Level)
+    {
+        sun.util.logging.PlatformLogger$Level r1;
+        sun.util.logging.PlatformLogger r0;
+        sun.util.logging.PlatformLogger$LoggerProxy $r2;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        r1 := @parameter0: sun.util.logging.PlatformLogger$Level;
+
+        $r2 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        virtualinvoke $r2.<sun.util.logging.PlatformLogger$LoggerProxy: void setLevel(sun.util.logging.PlatformLogger$Level)>(r1);
+
+        return;
+    }
+
+    public void severe(java.lang.String)
+    {
+        sun.util.logging.PlatformLogger$Level $r2;
+        sun.util.logging.PlatformLogger r0;
+        sun.util.logging.PlatformLogger$LoggerProxy $r3;
+        java.lang.String r1;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r3 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $r2 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level SEVERE>;
+
+        virtualinvoke $r3.<sun.util.logging.PlatformLogger$LoggerProxy: void doLog(sun.util.logging.PlatformLogger$Level,java.lang.String)>($r2, r1);
+
+        return;
+    }
+
+    public void severe(java.lang.String, java.lang.Throwable)
+    {
+        java.lang.Throwable r2;
+        sun.util.logging.PlatformLogger$Level $r3;
+        sun.util.logging.PlatformLogger r0;
+        sun.util.logging.PlatformLogger$LoggerProxy $r4;
+        java.lang.String r1;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Throwable;
+
+        $r4 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $r3 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level SEVERE>;
+
+        virtualinvoke $r4.<sun.util.logging.PlatformLogger$LoggerProxy: void doLog(sun.util.logging.PlatformLogger$Level,java.lang.String,java.lang.Throwable)>($r3, r1, r2);
+
+        return;
+    }
+
+    public transient void severe(java.lang.String, java.lang.Object[])
+    {
+        sun.util.logging.PlatformLogger$Level $r3;
+        sun.util.logging.PlatformLogger r0;
+        java.lang.Object[] r2;
+        sun.util.logging.PlatformLogger$LoggerProxy $r4;
+        java.lang.String r1;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Object[];
+
+        $r4 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $r3 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level SEVERE>;
+
+        virtualinvoke $r4.<sun.util.logging.PlatformLogger$LoggerProxy: void doLog(sun.util.logging.PlatformLogger$Level,java.lang.String,java.lang.Object[])>($r3, r1, r2);
+
+        return;
+    }
+
+    public void warning(java.lang.String)
+    {
+        sun.util.logging.PlatformLogger$Level $r2;
+        sun.util.logging.PlatformLogger r0;
+        sun.util.logging.PlatformLogger$LoggerProxy $r3;
+        java.lang.String r1;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r3 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $r2 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level WARNING>;
+
+        virtualinvoke $r3.<sun.util.logging.PlatformLogger$LoggerProxy: void doLog(sun.util.logging.PlatformLogger$Level,java.lang.String)>($r2, r1);
+
+        return;
+    }
+
+    public void warning(java.lang.String, java.lang.Throwable)
+    {
+        java.lang.Throwable r2;
+        sun.util.logging.PlatformLogger$Level $r3;
+        sun.util.logging.PlatformLogger r0;
+        sun.util.logging.PlatformLogger$LoggerProxy $r4;
+        java.lang.String r1;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Throwable;
+
+        $r4 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $r3 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level WARNING>;
+
+        virtualinvoke $r4.<sun.util.logging.PlatformLogger$LoggerProxy: void doLog(sun.util.logging.PlatformLogger$Level,java.lang.String,java.lang.Throwable)>($r3, r1, r2);
+
+        return;
+    }
+
+    public transient void warning(java.lang.String, java.lang.Object[])
+    {
+        sun.util.logging.PlatformLogger$Level $r3;
+        sun.util.logging.PlatformLogger r0;
+        java.lang.Object[] r2;
+        sun.util.logging.PlatformLogger$LoggerProxy $r4;
+        java.lang.String r1;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Object[];
+
+        $r4 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $r3 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level WARNING>;
+
+        virtualinvoke $r4.<sun.util.logging.PlatformLogger$LoggerProxy: void doLog(sun.util.logging.PlatformLogger$Level,java.lang.String,java.lang.Object[])>($r3, r1, r2);
+
+        return;
+    }
+
+    public void info(java.lang.String)
+    {
+        sun.util.logging.PlatformLogger$Level $r2;
+        sun.util.logging.PlatformLogger r0;
+        sun.util.logging.PlatformLogger$LoggerProxy $r3;
+        java.lang.String r1;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r3 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $r2 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level INFO>;
+
+        virtualinvoke $r3.<sun.util.logging.PlatformLogger$LoggerProxy: void doLog(sun.util.logging.PlatformLogger$Level,java.lang.String)>($r2, r1);
+
+        return;
+    }
+
+    public void info(java.lang.String, java.lang.Throwable)
+    {
+        java.lang.Throwable r2;
+        sun.util.logging.PlatformLogger$Level $r3;
+        sun.util.logging.PlatformLogger r0;
+        sun.util.logging.PlatformLogger$LoggerProxy $r4;
+        java.lang.String r1;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Throwable;
+
+        $r4 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $r3 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level INFO>;
+
+        virtualinvoke $r4.<sun.util.logging.PlatformLogger$LoggerProxy: void doLog(sun.util.logging.PlatformLogger$Level,java.lang.String,java.lang.Throwable)>($r3, r1, r2);
+
+        return;
+    }
+
+    public transient void info(java.lang.String, java.lang.Object[])
+    {
+        sun.util.logging.PlatformLogger$Level $r3;
+        sun.util.logging.PlatformLogger r0;
+        java.lang.Object[] r2;
+        sun.util.logging.PlatformLogger$LoggerProxy $r4;
+        java.lang.String r1;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Object[];
+
+        $r4 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $r3 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level INFO>;
+
+        virtualinvoke $r4.<sun.util.logging.PlatformLogger$LoggerProxy: void doLog(sun.util.logging.PlatformLogger$Level,java.lang.String,java.lang.Object[])>($r3, r1, r2);
+
+        return;
+    }
+
+    public void config(java.lang.String)
+    {
+        sun.util.logging.PlatformLogger$Level $r2;
+        sun.util.logging.PlatformLogger r0;
+        sun.util.logging.PlatformLogger$LoggerProxy $r3;
+        java.lang.String r1;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r3 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $r2 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level CONFIG>;
+
+        virtualinvoke $r3.<sun.util.logging.PlatformLogger$LoggerProxy: void doLog(sun.util.logging.PlatformLogger$Level,java.lang.String)>($r2, r1);
+
+        return;
+    }
+
+    public void config(java.lang.String, java.lang.Throwable)
+    {
+        java.lang.Throwable r2;
+        sun.util.logging.PlatformLogger$Level $r3;
+        sun.util.logging.PlatformLogger r0;
+        sun.util.logging.PlatformLogger$LoggerProxy $r4;
+        java.lang.String r1;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Throwable;
+
+        $r4 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $r3 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level CONFIG>;
+
+        virtualinvoke $r4.<sun.util.logging.PlatformLogger$LoggerProxy: void doLog(sun.util.logging.PlatformLogger$Level,java.lang.String,java.lang.Throwable)>($r3, r1, r2);
+
+        return;
+    }
+
+    public transient void config(java.lang.String, java.lang.Object[])
+    {
+        sun.util.logging.PlatformLogger$Level $r3;
+        sun.util.logging.PlatformLogger r0;
+        java.lang.Object[] r2;
+        sun.util.logging.PlatformLogger$LoggerProxy $r4;
+        java.lang.String r1;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Object[];
+
+        $r4 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $r3 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level CONFIG>;
+
+        virtualinvoke $r4.<sun.util.logging.PlatformLogger$LoggerProxy: void doLog(sun.util.logging.PlatformLogger$Level,java.lang.String,java.lang.Object[])>($r3, r1, r2);
+
+        return;
+    }
+
+    public void fine(java.lang.String)
+    {
+        sun.util.logging.PlatformLogger$Level $r2;
+        sun.util.logging.PlatformLogger r0;
+        sun.util.logging.PlatformLogger$LoggerProxy $r3;
+        java.lang.String r1;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r3 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $r2 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINE>;
+
+        virtualinvoke $r3.<sun.util.logging.PlatformLogger$LoggerProxy: void doLog(sun.util.logging.PlatformLogger$Level,java.lang.String)>($r2, r1);
+
+        return;
+    }
+
+    public void fine(java.lang.String, java.lang.Throwable)
+    {
+        java.lang.Throwable r2;
+        sun.util.logging.PlatformLogger$Level $r3;
+        sun.util.logging.PlatformLogger r0;
+        sun.util.logging.PlatformLogger$LoggerProxy $r4;
+        java.lang.String r1;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Throwable;
+
+        $r4 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $r3 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINE>;
+
+        virtualinvoke $r4.<sun.util.logging.PlatformLogger$LoggerProxy: void doLog(sun.util.logging.PlatformLogger$Level,java.lang.String,java.lang.Throwable)>($r3, r1, r2);
+
+        return;
+    }
+
+    public transient void fine(java.lang.String, java.lang.Object[])
+    {
+        sun.util.logging.PlatformLogger$Level $r3;
+        sun.util.logging.PlatformLogger r0;
+        java.lang.Object[] r2;
+        sun.util.logging.PlatformLogger$LoggerProxy $r4;
+        java.lang.String r1;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Object[];
+
+        $r4 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $r3 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINE>;
+
+        virtualinvoke $r4.<sun.util.logging.PlatformLogger$LoggerProxy: void doLog(sun.util.logging.PlatformLogger$Level,java.lang.String,java.lang.Object[])>($r3, r1, r2);
+
+        return;
+    }
+
+    public void finer(java.lang.String)
+    {
+        sun.util.logging.PlatformLogger$Level $r2;
+        sun.util.logging.PlatformLogger r0;
+        sun.util.logging.PlatformLogger$LoggerProxy $r3;
+        java.lang.String r1;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r3 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $r2 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINER>;
+
+        virtualinvoke $r3.<sun.util.logging.PlatformLogger$LoggerProxy: void doLog(sun.util.logging.PlatformLogger$Level,java.lang.String)>($r2, r1);
+
+        return;
+    }
+
+    public void finer(java.lang.String, java.lang.Throwable)
+    {
+        java.lang.Throwable r2;
+        sun.util.logging.PlatformLogger$Level $r3;
+        sun.util.logging.PlatformLogger r0;
+        sun.util.logging.PlatformLogger$LoggerProxy $r4;
+        java.lang.String r1;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Throwable;
+
+        $r4 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $r3 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINER>;
+
+        virtualinvoke $r4.<sun.util.logging.PlatformLogger$LoggerProxy: void doLog(sun.util.logging.PlatformLogger$Level,java.lang.String,java.lang.Throwable)>($r3, r1, r2);
+
+        return;
+    }
+
+    public transient void finer(java.lang.String, java.lang.Object[])
+    {
+        sun.util.logging.PlatformLogger$Level $r3;
+        sun.util.logging.PlatformLogger r0;
+        java.lang.Object[] r2;
+        sun.util.logging.PlatformLogger$LoggerProxy $r4;
+        java.lang.String r1;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Object[];
+
+        $r4 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $r3 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINER>;
+
+        virtualinvoke $r4.<sun.util.logging.PlatformLogger$LoggerProxy: void doLog(sun.util.logging.PlatformLogger$Level,java.lang.String,java.lang.Object[])>($r3, r1, r2);
+
+        return;
+    }
+
+    public void finest(java.lang.String)
+    {
+        sun.util.logging.PlatformLogger$Level $r2;
+        sun.util.logging.PlatformLogger r0;
+        sun.util.logging.PlatformLogger$LoggerProxy $r3;
+        java.lang.String r1;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r3 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $r2 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINEST>;
+
+        virtualinvoke $r3.<sun.util.logging.PlatformLogger$LoggerProxy: void doLog(sun.util.logging.PlatformLogger$Level,java.lang.String)>($r2, r1);
+
+        return;
+    }
+
+    public void finest(java.lang.String, java.lang.Throwable)
+    {
+        java.lang.Throwable r2;
+        sun.util.logging.PlatformLogger$Level $r3;
+        sun.util.logging.PlatformLogger r0;
+        sun.util.logging.PlatformLogger$LoggerProxy $r4;
+        java.lang.String r1;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Throwable;
+
+        $r4 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $r3 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINEST>;
+
+        virtualinvoke $r4.<sun.util.logging.PlatformLogger$LoggerProxy: void doLog(sun.util.logging.PlatformLogger$Level,java.lang.String,java.lang.Throwable)>($r3, r1, r2);
+
+        return;
+    }
+
+    public transient void finest(java.lang.String, java.lang.Object[])
+    {
+        sun.util.logging.PlatformLogger$Level $r3;
+        sun.util.logging.PlatformLogger r0;
+        java.lang.Object[] r2;
+        sun.util.logging.PlatformLogger$LoggerProxy $r4;
+        java.lang.String r1;
+
+        r0 := @this: sun.util.logging.PlatformLogger;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Object[];
+
+        $r4 = r0.<sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$LoggerProxy loggerProxy>;
+
+        $r3 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINEST>;
+
+        virtualinvoke $r4.<sun.util.logging.PlatformLogger$LoggerProxy: void doLog(sun.util.logging.PlatformLogger$Level,java.lang.String,java.lang.Object[])>($r3, r1, r2);
+
+        return;
+    }
+
+    static sun.util.logging.PlatformLogger$Level access$000()
+    {
+        sun.util.logging.PlatformLogger$Level $r0;
+
+        $r0 = <sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$Level DEFAULT_LEVEL>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        sun.util.logging.PlatformLogger$Level $r0;
+        sun.util.logging.PlatformLogger$1 $r1;
+        java.util.HashMap $r8;
+        java.lang.Boolean $r3;
+        java.lang.InternalError $r10;
+        java.lang.Object $r2;
+        java.lang.Class $r4, $r6;
+        java.lang.ClassNotFoundException $r9;
+        java.lang.ClassLoader $r5, $r7;
+        boolean $z0;
+
+        <sun.util.logging.PlatformLogger: int ALL> = -2147483648;
+
+        <sun.util.logging.PlatformLogger: int FINEST> = 300;
+
+        <sun.util.logging.PlatformLogger: int FINER> = 400;
+
+        <sun.util.logging.PlatformLogger: int FINE> = 500;
+
+        <sun.util.logging.PlatformLogger: int CONFIG> = 700;
+
+        <sun.util.logging.PlatformLogger: int INFO> = 800;
+
+        <sun.util.logging.PlatformLogger: int WARNING> = 900;
+
+        <sun.util.logging.PlatformLogger: int SEVERE> = 1000;
+
+        <sun.util.logging.PlatformLogger: int OFF> = 2147483647;
+
+        $r0 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level INFO>;
+
+        <sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger$Level DEFAULT_LEVEL> = $r0;
+
+        $r1 = new sun.util.logging.PlatformLogger$1;
+
+        specialinvoke $r1.<sun.util.logging.PlatformLogger$1: void <init>()>();
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        $r3 = (java.lang.Boolean) $r2;
+
+        $z0 = virtualinvoke $r3.<java.lang.Boolean: boolean booleanValue()>();
+
+        <sun.util.logging.PlatformLogger: boolean loggingEnabled> = $z0;
+
+     label1:
+        $r4 = class "Lsun/util/logging/PlatformLogger;";
+
+        $r5 = virtualinvoke $r4.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>("sun.util.logging.PlatformLogger$DefaultLoggerProxy", 0, $r5);
+
+        $r6 = class "Lsun/util/logging/PlatformLogger;";
+
+        $r7 = virtualinvoke $r6.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>("sun.util.logging.PlatformLogger$JavaLoggerProxy", 0, $r7);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r9 := @caughtexception;
+
+        $r10 = new java.lang.InternalError;
+
+        specialinvoke $r10.<java.lang.InternalError: void <init>(java.lang.Throwable)>($r9);
+
+        throw $r10;
+
+     label4:
+        $r8 = new java.util.HashMap;
+
+        specialinvoke $r8.<java.util.HashMap: void <init>()>();
+
+        <sun.util.logging.PlatformLogger: java.util.Map loggers> = $r8;
+
+        return;
+
+        catch java.lang.ClassNotFoundException from label1 to label2 with label3;
+    }
+}

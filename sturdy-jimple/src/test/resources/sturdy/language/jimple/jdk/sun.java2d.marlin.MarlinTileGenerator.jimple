@@ -1,0 +1,1691 @@
+final class sun.java2d.marlin.MarlinTileGenerator extends java.lang.Object implements sun.java2d.pipe.AATileGenerator, sun.java2d.marlin.MarlinConst
+{
+    private static final boolean DISABLE_BLEND;
+    private static final int MAX_TILE_ALPHA_SUM;
+    private static final int TH_AA_ALPHA_FILL_EMPTY;
+    private static final int TH_AA_ALPHA_FILL_FULL;
+    private static final int FILL_TILE_W;
+    private final sun.java2d.marlin.Renderer rdrF;
+    private final sun.java2d.marlin.DRenderer rdrD;
+    private final sun.java2d.marlin.MarlinCache cache;
+    private int x;
+    private int y;
+    final sun.java2d.marlin.RendererStats rdrStats;
+
+    void <init>(sun.java2d.marlin.RendererStats, sun.java2d.marlin.MarlinRenderer, sun.java2d.marlin.MarlinCache)
+    {
+        sun.java2d.marlin.RendererStats r1;
+        sun.java2d.marlin.MarlinRenderer r2;
+        sun.java2d.marlin.Renderer $r5;
+        sun.java2d.marlin.MarlinCache r4;
+        sun.java2d.marlin.DRenderer $r3;
+        sun.java2d.marlin.MarlinTileGenerator r0;
+        boolean $z0;
+
+        r0 := @this: sun.java2d.marlin.MarlinTileGenerator;
+
+        r1 := @parameter0: sun.java2d.marlin.RendererStats;
+
+        r2 := @parameter1: sun.java2d.marlin.MarlinRenderer;
+
+        r4 := @parameter2: sun.java2d.marlin.MarlinCache;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.RendererStats rdrStats> = r1;
+
+        $z0 = r2 instanceof sun.java2d.marlin.Renderer;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = (sun.java2d.marlin.Renderer) r2;
+
+        r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.Renderer rdrF> = $r5;
+
+        r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.DRenderer rdrD> = null;
+
+        goto label2;
+
+     label1:
+        r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.Renderer rdrF> = null;
+
+        $r3 = (sun.java2d.marlin.DRenderer) r2;
+
+        r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.DRenderer rdrD> = $r3;
+
+     label2:
+        r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.MarlinCache cache> = r4;
+
+        return;
+    }
+
+    sun.java2d.marlin.MarlinTileGenerator init()
+    {
+        sun.java2d.marlin.MarlinCache $r1, $r2;
+        int $i0, $i1;
+        sun.java2d.marlin.MarlinTileGenerator r0;
+
+        r0 := @this: sun.java2d.marlin.MarlinTileGenerator;
+
+        $r1 = r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.MarlinCache cache>;
+
+        $i0 = $r1.<sun.java2d.marlin.MarlinCache: int bboxX0>;
+
+        r0.<sun.java2d.marlin.MarlinTileGenerator: int x> = $i0;
+
+        $r2 = r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.MarlinCache cache>;
+
+        $i1 = $r2.<sun.java2d.marlin.MarlinCache: int bboxY0>;
+
+        r0.<sun.java2d.marlin.MarlinTileGenerator: int y> = $i1;
+
+        return r0;
+    }
+
+    public void dispose()
+    {
+        sun.java2d.marlin.Renderer $r2, $r5;
+        sun.java2d.marlin.MarlinCache $r1;
+        sun.java2d.marlin.DRenderer $r3, $r4;
+        sun.java2d.marlin.MarlinTileGenerator r0;
+
+        r0 := @this: sun.java2d.marlin.MarlinTileGenerator;
+
+        $r1 = r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.MarlinCache cache>;
+
+        virtualinvoke $r1.<sun.java2d.marlin.MarlinCache: void dispose()>();
+
+        $r2 = r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.Renderer rdrF>;
+
+        if $r2 == null goto label1;
+
+        $r5 = r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.Renderer rdrF>;
+
+        virtualinvoke $r5.<sun.java2d.marlin.Renderer: void dispose()>();
+
+        goto label2;
+
+     label1:
+        $r3 = r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.DRenderer rdrD>;
+
+        if $r3 == null goto label2;
+
+        $r4 = r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.DRenderer rdrD>;
+
+        virtualinvoke $r4.<sun.java2d.marlin.DRenderer: void dispose()>();
+
+     label2:
+        return;
+    }
+
+    void getBbox(int[])
+    {
+        sun.java2d.marlin.MarlinCache $r2, $r3, $r4, $r5;
+        sun.java2d.marlin.MarlinTileGenerator r1;
+        int[] r0;
+        int $i0, $i1, $i2, $i3;
+
+        r1 := @this: sun.java2d.marlin.MarlinTileGenerator;
+
+        r0 := @parameter0: int[];
+
+        $r2 = r1.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.MarlinCache cache>;
+
+        $i0 = $r2.<sun.java2d.marlin.MarlinCache: int bboxX0>;
+
+        r0[0] = $i0;
+
+        $r3 = r1.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.MarlinCache cache>;
+
+        $i1 = $r3.<sun.java2d.marlin.MarlinCache: int bboxY0>;
+
+        r0[1] = $i1;
+
+        $r4 = r1.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.MarlinCache cache>;
+
+        $i2 = $r4.<sun.java2d.marlin.MarlinCache: int bboxX1>;
+
+        r0[2] = $i2;
+
+        $r5 = r1.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.MarlinCache cache>;
+
+        $i3 = $r5.<sun.java2d.marlin.MarlinCache: int bboxY1>;
+
+        r0[3] = $i3;
+
+        return;
+    }
+
+    public int getTileWidth()
+    {
+        int $i0;
+        sun.java2d.marlin.MarlinTileGenerator r0;
+
+        r0 := @this: sun.java2d.marlin.MarlinTileGenerator;
+
+        $i0 = <sun.java2d.marlin.MarlinTileGenerator: int TILE_W>;
+
+        return $i0;
+    }
+
+    public int getTileHeight()
+    {
+        int $i0;
+        sun.java2d.marlin.MarlinTileGenerator r0;
+
+        r0 := @this: sun.java2d.marlin.MarlinTileGenerator;
+
+        $i0 = <sun.java2d.marlin.MarlinTileGenerator: int TILE_H>;
+
+        return $i0;
+    }
+
+    public int getTypicalAlpha()
+    {
+        sun.java2d.marlin.MarlinCache $r1;
+        sun.java2d.marlin.MarlinTileGenerator r0;
+        sun.java2d.marlin.RendererStats $r2;
+        short s3, $s5, $s6;
+        sun.java2d.marlin.stats.Histogram $r3;
+        int $i0, $i1, $i2;
+        boolean $z0;
+
+        r0 := @this: sun.java2d.marlin.MarlinTileGenerator;
+
+        $r1 = r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.MarlinCache cache>;
+
+        $i0 = r0.<sun.java2d.marlin.MarlinTileGenerator: int x>;
+
+        $i1 = virtualinvoke $r1.<sun.java2d.marlin.MarlinCache: int alphaSumInTile(int)>($i0);
+
+        if $i1 != 0 goto label1;
+
+        $s6 = 0;
+
+        $s5 = 0;
+
+        goto label3;
+
+     label1:
+        $i2 = <sun.java2d.marlin.MarlinTileGenerator: int MAX_TILE_ALPHA_SUM>;
+
+        if $i1 != $i2 goto label2;
+
+        $s6 = 255;
+
+        $s5 = 255;
+
+        goto label3;
+
+     label2:
+        $s6 = 128;
+
+        $s5 = 128;
+
+     label3:
+        s3 = $s5;
+
+        $z0 = <sun.java2d.marlin.MarlinTileGenerator: boolean DO_STATS>;
+
+        if $z0 == 0 goto label4;
+
+        $r2 = r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.RendererStats rdrStats>;
+
+        $r3 = $r2.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.Histogram hist_tile_generator_alpha>;
+
+        virtualinvoke $r3.<sun.java2d.marlin.stats.Histogram: void add(int)>($s6);
+
+     label4:
+        return s3;
+    }
+
+    public void nextTile()
+    {
+        sun.java2d.marlin.MarlinCache $r1, $r2, $r3;
+        sun.java2d.marlin.Renderer $r4, $r7;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11;
+        sun.java2d.marlin.DRenderer $r5, $r6;
+        sun.java2d.marlin.MarlinTileGenerator r0;
+
+        r0 := @this: sun.java2d.marlin.MarlinTileGenerator;
+
+        $i1 = r0.<sun.java2d.marlin.MarlinTileGenerator: int x>;
+
+        $i0 = <sun.java2d.marlin.MarlinTileGenerator: int TILE_W>;
+
+        $i2 = $i1 + $i0;
+
+        r0.<sun.java2d.marlin.MarlinTileGenerator: int x> = $i2;
+
+        $r1 = r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.MarlinCache cache>;
+
+        $i3 = $r1.<sun.java2d.marlin.MarlinCache: int bboxX1>;
+
+        if $i2 < $i3 goto label2;
+
+        $r2 = r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.MarlinCache cache>;
+
+        $i4 = $r2.<sun.java2d.marlin.MarlinCache: int bboxX0>;
+
+        r0.<sun.java2d.marlin.MarlinTileGenerator: int x> = $i4;
+
+        $i6 = r0.<sun.java2d.marlin.MarlinTileGenerator: int y>;
+
+        $i5 = <sun.java2d.marlin.MarlinTileGenerator: int TILE_H>;
+
+        $i7 = $i6 + $i5;
+
+        r0.<sun.java2d.marlin.MarlinTileGenerator: int y> = $i7;
+
+        $i9 = r0.<sun.java2d.marlin.MarlinTileGenerator: int y>;
+
+        $r3 = r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.MarlinCache cache>;
+
+        $i8 = $r3.<sun.java2d.marlin.MarlinCache: int bboxY1>;
+
+        if $i9 >= $i8 goto label2;
+
+        $r4 = r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.Renderer rdrF>;
+
+        if $r4 == null goto label1;
+
+        $r7 = r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.Renderer rdrF>;
+
+        $i11 = r0.<sun.java2d.marlin.MarlinTileGenerator: int y>;
+
+        virtualinvoke $r7.<sun.java2d.marlin.Renderer: void endRendering(int)>($i11);
+
+        goto label2;
+
+     label1:
+        $r5 = r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.DRenderer rdrD>;
+
+        if $r5 == null goto label2;
+
+        $r6 = r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.DRenderer rdrD>;
+
+        $i10 = r0.<sun.java2d.marlin.MarlinTileGenerator: int y>;
+
+        virtualinvoke $r6.<sun.java2d.marlin.DRenderer: void endRendering(int)>($i10);
+
+     label2:
+        return;
+    }
+
+    public void getAlpha(byte[], int, int)
+    {
+        byte[] r2;
+        sun.java2d.marlin.MarlinCache $r1;
+        int i0, i1;
+        sun.java2d.marlin.MarlinTileGenerator r0;
+        boolean $z0;
+
+        r0 := @this: sun.java2d.marlin.MarlinTileGenerator;
+
+        r2 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r1 = r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.MarlinCache cache>;
+
+        $z0 = $r1.<sun.java2d.marlin.MarlinCache: boolean useRLE>;
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<sun.java2d.marlin.MarlinTileGenerator: void getAlphaRLE(byte[],int,int)>(r2, i0, i1);
+
+        goto label2;
+
+     label1:
+        specialinvoke r0.<sun.java2d.marlin.MarlinTileGenerator: void getAlphaNoRLE(byte[],int,int)>(r2, i0, i1);
+
+     label2:
+        return;
+    }
+
+    private void getAlphaNoRLE(byte[], int, int)
+    {
+        byte[] r7;
+        byte $b17, $b25;
+        int[] r3, r4;
+        sun.java2d.marlin.OffHeapArray $r5;
+        boolean $z0, $z1;
+        sun.java2d.marlin.MarlinTileGenerator r0;
+        java.lang.StringBuilder $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r22;
+        sun.misc.Unsafe $r21;
+        sun.java2d.marlin.MarlinCache r1;
+        long $l20, $l22, $l23, $l27, l33;
+        long[] r2;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, i11, i12, $i13, i14, i15, $i16, $i18, i19, $i21, $i24, $i26, $i28, i29, i30, i31, i32, $i34, i35, i36, $i37;
+        java.lang.String $r9, $r20;
+        java.io.PrintStream $r6, $r8;
+
+        r0 := @this: sun.java2d.marlin.MarlinTileGenerator;
+
+        r7 := @parameter0: byte[];
+
+        i14 := @parameter1: int;
+
+        i12 := @parameter2: int;
+
+        r1 = r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.MarlinCache cache>;
+
+        r2 = r1.<sun.java2d.marlin.MarlinCache: long[] rowAAChunkIndex>;
+
+        r3 = r1.<sun.java2d.marlin.MarlinCache: int[] rowAAx0>;
+
+        r4 = r1.<sun.java2d.marlin.MarlinCache: int[] rowAAx1>;
+
+        i0 = r0.<sun.java2d.marlin.MarlinTileGenerator: int x>;
+
+        $i1 = <sun.java2d.marlin.MarlinTileGenerator: int TILE_W>;
+
+        $i3 = i0 + $i1;
+
+        $i2 = r1.<sun.java2d.marlin.MarlinCache: int bboxX1>;
+
+        $i4 = staticinvoke <sun.java2d.marlin.FloatMath: int min(int,int)>($i3, $i2);
+
+        $i6 = r0.<sun.java2d.marlin.MarlinTileGenerator: int y>;
+
+        $i5 = <sun.java2d.marlin.MarlinTileGenerator: int TILE_H>;
+
+        $i8 = $i6 + $i5;
+
+        $i7 = r1.<sun.java2d.marlin.MarlinCache: int bboxY1>;
+
+        $i9 = staticinvoke <sun.java2d.marlin.FloatMath: int min(int,int)>($i8, $i7);
+
+        $i10 = r0.<sun.java2d.marlin.MarlinTileGenerator: int y>;
+
+        i11 = $i9 - $i10;
+
+        $z0 = <sun.java2d.marlin.MarlinTileGenerator: boolean DO_LOG_BOUNDS>;
+
+        if $z0 == 0 goto label01;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getAlpha = [");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ... ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[ [");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(0);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ... ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i11);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.java2d.marlin.MarlinUtils: void logInfo(java.lang.String)>($r20);
+
+     label01:
+        $r21 = <sun.java2d.marlin.OffHeapArray: sun.misc.Unsafe UNSAFE>;
+
+        $r5 = r1.<sun.java2d.marlin.MarlinCache: sun.java2d.marlin.OffHeapArray rowAAChunk>;
+
+        $l27 = $r5.<sun.java2d.marlin.OffHeapArray: long address>;
+
+        $i13 = $i4 - i0;
+
+        $i28 = i12 - $i13;
+
+        i29 = i14;
+
+        i30 = 0;
+
+     label02:
+        if i30 >= i11 goto label14;
+
+        i31 = i0;
+
+        i15 = r4[i30];
+
+        if i15 <= i0 goto label09;
+
+        i19 = r3[i30];
+
+        if i19 >= $i4 goto label09;
+
+        i31 = i19;
+
+        if i19 > i0 goto label03;
+
+        i31 = i0;
+
+        goto label05;
+
+     label03:
+        i32 = i0;
+
+     label04:
+        if i32 >= i19 goto label05;
+
+        $i26 = i29;
+
+        i29 = i29 + 1;
+
+        r7[$i26] = 0;
+
+        i32 = i32 + 1;
+
+        goto label04;
+
+     label05:
+        $l20 = r2[i30];
+
+        $l23 = $l27 + $l20;
+
+        $i21 = i31 - i19;
+
+        $l22 = (long) $i21;
+
+        l33 = $l23 + $l22;
+
+        if i15 > $i4 goto label06;
+
+        $i34 = i15;
+
+        goto label07;
+
+     label06:
+        $i34 = $i4;
+
+     label07:
+        i35 = $i34;
+
+     label08:
+        if i31 >= i35 goto label09;
+
+        $i24 = i29;
+
+        i29 = i29 + 1;
+
+        $b25 = virtualinvoke $r21.<sun.misc.Unsafe: byte getByte(long)>(l33);
+
+        r7[$i24] = $b25;
+
+        l33 = l33 + 1L;
+
+        i31 = i31 + 1;
+
+        goto label08;
+
+     label09:
+        if i31 >= $i4 goto label10;
+
+        $i18 = i29;
+
+        i29 = i29 + 1;
+
+        r7[$i18] = 0;
+
+        i31 = i31 + 1;
+
+        goto label09;
+
+     label10:
+        $z1 = <sun.java2d.marlin.MarlinTileGenerator: boolean DO_TRACE>;
+
+        if $z1 == 0 goto label13;
+
+        $i16 = $i4 - i0;
+
+        i36 = i29 - $i16;
+
+     label11:
+        if i36 >= i29 goto label12;
+
+        $r8 = <java.lang.System: java.io.PrintStream out>;
+
+        $b17 = r7[i36];
+
+        $i37 = (int) $b17;
+
+        $r9 = staticinvoke <sun.java2d.marlin.MarlinTileGenerator: java.lang.String hex(int,int)>($i37, 2);
+
+        virtualinvoke $r8.<java.io.PrintStream: void print(java.lang.String)>($r9);
+
+        i36 = i36 + 1;
+
+        goto label11;
+
+     label12:
+        $r6 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r6.<java.io.PrintStream: void println()>();
+
+     label13:
+        i29 = i29 + $i28;
+
+        i30 = i30 + 1;
+
+        goto label02;
+
+     label14:
+        virtualinvoke r0.<sun.java2d.marlin.MarlinTileGenerator: void nextTile()>();
+
+        return;
+    }
+
+    private void getAlphaRLE(byte[], int, int)
+    {
+        byte[] r8;
+        byte $b21, $b26, $b28, $b38, $b45, $b50, $b52, $b65, $b69, $b74, $b76, $b86, b94, b95, b113, b133, b153, b155, b156;
+        java.lang.StringBuilder $r20, $r21, $r22, $r23, $r24, $r25, $r26, $r27, $r28, $r32;
+        long $l23, $l24, $l25, $l27, $l33, $l35, $l36, $l47, $l48, $l49, $l51, $l57, $l58, $l60, $l62, $l63, $l71, $l72, $l73, $l75, $l81, $l83, $l84, $l96, l103, l106, l107, l120, l124, l125, l126, l127, l140, l144, l145, l146, l147;
+        int[] r3, r4, r5;
+        sun.java2d.marlin.MarlinCache r1, $r18;
+        long[] r2, r6, r7;
+        int i0, $i1, $i2, $i3, $i4, i5, $i6, $i7, $i8, $i9, $i10, $i11, i12, $i13, i14, i15, $i16, $i17, $i18, $i19, $i20, $i22, $i29, $i30, $i31, $i32, $i34, $i37, $i39, $i40, $i41, $i42, $i43, $i44, $i46, $i53, $i54, $i55, $i56, $i59, $i61, $i64, $i66, $i67, $i68, $i70, $i77, $i78, $i79, $i80, $i82, $i85, $i87, $i88, $i89, $i90, $i91, $i92, $i93, $i97, i98, i99, i100, i101, i102, $i104, i105, i108, i109, i110, i111, i112, i114, i115, i116, i117, i118, i119, $i121, i122, i123, i128, i129, i130, i131, i132, i134, i135, i136, i137, i138, i139, $i141, i142, i143, i148, i149, i150, i151, i152, i154, $i157, $i159, $i160, $i161, $i163, $i164, $i165, $i167, $i168;
+        java.io.PrintStream $r9, $r10, $r12, $r13, $r15, $r16;
+        sun.misc.Unsafe $r30;
+        java.lang.String $r11, $r14, $r17, $r29;
+        sun.java2d.marlin.OffHeapArray $r31;
+        boolean $z0, $z1, $z2, $z3;
+        sun.java2d.marlin.MarlinTileGenerator r0;
+
+        r0 := @this: sun.java2d.marlin.MarlinTileGenerator;
+
+        r8 := @parameter0: byte[];
+
+        i15 := @parameter1: int;
+
+        i14 := @parameter2: int;
+
+        r1 = r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.MarlinCache cache>;
+
+        r2 = r1.<sun.java2d.marlin.MarlinCache: long[] rowAAChunkIndex>;
+
+        r3 = r1.<sun.java2d.marlin.MarlinCache: int[] rowAAx0>;
+
+        r4 = r1.<sun.java2d.marlin.MarlinCache: int[] rowAAx1>;
+
+        r5 = r1.<sun.java2d.marlin.MarlinCache: int[] rowAAEnc>;
+
+        r6 = r1.<sun.java2d.marlin.MarlinCache: long[] rowAALen>;
+
+        r7 = r1.<sun.java2d.marlin.MarlinCache: long[] rowAAPos>;
+
+        i0 = r0.<sun.java2d.marlin.MarlinTileGenerator: int x>;
+
+        $i1 = <sun.java2d.marlin.MarlinTileGenerator: int TILE_W>;
+
+        $i3 = i0 + $i1;
+
+        $i2 = r1.<sun.java2d.marlin.MarlinCache: int bboxX1>;
+
+        $i4 = staticinvoke <sun.java2d.marlin.FloatMath: int min(int,int)>($i3, $i2);
+
+        i5 = $i4 - i0;
+
+        $i7 = r0.<sun.java2d.marlin.MarlinTileGenerator: int y>;
+
+        $i6 = <sun.java2d.marlin.MarlinTileGenerator: int TILE_H>;
+
+        $i9 = $i7 + $i6;
+
+        $i8 = r1.<sun.java2d.marlin.MarlinCache: int bboxY1>;
+
+        $i10 = staticinvoke <sun.java2d.marlin.FloatMath: int min(int,int)>($i9, $i8);
+
+        $i11 = r0.<sun.java2d.marlin.MarlinTileGenerator: int y>;
+
+        i12 = $i10 - $i11;
+
+        $z0 = <sun.java2d.marlin.MarlinTileGenerator: boolean DO_LOG_BOUNDS>;
+
+        if $z0 == 0 goto label01;
+
+        $r32 = new java.lang.StringBuilder;
+
+        specialinvoke $r32.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getAlpha = [");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ... ");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[ [");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(0);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ... ");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i12);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.java2d.marlin.MarlinUtils: void logInfo(java.lang.String)>($r29);
+
+     label01:
+        $i13 = <sun.java2d.marlin.MarlinTileGenerator: int FILL_TILE_W>;
+
+        if i5 < $i13 goto label05;
+
+        $i88 = i5 * i12;
+
+        if $i88 <= 64 goto label05;
+
+        $r18 = r0.<sun.java2d.marlin.MarlinTileGenerator: sun.java2d.marlin.MarlinCache cache>;
+
+        $i89 = virtualinvoke $r18.<sun.java2d.marlin.MarlinCache: int alphaSumInTile(int)>(i0);
+
+        $i90 = <sun.java2d.marlin.MarlinTileGenerator: int TH_AA_ALPHA_FILL_EMPTY>;
+
+        $i91 = $i88 * $i90;
+
+        if $i89 >= $i91 goto label02;
+
+        b94 = 1;
+
+        b95 = 0;
+
+        b156 = 0;
+
+        b155 = 0;
+
+        goto label04;
+
+     label02:
+        $i92 = <sun.java2d.marlin.MarlinTileGenerator: int TH_AA_ALPHA_FILL_FULL>;
+
+        $i93 = $i88 * $i92;
+
+        if $i89 <= $i93 goto label03;
+
+        b94 = 2;
+
+        b95 = -1;
+
+        b156 = -1;
+
+        b155 = -1;
+
+        goto label04;
+
+     label03:
+        b94 = 0;
+
+        b95 = 0;
+
+        b156 = 0;
+
+        b155 = 0;
+
+     label04:
+        goto label06;
+
+     label05:
+        b94 = 0;
+
+        b95 = 0;
+
+        b156 = 0;
+
+        b155 = 0;
+
+     label06:
+        $r30 = <sun.java2d.marlin.OffHeapArray: sun.misc.Unsafe UNSAFE>;
+
+        $r31 = r1.<sun.java2d.marlin.MarlinCache: sun.java2d.marlin.OffHeapArray rowAAChunk>;
+
+        $l96 = $r31.<sun.java2d.marlin.OffHeapArray: long address>;
+
+        $i97 = i14 - i5;
+
+        i98 = i15;
+
+        tableswitch(b94)
+        {
+            case 0: goto label29;
+            case 1: goto label07;
+            case 2: goto label52;
+            default: goto label29;
+        };
+
+     label07:
+        $i40 = i12 * i14;
+
+        $i41 = i15 + $i40;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],int,int,byte)>(r8, i15, $i41, b156);
+
+        i99 = 0;
+
+     label08:
+        if i99 >= i12 goto label76;
+
+        i100 = i0;
+
+        $i42 = r5[i99];
+
+        if $i42 != 0 goto label15;
+
+        i101 = r4[i99];
+
+        if i101 <= i0 goto label14;
+
+        i102 = r3[i99];
+
+        if i102 >= $i4 goto label14;
+
+        i100 = i102;
+
+        if i102 > i0 goto label09;
+
+        i100 = i0;
+
+        goto label10;
+
+     label09:
+        $i59 = i102 - i0;
+
+        i98 = i98 + $i59;
+
+     label10:
+        $l60 = r2[i99];
+
+        $l63 = $l96 + $l60;
+
+        $i61 = i100 - i102;
+
+        $l62 = (long) $i61;
+
+        l103 = $l63 + $l62;
+
+        if i101 > $i4 goto label11;
+
+        $i104 = i101;
+
+        goto label12;
+
+     label11:
+        $i104 = $i4;
+
+     label12:
+        i105 = $i104;
+
+     label13:
+        if i100 >= i105 goto label14;
+
+        $i64 = i98;
+
+        i98 = i98 + 1;
+
+        $b65 = virtualinvoke $r30.<sun.misc.Unsafe: byte getByte(long)>(l103);
+
+        r8[$i64] = $b65;
+
+        l103 = l103 + 1L;
+
+        i100 = i100 + 1;
+
+        goto label13;
+
+     label14:
+        goto label24;
+
+     label15:
+        $i43 = r4[i99];
+
+        if $i43 <= i0 goto label24;
+
+        i100 = r3[i99];
+
+        if i100 <= $i4 goto label16;
+
+        i100 = $i4;
+
+     label16:
+        if i100 <= i0 goto label17;
+
+        $i56 = i100 - i0;
+
+        i98 = i98 + $i56;
+
+     label17:
+        $l47 = r2[i99];
+
+        $l57 = $l96 + $l47;
+
+        $l48 = r6[i99];
+
+        $l58 = $l57 + $l48;
+
+        $l49 = r7[i99];
+
+        l106 = $l57 + $l49;
+
+        l107 = 0L;
+
+     label18:
+        if i100 >= $i4 goto label23;
+
+        $b52 = l106 cmp $l58;
+
+        $i157 = (int) $b52;
+
+        if $i157 >= 0 goto label23;
+
+        l107 = l106;
+
+        $i53 = virtualinvoke $r30.<sun.misc.Unsafe: int getInt(long)>(l106);
+
+        i108 = $i53 >> 8;
+
+        l106 = l106 + 4L;
+
+        i109 = i100;
+
+        if i100 >= i0 goto label19;
+
+        i109 = i0;
+
+     label19:
+        i100 = i108;
+
+        i110 = i108;
+
+        if i108 <= $i4 goto label20;
+
+        i110 = $i4;
+
+        i100 = $i4;
+
+     label20:
+        $i55 = i110 - i109;
+
+        i111 = $i55;
+
+        if $i55 <= 0 goto label18;
+
+        i112 = $i53 & 255;
+
+        if i112 != 0 goto label21;
+
+        i98 = i98 + $i55;
+
+        goto label18;
+
+     label21:
+        b113 = (byte) i112;
+
+     label22:
+        $i54 = i98;
+
+        i98 = i98 + 1;
+
+        r8[$i54] = b113;
+
+        $i159 = (int) -1;
+
+        i111 = i111 + $i159;
+
+        if i111 > 0 goto label22;
+
+        goto label18;
+
+     label23:
+        $b50 = l107 cmp 0L;
+
+        if $b50 == 0 goto label24;
+
+        r3[i99] = i100;
+
+        $l51 = l107 - $l57;
+
+        r7[i99] = $l51;
+
+     label24:
+        if i100 >= $i4 goto label25;
+
+        $i46 = $i4 - i100;
+
+        i98 = i98 + $i46;
+
+     label25:
+        $z2 = <sun.java2d.marlin.MarlinTileGenerator: boolean DO_TRACE>;
+
+        if $z2 == 0 goto label28;
+
+        $i44 = $i4 - i0;
+
+        i114 = i98 - $i44;
+
+     label26:
+        if i114 >= i98 goto label27;
+
+        $r13 = <java.lang.System: java.io.PrintStream out>;
+
+        $b45 = r8[i114];
+
+        $i160 = (int) $b45;
+
+        $r14 = staticinvoke <sun.java2d.marlin.MarlinTileGenerator: java.lang.String hex(int,int)>($i160, 2);
+
+        virtualinvoke $r13.<java.io.PrintStream: void print(java.lang.String)>($r14);
+
+        i114 = i114 + 1;
+
+        goto label26;
+
+     label27:
+        $r12 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r12.<java.io.PrintStream: void println()>();
+
+     label28:
+        i98 = i98 + $i97;
+
+        i99 = i99 + 1;
+
+        goto label08;
+
+     label29:
+        i115 = 0;
+
+     label30:
+        if i115 >= i12 goto label76;
+
+        i116 = i0;
+
+        $i66 = r5[i115];
+
+        if $i66 != 0 goto label38;
+
+        i117 = r4[i115];
+
+        if i117 <= i0 goto label37;
+
+        i118 = r3[i115];
+
+        if i118 >= $i4 goto label37;
+
+        i116 = i118;
+
+        if i118 > i0 goto label31;
+
+        i116 = i0;
+
+        goto label33;
+
+     label31:
+        i119 = i0;
+
+     label32:
+        if i119 >= i118 goto label33;
+
+        $i87 = i98;
+
+        i98 = i98 + 1;
+
+        r8[$i87] = 0;
+
+        i119 = i119 + 1;
+
+        goto label32;
+
+     label33:
+        $l81 = r2[i115];
+
+        $l84 = $l96 + $l81;
+
+        $i82 = i116 - i118;
+
+        $l83 = (long) $i82;
+
+        l120 = $l84 + $l83;
+
+        if i117 > $i4 goto label34;
+
+        $i121 = i117;
+
+        goto label35;
+
+     label34:
+        $i121 = $i4;
+
+     label35:
+        i122 = $i121;
+
+     label36:
+        if i116 >= i122 goto label37;
+
+        $i85 = i98;
+
+        i98 = i98 + 1;
+
+        $b86 = virtualinvoke $r30.<sun.misc.Unsafe: byte getByte(long)>(l120);
+
+        r8[$i85] = $b86;
+
+        l120 = l120 + 1L;
+
+        i116 = i116 + 1;
+
+        goto label36;
+
+     label37:
+        goto label47;
+
+     label38:
+        $i67 = r4[i115];
+
+        if $i67 <= i0 goto label47;
+
+        i116 = r3[i115];
+
+        if i116 <= $i4 goto label39;
+
+        i116 = $i4;
+
+     label39:
+        i123 = i0;
+
+     label40:
+        if i123 >= i116 goto label41;
+
+        $i80 = i98;
+
+        i98 = i98 + 1;
+
+        r8[$i80] = 0;
+
+        i123 = i123 + 1;
+
+        goto label40;
+
+     label41:
+        $l71 = r2[i115];
+
+        l124 = $l96 + $l71;
+
+        $l72 = r6[i115];
+
+        l125 = l124 + $l72;
+
+        $l73 = r7[i115];
+
+        l126 = l124 + $l73;
+
+        l127 = 0L;
+
+     label42:
+        if i116 >= $i4 goto label46;
+
+        $b76 = l126 cmp l125;
+
+        $i161 = (int) $b76;
+
+        if $i161 >= 0 goto label46;
+
+        l127 = l126;
+
+        $i77 = virtualinvoke $r30.<sun.misc.Unsafe: int getInt(long)>(l126);
+
+        i128 = $i77 >> 8;
+
+        l126 = l126 + 4L;
+
+        i129 = i116;
+
+        if i116 >= i0 goto label43;
+
+        i129 = i0;
+
+     label43:
+        i116 = i128;
+
+        i130 = i128;
+
+        if i128 <= $i4 goto label44;
+
+        i130 = $i4;
+
+        i116 = $i4;
+
+     label44:
+        $i79 = i130 - i129;
+
+        i131 = $i79;
+
+        if $i79 <= 0 goto label42;
+
+        i132 = $i77 & 255;
+
+        b133 = (byte) i132;
+
+     label45:
+        $i78 = i98;
+
+        i98 = i98 + 1;
+
+        r8[$i78] = b133;
+
+        $i163 = (int) -1;
+
+        i131 = i131 + $i163;
+
+        if i131 > 0 goto label45;
+
+        goto label42;
+
+     label46:
+        $b74 = l127 cmp 0L;
+
+        if $b74 == 0 goto label47;
+
+        r3[i115] = i116;
+
+        $l75 = l127 - l124;
+
+        r7[i115] = $l75;
+
+     label47:
+        if i116 >= $i4 goto label48;
+
+        $i70 = i98;
+
+        i98 = i98 + 1;
+
+        r8[$i70] = 0;
+
+        i116 = i116 + 1;
+
+        goto label47;
+
+     label48:
+        $z3 = <sun.java2d.marlin.MarlinTileGenerator: boolean DO_TRACE>;
+
+        if $z3 == 0 goto label51;
+
+        $i68 = $i4 - i0;
+
+        i134 = i98 - $i68;
+
+     label49:
+        if i134 >= i98 goto label50;
+
+        $r16 = <java.lang.System: java.io.PrintStream out>;
+
+        $b69 = r8[i134];
+
+        $i164 = (int) $b69;
+
+        $r17 = staticinvoke <sun.java2d.marlin.MarlinTileGenerator: java.lang.String hex(int,int)>($i164, 2);
+
+        virtualinvoke $r16.<java.io.PrintStream: void print(java.lang.String)>($r17);
+
+        i134 = i134 + 1;
+
+        goto label49;
+
+     label50:
+        $r15 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r15.<java.io.PrintStream: void println()>();
+
+     label51:
+        i98 = i98 + $i97;
+
+        i115 = i115 + 1;
+
+        goto label30;
+
+     label52:
+        $i16 = i12 * i14;
+
+        $i17 = i15 + $i16;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],int,int,byte)>(r8, i15, $i17, b155);
+
+        i135 = 0;
+
+     label53:
+        if i135 >= i12 goto label76;
+
+        i136 = i0;
+
+        $i18 = r5[i135];
+
+        if $i18 != 0 goto label61;
+
+        i137 = r4[i135];
+
+        if i137 <= i0 goto label60;
+
+        i138 = r3[i135];
+
+        if i138 >= $i4 goto label60;
+
+        i136 = i138;
+
+        if i138 > i0 goto label54;
+
+        i136 = i0;
+
+        goto label56;
+
+     label54:
+        i139 = i0;
+
+     label55:
+        if i139 >= i138 goto label56;
+
+        $i39 = i98;
+
+        i98 = i98 + 1;
+
+        r8[$i39] = 0;
+
+        i139 = i139 + 1;
+
+        goto label55;
+
+     label56:
+        $l33 = r2[i135];
+
+        $l36 = $l96 + $l33;
+
+        $i34 = i136 - i138;
+
+        $l35 = (long) $i34;
+
+        l140 = $l36 + $l35;
+
+        if i137 > $i4 goto label57;
+
+        $i141 = i137;
+
+        goto label58;
+
+     label57:
+        $i141 = $i4;
+
+     label58:
+        i142 = $i141;
+
+     label59:
+        if i136 >= i142 goto label60;
+
+        $i37 = i98;
+
+        i98 = i98 + 1;
+
+        $b38 = virtualinvoke $r30.<sun.misc.Unsafe: byte getByte(long)>(l140);
+
+        r8[$i37] = $b38;
+
+        l140 = l140 + 1L;
+
+        i136 = i136 + 1;
+
+        goto label59;
+
+     label60:
+        goto label71;
+
+     label61:
+        $i19 = r4[i135];
+
+        if $i19 <= i0 goto label71;
+
+        i136 = r3[i135];
+
+        if i136 <= $i4 goto label62;
+
+        i136 = $i4;
+
+     label62:
+        i143 = i0;
+
+     label63:
+        if i143 >= i136 goto label64;
+
+        $i32 = i98;
+
+        i98 = i98 + 1;
+
+        r8[$i32] = 0;
+
+        i143 = i143 + 1;
+
+        goto label63;
+
+     label64:
+        $l23 = r2[i135];
+
+        l144 = $l96 + $l23;
+
+        $l24 = r6[i135];
+
+        l145 = l144 + $l24;
+
+        $l25 = r7[i135];
+
+        l146 = l144 + $l25;
+
+        l147 = 0L;
+
+     label65:
+        if i136 >= $i4 goto label70;
+
+        $b28 = l146 cmp l145;
+
+        $i165 = (int) $b28;
+
+        if $i165 >= 0 goto label70;
+
+        l147 = l146;
+
+        $i29 = virtualinvoke $r30.<sun.misc.Unsafe: int getInt(long)>(l146);
+
+        i148 = $i29 >> 8;
+
+        l146 = l146 + 4L;
+
+        i149 = i136;
+
+        if i136 >= i0 goto label66;
+
+        i149 = i0;
+
+     label66:
+        i136 = i148;
+
+        i150 = i148;
+
+        if i148 <= $i4 goto label67;
+
+        i150 = $i4;
+
+        i136 = $i4;
+
+     label67:
+        $i31 = i150 - i149;
+
+        i151 = $i31;
+
+        if $i31 <= 0 goto label65;
+
+        i152 = $i29 & 255;
+
+        if i152 != 255 goto label68;
+
+        i98 = i98 + $i31;
+
+        goto label65;
+
+     label68:
+        b153 = (byte) i152;
+
+     label69:
+        $i30 = i98;
+
+        i98 = i98 + 1;
+
+        r8[$i30] = b153;
+
+        $i167 = (int) -1;
+
+        i151 = i151 + $i167;
+
+        if i151 > 0 goto label69;
+
+        goto label65;
+
+     label70:
+        $b26 = l147 cmp 0L;
+
+        if $b26 == 0 goto label71;
+
+        r3[i135] = i136;
+
+        $l27 = l147 - l144;
+
+        r7[i135] = $l27;
+
+     label71:
+        if i136 >= $i4 goto label72;
+
+        $i22 = i98;
+
+        i98 = i98 + 1;
+
+        r8[$i22] = 0;
+
+        i136 = i136 + 1;
+
+        goto label71;
+
+     label72:
+        $z1 = <sun.java2d.marlin.MarlinTileGenerator: boolean DO_TRACE>;
+
+        if $z1 == 0 goto label75;
+
+        $i20 = $i4 - i0;
+
+        i154 = i98 - $i20;
+
+     label73:
+        if i154 >= i98 goto label74;
+
+        $r10 = <java.lang.System: java.io.PrintStream out>;
+
+        $b21 = r8[i154];
+
+        $i168 = (int) $b21;
+
+        $r11 = staticinvoke <sun.java2d.marlin.MarlinTileGenerator: java.lang.String hex(int,int)>($i168, 2);
+
+        virtualinvoke $r10.<java.io.PrintStream: void print(java.lang.String)>($r11);
+
+        i154 = i154 + 1;
+
+        goto label73;
+
+     label74:
+        $r9 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r9.<java.io.PrintStream: void println()>();
+
+     label75:
+        i98 = i98 + $i97;
+
+        i135 = i135 + 1;
+
+        goto label53;
+
+     label76:
+        virtualinvoke r0.<sun.java2d.marlin.MarlinTileGenerator: void nextTile()>();
+
+        return;
+    }
+
+    static java.lang.String hex(int, int)
+    {
+        int i0, $i1, i2;
+        java.lang.StringBuilder $r1, $r2, $r3;
+        java.lang.String $r0, r4;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        r4 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>(i0);
+
+     label1:
+        $i1 = virtualinvoke r4.<java.lang.String: int length()>();
+
+        if $i1 >= i2 goto label2;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("0");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label1;
+
+     label2:
+        $r0 = virtualinvoke r4.<java.lang.String: java.lang.String substring(int,int)>(0, i2);
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.IllegalStateException $r16;
+        boolean $z0;
+        java.lang.StringBuilder $r0, $r1, $r2, $r4, $r5, $r6, $r8, $r9, $r10, $r12, $r13, $r14, $r17, $r18, $r19;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19;
+        java.lang.String $r3, $r7, $r11, $r15, $r20;
+
+        <sun.java2d.marlin.MarlinTileGenerator: boolean DISABLE_BLEND> = 0;
+
+        $i1 = <sun.java2d.marlin.MarlinTileGenerator: int TILE_W>;
+
+        $i0 = <sun.java2d.marlin.MarlinTileGenerator: int TILE_H>;
+
+        $i3 = $i1 * $i0;
+
+        $i2 = <sun.java2d.marlin.MarlinTileGenerator: int MAX_AA_ALPHA>;
+
+        $i4 = $i3 * $i2;
+
+        <sun.java2d.marlin.MarlinTileGenerator: int MAX_TILE_ALPHA_SUM> = $i4;
+
+        $i5 = <sun.java2d.marlin.MarlinTileGenerator: int MAX_AA_ALPHA>;
+
+        $i6 = $i5 + 1;
+
+        $i7 = $i6 / 3;
+
+        <sun.java2d.marlin.MarlinTileGenerator: int TH_AA_ALPHA_FILL_EMPTY> = $i7;
+
+        $i8 = <sun.java2d.marlin.MarlinTileGenerator: int MAX_AA_ALPHA>;
+
+        $i9 = $i8 + 1;
+
+        $i10 = $i9 * 2;
+
+        $i11 = $i10 / 3;
+
+        <sun.java2d.marlin.MarlinTileGenerator: int TH_AA_ALPHA_FILL_FULL> = $i11;
+
+        $i12 = <sun.java2d.marlin.MarlinTileGenerator: int TILE_W>;
+
+        $i13 = $i12 >> 1;
+
+        <sun.java2d.marlin.MarlinTileGenerator: int FILL_TILE_W> = $i13;
+
+        $i14 = <sun.java2d.marlin.MarlinTileGenerator: int MAX_TILE_ALPHA_SUM>;
+
+        if $i14 > 0 goto label1;
+
+        $r16 = new java.lang.IllegalStateException;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid MAX_TILE_ALPHA_SUM: ");
+
+        $i19 = <sun.java2d.marlin.MarlinTileGenerator: int MAX_TILE_ALPHA_SUM>;
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i19);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r16.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r20);
+
+        throw $r16;
+
+     label1:
+        $z0 = <sun.java2d.marlin.MarlinTileGenerator: boolean DO_TRACE>;
+
+        if $z0 == 0 goto label2;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("MAX_AA_ALPHA           : ");
+
+        $i15 = <sun.java2d.marlin.MarlinTileGenerator: int MAX_AA_ALPHA>;
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i15);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.java2d.marlin.MarlinUtils: void logInfo(java.lang.String)>($r3);
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("TH_AA_ALPHA_FILL_EMPTY : ");
+
+        $i16 = <sun.java2d.marlin.MarlinTileGenerator: int TH_AA_ALPHA_FILL_EMPTY>;
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i16);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.java2d.marlin.MarlinUtils: void logInfo(java.lang.String)>($r7);
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("TH_AA_ALPHA_FILL_FULL  : ");
+
+        $i17 = <sun.java2d.marlin.MarlinTileGenerator: int TH_AA_ALPHA_FILL_FULL>;
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i17);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.java2d.marlin.MarlinUtils: void logInfo(java.lang.String)>($r11);
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("FILL_TILE_W            : ");
+
+        $i18 = <sun.java2d.marlin.MarlinTileGenerator: int FILL_TILE_W>;
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i18);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.java2d.marlin.MarlinUtils: void logInfo(java.lang.String)>($r15);
+
+     label2:
+        return;
+    }
+}

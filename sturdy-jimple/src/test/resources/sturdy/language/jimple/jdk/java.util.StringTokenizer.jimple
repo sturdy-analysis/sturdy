@@ -1,0 +1,623 @@
+public class java.util.StringTokenizer extends java.lang.Object implements java.util.Enumeration
+{
+    private int currentPosition;
+    private int newPosition;
+    private int maxPosition;
+    private java.lang.String str;
+    private java.lang.String delimiters;
+    private boolean retDelims;
+    private boolean delimsChanged;
+    private int maxDelimCodePoint;
+    private boolean hasSurrogates;
+    private int[] delimiterCodePoints;
+
+    private void setMaxDelimCodePoint()
+    {
+        int[] $r3, $r5;
+        java.util.StringTokenizer r0;
+        int $i0, $i1, $i2, $i4, i5, i6, i7, i8, i9, i10, $i11, $i12, $i14, $i15, $i17;
+        java.lang.String $r1, $r2, $r4, $r6, $r7;
+        boolean $z0;
+        char $c3;
+
+        r0 := @this: java.util.StringTokenizer;
+
+        $r1 = r0.<java.util.StringTokenizer: java.lang.String delimiters>;
+
+        if $r1 != null goto label1;
+
+        r0.<java.util.StringTokenizer: int maxDelimCodePoint> = 0;
+
+        return;
+
+     label1:
+        i5 = 0;
+
+        i6 = 0;
+
+        i7 = 0;
+
+     label2:
+        $r2 = r0.<java.util.StringTokenizer: java.lang.String delimiters>;
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        if i7 >= $i0 goto label5;
+
+        $r6 = r0.<java.util.StringTokenizer: java.lang.String delimiters>;
+
+        $c3 = virtualinvoke $r6.<java.lang.String: char charAt(int)>(i7);
+
+        $i11 = (int) $c3;
+
+        i8 = $i11;
+
+        $i12 = (int) $c3;
+
+        $i14 = (int) 55296;
+
+        if $i12 < $i14 goto label3;
+
+        $i15 = (int) $c3;
+
+        $i17 = (int) 57343;
+
+        if $i15 > $i17 goto label3;
+
+        $r7 = r0.<java.util.StringTokenizer: java.lang.String delimiters>;
+
+        i8 = virtualinvoke $r7.<java.lang.String: int codePointAt(int)>(i7);
+
+        r0.<java.util.StringTokenizer: boolean hasSurrogates> = 1;
+
+     label3:
+        if i5 >= i8 goto label4;
+
+        i5 = i8;
+
+     label4:
+        i6 = i6 + 1;
+
+        $i4 = staticinvoke <java.lang.Character: int charCount(int)>(i8);
+
+        i7 = i7 + $i4;
+
+        goto label2;
+
+     label5:
+        r0.<java.util.StringTokenizer: int maxDelimCodePoint> = i5;
+
+        $z0 = r0.<java.util.StringTokenizer: boolean hasSurrogates>;
+
+        if $z0 == 0 goto label7;
+
+        $r3 = newarray (int)[i6];
+
+        r0.<java.util.StringTokenizer: int[] delimiterCodePoints> = $r3;
+
+        i9 = 0;
+
+        i10 = 0;
+
+     label6:
+        if i9 >= i6 goto label7;
+
+        $r4 = r0.<java.util.StringTokenizer: java.lang.String delimiters>;
+
+        $i1 = virtualinvoke $r4.<java.lang.String: int codePointAt(int)>(i10);
+
+        $r5 = r0.<java.util.StringTokenizer: int[] delimiterCodePoints>;
+
+        $r5[i9] = $i1;
+
+        i9 = i9 + 1;
+
+        $i2 = staticinvoke <java.lang.Character: int charCount(int)>($i1);
+
+        i10 = i10 + $i2;
+
+        goto label6;
+
+     label7:
+        return;
+    }
+
+    public void <init>(java.lang.String, java.lang.String, boolean)
+    {
+        java.util.StringTokenizer r0;
+        int $i0, $i2;
+        java.lang.String r1, r2;
+        boolean z0;
+
+        r0 := @this: java.util.StringTokenizer;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        z0 := @parameter2: boolean;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.util.StringTokenizer: boolean hasSurrogates> = 0;
+
+        r0.<java.util.StringTokenizer: int currentPosition> = 0;
+
+        $i2 = (int) -1;
+
+        r0.<java.util.StringTokenizer: int newPosition> = $i2;
+
+        r0.<java.util.StringTokenizer: boolean delimsChanged> = 0;
+
+        r0.<java.util.StringTokenizer: java.lang.String str> = r1;
+
+        $i0 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        r0.<java.util.StringTokenizer: int maxPosition> = $i0;
+
+        r0.<java.util.StringTokenizer: java.lang.String delimiters> = r2;
+
+        r0.<java.util.StringTokenizer: boolean retDelims> = z0;
+
+        specialinvoke r0.<java.util.StringTokenizer: void setMaxDelimCodePoint()>();
+
+        return;
+    }
+
+    public void <init>(java.lang.String, java.lang.String)
+    {
+        java.lang.String r1, r2;
+        java.util.StringTokenizer r0;
+
+        r0 := @this: java.util.StringTokenizer;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String,boolean)>(r1, r2, 0);
+
+        return;
+    }
+
+    public void <init>(java.lang.String)
+    {
+        java.lang.String r1;
+        java.util.StringTokenizer r0;
+
+        r0 := @this: java.util.StringTokenizer;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String,boolean)>(r1, " \t\n\r\f", 0);
+
+        return;
+    }
+
+    private int skipDelimiters(int)
+    {
+        java.lang.NullPointerException $r6;
+        java.util.StringTokenizer r0;
+        int i0, $i1, $i2, $i3, $i4, $i6, $i7, i8, $i9, $i10;
+        java.lang.String $r1, $r2, $r3, $r4;
+        boolean $z0, $z1, $z2;
+        char $c5;
+
+        r0 := @this: java.util.StringTokenizer;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.util.StringTokenizer: java.lang.String delimiters>;
+
+        if $r1 != null goto label1;
+
+        $r6 = new java.lang.NullPointerException;
+
+        specialinvoke $r6.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r6;
+
+     label1:
+        i8 = i0;
+
+     label2:
+        $z2 = r0.<java.util.StringTokenizer: boolean retDelims>;
+
+        if $z2 != 0 goto label6;
+
+        $i1 = r0.<java.util.StringTokenizer: int maxPosition>;
+
+        if i8 >= $i1 goto label6;
+
+        $z0 = r0.<java.util.StringTokenizer: boolean hasSurrogates>;
+
+        if $z0 != 0 goto label4;
+
+        $r3 = r0.<java.util.StringTokenizer: java.lang.String str>;
+
+        $c5 = virtualinvoke $r3.<java.lang.String: char charAt(int)>(i8);
+
+        $i6 = r0.<java.util.StringTokenizer: int maxDelimCodePoint>;
+
+        $i9 = (int) $c5;
+
+        if $i9 > $i6 goto label6;
+
+        $r4 = r0.<java.util.StringTokenizer: java.lang.String delimiters>;
+
+        $i10 = (int) $c5;
+
+        $i7 = virtualinvoke $r4.<java.lang.String: int indexOf(int)>($i10);
+
+        if $i7 >= 0 goto label3;
+
+        goto label6;
+
+     label3:
+        i8 = i8 + 1;
+
+        goto label2;
+
+     label4:
+        $r2 = r0.<java.util.StringTokenizer: java.lang.String str>;
+
+        $i2 = virtualinvoke $r2.<java.lang.String: int codePointAt(int)>(i8);
+
+        $i3 = r0.<java.util.StringTokenizer: int maxDelimCodePoint>;
+
+        if $i2 > $i3 goto label6;
+
+        $z1 = specialinvoke r0.<java.util.StringTokenizer: boolean isDelimiter(int)>($i2);
+
+        if $z1 != 0 goto label5;
+
+        goto label6;
+
+     label5:
+        $i4 = staticinvoke <java.lang.Character: int charCount(int)>($i2);
+
+        i8 = i8 + $i4;
+
+        goto label2;
+
+     label6:
+        return i8;
+    }
+
+    private int scanToken(int)
+    {
+        java.util.StringTokenizer r0;
+        int i0, $i1, $i2, $i3, $i5, $i6, $i7, $i8, $i9, $i11, $i12, i13, $i14, $i15, $i16, $i17, $i18;
+        java.lang.String $r1, $r2, $r3, $r4, $r5, $r6;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        char $c4, $c10;
+
+        r0 := @this: java.util.StringTokenizer;
+
+        i0 := @parameter0: int;
+
+        i13 = i0;
+
+     label1:
+        $i14 = r0.<java.util.StringTokenizer: int maxPosition>;
+
+        if i13 >= $i14 goto label5;
+
+        $z2 = r0.<java.util.StringTokenizer: boolean hasSurrogates>;
+
+        if $z2 != 0 goto label3;
+
+        $r5 = r0.<java.util.StringTokenizer: java.lang.String str>;
+
+        $c10 = virtualinvoke $r5.<java.lang.String: char charAt(int)>(i13);
+
+        $i11 = r0.<java.util.StringTokenizer: int maxDelimCodePoint>;
+
+        $i15 = (int) $c10;
+
+        if $i15 > $i11 goto label2;
+
+        $r6 = r0.<java.util.StringTokenizer: java.lang.String delimiters>;
+
+        $i16 = (int) $c10;
+
+        $i12 = virtualinvoke $r6.<java.lang.String: int indexOf(int)>($i16);
+
+        if $i12 < 0 goto label2;
+
+        goto label5;
+
+     label2:
+        i13 = i13 + 1;
+
+        goto label1;
+
+     label3:
+        $r4 = r0.<java.util.StringTokenizer: java.lang.String str>;
+
+        $i7 = virtualinvoke $r4.<java.lang.String: int codePointAt(int)>(i13);
+
+        $i8 = r0.<java.util.StringTokenizer: int maxDelimCodePoint>;
+
+        if $i7 > $i8 goto label4;
+
+        $z3 = specialinvoke r0.<java.util.StringTokenizer: boolean isDelimiter(int)>($i7);
+
+        if $z3 == 0 goto label4;
+
+        goto label5;
+
+     label4:
+        $i9 = staticinvoke <java.lang.Character: int charCount(int)>($i7);
+
+        i13 = i13 + $i9;
+
+        goto label1;
+
+     label5:
+        $z4 = r0.<java.util.StringTokenizer: boolean retDelims>;
+
+        if $z4 == 0 goto label8;
+
+        if i0 != i13 goto label8;
+
+        $z0 = r0.<java.util.StringTokenizer: boolean hasSurrogates>;
+
+        if $z0 != 0 goto label7;
+
+        $r2 = r0.<java.util.StringTokenizer: java.lang.String str>;
+
+        $c4 = virtualinvoke $r2.<java.lang.String: char charAt(int)>(i13);
+
+        $i5 = r0.<java.util.StringTokenizer: int maxDelimCodePoint>;
+
+        $i17 = (int) $c4;
+
+        if $i17 > $i5 goto label6;
+
+        $r3 = r0.<java.util.StringTokenizer: java.lang.String delimiters>;
+
+        $i18 = (int) $c4;
+
+        $i6 = virtualinvoke $r3.<java.lang.String: int indexOf(int)>($i18);
+
+        if $i6 < 0 goto label6;
+
+        i13 = i13 + 1;
+
+     label6:
+        goto label8;
+
+     label7:
+        $r1 = r0.<java.util.StringTokenizer: java.lang.String str>;
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int codePointAt(int)>(i13);
+
+        $i2 = r0.<java.util.StringTokenizer: int maxDelimCodePoint>;
+
+        if $i1 > $i2 goto label8;
+
+        $z1 = specialinvoke r0.<java.util.StringTokenizer: boolean isDelimiter(int)>($i1);
+
+        if $z1 == 0 goto label8;
+
+        $i3 = staticinvoke <java.lang.Character: int charCount(int)>($i1);
+
+        i13 = i13 + $i3;
+
+     label8:
+        return i13;
+    }
+
+    private boolean isDelimiter(int)
+    {
+        int[] $r1, $r2;
+        java.util.StringTokenizer r0;
+        int $i0, i1, $i2, i3;
+
+        r0 := @this: java.util.StringTokenizer;
+
+        i1 := @parameter0: int;
+
+        i3 = 0;
+
+     label1:
+        $r1 = r0.<java.util.StringTokenizer: int[] delimiterCodePoints>;
+
+        $i0 = lengthof $r1;
+
+        if i3 >= $i0 goto label3;
+
+        $r2 = r0.<java.util.StringTokenizer: int[] delimiterCodePoints>;
+
+        $i2 = $r2[i3];
+
+        if $i2 != i1 goto label2;
+
+        return 1;
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    public boolean hasMoreTokens()
+    {
+        java.util.StringTokenizer r0;
+        int $i0, $i1, $i2, $i3;
+        boolean $z0;
+
+        r0 := @this: java.util.StringTokenizer;
+
+        $i0 = r0.<java.util.StringTokenizer: int currentPosition>;
+
+        $i1 = specialinvoke r0.<java.util.StringTokenizer: int skipDelimiters(int)>($i0);
+
+        r0.<java.util.StringTokenizer: int newPosition> = $i1;
+
+        $i3 = r0.<java.util.StringTokenizer: int newPosition>;
+
+        $i2 = r0.<java.util.StringTokenizer: int maxPosition>;
+
+        if $i3 >= $i2 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public java.lang.String nextToken()
+    {
+        java.util.StringTokenizer r0;
+        int $i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i10;
+        java.lang.String $r1, $r2;
+        java.util.NoSuchElementException $r4;
+        boolean $z0;
+
+        r0 := @this: java.util.StringTokenizer;
+
+        $i0 = r0.<java.util.StringTokenizer: int newPosition>;
+
+        if $i0 < 0 goto label1;
+
+        $z0 = r0.<java.util.StringTokenizer: boolean delimsChanged>;
+
+        if $z0 != 0 goto label1;
+
+        $i6 = r0.<java.util.StringTokenizer: int newPosition>;
+
+        goto label2;
+
+     label1:
+        $i1 = r0.<java.util.StringTokenizer: int currentPosition>;
+
+        $i6 = specialinvoke r0.<java.util.StringTokenizer: int skipDelimiters(int)>($i1);
+
+     label2:
+        r0.<java.util.StringTokenizer: int currentPosition> = $i6;
+
+        r0.<java.util.StringTokenizer: boolean delimsChanged> = 0;
+
+        $i10 = (int) -1;
+
+        r0.<java.util.StringTokenizer: int newPosition> = $i10;
+
+        $i7 = r0.<java.util.StringTokenizer: int currentPosition>;
+
+        $i8 = r0.<java.util.StringTokenizer: int maxPosition>;
+
+        if $i7 < $i8 goto label3;
+
+        $r4 = new java.util.NoSuchElementException;
+
+        specialinvoke $r4.<java.util.NoSuchElementException: void <init>()>();
+
+        throw $r4;
+
+     label3:
+        i2 = r0.<java.util.StringTokenizer: int currentPosition>;
+
+        $i3 = r0.<java.util.StringTokenizer: int currentPosition>;
+
+        $i4 = specialinvoke r0.<java.util.StringTokenizer: int scanToken(int)>($i3);
+
+        r0.<java.util.StringTokenizer: int currentPosition> = $i4;
+
+        $r1 = r0.<java.util.StringTokenizer: java.lang.String str>;
+
+        $i5 = r0.<java.util.StringTokenizer: int currentPosition>;
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(i2, $i5);
+
+        return $r2;
+    }
+
+    public java.lang.String nextToken(java.lang.String)
+    {
+        java.lang.String r1, $r2;
+        java.util.StringTokenizer r0;
+
+        r0 := @this: java.util.StringTokenizer;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0.<java.util.StringTokenizer: java.lang.String delimiters> = r1;
+
+        r0.<java.util.StringTokenizer: boolean delimsChanged> = 1;
+
+        specialinvoke r0.<java.util.StringTokenizer: void setMaxDelimCodePoint()>();
+
+        $r2 = virtualinvoke r0.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        return $r2;
+    }
+
+    public boolean hasMoreElements()
+    {
+        java.util.StringTokenizer r0;
+        boolean $z0;
+
+        r0 := @this: java.util.StringTokenizer;
+
+        $z0 = virtualinvoke r0.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        return $z0;
+    }
+
+    public java.lang.Object nextElement()
+    {
+        java.lang.String $r1;
+        java.util.StringTokenizer r0;
+
+        r0 := @this: java.util.StringTokenizer;
+
+        $r1 = virtualinvoke r0.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        return $r1;
+    }
+
+    public int countTokens()
+    {
+        java.util.StringTokenizer r0;
+        int $i0, $i1, $i2, i3, i4;
+
+        r0 := @this: java.util.StringTokenizer;
+
+        i3 = 0;
+
+        i4 = r0.<java.util.StringTokenizer: int currentPosition>;
+
+     label1:
+        $i0 = r0.<java.util.StringTokenizer: int maxPosition>;
+
+        if i4 >= $i0 goto label3;
+
+        $i1 = specialinvoke r0.<java.util.StringTokenizer: int skipDelimiters(int)>(i4);
+
+        $i2 = r0.<java.util.StringTokenizer: int maxPosition>;
+
+        if $i1 < $i2 goto label2;
+
+        goto label3;
+
+     label2:
+        i4 = specialinvoke r0.<java.util.StringTokenizer: int scanToken(int)>($i1);
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        return i3;
+    }
+}

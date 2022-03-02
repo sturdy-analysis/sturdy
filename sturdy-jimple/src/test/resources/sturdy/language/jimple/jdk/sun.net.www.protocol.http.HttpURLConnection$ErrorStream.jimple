@@ -1,0 +1,407 @@
+class sun.net.www.protocol.http.HttpURLConnection$ErrorStream extends java.io.InputStream
+{
+    java.nio.ByteBuffer buffer;
+    java.io.InputStream is;
+
+    private void <init>(java.nio.ByteBuffer)
+    {
+        sun.net.www.protocol.http.HttpURLConnection$ErrorStream r0;
+        java.nio.ByteBuffer r1;
+
+        r0 := @this: sun.net.www.protocol.http.HttpURLConnection$ErrorStream;
+
+        r1 := @parameter0: java.nio.ByteBuffer;
+
+        specialinvoke r0.<java.io.InputStream: void <init>()>();
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$ErrorStream: java.nio.ByteBuffer buffer> = r1;
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$ErrorStream: java.io.InputStream is> = null;
+
+        return;
+    }
+
+    private void <init>(java.nio.ByteBuffer, java.io.InputStream)
+    {
+        sun.net.www.protocol.http.HttpURLConnection$ErrorStream r0;
+        java.nio.ByteBuffer r1;
+        java.io.InputStream r2;
+
+        r0 := @this: sun.net.www.protocol.http.HttpURLConnection$ErrorStream;
+
+        r1 := @parameter0: java.nio.ByteBuffer;
+
+        r2 := @parameter1: java.io.InputStream;
+
+        specialinvoke r0.<java.io.InputStream: void <init>()>();
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$ErrorStream: java.nio.ByteBuffer buffer> = r1;
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$ErrorStream: java.io.InputStream is> = r2;
+
+        return;
+    }
+
+    public static java.io.InputStream getErrorStream(java.io.InputStream, long, sun.net.www.http.HttpClient)
+    {
+        byte[] r1;
+        java.nio.ByteBuffer $r4, $r6;
+        byte $b1, $b5, $b8, $b14;
+        boolean z0, z1, z2, z3;
+        java.lang.StringBuilder $r9, $r10, $r11, $r15;
+        long l0, $l7, $l13, l19;
+        sun.net.www.http.HttpClient r0;
+        java.net.SocketTimeoutException $r14;
+        int $i2, $i3, $i4, $i6, i9, $i10, $i11, $i12, $i15, $i16, $i17, $i18, i20, i21, i22, $i23, $i24;
+        java.lang.String $r12;
+        sun.net.www.protocol.http.HttpURLConnection$ErrorStream $r17, $r18;
+        java.io.IOException $r13, $r16;
+        java.io.InputStream r2;
+
+        r2 := @parameter0: java.io.InputStream;
+
+        l0 := @parameter1: long;
+
+        r0 := @parameter2: sun.net.www.http.HttpClient;
+
+        $b1 = l0 cmp 0L;
+
+        if $b1 != 0 goto label01;
+
+        return null;
+
+     label01:
+        $i2 = virtualinvoke r0.<sun.net.www.http.HttpClient: int getReadTimeout()>();
+
+        $i3 = staticinvoke <sun.net.www.protocol.http.HttpURLConnection: int access$500()>();
+
+        $i4 = $i3 / 5;
+
+        virtualinvoke r0.<sun.net.www.http.HttpClient: void setReadTimeout(int)>($i4);
+
+        z0 = 0;
+
+        z3 = 0;
+
+        z2 = 0;
+
+        z1 = 0;
+
+        $b5 = l0 cmp 0L;
+
+        $i23 = (int) $b5;
+
+        if $i23 >= 0 goto label02;
+
+        $i16 = staticinvoke <sun.net.www.protocol.http.HttpURLConnection: int access$600()>();
+
+        l19 = (long) $i16;
+
+        z0 = 1;
+
+        z3 = 1;
+
+        z2 = 1;
+
+        z1 = 1;
+
+        goto label03;
+
+     label02:
+        l19 = l0;
+
+     label03:
+        $i6 = staticinvoke <sun.net.www.protocol.http.HttpURLConnection: int access$600()>();
+
+        $l7 = (long) $i6;
+
+        $b8 = l19 cmp $l7;
+
+        $i24 = (int) $b8;
+
+        if $i24 > 0 goto label19;
+
+        i9 = (int) l19;
+
+        r1 = newarray (byte)[i9];
+
+        i20 = 0;
+
+        i21 = 0;
+
+        i22 = 0;
+
+     label04:
+        $i10 = lengthof r1;
+
+        $i11 = $i10 - i20;
+
+        $i12 = virtualinvoke r2.<java.io.InputStream: int read(byte[],int,int)>(r1, i20, $i11);
+
+        i22 = $i12;
+
+        if $i12 >= 0 goto label07;
+
+        if z2 == 0 goto label06;
+
+     label05:
+        goto label11;
+
+     label06:
+        $r16 = new java.io.IOException;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("the server closes before sending ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>(l0);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" bytes of data");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r16.<java.io.IOException: void <init>(java.lang.String)>($r12);
+
+        throw $r16;
+
+     label07:
+        i20 = i20 + $i12;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r14 := @caughtexception;
+
+        $i17 = staticinvoke <sun.net.www.protocol.http.HttpURLConnection: int access$500()>();
+
+        $i18 = $i17 / 5;
+
+        i21 = i21 + $i18;
+
+     label10:
+        if i20 >= i9 goto label11;
+
+        $i15 = staticinvoke <sun.net.www.protocol.http.HttpURLConnection: int access$500()>();
+
+        if i21 < $i15 goto label04;
+
+     label11:
+        virtualinvoke r0.<sun.net.www.http.HttpClient: void setReadTimeout(int)>($i2);
+
+        if i20 != 0 goto label13;
+
+     label12:
+        return null;
+
+     label13:
+        $l13 = (long) i20;
+
+        $b14 = $l13 cmp l19;
+
+        if $b14 != 0 goto label14;
+
+        if z1 == 0 goto label15;
+
+     label14:
+        if z3 == 0 goto label17;
+
+        if i22 >= 0 goto label17;
+
+     label15:
+        virtualinvoke r2.<java.io.InputStream: void close()>();
+
+        $r17 = new sun.net.www.protocol.http.HttpURLConnection$ErrorStream;
+
+        $r6 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[],int,int)>(r1, 0, i20);
+
+        specialinvoke $r17.<sun.net.www.protocol.http.HttpURLConnection$ErrorStream: void <init>(java.nio.ByteBuffer)>($r6);
+
+     label16:
+        return $r17;
+
+     label17:
+        $r18 = new sun.net.www.protocol.http.HttpURLConnection$ErrorStream;
+
+        $r4 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[],int,int)>(r1, 0, i20);
+
+        specialinvoke $r18.<sun.net.www.protocol.http.HttpURLConnection$ErrorStream: void <init>(java.nio.ByteBuffer,java.io.InputStream)>($r4, r2);
+
+     label18:
+        return $r18;
+
+     label19:
+        return null;
+
+     label20:
+        $r13 := @caughtexception;
+
+        return null;
+
+        catch java.net.SocketTimeoutException from label04 to label05 with label09;
+        catch java.net.SocketTimeoutException from label06 to label08 with label09;
+        catch java.io.IOException from label01 to label12 with label20;
+        catch java.io.IOException from label13 to label16 with label20;
+        catch java.io.IOException from label17 to label18 with label20;
+    }
+
+    public int available() throws java.io.IOException
+    {
+        sun.net.www.protocol.http.HttpURLConnection$ErrorStream r0;
+        java.nio.ByteBuffer $r2, $r4;
+        int $i0, $i1, $i2, $i3;
+        java.io.InputStream $r1, $r3;
+
+        r0 := @this: sun.net.www.protocol.http.HttpURLConnection$ErrorStream;
+
+        $r1 = r0.<sun.net.www.protocol.http.HttpURLConnection$ErrorStream: java.io.InputStream is>;
+
+        if $r1 != null goto label1;
+
+        $r4 = r0.<sun.net.www.protocol.http.HttpURLConnection$ErrorStream: java.nio.ByteBuffer buffer>;
+
+        $i3 = virtualinvoke $r4.<java.nio.ByteBuffer: int remaining()>();
+
+        return $i3;
+
+     label1:
+        $r2 = r0.<sun.net.www.protocol.http.HttpURLConnection$ErrorStream: java.nio.ByteBuffer buffer>;
+
+        $i0 = virtualinvoke $r2.<java.nio.ByteBuffer: int remaining()>();
+
+        $r3 = r0.<sun.net.www.protocol.http.HttpURLConnection$ErrorStream: java.io.InputStream is>;
+
+        $i1 = virtualinvoke $r3.<java.io.InputStream: int available()>();
+
+        $i2 = $i0 + $i1;
+
+        return $i2;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        byte[] r0;
+        sun.net.www.protocol.http.HttpURLConnection$ErrorStream r1;
+        byte $b1;
+        int $i0, $i2, $i4, $i5;
+
+        r1 := @this: sun.net.www.protocol.http.HttpURLConnection$ErrorStream;
+
+        r0 = newarray (byte)[1];
+
+        $i0 = virtualinvoke r1.<sun.net.www.protocol.http.HttpURLConnection$ErrorStream: int read(byte[])>(r0);
+
+        $i4 = (int) -1;
+
+        if $i0 != $i4 goto label1;
+
+        $i2 = $i0;
+
+        goto label2;
+
+     label1:
+        $b1 = r0[0];
+
+        $i5 = (int) $b1;
+
+        $i2 = $i5 & 255;
+
+     label2:
+        return $i2;
+    }
+
+    public int read(byte[]) throws java.io.IOException
+    {
+        byte[] r1;
+        sun.net.www.protocol.http.HttpURLConnection$ErrorStream r0;
+        int $i0, $i1;
+
+        r0 := @this: sun.net.www.protocol.http.HttpURLConnection$ErrorStream;
+
+        r1 := @parameter0: byte[];
+
+        $i0 = lengthof r1;
+
+        $i1 = virtualinvoke r0.<sun.net.www.protocol.http.HttpURLConnection$ErrorStream: int read(byte[],int,int)>(r1, 0, $i0);
+
+        return $i1;
+    }
+
+    public int read(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r3;
+        sun.net.www.protocol.http.HttpURLConnection$ErrorStream r0;
+        java.nio.ByteBuffer $r1, $r5;
+        int $i0, i1, i2, $i3, $i4, $i6;
+        java.io.InputStream $r2, $r4;
+
+        r0 := @this: sun.net.www.protocol.http.HttpURLConnection$ErrorStream;
+
+        r3 := @parameter0: byte[];
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $r1 = r0.<sun.net.www.protocol.http.HttpURLConnection$ErrorStream: java.nio.ByteBuffer buffer>;
+
+        $i0 = virtualinvoke $r1.<java.nio.ByteBuffer: int remaining()>();
+
+        if $i0 <= 0 goto label3;
+
+        if $i0 >= i2 goto label1;
+
+        $i4 = $i0;
+
+        goto label2;
+
+     label1:
+        $i4 = i2;
+
+     label2:
+        $r5 = r0.<sun.net.www.protocol.http.HttpURLConnection$ErrorStream: java.nio.ByteBuffer buffer>;
+
+        virtualinvoke $r5.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[],int,int)>(r3, i1, $i4);
+
+        return $i4;
+
+     label3:
+        $r2 = r0.<sun.net.www.protocol.http.HttpURLConnection$ErrorStream: java.io.InputStream is>;
+
+        if $r2 != null goto label4;
+
+        $i6 = (int) -1;
+
+        return $i6;
+
+     label4:
+        $r4 = r0.<sun.net.www.protocol.http.HttpURLConnection$ErrorStream: java.io.InputStream is>;
+
+        $i3 = virtualinvoke $r4.<java.io.InputStream: int read(byte[],int,int)>(r3, i1, i2);
+
+        return $i3;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        sun.net.www.protocol.http.HttpURLConnection$ErrorStream r0;
+        java.io.InputStream $r1, $r2;
+
+        r0 := @this: sun.net.www.protocol.http.HttpURLConnection$ErrorStream;
+
+        r0.<sun.net.www.protocol.http.HttpURLConnection$ErrorStream: java.nio.ByteBuffer buffer> = null;
+
+        $r1 = r0.<sun.net.www.protocol.http.HttpURLConnection$ErrorStream: java.io.InputStream is>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.net.www.protocol.http.HttpURLConnection$ErrorStream: java.io.InputStream is>;
+
+        virtualinvoke $r2.<java.io.InputStream: void close()>();
+
+     label1:
+        return;
+    }
+}

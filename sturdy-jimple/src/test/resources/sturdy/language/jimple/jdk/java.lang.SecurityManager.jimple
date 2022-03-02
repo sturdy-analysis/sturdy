@@ -1,0 +1,1590 @@
+public class java.lang.SecurityManager extends java.lang.Object
+{
+    protected boolean inCheck;
+    private boolean initialized;
+    private static java.lang.ThreadGroup rootGroup;
+    private static boolean packageAccessValid;
+    private static java.lang.String[] packageAccess;
+    private static final java.lang.Object packageAccessLock;
+    private static boolean packageDefinitionValid;
+    private static java.lang.String[] packageDefinition;
+    private static final java.lang.Object packageDefinitionLock;
+
+    private boolean hasAllPermission()
+    {
+        java.lang.SecurityException $r2;
+        java.security.AllPermission $r1;
+        java.lang.SecurityManager r0;
+
+        r0 := @this: java.lang.SecurityManager;
+
+     label1:
+        $r1 = <sun.security.util.SecurityConstants: java.security.AllPermission ALL_PERMISSION>;
+
+        virtualinvoke r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r1);
+
+     label2:
+        return 1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        return 0;
+
+        catch java.lang.SecurityException from label1 to label2 with label3;
+    }
+
+    public boolean getInCheck()
+    {
+        java.lang.SecurityManager r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.SecurityManager;
+
+        $z0 = r0.<java.lang.SecurityManager: boolean inCheck>;
+
+        return $z0;
+    }
+
+    public void <init>()
+    {
+        java.lang.Throwable $r3;
+        java.lang.RuntimePermission $r2;
+        java.lang.SecurityManager r0, $r1;
+
+        r0 := @this: java.lang.SecurityManager;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.lang.SecurityManager: boolean initialized> = 0;
+
+        entermonitor class "Ljava/lang/SecurityManager;";
+
+     label1:
+        $r1 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r1 == null goto label2;
+
+        $r2 = new java.lang.RuntimePermission;
+
+        specialinvoke $r2.<java.lang.RuntimePermission: void <init>(java.lang.String)>("createSecurityManager");
+
+        virtualinvoke $r1.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r2);
+
+     label2:
+        r0.<java.lang.SecurityManager: boolean initialized> = 1;
+
+        exitmonitor class "Ljava/lang/SecurityManager;";
+
+     label3:
+        goto label6;
+
+     label4:
+        $r3 := @caughtexception;
+
+        exitmonitor class "Ljava/lang/SecurityManager;";
+
+     label5:
+        throw $r3;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    protected native java.lang.Class[] getClassContext();
+
+    protected java.lang.ClassLoader currentClassLoader()
+    {
+        java.lang.ClassLoader $r1, r2;
+        java.lang.SecurityManager r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.SecurityManager;
+
+        $r1 = specialinvoke r0.<java.lang.SecurityManager: java.lang.ClassLoader currentClassLoader0()>();
+
+        r2 = $r1;
+
+        if $r1 == null goto label1;
+
+        $z0 = specialinvoke r0.<java.lang.SecurityManager: boolean hasAllPermission()>();
+
+        if $z0 == 0 goto label1;
+
+        r2 = null;
+
+     label1:
+        return r2;
+    }
+
+    private native java.lang.ClassLoader currentClassLoader0();
+
+    protected java.lang.Class currentLoadedClass()
+    {
+        java.lang.Class $r1, r2;
+        java.lang.SecurityManager r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.SecurityManager;
+
+        $r1 = specialinvoke r0.<java.lang.SecurityManager: java.lang.Class currentLoadedClass0()>();
+
+        r2 = $r1;
+
+        if $r1 == null goto label1;
+
+        $z0 = specialinvoke r0.<java.lang.SecurityManager: boolean hasAllPermission()>();
+
+        if $z0 == 0 goto label1;
+
+        r2 = null;
+
+     label1:
+        return r2;
+    }
+
+    protected native int classDepth(java.lang.String);
+
+    protected int classLoaderDepth()
+    {
+        int $i0, i1, $i3, $i5, $i7;
+        java.lang.SecurityManager r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.SecurityManager;
+
+        $i0 = specialinvoke r0.<java.lang.SecurityManager: int classLoaderDepth0()>();
+
+        i1 = $i0;
+
+        $i3 = (int) -1;
+
+        if $i0 == $i3 goto label2;
+
+        $z0 = specialinvoke r0.<java.lang.SecurityManager: boolean hasAllPermission()>();
+
+        if $z0 == 0 goto label1;
+
+        $i5 = (int) -1;
+
+        i1 = $i5;
+
+        goto label2;
+
+     label1:
+        $i7 = (int) -1;
+
+        i1 = $i0 + $i7;
+
+     label2:
+        return i1;
+    }
+
+    private native int classLoaderDepth0();
+
+    protected boolean inClass(java.lang.String)
+    {
+        int $i0;
+        java.lang.String r1;
+        java.lang.SecurityManager r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.SecurityManager;
+
+        r1 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.SecurityManager: int classDepth(java.lang.String)>(r1);
+
+        if $i0 < 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    protected boolean inClassLoader()
+    {
+        java.lang.ClassLoader $r1;
+        java.lang.SecurityManager r0;
+        boolean $z0;
+
+        r0 := @this: java.lang.SecurityManager;
+
+        $r1 = virtualinvoke r0.<java.lang.SecurityManager: java.lang.ClassLoader currentClassLoader()>();
+
+        if $r1 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public java.lang.Object getSecurityContext()
+    {
+        java.security.AccessControlContext $r0;
+        java.lang.SecurityManager r1;
+
+        r1 := @this: java.lang.SecurityManager;
+
+        $r0 = staticinvoke <java.security.AccessController: java.security.AccessControlContext getContext()>();
+
+        return $r0;
+    }
+
+    public void checkPermission(java.security.Permission)
+    {
+        java.security.Permission r0;
+        java.lang.SecurityManager r1;
+
+        r1 := @this: java.lang.SecurityManager;
+
+        r0 := @parameter0: java.security.Permission;
+
+        staticinvoke <java.security.AccessController: void checkPermission(java.security.Permission)>(r0);
+
+        return;
+    }
+
+    public void checkPermission(java.security.Permission, java.lang.Object)
+    {
+        java.security.AccessControlContext $r3;
+        java.security.Permission r2;
+        java.lang.Object r0;
+        java.lang.SecurityException $r1;
+        java.lang.SecurityManager r4;
+        boolean $z0;
+
+        r4 := @this: java.lang.SecurityManager;
+
+        r2 := @parameter0: java.security.Permission;
+
+        r0 := @parameter1: java.lang.Object;
+
+        $z0 = r0 instanceof java.security.AccessControlContext;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = (java.security.AccessControlContext) r0;
+
+        virtualinvoke $r3.<java.security.AccessControlContext: void checkPermission(java.security.Permission)>(r2);
+
+        goto label2;
+
+     label1:
+        $r1 = new java.lang.SecurityException;
+
+        specialinvoke $r1.<java.lang.SecurityException: void <init>()>();
+
+        throw $r1;
+
+     label2:
+        return;
+    }
+
+    public void checkCreateClassLoader()
+    {
+        java.lang.RuntimePermission $r1;
+        java.lang.SecurityManager r0;
+
+        r0 := @this: java.lang.SecurityManager;
+
+        $r1 = <sun.security.util.SecurityConstants: java.lang.RuntimePermission CREATE_CLASSLOADER_PERMISSION>;
+
+        virtualinvoke r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r1);
+
+        return;
+    }
+
+    private static java.lang.ThreadGroup getRootGroup()
+    {
+        java.lang.ThreadGroup $r1, r2;
+        java.lang.Thread $r0;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        r2 = virtualinvoke $r0.<java.lang.Thread: java.lang.ThreadGroup getThreadGroup()>();
+
+     label1:
+        $r1 = virtualinvoke r2.<java.lang.ThreadGroup: java.lang.ThreadGroup getParent()>();
+
+        if $r1 == null goto label2;
+
+        r2 = virtualinvoke r2.<java.lang.ThreadGroup: java.lang.ThreadGroup getParent()>();
+
+        goto label1;
+
+     label2:
+        return r2;
+    }
+
+    public void checkAccess(java.lang.Thread)
+    {
+        java.lang.Thread r0;
+        java.lang.RuntimePermission $r4;
+        java.lang.ThreadGroup $r1, $r2;
+        java.lang.SecurityManager r3;
+        java.lang.NullPointerException $r5;
+
+        r3 := @this: java.lang.SecurityManager;
+
+        r0 := @parameter0: java.lang.Thread;
+
+        if r0 != null goto label1;
+
+        $r5 = new java.lang.NullPointerException;
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>(java.lang.String)>("thread can\'t be null");
+
+        throw $r5;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.lang.Thread: java.lang.ThreadGroup getThreadGroup()>();
+
+        $r2 = <java.lang.SecurityManager: java.lang.ThreadGroup rootGroup>;
+
+        if $r1 != $r2 goto label2;
+
+        $r4 = <sun.security.util.SecurityConstants: java.lang.RuntimePermission MODIFY_THREAD_PERMISSION>;
+
+        virtualinvoke r3.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r4);
+
+     label2:
+        return;
+    }
+
+    public void checkAccess(java.lang.ThreadGroup)
+    {
+        java.lang.RuntimePermission $r3;
+        java.lang.ThreadGroup r0, $r1;
+        java.lang.SecurityManager r2;
+        java.lang.NullPointerException $r4;
+
+        r2 := @this: java.lang.SecurityManager;
+
+        r0 := @parameter0: java.lang.ThreadGroup;
+
+        if r0 != null goto label1;
+
+        $r4 = new java.lang.NullPointerException;
+
+        specialinvoke $r4.<java.lang.NullPointerException: void <init>(java.lang.String)>("thread group can\'t be null");
+
+        throw $r4;
+
+     label1:
+        $r1 = <java.lang.SecurityManager: java.lang.ThreadGroup rootGroup>;
+
+        if r0 != $r1 goto label2;
+
+        $r3 = <sun.security.util.SecurityConstants: java.lang.RuntimePermission MODIFY_THREADGROUP_PERMISSION>;
+
+        virtualinvoke r2.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r3);
+
+     label2:
+        return;
+    }
+
+    public void checkExit(int)
+    {
+        int i0;
+        java.lang.RuntimePermission $r1;
+        java.lang.StringBuilder $r2, $r3, $r4;
+        java.lang.String $r5;
+        java.lang.SecurityManager r0;
+
+        r0 := @this: java.lang.SecurityManager;
+
+        i0 := @parameter0: int;
+
+        $r1 = new java.lang.RuntimePermission;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("exitVM.");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.lang.RuntimePermission: void <init>(java.lang.String)>($r5);
+
+        virtualinvoke r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r1);
+
+        return;
+    }
+
+    public void checkExec(java.lang.String)
+    {
+        java.io.FilePermission $r3, $r4;
+        java.lang.String r1;
+        java.io.File $r0;
+        java.lang.SecurityManager r2;
+        boolean $z0;
+
+        r2 := @this: java.lang.SecurityManager;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = new java.io.File;
+
+        specialinvoke $r0.<java.io.File: void <init>(java.lang.String)>(r1);
+
+        $z0 = virtualinvoke $r0.<java.io.File: boolean isAbsolute()>();
+
+        if $z0 == 0 goto label1;
+
+        $r4 = new java.io.FilePermission;
+
+        specialinvoke $r4.<java.io.FilePermission: void <init>(java.lang.String,java.lang.String)>(r1, "execute");
+
+        virtualinvoke r2.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r4);
+
+        goto label2;
+
+     label1:
+        $r3 = new java.io.FilePermission;
+
+        specialinvoke $r3.<java.io.FilePermission: void <init>(java.lang.String,java.lang.String)>("<<ALL FILES>>", "execute");
+
+        virtualinvoke r2.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r3);
+
+     label2:
+        return;
+    }
+
+    public void checkLink(java.lang.String)
+    {
+        java.lang.SecurityManager r1;
+        java.lang.NullPointerException $r7;
+        java.lang.RuntimePermission $r2;
+        java.lang.StringBuilder $r3, $r4, $r5;
+        java.lang.String r0, $r6;
+
+        r1 := @this: java.lang.SecurityManager;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        $r7 = new java.lang.NullPointerException;
+
+        specialinvoke $r7.<java.lang.NullPointerException: void <init>(java.lang.String)>("library can\'t be null");
+
+        throw $r7;
+
+     label1:
+        $r2 = new java.lang.RuntimePermission;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("loadLibrary.");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.RuntimePermission: void <init>(java.lang.String)>($r6);
+
+        virtualinvoke r1.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r2);
+
+        return;
+    }
+
+    public void checkRead(java.io.FileDescriptor)
+    {
+        java.io.FileDescriptor r0;
+        java.lang.RuntimePermission $r2;
+        java.lang.SecurityManager r1;
+        java.lang.NullPointerException $r3;
+
+        r1 := @this: java.lang.SecurityManager;
+
+        r0 := @parameter0: java.io.FileDescriptor;
+
+        if r0 != null goto label1;
+
+        $r3 = new java.lang.NullPointerException;
+
+        specialinvoke $r3.<java.lang.NullPointerException: void <init>(java.lang.String)>("file descriptor can\'t be null");
+
+        throw $r3;
+
+     label1:
+        $r2 = new java.lang.RuntimePermission;
+
+        specialinvoke $r2.<java.lang.RuntimePermission: void <init>(java.lang.String)>("readFileDescriptor");
+
+        virtualinvoke r1.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r2);
+
+        return;
+    }
+
+    public void checkRead(java.lang.String)
+    {
+        java.lang.String r2;
+        java.lang.SecurityManager r0;
+        java.io.FilePermission $r1;
+
+        r0 := @this: java.lang.SecurityManager;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = new java.io.FilePermission;
+
+        specialinvoke $r1.<java.io.FilePermission: void <init>(java.lang.String,java.lang.String)>(r2, "read");
+
+        virtualinvoke r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r1);
+
+        return;
+    }
+
+    public void checkRead(java.lang.String, java.lang.Object)
+    {
+        java.io.FilePermission $r1;
+        java.lang.Object r3;
+        java.lang.String r2;
+        java.lang.SecurityManager r0;
+
+        r0 := @this: java.lang.SecurityManager;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.Object;
+
+        $r1 = new java.io.FilePermission;
+
+        specialinvoke $r1.<java.io.FilePermission: void <init>(java.lang.String,java.lang.String)>(r2, "read");
+
+        virtualinvoke r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission,java.lang.Object)>($r1, r3);
+
+        return;
+    }
+
+    public void checkWrite(java.io.FileDescriptor)
+    {
+        java.io.FileDescriptor r0;
+        java.lang.RuntimePermission $r2;
+        java.lang.SecurityManager r1;
+        java.lang.NullPointerException $r3;
+
+        r1 := @this: java.lang.SecurityManager;
+
+        r0 := @parameter0: java.io.FileDescriptor;
+
+        if r0 != null goto label1;
+
+        $r3 = new java.lang.NullPointerException;
+
+        specialinvoke $r3.<java.lang.NullPointerException: void <init>(java.lang.String)>("file descriptor can\'t be null");
+
+        throw $r3;
+
+     label1:
+        $r2 = new java.lang.RuntimePermission;
+
+        specialinvoke $r2.<java.lang.RuntimePermission: void <init>(java.lang.String)>("writeFileDescriptor");
+
+        virtualinvoke r1.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r2);
+
+        return;
+    }
+
+    public void checkWrite(java.lang.String)
+    {
+        java.lang.String r2;
+        java.lang.SecurityManager r0;
+        java.io.FilePermission $r1;
+
+        r0 := @this: java.lang.SecurityManager;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = new java.io.FilePermission;
+
+        specialinvoke $r1.<java.io.FilePermission: void <init>(java.lang.String,java.lang.String)>(r2, "write");
+
+        virtualinvoke r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r1);
+
+        return;
+    }
+
+    public void checkDelete(java.lang.String)
+    {
+        java.lang.String r2;
+        java.lang.SecurityManager r0;
+        java.io.FilePermission $r1;
+
+        r0 := @this: java.lang.SecurityManager;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = new java.io.FilePermission;
+
+        specialinvoke $r1.<java.io.FilePermission: void <init>(java.lang.String,java.lang.String)>(r2, "delete");
+
+        virtualinvoke r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r1);
+
+        return;
+    }
+
+    public void checkConnect(java.lang.String, int)
+    {
+        java.lang.NullPointerException $r14;
+        int i0, $i1, $i3, $i5;
+        java.lang.String $r6, r13;
+        java.net.SocketPermission $r16, $r18;
+        boolean $z0;
+        java.lang.SecurityManager r0;
+        java.lang.StringBuilder $r3, $r4, $r5, $r9, $r10, $r11, $r15, $r17;
+
+        r0 := @this: java.lang.SecurityManager;
+
+        r13 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        if r13 != null goto label1;
+
+        $r14 = new java.lang.NullPointerException;
+
+        specialinvoke $r14.<java.lang.NullPointerException: void <init>(java.lang.String)>("host can\'t be null");
+
+        throw $r14;
+
+     label1:
+        $z0 = virtualinvoke r13.<java.lang.String: boolean startsWith(java.lang.String)>("[");
+
+        if $z0 != 0 goto label2;
+
+        $i1 = virtualinvoke r13.<java.lang.String: int indexOf(int)>(58);
+
+        $i3 = (int) -1;
+
+        if $i1 == $i3 goto label2;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r13);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label2:
+        $i5 = (int) -1;
+
+        if i0 != $i5 goto label3;
+
+        $r16 = new java.net.SocketPermission;
+
+        specialinvoke $r16.<java.net.SocketPermission: void <init>(java.lang.String,java.lang.String)>(r13, "resolve");
+
+        virtualinvoke r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r16);
+
+        goto label4;
+
+     label3:
+        $r18 = new java.net.SocketPermission;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r13);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r18.<java.net.SocketPermission: void <init>(java.lang.String,java.lang.String)>($r6, "connect");
+
+        virtualinvoke r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r18);
+
+     label4:
+        return;
+    }
+
+    public void checkConnect(java.lang.String, int, java.lang.Object)
+    {
+        java.lang.NullPointerException $r15;
+        int i0, $i1, $i3, $i5;
+        java.lang.String $r6, r14;
+        java.net.SocketPermission $r17, $r19;
+        boolean $z0;
+        java.lang.SecurityManager r0;
+        java.lang.StringBuilder $r3, $r4, $r5, $r10, $r11, $r12, $r16, $r18;
+        java.lang.Object r7;
+
+        r0 := @this: java.lang.SecurityManager;
+
+        r14 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        r7 := @parameter2: java.lang.Object;
+
+        if r14 != null goto label1;
+
+        $r15 = new java.lang.NullPointerException;
+
+        specialinvoke $r15.<java.lang.NullPointerException: void <init>(java.lang.String)>("host can\'t be null");
+
+        throw $r15;
+
+     label1:
+        $z0 = virtualinvoke r14.<java.lang.String: boolean startsWith(java.lang.String)>("[");
+
+        if $z0 != 0 goto label2;
+
+        $i1 = virtualinvoke r14.<java.lang.String: int indexOf(int)>(58);
+
+        $i3 = (int) -1;
+
+        if $i1 == $i3 goto label2;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r14);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label2:
+        $i5 = (int) -1;
+
+        if i0 != $i5 goto label3;
+
+        $r17 = new java.net.SocketPermission;
+
+        specialinvoke $r17.<java.net.SocketPermission: void <init>(java.lang.String,java.lang.String)>(r14, "resolve");
+
+        virtualinvoke r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission,java.lang.Object)>($r17, r7);
+
+        goto label4;
+
+     label3:
+        $r19 = new java.net.SocketPermission;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r14);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r19.<java.net.SocketPermission: void <init>(java.lang.String,java.lang.String)>($r6, "connect");
+
+        virtualinvoke r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission,java.lang.Object)>($r19, r7);
+
+     label4:
+        return;
+    }
+
+    public void checkListen(int)
+    {
+        int i0;
+        java.lang.StringBuilder $r2, $r3, $r4;
+        java.net.SocketPermission $r1;
+        java.lang.String $r5;
+        java.lang.SecurityManager r0;
+
+        r0 := @this: java.lang.SecurityManager;
+
+        i0 := @parameter0: int;
+
+        $r1 = new java.net.SocketPermission;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("localhost:");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.net.SocketPermission: void <init>(java.lang.String,java.lang.String)>($r5, "listen");
+
+        virtualinvoke r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r1);
+
+        return;
+    }
+
+    public void checkAccept(java.lang.String, int)
+    {
+        java.lang.NullPointerException $r13;
+        int i0, $i1, $i3;
+        java.lang.String r6, $r12;
+        java.net.SocketPermission $r16;
+        boolean $z0;
+        java.lang.SecurityManager r0;
+        java.lang.StringBuilder $r2, $r3, $r4, $r9, $r10, $r11, $r14, $r15;
+
+        r0 := @this: java.lang.SecurityManager;
+
+        r6 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        if r6 != null goto label1;
+
+        $r13 = new java.lang.NullPointerException;
+
+        specialinvoke $r13.<java.lang.NullPointerException: void <init>(java.lang.String)>("host can\'t be null");
+
+        throw $r13;
+
+     label1:
+        $z0 = virtualinvoke r6.<java.lang.String: boolean startsWith(java.lang.String)>("[");
+
+        if $z0 != 0 goto label2;
+
+        $i1 = virtualinvoke r6.<java.lang.String: int indexOf(int)>(58);
+
+        $i3 = (int) -1;
+
+        if $i1 == $i3 goto label2;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label2:
+        $r16 = new java.net.SocketPermission;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r16.<java.net.SocketPermission: void <init>(java.lang.String,java.lang.String)>($r12, "accept");
+
+        virtualinvoke r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r16);
+
+        return;
+    }
+
+    public void checkMulticast(java.net.InetAddress)
+    {
+        java.lang.SecurityManager r2;
+        java.net.InetAddress r0;
+        int $i0, $i2;
+        java.lang.StringBuilder $r4, $r5, $r6, $r9;
+        java.lang.String $r1, r7;
+        java.net.SocketPermission $r10;
+        boolean $z0;
+
+        r2 := @this: java.lang.SecurityManager;
+
+        r0 := @parameter0: java.net.InetAddress;
+
+        $r1 = virtualinvoke r0.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+        r7 = $r1;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("[");
+
+        if $z0 != 0 goto label1;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int indexOf(int)>(58);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label1;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label1:
+        $r10 = new java.net.SocketPermission;
+
+        specialinvoke $r10.<java.net.SocketPermission: void <init>(java.lang.String,java.lang.String)>(r7, "connect,accept");
+
+        virtualinvoke r2.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r10);
+
+        return;
+    }
+
+    public void checkMulticast(java.net.InetAddress, byte)
+    {
+        java.lang.SecurityManager r2;
+        java.net.InetAddress r0;
+        byte b1;
+        int $i0, $i3;
+        java.lang.StringBuilder $r4, $r5, $r6, $r9;
+        java.lang.String $r1, r7;
+        java.net.SocketPermission $r10;
+        boolean $z0;
+
+        r2 := @this: java.lang.SecurityManager;
+
+        r0 := @parameter0: java.net.InetAddress;
+
+        b1 := @parameter1: byte;
+
+        $r1 = virtualinvoke r0.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+        r7 = $r1;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("[");
+
+        if $z0 != 0 goto label1;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int indexOf(int)>(58);
+
+        $i3 = (int) -1;
+
+        if $i0 == $i3 goto label1;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label1:
+        $r10 = new java.net.SocketPermission;
+
+        specialinvoke $r10.<java.net.SocketPermission: void <init>(java.lang.String,java.lang.String)>(r7, "connect,accept");
+
+        virtualinvoke r2.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r10);
+
+        return;
+    }
+
+    public void checkPropertiesAccess()
+    {
+        java.lang.SecurityManager r0;
+        java.util.PropertyPermission $r1;
+
+        r0 := @this: java.lang.SecurityManager;
+
+        $r1 = new java.util.PropertyPermission;
+
+        specialinvoke $r1.<java.util.PropertyPermission: void <init>(java.lang.String,java.lang.String)>("*", "read,write");
+
+        virtualinvoke r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r1);
+
+        return;
+    }
+
+    public void checkPropertyAccess(java.lang.String)
+    {
+        java.lang.String r2;
+        java.lang.SecurityManager r0;
+        java.util.PropertyPermission $r1;
+
+        r0 := @this: java.lang.SecurityManager;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = new java.util.PropertyPermission;
+
+        specialinvoke $r1.<java.util.PropertyPermission: void <init>(java.lang.String,java.lang.String)>(r2, "read");
+
+        virtualinvoke r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r1);
+
+        return;
+    }
+
+    public boolean checkTopLevelWindow(java.lang.Object)
+    {
+        java.security.Permission r4;
+        java.lang.Object r0;
+        java.lang.SecurityException $r3;
+        java.lang.SecurityManager r1;
+        java.lang.NullPointerException $r2;
+
+        r1 := @this: java.lang.SecurityManager;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>(java.lang.String)>("window can\'t be null");
+
+        throw $r2;
+
+     label1:
+        r4 = <sun.security.util.SecurityConstants$AWT: java.security.Permission TOPLEVEL_WINDOW_PERMISSION>;
+
+        if r4 != null goto label2;
+
+        r4 = <sun.security.util.SecurityConstants: java.security.AllPermission ALL_PERMISSION>;
+
+     label2:
+        virtualinvoke r1.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>(r4);
+
+     label3:
+        return 1;
+
+     label4:
+        $r3 := @caughtexception;
+
+        return 0;
+
+        catch java.lang.SecurityException from label2 to label3 with label4;
+    }
+
+    public void checkPrintJobAccess()
+    {
+        java.lang.RuntimePermission $r1;
+        java.lang.SecurityManager r0;
+
+        r0 := @this: java.lang.SecurityManager;
+
+        $r1 = new java.lang.RuntimePermission;
+
+        specialinvoke $r1.<java.lang.RuntimePermission: void <init>(java.lang.String)>("queuePrintJob");
+
+        virtualinvoke r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r1);
+
+        return;
+    }
+
+    public void checkSystemClipboardAccess()
+    {
+        java.security.Permission r1;
+        java.lang.SecurityManager r0;
+
+        r0 := @this: java.lang.SecurityManager;
+
+        r1 = <sun.security.util.SecurityConstants$AWT: java.security.Permission ACCESS_CLIPBOARD_PERMISSION>;
+
+        if r1 != null goto label1;
+
+        r1 = <sun.security.util.SecurityConstants: java.security.AllPermission ALL_PERMISSION>;
+
+     label1:
+        virtualinvoke r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>(r1);
+
+        return;
+    }
+
+    public void checkAwtEventQueueAccess()
+    {
+        java.security.Permission r1;
+        java.lang.SecurityManager r0;
+
+        r0 := @this: java.lang.SecurityManager;
+
+        r1 = <sun.security.util.SecurityConstants$AWT: java.security.Permission CHECK_AWT_EVENTQUEUE_PERMISSION>;
+
+        if r1 != null goto label1;
+
+        r1 = <sun.security.util.SecurityConstants: java.security.AllPermission ALL_PERMISSION>;
+
+     label1:
+        virtualinvoke r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>(r1);
+
+        return;
+    }
+
+    private static java.lang.String[] getPackages(java.lang.String)
+    {
+        java.lang.String[] r4;
+        java.util.StringTokenizer $r1;
+        int $i0, $i1, i2;
+        java.lang.String r0, $r2, $r3;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.String;
+
+        r4 = null;
+
+        if r0 == null goto label2;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z0 != 0 goto label2;
+
+        $r1 = new java.util.StringTokenizer;
+
+        specialinvoke $r1.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>(r0, ",");
+
+        $i0 = virtualinvoke $r1.<java.util.StringTokenizer: int countTokens()>();
+
+        if $i0 <= 0 goto label2;
+
+        r4 = newarray (java.lang.String)[$i0];
+
+        i2 = 0;
+
+     label1:
+        $z1 = virtualinvoke $r1.<java.util.StringTokenizer: boolean hasMoreElements()>();
+
+        if $z1 == 0 goto label2;
+
+        $r2 = virtualinvoke $r1.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.String: java.lang.String trim()>();
+
+        $i1 = i2;
+
+        i2 = i2 + 1;
+
+        r4[$i1] = $r3;
+
+        goto label1;
+
+     label2:
+        if r4 != null goto label3;
+
+        r4 = newarray (java.lang.String)[0];
+
+     label3:
+        return r4;
+    }
+
+    public void checkPackageAccess(java.lang.String)
+    {
+        java.lang.Throwable $r20;
+        java.lang.String[] $r17, $r18;
+        java.lang.NullPointerException $r19;
+        int $i0, i1;
+        java.lang.String r0, $r2, $r8, $r10, $r13, r16;
+        boolean $z0, $z1, $z2;
+        java.lang.SecurityManager r3;
+        java.lang.SecurityManager$1 $r14;
+        java.lang.Object $r1, $r15;
+        java.lang.RuntimePermission $r4;
+        java.lang.StringBuilder $r5, $r6, $r7, $r9, $r11, $r12;
+
+        r3 := @this: java.lang.SecurityManager;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label01;
+
+        $r19 = new java.lang.NullPointerException;
+
+        specialinvoke $r19.<java.lang.NullPointerException: void <init>(java.lang.String)>("package name can\'t be null");
+
+        throw $r19;
+
+     label01:
+        $r1 = <java.lang.SecurityManager: java.lang.Object packageAccessLock>;
+
+        entermonitor $r1;
+
+     label02:
+        $z0 = <java.lang.SecurityManager: boolean packageAccessValid>;
+
+        if $z0 != 0 goto label03;
+
+        $r14 = new java.lang.SecurityManager$1;
+
+        specialinvoke $r14.<java.lang.SecurityManager$1: void <init>(java.lang.SecurityManager)>(r3);
+
+        $r15 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r14);
+
+        r16 = (java.lang.String) $r15;
+
+        $r17 = staticinvoke <java.lang.SecurityManager: java.lang.String[] getPackages(java.lang.String)>(r16);
+
+        <java.lang.SecurityManager: java.lang.String[] packageAccess> = $r17;
+
+        <java.lang.SecurityManager: boolean packageAccessValid> = 1;
+
+     label03:
+        $r18 = <java.lang.SecurityManager: java.lang.String[] packageAccess>;
+
+        exitmonitor $r1;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r20 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label06:
+        throw $r20;
+
+     label07:
+        i1 = 0;
+
+     label08:
+        $i0 = lengthof $r18;
+
+        if i1 >= $i0 goto label11;
+
+        $r2 = $r18[i1];
+
+        $z1 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>($r2);
+
+        if $z1 != 0 goto label09;
+
+        $r10 = $r18[i1];
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $z2 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>($r13);
+
+        if $z2 == 0 goto label10;
+
+     label09:
+        $r4 = new java.lang.RuntimePermission;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("accessClassInPackage.");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.RuntimePermission: void <init>(java.lang.String)>($r8);
+
+        virtualinvoke r3.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r4);
+
+        goto label11;
+
+     label10:
+        i1 = i1 + 1;
+
+        goto label08;
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label02 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+    }
+
+    public void checkPackageDefinition(java.lang.String)
+    {
+        java.lang.Throwable $r20;
+        java.lang.String[] $r17, $r18;
+        java.lang.NullPointerException $r19;
+        int $i0, i1;
+        java.lang.String r0, $r2, $r8, $r10, $r13, r16;
+        boolean $z0, $z1, $z2;
+        java.lang.SecurityManager r3;
+        java.lang.SecurityManager$2 $r14;
+        java.lang.Object $r1, $r15;
+        java.lang.RuntimePermission $r4;
+        java.lang.StringBuilder $r5, $r6, $r7, $r9, $r11, $r12;
+
+        r3 := @this: java.lang.SecurityManager;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label01;
+
+        $r19 = new java.lang.NullPointerException;
+
+        specialinvoke $r19.<java.lang.NullPointerException: void <init>(java.lang.String)>("package name can\'t be null");
+
+        throw $r19;
+
+     label01:
+        $r1 = <java.lang.SecurityManager: java.lang.Object packageDefinitionLock>;
+
+        entermonitor $r1;
+
+     label02:
+        $z0 = <java.lang.SecurityManager: boolean packageDefinitionValid>;
+
+        if $z0 != 0 goto label03;
+
+        $r14 = new java.lang.SecurityManager$2;
+
+        specialinvoke $r14.<java.lang.SecurityManager$2: void <init>(java.lang.SecurityManager)>(r3);
+
+        $r15 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r14);
+
+        r16 = (java.lang.String) $r15;
+
+        $r17 = staticinvoke <java.lang.SecurityManager: java.lang.String[] getPackages(java.lang.String)>(r16);
+
+        <java.lang.SecurityManager: java.lang.String[] packageDefinition> = $r17;
+
+        <java.lang.SecurityManager: boolean packageDefinitionValid> = 1;
+
+     label03:
+        $r18 = <java.lang.SecurityManager: java.lang.String[] packageDefinition>;
+
+        exitmonitor $r1;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r20 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label06:
+        throw $r20;
+
+     label07:
+        i1 = 0;
+
+     label08:
+        $i0 = lengthof $r18;
+
+        if i1 >= $i0 goto label11;
+
+        $r2 = $r18[i1];
+
+        $z1 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>($r2);
+
+        if $z1 != 0 goto label09;
+
+        $r10 = $r18[i1];
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $z2 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>($r13);
+
+        if $z2 == 0 goto label10;
+
+     label09:
+        $r4 = new java.lang.RuntimePermission;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("defineClassInPackage.");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.RuntimePermission: void <init>(java.lang.String)>($r8);
+
+        virtualinvoke r3.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r4);
+
+        goto label11;
+
+     label10:
+        i1 = i1 + 1;
+
+        goto label08;
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label02 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+    }
+
+    public void checkSetFactory()
+    {
+        java.lang.RuntimePermission $r1;
+        java.lang.SecurityManager r0;
+
+        r0 := @this: java.lang.SecurityManager;
+
+        $r1 = new java.lang.RuntimePermission;
+
+        specialinvoke $r1.<java.lang.RuntimePermission: void <init>(java.lang.String)>("setFactory");
+
+        virtualinvoke r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r1);
+
+        return;
+    }
+
+    public void checkMemberAccess(java.lang.Class, int)
+    {
+        java.lang.Class[] $r2;
+        java.lang.SecurityManager r1;
+        java.lang.NullPointerException $r7;
+        int i0, $i1;
+        java.lang.Class r0, $r4;
+        java.lang.RuntimePermission $r3;
+        java.lang.ClassLoader $r5, $r6;
+
+        r1 := @this: java.lang.SecurityManager;
+
+        r0 := @parameter0: java.lang.Class;
+
+        i0 := @parameter1: int;
+
+        if r0 != null goto label1;
+
+        $r7 = new java.lang.NullPointerException;
+
+        specialinvoke $r7.<java.lang.NullPointerException: void <init>(java.lang.String)>("class can\'t be null");
+
+        throw $r7;
+
+     label1:
+        if i0 == 0 goto label3;
+
+        $r2 = virtualinvoke r1.<java.lang.SecurityManager: java.lang.Class[] getClassContext()>();
+
+        $i1 = lengthof $r2;
+
+        if $i1 < 4 goto label2;
+
+        $r4 = $r2[3];
+
+        $r5 = virtualinvoke $r4.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $r6 = virtualinvoke r0.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        if $r5 == $r6 goto label3;
+
+     label2:
+        $r3 = <sun.security.util.SecurityConstants: java.lang.RuntimePermission CHECK_MEMBER_ACCESS_PERMISSION>;
+
+        virtualinvoke r1.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r3);
+
+     label3:
+        return;
+    }
+
+    public void checkSecurityAccess(java.lang.String)
+    {
+        java.security.SecurityPermission $r1;
+        java.lang.String r2;
+        java.lang.SecurityManager r0;
+
+        r0 := @this: java.lang.SecurityManager;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = new java.security.SecurityPermission;
+
+        specialinvoke $r1.<java.security.SecurityPermission: void <init>(java.lang.String)>(r2);
+
+        virtualinvoke r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r1);
+
+        return;
+    }
+
+    private native java.lang.Class currentLoadedClass0();
+
+    public java.lang.ThreadGroup getThreadGroup()
+    {
+        java.lang.ThreadGroup $r1;
+        java.lang.SecurityManager r2;
+        java.lang.Thread $r0;
+
+        r2 := @this: java.lang.SecurityManager;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.Thread: java.lang.ThreadGroup getThreadGroup()>();
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Object $r1, $r2;
+        java.lang.ThreadGroup $r0;
+
+        $r0 = staticinvoke <java.lang.SecurityManager: java.lang.ThreadGroup getRootGroup()>();
+
+        <java.lang.SecurityManager: java.lang.ThreadGroup rootGroup> = $r0;
+
+        <java.lang.SecurityManager: boolean packageAccessValid> = 0;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        <java.lang.SecurityManager: java.lang.Object packageAccessLock> = $r1;
+
+        <java.lang.SecurityManager: boolean packageDefinitionValid> = 0;
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        <java.lang.SecurityManager: java.lang.Object packageDefinitionLock> = $r2;
+
+        return;
+    }
+}

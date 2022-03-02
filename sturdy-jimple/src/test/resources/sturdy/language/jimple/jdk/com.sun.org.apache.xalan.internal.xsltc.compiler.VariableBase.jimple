@@ -1,0 +1,673 @@
+class com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase extends com.sun.org.apache.xalan.internal.xsltc.compiler.TopLevelElement
+{
+    protected com.sun.org.apache.xalan.internal.xsltc.compiler.QName _name;
+    protected java.lang.String _escapedName;
+    protected com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type _type;
+    protected boolean _isLocal;
+    protected com.sun.org.apache.bcel.internal.generic.LocalVariableGen _local;
+    protected com.sun.org.apache.bcel.internal.generic.Instruction _loadInstruction;
+    protected com.sun.org.apache.bcel.internal.generic.Instruction _storeInstruction;
+    protected com.sun.org.apache.xalan.internal.xsltc.compiler.Expression _select;
+    protected java.lang.String select;
+    protected java.util.Vector _refs;
+    protected boolean _ignore;
+
+    void <init>()
+    {
+        com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase r0;
+        java.util.Vector $r1;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase;
+
+        specialinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.TopLevelElement: void <init>()>();
+
+        $r1 = new java.util.Vector;
+
+        specialinvoke $r1.<java.util.Vector: void <init>(int)>(2);
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: java.util.Vector _refs> = $r1;
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: boolean _ignore> = 0;
+
+        return;
+    }
+
+    public void disable()
+    {
+        com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase r0;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase;
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: boolean _ignore> = 1;
+
+        return;
+    }
+
+    public void addReference(com.sun.org.apache.xalan.internal.xsltc.compiler.VariableRefBase)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase r0;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.VariableRefBase r1;
+        java.util.Vector $r2;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase;
+
+        r1 := @parameter0: com.sun.org.apache.xalan.internal.xsltc.compiler.VariableRefBase;
+
+        $r2 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: java.util.Vector _refs>;
+
+        virtualinvoke $r2.<java.util.Vector: void addElement(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    public void copyReferences(com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.compiler.VariableRefBase $r5;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase r0, r2;
+        java.util.Vector $r1, $r3;
+        int $i0, i1;
+        java.lang.Object $r4;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase;
+
+        r2 := @parameter0: com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase;
+
+        $r1 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: java.util.Vector _refs>;
+
+        $i0 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        i1 = 0;
+
+     label1:
+        if i1 >= $i0 goto label2;
+
+        $r3 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: java.util.Vector _refs>;
+
+        $r4 = virtualinvoke $r3.<java.util.Vector: java.lang.Object get(int)>(i1);
+
+        $r5 = (com.sun.org.apache.xalan.internal.xsltc.compiler.VariableRefBase) $r4;
+
+        virtualinvoke r2.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: void addReference(com.sun.org.apache.xalan.internal.xsltc.compiler.VariableRefBase)>($r5);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void mapRegister(com.sun.org.apache.xalan.internal.xsltc.compiler.util.MethodGenerator)
+    {
+        com.sun.org.apache.bcel.internal.generic.LocalVariableGen $r1, $r8;
+        com.sun.org.apache.bcel.internal.generic.InstructionList $r3;
+        com.sun.org.apache.bcel.internal.generic.Type $r6;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.util.MethodGenerator r2;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type $r5;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase r0;
+        com.sun.org.apache.bcel.internal.generic.InstructionHandle $r7;
+        java.lang.String $r4;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase;
+
+        r2 := @parameter0: com.sun.org.apache.xalan.internal.xsltc.compiler.util.MethodGenerator;
+
+        $r1 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.bcel.internal.generic.LocalVariableGen _local>;
+
+        if $r1 != null goto label1;
+
+        $r3 = virtualinvoke r2.<com.sun.org.apache.xalan.internal.xsltc.compiler.util.MethodGenerator: com.sun.org.apache.bcel.internal.generic.InstructionList getInstructionList()>();
+
+        $r4 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: java.lang.String getEscapedName()>();
+
+        $r5 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type _type>;
+
+        $r6 = virtualinvoke $r5.<com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type: com.sun.org.apache.bcel.internal.generic.Type toJCType()>();
+
+        $r7 = virtualinvoke $r3.<com.sun.org.apache.bcel.internal.generic.InstructionList: com.sun.org.apache.bcel.internal.generic.InstructionHandle getEnd()>();
+
+        $r8 = virtualinvoke r2.<com.sun.org.apache.xalan.internal.xsltc.compiler.util.MethodGenerator: com.sun.org.apache.bcel.internal.generic.LocalVariableGen addLocalVariable2(java.lang.String,com.sun.org.apache.bcel.internal.generic.Type,com.sun.org.apache.bcel.internal.generic.InstructionHandle)>($r4, $r6, $r7);
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.bcel.internal.generic.LocalVariableGen _local> = $r8;
+
+     label1:
+        return;
+    }
+
+    public void unmapRegister(com.sun.org.apache.xalan.internal.xsltc.compiler.util.ClassGenerator, com.sun.org.apache.xalan.internal.xsltc.compiler.util.MethodGenerator)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.compiler.util.ClassGenerator r4;
+        com.sun.org.apache.bcel.internal.generic.INVOKEVIRTUAL $r13;
+        com.sun.org.apache.bcel.internal.generic.InstructionHandle $r18;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String $r8;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.Stylesheet $r7;
+        boolean $z0, $z1, $z2;
+        com.sun.org.apache.bcel.internal.generic.Instruction $r9, $r11, $r14;
+        com.sun.org.apache.bcel.internal.generic.LocalVariableGen $r1, $r16, $r19;
+        com.sun.org.apache.bcel.internal.generic.InstructionList $r6, $r17;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type $r2;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.util.MethodGenerator r3;
+        com.sun.org.apache.bcel.internal.generic.CHECKCAST $r10, $r12;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase r0;
+        com.sun.org.apache.bcel.internal.generic.INVOKEINTERFACE $r15;
+        com.sun.org.apache.bcel.internal.generic.ConstantPoolGen $r5;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase;
+
+        r4 := @parameter0: com.sun.org.apache.xalan.internal.xsltc.compiler.util.ClassGenerator;
+
+        r3 := @parameter1: com.sun.org.apache.xalan.internal.xsltc.compiler.util.MethodGenerator;
+
+        $r1 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.bcel.internal.generic.LocalVariableGen _local>;
+
+        if $r1 == null goto label3;
+
+        $r2 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type _type>;
+
+        $z0 = $r2 instanceof com.sun.org.apache.xalan.internal.xsltc.compiler.util.ResultTreeType;
+
+        if $z0 == 0 goto label2;
+
+        $r5 = virtualinvoke r4.<com.sun.org.apache.xalan.internal.xsltc.compiler.util.ClassGenerator: com.sun.org.apache.bcel.internal.generic.ConstantPoolGen getConstantPool()>();
+
+        $r6 = virtualinvoke r3.<com.sun.org.apache.xalan.internal.xsltc.compiler.util.MethodGenerator: com.sun.org.apache.bcel.internal.generic.InstructionList getInstructionList()>();
+
+        $r7 = virtualinvoke r4.<com.sun.org.apache.xalan.internal.xsltc.compiler.util.ClassGenerator: com.sun.org.apache.xalan.internal.xsltc.compiler.Stylesheet getStylesheet()>();
+
+        $z1 = virtualinvoke $r7.<com.sun.org.apache.xalan.internal.xsltc.compiler.Stylesheet: boolean callsNodeset()>();
+
+        if $z1 == 0 goto label1;
+
+        $r8 = virtualinvoke r4.<com.sun.org.apache.xalan.internal.xsltc.compiler.util.ClassGenerator: java.lang.String getDOMClass()>();
+
+        $z2 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>("com.sun.org.apache.xalan.internal.xsltc.dom.MultiDOM");
+
+        if $z2 == 0 goto label1;
+
+        $i0 = virtualinvoke $r5.<com.sun.org.apache.bcel.internal.generic.ConstantPoolGen: int addMethodref(java.lang.String,java.lang.String,java.lang.String)>("com.sun.org.apache.xalan.internal.xsltc.dom.MultiDOM", "removeDOMAdapter", "(Lcom/sun/org/apache/xalan/internal/xsltc/dom/DOMAdapter;)V");
+
+        $r9 = virtualinvoke r3.<com.sun.org.apache.xalan.internal.xsltc.compiler.util.MethodGenerator: com.sun.org.apache.bcel.internal.generic.Instruction loadDOM()>();
+
+        virtualinvoke $r6.<com.sun.org.apache.bcel.internal.generic.InstructionList: com.sun.org.apache.bcel.internal.generic.InstructionHandle append(com.sun.org.apache.bcel.internal.generic.Instruction)>($r9);
+
+        $r10 = new com.sun.org.apache.bcel.internal.generic.CHECKCAST;
+
+        $i1 = virtualinvoke $r5.<com.sun.org.apache.bcel.internal.generic.ConstantPoolGen: int addClass(java.lang.String)>("com.sun.org.apache.xalan.internal.xsltc.dom.MultiDOM");
+
+        specialinvoke $r10.<com.sun.org.apache.bcel.internal.generic.CHECKCAST: void <init>(int)>($i1);
+
+        virtualinvoke $r6.<com.sun.org.apache.bcel.internal.generic.InstructionList: com.sun.org.apache.bcel.internal.generic.InstructionHandle append(com.sun.org.apache.bcel.internal.generic.Instruction)>($r10);
+
+        $r11 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.bcel.internal.generic.Instruction loadInstruction()>();
+
+        virtualinvoke $r6.<com.sun.org.apache.bcel.internal.generic.InstructionList: com.sun.org.apache.bcel.internal.generic.InstructionHandle append(com.sun.org.apache.bcel.internal.generic.Instruction)>($r11);
+
+        $r12 = new com.sun.org.apache.bcel.internal.generic.CHECKCAST;
+
+        $i2 = virtualinvoke $r5.<com.sun.org.apache.bcel.internal.generic.ConstantPoolGen: int addClass(java.lang.String)>("com/sun/org/apache/xalan/internal/xsltc/dom/DOMAdapter");
+
+        specialinvoke $r12.<com.sun.org.apache.bcel.internal.generic.CHECKCAST: void <init>(int)>($i2);
+
+        virtualinvoke $r6.<com.sun.org.apache.bcel.internal.generic.InstructionList: com.sun.org.apache.bcel.internal.generic.InstructionHandle append(com.sun.org.apache.bcel.internal.generic.Instruction)>($r12);
+
+        $r13 = new com.sun.org.apache.bcel.internal.generic.INVOKEVIRTUAL;
+
+        specialinvoke $r13.<com.sun.org.apache.bcel.internal.generic.INVOKEVIRTUAL: void <init>(int)>($i0);
+
+        virtualinvoke $r6.<com.sun.org.apache.bcel.internal.generic.InstructionList: com.sun.org.apache.bcel.internal.generic.InstructionHandle append(com.sun.org.apache.bcel.internal.generic.Instruction)>($r13);
+
+     label1:
+        $i3 = virtualinvoke $r5.<com.sun.org.apache.bcel.internal.generic.ConstantPoolGen: int addInterfaceMethodref(java.lang.String,java.lang.String,java.lang.String)>("com/sun/org/apache/xalan/internal/xsltc/DOM", "release", "()V");
+
+        $r14 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.bcel.internal.generic.Instruction loadInstruction()>();
+
+        virtualinvoke $r6.<com.sun.org.apache.bcel.internal.generic.InstructionList: com.sun.org.apache.bcel.internal.generic.InstructionHandle append(com.sun.org.apache.bcel.internal.generic.Instruction)>($r14);
+
+        $r15 = new com.sun.org.apache.bcel.internal.generic.INVOKEINTERFACE;
+
+        specialinvoke $r15.<com.sun.org.apache.bcel.internal.generic.INVOKEINTERFACE: void <init>(int,int)>($i3, 1);
+
+        virtualinvoke $r6.<com.sun.org.apache.bcel.internal.generic.InstructionList: com.sun.org.apache.bcel.internal.generic.InstructionHandle append(com.sun.org.apache.bcel.internal.generic.Instruction)>($r15);
+
+     label2:
+        $r16 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.bcel.internal.generic.LocalVariableGen _local>;
+
+        $r17 = virtualinvoke r3.<com.sun.org.apache.xalan.internal.xsltc.compiler.util.MethodGenerator: com.sun.org.apache.bcel.internal.generic.InstructionList getInstructionList()>();
+
+        $r18 = virtualinvoke $r17.<com.sun.org.apache.bcel.internal.generic.InstructionList: com.sun.org.apache.bcel.internal.generic.InstructionHandle getEnd()>();
+
+        virtualinvoke $r16.<com.sun.org.apache.bcel.internal.generic.LocalVariableGen: void setEnd(com.sun.org.apache.bcel.internal.generic.InstructionHandle)>($r18);
+
+        $r19 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.bcel.internal.generic.LocalVariableGen _local>;
+
+        virtualinvoke r3.<com.sun.org.apache.xalan.internal.xsltc.compiler.util.MethodGenerator: void removeLocalVariable(com.sun.org.apache.bcel.internal.generic.LocalVariableGen)>($r19);
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: java.util.Vector _refs> = null;
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.bcel.internal.generic.LocalVariableGen _local> = null;
+
+     label3:
+        return;
+    }
+
+    public com.sun.org.apache.bcel.internal.generic.Instruction loadInstruction()
+    {
+        com.sun.org.apache.bcel.internal.generic.Instruction $r1, $r2, $r5;
+        com.sun.org.apache.bcel.internal.generic.LocalVariableGen $r3;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type $r4;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase r0;
+        int $i0;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase;
+
+        $r1 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.bcel.internal.generic.Instruction _loadInstruction>;
+
+        if $r1 != null goto label1;
+
+        $r4 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type _type>;
+
+        $r3 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.bcel.internal.generic.LocalVariableGen _local>;
+
+        $i0 = virtualinvoke $r3.<com.sun.org.apache.bcel.internal.generic.LocalVariableGen: int getIndex()>();
+
+        $r5 = virtualinvoke $r4.<com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type: com.sun.org.apache.bcel.internal.generic.Instruction LOAD(int)>($i0);
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.bcel.internal.generic.Instruction _loadInstruction> = $r5;
+
+     label1:
+        $r2 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.bcel.internal.generic.Instruction _loadInstruction>;
+
+        return $r2;
+    }
+
+    public com.sun.org.apache.bcel.internal.generic.Instruction storeInstruction()
+    {
+        com.sun.org.apache.bcel.internal.generic.Instruction $r1, $r2, $r5;
+        com.sun.org.apache.bcel.internal.generic.LocalVariableGen $r3;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type $r4;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase r0;
+        int $i0;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase;
+
+        $r1 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.bcel.internal.generic.Instruction _storeInstruction>;
+
+        if $r1 != null goto label1;
+
+        $r4 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type _type>;
+
+        $r3 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.bcel.internal.generic.LocalVariableGen _local>;
+
+        $i0 = virtualinvoke $r3.<com.sun.org.apache.bcel.internal.generic.LocalVariableGen: int getIndex()>();
+
+        $r5 = virtualinvoke $r4.<com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type: com.sun.org.apache.bcel.internal.generic.Instruction STORE(int)>($i0);
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.bcel.internal.generic.Instruction _storeInstruction> = $r5;
+
+     label1:
+        $r2 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.bcel.internal.generic.Instruction _storeInstruction>;
+
+        return $r2;
+    }
+
+    public com.sun.org.apache.xalan.internal.xsltc.compiler.Expression getExpression()
+    {
+        com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase r0;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.Expression $r1;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase;
+
+        $r1 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.xalan.internal.xsltc.compiler.Expression _select>;
+
+        return $r1;
+    }
+
+    public java.lang.String toString()
+    {
+        com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase r2;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.QName $r3;
+        java.lang.StringBuilder $r0, $r1, $r4, $r5;
+        java.lang.String $r6;
+
+        r2 := @this: com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("variable(");
+
+        $r3 = r2.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.xalan.internal.xsltc.compiler.QName _name>;
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r6;
+    }
+
+    public void display(int)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.compiler.QName $r4;
+        int i0, $i1, $i2;
+        java.lang.String $r6, $r12, $r14;
+        java.io.PrintStream $r2, $r9;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.Expression $r7, $r11;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase r0;
+        java.lang.StringBuilder $r1, $r3, $r5, $r8, $r10, $r13;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase;
+
+        i0 := @parameter0: int;
+
+        virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: void indent(int)>(i0);
+
+        $r2 = <java.lang.System: java.io.PrintStream out>;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Variable ");
+
+        $r4 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.xalan.internal.xsltc.compiler.QName _name>;
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>($r6);
+
+        $r7 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.xalan.internal.xsltc.compiler.Expression _select>;
+
+        if $r7 == null goto label1;
+
+        $i2 = i0 + 4;
+
+        virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: void indent(int)>($i2);
+
+        $r9 = <java.lang.System: java.io.PrintStream out>;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("select ");
+
+        $r11 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.xalan.internal.xsltc.compiler.Expression _select>;
+
+        $r12 = virtualinvoke $r11.<com.sun.org.apache.xalan.internal.xsltc.compiler.Expression: java.lang.String toString()>();
+
+        $r13 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r9.<java.io.PrintStream: void println(java.lang.String)>($r14);
+
+     label1:
+        $i1 = i0 + 4;
+
+        virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: void displayContents(int)>($i1);
+
+        return;
+    }
+
+    public com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type getType()
+    {
+        com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type $r1;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase r0;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase;
+
+        $r1 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type _type>;
+
+        return $r1;
+    }
+
+    public com.sun.org.apache.xalan.internal.xsltc.compiler.QName getName()
+    {
+        com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase r0;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.QName $r1;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase;
+
+        $r1 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.xalan.internal.xsltc.compiler.QName _name>;
+
+        return $r1;
+    }
+
+    public java.lang.String getEscapedName()
+    {
+        com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase r0;
+        java.lang.String $r1;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase;
+
+        $r1 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: java.lang.String _escapedName>;
+
+        return $r1;
+    }
+
+    public void setName(com.sun.org.apache.xalan.internal.xsltc.compiler.QName)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase r0;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.QName r1;
+        java.lang.String $r2, $r3;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase;
+
+        r1 := @parameter0: com.sun.org.apache.xalan.internal.xsltc.compiler.QName;
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.xalan.internal.xsltc.compiler.QName _name> = r1;
+
+        $r2 = virtualinvoke r1.<com.sun.org.apache.xalan.internal.xsltc.compiler.QName: java.lang.String getStringRep()>();
+
+        $r3 = staticinvoke <com.sun.org.apache.xalan.internal.xsltc.compiler.util.Util: java.lang.String escape(java.lang.String)>($r2);
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: java.lang.String _escapedName> = $r3;
+
+        return;
+    }
+
+    public boolean isLocal()
+    {
+        com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase;
+
+        $z0 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: boolean _isLocal>;
+
+        return $z0;
+    }
+
+    public void parseContents(com.sun.org.apache.xalan.internal.xsltc.compiler.Parser)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.compiler.QName $r3, $r10;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.SyntaxTreeNode $r8, $r9;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.util.ErrorMsg $r11;
+        int $i0, $i1;
+        java.lang.String $r1, $r12, $r13;
+        boolean $z0, $z1;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.Expression $r6, $r7;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase r0, $r4;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.Parser r2, $r5;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase;
+
+        r2 := @parameter0: com.sun.org.apache.xalan.internal.xsltc.compiler.Parser;
+
+        $r1 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: java.lang.String getAttribute(java.lang.String)>("name");
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label2;
+
+        $z1 = staticinvoke <com.sun.org.apache.xml.internal.utils.XML11Char: boolean isXML11ValidQName(java.lang.String)>($r1);
+
+        if $z1 != 0 goto label1;
+
+        $r11 = new com.sun.org.apache.xalan.internal.xsltc.compiler.util.ErrorMsg;
+
+        specialinvoke $r11.<com.sun.org.apache.xalan.internal.xsltc.compiler.util.ErrorMsg: void <init>(java.lang.String,java.lang.Object,com.sun.org.apache.xalan.internal.xsltc.compiler.SyntaxTreeNode)>("INVALID_QNAME_ERR", $r1, r0);
+
+        virtualinvoke r2.<com.sun.org.apache.xalan.internal.xsltc.compiler.Parser: void reportError(int,com.sun.org.apache.xalan.internal.xsltc.compiler.util.ErrorMsg)>(3, $r11);
+
+     label1:
+        $r10 = virtualinvoke r2.<com.sun.org.apache.xalan.internal.xsltc.compiler.Parser: com.sun.org.apache.xalan.internal.xsltc.compiler.QName getQNameIgnoreDefaultNs(java.lang.String)>($r1);
+
+        virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: void setName(com.sun.org.apache.xalan.internal.xsltc.compiler.QName)>($r10);
+
+        goto label3;
+
+     label2:
+        virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: void reportError(com.sun.org.apache.xalan.internal.xsltc.compiler.SyntaxTreeNode,com.sun.org.apache.xalan.internal.xsltc.compiler.Parser,java.lang.String,java.lang.String)>(r0, r2, "REQUIRED_ATTR_ERR", "name");
+
+     label3:
+        $r3 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.xalan.internal.xsltc.compiler.QName _name>;
+
+        $r4 = virtualinvoke r2.<com.sun.org.apache.xalan.internal.xsltc.compiler.Parser: com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase lookupVariable(com.sun.org.apache.xalan.internal.xsltc.compiler.QName)>($r3);
+
+        if $r4 == null goto label4;
+
+        $r8 = virtualinvoke $r4.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.xalan.internal.xsltc.compiler.SyntaxTreeNode getParent()>();
+
+        $r9 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.xalan.internal.xsltc.compiler.SyntaxTreeNode getParent()>();
+
+        if $r8 != $r9 goto label4;
+
+        virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: void reportError(com.sun.org.apache.xalan.internal.xsltc.compiler.SyntaxTreeNode,com.sun.org.apache.xalan.internal.xsltc.compiler.Parser,java.lang.String,java.lang.String)>(r0, r2, "VARIABLE_REDEF_ERR", $r1);
+
+     label4:
+        $r12 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: java.lang.String getAttribute(java.lang.String)>("select");
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: java.lang.String select> = $r12;
+
+        $r13 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: java.lang.String select>;
+
+        $i1 = virtualinvoke $r13.<java.lang.String: int length()>();
+
+        if $i1 <= 0 goto label5;
+
+        $r5 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.xalan.internal.xsltc.compiler.Parser getParser()>();
+
+        $r6 = virtualinvoke $r5.<com.sun.org.apache.xalan.internal.xsltc.compiler.Parser: com.sun.org.apache.xalan.internal.xsltc.compiler.Expression parseExpression(com.sun.org.apache.xalan.internal.xsltc.compiler.SyntaxTreeNode,java.lang.String,java.lang.String)>(r0, "select", null);
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.xalan.internal.xsltc.compiler.Expression _select> = $r6;
+
+        $r7 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.xalan.internal.xsltc.compiler.Expression _select>;
+
+        $z0 = virtualinvoke $r7.<com.sun.org.apache.xalan.internal.xsltc.compiler.Expression: boolean isDummy()>();
+
+        if $z0 == 0 goto label5;
+
+        virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: void reportError(com.sun.org.apache.xalan.internal.xsltc.compiler.SyntaxTreeNode,com.sun.org.apache.xalan.internal.xsltc.compiler.Parser,java.lang.String,java.lang.String)>(r0, r2, "REQUIRED_ATTR_ERR", "select");
+
+        return;
+
+     label5:
+        virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: void parseChildren(com.sun.org.apache.xalan.internal.xsltc.compiler.Parser)>(r2);
+
+        return;
+    }
+
+    public void translateValue(com.sun.org.apache.xalan.internal.xsltc.compiler.util.ClassGenerator, com.sun.org.apache.xalan.internal.xsltc.compiler.util.MethodGenerator)
+    {
+        com.sun.org.apache.bcel.internal.generic.PUSH $r6;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.util.ClassGenerator r2;
+        int $i0, $i1;
+        com.sun.org.apache.bcel.internal.generic.NEW $r13;
+        boolean $z0, $z1;
+        com.sun.org.apache.bcel.internal.generic.INVOKESPECIAL $r16;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.Expression $r1, $r7, $r8, $r10;
+        com.sun.org.apache.bcel.internal.generic.InstructionList $r5, $r12;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.util.MethodGenerator r4;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type $r9;
+        com.sun.org.apache.bcel.internal.generic.StackInstruction $r14, $r15;
+        com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase r0;
+        com.sun.org.apache.bcel.internal.generic.ConstantPoolGen $r3, $r11;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase;
+
+        r2 := @parameter0: com.sun.org.apache.xalan.internal.xsltc.compiler.util.ClassGenerator;
+
+        r4 := @parameter1: com.sun.org.apache.xalan.internal.xsltc.compiler.util.MethodGenerator;
+
+        $r1 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.xalan.internal.xsltc.compiler.Expression _select>;
+
+        if $r1 == null goto label2;
+
+        $r7 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.xalan.internal.xsltc.compiler.Expression _select>;
+
+        virtualinvoke $r7.<com.sun.org.apache.xalan.internal.xsltc.compiler.Expression: void translate(com.sun.org.apache.xalan.internal.xsltc.compiler.util.ClassGenerator,com.sun.org.apache.xalan.internal.xsltc.compiler.util.MethodGenerator)>(r2, r4);
+
+        $r8 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.xalan.internal.xsltc.compiler.Expression _select>;
+
+        $r9 = virtualinvoke $r8.<com.sun.org.apache.xalan.internal.xsltc.compiler.Expression: com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type getType()>();
+
+        $z1 = $r9 instanceof com.sun.org.apache.xalan.internal.xsltc.compiler.util.NodeSetType;
+
+        if $z1 == 0 goto label1;
+
+        $r11 = virtualinvoke r2.<com.sun.org.apache.xalan.internal.xsltc.compiler.util.ClassGenerator: com.sun.org.apache.bcel.internal.generic.ConstantPoolGen getConstantPool()>();
+
+        $r12 = virtualinvoke r4.<com.sun.org.apache.xalan.internal.xsltc.compiler.util.MethodGenerator: com.sun.org.apache.bcel.internal.generic.InstructionList getInstructionList()>();
+
+        $i0 = virtualinvoke $r11.<com.sun.org.apache.bcel.internal.generic.ConstantPoolGen: int addMethodref(java.lang.String,java.lang.String,java.lang.String)>("com.sun.org.apache.xalan.internal.xsltc.dom.CachedNodeListIterator", "<init>", "(Lcom/sun/org/apache/xml/internal/dtm/DTMAxisIterator;)V");
+
+        $r13 = new com.sun.org.apache.bcel.internal.generic.NEW;
+
+        $i1 = virtualinvoke $r11.<com.sun.org.apache.bcel.internal.generic.ConstantPoolGen: int addClass(java.lang.String)>("com.sun.org.apache.xalan.internal.xsltc.dom.CachedNodeListIterator");
+
+        specialinvoke $r13.<com.sun.org.apache.bcel.internal.generic.NEW: void <init>(int)>($i1);
+
+        virtualinvoke $r12.<com.sun.org.apache.bcel.internal.generic.InstructionList: com.sun.org.apache.bcel.internal.generic.InstructionHandle append(com.sun.org.apache.bcel.internal.generic.Instruction)>($r13);
+
+        $r14 = <com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.bcel.internal.generic.StackInstruction DUP_X1>;
+
+        virtualinvoke $r12.<com.sun.org.apache.bcel.internal.generic.InstructionList: com.sun.org.apache.bcel.internal.generic.InstructionHandle append(com.sun.org.apache.bcel.internal.generic.Instruction)>($r14);
+
+        $r15 = <com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.bcel.internal.generic.StackInstruction SWAP>;
+
+        virtualinvoke $r12.<com.sun.org.apache.bcel.internal.generic.InstructionList: com.sun.org.apache.bcel.internal.generic.InstructionHandle append(com.sun.org.apache.bcel.internal.generic.Instruction)>($r15);
+
+        $r16 = new com.sun.org.apache.bcel.internal.generic.INVOKESPECIAL;
+
+        specialinvoke $r16.<com.sun.org.apache.bcel.internal.generic.INVOKESPECIAL: void <init>(int)>($i0);
+
+        virtualinvoke $r12.<com.sun.org.apache.bcel.internal.generic.InstructionList: com.sun.org.apache.bcel.internal.generic.InstructionHandle append(com.sun.org.apache.bcel.internal.generic.Instruction)>($r16);
+
+     label1:
+        $r10 = r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: com.sun.org.apache.xalan.internal.xsltc.compiler.Expression _select>;
+
+        virtualinvoke $r10.<com.sun.org.apache.xalan.internal.xsltc.compiler.Expression: void startIterator(com.sun.org.apache.xalan.internal.xsltc.compiler.util.ClassGenerator,com.sun.org.apache.xalan.internal.xsltc.compiler.util.MethodGenerator)>(r2, r4);
+
+        goto label4;
+
+     label2:
+        $z0 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: boolean hasContents()>();
+
+        if $z0 == 0 goto label3;
+
+        virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.compiler.VariableBase: void compileResultTree(com.sun.org.apache.xalan.internal.xsltc.compiler.util.ClassGenerator,com.sun.org.apache.xalan.internal.xsltc.compiler.util.MethodGenerator)>(r2, r4);
+
+        goto label4;
+
+     label3:
+        $r3 = virtualinvoke r2.<com.sun.org.apache.xalan.internal.xsltc.compiler.util.ClassGenerator: com.sun.org.apache.bcel.internal.generic.ConstantPoolGen getConstantPool()>();
+
+        $r5 = virtualinvoke r4.<com.sun.org.apache.xalan.internal.xsltc.compiler.util.MethodGenerator: com.sun.org.apache.bcel.internal.generic.InstructionList getInstructionList()>();
+
+        $r6 = new com.sun.org.apache.bcel.internal.generic.PUSH;
+
+        specialinvoke $r6.<com.sun.org.apache.bcel.internal.generic.PUSH: void <init>(com.sun.org.apache.bcel.internal.generic.ConstantPoolGen,java.lang.String)>($r3, "");
+
+        virtualinvoke $r5.<com.sun.org.apache.bcel.internal.generic.InstructionList: com.sun.org.apache.bcel.internal.generic.InstructionHandle append(com.sun.org.apache.bcel.internal.generic.CompoundInstruction)>($r6);
+
+     label4:
+        return;
+    }
+}

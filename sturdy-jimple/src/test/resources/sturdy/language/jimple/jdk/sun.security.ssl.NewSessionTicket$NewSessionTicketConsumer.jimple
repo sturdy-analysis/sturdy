@@ -1,0 +1,209 @@
+final class sun.security.ssl.NewSessionTicket$NewSessionTicketConsumer extends java.lang.Object implements sun.security.ssl.SSLConsumer
+{
+
+    private void <init>()
+    {
+        sun.security.ssl.NewSessionTicket$NewSessionTicketConsumer r0;
+
+        r0 := @this: sun.security.ssl.NewSessionTicket$NewSessionTicketConsumer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void consume(sun.security.ssl.ConnectionContext, java.nio.ByteBuffer) throws java.io.IOException
+    {
+        byte[] $r16, $r23;
+        sun.security.ssl.NewSessionTicket$NewSessionTicketConsumer r28;
+        java.nio.ByteBuffer r3;
+        java.security.SecureRandom $r21;
+        javax.net.ssl.SSLSessionContext $r10;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        sun.security.ssl.SSLContextImpl $r9, $r20;
+        sun.security.ssl.SSLSessionContextImpl r11;
+        java.lang.StringBuilder $r4, $r5, $r6;
+        javax.crypto.SecretKey $r14, $r18;
+        sun.security.ssl.CipherSuite $r15;
+        java.lang.Object[] $r8, $r25, $r26, $r27;
+        sun.security.ssl.CipherSuite$HashAlg $r17;
+        sun.security.ssl.ConnectionContext r0;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.lang.String $r7;
+        sun.security.ssl.NewSessionTicket$NewSessionTicketMessage $r2;
+        sun.security.ssl.TransportContext $r12, $r24;
+        sun.security.ssl.SessionId $r19;
+        sun.security.ssl.SSLSessionImpl r13, $r22;
+        sun.security.ssl.HandshakeContext r1;
+
+        r28 := @this: sun.security.ssl.NewSessionTicket$NewSessionTicketConsumer;
+
+        r0 := @parameter0: sun.security.ssl.ConnectionContext;
+
+        r3 := @parameter1: java.nio.ByteBuffer;
+
+        r1 = (sun.security.ssl.HandshakeContext) r0;
+
+        $r2 = new sun.security.ssl.NewSessionTicket$NewSessionTicketMessage;
+
+        specialinvoke $r2.<sun.security.ssl.NewSessionTicket$NewSessionTicketMessage: void <init>(sun.security.ssl.HandshakeContext,java.nio.ByteBuffer)>(r1, r3);
+
+        $z0 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z0 == 0 goto label1;
+
+        $z7 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z7 == 0 goto label1;
+
+        $r27 = newarray (java.lang.Object)[1];
+
+        $r27[0] = $r2;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Consuming NewSessionTicket message", $r27);
+
+     label1:
+        $i4 = $r2.<sun.security.ssl.NewSessionTicket$NewSessionTicketMessage: int ticketLifetime>;
+
+        if $i4 <= 0 goto label2;
+
+        $i1 = $r2.<sun.security.ssl.NewSessionTicket$NewSessionTicketMessage: int ticketLifetime>;
+
+        if $i1 <= 604800 goto label4;
+
+     label2:
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label3;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z2 == 0 goto label3;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Discarding NewSessionTicket with lifetime ");
+
+        $i0 = $r2.<sun.security.ssl.NewSessionTicket$NewSessionTicketMessage: int ticketLifetime>;
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r8 = newarray (java.lang.Object)[1];
+
+        $r8[0] = $r2;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r7, $r8);
+
+     label3:
+        return;
+
+     label4:
+        $r9 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.SSLContextImpl sslContext>;
+
+        $r10 = virtualinvoke $r9.<sun.security.ssl.SSLContextImpl: javax.net.ssl.SSLSessionContext engineGetClientSessionContext()>();
+
+        r11 = (sun.security.ssl.SSLSessionContextImpl) $r10;
+
+        $i2 = virtualinvoke r11.<sun.security.ssl.SSLSessionContextImpl: int getSessionTimeout()>();
+
+        if $i2 <= 604800 goto label6;
+
+        $z5 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z5 == 0 goto label5;
+
+        $z6 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z6 == 0 goto label5;
+
+        $r26 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Session cache lifetime is too long. Discarding ticket.", $r26);
+
+     label5:
+        return;
+
+     label6:
+        $r12 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        r13 = $r12.<sun.security.ssl.TransportContext: sun.security.ssl.SSLSessionImpl conSession>;
+
+        $r14 = virtualinvoke r13.<sun.security.ssl.SSLSessionImpl: javax.crypto.SecretKey getResumptionMasterSecret()>();
+
+        if $r14 != null goto label8;
+
+        $z3 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z3 == 0 goto label7;
+
+        $z4 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z4 == 0 goto label7;
+
+        $r25 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Session has no resumption master secret. Ignoring ticket.", $r25);
+
+     label7:
+        return;
+
+     label8:
+        $r15 = virtualinvoke r13.<sun.security.ssl.SSLSessionImpl: sun.security.ssl.CipherSuite getSuite()>();
+
+        $r17 = $r15.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$HashAlg hashAlg>;
+
+        $r16 = $r2.<sun.security.ssl.NewSessionTicket$NewSessionTicketMessage: byte[] ticketNonce>;
+
+        $r18 = staticinvoke <sun.security.ssl.NewSessionTicket: javax.crypto.SecretKey access$300(sun.security.ssl.CipherSuite$HashAlg,javax.crypto.SecretKey,byte[])>($r17, $r14, $r16);
+
+        $r19 = new sun.security.ssl.SessionId;
+
+        $r20 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.SSLContextImpl sslContext>;
+
+        $r21 = virtualinvoke $r20.<sun.security.ssl.SSLContextImpl: java.security.SecureRandom getSecureRandom()>();
+
+        specialinvoke $r19.<sun.security.ssl.SessionId: void <init>(boolean,java.security.SecureRandom)>(1, $r21);
+
+        $r22 = new sun.security.ssl.SSLSessionImpl;
+
+        specialinvoke $r22.<sun.security.ssl.SSLSessionImpl: void <init>(sun.security.ssl.SSLSessionImpl,sun.security.ssl.SessionId)>(r13, $r19);
+
+        virtualinvoke r13.<sun.security.ssl.SSLSessionImpl: void addChild(sun.security.ssl.SSLSessionImpl)>($r22);
+
+        virtualinvoke $r22.<sun.security.ssl.SSLSessionImpl: void setPreSharedKey(javax.crypto.SecretKey)>($r18);
+
+        $i3 = $r2.<sun.security.ssl.NewSessionTicket$NewSessionTicketMessage: int ticketAgeAdd>;
+
+        virtualinvoke $r22.<sun.security.ssl.SSLSessionImpl: void setTicketAgeAdd(int)>($i3);
+
+        $r23 = $r2.<sun.security.ssl.NewSessionTicket$NewSessionTicketMessage: byte[] ticket>;
+
+        virtualinvoke $r22.<sun.security.ssl.SSLSessionImpl: void setPskIdentity(byte[])>($r23);
+
+        virtualinvoke r11.<sun.security.ssl.SSLSessionContextImpl: void put(sun.security.ssl.SSLSessionImpl)>($r22);
+
+        $r24 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        virtualinvoke $r24.<sun.security.ssl.TransportContext: javax.net.ssl.SSLEngineResult$HandshakeStatus finishPostHandshake()>();
+
+        return;
+    }
+
+    void <init>(sun.security.ssl.NewSessionTicket$1)
+    {
+        sun.security.ssl.NewSessionTicket$NewSessionTicketConsumer r0;
+        sun.security.ssl.NewSessionTicket$1 r1;
+
+        r0 := @this: sun.security.ssl.NewSessionTicket$NewSessionTicketConsumer;
+
+        r1 := @parameter0: sun.security.ssl.NewSessionTicket$1;
+
+        specialinvoke r0.<sun.security.ssl.NewSessionTicket$NewSessionTicketConsumer: void <init>()>();
+
+        return;
+    }
+}

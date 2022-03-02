@@ -1,0 +1,446 @@
+abstract class sun.security.provider.DigestBase extends java.security.MessageDigestSpi implements java.lang.Cloneable
+{
+    private byte[] oneByte;
+    private final java.lang.String algorithm;
+    private final int digestLength;
+    private final int blockSize;
+    byte[] buffer;
+    private int bufOfs;
+    long bytesProcessed;
+    static final byte[] padding;
+
+    void <init>(java.lang.String, int, int)
+    {
+        byte[] $r2;
+        int i0, i1;
+        sun.security.provider.DigestBase r0;
+        java.lang.String r1;
+
+        r0 := @this: sun.security.provider.DigestBase;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<java.security.MessageDigestSpi: void <init>()>();
+
+        r0.<sun.security.provider.DigestBase: java.lang.String algorithm> = r1;
+
+        r0.<sun.security.provider.DigestBase: int digestLength> = i0;
+
+        r0.<sun.security.provider.DigestBase: int blockSize> = i1;
+
+        $r2 = newarray (byte)[i1];
+
+        r0.<sun.security.provider.DigestBase: byte[] buffer> = $r2;
+
+        return;
+    }
+
+    protected final int engineGetDigestLength()
+    {
+        int $i0;
+        sun.security.provider.DigestBase r0;
+
+        r0 := @this: sun.security.provider.DigestBase;
+
+        $i0 = r0.<sun.security.provider.DigestBase: int digestLength>;
+
+        return $i0;
+    }
+
+    protected final void engineUpdate(byte)
+    {
+        byte[] $r1, $r2, $r3, $r4;
+        byte b0;
+        sun.security.provider.DigestBase r0;
+
+        r0 := @this: sun.security.provider.DigestBase;
+
+        b0 := @parameter0: byte;
+
+        $r1 = r0.<sun.security.provider.DigestBase: byte[] oneByte>;
+
+        if $r1 != null goto label1;
+
+        $r4 = newarray (byte)[1];
+
+        r0.<sun.security.provider.DigestBase: byte[] oneByte> = $r4;
+
+     label1:
+        $r2 = r0.<sun.security.provider.DigestBase: byte[] oneByte>;
+
+        $r2[0] = b0;
+
+        $r3 = r0.<sun.security.provider.DigestBase: byte[] oneByte>;
+
+        virtualinvoke r0.<sun.security.provider.DigestBase: void engineUpdate(byte[],int,int)>($r3, 0, 1);
+
+        return;
+    }
+
+    protected final void engineUpdate(byte[], int, int)
+    {
+        byte[] r0, $r2, $r3, $r4;
+        long $l2, $l4, $l5, $l6;
+        byte $b3;
+        int $i0, $i1, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, i20, i21, $i22, i23, $i24;
+        sun.security.provider.DigestBase r1;
+        java.lang.ArrayIndexOutOfBoundsException $r6;
+
+        r1 := @this: sun.security.provider.DigestBase;
+
+        r0 := @parameter0: byte[];
+
+        i20 := @parameter1: int;
+
+        i21 := @parameter2: int;
+
+        if i21 != 0 goto label1;
+
+        return;
+
+     label1:
+        if i20 < 0 goto label2;
+
+        if i21 < 0 goto label2;
+
+        $i0 = lengthof r0;
+
+        $i1 = $i0 - i21;
+
+        if i20 <= $i1 goto label3;
+
+     label2:
+        $r6 = new java.lang.ArrayIndexOutOfBoundsException;
+
+        specialinvoke $r6.<java.lang.ArrayIndexOutOfBoundsException: void <init>()>();
+
+        throw $r6;
+
+     label3:
+        $l2 = r1.<sun.security.provider.DigestBase: long bytesProcessed>;
+
+        $b3 = $l2 cmp 0L;
+
+        $i24 = (int) $b3;
+
+        if $i24 >= 0 goto label4;
+
+        virtualinvoke r1.<sun.security.provider.DigestBase: void engineReset()>();
+
+     label4:
+        $l5 = r1.<sun.security.provider.DigestBase: long bytesProcessed>;
+
+        $l4 = (long) i21;
+
+        $l6 = $l5 + $l4;
+
+        r1.<sun.security.provider.DigestBase: long bytesProcessed> = $l6;
+
+        $i7 = r1.<sun.security.provider.DigestBase: int bufOfs>;
+
+        if $i7 == 0 goto label5;
+
+        $i12 = r1.<sun.security.provider.DigestBase: int blockSize>;
+
+        $i11 = r1.<sun.security.provider.DigestBase: int bufOfs>;
+
+        $i13 = $i12 - $i11;
+
+        $i14 = staticinvoke <java.lang.Math: int min(int,int)>(i21, $i13);
+
+        $r3 = r1.<sun.security.provider.DigestBase: byte[] buffer>;
+
+        $i15 = r1.<sun.security.provider.DigestBase: int bufOfs>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, i20, $r3, $i15, $i14);
+
+        $i16 = r1.<sun.security.provider.DigestBase: int bufOfs>;
+
+        $i17 = $i16 + $i14;
+
+        r1.<sun.security.provider.DigestBase: int bufOfs> = $i17;
+
+        i20 = i20 + $i14;
+
+        i21 = i21 - $i14;
+
+        $i19 = r1.<sun.security.provider.DigestBase: int bufOfs>;
+
+        $i18 = r1.<sun.security.provider.DigestBase: int blockSize>;
+
+        if $i19 < $i18 goto label5;
+
+        $r4 = r1.<sun.security.provider.DigestBase: byte[] buffer>;
+
+        virtualinvoke r1.<sun.security.provider.DigestBase: void implCompress(byte[],int)>($r4, 0);
+
+        r1.<sun.security.provider.DigestBase: int bufOfs> = 0;
+
+     label5:
+        $i22 = r1.<sun.security.provider.DigestBase: int blockSize>;
+
+        if i21 < $i22 goto label6;
+
+        i23 = i20 + i21;
+
+        $i8 = r1.<sun.security.provider.DigestBase: int blockSize>;
+
+        $i9 = i23 - $i8;
+
+        $i10 = specialinvoke r1.<sun.security.provider.DigestBase: int implCompressMultiBlock(byte[],int,int)>(r0, i20, $i9);
+
+        i20 = $i10;
+
+        i21 = i23 - $i10;
+
+     label6:
+        if i21 <= 0 goto label7;
+
+        $r2 = r1.<sun.security.provider.DigestBase: byte[] buffer>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, i20, $r2, 0, i21);
+
+        r1.<sun.security.provider.DigestBase: int bufOfs> = i21;
+
+     label7:
+        return;
+    }
+
+    private int implCompressMultiBlock(byte[], int, int)
+    {
+        byte[] r1;
+        int i0, $i1, i2;
+        sun.security.provider.DigestBase r0;
+
+        r0 := @this: sun.security.provider.DigestBase;
+
+        r1 := @parameter0: byte[];
+
+        i2 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+     label1:
+        if i2 > i0 goto label2;
+
+        virtualinvoke r0.<sun.security.provider.DigestBase: void implCompress(byte[],int)>(r1, i2);
+
+        $i1 = r0.<sun.security.provider.DigestBase: int blockSize>;
+
+        i2 = i2 + $i1;
+
+        goto label1;
+
+     label2:
+        return i2;
+    }
+
+    protected final void engineReset()
+    {
+        byte[] $r1;
+        byte $b1;
+        sun.security.provider.DigestBase r0;
+        long $l0;
+
+        r0 := @this: sun.security.provider.DigestBase;
+
+        $l0 = r0.<sun.security.provider.DigestBase: long bytesProcessed>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        return;
+
+     label1:
+        virtualinvoke r0.<sun.security.provider.DigestBase: void implReset()>();
+
+        r0.<sun.security.provider.DigestBase: int bufOfs> = 0;
+
+        r0.<sun.security.provider.DigestBase: long bytesProcessed> = 0L;
+
+        $r1 = r0.<sun.security.provider.DigestBase: byte[] buffer>;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],byte)>($r1, 0);
+
+        return;
+    }
+
+    protected final byte[] engineDigest()
+    {
+        java.lang.Throwable $r4;
+        byte[] r1;
+        java.security.ProviderException $r3, $r5;
+        sun.security.provider.DigestBase r0;
+        int $i0, $i1;
+        java.security.DigestException $r2;
+
+        r0 := @this: sun.security.provider.DigestBase;
+
+        $i0 = r0.<sun.security.provider.DigestBase: int digestLength>;
+
+        r1 = newarray (byte)[$i0];
+
+     label1:
+        $i1 = lengthof r1;
+
+        virtualinvoke r0.<sun.security.provider.DigestBase: int engineDigest(byte[],int,int)>(r1, 0, $i1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new java.security.ProviderException;
+
+        specialinvoke $r3.<java.security.ProviderException: void <init>(java.lang.String)>("Internal error");
+
+        $r4 = virtualinvoke $r3.<java.security.ProviderException: java.lang.Throwable initCause(java.lang.Throwable)>($r2);
+
+        $r5 = (java.security.ProviderException) $r4;
+
+        throw $r5;
+
+     label4:
+        return r1;
+
+        catch java.security.DigestException from label1 to label2 with label3;
+    }
+
+    protected final int engineDigest(byte[], int, int) throws java.security.DigestException
+    {
+        byte[] r1;
+        long $l5;
+        byte $b6;
+        int i0, $i1, i2, $i3, $i4, $i7, $i8, $i9;
+        java.security.DigestException $r13, $r14;
+        java.lang.String $r7, $r10;
+        sun.security.provider.DigestBase r0;
+        java.lang.StringBuilder $r4, $r5, $r6, $r8, $r9, $r12;
+
+        r0 := @this: sun.security.provider.DigestBase;
+
+        r1 := @parameter0: byte[];
+
+        i2 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        $i1 = r0.<sun.security.provider.DigestBase: int digestLength>;
+
+        if i0 >= $i1 goto label1;
+
+        $r13 = new java.security.DigestException;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Length must be at least ");
+
+        $i8 = r0.<sun.security.provider.DigestBase: int digestLength>;
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i8);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" for ");
+
+        $r7 = r0.<sun.security.provider.DigestBase: java.lang.String algorithm>;
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("digests");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<java.security.DigestException: void <init>(java.lang.String)>($r10);
+
+        throw $r13;
+
+     label1:
+        if i2 < 0 goto label2;
+
+        if i0 < 0 goto label2;
+
+        $i3 = lengthof r1;
+
+        $i4 = $i3 - i0;
+
+        if i2 <= $i4 goto label3;
+
+     label2:
+        $r14 = new java.security.DigestException;
+
+        specialinvoke $r14.<java.security.DigestException: void <init>(java.lang.String)>("Buffer too short to store digest");
+
+        throw $r14;
+
+     label3:
+        $l5 = r0.<sun.security.provider.DigestBase: long bytesProcessed>;
+
+        $b6 = $l5 cmp 0L;
+
+        $i9 = (int) $b6;
+
+        if $i9 >= 0 goto label4;
+
+        virtualinvoke r0.<sun.security.provider.DigestBase: void engineReset()>();
+
+     label4:
+        virtualinvoke r0.<sun.security.provider.DigestBase: void implDigest(byte[],int)>(r1, i2);
+
+        r0.<sun.security.provider.DigestBase: long bytesProcessed> = -1L;
+
+        $i7 = r0.<sun.security.provider.DigestBase: int digestLength>;
+
+        return $i7;
+    }
+
+    abstract void implCompress(byte[], int);
+
+    abstract void implDigest(byte[], int);
+
+    abstract void implReset();
+
+    public java.lang.Object clone() throws java.lang.CloneNotSupportedException
+    {
+        byte[] $r3, $r5;
+        sun.security.provider.DigestBase r0, r2;
+        java.lang.Object $r1, $r4;
+
+        r0 := @this: sun.security.provider.DigestBase;
+
+        $r1 = specialinvoke r0.<java.security.MessageDigestSpi: java.lang.Object clone()>();
+
+        r2 = (sun.security.provider.DigestBase) $r1;
+
+        $r3 = r2.<sun.security.provider.DigestBase: byte[] buffer>;
+
+        $r4 = virtualinvoke $r3.<java.lang.Object: java.lang.Object clone()>();
+
+        $r5 = (byte[]) $r4;
+
+        r2.<sun.security.provider.DigestBase: byte[] buffer> = $r5;
+
+        return r2;
+    }
+
+    static void <clinit>()
+    {
+        byte[] $r0, $r1;
+
+        $r0 = newarray (byte)[136];
+
+        <sun.security.provider.DigestBase: byte[] padding> = $r0;
+
+        $r1 = <sun.security.provider.DigestBase: byte[] padding>;
+
+        $r1[0] = -128;
+
+        return;
+    }
+}

@@ -1,0 +1,3387 @@
+public final class com.sun.xml.internal.ws.api.pipe.Fiber extends java.lang.Object implements java.lang.Runnable, com.sun.xml.internal.ws.api.Cancelable, com.sun.xml.internal.ws.api.ComponentRegistry
+{
+    private final java.util.List _listeners;
+    private com.sun.xml.internal.ws.api.pipe.Tube[] conts;
+    private int contsSize;
+    private com.sun.xml.internal.ws.api.pipe.Tube next;
+    private com.sun.xml.internal.ws.api.message.Packet packet;
+    private java.lang.Throwable throwable;
+    public final com.sun.xml.internal.ws.api.pipe.Engine owner;
+    private volatile int suspendedCount;
+    private volatile boolean isInsideSuspendCallbacks;
+    private boolean synchronous;
+    private boolean interrupted;
+    private final int id;
+    private java.util.List interceptors;
+    private java.lang.ClassLoader contextClassLoader;
+    private com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback completionCallback;
+    private boolean isDeliverThrowableInPacket;
+    private java.lang.Thread currentThread;
+    private final java.util.concurrent.locks.ReentrantLock lock;
+    private final java.util.concurrent.locks.Condition condition;
+    private volatile boolean isCanceled;
+    private boolean started;
+    private boolean startedSync;
+    private static final com.sun.xml.internal.ws.api.pipe.Fiber$PlaceholderTube PLACEHOLDER;
+    private static final java.lang.ThreadLocal CURRENT_FIBER;
+    private static final java.util.concurrent.atomic.AtomicInteger iotaGen;
+    private static final java.util.logging.Logger LOGGER;
+    private static final java.util.concurrent.locks.ReentrantLock serializedExecutionLock;
+    public static volatile boolean serializeExecution;
+    private final java.util.Set components;
+    static final boolean $assertionsDisabled;
+
+    public void addListener(com.sun.xml.internal.ws.api.pipe.Fiber$Listener)
+    {
+        java.lang.Throwable $r5;
+        java.util.List $r1, $r3, $r4;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        com.sun.xml.internal.ws.api.pipe.Fiber$Listener r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r2 := @parameter0: com.sun.xml.internal.ws.api.pipe.Fiber$Listener;
+
+        $r1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List _listeners>;
+
+        entermonitor $r1;
+
+     label1:
+        $r3 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List _listeners>;
+
+        $z0 = interfaceinvoke $r3.<java.util.List: boolean contains(java.lang.Object)>(r2);
+
+        if $z0 != 0 goto label2;
+
+        $r4 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List _listeners>;
+
+        interfaceinvoke $r4.<java.util.List: boolean add(java.lang.Object)>(r2);
+
+     label2:
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r5;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void removeListener(com.sun.xml.internal.ws.api.pipe.Fiber$Listener)
+    {
+        java.lang.Throwable $r4;
+        java.util.List $r1, $r3;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        com.sun.xml.internal.ws.api.pipe.Fiber$Listener r2;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r2 := @parameter0: com.sun.xml.internal.ws.api.pipe.Fiber$Listener;
+
+        $r1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List _listeners>;
+
+        entermonitor $r1;
+
+     label1:
+        $r3 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List _listeners>;
+
+        interfaceinvoke $r3.<java.util.List: boolean remove(java.lang.Object)>(r2);
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r4;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    java.util.List getCurrentListeners()
+    {
+        java.lang.Throwable $r4;
+        java.util.List $r1, $r3;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        java.util.ArrayList $r2;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        $r1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List _listeners>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = new java.util.ArrayList;
+
+        $r3 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List _listeners>;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>(java.util.Collection)>($r3);
+
+        exitmonitor $r1;
+
+     label2:
+        return $r2;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private void clearListeners()
+    {
+        java.lang.Throwable $r3;
+        java.util.List $r1, $r2;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        $r1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List _listeners>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List _listeners>;
+
+        interfaceinvoke $r2.<java.util.List: void clear()>();
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r3;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void setDeliverThrowableInPacket(boolean)
+    {
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        boolean z0;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        z0 := @parameter0: boolean;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean isDeliverThrowableInPacket> = z0;
+
+        return;
+    }
+
+    void <init>(com.sun.xml.internal.ws.api.pipe.Engine)
+    {
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        com.sun.xml.internal.ws.api.pipe.Engine r7;
+        java.util.ArrayList $r1;
+        java.util.logging.Level $r12;
+        java.util.concurrent.atomic.AtomicInteger $r8;
+        java.lang.Thread $r9;
+        int $i0;
+        java.lang.String $r13;
+        boolean $z0;
+        java.util.concurrent.locks.ReentrantLock $r3, $r4;
+        java.util.concurrent.CopyOnWriteArraySet $r6;
+        java.util.logging.Logger $r11;
+        com.sun.xml.internal.ws.api.pipe.Tube[] $r2;
+        java.util.concurrent.locks.Condition $r5;
+        java.lang.ClassLoader $r10;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r7 := @parameter0: com.sun.xml.internal.ws.api.pipe.Engine;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List _listeners> = $r1;
+
+        $r2 = newarray (com.sun.xml.internal.ws.api.pipe.Tube)[16];
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube[] conts> = $r2;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int suspendedCount> = 0;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean isInsideSuspendCallbacks> = 0;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean isDeliverThrowableInPacket> = 0;
+
+        $r3 = new java.util.concurrent.locks.ReentrantLock;
+
+        specialinvoke $r3.<java.util.concurrent.locks.ReentrantLock: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.ReentrantLock lock> = $r3;
+
+        $r4 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.ReentrantLock lock>;
+
+        $r5 = virtualinvoke $r4.<java.util.concurrent.locks.ReentrantLock: java.util.concurrent.locks.Condition newCondition()>();
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.Condition condition> = $r5;
+
+        $r6 = new java.util.concurrent.CopyOnWriteArraySet;
+
+        specialinvoke $r6.<java.util.concurrent.CopyOnWriteArraySet: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.Set components> = $r6;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Engine owner> = r7;
+
+        $r8 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.atomic.AtomicInteger iotaGen>;
+
+        $i0 = virtualinvoke $r8.<java.util.concurrent.atomic.AtomicInteger: int incrementAndGet()>();
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int id> = $i0;
+
+        $z0 = staticinvoke <com.sun.xml.internal.ws.api.pipe.Fiber: boolean isTraceEnabled()>();
+
+        if $z0 == 0 goto label1;
+
+        $r11 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r12 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r13 = specialinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.String getName()>();
+
+        virtualinvoke $r11.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r12, "{0} created", $r13);
+
+     label1:
+        $r9 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.Thread: java.lang.ClassLoader getContextClassLoader()>();
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.ClassLoader contextClassLoader> = $r10;
+
+        return;
+    }
+
+    public void start(com.sun.xml.internal.ws.api.pipe.Tube, com.sun.xml.internal.ws.api.message.Packet, com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback)
+    {
+        com.sun.xml.internal.ws.api.pipe.Tube r1;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback r3;
+        com.sun.xml.internal.ws.api.message.Packet r2;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.api.pipe.Tube;
+
+        r2 := @parameter1: com.sun.xml.internal.ws.api.message.Packet;
+
+        r3 := @parameter2: com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: void start(com.sun.xml.internal.ws.api.pipe.Tube,com.sun.xml.internal.ws.api.message.Packet,com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback,boolean)>(r1, r2, r3, 0);
+
+        return;
+    }
+
+    private void dumpFiberContext(java.lang.String)
+    {
+        com.sun.xml.internal.ws.api.pipe.Tube $r9, $r22, $r45;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        com.sun.xml.internal.ws.api.message.Message $r31, $r33, $r35, $r38;
+        java.lang.Thread $r17;
+        com.sun.xml.internal.ws.api.message.Packet $r1, $r19, $r20, $r30, $r32, $r34, $r37;
+        boolean $z0;
+        java.util.logging.Logger $r13;
+        java.lang.StringBuilder $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r10, $r11, $r21, $r24, $r25;
+        com.sun.xml.internal.ws.api.message.MessageHeaders $r36, $r39;
+        java.lang.Object[] $r12;
+        com.sun.xml.internal.ws.api.SOAPVersion r27;
+        java.util.logging.Level $r14;
+        com.sun.xml.internal.ws.api.SOAPVersion[] $r26;
+        int i0, i1, i2, i3;
+        java.lang.String $r15, r16, $r18, $r23, r40, r41, $r42, $r43, r44, r46, $r47;
+        com.sun.xml.internal.ws.api.addressing.AddressingVersion[] $r28;
+        com.sun.xml.internal.ws.api.addressing.AddressingVersion r29;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r16 := @parameter0: java.lang.String;
+
+        $z0 = staticinvoke <com.sun.xml.internal.ws.api.pipe.Fiber: boolean isTraceEnabled()>();
+
+        if $z0 == 0 goto label17;
+
+        r40 = null;
+
+        r41 = null;
+
+        $r1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.message.Packet packet>;
+
+        if $r1 == null goto label10;
+
+        $r26 = staticinvoke <com.sun.xml.internal.ws.api.SOAPVersion: com.sun.xml.internal.ws.api.SOAPVersion[] values()>();
+
+        i1 = lengthof $r26;
+
+        i2 = 0;
+
+     label01:
+        if i2 >= i1 goto label10;
+
+        r27 = $r26[i2];
+
+        $r28 = staticinvoke <com.sun.xml.internal.ws.api.addressing.AddressingVersion: com.sun.xml.internal.ws.api.addressing.AddressingVersion[] values()>();
+
+        i0 = lengthof $r28;
+
+        i3 = 0;
+
+     label02:
+        if i3 >= i0 goto label08;
+
+        r29 = $r28[i3];
+
+        $r30 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.message.Packet packet>;
+
+        $r31 = virtualinvoke $r30.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.api.message.Message getMessage()>();
+
+        if $r31 == null goto label03;
+
+        $r37 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.message.Packet packet>;
+
+        $r38 = virtualinvoke $r37.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.api.message.Message getMessage()>();
+
+        $r39 = virtualinvoke $r38.<com.sun.xml.internal.ws.api.message.Message: com.sun.xml.internal.ws.api.message.MessageHeaders getHeaders()>();
+
+        $r42 = staticinvoke <com.sun.xml.internal.ws.api.message.AddressingUtils: java.lang.String getAction(com.sun.xml.internal.ws.api.message.MessageHeaders,com.sun.xml.internal.ws.api.addressing.AddressingVersion,com.sun.xml.internal.ws.api.SOAPVersion)>($r39, r29, r27);
+
+        goto label04;
+
+     label03:
+        $r42 = null;
+
+     label04:
+        r40 = $r42;
+
+        $r32 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.message.Packet packet>;
+
+        $r33 = virtualinvoke $r32.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.api.message.Message getMessage()>();
+
+        if $r33 == null goto label05;
+
+        $r34 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.message.Packet packet>;
+
+        $r35 = virtualinvoke $r34.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.api.message.Message getMessage()>();
+
+        $r36 = virtualinvoke $r35.<com.sun.xml.internal.ws.api.message.Message: com.sun.xml.internal.ws.api.message.MessageHeaders getHeaders()>();
+
+        $r43 = staticinvoke <com.sun.xml.internal.ws.api.message.AddressingUtils: java.lang.String getMessageID(com.sun.xml.internal.ws.api.message.MessageHeaders,com.sun.xml.internal.ws.api.addressing.AddressingVersion,com.sun.xml.internal.ws.api.SOAPVersion)>($r36, r29, r27);
+
+        goto label06;
+
+     label05:
+        $r43 = null;
+
+     label06:
+        r41 = $r43;
+
+        if r40 != null goto label08;
+
+        if $r43 == null goto label07;
+
+        goto label08;
+
+     label07:
+        i3 = i3 + 1;
+
+        goto label02;
+
+     label08:
+        if r40 != null goto label10;
+
+        if r41 == null goto label09;
+
+        goto label10;
+
+     label09:
+        i2 = i2 + 1;
+
+        goto label01;
+
+     label10:
+        if r40 != null goto label11;
+
+        if r41 != null goto label11;
+
+        r44 = "NO ACTION or MSG ID";
+
+        goto label12;
+
+     label11:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r40);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' and msgId \'");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r41);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        r44 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label12:
+        $r45 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube next>;
+
+        if $r45 == null goto label13;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube next>;
+
+        $r23 = virtualinvoke $r22.<java.lang.Object: java.lang.String toString()>();
+
+        $r24 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r23);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".processRequest()");
+
+        r46 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label14;
+
+     label13:
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = specialinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube peekCont()>();
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".processResponse()");
+
+        r46 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label14:
+        $r13 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r14 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r12 = newarray (java.lang.Object)[6];
+
+        $r15 = specialinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.String getName()>();
+
+        $r12[0] = $r15;
+
+        $r12[1] = r16;
+
+        $r12[2] = r44;
+
+        $r12[3] = r46;
+
+        $r17 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.Thread: java.lang.String getName()>();
+
+        $r12[4] = $r18;
+
+        $r19 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.message.Packet packet>;
+
+        if $r19 == null goto label15;
+
+        $r20 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.message.Packet packet>;
+
+        $r47 = virtualinvoke $r20.<com.sun.xml.internal.ws.api.message.Packet: java.lang.String toShortString()>();
+
+        goto label16;
+
+     label15:
+        $r47 = null;
+
+     label16:
+        $r12[5] = $r47;
+
+        virtualinvoke $r13.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r14, "{0} {1} with {2} and \'\'current\'\' tube {3} from thread {4} with Packet: {5}", $r12);
+
+     label17:
+        return;
+    }
+
+    public void start(com.sun.xml.internal.ws.api.pipe.Tube, com.sun.xml.internal.ws.api.message.Packet, com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback, boolean)
+    {
+        com.sun.xml.internal.ws.api.pipe.Tube r1;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback r3;
+        com.sun.xml.internal.ws.api.message.Packet r2;
+        com.sun.xml.internal.ws.api.pipe.Engine $r4;
+        boolean z0;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.api.pipe.Tube;
+
+        r2 := @parameter1: com.sun.xml.internal.ws.api.message.Packet;
+
+        r3 := @parameter2: com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback;
+
+        z0 := @parameter3: boolean;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube next> = r1;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.message.Packet packet> = r2;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback completionCallback> = r3;
+
+        if z0 == 0 goto label1;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean startedSync> = 1;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: void dumpFiberContext(java.lang.String)>("starting (sync)");
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: void run()>();
+
+        goto label2;
+
+     label1:
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean started> = 1;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: void dumpFiberContext(java.lang.String)>("starting (async)");
+
+        $r4 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Engine owner>;
+
+        virtualinvoke $r4.<com.sun.xml.internal.ws.api.pipe.Engine: void addRunnable(com.sun.xml.internal.ws.api.pipe.Fiber)>(r0);
+
+     label2:
+        return;
+    }
+
+    public void resume(com.sun.xml.internal.ws.api.message.Packet)
+    {
+        com.sun.xml.internal.ws.api.message.Packet r1;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.api.message.Packet;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: void resume(com.sun.xml.internal.ws.api.message.Packet,boolean)>(r1, 0);
+
+        return;
+    }
+
+    public void resume(com.sun.xml.internal.ws.api.message.Packet, boolean)
+    {
+        com.sun.xml.internal.ws.api.message.Packet r1;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        boolean z0;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.api.message.Packet;
+
+        z0 := @parameter1: boolean;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: void resume(com.sun.xml.internal.ws.api.message.Packet,boolean,com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback)>(r1, z0, null);
+
+        return;
+    }
+
+    public void resume(com.sun.xml.internal.ws.api.message.Packet, boolean, com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback)
+    {
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        com.sun.xml.internal.ws.api.pipe.Engine $r11;
+        java.lang.Integer $r8, $r19;
+        com.sun.xml.internal.ws.api.message.Packet r3;
+        boolean $z0, $z1, $z2, $z3, $z4, z5, $z6, $z7;
+        java.util.logging.Logger $r5, $r16, $r24;
+        java.util.List $r9;
+        java.lang.Throwable $r20, $r22;
+        java.lang.Object[] $r4, $r15, $r23;
+        java.util.logging.Level $r6, $r17, $r25;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.lang.String $r7, $r18, $r26;
+        com.sun.xml.internal.ws.api.pipe.Fiber$Listener r14;
+        java.util.concurrent.locks.ReentrantLock $r1, $r21, $r27;
+        java.util.Iterator $r10;
+        java.util.concurrent.locks.Condition $r12;
+        com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback r2;
+        java.lang.Object $r13;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r3 := @parameter0: com.sun.xml.internal.ws.api.message.Packet;
+
+        z5 := @parameter1: boolean;
+
+        r2 := @parameter2: com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback;
+
+        $r1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke $r1.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label01:
+        if r2 == null goto label02;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: void setCompletionCallback(com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback)>(r2);
+
+     label02:
+        $z0 = staticinvoke <com.sun.xml.internal.ws.api.pipe.Fiber: boolean isTraceEnabled()>();
+
+        if $z0 == 0 goto label03;
+
+        $r16 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r17 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r15 = newarray (java.lang.Object)[2];
+
+        $r18 = specialinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.String getName()>();
+
+        $r15[0] = $r18;
+
+        $i3 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int suspendedCount>;
+
+        $i4 = $i3 - 1;
+
+        $r19 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i4);
+
+        $r15[1] = $r19;
+
+        virtualinvoke $r16.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r17, "{0} resuming. Will have suspendedCount={1}", $r15);
+
+     label03:
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.message.Packet packet> = r3;
+
+        $i0 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int suspendedCount>;
+
+        $i1 = $i0 - 1;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int suspendedCount> = $i1;
+
+        if $i1 != 0 goto label14;
+
+        $z2 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean isInsideSuspendCallbacks>;
+
+        if $z2 != 0 goto label15;
+
+        $r9 = virtualinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List getCurrentListeners()>();
+
+        $r10 = interfaceinvoke $r9.<java.util.List: java.util.Iterator iterator()>();
+
+     label04:
+        $z3 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label09;
+
+        $r13 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        r14 = (com.sun.xml.internal.ws.api.pipe.Fiber$Listener) $r13;
+
+     label05:
+        interfaceinvoke r14.<com.sun.xml.internal.ws.api.pipe.Fiber$Listener: void fiberResumed(com.sun.xml.internal.ws.api.pipe.Fiber)>(r0);
+
+     label06:
+        goto label08;
+
+     label07:
+        $r22 := @caughtexception;
+
+        $z7 = staticinvoke <com.sun.xml.internal.ws.api.pipe.Fiber: boolean isTraceEnabled()>();
+
+        if $z7 == 0 goto label08;
+
+        $r24 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r25 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r23 = newarray (java.lang.Object)[2];
+
+        $r23[0] = r14;
+
+        $r26 = virtualinvoke $r22.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r23[1] = $r26;
+
+        virtualinvoke $r24.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r25, "Listener {0} threw exception: {1}", $r23);
+
+     label08:
+        goto label04;
+
+     label09:
+        $z4 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean synchronous>;
+
+        if $z4 == 0 goto label10;
+
+        $r12 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.Condition condition>;
+
+        interfaceinvoke $r12.<java.util.concurrent.locks.Condition: void signalAll()>();
+
+        goto label13;
+
+     label10:
+        if z5 != 0 goto label11;
+
+        $z6 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean startedSync>;
+
+        if $z6 == 0 goto label12;
+
+     label11:
+        virtualinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: void run()>();
+
+        goto label13;
+
+     label12:
+        specialinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: void dumpFiberContext(java.lang.String)>("resuming (async)");
+
+        $r11 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Engine owner>;
+
+        virtualinvoke $r11.<com.sun.xml.internal.ws.api.pipe.Engine: void addRunnable(com.sun.xml.internal.ws.api.pipe.Fiber)>(r0);
+
+     label13:
+        goto label15;
+
+     label14:
+        $z1 = staticinvoke <com.sun.xml.internal.ws.api.pipe.Fiber: boolean isTraceEnabled()>();
+
+        if $z1 == 0 goto label15;
+
+        $r5 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r6 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r4 = newarray (java.lang.Object)[2];
+
+        $r7 = specialinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.String getName()>();
+
+        $r4[0] = $r7;
+
+        $i2 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int suspendedCount>;
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r4[1] = $r8;
+
+        virtualinvoke $r5.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r6, "{0} taking no action on resume because suspendedCount != 0: {1}", $r4);
+
+     label15:
+        $r27 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke $r27.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        goto label18;
+
+     label16:
+        $r20 := @caughtexception;
+
+     label17:
+        $r21 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke $r21.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r20;
+
+     label18:
+        return;
+
+        catch java.lang.Throwable from label05 to label06 with label07;
+        catch java.lang.Throwable from label01 to label15 with label16;
+        catch java.lang.Throwable from label16 to label17 with label16;
+    }
+
+    public void resumeAndReturn(com.sun.xml.internal.ws.api.message.Packet, boolean)
+    {
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        com.sun.xml.internal.ws.api.message.Packet r1;
+        java.lang.String $r4;
+        java.util.logging.Logger $r2;
+        boolean $z0, z1;
+        java.util.logging.Level $r3;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.api.message.Packet;
+
+        z1 := @parameter1: boolean;
+
+        $z0 = staticinvoke <com.sun.xml.internal.ws.api.pipe.Fiber: boolean isTraceEnabled()>();
+
+        if $z0 == 0 goto label1;
+
+        $r2 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r3 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r4 = specialinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.String getName()>();
+
+        virtualinvoke $r2.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r3, "{0} resumed with Return Packet", $r4);
+
+     label1:
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube next> = null;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: void resume(com.sun.xml.internal.ws.api.message.Packet,boolean)>(r1, z1);
+
+        return;
+    }
+
+    public void resume(java.lang.Throwable)
+    {
+        java.lang.Throwable r1;
+        com.sun.xml.internal.ws.api.message.Packet $r2;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r1 := @parameter0: java.lang.Throwable;
+
+        $r2 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.message.Packet packet>;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: void resume(java.lang.Throwable,com.sun.xml.internal.ws.api.message.Packet,boolean)>(r1, $r2, 0);
+
+        return;
+    }
+
+    public void resume(java.lang.Throwable, com.sun.xml.internal.ws.api.message.Packet)
+    {
+        java.lang.Throwable r1;
+        com.sun.xml.internal.ws.api.message.Packet r2;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r1 := @parameter0: java.lang.Throwable;
+
+        r2 := @parameter1: com.sun.xml.internal.ws.api.message.Packet;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: void resume(java.lang.Throwable,com.sun.xml.internal.ws.api.message.Packet,boolean)>(r1, r2, 0);
+
+        return;
+    }
+
+    public void resume(java.lang.Throwable, boolean)
+    {
+        java.lang.Throwable r1;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        com.sun.xml.internal.ws.api.message.Packet $r2;
+        boolean z0;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r1 := @parameter0: java.lang.Throwable;
+
+        z0 := @parameter1: boolean;
+
+        $r2 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.message.Packet packet>;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: void resume(java.lang.Throwable,com.sun.xml.internal.ws.api.message.Packet,boolean)>(r1, $r2, z0);
+
+        return;
+    }
+
+    public void resume(java.lang.Throwable, com.sun.xml.internal.ws.api.message.Packet, boolean)
+    {
+        java.lang.Throwable r1;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        java.util.logging.Logger $r3;
+        java.util.logging.Level $r4;
+        com.sun.xml.internal.ws.api.message.Packet r2;
+        java.lang.String $r5;
+        boolean $z0, z1;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r1 := @parameter0: java.lang.Throwable;
+
+        r2 := @parameter1: com.sun.xml.internal.ws.api.message.Packet;
+
+        z1 := @parameter2: boolean;
+
+        $z0 = staticinvoke <com.sun.xml.internal.ws.api.pipe.Fiber: boolean isTraceEnabled()>();
+
+        if $z0 == 0 goto label1;
+
+        $r3 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r4 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r5 = specialinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.String getName()>();
+
+        virtualinvoke $r3.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r4, "{0} resumed with Return Throwable", $r5);
+
+     label1:
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube next> = null;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Throwable throwable> = r1;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: void resume(com.sun.xml.internal.ws.api.message.Packet,boolean)>(r2, z1);
+
+        return;
+    }
+
+    public void cancel(boolean)
+    {
+        java.lang.Throwable $r3;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        java.lang.Thread $r1, $r2;
+        boolean z0;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        z0 := @parameter0: boolean;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean isCanceled> = 1;
+
+        if z0 == 0 goto label6;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Thread currentThread>;
+
+        if $r1 == null goto label2;
+
+        $r2 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Thread currentThread>;
+
+        virtualinvoke $r2.<java.lang.Thread: void interrupt()>();
+
+     label2:
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r3;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private boolean suspend(javax.xml.ws.Holder, java.lang.Runnable)
+    {
+        com.sun.xml.internal.ws.api.pipe.Fiber$OnExitRunnableException $r21;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        java.lang.Runnable r1;
+        java.lang.Integer $r16;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        java.util.logging.Logger $r2, $r13, $r17, $r25, $r31;
+        java.util.List $r34;
+        java.lang.Throwable $r20, $r22, $r23, $r28, $r29;
+        java.lang.Object[] $r12, $r24, $r30;
+        java.lang.AssertionError $r7;
+        java.util.logging.Level $r14, $r18, $r26, $r32;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.lang.Boolean $r5;
+        java.lang.String $r15, $r19, $r27, $r33;
+        com.sun.xml.internal.ws.api.pipe.Fiber$Listener r35, r36;
+        java.util.concurrent.locks.ReentrantLock $r3, $r6;
+        java.util.Iterator $r8, $r10;
+        javax.xml.ws.Holder r4;
+        java.lang.Object $r9, $r11;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r4 := @parameter0: javax.xml.ws.Holder;
+
+        r1 := @parameter1: java.lang.Runnable;
+
+        $z0 = staticinvoke <com.sun.xml.internal.ws.api.pipe.Fiber: boolean isTraceEnabled()>();
+
+        if $z0 == 0 goto label01;
+
+        $r13 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r14 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r12 = newarray (java.lang.Object)[2];
+
+        $r15 = specialinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.String getName()>();
+
+        $r12[0] = $r15;
+
+        $i1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int suspendedCount>;
+
+        $i2 = $i1 + 1;
+
+        $r16 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r12[1] = $r16;
+
+        virtualinvoke $r13.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r14, "{0} suspending. Will have suspendedCount={1}", $r12);
+
+        $i3 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int suspendedCount>;
+
+        if $i3 <= 0 goto label01;
+
+        $r17 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r18 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r19 = specialinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.String getName()>();
+
+        virtualinvoke $r17.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r18, "WARNING - {0} suspended more than resumed. Will require more than one resume to actually resume this fiber.", $r19);
+
+     label01:
+        $r34 = virtualinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List getCurrentListeners()>();
+
+        $i4 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int suspendedCount>;
+
+        $i5 = $i4 + 1;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int suspendedCount> = $i5;
+
+        if $i5 != 1 goto label11;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean isInsideSuspendCallbacks> = 1;
+
+     label02:
+        $r10 = interfaceinvoke $r34.<java.util.List: java.util.Iterator iterator()>();
+
+     label03:
+        $z6 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z6 == 0 goto label08;
+
+        $r11 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        r35 = (com.sun.xml.internal.ws.api.pipe.Fiber$Listener) $r11;
+
+     label04:
+        interfaceinvoke r35.<com.sun.xml.internal.ws.api.pipe.Fiber$Listener: void fiberSuspended(com.sun.xml.internal.ws.api.pipe.Fiber)>(r0);
+
+     label05:
+        goto label07;
+
+     label06:
+        $r29 := @caughtexception;
+
+        $z8 = staticinvoke <com.sun.xml.internal.ws.api.pipe.Fiber: boolean isTraceEnabled()>();
+
+        if $z8 == 0 goto label07;
+
+        $r31 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r32 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r30 = newarray (java.lang.Object)[2];
+
+        $r30[0] = r35;
+
+        $r33 = virtualinvoke $r29.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r30[1] = $r33;
+
+        virtualinvoke $r31.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r32, "Listener {0} threw exception: {1}", $r30);
+
+     label07:
+        goto label03;
+
+     label08:
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean isInsideSuspendCallbacks> = 0;
+
+        goto label11;
+
+     label09:
+        $r28 := @caughtexception;
+
+     label10:
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean isInsideSuspendCallbacks> = 0;
+
+        throw $r28;
+
+     label11:
+        $i0 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int suspendedCount>;
+
+        if $i0 > 0 goto label18;
+
+        $r8 = interfaceinvoke $r34.<java.util.List: java.util.Iterator iterator()>();
+
+     label12:
+        $z5 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z5 == 0 goto label17;
+
+        $r9 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        r36 = (com.sun.xml.internal.ws.api.pipe.Fiber$Listener) $r9;
+
+     label13:
+        interfaceinvoke r36.<com.sun.xml.internal.ws.api.pipe.Fiber$Listener: void fiberResumed(com.sun.xml.internal.ws.api.pipe.Fiber)>(r0);
+
+     label14:
+        goto label16;
+
+     label15:
+        $r23 := @caughtexception;
+
+        $z7 = staticinvoke <com.sun.xml.internal.ws.api.pipe.Fiber: boolean isTraceEnabled()>();
+
+        if $z7 == 0 goto label16;
+
+        $r25 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r26 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r24 = newarray (java.lang.Object)[2];
+
+        $r24[0] = r36;
+
+        $r27 = virtualinvoke $r23.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r24[1] = $r27;
+
+        virtualinvoke $r25.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r26, "Listener {0} threw exception: {1}", $r24);
+
+     label16:
+        goto label12;
+
+     label17:
+        goto label31;
+
+     label18:
+        if r1 == null goto label31;
+
+        $z1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean synchronous>;
+
+        if $z1 != 0 goto label29;
+
+        entermonitor r0;
+
+     label19:
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Thread currentThread> = null;
+
+        exitmonitor r0;
+
+     label20:
+        goto label23;
+
+     label21:
+        $r22 := @caughtexception;
+
+        exitmonitor r0;
+
+     label22:
+        throw $r22;
+
+     label23:
+        $r3 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke $r3.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        $z3 = <com.sun.xml.internal.ws.api.pipe.Fiber: boolean $assertionsDisabled>;
+
+        if $z3 != 0 goto label24;
+
+        $r6 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.ReentrantLock lock>;
+
+        $z4 = virtualinvoke $r6.<java.util.concurrent.locks.ReentrantLock: boolean isHeldByCurrentThread()>();
+
+        if $z4 == 0 goto label24;
+
+        $r7 = new java.lang.AssertionError;
+
+        specialinvoke $r7.<java.lang.AssertionError: void <init>()>();
+
+        throw $r7;
+
+     label24:
+        $r5 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        r4.<javax.xml.ws.Holder: java.lang.Object value> = $r5;
+
+     label25:
+        interfaceinvoke r1.<java.lang.Runnable: void run()>();
+
+     label26:
+        goto label28;
+
+     label27:
+        $r20 := @caughtexception;
+
+        $r21 = new com.sun.xml.internal.ws.api.pipe.Fiber$OnExitRunnableException;
+
+        specialinvoke $r21.<com.sun.xml.internal.ws.api.pipe.Fiber$OnExitRunnableException: void <init>(java.lang.Throwable)>($r20);
+
+        throw $r21;
+
+     label28:
+        return 1;
+
+     label29:
+        $z2 = staticinvoke <com.sun.xml.internal.ws.api.pipe.Fiber: boolean isTraceEnabled()>();
+
+        if $z2 == 0 goto label30;
+
+        $r2 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        virtualinvoke $r2.<java.util.logging.Logger: void fine(java.lang.String)>("onExitRunnable used with synchronous Fiber execution -- not exiting current thread");
+
+     label30:
+        interfaceinvoke r1.<java.lang.Runnable: void run()>();
+
+     label31:
+        return 0;
+
+        catch java.lang.Throwable from label04 to label05 with label06;
+        catch java.lang.Throwable from label02 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+        catch java.lang.Throwable from label13 to label14 with label15;
+        catch java.lang.Throwable from label19 to label20 with label21;
+        catch java.lang.Throwable from label21 to label22 with label21;
+        catch java.lang.Throwable from label25 to label26 with label27;
+    }
+
+    public synchronized void addInterceptor(com.sun.xml.internal.ws.api.pipe.FiberContextSwitchInterceptor)
+    {
+        java.util.List $r1, $r3, $r5;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        com.sun.xml.internal.ws.api.pipe.FiberContextSwitchInterceptor r4;
+        java.util.ArrayList $r2, $r6;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r4 := @parameter0: com.sun.xml.internal.ws.api.pipe.FiberContextSwitchInterceptor;
+
+        $r1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List interceptors>;
+
+        if $r1 != null goto label1;
+
+        $r6 = new java.util.ArrayList;
+
+        specialinvoke $r6.<java.util.ArrayList: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List interceptors> = $r6;
+
+        goto label2;
+
+     label1:
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        $r3 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List interceptors>;
+
+        interfaceinvoke $r2.<java.util.List: boolean addAll(java.util.Collection)>($r3);
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List interceptors> = $r2;
+
+     label2:
+        $r5 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List interceptors>;
+
+        interfaceinvoke $r5.<java.util.List: boolean add(java.lang.Object)>(r4);
+
+        return;
+    }
+
+    public synchronized boolean removeInterceptor(com.sun.xml.internal.ws.api.pipe.FiberContextSwitchInterceptor)
+    {
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        java.util.ArrayList $r5;
+        java.util.List $r1, $r3, $r4, $r6;
+        com.sun.xml.internal.ws.api.pipe.FiberContextSwitchInterceptor r2;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r2 := @parameter0: com.sun.xml.internal.ws.api.pipe.FiberContextSwitchInterceptor;
+
+        $r1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List interceptors>;
+
+        if $r1 == null goto label3;
+
+        $r3 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List interceptors>;
+
+        $z0 = interfaceinvoke $r3.<java.util.List: boolean remove(java.lang.Object)>(r2);
+
+        $r4 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List interceptors>;
+
+        $z1 = interfaceinvoke $r4.<java.util.List: boolean isEmpty()>();
+
+        if $z1 == 0 goto label1;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List interceptors> = null;
+
+        goto label2;
+
+     label1:
+        $r5 = new java.util.ArrayList;
+
+        specialinvoke $r5.<java.util.ArrayList: void <init>()>();
+
+        $r6 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List interceptors>;
+
+        interfaceinvoke $r5.<java.util.List: boolean addAll(java.util.Collection)>($r6);
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List interceptors> = $r5;
+
+     label2:
+        return $z0;
+
+     label3:
+        return 0;
+    }
+
+    public java.lang.ClassLoader getContextClassLoader()
+    {
+        java.lang.ClassLoader $r1;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        $r1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.ClassLoader contextClassLoader>;
+
+        return $r1;
+    }
+
+    public java.lang.ClassLoader setContextClassLoader(java.lang.ClassLoader)
+    {
+        java.lang.ClassLoader r1, r2;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r2 := @parameter0: java.lang.ClassLoader;
+
+        r1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.ClassLoader contextClassLoader>;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.ClassLoader contextClassLoader> = r2;
+
+        return r1;
+    }
+
+    public void run()
+    {
+        java.lang.Throwable $r8;
+        com.sun.xml.internal.ws.api.pipe.Tube $r5;
+        com.sun.xml.internal.ws.api.pipe.Fiber r1;
+        java.lang.AssertionError $r7;
+        com.sun.xml.internal.ws.api.pipe.Engine $r2, $r6;
+        int $i0, $i1;
+        boolean $z0, $z1, $z2, $z3;
+        com.sun.xml.internal.ws.api.server.Container $r3, $r4;
+        com.sun.xml.internal.ws.api.server.ThreadLocalContainerResolver $r0, $r9, $r10;
+
+        r1 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        $r0 = staticinvoke <com.sun.xml.internal.ws.api.server.ContainerResolver: com.sun.xml.internal.ws.api.server.ThreadLocalContainerResolver getDefault()>();
+
+        $r2 = r1.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Engine owner>;
+
+        $r3 = virtualinvoke $r2.<com.sun.xml.internal.ws.api.pipe.Engine: com.sun.xml.internal.ws.api.server.Container getContainer()>();
+
+        $r4 = virtualinvoke $r0.<com.sun.xml.internal.ws.api.server.ThreadLocalContainerResolver: com.sun.xml.internal.ws.api.server.Container enterContainer(com.sun.xml.internal.ws.api.server.Container)>($r3);
+
+     label1:
+        $z0 = <com.sun.xml.internal.ws.api.pipe.Fiber: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label2;
+
+        $z3 = r1.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean synchronous>;
+
+        if $z3 == 0 goto label2;
+
+        $r7 = new java.lang.AssertionError;
+
+        specialinvoke $r7.<java.lang.AssertionError: void <init>()>();
+
+        throw $r7;
+
+     label2:
+        $z1 = specialinvoke r1.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean doRun()>();
+
+        if $z1 != 0 goto label5;
+
+        $z2 = r1.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean startedSync>;
+
+        if $z2 == 0 goto label4;
+
+        $i0 = r1.<com.sun.xml.internal.ws.api.pipe.Fiber: int suspendedCount>;
+
+        if $i0 != 0 goto label4;
+
+        $r5 = r1.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube next>;
+
+        if $r5 != null goto label3;
+
+        $i1 = r1.<com.sun.xml.internal.ws.api.pipe.Fiber: int contsSize>;
+
+        if $i1 <= 0 goto label4;
+
+     label3:
+        r1.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean startedSync> = 0;
+
+        specialinvoke r1.<com.sun.xml.internal.ws.api.pipe.Fiber: void dumpFiberContext(java.lang.String)>("restarting (async) after startSync");
+
+        $r6 = r1.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Engine owner>;
+
+        virtualinvoke $r6.<com.sun.xml.internal.ws.api.pipe.Engine: void addRunnable(com.sun.xml.internal.ws.api.pipe.Fiber)>(r1);
+
+        goto label5;
+
+     label4:
+        specialinvoke r1.<com.sun.xml.internal.ws.api.pipe.Fiber: void completionCheck()>();
+
+     label5:
+        $r10 = staticinvoke <com.sun.xml.internal.ws.api.server.ContainerResolver: com.sun.xml.internal.ws.api.server.ThreadLocalContainerResolver getDefault()>();
+
+        virtualinvoke $r10.<com.sun.xml.internal.ws.api.server.ThreadLocalContainerResolver: void exitContainer(com.sun.xml.internal.ws.api.server.Container)>($r4);
+
+        goto label7;
+
+     label6:
+        $r8 := @caughtexception;
+
+        $r9 = staticinvoke <com.sun.xml.internal.ws.api.server.ContainerResolver: com.sun.xml.internal.ws.api.server.ThreadLocalContainerResolver getDefault()>();
+
+        virtualinvoke $r9.<com.sun.xml.internal.ws.api.server.ThreadLocalContainerResolver: void exitContainer(com.sun.xml.internal.ws.api.server.Container)>($r4);
+
+        throw $r8;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label5 with label6;
+    }
+
+    public com.sun.xml.internal.ws.api.message.Packet runSync(com.sun.xml.internal.ws.api.pipe.Tube, com.sun.xml.internal.ws.api.message.Packet)
+    {
+        com.sun.xml.internal.ws.api.pipe.Tube r3, r5;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        java.lang.Thread $r7, $r24;
+        com.sun.xml.internal.ws.api.message.Packet r4, $r18, $r19;
+        boolean z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        com.sun.xml.internal.ws.api.pipe.Tube[] r2, $r20;
+        java.lang.Throwable $r6, $r8, $r9, $r11, $r12, $r14, $r17, $r21, $r23;
+        java.lang.Error $r13;
+        java.lang.AssertionError $r10;
+        int i0;
+        java.util.concurrent.locks.ReentrantLock $r1, $r22, $r25;
+        java.lang.RuntimeException $r15;
+        com.sun.xml.internal.ws.api.pipe.ThrowableContainerPropertySet $r16;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r5 := @parameter0: com.sun.xml.internal.ws.api.pipe.Tube;
+
+        r4 := @parameter1: com.sun.xml.internal.ws.api.message.Packet;
+
+        $r1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke $r1.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label01:
+        r2 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube[] conts>;
+
+        i0 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int contsSize>;
+
+        z0 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean synchronous>;
+
+        r3 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube next>;
+
+        if i0 <= 0 goto label02;
+
+        $r20 = newarray (com.sun.xml.internal.ws.api.pipe.Tube)[16];
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube[] conts> = $r20;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int contsSize> = 0;
+
+     label02:
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean synchronous> = 1;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.message.Packet packet> = r4;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube next> = r5;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean doRun()>();
+
+        $r6 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Throwable throwable>;
+
+        if $r6 == null goto label06;
+
+        $z4 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean isDeliverThrowableInPacket>;
+
+        if $z4 == 0 goto label03;
+
+        $r18 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.message.Packet packet>;
+
+        $r16 = new com.sun.xml.internal.ws.api.pipe.ThrowableContainerPropertySet;
+
+        $r17 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Throwable throwable>;
+
+        specialinvoke $r16.<com.sun.xml.internal.ws.api.pipe.ThrowableContainerPropertySet: void <init>(java.lang.Throwable)>($r17);
+
+        virtualinvoke $r18.<com.sun.xml.internal.ws.api.message.Packet: void addSatellite(com.oracle.webservices.internal.api.message.PropertySet)>($r16);
+
+        goto label06;
+
+     label03:
+        $r8 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Throwable throwable>;
+
+        $z5 = $r8 instanceof java.lang.RuntimeException;
+
+        if $z5 == 0 goto label04;
+
+        $r14 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Throwable throwable>;
+
+        $r15 = (java.lang.RuntimeException) $r14;
+
+        throw $r15;
+
+     label04:
+        $r9 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Throwable throwable>;
+
+        $z6 = $r9 instanceof java.lang.Error;
+
+        if $z6 == 0 goto label05;
+
+        $r12 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Throwable throwable>;
+
+        $r13 = (java.lang.Error) $r12;
+
+        throw $r13;
+
+     label05:
+        $r10 = new java.lang.AssertionError;
+
+        $r11 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Throwable throwable>;
+
+        specialinvoke $r10.<java.lang.AssertionError: void <init>(java.lang.Object)>($r11);
+
+        throw $r10;
+
+     label06:
+        $r19 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.message.Packet packet>;
+
+     label07:
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube[] conts> = r2;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int contsSize> = i0;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean synchronous> = z0;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube next> = r3;
+
+        $z1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean interrupted>;
+
+        if $z1 == 0 goto label08;
+
+        $r7 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r7.<java.lang.Thread: void interrupt()>();
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean interrupted> = 0;
+
+     label08:
+        $z2 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean started>;
+
+        if $z2 != 0 goto label09;
+
+        $z3 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean startedSync>;
+
+        if $z3 != 0 goto label09;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: void completionCheck()>();
+
+     label09:
+        $r25 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke $r25.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return $r19;
+
+     label10:
+        $r23 := @caughtexception;
+
+     label11:
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube[] conts> = r2;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int contsSize> = i0;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean synchronous> = z0;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube next> = r3;
+
+        $z7 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean interrupted>;
+
+        if $z7 == 0 goto label12;
+
+        $r24 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r24.<java.lang.Thread: void interrupt()>();
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean interrupted> = 0;
+
+     label12:
+        $z8 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean started>;
+
+        if $z8 != 0 goto label13;
+
+        $z9 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean startedSync>;
+
+        if $z9 != 0 goto label13;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: void completionCheck()>();
+
+     label13:
+        throw $r23;
+
+     label14:
+        $r21 := @caughtexception;
+
+     label15:
+        $r22 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke $r22.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r21;
+
+        catch java.lang.Throwable from label02 to label07 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+        catch java.lang.Throwable from label01 to label09 with label14;
+        catch java.lang.Throwable from label10 to label15 with label14;
+    }
+
+    private void completionCheck()
+    {
+        java.lang.Throwable $r4, $r7, $r10, $r17;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        java.util.logging.Level $r15;
+        int $i0, $i1;
+        com.sun.xml.internal.ws.api.message.Packet $r5, $r11, $r12;
+        java.lang.String $r16;
+        boolean $z0, $z1, $z2;
+        java.util.concurrent.locks.ReentrantLock $r1, $r18, $r19;
+        java.util.logging.Logger $r14;
+        java.util.concurrent.locks.Condition $r2;
+        com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback $r3, $r6, $r8, $r13;
+        com.sun.xml.internal.ws.api.pipe.ThrowableContainerPropertySet $r9;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        $r1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke $r1.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label1:
+        $z0 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean isCanceled>;
+
+        if $z0 != 0 goto label5;
+
+        $i0 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int contsSize>;
+
+        if $i0 != 0 goto label5;
+
+        $i1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int suspendedCount>;
+
+        if $i1 != 0 goto label5;
+
+        $z1 = staticinvoke <com.sun.xml.internal.ws.api.pipe.Fiber: boolean isTraceEnabled()>();
+
+        if $z1 == 0 goto label2;
+
+        $r14 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r15 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r16 = specialinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.String getName()>();
+
+        virtualinvoke $r14.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r15, "{0} completed", $r16);
+
+     label2:
+        specialinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: void clearListeners()>();
+
+        $r2 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.Condition condition>;
+
+        interfaceinvoke $r2.<java.util.concurrent.locks.Condition: void signalAll()>();
+
+        $r3 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback completionCallback>;
+
+        if $r3 == null goto label5;
+
+        $r4 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Throwable throwable>;
+
+        if $r4 == null goto label4;
+
+        $z2 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean isDeliverThrowableInPacket>;
+
+        if $z2 == 0 goto label3;
+
+        $r11 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.message.Packet packet>;
+
+        $r9 = new com.sun.xml.internal.ws.api.pipe.ThrowableContainerPropertySet;
+
+        $r10 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Throwable throwable>;
+
+        specialinvoke $r9.<com.sun.xml.internal.ws.api.pipe.ThrowableContainerPropertySet: void <init>(java.lang.Throwable)>($r10);
+
+        virtualinvoke $r11.<com.sun.xml.internal.ws.api.message.Packet: void addSatellite(com.oracle.webservices.internal.api.message.PropertySet)>($r9);
+
+        $r13 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback completionCallback>;
+
+        $r12 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.message.Packet packet>;
+
+        interfaceinvoke $r13.<com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback: void onCompletion(com.sun.xml.internal.ws.api.message.Packet)>($r12);
+
+        goto label5;
+
+     label3:
+        $r8 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback completionCallback>;
+
+        $r7 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Throwable throwable>;
+
+        interfaceinvoke $r8.<com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback: void onCompletion(java.lang.Throwable)>($r7);
+
+        goto label5;
+
+     label4:
+        $r6 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback completionCallback>;
+
+        $r5 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.message.Packet packet>;
+
+        interfaceinvoke $r6.<com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback: void onCompletion(com.sun.xml.internal.ws.api.message.Packet)>($r5);
+
+     label5:
+        $r19 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke $r19.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        goto label7;
+
+     label6:
+        $r17 := @caughtexception;
+
+        $r18 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke $r18.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r17;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label5 with label6;
+    }
+
+    private boolean doRun()
+    {
+        java.lang.Throwable $r5;
+        com.sun.xml.internal.ws.api.pipe.Tube $r1, $r3;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        java.util.concurrent.locks.ReentrantLock $r2, $r4, $r6;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: void dumpFiberContext(java.lang.String)>("running");
+
+        $z0 = <com.sun.xml.internal.ws.api.pipe.Fiber: boolean serializeExecution>;
+
+        if $z0 == 0 goto label4;
+
+        $r2 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.ReentrantLock serializedExecutionLock>;
+
+        virtualinvoke $r2.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label1:
+        $r3 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube next>;
+
+        $z2 = specialinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean _doRun(com.sun.xml.internal.ws.api.pipe.Tube)>($r3);
+
+     label2:
+        $r4 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.ReentrantLock serializedExecutionLock>;
+
+        virtualinvoke $r4.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return $z2;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.ReentrantLock serializedExecutionLock>;
+
+        virtualinvoke $r6.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r5;
+
+     label4:
+        $r1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube next>;
+
+        $z1 = specialinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean _doRun(com.sun.xml.internal.ws.api.pipe.Tube)>($r1);
+
+        return $z1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private boolean _doRun(com.sun.xml.internal.ws.api.pipe.Tube)
+    {
+        com.sun.xml.internal.ws.api.pipe.Fiber r2;
+        java.lang.Thread $r4, $r5, $r8, $r13, $r19, $r25, $r31, $r41;
+        java.lang.ClassLoader $r6, $r7;
+        java.lang.Throwable $r34, $r35, $r39, $r40, $r47, $r48, $r49, $r50, r53;
+        com.sun.xml.internal.ws.api.pipe.Fiber$InterceptorHandler $r9;
+        javax.xml.ws.WebServiceException $r45, $r46;
+        com.sun.xml.internal.ws.api.pipe.Fiber$OnExitRunnableException $r44;
+        com.sun.xml.internal.ws.api.pipe.Tube $r10, r51;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, z12, $z13, $z14;
+        java.util.logging.Logger $r18, $r24, $r30, $r33, $r43;
+        java.util.List $r12, r52;
+        java.util.logging.Level $r17, $r23, $r29, $r32, $r42;
+        java.lang.Boolean $r1, $r15, $r21, $r27, $r37;
+        com.sun.xml.internal.ws.api.pipe.Fiber$PlaceholderTube $r11;
+        java.util.concurrent.locks.ReentrantLock $r3, $r16, $r22, $r28, $r38;
+        javax.xml.ws.Holder $r0;
+        java.lang.Object $r14, $r20, $r26, $r36;
+
+        r2 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r51 := @parameter0: com.sun.xml.internal.ws.api.pipe.Tube;
+
+        $r0 = new javax.xml.ws.Holder;
+
+        $r1 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        specialinvoke $r0.<javax.xml.ws.Holder: void <init>(java.lang.Object)>($r1);
+
+        $r3 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke $r3.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label01:
+        entermonitor r2;
+
+     label02:
+        r52 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List interceptors>;
+
+        $r4 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Thread currentThread> = $r4;
+
+        $z0 = staticinvoke <com.sun.xml.internal.ws.api.pipe.Fiber: boolean isTraceEnabled()>();
+
+        if $z0 == 0 goto label03;
+
+        $r33 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r32 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r31 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Thread currentThread>;
+
+        virtualinvoke $r33.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r32, "Thread entering _doRun(): {0}", $r31);
+
+     label03:
+        $r5 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Thread currentThread>;
+
+        $r6 = virtualinvoke $r5.<java.lang.Thread: java.lang.ClassLoader getContextClassLoader()>();
+
+        $r8 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Thread currentThread>;
+
+        $r7 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.ClassLoader contextClassLoader>;
+
+        virtualinvoke $r8.<java.lang.Thread: void setContextClassLoader(java.lang.ClassLoader)>($r7);
+
+        exitmonitor r2;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r50 := @caughtexception;
+
+        exitmonitor r2;
+
+     label06:
+        throw $r50;
+
+     label07:
+        if r52 != null goto label16;
+
+        r2.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube next> = r51;
+
+        $z5 = specialinvoke r2.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean __doRun(javax.xml.ws.Holder,java.util.List)>($r0, null);
+
+        if $z5 == 0 goto label25;
+
+     label08:
+        $r25 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r25.<java.lang.Thread: void setContextClassLoader(java.lang.ClassLoader)>($r6);
+
+        $z6 = staticinvoke <com.sun.xml.internal.ws.api.pipe.Fiber: boolean isTraceEnabled()>();
+
+        if $z6 == 0 goto label09;
+
+        $r30 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r29 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        virtualinvoke $r30.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r29, "Thread leaving _doRun(): {0}", $r25);
+
+     label09:
+        $r26 = $r0.<javax.xml.ws.Holder: java.lang.Object value>;
+
+        $r27 = (java.lang.Boolean) $r26;
+
+        $z7 = virtualinvoke $r27.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z7 == 0 goto label15;
+
+        entermonitor r2;
+
+     label10:
+        r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Thread currentThread> = null;
+
+        exitmonitor r2;
+
+     label11:
+        goto label14;
+
+     label12:
+        $r49 := @caughtexception;
+
+        exitmonitor r2;
+
+     label13:
+        throw $r49;
+
+     label14:
+        $r28 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke $r28.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+     label15:
+        return 1;
+
+     label16:
+        $r9 = new com.sun.xml.internal.ws.api.pipe.Fiber$InterceptorHandler;
+
+        specialinvoke $r9.<com.sun.xml.internal.ws.api.pipe.Fiber$InterceptorHandler: void <init>(com.sun.xml.internal.ws.api.pipe.Fiber,javax.xml.ws.Holder,java.util.List)>(r2, $r0, r52);
+
+        $r10 = virtualinvoke $r9.<com.sun.xml.internal.ws.api.pipe.Fiber$InterceptorHandler: com.sun.xml.internal.ws.api.pipe.Tube invoke(com.sun.xml.internal.ws.api.pipe.Tube)>(r51);
+
+        r51 = $r10;
+
+        $r11 = <com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Fiber$PlaceholderTube PLACEHOLDER>;
+
+        if $r10 != $r11 goto label25;
+
+     label17:
+        $r19 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r19.<java.lang.Thread: void setContextClassLoader(java.lang.ClassLoader)>($r6);
+
+        $z3 = staticinvoke <com.sun.xml.internal.ws.api.pipe.Fiber: boolean isTraceEnabled()>();
+
+        if $z3 == 0 goto label18;
+
+        $r24 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r23 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        virtualinvoke $r24.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r23, "Thread leaving _doRun(): {0}", $r19);
+
+     label18:
+        $r20 = $r0.<javax.xml.ws.Holder: java.lang.Object value>;
+
+        $r21 = (java.lang.Boolean) $r20;
+
+        $z4 = virtualinvoke $r21.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z4 == 0 goto label24;
+
+        entermonitor r2;
+
+     label19:
+        r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Thread currentThread> = null;
+
+        exitmonitor r2;
+
+     label20:
+        goto label23;
+
+     label21:
+        $r48 := @caughtexception;
+
+        exitmonitor r2;
+
+     label22:
+        throw $r48;
+
+     label23:
+        $r22 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke $r22.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+     label24:
+        return 1;
+
+     label25:
+        entermonitor r2;
+
+     label26:
+        $r12 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List interceptors>;
+
+        if r52 == $r12 goto label27;
+
+        $z14 = 1;
+
+        $z13 = 1;
+
+        goto label28;
+
+     label27:
+        $z14 = 0;
+
+        $z13 = 0;
+
+     label28:
+        z12 = $z13;
+
+        if $z14 == 0 goto label29;
+
+        r52 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List interceptors>;
+
+     label29:
+        exitmonitor r2;
+
+     label30:
+        goto label33;
+
+     label31:
+        $r47 := @caughtexception;
+
+        exitmonitor r2;
+
+     label32:
+        throw $r47;
+
+     label33:
+        if z12 != 0 goto label07;
+
+     label34:
+        $r13 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r13.<java.lang.Thread: void setContextClassLoader(java.lang.ClassLoader)>($r6);
+
+        $z1 = staticinvoke <com.sun.xml.internal.ws.api.pipe.Fiber: boolean isTraceEnabled()>();
+
+        if $z1 == 0 goto label35;
+
+        $r18 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r17 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        virtualinvoke $r18.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r17, "Thread leaving _doRun(): {0}", $r13);
+
+     label35:
+        goto label41;
+
+     label36:
+        $r44 := @caughtexception;
+
+        r53 = $r44.<com.sun.xml.internal.ws.api.pipe.Fiber$OnExitRunnableException: java.lang.Throwable target>;
+
+        $z10 = r53 instanceof javax.xml.ws.WebServiceException;
+
+        if $z10 == 0 goto label37;
+
+        $r46 = (javax.xml.ws.WebServiceException) r53;
+
+        throw $r46;
+
+     label37:
+        $r45 = new javax.xml.ws.WebServiceException;
+
+        specialinvoke $r45.<javax.xml.ws.WebServiceException: void <init>(java.lang.Throwable)>(r53);
+
+        throw $r45;
+
+     label38:
+        $r40 := @caughtexception;
+
+     label39:
+        $r41 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r41.<java.lang.Thread: void setContextClassLoader(java.lang.ClassLoader)>($r6);
+
+        $z9 = staticinvoke <com.sun.xml.internal.ws.api.pipe.Fiber: boolean isTraceEnabled()>();
+
+        if $z9 == 0 goto label40;
+
+        $r43 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r42 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        virtualinvoke $r43.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r42, "Thread leaving _doRun(): {0}", $r41);
+
+     label40:
+        throw $r40;
+
+     label41:
+        $r14 = $r0.<javax.xml.ws.Holder: java.lang.Object value>;
+
+        $r15 = (java.lang.Boolean) $r14;
+
+        $z2 = virtualinvoke $r15.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z2 == 0 goto label47;
+
+        entermonitor r2;
+
+     label42:
+        r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Thread currentThread> = null;
+
+        exitmonitor r2;
+
+     label43:
+        goto label46;
+
+     label44:
+        $r39 := @caughtexception;
+
+        exitmonitor r2;
+
+     label45:
+        throw $r39;
+
+     label46:
+        $r16 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke $r16.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+     label47:
+        return 0;
+
+     label48:
+        $r35 := @caughtexception;
+
+     label49:
+        $r36 = $r0.<javax.xml.ws.Holder: java.lang.Object value>;
+
+        $r37 = (java.lang.Boolean) $r36;
+
+        $z8 = virtualinvoke $r37.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z8 == 0 goto label55;
+
+        entermonitor r2;
+
+     label50:
+        r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Thread currentThread> = null;
+
+        exitmonitor r2;
+
+     label51:
+        goto label54;
+
+     label52:
+        $r34 := @caughtexception;
+
+        exitmonitor r2;
+
+     label53:
+        throw $r34;
+
+     label54:
+        $r38 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.ReentrantLock lock>;
+
+        virtualinvoke $r38.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+     label55:
+        throw $r35;
+
+        catch java.lang.Throwable from label02 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.lang.Throwable from label10 to label11 with label12;
+        catch java.lang.Throwable from label12 to label13 with label12;
+        catch java.lang.Throwable from label19 to label20 with label21;
+        catch java.lang.Throwable from label21 to label22 with label21;
+        catch java.lang.Throwable from label26 to label30 with label31;
+        catch java.lang.Throwable from label31 to label32 with label31;
+        catch com.sun.xml.internal.ws.api.pipe.Fiber$OnExitRunnableException from label07 to label08 with label36;
+        catch com.sun.xml.internal.ws.api.pipe.Fiber$OnExitRunnableException from label16 to label17 with label36;
+        catch com.sun.xml.internal.ws.api.pipe.Fiber$OnExitRunnableException from label25 to label34 with label36;
+        catch java.lang.Throwable from label07 to label08 with label38;
+        catch java.lang.Throwable from label16 to label17 with label38;
+        catch java.lang.Throwable from label25 to label34 with label38;
+        catch java.lang.Throwable from label36 to label39 with label38;
+        catch java.lang.Throwable from label42 to label43 with label44;
+        catch java.lang.Throwable from label44 to label45 with label44;
+        catch java.lang.Throwable from label01 to label09 with label48;
+        catch java.lang.Throwable from label16 to label18 with label48;
+        catch java.lang.Throwable from label25 to label41 with label48;
+        catch java.lang.Throwable from label50 to label51 with label52;
+        catch java.lang.Throwable from label52 to label53 with label52;
+        catch java.lang.Throwable from label48 to label49 with label48;
+    }
+
+    private boolean __doRun(javax.xml.ws.Holder, java.util.List)
+    {
+        com.sun.xml.internal.ws.api.pipe.Fiber r2, $r59;
+        java.lang.StringBuilder $r34, $r35, $r38, $r45, $r46, $r49, $r64, $r68, $r69, $r70, $r71, $r74, $r78, $r79, $r80, $r81;
+        java.lang.Throwable $r8, $r13, $r52, $r57, $r61, $r90;
+        java.lang.Object[] $r12, $r25, $r29, $r39, $r53;
+        java.lang.Error $r63;
+        java.lang.AssertionError $r23, $r60;
+        java.lang.String $r28, $r32, $r37, $r42, $r48, $r56, $r67, $r72, $r77, $r82, $r85, $r88;
+        java.lang.RuntimeException $r73;
+        com.sun.xml.internal.ws.api.pipe.Tube $r9, $r11, $r16, $r17, $r21, $r43, $r51, r83, $r86;
+        java.lang.Runnable $r19;
+        com.sun.xml.internal.ws.api.message.Packet $r24, $r33, $r36, $r44, $r47, $r87, $r89;
+        com.sun.xml.internal.ws.api.pipe.NextAction r84;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, z7, $z8, z9, z10;
+        java.lang.ThreadLocal $r0, $r3, $r7, $r10, $r20, $r22, $r50, $r62;
+        java.util.logging.Logger $r5, $r15, $r26, $r30, $r40, $r54, $r65, $r75;
+        java.util.List r6;
+        java.util.logging.Level $r4, $r14, $r27, $r31, $r41, $r55, $r66, $r76;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        java.util.concurrent.locks.ReentrantLock $r58;
+        java.lang.Object $r1;
+        javax.xml.ws.Holder r18;
+
+        r2 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r18 := @parameter0: javax.xml.ws.Holder;
+
+        r6 := @parameter1: java.util.List;
+
+        $z0 = <com.sun.xml.internal.ws.api.pipe.Fiber: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label01;
+
+        $r58 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.ReentrantLock lock>;
+
+        $z6 = virtualinvoke $r58.<java.util.concurrent.locks.ReentrantLock: boolean isHeldByCurrentThread()>();
+
+        if $z6 != 0 goto label01;
+
+        $r60 = new java.lang.AssertionError;
+
+        specialinvoke $r60.<java.lang.AssertionError: void <init>()>();
+
+        throw $r60;
+
+     label01:
+        $r0 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.ThreadLocal CURRENT_FIBER>;
+
+        $r1 = virtualinvoke $r0.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        $r59 = (com.sun.xml.internal.ws.api.pipe.Fiber) $r1;
+
+        $r3 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.ThreadLocal CURRENT_FIBER>;
+
+        virtualinvoke $r3.<java.lang.ThreadLocal: void set(java.lang.Object)>(r2);
+
+        $r5 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r4 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z1 = virtualinvoke $r5.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r4);
+
+     label02:
+        z7 = 0;
+
+        z10 = 0;
+
+        z9 = 0;
+
+     label03:
+        $z8 = specialinvoke r2.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean isReady(java.util.List)>(r6);
+
+        if $z8 == 0 goto label39;
+
+        $z2 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean isCanceled>;
+
+        if $z2 == 0 goto label04;
+
+        r2.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube next> = null;
+
+        r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Throwable throwable> = null;
+
+        r2.<com.sun.xml.internal.ws.api.pipe.Fiber: int contsSize> = 0;
+
+        goto label39;
+
+     label04:
+        $r8 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Throwable throwable>;
+
+        if $r8 == null goto label09;
+
+        $i7 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: int contsSize>;
+
+        if $i7 == 0 goto label05;
+
+        if z9 == 0 goto label07;
+
+     label05:
+        r2.<com.sun.xml.internal.ws.api.pipe.Fiber: int contsSize> = 0;
+
+     label06:
+        $r50 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.ThreadLocal CURRENT_FIBER>;
+
+        virtualinvoke $r50.<java.lang.ThreadLocal: void set(java.lang.Object)>($r59);
+
+        return 0;
+
+     label07:
+        $r51 = specialinvoke r2.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube popCont()>();
+
+        r83 = $r51;
+
+        if $z1 == 0 goto label08;
+
+        $r54 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r55 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r53 = newarray (java.lang.Object)[3];
+
+        $r56 = specialinvoke r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.String getName()>();
+
+        $r53[0] = $r56;
+
+        $r53[1] = $r51;
+
+        $r57 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Throwable throwable>;
+
+        $r53[2] = $r57;
+
+        virtualinvoke $r54.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r55, "{0} {1}.processException({2})", $r53);
+
+     label08:
+        $r52 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Throwable throwable>;
+
+        r84 = interfaceinvoke $r51.<com.sun.xml.internal.ws.api.pipe.Tube: com.sun.xml.internal.ws.api.pipe.NextAction processException(java.lang.Throwable)>($r52);
+
+        goto label20;
+
+     label09:
+        $r9 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube next>;
+
+        if $r9 == null goto label13;
+
+        if $z1 == 0 goto label12;
+
+        $r40 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r41 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r39 = newarray (java.lang.Object)[3];
+
+        $r42 = specialinvoke r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.String getName()>();
+
+        $r39[0] = $r42;
+
+        $r43 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube next>;
+
+        $r39[1] = $r43;
+
+        $r44 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.message.Packet packet>;
+
+        if $r44 == null goto label10;
+
+        $r45 = new java.lang.StringBuilder;
+
+        specialinvoke $r45.<java.lang.StringBuilder: void <init>()>();
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Packet@");
+
+        $r47 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.message.Packet packet>;
+
+        $i6 = virtualinvoke $r47.<java.lang.Object: int hashCode()>();
+
+        $r48 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i6);
+
+        $r49 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r48);
+
+        $r85 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label11;
+
+     label10:
+        $r85 = "null";
+
+     label11:
+        $r39[2] = $r85;
+
+        virtualinvoke $r40.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r41, "{0} {1}.processRequest({2})", $r39);
+
+     label12:
+        $r86 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube next>;
+
+        $r87 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.message.Packet packet>;
+
+        r84 = interfaceinvoke $r86.<com.sun.xml.internal.ws.api.pipe.Tube: com.sun.xml.internal.ws.api.pipe.NextAction processRequest(com.sun.xml.internal.ws.api.message.Packet)>($r87);
+
+        r83 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube next>;
+
+        goto label20;
+
+     label13:
+        $i0 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: int contsSize>;
+
+        if $i0 == 0 goto label14;
+
+        if z10 == 0 goto label16;
+
+     label14:
+        r2.<com.sun.xml.internal.ws.api.pipe.Fiber: int contsSize> = 0;
+
+     label15:
+        $r10 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.ThreadLocal CURRENT_FIBER>;
+
+        virtualinvoke $r10.<java.lang.ThreadLocal: void set(java.lang.Object)>($r59);
+
+        return 0;
+
+     label16:
+        $r11 = specialinvoke r2.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube popCont()>();
+
+        r83 = $r11;
+
+        if $z1 == 0 goto label19;
+
+        $r30 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r31 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r29 = newarray (java.lang.Object)[3];
+
+        $r32 = specialinvoke r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.String getName()>();
+
+        $r29[0] = $r32;
+
+        $r29[1] = $r11;
+
+        $r33 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.message.Packet packet>;
+
+        if $r33 == null goto label17;
+
+        $r34 = new java.lang.StringBuilder;
+
+        specialinvoke $r34.<java.lang.StringBuilder: void <init>()>();
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Packet@");
+
+        $r36 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.message.Packet packet>;
+
+        $i5 = virtualinvoke $r36.<java.lang.Object: int hashCode()>();
+
+        $r37 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i5);
+
+        $r38 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r37);
+
+        $r88 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label18;
+
+     label17:
+        $r88 = "null";
+
+     label18:
+        $r29[2] = $r88;
+
+        virtualinvoke $r30.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r31, "{0} {1}.processResponse({2})", $r29);
+
+     label19:
+        $r89 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.message.Packet packet>;
+
+        r84 = interfaceinvoke $r11.<com.sun.xml.internal.ws.api.pipe.Tube: com.sun.xml.internal.ws.api.pipe.NextAction processResponse(com.sun.xml.internal.ws.api.message.Packet)>($r89);
+
+     label20:
+        if $z1 == 0 goto label21;
+
+        $r26 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r27 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r25 = newarray (java.lang.Object)[3];
+
+        $r28 = specialinvoke r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.String getName()>();
+
+        $r25[0] = $r28;
+
+        $r25[1] = r83;
+
+        $r25[2] = r84;
+
+        virtualinvoke $r26.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r27, "{0} {1} returned with {2}", $r25);
+
+     label21:
+        $i1 = r84.<com.sun.xml.internal.ws.api.pipe.NextAction: int kind>;
+
+        if $i1 == 4 goto label23;
+
+        $i3 = r84.<com.sun.xml.internal.ws.api.pipe.NextAction: int kind>;
+
+        if $i3 == 3 goto label22;
+
+        $i4 = r84.<com.sun.xml.internal.ws.api.pipe.NextAction: int kind>;
+
+        if $i4 == 5 goto label22;
+
+        $r24 = r84.<com.sun.xml.internal.ws.api.pipe.NextAction: com.sun.xml.internal.ws.api.message.Packet packet>;
+
+        r2.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.message.Packet packet> = $r24;
+
+     label22:
+        $r90 = r84.<com.sun.xml.internal.ws.api.pipe.NextAction: java.lang.Throwable throwable>;
+
+        r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Throwable throwable> = $r90;
+
+     label23:
+        $i8 = r84.<com.sun.xml.internal.ws.api.pipe.NextAction: int kind>;
+
+        tableswitch($i8)
+        {
+            case 0: goto label24;
+            case 1: goto label25;
+            case 2: goto label28;
+            case 3: goto label28;
+            case 4: goto label29;
+            case 5: goto label27;
+            case 6: goto label27;
+            case 7: goto label24;
+            default: goto label32;
+        };
+
+     label24:
+        specialinvoke r2.<com.sun.xml.internal.ws.api.pipe.Fiber: void pushCont(com.sun.xml.internal.ws.api.pipe.Tube)>(r83);
+
+     label25:
+        $r21 = r84.<com.sun.xml.internal.ws.api.pipe.NextAction: com.sun.xml.internal.ws.api.pipe.Tube next>;
+
+        r2.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube next> = $r21;
+
+        $i2 = r84.<com.sun.xml.internal.ws.api.pipe.NextAction: int kind>;
+
+        if $i2 != 7 goto label33;
+
+        $z5 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean startedSync>;
+
+        if $z5 == 0 goto label33;
+
+     label26:
+        $r22 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.ThreadLocal CURRENT_FIBER>;
+
+        virtualinvoke $r22.<java.lang.ThreadLocal: void set(java.lang.Object)>($r59);
+
+        return 0;
+
+     label27:
+        z7 = 1;
+
+        z10 = 1;
+
+        z9 = 1;
+
+        $z3 = staticinvoke <com.sun.xml.internal.ws.api.pipe.Fiber: boolean isTraceEnabled()>();
+
+        if $z3 == 0 goto label28;
+
+        $r15 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r14 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r12 = newarray (java.lang.Object)[2];
+
+        $r12[0] = r2;
+
+        $r13 = r84.<com.sun.xml.internal.ws.api.pipe.NextAction: java.lang.Throwable throwable>;
+
+        $r12[1] = $r13;
+
+        virtualinvoke $r15.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r14, "Fiber {0} is aborting a response due to exception: {1}", $r12);
+
+     label28:
+        r2.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube next> = null;
+
+        goto label33;
+
+     label29:
+        $r16 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube next>;
+
+        if $r16 == null goto label30;
+
+        specialinvoke r2.<com.sun.xml.internal.ws.api.pipe.Fiber: void pushCont(com.sun.xml.internal.ws.api.pipe.Tube)>(r83);
+
+     label30:
+        $r17 = r84.<com.sun.xml.internal.ws.api.pipe.NextAction: com.sun.xml.internal.ws.api.pipe.Tube next>;
+
+        r2.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube next> = $r17;
+
+        $r19 = r84.<com.sun.xml.internal.ws.api.pipe.NextAction: java.lang.Runnable onExitRunnable>;
+
+        $z4 = specialinvoke r2.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean suspend(javax.xml.ws.Holder,java.lang.Runnable)>(r18, $r19);
+
+        if $z4 == 0 goto label33;
+
+     label31:
+        $r20 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.ThreadLocal CURRENT_FIBER>;
+
+        virtualinvoke $r20.<java.lang.ThreadLocal: void set(java.lang.Object)>($r59);
+
+        return 1;
+
+     label32:
+        $r23 = new java.lang.AssertionError;
+
+        specialinvoke $r23.<java.lang.AssertionError: void <init>()>();
+
+        throw $r23;
+
+     label33:
+        goto label38;
+
+     label34:
+        $r73 := @caughtexception;
+
+        if $z1 == 0 goto label35;
+
+        $r75 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r76 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r74 = new java.lang.StringBuilder;
+
+        specialinvoke $r74.<java.lang.StringBuilder: void <init>()>();
+
+        $r77 = specialinvoke r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.String getName()>();
+
+        $r78 = virtualinvoke $r74.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r77);
+
+        $r79 = virtualinvoke $r78.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" Caught ");
+
+        $r80 = virtualinvoke $r79.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r73);
+
+        $r81 = virtualinvoke $r80.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(". Start stack unwinding");
+
+        $r82 = virtualinvoke $r81.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r75.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r76, $r82, $r73);
+
+     label35:
+        r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Throwable throwable> = $r73;
+
+        goto label38;
+
+     label36:
+        $r63 := @caughtexception;
+
+        if $z1 == 0 goto label37;
+
+        $r65 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r66 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $r64 = new java.lang.StringBuilder;
+
+        specialinvoke $r64.<java.lang.StringBuilder: void <init>()>();
+
+        $r67 = specialinvoke r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.String getName()>();
+
+        $r68 = virtualinvoke $r64.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r67);
+
+        $r69 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" Caught ");
+
+        $r70 = virtualinvoke $r69.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r63);
+
+        $r71 = virtualinvoke $r70.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(". Start stack unwinding");
+
+        $r72 = virtualinvoke $r71.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r65.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r66, $r72, $r63);
+
+     label37:
+        r2.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.Throwable throwable> = $r63;
+
+     label38:
+        specialinvoke r2.<com.sun.xml.internal.ws.api.pipe.Fiber: void dumpFiberContext(java.lang.String)>("After tube execution");
+
+        goto label03;
+
+     label39:
+        $r7 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.ThreadLocal CURRENT_FIBER>;
+
+        virtualinvoke $r7.<java.lang.ThreadLocal: void set(java.lang.Object)>($r59);
+
+        goto label42;
+
+     label40:
+        $r61 := @caughtexception;
+
+     label41:
+        $r62 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.ThreadLocal CURRENT_FIBER>;
+
+        virtualinvoke $r62.<java.lang.ThreadLocal: void set(java.lang.Object)>($r59);
+
+        throw $r61;
+
+     label42:
+        return 0;
+
+        catch java.lang.RuntimeException from label04 to label06 with label34;
+        catch java.lang.RuntimeException from label07 to label15 with label34;
+        catch java.lang.RuntimeException from label16 to label26 with label34;
+        catch java.lang.RuntimeException from label27 to label31 with label34;
+        catch java.lang.RuntimeException from label32 to label33 with label34;
+        catch java.lang.Error from label04 to label06 with label36;
+        catch java.lang.Error from label07 to label15 with label36;
+        catch java.lang.Error from label16 to label26 with label36;
+        catch java.lang.Error from label27 to label31 with label36;
+        catch java.lang.Error from label32 to label33 with label36;
+        catch java.lang.Throwable from label02 to label06 with label40;
+        catch java.lang.Throwable from label07 to label15 with label40;
+        catch java.lang.Throwable from label16 to label26 with label40;
+        catch java.lang.Throwable from label27 to label31 with label40;
+        catch java.lang.Throwable from label32 to label39 with label40;
+        catch java.lang.Throwable from label40 to label41 with label40;
+    }
+
+    private void pushCont(com.sun.xml.internal.ws.api.pipe.Tube)
+    {
+        com.sun.xml.internal.ws.api.pipe.Tube r2;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        com.sun.xml.internal.ws.api.pipe.Tube[] $r1, $r3, r4, $r5;
+        int $i0, $i1, i2, $i3, $i4;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r2 := @parameter0: com.sun.xml.internal.ws.api.pipe.Tube;
+
+        $r1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube[] conts>;
+
+        $i0 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int contsSize>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int contsSize> = $i1;
+
+        $r1[$i0] = r2;
+
+        $r3 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube[] conts>;
+
+        i2 = lengthof $r3;
+
+        $i3 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int contsSize>;
+
+        if $i3 != i2 goto label1;
+
+        $i4 = i2 * 2;
+
+        r4 = newarray (com.sun.xml.internal.ws.api.pipe.Tube)[$i4];
+
+        $r5 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube[] conts>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r5, 0, r4, 0, i2);
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube[] conts> = r4;
+
+     label1:
+        return;
+    }
+
+    private com.sun.xml.internal.ws.api.pipe.Tube popCont()
+    {
+        com.sun.xml.internal.ws.api.pipe.Tube[] $r1;
+        com.sun.xml.internal.ws.api.pipe.Tube $r2;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        int $i0, $i1;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        $r1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube[] conts>;
+
+        $i0 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int contsSize>;
+
+        $i1 = $i0 - 1;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int contsSize> = $i1;
+
+        $r2 = $r1[$i1];
+
+        return $r2;
+    }
+
+    private com.sun.xml.internal.ws.api.pipe.Tube peekCont()
+    {
+        com.sun.xml.internal.ws.api.pipe.Tube[] $r1, $r2;
+        com.sun.xml.internal.ws.api.pipe.Tube $r3;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        int $i0, i1, $i2;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        $i0 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int contsSize>;
+
+        i1 = $i0 - 1;
+
+        if i1 < 0 goto label1;
+
+        $r1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube[] conts>;
+
+        $i2 = lengthof $r1;
+
+        if i1 >= $i2 goto label1;
+
+        $r2 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube[] conts>;
+
+        $r3 = $r2[i1];
+
+        return $r3;
+
+     label1:
+        return null;
+    }
+
+    public void resetCont(com.sun.xml.internal.ws.api.pipe.Tube[], int)
+    {
+        int i0;
+        com.sun.xml.internal.ws.api.pipe.Tube[] r1;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.api.pipe.Tube[];
+
+        i0 := @parameter1: int;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube[] conts> = r1;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int contsSize> = i0;
+
+        return;
+    }
+
+    private boolean isReady(java.util.List)
+    {
+        java.lang.Throwable $r11, $r12;
+        java.lang.Object[] $r5;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        java.util.logging.Level $r7;
+        java.lang.Thread $r9;
+        int $i0, $i1;
+        java.lang.String $r8, $r10;
+        boolean $z0, $z1, $z2, $z3;
+        java.util.logging.Logger $r6;
+        java.util.List r1, $r2, $r3;
+        java.util.concurrent.locks.Condition $r4;
+        java.lang.InterruptedException $r13;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r1 := @parameter0: java.util.List;
+
+        $z0 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean synchronous>;
+
+        if $z0 == 0 goto label13;
+
+     label01:
+        $i1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int suspendedCount>;
+
+        if $i1 != 1 goto label06;
+
+     label02:
+        $z1 = staticinvoke <com.sun.xml.internal.ws.api.pipe.Fiber: boolean isTraceEnabled()>();
+
+        if $z1 == 0 goto label03;
+
+        $r6 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r7 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r5 = newarray (java.lang.Object)[2];
+
+        $r8 = specialinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.String getName()>();
+
+        $r5[0] = $r8;
+
+        $r9 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.Thread: java.lang.String getName()>();
+
+        $r5[1] = $r10;
+
+        virtualinvoke $r6.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r7, "{0} is blocking thread {1}", $r5);
+
+     label03:
+        $r4 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.Condition condition>;
+
+        interfaceinvoke $r4.<java.util.concurrent.locks.Condition: void await()>();
+
+     label04:
+        goto label01;
+
+     label05:
+        $r13 := @caughtexception;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean interrupted> = 1;
+
+        goto label01;
+
+     label06:
+        entermonitor r0;
+
+     label07:
+        $r3 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List interceptors>;
+
+        if $r3 != r1 goto label08;
+
+        $z2 = 1;
+
+        goto label09;
+
+     label08:
+        $z2 = 0;
+
+     label09:
+        exitmonitor r0;
+
+     label10:
+        return $z2;
+
+     label11:
+        $r12 := @caughtexception;
+
+        exitmonitor r0;
+
+     label12:
+        throw $r12;
+
+     label13:
+        $i0 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: int suspendedCount>;
+
+        if $i0 <= 0 goto label14;
+
+        return 0;
+
+     label14:
+        entermonitor r0;
+
+     label15:
+        $r2 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.List interceptors>;
+
+        if $r2 != r1 goto label16;
+
+        $z3 = 1;
+
+        goto label17;
+
+     label16:
+        $z3 = 0;
+
+     label17:
+        exitmonitor r0;
+
+     label18:
+        return $z3;
+
+     label19:
+        $r11 := @caughtexception;
+
+        exitmonitor r0;
+
+     label20:
+        throw $r11;
+
+        catch java.lang.InterruptedException from label02 to label04 with label05;
+        catch java.lang.Throwable from label07 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+        catch java.lang.Throwable from label15 to label18 with label19;
+        catch java.lang.Throwable from label19 to label20 with label19;
+    }
+
+    private java.lang.String getName()
+    {
+        com.sun.xml.internal.ws.api.pipe.Fiber r2;
+        com.sun.xml.internal.ws.api.pipe.Engine $r3;
+        int $i0;
+        java.lang.StringBuilder $r0, $r1, $r5, $r6, $r7;
+        java.lang.String $r4, $r8;
+
+        r2 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("engine-");
+
+        $r3 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Engine owner>;
+
+        $r4 = $r3.<com.sun.xml.internal.ws.api.pipe.Engine: java.lang.String id>;
+
+        $r5 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("fiber-");
+
+        $i0 = r2.<com.sun.xml.internal.ws.api.pipe.Fiber: int id>;
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r8;
+    }
+
+    public java.lang.String toString()
+    {
+        java.lang.String $r1;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        $r1 = specialinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.String getName()>();
+
+        return $r1;
+    }
+
+    public com.sun.xml.internal.ws.api.message.Packet getPacket()
+    {
+        com.sun.xml.internal.ws.api.message.Packet $r1;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        $r1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.message.Packet packet>;
+
+        return $r1;
+    }
+
+    public com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback getCompletionCallback()
+    {
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        $r1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback completionCallback>;
+
+        return $r1;
+    }
+
+    public void setCompletionCallback(com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback)
+    {
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback r1;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Fiber$CompletionCallback completionCallback> = r1;
+
+        return;
+    }
+
+    public static boolean isSynchronous()
+    {
+        com.sun.xml.internal.ws.api.pipe.Fiber $r0;
+        boolean $z0;
+
+        $r0 = staticinvoke <com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Fiber current()>();
+
+        $z0 = $r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean synchronous>;
+
+        return $z0;
+    }
+
+    public boolean isStartedSync()
+    {
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        $z0 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean startedSync>;
+
+        return $z0;
+    }
+
+    public static com.sun.xml.internal.ws.api.pipe.Fiber current()
+    {
+        java.lang.IllegalStateException $r3;
+        java.lang.ThreadLocal $r0;
+        com.sun.xml.internal.ws.api.pipe.Fiber r2;
+        java.lang.Object $r1;
+
+        $r0 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.ThreadLocal CURRENT_FIBER>;
+
+        $r1 = virtualinvoke $r0.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        r2 = (com.sun.xml.internal.ws.api.pipe.Fiber) $r1;
+
+        if r2 != null goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Can be only used from fibers");
+
+        throw $r3;
+
+     label1:
+        return r2;
+    }
+
+    public static com.sun.xml.internal.ws.api.pipe.Fiber getCurrentIfSet()
+    {
+        java.lang.ThreadLocal $r0;
+        java.lang.Object $r1;
+        com.sun.xml.internal.ws.api.pipe.Fiber $r2;
+
+        $r0 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.ThreadLocal CURRENT_FIBER>;
+
+        $r1 = virtualinvoke $r0.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        $r2 = (com.sun.xml.internal.ws.api.pipe.Fiber) $r1;
+
+        return $r2;
+    }
+
+    private static boolean isTraceEnabled()
+    {
+        java.util.logging.Logger $r1;
+        java.util.logging.Level $r0;
+        boolean $z0;
+
+        $r1 = <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER>;
+
+        $r0 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $z0 = virtualinvoke $r1.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r0);
+
+        return $z0;
+    }
+
+    public java.lang.Object getSPI(java.lang.Class)
+    {
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        java.util.Iterator $r2;
+        java.util.Set $r1;
+        java.lang.Object $r3, $r6;
+        java.lang.Class r5;
+        com.sun.xml.internal.ws.api.Component r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r5 := @parameter0: java.lang.Class;
+
+        $r1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.Set components>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (com.sun.xml.internal.ws.api.Component) $r3;
+
+        $r6 = interfaceinvoke r4.<com.sun.xml.internal.ws.api.Component: java.lang.Object getSPI(java.lang.Class)>(r5);
+
+        if $r6 == null goto label2;
+
+        return $r6;
+
+     label2:
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    public java.util.Set getComponents()
+    {
+        java.util.Set $r1;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+
+        r0 := @this: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        $r1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: java.util.Set components>;
+
+        return $r1;
+    }
+
+    static com.sun.xml.internal.ws.api.pipe.Tube access$002(com.sun.xml.internal.ws.api.pipe.Fiber, com.sun.xml.internal.ws.api.pipe.Tube)
+    {
+        com.sun.xml.internal.ws.api.pipe.Tube r1;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r1 := @parameter1: com.sun.xml.internal.ws.api.pipe.Tube;
+
+        r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube next> = r1;
+
+        return r1;
+    }
+
+    static boolean access$100(com.sun.xml.internal.ws.api.pipe.Fiber, javax.xml.ws.Holder, java.util.List)
+    {
+        java.util.List r2;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+        javax.xml.ws.Holder r1;
+        boolean $z0;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        r1 := @parameter1: javax.xml.ws.Holder;
+
+        r2 := @parameter2: java.util.List;
+
+        $z0 = specialinvoke r0.<com.sun.xml.internal.ws.api.pipe.Fiber: boolean __doRun(javax.xml.ws.Holder,java.util.List)>(r1, r2);
+
+        return $z0;
+    }
+
+    static com.sun.xml.internal.ws.api.pipe.Fiber$PlaceholderTube access$200()
+    {
+        com.sun.xml.internal.ws.api.pipe.Fiber$PlaceholderTube $r0;
+
+        $r0 = <com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Fiber$PlaceholderTube PLACEHOLDER>;
+
+        return $r0;
+    }
+
+    static com.sun.xml.internal.ws.api.pipe.Tube access$000(com.sun.xml.internal.ws.api.pipe.Fiber)
+    {
+        com.sun.xml.internal.ws.api.pipe.Tube $r1;
+        com.sun.xml.internal.ws.api.pipe.Fiber r0;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.api.pipe.Fiber;
+
+        $r1 = r0.<com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Tube next>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        java.util.concurrent.atomic.AtomicInteger $r3;
+        com.sun.xml.internal.ws.api.pipe.Fiber$PlaceholderTube $r1;
+        java.lang.String $r5, $r10, $r13;
+        boolean $z0, $z1, $z2;
+        java.lang.ThreadLocal $r2;
+        java.util.concurrent.locks.ReentrantLock $r7;
+        java.util.logging.Logger $r6;
+        java.lang.Class $r0, $r4, $r9;
+        java.lang.StringBuilder $r8, $r11, $r12;
+
+        $r0 = class "Lcom/sun/xml/internal/ws/api/pipe/Fiber;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        <com.sun.xml.internal.ws.api.pipe.Fiber: boolean $assertionsDisabled> = $z2;
+
+        $r1 = new com.sun.xml.internal.ws.api.pipe.Fiber$PlaceholderTube;
+
+        specialinvoke $r1.<com.sun.xml.internal.ws.api.pipe.Fiber$PlaceholderTube: void <init>(com.sun.xml.internal.ws.api.pipe.Fiber$1)>(null);
+
+        <com.sun.xml.internal.ws.api.pipe.Fiber: com.sun.xml.internal.ws.api.pipe.Fiber$PlaceholderTube PLACEHOLDER> = $r1;
+
+        $r2 = new java.lang.ThreadLocal;
+
+        specialinvoke $r2.<java.lang.ThreadLocal: void <init>()>();
+
+        <com.sun.xml.internal.ws.api.pipe.Fiber: java.lang.ThreadLocal CURRENT_FIBER> = $r2;
+
+        $r3 = new java.util.concurrent.atomic.AtomicInteger;
+
+        specialinvoke $r3.<java.util.concurrent.atomic.AtomicInteger: void <init>()>();
+
+        <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.atomic.AtomicInteger iotaGen> = $r3;
+
+        $r4 = class "Lcom/sun/xml/internal/ws/api/pipe/Fiber;";
+
+        $r5 = virtualinvoke $r4.<java.lang.Class: java.lang.String getName()>();
+
+        $r6 = staticinvoke <java.util.logging.Logger: java.util.logging.Logger getLogger(java.lang.String)>($r5);
+
+        <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.logging.Logger LOGGER> = $r6;
+
+        $r7 = new java.util.concurrent.locks.ReentrantLock;
+
+        specialinvoke $r7.<java.util.concurrent.locks.ReentrantLock: void <init>()>();
+
+        <com.sun.xml.internal.ws.api.pipe.Fiber: java.util.concurrent.locks.ReentrantLock serializedExecutionLock> = $r7;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = class "Lcom/sun/xml/internal/ws/api/pipe/Fiber;";
+
+        $r10 = virtualinvoke $r9.<java.lang.Class: java.lang.String getName()>();
+
+        $r11 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".serialize");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $z1 = staticinvoke <java.lang.Boolean: boolean getBoolean(java.lang.String)>($r13);
+
+        <com.sun.xml.internal.ws.api.pipe.Fiber: boolean serializeExecution> = $z1;
+
+        return;
+    }
+}

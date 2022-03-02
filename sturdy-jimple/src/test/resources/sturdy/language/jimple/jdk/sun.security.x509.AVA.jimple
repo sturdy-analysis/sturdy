@@ -1,0 +1,2642 @@
+public class sun.security.x509.AVA extends java.lang.Object implements sun.security.util.DerEncoder
+{
+    private static final sun.security.util.Debug debug;
+    private static final boolean PRESERVE_OLD_DC_ENCODING;
+    static final int DEFAULT;
+    static final int RFC1779;
+    static final int RFC2253;
+    final sun.security.util.ObjectIdentifier oid;
+    final sun.security.util.DerValue value;
+    private static final java.lang.String specialChars1779;
+    private static final java.lang.String specialChars2253;
+    private static final java.lang.String specialCharsDefault;
+    private static final java.lang.String escapedDefault;
+    private static final java.lang.String hexDigits;
+
+    public void <init>(sun.security.util.ObjectIdentifier, sun.security.util.DerValue)
+    {
+        sun.security.util.DerValue r3;
+        sun.security.util.ObjectIdentifier r1;
+        sun.security.x509.AVA r0;
+        java.lang.NullPointerException $r2;
+
+        r0 := @this: sun.security.x509.AVA;
+
+        r1 := @parameter0: sun.security.util.ObjectIdentifier;
+
+        r3 := @parameter1: sun.security.util.DerValue;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        if r1 == null goto label1;
+
+        if r3 != null goto label2;
+
+     label1:
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r2;
+
+     label2:
+        r0.<sun.security.x509.AVA: sun.security.util.ObjectIdentifier oid> = r1;
+
+        r0.<sun.security.x509.AVA: sun.security.util.DerValue value> = r3;
+
+        return;
+    }
+
+    void <init>(java.io.Reader) throws java.io.IOException
+    {
+        java.io.Reader r1;
+        sun.security.x509.AVA r0;
+
+        r0 := @this: sun.security.x509.AVA;
+
+        r1 := @parameter0: java.io.Reader;
+
+        specialinvoke r0.<sun.security.x509.AVA: void <init>(java.io.Reader,int)>(r1, 1);
+
+        return;
+    }
+
+    void <init>(java.io.Reader, java.util.Map) throws java.io.IOException
+    {
+        java.io.Reader r1;
+        sun.security.x509.AVA r0;
+        java.util.Map r2;
+
+        r0 := @this: sun.security.x509.AVA;
+
+        r1 := @parameter0: java.io.Reader;
+
+        r2 := @parameter1: java.util.Map;
+
+        specialinvoke r0.<sun.security.x509.AVA: void <init>(java.io.Reader,int,java.util.Map)>(r1, 1, r2);
+
+        return;
+    }
+
+    void <init>(java.io.Reader, int) throws java.io.IOException
+    {
+        java.util.Map $r2;
+        int i0;
+        java.io.Reader r1;
+        sun.security.x509.AVA r0;
+
+        r0 := @this: sun.security.x509.AVA;
+
+        r1 := @parameter0: java.io.Reader;
+
+        i0 := @parameter1: int;
+
+        $r2 = staticinvoke <java.util.Collections: java.util.Map emptyMap()>();
+
+        specialinvoke r0.<sun.security.x509.AVA: void <init>(java.io.Reader,int,java.util.Map)>(r1, i0, $r2);
+
+        return;
+    }
+
+    void <init>(java.io.Reader, int, java.util.Map) throws java.io.IOException
+    {
+        sun.security.x509.AVA r0;
+        java.util.Map r4;
+        int $i0, i2, $i3, i4, $i5, $i7;
+        sun.security.util.ObjectIdentifier $r5;
+        java.lang.String $r3;
+        sun.security.util.DerValue $r6, $r7, $r8, $r13;
+        char $c1;
+        java.io.IOException $r12;
+        java.io.Reader r2;
+        java.lang.StringBuilder $r11;
+
+        r0 := @this: sun.security.x509.AVA;
+
+        r2 := @parameter0: java.io.Reader;
+
+        i2 := @parameter1: int;
+
+        r4 := @parameter2: java.util.Map;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+     label1:
+        $i0 = staticinvoke <sun.security.x509.AVA: int readChar(java.io.Reader,java.lang.String)>(r2, "Incorrect AVA format");
+
+        if $i0 != 61 goto label2;
+
+        goto label3;
+
+     label2:
+        $c1 = (char) $i0;
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c1);
+
+        goto label1;
+
+     label3:
+        $r3 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r5 = staticinvoke <sun.security.x509.AVAKeyword: sun.security.util.ObjectIdentifier getOID(java.lang.String,int,java.util.Map)>($r3, i2, r4);
+
+        r0.<sun.security.x509.AVA: sun.security.util.ObjectIdentifier oid> = $r5;
+
+        virtualinvoke $r11.<java.lang.StringBuilder: void setLength(int)>(0);
+
+        if i2 != 3 goto label4;
+
+        $i3 = virtualinvoke r2.<java.io.Reader: int read()>();
+
+        i4 = $i3;
+
+        if $i3 != 32 goto label5;
+
+        $r12 = new java.io.IOException;
+
+        specialinvoke $r12.<java.io.IOException: void <init>(java.lang.String)>("Incorrect AVA RFC2253 format - leading space must be escaped");
+
+        throw $r12;
+
+     label4:
+        $i5 = virtualinvoke r2.<java.io.Reader: int read()>();
+
+        i4 = $i5;
+
+        if $i5 == 32 goto label4;
+
+        if $i5 == 10 goto label4;
+
+     label5:
+        $i7 = (int) -1;
+
+        if i4 != $i7 goto label6;
+
+        $r13 = new sun.security.util.DerValue;
+
+        specialinvoke $r13.<sun.security.util.DerValue: void <init>(java.lang.String)>("");
+
+        r0.<sun.security.x509.AVA: sun.security.util.DerValue value> = $r13;
+
+        return;
+
+     label6:
+        if i4 != 35 goto label7;
+
+        $r8 = staticinvoke <sun.security.x509.AVA: sun.security.util.DerValue parseHexString(java.io.Reader,int)>(r2, i2);
+
+        r0.<sun.security.x509.AVA: sun.security.util.DerValue value> = $r8;
+
+        goto label9;
+
+     label7:
+        if i4 != 34 goto label8;
+
+        if i2 == 3 goto label8;
+
+        $r7 = specialinvoke r0.<sun.security.x509.AVA: sun.security.util.DerValue parseQuotedString(java.io.Reader,java.lang.StringBuilder)>(r2, $r11);
+
+        r0.<sun.security.x509.AVA: sun.security.util.DerValue value> = $r7;
+
+        goto label9;
+
+     label8:
+        $r6 = specialinvoke r0.<sun.security.x509.AVA: sun.security.util.DerValue parseString(java.io.Reader,int,int,java.lang.StringBuilder)>(r2, i4, i2, $r11);
+
+        r0.<sun.security.x509.AVA: sun.security.util.DerValue value> = $r6;
+
+     label9:
+        return;
+    }
+
+    public sun.security.util.ObjectIdentifier getObjectIdentifier()
+    {
+        sun.security.util.ObjectIdentifier $r1;
+        sun.security.x509.AVA r0;
+
+        r0 := @this: sun.security.x509.AVA;
+
+        $r1 = r0.<sun.security.x509.AVA: sun.security.util.ObjectIdentifier oid>;
+
+        return $r1;
+    }
+
+    public sun.security.util.DerValue getDerValue()
+    {
+        sun.security.util.DerValue $r1;
+        sun.security.x509.AVA r0;
+
+        r0 := @this: sun.security.x509.AVA;
+
+        $r1 = r0.<sun.security.x509.AVA: sun.security.util.DerValue value>;
+
+        return $r1;
+    }
+
+    public java.lang.String getValueString()
+    {
+        sun.security.util.DerValue $r1;
+        java.io.IOException $r4;
+        java.lang.RuntimeException $r3, $r5;
+        sun.security.x509.AVA r0;
+        java.lang.StringBuilder $r6, $r7, $r8;
+        java.lang.String $r2, $r9;
+
+        r0 := @this: sun.security.x509.AVA;
+
+     label1:
+        $r1 = r0.<sun.security.x509.AVA: sun.security.util.DerValue value>;
+
+        $r2 = virtualinvoke $r1.<sun.security.util.DerValue: java.lang.String getAsString()>();
+
+        if $r2 != null goto label2;
+
+        $r3 = new java.lang.RuntimeException;
+
+        specialinvoke $r3.<java.lang.RuntimeException: void <init>(java.lang.String)>("AVA string is null");
+
+        throw $r3;
+
+     label2:
+        return $r2;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = new java.lang.RuntimeException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("AVA error: ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.lang.RuntimeException: void <init>(java.lang.String,java.lang.Throwable)>($r9, $r4);
+
+        throw $r5;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    private static sun.security.util.DerValue parseHexString(java.io.Reader, int) throws java.io.IOException
+    {
+        byte[] $r9;
+        java.io.ByteArrayOutputStream $r12;
+        byte $b6, b11;
+        int $i0, i1, $i4, $i5, $i7, $i8, $i10, i12, $i13, $i15, $i16;
+        java.lang.String $r2, $r7;
+        boolean $z0;
+        sun.security.util.DerValue $r17;
+        char $c2, $c3, $c9;
+        java.io.IOException $r14, $r15, $r16;
+        java.io.Reader r1;
+        java.lang.StringBuilder $r5, $r6, $r13;
+
+        r1 := @parameter0: java.io.Reader;
+
+        i1 := @parameter1: int;
+
+        $r12 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r12.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        b11 = 0;
+
+        i12 = 0;
+
+     label1:
+        $i0 = virtualinvoke r1.<java.io.Reader: int read()>();
+
+        $z0 = staticinvoke <sun.security.x509.AVA: boolean isTerminator(int,int)>($i0, i1);
+
+        if $z0 == 0 goto label2;
+
+        goto label6;
+
+     label2:
+        $r2 = "0123456789ABCDEF";
+
+        $c2 = (char) $i0;
+
+        $c3 = staticinvoke <java.lang.Character: char toUpperCase(char)>($c2);
+
+        $i13 = (int) $c3;
+
+        $i4 = virtualinvoke $r2.<java.lang.String: int indexOf(int)>($i13);
+
+        $i15 = (int) -1;
+
+        if $i4 != $i15 goto label3;
+
+        $r14 = new java.io.IOException;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("AVA parse, invalid hex digit: ");
+
+        $c9 = (char) $i0;
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c9);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r14.<java.io.IOException: void <init>(java.lang.String)>($r7);
+
+        throw $r14;
+
+     label3:
+        $i5 = i12 % 2;
+
+        if $i5 != 1 goto label4;
+
+        $i7 = b11 * 16;
+
+        $b6 = (byte) $i4;
+
+        $i16 = (int) $b6;
+
+        $i8 = $i7 + $i16;
+
+        b11 = (byte) $i8;
+
+        virtualinvoke $r12.<java.io.ByteArrayOutputStream: void write(int)>(b11);
+
+        goto label5;
+
+     label4:
+        b11 = (byte) $i4;
+
+     label5:
+        i12 = i12 + 1;
+
+        goto label1;
+
+     label6:
+        if i12 != 0 goto label7;
+
+        $r15 = new java.io.IOException;
+
+        specialinvoke $r15.<java.io.IOException: void <init>(java.lang.String)>("AVA parse, zero hex digits");
+
+        throw $r15;
+
+     label7:
+        $i10 = i12 % 2;
+
+        if $i10 != 1 goto label8;
+
+        $r16 = new java.io.IOException;
+
+        specialinvoke $r16.<java.io.IOException: void <init>(java.lang.String)>("AVA parse, odd number of hex digits");
+
+        throw $r16;
+
+     label8:
+        $r17 = new sun.security.util.DerValue;
+
+        $r9 = virtualinvoke $r12.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        specialinvoke $r17.<sun.security.util.DerValue: void <init>(byte[])>($r9);
+
+        return $r17;
+    }
+
+    private sun.security.util.DerValue parseQuotedString(java.io.Reader, java.lang.StringBuilder) throws java.io.IOException
+    {
+        sun.security.util.ObjectIdentifier $r3, $r4, $r9, $r10;
+        java.lang.Byte $r20;
+        boolean $z0, $z1, $z2, $z3, z4;
+        sun.security.util.DerValue $r31, $r32, $r33;
+        java.io.Reader r0;
+        java.lang.StringBuilder r6, $r24, $r25, $r28;
+        sun.security.x509.AVA r2;
+        java.util.ArrayList $r27;
+        int $i0, $i1, $i4, $i6, i8, $i9, $i10, $i12;
+        java.lang.String $r7, $r8, $r12, $r13, $r15, $r16, $r18, $r19, $r21, $r26;
+        char $c2, $c3, $c5, $c7;
+        java.io.IOException $r29, $r30;
+
+        r2 := @this: sun.security.x509.AVA;
+
+        r0 := @parameter0: java.io.Reader;
+
+        r6 := @parameter1: java.lang.StringBuilder;
+
+        i8 = staticinvoke <sun.security.x509.AVA: int readChar(java.io.Reader,java.lang.String)>(r0, "Quoted string did not end in quote");
+
+        $r27 = new java.util.ArrayList;
+
+        specialinvoke $r27.<java.util.ArrayList: void <init>()>();
+
+        z4 = 1;
+
+     label01:
+        if i8 == 34 goto label05;
+
+        if i8 != 92 goto label03;
+
+        $i4 = staticinvoke <sun.security.x509.AVA: int readChar(java.io.Reader,java.lang.String)>(r0, "Quoted string did not end in quote");
+
+        i8 = $i4;
+
+        $r20 = staticinvoke <sun.security.x509.AVA: java.lang.Byte getEmbeddedHexPair(int,java.io.Reader)>($i4, r0);
+
+        if $r20 == null goto label02;
+
+        z4 = 0;
+
+        interfaceinvoke $r27.<java.util.List: boolean add(java.lang.Object)>($r20);
+
+        i8 = virtualinvoke r0.<java.io.Reader: int read()>();
+
+        goto label01;
+
+     label02:
+        $r21 = ",=\n+<>#;\\\"";
+
+        $c5 = (char) $i4;
+
+        $i10 = (int) $c5;
+
+        $i6 = virtualinvoke $r21.<java.lang.String: int indexOf(int)>($i10);
+
+        if $i6 >= 0 goto label03;
+
+        $r29 = new java.io.IOException;
+
+        $r28 = new java.lang.StringBuilder;
+
+        specialinvoke $r28.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid escaped character in AVA: ");
+
+        $c7 = (char) $i4;
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c7);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r29.<java.io.IOException: void <init>(java.lang.String)>($r26);
+
+        throw $r29;
+
+     label03:
+        $i1 = interfaceinvoke $r27.<java.util.List: int size()>();
+
+        if $i1 <= 0 goto label04;
+
+        $r19 = staticinvoke <sun.security.x509.AVA: java.lang.String getEmbeddedHexString(java.util.List)>($r27);
+
+        virtualinvoke r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        interfaceinvoke $r27.<java.util.List: void clear()>();
+
+     label04:
+        $c2 = (char) i8;
+
+        $z3 = staticinvoke <sun.security.util.DerValue: boolean isPrintableStringChar(char)>($c2);
+
+        z4 = z4 & $z3;
+
+        $c3 = (char) i8;
+
+        virtualinvoke r6.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c3);
+
+        i8 = staticinvoke <sun.security.x509.AVA: int readChar(java.io.Reader,java.lang.String)>(r0, "Quoted string did not end in quote");
+
+        goto label01;
+
+     label05:
+        $i0 = interfaceinvoke $r27.<java.util.List: int size()>();
+
+        if $i0 <= 0 goto label06;
+
+        $r18 = staticinvoke <sun.security.x509.AVA: java.lang.String getEmbeddedHexString(java.util.List)>($r27);
+
+        virtualinvoke r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        interfaceinvoke $r27.<java.util.List: void clear()>();
+
+     label06:
+        $i9 = virtualinvoke r0.<java.io.Reader: int read()>();
+
+        if $i9 == 10 goto label06;
+
+        if $i9 == 32 goto label06;
+
+        $i12 = (int) -1;
+
+        if $i9 == $i12 goto label07;
+
+        $r30 = new java.io.IOException;
+
+        specialinvoke $r30.<java.io.IOException: void <init>(java.lang.String)>("AVA had characters other than whitespace after terminating quote");
+
+        throw $r30;
+
+     label07:
+        $r4 = r2.<sun.security.x509.AVA: sun.security.util.ObjectIdentifier oid>;
+
+        $r3 = <sun.security.pkcs.PKCS9Attribute: sun.security.util.ObjectIdentifier EMAIL_ADDRESS_OID>;
+
+        $z0 = virtualinvoke $r4.<sun.security.util.ObjectIdentifier: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 != 0 goto label08;
+
+        $r10 = r2.<sun.security.x509.AVA: sun.security.util.ObjectIdentifier oid>;
+
+        $r9 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier DOMAIN_COMPONENT_OID>;
+
+        $z1 = virtualinvoke $r10.<sun.security.util.ObjectIdentifier: boolean equals(java.lang.Object)>($r9);
+
+        if $z1 == 0 goto label09;
+
+        $z2 = <sun.security.x509.AVA: boolean PRESERVE_OLD_DC_ENCODING>;
+
+        if $z2 != 0 goto label09;
+
+     label08:
+        $r31 = new sun.security.util.DerValue;
+
+        $r7 = virtualinvoke r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.String: java.lang.String trim()>();
+
+        specialinvoke $r31.<sun.security.util.DerValue: void <init>(byte,java.lang.String)>(22, $r8);
+
+        return $r31;
+
+     label09:
+        if z4 == 0 goto label10;
+
+        $r32 = new sun.security.util.DerValue;
+
+        $r15 = virtualinvoke r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.String: java.lang.String trim()>();
+
+        specialinvoke $r32.<sun.security.util.DerValue: void <init>(java.lang.String)>($r16);
+
+        return $r32;
+
+     label10:
+        $r33 = new sun.security.util.DerValue;
+
+        $r12 = virtualinvoke r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.String: java.lang.String trim()>();
+
+        specialinvoke $r33.<sun.security.util.DerValue: void <init>(byte,java.lang.String)>(12, $r13);
+
+        return $r33;
+    }
+
+    private sun.security.util.DerValue parseString(java.io.Reader, int, int, java.lang.StringBuilder) throws java.io.IOException
+    {
+        sun.security.util.ObjectIdentifier $r5, $r6, $r9, $r10;
+        sun.security.util.DerValue $r60, $r61, $r62;
+        java.io.Reader r3;
+        java.lang.StringBuilder r2, $r20, $r21, $r22, $r27, $r28, $r29, $r35, $r36, $r37, $r44, $r45, $r46, $r49, $r53, $r55, $r57;
+        sun.security.x509.AVA r4;
+        java.util.ArrayList $r48;
+        java.lang.String $r1, $r8, $r12, $r14, $r15, $r17, $r23, $r24, $r30, $r32, $r38, $r41, $r47;
+        java.io.IOException $r50, $r51, $r52, $r54, $r56, $r58, $r59;
+        java.lang.Byte $r31;
+        boolean $z0, $z1, $z2, $z3, $z4, z5, z6, z7, $z8, z9, z10;
+        int i0, $i2, $i5, $i8, $i10, $i12, $i15, i17, i18, $i19, i20, i21, $i22, $i24, $i25, $i27, $i28, $i30, $i31, $i33;
+        char $c1, $c3, $c4, $c6, $c7, $c9, $c11, $c13, $c14, $c16;
+
+        r4 := @this: sun.security.x509.AVA;
+
+        r3 := @parameter0: java.io.Reader;
+
+        i17 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        r2 := @parameter3: java.lang.StringBuilder;
+
+        $r48 = new java.util.ArrayList;
+
+        specialinvoke $r48.<java.util.ArrayList: void <init>()>();
+
+        z5 = 1;
+
+        z6 = 1;
+
+        z10 = 1;
+
+        z9 = 1;
+
+        i18 = 0;
+
+     label01:
+        z7 = 0;
+
+        if i17 != 92 goto label07;
+
+        z7 = 1;
+
+        $i10 = staticinvoke <sun.security.x509.AVA: int readChar(java.io.Reader,java.lang.String)>(r3, "Invalid trailing backslash");
+
+        i17 = $i10;
+
+        $r31 = staticinvoke <sun.security.x509.AVA: java.lang.Byte getEmbeddedHexPair(int,java.io.Reader)>($i10, r3);
+
+        if $r31 == null goto label02;
+
+        z5 = 0;
+
+        interfaceinvoke $r48.<java.util.List: boolean add(java.lang.Object)>($r31);
+
+        i17 = virtualinvoke r3.<java.io.Reader: int read()>();
+
+        z6 = 0;
+
+        z10 = 0;
+
+        z9 = 0;
+
+        goto label17;
+
+     label02:
+        if i0 != 1 goto label03;
+
+        $r41 = ",=\n+<>#;\\\" ";
+
+        $c14 = (char) $i10;
+
+        $i22 = (int) $c14;
+
+        $i15 = virtualinvoke $r41.<java.lang.String: int indexOf(int)>($i22);
+
+        $i24 = (int) -1;
+
+        if $i15 != $i24 goto label03;
+
+        $r50 = new java.io.IOException;
+
+        $r49 = new java.lang.StringBuilder;
+
+        specialinvoke $r49.<java.lang.StringBuilder: void <init>()>();
+
+        $r44 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid escaped character in AVA: \'");
+
+        $c16 = (char) $i10;
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c16);
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r50.<java.io.IOException: void <init>(java.lang.String)>($r47);
+
+        throw $r50;
+
+     label03:
+        if i0 != 3 goto label06;
+
+        if $i10 != 32 goto label04;
+
+        if z9 != 0 goto label06;
+
+        $z4 = staticinvoke <sun.security.x509.AVA: boolean trailingSpace(java.io.Reader)>(r3);
+
+        if $z4 != 0 goto label06;
+
+        $r51 = new java.io.IOException;
+
+        specialinvoke $r51.<java.io.IOException: void <init>(java.lang.String)>("Invalid escaped space character in AVA.  Only a leading or trailing space character can be escaped.");
+
+        throw $r51;
+
+     label04:
+        if $i10 != 35 goto label05;
+
+        if z10 != 0 goto label06;
+
+        $r52 = new java.io.IOException;
+
+        specialinvoke $r52.<java.io.IOException: void <init>(java.lang.String)>("Invalid escaped \'#\' character in AVA.  Only a leading \'#\' can be escaped.");
+
+        throw $r52;
+
+     label05:
+        $r32 = ",=+<>#;\\\"";
+
+        $c11 = (char) $i10;
+
+        $i25 = (int) $c11;
+
+        $i12 = virtualinvoke $r32.<java.lang.String: int indexOf(int)>($i25);
+
+        $i27 = (int) -1;
+
+        if $i12 != $i27 goto label06;
+
+        $r54 = new java.io.IOException;
+
+        $r53 = new java.lang.StringBuilder;
+
+        specialinvoke $r53.<java.lang.StringBuilder: void <init>()>();
+
+        $r35 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid escaped character in AVA: \'");
+
+        $c13 = (char) $i10;
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c13);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r54.<java.io.IOException: void <init>(java.lang.String)>($r38);
+
+        throw $r54;
+
+     label06:
+        goto label09;
+
+     label07:
+        if i0 != 3 goto label08;
+
+        $r24 = ",=+<>#;\\\"";
+
+        $c7 = (char) i17;
+
+        $i28 = (int) $c7;
+
+        $i8 = virtualinvoke $r24.<java.lang.String: int indexOf(int)>($i28);
+
+        $i30 = (int) -1;
+
+        if $i8 == $i30 goto label09;
+
+        $r56 = new java.io.IOException;
+
+        $r55 = new java.lang.StringBuilder;
+
+        specialinvoke $r55.<java.lang.StringBuilder: void <init>()>();
+
+        $r27 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Character \'");
+
+        $c9 = (char) i17;
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c9);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' in AVA appears without escape");
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r56.<java.io.IOException: void <init>(java.lang.String)>($r30);
+
+        throw $r56;
+
+     label08:
+        $r1 = ",+<>;\"";
+
+        $c1 = (char) i17;
+
+        $i31 = (int) $c1;
+
+        $i2 = virtualinvoke $r1.<java.lang.String: int indexOf(int)>($i31);
+
+        $i33 = (int) -1;
+
+        if $i2 == $i33 goto label09;
+
+        $r58 = new java.io.IOException;
+
+        $r57 = new java.lang.StringBuilder;
+
+        specialinvoke $r57.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Character \'");
+
+        $c6 = (char) i17;
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c6);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' in AVA appears without escape");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r58.<java.io.IOException: void <init>(java.lang.String)>($r23);
+
+        throw $r58;
+
+     label09:
+        $i19 = interfaceinvoke $r48.<java.util.List: int size()>();
+
+        if $i19 <= 0 goto label12;
+
+        i20 = 0;
+
+     label10:
+        if i20 >= i18 goto label11;
+
+        virtualinvoke r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        i20 = i20 + 1;
+
+        goto label10;
+
+     label11:
+        i18 = 0;
+
+        $r17 = staticinvoke <sun.security.x509.AVA: java.lang.String getEmbeddedHexString(java.util.List)>($r48);
+
+        virtualinvoke r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        interfaceinvoke $r48.<java.util.List: void clear()>();
+
+     label12:
+        $c3 = (char) i17;
+
+        $z0 = staticinvoke <sun.security.util.DerValue: boolean isPrintableStringChar(char)>($c3);
+
+        z5 = z5 & $z0;
+
+        if i17 != 32 goto label13;
+
+        if z7 != 0 goto label13;
+
+        i18 = i18 + 1;
+
+        goto label16;
+
+     label13:
+        i21 = 0;
+
+     label14:
+        if i21 >= i18 goto label15;
+
+        virtualinvoke r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        i21 = i21 + 1;
+
+        goto label14;
+
+     label15:
+        i18 = 0;
+
+        $c4 = (char) i17;
+
+        virtualinvoke r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c4);
+
+     label16:
+        i17 = virtualinvoke r3.<java.io.Reader: int read()>();
+
+        z6 = 0;
+
+        z10 = 0;
+
+        z9 = 0;
+
+     label17:
+        $z8 = staticinvoke <sun.security.x509.AVA: boolean isTerminator(int,int)>(i17, i0);
+
+        if $z8 == 0 goto label01;
+
+        if i0 != 3 goto label18;
+
+        if i18 <= 0 goto label18;
+
+        $r59 = new java.io.IOException;
+
+        specialinvoke $r59.<java.io.IOException: void <init>(java.lang.String)>("Incorrect AVA RFC2253 format - trailing space must be escaped");
+
+        throw $r59;
+
+     label18:
+        $i5 = interfaceinvoke $r48.<java.util.List: int size()>();
+
+        if $i5 <= 0 goto label19;
+
+        $r15 = staticinvoke <sun.security.x509.AVA: java.lang.String getEmbeddedHexString(java.util.List)>($r48);
+
+        virtualinvoke r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        interfaceinvoke $r48.<java.util.List: void clear()>();
+
+     label19:
+        $r6 = r4.<sun.security.x509.AVA: sun.security.util.ObjectIdentifier oid>;
+
+        $r5 = <sun.security.pkcs.PKCS9Attribute: sun.security.util.ObjectIdentifier EMAIL_ADDRESS_OID>;
+
+        $z1 = virtualinvoke $r6.<sun.security.util.ObjectIdentifier: boolean equals(java.lang.Object)>($r5);
+
+        if $z1 != 0 goto label20;
+
+        $r10 = r4.<sun.security.x509.AVA: sun.security.util.ObjectIdentifier oid>;
+
+        $r9 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier DOMAIN_COMPONENT_OID>;
+
+        $z2 = virtualinvoke $r10.<sun.security.util.ObjectIdentifier: boolean equals(java.lang.Object)>($r9);
+
+        if $z2 == 0 goto label21;
+
+        $z3 = <sun.security.x509.AVA: boolean PRESERVE_OLD_DC_ENCODING>;
+
+        if $z3 != 0 goto label21;
+
+     label20:
+        $r60 = new sun.security.util.DerValue;
+
+        $r8 = virtualinvoke r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r60.<sun.security.util.DerValue: void <init>(byte,java.lang.String)>(22, $r8);
+
+        return $r60;
+
+     label21:
+        if z5 == 0 goto label22;
+
+        $r61 = new sun.security.util.DerValue;
+
+        $r14 = virtualinvoke r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r61.<sun.security.util.DerValue: void <init>(java.lang.String)>($r14);
+
+        return $r61;
+
+     label22:
+        $r62 = new sun.security.util.DerValue;
+
+        $r12 = virtualinvoke r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r62.<sun.security.util.DerValue: void <init>(byte,java.lang.String)>(12, $r12);
+
+        return $r62;
+    }
+
+    private static java.lang.Byte getEmbeddedHexPair(int, java.io.Reader) throws java.io.IOException
+    {
+        byte $b14;
+        int i0, $i3, $i4, $i7, $i9, $i11, $i12, $i13, $i15, $i16;
+        java.lang.String $r0, $r2;
+        java.lang.Byte $r5;
+        char $c1, $c2, $c5, $c6, $c8, $c10;
+        java.io.IOException $r6;
+        java.io.Reader r1;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.io.Reader;
+
+        $r0 = "0123456789ABCDEF";
+
+        $c1 = (char) i0;
+
+        $c2 = staticinvoke <java.lang.Character: char toUpperCase(char)>($c1);
+
+        $i15 = (int) $c2;
+
+        $i3 = virtualinvoke $r0.<java.lang.String: int indexOf(int)>($i15);
+
+        if $i3 < 0 goto label2;
+
+        $i4 = staticinvoke <sun.security.x509.AVA: int readChar(java.io.Reader,java.lang.String)>(r1, "unexpected EOF - escaped hex value must include two valid digits");
+
+        $r2 = "0123456789ABCDEF";
+
+        $c5 = (char) $i4;
+
+        $c6 = staticinvoke <java.lang.Character: char toUpperCase(char)>($c5);
+
+        $i16 = (int) $c6;
+
+        $i7 = virtualinvoke $r2.<java.lang.String: int indexOf(int)>($i16);
+
+        if $i7 < 0 goto label1;
+
+        $c8 = (char) i0;
+
+        $i9 = staticinvoke <java.lang.Character: int digit(char,int)>($c8, 16);
+
+        $c10 = (char) $i4;
+
+        $i11 = staticinvoke <java.lang.Character: int digit(char,int)>($c10, 16);
+
+        $r5 = new java.lang.Byte;
+
+        $i12 = $i9 << 4;
+
+        $i13 = $i12 + $i11;
+
+        $b14 = (byte) $i13;
+
+        specialinvoke $r5.<java.lang.Byte: void <init>(byte)>($b14);
+
+        return $r5;
+
+     label1:
+        $r6 = new java.io.IOException;
+
+        specialinvoke $r6.<java.io.IOException: void <init>(java.lang.String)>("escaped hex value must include two valid digits");
+
+        throw $r6;
+
+     label2:
+        return null;
+    }
+
+    private static java.lang.String getEmbeddedHexString(java.util.List) throws java.io.IOException
+    {
+        byte[] r1;
+        java.util.List r0;
+        byte $b1;
+        int $i0, i2;
+        java.lang.Object $r3;
+        java.lang.String $r2;
+        java.lang.Byte $r4;
+
+        r0 := @parameter0: java.util.List;
+
+        $i0 = interfaceinvoke r0.<java.util.List: int size()>();
+
+        r1 = newarray (byte)[$i0];
+
+        i2 = 0;
+
+     label1:
+        if i2 >= $i0 goto label2;
+
+        $r3 = interfaceinvoke r0.<java.util.List: java.lang.Object get(int)>(i2);
+
+        $r4 = (java.lang.Byte) $r3;
+
+        $b1 = virtualinvoke $r4.<java.lang.Byte: byte byteValue()>();
+
+        r1[i2] = $b1;
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        $r2 = new java.lang.String;
+
+        specialinvoke $r2.<java.lang.String: void <init>(byte[],java.lang.String)>(r1, "UTF8");
+
+        return $r2;
+    }
+
+    private static boolean isTerminator(int, int)
+    {
+        int i0, i1;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        lookupswitch(i0)
+        {
+            case -1: goto label1;
+            case 43: goto label1;
+            case 44: goto label1;
+            case 59: goto label2;
+            default: goto label5;
+        };
+
+     label1:
+        return 1;
+
+     label2:
+        if i1 == 3 goto label3;
+
+        $z0 = 1;
+
+        goto label4;
+
+     label3:
+        $z0 = 0;
+
+     label4:
+        return $z0;
+
+     label5:
+        return 0;
+    }
+
+    private static int readChar(java.io.Reader, java.lang.String) throws java.io.IOException
+    {
+        int $i0, $i2;
+        java.io.IOException $r3;
+        java.io.Reader r0;
+        java.lang.String r2;
+
+        r0 := @parameter0: java.io.Reader;
+
+        r2 := @parameter1: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.io.Reader: int read()>();
+
+        $i2 = (int) -1;
+
+        if $i0 != $i2 goto label1;
+
+        $r3 = new java.io.IOException;
+
+        specialinvoke $r3.<java.io.IOException: void <init>(java.lang.String)>(r2);
+
+        throw $r3;
+
+     label1:
+        return $i0;
+    }
+
+    private static boolean trailingSpace(java.io.Reader) throws java.io.IOException
+    {
+        int $i0, $i1, $i3;
+        java.io.Reader r0;
+        boolean $z0, z1;
+
+        r0 := @parameter0: java.io.Reader;
+
+        $z0 = virtualinvoke r0.<java.io.Reader: boolean markSupported()>();
+
+        if $z0 != 0 goto label1;
+
+        return 1;
+
+     label1:
+        virtualinvoke r0.<java.io.Reader: void mark(int)>(9999);
+
+     label2:
+        $i1 = virtualinvoke r0.<java.io.Reader: int read()>();
+
+        $i3 = (int) -1;
+
+        if $i1 != $i3 goto label3;
+
+        z1 = 1;
+
+        goto label8;
+
+     label3:
+        if $i1 != 32 goto label4;
+
+        goto label2;
+
+     label4:
+        if $i1 != 92 goto label6;
+
+        $i0 = virtualinvoke r0.<java.io.Reader: int read()>();
+
+        if $i0 == 32 goto label5;
+
+        z1 = 0;
+
+        goto label8;
+
+     label5:
+        goto label7;
+
+     label6:
+        z1 = 0;
+
+        goto label8;
+
+     label7:
+        goto label2;
+
+     label8:
+        virtualinvoke r0.<java.io.Reader: void reset()>();
+
+        return z1;
+    }
+
+    void <init>(sun.security.util.DerValue) throws java.io.IOException
+    {
+        sun.security.util.DerInputStream $r2, $r4, $r6, $r10;
+        sun.security.x509.AVA r0;
+        byte $b0;
+        int $i1, $i2, $i3;
+        sun.security.util.ObjectIdentifier $r3;
+        java.lang.String $r12;
+        sun.security.util.DerValue r1, $r5;
+        java.io.IOException $r14, $r16;
+        java.lang.StringBuilder $r9, $r11, $r15;
+
+        r0 := @this: sun.security.x509.AVA;
+
+        r1 := @parameter0: sun.security.util.DerValue;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $b0 = r1.<sun.security.util.DerValue: byte tag>;
+
+        $i3 = (int) $b0;
+
+        if $i3 == 48 goto label1;
+
+        $r14 = new java.io.IOException;
+
+        specialinvoke $r14.<java.io.IOException: void <init>(java.lang.String)>("AVA not a sequence");
+
+        throw $r14;
+
+     label1:
+        $r2 = r1.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $r3 = virtualinvoke $r2.<sun.security.util.DerInputStream: sun.security.util.ObjectIdentifier getOID()>();
+
+        r0.<sun.security.x509.AVA: sun.security.util.ObjectIdentifier oid> = $r3;
+
+        $r4 = r1.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $r5 = virtualinvoke $r4.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+        r0.<sun.security.x509.AVA: sun.security.util.DerValue value> = $r5;
+
+        $r6 = r1.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $i1 = virtualinvoke $r6.<sun.security.util.DerInputStream: int available()>();
+
+        if $i1 == 0 goto label2;
+
+        $r16 = new java.io.IOException;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("AVA, extra bytes = ");
+
+        $r10 = r1.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $i2 = virtualinvoke $r10.<sun.security.util.DerInputStream: int available()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r16.<java.io.IOException: void <init>(java.lang.String)>($r12);
+
+        throw $r16;
+
+     label2:
+        return;
+    }
+
+    void <init>(sun.security.util.DerInputStream) throws java.io.IOException
+    {
+        sun.security.util.DerValue $r2;
+        sun.security.x509.AVA r0;
+        sun.security.util.DerInputStream r1;
+
+        r0 := @this: sun.security.x509.AVA;
+
+        r1 := @parameter0: sun.security.util.DerInputStream;
+
+        $r2 = virtualinvoke r1.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+        specialinvoke r0.<sun.security.x509.AVA: void <init>(sun.security.util.DerValue)>($r2);
+
+        return;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        java.lang.Object r1;
+        java.lang.String $r3, $r4;
+        sun.security.x509.AVA r0, r2;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.security.x509.AVA;
+
+        r1 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        $z0 = r1 instanceof sun.security.x509.AVA;
+
+        if $z0 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        r2 = (sun.security.x509.AVA) r1;
+
+        $r3 = virtualinvoke r0.<sun.security.x509.AVA: java.lang.String toRFC2253CanonicalString()>();
+
+        $r4 = virtualinvoke r2.<sun.security.x509.AVA: java.lang.String toRFC2253CanonicalString()>();
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        return $z1;
+    }
+
+    public int hashCode()
+    {
+        int $i0;
+        java.lang.String $r1;
+        sun.security.x509.AVA r0;
+
+        r0 := @this: sun.security.x509.AVA;
+
+        $r1 = virtualinvoke r0.<sun.security.x509.AVA: java.lang.String toRFC2253CanonicalString()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int hashCode()>();
+
+        return $i0;
+    }
+
+    public void encode(sun.security.util.DerOutputStream) throws java.io.IOException
+    {
+        sun.security.x509.AVA r0;
+        sun.security.util.DerOutputStream r1;
+
+        r0 := @this: sun.security.x509.AVA;
+
+        r1 := @parameter0: sun.security.util.DerOutputStream;
+
+        virtualinvoke r0.<sun.security.x509.AVA: void derEncode(java.io.OutputStream)>(r1);
+
+        return;
+    }
+
+    public void derEncode(java.io.OutputStream) throws java.io.IOException
+    {
+        sun.security.util.DerValue $r4;
+        java.io.OutputStream r5;
+        byte[] $r6;
+        sun.security.util.DerOutputStream $r0, $r1;
+        sun.security.util.ObjectIdentifier $r3;
+        sun.security.x509.AVA r2;
+
+        r2 := @this: sun.security.x509.AVA;
+
+        r5 := @parameter0: java.io.OutputStream;
+
+        $r0 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r0.<sun.security.util.DerOutputStream: void <init>()>();
+
+        $r1 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r1.<sun.security.util.DerOutputStream: void <init>()>();
+
+        $r3 = r2.<sun.security.x509.AVA: sun.security.util.ObjectIdentifier oid>;
+
+        virtualinvoke $r0.<sun.security.util.DerOutputStream: void putOID(sun.security.util.ObjectIdentifier)>($r3);
+
+        $r4 = r2.<sun.security.x509.AVA: sun.security.util.DerValue value>;
+
+        virtualinvoke $r4.<sun.security.util.DerValue: void encode(sun.security.util.DerOutputStream)>($r0);
+
+        virtualinvoke $r1.<sun.security.util.DerOutputStream: void write(byte,sun.security.util.DerOutputStream)>(48, $r0);
+
+        $r6 = virtualinvoke $r1.<sun.security.util.DerOutputStream: byte[] toByteArray()>();
+
+        virtualinvoke r5.<java.io.OutputStream: void write(byte[])>($r6);
+
+        return;
+    }
+
+    private java.lang.String toKeyword(int, java.util.Map)
+    {
+        java.util.Map r1;
+        int i0;
+        sun.security.util.ObjectIdentifier $r2;
+        java.lang.String $r3;
+        sun.security.x509.AVA r0;
+
+        r0 := @this: sun.security.x509.AVA;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.util.Map;
+
+        $r2 = r0.<sun.security.x509.AVA: sun.security.util.ObjectIdentifier oid>;
+
+        $r3 = staticinvoke <sun.security.x509.AVAKeyword: java.lang.String getKeyword(sun.security.util.ObjectIdentifier,int,java.util.Map)>($r2, i0, r1);
+
+        return $r3;
+    }
+
+    public java.lang.String toString()
+    {
+        java.util.Map $r1;
+        java.lang.String $r2, $r3;
+        sun.security.x509.AVA r0;
+
+        r0 := @this: sun.security.x509.AVA;
+
+        $r1 = staticinvoke <java.util.Collections: java.util.Map emptyMap()>();
+
+        $r2 = specialinvoke r0.<sun.security.x509.AVA: java.lang.String toKeyword(int,java.util.Map)>(1, $r1);
+
+        $r3 = specialinvoke r0.<sun.security.x509.AVA: java.lang.String toKeywordValueString(java.lang.String)>($r2);
+
+        return $r3;
+    }
+
+    public java.lang.String toRFC1779String()
+    {
+        java.lang.String $r2;
+        sun.security.x509.AVA r0;
+        java.util.Map $r1;
+
+        r0 := @this: sun.security.x509.AVA;
+
+        $r1 = staticinvoke <java.util.Collections: java.util.Map emptyMap()>();
+
+        $r2 = virtualinvoke r0.<sun.security.x509.AVA: java.lang.String toRFC1779String(java.util.Map)>($r1);
+
+        return $r2;
+    }
+
+    public java.lang.String toRFC1779String(java.util.Map)
+    {
+        java.util.Map r1;
+        java.lang.String $r2, $r3;
+        sun.security.x509.AVA r0;
+
+        r0 := @this: sun.security.x509.AVA;
+
+        r1 := @parameter0: java.util.Map;
+
+        $r2 = specialinvoke r0.<sun.security.x509.AVA: java.lang.String toKeyword(int,java.util.Map)>(2, r1);
+
+        $r3 = specialinvoke r0.<sun.security.x509.AVA: java.lang.String toKeywordValueString(java.lang.String)>($r2);
+
+        return $r3;
+    }
+
+    public java.lang.String toRFC2253String()
+    {
+        java.lang.String $r2;
+        sun.security.x509.AVA r0;
+        java.util.Map $r1;
+
+        r0 := @this: sun.security.x509.AVA;
+
+        $r1 = staticinvoke <java.util.Collections: java.util.Map emptyMap()>();
+
+        $r2 = virtualinvoke r0.<sun.security.x509.AVA: java.lang.String toRFC2253String(java.util.Map)>($r1);
+
+        return $r2;
+    }
+
+    public java.lang.String toRFC2253String(java.util.Map)
+    {
+        byte[] $r7, $r18, $r20;
+        byte $b12, $b17, $b18, $b25, b29;
+        java.util.Map r2;
+        sun.security.util.DerValue $r4, $r6, $r19;
+        sun.security.util.Debug $r16;
+        java.lang.StringBuilder $r27, $r31, $r33;
+        sun.security.x509.AVA r1;
+        java.lang.String $r3, $r9, $r12, $r13, $r14, $r15, $r17, $r29;
+        java.io.IOException $r21, $r23, $r25;
+        char[] $r10;
+        boolean $z0, $z1, $z2;
+        int $i1, $i2, $i3, $i9, $i10, $i11, $i13, $i14, $i21, $i22, $i23, i28, i30, i31, i32, i33, i34, $i35, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i48;
+        char $c0, $c4, $c5, $c6, $c7, $c8, $c15, $c16, $c19, $c20, $c24, $c26, $c27, c36;
+        java.lang.IllegalArgumentException $r28, $r30, $r32;
+
+        r1 := @this: sun.security.x509.AVA;
+
+        r2 := @parameter0: java.util.Map;
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>(int)>(100);
+
+        $r3 = specialinvoke r1.<sun.security.x509.AVA: java.lang.String toKeyword(int,java.util.Map)>(3, r2);
+
+        virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(61);
+
+        $c0 = virtualinvoke $r27.<java.lang.StringBuilder: char charAt(int)>(0);
+
+        $i37 = (int) $c0;
+
+        if $i37 < 48 goto label01;
+
+        $c27 = virtualinvoke $r27.<java.lang.StringBuilder: char charAt(int)>(0);
+
+        $i38 = (int) $c27;
+
+        if $i38 <= 57 goto label02;
+
+     label01:
+        $r4 = r1.<sun.security.x509.AVA: sun.security.util.DerValue value>;
+
+        $z0 = staticinvoke <sun.security.x509.AVA: boolean isDerString(sun.security.util.DerValue,boolean)>($r4, 0);
+
+        if $z0 != 0 goto label08;
+
+     label02:
+        $r19 = r1.<sun.security.x509.AVA: sun.security.util.DerValue value>;
+
+        $r20 = virtualinvoke $r19.<sun.security.util.DerValue: byte[] toByteArray()>();
+
+     label03:
+        goto label05;
+
+     label04:
+        $r25 := @caughtexception;
+
+        $r28 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r28.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("DER Value conversion");
+
+        throw $r28;
+
+     label05:
+        virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(35);
+
+        i28 = 0;
+
+     label06:
+        $i21 = lengthof $r20;
+
+        if i28 >= $i21 goto label07;
+
+        b29 = $r20[i28];
+
+        $i39 = (int) b29;
+
+        $i22 = $i39 >>> 4;
+
+        $i23 = 15 & $i22;
+
+        $c24 = staticinvoke <java.lang.Character: char forDigit(int,int)>($i23, 16);
+
+        virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c24);
+
+        $b25 = 15 & b29;
+
+        $c26 = staticinvoke <java.lang.Character: char forDigit(int,int)>($b25, 16);
+
+        virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c26);
+
+        i28 = i28 + 1;
+
+        goto label06;
+
+     label07:
+        goto label36;
+
+     label08:
+        $r29 = new java.lang.String;
+
+        $r6 = r1.<sun.security.x509.AVA: sun.security.util.DerValue value>;
+
+        $r7 = virtualinvoke $r6.<sun.security.util.DerValue: byte[] getDataBytes()>();
+
+        specialinvoke $r29.<java.lang.String: void <init>(byte[],java.lang.String)>($r7, "UTF8");
+
+     label09:
+        goto label11;
+
+     label10:
+        $r23 := @caughtexception;
+
+        $r30 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r30.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("DER Value conversion");
+
+        throw $r30;
+
+     label11:
+        $r31 = new java.lang.StringBuilder;
+
+        specialinvoke $r31.<java.lang.StringBuilder: void <init>()>();
+
+        i30 = 0;
+
+     label12:
+        $i1 = virtualinvoke $r29.<java.lang.String: int length()>();
+
+        if i30 >= $i1 goto label25;
+
+        $c8 = virtualinvoke $r29.<java.lang.String: char charAt(int)>(i30);
+
+        $z1 = staticinvoke <sun.security.util.DerValue: boolean isPrintableStringChar(char)>($c8);
+
+        if $z1 != 0 goto label13;
+
+        $r15 = ",=+<>#;\"\\";
+
+        $i40 = (int) $c8;
+
+        $i10 = virtualinvoke $r15.<java.lang.String: int indexOf(int)>($i40);
+
+        if $i10 < 0 goto label15;
+
+     label13:
+        $r14 = ",=+<>#;\"\\";
+
+        $i41 = (int) $c8;
+
+        $i9 = virtualinvoke $r14.<java.lang.String: int indexOf(int)>($i41);
+
+        if $i9 < 0 goto label14;
+
+        virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(92);
+
+     label14:
+        virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c8);
+
+        goto label24;
+
+     label15:
+        if $c8 != 0 goto label16;
+
+        virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\\00");
+
+        goto label24;
+
+     label16:
+        $r16 = <sun.security.x509.AVA: sun.security.util.Debug debug>;
+
+        if $r16 == null goto label23;
+
+        $z2 = staticinvoke <sun.security.util.Debug: boolean isOn(java.lang.String)>("ava");
+
+        if $z2 == 0 goto label23;
+
+     label17:
+        $r17 = staticinvoke <java.lang.Character: java.lang.String toString(char)>($c8);
+
+        $r18 = virtualinvoke $r17.<java.lang.String: byte[] getBytes(java.lang.String)>("UTF8");
+
+     label18:
+        goto label20;
+
+     label19:
+        $r21 := @caughtexception;
+
+        $r32 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r32.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("DER Value conversion");
+
+        throw $r32;
+
+     label20:
+        i31 = 0;
+
+     label21:
+        $i11 = lengthof $r18;
+
+        if i31 >= $i11 goto label22;
+
+        virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(92);
+
+        $b12 = $r18[i31];
+
+        $i42 = (int) $b12;
+
+        $i13 = $i42 >>> 4;
+
+        $i14 = 15 & $i13;
+
+        $c15 = staticinvoke <java.lang.Character: char forDigit(int,int)>($i14, 16);
+
+        $c16 = staticinvoke <java.lang.Character: char toUpperCase(char)>($c15);
+
+        virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c16);
+
+        $b17 = $r18[i31];
+
+        $b18 = 15 & $b17;
+
+        $c19 = staticinvoke <java.lang.Character: char forDigit(int,int)>($b18, 16);
+
+        $c20 = staticinvoke <java.lang.Character: char toUpperCase(char)>($c19);
+
+        virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c20);
+
+        i31 = i31 + 1;
+
+        goto label21;
+
+     label22:
+        goto label24;
+
+     label23:
+        virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c8);
+
+     label24:
+        i30 = i30 + 1;
+
+        goto label12;
+
+     label25:
+        $r9 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.String: char[] toCharArray()>();
+
+        $r33 = new java.lang.StringBuilder;
+
+        specialinvoke $r33.<java.lang.StringBuilder: void <init>()>();
+
+        i32 = 0;
+
+     label26:
+        $i2 = lengthof $r10;
+
+        if i32 >= $i2 goto label28;
+
+        $c6 = $r10[i32];
+
+        $i43 = (int) $c6;
+
+        if $i43 == 32 goto label27;
+
+        $c7 = $r10[i32];
+
+        $i44 = (int) $c7;
+
+        if $i44 == 13 goto label27;
+
+        goto label28;
+
+     label27:
+        i32 = i32 + 1;
+
+        goto label26;
+
+     label28:
+        $i3 = lengthof $r10;
+
+        i33 = $i3 - 1;
+
+     label29:
+        if i33 < 0 goto label31;
+
+        $c4 = $r10[i33];
+
+        $i45 = (int) $c4;
+
+        if $i45 == 32 goto label30;
+
+        $c5 = $r10[i33];
+
+        $i46 = (int) $c5;
+
+        if $i46 == 13 goto label30;
+
+        goto label31;
+
+     label30:
+        $i48 = (int) -1;
+
+        i33 = i33 + $i48;
+
+        goto label29;
+
+     label31:
+        i34 = 0;
+
+     label32:
+        $i35 = lengthof $r10;
+
+        if i34 >= $i35 goto label35;
+
+        c36 = $r10[i34];
+
+        if i34 < i32 goto label33;
+
+        if i34 <= i33 goto label34;
+
+     label33:
+        virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(92);
+
+     label34:
+        virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(c36);
+
+        i34 = i34 + 1;
+
+        goto label32;
+
+     label35:
+        $r12 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+     label36:
+        $r13 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r13;
+
+        catch java.io.IOException from label02 to label03 with label04;
+        catch java.io.IOException from label08 to label09 with label10;
+        catch java.io.IOException from label17 to label18 with label19;
+    }
+
+    public java.lang.String toRFC2253CanonicalString()
+    {
+        byte[] $r7, $r22, $r24;
+        byte $b6, $b10, $b11, $b17, b21;
+        java.util.Map $r2;
+        sun.security.util.DerValue $r4, $r6, $r23;
+        sun.security.util.Debug $r20;
+        java.lang.StringBuilder $r31, $r35;
+        sun.security.x509.AVA r1;
+        java.lang.String $r3, $r9, $r10, $r11, $r13, $r15, $r17, $r18, $r19, $r21, $r33;
+        java.io.IOException $r25, $r27, $r29;
+        java.util.Locale $r12, $r14;
+        boolean $z0, $z1, $z2, z3, $z4;
+        java.text.Normalizer$Form $r16;
+        int $i1, $i3, $i4, $i5, $i7, $i8, $i13, $i14, $i15, i20, i22, i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31;
+        char $c0, $c2, $c9, $c12, $c16, $c18, $c19;
+        java.lang.IllegalArgumentException $r32, $r34, $r36;
+
+        r1 := @this: sun.security.x509.AVA;
+
+        $r31 = new java.lang.StringBuilder;
+
+        specialinvoke $r31.<java.lang.StringBuilder: void <init>(int)>(40);
+
+        $r2 = staticinvoke <java.util.Collections: java.util.Map emptyMap()>();
+
+        $r3 = specialinvoke r1.<sun.security.x509.AVA: java.lang.String toKeyword(int,java.util.Map)>(3, $r2);
+
+        virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(61);
+
+        $c0 = virtualinvoke $r31.<java.lang.StringBuilder: char charAt(int)>(0);
+
+        $i24 = (int) $c0;
+
+        if $i24 < 48 goto label01;
+
+        $c19 = virtualinvoke $r31.<java.lang.StringBuilder: char charAt(int)>(0);
+
+        $i25 = (int) $c19;
+
+        if $i25 <= 57 goto label02;
+
+     label01:
+        $r4 = r1.<sun.security.x509.AVA: sun.security.util.DerValue value>;
+
+        $z0 = staticinvoke <sun.security.x509.AVA: boolean isDerString(sun.security.util.DerValue,boolean)>($r4, 1);
+
+        if $z0 != 0 goto label08;
+
+     label02:
+        $r23 = r1.<sun.security.x509.AVA: sun.security.util.DerValue value>;
+
+        $r24 = virtualinvoke $r23.<sun.security.util.DerValue: byte[] toByteArray()>();
+
+     label03:
+        goto label05;
+
+     label04:
+        $r29 := @caughtexception;
+
+        $r32 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r32.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("DER Value conversion");
+
+        throw $r32;
+
+     label05:
+        virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(35);
+
+        i20 = 0;
+
+     label06:
+        $i13 = lengthof $r24;
+
+        if i20 >= $i13 goto label07;
+
+        b21 = $r24[i20];
+
+        $i26 = (int) b21;
+
+        $i14 = $i26 >>> 4;
+
+        $i15 = 15 & $i14;
+
+        $c16 = staticinvoke <java.lang.Character: char forDigit(int,int)>($i15, 16);
+
+        virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c16);
+
+        $b17 = 15 & b21;
+
+        $c18 = staticinvoke <java.lang.Character: char forDigit(int,int)>($b17, 16);
+
+        virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c18);
+
+        i20 = i20 + 1;
+
+        goto label06;
+
+     label07:
+        goto label28;
+
+     label08:
+        $r33 = new java.lang.String;
+
+        $r6 = r1.<sun.security.x509.AVA: sun.security.util.DerValue value>;
+
+        $r7 = virtualinvoke $r6.<sun.security.util.DerValue: byte[] getDataBytes()>();
+
+        specialinvoke $r33.<java.lang.String: void <init>(byte[],java.lang.String)>($r7, "UTF8");
+
+     label09:
+        goto label11;
+
+     label10:
+        $r27 := @caughtexception;
+
+        $r34 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r34.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("DER Value conversion");
+
+        throw $r34;
+
+     label11:
+        $r35 = new java.lang.StringBuilder;
+
+        specialinvoke $r35.<java.lang.StringBuilder: void <init>()>();
+
+        z3 = 0;
+
+        i22 = 0;
+
+     label12:
+        $i1 = virtualinvoke $r33.<java.lang.String: int length()>();
+
+        if i22 >= $i1 goto label27;
+
+        $c2 = virtualinvoke $r33.<java.lang.String: char charAt(int)>(i22);
+
+        $z1 = staticinvoke <sun.security.util.DerValue: boolean isPrintableStringChar(char)>($c2);
+
+        if $z1 != 0 goto label13;
+
+        $r19 = ",+<>;\"\\";
+
+        $i27 = (int) $c2;
+
+        $i4 = virtualinvoke $r19.<java.lang.String: int indexOf(int)>($i27);
+
+        if $i4 >= 0 goto label13;
+
+        if i22 != 0 goto label18;
+
+        $i28 = (int) $c2;
+
+        if $i28 != 35 goto label18;
+
+     label13:
+        if i22 != 0 goto label14;
+
+        $i29 = (int) $c2;
+
+        if $i29 == 35 goto label15;
+
+     label14:
+        $r18 = ",+<>;\"\\";
+
+        $i30 = (int) $c2;
+
+        $i3 = virtualinvoke $r18.<java.lang.String: int indexOf(int)>($i30);
+
+        if $i3 < 0 goto label16;
+
+     label15:
+        virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(92);
+
+     label16:
+        $z4 = staticinvoke <java.lang.Character: boolean isWhitespace(char)>($c2);
+
+        if $z4 != 0 goto label17;
+
+        z3 = 0;
+
+        virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c2);
+
+        goto label26;
+
+     label17:
+        if z3 != 0 goto label26;
+
+        z3 = 1;
+
+        virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c2);
+
+        goto label26;
+
+     label18:
+        $r20 = <sun.security.x509.AVA: sun.security.util.Debug debug>;
+
+        if $r20 == null goto label25;
+
+        $z2 = staticinvoke <sun.security.util.Debug: boolean isOn(java.lang.String)>("ava");
+
+        if $z2 == 0 goto label25;
+
+        z3 = 0;
+
+     label19:
+        $r21 = staticinvoke <java.lang.Character: java.lang.String toString(char)>($c2);
+
+        $r22 = virtualinvoke $r21.<java.lang.String: byte[] getBytes(java.lang.String)>("UTF8");
+
+     label20:
+        goto label22;
+
+     label21:
+        $r25 := @caughtexception;
+
+        $r36 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r36.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("DER Value conversion");
+
+        throw $r36;
+
+     label22:
+        i23 = 0;
+
+     label23:
+        $i5 = lengthof $r22;
+
+        if i23 >= $i5 goto label24;
+
+        virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(92);
+
+        $b6 = $r22[i23];
+
+        $i31 = (int) $b6;
+
+        $i7 = $i31 >>> 4;
+
+        $i8 = 15 & $i7;
+
+        $c9 = staticinvoke <java.lang.Character: char forDigit(int,int)>($i8, 16);
+
+        virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c9);
+
+        $b10 = $r22[i23];
+
+        $b11 = 15 & $b10;
+
+        $c12 = staticinvoke <java.lang.Character: char forDigit(int,int)>($b11, 16);
+
+        virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c12);
+
+        i23 = i23 + 1;
+
+        goto label23;
+
+     label24:
+        goto label26;
+
+     label25:
+        z3 = 0;
+
+        virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c2);
+
+     label26:
+        i22 = i22 + 1;
+
+        goto label12;
+
+     label27:
+        $r9 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.String: java.lang.String trim()>();
+
+        virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+     label28:
+        $r11 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r12 = <java.util.Locale: java.util.Locale US>;
+
+        $r13 = virtualinvoke $r11.<java.lang.String: java.lang.String toUpperCase(java.util.Locale)>($r12);
+
+        $r14 = <java.util.Locale: java.util.Locale US>;
+
+        $r15 = virtualinvoke $r13.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r14);
+
+        $r16 = <java.text.Normalizer$Form: java.text.Normalizer$Form NFKD>;
+
+        $r17 = staticinvoke <java.text.Normalizer: java.lang.String normalize(java.lang.CharSequence,java.text.Normalizer$Form)>($r15, $r16);
+
+        return $r17;
+
+        catch java.io.IOException from label02 to label03 with label04;
+        catch java.io.IOException from label08 to label09 with label10;
+        catch java.io.IOException from label19 to label20 with label21;
+    }
+
+    private static boolean isDerString(sun.security.util.DerValue, boolean)
+    {
+        sun.security.util.DerValue r0;
+        byte $b0, $b1;
+        int $i2, $i3;
+        boolean z0;
+
+        r0 := @parameter0: sun.security.util.DerValue;
+
+        z0 := @parameter1: boolean;
+
+        if z0 == 0 goto label3;
+
+        $b1 = r0.<sun.security.util.DerValue: byte tag>;
+
+        $i2 = (int) $b1;
+
+        lookupswitch($i2)
+        {
+            case 12: goto label1;
+            case 19: goto label1;
+            default: goto label2;
+        };
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+
+     label3:
+        $b0 = r0.<sun.security.util.DerValue: byte tag>;
+
+        $i3 = (int) $b0;
+
+        tableswitch($i3)
+        {
+            case 12: goto label4;
+            case 13: goto label5;
+            case 14: goto label5;
+            case 15: goto label5;
+            case 16: goto label5;
+            case 17: goto label5;
+            case 18: goto label5;
+            case 19: goto label4;
+            case 20: goto label4;
+            case 21: goto label5;
+            case 22: goto label4;
+            case 23: goto label5;
+            case 24: goto label5;
+            case 25: goto label5;
+            case 26: goto label5;
+            case 27: goto label4;
+            case 28: goto label5;
+            case 29: goto label5;
+            case 30: goto label4;
+            default: goto label5;
+        };
+
+     label4:
+        return 1;
+
+     label5:
+        return 0;
+    }
+
+    boolean hasRFC2253Keyword()
+    {
+        sun.security.util.ObjectIdentifier $r1;
+        sun.security.x509.AVA r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.x509.AVA;
+
+        $r1 = r0.<sun.security.x509.AVA: sun.security.util.ObjectIdentifier oid>;
+
+        $z0 = staticinvoke <sun.security.x509.AVAKeyword: boolean hasKeyword(sun.security.util.ObjectIdentifier,int)>($r1, 3);
+
+        return $z0;
+    }
+
+    private java.lang.String toKeywordValueString(java.lang.String)
+    {
+        byte[] $r18, $r20;
+        byte $b9, $b14, $b15, $b23, $b27, $b28;
+        sun.security.util.DerValue $r3, $r19;
+        sun.security.util.Debug $r16;
+        java.lang.StringBuilder $r9, $r11, $r12, $r25, $r26, $r27;
+        sun.security.x509.AVA r2;
+        java.lang.String r1, $r4, $r6, $r7, $r10, $r13, $r14, $r15, $r17, $r21, $r22;
+        java.io.IOException $r23;
+        boolean z0, $z1, $z2, z3, z4, $z5, z6, z7, z8;
+        int $i0, $i1, $i2, $i3, $i6, $i7, $i8, $i10, $i11, $i18, $i20, $i22, $i24, $i25, i30, i31, i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47;
+        char $c4, $c5, $c12, $c13, $c16, $c17, $c19, $c21, $c26, $c29;
+        java.lang.IllegalArgumentException $r28;
+
+        r2 := @this: sun.security.x509.AVA;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r25 = new java.lang.StringBuilder;
+
+        specialinvoke $r25.<java.lang.StringBuilder: void <init>(int)>(40);
+
+        virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("=");
+
+     label01:
+        $r3 = r2.<sun.security.x509.AVA: sun.security.util.DerValue value>;
+
+        $r4 = virtualinvoke $r3.<sun.security.util.DerValue: java.lang.String getAsString()>();
+
+        if $r4 != null goto label04;
+
+        $r19 = r2.<sun.security.x509.AVA: sun.security.util.DerValue value>;
+
+        $r20 = virtualinvoke $r19.<sun.security.util.DerValue: byte[] toByteArray()>();
+
+        virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(35);
+
+        i30 = 0;
+
+     label02:
+        $i22 = lengthof $r20;
+
+        if i30 >= $i22 goto label03;
+
+        $r21 = "0123456789ABCDEF";
+
+        $b23 = $r20[i30];
+
+        $i33 = (int) $b23;
+
+        $i24 = $i33 >> 4;
+
+        $i25 = $i24 & 15;
+
+        $c26 = virtualinvoke $r21.<java.lang.String: char charAt(int)>($i25);
+
+        virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c26);
+
+        $r22 = "0123456789ABCDEF";
+
+        $b27 = $r20[i30];
+
+        $b28 = $b27 & 15;
+
+        $i34 = (int) $b28;
+
+        $c29 = virtualinvoke $r22.<java.lang.String: char charAt(int)>($i34);
+
+        virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c29);
+
+        i30 = i30 + 1;
+
+        goto label02;
+
+     label03:
+        goto label28;
+
+     label04:
+        z3 = 0;
+
+        z8 = 0;
+
+        z7 = 0;
+
+        z6 = 0;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        z4 = 0;
+
+        $i0 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        if $i0 <= 1 goto label05;
+
+        $c19 = virtualinvoke $r4.<java.lang.String: char charAt(int)>(0);
+
+        $i35 = (int) $c19;
+
+        if $i35 != 34 goto label05;
+
+        $i20 = $i0 - 1;
+
+        $c21 = virtualinvoke $r4.<java.lang.String: char charAt(int)>($i20);
+
+        $i36 = (int) $c21;
+
+        if $i36 != 34 goto label05;
+
+        $z5 = 1;
+
+        goto label06;
+
+     label05:
+        $z5 = 0;
+
+     label06:
+        z0 = $z5;
+
+        i31 = 0;
+
+     label07:
+        if i31 >= $i0 goto label24;
+
+        $c5 = virtualinvoke $r4.<java.lang.String: char charAt(int)>(i31);
+
+        if z0 == 0 goto label09;
+
+        if i31 == 0 goto label08;
+
+        $i18 = $i0 - 1;
+
+        if i31 != $i18 goto label09;
+
+     label08:
+        virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c5);
+
+        goto label23;
+
+     label09:
+        $z1 = staticinvoke <sun.security.util.DerValue: boolean isPrintableStringChar(char)>($c5);
+
+        if $z1 != 0 goto label10;
+
+        $r15 = ",+=\n<>#;\\\"";
+
+        $i37 = (int) $c5;
+
+        $i7 = virtualinvoke $r15.<java.lang.String: int indexOf(int)>($i37);
+
+        if $i7 < 0 goto label19;
+
+     label10:
+        if z8 != 0 goto label13;
+
+        if i31 != 0 goto label11;
+
+        $i38 = (int) $c5;
+
+        if $i38 == 32 goto label12;
+
+        $i39 = (int) $c5;
+
+        if $i39 == 10 goto label12;
+
+     label11:
+        $r14 = ",+=\n<>#;\\\"";
+
+        $i40 = (int) $c5;
+
+        $i6 = virtualinvoke $r14.<java.lang.String: int indexOf(int)>($i40);
+
+        if $i6 < 0 goto label13;
+
+     label12:
+        z3 = 1;
+
+        z8 = 1;
+
+        z7 = 1;
+
+        z6 = 1;
+
+     label13:
+        $i41 = (int) $c5;
+
+        if $i41 == 32 goto label16;
+
+        $i42 = (int) $c5;
+
+        if $i42 == 10 goto label16;
+
+        $i43 = (int) $c5;
+
+        if $i43 == 34 goto label14;
+
+        $i44 = (int) $c5;
+
+        if $i44 != 92 goto label15;
+
+     label14:
+        virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(92);
+
+     label15:
+        z4 = 0;
+
+        goto label18;
+
+     label16:
+        if z6 != 0 goto label17;
+
+        if z4 == 0 goto label17;
+
+        z3 = 1;
+
+        z8 = 1;
+
+        z7 = 1;
+
+        z6 = 1;
+
+     label17:
+        z4 = 1;
+
+     label18:
+        virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c5);
+
+        goto label23;
+
+     label19:
+        $r16 = <sun.security.x509.AVA: sun.security.util.Debug debug>;
+
+        if $r16 == null goto label22;
+
+        $z2 = staticinvoke <sun.security.util.Debug: boolean isOn(java.lang.String)>("ava");
+
+        if $z2 == 0 goto label22;
+
+        z4 = 0;
+
+        $r17 = staticinvoke <java.lang.Character: java.lang.String toString(char)>($c5);
+
+        $r18 = virtualinvoke $r17.<java.lang.String: byte[] getBytes(java.lang.String)>("UTF8");
+
+        i32 = 0;
+
+     label20:
+        $i8 = lengthof $r18;
+
+        if i32 >= $i8 goto label21;
+
+        virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(92);
+
+        $b9 = $r18[i32];
+
+        $i45 = (int) $b9;
+
+        $i10 = $i45 >>> 4;
+
+        $i11 = 15 & $i10;
+
+        $c12 = staticinvoke <java.lang.Character: char forDigit(int,int)>($i11, 16);
+
+        $c13 = staticinvoke <java.lang.Character: char toUpperCase(char)>($c12);
+
+        virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c13);
+
+        $b14 = $r18[i32];
+
+        $b15 = 15 & $b14;
+
+        $c16 = staticinvoke <java.lang.Character: char forDigit(int,int)>($b15, 16);
+
+        $c17 = staticinvoke <java.lang.Character: char toUpperCase(char)>($c16);
+
+        virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c17);
+
+        i32 = i32 + 1;
+
+        goto label20;
+
+     label21:
+        goto label23;
+
+     label22:
+        z4 = 0;
+
+        virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c5);
+
+     label23:
+        i31 = i31 + 1;
+
+        goto label07;
+
+     label24:
+        $i1 = virtualinvoke $r26.<java.lang.StringBuilder: int length()>();
+
+        if $i1 <= 0 goto label26;
+
+        $i2 = virtualinvoke $r26.<java.lang.StringBuilder: int length()>();
+
+        $i3 = $i2 - 1;
+
+        $c4 = virtualinvoke $r26.<java.lang.StringBuilder: char charAt(int)>($i3);
+
+        $i46 = (int) $c4;
+
+        if $i46 == 32 goto label25;
+
+        $i47 = (int) $c4;
+
+        if $i47 != 10 goto label26;
+
+     label25:
+        z3 = 1;
+
+        z7 = 1;
+
+     label26:
+        if z0 != 0 goto label27;
+
+        if z7 == 0 goto label27;
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r10 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        goto label28;
+
+     label27:
+        $r6 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+     label28:
+        goto label30;
+
+     label29:
+        $r23 := @caughtexception;
+
+        $r28 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r28.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("DER Value conversion");
+
+        throw $r28;
+
+     label30:
+        $r7 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r7;
+
+        catch java.io.IOException from label01 to label28 with label29;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.action.GetBooleanAction $r1;
+        java.lang.Boolean $r3;
+        java.lang.Object $r2;
+        sun.security.util.Debug $r0;
+        boolean $z0;
+
+        <sun.security.x509.AVA: java.lang.String hexDigits> = "0123456789ABCDEF";
+
+        <sun.security.x509.AVA: java.lang.String escapedDefault> = ",+<>;\"";
+
+        <sun.security.x509.AVA: java.lang.String specialCharsDefault> = ",=\n+<>#;\\\" ";
+
+        <sun.security.x509.AVA: java.lang.String specialChars2253> = ",=+<>#;\\\"";
+
+        <sun.security.x509.AVA: java.lang.String specialChars1779> = ",=\n+<>#;\\\"";
+
+        <sun.security.x509.AVA: int RFC2253> = 3;
+
+        <sun.security.x509.AVA: int RFC1779> = 2;
+
+        <sun.security.x509.AVA: int DEFAULT> = 1;
+
+        $r0 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String,java.lang.String)>("x509", "\t[AVA]");
+
+        <sun.security.x509.AVA: sun.security.util.Debug debug> = $r0;
+
+        $r1 = new sun.security.action.GetBooleanAction;
+
+        specialinvoke $r1.<sun.security.action.GetBooleanAction: void <init>(java.lang.String)>("com.sun.security.preserveOldDCEncoding");
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        $r3 = (java.lang.Boolean) $r2;
+
+        $z0 = virtualinvoke $r3.<java.lang.Boolean: boolean booleanValue()>();
+
+        <sun.security.x509.AVA: boolean PRESERVE_OLD_DC_ENCODING> = $z0;
+
+        return;
+    }
+}

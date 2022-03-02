@@ -1,0 +1,4315 @@
+public class com.sun.imageio.plugins.bmp.BMPImageWriter extends javax.imageio.ImageWriter implements com.sun.imageio.plugins.bmp.BMPConstants
+{
+    private javax.imageio.stream.ImageOutputStream stream;
+    private java.io.ByteArrayOutputStream embedded_stream;
+    private int version;
+    private int compressionType;
+    private boolean isTopDown;
+    private int w;
+    private int h;
+    private int compImageSize;
+    private int[] bitMasks;
+    private int[] bitPos;
+    private byte[] bpixels;
+    private short[] spixels;
+    private int[] ipixels;
+
+    public void <init>(javax.imageio.spi.ImageWriterSpi)
+    {
+        javax.imageio.spi.ImageWriterSpi r1;
+        com.sun.imageio.plugins.bmp.BMPImageWriter r0;
+
+        r0 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        r1 := @parameter0: javax.imageio.spi.ImageWriterSpi;
+
+        specialinvoke r0.<javax.imageio.ImageWriter: void <init>(javax.imageio.spi.ImageWriterSpi)>(r1);
+
+        r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream> = null;
+
+        r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: java.io.ByteArrayOutputStream embedded_stream> = null;
+
+        r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compImageSize> = 0;
+
+        return;
+    }
+
+    public void setOutput(java.lang.Object)
+    {
+        java.lang.IllegalArgumentException $r5;
+        javax.imageio.stream.ImageOutputStream $r2, $r4;
+        java.nio.ByteOrder $r3;
+        com.sun.imageio.plugins.bmp.BMPImageWriter r0;
+        java.lang.Object r1;
+        java.lang.String $r6;
+        boolean $z0;
+
+        r0 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        r1 := @parameter0: java.lang.Object;
+
+        specialinvoke r0.<javax.imageio.ImageWriter: void setOutput(java.lang.Object)>(r1);
+
+        if r1 == null goto label2;
+
+        $z0 = r1 instanceof javax.imageio.stream.ImageOutputStream;
+
+        if $z0 != 0 goto label1;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        $r6 = staticinvoke <com.sun.imageio.plugins.common.I18N: java.lang.String getString(java.lang.String)>("BMPImageWriter0");
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r6);
+
+        throw $r5;
+
+     label1:
+        $r2 = (javax.imageio.stream.ImageOutputStream) r1;
+
+        r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream> = $r2;
+
+        $r4 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $r3 = <java.nio.ByteOrder: java.nio.ByteOrder LITTLE_ENDIAN>;
+
+        interfaceinvoke $r4.<javax.imageio.stream.ImageOutputStream: void setByteOrder(java.nio.ByteOrder)>($r3);
+
+        goto label3;
+
+     label2:
+        r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream> = null;
+
+     label3:
+        return;
+    }
+
+    public javax.imageio.ImageWriteParam getDefaultWriteParam()
+    {
+        javax.imageio.plugins.bmp.BMPImageWriteParam $r0;
+        com.sun.imageio.plugins.bmp.BMPImageWriter r1;
+
+        r1 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        $r0 = new javax.imageio.plugins.bmp.BMPImageWriteParam;
+
+        specialinvoke $r0.<javax.imageio.plugins.bmp.BMPImageWriteParam: void <init>()>();
+
+        return $r0;
+    }
+
+    public javax.imageio.metadata.IIOMetadata getDefaultStreamMetadata(javax.imageio.ImageWriteParam)
+    {
+        javax.imageio.ImageWriteParam r1;
+        com.sun.imageio.plugins.bmp.BMPImageWriter r0;
+
+        r0 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        r1 := @parameter0: javax.imageio.ImageWriteParam;
+
+        return null;
+    }
+
+    public javax.imageio.metadata.IIOMetadata getDefaultImageMetadata(javax.imageio.ImageTypeSpecifier, javax.imageio.ImageWriteParam)
+    {
+        javax.imageio.ImageTypeSpecifier r2;
+        javax.imageio.ImageWriteParam r3;
+        short $s4;
+        com.sun.imageio.plugins.bmp.BMPImageWriter r1;
+        java.awt.image.ColorModel $r5;
+        com.sun.imageio.plugins.bmp.BMPMetadata $r0;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String $r4;
+
+        r1 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        r2 := @parameter0: javax.imageio.ImageTypeSpecifier;
+
+        r3 := @parameter1: javax.imageio.ImageWriteParam;
+
+        $r0 = new com.sun.imageio.plugins.bmp.BMPMetadata;
+
+        specialinvoke $r0.<com.sun.imageio.plugins.bmp.BMPMetadata: void <init>()>();
+
+        $r0.<com.sun.imageio.plugins.bmp.BMPMetadata: java.lang.String bmpVersion> = "BMP v. 3.x";
+
+        $i0 = virtualinvoke r1.<com.sun.imageio.plugins.bmp.BMPImageWriter: int getPreferredCompressionType(javax.imageio.ImageTypeSpecifier)>(r2);
+
+        $r0.<com.sun.imageio.plugins.bmp.BMPMetadata: int compression> = $i0;
+
+        if r3 == null goto label1;
+
+        $i1 = virtualinvoke r3.<javax.imageio.ImageWriteParam: int getCompressionMode()>();
+
+        if $i1 != 2 goto label1;
+
+        $r4 = virtualinvoke r3.<javax.imageio.ImageWriteParam: java.lang.String getCompressionType()>();
+
+        $i2 = staticinvoke <com.sun.imageio.plugins.bmp.BMPCompressionTypes: int getType(java.lang.String)>($r4);
+
+        $r0.<com.sun.imageio.plugins.bmp.BMPMetadata: int compression> = $i2;
+
+     label1:
+        $r5 = virtualinvoke r2.<javax.imageio.ImageTypeSpecifier: java.awt.image.ColorModel getColorModel()>();
+
+        $i3 = virtualinvoke $r5.<java.awt.image.ColorModel: int getPixelSize()>();
+
+        $s4 = (short) $i3;
+
+        $r0.<com.sun.imageio.plugins.bmp.BMPMetadata: short bitsPerPixel> = $s4;
+
+        return $r0;
+    }
+
+    public javax.imageio.metadata.IIOMetadata convertStreamMetadata(javax.imageio.metadata.IIOMetadata, javax.imageio.ImageWriteParam)
+    {
+        javax.imageio.metadata.IIOMetadata r1;
+        javax.imageio.ImageWriteParam r2;
+        com.sun.imageio.plugins.bmp.BMPImageWriter r0;
+
+        r0 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        r1 := @parameter0: javax.imageio.metadata.IIOMetadata;
+
+        r2 := @parameter1: javax.imageio.ImageWriteParam;
+
+        return null;
+    }
+
+    public javax.imageio.metadata.IIOMetadata convertImageMetadata(javax.imageio.metadata.IIOMetadata, javax.imageio.ImageTypeSpecifier, javax.imageio.ImageWriteParam)
+    {
+        javax.imageio.ImageWriteParam r3;
+        com.sun.imageio.plugins.bmp.BMPImageWriter r0;
+        javax.imageio.metadata.IIOMetadata r1;
+        javax.imageio.ImageTypeSpecifier r2;
+
+        r0 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        r1 := @parameter0: javax.imageio.metadata.IIOMetadata;
+
+        r2 := @parameter1: javax.imageio.ImageTypeSpecifier;
+
+        r3 := @parameter2: javax.imageio.ImageWriteParam;
+
+        return null;
+    }
+
+    public boolean canWriteRasters()
+    {
+        com.sun.imageio.plugins.bmp.BMPImageWriter r0;
+
+        r0 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        return 1;
+    }
+
+    public void write(javax.imageio.metadata.IIOMetadata, javax.imageio.IIOImage, javax.imageio.ImageWriteParam) throws java.io.IOException
+    {
+        java.awt.image.SampleModel $r39, $r98, $r102, r114;
+        java.io.ByteArrayOutputStream $r19, $r20, $r25, $r147;
+        javax.imageio.ImageTypeSpecifier $r140;
+        java.awt.image.DataBufferInt $r41;
+        com.sun.imageio.plugins.bmp.BMPImageWriter r0;
+        javax.imageio.ImageWriteParam r110;
+        int[] $r9, $r10, $r42, $r72, $r73, $r74, $r75, $r76, $r77, $r78, $r79, $r80, $r95, $r97, r119, r120, $r130, r132;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, i14, $i15, i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, i34, $i35, $i36, $i37, $i39, $i40, $i41, $i44, $i45, $i46, $i47, $i48, $i51, $i52, $i53, $i54, $i55, $i56, $i57, $i58, $i59, $i60, $i61, $i62, $i63, $i64, $i65, $i66, $i67, $i68, $i69, $i70, $i71, $i72, $i73, $i74, $i75, $i76, $i77, $i78, $i79, $i81, $i82, $i84, $i85, $i86, $i87, $i88, $i89, $i90, $i91, $i92, $i93, $i94, $i102, $i106, $i107, $i110, $i111, $i112, $i113, $i114, $i115, $i116, $i117, $i118, $i119, $i120, $i121, $i122, $i123, $i124, $i128, $i129, $i130, $i131, $i132, $i133, $i134, $i135, $i136, $i137, $i138, $i139, $i140, $i141, $i142, $i143, $i144, $i145, $i146, $i147, $i148, $i149, $i150, $i151, $i152, i153, i154, i155, i156, i157, i158, i159, i160, i161, i162, $i163, $i164, $i165, $i166, i167, i168, i169, i170, i171, i172, i173, i174, $i175, i176, i177, i178, i179, $i180, $i181, $i182, $i183, i184, i185, i186, i187, $i188, i189, i190, i191, i192, i193, $i194, i195, $i196, $i197, $i198, $i199, i200, $i201, $i202, $i203, $i204, i205, i206, i207, i208, $i209, i210, $i211, $i213, $i216, $i217, $i219, $i221, $i222, $i223, $i224, $i225;
+        java.awt.image.DataBufferByte $r54;
+        java.awt.image.SinglePixelPackedSampleModel $r94, r136;
+        java.lang.String $r84, $r86, $r90, $r92, $r93, $r100, $r106, $r108;
+        java.lang.RuntimeException $r141;
+        javax.imageio.metadata.IIOMetadata $r7, r109, $r117;
+        java.awt.image.DataBufferShort $r46;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, z19, $z20, z21, z22, $z23, $z24, z25, $z26, $z27, z28, z29, z30, z31, z32;
+        java.awt.image.DataBuffer $r40, $r45, $r49, $r53;
+        java.awt.Rectangle $r3, $r103, r116, $r139, $r142, $r148;
+        byte[] $r27, $r55, $r57, $r58, $r59, $r60, $r61, $r62, $r63, $r64, $r65, $r66, r121, r122, r123, r124, $r125, $r126, $r127, $r128, $r131;
+        byte $b80, $b83, $b95, $b96, $b97, $b98, $b99, $b100, $b104, $b108, $b125, $b126, $b127;
+        java.lang.StringBuilder $r83, $r85, $r89, $r91, $r143, $r145;
+        long $l38, $l42, $l43, $l49, $l50;
+        short $s101, $s103, $s105, $s109, $s214, $s215, $s218, $s220;
+        java.awt.image.Raster $r101, r113, r133;
+        java.io.IOException $r144, $r146;
+        com.sun.imageio.plugins.bmp.BMPMetadata r118;
+        java.awt.image.RenderedImage $r4, r112;
+        javax.imageio.IIOImage r2;
+        java.awt.image.DataBufferUShort $r50;
+        javax.imageio.plugins.bmp.BMPImageWriteParam $r104;
+        java.awt.image.IndexColorModel r111;
+        java.awt.image.DirectColorModel r129;
+        javax.imageio.stream.ImageOutputStream $r1, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r21, $r22, $r23, $r24, $r26, $r28, $r29, $r30, $r31, $r32, $r33, $r34, $r35, $r36, $r37, $r43, $r44, $r48, $r52, $r56, $r67, $r68, $r69, $r70, $r71;
+        java.lang.IllegalStateException $r137;
+        float $f0, $f1, $f2, $f3;
+        short[] $r47, $r51;
+        java.awt.image.ComponentSampleModel $r96, r134;
+        java.awt.image.MultiPixelPackedSampleModel r135;
+        java.lang.IllegalArgumentException $r138;
+        java.awt.image.ColorModel r115;
+
+        r0 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        r109 := @parameter0: javax.imageio.metadata.IIOMetadata;
+
+        r2 := @parameter1: javax.imageio.IIOImage;
+
+        r110 := @parameter2: javax.imageio.ImageWriteParam;
+
+        $r1 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        if $r1 != null goto label001;
+
+        $r137 = new java.lang.IllegalStateException;
+
+        $r108 = staticinvoke <com.sun.imageio.plugins.common.I18N: java.lang.String getString(java.lang.String)>("BMPImageWriter7");
+
+        specialinvoke $r137.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r108);
+
+        throw $r137;
+
+     label001:
+        if r2 != null goto label002;
+
+        $r138 = new java.lang.IllegalArgumentException;
+
+        $r106 = staticinvoke <com.sun.imageio.plugins.common.I18N: java.lang.String getString(java.lang.String)>("BMPImageWriter8");
+
+        specialinvoke $r138.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r106);
+
+        throw $r138;
+
+     label002:
+        virtualinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: void clearAbortRequest()>();
+
+        virtualinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: void processImageStarted(int)>(0);
+
+        if r110 != null goto label003;
+
+        r110 = virtualinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.ImageWriteParam getDefaultWriteParam()>();
+
+     label003:
+        $r104 = (javax.imageio.plugins.bmp.BMPImageWriteParam) r110;
+
+        i153 = 24;
+
+        z19 = 0;
+
+        z28 = 0;
+
+        i154 = 0;
+
+        r111 = null;
+
+        r112 = null;
+
+        r113 = null;
+
+        $z0 = virtualinvoke r2.<javax.imageio.IIOImage: boolean hasRaster()>();
+
+        $r3 = virtualinvoke r110.<javax.imageio.ImageWriteParam: java.awt.Rectangle getSourceRegion()>();
+
+        r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compImageSize> = 0;
+
+        if $z0 == 0 goto label005;
+
+        $r101 = virtualinvoke r2.<javax.imageio.IIOImage: java.awt.image.Raster getRaster()>();
+
+        r113 = $r101;
+
+        $r102 = virtualinvoke $r101.<java.awt.image.Raster: java.awt.image.SampleModel getSampleModel()>();
+
+        r114 = $r102;
+
+        r115 = staticinvoke <com.sun.imageio.plugins.common.ImageUtil: java.awt.image.ColorModel createColorModel(java.awt.color.ColorSpace,java.awt.image.SampleModel)>(null, $r102);
+
+        if $r3 != null goto label004;
+
+        r116 = virtualinvoke $r101.<java.awt.image.Raster: java.awt.Rectangle getBounds()>();
+
+        goto label007;
+
+     label004:
+        $r103 = virtualinvoke $r101.<java.awt.image.Raster: java.awt.Rectangle getBounds()>();
+
+        r116 = virtualinvoke $r3.<java.awt.Rectangle: java.awt.Rectangle intersection(java.awt.Rectangle)>($r103);
+
+        goto label007;
+
+     label005:
+        $r4 = virtualinvoke r2.<javax.imageio.IIOImage: java.awt.image.RenderedImage getRenderedImage()>();
+
+        r112 = $r4;
+
+        r114 = interfaceinvoke $r4.<java.awt.image.RenderedImage: java.awt.image.SampleModel getSampleModel()>();
+
+        r115 = interfaceinvoke $r4.<java.awt.image.RenderedImage: java.awt.image.ColorModel getColorModel()>();
+
+        $r139 = new java.awt.Rectangle;
+
+        $i0 = interfaceinvoke $r4.<java.awt.image.RenderedImage: int getMinX()>();
+
+        $i1 = interfaceinvoke $r4.<java.awt.image.RenderedImage: int getMinY()>();
+
+        $i2 = interfaceinvoke $r4.<java.awt.image.RenderedImage: int getWidth()>();
+
+        $i3 = interfaceinvoke $r4.<java.awt.image.RenderedImage: int getHeight()>();
+
+        specialinvoke $r139.<java.awt.Rectangle: void <init>(int,int,int,int)>($i0, $i1, $i2, $i3);
+
+        if $r3 != null goto label006;
+
+        r116 = $r139;
+
+        goto label007;
+
+     label006:
+        r116 = virtualinvoke $r3.<java.awt.Rectangle: java.awt.Rectangle intersection(java.awt.Rectangle)>($r139);
+
+     label007:
+        $r117 = virtualinvoke r2.<javax.imageio.IIOImage: javax.imageio.metadata.IIOMetadata getMetadata()>();
+
+        if $r117 == null goto label008;
+
+        $z18 = $r117 instanceof com.sun.imageio.plugins.bmp.BMPMetadata;
+
+        if $z18 == 0 goto label008;
+
+        r118 = (com.sun.imageio.plugins.bmp.BMPMetadata) $r117;
+
+        goto label009;
+
+     label008:
+        $r140 = new javax.imageio.ImageTypeSpecifier;
+
+        specialinvoke $r140.<javax.imageio.ImageTypeSpecifier: void <init>(java.awt.image.ColorModel,java.awt.image.SampleModel)>(r115, r114);
+
+        $r7 = virtualinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.metadata.IIOMetadata getDefaultImageMetadata(javax.imageio.ImageTypeSpecifier,javax.imageio.ImageWriteParam)>($r140, r110);
+
+        r118 = (com.sun.imageio.plugins.bmp.BMPMetadata) $r7;
+
+     label009:
+        $z20 = virtualinvoke r116.<java.awt.Rectangle: boolean isEmpty()>();
+
+        if $z20 == 0 goto label010;
+
+        $r141 = new java.lang.RuntimeException;
+
+        $r100 = staticinvoke <com.sun.imageio.plugins.common.I18N: java.lang.String getString(java.lang.String)>("BMPImageWrite0");
+
+        specialinvoke $r141.<java.lang.RuntimeException: void <init>(java.lang.String)>($r100);
+
+        throw $r141;
+
+     label010:
+        $i4 = virtualinvoke r110.<javax.imageio.ImageWriteParam: int getSourceXSubsampling()>();
+
+        $i5 = virtualinvoke r110.<javax.imageio.ImageWriteParam: int getSourceYSubsampling()>();
+
+        $i6 = virtualinvoke r110.<javax.imageio.ImageWriteParam: int getSubsamplingXOffset()>();
+
+        $i7 = virtualinvoke r110.<javax.imageio.ImageWriteParam: int getSubsamplingYOffset()>();
+
+        $i8 = virtualinvoke r114.<java.awt.image.SampleModel: int getDataType()>();
+
+        virtualinvoke r116.<java.awt.Rectangle: void translate(int,int)>($i6, $i7);
+
+        $i9 = r116.<java.awt.Rectangle: int width>;
+
+        $i10 = $i9 - $i6;
+
+        r116.<java.awt.Rectangle: int width> = $i10;
+
+        $i11 = r116.<java.awt.Rectangle: int height>;
+
+        $i12 = $i11 - $i7;
+
+        r116.<java.awt.Rectangle: int height> = $i12;
+
+        $i13 = r116.<java.awt.Rectangle: int x>;
+
+        i14 = $i13 / $i4;
+
+        $i15 = r116.<java.awt.Rectangle: int y>;
+
+        i16 = $i15 / $i5;
+
+        $i17 = r116.<java.awt.Rectangle: int width>;
+
+        $i18 = $i17 + $i4;
+
+        $i19 = $i18 - 1;
+
+        $i20 = $i19 / $i4;
+
+        r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int w> = $i20;
+
+        $i21 = r116.<java.awt.Rectangle: int height>;
+
+        $i22 = $i21 + $i5;
+
+        $i23 = $i22 - 1;
+
+        $i24 = $i23 / $i5;
+
+        r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int h> = $i24;
+
+        $i25 = r116.<java.awt.Rectangle: int x>;
+
+        i155 = $i25 % $i4;
+
+        $i26 = r116.<java.awt.Rectangle: int y>;
+
+        i156 = $i26 % $i5;
+
+        $r142 = new java.awt.Rectangle;
+
+        $i28 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int w>;
+
+        $i27 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int h>;
+
+        specialinvoke $r142.<java.awt.Rectangle: void <init>(int,int,int,int)>(i14, i16, $i28, $i27);
+
+        $z1 = virtualinvoke $r142.<java.awt.Rectangle: boolean equals(java.lang.Object)>(r116);
+
+        $r9 = virtualinvoke r110.<javax.imageio.ImageWriteParam: int[] getSourceBands()>();
+
+        r119 = $r9;
+
+        z21 = 1;
+
+        z32 = 1;
+
+        z31 = 1;
+
+        z30 = 1;
+
+        $i29 = virtualinvoke r114.<java.awt.image.SampleModel: int getNumBands()>();
+
+        i157 = $i29;
+
+        if $r9 == null goto label011;
+
+        $r98 = virtualinvoke r114.<java.awt.image.SampleModel: java.awt.image.SampleModel createSubsetSampleModel(int[])>($r9);
+
+        r114 = $r98;
+
+        r115 = null;
+
+        z21 = 0;
+
+        z32 = 0;
+
+        z31 = 0;
+
+        z30 = 0;
+
+        i157 = virtualinvoke $r98.<java.awt.image.SampleModel: int getNumBands()>();
+
+        goto label013;
+
+     label011:
+        r119 = newarray (int)[$i29];
+
+        i158 = 0;
+
+     label012:
+        if i158 >= $i29 goto label013;
+
+        r119[i158] = i158;
+
+        i158 = i158 + 1;
+
+        goto label012;
+
+     label013:
+        r120 = null;
+
+        z22 = 1;
+
+        $z2 = r114 instanceof java.awt.image.ComponentSampleModel;
+
+        if $z2 == 0 goto label019;
+
+        $r96 = (java.awt.image.ComponentSampleModel) r114;
+
+        $r97 = virtualinvoke $r96.<java.awt.image.ComponentSampleModel: int[] getBandOffsets()>();
+
+        r120 = $r97;
+
+        $z16 = r114 instanceof java.awt.image.BandedSampleModel;
+
+        if $z16 == 0 goto label014;
+
+        z22 = 0;
+
+        goto label023;
+
+     label014:
+        i159 = 0;
+
+     label015:
+        $i148 = lengthof $r97;
+
+        if i159 >= $i148 goto label018;
+
+        $z17 = z22;
+
+        $i152 = $r97[i159];
+
+        $i149 = lengthof $r97;
+
+        $i150 = $i149 - i159;
+
+        $i151 = $i150 - 1;
+
+        if $i152 != $i151 goto label016;
+
+        $z23 = 1;
+
+        goto label017;
+
+     label016:
+        $z23 = 0;
+
+     label017:
+        z22 = $z17 & $z23;
+
+        i159 = i159 + 1;
+
+        goto label015;
+
+     label018:
+        goto label023;
+
+     label019:
+        $z3 = r114 instanceof java.awt.image.SinglePixelPackedSampleModel;
+
+        if $z3 == 0 goto label023;
+
+        $r94 = (java.awt.image.SinglePixelPackedSampleModel) r114;
+
+        $r95 = virtualinvoke $r94.<java.awt.image.SinglePixelPackedSampleModel: int[] getBitOffsets()>();
+
+        i160 = 0;
+
+     label020:
+        $i143 = lengthof $r95;
+
+        $i144 = $i143 - 1;
+
+        if i160 >= $i144 goto label023;
+
+        $z15 = z22;
+
+        $i147 = $r95[i160];
+
+        $i145 = i160 + 1;
+
+        $i146 = $r95[$i145];
+
+        if $i147 <= $i146 goto label021;
+
+        $z24 = 1;
+
+        goto label022;
+
+     label021:
+        $z24 = 0;
+
+     label022:
+        z22 = $z15 & $z24;
+
+        i160 = i160 + 1;
+
+        goto label020;
+
+     label023:
+        if r120 != null goto label025;
+
+        r120 = newarray (int)[i157];
+
+        i161 = 0;
+
+     label024:
+        if i161 >= i157 goto label025;
+
+        r120[i161] = i161;
+
+        i161 = i161 + 1;
+
+        goto label024;
+
+     label025:
+        z25 = $z1 & z22;
+
+        $r10 = virtualinvoke r114.<java.awt.image.SampleModel: int[] getSampleSize()>();
+
+        $i30 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int w>;
+
+        i162 = $i30 * i157;
+
+        $i31 = virtualinvoke $r104.<javax.imageio.plugins.bmp.BMPImageWriteParam: int getCompressionMode()>();
+
+        tableswitch($i31)
+        {
+            case 1: goto label028;
+            case 2: goto label026;
+            case 3: goto label027;
+            default: goto label029;
+        };
+
+     label026:
+        $r93 = virtualinvoke $r104.<javax.imageio.plugins.bmp.BMPImageWriteParam: java.lang.String getCompressionType()>();
+
+        $i141 = staticinvoke <com.sun.imageio.plugins.bmp.BMPCompressionTypes: int getType(java.lang.String)>($r93);
+
+        r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType> = $i141;
+
+        goto label030;
+
+     label027:
+        $i32 = r118.<com.sun.imageio.plugins.bmp.BMPMetadata: int compression>;
+
+        r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType> = $i32;
+
+        goto label030;
+
+     label028:
+        $i142 = virtualinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int getPreferredCompressionType(java.awt.image.ColorModel,java.awt.image.SampleModel)>(r115, r114);
+
+        r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType> = $i142;
+
+        goto label030;
+
+     label029:
+        r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType> = 0;
+
+     label030:
+        $i163 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        $z26 = virtualinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: boolean canEncodeImage(int,java.awt.image.ColorModel,java.awt.image.SampleModel)>($i163, r115, r114);
+
+        if $z26 != 0 goto label031;
+
+        $r144 = new java.io.IOException;
+
+        $r143 = new java.lang.StringBuilder;
+
+        specialinvoke $r143.<java.lang.StringBuilder: void <init>()>();
+
+        $r89 = virtualinvoke $r143.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Image can not be encoded with compression type ");
+
+        $i140 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        $r90 = staticinvoke <com.sun.imageio.plugins.bmp.BMPCompressionTypes: java.lang.String getName(int)>($i140);
+
+        $r91 = virtualinvoke $r89.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r90);
+
+        $r92 = virtualinvoke $r91.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r144.<java.io.IOException: void <init>(java.lang.String)>($r92);
+
+        throw $r144;
+
+     label031:
+        r121 = null;
+
+        r122 = null;
+
+        r123 = null;
+
+        r124 = null;
+
+        $i33 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        if $i33 != 3 goto label037;
+
+        $i134 = virtualinvoke r114.<java.awt.image.SampleModel: int getDataType()>();
+
+        $i135 = staticinvoke <java.awt.image.DataBuffer: int getDataTypeSize(int)>($i134);
+
+        i153 = $i135;
+
+        if $i135 == 16 goto label032;
+
+        if $i135 == 32 goto label032;
+
+        i153 = 32;
+
+        z25 = 0;
+
+     label032:
+        $i164 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int w>;
+
+        $i165 = $i164 * i153;
+
+        $i166 = $i165 + 7;
+
+        i162 = $i166 >> 3;
+
+        z19 = 1;
+
+        z28 = 1;
+
+        i154 = 3;
+
+        $r125 = newarray (byte)[3];
+
+        r121 = $r125;
+
+        $r126 = newarray (byte)[3];
+
+        r122 = $r126;
+
+        $r127 = newarray (byte)[3];
+
+        r123 = $r127;
+
+        $r128 = newarray (byte)[3];
+
+        r124 = $r128;
+
+        i167 = 16711680;
+
+        $i213 = (int) 65280;
+
+        i168 = $i213;
+
+        i169 = 255;
+
+        if i153 != 16 goto label034;
+
+        $z14 = r115 instanceof java.awt.image.DirectColorModel;
+
+        if $z14 == 0 goto label033;
+
+        r129 = (java.awt.image.DirectColorModel) r115;
+
+        i167 = virtualinvoke r129.<java.awt.image.DirectColorModel: int getRedMask()>();
+
+        i168 = virtualinvoke r129.<java.awt.image.DirectColorModel: int getGreenMask()>();
+
+        i169 = virtualinvoke r129.<java.awt.image.DirectColorModel: int getBlueMask()>();
+
+        goto label034;
+
+     label033:
+        $r146 = new java.io.IOException;
+
+        $r145 = new java.lang.StringBuilder;
+
+        specialinvoke $r145.<java.lang.StringBuilder: void <init>()>();
+
+        $r83 = virtualinvoke $r145.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Image can not be encoded with compression type ");
+
+        $i139 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        $r84 = staticinvoke <com.sun.imageio.plugins.bmp.BMPCompressionTypes: java.lang.String getName(int)>($i139);
+
+        $r85 = virtualinvoke $r83.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r84);
+
+        $r86 = virtualinvoke $r85.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r146.<java.io.IOException: void <init>(java.lang.String)>($r86);
+
+        throw $r146;
+
+     label034:
+        virtualinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: void writeMaskToPalette(int,int,byte[],byte[],byte[],byte[])>(i167, 0, $r125, $r126, $r127, $r128);
+
+        virtualinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: void writeMaskToPalette(int,int,byte[],byte[],byte[],byte[])>(i168, 1, $r125, $r126, $r127, $r128);
+
+        virtualinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: void writeMaskToPalette(int,int,byte[],byte[],byte[],byte[])>(i169, 2, $r125, $r126, $r127, $r128);
+
+        if z25 != 0 goto label035;
+
+        $r73 = newarray (int)[3];
+
+        r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int[] bitMasks> = $r73;
+
+        $r74 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int[] bitMasks>;
+
+        $r74[0] = i167;
+
+        $r75 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int[] bitMasks>;
+
+        $r75[1] = i168;
+
+        $r76 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int[] bitMasks>;
+
+        $r76[2] = i169;
+
+        $r77 = newarray (int)[3];
+
+        r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int[] bitPos> = $r77;
+
+        $r78 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int[] bitPos>;
+
+        $i136 = specialinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int firstLowBit(int)>(i167);
+
+        $r78[0] = $i136;
+
+        $r79 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int[] bitPos>;
+
+        $i137 = specialinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int firstLowBit(int)>(i168);
+
+        $r79[1] = $i137;
+
+        $r80 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int[] bitPos>;
+
+        $i138 = specialinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int firstLowBit(int)>(i169);
+
+        $r80[2] = $i138;
+
+     label035:
+        $z13 = r115 instanceof java.awt.image.IndexColorModel;
+
+        if $z13 == 0 goto label036;
+
+        r111 = (java.awt.image.IndexColorModel) r115;
+
+     label036:
+        goto label049;
+
+     label037:
+        $z4 = r115 instanceof java.awt.image.IndexColorModel;
+
+        if $z4 == 0 goto label042;
+
+        z19 = 1;
+
+        z29 = 1;
+
+        z28 = 1;
+
+        r111 = (java.awt.image.IndexColorModel) r115;
+
+        $i128 = virtualinvoke r111.<java.awt.image.IndexColorModel: int getMapSize()>();
+
+        i154 = $i128;
+
+        if $i128 > 2 goto label038;
+
+        i153 = 1;
+
+        $i132 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int w>;
+
+        $i133 = $i132 + 7;
+
+        i162 = $i133 >> 3;
+
+        goto label041;
+
+     label038:
+        if $i128 > 16 goto label039;
+
+        i153 = 4;
+
+        $i130 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int w>;
+
+        $i131 = $i130 + 1;
+
+        i162 = $i131 >> 1;
+
+        goto label041;
+
+     label039:
+        if $i128 > 256 goto label040;
+
+        i153 = 8;
+
+        goto label041;
+
+     label040:
+        i153 = 24;
+
+        z19 = 0;
+
+        z29 = 0;
+
+        z28 = 0;
+
+        i154 = 0;
+
+        $i129 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int w>;
+
+        i162 = $i129 * 3;
+
+     label041:
+        if z29 != 1 goto label049;
+
+        r121 = newarray (byte)[i154];
+
+        r122 = newarray (byte)[i154];
+
+        r123 = newarray (byte)[i154];
+
+        r124 = newarray (byte)[i154];
+
+        virtualinvoke r111.<java.awt.image.IndexColorModel: void getAlphas(byte[])>(r124);
+
+        virtualinvoke r111.<java.awt.image.IndexColorModel: void getReds(byte[])>(r121);
+
+        virtualinvoke r111.<java.awt.image.IndexColorModel: void getGreens(byte[])>(r122);
+
+        virtualinvoke r111.<java.awt.image.IndexColorModel: void getBlues(byte[])>(r123);
+
+        goto label049;
+
+     label042:
+        if i157 != 1 goto label045;
+
+        z19 = 1;
+
+        z28 = 1;
+
+        i154 = 256;
+
+        i153 = $r10[0];
+
+        $i122 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int w>;
+
+        $i123 = $i122 * i153;
+
+        $i124 = $i123 + 7;
+
+        i162 = $i124 >> 3;
+
+        r121 = newarray (byte)[256];
+
+        r122 = newarray (byte)[256];
+
+        r123 = newarray (byte)[256];
+
+        r124 = newarray (byte)[256];
+
+        i170 = 0;
+
+     label043:
+        if i170 >= 256 goto label044;
+
+        $b125 = (byte) i170;
+
+        r121[i170] = $b125;
+
+        $b126 = (byte) i170;
+
+        r122[i170] = $b126;
+
+        $b127 = (byte) i170;
+
+        r123[i170] = $b127;
+
+        r124[i170] = -1;
+
+        i170 = i170 + 1;
+
+        goto label043;
+
+     label044:
+        goto label049;
+
+     label045:
+        $z5 = r114 instanceof java.awt.image.SinglePixelPackedSampleModel;
+
+        if $z5 == 0 goto label049;
+
+        if z31 == 0 goto label049;
+
+        $r72 = virtualinvoke r114.<java.awt.image.SampleModel: int[] getSampleSize()>();
+
+        i171 = 0;
+
+        i172 = lengthof $r72;
+
+        i173 = 0;
+
+     label046:
+        if i173 >= i172 goto label047;
+
+        i174 = $r72[i173];
+
+        i171 = i171 + i174;
+
+        i173 = i173 + 1;
+
+        goto label046;
+
+     label047:
+        $i116 = specialinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int roundBpp(int)>(i171);
+
+        i153 = $i116;
+
+        $i117 = virtualinvoke r114.<java.awt.image.SampleModel: int getDataType()>();
+
+        $i118 = staticinvoke <java.awt.image.DataBuffer: int getDataTypeSize(int)>($i117);
+
+        if $i116 == $i118 goto label048;
+
+        z25 = 0;
+
+     label048:
+        $i119 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int w>;
+
+        $i120 = $i119 * $i116;
+
+        $i121 = $i120 + 7;
+
+        i162 = $i121 >> 3;
+
+     label049:
+        i34 = i154;
+
+        $i175 = i162 % 4;
+
+        i176 = $i175;
+
+        if $i175 == 0 goto label050;
+
+        i176 = 4 - $i175;
+
+     label050:
+        $i35 = i154 * 4;
+
+        $i113 = 54 + $i35;
+
+        $i37 = i162 + i176;
+
+        $i36 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int h>;
+
+        $i114 = $i37 * $i36;
+
+        $i115 = $i114 + $i113;
+
+        $r11 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $l38 = interfaceinvoke $r11.<javax.imageio.stream.ImageOutputStream: long getStreamPosition()>();
+
+        specialinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: void writeFileHeader(int,int)>($i115, $i113);
+
+        $i39 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        if $i39 == 0 goto label051;
+
+        $i112 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        if $i112 != 3 goto label052;
+
+     label051:
+        $z6 = virtualinvoke $r104.<javax.imageio.plugins.bmp.BMPImageWriteParam: boolean isTopDown()>();
+
+        r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: boolean isTopDown> = $z6;
+
+        goto label053;
+
+     label052:
+        r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: boolean isTopDown> = 0;
+
+     label053:
+        specialinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: void writeInfoHeader(int,int)>(40, i153);
+
+        $r12 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $i40 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        interfaceinvoke $r12.<javax.imageio.stream.ImageOutputStream: void writeInt(int)>($i40);
+
+        $r13 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r13.<javax.imageio.stream.ImageOutputStream: void writeInt(int)>($i114);
+
+        $r14 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r14.<javax.imageio.stream.ImageOutputStream: void writeInt(int)>(0);
+
+        $r15 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r15.<javax.imageio.stream.ImageOutputStream: void writeInt(int)>(0);
+
+        $r16 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r16.<javax.imageio.stream.ImageOutputStream: void writeInt(int)>(0);
+
+        $r17 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r17.<javax.imageio.stream.ImageOutputStream: void writeInt(int)>(i34);
+
+        if z28 != 1 goto label058;
+
+        $i94 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        if $i94 != 3 goto label056;
+
+        i177 = 0;
+
+     label054:
+        if i177 >= 3 goto label055;
+
+        $b99 = r124[i177];
+
+        $s214 = (short) $b99;
+
+        $s103 = $s214 & 255;
+
+        $b100 = r121[i177];
+
+        $s215 = (short) $b100;
+
+        $s101 = $s215 & 255;
+
+        $i216 = (int) $s101;
+
+        $i102 = $i216 * 256;
+
+        $i217 = (int) $s103;
+
+        $i107 = $i217 + $i102;
+
+        $b104 = r122[i177];
+
+        $s218 = (short) $b104;
+
+        $s105 = $s218 & 255;
+
+        $i219 = (int) $s105;
+
+        $i106 = $i219 * 65536;
+
+        $i111 = $i107 + $i106;
+
+        $b108 = r123[i177];
+
+        $s220 = (short) $b108;
+
+        $s109 = $s220 & 255;
+
+        $i221 = (int) $s109;
+
+        $i110 = $i221 * 16777216;
+
+        i178 = $i111 + $i110;
+
+        $r71 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r71.<javax.imageio.stream.ImageOutputStream: void writeInt(int)>(i178);
+
+        i177 = i177 + 1;
+
+        goto label054;
+
+     label055:
+        goto label058;
+
+     label056:
+        i179 = 0;
+
+     label057:
+        if i179 >= i154 goto label058;
+
+        $r67 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $b95 = r123[i179];
+
+        $i222 = (int) $b95;
+
+        interfaceinvoke $r67.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>($i222);
+
+        $r68 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $b96 = r122[i179];
+
+        $i223 = (int) $b96;
+
+        interfaceinvoke $r68.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>($i223);
+
+        $r69 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $b97 = r121[i179];
+
+        $i224 = (int) $b97;
+
+        interfaceinvoke $r69.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>($i224);
+
+        $r70 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $b98 = r124[i179];
+
+        $i225 = (int) $b98;
+
+        interfaceinvoke $r70.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>($i225);
+
+        i179 = i179 + 1;
+
+        goto label057;
+
+     label058:
+        $i180 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int w>;
+
+        $i181 = $i180 * i157;
+
+        $i182 = $i181 * $i4;
+
+        $r130 = newarray (int)[$i182];
+
+        $r131 = newarray (byte)[i162];
+
+        r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels> = $r131;
+
+        $i183 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        if $i183 == 4 goto label059;
+
+        $i44 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        if $i44 != 5 goto label062;
+
+     label059:
+        $r147 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r147.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: java.io.ByteArrayOutputStream embedded_stream> = $r147;
+
+        specialinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: void writeEmbedded(javax.imageio.IIOImage,javax.imageio.ImageWriteParam)>(r2, $r104);
+
+        $r19 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: java.io.ByteArrayOutputStream embedded_stream>;
+
+        virtualinvoke $r19.<java.io.ByteArrayOutputStream: void flush()>();
+
+        $r20 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: java.io.ByteArrayOutputStream embedded_stream>;
+
+        $i41 = virtualinvoke $r20.<java.io.ByteArrayOutputStream: int size()>();
+
+        $r21 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $l42 = interfaceinvoke $r21.<javax.imageio.stream.ImageOutputStream: long getStreamPosition()>();
+
+        $i93 = $i113 + $i41;
+
+        $r22 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r22.<javax.imageio.stream.ImageOutputStream: void seek(long)>($l38);
+
+        specialinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: void writeSize(int,int)>($i93, 2);
+
+        $r23 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r23.<javax.imageio.stream.ImageOutputStream: void seek(long)>($l38);
+
+        specialinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: void writeSize(int,int)>($i41, 34);
+
+        $r24 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r24.<javax.imageio.stream.ImageOutputStream: void seek(long)>($l42);
+
+        $r26 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $r25 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: java.io.ByteArrayOutputStream embedded_stream>;
+
+        $r27 = virtualinvoke $r25.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        interfaceinvoke $r26.<javax.imageio.stream.ImageOutputStream: void write(byte[])>($r27);
+
+        r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: java.io.ByteArrayOutputStream embedded_stream> = null;
+
+        $z7 = virtualinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: boolean abortRequested()>();
+
+        if $z7 == 0 goto label060;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: void processWriteAborted()>();
+
+        goto label061;
+
+     label060:
+        virtualinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: void processImageComplete()>();
+
+        $r29 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $r28 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $l43 = interfaceinvoke $r28.<javax.imageio.stream.ImageOutputStream: long getStreamPosition()>();
+
+        interfaceinvoke $r29.<javax.imageio.stream.ImageOutputStream: void flushBefore(long)>($l43);
+
+     label061:
+        return;
+
+     label062:
+        i184 = r120[0];
+
+        i185 = 1;
+
+     label063:
+        $i45 = lengthof r120;
+
+        if i185 >= $i45 goto label065;
+
+        $i92 = r120[i185];
+
+        if $i92 <= i184 goto label064;
+
+        i184 = r120[i185];
+
+     label064:
+        i185 = i185 + 1;
+
+        goto label063;
+
+     label065:
+        $i46 = i184 + 1;
+
+        r132 = newarray (int)[$i46];
+
+        i186 = i162;
+
+        if z25 == 0 goto label066;
+
+        if z32 == 0 goto label066;
+
+        $i90 = staticinvoke <java.awt.image.DataBuffer: int getDataTypeSize(int)>($i8);
+
+        $i91 = $i90 >> 3;
+
+        i186 = i162 / $i91;
+
+     label066:
+        i187 = 0;
+
+     label067:
+        $i188 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int h>;
+
+        if i187 >= $i188 goto label103;
+
+        $z8 = virtualinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: boolean abortRequested()>();
+
+        if $z8 == 0 goto label068;
+
+        goto label103;
+
+     label068:
+        i189 = i16 + i187;
+
+        $z9 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: boolean isTopDown>;
+
+        if $z9 != 0 goto label069;
+
+        $i87 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int h>;
+
+        $i88 = i16 + $i87;
+
+        $i89 = $i88 - i187;
+
+        i189 = $i89 - 1;
+
+     label069:
+        r133 = r113;
+
+        $r148 = new java.awt.Rectangle;
+
+        $i54 = i14 * $i4;
+
+        $i61 = $i54 + i155;
+
+        $i55 = i189 * $i5;
+
+        $i60 = $i55 + i156;
+
+        $i56 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int w>;
+
+        $i57 = $i56 - 1;
+
+        $i58 = $i57 * $i4;
+
+        $i59 = $i58 + 1;
+
+        specialinvoke $r148.<java.awt.Rectangle: void <init>(int,int,int,int)>($i61, $i60, $i59, 1);
+
+        if $z0 != 0 goto label070;
+
+        r133 = interfaceinvoke r112.<java.awt.image.RenderedImage: java.awt.image.Raster getData(java.awt.Rectangle)>($r148);
+
+     label070:
+        if z25 == 0 goto label096;
+
+        if z30 == 0 goto label096;
+
+        $r39 = virtualinvoke r133.<java.awt.image.Raster: java.awt.image.SampleModel getSampleModel()>();
+
+        i190 = 0;
+
+        $i72 = $r148.<java.awt.Rectangle: int x>;
+
+        $i73 = virtualinvoke r133.<java.awt.image.Raster: int getSampleModelTranslateX()>();
+
+        i191 = $i72 - $i73;
+
+        $i74 = $r148.<java.awt.Rectangle: int y>;
+
+        $i75 = virtualinvoke r133.<java.awt.image.Raster: int getSampleModelTranslateY()>();
+
+        i192 = $i74 - $i75;
+
+        $z10 = $r39 instanceof java.awt.image.ComponentSampleModel;
+
+        if $z10 == 0 goto label074;
+
+        r134 = (java.awt.image.ComponentSampleModel) $r39;
+
+        i190 = virtualinvoke r134.<java.awt.image.ComponentSampleModel: int getOffset(int,int,int)>(i191, i192, 0);
+
+        i193 = 1;
+
+     label071:
+        $i85 = virtualinvoke r134.<java.awt.image.ComponentSampleModel: int getNumBands()>();
+
+        if i193 >= $i85 goto label073;
+
+        $i86 = virtualinvoke r134.<java.awt.image.ComponentSampleModel: int getOffset(int,int,int)>(i191, i192, i193);
+
+        if i190 <= $i86 goto label072;
+
+        i190 = virtualinvoke r134.<java.awt.image.ComponentSampleModel: int getOffset(int,int,int)>(i191, i192, i193);
+
+     label072:
+        i193 = i193 + 1;
+
+        goto label071;
+
+     label073:
+        goto label076;
+
+     label074:
+        $z11 = $r39 instanceof java.awt.image.MultiPixelPackedSampleModel;
+
+        if $z11 == 0 goto label075;
+
+        r135 = (java.awt.image.MultiPixelPackedSampleModel) $r39;
+
+        i190 = virtualinvoke r135.<java.awt.image.MultiPixelPackedSampleModel: int getOffset(int,int)>(i191, i192);
+
+        goto label076;
+
+     label075:
+        $z12 = $r39 instanceof java.awt.image.SinglePixelPackedSampleModel;
+
+        if $z12 == 0 goto label076;
+
+        r136 = (java.awt.image.SinglePixelPackedSampleModel) $r39;
+
+        i190 = virtualinvoke r136.<java.awt.image.SinglePixelPackedSampleModel: int getOffset(int,int)>(i191, i192);
+
+     label076:
+        $i194 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        if $i194 == 0 goto label077;
+
+        $i76 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        if $i76 != 3 goto label085;
+
+     label077:
+        tableswitch($i8)
+        {
+            case 0: goto label078;
+            case 1: goto label080;
+            case 2: goto label079;
+            case 3: goto label081;
+            default: goto label082;
+        };
+
+     label078:
+        $r53 = virtualinvoke r133.<java.awt.image.Raster: java.awt.image.DataBuffer getDataBuffer()>();
+
+        $r54 = (java.awt.image.DataBufferByte) $r53;
+
+        $r55 = virtualinvoke $r54.<java.awt.image.DataBufferByte: byte[] getData()>();
+
+        $r56 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r56.<javax.imageio.stream.ImageOutputStream: void write(byte[],int,int)>($r55, i190, i186);
+
+        goto label082;
+
+     label079:
+        $r45 = virtualinvoke r133.<java.awt.image.Raster: java.awt.image.DataBuffer getDataBuffer()>();
+
+        $r46 = (java.awt.image.DataBufferShort) $r45;
+
+        $r47 = virtualinvoke $r46.<java.awt.image.DataBufferShort: short[] getData()>();
+
+        $r48 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r48.<javax.imageio.stream.ImageOutputStream: void writeShorts(short[],int,int)>($r47, i190, i186);
+
+        goto label082;
+
+     label080:
+        $r49 = virtualinvoke r133.<java.awt.image.Raster: java.awt.image.DataBuffer getDataBuffer()>();
+
+        $r50 = (java.awt.image.DataBufferUShort) $r49;
+
+        $r51 = virtualinvoke $r50.<java.awt.image.DataBufferUShort: short[] getData()>();
+
+        $r52 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r52.<javax.imageio.stream.ImageOutputStream: void writeShorts(short[],int,int)>($r51, i190, i186);
+
+        goto label082;
+
+     label081:
+        $r40 = virtualinvoke r133.<java.awt.image.Raster: java.awt.image.DataBuffer getDataBuffer()>();
+
+        $r41 = (java.awt.image.DataBufferInt) $r40;
+
+        $r42 = virtualinvoke $r41.<java.awt.image.DataBufferInt: int[] getData()>();
+
+        $r43 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r43.<javax.imageio.stream.ImageOutputStream: void writeInts(int[],int,int)>($r42, i190, i186);
+
+     label082:
+        i195 = 0;
+
+     label083:
+        if i195 >= i176 goto label084;
+
+        $r44 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r44.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(0);
+
+        i195 = i195 + 1;
+
+        goto label083;
+
+     label084:
+        goto label095;
+
+     label085:
+        $i77 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        if $i77 != 2 goto label090;
+
+        $r62 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        if $r62 == null goto label086;
+
+        $r66 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        $i84 = lengthof $r66;
+
+        if $i84 >= $i181 goto label087;
+
+     label086:
+        $r63 = newarray (byte)[$i181];
+
+        r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels> = $r63;
+
+     label087:
+        $i196 = $r148.<java.awt.Rectangle: int x>;
+
+        $i197 = $r148.<java.awt.Rectangle: int y>;
+
+        $i198 = $r148.<java.awt.Rectangle: int width>;
+
+        $i199 = $r148.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r133.<java.awt.image.Raster: int[] getPixels(int,int,int,int,int[])>($i196, $i197, $i198, $i199, $r130);
+
+        i200 = 0;
+
+     label088:
+        if i200 >= $i181 goto label089;
+
+        $r65 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        $i82 = $r130[i200];
+
+        $b83 = (byte) $i82;
+
+        $r65[i200] = $b83;
+
+        i200 = i200 + 1;
+
+        goto label088;
+
+     label089:
+        $r64 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        specialinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: void encodeRLE4(byte[],int)>($r64, $i181);
+
+        goto label095;
+
+     label090:
+        $i78 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        if $i78 != 1 goto label095;
+
+        $r57 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        if $r57 == null goto label091;
+
+        $r61 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        $i81 = lengthof $r61;
+
+        if $i81 >= $i181 goto label092;
+
+     label091:
+        $r58 = newarray (byte)[$i181];
+
+        r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels> = $r58;
+
+     label092:
+        $i201 = $r148.<java.awt.Rectangle: int x>;
+
+        $i202 = $r148.<java.awt.Rectangle: int y>;
+
+        $i203 = $r148.<java.awt.Rectangle: int width>;
+
+        $i204 = $r148.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r133.<java.awt.image.Raster: int[] getPixels(int,int,int,int,int[])>($i201, $i202, $i203, $i204, $r130);
+
+        i205 = 0;
+
+     label093:
+        if i205 >= $i181 goto label094;
+
+        $r60 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        $i79 = $r130[i205];
+
+        $b80 = (byte) $i79;
+
+        $r60[i205] = $b80;
+
+        i205 = i205 + 1;
+
+        goto label093;
+
+     label094:
+        $r59 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        specialinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: void encodeRLE8(byte[],int)>($r59, $i181);
+
+     label095:
+        goto label102;
+
+     label096:
+        $i65 = $r148.<java.awt.Rectangle: int x>;
+
+        $i64 = $r148.<java.awt.Rectangle: int y>;
+
+        $i63 = $r148.<java.awt.Rectangle: int width>;
+
+        $i62 = $r148.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r133.<java.awt.image.Raster: int[] getPixels(int,int,int,int,int[])>($i65, $i64, $i63, $i62, $r130);
+
+        if $i4 != 1 goto label097;
+
+        $i71 = i157 - 1;
+
+        if i184 == $i71 goto label101;
+
+     label097:
+        i206 = 0;
+
+        i207 = 0;
+
+        i208 = 0;
+
+     label098:
+        $i209 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int w>;
+
+        if i206 >= $i209 goto label101;
+
+        $i66 = lengthof r132;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r130, i207, r132, 0, $i66);
+
+        i210 = 0;
+
+     label099:
+        if i210 >= i157 goto label100;
+
+        $i70 = i208 + i210;
+
+        $i68 = r119[i210];
+
+        $i69 = r132[$i68];
+
+        $r130[$i70] = $i69;
+
+        i210 = i210 + 1;
+
+        goto label099;
+
+     label100:
+        i206 = i206 + 1;
+
+        $i67 = $i4 * i157;
+
+        i207 = i207 + $i67;
+
+        i208 = i208 + i157;
+
+        goto label098;
+
+     label101:
+        specialinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: void writePixels(int,int,int,int[],int,int,java.awt.image.IndexColorModel)>(0, $i181, i153, $r130, i176, i157, r111);
+
+     label102:
+        $f0 = (float) i187;
+
+        $i211 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int h>;
+
+        $f1 = (float) $i211;
+
+        $f2 = $f0 / $f1;
+
+        $f3 = 100.0F * $f2;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: void processImageProgress(float)>($f3);
+
+        i187 = i187 + 1;
+
+        goto label067;
+
+     label103:
+        $i47 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        if $i47 == 2 goto label104;
+
+        $i51 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        if $i51 != 1 goto label105;
+
+     label104:
+        $r30 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r30.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(0);
+
+        $r31 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r31.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(1);
+
+        specialinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(2);
+
+        $i52 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compImageSize>;
+
+        $i48 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compImageSize>;
+
+        $i53 = $i48 + $i113;
+
+        $r32 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $l49 = interfaceinvoke $r32.<javax.imageio.stream.ImageOutputStream: long getStreamPosition()>();
+
+        $r33 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r33.<javax.imageio.stream.ImageOutputStream: void seek(long)>($l38);
+
+        specialinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: void writeSize(int,int)>($i53, 2);
+
+        $r34 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r34.<javax.imageio.stream.ImageOutputStream: void seek(long)>($l38);
+
+        specialinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: void writeSize(int,int)>($i52, 34);
+
+        $r35 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r35.<javax.imageio.stream.ImageOutputStream: void seek(long)>($l49);
+
+     label105:
+        $z27 = virtualinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: boolean abortRequested()>();
+
+        if $z27 == 0 goto label106;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: void processWriteAborted()>();
+
+        goto label107;
+
+     label106:
+        virtualinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: void processImageComplete()>();
+
+        $r37 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $r36 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $l50 = interfaceinvoke $r36.<javax.imageio.stream.ImageOutputStream: long getStreamPosition()>();
+
+        interfaceinvoke $r37.<javax.imageio.stream.ImageOutputStream: void flushBefore(long)>($l50);
+
+     label107:
+        return;
+    }
+
+    private void writePixels(int, int, int, int[], int, int, java.awt.image.IndexColorModel) throws java.io.IOException
+    {
+        byte[] r16, $r17, $r19, $r20, $r21, $r22, $r24, $r25, $r26, $r37, $r39, $r40, $r41, $r42, $r44, $r45, $r46, $r48, $r49, r50, r51, r52;
+        byte $b39, $b40, $b41, $b44, $b47, $b49, $b77, $b80, $b87, $b92, $b95, $b101, $b129;
+        short $s57, $s59, $s72;
+        com.sun.imageio.plugins.bmp.BMPImageWriter r0;
+        int[] $r1, $r2, $r3, r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r33, $r34;
+        int i0, i1, i2, $i3, i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, i38, $i42, $i43, $i45, $i46, $i48, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i58, $i60, $i61, $i62, $i63, $i64, $i65, $i66, $i67, $i68, $i69, $i70, $i71, $i73, $i74, $i75, $i76, $i78, $i79, $i81, $i82, $i83, $i84, $i85, $i86, $i88, $i89, $i90, $i91, $i93, $i94, $i96, $i97, $i98, $i99, $i100, $i102, $i103, $i104, $i105, $i106, $i107, $i108, $i109, $i110, $i111, $i112, $i113, $i114, $i115, $i116, $i117, $i118, $i119, $i120, $i121, $i122, $i123, $i124, $i125, $i126, $i127, $i128, i130, i131, i132, i133, i134, i135, i136, i137, i138, i139, i140, i141, i142, i143, i144, i145, i146, i147, i148, i149, i150, i151, i152, i153, i154, i155, i156, i157, i158, i159, i160, i161, $i162, i163, $i164;
+        java.awt.image.IndexColorModel r6;
+        javax.imageio.stream.ImageOutputStream $r4, $r5, $r18, $r23, $r30, $r38, $r43, $r47;
+        short[] $r27, $r28, $r29, $r31, $r32, $r35, $r36;
+
+        r0 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        i130 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        r7 := @parameter3: int[];
+
+        i4 := @parameter4: int;
+
+        i1 := @parameter5: int;
+
+        r6 := @parameter6: java.awt.image.IndexColorModel;
+
+        i131 = 0;
+
+        lookupswitch(i0)
+        {
+            case 1: goto label01;
+            case 4: goto label07;
+            case 8: goto label14;
+            case 16: goto label20;
+            case 24: goto label27;
+            case 32: goto label33;
+            default: goto label45;
+        };
+
+     label01:
+        i132 = 0;
+
+     label02:
+        $i96 = i2 / 8;
+
+        if i132 >= $i96 goto label03;
+
+        $r49 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        $i106 = i131;
+
+        i131 = i131 + 1;
+
+        i133 = i130 + 1;
+
+        $i107 = r7[i130];
+
+        $i110 = $i107 << 7;
+
+        i134 = i133 + 1;
+
+        $i108 = r7[i133];
+
+        $i109 = $i108 << 6;
+
+        $i113 = $i110 | $i109;
+
+        i135 = i134 + 1;
+
+        $i111 = r7[i134];
+
+        $i112 = $i111 << 5;
+
+        $i116 = $i113 | $i112;
+
+        i136 = i135 + 1;
+
+        $i114 = r7[i135];
+
+        $i115 = $i114 << 4;
+
+        $i119 = $i116 | $i115;
+
+        i137 = i136 + 1;
+
+        $i117 = r7[i136];
+
+        $i118 = $i117 << 3;
+
+        $i122 = $i119 | $i118;
+
+        i138 = i137 + 1;
+
+        $i120 = r7[i137];
+
+        $i121 = $i120 << 2;
+
+        $i125 = $i122 | $i121;
+
+        i139 = i138 + 1;
+
+        $i123 = r7[i138];
+
+        $i124 = $i123 << 1;
+
+        $i127 = $i125 | $i124;
+
+        i130 = i139 + 1;
+
+        $i126 = r7[i139];
+
+        $i128 = $i127 | $i126;
+
+        $b129 = (byte) $i128;
+
+        $r49[$i106] = $b129;
+
+        i132 = i132 + 1;
+
+        goto label02;
+
+     label03:
+        $i97 = i2 % 8;
+
+        if $i97 <= 0 goto label06;
+
+        i140 = 0;
+
+        i141 = 0;
+
+     label04:
+        $i100 = i2 % 8;
+
+        if i141 >= $i100 goto label05;
+
+        $i102 = i130;
+
+        i130 = i130 + 1;
+
+        $i104 = r7[$i102];
+
+        $i103 = 7 - i141;
+
+        $i105 = $i104 << $i103;
+
+        i140 = i140 | $i105;
+
+        i141 = i141 + 1;
+
+        goto label04;
+
+     label05:
+        $r48 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        $b101 = (byte) i140;
+
+        $r48[i131] = $b101;
+
+     label06:
+        $r47 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $r46 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        $i98 = i2 + 7;
+
+        $i99 = $i98 / 8;
+
+        interfaceinvoke $r47.<javax.imageio.stream.ImageOutputStream: void write(byte[],int,int)>($r46, 0, $i99);
+
+        goto label45;
+
+     label07:
+        $i81 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        if $i81 != 2 goto label10;
+
+        r50 = newarray (byte)[i2];
+
+        i142 = 0;
+
+     label08:
+        if i142 >= i2 goto label09;
+
+        $i93 = i130;
+
+        i130 = i130 + 1;
+
+        $i94 = r7[$i93];
+
+        $b95 = (byte) $i94;
+
+        r50[i142] = $b95;
+
+        i142 = i142 + 1;
+
+        goto label08;
+
+     label09:
+        specialinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: void encodeRLE4(byte[],int)>(r50, i2);
+
+        goto label45;
+
+     label10:
+        i143 = 0;
+
+     label11:
+        $i82 = i2 / 2;
+
+        if i143 >= $i82 goto label12;
+
+        i144 = i130 + 1;
+
+        $i88 = r7[i130];
+
+        $i90 = $i88 << 4;
+
+        i130 = i144 + 1;
+
+        $i89 = r7[i144];
+
+        i145 = $i90 | $i89;
+
+        $r45 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        $i91 = i131;
+
+        i131 = i131 + 1;
+
+        $b92 = (byte) i145;
+
+        $r45[$i91] = $b92;
+
+        i143 = i143 + 1;
+
+        goto label11;
+
+     label12:
+        $i83 = i2 % 2;
+
+        if $i83 != 1 goto label13;
+
+        $i86 = r7[i130];
+
+        i146 = $i86 << 4;
+
+        $r44 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        $b87 = (byte) i146;
+
+        $r44[i131] = $b87;
+
+     label13:
+        $r43 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $r42 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        $i84 = i2 + 1;
+
+        $i85 = $i84 / 2;
+
+        interfaceinvoke $r43.<javax.imageio.stream.ImageOutputStream: void write(byte[],int,int)>($r42, 0, $i85);
+
+        goto label45;
+
+     label14:
+        $i74 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        if $i74 != 1 goto label17;
+
+        i147 = 0;
+
+     label15:
+        if i147 >= i2 goto label16;
+
+        $r41 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        $i78 = i130;
+
+        i130 = i130 + 1;
+
+        $i79 = r7[$i78];
+
+        $b80 = (byte) $i79;
+
+        $r41[i147] = $b80;
+
+        i147 = i147 + 1;
+
+        goto label15;
+
+     label16:
+        $r40 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        specialinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: void encodeRLE8(byte[],int)>($r40, i2);
+
+        goto label45;
+
+     label17:
+        i148 = 0;
+
+     label18:
+        if i148 >= i2 goto label19;
+
+        $r39 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        $i75 = i130;
+
+        i130 = i130 + 1;
+
+        $i76 = r7[$i75];
+
+        $b77 = (byte) $i76;
+
+        $r39[i148] = $b77;
+
+        i148 = i148 + 1;
+
+        goto label18;
+
+     label19:
+        $r38 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $r37 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        interfaceinvoke $r38.<javax.imageio.stream.ImageOutputStream: void write(byte[],int,int)>($r37, 0, i2);
+
+        goto label45;
+
+     label20:
+        $r27 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: short[] spixels>;
+
+        if $r27 != null goto label21;
+
+        $i73 = i2 / i1;
+
+        $r36 = newarray (short)[$i73];
+
+        r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: short[] spixels> = $r36;
+
+     label21:
+        i149 = 0;
+
+        i150 = 0;
+
+     label22:
+        if i149 >= i2 goto label26;
+
+        $r31 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: short[] spixels>;
+
+        $r31[i150] = 0;
+
+        $i51 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        if $i51 != 0 goto label23;
+
+        $r35 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: short[] spixels>;
+
+        $i60 = r7[i149];
+
+        $i61 = 31 & $i60;
+
+        $i66 = $i61 << 10;
+
+        $i62 = i149 + 1;
+
+        $i63 = r7[$i62];
+
+        $i64 = 31 & $i63;
+
+        $i65 = $i64 << 5;
+
+        $i70 = $i66 | $i65;
+
+        $i67 = i149 + 2;
+
+        $i68 = r7[$i67];
+
+        $i69 = 31 & $i68;
+
+        $i71 = $i70 | $i69;
+
+        $s72 = (short) $i71;
+
+        $r35[i150] = $s72;
+
+        i149 = i149 + 3;
+
+        goto label25;
+
+     label23:
+        i151 = 0;
+
+     label24:
+        if i151 >= i1 goto label25;
+
+        $r32 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: short[] spixels>;
+
+        $s57 = $r32[i150];
+
+        $i53 = r7[i149];
+
+        $r33 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int[] bitPos>;
+
+        $i52 = $r33[i151];
+
+        $i55 = $i53 << $i52;
+
+        $r34 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int[] bitMasks>;
+
+        $i54 = $r34[i151];
+
+        $i56 = $i55 & $i54;
+
+        $i164 = (int) $s57;
+
+        $i58 = $i164 | $i56;
+
+        $s59 = (short) $i58;
+
+        $r32[i150] = $s59;
+
+        i151 = i151 + 1;
+
+        i149 = i149 + 1;
+
+        goto label24;
+
+     label25:
+        i150 = i150 + 1;
+
+        goto label22;
+
+     label26:
+        $r30 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $r29 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: short[] spixels>;
+
+        $r28 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: short[] spixels>;
+
+        $i50 = lengthof $r28;
+
+        interfaceinvoke $r30.<javax.imageio.stream.ImageOutputStream: void writeShorts(short[],int,int)>($r29, 0, $i50);
+
+        goto label45;
+
+     label27:
+        if i1 != 3 goto label30;
+
+        i152 = 0;
+
+     label28:
+        if i152 >= i2 goto label29;
+
+        $r24 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        i153 = i131 + 1;
+
+        $i42 = i130 + 2;
+
+        $i43 = r7[$i42];
+
+        $b44 = (byte) $i43;
+
+        $r24[i131] = $b44;
+
+        $r25 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        i154 = i153 + 1;
+
+        $i45 = i130 + 1;
+
+        $i46 = r7[$i45];
+
+        $b47 = (byte) $i46;
+
+        $r25[i153] = $b47;
+
+        $r26 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        i131 = i154 + 1;
+
+        $i48 = r7[i130];
+
+        $b49 = (byte) $i48;
+
+        $r26[i154] = $b49;
+
+        i130 = i130 + 3;
+
+        i152 = i152 + 3;
+
+        goto label28;
+
+     label29:
+        $r23 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $r22 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        interfaceinvoke $r23.<javax.imageio.stream.ImageOutputStream: void write(byte[],int,int)>($r22, 0, i2);
+
+        goto label45;
+
+     label30:
+        $i36 = virtualinvoke r6.<java.awt.image.IndexColorModel: int getMapSize()>();
+
+        r51 = newarray (byte)[$i36];
+
+        r52 = newarray (byte)[$i36];
+
+        r16 = newarray (byte)[$i36];
+
+        virtualinvoke r6.<java.awt.image.IndexColorModel: void getReds(byte[])>(r51);
+
+        virtualinvoke r6.<java.awt.image.IndexColorModel: void getGreens(byte[])>(r52);
+
+        virtualinvoke r6.<java.awt.image.IndexColorModel: void getBlues(byte[])>(r16);
+
+        i155 = 0;
+
+     label31:
+        if i155 >= i2 goto label32;
+
+        i38 = r7[i130];
+
+        $r19 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        i156 = i131 + 1;
+
+        $b39 = r16[i38];
+
+        $r19[i131] = $b39;
+
+        $r20 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        i157 = i156 + 1;
+
+        $b40 = r52[i38];
+
+        $r20[i156] = $b40;
+
+        $r21 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        i131 = i157 + 1;
+
+        $b41 = r16[i38];
+
+        $r21[i157] = $b41;
+
+        i130 = i130 + 1;
+
+        i155 = i155 + 1;
+
+        goto label31;
+
+     label32:
+        $r18 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $r17 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: byte[] bpixels>;
+
+        $i37 = i2 * 3;
+
+        interfaceinvoke $r18.<javax.imageio.stream.ImageOutputStream: void write(byte[],int,int)>($r17, 0, $i37);
+
+        goto label45;
+
+     label33:
+        $r1 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int[] ipixels>;
+
+        if $r1 != null goto label34;
+
+        $i35 = i2 / i1;
+
+        $r15 = newarray (int)[$i35];
+
+        r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int[] ipixels> = $r15;
+
+     label34:
+        if i1 != 3 goto label40;
+
+        i158 = 0;
+
+        i159 = 0;
+
+     label35:
+        if i158 >= i2 goto label39;
+
+        $r10 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int[] ipixels>;
+
+        $r10[i159] = 0;
+
+        $i15 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        if $i15 != 0 goto label36;
+
+        $r14 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int[] ipixels>;
+
+        $i23 = i158 + 2;
+
+        $i24 = r7[$i23];
+
+        $i25 = 255 & $i24;
+
+        $i30 = $i25 << 16;
+
+        $i26 = i158 + 1;
+
+        $i27 = r7[$i26];
+
+        $i28 = 255 & $i27;
+
+        $i29 = $i28 << 8;
+
+        $i33 = $i30 | $i29;
+
+        $i31 = r7[i158];
+
+        $i32 = 255 & $i31;
+
+        $i34 = $i33 | $i32;
+
+        $r14[i159] = $i34;
+
+        i158 = i158 + 3;
+
+        goto label38;
+
+     label36:
+        i160 = 0;
+
+     label37:
+        if i160 >= i1 goto label38;
+
+        $r11 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int[] ipixels>;
+
+        $i21 = $r11[i159];
+
+        $i17 = r7[i158];
+
+        $r12 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int[] bitPos>;
+
+        $i16 = $r12[i160];
+
+        $i19 = $i17 << $i16;
+
+        $r13 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int[] bitMasks>;
+
+        $i18 = $r13[i160];
+
+        $i20 = $i19 & $i18;
+
+        $i22 = $i21 | $i20;
+
+        $r11[i159] = $i22;
+
+        i160 = i160 + 1;
+
+        i158 = i158 + 1;
+
+        goto label37;
+
+     label38:
+        i159 = i159 + 1;
+
+        goto label35;
+
+     label39:
+        goto label44;
+
+     label40:
+        i161 = 0;
+
+     label41:
+        if i161 >= i2 goto label44;
+
+        if r6 == null goto label42;
+
+        $r9 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int[] ipixels>;
+
+        $i13 = r7[i161];
+
+        $i14 = virtualinvoke r6.<java.awt.image.IndexColorModel: int getRGB(int)>($i13);
+
+        $r9[i161] = $i14;
+
+        goto label43;
+
+     label42:
+        $r8 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int[] ipixels>;
+
+        $i6 = r7[i161];
+
+        $i9 = $i6 << 16;
+
+        $i7 = r7[i161];
+
+        $i8 = $i7 << 8;
+
+        $i11 = $i9 | $i8;
+
+        $i10 = r7[i161];
+
+        $i12 = $i11 | $i10;
+
+        $r8[i161] = $i12;
+
+     label43:
+        i161 = i161 + 1;
+
+        goto label41;
+
+     label44:
+        $r4 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $r3 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int[] ipixels>;
+
+        $r2 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int[] ipixels>;
+
+        $i3 = lengthof $r2;
+
+        interfaceinvoke $r4.<javax.imageio.stream.ImageOutputStream: void writeInts(int[],int,int)>($r3, 0, $i3);
+
+     label45:
+        $i162 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        if $i162 == 0 goto label46;
+
+        $i5 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        if $i5 != 3 goto label48;
+
+     label46:
+        i163 = 0;
+
+     label47:
+        if i163 >= i4 goto label48;
+
+        $r5 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r5.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(0);
+
+        i163 = i163 + 1;
+
+        goto label47;
+
+     label48:
+        return;
+    }
+
+    private void encodeRLE8(byte[], int) throws java.io.IOException
+    {
+        byte[] r0, r1;
+        byte $b2, $b5, $b6, $b8, $b9, b13, b15;
+        javax.imageio.stream.ImageOutputStream $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26;
+        com.sun.imageio.plugins.bmp.BMPImageWriter r2;
+        boolean $z0, $z1;
+        int i0, $i1, $i3, $i4, $i7, i10, i11, i12, $i14, i16, i17, i18, i19, $i20, i21, i22, $i24, $i25, $i26, $i27, $i29, $i30, $i32, $i33, $i34, $i35, $i37, $i39, $i40, $i41, $i43, $i44;
+
+        r2 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i10 = 1;
+
+        $i24 = (int) -1;
+
+        i11 = $i24;
+
+        i12 = 0;
+
+        b13 = r0[0];
+
+        r1 = newarray (byte)[256];
+
+     label01:
+        $i14 = i0 - 1;
+
+        if i12 >= $i14 goto label21;
+
+        i12 = i12 + 1;
+
+        b15 = r0[i12];
+
+        $i25 = (int) b15;
+
+        $i26 = (int) b13;
+
+        if $i25 != $i26 goto label07;
+
+        if i11 < 3 goto label04;
+
+        $r21 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r21.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(0);
+
+        $r22 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r22.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(i11);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(2);
+
+        i16 = 0;
+
+     label02:
+        if i16 >= i11 goto label03;
+
+        $r24 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $b9 = r1[i16];
+
+        $i27 = (int) $b9;
+
+        interfaceinvoke $r24.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>($i27);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(1);
+
+        i16 = i16 + 1;
+
+        goto label02;
+
+     label03:
+        $z1 = specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: boolean isEven(int)>(i11);
+
+        if $z1 != 0 goto label06;
+
+        $r23 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r23.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(0);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(1);
+
+        goto label06;
+
+     label04:
+        $i29 = (int) -1;
+
+        if i11 <= $i29 goto label06;
+
+        i17 = 0;
+
+     label05:
+        if i17 >= i11 goto label06;
+
+        $r19 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r19.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(1);
+
+        $r20 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $b8 = r1[i17];
+
+        $i30 = (int) $b8;
+
+        interfaceinvoke $r20.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>($i30);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(2);
+
+        i17 = i17 + 1;
+
+        goto label05;
+
+     label06:
+        $i32 = (int) -1;
+
+        i11 = $i32;
+
+        i10 = i10 + 1;
+
+        if i10 != 256 goto label14;
+
+        $r17 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $i7 = i10 - 1;
+
+        interfaceinvoke $r17.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>($i7);
+
+        $r18 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $i33 = (int) b13;
+
+        interfaceinvoke $r18.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>($i33);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(2);
+
+        i10 = 1;
+
+        goto label14;
+
+     label07:
+        if i10 <= 1 goto label08;
+
+        $r15 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r15.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(i10);
+
+        $r16 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $i34 = (int) b13;
+
+        interfaceinvoke $r16.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>($i34);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(2);
+
+        goto label13;
+
+     label08:
+        if i11 >= 0 goto label09;
+
+        i18 = i11 + 1;
+
+        r1[i18] = b13;
+
+        i11 = i18 + 1;
+
+        r1[i11] = b15;
+
+        goto label13;
+
+     label09:
+        if i11 >= 254 goto label10;
+
+        i11 = i11 + 1;
+
+        r1[i11] = b15;
+
+        goto label13;
+
+     label10:
+        $r3 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r3.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(0);
+
+        $r4 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $i1 = i11 + 1;
+
+        interfaceinvoke $r4.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>($i1);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(2);
+
+        i19 = 0;
+
+     label11:
+        if i19 > i11 goto label12;
+
+        $r14 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $b6 = r1[i19];
+
+        $i35 = (int) $b6;
+
+        interfaceinvoke $r14.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>($i35);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(1);
+
+        i19 = i19 + 1;
+
+        goto label11;
+
+     label12:
+        $r5 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r5.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(0);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(1);
+
+        $i37 = (int) -1;
+
+        i11 = $i37;
+
+     label13:
+        b13 = b15;
+
+        i10 = 1;
+
+     label14:
+        $i20 = i0 - 1;
+
+        if i12 != $i20 goto label01;
+
+        $i39 = (int) -1;
+
+        if i11 != $i39 goto label15;
+
+        $r12 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r12.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(i10);
+
+        $r13 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $i40 = (int) b13;
+
+        interfaceinvoke $r13.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>($i40);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(2);
+
+        i10 = 1;
+
+        goto label20;
+
+     label15:
+        if i11 < 2 goto label18;
+
+        $r8 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r8.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(0);
+
+        $r9 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $i3 = i11 + 1;
+
+        interfaceinvoke $r9.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>($i3);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(2);
+
+        i21 = 0;
+
+     label16:
+        if i21 > i11 goto label17;
+
+        $r11 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $b5 = r1[i21];
+
+        $i41 = (int) $b5;
+
+        interfaceinvoke $r11.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>($i41);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(1);
+
+        i21 = i21 + 1;
+
+        goto label16;
+
+     label17:
+        $i4 = i11 + 1;
+
+        $z0 = specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: boolean isEven(int)>($i4);
+
+        if $z0 != 0 goto label20;
+
+        $r10 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r10.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(0);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(1);
+
+        goto label20;
+
+     label18:
+        $i43 = (int) -1;
+
+        if i11 <= $i43 goto label20;
+
+        i22 = 0;
+
+     label19:
+        if i22 > i11 goto label20;
+
+        $r6 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r6.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(1);
+
+        $r7 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $b2 = r1[i22];
+
+        $i44 = (int) $b2;
+
+        interfaceinvoke $r7.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>($i44);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(2);
+
+        i22 = i22 + 1;
+
+        goto label19;
+
+     label20:
+        $r25 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r25.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(0);
+
+        $r26 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r26.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(0);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(2);
+
+        goto label01;
+
+     label21:
+        return;
+    }
+
+    private void encodeRLE4(byte[], int) throws java.io.IOException
+    {
+        byte[] r0, r1;
+        byte $b3, $b4, $b6, $b13, $b15, $b17, $b19, $b20, $b23, $b25, $b27, $b29, $b31, $b33, $b42, $b43, $b52, $b54, $b56, $b58, b61, b63, b66, b67;
+        com.sun.imageio.plugins.bmp.BMPImageWriter r2;
+        int i0, $i1, $i2, $i5, $i7, $i8, $i9, $i10, $i11, $i12, $i14, $i16, $i18, $i21, $i22, $i24, $i26, $i28, $i30, $i32, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i53, $i55, $i57, i59, i60, i62, $i64, i65, i68, i69, i70, i71, i72, i73, i74, i75, i76, i77, i78, i79, i80, i81, i82, i83, $i84, i85, i86, i87, i88, i89, i90, i91, i92, i93, $i95, $i96, $i97, $i98, $i99, $i100, $i101, $i103, $i104, $i105, $i107, $i108, $i109, $i110, $i111, $i112, $i114, $i115, $i116, $i117, $i119, $i120, $i121, $i122, $i123, $i124, $i126, $i128, $i129, $i130, $i131, $i132, $i133, $i134, $i135, $i136, $i137, $i139, $i140, $i141, $i142, $i143, $i144, $i145, $i146;
+        javax.imageio.stream.ImageOutputStream $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26, $r27, $r28, $r29, $r30, $r31, $r32, $r33, $r34, $r35, $r36, $r37, $r38, $r39, $r40, $r41, $r42;
+        boolean $z0, $z1, $z2, $z3;
+        double $d0, $d1, $d2, $d3;
+
+        r2 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i59 = 2;
+
+        $i95 = (int) -1;
+
+        i60 = $i95;
+
+        r0 = newarray (byte)[256];
+
+        b61 = r1[0];
+
+        i62 = 1;
+
+        b63 = r1[1];
+
+     label01:
+        $i64 = i0 - 2;
+
+        if i62 >= $i64 goto label29;
+
+        i65 = i62 + 1;
+
+        b66 = r1[i65];
+
+        i62 = i65 + 1;
+
+        b67 = r1[i62];
+
+        $i96 = (int) b66;
+
+        $i97 = (int) b61;
+
+        if $i96 != $i97 goto label10;
+
+        if i60 < 4 goto label05;
+
+        $r36 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r36.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(0);
+
+        $r37 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $i45 = i60 - 1;
+
+        interfaceinvoke $r37.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>($i45);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(2);
+
+        i68 = 0;
+
+     label02:
+        $i46 = i60 - 2;
+
+        if i68 >= $i46 goto label03;
+
+        $b54 = r0[i68];
+
+        $i98 = (int) $b54;
+
+        $i57 = $i98 << 4;
+
+        $i55 = i68 + 1;
+
+        $b56 = r0[$i55];
+
+        $i99 = (int) $b56;
+
+        i69 = $i57 | $i99;
+
+        $r40 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $b58 = (byte) i69;
+
+        $i100 = (int) $b58;
+
+        interfaceinvoke $r40.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>($i100);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(1);
+
+        i68 = i68 + 2;
+
+        goto label02;
+
+     label03:
+        $i47 = i60 - 1;
+
+        $z2 = specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: boolean isEven(int)>($i47);
+
+        if $z2 != 0 goto label04;
+
+        $i51 = i60 - 2;
+
+        $b52 = r0[$i51];
+
+        $i101 = (int) $b52;
+
+        $i53 = $i101 << 4;
+
+        i70 = $i53 | 0;
+
+        $r39 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r39.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(i70);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(1);
+
+     label04:
+        $i48 = i60 - 1;
+
+        $i49 = $i48 / 2;
+
+        $d2 = (double) $i49;
+
+        $d3 = staticinvoke <java.lang.Math: double ceil(double)>($d2);
+
+        $i50 = (int) $d3;
+
+        $z3 = specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: boolean isEven(int)>($i50);
+
+        if $z3 != 0 goto label06;
+
+        $r38 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r38.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(0);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(1);
+
+        goto label06;
+
+     label05:
+        $i103 = (int) -1;
+
+        if i60 <= $i103 goto label06;
+
+        $r34 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r34.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(2);
+
+        $b42 = r0[0];
+
+        $i104 = (int) $b42;
+
+        $i44 = $i104 << 4;
+
+        $b43 = r0[1];
+
+        $i105 = (int) $b43;
+
+        i71 = $i44 | $i105;
+
+        $r35 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r35.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(i71);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(2);
+
+     label06:
+        $i107 = (int) -1;
+
+        i60 = $i107;
+
+        $i108 = (int) b67;
+
+        $i109 = (int) b63;
+
+        if $i108 != $i109 goto label08;
+
+        i59 = i59 + 2;
+
+        if i59 != 256 goto label17;
+
+        $r30 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $i38 = i59 - 1;
+
+        interfaceinvoke $r30.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>($i38);
+
+        $i110 = (int) b61;
+
+        $i39 = $i110 << 4;
+
+        $i111 = (int) b63;
+
+        i72 = $i39 | $i111;
+
+        $r31 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r31.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(i72);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(2);
+
+        i59 = 2;
+
+        $i40 = i0 - 1;
+
+        if i62 >= $i40 goto label07;
+
+        b61 = b63;
+
+        i62 = i62 + 1;
+
+        b63 = r1[i62];
+
+        goto label17;
+
+     label07:
+        $r32 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r32.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(1);
+
+        $i112 = (int) b63;
+
+        $i41 = $i112 << 4;
+
+        i73 = $i41 | 0;
+
+        $r33 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r33.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(i73);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(2);
+
+        $i114 = (int) -1;
+
+        i59 = $i114;
+
+        goto label17;
+
+     label08:
+        i74 = i59 + 1;
+
+        $i115 = (int) b61;
+
+        $i35 = $i115 << 4;
+
+        $i116 = (int) b63;
+
+        i75 = $i35 | $i116;
+
+        $r26 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r26.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(i74);
+
+        $r27 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r27.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(i75);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(2);
+
+        i59 = 2;
+
+        b61 = b67;
+
+        $i36 = i0 - 1;
+
+        if i62 >= $i36 goto label09;
+
+        i62 = i62 + 1;
+
+        b63 = r1[i62];
+
+        goto label17;
+
+     label09:
+        $r28 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r28.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(1);
+
+        $i117 = (int) b67;
+
+        $i37 = $i117 << 4;
+
+        i76 = $i37 | 0;
+
+        $r29 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r29.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(i76);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(2);
+
+        $i119 = (int) -1;
+
+        i59 = $i119;
+
+        goto label17;
+
+     label10:
+        if i59 <= 2 goto label11;
+
+        $i120 = (int) b61;
+
+        $i34 = $i120 << 4;
+
+        $i121 = (int) b63;
+
+        i77 = $i34 | $i121;
+
+        $r24 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r24.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(i59);
+
+        $r25 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r25.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(i77);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(2);
+
+        goto label16;
+
+     label11:
+        if i60 >= 0 goto label12;
+
+        i78 = i60 + 1;
+
+        r0[i78] = b61;
+
+        i79 = i78 + 1;
+
+        r0[i79] = b63;
+
+        i80 = i79 + 1;
+
+        r0[i80] = b66;
+
+        i60 = i80 + 1;
+
+        r0[i60] = b67;
+
+        goto label16;
+
+     label12:
+        if i60 >= 253 goto label13;
+
+        i81 = i60 + 1;
+
+        r0[i81] = b66;
+
+        i60 = i81 + 1;
+
+        r0[i60] = b67;
+
+        goto label16;
+
+     label13:
+        $r3 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r3.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(0);
+
+        $r4 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $i1 = i60 + 1;
+
+        interfaceinvoke $r4.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>($i1);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(2);
+
+        i82 = 0;
+
+     label14:
+        if i82 >= i60 goto label15;
+
+        $b29 = r0[i82];
+
+        $i122 = (int) $b29;
+
+        $i32 = $i122 << 4;
+
+        $i30 = i82 + 1;
+
+        $b31 = r0[$i30];
+
+        $i123 = (int) $b31;
+
+        i83 = $i32 | $i123;
+
+        $r23 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $b33 = (byte) i83;
+
+        $i124 = (int) $b33;
+
+        interfaceinvoke $r23.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>($i124);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(1);
+
+        i82 = i82 + 2;
+
+        goto label14;
+
+     label15:
+        $r5 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r5.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(0);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(1);
+
+        $i126 = (int) -1;
+
+        i60 = $i126;
+
+     label16:
+        b61 = b66;
+
+        b63 = b67;
+
+        i59 = 2;
+
+     label17:
+        $i84 = i0 - 2;
+
+        if i62 < $i84 goto label01;
+
+        $i128 = (int) -1;
+
+        if i60 != $i128 goto label20;
+
+        if i59 < 2 goto label20;
+
+        $i21 = i0 - 2;
+
+        if i62 != $i21 goto label19;
+
+        i62 = i62 + 1;
+
+        $b23 = r1[i62];
+
+        $i129 = (int) $b23;
+
+        $i130 = (int) b61;
+
+        if $i129 != $i130 goto label18;
+
+        i59 = i59 + 1;
+
+        $i131 = (int) b61;
+
+        $i28 = $i131 << 4;
+
+        $i132 = (int) b63;
+
+        i85 = $i28 | $i132;
+
+        $r21 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r21.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(i59);
+
+        $r22 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r22.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(i85);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(2);
+
+        goto label28;
+
+     label18:
+        $i133 = (int) b61;
+
+        $i24 = $i133 << 4;
+
+        $i134 = (int) b63;
+
+        i86 = $i24 | $i134;
+
+        $r17 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r17.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(i59);
+
+        $r18 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r18.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(i86);
+
+        $r19 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r19.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(1);
+
+        $b25 = r1[i62];
+
+        $i135 = (int) $b25;
+
+        $i26 = $i135 << 4;
+
+        i87 = $i26 | 0;
+
+        $r20 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r20.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(i87);
+
+        $b27 = r1[i62];
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(4);
+
+        goto label28;
+
+     label19:
+        $r15 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r15.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(i59);
+
+        $i136 = (int) b61;
+
+        $i22 = $i136 << 4;
+
+        $i137 = (int) b63;
+
+        i88 = $i22 | $i137;
+
+        $r16 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r16.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(i88);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(2);
+
+        goto label28;
+
+     label20:
+        $i139 = (int) -1;
+
+        if i60 <= $i139 goto label28;
+
+        $i2 = i0 - 2;
+
+        if i62 != $i2 goto label21;
+
+        i60 = i60 + 1;
+
+        i62 = i62 + 1;
+
+        $b20 = r1[i62];
+
+        r0[i60] = $b20;
+
+     label21:
+        if i60 < 2 goto label25;
+
+        $r10 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r10.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(0);
+
+        $r11 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $i8 = i60 + 1;
+
+        interfaceinvoke $r11.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>($i8);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(2);
+
+        i89 = 0;
+
+     label22:
+        if i89 >= i60 goto label23;
+
+        $b15 = r0[i89];
+
+        $i140 = (int) $b15;
+
+        $i18 = $i140 << 4;
+
+        $i16 = i89 + 1;
+
+        $b17 = r0[$i16];
+
+        $i141 = (int) $b17;
+
+        i90 = $i18 | $i141;
+
+        $r14 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $b19 = (byte) i90;
+
+        $i142 = (int) $b19;
+
+        interfaceinvoke $r14.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>($i142);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(1);
+
+        i89 = i89 + 2;
+
+        goto label22;
+
+     label23:
+        $i9 = i60 + 1;
+
+        $z0 = specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: boolean isEven(int)>($i9);
+
+        if $z0 != 0 goto label24;
+
+        $b13 = r0[i60];
+
+        $i143 = (int) $b13;
+
+        $i14 = $i143 << 4;
+
+        i91 = $i14 | 0;
+
+        $r13 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r13.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(i91);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(1);
+
+     label24:
+        $i10 = i60 + 1;
+
+        $i11 = $i10 / 2;
+
+        $d0 = (double) $i11;
+
+        $d1 = staticinvoke <java.lang.Math: double ceil(double)>($d0);
+
+        $i12 = (int) $d1;
+
+        $z1 = specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: boolean isEven(int)>($i12);
+
+        if $z1 != 0 goto label28;
+
+        $r12 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r12.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(0);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(1);
+
+        goto label28;
+
+     label25:
+        lookupswitch(i60)
+        {
+            case 0: goto label26;
+            case 1: goto label27;
+            default: goto label28;
+        };
+
+     label26:
+        $r8 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r8.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(1);
+
+        $b6 = r0[0];
+
+        $i144 = (int) $b6;
+
+        $i7 = $i144 << 4;
+
+        i92 = $i7 | 0;
+
+        $r9 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r9.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(i92);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(2);
+
+        goto label28;
+
+     label27:
+        $r6 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r6.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(2);
+
+        $b3 = r0[0];
+
+        $i145 = (int) $b3;
+
+        $i5 = $i145 << 4;
+
+        $b4 = r0[1];
+
+        $i146 = (int) $b4;
+
+        i93 = $i5 | $i146;
+
+        $r7 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r7.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(i93);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(2);
+
+     label28:
+        $r41 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r41.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(0);
+
+        $r42 = r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r42.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(0);
+
+        specialinvoke r2.<com.sun.imageio.plugins.bmp.BMPImageWriter: void incCompImageSize(int)>(2);
+
+        goto label01;
+
+     label29:
+        return;
+    }
+
+    private synchronized void incCompImageSize(int)
+    {
+        com.sun.imageio.plugins.bmp.BMPImageWriter r0;
+        int i0, $i1, $i2;
+
+        r0 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        i0 := @parameter0: int;
+
+        $i1 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compImageSize>;
+
+        $i2 = $i1 + i0;
+
+        r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compImageSize> = $i2;
+
+        return;
+    }
+
+    private boolean isEven(int)
+    {
+        com.sun.imageio.plugins.bmp.BMPImageWriter r0;
+        int i0, $i1;
+        boolean $z0;
+
+        r0 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        i0 := @parameter0: int;
+
+        $i1 = i0 % 2;
+
+        if $i1 != 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private void writeFileHeader(int, int) throws java.io.IOException
+    {
+        javax.imageio.stream.ImageOutputStream $r1, $r2, $r3, $r4, $r5;
+        com.sun.imageio.plugins.bmp.BMPImageWriter r0;
+        int i0, i1;
+
+        r0 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r1 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r1.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(66);
+
+        $r2 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r2.<javax.imageio.stream.ImageOutputStream: void writeByte(int)>(77);
+
+        $r3 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r3.<javax.imageio.stream.ImageOutputStream: void writeInt(int)>(i0);
+
+        $r4 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r4.<javax.imageio.stream.ImageOutputStream: void writeInt(int)>(0);
+
+        $r5 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r5.<javax.imageio.stream.ImageOutputStream: void writeInt(int)>(i1);
+
+        return;
+    }
+
+    private void writeInfoHeader(int, int) throws java.io.IOException
+    {
+        javax.imageio.stream.ImageOutputStream $r1, $r2, $r3, $r4, $r5;
+        com.sun.imageio.plugins.bmp.BMPImageWriter r0;
+        int i0, $i1, i2, $i3, $i4;
+        boolean $z0;
+
+        r0 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        $r1 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r1.<javax.imageio.stream.ImageOutputStream: void writeInt(int)>(i0);
+
+        $r2 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $i1 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int w>;
+
+        interfaceinvoke $r2.<javax.imageio.stream.ImageOutputStream: void writeInt(int)>($i1);
+
+        $r3 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        $z0 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: boolean isTopDown>;
+
+        if $z0 == 0 goto label1;
+
+        $i3 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int h>;
+
+        $i4 = neg $i3;
+
+        goto label2;
+
+     label1:
+        $i4 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int h>;
+
+     label2:
+        interfaceinvoke $r3.<javax.imageio.stream.ImageOutputStream: void writeInt(int)>($i4);
+
+        $r4 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r4.<javax.imageio.stream.ImageOutputStream: void writeShort(int)>(1);
+
+        $r5 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r5.<javax.imageio.stream.ImageOutputStream: void writeShort(int)>(i2);
+
+        return;
+    }
+
+    private void writeSize(int, int) throws java.io.IOException
+    {
+        com.sun.imageio.plugins.bmp.BMPImageWriter r0;
+        int i0, i1;
+        javax.imageio.stream.ImageOutputStream $r1, $r2;
+
+        r0 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        $r1 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r1.<javax.imageio.stream.ImageOutputStream: int skipBytes(int)>(i0);
+
+        $r2 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream>;
+
+        interfaceinvoke $r2.<javax.imageio.stream.ImageOutputStream: void writeInt(int)>(i1);
+
+        return;
+    }
+
+    public void reset()
+    {
+        com.sun.imageio.plugins.bmp.BMPImageWriter r0;
+
+        r0 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        specialinvoke r0.<javax.imageio.ImageWriter: void reset()>();
+
+        r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.stream.ImageOutputStream stream> = null;
+
+        return;
+    }
+
+    private void writeEmbedded(javax.imageio.IIOImage, javax.imageio.ImageWriteParam) throws java.io.IOException
+    {
+        javax.imageio.IIOImage r20;
+        java.awt.Point $r17;
+        javax.imageio.ImageWriteParam $r15, r16;
+        int[] $r18;
+        boolean $z0;
+        javax.imageio.stream.ImageOutputStream $r14;
+        java.lang.StringBuilder $r4, $r6, $r7, $r8;
+        java.awt.Rectangle $r19;
+        java.io.ByteArrayOutputStream $r10, $r13;
+        com.sun.imageio.plugins.bmp.BMPImageWriter$1 $r11;
+        com.sun.imageio.plugins.bmp.BMPImageWriter$2 $r12;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.lang.String r1, $r5, $r9, $r25, $r26;
+        java.util.Iterator $r2;
+        java.lang.RuntimeException $r3, $r21;
+        com.sun.imageio.plugins.bmp.BMPImageWriter r0;
+        javax.imageio.ImageWriter r24;
+        java.lang.Object $r22;
+
+        r0 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        r20 := @parameter0: javax.imageio.IIOImage;
+
+        r16 := @parameter1: javax.imageio.ImageWriteParam;
+
+        $i0 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        if $i0 != 4 goto label1;
+
+        $r26 = "jpeg";
+
+        $r25 = "jpeg";
+
+        goto label2;
+
+     label1:
+        $r26 = "png";
+
+        $r25 = "png";
+
+     label2:
+        r1 = $r26;
+
+        $r2 = staticinvoke <javax.imageio.ImageIO: java.util.Iterator getImageWritersByFormatName(java.lang.String)>($r25);
+
+        r24 = null;
+
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r22 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r24 = (javax.imageio.ImageWriter) $r22;
+
+     label3:
+        if r24 == null goto label5;
+
+        $r10 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: java.io.ByteArrayOutputStream embedded_stream>;
+
+        if $r10 != null goto label4;
+
+        $r21 = new java.lang.RuntimeException;
+
+        specialinvoke $r21.<java.lang.RuntimeException: void <init>(java.lang.String)>("No stream for writing embedded image!");
+
+        throw $r21;
+
+     label4:
+        $r11 = new com.sun.imageio.plugins.bmp.BMPImageWriter$1;
+
+        specialinvoke $r11.<com.sun.imageio.plugins.bmp.BMPImageWriter$1: void <init>(com.sun.imageio.plugins.bmp.BMPImageWriter)>(r0);
+
+        virtualinvoke r24.<javax.imageio.ImageWriter: void addIIOWriteProgressListener(javax.imageio.event.IIOWriteProgressListener)>($r11);
+
+        $r12 = new com.sun.imageio.plugins.bmp.BMPImageWriter$2;
+
+        specialinvoke $r12.<com.sun.imageio.plugins.bmp.BMPImageWriter$2: void <init>(com.sun.imageio.plugins.bmp.BMPImageWriter)>(r0);
+
+        virtualinvoke r24.<javax.imageio.ImageWriter: void addIIOWriteWarningListener(javax.imageio.event.IIOWriteWarningListener)>($r12);
+
+        $r13 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: java.io.ByteArrayOutputStream embedded_stream>;
+
+        $r14 = staticinvoke <javax.imageio.ImageIO: javax.imageio.stream.ImageOutputStream createImageOutputStream(java.lang.Object)>($r13);
+
+        virtualinvoke r24.<javax.imageio.ImageWriter: void setOutput(java.lang.Object)>($r14);
+
+        $r15 = virtualinvoke r24.<javax.imageio.ImageWriter: javax.imageio.ImageWriteParam getDefaultWriteParam()>();
+
+        $r17 = virtualinvoke r16.<javax.imageio.ImageWriteParam: java.awt.Point getDestinationOffset()>();
+
+        virtualinvoke $r15.<javax.imageio.ImageWriteParam: void setDestinationOffset(java.awt.Point)>($r17);
+
+        $r18 = virtualinvoke r16.<javax.imageio.ImageWriteParam: int[] getSourceBands()>();
+
+        virtualinvoke $r15.<javax.imageio.ImageWriteParam: void setSourceBands(int[])>($r18);
+
+        $r19 = virtualinvoke r16.<javax.imageio.ImageWriteParam: java.awt.Rectangle getSourceRegion()>();
+
+        virtualinvoke $r15.<javax.imageio.ImageWriteParam: void setSourceRegion(java.awt.Rectangle)>($r19);
+
+        $i1 = virtualinvoke r16.<javax.imageio.ImageWriteParam: int getSourceXSubsampling()>();
+
+        $i2 = virtualinvoke r16.<javax.imageio.ImageWriteParam: int getSourceYSubsampling()>();
+
+        $i3 = virtualinvoke r16.<javax.imageio.ImageWriteParam: int getSubsamplingXOffset()>();
+
+        $i4 = virtualinvoke r16.<javax.imageio.ImageWriteParam: int getSubsamplingYOffset()>();
+
+        virtualinvoke $r15.<javax.imageio.ImageWriteParam: void setSourceSubsampling(int,int,int,int)>($i1, $i2, $i3, $i4);
+
+        virtualinvoke r24.<javax.imageio.ImageWriter: void write(javax.imageio.metadata.IIOMetadata,javax.imageio.IIOImage,javax.imageio.ImageWriteParam)>(null, r20, $r15);
+
+        goto label6;
+
+     label5:
+        $r3 = new java.lang.RuntimeException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = staticinvoke <com.sun.imageio.plugins.common.I18N: java.lang.String getString(java.lang.String)>("BMPImageWrite5");
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.RuntimeException: void <init>(java.lang.String)>($r9);
+
+        throw $r3;
+
+     label6:
+        return;
+    }
+
+    private int firstLowBit(int)
+    {
+        com.sun.imageio.plugins.bmp.BMPImageWriter r0;
+        int $i0, i1, i2;
+
+        r0 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        i1 := @parameter0: int;
+
+        i2 = 0;
+
+     label1:
+        $i0 = i1 & 1;
+
+        if $i0 != 0 goto label2;
+
+        i2 = i2 + 1;
+
+        i1 = i1 >>> 1;
+
+        goto label1;
+
+     label2:
+        return i2;
+    }
+
+    protected int getPreferredCompressionType(java.awt.image.ColorModel, java.awt.image.SampleModel)
+    {
+        java.awt.image.ColorModel r1;
+        com.sun.imageio.plugins.bmp.BMPImageWriter r3;
+        int $i0;
+        javax.imageio.ImageTypeSpecifier $r0;
+        java.awt.image.SampleModel r2;
+
+        r3 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        r1 := @parameter0: java.awt.image.ColorModel;
+
+        r2 := @parameter1: java.awt.image.SampleModel;
+
+        $r0 = new javax.imageio.ImageTypeSpecifier;
+
+        specialinvoke $r0.<javax.imageio.ImageTypeSpecifier: void <init>(java.awt.image.ColorModel,java.awt.image.SampleModel)>(r1, r2);
+
+        $i0 = virtualinvoke r3.<com.sun.imageio.plugins.bmp.BMPImageWriter: int getPreferredCompressionType(javax.imageio.ImageTypeSpecifier)>($r0);
+
+        return $i0;
+    }
+
+    protected int getPreferredCompressionType(javax.imageio.ImageTypeSpecifier)
+    {
+        int $i0;
+        javax.imageio.ImageTypeSpecifier r0;
+        com.sun.imageio.plugins.bmp.BMPImageWriter r1;
+
+        r1 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        r0 := @parameter0: javax.imageio.ImageTypeSpecifier;
+
+        $i0 = virtualinvoke r0.<javax.imageio.ImageTypeSpecifier: int getBufferedImageType()>();
+
+        if $i0 != 8 goto label1;
+
+        return 3;
+
+     label1:
+        return 0;
+    }
+
+    protected boolean canEncodeImage(int, java.awt.image.ColorModel, java.awt.image.SampleModel)
+    {
+        java.awt.image.ColorModel r1;
+        com.sun.imageio.plugins.bmp.BMPImageWriter r3;
+        int i0;
+        javax.imageio.ImageTypeSpecifier $r0;
+        java.awt.image.SampleModel r2;
+        boolean $z0;
+
+        r3 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.awt.image.ColorModel;
+
+        r2 := @parameter2: java.awt.image.SampleModel;
+
+        $r0 = new javax.imageio.ImageTypeSpecifier;
+
+        specialinvoke $r0.<javax.imageio.ImageTypeSpecifier: void <init>(java.awt.image.ColorModel,java.awt.image.SampleModel)>(r1, r2);
+
+        $z0 = virtualinvoke r3.<com.sun.imageio.plugins.bmp.BMPImageWriter: boolean canEncodeImage(int,javax.imageio.ImageTypeSpecifier)>(i0, $r0);
+
+        return $z0;
+    }
+
+    protected boolean canEncodeImage(int, javax.imageio.ImageTypeSpecifier)
+    {
+        javax.imageio.ImageTypeSpecifier r2;
+        java.awt.image.SampleModel $r4;
+        int[] $r6;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, i10;
+        javax.imageio.spi.ImageWriterSpi $r1;
+        java.awt.image.SinglePixelPackedSampleModel $r5;
+        boolean $z0, $z1, $z2, z3, z4, $z5, $z6, $z7, $z8;
+        com.sun.imageio.plugins.bmp.BMPImageWriter r0;
+        java.awt.image.ColorModel $r3;
+
+        r0 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        i9 := @parameter0: int;
+
+        r2 := @parameter1: javax.imageio.ImageTypeSpecifier;
+
+        $r1 = virtualinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: javax.imageio.spi.ImageWriterSpi getOriginatingProvider()>();
+
+        $z0 = virtualinvoke $r1.<javax.imageio.spi.ImageWriterSpi: boolean canEncodeImage(javax.imageio.ImageTypeSpecifier)>(r2);
+
+        if $z0 != 0 goto label01;
+
+        return 0;
+
+     label01:
+        virtualinvoke r2.<javax.imageio.ImageTypeSpecifier: int getBufferedImageType()>();
+
+        $r3 = virtualinvoke r2.<javax.imageio.ImageTypeSpecifier: java.awt.image.ColorModel getColorModel()>();
+
+        $i0 = virtualinvoke $r3.<java.awt.image.ColorModel: int getPixelSize()>();
+
+        $i1 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        if $i1 != 2 goto label02;
+
+        if $i0 == 4 goto label02;
+
+        return 0;
+
+     label02:
+        $i2 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        if $i2 != 1 goto label03;
+
+        if $i0 == 8 goto label03;
+
+        return 0;
+
+     label03:
+        if $i0 != 16 goto label15;
+
+        z3 = 0;
+
+        z4 = 0;
+
+        $r4 = virtualinvoke r2.<javax.imageio.ImageTypeSpecifier: java.awt.image.SampleModel getSampleModel()>();
+
+        $z1 = $r4 instanceof java.awt.image.SinglePixelPackedSampleModel;
+
+        if $z1 == 0 goto label10;
+
+        $r5 = (java.awt.image.SinglePixelPackedSampleModel) $r4;
+
+        $r6 = virtualinvoke $r5.<java.awt.image.SinglePixelPackedSampleModel: int[] getSampleSize()>();
+
+        z3 = 1;
+
+        z4 = 1;
+
+        i10 = 0;
+
+     label04:
+        $i5 = lengthof $r6;
+
+        if i10 >= $i5 goto label10;
+
+        $z2 = z3;
+
+        $i6 = $r6[i10];
+
+        if $i6 != 5 goto label05;
+
+        $z5 = 1;
+
+        goto label06;
+
+     label05:
+        $z5 = 0;
+
+     label06:
+        z3 = $z2 & $z5;
+
+        $z6 = z4;
+
+        $i7 = $r6[i10];
+
+        if $i7 == 5 goto label07;
+
+        if i10 != 1 goto label08;
+
+        $i8 = $r6[i10];
+
+        if $i8 != 6 goto label08;
+
+     label07:
+        $z7 = 1;
+
+        goto label09;
+
+     label08:
+        $z7 = 0;
+
+     label09:
+        z4 = $z6 & $z7;
+
+        i10 = i10 + 1;
+
+        goto label04;
+
+     label10:
+        $i3 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        if $i3 != 0 goto label11;
+
+        if z3 != 0 goto label12;
+
+     label11:
+        $i4 = r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: int compressionType>;
+
+        if $i4 != 3 goto label13;
+
+        if z4 == 0 goto label13;
+
+     label12:
+        $z8 = 1;
+
+        goto label14;
+
+     label13:
+        $z8 = 0;
+
+     label14:
+        return $z8;
+
+     label15:
+        return 1;
+    }
+
+    protected void writeMaskToPalette(int, int, byte[], byte[], byte[], byte[])
+    {
+        byte[] r0, r1, r2, r3;
+        byte $b4, $b7, $b10, $b12;
+        int i0, i1, $i2, $i3, $i5, $i6, $i8, $i9, $i11;
+        com.sun.imageio.plugins.bmp.BMPImageWriter r4;
+
+        r4 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        r2 := @parameter2: byte[];
+
+        r1 := @parameter3: byte[];
+
+        r0 := @parameter4: byte[];
+
+        r3 := @parameter5: byte[];
+
+        $i2 = i1 >> 24;
+
+        $i3 = 255 & $i2;
+
+        $b4 = (byte) $i3;
+
+        r0[i0] = $b4;
+
+        $i5 = i1 >> 16;
+
+        $i6 = 255 & $i5;
+
+        $b7 = (byte) $i6;
+
+        r1[i0] = $b7;
+
+        $i8 = i1 >> 8;
+
+        $i9 = 255 & $i8;
+
+        $b10 = (byte) $i9;
+
+        r2[i0] = $b10;
+
+        $i11 = 255 & i1;
+
+        $b12 = (byte) $i11;
+
+        r3[i0] = $b12;
+
+        return;
+    }
+
+    private int roundBpp(int)
+    {
+        int i0;
+        com.sun.imageio.plugins.bmp.BMPImageWriter r0;
+
+        r0 := @this: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        i0 := @parameter0: int;
+
+        if i0 > 8 goto label1;
+
+        return 8;
+
+     label1:
+        if i0 > 16 goto label2;
+
+        return 16;
+
+     label2:
+        if i0 > 24 goto label3;
+
+        return 24;
+
+     label3:
+        return 32;
+    }
+
+    static void access$100(com.sun.imageio.plugins.bmp.BMPImageWriter, float)
+    {
+        float f0;
+        com.sun.imageio.plugins.bmp.BMPImageWriter r0;
+
+        r0 := @parameter0: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        f0 := @parameter1: float;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: void processImageProgress(float)>(f0);
+
+        return;
+    }
+
+    static void access$200(com.sun.imageio.plugins.bmp.BMPImageWriter, int, java.lang.String)
+    {
+        int i0;
+        java.lang.String r1;
+        com.sun.imageio.plugins.bmp.BMPImageWriter r0;
+
+        r0 := @parameter0: com.sun.imageio.plugins.bmp.BMPImageWriter;
+
+        i0 := @parameter1: int;
+
+        r1 := @parameter2: java.lang.String;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.bmp.BMPImageWriter: void processWarningOccurred(int,java.lang.String)>(i0, r1);
+
+        return;
+    }
+}

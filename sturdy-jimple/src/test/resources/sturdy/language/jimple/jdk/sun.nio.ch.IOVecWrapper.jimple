@@ -1,0 +1,385 @@
+class sun.nio.ch.IOVecWrapper extends java.lang.Object
+{
+    private static final int BASE_OFFSET;
+    private static final int LEN_OFFSET;
+    private static final int SIZE_IOVEC;
+    private final sun.nio.ch.AllocatedNativeObject vecArray;
+    private final int size;
+    private final java.nio.ByteBuffer[] buf;
+    private final int[] position;
+    private final int[] remaining;
+    private final java.nio.ByteBuffer[] shadow;
+    final long address;
+    static int addressSize;
+    private static final java.lang.ThreadLocal cached;
+
+    private void <init>(int)
+    {
+        java.nio.ByteBuffer[] $r1, $r4;
+        sun.nio.ch.AllocatedNativeObject $r5, $r6;
+        long $l3;
+        int[] $r2, $r3;
+        int i0, $i1, $i2;
+        sun.nio.ch.IOVecWrapper r0;
+
+        r0 := @this: sun.nio.ch.IOVecWrapper;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.nio.ch.IOVecWrapper: int size> = i0;
+
+        $r1 = newarray (java.nio.ByteBuffer)[i0];
+
+        r0.<sun.nio.ch.IOVecWrapper: java.nio.ByteBuffer[] buf> = $r1;
+
+        $r2 = newarray (int)[i0];
+
+        r0.<sun.nio.ch.IOVecWrapper: int[] position> = $r2;
+
+        $r3 = newarray (int)[i0];
+
+        r0.<sun.nio.ch.IOVecWrapper: int[] remaining> = $r3;
+
+        $r4 = newarray (java.nio.ByteBuffer)[i0];
+
+        r0.<sun.nio.ch.IOVecWrapper: java.nio.ByteBuffer[] shadow> = $r4;
+
+        $r5 = new sun.nio.ch.AllocatedNativeObject;
+
+        $i1 = <sun.nio.ch.IOVecWrapper: int SIZE_IOVEC>;
+
+        $i2 = i0 * $i1;
+
+        specialinvoke $r5.<sun.nio.ch.AllocatedNativeObject: void <init>(int,boolean)>($i2, 0);
+
+        r0.<sun.nio.ch.IOVecWrapper: sun.nio.ch.AllocatedNativeObject vecArray> = $r5;
+
+        $r6 = r0.<sun.nio.ch.IOVecWrapper: sun.nio.ch.AllocatedNativeObject vecArray>;
+
+        $l3 = virtualinvoke $r6.<sun.nio.ch.AllocatedNativeObject: long address()>();
+
+        r0.<sun.nio.ch.IOVecWrapper: long address> = $l3;
+
+        return;
+    }
+
+    static sun.nio.ch.IOVecWrapper get(int)
+    {
+        java.lang.ThreadLocal $r0, $r5;
+        sun.nio.ch.AllocatedNativeObject $r4, $r6;
+        sun.nio.ch.IOVecWrapper$Deallocator $r3;
+        int i0, $i1;
+        java.lang.Object $r1;
+        sun.nio.ch.IOVecWrapper $r2, r7;
+
+        i0 := @parameter0: int;
+
+        $r0 = <sun.nio.ch.IOVecWrapper: java.lang.ThreadLocal cached>;
+
+        $r1 = virtualinvoke $r0.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        r7 = (sun.nio.ch.IOVecWrapper) $r1;
+
+        if r7 == null goto label1;
+
+        $i1 = r7.<sun.nio.ch.IOVecWrapper: int size>;
+
+        if $i1 >= i0 goto label1;
+
+        $r6 = r7.<sun.nio.ch.IOVecWrapper: sun.nio.ch.AllocatedNativeObject vecArray>;
+
+        virtualinvoke $r6.<sun.nio.ch.AllocatedNativeObject: void free()>();
+
+        r7 = null;
+
+     label1:
+        if r7 != null goto label2;
+
+        $r2 = new sun.nio.ch.IOVecWrapper;
+
+        specialinvoke $r2.<sun.nio.ch.IOVecWrapper: void <init>(int)>(i0);
+
+        r7 = $r2;
+
+        $r3 = new sun.nio.ch.IOVecWrapper$Deallocator;
+
+        $r4 = $r2.<sun.nio.ch.IOVecWrapper: sun.nio.ch.AllocatedNativeObject vecArray>;
+
+        specialinvoke $r3.<sun.nio.ch.IOVecWrapper$Deallocator: void <init>(sun.nio.ch.AllocatedNativeObject)>($r4);
+
+        staticinvoke <sun.misc.Cleaner: sun.misc.Cleaner create(java.lang.Object,java.lang.Runnable)>($r2, $r3);
+
+        $r5 = <sun.nio.ch.IOVecWrapper: java.lang.ThreadLocal cached>;
+
+        virtualinvoke $r5.<java.lang.ThreadLocal: void set(java.lang.Object)>($r2);
+
+     label2:
+        return r7;
+    }
+
+    void setBuffer(int, java.nio.ByteBuffer, int, int)
+    {
+        java.nio.ByteBuffer[] $r2;
+        java.nio.ByteBuffer r1;
+        int[] $r3, $r4;
+        int i0, i1, i2;
+        sun.nio.ch.IOVecWrapper r0;
+
+        r0 := @this: sun.nio.ch.IOVecWrapper;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.nio.ByteBuffer;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        $r2 = r0.<sun.nio.ch.IOVecWrapper: java.nio.ByteBuffer[] buf>;
+
+        $r2[i0] = r1;
+
+        $r3 = r0.<sun.nio.ch.IOVecWrapper: int[] position>;
+
+        $r3[i0] = i1;
+
+        $r4 = r0.<sun.nio.ch.IOVecWrapper: int[] remaining>;
+
+        $r4[i0] = i2;
+
+        return;
+    }
+
+    void setShadow(int, java.nio.ByteBuffer)
+    {
+        java.nio.ByteBuffer[] $r2;
+        int i0;
+        sun.nio.ch.IOVecWrapper r0;
+        java.nio.ByteBuffer r1;
+
+        r0 := @this: sun.nio.ch.IOVecWrapper;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.nio.ByteBuffer;
+
+        $r2 = r0.<sun.nio.ch.IOVecWrapper: java.nio.ByteBuffer[] shadow>;
+
+        $r2[i0] = r1;
+
+        return;
+    }
+
+    java.nio.ByteBuffer getBuffer(int)
+    {
+        java.nio.ByteBuffer[] $r1;
+        int i0;
+        sun.nio.ch.IOVecWrapper r0;
+        java.nio.ByteBuffer $r2;
+
+        r0 := @this: sun.nio.ch.IOVecWrapper;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.nio.ch.IOVecWrapper: java.nio.ByteBuffer[] buf>;
+
+        $r2 = $r1[i0];
+
+        return $r2;
+    }
+
+    int getPosition(int)
+    {
+        int[] $r1;
+        int i0, $i1;
+        sun.nio.ch.IOVecWrapper r0;
+
+        r0 := @this: sun.nio.ch.IOVecWrapper;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.nio.ch.IOVecWrapper: int[] position>;
+
+        $i1 = $r1[i0];
+
+        return $i1;
+    }
+
+    int getRemaining(int)
+    {
+        int[] $r1;
+        int i0, $i1;
+        sun.nio.ch.IOVecWrapper r0;
+
+        r0 := @this: sun.nio.ch.IOVecWrapper;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.nio.ch.IOVecWrapper: int[] remaining>;
+
+        $i1 = $r1[i0];
+
+        return $i1;
+    }
+
+    java.nio.ByteBuffer getShadow(int)
+    {
+        java.nio.ByteBuffer[] $r1;
+        int i0;
+        sun.nio.ch.IOVecWrapper r0;
+        java.nio.ByteBuffer $r2;
+
+        r0 := @this: sun.nio.ch.IOVecWrapper;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.nio.ch.IOVecWrapper: java.nio.ByteBuffer[] shadow>;
+
+        $r2 = $r1[i0];
+
+        return $r2;
+    }
+
+    void clearRefs(int)
+    {
+        java.nio.ByteBuffer[] $r1, $r2;
+        int i0;
+        sun.nio.ch.IOVecWrapper r0;
+
+        r0 := @this: sun.nio.ch.IOVecWrapper;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.nio.ch.IOVecWrapper: java.nio.ByteBuffer[] buf>;
+
+        $r1[i0] = null;
+
+        $r2 = r0.<sun.nio.ch.IOVecWrapper: java.nio.ByteBuffer[] shadow>;
+
+        $r2[i0] = null;
+
+        return;
+    }
+
+    void putBase(int, long)
+    {
+        sun.nio.ch.AllocatedNativeObject $r1, $r2;
+        long l5;
+        int i0, $i1, $i2, i3, $i4, $i6;
+        sun.nio.ch.IOVecWrapper r0;
+
+        r0 := @this: sun.nio.ch.IOVecWrapper;
+
+        i0 := @parameter0: int;
+
+        l5 := @parameter1: long;
+
+        $i1 = <sun.nio.ch.IOVecWrapper: int SIZE_IOVEC>;
+
+        $i2 = $i1 * i0;
+
+        i3 = $i2 + 0;
+
+        $i4 = <sun.nio.ch.IOVecWrapper: int addressSize>;
+
+        if $i4 != 4 goto label1;
+
+        $r2 = r0.<sun.nio.ch.IOVecWrapper: sun.nio.ch.AllocatedNativeObject vecArray>;
+
+        $i6 = (int) l5;
+
+        virtualinvoke $r2.<sun.nio.ch.AllocatedNativeObject: void putInt(int,int)>(i3, $i6);
+
+        goto label2;
+
+     label1:
+        $r1 = r0.<sun.nio.ch.IOVecWrapper: sun.nio.ch.AllocatedNativeObject vecArray>;
+
+        virtualinvoke $r1.<sun.nio.ch.AllocatedNativeObject: void putLong(int,long)>(i3, l5);
+
+     label2:
+        return;
+    }
+
+    void putLen(int, long)
+    {
+        sun.nio.ch.AllocatedNativeObject $r1, $r2;
+        long l6;
+        int i0, $i1, $i2, $i3, i4, $i5, $i7;
+        sun.nio.ch.IOVecWrapper r0;
+
+        r0 := @this: sun.nio.ch.IOVecWrapper;
+
+        i0 := @parameter0: int;
+
+        l6 := @parameter1: long;
+
+        $i1 = <sun.nio.ch.IOVecWrapper: int SIZE_IOVEC>;
+
+        $i3 = $i1 * i0;
+
+        $i2 = <sun.nio.ch.IOVecWrapper: int LEN_OFFSET>;
+
+        i4 = $i3 + $i2;
+
+        $i5 = <sun.nio.ch.IOVecWrapper: int addressSize>;
+
+        if $i5 != 4 goto label1;
+
+        $r2 = r0.<sun.nio.ch.IOVecWrapper: sun.nio.ch.AllocatedNativeObject vecArray>;
+
+        $i7 = (int) l6;
+
+        virtualinvoke $r2.<sun.nio.ch.AllocatedNativeObject: void putInt(int,int)>(i4, $i7);
+
+        goto label2;
+
+     label1:
+        $r1 = r0.<sun.nio.ch.IOVecWrapper: sun.nio.ch.AllocatedNativeObject vecArray>;
+
+        virtualinvoke $r1.<sun.nio.ch.AllocatedNativeObject: void putLong(int,long)>(i4, l6);
+
+     label2:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        sun.misc.Unsafe $r1;
+        java.lang.ThreadLocal $r2;
+        short $s4;
+        int $i0, $i1, $i2, $i3, $i5;
+
+        <sun.nio.ch.IOVecWrapper: int BASE_OFFSET> = 0;
+
+        $r2 = new java.lang.ThreadLocal;
+
+        specialinvoke $r2.<java.lang.ThreadLocal: void <init>()>();
+
+        <sun.nio.ch.IOVecWrapper: java.lang.ThreadLocal cached> = $r2;
+
+        $r1 = staticinvoke <sun.nio.ch.Util: sun.misc.Unsafe unsafe()>();
+
+        $i0 = virtualinvoke $r1.<sun.misc.Unsafe: int addressSize()>();
+
+        <sun.nio.ch.IOVecWrapper: int addressSize> = $i0;
+
+        $i1 = <sun.nio.ch.IOVecWrapper: int addressSize>;
+
+        <sun.nio.ch.IOVecWrapper: int LEN_OFFSET> = $i1;
+
+        $i2 = <sun.nio.ch.IOVecWrapper: int addressSize>;
+
+        $i3 = $i2 * 2;
+
+        $s4 = (short) $i3;
+
+        $i5 = (int) $s4;
+
+        <sun.nio.ch.IOVecWrapper: int SIZE_IOVEC> = $i5;
+
+        return;
+    }
+}

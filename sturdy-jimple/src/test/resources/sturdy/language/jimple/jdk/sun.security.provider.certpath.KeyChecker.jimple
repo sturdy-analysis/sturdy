@@ -1,0 +1,308 @@
+class sun.security.provider.certpath.KeyChecker extends java.security.cert.PKIXCertPathChecker
+{
+    private static final sun.security.util.Debug debug;
+    private final int certPathLen;
+    private final java.security.cert.CertSelector targetConstraints;
+    private int remainingCerts;
+    private java.util.Set supportedExts;
+    private static final int KEY_CERT_SIGN;
+
+    void <init>(int, java.security.cert.CertSelector)
+    {
+        int i0;
+        java.security.cert.CertSelector r1;
+        sun.security.provider.certpath.KeyChecker r0;
+
+        r0 := @this: sun.security.provider.certpath.KeyChecker;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.security.cert.CertSelector;
+
+        specialinvoke r0.<java.security.cert.PKIXCertPathChecker: void <init>()>();
+
+        r0.<sun.security.provider.certpath.KeyChecker: int certPathLen> = i0;
+
+        r0.<sun.security.provider.certpath.KeyChecker: java.security.cert.CertSelector targetConstraints> = r1;
+
+        return;
+    }
+
+    public void init(boolean) throws java.security.cert.CertPathValidatorException
+    {
+        int $i0;
+        java.security.cert.CertPathValidatorException $r0;
+        boolean z0;
+        sun.security.provider.certpath.KeyChecker r1;
+
+        r1 := @this: sun.security.provider.certpath.KeyChecker;
+
+        z0 := @parameter0: boolean;
+
+        if z0 != 0 goto label1;
+
+        $i0 = r1.<sun.security.provider.certpath.KeyChecker: int certPathLen>;
+
+        r1.<sun.security.provider.certpath.KeyChecker: int remainingCerts> = $i0;
+
+        goto label2;
+
+     label1:
+        $r0 = new java.security.cert.CertPathValidatorException;
+
+        specialinvoke $r0.<java.security.cert.CertPathValidatorException: void <init>(java.lang.String)>("forward checking not supported");
+
+        throw $r0;
+
+     label2:
+        return;
+    }
+
+    public boolean isForwardCheckingSupported()
+    {
+        sun.security.provider.certpath.KeyChecker r0;
+
+        r0 := @this: sun.security.provider.certpath.KeyChecker;
+
+        return 0;
+    }
+
+    public java.util.Set getSupportedExtensions()
+    {
+        java.util.Set $r1, $r2, $r5, $r8, $r11, $r13, $r14;
+        sun.security.provider.certpath.KeyChecker r0;
+        java.util.HashSet $r3;
+        sun.security.util.ObjectIdentifier $r4, $r7, $r10;
+        java.lang.String $r6, $r9, $r12;
+
+        r0 := @this: sun.security.provider.certpath.KeyChecker;
+
+        $r1 = r0.<sun.security.provider.certpath.KeyChecker: java.util.Set supportedExts>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.util.HashSet;
+
+        specialinvoke $r3.<java.util.HashSet: void <init>(int)>(3);
+
+        r0.<sun.security.provider.certpath.KeyChecker: java.util.Set supportedExts> = $r3;
+
+        $r5 = r0.<sun.security.provider.certpath.KeyChecker: java.util.Set supportedExts>;
+
+        $r4 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier KeyUsage_Id>;
+
+        $r6 = virtualinvoke $r4.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        interfaceinvoke $r5.<java.util.Set: boolean add(java.lang.Object)>($r6);
+
+        $r8 = r0.<sun.security.provider.certpath.KeyChecker: java.util.Set supportedExts>;
+
+        $r7 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier ExtendedKeyUsage_Id>;
+
+        $r9 = virtualinvoke $r7.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        interfaceinvoke $r8.<java.util.Set: boolean add(java.lang.Object)>($r9);
+
+        $r11 = r0.<sun.security.provider.certpath.KeyChecker: java.util.Set supportedExts>;
+
+        $r10 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier SubjectAlternativeName_Id>;
+
+        $r12 = virtualinvoke $r10.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        interfaceinvoke $r11.<java.util.Set: boolean add(java.lang.Object)>($r12);
+
+        $r13 = r0.<sun.security.provider.certpath.KeyChecker: java.util.Set supportedExts>;
+
+        $r14 = staticinvoke <java.util.Collections: java.util.Set unmodifiableSet(java.util.Set)>($r13);
+
+        r0.<sun.security.provider.certpath.KeyChecker: java.util.Set supportedExts> = $r14;
+
+     label1:
+        $r2 = r0.<sun.security.provider.certpath.KeyChecker: java.util.Set supportedExts>;
+
+        return $r2;
+    }
+
+    public void check(java.security.cert.Certificate, java.util.Collection) throws java.security.cert.CertPathValidatorException
+    {
+        java.security.cert.X509Certificate r1;
+        int $i0, $i1, $i2;
+        sun.security.util.ObjectIdentifier $r4, $r6, $r8;
+        java.lang.String $r5, $r7, $r9;
+        java.security.cert.CertPathValidatorException $r12;
+        boolean $z0, $z1;
+        java.util.Collection r3;
+        java.security.cert.CertSelector $r10, $r11;
+        sun.security.provider.certpath.KeyChecker r2;
+        java.security.cert.Certificate r0;
+
+        r2 := @this: sun.security.provider.certpath.KeyChecker;
+
+        r0 := @parameter0: java.security.cert.Certificate;
+
+        r3 := @parameter1: java.util.Collection;
+
+        r1 = (java.security.cert.X509Certificate) r0;
+
+        $i0 = r2.<sun.security.provider.certpath.KeyChecker: int remainingCerts>;
+
+        $i1 = $i0 - 1;
+
+        r2.<sun.security.provider.certpath.KeyChecker: int remainingCerts> = $i1;
+
+        $i2 = r2.<sun.security.provider.certpath.KeyChecker: int remainingCerts>;
+
+        if $i2 != 0 goto label1;
+
+        $r10 = r2.<sun.security.provider.certpath.KeyChecker: java.security.cert.CertSelector targetConstraints>;
+
+        if $r10 == null goto label2;
+
+        $r11 = r2.<sun.security.provider.certpath.KeyChecker: java.security.cert.CertSelector targetConstraints>;
+
+        $z1 = interfaceinvoke $r11.<java.security.cert.CertSelector: boolean match(java.security.cert.Certificate)>(r1);
+
+        if $z1 != 0 goto label2;
+
+        $r12 = new java.security.cert.CertPathValidatorException;
+
+        specialinvoke $r12.<java.security.cert.CertPathValidatorException: void <init>(java.lang.String)>("target certificate constraints check failed");
+
+        throw $r12;
+
+     label1:
+        staticinvoke <sun.security.provider.certpath.KeyChecker: void verifyCAKeyUsage(java.security.cert.X509Certificate)>(r1);
+
+     label2:
+        if r3 == null goto label3;
+
+        $z0 = interfaceinvoke r3.<java.util.Collection: boolean isEmpty()>();
+
+        if $z0 != 0 goto label3;
+
+        $r4 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier KeyUsage_Id>;
+
+        $r5 = virtualinvoke $r4.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        interfaceinvoke r3.<java.util.Collection: boolean remove(java.lang.Object)>($r5);
+
+        $r6 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier ExtendedKeyUsage_Id>;
+
+        $r7 = virtualinvoke $r6.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        interfaceinvoke r3.<java.util.Collection: boolean remove(java.lang.Object)>($r7);
+
+        $r8 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier SubjectAlternativeName_Id>;
+
+        $r9 = virtualinvoke $r8.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        interfaceinvoke r3.<java.util.Collection: boolean remove(java.lang.Object)>($r9);
+
+     label3:
+        return;
+    }
+
+    static void verifyCAKeyUsage(java.security.cert.X509Certificate) throws java.security.cert.CertPathValidatorException
+    {
+        java.security.cert.X509Certificate r1;
+        int $i1;
+        java.lang.String $r9, $r14, $r21;
+        java.security.cert.PKIXReason $r15;
+        java.security.cert.CertPathValidatorException $r24;
+        boolean $z0;
+        boolean[] $r2;
+        sun.security.util.Debug $r0, $r3, $r5, $r17;
+        java.lang.StringBuilder $r6, $r7, $r8, $r12, $r13, $r18, $r19, $r20, $r22, $r23, $r25;
+
+        r1 := @parameter0: java.security.cert.X509Certificate;
+
+        $r0 = <sun.security.provider.certpath.KeyChecker: sun.security.util.Debug debug>;
+
+        if $r0 == null goto label1;
+
+        $r17 = <sun.security.provider.certpath.KeyChecker: sun.security.util.Debug debug>;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("KeyChecker.verifyCAKeyUsage() ---checking ");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("CA key usage");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("...");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r17.<sun.security.util.Debug: void println(java.lang.String)>($r21);
+
+     label1:
+        $r2 = virtualinvoke r1.<java.security.cert.X509Certificate: boolean[] getKeyUsage()>();
+
+        if $r2 != null goto label2;
+
+        return;
+
+     label2:
+        $z0 = $r2[5];
+
+        if $z0 != 0 goto label3;
+
+        $r24 = new java.security.cert.CertPathValidatorException;
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("CA key usage");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" check failed: keyCertSign bit is not set");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r15 = <java.security.cert.PKIXReason: java.security.cert.PKIXReason INVALID_KEY_USAGE>;
+
+        $i1 = (int) -1;
+
+        specialinvoke $r24.<java.security.cert.CertPathValidatorException: void <init>(java.lang.String,java.lang.Throwable,java.security.cert.CertPath,int,java.security.cert.CertPathValidatorException$Reason)>($r14, null, null, $i1, $r15);
+
+        throw $r24;
+
+     label3:
+        $r3 = <sun.security.provider.certpath.KeyChecker: sun.security.util.Debug debug>;
+
+        if $r3 == null goto label4;
+
+        $r5 = <sun.security.provider.certpath.KeyChecker: sun.security.util.Debug debug>;
+
+        $r25 = new java.lang.StringBuilder;
+
+        specialinvoke $r25.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("KeyChecker.verifyCAKeyUsage() ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("CA key usage");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" verified.");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<sun.security.util.Debug: void println(java.lang.String)>($r9);
+
+     label4:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.util.Debug $r0;
+
+        <sun.security.provider.certpath.KeyChecker: int KEY_CERT_SIGN> = 5;
+
+        $r0 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String)>("certpath");
+
+        <sun.security.provider.certpath.KeyChecker: sun.security.util.Debug debug> = $r0;
+
+        return;
+    }
+}

@@ -1,0 +1,385 @@
+public abstract class sun.awt.KeyboardFocusManagerPeerImpl extends java.lang.Object implements java.awt.peer.KeyboardFocusManagerPeer
+{
+    private static final sun.util.logging.PlatformLogger focusLog;
+    private static sun.awt.AWTAccessor$KeyboardFocusManagerAccessor kfmAccessor;
+    public static final int SNFH_FAILURE;
+    public static final int SNFH_SUCCESS_HANDLED;
+    public static final int SNFH_SUCCESS_PROCEED;
+
+    public void <init>()
+    {
+        sun.awt.KeyboardFocusManagerPeerImpl r0;
+
+        r0 := @this: sun.awt.KeyboardFocusManagerPeerImpl;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void clearGlobalFocusOwner(java.awt.Window)
+    {
+        sun.awt.KeyboardFocusManagerPeerImpl r11;
+        sun.util.logging.PlatformLogger$Level $r2;
+        sun.util.logging.PlatformLogger $r3, $r7;
+        java.awt.Window r0;
+        sun.awt.CausedFocusEvent$Cause $r5;
+        java.awt.Component $r1;
+        sun.awt.CausedFocusEvent $r4;
+        java.lang.StringBuilder $r6, $r8, $r9;
+        java.lang.String $r10;
+        boolean $z0;
+
+        r11 := @this: sun.awt.KeyboardFocusManagerPeerImpl;
+
+        r0 := @parameter0: java.awt.Window;
+
+        if r0 == null goto label2;
+
+        $r1 = virtualinvoke r0.<java.awt.Window: java.awt.Component getFocusOwner()>();
+
+        $r3 = <sun.awt.KeyboardFocusManagerPeerImpl: sun.util.logging.PlatformLogger focusLog>;
+
+        $r2 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINE>;
+
+        $z0 = virtualinvoke $r3.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        $r7 = <sun.awt.KeyboardFocusManagerPeerImpl: sun.util.logging.PlatformLogger focusLog>;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Clearing global focus owner ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<sun.util.logging.PlatformLogger: void fine(java.lang.String)>($r10);
+
+     label1:
+        if $r1 == null goto label2;
+
+        $r4 = new sun.awt.CausedFocusEvent;
+
+        $r5 = <sun.awt.CausedFocusEvent$Cause: sun.awt.CausedFocusEvent$Cause CLEAR_GLOBAL_FOCUS_OWNER>;
+
+        specialinvoke $r4.<sun.awt.CausedFocusEvent: void <init>(java.awt.Component,int,boolean,java.awt.Component,sun.awt.CausedFocusEvent$Cause)>($r1, 1005, 0, null, $r5);
+
+        staticinvoke <sun.awt.SunToolkit: void postPriorityEvent(java.awt.AWTEvent)>($r4);
+
+     label2:
+        return;
+    }
+
+    public static boolean shouldFocusOnClick(java.awt.Component)
+    {
+        java.awt.peer.ComponentPeer $r3;
+        java.awt.Component r0;
+        sun.awt.AWTAccessor$ComponentAccessor $r1;
+        java.awt.Panel $r2;
+        int $i0;
+        boolean $z0, $z1, $z2, $z3, z4, $z5, $z6, $z7;
+
+        r0 := @parameter0: java.awt.Component;
+
+        $z0 = r0 instanceof java.awt.Canvas;
+
+        if $z0 != 0 goto label01;
+
+        $z2 = r0 instanceof java.awt.Scrollbar;
+
+        if $z2 == 0 goto label02;
+
+     label01:
+        z4 = 1;
+
+        goto label10;
+
+     label02:
+        $z3 = r0 instanceof java.awt.Panel;
+
+        if $z3 == 0 goto label05;
+
+        $r2 = (java.awt.Panel) r0;
+
+        $i0 = virtualinvoke $r2.<java.awt.Panel: int getComponentCount()>();
+
+        if $i0 != 0 goto label03;
+
+        $z5 = 1;
+
+        goto label04;
+
+     label03:
+        $z5 = 0;
+
+     label04:
+        z4 = $z5;
+
+        goto label10;
+
+     label05:
+        if r0 == null goto label06;
+
+        $r3 = virtualinvoke r0.<java.awt.Component: java.awt.peer.ComponentPeer getPeer()>();
+
+        goto label07;
+
+     label06:
+        $r3 = null;
+
+     label07:
+        if $r3 == null goto label08;
+
+        $z6 = interfaceinvoke $r3.<java.awt.peer.ComponentPeer: boolean isFocusable()>();
+
+        goto label09;
+
+     label08:
+        $z6 = 0;
+
+     label09:
+        z4 = $z6;
+
+     label10:
+        if z4 == 0 goto label11;
+
+        $r1 = staticinvoke <sun.awt.AWTAccessor: sun.awt.AWTAccessor$ComponentAccessor getComponentAccessor()>();
+
+        $z1 = interfaceinvoke $r1.<sun.awt.AWTAccessor$ComponentAccessor: boolean canBeFocusOwner(java.awt.Component)>(r0);
+
+        if $z1 == 0 goto label11;
+
+        $z7 = 1;
+
+        goto label12;
+
+     label11:
+        $z7 = 0;
+
+     label12:
+        return $z7;
+    }
+
+    public static boolean deliverFocus(java.awt.Component, java.awt.Component, boolean, boolean, long, sun.awt.CausedFocusEvent$Cause, java.awt.Component)
+    {
+        long l0;
+        sun.awt.AppContext $r2, $r11;
+        java.lang.String $r7, $r16;
+        boolean $z0, z1, z2, $z3;
+        sun.util.logging.PlatformLogger$Level $r9, $r23;
+        java.awt.peer.ComponentPeer $r17;
+        sun.util.logging.PlatformLogger $r4, $r10, $r13, $r22;
+        sun.awt.CausedFocusEvent$Cause r1;
+        java.awt.Component r0, r18, r19, r20;
+        sun.awt.CausedFocusEvent $r8, $r21;
+        java.lang.StringBuilder $r3, $r5, $r6, $r12, $r14, $r15;
+
+        r19 := @parameter0: java.awt.Component;
+
+        r18 := @parameter1: java.awt.Component;
+
+        z1 := @parameter2: boolean;
+
+        z2 := @parameter3: boolean;
+
+        l0 := @parameter4: long;
+
+        r1 := @parameter5: sun.awt.CausedFocusEvent$Cause;
+
+        r0 := @parameter6: java.awt.Component;
+
+        if r19 != null goto label1;
+
+        r19 = r18;
+
+     label1:
+        r20 = r0;
+
+        if r0 == null goto label2;
+
+        $r17 = virtualinvoke r0.<java.awt.Component: java.awt.peer.ComponentPeer getPeer()>();
+
+        if $r17 != null goto label2;
+
+        r20 = null;
+
+     label2:
+        if r20 == null goto label4;
+
+        $r8 = new sun.awt.CausedFocusEvent;
+
+        specialinvoke $r8.<sun.awt.CausedFocusEvent: void <init>(java.awt.Component,int,boolean,java.awt.Component,sun.awt.CausedFocusEvent$Cause)>(r20, 1005, 0, r19, r1);
+
+        $r10 = <sun.awt.KeyboardFocusManagerPeerImpl: sun.util.logging.PlatformLogger focusLog>;
+
+        $r9 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINER>;
+
+        $z0 = virtualinvoke $r10.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r9);
+
+        if $z0 == 0 goto label3;
+
+        $r13 = <sun.awt.KeyboardFocusManagerPeerImpl: sun.util.logging.PlatformLogger focusLog>;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Posting focus event: ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r13.<sun.util.logging.PlatformLogger: void finer(java.lang.String)>($r16);
+
+     label3:
+        $r11 = staticinvoke <sun.awt.SunToolkit: sun.awt.AppContext targetToAppContext(java.lang.Object)>(r20);
+
+        staticinvoke <sun.awt.SunToolkit: void postEvent(sun.awt.AppContext,java.awt.AWTEvent)>($r11, $r8);
+
+     label4:
+        $r21 = new sun.awt.CausedFocusEvent;
+
+        specialinvoke $r21.<sun.awt.CausedFocusEvent: void <init>(java.awt.Component,int,boolean,java.awt.Component,sun.awt.CausedFocusEvent$Cause)>(r19, 1004, 0, r20, r1);
+
+        $r22 = <sun.awt.KeyboardFocusManagerPeerImpl: sun.util.logging.PlatformLogger focusLog>;
+
+        $r23 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINER>;
+
+        $z3 = virtualinvoke $r22.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r23);
+
+        if $z3 == 0 goto label5;
+
+        $r4 = <sun.awt.KeyboardFocusManagerPeerImpl: sun.util.logging.PlatformLogger focusLog>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Posting focus event: ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r21);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<sun.util.logging.PlatformLogger: void finer(java.lang.String)>($r7);
+
+     label5:
+        $r2 = staticinvoke <sun.awt.SunToolkit: sun.awt.AppContext targetToAppContext(java.lang.Object)>(r19);
+
+        staticinvoke <sun.awt.SunToolkit: void postEvent(sun.awt.AppContext,java.awt.AWTEvent)>($r2, $r21);
+
+        return 1;
+    }
+
+    public static boolean requestFocusFor(java.awt.Component, sun.awt.CausedFocusEvent$Cause)
+    {
+        sun.awt.CausedFocusEvent$Cause r2;
+        java.awt.Component r1;
+        sun.awt.AWTAccessor$ComponentAccessor $r0;
+        boolean $z0;
+
+        r1 := @parameter0: java.awt.Component;
+
+        r2 := @parameter1: sun.awt.CausedFocusEvent$Cause;
+
+        $r0 = staticinvoke <sun.awt.AWTAccessor: sun.awt.AWTAccessor$ComponentAccessor getComponentAccessor()>();
+
+        $z0 = interfaceinvoke $r0.<sun.awt.AWTAccessor$ComponentAccessor: boolean requestFocus(java.awt.Component,sun.awt.CausedFocusEvent$Cause)>(r1, r2);
+
+        return $z0;
+    }
+
+    public static int shouldNativelyFocusHeavyweight(java.awt.Component, java.awt.Component, boolean, boolean, long, sun.awt.CausedFocusEvent$Cause)
+    {
+        long l0;
+        sun.awt.CausedFocusEvent$Cause r2;
+        java.awt.Component r0, r1;
+        sun.awt.AWTAccessor$KeyboardFocusManagerAccessor $r3;
+        int $i1;
+        boolean z0, z1;
+
+        r0 := @parameter0: java.awt.Component;
+
+        r1 := @parameter1: java.awt.Component;
+
+        z0 := @parameter2: boolean;
+
+        z1 := @parameter3: boolean;
+
+        l0 := @parameter4: long;
+
+        r2 := @parameter5: sun.awt.CausedFocusEvent$Cause;
+
+        $r3 = <sun.awt.KeyboardFocusManagerPeerImpl: sun.awt.AWTAccessor$KeyboardFocusManagerAccessor kfmAccessor>;
+
+        $i1 = interfaceinvoke $r3.<sun.awt.AWTAccessor$KeyboardFocusManagerAccessor: int shouldNativelyFocusHeavyweight(java.awt.Component,java.awt.Component,boolean,boolean,long,sun.awt.CausedFocusEvent$Cause)>(r0, r1, z0, z1, l0, r2);
+
+        return $i1;
+    }
+
+    public static void removeLastFocusRequest(java.awt.Component)
+    {
+        sun.awt.AWTAccessor$KeyboardFocusManagerAccessor $r1;
+        java.awt.Component r0;
+
+        r0 := @parameter0: java.awt.Component;
+
+        $r1 = <sun.awt.KeyboardFocusManagerPeerImpl: sun.awt.AWTAccessor$KeyboardFocusManagerAccessor kfmAccessor>;
+
+        interfaceinvoke $r1.<sun.awt.AWTAccessor$KeyboardFocusManagerAccessor: void removeLastFocusRequest(java.awt.Component)>(r0);
+
+        return;
+    }
+
+    public static boolean processSynchronousLightweightTransfer(java.awt.Component, java.awt.Component, boolean, boolean, long)
+    {
+        sun.awt.AWTAccessor$KeyboardFocusManagerAccessor $r2;
+        long l0;
+        java.awt.Component r0, r1;
+        boolean z0, z1, $z2;
+
+        r0 := @parameter0: java.awt.Component;
+
+        r1 := @parameter1: java.awt.Component;
+
+        z0 := @parameter2: boolean;
+
+        z1 := @parameter3: boolean;
+
+        l0 := @parameter4: long;
+
+        $r2 = <sun.awt.KeyboardFocusManagerPeerImpl: sun.awt.AWTAccessor$KeyboardFocusManagerAccessor kfmAccessor>;
+
+        $z2 = interfaceinvoke $r2.<sun.awt.AWTAccessor$KeyboardFocusManagerAccessor: boolean processSynchronousLightweightTransfer(java.awt.Component,java.awt.Component,boolean,boolean,long)>(r0, r1, z0, z1, l0);
+
+        return $z2;
+    }
+
+    static void <clinit>()
+    {
+        sun.awt.AWTAccessor$KeyboardFocusManagerAccessor $r1;
+        sun.util.logging.PlatformLogger $r0;
+
+        <sun.awt.KeyboardFocusManagerPeerImpl: int SNFH_SUCCESS_PROCEED> = 2;
+
+        <sun.awt.KeyboardFocusManagerPeerImpl: int SNFH_SUCCESS_HANDLED> = 1;
+
+        <sun.awt.KeyboardFocusManagerPeerImpl: int SNFH_FAILURE> = 0;
+
+        $r0 = staticinvoke <sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger getLogger(java.lang.String)>("sun.awt.focus.KeyboardFocusManagerPeerImpl");
+
+        <sun.awt.KeyboardFocusManagerPeerImpl: sun.util.logging.PlatformLogger focusLog> = $r0;
+
+        $r1 = staticinvoke <sun.awt.AWTAccessor: sun.awt.AWTAccessor$KeyboardFocusManagerAccessor getKeyboardFocusManagerAccessor()>();
+
+        <sun.awt.KeyboardFocusManagerPeerImpl: sun.awt.AWTAccessor$KeyboardFocusManagerAccessor kfmAccessor> = $r1;
+
+        return;
+    }
+}

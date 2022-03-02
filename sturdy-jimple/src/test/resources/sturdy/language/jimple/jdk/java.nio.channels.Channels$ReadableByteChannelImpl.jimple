@@ -1,0 +1,205 @@
+class java.nio.channels.Channels$ReadableByteChannelImpl extends java.nio.channels.spi.AbstractInterruptibleChannel implements java.nio.channels.ReadableByteChannel
+{
+    java.io.InputStream in;
+    private static final int TRANSFER_SIZE;
+    private byte[] buf;
+    private boolean open;
+    private java.lang.Object readLock;
+
+    void <init>(java.io.InputStream)
+    {
+        byte[] $r1;
+        java.nio.channels.Channels$ReadableByteChannelImpl r0;
+        java.lang.Object $r2;
+        java.io.InputStream r3;
+
+        r0 := @this: java.nio.channels.Channels$ReadableByteChannelImpl;
+
+        r3 := @parameter0: java.io.InputStream;
+
+        specialinvoke r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void <init>()>();
+
+        $r1 = newarray (byte)[0];
+
+        r0.<java.nio.channels.Channels$ReadableByteChannelImpl: byte[] buf> = $r1;
+
+        r0.<java.nio.channels.Channels$ReadableByteChannelImpl: boolean open> = 1;
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        r0.<java.nio.channels.Channels$ReadableByteChannelImpl: java.lang.Object readLock> = $r2;
+
+        r0.<java.nio.channels.Channels$ReadableByteChannelImpl: java.io.InputStream in> = r3;
+
+        return;
+    }
+
+    public int read(java.nio.ByteBuffer) throws java.io.IOException
+    {
+        java.lang.Throwable $r9, $r10;
+        byte[] $r3, $r4, $r6, $r8;
+        java.nio.ByteBuffer r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, i7, $i9;
+        boolean $z0, $z1;
+        java.nio.channels.Channels$ReadableByteChannelImpl r1;
+        java.lang.Object $r2;
+        java.io.InputStream $r5, $r7;
+
+        r1 := @this: java.nio.channels.Channels$ReadableByteChannelImpl;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        $i0 = virtualinvoke r0.<java.nio.ByteBuffer: int remaining()>();
+
+        i6 = 0;
+
+        i7 = 0;
+
+        $r2 = r1.<java.nio.channels.Channels$ReadableByteChannelImpl: java.lang.Object readLock>;
+
+        entermonitor $r2;
+
+     label01:
+        if i6 >= $i0 goto label13;
+
+        $i1 = $i0 - i6;
+
+        $i2 = staticinvoke <java.lang.Math: int min(int,int)>($i1, 8192);
+
+        $r3 = r1.<java.nio.channels.Channels$ReadableByteChannelImpl: byte[] buf>;
+
+        $i3 = lengthof $r3;
+
+        if $i3 >= $i2 goto label02;
+
+        $r8 = newarray (byte)[$i2];
+
+        r1.<java.nio.channels.Channels$ReadableByteChannelImpl: byte[] buf> = $r8;
+
+     label02:
+        if i6 <= 0 goto label03;
+
+        $r7 = r1.<java.nio.channels.Channels$ReadableByteChannelImpl: java.io.InputStream in>;
+
+        $i5 = virtualinvoke $r7.<java.io.InputStream: int available()>();
+
+        if $i5 > 0 goto label03;
+
+        goto label13;
+
+     label03:
+        virtualinvoke r1.<java.nio.channels.Channels$ReadableByteChannelImpl: void begin()>();
+
+        $r5 = r1.<java.nio.channels.Channels$ReadableByteChannelImpl: java.io.InputStream in>;
+
+        $r4 = r1.<java.nio.channels.Channels$ReadableByteChannelImpl: byte[] buf>;
+
+        $i4 = virtualinvoke $r5.<java.io.InputStream: int read(byte[],int,int)>($r4, 0, $i2);
+
+        i7 = $i4;
+
+     label04:
+        if $i4 <= 0 goto label05;
+
+        $z0 = 1;
+
+        goto label06;
+
+     label05:
+        $z0 = 0;
+
+     label06:
+        virtualinvoke r1.<java.nio.channels.Channels$ReadableByteChannelImpl: void end(boolean)>($z0);
+
+        goto label11;
+
+     label07:
+        $r10 := @caughtexception;
+
+     label08:
+        if i7 <= 0 goto label09;
+
+        $z1 = 1;
+
+        goto label10;
+
+     label09:
+        $z1 = 0;
+
+     label10:
+        virtualinvoke r1.<java.nio.channels.Channels$ReadableByteChannelImpl: void end(boolean)>($z1);
+
+        throw $r10;
+
+     label11:
+        if $i4 >= 0 goto label12;
+
+        goto label13;
+
+     label12:
+        i6 = i6 + $i4;
+
+        $r6 = r1.<java.nio.channels.Channels$ReadableByteChannelImpl: byte[] buf>;
+
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.ByteBuffer put(byte[],int,int)>($r6, 0, $i4);
+
+        goto label01;
+
+     label13:
+        if i7 >= 0 goto label15;
+
+        if i6 != 0 goto label15;
+
+        exitmonitor $r2;
+
+     label14:
+        $i9 = (int) -1;
+
+        return $i9;
+
+     label15:
+        exitmonitor $r2;
+
+     label16:
+        return i6;
+
+     label17:
+        $r9 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label18:
+        throw $r9;
+
+        catch java.lang.Throwable from label03 to label04 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+        catch java.lang.Throwable from label01 to label14 with label17;
+        catch java.lang.Throwable from label15 to label16 with label17;
+        catch java.lang.Throwable from label17 to label18 with label17;
+    }
+
+    protected void implCloseChannel() throws java.io.IOException
+    {
+        java.nio.channels.Channels$ReadableByteChannelImpl r0;
+        java.io.InputStream $r1;
+
+        r0 := @this: java.nio.channels.Channels$ReadableByteChannelImpl;
+
+        $r1 = r0.<java.nio.channels.Channels$ReadableByteChannelImpl: java.io.InputStream in>;
+
+        virtualinvoke $r1.<java.io.InputStream: void close()>();
+
+        r0.<java.nio.channels.Channels$ReadableByteChannelImpl: boolean open> = 0;
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <java.nio.channels.Channels$ReadableByteChannelImpl: int TRANSFER_SIZE> = 8192;
+
+        return;
+    }
+}

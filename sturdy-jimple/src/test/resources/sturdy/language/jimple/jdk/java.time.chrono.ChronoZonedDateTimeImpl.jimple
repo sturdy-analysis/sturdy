@@ -1,0 +1,922 @@
+final class java.time.chrono.ChronoZonedDateTimeImpl extends java.lang.Object implements java.time.chrono.ChronoZonedDateTime, java.io.Serializable
+{
+    private static final long serialVersionUID;
+    private final transient java.time.chrono.ChronoLocalDateTimeImpl dateTime;
+    private final transient java.time.ZoneOffset offset;
+    private final transient java.time.ZoneId zone;
+
+    static java.time.chrono.ChronoZonedDateTime ofBest(java.time.chrono.ChronoLocalDateTimeImpl, java.time.ZoneId, java.time.ZoneOffset)
+    {
+        java.time.LocalDateTime $r2;
+        long $l2;
+        java.time.zone.ZoneRules $r1;
+        java.time.chrono.ChronoLocalDateTimeImpl r11;
+        java.time.Duration $r7;
+        int $i0, $i1;
+        java.time.ZoneOffset r4, $r10, r12;
+        boolean $z0, $z1;
+        java.time.zone.ZoneOffsetTransition $r6;
+        java.time.chrono.ChronoZonedDateTimeImpl $r9, $r13;
+        java.time.ZoneId r0;
+        java.util.List $r3;
+        java.lang.Object $r5, $r8;
+
+        r11 := @parameter0: java.time.chrono.ChronoLocalDateTimeImpl;
+
+        r0 := @parameter1: java.time.ZoneId;
+
+        r4 := @parameter2: java.time.ZoneOffset;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r11, "localDateTime");
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "zone");
+
+        $z0 = r0 instanceof java.time.ZoneOffset;
+
+        if $z0 == 0 goto label1;
+
+        $r9 = new java.time.chrono.ChronoZonedDateTimeImpl;
+
+        $r10 = (java.time.ZoneOffset) r0;
+
+        specialinvoke $r9.<java.time.chrono.ChronoZonedDateTimeImpl: void <init>(java.time.chrono.ChronoLocalDateTimeImpl,java.time.ZoneOffset,java.time.ZoneId)>(r11, $r10, r0);
+
+        return $r9;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.time.ZoneId: java.time.zone.ZoneRules getRules()>();
+
+        $r2 = staticinvoke <java.time.LocalDateTime: java.time.LocalDateTime 'from'(java.time.temporal.TemporalAccessor)>(r11);
+
+        $r3 = virtualinvoke $r1.<java.time.zone.ZoneRules: java.util.List getValidOffsets(java.time.LocalDateTime)>($r2);
+
+        $i0 = interfaceinvoke $r3.<java.util.List: int size()>();
+
+        if $i0 != 1 goto label2;
+
+        $r8 = interfaceinvoke $r3.<java.util.List: java.lang.Object get(int)>(0);
+
+        r12 = (java.time.ZoneOffset) $r8;
+
+        goto label5;
+
+     label2:
+        $i1 = interfaceinvoke $r3.<java.util.List: int size()>();
+
+        if $i1 != 0 goto label3;
+
+        $r6 = virtualinvoke $r1.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransition getTransition(java.time.LocalDateTime)>($r2);
+
+        $r7 = virtualinvoke $r6.<java.time.zone.ZoneOffsetTransition: java.time.Duration getDuration()>();
+
+        $l2 = virtualinvoke $r7.<java.time.Duration: long getSeconds()>();
+
+        r11 = virtualinvoke r11.<java.time.chrono.ChronoLocalDateTimeImpl: java.time.chrono.ChronoLocalDateTimeImpl plusSeconds(long)>($l2);
+
+        r12 = virtualinvoke $r6.<java.time.zone.ZoneOffsetTransition: java.time.ZoneOffset getOffsetAfter()>();
+
+        goto label5;
+
+     label3:
+        if r4 == null goto label4;
+
+        $z1 = interfaceinvoke $r3.<java.util.List: boolean contains(java.lang.Object)>(r4);
+
+        if $z1 == 0 goto label4;
+
+        r12 = r4;
+
+        goto label5;
+
+     label4:
+        $r5 = interfaceinvoke $r3.<java.util.List: java.lang.Object get(int)>(0);
+
+        r12 = (java.time.ZoneOffset) $r5;
+
+     label5:
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r12, "offset");
+
+        $r13 = new java.time.chrono.ChronoZonedDateTimeImpl;
+
+        specialinvoke $r13.<java.time.chrono.ChronoZonedDateTimeImpl: void <init>(java.time.chrono.ChronoLocalDateTimeImpl,java.time.ZoneOffset,java.time.ZoneId)>(r11, r12, r0);
+
+        return $r13;
+    }
+
+    static java.time.chrono.ChronoZonedDateTimeImpl ofInstant(java.time.chrono.Chronology, java.time.Instant, java.time.ZoneId)
+    {
+        java.time.chrono.ChronoLocalDateTime $r6;
+        java.time.LocalDateTime $r4;
+        java.time.chrono.ChronoZonedDateTimeImpl $r8;
+        long $l0;
+        java.time.Instant r2;
+        java.time.ZoneId r0;
+        java.time.chrono.Chronology r5;
+        java.time.zone.ZoneRules $r1;
+        java.time.chrono.ChronoLocalDateTimeImpl r7;
+        int $i1;
+        java.time.ZoneOffset $r3;
+
+        r5 := @parameter0: java.time.chrono.Chronology;
+
+        r2 := @parameter1: java.time.Instant;
+
+        r0 := @parameter2: java.time.ZoneId;
+
+        $r1 = virtualinvoke r0.<java.time.ZoneId: java.time.zone.ZoneRules getRules()>();
+
+        $r3 = virtualinvoke $r1.<java.time.zone.ZoneRules: java.time.ZoneOffset getOffset(java.time.Instant)>(r2);
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>($r3, "offset");
+
+        $l0 = virtualinvoke r2.<java.time.Instant: long getEpochSecond()>();
+
+        $i1 = virtualinvoke r2.<java.time.Instant: int getNano()>();
+
+        $r4 = staticinvoke <java.time.LocalDateTime: java.time.LocalDateTime ofEpochSecond(long,int,java.time.ZoneOffset)>($l0, $i1, $r3);
+
+        $r6 = interfaceinvoke r5.<java.time.chrono.Chronology: java.time.chrono.ChronoLocalDateTime localDateTime(java.time.temporal.TemporalAccessor)>($r4);
+
+        r7 = (java.time.chrono.ChronoLocalDateTimeImpl) $r6;
+
+        $r8 = new java.time.chrono.ChronoZonedDateTimeImpl;
+
+        specialinvoke $r8.<java.time.chrono.ChronoZonedDateTimeImpl: void <init>(java.time.chrono.ChronoLocalDateTimeImpl,java.time.ZoneOffset,java.time.ZoneId)>(r7, $r3, r0);
+
+        return $r8;
+    }
+
+    private java.time.chrono.ChronoZonedDateTimeImpl create(java.time.Instant, java.time.ZoneId)
+    {
+        java.time.chrono.Chronology $r1;
+        java.time.chrono.ChronoZonedDateTimeImpl r0, $r4;
+        java.time.Instant r2;
+        java.time.ZoneId r3;
+
+        r0 := @this: java.time.chrono.ChronoZonedDateTimeImpl;
+
+        r2 := @parameter0: java.time.Instant;
+
+        r3 := @parameter1: java.time.ZoneId;
+
+        $r1 = virtualinvoke r0.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.Chronology getChronology()>();
+
+        $r4 = staticinvoke <java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.ChronoZonedDateTimeImpl ofInstant(java.time.chrono.Chronology,java.time.Instant,java.time.ZoneId)>($r1, r2, r3);
+
+        return $r4;
+    }
+
+    static java.time.chrono.ChronoZonedDateTimeImpl ensureValid(java.time.chrono.Chronology, java.time.temporal.Temporal)
+    {
+        java.time.chrono.ChronoZonedDateTimeImpl r1;
+        java.lang.ClassCastException $r4;
+        java.time.chrono.Chronology r2, $r3, $r10;
+        java.lang.StringBuilder $r5, $r6, $r8, $r9, $r12;
+        java.lang.String $r7, $r11, $r13;
+        java.time.temporal.Temporal r0;
+        boolean $z0;
+
+        r2 := @parameter0: java.time.chrono.Chronology;
+
+        r0 := @parameter1: java.time.temporal.Temporal;
+
+        r1 = (java.time.chrono.ChronoZonedDateTimeImpl) r0;
+
+        $r3 = virtualinvoke r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.Chronology getChronology()>();
+
+        $z0 = interfaceinvoke r2.<java.time.chrono.Chronology: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 != 0 goto label1;
+
+        $r4 = new java.lang.ClassCastException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Chronology mismatch, required: ");
+
+        $r7 = interfaceinvoke r2.<java.time.chrono.Chronology: java.lang.String getId()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", actual: ");
+
+        $r10 = virtualinvoke r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.Chronology getChronology()>();
+
+        $r11 = interfaceinvoke $r10.<java.time.chrono.Chronology: java.lang.String getId()>();
+
+        $r12 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.ClassCastException: void <init>(java.lang.String)>($r13);
+
+        throw $r4;
+
+     label1:
+        return r1;
+    }
+
+    private void <init>(java.time.chrono.ChronoLocalDateTimeImpl, java.time.ZoneOffset, java.time.ZoneId)
+    {
+        java.time.chrono.ChronoZonedDateTimeImpl r0;
+        java.time.ZoneId r7, $r9;
+        java.time.chrono.ChronoLocalDateTimeImpl r1, $r3;
+        java.lang.Object $r2, $r5, $r8;
+        java.time.ZoneOffset r4, $r6;
+
+        r0 := @this: java.time.chrono.ChronoZonedDateTimeImpl;
+
+        r1 := @parameter0: java.time.chrono.ChronoLocalDateTimeImpl;
+
+        r4 := @parameter1: java.time.ZoneOffset;
+
+        r7 := @parameter2: java.time.ZoneId;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r2 = staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r1, "dateTime");
+
+        $r3 = (java.time.chrono.ChronoLocalDateTimeImpl) $r2;
+
+        r0.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.ChronoLocalDateTimeImpl dateTime> = $r3;
+
+        $r5 = staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r4, "offset");
+
+        $r6 = (java.time.ZoneOffset) $r5;
+
+        r0.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.ZoneOffset offset> = $r6;
+
+        $r8 = staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r7, "zone");
+
+        $r9 = (java.time.ZoneId) $r8;
+
+        r0.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.ZoneId zone> = $r9;
+
+        return;
+    }
+
+    public java.time.ZoneOffset getOffset()
+    {
+        java.time.chrono.ChronoZonedDateTimeImpl r0;
+        java.time.ZoneOffset $r1;
+
+        r0 := @this: java.time.chrono.ChronoZonedDateTimeImpl;
+
+        $r1 = r0.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.ZoneOffset offset>;
+
+        return $r1;
+    }
+
+    public java.time.chrono.ChronoZonedDateTime withEarlierOffsetAtOverlap()
+    {
+        java.time.chrono.ChronoZonedDateTimeImpl r0, $r7;
+        java.time.LocalDateTime $r3;
+        java.time.zone.ZoneOffsetTransition $r4;
+        java.time.ZoneId $r1, $r8;
+        java.time.zone.ZoneRules $r2;
+        java.time.chrono.ChronoLocalDateTimeImpl $r9;
+        java.time.ZoneOffset $r5, $r6;
+        boolean $z0, $z1;
+
+        r0 := @this: java.time.chrono.ChronoZonedDateTimeImpl;
+
+        $r1 = virtualinvoke r0.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.ZoneId getZone()>();
+
+        $r2 = virtualinvoke $r1.<java.time.ZoneId: java.time.zone.ZoneRules getRules()>();
+
+        $r3 = staticinvoke <java.time.LocalDateTime: java.time.LocalDateTime 'from'(java.time.temporal.TemporalAccessor)>(r0);
+
+        $r4 = virtualinvoke $r2.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransition getTransition(java.time.LocalDateTime)>($r3);
+
+        if $r4 == null goto label1;
+
+        $z0 = virtualinvoke $r4.<java.time.zone.ZoneOffsetTransition: boolean isOverlap()>();
+
+        if $z0 == 0 goto label1;
+
+        $r5 = virtualinvoke $r4.<java.time.zone.ZoneOffsetTransition: java.time.ZoneOffset getOffsetBefore()>();
+
+        $r6 = r0.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.ZoneOffset offset>;
+
+        $z1 = virtualinvoke $r5.<java.time.ZoneOffset: boolean equals(java.lang.Object)>($r6);
+
+        if $z1 != 0 goto label1;
+
+        $r7 = new java.time.chrono.ChronoZonedDateTimeImpl;
+
+        $r9 = r0.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.ChronoLocalDateTimeImpl dateTime>;
+
+        $r8 = r0.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.ZoneId zone>;
+
+        specialinvoke $r7.<java.time.chrono.ChronoZonedDateTimeImpl: void <init>(java.time.chrono.ChronoLocalDateTimeImpl,java.time.ZoneOffset,java.time.ZoneId)>($r9, $r5, $r8);
+
+        return $r7;
+
+     label1:
+        return r0;
+    }
+
+    public java.time.chrono.ChronoZonedDateTime withLaterOffsetAtOverlap()
+    {
+        java.time.chrono.ChronoZonedDateTimeImpl r0, $r7;
+        java.time.LocalDateTime $r3;
+        java.time.zone.ZoneOffsetTransition $r4;
+        java.time.ZoneId $r1, $r8;
+        java.time.zone.ZoneRules $r2;
+        java.time.chrono.ChronoLocalDateTimeImpl $r9;
+        java.time.ZoneOffset $r5, $r6;
+        boolean $z0;
+
+        r0 := @this: java.time.chrono.ChronoZonedDateTimeImpl;
+
+        $r1 = virtualinvoke r0.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.ZoneId getZone()>();
+
+        $r2 = virtualinvoke $r1.<java.time.ZoneId: java.time.zone.ZoneRules getRules()>();
+
+        $r3 = staticinvoke <java.time.LocalDateTime: java.time.LocalDateTime 'from'(java.time.temporal.TemporalAccessor)>(r0);
+
+        $r4 = virtualinvoke $r2.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransition getTransition(java.time.LocalDateTime)>($r3);
+
+        if $r4 == null goto label1;
+
+        $r5 = virtualinvoke $r4.<java.time.zone.ZoneOffsetTransition: java.time.ZoneOffset getOffsetAfter()>();
+
+        $r6 = virtualinvoke r0.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.ZoneOffset getOffset()>();
+
+        $z0 = virtualinvoke $r5.<java.time.ZoneOffset: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 != 0 goto label1;
+
+        $r7 = new java.time.chrono.ChronoZonedDateTimeImpl;
+
+        $r9 = r0.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.ChronoLocalDateTimeImpl dateTime>;
+
+        $r8 = r0.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.ZoneId zone>;
+
+        specialinvoke $r7.<java.time.chrono.ChronoZonedDateTimeImpl: void <init>(java.time.chrono.ChronoLocalDateTimeImpl,java.time.ZoneOffset,java.time.ZoneId)>($r9, $r5, $r8);
+
+        return $r7;
+
+     label1:
+        return r0;
+    }
+
+    public java.time.chrono.ChronoLocalDateTime toLocalDateTime()
+    {
+        java.time.chrono.ChronoZonedDateTimeImpl r0;
+        java.time.chrono.ChronoLocalDateTimeImpl $r1;
+
+        r0 := @this: java.time.chrono.ChronoZonedDateTimeImpl;
+
+        $r1 = r0.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.ChronoLocalDateTimeImpl dateTime>;
+
+        return $r1;
+    }
+
+    public java.time.ZoneId getZone()
+    {
+        java.time.chrono.ChronoZonedDateTimeImpl r0;
+        java.time.ZoneId $r1;
+
+        r0 := @this: java.time.chrono.ChronoZonedDateTimeImpl;
+
+        $r1 = r0.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.ZoneId zone>;
+
+        return $r1;
+    }
+
+    public java.time.chrono.ChronoZonedDateTime withZoneSameLocal(java.time.ZoneId)
+    {
+        java.time.chrono.ChronoZonedDateTime $r4;
+        java.time.chrono.ChronoLocalDateTimeImpl $r3;
+        java.time.chrono.ChronoZonedDateTimeImpl r0;
+        java.time.ZoneOffset $r2;
+        java.time.ZoneId r1;
+
+        r0 := @this: java.time.chrono.ChronoZonedDateTimeImpl;
+
+        r1 := @parameter0: java.time.ZoneId;
+
+        $r3 = r0.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.ChronoLocalDateTimeImpl dateTime>;
+
+        $r2 = r0.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.ZoneOffset offset>;
+
+        $r4 = staticinvoke <java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.ChronoZonedDateTime ofBest(java.time.chrono.ChronoLocalDateTimeImpl,java.time.ZoneId,java.time.ZoneOffset)>($r3, r1, $r2);
+
+        return $r4;
+    }
+
+    public java.time.chrono.ChronoZonedDateTime withZoneSameInstant(java.time.ZoneId)
+    {
+        java.time.chrono.ChronoZonedDateTimeImpl r1, $r6;
+        java.time.Instant $r5;
+        java.time.ZoneId r0, $r2;
+        java.time.chrono.ChronoLocalDateTimeImpl $r4;
+        java.time.ZoneOffset $r3;
+        boolean $z0;
+
+        r1 := @this: java.time.chrono.ChronoZonedDateTimeImpl;
+
+        r0 := @parameter0: java.time.ZoneId;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "zone");
+
+        $r2 = r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.ZoneId zone>;
+
+        $z0 = virtualinvoke $r2.<java.time.ZoneId: boolean equals(java.lang.Object)>(r0);
+
+        if $z0 == 0 goto label1;
+
+        $r6 = r1;
+
+        goto label2;
+
+     label1:
+        $r4 = r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.ChronoLocalDateTimeImpl dateTime>;
+
+        $r3 = r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.ZoneOffset offset>;
+
+        $r5 = virtualinvoke $r4.<java.time.chrono.ChronoLocalDateTimeImpl: java.time.Instant toInstant(java.time.ZoneOffset)>($r3);
+
+        $r6 = specialinvoke r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.ChronoZonedDateTimeImpl create(java.time.Instant,java.time.ZoneId)>($r5, r0);
+
+     label2:
+        return $r6;
+    }
+
+    public boolean isSupported(java.time.temporal.TemporalField)
+    {
+        java.time.temporal.TemporalField r0;
+        java.time.chrono.ChronoZonedDateTimeImpl r1;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: java.time.chrono.ChronoZonedDateTimeImpl;
+
+        r0 := @parameter0: java.time.temporal.TemporalField;
+
+        $z0 = r0 instanceof java.time.temporal.ChronoField;
+
+        if $z0 != 0 goto label1;
+
+        if r0 == null goto label2;
+
+        $z1 = interfaceinvoke r0.<java.time.temporal.TemporalField: boolean isSupportedBy(java.time.temporal.TemporalAccessor)>(r1);
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+    }
+
+    public java.time.chrono.ChronoZonedDateTime 'with'(java.time.temporal.TemporalField, long)
+    {
+        java.time.temporal.ChronoField r5;
+        long l0, $l4, $l5;
+        int[] $r6;
+        java.time.chrono.ChronoLocalDateTimeImpl $r8, $r14, $r15;
+        int $i1, $i2, $i3;
+        java.time.ZoneOffset $r7, $r16;
+        boolean $z0;
+        java.time.temporal.TemporalField r0;
+        java.time.chrono.ChronoZonedDateTimeImpl r1, $r4, $r11;
+        java.time.Instant $r9;
+        java.time.ZoneId $r10, $r17;
+        java.time.chrono.Chronology $r2;
+        java.time.temporal.ChronoUnit $r12;
+        java.time.chrono.ChronoZonedDateTime $r13, $r18;
+        java.time.temporal.Temporal $r3;
+
+        r1 := @this: java.time.chrono.ChronoZonedDateTimeImpl;
+
+        r0 := @parameter0: java.time.temporal.TemporalField;
+
+        l0 := @parameter1: long;
+
+        $z0 = r0 instanceof java.time.temporal.ChronoField;
+
+        if $z0 == 0 goto label4;
+
+        r5 = (java.time.temporal.ChronoField) r0;
+
+        $r6 = <java.time.chrono.ChronoZonedDateTimeImpl$1: int[] $SwitchMap$java$time$temporal$ChronoField>;
+
+        $i1 = virtualinvoke r5.<java.time.temporal.ChronoField: int ordinal()>();
+
+        $i2 = $r6[$i1];
+
+        lookupswitch($i2)
+        {
+            case 1: goto label1;
+            case 2: goto label2;
+            default: goto label3;
+        };
+
+     label1:
+        $l4 = virtualinvoke r1.<java.time.chrono.ChronoZonedDateTimeImpl: long toEpochSecond()>();
+
+        $l5 = l0 - $l4;
+
+        $r12 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit SECONDS>;
+
+        $r13 = virtualinvoke r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.ChronoZonedDateTime plus(long,java.time.temporal.TemporalUnit)>($l5, $r12);
+
+        return $r13;
+
+     label2:
+        $i3 = virtualinvoke r5.<java.time.temporal.ChronoField: int checkValidIntValue(long)>(l0);
+
+        $r7 = staticinvoke <java.time.ZoneOffset: java.time.ZoneOffset ofTotalSeconds(int)>($i3);
+
+        $r8 = r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.ChronoLocalDateTimeImpl dateTime>;
+
+        $r9 = virtualinvoke $r8.<java.time.chrono.ChronoLocalDateTimeImpl: java.time.Instant toInstant(java.time.ZoneOffset)>($r7);
+
+        $r10 = r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.ZoneId zone>;
+
+        $r11 = specialinvoke r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.ChronoZonedDateTimeImpl create(java.time.Instant,java.time.ZoneId)>($r9, $r10);
+
+        return $r11;
+
+     label3:
+        $r14 = r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.ChronoLocalDateTimeImpl dateTime>;
+
+        $r15 = virtualinvoke $r14.<java.time.chrono.ChronoLocalDateTimeImpl: java.time.chrono.ChronoLocalDateTimeImpl 'with'(java.time.temporal.TemporalField,long)>(r0, l0);
+
+        $r17 = r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.ZoneId zone>;
+
+        $r16 = r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.ZoneOffset offset>;
+
+        $r18 = staticinvoke <java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.ChronoZonedDateTime ofBest(java.time.chrono.ChronoLocalDateTimeImpl,java.time.ZoneId,java.time.ZoneOffset)>($r15, $r17, $r16);
+
+        return $r18;
+
+     label4:
+        $r2 = virtualinvoke r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.Chronology getChronology()>();
+
+        $r3 = interfaceinvoke r0.<java.time.temporal.TemporalField: java.time.temporal.Temporal adjustInto(java.time.temporal.Temporal,long)>(r1, l0);
+
+        $r4 = staticinvoke <java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.ChronoZonedDateTimeImpl ensureValid(java.time.chrono.Chronology,java.time.temporal.Temporal)>($r2, $r3);
+
+        return $r4;
+    }
+
+    public java.time.chrono.ChronoZonedDateTime plus(long, java.time.temporal.TemporalUnit)
+    {
+        java.time.temporal.TemporalUnit r0;
+        java.time.chrono.ChronoZonedDateTimeImpl r1, $r4;
+        long l0;
+        java.time.chrono.Chronology $r2;
+        java.time.chrono.ChronoZonedDateTime $r7;
+        java.time.chrono.ChronoLocalDateTimeImpl $r5, $r6;
+        java.time.temporal.Temporal $r3;
+        boolean $z0;
+
+        r1 := @this: java.time.chrono.ChronoZonedDateTimeImpl;
+
+        l0 := @parameter0: long;
+
+        r0 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $z0 = r0 instanceof java.time.temporal.ChronoUnit;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.ChronoLocalDateTimeImpl dateTime>;
+
+        $r6 = virtualinvoke $r5.<java.time.chrono.ChronoLocalDateTimeImpl: java.time.chrono.ChronoLocalDateTimeImpl plus(long,java.time.temporal.TemporalUnit)>(l0, r0);
+
+        $r7 = virtualinvoke r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.ChronoZonedDateTime 'with'(java.time.temporal.TemporalAdjuster)>($r6);
+
+        return $r7;
+
+     label1:
+        $r2 = virtualinvoke r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.Chronology getChronology()>();
+
+        $r3 = interfaceinvoke r0.<java.time.temporal.TemporalUnit: java.time.temporal.Temporal addTo(java.time.temporal.Temporal,long)>(r1, l0);
+
+        $r4 = staticinvoke <java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.ChronoZonedDateTimeImpl ensureValid(java.time.chrono.Chronology,java.time.temporal.Temporal)>($r2, $r3);
+
+        return $r4;
+    }
+
+    public long until(java.time.temporal.Temporal, java.time.temporal.TemporalUnit)
+    {
+        java.time.chrono.ChronoLocalDateTime $r8;
+        java.time.temporal.TemporalUnit r4;
+        java.time.chrono.ChronoZonedDateTimeImpl r1;
+        long $l0, $l1;
+        java.time.chrono.Chronology $r2;
+        java.time.chrono.ChronoZonedDateTime $r3, $r6;
+        java.time.chrono.ChronoLocalDateTimeImpl $r7;
+        java.time.ZoneOffset $r5;
+        java.time.temporal.Temporal r0;
+        boolean $z0;
+
+        r1 := @this: java.time.chrono.ChronoZonedDateTimeImpl;
+
+        r0 := @parameter0: java.time.temporal.Temporal;
+
+        r4 := @parameter1: java.time.temporal.TemporalUnit;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "endExclusive");
+
+        $r2 = virtualinvoke r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.Chronology getChronology()>();
+
+        $r3 = interfaceinvoke $r2.<java.time.chrono.Chronology: java.time.chrono.ChronoZonedDateTime zonedDateTime(java.time.temporal.TemporalAccessor)>(r0);
+
+        $z0 = r4 instanceof java.time.temporal.ChronoUnit;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.ZoneOffset offset>;
+
+        $r6 = interfaceinvoke $r3.<java.time.chrono.ChronoZonedDateTime: java.time.chrono.ChronoZonedDateTime withZoneSameInstant(java.time.ZoneId)>($r5);
+
+        $r7 = r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.ChronoLocalDateTimeImpl dateTime>;
+
+        $r8 = interfaceinvoke $r6.<java.time.chrono.ChronoZonedDateTime: java.time.chrono.ChronoLocalDateTime toLocalDateTime()>();
+
+        $l1 = virtualinvoke $r7.<java.time.chrono.ChronoLocalDateTimeImpl: long until(java.time.temporal.Temporal,java.time.temporal.TemporalUnit)>($r8, r4);
+
+        return $l1;
+
+     label1:
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r4, "unit");
+
+        $l0 = interfaceinvoke r4.<java.time.temporal.TemporalUnit: long between(java.time.temporal.Temporal,java.time.temporal.Temporal)>(r1, $r3);
+
+        return $l0;
+    }
+
+    private java.lang.Object writeReplace()
+    {
+        java.time.chrono.ChronoZonedDateTimeImpl r1;
+        java.time.chrono.Ser $r0;
+
+        r1 := @this: java.time.chrono.ChronoZonedDateTimeImpl;
+
+        $r0 = new java.time.chrono.Ser;
+
+        specialinvoke $r0.<java.time.chrono.Ser: void <init>(byte,java.lang.Object)>(3, r1);
+
+        return $r0;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.InvalidObjectException
+    {
+        java.time.chrono.ChronoZonedDateTimeImpl r1;
+        java.io.ObjectInputStream r2;
+        java.io.InvalidObjectException $r0;
+
+        r1 := @this: java.time.chrono.ChronoZonedDateTimeImpl;
+
+        r2 := @parameter0: java.io.ObjectInputStream;
+
+        $r0 = new java.io.InvalidObjectException;
+
+        specialinvoke $r0.<java.io.InvalidObjectException: void <init>(java.lang.String)>("Deserialization via serialization delegate");
+
+        throw $r0;
+    }
+
+    void writeExternal(java.io.ObjectOutput) throws java.io.IOException
+    {
+        java.time.chrono.ChronoLocalDateTimeImpl $r2;
+        java.io.ObjectOutput r0;
+        java.time.chrono.ChronoZonedDateTimeImpl r1;
+        java.time.ZoneOffset $r3;
+        java.time.ZoneId $r4;
+
+        r1 := @this: java.time.chrono.ChronoZonedDateTimeImpl;
+
+        r0 := @parameter0: java.io.ObjectOutput;
+
+        $r2 = r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.ChronoLocalDateTimeImpl dateTime>;
+
+        interfaceinvoke r0.<java.io.ObjectOutput: void writeObject(java.lang.Object)>($r2);
+
+        $r3 = r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.ZoneOffset offset>;
+
+        interfaceinvoke r0.<java.io.ObjectOutput: void writeObject(java.lang.Object)>($r3);
+
+        $r4 = r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.ZoneId zone>;
+
+        interfaceinvoke r0.<java.io.ObjectOutput: void writeObject(java.lang.Object)>($r4);
+
+        return;
+    }
+
+    static java.time.chrono.ChronoZonedDateTime readExternal(java.io.ObjectInput) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.time.chrono.ChronoLocalDateTime r2;
+        java.time.ZoneId r6;
+        java.time.chrono.ChronoZonedDateTime $r7, $r8;
+        java.io.ObjectInput r0;
+        java.lang.Object $r1, $r3, $r5;
+        java.time.ZoneOffset r4;
+
+        r0 := @parameter0: java.io.ObjectInput;
+
+        $r1 = interfaceinvoke r0.<java.io.ObjectInput: java.lang.Object readObject()>();
+
+        r2 = (java.time.chrono.ChronoLocalDateTime) $r1;
+
+        $r3 = interfaceinvoke r0.<java.io.ObjectInput: java.lang.Object readObject()>();
+
+        r4 = (java.time.ZoneOffset) $r3;
+
+        $r5 = interfaceinvoke r0.<java.io.ObjectInput: java.lang.Object readObject()>();
+
+        r6 = (java.time.ZoneId) $r5;
+
+        $r7 = interfaceinvoke r2.<java.time.chrono.ChronoLocalDateTime: java.time.chrono.ChronoZonedDateTime atZone(java.time.ZoneId)>(r4);
+
+        $r8 = interfaceinvoke $r7.<java.time.chrono.ChronoZonedDateTime: java.time.chrono.ChronoZonedDateTime withZoneSameLocal(java.time.ZoneId)>(r6);
+
+        return $r8;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        java.time.chrono.ChronoZonedDateTime $r2;
+        java.time.chrono.ChronoZonedDateTimeImpl r0;
+        int $i0;
+        java.lang.Object r1;
+        boolean $z0, $z1;
+
+        r0 := @this: java.time.chrono.ChronoZonedDateTimeImpl;
+
+        r1 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        $z0 = r1 instanceof java.time.chrono.ChronoZonedDateTime;
+
+        if $z0 == 0 goto label4;
+
+        $r2 = (java.time.chrono.ChronoZonedDateTime) r1;
+
+        $i0 = virtualinvoke r0.<java.time.chrono.ChronoZonedDateTimeImpl: int compareTo(java.time.chrono.ChronoZonedDateTime)>($r2);
+
+        if $i0 != 0 goto label2;
+
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        return $z1;
+
+     label4:
+        return 0;
+    }
+
+    public int hashCode()
+    {
+        java.time.chrono.ChronoLocalDateTime $r1;
+        java.time.chrono.ChronoZonedDateTimeImpl r0;
+        java.time.ZoneId $r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.time.ZoneOffset $r2;
+
+        r0 := @this: java.time.chrono.ChronoZonedDateTimeImpl;
+
+        $r1 = virtualinvoke r0.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.ChronoLocalDateTime toLocalDateTime()>();
+
+        $i0 = interfaceinvoke $r1.<java.time.chrono.ChronoLocalDateTime: int hashCode()>();
+
+        $r2 = virtualinvoke r0.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.ZoneOffset getOffset()>();
+
+        $i1 = virtualinvoke $r2.<java.time.ZoneOffset: int hashCode()>();
+
+        $i2 = $i0 ^ $i1;
+
+        $r3 = virtualinvoke r0.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.ZoneId getZone()>();
+
+        $i3 = virtualinvoke $r3.<java.time.ZoneId: int hashCode()>();
+
+        $i4 = staticinvoke <java.lang.Integer: int rotateLeft(int,int)>($i3, 3);
+
+        $i5 = $i2 ^ $i4;
+
+        return $i5;
+    }
+
+    public java.lang.String toString()
+    {
+        java.lang.String $r3, $r6, $r8, $r15, r18;
+        java.time.ZoneOffset $r5, $r9;
+        java.time.chrono.ChronoLocalDateTime $r2;
+        java.time.chrono.ChronoZonedDateTimeImpl r1;
+        java.time.ZoneId $r10, $r14;
+        java.lang.StringBuilder $r0, $r4, $r7, $r11, $r12, $r13, $r16, $r17;
+
+        r1 := @this: java.time.chrono.ChronoZonedDateTimeImpl;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.ChronoLocalDateTime toLocalDateTime()>();
+
+        $r3 = interfaceinvoke $r2.<java.time.chrono.ChronoLocalDateTime: java.lang.String toString()>();
+
+        $r4 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.ZoneOffset getOffset()>();
+
+        $r6 = virtualinvoke $r5.<java.time.ZoneOffset: java.lang.String toString()>();
+
+        $r7 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r18 = $r8;
+
+        $r9 = virtualinvoke r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.ZoneOffset getOffset()>();
+
+        $r10 = virtualinvoke r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.ZoneId getZone()>();
+
+        if $r9 == $r10 goto label1;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(91);
+
+        $r14 = virtualinvoke r1.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.ZoneId getZone()>();
+
+        $r15 = virtualinvoke $r14.<java.time.ZoneId: java.lang.String toString()>();
+
+        $r16 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(93);
+
+        r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label1:
+        return r18;
+    }
+
+    public volatile java.time.temporal.Temporal plus(long, java.time.temporal.TemporalUnit)
+    {
+        java.time.chrono.ChronoZonedDateTime $r2;
+        java.time.temporal.TemporalUnit r1;
+        java.time.chrono.ChronoZonedDateTimeImpl r0;
+        long l0;
+
+        r0 := @this: java.time.chrono.ChronoZonedDateTimeImpl;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $r2 = virtualinvoke r0.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.ChronoZonedDateTime plus(long,java.time.temporal.TemporalUnit)>(l0, r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.temporal.Temporal 'with'(java.time.temporal.TemporalField, long)
+    {
+        java.time.chrono.ChronoZonedDateTime $r2;
+        java.time.temporal.TemporalField r1;
+        java.time.chrono.ChronoZonedDateTimeImpl r0;
+        long l0;
+
+        r0 := @this: java.time.chrono.ChronoZonedDateTimeImpl;
+
+        r1 := @parameter0: java.time.temporal.TemporalField;
+
+        l0 := @parameter1: long;
+
+        $r2 = virtualinvoke r0.<java.time.chrono.ChronoZonedDateTimeImpl: java.time.chrono.ChronoZonedDateTime 'with'(java.time.temporal.TemporalField,long)>(r1, l0);
+
+        return $r2;
+    }
+
+    public static void <clinit>()
+    {
+        <java.time.chrono.ChronoZonedDateTimeImpl: long serialVersionUID> = -5261813987200935591L;
+
+        return;
+    }
+}

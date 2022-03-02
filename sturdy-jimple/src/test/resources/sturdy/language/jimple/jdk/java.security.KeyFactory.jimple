@@ -1,0 +1,651 @@
+public class java.security.KeyFactory extends java.lang.Object
+{
+    private static final sun.security.util.Debug debug;
+    private final java.lang.String algorithm;
+    private java.security.Provider provider;
+    private volatile java.security.KeyFactorySpi spi;
+    private final java.lang.Object lock;
+    private java.util.Iterator serviceIterator;
+
+    protected void <init>(java.security.KeyFactorySpi, java.security.Provider, java.lang.String)
+    {
+        java.security.KeyFactorySpi r2;
+        java.lang.Object $r1;
+        java.lang.String r4;
+        java.security.KeyFactory r0;
+        java.security.Provider r3;
+
+        r0 := @this: java.security.KeyFactory;
+
+        r2 := @parameter0: java.security.KeyFactorySpi;
+
+        r3 := @parameter1: java.security.Provider;
+
+        r4 := @parameter2: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<java.security.KeyFactory: java.lang.Object lock> = $r1;
+
+        r0.<java.security.KeyFactory: java.security.KeyFactorySpi spi> = r2;
+
+        r0.<java.security.KeyFactory: java.security.Provider provider> = r3;
+
+        r0.<java.security.KeyFactory: java.lang.String algorithm> = r4;
+
+        return;
+    }
+
+    private void <init>(java.lang.String) throws java.security.NoSuchAlgorithmException
+    {
+        java.security.KeyFactorySpi $r5;
+        java.util.Iterator $r4;
+        java.security.KeyFactory r0;
+        java.util.List $r3;
+        java.security.NoSuchAlgorithmException $r6;
+        java.lang.Object $r1;
+        java.lang.StringBuilder $r7, $r8, $r9;
+        java.lang.String r2, $r10;
+
+        r0 := @this: java.security.KeyFactory;
+
+        r2 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<java.security.KeyFactory: java.lang.Object lock> = $r1;
+
+        r0.<java.security.KeyFactory: java.lang.String algorithm> = r2;
+
+        $r3 = staticinvoke <sun.security.jca.GetInstance: java.util.List getServices(java.lang.String,java.lang.String)>("KeyFactory", r2);
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+        r0.<java.security.KeyFactory: java.util.Iterator serviceIterator> = $r4;
+
+        $r5 = specialinvoke r0.<java.security.KeyFactory: java.security.KeyFactorySpi nextSpi(java.security.KeyFactorySpi)>(null);
+
+        if $r5 != null goto label1;
+
+        $r6 = new java.security.NoSuchAlgorithmException;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" KeyFactory not available");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.security.NoSuchAlgorithmException: void <init>(java.lang.String)>($r10);
+
+        throw $r6;
+
+     label1:
+        return;
+    }
+
+    public static java.security.KeyFactory getInstance(java.lang.String) throws java.security.NoSuchAlgorithmException
+    {
+        java.lang.String r1;
+        java.security.KeyFactory $r0;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = new java.security.KeyFactory;
+
+        specialinvoke $r0.<java.security.KeyFactory: void <init>(java.lang.String)>(r1);
+
+        return $r0;
+    }
+
+    public static java.security.KeyFactory getInstance(java.lang.String, java.lang.String) throws java.security.NoSuchAlgorithmException, java.security.NoSuchProviderException
+    {
+        java.security.KeyFactorySpi $r6;
+        sun.security.jca.GetInstance$Instance $r2;
+        java.lang.Object $r4;
+        java.lang.String r0, r1;
+        java.security.KeyFactory $r3;
+        java.security.Provider $r5;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        $r2 = staticinvoke <sun.security.jca.GetInstance: sun.security.jca.GetInstance$Instance getInstance(java.lang.String,java.lang.Class,java.lang.String,java.lang.String)>("KeyFactory", class "Ljava/security/KeyFactorySpi;", r0, r1);
+
+        $r3 = new java.security.KeyFactory;
+
+        $r4 = $r2.<sun.security.jca.GetInstance$Instance: java.lang.Object impl>;
+
+        $r6 = (java.security.KeyFactorySpi) $r4;
+
+        $r5 = $r2.<sun.security.jca.GetInstance$Instance: java.security.Provider provider>;
+
+        specialinvoke $r3.<java.security.KeyFactory: void <init>(java.security.KeyFactorySpi,java.security.Provider,java.lang.String)>($r6, $r5, r0);
+
+        return $r3;
+    }
+
+    public static java.security.KeyFactory getInstance(java.lang.String, java.security.Provider) throws java.security.NoSuchAlgorithmException
+    {
+        java.security.KeyFactorySpi $r6;
+        sun.security.jca.GetInstance$Instance $r2;
+        java.lang.Object $r4;
+        java.lang.String r0;
+        java.security.Provider r1, $r5;
+        java.security.KeyFactory $r3;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.security.Provider;
+
+        $r2 = staticinvoke <sun.security.jca.GetInstance: sun.security.jca.GetInstance$Instance getInstance(java.lang.String,java.lang.Class,java.lang.String,java.security.Provider)>("KeyFactory", class "Ljava/security/KeyFactorySpi;", r0, r1);
+
+        $r3 = new java.security.KeyFactory;
+
+        $r4 = $r2.<sun.security.jca.GetInstance$Instance: java.lang.Object impl>;
+
+        $r6 = (java.security.KeyFactorySpi) $r4;
+
+        $r5 = $r2.<sun.security.jca.GetInstance$Instance: java.security.Provider provider>;
+
+        specialinvoke $r3.<java.security.KeyFactory: void <init>(java.security.KeyFactorySpi,java.security.Provider,java.lang.String)>($r6, $r5, r0);
+
+        return $r3;
+    }
+
+    public final java.security.Provider getProvider()
+    {
+        java.lang.Throwable $r3;
+        java.lang.Object $r1;
+        java.security.KeyFactory r0;
+        java.security.Provider $r2;
+
+        r0 := @this: java.security.KeyFactory;
+
+        $r1 = r0.<java.security.KeyFactory: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label1:
+        r0.<java.security.KeyFactory: java.util.Iterator serviceIterator> = null;
+
+        $r2 = r0.<java.security.KeyFactory: java.security.Provider provider>;
+
+        exitmonitor $r1;
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public final java.lang.String getAlgorithm()
+    {
+        java.lang.String $r1;
+        java.security.KeyFactory r0;
+
+        r0 := @this: java.security.KeyFactory;
+
+        $r1 = r0.<java.security.KeyFactory: java.lang.String algorithm>;
+
+        return $r1;
+    }
+
+    private java.security.KeyFactorySpi nextSpi(java.security.KeyFactorySpi)
+    {
+        java.lang.Throwable $r12;
+        java.security.KeyFactorySpi r2, r8, $r10, $r11;
+        boolean $z0, $z1;
+        java.util.Iterator $r3, $r4, $r14;
+        java.security.KeyFactory r0;
+        java.security.Provider $r9;
+        java.security.Provider$Service r6;
+        java.security.NoSuchAlgorithmException $r13;
+        java.lang.Object $r1, $r5, $r7;
+
+        r0 := @this: java.security.KeyFactory;
+
+        r2 := @parameter0: java.security.KeyFactorySpi;
+
+        $r1 = r0.<java.security.KeyFactory: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label01:
+        if r2 == null goto label03;
+
+        $r10 = r0.<java.security.KeyFactory: java.security.KeyFactorySpi spi>;
+
+        if r2 == $r10 goto label03;
+
+        $r11 = r0.<java.security.KeyFactory: java.security.KeyFactorySpi spi>;
+
+        exitmonitor $r1;
+
+     label02:
+        return $r11;
+
+     label03:
+        $r3 = r0.<java.security.KeyFactory: java.util.Iterator serviceIterator>;
+
+        if $r3 != null goto label05;
+
+        exitmonitor $r1;
+
+     label04:
+        return null;
+
+     label05:
+        $r14 = r0.<java.security.KeyFactory: java.util.Iterator serviceIterator>;
+
+        $z1 = interfaceinvoke $r14.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label12;
+
+        $r4 = r0.<java.security.KeyFactory: java.util.Iterator serviceIterator>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (java.security.Provider$Service) $r5;
+
+     label06:
+        $r7 = virtualinvoke r6.<java.security.Provider$Service: java.lang.Object newInstance(java.lang.Object)>(null);
+
+        $z0 = $r7 instanceof java.security.KeyFactorySpi;
+
+        if $z0 != 0 goto label08;
+
+     label07:
+        goto label05;
+
+     label08:
+        r8 = (java.security.KeyFactorySpi) $r7;
+
+        $r9 = virtualinvoke r6.<java.security.Provider$Service: java.security.Provider getProvider()>();
+
+        r0.<java.security.KeyFactory: java.security.Provider provider> = $r9;
+
+        r0.<java.security.KeyFactory: java.security.KeyFactorySpi spi> = r8;
+
+     label09:
+        exitmonitor $r1;
+
+     label10:
+        return r8;
+
+     label11:
+        $r13 := @caughtexception;
+
+        goto label05;
+
+     label12:
+        r0.<java.security.KeyFactory: java.util.Iterator serviceIterator> = null;
+
+        exitmonitor $r1;
+
+     label13:
+        return null;
+
+     label14:
+        $r12 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label15:
+        throw $r12;
+
+        catch java.security.NoSuchAlgorithmException from label06 to label07 with label11;
+        catch java.security.NoSuchAlgorithmException from label08 to label09 with label11;
+        catch java.lang.Throwable from label01 to label02 with label14;
+        catch java.lang.Throwable from label03 to label04 with label14;
+        catch java.lang.Throwable from label05 to label10 with label14;
+        catch java.lang.Throwable from label11 to label13 with label14;
+        catch java.lang.Throwable from label14 to label15 with label14;
+    }
+
+    public final java.security.PublicKey generatePublic(java.security.spec.KeySpec) throws java.security.spec.InvalidKeySpecException
+    {
+        java.security.KeyFactorySpi $r4, $r7, r12;
+        java.util.Iterator $r1;
+        java.security.spec.InvalidKeySpecException $r8, $r9;
+        java.security.PublicKey $r3, $r5;
+        java.lang.RuntimeException $r10;
+        java.lang.Exception $r6, r11;
+        java.security.KeyFactory r0;
+        java.security.spec.KeySpec r2;
+        boolean $z0, $z1;
+
+        r0 := @this: java.security.KeyFactory;
+
+        r2 := @parameter0: java.security.spec.KeySpec;
+
+        $r1 = r0.<java.security.KeyFactory: java.util.Iterator serviceIterator>;
+
+        if $r1 != null goto label1;
+
+        $r4 = r0.<java.security.KeyFactory: java.security.KeyFactorySpi spi>;
+
+        $r5 = virtualinvoke $r4.<java.security.KeyFactorySpi: java.security.PublicKey engineGeneratePublic(java.security.spec.KeySpec)>(r2);
+
+        return $r5;
+
+     label1:
+        r11 = null;
+
+        r12 = r0.<java.security.KeyFactory: java.security.KeyFactorySpi spi>;
+
+     label2:
+        $r3 = virtualinvoke r12.<java.security.KeyFactorySpi: java.security.PublicKey engineGeneratePublic(java.security.spec.KeySpec)>(r2);
+
+     label3:
+        return $r3;
+
+     label4:
+        $r6 := @caughtexception;
+
+        if r11 != null goto label5;
+
+        r11 = $r6;
+
+     label5:
+        $r7 = specialinvoke r0.<java.security.KeyFactory: java.security.KeyFactorySpi nextSpi(java.security.KeyFactorySpi)>(r12);
+
+        r12 = $r7;
+
+        if $r7 != null goto label2;
+
+        $z0 = r11 instanceof java.lang.RuntimeException;
+
+        if $z0 == 0 goto label6;
+
+        $r10 = (java.lang.RuntimeException) r11;
+
+        throw $r10;
+
+     label6:
+        $z1 = r11 instanceof java.security.spec.InvalidKeySpecException;
+
+        if $z1 == 0 goto label7;
+
+        $r9 = (java.security.spec.InvalidKeySpecException) r11;
+
+        throw $r9;
+
+     label7:
+        $r8 = new java.security.spec.InvalidKeySpecException;
+
+        specialinvoke $r8.<java.security.spec.InvalidKeySpecException: void <init>(java.lang.String,java.lang.Throwable)>("Could not generate public key", r11);
+
+        throw $r8;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    public final java.security.PrivateKey generatePrivate(java.security.spec.KeySpec) throws java.security.spec.InvalidKeySpecException
+    {
+        java.security.KeyFactorySpi $r4, $r7, r12;
+        java.util.Iterator $r1;
+        java.security.spec.InvalidKeySpecException $r8, $r9;
+        java.lang.RuntimeException $r10;
+        java.lang.Exception $r6, r11;
+        java.security.KeyFactory r0;
+        java.security.spec.KeySpec r2;
+        java.security.PrivateKey $r3, $r5;
+        boolean $z0, $z1;
+
+        r0 := @this: java.security.KeyFactory;
+
+        r2 := @parameter0: java.security.spec.KeySpec;
+
+        $r1 = r0.<java.security.KeyFactory: java.util.Iterator serviceIterator>;
+
+        if $r1 != null goto label1;
+
+        $r4 = r0.<java.security.KeyFactory: java.security.KeyFactorySpi spi>;
+
+        $r5 = virtualinvoke $r4.<java.security.KeyFactorySpi: java.security.PrivateKey engineGeneratePrivate(java.security.spec.KeySpec)>(r2);
+
+        return $r5;
+
+     label1:
+        r11 = null;
+
+        r12 = r0.<java.security.KeyFactory: java.security.KeyFactorySpi spi>;
+
+     label2:
+        $r3 = virtualinvoke r12.<java.security.KeyFactorySpi: java.security.PrivateKey engineGeneratePrivate(java.security.spec.KeySpec)>(r2);
+
+     label3:
+        return $r3;
+
+     label4:
+        $r6 := @caughtexception;
+
+        if r11 != null goto label5;
+
+        r11 = $r6;
+
+     label5:
+        $r7 = specialinvoke r0.<java.security.KeyFactory: java.security.KeyFactorySpi nextSpi(java.security.KeyFactorySpi)>(r12);
+
+        r12 = $r7;
+
+        if $r7 != null goto label2;
+
+        $z0 = r11 instanceof java.lang.RuntimeException;
+
+        if $z0 == 0 goto label6;
+
+        $r10 = (java.lang.RuntimeException) r11;
+
+        throw $r10;
+
+     label6:
+        $z1 = r11 instanceof java.security.spec.InvalidKeySpecException;
+
+        if $z1 == 0 goto label7;
+
+        $r9 = (java.security.spec.InvalidKeySpecException) r11;
+
+        throw $r9;
+
+     label7:
+        $r8 = new java.security.spec.InvalidKeySpecException;
+
+        specialinvoke $r8.<java.security.spec.InvalidKeySpecException: void <init>(java.lang.String,java.lang.Throwable)>("Could not generate private key", r11);
+
+        throw $r8;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    public final java.security.spec.KeySpec getKeySpec(java.security.Key, java.lang.Class) throws java.security.spec.InvalidKeySpecException
+    {
+        java.security.KeyFactorySpi $r5, $r8, r13;
+        java.security.spec.InvalidKeySpecException $r9, $r10;
+        java.security.spec.KeySpec $r4, $r6;
+        boolean $z0, $z1;
+        java.util.Iterator $r1;
+        java.lang.RuntimeException $r11;
+        java.lang.Exception $r7, r12;
+        java.security.KeyFactory r0;
+        java.security.Key r2;
+        java.lang.Class r3;
+
+        r0 := @this: java.security.KeyFactory;
+
+        r2 := @parameter0: java.security.Key;
+
+        r3 := @parameter1: java.lang.Class;
+
+        $r1 = r0.<java.security.KeyFactory: java.util.Iterator serviceIterator>;
+
+        if $r1 != null goto label1;
+
+        $r5 = r0.<java.security.KeyFactory: java.security.KeyFactorySpi spi>;
+
+        $r6 = virtualinvoke $r5.<java.security.KeyFactorySpi: java.security.spec.KeySpec engineGetKeySpec(java.security.Key,java.lang.Class)>(r2, r3);
+
+        return $r6;
+
+     label1:
+        r12 = null;
+
+        r13 = r0.<java.security.KeyFactory: java.security.KeyFactorySpi spi>;
+
+     label2:
+        $r4 = virtualinvoke r13.<java.security.KeyFactorySpi: java.security.spec.KeySpec engineGetKeySpec(java.security.Key,java.lang.Class)>(r2, r3);
+
+     label3:
+        return $r4;
+
+     label4:
+        $r7 := @caughtexception;
+
+        if r12 != null goto label5;
+
+        r12 = $r7;
+
+     label5:
+        $r8 = specialinvoke r0.<java.security.KeyFactory: java.security.KeyFactorySpi nextSpi(java.security.KeyFactorySpi)>(r13);
+
+        r13 = $r8;
+
+        if $r8 != null goto label2;
+
+        $z0 = r12 instanceof java.lang.RuntimeException;
+
+        if $z0 == 0 goto label6;
+
+        $r11 = (java.lang.RuntimeException) r12;
+
+        throw $r11;
+
+     label6:
+        $z1 = r12 instanceof java.security.spec.InvalidKeySpecException;
+
+        if $z1 == 0 goto label7;
+
+        $r10 = (java.security.spec.InvalidKeySpecException) r12;
+
+        throw $r10;
+
+     label7:
+        $r9 = new java.security.spec.InvalidKeySpecException;
+
+        specialinvoke $r9.<java.security.spec.InvalidKeySpecException: void <init>(java.lang.String,java.lang.Throwable)>("Could not get key spec", r12);
+
+        throw $r9;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    public final java.security.Key translateKey(java.security.Key) throws java.security.InvalidKeyException
+    {
+        java.security.KeyFactorySpi $r4, $r7, r12;
+        java.util.Iterator $r1;
+        java.lang.RuntimeException $r10;
+        java.lang.Exception $r6, r11;
+        java.security.KeyFactory r0;
+        java.security.Key r2, $r3, $r5;
+        java.security.InvalidKeyException $r8, $r9;
+        boolean $z0, $z1;
+
+        r0 := @this: java.security.KeyFactory;
+
+        r2 := @parameter0: java.security.Key;
+
+        $r1 = r0.<java.security.KeyFactory: java.util.Iterator serviceIterator>;
+
+        if $r1 != null goto label1;
+
+        $r4 = r0.<java.security.KeyFactory: java.security.KeyFactorySpi spi>;
+
+        $r5 = virtualinvoke $r4.<java.security.KeyFactorySpi: java.security.Key engineTranslateKey(java.security.Key)>(r2);
+
+        return $r5;
+
+     label1:
+        r11 = null;
+
+        r12 = r0.<java.security.KeyFactory: java.security.KeyFactorySpi spi>;
+
+     label2:
+        $r3 = virtualinvoke r12.<java.security.KeyFactorySpi: java.security.Key engineTranslateKey(java.security.Key)>(r2);
+
+     label3:
+        return $r3;
+
+     label4:
+        $r6 := @caughtexception;
+
+        if r11 != null goto label5;
+
+        r11 = $r6;
+
+     label5:
+        $r7 = specialinvoke r0.<java.security.KeyFactory: java.security.KeyFactorySpi nextSpi(java.security.KeyFactorySpi)>(r12);
+
+        r12 = $r7;
+
+        if $r7 != null goto label2;
+
+        $z0 = r11 instanceof java.lang.RuntimeException;
+
+        if $z0 == 0 goto label6;
+
+        $r10 = (java.lang.RuntimeException) r11;
+
+        throw $r10;
+
+     label6:
+        $z1 = r11 instanceof java.security.InvalidKeyException;
+
+        if $z1 == 0 goto label7;
+
+        $r9 = (java.security.InvalidKeyException) r11;
+
+        throw $r9;
+
+     label7:
+        $r8 = new java.security.InvalidKeyException;
+
+        specialinvoke $r8.<java.security.InvalidKeyException: void <init>(java.lang.String,java.lang.Throwable)>("Could not translate key", r11);
+
+        throw $r8;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.util.Debug $r0;
+
+        $r0 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String,java.lang.String)>("jca", "KeyFactory");
+
+        <java.security.KeyFactory: sun.security.util.Debug debug> = $r0;
+
+        return;
+    }
+}

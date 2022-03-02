@@ -1,0 +1,809 @@
+public final class sun.awt.im.CompositionArea extends javax.swing.JPanel implements java.awt.event.InputMethodListener
+{
+    private sun.awt.im.CompositionAreaHandler handler;
+    private java.awt.font.TextLayout composedTextLayout;
+    private java.awt.font.TextHitInfo caret;
+    private javax.swing.JFrame compositionWindow;
+    private static final int TEXT_ORIGIN_X;
+    private static final int TEXT_ORIGIN_Y;
+    private static final int PASSIVE_WIDTH;
+    private static final int WIDTH_MARGIN;
+    private static final int HEIGHT_MARGIN;
+    private static final long serialVersionUID;
+
+    void <init>()
+    {
+        java.awt.Color $r5, $r6;
+        sun.awt.im.CompositionArea$FrameWindowAdapter $r9;
+        javax.swing.border.Border $r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7;
+        java.lang.String $r1;
+        java.awt.Container $r8;
+        javax.swing.JFrame $r3, $r7, $r10, $r11, $r12, $r13, $r17, $r18;
+        java.awt.Window $r2;
+        java.awt.Dimension $r14, $r16;
+        sun.awt.im.CompositionArea r0;
+        java.awt.Toolkit $r15;
+
+        r0 := @this: sun.awt.im.CompositionArea;
+
+        specialinvoke r0.<javax.swing.JPanel: void <init>()>();
+
+        r0.<sun.awt.im.CompositionArea: java.awt.font.TextHitInfo caret> = null;
+
+        $r1 = staticinvoke <java.awt.Toolkit: java.lang.String getProperty(java.lang.String,java.lang.String)>("AWT.CompositionWindowTitle", "Input Window");
+
+        $r2 = staticinvoke <sun.awt.im.InputMethodContext: java.awt.Window createInputMethodWindow(java.lang.String,sun.awt.im.InputContext,boolean)>($r1, null, 1);
+
+        $r3 = (javax.swing.JFrame) $r2;
+
+        r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow> = $r3;
+
+        virtualinvoke r0.<sun.awt.im.CompositionArea: void setOpaque(boolean)>(1);
+
+        $r4 = staticinvoke <javax.swing.border.LineBorder: javax.swing.border.Border createGrayLineBorder()>();
+
+        virtualinvoke r0.<sun.awt.im.CompositionArea: void setBorder(javax.swing.border.Border)>($r4);
+
+        $r5 = <java.awt.Color: java.awt.Color black>;
+
+        virtualinvoke r0.<sun.awt.im.CompositionArea: void setForeground(java.awt.Color)>($r5);
+
+        $r6 = <java.awt.Color: java.awt.Color white>;
+
+        virtualinvoke r0.<sun.awt.im.CompositionArea: void setBackground(java.awt.Color)>($r6);
+
+        virtualinvoke r0.<sun.awt.im.CompositionArea: void enableInputMethods(boolean)>(1);
+
+        virtualinvoke r0.<sun.awt.im.CompositionArea: void enableEvents(long)>(8L);
+
+        $r7 = r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow>;
+
+        $r8 = virtualinvoke $r7.<javax.swing.JFrame: java.awt.Container getContentPane()>();
+
+        virtualinvoke $r8.<java.awt.Container: java.awt.Component add(java.awt.Component)>(r0);
+
+        $r10 = r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow>;
+
+        $r9 = new sun.awt.im.CompositionArea$FrameWindowAdapter;
+
+        specialinvoke $r9.<sun.awt.im.CompositionArea$FrameWindowAdapter: void <init>(sun.awt.im.CompositionArea)>(r0);
+
+        virtualinvoke $r10.<javax.swing.JFrame: void addWindowListener(java.awt.event.WindowListener)>($r9);
+
+        virtualinvoke r0.<sun.awt.im.CompositionArea: void addInputMethodListener(java.awt.event.InputMethodListener)>(r0);
+
+        $r11 = r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow>;
+
+        virtualinvoke $r11.<javax.swing.JFrame: void enableInputMethods(boolean)>(0);
+
+        $r12 = r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow>;
+
+        virtualinvoke $r12.<javax.swing.JFrame: void pack()>();
+
+        $r13 = r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow>;
+
+        $r14 = virtualinvoke $r13.<javax.swing.JFrame: java.awt.Dimension getSize()>();
+
+        $r15 = virtualinvoke r0.<sun.awt.im.CompositionArea: java.awt.Toolkit getToolkit()>();
+
+        $r16 = virtualinvoke $r15.<java.awt.Toolkit: java.awt.Dimension getScreenSize()>();
+
+        $r17 = r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow>;
+
+        $i1 = $r16.<java.awt.Dimension: int width>;
+
+        $i0 = $r14.<java.awt.Dimension: int width>;
+
+        $i2 = $i1 - $i0;
+
+        $i7 = $i2 - 20;
+
+        $i4 = $r16.<java.awt.Dimension: int height>;
+
+        $i3 = $r14.<java.awt.Dimension: int height>;
+
+        $i5 = $i4 - $i3;
+
+        $i6 = $i5 - 100;
+
+        virtualinvoke $r17.<javax.swing.JFrame: void setLocation(int,int)>($i7, $i6);
+
+        $r18 = r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow>;
+
+        virtualinvoke $r18.<javax.swing.JFrame: void setVisible(boolean)>(0);
+
+        return;
+    }
+
+    synchronized void setHandlerInfo(sun.awt.im.CompositionAreaHandler, sun.awt.im.InputContext)
+    {
+        sun.awt.im.InputMethodWindow $r4;
+        sun.awt.im.CompositionAreaHandler r1;
+        sun.awt.im.InputContext r3;
+        javax.swing.JFrame $r2;
+        sun.awt.im.CompositionArea r0;
+
+        r0 := @this: sun.awt.im.CompositionArea;
+
+        r1 := @parameter0: sun.awt.im.CompositionAreaHandler;
+
+        r3 := @parameter1: sun.awt.im.InputContext;
+
+        r0.<sun.awt.im.CompositionArea: sun.awt.im.CompositionAreaHandler handler> = r1;
+
+        $r2 = r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow>;
+
+        $r4 = (sun.awt.im.InputMethodWindow) $r2;
+
+        interfaceinvoke $r4.<sun.awt.im.InputMethodWindow: void setInputContext(sun.awt.im.InputContext)>(r3);
+
+        return;
+    }
+
+    public java.awt.im.InputMethodRequests getInputMethodRequests()
+    {
+        sun.awt.im.CompositionArea r0;
+        sun.awt.im.CompositionAreaHandler $r1;
+
+        r0 := @this: sun.awt.im.CompositionArea;
+
+        $r1 = r0.<sun.awt.im.CompositionArea: sun.awt.im.CompositionAreaHandler handler>;
+
+        return $r1;
+    }
+
+    private java.awt.Rectangle getCaretRectangle(java.awt.font.TextHitInfo)
+    {
+        java.lang.Throwable $r7;
+        java.awt.Rectangle $r4;
+        java.awt.font.TextLayout r1;
+        float[] $r6;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6;
+        java.awt.font.TextHitInfo r5;
+        java.awt.FontMetrics $r3;
+        java.awt.Graphics $r2;
+        float $f0;
+        sun.awt.im.CompositionArea r0;
+
+        r0 := @this: sun.awt.im.CompositionArea;
+
+        r5 := @parameter0: java.awt.font.TextHitInfo;
+
+        i6 = 0;
+
+        r1 = r0.<sun.awt.im.CompositionArea: java.awt.font.TextLayout composedTextLayout>;
+
+        if r1 == null goto label1;
+
+        $r6 = virtualinvoke r1.<java.awt.font.TextLayout: float[] getCaretInfo(java.awt.font.TextHitInfo)>(r5);
+
+        $f0 = $r6[0];
+
+        i6 = staticinvoke <java.lang.Math: int round(float)>($f0);
+
+     label1:
+        $r2 = virtualinvoke r0.<sun.awt.im.CompositionArea: java.awt.Graphics getGraphics()>();
+
+     label2:
+        $r3 = virtualinvoke $r2.<java.awt.Graphics: java.awt.FontMetrics getFontMetrics()>();
+
+     label3:
+        virtualinvoke $r2.<java.awt.Graphics: void dispose()>();
+
+        goto label6;
+
+     label4:
+        $r7 := @caughtexception;
+
+     label5:
+        virtualinvoke $r2.<java.awt.Graphics: void dispose()>();
+
+        throw $r7;
+
+     label6:
+        $r4 = new java.awt.Rectangle;
+
+        $i0 = 5 + i6;
+
+        $i1 = virtualinvoke $r3.<java.awt.FontMetrics: int getAscent()>();
+
+        $i2 = 15 - $i1;
+
+        $i3 = virtualinvoke $r3.<java.awt.FontMetrics: int getAscent()>();
+
+        $i4 = virtualinvoke $r3.<java.awt.FontMetrics: int getDescent()>();
+
+        $i5 = $i3 + $i4;
+
+        specialinvoke $r4.<java.awt.Rectangle: void <init>(int,int,int,int)>($i0, $i2, 0, $i5);
+
+        return $r4;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void paint(java.awt.Graphics)
+    {
+        java.awt.Color $r2, $r7;
+        java.awt.Rectangle $r6;
+        java.awt.font.TextLayout r3;
+        java.awt.Graphics2D $r8;
+        java.awt.Graphics r1;
+        int $i0, $i1, $i2;
+        java.awt.font.TextHitInfo $r4, $r5;
+        sun.awt.im.CompositionArea r0;
+
+        r0 := @this: sun.awt.im.CompositionArea;
+
+        r1 := @parameter0: java.awt.Graphics;
+
+        specialinvoke r0.<javax.swing.JPanel: void paint(java.awt.Graphics)>(r1);
+
+        $r2 = virtualinvoke r0.<sun.awt.im.CompositionArea: java.awt.Color getForeground()>();
+
+        virtualinvoke r1.<java.awt.Graphics: void setColor(java.awt.Color)>($r2);
+
+        r3 = r0.<sun.awt.im.CompositionArea: java.awt.font.TextLayout composedTextLayout>;
+
+        if r3 == null goto label1;
+
+        $r8 = (java.awt.Graphics2D) r1;
+
+        virtualinvoke r3.<java.awt.font.TextLayout: void draw(java.awt.Graphics2D,float,float)>($r8, 5.0F, 15.0F);
+
+     label1:
+        $r4 = r0.<sun.awt.im.CompositionArea: java.awt.font.TextHitInfo caret>;
+
+        if $r4 == null goto label2;
+
+        $r5 = r0.<sun.awt.im.CompositionArea: java.awt.font.TextHitInfo caret>;
+
+        $r6 = specialinvoke r0.<sun.awt.im.CompositionArea: java.awt.Rectangle getCaretRectangle(java.awt.font.TextHitInfo)>($r5);
+
+        $r7 = virtualinvoke r0.<sun.awt.im.CompositionArea: java.awt.Color getBackground()>();
+
+        virtualinvoke r1.<java.awt.Graphics: void setXORMode(java.awt.Color)>($r7);
+
+        $i2 = $r6.<java.awt.Rectangle: int x>;
+
+        $i1 = $r6.<java.awt.Rectangle: int y>;
+
+        $i0 = $r6.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r1.<java.awt.Graphics: void fillRect(int,int,int,int)>($i2, $i1, 1, $i0);
+
+        virtualinvoke r1.<java.awt.Graphics: void setPaintMode()>();
+
+     label2:
+        return;
+    }
+
+    void setCompositionAreaVisible(boolean)
+    {
+        javax.swing.JFrame $r1;
+        sun.awt.im.CompositionArea r0;
+        boolean z0;
+
+        r0 := @this: sun.awt.im.CompositionArea;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow>;
+
+        virtualinvoke $r1.<javax.swing.JFrame: void setVisible(boolean)>(z0);
+
+        return;
+    }
+
+    boolean isCompositionAreaVisible()
+    {
+        javax.swing.JFrame $r1;
+        sun.awt.im.CompositionArea r0;
+        boolean $z0;
+
+        r0 := @this: sun.awt.im.CompositionArea;
+
+        $r1 = r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow>;
+
+        $z0 = virtualinvoke $r1.<javax.swing.JFrame: boolean isVisible()>();
+
+        return $z0;
+    }
+
+    public void inputMethodTextChanged(java.awt.event.InputMethodEvent)
+    {
+        java.awt.event.InputMethodEvent r1;
+        sun.awt.im.CompositionArea r0;
+        sun.awt.im.CompositionAreaHandler $r2;
+
+        r0 := @this: sun.awt.im.CompositionArea;
+
+        r1 := @parameter0: java.awt.event.InputMethodEvent;
+
+        $r2 = r0.<sun.awt.im.CompositionArea: sun.awt.im.CompositionAreaHandler handler>;
+
+        virtualinvoke $r2.<sun.awt.im.CompositionAreaHandler: void inputMethodTextChanged(java.awt.event.InputMethodEvent)>(r1);
+
+        return;
+    }
+
+    public void caretPositionChanged(java.awt.event.InputMethodEvent)
+    {
+        java.awt.event.InputMethodEvent r1;
+        sun.awt.im.CompositionArea r0;
+        sun.awt.im.CompositionAreaHandler $r2;
+
+        r0 := @this: sun.awt.im.CompositionArea;
+
+        r1 := @parameter0: java.awt.event.InputMethodEvent;
+
+        $r2 = r0.<sun.awt.im.CompositionArea: sun.awt.im.CompositionAreaHandler handler>;
+
+        virtualinvoke $r2.<sun.awt.im.CompositionAreaHandler: void caretPositionChanged(java.awt.event.InputMethodEvent)>(r1);
+
+        return;
+    }
+
+    void setText(java.text.AttributedCharacterIterator, java.awt.font.TextHitInfo)
+    {
+        java.awt.geom.Rectangle2D $r8, $r11;
+        javax.swing.JFrame $r2, $r12, $r14, $r18, $r20, $r24, $r25, $r26;
+        boolean $z0;
+        java.awt.Dimension $r22, $r23;
+        java.text.AttributedCharacterIterator r1;
+        java.awt.Graphics $r3;
+        java.lang.Throwable $r27;
+        java.awt.Insets $r13, $r15, $r19, $r21;
+        java.awt.font.TextLayout $r6, $r7;
+        java.awt.Graphics2D $r4;
+        int $i0, i1, $i2, $i3, $i4, i5, $i6, $i7, $i8, $i9, $i10, $i11;
+        java.awt.im.InputMethodRequests $r17;
+        java.awt.font.TextHitInfo r9;
+        double $d0, $d1;
+        sun.awt.im.CompositionAreaHandler $r16;
+        java.awt.font.FontRenderContext $r5;
+        java.awt.FontMetrics $r10;
+        sun.awt.im.CompositionArea r0;
+
+        r0 := @this: sun.awt.im.CompositionArea;
+
+        r1 := @parameter0: java.text.AttributedCharacterIterator;
+
+        r9 := @parameter1: java.awt.font.TextHitInfo;
+
+        r0.<sun.awt.im.CompositionArea: java.awt.font.TextLayout composedTextLayout> = null;
+
+        if r1 != null goto label1;
+
+        $r26 = r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow>;
+
+        virtualinvoke $r26.<javax.swing.JFrame: void setVisible(boolean)>(0);
+
+        r0.<sun.awt.im.CompositionArea: java.awt.font.TextHitInfo caret> = null;
+
+        goto label9;
+
+     label1:
+        $r2 = r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow>;
+
+        $z0 = virtualinvoke $r2.<javax.swing.JFrame: boolean isVisible()>();
+
+        if $z0 != 0 goto label2;
+
+        $r25 = r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow>;
+
+        virtualinvoke $r25.<javax.swing.JFrame: void setVisible(boolean)>(1);
+
+     label2:
+        $r3 = virtualinvoke r0.<sun.awt.im.CompositionArea: java.awt.Graphics getGraphics()>();
+
+        if $r3 != null goto label3;
+
+        return;
+
+     label3:
+        virtualinvoke r0.<sun.awt.im.CompositionArea: void updateWindowLocation()>();
+
+        $r4 = (java.awt.Graphics2D) $r3;
+
+        $r5 = virtualinvoke $r4.<java.awt.Graphics2D: java.awt.font.FontRenderContext getFontRenderContext()>();
+
+        $r6 = new java.awt.font.TextLayout;
+
+        specialinvoke $r6.<java.awt.font.TextLayout: void <init>(java.text.AttributedCharacterIterator,java.awt.font.FontRenderContext)>(r1, $r5);
+
+        r0.<sun.awt.im.CompositionArea: java.awt.font.TextLayout composedTextLayout> = $r6;
+
+        $r7 = r0.<sun.awt.im.CompositionArea: java.awt.font.TextLayout composedTextLayout>;
+
+        $r8 = virtualinvoke $r7.<java.awt.font.TextLayout: java.awt.geom.Rectangle2D getBounds()>();
+
+        r0.<sun.awt.im.CompositionArea: java.awt.font.TextHitInfo caret> = r9;
+
+        $r10 = virtualinvoke $r3.<java.awt.Graphics: java.awt.FontMetrics getFontMetrics()>();
+
+        $r11 = virtualinvoke $r10.<java.awt.FontMetrics: java.awt.geom.Rectangle2D getMaxCharBounds(java.awt.Graphics)>($r3);
+
+        $d0 = virtualinvoke $r11.<java.awt.geom.Rectangle2D: double getHeight()>();
+
+        $i0 = (int) $d0;
+
+        i1 = $i0 + 3;
+
+        $r12 = r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow>;
+
+        $r13 = virtualinvoke $r12.<javax.swing.JFrame: java.awt.Insets getInsets()>();
+
+        $i2 = $r13.<java.awt.Insets: int top>;
+
+        $i3 = i1 + $i2;
+
+        $r14 = r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow>;
+
+        $r15 = virtualinvoke $r14.<javax.swing.JFrame: java.awt.Insets getInsets()>();
+
+        $i4 = $r15.<java.awt.Insets: int bottom>;
+
+        i5 = $i3 + $i4;
+
+        $r16 = r0.<sun.awt.im.CompositionArea: sun.awt.im.CompositionAreaHandler handler>;
+
+        $r17 = virtualinvoke $r16.<sun.awt.im.CompositionAreaHandler: java.awt.im.InputMethodRequests getClientInputMethodRequests()>();
+
+        if $r17 != null goto label4;
+
+        $i11 = 480;
+
+        goto label5;
+
+     label4:
+        $d1 = virtualinvoke $r8.<java.awt.geom.Rectangle2D: double getWidth()>();
+
+        $i6 = (int) $d1;
+
+        $i11 = $i6 + 10;
+
+     label5:
+        $r18 = r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow>;
+
+        $r19 = virtualinvoke $r18.<javax.swing.JFrame: java.awt.Insets getInsets()>();
+
+        $i7 = $r19.<java.awt.Insets: int left>;
+
+        $i8 = $i11 + $i7;
+
+        $r20 = r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow>;
+
+        $r21 = virtualinvoke $r20.<javax.swing.JFrame: java.awt.Insets getInsets()>();
+
+        $i9 = $r21.<java.awt.Insets: int right>;
+
+        $i10 = $i8 + $i9;
+
+        $r22 = new java.awt.Dimension;
+
+        specialinvoke $r22.<java.awt.Dimension: void <init>(int,int)>($i11, i1);
+
+        virtualinvoke r0.<sun.awt.im.CompositionArea: void setPreferredSize(java.awt.Dimension)>($r22);
+
+        $r24 = r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow>;
+
+        $r23 = new java.awt.Dimension;
+
+        specialinvoke $r23.<java.awt.Dimension: void <init>(int,int)>($i10, i5);
+
+        virtualinvoke $r24.<javax.swing.JFrame: void setSize(java.awt.Dimension)>($r23);
+
+        virtualinvoke r0.<sun.awt.im.CompositionArea: void paint(java.awt.Graphics)>($r3);
+
+     label6:
+        virtualinvoke $r3.<java.awt.Graphics: void dispose()>();
+
+        goto label9;
+
+     label7:
+        $r27 := @caughtexception;
+
+     label8:
+        virtualinvoke $r3.<java.awt.Graphics: void dispose()>();
+
+        throw $r27;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label3 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    void setCaret(java.awt.font.TextHitInfo)
+    {
+        java.lang.Throwable $r4;
+        java.awt.Graphics $r3;
+        java.awt.font.TextHitInfo r1;
+        javax.swing.JFrame $r2;
+        sun.awt.im.CompositionArea r0;
+        boolean $z0;
+
+        r0 := @this: sun.awt.im.CompositionArea;
+
+        r1 := @parameter0: java.awt.font.TextHitInfo;
+
+        r0.<sun.awt.im.CompositionArea: java.awt.font.TextHitInfo caret> = r1;
+
+        $r2 = r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow>;
+
+        $z0 = virtualinvoke $r2.<javax.swing.JFrame: boolean isVisible()>();
+
+        if $z0 == 0 goto label4;
+
+        $r3 = virtualinvoke r0.<sun.awt.im.CompositionArea: java.awt.Graphics getGraphics()>();
+
+     label1:
+        virtualinvoke r0.<sun.awt.im.CompositionArea: void paint(java.awt.Graphics)>($r3);
+
+     label2:
+        virtualinvoke $r3.<java.awt.Graphics: void dispose()>();
+
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        virtualinvoke $r3.<java.awt.Graphics: void dispose()>();
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    void updateWindowLocation()
+    {
+        java.awt.Point $r3;
+        javax.swing.JFrame $r7, $r9;
+        java.awt.Dimension $r6, $r8;
+        java.awt.Toolkit $r5;
+        java.awt.Rectangle $r4;
+        java.awt.im.InputMethodRequests $r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22;
+        sun.awt.im.CompositionAreaHandler $r1;
+        sun.awt.im.CompositionArea r0;
+
+        r0 := @this: sun.awt.im.CompositionArea;
+
+        $r1 = r0.<sun.awt.im.CompositionArea: sun.awt.im.CompositionAreaHandler handler>;
+
+        $r2 = virtualinvoke $r1.<sun.awt.im.CompositionAreaHandler: java.awt.im.InputMethodRequests getClientInputMethodRequests()>();
+
+        if $r2 != null goto label1;
+
+        return;
+
+     label1:
+        $r3 = new java.awt.Point;
+
+        specialinvoke $r3.<java.awt.Point: void <init>()>();
+
+        $r4 = interfaceinvoke $r2.<java.awt.im.InputMethodRequests: java.awt.Rectangle getTextLocation(java.awt.font.TextHitInfo)>(null);
+
+        $r5 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r6 = virtualinvoke $r5.<java.awt.Toolkit: java.awt.Dimension getScreenSize()>();
+
+        $r7 = r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow>;
+
+        $r8 = virtualinvoke $r7.<javax.swing.JFrame: java.awt.Dimension getSize()>();
+
+        $i1 = $r4.<java.awt.Rectangle: int x>;
+
+        $i0 = $r8.<java.awt.Dimension: int width>;
+
+        $i3 = $i1 + $i0;
+
+        $i2 = $r6.<java.awt.Dimension: int width>;
+
+        if $i3 <= $i2 goto label2;
+
+        $i21 = $r6.<java.awt.Dimension: int width>;
+
+        $i20 = $r8.<java.awt.Dimension: int width>;
+
+        $i22 = $i21 - $i20;
+
+        $r3.<java.awt.Point: int x> = $i22;
+
+        goto label3;
+
+     label2:
+        $i4 = $r4.<java.awt.Rectangle: int x>;
+
+        $r3.<java.awt.Point: int x> = $i4;
+
+     label3:
+        $i6 = $r4.<java.awt.Rectangle: int y>;
+
+        $i5 = $r4.<java.awt.Rectangle: int height>;
+
+        $i7 = $i6 + $i5;
+
+        $i9 = $i7 + 2;
+
+        $i8 = $r8.<java.awt.Dimension: int height>;
+
+        $i11 = $i9 + $i8;
+
+        $i10 = $r6.<java.awt.Dimension: int height>;
+
+        if $i11 <= $i10 goto label4;
+
+        $i16 = $r4.<java.awt.Rectangle: int y>;
+
+        $i18 = $i16 - 2;
+
+        $i17 = $r8.<java.awt.Dimension: int height>;
+
+        $i19 = $i18 - $i17;
+
+        $r3.<java.awt.Point: int y> = $i19;
+
+        goto label5;
+
+     label4:
+        $i13 = $r4.<java.awt.Rectangle: int y>;
+
+        $i12 = $r4.<java.awt.Rectangle: int height>;
+
+        $i14 = $i13 + $i12;
+
+        $i15 = $i14 + 2;
+
+        $r3.<java.awt.Point: int y> = $i15;
+
+     label5:
+        $r9 = r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow>;
+
+        virtualinvoke $r9.<javax.swing.JFrame: void setLocation(java.awt.Point)>($r3);
+
+        return;
+    }
+
+    java.awt.Rectangle getTextLocation(java.awt.font.TextHitInfo)
+    {
+        java.awt.Rectangle $r2;
+        int $i0, $i1;
+        java.awt.Point $r3;
+        java.awt.font.TextHitInfo r1;
+        sun.awt.im.CompositionArea r0;
+
+        r0 := @this: sun.awt.im.CompositionArea;
+
+        r1 := @parameter0: java.awt.font.TextHitInfo;
+
+        $r2 = specialinvoke r0.<sun.awt.im.CompositionArea: java.awt.Rectangle getCaretRectangle(java.awt.font.TextHitInfo)>(r1);
+
+        $r3 = virtualinvoke r0.<sun.awt.im.CompositionArea: java.awt.Point getLocationOnScreen()>();
+
+        $i1 = $r3.<java.awt.Point: int x>;
+
+        $i0 = $r3.<java.awt.Point: int y>;
+
+        virtualinvoke $r2.<java.awt.Rectangle: void translate(int,int)>($i1, $i0);
+
+        return $r2;
+    }
+
+    java.awt.font.TextHitInfo getLocationOffset(int, int)
+    {
+        java.awt.font.TextLayout r1;
+        java.awt.geom.Rectangle2D $r3;
+        java.awt.Point $r2;
+        int $i0, $i1, $i2, $i3, i4, i5, i6, i7;
+        java.awt.font.TextHitInfo $r4;
+        double $d0, $d1;
+        boolean $z0;
+        float $f0, $f1;
+        sun.awt.im.CompositionArea r0;
+
+        r0 := @this: sun.awt.im.CompositionArea;
+
+        i4 := @parameter0: int;
+
+        i5 := @parameter1: int;
+
+        r1 = r0.<sun.awt.im.CompositionArea: java.awt.font.TextLayout composedTextLayout>;
+
+        if r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = virtualinvoke r0.<sun.awt.im.CompositionArea: java.awt.Point getLocationOnScreen()>();
+
+        $i0 = $r2.<java.awt.Point: int x>;
+
+        $i1 = $i0 + 5;
+
+        i6 = i4 - $i1;
+
+        $i2 = $r2.<java.awt.Point: int y>;
+
+        $i3 = $i2 + 15;
+
+        i7 = i5 - $i3;
+
+        $r3 = virtualinvoke r1.<java.awt.font.TextLayout: java.awt.geom.Rectangle2D getBounds()>();
+
+        $d1 = (double) i6;
+
+        $d0 = (double) i7;
+
+        $z0 = virtualinvoke $r3.<java.awt.geom.Rectangle2D: boolean contains(double,double)>($d1, $d0);
+
+        if $z0 == 0 goto label2;
+
+        $f1 = (float) i6;
+
+        $f0 = (float) i7;
+
+        $r4 = virtualinvoke r1.<java.awt.font.TextLayout: java.awt.font.TextHitInfo hitTestChar(float,float)>($f1, $f0);
+
+        return $r4;
+
+     label2:
+        return null;
+    }
+
+    void setCompositionAreaUndecorated(boolean)
+    {
+        javax.swing.JFrame $r1, $r2, $r3, $r4;
+        sun.awt.im.CompositionArea r0;
+        boolean $z0, z1;
+
+        r0 := @this: sun.awt.im.CompositionArea;
+
+        z1 := @parameter0: boolean;
+
+        $r1 = r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow>;
+
+        $z0 = virtualinvoke $r1.<javax.swing.JFrame: boolean isDisplayable()>();
+
+        if $z0 == 0 goto label1;
+
+        $r4 = r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow>;
+
+        virtualinvoke $r4.<javax.swing.JFrame: void removeNotify()>();
+
+     label1:
+        $r2 = r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow>;
+
+        virtualinvoke $r2.<javax.swing.JFrame: void setUndecorated(boolean)>(z1);
+
+        $r3 = r0.<sun.awt.im.CompositionArea: javax.swing.JFrame compositionWindow>;
+
+        virtualinvoke $r3.<javax.swing.JFrame: void pack()>();
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.awt.im.CompositionArea: long serialVersionUID> = -1057247068746557444L;
+
+        <sun.awt.im.CompositionArea: int HEIGHT_MARGIN> = 3;
+
+        <sun.awt.im.CompositionArea: int WIDTH_MARGIN> = 10;
+
+        <sun.awt.im.CompositionArea: int PASSIVE_WIDTH> = 480;
+
+        <sun.awt.im.CompositionArea: int TEXT_ORIGIN_Y> = 15;
+
+        <sun.awt.im.CompositionArea: int TEXT_ORIGIN_X> = 5;
+
+        return;
+    }
+}

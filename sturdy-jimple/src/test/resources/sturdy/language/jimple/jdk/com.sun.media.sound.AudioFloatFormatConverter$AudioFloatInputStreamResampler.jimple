@@ -1,0 +1,1015 @@
+class com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler extends com.sun.media.sound.AudioFloatInputStream
+{
+    private final com.sun.media.sound.AudioFloatInputStream ais;
+    private final javax.sound.sampled.AudioFormat targetFormat;
+    private float[] skipbuffer;
+    private com.sun.media.sound.SoftAbstractResampler resampler;
+    private final float[] pitch;
+    private final float[] ibuffer2;
+    private final float[][] ibuffer;
+    private float ibuffer_index;
+    private int ibuffer_len;
+    private final int nrofchannels;
+    private float[][] cbuffer;
+    private final int buffer_len;
+    private final int pad;
+    private final int pad2;
+    private final float[] ix;
+    private final int[] ox;
+    private float[][] mark_ibuffer;
+    private float mark_ibuffer_index;
+    private int mark_ibuffer_len;
+
+    void <init>(com.sun.media.sound.AudioFloatInputStream, javax.sound.sampled.AudioFormat)
+    {
+        javax.sound.sampled.AudioFormat $r6, $r7, r9, $r10;
+        int[] $r3;
+        com.sun.media.sound.AudioFloatInputStream r5;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler r0;
+        float $f0, $f1, $f2, $f3, $f4, $f5;
+        com.sun.media.sound.SoftLinearResampler $r22;
+        com.sun.media.sound.SoftCubicResampler $r20;
+        com.sun.media.sound.SoftLinearResampler2 $r16, $r21, $r23;
+        float[] $r1, $r2, $r12, $r15;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13;
+        java.lang.String r17;
+        com.sun.media.sound.SoftSincResampler $r18;
+        float[][] $r4, $r14;
+        com.sun.media.sound.SoftPointResampler $r24;
+        javax.sound.sampled.AudioFormat$Encoding $r8;
+        com.sun.media.sound.SoftAbstractResampler $r13, $r25;
+        java.lang.Object $r11;
+        com.sun.media.sound.SoftLanczosResampler $r19;
+
+        r0 := @this: com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler;
+
+        r5 := @parameter0: com.sun.media.sound.AudioFloatInputStream;
+
+        r9 := @parameter1: javax.sound.sampled.AudioFormat;
+
+        specialinvoke r0.<com.sun.media.sound.AudioFloatInputStream: void <init>()>();
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int buffer_len> = 512;
+
+        $r1 = newarray (float)[1];
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[] pitch> = $r1;
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float ibuffer_index> = 0.0F;
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int ibuffer_len> = 0;
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int buffer_len> = 512;
+
+        $r2 = newarray (float)[1];
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[] ix> = $r2;
+
+        $r3 = newarray (int)[1];
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int[] ox> = $r3;
+
+        $r4 = (float[][]) null;
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[][] mark_ibuffer> = $r4;
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float mark_ibuffer_index> = 0.0F;
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int mark_ibuffer_len> = 0;
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: com.sun.media.sound.AudioFloatInputStream ais> = r5;
+
+        $r6 = virtualinvoke r5.<com.sun.media.sound.AudioFloatInputStream: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $r7 = new javax.sound.sampled.AudioFormat;
+
+        $r8 = virtualinvoke $r6.<javax.sound.sampled.AudioFormat: javax.sound.sampled.AudioFormat$Encoding getEncoding()>();
+
+        $f0 = virtualinvoke r9.<javax.sound.sampled.AudioFormat: float getSampleRate()>();
+
+        $i0 = virtualinvoke $r6.<javax.sound.sampled.AudioFormat: int getSampleSizeInBits()>();
+
+        $i1 = virtualinvoke $r6.<javax.sound.sampled.AudioFormat: int getChannels()>();
+
+        $i2 = virtualinvoke $r6.<javax.sound.sampled.AudioFormat: int getFrameSize()>();
+
+        $f1 = virtualinvoke r9.<javax.sound.sampled.AudioFormat: float getSampleRate()>();
+
+        $z0 = virtualinvoke $r6.<javax.sound.sampled.AudioFormat: boolean isBigEndian()>();
+
+        specialinvoke $r7.<javax.sound.sampled.AudioFormat: void <init>(javax.sound.sampled.AudioFormat$Encoding,float,int,int,int,float,boolean)>($r8, $f0, $i0, $i1, $i2, $f1, $z0);
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: javax.sound.sampled.AudioFormat targetFormat> = $r7;
+
+        $r10 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: javax.sound.sampled.AudioFormat targetFormat>;
+
+        $i3 = virtualinvoke $r10.<javax.sound.sampled.AudioFormat: int getChannels()>();
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int nrofchannels> = $i3;
+
+        $r11 = virtualinvoke r9.<javax.sound.sampled.AudioFormat: java.lang.Object getProperty(java.lang.String)>("interpolation");
+
+        if $r11 == null goto label7;
+
+        $z1 = $r11 instanceof java.lang.String;
+
+        if $z1 == 0 goto label7;
+
+        r17 = (java.lang.String) $r11;
+
+        $z2 = virtualinvoke r17.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("point");
+
+        if $z2 == 0 goto label1;
+
+        $r24 = new com.sun.media.sound.SoftPointResampler;
+
+        specialinvoke $r24.<com.sun.media.sound.SoftPointResampler: void <init>()>();
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: com.sun.media.sound.SoftAbstractResampler resampler> = $r24;
+
+     label1:
+        $z3 = virtualinvoke r17.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("linear");
+
+        if $z3 == 0 goto label2;
+
+        $r23 = new com.sun.media.sound.SoftLinearResampler2;
+
+        specialinvoke $r23.<com.sun.media.sound.SoftLinearResampler2: void <init>()>();
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: com.sun.media.sound.SoftAbstractResampler resampler> = $r23;
+
+     label2:
+        $z4 = virtualinvoke r17.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("linear1");
+
+        if $z4 == 0 goto label3;
+
+        $r22 = new com.sun.media.sound.SoftLinearResampler;
+
+        specialinvoke $r22.<com.sun.media.sound.SoftLinearResampler: void <init>()>();
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: com.sun.media.sound.SoftAbstractResampler resampler> = $r22;
+
+     label3:
+        $z5 = virtualinvoke r17.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("linear2");
+
+        if $z5 == 0 goto label4;
+
+        $r21 = new com.sun.media.sound.SoftLinearResampler2;
+
+        specialinvoke $r21.<com.sun.media.sound.SoftLinearResampler2: void <init>()>();
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: com.sun.media.sound.SoftAbstractResampler resampler> = $r21;
+
+     label4:
+        $z6 = virtualinvoke r17.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("cubic");
+
+        if $z6 == 0 goto label5;
+
+        $r20 = new com.sun.media.sound.SoftCubicResampler;
+
+        specialinvoke $r20.<com.sun.media.sound.SoftCubicResampler: void <init>()>();
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: com.sun.media.sound.SoftAbstractResampler resampler> = $r20;
+
+     label5:
+        $z7 = virtualinvoke r17.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("lanczos");
+
+        if $z7 == 0 goto label6;
+
+        $r19 = new com.sun.media.sound.SoftLanczosResampler;
+
+        specialinvoke $r19.<com.sun.media.sound.SoftLanczosResampler: void <init>()>();
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: com.sun.media.sound.SoftAbstractResampler resampler> = $r19;
+
+     label6:
+        $z8 = virtualinvoke r17.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("sinc");
+
+        if $z8 == 0 goto label7;
+
+        $r18 = new com.sun.media.sound.SoftSincResampler;
+
+        specialinvoke $r18.<com.sun.media.sound.SoftSincResampler: void <init>()>();
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: com.sun.media.sound.SoftAbstractResampler resampler> = $r18;
+
+     label7:
+        $r25 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: com.sun.media.sound.SoftAbstractResampler resampler>;
+
+        if $r25 != null goto label8;
+
+        $r16 = new com.sun.media.sound.SoftLinearResampler2;
+
+        specialinvoke $r16.<com.sun.media.sound.SoftLinearResampler2: void <init>()>();
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: com.sun.media.sound.SoftAbstractResampler resampler> = $r16;
+
+     label8:
+        $r12 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[] pitch>;
+
+        $f2 = virtualinvoke $r6.<javax.sound.sampled.AudioFormat: float getSampleRate()>();
+
+        $f3 = virtualinvoke r9.<javax.sound.sampled.AudioFormat: float getSampleRate()>();
+
+        $f4 = $f2 / $f3;
+
+        $r12[0] = $f4;
+
+        $r13 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: com.sun.media.sound.SoftAbstractResampler resampler>;
+
+        $i4 = virtualinvoke $r13.<com.sun.media.sound.SoftAbstractResampler: int getPadding()>();
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int pad> = $i4;
+
+        $i5 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int pad>;
+
+        $i6 = $i5 * 2;
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int pad2> = $i6;
+
+        $i9 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int nrofchannels>;
+
+        $i7 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int pad2>;
+
+        $i8 = 512 + $i7;
+
+        $r14 = newmultiarray (float)[$i9][$i8];
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[][] ibuffer> = $r14;
+
+        $i10 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int nrofchannels>;
+
+        $i11 = $i10 * 512;
+
+        $r15 = newarray (float)[$i11];
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[] ibuffer2> = $r15;
+
+        $i12 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int pad>;
+
+        $i13 = 512 + $i12;
+
+        $f5 = (float) $i13;
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float ibuffer_index> = $f5;
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int ibuffer_len> = 512;
+
+        return;
+    }
+
+    public int available() throws java.io.IOException
+    {
+        com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler r0;
+
+        r0 := @this: com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler;
+
+        return 0;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler r0;
+        com.sun.media.sound.AudioFloatInputStream $r1;
+
+        r0 := @this: com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler;
+
+        $r1 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: com.sun.media.sound.AudioFloatInputStream ais>;
+
+        virtualinvoke $r1.<com.sun.media.sound.AudioFloatInputStream: void close()>();
+
+        return;
+    }
+
+    public javax.sound.sampled.AudioFormat getFormat()
+    {
+        com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler r0;
+        javax.sound.sampled.AudioFormat $r1;
+
+        r0 := @this: com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler;
+
+        $r1 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: javax.sound.sampled.AudioFormat targetFormat>;
+
+        return $r1;
+    }
+
+    public long getFrameLength()
+    {
+        com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler r0;
+
+        r0 := @this: com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler;
+
+        return -1L;
+    }
+
+    public void mark(int)
+    {
+        float[] $r1, r5, r7, $r10;
+        com.sun.media.sound.AudioFloatInputStream $r2;
+        int i0, $i1, $i2, $i3, $i4, $i5, i6, $i7, i8;
+        float[][] $r3, $r4, $r6, $r8, $r9, $r11, $r12;
+        com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler r0;
+        float $f0, $f1, $f2, $f3, $f4;
+
+        r0 := @this: com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler;
+
+        i0 := @parameter0: int;
+
+        $r2 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: com.sun.media.sound.AudioFloatInputStream ais>;
+
+        $f1 = (float) i0;
+
+        $r1 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[] pitch>;
+
+        $f0 = $r1[0];
+
+        $f2 = $f1 * $f0;
+
+        $i1 = (int) $f2;
+
+        virtualinvoke $r2.<com.sun.media.sound.AudioFloatInputStream: void mark(int)>($i1);
+
+        $f3 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float ibuffer_index>;
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float mark_ibuffer_index> = $f3;
+
+        $i2 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int ibuffer_len>;
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int mark_ibuffer_len> = $i2;
+
+        $r3 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[][] mark_ibuffer>;
+
+        if $r3 != null goto label1;
+
+        $r8 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[][] ibuffer>;
+
+        $i5 = lengthof $r8;
+
+        $r9 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[][] ibuffer>;
+
+        $r10 = $r9[0];
+
+        $i4 = lengthof $r10;
+
+        $r11 = newmultiarray (float)[$i5][$i4];
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[][] mark_ibuffer> = $r11;
+
+     label1:
+        i6 = 0;
+
+     label2:
+        $r12 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[][] ibuffer>;
+
+        $i7 = lengthof $r12;
+
+        if i6 >= $i7 goto label5;
+
+        $r4 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[][] ibuffer>;
+
+        r5 = $r4[i6];
+
+        $r6 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[][] mark_ibuffer>;
+
+        r7 = $r6[i6];
+
+        i8 = 0;
+
+     label3:
+        $i3 = lengthof r7;
+
+        if i8 >= $i3 goto label4;
+
+        $f4 = r5[i8];
+
+        r7[i8] = $f4;
+
+        i8 = i8 + 1;
+
+        goto label3;
+
+     label4:
+        i6 = i6 + 1;
+
+        goto label2;
+
+     label5:
+        return;
+    }
+
+    public boolean markSupported()
+    {
+        com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler r0;
+        com.sun.media.sound.AudioFloatInputStream $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler;
+
+        $r1 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: com.sun.media.sound.AudioFloatInputStream ais>;
+
+        $z0 = virtualinvoke $r1.<com.sun.media.sound.AudioFloatInputStream: boolean markSupported()>();
+
+        return $z0;
+    }
+
+    private void readNextBuffer() throws java.io.IOException
+    {
+        com.sun.media.sound.AudioFloatInputStream $r2, $r13;
+        com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler r0;
+        float $f0, $f1, $f2, $f3, $f4;
+        float[] $r1, $r3, $r4, $r5, $r7, $r8, $r9, $r10, $r11, $r12, r15, r16;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, i24, i25, i26, i27, i28, $i29, i30, i31, $i33, $i35;
+        float[][] $r6, $r14;
+
+        r0 := @this: com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler;
+
+        $i0 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int ibuffer_len>;
+
+        $i33 = (int) -1;
+
+        if $i0 != $i33 goto label01;
+
+        return;
+
+     label01:
+        i24 = 0;
+
+     label02:
+        $i1 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int nrofchannels>;
+
+        if i24 >= $i1 goto label05;
+
+        $r14 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[][] ibuffer>;
+
+        r15 = $r14[i24];
+
+        $i23 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int ibuffer_len>;
+
+        $i22 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int pad2>;
+
+        i25 = $i23 + $i22;
+
+        i26 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int ibuffer_len>;
+
+        i27 = 0;
+
+     label03:
+        if i26 >= i25 goto label04;
+
+        $f4 = r15[i26];
+
+        r15[i27] = $f4;
+
+        i26 = i26 + 1;
+
+        i27 = i27 + 1;
+
+        goto label03;
+
+     label04:
+        i24 = i24 + 1;
+
+        goto label02;
+
+     label05:
+        $f1 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float ibuffer_index>;
+
+        $i2 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int ibuffer_len>;
+
+        $f0 = (float) $i2;
+
+        $f2 = $f1 - $f0;
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float ibuffer_index> = $f2;
+
+        $r2 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: com.sun.media.sound.AudioFloatInputStream ais>;
+
+        $r1 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[] ibuffer2>;
+
+        $i3 = virtualinvoke $r2.<com.sun.media.sound.AudioFloatInputStream: int read(float[])>($r1);
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int ibuffer_len> = $i3;
+
+        $i4 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int ibuffer_len>;
+
+        if $i4 < 0 goto label09;
+
+     label06:
+        $i8 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int ibuffer_len>;
+
+        $r8 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[] ibuffer2>;
+
+        $i7 = lengthof $r8;
+
+        if $i8 >= $i7 goto label08;
+
+        $r13 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: com.sun.media.sound.AudioFloatInputStream ais>;
+
+        $r12 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[] ibuffer2>;
+
+        $i18 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int ibuffer_len>;
+
+        $r11 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[] ibuffer2>;
+
+        $i16 = lengthof $r11;
+
+        $i15 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int ibuffer_len>;
+
+        $i17 = $i16 - $i15;
+
+        $i19 = virtualinvoke $r13.<com.sun.media.sound.AudioFloatInputStream: int read(float[],int,int)>($r12, $i18, $i17);
+
+        $i35 = (int) -1;
+
+        if $i19 != $i35 goto label07;
+
+        goto label08;
+
+     label07:
+        $i20 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int ibuffer_len>;
+
+        $i21 = $i20 + $i19;
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int ibuffer_len> = $i21;
+
+        goto label06;
+
+     label08:
+        $r10 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[] ibuffer2>;
+
+        $i10 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int ibuffer_len>;
+
+        $r9 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[] ibuffer2>;
+
+        $i9 = lengthof $r9;
+
+        staticinvoke <java.util.Arrays: void fill(float[],int,int,float)>($r10, $i10, $i9, 0.0F);
+
+        $i12 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int ibuffer_len>;
+
+        $i11 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int nrofchannels>;
+
+        $i13 = $i12 / $i11;
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int ibuffer_len> = $i13;
+
+        goto label10;
+
+     label09:
+        $r4 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[] ibuffer2>;
+
+        $r3 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[] ibuffer2>;
+
+        $i5 = lengthof $r3;
+
+        staticinvoke <java.util.Arrays: void fill(float[],int,int,float)>($r4, 0, $i5, 0.0F);
+
+     label10:
+        $r5 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[] ibuffer2>;
+
+        $i14 = lengthof $r5;
+
+        i28 = 0;
+
+     label11:
+        $i29 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int nrofchannels>;
+
+        if i28 >= $i29 goto label14;
+
+        $r6 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[][] ibuffer>;
+
+        r16 = $r6[i28];
+
+        i30 = i28;
+
+        i31 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int pad2>;
+
+     label12:
+        if i30 >= $i14 goto label13;
+
+        $r7 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[] ibuffer2>;
+
+        $f3 = $r7[i30];
+
+        r16[i31] = $f3;
+
+        $i6 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int nrofchannels>;
+
+        i30 = i30 + $i6;
+
+        i31 = i31 + 1;
+
+        goto label12;
+
+     label13:
+        i28 = i28 + 1;
+
+        goto label11;
+
+     label14:
+        return;
+    }
+
+    public int read(float[], int, int) throws java.io.IOException
+    {
+        byte $b13, $b18, $b22;
+        com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler r0;
+        float[] r4, $r5, $r7, $r12, $r13, $r14, $r17, r18, r19;
+        com.sun.media.sound.SoftAbstractResampler $r15;
+        int[] $r6, $r8, $r11;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8;
+        int i0, $i1, $i2, $i3, i4, i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i14, $i15, $i16, $i17, $i19, $i20, $i21, $i23, $i24, $i25, $i26, $i27, $i28, i29, i30, i31, $i32, i33, i34, i35, $i36, i37, i38, $i40, $i42, $i43, $i44, $i45;
+        float[][] $r1, $r2, $r3, $r9, $r10, $r16;
+
+        r0 := @this: com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler;
+
+        r4 := @parameter0: float[];
+
+        i4 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        $r1 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[][] cbuffer>;
+
+        if $r1 == null goto label01;
+
+        $r16 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[][] cbuffer>;
+
+        $r17 = $r16[0];
+
+        $i27 = lengthof $r17;
+
+        $i25 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int nrofchannels>;
+
+        $i26 = i0 / $i25;
+
+        if $i27 >= $i26 goto label02;
+
+     label01:
+        $i3 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int nrofchannels>;
+
+        $i1 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int nrofchannels>;
+
+        $i2 = i0 / $i1;
+
+        $r2 = newmultiarray (float)[$i3][$i2];
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[][] cbuffer> = $r2;
+
+     label02:
+        $i28 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int ibuffer_len>;
+
+        $i40 = (int) -1;
+
+        if $i28 != $i40 goto label03;
+
+        $i42 = (int) -1;
+
+        return $i42;
+
+     label03:
+        if i0 >= 0 goto label04;
+
+        return 0;
+
+     label04:
+        i5 = i4 + i0;
+
+        $i6 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int nrofchannels>;
+
+        i29 = i0 / $i6;
+
+        i30 = 0;
+
+        i31 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int ibuffer_len>;
+
+     label05:
+        if i29 <= 0 goto label12;
+
+        $i12 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int ibuffer_len>;
+
+        if $i12 < 0 goto label07;
+
+        $f8 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float ibuffer_index>;
+
+        $i20 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int ibuffer_len>;
+
+        $i19 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int pad>;
+
+        $i21 = $i20 + $i19;
+
+        $f7 = (float) $i21;
+
+        $b22 = $f8 cmpl $f7;
+
+        $i43 = (int) $b22;
+
+        if $i43 < 0 goto label06;
+
+        specialinvoke r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: void readNextBuffer()>();
+
+     label06:
+        $i24 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int ibuffer_len>;
+
+        $i23 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int pad>;
+
+        i31 = $i24 + $i23;
+
+     label07:
+        $i32 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int ibuffer_len>;
+
+        if $i32 >= 0 goto label08;
+
+        i31 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int pad2>;
+
+        $f6 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float ibuffer_index>;
+
+        $f5 = (float) i31;
+
+        $b18 = $f6 cmpl $f5;
+
+        $i44 = (int) $b18;
+
+        if $i44 < 0 goto label08;
+
+        goto label12;
+
+     label08:
+        $f1 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float ibuffer_index>;
+
+        $b13 = $f1 cmpg 0.0F;
+
+        $i45 = (int) $b13;
+
+        if $i45 >= 0 goto label09;
+
+        goto label12;
+
+     label09:
+        i33 = i30;
+
+        i34 = 0;
+
+     label10:
+        $i14 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int nrofchannels>;
+
+        if i34 >= $i14 goto label11;
+
+        $r7 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[] ix>;
+
+        $f3 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float ibuffer_index>;
+
+        $r7[0] = $f3;
+
+        $r8 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int[] ox>;
+
+        $r8[0] = i30;
+
+        $r9 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[][] ibuffer>;
+
+        r18 = $r9[i34];
+
+        $r15 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: com.sun.media.sound.SoftAbstractResampler resampler>;
+
+        $r14 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[] ix>;
+
+        $f4 = (float) i31;
+
+        $r13 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[] pitch>;
+
+        $r10 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[][] cbuffer>;
+
+        $r12 = $r10[i34];
+
+        $r11 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int[] ox>;
+
+        $i16 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int nrofchannels>;
+
+        $i17 = i0 / $i16;
+
+        virtualinvoke $r15.<com.sun.media.sound.SoftAbstractResampler: void interpolate(float[],float[],float,float[],float,float[],int[],int)>(r18, $r14, $f4, $r13, 0.0F, $r12, $r11, $i17);
+
+        i34 = i34 + 1;
+
+        goto label10;
+
+     label11:
+        $r5 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[] ix>;
+
+        $f2 = $r5[0];
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float ibuffer_index> = $f2;
+
+        $r6 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int[] ox>;
+
+        i30 = $r6[0];
+
+        $i15 = i30 - i33;
+
+        i29 = i29 - $i15;
+
+        goto label05;
+
+     label12:
+        i35 = 0;
+
+     label13:
+        $i36 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int nrofchannels>;
+
+        if i35 >= $i36 goto label16;
+
+        i37 = 0;
+
+        $r3 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[][] cbuffer>;
+
+        r19 = $r3[i35];
+
+        i38 = i35 + i4;
+
+     label14:
+        if i38 >= i5 goto label15;
+
+        $i10 = i37;
+
+        i37 = i37 + 1;
+
+        $f0 = r19[$i10];
+
+        r4[i38] = $f0;
+
+        $i11 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int nrofchannels>;
+
+        i38 = i38 + $i11;
+
+        goto label14;
+
+     label15:
+        i35 = i35 + 1;
+
+        goto label13;
+
+     label16:
+        $i7 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int nrofchannels>;
+
+        $i8 = i29 * $i7;
+
+        $i9 = i0 - $i8;
+
+        return $i9;
+    }
+
+    public void reset() throws java.io.IOException
+    {
+        float[][] $r2, $r3, $r4, $r6;
+        com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler r0;
+        float[] r5, r7;
+        com.sun.media.sound.AudioFloatInputStream $r1;
+        int $i0, $i1, $i2, i3, i4;
+        float $f0, $f1;
+
+        r0 := @this: com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler;
+
+        $r1 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: com.sun.media.sound.AudioFloatInputStream ais>;
+
+        virtualinvoke $r1.<com.sun.media.sound.AudioFloatInputStream: void reset()>();
+
+        $r2 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[][] mark_ibuffer>;
+
+        if $r2 != null goto label1;
+
+        return;
+
+     label1:
+        $f0 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float mark_ibuffer_index>;
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float ibuffer_index> = $f0;
+
+        $i0 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int mark_ibuffer_len>;
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int ibuffer_len> = $i0;
+
+        i3 = 0;
+
+     label2:
+        $r3 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[][] ibuffer>;
+
+        $i1 = lengthof $r3;
+
+        if i3 >= $i1 goto label5;
+
+        $r4 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[][] mark_ibuffer>;
+
+        r5 = $r4[i3];
+
+        $r6 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[][] ibuffer>;
+
+        r7 = $r6[i3];
+
+        i4 = 0;
+
+     label3:
+        $i2 = lengthof r7;
+
+        if i4 >= $i2 goto label4;
+
+        $f1 = r5[i4];
+
+        r7[i4] = $f1;
+
+        i4 = i4 + 1;
+
+        goto label3;
+
+     label4:
+        i3 = i3 + 1;
+
+        goto label2;
+
+     label5:
+        return;
+    }
+
+    public long skip(long) throws java.io.IOException
+    {
+        javax.sound.sampled.AudioFormat $r3;
+        long l0, $l2, $l4, $l5, $l8, $l10, l13;
+        float[] $r1, $r2, $r4, $r5;
+        byte $b1, $b9, $b14;
+        int $i3, $i6, $i7, $i11, $i12, $i15, $i16;
+        com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler r0;
+
+        r0 := @this: com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        $i15 = (int) $b1;
+
+        if $i15 >= 0 goto label1;
+
+        return 0L;
+
+     label1:
+        $r1 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[] skipbuffer>;
+
+        if $r1 != null goto label2;
+
+        $r3 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: javax.sound.sampled.AudioFormat targetFormat>;
+
+        $i11 = virtualinvoke $r3.<javax.sound.sampled.AudioFormat: int getFrameSize()>();
+
+        $i12 = 1024 * $i11;
+
+        $r4 = newarray (float)[$i12];
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[] skipbuffer> = $r4;
+
+     label2:
+        $r5 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[] skipbuffer>;
+
+        l13 = l0;
+
+     label3:
+        $b14 = l13 cmp 0L;
+
+        $i16 = (int) $b14;
+
+        if $i16 <= 0 goto label5;
+
+        $r2 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: float[] skipbuffer>;
+
+        $i3 = lengthof $r2;
+
+        $l4 = (long) $i3;
+
+        $l5 = staticinvoke <java.lang.Math: long min(long,long)>(l13, $l4);
+
+        $i6 = (int) $l5;
+
+        $i7 = virtualinvoke r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatInputStreamResampler: int read(float[],int,int)>($r5, 0, $i6);
+
+        if $i7 >= 0 goto label4;
+
+        $b9 = l13 cmp l0;
+
+        if $b9 != 0 goto label5;
+
+        $l10 = (long) $i7;
+
+        return $l10;
+
+     label4:
+        $l8 = (long) $i7;
+
+        l13 = l13 - $l8;
+
+        goto label3;
+
+     label5:
+        $l2 = l0 - l13;
+
+        return $l2;
+    }
+}

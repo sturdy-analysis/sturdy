@@ -1,0 +1,937 @@
+public class com.sun.rowset.internal.CachedRowSetReader extends java.lang.Object implements javax.sql.RowSetReader, java.io.Serializable
+{
+    private int writerCalls;
+    private boolean userCon;
+    private int startPosition;
+    private com.sun.rowset.JdbcRowSetResourceBundle resBundle;
+    static final long serialVersionUID;
+
+    public void <init>()
+    {
+        com.sun.rowset.internal.CachedRowSetReader r0;
+        java.io.IOException $r2;
+        com.sun.rowset.JdbcRowSetResourceBundle $r1;
+        java.lang.RuntimeException $r3;
+
+        r0 := @this: com.sun.rowset.internal.CachedRowSetReader;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.rowset.internal.CachedRowSetReader: int writerCalls> = 0;
+
+        r0.<com.sun.rowset.internal.CachedRowSetReader: boolean userCon> = 0;
+
+     label1:
+        $r1 = staticinvoke <com.sun.rowset.JdbcRowSetResourceBundle: com.sun.rowset.JdbcRowSetResourceBundle getJdbcRowSetResourceBundle()>();
+
+        r0.<com.sun.rowset.internal.CachedRowSetReader: com.sun.rowset.JdbcRowSetResourceBundle resBundle> = $r1;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new java.lang.RuntimeException;
+
+        specialinvoke $r3.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r2);
+
+        throw $r3;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public void readData(javax.sql.RowSetInternal) throws java.sql.SQLException
+    {
+        com.sun.rowset.internal.CachedRowSetReader r1;
+        java.sql.Connection r31, $r33;
+        java.sql.ResultSet $r12, $r16, r35;
+        javax.sql.rowset.CachedRowSet r32;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        com.sun.rowset.JdbcRowSetResourceBundle $r3;
+        java.sql.PreparedStatement $r8, $r14, r34;
+        java.lang.Exception $r18, $r22, $r24, $r27, $r30;
+        java.lang.Throwable $r19;
+        java.lang.Object[] $r9, $r15;
+        java.sql.SQLException $r17, $r20, $r21, $r23, $r36, $r37, $r38;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i13;
+        java.lang.String $r5, $r6, $r7, $r10, $r11, $r13, $r26, $r29;
+        javax.sql.RowSetInternal r0;
+        java.lang.Object $r4;
+
+        r1 := @this: com.sun.rowset.internal.CachedRowSetReader;
+
+        r0 := @parameter0: javax.sql.RowSetInternal;
+
+        r31 = null;
+
+     label01:
+        r32 = (javax.sql.rowset.CachedRowSet) r0;
+
+        $i0 = interfaceinvoke r32.<javax.sql.rowset.CachedRowSet: int getPageSize()>();
+
+        if $i0 != 0 goto label02;
+
+        $i11 = interfaceinvoke r32.<javax.sql.rowset.CachedRowSet: int size()>();
+
+        if $i11 <= 0 goto label02;
+
+        interfaceinvoke r32.<javax.sql.rowset.CachedRowSet: void close()>();
+
+     label02:
+        r1.<com.sun.rowset.internal.CachedRowSetReader: int writerCalls> = 0;
+
+        r1.<com.sun.rowset.internal.CachedRowSetReader: boolean userCon> = 0;
+
+        $r33 = virtualinvoke r1.<com.sun.rowset.internal.CachedRowSetReader: java.sql.Connection connect(javax.sql.RowSetInternal)>(r0);
+
+        r31 = $r33;
+
+        if $r33 == null goto label03;
+
+        $r6 = interfaceinvoke r32.<javax.sql.rowset.CachedRowSet: java.lang.String getCommand()>();
+
+        if $r6 != null goto label04;
+
+     label03:
+        $r36 = new java.sql.SQLException;
+
+        $r3 = r1.<com.sun.rowset.internal.CachedRowSetReader: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r4 = virtualinvoke $r3.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("crsreader.connecterr");
+
+        $r5 = virtualinvoke $r4.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r36.<java.sql.SQLException: void <init>(java.lang.String)>($r5);
+
+        throw $r36;
+
+     label04:
+        $i1 = interfaceinvoke r32.<javax.sql.rowset.CachedRowSet: int getTransactionIsolation()>();
+
+        interfaceinvoke $r33.<java.sql.Connection: void setTransactionIsolation(int)>($i1);
+
+     label05:
+        goto label07;
+
+     label06:
+        $r30 := @caughtexception;
+
+     label07:
+        $r7 = interfaceinvoke r32.<javax.sql.rowset.CachedRowSet: java.lang.String getCommand()>();
+
+        $r8 = interfaceinvoke $r33.<java.sql.Connection: java.sql.PreparedStatement prepareStatement(java.lang.String)>($r7);
+
+        r34 = $r8;
+
+        $r9 = interfaceinvoke r0.<javax.sql.RowSetInternal: java.lang.Object[] getParams()>();
+
+        specialinvoke r1.<com.sun.rowset.internal.CachedRowSetReader: void decodeParams(java.lang.Object[],java.sql.PreparedStatement)>($r9, $r8);
+
+     label08:
+        $i2 = interfaceinvoke r32.<javax.sql.rowset.CachedRowSet: int getMaxRows()>();
+
+        interfaceinvoke $r8.<java.sql.PreparedStatement: void setMaxRows(int)>($i2);
+
+        $i3 = interfaceinvoke r32.<javax.sql.rowset.CachedRowSet: int getMaxFieldSize()>();
+
+        interfaceinvoke $r8.<java.sql.PreparedStatement: void setMaxFieldSize(int)>($i3);
+
+        $z0 = interfaceinvoke r32.<javax.sql.rowset.CachedRowSet: boolean getEscapeProcessing()>();
+
+        interfaceinvoke $r8.<java.sql.PreparedStatement: void setEscapeProcessing(boolean)>($z0);
+
+        $i4 = interfaceinvoke r32.<javax.sql.rowset.CachedRowSet: int getQueryTimeout()>();
+
+        interfaceinvoke $r8.<java.sql.PreparedStatement: void setQueryTimeout(int)>($i4);
+
+     label09:
+        goto label11;
+
+     label10:
+        $r27 := @caughtexception;
+
+        $r37 = new java.sql.SQLException;
+
+        $r29 = virtualinvoke $r27.<java.lang.Exception: java.lang.String getMessage()>();
+
+        specialinvoke $r37.<java.sql.SQLException: void <init>(java.lang.String)>($r29);
+
+        throw $r37;
+
+     label11:
+        $r10 = interfaceinvoke r32.<javax.sql.rowset.CachedRowSet: java.lang.String getCommand()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $i5 = virtualinvoke $r11.<java.lang.String: int indexOf(java.lang.String)>("select");
+
+        $i13 = (int) -1;
+
+        if $i5 == $i13 goto label18;
+
+        $r12 = interfaceinvoke $r8.<java.sql.PreparedStatement: java.sql.ResultSet executeQuery()>();
+
+        r35 = $r12;
+
+        $i6 = interfaceinvoke r32.<javax.sql.rowset.CachedRowSet: int getPageSize()>();
+
+        if $i6 != 0 goto label12;
+
+        interfaceinvoke r32.<javax.sql.rowset.CachedRowSet: void populate(java.sql.ResultSet)>($r12);
+
+        goto label17;
+
+     label12:
+        $r13 = interfaceinvoke r32.<javax.sql.rowset.CachedRowSet: java.lang.String getCommand()>();
+
+        $r14 = interfaceinvoke $r33.<java.sql.Connection: java.sql.PreparedStatement prepareStatement(java.lang.String,int,int)>($r13, 1004, 1008);
+
+        r34 = $r14;
+
+        $r15 = interfaceinvoke r0.<javax.sql.RowSetInternal: java.lang.Object[] getParams()>();
+
+        specialinvoke r1.<com.sun.rowset.internal.CachedRowSetReader: void decodeParams(java.lang.Object[],java.sql.PreparedStatement)>($r15, $r14);
+
+     label13:
+        $i7 = interfaceinvoke r32.<javax.sql.rowset.CachedRowSet: int getMaxRows()>();
+
+        interfaceinvoke $r14.<java.sql.PreparedStatement: void setMaxRows(int)>($i7);
+
+        $i8 = interfaceinvoke r32.<javax.sql.rowset.CachedRowSet: int getMaxFieldSize()>();
+
+        interfaceinvoke $r14.<java.sql.PreparedStatement: void setMaxFieldSize(int)>($i8);
+
+        $z4 = interfaceinvoke r32.<javax.sql.rowset.CachedRowSet: boolean getEscapeProcessing()>();
+
+        interfaceinvoke $r14.<java.sql.PreparedStatement: void setEscapeProcessing(boolean)>($z4);
+
+        $i9 = interfaceinvoke r32.<javax.sql.rowset.CachedRowSet: int getQueryTimeout()>();
+
+        interfaceinvoke $r14.<java.sql.PreparedStatement: void setQueryTimeout(int)>($i9);
+
+     label14:
+        goto label16;
+
+     label15:
+        $r24 := @caughtexception;
+
+        $r38 = new java.sql.SQLException;
+
+        $r26 = virtualinvoke $r24.<java.lang.Exception: java.lang.String getMessage()>();
+
+        specialinvoke $r38.<java.sql.SQLException: void <init>(java.lang.String)>($r26);
+
+        throw $r38;
+
+     label16:
+        $r16 = interfaceinvoke $r14.<java.sql.PreparedStatement: java.sql.ResultSet executeQuery()>();
+
+        r35 = $r16;
+
+        $i10 = r1.<com.sun.rowset.internal.CachedRowSetReader: int startPosition>;
+
+        interfaceinvoke r32.<javax.sql.rowset.CachedRowSet: void populate(java.sql.ResultSet,int)>($r16, $i10);
+
+     label17:
+        interfaceinvoke r35.<java.sql.ResultSet: void close()>();
+
+        goto label19;
+
+     label18:
+        interfaceinvoke $r8.<java.sql.PreparedStatement: int executeUpdate()>();
+
+     label19:
+        interfaceinvoke r34.<java.sql.PreparedStatement: void close()>();
+
+     label20:
+        interfaceinvoke $r33.<java.sql.Connection: void commit()>();
+
+     label21:
+        goto label23;
+
+     label22:
+        $r23 := @caughtexception;
+
+     label23:
+        $z1 = virtualinvoke r1.<com.sun.rowset.internal.CachedRowSetReader: boolean getCloseConnection()>();
+
+        if $z1 != 1 goto label24;
+
+        interfaceinvoke $r33.<java.sql.Connection: void close()>();
+
+     label24:
+        if $r33 == null goto label29;
+
+        $z2 = virtualinvoke r1.<com.sun.rowset.internal.CachedRowSetReader: boolean getCloseConnection()>();
+
+        if $z2 != 1 goto label29;
+
+     label25:
+        $z3 = interfaceinvoke $r33.<java.sql.Connection: boolean getAutoCommit()>();
+
+        if $z3 != 0 goto label26;
+
+        interfaceinvoke $r33.<java.sql.Connection: void rollback()>();
+
+     label26:
+        goto label28;
+
+     label27:
+        $r22 := @caughtexception;
+
+     label28:
+        interfaceinvoke $r33.<java.sql.Connection: void close()>();
+
+     label29:
+        goto label41;
+
+     label30:
+        $r21 := @caughtexception;
+
+        goto label41;
+
+     label31:
+        $r20 := @caughtexception;
+
+        throw $r20;
+
+     label32:
+        $r19 := @caughtexception;
+
+     label33:
+        if r31 == null goto label38;
+
+        $z5 = virtualinvoke r1.<com.sun.rowset.internal.CachedRowSetReader: boolean getCloseConnection()>();
+
+        if $z5 != 1 goto label38;
+
+     label34:
+        $z6 = interfaceinvoke r31.<java.sql.Connection: boolean getAutoCommit()>();
+
+        if $z6 != 0 goto label35;
+
+        interfaceinvoke r31.<java.sql.Connection: void rollback()>();
+
+     label35:
+        goto label37;
+
+     label36:
+        $r18 := @caughtexception;
+
+     label37:
+        interfaceinvoke r31.<java.sql.Connection: void close()>();
+
+     label38:
+        goto label40;
+
+     label39:
+        $r17 := @caughtexception;
+
+     label40:
+        throw $r19;
+
+     label41:
+        return;
+
+        catch java.lang.Exception from label04 to label05 with label06;
+        catch java.lang.Exception from label08 to label09 with label10;
+        catch java.lang.Exception from label13 to label14 with label15;
+        catch java.sql.SQLException from label20 to label21 with label22;
+        catch java.lang.Exception from label25 to label26 with label27;
+        catch java.sql.SQLException from label24 to label29 with label30;
+        catch java.sql.SQLException from label01 to label24 with label31;
+        catch java.lang.Throwable from label01 to label24 with label32;
+        catch java.lang.Exception from label34 to label35 with label36;
+        catch java.sql.SQLException from label33 to label38 with label39;
+        catch java.lang.Throwable from label31 to label33 with label32;
+    }
+
+    public boolean reset() throws java.sql.SQLException
+    {
+        com.sun.rowset.internal.CachedRowSetReader r0;
+        int $i0, $i1, $i2;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.internal.CachedRowSetReader;
+
+        $i0 = r0.<com.sun.rowset.internal.CachedRowSetReader: int writerCalls>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.rowset.internal.CachedRowSetReader: int writerCalls> = $i1;
+
+        $i2 = r0.<com.sun.rowset.internal.CachedRowSetReader: int writerCalls>;
+
+        if $i2 != 1 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public java.sql.Connection connect(javax.sql.RowSetInternal) throws java.sql.SQLException
+    {
+        com.sun.rowset.internal.CachedRowSetReader r25;
+        java.sql.Connection $r1, $r12, $r19, $r24, $r26;
+        javax.naming.NamingException $r27;
+        javax.naming.InitialContext $r13;
+        com.sun.rowset.JdbcRowSetResourceBundle $r29;
+        java.sql.SQLException $r28;
+        javax.sql.RowSet $r2, $r4, $r6, $r8, $r10, $r14, $r17, $r20, $r22;
+        javax.sql.DataSource r32;
+        java.lang.String $r3, $r5, $r7, $r9, $r11, $r15, $r18, $r21, $r23, $r31;
+        javax.sql.RowSetInternal r0;
+        java.lang.Object $r16, $r30;
+
+        r25 := @this: com.sun.rowset.internal.CachedRowSetReader;
+
+        r0 := @parameter0: javax.sql.RowSetInternal;
+
+        $r1 = interfaceinvoke r0.<javax.sql.RowSetInternal: java.sql.Connection getConnection()>();
+
+        if $r1 == null goto label1;
+
+        r25.<com.sun.rowset.internal.CachedRowSetReader: boolean userCon> = 1;
+
+        $r26 = interfaceinvoke r0.<javax.sql.RowSetInternal: java.sql.Connection getConnection()>();
+
+        return $r26;
+
+     label1:
+        $r2 = (javax.sql.RowSet) r0;
+
+        $r3 = interfaceinvoke $r2.<javax.sql.RowSet: java.lang.String getDataSourceName()>();
+
+        if $r3 == null goto label7;
+
+     label2:
+        $r13 = new javax.naming.InitialContext;
+
+        specialinvoke $r13.<javax.naming.InitialContext: void <init>()>();
+
+        $r14 = (javax.sql.RowSet) r0;
+
+        $r15 = interfaceinvoke $r14.<javax.sql.RowSet: java.lang.String getDataSourceName()>();
+
+        $r16 = interfaceinvoke $r13.<javax.naming.Context: java.lang.Object lookup(java.lang.String)>($r15);
+
+        r32 = (javax.sql.DataSource) $r16;
+
+        $r17 = (javax.sql.RowSet) r0;
+
+        $r18 = interfaceinvoke $r17.<javax.sql.RowSet: java.lang.String getUsername()>();
+
+        if $r18 == null goto label4;
+
+        $r20 = (javax.sql.RowSet) r0;
+
+        $r21 = interfaceinvoke $r20.<javax.sql.RowSet: java.lang.String getUsername()>();
+
+        $r22 = (javax.sql.RowSet) r0;
+
+        $r23 = interfaceinvoke $r22.<javax.sql.RowSet: java.lang.String getPassword()>();
+
+        $r24 = interfaceinvoke r32.<javax.sql.DataSource: java.sql.Connection getConnection(java.lang.String,java.lang.String)>($r21, $r23);
+
+     label3:
+        return $r24;
+
+     label4:
+        $r19 = interfaceinvoke r32.<javax.sql.DataSource: java.sql.Connection getConnection()>();
+
+     label5:
+        return $r19;
+
+     label6:
+        $r27 := @caughtexception;
+
+        $r28 = new java.sql.SQLException;
+
+        $r29 = r25.<com.sun.rowset.internal.CachedRowSetReader: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r30 = virtualinvoke $r29.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("crsreader.connect");
+
+        $r31 = virtualinvoke $r30.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r28.<java.sql.SQLException: void <init>(java.lang.String)>($r31);
+
+        virtualinvoke $r28.<java.sql.SQLException: java.lang.Throwable initCause(java.lang.Throwable)>($r27);
+
+        throw $r28;
+
+     label7:
+        $r4 = (javax.sql.RowSet) r0;
+
+        $r5 = interfaceinvoke $r4.<javax.sql.RowSet: java.lang.String getUrl()>();
+
+        if $r5 == null goto label8;
+
+        $r6 = (javax.sql.RowSet) r0;
+
+        $r7 = interfaceinvoke $r6.<javax.sql.RowSet: java.lang.String getUrl()>();
+
+        $r8 = (javax.sql.RowSet) r0;
+
+        $r9 = interfaceinvoke $r8.<javax.sql.RowSet: java.lang.String getUsername()>();
+
+        $r10 = (javax.sql.RowSet) r0;
+
+        $r11 = interfaceinvoke $r10.<javax.sql.RowSet: java.lang.String getPassword()>();
+
+        $r12 = staticinvoke <java.sql.DriverManager: java.sql.Connection getConnection(java.lang.String,java.lang.String,java.lang.String)>($r7, $r9, $r11);
+
+        return $r12;
+
+     label8:
+        return null;
+
+        catch javax.naming.NamingException from label2 to label3 with label6;
+        catch javax.naming.NamingException from label4 to label5 with label6;
+    }
+
+    private void decodeParams(java.lang.Object[], java.sql.PreparedStatement) throws java.sql.SQLException
+    {
+        com.sun.rowset.internal.CachedRowSetReader r10;
+        java.lang.Integer $r16, $r19, $r21, $r24, $r28, $r32, $r39, $r61, $r65, $r68;
+        com.sun.rowset.JdbcRowSetResourceBundle $r11, $r35, $r45, $r48, $r71;
+        java.io.Reader $r66;
+        java.sql.PreparedStatement r2;
+        java.lang.Object[] r0, $r5, r69;
+        java.sql.SQLException $r9, $r34, $r44;
+        java.util.Calendar $r54;
+        java.lang.String $r13, $r37, $r41, $r47, $r51, $r73;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, i24;
+        java.io.PrintStream $r49, $r70;
+        java.sql.Date $r55;
+        java.lang.Object $r1, $r3, $r4, $r6, $r7, $r8, $r12, $r14, $r15, $r17, $r18, $r20, $r22, $r23, $r26, $r27, $r30, $r31, $r36, $r38, $r40, $r42, $r43, $r46, $r50, $r52, $r53, $r56, $r57, $r58, $r59, $r60, $r62, $r63, $r64, $r67, $r72, $r74, $r75;
+        java.io.InputStream $r25, $r29, $r33;
+
+        r10 := @this: com.sun.rowset.internal.CachedRowSetReader;
+
+        r0 := @parameter0: java.lang.Object[];
+
+        r2 := @parameter1: java.sql.PreparedStatement;
+
+        i24 = 0;
+
+     label01:
+        $i0 = lengthof r0;
+
+        if i24 >= $i0 goto label18;
+
+        $r1 = r0[i24];
+
+        $z0 = $r1 instanceof java.lang.Object[];
+
+        if $z0 == 0 goto label16;
+
+        $r4 = r0[i24];
+
+        $r5 = (java.lang.Object[]) $r4;
+
+        r69 = (java.lang.Object[]) $r5;
+
+        $i2 = lengthof r69;
+
+        if $i2 != 2 goto label07;
+
+        $r42 = r69[0];
+
+        if $r42 != null goto label02;
+
+        $i22 = i24 + 1;
+
+        $r67 = r69[1];
+
+        $r68 = (java.lang.Integer) $r67;
+
+        $i23 = virtualinvoke $r68.<java.lang.Integer: int intValue()>();
+
+        interfaceinvoke r2.<java.sql.PreparedStatement: void setNull(int,int)>($i22, $i23);
+
+        goto label17;
+
+     label02:
+        $r43 = r69[0];
+
+        $z3 = $r43 instanceof java.sql.Date;
+
+        if $z3 != 0 goto label03;
+
+        $r56 = r69[0];
+
+        $z4 = $r56 instanceof java.sql.Time;
+
+        if $z4 != 0 goto label03;
+
+        $r57 = r69[0];
+
+        $z5 = $r57 instanceof java.sql.Timestamp;
+
+        if $z5 == 0 goto label05;
+
+     label03:
+        $r70 = <java.lang.System: java.io.PrintStream err>;
+
+        $r71 = r10.<com.sun.rowset.internal.CachedRowSetReader: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r72 = virtualinvoke $r71.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("crsreader.datedetected");
+
+        $r73 = virtualinvoke $r72.<java.lang.Object: java.lang.String toString()>();
+
+        virtualinvoke $r70.<java.io.PrintStream: void println(java.lang.String)>($r73);
+
+        $r74 = r69[1];
+
+        $z8 = $r74 instanceof java.util.Calendar;
+
+        if $z8 == 0 goto label04;
+
+        $r49 = <java.lang.System: java.io.PrintStream err>;
+
+        $r48 = r10.<com.sun.rowset.internal.CachedRowSetReader: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r50 = virtualinvoke $r48.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("crsreader.caldetected");
+
+        $r51 = virtualinvoke $r50.<java.lang.Object: java.lang.String toString()>();
+
+        virtualinvoke $r49.<java.io.PrintStream: void println(java.lang.String)>($r51);
+
+        $i17 = i24 + 1;
+
+        $r52 = r69[0];
+
+        $r55 = (java.sql.Date) $r52;
+
+        $r53 = r69[1];
+
+        $r54 = (java.util.Calendar) $r53;
+
+        interfaceinvoke r2.<java.sql.PreparedStatement: void setDate(int,java.sql.Date,java.util.Calendar)>($i17, $r55, $r54);
+
+        goto label17;
+
+     label04:
+        $r44 = new java.sql.SQLException;
+
+        $r45 = r10.<com.sun.rowset.internal.CachedRowSetReader: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r46 = virtualinvoke $r45.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("crsreader.paramtype");
+
+        $r47 = virtualinvoke $r46.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r44.<java.sql.SQLException: void <init>(java.lang.String)>($r47);
+
+        throw $r44;
+
+     label05:
+        $r58 = r69[0];
+
+        $z6 = $r58 instanceof java.io.Reader;
+
+        if $z6 == 0 goto label06;
+
+        $i20 = i24 + 1;
+
+        $r63 = r69[0];
+
+        $r66 = (java.io.Reader) $r63;
+
+        $r64 = r69[1];
+
+        $r65 = (java.lang.Integer) $r64;
+
+        $i21 = virtualinvoke $r65.<java.lang.Integer: int intValue()>();
+
+        interfaceinvoke r2.<java.sql.PreparedStatement: void setCharacterStream(int,java.io.Reader,int)>($i20, $r66, $i21);
+
+        goto label17;
+
+     label06:
+        $r59 = r69[1];
+
+        $z7 = $r59 instanceof java.lang.Integer;
+
+        if $z7 == 0 goto label17;
+
+        $i18 = i24 + 1;
+
+        $r62 = r69[0];
+
+        $r60 = r69[1];
+
+        $r61 = (java.lang.Integer) $r60;
+
+        $i19 = virtualinvoke $r61.<java.lang.Integer: int intValue()>();
+
+        interfaceinvoke r2.<java.sql.PreparedStatement: void setObject(int,java.lang.Object,int)>($i18, $r62, $i19);
+
+        goto label17;
+
+     label07:
+        $i3 = lengthof r69;
+
+        if $i3 != 3 goto label15;
+
+        $r7 = r69[0];
+
+        if $r7 != null goto label08;
+
+        $i15 = i24 + 1;
+
+        $r38 = r69[1];
+
+        $r39 = (java.lang.Integer) $r38;
+
+        $i16 = virtualinvoke $r39.<java.lang.Integer: int intValue()>();
+
+        $r40 = r69[2];
+
+        $r41 = (java.lang.String) $r40;
+
+        interfaceinvoke r2.<java.sql.PreparedStatement: void setNull(int,int,java.lang.String)>($i15, $i16, $r41);
+
+        goto label17;
+
+     label08:
+        $r8 = r69[0];
+
+        $z1 = $r8 instanceof java.io.InputStream;
+
+        if $z1 == 0 goto label13;
+
+        $r20 = r69[2];
+
+        $r21 = (java.lang.Integer) $r20;
+
+        $i8 = virtualinvoke $r21.<java.lang.Integer: int intValue()>();
+
+        tableswitch($i8)
+        {
+            case 0: goto label09;
+            case 1: goto label10;
+            case 2: goto label11;
+            default: goto label12;
+        };
+
+     label09:
+        $i13 = i24 + 1;
+
+        $r30 = r69[0];
+
+        $r33 = (java.io.InputStream) $r30;
+
+        $r31 = r69[1];
+
+        $r32 = (java.lang.Integer) $r31;
+
+        $i14 = virtualinvoke $r32.<java.lang.Integer: int intValue()>();
+
+        interfaceinvoke r2.<java.sql.PreparedStatement: void setUnicodeStream(int,java.io.InputStream,int)>($i13, $r33, $i14);
+
+        goto label13;
+
+     label10:
+        $i11 = i24 + 1;
+
+        $r26 = r69[0];
+
+        $r29 = (java.io.InputStream) $r26;
+
+        $r27 = r69[1];
+
+        $r28 = (java.lang.Integer) $r27;
+
+        $i12 = virtualinvoke $r28.<java.lang.Integer: int intValue()>();
+
+        interfaceinvoke r2.<java.sql.PreparedStatement: void setBinaryStream(int,java.io.InputStream,int)>($i11, $r29, $i12);
+
+        goto label13;
+
+     label11:
+        $i9 = i24 + 1;
+
+        $r22 = r69[0];
+
+        $r25 = (java.io.InputStream) $r22;
+
+        $r23 = r69[1];
+
+        $r24 = (java.lang.Integer) $r23;
+
+        $i10 = virtualinvoke $r24.<java.lang.Integer: int intValue()>();
+
+        interfaceinvoke r2.<java.sql.PreparedStatement: void setAsciiStream(int,java.io.InputStream,int)>($i9, $r25, $i10);
+
+        goto label13;
+
+     label12:
+        $r34 = new java.sql.SQLException;
+
+        $r35 = r10.<com.sun.rowset.internal.CachedRowSetReader: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r36 = virtualinvoke $r35.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("crsreader.paramtype");
+
+        $r37 = virtualinvoke $r36.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r34.<java.sql.SQLException: void <init>(java.lang.String)>($r37);
+
+        throw $r34;
+
+     label13:
+        $r75 = r69[1];
+
+        $z9 = $r75 instanceof java.lang.Integer;
+
+        if $z9 == 0 goto label14;
+
+        $r14 = r69[2];
+
+        $z2 = $r14 instanceof java.lang.Integer;
+
+        if $z2 == 0 goto label14;
+
+        $i5 = i24 + 1;
+
+        $r17 = r69[0];
+
+        $r15 = r69[1];
+
+        $r16 = (java.lang.Integer) $r15;
+
+        $i6 = virtualinvoke $r16.<java.lang.Integer: int intValue()>();
+
+        $r18 = r69[2];
+
+        $r19 = (java.lang.Integer) $r18;
+
+        $i7 = virtualinvoke $r19.<java.lang.Integer: int intValue()>();
+
+        interfaceinvoke r2.<java.sql.PreparedStatement: void setObject(int,java.lang.Object,int,int)>($i5, $r17, $i6, $i7);
+
+        goto label17;
+
+     label14:
+        $r9 = new java.sql.SQLException;
+
+        $r11 = r10.<com.sun.rowset.internal.CachedRowSetReader: com.sun.rowset.JdbcRowSetResourceBundle resBundle>;
+
+        $r12 = virtualinvoke $r11.<com.sun.rowset.JdbcRowSetResourceBundle: java.lang.Object handleGetObject(java.lang.String)>("crsreader.paramtype");
+
+        $r13 = virtualinvoke $r12.<java.lang.Object: java.lang.String toString()>();
+
+        specialinvoke $r9.<java.sql.SQLException: void <init>(java.lang.String)>($r13);
+
+        throw $r9;
+
+     label15:
+        $i4 = i24 + 1;
+
+        $r6 = r0[i24];
+
+        interfaceinvoke r2.<java.sql.PreparedStatement: void setObject(int,java.lang.Object)>($i4, $r6);
+
+        goto label17;
+
+     label16:
+        $i1 = i24 + 1;
+
+        $r3 = r0[i24];
+
+        interfaceinvoke r2.<java.sql.PreparedStatement: void setObject(int,java.lang.Object)>($i1, $r3);
+
+     label17:
+        i24 = i24 + 1;
+
+        goto label01;
+
+     label18:
+        return;
+    }
+
+    protected boolean getCloseConnection()
+    {
+        com.sun.rowset.internal.CachedRowSetReader r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.rowset.internal.CachedRowSetReader;
+
+        $z0 = r0.<com.sun.rowset.internal.CachedRowSetReader: boolean userCon>;
+
+        if $z0 != 1 goto label1;
+
+        return 0;
+
+     label1:
+        return 1;
+    }
+
+    public void setStartPosition(int)
+    {
+        int i0;
+        com.sun.rowset.internal.CachedRowSetReader r0;
+
+        r0 := @this: com.sun.rowset.internal.CachedRowSetReader;
+
+        i0 := @parameter0: int;
+
+        r0.<com.sun.rowset.internal.CachedRowSetReader: int startPosition> = i0;
+
+        return;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        com.sun.rowset.internal.CachedRowSetReader r1;
+        java.io.ObjectInputStream r0;
+        java.io.IOException $r3;
+        com.sun.rowset.JdbcRowSetResourceBundle $r2;
+        java.lang.RuntimeException $r4;
+
+        r1 := @this: com.sun.rowset.internal.CachedRowSetReader;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+     label1:
+        $r2 = staticinvoke <com.sun.rowset.JdbcRowSetResourceBundle: com.sun.rowset.JdbcRowSetResourceBundle getJdbcRowSetResourceBundle()>();
+
+        r1.<com.sun.rowset.internal.CachedRowSetReader: com.sun.rowset.JdbcRowSetResourceBundle resBundle> = $r2;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.lang.RuntimeException;
+
+        specialinvoke $r4.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r3);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.rowset.internal.CachedRowSetReader: long serialVersionUID> = 5049738185801363801L;
+
+        return;
+    }
+}

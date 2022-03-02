@@ -1,0 +1,2571 @@
+public final class sun.util.calendar.ZoneInfoFile extends java.lang.Object
+{
+    private static java.lang.String versionId;
+    private static final java.util.Map zones;
+    private static java.util.Map aliases;
+    private static byte[][] ruleArray;
+    private static java.lang.String[] regions;
+    private static int[] indices;
+    private static final boolean USE_OLDMAPPING;
+    private static java.lang.String[][] oldMappings;
+    private static final long UTC1900;
+    private static final long UTC2037;
+    private static final long LDT2037;
+    private static final long CURRT;
+    static final int SECONDS_PER_DAY;
+    static final int DAYS_PER_CYCLE;
+    static final long DAYS_0000_TO_1970;
+    private static final int[] toCalendarDOW;
+    private static final int[] toSTZTime;
+    private static final long OFFSET_MASK;
+    private static final long DST_MASK;
+    private static final int DST_NSHIFT;
+    private static final int TRANSITION_NSHIFT;
+    private static final int LASTYEAR;
+
+    public static java.lang.String[] getZoneIds()
+    {
+        java.lang.Object[] $r3;
+        java.lang.String[] $r0, $r2, $r4, $r6, $r8;
+        int $i0, $i1, $i2, $i3, i4, i5, i6, i7, i8, $i9;
+        java.lang.String $r7;
+        boolean $z0, $z1;
+        java.lang.String[][] $r1, $r5, $r9;
+
+        $r0 = <sun.util.calendar.ZoneInfoFile: java.lang.String[] regions>;
+
+        $i1 = lengthof $r0;
+
+        $r1 = <sun.util.calendar.ZoneInfoFile: java.lang.String[][] oldMappings>;
+
+        $i0 = lengthof $r1;
+
+        i4 = $i1 + $i0;
+
+        $z0 = <sun.util.calendar.ZoneInfoFile: boolean USE_OLDMAPPING>;
+
+        if $z0 != 0 goto label1;
+
+        i4 = i4 + 3;
+
+     label1:
+        $r2 = <sun.util.calendar.ZoneInfoFile: java.lang.String[] regions>;
+
+        $r3 = staticinvoke <java.util.Arrays: java.lang.Object[] copyOf(java.lang.Object[],int)>($r2, i4);
+
+        $r8 = (java.lang.String[]) $r3;
+
+        $r4 = <sun.util.calendar.ZoneInfoFile: java.lang.String[] regions>;
+
+        $i3 = lengthof $r4;
+
+        i5 = $i3;
+
+        $z1 = <sun.util.calendar.ZoneInfoFile: boolean USE_OLDMAPPING>;
+
+        if $z1 != 0 goto label2;
+
+        i6 = $i3 + 1;
+
+        $r8[$i3] = "EST";
+
+        i7 = i6 + 1;
+
+        $r8[i6] = "HST";
+
+        i5 = i7 + 1;
+
+        $r8[i7] = "MST";
+
+     label2:
+        i8 = 0;
+
+     label3:
+        $r9 = <sun.util.calendar.ZoneInfoFile: java.lang.String[][] oldMappings>;
+
+        $i9 = lengthof $r9;
+
+        if i8 >= $i9 goto label4;
+
+        $i2 = i5;
+
+        i5 = i5 + 1;
+
+        $r5 = <sun.util.calendar.ZoneInfoFile: java.lang.String[][] oldMappings>;
+
+        $r6 = $r5[i8];
+
+        $r7 = $r6[0];
+
+        $r8[$i2] = $r7;
+
+        i8 = i8 + 1;
+
+        goto label3;
+
+     label4:
+        return $r8;
+    }
+
+    public static java.lang.String[] getZoneIds(int)
+    {
+        java.lang.Object[] $r3;
+        java.lang.String[] $r1, $r2, r6;
+        java.util.ArrayList $r0;
+        sun.util.calendar.ZoneInfo $r5;
+        int i0, $i1, $i2, i3, i4;
+        java.lang.String r4;
+
+        i3 := @parameter0: int;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+        $r1 = staticinvoke <sun.util.calendar.ZoneInfoFile: java.lang.String[] getZoneIds()>();
+
+        i0 = lengthof $r1;
+
+        i4 = 0;
+
+     label1:
+        if i4 >= i0 goto label3;
+
+        r4 = $r1[i4];
+
+        $r5 = staticinvoke <sun.util.calendar.ZoneInfoFile: sun.util.calendar.ZoneInfo getZoneInfo(java.lang.String)>(r4);
+
+        $i2 = virtualinvoke $r5.<sun.util.calendar.ZoneInfo: int getRawOffset()>();
+
+        if $i2 != i3 goto label2;
+
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>(r4);
+
+     label2:
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label3:
+        $i1 = interfaceinvoke $r0.<java.util.List: int size()>();
+
+        $r2 = newarray (java.lang.String)[$i1];
+
+        $r3 = interfaceinvoke $r0.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r2);
+
+        r6 = (java.lang.String[]) $r3;
+
+        staticinvoke <java.util.Arrays: void sort(java.lang.Object[])>(r6);
+
+        return r6;
+    }
+
+    public static sun.util.calendar.ZoneInfo getZoneInfo(java.lang.String)
+    {
+        sun.util.calendar.ZoneInfo $r1, r3;
+        java.lang.Object $r2;
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        return null;
+
+     label1:
+        $r1 = staticinvoke <sun.util.calendar.ZoneInfoFile: sun.util.calendar.ZoneInfo getZoneInfo0(java.lang.String)>(r0);
+
+        r3 = $r1;
+
+        if $r1 == null goto label2;
+
+        $r2 = virtualinvoke $r1.<sun.util.calendar.ZoneInfo: java.lang.Object clone()>();
+
+        r3 = (sun.util.calendar.ZoneInfo) $r2;
+
+        virtualinvoke r3.<sun.util.calendar.ZoneInfo: void setID(java.lang.String)>(r0);
+
+     label2:
+        return r3;
+    }
+
+    private static sun.util.calendar.ZoneInfo getZoneInfo0(java.lang.String)
+    {
+        byte[] r7;
+        java.io.DataInputStream $r8;
+        java.lang.String[] $r4;
+        java.io.ByteArrayInputStream $r9;
+        int[] $r5;
+        java.util.Map $r1, $r3, $r11, $r12;
+        int $i0, $i1;
+        java.lang.String r0, $r20, $r22, r24;
+        boolean $z0;
+        java.lang.RuntimeException $r15;
+        java.lang.Exception $r14;
+        byte[][] $r6;
+        sun.util.calendar.ZoneInfo $r10, r23;
+        java.lang.Object $r2, $r13;
+        java.lang.StringBuilder $r16, $r17, $r18, $r19, $r21;
+
+        r0 := @parameter0: java.lang.String;
+
+     label1:
+        $r1 = <sun.util.calendar.ZoneInfoFile: java.util.Map zones>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.lang.Object get(java.lang.Object)>(r0);
+
+        r23 = (sun.util.calendar.ZoneInfo) $r2;
+
+        if r23 == null goto label3;
+
+     label2:
+        return r23;
+
+     label3:
+        r24 = r0;
+
+        $r3 = <sun.util.calendar.ZoneInfoFile: java.util.Map aliases>;
+
+        $z0 = interfaceinvoke $r3.<java.util.Map: boolean containsKey(java.lang.Object)>(r0);
+
+        if $z0 == 0 goto label4;
+
+        $r12 = <sun.util.calendar.ZoneInfoFile: java.util.Map aliases>;
+
+        $r13 = interfaceinvoke $r12.<java.util.Map: java.lang.Object get(java.lang.Object)>(r0);
+
+        r24 = (java.lang.String) $r13;
+
+     label4:
+        $r4 = <sun.util.calendar.ZoneInfoFile: java.lang.String[] regions>;
+
+        $i0 = staticinvoke <java.util.Arrays: int binarySearch(java.lang.Object[],java.lang.Object)>($r4, r24);
+
+        if $i0 >= 0 goto label6;
+
+     label5:
+        return null;
+
+     label6:
+        $r6 = <sun.util.calendar.ZoneInfoFile: byte[][] ruleArray>;
+
+        $r5 = <sun.util.calendar.ZoneInfoFile: int[] indices>;
+
+        $i1 = $r5[$i0];
+
+        r7 = $r6[$i1];
+
+        $r8 = new java.io.DataInputStream;
+
+        $r9 = new java.io.ByteArrayInputStream;
+
+        specialinvoke $r9.<java.io.ByteArrayInputStream: void <init>(byte[])>(r7);
+
+        specialinvoke $r8.<java.io.DataInputStream: void <init>(java.io.InputStream)>($r9);
+
+        $r10 = staticinvoke <sun.util.calendar.ZoneInfoFile: sun.util.calendar.ZoneInfo getZoneInfo(java.io.DataInput,java.lang.String)>($r8, r24);
+
+        $r11 = <sun.util.calendar.ZoneInfoFile: java.util.Map zones>;
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r0, $r10);
+
+     label7:
+        return $r10;
+
+     label8:
+        $r14 := @caughtexception;
+
+        $r15 = new java.lang.RuntimeException;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid binary time-zone data: TZDB:");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", version: ");
+
+        $r20 = <sun.util.calendar.ZoneInfoFile: java.lang.String versionId>;
+
+        $r21 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r15.<java.lang.RuntimeException: void <init>(java.lang.String,java.lang.Throwable)>($r22, $r14);
+
+        throw $r15;
+
+        catch java.lang.Exception from label1 to label2 with label8;
+        catch java.lang.Exception from label3 to label5 with label8;
+        catch java.lang.Exception from label6 to label7 with label8;
+    }
+
+    public static java.util.Map getAliasMap()
+    {
+        java.util.Map $r0, $r1;
+
+        $r0 = <sun.util.calendar.ZoneInfoFile: java.util.Map aliases>;
+
+        $r1 = staticinvoke <java.util.Collections: java.util.Map unmodifiableMap(java.util.Map)>($r0);
+
+        return $r1;
+    }
+
+    public static java.lang.String getVersion()
+    {
+        java.lang.String $r0;
+
+        $r0 = <sun.util.calendar.ZoneInfoFile: java.lang.String versionId>;
+
+        return $r0;
+    }
+
+    public static sun.util.calendar.ZoneInfo getCustomTimeZone(java.lang.String, int)
+    {
+        sun.util.calendar.ZoneInfo $r1;
+        int i0;
+        java.lang.String $r0, r2;
+
+        r2 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $r0 = staticinvoke <sun.util.calendar.ZoneInfoFile: java.lang.String toCustomID(int)>(i0);
+
+        $r1 = new sun.util.calendar.ZoneInfo;
+
+        specialinvoke $r1.<sun.util.calendar.ZoneInfo: void <init>(java.lang.String,int)>($r0, i0);
+
+        return $r1;
+    }
+
+    public static java.lang.String toCustomID(int)
+    {
+        int i0, $i1, $i3, $i5, $i7, $i9, $i11, $i13, $i15, $i17, $i18, i19, $i22, $i23, $i24, $i25, $i26;
+        java.lang.String $r2;
+        char $c2, $c4, $c6, $c8, $c10, $c12, $c14, $c16, c20;
+        char[] $r0;
+
+        i0 := @parameter0: int;
+
+        $i22 = (int) 60000;
+
+        i19 = i0 / $i22;
+
+        if i19 < 0 goto label1;
+
+        c20 = 43;
+
+        goto label2;
+
+     label1:
+        c20 = 45;
+
+        i19 = neg i19;
+
+     label2:
+        $i17 = i19 / 60;
+
+        $i18 = i19 % 60;
+
+        $r0 = newarray (char)[9];
+
+        $r0[0] = 71;
+
+        $r0[1] = 77;
+
+        $r0[2] = 84;
+
+        $r0[3] = c20;
+
+        $r0[4] = 48;
+
+        $r0[5] = 48;
+
+        $r0[6] = 58;
+
+        $r0[7] = 48;
+
+        $r0[8] = 48;
+
+        if $i17 < 10 goto label3;
+
+        $c14 = $r0[4];
+
+        $i13 = $i17 / 10;
+
+        $i23 = (int) $c14;
+
+        $i15 = $i23 + $i13;
+
+        $c16 = (char) $i15;
+
+        $r0[4] = $c16;
+
+     label3:
+        $c2 = $r0[5];
+
+        $i1 = $i17 % 10;
+
+        $i24 = (int) $c2;
+
+        $i3 = $i24 + $i1;
+
+        $c4 = (char) $i3;
+
+        $r0[5] = $c4;
+
+        if $i18 == 0 goto label4;
+
+        $c6 = $r0[7];
+
+        $i5 = $i18 / 10;
+
+        $i25 = (int) $c6;
+
+        $i7 = $i25 + $i5;
+
+        $c8 = (char) $i7;
+
+        $r0[7] = $c8;
+
+        $c10 = $r0[8];
+
+        $i9 = $i18 % 10;
+
+        $i26 = (int) $c10;
+
+        $i11 = $i26 + $i9;
+
+        $c12 = (char) $i11;
+
+        $r0[8] = $c12;
+
+     label4:
+        $r2 = new java.lang.String;
+
+        specialinvoke $r2.<java.lang.String: void <init>(char[])>($r0);
+
+        return $r2;
+    }
+
+    private void <init>()
+    {
+        sun.util.calendar.ZoneInfoFile r0;
+
+        r0 := @this: sun.util.calendar.ZoneInfoFile;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static void addOldMapping()
+    {
+        java.lang.String[] r10;
+        java.util.Map $r2, $r4, $r6, $r7, $r8, $r9, $r13;
+        int i0, i1;
+        java.lang.String $r11, $r12;
+        boolean $z0;
+        sun.util.calendar.ZoneInfo $r1, $r3, $r5;
+        java.lang.String[][] r0;
+
+        r0 = <sun.util.calendar.ZoneInfoFile: java.lang.String[][] oldMappings>;
+
+        i0 = lengthof r0;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label2;
+
+        r10 = r0[i1];
+
+        $r13 = <sun.util.calendar.ZoneInfoFile: java.util.Map aliases>;
+
+        $r12 = r10[0];
+
+        $r11 = r10[1];
+
+        interfaceinvoke $r13.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r12, $r11);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        $z0 = <sun.util.calendar.ZoneInfoFile: boolean USE_OLDMAPPING>;
+
+        if $z0 == 0 goto label3;
+
+        $r7 = <sun.util.calendar.ZoneInfoFile: java.util.Map aliases>;
+
+        interfaceinvoke $r7.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("EST", "America/New_York");
+
+        $r8 = <sun.util.calendar.ZoneInfoFile: java.util.Map aliases>;
+
+        interfaceinvoke $r8.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("MST", "America/Denver");
+
+        $r9 = <sun.util.calendar.ZoneInfoFile: java.util.Map aliases>;
+
+        interfaceinvoke $r9.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("HST", "Pacific/Honolulu");
+
+        goto label4;
+
+     label3:
+        $r2 = <sun.util.calendar.ZoneInfoFile: java.util.Map zones>;
+
+        $r1 = new sun.util.calendar.ZoneInfo;
+
+        specialinvoke $r1.<sun.util.calendar.ZoneInfo: void <init>(java.lang.String,int)>("EST", -18000000);
+
+        interfaceinvoke $r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("EST", $r1);
+
+        $r4 = <sun.util.calendar.ZoneInfoFile: java.util.Map zones>;
+
+        $r3 = new sun.util.calendar.ZoneInfo;
+
+        specialinvoke $r3.<sun.util.calendar.ZoneInfo: void <init>(java.lang.String,int)>("MST", -25200000);
+
+        interfaceinvoke $r4.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("MST", $r3);
+
+        $r6 = <sun.util.calendar.ZoneInfoFile: java.util.Map zones>;
+
+        $r5 = new sun.util.calendar.ZoneInfo;
+
+        specialinvoke $r5.<sun.util.calendar.ZoneInfo: void <init>(java.lang.String,int)>("HST", -36000000);
+
+        interfaceinvoke $r6.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("HST", $r5);
+
+     label4:
+        return;
+    }
+
+    public static boolean useOldMapping()
+    {
+        boolean $z0;
+
+        $z0 = <sun.util.calendar.ZoneInfoFile: boolean USE_OLDMAPPING>;
+
+        return $z0;
+    }
+
+    private static void load(java.io.DataInputStream) throws java.lang.ClassNotFoundException, java.io.IOException
+    {
+        byte[] r20;
+        byte $b0;
+        int[] $r11, $r14;
+        java.util.Map $r5, $r6, $r9;
+        boolean $z0;
+        java.io.StreamCorruptedException $r21, $r22;
+        byte[][] $r4, $r15;
+        java.io.DataInputStream r0;
+        java.lang.String[] r3, $r10, $r12;
+        short $s1, $s2, $s3, $s4, $s5, $s6, $s7, $s8, $s9, $s10;
+        int i11, i12, i13, i14, i15, i16, i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33;
+        java.lang.String $r1, $r2, r7, r8, $r13, $r16, $r17;
+
+        r0 := @parameter0: java.io.DataInputStream;
+
+        $b0 = virtualinvoke r0.<java.io.DataInputStream: byte readByte()>();
+
+        if $b0 == 1 goto label01;
+
+        $r21 = new java.io.StreamCorruptedException;
+
+        specialinvoke $r21.<java.io.StreamCorruptedException: void <init>(java.lang.String)>("File format not recognised");
+
+        throw $r21;
+
+     label01:
+        $r1 = virtualinvoke r0.<java.io.DataInputStream: java.lang.String readUTF()>();
+
+        $r2 = "TZDB";
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label02;
+
+        $r22 = new java.io.StreamCorruptedException;
+
+        specialinvoke $r22.<java.io.StreamCorruptedException: void <init>(java.lang.String)>("File format not recognised");
+
+        throw $r22;
+
+     label02:
+        $s1 = virtualinvoke r0.<java.io.DataInputStream: short readShort()>();
+
+        i11 = 0;
+
+     label03:
+        $i18 = (int) $s1;
+
+        if i11 >= $i18 goto label04;
+
+        $r17 = virtualinvoke r0.<java.io.DataInputStream: java.lang.String readUTF()>();
+
+        <sun.util.calendar.ZoneInfoFile: java.lang.String versionId> = $r17;
+
+        i11 = i11 + 1;
+
+        goto label03;
+
+     label04:
+        $s2 = virtualinvoke r0.<java.io.DataInputStream: short readShort()>();
+
+        $i19 = (int) $s2;
+
+        r3 = newarray (java.lang.String)[$i19];
+
+        i12 = 0;
+
+     label05:
+        $i20 = (int) $s2;
+
+        if i12 >= $i20 goto label06;
+
+        $r16 = virtualinvoke r0.<java.io.DataInputStream: java.lang.String readUTF()>();
+
+        r3[i12] = $r16;
+
+        i12 = i12 + 1;
+
+        goto label05;
+
+     label06:
+        $s3 = virtualinvoke r0.<java.io.DataInputStream: short readShort()>();
+
+        $i21 = (int) $s3;
+
+        $r4 = newarray (byte[])[$i21];
+
+        <sun.util.calendar.ZoneInfoFile: byte[][] ruleArray> = $r4;
+
+        i13 = 0;
+
+     label07:
+        $i22 = (int) $s3;
+
+        if i13 >= $i22 goto label08;
+
+        $s10 = virtualinvoke r0.<java.io.DataInputStream: short readShort()>();
+
+        $i23 = (int) $s10;
+
+        r20 = newarray (byte)[$i23];
+
+        virtualinvoke r0.<java.io.DataInputStream: void readFully(byte[])>(r20);
+
+        $r15 = <sun.util.calendar.ZoneInfoFile: byte[][] ruleArray>;
+
+        $r15[i13] = r20;
+
+        i13 = i13 + 1;
+
+        goto label07;
+
+     label08:
+        i14 = 0;
+
+     label09:
+        $i24 = (int) $s1;
+
+        if i14 >= $i24 goto label12;
+
+        $s7 = virtualinvoke r0.<java.io.DataInputStream: short readShort()>();
+
+        $i25 = (int) $s7;
+
+        $r10 = newarray (java.lang.String)[$i25];
+
+        <sun.util.calendar.ZoneInfoFile: java.lang.String[] regions> = $r10;
+
+        $i26 = (int) $s7;
+
+        $r11 = newarray (int)[$i26];
+
+        <sun.util.calendar.ZoneInfoFile: int[] indices> = $r11;
+
+        i15 = 0;
+
+     label10:
+        $i27 = (int) $s7;
+
+        if i15 >= $i27 goto label11;
+
+        $r12 = <sun.util.calendar.ZoneInfoFile: java.lang.String[] regions>;
+
+        $s8 = virtualinvoke r0.<java.io.DataInputStream: short readShort()>();
+
+        $i28 = (int) $s8;
+
+        $r13 = r3[$i28];
+
+        $r12[i15] = $r13;
+
+        $r14 = <sun.util.calendar.ZoneInfoFile: int[] indices>;
+
+        $s9 = virtualinvoke r0.<java.io.DataInputStream: short readShort()>();
+
+        $i29 = (int) $s9;
+
+        $r14[i15] = $i29;
+
+        i15 = i15 + 1;
+
+        goto label10;
+
+     label11:
+        i14 = i14 + 1;
+
+        goto label09;
+
+     label12:
+        $r5 = <sun.util.calendar.ZoneInfoFile: java.util.Map zones>;
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object remove(java.lang.Object)>("ROC");
+
+        i16 = 0;
+
+     label13:
+        $i30 = (int) $s1;
+
+        if i16 >= $i30 goto label16;
+
+        $s4 = virtualinvoke r0.<java.io.DataInputStream: short readShort()>();
+
+        $r6 = <sun.util.calendar.ZoneInfoFile: java.util.Map aliases>;
+
+        interfaceinvoke $r6.<java.util.Map: void clear()>();
+
+        i17 = 0;
+
+     label14:
+        $i31 = (int) $s4;
+
+        if i17 >= $i31 goto label15;
+
+        $s5 = virtualinvoke r0.<java.io.DataInputStream: short readShort()>();
+
+        $i32 = (int) $s5;
+
+        r7 = r3[$i32];
+
+        $s6 = virtualinvoke r0.<java.io.DataInputStream: short readShort()>();
+
+        $i33 = (int) $s6;
+
+        r8 = r3[$i33];
+
+        $r9 = <sun.util.calendar.ZoneInfoFile: java.util.Map aliases>;
+
+        interfaceinvoke $r9.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r7, r8);
+
+        i17 = i17 + 1;
+
+        goto label14;
+
+     label15:
+        i16 = i16 + 1;
+
+        goto label13;
+
+     label16:
+        staticinvoke <sun.util.calendar.ZoneInfoFile: void addOldMapping()>();
+
+        return;
+    }
+
+    public static sun.util.calendar.ZoneInfo getZoneInfo(java.io.DataInput, java.lang.String) throws java.lang.Exception
+    {
+        long $l8, $l10;
+        long[] r1, r2;
+        byte $b6;
+        int[] r7, r8;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i7, $i9, i11, i12, i13, i14, i15, $i16, $i17;
+        java.lang.String r4;
+        sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule $r9;
+        sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule[] r3;
+        sun.util.calendar.ZoneInfo $r5;
+        java.io.DataInput r0;
+
+        r0 := @parameter0: java.io.DataInput;
+
+        r4 := @parameter1: java.lang.String;
+
+        interfaceinvoke r0.<java.io.DataInput: byte readByte()>();
+
+        $i0 = interfaceinvoke r0.<java.io.DataInput: int readInt()>();
+
+        r1 = newarray (long)[$i0];
+
+        i11 = 0;
+
+     label01:
+        if i11 >= $i0 goto label02;
+
+        $l10 = staticinvoke <sun.util.calendar.ZoneInfoFile: long readEpochSec(java.io.DataInput)>(r0);
+
+        r1[i11] = $l10;
+
+        i11 = i11 + 1;
+
+        goto label01;
+
+     label02:
+        $i1 = $i0 + 1;
+
+        r7 = newarray (int)[$i1];
+
+        i12 = 0;
+
+     label03:
+        $i2 = lengthof r7;
+
+        if i12 >= $i2 goto label04;
+
+        $i9 = staticinvoke <sun.util.calendar.ZoneInfoFile: int readOffset(java.io.DataInput)>(r0);
+
+        r7[i12] = $i9;
+
+        i12 = i12 + 1;
+
+        goto label03;
+
+     label04:
+        $i3 = interfaceinvoke r0.<java.io.DataInput: int readInt()>();
+
+        r2 = newarray (long)[$i3];
+
+        i13 = 0;
+
+     label05:
+        if i13 >= $i3 goto label06;
+
+        $l8 = staticinvoke <sun.util.calendar.ZoneInfoFile: long readEpochSec(java.io.DataInput)>(r0);
+
+        r2[i13] = $l8;
+
+        i13 = i13 + 1;
+
+        goto label05;
+
+     label06:
+        $i4 = $i3 + 1;
+
+        r8 = newarray (int)[$i4];
+
+        i14 = 0;
+
+     label07:
+        $i5 = lengthof r8;
+
+        if i14 >= $i5 goto label08;
+
+        $i7 = staticinvoke <sun.util.calendar.ZoneInfoFile: int readOffset(java.io.DataInput)>(r0);
+
+        r8[i14] = $i7;
+
+        i14 = i14 + 1;
+
+        goto label07;
+
+     label08:
+        $b6 = interfaceinvoke r0.<java.io.DataInput: byte readByte()>();
+
+        $i16 = (int) $b6;
+
+        r3 = newarray (sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule)[$i16];
+
+        i15 = 0;
+
+     label09:
+        $i17 = (int) $b6;
+
+        if i15 >= $i17 goto label10;
+
+        $r9 = new sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule;
+
+        specialinvoke $r9.<sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule: void <init>(java.io.DataInput)>(r0);
+
+        r3[i15] = $r9;
+
+        i15 = i15 + 1;
+
+        goto label09;
+
+     label10:
+        $r5 = staticinvoke <sun.util.calendar.ZoneInfoFile: sun.util.calendar.ZoneInfo getZoneInfo(java.lang.String,long[],int[],long[],int[],sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule[])>(r4, r1, r7, r2, r8, r3);
+
+        return $r5;
+    }
+
+    public static int readOffset(java.io.DataInput) throws java.io.IOException
+    {
+        byte $b0;
+        java.io.DataInput r0;
+        int $i1, $i2, $i3;
+
+        r0 := @parameter0: java.io.DataInput;
+
+        $b0 = interfaceinvoke r0.<java.io.DataInput: byte readByte()>();
+
+        $i2 = (int) $b0;
+
+        if $i2 != 127 goto label1;
+
+        $i1 = interfaceinvoke r0.<java.io.DataInput: int readInt()>();
+
+        goto label2;
+
+     label1:
+        $i3 = (int) $b0;
+
+        $i1 = $i3 * 900;
+
+     label2:
+        return $i1;
+    }
+
+    static long readEpochSec(java.io.DataInput) throws java.io.IOException
+    {
+        long l10, $l11, $l12, $l13;
+        short s1, s3, s5, $s14, $s16, $s17;
+        byte $b0, $b2, $b4;
+        int $i6, $i7, $i8, $i9, $i15, $i18, $i19, $i20;
+        java.io.DataInput r0;
+
+        r0 := @parameter0: java.io.DataInput;
+
+        $b0 = interfaceinvoke r0.<java.io.DataInput: byte readByte()>();
+
+        $s14 = (short) $b0;
+
+        s1 = $s14 & 255;
+
+        $i15 = (int) s1;
+
+        if $i15 != 255 goto label1;
+
+        $l13 = interfaceinvoke r0.<java.io.DataInput: long readLong()>();
+
+        return $l13;
+
+     label1:
+        $b2 = interfaceinvoke r0.<java.io.DataInput: byte readByte()>();
+
+        $s16 = (short) $b2;
+
+        s3 = $s16 & 255;
+
+        $b4 = interfaceinvoke r0.<java.io.DataInput: byte readByte()>();
+
+        $s17 = (short) $b4;
+
+        s5 = $s17 & 255;
+
+        $i18 = (int) s1;
+
+        $i7 = $i18 << 16;
+
+        $i19 = (int) s3;
+
+        $i6 = $i19 << 8;
+
+        $i8 = $i7 + $i6;
+
+        $i20 = (int) s5;
+
+        $i9 = $i8 + $i20;
+
+        l10 = (long) $i9;
+
+        $l11 = l10 * 900L;
+
+        $l12 = $l11 - 4575744000L;
+
+        return $l12;
+    }
+
+    private static sun.util.calendar.ZoneInfo getZoneInfo(java.lang.String, long[], int[], long[], int[], sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule[])
+    {
+        java.time.LocalDateTime $r9, $r12, r29, r30;
+        sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule r21, r22, r23, r24;
+        int[] r1, r4, $r15, $r16, $r17, r18, r20, $r25, $r26, $r27, $r28;
+        sun.util.calendar.ZoneInfoFile$Checksum $r32;
+        sun.util.calendar.ZoneInfo $r33;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i9, $i10, $i11, $i12, $i19, $i20, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i38, $i39, $i40, $i41, $i42, $i43, $i45, $i46, $i47, $i48, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57, $i58, $i59, $i60, $i61, $i62, $i63, $i64, $i65, $i66, $i68, $i69, $i71, $i72, $i73, $i79, $i80, $i81, $i82, $i83, $i84, $i85, $i86, $i87, $i88, $i89, $i90, $i91, $i92, $i93, $i94, $i96, $i97, $i98, $i99, $i100, $i101, $i102, $i103, $i104, $i105, $i106, $i108, $i109, $i116, $i117, $i118, $i119, $i120, $i121, $i122, $i123, $i124, $i125, $i126, $i127, $i128, $i132, $i133, $i134, $i135, $i136, $i137, $i138, $i139, $i140, $i141, $i142, $i143, $i144, $i145, $i146, $i147, $i148, $i149, $i150, $i153, $i154, $i155, $i156, $i157, i161, i162, i163, i164, i165, i166, i167, i168, $i169, $i172, i174, i175, i176, $i177, $i178, $i180, $i181, $i182, $i183, $i184, $i185, $i186, $i187, $i188, $i190, $i191, $i192, $i193, $i194, $i195, $i196, $i197, $i198, $i199, $i200, $i201, $i202, i204, i206, i208, i209, i210, i212, $i213, $i214, $i215, $i216, $i217, $i218, $i219, $i220, $i221, $i223, $i224, $i225, $i226, $i228, $i229, $i231, $i232, $i233, $i234, $i236, $i237, $i239;
+        sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule[] r5;
+        java.lang.String r3;
+        java.time.LocalTime $r13, $r14;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, z7, $z8;
+        byte $b107, $b115, $b129, $b130, $b131, $b152, $b160, $b179, $b189;
+        java.time.ZoneOffset $r7, $r8, $r10, $r11;
+        long $l8, $l13, $l14, $l15, $l16, $l17, $l18, $l21, $l37, $l44, $l49, $l67, $l70, $l74, $l75, $l76, $l77, $l78, $l95, $l110, $l111, $l112, $l113, $l114, $l151, $l158, $l159, l170, l171, l173, l203, l205, l207, l211;
+        long[] r0, r2, r19;
+
+        r3 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: long[];
+
+        r1 := @parameter2: int[];
+
+        r2 := @parameter3: long[];
+
+        r4 := @parameter4: int[];
+
+        r5 := @parameter5: sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule[];
+
+        i161 = 0;
+
+        i162 = 0;
+
+        r18 = null;
+
+        z7 = 0;
+
+        $i0 = lengthof r0;
+
+        if $i0 <= 0 goto label03;
+
+        $i153 = lengthof r1;
+
+        $i154 = $i153 - 1;
+
+        $i155 = r1[$i154];
+
+        i163 = $i155 * 1000;
+
+        $i156 = lengthof r0;
+
+        $i157 = $i156 - 1;
+
+        $l159 = r0[$i157];
+
+        $l158 = <sun.util.calendar.ZoneInfoFile: long CURRT>;
+
+        $b160 = $l159 cmp $l158;
+
+        $i215 = (int) $b160;
+
+        if $i215 <= 0 goto label01;
+
+        $z8 = 1;
+
+        goto label02;
+
+     label01:
+        $z8 = 0;
+
+     label02:
+        z7 = $z8;
+
+        goto label04;
+
+     label03:
+        $i1 = r1[0];
+
+        i163 = $i1 * 1000;
+
+     label04:
+        r19 = null;
+
+        r20 = null;
+
+        i164 = 0;
+
+        i165 = 0;
+
+        $i2 = lengthof r2;
+
+        if $i2 == 0 goto label57;
+
+        r19 = newarray (long)[250];
+
+        r20 = newarray (int)[100];
+
+        $i3 = lengthof r2;
+
+        $i4 = $i3 - 1;
+
+        $l8 = r2[$i4];
+
+        $i5 = lengthof r2;
+
+        $i6 = $i5 - 1;
+
+        $i7 = r4[$i6];
+
+        i166 = staticinvoke <sun.util.calendar.ZoneInfoFile: int getYear(long,int)>($l8, $i7);
+
+        i167 = 0;
+
+        i168 = 1;
+
+     label05:
+        $i9 = lengthof r2;
+
+        if i167 >= $i9 goto label06;
+
+        $l151 = r2[i167];
+
+        $b152 = $l151 cmp -2208988800L;
+
+        $i216 = (int) $b152;
+
+        if $i216 >= 0 goto label06;
+
+        i167 = i167 + 1;
+
+        goto label05;
+
+     label06:
+        $i10 = lengthof r2;
+
+        if i167 >= $i10 goto label08;
+
+        $i144 = lengthof r2;
+
+        if i167 >= $i144 goto label07;
+
+        $i147 = lengthof r1;
+
+        $i148 = $i147 - 1;
+
+        $i149 = r1[$i148];
+
+        $i150 = $i149 * 1000;
+
+        r20[0] = $i150;
+
+        i164 = 1;
+
+     label07:
+        i165 = 1;
+
+        $i145 = r4[i167];
+
+        $i146 = staticinvoke <sun.util.calendar.ZoneInfoFile: int getStandardOffset(long[],int[],long)>(r0, r1, -2208988800L);
+
+        i164 = staticinvoke <sun.util.calendar.ZoneInfoFile: int addTrans(long[],int,int[],int,long,int,int)>(r19, 0, r20, i164, -2208988800L, $i145, $i146);
+
+     label08:
+        $i169 = lengthof r2;
+
+        if i167 >= $i169 goto label17;
+
+        l170 = r2[i167];
+
+        $b115 = l170 cmp 2145916799L;
+
+        $i217 = (int) $b115;
+
+        if $i217 <= 0 goto label09;
+
+        i166 = 2037;
+
+        goto label17;
+
+     label09:
+        $i116 = lengthof r0;
+
+        if i168 >= $i116 goto label14;
+
+        l171 = r0[i168];
+
+        $b129 = l171 cmp -2208988800L;
+
+        $i218 = (int) $b129;
+
+        if $i218 < 0 goto label13;
+
+        $b130 = l171 cmp l170;
+
+        $i219 = (int) $b130;
+
+        if $i219 <= 0 goto label10;
+
+        goto label14;
+
+     label10:
+        $b131 = l171 cmp l170;
+
+        $i220 = (int) $b131;
+
+        if $i220 >= 0 goto label13;
+
+        $i133 = i164 + 2;
+
+        $i132 = lengthof r20;
+
+        if $i133 < $i132 goto label11;
+
+        $i142 = lengthof r20;
+
+        $i143 = $i142 + 100;
+
+        r20 = staticinvoke <java.util.Arrays: int[] copyOf(int[],int)>(r20, $i143);
+
+     label11:
+        $i135 = i165 + 1;
+
+        $i134 = lengthof r19;
+
+        if $i135 < $i134 goto label12;
+
+        $i140 = lengthof r19;
+
+        $i141 = $i140 + 100;
+
+        r19 = staticinvoke <java.util.Arrays: long[] copyOf(long[],int)>(r19, $i141);
+
+     label12:
+        $i136 = i165;
+
+        i165 = i165 + 1;
+
+        $i139 = r4[i167];
+
+        $i137 = i168 + 1;
+
+        $i138 = r1[$i137];
+
+        i164 = staticinvoke <sun.util.calendar.ZoneInfoFile: int addTrans(long[],int,int[],int,long,int,int)>(r19, $i136, r20, i164, l171, $i139, $i138);
+
+     label13:
+        i168 = i168 + 1;
+
+        goto label09;
+
+     label14:
+        $i118 = i164 + 2;
+
+        $i117 = lengthof r20;
+
+        if $i118 < $i117 goto label15;
+
+        $i127 = lengthof r20;
+
+        $i128 = $i127 + 100;
+
+        r20 = staticinvoke <java.util.Arrays: int[] copyOf(int[],int)>(r20, $i128);
+
+     label15:
+        $i120 = i165 + 1;
+
+        $i119 = lengthof r19;
+
+        if $i120 < $i119 goto label16;
+
+        $i125 = lengthof r19;
+
+        $i126 = $i125 + 100;
+
+        r19 = staticinvoke <java.util.Arrays: long[] copyOf(long[],int)>(r19, $i126);
+
+     label16:
+        $i121 = i165;
+
+        i165 = i165 + 1;
+
+        $i122 = i167 + 1;
+
+        $i123 = r4[$i122];
+
+        $i124 = staticinvoke <sun.util.calendar.ZoneInfoFile: int getStandardOffset(long[],int[],long)>(r0, r1, l170);
+
+        i164 = staticinvoke <sun.util.calendar.ZoneInfoFile: int addTrans(long[],int,int[],int,long,int,int)>(r19, $i121, r20, i164, l170, $i123, $i124);
+
+        i167 = i167 + 1;
+
+        goto label08;
+
+     label17:
+        $i172 = lengthof r0;
+
+        if i168 >= $i172 goto label20;
+
+        l173 = r0[i168];
+
+        $b107 = l173 cmp -2208988800L;
+
+        $i221 = (int) $b107;
+
+        if $i221 < 0 goto label19;
+
+        i174 = r4[i167];
+
+        $i108 = staticinvoke <sun.util.calendar.ZoneInfoFile: int indexOf(int[],int,int,int)>(r20, 0, i164, i174);
+
+        if $i108 != i164 goto label18;
+
+        i164 = i164 + 1;
+
+     label18:
+        $i109 = i165;
+
+        i165 = i165 + 1;
+
+        $l110 = l173 * 1000L;
+
+        $l113 = $l110 << 12;
+
+        $l111 = (long) $i108;
+
+        $l112 = $l111 & 15L;
+
+        $l114 = $l113 | $l112;
+
+        r19[$i109] = $l114;
+
+     label19:
+        i168 = i168 + 1;
+
+        goto label17;
+
+     label20:
+        $i11 = lengthof r5;
+
+        if $i11 <= 1 goto label39;
+
+     label21:
+        $i79 = i166;
+
+        i166 = i166 + 1;
+
+        if $i79 >= 2037 goto label26;
+
+        i175 = lengthof r5;
+
+        i176 = 0;
+
+     label22:
+        if i176 >= i175 goto label25;
+
+        r21 = r5[i176];
+
+        $l95 = virtualinvoke r21.<sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule: long getTransitionEpochSecond(int)>(i166);
+
+        $i97 = i164 + 2;
+
+        $i96 = lengthof r20;
+
+        if $i97 < $i96 goto label23;
+
+        $i105 = lengthof r20;
+
+        $i106 = $i105 + 100;
+
+        r20 = staticinvoke <java.util.Arrays: int[] copyOf(int[],int)>(r20, $i106);
+
+     label23:
+        $i99 = i165 + 1;
+
+        $i98 = lengthof r19;
+
+        if $i99 < $i98 goto label24;
+
+        $i103 = lengthof r19;
+
+        $i104 = $i103 + 100;
+
+        r19 = staticinvoke <java.util.Arrays: long[] copyOf(long[],int)>(r19, $i104);
+
+     label24:
+        $i100 = i165;
+
+        i165 = i165 + 1;
+
+        $i101 = staticinvoke <sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule: int access$100(sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule)>(r21);
+
+        $i102 = staticinvoke <sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule: int access$200(sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule)>(r21);
+
+        i164 = staticinvoke <sun.util.calendar.ZoneInfoFile: int addTrans(long[],int,int[],int,long,int,int)>(r19, $i100, r20, i164, $l95, $i101, $i102);
+
+        i176 = i176 + 1;
+
+        goto label22;
+
+     label25:
+        goto label21;
+
+     label26:
+        $i80 = lengthof r5;
+
+        $i81 = $i80 - 2;
+
+        r22 = r5[$i81];
+
+        $i82 = lengthof r5;
+
+        $i83 = $i82 - 1;
+
+        r23 = r5[$i83];
+
+        r18 = newarray (int)[10];
+
+        $i84 = staticinvoke <sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule: int access$100(sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule)>(r22);
+
+        $i85 = staticinvoke <sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule: int access$300(sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule)>(r22);
+
+        $i86 = $i84 - $i85;
+
+        if $i86 >= 0 goto label27;
+
+        $i92 = staticinvoke <sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule: int access$100(sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule)>(r23);
+
+        $i93 = staticinvoke <sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule: int access$300(sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule)>(r23);
+
+        $i94 = $i92 - $i93;
+
+        if $i94 <= 0 goto label27;
+
+        r24 = r22;
+
+        r22 = r23;
+
+        r23 = r24;
+
+     label27:
+        $i177 = staticinvoke <sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule: int access$400(sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule)>(r22);
+
+        $i178 = $i177 - 1;
+
+        r18[0] = $i178;
+
+        $b179 = staticinvoke <sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule: byte access$500(sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule)>(r22);
+
+        $i180 = staticinvoke <sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule: int access$600(sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule)>(r22);
+
+        $i223 = (int) -1;
+
+        if $i180 != $i223 goto label28;
+
+        $i224 = (int) $b179;
+
+        r18[1] = $i224;
+
+        r18[2] = 0;
+
+        goto label31;
+
+     label28:
+        $i225 = (int) $b179;
+
+        if $i225 < 0 goto label29;
+
+        $i226 = (int) $b179;
+
+        if $i226 < 24 goto label30;
+
+        $z5 = virtualinvoke r3.<java.lang.String: boolean equals(java.lang.Object)>("Asia/Gaza");
+
+        if $z5 != 0 goto label30;
+
+        $z6 = virtualinvoke r3.<java.lang.String: boolean equals(java.lang.Object)>("Asia/Hebron");
+
+        if $z6 != 0 goto label30;
+
+     label29:
+        $i228 = (int) -1;
+
+        r18[1] = $i228;
+
+        $r16 = <sun.util.calendar.ZoneInfoFile: int[] toCalendarDOW>;
+
+        $i87 = $r16[$i180];
+
+        r18[2] = $i87;
+
+        goto label31;
+
+     label30:
+        $i229 = (int) $b179;
+
+        r18[1] = $i229;
+
+        $r25 = <sun.util.calendar.ZoneInfoFile: int[] toCalendarDOW>;
+
+        $i181 = $r25[$i180];
+
+        $i182 = neg $i181;
+
+        r18[2] = $i182;
+
+     label31:
+        $i183 = staticinvoke <sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule: int access$700(sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule)>(r22);
+
+        $i184 = $i183 * 1000;
+
+        r18[3] = $i184;
+
+        $r26 = <sun.util.calendar.ZoneInfoFile: int[] toSTZTime>;
+
+        $i185 = staticinvoke <sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule: int access$800(sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule)>(r22);
+
+        $i186 = $r26[$i185];
+
+        r18[4] = $i186;
+
+        $i187 = staticinvoke <sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule: int access$400(sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule)>(r23);
+
+        $i188 = $i187 - 1;
+
+        r18[5] = $i188;
+
+        $b189 = staticinvoke <sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule: byte access$500(sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule)>(r23);
+
+        $i190 = staticinvoke <sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule: int access$600(sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule)>(r23);
+
+        $i231 = (int) -1;
+
+        if $i190 != $i231 goto label32;
+
+        $i232 = (int) $b189;
+
+        r18[6] = $i232;
+
+        r18[7] = 0;
+
+        goto label35;
+
+     label32:
+        $i233 = (int) $b189;
+
+        if $i233 < 0 goto label33;
+
+        $i234 = (int) $b189;
+
+        if $i234 < 24 goto label34;
+
+        $z3 = virtualinvoke r3.<java.lang.String: boolean equals(java.lang.Object)>("Asia/Gaza");
+
+        if $z3 != 0 goto label34;
+
+        $z4 = virtualinvoke r3.<java.lang.String: boolean equals(java.lang.Object)>("Asia/Hebron");
+
+        if $z4 != 0 goto label34;
+
+     label33:
+        $i236 = (int) -1;
+
+        r18[6] = $i236;
+
+        $r17 = <sun.util.calendar.ZoneInfoFile: int[] toCalendarDOW>;
+
+        $i88 = $r17[$i190];
+
+        r18[7] = $i88;
+
+        goto label35;
+
+     label34:
+        $i237 = (int) $b189;
+
+        r18[6] = $i237;
+
+        $r27 = <sun.util.calendar.ZoneInfoFile: int[] toCalendarDOW>;
+
+        $i191 = $r27[$i190];
+
+        $i192 = neg $i191;
+
+        r18[7] = $i192;
+
+     label35:
+        $i193 = staticinvoke <sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule: int access$700(sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule)>(r23);
+
+        $i194 = $i193 * 1000;
+
+        r18[8] = $i194;
+
+        $r28 = <sun.util.calendar.ZoneInfoFile: int[] toSTZTime>;
+
+        $i195 = staticinvoke <sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule: int access$800(sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule)>(r23);
+
+        $i196 = $r28[$i195];
+
+        r18[9] = $i196;
+
+        $i197 = staticinvoke <sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule: int access$100(sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule)>(r22);
+
+        $i198 = staticinvoke <sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule: int access$300(sun.util.calendar.ZoneInfoFile$ZoneOffsetTransitionRule)>(r22);
+
+        $i199 = $i197 - $i198;
+
+        i161 = $i199 * 1000;
+
+        $i200 = r18[2];
+
+        if $i200 != 6 goto label36;
+
+        $i91 = r18[3];
+
+        if $i91 != 0 goto label36;
+
+        $z2 = virtualinvoke r3.<java.lang.String: boolean equals(java.lang.Object)>("Asia/Amman");
+
+        if $z2 == 0 goto label36;
+
+        r18[2] = 5;
+
+        r18[3] = 86400000;
+
+     label36:
+        $i201 = r18[2];
+
+        if $i201 != 7 goto label37;
+
+        $i90 = r18[3];
+
+        if $i90 != 0 goto label37;
+
+        $z1 = virtualinvoke r3.<java.lang.String: boolean equals(java.lang.Object)>("Asia/Amman");
+
+        if $z1 == 0 goto label37;
+
+        r18[2] = 6;
+
+        r18[3] = 86400000;
+
+     label37:
+        $i202 = r18[7];
+
+        if $i202 != 6 goto label38;
+
+        $i89 = r18[8];
+
+        if $i89 != 0 goto label38;
+
+        $z0 = virtualinvoke r3.<java.lang.String: boolean equals(java.lang.Object)>("Africa/Cairo");
+
+        if $z0 == 0 goto label38;
+
+        r18[7] = 5;
+
+        r18[8] = 86400000;
+
+     label38:
+        goto label46;
+
+     label39:
+        if i165 <= 0 goto label46;
+
+        if i166 >= 2037 goto label41;
+
+        $i69 = i163 / 1000;
+
+        $l70 = (long) $i69;
+
+        l203 = 2114380800L - $l70;
+
+        $i71 = i163 / 1000;
+
+        $i72 = staticinvoke <sun.util.calendar.ZoneInfoFile: int indexOf(int[],int,int,int)>(r20, 0, i164, $i71);
+
+        if $i72 != i164 goto label40;
+
+        i164 = i164 + 1;
+
+     label40:
+        $i73 = i165;
+
+        i165 = i165 + 1;
+
+        $l74 = l203 * 1000L;
+
+        $l77 = $l74 << 12;
+
+        $l75 = (long) $i72;
+
+        $l76 = $l75 & 15L;
+
+        $l78 = $l77 | $l76;
+
+        r19[$i73] = $l78;
+
+        goto label46;
+
+     label41:
+        $i24 = lengthof r2;
+
+        if $i24 <= 2 goto label46;
+
+        i204 = lengthof r2;
+
+        $i25 = i204 - 2;
+
+        l205 = r2[$i25];
+
+        $i26 = i204 - 2;
+
+        $i27 = $i26 + 1;
+
+        i206 = r4[$i27];
+
+        $i28 = staticinvoke <sun.util.calendar.ZoneInfoFile: int getStandardOffset(long[],int[],long)>(r0, r1, l205);
+
+        $i29 = i204 - 1;
+
+        l207 = r2[$i29];
+
+        $i30 = i204 - 1;
+
+        $i31 = $i30 + 1;
+
+        i208 = r4[$i31];
+
+        $i32 = staticinvoke <sun.util.calendar.ZoneInfoFile: int getStandardOffset(long[],int[],long)>(r0, r1, l207);
+
+        if i206 <= $i28 goto label46;
+
+        if i208 != $i32 goto label46;
+
+        $i33 = lengthof r2;
+
+        i209 = $i33 - 2;
+
+        $i34 = r4[i209];
+
+        $r7 = staticinvoke <java.time.ZoneOffset: java.time.ZoneOffset ofTotalSeconds(int)>($i34);
+
+        $i35 = i209 + 1;
+
+        $i36 = r4[$i35];
+
+        $r8 = staticinvoke <java.time.ZoneOffset: java.time.ZoneOffset ofTotalSeconds(int)>($i36);
+
+        $l37 = r2[i209];
+
+        $r9 = staticinvoke <java.time.LocalDateTime: java.time.LocalDateTime ofEpochSecond(long,int,java.time.ZoneOffset)>($l37, 0, $r7);
+
+        $i38 = virtualinvoke $r8.<java.time.ZoneOffset: int getTotalSeconds()>();
+
+        $i39 = virtualinvoke $r7.<java.time.ZoneOffset: int getTotalSeconds()>();
+
+        if $i38 <= $i39 goto label42;
+
+        r29 = $r9;
+
+        goto label43;
+
+     label42:
+        $i40 = i209 + 1;
+
+        $i42 = r4[$i40];
+
+        $i41 = r4[i209];
+
+        $i43 = $i42 - $i41;
+
+        $l44 = (long) $i43;
+
+        r29 = virtualinvoke $r9.<java.time.LocalDateTime: java.time.LocalDateTime plusSeconds(long)>($l44);
+
+     label43:
+        $i45 = lengthof r2;
+
+        $i68 = $i45 - 1;
+
+        $i46 = r4[$i68];
+
+        $r10 = staticinvoke <java.time.ZoneOffset: java.time.ZoneOffset ofTotalSeconds(int)>($i46);
+
+        $i47 = $i68 + 1;
+
+        $i48 = r4[$i47];
+
+        $r11 = staticinvoke <java.time.ZoneOffset: java.time.ZoneOffset ofTotalSeconds(int)>($i48);
+
+        $l49 = r2[$i68];
+
+        $r12 = staticinvoke <java.time.LocalDateTime: java.time.LocalDateTime ofEpochSecond(long,int,java.time.ZoneOffset)>($l49, 0, $r10);
+
+        $i50 = virtualinvoke $r11.<java.time.ZoneOffset: int getTotalSeconds()>();
+
+        $i51 = virtualinvoke $r10.<java.time.ZoneOffset: int getTotalSeconds()>();
+
+        if $i50 <= $i51 goto label44;
+
+        $i63 = $i68 + 1;
+
+        $i65 = r4[$i63];
+
+        $i64 = r4[$i68];
+
+        $i66 = $i65 - $i64;
+
+        $l67 = (long) $i66;
+
+        r30 = virtualinvoke $r12.<java.time.LocalDateTime: java.time.LocalDateTime plusSeconds(long)>($l67);
+
+        goto label45;
+
+     label44:
+        r30 = $r12;
+
+     label45:
+        $r15 = newarray (int)[10];
+
+        r18 = $r15;
+
+        $i52 = virtualinvoke r29.<java.time.LocalDateTime: int getMonthValue()>();
+
+        $i53 = $i52 - 1;
+
+        $r15[0] = $i53;
+
+        $i54 = virtualinvoke r29.<java.time.LocalDateTime: int getDayOfMonth()>();
+
+        $r15[1] = $i54;
+
+        $r15[2] = 0;
+
+        $r13 = virtualinvoke r29.<java.time.LocalDateTime: java.time.LocalTime toLocalTime()>();
+
+        $i55 = virtualinvoke $r13.<java.time.LocalTime: int toSecondOfDay()>();
+
+        $i56 = $i55 * 1000;
+
+        $r15[3] = $i56;
+
+        $r15[4] = 0;
+
+        $i57 = virtualinvoke r30.<java.time.LocalDateTime: int getMonthValue()>();
+
+        $i58 = $i57 - 1;
+
+        $r15[5] = $i58;
+
+        $i59 = virtualinvoke r30.<java.time.LocalDateTime: int getDayOfMonth()>();
+
+        $r15[6] = $i59;
+
+        $r15[7] = 0;
+
+        $r14 = virtualinvoke r30.<java.time.LocalDateTime: java.time.LocalTime toLocalTime()>();
+
+        $i60 = virtualinvoke $r14.<java.time.LocalTime: int toSecondOfDay()>();
+
+        $i61 = $i60 * 1000;
+
+        $r15[8] = $i61;
+
+        $r15[9] = 0;
+
+        $i62 = i206 - $i28;
+
+        i161 = $i62 * 1000;
+
+     label46:
+        if r19 == null goto label48;
+
+        $i23 = lengthof r19;
+
+        if $i23 == i165 goto label48;
+
+        if i165 != 0 goto label47;
+
+        r19 = null;
+
+        goto label48;
+
+     label47:
+        r19 = staticinvoke <java.util.Arrays: long[] copyOf(long[],int)>(r19, i165);
+
+     label48:
+        if r20 == null goto label50;
+
+        $i22 = lengthof r20;
+
+        if $i22 == i164 goto label50;
+
+        if i164 != 0 goto label49;
+
+        r20 = null;
+
+        goto label50;
+
+     label49:
+        r20 = staticinvoke <java.util.Arrays: int[] copyOf(int[],int)>(r20, i164);
+
+     label50:
+        if r19 == null goto label57;
+
+        $r32 = new sun.util.calendar.ZoneInfoFile$Checksum;
+
+        specialinvoke $r32.<sun.util.calendar.ZoneInfoFile$Checksum: void <init>(sun.util.calendar.ZoneInfoFile$1)>(null);
+
+        i210 = 0;
+
+     label51:
+        $i12 = lengthof r19;
+
+        if i210 >= $i12 goto label56;
+
+        l211 = r19[i210];
+
+        $l14 = l211 >>> 4;
+
+        $l15 = $l14 & 15L;
+
+        i212 = (int) $l15;
+
+        if i212 != 0 goto label52;
+
+        goto label53;
+
+     label52:
+        $i213 = r20[i212];
+
+     label53:
+        $l16 = l211 & 15L;
+
+        $i19 = (int) $l16;
+
+        $i20 = r20[$i19];
+
+        $l21 = l211 >> 12;
+
+        $l17 = (long) $i19;
+
+        $l18 = $l21 + $l17;
+
+        virtualinvoke $r32.<sun.util.calendar.ZoneInfoFile$Checksum: void update(long)>($l18);
+
+        virtualinvoke $r32.<sun.util.calendar.ZoneInfoFile$Checksum: void update(int)>($i19);
+
+        if i212 != 0 goto label54;
+
+        $i239 = (int) -1;
+
+        $i214 = $i239;
+
+        goto label55;
+
+     label54:
+        $i214 = i212;
+
+     label55:
+        virtualinvoke $r32.<sun.util.calendar.ZoneInfoFile$Checksum: void update(int)>($i214);
+
+        i210 = i210 + 1;
+
+        goto label51;
+
+     label56:
+        $l13 = virtualinvoke $r32.<sun.util.calendar.ZoneInfoFile$Checksum: long getValue()>();
+
+        i162 = (int) $l13;
+
+     label57:
+        $r33 = new sun.util.calendar.ZoneInfo;
+
+        specialinvoke $r33.<sun.util.calendar.ZoneInfo: void <init>(java.lang.String,int,int,int,long[],int[],int[],boolean)>(r3, i163, i161, i162, r19, r20, r18, z7);
+
+        return $r33;
+    }
+
+    private static int getStandardOffset(long[], int[], long)
+    {
+        long l2, $l3;
+        long[] r0;
+        byte $b4;
+        int[] r1;
+        int $i0, $i1, i5, $i6;
+
+        r0 := @parameter0: long[];
+
+        r1 := @parameter1: int[];
+
+        l2 := @parameter2: long;
+
+        i5 = 0;
+
+     label1:
+        $i0 = lengthof r0;
+
+        if i5 >= $i0 goto label3;
+
+        $l3 = r0[i5];
+
+        $b4 = l2 cmp $l3;
+
+        $i6 = (int) $b4;
+
+        if $i6 >= 0 goto label2;
+
+        goto label3;
+
+     label2:
+        i5 = i5 + 1;
+
+        goto label1;
+
+     label3:
+        $i1 = r1[i5];
+
+        return $i1;
+    }
+
+    private static int getYear(long, int)
+    {
+        byte $b5, $b15;
+        long l0, $l2, l3, $l4, $l6, $l7, $l8, $l9, $l10, $l11, $l12, $l13, $l14, $l19, $l21, $l22, $l23, $l24, $l25, $l26, $l27, $l28, $l31, $l32, $l33, $l34, $l35, $l36, $l37, l38, l39, l40, l41, l42, l43;
+        int i1, $i16, $i17, $i18, $i20, $i29, $i30, $i44, $i45;
+
+        l0 := @parameter0: long;
+
+        i1 := @parameter1: int;
+
+        $l2 = (long) i1;
+
+        l3 = l0 + $l2;
+
+        $l4 = staticinvoke <java.lang.Math: long floorDiv(long,long)>(l3, 86400L);
+
+        l38 = $l4 + 719528L;
+
+        l39 = l38 - 60L;
+
+        l40 = 0L;
+
+        $b5 = l39 cmp 0L;
+
+        $i44 = (int) $b5;
+
+        if $i44 >= 0 goto label1;
+
+        $l32 = l39 + 1L;
+
+        $l33 = $l32 / 146097L;
+
+        l41 = $l33 - 1L;
+
+        l40 = l41 * 400L;
+
+        $l34 = neg l41;
+
+        $l35 = $l34 * 146097L;
+
+        l39 = l39 + $l35;
+
+     label1:
+        $l6 = 400L * l39;
+
+        $l7 = $l6 + 591L;
+
+        $l36 = $l7 / 146097L;
+
+        l42 = $l36;
+
+        $l9 = 365L * $l36;
+
+        $l8 = $l36 / 4L;
+
+        $l11 = $l9 + $l8;
+
+        $l10 = $l36 / 100L;
+
+        $l13 = $l11 - $l10;
+
+        $l12 = $l36 / 400L;
+
+        $l14 = $l13 + $l12;
+
+        $l37 = l39 - $l14;
+
+        l43 = $l37;
+
+        $b15 = $l37 cmp 0L;
+
+        $i45 = (int) $b15;
+
+        if $i45 >= 0 goto label2;
+
+        l42 = $l36 - 1L;
+
+        $l22 = 365L * l42;
+
+        $l21 = l42 / 4L;
+
+        $l24 = $l22 + $l21;
+
+        $l23 = l42 / 100L;
+
+        $l26 = $l24 - $l23;
+
+        $l25 = l42 / 400L;
+
+        $l27 = $l26 + $l25;
+
+        l43 = l39 - $l27;
+
+     label2:
+        $l28 = l42 + l40;
+
+        $i29 = (int) l43;
+
+        $i16 = $i29 * 5;
+
+        $i17 = $i16 + 2;
+
+        $i30 = $i17 / 153;
+
+        $i18 = $i30 / 10;
+
+        $l19 = (long) $i18;
+
+        $l31 = $l28 + $l19;
+
+        $i20 = (int) $l31;
+
+        return $i20;
+    }
+
+    private static int indexOf(int[], int, int, int)
+    {
+        int[] r0;
+        int i0, $i1, i2, i3, i4;
+
+        r0 := @parameter0: int[];
+
+        i2 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        i4 = i3 * 1000;
+
+     label1:
+        if i2 >= i0 goto label3;
+
+        $i1 = r0[i2];
+
+        if $i1 != i4 goto label2;
+
+        return i2;
+
+     label2:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label3:
+        r0[i2] = i4;
+
+        return i2;
+    }
+
+    private static int addTrans(long[], int, int[], int, long, int, int)
+    {
+        long l4, $l9, $l10, $l12, $l13, $l14, $l15, $l16, $l17;
+        long[] r1;
+        int[] r0;
+        int i0, $i1, i2, i3, $i5, $i6, i7, i8, $i11;
+
+        r1 := @parameter0: long[];
+
+        i3 := @parameter1: int;
+
+        r0 := @parameter2: int[];
+
+        i7 := @parameter3: int;
+
+        l4 := @parameter4: long;
+
+        i0 := @parameter5: int;
+
+        i2 := @parameter6: int;
+
+        $i1 = staticinvoke <sun.util.calendar.ZoneInfoFile: int indexOf(int[],int,int,int)>(r0, 0, i7, i0);
+
+        if $i1 != i7 goto label1;
+
+        i7 = i7 + 1;
+
+     label1:
+        i8 = 0;
+
+        if i0 == i2 goto label2;
+
+        $i5 = i0 - i2;
+
+        $i6 = staticinvoke <sun.util.calendar.ZoneInfoFile: int indexOf(int[],int,int,int)>(r0, 1, i7, $i5);
+
+        i8 = $i6;
+
+        if $i6 != i7 goto label2;
+
+        i7 = i7 + 1;
+
+     label2:
+        $l9 = l4 * 1000L;
+
+        $l10 = $l9 << 12;
+
+        $i11 = i8 << 4;
+
+        $l12 = (long) $i11;
+
+        $l13 = $l12 & 240L;
+
+        $l14 = $l10 | $l13;
+
+        $l15 = (long) $i1;
+
+        $l16 = $l15 & 15L;
+
+        $l17 = $l14 | $l16;
+
+        r1[i3] = $l17;
+
+        return i7;
+    }
+
+    static void access$000(java.io.DataInputStream) throws java.lang.ClassNotFoundException, java.io.IOException
+    {
+        java.io.DataInputStream r0;
+
+        r0 := @parameter0: java.io.DataInputStream;
+
+        staticinvoke <sun.util.calendar.ZoneInfoFile: void load(java.io.DataInputStream)>(r0);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.action.GetPropertyAction $r38;
+        int[] $r34, $r35;
+        java.util.Locale $r30;
+        boolean $z0, $z1, $z2;
+        java.util.concurrent.ConcurrentHashMap $r36;
+        java.lang.String[] $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26, $r27;
+        long $l0, $l1;
+        java.util.HashMap $r37;
+        int $i3;
+        java.lang.String $r31, $r32;
+        sun.util.calendar.ZoneInfoFile$1 $r39;
+        java.lang.Object $r29;
+        java.lang.String[][] $r2;
+
+        <sun.util.calendar.ZoneInfoFile: int LASTYEAR> = 2037;
+
+        <sun.util.calendar.ZoneInfoFile: int TRANSITION_NSHIFT> = 12;
+
+        <sun.util.calendar.ZoneInfoFile: int DST_NSHIFT> = 4;
+
+        <sun.util.calendar.ZoneInfoFile: long DST_MASK> = 240L;
+
+        <sun.util.calendar.ZoneInfoFile: long OFFSET_MASK> = 15L;
+
+        <sun.util.calendar.ZoneInfoFile: long DAYS_0000_TO_1970> = 719528L;
+
+        <sun.util.calendar.ZoneInfoFile: int DAYS_PER_CYCLE> = 146097;
+
+        <sun.util.calendar.ZoneInfoFile: int SECONDS_PER_DAY> = 86400;
+
+        <sun.util.calendar.ZoneInfoFile: long LDT2037> = 2114380800L;
+
+        <sun.util.calendar.ZoneInfoFile: long UTC2037> = 2145916799L;
+
+        <sun.util.calendar.ZoneInfoFile: long UTC1900> = -2208988800L;
+
+        $r36 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r36.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        <sun.util.calendar.ZoneInfoFile: java.util.Map zones> = $r36;
+
+        $r37 = new java.util.HashMap;
+
+        specialinvoke $r37.<java.util.HashMap: void <init>()>();
+
+        <sun.util.calendar.ZoneInfoFile: java.util.Map aliases> = $r37;
+
+        $r2 = newarray (java.lang.String[])[25];
+
+        $r3 = newarray (java.lang.String)[2];
+
+        $r3[0] = "ACT";
+
+        $r3[1] = "Australia/Darwin";
+
+        $r2[0] = $r3;
+
+        $r4 = newarray (java.lang.String)[2];
+
+        $r4[0] = "AET";
+
+        $r4[1] = "Australia/Sydney";
+
+        $r2[1] = $r4;
+
+        $r5 = newarray (java.lang.String)[2];
+
+        $r5[0] = "AGT";
+
+        $r5[1] = "America/Argentina/Buenos_Aires";
+
+        $r2[2] = $r5;
+
+        $r6 = newarray (java.lang.String)[2];
+
+        $r6[0] = "ART";
+
+        $r6[1] = "Africa/Cairo";
+
+        $r2[3] = $r6;
+
+        $r7 = newarray (java.lang.String)[2];
+
+        $r7[0] = "AST";
+
+        $r7[1] = "America/Anchorage";
+
+        $r2[4] = $r7;
+
+        $r8 = newarray (java.lang.String)[2];
+
+        $r8[0] = "BET";
+
+        $r8[1] = "America/Sao_Paulo";
+
+        $r2[5] = $r8;
+
+        $r9 = newarray (java.lang.String)[2];
+
+        $r9[0] = "BST";
+
+        $r9[1] = "Asia/Dhaka";
+
+        $r2[6] = $r9;
+
+        $r10 = newarray (java.lang.String)[2];
+
+        $r10[0] = "CAT";
+
+        $r10[1] = "Africa/Harare";
+
+        $r2[7] = $r10;
+
+        $r11 = newarray (java.lang.String)[2];
+
+        $r11[0] = "CNT";
+
+        $r11[1] = "America/St_Johns";
+
+        $r2[8] = $r11;
+
+        $r12 = newarray (java.lang.String)[2];
+
+        $r12[0] = "CST";
+
+        $r12[1] = "America/Chicago";
+
+        $r2[9] = $r12;
+
+        $r13 = newarray (java.lang.String)[2];
+
+        $r13[0] = "CTT";
+
+        $r13[1] = "Asia/Shanghai";
+
+        $r2[10] = $r13;
+
+        $r14 = newarray (java.lang.String)[2];
+
+        $r14[0] = "EAT";
+
+        $r14[1] = "Africa/Addis_Ababa";
+
+        $r2[11] = $r14;
+
+        $r15 = newarray (java.lang.String)[2];
+
+        $r15[0] = "ECT";
+
+        $r15[1] = "Europe/Paris";
+
+        $r2[12] = $r15;
+
+        $r16 = newarray (java.lang.String)[2];
+
+        $r16[0] = "IET";
+
+        $r16[1] = "America/Indiana/Indianapolis";
+
+        $r2[13] = $r16;
+
+        $r17 = newarray (java.lang.String)[2];
+
+        $r17[0] = "IST";
+
+        $r17[1] = "Asia/Kolkata";
+
+        $r2[14] = $r17;
+
+        $r18 = newarray (java.lang.String)[2];
+
+        $r18[0] = "JST";
+
+        $r18[1] = "Asia/Tokyo";
+
+        $r2[15] = $r18;
+
+        $r19 = newarray (java.lang.String)[2];
+
+        $r19[0] = "MIT";
+
+        $r19[1] = "Pacific/Apia";
+
+        $r2[16] = $r19;
+
+        $r20 = newarray (java.lang.String)[2];
+
+        $r20[0] = "NET";
+
+        $r20[1] = "Asia/Yerevan";
+
+        $r2[17] = $r20;
+
+        $r21 = newarray (java.lang.String)[2];
+
+        $r21[0] = "NST";
+
+        $r21[1] = "Pacific/Auckland";
+
+        $r2[18] = $r21;
+
+        $r22 = newarray (java.lang.String)[2];
+
+        $r22[0] = "PLT";
+
+        $r22[1] = "Asia/Karachi";
+
+        $r2[19] = $r22;
+
+        $r23 = newarray (java.lang.String)[2];
+
+        $r23[0] = "PNT";
+
+        $r23[1] = "America/Phoenix";
+
+        $r2[20] = $r23;
+
+        $r24 = newarray (java.lang.String)[2];
+
+        $r24[0] = "PRT";
+
+        $r24[1] = "America/Puerto_Rico";
+
+        $r2[21] = $r24;
+
+        $r25 = newarray (java.lang.String)[2];
+
+        $r25[0] = "PST";
+
+        $r25[1] = "America/Los_Angeles";
+
+        $r2[22] = $r25;
+
+        $r26 = newarray (java.lang.String)[2];
+
+        $r26[0] = "SST";
+
+        $r26[1] = "Pacific/Guadalcanal";
+
+        $r2[23] = $r26;
+
+        $r27 = newarray (java.lang.String)[2];
+
+        $r27[0] = "VST";
+
+        $r27[1] = "Asia/Ho_Chi_Minh";
+
+        $r2[24] = $r27;
+
+        <sun.util.calendar.ZoneInfoFile: java.lang.String[][] oldMappings> = $r2;
+
+        $r38 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r38.<sun.security.action.GetPropertyAction: void <init>(java.lang.String,java.lang.String)>("sun.timezone.ids.oldmapping", "false");
+
+        $r29 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r38);
+
+        $r31 = (java.lang.String) $r29;
+
+        $r30 = <java.util.Locale: java.util.Locale ROOT>;
+
+        $r32 = virtualinvoke $r31.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r30);
+
+        $z0 = virtualinvoke $r32.<java.lang.String: boolean equals(java.lang.Object)>("yes");
+
+        if $z0 != 0 goto label1;
+
+        $z1 = virtualinvoke $r32.<java.lang.String: boolean equals(java.lang.Object)>("true");
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        <sun.util.calendar.ZoneInfoFile: boolean USE_OLDMAPPING> = $z2;
+
+        $r39 = new sun.util.calendar.ZoneInfoFile$1;
+
+        specialinvoke $r39.<sun.util.calendar.ZoneInfoFile$1: void <init>()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r39);
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l1 = $l0 / 1000L;
+
+        <sun.util.calendar.ZoneInfoFile: long CURRT> = $l1;
+
+        $r34 = newarray (int)[8];
+
+        $i3 = (int) -1;
+
+        $r34[0] = $i3;
+
+        $r34[1] = 2;
+
+        $r34[2] = 3;
+
+        $r34[3] = 4;
+
+        $r34[4] = 5;
+
+        $r34[5] = 6;
+
+        $r34[6] = 7;
+
+        $r34[7] = 1;
+
+        <sun.util.calendar.ZoneInfoFile: int[] toCalendarDOW> = $r34;
+
+        $r35 = newarray (int)[3];
+
+        $r35[0] = 2;
+
+        $r35[1] = 0;
+
+        $r35[2] = 1;
+
+        <sun.util.calendar.ZoneInfoFile: int[] toSTZTime> = $r35;
+
+        return;
+    }
+}

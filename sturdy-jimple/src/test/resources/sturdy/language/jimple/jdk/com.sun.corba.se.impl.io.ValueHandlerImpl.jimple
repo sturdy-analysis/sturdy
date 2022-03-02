@@ -1,0 +1,2236 @@
+public final class com.sun.corba.se.impl.io.ValueHandlerImpl extends java.lang.Object implements javax.rmi.CORBA.ValueHandlerMultiFormat
+{
+    public static final java.lang.String FORMAT_VERSION_PROPERTY;
+    private static final byte MAX_SUPPORTED_FORMAT_VERSION;
+    private static final byte STREAM_FORMAT_VERSION_1;
+    private static final byte MAX_STREAM_FORMAT_VERSION;
+    public static final short kRemoteType;
+    public static final short kAbstractType;
+    public static final short kValueType;
+    private java.util.Hashtable inputStreamPairs;
+    private java.util.Hashtable outputStreamPairs;
+    private com.sun.org.omg.SendingContext.CodeBase codeBase;
+    private boolean useHashtables;
+    private boolean isInputStream;
+    private com.sun.corba.se.impl.io.IIOPOutputStream outputStreamBridge;
+    private com.sun.corba.se.impl.io.IIOPInputStream inputStreamBridge;
+    private com.sun.corba.se.impl.logging.OMGSystemException omgWrapper;
+    private com.sun.corba.se.impl.logging.UtilSystemException utilWrapper;
+
+    private static byte getMaxStreamFormatVersion()
+    {
+        com.sun.corba.se.impl.io.ValueHandlerImpl$1 $r12;
+        byte $b0;
+        int $i1, $i2, $i3;
+        java.lang.String $r8, r11;
+        java.lang.Exception $r9;
+        java.lang.Object $r1;
+        java.lang.StringBuilder $r4, $r5, $r6, $r7, $r13;
+        java.lang.ExceptionInInitializerError $r14, $r15;
+
+     label1:
+        $r12 = new com.sun.corba.se.impl.io.ValueHandlerImpl$1;
+
+        specialinvoke $r12.<com.sun.corba.se.impl.io.ValueHandlerImpl$1: void <init>()>();
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r12);
+
+        r11 = (java.lang.String) $r1;
+
+        if r11 != null goto label3;
+
+     label2:
+        return 2;
+
+     label3:
+        $b0 = staticinvoke <java.lang.Byte: byte parseByte(java.lang.String)>(r11);
+
+        $i1 = (int) $b0;
+
+        if $i1 < 1 goto label4;
+
+        $i2 = (int) $b0;
+
+        if $i2 <= 2 goto label5;
+
+     label4:
+        $r14 = new java.lang.ExceptionInInitializerError;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid stream format version: ");
+
+        $i3 = (int) $b0;
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".  Valid range is 1 through ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(2);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r14.<java.lang.ExceptionInInitializerError: void <init>(java.lang.String)>($r8);
+
+        throw $r14;
+
+     label5:
+        return $b0;
+
+     label6:
+        $r9 := @caughtexception;
+
+        $r15 = new java.lang.ExceptionInInitializerError;
+
+        specialinvoke $r15.<java.lang.ExceptionInInitializerError: void <init>(java.lang.Throwable)>($r9);
+
+        virtualinvoke $r15.<java.lang.Error: java.lang.Throwable initCause(java.lang.Throwable)>($r9);
+
+        throw $r15;
+
+        catch java.lang.Exception from label1 to label2 with label6;
+        catch java.lang.Exception from label3 to label5 with label6;
+    }
+
+    public byte getMaximumStreamFormatVersion()
+    {
+        byte $b0;
+        com.sun.corba.se.impl.io.ValueHandlerImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        $b0 = <com.sun.corba.se.impl.io.ValueHandlerImpl: byte MAX_STREAM_FORMAT_VERSION>;
+
+        return $b0;
+    }
+
+    public void writeValue(org.omg.CORBA.portable.OutputStream, java.io.Serializable, byte)
+    {
+        org.omg.CORBA.BAD_PARAM $r5, $r7;
+        com.sun.corba.se.impl.io.ValueHandlerImpl r0;
+        com.sun.corba.se.impl.logging.OMGSystemException $r4, $r6;
+        java.lang.Integer $r8;
+        java.io.Serializable r2;
+        org.omg.CORBA.portable.OutputStream r1;
+        byte b0;
+        int $i1, $i2;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r1 := @parameter0: org.omg.CORBA.portable.OutputStream;
+
+        r2 := @parameter1: java.io.Serializable;
+
+        b0 := @parameter2: byte;
+
+        $i1 = (int) b0;
+
+        if $i1 != 2 goto label1;
+
+        $z0 = r1 instanceof org.omg.CORBA.portable.ValueOutputStream;
+
+        if $z0 != 0 goto label2;
+
+        $r6 = r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.logging.OMGSystemException omgWrapper>;
+
+        $r7 = virtualinvoke $r6.<com.sun.corba.se.impl.logging.OMGSystemException: org.omg.CORBA.BAD_PARAM notAValueoutputstream()>();
+
+        throw $r7;
+
+     label1:
+        if b0 == 1 goto label2;
+
+        $r4 = r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.logging.OMGSystemException omgWrapper>;
+
+        $r8 = new java.lang.Integer;
+
+        $i2 = (int) b0;
+
+        specialinvoke $r8.<java.lang.Integer: void <init>(int)>($i2);
+
+        $r5 = virtualinvoke $r4.<com.sun.corba.se.impl.logging.OMGSystemException: org.omg.CORBA.BAD_PARAM invalidStreamFormatVersion(java.lang.Object)>($r8);
+
+        throw $r5;
+
+     label2:
+        specialinvoke r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: void writeValueWithVersion(org.omg.CORBA.portable.OutputStream,java.io.Serializable,byte)>(r1, r2, b0);
+
+        return;
+    }
+
+    private void <init>()
+    {
+        com.sun.corba.se.impl.io.ValueHandlerImpl r0;
+        com.sun.corba.se.impl.logging.OMGSystemException $r1;
+        com.sun.corba.se.impl.logging.UtilSystemException $r2;
+
+        r0 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: java.util.Hashtable inputStreamPairs> = null;
+
+        r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: java.util.Hashtable outputStreamPairs> = null;
+
+        r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.org.omg.SendingContext.CodeBase codeBase> = null;
+
+        r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: boolean useHashtables> = 1;
+
+        r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: boolean isInputStream> = 1;
+
+        r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPOutputStream outputStreamBridge> = null;
+
+        r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPInputStream inputStreamBridge> = null;
+
+        $r1 = staticinvoke <com.sun.corba.se.impl.logging.OMGSystemException: com.sun.corba.se.impl.logging.OMGSystemException get(java.lang.String)>("rpc.encoding");
+
+        r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.logging.OMGSystemException omgWrapper> = $r1;
+
+        $r2 = staticinvoke <com.sun.corba.se.impl.logging.UtilSystemException: com.sun.corba.se.impl.logging.UtilSystemException get(java.lang.String)>("rpc.encoding");
+
+        r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.logging.UtilSystemException utilWrapper> = $r2;
+
+        return;
+    }
+
+    private void <init>(boolean)
+    {
+        com.sun.corba.se.impl.io.ValueHandlerImpl r0;
+        boolean z0;
+
+        r0 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        z0 := @parameter0: boolean;
+
+        specialinvoke r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: boolean useHashtables> = 0;
+
+        r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: boolean isInputStream> = z0;
+
+        return;
+    }
+
+    static com.sun.corba.se.impl.io.ValueHandlerImpl getInstance()
+    {
+        com.sun.corba.se.impl.io.ValueHandlerImpl $r0;
+
+        $r0 = new com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        specialinvoke $r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: void <init>()>();
+
+        return $r0;
+    }
+
+    static com.sun.corba.se.impl.io.ValueHandlerImpl getInstance(boolean)
+    {
+        com.sun.corba.se.impl.io.ValueHandlerImpl $r0;
+        boolean z0;
+
+        z0 := @parameter0: boolean;
+
+        $r0 = new com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        specialinvoke $r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: void <init>(boolean)>(z0);
+
+        return $r0;
+    }
+
+    public void writeValue(org.omg.CORBA.portable.OutputStream, java.io.Serializable)
+    {
+        org.omg.CORBA.portable.OutputStream r1;
+        com.sun.corba.se.impl.io.ValueHandlerImpl r0;
+        java.io.Serializable r2;
+
+        r0 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r1 := @parameter0: org.omg.CORBA.portable.OutputStream;
+
+        r2 := @parameter1: java.io.Serializable;
+
+        specialinvoke r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: void writeValueWithVersion(org.omg.CORBA.portable.OutputStream,java.io.Serializable,byte)>(r1, r2, 1);
+
+        return;
+    }
+
+    private void writeValueWithVersion(org.omg.CORBA.portable.OutputStream, java.io.Serializable, byte)
+    {
+        java.lang.Throwable $r18, $r20;
+        com.sun.corba.se.impl.io.IIOPOutputStream $r8, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r21, r22;
+        org.omg.CORBA.portable.OutputStream r0;
+        byte b0;
+        int $i1, $i2;
+        java.util.Hashtable $r3, $r4, $r7, $r9, $r10, $r19;
+        boolean $z0;
+        com.sun.corba.se.impl.io.ValueHandlerImpl r2;
+        java.io.Serializable r6;
+        org.omg.CORBA_2_3.portable.OutputStream r1;
+        java.lang.Object $r5;
+
+        r2 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r0 := @parameter0: org.omg.CORBA.portable.OutputStream;
+
+        r6 := @parameter1: java.io.Serializable;
+
+        b0 := @parameter2: byte;
+
+        r1 = (org.omg.CORBA_2_3.portable.OutputStream) r0;
+
+        $z0 = r2.<com.sun.corba.se.impl.io.ValueHandlerImpl: boolean useHashtables>;
+
+        if $z0 != 0 goto label06;
+
+        $r12 = r2.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPOutputStream outputStreamBridge>;
+
+        if $r12 != null goto label01;
+
+        $r16 = specialinvoke r2.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPOutputStream createOutputStream()>();
+
+        r2.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPOutputStream outputStreamBridge> = $r16;
+
+        $r17 = r2.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPOutputStream outputStreamBridge>;
+
+        virtualinvoke $r17.<com.sun.corba.se.impl.io.IIOPOutputStream: void setOrbStream(org.omg.CORBA_2_3.portable.OutputStream)>(r1);
+
+     label01:
+        $r13 = r2.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPOutputStream outputStreamBridge>;
+
+        virtualinvoke $r13.<com.sun.corba.se.impl.io.IIOPOutputStream: void increaseRecursionDepth()>();
+
+        $r14 = r2.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPOutputStream outputStreamBridge>;
+
+        specialinvoke r2.<com.sun.corba.se.impl.io.ValueHandlerImpl: void writeValueInternal(com.sun.corba.se.impl.io.IIOPOutputStream,org.omg.CORBA_2_3.portable.OutputStream,java.io.Serializable,byte)>($r14, r1, r6, b0);
+
+     label02:
+        $r15 = r2.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPOutputStream outputStreamBridge>;
+
+        virtualinvoke $r15.<com.sun.corba.se.impl.io.IIOPOutputStream: int decreaseRecursionDepth()>();
+
+        goto label05;
+
+     label03:
+        $r20 := @caughtexception;
+
+     label04:
+        $r21 = r2.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPOutputStream outputStreamBridge>;
+
+        virtualinvoke $r21.<com.sun.corba.se.impl.io.IIOPOutputStream: int decreaseRecursionDepth()>();
+
+        throw $r20;
+
+     label05:
+        return;
+
+     label06:
+        $r3 = r2.<com.sun.corba.se.impl.io.ValueHandlerImpl: java.util.Hashtable outputStreamPairs>;
+
+        if $r3 != null goto label07;
+
+        $r10 = new java.util.Hashtable;
+
+        specialinvoke $r10.<java.util.Hashtable: void <init>()>();
+
+        r2.<com.sun.corba.se.impl.io.ValueHandlerImpl: java.util.Hashtable outputStreamPairs> = $r10;
+
+     label07:
+        $r4 = r2.<com.sun.corba.se.impl.io.ValueHandlerImpl: java.util.Hashtable outputStreamPairs>;
+
+        $r5 = virtualinvoke $r4.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r0);
+
+        $r11 = (com.sun.corba.se.impl.io.IIOPOutputStream) $r5;
+
+        r22 = $r11;
+
+        if $r11 != null goto label08;
+
+        $r8 = specialinvoke r2.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPOutputStream createOutputStream()>();
+
+        r22 = $r8;
+
+        virtualinvoke $r8.<com.sun.corba.se.impl.io.IIOPOutputStream: void setOrbStream(org.omg.CORBA_2_3.portable.OutputStream)>(r1);
+
+        $r9 = r2.<com.sun.corba.se.impl.io.ValueHandlerImpl: java.util.Hashtable outputStreamPairs>;
+
+        virtualinvoke $r9.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>(r0, $r8);
+
+     label08:
+        virtualinvoke r22.<com.sun.corba.se.impl.io.IIOPOutputStream: void increaseRecursionDepth()>();
+
+        specialinvoke r2.<com.sun.corba.se.impl.io.ValueHandlerImpl: void writeValueInternal(com.sun.corba.se.impl.io.IIOPOutputStream,org.omg.CORBA_2_3.portable.OutputStream,java.io.Serializable,byte)>(r22, r1, r6, b0);
+
+     label09:
+        $i1 = virtualinvoke r22.<com.sun.corba.se.impl.io.IIOPOutputStream: int decreaseRecursionDepth()>();
+
+        if $i1 != 0 goto label13;
+
+        $r7 = r2.<com.sun.corba.se.impl.io.ValueHandlerImpl: java.util.Hashtable outputStreamPairs>;
+
+        virtualinvoke $r7.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>(r0);
+
+        goto label13;
+
+     label10:
+        $r18 := @caughtexception;
+
+     label11:
+        $i2 = virtualinvoke r22.<com.sun.corba.se.impl.io.IIOPOutputStream: int decreaseRecursionDepth()>();
+
+        if $i2 != 0 goto label12;
+
+        $r19 = r2.<com.sun.corba.se.impl.io.ValueHandlerImpl: java.util.Hashtable outputStreamPairs>;
+
+        virtualinvoke $r19.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>(r0);
+
+     label12:
+        throw $r18;
+
+     label13:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label03;
+        catch java.lang.Throwable from label03 to label04 with label03;
+        catch java.lang.Throwable from label08 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    private void writeValueInternal(com.sun.corba.se.impl.io.IIOPOutputStream, org.omg.CORBA_2_3.portable.OutputStream, java.io.Serializable, byte)
+    {
+        com.sun.corba.se.impl.io.ValueHandlerImpl r3;
+        java.io.Serializable r0;
+        com.sun.corba.se.impl.io.IIOPOutputStream r2;
+        org.omg.CORBA_2_3.portable.OutputStream r4;
+        byte b0;
+        java.lang.Class $r1, $r5;
+        boolean $z0;
+
+        r3 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r2 := @parameter0: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        r4 := @parameter1: org.omg.CORBA_2_3.portable.OutputStream;
+
+        r0 := @parameter2: java.io.Serializable;
+
+        b0 := @parameter3: byte;
+
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.Class: boolean isArray()>();
+
+        if $z0 == 0 goto label1;
+
+        $r5 = virtualinvoke $r1.<java.lang.Class: java.lang.Class getComponentType()>();
+
+        specialinvoke r3.<com.sun.corba.se.impl.io.ValueHandlerImpl: void write_Array(org.omg.CORBA_2_3.portable.OutputStream,java.io.Serializable,java.lang.Class)>(r4, r0, $r5);
+
+        goto label2;
+
+     label1:
+        virtualinvoke r2.<com.sun.corba.se.impl.io.IIOPOutputStream: void simpleWriteObject(java.lang.Object,byte)>(r0, b0);
+
+     label2:
+        return;
+    }
+
+    public java.io.Serializable readValue(org.omg.CORBA.portable.InputStream, int, java.lang.Class, java.lang.String, org.omg.SendingContext.RunTime)
+    {
+        org.omg.CORBA_2_3.portable.InputStream r3;
+        org.omg.CORBA.portable.InputStream r2;
+        boolean $z0;
+        com.sun.corba.se.impl.io.ValueHandlerImpl r4;
+        com.sun.org.omg.SendingContext.CodeBase $r1;
+        java.io.Serializable $r10, $r19;
+        java.lang.Throwable $r25, $r27;
+        int i0, $i1, $i2, $i3, $i4;
+        java.lang.String r9;
+        java.util.Hashtable $r5, $r6, $r11, $r13, $r14, $r26;
+        org.omg.SendingContext.RunTime r0;
+        com.sun.corba.se.impl.io.IIOPInputStream $r12, $r15, $r16, $r17, $r18, $r20, $r21, $r22, $r23, $r24, $r28, r29;
+        java.lang.Object $r7;
+        java.lang.Class r8;
+
+        r4 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r2 := @parameter0: org.omg.CORBA.portable.InputStream;
+
+        i0 := @parameter1: int;
+
+        r8 := @parameter2: java.lang.Class;
+
+        r9 := @parameter3: java.lang.String;
+
+        r0 := @parameter4: org.omg.SendingContext.RunTime;
+
+        $r1 = staticinvoke <com.sun.org.omg.SendingContext.CodeBaseHelper: com.sun.org.omg.SendingContext.CodeBase narrow(org.omg.CORBA.Object)>(r0);
+
+        r3 = (org.omg.CORBA_2_3.portable.InputStream) r2;
+
+        $z0 = r4.<com.sun.corba.se.impl.io.ValueHandlerImpl: boolean useHashtables>;
+
+        if $z0 != 0 goto label07;
+
+        $r16 = r4.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPInputStream inputStreamBridge>;
+
+        if $r16 != null goto label01;
+
+        $r21 = specialinvoke r4.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPInputStream createInputStream()>();
+
+        r4.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPInputStream inputStreamBridge> = $r21;
+
+        $r22 = r4.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPInputStream inputStreamBridge>;
+
+        virtualinvoke $r22.<com.sun.corba.se.impl.io.IIOPInputStream: void setOrbStream(org.omg.CORBA_2_3.portable.InputStream)>(r3);
+
+        $r23 = r4.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPInputStream inputStreamBridge>;
+
+        virtualinvoke $r23.<com.sun.corba.se.impl.io.IIOPInputStream: void setSender(com.sun.org.omg.SendingContext.CodeBase)>($r1);
+
+        $r24 = r4.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPInputStream inputStreamBridge>;
+
+        virtualinvoke $r24.<com.sun.corba.se.impl.io.IIOPInputStream: void setValueHandler(javax.rmi.CORBA.ValueHandler)>(r4);
+
+     label01:
+        $r17 = r4.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPInputStream inputStreamBridge>;
+
+        virtualinvoke $r17.<com.sun.corba.se.impl.io.IIOPInputStream: void increaseRecursionDepth()>();
+
+        $r18 = r4.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPInputStream inputStreamBridge>;
+
+        $r19 = specialinvoke r4.<com.sun.corba.se.impl.io.ValueHandlerImpl: java.io.Serializable readValueInternal(com.sun.corba.se.impl.io.IIOPInputStream,org.omg.CORBA_2_3.portable.InputStream,int,java.lang.Class,java.lang.String,com.sun.org.omg.SendingContext.CodeBase)>($r18, r3, i0, r8, r9, $r1);
+
+     label02:
+        $r20 = r4.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPInputStream inputStreamBridge>;
+
+        $i2 = virtualinvoke $r20.<com.sun.corba.se.impl.io.IIOPInputStream: int decreaseRecursionDepth()>();
+
+        if $i2 != 0 goto label06;
+
+        goto label06;
+
+     label03:
+        $r27 := @caughtexception;
+
+     label04:
+        $r28 = r4.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPInputStream inputStreamBridge>;
+
+        $i4 = virtualinvoke $r28.<com.sun.corba.se.impl.io.IIOPInputStream: int decreaseRecursionDepth()>();
+
+        if $i4 != 0 goto label05;
+
+     label05:
+        throw $r27;
+
+     label06:
+        return $r19;
+
+     label07:
+        $r5 = r4.<com.sun.corba.se.impl.io.ValueHandlerImpl: java.util.Hashtable inputStreamPairs>;
+
+        if $r5 != null goto label08;
+
+        $r14 = new java.util.Hashtable;
+
+        specialinvoke $r14.<java.util.Hashtable: void <init>()>();
+
+        r4.<com.sun.corba.se.impl.io.ValueHandlerImpl: java.util.Hashtable inputStreamPairs> = $r14;
+
+     label08:
+        $r6 = r4.<com.sun.corba.se.impl.io.ValueHandlerImpl: java.util.Hashtable inputStreamPairs>;
+
+        $r7 = virtualinvoke $r6.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r2);
+
+        $r15 = (com.sun.corba.se.impl.io.IIOPInputStream) $r7;
+
+        r29 = $r15;
+
+        if $r15 != null goto label09;
+
+        $r12 = specialinvoke r4.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPInputStream createInputStream()>();
+
+        r29 = $r12;
+
+        virtualinvoke $r12.<com.sun.corba.se.impl.io.IIOPInputStream: void setOrbStream(org.omg.CORBA_2_3.portable.InputStream)>(r3);
+
+        virtualinvoke $r12.<com.sun.corba.se.impl.io.IIOPInputStream: void setSender(com.sun.org.omg.SendingContext.CodeBase)>($r1);
+
+        virtualinvoke $r12.<com.sun.corba.se.impl.io.IIOPInputStream: void setValueHandler(javax.rmi.CORBA.ValueHandler)>(r4);
+
+        $r13 = r4.<com.sun.corba.se.impl.io.ValueHandlerImpl: java.util.Hashtable inputStreamPairs>;
+
+        virtualinvoke $r13.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>(r2, $r12);
+
+     label09:
+        virtualinvoke r29.<com.sun.corba.se.impl.io.IIOPInputStream: void increaseRecursionDepth()>();
+
+        $r10 = specialinvoke r4.<com.sun.corba.se.impl.io.ValueHandlerImpl: java.io.Serializable readValueInternal(com.sun.corba.se.impl.io.IIOPInputStream,org.omg.CORBA_2_3.portable.InputStream,int,java.lang.Class,java.lang.String,com.sun.org.omg.SendingContext.CodeBase)>(r29, r3, i0, r8, r9, $r1);
+
+     label10:
+        $i1 = virtualinvoke r29.<com.sun.corba.se.impl.io.IIOPInputStream: int decreaseRecursionDepth()>();
+
+        if $i1 != 0 goto label14;
+
+        $r11 = r4.<com.sun.corba.se.impl.io.ValueHandlerImpl: java.util.Hashtable inputStreamPairs>;
+
+        virtualinvoke $r11.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>(r2);
+
+        goto label14;
+
+     label11:
+        $r25 := @caughtexception;
+
+     label12:
+        $i3 = virtualinvoke r29.<com.sun.corba.se.impl.io.IIOPInputStream: int decreaseRecursionDepth()>();
+
+        if $i3 != 0 goto label13;
+
+        $r26 = r4.<com.sun.corba.se.impl.io.ValueHandlerImpl: java.util.Hashtable inputStreamPairs>;
+
+        virtualinvoke $r26.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>(r2);
+
+     label13:
+        throw $r25;
+
+     label14:
+        return $r10;
+
+        catch java.lang.Throwable from label01 to label02 with label03;
+        catch java.lang.Throwable from label03 to label04 with label03;
+        catch java.lang.Throwable from label09 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+    }
+
+    private java.io.Serializable readValueInternal(com.sun.corba.se.impl.io.IIOPInputStream, org.omg.CORBA_2_3.portable.InputStream, int, java.lang.Class, java.lang.String, com.sun.org.omg.SendingContext.CodeBase)
+    {
+        com.sun.corba.se.impl.io.ValueHandlerImpl r5;
+        org.omg.CORBA_2_3.portable.InputStream r6;
+        com.sun.org.omg.SendingContext.CodeBase r3;
+        java.io.Serializable r8;
+        com.sun.corba.se.impl.io.IIOPInputStream r1;
+        int i0;
+        java.lang.Class r0;
+        java.lang.Object $r4, $r7;
+        java.lang.String r2;
+        boolean $z0, $z1;
+
+        r5 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r1 := @parameter0: com.sun.corba.se.impl.io.IIOPInputStream;
+
+        r6 := @parameter1: org.omg.CORBA_2_3.portable.InputStream;
+
+        i0 := @parameter2: int;
+
+        r0 := @parameter3: java.lang.Class;
+
+        r2 := @parameter4: java.lang.String;
+
+        r3 := @parameter5: com.sun.org.omg.SendingContext.CodeBase;
+
+        if r0 != null goto label3;
+
+        $z1 = specialinvoke r5.<com.sun.corba.se.impl.io.ValueHandlerImpl: boolean isArray(java.lang.String)>(r2);
+
+        if $z1 == 0 goto label1;
+
+        specialinvoke r5.<com.sun.corba.se.impl.io.ValueHandlerImpl: java.lang.Object read_Array(com.sun.corba.se.impl.io.IIOPInputStream,org.omg.CORBA_2_3.portable.InputStream,java.lang.Class,com.sun.org.omg.SendingContext.CodeBase,int)>(r1, r6, null, r3, i0);
+
+        goto label2;
+
+     label1:
+        virtualinvoke r1.<com.sun.corba.se.impl.io.IIOPInputStream: void simpleSkipObject(java.lang.String,com.sun.org.omg.SendingContext.CodeBase)>(r2, r3);
+
+     label2:
+        return null;
+
+     label3:
+        $z0 = virtualinvoke r0.<java.lang.Class: boolean isArray()>();
+
+        if $z0 == 0 goto label4;
+
+        $r7 = specialinvoke r5.<com.sun.corba.se.impl.io.ValueHandlerImpl: java.lang.Object read_Array(com.sun.corba.se.impl.io.IIOPInputStream,org.omg.CORBA_2_3.portable.InputStream,java.lang.Class,com.sun.org.omg.SendingContext.CodeBase,int)>(r1, r6, r0, r3, i0);
+
+        r8 = (java.io.Serializable) $r7;
+
+        goto label5;
+
+     label4:
+        $r4 = virtualinvoke r1.<com.sun.corba.se.impl.io.IIOPInputStream: java.lang.Object simpleReadObject(java.lang.Class,java.lang.String,com.sun.org.omg.SendingContext.CodeBase,int)>(r0, r2, r3, i0);
+
+        r8 = (java.io.Serializable) $r4;
+
+     label5:
+        return r8;
+    }
+
+    public java.lang.String getRMIRepositoryID(java.lang.Class)
+    {
+        java.lang.Class r0;
+        java.lang.String $r1;
+        com.sun.corba.se.impl.io.ValueHandlerImpl r2;
+
+        r2 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r0 := @parameter0: java.lang.Class;
+
+        $r1 = staticinvoke <com.sun.corba.se.impl.util.RepositoryId: java.lang.String createForJavaType(java.lang.Class)>(r0);
+
+        return $r1;
+    }
+
+    public boolean isCustomMarshaled(java.lang.Class)
+    {
+        com.sun.corba.se.impl.io.ValueHandlerImpl r2;
+        java.lang.Class r0;
+        com.sun.corba.se.impl.io.ObjectStreamClass $r1;
+        boolean $z0;
+
+        r2 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r0 := @parameter0: java.lang.Class;
+
+        $r1 = staticinvoke <com.sun.corba.se.impl.io.ObjectStreamClass: com.sun.corba.se.impl.io.ObjectStreamClass lookup(java.lang.Class)>(r0);
+
+        $z0 = virtualinvoke $r1.<com.sun.corba.se.impl.io.ObjectStreamClass: boolean isCustomMarshaled()>();
+
+        return $z0;
+    }
+
+    public org.omg.SendingContext.RunTime getRunTimeCodeBase()
+    {
+        com.sun.corba.se.impl.io.ValueHandlerImpl r0;
+        com.sun.org.omg.SendingContext.CodeBase $r1, $r3, $r5, $r6;
+        com.sun.corba.se.impl.io.FVDCodeBaseImpl $r2, r4;
+
+        r0 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.org.omg.SendingContext.CodeBase codeBase>;
+
+        if $r1 == null goto label1;
+
+        $r6 = r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.org.omg.SendingContext.CodeBase codeBase>;
+
+        return $r6;
+
+     label1:
+        $r2 = new com.sun.corba.se.impl.io.FVDCodeBaseImpl;
+
+        specialinvoke $r2.<com.sun.corba.se.impl.io.FVDCodeBaseImpl: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.org.omg.SendingContext.CodeBase codeBase> = $r2;
+
+        $r3 = r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.org.omg.SendingContext.CodeBase codeBase>;
+
+        r4 = (com.sun.corba.se.impl.io.FVDCodeBaseImpl) $r3;
+
+        virtualinvoke r4.<com.sun.corba.se.impl.io.FVDCodeBaseImpl: void setValueHandler(javax.rmi.CORBA.ValueHandler)>(r0);
+
+        $r5 = r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.org.omg.SendingContext.CodeBase codeBase>;
+
+        return $r5;
+    }
+
+    public boolean useFullValueDescription(java.lang.Class, java.lang.String) throws java.io.IOException
+    {
+        com.sun.corba.se.impl.io.ValueHandlerImpl r2;
+        java.lang.Class r0;
+        java.lang.String r1;
+        boolean $z0;
+
+        r2 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r0 := @parameter0: java.lang.Class;
+
+        r1 := @parameter1: java.lang.String;
+
+        $z0 = staticinvoke <com.sun.corba.se.impl.util.RepositoryId: boolean useFullValueDescription(java.lang.Class,java.lang.String)>(r0, r1);
+
+        return $z0;
+    }
+
+    public java.lang.String getClassName(java.lang.String)
+    {
+        com.sun.corba.se.impl.io.ValueHandlerImpl r4;
+        java.lang.String r0, $r3;
+        com.sun.corba.se.impl.util.RepositoryId $r2;
+        com.sun.corba.se.impl.util.RepositoryIdCache $r1;
+
+        r4 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = <com.sun.corba.se.impl.util.RepositoryId: com.sun.corba.se.impl.util.RepositoryIdCache cache>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.util.RepositoryIdCache: com.sun.corba.se.impl.util.RepositoryId getId(java.lang.String)>(r0);
+
+        $r3 = virtualinvoke $r2.<com.sun.corba.se.impl.util.RepositoryId: java.lang.String getClassName()>();
+
+        return $r3;
+    }
+
+    public java.lang.Class getClassFromType(java.lang.String) throws java.lang.ClassNotFoundException
+    {
+        com.sun.corba.se.impl.io.ValueHandlerImpl r4;
+        java.lang.Class $r3;
+        java.lang.String r0;
+        com.sun.corba.se.impl.util.RepositoryId $r2;
+        com.sun.corba.se.impl.util.RepositoryIdCache $r1;
+
+        r4 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = <com.sun.corba.se.impl.util.RepositoryId: com.sun.corba.se.impl.util.RepositoryIdCache cache>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.util.RepositoryIdCache: com.sun.corba.se.impl.util.RepositoryId getId(java.lang.String)>(r0);
+
+        $r3 = virtualinvoke $r2.<com.sun.corba.se.impl.util.RepositoryId: java.lang.Class getClassFromType()>();
+
+        return $r3;
+    }
+
+    public java.lang.Class getAnyClassFromType(java.lang.String) throws java.lang.ClassNotFoundException
+    {
+        com.sun.corba.se.impl.io.ValueHandlerImpl r4;
+        java.lang.Class $r3;
+        java.lang.String r0;
+        com.sun.corba.se.impl.util.RepositoryId $r2;
+        com.sun.corba.se.impl.util.RepositoryIdCache $r1;
+
+        r4 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = <com.sun.corba.se.impl.util.RepositoryId: com.sun.corba.se.impl.util.RepositoryIdCache cache>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.util.RepositoryIdCache: com.sun.corba.se.impl.util.RepositoryId getId(java.lang.String)>(r0);
+
+        $r3 = virtualinvoke $r2.<com.sun.corba.se.impl.util.RepositoryId: java.lang.Class getAnyClassFromType()>();
+
+        return $r3;
+    }
+
+    public java.lang.String createForAnyType(java.lang.Class)
+    {
+        java.lang.Class r0;
+        java.lang.String $r1;
+        com.sun.corba.se.impl.io.ValueHandlerImpl r2;
+
+        r2 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r0 := @parameter0: java.lang.Class;
+
+        $r1 = staticinvoke <com.sun.corba.se.impl.util.RepositoryId: java.lang.String createForAnyType(java.lang.Class)>(r0);
+
+        return $r1;
+    }
+
+    public java.lang.String getDefinedInId(java.lang.String)
+    {
+        com.sun.corba.se.impl.io.ValueHandlerImpl r4;
+        java.lang.String r0, $r3;
+        com.sun.corba.se.impl.util.RepositoryId $r2;
+        com.sun.corba.se.impl.util.RepositoryIdCache $r1;
+
+        r4 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = <com.sun.corba.se.impl.util.RepositoryId: com.sun.corba.se.impl.util.RepositoryIdCache cache>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.util.RepositoryIdCache: com.sun.corba.se.impl.util.RepositoryId getId(java.lang.String)>(r0);
+
+        $r3 = virtualinvoke $r2.<com.sun.corba.se.impl.util.RepositoryId: java.lang.String getDefinedInId()>();
+
+        return $r3;
+    }
+
+    public java.lang.String getUnqualifiedName(java.lang.String)
+    {
+        com.sun.corba.se.impl.io.ValueHandlerImpl r4;
+        java.lang.String r0, $r3;
+        com.sun.corba.se.impl.util.RepositoryId $r2;
+        com.sun.corba.se.impl.util.RepositoryIdCache $r1;
+
+        r4 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = <com.sun.corba.se.impl.util.RepositoryId: com.sun.corba.se.impl.util.RepositoryIdCache cache>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.util.RepositoryIdCache: com.sun.corba.se.impl.util.RepositoryId getId(java.lang.String)>(r0);
+
+        $r3 = virtualinvoke $r2.<com.sun.corba.se.impl.util.RepositoryId: java.lang.String getUnqualifiedName()>();
+
+        return $r3;
+    }
+
+    public java.lang.String getSerialVersionUID(java.lang.String)
+    {
+        com.sun.corba.se.impl.io.ValueHandlerImpl r4;
+        java.lang.String r0, $r3;
+        com.sun.corba.se.impl.util.RepositoryId $r2;
+        com.sun.corba.se.impl.util.RepositoryIdCache $r1;
+
+        r4 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = <com.sun.corba.se.impl.util.RepositoryId: com.sun.corba.se.impl.util.RepositoryIdCache cache>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.util.RepositoryIdCache: com.sun.corba.se.impl.util.RepositoryId getId(java.lang.String)>(r0);
+
+        $r3 = virtualinvoke $r2.<com.sun.corba.se.impl.util.RepositoryId: java.lang.String getSerialVersionUID()>();
+
+        return $r3;
+    }
+
+    public boolean isAbstractBase(java.lang.Class)
+    {
+        java.lang.Class r0;
+        com.sun.corba.se.impl.io.ValueHandlerImpl r1;
+        boolean $z0;
+
+        r1 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r0 := @parameter0: java.lang.Class;
+
+        $z0 = staticinvoke <com.sun.corba.se.impl.util.RepositoryId: boolean isAbstractBase(java.lang.Class)>(r0);
+
+        return $z0;
+    }
+
+    public boolean isSequence(java.lang.String)
+    {
+        com.sun.corba.se.impl.io.ValueHandlerImpl r3;
+        java.lang.String r0;
+        com.sun.corba.se.impl.util.RepositoryId $r2;
+        com.sun.corba.se.impl.util.RepositoryIdCache $r1;
+        boolean $z0;
+
+        r3 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = <com.sun.corba.se.impl.util.RepositoryId: com.sun.corba.se.impl.util.RepositoryIdCache cache>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.util.RepositoryIdCache: com.sun.corba.se.impl.util.RepositoryId getId(java.lang.String)>(r0);
+
+        $z0 = virtualinvoke $r2.<com.sun.corba.se.impl.util.RepositoryId: boolean isSequence()>();
+
+        return $z0;
+    }
+
+    public java.io.Serializable writeReplace(java.io.Serializable)
+    {
+        com.sun.corba.se.impl.io.ValueHandlerImpl r4;
+        java.lang.Class $r1;
+        com.sun.corba.se.impl.io.ObjectStreamClass $r2;
+        java.io.Serializable r0, $r3;
+
+        r4 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r0 := @parameter0: java.io.Serializable;
+
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r2 = staticinvoke <com.sun.corba.se.impl.io.ObjectStreamClass: com.sun.corba.se.impl.io.ObjectStreamClass lookup(java.lang.Class)>($r1);
+
+        $r3 = virtualinvoke $r2.<com.sun.corba.se.impl.io.ObjectStreamClass: java.io.Serializable writeReplace(java.io.Serializable)>(r0);
+
+        return $r3;
+    }
+
+    private void writeCharArray(org.omg.CORBA_2_3.portable.OutputStream, char[], int, int)
+    {
+        org.omg.CORBA_2_3.portable.OutputStream r0;
+        com.sun.corba.se.impl.io.ValueHandlerImpl r2;
+        int i0, i1;
+        char[] r1;
+
+        r2 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r0 := @parameter0: org.omg.CORBA_2_3.portable.OutputStream;
+
+        r1 := @parameter1: char[];
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        virtualinvoke r0.<org.omg.CORBA_2_3.portable.OutputStream: void write_wchar_array(char[],int,int)>(r1, i0, i1);
+
+        return;
+    }
+
+    private void write_Array(org.omg.CORBA_2_3.portable.OutputStream, java.io.Serializable, java.lang.Class)
+    {
+        byte[] r32;
+        byte b11;
+        int[] r31;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        com.sun.corba.se.impl.io.ValueHandlerImpl r25;
+        java.io.Serializable r1, $r4;
+        org.omg.CORBA_2_3.portable.OutputStream r2;
+        java.lang.StringBuilder $r19, $r20, $r23;
+        short[] r36;
+        java.lang.Object[] r39, r40;
+        double[] r35;
+        java.lang.Error $r18;
+        float[] r34;
+        java.lang.ClassCastException $r26;
+        long[] r33;
+        int i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i12;
+        java.lang.String $r22, $r24, $r30;
+        boolean[] r38;
+        char[] r37;
+        java.lang.Class r0, $r7, $r8, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r21, $r29;
+        java.lang.Object $r3, $r5, $r6, $r9, $r27, $r28;
+
+        r25 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r2 := @parameter0: org.omg.CORBA_2_3.portable.OutputStream;
+
+        r1 := @parameter1: java.io.Serializable;
+
+        r0 := @parameter2: java.lang.Class;
+
+        $z0 = virtualinvoke r0.<java.lang.Class: boolean isPrimitive()>();
+
+        if $z0 == 0 goto label09;
+
+        $r10 = <java.lang.Integer: java.lang.Class TYPE>;
+
+        if r0 != $r10 goto label01;
+
+        r31 = (int[]) r1;
+
+        i0 = lengthof r31;
+
+        virtualinvoke r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_ulong(int)>(i0);
+
+        virtualinvoke r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_long_array(int[],int,int)>(r31, 0, i0);
+
+        goto label25;
+
+     label01:
+        $r11 = <java.lang.Byte: java.lang.Class TYPE>;
+
+        if r0 != $r11 goto label02;
+
+        r32 = (byte[]) r1;
+
+        i1 = lengthof r32;
+
+        virtualinvoke r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_ulong(int)>(i1);
+
+        virtualinvoke r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_octet_array(byte[],int,int)>(r32, 0, i1);
+
+        goto label25;
+
+     label02:
+        $r12 = <java.lang.Long: java.lang.Class TYPE>;
+
+        if r0 != $r12 goto label03;
+
+        r33 = (long[]) r1;
+
+        i2 = lengthof r33;
+
+        virtualinvoke r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_ulong(int)>(i2);
+
+        virtualinvoke r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_longlong_array(long[],int,int)>(r33, 0, i2);
+
+        goto label25;
+
+     label03:
+        $r13 = <java.lang.Float: java.lang.Class TYPE>;
+
+        if r0 != $r13 goto label04;
+
+        r34 = (float[]) r1;
+
+        i3 = lengthof r34;
+
+        virtualinvoke r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_ulong(int)>(i3);
+
+        virtualinvoke r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_float_array(float[],int,int)>(r34, 0, i3);
+
+        goto label25;
+
+     label04:
+        $r14 = <java.lang.Double: java.lang.Class TYPE>;
+
+        if r0 != $r14 goto label05;
+
+        r35 = (double[]) r1;
+
+        i4 = lengthof r35;
+
+        virtualinvoke r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_ulong(int)>(i4);
+
+        virtualinvoke r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_double_array(double[],int,int)>(r35, 0, i4);
+
+        goto label25;
+
+     label05:
+        $r15 = <java.lang.Short: java.lang.Class TYPE>;
+
+        if r0 != $r15 goto label06;
+
+        r36 = (short[]) r1;
+
+        i5 = lengthof r36;
+
+        virtualinvoke r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_ulong(int)>(i5);
+
+        virtualinvoke r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_short_array(short[],int,int)>(r36, 0, i5);
+
+        goto label25;
+
+     label06:
+        $r16 = <java.lang.Character: java.lang.Class TYPE>;
+
+        if r0 != $r16 goto label07;
+
+        r37 = (char[]) r1;
+
+        i6 = lengthof r37;
+
+        virtualinvoke r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_ulong(int)>(i6);
+
+        specialinvoke r25.<com.sun.corba.se.impl.io.ValueHandlerImpl: void writeCharArray(org.omg.CORBA_2_3.portable.OutputStream,char[],int,int)>(r2, r37, 0, i6);
+
+        goto label25;
+
+     label07:
+        $r17 = <java.lang.Boolean: java.lang.Class TYPE>;
+
+        if r0 != $r17 goto label08;
+
+        r38 = (boolean[]) r1;
+
+        i7 = lengthof r38;
+
+        virtualinvoke r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_ulong(int)>(i7);
+
+        virtualinvoke r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_boolean_array(boolean[],int,int)>(r38, 0, i7);
+
+        goto label25;
+
+     label08:
+        $r18 = new java.lang.Error;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid primitive type : ");
+
+        $r21 = virtualinvoke r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r22 = virtualinvoke $r21.<java.lang.Class: java.lang.String getName()>();
+
+        $r23 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r18.<java.lang.Error: void <init>(java.lang.String)>($r24);
+
+        throw $r18;
+
+     label09:
+        if r0 != class "Ljava/lang/Object;" goto label12;
+
+        r39 = (java.lang.Object[]) r1;
+
+        i8 = lengthof r39;
+
+        virtualinvoke r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_ulong(int)>(i8);
+
+        i9 = 0;
+
+     label10:
+        if i9 >= i8 goto label11;
+
+        $r9 = r39[i9];
+
+        staticinvoke <javax.rmi.CORBA.Util: void writeAny(org.omg.CORBA.portable.OutputStream,java.lang.Object)>(r2, $r9);
+
+        i9 = i9 + 1;
+
+        goto label10;
+
+     label11:
+        goto label25;
+
+     label12:
+        r40 = (java.lang.Object[]) r1;
+
+        i10 = lengthof r40;
+
+        virtualinvoke r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_ulong(int)>(i10);
+
+        b11 = 2;
+
+        $z1 = virtualinvoke r0.<java.lang.Class: boolean isInterface()>();
+
+        if $z1 == 0 goto label16;
+
+        virtualinvoke r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r7 = class "Ljava/rmi/Remote;";
+
+        $z2 = virtualinvoke $r7.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(r0);
+
+        if $z2 == 0 goto label13;
+
+        b11 = 0;
+
+        goto label16;
+
+     label13:
+        $r8 = class "Lorg/omg/CORBA/Object;";
+
+        $z3 = virtualinvoke $r8.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(r0);
+
+        if $z3 == 0 goto label14;
+
+        b11 = 0;
+
+        goto label16;
+
+     label14:
+        $z4 = staticinvoke <com.sun.corba.se.impl.util.RepositoryId: boolean isAbstractBase(java.lang.Class)>(r0);
+
+        if $z4 == 0 goto label15;
+
+        b11 = 1;
+
+        goto label16;
+
+     label15:
+        $z5 = staticinvoke <com.sun.corba.se.impl.io.ObjectStreamClassCorbaExt: boolean isAbstractInterface(java.lang.Class)>(r0);
+
+        if $z5 == 0 goto label16;
+
+        b11 = 1;
+
+     label16:
+        i12 = 0;
+
+     label17:
+        if i12 >= i10 goto label25;
+
+        tableswitch(b11)
+        {
+            case 0: goto label18;
+            case 1: goto label19;
+            case 2: goto label20;
+            default: goto label24;
+        };
+
+     label18:
+        $r6 = r40[i12];
+
+        staticinvoke <javax.rmi.CORBA.Util: void writeRemoteObject(org.omg.CORBA.portable.OutputStream,java.lang.Object)>(r2, $r6);
+
+        goto label24;
+
+     label19:
+        $r5 = r40[i12];
+
+        staticinvoke <javax.rmi.CORBA.Util: void writeAbstractObject(org.omg.CORBA.portable.OutputStream,java.lang.Object)>(r2, $r5);
+
+        goto label24;
+
+     label20:
+        $r3 = r40[i12];
+
+        $r4 = (java.io.Serializable) $r3;
+
+        virtualinvoke r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_value(java.io.Serializable)>($r4);
+
+     label21:
+        goto label24;
+
+     label22:
+        $r26 := @caughtexception;
+
+        $r27 = r40[i12];
+
+        $z6 = $r27 instanceof java.io.Serializable;
+
+        if $z6 == 0 goto label23;
+
+        throw $r26;
+
+     label23:
+        $r28 = r40[i12];
+
+        $r29 = virtualinvoke $r28.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r30 = virtualinvoke $r29.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <com.sun.corba.se.impl.util.Utility: void throwNotSerializableForCorba(java.lang.String)>($r30);
+
+     label24:
+        i12 = i12 + 1;
+
+        goto label17;
+
+     label25:
+        return;
+
+        catch java.lang.ClassCastException from label20 to label21 with label22;
+    }
+
+    private void readCharArray(org.omg.CORBA_2_3.portable.InputStream, char[], int, int)
+    {
+        com.sun.corba.se.impl.io.ValueHandlerImpl r2;
+        org.omg.CORBA_2_3.portable.InputStream r0;
+        int i0, i1;
+        char[] r1;
+
+        r2 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r0 := @parameter0: org.omg.CORBA_2_3.portable.InputStream;
+
+        r1 := @parameter1: char[];
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        virtualinvoke r0.<org.omg.CORBA_2_3.portable.InputStream: void read_wchar_array(char[],int,int)>(r1, i0, i1);
+
+        return;
+    }
+
+    private java.lang.Object read_Array(com.sun.corba.se.impl.io.IIOPInputStream, org.omg.CORBA_2_3.portable.InputStream, java.lang.Class, com.sun.org.omg.SendingContext.CodeBase, int)
+    {
+        byte[] r65;
+        org.omg.CORBA_2_3.portable.InputStream r0;
+        java.lang.Integer $r48, $r56;
+        byte b8;
+        org.omg.CORBA.portable.IndirectionException $r51, $r59;
+        com.sun.corba.se.impl.io.ValueHandlerImpl r36;
+        com.sun.org.omg.SendingContext.CodeBase r61;
+        java.io.Serializable $r8, r64, r66, r68, r70, r72, r74, r76, r78, r81, r83;
+        java.lang.StringBuilder $r30, $r31, $r33;
+        java.lang.Throwable $r45;
+        java.lang.Object[] $r4, $r18, r79, r82;
+        org.omg.CORBA.MARSHAL $r50, $r58;
+        double[] r71;
+        java.lang.Error $r29;
+        float[] r69;
+        java.lang.String $r15, $r16, $r32, $r34;
+        boolean[] r77;
+        java.io.IOException $r47, $r55;
+        org.omg.CORBA.Object $r12;
+        com.sun.corba.se.impl.logging.UtilSystemException $r49, $r57;
+        char[] r75;
+        java.lang.ClassNotFoundException $r54;
+        int[] r63;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, z6, z7, z8, z9;
+        short[] r73;
+        long[] r67;
+        int $i0, i1, $i2, $i3, $i4, $i5, i6, i7, i9;
+        com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager $r6, $r7, $r19, $r20, $r35, $r37, $r38, $r39, $r40, $r41, $r42, $r43, $r44, $r46, $r52, $r60;
+        com.sun.corba.se.impl.io.IIOPInputStream r5;
+        java.lang.Class r1, $r2, $r13, $r14, $r21, $r22, $r23, $r24, $r25, $r26, $r27, $r28, r62;
+        java.lang.Object $r3, $r9, $r10, $r11, $r17, $r53, r80;
+
+        r36 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r5 := @parameter0: com.sun.corba.se.impl.io.IIOPInputStream;
+
+        r0 := @parameter1: org.omg.CORBA_2_3.portable.InputStream;
+
+        r1 := @parameter2: java.lang.Class;
+
+        r61 := @parameter3: com.sun.org.omg.SendingContext.CodeBase;
+
+        i1 := @parameter4: int;
+
+     label01:
+        $i0 = virtualinvoke r0.<org.omg.CORBA_2_3.portable.InputStream: int read_ulong()>();
+
+        if r1 != null goto label04;
+
+        i6 = 0;
+
+     label02:
+        if i6 >= $i0 goto label03;
+
+        virtualinvoke r0.<org.omg.CORBA_2_3.portable.InputStream: java.io.Serializable read_value()>();
+
+        i6 = i6 + 1;
+
+        goto label02;
+
+     label03:
+        $r44 = r5.<com.sun.corba.se.impl.io.IIOPInputStream: com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager activeRecursionMgr>;
+
+        virtualinvoke $r44.<com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager: void removeObject(int)>(i1);
+
+        return null;
+
+     label04:
+        $r2 = virtualinvoke r1.<java.lang.Class: java.lang.Class getComponentType()>();
+
+        r62 = $r2;
+
+        $z0 = virtualinvoke $r2.<java.lang.Class: boolean isPrimitive()>();
+
+        if $z0 == 0 goto label21;
+
+        $r21 = <java.lang.Integer: java.lang.Class TYPE>;
+
+        if $r2 != $r21 goto label06;
+
+        r63 = newarray (int)[$i0];
+
+        virtualinvoke r0.<org.omg.CORBA_2_3.portable.InputStream: void read_long_array(int[],int,int)>(r63, 0, $i0);
+
+        r64 = (java.io.Serializable) r63;
+
+     label05:
+        $r43 = r5.<com.sun.corba.se.impl.io.IIOPInputStream: com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager activeRecursionMgr>;
+
+        virtualinvoke $r43.<com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager: void removeObject(int)>(i1);
+
+        return r64;
+
+     label06:
+        $r22 = <java.lang.Byte: java.lang.Class TYPE>;
+
+        if $r2 != $r22 goto label08;
+
+        r65 = newarray (byte)[$i0];
+
+        virtualinvoke r0.<org.omg.CORBA_2_3.portable.InputStream: void read_octet_array(byte[],int,int)>(r65, 0, $i0);
+
+        r66 = (java.io.Serializable) r65;
+
+     label07:
+        $r42 = r5.<com.sun.corba.se.impl.io.IIOPInputStream: com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager activeRecursionMgr>;
+
+        virtualinvoke $r42.<com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager: void removeObject(int)>(i1);
+
+        return r66;
+
+     label08:
+        $r23 = <java.lang.Long: java.lang.Class TYPE>;
+
+        if $r2 != $r23 goto label10;
+
+        r67 = newarray (long)[$i0];
+
+        virtualinvoke r0.<org.omg.CORBA_2_3.portable.InputStream: void read_longlong_array(long[],int,int)>(r67, 0, $i0);
+
+        r68 = (java.io.Serializable) r67;
+
+     label09:
+        $r41 = r5.<com.sun.corba.se.impl.io.IIOPInputStream: com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager activeRecursionMgr>;
+
+        virtualinvoke $r41.<com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager: void removeObject(int)>(i1);
+
+        return r68;
+
+     label10:
+        $r24 = <java.lang.Float: java.lang.Class TYPE>;
+
+        if $r2 != $r24 goto label12;
+
+        r69 = newarray (float)[$i0];
+
+        virtualinvoke r0.<org.omg.CORBA_2_3.portable.InputStream: void read_float_array(float[],int,int)>(r69, 0, $i0);
+
+        r70 = (java.io.Serializable) r69;
+
+     label11:
+        $r40 = r5.<com.sun.corba.se.impl.io.IIOPInputStream: com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager activeRecursionMgr>;
+
+        virtualinvoke $r40.<com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager: void removeObject(int)>(i1);
+
+        return r70;
+
+     label12:
+        $r25 = <java.lang.Double: java.lang.Class TYPE>;
+
+        if $r2 != $r25 goto label14;
+
+        r71 = newarray (double)[$i0];
+
+        virtualinvoke r0.<org.omg.CORBA_2_3.portable.InputStream: void read_double_array(double[],int,int)>(r71, 0, $i0);
+
+        r72 = (java.io.Serializable) r71;
+
+     label13:
+        $r39 = r5.<com.sun.corba.se.impl.io.IIOPInputStream: com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager activeRecursionMgr>;
+
+        virtualinvoke $r39.<com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager: void removeObject(int)>(i1);
+
+        return r72;
+
+     label14:
+        $r26 = <java.lang.Short: java.lang.Class TYPE>;
+
+        if $r2 != $r26 goto label16;
+
+        r73 = newarray (short)[$i0];
+
+        virtualinvoke r0.<org.omg.CORBA_2_3.portable.InputStream: void read_short_array(short[],int,int)>(r73, 0, $i0);
+
+        r74 = (java.io.Serializable) r73;
+
+     label15:
+        $r38 = r5.<com.sun.corba.se.impl.io.IIOPInputStream: com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager activeRecursionMgr>;
+
+        virtualinvoke $r38.<com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager: void removeObject(int)>(i1);
+
+        return r74;
+
+     label16:
+        $r27 = <java.lang.Character: java.lang.Class TYPE>;
+
+        if $r2 != $r27 goto label18;
+
+        r75 = newarray (char)[$i0];
+
+        specialinvoke r36.<com.sun.corba.se.impl.io.ValueHandlerImpl: void readCharArray(org.omg.CORBA_2_3.portable.InputStream,char[],int,int)>(r0, r75, 0, $i0);
+
+        r76 = (java.io.Serializable) r75;
+
+     label17:
+        $r37 = r5.<com.sun.corba.se.impl.io.IIOPInputStream: com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager activeRecursionMgr>;
+
+        virtualinvoke $r37.<com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager: void removeObject(int)>(i1);
+
+        return r76;
+
+     label18:
+        $r28 = <java.lang.Boolean: java.lang.Class TYPE>;
+
+        if $r2 != $r28 goto label20;
+
+        r77 = newarray (boolean)[$i0];
+
+        virtualinvoke r0.<org.omg.CORBA_2_3.portable.InputStream: void read_boolean_array(boolean[],int,int)>(r77, 0, $i0);
+
+        r78 = (java.io.Serializable) r77;
+
+     label19:
+        $r35 = r5.<com.sun.corba.se.impl.io.IIOPInputStream: com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager activeRecursionMgr>;
+
+        virtualinvoke $r35.<com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager: void removeObject(int)>(i1);
+
+        return r78;
+
+     label20:
+        $r29 = new java.lang.Error;
+
+        $r30 = new java.lang.StringBuilder;
+
+        specialinvoke $r30.<java.lang.StringBuilder: void <init>()>();
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid primitive componentType : ");
+
+        $r32 = virtualinvoke r1.<java.lang.Class: java.lang.String getName()>();
+
+        $r33 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r32);
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r29.<java.lang.Error: void <init>(java.lang.String)>($r34);
+
+        throw $r29;
+
+     label21:
+        if $r2 != class "Ljava/lang/Object;" goto label32;
+
+        $r17 = staticinvoke <java.lang.reflect.Array: java.lang.Object newInstance(java.lang.Class,int)>($r2, $i0);
+
+        $r18 = (java.lang.Object[]) $r17;
+
+        r79 = (java.lang.Object[]) $r18;
+
+        $r19 = r5.<com.sun.corba.se.impl.io.IIOPInputStream: com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager activeRecursionMgr>;
+
+        virtualinvoke $r19.<com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager: void addObject(int,java.lang.Object)>(i1, r79);
+
+        i7 = 0;
+
+     label22:
+        if i7 >= $i0 goto label30;
+
+     label23:
+        r80 = staticinvoke <javax.rmi.CORBA.Util: java.lang.Object readAny(org.omg.CORBA.portable.InputStream)>(r0);
+
+     label24:
+        goto label29;
+
+     label25:
+        $r59 := @caughtexception;
+
+     label26:
+        $r60 = r5.<com.sun.corba.se.impl.io.IIOPInputStream: com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager activeRecursionMgr>;
+
+        $i5 = $r59.<org.omg.CORBA.portable.IndirectionException: int offset>;
+
+        r80 = virtualinvoke $r60.<com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager: java.lang.Object getObject(int)>($i5);
+
+     label27:
+        goto label29;
+
+     label28:
+        $r55 := @caughtexception;
+
+        $r57 = r36.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.logging.UtilSystemException utilWrapper>;
+
+        $r56 = new java.lang.Integer;
+
+        $i4 = $r59.<org.omg.CORBA.portable.IndirectionException: int offset>;
+
+        specialinvoke $r56.<java.lang.Integer: void <init>(int)>($i4);
+
+        $r58 = virtualinvoke $r57.<com.sun.corba.se.impl.logging.UtilSystemException: org.omg.CORBA.MARSHAL invalidIndirection(java.lang.Throwable,java.lang.Object)>($r55, $r56);
+
+        throw $r58;
+
+     label29:
+        r79[i7] = r80;
+
+        i7 = i7 + 1;
+
+        goto label22;
+
+     label30:
+        r81 = (java.io.Serializable) r79;
+
+     label31:
+        $r20 = r5.<com.sun.corba.se.impl.io.IIOPInputStream: com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager activeRecursionMgr>;
+
+        virtualinvoke $r20.<com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager: void removeObject(int)>(i1);
+
+        return r81;
+
+     label32:
+        $r3 = staticinvoke <java.lang.reflect.Array: java.lang.Object newInstance(java.lang.Class,int)>($r2, $i0);
+
+        $r4 = (java.lang.Object[]) $r3;
+
+        r82 = (java.lang.Object[]) $r4;
+
+        $r6 = r5.<com.sun.corba.se.impl.io.IIOPInputStream: com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager activeRecursionMgr>;
+
+        virtualinvoke $r6.<com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager: void addObject(int,java.lang.Object)>(i1, r82);
+
+        b8 = 2;
+
+        z6 = 0;
+
+        z9 = 0;
+
+        z8 = 0;
+
+        $z1 = virtualinvoke $r2.<java.lang.Class: boolean isInterface()>();
+
+        if $z1 == 0 goto label41;
+
+        z7 = 0;
+
+        $r13 = class "Ljava/rmi/Remote;";
+
+        $z2 = virtualinvoke $r13.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>($r2);
+
+        if $z2 == 0 goto label33;
+
+        b8 = 0;
+
+        z7 = 1;
+
+        goto label36;
+
+     label33:
+        $r14 = class "Lorg/omg/CORBA/Object;";
+
+        $z3 = virtualinvoke $r14.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>($r2);
+
+        if $z3 == 0 goto label34;
+
+        b8 = 0;
+
+        z7 = 1;
+
+        goto label36;
+
+     label34:
+        $z4 = staticinvoke <com.sun.corba.se.impl.util.RepositoryId: boolean isAbstractBase(java.lang.Class)>($r2);
+
+        if $z4 == 0 goto label35;
+
+        b8 = 1;
+
+        z7 = 1;
+
+        goto label36;
+
+     label35:
+        $z5 = staticinvoke <com.sun.corba.se.impl.io.ObjectStreamClassCorbaExt: boolean isAbstractInterface(java.lang.Class)>($r2);
+
+        if $z5 == 0 goto label36;
+
+        b8 = 1;
+
+     label36:
+        if z7 == 0 goto label40;
+
+     label37:
+        $r15 = staticinvoke <javax.rmi.CORBA.Util: java.lang.String getCodebase(java.lang.Class)>($r2);
+
+        $r16 = staticinvoke <com.sun.corba.se.impl.util.RepositoryId: java.lang.String createForAnyType(java.lang.Class)>($r2);
+
+        r62 = staticinvoke <com.sun.corba.se.impl.util.Utility: java.lang.Class loadStubClass(java.lang.String,java.lang.String,java.lang.Class)>($r16, $r15, $r2);
+
+     label38:
+        goto label41;
+
+     label39:
+        $r54 := @caughtexception;
+
+        z6 = 1;
+
+        z9 = 1;
+
+        z8 = 1;
+
+        goto label41;
+
+     label40:
+        z6 = 1;
+
+        z9 = 1;
+
+        z8 = 1;
+
+     label41:
+        i9 = 0;
+
+     label42:
+        if i9 >= $i0 goto label55;
+
+     label43:
+        tableswitch(b8)
+        {
+            case 0: goto label44;
+            case 1: goto label46;
+            case 2: goto label48;
+            default: goto label49;
+        };
+
+     label44:
+        if z8 != 0 goto label45;
+
+        $r12 = virtualinvoke r0.<org.omg.CORBA_2_3.portable.InputStream: org.omg.CORBA.Object read_Object(java.lang.Class)>(r62);
+
+        r82[i9] = $r12;
+
+        goto label49;
+
+     label45:
+        $r11 = staticinvoke <com.sun.corba.se.impl.util.Utility: java.lang.Object readObjectAndNarrow(org.omg.CORBA.portable.InputStream,java.lang.Class)>(r0, r62);
+
+        r82[i9] = $r11;
+
+        goto label49;
+
+     label46:
+        if z9 != 0 goto label47;
+
+        $r10 = virtualinvoke r0.<org.omg.CORBA_2_3.portable.InputStream: java.lang.Object read_abstract_interface(java.lang.Class)>(r62);
+
+        r82[i9] = $r10;
+
+        goto label49;
+
+     label47:
+        $r9 = staticinvoke <com.sun.corba.se.impl.util.Utility: java.lang.Object readAbstractAndNarrow(org.omg.CORBA_2_3.portable.InputStream,java.lang.Class)>(r0, r62);
+
+        r82[i9] = $r9;
+
+        goto label49;
+
+     label48:
+        $r8 = virtualinvoke r0.<org.omg.CORBA_2_3.portable.InputStream: java.io.Serializable read_value(java.lang.Class)>(r62);
+
+        r82[i9] = $r8;
+
+     label49:
+        goto label54;
+
+     label50:
+        $r51 := @caughtexception;
+
+     label51:
+        $r52 = r5.<com.sun.corba.se.impl.io.IIOPInputStream: com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager activeRecursionMgr>;
+
+        $i3 = $r51.<org.omg.CORBA.portable.IndirectionException: int offset>;
+
+        $r53 = virtualinvoke $r52.<com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager: java.lang.Object getObject(int)>($i3);
+
+        r82[i9] = $r53;
+
+     label52:
+        goto label54;
+
+     label53:
+        $r47 := @caughtexception;
+
+        $r49 = r36.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.logging.UtilSystemException utilWrapper>;
+
+        $r48 = new java.lang.Integer;
+
+        $i2 = $r51.<org.omg.CORBA.portable.IndirectionException: int offset>;
+
+        specialinvoke $r48.<java.lang.Integer: void <init>(int)>($i2);
+
+        $r50 = virtualinvoke $r49.<com.sun.corba.se.impl.logging.UtilSystemException: org.omg.CORBA.MARSHAL invalidIndirection(java.lang.Throwable,java.lang.Object)>($r47, $r48);
+
+        throw $r50;
+
+     label54:
+        i9 = i9 + 1;
+
+        goto label42;
+
+     label55:
+        r83 = (java.io.Serializable) r82;
+
+     label56:
+        $r7 = r5.<com.sun.corba.se.impl.io.IIOPInputStream: com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager activeRecursionMgr>;
+
+        virtualinvoke $r7.<com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager: void removeObject(int)>(i1);
+
+        return r83;
+
+     label57:
+        $r45 := @caughtexception;
+
+     label58:
+        $r46 = r5.<com.sun.corba.se.impl.io.IIOPInputStream: com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager activeRecursionMgr>;
+
+        virtualinvoke $r46.<com.sun.corba.se.impl.io.IIOPInputStream$ActiveRecursionManager: void removeObject(int)>(i1);
+
+        throw $r45;
+
+        catch org.omg.CORBA.portable.IndirectionException from label23 to label24 with label25;
+        catch java.io.IOException from label26 to label27 with label28;
+        catch java.lang.ClassNotFoundException from label37 to label38 with label39;
+        catch org.omg.CORBA.portable.IndirectionException from label43 to label49 with label50;
+        catch java.io.IOException from label51 to label52 with label53;
+        catch java.lang.Throwable from label01 to label03 with label57;
+        catch java.lang.Throwable from label04 to label05 with label57;
+        catch java.lang.Throwable from label06 to label07 with label57;
+        catch java.lang.Throwable from label08 to label09 with label57;
+        catch java.lang.Throwable from label10 to label11 with label57;
+        catch java.lang.Throwable from label12 to label13 with label57;
+        catch java.lang.Throwable from label14 to label15 with label57;
+        catch java.lang.Throwable from label16 to label17 with label57;
+        catch java.lang.Throwable from label18 to label19 with label57;
+        catch java.lang.Throwable from label20 to label31 with label57;
+        catch java.lang.Throwable from label32 to label56 with label57;
+        catch java.lang.Throwable from label57 to label58 with label57;
+    }
+
+    private boolean isArray(java.lang.String)
+    {
+        com.sun.corba.se.impl.io.ValueHandlerImpl r3;
+        java.lang.String r0;
+        com.sun.corba.se.impl.util.RepositoryId $r2;
+        com.sun.corba.se.impl.util.RepositoryIdCache $r1;
+        boolean $z0;
+
+        r3 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = <com.sun.corba.se.impl.util.RepositoryId: com.sun.corba.se.impl.util.RepositoryIdCache cache>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.util.RepositoryIdCache: com.sun.corba.se.impl.util.RepositoryId getId(java.lang.String)>(r0);
+
+        $z0 = virtualinvoke $r2.<com.sun.corba.se.impl.util.RepositoryId: boolean isSequence()>();
+
+        return $z0;
+    }
+
+    private java.lang.String getOutputStreamClassName()
+    {
+        com.sun.corba.se.impl.io.ValueHandlerImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        return "com.sun.corba.se.impl.io.IIOPOutputStream";
+    }
+
+    private com.sun.corba.se.impl.io.IIOPOutputStream createOutputStream()
+    {
+        java.lang.Throwable $r5;
+        com.sun.corba.se.impl.io.ValueHandlerImpl r0;
+        com.sun.corba.se.impl.io.IIOPOutputStream $r2, $r4;
+        java.lang.InternalError $r6;
+        java.lang.Object $r3;
+        java.lang.StringBuilder $r7, $r8, $r9;
+        java.lang.String $r1, $r10;
+
+        r0 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: java.lang.String getOutputStreamClassName()>();
+
+     label1:
+        $r2 = specialinvoke r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPOutputStream createOutputStreamBuiltIn(java.lang.String)>($r1);
+
+        if $r2 == null goto label3;
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 = specialinvoke r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: java.lang.Object createCustom(java.lang.Class,java.lang.String)>(class "Lcom/sun/corba/se/impl/io/IIOPOutputStream;", $r1);
+
+        $r4 = (com.sun.corba.se.impl.io.IIOPOutputStream) $r3;
+
+     label4:
+        return $r4;
+
+     label5:
+        $r5 := @caughtexception;
+
+        $r6 = new java.lang.InternalError;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error loading ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.lang.InternalError: void <init>(java.lang.String)>($r10);
+
+        virtualinvoke $r6.<java.lang.InternalError: java.lang.Throwable initCause(java.lang.Throwable)>($r5);
+
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+
+    private com.sun.corba.se.impl.io.IIOPOutputStream createOutputStreamBuiltIn(java.lang.String) throws java.lang.Throwable
+    {
+        com.sun.corba.se.impl.io.ValueHandlerImpl$2 $r0;
+        com.sun.corba.se.impl.io.IIOPOutputStream $r4;
+        java.lang.Throwable $r6;
+        java.security.PrivilegedActionException $r5;
+        com.sun.corba.se.impl.io.ValueHandlerImpl r1;
+        java.lang.Object $r3;
+        java.lang.String r2;
+
+        r1 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+     label1:
+        $r0 = new com.sun.corba.se.impl.io.ValueHandlerImpl$2;
+
+        specialinvoke $r0.<com.sun.corba.se.impl.io.ValueHandlerImpl$2: void <init>(com.sun.corba.se.impl.io.ValueHandlerImpl,java.lang.String)>(r1, r2);
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r0);
+
+        $r4 = (com.sun.corba.se.impl.io.IIOPOutputStream) $r3;
+
+     label2:
+        return $r4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = virtualinvoke $r5.<java.security.PrivilegedActionException: java.lang.Throwable getCause()>();
+
+        throw $r6;
+
+        catch java.security.PrivilegedActionException from label1 to label2 with label3;
+    }
+
+    private com.sun.corba.se.impl.io.IIOPOutputStream createOutputStreamBuiltInNoPriv(java.lang.String) throws java.io.IOException
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream $r4;
+        com.sun.corba.se.impl.io.ValueHandlerImpl r3;
+        java.lang.Class $r1;
+        java.lang.String r0, $r2;
+        boolean $z0;
+
+        r3 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = class "Lcom/sun/corba/se/impl/io/IIOPOutputStream;";
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.String getName()>();
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        $r4 = new com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        specialinvoke $r4.<com.sun.corba.se.impl.io.IIOPOutputStream: void <init>()>();
+
+        goto label2;
+
+     label1:
+        $r4 = null;
+
+     label2:
+        return $r4;
+    }
+
+    private java.lang.String getInputStreamClassName()
+    {
+        com.sun.corba.se.impl.io.ValueHandlerImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        return "com.sun.corba.se.impl.io.IIOPInputStream";
+    }
+
+    private com.sun.corba.se.impl.io.IIOPInputStream createInputStream()
+    {
+        java.lang.Throwable $r5;
+        com.sun.corba.se.impl.io.ValueHandlerImpl r0;
+        com.sun.corba.se.impl.io.IIOPInputStream $r2, $r4;
+        java.lang.InternalError $r6;
+        java.lang.Object $r3;
+        java.lang.StringBuilder $r7, $r8, $r9;
+        java.lang.String $r1, $r10;
+
+        r0 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: java.lang.String getInputStreamClassName()>();
+
+     label1:
+        $r2 = specialinvoke r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPInputStream createInputStreamBuiltIn(java.lang.String)>($r1);
+
+        if $r2 == null goto label3;
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 = specialinvoke r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: java.lang.Object createCustom(java.lang.Class,java.lang.String)>(class "Lcom/sun/corba/se/impl/io/IIOPInputStream;", $r1);
+
+        $r4 = (com.sun.corba.se.impl.io.IIOPInputStream) $r3;
+
+     label4:
+        return $r4;
+
+     label5:
+        $r5 := @caughtexception;
+
+        $r6 = new java.lang.InternalError;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error loading ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.lang.InternalError: void <init>(java.lang.String)>($r10);
+
+        virtualinvoke $r6.<java.lang.InternalError: java.lang.Throwable initCause(java.lang.Throwable)>($r5);
+
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+
+    private com.sun.corba.se.impl.io.IIOPInputStream createInputStreamBuiltIn(java.lang.String) throws java.lang.Throwable
+    {
+        java.lang.Throwable $r6;
+        com.sun.corba.se.impl.io.IIOPInputStream $r4;
+        java.security.PrivilegedActionException $r5;
+        com.sun.corba.se.impl.io.ValueHandlerImpl$3 $r0;
+        com.sun.corba.se.impl.io.ValueHandlerImpl r1;
+        java.lang.Object $r3;
+        java.lang.String r2;
+
+        r1 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+     label1:
+        $r0 = new com.sun.corba.se.impl.io.ValueHandlerImpl$3;
+
+        specialinvoke $r0.<com.sun.corba.se.impl.io.ValueHandlerImpl$3: void <init>(com.sun.corba.se.impl.io.ValueHandlerImpl,java.lang.String)>(r1, r2);
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r0);
+
+        $r4 = (com.sun.corba.se.impl.io.IIOPInputStream) $r3;
+
+     label2:
+        return $r4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = virtualinvoke $r5.<java.security.PrivilegedActionException: java.lang.Throwable getCause()>();
+
+        throw $r6;
+
+        catch java.security.PrivilegedActionException from label1 to label2 with label3;
+    }
+
+    private com.sun.corba.se.impl.io.IIOPInputStream createInputStreamBuiltInNoPriv(java.lang.String) throws java.io.IOException
+    {
+        com.sun.corba.se.impl.io.IIOPInputStream $r4;
+        com.sun.corba.se.impl.io.ValueHandlerImpl r3;
+        java.lang.Class $r1;
+        java.lang.String r0, $r2;
+        boolean $z0;
+
+        r3 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = class "Lcom/sun/corba/se/impl/io/IIOPInputStream;";
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.String getName()>();
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        $r4 = new com.sun.corba.se.impl.io.IIOPInputStream;
+
+        specialinvoke $r4.<com.sun.corba.se.impl.io.IIOPInputStream: void <init>()>();
+
+        goto label2;
+
+     label1:
+        $r4 = null;
+
+     label2:
+        return $r4;
+    }
+
+    private java.lang.Object createCustom(java.lang.Class, java.lang.String) throws java.lang.Throwable
+    {
+        com.sun.corba.se.impl.io.ValueHandlerImpl r7;
+        java.lang.Thread $r0;
+        java.lang.Class $r3, r4, $r5;
+        java.lang.Object $r6;
+        java.lang.ClassLoader $r1, r8;
+        java.lang.String r2;
+
+        r7 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r4 := @parameter0: java.lang.Class;
+
+        r2 := @parameter1: java.lang.String;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.Thread: java.lang.ClassLoader getContextClassLoader()>();
+
+        r8 = $r1;
+
+        if $r1 != null goto label1;
+
+        r8 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getSystemClassLoader()>();
+
+     label1:
+        $r3 = virtualinvoke r8.<java.lang.ClassLoader: java.lang.Class loadClass(java.lang.String)>(r2);
+
+        $r5 = virtualinvoke $r3.<java.lang.Class: java.lang.Class asSubclass(java.lang.Class)>(r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.Class: java.lang.Object newInstance()>();
+
+        return $r6;
+    }
+
+    org.omg.CORBA.TCKind getJavaCharTCKind()
+    {
+        org.omg.CORBA.TCKind $r0;
+        com.sun.corba.se.impl.io.ValueHandlerImpl r1;
+
+        r1 := @this: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        $r0 = <org.omg.CORBA.TCKind: org.omg.CORBA.TCKind tk_wchar>;
+
+        return $r0;
+    }
+
+    static com.sun.corba.se.impl.io.IIOPOutputStream access$000(com.sun.corba.se.impl.io.ValueHandlerImpl, java.lang.String) throws java.io.IOException
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream $r2;
+        java.lang.String r1;
+        com.sun.corba.se.impl.io.ValueHandlerImpl r0;
+
+        r0 := @parameter0: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r1 := @parameter1: java.lang.String;
+
+        $r2 = specialinvoke r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPOutputStream createOutputStreamBuiltInNoPriv(java.lang.String)>(r1);
+
+        return $r2;
+    }
+
+    static com.sun.corba.se.impl.io.IIOPInputStream access$100(com.sun.corba.se.impl.io.ValueHandlerImpl, java.lang.String) throws java.io.IOException
+    {
+        com.sun.corba.se.impl.io.IIOPInputStream $r2;
+        java.lang.String r1;
+        com.sun.corba.se.impl.io.ValueHandlerImpl r0;
+
+        r0 := @parameter0: com.sun.corba.se.impl.io.ValueHandlerImpl;
+
+        r1 := @parameter1: java.lang.String;
+
+        $r2 = specialinvoke r0.<com.sun.corba.se.impl.io.ValueHandlerImpl: com.sun.corba.se.impl.io.IIOPInputStream createInputStreamBuiltInNoPriv(java.lang.String)>(r1);
+
+        return $r2;
+    }
+
+    static void <clinit>()
+    {
+        byte $b0;
+
+        <com.sun.corba.se.impl.io.ValueHandlerImpl: short kValueType> = 2;
+
+        <com.sun.corba.se.impl.io.ValueHandlerImpl: short kAbstractType> = 1;
+
+        <com.sun.corba.se.impl.io.ValueHandlerImpl: short kRemoteType> = 0;
+
+        <com.sun.corba.se.impl.io.ValueHandlerImpl: byte STREAM_FORMAT_VERSION_1> = 1;
+
+        <com.sun.corba.se.impl.io.ValueHandlerImpl: byte MAX_SUPPORTED_FORMAT_VERSION> = 2;
+
+        <com.sun.corba.se.impl.io.ValueHandlerImpl: java.lang.String FORMAT_VERSION_PROPERTY> = "com.sun.CORBA.MaxStreamFormatVersion";
+
+        $b0 = staticinvoke <com.sun.corba.se.impl.io.ValueHandlerImpl: byte getMaxStreamFormatVersion()>();
+
+        <com.sun.corba.se.impl.io.ValueHandlerImpl: byte MAX_STREAM_FORMAT_VERSION> = $b0;
+
+        return;
+    }
+}

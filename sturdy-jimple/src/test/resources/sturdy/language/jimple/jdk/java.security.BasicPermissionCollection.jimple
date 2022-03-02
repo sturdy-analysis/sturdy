@@ -1,0 +1,517 @@
+final class java.security.BasicPermissionCollection extends java.security.PermissionCollection implements java.io.Serializable
+{
+    private static final long serialVersionUID;
+    private transient java.util.Map perms;
+    private boolean all_allowed;
+    private java.lang.Class permClass;
+    private static final java.io.ObjectStreamField[] serialPersistentFields;
+
+    public void <init>(java.lang.Class)
+    {
+        java.util.HashMap $r1;
+        java.lang.Class r2;
+        java.security.BasicPermissionCollection r0;
+
+        r0 := @this: java.security.BasicPermissionCollection;
+
+        r2 := @parameter0: java.lang.Class;
+
+        specialinvoke r0.<java.security.PermissionCollection: void <init>()>();
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>(int)>(11);
+
+        r0.<java.security.BasicPermissionCollection: java.util.Map perms> = $r1;
+
+        r0.<java.security.BasicPermissionCollection: boolean all_allowed> = 0;
+
+        r0.<java.security.BasicPermissionCollection: java.lang.Class permClass> = r2;
+
+        return;
+    }
+
+    public void add(java.security.Permission)
+    {
+        java.lang.Throwable $r21;
+        java.security.BasicPermission r2;
+        java.util.Map $r6;
+        java.lang.SecurityException $r15;
+        java.lang.String $r7, $r8, $r13, $r20;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.IllegalArgumentException $r9, $r16;
+        java.security.Permission r0;
+        java.lang.Class $r3, $r4, $r5, $r14;
+        java.lang.StringBuilder $r10, $r11, $r12, $r17, $r18, $r19;
+        java.security.BasicPermissionCollection r1;
+
+        r1 := @this: java.security.BasicPermissionCollection;
+
+        r0 := @parameter0: java.security.Permission;
+
+        $z0 = r0 instanceof java.security.BasicPermission;
+
+        if $z0 != 0 goto label01;
+
+        $r16 = new java.lang.IllegalArgumentException;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("invalid permission: ");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r16.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r20);
+
+        throw $r16;
+
+     label01:
+        $z1 = virtualinvoke r1.<java.security.BasicPermissionCollection: boolean isReadOnly()>();
+
+        if $z1 == 0 goto label02;
+
+        $r15 = new java.lang.SecurityException;
+
+        specialinvoke $r15.<java.lang.SecurityException: void <init>(java.lang.String)>("attempt to add a Permission to a readonly PermissionCollection");
+
+        throw $r15;
+
+     label02:
+        r2 = (java.security.BasicPermission) r0;
+
+        $r3 = r1.<java.security.BasicPermissionCollection: java.lang.Class permClass>;
+
+        if $r3 != null goto label03;
+
+        $r14 = virtualinvoke r2.<java.lang.Object: java.lang.Class getClass()>();
+
+        r1.<java.security.BasicPermissionCollection: java.lang.Class permClass> = $r14;
+
+        goto label04;
+
+     label03:
+        $r4 = virtualinvoke r2.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r5 = r1.<java.security.BasicPermissionCollection: java.lang.Class permClass>;
+
+        if $r4 == $r5 goto label04;
+
+        $r9 = new java.lang.IllegalArgumentException;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("invalid permission: ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r13);
+
+        throw $r9;
+
+     label04:
+        entermonitor r1;
+
+     label05:
+        $r6 = r1.<java.security.BasicPermissionCollection: java.util.Map perms>;
+
+        $r7 = virtualinvoke r2.<java.security.BasicPermission: java.lang.String getCanonicalName()>();
+
+        interfaceinvoke $r6.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r7, r0);
+
+        exitmonitor r1;
+
+     label06:
+        goto label09;
+
+     label07:
+        $r21 := @caughtexception;
+
+        exitmonitor r1;
+
+     label08:
+        throw $r21;
+
+     label09:
+        $z2 = r1.<java.security.BasicPermissionCollection: boolean all_allowed>;
+
+        if $z2 != 0 goto label10;
+
+        $r8 = virtualinvoke r2.<java.security.BasicPermission: java.lang.String getCanonicalName()>();
+
+        $z3 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>("*");
+
+        if $z3 == 0 goto label10;
+
+        r1.<java.security.BasicPermissionCollection: boolean all_allowed> = 1;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label05 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+    }
+
+    public boolean implies(java.security.Permission)
+    {
+        java.lang.Throwable $r15, $r16;
+        java.security.BasicPermission r1;
+        java.util.Map $r6, $r13;
+        int $i0, $i1, $i2, i3, $i5;
+        java.lang.String $r5, $r9, $r12, r17;
+        boolean $z0, $z1, $z2, $z3;
+        java.security.Permission r0, r18, r19;
+        java.lang.Class $r2, $r4;
+        java.lang.Object $r7, $r14;
+        java.lang.StringBuilder $r10, $r11, $r20;
+        java.security.BasicPermissionCollection r3;
+
+        r3 := @this: java.security.BasicPermissionCollection;
+
+        r0 := @parameter0: java.security.Permission;
+
+        $z0 = r0 instanceof java.security.BasicPermission;
+
+        if $z0 != 0 goto label01;
+
+        return 0;
+
+     label01:
+        r1 = (java.security.BasicPermission) r0;
+
+        $r2 = virtualinvoke r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r4 = r3.<java.security.BasicPermissionCollection: java.lang.Class permClass>;
+
+        if $r2 == $r4 goto label02;
+
+        return 0;
+
+     label02:
+        $z1 = r3.<java.security.BasicPermissionCollection: boolean all_allowed>;
+
+        if $z1 == 0 goto label03;
+
+        return 1;
+
+     label03:
+        $r5 = virtualinvoke r1.<java.security.BasicPermission: java.lang.String getCanonicalName()>();
+
+        r17 = $r5;
+
+        entermonitor r3;
+
+     label04:
+        $r6 = r3.<java.security.BasicPermissionCollection: java.util.Map perms>;
+
+        $r7 = interfaceinvoke $r6.<java.util.Map: java.lang.Object get(java.lang.Object)>($r5);
+
+        r18 = (java.security.Permission) $r7;
+
+        exitmonitor r3;
+
+     label05:
+        goto label08;
+
+     label06:
+        $r16 := @caughtexception;
+
+        exitmonitor r3;
+
+     label07:
+        throw $r16;
+
+     label08:
+        if r18 == null goto label09;
+
+        $z3 = virtualinvoke r18.<java.security.Permission: boolean implies(java.security.Permission)>(r0);
+
+        return $z3;
+
+     label09:
+        $i0 = virtualinvoke $r5.<java.lang.String: int length()>();
+
+        i3 = $i0 - 1;
+
+     label10:
+        $i1 = virtualinvoke r17.<java.lang.String: int lastIndexOf(java.lang.String,int)>(".", i3);
+
+        $i5 = (int) -1;
+
+        if $i1 == $i5 goto label17;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $i2 = $i1 + 1;
+
+        $r9 = virtualinvoke r17.<java.lang.String: java.lang.String substring(int,int)>(0, $i2);
+
+        $r10 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("*");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r17 = $r12;
+
+        entermonitor r3;
+
+     label11:
+        $r13 = r3.<java.security.BasicPermissionCollection: java.util.Map perms>;
+
+        $r14 = interfaceinvoke $r13.<java.util.Map: java.lang.Object get(java.lang.Object)>($r12);
+
+        r19 = (java.security.Permission) $r14;
+
+        exitmonitor r3;
+
+     label12:
+        goto label15;
+
+     label13:
+        $r15 := @caughtexception;
+
+        exitmonitor r3;
+
+     label14:
+        throw $r15;
+
+     label15:
+        if r19 == null goto label16;
+
+        $z2 = virtualinvoke r19.<java.security.Permission: boolean implies(java.security.Permission)>(r0);
+
+        return $z2;
+
+     label16:
+        i3 = $i1 - 1;
+
+        goto label10;
+
+     label17:
+        return 0;
+
+        catch java.lang.Throwable from label04 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+        catch java.lang.Throwable from label11 to label12 with label13;
+        catch java.lang.Throwable from label13 to label14 with label13;
+    }
+
+    public java.util.Enumeration elements()
+    {
+        java.lang.Throwable $r4;
+        java.util.Enumeration $r3;
+        java.util.Map $r1;
+        java.util.Collection $r2;
+        java.security.BasicPermissionCollection r0;
+
+        r0 := @this: java.security.BasicPermissionCollection;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = r0.<java.security.BasicPermissionCollection: java.util.Map perms>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.util.Collection values()>();
+
+        $r3 = staticinvoke <java.util.Collections: java.util.Enumeration enumeration(java.util.Collection)>($r2);
+
+        exitmonitor r0;
+
+     label2:
+        return $r3;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private void writeObject(java.io.ObjectOutputStream) throws java.io.IOException
+    {
+        java.lang.Throwable $r7;
+        java.io.ObjectOutputStream$PutField $r5;
+        java.util.Map $r2, $r3;
+        int $i0, $i1;
+        java.io.ObjectOutputStream r4;
+        java.lang.Class $r6;
+        java.security.BasicPermissionCollection r1;
+        java.util.Hashtable $r0;
+        boolean $z0;
+
+        r1 := @this: java.security.BasicPermissionCollection;
+
+        r4 := @parameter0: java.io.ObjectOutputStream;
+
+        $r0 = new java.util.Hashtable;
+
+        $r2 = r1.<java.security.BasicPermissionCollection: java.util.Map perms>;
+
+        $i0 = interfaceinvoke $r2.<java.util.Map: int size()>();
+
+        $i1 = $i0 * 2;
+
+        specialinvoke $r0.<java.util.Hashtable: void <init>(int)>($i1);
+
+        entermonitor r1;
+
+     label1:
+        $r3 = r1.<java.security.BasicPermissionCollection: java.util.Map perms>;
+
+        virtualinvoke $r0.<java.util.Hashtable: void putAll(java.util.Map)>($r3);
+
+        exitmonitor r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r7 := @caughtexception;
+
+        exitmonitor r1;
+
+     label4:
+        throw $r7;
+
+     label5:
+        $r5 = virtualinvoke r4.<java.io.ObjectOutputStream: java.io.ObjectOutputStream$PutField putFields()>();
+
+        $z0 = r1.<java.security.BasicPermissionCollection: boolean all_allowed>;
+
+        virtualinvoke $r5.<java.io.ObjectOutputStream$PutField: void put(java.lang.String,boolean)>("all_allowed", $z0);
+
+        virtualinvoke $r5.<java.io.ObjectOutputStream$PutField: void put(java.lang.String,java.lang.Object)>("permissions", $r0);
+
+        $r6 = r1.<java.security.BasicPermissionCollection: java.lang.Class permClass>;
+
+        virtualinvoke $r5.<java.io.ObjectOutputStream$PutField: void put(java.lang.String,java.lang.Object)>("permClass", $r6);
+
+        virtualinvoke r4.<java.io.ObjectOutputStream: void writeFields()>();
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.util.Enumeration $r10;
+        java.io.ObjectInputStream r0;
+        java.util.HashMap $r5;
+        java.util.Map $r6;
+        int $i0, $i1;
+        java.util.Hashtable r3;
+        boolean $z0, $z1;
+        java.security.Permission r12;
+        java.io.ObjectInputStream$GetField $r1;
+        java.lang.Object $r2, $r7, $r11;
+        java.lang.Class $r8, $r9, $r13;
+        java.security.BasicPermissionCollection r4;
+
+        r4 := @this: java.security.BasicPermissionCollection;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        $r1 = virtualinvoke r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$GetField readFields()>();
+
+        $r2 = virtualinvoke $r1.<java.io.ObjectInputStream$GetField: java.lang.Object get(java.lang.String,java.lang.Object)>("permissions", null);
+
+        r3 = (java.util.Hashtable) $r2;
+
+        $r5 = new java.util.HashMap;
+
+        $i0 = virtualinvoke r3.<java.util.Hashtable: int size()>();
+
+        $i1 = $i0 * 2;
+
+        specialinvoke $r5.<java.util.HashMap: void <init>(int)>($i1);
+
+        r4.<java.security.BasicPermissionCollection: java.util.Map perms> = $r5;
+
+        $r6 = r4.<java.security.BasicPermissionCollection: java.util.Map perms>;
+
+        interfaceinvoke $r6.<java.util.Map: void putAll(java.util.Map)>(r3);
+
+        $z0 = virtualinvoke $r1.<java.io.ObjectInputStream$GetField: boolean get(java.lang.String,boolean)>("all_allowed", 0);
+
+        r4.<java.security.BasicPermissionCollection: boolean all_allowed> = $z0;
+
+        $r7 = virtualinvoke $r1.<java.io.ObjectInputStream$GetField: java.lang.Object get(java.lang.String,java.lang.Object)>("permClass", null);
+
+        $r8 = (java.lang.Class) $r7;
+
+        r4.<java.security.BasicPermissionCollection: java.lang.Class permClass> = $r8;
+
+        $r9 = r4.<java.security.BasicPermissionCollection: java.lang.Class permClass>;
+
+        if $r9 != null goto label1;
+
+        $r10 = virtualinvoke r3.<java.util.Hashtable: java.util.Enumeration elements()>();
+
+        $z1 = interfaceinvoke $r10.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z1 == 0 goto label1;
+
+        $r11 = interfaceinvoke $r10.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r12 = (java.security.Permission) $r11;
+
+        $r13 = virtualinvoke r12.<java.lang.Object: java.lang.Class getClass()>();
+
+        r4.<java.security.BasicPermissionCollection: java.lang.Class permClass> = $r13;
+
+     label1:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r3;
+        java.io.ObjectStreamField[] $r0;
+        java.io.ObjectStreamField $r1, $r2, $r4;
+
+        <java.security.BasicPermissionCollection: long serialVersionUID> = 739301742472979399L;
+
+        $r0 = newarray (java.io.ObjectStreamField)[3];
+
+        $r1 = new java.io.ObjectStreamField;
+
+        specialinvoke $r1.<java.io.ObjectStreamField: void <init>(java.lang.String,java.lang.Class)>("permissions", class "Ljava/util/Hashtable;");
+
+        $r0[0] = $r1;
+
+        $r2 = new java.io.ObjectStreamField;
+
+        $r3 = <java.lang.Boolean: java.lang.Class TYPE>;
+
+        specialinvoke $r2.<java.io.ObjectStreamField: void <init>(java.lang.String,java.lang.Class)>("all_allowed", $r3);
+
+        $r0[1] = $r2;
+
+        $r4 = new java.io.ObjectStreamField;
+
+        specialinvoke $r4.<java.io.ObjectStreamField: void <init>(java.lang.String,java.lang.Class)>("permClass", class "Ljava/lang/Class;");
+
+        $r0[2] = $r4;
+
+        <java.security.BasicPermissionCollection: java.io.ObjectStreamField[] serialPersistentFields> = $r0;
+
+        return;
+    }
+}

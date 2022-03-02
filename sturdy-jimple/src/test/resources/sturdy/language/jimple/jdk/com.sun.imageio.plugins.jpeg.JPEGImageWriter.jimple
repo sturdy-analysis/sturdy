@@ -1,0 +1,4550 @@
+public class com.sun.imageio.plugins.jpeg.JPEGImageWriter extends javax.imageio.ImageWriter
+{
+    private boolean debug;
+    private long structPointer;
+    private javax.imageio.stream.ImageOutputStream ios;
+    private java.awt.image.Raster srcRas;
+    private java.awt.image.WritableRaster raster;
+    private boolean indexed;
+    private java.awt.image.IndexColorModel indexCM;
+    private boolean convertTosRGB;
+    private java.awt.image.WritableRaster converted;
+    private boolean isAlphaPremultiplied;
+    private java.awt.image.ColorModel srcCM;
+    private java.util.List thumbnails;
+    private java.awt.color.ICC_Profile iccProfile;
+    private int sourceXOffset;
+    private int sourceYOffset;
+    private int sourceWidth;
+    private int[] srcBands;
+    private int sourceHeight;
+    private int currentImage;
+    private java.awt.image.ColorConvertOp convertOp;
+    private javax.imageio.plugins.jpeg.JPEGQTable[] streamQTables;
+    private javax.imageio.plugins.jpeg.JPEGHuffmanTable[] streamDCHuffmanTables;
+    private javax.imageio.plugins.jpeg.JPEGHuffmanTable[] streamACHuffmanTables;
+    private boolean ignoreJFIF;
+    private boolean forceJFIF;
+    private boolean ignoreAdobe;
+    private int newAdobeTransform;
+    private boolean writeDefaultJFIF;
+    private boolean writeAdobe;
+    private com.sun.imageio.plugins.jpeg.JPEGMetadata metadata;
+    private boolean sequencePrepared;
+    private int numScans;
+    private java.lang.Object disposerReferent;
+    private sun.java2d.DisposerRecord disposerRecord;
+    protected static final int WARNING_DEST_IGNORED;
+    protected static final int WARNING_STREAM_METADATA_IGNORED;
+    protected static final int WARNING_DEST_METADATA_COMP_MISMATCH;
+    protected static final int WARNING_DEST_METADATA_JFIF_MISMATCH;
+    protected static final int WARNING_DEST_METADATA_ADOBE_MISMATCH;
+    protected static final int WARNING_IMAGE_METADATA_JFIF_MISMATCH;
+    protected static final int WARNING_IMAGE_METADATA_ADOBE_MISMATCH;
+    protected static final int WARNING_METADATA_NOT_JPEG_FOR_RASTER;
+    protected static final int WARNING_NO_BANDS_ON_INDEXED;
+    protected static final int WARNING_ILLEGAL_THUMBNAIL;
+    protected static final int WARNING_IGNORING_THUMBS;
+    protected static final int WARNING_FORCING_JFIF;
+    protected static final int WARNING_THUMB_CLIPPED;
+    protected static final int WARNING_METADATA_ADJUSTED_FOR_THUMB;
+    protected static final int WARNING_NO_RGB_THUMB_AS_INDEXED;
+    protected static final int WARNING_NO_GRAY_THUMB_AS_INDEXED;
+    private static final int MAX_WARNING;
+    static final java.awt.Dimension[] preferredThumbSizes;
+    private java.lang.Thread theThread;
+    private int theLockCount;
+    private com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock;
+
+    public void <init>(javax.imageio.spi.ImageWriterSpi)
+    {
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock $r8;
+        long $l0, $l1;
+        sun.java2d.DisposerRecord $r5;
+        int $i3;
+        javax.imageio.spi.ImageWriterSpi r1;
+        java.lang.Object $r6, $r7;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter$JPEGWriterDisposerRecord $r9;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r1 := @parameter0: javax.imageio.spi.ImageWriterSpi;
+
+        specialinvoke r0.<javax.imageio.ImageWriter: void <init>(javax.imageio.spi.ImageWriterSpi)>(r1);
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean debug> = 0;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: long structPointer> = 0L;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.stream.ImageOutputStream ios> = null;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.Raster srcRas> = null;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.WritableRaster raster> = null;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean indexed> = 0;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.IndexColorModel indexCM> = null;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean convertTosRGB> = 0;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.WritableRaster converted> = null;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean isAlphaPremultiplied> = 0;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.ColorModel srcCM> = null;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.util.List thumbnails> = null;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.color.ICC_Profile iccProfile> = null;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceXOffset> = 0;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceYOffset> = 0;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceWidth> = 0;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int[] srcBands> = null;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceHeight> = 0;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int currentImage> = 0;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.ColorConvertOp convertOp> = null;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGQTable[] streamQTables> = null;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGHuffmanTable[] streamDCHuffmanTables> = null;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGHuffmanTable[] streamACHuffmanTables> = null;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean ignoreJFIF> = 0;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean forceJFIF> = 0;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean ignoreAdobe> = 0;
+
+        $i3 = (int) -1;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int newAdobeTransform> = $i3;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean writeDefaultJFIF> = 0;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean writeAdobe> = 0;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata> = null;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean sequencePrepared> = 0;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int numScans> = 0;
+
+        $r7 = new java.lang.Object;
+
+        specialinvoke $r7.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.lang.Object disposerReferent> = $r7;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.lang.Thread theThread> = null;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int theLockCount> = 0;
+
+        $r8 = new com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock;
+
+        specialinvoke $r8.<com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void <init>()>();
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock> = $r8;
+
+        $l0 = specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: long initJPEGImageWriter()>();
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: long structPointer> = $l0;
+
+        $r9 = new com.sun.imageio.plugins.jpeg.JPEGImageWriter$JPEGWriterDisposerRecord;
+
+        $l1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: long structPointer>;
+
+        specialinvoke $r9.<com.sun.imageio.plugins.jpeg.JPEGImageWriter$JPEGWriterDisposerRecord: void <init>(long)>($l1);
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: sun.java2d.DisposerRecord disposerRecord> = $r9;
+
+        $r6 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.lang.Object disposerReferent>;
+
+        $r5 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: sun.java2d.DisposerRecord disposerRecord>;
+
+        staticinvoke <sun.java2d.Disposer: void addRecord(java.lang.Object,sun.java2d.DisposerRecord)>($r6, $r5);
+
+        return;
+    }
+
+    public void setOutput(java.lang.Object)
+    {
+        java.lang.Throwable $r4;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock $r1;
+        java.lang.Object r2;
+        long $l0;
+        javax.imageio.stream.ImageOutputStream $r3;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r2 := @parameter0: java.lang.Object;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void setThreadLock()>();
+
+     label1:
+        $r1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        virtualinvoke $r1.<com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void check()>();
+
+        specialinvoke r0.<javax.imageio.ImageWriter: void setOutput(java.lang.Object)>(r2);
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void resetInternalState()>();
+
+        $r3 = (javax.imageio.stream.ImageOutputStream) r2;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.stream.ImageOutputStream ios> = $r3;
+
+        $l0 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: long structPointer>;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void setDest(long)>($l0);
+
+     label2:
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void clearThreadLock()>();
+
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void clearThreadLock()>();
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public javax.imageio.ImageWriteParam getDefaultWriteParam()
+    {
+        javax.imageio.plugins.jpeg.JPEGImageWriteParam $r0;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r1;
+
+        r1 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        $r0 = new javax.imageio.plugins.jpeg.JPEGImageWriteParam;
+
+        specialinvoke $r0.<javax.imageio.plugins.jpeg.JPEGImageWriteParam: void <init>(java.util.Locale)>(null);
+
+        return $r0;
+    }
+
+    public javax.imageio.metadata.IIOMetadata getDefaultStreamMetadata(javax.imageio.ImageWriteParam)
+    {
+        java.lang.Throwable $r3;
+        javax.imageio.ImageWriteParam r2;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        com.sun.imageio.plugins.jpeg.JPEGMetadata $r1;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r2 := @parameter0: javax.imageio.ImageWriteParam;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void setThreadLock()>();
+
+     label1:
+        $r1 = new com.sun.imageio.plugins.jpeg.JPEGMetadata;
+
+        specialinvoke $r1.<com.sun.imageio.plugins.jpeg.JPEGMetadata: void <init>(javax.imageio.ImageWriteParam,com.sun.imageio.plugins.jpeg.JPEGImageWriter)>(r2, r0);
+
+     label2:
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void clearThreadLock()>();
+
+        return $r1;
+
+     label3:
+        $r3 := @caughtexception;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void clearThreadLock()>();
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public javax.imageio.metadata.IIOMetadata getDefaultImageMetadata(javax.imageio.ImageTypeSpecifier, javax.imageio.ImageWriteParam)
+    {
+        java.lang.Throwable $r4;
+        javax.imageio.ImageWriteParam r3;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        javax.imageio.ImageTypeSpecifier r2;
+        com.sun.imageio.plugins.jpeg.JPEGMetadata $r1;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r2 := @parameter0: javax.imageio.ImageTypeSpecifier;
+
+        r3 := @parameter1: javax.imageio.ImageWriteParam;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void setThreadLock()>();
+
+     label1:
+        $r1 = new com.sun.imageio.plugins.jpeg.JPEGMetadata;
+
+        specialinvoke $r1.<com.sun.imageio.plugins.jpeg.JPEGMetadata: void <init>(javax.imageio.ImageTypeSpecifier,javax.imageio.ImageWriteParam,com.sun.imageio.plugins.jpeg.JPEGImageWriter)>(r2, r3, r0);
+
+     label2:
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void clearThreadLock()>();
+
+        return $r1;
+
+     label3:
+        $r4 := @caughtexception;
+
+     label4:
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void clearThreadLock()>();
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public javax.imageio.metadata.IIOMetadata convertStreamMetadata(javax.imageio.metadata.IIOMetadata, javax.imageio.ImageWriteParam)
+    {
+        javax.imageio.ImageWriteParam r3;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r2;
+        javax.imageio.metadata.IIOMetadata r0;
+        com.sun.imageio.plugins.jpeg.JPEGMetadata r1;
+        boolean $z0, $z1;
+
+        r2 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r0 := @parameter0: javax.imageio.metadata.IIOMetadata;
+
+        r3 := @parameter1: javax.imageio.ImageWriteParam;
+
+        $z0 = r0 instanceof com.sun.imageio.plugins.jpeg.JPEGMetadata;
+
+        if $z0 == 0 goto label1;
+
+        r1 = (com.sun.imageio.plugins.jpeg.JPEGMetadata) r0;
+
+        $z1 = r1.<com.sun.imageio.plugins.jpeg.JPEGMetadata: boolean isStream>;
+
+        if $z1 == 0 goto label1;
+
+        return r0;
+
+     label1:
+        return null;
+    }
+
+    public javax.imageio.metadata.IIOMetadata convertImageMetadata(javax.imageio.metadata.IIOMetadata, javax.imageio.ImageTypeSpecifier, javax.imageio.ImageWriteParam)
+    {
+        java.lang.Throwable $r5;
+        javax.imageio.ImageWriteParam r3;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        javax.imageio.metadata.IIOMetadata r1, $r4;
+        javax.imageio.ImageTypeSpecifier r2;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r1 := @parameter0: javax.imageio.metadata.IIOMetadata;
+
+        r2 := @parameter1: javax.imageio.ImageTypeSpecifier;
+
+        r3 := @parameter2: javax.imageio.ImageWriteParam;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void setThreadLock()>();
+
+     label1:
+        $r4 = specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.metadata.IIOMetadata convertImageMetadataOnThread(javax.imageio.metadata.IIOMetadata,javax.imageio.ImageTypeSpecifier,javax.imageio.ImageWriteParam)>(r1, r2, r3);
+
+     label2:
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void clearThreadLock()>();
+
+        return $r4;
+
+     label3:
+        $r5 := @caughtexception;
+
+     label4:
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void clearThreadLock()>();
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private javax.imageio.metadata.IIOMetadata convertImageMetadataOnThread(javax.imageio.metadata.IIOMetadata, javax.imageio.ImageTypeSpecifier, javax.imageio.ImageWriteParam)
+    {
+        javax.imageio.metadata.IIOInvalidTreeException $r6;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r5;
+        javax.imageio.metadata.IIOMetadata r0;
+        javax.imageio.ImageTypeSpecifier r3;
+        com.sun.imageio.plugins.jpeg.JPEGMetadata $r2, r7;
+        javax.imageio.ImageWriteParam r4;
+        org.w3c.dom.Node $r1;
+        boolean $z0, $z1, $z2;
+
+        r5 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r0 := @parameter0: javax.imageio.metadata.IIOMetadata;
+
+        r3 := @parameter1: javax.imageio.ImageTypeSpecifier;
+
+        r4 := @parameter2: javax.imageio.ImageWriteParam;
+
+        $z0 = r0 instanceof com.sun.imageio.plugins.jpeg.JPEGMetadata;
+
+        if $z0 == 0 goto label2;
+
+        r7 = (com.sun.imageio.plugins.jpeg.JPEGMetadata) r0;
+
+        $z2 = r7.<com.sun.imageio.plugins.jpeg.JPEGMetadata: boolean isStream>;
+
+        if $z2 != 0 goto label1;
+
+        return r0;
+
+     label1:
+        return null;
+
+     label2:
+        $z1 = virtualinvoke r0.<javax.imageio.metadata.IIOMetadata: boolean isStandardMetadataFormatSupported()>();
+
+        if $z1 == 0 goto label7;
+
+        $r1 = virtualinvoke r0.<javax.imageio.metadata.IIOMetadata: org.w3c.dom.Node getAsTree(java.lang.String)>("javax_imageio_1.0");
+
+        if $r1 == null goto label7;
+
+        $r2 = new com.sun.imageio.plugins.jpeg.JPEGMetadata;
+
+        specialinvoke $r2.<com.sun.imageio.plugins.jpeg.JPEGMetadata: void <init>(javax.imageio.ImageTypeSpecifier,javax.imageio.ImageWriteParam,com.sun.imageio.plugins.jpeg.JPEGImageWriter)>(r3, r4, r5);
+
+     label3:
+        virtualinvoke $r2.<com.sun.imageio.plugins.jpeg.JPEGMetadata: void setFromTree(java.lang.String,org.w3c.dom.Node)>("javax_imageio_1.0", $r1);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r6 := @caughtexception;
+
+        return null;
+
+     label6:
+        return $r2;
+
+     label7:
+        return null;
+
+        catch javax.imageio.metadata.IIOInvalidTreeException from label3 to label4 with label5;
+    }
+
+    public int getNumThumbnailsSupported(javax.imageio.ImageTypeSpecifier, javax.imageio.ImageWriteParam, javax.imageio.metadata.IIOMetadata, javax.imageio.metadata.IIOMetadata)
+    {
+        javax.imageio.ImageWriteParam r2;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        javax.imageio.metadata.IIOMetadata r3, r4;
+        javax.imageio.ImageTypeSpecifier r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r1 := @parameter0: javax.imageio.ImageTypeSpecifier;
+
+        r2 := @parameter1: javax.imageio.ImageWriteParam;
+
+        r3 := @parameter2: javax.imageio.metadata.IIOMetadata;
+
+        r4 := @parameter3: javax.imageio.metadata.IIOMetadata;
+
+        $z0 = specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean jfifOK(javax.imageio.ImageTypeSpecifier,javax.imageio.ImageWriteParam,javax.imageio.metadata.IIOMetadata,javax.imageio.metadata.IIOMetadata)>(r1, r2, r3, r4);
+
+        if $z0 == 0 goto label1;
+
+        return 2147483647;
+
+     label1:
+        return 0;
+    }
+
+    public java.awt.Dimension[] getPreferredThumbnailSizes(javax.imageio.ImageTypeSpecifier, javax.imageio.ImageWriteParam, javax.imageio.metadata.IIOMetadata, javax.imageio.metadata.IIOMetadata)
+    {
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        javax.imageio.metadata.IIOMetadata r3, r4;
+        javax.imageio.ImageTypeSpecifier r1;
+        java.awt.Dimension[] $r5, $r7, $r8;
+        javax.imageio.ImageWriteParam r2;
+        java.lang.Object $r6;
+        boolean $z0;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r1 := @parameter0: javax.imageio.ImageTypeSpecifier;
+
+        r2 := @parameter1: javax.imageio.ImageWriteParam;
+
+        r3 := @parameter2: javax.imageio.metadata.IIOMetadata;
+
+        r4 := @parameter3: javax.imageio.metadata.IIOMetadata;
+
+        $z0 = specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean jfifOK(javax.imageio.ImageTypeSpecifier,javax.imageio.ImageWriteParam,javax.imageio.metadata.IIOMetadata,javax.imageio.metadata.IIOMetadata)>(r1, r2, r3, r4);
+
+        if $z0 == 0 goto label1;
+
+        $r5 = <com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.Dimension[] preferredThumbSizes>;
+
+        $r6 = virtualinvoke $r5.<java.lang.Object: java.lang.Object clone()>();
+
+        $r7 = (java.awt.Dimension[]) $r6;
+
+        $r8 = (java.awt.Dimension[]) $r7;
+
+        return $r8;
+
+     label1:
+        return null;
+    }
+
+    private boolean jfifOK(javax.imageio.ImageTypeSpecifier, javax.imageio.ImageWriteParam, javax.imageio.metadata.IIOMetadata, javax.imageio.metadata.IIOMetadata)
+    {
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r2;
+        javax.imageio.metadata.IIOMetadata r1, $r4, r6;
+        javax.imageio.ImageTypeSpecifier r0;
+        com.sun.imageio.plugins.jpeg.JPEGMetadata r7;
+        javax.imageio.ImageWriteParam r3;
+        com.sun.imageio.plugins.jpeg.MarkerSegment $r5;
+        boolean $z0, $z1;
+
+        r2 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r0 := @parameter0: javax.imageio.ImageTypeSpecifier;
+
+        r3 := @parameter1: javax.imageio.ImageWriteParam;
+
+        r6 := @parameter2: javax.imageio.metadata.IIOMetadata;
+
+        r1 := @parameter3: javax.imageio.metadata.IIOMetadata;
+
+        if r0 == null goto label1;
+
+        $z1 = staticinvoke <com.sun.imageio.plugins.jpeg.JPEG: boolean isJFIFcompliant(javax.imageio.ImageTypeSpecifier,boolean)>(r0, 1);
+
+        if $z1 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        if r1 == null goto label4;
+
+        $z0 = r1 instanceof com.sun.imageio.plugins.jpeg.JPEGMetadata;
+
+        if $z0 == 0 goto label2;
+
+        r7 = (com.sun.imageio.plugins.jpeg.JPEGMetadata) r1;
+
+        goto label3;
+
+     label2:
+        $r4 = virtualinvoke r2.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.metadata.IIOMetadata convertImageMetadata(javax.imageio.metadata.IIOMetadata,javax.imageio.ImageTypeSpecifier,javax.imageio.ImageWriteParam)>(r1, r0, r3);
+
+        r7 = (com.sun.imageio.plugins.jpeg.JPEGMetadata) $r4;
+
+     label3:
+        $r5 = virtualinvoke r7.<com.sun.imageio.plugins.jpeg.JPEGMetadata: com.sun.imageio.plugins.jpeg.MarkerSegment findMarkerSegment(java.lang.Class,boolean)>(class "Lcom/sun/imageio/plugins/jpeg/JFIFMarkerSegment;", 1);
+
+        if $r5 != null goto label4;
+
+        return 0;
+
+     label4:
+        return 1;
+    }
+
+    public boolean canWriteRasters()
+    {
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        return 1;
+    }
+
+    public void write(javax.imageio.metadata.IIOMetadata, javax.imageio.IIOImage, javax.imageio.ImageWriteParam) throws java.io.IOException
+    {
+        java.lang.Throwable $r5;
+        javax.imageio.IIOImage r3;
+        javax.imageio.ImageWriteParam r4;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock $r1;
+        javax.imageio.metadata.IIOMetadata r2;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r2 := @parameter0: javax.imageio.metadata.IIOMetadata;
+
+        r3 := @parameter1: javax.imageio.IIOImage;
+
+        r4 := @parameter2: javax.imageio.ImageWriteParam;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void setThreadLock()>();
+
+     label1:
+        $r1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        virtualinvoke $r1.<com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void check()>();
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void writeOnThread(javax.imageio.metadata.IIOMetadata,javax.imageio.IIOImage,javax.imageio.ImageWriteParam)>(r2, r3, r4);
+
+     label2:
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void clearThreadLock()>();
+
+        goto label5;
+
+     label3:
+        $r5 := @caughtexception;
+
+     label4:
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void clearThreadLock()>();
+
+        throw $r5;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private void writeOnThread(javax.imageio.metadata.IIOMetadata, javax.imageio.IIOImage, javax.imageio.ImageWriteParam) throws java.io.IOException
+    {
+        java.awt.image.SampleModel $r8, $r137;
+        java.awt.image.ColorConvertOp $r215;
+        javax.imageio.ImageTypeSpecifier $r107, r171, r181, $r209, $r212, $r214;
+        javax.imageio.ImageWriteParam r6;
+        int[] $r9, $r21, $r35, $r138, $r139, $r140, $r141, $r168, r169, r170, r187, $r194, $r195, $r196, $r197;
+        com.sun.imageio.plugins.jpeg.MarkerSegment $r50, $r52, $r54, $r57, $r60, $r73, $r87, $r89, $r91;
+        javax.imageio.plugins.jpeg.JPEGQTable[] $r22, $r47, r176;
+        com.sun.imageio.plugins.jpeg.JFIFMarkerSegment r182;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57, $i58, $i59, $i60, $i61, $i62, $i63, $i64, $i65, $i66, $i67, $i68, $i69, $i70, $i71, $i72, $i73, $i74, $i75, $i76, $i77, $i78, $i79, $i80, $i81, $i82, $i83, $i84, $i85, $i86, i87, $i88, i89, i90, i91, i92, $i93, i94, $i95, $i96, $i97, $i98, i99, i100, i101, i102, i103, i104, i105, $i107, i108, i109, i110, $i112, $i114;
+        java.io.PrintStream $r26, $r31, $r96, $r109, $r114, $r119, $r124, $r128, $r129, $r131;
+        java.awt.color.ICC_Profile $r68, $r77, $r82, $r84;
+        java.awt.image.DataBufferByte $r216;
+        javax.imageio.IIOException $r200, $r201, $r208, $r210;
+        java.lang.String $r29, $r34, $r112, $r117, $r122, $r127, $r134;
+        javax.imageio.metadata.IIOMetadata r3, $r92, $r180;
+        boolean $z0, $z1, z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19, $z20, $z21, $z22, $z23, $z24, $z25, $z26, $z27, $z28, $z29, z31, $z32, $z33, z34, $z35, z36, $z37, $z38, z39, z40, z41, $z42, $z43, $z44;
+        com.sun.imageio.plugins.jpeg.SOFMarkerSegment r184;
+        com.sun.imageio.plugins.jpeg.DHTMarkerSegment r192;
+        javax.imageio.plugins.jpeg.JPEGQTable $r98, $r99, $r100, $r101, $r102, $r103;
+        javax.imageio.plugins.jpeg.JPEGImageWriteParam r179;
+        java.util.List $r189;
+        java.awt.Rectangle $r97, $r106, $r207;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        java.awt.color.ColorSpace $r62, $r64, $r75, $r79, r166;
+        com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec[] $r36, $r38, $r40, $r42, $r65, $r66;
+        byte[] $r17;
+        byte $b106;
+        java.lang.StringBuilder $r27, $r28, $r32, $r33, $r110, $r111, $r115, $r116, $r120, $r121, $r125, $r126, $r132, $r133, $r202, $r203, $r204, $r205, $r206, $r217, $r218;
+        com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec $r37, $r39, $r41, $r43;
+        long $l19;
+        java.awt.image.Raster $r5, $r7, $r136, $r145, $r146, $r147, $r148, $r149, $r150, $r151, $r152, $r153, $r156, $r164, $r172, $r173, $r174, $r175;
+        com.sun.imageio.plugins.jpeg.AdobeMarkerSegment r183;
+        java.awt.image.RenderedImage $r4, r163;
+        com.sun.imageio.plugins.jpeg.DQTMarkerSegment r191;
+        com.sun.imageio.plugins.jpeg.DRIMarkerSegment r193;
+        com.sun.imageio.plugins.jpeg.JFIFMarkerSegment$ICCMarkerSegment $r69;
+        java.awt.image.WritableRaster $r14, $r155;
+        javax.imageio.IIOImage r2;
+        javax.imageio.plugins.jpeg.JPEGHuffmanTable[] $r23, $r24, $r44, r177, r178;
+        java.awt.image.IndexColorModel $r144;
+        java.awt.color.ICC_ColorSpace $r67, $r76, $r81, $r83;
+        com.sun.imageio.plugins.jpeg.JPEGMetadata $r10, $r11, $r45, $r46, $r48, $r49, $r51, $r53, $r55, $r56, $r58, $r59, $r72, $r80, $r86, $r88, $r90, $r93, $r95, $r185, $r188, $r190, $r211, $r213;
+        javax.imageio.stream.ImageOutputStream $r1, $r19;
+        java.lang.Throwable $r159, $r161;
+        java.lang.IllegalStateException $r198;
+        int[][] $r13, $r167;
+        java.awt.image.BufferedImage $r154;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock $r15, $r16, $r18, $r20, $r160, $r162;
+        float $f0, $f1;
+        java.lang.IllegalArgumentException $r199;
+        java.awt.image.ColorModel $r74, $r78, $r143, r165;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r3 := @parameter0: javax.imageio.metadata.IIOMetadata;
+
+        r2 := @parameter1: javax.imageio.IIOImage;
+
+        r6 := @parameter2: javax.imageio.ImageWriteParam;
+
+        $r1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.stream.ImageOutputStream ios>;
+
+        if $r1 != null goto label001;
+
+        $r198 = new java.lang.IllegalStateException;
+
+        specialinvoke $r198.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Output has not been set!");
+
+        throw $r198;
+
+     label001:
+        if r2 != null goto label002;
+
+        $r199 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r199.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("image is null!");
+
+        throw $r199;
+
+     label002:
+        if r3 == null goto label003;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void warningOccurred(int)>(1);
+
+     label003:
+        $z0 = virtualinvoke r2.<javax.imageio.IIOImage: boolean hasRaster()>();
+
+        r163 = null;
+
+        if $z0 == 0 goto label004;
+
+        $r156 = virtualinvoke r2.<javax.imageio.IIOImage: java.awt.image.Raster getRaster()>();
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.Raster srcRas> = $r156;
+
+        goto label008;
+
+     label004:
+        $r4 = virtualinvoke r2.<javax.imageio.IIOImage: java.awt.image.RenderedImage getRenderedImage()>();
+
+        r163 = $r4;
+
+        $z1 = $r4 instanceof java.awt.image.BufferedImage;
+
+        if $z1 == 0 goto label005;
+
+        $r154 = (java.awt.image.BufferedImage) $r4;
+
+        $r155 = virtualinvoke $r154.<java.awt.image.BufferedImage: java.awt.image.WritableRaster getRaster()>();
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.Raster srcRas> = $r155;
+
+        goto label008;
+
+     label005:
+        $i0 = interfaceinvoke $r4.<java.awt.image.RenderedImage: int getNumXTiles()>();
+
+        if $i0 != 1 goto label007;
+
+        $i74 = interfaceinvoke $r4.<java.awt.image.RenderedImage: int getNumYTiles()>();
+
+        if $i74 != 1 goto label007;
+
+        $i75 = interfaceinvoke $r4.<java.awt.image.RenderedImage: int getMinTileX()>();
+
+        $i76 = interfaceinvoke $r4.<java.awt.image.RenderedImage: int getMinTileY()>();
+
+        $r145 = interfaceinvoke $r4.<java.awt.image.RenderedImage: java.awt.image.Raster getTile(int,int)>($i75, $i76);
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.Raster srcRas> = $r145;
+
+        $r146 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.Raster srcRas>;
+
+        $i77 = virtualinvoke $r146.<java.awt.image.Raster: int getWidth()>();
+
+        $i78 = interfaceinvoke $r4.<java.awt.image.RenderedImage: int getWidth()>();
+
+        if $i77 != $i78 goto label006;
+
+        $r153 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.Raster srcRas>;
+
+        $i85 = virtualinvoke $r153.<java.awt.image.Raster: int getHeight()>();
+
+        $i86 = interfaceinvoke $r4.<java.awt.image.RenderedImage: int getHeight()>();
+
+        if $i85 == $i86 goto label008;
+
+     label006:
+        $r148 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.Raster srcRas>;
+
+        $r147 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.Raster srcRas>;
+
+        $i79 = virtualinvoke $r147.<java.awt.image.Raster: int getMinX()>();
+
+        $r149 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.Raster srcRas>;
+
+        $i80 = virtualinvoke $r149.<java.awt.image.Raster: int getMinY()>();
+
+        $i81 = interfaceinvoke $r4.<java.awt.image.RenderedImage: int getWidth()>();
+
+        $i82 = interfaceinvoke $r4.<java.awt.image.RenderedImage: int getHeight()>();
+
+        $r150 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.Raster srcRas>;
+
+        $i83 = virtualinvoke $r150.<java.awt.image.Raster: int getMinX()>();
+
+        $r151 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.Raster srcRas>;
+
+        $i84 = virtualinvoke $r151.<java.awt.image.Raster: int getMinY()>();
+
+        $r152 = virtualinvoke $r148.<java.awt.image.Raster: java.awt.image.Raster createChild(int,int,int,int,int,int,int[])>($i79, $i80, $i81, $i82, $i83, $i84, null);
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.Raster srcRas> = $r152;
+
+        goto label008;
+
+     label007:
+        $r5 = interfaceinvoke $r4.<java.awt.image.RenderedImage: java.awt.image.Raster getData()>();
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.Raster srcRas> = $r5;
+
+     label008:
+        $r164 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.Raster srcRas>;
+
+        i87 = virtualinvoke $r164.<java.awt.image.Raster: int getNumBands()>();
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean indexed> = 0;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.IndexColorModel indexCM> = null;
+
+        r165 = null;
+
+        r166 = null;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean isAlphaPremultiplied> = 0;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.ColorModel srcCM> = null;
+
+        if $z0 != 0 goto label010;
+
+        $r143 = interfaceinvoke r163.<java.awt.image.RenderedImage: java.awt.image.ColorModel getColorModel()>();
+
+        r165 = $r143;
+
+        if $r143 == null goto label010;
+
+        r166 = virtualinvoke $r143.<java.awt.image.ColorModel: java.awt.color.ColorSpace getColorSpace()>();
+
+        $z28 = $r143 instanceof java.awt.image.IndexColorModel;
+
+        if $z28 == 0 goto label009;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean indexed> = 1;
+
+        $r144 = (java.awt.image.IndexColorModel) $r143;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.IndexColorModel indexCM> = $r144;
+
+        i87 = virtualinvoke $r143.<java.awt.image.ColorModel: int getNumComponents()>();
+
+     label009:
+        $z29 = virtualinvoke $r143.<java.awt.image.ColorModel: boolean isAlphaPremultiplied()>();
+
+        if $z29 == 0 goto label010;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean isAlphaPremultiplied> = 1;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.ColorModel srcCM> = $r143;
+
+     label010:
+        $r167 = <com.sun.imageio.plugins.jpeg.JPEG: int[][] bandOffsets>;
+
+        $i88 = i87 - 1;
+
+        $r168 = $r167[$i88];
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int[] srcBands> = $r168;
+
+        i89 = i87;
+
+        if r6 == null goto label012;
+
+        $r140 = virtualinvoke r6.<javax.imageio.ImageWriteParam: int[] getSourceBands()>();
+
+        if $r140 == null goto label012;
+
+        $z27 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean indexed>;
+
+        if $z27 == 0 goto label011;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void warningOccurred(int)>(8);
+
+        goto label012;
+
+     label011:
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int[] srcBands> = $r140;
+
+        $r141 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int[] srcBands>;
+
+        i89 = lengthof $r141;
+
+        if i89 <= i87 goto label012;
+
+        $r200 = new javax.imageio.IIOException;
+
+        specialinvoke $r200.<javax.imageio.IIOException: void <init>(java.lang.String)>("ImageWriteParam specifies too many source bands");
+
+        throw $r200;
+
+     label012:
+        if i89 == i87 goto label013;
+
+        $z44 = 1;
+
+        $z43 = 1;
+
+        goto label014;
+
+     label013:
+        $z44 = 0;
+
+        $z43 = 0;
+
+     label014:
+        z31 = $z43;
+
+        if $z0 != 0 goto label015;
+
+        if $z44 != 0 goto label015;
+
+        $z32 = 1;
+
+        goto label016;
+
+     label015:
+        $z32 = 0;
+
+     label016:
+        z2 = $z32;
+
+        $z33 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean indexed>;
+
+        if $z33 != 0 goto label019;
+
+        $r136 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.Raster srcRas>;
+
+        $r137 = virtualinvoke $r136.<java.awt.image.Raster: java.awt.image.SampleModel getSampleModel()>();
+
+        $r138 = virtualinvoke $r137.<java.awt.image.SampleModel: int[] getSampleSize()>();
+
+        r169 = $r138;
+
+        if z31 == 0 goto label021;
+
+        r170 = newarray (int)[i89];
+
+        i90 = 0;
+
+     label017:
+        if i90 >= i89 goto label018;
+
+        $r139 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int[] srcBands>;
+
+        $i72 = $r139[i90];
+
+        $i73 = $r138[$i72];
+
+        r170[i90] = $i73;
+
+        i90 = i90 + 1;
+
+        goto label017;
+
+     label018:
+        r169 = r170;
+
+        goto label021;
+
+     label019:
+        $r7 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.Raster srcRas>;
+
+        $r8 = virtualinvoke $r7.<java.awt.image.Raster: java.awt.image.SampleModel getSampleModel()>();
+
+        $r9 = virtualinvoke $r8.<java.awt.image.SampleModel: int[] getSampleSize()>();
+
+        r169 = newarray (int)[i87];
+
+        i91 = 0;
+
+     label020:
+        if i91 >= i87 goto label021;
+
+        $i71 = $r9[0];
+
+        r169[i91] = $i71;
+
+        i91 = i91 + 1;
+
+        goto label020;
+
+     label021:
+        i92 = 0;
+
+     label022:
+        $i93 = lengthof r169;
+
+        if i92 >= $i93 goto label026;
+
+        $i69 = r169[i92];
+
+        if $i69 <= 0 goto label023;
+
+        $i70 = r169[i92];
+
+        if $i70 <= 8 goto label024;
+
+     label023:
+        $r201 = new javax.imageio.IIOException;
+
+        specialinvoke $r201.<javax.imageio.IIOException: void <init>(java.lang.String)>("Illegal band size: should be 0 < size <= 8");
+
+        throw $r201;
+
+     label024:
+        $z26 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean indexed>;
+
+        if $z26 == 0 goto label025;
+
+        r169[i92] = 8;
+
+     label025:
+        i92 = i92 + 1;
+
+        goto label022;
+
+     label026:
+        $z3 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean debug>;
+
+        if $z3 == 0 goto label029;
+
+        $r109 = <java.lang.System: java.io.PrintStream out>;
+
+        $r202 = new java.lang.StringBuilder;
+
+        specialinvoke $r202.<java.lang.StringBuilder: void <init>()>();
+
+        $r110 = virtualinvoke $r202.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("numSrcBands is ");
+
+        $r111 = virtualinvoke $r110.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i87);
+
+        $r112 = virtualinvoke $r111.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r109.<java.io.PrintStream: void println(java.lang.String)>($r112);
+
+        $r114 = <java.lang.System: java.io.PrintStream out>;
+
+        $r203 = new java.lang.StringBuilder;
+
+        specialinvoke $r203.<java.lang.StringBuilder: void <init>()>();
+
+        $r115 = virtualinvoke $r203.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("numBandsUsed is ");
+
+        $r116 = virtualinvoke $r115.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i89);
+
+        $r117 = virtualinvoke $r116.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r114.<java.io.PrintStream: void println(java.lang.String)>($r117);
+
+        $r119 = <java.lang.System: java.io.PrintStream out>;
+
+        $r204 = new java.lang.StringBuilder;
+
+        specialinvoke $r204.<java.lang.StringBuilder: void <init>()>();
+
+        $r120 = virtualinvoke $r204.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("usingBandSubset is ");
+
+        $r121 = virtualinvoke $r120.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>(z31);
+
+        $r122 = virtualinvoke $r121.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r119.<java.io.PrintStream: void println(java.lang.String)>($r122);
+
+        $r124 = <java.lang.System: java.io.PrintStream out>;
+
+        $r205 = new java.lang.StringBuilder;
+
+        specialinvoke $r205.<java.lang.StringBuilder: void <init>()>();
+
+        $r125 = virtualinvoke $r205.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("fullImage is ");
+
+        $r126 = virtualinvoke $r125.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>(z2);
+
+        $r127 = virtualinvoke $r126.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r124.<java.io.PrintStream: void println(java.lang.String)>($r127);
+
+        $r128 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r128.<java.io.PrintStream: void print(java.lang.String)>("Band sizes:");
+
+        i94 = 0;
+
+     label027:
+        $i67 = lengthof r169;
+
+        if i94 >= $i67 goto label028;
+
+        $r131 = <java.lang.System: java.io.PrintStream out>;
+
+        $r206 = new java.lang.StringBuilder;
+
+        specialinvoke $r206.<java.lang.StringBuilder: void <init>()>();
+
+        $r132 = virtualinvoke $r206.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $i68 = r169[i94];
+
+        $r133 = virtualinvoke $r132.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i68);
+
+        $r134 = virtualinvoke $r133.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r131.<java.io.PrintStream: void print(java.lang.String)>($r134);
+
+        i94 = i94 + 1;
+
+        goto label027;
+
+     label028:
+        $r129 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r129.<java.io.PrintStream: void println()>();
+
+     label029:
+        r171 = null;
+
+        if r6 == null goto label030;
+
+        $r107 = virtualinvoke r6.<javax.imageio.ImageWriteParam: javax.imageio.ImageTypeSpecifier getDestinationType()>();
+
+        r171 = $r107;
+
+        if z2 == 0 goto label030;
+
+        if $r107 == null goto label030;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void warningOccurred(int)>(0);
+
+        r171 = null;
+
+     label030:
+        $r172 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.Raster srcRas>;
+
+        $i95 = virtualinvoke $r172.<java.awt.image.Raster: int getMinX()>();
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceXOffset> = $i95;
+
+        $r173 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.Raster srcRas>;
+
+        $i96 = virtualinvoke $r173.<java.awt.image.Raster: int getMinY()>();
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceYOffset> = $i96;
+
+        $r174 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.Raster srcRas>;
+
+        $i97 = virtualinvoke $r174.<java.awt.image.Raster: int getWidth()>();
+
+        $r175 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.Raster srcRas>;
+
+        $i98 = virtualinvoke $r175.<java.awt.image.Raster: int getHeight()>();
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceWidth> = $i97;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceHeight> = $i98;
+
+        i99 = 1;
+
+        i100 = 1;
+
+        i101 = 0;
+
+        i102 = 0;
+
+        r176 = null;
+
+        r177 = null;
+
+        r178 = null;
+
+        z34 = 0;
+
+        r179 = null;
+
+        i103 = 0;
+
+        if r6 == null goto label038;
+
+        $r97 = virtualinvoke r6.<javax.imageio.ImageWriteParam: java.awt.Rectangle getSourceRegion()>();
+
+        if $r97 == null goto label031;
+
+        $r207 = new java.awt.Rectangle;
+
+        $i62 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceXOffset>;
+
+        $i61 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceYOffset>;
+
+        $i60 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceWidth>;
+
+        $i59 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceHeight>;
+
+        specialinvoke $r207.<java.awt.Rectangle: void <init>(int,int,int,int)>($i62, $i61, $i60, $i59);
+
+        $r106 = virtualinvoke $r97.<java.awt.Rectangle: java.awt.Rectangle intersection(java.awt.Rectangle)>($r207);
+
+        $i63 = $r106.<java.awt.Rectangle: int x>;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceXOffset> = $i63;
+
+        $i64 = $r106.<java.awt.Rectangle: int y>;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceYOffset> = $i64;
+
+        $i65 = $r106.<java.awt.Rectangle: int width>;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceWidth> = $i65;
+
+        $i66 = $r106.<java.awt.Rectangle: int height>;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceHeight> = $i66;
+
+     label031:
+        $i49 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceWidth>;
+
+        $i48 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceXOffset>;
+
+        $i50 = $i49 + $i48;
+
+        if $i50 <= $i97 goto label032;
+
+        $i57 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceXOffset>;
+
+        $i58 = $i97 - $i57;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceWidth> = $i58;
+
+     label032:
+        $i52 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceHeight>;
+
+        $i51 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceYOffset>;
+
+        $i53 = $i52 + $i51;
+
+        if $i53 <= $i98 goto label033;
+
+        $i55 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceYOffset>;
+
+        $i56 = $i98 - $i55;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceHeight> = $i56;
+
+     label033:
+        i99 = virtualinvoke r6.<javax.imageio.ImageWriteParam: int getSourceXSubsampling()>();
+
+        i100 = virtualinvoke r6.<javax.imageio.ImageWriteParam: int getSourceYSubsampling()>();
+
+        i101 = virtualinvoke r6.<javax.imageio.ImageWriteParam: int getSubsamplingXOffset()>();
+
+        i102 = virtualinvoke r6.<javax.imageio.ImageWriteParam: int getSubsamplingYOffset()>();
+
+        $i54 = virtualinvoke r6.<javax.imageio.ImageWriteParam: int getCompressionMode()>();
+
+        tableswitch($i54)
+        {
+            case 0: goto label034;
+            case 1: goto label036;
+            case 2: goto label035;
+            default: goto label037;
+        };
+
+     label034:
+        $r208 = new javax.imageio.IIOException;
+
+        specialinvoke $r208.<javax.imageio.IIOException: void <init>(java.lang.String)>("JPEG compression cannot be disabled");
+
+        throw $r208;
+
+     label035:
+        $f0 = virtualinvoke r6.<javax.imageio.ImageWriteParam: float getCompressionQuality()>();
+
+        $f1 = staticinvoke <com.sun.imageio.plugins.jpeg.JPEG: float convertToLinearQuality(float)>($f0);
+
+        r176 = newarray (javax.imageio.plugins.jpeg.JPEGQTable)[2];
+
+        $r98 = <javax.imageio.plugins.jpeg.JPEGQTable: javax.imageio.plugins.jpeg.JPEGQTable K1Luminance>;
+
+        $r99 = virtualinvoke $r98.<javax.imageio.plugins.jpeg.JPEGQTable: javax.imageio.plugins.jpeg.JPEGQTable getScaledInstance(float,boolean)>($f1, 1);
+
+        r176[0] = $r99;
+
+        $r100 = <javax.imageio.plugins.jpeg.JPEGQTable: javax.imageio.plugins.jpeg.JPEGQTable K2Chrominance>;
+
+        $r101 = virtualinvoke $r100.<javax.imageio.plugins.jpeg.JPEGQTable: javax.imageio.plugins.jpeg.JPEGQTable getScaledInstance(float,boolean)>($f1, 1);
+
+        r176[1] = $r101;
+
+        goto label037;
+
+     label036:
+        r176 = newarray (javax.imageio.plugins.jpeg.JPEGQTable)[2];
+
+        $r102 = <javax.imageio.plugins.jpeg.JPEGQTable: javax.imageio.plugins.jpeg.JPEGQTable K1Div2Luminance>;
+
+        r176[0] = $r102;
+
+        $r103 = <javax.imageio.plugins.jpeg.JPEGQTable: javax.imageio.plugins.jpeg.JPEGQTable K2Div2Chrominance>;
+
+        r176[1] = $r103;
+
+     label037:
+        i103 = virtualinvoke r6.<javax.imageio.ImageWriteParam: int getProgressiveMode()>();
+
+        $z35 = r6 instanceof javax.imageio.plugins.jpeg.JPEGImageWriteParam;
+
+        if $z35 == 0 goto label038;
+
+        r179 = (javax.imageio.plugins.jpeg.JPEGImageWriteParam) r6;
+
+        z34 = virtualinvoke r179.<javax.imageio.plugins.jpeg.JPEGImageWriteParam: boolean getOptimizeHuffmanTables()>();
+
+     label038:
+        $r180 = virtualinvoke r2.<javax.imageio.IIOImage: javax.imageio.metadata.IIOMetadata getMetadata()>();
+
+        if $r180 == null goto label042;
+
+        $z24 = $r180 instanceof com.sun.imageio.plugins.jpeg.JPEGMetadata;
+
+        if $z24 == 0 goto label039;
+
+        $r95 = (com.sun.imageio.plugins.jpeg.JPEGMetadata) $r180;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata> = $r95;
+
+        $z25 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean debug>;
+
+        if $z25 == 0 goto label042;
+
+        $r96 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r96.<java.io.PrintStream: void println(java.lang.String)>("We have metadata, and it\'s JPEG metadata");
+
+        goto label042;
+
+     label039:
+        if $z0 != 0 goto label041;
+
+        r181 = r171;
+
+        if r171 != null goto label040;
+
+        $r209 = new javax.imageio.ImageTypeSpecifier;
+
+        specialinvoke $r209.<javax.imageio.ImageTypeSpecifier: void <init>(java.awt.image.RenderedImage)>(r163);
+
+        r181 = $r209;
+
+     label040:
+        $r92 = virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.metadata.IIOMetadata convertImageMetadata(javax.imageio.metadata.IIOMetadata,javax.imageio.ImageTypeSpecifier,javax.imageio.ImageWriteParam)>($r180, r181, r6);
+
+        $r93 = (com.sun.imageio.plugins.jpeg.JPEGMetadata) $r92;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata> = $r93;
+
+        goto label042;
+
+     label041:
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void warningOccurred(int)>(7);
+
+     label042:
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean ignoreJFIF> = 0;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean ignoreAdobe> = 0;
+
+        $i112 = (int) -1;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int newAdobeTransform> = $i112;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean writeDefaultJFIF> = 0;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean writeAdobe> = 0;
+
+        i104 = 0;
+
+        i105 = 0;
+
+        r182 = null;
+
+        r183 = null;
+
+        r184 = null;
+
+        $r185 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata>;
+
+        if $r185 == null goto label043;
+
+        $r86 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata>;
+
+        $r87 = virtualinvoke $r86.<com.sun.imageio.plugins.jpeg.JPEGMetadata: com.sun.imageio.plugins.jpeg.MarkerSegment findMarkerSegment(java.lang.Class,boolean)>(class "Lcom/sun/imageio/plugins/jpeg/JFIFMarkerSegment;", 1);
+
+        r182 = (com.sun.imageio.plugins.jpeg.JFIFMarkerSegment) $r87;
+
+        $r88 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata>;
+
+        $r89 = virtualinvoke $r88.<com.sun.imageio.plugins.jpeg.JPEGMetadata: com.sun.imageio.plugins.jpeg.MarkerSegment findMarkerSegment(java.lang.Class,boolean)>(class "Lcom/sun/imageio/plugins/jpeg/AdobeMarkerSegment;", 1);
+
+        r183 = (com.sun.imageio.plugins.jpeg.AdobeMarkerSegment) $r89;
+
+        $r90 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata>;
+
+        $r91 = virtualinvoke $r90.<com.sun.imageio.plugins.jpeg.JPEGMetadata: com.sun.imageio.plugins.jpeg.MarkerSegment findMarkerSegment(java.lang.Class,boolean)>(class "Lcom/sun/imageio/plugins/jpeg/SOFMarkerSegment;", 1);
+
+        r184 = (com.sun.imageio.plugins.jpeg.SOFMarkerSegment) $r91;
+
+     label043:
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.color.ICC_Profile iccProfile> = null;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean convertTosRGB> = 0;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.WritableRaster converted> = null;
+
+        if r171 == null goto label050;
+
+        $i46 = virtualinvoke r171.<javax.imageio.ImageTypeSpecifier: int getNumBands()>();
+
+        if i89 == $i46 goto label044;
+
+        $r210 = new javax.imageio.IIOException;
+
+        specialinvoke $r210.<javax.imageio.IIOException: void <init>(java.lang.String)>("Number of source bands != number of destination bands");
+
+        throw $r210;
+
+     label044:
+        $r78 = virtualinvoke r171.<javax.imageio.ImageTypeSpecifier: java.awt.image.ColorModel getColorModel()>();
+
+        $r79 = virtualinvoke $r78.<java.awt.image.ColorModel: java.awt.color.ColorSpace getColorSpace()>();
+
+        $r80 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata>;
+
+        if $r80 == null goto label046;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void checkSOFBands(com.sun.imageio.plugins.jpeg.SOFMarkerSegment,int)>(r184, i89);
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void checkJFIF(com.sun.imageio.plugins.jpeg.JFIFMarkerSegment,javax.imageio.ImageTypeSpecifier,boolean)>(r182, r171, 0);
+
+        if r182 == null goto label045;
+
+        $z22 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean ignoreJFIF>;
+
+        if $z22 != 0 goto label045;
+
+        $z23 = staticinvoke <com.sun.imageio.plugins.jpeg.JPEG: boolean isNonStandardICC(java.awt.color.ColorSpace)>($r79);
+
+        if $z23 == 0 goto label045;
+
+        $r83 = (java.awt.color.ICC_ColorSpace) $r79;
+
+        $r84 = virtualinvoke $r83.<java.awt.color.ICC_ColorSpace: java.awt.color.ICC_Profile getProfile()>();
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.color.ICC_Profile iccProfile> = $r84;
+
+     label045:
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void checkAdobe(com.sun.imageio.plugins.jpeg.AdobeMarkerSegment,javax.imageio.ImageTypeSpecifier,boolean)>(r183, r171, 0);
+
+        goto label049;
+
+     label046:
+        $z20 = staticinvoke <com.sun.imageio.plugins.jpeg.JPEG: boolean isJFIFcompliant(javax.imageio.ImageTypeSpecifier,boolean)>(r171, 0);
+
+        if $z20 == 0 goto label047;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean writeDefaultJFIF> = 1;
+
+        $z21 = staticinvoke <com.sun.imageio.plugins.jpeg.JPEG: boolean isNonStandardICC(java.awt.color.ColorSpace)>($r79);
+
+        if $z21 == 0 goto label048;
+
+        $r81 = (java.awt.color.ICC_ColorSpace) $r79;
+
+        $r82 = virtualinvoke $r81.<java.awt.color.ICC_ColorSpace: java.awt.color.ICC_Profile getProfile()>();
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.color.ICC_Profile iccProfile> = $r82;
+
+        goto label048;
+
+     label047:
+        $i47 = staticinvoke <com.sun.imageio.plugins.jpeg.JPEG: int transformForType(javax.imageio.ImageTypeSpecifier,boolean)>(r171, 0);
+
+        $i114 = (int) -1;
+
+        if $i47 == $i114 goto label048;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean writeAdobe> = 1;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int newAdobeTransform> = $i47;
+
+     label048:
+        $r211 = new com.sun.imageio.plugins.jpeg.JPEGMetadata;
+
+        specialinvoke $r211.<com.sun.imageio.plugins.jpeg.JPEGMetadata: void <init>(javax.imageio.ImageTypeSpecifier,javax.imageio.ImageWriteParam,com.sun.imageio.plugins.jpeg.JPEGImageWriter)>(r171, null, r0);
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata> = $r211;
+
+     label049:
+        i104 = specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int getSrcCSType(javax.imageio.ImageTypeSpecifier)>(r171);
+
+        i105 = specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int getDefaultDestCSType(javax.imageio.ImageTypeSpecifier)>(r171);
+
+        goto label081;
+
+     label050:
+        $r10 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata>;
+
+        if $r10 != null goto label052;
+
+        if z2 == 0 goto label081;
+
+        $r213 = new com.sun.imageio.plugins.jpeg.JPEGMetadata;
+
+        $r212 = new javax.imageio.ImageTypeSpecifier;
+
+        specialinvoke $r212.<javax.imageio.ImageTypeSpecifier: void <init>(java.awt.image.RenderedImage)>(r163);
+
+        specialinvoke $r213.<com.sun.imageio.plugins.jpeg.JPEGMetadata: void <init>(javax.imageio.ImageTypeSpecifier,javax.imageio.ImageWriteParam,com.sun.imageio.plugins.jpeg.JPEGImageWriter)>($r212, r6, r0);
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata> = $r213;
+
+        $r72 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata>;
+
+        $r73 = virtualinvoke $r72.<com.sun.imageio.plugins.jpeg.JPEGMetadata: com.sun.imageio.plugins.jpeg.MarkerSegment findMarkerSegment(java.lang.Class,boolean)>(class "Lcom/sun/imageio/plugins/jpeg/JFIFMarkerSegment;", 1);
+
+        if $r73 == null goto label051;
+
+        $r74 = interfaceinvoke r163.<java.awt.image.RenderedImage: java.awt.image.ColorModel getColorModel()>();
+
+        $r75 = virtualinvoke $r74.<java.awt.image.ColorModel: java.awt.color.ColorSpace getColorSpace()>();
+
+        $z19 = staticinvoke <com.sun.imageio.plugins.jpeg.JPEG: boolean isNonStandardICC(java.awt.color.ColorSpace)>($r75);
+
+        if $z19 == 0 goto label051;
+
+        $r76 = (java.awt.color.ICC_ColorSpace) $r75;
+
+        $r77 = virtualinvoke $r76.<java.awt.color.ICC_ColorSpace: java.awt.color.ICC_Profile getProfile()>();
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.color.ICC_Profile iccProfile> = $r77;
+
+     label051:
+        i104 = specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int getSrcCSType(java.awt.image.RenderedImage)>(r163);
+
+        i105 = specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int getDefaultDestCSType(java.awt.image.RenderedImage)>(r163);
+
+        goto label081;
+
+     label052:
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void checkSOFBands(com.sun.imageio.plugins.jpeg.SOFMarkerSegment,int)>(r184, i89);
+
+        if z2 == 0 goto label081;
+
+        $r214 = new javax.imageio.ImageTypeSpecifier;
+
+        specialinvoke $r214.<javax.imageio.ImageTypeSpecifier: void <init>(java.awt.image.RenderedImage)>(r163);
+
+        i104 = specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int getSrcCSType(java.awt.image.RenderedImage)>(r163);
+
+        if r165 == null goto label081;
+
+        $z14 = virtualinvoke r165.<java.awt.image.ColorModel: boolean hasAlpha()>();
+
+        $i38 = virtualinvoke r166.<java.awt.color.ColorSpace: int getType()>();
+
+        lookupswitch($i38)
+        {
+            case 5: goto label056;
+            case 6: goto label053;
+            case 13: goto label074;
+            default: goto label081;
+        };
+
+     label053:
+        if $z14 != 0 goto label054;
+
+        i105 = 1;
+
+        goto label055;
+
+     label054:
+        if r182 == null goto label055;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean ignoreJFIF> = 1;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void warningOccurred(int)>(5);
+
+     label055:
+        if r183 == null goto label081;
+
+        $i41 = r183.<com.sun.imageio.plugins.jpeg.AdobeMarkerSegment: int transform>;
+
+        if $i41 == 0 goto label081;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int newAdobeTransform> = 0;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void warningOccurred(int)>(6);
+
+        goto label081;
+
+     label056:
+        if $z14 != 0 goto label066;
+
+        if r182 == null goto label058;
+
+        i105 = 3;
+
+        $z17 = staticinvoke <com.sun.imageio.plugins.jpeg.JPEG: boolean isNonStandardICC(java.awt.color.ColorSpace)>(r166);
+
+        if $z17 != 0 goto label057;
+
+        $z18 = r166 instanceof java.awt.color.ICC_ColorSpace;
+
+        if $z18 == 0 goto label081;
+
+        $r69 = r182.<com.sun.imageio.plugins.jpeg.JFIFMarkerSegment: com.sun.imageio.plugins.jpeg.JFIFMarkerSegment$ICCMarkerSegment iccSegment>;
+
+        if $r69 == null goto label081;
+
+     label057:
+        $r67 = (java.awt.color.ICC_ColorSpace) r166;
+
+        $r68 = virtualinvoke $r67.<java.awt.color.ICC_ColorSpace: java.awt.color.ICC_Profile getProfile()>();
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.color.ICC_Profile iccProfile> = $r68;
+
+        goto label081;
+
+     label058:
+        if r183 == null goto label062;
+
+        $i45 = r183.<com.sun.imageio.plugins.jpeg.AdobeMarkerSegment: int transform>;
+
+        lookupswitch($i45)
+        {
+            case 0: goto label059;
+            case 1: goto label060;
+            default: goto label061;
+        };
+
+     label059:
+        i105 = 2;
+
+        goto label081;
+
+     label060:
+        i105 = 3;
+
+        goto label081;
+
+     label061:
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void warningOccurred(int)>(6);
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int newAdobeTransform> = 0;
+
+        i105 = 2;
+
+        goto label081;
+
+     label062:
+        $i44 = virtualinvoke r184.<com.sun.imageio.plugins.jpeg.SOFMarkerSegment: int getIDencodedCSType()>();
+
+        if $i44 == 0 goto label063;
+
+        i105 = $i44;
+
+        goto label065;
+
+     label063:
+        $r66 = r184.<com.sun.imageio.plugins.jpeg.SOFMarkerSegment: com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec[] componentSpecs>;
+
+        $z16 = specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean isSubsampled(com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec[])>($r66);
+
+        if $z16 == 0 goto label064;
+
+        i105 = 3;
+
+        goto label065;
+
+     label064:
+        i105 = 2;
+
+     label065:
+        goto label081;
+
+     label066:
+        if r182 == null goto label067;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean ignoreJFIF> = 1;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void warningOccurred(int)>(5);
+
+     label067:
+        if r183 == null goto label069;
+
+        $i43 = r183.<com.sun.imageio.plugins.jpeg.AdobeMarkerSegment: int transform>;
+
+        if $i43 == 0 goto label068;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int newAdobeTransform> = 0;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void warningOccurred(int)>(6);
+
+     label068:
+        i105 = 6;
+
+        goto label081;
+
+     label069:
+        $i42 = virtualinvoke r184.<com.sun.imageio.plugins.jpeg.SOFMarkerSegment: int getIDencodedCSType()>();
+
+        if $i42 == 0 goto label070;
+
+        i105 = $i42;
+
+        goto label073;
+
+     label070:
+        $r65 = r184.<com.sun.imageio.plugins.jpeg.SOFMarkerSegment: com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec[] componentSpecs>;
+
+        $z15 = specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean isSubsampled(com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec[])>($r65);
+
+        if $z15 == 0 goto label071;
+
+        $b106 = 7;
+
+        goto label072;
+
+     label071:
+        $b106 = 6;
+
+     label072:
+        i105 = $b106;
+
+     label073:
+        goto label081;
+
+     label074:
+        $r62 = staticinvoke <com.sun.imageio.plugins.jpeg.JPEG$JCS: java.awt.color.ColorSpace getYCC()>();
+
+        if r166 != $r62 goto label081;
+
+        if $z14 != 0 goto label078;
+
+        if r182 == null goto label075;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean convertTosRGB> = 1;
+
+        $r215 = new java.awt.image.ColorConvertOp;
+
+        $r64 = <com.sun.imageio.plugins.jpeg.JPEG$JCS: java.awt.color.ColorSpace sRGB>;
+
+        specialinvoke $r215.<java.awt.image.ColorConvertOp: void <init>(java.awt.color.ColorSpace,java.awt.color.ColorSpace,java.awt.RenderingHints)>(r166, $r64, null);
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.ColorConvertOp convertOp> = $r215;
+
+        i105 = 3;
+
+        goto label081;
+
+     label075:
+        if r183 == null goto label077;
+
+        $i40 = r183.<com.sun.imageio.plugins.jpeg.AdobeMarkerSegment: int transform>;
+
+        if $i40 == 1 goto label076;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int newAdobeTransform> = 1;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void warningOccurred(int)>(6);
+
+     label076:
+        i105 = 5;
+
+        goto label081;
+
+     label077:
+        i105 = 5;
+
+        goto label081;
+
+     label078:
+        if r182 == null goto label079;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean ignoreJFIF> = 1;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void warningOccurred(int)>(5);
+
+        goto label080;
+
+     label079:
+        if r183 == null goto label080;
+
+        $i39 = r183.<com.sun.imageio.plugins.jpeg.AdobeMarkerSegment: int transform>;
+
+        if $i39 == 0 goto label080;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int newAdobeTransform> = 0;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void warningOccurred(int)>(6);
+
+     label080:
+        i105 = 10;
+
+     label081:
+        z36 = 0;
+
+        r187 = null;
+
+        $r188 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata>;
+
+        if $r188 == null goto label085;
+
+        if r184 != null goto label082;
+
+        $r59 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata>;
+
+        $r60 = virtualinvoke $r59.<com.sun.imageio.plugins.jpeg.JPEGMetadata: com.sun.imageio.plugins.jpeg.MarkerSegment findMarkerSegment(java.lang.Class,boolean)>(class "Lcom/sun/imageio/plugins/jpeg/SOFMarkerSegment;", 1);
+
+        r184 = (com.sun.imageio.plugins.jpeg.SOFMarkerSegment) $r60;
+
+     label082:
+        if r184 == null goto label084;
+
+        $i37 = r184.<com.sun.imageio.plugins.jpeg.SOFMarkerSegment: int tag>;
+
+        if $i37 != 194 goto label084;
+
+        z36 = 1;
+
+        if i103 != 3 goto label083;
+
+        $r58 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata>;
+
+        r187 = specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int[] collectScans(com.sun.imageio.plugins.jpeg.JPEGMetadata,com.sun.imageio.plugins.jpeg.SOFMarkerSegment)>($r58, r184);
+
+        goto label084;
+
+     label083:
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int numScans> = 0;
+
+     label084:
+        if r182 != null goto label085;
+
+        $r56 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata>;
+
+        $r57 = virtualinvoke $r56.<com.sun.imageio.plugins.jpeg.JPEGMetadata: com.sun.imageio.plugins.jpeg.MarkerSegment findMarkerSegment(java.lang.Class,boolean)>(class "Lcom/sun/imageio/plugins/jpeg/JFIFMarkerSegment;", 1);
+
+        r182 = (com.sun.imageio.plugins.jpeg.JFIFMarkerSegment) $r57;
+
+     label085:
+        $r189 = virtualinvoke r2.<javax.imageio.IIOImage: java.util.List getThumbnails()>();
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.util.List thumbnails> = $r189;
+
+        $i107 = virtualinvoke r2.<javax.imageio.IIOImage: int getNumThumbnails()>();
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean forceJFIF> = 0;
+
+        $z37 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean writeDefaultJFIF>;
+
+        if $z37 != 0 goto label090;
+
+        $r55 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata>;
+
+        if $r55 != null goto label086;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.util.List thumbnails> = null;
+
+        if $i107 == 0 goto label090;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void warningOccurred(int)>(10);
+
+        goto label090;
+
+     label086:
+        if z2 != 0 goto label087;
+
+        if r182 != null goto label090;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.util.List thumbnails> = null;
+
+        if $i107 == 0 goto label090;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void warningOccurred(int)>(10);
+
+        goto label090;
+
+     label087:
+        if r182 != null goto label090;
+
+        if i105 == 1 goto label088;
+
+        if i105 != 3 goto label089;
+
+     label088:
+        if $i107 == 0 goto label090;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean forceJFIF> = 1;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void warningOccurred(int)>(11);
+
+        goto label090;
+
+     label089:
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.util.List thumbnails> = null;
+
+        if $i107 == 0 goto label090;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void warningOccurred(int)>(10);
+
+     label090:
+        $r190 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata>;
+
+        if $r190 != null goto label091;
+
+        $z12 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean writeDefaultJFIF>;
+
+        if $z12 != 0 goto label091;
+
+        $z13 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean writeAdobe>;
+
+        if $z13 == 0 goto label092;
+
+     label091:
+        $z38 = 1;
+
+        goto label093;
+
+     label092:
+        $z38 = 0;
+
+     label093:
+        z39 = $z38;
+
+        z40 = 1;
+
+        z41 = 1;
+
+        r191 = null;
+
+        r192 = null;
+
+        i108 = 0;
+
+        $r11 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata>;
+
+        if $r11 == null goto label096;
+
+        $r49 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata>;
+
+        $r50 = virtualinvoke $r49.<com.sun.imageio.plugins.jpeg.JPEGMetadata: com.sun.imageio.plugins.jpeg.MarkerSegment findMarkerSegment(java.lang.Class,boolean)>(class "Lcom/sun/imageio/plugins/jpeg/DQTMarkerSegment;", 1);
+
+        r191 = (com.sun.imageio.plugins.jpeg.DQTMarkerSegment) $r50;
+
+        $r51 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata>;
+
+        $r52 = virtualinvoke $r51.<com.sun.imageio.plugins.jpeg.JPEGMetadata: com.sun.imageio.plugins.jpeg.MarkerSegment findMarkerSegment(java.lang.Class,boolean)>(class "Lcom/sun/imageio/plugins/jpeg/DHTMarkerSegment;", 1);
+
+        r192 = (com.sun.imageio.plugins.jpeg.DHTMarkerSegment) $r52;
+
+        $r53 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata>;
+
+        $r54 = virtualinvoke $r53.<com.sun.imageio.plugins.jpeg.JPEGMetadata: com.sun.imageio.plugins.jpeg.MarkerSegment findMarkerSegment(java.lang.Class,boolean)>(class "Lcom/sun/imageio/plugins/jpeg/DRIMarkerSegment;", 1);
+
+        r193 = (com.sun.imageio.plugins.jpeg.DRIMarkerSegment) $r54;
+
+        if r193 == null goto label094;
+
+        i108 = r193.<com.sun.imageio.plugins.jpeg.DRIMarkerSegment: int restartInterval>;
+
+     label094:
+        if r191 != null goto label095;
+
+        z40 = 0;
+
+     label095:
+        if r192 != null goto label096;
+
+        z41 = 0;
+
+     label096:
+        if r176 != null goto label100;
+
+        if r191 == null goto label097;
+
+        $r48 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata>;
+
+        r176 = specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGQTable[] collectQTablesFromMetadata(com.sun.imageio.plugins.jpeg.JPEGMetadata)>($r48);
+
+        goto label100;
+
+     label097:
+        $r47 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGQTable[] streamQTables>;
+
+        if $r47 == null goto label098;
+
+        r176 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGQTable[] streamQTables>;
+
+        goto label100;
+
+     label098:
+        if r179 == null goto label099;
+
+        $z11 = virtualinvoke r179.<javax.imageio.plugins.jpeg.JPEGImageWriteParam: boolean areTablesSet()>();
+
+        if $z11 == 0 goto label099;
+
+        r176 = virtualinvoke r179.<javax.imageio.plugins.jpeg.JPEGImageWriteParam: javax.imageio.plugins.jpeg.JPEGQTable[] getQTables()>();
+
+        goto label100;
+
+     label099:
+        r176 = staticinvoke <com.sun.imageio.plugins.jpeg.JPEG: javax.imageio.plugins.jpeg.JPEGQTable[] getDefaultQTables()>();
+
+     label100:
+        if z34 != 0 goto label104;
+
+        if r192 == null goto label101;
+
+        if z36 != 0 goto label101;
+
+        $r45 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata>;
+
+        r177 = specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGHuffmanTable[] collectHTablesFromMetadata(com.sun.imageio.plugins.jpeg.JPEGMetadata,boolean)>($r45, 1);
+
+        $r46 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata>;
+
+        r178 = specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGHuffmanTable[] collectHTablesFromMetadata(com.sun.imageio.plugins.jpeg.JPEGMetadata,boolean)>($r46, 0);
+
+        goto label104;
+
+     label101:
+        $r44 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGHuffmanTable[] streamDCHuffmanTables>;
+
+        if $r44 == null goto label102;
+
+        r177 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGHuffmanTable[] streamDCHuffmanTables>;
+
+        r178 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGHuffmanTable[] streamACHuffmanTables>;
+
+        goto label104;
+
+     label102:
+        if r179 == null goto label103;
+
+        $z10 = virtualinvoke r179.<javax.imageio.plugins.jpeg.JPEGImageWriteParam: boolean areTablesSet()>();
+
+        if $z10 == 0 goto label103;
+
+        r177 = virtualinvoke r179.<javax.imageio.plugins.jpeg.JPEGImageWriteParam: javax.imageio.plugins.jpeg.JPEGHuffmanTable[] getDCHuffmanTables()>();
+
+        r178 = virtualinvoke r179.<javax.imageio.plugins.jpeg.JPEGImageWriteParam: javax.imageio.plugins.jpeg.JPEGHuffmanTable[] getACHuffmanTables()>();
+
+        goto label104;
+
+     label103:
+        r177 = staticinvoke <com.sun.imageio.plugins.jpeg.JPEG: javax.imageio.plugins.jpeg.JPEGHuffmanTable[] getDefaultHuffmanTables(boolean)>(1);
+
+        r178 = staticinvoke <com.sun.imageio.plugins.jpeg.JPEG: javax.imageio.plugins.jpeg.JPEGHuffmanTable[] getDefaultHuffmanTables(boolean)>(0);
+
+     label104:
+        $r194 = newarray (int)[i89];
+
+        $r195 = newarray (int)[i89];
+
+        $r196 = newarray (int)[i89];
+
+        $r197 = newarray (int)[i89];
+
+        i109 = 0;
+
+     label105:
+        if i109 >= i89 goto label106;
+
+        $i36 = i109 + 1;
+
+        $r194[i109] = $i36;
+
+        $r195[i109] = 1;
+
+        $r196[i109] = 1;
+
+        $r197[i109] = 0;
+
+        i109 = i109 + 1;
+
+        goto label105;
+
+     label106:
+        if r184 == null goto label109;
+
+        i110 = 0;
+
+     label107:
+        if i110 >= i89 goto label109;
+
+        $z9 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean forceJFIF>;
+
+        if $z9 != 0 goto label108;
+
+        $r42 = r184.<com.sun.imageio.plugins.jpeg.SOFMarkerSegment: com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec[] componentSpecs>;
+
+        $r43 = $r42[i110];
+
+        $i35 = $r43.<com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec: int componentId>;
+
+        $r194[i110] = $i35;
+
+     label108:
+        $r36 = r184.<com.sun.imageio.plugins.jpeg.SOFMarkerSegment: com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec[] componentSpecs>;
+
+        $r37 = $r36[i110];
+
+        $i32 = $r37.<com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec: int HsamplingFactor>;
+
+        $r195[i110] = $i32;
+
+        $r38 = r184.<com.sun.imageio.plugins.jpeg.SOFMarkerSegment: com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec[] componentSpecs>;
+
+        $r39 = $r38[i110];
+
+        $i33 = $r39.<com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec: int VsamplingFactor>;
+
+        $r196[i110] = $i33;
+
+        $r40 = r184.<com.sun.imageio.plugins.jpeg.SOFMarkerSegment: com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec[] componentSpecs>;
+
+        $r41 = $r40[i110];
+
+        $i34 = $r41.<com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec: int QtableSelector>;
+
+        $r197[i110] = $i34;
+
+        i110 = i110 + 1;
+
+        goto label107;
+
+     label109:
+        $i1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceXOffset>;
+
+        $i2 = $i1 + i101;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceXOffset> = $i2;
+
+        $i3 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceWidth>;
+
+        $i4 = $i3 - i101;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceWidth> = $i4;
+
+        $i5 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceYOffset>;
+
+        $i6 = $i5 + i102;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceYOffset> = $i6;
+
+        $i7 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceHeight>;
+
+        $i8 = $i7 - i102;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceHeight> = $i8;
+
+        $i9 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceWidth>;
+
+        $i10 = $i9 + i99;
+
+        $i11 = $i10 - 1;
+
+        $i29 = $i11 / i99;
+
+        $i12 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceHeight>;
+
+        $i13 = $i12 + i100;
+
+        $i14 = $i13 - 1;
+
+        $i30 = $i14 / i100;
+
+        $i15 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceWidth>;
+
+        $i31 = $i15 * i89;
+
+        $r216 = new java.awt.image.DataBufferByte;
+
+        specialinvoke $r216.<java.awt.image.DataBufferByte: void <init>(int)>($i31);
+
+        $r13 = <com.sun.imageio.plugins.jpeg.JPEG: int[][] bandOffsets>;
+
+        $i16 = i89 - 1;
+
+        $r35 = $r13[$i16];
+
+        $i17 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceWidth>;
+
+        $r14 = staticinvoke <java.awt.image.Raster: java.awt.image.WritableRaster createInterleavedRaster(java.awt.image.DataBuffer,int,int,int,int,int[],java.awt.Point)>($r216, $i17, 1, $i31, i89, $r35, null);
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.WritableRaster raster> = $r14;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void clearAbortRequest()>();
+
+        $r15 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$000(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r15);
+
+     label110:
+        $i18 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int currentImage>;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void processImageStarted(int)>($i18);
+
+     label111:
+        $r16 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$100(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r16);
+
+        goto label114;
+
+     label112:
+        $r161 := @caughtexception;
+
+     label113:
+        $r162 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$100(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r162);
+
+        throw $r161;
+
+     label114:
+        $z4 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean debug>;
+
+        if $z4 == 0 goto label115;
+
+        $r26 = <java.lang.System: java.io.PrintStream out>;
+
+        $r217 = new java.lang.StringBuilder;
+
+        specialinvoke $r217.<java.lang.StringBuilder: void <init>()>();
+
+        $r27 = virtualinvoke $r217.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("inCsType: ");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i104);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r26.<java.io.PrintStream: void println(java.lang.String)>($r29);
+
+        $r31 = <java.lang.System: java.io.PrintStream out>;
+
+        $r218 = new java.lang.StringBuilder;
+
+        specialinvoke $r218.<java.lang.StringBuilder: void <init>()>();
+
+        $r32 = virtualinvoke $r218.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("outCsType: ");
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i105);
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r31.<java.io.PrintStream: void println(java.lang.String)>($r34);
+
+     label115:
+        $l19 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: long structPointer>;
+
+        $r17 = virtualinvoke $r216.<java.awt.image.DataBufferByte: byte[] getData()>();
+
+        $i24 = i104;
+
+        $i25 = i105;
+
+        $i26 = i89;
+
+        $r21 = r169;
+
+        $i21 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceWidth>;
+
+        $i27 = i99;
+
+        $i28 = i100;
+
+        $r22 = r176;
+
+        $z6 = z40;
+
+        $r23 = r177;
+
+        $r24 = r178;
+
+        $z7 = z41;
+
+        $z8 = z34;
+
+        if i103 == 0 goto label116;
+
+        $z42 = 1;
+
+        goto label117;
+
+     label116:
+        $z42 = 0;
+
+     label117:
+        $i20 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int numScans>;
+
+        $z5 = specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean writeImage(long,byte[],int,int,int,int[],int,int,int,int,int,javax.imageio.plugins.jpeg.JPEGQTable[],boolean,javax.imageio.plugins.jpeg.JPEGHuffmanTable[],javax.imageio.plugins.jpeg.JPEGHuffmanTable[],boolean,boolean,boolean,int,int[],int[],int[],int[],int[],boolean,int)>($l19, $r17, $i24, $i25, $i26, $r21, $i21, $i29, $i30, $i27, $i28, $r22, $z6, $r23, $r24, $z7, $z8, $z42, $i20, r187, $r194, $r195, $r196, $r197, z39, i108);
+
+        $r18 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$000(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r18);
+
+     label118:
+        if $z5 == 0 goto label119;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void processWriteAborted()>();
+
+        goto label120;
+
+     label119:
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void processImageComplete()>();
+
+     label120:
+        $r19 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.stream.ImageOutputStream ios>;
+
+        interfaceinvoke $r19.<javax.imageio.stream.ImageOutputStream: void flush()>();
+
+     label121:
+        $r20 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$100(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r20);
+
+        goto label124;
+
+     label122:
+        $r159 := @caughtexception;
+
+     label123:
+        $r160 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$100(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r160);
+
+        throw $r159;
+
+     label124:
+        $i22 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int currentImage>;
+
+        $i23 = $i22 + 1;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int currentImage> = $i23;
+
+        return;
+
+        catch java.lang.Throwable from label110 to label111 with label112;
+        catch java.lang.Throwable from label112 to label113 with label112;
+        catch java.lang.Throwable from label118 to label121 with label122;
+        catch java.lang.Throwable from label122 to label123 with label122;
+    }
+
+    public boolean canWriteSequence()
+    {
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        return 1;
+    }
+
+    public void prepareWriteSequence(javax.imageio.metadata.IIOMetadata) throws java.io.IOException
+    {
+        java.lang.Throwable $r3;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock $r1;
+        javax.imageio.metadata.IIOMetadata r2;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r2 := @parameter0: javax.imageio.metadata.IIOMetadata;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void setThreadLock()>();
+
+     label1:
+        $r1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        virtualinvoke $r1.<com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void check()>();
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void prepareWriteSequenceOnThread(javax.imageio.metadata.IIOMetadata)>(r2);
+
+     label2:
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void clearThreadLock()>();
+
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void clearThreadLock()>();
+
+        throw $r3;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private void prepareWriteSequenceOnThread(javax.imageio.metadata.IIOMetadata) throws java.io.IOException
+    {
+        java.lang.IllegalStateException $r26;
+        javax.imageio.metadata.IIOMetadata r2;
+        javax.imageio.plugins.jpeg.JPEGHuffmanTable[] $r7, $r8, $r9, $r10, $r11, $r12, $r14, $r15;
+        boolean $z0, $z1, $z2, $z3;
+        com.sun.imageio.plugins.jpeg.JPEGMetadata r4;
+        javax.imageio.stream.ImageOutputStream $r1;
+        javax.imageio.plugins.jpeg.JPEGQTable[] $r5, $r6, $r13, $r16, $r20;
+        java.lang.StringBuilder $r17, $r19, $r21;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        javax.imageio.IIOException $r3, $r23, $r24;
+        long $l1;
+        int $i0, $i2;
+        java.lang.String $r22;
+        java.io.PrintStream $r18;
+        java.lang.IllegalArgumentException $r25;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r2 := @parameter0: javax.imageio.metadata.IIOMetadata;
+
+        $r1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.stream.ImageOutputStream ios>;
+
+        if $r1 != null goto label01;
+
+        $r26 = new java.lang.IllegalStateException;
+
+        specialinvoke $r26.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Output has not been set!");
+
+        throw $r26;
+
+     label01:
+        if r2 == null goto label10;
+
+        $z0 = r2 instanceof com.sun.imageio.plugins.jpeg.JPEGMetadata;
+
+        if $z0 == 0 goto label09;
+
+        r4 = (com.sun.imageio.plugins.jpeg.JPEGMetadata) r2;
+
+        $z1 = r4.<com.sun.imageio.plugins.jpeg.JPEGMetadata: boolean isStream>;
+
+        if $z1 != 0 goto label02;
+
+        $r25 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r25.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid stream metadata object.");
+
+        throw $r25;
+
+     label02:
+        $i0 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int currentImage>;
+
+        if $i0 == 0 goto label03;
+
+        $r24 = new javax.imageio.IIOException;
+
+        specialinvoke $r24.<javax.imageio.IIOException: void <init>(java.lang.String)>("JPEG Stream metadata must precede all images");
+
+        throw $r24;
+
+     label03:
+        $z2 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean sequencePrepared>;
+
+        if $z2 != 1 goto label04;
+
+        $r23 = new javax.imageio.IIOException;
+
+        specialinvoke $r23.<javax.imageio.IIOException: void <init>(java.lang.String)>("Stream metadata already written!");
+
+        throw $r23;
+
+     label04:
+        $r5 = specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGQTable[] collectQTablesFromMetadata(com.sun.imageio.plugins.jpeg.JPEGMetadata)>(r4);
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGQTable[] streamQTables> = $r5;
+
+        $z3 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean debug>;
+
+        if $z3 == 0 goto label05;
+
+        $r18 = <java.lang.System: java.io.PrintStream out>;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("after collecting from stream metadata, streamQTables.length is ");
+
+        $r20 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGQTable[] streamQTables>;
+
+        $i2 = lengthof $r20;
+
+        $r21 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r18.<java.io.PrintStream: void println(java.lang.String)>($r22);
+
+     label05:
+        $r6 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGQTable[] streamQTables>;
+
+        if $r6 != null goto label06;
+
+        $r16 = staticinvoke <com.sun.imageio.plugins.jpeg.JPEG: javax.imageio.plugins.jpeg.JPEGQTable[] getDefaultQTables()>();
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGQTable[] streamQTables> = $r16;
+
+     label06:
+        $r7 = specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGHuffmanTable[] collectHTablesFromMetadata(com.sun.imageio.plugins.jpeg.JPEGMetadata,boolean)>(r4, 1);
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGHuffmanTable[] streamDCHuffmanTables> = $r7;
+
+        $r8 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGHuffmanTable[] streamDCHuffmanTables>;
+
+        if $r8 != null goto label07;
+
+        $r15 = staticinvoke <com.sun.imageio.plugins.jpeg.JPEG: javax.imageio.plugins.jpeg.JPEGHuffmanTable[] getDefaultHuffmanTables(boolean)>(1);
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGHuffmanTable[] streamDCHuffmanTables> = $r15;
+
+     label07:
+        $r9 = specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGHuffmanTable[] collectHTablesFromMetadata(com.sun.imageio.plugins.jpeg.JPEGMetadata,boolean)>(r4, 0);
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGHuffmanTable[] streamACHuffmanTables> = $r9;
+
+        $r10 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGHuffmanTable[] streamACHuffmanTables>;
+
+        if $r10 != null goto label08;
+
+        $r14 = staticinvoke <com.sun.imageio.plugins.jpeg.JPEG: javax.imageio.plugins.jpeg.JPEGHuffmanTable[] getDefaultHuffmanTables(boolean)>(0);
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGHuffmanTable[] streamACHuffmanTables> = $r14;
+
+     label08:
+        $l1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: long structPointer>;
+
+        $r13 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGQTable[] streamQTables>;
+
+        $r12 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGHuffmanTable[] streamDCHuffmanTables>;
+
+        $r11 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.plugins.jpeg.JPEGHuffmanTable[] streamACHuffmanTables>;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void writeTables(long,javax.imageio.plugins.jpeg.JPEGQTable[],javax.imageio.plugins.jpeg.JPEGHuffmanTable[],javax.imageio.plugins.jpeg.JPEGHuffmanTable[])>($l1, $r13, $r12, $r11);
+
+        goto label10;
+
+     label09:
+        $r3 = new javax.imageio.IIOException;
+
+        specialinvoke $r3.<javax.imageio.IIOException: void <init>(java.lang.String)>("Stream metadata must be JPEG metadata");
+
+        throw $r3;
+
+     label10:
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean sequencePrepared> = 1;
+
+        return;
+    }
+
+    public void writeToSequence(javax.imageio.IIOImage, javax.imageio.ImageWriteParam) throws java.io.IOException
+    {
+        java.lang.Throwable $r5;
+        javax.imageio.IIOImage r2;
+        javax.imageio.ImageWriteParam r3;
+        java.lang.IllegalStateException $r4;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r2 := @parameter0: javax.imageio.IIOImage;
+
+        r3 := @parameter1: javax.imageio.ImageWriteParam;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void setThreadLock()>();
+
+     label1:
+        $r1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        virtualinvoke $r1.<com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void check()>();
+
+        $z0 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean sequencePrepared>;
+
+        if $z0 != 0 goto label2;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("sequencePrepared not called!");
+
+        throw $r4;
+
+     label2:
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void write(javax.imageio.metadata.IIOMetadata,javax.imageio.IIOImage,javax.imageio.ImageWriteParam)>(null, r2, r3);
+
+     label3:
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void clearThreadLock()>();
+
+        goto label5;
+
+     label4:
+        $r5 := @caughtexception;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void clearThreadLock()>();
+
+        throw $r5;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+    }
+
+    public void endWriteSequence() throws java.io.IOException
+    {
+        java.lang.Throwable $r3;
+        java.lang.IllegalStateException $r2;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void setThreadLock()>();
+
+     label1:
+        $r1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        virtualinvoke $r1.<com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void check()>();
+
+        $z0 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean sequencePrepared>;
+
+        if $z0 != 0 goto label2;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("sequencePrepared not called!");
+
+        throw $r2;
+
+     label2:
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean sequencePrepared> = 0;
+
+     label3:
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void clearThreadLock()>();
+
+        goto label5;
+
+     label4:
+        $r3 := @caughtexception;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void clearThreadLock()>();
+
+        throw $r3;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+    }
+
+    public synchronized void abort()
+    {
+        java.lang.Throwable $r1;
+        long $l0;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void setThreadLock()>();
+
+     label1:
+        specialinvoke r0.<javax.imageio.ImageWriter: void abort()>();
+
+        $l0 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: long structPointer>;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void abortWrite(long)>($l0);
+
+     label2:
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void clearThreadLock()>();
+
+        goto label4;
+
+     label3:
+        $r1 := @caughtexception;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void clearThreadLock()>();
+
+        throw $r1;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    protected synchronized void clearAbortRequest()
+    {
+        java.lang.Throwable $r2;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock $r1;
+        long $l0, $l1;
+        boolean $z0;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void setThreadLock()>();
+
+     label1:
+        $r1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        virtualinvoke $r1.<com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void check()>();
+
+        $z0 = virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean abortRequested()>();
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke r0.<javax.imageio.ImageWriter: void clearAbortRequest()>();
+
+        $l0 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: long structPointer>;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void resetWriter(long)>($l0);
+
+        $l1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: long structPointer>;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void setDest(long)>($l1);
+
+     label2:
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void clearThreadLock()>();
+
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void clearThreadLock()>();
+
+        throw $r2;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private void resetInternalState()
+    {
+        long $l0;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        $l0 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: long structPointer>;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void resetWriter(long)>($l0);
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.Raster srcRas> = null;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.WritableRaster raster> = null;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean convertTosRGB> = 0;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int currentImage> = 0;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int numScans> = 0;
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata> = null;
+
+        return;
+    }
+
+    public void reset()
+    {
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock $r1;
+        java.lang.Throwable $r2;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void setThreadLock()>();
+
+     label1:
+        $r1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        virtualinvoke $r1.<com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void check()>();
+
+        specialinvoke r0.<javax.imageio.ImageWriter: void reset()>();
+
+     label2:
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void clearThreadLock()>();
+
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void clearThreadLock()>();
+
+        throw $r2;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public void dispose()
+    {
+        java.lang.Throwable $r3;
+        sun.java2d.DisposerRecord $r2;
+        byte $b1;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock $r1;
+        long $l0;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void setThreadLock()>();
+
+     label1:
+        $r1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        virtualinvoke $r1.<com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void check()>();
+
+        $l0 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: long structPointer>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 == 0 goto label2;
+
+        $r2 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: sun.java2d.DisposerRecord disposerRecord>;
+
+        interfaceinvoke $r2.<sun.java2d.DisposerRecord: void dispose()>();
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: long structPointer> = 0L;
+
+     label2:
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void clearThreadLock()>();
+
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void clearThreadLock()>();
+
+        throw $r3;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    void warningOccurred(int)
+    {
+        java.lang.Throwable $r5;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock $r1, $r4, $r6;
+        int i0, $i1;
+        java.lang.InternalError $r2;
+        java.lang.String $r3;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$000(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r1);
+
+     label1:
+        if i0 < 0 goto label2;
+
+        if i0 <= 15 goto label3;
+
+     label2:
+        $r2 = new java.lang.InternalError;
+
+        specialinvoke $r2.<java.lang.InternalError: void <init>(java.lang.String)>("Invalid warning index");
+
+        throw $r2;
+
+     label3:
+        $i1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int currentImage>;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>(i0);
+
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void processWarningOccurred(int,java.lang.String,java.lang.String)>($i1, "com.sun.imageio.plugins.jpeg.JPEGImageWriterResources", $r3);
+
+     label4:
+        $r4 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$100(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r4);
+
+        goto label6;
+
+     label5:
+        $r5 := @caughtexception;
+
+        $r6 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$100(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r6);
+
+        throw $r5;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+    }
+
+    void warningWithMessage(java.lang.String)
+    {
+        java.lang.Throwable $r4;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock $r1, $r3, $r5;
+        int $i0;
+        java.lang.String r2;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$000(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r1);
+
+     label1:
+        $i0 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int currentImage>;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void processWarningOccurred(int,java.lang.String)>($i0, r2);
+
+     label2:
+        $r3 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$100(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r3);
+
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$100(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r5);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    void thumbnailStarted(int)
+    {
+        java.lang.Throwable $r3;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock $r1, $r2, $r4;
+        int i0, $i1;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$000(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r1);
+
+     label1:
+        $i1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int currentImage>;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void processThumbnailStarted(int,int)>($i1, i0);
+
+     label2:
+        $r2 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$100(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r2);
+
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$100(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r4);
+
+        throw $r3;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    void thumbnailProgress(float)
+    {
+        java.lang.Throwable $r3;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock $r1, $r2, $r4;
+        float f0;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        f0 := @parameter0: float;
+
+        $r1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$000(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r1);
+
+     label1:
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void processThumbnailProgress(float)>(f0);
+
+     label2:
+        $r2 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$100(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r2);
+
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$100(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r4);
+
+        throw $r3;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    void thumbnailComplete()
+    {
+        java.lang.Throwable $r3;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock $r1, $r2, $r4;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        $r1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$000(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r1);
+
+     label1:
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void processThumbnailComplete()>();
+
+     label2:
+        $r2 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$100(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r2);
+
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$100(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r4);
+
+        throw $r3;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private void checkSOFBands(com.sun.imageio.plugins.jpeg.SOFMarkerSegment, int) throws javax.imageio.IIOException
+    {
+        com.sun.imageio.plugins.jpeg.SOFMarkerSegment r0;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r3;
+        int i0, $i1;
+        javax.imageio.IIOException $r2;
+        com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec[] $r1;
+
+        r3 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r0 := @parameter0: com.sun.imageio.plugins.jpeg.SOFMarkerSegment;
+
+        i0 := @parameter1: int;
+
+        if r0 == null goto label1;
+
+        $r1 = r0.<com.sun.imageio.plugins.jpeg.SOFMarkerSegment: com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec[] componentSpecs>;
+
+        $i1 = lengthof $r1;
+
+        if $i1 == i0 goto label1;
+
+        $r2 = new javax.imageio.IIOException;
+
+        specialinvoke $r2.<javax.imageio.IIOException: void <init>(java.lang.String)>("Metadata components != number of destination bands");
+
+        throw $r2;
+
+     label1:
+        return;
+    }
+
+    private void checkJFIF(com.sun.imageio.plugins.jpeg.JFIFMarkerSegment, javax.imageio.ImageTypeSpecifier, boolean)
+    {
+        byte $b0;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r2;
+        javax.imageio.ImageTypeSpecifier r1;
+        com.sun.imageio.plugins.jpeg.JFIFMarkerSegment r0;
+        boolean z0, $z1;
+
+        r2 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r0 := @parameter0: com.sun.imageio.plugins.jpeg.JFIFMarkerSegment;
+
+        r1 := @parameter1: javax.imageio.ImageTypeSpecifier;
+
+        z0 := @parameter2: boolean;
+
+        if r0 == null goto label3;
+
+        $z1 = staticinvoke <com.sun.imageio.plugins.jpeg.JPEG: boolean isJFIFcompliant(javax.imageio.ImageTypeSpecifier,boolean)>(r1, z0);
+
+        if $z1 != 0 goto label3;
+
+        r2.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean ignoreJFIF> = 1;
+
+        if z0 == 0 goto label1;
+
+        $b0 = 5;
+
+        goto label2;
+
+     label1:
+        $b0 = 3;
+
+     label2:
+        virtualinvoke r2.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void warningOccurred(int)>($b0);
+
+     label3:
+        return;
+    }
+
+    private void checkAdobe(com.sun.imageio.plugins.jpeg.AdobeMarkerSegment, javax.imageio.ImageTypeSpecifier, boolean)
+    {
+        com.sun.imageio.plugins.jpeg.AdobeMarkerSegment r0;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r2;
+        javax.imageio.ImageTypeSpecifier r1;
+        byte $b2;
+        int $i0, $i1, $i4;
+        boolean z0;
+
+        r2 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r0 := @parameter0: com.sun.imageio.plugins.jpeg.AdobeMarkerSegment;
+
+        r1 := @parameter1: javax.imageio.ImageTypeSpecifier;
+
+        z0 := @parameter2: boolean;
+
+        if r0 == null goto label4;
+
+        $i0 = staticinvoke <com.sun.imageio.plugins.jpeg.JPEG: int transformForType(javax.imageio.ImageTypeSpecifier,boolean)>(r1, z0);
+
+        $i1 = r0.<com.sun.imageio.plugins.jpeg.AdobeMarkerSegment: int transform>;
+
+        if $i1 == $i0 goto label4;
+
+        if z0 == 0 goto label1;
+
+        $b2 = 6;
+
+        goto label2;
+
+     label1:
+        $b2 = 4;
+
+     label2:
+        virtualinvoke r2.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void warningOccurred(int)>($b2);
+
+        $i4 = (int) -1;
+
+        if $i0 != $i4 goto label3;
+
+        r2.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean ignoreAdobe> = 1;
+
+        goto label4;
+
+     label3:
+        r2.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int newAdobeTransform> = $i0;
+
+     label4:
+        return;
+    }
+
+    private int[] collectScans(com.sun.imageio.plugins.jpeg.JPEGMetadata, com.sun.imageio.plugins.jpeg.SOFMarkerSegment)
+    {
+        int[] r17;
+        com.sun.imageio.plugins.jpeg.MarkerSegment r16;
+        boolean $z0, $z1, $z2;
+        com.sun.imageio.plugins.jpeg.SOFMarkerSegment r11;
+        com.sun.imageio.plugins.jpeg.JPEGMetadata r1;
+        java.util.List $r2;
+        com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec $r14;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r4;
+        java.util.ArrayList $r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, i11, $i12, $i13, $i14, i15, i16, i17, i18, i19, i20, i21, i22;
+        com.sun.imageio.plugins.jpeg.SOSMarkerSegment$ScanComponentSpec $r10;
+        java.util.Iterator $r3;
+        com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec[] $r12, $r13;
+        com.sun.imageio.plugins.jpeg.SOSMarkerSegment r6;
+        com.sun.imageio.plugins.jpeg.SOSMarkerSegment$ScanComponentSpec[] $r7, $r8, $r9;
+        java.lang.Object $r5, $r15;
+
+        r4 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r1 := @parameter0: com.sun.imageio.plugins.jpeg.JPEGMetadata;
+
+        r11 := @parameter1: com.sun.imageio.plugins.jpeg.SOFMarkerSegment;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+        $r2 = r1.<com.sun.imageio.plugins.jpeg.JPEGMetadata: java.util.List markerSequence>;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label01:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label03;
+
+        $r15 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r16 = (com.sun.imageio.plugins.jpeg.MarkerSegment) $r15;
+
+        $z2 = r16 instanceof com.sun.imageio.plugins.jpeg.SOSMarkerSegment;
+
+        if $z2 == 0 goto label02;
+
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>(r16);
+
+     label02:
+        goto label01;
+
+     label03:
+        r17 = null;
+
+        r4.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int numScans> = 0;
+
+        $z1 = interfaceinvoke $r0.<java.util.List: boolean isEmpty()>();
+
+        if $z1 != 0 goto label12;
+
+        $i0 = interfaceinvoke $r0.<java.util.List: int size()>();
+
+        r4.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int numScans> = $i0;
+
+        $i1 = r4.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int numScans>;
+
+        $i2 = $i1 * 9;
+
+        r17 = newarray (int)[$i2];
+
+        i15 = 0;
+
+        i16 = 0;
+
+     label04:
+        $i3 = r4.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int numScans>;
+
+        if i16 >= $i3 goto label12;
+
+        $r5 = interfaceinvoke $r0.<java.util.List: java.lang.Object get(int)>(i16);
+
+        r6 = (com.sun.imageio.plugins.jpeg.SOSMarkerSegment) $r5;
+
+        i17 = i15 + 1;
+
+        $r7 = r6.<com.sun.imageio.plugins.jpeg.SOSMarkerSegment: com.sun.imageio.plugins.jpeg.SOSMarkerSegment$ScanComponentSpec[] componentSpecs>;
+
+        $i4 = lengthof $r7;
+
+        r17[i15] = $i4;
+
+        i18 = 0;
+
+     label05:
+        if i18 >= 4 goto label11;
+
+        $r8 = r6.<com.sun.imageio.plugins.jpeg.SOSMarkerSegment: com.sun.imageio.plugins.jpeg.SOSMarkerSegment$ScanComponentSpec[] componentSpecs>;
+
+        $i9 = lengthof $r8;
+
+        if i18 >= $i9 goto label09;
+
+        $r9 = r6.<com.sun.imageio.plugins.jpeg.SOSMarkerSegment: com.sun.imageio.plugins.jpeg.SOSMarkerSegment$ScanComponentSpec[] componentSpecs>;
+
+        $r10 = $r9[i18];
+
+        i11 = $r10.<com.sun.imageio.plugins.jpeg.SOSMarkerSegment$ScanComponentSpec: int componentSelector>;
+
+        i19 = 0;
+
+     label06:
+        $r12 = r11.<com.sun.imageio.plugins.jpeg.SOFMarkerSegment: com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec[] componentSpecs>;
+
+        $i12 = lengthof $r12;
+
+        if i19 >= $i12 goto label08;
+
+        $r13 = r11.<com.sun.imageio.plugins.jpeg.SOFMarkerSegment: com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec[] componentSpecs>;
+
+        $r14 = $r13[i19];
+
+        $i13 = $r14.<com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec: int componentId>;
+
+        if i11 != $i13 goto label07;
+
+        $i14 = i17;
+
+        i17 = i17 + 1;
+
+        r17[$i14] = i19;
+
+        goto label08;
+
+     label07:
+        i19 = i19 + 1;
+
+        goto label06;
+
+     label08:
+        goto label10;
+
+     label09:
+        $i10 = i17;
+
+        i17 = i17 + 1;
+
+        r17[$i10] = 0;
+
+     label10:
+        i18 = i18 + 1;
+
+        goto label05;
+
+     label11:
+        i20 = i17 + 1;
+
+        $i5 = r6.<com.sun.imageio.plugins.jpeg.SOSMarkerSegment: int startSpectralSelection>;
+
+        r17[i17] = $i5;
+
+        i21 = i20 + 1;
+
+        $i6 = r6.<com.sun.imageio.plugins.jpeg.SOSMarkerSegment: int endSpectralSelection>;
+
+        r17[i20] = $i6;
+
+        i22 = i21 + 1;
+
+        $i7 = r6.<com.sun.imageio.plugins.jpeg.SOSMarkerSegment: int approxHigh>;
+
+        r17[i21] = $i7;
+
+        i15 = i22 + 1;
+
+        $i8 = r6.<com.sun.imageio.plugins.jpeg.SOSMarkerSegment: int approxLow>;
+
+        r17[i22] = $i8;
+
+        i16 = i16 + 1;
+
+        goto label04;
+
+     label12:
+        return r17;
+    }
+
+    private javax.imageio.plugins.jpeg.JPEGQTable[] collectQTablesFromMetadata(com.sun.imageio.plugins.jpeg.JPEGMetadata)
+    {
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r10;
+        java.util.ArrayList $r0;
+        int[] $r7;
+        com.sun.imageio.plugins.jpeg.MarkerSegment r11;
+        com.sun.imageio.plugins.jpeg.DQTMarkerSegment r12;
+        int $i0, $i1, $i2, i3;
+        boolean $z0, $z1;
+        java.util.Iterator $r3;
+        javax.imageio.plugins.jpeg.JPEGQTable $r4;
+        com.sun.imageio.plugins.jpeg.JPEGMetadata r1;
+        com.sun.imageio.plugins.jpeg.DQTMarkerSegment$Qtable $r6;
+        java.util.List $r2, $r9;
+        javax.imageio.plugins.jpeg.JPEGQTable[] r13;
+        java.lang.Object $r5, $r8;
+
+        r10 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r1 := @parameter0: com.sun.imageio.plugins.jpeg.JPEGMetadata;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+        $r2 = r1.<com.sun.imageio.plugins.jpeg.JPEGMetadata: java.util.List markerSequence>;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r8 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r11 = (com.sun.imageio.plugins.jpeg.MarkerSegment) $r8;
+
+        $z1 = r11 instanceof com.sun.imageio.plugins.jpeg.DQTMarkerSegment;
+
+        if $z1 == 0 goto label2;
+
+        r12 = (com.sun.imageio.plugins.jpeg.DQTMarkerSegment) r11;
+
+        $r9 = r12.<com.sun.imageio.plugins.jpeg.DQTMarkerSegment: java.util.List tables>;
+
+        virtualinvoke $r0.<java.util.ArrayList: boolean addAll(java.util.Collection)>($r9);
+
+     label2:
+        goto label1;
+
+     label3:
+        r13 = null;
+
+        $i0 = virtualinvoke $r0.<java.util.ArrayList: int size()>();
+
+        if $i0 == 0 goto label5;
+
+        $i1 = virtualinvoke $r0.<java.util.ArrayList: int size()>();
+
+        r13 = newarray (javax.imageio.plugins.jpeg.JPEGQTable)[$i1];
+
+        i3 = 0;
+
+     label4:
+        $i2 = lengthof r13;
+
+        if i3 >= $i2 goto label5;
+
+        $r4 = new javax.imageio.plugins.jpeg.JPEGQTable;
+
+        $r5 = virtualinvoke $r0.<java.util.ArrayList: java.lang.Object get(int)>(i3);
+
+        $r6 = (com.sun.imageio.plugins.jpeg.DQTMarkerSegment$Qtable) $r5;
+
+        $r7 = $r6.<com.sun.imageio.plugins.jpeg.DQTMarkerSegment$Qtable: int[] data>;
+
+        specialinvoke $r4.<javax.imageio.plugins.jpeg.JPEGQTable: void <init>(int[])>($r7);
+
+        r13[i3] = $r4;
+
+        i3 = i3 + 1;
+
+        goto label4;
+
+     label5:
+        return r13;
+    }
+
+    private javax.imageio.plugins.jpeg.JPEGHuffmanTable[] collectHTablesFromMetadata(com.sun.imageio.plugins.jpeg.JPEGMetadata, boolean) throws javax.imageio.IIOException
+    {
+        com.sun.imageio.plugins.jpeg.DHTMarkerSegment$Htable $r4, $r7, $r8, r19;
+        javax.imageio.plugins.jpeg.JPEGHuffmanTable[] r20;
+        com.sun.imageio.plugins.jpeg.MarkerSegment r17;
+        boolean $z0, $z1, z2, $z3;
+        com.sun.imageio.plugins.jpeg.DHTMarkerSegment r18;
+        com.sun.imageio.plugins.jpeg.JPEGMetadata r1;
+        java.util.List $r2, $r13, $r14;
+        javax.imageio.plugins.jpeg.JPEGHuffmanTable $r5, $r6;
+        short[] $r9, $r10;
+        com.sun.imageio.plugins.jpeg.DHTMarkerSegment$Htable[] r21;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r16;
+        javax.imageio.IIOException $r11;
+        java.util.ArrayList $r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, i8, i9, i10;
+        java.util.Iterator $r3;
+        java.lang.Object $r12, $r15;
+
+        r16 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r1 := @parameter0: com.sun.imageio.plugins.jpeg.JPEGMetadata;
+
+        z2 := @parameter1: boolean;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+        $r2 = r1.<com.sun.imageio.plugins.jpeg.JPEGMetadata: java.util.List markerSequence>;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label01:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label07;
+
+        $r12 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r17 = (com.sun.imageio.plugins.jpeg.MarkerSegment) $r12;
+
+        $z1 = r17 instanceof com.sun.imageio.plugins.jpeg.DHTMarkerSegment;
+
+        if $z1 == 0 goto label06;
+
+        r18 = (com.sun.imageio.plugins.jpeg.DHTMarkerSegment) r17;
+
+        i8 = 0;
+
+     label02:
+        $r13 = r18.<com.sun.imageio.plugins.jpeg.DHTMarkerSegment: java.util.List tables>;
+
+        $i6 = interfaceinvoke $r13.<java.util.List: int size()>();
+
+        if i8 >= $i6 goto label06;
+
+        $r14 = r18.<com.sun.imageio.plugins.jpeg.DHTMarkerSegment: java.util.List tables>;
+
+        $r15 = interfaceinvoke $r14.<java.util.List: java.lang.Object get(int)>(i8);
+
+        r19 = (com.sun.imageio.plugins.jpeg.DHTMarkerSegment$Htable) $r15;
+
+        $i7 = r19.<com.sun.imageio.plugins.jpeg.DHTMarkerSegment$Htable: int tableClass>;
+
+        if z2 == 0 goto label03;
+
+        $z3 = 0;
+
+        goto label04;
+
+     label03:
+        $z3 = 1;
+
+     label04:
+        if $i7 != $z3 goto label05;
+
+        virtualinvoke $r0.<java.util.ArrayList: boolean add(java.lang.Object)>(r19);
+
+     label05:
+        i8 = i8 + 1;
+
+        goto label02;
+
+     label06:
+        goto label01;
+
+     label07:
+        r20 = null;
+
+        $i0 = virtualinvoke $r0.<java.util.ArrayList: int size()>();
+
+        if $i0 == 0 goto label13;
+
+        $i1 = virtualinvoke $r0.<java.util.ArrayList: int size()>();
+
+        r21 = newarray (com.sun.imageio.plugins.jpeg.DHTMarkerSegment$Htable)[$i1];
+
+        virtualinvoke $r0.<java.util.ArrayList: java.lang.Object[] toArray(java.lang.Object[])>(r21);
+
+        $i2 = virtualinvoke $r0.<java.util.ArrayList: int size()>();
+
+        r20 = newarray (javax.imageio.plugins.jpeg.JPEGHuffmanTable)[$i2];
+
+        i9 = 0;
+
+     label08:
+        $i3 = lengthof r20;
+
+        if i9 >= $i3 goto label13;
+
+        r20[i9] = null;
+
+        i10 = 0;
+
+     label09:
+        $i4 = virtualinvoke $r0.<java.util.ArrayList: int size()>();
+
+        if i10 >= $i4 goto label12;
+
+        $r4 = r21[i10];
+
+        $i5 = $r4.<com.sun.imageio.plugins.jpeg.DHTMarkerSegment$Htable: int tableID>;
+
+        if $i5 != i9 goto label11;
+
+        $r5 = r20[i9];
+
+        if $r5 == null goto label10;
+
+        $r11 = new javax.imageio.IIOException;
+
+        specialinvoke $r11.<javax.imageio.IIOException: void <init>(java.lang.String)>("Metadata has duplicate Htables!");
+
+        throw $r11;
+
+     label10:
+        $r6 = new javax.imageio.plugins.jpeg.JPEGHuffmanTable;
+
+        $r7 = r21[i10];
+
+        $r10 = $r7.<com.sun.imageio.plugins.jpeg.DHTMarkerSegment$Htable: short[] numCodes>;
+
+        $r8 = r21[i10];
+
+        $r9 = $r8.<com.sun.imageio.plugins.jpeg.DHTMarkerSegment$Htable: short[] values>;
+
+        specialinvoke $r6.<javax.imageio.plugins.jpeg.JPEGHuffmanTable: void <init>(short[],short[])>($r10, $r9);
+
+        r20[i9] = $r6;
+
+     label11:
+        i10 = i10 + 1;
+
+        goto label09;
+
+     label12:
+        i9 = i9 + 1;
+
+        goto label08;
+
+     label13:
+        return r20;
+    }
+
+    private int getSrcCSType(javax.imageio.ImageTypeSpecifier)
+    {
+        java.awt.image.ColorModel $r2;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        int $i0;
+        javax.imageio.ImageTypeSpecifier r1;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r1 := @parameter0: javax.imageio.ImageTypeSpecifier;
+
+        $r2 = virtualinvoke r1.<javax.imageio.ImageTypeSpecifier: java.awt.image.ColorModel getColorModel()>();
+
+        $i0 = specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int getSrcCSType(java.awt.image.ColorModel)>($r2);
+
+        return $i0;
+    }
+
+    private int getSrcCSType(java.awt.image.RenderedImage)
+    {
+        java.awt.image.ColorModel $r2;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        java.awt.image.RenderedImage r1;
+        int $i0;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r1 := @parameter0: java.awt.image.RenderedImage;
+
+        $r2 = interfaceinvoke r1.<java.awt.image.RenderedImage: java.awt.image.ColorModel getColorModel()>();
+
+        $i0 = specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int getSrcCSType(java.awt.image.ColorModel)>($r2);
+
+        return $i0;
+    }
+
+    private int getSrcCSType(java.awt.image.ColorModel)
+    {
+        java.awt.image.ColorModel r0;
+        byte b1;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r3;
+        int $i0;
+        java.awt.color.ColorSpace $r1, $r2;
+        boolean $z0;
+
+        r3 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r0 := @parameter0: java.awt.image.ColorModel;
+
+        b1 = 0;
+
+        if r0 == null goto label8;
+
+        $z0 = virtualinvoke r0.<java.awt.image.ColorModel: boolean hasAlpha()>();
+
+        $r1 = virtualinvoke r0.<java.awt.image.ColorModel: java.awt.color.ColorSpace getColorSpace()>();
+
+        $i0 = virtualinvoke $r1.<java.awt.color.ColorSpace: int getType()>();
+
+        tableswitch($i0)
+        {
+            case 3: goto label4;
+            case 4: goto label8;
+            case 5: goto label2;
+            case 6: goto label1;
+            case 7: goto label8;
+            case 8: goto label8;
+            case 9: goto label7;
+            case 10: goto label8;
+            case 11: goto label8;
+            case 12: goto label8;
+            case 13: goto label6;
+            default: goto label8;
+        };
+
+     label1:
+        b1 = 1;
+
+        goto label8;
+
+     label2:
+        if $z0 == 0 goto label3;
+
+        b1 = 6;
+
+        goto label8;
+
+     label3:
+        b1 = 2;
+
+        goto label8;
+
+     label4:
+        if $z0 == 0 goto label5;
+
+        b1 = 7;
+
+        goto label8;
+
+     label5:
+        b1 = 3;
+
+        goto label8;
+
+     label6:
+        $r2 = staticinvoke <com.sun.imageio.plugins.jpeg.JPEG$JCS: java.awt.color.ColorSpace getYCC()>();
+
+        if $r1 != $r2 goto label7;
+
+        if $z0 == 0 goto label7;
+
+        goto label7;
+
+     label7:
+        b1 = 4;
+
+     label8:
+        return b1;
+    }
+
+    private int getDestCSType(javax.imageio.ImageTypeSpecifier)
+    {
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r4;
+        javax.imageio.ImageTypeSpecifier r0;
+        java.awt.color.ColorSpace $r2, $r3;
+        java.awt.image.ColorModel $r1;
+        byte b1;
+        int $i0;
+        boolean $z0;
+
+        r4 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r0 := @parameter0: javax.imageio.ImageTypeSpecifier;
+
+        $r1 = virtualinvoke r0.<javax.imageio.ImageTypeSpecifier: java.awt.image.ColorModel getColorModel()>();
+
+        $z0 = virtualinvoke $r1.<java.awt.image.ColorModel: boolean hasAlpha()>();
+
+        $r2 = virtualinvoke $r1.<java.awt.image.ColorModel: java.awt.color.ColorSpace getColorSpace()>();
+
+        b1 = 0;
+
+        $i0 = virtualinvoke $r2.<java.awt.color.ColorSpace: int getType()>();
+
+        tableswitch($i0)
+        {
+            case 3: goto label4;
+            case 4: goto label8;
+            case 5: goto label2;
+            case 6: goto label1;
+            case 7: goto label8;
+            case 8: goto label8;
+            case 9: goto label7;
+            case 10: goto label8;
+            case 11: goto label8;
+            case 12: goto label8;
+            case 13: goto label6;
+            default: goto label8;
+        };
+
+     label1:
+        b1 = 1;
+
+        goto label8;
+
+     label2:
+        if $z0 == 0 goto label3;
+
+        b1 = 6;
+
+        goto label8;
+
+     label3:
+        b1 = 2;
+
+        goto label8;
+
+     label4:
+        if $z0 == 0 goto label5;
+
+        b1 = 7;
+
+        goto label8;
+
+     label5:
+        b1 = 3;
+
+        goto label8;
+
+     label6:
+        $r3 = staticinvoke <com.sun.imageio.plugins.jpeg.JPEG$JCS: java.awt.color.ColorSpace getYCC()>();
+
+        if $r2 != $r3 goto label7;
+
+        if $z0 == 0 goto label7;
+
+        goto label7;
+
+     label7:
+        b1 = 4;
+
+     label8:
+        return b1;
+    }
+
+    private int getDefaultDestCSType(javax.imageio.ImageTypeSpecifier)
+    {
+        java.awt.image.ColorModel $r2;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        int $i0;
+        javax.imageio.ImageTypeSpecifier r1;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r1 := @parameter0: javax.imageio.ImageTypeSpecifier;
+
+        $r2 = virtualinvoke r1.<javax.imageio.ImageTypeSpecifier: java.awt.image.ColorModel getColorModel()>();
+
+        $i0 = specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int getDefaultDestCSType(java.awt.image.ColorModel)>($r2);
+
+        return $i0;
+    }
+
+    private int getDefaultDestCSType(java.awt.image.RenderedImage)
+    {
+        java.awt.image.ColorModel $r2;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        java.awt.image.RenderedImage r1;
+        int $i0;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r1 := @parameter0: java.awt.image.RenderedImage;
+
+        $r2 = interfaceinvoke r1.<java.awt.image.RenderedImage: java.awt.image.ColorModel getColorModel()>();
+
+        $i0 = specialinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int getDefaultDestCSType(java.awt.image.ColorModel)>($r2);
+
+        return $i0;
+    }
+
+    private int getDefaultDestCSType(java.awt.image.ColorModel)
+    {
+        java.awt.image.ColorModel r0;
+        byte b1;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r3;
+        int $i0;
+        java.awt.color.ColorSpace $r1, $r2;
+        boolean $z0;
+
+        r3 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r0 := @parameter0: java.awt.image.ColorModel;
+
+        b1 = 0;
+
+        if r0 == null goto label8;
+
+        $z0 = virtualinvoke r0.<java.awt.image.ColorModel: boolean hasAlpha()>();
+
+        $r1 = virtualinvoke r0.<java.awt.image.ColorModel: java.awt.color.ColorSpace getColorSpace()>();
+
+        $i0 = virtualinvoke $r1.<java.awt.color.ColorSpace: int getType()>();
+
+        tableswitch($i0)
+        {
+            case 3: goto label4;
+            case 4: goto label8;
+            case 5: goto label2;
+            case 6: goto label1;
+            case 7: goto label8;
+            case 8: goto label8;
+            case 9: goto label7;
+            case 10: goto label8;
+            case 11: goto label8;
+            case 12: goto label8;
+            case 13: goto label6;
+            default: goto label8;
+        };
+
+     label1:
+        b1 = 1;
+
+        goto label8;
+
+     label2:
+        if $z0 == 0 goto label3;
+
+        b1 = 7;
+
+        goto label8;
+
+     label3:
+        b1 = 3;
+
+        goto label8;
+
+     label4:
+        if $z0 == 0 goto label5;
+
+        b1 = 7;
+
+        goto label8;
+
+     label5:
+        b1 = 3;
+
+        goto label8;
+
+     label6:
+        $r2 = staticinvoke <com.sun.imageio.plugins.jpeg.JPEG$JCS: java.awt.color.ColorSpace getYCC()>();
+
+        if $r1 != $r2 goto label7;
+
+        if $z0 == 0 goto label7;
+
+        goto label7;
+
+     label7:
+        b1 = 11;
+
+     label8:
+        return b1;
+    }
+
+    private boolean isSubsampled(com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec[])
+    {
+        com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec $r1, $r2, $r3, $r4;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r5;
+        com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec[] r0;
+        int i0, i1, $i2, $i3, $i4, i5;
+
+        r5 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r0 := @parameter0: com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec[];
+
+        $r1 = r0[0];
+
+        i0 = $r1.<com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec: int HsamplingFactor>;
+
+        $r2 = r0[0];
+
+        i1 = $r2.<com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec: int VsamplingFactor>;
+
+        i5 = 1;
+
+     label1:
+        $i2 = lengthof r0;
+
+        if i5 >= $i2 goto label4;
+
+        $r3 = r0[i5];
+
+        $i3 = $r3.<com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec: int HsamplingFactor>;
+
+        if $i3 != i0 goto label2;
+
+        $r4 = r0[i5];
+
+        $i4 = $r4.<com.sun.imageio.plugins.jpeg.SOFMarkerSegment$ComponentSpec: int HsamplingFactor>;
+
+        if $i4 == i0 goto label3;
+
+     label2:
+        return 1;
+
+     label3:
+        i5 = i5 + 1;
+
+        goto label1;
+
+     label4:
+        return 0;
+    }
+
+    private static native void initWriterIDs(java.lang.Class, java.lang.Class);
+
+    private native long initJPEGImageWriter();
+
+    private native void setDest(long);
+
+    private native boolean writeImage(long, byte[], int, int, int, int[], int, int, int, int, int, javax.imageio.plugins.jpeg.JPEGQTable[], boolean, javax.imageio.plugins.jpeg.JPEGHuffmanTable[], javax.imageio.plugins.jpeg.JPEGHuffmanTable[], boolean, boolean, boolean, int, int[], int[], int[], int[], int[], boolean, int);
+
+    private void writeMetadata() throws java.io.IOException
+    {
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        int $i0, $i1;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.awt.color.ICC_Profile $r2, $r7;
+        com.sun.imageio.plugins.jpeg.JPEGMetadata $r1, $r5;
+        javax.imageio.stream.ImageOutputStream $r4, $r6, $r9;
+        java.util.List $r3, $r8;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        $r1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata>;
+
+        if $r1 != null goto label2;
+
+        $z3 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean writeDefaultJFIF>;
+
+        if $z3 == 0 goto label1;
+
+        $r9 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.stream.ImageOutputStream ios>;
+
+        $r8 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.util.List thumbnails>;
+
+        $r7 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.color.ICC_Profile iccProfile>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JFIFMarkerSegment: void writeDefaultJFIF(javax.imageio.stream.ImageOutputStream,java.util.List,java.awt.color.ICC_Profile,com.sun.imageio.plugins.jpeg.JPEGImageWriter)>($r9, $r8, $r7, r0);
+
+     label1:
+        $z4 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean writeAdobe>;
+
+        if $z4 == 0 goto label3;
+
+        $r6 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.stream.ImageOutputStream ios>;
+
+        $i1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int newAdobeTransform>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.AdobeMarkerSegment: void writeAdobeSegment(javax.imageio.stream.ImageOutputStream,int)>($r6, $i1);
+
+        goto label3;
+
+     label2:
+        $r5 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGMetadata metadata>;
+
+        $r4 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.stream.ImageOutputStream ios>;
+
+        $z2 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean ignoreJFIF>;
+
+        $z1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean forceJFIF>;
+
+        $r3 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.util.List thumbnails>;
+
+        $r2 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.color.ICC_Profile iccProfile>;
+
+        $z0 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean ignoreAdobe>;
+
+        $i0 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int newAdobeTransform>;
+
+        virtualinvoke $r5.<com.sun.imageio.plugins.jpeg.JPEGMetadata: void writeToStream(javax.imageio.stream.ImageOutputStream,boolean,boolean,java.util.List,java.awt.color.ICC_Profile,boolean,int,com.sun.imageio.plugins.jpeg.JPEGImageWriter)>($r4, $z2, $z1, $r3, $r2, $z0, $i0, r0);
+
+     label3:
+        return;
+    }
+
+    private native void writeTables(long, javax.imageio.plugins.jpeg.JPEGQTable[], javax.imageio.plugins.jpeg.JPEGHuffmanTable[], javax.imageio.plugins.jpeg.JPEGHuffmanTable[]);
+
+    private void grabPixels(int)
+    {
+        java.awt.image.ColorConvertOp $r11;
+        int[] $r1, $r7, $r9, $r14;
+        java.awt.image.IndexColorModel $r17, $r18;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.awt.image.BufferedImage $r19;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock $r4, $r5, $r21;
+        float $f0, $f1, $f2, $f3;
+        java.lang.Throwable $r20;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23;
+        java.awt.image.Raster $r2, $r15, $r16, r22;
+        java.io.PrintStream $r13;
+        java.awt.image.ColorModel $r8;
+        java.awt.image.WritableRaster $r3, $r6, $r10, $r12;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        i0 := @parameter0: int;
+
+        $z0 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean indexed>;
+
+        if $z0 == 0 goto label03;
+
+        $r15 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.Raster srcRas>;
+
+        $i22 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceXOffset>;
+
+        $i19 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceYOffset>;
+
+        $i21 = $i19 + i0;
+
+        $i20 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceWidth>;
+
+        $r14 = newarray (int)[1];
+
+        $r14[0] = 0;
+
+        $r16 = virtualinvoke $r15.<java.awt.image.Raster: java.awt.image.Raster createChild(int,int,int,int,int,int,int[])>($i22, $i21, $i20, 1, 0, 0, $r14);
+
+        $r17 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.IndexColorModel indexCM>;
+
+        $i23 = virtualinvoke $r17.<java.awt.image.IndexColorModel: int getTransparency()>();
+
+        if $i23 == 1 goto label01;
+
+        $z3 = 1;
+
+        goto label02;
+
+     label01:
+        $z3 = 0;
+
+     label02:
+        $r18 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.IndexColorModel indexCM>;
+
+        $r19 = virtualinvoke $r18.<java.awt.image.IndexColorModel: java.awt.image.BufferedImage convertToIntDiscrete(java.awt.image.Raster,boolean)>($r16, $z3);
+
+        r22 = virtualinvoke $r19.<java.awt.image.BufferedImage: java.awt.image.WritableRaster getRaster()>();
+
+        goto label04;
+
+     label03:
+        $r2 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.Raster srcRas>;
+
+        $i4 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceXOffset>;
+
+        $i1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceYOffset>;
+
+        $i3 = $i1 + i0;
+
+        $i2 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceWidth>;
+
+        $r1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int[] srcBands>;
+
+        r22 = virtualinvoke $r2.<java.awt.image.Raster: java.awt.image.Raster createChild(int,int,int,int,int,int,int[])>($i4, $i3, $i2, 1, 0, 0, $r1);
+
+     label04:
+        $z1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean convertTosRGB>;
+
+        if $z1 == 0 goto label06;
+
+        $z2 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean debug>;
+
+        if $z2 == 0 goto label05;
+
+        $r13 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r13.<java.io.PrintStream: void println(java.lang.String)>("Converting to sRGB");
+
+     label05:
+        $r11 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.ColorConvertOp convertOp>;
+
+        $r10 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.WritableRaster converted>;
+
+        $r12 = virtualinvoke $r11.<java.awt.image.ColorConvertOp: java.awt.image.WritableRaster filter(java.awt.image.Raster,java.awt.image.WritableRaster)>(r22, $r10);
+
+        r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.WritableRaster converted> = $r12;
+
+        r22 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.WritableRaster converted>;
+
+     label06:
+        $z4 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: boolean isAlphaPremultiplied>;
+
+        if $z4 == 0 goto label07;
+
+        $r6 = virtualinvoke r22.<java.awt.image.Raster: java.awt.image.WritableRaster createCompatibleWritableRaster()>();
+
+        $i7 = virtualinvoke r22.<java.awt.image.Raster: int getMinX()>();
+
+        $i8 = virtualinvoke r22.<java.awt.image.Raster: int getMinY()>();
+
+        $i9 = virtualinvoke r22.<java.awt.image.Raster: int getWidth()>();
+
+        $i10 = virtualinvoke r22.<java.awt.image.Raster: int getHeight()>();
+
+        $r7 = virtualinvoke r22.<java.awt.image.Raster: int[] getPixels(int,int,int,int,int[])>($i7, $i8, $i9, $i10, null);
+
+        $i11 = virtualinvoke r22.<java.awt.image.Raster: int getMinX()>();
+
+        $i12 = virtualinvoke r22.<java.awt.image.Raster: int getMinY()>();
+
+        $i13 = virtualinvoke r22.<java.awt.image.Raster: int getWidth()>();
+
+        $i14 = virtualinvoke r22.<java.awt.image.Raster: int getHeight()>();
+
+        virtualinvoke $r6.<java.awt.image.WritableRaster: void setPixels(int,int,int,int,int[])>($i11, $i12, $i13, $i14, $r7);
+
+        $r8 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.ColorModel srcCM>;
+
+        virtualinvoke $r8.<java.awt.image.ColorModel: java.awt.image.ColorModel coerceData(java.awt.image.WritableRaster,boolean)>($r6, 0);
+
+        $i15 = virtualinvoke $r6.<java.awt.image.WritableRaster: int getMinX()>();
+
+        $i16 = virtualinvoke $r6.<java.awt.image.WritableRaster: int getMinY()>();
+
+        $i17 = virtualinvoke $r6.<java.awt.image.WritableRaster: int getWidth()>();
+
+        $i18 = virtualinvoke $r6.<java.awt.image.WritableRaster: int getHeight()>();
+
+        $r9 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int[] srcBands>;
+
+        r22 = virtualinvoke $r6.<java.awt.image.WritableRaster: java.awt.image.Raster createChild(int,int,int,int,int,int,int[])>($i15, $i16, $i17, $i18, 0, 0, $r9);
+
+     label07:
+        $r3 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.image.WritableRaster raster>;
+
+        virtualinvoke $r3.<java.awt.image.WritableRaster: void setRect(java.awt.image.Raster)>(r22);
+
+        if i0 <= 7 goto label12;
+
+        $i5 = i0 % 8;
+
+        if $i5 != 0 goto label12;
+
+        $r4 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$000(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r4);
+
+     label08:
+        $f1 = (float) i0;
+
+        $i6 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int sourceHeight>;
+
+        $f0 = (float) $i6;
+
+        $f2 = $f1 / $f0;
+
+        $f3 = $f2 * 100.0F;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: void processImageProgress(float)>($f3);
+
+     label09:
+        $r5 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$100(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r5);
+
+        goto label12;
+
+     label10:
+        $r20 := @caughtexception;
+
+     label11:
+        $r21 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$100(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r21);
+
+        throw $r20;
+
+     label12:
+        return;
+
+        catch java.lang.Throwable from label08 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    private native void abortWrite(long);
+
+    private native void resetWriter(long);
+
+    private static native void disposeWriter(long);
+
+    private void writeOutputData(byte[], int, int) throws java.io.IOException
+    {
+        java.lang.Throwable $r5;
+        byte[] r2;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r0;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock $r1, $r4, $r6;
+        javax.imageio.stream.ImageOutputStream $r3;
+        int i0, i1;
+
+        r0 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        r2 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r1 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$000(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r1);
+
+     label1:
+        $r3 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: javax.imageio.stream.ImageOutputStream ios>;
+
+        interfaceinvoke $r3.<javax.imageio.stream.ImageOutputStream: void write(byte[],int,int)>(r2, i0, i1);
+
+     label2:
+        $r4 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$100(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r4);
+
+        goto label5;
+
+     label3:
+        $r5 := @caughtexception;
+
+     label4:
+        $r6 = r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock cbLock>;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock: void access$100(com.sun.imageio.plugins.jpeg.JPEGImageWriter$CallBackLock)>($r6);
+
+        throw $r5;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private synchronized void setThreadLock()
+    {
+        java.lang.IllegalStateException $r4;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r1;
+        java.lang.Thread $r0, $r2, $r3, $r9;
+        int $i0, $i1;
+        java.lang.String $r13;
+        java.lang.StringBuilder $r5, $r6, $r7, $r8, $r10, $r11, $r12;
+
+        r1 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = r1.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.lang.Thread theThread>;
+
+        if $r2 == null goto label2;
+
+        $r3 = r1.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.lang.Thread theThread>;
+
+        if $r3 == $r0 goto label1;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Attempt to use instance of ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" locked on thread ");
+
+        $r9 = r1.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.lang.Thread theThread>;
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" from thread ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r0);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r13);
+
+        throw $r4;
+
+     label1:
+        $i0 = r1.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int theLockCount>;
+
+        $i1 = $i0 + 1;
+
+        r1.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int theLockCount> = $i1;
+
+        goto label3;
+
+     label2:
+        r1.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.lang.Thread theThread> = $r0;
+
+        r1.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int theLockCount> = 1;
+
+     label3:
+        return;
+    }
+
+    private synchronized void clearThreadLock()
+    {
+        java.lang.IllegalStateException $r3;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter r1;
+        java.lang.Thread $r0, $r2, $r6, $r11;
+        int $i0, $i1, $i2;
+        java.lang.StringBuilder $r4, $r5, $r7, $r8, $r9;
+        java.lang.String $r10;
+
+        r1 := @this: com.sun.imageio.plugins.jpeg.JPEGImageWriter;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = r1.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.lang.Thread theThread>;
+
+        if $r2 == null goto label1;
+
+        $r11 = r1.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.lang.Thread theThread>;
+
+        if $r11 == $r0 goto label2;
+
+     label1:
+        $r3 = new java.lang.IllegalStateException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Attempt to clear thread lock form wrong thread. Locked thread: ");
+
+        $r6 = r1.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.lang.Thread theThread>;
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("; current thread: ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r10);
+
+        throw $r3;
+
+     label2:
+        $i0 = r1.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int theLockCount>;
+
+        $i1 = $i0 - 1;
+
+        r1.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int theLockCount> = $i1;
+
+        $i2 = r1.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: int theLockCount>;
+
+        if $i2 != 0 goto label3;
+
+        r1.<com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.lang.Thread theThread> = null;
+
+     label3:
+        return;
+    }
+
+    static void access$200(long)
+    {
+        long l0;
+
+        l0 := @parameter0: long;
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter: void disposeWriter(long)>(l0);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.awt.Dimension $r2, $r3;
+        java.awt.Dimension[] $r1;
+        com.sun.imageio.plugins.jpeg.JPEGImageWriter$1 $r0;
+
+        <com.sun.imageio.plugins.jpeg.JPEGImageWriter: int MAX_WARNING> = 15;
+
+        <com.sun.imageio.plugins.jpeg.JPEGImageWriter: int WARNING_NO_GRAY_THUMB_AS_INDEXED> = 15;
+
+        <com.sun.imageio.plugins.jpeg.JPEGImageWriter: int WARNING_NO_RGB_THUMB_AS_INDEXED> = 14;
+
+        <com.sun.imageio.plugins.jpeg.JPEGImageWriter: int WARNING_METADATA_ADJUSTED_FOR_THUMB> = 13;
+
+        <com.sun.imageio.plugins.jpeg.JPEGImageWriter: int WARNING_THUMB_CLIPPED> = 12;
+
+        <com.sun.imageio.plugins.jpeg.JPEGImageWriter: int WARNING_FORCING_JFIF> = 11;
+
+        <com.sun.imageio.plugins.jpeg.JPEGImageWriter: int WARNING_IGNORING_THUMBS> = 10;
+
+        <com.sun.imageio.plugins.jpeg.JPEGImageWriter: int WARNING_ILLEGAL_THUMBNAIL> = 9;
+
+        <com.sun.imageio.plugins.jpeg.JPEGImageWriter: int WARNING_NO_BANDS_ON_INDEXED> = 8;
+
+        <com.sun.imageio.plugins.jpeg.JPEGImageWriter: int WARNING_METADATA_NOT_JPEG_FOR_RASTER> = 7;
+
+        <com.sun.imageio.plugins.jpeg.JPEGImageWriter: int WARNING_IMAGE_METADATA_ADOBE_MISMATCH> = 6;
+
+        <com.sun.imageio.plugins.jpeg.JPEGImageWriter: int WARNING_IMAGE_METADATA_JFIF_MISMATCH> = 5;
+
+        <com.sun.imageio.plugins.jpeg.JPEGImageWriter: int WARNING_DEST_METADATA_ADOBE_MISMATCH> = 4;
+
+        <com.sun.imageio.plugins.jpeg.JPEGImageWriter: int WARNING_DEST_METADATA_JFIF_MISMATCH> = 3;
+
+        <com.sun.imageio.plugins.jpeg.JPEGImageWriter: int WARNING_DEST_METADATA_COMP_MISMATCH> = 2;
+
+        <com.sun.imageio.plugins.jpeg.JPEGImageWriter: int WARNING_STREAM_METADATA_IGNORED> = 1;
+
+        <com.sun.imageio.plugins.jpeg.JPEGImageWriter: int WARNING_DEST_IGNORED> = 0;
+
+        $r0 = new com.sun.imageio.plugins.jpeg.JPEGImageWriter$1;
+
+        specialinvoke $r0.<com.sun.imageio.plugins.jpeg.JPEGImageWriter$1: void <init>()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        staticinvoke <com.sun.imageio.plugins.jpeg.JPEGImageWriter: void initWriterIDs(java.lang.Class,java.lang.Class)>(class "Ljavax/imageio/plugins/jpeg/JPEGQTable;", class "Ljavax/imageio/plugins/jpeg/JPEGHuffmanTable;");
+
+        $r1 = newarray (java.awt.Dimension)[2];
+
+        $r2 = new java.awt.Dimension;
+
+        specialinvoke $r2.<java.awt.Dimension: void <init>(int,int)>(1, 1);
+
+        $r1[0] = $r2;
+
+        $r3 = new java.awt.Dimension;
+
+        specialinvoke $r3.<java.awt.Dimension: void <init>(int,int)>(255, 255);
+
+        $r1[1] = $r3;
+
+        <com.sun.imageio.plugins.jpeg.JPEGImageWriter: java.awt.Dimension[] preferredThumbSizes> = $r1;
+
+        return;
+    }
+}

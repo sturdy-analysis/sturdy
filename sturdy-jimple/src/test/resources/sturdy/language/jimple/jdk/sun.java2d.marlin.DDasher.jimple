@@ -1,0 +1,2035 @@
+final class sun.java2d.marlin.DDasher extends java.lang.Object implements sun.java2d.marlin.DPathConsumer2D, sun.java2d.marlin.MarlinConst
+{
+    static final int REC_LIMIT;
+    static final double CURVE_LEN_ERR;
+    static final double MIN_T_INC;
+    static final double EPS;
+    static final double MAX_CYCLES;
+    private sun.java2d.marlin.DPathConsumer2D out;
+    private double[] dash;
+    private int dashLen;
+    private double startPhase;
+    private boolean startDashOn;
+    private int startIdx;
+    private boolean starting;
+    private boolean needsMoveTo;
+    private int idx;
+    private boolean dashOn;
+    private double phase;
+    private double sx0;
+    private double sy0;
+    private double cx0;
+    private double cy0;
+    private final double[] curCurvepts;
+    final sun.java2d.marlin.DRendererContext rdrCtx;
+    boolean recycleDashes;
+    private double[] firstSegmentsBuffer;
+    private int firstSegidx;
+    final sun.java2d.marlin.DoubleArrayCache$Reference dashes_ref;
+    final sun.java2d.marlin.DoubleArrayCache$Reference firstSegmentsBuffer_ref;
+    private double[] clipRect;
+    private int cOutCode;
+    private boolean subdivide;
+    private final sun.java2d.marlin.DDasher$LengthIterator li;
+    private final sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter curveSplitter;
+    private double cycleLen;
+    private boolean outside;
+    private double totalSkipLen;
+
+    void <init>(sun.java2d.marlin.DRendererContext)
+    {
+        double[] $r6, $r7;
+        sun.java2d.marlin.DDasher r0;
+        sun.java2d.marlin.DDasher$LengthIterator $r1;
+        sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter $r8;
+        sun.java2d.marlin.DRendererContext r2;
+        sun.java2d.marlin.DoubleArrayCache$Reference $r3, $r4, $r5;
+        boolean $z0;
+
+        r0 := @this: sun.java2d.marlin.DDasher;
+
+        r2 := @parameter0: sun.java2d.marlin.DRendererContext;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.java2d.marlin.DDasher: int cOutCode> = 0;
+
+        $z0 = <sun.java2d.marlin.DDasher: boolean DO_CLIP_SUBDIVIDER>;
+
+        r0.<sun.java2d.marlin.DDasher: boolean subdivide> = $z0;
+
+        $r1 = new sun.java2d.marlin.DDasher$LengthIterator;
+
+        specialinvoke $r1.<sun.java2d.marlin.DDasher$LengthIterator: void <init>()>();
+
+        r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DDasher$LengthIterator li> = $r1;
+
+        r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DRendererContext rdrCtx> = r2;
+
+        $r3 = virtualinvoke r2.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.DoubleArrayCache$Reference newDirtyDoubleArrayRef(int)>(256);
+
+        r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DoubleArrayCache$Reference dashes_ref> = $r3;
+
+        $r4 = virtualinvoke r2.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.DoubleArrayCache$Reference newDirtyDoubleArrayRef(int)>(256);
+
+        r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DoubleArrayCache$Reference firstSegmentsBuffer_ref> = $r4;
+
+        $r5 = r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DoubleArrayCache$Reference firstSegmentsBuffer_ref>;
+
+        $r6 = $r5.<sun.java2d.marlin.DoubleArrayCache$Reference: double[] initial>;
+
+        r0.<sun.java2d.marlin.DDasher: double[] firstSegmentsBuffer> = $r6;
+
+        $r7 = newarray (double)[16];
+
+        r0.<sun.java2d.marlin.DDasher: double[] curCurvepts> = $r7;
+
+        $r8 = r2.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter curveClipSplitter>;
+
+        r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter curveSplitter> = $r8;
+
+        return;
+    }
+
+    sun.java2d.marlin.DDasher init(sun.java2d.marlin.DPathConsumer2D, double[], int, double, boolean)
+    {
+        sun.java2d.marlin.DDasher r0;
+        byte $b1, $b2, $b3, $b8, $b14, $b15;
+        boolean z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10;
+        double[] r2, $r4;
+        sun.java2d.marlin.DPathConsumer2D r1;
+        sun.java2d.marlin.DRendererContext $r3, $r5;
+        int i0, $i4, $i5, $i6, $i7, $i9, $i10, $i11, i12, i13, $i16, $i17, $i18, $i20, $i21, $i22, $i23;
+        double $d0, $d1, $d2, $d3, d4, d5, d6, $d7, $d8, $d9, $d10, $d11;
+
+        r0 := @this: sun.java2d.marlin.DDasher;
+
+        r1 := @parameter0: sun.java2d.marlin.DPathConsumer2D;
+
+        r2 := @parameter1: double[];
+
+        i0 := @parameter2: int;
+
+        d4 := @parameter3: double;
+
+        z0 := @parameter4: boolean;
+
+        r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DPathConsumer2D out> = r1;
+
+        i12 = 0;
+
+        r0.<sun.java2d.marlin.DDasher: boolean dashOn> = 1;
+
+        d5 = 0.0;
+
+        i13 = 0;
+
+     label01:
+        if i13 >= i0 goto label02;
+
+        $d3 = r2[i13];
+
+        d5 = d5 + $d3;
+
+        i13 = i13 + 1;
+
+        goto label01;
+
+     label02:
+        r0.<sun.java2d.marlin.DDasher: double cycleLen> = d5;
+
+        d6 = d4 / d5;
+
+        $b1 = d4 cmpg 0.0;
+
+        $i16 = (int) $b1;
+
+        if $i16 >= 0 goto label12;
+
+        $d0 = neg d6;
+
+        $b8 = $d0 cmpl 1.6E7;
+
+        $i17 = (int) $b8;
+
+        if $i17 < 0 goto label03;
+
+        d4 = 0.0;
+
+        goto label20;
+
+     label03:
+        $d1 = neg d6;
+
+        $i9 = staticinvoke <sun.java2d.marlin.FloatMath: int floor_int(double)>($d1);
+
+        $i10 = $i9 & i0;
+
+        $i11 = $i10 & 1;
+
+        if $i11 == 0 goto label06;
+
+        $z4 = r0.<sun.java2d.marlin.DDasher: boolean dashOn>;
+
+        if $z4 != 0 goto label04;
+
+        $z5 = 1;
+
+        goto label05;
+
+     label04:
+        $z5 = 0;
+
+     label05:
+        r0.<sun.java2d.marlin.DDasher: boolean dashOn> = $z5;
+
+     label06:
+        $d7 = (double) $i9;
+
+        $d8 = $d7 * d5;
+
+        d4 = d4 + $d8;
+
+     label07:
+        $b14 = d4 cmpg 0.0;
+
+        $i18 = (int) $b14;
+
+        if $i18 >= 0 goto label11;
+
+        $i20 = (int) -1;
+
+        i12 = i12 + $i20;
+
+        if i12 >= 0 goto label08;
+
+        i12 = i0 - 1;
+
+     label08:
+        $d2 = r2[i12];
+
+        d4 = d4 + $d2;
+
+        $z3 = r0.<sun.java2d.marlin.DDasher: boolean dashOn>;
+
+        if $z3 != 0 goto label09;
+
+        $z6 = 1;
+
+        goto label10;
+
+     label09:
+        $z6 = 0;
+
+     label10:
+        r0.<sun.java2d.marlin.DDasher: boolean dashOn> = $z6;
+
+        goto label07;
+
+     label11:
+        goto label20;
+
+     label12:
+        $b2 = d4 cmpl 0.0;
+
+        $i21 = (int) $b2;
+
+        if $i21 <= 0 goto label20;
+
+        $b3 = d6 cmpl 1.6E7;
+
+        $i22 = (int) $b3;
+
+        if $i22 < 0 goto label13;
+
+        d4 = 0.0;
+
+        goto label20;
+
+     label13:
+        $i4 = staticinvoke <sun.java2d.marlin.FloatMath: int floor_int(double)>(d6);
+
+        $i5 = $i4 & i0;
+
+        $i6 = $i5 & 1;
+
+        if $i6 == 0 goto label16;
+
+        $z2 = r0.<sun.java2d.marlin.DDasher: boolean dashOn>;
+
+        if $z2 != 0 goto label14;
+
+        $z7 = 1;
+
+        goto label15;
+
+     label14:
+        $z7 = 0;
+
+     label15:
+        r0.<sun.java2d.marlin.DDasher: boolean dashOn> = $z7;
+
+     label16:
+        $d9 = (double) $i4;
+
+        $d10 = $d9 * d5;
+
+        d4 = d4 - $d10;
+
+     label17:
+        $d11 = r2[i12];
+
+        $b15 = d4 cmpl $d11;
+
+        $i23 = (int) $b15;
+
+        if $i23 < 0 goto label20;
+
+        d4 = d4 - $d11;
+
+        $i7 = i12 + 1;
+
+        i12 = $i7 % i0;
+
+        $z1 = r0.<sun.java2d.marlin.DDasher: boolean dashOn>;
+
+        if $z1 != 0 goto label18;
+
+        $z8 = 1;
+
+        goto label19;
+
+     label18:
+        $z8 = 0;
+
+     label19:
+        r0.<sun.java2d.marlin.DDasher: boolean dashOn> = $z8;
+
+        goto label17;
+
+     label20:
+        r0.<sun.java2d.marlin.DDasher: double[] dash> = r2;
+
+        r0.<sun.java2d.marlin.DDasher: int dashLen> = i0;
+
+        r0.<sun.java2d.marlin.DDasher: double phase> = d4;
+
+        r0.<sun.java2d.marlin.DDasher: double startPhase> = d4;
+
+        $z9 = r0.<sun.java2d.marlin.DDasher: boolean dashOn>;
+
+        r0.<sun.java2d.marlin.DDasher: boolean startDashOn> = $z9;
+
+        r0.<sun.java2d.marlin.DDasher: int startIdx> = i12;
+
+        r0.<sun.java2d.marlin.DDasher: boolean starting> = 1;
+
+        r0.<sun.java2d.marlin.DDasher: boolean needsMoveTo> = 0;
+
+        r0.<sun.java2d.marlin.DDasher: int firstSegidx> = 0;
+
+        r0.<sun.java2d.marlin.DDasher: boolean recycleDashes> = z0;
+
+        $r5 = r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $z10 = $r5.<sun.java2d.marlin.DRendererContext: boolean doClip>;
+
+        if $z10 == 0 goto label21;
+
+        $r3 = r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r4 = $r3.<sun.java2d.marlin.DRendererContext: double[] clipRect>;
+
+        r0.<sun.java2d.marlin.DDasher: double[] clipRect> = $r4;
+
+        goto label22;
+
+     label21:
+        r0.<sun.java2d.marlin.DDasher: double[] clipRect> = null;
+
+        r0.<sun.java2d.marlin.DDasher: int cOutCode> = 0;
+
+     label22:
+        return r0;
+    }
+
+    void dispose()
+    {
+        double[] $r1, $r3, $r4, $r6;
+        sun.java2d.marlin.DDasher r0;
+        sun.java2d.marlin.DoubleArrayCache$Reference $r2, $r5;
+        boolean $z0;
+
+        r0 := @this: sun.java2d.marlin.DDasher;
+
+        $z0 = r0.<sun.java2d.marlin.DDasher: boolean recycleDashes>;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DoubleArrayCache$Reference dashes_ref>;
+
+        $r4 = r0.<sun.java2d.marlin.DDasher: double[] dash>;
+
+        $r6 = virtualinvoke $r5.<sun.java2d.marlin.DoubleArrayCache$Reference: double[] putArray(double[])>($r4);
+
+        r0.<sun.java2d.marlin.DDasher: double[] dash> = $r6;
+
+     label1:
+        $r2 = r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DoubleArrayCache$Reference firstSegmentsBuffer_ref>;
+
+        $r1 = r0.<sun.java2d.marlin.DDasher: double[] firstSegmentsBuffer>;
+
+        $r3 = virtualinvoke $r2.<sun.java2d.marlin.DoubleArrayCache$Reference: double[] putArray(double[])>($r1);
+
+        r0.<sun.java2d.marlin.DDasher: double[] firstSegmentsBuffer> = $r3;
+
+        return;
+    }
+
+    double[] copyDashArray(float[])
+    {
+        double[] r7;
+        float[] r0;
+        sun.java2d.marlin.RendererStats $r4;
+        sun.java2d.marlin.stats.StatLong $r5;
+        sun.java2d.marlin.DDasher r1;
+        sun.java2d.marlin.DRendererContext $r3;
+        int i0, i1;
+        float $f0;
+        sun.java2d.marlin.DoubleArrayCache$Reference $r2, $r6;
+        boolean $z0;
+        double $d0;
+
+        r1 := @this: sun.java2d.marlin.DDasher;
+
+        r0 := @parameter0: float[];
+
+        i0 = lengthof r0;
+
+        if i0 > 256 goto label1;
+
+        $r6 = r1.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DoubleArrayCache$Reference dashes_ref>;
+
+        r7 = $r6.<sun.java2d.marlin.DoubleArrayCache$Reference: double[] initial>;
+
+        goto label3;
+
+     label1:
+        $z0 = <sun.java2d.marlin.DDasher: boolean DO_STATS>;
+
+        if $z0 == 0 goto label2;
+
+        $r3 = r1.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r4 = $r3.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r5 = $r4.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_array_dasher_dasher>;
+
+        virtualinvoke $r5.<sun.java2d.marlin.stats.StatLong: void add(int)>(i0);
+
+     label2:
+        $r2 = r1.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DoubleArrayCache$Reference dashes_ref>;
+
+        r7 = virtualinvoke $r2.<sun.java2d.marlin.DoubleArrayCache$Reference: double[] getArray(int)>(i0);
+
+     label3:
+        i1 = 0;
+
+     label4:
+        if i1 >= i0 goto label5;
+
+        $f0 = r0[i1];
+
+        $d0 = (double) $f0;
+
+        r7[i1] = $d0;
+
+        i1 = i1 + 1;
+
+        goto label4;
+
+     label5:
+        return r7;
+    }
+
+    public void moveTo(double, double)
+    {
+        double[] $r1, $r2;
+        sun.java2d.marlin.DPathConsumer2D $r3;
+        sun.java2d.marlin.DDasher r0;
+        int $i0, $i1, $i2;
+        boolean $z0;
+        double $d0, d1, d2, $d3, $d4;
+
+        r0 := @this: sun.java2d.marlin.DDasher;
+
+        d1 := @parameter0: double;
+
+        d2 := @parameter1: double;
+
+        $i0 = r0.<sun.java2d.marlin.DDasher: int firstSegidx>;
+
+        if $i0 == 0 goto label1;
+
+        $r3 = r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DPathConsumer2D out>;
+
+        $d4 = r0.<sun.java2d.marlin.DDasher: double sx0>;
+
+        $d3 = r0.<sun.java2d.marlin.DDasher: double sy0>;
+
+        interfaceinvoke $r3.<sun.java2d.marlin.DPathConsumer2D: void moveTo(double,double)>($d4, $d3);
+
+        specialinvoke r0.<sun.java2d.marlin.DDasher: void emitFirstSegments()>();
+
+     label1:
+        r0.<sun.java2d.marlin.DDasher: boolean needsMoveTo> = 1;
+
+        $i1 = r0.<sun.java2d.marlin.DDasher: int startIdx>;
+
+        r0.<sun.java2d.marlin.DDasher: int idx> = $i1;
+
+        $z0 = r0.<sun.java2d.marlin.DDasher: boolean startDashOn>;
+
+        r0.<sun.java2d.marlin.DDasher: boolean dashOn> = $z0;
+
+        $d0 = r0.<sun.java2d.marlin.DDasher: double startPhase>;
+
+        r0.<sun.java2d.marlin.DDasher: double phase> = $d0;
+
+        r0.<sun.java2d.marlin.DDasher: double cx0> = d1;
+
+        r0.<sun.java2d.marlin.DDasher: double cy0> = d2;
+
+        r0.<sun.java2d.marlin.DDasher: double sx0> = d1;
+
+        r0.<sun.java2d.marlin.DDasher: double sy0> = d2;
+
+        r0.<sun.java2d.marlin.DDasher: boolean starting> = 1;
+
+        $r1 = r0.<sun.java2d.marlin.DDasher: double[] clipRect>;
+
+        if $r1 == null goto label2;
+
+        $r2 = r0.<sun.java2d.marlin.DDasher: double[] clipRect>;
+
+        $i2 = staticinvoke <sun.java2d.marlin.DHelpers: int outcode(double,double,double[])>(d1, d2, $r2);
+
+        r0.<sun.java2d.marlin.DDasher: int cOutCode> = $i2;
+
+        r0.<sun.java2d.marlin.DDasher: boolean outside> = 0;
+
+        r0.<sun.java2d.marlin.DDasher: double totalSkipLen> = 0.0;
+
+     label2:
+        return;
+    }
+
+    private void emitSeg(double[], int, int)
+    {
+        double[] r1;
+        sun.java2d.marlin.DPathConsumer2D $r2, $r3, $r4;
+        sun.java2d.marlin.DDasher r0;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11;
+
+        r0 := @this: sun.java2d.marlin.DDasher;
+
+        r1 := @parameter0: double[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        tableswitch(i0)
+        {
+            case 4: goto label1;
+            case 5: goto label4;
+            case 6: goto label3;
+            case 7: goto label4;
+            case 8: goto label2;
+            default: goto label4;
+        };
+
+     label1:
+        $r4 = r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DPathConsumer2D out>;
+
+        $d11 = r1[i1];
+
+        $i10 = i1 + 1;
+
+        $d10 = r1[$i10];
+
+        interfaceinvoke $r4.<sun.java2d.marlin.DPathConsumer2D: void lineTo(double,double)>($d11, $d10);
+
+        return;
+
+     label2:
+        $r2 = r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DPathConsumer2D out>;
+
+        $d5 = r1[i1];
+
+        $i2 = i1 + 1;
+
+        $d4 = r1[$i2];
+
+        $i3 = i1 + 2;
+
+        $d3 = r1[$i3];
+
+        $i4 = i1 + 3;
+
+        $d2 = r1[$i4];
+
+        $i5 = i1 + 4;
+
+        $d1 = r1[$i5];
+
+        $i6 = i1 + 5;
+
+        $d0 = r1[$i6];
+
+        interfaceinvoke $r2.<sun.java2d.marlin.DPathConsumer2D: void curveTo(double,double,double,double,double,double)>($d5, $d4, $d3, $d2, $d1, $d0);
+
+        return;
+
+     label3:
+        $r3 = r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DPathConsumer2D out>;
+
+        $d9 = r1[i1];
+
+        $i7 = i1 + 1;
+
+        $d8 = r1[$i7];
+
+        $i8 = i1 + 2;
+
+        $d7 = r1[$i8];
+
+        $i9 = i1 + 3;
+
+        $d6 = r1[$i9];
+
+        interfaceinvoke $r3.<sun.java2d.marlin.DPathConsumer2D: void quadTo(double,double,double,double)>($d9, $d8, $d7, $d6);
+
+        return;
+
+     label4:
+        return;
+    }
+
+    private void emitFirstSegments()
+    {
+        double[] r1;
+        sun.java2d.marlin.DDasher r0;
+        int i0, i1, $i2, $i3, i4;
+        double $d0;
+
+        r0 := @this: sun.java2d.marlin.DDasher;
+
+        r1 = r0.<sun.java2d.marlin.DDasher: double[] firstSegmentsBuffer>;
+
+        i4 = 0;
+
+        i0 = r0.<sun.java2d.marlin.DDasher: int firstSegidx>;
+
+     label1:
+        if i4 >= i0 goto label2;
+
+        $d0 = r1[i4];
+
+        i1 = (int) $d0;
+
+        $i2 = i4 + 1;
+
+        specialinvoke r0.<sun.java2d.marlin.DDasher: void emitSeg(double[],int,int)>(r1, $i2, i1);
+
+        $i3 = i1 - 1;
+
+        i4 = i4 + $i3;
+
+        goto label1;
+
+     label2:
+        r0.<sun.java2d.marlin.DDasher: int firstSegidx> = 0;
+
+        return;
+    }
+
+    private void goTo(double[], int, int, boolean)
+    {
+        double[] r0;
+        sun.java2d.marlin.DPathConsumer2D $r2;
+        sun.java2d.marlin.DDasher r1;
+        int i0, i1, i2, $i3, $i4;
+        double d0, d1, $d2, $d3;
+        boolean z0, $z1, $z2, $z3;
+
+        r1 := @this: sun.java2d.marlin.DDasher;
+
+        r0 := @parameter0: double[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        z0 := @parameter3: boolean;
+
+        i2 = i0 + i1;
+
+        $i3 = i2 - 4;
+
+        d0 = r0[$i3];
+
+        $i4 = i2 - 3;
+
+        d1 = r0[$i4];
+
+        if z0 == 0 goto label3;
+
+        $z2 = r1.<sun.java2d.marlin.DDasher: boolean starting>;
+
+        if $z2 == 0 goto label1;
+
+        specialinvoke r1.<sun.java2d.marlin.DDasher: void goTo_starting(double[],int,int)>(r0, i0, i1);
+
+        goto label5;
+
+     label1:
+        $z3 = r1.<sun.java2d.marlin.DDasher: boolean needsMoveTo>;
+
+        if $z3 == 0 goto label2;
+
+        r1.<sun.java2d.marlin.DDasher: boolean needsMoveTo> = 0;
+
+        $r2 = r1.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DPathConsumer2D out>;
+
+        $d3 = r1.<sun.java2d.marlin.DDasher: double cx0>;
+
+        $d2 = r1.<sun.java2d.marlin.DDasher: double cy0>;
+
+        interfaceinvoke $r2.<sun.java2d.marlin.DPathConsumer2D: void moveTo(double,double)>($d3, $d2);
+
+     label2:
+        specialinvoke r1.<sun.java2d.marlin.DDasher: void emitSeg(double[],int,int)>(r0, i0, i1);
+
+        goto label5;
+
+     label3:
+        $z1 = r1.<sun.java2d.marlin.DDasher: boolean starting>;
+
+        if $z1 == 0 goto label4;
+
+        r1.<sun.java2d.marlin.DDasher: boolean starting> = 0;
+
+     label4:
+        r1.<sun.java2d.marlin.DDasher: boolean needsMoveTo> = 1;
+
+     label5:
+        r1.<sun.java2d.marlin.DDasher: double cx0> = d0;
+
+        r1.<sun.java2d.marlin.DDasher: double cy0> = d1;
+
+        return;
+    }
+
+    private void goTo_starting(double[], int, int)
+    {
+        double[] r1, $r3, r7;
+        sun.java2d.marlin.DDasher r0;
+        sun.java2d.marlin.DRendererContext $r4;
+        int i0, $i1, $i2, i3, $i4, $i5, i6, i7, i8, i9, $i10, $i12;
+        boolean $z0;
+        double $d0;
+        sun.java2d.marlin.RendererStats $r5;
+        sun.java2d.marlin.stats.StatLong $r6;
+        sun.java2d.marlin.DoubleArrayCache$Reference $r2;
+
+        r0 := @this: sun.java2d.marlin.DDasher;
+
+        r1 := @parameter0: double[];
+
+        i3 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i6 = i0 - 1;
+
+        i7 = r0.<sun.java2d.marlin.DDasher: int firstSegidx>;
+
+        r7 = r0.<sun.java2d.marlin.DDasher: double[] firstSegmentsBuffer>;
+
+        $i2 = i7 + i6;
+
+        $i1 = lengthof r7;
+
+        if $i2 <= $i1 goto label2;
+
+        $z0 = <sun.java2d.marlin.DDasher: boolean DO_STATS>;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r5 = $r4.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r6 = $r5.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_array_dasher_firstSegmentsBuffer>;
+
+        $i5 = i7 + i6;
+
+        virtualinvoke $r6.<sun.java2d.marlin.stats.StatLong: void add(int)>($i5);
+
+     label1:
+        $r2 = r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DoubleArrayCache$Reference firstSegmentsBuffer_ref>;
+
+        $i4 = i7 + i6;
+
+        $r3 = virtualinvoke $r2.<sun.java2d.marlin.DoubleArrayCache$Reference: double[] widenArray(double[],int,int)>(r7, i7, $i4);
+
+        r7 = $r3;
+
+        r0.<sun.java2d.marlin.DDasher: double[] firstSegmentsBuffer> = $r3;
+
+     label2:
+        i8 = i7 + 1;
+
+        $d0 = (double) i0;
+
+        r7[i7] = $d0;
+
+        $i12 = (int) -1;
+
+        i9 = i6 + $i12;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, i3, r7, i8, i9);
+
+        $i10 = i8 + i9;
+
+        r0.<sun.java2d.marlin.DDasher: int firstSegidx> = $i10;
+
+        return;
+    }
+
+    public void lineTo(double, double)
+    {
+        double[] $r1, $r2;
+        sun.java2d.marlin.DDasher r0;
+        sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter $r3;
+        int i0, $i1, i2, i3;
+        double d0, d1, $d2, $d3;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.java2d.marlin.DDasher;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        i0 = r0.<sun.java2d.marlin.DDasher: int cOutCode>;
+
+        $r1 = r0.<sun.java2d.marlin.DDasher: double[] clipRect>;
+
+        if $r1 == null goto label4;
+
+        $r2 = r0.<sun.java2d.marlin.DDasher: double[] clipRect>;
+
+        $i1 = staticinvoke <sun.java2d.marlin.DHelpers: int outcode(double,double,double[])>(d0, d1, $r2);
+
+        i2 = i0 | $i1;
+
+        if i2 == 0 goto label3;
+
+        i3 = i0 & $i1;
+
+        if i3 != 0 goto label2;
+
+        $z0 = r0.<sun.java2d.marlin.DDasher: boolean subdivide>;
+
+        if $z0 == 0 goto label3;
+
+        r0.<sun.java2d.marlin.DDasher: boolean subdivide> = 0;
+
+        $r3 = r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter curveSplitter>;
+
+        $d3 = r0.<sun.java2d.marlin.DDasher: double cx0>;
+
+        $d2 = r0.<sun.java2d.marlin.DDasher: double cy0>;
+
+        $z1 = virtualinvoke $r3.<sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter: boolean splitLine(double,double,double,double,int,sun.java2d.marlin.DPathConsumer2D)>($d3, $d2, d0, d1, i2, r0);
+
+        r0.<sun.java2d.marlin.DDasher: boolean subdivide> = 1;
+
+        if $z1 == 0 goto label1;
+
+        return;
+
+     label1:
+        goto label3;
+
+     label2:
+        r0.<sun.java2d.marlin.DDasher: int cOutCode> = $i1;
+
+        specialinvoke r0.<sun.java2d.marlin.DDasher: void skipLineTo(double,double)>(d0, d1);
+
+        return;
+
+     label3:
+        r0.<sun.java2d.marlin.DDasher: int cOutCode> = $i1;
+
+        $z2 = r0.<sun.java2d.marlin.DDasher: boolean outside>;
+
+        if $z2 == 0 goto label4;
+
+        r0.<sun.java2d.marlin.DDasher: boolean outside> = 0;
+
+        virtualinvoke r0.<sun.java2d.marlin.DDasher: void skipLen()>();
+
+     label4:
+        specialinvoke r0.<sun.java2d.marlin.DDasher: void _lineTo(double,double)>(d0, d1);
+
+        return;
+    }
+
+    private void _lineTo(double, double)
+    {
+        sun.java2d.marlin.DDasher r0;
+        byte $b0, $b2, $b4;
+        boolean z0, $z1, $z2;
+        double[] r1, r2;
+        int i1, $i3, $i5, i6, $i7, $i8;
+        double d0, $d1, d2, d3, $d4, d5, $d6, $d7, $d8, d9, d10, $d11, $d12, $d13, $d14, $d15, $d16, $d17, $d18, $d19, $d20, d21, d22, d23, d24;
+
+        r0 := @this: sun.java2d.marlin.DDasher;
+
+        d0 := @parameter0: double;
+
+        d3 := @parameter1: double;
+
+        $d1 = r0.<sun.java2d.marlin.DDasher: double cx0>;
+
+        d2 = d0 - $d1;
+
+        $d4 = r0.<sun.java2d.marlin.DDasher: double cy0>;
+
+        d5 = d3 - $d4;
+
+        $d7 = d2 * d2;
+
+        $d6 = d5 * d5;
+
+        d21 = $d7 + $d6;
+
+        $b0 = d21 cmpl 0.0;
+
+        if $b0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $d8 = staticinvoke <java.lang.Math: double sqrt(double)>(d21);
+
+        d22 = $d8;
+
+        d9 = d2 / $d8;
+
+        d10 = d5 / $d8;
+
+        r1 = r0.<sun.java2d.marlin.DDasher: double[] curCurvepts>;
+
+        r2 = r0.<sun.java2d.marlin.DDasher: double[] dash>;
+
+        i1 = r0.<sun.java2d.marlin.DDasher: int dashLen>;
+
+        i6 = r0.<sun.java2d.marlin.DDasher: int idx>;
+
+        z0 = r0.<sun.java2d.marlin.DDasher: boolean dashOn>;
+
+        d23 = r0.<sun.java2d.marlin.DDasher: double phase>;
+
+     label2:
+        $d11 = r2[i6];
+
+        $d18 = $d11 - d23;
+
+        $d19 = d22 - $d18;
+
+        $b2 = $d19 cmpg 1.0E-6;
+
+        $i7 = (int) $b2;
+
+        if $i7 > 0 goto label5;
+
+        r1[0] = d0;
+
+        r1[1] = d3;
+
+        specialinvoke r0.<sun.java2d.marlin.DDasher: void goTo(double[],int,int,boolean)>(r1, 0, 4, z0);
+
+        d24 = d23 + d22;
+
+        $d20 = staticinvoke <java.lang.Math: double abs(double)>($d19);
+
+        $b4 = $d20 cmpg 1.0E-6;
+
+        $i8 = (int) $b4;
+
+        if $i8 > 0 goto label8;
+
+        d24 = 0.0;
+
+        $i5 = i6 + 1;
+
+        i6 = $i5 % i1;
+
+        if z0 != 0 goto label3;
+
+        $z1 = 1;
+
+        goto label4;
+
+     label3:
+        $z1 = 0;
+
+     label4:
+        z0 = $z1;
+
+        goto label8;
+
+     label5:
+        $d13 = r0.<sun.java2d.marlin.DDasher: double cx0>;
+
+        $d12 = $d18 * d9;
+
+        $d14 = $d13 + $d12;
+
+        r1[0] = $d14;
+
+        $d16 = r0.<sun.java2d.marlin.DDasher: double cy0>;
+
+        $d15 = $d18 * d10;
+
+        $d17 = $d16 + $d15;
+
+        r1[1] = $d17;
+
+        specialinvoke r0.<sun.java2d.marlin.DDasher: void goTo(double[],int,int,boolean)>(r1, 0, 4, z0);
+
+        d22 = $d19;
+
+        $i3 = i6 + 1;
+
+        i6 = $i3 % i1;
+
+        if z0 != 0 goto label6;
+
+        $z2 = 1;
+
+        goto label7;
+
+     label6:
+        $z2 = 0;
+
+     label7:
+        z0 = $z2;
+
+        d23 = 0.0;
+
+        goto label2;
+
+     label8:
+        r0.<sun.java2d.marlin.DDasher: int idx> = i6;
+
+        r0.<sun.java2d.marlin.DDasher: boolean dashOn> = z0;
+
+        r0.<sun.java2d.marlin.DDasher: double phase> = d24;
+
+        return;
+    }
+
+    private void skipLineTo(double, double)
+    {
+        sun.java2d.marlin.DDasher r0;
+        byte $b0;
+        double d0, $d1, d2, d3, $d4, d5, $d6, $d7, $d8, $d9, d10;
+
+        r0 := @this: sun.java2d.marlin.DDasher;
+
+        d0 := @parameter0: double;
+
+        d3 := @parameter1: double;
+
+        $d1 = r0.<sun.java2d.marlin.DDasher: double cx0>;
+
+        d2 = d0 - $d1;
+
+        $d4 = r0.<sun.java2d.marlin.DDasher: double cy0>;
+
+        d5 = d3 - $d4;
+
+        $d7 = d2 * d2;
+
+        $d6 = d5 * d5;
+
+        d10 = $d7 + $d6;
+
+        $b0 = d10 cmpl 0.0;
+
+        if $b0 == 0 goto label1;
+
+        d10 = staticinvoke <java.lang.Math: double sqrt(double)>(d10);
+
+     label1:
+        r0.<sun.java2d.marlin.DDasher: boolean outside> = 1;
+
+        $d8 = r0.<sun.java2d.marlin.DDasher: double totalSkipLen>;
+
+        $d9 = $d8 + d10;
+
+        r0.<sun.java2d.marlin.DDasher: double totalSkipLen> = $d9;
+
+        r0.<sun.java2d.marlin.DDasher: boolean needsMoveTo> = 1;
+
+        r0.<sun.java2d.marlin.DDasher: boolean starting> = 0;
+
+        r0.<sun.java2d.marlin.DDasher: double cx0> = d0;
+
+        r0.<sun.java2d.marlin.DDasher: double cy0> = d3;
+
+        return;
+    }
+
+    public void skipLen()
+    {
+        sun.java2d.marlin.DDasher r0;
+        byte $b3, $b5, $b13, $b17;
+        boolean z0, $z1, $z2, $z3;
+        double[] r1;
+        long $l1, l2, $l7, $l8, $l9, $l11, $l12, l15, $l16;
+        int i0, $i4, $i6, $i10, i14, $i18, $i19, $i20;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, d7, d8, $d9, $d10, $d11, d12;
+
+        r0 := @this: sun.java2d.marlin.DDasher;
+
+        d7 = r0.<sun.java2d.marlin.DDasher: double totalSkipLen>;
+
+        r0.<sun.java2d.marlin.DDasher: double totalSkipLen> = 0.0;
+
+        r1 = r0.<sun.java2d.marlin.DDasher: double[] dash>;
+
+        i0 = r0.<sun.java2d.marlin.DDasher: int dashLen>;
+
+        i14 = r0.<sun.java2d.marlin.DDasher: int idx>;
+
+        z0 = r0.<sun.java2d.marlin.DDasher: boolean dashOn>;
+
+        d8 = r0.<sun.java2d.marlin.DDasher: double phase>;
+
+        $d0 = r0.<sun.java2d.marlin.DDasher: double cycleLen>;
+
+        $d1 = d7 / $d0;
+
+        $d2 = staticinvoke <java.lang.Math: double floor(double)>($d1);
+
+        $l1 = (long) $d2;
+
+        l2 = $l1 - 2L;
+
+        $b3 = l2 cmp 0L;
+
+        $i18 = (int) $b3;
+
+        if $i18 <= 0 goto label05;
+
+        $d5 = r0.<sun.java2d.marlin.DDasher: double cycleLen>;
+
+        $d4 = (double) l2;
+
+        $d6 = $d5 * $d4;
+
+        d7 = d7 - $d6;
+
+        $l7 = (long) i0;
+
+        l15 = l2 * $l7;
+
+        $l8 = (long) i14;
+
+        $l9 = l15 + $l8;
+
+        $i10 = (int) $l9;
+
+        i14 = $i10 % i0;
+
+        if z0 == 0 goto label01;
+
+        $l16 = 1L;
+
+        goto label02;
+
+     label01:
+        $l16 = 0L;
+
+     label02:
+        $l11 = l15 + $l16;
+
+        $l12 = $l11 & 1L;
+
+        $b13 = $l12 cmp 1L;
+
+        if $b13 != 0 goto label03;
+
+        $z1 = 1;
+
+        goto label04;
+
+     label03:
+        $z1 = 0;
+
+     label04:
+        z0 = $z1;
+
+     label05:
+        $d9 = r1[i14];
+
+        $d10 = $d9 - d8;
+
+        $d11 = d7 - $d10;
+
+        $b17 = $d11 cmpg 1.0E-6;
+
+        $i19 = (int) $b17;
+
+        if $i19 > 0 goto label08;
+
+        d12 = d8 + d7;
+
+        $d3 = staticinvoke <java.lang.Math: double abs(double)>($d11);
+
+        $b5 = $d3 cmpg 1.0E-6;
+
+        $i20 = (int) $b5;
+
+        if $i20 > 0 goto label11;
+
+        d12 = 0.0;
+
+        $i6 = i14 + 1;
+
+        i14 = $i6 % i0;
+
+        if z0 != 0 goto label06;
+
+        $z2 = 1;
+
+        goto label07;
+
+     label06:
+        $z2 = 0;
+
+     label07:
+        z0 = $z2;
+
+        goto label11;
+
+     label08:
+        d7 = $d11;
+
+        $i4 = i14 + 1;
+
+        i14 = $i4 % i0;
+
+        if z0 != 0 goto label09;
+
+        $z3 = 1;
+
+        goto label10;
+
+     label09:
+        $z3 = 0;
+
+     label10:
+        z0 = $z3;
+
+        d8 = 0.0;
+
+        goto label05;
+
+     label11:
+        r0.<sun.java2d.marlin.DDasher: int idx> = i14;
+
+        r0.<sun.java2d.marlin.DDasher: boolean dashOn> = z0;
+
+        r0.<sun.java2d.marlin.DDasher: double phase> = d12;
+
+        return;
+    }
+
+    private void somethingTo(int)
+    {
+        sun.java2d.marlin.DDasher r0;
+        byte $b2, $b4, $b6;
+        boolean $z0, z1, $z2, $z3;
+        double[] r1, r3;
+        int i0, i1, $i3, $i5, $i7, $i8, i9, i10, $i11, $i12;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, d8, d9, d10, d11;
+        sun.java2d.marlin.DDasher$LengthIterator r2;
+
+        r0 := @this: sun.java2d.marlin.DDasher;
+
+        i0 := @parameter0: int;
+
+        r1 = r0.<sun.java2d.marlin.DDasher: double[] curCurvepts>;
+
+        $z0 = staticinvoke <sun.java2d.marlin.DDasher: boolean pointCurve(double[],int)>(r1, i0);
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        r2 = r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DDasher$LengthIterator li>;
+
+        r3 = r0.<sun.java2d.marlin.DDasher: double[] dash>;
+
+        i1 = r0.<sun.java2d.marlin.DDasher: int dashLen>;
+
+        virtualinvoke r2.<sun.java2d.marlin.DDasher$LengthIterator: void initializeIterationOnCurve(double[],int)>(r1, i0);
+
+        i9 = r0.<sun.java2d.marlin.DDasher: int idx>;
+
+        z1 = r0.<sun.java2d.marlin.DDasher: boolean dashOn>;
+
+        d8 = r0.<sun.java2d.marlin.DDasher: double phase>;
+
+        i10 = 0;
+
+        d9 = 0.0;
+
+        $d0 = r3[i9];
+
+        d10 = $d0 - d8;
+
+     label2:
+        $d1 = virtualinvoke r2.<sun.java2d.marlin.DDasher$LengthIterator: double next(double)>(d10);
+
+        $b2 = $d1 cmpg 1.0;
+
+        $i11 = (int) $b2;
+
+        if $i11 >= 0 goto label6;
+
+        $b6 = $d1 cmpl 0.0;
+
+        if $b6 == 0 goto label3;
+
+        $d6 = $d1 - d9;
+
+        $d5 = 1.0 - d9;
+
+        $d7 = $d6 / $d5;
+
+        staticinvoke <sun.java2d.marlin.DHelpers: void subdivideAt(double,double[],int,double[],int,int)>($d7, r1, i10, r1, 0, i0);
+
+        d9 = $d1;
+
+        specialinvoke r0.<sun.java2d.marlin.DDasher: void goTo(double[],int,int,boolean)>(r1, 2, i0, z1);
+
+        i10 = i0;
+
+     label3:
+        $i7 = i9 + 1;
+
+        $i8 = $i7 % i1;
+
+        i9 = $i8;
+
+        if z1 != 0 goto label4;
+
+        $z2 = 1;
+
+        goto label5;
+
+     label4:
+        $z2 = 0;
+
+     label5:
+        z1 = $z2;
+
+        d8 = 0.0;
+
+        d10 = r3[$i8];
+
+        goto label2;
+
+     label6:
+        $i3 = i10 + 2;
+
+        specialinvoke r0.<sun.java2d.marlin.DDasher: void goTo(double[],int,int,boolean)>(r1, $i3, i0, z1);
+
+        $d2 = virtualinvoke r2.<sun.java2d.marlin.DDasher$LengthIterator: double lastSegLen()>();
+
+        d11 = d8 + $d2;
+
+        $d4 = d11 + 1.0E-6;
+
+        $d3 = r3[i9];
+
+        $b4 = $d4 cmpl $d3;
+
+        $i12 = (int) $b4;
+
+        if $i12 < 0 goto label9;
+
+        d11 = 0.0;
+
+        $i5 = i9 + 1;
+
+        i9 = $i5 % i1;
+
+        if z1 != 0 goto label7;
+
+        $z3 = 1;
+
+        goto label8;
+
+     label7:
+        $z3 = 0;
+
+     label8:
+        z1 = $z3;
+
+     label9:
+        r0.<sun.java2d.marlin.DDasher: int idx> = i9;
+
+        r0.<sun.java2d.marlin.DDasher: boolean dashOn> = z1;
+
+        r0.<sun.java2d.marlin.DDasher: double phase> = d11;
+
+        virtualinvoke r2.<sun.java2d.marlin.DDasher$LengthIterator: void reset()>();
+
+        return;
+    }
+
+    private void skipSomethingTo(int)
+    {
+        double[] r1;
+        sun.java2d.marlin.DDasher r0;
+        sun.java2d.marlin.DDasher$LengthIterator r2;
+        int i0;
+        boolean $z0;
+        double $d0, $d1, $d2;
+
+        r0 := @this: sun.java2d.marlin.DDasher;
+
+        i0 := @parameter0: int;
+
+        r1 = r0.<sun.java2d.marlin.DDasher: double[] curCurvepts>;
+
+        $z0 = staticinvoke <sun.java2d.marlin.DDasher: boolean pointCurve(double[],int)>(r1, i0);
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        r2 = r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DDasher$LengthIterator li>;
+
+        virtualinvoke r2.<sun.java2d.marlin.DDasher$LengthIterator: void initializeIterationOnCurve(double[],int)>(r1, i0);
+
+        $d0 = virtualinvoke r2.<sun.java2d.marlin.DDasher$LengthIterator: double totalLength()>();
+
+        r0.<sun.java2d.marlin.DDasher: boolean outside> = 1;
+
+        $d1 = r0.<sun.java2d.marlin.DDasher: double totalSkipLen>;
+
+        $d2 = $d1 + $d0;
+
+        r0.<sun.java2d.marlin.DDasher: double totalSkipLen> = $d2;
+
+        r0.<sun.java2d.marlin.DDasher: boolean needsMoveTo> = 1;
+
+        r0.<sun.java2d.marlin.DDasher: boolean starting> = 0;
+
+        return;
+    }
+
+    private static boolean pointCurve(double[], int)
+    {
+        byte $b2;
+        int i0, $i1, i3;
+        double[] r0;
+        double $d0, $d1;
+
+        r0 := @parameter0: double[];
+
+        i0 := @parameter1: int;
+
+        i3 = 2;
+
+     label1:
+        if i3 >= i0 goto label3;
+
+        $d1 = r0[i3];
+
+        $i1 = i3 - 2;
+
+        $d0 = r0[$i1];
+
+        $b2 = $d1 cmpl $d0;
+
+        if $b2 == 0 goto label2;
+
+        return 0;
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        return 1;
+    }
+
+    public void curveTo(double, double, double, double, double, double)
+    {
+        double[] $r1, $r2, $r3, $r4;
+        sun.java2d.marlin.DDasher r0;
+        sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter $r5;
+        int i0, $i1, $i2, $i3, $i4, $i5, i6, $i7, $i8, i9;
+        double d0, d1, d2, d3, d4, d5, $d6, $d7;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.java2d.marlin.DDasher;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        d2 := @parameter2: double;
+
+        d3 := @parameter3: double;
+
+        d4 := @parameter4: double;
+
+        d5 := @parameter5: double;
+
+        i0 = r0.<sun.java2d.marlin.DDasher: int cOutCode>;
+
+        $r1 = r0.<sun.java2d.marlin.DDasher: double[] clipRect>;
+
+        if $r1 == null goto label4;
+
+        $r2 = r0.<sun.java2d.marlin.DDasher: double[] clipRect>;
+
+        $i1 = staticinvoke <sun.java2d.marlin.DHelpers: int outcode(double,double,double[])>(d0, d1, $r2);
+
+        $r3 = r0.<sun.java2d.marlin.DDasher: double[] clipRect>;
+
+        $i2 = staticinvoke <sun.java2d.marlin.DHelpers: int outcode(double,double,double[])>(d2, d3, $r3);
+
+        $r4 = r0.<sun.java2d.marlin.DDasher: double[] clipRect>;
+
+        $i3 = staticinvoke <sun.java2d.marlin.DHelpers: int outcode(double,double,double[])>(d4, d5, $r4);
+
+        $i4 = i0 | $i1;
+
+        $i5 = $i4 | $i2;
+
+        i6 = $i5 | $i3;
+
+        if i6 == 0 goto label3;
+
+        $i7 = i0 & $i1;
+
+        $i8 = $i7 & $i2;
+
+        i9 = $i8 & $i3;
+
+        if i9 != 0 goto label2;
+
+        $z0 = r0.<sun.java2d.marlin.DDasher: boolean subdivide>;
+
+        if $z0 == 0 goto label3;
+
+        r0.<sun.java2d.marlin.DDasher: boolean subdivide> = 0;
+
+        $r5 = r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter curveSplitter>;
+
+        $d7 = r0.<sun.java2d.marlin.DDasher: double cx0>;
+
+        $d6 = r0.<sun.java2d.marlin.DDasher: double cy0>;
+
+        $z1 = virtualinvoke $r5.<sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter: boolean splitCurve(double,double,double,double,double,double,double,double,int,sun.java2d.marlin.DPathConsumer2D)>($d7, $d6, d0, d1, d2, d3, d4, d5, i6, r0);
+
+        r0.<sun.java2d.marlin.DDasher: boolean subdivide> = 1;
+
+        if $z1 == 0 goto label1;
+
+        return;
+
+     label1:
+        goto label3;
+
+     label2:
+        r0.<sun.java2d.marlin.DDasher: int cOutCode> = $i3;
+
+        specialinvoke r0.<sun.java2d.marlin.DDasher: void skipCurveTo(double,double,double,double,double,double)>(d0, d1, d2, d3, d4, d5);
+
+        return;
+
+     label3:
+        r0.<sun.java2d.marlin.DDasher: int cOutCode> = $i3;
+
+        $z2 = r0.<sun.java2d.marlin.DDasher: boolean outside>;
+
+        if $z2 == 0 goto label4;
+
+        r0.<sun.java2d.marlin.DDasher: boolean outside> = 0;
+
+        virtualinvoke r0.<sun.java2d.marlin.DDasher: void skipLen()>();
+
+     label4:
+        specialinvoke r0.<sun.java2d.marlin.DDasher: void _curveTo(double,double,double,double,double,double)>(d0, d1, d2, d3, d4, d5);
+
+        return;
+    }
+
+    private void _curveTo(double, double, double, double, double, double)
+    {
+        double[] r1, r5;
+        sun.java2d.marlin.DDasher r0;
+        sun.java2d.marlin.DRendererContext $r2;
+        int i0, i1, i2;
+        sun.java2d.marlin.DTransformingPathConsumer2D$CurveBasicMonotonizer $r3, $r4;
+        double d0, d1, d2, d3, d4, d5, $d6, $d7;
+
+        r0 := @this: sun.java2d.marlin.DDasher;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        d2 := @parameter2: double;
+
+        d3 := @parameter3: double;
+
+        d4 := @parameter4: double;
+
+        d5 := @parameter5: double;
+
+        r1 = r0.<sun.java2d.marlin.DDasher: double[] curCurvepts>;
+
+        $r2 = r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r3 = $r2.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.DTransformingPathConsumer2D$CurveBasicMonotonizer monotonizer>;
+
+        $d7 = r0.<sun.java2d.marlin.DDasher: double cx0>;
+
+        $d6 = r0.<sun.java2d.marlin.DDasher: double cy0>;
+
+        $r4 = virtualinvoke $r3.<sun.java2d.marlin.DTransformingPathConsumer2D$CurveBasicMonotonizer: sun.java2d.marlin.DTransformingPathConsumer2D$CurveBasicMonotonizer curve(double,double,double,double,double,double,double,double)>($d7, $d6, d0, d1, d2, d3, d4, d5);
+
+        i0 = $r4.<sun.java2d.marlin.DTransformingPathConsumer2D$CurveBasicMonotonizer: int nbSplits>;
+
+        r5 = $r4.<sun.java2d.marlin.DTransformingPathConsumer2D$CurveBasicMonotonizer: double[] middle>;
+
+        i1 = 0;
+
+        i2 = 0;
+
+     label1:
+        if i1 > i0 goto label2;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r5, i2, r1, 0, 8);
+
+        specialinvoke r0.<sun.java2d.marlin.DDasher: void somethingTo(int)>(8);
+
+        i1 = i1 + 1;
+
+        i2 = i2 + 6;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private void skipCurveTo(double, double, double, double, double, double)
+    {
+        double[] r1;
+        sun.java2d.marlin.DDasher r0;
+        double $d0, $d1, d2, d3, d4, d5, d6, d7;
+
+        r0 := @this: sun.java2d.marlin.DDasher;
+
+        d2 := @parameter0: double;
+
+        d3 := @parameter1: double;
+
+        d4 := @parameter2: double;
+
+        d5 := @parameter3: double;
+
+        d6 := @parameter4: double;
+
+        d7 := @parameter5: double;
+
+        r1 = r0.<sun.java2d.marlin.DDasher: double[] curCurvepts>;
+
+        $d0 = r0.<sun.java2d.marlin.DDasher: double cx0>;
+
+        r1[0] = $d0;
+
+        $d1 = r0.<sun.java2d.marlin.DDasher: double cy0>;
+
+        r1[1] = $d1;
+
+        r1[2] = d2;
+
+        r1[3] = d3;
+
+        r1[4] = d4;
+
+        r1[5] = d5;
+
+        r1[6] = d6;
+
+        r1[7] = d7;
+
+        specialinvoke r0.<sun.java2d.marlin.DDasher: void skipSomethingTo(int)>(8);
+
+        r0.<sun.java2d.marlin.DDasher: double cx0> = d6;
+
+        r0.<sun.java2d.marlin.DDasher: double cy0> = d7;
+
+        return;
+    }
+
+    public void quadTo(double, double, double, double)
+    {
+        double[] $r1, $r2, $r3;
+        sun.java2d.marlin.DDasher r0;
+        sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter $r4;
+        int i0, $i1, $i2, $i3, i4, $i5, i6;
+        double d0, d1, d2, d3, $d4, $d5;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.java2d.marlin.DDasher;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        d2 := @parameter2: double;
+
+        d3 := @parameter3: double;
+
+        i0 = r0.<sun.java2d.marlin.DDasher: int cOutCode>;
+
+        $r1 = r0.<sun.java2d.marlin.DDasher: double[] clipRect>;
+
+        if $r1 == null goto label4;
+
+        $r2 = r0.<sun.java2d.marlin.DDasher: double[] clipRect>;
+
+        $i1 = staticinvoke <sun.java2d.marlin.DHelpers: int outcode(double,double,double[])>(d0, d1, $r2);
+
+        $r3 = r0.<sun.java2d.marlin.DDasher: double[] clipRect>;
+
+        $i2 = staticinvoke <sun.java2d.marlin.DHelpers: int outcode(double,double,double[])>(d2, d3, $r3);
+
+        $i3 = i0 | $i1;
+
+        i4 = $i3 | $i2;
+
+        if i4 == 0 goto label3;
+
+        $i5 = i0 & $i1;
+
+        i6 = $i5 & $i2;
+
+        if i6 != 0 goto label2;
+
+        $z0 = r0.<sun.java2d.marlin.DDasher: boolean subdivide>;
+
+        if $z0 == 0 goto label3;
+
+        r0.<sun.java2d.marlin.DDasher: boolean subdivide> = 0;
+
+        $r4 = r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter curveSplitter>;
+
+        $d5 = r0.<sun.java2d.marlin.DDasher: double cx0>;
+
+        $d4 = r0.<sun.java2d.marlin.DDasher: double cy0>;
+
+        $z1 = virtualinvoke $r4.<sun.java2d.marlin.DTransformingPathConsumer2D$CurveClipSplitter: boolean splitQuad(double,double,double,double,double,double,int,sun.java2d.marlin.DPathConsumer2D)>($d5, $d4, d0, d1, d2, d3, i4, r0);
+
+        r0.<sun.java2d.marlin.DDasher: boolean subdivide> = 1;
+
+        if $z1 == 0 goto label1;
+
+        return;
+
+     label1:
+        goto label3;
+
+     label2:
+        r0.<sun.java2d.marlin.DDasher: int cOutCode> = $i2;
+
+        specialinvoke r0.<sun.java2d.marlin.DDasher: void skipQuadTo(double,double,double,double)>(d0, d1, d2, d3);
+
+        return;
+
+     label3:
+        r0.<sun.java2d.marlin.DDasher: int cOutCode> = $i2;
+
+        $z2 = r0.<sun.java2d.marlin.DDasher: boolean outside>;
+
+        if $z2 == 0 goto label4;
+
+        r0.<sun.java2d.marlin.DDasher: boolean outside> = 0;
+
+        virtualinvoke r0.<sun.java2d.marlin.DDasher: void skipLen()>();
+
+     label4:
+        specialinvoke r0.<sun.java2d.marlin.DDasher: void _quadTo(double,double,double,double)>(d0, d1, d2, d3);
+
+        return;
+    }
+
+    private void _quadTo(double, double, double, double)
+    {
+        double[] r1, r5;
+        sun.java2d.marlin.DDasher r0;
+        sun.java2d.marlin.DRendererContext $r2;
+        int i0, i1, i2;
+        sun.java2d.marlin.DTransformingPathConsumer2D$CurveBasicMonotonizer $r3, $r4;
+        double d0, d1, d2, d3, $d4, $d5;
+
+        r0 := @this: sun.java2d.marlin.DDasher;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        d2 := @parameter2: double;
+
+        d3 := @parameter3: double;
+
+        r1 = r0.<sun.java2d.marlin.DDasher: double[] curCurvepts>;
+
+        $r2 = r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r3 = $r2.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.DTransformingPathConsumer2D$CurveBasicMonotonizer monotonizer>;
+
+        $d5 = r0.<sun.java2d.marlin.DDasher: double cx0>;
+
+        $d4 = r0.<sun.java2d.marlin.DDasher: double cy0>;
+
+        $r4 = virtualinvoke $r3.<sun.java2d.marlin.DTransformingPathConsumer2D$CurveBasicMonotonizer: sun.java2d.marlin.DTransformingPathConsumer2D$CurveBasicMonotonizer quad(double,double,double,double,double,double)>($d5, $d4, d0, d1, d2, d3);
+
+        i0 = $r4.<sun.java2d.marlin.DTransformingPathConsumer2D$CurveBasicMonotonizer: int nbSplits>;
+
+        r5 = $r4.<sun.java2d.marlin.DTransformingPathConsumer2D$CurveBasicMonotonizer: double[] middle>;
+
+        i1 = 0;
+
+        i2 = 0;
+
+     label1:
+        if i1 > i0 goto label2;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r5, i2, r1, 0, 8);
+
+        specialinvoke r0.<sun.java2d.marlin.DDasher: void somethingTo(int)>(6);
+
+        i1 = i1 + 1;
+
+        i2 = i2 + 4;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private void skipQuadTo(double, double, double, double)
+    {
+        double[] r1;
+        sun.java2d.marlin.DDasher r0;
+        double $d0, $d1, d2, d3, d4, d5;
+
+        r0 := @this: sun.java2d.marlin.DDasher;
+
+        d2 := @parameter0: double;
+
+        d3 := @parameter1: double;
+
+        d4 := @parameter2: double;
+
+        d5 := @parameter3: double;
+
+        r1 = r0.<sun.java2d.marlin.DDasher: double[] curCurvepts>;
+
+        $d0 = r0.<sun.java2d.marlin.DDasher: double cx0>;
+
+        r1[0] = $d0;
+
+        $d1 = r0.<sun.java2d.marlin.DDasher: double cy0>;
+
+        r1[1] = $d1;
+
+        r1[2] = d2;
+
+        r1[3] = d3;
+
+        r1[4] = d4;
+
+        r1[5] = d5;
+
+        specialinvoke r0.<sun.java2d.marlin.DDasher: void skipSomethingTo(int)>(6);
+
+        r0.<sun.java2d.marlin.DDasher: double cx0> = d4;
+
+        r0.<sun.java2d.marlin.DDasher: double cy0> = d5;
+
+        return;
+    }
+
+    public void closePath()
+    {
+        sun.java2d.marlin.DPathConsumer2D $r1;
+        sun.java2d.marlin.DDasher r0;
+        byte $b0, $b1;
+        int $i2;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.java2d.marlin.DDasher;
+
+        $d1 = r0.<sun.java2d.marlin.DDasher: double cx0>;
+
+        $d0 = r0.<sun.java2d.marlin.DDasher: double sx0>;
+
+        $b0 = $d1 cmpl $d0;
+
+        if $b0 != 0 goto label1;
+
+        $d7 = r0.<sun.java2d.marlin.DDasher: double cy0>;
+
+        $d6 = r0.<sun.java2d.marlin.DDasher: double sy0>;
+
+        $b1 = $d7 cmpl $d6;
+
+        if $b1 == 0 goto label2;
+
+     label1:
+        $d3 = r0.<sun.java2d.marlin.DDasher: double sx0>;
+
+        $d2 = r0.<sun.java2d.marlin.DDasher: double sy0>;
+
+        virtualinvoke r0.<sun.java2d.marlin.DDasher: void lineTo(double,double)>($d3, $d2);
+
+     label2:
+        $i2 = r0.<sun.java2d.marlin.DDasher: int firstSegidx>;
+
+        if $i2 == 0 goto label5;
+
+        $z0 = r0.<sun.java2d.marlin.DDasher: boolean dashOn>;
+
+        if $z0 == 0 goto label3;
+
+        $z1 = r0.<sun.java2d.marlin.DDasher: boolean needsMoveTo>;
+
+        if $z1 == 0 goto label4;
+
+     label3:
+        $r1 = r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DPathConsumer2D out>;
+
+        $d5 = r0.<sun.java2d.marlin.DDasher: double sx0>;
+
+        $d4 = r0.<sun.java2d.marlin.DDasher: double sy0>;
+
+        interfaceinvoke $r1.<sun.java2d.marlin.DPathConsumer2D: void moveTo(double,double)>($d5, $d4);
+
+     label4:
+        specialinvoke r0.<sun.java2d.marlin.DDasher: void emitFirstSegments()>();
+
+     label5:
+        $d8 = r0.<sun.java2d.marlin.DDasher: double sx0>;
+
+        $d9 = r0.<sun.java2d.marlin.DDasher: double sy0>;
+
+        virtualinvoke r0.<sun.java2d.marlin.DDasher: void moveTo(double,double)>($d8, $d9);
+
+        return;
+    }
+
+    public void pathDone()
+    {
+        sun.java2d.marlin.DDasher r0;
+        int $i0;
+        sun.java2d.marlin.DPathConsumer2D $r1, $r2;
+        double $d0, $d1;
+
+        r0 := @this: sun.java2d.marlin.DDasher;
+
+        $i0 = r0.<sun.java2d.marlin.DDasher: int firstSegidx>;
+
+        if $i0 == 0 goto label1;
+
+        $r2 = r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DPathConsumer2D out>;
+
+        $d1 = r0.<sun.java2d.marlin.DDasher: double sx0>;
+
+        $d0 = r0.<sun.java2d.marlin.DDasher: double sy0>;
+
+        interfaceinvoke $r2.<sun.java2d.marlin.DPathConsumer2D: void moveTo(double,double)>($d1, $d0);
+
+        specialinvoke r0.<sun.java2d.marlin.DDasher: void emitFirstSegments()>();
+
+     label1:
+        $r1 = r0.<sun.java2d.marlin.DDasher: sun.java2d.marlin.DPathConsumer2D out>;
+
+        interfaceinvoke $r1.<sun.java2d.marlin.DPathConsumer2D: void pathDone()>();
+
+        virtualinvoke r0.<sun.java2d.marlin.DDasher: void dispose()>();
+
+        return;
+    }
+
+    public long getNativeConsumer()
+    {
+        java.lang.InternalError $r0;
+        sun.java2d.marlin.DDasher r1;
+
+        r1 := @this: sun.java2d.marlin.DDasher;
+
+        $r0 = new java.lang.InternalError;
+
+        specialinvoke $r0.<java.lang.InternalError: void <init>(java.lang.String)>("DDasher does not use a native consumer");
+
+        throw $r0;
+    }
+
+    static void <clinit>()
+    {
+        float $f0;
+        double $d0;
+
+        <sun.java2d.marlin.DDasher: double MAX_CYCLES> = 1.6E7;
+
+        <sun.java2d.marlin.DDasher: double EPS> = 1.0E-6;
+
+        <sun.java2d.marlin.DDasher: double MIN_T_INC> = 1.52587890625E-5;
+
+        <sun.java2d.marlin.DDasher: int REC_LIMIT> = 16;
+
+        $f0 = staticinvoke <sun.java2d.marlin.MarlinProperties: float getCurveLengthError()>();
+
+        $d0 = (double) $f0;
+
+        <sun.java2d.marlin.DDasher: double CURVE_LEN_ERR> = $d0;
+
+        return;
+    }
+}

@@ -1,0 +1,823 @@
+public final class com.sun.media.sound.AiffFileWriter extends com.sun.media.sound.SunFileWriter
+{
+    private static final int DOUBLE_MANTISSA_LENGTH;
+    private static final int DOUBLE_EXPONENT_LENGTH;
+    private static final long DOUBLE_SIGN_MASK;
+    private static final long DOUBLE_EXPONENT_MASK;
+    private static final long DOUBLE_MANTISSA_MASK;
+    private static final int DOUBLE_EXPONENT_OFFSET;
+    private static final int EXTENDED_EXPONENT_OFFSET;
+    private static final int EXTENDED_MANTISSA_LENGTH;
+    private static final int EXTENDED_EXPONENT_LENGTH;
+    private static final long EXTENDED_INTEGER_MASK;
+
+    public void <init>()
+    {
+        com.sun.media.sound.AiffFileWriter r0;
+        javax.sound.sampled.AudioFileFormat$Type[] $r1;
+        javax.sound.sampled.AudioFileFormat$Type $r2;
+
+        r0 := @this: com.sun.media.sound.AiffFileWriter;
+
+        $r1 = newarray (javax.sound.sampled.AudioFileFormat$Type)[1];
+
+        $r2 = <javax.sound.sampled.AudioFileFormat$Type: javax.sound.sampled.AudioFileFormat$Type AIFF>;
+
+        $r1[0] = $r2;
+
+        specialinvoke r0.<com.sun.media.sound.SunFileWriter: void <init>(javax.sound.sampled.AudioFileFormat$Type[])>($r1);
+
+        return;
+    }
+
+    public javax.sound.sampled.AudioFileFormat$Type[] getAudioFileTypes(javax.sound.sampled.AudioInputStream)
+    {
+        javax.sound.sampled.AudioFormat $r6;
+        int $i0, $i1;
+        javax.sound.sampled.AudioInputStream r5;
+        javax.sound.sampled.AudioFileFormat$Type[] $r1, r2, $r3, $r4, $r12;
+        boolean $z0, $z1, $z2, $z3;
+        javax.sound.sampled.AudioFormat$Encoding $r7, $r8, $r9, $r10, $r11;
+        com.sun.media.sound.AiffFileWriter r0;
+
+        r0 := @this: com.sun.media.sound.AiffFileWriter;
+
+        r5 := @parameter0: javax.sound.sampled.AudioInputStream;
+
+        $r1 = r0.<com.sun.media.sound.AiffFileWriter: javax.sound.sampled.AudioFileFormat$Type[] types>;
+
+        $i0 = lengthof $r1;
+
+        r2 = newarray (javax.sound.sampled.AudioFileFormat$Type)[$i0];
+
+        $r4 = r0.<com.sun.media.sound.AiffFileWriter: javax.sound.sampled.AudioFileFormat$Type[] types>;
+
+        $r3 = r0.<com.sun.media.sound.AiffFileWriter: javax.sound.sampled.AudioFileFormat$Type[] types>;
+
+        $i1 = lengthof $r3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, r2, 0, $i1);
+
+        $r6 = virtualinvoke r5.<javax.sound.sampled.AudioInputStream: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $r7 = virtualinvoke $r6.<javax.sound.sampled.AudioFormat: javax.sound.sampled.AudioFormat$Encoding getEncoding()>();
+
+        $r8 = <javax.sound.sampled.AudioFormat$Encoding: javax.sound.sampled.AudioFormat$Encoding ALAW>;
+
+        $z0 = virtualinvoke $r8.<javax.sound.sampled.AudioFormat$Encoding: boolean equals(java.lang.Object)>($r7);
+
+        if $z0 != 0 goto label1;
+
+        $r9 = <javax.sound.sampled.AudioFormat$Encoding: javax.sound.sampled.AudioFormat$Encoding ULAW>;
+
+        $z1 = virtualinvoke $r9.<javax.sound.sampled.AudioFormat$Encoding: boolean equals(java.lang.Object)>($r7);
+
+        if $z1 != 0 goto label1;
+
+        $r10 = <javax.sound.sampled.AudioFormat$Encoding: javax.sound.sampled.AudioFormat$Encoding PCM_SIGNED>;
+
+        $z2 = virtualinvoke $r10.<javax.sound.sampled.AudioFormat$Encoding: boolean equals(java.lang.Object)>($r7);
+
+        if $z2 != 0 goto label1;
+
+        $r11 = <javax.sound.sampled.AudioFormat$Encoding: javax.sound.sampled.AudioFormat$Encoding PCM_UNSIGNED>;
+
+        $z3 = virtualinvoke $r11.<javax.sound.sampled.AudioFormat$Encoding: boolean equals(java.lang.Object)>($r7);
+
+        if $z3 == 0 goto label2;
+
+     label1:
+        return r2;
+
+     label2:
+        $r12 = newarray (javax.sound.sampled.AudioFileFormat$Type)[0];
+
+        return $r12;
+    }
+
+    public int write(javax.sound.sampled.AudioInputStream, javax.sound.sampled.AudioFileFormat$Type, java.io.OutputStream) throws java.io.IOException
+    {
+        java.io.OutputStream r5;
+        com.sun.media.sound.AiffFileFormat r4;
+        long $l0;
+        java.io.IOException $r6;
+        javax.sound.sampled.AudioFileFormat$Type r1;
+        com.sun.media.sound.AiffFileWriter r0;
+        byte $b1;
+        javax.sound.sampled.AudioFileFormat $r3;
+        javax.sound.sampled.AudioInputStream r2;
+        int $i2;
+
+        r0 := @this: com.sun.media.sound.AiffFileWriter;
+
+        r2 := @parameter0: javax.sound.sampled.AudioInputStream;
+
+        r1 := @parameter1: javax.sound.sampled.AudioFileFormat$Type;
+
+        r5 := @parameter2: java.io.OutputStream;
+
+        $r3 = specialinvoke r0.<com.sun.media.sound.AiffFileWriter: javax.sound.sampled.AudioFileFormat getAudioFileFormat(javax.sound.sampled.AudioFileFormat$Type,javax.sound.sampled.AudioInputStream)>(r1, r2);
+
+        r4 = (com.sun.media.sound.AiffFileFormat) $r3;
+
+        $l0 = virtualinvoke r2.<javax.sound.sampled.AudioInputStream: long getFrameLength()>();
+
+        $b1 = $l0 cmp -1L;
+
+        if $b1 != 0 goto label1;
+
+        $r6 = new java.io.IOException;
+
+        specialinvoke $r6.<java.io.IOException: void <init>(java.lang.String)>("stream length not specified");
+
+        throw $r6;
+
+     label1:
+        $i2 = specialinvoke r0.<com.sun.media.sound.AiffFileWriter: int writeAiffFile(java.io.InputStream,com.sun.media.sound.AiffFileFormat,java.io.OutputStream)>(r2, r4, r5);
+
+        return $i2;
+    }
+
+    public int write(javax.sound.sampled.AudioInputStream, javax.sound.sampled.AudioFileFormat$Type, java.io.File) throws java.io.IOException
+    {
+        java.io.RandomAccessFile $r13;
+        com.sun.media.sound.AiffFileFormat r4;
+        javax.sound.sampled.AudioFormat $r8, $r9;
+        javax.sound.sampled.AudioFileFormat $r3;
+        javax.sound.sampled.AudioInputStream r2;
+        javax.sound.sampled.AudioFileFormat$Type r1;
+        long l9, $l10, $l11, $l12;
+        java.io.BufferedOutputStream $r12;
+        int $i0, $i1, $i2, $i3, i4, $i5, $i6, i7, $i8, i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i22;
+        java.io.FileOutputStream $r11;
+        java.io.File r6;
+        com.sun.media.sound.AiffFileWriter r0;
+
+        r0 := @this: com.sun.media.sound.AiffFileWriter;
+
+        r2 := @parameter0: javax.sound.sampled.AudioInputStream;
+
+        r1 := @parameter1: javax.sound.sampled.AudioFileFormat$Type;
+
+        r6 := @parameter2: java.io.File;
+
+        $r3 = specialinvoke r0.<com.sun.media.sound.AiffFileWriter: javax.sound.sampled.AudioFileFormat getAudioFileFormat(javax.sound.sampled.AudioFileFormat$Type,javax.sound.sampled.AudioInputStream)>(r1, r2);
+
+        r4 = (com.sun.media.sound.AiffFileFormat) $r3;
+
+        $r11 = new java.io.FileOutputStream;
+
+        specialinvoke $r11.<java.io.FileOutputStream: void <init>(java.io.File)>(r6);
+
+        $r12 = new java.io.BufferedOutputStream;
+
+        specialinvoke $r12.<java.io.BufferedOutputStream: void <init>(java.io.OutputStream,int)>($r11, 4096);
+
+        $i0 = specialinvoke r0.<com.sun.media.sound.AiffFileWriter: int writeAiffFile(java.io.InputStream,com.sun.media.sound.AiffFileFormat,java.io.OutputStream)>(r2, r4, $r12);
+
+        virtualinvoke $r12.<java.io.BufferedOutputStream: void close()>();
+
+        $i1 = virtualinvoke r4.<com.sun.media.sound.AiffFileFormat: int getByteLength()>();
+
+        $i22 = (int) -1;
+
+        if $i1 != $i22 goto label1;
+
+        $r8 = virtualinvoke r4.<com.sun.media.sound.AiffFileFormat: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $i2 = virtualinvoke $r8.<javax.sound.sampled.AudioFormat: int getChannels()>();
+
+        $r9 = virtualinvoke r4.<com.sun.media.sound.AiffFileFormat: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $i3 = virtualinvoke $r9.<javax.sound.sampled.AudioFormat: int getSampleSizeInBits()>();
+
+        i4 = $i2 * $i3;
+
+        $i5 = virtualinvoke r4.<com.sun.media.sound.AiffFileFormat: int getHeaderSize()>();
+
+        $i6 = $i0 - $i5;
+
+        i7 = $i6 + 16;
+
+        $i8 = i7 - 16;
+
+        l9 = (long) $i8;
+
+        $l11 = l9 * 8L;
+
+        $l10 = (long) i4;
+
+        $l12 = $l11 / $l10;
+
+        i13 = (int) $l12;
+
+        $r13 = new java.io.RandomAccessFile;
+
+        specialinvoke $r13.<java.io.RandomAccessFile: void <init>(java.io.File,java.lang.String)>(r6, "rw");
+
+        virtualinvoke $r13.<java.io.RandomAccessFile: int skipBytes(int)>(4);
+
+        $i14 = $i0 - 8;
+
+        virtualinvoke $r13.<java.io.RandomAccessFile: void writeInt(int)>($i14);
+
+        $i15 = virtualinvoke r4.<com.sun.media.sound.AiffFileFormat: int getFverChunkSize()>();
+
+        $i16 = 4 + $i15;
+
+        $i17 = $i16 + 4;
+
+        $i18 = $i17 + 4;
+
+        $i19 = $i18 + 2;
+
+        virtualinvoke $r13.<java.io.RandomAccessFile: int skipBytes(int)>($i19);
+
+        virtualinvoke $r13.<java.io.RandomAccessFile: void writeInt(int)>(i13);
+
+        virtualinvoke $r13.<java.io.RandomAccessFile: int skipBytes(int)>(16);
+
+        $i20 = i7 - 8;
+
+        virtualinvoke $r13.<java.io.RandomAccessFile: void writeInt(int)>($i20);
+
+        virtualinvoke $r13.<java.io.RandomAccessFile: void close()>();
+
+     label1:
+        return $i0;
+    }
+
+    private javax.sound.sampled.AudioFileFormat getAudioFileFormat(javax.sound.sampled.AudioFileFormat$Type, javax.sound.sampled.AudioInputStream)
+    {
+        com.sun.media.sound.AiffFileFormat $r31;
+        javax.sound.sampled.AudioFormat $r1, $r30;
+        byte $b15;
+        javax.sound.sampled.AudioInputStream r0;
+        javax.sound.sampled.AudioFileFormat$Type[] $r4;
+        boolean $z0, $z1, $z2, z3;
+        javax.sound.sampled.AudioFileFormat$Type r5, $r6, $r25;
+        float $f0, $f1;
+        java.lang.StringBuilder $r10, $r11, $r12, $r17, $r18, $r19, $r26, $r28;
+        long $l1, $l5, $l14, $l17;
+        int $i0, $i2, $i3, $i4, $i6, $i7, $i8, $i9, $i10, i11, $i12, $i13, i16, $i18, $i20;
+        java.lang.String $r13, $r20;
+        java.lang.IllegalArgumentException $r27, $r29;
+        javax.sound.sampled.AudioFormat$Encoding $r2, $r7, $r14, r21, r22;
+        com.sun.media.sound.AiffFileWriter r3;
+
+        r3 := @this: com.sun.media.sound.AiffFileWriter;
+
+        r5 := @parameter0: javax.sound.sampled.AudioFileFormat$Type;
+
+        r0 := @parameter1: javax.sound.sampled.AudioInputStream;
+
+        r21 = <javax.sound.sampled.AudioFormat$Encoding: javax.sound.sampled.AudioFormat$Encoding PCM_SIGNED>;
+
+        $r1 = virtualinvoke r0.<javax.sound.sampled.AudioInputStream: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $r2 = virtualinvoke $r1.<javax.sound.sampled.AudioFormat: javax.sound.sampled.AudioFormat$Encoding getEncoding()>();
+
+        z3 = 0;
+
+        $r4 = r3.<com.sun.media.sound.AiffFileWriter: javax.sound.sampled.AudioFileFormat$Type[] types>;
+
+        $r6 = $r4[0];
+
+        $z0 = virtualinvoke $r6.<javax.sound.sampled.AudioFileFormat$Type: boolean equals(java.lang.Object)>(r5);
+
+        if $z0 != 0 goto label1;
+
+        $r27 = new java.lang.IllegalArgumentException;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("File type ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r5);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" not supported.");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r27.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r20);
+
+        throw $r27;
+
+     label1:
+        $r7 = <javax.sound.sampled.AudioFormat$Encoding: javax.sound.sampled.AudioFormat$Encoding ALAW>;
+
+        $z1 = virtualinvoke $r7.<javax.sound.sampled.AudioFormat$Encoding: boolean equals(java.lang.Object)>($r2);
+
+        if $z1 != 0 goto label2;
+
+        $r14 = <javax.sound.sampled.AudioFormat$Encoding: javax.sound.sampled.AudioFormat$Encoding ULAW>;
+
+        $z2 = virtualinvoke $r14.<javax.sound.sampled.AudioFormat$Encoding: boolean equals(java.lang.Object)>($r2);
+
+        if $z2 == 0 goto label4;
+
+     label2:
+        $i0 = virtualinvoke $r1.<javax.sound.sampled.AudioFormat: int getSampleSizeInBits()>();
+
+        if $i0 != 8 goto label3;
+
+        r22 = <javax.sound.sampled.AudioFormat$Encoding: javax.sound.sampled.AudioFormat$Encoding PCM_SIGNED>;
+
+        i11 = 16;
+
+        z3 = 1;
+
+        goto label6;
+
+     label3:
+        $r29 = new java.lang.IllegalArgumentException;
+
+        $r28 = new java.lang.StringBuilder;
+
+        specialinvoke $r28.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Encoding ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" supported only for 8-bit data.");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r29.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r13);
+
+        throw $r29;
+
+     label4:
+        $i10 = virtualinvoke $r1.<javax.sound.sampled.AudioFormat: int getSampleSizeInBits()>();
+
+        if $i10 != 8 goto label5;
+
+        r22 = <javax.sound.sampled.AudioFormat$Encoding: javax.sound.sampled.AudioFormat$Encoding PCM_UNSIGNED>;
+
+        i11 = 8;
+
+        goto label6;
+
+     label5:
+        r22 = <javax.sound.sampled.AudioFormat$Encoding: javax.sound.sampled.AudioFormat$Encoding PCM_SIGNED>;
+
+        i11 = virtualinvoke $r1.<javax.sound.sampled.AudioFormat: int getSampleSizeInBits()>();
+
+     label6:
+        $r30 = new javax.sound.sampled.AudioFormat;
+
+        $f0 = virtualinvoke $r1.<javax.sound.sampled.AudioFormat: float getSampleRate()>();
+
+        $i12 = virtualinvoke $r1.<javax.sound.sampled.AudioFormat: int getChannels()>();
+
+        $i13 = virtualinvoke $r1.<javax.sound.sampled.AudioFormat: int getFrameSize()>();
+
+        $f1 = virtualinvoke $r1.<javax.sound.sampled.AudioFormat: float getFrameRate()>();
+
+        specialinvoke $r30.<javax.sound.sampled.AudioFormat: void <init>(javax.sound.sampled.AudioFormat$Encoding,float,int,int,int,float,boolean)>(r22, $f0, i11, $i12, $i13, $f1, 1);
+
+        $l14 = virtualinvoke r0.<javax.sound.sampled.AudioInputStream: long getFrameLength()>();
+
+        $b15 = $l14 cmp -1L;
+
+        if $b15 == 0 goto label8;
+
+        if z3 == 0 goto label7;
+
+        $l5 = virtualinvoke r0.<javax.sound.sampled.AudioInputStream: long getFrameLength()>();
+
+        $i6 = (int) $l5;
+
+        $i7 = virtualinvoke $r1.<javax.sound.sampled.AudioFormat: int getFrameSize()>();
+
+        $i8 = $i6 * $i7;
+
+        $i9 = $i8 * 2;
+
+        i16 = $i9 + 54;
+
+        goto label9;
+
+     label7:
+        $l1 = virtualinvoke r0.<javax.sound.sampled.AudioInputStream: long getFrameLength()>();
+
+        $i2 = (int) $l1;
+
+        $i3 = virtualinvoke $r1.<javax.sound.sampled.AudioFormat: int getFrameSize()>();
+
+        $i4 = $i2 * $i3;
+
+        i16 = $i4 + 54;
+
+        goto label9;
+
+     label8:
+        $i20 = (int) -1;
+
+        i16 = $i20;
+
+     label9:
+        $r31 = new com.sun.media.sound.AiffFileFormat;
+
+        $r25 = <javax.sound.sampled.AudioFileFormat$Type: javax.sound.sampled.AudioFileFormat$Type AIFF>;
+
+        $l17 = virtualinvoke r0.<javax.sound.sampled.AudioInputStream: long getFrameLength()>();
+
+        $i18 = (int) $l17;
+
+        specialinvoke $r31.<com.sun.media.sound.AiffFileFormat: void <init>(javax.sound.sampled.AudioFileFormat$Type,int,javax.sound.sampled.AudioFormat,int)>($r25, i16, $r30, $i18);
+
+        return $r31;
+    }
+
+    private int writeAiffFile(java.io.InputStream, com.sun.media.sound.AiffFileFormat, java.io.OutputStream) throws java.io.IOException
+    {
+        java.io.OutputStream r5;
+        byte[] r4;
+        com.sun.media.sound.AiffFileFormat r1;
+        com.sun.media.sound.AiffFileWriter r0;
+        int i0, i1, $i2;
+        java.io.InputStream r2, $r3;
+
+        r0 := @this: com.sun.media.sound.AiffFileWriter;
+
+        r2 := @parameter0: java.io.InputStream;
+
+        r1 := @parameter1: com.sun.media.sound.AiffFileFormat;
+
+        r5 := @parameter2: java.io.OutputStream;
+
+        i0 = 0;
+
+        $r3 = specialinvoke r0.<com.sun.media.sound.AiffFileWriter: java.io.InputStream getFileStream(com.sun.media.sound.AiffFileFormat,java.io.InputStream)>(r1, r2);
+
+        r4 = newarray (byte)[4096];
+
+        i1 = virtualinvoke r1.<com.sun.media.sound.AiffFileFormat: int getByteLength()>();
+
+     label1:
+        $i2 = virtualinvoke $r3.<java.io.InputStream: int read(byte[])>(r4);
+
+        if $i2 < 0 goto label4;
+
+        if i1 <= 0 goto label3;
+
+        if $i2 >= i1 goto label2;
+
+        virtualinvoke r5.<java.io.OutputStream: void write(byte[],int,int)>(r4, 0, $i2);
+
+        i0 = i0 + $i2;
+
+        i1 = i1 - $i2;
+
+        goto label1;
+
+     label2:
+        virtualinvoke r5.<java.io.OutputStream: void write(byte[],int,int)>(r4, 0, i1);
+
+        i0 = i0 + i1;
+
+        goto label4;
+
+     label3:
+        virtualinvoke r5.<java.io.OutputStream: void write(byte[],int,int)>(r4, 0, $i2);
+
+        i0 = i0 + $i2;
+
+        goto label1;
+
+     label4:
+        return i0;
+    }
+
+    private java.io.InputStream getFileStream(com.sun.media.sound.AiffFileFormat, java.io.InputStream) throws java.io.IOException
+    {
+        byte[] $r21;
+        javax.sound.sampled.AudioFormat $r1, $r5, $r25, $r27;
+        java.io.DataOutputStream $r29;
+        java.io.ByteArrayOutputStream $r28;
+        long $l17, $l18, $l19, l24;
+        short s3, s5;
+        javax.sound.sampled.AudioFormat$Encoding $r6, $r7, $r9, $r11, $r12, $r14, $r17;
+        com.sun.media.sound.AiffFileWriter r3;
+        com.sun.media.sound.AiffFileFormat r0;
+        java.io.ByteArrayInputStream $r30;
+        javax.sound.sampled.AudioInputStream $r4, $r10, $r15;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        float $f0, $f1, $f2, $f3, $f4;
+        int $i0, $i1, $i2, $i4, i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i20, $i21, i22, i23, $i25, $i26, $i27, $i29, $i31, $i32, $i33, $i35, $i36, $i37;
+        java.io.SequenceInputStream $r32;
+        java.lang.IllegalArgumentException $r26;
+        com.sun.media.sound.SunFileWriter$NoCloseInputStream $r31;
+        java.io.InputStream r2, r18;
+
+        r3 := @this: com.sun.media.sound.AiffFileWriter;
+
+        r0 := @parameter0: com.sun.media.sound.AiffFileFormat;
+
+        r2 := @parameter1: java.io.InputStream;
+
+        $r1 = virtualinvoke r0.<com.sun.media.sound.AiffFileFormat: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $i0 = virtualinvoke r0.<com.sun.media.sound.AiffFileFormat: int getHeaderSize()>();
+
+        virtualinvoke r0.<com.sun.media.sound.AiffFileFormat: int getFverChunkSize()>();
+
+        $i1 = virtualinvoke r0.<com.sun.media.sound.AiffFileFormat: int getCommChunkSize()>();
+
+        $i29 = (int) -1;
+
+        i22 = $i29;
+
+        $i31 = (int) -1;
+
+        i23 = $i31;
+
+        virtualinvoke r0.<com.sun.media.sound.AiffFileFormat: int getSsndChunkOffset()>();
+
+        $i2 = virtualinvoke $r1.<javax.sound.sampled.AudioFormat: int getChannels()>();
+
+        s3 = (short) $i2;
+
+        $i4 = virtualinvoke $r1.<javax.sound.sampled.AudioFormat: int getSampleSizeInBits()>();
+
+        s5 = (short) $i4;
+
+        $i32 = (int) s3;
+
+        $i33 = (int) s5;
+
+        i6 = $i32 * $i33;
+
+        $i7 = virtualinvoke r0.<com.sun.media.sound.AiffFileFormat: int getFrameLength()>();
+
+        $i35 = (int) -1;
+
+        if $i7 == $i35 goto label1;
+
+        $l18 = (long) $i7;
+
+        $l17 = (long) i6;
+
+        $l19 = $l18 * $l17;
+
+        l24 = $l19 / 8L;
+
+        $i20 = (int) l24;
+
+        i23 = $i20 + 16;
+
+        $i21 = (int) l24;
+
+        i22 = $i21 + $i0;
+
+     label1:
+        $f0 = virtualinvoke $r1.<javax.sound.sampled.AudioFormat: float getSampleRate()>();
+
+        r18 = r2;
+
+        $z0 = r2 instanceof javax.sound.sampled.AudioInputStream;
+
+        if $z0 == 0 goto label6;
+
+        $r4 = (javax.sound.sampled.AudioInputStream) r2;
+
+        $r5 = virtualinvoke $r4.<javax.sound.sampled.AudioInputStream: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $r6 = virtualinvoke $r5.<javax.sound.sampled.AudioFormat: javax.sound.sampled.AudioFormat$Encoding getEncoding()>();
+
+        $r7 = <javax.sound.sampled.AudioFormat$Encoding: javax.sound.sampled.AudioFormat$Encoding PCM_UNSIGNED>;
+
+        $z1 = virtualinvoke $r7.<javax.sound.sampled.AudioFormat$Encoding: boolean equals(java.lang.Object)>($r6);
+
+        if $z1 != 0 goto label2;
+
+        $r11 = <javax.sound.sampled.AudioFormat$Encoding: javax.sound.sampled.AudioFormat$Encoding PCM_SIGNED>;
+
+        $z2 = virtualinvoke $r11.<javax.sound.sampled.AudioFormat$Encoding: boolean equals(java.lang.Object)>($r6);
+
+        if $z2 == 0 goto label3;
+
+        $z5 = virtualinvoke $r5.<javax.sound.sampled.AudioFormat: boolean isBigEndian()>();
+
+        if $z5 != 0 goto label3;
+
+     label2:
+        $r25 = new javax.sound.sampled.AudioFormat;
+
+        $r9 = <javax.sound.sampled.AudioFormat$Encoding: javax.sound.sampled.AudioFormat$Encoding PCM_SIGNED>;
+
+        $f1 = virtualinvoke $r5.<javax.sound.sampled.AudioFormat: float getSampleRate()>();
+
+        $i8 = virtualinvoke $r5.<javax.sound.sampled.AudioFormat: int getSampleSizeInBits()>();
+
+        $i9 = virtualinvoke $r5.<javax.sound.sampled.AudioFormat: int getChannels()>();
+
+        $i10 = virtualinvoke $r5.<javax.sound.sampled.AudioFormat: int getFrameSize()>();
+
+        $f2 = virtualinvoke $r5.<javax.sound.sampled.AudioFormat: float getFrameRate()>();
+
+        specialinvoke $r25.<javax.sound.sampled.AudioFormat: void <init>(javax.sound.sampled.AudioFormat$Encoding,float,int,int,int,float,boolean)>($r9, $f1, $i8, $i9, $i10, $f2, 1);
+
+        $r10 = (javax.sound.sampled.AudioInputStream) r2;
+
+        r18 = staticinvoke <javax.sound.sampled.AudioSystem: javax.sound.sampled.AudioInputStream getAudioInputStream(javax.sound.sampled.AudioFormat,javax.sound.sampled.AudioInputStream)>($r25, $r10);
+
+        goto label6;
+
+     label3:
+        $r12 = <javax.sound.sampled.AudioFormat$Encoding: javax.sound.sampled.AudioFormat$Encoding ULAW>;
+
+        $z3 = virtualinvoke $r12.<javax.sound.sampled.AudioFormat$Encoding: boolean equals(java.lang.Object)>($r6);
+
+        if $z3 != 0 goto label4;
+
+        $r17 = <javax.sound.sampled.AudioFormat$Encoding: javax.sound.sampled.AudioFormat$Encoding ALAW>;
+
+        $z4 = virtualinvoke $r17.<javax.sound.sampled.AudioFormat$Encoding: boolean equals(java.lang.Object)>($r6);
+
+        if $z4 == 0 goto label6;
+
+     label4:
+        $i11 = virtualinvoke $r5.<javax.sound.sampled.AudioFormat: int getSampleSizeInBits()>();
+
+        if $i11 == 8 goto label5;
+
+        $r26 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r26.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("unsupported encoding");
+
+        throw $r26;
+
+     label5:
+        $r27 = new javax.sound.sampled.AudioFormat;
+
+        $r14 = <javax.sound.sampled.AudioFormat$Encoding: javax.sound.sampled.AudioFormat$Encoding PCM_SIGNED>;
+
+        $f3 = virtualinvoke $r5.<javax.sound.sampled.AudioFormat: float getSampleRate()>();
+
+        $i12 = virtualinvoke $r5.<javax.sound.sampled.AudioFormat: int getSampleSizeInBits()>();
+
+        $i13 = $i12 * 2;
+
+        $i14 = virtualinvoke $r5.<javax.sound.sampled.AudioFormat: int getChannels()>();
+
+        $i15 = virtualinvoke $r5.<javax.sound.sampled.AudioFormat: int getFrameSize()>();
+
+        $i16 = $i15 * 2;
+
+        $f4 = virtualinvoke $r5.<javax.sound.sampled.AudioFormat: float getFrameRate()>();
+
+        specialinvoke $r27.<javax.sound.sampled.AudioFormat: void <init>(javax.sound.sampled.AudioFormat$Encoding,float,int,int,int,float,boolean)>($r14, $f3, $i13, $i14, $i16, $f4, 1);
+
+        $r15 = (javax.sound.sampled.AudioInputStream) r2;
+
+        r18 = staticinvoke <javax.sound.sampled.AudioSystem: javax.sound.sampled.AudioInputStream getAudioInputStream(javax.sound.sampled.AudioFormat,javax.sound.sampled.AudioInputStream)>($r27, $r15);
+
+     label6:
+        $r28 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r28.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $r29 = new java.io.DataOutputStream;
+
+        specialinvoke $r29.<java.io.DataOutputStream: void <init>(java.io.OutputStream)>($r28);
+
+        virtualinvoke $r29.<java.io.DataOutputStream: void writeInt(int)>(1179603533);
+
+        $i25 = i22 - 8;
+
+        virtualinvoke $r29.<java.io.DataOutputStream: void writeInt(int)>($i25);
+
+        virtualinvoke $r29.<java.io.DataOutputStream: void writeInt(int)>(1095321158);
+
+        virtualinvoke $r29.<java.io.DataOutputStream: void writeInt(int)>(1129270605);
+
+        $i26 = $i1 - 8;
+
+        virtualinvoke $r29.<java.io.DataOutputStream: void writeInt(int)>($i26);
+
+        $i36 = (int) s3;
+
+        virtualinvoke $r29.<java.io.DataOutputStream: void writeShort(int)>($i36);
+
+        virtualinvoke $r29.<java.io.DataOutputStream: void writeInt(int)>($i7);
+
+        $i37 = (int) s5;
+
+        virtualinvoke $r29.<java.io.DataOutputStream: void writeShort(int)>($i37);
+
+        specialinvoke r3.<com.sun.media.sound.AiffFileWriter: void write_ieee_extended(java.io.DataOutputStream,float)>($r29, $f0);
+
+        virtualinvoke $r29.<java.io.DataOutputStream: void writeInt(int)>(1397968452);
+
+        $i27 = i23 - 8;
+
+        virtualinvoke $r29.<java.io.DataOutputStream: void writeInt(int)>($i27);
+
+        virtualinvoke $r29.<java.io.DataOutputStream: void writeInt(int)>(0);
+
+        virtualinvoke $r29.<java.io.DataOutputStream: void writeInt(int)>(0);
+
+        virtualinvoke $r29.<java.io.DataOutputStream: void close()>();
+
+        $r21 = virtualinvoke $r28.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        $r30 = new java.io.ByteArrayInputStream;
+
+        specialinvoke $r30.<java.io.ByteArrayInputStream: void <init>(byte[])>($r21);
+
+        $r32 = new java.io.SequenceInputStream;
+
+        $r31 = new com.sun.media.sound.SunFileWriter$NoCloseInputStream;
+
+        specialinvoke $r31.<com.sun.media.sound.SunFileWriter$NoCloseInputStream: void <init>(com.sun.media.sound.SunFileWriter,java.io.InputStream)>(r3, r18);
+
+        specialinvoke $r32.<java.io.SequenceInputStream: void <init>(java.io.InputStream,java.io.InputStream)>($r30, $r31);
+
+        return $r32;
+    }
+
+    private void write_ieee_extended(java.io.DataOutputStream, float) throws java.io.IOException
+    {
+        long $l0, $l1, l2, $l3, l4, l5, $l6, l7, l8, l9, $l10, l13;
+        short s12;
+        java.io.DataOutputStream r0;
+        int $i11, $i14;
+        double $d0;
+        com.sun.media.sound.AiffFileWriter r1;
+        float f0;
+
+        r1 := @this: com.sun.media.sound.AiffFileWriter;
+
+        r0 := @parameter0: java.io.DataOutputStream;
+
+        f0 := @parameter1: float;
+
+        $d0 = (double) f0;
+
+        $l0 = staticinvoke <java.lang.Double: long doubleToLongBits(double)>($d0);
+
+        $l1 = $l0 & -9223372036854775808L;
+
+        l2 = $l1 >> 63;
+
+        $l3 = $l0 & 9218868437227405312L;
+
+        l4 = $l3 >> 52;
+
+        l5 = $l0 & 4503599627370495L;
+
+        $l6 = l4 - 1023L;
+
+        l7 = $l6 + 16383L;
+
+        l8 = l5 << 11;
+
+        l9 = l2 << 15;
+
+        $l10 = l9 | l7;
+
+        $i11 = (int) $l10;
+
+        s12 = (short) $i11;
+
+        l13 = -9223372036854775808L | l8;
+
+        $i14 = (int) s12;
+
+        virtualinvoke r0.<java.io.DataOutputStream: void writeShort(int)>($i14);
+
+        virtualinvoke r0.<java.io.DataOutputStream: void writeLong(long)>(l13);
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.media.sound.AiffFileWriter: long EXTENDED_INTEGER_MASK> = -9223372036854775808L;
+
+        <com.sun.media.sound.AiffFileWriter: int EXTENDED_EXPONENT_LENGTH> = 15;
+
+        <com.sun.media.sound.AiffFileWriter: int EXTENDED_MANTISSA_LENGTH> = 63;
+
+        <com.sun.media.sound.AiffFileWriter: int EXTENDED_EXPONENT_OFFSET> = 16383;
+
+        <com.sun.media.sound.AiffFileWriter: int DOUBLE_EXPONENT_OFFSET> = 1023;
+
+        <com.sun.media.sound.AiffFileWriter: long DOUBLE_MANTISSA_MASK> = 4503599627370495L;
+
+        <com.sun.media.sound.AiffFileWriter: long DOUBLE_EXPONENT_MASK> = 9218868437227405312L;
+
+        <com.sun.media.sound.AiffFileWriter: long DOUBLE_SIGN_MASK> = -9223372036854775808L;
+
+        <com.sun.media.sound.AiffFileWriter: int DOUBLE_EXPONENT_LENGTH> = 11;
+
+        <com.sun.media.sound.AiffFileWriter: int DOUBLE_MANTISSA_LENGTH> = 52;
+
+        return;
+    }
+}

@@ -1,0 +1,1278 @@
+final class sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage extends sun.security.ssl.SSLHandshake$HandshakeMessage
+{
+    private static final byte CURVE_NAMED_CURVE;
+    private final sun.security.ssl.SupportedGroupsExtension$NamedGroup namedGroup;
+    private final byte[] publicPoint;
+    private final byte[] paramsSignature;
+    private final java.security.interfaces.ECPublicKey publicKey;
+    private final boolean useExplicitSigAlgorithm;
+    private final sun.security.ssl.SignatureScheme signatureScheme;
+
+    void <init>(sun.security.ssl.HandshakeContext) throws java.io.IOException
+    {
+        byte[] $r11, $r30, $r31, $r32, $r33;
+        sun.security.ssl.ECDHKeyExchange$ECDHEPossession r75;
+        java.security.GeneralSecurityException $r65;
+        sun.security.ssl.ServerHandshakeContext r2;
+        java.security.Signature r78;
+        javax.net.ssl.SSLException $r20, $r50, $r53, $r64, $r74;
+        java.security.PrivateKey $r24, $r26, $r45, $r60, $r70;
+        sun.security.ssl.SSLPossession r77;
+        java.lang.StringBuilder $r14, $r17, $r18, $r41, $r44, $r47, $r48, $r56, $r59, $r62, $r66, $r69, $r72;
+        sun.security.ssl.ProtocolVersion $r23, $r34;
+        java.lang.String $r19, $r22, $r25, $r46, $r49, $r61, $r63, $r71, $r73;
+        java.util.Map$Entry $r37;
+        sun.security.ssl.TransportContext $r15, $r42, $r52, $r57, $r67;
+        java.security.spec.ECParameterSpec $r7;
+        java.security.AlgorithmConstraints $r36;
+        sun.security.ssl.Alert $r16, $r43, $r51, $r58, $r68;
+        java.security.spec.ECPoint $r9;
+        sun.security.ssl.HandshakeContext r1;
+        sun.security.ssl.SignatureScheme $r39;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.security.SignatureException $r55;
+        sun.security.ssl.X509Authentication$X509Possession r76;
+        java.security.spec.EllipticCurve $r10;
+        java.util.List $r3, $r35;
+        sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage r0;
+        java.security.interfaces.ECPublicKey $r5, $r6, $r8;
+        sun.security.ssl.SupportedGroupsExtension$NamedGroup $r12, $r13, $r21, $r29;
+        int $i0;
+        java.util.Iterator $r4;
+        sun.security.ssl.RandomCookie $r27, $r28;
+        java.lang.Object $r38, $r40, $r54;
+
+        r0 := @this: sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage;
+
+        r1 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        specialinvoke r0.<sun.security.ssl.SSLHandshake$HandshakeMessage: void <init>(sun.security.ssl.HandshakeContext)>(r1);
+
+        r2 = (sun.security.ssl.ServerHandshakeContext) r1;
+
+        r75 = null;
+
+        r76 = null;
+
+        $r3 = r2.<sun.security.ssl.ServerHandshakeContext: java.util.List handshakePossessions>;
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+     label01:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label04;
+
+        $r54 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r77 = (sun.security.ssl.SSLPossession) $r54;
+
+        $z3 = r77 instanceof sun.security.ssl.ECDHKeyExchange$ECDHEPossession;
+
+        if $z3 == 0 goto label02;
+
+        r75 = (sun.security.ssl.ECDHKeyExchange$ECDHEPossession) r77;
+
+        if r76 == null goto label03;
+
+        goto label04;
+
+     label02:
+        $z4 = r77 instanceof sun.security.ssl.X509Authentication$X509Possession;
+
+        if $z4 == 0 goto label03;
+
+        r76 = (sun.security.ssl.X509Authentication$X509Possession) r77;
+
+        if r75 == null goto label03;
+
+        goto label04;
+
+     label03:
+        goto label01;
+
+     label04:
+        if r75 != null goto label05;
+
+        $r52 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r51 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r53 = virtualinvoke $r52.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r51, "No ECDHE credentials negotiated for server key exchange");
+
+        throw $r53;
+
+     label05:
+        $r5 = r75.<sun.security.ssl.ECDHKeyExchange$ECDHEPossession: java.security.interfaces.ECPublicKey publicKey>;
+
+        r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: java.security.interfaces.ECPublicKey publicKey> = $r5;
+
+        $r6 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: java.security.interfaces.ECPublicKey publicKey>;
+
+        $r7 = interfaceinvoke $r6.<java.security.interfaces.ECPublicKey: java.security.spec.ECParameterSpec getParams()>();
+
+        $r8 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: java.security.interfaces.ECPublicKey publicKey>;
+
+        $r9 = interfaceinvoke $r8.<java.security.interfaces.ECPublicKey: java.security.spec.ECPoint getW()>();
+
+        $r10 = virtualinvoke $r7.<java.security.spec.ECParameterSpec: java.security.spec.EllipticCurve getCurve()>();
+
+        $r11 = staticinvoke <sun.security.ssl.JsseJce: byte[] encodePoint(java.security.spec.ECPoint,java.security.spec.EllipticCurve)>($r9, $r10);
+
+        r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: byte[] publicPoint> = $r11;
+
+        $r12 = staticinvoke <sun.security.ssl.SupportedGroupsExtension$NamedGroup: sun.security.ssl.SupportedGroupsExtension$NamedGroup valueOf(java.security.spec.ECParameterSpec)>($r7);
+
+        r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SupportedGroupsExtension$NamedGroup namedGroup> = $r12;
+
+        $r13 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SupportedGroupsExtension$NamedGroup namedGroup>;
+
+        if $r13 == null goto label06;
+
+        $r21 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SupportedGroupsExtension$NamedGroup namedGroup>;
+
+        $r22 = $r21.<sun.security.ssl.SupportedGroupsExtension$NamedGroup: java.lang.String oid>;
+
+        if $r22 != null goto label07;
+
+     label06:
+        $r15 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r16 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unnamed EC parameter spec: ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r7);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r20 = virtualinvoke $r15.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r16, $r19);
+
+        throw $r20;
+
+     label07:
+        if r76 != null goto label08;
+
+        r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: byte[] paramsSignature> = null;
+
+        r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SignatureScheme signatureScheme> = null;
+
+        r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: boolean useExplicitSigAlgorithm> = 0;
+
+        goto label18;
+
+     label08:
+        $r23 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $z1 = virtualinvoke $r23.<sun.security.ssl.ProtocolVersion: boolean useTLS12PlusSpec()>();
+
+        r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: boolean useExplicitSigAlgorithm> = $z1;
+
+        $z2 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: boolean useExplicitSigAlgorithm>;
+
+        if $z2 == 0 goto label10;
+
+        $r36 = r2.<sun.security.ssl.ServerHandshakeContext: java.security.AlgorithmConstraints algorithmConstraints>;
+
+        $r35 = r2.<sun.security.ssl.ServerHandshakeContext: java.util.List peerRequestedSignatureSchemes>;
+
+        $r34 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r37 = staticinvoke <sun.security.ssl.SignatureScheme: java.util.Map$Entry getSignerOfPreferableAlgorithm(java.security.AlgorithmConstraints,java.util.List,sun.security.ssl.X509Authentication$X509Possession,sun.security.ssl.ProtocolVersion)>($r36, $r35, r76, $r34);
+
+        if $r37 != null goto label09;
+
+        $r42 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r43 = <sun.security.ssl.Alert: sun.security.ssl.Alert INTERNAL_ERROR>;
+
+        $r41 = new java.lang.StringBuilder;
+
+        specialinvoke $r41.<java.lang.StringBuilder: void <init>()>();
+
+        $r44 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No supported signature algorithm for ");
+
+        $r45 = r76.<sun.security.ssl.X509Authentication$X509Possession: java.security.PrivateKey popPrivateKey>;
+
+        $r46 = interfaceinvoke $r45.<java.security.PrivateKey: java.lang.String getAlgorithm()>();
+
+        $r47 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r46);
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  key");
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r50 = virtualinvoke $r42.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r43, $r49);
+
+        throw $r50;
+
+     label09:
+        $r38 = interfaceinvoke $r37.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r39 = (sun.security.ssl.SignatureScheme) $r38;
+
+        r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SignatureScheme signatureScheme> = $r39;
+
+        $r40 = interfaceinvoke $r37.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        r78 = (java.security.Signature) $r40;
+
+        goto label14;
+
+     label10:
+        r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SignatureScheme signatureScheme> = null;
+
+     label11:
+        $r24 = r76.<sun.security.ssl.X509Authentication$X509Possession: java.security.PrivateKey popPrivateKey>;
+
+        $r25 = interfaceinvoke $r24.<java.security.PrivateKey: java.lang.String getAlgorithm()>();
+
+        $r26 = r76.<sun.security.ssl.X509Authentication$X509Possession: java.security.PrivateKey popPrivateKey>;
+
+        r78 = staticinvoke <sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: java.security.Signature getSignature(java.lang.String,java.security.Key)>($r25, $r26);
+
+     label12:
+        goto label14;
+
+     label13:
+        $r65 := @caughtexception;
+
+        $r67 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r68 = <sun.security.ssl.Alert: sun.security.ssl.Alert INTERNAL_ERROR>;
+
+        $r66 = new java.lang.StringBuilder;
+
+        specialinvoke $r66.<java.lang.StringBuilder: void <init>()>();
+
+        $r69 = virtualinvoke $r66.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported signature algorithm: ");
+
+        $r70 = r76.<sun.security.ssl.X509Authentication$X509Possession: java.security.PrivateKey popPrivateKey>;
+
+        $r71 = interfaceinvoke $r70.<java.security.PrivateKey: java.lang.String getAlgorithm()>();
+
+        $r72 = virtualinvoke $r69.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r71);
+
+        $r73 = virtualinvoke $r72.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r74 = virtualinvoke $r67.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String,java.lang.Throwable)>($r68, $r73, $r65);
+
+        throw $r74;
+
+     label14:
+        $r27 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.RandomCookie clientHelloRandom>;
+
+        $r32 = $r27.<sun.security.ssl.RandomCookie: byte[] randomBytes>;
+
+        $r28 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.RandomCookie serverHelloRandom>;
+
+        $r31 = $r28.<sun.security.ssl.RandomCookie: byte[] randomBytes>;
+
+        $r29 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SupportedGroupsExtension$NamedGroup namedGroup>;
+
+        $i0 = $r29.<sun.security.ssl.SupportedGroupsExtension$NamedGroup: int id>;
+
+        $r30 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: byte[] publicPoint>;
+
+        staticinvoke <sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: void updateSignature(java.security.Signature,byte[],byte[],int,byte[])>(r78, $r32, $r31, $i0, $r30);
+
+        $r33 = virtualinvoke r78.<java.security.Signature: byte[] sign()>();
+
+     label15:
+        goto label17;
+
+     label16:
+        $r55 := @caughtexception;
+
+        $r57 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r58 = <sun.security.ssl.Alert: sun.security.ssl.Alert INTERNAL_ERROR>;
+
+        $r56 = new java.lang.StringBuilder;
+
+        specialinvoke $r56.<java.lang.StringBuilder: void <init>()>();
+
+        $r59 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to sign ecdhe parameters: ");
+
+        $r60 = r76.<sun.security.ssl.X509Authentication$X509Possession: java.security.PrivateKey popPrivateKey>;
+
+        $r61 = interfaceinvoke $r60.<java.security.PrivateKey: java.lang.String getAlgorithm()>();
+
+        $r62 = virtualinvoke $r59.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r61);
+
+        $r63 = virtualinvoke $r62.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r64 = virtualinvoke $r57.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String,java.lang.Throwable)>($r58, $r63, $r55);
+
+        throw $r64;
+
+     label17:
+        r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: byte[] paramsSignature> = $r33;
+
+     label18:
+        return;
+
+        catch java.security.NoSuchAlgorithmException from label11 to label12 with label13;
+        catch java.security.InvalidKeyException from label11 to label12 with label13;
+        catch java.security.SignatureException from label14 to label15 with label16;
+    }
+
+    void <init>(sun.security.ssl.HandshakeContext, java.nio.ByteBuffer) throws java.io.IOException
+    {
+        byte[] $r12, $r13, $r14, $r23, $r30, $r31, $r32, $r33;
+        java.security.GeneralSecurityException $r115, $r125;
+        byte b1;
+        java.lang.StringBuilder $r46, $r49, $r50, $r56, $r57, $r58, $r68, $r70, $r76, $r78, $r84, $r86, $r92, $r94, $r100, $r101, $r107, $r108, $r119, $r122, $r129, $r132, $r139, $r141, $r148, $r149, $r150, $r151, $r152, $r153, $r155, $r156, $r157, $r158, $r159;
+        sun.security.ssl.ProtocolVersion $r22;
+        sun.security.ssl.TransportContext $r35, $r44, $r54, $r62, $r66, $r74, $r82, $r90, $r98, $r105, $r113, $r117, $r127, $r137;
+        java.security.spec.ECPoint $r16;
+        sun.security.ssl.HandshakeContext r1;
+        sun.security.ssl.SignatureScheme $r38, $r39, $r40, $r41, $r47, $r130;
+        sun.security.ssl.SSLCredentials r146;
+        java.security.SignatureException $r111;
+        java.security.spec.EllipticCurve $r15;
+        java.security.KeyFactory $r17;
+        sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage r0;
+        int $i0, $i2, $i3, $i4, $i5, $i6, $i7;
+        sun.security.ssl.RandomCookie $r27, $r28;
+        java.security.PublicKey $r19, $r24, $r26, $r37, $r120;
+        java.lang.Object $r64;
+        java.security.spec.ECPublicKeySpec $r154;
+        java.security.Signature r147;
+        java.lang.Exception $r135;
+        javax.net.ssl.SSLException $r36, $r52, $r60, $r63, $r72, $r80, $r88, $r96, $r103, $r110, $r114, $r124, $r134, $r143;
+        sun.security.ssl.X509Authentication$X509Credentials r145;
+        java.lang.String $r8, $r10, $r25, $r48, $r51, $r59, $r71, $r79, $r87, $r95, $r102, $r109, $r121, $r123, $r131, $r133, $r142;
+        java.security.spec.ECParameterSpec $r11;
+        sun.security.ssl.Alert $r34, $r45, $r55, $r61, $r67, $r75, $r83, $r91, $r99, $r106, $r112, $r118, $r128, $r138;
+        java.nio.ByteBuffer r3;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        java.util.List $r20, $r42;
+        java.security.interfaces.ECPublicKey r144;
+        sun.security.ssl.SupportedGroupsExtension$NamedGroup $r4, $r5, $r6, $r7, $r9, $r29, $r69, $r77, $r85, $r93, $r140;
+        java.util.Iterator $r21;
+        sun.security.ssl.ClientHandshakeContext r2;
+
+        r0 := @this: sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage;
+
+        r1 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        r3 := @parameter1: java.nio.ByteBuffer;
+
+        specialinvoke r0.<sun.security.ssl.SSLHandshake$HandshakeMessage: void <init>(sun.security.ssl.HandshakeContext)>(r1);
+
+        r2 = (sun.security.ssl.ClientHandshakeContext) r1;
+
+        $i0 = staticinvoke <sun.security.ssl.Record: int getInt8(java.nio.ByteBuffer)>(r3);
+
+        b1 = (byte) $i0;
+
+        $i6 = (int) b1;
+
+        if $i6 == 3 goto label01;
+
+        $r105 = r2.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r106 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r148 = new java.lang.StringBuilder;
+
+        specialinvoke $r148.<java.lang.StringBuilder: void <init>()>();
+
+        $r107 = virtualinvoke $r148.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported ECCurveType: ");
+
+        $i7 = (int) b1;
+
+        $r108 = virtualinvoke $r107.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i7);
+
+        $r109 = virtualinvoke $r108.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r110 = virtualinvoke $r105.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r106, $r109);
+
+        throw $r110;
+
+     label01:
+        $i2 = staticinvoke <sun.security.ssl.Record: int getInt16(java.nio.ByteBuffer)>(r3);
+
+        $r4 = staticinvoke <sun.security.ssl.SupportedGroupsExtension$NamedGroup: sun.security.ssl.SupportedGroupsExtension$NamedGroup valueOf(int)>($i2);
+
+        r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SupportedGroupsExtension$NamedGroup namedGroup> = $r4;
+
+        $r5 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SupportedGroupsExtension$NamedGroup namedGroup>;
+
+        if $r5 != null goto label02;
+
+        $r98 = r2.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r99 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r149 = new java.lang.StringBuilder;
+
+        specialinvoke $r149.<java.lang.StringBuilder: void <init>()>();
+
+        $r100 = virtualinvoke $r149.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown named group ID: ");
+
+        $r101 = virtualinvoke $r100.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r102 = virtualinvoke $r101.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r103 = virtualinvoke $r98.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r99, $r102);
+
+        throw $r103;
+
+     label02:
+        $r6 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SupportedGroupsExtension$NamedGroup namedGroup>;
+
+        $z0 = staticinvoke <sun.security.ssl.SupportedGroupsExtension$SupportedGroups: boolean isSupported(sun.security.ssl.SupportedGroupsExtension$NamedGroup)>($r6);
+
+        if $z0 != 0 goto label03;
+
+        $r90 = r2.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r91 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r150 = new java.lang.StringBuilder;
+
+        specialinvoke $r150.<java.lang.StringBuilder: void <init>()>();
+
+        $r92 = virtualinvoke $r150.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported named group: ");
+
+        $r93 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SupportedGroupsExtension$NamedGroup namedGroup>;
+
+        $r94 = virtualinvoke $r92.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r93);
+
+        $r95 = virtualinvoke $r94.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r96 = virtualinvoke $r90.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r91, $r95);
+
+        throw $r96;
+
+     label03:
+        $r7 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SupportedGroupsExtension$NamedGroup namedGroup>;
+
+        $r8 = $r7.<sun.security.ssl.SupportedGroupsExtension$NamedGroup: java.lang.String oid>;
+
+        if $r8 != null goto label04;
+
+        $r82 = r2.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r83 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r151 = new java.lang.StringBuilder;
+
+        specialinvoke $r151.<java.lang.StringBuilder: void <init>()>();
+
+        $r84 = virtualinvoke $r151.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown named EC curve: ");
+
+        $r85 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SupportedGroupsExtension$NamedGroup namedGroup>;
+
+        $r86 = virtualinvoke $r84.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r85);
+
+        $r87 = virtualinvoke $r86.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r88 = virtualinvoke $r82.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r83, $r87);
+
+        throw $r88;
+
+     label04:
+        $r9 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SupportedGroupsExtension$NamedGroup namedGroup>;
+
+        $r10 = $r9.<sun.security.ssl.SupportedGroupsExtension$NamedGroup: java.lang.String oid>;
+
+        $r11 = staticinvoke <sun.security.ssl.JsseJce: java.security.spec.ECParameterSpec getECParameterSpec(java.lang.String)>($r10);
+
+        if $r11 != null goto label05;
+
+        $r74 = r2.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r75 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r152 = new java.lang.StringBuilder;
+
+        specialinvoke $r152.<java.lang.StringBuilder: void <init>()>();
+
+        $r76 = virtualinvoke $r152.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No supported EC parameter: ");
+
+        $r77 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SupportedGroupsExtension$NamedGroup namedGroup>;
+
+        $r78 = virtualinvoke $r76.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r77);
+
+        $r79 = virtualinvoke $r78.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r80 = virtualinvoke $r74.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r75, $r79);
+
+        throw $r80;
+
+     label05:
+        $r12 = staticinvoke <sun.security.ssl.Record: byte[] getBytes8(java.nio.ByteBuffer)>(r3);
+
+        r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: byte[] publicPoint> = $r12;
+
+        $r13 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: byte[] publicPoint>;
+
+        $i3 = lengthof $r13;
+
+        if $i3 != 0 goto label06;
+
+        $r66 = r2.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r67 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r153 = new java.lang.StringBuilder;
+
+        specialinvoke $r153.<java.lang.StringBuilder: void <init>()>();
+
+        $r68 = virtualinvoke $r153.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Insufficient ECPoint data: ");
+
+        $r69 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SupportedGroupsExtension$NamedGroup namedGroup>;
+
+        $r70 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r69);
+
+        $r71 = virtualinvoke $r70.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r72 = virtualinvoke $r66.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r67, $r71);
+
+        throw $r72;
+
+     label06:
+        $r14 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: byte[] publicPoint>;
+
+        $r15 = virtualinvoke $r11.<java.security.spec.ECParameterSpec: java.security.spec.EllipticCurve getCurve()>();
+
+        $r16 = staticinvoke <sun.security.ssl.JsseJce: java.security.spec.ECPoint decodePoint(byte[],java.security.spec.EllipticCurve)>($r14, $r15);
+
+        $r17 = staticinvoke <sun.security.ssl.JsseJce: java.security.KeyFactory getKeyFactory(java.lang.String)>("EC");
+
+        $r154 = new java.security.spec.ECPublicKeySpec;
+
+        specialinvoke $r154.<java.security.spec.ECPublicKeySpec: void <init>(java.security.spec.ECPoint,java.security.spec.ECParameterSpec)>($r16, $r11);
+
+        $r19 = virtualinvoke $r17.<java.security.KeyFactory: java.security.PublicKey generatePublic(java.security.spec.KeySpec)>($r154);
+
+        r144 = (java.security.interfaces.ECPublicKey) $r19;
+
+     label07:
+        goto label09;
+
+     label08:
+        $r135 := @caughtexception;
+
+        $r137 = r2.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r138 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r155 = new java.lang.StringBuilder;
+
+        specialinvoke $r155.<java.lang.StringBuilder: void <init>()>();
+
+        $r139 = virtualinvoke $r155.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid ECPoint: ");
+
+        $r140 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SupportedGroupsExtension$NamedGroup namedGroup>;
+
+        $r141 = virtualinvoke $r139.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r140);
+
+        $r142 = virtualinvoke $r141.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r143 = virtualinvoke $r137.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String,java.lang.Throwable)>($r138, $r142, $r135);
+
+        throw $r143;
+
+     label09:
+        r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: java.security.interfaces.ECPublicKey publicKey> = r144;
+
+        r145 = null;
+
+        $r20 = r2.<sun.security.ssl.ClientHandshakeContext: java.util.List handshakeCredentials>;
+
+        $r21 = interfaceinvoke $r20.<java.util.List: java.util.Iterator iterator()>();
+
+     label10:
+        $z1 = interfaceinvoke $r21.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label12;
+
+        $r64 = interfaceinvoke $r21.<java.util.Iterator: java.lang.Object next()>();
+
+        r146 = (sun.security.ssl.SSLCredentials) $r64;
+
+        $z8 = r146 instanceof sun.security.ssl.X509Authentication$X509Credentials;
+
+        if $z8 == 0 goto label11;
+
+        r145 = (sun.security.ssl.X509Authentication$X509Credentials) r146;
+
+        goto label12;
+
+     label11:
+        goto label10;
+
+     label12:
+        if r145 != null goto label14;
+
+        $z7 = virtualinvoke r3.<java.nio.ByteBuffer: boolean hasRemaining()>();
+
+        if $z7 == 0 goto label13;
+
+        $r62 = r2.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r61 = <sun.security.ssl.Alert: sun.security.ssl.Alert HANDSHAKE_FAILURE>;
+
+        $r63 = virtualinvoke $r62.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r61, "Invalid DH ServerKeyExchange: unknown extra data");
+
+        throw $r63;
+
+     label13:
+        r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SignatureScheme signatureScheme> = null;
+
+        r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: byte[] paramsSignature> = null;
+
+        r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: boolean useExplicitSigAlgorithm> = 0;
+
+        return;
+
+     label14:
+        $r22 = r2.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $z2 = virtualinvoke $r22.<sun.security.ssl.ProtocolVersion: boolean useTLS12PlusSpec()>();
+
+        r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: boolean useExplicitSigAlgorithm> = $z2;
+
+        $z3 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: boolean useExplicitSigAlgorithm>;
+
+        if $z3 == 0 goto label17;
+
+        $i5 = staticinvoke <sun.security.ssl.Record: int getInt16(java.nio.ByteBuffer)>(r3);
+
+        $r39 = staticinvoke <sun.security.ssl.SignatureScheme: sun.security.ssl.SignatureScheme valueOf(int)>($i5);
+
+        r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SignatureScheme signatureScheme> = $r39;
+
+        $r40 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SignatureScheme signatureScheme>;
+
+        if $r40 != null goto label15;
+
+        $r54 = r2.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r55 = <sun.security.ssl.Alert: sun.security.ssl.Alert HANDSHAKE_FAILURE>;
+
+        $r156 = new java.lang.StringBuilder;
+
+        specialinvoke $r156.<java.lang.StringBuilder: void <init>()>();
+
+        $r56 = virtualinvoke $r156.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid signature algorithm (");
+
+        $r57 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r58 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") used in ECDH ServerKeyExchange handshake message");
+
+        $r59 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r60 = virtualinvoke $r54.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r55, $r59);
+
+        throw $r60;
+
+     label15:
+        $r42 = r2.<sun.security.ssl.ClientHandshakeContext: java.util.List localSupportedSignAlgs>;
+
+        $r41 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SignatureScheme signatureScheme>;
+
+        $z6 = interfaceinvoke $r42.<java.util.List: boolean contains(java.lang.Object)>($r41);
+
+        if $z6 != 0 goto label16;
+
+        $r44 = r2.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r45 = <sun.security.ssl.Alert: sun.security.ssl.Alert HANDSHAKE_FAILURE>;
+
+        $r157 = new java.lang.StringBuilder;
+
+        specialinvoke $r157.<java.lang.StringBuilder: void <init>()>();
+
+        $r46 = virtualinvoke $r157.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported signature algorithm (");
+
+        $r47 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SignatureScheme signatureScheme>;
+
+        $r48 = $r47.<sun.security.ssl.SignatureScheme: java.lang.String name>;
+
+        $r49 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r48);
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") used in ECDH ServerKeyExchange handshake message");
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r52 = virtualinvoke $r44.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r45, $r51);
+
+        throw $r52;
+
+     label16:
+        goto label18;
+
+     label17:
+        r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SignatureScheme signatureScheme> = null;
+
+     label18:
+        $r23 = staticinvoke <sun.security.ssl.Record: byte[] getBytes16(java.nio.ByteBuffer)>(r3);
+
+        r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: byte[] paramsSignature> = $r23;
+
+        $z4 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: boolean useExplicitSigAlgorithm>;
+
+        if $z4 == 0 goto label22;
+
+     label19:
+        $r38 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SignatureScheme signatureScheme>;
+
+        $r37 = r145.<sun.security.ssl.X509Authentication$X509Credentials: java.security.PublicKey popPublicKey>;
+
+        r147 = virtualinvoke $r38.<sun.security.ssl.SignatureScheme: java.security.Signature getVerifier(java.security.PublicKey)>($r37);
+
+     label20:
+        goto label25;
+
+     label21:
+        $r125 := @caughtexception;
+
+        $r127 = r2.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r128 = <sun.security.ssl.Alert: sun.security.ssl.Alert INTERNAL_ERROR>;
+
+        $r158 = new java.lang.StringBuilder;
+
+        specialinvoke $r158.<java.lang.StringBuilder: void <init>()>();
+
+        $r129 = virtualinvoke $r158.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported signature algorithm: ");
+
+        $r130 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SignatureScheme signatureScheme>;
+
+        $r131 = $r130.<sun.security.ssl.SignatureScheme: java.lang.String name>;
+
+        $r132 = virtualinvoke $r129.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r131);
+
+        $r133 = virtualinvoke $r132.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r134 = virtualinvoke $r127.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String,java.lang.Throwable)>($r128, $r133, $r125);
+
+        throw $r134;
+
+     label22:
+        $r24 = r145.<sun.security.ssl.X509Authentication$X509Credentials: java.security.PublicKey popPublicKey>;
+
+        $r25 = interfaceinvoke $r24.<java.security.PublicKey: java.lang.String getAlgorithm()>();
+
+        $r26 = r145.<sun.security.ssl.X509Authentication$X509Credentials: java.security.PublicKey popPublicKey>;
+
+        r147 = staticinvoke <sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: java.security.Signature getSignature(java.lang.String,java.security.Key)>($r25, $r26);
+
+     label23:
+        goto label25;
+
+     label24:
+        $r115 := @caughtexception;
+
+        $r117 = r2.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r118 = <sun.security.ssl.Alert: sun.security.ssl.Alert INTERNAL_ERROR>;
+
+        $r159 = new java.lang.StringBuilder;
+
+        specialinvoke $r159.<java.lang.StringBuilder: void <init>()>();
+
+        $r119 = virtualinvoke $r159.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported signature algorithm: ");
+
+        $r120 = r145.<sun.security.ssl.X509Authentication$X509Credentials: java.security.PublicKey popPublicKey>;
+
+        $r121 = interfaceinvoke $r120.<java.security.PublicKey: java.lang.String getAlgorithm()>();
+
+        $r122 = virtualinvoke $r119.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r121);
+
+        $r123 = virtualinvoke $r122.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r124 = virtualinvoke $r117.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String,java.lang.Throwable)>($r118, $r123, $r115);
+
+        throw $r124;
+
+     label25:
+        $r27 = r2.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.RandomCookie clientHelloRandom>;
+
+        $r32 = $r27.<sun.security.ssl.RandomCookie: byte[] randomBytes>;
+
+        $r28 = r2.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.RandomCookie serverHelloRandom>;
+
+        $r31 = $r28.<sun.security.ssl.RandomCookie: byte[] randomBytes>;
+
+        $r29 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SupportedGroupsExtension$NamedGroup namedGroup>;
+
+        $i4 = $r29.<sun.security.ssl.SupportedGroupsExtension$NamedGroup: int id>;
+
+        $r30 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: byte[] publicPoint>;
+
+        staticinvoke <sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: void updateSignature(java.security.Signature,byte[],byte[],int,byte[])>(r147, $r32, $r31, $i4, $r30);
+
+        $r33 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: byte[] paramsSignature>;
+
+        $z5 = virtualinvoke r147.<java.security.Signature: boolean verify(byte[])>($r33);
+
+        if $z5 != 0 goto label26;
+
+        $r35 = r2.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r34 = <sun.security.ssl.Alert: sun.security.ssl.Alert HANDSHAKE_FAILURE>;
+
+        $r36 = virtualinvoke $r35.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r34, "Invalid ECDH ServerKeyExchange signature");
+
+        throw $r36;
+
+     label26:
+        goto label28;
+
+     label27:
+        $r111 := @caughtexception;
+
+        $r113 = r2.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r112 = <sun.security.ssl.Alert: sun.security.ssl.Alert HANDSHAKE_FAILURE>;
+
+        $r114 = virtualinvoke $r113.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String,java.lang.Throwable)>($r112, "Cannot verify ECDH ServerKeyExchange signature", $r111);
+
+        throw $r114;
+
+     label28:
+        return;
+
+        catch java.security.NoSuchAlgorithmException from label06 to label07 with label08;
+        catch java.security.spec.InvalidKeySpecException from label06 to label07 with label08;
+        catch java.io.IOException from label06 to label07 with label08;
+        catch java.security.NoSuchAlgorithmException from label19 to label20 with label21;
+        catch java.security.InvalidKeyException from label19 to label20 with label21;
+        catch java.security.InvalidAlgorithmParameterException from label19 to label20 with label21;
+        catch java.security.NoSuchAlgorithmException from label22 to label23 with label24;
+        catch java.security.InvalidKeyException from label22 to label23 with label24;
+        catch java.security.SignatureException from label25 to label26 with label27;
+    }
+
+    public sun.security.ssl.SSLHandshake handshakeType()
+    {
+        sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage r1;
+        sun.security.ssl.SSLHandshake $r0;
+
+        r1 := @this: sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage;
+
+        $r0 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake SERVER_KEY_EXCHANGE>;
+
+        return $r0;
+    }
+
+    public int messageLength()
+    {
+        byte[] $r1, $r2, $r3;
+        sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage r0;
+        int $i0, $i1, i2, $i3, $i4, $i5;
+        boolean $z0;
+
+        r0 := @this: sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage;
+
+        i2 = 0;
+
+        $r1 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: byte[] paramsSignature>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: byte[] paramsSignature>;
+
+        $i0 = lengthof $r2;
+
+        i2 = 2 + $i0;
+
+        $z0 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: boolean useExplicitSigAlgorithm>;
+
+        if $z0 == 0 goto label1;
+
+        $i1 = staticinvoke <sun.security.ssl.SignatureScheme: int sizeInRecord()>();
+
+        i2 = i2 + $i1;
+
+     label1:
+        $r3 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: byte[] publicPoint>;
+
+        $i3 = lengthof $r3;
+
+        $i4 = 4 + $i3;
+
+        $i5 = $i4 + i2;
+
+        return $i5;
+    }
+
+    public void send(sun.security.ssl.HandshakeOutStream) throws java.io.IOException
+    {
+        byte[] $r3, $r4, $r5;
+        sun.security.ssl.HandshakeOutStream r0;
+        sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage r1;
+        int $i0, $i1;
+        sun.security.ssl.SupportedGroupsExtension$NamedGroup $r2;
+        boolean $z0;
+        sun.security.ssl.SignatureScheme $r6;
+
+        r1 := @this: sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage;
+
+        r0 := @parameter0: sun.security.ssl.HandshakeOutStream;
+
+        virtualinvoke r0.<sun.security.ssl.HandshakeOutStream: void putInt8(int)>(3);
+
+        $r2 = r1.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SupportedGroupsExtension$NamedGroup namedGroup>;
+
+        $i0 = $r2.<sun.security.ssl.SupportedGroupsExtension$NamedGroup: int id>;
+
+        virtualinvoke r0.<sun.security.ssl.HandshakeOutStream: void putInt16(int)>($i0);
+
+        $r3 = r1.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: byte[] publicPoint>;
+
+        virtualinvoke r0.<sun.security.ssl.HandshakeOutStream: void putBytes8(byte[])>($r3);
+
+        $r4 = r1.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: byte[] paramsSignature>;
+
+        if $r4 == null goto label2;
+
+        $z0 = r1.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: boolean useExplicitSigAlgorithm>;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = r1.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SignatureScheme signatureScheme>;
+
+        $i1 = $r6.<sun.security.ssl.SignatureScheme: int id>;
+
+        virtualinvoke r0.<sun.security.ssl.HandshakeOutStream: void putInt16(int)>($i1);
+
+     label1:
+        $r5 = r1.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: byte[] paramsSignature>;
+
+        virtualinvoke r0.<sun.security.ssl.HandshakeOutStream: void putBytes16(byte[])>($r5);
+
+     label2:
+        return;
+    }
+
+    public java.lang.String toString()
+    {
+        byte[] $r1, $r8, $r18, $r21, $r31, $r36;
+        java.util.Locale $r3, $r13, $r26;
+        boolean $z0;
+        sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage r0;
+        sun.security.ssl.SupportedGroupsExtension$NamedGroup $r6, $r16, $r29;
+        java.lang.Object[] $r5, $r15, $r28;
+        java.text.MessageFormat $r2, $r12, $r25;
+        java.lang.String $r7, $r9, $r10, $r11, $r17, $r19, $r20, $r22, $r23, $r24, $r30, $r32, $r33, $r35, $r37, $r38, $r39;
+        sun.misc.HexDumpEncoder $r4, $r14, $r27;
+        sun.security.ssl.SignatureScheme $r34;
+
+        r0 := @this: sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage;
+
+        $z0 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: boolean useExplicitSigAlgorithm>;
+
+        if $z0 == 0 goto label1;
+
+        $r25 = new java.text.MessageFormat;
+
+        $r26 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        specialinvoke $r25.<java.text.MessageFormat: void <init>(java.lang.String,java.util.Locale)>("\"ECDH ServerKeyExchange\": \'{\'\n  \"parameters\": \'{\'\n    \"named group\": \"{0}\"\n    \"ecdh public\": \'{\'\n{1}\n    \'}\',\n  \'}\',\n  \"digital signature\":  \'{\'\n    \"signature algorithm\": \"{2}\"\n    \"signature\": \'{\'\n{3}\n    \'}\',\n  \'}\'\n\'}\'", $r26);
+
+        $r27 = new sun.misc.HexDumpEncoder;
+
+        specialinvoke $r27.<sun.misc.HexDumpEncoder: void <init>()>();
+
+        $r28 = newarray (java.lang.Object)[4];
+
+        $r29 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SupportedGroupsExtension$NamedGroup namedGroup>;
+
+        $r30 = $r29.<sun.security.ssl.SupportedGroupsExtension$NamedGroup: java.lang.String name>;
+
+        $r28[0] = $r30;
+
+        $r31 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: byte[] publicPoint>;
+
+        $r32 = virtualinvoke $r27.<sun.misc.HexDumpEncoder: java.lang.String encodeBuffer(byte[])>($r31);
+
+        $r33 = staticinvoke <sun.security.ssl.Utilities: java.lang.String indent(java.lang.String,java.lang.String)>($r32, "      ");
+
+        $r28[1] = $r33;
+
+        $r34 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SignatureScheme signatureScheme>;
+
+        $r35 = $r34.<sun.security.ssl.SignatureScheme: java.lang.String name>;
+
+        $r28[2] = $r35;
+
+        $r36 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: byte[] paramsSignature>;
+
+        $r37 = virtualinvoke $r27.<sun.misc.HexDumpEncoder: java.lang.String encodeBuffer(byte[])>($r36);
+
+        $r38 = staticinvoke <sun.security.ssl.Utilities: java.lang.String indent(java.lang.String,java.lang.String)>($r37, "      ");
+
+        $r28[3] = $r38;
+
+        $r39 = virtualinvoke $r25.<java.text.MessageFormat: java.lang.String format(java.lang.Object)>($r28);
+
+        return $r39;
+
+     label1:
+        $r1 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: byte[] paramsSignature>;
+
+        if $r1 == null goto label2;
+
+        $r12 = new java.text.MessageFormat;
+
+        $r13 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        specialinvoke $r12.<java.text.MessageFormat: void <init>(java.lang.String,java.util.Locale)>("\"ECDH ServerKeyExchange\": \'{\'\n  \"parameters\":  \'{\'\n    \"named group\": \"{0}\"\n    \"ecdh public\": \'{\'\n{1}\n    \'}\',\n  \'}\',\n  \"signature\": \'{\'\n{2}\n  \'}\'\n\'}\'", $r13);
+
+        $r14 = new sun.misc.HexDumpEncoder;
+
+        specialinvoke $r14.<sun.misc.HexDumpEncoder: void <init>()>();
+
+        $r15 = newarray (java.lang.Object)[3];
+
+        $r16 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SupportedGroupsExtension$NamedGroup namedGroup>;
+
+        $r17 = $r16.<sun.security.ssl.SupportedGroupsExtension$NamedGroup: java.lang.String name>;
+
+        $r15[0] = $r17;
+
+        $r18 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: byte[] publicPoint>;
+
+        $r19 = virtualinvoke $r14.<sun.misc.HexDumpEncoder: java.lang.String encodeBuffer(byte[])>($r18);
+
+        $r20 = staticinvoke <sun.security.ssl.Utilities: java.lang.String indent(java.lang.String,java.lang.String)>($r19, "      ");
+
+        $r15[1] = $r20;
+
+        $r21 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: byte[] paramsSignature>;
+
+        $r22 = virtualinvoke $r14.<sun.misc.HexDumpEncoder: java.lang.String encodeBuffer(byte[])>($r21);
+
+        $r23 = staticinvoke <sun.security.ssl.Utilities: java.lang.String indent(java.lang.String,java.lang.String)>($r22, "    ");
+
+        $r15[2] = $r23;
+
+        $r24 = virtualinvoke $r12.<java.text.MessageFormat: java.lang.String format(java.lang.Object)>($r15);
+
+        return $r24;
+
+     label2:
+        $r2 = new java.text.MessageFormat;
+
+        $r3 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        specialinvoke $r2.<java.text.MessageFormat: void <init>(java.lang.String,java.util.Locale)>("\"ECDH ServerKeyExchange\": \'{\'\n  \"parameters\":  \'{\'\n    \"named group\": \"{0}\"\n    \"ecdh public\": \'{\'\n{1}\n    \'}\',\n  \'}\'\n\'}\'", $r3);
+
+        $r4 = new sun.misc.HexDumpEncoder;
+
+        specialinvoke $r4.<sun.misc.HexDumpEncoder: void <init>()>();
+
+        $r5 = newarray (java.lang.Object)[2];
+
+        $r6 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SupportedGroupsExtension$NamedGroup namedGroup>;
+
+        $r7 = $r6.<sun.security.ssl.SupportedGroupsExtension$NamedGroup: java.lang.String name>;
+
+        $r5[0] = $r7;
+
+        $r8 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: byte[] publicPoint>;
+
+        $r9 = virtualinvoke $r4.<sun.misc.HexDumpEncoder: java.lang.String encodeBuffer(byte[])>($r8);
+
+        $r10 = staticinvoke <sun.security.ssl.Utilities: java.lang.String indent(java.lang.String,java.lang.String)>($r9, "      ");
+
+        $r5[1] = $r10;
+
+        $r11 = virtualinvoke $r2.<java.text.MessageFormat: java.lang.String format(java.lang.Object)>($r5);
+
+        return $r11;
+    }
+
+    private static java.security.Signature getSignature(java.lang.String, java.security.Key) throws java.security.NoSuchAlgorithmException, java.security.InvalidKeyException
+    {
+        byte b1;
+        int $i0;
+        java.lang.String r0, $r9;
+        boolean $z0, $z1, $z2;
+        java.security.Signature r10;
+        java.security.PublicKey $r3, $r4;
+        java.security.Key r1;
+        java.security.PrivateKey $r2;
+        java.security.NoSuchAlgorithmException $r5;
+        java.lang.StringBuilder $r6, $r7, $r8;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.security.Key;
+
+        b1 = -1;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int hashCode()>();
+
+        lookupswitch($i0)
+        {
+            case 2206: goto label1;
+            case 81440: goto label2;
+            default: goto label3;
+        };
+
+     label1:
+        $z2 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("EC");
+
+        if $z2 == 0 goto label3;
+
+        b1 = 0;
+
+        goto label3;
+
+     label2:
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("RSA");
+
+        if $z0 == 0 goto label3;
+
+        b1 = 1;
+
+     label3:
+        lookupswitch(b1)
+        {
+            case 0: goto label4;
+            case 1: goto label5;
+            default: goto label6;
+        };
+
+     label4:
+        r10 = staticinvoke <sun.security.ssl.JsseJce: java.security.Signature getSignature(java.lang.String)>("SHA1withECDSA");
+
+        goto label7;
+
+     label5:
+        r10 = staticinvoke <sun.security.ssl.RSASignature: java.security.Signature getInstance()>();
+
+        goto label7;
+
+     label6:
+        $r5 = new java.security.NoSuchAlgorithmException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("neither an RSA or a EC key : ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.security.NoSuchAlgorithmException: void <init>(java.lang.String)>($r9);
+
+        throw $r5;
+
+     label7:
+        if r10 == null goto label9;
+
+        $z1 = r1 instanceof java.security.PublicKey;
+
+        if $z1 == 0 goto label8;
+
+        $r3 = (java.security.PublicKey) r1;
+
+        $r4 = (java.security.PublicKey) $r3;
+
+        virtualinvoke r10.<java.security.Signature: void initVerify(java.security.PublicKey)>($r4);
+
+        goto label9;
+
+     label8:
+        $r2 = (java.security.PrivateKey) r1;
+
+        virtualinvoke r10.<java.security.Signature: void initSign(java.security.PrivateKey)>($r2);
+
+     label9:
+        return r10;
+    }
+
+    private static void updateSignature(java.security.Signature, byte[], byte[], int, byte[]) throws java.security.SignatureException
+    {
+        byte[] r1, r2, r3;
+        java.security.Signature r0;
+        byte $b3, $b5, $b7;
+        int i0, $i1, $i2, $i4, $i6;
+
+        r0 := @parameter0: java.security.Signature;
+
+        r1 := @parameter1: byte[];
+
+        r2 := @parameter2: byte[];
+
+        i0 := @parameter3: int;
+
+        r3 := @parameter4: byte[];
+
+        virtualinvoke r0.<java.security.Signature: void update(byte[])>(r1);
+
+        virtualinvoke r0.<java.security.Signature: void update(byte[])>(r2);
+
+        virtualinvoke r0.<java.security.Signature: void update(byte)>(3);
+
+        $i1 = i0 >> 8;
+
+        $i2 = $i1 & 255;
+
+        $b3 = (byte) $i2;
+
+        virtualinvoke r0.<java.security.Signature: void update(byte)>($b3);
+
+        $i4 = i0 & 255;
+
+        $b5 = (byte) $i4;
+
+        virtualinvoke r0.<java.security.Signature: void update(byte)>($b5);
+
+        $i6 = lengthof r3;
+
+        $b7 = (byte) $i6;
+
+        virtualinvoke r0.<java.security.Signature: void update(byte)>($b7);
+
+        virtualinvoke r0.<java.security.Signature: void update(byte[])>(r3);
+
+        return;
+    }
+
+    static java.security.interfaces.ECPublicKey access$200(sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage)
+    {
+        sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage r0;
+        java.security.interfaces.ECPublicKey $r1;
+
+        r0 := @parameter0: sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage;
+
+        $r1 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: java.security.interfaces.ECPublicKey publicKey>;
+
+        return $r1;
+    }
+
+    static sun.security.ssl.SupportedGroupsExtension$NamedGroup access$300(sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage)
+    {
+        sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage r0;
+        sun.security.ssl.SupportedGroupsExtension$NamedGroup $r1;
+
+        r0 := @parameter0: sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage;
+
+        $r1 = r0.<sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: sun.security.ssl.SupportedGroupsExtension$NamedGroup namedGroup>;
+
+        return $r1;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.security.ssl.ECDHServerKeyExchange$ECDHServerKeyExchangeMessage: byte CURVE_NAMED_CURVE> = 3;
+
+        return;
+    }
+}

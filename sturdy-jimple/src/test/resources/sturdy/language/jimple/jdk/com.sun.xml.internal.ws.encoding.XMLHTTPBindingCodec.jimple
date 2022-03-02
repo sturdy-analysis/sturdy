@@ -1,0 +1,906 @@
+public final class com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec extends com.sun.xml.internal.ws.encoding.MimeCodec
+{
+    private static final java.lang.String BASE_ACCEPT_VALUE;
+    private static final java.lang.String APPLICATION_FAST_INFOSET_MIME_TYPE;
+    private boolean useFastInfosetForEncoding;
+    private final com.sun.xml.internal.ws.api.pipe.Codec xmlCodec;
+    private final com.sun.xml.internal.ws.api.pipe.Codec fiCodec;
+    private static final java.lang.String xmlAccept;
+    private static final java.lang.String fiXmlAccept;
+
+    private com.sun.xml.internal.ws.encoding.ContentTypeImpl setAcceptHeader(com.sun.xml.internal.ws.api.message.Packet, com.sun.xml.internal.ws.api.pipe.ContentType)
+    {
+        com.sun.xml.internal.ws.api.pipe.ContentType r0;
+        com.sun.xml.internal.ws.client.ContentNegotiation $r3, $r4, $r5, $r6;
+        com.sun.xml.internal.ws.encoding.ContentTypeImpl r1;
+        com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec r8;
+        com.sun.xml.internal.ws.api.message.Packet r2;
+        java.lang.String $r7;
+
+        r8 := @this: com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec;
+
+        r2 := @parameter0: com.sun.xml.internal.ws.api.message.Packet;
+
+        r0 := @parameter1: com.sun.xml.internal.ws.api.pipe.ContentType;
+
+        r1 = (com.sun.xml.internal.ws.encoding.ContentTypeImpl) r0;
+
+        $r4 = r2.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.client.ContentNegotiation contentNegotiation>;
+
+        $r3 = <com.sun.xml.internal.ws.client.ContentNegotiation: com.sun.xml.internal.ws.client.ContentNegotiation optimistic>;
+
+        if $r4 == $r3 goto label1;
+
+        $r6 = r2.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.client.ContentNegotiation contentNegotiation>;
+
+        $r5 = <com.sun.xml.internal.ws.client.ContentNegotiation: com.sun.xml.internal.ws.client.ContentNegotiation pessimistic>;
+
+        if $r6 != $r5 goto label2;
+
+     label1:
+        virtualinvoke r1.<com.sun.xml.internal.ws.encoding.ContentTypeImpl: void setAcceptHeader(java.lang.String)>("application/fastinfoset, *");
+
+        goto label3;
+
+     label2:
+        $r7 = <com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: java.lang.String xmlAccept>;
+
+        virtualinvoke r1.<com.sun.xml.internal.ws.encoding.ContentTypeImpl: void setAcceptHeader(java.lang.String)>($r7);
+
+     label3:
+        virtualinvoke r2.<com.sun.xml.internal.ws.api.message.Packet: void setContentType(com.oracle.webservices.internal.api.message.ContentType)>(r1);
+
+        return r1;
+    }
+
+    public void <init>(com.sun.xml.internal.ws.api.WSFeatureList)
+    {
+        com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec r0;
+        com.sun.xml.internal.ws.api.SOAPVersion $r2;
+        com.sun.xml.internal.ws.encoding.xml.XMLCodec $r3;
+        com.sun.xml.internal.ws.api.pipe.Codec $r4;
+        com.sun.xml.internal.ws.api.WSFeatureList r1;
+
+        r0 := @this: com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.api.WSFeatureList;
+
+        $r2 = <com.sun.xml.internal.ws.api.SOAPVersion: com.sun.xml.internal.ws.api.SOAPVersion SOAP_11>;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.encoding.MimeCodec: void <init>(com.sun.xml.internal.ws.api.SOAPVersion,com.sun.xml.internal.ws.api.WSFeatureList)>($r2, r1);
+
+        $r3 = new com.sun.xml.internal.ws.encoding.xml.XMLCodec;
+
+        specialinvoke $r3.<com.sun.xml.internal.ws.encoding.xml.XMLCodec: void <init>(com.sun.xml.internal.ws.api.WSFeatureList)>(r1);
+
+        r0.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: com.sun.xml.internal.ws.api.pipe.Codec xmlCodec> = $r3;
+
+        $r4 = staticinvoke <com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: com.sun.xml.internal.ws.api.pipe.Codec getFICodec()>();
+
+        r0.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: com.sun.xml.internal.ws.api.pipe.Codec fiCodec> = $r4;
+
+        return;
+    }
+
+    public java.lang.String getMimeType()
+    {
+        com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec r0;
+
+        r0 := @this: com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec;
+
+        return null;
+    }
+
+    public com.sun.xml.internal.ws.api.pipe.ContentType getStaticContentType(com.sun.xml.internal.ws.api.message.Packet)
+    {
+        com.sun.xml.internal.ws.api.pipe.ContentType $r3, $r6;
+        com.sun.xml.internal.ws.encoding.ContentTypeImpl $r7, $r8;
+        com.sun.xml.internal.ws.api.message.Message $r1, $r4;
+        com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec r2;
+        com.sun.xml.internal.ws.encoding.xml.XMLMessage$MessageDataSource r5;
+        com.sun.xml.internal.ws.api.message.Packet r0;
+        boolean $z0, $z1;
+
+        r2 := @this: com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.api.message.Packet;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.api.message.Message getInternalMessage()>();
+
+        $z0 = $r1 instanceof com.sun.xml.internal.ws.encoding.xml.XMLMessage$MessageDataSource;
+
+        if $z0 == 0 goto label3;
+
+        $r4 = virtualinvoke r0.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.api.message.Message getInternalMessage()>();
+
+        r5 = (com.sun.xml.internal.ws.encoding.xml.XMLMessage$MessageDataSource) $r4;
+
+        $z1 = interfaceinvoke r5.<com.sun.xml.internal.ws.encoding.xml.XMLMessage$MessageDataSource: boolean hasUnconsumedDataSource()>();
+
+        if $z1 == 0 goto label3;
+
+        $r6 = specialinvoke r2.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: com.sun.xml.internal.ws.api.pipe.ContentType getStaticContentType(com.sun.xml.internal.ws.encoding.xml.XMLMessage$MessageDataSource)>(r5);
+
+        if $r6 == null goto label1;
+
+        $r7 = specialinvoke r2.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: com.sun.xml.internal.ws.encoding.ContentTypeImpl setAcceptHeader(com.sun.xml.internal.ws.api.message.Packet,com.sun.xml.internal.ws.api.pipe.ContentType)>(r0, $r6);
+
+        goto label2;
+
+     label1:
+        $r7 = null;
+
+     label2:
+        return $r7;
+
+     label3:
+        $r3 = specialinvoke r2.<com.sun.xml.internal.ws.encoding.MimeCodec: com.sun.xml.internal.ws.api.pipe.ContentType getStaticContentType(com.sun.xml.internal.ws.api.message.Packet)>(r0);
+
+        if $r3 == null goto label4;
+
+        $r8 = specialinvoke r2.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: com.sun.xml.internal.ws.encoding.ContentTypeImpl setAcceptHeader(com.sun.xml.internal.ws.api.message.Packet,com.sun.xml.internal.ws.api.pipe.ContentType)>(r0, $r3);
+
+        goto label5;
+
+     label4:
+        $r8 = null;
+
+     label5:
+        return $r8;
+    }
+
+    public com.sun.xml.internal.ws.api.pipe.ContentType encode(com.sun.xml.internal.ws.api.message.Packet, java.io.OutputStream) throws java.io.IOException
+    {
+        java.io.OutputStream r3;
+        com.sun.xml.internal.ws.api.pipe.ContentType $r4, $r8;
+        com.sun.xml.internal.ws.encoding.ContentTypeImpl $r5, $r9;
+        com.sun.xml.internal.ws.api.message.Message $r1, $r6;
+        com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec r2;
+        com.sun.xml.internal.ws.encoding.xml.XMLMessage$MessageDataSource r7;
+        com.sun.xml.internal.ws.api.message.Packet r0;
+        boolean $z0, $z1;
+
+        r2 := @this: com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.api.message.Packet;
+
+        r3 := @parameter1: java.io.OutputStream;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.api.message.Message getInternalMessage()>();
+
+        $z0 = $r1 instanceof com.sun.xml.internal.ws.encoding.xml.XMLMessage$MessageDataSource;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = virtualinvoke r0.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.api.message.Message getInternalMessage()>();
+
+        r7 = (com.sun.xml.internal.ws.encoding.xml.XMLMessage$MessageDataSource) $r6;
+
+        $z1 = interfaceinvoke r7.<com.sun.xml.internal.ws.encoding.xml.XMLMessage$MessageDataSource: boolean hasUnconsumedDataSource()>();
+
+        if $z1 == 0 goto label1;
+
+        $r8 = specialinvoke r2.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: com.sun.xml.internal.ws.api.pipe.ContentType encode(com.sun.xml.internal.ws.encoding.xml.XMLMessage$MessageDataSource,java.io.OutputStream)>(r7, r3);
+
+        $r9 = specialinvoke r2.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: com.sun.xml.internal.ws.encoding.ContentTypeImpl setAcceptHeader(com.sun.xml.internal.ws.api.message.Packet,com.sun.xml.internal.ws.api.pipe.ContentType)>(r0, $r8);
+
+        return $r9;
+
+     label1:
+        $r4 = specialinvoke r2.<com.sun.xml.internal.ws.encoding.MimeCodec: com.sun.xml.internal.ws.api.pipe.ContentType encode(com.sun.xml.internal.ws.api.message.Packet,java.io.OutputStream)>(r0, r3);
+
+        $r5 = specialinvoke r2.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: com.sun.xml.internal.ws.encoding.ContentTypeImpl setAcceptHeader(com.sun.xml.internal.ws.api.message.Packet,com.sun.xml.internal.ws.api.pipe.ContentType)>(r0, $r4);
+
+        return $r5;
+    }
+
+    public com.sun.xml.internal.ws.api.pipe.ContentType encode(com.sun.xml.internal.ws.api.message.Packet, java.nio.channels.WritableByteChannel)
+    {
+        java.lang.UnsupportedOperationException $r0;
+        com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec r1;
+        com.sun.xml.internal.ws.api.message.Packet r2;
+        java.nio.channels.WritableByteChannel r3;
+
+        r1 := @this: com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec;
+
+        r2 := @parameter0: com.sun.xml.internal.ws.api.message.Packet;
+
+        r3 := @parameter1: java.nio.channels.WritableByteChannel;
+
+        $r0 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r0.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r0;
+    }
+
+    public void decode(java.io.InputStream, java.lang.String, com.sun.xml.internal.ws.api.message.Packet) throws java.io.IOException
+    {
+        com.sun.xml.internal.ws.api.WSFeatureList $r13;
+        com.sun.xml.internal.ws.encoding.xml.XMLMessage$XMLMultiPart $r12;
+        com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec r3;
+        com.sun.xml.internal.ws.api.message.Packet r0;
+        java.lang.String r2, $r6, $r11;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        com.sun.xml.internal.ws.client.ContentNegotiation $r1;
+        java.lang.RuntimeException $r10;
+        com.sun.xml.internal.ws.api.pipe.Codec $r7, $r8, $r9, $r14;
+        com.sun.xml.internal.ws.encoding.xml.XMLMessage$UnknownContent $r4;
+        java.io.InputStream r5;
+
+        r3 := @this: com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec;
+
+        r5 := @parameter0: java.io.InputStream;
+
+        r2 := @parameter1: java.lang.String;
+
+        r0 := @parameter2: com.sun.xml.internal.ws.api.message.Packet;
+
+        $r1 = r0.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.client.ContentNegotiation contentNegotiation>;
+
+        if $r1 != null goto label1;
+
+        r3.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: boolean useFastInfosetForEncoding> = 0;
+
+     label1:
+        if r2 != null goto label2;
+
+        $r14 = r3.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: com.sun.xml.internal.ws.api.pipe.Codec xmlCodec>;
+
+        interfaceinvoke $r14.<com.sun.xml.internal.ws.api.pipe.Codec: void decode(java.io.InputStream,java.lang.String,com.sun.xml.internal.ws.api.message.Packet)>(r5, r2, r0);
+
+        goto label7;
+
+     label2:
+        $z0 = specialinvoke r3.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: boolean isMultipartRelated(java.lang.String)>(r2);
+
+        if $z0 == 0 goto label3;
+
+        $r12 = new com.sun.xml.internal.ws.encoding.xml.XMLMessage$XMLMultiPart;
+
+        $r13 = r3.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: com.sun.xml.internal.ws.api.WSFeatureList features>;
+
+        specialinvoke $r12.<com.sun.xml.internal.ws.encoding.xml.XMLMessage$XMLMultiPart: void <init>(java.lang.String,java.io.InputStream,com.sun.xml.internal.ws.api.WSFeatureList)>(r2, r5, $r13);
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.api.message.Packet: void setMessage(com.sun.xml.internal.ws.api.message.Message)>($r12);
+
+        goto label7;
+
+     label3:
+        $z1 = specialinvoke r3.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: boolean isFastInfoset(java.lang.String)>(r2);
+
+        if $z1 == 0 goto label5;
+
+        $r8 = r3.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: com.sun.xml.internal.ws.api.pipe.Codec fiCodec>;
+
+        if $r8 != null goto label4;
+
+        $r10 = new java.lang.RuntimeException;
+
+        $r11 = staticinvoke <com.sun.xml.internal.ws.resources.StreamingMessages: java.lang.String FASTINFOSET_NO_IMPLEMENTATION()>();
+
+        specialinvoke $r10.<java.lang.RuntimeException: void <init>(java.lang.String)>($r11);
+
+        throw $r10;
+
+     label4:
+        r3.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: boolean useFastInfosetForEncoding> = 1;
+
+        $r9 = r3.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: com.sun.xml.internal.ws.api.pipe.Codec fiCodec>;
+
+        interfaceinvoke $r9.<com.sun.xml.internal.ws.api.pipe.Codec: void decode(java.io.InputStream,java.lang.String,com.sun.xml.internal.ws.api.message.Packet)>(r5, r2, r0);
+
+        goto label7;
+
+     label5:
+        $z2 = specialinvoke r3.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: boolean isXml(java.lang.String)>(r2);
+
+        if $z2 == 0 goto label6;
+
+        $r7 = r3.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: com.sun.xml.internal.ws.api.pipe.Codec xmlCodec>;
+
+        interfaceinvoke $r7.<com.sun.xml.internal.ws.api.pipe.Codec: void decode(java.io.InputStream,java.lang.String,com.sun.xml.internal.ws.api.message.Packet)>(r5, r2, r0);
+
+        goto label7;
+
+     label6:
+        $r4 = new com.sun.xml.internal.ws.encoding.xml.XMLMessage$UnknownContent;
+
+        specialinvoke $r4.<com.sun.xml.internal.ws.encoding.xml.XMLMessage$UnknownContent: void <init>(java.lang.String,java.io.InputStream)>(r2, r5);
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.api.message.Packet: void setMessage(com.sun.xml.internal.ws.api.message.Message)>($r4);
+
+     label7:
+        $z4 = r3.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: boolean useFastInfosetForEncoding>;
+
+        if $z4 != 0 goto label8;
+
+        $r6 = r0.<com.sun.xml.internal.ws.api.message.Packet: java.lang.String acceptableMimeTypes>;
+
+        $z3 = specialinvoke r3.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: boolean isFastInfosetAcceptable(java.lang.String)>($r6);
+
+        r3.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: boolean useFastInfosetForEncoding> = $z3;
+
+     label8:
+        return;
+    }
+
+    protected void decode(com.sun.xml.internal.ws.encoding.MimeMultipartParser, com.sun.xml.internal.ws.api.message.Packet) throws java.io.IOException
+    {
+        com.sun.xml.internal.ws.api.message.Packet r2;
+        com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec r0;
+        com.sun.xml.internal.ws.encoding.MimeMultipartParser r1;
+
+        r0 := @this: com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.encoding.MimeMultipartParser;
+
+        r2 := @parameter1: com.sun.xml.internal.ws.api.message.Packet;
+
+        return;
+    }
+
+    public com.sun.xml.internal.ws.encoding.MimeCodec copy()
+    {
+        com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec $r0, r1;
+        com.sun.xml.internal.ws.api.WSFeatureList $r2;
+
+        r1 := @this: com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec;
+
+        $r0 = new com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec;
+
+        $r2 = r1.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: com.sun.xml.internal.ws.api.WSFeatureList features>;
+
+        specialinvoke $r0.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: void <init>(com.sun.xml.internal.ws.api.WSFeatureList)>($r2);
+
+        return $r0;
+    }
+
+    private boolean isMultipartRelated(java.lang.String)
+    {
+        com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec r0;
+        java.lang.String r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec;
+
+        r1 := @parameter0: java.lang.String;
+
+        $z0 = specialinvoke r0.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: boolean compareStrings(java.lang.String,java.lang.String)>(r1, "multipart/related");
+
+        return $z0;
+    }
+
+    private boolean isXml(java.lang.String)
+    {
+        com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec r0;
+        int $i0, $i2;
+        java.lang.String r1, $r2;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec;
+
+        r1 := @parameter0: java.lang.String;
+
+        $z0 = specialinvoke r0.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: boolean compareStrings(java.lang.String,java.lang.String)>(r1, "application/xml");
+
+        if $z0 != 0 goto label1;
+
+        $z1 = specialinvoke r0.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: boolean compareStrings(java.lang.String,java.lang.String)>(r1, "text/xml");
+
+        if $z1 != 0 goto label1;
+
+        $z2 = specialinvoke r0.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: boolean compareStrings(java.lang.String,java.lang.String)>(r1, "application/");
+
+        if $z2 == 0 goto label2;
+
+        $r2 = virtualinvoke r1.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int indexOf(java.lang.String)>("+xml");
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label2;
+
+     label1:
+        $z3 = 1;
+
+        goto label3;
+
+     label2:
+        $z3 = 0;
+
+     label3:
+        return $z3;
+    }
+
+    private boolean isFastInfoset(java.lang.String)
+    {
+        com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec r0;
+        java.lang.String r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec;
+
+        r1 := @parameter0: java.lang.String;
+
+        $z0 = specialinvoke r0.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: boolean compareStrings(java.lang.String,java.lang.String)>(r1, "application/fastinfoset");
+
+        return $z0;
+    }
+
+    private boolean compareStrings(java.lang.String, java.lang.String)
+    {
+        com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec r3;
+        int $i0, $i1, $i2;
+        java.lang.String r0, r1, $r2;
+        boolean $z0, $z1;
+
+        r3 := @this: com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $i1 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if $i0 < $i1 goto label1;
+
+        $i2 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        $r2 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, $i2);
+
+        $z0 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    private boolean isFastInfosetAcceptable(java.lang.String)
+    {
+        com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec r4;
+        java.util.StringTokenizer $r1;
+        java.lang.String r0, $r2, $r3;
+        boolean $z0, $z1;
+
+        r4 := @this: com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r1 = new java.util.StringTokenizer;
+
+        specialinvoke $r1.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>(r0, ",");
+
+     label2:
+        $z0 = virtualinvoke $r1.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label4;
+
+        $r2 = virtualinvoke $r1.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.String: java.lang.String trim()>();
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("application/fastinfoset");
+
+        if $z1 == 0 goto label3;
+
+        return 1;
+
+     label3:
+        goto label2;
+
+     label4:
+        return 0;
+    }
+
+    private com.sun.xml.internal.ws.api.pipe.ContentType getStaticContentType(com.sun.xml.internal.ws.encoding.xml.XMLMessage$MessageDataSource)
+    {
+        com.sun.xml.internal.ws.encoding.ContentTypeImpl $r4;
+        com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec r3;
+        com.sun.xml.internal.ws.encoding.xml.XMLMessage$MessageDataSource r0;
+        javax.activation.DataSource $r1;
+        java.lang.String $r2;
+        boolean $z0, $z1, $z2;
+
+        r3 := @this: com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.encoding.xml.XMLMessage$MessageDataSource;
+
+        $r1 = interfaceinvoke r0.<com.sun.xml.internal.ws.encoding.xml.XMLMessage$MessageDataSource: javax.activation.DataSource getDataSource()>();
+
+        $r2 = interfaceinvoke $r1.<javax.activation.DataSource: java.lang.String getContentType()>();
+
+        $z0 = staticinvoke <com.sun.xml.internal.ws.encoding.xml.XMLMessage: boolean isFastInfoset(java.lang.String)>($r2);
+
+        $z1 = r3.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: boolean useFastInfosetForEncoding>;
+
+        $z2 = staticinvoke <com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: boolean requiresTransformationOfDataSource(boolean,boolean)>($z0, $z1);
+
+        if $z2 != 0 goto label1;
+
+        $r4 = new com.sun.xml.internal.ws.encoding.ContentTypeImpl;
+
+        specialinvoke $r4.<com.sun.xml.internal.ws.encoding.ContentTypeImpl: void <init>(java.lang.String)>($r2);
+
+        return $r4;
+
+     label1:
+        return null;
+    }
+
+    private com.sun.xml.internal.ws.api.pipe.ContentType encode(com.sun.xml.internal.ws.encoding.xml.XMLMessage$MessageDataSource, java.io.OutputStream)
+    {
+        byte[] r8;
+        com.sun.xml.internal.ws.api.WSFeatureList $r5;
+        com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec r4;
+        int $i0, $i2;
+        java.lang.String $r2, $r10;
+        boolean $z0, $z1;
+        java.io.OutputStream r11;
+        java.io.IOException $r12;
+        com.sun.xml.internal.ws.encoding.ContentTypeImpl $r14;
+        com.sun.xml.internal.ws.encoding.xml.XMLMessage$MessageDataSource r0;
+        javax.xml.ws.WebServiceException $r15;
+        javax.activation.DataSource $r1, $r3, $r6;
+        java.io.InputStream $r7;
+
+        r4 := @this: com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.encoding.xml.XMLMessage$MessageDataSource;
+
+        r11 := @parameter1: java.io.OutputStream;
+
+     label1:
+        $r1 = interfaceinvoke r0.<com.sun.xml.internal.ws.encoding.xml.XMLMessage$MessageDataSource: javax.activation.DataSource getDataSource()>();
+
+        $r2 = interfaceinvoke $r1.<javax.activation.DataSource: java.lang.String getContentType()>();
+
+        $z0 = staticinvoke <com.sun.xml.internal.ws.encoding.xml.XMLMessage: boolean isFastInfoset(java.lang.String)>($r2);
+
+        $r3 = interfaceinvoke r0.<com.sun.xml.internal.ws.encoding.xml.XMLMessage$MessageDataSource: javax.activation.DataSource getDataSource()>();
+
+        $z1 = r4.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: boolean useFastInfosetForEncoding>;
+
+        $r5 = r4.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: com.sun.xml.internal.ws.api.WSFeatureList features>;
+
+        $r6 = staticinvoke <com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: javax.activation.DataSource transformDataSource(javax.activation.DataSource,boolean,boolean,com.sun.xml.internal.ws.api.WSFeatureList)>($r3, $z0, $z1, $r5);
+
+        $r7 = interfaceinvoke $r6.<javax.activation.DataSource: java.io.InputStream getInputStream()>();
+
+        r8 = newarray (byte)[1024];
+
+     label2:
+        $i0 = virtualinvoke $r7.<java.io.InputStream: int read(byte[])>(r8);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label3;
+
+        virtualinvoke r11.<java.io.OutputStream: void write(byte[],int,int)>(r8, 0, $i0);
+
+        goto label2;
+
+     label3:
+        $r14 = new com.sun.xml.internal.ws.encoding.ContentTypeImpl;
+
+        $r10 = interfaceinvoke $r6.<javax.activation.DataSource: java.lang.String getContentType()>();
+
+        specialinvoke $r14.<com.sun.xml.internal.ws.encoding.ContentTypeImpl: void <init>(java.lang.String)>($r10);
+
+     label4:
+        return $r14;
+
+     label5:
+        $r12 := @caughtexception;
+
+        $r15 = new javax.xml.ws.WebServiceException;
+
+        specialinvoke $r15.<javax.xml.ws.WebServiceException: void <init>(java.lang.Throwable)>($r12);
+
+        throw $r15;
+
+        catch java.io.IOException from label1 to label4 with label5;
+    }
+
+    protected com.sun.xml.internal.ws.api.pipe.Codec getMimeRootCodec(com.sun.xml.internal.ws.api.message.Packet)
+    {
+        com.sun.xml.internal.ws.client.ContentNegotiation $r1, $r2, $r3, $r4;
+        com.sun.xml.internal.ws.api.pipe.Codec $r6, $r7;
+        com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec r5;
+        com.sun.xml.internal.ws.api.message.Packet r0;
+        boolean $z0;
+
+        r5 := @this: com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.api.message.Packet;
+
+        $r2 = r0.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.client.ContentNegotiation contentNegotiation>;
+
+        $r1 = <com.sun.xml.internal.ws.client.ContentNegotiation: com.sun.xml.internal.ws.client.ContentNegotiation none>;
+
+        if $r2 != $r1 goto label1;
+
+        r5.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: boolean useFastInfosetForEncoding> = 0;
+
+        goto label2;
+
+     label1:
+        $r4 = r0.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.client.ContentNegotiation contentNegotiation>;
+
+        $r3 = <com.sun.xml.internal.ws.client.ContentNegotiation: com.sun.xml.internal.ws.client.ContentNegotiation optimistic>;
+
+        if $r4 != $r3 goto label2;
+
+        r5.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: boolean useFastInfosetForEncoding> = 1;
+
+     label2:
+        $z0 = r5.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: boolean useFastInfosetForEncoding>;
+
+        if $z0 == 0 goto label3;
+
+        $r6 = r5.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: com.sun.xml.internal.ws.api.pipe.Codec fiCodec>;
+
+        if $r6 == null goto label3;
+
+        $r7 = r5.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: com.sun.xml.internal.ws.api.pipe.Codec fiCodec>;
+
+        goto label4;
+
+     label3:
+        $r7 = r5.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: com.sun.xml.internal.ws.api.pipe.Codec xmlCodec>;
+
+     label4:
+        return $r7;
+    }
+
+    public static boolean requiresTransformationOfDataSource(boolean, boolean)
+    {
+        boolean z0, z1, $z2;
+
+        z0 := @parameter0: boolean;
+
+        z1 := @parameter1: boolean;
+
+        if z0 == 0 goto label1;
+
+        if z1 == 0 goto label2;
+
+     label1:
+        if z0 != 0 goto label3;
+
+        if z1 == 0 goto label3;
+
+     label2:
+        $z2 = 1;
+
+        goto label4;
+
+     label3:
+        $z2 = 0;
+
+     label4:
+        return $z2;
+    }
+
+    public static javax.activation.DataSource transformDataSource(javax.activation.DataSource, boolean, boolean, com.sun.xml.internal.ws.api.WSFeatureList)
+    {
+        com.sun.xml.internal.ws.api.pipe.ContentType $r9, $r19;
+        com.sun.xml.internal.ws.util.ByteArrayBuffer $r8, $r18;
+        com.sun.xml.internal.ws.api.message.Message $r7, $r17;
+        com.sun.xml.internal.ws.api.WSFeatureList r2;
+        com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec $r1, $r13;
+        com.sun.xml.internal.ws.api.message.Packet $r3, $r14;
+        java.lang.String $r5, $r10, $r16, $r20;
+        boolean z0, z1;
+        com.sun.xml.internal.ws.client.ContentNegotiation $r6;
+        java.lang.Exception $r23;
+        javax.xml.ws.WebServiceException $r24;
+        javax.activation.DataSource r0, $r12, $r22;
+        java.io.InputStream $r4, $r11, $r15, $r21;
+
+        r0 := @parameter0: javax.activation.DataSource;
+
+        z0 := @parameter1: boolean;
+
+        z1 := @parameter2: boolean;
+
+        r2 := @parameter3: com.sun.xml.internal.ws.api.WSFeatureList;
+
+     label1:
+        if z0 == 0 goto label3;
+
+        if z1 != 0 goto label3;
+
+        $r13 = new com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec;
+
+        specialinvoke $r13.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: void <init>(com.sun.xml.internal.ws.api.WSFeatureList)>(r2);
+
+        $r14 = new com.sun.xml.internal.ws.api.message.Packet;
+
+        specialinvoke $r14.<com.sun.xml.internal.ws.api.message.Packet: void <init>()>();
+
+        $r15 = interfaceinvoke r0.<javax.activation.DataSource: java.io.InputStream getInputStream()>();
+
+        $r16 = interfaceinvoke r0.<javax.activation.DataSource: java.lang.String getContentType()>();
+
+        interfaceinvoke $r13.<com.sun.xml.internal.ws.api.pipe.Codec: void decode(java.io.InputStream,java.lang.String,com.sun.xml.internal.ws.api.message.Packet)>($r15, $r16, $r14);
+
+        $r17 = virtualinvoke $r14.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.api.message.Message getMessage()>();
+
+        virtualinvoke $r17.<com.sun.xml.internal.ws.api.message.Message: com.sun.xml.internal.ws.api.message.AttachmentSet getAttachments()>();
+
+        interfaceinvoke $r13.<com.sun.xml.internal.ws.api.pipe.Codec: com.sun.xml.internal.ws.api.pipe.ContentType getStaticContentType(com.sun.xml.internal.ws.api.message.Packet)>($r14);
+
+        $r18 = new com.sun.xml.internal.ws.util.ByteArrayBuffer;
+
+        specialinvoke $r18.<com.sun.xml.internal.ws.util.ByteArrayBuffer: void <init>()>();
+
+        $r19 = interfaceinvoke $r13.<com.sun.xml.internal.ws.api.pipe.Codec: com.sun.xml.internal.ws.api.pipe.ContentType encode(com.sun.xml.internal.ws.api.message.Packet,java.io.OutputStream)>($r14, $r18);
+
+        $r20 = interfaceinvoke $r19.<com.sun.xml.internal.ws.api.pipe.ContentType: java.lang.String getContentType()>();
+
+        $r21 = virtualinvoke $r18.<com.sun.xml.internal.ws.util.ByteArrayBuffer: java.io.InputStream newInputStream()>();
+
+        $r22 = staticinvoke <com.sun.xml.internal.ws.encoding.xml.XMLMessage: javax.activation.DataSource createDataSource(java.lang.String,java.io.InputStream)>($r20, $r21);
+
+     label2:
+        return $r22;
+
+     label3:
+        if z0 != 0 goto label5;
+
+        if z1 == 0 goto label5;
+
+        $r1 = new com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec;
+
+        specialinvoke $r1.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: void <init>(com.sun.xml.internal.ws.api.WSFeatureList)>(r2);
+
+        $r3 = new com.sun.xml.internal.ws.api.message.Packet;
+
+        specialinvoke $r3.<com.sun.xml.internal.ws.api.message.Packet: void <init>()>();
+
+        $r4 = interfaceinvoke r0.<javax.activation.DataSource: java.io.InputStream getInputStream()>();
+
+        $r5 = interfaceinvoke r0.<javax.activation.DataSource: java.lang.String getContentType()>();
+
+        interfaceinvoke $r1.<com.sun.xml.internal.ws.api.pipe.Codec: void decode(java.io.InputStream,java.lang.String,com.sun.xml.internal.ws.api.message.Packet)>($r4, $r5, $r3);
+
+        $r6 = <com.sun.xml.internal.ws.client.ContentNegotiation: com.sun.xml.internal.ws.client.ContentNegotiation optimistic>;
+
+        $r3.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.client.ContentNegotiation contentNegotiation> = $r6;
+
+        $r7 = virtualinvoke $r3.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.api.message.Message getMessage()>();
+
+        virtualinvoke $r7.<com.sun.xml.internal.ws.api.message.Message: com.sun.xml.internal.ws.api.message.AttachmentSet getAttachments()>();
+
+        interfaceinvoke $r1.<com.sun.xml.internal.ws.api.pipe.Codec: com.sun.xml.internal.ws.api.pipe.ContentType getStaticContentType(com.sun.xml.internal.ws.api.message.Packet)>($r3);
+
+        $r8 = new com.sun.xml.internal.ws.util.ByteArrayBuffer;
+
+        specialinvoke $r8.<com.sun.xml.internal.ws.util.ByteArrayBuffer: void <init>()>();
+
+        $r9 = interfaceinvoke $r1.<com.sun.xml.internal.ws.api.pipe.Codec: com.sun.xml.internal.ws.api.pipe.ContentType encode(com.sun.xml.internal.ws.api.message.Packet,java.io.OutputStream)>($r3, $r8);
+
+        $r10 = interfaceinvoke $r9.<com.sun.xml.internal.ws.api.pipe.ContentType: java.lang.String getContentType()>();
+
+        $r11 = virtualinvoke $r8.<com.sun.xml.internal.ws.util.ByteArrayBuffer: java.io.InputStream newInputStream()>();
+
+        $r12 = staticinvoke <com.sun.xml.internal.ws.encoding.xml.XMLMessage: javax.activation.DataSource createDataSource(java.lang.String,java.io.InputStream)>($r10, $r11);
+
+     label4:
+        return $r12;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r23 := @caughtexception;
+
+        $r24 = new javax.xml.ws.WebServiceException;
+
+        specialinvoke $r24.<javax.xml.ws.WebServiceException: void <init>(java.lang.Throwable)>($r23);
+
+        throw $r24;
+
+     label7:
+        return r0;
+
+        catch java.lang.Exception from label1 to label2 with label6;
+        catch java.lang.Exception from label3 to label4 with label6;
+    }
+
+    private static com.sun.xml.internal.ws.api.pipe.Codec getFICodec()
+    {
+        java.lang.Object[] $r3;
+        java.lang.Class[] $r1;
+        java.lang.Class $r0;
+        java.lang.Object $r4;
+        java.lang.reflect.Method $r2;
+        com.sun.xml.internal.ws.api.pipe.Codec $r5;
+        java.lang.Exception $r6;
+
+     label1:
+        $r0 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String)>("com.sun.xml.internal.ws.encoding.fastinfoset.FastInfosetCodec");
+
+        $r1 = newarray (java.lang.Class)[0];
+
+        $r2 = virtualinvoke $r0.<java.lang.Class: java.lang.reflect.Method getMethod(java.lang.String,java.lang.Class[])>("create", $r1);
+
+        $r3 = newarray (java.lang.Object)[0];
+
+        $r4 = virtualinvoke $r2.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>(null, $r3);
+
+        $r5 = (com.sun.xml.internal.ws.api.pipe.Codec) $r4;
+
+     label2:
+        return $r5;
+
+     label3:
+        $r6 := @caughtexception;
+
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public volatile void decode(java.nio.channels.ReadableByteChannel, java.lang.String, com.sun.xml.internal.ws.api.message.Packet)
+    {
+        com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec r0;
+        java.nio.channels.ReadableByteChannel r1;
+        com.sun.xml.internal.ws.api.message.Packet r3;
+        java.lang.String r2;
+
+        r0 := @this: com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec;
+
+        r1 := @parameter0: java.nio.channels.ReadableByteChannel;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: com.sun.xml.internal.ws.api.message.Packet;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.encoding.MimeCodec: void decode(java.nio.channels.ReadableByteChannel,java.lang.String,com.sun.xml.internal.ws.api.message.Packet)>(r1, r2, r3);
+
+        return;
+    }
+
+    public volatile com.sun.xml.internal.ws.api.pipe.Codec copy()
+    {
+        com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec r0;
+        com.sun.xml.internal.ws.encoding.MimeCodec $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: com.sun.xml.internal.ws.encoding.MimeCodec copy()>();
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        <com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: java.lang.String fiXmlAccept> = "application/fastinfoset, *";
+
+        <com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: java.lang.String APPLICATION_FAST_INFOSET_MIME_TYPE> = "application/fastinfoset";
+
+        <com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: java.lang.String BASE_ACCEPT_VALUE> = "*";
+
+        <com.sun.xml.internal.ws.encoding.XMLHTTPBindingCodec: java.lang.String xmlAccept> = null;
+
+        return;
+    }
+}

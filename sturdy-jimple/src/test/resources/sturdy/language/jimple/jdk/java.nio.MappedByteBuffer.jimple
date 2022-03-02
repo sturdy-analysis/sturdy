@@ -1,0 +1,300 @@
+public abstract class java.nio.MappedByteBuffer extends java.nio.ByteBuffer
+{
+    private final java.io.FileDescriptor fd;
+    private static byte unused;
+
+    void <init>(int, int, int, int, java.io.FileDescriptor)
+    {
+        java.io.FileDescriptor r1;
+        int i0, i1, i2, i3;
+        java.nio.MappedByteBuffer r0;
+
+        r0 := @this: java.nio.MappedByteBuffer;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        r1 := @parameter4: java.io.FileDescriptor;
+
+        specialinvoke r0.<java.nio.ByteBuffer: void <init>(int,int,int,int)>(i0, i1, i2, i3);
+
+        r0.<java.nio.MappedByteBuffer: java.io.FileDescriptor fd> = r1;
+
+        return;
+    }
+
+    void <init>(int, int, int, int)
+    {
+        int i0, i1, i2, i3;
+        java.nio.MappedByteBuffer r0;
+
+        r0 := @this: java.nio.MappedByteBuffer;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        specialinvoke r0.<java.nio.ByteBuffer: void <init>(int,int,int,int)>(i0, i1, i2, i3);
+
+        r0.<java.nio.MappedByteBuffer: java.io.FileDescriptor fd> = null;
+
+        return;
+    }
+
+    private void checkMapped()
+    {
+        java.lang.UnsupportedOperationException $r2;
+        java.nio.MappedByteBuffer r0;
+        java.io.FileDescriptor $r1;
+
+        r0 := @this: java.nio.MappedByteBuffer;
+
+        $r1 = r0.<java.nio.MappedByteBuffer: java.io.FileDescriptor fd>;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r2.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        return;
+    }
+
+    private long mappingOffset()
+    {
+        long $l1, $l2, l3, $l5, $l6;
+        byte $b4;
+        int $i0, $i7;
+        java.nio.MappedByteBuffer r0;
+
+        r0 := @this: java.nio.MappedByteBuffer;
+
+        $i0 = staticinvoke <java.nio.Bits: int pageSize()>();
+
+        $l2 = r0.<java.nio.MappedByteBuffer: long address>;
+
+        $l1 = (long) $i0;
+
+        l3 = $l2 % $l1;
+
+        $b4 = l3 cmp 0L;
+
+        $i7 = (int) $b4;
+
+        if $i7 < 0 goto label1;
+
+        $l6 = l3;
+
+        goto label2;
+
+     label1:
+        $l5 = (long) $i0;
+
+        $l6 = $l5 + l3;
+
+     label2:
+        return $l6;
+    }
+
+    private long mappingAddress(long)
+    {
+        long l0, $l1, $l2;
+        java.nio.MappedByteBuffer r0;
+
+        r0 := @this: java.nio.MappedByteBuffer;
+
+        l0 := @parameter0: long;
+
+        $l1 = r0.<java.nio.MappedByteBuffer: long address>;
+
+        $l2 = $l1 - l0;
+
+        return $l2;
+    }
+
+    private long mappingLength(long)
+    {
+        int $i0;
+        long l1, $l2, $l3;
+        java.nio.MappedByteBuffer r0;
+
+        r0 := @this: java.nio.MappedByteBuffer;
+
+        l1 := @parameter0: long;
+
+        $i0 = virtualinvoke r0.<java.nio.MappedByteBuffer: int capacity()>();
+
+        $l2 = (long) $i0;
+
+        $l3 = $l2 + l1;
+
+        return $l3;
+    }
+
+    public final boolean isLoaded()
+    {
+        long $l0, $l3, $l4, $l5;
+        byte $b1;
+        int $i2, $i6;
+        java.nio.MappedByteBuffer r0;
+        boolean $z0;
+
+        r0 := @this: java.nio.MappedByteBuffer;
+
+        specialinvoke r0.<java.nio.MappedByteBuffer: void checkMapped()>();
+
+        $l0 = r0.<java.nio.MappedByteBuffer: long address>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 == 0 goto label1;
+
+        $i2 = virtualinvoke r0.<java.nio.MappedByteBuffer: int capacity()>();
+
+        if $i2 != 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        $l3 = specialinvoke r0.<java.nio.MappedByteBuffer: long mappingOffset()>();
+
+        $l4 = specialinvoke r0.<java.nio.MappedByteBuffer: long mappingLength(long)>($l3);
+
+        $l5 = specialinvoke r0.<java.nio.MappedByteBuffer: long mappingAddress(long)>($l3);
+
+        $i6 = staticinvoke <java.nio.Bits: int pageCount(long)>($l4);
+
+        $z0 = specialinvoke r0.<java.nio.MappedByteBuffer: boolean isLoaded0(long,long,int)>($l5, $l4, $i6);
+
+        return $z0;
+    }
+
+    public final java.nio.MappedByteBuffer load()
+    {
+        sun.misc.Unsafe $r1;
+        long $l0, $l3, $l4, $l5, $l11, l12;
+        byte $b1, $b8, $b9, $b10, b13;
+        int $i2, $i6, $i7, i14;
+        java.nio.MappedByteBuffer r0;
+
+        r0 := @this: java.nio.MappedByteBuffer;
+
+        specialinvoke r0.<java.nio.MappedByteBuffer: void checkMapped()>();
+
+        $l0 = r0.<java.nio.MappedByteBuffer: long address>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 == 0 goto label1;
+
+        $i2 = virtualinvoke r0.<java.nio.MappedByteBuffer: int capacity()>();
+
+        if $i2 != 0 goto label2;
+
+     label1:
+        return r0;
+
+     label2:
+        $l3 = specialinvoke r0.<java.nio.MappedByteBuffer: long mappingOffset()>();
+
+        $l4 = specialinvoke r0.<java.nio.MappedByteBuffer: long mappingLength(long)>($l3);
+
+        $l5 = specialinvoke r0.<java.nio.MappedByteBuffer: long mappingAddress(long)>($l3);
+
+        specialinvoke r0.<java.nio.MappedByteBuffer: void load0(long,long)>($l5, $l4);
+
+        $r1 = staticinvoke <sun.misc.Unsafe: sun.misc.Unsafe getUnsafe()>();
+
+        $i6 = staticinvoke <java.nio.Bits: int pageSize()>();
+
+        $i7 = staticinvoke <java.nio.Bits: int pageCount(long)>($l4);
+
+        l12 = specialinvoke r0.<java.nio.MappedByteBuffer: long mappingAddress(long)>($l3);
+
+        b13 = 0;
+
+        i14 = 0;
+
+     label3:
+        if i14 >= $i7 goto label4;
+
+        $b9 = virtualinvoke $r1.<sun.misc.Unsafe: byte getByte(long)>(l12);
+
+        $b10 = b13 ^ $b9;
+
+        b13 = (byte) $b10;
+
+        $l11 = (long) $i6;
+
+        l12 = l12 + $l11;
+
+        i14 = i14 + 1;
+
+        goto label3;
+
+     label4:
+        $b8 = <java.nio.MappedByteBuffer: byte unused>;
+
+        if $b8 == 0 goto label5;
+
+        <java.nio.MappedByteBuffer: byte unused> = b13;
+
+     label5:
+        return r0;
+    }
+
+    public final java.nio.MappedByteBuffer force()
+    {
+        long $l0, $l3, $l4, $l5;
+        byte $b1;
+        java.io.FileDescriptor $r1;
+        int $i2;
+        java.nio.MappedByteBuffer r0;
+
+        r0 := @this: java.nio.MappedByteBuffer;
+
+        specialinvoke r0.<java.nio.MappedByteBuffer: void checkMapped()>();
+
+        $l0 = r0.<java.nio.MappedByteBuffer: long address>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 == 0 goto label1;
+
+        $i2 = virtualinvoke r0.<java.nio.MappedByteBuffer: int capacity()>();
+
+        if $i2 == 0 goto label1;
+
+        $l3 = specialinvoke r0.<java.nio.MappedByteBuffer: long mappingOffset()>();
+
+        $r1 = r0.<java.nio.MappedByteBuffer: java.io.FileDescriptor fd>;
+
+        $l4 = specialinvoke r0.<java.nio.MappedByteBuffer: long mappingAddress(long)>($l3);
+
+        $l5 = specialinvoke r0.<java.nio.MappedByteBuffer: long mappingLength(long)>($l3);
+
+        specialinvoke r0.<java.nio.MappedByteBuffer: void force0(java.io.FileDescriptor,long,long)>($r1, $l4, $l5);
+
+     label1:
+        return r0;
+    }
+
+    private native boolean isLoaded0(long, long, int);
+
+    private native void load0(long, long);
+
+    private native void force0(java.io.FileDescriptor, long, long);
+}

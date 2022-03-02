@@ -1,0 +1,445 @@
+public abstract class javax.crypto.CipherSpi extends java.lang.Object
+{
+
+    public void <init>()
+    {
+        javax.crypto.CipherSpi r0;
+
+        r0 := @this: javax.crypto.CipherSpi;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    protected abstract void engineSetMode(java.lang.String) throws java.security.NoSuchAlgorithmException;
+
+    protected abstract void engineSetPadding(java.lang.String) throws javax.crypto.NoSuchPaddingException;
+
+    protected abstract int engineGetBlockSize();
+
+    protected abstract int engineGetOutputSize(int);
+
+    protected abstract byte[] engineGetIV();
+
+    protected abstract java.security.AlgorithmParameters engineGetParameters();
+
+    protected abstract void engineInit(int, java.security.Key, java.security.SecureRandom) throws java.security.InvalidKeyException;
+
+    protected abstract void engineInit(int, java.security.Key, java.security.spec.AlgorithmParameterSpec, java.security.SecureRandom) throws java.security.InvalidKeyException, java.security.InvalidAlgorithmParameterException;
+
+    protected abstract void engineInit(int, java.security.Key, java.security.AlgorithmParameters, java.security.SecureRandom) throws java.security.InvalidKeyException, java.security.InvalidAlgorithmParameterException;
+
+    protected abstract byte[] engineUpdate(byte[], int, int);
+
+    protected abstract int engineUpdate(byte[], int, int, byte[], int) throws javax.crypto.ShortBufferException;
+
+    protected int engineUpdate(java.nio.ByteBuffer, java.nio.ByteBuffer) throws javax.crypto.ShortBufferException
+    {
+        javax.crypto.IllegalBlockSizeException $r5;
+        java.security.ProviderException $r4, $r6;
+        java.nio.ByteBuffer r1, r2;
+        javax.crypto.CipherSpi r0;
+        javax.crypto.BadPaddingException $r3;
+        int $i0;
+
+        r0 := @this: javax.crypto.CipherSpi;
+
+        r1 := @parameter0: java.nio.ByteBuffer;
+
+        r2 := @parameter1: java.nio.ByteBuffer;
+
+     label1:
+        $i0 = specialinvoke r0.<javax.crypto.CipherSpi: int bufferCrypt(java.nio.ByteBuffer,java.nio.ByteBuffer,boolean)>(r1, r2, 1);
+
+     label2:
+        return $i0;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new java.security.ProviderException;
+
+        specialinvoke $r6.<java.security.ProviderException: void <init>(java.lang.String)>("Internal error in update()");
+
+        throw $r6;
+
+     label4:
+        $r3 := @caughtexception;
+
+        $r4 = new java.security.ProviderException;
+
+        specialinvoke $r4.<java.security.ProviderException: void <init>(java.lang.String)>("Internal error in update()");
+
+        throw $r4;
+
+        catch javax.crypto.IllegalBlockSizeException from label1 to label2 with label3;
+        catch javax.crypto.BadPaddingException from label1 to label2 with label4;
+    }
+
+    protected abstract byte[] engineDoFinal(byte[], int, int) throws javax.crypto.IllegalBlockSizeException, javax.crypto.BadPaddingException;
+
+    protected abstract int engineDoFinal(byte[], int, int, byte[], int) throws javax.crypto.ShortBufferException, javax.crypto.IllegalBlockSizeException, javax.crypto.BadPaddingException;
+
+    protected int engineDoFinal(java.nio.ByteBuffer, java.nio.ByteBuffer) throws javax.crypto.ShortBufferException, javax.crypto.IllegalBlockSizeException, javax.crypto.BadPaddingException
+    {
+        javax.crypto.CipherSpi r0;
+        int $i0;
+        java.nio.ByteBuffer r1, r2;
+
+        r0 := @this: javax.crypto.CipherSpi;
+
+        r1 := @parameter0: java.nio.ByteBuffer;
+
+        r2 := @parameter1: java.nio.ByteBuffer;
+
+        $i0 = specialinvoke r0.<javax.crypto.CipherSpi: int bufferCrypt(java.nio.ByteBuffer,java.nio.ByteBuffer,boolean)>(r1, r2, 0);
+
+        return $i0;
+    }
+
+    static int getTempArraySize(int)
+    {
+        int i0, $i1;
+
+        i0 := @parameter0: int;
+
+        $i1 = staticinvoke <java.lang.Math: int min(int,int)>(4096, i0);
+
+        return $i1;
+    }
+
+    private int bufferCrypt(java.nio.ByteBuffer, java.nio.ByteBuffer, boolean) throws javax.crypto.ShortBufferException, javax.crypto.IllegalBlockSizeException, javax.crypto.BadPaddingException
+    {
+        byte[] $r4, $r5, $r6, r13, r14, r15, r16;
+        java.nio.ByteBuffer r0, r2;
+        java.lang.NullPointerException $r1;
+        boolean z0, $z1, $z2;
+        javax.crypto.ShortBufferException $r7;
+        java.lang.StringBuilder $r8, $r9, $r10, $r11;
+        javax.crypto.CipherSpi r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, i19, i20, i21, i22, i23, i24, $i25;
+        java.lang.String $r12;
+
+        r3 := @this: javax.crypto.CipherSpi;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        r2 := @parameter1: java.nio.ByteBuffer;
+
+        z0 := @parameter2: boolean;
+
+        if r0 == null goto label01;
+
+        if r2 != null goto label02;
+
+     label01:
+        $r1 = new java.lang.NullPointerException;
+
+        specialinvoke $r1.<java.lang.NullPointerException: void <init>(java.lang.String)>("Input and output buffers must not be null");
+
+        throw $r1;
+
+     label02:
+        $i0 = virtualinvoke r0.<java.nio.ByteBuffer: int position()>();
+
+        $i1 = virtualinvoke r0.<java.nio.ByteBuffer: int limit()>();
+
+        i19 = $i1 - $i0;
+
+        if z0 == 0 goto label03;
+
+        if i19 != 0 goto label03;
+
+        return 0;
+
+     label03:
+        $i2 = virtualinvoke r3.<javax.crypto.CipherSpi: int engineGetOutputSize(int)>(i19);
+
+        $i3 = virtualinvoke r2.<java.nio.ByteBuffer: int remaining()>();
+
+        if $i3 >= $i2 goto label04;
+
+        $r7 = new javax.crypto.ShortBufferException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Need at least ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" bytes of space in output buffer");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<javax.crypto.ShortBufferException: void <init>(java.lang.String)>($r12);
+
+        throw $r7;
+
+     label04:
+        $z1 = virtualinvoke r0.<java.nio.ByteBuffer: boolean hasArray()>();
+
+        $z2 = virtualinvoke r2.<java.nio.ByteBuffer: boolean hasArray()>();
+
+        i20 = 0;
+
+        if $z2 == 0 goto label14;
+
+        $r5 = virtualinvoke r2.<java.nio.ByteBuffer: byte[] array()>();
+
+        $i11 = virtualinvoke r2.<java.nio.ByteBuffer: int position()>();
+
+        $i12 = virtualinvoke r2.<java.nio.ByteBuffer: int arrayOffset()>();
+
+        i21 = $i12 + $i11;
+
+        if $z1 == 0 goto label07;
+
+        $r6 = virtualinvoke r0.<java.nio.ByteBuffer: byte[] array()>();
+
+        $i18 = virtualinvoke r0.<java.nio.ByteBuffer: int arrayOffset()>();
+
+        i22 = $i18 + $i0;
+
+        if z0 == 0 goto label05;
+
+        i20 = virtualinvoke r3.<javax.crypto.CipherSpi: int engineUpdate(byte[],int,int,byte[],int)>($r6, i22, i19, $r5, i21);
+
+        goto label06;
+
+     label05:
+        i20 = virtualinvoke r3.<javax.crypto.CipherSpi: int engineDoFinal(byte[],int,int,byte[],int)>($r6, i22, i19, $r5, i21);
+
+     label06:
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i1);
+
+        goto label13;
+
+     label07:
+        $i13 = staticinvoke <javax.crypto.CipherSpi: int getTempArraySize(int)>(i19);
+
+        r13 = newarray (byte)[$i13];
+
+     label08:
+        $i14 = lengthof r13;
+
+        $i15 = staticinvoke <java.lang.Math: int min(int,int)>(i19, $i14);
+
+        if $i15 <= 0 goto label09;
+
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[],int,int)>(r13, 0, $i15);
+
+     label09:
+        if z0 != 0 goto label10;
+
+        if i19 <= $i15 goto label11;
+
+     label10:
+        i23 = virtualinvoke r3.<javax.crypto.CipherSpi: int engineUpdate(byte[],int,int,byte[],int)>(r13, 0, $i15, $r5, i21);
+
+        goto label12;
+
+     label11:
+        i23 = virtualinvoke r3.<javax.crypto.CipherSpi: int engineDoFinal(byte[],int,int,byte[],int)>(r13, 0, $i15, $r5, i21);
+
+     label12:
+        i20 = i20 + i23;
+
+        i21 = i21 + i23;
+
+        $i17 = i19 - $i15;
+
+        i19 = $i17;
+
+        if $i17 > 0 goto label08;
+
+     label13:
+        $i16 = $i11 + i20;
+
+        virtualinvoke r2.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i16);
+
+        goto label25;
+
+     label14:
+        if $z1 == 0 goto label18;
+
+        $r4 = virtualinvoke r0.<java.nio.ByteBuffer: byte[] array()>();
+
+        $i9 = virtualinvoke r0.<java.nio.ByteBuffer: int arrayOffset()>();
+
+        i24 = $i9 + $i0;
+
+        if z0 == 0 goto label15;
+
+        r14 = virtualinvoke r3.<javax.crypto.CipherSpi: byte[] engineUpdate(byte[],int,int)>($r4, i24, i19);
+
+        goto label16;
+
+     label15:
+        r14 = virtualinvoke r3.<javax.crypto.CipherSpi: byte[] engineDoFinal(byte[],int,int)>($r4, i24, i19);
+
+     label16:
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i1);
+
+        if r14 == null goto label17;
+
+        $i10 = lengthof r14;
+
+        if $i10 == 0 goto label17;
+
+        virtualinvoke r2.<java.nio.ByteBuffer: java.nio.ByteBuffer put(byte[])>(r14);
+
+        i20 = lengthof r14;
+
+     label17:
+        goto label25;
+
+     label18:
+        $i4 = staticinvoke <javax.crypto.CipherSpi: int getTempArraySize(int)>(i19);
+
+        r15 = newarray (byte)[$i4];
+
+     label19:
+        $i5 = lengthof r15;
+
+        $i6 = staticinvoke <java.lang.Math: int min(int,int)>(i19, $i5);
+
+        if $i6 <= 0 goto label20;
+
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[],int,int)>(r15, 0, $i6);
+
+     label20:
+        if z0 != 0 goto label21;
+
+        if i19 <= $i6 goto label22;
+
+     label21:
+        r16 = virtualinvoke r3.<javax.crypto.CipherSpi: byte[] engineUpdate(byte[],int,int)>(r15, 0, $i6);
+
+        goto label23;
+
+     label22:
+        r16 = virtualinvoke r3.<javax.crypto.CipherSpi: byte[] engineDoFinal(byte[],int,int)>(r15, 0, $i6);
+
+     label23:
+        if r16 == null goto label24;
+
+        $i7 = lengthof r16;
+
+        if $i7 == 0 goto label24;
+
+        virtualinvoke r2.<java.nio.ByteBuffer: java.nio.ByteBuffer put(byte[])>(r16);
+
+        $i8 = lengthof r16;
+
+        i20 = i20 + $i8;
+
+     label24:
+        $i25 = i19 - $i6;
+
+        i19 = $i25;
+
+        if $i25 > 0 goto label19;
+
+     label25:
+        return i20;
+    }
+
+    protected byte[] engineWrap(java.security.Key) throws javax.crypto.IllegalBlockSizeException, java.security.InvalidKeyException
+    {
+        java.security.Key r2;
+        java.lang.UnsupportedOperationException $r0;
+        javax.crypto.CipherSpi r1;
+
+        r1 := @this: javax.crypto.CipherSpi;
+
+        r2 := @parameter0: java.security.Key;
+
+        $r0 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r0.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r0;
+    }
+
+    protected java.security.Key engineUnwrap(byte[], java.lang.String, int) throws java.security.InvalidKeyException, java.security.NoSuchAlgorithmException
+    {
+        java.lang.UnsupportedOperationException $r0;
+        byte[] r2;
+        javax.crypto.CipherSpi r1;
+        int i0;
+        java.lang.String r3;
+
+        r1 := @this: javax.crypto.CipherSpi;
+
+        r2 := @parameter0: byte[];
+
+        r3 := @parameter1: java.lang.String;
+
+        i0 := @parameter2: int;
+
+        $r0 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r0.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r0;
+    }
+
+    protected int engineGetKeySize(java.security.Key) throws java.security.InvalidKeyException
+    {
+        java.security.Key r2;
+        java.lang.UnsupportedOperationException $r0;
+        javax.crypto.CipherSpi r1;
+
+        r1 := @this: javax.crypto.CipherSpi;
+
+        r2 := @parameter0: java.security.Key;
+
+        $r0 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r0.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r0;
+    }
+
+    protected void engineUpdateAAD(byte[], int, int)
+    {
+        java.lang.UnsupportedOperationException $r0;
+        byte[] r2;
+        javax.crypto.CipherSpi r1;
+        int i0, i1;
+
+        r1 := @this: javax.crypto.CipherSpi;
+
+        r2 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r0 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r0.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("The underlying Cipher implementation does not support this method");
+
+        throw $r0;
+    }
+
+    protected void engineUpdateAAD(java.nio.ByteBuffer)
+    {
+        java.lang.UnsupportedOperationException $r0;
+        javax.crypto.CipherSpi r1;
+        java.nio.ByteBuffer r2;
+
+        r1 := @this: javax.crypto.CipherSpi;
+
+        r2 := @parameter0: java.nio.ByteBuffer;
+
+        $r0 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r0.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("The underlying Cipher implementation does not support this method");
+
+        throw $r0;
+    }
+}

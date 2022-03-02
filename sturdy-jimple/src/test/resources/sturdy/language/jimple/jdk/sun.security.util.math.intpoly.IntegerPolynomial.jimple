@@ -1,0 +1,1312 @@
+public abstract class sun.security.util.math.intpoly.IntegerPolynomial extends java.lang.Object implements sun.security.util.math.IntegerFieldModuloP
+{
+    protected static final java.math.BigInteger TWO;
+    protected final int numLimbs;
+    private final java.math.BigInteger modulus;
+    protected final int bitsPerLimb;
+    private final long[] posModLimbs;
+    private final int maxAdds;
+
+    protected abstract void reduce(long[]);
+
+    protected void multByInt(long[], long)
+    {
+        long[] r0;
+        sun.security.util.math.intpoly.IntegerPolynomial r1;
+        int $i0, i4;
+        long l1, $l2, $l3;
+
+        r1 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        r0 := @parameter0: long[];
+
+        l1 := @parameter1: long;
+
+        i4 = 0;
+
+     label1:
+        $i0 = lengthof r0;
+
+        if i4 >= $i0 goto label2;
+
+        $l2 = r0[i4];
+
+        $l3 = $l2 * l1;
+
+        r0[i4] = $l3;
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label2:
+        virtualinvoke r1.<sun.security.util.math.intpoly.IntegerPolynomial: void reduce(long[])>(r0);
+
+        return;
+    }
+
+    protected abstract void mult(long[], long[], long[]);
+
+    protected abstract void square(long[], long[]);
+
+    void <init>(int, int, int, java.math.BigInteger)
+    {
+        long[] $r2;
+        sun.security.util.math.intpoly.IntegerPolynomial r0;
+        int i0, i1, i2;
+        java.math.BigInteger r1;
+
+        r0 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        r1 := @parameter3: java.math.BigInteger;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.util.math.intpoly.IntegerPolynomial: int numLimbs> = i0;
+
+        r0.<sun.security.util.math.intpoly.IntegerPolynomial: java.math.BigInteger modulus> = r1;
+
+        r0.<sun.security.util.math.intpoly.IntegerPolynomial: int bitsPerLimb> = i1;
+
+        r0.<sun.security.util.math.intpoly.IntegerPolynomial: int maxAdds> = i2;
+
+        $r2 = specialinvoke r0.<sun.security.util.math.intpoly.IntegerPolynomial: long[] setPosModLimbs()>();
+
+        r0.<sun.security.util.math.intpoly.IntegerPolynomial: long[] posModLimbs> = $r2;
+
+        return;
+    }
+
+    private long[] setPosModLimbs()
+    {
+        long[] r1;
+        sun.security.util.math.intpoly.IntegerPolynomial r0;
+        int $i0;
+        java.math.BigInteger $r2;
+
+        r0 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        $i0 = r0.<sun.security.util.math.intpoly.IntegerPolynomial: int numLimbs>;
+
+        r1 = newarray (long)[$i0];
+
+        $r2 = r0.<sun.security.util.math.intpoly.IntegerPolynomial: java.math.BigInteger modulus>;
+
+        virtualinvoke r0.<sun.security.util.math.intpoly.IntegerPolynomial: void setLimbsValuePositive(java.math.BigInteger,long[])>($r2, r1);
+
+        return r1;
+    }
+
+    protected int getNumLimbs()
+    {
+        int $i0;
+        sun.security.util.math.intpoly.IntegerPolynomial r0;
+
+        r0 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        $i0 = r0.<sun.security.util.math.intpoly.IntegerPolynomial: int numLimbs>;
+
+        return $i0;
+    }
+
+    public int getMaxAdds()
+    {
+        int $i0;
+        sun.security.util.math.intpoly.IntegerPolynomial r0;
+
+        r0 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        $i0 = r0.<sun.security.util.math.intpoly.IntegerPolynomial: int maxAdds>;
+
+        return $i0;
+    }
+
+    public java.math.BigInteger getSize()
+    {
+        java.math.BigInteger $r1;
+        sun.security.util.math.intpoly.IntegerPolynomial r0;
+
+        r0 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        $r1 = r0.<sun.security.util.math.intpoly.IntegerPolynomial: java.math.BigInteger modulus>;
+
+        return $r1;
+    }
+
+    public sun.security.util.math.intpoly.IntegerPolynomial$ImmutableElement get0()
+    {
+        sun.security.util.math.intpoly.IntegerPolynomial r1;
+        sun.security.util.math.intpoly.IntegerPolynomial$ImmutableElement $r0;
+
+        r1 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        $r0 = new sun.security.util.math.intpoly.IntegerPolynomial$ImmutableElement;
+
+        specialinvoke $r0.<sun.security.util.math.intpoly.IntegerPolynomial$ImmutableElement: void <init>(sun.security.util.math.intpoly.IntegerPolynomial,boolean)>(r1, 0);
+
+        return $r0;
+    }
+
+    public sun.security.util.math.intpoly.IntegerPolynomial$ImmutableElement get1()
+    {
+        sun.security.util.math.intpoly.IntegerPolynomial r1;
+        sun.security.util.math.intpoly.IntegerPolynomial$ImmutableElement $r0;
+
+        r1 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        $r0 = new sun.security.util.math.intpoly.IntegerPolynomial$ImmutableElement;
+
+        specialinvoke $r0.<sun.security.util.math.intpoly.IntegerPolynomial$ImmutableElement: void <init>(sun.security.util.math.intpoly.IntegerPolynomial,boolean)>(r1, 1);
+
+        return $r0;
+    }
+
+    public sun.security.util.math.intpoly.IntegerPolynomial$ImmutableElement getElement(java.math.BigInteger)
+    {
+        java.math.BigInteger r2;
+        sun.security.util.math.intpoly.IntegerPolynomial r1;
+        sun.security.util.math.intpoly.IntegerPolynomial$ImmutableElement $r0;
+
+        r1 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        r2 := @parameter0: java.math.BigInteger;
+
+        $r0 = new sun.security.util.math.intpoly.IntegerPolynomial$ImmutableElement;
+
+        specialinvoke $r0.<sun.security.util.math.intpoly.IntegerPolynomial$ImmutableElement: void <init>(sun.security.util.math.intpoly.IntegerPolynomial,java.math.BigInteger)>(r1, r2);
+
+        return $r0;
+    }
+
+    public sun.security.util.math.SmallValue getSmallValue(int)
+    {
+        sun.security.util.math.intpoly.IntegerPolynomial r0;
+        java.lang.IllegalArgumentException $r2;
+        sun.security.util.math.intpoly.IntegerPolynomial$Limb $r1;
+        int $i0, $i1, i2, i3, $i4;
+        java.lang.StringBuilder $r3, $r4, $r5;
+        java.lang.String $r6;
+
+        r0 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        i3 := @parameter0: int;
+
+        $i0 = r0.<sun.security.util.math.intpoly.IntegerPolynomial: int bitsPerLimb>;
+
+        $i1 = $i0 - 1;
+
+        i2 = 1 << $i1;
+
+        $i4 = staticinvoke <java.lang.Math: int abs(int)>(i3);
+
+        if $i4 < i2 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("max magnitude is ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i2);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r6);
+
+        throw $r2;
+
+     label1:
+        $r1 = new sun.security.util.math.intpoly.IntegerPolynomial$Limb;
+
+        specialinvoke $r1.<sun.security.util.math.intpoly.IntegerPolynomial$Limb: void <init>(sun.security.util.math.intpoly.IntegerPolynomial,int)>(r0, i3);
+
+        return $r1;
+    }
+
+    protected void encode(java.nio.ByteBuffer, int, byte, long[])
+    {
+        sun.security.util.math.intpoly.IntegerPolynomial r0;
+        java.nio.ByteBuffer r1;
+        long[] r2, r3;
+        byte b0;
+        int $i1, i2, i3, $i4, i5, $i6, $i7, $i8, $i9, i10, $i11, $i12, $i13;
+
+        r0 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        r1 := @parameter0: java.nio.ByteBuffer;
+
+        i3 := @parameter1: int;
+
+        b0 := @parameter2: byte;
+
+        r2 := @parameter3: long[];
+
+        $i13 = (int) b0;
+
+        $i1 = staticinvoke <java.lang.Integer: int numberOfLeadingZeros(int)>($i13);
+
+        i2 = 32 - $i1;
+
+        $i4 = 8 * i3;
+
+        i5 = $i4 + i2;
+
+        $i6 = r0.<sun.security.util.math.intpoly.IntegerPolynomial: int bitsPerLimb>;
+
+        $i7 = i5 + $i6;
+
+        $i9 = $i7 - 1;
+
+        $i8 = r0.<sun.security.util.math.intpoly.IntegerPolynomial: int bitsPerLimb>;
+
+        i10 = $i9 / $i8;
+
+        $i11 = r0.<sun.security.util.math.intpoly.IntegerPolynomial: int numLimbs>;
+
+        if i10 <= $i11 goto label1;
+
+        r3 = newarray (long)[i10];
+
+        virtualinvoke r0.<sun.security.util.math.intpoly.IntegerPolynomial: void encodeSmall(java.nio.ByteBuffer,int,byte,long[])>(r1, i3, b0, r3);
+
+        $i12 = lengthof r2;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r3, 0, r2, 0, $i12);
+
+        goto label2;
+
+     label1:
+        virtualinvoke r0.<sun.security.util.math.intpoly.IntegerPolynomial: void encodeSmall(java.nio.ByteBuffer,int,byte,long[])>(r1, i3, b0, r2);
+
+     label2:
+        return;
+    }
+
+    protected void encodeSmall(java.nio.ByteBuffer, int, byte, long[])
+    {
+        sun.security.util.math.intpoly.IntegerPolynomial r1;
+        java.nio.ByteBuffer r2;
+        byte b1, $b16;
+        long $l7, $l12, $l13, $l14, l18, $l21, $l26, $l27, $l28, l31, l34, l35, l36;
+        short $s4, $s17, $s38, $s39;
+        long[] r0;
+        int i0, $i2, $i3, $i5, $i6, $i8, i9, $i10, $i11, $i15, $i19, $i20, $i22, i23, $i24, $i25, $i29, i30, i32, i33, $i37;
+
+        r1 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        r2 := @parameter0: java.nio.ByteBuffer;
+
+        i0 := @parameter1: int;
+
+        b1 := @parameter2: byte;
+
+        r0 := @parameter3: long[];
+
+        i30 = 0;
+
+        l31 = 0L;
+
+        i32 = 0;
+
+        i33 = 0;
+
+     label1:
+        if i33 >= i0 goto label4;
+
+        $b16 = virtualinvoke r2.<java.nio.ByteBuffer: byte get()>();
+
+        $s38 = (short) $b16;
+
+        $s17 = $s38 & 255;
+
+        l18 = (long) $s17;
+
+        $i20 = i32 + 8;
+
+        $i19 = r1.<sun.security.util.math.intpoly.IntegerPolynomial: int bitsPerLimb>;
+
+        if $i20 < $i19 goto label2;
+
+        $i22 = r1.<sun.security.util.math.intpoly.IntegerPolynomial: int bitsPerLimb>;
+
+        i23 = $i22 - i32;
+
+        $i24 = 8 - i23;
+
+        $i25 = 255 >> $i24;
+
+        $l26 = (long) $i25;
+
+        $l27 = l18 & $l26;
+
+        $l28 = $l27 << i32;
+
+        l34 = l31 + $l28;
+
+        $i29 = i30;
+
+        i30 = i30 + 1;
+
+        r0[$i29] = l34;
+
+        l31 = l18 >> i23;
+
+        i32 = 8 - i23;
+
+        goto label3;
+
+     label2:
+        $l21 = l18 << i32;
+
+        l31 = l31 + $l21;
+
+        i32 = i32 + 8;
+
+     label3:
+        i33 = i33 + 1;
+
+        goto label1;
+
+     label4:
+        if b1 == 0 goto label6;
+
+        $s39 = (short) b1;
+
+        $s4 = $s39 & 255;
+
+        l35 = (long) $s4;
+
+        $i6 = i32 + 8;
+
+        $i5 = r1.<sun.security.util.math.intpoly.IntegerPolynomial: int bitsPerLimb>;
+
+        if $i6 < $i5 goto label5;
+
+        $i8 = r1.<sun.security.util.math.intpoly.IntegerPolynomial: int bitsPerLimb>;
+
+        i9 = $i8 - i32;
+
+        $i10 = 8 - i9;
+
+        $i11 = 255 >> $i10;
+
+        $l12 = (long) $i11;
+
+        $l13 = l35 & $l12;
+
+        $l14 = $l13 << i32;
+
+        l36 = l31 + $l14;
+
+        $i15 = i30;
+
+        i30 = i30 + 1;
+
+        r0[$i15] = l36;
+
+        l31 = l35 >> i9;
+
+        goto label6;
+
+     label5:
+        $l7 = l35 << i32;
+
+        l31 = l31 + $l7;
+
+     label6:
+        $i37 = lengthof r0;
+
+        if i30 >= $i37 goto label7;
+
+        $i3 = i30;
+
+        i30 = i30 + 1;
+
+        r0[$i3] = l31;
+
+     label7:
+        $i2 = lengthof r0;
+
+        staticinvoke <java.util.Arrays: void fill(long[],int,int,long)>(r0, i30, $i2, 0L);
+
+        virtualinvoke r1.<sun.security.util.math.intpoly.IntegerPolynomial: void postEncodeCarry(long[])>(r0);
+
+        return;
+    }
+
+    protected void encode(byte[], int, int, byte, long[])
+    {
+        byte[] r0;
+        sun.security.util.math.intpoly.IntegerPolynomial r3;
+        java.nio.ByteBuffer $r1;
+        java.nio.ByteOrder $r2;
+        long[] r4;
+        byte b2;
+        int i0, i1;
+
+        r3 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        b2 := @parameter3: byte;
+
+        r4 := @parameter4: long[];
+
+        $r1 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[],int,int)>(r0, i0, i1);
+
+        $r2 = <java.nio.ByteOrder: java.nio.ByteOrder LITTLE_ENDIAN>;
+
+        virtualinvoke $r1.<java.nio.ByteBuffer: java.nio.ByteBuffer order(java.nio.ByteOrder)>($r2);
+
+        virtualinvoke r3.<sun.security.util.math.intpoly.IntegerPolynomial: void encode(java.nio.ByteBuffer,int,byte,long[])>($r1, i1, b2, r4);
+
+        return;
+    }
+
+    protected void postEncodeCarry(long[])
+    {
+        long[] r1;
+        sun.security.util.math.intpoly.IntegerPolynomial r0;
+
+        r0 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        r1 := @parameter0: long[];
+
+        virtualinvoke r0.<sun.security.util.math.intpoly.IntegerPolynomial: void reduce(long[])>(r1);
+
+        return;
+    }
+
+    public sun.security.util.math.intpoly.IntegerPolynomial$ImmutableElement getElement(byte[], int, int, byte)
+    {
+        byte[] r2;
+        sun.security.util.math.intpoly.IntegerPolynomial r0;
+        sun.security.util.math.intpoly.IntegerPolynomial$ImmutableElement $r3;
+        long[] r1;
+        byte b3;
+        int $i0, i1, i2;
+
+        r0 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        r2 := @parameter0: byte[];
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        b3 := @parameter3: byte;
+
+        $i0 = r0.<sun.security.util.math.intpoly.IntegerPolynomial: int numLimbs>;
+
+        r1 = newarray (long)[$i0];
+
+        virtualinvoke r0.<sun.security.util.math.intpoly.IntegerPolynomial: void encode(byte[],int,int,byte,long[])>(r2, i1, i2, b3, r1);
+
+        $r3 = new sun.security.util.math.intpoly.IntegerPolynomial$ImmutableElement;
+
+        specialinvoke $r3.<sun.security.util.math.intpoly.IntegerPolynomial$ImmutableElement: void <init>(sun.security.util.math.intpoly.IntegerPolynomial,long[],int)>(r0, r1, 0);
+
+        return $r3;
+    }
+
+    protected java.math.BigInteger evaluate(long[])
+    {
+        sun.security.util.math.intpoly.IntegerPolynomial r1;
+        long $l2;
+        long[] r0;
+        int $i0, $i1, i3, $i5;
+        java.math.BigInteger $r2, $r3, $r4, $r5, r6;
+
+        r1 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        r0 := @parameter0: long[];
+
+        r6 = <java.math.BigInteger: java.math.BigInteger ZERO>;
+
+        $i0 = lengthof r0;
+
+        i3 = $i0 - 1;
+
+     label1:
+        if i3 < 0 goto label2;
+
+        $i1 = r1.<sun.security.util.math.intpoly.IntegerPolynomial: int bitsPerLimb>;
+
+        $r4 = virtualinvoke r6.<java.math.BigInteger: java.math.BigInteger shiftLeft(int)>($i1);
+
+        $l2 = r0[i3];
+
+        $r5 = staticinvoke <java.math.BigInteger: java.math.BigInteger valueOf(long)>($l2);
+
+        r6 = virtualinvoke $r4.<java.math.BigInteger: java.math.BigInteger add(java.math.BigInteger)>($r5);
+
+        $i5 = (int) -1;
+
+        i3 = i3 + $i5;
+
+        goto label1;
+
+     label2:
+        $r2 = r1.<sun.security.util.math.intpoly.IntegerPolynomial: java.math.BigInteger modulus>;
+
+        $r3 = virtualinvoke r6.<java.math.BigInteger: java.math.BigInteger mod(java.math.BigInteger)>($r2);
+
+        return $r3;
+    }
+
+    protected long carryValue(long)
+    {
+        sun.security.util.math.intpoly.IntegerPolynomial r0;
+        long l0, $l4, $l6, $l7;
+        int $i1, $i2, $i3, $i5;
+
+        r0 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        l0 := @parameter0: long;
+
+        $i1 = r0.<sun.security.util.math.intpoly.IntegerPolynomial: int bitsPerLimb>;
+
+        $i2 = $i1 - 1;
+
+        $i3 = 1 << $i2;
+
+        $l4 = (long) $i3;
+
+        $l6 = l0 + $l4;
+
+        $i5 = r0.<sun.security.util.math.intpoly.IntegerPolynomial: int bitsPerLimb>;
+
+        $l7 = $l6 >> $i5;
+
+        return $l7;
+    }
+
+    protected void carry(long[], int, int)
+    {
+        sun.security.util.math.intpoly.IntegerPolynomial r0;
+        long $l2, $l4, $l5;
+        long[] r1;
+        int i0, i1, $i3, i6;
+
+        r0 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        r1 := @parameter0: long[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i6 = i0;
+
+     label1:
+        if i6 >= i1 goto label2;
+
+        $l2 = virtualinvoke r0.<sun.security.util.math.intpoly.IntegerPolynomial: long carryOut(long[],int)>(r1, i6);
+
+        $i3 = i6 + 1;
+
+        $l4 = r1[$i3];
+
+        $l5 = $l4 + $l2;
+
+        r1[$i3] = $l5;
+
+        i6 = i6 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    protected void carry(long[])
+    {
+        long[] r1;
+        sun.security.util.math.intpoly.IntegerPolynomial r0;
+        int $i0, $i1;
+
+        r0 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        r1 := @parameter0: long[];
+
+        $i0 = lengthof r1;
+
+        $i1 = $i0 - 1;
+
+        virtualinvoke r0.<sun.security.util.math.intpoly.IntegerPolynomial: void carry(long[],int,int)>(r1, 0, $i1);
+
+        return;
+    }
+
+    protected long carryOut(long[], int)
+    {
+        sun.security.util.math.intpoly.IntegerPolynomial r0;
+        long $l1, $l2, $l4, $l5, $l6;
+        long[] r1;
+        int i0, $i3;
+
+        r0 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        r1 := @parameter0: long[];
+
+        i0 := @parameter1: int;
+
+        $l1 = r1[i0];
+
+        $l2 = virtualinvoke r0.<sun.security.util.math.intpoly.IntegerPolynomial: long carryValue(long)>($l1);
+
+        $l5 = r1[i0];
+
+        $i3 = r0.<sun.security.util.math.intpoly.IntegerPolynomial: int bitsPerLimb>;
+
+        $l4 = $l2 << $i3;
+
+        $l6 = $l5 - $l4;
+
+        r1[i0] = $l6;
+
+        return $l2;
+    }
+
+    private void setLimbsValue(java.math.BigInteger, long[])
+    {
+        java.math.BigInteger r1;
+        long[] r2;
+        sun.security.util.math.intpoly.IntegerPolynomial r0;
+
+        r0 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        r1 := @parameter0: java.math.BigInteger;
+
+        r2 := @parameter1: long[];
+
+        virtualinvoke r0.<sun.security.util.math.intpoly.IntegerPolynomial: void setLimbsValuePositive(java.math.BigInteger,long[])>(r1, r2);
+
+        virtualinvoke r0.<sun.security.util.math.intpoly.IntegerPolynomial: void carry(long[])>(r2);
+
+        return;
+    }
+
+    protected void setLimbsValuePositive(java.math.BigInteger, long[])
+    {
+        sun.security.util.math.intpoly.IntegerPolynomial r0;
+        long $l2, $l4;
+        long[] r2;
+        int $i0, $i1, $i3, $i5, i6;
+        java.math.BigInteger $r1, $r3, r4;
+
+        r0 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        r4 := @parameter0: java.math.BigInteger;
+
+        r2 := @parameter1: long[];
+
+        $i0 = r0.<sun.security.util.math.intpoly.IntegerPolynomial: int bitsPerLimb>;
+
+        $i1 = 1 << $i0;
+
+        $l2 = (long) $i1;
+
+        $r1 = staticinvoke <java.math.BigInteger: java.math.BigInteger valueOf(long)>($l2);
+
+        i6 = 0;
+
+     label1:
+        $i3 = lengthof r2;
+
+        if i6 >= $i3 goto label2;
+
+        $r3 = virtualinvoke r4.<java.math.BigInteger: java.math.BigInteger mod(java.math.BigInteger)>($r1);
+
+        $l4 = virtualinvoke $r3.<java.math.BigInteger: long longValue()>();
+
+        r2[i6] = $l4;
+
+        $i5 = r0.<sun.security.util.math.intpoly.IntegerPolynomial: int bitsPerLimb>;
+
+        r4 = virtualinvoke r4.<java.math.BigInteger: java.math.BigInteger shiftRight(int)>($i5);
+
+        i6 = i6 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    protected abstract void finalCarryReduceLast(long[]);
+
+    protected void finalReduce(long[])
+    {
+        sun.security.util.math.intpoly.IntegerPolynomial r0;
+        long $l2, $l3, $l4, $l5, $l6, $l13, $l14, $l15, $l16, $l18, $l20, $l21, $l22, l24;
+        long[] r1, $r2, r3;
+        int $i0, $i1, $i7, $i8, $i9, $i10, $i11, $i12, $i17, $i19, i23, i25, i26, i27, $i29;
+
+        r0 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        r1 := @parameter0: long[];
+
+        i23 = 0;
+
+     label1:
+        if i23 >= 2 goto label4;
+
+        virtualinvoke r0.<sun.security.util.math.intpoly.IntegerPolynomial: void finalCarryReduceLast(long[])>(r1);
+
+        l24 = 0L;
+
+        i25 = 0;
+
+     label2:
+        $i9 = r0.<sun.security.util.math.intpoly.IntegerPolynomial: int numLimbs>;
+
+        $i10 = $i9 - 1;
+
+        if i25 >= $i10 goto label3;
+
+        $l15 = r1[i25];
+
+        $l16 = $l15 + l24;
+
+        r1[i25] = $l16;
+
+        $l18 = r1[i25];
+
+        $i17 = r0.<sun.security.util.math.intpoly.IntegerPolynomial: int bitsPerLimb>;
+
+        l24 = $l18 >> $i17;
+
+        $l21 = r1[i25];
+
+        $i19 = r0.<sun.security.util.math.intpoly.IntegerPolynomial: int bitsPerLimb>;
+
+        $l20 = l24 << $i19;
+
+        $l22 = $l21 - $l20;
+
+        r1[i25] = $l22;
+
+        i25 = i25 + 1;
+
+        goto label2;
+
+     label3:
+        $i11 = r0.<sun.security.util.math.intpoly.IntegerPolynomial: int numLimbs>;
+
+        $i12 = $i11 - 1;
+
+        $l13 = r1[$i12];
+
+        $l14 = $l13 + l24;
+
+        r1[$i12] = $l14;
+
+        i23 = i23 + 1;
+
+        goto label1;
+
+     label4:
+        i26 = 1;
+
+        $i0 = r0.<sun.security.util.math.intpoly.IntegerPolynomial: int numLimbs>;
+
+        r3 = newarray (long)[$i0];
+
+        $i1 = r0.<sun.security.util.math.intpoly.IntegerPolynomial: int numLimbs>;
+
+        i27 = $i1 - 1;
+
+     label5:
+        if i27 < 0 goto label6;
+
+        $l3 = r1[i27];
+
+        $r2 = r0.<sun.security.util.math.intpoly.IntegerPolynomial: long[] posModLimbs>;
+
+        $l2 = $r2[i27];
+
+        $l4 = $l3 - $l2;
+
+        r3[i27] = $l4;
+
+        $l5 = r3[i27];
+
+        $l6 = $l5 >> 63;
+
+        $i7 = (int) $l6;
+
+        $i8 = $i7 + 1;
+
+        i26 = i26 * $i8;
+
+        $i29 = (int) -1;
+
+        i27 = i27 + $i29;
+
+        goto label5;
+
+     label6:
+        staticinvoke <sun.security.util.math.intpoly.IntegerPolynomial: void conditionalSwap(int,long[],long[])>(i26, r1, r3);
+
+        return;
+    }
+
+    protected void decode(long[], byte[], int, int)
+    {
+        byte[] r2;
+        sun.security.util.math.intpoly.IntegerPolynomial r1;
+        long $l13, $l14, $l15, $l16, $l17, l24, l27;
+        long[] r0;
+        byte $b6, $b8, $b11, $b19;
+        int i0, i1, i2, $i3, $i4, $i5, $i7, $i9, $i10, $i12, $i18, $i20, $i21, $i22, i23, i25, i26;
+
+        r1 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        r0 := @parameter0: long[];
+
+        r2 := @parameter1: byte[];
+
+        i1 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        i23 = 1;
+
+        l24 = r0[0];
+
+        i25 = 0;
+
+        i26 = 0;
+
+     label1:
+        if i26 >= i0 goto label5;
+
+        i2 = i26 + i1;
+
+        $i4 = i25 + 8;
+
+        $i3 = r1.<sun.security.util.math.intpoly.IntegerPolynomial: int bitsPerLimb>;
+
+        if $i4 < $i3 goto label3;
+
+        $i7 = (int) l24;
+
+        $b8 = (byte) $i7;
+
+        r2[i2] = $b8;
+
+        l27 = 0L;
+
+        $i9 = lengthof r0;
+
+        if i23 >= $i9 goto label2;
+
+        $i20 = i23;
+
+        i23 = i23 + 1;
+
+        l27 = r0[$i20];
+
+     label2:
+        $i10 = r1.<sun.security.util.math.intpoly.IntegerPolynomial: int bitsPerLimb>;
+
+        $i21 = $i10 - i25;
+
+        $i22 = 8 - $i21;
+
+        $b11 = r2[i2];
+
+        $l16 = (long) $b11;
+
+        $i12 = 255 >> $i21;
+
+        $l13 = (long) $i12;
+
+        $l14 = l27 & $l13;
+
+        $l15 = $l14 << $i21;
+
+        $l17 = $l16 + $l15;
+
+        $i18 = (int) $l17;
+
+        $b19 = (byte) $i18;
+
+        r2[i2] = $b19;
+
+        l24 = l27 >> $i22;
+
+        i25 = $i22;
+
+        goto label4;
+
+     label3:
+        $i5 = (int) l24;
+
+        $b6 = (byte) $i5;
+
+        r2[i2] = $b6;
+
+        l24 = l24 >> 8;
+
+        i25 = i25 + 8;
+
+     label4:
+        i26 = i26 + 1;
+
+        goto label1;
+
+     label5:
+        return;
+    }
+
+    protected void addLimbs(long[], long[], long[])
+    {
+        sun.security.util.math.intpoly.IntegerPolynomial r3;
+        long $l1, $l2, $l3;
+        long[] r0, r1, r2;
+        int $i0, i4;
+
+        r3 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        r1 := @parameter0: long[];
+
+        r2 := @parameter1: long[];
+
+        r0 := @parameter2: long[];
+
+        i4 = 0;
+
+     label1:
+        $i0 = lengthof r0;
+
+        if i4 >= $i0 goto label2;
+
+        $l2 = r1[i4];
+
+        $l1 = r2[i4];
+
+        $l3 = $l2 + $l1;
+
+        r0[i4] = $l3;
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    protected static void conditionalAssign(int, long[], long[])
+    {
+        long $l3, $l4, $l5, $l6, l7, $l8, $l9;
+        long[] r0, r1;
+        int i0, i1, $i2, i10;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: long[];
+
+        r1 := @parameter2: long[];
+
+        i1 = 0 - i0;
+
+        i10 = 0;
+
+     label1:
+        $i2 = lengthof r0;
+
+        if i10 >= $i2 goto label2;
+
+        $l6 = (long) i1;
+
+        $l4 = r0[i10];
+
+        $l3 = r1[i10];
+
+        $l5 = $l4 ^ $l3;
+
+        l7 = $l6 & $l5;
+
+        $l8 = r0[i10];
+
+        $l9 = l7 ^ $l8;
+
+        r0[i10] = $l9;
+
+        i10 = i10 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    protected static void conditionalSwap(int, long[], long[])
+    {
+        long $l3, $l4, $l5, $l6, l7, $l8, $l9, $l10, $l11;
+        long[] r0, r1;
+        int i0, i1, $i2, i12;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: long[];
+
+        r1 := @parameter2: long[];
+
+        i1 = 0 - i0;
+
+        i12 = 0;
+
+     label1:
+        $i2 = lengthof r0;
+
+        if i12 >= $i2 goto label2;
+
+        $l6 = (long) i1;
+
+        $l4 = r0[i12];
+
+        $l3 = r1[i12];
+
+        $l5 = $l4 ^ $l3;
+
+        l7 = $l6 & $l5;
+
+        $l8 = r0[i12];
+
+        $l9 = l7 ^ $l8;
+
+        r0[i12] = $l9;
+
+        $l10 = r1[i12];
+
+        $l11 = l7 ^ $l10;
+
+        r1[i12] = $l11;
+
+        i12 = i12 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    protected void limbsToByteArray(long[], byte[])
+    {
+        byte[] r4;
+        long[] r0, r2;
+        sun.security.util.math.intpoly.IntegerPolynomial r3;
+        int $i0;
+        java.lang.Object $r1;
+
+        r3 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        r0 := @parameter0: long[];
+
+        r4 := @parameter1: byte[];
+
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Object clone()>();
+
+        r2 = (long[]) $r1;
+
+        virtualinvoke r3.<sun.security.util.math.intpoly.IntegerPolynomial: void finalReduce(long[])>(r2);
+
+        $i0 = lengthof r4;
+
+        virtualinvoke r3.<sun.security.util.math.intpoly.IntegerPolynomial: void decode(long[],byte[],int,int)>(r2, r4, 0, $i0);
+
+        return;
+    }
+
+    protected void addLimbsModPowerTwo(long[], long[], byte[])
+    {
+        byte[] r7;
+        sun.security.util.math.intpoly.IntegerPolynomial r6;
+        long $l2, $l3, $l5, $l7, $l8, $l9, l10;
+        long[] r0, r2, r3, r5;
+        int $i0, $i1, $i4, $i6, i11;
+        java.lang.Object $r1, $r4;
+
+        r6 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        r3 := @parameter0: long[];
+
+        r0 := @parameter1: long[];
+
+        r7 := @parameter2: byte[];
+
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Object clone()>();
+
+        r2 = (long[]) $r1;
+
+        $r4 = virtualinvoke r3.<java.lang.Object: java.lang.Object clone()>();
+
+        r5 = (long[]) $r4;
+
+        virtualinvoke r6.<sun.security.util.math.intpoly.IntegerPolynomial: void finalReduce(long[])>(r2);
+
+        virtualinvoke r6.<sun.security.util.math.intpoly.IntegerPolynomial: void finalReduce(long[])>(r5);
+
+        virtualinvoke r6.<sun.security.util.math.intpoly.IntegerPolynomial: void addLimbs(long[],long[],long[])>(r5, r2, r5);
+
+        l10 = 0L;
+
+        i11 = 0;
+
+     label1:
+        $i0 = r6.<sun.security.util.math.intpoly.IntegerPolynomial: int numLimbs>;
+
+        if i11 >= $i0 goto label2;
+
+        $l2 = r5[i11];
+
+        $l3 = $l2 + l10;
+
+        r5[i11] = $l3;
+
+        $l5 = r5[i11];
+
+        $i4 = r6.<sun.security.util.math.intpoly.IntegerPolynomial: int bitsPerLimb>;
+
+        l10 = $l5 >> $i4;
+
+        $l8 = r5[i11];
+
+        $i6 = r6.<sun.security.util.math.intpoly.IntegerPolynomial: int bitsPerLimb>;
+
+        $l7 = l10 << $i6;
+
+        $l9 = $l8 - $l7;
+
+        r5[i11] = $l9;
+
+        i11 = i11 + 1;
+
+        goto label1;
+
+     label2:
+        $i1 = lengthof r7;
+
+        virtualinvoke r6.<sun.security.util.math.intpoly.IntegerPolynomial: void decode(long[],byte[],int,int)>(r5, r7, 0, $i1);
+
+        return;
+    }
+
+    public volatile sun.security.util.math.ImmutableIntegerModuloP getElement(byte[], int, int, byte)
+    {
+        byte[] r1;
+        byte b2;
+        sun.security.util.math.intpoly.IntegerPolynomial r0;
+        int i0, i1;
+        sun.security.util.math.intpoly.IntegerPolynomial$ImmutableElement $r2;
+
+        r0 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        b2 := @parameter3: byte;
+
+        $r2 = virtualinvoke r0.<sun.security.util.math.intpoly.IntegerPolynomial: sun.security.util.math.intpoly.IntegerPolynomial$ImmutableElement getElement(byte[],int,int,byte)>(r1, i0, i1, b2);
+
+        return $r2;
+    }
+
+    public volatile sun.security.util.math.ImmutableIntegerModuloP getElement(java.math.BigInteger)
+    {
+        java.math.BigInteger r1;
+        sun.security.util.math.intpoly.IntegerPolynomial r0;
+        sun.security.util.math.intpoly.IntegerPolynomial$ImmutableElement $r2;
+
+        r0 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        r1 := @parameter0: java.math.BigInteger;
+
+        $r2 = virtualinvoke r0.<sun.security.util.math.intpoly.IntegerPolynomial: sun.security.util.math.intpoly.IntegerPolynomial$ImmutableElement getElement(java.math.BigInteger)>(r1);
+
+        return $r2;
+    }
+
+    public volatile sun.security.util.math.ImmutableIntegerModuloP get1()
+    {
+        sun.security.util.math.intpoly.IntegerPolynomial r0;
+        sun.security.util.math.intpoly.IntegerPolynomial$ImmutableElement $r1;
+
+        r0 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        $r1 = virtualinvoke r0.<sun.security.util.math.intpoly.IntegerPolynomial: sun.security.util.math.intpoly.IntegerPolynomial$ImmutableElement get1()>();
+
+        return $r1;
+    }
+
+    public volatile sun.security.util.math.ImmutableIntegerModuloP get0()
+    {
+        sun.security.util.math.intpoly.IntegerPolynomial r0;
+        sun.security.util.math.intpoly.IntegerPolynomial$ImmutableElement $r1;
+
+        r0 := @this: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        $r1 = virtualinvoke r0.<sun.security.util.math.intpoly.IntegerPolynomial: sun.security.util.math.intpoly.IntegerPolynomial$ImmutableElement get0()>();
+
+        return $r1;
+    }
+
+    static void access$000(sun.security.util.math.intpoly.IntegerPolynomial, java.math.BigInteger, long[])
+    {
+        java.math.BigInteger r1;
+        long[] r2;
+        sun.security.util.math.intpoly.IntegerPolynomial r0;
+
+        r0 := @parameter0: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        r1 := @parameter1: java.math.BigInteger;
+
+        r2 := @parameter2: long[];
+
+        specialinvoke r0.<sun.security.util.math.intpoly.IntegerPolynomial: void setLimbsValue(java.math.BigInteger,long[])>(r1, r2);
+
+        return;
+    }
+
+    static int access$100(sun.security.util.math.intpoly.IntegerPolynomial)
+    {
+        int $i0;
+        sun.security.util.math.intpoly.IntegerPolynomial r0;
+
+        r0 := @parameter0: sun.security.util.math.intpoly.IntegerPolynomial;
+
+        $i0 = r0.<sun.security.util.math.intpoly.IntegerPolynomial: int maxAdds>;
+
+        return $i0;
+    }
+
+    static void <clinit>()
+    {
+        java.math.BigInteger $r0;
+
+        $r0 = staticinvoke <java.math.BigInteger: java.math.BigInteger valueOf(long)>(2L);
+
+        <sun.security.util.math.intpoly.IntegerPolynomial: java.math.BigInteger TWO> = $r0;
+
+        return;
+    }
+}

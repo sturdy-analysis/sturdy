@@ -1,0 +1,3516 @@
+public final class java.time.LocalDate extends java.lang.Object implements java.time.temporal.Temporal, java.time.temporal.TemporalAdjuster, java.time.chrono.ChronoLocalDate, java.io.Serializable
+{
+    public static final java.time.LocalDate MIN;
+    public static final java.time.LocalDate MAX;
+    private static final long serialVersionUID;
+    private static final int DAYS_PER_CYCLE;
+    static final long DAYS_0000_TO_1970;
+    private final int year;
+    private final short month;
+    private final short day;
+
+    public static java.time.LocalDate now()
+    {
+        java.time.Clock $r0;
+        java.time.LocalDate $r1;
+
+        $r0 = staticinvoke <java.time.Clock: java.time.Clock systemDefaultZone()>();
+
+        $r1 = staticinvoke <java.time.LocalDate: java.time.LocalDate now(java.time.Clock)>($r0);
+
+        return $r1;
+    }
+
+    public static java.time.LocalDate now(java.time.ZoneId)
+    {
+        java.time.Clock $r1;
+        java.time.ZoneId r0;
+        java.time.LocalDate $r2;
+
+        r0 := @parameter0: java.time.ZoneId;
+
+        $r1 = staticinvoke <java.time.Clock: java.time.Clock system(java.time.ZoneId)>(r0);
+
+        $r2 = staticinvoke <java.time.LocalDate: java.time.LocalDate now(java.time.Clock)>($r1);
+
+        return $r2;
+    }
+
+    public static java.time.LocalDate now(java.time.Clock)
+    {
+        long $l0, $l2, l3, $l4;
+        java.time.Instant $r1;
+        java.time.ZoneId $r2;
+        java.time.zone.ZoneRules $r3;
+        java.time.LocalDate $r5;
+        int $i1;
+        java.time.Clock r0;
+        java.time.ZoneOffset $r4;
+
+        r0 := @parameter0: java.time.Clock;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "clock");
+
+        $r1 = virtualinvoke r0.<java.time.Clock: java.time.Instant instant()>();
+
+        $r2 = virtualinvoke r0.<java.time.Clock: java.time.ZoneId getZone()>();
+
+        $r3 = virtualinvoke $r2.<java.time.ZoneId: java.time.zone.ZoneRules getRules()>();
+
+        $r4 = virtualinvoke $r3.<java.time.zone.ZoneRules: java.time.ZoneOffset getOffset(java.time.Instant)>($r1);
+
+        $l0 = virtualinvoke $r1.<java.time.Instant: long getEpochSecond()>();
+
+        $i1 = virtualinvoke $r4.<java.time.ZoneOffset: int getTotalSeconds()>();
+
+        $l2 = (long) $i1;
+
+        l3 = $l0 + $l2;
+
+        $l4 = staticinvoke <java.lang.Math: long floorDiv(long,long)>(l3, 86400L);
+
+        $r5 = staticinvoke <java.time.LocalDate: java.time.LocalDate ofEpochDay(long)>($l4);
+
+        return $r5;
+    }
+
+    public static java.time.LocalDate of(int, java.time.Month, int)
+    {
+        java.time.temporal.ChronoField $r0, $r2;
+        java.time.Month r1;
+        long $l1, $l3;
+        java.time.LocalDate $r3;
+        int i0, i2, $i4;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.time.Month;
+
+        i2 := @parameter2: int;
+
+        $r0 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $l1 = (long) i0;
+
+        virtualinvoke $r0.<java.time.temporal.ChronoField: long checkValidValue(long)>($l1);
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r1, "month");
+
+        $r2 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField DAY_OF_MONTH>;
+
+        $l3 = (long) i2;
+
+        virtualinvoke $r2.<java.time.temporal.ChronoField: long checkValidValue(long)>($l3);
+
+        $i4 = virtualinvoke r1.<java.time.Month: int getValue()>();
+
+        $r3 = staticinvoke <java.time.LocalDate: java.time.LocalDate create(int,int,int)>(i0, $i4, i2);
+
+        return $r3;
+    }
+
+    public static java.time.LocalDate of(int, int, int)
+    {
+        java.time.temporal.ChronoField $r0, $r1, $r2;
+        long $l1, $l3, $l5;
+        java.time.LocalDate $r3;
+        int i0, i2, i4;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        i4 := @parameter2: int;
+
+        $r0 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $l1 = (long) i0;
+
+        virtualinvoke $r0.<java.time.temporal.ChronoField: long checkValidValue(long)>($l1);
+
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MONTH_OF_YEAR>;
+
+        $l3 = (long) i2;
+
+        virtualinvoke $r1.<java.time.temporal.ChronoField: long checkValidValue(long)>($l3);
+
+        $r2 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField DAY_OF_MONTH>;
+
+        $l5 = (long) i4;
+
+        virtualinvoke $r2.<java.time.temporal.ChronoField: long checkValidValue(long)>($l5);
+
+        $r3 = staticinvoke <java.time.LocalDate: java.time.LocalDate create(int,int,int)>(i0, i2, i4);
+
+        return $r3;
+    }
+
+    public static java.time.LocalDate ofYearDay(int, int)
+    {
+        java.time.temporal.ChronoField $r0, $r1;
+        long $l1, $l3, $l4;
+        java.time.chrono.IsoChronology $r2;
+        int i0, i2, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15;
+        java.lang.String $r10;
+        java.time.DateTimeException $r5;
+        boolean $z0;
+        java.time.Month $r3, r11;
+        java.time.LocalDate $r4;
+        java.lang.StringBuilder $r6, $r7, $r8, $r9;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        $r0 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $l1 = (long) i0;
+
+        virtualinvoke $r0.<java.time.temporal.ChronoField: long checkValidValue(long)>($l1);
+
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField DAY_OF_YEAR>;
+
+        $l3 = (long) i2;
+
+        virtualinvoke $r1.<java.time.temporal.ChronoField: long checkValidValue(long)>($l3);
+
+        $r2 = <java.time.chrono.IsoChronology: java.time.chrono.IsoChronology INSTANCE>;
+
+        $l4 = (long) i0;
+
+        $z0 = virtualinvoke $r2.<java.time.chrono.IsoChronology: boolean isLeapYear(long)>($l4);
+
+        if i2 != 366 goto label1;
+
+        if $z0 != 0 goto label1;
+
+        $r5 = new java.time.DateTimeException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid date \'DayOfYear 366\' as \'");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' is not a leap year");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.time.DateTimeException: void <init>(java.lang.String)>($r10);
+
+        throw $r5;
+
+     label1:
+        $i5 = i2 - 1;
+
+        $i6 = $i5 / 31;
+
+        $i7 = $i6 + 1;
+
+        $r3 = staticinvoke <java.time.Month: java.time.Month of(int)>($i7);
+
+        r11 = $r3;
+
+        $i8 = virtualinvoke $r3.<java.time.Month: int firstDayOfYear(boolean)>($z0);
+
+        $i9 = virtualinvoke $r3.<java.time.Month: int length(boolean)>($z0);
+
+        $i10 = $i8 + $i9;
+
+        $i15 = $i10 - 1;
+
+        if i2 <= $i15 goto label2;
+
+        r11 = virtualinvoke $r3.<java.time.Month: java.time.Month plus(long)>(1L);
+
+     label2:
+        $i11 = virtualinvoke r11.<java.time.Month: int firstDayOfYear(boolean)>($z0);
+
+        $i12 = i2 - $i11;
+
+        $i14 = $i12 + 1;
+
+        $r4 = new java.time.LocalDate;
+
+        $i13 = virtualinvoke r11.<java.time.Month: int getValue()>();
+
+        specialinvoke $r4.<java.time.LocalDate: void <init>(int,int,int)>(i0, $i13, $i14);
+
+        return $r4;
+    }
+
+    public static java.time.LocalDate ofEpochDay(long)
+    {
+        byte $b1, $b11;
+        java.time.LocalDate $r2;
+        java.time.temporal.ChronoField $r0;
+        long l0, $l2, $l3, $l4, $l5, $l6, $l7, $l8, $l9, $l10, $l21, $l23, $l24, $l25, $l26, $l27, $l28, $l29, $l30, $l35, $l36, $l37, $l38, $l39, $l40, $l41, l42, l43, l44, l45, l46, l47;
+        int $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i22, $i31, $i32, $i33, $i34, $i48, $i49;
+
+        l0 := @parameter0: long;
+
+        l42 = l0 + 719528L;
+
+        l43 = l42 - 60L;
+
+        l44 = 0L;
+
+        $b1 = l43 cmp 0L;
+
+        $i48 = (int) $b1;
+
+        if $i48 >= 0 goto label1;
+
+        $l36 = l43 + 1L;
+
+        $l37 = $l36 / 146097L;
+
+        l45 = $l37 - 1L;
+
+        l44 = l45 * 400L;
+
+        $l38 = neg l45;
+
+        $l39 = $l38 * 146097L;
+
+        l43 = l43 + $l39;
+
+     label1:
+        $l2 = 400L * l43;
+
+        $l3 = $l2 + 591L;
+
+        $l40 = $l3 / 146097L;
+
+        l46 = $l40;
+
+        $l5 = 365L * $l40;
+
+        $l4 = $l40 / 4L;
+
+        $l7 = $l5 + $l4;
+
+        $l6 = $l40 / 100L;
+
+        $l9 = $l7 - $l6;
+
+        $l8 = $l40 / 400L;
+
+        $l10 = $l9 + $l8;
+
+        $l41 = l43 - $l10;
+
+        l47 = $l41;
+
+        $b11 = $l41 cmp 0L;
+
+        $i49 = (int) $b11;
+
+        if $i49 >= 0 goto label2;
+
+        l46 = $l40 - 1L;
+
+        $l24 = 365L * l46;
+
+        $l23 = l46 / 4L;
+
+        $l26 = $l24 + $l23;
+
+        $l25 = l46 / 100L;
+
+        $l28 = $l26 - $l25;
+
+        $l27 = l46 / 400L;
+
+        $l29 = $l28 + $l27;
+
+        l47 = l43 - $l29;
+
+     label2:
+        $l30 = l46 + l44;
+
+        $i31 = (int) l47;
+
+        $i12 = $i31 * 5;
+
+        $i13 = $i12 + 2;
+
+        $i32 = $i13 / 153;
+
+        $i14 = $i32 + 2;
+
+        $i15 = $i14 % 12;
+
+        $i33 = $i15 + 1;
+
+        $i16 = $i32 * 306;
+
+        $i17 = $i16 + 5;
+
+        $i18 = $i17 / 10;
+
+        $i19 = $i31 - $i18;
+
+        $i34 = $i19 + 1;
+
+        $i20 = $i32 / 10;
+
+        $l21 = (long) $i20;
+
+        $l35 = $l30 + $l21;
+
+        $r0 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $i22 = virtualinvoke $r0.<java.time.temporal.ChronoField: int checkValidIntValue(long)>($l35);
+
+        $r2 = new java.time.LocalDate;
+
+        specialinvoke $r2.<java.time.LocalDate: void <init>(int,int,int)>($i22, $i33, $i34);
+
+        return $r2;
+    }
+
+    public static java.time.LocalDate 'from'(java.time.temporal.TemporalAccessor)
+    {
+        java.time.temporal.TemporalQuery $r1;
+        java.time.temporal.TemporalAccessor r0;
+        java.time.LocalDate r3;
+        java.lang.Object $r2;
+        java.lang.StringBuilder $r5, $r6, $r7, $r8, $r11;
+        java.lang.Class $r9;
+        java.lang.String $r10, $r12;
+        java.time.DateTimeException $r4;
+
+        r0 := @parameter0: java.time.temporal.TemporalAccessor;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "temporal");
+
+        $r1 = staticinvoke <java.time.temporal.TemporalQueries: java.time.temporal.TemporalQuery localDate()>();
+
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalAccessor: java.lang.Object query(java.time.temporal.TemporalQuery)>($r1);
+
+        r3 = (java.time.LocalDate) $r2;
+
+        if r3 != null goto label1;
+
+        $r4 = new java.time.DateTimeException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to obtain LocalDate from TemporalAccessor: ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" of type ");
+
+        $r9 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.Class: java.lang.String getName()>();
+
+        $r11 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.time.DateTimeException: void <init>(java.lang.String)>($r12);
+
+        throw $r4;
+
+     label1:
+        return r3;
+    }
+
+    public static java.time.LocalDate parse(java.lang.CharSequence)
+    {
+        java.lang.CharSequence r0;
+        java.time.format.DateTimeFormatter $r1;
+        java.time.LocalDate $r2;
+
+        r0 := @parameter0: java.lang.CharSequence;
+
+        $r1 = <java.time.format.DateTimeFormatter: java.time.format.DateTimeFormatter ISO_LOCAL_DATE>;
+
+        $r2 = staticinvoke <java.time.LocalDate: java.time.LocalDate parse(java.lang.CharSequence,java.time.format.DateTimeFormatter)>(r0, $r1);
+
+        return $r2;
+    }
+
+    public static java.time.LocalDate parse(java.lang.CharSequence, java.time.format.DateTimeFormatter)
+    {
+        java.lang.CharSequence r1;
+        java.time.format.DateTimeFormatter r0;
+        java.time.LocalDate $r4;
+        java.time.temporal.TemporalQuery $r2;
+        java.lang.Object $r3;
+
+        r1 := @parameter0: java.lang.CharSequence;
+
+        r0 := @parameter1: java.time.format.DateTimeFormatter;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "formatter");
+
+        $r2 = staticinvoke <java.time.LocalDate$from__37: java.time.temporal.TemporalQuery bootstrap$()>();
+
+        $r3 = virtualinvoke r0.<java.time.format.DateTimeFormatter: java.lang.Object parse(java.lang.CharSequence,java.time.temporal.TemporalQuery)>(r1, $r2);
+
+        $r4 = (java.time.LocalDate) $r3;
+
+        return $r4;
+    }
+
+    private static java.time.LocalDate create(int, int, int)
+    {
+        long $l3;
+        java.time.chrono.IsoChronology $r17;
+        byte b4, $b5;
+        int i0, i1, i2;
+        java.lang.String $r5, $r10, $r16;
+        java.time.DateTimeException $r1, $r11;
+        boolean $z0;
+        java.time.Month $r4;
+        java.time.LocalDate $r0;
+        java.lang.StringBuilder $r2, $r3, $r6, $r7, $r8, $r9, $r12, $r13, $r14, $r15;
+
+        i1 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        if i0 <= 28 goto label7;
+
+        b4 = 31;
+
+        tableswitch(i2)
+        {
+            case 2: goto label1;
+            case 3: goto label5;
+            case 4: goto label4;
+            case 5: goto label5;
+            case 6: goto label4;
+            case 7: goto label5;
+            case 8: goto label5;
+            case 9: goto label4;
+            case 10: goto label5;
+            case 11: goto label4;
+            default: goto label5;
+        };
+
+     label1:
+        $r17 = <java.time.chrono.IsoChronology: java.time.chrono.IsoChronology INSTANCE>;
+
+        $l3 = (long) i1;
+
+        $z0 = virtualinvoke $r17.<java.time.chrono.IsoChronology: boolean isLeapYear(long)>($l3);
+
+        if $z0 == 0 goto label2;
+
+        $b5 = 29;
+
+        goto label3;
+
+     label2:
+        $b5 = 28;
+
+     label3:
+        b4 = $b5;
+
+        goto label5;
+
+     label4:
+        b4 = 30;
+
+     label5:
+        if i0 <= b4 goto label7;
+
+        if i0 != 29 goto label6;
+
+        $r11 = new java.time.DateTimeException;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid date \'February 29\' as \'");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' is not a leap year");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r11.<java.time.DateTimeException: void <init>(java.lang.String)>($r16);
+
+        throw $r11;
+
+     label6:
+        $r1 = new java.time.DateTimeException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid date \'");
+
+        $r4 = staticinvoke <java.time.Month: java.time.Month of(int)>(i2);
+
+        $r5 = virtualinvoke $r4.<java.time.Month: java.lang.String name()>();
+
+        $r6 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.time.DateTimeException: void <init>(java.lang.String)>($r10);
+
+        throw $r1;
+
+     label7:
+        $r0 = new java.time.LocalDate;
+
+        specialinvoke $r0.<java.time.LocalDate: void <init>(int,int,int)>(i1, i2, i0);
+
+        return $r0;
+    }
+
+    private static java.time.LocalDate resolvePreviousValid(int, int, int)
+    {
+        long $l2;
+        java.time.chrono.IsoChronology $r0;
+        byte $b5;
+        java.time.LocalDate $r1;
+        int i0, i1, $i3, i4;
+        boolean $z0;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        i4 := @parameter2: int;
+
+        tableswitch(i0)
+        {
+            case 2: goto label1;
+            case 3: goto label5;
+            case 4: goto label4;
+            case 5: goto label5;
+            case 6: goto label4;
+            case 7: goto label5;
+            case 8: goto label5;
+            case 9: goto label4;
+            case 10: goto label5;
+            case 11: goto label4;
+            default: goto label5;
+        };
+
+     label1:
+        $i3 = i4;
+
+        $r0 = <java.time.chrono.IsoChronology: java.time.chrono.IsoChronology INSTANCE>;
+
+        $l2 = (long) i1;
+
+        $z0 = virtualinvoke $r0.<java.time.chrono.IsoChronology: boolean isLeapYear(long)>($l2);
+
+        if $z0 == 0 goto label2;
+
+        $b5 = 29;
+
+        goto label3;
+
+     label2:
+        $b5 = 28;
+
+     label3:
+        i4 = staticinvoke <java.lang.Math: int min(int,int)>($i3, $b5);
+
+        goto label5;
+
+     label4:
+        i4 = staticinvoke <java.lang.Math: int min(int,int)>(i4, 30);
+
+     label5:
+        $r1 = new java.time.LocalDate;
+
+        specialinvoke $r1.<java.time.LocalDate: void <init>(int,int,int)>(i1, i0, i4);
+
+        return $r1;
+    }
+
+    private void <init>(int, int, int)
+    {
+        short $s2, $s4;
+        java.time.LocalDate r0;
+        int i0, i1, i3;
+
+        r0 := @this: java.time.LocalDate;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.time.LocalDate: int year> = i0;
+
+        $s2 = (short) i1;
+
+        r0.<java.time.LocalDate: short month> = $s2;
+
+        $s4 = (short) i3;
+
+        r0.<java.time.LocalDate: short day> = $s4;
+
+        return;
+    }
+
+    public boolean isSupported(java.time.temporal.TemporalField)
+    {
+        java.time.LocalDate r0;
+        java.time.temporal.TemporalField r1;
+        boolean $z0;
+
+        r0 := @this: java.time.LocalDate;
+
+        r1 := @parameter0: java.time.temporal.TemporalField;
+
+        $z0 = specialinvoke r0.<java.time.chrono.ChronoLocalDate: boolean isSupported(java.time.temporal.TemporalField)>(r1);
+
+        return $z0;
+    }
+
+    public boolean isSupported(java.time.temporal.TemporalUnit)
+    {
+        java.time.LocalDate r0;
+        java.time.temporal.TemporalUnit r1;
+        boolean $z0;
+
+        r0 := @this: java.time.LocalDate;
+
+        r1 := @parameter0: java.time.temporal.TemporalUnit;
+
+        $z0 = specialinvoke r0.<java.time.chrono.ChronoLocalDate: boolean isSupported(java.time.temporal.TemporalUnit)>(r1);
+
+        return $z0;
+    }
+
+    public java.time.temporal.ValueRange range(java.time.temporal.TemporalField)
+    {
+        java.time.temporal.ChronoField r3;
+        long $l4, $l6, $l7;
+        java.time.temporal.ValueRange $r2, $r12, $r13, $r14, $r15, $r16;
+        int[] $r9;
+        int $i0, $i1, $i2, $i3, $i5;
+        java.lang.String $r8;
+        boolean $z0, $z1, $z2;
+        java.time.Month $r10, $r11;
+        java.time.temporal.TemporalField r0;
+        java.time.temporal.UnsupportedTemporalTypeException $r4;
+        java.time.LocalDate r1;
+        java.lang.StringBuilder $r5, $r6, $r7;
+
+        r1 := @this: java.time.LocalDate;
+
+        r0 := @parameter0: java.time.temporal.TemporalField;
+
+        $z0 = r0 instanceof java.time.temporal.ChronoField;
+
+        if $z0 == 0 goto label11;
+
+        r3 = (java.time.temporal.ChronoField) r0;
+
+        $z1 = virtualinvoke r3.<java.time.temporal.ChronoField: boolean isDateBased()>();
+
+        if $z1 == 0 goto label10;
+
+        $r9 = <java.time.LocalDate$1: int[] $SwitchMap$java$time$temporal$ChronoField>;
+
+        $i0 = virtualinvoke r3.<java.time.temporal.ChronoField: int ordinal()>();
+
+        $i1 = $r9[$i0];
+
+        tableswitch($i1)
+        {
+            case 1: goto label01;
+            case 2: goto label02;
+            case 3: goto label03;
+            case 4: goto label06;
+            default: goto label09;
+        };
+
+     label01:
+        $i5 = virtualinvoke r1.<java.time.LocalDate: int lengthOfMonth()>();
+
+        $l6 = (long) $i5;
+
+        $r13 = staticinvoke <java.time.temporal.ValueRange: java.time.temporal.ValueRange of(long,long)>(1L, $l6);
+
+        return $r13;
+
+     label02:
+        $i3 = virtualinvoke r1.<java.time.LocalDate: int lengthOfYear()>();
+
+        $l4 = (long) $i3;
+
+        $r12 = staticinvoke <java.time.temporal.ValueRange: java.time.temporal.ValueRange of(long,long)>(1L, $l4);
+
+        return $r12;
+
+     label03:
+        $r10 = virtualinvoke r1.<java.time.LocalDate: java.time.Month getMonth()>();
+
+        $r11 = <java.time.Month: java.time.Month FEBRUARY>;
+
+        if $r10 != $r11 goto label04;
+
+        $z2 = virtualinvoke r1.<java.time.LocalDate: boolean isLeapYear()>();
+
+        if $z2 != 0 goto label04;
+
+        $l7 = 4L;
+
+        goto label05;
+
+     label04:
+        $l7 = 5L;
+
+     label05:
+        $r15 = staticinvoke <java.time.temporal.ValueRange: java.time.temporal.ValueRange of(long,long)>(1L, $l7);
+
+        return $r15;
+
+     label06:
+        $i2 = virtualinvoke r1.<java.time.LocalDate: int getYear()>();
+
+        if $i2 > 0 goto label07;
+
+        $r16 = staticinvoke <java.time.temporal.ValueRange: java.time.temporal.ValueRange of(long,long)>(1L, 1000000000L);
+
+        goto label08;
+
+     label07:
+        $r16 = staticinvoke <java.time.temporal.ValueRange: java.time.temporal.ValueRange of(long,long)>(1L, 999999999L);
+
+     label08:
+        return $r16;
+
+     label09:
+        $r14 = interfaceinvoke r0.<java.time.temporal.TemporalField: java.time.temporal.ValueRange range()>();
+
+        return $r14;
+
+     label10:
+        $r4 = new java.time.temporal.UnsupportedTemporalTypeException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported field: ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.time.temporal.UnsupportedTemporalTypeException: void <init>(java.lang.String)>($r8);
+
+        throw $r4;
+
+     label11:
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalField: java.time.temporal.ValueRange rangeRefinedBy(java.time.temporal.TemporalAccessor)>(r1);
+
+        return $r2;
+    }
+
+    public int get(java.time.temporal.TemporalField)
+    {
+        java.time.temporal.TemporalField r0;
+        java.time.LocalDate r1;
+        int $i0, $i1;
+        boolean $z0;
+
+        r1 := @this: java.time.LocalDate;
+
+        r0 := @parameter0: java.time.temporal.TemporalField;
+
+        $z0 = r0 instanceof java.time.temporal.ChronoField;
+
+        if $z0 == 0 goto label1;
+
+        $i1 = specialinvoke r1.<java.time.LocalDate: int get0(java.time.temporal.TemporalField)>(r0);
+
+        return $i1;
+
+     label1:
+        $i0 = specialinvoke r1.<java.time.chrono.ChronoLocalDate: int get(java.time.temporal.TemporalField)>(r0);
+
+        return $i0;
+    }
+
+    public long getLong(java.time.temporal.TemporalField)
+    {
+        java.time.temporal.ChronoField $r2, $r3;
+        java.time.temporal.TemporalField r0;
+        long $l0, $l2, $l3, $l4;
+        java.time.LocalDate r1;
+        int $i1;
+        boolean $z0;
+
+        r1 := @this: java.time.LocalDate;
+
+        r0 := @parameter0: java.time.temporal.TemporalField;
+
+        $z0 = r0 instanceof java.time.temporal.ChronoField;
+
+        if $z0 == 0 goto label3;
+
+        $r2 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField EPOCH_DAY>;
+
+        if r0 != $r2 goto label1;
+
+        $l4 = virtualinvoke r1.<java.time.LocalDate: long toEpochDay()>();
+
+        return $l4;
+
+     label1:
+        $r3 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField PROLEPTIC_MONTH>;
+
+        if r0 != $r3 goto label2;
+
+        $l3 = specialinvoke r1.<java.time.LocalDate: long getProlepticMonth()>();
+
+        return $l3;
+
+     label2:
+        $i1 = specialinvoke r1.<java.time.LocalDate: int get0(java.time.temporal.TemporalField)>(r0);
+
+        $l2 = (long) $i1;
+
+        return $l2;
+
+     label3:
+        $l0 = interfaceinvoke r0.<java.time.temporal.TemporalField: long getFrom(java.time.temporal.TemporalAccessor)>(r1);
+
+        return $l0;
+    }
+
+    private int get0(java.time.temporal.TemporalField)
+    {
+        byte $b27;
+        int[] $r2;
+        java.time.temporal.TemporalField r0;
+        java.time.LocalDate r3;
+        java.lang.StringBuilder $r9, $r10, $r14;
+        java.time.temporal.ChronoField $r1;
+        short $s4, $s13, $s20, $s25;
+        int $i0, $i1, $i2, $i3, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i14, $i15, $i16, $i17, $i18, $i19, $i21, $i22, $i23, $i24, $i26, $i28, $i29, $i30, $i31;
+        java.lang.String $r11;
+        java.time.temporal.UnsupportedTemporalTypeException $r12, $r13, $r15;
+        java.time.DayOfWeek $r6;
+
+        r3 := @this: java.time.LocalDate;
+
+        r0 := @parameter0: java.time.temporal.TemporalField;
+
+        $r2 = <java.time.LocalDate$1: int[] $SwitchMap$java$time$temporal$ChronoField>;
+
+        $r1 = (java.time.temporal.ChronoField) r0;
+
+        $i0 = virtualinvoke $r1.<java.time.temporal.ChronoField: int ordinal()>();
+
+        $i1 = $r2[$i0];
+
+        tableswitch($i1)
+        {
+            case 1: goto label04;
+            case 2: goto label05;
+            case 3: goto label07;
+            case 4: goto label11;
+            case 5: goto label01;
+            case 6: goto label02;
+            case 7: goto label03;
+            case 8: goto label06;
+            case 9: goto label08;
+            case 10: goto label09;
+            case 11: goto label10;
+            case 12: goto label14;
+            case 13: goto label15;
+            default: goto label18;
+        };
+
+     label01:
+        $r6 = virtualinvoke r3.<java.time.LocalDate: java.time.DayOfWeek getDayOfWeek()>();
+
+        $i17 = virtualinvoke $r6.<java.time.DayOfWeek: int getValue()>();
+
+        return $i17;
+
+     label02:
+        $s13 = r3.<java.time.LocalDate: short day>;
+
+        $i28 = (int) $s13;
+
+        $i14 = $i28 - 1;
+
+        $i15 = $i14 % 7;
+
+        $i16 = $i15 + 1;
+
+        return $i16;
+
+     label03:
+        $i9 = virtualinvoke r3.<java.time.LocalDate: int getDayOfYear()>();
+
+        $i10 = $i9 - 1;
+
+        $i11 = $i10 % 7;
+
+        $i12 = $i11 + 1;
+
+        return $i12;
+
+     label04:
+        $s25 = r3.<java.time.LocalDate: short day>;
+
+        $i29 = (int) $s25;
+
+        return $i29;
+
+     label05:
+        $i24 = virtualinvoke r3.<java.time.LocalDate: int getDayOfYear()>();
+
+        return $i24;
+
+     label06:
+        $r12 = new java.time.temporal.UnsupportedTemporalTypeException;
+
+        specialinvoke $r12.<java.time.temporal.UnsupportedTemporalTypeException: void <init>(java.lang.String)>("Invalid field \'EpochDay\' for get() method, use getLong() instead");
+
+        throw $r12;
+
+     label07:
+        $s20 = r3.<java.time.LocalDate: short day>;
+
+        $i30 = (int) $s20;
+
+        $i21 = $i30 - 1;
+
+        $i22 = $i21 / 7;
+
+        $i23 = $i22 + 1;
+
+        return $i23;
+
+     label08:
+        $i5 = virtualinvoke r3.<java.time.LocalDate: int getDayOfYear()>();
+
+        $i6 = $i5 - 1;
+
+        $i7 = $i6 / 7;
+
+        $i8 = $i7 + 1;
+
+        return $i8;
+
+     label09:
+        $s4 = r3.<java.time.LocalDate: short month>;
+
+        $i31 = (int) $s4;
+
+        return $i31;
+
+     label10:
+        $r13 = new java.time.temporal.UnsupportedTemporalTypeException;
+
+        specialinvoke $r13.<java.time.temporal.UnsupportedTemporalTypeException: void <init>(java.lang.String)>("Invalid field \'ProlepticMonth\' for get() method, use getLong() instead");
+
+        throw $r13;
+
+     label11:
+        $i18 = r3.<java.time.LocalDate: int year>;
+
+        if $i18 < 1 goto label12;
+
+        $i26 = r3.<java.time.LocalDate: int year>;
+
+        goto label13;
+
+     label12:
+        $i19 = r3.<java.time.LocalDate: int year>;
+
+        $i26 = 1 - $i19;
+
+     label13:
+        return $i26;
+
+     label14:
+        $i3 = r3.<java.time.LocalDate: int year>;
+
+        return $i3;
+
+     label15:
+        $i2 = r3.<java.time.LocalDate: int year>;
+
+        if $i2 < 1 goto label16;
+
+        $b27 = 1;
+
+        goto label17;
+
+     label16:
+        $b27 = 0;
+
+     label17:
+        return $b27;
+
+     label18:
+        $r15 = new java.time.temporal.UnsupportedTemporalTypeException;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported field: ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r15.<java.time.temporal.UnsupportedTemporalTypeException: void <init>(java.lang.String)>($r11);
+
+        throw $r15;
+    }
+
+    private long getProlepticMonth()
+    {
+        long $l1, $l3, $l4, $l5, $l6;
+        short $s2;
+        java.time.LocalDate r0;
+        int $i0;
+
+        r0 := @this: java.time.LocalDate;
+
+        $i0 = r0.<java.time.LocalDate: int year>;
+
+        $l1 = (long) $i0;
+
+        $l4 = $l1 * 12L;
+
+        $s2 = r0.<java.time.LocalDate: short month>;
+
+        $l3 = (long) $s2;
+
+        $l5 = $l4 + $l3;
+
+        $l6 = $l5 - 1L;
+
+        return $l6;
+    }
+
+    public java.time.chrono.IsoChronology getChronology()
+    {
+        java.time.chrono.IsoChronology $r0;
+        java.time.LocalDate r1;
+
+        r1 := @this: java.time.LocalDate;
+
+        $r0 = <java.time.chrono.IsoChronology: java.time.chrono.IsoChronology INSTANCE>;
+
+        return $r0;
+    }
+
+    public java.time.chrono.Era getEra()
+    {
+        java.time.chrono.Era $r1;
+        java.time.LocalDate r0;
+
+        r0 := @this: java.time.LocalDate;
+
+        $r1 = specialinvoke r0.<java.time.chrono.ChronoLocalDate: java.time.chrono.Era getEra()>();
+
+        return $r1;
+    }
+
+    public int getYear()
+    {
+        int $i0;
+        java.time.LocalDate r0;
+
+        r0 := @this: java.time.LocalDate;
+
+        $i0 = r0.<java.time.LocalDate: int year>;
+
+        return $i0;
+    }
+
+    public int getMonthValue()
+    {
+        int $i1;
+        short $s0;
+        java.time.LocalDate r0;
+
+        r0 := @this: java.time.LocalDate;
+
+        $s0 = r0.<java.time.LocalDate: short month>;
+
+        $i1 = (int) $s0;
+
+        return $i1;
+    }
+
+    public java.time.Month getMonth()
+    {
+        short $s0;
+        java.time.Month $r1;
+        java.time.LocalDate r0;
+        int $i1;
+
+        r0 := @this: java.time.LocalDate;
+
+        $s0 = r0.<java.time.LocalDate: short month>;
+
+        $i1 = (int) $s0;
+
+        $r1 = staticinvoke <java.time.Month: java.time.Month of(int)>($i1);
+
+        return $r1;
+    }
+
+    public int getDayOfMonth()
+    {
+        int $i1;
+        short $s0;
+        java.time.LocalDate r0;
+
+        r0 := @this: java.time.LocalDate;
+
+        $s0 = r0.<java.time.LocalDate: short day>;
+
+        $i1 = (int) $s0;
+
+        return $i1;
+    }
+
+    public int getDayOfYear()
+    {
+        java.time.Month $r1;
+        short $s1;
+        java.time.LocalDate r0;
+        int $i0, $i2, $i3, $i4;
+        boolean $z0;
+
+        r0 := @this: java.time.LocalDate;
+
+        $r1 = virtualinvoke r0.<java.time.LocalDate: java.time.Month getMonth()>();
+
+        $z0 = virtualinvoke r0.<java.time.LocalDate: boolean isLeapYear()>();
+
+        $i0 = virtualinvoke $r1.<java.time.Month: int firstDayOfYear(boolean)>($z0);
+
+        $s1 = r0.<java.time.LocalDate: short day>;
+
+        $i4 = (int) $s1;
+
+        $i2 = $i0 + $i4;
+
+        $i3 = $i2 - 1;
+
+        return $i3;
+    }
+
+    public java.time.DayOfWeek getDayOfWeek()
+    {
+        java.time.LocalDate r0;
+        java.time.DayOfWeek $r1;
+        int i3, $i4;
+        long $l0, $l1, $l2;
+
+        r0 := @this: java.time.LocalDate;
+
+        $l0 = virtualinvoke r0.<java.time.LocalDate: long toEpochDay()>();
+
+        $l1 = $l0 + 3L;
+
+        $l2 = staticinvoke <java.lang.Math: long floorMod(long,long)>($l1, 7L);
+
+        i3 = (int) $l2;
+
+        $i4 = i3 + 1;
+
+        $r1 = staticinvoke <java.time.DayOfWeek: java.time.DayOfWeek of(int)>($i4);
+
+        return $r1;
+    }
+
+    public boolean isLeapYear()
+    {
+        java.time.chrono.IsoChronology $r1;
+        java.time.LocalDate r0;
+        int $i0;
+        long $l1;
+        boolean $z0;
+
+        r0 := @this: java.time.LocalDate;
+
+        $r1 = <java.time.chrono.IsoChronology: java.time.chrono.IsoChronology INSTANCE>;
+
+        $i0 = r0.<java.time.LocalDate: int year>;
+
+        $l1 = (long) $i0;
+
+        $z0 = virtualinvoke $r1.<java.time.chrono.IsoChronology: boolean isLeapYear(long)>($l1);
+
+        return $z0;
+    }
+
+    public int lengthOfMonth()
+    {
+        short $s0;
+        byte $b1;
+        java.time.LocalDate r0;
+        int $i2;
+        boolean $z0;
+
+        r0 := @this: java.time.LocalDate;
+
+        $s0 = r0.<java.time.LocalDate: short month>;
+
+        $i2 = (int) $s0;
+
+        tableswitch($i2)
+        {
+            case 2: goto label1;
+            case 3: goto label5;
+            case 4: goto label4;
+            case 5: goto label5;
+            case 6: goto label4;
+            case 7: goto label5;
+            case 8: goto label5;
+            case 9: goto label4;
+            case 10: goto label5;
+            case 11: goto label4;
+            default: goto label5;
+        };
+
+     label1:
+        $z0 = virtualinvoke r0.<java.time.LocalDate: boolean isLeapYear()>();
+
+        if $z0 == 0 goto label2;
+
+        $b1 = 29;
+
+        goto label3;
+
+     label2:
+        $b1 = 28;
+
+     label3:
+        return $b1;
+
+     label4:
+        return 30;
+
+     label5:
+        return 31;
+    }
+
+    public int lengthOfYear()
+    {
+        short $s0;
+        java.time.LocalDate r0;
+        boolean $z0;
+
+        r0 := @this: java.time.LocalDate;
+
+        $z0 = virtualinvoke r0.<java.time.LocalDate: boolean isLeapYear()>();
+
+        if $z0 == 0 goto label1;
+
+        $s0 = 366;
+
+        goto label2;
+
+     label1:
+        $s0 = 365;
+
+     label2:
+        return $s0;
+    }
+
+    public java.time.LocalDate 'with'(java.time.temporal.TemporalAdjuster)
+    {
+        java.time.LocalDate r1, $r3, $r4;
+        java.time.temporal.TemporalAdjuster r0;
+        java.time.temporal.Temporal $r2;
+        boolean $z0;
+
+        r1 := @this: java.time.LocalDate;
+
+        r0 := @parameter0: java.time.temporal.TemporalAdjuster;
+
+        $z0 = r0 instanceof java.time.LocalDate;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = (java.time.LocalDate) r0;
+
+        return $r4;
+
+     label1:
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalAdjuster: java.time.temporal.Temporal adjustInto(java.time.temporal.Temporal)>(r1);
+
+        $r3 = (java.time.LocalDate) $r2;
+
+        return $r3;
+    }
+
+    public java.time.LocalDate 'with'(java.time.temporal.TemporalField, long)
+    {
+        byte $b4;
+        int[] $r5;
+        boolean $z0;
+        java.time.temporal.TemporalField r0;
+        java.time.LocalDate r1, $r3, $r7, $r8, $r9, $r11, $r12, $r14, $r16, $r18, $r19, $r21, $r22, $r23, $r29;
+        java.lang.StringBuilder $r25, $r26, $r27;
+        java.time.temporal.Temporal $r2;
+        java.time.temporal.ChronoField r4, $r6, $r10, $r13, $r15, $r20;
+        long l0, $l3, $l8, $l9, $l11, $l12, $l13, $l14, $l15, $l16, $l18, $l19, $l22, $l23, $l26;
+        int $i1, $i2, $i5, $i6, $i7, $i10, $i17, $i20, $i21, $i24, $i25;
+        java.lang.String $r28;
+        java.time.temporal.UnsupportedTemporalTypeException $r24;
+        java.time.DayOfWeek $r17;
+
+        r1 := @this: java.time.LocalDate;
+
+        r0 := @parameter0: java.time.temporal.TemporalField;
+
+        l0 := @parameter1: long;
+
+        $z0 = r0 instanceof java.time.temporal.ChronoField;
+
+        if $z0 == 0 goto label19;
+
+        r4 = (java.time.temporal.ChronoField) r0;
+
+        virtualinvoke r4.<java.time.temporal.ChronoField: long checkValidValue(long)>(l0);
+
+        $r5 = <java.time.LocalDate$1: int[] $SwitchMap$java$time$temporal$ChronoField>;
+
+        $i1 = virtualinvoke r4.<java.time.temporal.ChronoField: int ordinal()>();
+
+        $i2 = $r5[$i1];
+
+        tableswitch($i2)
+        {
+            case 1: goto label04;
+            case 2: goto label05;
+            case 3: goto label07;
+            case 4: goto label11;
+            case 5: goto label01;
+            case 6: goto label02;
+            case 7: goto label03;
+            case 8: goto label06;
+            case 9: goto label08;
+            case 10: goto label09;
+            case 11: goto label10;
+            case 12: goto label14;
+            case 13: goto label15;
+            default: goto label18;
+        };
+
+     label01:
+        $r17 = virtualinvoke r1.<java.time.LocalDate: java.time.DayOfWeek getDayOfWeek()>();
+
+        $i17 = virtualinvoke $r17.<java.time.DayOfWeek: int getValue()>();
+
+        $l18 = (long) $i17;
+
+        $l19 = l0 - $l18;
+
+        $r18 = virtualinvoke r1.<java.time.LocalDate: java.time.LocalDate plusDays(long)>($l19);
+
+        return $r18;
+
+     label02:
+        $r15 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_DAY_OF_WEEK_IN_MONTH>;
+
+        $l15 = virtualinvoke r1.<java.time.LocalDate: long getLong(java.time.temporal.TemporalField)>($r15);
+
+        $l16 = l0 - $l15;
+
+        $r16 = virtualinvoke r1.<java.time.LocalDate: java.time.LocalDate plusDays(long)>($l16);
+
+        return $r16;
+
+     label03:
+        $r13 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_DAY_OF_WEEK_IN_YEAR>;
+
+        $l13 = virtualinvoke r1.<java.time.LocalDate: long getLong(java.time.temporal.TemporalField)>($r13);
+
+        $l14 = l0 - $l13;
+
+        $r14 = virtualinvoke r1.<java.time.LocalDate: java.time.LocalDate plusDays(long)>($l14);
+
+        return $r14;
+
+     label04:
+        $i25 = (int) l0;
+
+        $r23 = virtualinvoke r1.<java.time.LocalDate: java.time.LocalDate withDayOfMonth(int)>($i25);
+
+        return $r23;
+
+     label05:
+        $i24 = (int) l0;
+
+        $r22 = virtualinvoke r1.<java.time.LocalDate: java.time.LocalDate withDayOfYear(int)>($i24);
+
+        return $r22;
+
+     label06:
+        $r12 = staticinvoke <java.time.LocalDate: java.time.LocalDate ofEpochDay(long)>(l0);
+
+        return $r12;
+
+     label07:
+        $r20 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_WEEK_OF_MONTH>;
+
+        $l22 = virtualinvoke r1.<java.time.LocalDate: long getLong(java.time.temporal.TemporalField)>($r20);
+
+        $l23 = l0 - $l22;
+
+        $r21 = virtualinvoke r1.<java.time.LocalDate: java.time.LocalDate plusWeeks(long)>($l23);
+
+        return $r21;
+
+     label08:
+        $r10 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ALIGNED_WEEK_OF_YEAR>;
+
+        $l11 = virtualinvoke r1.<java.time.LocalDate: long getLong(java.time.temporal.TemporalField)>($r10);
+
+        $l12 = l0 - $l11;
+
+        $r11 = virtualinvoke r1.<java.time.LocalDate: java.time.LocalDate plusWeeks(long)>($l12);
+
+        return $r11;
+
+     label09:
+        $i10 = (int) l0;
+
+        $r9 = virtualinvoke r1.<java.time.LocalDate: java.time.LocalDate withMonth(int)>($i10);
+
+        return $r9;
+
+     label10:
+        $l8 = specialinvoke r1.<java.time.LocalDate: long getProlepticMonth()>();
+
+        $l9 = l0 - $l8;
+
+        $r8 = virtualinvoke r1.<java.time.LocalDate: java.time.LocalDate plusMonths(long)>($l9);
+
+        return $r8;
+
+     label11:
+        $i20 = r1.<java.time.LocalDate: int year>;
+
+        if $i20 < 1 goto label12;
+
+        $l26 = l0;
+
+        goto label13;
+
+     label12:
+        $l26 = 1L - l0;
+
+     label13:
+        $i21 = (int) $l26;
+
+        $r19 = virtualinvoke r1.<java.time.LocalDate: java.time.LocalDate withYear(int)>($i21);
+
+        return $r19;
+
+     label14:
+        $i7 = (int) l0;
+
+        $r7 = virtualinvoke r1.<java.time.LocalDate: java.time.LocalDate withYear(int)>($i7);
+
+        return $r7;
+
+     label15:
+        $r6 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ERA>;
+
+        $l3 = virtualinvoke r1.<java.time.LocalDate: long getLong(java.time.temporal.TemporalField)>($r6);
+
+        $b4 = $l3 cmp l0;
+
+        if $b4 != 0 goto label16;
+
+        $r29 = r1;
+
+        goto label17;
+
+     label16:
+        $i5 = r1.<java.time.LocalDate: int year>;
+
+        $i6 = 1 - $i5;
+
+        $r29 = virtualinvoke r1.<java.time.LocalDate: java.time.LocalDate withYear(int)>($i6);
+
+     label17:
+        return $r29;
+
+     label18:
+        $r24 = new java.time.temporal.UnsupportedTemporalTypeException;
+
+        $r25 = new java.lang.StringBuilder;
+
+        specialinvoke $r25.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported field: ");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r24.<java.time.temporal.UnsupportedTemporalTypeException: void <init>(java.lang.String)>($r28);
+
+        throw $r24;
+
+     label19:
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalField: java.time.temporal.Temporal adjustInto(java.time.temporal.Temporal,long)>(r1, l0);
+
+        $r3 = (java.time.LocalDate) $r2;
+
+        return $r3;
+    }
+
+    public java.time.LocalDate withYear(int)
+    {
+        java.time.temporal.ChronoField $r1;
+        long $l2;
+        short $s3, $s4;
+        java.time.LocalDate r0, $r2;
+        int i0, $i1, $i5, $i6;
+
+        r0 := @this: java.time.LocalDate;
+
+        i0 := @parameter0: int;
+
+        $i1 = r0.<java.time.LocalDate: int year>;
+
+        if $i1 != i0 goto label1;
+
+        return r0;
+
+     label1:
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $l2 = (long) i0;
+
+        virtualinvoke $r1.<java.time.temporal.ChronoField: long checkValidValue(long)>($l2);
+
+        $s4 = r0.<java.time.LocalDate: short month>;
+
+        $s3 = r0.<java.time.LocalDate: short day>;
+
+        $i5 = (int) $s4;
+
+        $i6 = (int) $s3;
+
+        $r2 = staticinvoke <java.time.LocalDate: java.time.LocalDate resolvePreviousValid(int,int,int)>(i0, $i5, $i6);
+
+        return $r2;
+    }
+
+    public java.time.LocalDate withMonth(int)
+    {
+        java.time.temporal.ChronoField $r1;
+        long $l2;
+        short $s1, $s3;
+        java.time.LocalDate r0, $r2;
+        int i0, $i4, $i5, $i6;
+
+        r0 := @this: java.time.LocalDate;
+
+        i0 := @parameter0: int;
+
+        $s1 = r0.<java.time.LocalDate: short month>;
+
+        $i5 = (int) $s1;
+
+        if $i5 != i0 goto label1;
+
+        return r0;
+
+     label1:
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MONTH_OF_YEAR>;
+
+        $l2 = (long) i0;
+
+        virtualinvoke $r1.<java.time.temporal.ChronoField: long checkValidValue(long)>($l2);
+
+        $i4 = r0.<java.time.LocalDate: int year>;
+
+        $s3 = r0.<java.time.LocalDate: short day>;
+
+        $i6 = (int) $s3;
+
+        $r2 = staticinvoke <java.time.LocalDate: java.time.LocalDate resolvePreviousValid(int,int,int)>($i4, i0, $i6);
+
+        return $r2;
+    }
+
+    public java.time.LocalDate withDayOfMonth(int)
+    {
+        short $s1, $s2;
+        java.time.LocalDate r0, $r1;
+        int i0, $i3, $i4, $i5;
+
+        r0 := @this: java.time.LocalDate;
+
+        i0 := @parameter0: int;
+
+        $s1 = r0.<java.time.LocalDate: short day>;
+
+        $i4 = (int) $s1;
+
+        if $i4 != i0 goto label1;
+
+        return r0;
+
+     label1:
+        $i3 = r0.<java.time.LocalDate: int year>;
+
+        $s2 = r0.<java.time.LocalDate: short month>;
+
+        $i5 = (int) $s2;
+
+        $r1 = staticinvoke <java.time.LocalDate: java.time.LocalDate of(int,int,int)>($i3, $i5, i0);
+
+        return $r1;
+    }
+
+    public java.time.LocalDate withDayOfYear(int)
+    {
+        java.time.LocalDate r0, $r1;
+        int $i0, i1, $i2;
+
+        r0 := @this: java.time.LocalDate;
+
+        i1 := @parameter0: int;
+
+        $i0 = virtualinvoke r0.<java.time.LocalDate: int getDayOfYear()>();
+
+        if $i0 != i1 goto label1;
+
+        return r0;
+
+     label1:
+        $i2 = r0.<java.time.LocalDate: int year>;
+
+        $r1 = staticinvoke <java.time.LocalDate: java.time.LocalDate ofYearDay(int,int)>($i2, i1);
+
+        return $r1;
+    }
+
+    public java.time.LocalDate plus(java.time.temporal.TemporalAmount)
+    {
+        java.time.Period r4;
+        long $l0, $l2;
+        java.time.LocalDate r1, $r3, $r5, $r6;
+        int $i1;
+        java.time.temporal.TemporalAmount r0;
+        java.time.temporal.Temporal $r2;
+        boolean $z0;
+
+        r1 := @this: java.time.LocalDate;
+
+        r0 := @parameter0: java.time.temporal.TemporalAmount;
+
+        $z0 = r0 instanceof java.time.Period;
+
+        if $z0 == 0 goto label1;
+
+        r4 = (java.time.Period) r0;
+
+        $l0 = virtualinvoke r4.<java.time.Period: long toTotalMonths()>();
+
+        $r5 = virtualinvoke r1.<java.time.LocalDate: java.time.LocalDate plusMonths(long)>($l0);
+
+        $i1 = virtualinvoke r4.<java.time.Period: int getDays()>();
+
+        $l2 = (long) $i1;
+
+        $r6 = virtualinvoke $r5.<java.time.LocalDate: java.time.LocalDate plusDays(long)>($l2);
+
+        return $r6;
+
+     label1:
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "amountToAdd");
+
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalAmount: java.time.temporal.Temporal addTo(java.time.temporal.Temporal)>(r1);
+
+        $r3 = (java.time.LocalDate) $r2;
+
+        return $r3;
+    }
+
+    public java.time.LocalDate plus(long, java.time.temporal.TemporalUnit)
+    {
+        java.time.temporal.ChronoField $r6, $r7;
+        java.time.temporal.TemporalUnit r0;
+        long l0, $l3, $l4, $l5, $l6, $l7;
+        int[] $r5;
+        int $i1, $i2;
+        java.lang.String $r20;
+        boolean $z0;
+        java.time.temporal.UnsupportedTemporalTypeException $r16;
+        java.time.temporal.ChronoUnit r4;
+        java.time.LocalDate r1, $r3, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15;
+        java.lang.StringBuilder $r17, $r18, $r19;
+        java.time.temporal.Temporal $r2;
+
+        r1 := @this: java.time.LocalDate;
+
+        l0 := @parameter0: long;
+
+        r0 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $z0 = r0 instanceof java.time.temporal.ChronoUnit;
+
+        if $z0 == 0 goto label10;
+
+        r4 = (java.time.temporal.ChronoUnit) r0;
+
+        $r5 = <java.time.LocalDate$1: int[] $SwitchMap$java$time$temporal$ChronoUnit>;
+
+        $i1 = virtualinvoke r4.<java.time.temporal.ChronoUnit: int ordinal()>();
+
+        $i2 = $r5[$i1];
+
+        tableswitch($i2)
+        {
+            case 1: goto label01;
+            case 2: goto label02;
+            case 3: goto label03;
+            case 4: goto label04;
+            case 5: goto label05;
+            case 6: goto label06;
+            case 7: goto label07;
+            case 8: goto label08;
+            default: goto label09;
+        };
+
+     label01:
+        $r15 = virtualinvoke r1.<java.time.LocalDate: java.time.LocalDate plusDays(long)>(l0);
+
+        return $r15;
+
+     label02:
+        $r14 = virtualinvoke r1.<java.time.LocalDate: java.time.LocalDate plusWeeks(long)>(l0);
+
+        return $r14;
+
+     label03:
+        $r13 = virtualinvoke r1.<java.time.LocalDate: java.time.LocalDate plusMonths(long)>(l0);
+
+        return $r13;
+
+     label04:
+        $r12 = virtualinvoke r1.<java.time.LocalDate: java.time.LocalDate plusYears(long)>(l0);
+
+        return $r12;
+
+     label05:
+        $l7 = staticinvoke <java.lang.Math: long multiplyExact(long,long)>(l0, 10L);
+
+        $r11 = virtualinvoke r1.<java.time.LocalDate: java.time.LocalDate plusYears(long)>($l7);
+
+        return $r11;
+
+     label06:
+        $l6 = staticinvoke <java.lang.Math: long multiplyExact(long,long)>(l0, 100L);
+
+        $r10 = virtualinvoke r1.<java.time.LocalDate: java.time.LocalDate plusYears(long)>($l6);
+
+        return $r10;
+
+     label07:
+        $l5 = staticinvoke <java.lang.Math: long multiplyExact(long,long)>(l0, 1000L);
+
+        $r9 = virtualinvoke r1.<java.time.LocalDate: java.time.LocalDate plusYears(long)>($l5);
+
+        return $r9;
+
+     label08:
+        $r7 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ERA>;
+
+        $r6 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ERA>;
+
+        $l3 = virtualinvoke r1.<java.time.LocalDate: long getLong(java.time.temporal.TemporalField)>($r6);
+
+        $l4 = staticinvoke <java.lang.Math: long addExact(long,long)>($l3, l0);
+
+        $r8 = virtualinvoke r1.<java.time.LocalDate: java.time.LocalDate 'with'(java.time.temporal.TemporalField,long)>($r7, $l4);
+
+        return $r8;
+
+     label09:
+        $r16 = new java.time.temporal.UnsupportedTemporalTypeException;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported unit: ");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r16.<java.time.temporal.UnsupportedTemporalTypeException: void <init>(java.lang.String)>($r20);
+
+        throw $r16;
+
+     label10:
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalUnit: java.time.temporal.Temporal addTo(java.time.temporal.Temporal,long)>(r1, l0);
+
+        $r3 = (java.time.LocalDate) $r2;
+
+        return $r3;
+    }
+
+    public java.time.LocalDate plusYears(long)
+    {
+        java.time.temporal.ChronoField $r1;
+        long l0, $l3, $l4;
+        short $s6, $s7;
+        byte $b1;
+        java.time.LocalDate r0, $r2;
+        int $i2, $i5, $i8, $i9;
+
+        r0 := @this: java.time.LocalDate;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        return r0;
+
+     label1:
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $i2 = r0.<java.time.LocalDate: int year>;
+
+        $l3 = (long) $i2;
+
+        $l4 = $l3 + l0;
+
+        $i5 = virtualinvoke $r1.<java.time.temporal.ChronoField: int checkValidIntValue(long)>($l4);
+
+        $s7 = r0.<java.time.LocalDate: short month>;
+
+        $s6 = r0.<java.time.LocalDate: short day>;
+
+        $i8 = (int) $s7;
+
+        $i9 = (int) $s6;
+
+        $r2 = staticinvoke <java.time.LocalDate: java.time.LocalDate resolvePreviousValid(int,int,int)>($i5, $i8, $i9);
+
+        return $r2;
+    }
+
+    public java.time.LocalDate plusMonths(long)
+    {
+        java.time.temporal.ChronoField $r1;
+        long l0, $l3, $l6, $l7, l8, l9, $l10, $l12;
+        short $s4, $s15;
+        byte $b1;
+        int $i2, $i5, $i11, $i13, i14, $i16, $i17;
+        java.time.LocalDate r0, $r2;
+
+        r0 := @this: java.time.LocalDate;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        return r0;
+
+     label1:
+        $i2 = r0.<java.time.LocalDate: int year>;
+
+        $l3 = (long) $i2;
+
+        $l7 = $l3 * 12L;
+
+        $s4 = r0.<java.time.LocalDate: short month>;
+
+        $i16 = (int) $s4;
+
+        $i5 = $i16 - 1;
+
+        $l6 = (long) $i5;
+
+        l8 = $l7 + $l6;
+
+        l9 = l8 + l0;
+
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $l10 = staticinvoke <java.lang.Math: long floorDiv(long,long)>(l9, 12L);
+
+        $i11 = virtualinvoke $r1.<java.time.temporal.ChronoField: int checkValidIntValue(long)>($l10);
+
+        $l12 = staticinvoke <java.lang.Math: long floorMod(long,long)>(l9, 12L);
+
+        $i13 = (int) $l12;
+
+        i14 = $i13 + 1;
+
+        $s15 = r0.<java.time.LocalDate: short day>;
+
+        $i17 = (int) $s15;
+
+        $r2 = staticinvoke <java.time.LocalDate: java.time.LocalDate resolvePreviousValid(int,int,int)>($i11, i14, $i17);
+
+        return $r2;
+    }
+
+    public java.time.LocalDate plusWeeks(long)
+    {
+        java.time.LocalDate r0, $r1;
+        long l0, $l1;
+
+        r0 := @this: java.time.LocalDate;
+
+        l0 := @parameter0: long;
+
+        $l1 = staticinvoke <java.lang.Math: long multiplyExact(long,long)>(l0, 7L);
+
+        $r1 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDate plusDays(long)>($l1);
+
+        return $r1;
+    }
+
+    public java.time.LocalDate plusDays(long)
+    {
+        byte $b1;
+        java.time.LocalDate r0, $r1;
+        long l0, $l2, $l3;
+
+        r0 := @this: java.time.LocalDate;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        return r0;
+
+     label1:
+        $l2 = virtualinvoke r0.<java.time.LocalDate: long toEpochDay()>();
+
+        $l3 = staticinvoke <java.lang.Math: long addExact(long,long)>($l2, l0);
+
+        $r1 = staticinvoke <java.time.LocalDate: java.time.LocalDate ofEpochDay(long)>($l3);
+
+        return $r1;
+    }
+
+    public java.time.LocalDate minus(java.time.temporal.TemporalAmount)
+    {
+        java.time.Period r4;
+        long $l0, $l2;
+        java.time.LocalDate r1, $r3, $r5, $r6;
+        int $i1;
+        java.time.temporal.TemporalAmount r0;
+        java.time.temporal.Temporal $r2;
+        boolean $z0;
+
+        r1 := @this: java.time.LocalDate;
+
+        r0 := @parameter0: java.time.temporal.TemporalAmount;
+
+        $z0 = r0 instanceof java.time.Period;
+
+        if $z0 == 0 goto label1;
+
+        r4 = (java.time.Period) r0;
+
+        $l0 = virtualinvoke r4.<java.time.Period: long toTotalMonths()>();
+
+        $r5 = virtualinvoke r1.<java.time.LocalDate: java.time.LocalDate minusMonths(long)>($l0);
+
+        $i1 = virtualinvoke r4.<java.time.Period: int getDays()>();
+
+        $l2 = (long) $i1;
+
+        $r6 = virtualinvoke $r5.<java.time.LocalDate: java.time.LocalDate minusDays(long)>($l2);
+
+        return $r6;
+
+     label1:
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "amountToSubtract");
+
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalAmount: java.time.temporal.Temporal subtractFrom(java.time.temporal.Temporal)>(r1);
+
+        $r3 = (java.time.LocalDate) $r2;
+
+        return $r3;
+    }
+
+    public java.time.LocalDate minus(long, java.time.temporal.TemporalUnit)
+    {
+        byte $b1;
+        java.time.LocalDate r0, $r2, $r3;
+        java.time.temporal.TemporalUnit r1;
+        long l0, $l2;
+
+        r0 := @this: java.time.LocalDate;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $b1 = l0 cmp -9223372036854775808L;
+
+        if $b1 != 0 goto label1;
+
+        $r2 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDate plus(long,java.time.temporal.TemporalUnit)>(9223372036854775807L, r1);
+
+        $r3 = virtualinvoke $r2.<java.time.LocalDate: java.time.LocalDate plus(long,java.time.temporal.TemporalUnit)>(1L, r1);
+
+        goto label2;
+
+     label1:
+        $l2 = neg l0;
+
+        $r3 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDate plus(long,java.time.temporal.TemporalUnit)>($l2, r1);
+
+     label2:
+        return $r3;
+    }
+
+    public java.time.LocalDate minusYears(long)
+    {
+        byte $b1;
+        java.time.LocalDate r0, $r1, $r2;
+        long l0, $l2;
+
+        r0 := @this: java.time.LocalDate;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp -9223372036854775808L;
+
+        if $b1 != 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDate plusYears(long)>(9223372036854775807L);
+
+        $r2 = virtualinvoke $r1.<java.time.LocalDate: java.time.LocalDate plusYears(long)>(1L);
+
+        goto label2;
+
+     label1:
+        $l2 = neg l0;
+
+        $r2 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDate plusYears(long)>($l2);
+
+     label2:
+        return $r2;
+    }
+
+    public java.time.LocalDate minusMonths(long)
+    {
+        byte $b1;
+        java.time.LocalDate r0, $r1, $r2;
+        long l0, $l2;
+
+        r0 := @this: java.time.LocalDate;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp -9223372036854775808L;
+
+        if $b1 != 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDate plusMonths(long)>(9223372036854775807L);
+
+        $r2 = virtualinvoke $r1.<java.time.LocalDate: java.time.LocalDate plusMonths(long)>(1L);
+
+        goto label2;
+
+     label1:
+        $l2 = neg l0;
+
+        $r2 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDate plusMonths(long)>($l2);
+
+     label2:
+        return $r2;
+    }
+
+    public java.time.LocalDate minusWeeks(long)
+    {
+        byte $b1;
+        java.time.LocalDate r0, $r1, $r2;
+        long l0, $l2;
+
+        r0 := @this: java.time.LocalDate;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp -9223372036854775808L;
+
+        if $b1 != 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDate plusWeeks(long)>(9223372036854775807L);
+
+        $r2 = virtualinvoke $r1.<java.time.LocalDate: java.time.LocalDate plusWeeks(long)>(1L);
+
+        goto label2;
+
+     label1:
+        $l2 = neg l0;
+
+        $r2 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDate plusWeeks(long)>($l2);
+
+     label2:
+        return $r2;
+    }
+
+    public java.time.LocalDate minusDays(long)
+    {
+        byte $b1;
+        java.time.LocalDate r0, $r1, $r2;
+        long l0, $l2;
+
+        r0 := @this: java.time.LocalDate;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp -9223372036854775808L;
+
+        if $b1 != 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDate plusDays(long)>(9223372036854775807L);
+
+        $r2 = virtualinvoke $r1.<java.time.LocalDate: java.time.LocalDate plusDays(long)>(1L);
+
+        goto label2;
+
+     label1:
+        $l2 = neg l0;
+
+        $r2 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDate plusDays(long)>($l2);
+
+     label2:
+        return $r2;
+    }
+
+    public java.lang.Object query(java.time.temporal.TemporalQuery)
+    {
+        java.time.LocalDate r2;
+        java.time.temporal.TemporalQuery r0, $r1;
+        java.lang.Object $r3;
+
+        r2 := @this: java.time.LocalDate;
+
+        r0 := @parameter0: java.time.temporal.TemporalQuery;
+
+        $r1 = staticinvoke <java.time.temporal.TemporalQueries: java.time.temporal.TemporalQuery localDate()>();
+
+        if r0 != $r1 goto label1;
+
+        return r2;
+
+     label1:
+        $r3 = specialinvoke r2.<java.time.chrono.ChronoLocalDate: java.lang.Object query(java.time.temporal.TemporalQuery)>(r0);
+
+        return $r3;
+    }
+
+    public java.time.temporal.Temporal adjustInto(java.time.temporal.Temporal)
+    {
+        java.time.temporal.Temporal r1, $r2;
+        java.time.LocalDate r0;
+
+        r0 := @this: java.time.LocalDate;
+
+        r1 := @parameter0: java.time.temporal.Temporal;
+
+        $r2 = specialinvoke r0.<java.time.chrono.ChronoLocalDate: java.time.temporal.Temporal adjustInto(java.time.temporal.Temporal)>(r1);
+
+        return $r2;
+    }
+
+    public long until(java.time.temporal.Temporal, java.time.temporal.TemporalUnit)
+    {
+        int[] $r5;
+        boolean $z0;
+        java.time.LocalDate $r1, r3;
+        java.lang.StringBuilder $r9, $r10, $r11;
+        java.time.temporal.Temporal r0;
+        java.time.temporal.ChronoField $r6, $r7;
+        java.time.temporal.TemporalUnit r2;
+        long $l0, $l3, $l4, $l5, $l6, $l7, $l8, $l9, $l10, $l11, $l12, $l13, $l14, $l15, $l16, $l17;
+        int $i1, $i2;
+        java.lang.String $r12;
+        java.time.temporal.UnsupportedTemporalTypeException $r8;
+        java.time.temporal.ChronoUnit $r4;
+
+        r3 := @this: java.time.LocalDate;
+
+        r0 := @parameter0: java.time.temporal.Temporal;
+
+        r2 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $r1 = staticinvoke <java.time.LocalDate: java.time.LocalDate 'from'(java.time.temporal.TemporalAccessor)>(r0);
+
+        $z0 = r2 instanceof java.time.temporal.ChronoUnit;
+
+        if $z0 == 0 goto label10;
+
+        $r5 = <java.time.LocalDate$1: int[] $SwitchMap$java$time$temporal$ChronoUnit>;
+
+        $r4 = (java.time.temporal.ChronoUnit) r2;
+
+        $i1 = virtualinvoke $r4.<java.time.temporal.ChronoUnit: int ordinal()>();
+
+        $i2 = $r5[$i1];
+
+        tableswitch($i2)
+        {
+            case 1: goto label01;
+            case 2: goto label02;
+            case 3: goto label03;
+            case 4: goto label04;
+            case 5: goto label05;
+            case 6: goto label06;
+            case 7: goto label07;
+            case 8: goto label08;
+            default: goto label09;
+        };
+
+     label01:
+        $l17 = virtualinvoke r3.<java.time.LocalDate: long daysUntil(java.time.LocalDate)>($r1);
+
+        return $l17;
+
+     label02:
+        $l15 = virtualinvoke r3.<java.time.LocalDate: long daysUntil(java.time.LocalDate)>($r1);
+
+        $l16 = $l15 / 7L;
+
+        return $l16;
+
+     label03:
+        $l14 = specialinvoke r3.<java.time.LocalDate: long monthsUntil(java.time.LocalDate)>($r1);
+
+        return $l14;
+
+     label04:
+        $l12 = specialinvoke r3.<java.time.LocalDate: long monthsUntil(java.time.LocalDate)>($r1);
+
+        $l13 = $l12 / 12L;
+
+        return $l13;
+
+     label05:
+        $l10 = specialinvoke r3.<java.time.LocalDate: long monthsUntil(java.time.LocalDate)>($r1);
+
+        $l11 = $l10 / 120L;
+
+        return $l11;
+
+     label06:
+        $l8 = specialinvoke r3.<java.time.LocalDate: long monthsUntil(java.time.LocalDate)>($r1);
+
+        $l9 = $l8 / 1200L;
+
+        return $l9;
+
+     label07:
+        $l6 = specialinvoke r3.<java.time.LocalDate: long monthsUntil(java.time.LocalDate)>($r1);
+
+        $l7 = $l6 / 12000L;
+
+        return $l7;
+
+     label08:
+        $r6 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ERA>;
+
+        $l3 = virtualinvoke $r1.<java.time.LocalDate: long getLong(java.time.temporal.TemporalField)>($r6);
+
+        $r7 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ERA>;
+
+        $l4 = virtualinvoke r3.<java.time.LocalDate: long getLong(java.time.temporal.TemporalField)>($r7);
+
+        $l5 = $l3 - $l4;
+
+        return $l5;
+
+     label09:
+        $r8 = new java.time.temporal.UnsupportedTemporalTypeException;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported unit: ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<java.time.temporal.UnsupportedTemporalTypeException: void <init>(java.lang.String)>($r12);
+
+        throw $r8;
+
+     label10:
+        $l0 = interfaceinvoke r2.<java.time.temporal.TemporalUnit: long between(java.time.temporal.Temporal,java.time.temporal.Temporal)>(r3, $r1);
+
+        return $l0;
+    }
+
+    long daysUntil(java.time.LocalDate)
+    {
+        java.time.LocalDate r0, r1;
+        long $l0, $l1, $l2;
+
+        r1 := @this: java.time.LocalDate;
+
+        r0 := @parameter0: java.time.LocalDate;
+
+        $l0 = virtualinvoke r0.<java.time.LocalDate: long toEpochDay()>();
+
+        $l1 = virtualinvoke r1.<java.time.LocalDate: long toEpochDay()>();
+
+        $l2 = $l0 - $l1;
+
+        return $l2;
+    }
+
+    private long monthsUntil(java.time.LocalDate)
+    {
+        long $l0, $l1, $l3, l4, $l5, $l6, $l8, l9, $l10, $l11;
+        java.time.LocalDate r0, r1;
+        int $i2, $i7;
+
+        r0 := @this: java.time.LocalDate;
+
+        r1 := @parameter0: java.time.LocalDate;
+
+        $l0 = specialinvoke r0.<java.time.LocalDate: long getProlepticMonth()>();
+
+        $l1 = $l0 * 32L;
+
+        $i2 = virtualinvoke r0.<java.time.LocalDate: int getDayOfMonth()>();
+
+        $l3 = (long) $i2;
+
+        l4 = $l1 + $l3;
+
+        $l5 = specialinvoke r1.<java.time.LocalDate: long getProlepticMonth()>();
+
+        $l6 = $l5 * 32L;
+
+        $i7 = virtualinvoke r1.<java.time.LocalDate: int getDayOfMonth()>();
+
+        $l8 = (long) $i7;
+
+        l9 = $l6 + $l8;
+
+        $l10 = l9 - l4;
+
+        $l11 = $l10 / 32L;
+
+        return $l11;
+    }
+
+    public java.time.Period until(java.time.chrono.ChronoLocalDate)
+    {
+        long $l0, $l1, $l7, $l8, $l9, l10, $l12, $l13;
+        short $s2, $s3;
+        byte $b4, $b5;
+        int $i6, i11, $i14, $i15, $i16, $i17, $i18, $i19;
+        java.time.Period $r4;
+        java.time.chrono.ChronoLocalDate r0;
+        java.time.LocalDate $r1, r2, $r3;
+
+        r2 := @this: java.time.LocalDate;
+
+        r0 := @parameter0: java.time.chrono.ChronoLocalDate;
+
+        $r1 = staticinvoke <java.time.LocalDate: java.time.LocalDate 'from'(java.time.temporal.TemporalAccessor)>(r0);
+
+        $l0 = specialinvoke $r1.<java.time.LocalDate: long getProlepticMonth()>();
+
+        $l1 = specialinvoke r2.<java.time.LocalDate: long getProlepticMonth()>();
+
+        l10 = $l0 - $l1;
+
+        $s3 = $r1.<java.time.LocalDate: short day>;
+
+        $s2 = r2.<java.time.LocalDate: short day>;
+
+        $i16 = (int) $s3;
+
+        $i17 = (int) $s2;
+
+        i11 = $i16 - $i17;
+
+        $b4 = l10 cmp 0L;
+
+        $i18 = (int) $b4;
+
+        if $i18 <= 0 goto label1;
+
+        if i11 >= 0 goto label1;
+
+        l10 = l10 - 1L;
+
+        $r3 = virtualinvoke r2.<java.time.LocalDate: java.time.LocalDate plusMonths(long)>(l10);
+
+        $l7 = virtualinvoke $r1.<java.time.LocalDate: long toEpochDay()>();
+
+        $l8 = virtualinvoke $r3.<java.time.LocalDate: long toEpochDay()>();
+
+        $l9 = $l7 - $l8;
+
+        i11 = (int) $l9;
+
+        goto label2;
+
+     label1:
+        $b5 = l10 cmp 0L;
+
+        $i19 = (int) $b5;
+
+        if $i19 >= 0 goto label2;
+
+        if i11 <= 0 goto label2;
+
+        l10 = l10 + 1L;
+
+        $i6 = virtualinvoke $r1.<java.time.LocalDate: int lengthOfMonth()>();
+
+        i11 = i11 - $i6;
+
+     label2:
+        $l12 = l10 / 12L;
+
+        $l13 = l10 % 12L;
+
+        $i14 = (int) $l13;
+
+        $i15 = staticinvoke <java.lang.Math: int toIntExact(long)>($l12);
+
+        $r4 = staticinvoke <java.time.Period: java.time.Period of(int,int,int)>($i15, $i14, i11);
+
+        return $r4;
+    }
+
+    public java.lang.String format(java.time.format.DateTimeFormatter)
+    {
+        java.lang.String $r2;
+        java.time.format.DateTimeFormatter r0;
+        java.time.LocalDate r1;
+
+        r1 := @this: java.time.LocalDate;
+
+        r0 := @parameter0: java.time.format.DateTimeFormatter;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "formatter");
+
+        $r2 = virtualinvoke r0.<java.time.format.DateTimeFormatter: java.lang.String format(java.time.temporal.TemporalAccessor)>(r1);
+
+        return $r2;
+    }
+
+    public java.time.LocalDateTime atTime(java.time.LocalTime)
+    {
+        java.time.LocalTime r1;
+        java.time.LocalDateTime $r2;
+        java.time.LocalDate r0;
+
+        r0 := @this: java.time.LocalDate;
+
+        r1 := @parameter0: java.time.LocalTime;
+
+        $r2 = staticinvoke <java.time.LocalDateTime: java.time.LocalDateTime of(java.time.LocalDate,java.time.LocalTime)>(r0, r1);
+
+        return $r2;
+    }
+
+    public java.time.LocalDateTime atTime(int, int)
+    {
+        java.time.LocalDate r0;
+        int i0, i1;
+        java.time.LocalTime $r1;
+        java.time.LocalDateTime $r2;
+
+        r0 := @this: java.time.LocalDate;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r1 = staticinvoke <java.time.LocalTime: java.time.LocalTime of(int,int)>(i0, i1);
+
+        $r2 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDateTime atTime(java.time.LocalTime)>($r1);
+
+        return $r2;
+    }
+
+    public java.time.LocalDateTime atTime(int, int, int)
+    {
+        java.time.LocalDate r0;
+        int i0, i1, i2;
+        java.time.LocalTime $r1;
+        java.time.LocalDateTime $r2;
+
+        r0 := @this: java.time.LocalDate;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $r1 = staticinvoke <java.time.LocalTime: java.time.LocalTime of(int,int,int)>(i0, i1, i2);
+
+        $r2 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDateTime atTime(java.time.LocalTime)>($r1);
+
+        return $r2;
+    }
+
+    public java.time.LocalDateTime atTime(int, int, int, int)
+    {
+        java.time.LocalDate r0;
+        int i0, i1, i2, i3;
+        java.time.LocalTime $r1;
+        java.time.LocalDateTime $r2;
+
+        r0 := @this: java.time.LocalDate;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        $r1 = staticinvoke <java.time.LocalTime: java.time.LocalTime of(int,int,int,int)>(i0, i1, i2, i3);
+
+        $r2 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDateTime atTime(java.time.LocalTime)>($r1);
+
+        return $r2;
+    }
+
+    public java.time.OffsetDateTime atTime(java.time.OffsetTime)
+    {
+        java.time.OffsetTime r1;
+        java.time.OffsetDateTime $r5;
+        java.time.LocalDate r0;
+        java.time.LocalTime $r2;
+        java.time.LocalDateTime $r3;
+        java.time.ZoneOffset $r4;
+
+        r0 := @this: java.time.LocalDate;
+
+        r1 := @parameter0: java.time.OffsetTime;
+
+        $r2 = virtualinvoke r1.<java.time.OffsetTime: java.time.LocalTime toLocalTime()>();
+
+        $r3 = staticinvoke <java.time.LocalDateTime: java.time.LocalDateTime of(java.time.LocalDate,java.time.LocalTime)>(r0, $r2);
+
+        $r4 = virtualinvoke r1.<java.time.OffsetTime: java.time.ZoneOffset getOffset()>();
+
+        $r5 = staticinvoke <java.time.OffsetDateTime: java.time.OffsetDateTime of(java.time.LocalDateTime,java.time.ZoneOffset)>($r3, $r4);
+
+        return $r5;
+    }
+
+    public java.time.LocalDateTime atStartOfDay()
+    {
+        java.time.LocalTime $r1;
+        java.time.LocalDateTime $r2;
+        java.time.LocalDate r0;
+
+        r0 := @this: java.time.LocalDate;
+
+        $r1 = <java.time.LocalTime: java.time.LocalTime MIDNIGHT>;
+
+        $r2 = staticinvoke <java.time.LocalDateTime: java.time.LocalDateTime of(java.time.LocalDate,java.time.LocalTime)>(r0, $r1);
+
+        return $r2;
+    }
+
+    public java.time.ZonedDateTime atStartOfDay(java.time.ZoneId)
+    {
+        java.time.ZonedDateTime $r7;
+        java.time.LocalDateTime $r3, r6;
+        java.time.zone.ZoneOffsetTransition $r5;
+        java.time.ZoneId r0;
+        java.time.zone.ZoneRules $r4;
+        java.time.LocalDate r1;
+        java.time.LocalTime $r2;
+        boolean $z0, $z1;
+
+        r1 := @this: java.time.LocalDate;
+
+        r0 := @parameter0: java.time.ZoneId;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "zone");
+
+        $r2 = <java.time.LocalTime: java.time.LocalTime MIDNIGHT>;
+
+        $r3 = virtualinvoke r1.<java.time.LocalDate: java.time.LocalDateTime atTime(java.time.LocalTime)>($r2);
+
+        r6 = $r3;
+
+        $z0 = r0 instanceof java.time.ZoneOffset;
+
+        if $z0 != 0 goto label1;
+
+        $r4 = virtualinvoke r0.<java.time.ZoneId: java.time.zone.ZoneRules getRules()>();
+
+        $r5 = virtualinvoke $r4.<java.time.zone.ZoneRules: java.time.zone.ZoneOffsetTransition getTransition(java.time.LocalDateTime)>($r3);
+
+        if $r5 == null goto label1;
+
+        $z1 = virtualinvoke $r5.<java.time.zone.ZoneOffsetTransition: boolean isGap()>();
+
+        if $z1 == 0 goto label1;
+
+        r6 = virtualinvoke $r5.<java.time.zone.ZoneOffsetTransition: java.time.LocalDateTime getDateTimeAfter()>();
+
+     label1:
+        $r7 = staticinvoke <java.time.ZonedDateTime: java.time.ZonedDateTime of(java.time.LocalDateTime,java.time.ZoneId)>(r6, r0);
+
+        return $r7;
+    }
+
+    public long toEpochDay()
+    {
+        byte $b5, $b17;
+        boolean $z0;
+        java.time.LocalDate r0;
+        long l1, l3, $l4, $l6, $l7, $l8, $l9, $l10, $l11, $l12, $l13, $l16, $l18, $l19, $l20, $l21, $l22, $l23, $l24, $l25, $l26, $l27, l28, l29, l30, $l31;
+        short $s2, $s14;
+        int $i0, $i15, $i32, $i33, $i34;
+
+        r0 := @this: java.time.LocalDate;
+
+        $i0 = r0.<java.time.LocalDate: int year>;
+
+        l1 = (long) $i0;
+
+        $s2 = r0.<java.time.LocalDate: short month>;
+
+        l3 = (long) $s2;
+
+        $l4 = 365L * l1;
+
+        l28 = 0L + $l4;
+
+        $b5 = l1 cmp 0L;
+
+        $i32 = (int) $b5;
+
+        if $i32 < 0 goto label1;
+
+        $l18 = l1 + 3L;
+
+        $l21 = $l18 / 4L;
+
+        $l19 = l1 + 99L;
+
+        $l20 = $l19 / 100L;
+
+        $l24 = $l21 - $l20;
+
+        $l22 = l1 + 399L;
+
+        $l23 = $l22 / 400L;
+
+        $l25 = $l24 + $l23;
+
+        l29 = l28 + $l25;
+
+        goto label2;
+
+     label1:
+        $l7 = l1 / -4L;
+
+        $l6 = l1 / -100L;
+
+        $l9 = $l7 - $l6;
+
+        $l8 = l1 / -400L;
+
+        $l10 = $l9 + $l8;
+
+        l29 = l28 - $l10;
+
+     label2:
+        $l11 = 367L * l3;
+
+        $l12 = $l11 - 362L;
+
+        $l13 = $l12 / 12L;
+
+        $l26 = l29 + $l13;
+
+        $s14 = r0.<java.time.LocalDate: short day>;
+
+        $i33 = (int) $s14;
+
+        $i15 = $i33 - 1;
+
+        $l16 = (long) $i15;
+
+        $l27 = $l26 + $l16;
+
+        l30 = $l27;
+
+        $b17 = l3 cmp 2L;
+
+        $i34 = (int) $b17;
+
+        if $i34 <= 0 goto label3;
+
+        l30 = $l27 - 1L;
+
+        $z0 = virtualinvoke r0.<java.time.LocalDate: boolean isLeapYear()>();
+
+        if $z0 != 0 goto label3;
+
+        l30 = l30 - 1L;
+
+     label3:
+        $l31 = l30 - 719528L;
+
+        return $l31;
+    }
+
+    public int compareTo(java.time.chrono.ChronoLocalDate)
+    {
+        java.time.chrono.ChronoLocalDate r0;
+        java.time.LocalDate r1, $r2;
+        int $i0, $i1;
+        boolean $z0;
+
+        r1 := @this: java.time.LocalDate;
+
+        r0 := @parameter0: java.time.chrono.ChronoLocalDate;
+
+        $z0 = r0 instanceof java.time.LocalDate;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = (java.time.LocalDate) r0;
+
+        $i1 = virtualinvoke r1.<java.time.LocalDate: int compareTo0(java.time.LocalDate)>($r2);
+
+        return $i1;
+
+     label1:
+        $i0 = specialinvoke r1.<java.time.chrono.ChronoLocalDate: int compareTo(java.time.chrono.ChronoLocalDate)>(r0);
+
+        return $i0;
+    }
+
+    int compareTo0(java.time.LocalDate)
+    {
+        short $s2, $s3, $s4, $s5;
+        java.time.LocalDate r0, r1;
+        int $i0, $i1, i6, $i7, $i8, $i9, $i10;
+
+        r0 := @this: java.time.LocalDate;
+
+        r1 := @parameter0: java.time.LocalDate;
+
+        $i1 = r0.<java.time.LocalDate: int year>;
+
+        $i0 = r1.<java.time.LocalDate: int year>;
+
+        i6 = $i1 - $i0;
+
+        if i6 != 0 goto label1;
+
+        $s3 = r0.<java.time.LocalDate: short month>;
+
+        $s2 = r1.<java.time.LocalDate: short month>;
+
+        $i7 = (int) $s3;
+
+        $i8 = (int) $s2;
+
+        i6 = $i7 - $i8;
+
+        if i6 != 0 goto label1;
+
+        $s5 = r0.<java.time.LocalDate: short day>;
+
+        $s4 = r1.<java.time.LocalDate: short day>;
+
+        $i9 = (int) $s5;
+
+        $i10 = (int) $s4;
+
+        i6 = $i9 - $i10;
+
+     label1:
+        return i6;
+    }
+
+    public boolean isAfter(java.time.chrono.ChronoLocalDate)
+    {
+        java.time.chrono.ChronoLocalDate r0;
+        java.time.LocalDate r1, $r2;
+        int $i0;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: java.time.LocalDate;
+
+        r0 := @parameter0: java.time.chrono.ChronoLocalDate;
+
+        $z0 = r0 instanceof java.time.LocalDate;
+
+        if $z0 == 0 goto label3;
+
+        $r2 = (java.time.LocalDate) r0;
+
+        $i0 = virtualinvoke r1.<java.time.LocalDate: int compareTo0(java.time.LocalDate)>($r2);
+
+        if $i0 <= 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+
+     label3:
+        $z1 = specialinvoke r1.<java.time.chrono.ChronoLocalDate: boolean isAfter(java.time.chrono.ChronoLocalDate)>(r0);
+
+        return $z1;
+    }
+
+    public boolean isBefore(java.time.chrono.ChronoLocalDate)
+    {
+        java.time.chrono.ChronoLocalDate r0;
+        java.time.LocalDate r1, $r2;
+        int $i0;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: java.time.LocalDate;
+
+        r0 := @parameter0: java.time.chrono.ChronoLocalDate;
+
+        $z0 = r0 instanceof java.time.LocalDate;
+
+        if $z0 == 0 goto label3;
+
+        $r2 = (java.time.LocalDate) r0;
+
+        $i0 = virtualinvoke r1.<java.time.LocalDate: int compareTo0(java.time.LocalDate)>($r2);
+
+        if $i0 >= 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+
+     label3:
+        $z1 = specialinvoke r1.<java.time.chrono.ChronoLocalDate: boolean isBefore(java.time.chrono.ChronoLocalDate)>(r0);
+
+        return $z1;
+    }
+
+    public boolean isEqual(java.time.chrono.ChronoLocalDate)
+    {
+        java.time.chrono.ChronoLocalDate r0;
+        java.time.LocalDate r1, $r2;
+        int $i0;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: java.time.LocalDate;
+
+        r0 := @parameter0: java.time.chrono.ChronoLocalDate;
+
+        $z0 = r0 instanceof java.time.LocalDate;
+
+        if $z0 == 0 goto label3;
+
+        $r2 = (java.time.LocalDate) r0;
+
+        $i0 = virtualinvoke r1.<java.time.LocalDate: int compareTo0(java.time.LocalDate)>($r2);
+
+        if $i0 != 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+
+     label3:
+        $z1 = specialinvoke r1.<java.time.chrono.ChronoLocalDate: boolean isEqual(java.time.chrono.ChronoLocalDate)>(r0);
+
+        return $z1;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        java.time.LocalDate r0, $r2;
+        int $i0;
+        java.lang.Object r1;
+        boolean $z0, $z1;
+
+        r0 := @this: java.time.LocalDate;
+
+        r1 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        $z0 = r1 instanceof java.time.LocalDate;
+
+        if $z0 == 0 goto label4;
+
+        $r2 = (java.time.LocalDate) r1;
+
+        $i0 = virtualinvoke r0.<java.time.LocalDate: int compareTo0(java.time.LocalDate)>($r2);
+
+        if $i0 != 0 goto label2;
+
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        return $z1;
+
+     label4:
+        return 0;
+    }
+
+    public int hashCode()
+    {
+        short s1, s2;
+        java.time.LocalDate r0;
+        int i0, $i3, $i4, $i5, $i6, $i7, $i8, $i10, $i11, $i12;
+
+        r0 := @this: java.time.LocalDate;
+
+        i0 = r0.<java.time.LocalDate: int year>;
+
+        s1 = r0.<java.time.LocalDate: short month>;
+
+        s2 = r0.<java.time.LocalDate: short day>;
+
+        $i10 = (int) -2048;
+
+        $i7 = i0 & $i10;
+
+        $i4 = i0 << 11;
+
+        $i11 = (int) s1;
+
+        $i3 = $i11 << 6;
+
+        $i5 = $i4 + $i3;
+
+        $i12 = (int) s2;
+
+        $i6 = $i5 + $i12;
+
+        $i8 = $i7 ^ $i6;
+
+        return $i8;
+    }
+
+    public java.lang.String toString()
+    {
+        short s1, s2;
+        int i0, $i3, $i4, $i5, $i6, $i7, $i8, $i9;
+        java.lang.String $r6, $r9, $r10;
+        java.time.LocalDate r0;
+        java.lang.StringBuilder $r2, $r3, $r4, $r5, $r7, $r8, $r11;
+
+        r0 := @this: java.time.LocalDate;
+
+        i0 = r0.<java.time.LocalDate: int year>;
+
+        s1 = r0.<java.time.LocalDate: short month>;
+
+        s2 = r0.<java.time.LocalDate: short day>;
+
+        $i3 = staticinvoke <java.lang.Math: int abs(int)>(i0);
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>(int)>(10);
+
+        if $i3 >= 1000 goto label2;
+
+        if i0 >= 0 goto label1;
+
+        $i5 = i0 - 10000;
+
+        $r8 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder deleteCharAt(int)>(1);
+
+        goto label4;
+
+     label1:
+        $i4 = i0 + 10000;
+
+        $r7 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder deleteCharAt(int)>(0);
+
+        goto label4;
+
+     label2:
+        if i0 <= 9999 goto label3;
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(43);
+
+     label3:
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+     label4:
+        $i6 = (int) s1;
+
+        if $i6 >= 10 goto label5;
+
+        $r9 = "-0";
+
+        goto label6;
+
+     label5:
+        $r9 = "-";
+
+     label6:
+        $r2 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $i7 = (int) s1;
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i7);
+
+        $i8 = (int) s2;
+
+        if $i8 >= 10 goto label7;
+
+        $r10 = "-0";
+
+        goto label8;
+
+     label7:
+        $r10 = "-";
+
+     label8:
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $i9 = (int) s2;
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i9);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r6;
+    }
+
+    private java.lang.Object writeReplace()
+    {
+        java.time.Ser $r0;
+        java.time.LocalDate r1;
+
+        r1 := @this: java.time.LocalDate;
+
+        $r0 = new java.time.Ser;
+
+        specialinvoke $r0.<java.time.Ser: void <init>(byte,java.lang.Object)>(3, r1);
+
+        return $r0;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.InvalidObjectException
+    {
+        java.io.ObjectInputStream r2;
+        java.io.InvalidObjectException $r0;
+        java.time.LocalDate r1;
+
+        r1 := @this: java.time.LocalDate;
+
+        r2 := @parameter0: java.io.ObjectInputStream;
+
+        $r0 = new java.io.InvalidObjectException;
+
+        specialinvoke $r0.<java.io.InvalidObjectException: void <init>(java.lang.String)>("Deserialization via serialization delegate");
+
+        throw $r0;
+    }
+
+    void writeExternal(java.io.DataOutput) throws java.io.IOException
+    {
+        java.io.DataOutput r0;
+        short $s1, $s2;
+        java.time.LocalDate r1;
+        int $i0, $i3, $i4;
+
+        r1 := @this: java.time.LocalDate;
+
+        r0 := @parameter0: java.io.DataOutput;
+
+        $i0 = r1.<java.time.LocalDate: int year>;
+
+        interfaceinvoke r0.<java.io.DataOutput: void writeInt(int)>($i0);
+
+        $s1 = r1.<java.time.LocalDate: short month>;
+
+        $i3 = (int) $s1;
+
+        interfaceinvoke r0.<java.io.DataOutput: void writeByte(int)>($i3);
+
+        $s2 = r1.<java.time.LocalDate: short day>;
+
+        $i4 = (int) $s2;
+
+        interfaceinvoke r0.<java.io.DataOutput: void writeByte(int)>($i4);
+
+        return;
+    }
+
+    static java.time.LocalDate readExternal(java.io.DataInput) throws java.io.IOException
+    {
+        byte $b1, $b2;
+        java.time.LocalDate $r1;
+        java.io.DataInput r0;
+        int $i0, $i3, $i4;
+
+        r0 := @parameter0: java.io.DataInput;
+
+        $i0 = interfaceinvoke r0.<java.io.DataInput: int readInt()>();
+
+        $b1 = interfaceinvoke r0.<java.io.DataInput: byte readByte()>();
+
+        $b2 = interfaceinvoke r0.<java.io.DataInput: byte readByte()>();
+
+        $i3 = (int) $b1;
+
+        $i4 = (int) $b2;
+
+        $r1 = staticinvoke <java.time.LocalDate: java.time.LocalDate of(int,int,int)>($i0, $i3, $i4);
+
+        return $r1;
+    }
+
+    public volatile java.time.temporal.Temporal minus(long, java.time.temporal.TemporalUnit)
+    {
+        java.time.LocalDate r0, $r2;
+        java.time.temporal.TemporalUnit r1;
+        long l0;
+
+        r0 := @this: java.time.LocalDate;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $r2 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDate minus(long,java.time.temporal.TemporalUnit)>(l0, r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.temporal.Temporal minus(java.time.temporal.TemporalAmount)
+    {
+        java.time.temporal.TemporalAmount r1;
+        java.time.LocalDate r0, $r2;
+
+        r0 := @this: java.time.LocalDate;
+
+        r1 := @parameter0: java.time.temporal.TemporalAmount;
+
+        $r2 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDate minus(java.time.temporal.TemporalAmount)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.temporal.Temporal plus(long, java.time.temporal.TemporalUnit)
+    {
+        java.time.LocalDate r0, $r2;
+        java.time.temporal.TemporalUnit r1;
+        long l0;
+
+        r0 := @this: java.time.LocalDate;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $r2 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDate plus(long,java.time.temporal.TemporalUnit)>(l0, r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.temporal.Temporal plus(java.time.temporal.TemporalAmount)
+    {
+        java.time.temporal.TemporalAmount r1;
+        java.time.LocalDate r0, $r2;
+
+        r0 := @this: java.time.LocalDate;
+
+        r1 := @parameter0: java.time.temporal.TemporalAmount;
+
+        $r2 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDate plus(java.time.temporal.TemporalAmount)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.temporal.Temporal 'with'(java.time.temporal.TemporalField, long)
+    {
+        java.time.LocalDate r0, $r2;
+        java.time.temporal.TemporalField r1;
+        long l0;
+
+        r0 := @this: java.time.LocalDate;
+
+        r1 := @parameter0: java.time.temporal.TemporalField;
+
+        l0 := @parameter1: long;
+
+        $r2 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDate 'with'(java.time.temporal.TemporalField,long)>(r1, l0);
+
+        return $r2;
+    }
+
+    public volatile java.time.temporal.Temporal 'with'(java.time.temporal.TemporalAdjuster)
+    {
+        java.time.temporal.TemporalAdjuster r1;
+        java.time.LocalDate r0, $r2;
+
+        r0 := @this: java.time.LocalDate;
+
+        r1 := @parameter0: java.time.temporal.TemporalAdjuster;
+
+        $r2 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDate 'with'(java.time.temporal.TemporalAdjuster)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.chrono.ChronoLocalDateTime atTime(java.time.LocalTime)
+    {
+        java.time.LocalTime r1;
+        java.time.LocalDateTime $r2;
+        java.time.LocalDate r0;
+
+        r0 := @this: java.time.LocalDate;
+
+        r1 := @parameter0: java.time.LocalTime;
+
+        $r2 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDateTime atTime(java.time.LocalTime)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.chrono.ChronoPeriod until(java.time.chrono.ChronoLocalDate)
+    {
+        java.time.Period $r2;
+        java.time.chrono.ChronoLocalDate r1;
+        java.time.LocalDate r0;
+
+        r0 := @this: java.time.LocalDate;
+
+        r1 := @parameter0: java.time.chrono.ChronoLocalDate;
+
+        $r2 = virtualinvoke r0.<java.time.LocalDate: java.time.Period until(java.time.chrono.ChronoLocalDate)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.chrono.ChronoLocalDate minus(long, java.time.temporal.TemporalUnit)
+    {
+        java.time.LocalDate r0, $r2;
+        java.time.temporal.TemporalUnit r1;
+        long l0;
+
+        r0 := @this: java.time.LocalDate;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $r2 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDate minus(long,java.time.temporal.TemporalUnit)>(l0, r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.chrono.ChronoLocalDate minus(java.time.temporal.TemporalAmount)
+    {
+        java.time.temporal.TemporalAmount r1;
+        java.time.LocalDate r0, $r2;
+
+        r0 := @this: java.time.LocalDate;
+
+        r1 := @parameter0: java.time.temporal.TemporalAmount;
+
+        $r2 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDate minus(java.time.temporal.TemporalAmount)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.chrono.ChronoLocalDate plus(long, java.time.temporal.TemporalUnit)
+    {
+        java.time.LocalDate r0, $r2;
+        java.time.temporal.TemporalUnit r1;
+        long l0;
+
+        r0 := @this: java.time.LocalDate;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $r2 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDate plus(long,java.time.temporal.TemporalUnit)>(l0, r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.chrono.ChronoLocalDate plus(java.time.temporal.TemporalAmount)
+    {
+        java.time.temporal.TemporalAmount r1;
+        java.time.LocalDate r0, $r2;
+
+        r0 := @this: java.time.LocalDate;
+
+        r1 := @parameter0: java.time.temporal.TemporalAmount;
+
+        $r2 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDate plus(java.time.temporal.TemporalAmount)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.chrono.ChronoLocalDate 'with'(java.time.temporal.TemporalField, long)
+    {
+        java.time.LocalDate r0, $r2;
+        java.time.temporal.TemporalField r1;
+        long l0;
+
+        r0 := @this: java.time.LocalDate;
+
+        r1 := @parameter0: java.time.temporal.TemporalField;
+
+        l0 := @parameter1: long;
+
+        $r2 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDate 'with'(java.time.temporal.TemporalField,long)>(r1, l0);
+
+        return $r2;
+    }
+
+    public volatile java.time.chrono.ChronoLocalDate 'with'(java.time.temporal.TemporalAdjuster)
+    {
+        java.time.temporal.TemporalAdjuster r1;
+        java.time.LocalDate r0, $r2;
+
+        r0 := @this: java.time.LocalDate;
+
+        r1 := @parameter0: java.time.temporal.TemporalAdjuster;
+
+        $r2 = virtualinvoke r0.<java.time.LocalDate: java.time.LocalDate 'with'(java.time.temporal.TemporalAdjuster)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.chrono.Chronology getChronology()
+    {
+        java.time.chrono.IsoChronology $r1;
+        java.time.LocalDate r0;
+
+        r0 := @this: java.time.LocalDate;
+
+        $r1 = virtualinvoke r0.<java.time.LocalDate: java.time.chrono.IsoChronology getChronology()>();
+
+        return $r1;
+    }
+
+    public volatile int compareTo(java.lang.Object)
+    {
+        java.time.chrono.ChronoLocalDate $r2;
+        java.time.LocalDate r0;
+        int $i0;
+        java.lang.Object r1;
+
+        r0 := @this: java.time.LocalDate;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = (java.time.chrono.ChronoLocalDate) r1;
+
+        $i0 = virtualinvoke r0.<java.time.LocalDate: int compareTo(java.time.chrono.ChronoLocalDate)>($r2);
+
+        return $i0;
+    }
+
+    static void <clinit>()
+    {
+        java.time.LocalDate $r0, $r1;
+
+        <java.time.LocalDate: long DAYS_0000_TO_1970> = 719528L;
+
+        <java.time.LocalDate: int DAYS_PER_CYCLE> = 146097;
+
+        <java.time.LocalDate: long serialVersionUID> = 2942565459149668126L;
+
+        $r0 = staticinvoke <java.time.LocalDate: java.time.LocalDate of(int,int,int)>(-999999999, 1, 1);
+
+        <java.time.LocalDate: java.time.LocalDate MIN> = $r0;
+
+        $r1 = staticinvoke <java.time.LocalDate: java.time.LocalDate of(int,int,int)>(999999999, 12, 31);
+
+        <java.time.LocalDate: java.time.LocalDate MAX> = $r1;
+
+        return;
+    }
+}

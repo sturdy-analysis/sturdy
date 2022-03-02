@@ -1,0 +1,1248 @@
+public abstract class javax.swing.text.AbstractWriter extends java.lang.Object
+{
+    private javax.swing.text.ElementIterator it;
+    private java.io.Writer out;
+    private int indentLevel;
+    private int indentSpace;
+    private javax.swing.text.Document doc;
+    private int maxLineLength;
+    private int currLength;
+    private int startOffset;
+    private int endOffset;
+    private int offsetIndent;
+    private java.lang.String lineSeparator;
+    private boolean canWrapLines;
+    private boolean isLineEmpty;
+    private char[] indentChars;
+    private char[] tempChars;
+    private char[] newlineChars;
+    private javax.swing.text.Segment segment;
+    protected static final char NEWLINE;
+
+    protected void <init>(java.io.Writer, javax.swing.text.Document)
+    {
+        java.io.Writer r1;
+        int $i0;
+        javax.swing.text.Document r2;
+        javax.swing.text.AbstractWriter r0;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        r1 := @parameter0: java.io.Writer;
+
+        r2 := @parameter1: javax.swing.text.Document;
+
+        $i0 = interfaceinvoke r2.<javax.swing.text.Document: int getLength()>();
+
+        specialinvoke r0.<javax.swing.text.AbstractWriter: void <init>(java.io.Writer,javax.swing.text.Document,int,int)>(r1, r2, 0, $i0);
+
+        return;
+    }
+
+    protected void <init>(java.io.Writer, javax.swing.text.Document, int, int)
+    {
+        javax.swing.text.ElementIterator $r2;
+        javax.swing.text.AbstractWriter r0;
+        java.io.Writer r4;
+        int i0, i1, $i2;
+        java.lang.Object $r5;
+        java.lang.SecurityException $r7;
+        javax.swing.text.Document r1;
+        java.lang.String $r6, r8;
+        javax.swing.text.Element $r3;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        r4 := @parameter0: java.io.Writer;
+
+        r1 := @parameter1: javax.swing.text.Document;
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<javax.swing.text.AbstractWriter: int indentLevel> = 0;
+
+        r0.<javax.swing.text.AbstractWriter: int indentSpace> = 2;
+
+        r0.<javax.swing.text.AbstractWriter: javax.swing.text.Document doc> = null;
+
+        r0.<javax.swing.text.AbstractWriter: int maxLineLength> = 100;
+
+        r0.<javax.swing.text.AbstractWriter: int currLength> = 0;
+
+        r0.<javax.swing.text.AbstractWriter: int startOffset> = 0;
+
+        r0.<javax.swing.text.AbstractWriter: int endOffset> = 0;
+
+        r0.<javax.swing.text.AbstractWriter: int offsetIndent> = 0;
+
+        r0.<javax.swing.text.AbstractWriter: javax.swing.text.Document doc> = r1;
+
+        $r2 = new javax.swing.text.ElementIterator;
+
+        $r3 = interfaceinvoke r1.<javax.swing.text.Document: javax.swing.text.Element getDefaultRootElement()>();
+
+        specialinvoke $r2.<javax.swing.text.ElementIterator: void <init>(javax.swing.text.Element)>($r3);
+
+        r0.<javax.swing.text.AbstractWriter: javax.swing.text.ElementIterator it> = $r2;
+
+        r0.<javax.swing.text.AbstractWriter: java.io.Writer out> = r4;
+
+        r0.<javax.swing.text.AbstractWriter: int startOffset> = i0;
+
+        $i2 = i0 + i1;
+
+        r0.<javax.swing.text.AbstractWriter: int endOffset> = $i2;
+
+        $r5 = interfaceinvoke r1.<javax.swing.text.Document: java.lang.Object getProperty(java.lang.Object)>("__EndOfLine__");
+
+        $z0 = $r5 instanceof java.lang.String;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = (java.lang.String) $r5;
+
+        virtualinvoke r0.<javax.swing.text.AbstractWriter: void setLineSeparator(java.lang.String)>($r6);
+
+        goto label7;
+
+     label1:
+        r8 = null;
+
+     label2:
+        r8 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("line.separator");
+
+     label3:
+        goto label5;
+
+     label4:
+        $r7 := @caughtexception;
+
+     label5:
+        if r8 != null goto label6;
+
+        r8 = "\n";
+
+     label6:
+        virtualinvoke r0.<javax.swing.text.AbstractWriter: void setLineSeparator(java.lang.String)>(r8);
+
+     label7:
+        r0.<javax.swing.text.AbstractWriter: boolean canWrapLines> = 1;
+
+        return;
+
+        catch java.lang.SecurityException from label2 to label3 with label4;
+    }
+
+    protected void <init>(java.io.Writer, javax.swing.text.Element)
+    {
+        java.io.Writer r1;
+        int $i0;
+        javax.swing.text.Element r2;
+        javax.swing.text.AbstractWriter r0;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        r1 := @parameter0: java.io.Writer;
+
+        r2 := @parameter1: javax.swing.text.Element;
+
+        $i0 = interfaceinvoke r2.<javax.swing.text.Element: int getEndOffset()>();
+
+        specialinvoke r0.<javax.swing.text.AbstractWriter: void <init>(java.io.Writer,javax.swing.text.Element,int,int)>(r1, r2, 0, $i0);
+
+        return;
+    }
+
+    protected void <init>(java.io.Writer, javax.swing.text.Element, int, int)
+    {
+        javax.swing.text.ElementIterator $r3;
+        javax.swing.text.AbstractWriter r0;
+        java.io.Writer r4;
+        int i0, i1, $i2;
+        javax.swing.text.Document $r2;
+        javax.swing.text.Element r1;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        r4 := @parameter0: java.io.Writer;
+
+        r1 := @parameter1: javax.swing.text.Element;
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<javax.swing.text.AbstractWriter: int indentLevel> = 0;
+
+        r0.<javax.swing.text.AbstractWriter: int indentSpace> = 2;
+
+        r0.<javax.swing.text.AbstractWriter: javax.swing.text.Document doc> = null;
+
+        r0.<javax.swing.text.AbstractWriter: int maxLineLength> = 100;
+
+        r0.<javax.swing.text.AbstractWriter: int currLength> = 0;
+
+        r0.<javax.swing.text.AbstractWriter: int startOffset> = 0;
+
+        r0.<javax.swing.text.AbstractWriter: int endOffset> = 0;
+
+        r0.<javax.swing.text.AbstractWriter: int offsetIndent> = 0;
+
+        $r2 = interfaceinvoke r1.<javax.swing.text.Element: javax.swing.text.Document getDocument()>();
+
+        r0.<javax.swing.text.AbstractWriter: javax.swing.text.Document doc> = $r2;
+
+        $r3 = new javax.swing.text.ElementIterator;
+
+        specialinvoke $r3.<javax.swing.text.ElementIterator: void <init>(javax.swing.text.Element)>(r1);
+
+        r0.<javax.swing.text.AbstractWriter: javax.swing.text.ElementIterator it> = $r3;
+
+        r0.<javax.swing.text.AbstractWriter: java.io.Writer out> = r4;
+
+        r0.<javax.swing.text.AbstractWriter: int startOffset> = i0;
+
+        $i2 = i0 + i1;
+
+        r0.<javax.swing.text.AbstractWriter: int endOffset> = $i2;
+
+        r0.<javax.swing.text.AbstractWriter: boolean canWrapLines> = 1;
+
+        return;
+    }
+
+    public int getStartOffset()
+    {
+        int $i0;
+        javax.swing.text.AbstractWriter r0;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        $i0 = r0.<javax.swing.text.AbstractWriter: int startOffset>;
+
+        return $i0;
+    }
+
+    public int getEndOffset()
+    {
+        int $i0;
+        javax.swing.text.AbstractWriter r0;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        $i0 = r0.<javax.swing.text.AbstractWriter: int endOffset>;
+
+        return $i0;
+    }
+
+    protected javax.swing.text.ElementIterator getElementIterator()
+    {
+        javax.swing.text.ElementIterator $r1;
+        javax.swing.text.AbstractWriter r0;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        $r1 = r0.<javax.swing.text.AbstractWriter: javax.swing.text.ElementIterator it>;
+
+        return $r1;
+    }
+
+    protected java.io.Writer getWriter()
+    {
+        java.io.Writer $r1;
+        javax.swing.text.AbstractWriter r0;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        $r1 = r0.<javax.swing.text.AbstractWriter: java.io.Writer out>;
+
+        return $r1;
+    }
+
+    protected javax.swing.text.Document getDocument()
+    {
+        javax.swing.text.Document $r1;
+        javax.swing.text.AbstractWriter r0;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        $r1 = r0.<javax.swing.text.AbstractWriter: javax.swing.text.Document doc>;
+
+        return $r1;
+    }
+
+    protected boolean inRange(javax.swing.text.Element)
+    {
+        javax.swing.text.AbstractWriter r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        javax.swing.text.Element r1;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        r1 := @parameter0: javax.swing.text.Element;
+
+        $i0 = virtualinvoke r0.<javax.swing.text.AbstractWriter: int getStartOffset()>();
+
+        $i1 = virtualinvoke r0.<javax.swing.text.AbstractWriter: int getEndOffset()>();
+
+        $i2 = interfaceinvoke r1.<javax.swing.text.Element: int getStartOffset()>();
+
+        if $i2 < $i0 goto label1;
+
+        $i5 = interfaceinvoke r1.<javax.swing.text.Element: int getStartOffset()>();
+
+        if $i5 < $i1 goto label2;
+
+     label1:
+        $i3 = interfaceinvoke r1.<javax.swing.text.Element: int getStartOffset()>();
+
+        if $i0 < $i3 goto label3;
+
+        $i4 = interfaceinvoke r1.<javax.swing.text.Element: int getEndOffset()>();
+
+        if $i0 >= $i4 goto label3;
+
+     label2:
+        return 1;
+
+     label3:
+        return 0;
+    }
+
+    protected abstract void write() throws java.io.IOException, javax.swing.text.BadLocationException;
+
+    protected java.lang.String getText(javax.swing.text.Element) throws javax.swing.text.BadLocationException
+    {
+        javax.swing.text.AbstractWriter r0;
+        int $i0, $i1, $i2, $i3;
+        javax.swing.text.Document $r2;
+        java.lang.String $r3;
+        javax.swing.text.Element r1;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        r1 := @parameter0: javax.swing.text.Element;
+
+        $r2 = r0.<javax.swing.text.AbstractWriter: javax.swing.text.Document doc>;
+
+        $i0 = interfaceinvoke r1.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i1 = interfaceinvoke r1.<javax.swing.text.Element: int getEndOffset()>();
+
+        $i2 = interfaceinvoke r1.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i3 = $i1 - $i2;
+
+        $r3 = interfaceinvoke $r2.<javax.swing.text.Document: java.lang.String getText(int,int)>($i0, $i3);
+
+        return $r3;
+    }
+
+    protected void text(javax.swing.text.Element) throws javax.swing.text.BadLocationException, java.io.IOException
+    {
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9;
+        javax.swing.text.AbstractWriter r0;
+        char[] $r9;
+        javax.swing.text.Segment $r2, $r4, $r5, $r6, $r7, $r8, $r10;
+        javax.swing.text.Document $r3;
+        javax.swing.text.Element r1;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        r1 := @parameter0: javax.swing.text.Element;
+
+        $i0 = virtualinvoke r0.<javax.swing.text.AbstractWriter: int getStartOffset()>();
+
+        $i1 = interfaceinvoke r1.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i2 = staticinvoke <java.lang.Math: int max(int,int)>($i0, $i1);
+
+        $i3 = virtualinvoke r0.<javax.swing.text.AbstractWriter: int getEndOffset()>();
+
+        $i4 = interfaceinvoke r1.<javax.swing.text.Element: int getEndOffset()>();
+
+        $i5 = staticinvoke <java.lang.Math: int min(int,int)>($i3, $i4);
+
+        if $i2 >= $i5 goto label2;
+
+        $r2 = r0.<javax.swing.text.AbstractWriter: javax.swing.text.Segment segment>;
+
+        if $r2 != null goto label1;
+
+        $r10 = new javax.swing.text.Segment;
+
+        specialinvoke $r10.<javax.swing.text.Segment: void <init>()>();
+
+        r0.<javax.swing.text.AbstractWriter: javax.swing.text.Segment segment> = $r10;
+
+     label1:
+        $r3 = virtualinvoke r0.<javax.swing.text.AbstractWriter: javax.swing.text.Document getDocument()>();
+
+        $i6 = $i5 - $i2;
+
+        $r4 = r0.<javax.swing.text.AbstractWriter: javax.swing.text.Segment segment>;
+
+        interfaceinvoke $r3.<javax.swing.text.Document: void getText(int,int,javax.swing.text.Segment)>($i2, $i6, $r4);
+
+        $r5 = r0.<javax.swing.text.AbstractWriter: javax.swing.text.Segment segment>;
+
+        $i7 = $r5.<javax.swing.text.Segment: int count>;
+
+        if $i7 <= 0 goto label2;
+
+        $r6 = r0.<javax.swing.text.AbstractWriter: javax.swing.text.Segment segment>;
+
+        $r9 = $r6.<javax.swing.text.Segment: char[] array>;
+
+        $r7 = r0.<javax.swing.text.AbstractWriter: javax.swing.text.Segment segment>;
+
+        $i9 = $r7.<javax.swing.text.Segment: int offset>;
+
+        $r8 = r0.<javax.swing.text.AbstractWriter: javax.swing.text.Segment segment>;
+
+        $i8 = $r8.<javax.swing.text.Segment: int count>;
+
+        virtualinvoke r0.<javax.swing.text.AbstractWriter: void write(char[],int,int)>($r9, $i9, $i8);
+
+     label2:
+        return;
+    }
+
+    protected void setLineLength(int)
+    {
+        int i0;
+        javax.swing.text.AbstractWriter r0;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        i0 := @parameter0: int;
+
+        r0.<javax.swing.text.AbstractWriter: int maxLineLength> = i0;
+
+        return;
+    }
+
+    protected int getLineLength()
+    {
+        int $i0;
+        javax.swing.text.AbstractWriter r0;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        $i0 = r0.<javax.swing.text.AbstractWriter: int maxLineLength>;
+
+        return $i0;
+    }
+
+    protected void setCurrentLineLength(int)
+    {
+        int i0, $i1;
+        javax.swing.text.AbstractWriter r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        i0 := @parameter0: int;
+
+        r0.<javax.swing.text.AbstractWriter: int currLength> = i0;
+
+        $i1 = r0.<javax.swing.text.AbstractWriter: int currLength>;
+
+        if $i1 != 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        r0.<javax.swing.text.AbstractWriter: boolean isLineEmpty> = $z0;
+
+        return;
+    }
+
+    protected int getCurrentLineLength()
+    {
+        int $i0;
+        javax.swing.text.AbstractWriter r0;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        $i0 = r0.<javax.swing.text.AbstractWriter: int currLength>;
+
+        return $i0;
+    }
+
+    protected boolean isLineEmpty()
+    {
+        javax.swing.text.AbstractWriter r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        $z0 = r0.<javax.swing.text.AbstractWriter: boolean isLineEmpty>;
+
+        return $z0;
+    }
+
+    protected void setCanWrapLines(boolean)
+    {
+        javax.swing.text.AbstractWriter r0;
+        boolean z0;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        z0 := @parameter0: boolean;
+
+        r0.<javax.swing.text.AbstractWriter: boolean canWrapLines> = z0;
+
+        return;
+    }
+
+    protected boolean getCanWrapLines()
+    {
+        javax.swing.text.AbstractWriter r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        $z0 = r0.<javax.swing.text.AbstractWriter: boolean canWrapLines>;
+
+        return $z0;
+    }
+
+    protected void setIndentSpace(int)
+    {
+        int i0;
+        javax.swing.text.AbstractWriter r0;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        i0 := @parameter0: int;
+
+        r0.<javax.swing.text.AbstractWriter: int indentSpace> = i0;
+
+        return;
+    }
+
+    protected int getIndentSpace()
+    {
+        int $i0;
+        javax.swing.text.AbstractWriter r0;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        $i0 = r0.<javax.swing.text.AbstractWriter: int indentSpace>;
+
+        return $i0;
+    }
+
+    public void setLineSeparator(java.lang.String)
+    {
+        java.lang.String r1;
+        javax.swing.text.AbstractWriter r0;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0.<javax.swing.text.AbstractWriter: java.lang.String lineSeparator> = r1;
+
+        return;
+    }
+
+    public java.lang.String getLineSeparator()
+    {
+        java.lang.String $r1;
+        javax.swing.text.AbstractWriter r0;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        $r1 = r0.<javax.swing.text.AbstractWriter: java.lang.String lineSeparator>;
+
+        return $r1;
+    }
+
+    protected void incrIndent()
+    {
+        javax.swing.text.AbstractWriter r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        $i0 = r0.<javax.swing.text.AbstractWriter: int offsetIndent>;
+
+        if $i0 <= 0 goto label1;
+
+        $i10 = r0.<javax.swing.text.AbstractWriter: int offsetIndent>;
+
+        $i11 = $i10 + 1;
+
+        r0.<javax.swing.text.AbstractWriter: int offsetIndent> = $i11;
+
+        goto label2;
+
+     label1:
+        $i1 = r0.<javax.swing.text.AbstractWriter: int indentLevel>;
+
+        $i2 = $i1 + 1;
+
+        r0.<javax.swing.text.AbstractWriter: int indentLevel> = $i2;
+
+        $i3 = virtualinvoke r0.<javax.swing.text.AbstractWriter: int getIndentSpace()>();
+
+        $i4 = $i2 * $i3;
+
+        $i5 = virtualinvoke r0.<javax.swing.text.AbstractWriter: int getLineLength()>();
+
+        if $i4 < $i5 goto label2;
+
+        $i6 = r0.<javax.swing.text.AbstractWriter: int offsetIndent>;
+
+        $i7 = $i6 + 1;
+
+        r0.<javax.swing.text.AbstractWriter: int offsetIndent> = $i7;
+
+        $i8 = r0.<javax.swing.text.AbstractWriter: int indentLevel>;
+
+        $i9 = $i8 - 1;
+
+        r0.<javax.swing.text.AbstractWriter: int indentLevel> = $i9;
+
+     label2:
+        return;
+    }
+
+    protected void decrIndent()
+    {
+        int $i0, $i1, $i2, $i3, $i4;
+        javax.swing.text.AbstractWriter r0;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        $i0 = r0.<javax.swing.text.AbstractWriter: int offsetIndent>;
+
+        if $i0 <= 0 goto label1;
+
+        $i3 = r0.<javax.swing.text.AbstractWriter: int offsetIndent>;
+
+        $i4 = $i3 - 1;
+
+        r0.<javax.swing.text.AbstractWriter: int offsetIndent> = $i4;
+
+        goto label2;
+
+     label1:
+        $i1 = r0.<javax.swing.text.AbstractWriter: int indentLevel>;
+
+        $i2 = $i1 - 1;
+
+        r0.<javax.swing.text.AbstractWriter: int indentLevel> = $i2;
+
+     label2:
+        return;
+    }
+
+    protected int getIndentLevel()
+    {
+        int $i0;
+        javax.swing.text.AbstractWriter r0;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        $i0 = r0.<javax.swing.text.AbstractWriter: int indentLevel>;
+
+        return $i0;
+    }
+
+    protected void indent() throws java.io.IOException
+    {
+        javax.swing.text.AbstractWriter r0;
+        int $i0, $i1, i2, $i3, $i4, i5;
+        char[] $r1, $r2, $r3, $r4, $r5;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        $i0 = virtualinvoke r0.<javax.swing.text.AbstractWriter: int getIndentLevel()>();
+
+        $i1 = virtualinvoke r0.<javax.swing.text.AbstractWriter: int getIndentSpace()>();
+
+        i2 = $i0 * $i1;
+
+        $r1 = r0.<javax.swing.text.AbstractWriter: char[] indentChars>;
+
+        if $r1 == null goto label1;
+
+        $r5 = r0.<javax.swing.text.AbstractWriter: char[] indentChars>;
+
+        $i4 = lengthof $r5;
+
+        if i2 <= $i4 goto label3;
+
+     label1:
+        $r2 = newarray (char)[i2];
+
+        r0.<javax.swing.text.AbstractWriter: char[] indentChars> = $r2;
+
+        i5 = 0;
+
+     label2:
+        if i5 >= i2 goto label3;
+
+        $r4 = r0.<javax.swing.text.AbstractWriter: char[] indentChars>;
+
+        $r4[i5] = 32;
+
+        i5 = i5 + 1;
+
+        goto label2;
+
+     label3:
+        $i3 = virtualinvoke r0.<javax.swing.text.AbstractWriter: int getCurrentLineLength()>();
+
+        $z0 = virtualinvoke r0.<javax.swing.text.AbstractWriter: boolean isLineEmpty()>();
+
+        $r3 = r0.<javax.swing.text.AbstractWriter: char[] indentChars>;
+
+        virtualinvoke r0.<javax.swing.text.AbstractWriter: void output(char[],int,int)>($r3, 0, i2);
+
+        if $z0 == 0 goto label4;
+
+        if $i3 != 0 goto label4;
+
+        r0.<javax.swing.text.AbstractWriter: boolean isLineEmpty> = 1;
+
+     label4:
+        return;
+    }
+
+    protected void write(char) throws java.io.IOException
+    {
+        char[] $r1, $r2, $r3, $r4;
+        char c0;
+        javax.swing.text.AbstractWriter r0;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        c0 := @parameter0: char;
+
+        $r1 = r0.<javax.swing.text.AbstractWriter: char[] tempChars>;
+
+        if $r1 != null goto label1;
+
+        $r4 = newarray (char)[128];
+
+        r0.<javax.swing.text.AbstractWriter: char[] tempChars> = $r4;
+
+     label1:
+        $r2 = r0.<javax.swing.text.AbstractWriter: char[] tempChars>;
+
+        $r2[0] = c0;
+
+        $r3 = r0.<javax.swing.text.AbstractWriter: char[] tempChars>;
+
+        virtualinvoke r0.<javax.swing.text.AbstractWriter: void write(char[],int,int)>($r3, 0, 1);
+
+        return;
+    }
+
+    protected void write(java.lang.String) throws java.io.IOException
+    {
+        javax.swing.text.AbstractWriter r1;
+        int $i0, $i1;
+        char[] $r2, $r3, $r4, $r5, $r6;
+        java.lang.String r0;
+
+        r1 := @this: javax.swing.text.AbstractWriter;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $r2 = r1.<javax.swing.text.AbstractWriter: char[] tempChars>;
+
+        if $r2 == null goto label2;
+
+        $r4 = r1.<javax.swing.text.AbstractWriter: char[] tempChars>;
+
+        $i1 = lengthof $r4;
+
+        if $i1 >= $i0 goto label3;
+
+     label2:
+        $r3 = newarray (char)[$i0];
+
+        r1.<javax.swing.text.AbstractWriter: char[] tempChars> = $r3;
+
+     label3:
+        $r5 = r1.<javax.swing.text.AbstractWriter: char[] tempChars>;
+
+        virtualinvoke r0.<java.lang.String: void getChars(int,int,char[],int)>(0, $i0, $r5, 0);
+
+        $r6 = r1.<javax.swing.text.AbstractWriter: char[] tempChars>;
+
+        virtualinvoke r1.<javax.swing.text.AbstractWriter: void write(char[],int,int)>($r6, 0, $i0);
+
+        return;
+    }
+
+    protected void writeLineSeparator() throws java.io.IOException
+    {
+        javax.swing.text.AbstractWriter r0;
+        int $i0, $i1;
+        char[] $r2, $r3, $r4, $r5, $r6;
+        java.lang.String $r1;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.AbstractWriter: java.lang.String getLineSeparator()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $r2 = r0.<javax.swing.text.AbstractWriter: char[] newlineChars>;
+
+        if $r2 == null goto label1;
+
+        $r4 = r0.<javax.swing.text.AbstractWriter: char[] newlineChars>;
+
+        $i1 = lengthof $r4;
+
+        if $i1 >= $i0 goto label2;
+
+     label1:
+        $r3 = newarray (char)[$i0];
+
+        r0.<javax.swing.text.AbstractWriter: char[] newlineChars> = $r3;
+
+     label2:
+        $r5 = r0.<javax.swing.text.AbstractWriter: char[] newlineChars>;
+
+        virtualinvoke $r1.<java.lang.String: void getChars(int,int,char[],int)>(0, $i0, $r5, 0);
+
+        $r6 = r0.<javax.swing.text.AbstractWriter: char[] newlineChars>;
+
+        virtualinvoke r0.<javax.swing.text.AbstractWriter: void output(char[],int,int)>($r6, 0, $i0);
+
+        virtualinvoke r0.<javax.swing.text.AbstractWriter: void setCurrentLineLength(int)>(0);
+
+        return;
+    }
+
+    protected void write(char[], int, int) throws java.io.IOException
+    {
+        boolean $z0, $z1, $z2, z3, z4, z5, z6;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i10, $i11, $i12, $i13, $i15, $i16, $i17, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, i28, i29, i30, i31, i32, i33, i34, i35, i36, i37, i38, i39, $i41, $i43, $i45, $i47, $i49, $i51, $i52;
+        char $c9, $c14, $c18;
+        javax.swing.text.AbstractWriter r0;
+        char[] r1;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        r1 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $z0 = virtualinvoke r0.<javax.swing.text.AbstractWriter: boolean getCanWrapLines()>();
+
+        if $z0 != 0 goto label05;
+
+        i28 = i0;
+
+        i29 = i0 + i1;
+
+        i30 = specialinvoke r0.<javax.swing.text.AbstractWriter: int indexOf(char[],char,int,int)>(r1, 10, i0, i29);
+
+     label01:
+        $i41 = (int) -1;
+
+        if i30 == $i41 goto label03;
+
+        if i30 <= i28 goto label02;
+
+        $i26 = i30 - i28;
+
+        virtualinvoke r0.<javax.swing.text.AbstractWriter: void output(char[],int,int)>(r1, i28, $i26);
+
+     label02:
+        virtualinvoke r0.<javax.swing.text.AbstractWriter: void writeLineSeparator()>();
+
+        $i27 = i30 + 1;
+
+        i28 = $i27;
+
+        i30 = specialinvoke r0.<javax.swing.text.AbstractWriter: int indexOf(char[],char,int,int)>(r1, 10, $i27, i29);
+
+        goto label01;
+
+     label03:
+        if i28 >= i29 goto label04;
+
+        $i25 = i29 - i28;
+
+        virtualinvoke r0.<javax.swing.text.AbstractWriter: void output(char[],int,int)>(r1, i28, $i25);
+
+     label04:
+        goto label25;
+
+     label05:
+        i31 = i0;
+
+        i32 = i0 + i1;
+
+        virtualinvoke r0.<javax.swing.text.AbstractWriter: int getCurrentLineLength()>();
+
+        $i2 = virtualinvoke r0.<javax.swing.text.AbstractWriter: int getLineLength()>();
+
+     label06:
+        if i31 >= i32 goto label25;
+
+        $i3 = specialinvoke r0.<javax.swing.text.AbstractWriter: int indexOf(char[],char,int,int)>(r1, 10, i31, i32);
+
+        z3 = 0;
+
+        z4 = 0;
+
+        z6 = 0;
+
+        z5 = 0;
+
+        $i4 = virtualinvoke r0.<javax.swing.text.AbstractWriter: int getCurrentLineLength()>();
+
+        $i43 = (int) -1;
+
+        if $i3 == $i43 goto label08;
+
+        $i22 = $i3 - i31;
+
+        $i23 = $i4 + $i22;
+
+        if $i23 >= $i2 goto label08;
+
+        if $i3 <= i31 goto label07;
+
+        $i24 = $i3 - i31;
+
+        virtualinvoke r0.<javax.swing.text.AbstractWriter: void output(char[],int,int)>(r1, i31, $i24);
+
+     label07:
+        i31 = $i3 + 1;
+
+        z4 = 1;
+
+        z6 = 1;
+
+        z5 = 1;
+
+        goto label21;
+
+     label08:
+        $i45 = (int) -1;
+
+        if $i3 != $i45 goto label10;
+
+        $i19 = i32 - i31;
+
+        $i20 = $i4 + $i19;
+
+        if $i20 >= $i2 goto label10;
+
+        if i32 <= i31 goto label09;
+
+        $i21 = i32 - i31;
+
+        virtualinvoke r0.<javax.swing.text.AbstractWriter: void output(char[],int,int)>(r1, i31, $i21);
+
+     label09:
+        i31 = i32;
+
+        goto label21;
+
+     label10:
+        $i47 = (int) -1;
+
+        i33 = $i47;
+
+        $i7 = i32 - i31;
+
+        $i5 = $i2 - $i4;
+
+        $i6 = $i5 - 1;
+
+        $i8 = staticinvoke <java.lang.Math: int min(int,int)>($i7, $i6);
+
+        i34 = 0;
+
+     label11:
+        if i34 >= $i8 goto label13;
+
+        $i17 = i34 + i31;
+
+        $c18 = r1[$i17];
+
+        $z2 = staticinvoke <java.lang.Character: boolean isWhitespace(char)>($c18);
+
+        if $z2 == 0 goto label12;
+
+        i33 = i34;
+
+     label12:
+        i34 = i34 + 1;
+
+        goto label11;
+
+     label13:
+        $i49 = (int) -1;
+
+        if i33 == $i49 goto label14;
+
+        $i15 = i31 + 1;
+
+        i35 = i33 + $i15;
+
+        $i16 = i35 - i31;
+
+        virtualinvoke r0.<javax.swing.text.AbstractWriter: void output(char[],int,int)>(r1, i31, $i16);
+
+        i31 = i35;
+
+        z3 = 1;
+
+        goto label21;
+
+     label14:
+        i36 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i8);
+
+        i37 = i32 - i31;
+
+     label15:
+        if i36 >= i37 goto label17;
+
+        $i13 = i36 + i31;
+
+        $c14 = r1[$i13];
+
+        $z1 = staticinvoke <java.lang.Character: boolean isWhitespace(char)>($c14);
+
+        if $z1 == 0 goto label16;
+
+        i33 = i36;
+
+        goto label17;
+
+     label16:
+        i36 = i36 + 1;
+
+        goto label15;
+
+     label17:
+        $i51 = (int) -1;
+
+        if i33 != $i51 goto label18;
+
+        $i12 = i32 - i31;
+
+        virtualinvoke r0.<javax.swing.text.AbstractWriter: void output(char[],int,int)>(r1, i31, $i12);
+
+        i38 = i32;
+
+        goto label20;
+
+     label18:
+        i39 = i33 + i31;
+
+        $c9 = r1[i39];
+
+        $i52 = (int) $c9;
+
+        if $i52 != 10 goto label19;
+
+        i38 = i39 + 1;
+
+        $i11 = i39 - i31;
+
+        virtualinvoke r0.<javax.swing.text.AbstractWriter: void output(char[],int,int)>(r1, i31, $i11);
+
+        z4 = 1;
+
+        z6 = 1;
+
+        z5 = 1;
+
+        goto label20;
+
+     label19:
+        i38 = i39 + 1;
+
+        $i10 = i38 - i31;
+
+        virtualinvoke r0.<javax.swing.text.AbstractWriter: void output(char[],int,int)>(r1, i31, $i10);
+
+        z3 = 1;
+
+     label20:
+        i31 = i38;
+
+     label21:
+        if z5 != 0 goto label22;
+
+        if z3 != 0 goto label22;
+
+        if i31 >= i32 goto label24;
+
+     label22:
+        virtualinvoke r0.<javax.swing.text.AbstractWriter: void writeLineSeparator()>();
+
+        if i31 < i32 goto label23;
+
+        if z6 != 0 goto label24;
+
+     label23:
+        virtualinvoke r0.<javax.swing.text.AbstractWriter: void indent()>();
+
+     label24:
+        goto label06;
+
+     label25:
+        return;
+    }
+
+    protected void writeAttributes(javax.swing.text.AttributeSet) throws java.io.IOException
+    {
+        java.util.Enumeration $r1;
+        javax.swing.text.AbstractWriter r3;
+        java.lang.Object $r2, $r8;
+        java.lang.StringBuilder $r4, $r5, $r6, $r7, $r9;
+        java.lang.String $r10;
+        javax.swing.text.AttributeSet r0;
+        boolean $z0;
+
+        r3 := @this: javax.swing.text.AbstractWriter;
+
+        r0 := @parameter0: javax.swing.text.AttributeSet;
+
+        $r1 = interfaceinvoke r0.<javax.swing.text.AttributeSet: java.util.Enumeration getAttributeNames()>();
+
+     label1:
+        $z0 = interfaceinvoke $r1.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label2;
+
+        $r2 = interfaceinvoke $r1.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("=");
+
+        $r8 = interfaceinvoke r0.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r2);
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r3.<javax.swing.text.AbstractWriter: void write(java.lang.String)>($r10);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    protected void output(char[], int, int) throws java.io.IOException
+    {
+        java.io.Writer $r1;
+        int i0, i1, $i2, $i3;
+        char[] r2;
+        javax.swing.text.AbstractWriter r0;
+
+        r0 := @this: javax.swing.text.AbstractWriter;
+
+        r2 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.AbstractWriter: java.io.Writer getWriter()>();
+
+        virtualinvoke $r1.<java.io.Writer: void write(char[],int,int)>(r2, i0, i1);
+
+        $i2 = virtualinvoke r0.<javax.swing.text.AbstractWriter: int getCurrentLineLength()>();
+
+        $i3 = $i2 + i1;
+
+        virtualinvoke r0.<javax.swing.text.AbstractWriter: void setCurrentLineLength(int)>($i3);
+
+        return;
+    }
+
+    private int indexOf(char[], char, int, int)
+    {
+        char c1, $c2;
+        javax.swing.text.AbstractWriter r1;
+        int i0, i3, $i4, $i5, $i7;
+        char[] r0;
+
+        r1 := @this: javax.swing.text.AbstractWriter;
+
+        r0 := @parameter0: char[];
+
+        c1 := @parameter1: char;
+
+        i3 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+     label1:
+        if i3 >= i0 goto label3;
+
+        $c2 = r0[i3];
+
+        $i4 = (int) $c2;
+
+        $i5 = (int) c1;
+
+        if $i4 != $i5 goto label2;
+
+        return i3;
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        $i7 = (int) -1;
+
+        return $i7;
+    }
+
+    public static void <clinit>()
+    {
+        <javax.swing.text.AbstractWriter: char NEWLINE> = 10;
+
+        return;
+    }
+}

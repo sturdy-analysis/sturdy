@@ -1,0 +1,1300 @@
+final class sun.rmi.transport.tcp.ConnectionMultiplexer extends java.lang.Object
+{
+    static int logLevel;
+    static final sun.rmi.runtime.Log multiplexLog;
+    private static final int OPEN;
+    private static final int CLOSE;
+    private static final int CLOSEACK;
+    private static final int REQUEST;
+    private static final int TRANSMIT;
+    private sun.rmi.transport.tcp.TCPChannel channel;
+    private java.io.InputStream in;
+    private java.io.OutputStream out;
+    private boolean orig;
+    private java.io.DataInputStream dataIn;
+    private java.io.DataOutputStream dataOut;
+    private java.util.Hashtable connectionTable;
+    private int numConnections;
+    private static final int maxConnections;
+    private int lastID;
+    private boolean alive;
+
+    private static java.lang.String getLogLevel()
+    {
+        java.lang.Object $r1;
+        java.lang.String $r2;
+        sun.security.action.GetPropertyAction $r0;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("sun.rmi.transport.tcp.multiplex.logLevel");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r2 = (java.lang.String) $r1;
+
+        return $r2;
+    }
+
+    public void <init>(sun.rmi.transport.tcp.TCPChannel, java.io.InputStream, java.io.OutputStream, boolean)
+    {
+        java.io.OutputStream r4;
+        java.io.DataInputStream $r5;
+        sun.rmi.transport.tcp.ConnectionMultiplexer r0;
+        java.io.DataOutputStream $r6;
+        sun.rmi.transport.tcp.TCPChannel r2;
+        java.util.Hashtable $r1;
+        java.io.InputStream r3;
+        boolean z0;
+
+        r0 := @this: sun.rmi.transport.tcp.ConnectionMultiplexer;
+
+        r2 := @parameter0: sun.rmi.transport.tcp.TCPChannel;
+
+        r3 := @parameter1: java.io.InputStream;
+
+        r4 := @parameter2: java.io.OutputStream;
+
+        z0 := @parameter3: boolean;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.Hashtable;
+
+        specialinvoke $r1.<java.util.Hashtable: void <init>(int)>(7);
+
+        r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.util.Hashtable connectionTable> = $r1;
+
+        r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: int numConnections> = 0;
+
+        r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: int lastID> = 4097;
+
+        r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: boolean alive> = 1;
+
+        r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: sun.rmi.transport.tcp.TCPChannel channel> = r2;
+
+        r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.InputStream in> = r3;
+
+        r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.OutputStream out> = r4;
+
+        r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: boolean orig> = z0;
+
+        $r5 = new java.io.DataInputStream;
+
+        specialinvoke $r5.<java.io.DataInputStream: void <init>(java.io.InputStream)>(r3);
+
+        r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataInputStream dataIn> = $r5;
+
+        $r6 = new java.io.DataOutputStream;
+
+        specialinvoke $r6.<java.io.DataOutputStream: void <init>(java.io.OutputStream)>(r4);
+
+        r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataOutputStream dataOut> = $r6;
+
+        return;
+    }
+
+    public void run() throws java.io.IOException
+    {
+        sun.rmi.transport.tcp.MultiplexConnectionInfo $r55, $r74, $r81, $r99, r111, r112;
+        java.lang.Integer $r3, $r21, $r40, $r46, $r60, $r66, $r79, $r86;
+        sun.rmi.transport.tcp.TCPConnection $r87;
+        sun.rmi.transport.tcp.MultiplexOutputStream $r26, $r43, $r63, $r83, $r88;
+        java.lang.StringBuilder $r10, $r13, $r14, $r15, $r16, $r27, $r30, $r31, $r32, $r33, $r49, $r52, $r53, $r68, $r71, $r72, $r93, $r96, $r97, $r101, $r102, $r104;
+        java.io.IOException $r18, $r35, $r47, $r48, $r67, $r92, $r100;
+        sun.rmi.transport.tcp.MultiplexInputStream $r9, $r42, $r62, $r82, $r89;
+        java.io.DataInputStream $r1, $r5, $r8, $r19, $r23, $r36, $r56, $r75, $r110;
+        java.util.logging.Level $r6, $r12, $r24, $r29, $r37, $r51, $r57, $r70, $r76, $r95;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13;
+        java.lang.Object $r4, $r22, $r41, $r61, $r80;
+        sun.rmi.runtime.Log $r7, $r11, $r25, $r28, $r38, $r50, $r58, $r69, $r77, $r94;
+        sun.rmi.transport.tcp.ConnectionMultiplexer r0;
+        java.lang.Throwable $r106, $r107, $r108, $r109;
+        java.lang.String $r17, $r34, $r54, $r73, $r98, $r103, $r105;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        sun.rmi.transport.tcp.TCPChannel $r90, $r91;
+        java.util.Hashtable $r2, $r20, $r39, $r44, $r45, $r59, $r64, $r65, $r78, $r84, $r85;
+
+        r0 := @this: sun.rmi.transport.tcp.ConnectionMultiplexer;
+
+     label01:
+        $r110 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataInputStream dataIn>;
+
+        $i13 = virtualinvoke $r110.<java.io.DataInputStream: int readUnsignedByte()>();
+
+        tableswitch($i13)
+        {
+            case 225: goto label02;
+            case 226: goto label10;
+            case 227: goto label19;
+            case 228: goto label28;
+            case 229: goto label31;
+            default: goto label34;
+        };
+
+     label02:
+        $r75 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataInputStream dataIn>;
+
+        $i10 = virtualinvoke $r75.<java.io.DataInputStream: int readUnsignedShort()>();
+
+        $r77 = <sun.rmi.transport.tcp.ConnectionMultiplexer: sun.rmi.runtime.Log multiplexLog>;
+
+        $r76 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z6 = virtualinvoke $r77.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r76);
+
+        if $z6 == 0 goto label03;
+
+        $r94 = <sun.rmi.transport.tcp.ConnectionMultiplexer: sun.rmi.runtime.Log multiplexLog>;
+
+        $r95 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r93 = new java.lang.StringBuilder;
+
+        specialinvoke $r93.<java.lang.StringBuilder: void <init>()>();
+
+        $r96 = virtualinvoke $r93.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("operation  OPEN ");
+
+        $r97 = virtualinvoke $r96.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i10);
+
+        $r98 = virtualinvoke $r97.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r94.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r95, $r98);
+
+     label03:
+        $r78 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.util.Hashtable connectionTable>;
+
+        $r79 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i10);
+
+        $r80 = virtualinvoke $r78.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r79);
+
+        $r99 = (sun.rmi.transport.tcp.MultiplexConnectionInfo) $r80;
+
+        if $r99 == null goto label04;
+
+        $r92 = new java.io.IOException;
+
+        specialinvoke $r92.<java.io.IOException: void <init>(java.lang.String)>("OPEN: Connection ID already exists");
+
+        throw $r92;
+
+     label04:
+        $r81 = new sun.rmi.transport.tcp.MultiplexConnectionInfo;
+
+        specialinvoke $r81.<sun.rmi.transport.tcp.MultiplexConnectionInfo: void <init>(int)>($i10);
+
+        $r82 = new sun.rmi.transport.tcp.MultiplexInputStream;
+
+        specialinvoke $r82.<sun.rmi.transport.tcp.MultiplexInputStream: void <init>(sun.rmi.transport.tcp.ConnectionMultiplexer,sun.rmi.transport.tcp.MultiplexConnectionInfo,int)>(r0, $r81, 2048);
+
+        $r81.<sun.rmi.transport.tcp.MultiplexConnectionInfo: sun.rmi.transport.tcp.MultiplexInputStream in> = $r82;
+
+        $r83 = new sun.rmi.transport.tcp.MultiplexOutputStream;
+
+        specialinvoke $r83.<sun.rmi.transport.tcp.MultiplexOutputStream: void <init>(sun.rmi.transport.tcp.ConnectionMultiplexer,sun.rmi.transport.tcp.MultiplexConnectionInfo,int)>(r0, $r81, 2048);
+
+        $r81.<sun.rmi.transport.tcp.MultiplexConnectionInfo: sun.rmi.transport.tcp.MultiplexOutputStream out> = $r83;
+
+        $r84 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.util.Hashtable connectionTable>;
+
+        entermonitor $r84;
+
+     label05:
+        $r85 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.util.Hashtable connectionTable>;
+
+        $r86 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i10);
+
+        virtualinvoke $r85.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r86, $r81);
+
+        $i11 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: int numConnections>;
+
+        $i12 = $i11 + 1;
+
+        r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: int numConnections> = $i12;
+
+        exitmonitor $r84;
+
+     label06:
+        goto label09;
+
+     label07:
+        $r109 := @caughtexception;
+
+        exitmonitor $r84;
+
+     label08:
+        throw $r109;
+
+     label09:
+        $r87 = new sun.rmi.transport.tcp.TCPConnection;
+
+        $r90 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: sun.rmi.transport.tcp.TCPChannel channel>;
+
+        $r89 = $r81.<sun.rmi.transport.tcp.MultiplexConnectionInfo: sun.rmi.transport.tcp.MultiplexInputStream in>;
+
+        $r88 = $r81.<sun.rmi.transport.tcp.MultiplexConnectionInfo: sun.rmi.transport.tcp.MultiplexOutputStream out>;
+
+        specialinvoke $r87.<sun.rmi.transport.tcp.TCPConnection: void <init>(sun.rmi.transport.tcp.TCPChannel,java.io.InputStream,java.io.OutputStream)>($r90, $r89, $r88);
+
+        $r91 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: sun.rmi.transport.tcp.TCPChannel channel>;
+
+        virtualinvoke $r91.<sun.rmi.transport.tcp.TCPChannel: void acceptMultiplexConnection(sun.rmi.transport.Connection)>($r87);
+
+        goto label01;
+
+     label10:
+        $r56 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataInputStream dataIn>;
+
+        $i7 = virtualinvoke $r56.<java.io.DataInputStream: int readUnsignedShort()>();
+
+        $r58 = <sun.rmi.transport.tcp.ConnectionMultiplexer: sun.rmi.runtime.Log multiplexLog>;
+
+        $r57 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z4 = virtualinvoke $r58.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r57);
+
+        if $z4 == 0 goto label11;
+
+        $r69 = <sun.rmi.transport.tcp.ConnectionMultiplexer: sun.rmi.runtime.Log multiplexLog>;
+
+        $r70 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r68 = new java.lang.StringBuilder;
+
+        specialinvoke $r68.<java.lang.StringBuilder: void <init>()>();
+
+        $r71 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("operation  CLOSE ");
+
+        $r72 = virtualinvoke $r71.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i7);
+
+        $r73 = virtualinvoke $r72.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r69.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r70, $r73);
+
+     label11:
+        $r59 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.util.Hashtable connectionTable>;
+
+        $r60 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i7);
+
+        $r61 = virtualinvoke $r59.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r60);
+
+        $r74 = (sun.rmi.transport.tcp.MultiplexConnectionInfo) $r61;
+
+        if $r74 != null goto label12;
+
+        $r67 = new java.io.IOException;
+
+        specialinvoke $r67.<java.io.IOException: void <init>(java.lang.String)>("CLOSE: Invalid connection ID");
+
+        throw $r67;
+
+     label12:
+        $r62 = $r74.<sun.rmi.transport.tcp.MultiplexConnectionInfo: sun.rmi.transport.tcp.MultiplexInputStream in>;
+
+        virtualinvoke $r62.<sun.rmi.transport.tcp.MultiplexInputStream: void disconnect()>();
+
+        $r63 = $r74.<sun.rmi.transport.tcp.MultiplexConnectionInfo: sun.rmi.transport.tcp.MultiplexOutputStream out>;
+
+        virtualinvoke $r63.<sun.rmi.transport.tcp.MultiplexOutputStream: void disconnect()>();
+
+        $z5 = $r74.<sun.rmi.transport.tcp.MultiplexConnectionInfo: boolean closed>;
+
+        if $z5 != 0 goto label13;
+
+        virtualinvoke r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: void sendCloseAck(sun.rmi.transport.tcp.MultiplexConnectionInfo)>($r74);
+
+     label13:
+        $r64 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.util.Hashtable connectionTable>;
+
+        entermonitor $r64;
+
+     label14:
+        $r65 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.util.Hashtable connectionTable>;
+
+        $r66 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i7);
+
+        virtualinvoke $r65.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>($r66);
+
+        $i8 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: int numConnections>;
+
+        $i9 = $i8 - 1;
+
+        r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: int numConnections> = $i9;
+
+        exitmonitor $r64;
+
+     label15:
+        goto label18;
+
+     label16:
+        $r108 := @caughtexception;
+
+        exitmonitor $r64;
+
+     label17:
+        throw $r108;
+
+     label18:
+        goto label01;
+
+     label19:
+        $r36 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataInputStream dataIn>;
+
+        $i4 = virtualinvoke $r36.<java.io.DataInputStream: int readUnsignedShort()>();
+
+        $r38 = <sun.rmi.transport.tcp.ConnectionMultiplexer: sun.rmi.runtime.Log multiplexLog>;
+
+        $r37 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z2 = virtualinvoke $r38.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r37);
+
+        if $z2 == 0 goto label20;
+
+        $r50 = <sun.rmi.transport.tcp.ConnectionMultiplexer: sun.rmi.runtime.Log multiplexLog>;
+
+        $r51 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r49 = new java.lang.StringBuilder;
+
+        specialinvoke $r49.<java.lang.StringBuilder: void <init>()>();
+
+        $r52 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("operation  CLOSEACK ");
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r50.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r51, $r54);
+
+     label20:
+        $r39 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.util.Hashtable connectionTable>;
+
+        $r40 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i4);
+
+        $r41 = virtualinvoke $r39.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r40);
+
+        $r55 = (sun.rmi.transport.tcp.MultiplexConnectionInfo) $r41;
+
+        if $r55 != null goto label21;
+
+        $r48 = new java.io.IOException;
+
+        specialinvoke $r48.<java.io.IOException: void <init>(java.lang.String)>("CLOSEACK: Invalid connection ID");
+
+        throw $r48;
+
+     label21:
+        $z3 = $r55.<sun.rmi.transport.tcp.MultiplexConnectionInfo: boolean closed>;
+
+        if $z3 != 0 goto label22;
+
+        $r47 = new java.io.IOException;
+
+        specialinvoke $r47.<java.io.IOException: void <init>(java.lang.String)>("CLOSEACK: Connection not closed");
+
+        throw $r47;
+
+     label22:
+        $r42 = $r55.<sun.rmi.transport.tcp.MultiplexConnectionInfo: sun.rmi.transport.tcp.MultiplexInputStream in>;
+
+        virtualinvoke $r42.<sun.rmi.transport.tcp.MultiplexInputStream: void disconnect()>();
+
+        $r43 = $r55.<sun.rmi.transport.tcp.MultiplexConnectionInfo: sun.rmi.transport.tcp.MultiplexOutputStream out>;
+
+        virtualinvoke $r43.<sun.rmi.transport.tcp.MultiplexOutputStream: void disconnect()>();
+
+        $r44 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.util.Hashtable connectionTable>;
+
+        entermonitor $r44;
+
+     label23:
+        $r45 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.util.Hashtable connectionTable>;
+
+        $r46 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i4);
+
+        virtualinvoke $r45.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>($r46);
+
+        $i5 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: int numConnections>;
+
+        $i6 = $i5 - 1;
+
+        r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: int numConnections> = $i6;
+
+        exitmonitor $r44;
+
+     label24:
+        goto label27;
+
+     label25:
+        $r107 := @caughtexception;
+
+        exitmonitor $r44;
+
+     label26:
+        throw $r107;
+
+     label27:
+        goto label01;
+
+     label28:
+        $r19 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataInputStream dataIn>;
+
+        $i2 = virtualinvoke $r19.<java.io.DataInputStream: int readUnsignedShort()>();
+
+        $r20 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.util.Hashtable connectionTable>;
+
+        $r21 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r22 = virtualinvoke $r20.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r21);
+
+        r111 = (sun.rmi.transport.tcp.MultiplexConnectionInfo) $r22;
+
+        if r111 != null goto label29;
+
+        $r35 = new java.io.IOException;
+
+        specialinvoke $r35.<java.io.IOException: void <init>(java.lang.String)>("REQUEST: Invalid connection ID");
+
+        throw $r35;
+
+     label29:
+        $r23 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataInputStream dataIn>;
+
+        $i3 = virtualinvoke $r23.<java.io.DataInputStream: int readInt()>();
+
+        $r25 = <sun.rmi.transport.tcp.ConnectionMultiplexer: sun.rmi.runtime.Log multiplexLog>;
+
+        $r24 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z1 = virtualinvoke $r25.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r24);
+
+        if $z1 == 0 goto label30;
+
+        $r28 = <sun.rmi.transport.tcp.ConnectionMultiplexer: sun.rmi.runtime.Log multiplexLog>;
+
+        $r29 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r30 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("operation  REQUEST ");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r28.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r29, $r34);
+
+     label30:
+        $r26 = r111.<sun.rmi.transport.tcp.MultiplexConnectionInfo: sun.rmi.transport.tcp.MultiplexOutputStream out>;
+
+        virtualinvoke $r26.<sun.rmi.transport.tcp.MultiplexOutputStream: void request(int)>($i3);
+
+        goto label01;
+
+     label31:
+        $r1 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataInputStream dataIn>;
+
+        $i0 = virtualinvoke $r1.<java.io.DataInputStream: int readUnsignedShort()>();
+
+        $r2 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.util.Hashtable connectionTable>;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r4 = virtualinvoke $r2.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r3);
+
+        r112 = (sun.rmi.transport.tcp.MultiplexConnectionInfo) $r4;
+
+        if r112 != null goto label32;
+
+        $r18 = new java.io.IOException;
+
+        specialinvoke $r18.<java.io.IOException: void <init>(java.lang.String)>("SEND: Invalid connection ID");
+
+        throw $r18;
+
+     label32:
+        $r5 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataInputStream dataIn>;
+
+        $i1 = virtualinvoke $r5.<java.io.DataInputStream: int readInt()>();
+
+        $r7 = <sun.rmi.transport.tcp.ConnectionMultiplexer: sun.rmi.runtime.Log multiplexLog>;
+
+        $r6 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z0 = virtualinvoke $r7.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r6);
+
+        if $z0 == 0 goto label33;
+
+        $r11 = <sun.rmi.transport.tcp.ConnectionMultiplexer: sun.rmi.runtime.Log multiplexLog>;
+
+        $r12 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("operation  TRANSMIT ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r11.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r12, $r17);
+
+     label33:
+        $r9 = r112.<sun.rmi.transport.tcp.MultiplexConnectionInfo: sun.rmi.transport.tcp.MultiplexInputStream in>;
+
+        $r8 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataInputStream dataIn>;
+
+        virtualinvoke $r9.<sun.rmi.transport.tcp.MultiplexInputStream: void receive(int,java.io.DataInputStream)>($i1, $r8);
+
+        goto label01;
+
+     label34:
+        $r100 = new java.io.IOException;
+
+        $r101 = new java.lang.StringBuilder;
+
+        specialinvoke $r101.<java.lang.StringBuilder: void <init>()>();
+
+        $r102 = virtualinvoke $r101.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid operation: ");
+
+        $r103 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i13);
+
+        $r104 = virtualinvoke $r102.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r103);
+
+        $r105 = virtualinvoke $r104.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r100.<java.io.IOException: void <init>(java.lang.String)>($r105);
+
+        throw $r100;
+
+     label35:
+        $r106 := @caughtexception;
+
+     label36:
+        virtualinvoke r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: void shutDown()>();
+
+        throw $r106;
+
+        catch java.lang.Throwable from label05 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+        catch java.lang.Throwable from label14 to label15 with label16;
+        catch java.lang.Throwable from label16 to label17 with label16;
+        catch java.lang.Throwable from label23 to label24 with label25;
+        catch java.lang.Throwable from label25 to label26 with label25;
+        catch java.lang.Throwable from label01 to label36 with label35;
+    }
+
+    public synchronized sun.rmi.transport.tcp.TCPConnection openConnection() throws java.io.IOException
+    {
+        sun.rmi.transport.tcp.MultiplexConnectionInfo $r25;
+        java.lang.Integer $r2, $r9;
+        java.io.DataOutputStream $r10, $r11, $r12, $r13;
+        boolean $z0, $z1;
+        sun.rmi.transport.tcp.MultiplexInputStream $r16, $r26;
+        sun.rmi.runtime.Log $r23;
+        sun.rmi.transport.tcp.TCPConnection $r30;
+        sun.rmi.transport.tcp.ConnectionMultiplexer r0;
+        sun.rmi.transport.tcp.MultiplexOutputStream $r15, $r27;
+        java.lang.Throwable $r20, $r24;
+        java.util.logging.Level $r22;
+        sun.rmi.transport.tcp.TCPChannel $r17;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, i7, $i9;
+        java.util.Hashtable $r1, $r7, $r8;
+        java.io.IOException $r21, $r28, $r29;
+        java.lang.Object $r3;
+
+        r0 := @this: sun.rmi.transport.tcp.ConnectionMultiplexer;
+
+     label01:
+        $i0 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: int lastID>;
+
+        $i1 = $i0 + 1;
+
+        r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: int lastID> = $i1;
+
+        $i2 = $i1 & 32767;
+
+        r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: int lastID> = $i2;
+
+        $i3 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: int lastID>;
+
+        i7 = $i3;
+
+        $z0 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: boolean orig>;
+
+        if $z0 == 0 goto label02;
+
+        $i9 = (int) 32768;
+
+        i7 = $i3 | $i9;
+
+     label02:
+        $r1 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.util.Hashtable connectionTable>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i7);
+
+        $r3 = virtualinvoke $r1.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r2);
+
+        if $r3 != null goto label01;
+
+        $r25 = new sun.rmi.transport.tcp.MultiplexConnectionInfo;
+
+        specialinvoke $r25.<sun.rmi.transport.tcp.MultiplexConnectionInfo: void <init>(int)>(i7);
+
+        $r26 = new sun.rmi.transport.tcp.MultiplexInputStream;
+
+        specialinvoke $r26.<sun.rmi.transport.tcp.MultiplexInputStream: void <init>(sun.rmi.transport.tcp.ConnectionMultiplexer,sun.rmi.transport.tcp.MultiplexConnectionInfo,int)>(r0, $r25, 2048);
+
+        $r25.<sun.rmi.transport.tcp.MultiplexConnectionInfo: sun.rmi.transport.tcp.MultiplexInputStream in> = $r26;
+
+        $r27 = new sun.rmi.transport.tcp.MultiplexOutputStream;
+
+        specialinvoke $r27.<sun.rmi.transport.tcp.MultiplexOutputStream: void <init>(sun.rmi.transport.tcp.ConnectionMultiplexer,sun.rmi.transport.tcp.MultiplexConnectionInfo,int)>(r0, $r25, 2048);
+
+        $r25.<sun.rmi.transport.tcp.MultiplexConnectionInfo: sun.rmi.transport.tcp.MultiplexOutputStream out> = $r27;
+
+        $r7 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.util.Hashtable connectionTable>;
+
+        entermonitor $r7;
+
+     label03:
+        $z1 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: boolean alive>;
+
+        if $z1 != 0 goto label04;
+
+        $r28 = new java.io.IOException;
+
+        specialinvoke $r28.<java.io.IOException: void <init>(java.lang.String)>("Multiplexer connection dead");
+
+        throw $r28;
+
+     label04:
+        $i4 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: int numConnections>;
+
+        if $i4 < 256 goto label05;
+
+        $r29 = new java.io.IOException;
+
+        specialinvoke $r29.<java.io.IOException: void <init>(java.lang.String)>("Cannot exceed 256 simultaneous multiplexed connections");
+
+        throw $r29;
+
+     label05:
+        $r8 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.util.Hashtable connectionTable>;
+
+        $r9 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i7);
+
+        virtualinvoke $r8.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r9, $r25);
+
+        $i5 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: int numConnections>;
+
+        $i6 = $i5 + 1;
+
+        r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: int numConnections> = $i6;
+
+        exitmonitor $r7;
+
+     label06:
+        goto label09;
+
+     label07:
+        $r24 := @caughtexception;
+
+        exitmonitor $r7;
+
+     label08:
+        throw $r24;
+
+     label09:
+        $r10 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataOutputStream dataOut>;
+
+        entermonitor $r10;
+
+     label10:
+        $r11 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataOutputStream dataOut>;
+
+        virtualinvoke $r11.<java.io.DataOutputStream: void writeByte(int)>(225);
+
+        $r12 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataOutputStream dataOut>;
+
+        virtualinvoke $r12.<java.io.DataOutputStream: void writeShort(int)>(i7);
+
+        $r13 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataOutputStream dataOut>;
+
+        virtualinvoke $r13.<java.io.DataOutputStream: void flush()>();
+
+     label11:
+        goto label13;
+
+     label12:
+        $r21 := @caughtexception;
+
+        $r23 = <sun.rmi.transport.tcp.ConnectionMultiplexer: sun.rmi.runtime.Log multiplexLog>;
+
+        $r22 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        virtualinvoke $r23.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r22, "exception: ", $r21);
+
+        virtualinvoke r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: void shutDown()>();
+
+        throw $r21;
+
+     label13:
+        exitmonitor $r10;
+
+     label14:
+        goto label17;
+
+     label15:
+        $r20 := @caughtexception;
+
+        exitmonitor $r10;
+
+     label16:
+        throw $r20;
+
+     label17:
+        $r30 = new sun.rmi.transport.tcp.TCPConnection;
+
+        $r17 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: sun.rmi.transport.tcp.TCPChannel channel>;
+
+        $r16 = $r25.<sun.rmi.transport.tcp.MultiplexConnectionInfo: sun.rmi.transport.tcp.MultiplexInputStream in>;
+
+        $r15 = $r25.<sun.rmi.transport.tcp.MultiplexConnectionInfo: sun.rmi.transport.tcp.MultiplexOutputStream out>;
+
+        specialinvoke $r30.<sun.rmi.transport.tcp.TCPConnection: void <init>(sun.rmi.transport.tcp.TCPChannel,java.io.InputStream,java.io.OutputStream)>($r17, $r16, $r15);
+
+        return $r30;
+
+        catch java.lang.Throwable from label03 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+        catch java.io.IOException from label10 to label11 with label12;
+        catch java.lang.Throwable from label10 to label14 with label15;
+        catch java.lang.Throwable from label15 to label16 with label15;
+    }
+
+    public void shutDown()
+    {
+        java.lang.Throwable $r13;
+        java.util.Enumeration $r3;
+        sun.rmi.transport.tcp.MultiplexConnectionInfo r8;
+        java.util.Hashtable $r1, $r2, $r4;
+        boolean $z0, $z1;
+        java.io.OutputStream $r6;
+        java.io.IOException $r11, $r12;
+        sun.rmi.transport.tcp.MultiplexInputStream $r9;
+        sun.rmi.transport.tcp.ConnectionMultiplexer r0;
+        sun.rmi.transport.tcp.MultiplexOutputStream $r10;
+        java.lang.Object $r7;
+        java.io.InputStream $r5;
+
+        r0 := @this: sun.rmi.transport.tcp.ConnectionMultiplexer;
+
+        $r1 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.util.Hashtable connectionTable>;
+
+        entermonitor $r1;
+
+     label01:
+        $z0 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: boolean alive>;
+
+        if $z0 != 0 goto label03;
+
+        exitmonitor $r1;
+
+     label02:
+        return;
+
+     label03:
+        r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: boolean alive> = 0;
+
+        $r2 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.util.Hashtable connectionTable>;
+
+        $r3 = virtualinvoke $r2.<java.util.Hashtable: java.util.Enumeration elements()>();
+
+     label04:
+        $z1 = interfaceinvoke $r3.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z1 == 0 goto label05;
+
+        $r7 = interfaceinvoke $r3.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r8 = (sun.rmi.transport.tcp.MultiplexConnectionInfo) $r7;
+
+        $r9 = r8.<sun.rmi.transport.tcp.MultiplexConnectionInfo: sun.rmi.transport.tcp.MultiplexInputStream in>;
+
+        virtualinvoke $r9.<sun.rmi.transport.tcp.MultiplexInputStream: void disconnect()>();
+
+        $r10 = r8.<sun.rmi.transport.tcp.MultiplexConnectionInfo: sun.rmi.transport.tcp.MultiplexOutputStream out>;
+
+        virtualinvoke $r10.<sun.rmi.transport.tcp.MultiplexOutputStream: void disconnect()>();
+
+        goto label04;
+
+     label05:
+        $r4 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.util.Hashtable connectionTable>;
+
+        virtualinvoke $r4.<java.util.Hashtable: void clear()>();
+
+        r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: int numConnections> = 0;
+
+        exitmonitor $r1;
+
+     label06:
+        goto label09;
+
+     label07:
+        $r13 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label08:
+        throw $r13;
+
+     label09:
+        $r5 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.InputStream in>;
+
+        virtualinvoke $r5.<java.io.InputStream: void close()>();
+
+     label10:
+        goto label12;
+
+     label11:
+        $r12 := @caughtexception;
+
+     label12:
+        $r6 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.OutputStream out>;
+
+        virtualinvoke $r6.<java.io.OutputStream: void close()>();
+
+     label13:
+        goto label15;
+
+     label14:
+        $r11 := @caughtexception;
+
+     label15:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label07;
+        catch java.lang.Throwable from label03 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+        catch java.io.IOException from label09 to label10 with label11;
+        catch java.io.IOException from label12 to label13 with label14;
+    }
+
+    void sendRequest(sun.rmi.transport.tcp.MultiplexConnectionInfo, int) throws java.io.IOException
+    {
+        java.lang.Throwable $r7;
+        sun.rmi.transport.tcp.MultiplexConnectionInfo r2;
+        java.io.IOException $r8;
+        java.util.logging.Level $r9;
+        sun.rmi.runtime.Log $r10;
+        sun.rmi.transport.tcp.ConnectionMultiplexer r0;
+        java.io.DataOutputStream $r1, $r3, $r4, $r5, $r6;
+        int $i0, i1;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.rmi.transport.tcp.ConnectionMultiplexer;
+
+        r2 := @parameter0: sun.rmi.transport.tcp.MultiplexConnectionInfo;
+
+        i1 := @parameter1: int;
+
+        $r1 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataOutputStream dataOut>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: boolean alive>;
+
+        if $z0 == 0 goto label5;
+
+        $z1 = r2.<sun.rmi.transport.tcp.MultiplexConnectionInfo: boolean closed>;
+
+        if $z1 != 0 goto label5;
+
+     label2:
+        $r3 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataOutputStream dataOut>;
+
+        virtualinvoke $r3.<java.io.DataOutputStream: void writeByte(int)>(228);
+
+        $r4 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataOutputStream dataOut>;
+
+        $i0 = r2.<sun.rmi.transport.tcp.MultiplexConnectionInfo: int id>;
+
+        virtualinvoke $r4.<java.io.DataOutputStream: void writeShort(int)>($i0);
+
+        $r5 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataOutputStream dataOut>;
+
+        virtualinvoke $r5.<java.io.DataOutputStream: void writeInt(int)>(i1);
+
+        $r6 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataOutputStream dataOut>;
+
+        virtualinvoke $r6.<java.io.DataOutputStream: void flush()>();
+
+     label3:
+        goto label5;
+
+     label4:
+        $r8 := @caughtexception;
+
+        $r10 = <sun.rmi.transport.tcp.ConnectionMultiplexer: sun.rmi.runtime.Log multiplexLog>;
+
+        $r9 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        virtualinvoke $r10.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r9, "exception: ", $r8);
+
+        virtualinvoke r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: void shutDown()>();
+
+        throw $r8;
+
+     label5:
+        exitmonitor $r1;
+
+     label6:
+        goto label9;
+
+     label7:
+        $r7 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label8:
+        throw $r7;
+
+     label9:
+        return;
+
+        catch java.io.IOException from label2 to label3 with label4;
+        catch java.lang.Throwable from label1 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    void sendTransmit(sun.rmi.transport.tcp.MultiplexConnectionInfo, byte[], int, int) throws java.io.IOException
+    {
+        java.lang.Throwable $r9;
+        byte[] r6;
+        sun.rmi.transport.tcp.MultiplexConnectionInfo r2;
+        java.util.logging.Level $r11;
+        java.io.DataOutputStream $r1, $r3, $r4, $r5, $r7, $r8;
+        int $i0, i1, i2;
+        boolean $z0, $z1;
+        java.io.IOException $r10;
+        sun.rmi.runtime.Log $r12;
+        sun.rmi.transport.tcp.ConnectionMultiplexer r0;
+
+        r0 := @this: sun.rmi.transport.tcp.ConnectionMultiplexer;
+
+        r2 := @parameter0: sun.rmi.transport.tcp.MultiplexConnectionInfo;
+
+        r6 := @parameter1: byte[];
+
+        i2 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        $r1 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataOutputStream dataOut>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: boolean alive>;
+
+        if $z0 == 0 goto label5;
+
+        $z1 = r2.<sun.rmi.transport.tcp.MultiplexConnectionInfo: boolean closed>;
+
+        if $z1 != 0 goto label5;
+
+     label2:
+        $r3 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataOutputStream dataOut>;
+
+        virtualinvoke $r3.<java.io.DataOutputStream: void writeByte(int)>(229);
+
+        $r4 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataOutputStream dataOut>;
+
+        $i0 = r2.<sun.rmi.transport.tcp.MultiplexConnectionInfo: int id>;
+
+        virtualinvoke $r4.<java.io.DataOutputStream: void writeShort(int)>($i0);
+
+        $r5 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataOutputStream dataOut>;
+
+        virtualinvoke $r5.<java.io.DataOutputStream: void writeInt(int)>(i1);
+
+        $r7 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataOutputStream dataOut>;
+
+        virtualinvoke $r7.<java.io.DataOutputStream: void write(byte[],int,int)>(r6, i2, i1);
+
+        $r8 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataOutputStream dataOut>;
+
+        virtualinvoke $r8.<java.io.DataOutputStream: void flush()>();
+
+     label3:
+        goto label5;
+
+     label4:
+        $r10 := @caughtexception;
+
+        $r12 = <sun.rmi.transport.tcp.ConnectionMultiplexer: sun.rmi.runtime.Log multiplexLog>;
+
+        $r11 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        virtualinvoke $r12.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r11, "exception: ", $r10);
+
+        virtualinvoke r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: void shutDown()>();
+
+        throw $r10;
+
+     label5:
+        exitmonitor $r1;
+
+     label6:
+        goto label9;
+
+     label7:
+        $r9 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label8:
+        throw $r9;
+
+     label9:
+        return;
+
+        catch java.io.IOException from label2 to label3 with label4;
+        catch java.lang.Throwable from label1 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    void sendClose(sun.rmi.transport.tcp.MultiplexConnectionInfo) throws java.io.IOException
+    {
+        java.lang.Throwable $r7;
+        sun.rmi.transport.tcp.MultiplexConnectionInfo r0;
+        java.io.IOException $r8;
+        java.util.logging.Level $r9;
+        sun.rmi.runtime.Log $r10;
+        sun.rmi.transport.tcp.ConnectionMultiplexer r2;
+        sun.rmi.transport.tcp.MultiplexOutputStream $r1;
+        java.io.DataOutputStream $r3, $r4, $r5, $r6;
+        int $i0;
+        boolean $z0, $z1;
+
+        r2 := @this: sun.rmi.transport.tcp.ConnectionMultiplexer;
+
+        r0 := @parameter0: sun.rmi.transport.tcp.MultiplexConnectionInfo;
+
+        $r1 = r0.<sun.rmi.transport.tcp.MultiplexConnectionInfo: sun.rmi.transport.tcp.MultiplexOutputStream out>;
+
+        virtualinvoke $r1.<sun.rmi.transport.tcp.MultiplexOutputStream: void disconnect()>();
+
+        $r3 = r2.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataOutputStream dataOut>;
+
+        entermonitor $r3;
+
+     label1:
+        $z0 = r2.<sun.rmi.transport.tcp.ConnectionMultiplexer: boolean alive>;
+
+        if $z0 == 0 goto label5;
+
+        $z1 = r0.<sun.rmi.transport.tcp.MultiplexConnectionInfo: boolean closed>;
+
+        if $z1 != 0 goto label5;
+
+     label2:
+        $r4 = r2.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataOutputStream dataOut>;
+
+        virtualinvoke $r4.<java.io.DataOutputStream: void writeByte(int)>(226);
+
+        $r5 = r2.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataOutputStream dataOut>;
+
+        $i0 = r0.<sun.rmi.transport.tcp.MultiplexConnectionInfo: int id>;
+
+        virtualinvoke $r5.<java.io.DataOutputStream: void writeShort(int)>($i0);
+
+        $r6 = r2.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataOutputStream dataOut>;
+
+        virtualinvoke $r6.<java.io.DataOutputStream: void flush()>();
+
+        r0.<sun.rmi.transport.tcp.MultiplexConnectionInfo: boolean closed> = 1;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r8 := @caughtexception;
+
+        $r10 = <sun.rmi.transport.tcp.ConnectionMultiplexer: sun.rmi.runtime.Log multiplexLog>;
+
+        $r9 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        virtualinvoke $r10.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r9, "exception: ", $r8);
+
+        virtualinvoke r2.<sun.rmi.transport.tcp.ConnectionMultiplexer: void shutDown()>();
+
+        throw $r8;
+
+     label5:
+        exitmonitor $r3;
+
+     label6:
+        goto label9;
+
+     label7:
+        $r7 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label8:
+        throw $r7;
+
+     label9:
+        return;
+
+        catch java.io.IOException from label2 to label3 with label4;
+        catch java.lang.Throwable from label1 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    void sendCloseAck(sun.rmi.transport.tcp.MultiplexConnectionInfo) throws java.io.IOException
+    {
+        java.lang.Throwable $r6;
+        sun.rmi.transport.tcp.MultiplexConnectionInfo r2;
+        java.io.IOException $r7;
+        java.util.logging.Level $r8;
+        sun.rmi.runtime.Log $r9;
+        sun.rmi.transport.tcp.ConnectionMultiplexer r0;
+        java.io.DataOutputStream $r1, $r3, $r4, $r5;
+        int $i0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.rmi.transport.tcp.ConnectionMultiplexer;
+
+        r2 := @parameter0: sun.rmi.transport.tcp.MultiplexConnectionInfo;
+
+        $r1 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataOutputStream dataOut>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: boolean alive>;
+
+        if $z0 == 0 goto label5;
+
+        $z1 = r2.<sun.rmi.transport.tcp.MultiplexConnectionInfo: boolean closed>;
+
+        if $z1 != 0 goto label5;
+
+     label2:
+        $r3 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataOutputStream dataOut>;
+
+        virtualinvoke $r3.<java.io.DataOutputStream: void writeByte(int)>(227);
+
+        $r4 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataOutputStream dataOut>;
+
+        $i0 = r2.<sun.rmi.transport.tcp.MultiplexConnectionInfo: int id>;
+
+        virtualinvoke $r4.<java.io.DataOutputStream: void writeShort(int)>($i0);
+
+        $r5 = r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: java.io.DataOutputStream dataOut>;
+
+        virtualinvoke $r5.<java.io.DataOutputStream: void flush()>();
+
+        r2.<sun.rmi.transport.tcp.MultiplexConnectionInfo: boolean closed> = 1;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r7 := @caughtexception;
+
+        $r9 = <sun.rmi.transport.tcp.ConnectionMultiplexer: sun.rmi.runtime.Log multiplexLog>;
+
+        $r8 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        virtualinvoke $r9.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r8, "exception: ", $r7);
+
+        virtualinvoke r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: void shutDown()>();
+
+        throw $r7;
+
+     label5:
+        exitmonitor $r1;
+
+     label6:
+        goto label9;
+
+     label7:
+        $r6 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label8:
+        throw $r6;
+
+     label9:
+        return;
+
+        catch java.io.IOException from label2 to label3 with label4;
+        catch java.lang.Throwable from label1 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    protected void finalize() throws java.lang.Throwable
+    {
+        sun.rmi.transport.tcp.ConnectionMultiplexer r0;
+
+        r0 := @this: sun.rmi.transport.tcp.ConnectionMultiplexer;
+
+        specialinvoke r0.<java.lang.Object: void finalize()>();
+
+        virtualinvoke r0.<sun.rmi.transport.tcp.ConnectionMultiplexer: void shutDown()>();
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        int $i0, $i1;
+        java.lang.String $r0;
+        sun.rmi.runtime.Log $r1;
+
+        <sun.rmi.transport.tcp.ConnectionMultiplexer: int maxConnections> = 256;
+
+        <sun.rmi.transport.tcp.ConnectionMultiplexer: int TRANSMIT> = 229;
+
+        <sun.rmi.transport.tcp.ConnectionMultiplexer: int REQUEST> = 228;
+
+        <sun.rmi.transport.tcp.ConnectionMultiplexer: int CLOSEACK> = 227;
+
+        <sun.rmi.transport.tcp.ConnectionMultiplexer: int CLOSE> = 226;
+
+        <sun.rmi.transport.tcp.ConnectionMultiplexer: int OPEN> = 225;
+
+        $r0 = staticinvoke <sun.rmi.transport.tcp.ConnectionMultiplexer: java.lang.String getLogLevel()>();
+
+        $i0 = staticinvoke <java.rmi.server.LogStream: int parseLevel(java.lang.String)>($r0);
+
+        <sun.rmi.transport.tcp.ConnectionMultiplexer: int logLevel> = $i0;
+
+        $i1 = <sun.rmi.transport.tcp.ConnectionMultiplexer: int logLevel>;
+
+        $r1 = staticinvoke <sun.rmi.runtime.Log: sun.rmi.runtime.Log getLog(java.lang.String,java.lang.String,int)>("sun.rmi.transport.tcp.multiplex", "multiplex", $i1);
+
+        <sun.rmi.transport.tcp.ConnectionMultiplexer: sun.rmi.runtime.Log multiplexLog> = $r1;
+
+        return;
+    }
+}

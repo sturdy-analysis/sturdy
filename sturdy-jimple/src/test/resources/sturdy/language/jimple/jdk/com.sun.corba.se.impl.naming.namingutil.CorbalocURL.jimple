@@ -1,0 +1,419 @@
+public class com.sun.corba.se.impl.naming.namingutil.CorbalocURL extends com.sun.corba.se.impl.naming.namingutil.INSURLBase
+{
+    static com.sun.corba.se.impl.logging.NamingSystemException wrapper;
+
+    public void <init>(java.lang.String)
+    {
+        com.sun.corba.se.impl.naming.namingutil.CorbalocURL r0;
+        java.util.ArrayList $r6, $r7, $r13;
+        java.util.StringTokenizer $r12;
+        int $i0, $i1, $i2, $i3, i4, $i6;
+        java.lang.String r1, $r3, $r4, $r5, r10;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        com.sun.corba.se.impl.naming.namingutil.IIOPEndpointInfo r11;
+        java.lang.Exception $r9;
+
+        r0 := @this: com.sun.corba.se.impl.naming.namingutil.CorbalocURL;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<com.sun.corba.se.impl.naming.namingutil.INSURLBase: void <init>()>();
+
+        r10 = r1;
+
+        if r1 == null goto label15;
+
+     label01:
+        r10 = staticinvoke <com.sun.corba.se.impl.naming.namingutil.Utility: java.lang.String cleanEscapes(java.lang.String)>(r1);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r9 := @caughtexception;
+
+        specialinvoke r0.<com.sun.corba.se.impl.naming.namingutil.CorbalocURL: void badAddress(java.lang.Throwable)>($r9);
+
+     label04:
+        $i0 = virtualinvoke r10.<java.lang.String: int indexOf(int)>(47);
+
+        i4 = $i0;
+
+        $i6 = (int) -1;
+
+        if $i0 != $i6 goto label05;
+
+        i4 = virtualinvoke r10.<java.lang.String: int length()>();
+
+     label05:
+        if i4 != 0 goto label06;
+
+        specialinvoke r0.<com.sun.corba.se.impl.naming.namingutil.CorbalocURL: void badAddress(java.lang.Throwable)>(null);
+
+     label06:
+        $r12 = new java.util.StringTokenizer;
+
+        $r3 = virtualinvoke r10.<java.lang.String: java.lang.String substring(int,int)>(0, i4);
+
+        specialinvoke $r12.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>($r3, ",");
+
+     label07:
+        $z3 = virtualinvoke $r12.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z3 == 0 goto label14;
+
+        $r5 = virtualinvoke $r12.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        r11 = null;
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean startsWith(java.lang.String)>("iiop:");
+
+        if $z0 == 0 goto label08;
+
+        r11 = specialinvoke r0.<com.sun.corba.se.impl.naming.namingutil.CorbalocURL: com.sun.corba.se.impl.naming.namingutil.IIOPEndpointInfo handleIIOPColon(java.lang.String)>($r5);
+
+        goto label11;
+
+     label08:
+        $z1 = virtualinvoke $r5.<java.lang.String: boolean startsWith(java.lang.String)>("rir:");
+
+        if $z1 == 0 goto label09;
+
+        specialinvoke r0.<com.sun.corba.se.impl.naming.namingutil.CorbalocURL: void handleRIRColon(java.lang.String)>($r5);
+
+        r0.<com.sun.corba.se.impl.naming.namingutil.CorbalocURL: boolean rirFlag> = 1;
+
+        goto label11;
+
+     label09:
+        $z2 = virtualinvoke $r5.<java.lang.String: boolean startsWith(java.lang.String)>(":");
+
+        if $z2 == 0 goto label10;
+
+        r11 = specialinvoke r0.<com.sun.corba.se.impl.naming.namingutil.CorbalocURL: com.sun.corba.se.impl.naming.namingutil.IIOPEndpointInfo handleColon(java.lang.String)>($r5);
+
+        goto label11;
+
+     label10:
+        specialinvoke r0.<com.sun.corba.se.impl.naming.namingutil.CorbalocURL: void badAddress(java.lang.Throwable)>(null);
+
+     label11:
+        $z4 = r0.<com.sun.corba.se.impl.naming.namingutil.CorbalocURL: boolean rirFlag>;
+
+        if $z4 != 0 goto label13;
+
+        $r6 = r0.<com.sun.corba.se.impl.naming.namingutil.CorbalocURL: java.util.ArrayList theEndpointInfo>;
+
+        if $r6 != null goto label12;
+
+        $r13 = new java.util.ArrayList;
+
+        specialinvoke $r13.<java.util.ArrayList: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.naming.namingutil.CorbalocURL: java.util.ArrayList theEndpointInfo> = $r13;
+
+     label12:
+        $r7 = r0.<com.sun.corba.se.impl.naming.namingutil.CorbalocURL: java.util.ArrayList theEndpointInfo>;
+
+        virtualinvoke $r7.<java.util.ArrayList: boolean add(java.lang.Object)>(r11);
+
+     label13:
+        goto label07;
+
+     label14:
+        $i1 = virtualinvoke r10.<java.lang.String: int length()>();
+
+        $i2 = i4 + 1;
+
+        if $i1 <= $i2 goto label15;
+
+        $i3 = i4 + 1;
+
+        $r4 = virtualinvoke r10.<java.lang.String: java.lang.String substring(int)>($i3);
+
+        r0.<com.sun.corba.se.impl.naming.namingutil.CorbalocURL: java.lang.String theKeyString> = $r4;
+
+     label15:
+        return;
+
+        catch java.lang.Exception from label01 to label02 with label03;
+    }
+
+    private void badAddress(java.lang.Throwable)
+    {
+        java.lang.Throwable r0;
+        org.omg.CORBA.BAD_PARAM $r2;
+        com.sun.corba.se.impl.logging.NamingSystemException $r1;
+        com.sun.corba.se.impl.naming.namingutil.CorbalocURL r3;
+
+        r3 := @this: com.sun.corba.se.impl.naming.namingutil.CorbalocURL;
+
+        r0 := @parameter0: java.lang.Throwable;
+
+        $r1 = <com.sun.corba.se.impl.naming.namingutil.CorbalocURL: com.sun.corba.se.impl.logging.NamingSystemException wrapper>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.logging.NamingSystemException: org.omg.CORBA.BAD_PARAM insBadAddress(java.lang.Throwable)>(r0);
+
+        throw $r2;
+    }
+
+    private com.sun.corba.se.impl.naming.namingutil.IIOPEndpointInfo handleIIOPColon(java.lang.String)
+    {
+        com.sun.corba.se.impl.naming.namingutil.IIOPEndpointInfo $r2;
+        com.sun.corba.se.impl.naming.namingutil.CorbalocURL r1;
+        java.lang.String $r0, r3;
+
+        r1 := @this: com.sun.corba.se.impl.naming.namingutil.CorbalocURL;
+
+        r3 := @parameter0: java.lang.String;
+
+        $r0 = virtualinvoke r3.<java.lang.String: java.lang.String substring(int)>(4);
+
+        $r2 = specialinvoke r1.<com.sun.corba.se.impl.naming.namingutil.CorbalocURL: com.sun.corba.se.impl.naming.namingutil.IIOPEndpointInfo handleColon(java.lang.String)>($r0);
+
+        return $r2;
+    }
+
+    private com.sun.corba.se.impl.naming.namingutil.IIOPEndpointInfo handleColon(java.lang.String)
+    {
+        java.lang.Throwable $r12, $r13;
+        com.sun.corba.se.impl.naming.namingutil.CorbalocURL r3;
+        java.util.StringTokenizer $r16, $r18;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i11, $i13;
+        java.lang.String $r0, $r5, $r6, $r7, $r8, $r9, $r10, $r11, r14, r15;
+        com.sun.corba.se.impl.naming.namingutil.IIOPEndpointInfo $r17;
+
+        r3 := @this: com.sun.corba.se.impl.naming.namingutil.CorbalocURL;
+
+        r14 := @parameter0: java.lang.String;
+
+        $r0 = virtualinvoke r14.<java.lang.String: java.lang.String substring(int)>(1);
+
+        r15 = $r0;
+
+        $r16 = new java.util.StringTokenizer;
+
+        specialinvoke $r16.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>($r0, "@");
+
+        $r17 = new com.sun.corba.se.impl.naming.namingutil.IIOPEndpointInfo;
+
+        specialinvoke $r17.<com.sun.corba.se.impl.naming.namingutil.IIOPEndpointInfo: void <init>()>();
+
+        $i0 = virtualinvoke $r16.<java.util.StringTokenizer: int countTokens()>();
+
+        if $i0 == 0 goto label01;
+
+        if $i0 <= 2 goto label02;
+
+     label01:
+        specialinvoke r3.<com.sun.corba.se.impl.naming.namingutil.CorbalocURL: void badAddress(java.lang.Throwable)>(null);
+
+     label02:
+        if $i0 != 2 goto label06;
+
+        $r9 = virtualinvoke $r16.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $i5 = virtualinvoke $r9.<java.lang.String: int indexOf(int)>(46);
+
+        $i11 = (int) -1;
+
+        if $i5 != $i11 goto label03;
+
+        specialinvoke r3.<com.sun.corba.se.impl.naming.namingutil.CorbalocURL: void badAddress(java.lang.Throwable)>(null);
+
+     label03:
+        $r10 = virtualinvoke $r9.<java.lang.String: java.lang.String substring(int,int)>(0, $i5);
+
+        $i6 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r10);
+
+        $i7 = $i5 + 1;
+
+        $r11 = virtualinvoke $r9.<java.lang.String: java.lang.String substring(int)>($i7);
+
+        $i8 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r11);
+
+        virtualinvoke $r17.<com.sun.corba.se.impl.naming.namingutil.IIOPEndpointInfo: void setVersion(int,int)>($i6, $i8);
+
+        r15 = virtualinvoke $r16.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+     label04:
+        goto label06;
+
+     label05:
+        $r13 := @caughtexception;
+
+        specialinvoke r3.<com.sun.corba.se.impl.naming.namingutil.CorbalocURL: void badAddress(java.lang.Throwable)>($r13);
+
+     label06:
+        $i9 = virtualinvoke r15.<java.lang.String: int indexOf(int)>(91);
+
+        $i13 = (int) -1;
+
+        if $i9 == $i13 goto label09;
+
+        $r7 = specialinvoke r3.<com.sun.corba.se.impl.naming.namingutil.CorbalocURL: java.lang.String getIPV6Port(java.lang.String)>(r15);
+
+        if $r7 == null goto label07;
+
+        $i4 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r7);
+
+        virtualinvoke $r17.<com.sun.corba.se.impl.naming.namingutil.IIOPEndpointInfo: void setPort(int)>($i4);
+
+     label07:
+        $r8 = specialinvoke r3.<com.sun.corba.se.impl.naming.namingutil.CorbalocURL: java.lang.String getIPV6Host(java.lang.String)>(r15);
+
+        virtualinvoke $r17.<com.sun.corba.se.impl.naming.namingutil.IIOPEndpointInfo: void setHost(java.lang.String)>($r8);
+
+     label08:
+        return $r17;
+
+     label09:
+        $r18 = new java.util.StringTokenizer;
+
+        specialinvoke $r18.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>(r15, ":");
+
+        $i1 = virtualinvoke $r18.<java.util.StringTokenizer: int countTokens()>();
+
+        if $i1 != 2 goto label10;
+
+        $r5 = virtualinvoke $r18.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        virtualinvoke $r17.<com.sun.corba.se.impl.naming.namingutil.IIOPEndpointInfo: void setHost(java.lang.String)>($r5);
+
+        $r6 = virtualinvoke $r18.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $i3 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r6);
+
+        virtualinvoke $r17.<com.sun.corba.se.impl.naming.namingutil.IIOPEndpointInfo: void setPort(int)>($i3);
+
+        goto label11;
+
+     label10:
+        if r15 == null goto label11;
+
+        $i2 = virtualinvoke r15.<java.lang.String: int length()>();
+
+        if $i2 == 0 goto label11;
+
+        virtualinvoke $r17.<com.sun.corba.se.impl.naming.namingutil.IIOPEndpointInfo: void setHost(java.lang.String)>(r15);
+
+     label11:
+        goto label13;
+
+     label12:
+        $r12 := @caughtexception;
+
+        specialinvoke r3.<com.sun.corba.se.impl.naming.namingutil.CorbalocURL: void badAddress(java.lang.Throwable)>($r12);
+
+     label13:
+        staticinvoke <com.sun.corba.se.impl.naming.namingutil.Utility: void validateGIOPVersion(com.sun.corba.se.impl.naming.namingutil.IIOPEndpointInfo)>($r17);
+
+        return $r17;
+
+        catch java.lang.Throwable from label03 to label04 with label05;
+        catch java.lang.Throwable from label06 to label08 with label12;
+        catch java.lang.Throwable from label09 to label11 with label12;
+    }
+
+    private void handleRIRColon(java.lang.String)
+    {
+        int $i0;
+        com.sun.corba.se.impl.naming.namingutil.CorbalocURL r1;
+        java.lang.String r0;
+
+        r1 := @this: com.sun.corba.se.impl.naming.namingutil.CorbalocURL;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i0 == 4 goto label1;
+
+        specialinvoke r1.<com.sun.corba.se.impl.naming.namingutil.CorbalocURL: void badAddress(java.lang.Throwable)>(null);
+
+     label1:
+        return;
+    }
+
+    private java.lang.String getIPV6Port(java.lang.String)
+    {
+        char $c4;
+        com.sun.corba.se.impl.naming.namingutil.CorbalocURL r3;
+        java.lang.RuntimeException $r4;
+        int $i0, $i1, $i2, $i3, $i5, $i6;
+        java.lang.String r0, $r1;
+
+        r3 := @this: com.sun.corba.se.impl.naming.namingutil.CorbalocURL;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int indexOf(int)>(93);
+
+        $i1 = $i0 + 1;
+
+        $i2 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i1 == $i2 goto label2;
+
+        $i3 = $i0 + 1;
+
+        $c4 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i3);
+
+        $i6 = (int) $c4;
+
+        if $i6 == 58 goto label1;
+
+        $r4 = new java.lang.RuntimeException;
+
+        specialinvoke $r4.<java.lang.RuntimeException: void <init>(java.lang.String)>("Host and Port is not separated by \':\'");
+
+        throw $r4;
+
+     label1:
+        $i5 = $i0 + 2;
+
+        $r1 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>($i5);
+
+        return $r1;
+
+     label2:
+        return null;
+    }
+
+    private java.lang.String getIPV6Host(java.lang.String)
+    {
+        int $i0;
+        com.sun.corba.se.impl.naming.namingutil.CorbalocURL r2;
+        java.lang.String r0, $r1;
+
+        r2 := @this: com.sun.corba.se.impl.naming.namingutil.CorbalocURL;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int indexOf(int)>(93);
+
+        $r1 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(1, $i0);
+
+        return $r1;
+    }
+
+    public boolean isCorbanameURL()
+    {
+        com.sun.corba.se.impl.naming.namingutil.CorbalocURL r0;
+
+        r0 := @this: com.sun.corba.se.impl.naming.namingutil.CorbalocURL;
+
+        return 0;
+    }
+
+    static void <clinit>()
+    {
+        com.sun.corba.se.impl.logging.NamingSystemException $r0;
+
+        $r0 = staticinvoke <com.sun.corba.se.impl.logging.NamingSystemException: com.sun.corba.se.impl.logging.NamingSystemException get(java.lang.String)>("naming.read");
+
+        <com.sun.corba.se.impl.naming.namingutil.CorbalocURL: com.sun.corba.se.impl.logging.NamingSystemException wrapper> = $r0;
+
+        return;
+    }
+}

@@ -1,0 +1,485 @@
+public abstract class sun.java2d.SunGraphicsEnvironment extends java.awt.GraphicsEnvironment implements sun.awt.DisplayChangedListener
+{
+    public static boolean isOpenSolaris;
+    private static java.awt.Font defaultFont;
+    protected java.awt.GraphicsDevice[] screens;
+    protected sun.awt.SunDisplayChanger displayChanger;
+
+    public void <init>()
+    {
+        sun.java2d.SunGraphicsEnvironment r0;
+        sun.awt.SunDisplayChanger $r1;
+        sun.java2d.SunGraphicsEnvironment$1 $r2;
+
+        r0 := @this: sun.java2d.SunGraphicsEnvironment;
+
+        specialinvoke r0.<java.awt.GraphicsEnvironment: void <init>()>();
+
+        $r1 = new sun.awt.SunDisplayChanger;
+
+        specialinvoke $r1.<sun.awt.SunDisplayChanger: void <init>()>();
+
+        r0.<sun.java2d.SunGraphicsEnvironment: sun.awt.SunDisplayChanger displayChanger> = $r1;
+
+        $r2 = new sun.java2d.SunGraphicsEnvironment$1;
+
+        specialinvoke $r2.<sun.java2d.SunGraphicsEnvironment$1: void <init>(sun.java2d.SunGraphicsEnvironment)>(r0);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        return;
+    }
+
+    public synchronized java.awt.GraphicsDevice[] getScreenDevices()
+    {
+        java.awt.GraphicsDevice[] r2;
+        java.awt.GraphicsDevice $r1;
+        int $i0, i1;
+        sun.java2d.SunGraphicsEnvironment r0;
+
+        r0 := @this: sun.java2d.SunGraphicsEnvironment;
+
+        r2 = r0.<sun.java2d.SunGraphicsEnvironment: java.awt.GraphicsDevice[] screens>;
+
+        if r2 != null goto label3;
+
+        $i0 = virtualinvoke r0.<sun.java2d.SunGraphicsEnvironment: int getNumScreens()>();
+
+        r2 = newarray (java.awt.GraphicsDevice)[$i0];
+
+        i1 = 0;
+
+     label1:
+        if i1 >= $i0 goto label2;
+
+        $r1 = virtualinvoke r0.<sun.java2d.SunGraphicsEnvironment: java.awt.GraphicsDevice makeScreenDevice(int)>(i1);
+
+        r2[i1] = $r1;
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        r0.<sun.java2d.SunGraphicsEnvironment: java.awt.GraphicsDevice[] screens> = r2;
+
+     label3:
+        return r2;
+    }
+
+    protected abstract int getNumScreens();
+
+    protected abstract java.awt.GraphicsDevice makeScreenDevice(int);
+
+    public java.awt.GraphicsDevice getDefaultScreenDevice()
+    {
+        java.awt.AWTError $r3;
+        java.awt.GraphicsDevice[] $r1;
+        java.awt.GraphicsDevice $r2;
+        int $i0;
+        sun.java2d.SunGraphicsEnvironment r0;
+
+        r0 := @this: sun.java2d.SunGraphicsEnvironment;
+
+        $r1 = virtualinvoke r0.<sun.java2d.SunGraphicsEnvironment: java.awt.GraphicsDevice[] getScreenDevices()>();
+
+        $i0 = lengthof $r1;
+
+        if $i0 != 0 goto label1;
+
+        $r3 = new java.awt.AWTError;
+
+        specialinvoke $r3.<java.awt.AWTError: void <init>(java.lang.String)>("no screen devices");
+
+        throw $r3;
+
+     label1:
+        $r2 = $r1[0];
+
+        return $r2;
+    }
+
+    public java.awt.Graphics2D createGraphics(java.awt.image.BufferedImage)
+    {
+        java.awt.Color $r4, $r5;
+        java.awt.image.BufferedImage r0;
+        java.awt.Font $r3;
+        sun.java2d.SurfaceData $r1;
+        java.lang.NullPointerException $r6;
+        sun.java2d.SunGraphics2D $r2;
+        sun.java2d.SunGraphicsEnvironment r7;
+
+        r7 := @this: sun.java2d.SunGraphicsEnvironment;
+
+        r0 := @parameter0: java.awt.image.BufferedImage;
+
+        if r0 != null goto label1;
+
+        $r6 = new java.lang.NullPointerException;
+
+        specialinvoke $r6.<java.lang.NullPointerException: void <init>(java.lang.String)>("BufferedImage cannot be null");
+
+        throw $r6;
+
+     label1:
+        $r1 = staticinvoke <sun.java2d.SurfaceData: sun.java2d.SurfaceData getPrimarySurfaceData(java.awt.Image)>(r0);
+
+        $r2 = new sun.java2d.SunGraphics2D;
+
+        $r5 = <java.awt.Color: java.awt.Color white>;
+
+        $r4 = <java.awt.Color: java.awt.Color black>;
+
+        $r3 = <sun.java2d.SunGraphicsEnvironment: java.awt.Font defaultFont>;
+
+        specialinvoke $r2.<sun.java2d.SunGraphics2D: void <init>(sun.java2d.SurfaceData,java.awt.Color,java.awt.Color,java.awt.Font)>($r1, $r5, $r4, $r3);
+
+        return $r2;
+    }
+
+    public static sun.font.FontManagerForSGE getFontManagerForSGE()
+    {
+        sun.font.FontManager $r0;
+        sun.font.FontManagerForSGE $r1;
+
+        $r0 = staticinvoke <sun.font.FontManagerFactory: sun.font.FontManager getInstance()>();
+
+        $r1 = (sun.font.FontManagerForSGE) $r0;
+
+        return $r1;
+    }
+
+    public static void useAlternateFontforJALocales()
+    {
+        sun.font.FontManagerForSGE $r0;
+
+        $r0 = staticinvoke <sun.java2d.SunGraphicsEnvironment: sun.font.FontManagerForSGE getFontManagerForSGE()>();
+
+        interfaceinvoke $r0.<sun.font.FontManagerForSGE: void useAlternateFontforJALocales()>();
+
+        return;
+    }
+
+    public java.awt.Font[] getAllFonts()
+    {
+        java.lang.Object[] $r3;
+        sun.font.FontManagerForSGE $r0;
+        java.awt.Font[] $r1, $r2, r4;
+        int $i0, $i1, $i2, i3, $i4, $i5;
+        sun.java2d.SunGraphicsEnvironment r5;
+
+        r5 := @this: sun.java2d.SunGraphicsEnvironment;
+
+        $r0 = staticinvoke <sun.java2d.SunGraphicsEnvironment: sun.font.FontManagerForSGE getFontManagerForSGE()>();
+
+        $r1 = interfaceinvoke $r0.<sun.font.FontManagerForSGE: java.awt.Font[] getAllInstalledFonts()>();
+
+        $r2 = interfaceinvoke $r0.<sun.font.FontManagerForSGE: java.awt.Font[] getCreatedFonts()>();
+
+        if $r2 == null goto label1;
+
+        $i0 = lengthof $r2;
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        return $r1;
+
+     label2:
+        $i2 = lengthof $r1;
+
+        $i1 = lengthof $r2;
+
+        i3 = $i2 + $i1;
+
+        $r3 = staticinvoke <java.util.Arrays: java.lang.Object[] copyOf(java.lang.Object[],int)>($r1, i3);
+
+        r4 = (java.awt.Font[]) $r3;
+
+        $i5 = lengthof $r1;
+
+        $i4 = lengthof $r2;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, 0, r4, $i5, $i4);
+
+        return r4;
+    }
+
+    public java.lang.String[] getAvailableFontFamilyNames(java.util.Locale)
+    {
+        java.lang.Object[] $r5;
+        java.lang.String[] $r2, r13;
+        java.util.Locale r1;
+        int $i0, $i1, $i2, $i3, i4, i5;
+        java.lang.String $r8, $r9, $r10, $r11;
+        sun.font.FontManagerForSGE $r0;
+        java.util.Set $r4;
+        java.util.TreeMap $r3;
+        java.lang.Object $r6, $r7;
+        sun.java2d.SunGraphicsEnvironment r12;
+
+        r12 := @this: sun.java2d.SunGraphicsEnvironment;
+
+        r1 := @parameter0: java.util.Locale;
+
+        $r0 = staticinvoke <sun.java2d.SunGraphicsEnvironment: sun.font.FontManagerForSGE getFontManagerForSGE()>();
+
+        $r2 = interfaceinvoke $r0.<sun.font.FontManagerForSGE: java.lang.String[] getInstalledFontFamilyNames(java.util.Locale)>(r1);
+
+        $r3 = interfaceinvoke $r0.<sun.font.FontManagerForSGE: java.util.TreeMap getCreatedFontFamilyNames()>();
+
+        if $r3 == null goto label1;
+
+        $i0 = virtualinvoke $r3.<java.util.TreeMap: int size()>();
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        return $r2;
+
+     label2:
+        i4 = 0;
+
+     label3:
+        $i1 = lengthof $r2;
+
+        if i4 >= $i1 goto label4;
+
+        $r9 = $r2[i4];
+
+        $r10 = virtualinvoke $r9.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>(r1);
+
+        $r11 = $r2[i4];
+
+        virtualinvoke $r3.<java.util.TreeMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r10, $r11);
+
+        i4 = i4 + 1;
+
+        goto label3;
+
+     label4:
+        $i2 = virtualinvoke $r3.<java.util.TreeMap: int size()>();
+
+        r13 = newarray (java.lang.String)[$i2];
+
+        $r4 = virtualinvoke $r3.<java.util.TreeMap: java.util.Set keySet()>();
+
+        $r5 = interfaceinvoke $r4.<java.util.Set: java.lang.Object[] toArray()>();
+
+        i5 = 0;
+
+     label5:
+        $i3 = lengthof $r5;
+
+        if i5 >= $i3 goto label6;
+
+        $r6 = $r5[i5];
+
+        $r7 = virtualinvoke $r3.<java.util.TreeMap: java.lang.Object get(java.lang.Object)>($r6);
+
+        $r8 = (java.lang.String) $r7;
+
+        r13[i5] = $r8;
+
+        i5 = i5 + 1;
+
+        goto label5;
+
+     label6:
+        return r13;
+    }
+
+    public java.lang.String[] getAvailableFontFamilyNames()
+    {
+        java.lang.String[] $r2;
+        sun.java2d.SunGraphicsEnvironment r0;
+        java.util.Locale $r1;
+
+        r0 := @this: sun.java2d.SunGraphicsEnvironment;
+
+        $r1 = staticinvoke <java.util.Locale: java.util.Locale getDefault()>();
+
+        $r2 = virtualinvoke r0.<sun.java2d.SunGraphicsEnvironment: java.lang.String[] getAvailableFontFamilyNames(java.util.Locale)>($r1);
+
+        return $r2;
+    }
+
+    public static java.awt.Rectangle getUsableBounds(java.awt.GraphicsDevice)
+    {
+        java.awt.Rectangle $r4;
+        java.awt.Insets $r3;
+        java.awt.GraphicsDevice r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15;
+        java.awt.GraphicsConfiguration $r1;
+        java.awt.Toolkit $r2;
+
+        r0 := @parameter0: java.awt.GraphicsDevice;
+
+        $r1 = virtualinvoke r0.<java.awt.GraphicsDevice: java.awt.GraphicsConfiguration getDefaultConfiguration()>();
+
+        $r2 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r3 = virtualinvoke $r2.<java.awt.Toolkit: java.awt.Insets getScreenInsets(java.awt.GraphicsConfiguration)>($r1);
+
+        $r4 = virtualinvoke $r1.<java.awt.GraphicsConfiguration: java.awt.Rectangle getBounds()>();
+
+        $i1 = $r4.<java.awt.Rectangle: int x>;
+
+        $i0 = $r3.<java.awt.Insets: int left>;
+
+        $i2 = $i1 + $i0;
+
+        $r4.<java.awt.Rectangle: int x> = $i2;
+
+        $i4 = $r4.<java.awt.Rectangle: int y>;
+
+        $i3 = $r3.<java.awt.Insets: int top>;
+
+        $i5 = $i4 + $i3;
+
+        $r4.<java.awt.Rectangle: int y> = $i5;
+
+        $i9 = $r4.<java.awt.Rectangle: int width>;
+
+        $i7 = $r3.<java.awt.Insets: int left>;
+
+        $i6 = $r3.<java.awt.Insets: int right>;
+
+        $i8 = $i7 + $i6;
+
+        $i10 = $i9 - $i8;
+
+        $r4.<java.awt.Rectangle: int width> = $i10;
+
+        $i14 = $r4.<java.awt.Rectangle: int height>;
+
+        $i12 = $r3.<java.awt.Insets: int top>;
+
+        $i11 = $r3.<java.awt.Insets: int bottom>;
+
+        $i13 = $i12 + $i11;
+
+        $i15 = $i14 - $i13;
+
+        $r4.<java.awt.Rectangle: int height> = $i15;
+
+        return $r4;
+    }
+
+    public void displayChanged()
+    {
+        sun.awt.SunDisplayChanger $r2;
+        java.awt.GraphicsDevice r3;
+        sun.awt.DisplayChangedListener $r4;
+        java.awt.GraphicsDevice[] $r1;
+        int i0, i1;
+        sun.java2d.SunGraphicsEnvironment r0;
+        boolean $z0;
+
+        r0 := @this: sun.java2d.SunGraphicsEnvironment;
+
+        $r1 = virtualinvoke r0.<sun.java2d.SunGraphicsEnvironment: java.awt.GraphicsDevice[] getScreenDevices()>();
+
+        i0 = lengthof $r1;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label3;
+
+        r3 = $r1[i1];
+
+        $z0 = r3 instanceof sun.awt.DisplayChangedListener;
+
+        if $z0 == 0 goto label2;
+
+        $r4 = (sun.awt.DisplayChangedListener) r3;
+
+        interfaceinvoke $r4.<sun.awt.DisplayChangedListener: void displayChanged()>();
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        $r2 = r0.<sun.java2d.SunGraphicsEnvironment: sun.awt.SunDisplayChanger displayChanger>;
+
+        virtualinvoke $r2.<sun.awt.SunDisplayChanger: void notifyListeners()>();
+
+        return;
+    }
+
+    public void paletteChanged()
+    {
+        sun.java2d.SunGraphicsEnvironment r0;
+        sun.awt.SunDisplayChanger $r1;
+
+        r0 := @this: sun.java2d.SunGraphicsEnvironment;
+
+        $r1 = r0.<sun.java2d.SunGraphicsEnvironment: sun.awt.SunDisplayChanger displayChanger>;
+
+        virtualinvoke $r1.<sun.awt.SunDisplayChanger: void notifyPaletteChanged()>();
+
+        return;
+    }
+
+    public abstract boolean isDisplayLocal();
+
+    public void addDisplayChangedListener(sun.awt.DisplayChangedListener)
+    {
+        sun.java2d.SunGraphicsEnvironment r0;
+        sun.awt.SunDisplayChanger $r2;
+        sun.awt.DisplayChangedListener r1;
+
+        r0 := @this: sun.java2d.SunGraphicsEnvironment;
+
+        r1 := @parameter0: sun.awt.DisplayChangedListener;
+
+        $r2 = r0.<sun.java2d.SunGraphicsEnvironment: sun.awt.SunDisplayChanger displayChanger>;
+
+        virtualinvoke $r2.<sun.awt.SunDisplayChanger: void add(sun.awt.DisplayChangedListener)>(r1);
+
+        return;
+    }
+
+    public void removeDisplayChangedListener(sun.awt.DisplayChangedListener)
+    {
+        sun.java2d.SunGraphicsEnvironment r0;
+        sun.awt.SunDisplayChanger $r2;
+        sun.awt.DisplayChangedListener r1;
+
+        r0 := @this: sun.java2d.SunGraphicsEnvironment;
+
+        r1 := @parameter0: sun.awt.DisplayChangedListener;
+
+        $r2 = r0.<sun.java2d.SunGraphicsEnvironment: sun.awt.SunDisplayChanger displayChanger>;
+
+        virtualinvoke $r2.<sun.awt.SunDisplayChanger: void remove(sun.awt.DisplayChangedListener)>(r1);
+
+        return;
+    }
+
+    public boolean isFlipStrategyPreferred(java.awt.peer.ComponentPeer)
+    {
+        java.awt.peer.ComponentPeer r1;
+        sun.java2d.SunGraphicsEnvironment r0;
+
+        r0 := @this: sun.java2d.SunGraphicsEnvironment;
+
+        r1 := @parameter0: java.awt.peer.ComponentPeer;
+
+        return 0;
+    }
+
+    static java.awt.Font access$002(java.awt.Font)
+    {
+        java.awt.Font r0;
+
+        r0 := @parameter0: java.awt.Font;
+
+        <sun.java2d.SunGraphicsEnvironment: java.awt.Font defaultFont> = r0;
+
+        return r0;
+    }
+}

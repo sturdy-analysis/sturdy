@@ -1,0 +1,454 @@
+public class sun.misc.Timer extends java.lang.Object
+{
+    public sun.misc.Timeable owner;
+    long interval;
+    long sleepUntil;
+    long remainingTime;
+    boolean regular;
+    boolean stopped;
+    sun.misc.Timer next;
+    static sun.misc.TimerThread timerThread;
+
+    public void <init>(sun.misc.Timeable, long)
+    {
+        java.lang.Throwable $r5;
+        sun.misc.Timer r0;
+        sun.misc.TimerThread $r3, $r4;
+        long l0, $l1;
+        sun.misc.Timeable r1;
+        java.lang.Class $r2;
+
+        r0 := @this: sun.misc.Timer;
+
+        r1 := @parameter0: sun.misc.Timeable;
+
+        l0 := @parameter1: long;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.misc.Timer: sun.misc.Timeable owner> = r1;
+
+        r0.<sun.misc.Timer: long interval> = l0;
+
+        r0.<sun.misc.Timer: long remainingTime> = l0;
+
+        r0.<sun.misc.Timer: boolean regular> = 1;
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        r0.<sun.misc.Timer: long sleepUntil> = $l1;
+
+        r0.<sun.misc.Timer: boolean stopped> = 1;
+
+        $r2 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = <sun.misc.Timer: sun.misc.TimerThread timerThread>;
+
+        if $r3 != null goto label2;
+
+        $r4 = new sun.misc.TimerThread;
+
+        specialinvoke $r4.<sun.misc.TimerThread: void <init>()>();
+
+        <sun.misc.Timer: sun.misc.TimerThread timerThread> = $r4;
+
+     label2:
+        exitmonitor $r2;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label5:
+        throw $r5;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public synchronized boolean isStopped()
+    {
+        sun.misc.Timer r0;
+        boolean $z0;
+
+        r0 := @this: sun.misc.Timer;
+
+        $z0 = r0.<sun.misc.Timer: boolean stopped>;
+
+        return $z0;
+    }
+
+    public void stop()
+    {
+        java.lang.Throwable $r2, $r3;
+        sun.misc.Timer r1;
+        sun.misc.TimerThread $r0;
+        long $l0, $l1, $l2, $l3;
+        boolean $z0;
+
+        r1 := @this: sun.misc.Timer;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r0 = <sun.misc.Timer: sun.misc.TimerThread timerThread>;
+
+        entermonitor $r0;
+
+     label01:
+        entermonitor r1;
+
+     label02:
+        $z0 = r1.<sun.misc.Timer: boolean stopped>;
+
+        if $z0 != 0 goto label03;
+
+        staticinvoke <sun.misc.TimerThread: boolean dequeue(sun.misc.Timer)>(r1);
+
+        $l1 = r1.<sun.misc.Timer: long sleepUntil>;
+
+        $l2 = $l1 - $l0;
+
+        $l3 = staticinvoke <java.lang.Math: long max(long,long)>(0L, $l2);
+
+        r1.<sun.misc.Timer: long remainingTime> = $l3;
+
+        r1.<sun.misc.Timer: long sleepUntil> = $l0;
+
+        r1.<sun.misc.Timer: boolean stopped> = 1;
+
+     label03:
+        exitmonitor r1;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r3 := @caughtexception;
+
+        exitmonitor r1;
+
+     label06:
+        throw $r3;
+
+     label07:
+        exitmonitor $r0;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label10:
+        throw $r2;
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label02 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.lang.Throwable from label01 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    public void cont()
+    {
+        java.lang.Throwable $r2, $r3;
+        sun.misc.Timer r1;
+        sun.misc.TimerThread $r0;
+        long $l0, $l1, $l2, $l3, $l4, $l5;
+        boolean $z0;
+
+        r1 := @this: sun.misc.Timer;
+
+        $r0 = <sun.misc.Timer: sun.misc.TimerThread timerThread>;
+
+        entermonitor $r0;
+
+     label01:
+        entermonitor r1;
+
+     label02:
+        $z0 = r1.<sun.misc.Timer: boolean stopped>;
+
+        if $z0 == 0 goto label03;
+
+        $l0 = r1.<sun.misc.Timer: long sleepUntil>;
+
+        $l1 = $l0 + 1L;
+
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l3 = r1.<sun.misc.Timer: long remainingTime>;
+
+        $l4 = $l2 + $l3;
+
+        $l5 = staticinvoke <java.lang.Math: long max(long,long)>($l1, $l4);
+
+        r1.<sun.misc.Timer: long sleepUntil> = $l5;
+
+        staticinvoke <sun.misc.TimerThread: void enqueue(sun.misc.Timer)>(r1);
+
+        r1.<sun.misc.Timer: boolean stopped> = 0;
+
+     label03:
+        exitmonitor r1;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r3 := @caughtexception;
+
+        exitmonitor r1;
+
+     label06:
+        throw $r3;
+
+     label07:
+        exitmonitor $r0;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label10:
+        throw $r2;
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label02 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.lang.Throwable from label01 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    public void reset()
+    {
+        java.lang.Throwable $r2, $r3;
+        sun.misc.Timer r1;
+        sun.misc.TimerThread $r0;
+        long $l0;
+
+        r1 := @this: sun.misc.Timer;
+
+        $r0 = <sun.misc.Timer: sun.misc.TimerThread timerThread>;
+
+        entermonitor $r0;
+
+     label01:
+        entermonitor r1;
+
+     label02:
+        $l0 = r1.<sun.misc.Timer: long interval>;
+
+        virtualinvoke r1.<sun.misc.Timer: void setRemainingTime(long)>($l0);
+
+        exitmonitor r1;
+
+     label03:
+        goto label06;
+
+     label04:
+        $r3 := @caughtexception;
+
+        exitmonitor r1;
+
+     label05:
+        throw $r3;
+
+     label06:
+        exitmonitor $r0;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label09:
+        throw $r2;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label02 to label03 with label04;
+        catch java.lang.Throwable from label04 to label05 with label04;
+        catch java.lang.Throwable from label01 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    public synchronized long getStopTime()
+    {
+        sun.misc.Timer r0;
+        long $l0;
+
+        r0 := @this: sun.misc.Timer;
+
+        $l0 = r0.<sun.misc.Timer: long sleepUntil>;
+
+        return $l0;
+    }
+
+    public synchronized long getInterval()
+    {
+        sun.misc.Timer r0;
+        long $l0;
+
+        r0 := @this: sun.misc.Timer;
+
+        $l0 = r0.<sun.misc.Timer: long interval>;
+
+        return $l0;
+    }
+
+    public synchronized void setInterval(long)
+    {
+        sun.misc.Timer r0;
+        long l0;
+
+        r0 := @this: sun.misc.Timer;
+
+        l0 := @parameter0: long;
+
+        r0.<sun.misc.Timer: long interval> = l0;
+
+        return;
+    }
+
+    public synchronized long getRemainingTime()
+    {
+        sun.misc.Timer r0;
+        long $l0;
+
+        r0 := @this: sun.misc.Timer;
+
+        $l0 = r0.<sun.misc.Timer: long remainingTime>;
+
+        return $l0;
+    }
+
+    public void setRemainingTime(long)
+    {
+        java.lang.Throwable $r2, $r3;
+        sun.misc.Timer r1;
+        sun.misc.TimerThread $r0;
+        long l0;
+        boolean $z0;
+
+        r1 := @this: sun.misc.Timer;
+
+        l0 := @parameter0: long;
+
+        $r0 = <sun.misc.Timer: sun.misc.TimerThread timerThread>;
+
+        entermonitor $r0;
+
+     label01:
+        entermonitor r1;
+
+     label02:
+        $z0 = r1.<sun.misc.Timer: boolean stopped>;
+
+        if $z0 == 0 goto label03;
+
+        r1.<sun.misc.Timer: long remainingTime> = l0;
+
+        goto label04;
+
+     label03:
+        virtualinvoke r1.<sun.misc.Timer: void stop()>();
+
+        r1.<sun.misc.Timer: long remainingTime> = l0;
+
+        virtualinvoke r1.<sun.misc.Timer: void cont()>();
+
+     label04:
+        exitmonitor r1;
+
+     label05:
+        goto label08;
+
+     label06:
+        $r3 := @caughtexception;
+
+        exitmonitor r1;
+
+     label07:
+        throw $r3;
+
+     label08:
+        exitmonitor $r0;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label11:
+        throw $r2;
+
+     label12:
+        return;
+
+        catch java.lang.Throwable from label02 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+        catch java.lang.Throwable from label01 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    public synchronized void setRegular(boolean)
+    {
+        sun.misc.Timer r0;
+        boolean z0;
+
+        r0 := @this: sun.misc.Timer;
+
+        z0 := @parameter0: boolean;
+
+        r0.<sun.misc.Timer: boolean regular> = z0;
+
+        return;
+    }
+
+    protected java.lang.Thread getTimerThread()
+    {
+        sun.misc.Timer r1;
+        sun.misc.TimerThread $r0;
+
+        r1 := @this: sun.misc.Timer;
+
+        $r0 = <sun.misc.TimerThread: sun.misc.TimerThread timerThread>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        <sun.misc.Timer: sun.misc.TimerThread timerThread> = null;
+
+        return;
+    }
+}

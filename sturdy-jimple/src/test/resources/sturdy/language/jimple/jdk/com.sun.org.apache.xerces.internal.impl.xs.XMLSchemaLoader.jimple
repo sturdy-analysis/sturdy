@@ -1,0 +1,3089 @@
+public class com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader extends java.lang.Object implements com.sun.org.apache.xerces.internal.xni.grammars.XMLGrammarLoader, com.sun.org.apache.xerces.internal.xni.parser.XMLComponent, com.sun.org.apache.xerces.internal.impl.xs.XSElementDeclHelper, com.sun.org.apache.xerces.internal.xs.XSLoader, org.w3c.dom.DOMConfiguration
+{
+    protected static final java.lang.String SCHEMA_FULL_CHECKING;
+    protected static final java.lang.String CONTINUE_AFTER_FATAL_ERROR;
+    protected static final java.lang.String ALLOW_JAVA_ENCODINGS;
+    protected static final java.lang.String STANDARD_URI_CONFORMANT_FEATURE;
+    protected static final java.lang.String VALIDATE_ANNOTATIONS;
+    protected static final java.lang.String DISALLOW_DOCTYPE;
+    protected static final java.lang.String GENERATE_SYNTHETIC_ANNOTATIONS;
+    protected static final java.lang.String HONOUR_ALL_SCHEMALOCATIONS;
+    protected static final java.lang.String AUGMENT_PSVI;
+    protected static final java.lang.String PARSER_SETTINGS;
+    protected static final java.lang.String NAMESPACE_GROWTH;
+    protected static final java.lang.String TOLERATE_DUPLICATES;
+    protected static final java.lang.String SCHEMA_DV_FACTORY;
+    protected static final java.lang.String OVERRIDE_PARSER;
+    private static final java.lang.String[] RECOGNIZED_FEATURES;
+    public static final java.lang.String SYMBOL_TABLE;
+    public static final java.lang.String ERROR_REPORTER;
+    protected static final java.lang.String ERROR_HANDLER;
+    public static final java.lang.String ENTITY_RESOLVER;
+    public static final java.lang.String XMLGRAMMAR_POOL;
+    protected static final java.lang.String SCHEMA_LOCATION;
+    protected static final java.lang.String SCHEMA_NONS_LOCATION;
+    protected static final java.lang.String JAXP_SCHEMA_SOURCE;
+    protected static final java.lang.String SECURITY_MANAGER;
+    protected static final java.lang.String LOCALE;
+    protected static final java.lang.String ENTITY_MANAGER;
+    private static final java.lang.String XML_SECURITY_PROPERTY_MANAGER;
+    public static final java.lang.String ACCESS_EXTERNAL_DTD;
+    public static final java.lang.String ACCESS_EXTERNAL_SCHEMA;
+    private static final java.lang.String[] RECOGNIZED_PROPERTIES;
+    private final com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings fLoaderConfig;
+    private com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter;
+    private com.sun.org.apache.xerces.internal.impl.XMLEntityManager fEntityManager;
+    private com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver fUserEntityResolver;
+    private com.sun.org.apache.xerces.internal.xni.grammars.XMLGrammarPool fGrammarPool;
+    private java.lang.String fExternalSchemas;
+    private java.lang.String fExternalNoNSSchema;
+    private java.lang.Object fJAXPSource;
+    private boolean fIsCheckedFully;
+    private boolean fJAXPProcessed;
+    private boolean fSettingsChanged;
+    private com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler fSchemaHandler;
+    private com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket fGrammarBucket;
+    private com.sun.org.apache.xerces.internal.impl.xs.XSDeclarationPool fDeclPool;
+    private com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler fSubGroupHandler;
+    private final com.sun.org.apache.xerces.internal.impl.xs.models.CMNodeFactory fNodeFactory;
+    private com.sun.org.apache.xerces.internal.impl.xs.models.CMBuilder fCMBuilder;
+    private com.sun.org.apache.xerces.internal.impl.xs.XSDDescription fXSDDescription;
+    private java.lang.String faccessExternalSchema;
+    private java.util.WeakHashMap fJAXPCache;
+    private java.util.Locale fLocale;
+    private org.w3c.dom.DOMStringList fRecognizedParameters;
+    private com.sun.org.apache.xerces.internal.util.DOMErrorHandlerWrapper fErrorHandler;
+    private com.sun.org.apache.xerces.internal.util.DOMEntityResolverWrapper fResourceResolver;
+
+    public void <init>()
+    {
+        com.sun.org.apache.xerces.internal.util.SymbolTable $r1;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r0;
+        com.sun.org.apache.xerces.internal.impl.XMLEntityManager $r2;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        $r1 = new com.sun.org.apache.xerces.internal.util.SymbolTable;
+
+        specialinvoke $r1.<com.sun.org.apache.xerces.internal.util.SymbolTable: void <init>()>();
+
+        $r2 = new com.sun.org.apache.xerces.internal.impl.XMLEntityManager;
+
+        specialinvoke $r2.<com.sun.org.apache.xerces.internal.impl.XMLEntityManager: void <init>()>();
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: void <init>(com.sun.org.apache.xerces.internal.util.SymbolTable,com.sun.org.apache.xerces.internal.impl.XMLErrorReporter,com.sun.org.apache.xerces.internal.impl.XMLEntityManager,com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket,com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler,com.sun.org.apache.xerces.internal.impl.xs.models.CMBuilder)>($r1, null, $r2, null, null, null);
+
+        return;
+    }
+
+    public void <init>(com.sun.org.apache.xerces.internal.util.SymbolTable)
+    {
+        com.sun.org.apache.xerces.internal.util.SymbolTable r1;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r0;
+        com.sun.org.apache.xerces.internal.impl.XMLEntityManager $r2;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r1 := @parameter0: com.sun.org.apache.xerces.internal.util.SymbolTable;
+
+        $r2 = new com.sun.org.apache.xerces.internal.impl.XMLEntityManager;
+
+        specialinvoke $r2.<com.sun.org.apache.xerces.internal.impl.XMLEntityManager: void <init>()>();
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: void <init>(com.sun.org.apache.xerces.internal.util.SymbolTable,com.sun.org.apache.xerces.internal.impl.XMLErrorReporter,com.sun.org.apache.xerces.internal.impl.XMLEntityManager,com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket,com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler,com.sun.org.apache.xerces.internal.impl.xs.models.CMBuilder)>(r1, null, $r2, null, null, null);
+
+        return;
+    }
+
+    void <init>(com.sun.org.apache.xerces.internal.impl.XMLErrorReporter, com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket, com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler, com.sun.org.apache.xerces.internal.impl.xs.models.CMBuilder)
+    {
+        com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler r3;
+        com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket r2;
+        com.sun.org.apache.xerces.internal.impl.xs.models.CMBuilder r4;
+        com.sun.org.apache.xerces.internal.impl.XMLErrorReporter r1;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r1 := @parameter0: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter;
+
+        r2 := @parameter1: com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket;
+
+        r3 := @parameter2: com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler;
+
+        r4 := @parameter3: com.sun.org.apache.xerces.internal.impl.xs.models.CMBuilder;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: void <init>(com.sun.org.apache.xerces.internal.util.SymbolTable,com.sun.org.apache.xerces.internal.impl.XMLErrorReporter,com.sun.org.apache.xerces.internal.impl.XMLEntityManager,com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket,com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler,com.sun.org.apache.xerces.internal.impl.xs.models.CMBuilder)>(null, r1, null, r2, r3, r4);
+
+        return;
+    }
+
+    void <init>(com.sun.org.apache.xerces.internal.util.SymbolTable, com.sun.org.apache.xerces.internal.impl.XMLErrorReporter, com.sun.org.apache.xerces.internal.impl.XMLEntityManager, com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket, com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler, com.sun.org.apache.xerces.internal.impl.xs.models.CMBuilder)
+    {
+        com.sun.org.apache.xerces.internal.impl.xs.models.CMNodeFactory $r3, $r22;
+        com.sun.org.apache.xerces.internal.impl.xs.XSMessageFormatter $r27;
+        com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler $r23, r35;
+        java.util.Locale $r5, $r30;
+        com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler $r18;
+        com.sun.org.apache.xerces.internal.impl.xs.XSDDescription $r4;
+        com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket $r19, $r24, r34;
+        java.lang.String[] $r6, $r8;
+        com.sun.org.apache.xerces.internal.impl.XMLErrorReporter $r2, $r11, $r13, $r28, $r29, r33;
+        com.sun.org.apache.xerces.internal.impl.XMLEntityManager r15, $r16, $r25;
+        com.sun.org.apache.xerces.internal.util.MessageFormatter $r12;
+        com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings $r1, $r7, $r9, $r14, $r17, $r26, $r32;
+        java.util.WeakHashMap $r20;
+        com.sun.org.apache.xerces.internal.util.SymbolTable r10;
+        com.sun.org.apache.xerces.internal.impl.xs.models.CMBuilder $r21, r36;
+        com.sun.org.apache.xerces.internal.util.DefaultErrorHandler $r31;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r10 := @parameter0: com.sun.org.apache.xerces.internal.util.SymbolTable;
+
+        r33 := @parameter1: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter;
+
+        r15 := @parameter2: com.sun.org.apache.xerces.internal.impl.XMLEntityManager;
+
+        r34 := @parameter3: com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket;
+
+        r35 := @parameter4: com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler;
+
+        r36 := @parameter5: com.sun.org.apache.xerces.internal.impl.xs.models.CMBuilder;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings;
+
+        specialinvoke $r1.<com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings: void <init>()>();
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings fLoaderConfig> = $r1;
+
+        $r2 = new com.sun.org.apache.xerces.internal.impl.XMLErrorReporter;
+
+        specialinvoke $r2.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: void <init>()>();
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter> = $r2;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLEntityManager fEntityManager> = null;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver fUserEntityResolver> = null;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.xni.grammars.XMLGrammarPool fGrammarPool> = null;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String fExternalSchemas> = null;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String fExternalNoNSSchema> = null;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.Object fJAXPSource> = null;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: boolean fIsCheckedFully> = 0;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: boolean fJAXPProcessed> = 0;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: boolean fSettingsChanged> = 1;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSDeclarationPool fDeclPool> = null;
+
+        $r3 = new com.sun.org.apache.xerces.internal.impl.xs.models.CMNodeFactory;
+
+        specialinvoke $r3.<com.sun.org.apache.xerces.internal.impl.xs.models.CMNodeFactory: void <init>()>();
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.models.CMNodeFactory fNodeFactory> = $r3;
+
+        $r4 = new com.sun.org.apache.xerces.internal.impl.xs.XSDDescription;
+
+        specialinvoke $r4.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: void <init>()>();
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSDDescription fXSDDescription> = $r4;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String faccessExternalSchema> = "all";
+
+        $r5 = staticinvoke <java.util.Locale: java.util.Locale getDefault()>();
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.util.Locale fLocale> = $r5;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: org.w3c.dom.DOMStringList fRecognizedParameters> = null;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.DOMErrorHandlerWrapper fErrorHandler> = null;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.DOMEntityResolverWrapper fResourceResolver> = null;
+
+        $r7 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings fLoaderConfig>;
+
+        $r6 = <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String[] RECOGNIZED_FEATURES>;
+
+        virtualinvoke $r7.<com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings: void addRecognizedFeatures(java.lang.String[])>($r6);
+
+        $r9 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings fLoaderConfig>;
+
+        $r8 = <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String[] RECOGNIZED_PROPERTIES>;
+
+        virtualinvoke $r9.<com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings: void addRecognizedProperties(java.lang.String[])>($r8);
+
+        if r10 == null goto label1;
+
+        $r32 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings fLoaderConfig>;
+
+        virtualinvoke $r32.<com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings: void setProperty(java.lang.String,java.lang.Object)>("http://apache.org/xml/properties/internal/symbol-table", r10);
+
+     label1:
+        if r33 != null goto label2;
+
+        $r29 = new com.sun.org.apache.xerces.internal.impl.XMLErrorReporter;
+
+        specialinvoke $r29.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: void <init>()>();
+
+        r33 = $r29;
+
+        $r30 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.util.Locale fLocale>;
+
+        virtualinvoke $r29.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: void setLocale(java.util.Locale)>($r30);
+
+        $r31 = new com.sun.org.apache.xerces.internal.util.DefaultErrorHandler;
+
+        specialinvoke $r31.<com.sun.org.apache.xerces.internal.util.DefaultErrorHandler: void <init>()>();
+
+        virtualinvoke $r29.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: void setProperty(java.lang.String,java.lang.Object)>("http://apache.org/xml/properties/internal/error-handler", $r31);
+
+     label2:
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter> = r33;
+
+        $r11 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        $r12 = virtualinvoke $r11.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: com.sun.org.apache.xerces.internal.util.MessageFormatter getMessageFormatter(java.lang.String)>("http://www.w3.org/TR/xml-schema-1");
+
+        if $r12 != null goto label3;
+
+        $r28 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        $r27 = new com.sun.org.apache.xerces.internal.impl.xs.XSMessageFormatter;
+
+        specialinvoke $r27.<com.sun.org.apache.xerces.internal.impl.xs.XSMessageFormatter: void <init>()>();
+
+        virtualinvoke $r28.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: void putMessageFormatter(java.lang.String,com.sun.org.apache.xerces.internal.util.MessageFormatter)>("http://www.w3.org/TR/xml-schema-1", $r27);
+
+     label3:
+        $r14 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings fLoaderConfig>;
+
+        $r13 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        virtualinvoke $r14.<com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings: void setProperty(java.lang.String,java.lang.Object)>("http://apache.org/xml/properties/internal/error-reporter", $r13);
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLEntityManager fEntityManager> = r15;
+
+        $r16 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLEntityManager fEntityManager>;
+
+        if $r16 == null goto label4;
+
+        $r26 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings fLoaderConfig>;
+
+        $r25 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLEntityManager fEntityManager>;
+
+        virtualinvoke $r26.<com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings: void setProperty(java.lang.String,java.lang.Object)>("http://apache.org/xml/properties/internal/entity-manager", $r25);
+
+     label4:
+        $r17 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings fLoaderConfig>;
+
+        virtualinvoke $r17.<com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings: void setFeature(java.lang.String,boolean)>("http://apache.org/xml/features/validation/schema/augment-psvi", 1);
+
+        if r34 != null goto label5;
+
+        $r24 = new com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket;
+
+        specialinvoke $r24.<com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket: void <init>()>();
+
+        r34 = $r24;
+
+     label5:
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket fGrammarBucket> = r34;
+
+        if r35 != null goto label6;
+
+        $r23 = new com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler;
+
+        specialinvoke $r23.<com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler: void <init>(com.sun.org.apache.xerces.internal.impl.xs.XSElementDeclHelper)>(r0);
+
+        r35 = $r23;
+
+     label6:
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler fSubGroupHandler> = r35;
+
+        if r36 != null goto label7;
+
+        $r21 = new com.sun.org.apache.xerces.internal.impl.xs.models.CMBuilder;
+
+        $r22 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.models.CMNodeFactory fNodeFactory>;
+
+        specialinvoke $r21.<com.sun.org.apache.xerces.internal.impl.xs.models.CMBuilder: void <init>(com.sun.org.apache.xerces.internal.impl.xs.models.CMNodeFactory)>($r22);
+
+        r36 = $r21;
+
+     label7:
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.models.CMBuilder fCMBuilder> = r36;
+
+        $r18 = new com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler;
+
+        $r19 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket fGrammarBucket>;
+
+        specialinvoke $r18.<com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler: void <init>(com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket)>($r19);
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler fSchemaHandler> = $r18;
+
+        $r20 = new java.util.WeakHashMap;
+
+        specialinvoke $r20.<java.util.WeakHashMap: void <init>()>();
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.util.WeakHashMap fJAXPCache> = $r20;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: boolean fSettingsChanged> = 1;
+
+        return;
+    }
+
+    public java.lang.String[] getRecognizedFeatures()
+    {
+        java.lang.String[] $r0, $r2, $r3;
+        java.lang.Object $r1;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r4;
+
+        r4 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        $r0 = <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String[] RECOGNIZED_FEATURES>;
+
+        $r1 = virtualinvoke $r0.<java.lang.Object: java.lang.Object clone()>();
+
+        $r2 = (java.lang.String[]) $r1;
+
+        $r3 = (java.lang.String[]) $r2;
+
+        return $r3;
+    }
+
+    public boolean getFeature(java.lang.String) throws com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException
+    {
+        java.lang.String r1;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r0;
+        com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings $r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings fLoaderConfig>;
+
+        $z0 = virtualinvoke $r2.<com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings: boolean getFeature(java.lang.String)>(r1);
+
+        return $z0;
+    }
+
+    public void setFeature(java.lang.String, boolean) throws com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException
+    {
+        com.sun.org.apache.xerces.internal.impl.XMLErrorReporter $r3;
+        com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler $r2;
+        java.lang.String r1;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r0;
+        com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings $r4;
+        boolean $z0, $z1, z2;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r1 := @parameter0: java.lang.String;
+
+        z2 := @parameter1: boolean;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: boolean fSettingsChanged> = 1;
+
+        $z0 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/features/continue-after-fatal-error");
+
+        if $z0 == 0 goto label1;
+
+        $r3 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        virtualinvoke $r3.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: void setFeature(java.lang.String,boolean)>("http://apache.org/xml/features/continue-after-fatal-error", z2);
+
+        goto label2;
+
+     label1:
+        $z1 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/features/generate-synthetic-annotations");
+
+        if $z1 == 0 goto label2;
+
+        $r2 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler fSchemaHandler>;
+
+        virtualinvoke $r2.<com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler: void setGenerateSyntheticAnnotations(boolean)>(z2);
+
+     label2:
+        $r4 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings fLoaderConfig>;
+
+        virtualinvoke $r4.<com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings: void setFeature(java.lang.String,boolean)>(r1, z2);
+
+        return;
+    }
+
+    public java.lang.String[] getRecognizedProperties()
+    {
+        java.lang.String[] $r0, $r2, $r3;
+        java.lang.Object $r1;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r4;
+
+        r4 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        $r0 = <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String[] RECOGNIZED_PROPERTIES>;
+
+        $r1 = virtualinvoke $r0.<java.lang.Object: java.lang.Object clone()>();
+
+        $r2 = (java.lang.String[]) $r1;
+
+        $r3 = (java.lang.String[]) $r2;
+
+        return $r3;
+    }
+
+    public java.lang.Object getProperty(java.lang.String) throws com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException
+    {
+        java.lang.Object $r3;
+        java.lang.String r1;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r0;
+        com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings $r2;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings fLoaderConfig>;
+
+        $r3 = virtualinvoke $r2.<com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings: java.lang.Object getProperty(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    public void setProperty(java.lang.String, java.lang.Object) throws com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException
+    {
+        com.sun.org.apache.xerces.internal.impl.XMLErrorReporter $r7, $r8, $r11;
+        com.sun.org.apache.xerces.internal.impl.xs.XSMessageFormatter $r10;
+        com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager r4;
+        com.sun.org.apache.xerces.internal.impl.XMLEntityManager $r12;
+        java.util.Locale $r13;
+        java.lang.String r1, $r6, $r14, $r15;
+        com.sun.org.apache.xerces.internal.util.MessageFormatter $r9;
+        com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings $r3;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager$Property $r5;
+        java.lang.Object r2;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r0;
+        com.sun.org.apache.xerces.internal.xni.grammars.XMLGrammarPool $r16;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Object;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: boolean fSettingsChanged> = 1;
+
+        $r3 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings fLoaderConfig>;
+
+        virtualinvoke $r3.<com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings: void setProperty(java.lang.String,java.lang.Object)>(r1, r2);
+
+        $z0 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://java.sun.com/xml/jaxp/properties/schemaSource");
+
+        if $z0 == 0 goto label1;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.Object fJAXPSource> = r2;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: boolean fJAXPProcessed> = 0;
+
+        goto label8;
+
+     label1:
+        $z1 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/properties/internal/grammar-pool");
+
+        if $z1 == 0 goto label2;
+
+        $r16 = (com.sun.org.apache.xerces.internal.xni.grammars.XMLGrammarPool) r2;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.xni.grammars.XMLGrammarPool fGrammarPool> = $r16;
+
+        goto label8;
+
+     label2:
+        $z2 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/properties/schema/external-schemaLocation");
+
+        if $z2 == 0 goto label3;
+
+        $r15 = (java.lang.String) r2;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String fExternalSchemas> = $r15;
+
+        goto label8;
+
+     label3:
+        $z3 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/properties/schema/external-noNamespaceSchemaLocation");
+
+        if $z3 == 0 goto label4;
+
+        $r14 = (java.lang.String) r2;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String fExternalNoNSSchema> = $r14;
+
+        goto label8;
+
+     label4:
+        $z4 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/properties/locale");
+
+        if $z4 == 0 goto label5;
+
+        $r13 = (java.util.Locale) r2;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: void setLocale(java.util.Locale)>($r13);
+
+        goto label8;
+
+     label5:
+        $z5 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/properties/internal/entity-resolver");
+
+        if $z5 == 0 goto label6;
+
+        $r12 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLEntityManager fEntityManager>;
+
+        virtualinvoke $r12.<com.sun.org.apache.xerces.internal.impl.XMLEntityManager: void setProperty(java.lang.String,java.lang.Object)>("http://apache.org/xml/properties/internal/entity-resolver", r2);
+
+        goto label8;
+
+     label6:
+        $z6 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/properties/internal/error-reporter");
+
+        if $z6 == 0 goto label7;
+
+        $r7 = (com.sun.org.apache.xerces.internal.impl.XMLErrorReporter) r2;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter> = $r7;
+
+        $r8 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        $r9 = virtualinvoke $r8.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: com.sun.org.apache.xerces.internal.util.MessageFormatter getMessageFormatter(java.lang.String)>("http://www.w3.org/TR/xml-schema-1");
+
+        if $r9 != null goto label8;
+
+        $r11 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        $r10 = new com.sun.org.apache.xerces.internal.impl.xs.XSMessageFormatter;
+
+        specialinvoke $r10.<com.sun.org.apache.xerces.internal.impl.xs.XSMessageFormatter: void <init>()>();
+
+        virtualinvoke $r11.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: void putMessageFormatter(java.lang.String,com.sun.org.apache.xerces.internal.util.MessageFormatter)>("http://www.w3.org/TR/xml-schema-1", $r10);
+
+        goto label8;
+
+     label7:
+        $z7 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://www.oracle.com/xml/jaxp/properties/xmlSecurityPropertyManager");
+
+        if $z7 == 0 goto label8;
+
+        r4 = (com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager) r2;
+
+        $r5 = <com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager$Property: com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager$Property ACCESS_EXTERNAL_SCHEMA>;
+
+        $r6 = virtualinvoke r4.<com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager: java.lang.String getValue(com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager$Property)>($r5);
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String faccessExternalSchema> = $r6;
+
+     label8:
+        return;
+    }
+
+    public void setLocale(java.util.Locale)
+    {
+        com.sun.org.apache.xerces.internal.impl.XMLErrorReporter $r2;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r0;
+        java.util.Locale r1;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r1 := @parameter0: java.util.Locale;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.util.Locale fLocale> = r1;
+
+        $r2 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        virtualinvoke $r2.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: void setLocale(java.util.Locale)>(r1);
+
+        return;
+    }
+
+    public java.util.Locale getLocale()
+    {
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r0;
+        java.util.Locale $r1;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.util.Locale fLocale>;
+
+        return $r1;
+    }
+
+    public void setErrorHandler(com.sun.org.apache.xerces.internal.xni.parser.XMLErrorHandler)
+    {
+        com.sun.org.apache.xerces.internal.xni.parser.XMLErrorHandler r1;
+        com.sun.org.apache.xerces.internal.impl.XMLErrorReporter $r2;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r1 := @parameter0: com.sun.org.apache.xerces.internal.xni.parser.XMLErrorHandler;
+
+        $r2 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        virtualinvoke $r2.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: void setProperty(java.lang.String,java.lang.Object)>("http://apache.org/xml/properties/internal/error-handler", r1);
+
+        return;
+    }
+
+    public com.sun.org.apache.xerces.internal.xni.parser.XMLErrorHandler getErrorHandler()
+    {
+        com.sun.org.apache.xerces.internal.xni.parser.XMLErrorHandler $r2;
+        com.sun.org.apache.xerces.internal.impl.XMLErrorReporter $r1;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        $r2 = virtualinvoke $r1.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: com.sun.org.apache.xerces.internal.xni.parser.XMLErrorHandler getErrorHandler()>();
+
+        return $r2;
+    }
+
+    public void setEntityResolver(com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver)
+    {
+        com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver r1;
+        com.sun.org.apache.xerces.internal.impl.XMLEntityManager $r3;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r0;
+        com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings $r2;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r1 := @parameter0: com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver fUserEntityResolver> = r1;
+
+        $r2 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings fLoaderConfig>;
+
+        virtualinvoke $r2.<com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings: void setProperty(java.lang.String,java.lang.Object)>("http://apache.org/xml/properties/internal/entity-resolver", r1);
+
+        $r3 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLEntityManager fEntityManager>;
+
+        virtualinvoke $r3.<com.sun.org.apache.xerces.internal.impl.XMLEntityManager: void setProperty(java.lang.String,java.lang.Object)>("http://apache.org/xml/properties/internal/entity-resolver", r1);
+
+        return;
+    }
+
+    public com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver getEntityResolver()
+    {
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r0;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver $r1;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver fUserEntityResolver>;
+
+        return $r1;
+    }
+
+    public void loadGrammar(com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource[]) throws java.io.IOException, com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource[] r0;
+        int i0, i1;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r1;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource $r2;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r0 := @parameter0: com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource[];
+
+        i0 = lengthof r0;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label2;
+
+        $r2 = r0[i1];
+
+        virtualinvoke r1.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.xni.grammars.Grammar loadGrammar(com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource)>($r2);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public com.sun.org.apache.xerces.internal.xni.grammars.Grammar loadGrammar(com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource) throws java.io.IOException, com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket $r12, $r20;
+        java.util.HashMap $r6;
+        com.sun.org.apache.xerces.internal.impl.XMLErrorReporter $r7, $r17;
+        com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler $r19;
+        com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar[] $r14;
+        java.lang.String $r4, $r5, $r8, $r9;
+        com.sun.org.apache.xerces.internal.impl.xs.XSDDescription $r2;
+        com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings $r1;
+        java.util.WeakHashMap $r15;
+        boolean $z0;
+        com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar $r10;
+        com.sun.org.apache.xerces.internal.impl.xs.models.CMBuilder $r18;
+        java.lang.Object $r16;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r0;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource r3;
+        com.sun.org.apache.xerces.internal.xni.grammars.XMLGrammarPool $r11, $r13;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r3 := @parameter0: com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings fLoaderConfig>;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: void reset(com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager)>($r1);
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: boolean fSettingsChanged> = 0;
+
+        $r2 = new com.sun.org.apache.xerces.internal.impl.xs.XSDDescription;
+
+        specialinvoke $r2.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: void <init>()>();
+
+        $r2.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: short fContextType> = 3;
+
+        $r4 = virtualinvoke r3.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: java.lang.String getBaseSystemId()>();
+
+        virtualinvoke $r2.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: void setBaseSystemId(java.lang.String)>($r4);
+
+        $r5 = virtualinvoke r3.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: java.lang.String getSystemId()>();
+
+        virtualinvoke $r2.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: void setLiteralSystemId(java.lang.String)>($r5);
+
+        $r6 = new java.util.HashMap;
+
+        specialinvoke $r6.<java.util.HashMap: void <init>()>();
+
+        $r9 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String fExternalSchemas>;
+
+        $r8 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String fExternalNoNSSchema>;
+
+        $r7 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        staticinvoke <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: void processExternalHints(java.lang.String,java.lang.String,java.util.Map,com.sun.org.apache.xerces.internal.impl.XMLErrorReporter)>($r9, $r8, $r6, $r7);
+
+        $r10 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar loadSchema(com.sun.org.apache.xerces.internal.impl.xs.XSDDescription,com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource,java.util.Map)>($r2, r3, $r6);
+
+        if $r10 == null goto label1;
+
+        $r11 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.xni.grammars.XMLGrammarPool fGrammarPool>;
+
+        if $r11 == null goto label1;
+
+        $r13 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.xni.grammars.XMLGrammarPool fGrammarPool>;
+
+        $r12 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket fGrammarBucket>;
+
+        $r14 = virtualinvoke $r12.<com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket: com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar[] getGrammars()>();
+
+        interfaceinvoke $r13.<com.sun.org.apache.xerces.internal.xni.grammars.XMLGrammarPool: void cacheGrammars(java.lang.String,com.sun.org.apache.xerces.internal.xni.grammars.Grammar[])>("http://www.w3.org/2001/XMLSchema", $r14);
+
+        $z0 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: boolean fIsCheckedFully>;
+
+        if $z0 == 0 goto label1;
+
+        $r15 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.util.WeakHashMap fJAXPCache>;
+
+        $r16 = virtualinvoke $r15.<java.util.WeakHashMap: java.lang.Object get(java.lang.Object)>($r10);
+
+        if $r16 == $r10 goto label1;
+
+        $r20 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket fGrammarBucket>;
+
+        $r19 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler fSubGroupHandler>;
+
+        $r18 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.models.CMBuilder fCMBuilder>;
+
+        $r17 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        staticinvoke <com.sun.org.apache.xerces.internal.impl.xs.XSConstraints: void fullSchemaChecking(com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket,com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler,com.sun.org.apache.xerces.internal.impl.xs.models.CMBuilder,com.sun.org.apache.xerces.internal.impl.XMLErrorReporter)>($r20, $r19, $r18, $r17);
+
+     label1:
+        return $r10;
+    }
+
+    com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar loadSchema(com.sun.org.apache.xerces.internal.impl.xs.XSDDescription, com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource, java.util.Map) throws java.io.IOException, com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        java.lang.Object[] $r10;
+        com.sun.org.apache.xerces.internal.impl.XMLErrorReporter $r11;
+        java.util.Map r3;
+        com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler $r4;
+        java.lang.String $r6, $r7, $r8, $r12, $r13, $r14;
+        com.sun.org.apache.xerces.internal.impl.xs.XSDDescription r1;
+        boolean $z0, $z1;
+        com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar $r5;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r9;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r0;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource r2;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r1 := @parameter0: com.sun.org.apache.xerces.internal.impl.xs.XSDDescription;
+
+        r2 := @parameter1: com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
+
+        r3 := @parameter2: java.util.Map;
+
+        $z0 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: boolean fJAXPProcessed>;
+
+        if $z0 != 0 goto label1;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: void processJAXPSchemaSource(java.util.Map)>(r3);
+
+     label1:
+        $z1 = virtualinvoke r1.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: boolean isExternal()>();
+
+        if $z1 == 0 goto label2;
+
+        $r6 = virtualinvoke r1.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: java.lang.String getExpandedSystemId()>();
+
+        $r7 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String faccessExternalSchema>;
+
+        $r8 = staticinvoke <com.sun.org.apache.xerces.internal.utils.SecuritySupport: java.lang.String checkAccess(java.lang.String,java.lang.String,java.lang.String)>($r6, $r7, "all");
+
+        if $r8 == null goto label2;
+
+        $r9 = new com.sun.org.apache.xerces.internal.xni.XNIException;
+
+        $r11 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        $r10 = newarray (java.lang.Object)[2];
+
+        $r12 = virtualinvoke r1.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: java.lang.String getExpandedSystemId()>();
+
+        $r13 = staticinvoke <com.sun.org.apache.xerces.internal.utils.SecuritySupport: java.lang.String sanitizePath(java.lang.String)>($r12);
+
+        $r10[0] = $r13;
+
+        $r10[1] = $r8;
+
+        $r14 = virtualinvoke $r11.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: java.lang.String reportError(java.lang.String,java.lang.String,java.lang.Object[],short)>("http://www.w3.org/TR/xml-schema-1", "schema_reference.access", $r10, 1);
+
+        specialinvoke $r9.<com.sun.org.apache.xerces.internal.xni.XNIException: void <init>(java.lang.String)>($r14);
+
+        throw $r9;
+
+     label2:
+        $r4 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler fSchemaHandler>;
+
+        $r5 = virtualinvoke $r4.<com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler: com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar parseSchema(com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource,com.sun.org.apache.xerces.internal.impl.xs.XSDDescription,java.util.Map)>(r2, r1, r3);
+
+        return $r5;
+    }
+
+    public static com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource resolveDocument(com.sun.org.apache.xerces.internal.impl.xs.XSDDescription, java.util.Map, com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver) throws java.io.IOException
+    {
+        java.lang.String[] $r5;
+        short $s0;
+        java.util.Map r2;
+        int $i1, $i2;
+        java.lang.String $r1, r7, $r8, $r9, $r10;
+        com.sun.org.apache.xerces.internal.impl.xs.XSDDescription r0;
+        boolean $z0;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader$LocationArray $r6;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver r4;
+        java.lang.Object $r3;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource $r11;
+
+        r0 := @parameter0: com.sun.org.apache.xerces.internal.impl.xs.XSDDescription;
+
+        r2 := @parameter1: java.util.Map;
+
+        r4 := @parameter2: com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver;
+
+        r7 = null;
+
+        $s0 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: short getContextType()>();
+
+        $i2 = (int) $s0;
+
+        if $i2 == 2 goto label1;
+
+        $z0 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: boolean fromInstance()>();
+
+        if $z0 == 0 goto label4;
+
+     label1:
+        $r1 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: java.lang.String getTargetNamespace()>();
+
+        if $r1 != null goto label2;
+
+        $r8 = <com.sun.org.apache.xerces.internal.util.XMLSymbols: java.lang.String EMPTY_STRING>;
+
+        goto label3;
+
+     label2:
+        $r8 = $r1;
+
+     label3:
+        $r3 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>($r8);
+
+        $r6 = (com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader$LocationArray) $r3;
+
+        if $r6 == null goto label4;
+
+        r7 = virtualinvoke $r6.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader$LocationArray: java.lang.String getFirstLocation()>();
+
+     label4:
+        if r7 != null goto label5;
+
+        $r5 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: java.lang.String[] getLocationHints()>();
+
+        if $r5 == null goto label5;
+
+        $i1 = lengthof $r5;
+
+        if $i1 <= 0 goto label5;
+
+        r7 = $r5[0];
+
+     label5:
+        $r9 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: java.lang.String getBaseSystemId()>();
+
+        $r10 = staticinvoke <com.sun.org.apache.xerces.internal.impl.XMLEntityManager: java.lang.String expandSystemId(java.lang.String,java.lang.String,boolean)>(r7, $r9, 0);
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: void setLiteralSystemId(java.lang.String)>(r7);
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: void setExpandedSystemId(java.lang.String)>($r10);
+
+        $r11 = interfaceinvoke r4.<com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver: com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource resolveEntity(com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier)>(r0);
+
+        return $r11;
+    }
+
+    public static void processExternalHints(java.lang.String, java.lang.String, java.util.Map, com.sun.org.apache.xerces.internal.impl.XMLErrorReporter)
+    {
+        java.lang.Object[] $r16, $r19, $r22;
+        com.sun.org.apache.xerces.internal.impl.XMLErrorReporter r15;
+        java.util.Map r6;
+        com.sun.org.apache.xerces.internal.impl.dv.XSSimpleType $r5, $r14;
+        java.lang.String r0, r1, $r2, $r7, $r10, $r11, $r18, $r21;
+        boolean $z0;
+        com.sun.org.apache.xerces.internal.impl.dv.InvalidDatatypeValueException $r17, $r20;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader$LocationArray $r9, r23;
+        com.sun.org.apache.xerces.internal.impl.xs.XSAttributeDecl $r4, $r13;
+        java.lang.Object $r8;
+        com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar$BuiltinSchemaGrammar $r3, $r12;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r6 := @parameter2: java.util.Map;
+
+        r15 := @parameter3: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter;
+
+        if r0 == null goto label4;
+
+     label1:
+        $r12 = <com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar: com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar$BuiltinSchemaGrammar SG_XSI>;
+
+        $r11 = <com.sun.org.apache.xerces.internal.impl.xs.SchemaSymbols: java.lang.String XSI_SCHEMALOCATION>;
+
+        $r13 = virtualinvoke $r12.<com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar$BuiltinSchemaGrammar: com.sun.org.apache.xerces.internal.impl.xs.XSAttributeDecl getGlobalAttributeDecl(java.lang.String)>($r11);
+
+        $r14 = $r13.<com.sun.org.apache.xerces.internal.impl.xs.XSAttributeDecl: com.sun.org.apache.xerces.internal.impl.dv.XSSimpleType fType>;
+
+        interfaceinvoke $r14.<com.sun.org.apache.xerces.internal.impl.dv.XSSimpleType: java.lang.Object validate(java.lang.String,com.sun.org.apache.xerces.internal.impl.dv.ValidationContext,com.sun.org.apache.xerces.internal.impl.dv.ValidatedInfo)>(r0, null, null);
+
+        $z0 = staticinvoke <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: boolean tokenizeSchemaLocationStr(java.lang.String,java.util.Map,java.lang.String)>(r0, r6, null);
+
+        if $z0 != 0 goto label2;
+
+        $r16 = newarray (java.lang.Object)[1];
+
+        $r16[0] = r0;
+
+        virtualinvoke r15.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: java.lang.String reportError(java.lang.String,java.lang.String,java.lang.Object[],short)>("http://www.w3.org/TR/xml-schema-1", "SchemaLocation", $r16, 0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r20 := @caughtexception;
+
+        $r21 = virtualinvoke $r20.<com.sun.org.apache.xerces.internal.impl.dv.InvalidDatatypeValueException: java.lang.String getKey()>();
+
+        $r22 = virtualinvoke $r20.<com.sun.org.apache.xerces.internal.impl.dv.InvalidDatatypeValueException: java.lang.Object[] getArgs()>();
+
+        virtualinvoke r15.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: java.lang.String reportError(java.lang.String,java.lang.String,java.lang.Object[],short)>("http://www.w3.org/TR/xml-schema-1", $r21, $r22, 0);
+
+     label4:
+        if r1 == null goto label9;
+
+     label5:
+        $r3 = <com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar: com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar$BuiltinSchemaGrammar SG_XSI>;
+
+        $r2 = <com.sun.org.apache.xerces.internal.impl.xs.SchemaSymbols: java.lang.String XSI_NONAMESPACESCHEMALOCATION>;
+
+        $r4 = virtualinvoke $r3.<com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar$BuiltinSchemaGrammar: com.sun.org.apache.xerces.internal.impl.xs.XSAttributeDecl getGlobalAttributeDecl(java.lang.String)>($r2);
+
+        $r5 = $r4.<com.sun.org.apache.xerces.internal.impl.xs.XSAttributeDecl: com.sun.org.apache.xerces.internal.impl.dv.XSSimpleType fType>;
+
+        interfaceinvoke $r5.<com.sun.org.apache.xerces.internal.impl.dv.XSSimpleType: java.lang.Object validate(java.lang.String,com.sun.org.apache.xerces.internal.impl.dv.ValidationContext,com.sun.org.apache.xerces.internal.impl.dv.ValidatedInfo)>(r1, null, null);
+
+        $r7 = <com.sun.org.apache.xerces.internal.util.XMLSymbols: java.lang.String EMPTY_STRING>;
+
+        $r8 = interfaceinvoke r6.<java.util.Map: java.lang.Object get(java.lang.Object)>($r7);
+
+        r23 = (com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader$LocationArray) $r8;
+
+        if r23 != null goto label6;
+
+        $r9 = new com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader$LocationArray;
+
+        specialinvoke $r9.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader$LocationArray: void <init>()>();
+
+        r23 = $r9;
+
+        $r10 = <com.sun.org.apache.xerces.internal.util.XMLSymbols: java.lang.String EMPTY_STRING>;
+
+        interfaceinvoke r6.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r10, $r9);
+
+     label6:
+        virtualinvoke r23.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader$LocationArray: void addLocation(java.lang.String)>(r1);
+
+     label7:
+        goto label9;
+
+     label8:
+        $r17 := @caughtexception;
+
+        $r18 = virtualinvoke $r17.<com.sun.org.apache.xerces.internal.impl.dv.InvalidDatatypeValueException: java.lang.String getKey()>();
+
+        $r19 = virtualinvoke $r17.<com.sun.org.apache.xerces.internal.impl.dv.InvalidDatatypeValueException: java.lang.Object[] getArgs()>();
+
+        virtualinvoke r15.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: java.lang.String reportError(java.lang.String,java.lang.String,java.lang.Object[],short)>("http://www.w3.org/TR/xml-schema-1", $r18, $r19, 0);
+
+     label9:
+        return;
+
+        catch com.sun.org.apache.xerces.internal.impl.dv.InvalidDatatypeValueException from label1 to label2 with label3;
+        catch com.sun.org.apache.xerces.internal.impl.dv.InvalidDatatypeValueException from label5 to label7 with label8;
+    }
+
+    public static boolean tokenizeSchemaLocationStr(java.lang.String, java.util.Map, java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader$LocationArray $r7, r10;
+        com.sun.org.apache.xerces.internal.util.URI$MalformedURIException $r8;
+        java.util.StringTokenizer $r1;
+        java.util.Map r4;
+        java.lang.Object $r5;
+        java.lang.String r0, $r2, $r3, r6, r9;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.util.Map;
+
+        r6 := @parameter2: java.lang.String;
+
+        if r0 == null goto label8;
+
+        $r1 = new java.util.StringTokenizer;
+
+        specialinvoke $r1.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>(r0, " \n\t\r");
+
+     label1:
+        $z0 = virtualinvoke $r1.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label8;
+
+        $r2 = virtualinvoke $r1.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $z1 = virtualinvoke $r1.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z1 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        $r3 = virtualinvoke $r1.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        r9 = $r3;
+
+        $r5 = interfaceinvoke r4.<java.util.Map: java.lang.Object get(java.lang.Object)>($r2);
+
+        r10 = (com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader$LocationArray) $r5;
+
+        if r10 != null goto label3;
+
+        $r7 = new com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader$LocationArray;
+
+        specialinvoke $r7.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader$LocationArray: void <init>()>();
+
+        r10 = $r7;
+
+        interfaceinvoke r4.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, $r7);
+
+     label3:
+        if r6 == null goto label7;
+
+     label4:
+        r9 = staticinvoke <com.sun.org.apache.xerces.internal.impl.XMLEntityManager: java.lang.String expandSystemId(java.lang.String,java.lang.String,boolean)>($r3, r6, 0);
+
+     label5:
+        goto label7;
+
+     label6:
+        $r8 := @caughtexception;
+
+     label7:
+        virtualinvoke r10.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader$LocationArray: void addLocation(java.lang.String)>(r9);
+
+        goto label1;
+
+     label8:
+        return 1;
+
+        catch com.sun.org.apache.xerces.internal.util.URI$MalformedURIException from label4 to label5 with label6;
+    }
+
+    private void processJAXPSchemaSource(java.util.Map) throws java.io.IOException
+    {
+        com.sun.org.apache.xerces.internal.util.Status $r49;
+        com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler $r31, $r70;
+        java.util.Map r14;
+        com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler $r16;
+        java.lang.Object[] $r51, $r84, $r85;
+        com.sun.org.apache.xerces.internal.impl.XMLErrorReporter $r23, $r26, $r29, $r45, $r48, $r68;
+        java.util.ArrayList $r86;
+        java.lang.String $r12, $r18, $r28, $r34, $r52, $r53, $r61, $r74;
+        com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar $r17, $r41, $r64, $r81;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r0;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource $r11, $r60;
+        java.util.Locale $r27, $r50;
+        com.sun.org.apache.xerces.internal.impl.xs.XSDDescription $r9, $r13, $r15, $r33, $r35, $r36, $r38, $r58, $r62, $r63, $r73, $r75, $r76, $r78;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14;
+        com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket $r32, $r39, $r71, $r79, $r82, $r87;
+        java.lang.String[] $r37, $r77;
+        int i0, $i1;
+        com.sun.org.apache.xerces.internal.util.MessageFormatter $r24, $r46;
+        java.util.WeakHashMap $r7, $r21, $r56, $r67;
+        com.sun.org.apache.xerces.internal.impl.xs.models.CMBuilder $r30, $r69;
+        java.lang.IllegalArgumentException $r25;
+        java.lang.Object $r1, $r2, $r5, $r6, $r8, $r10, $r19, $r20, $r22, $r40, $r54, $r55, $r57, $r59, $r65, $r66, $r72, $r80, $r83;
+        java.lang.Class $r3, $r4, $r42, $r43, $r44;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException $r47;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r14 := @parameter0: java.util.Map;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: boolean fJAXPProcessed> = 1;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.Object fJAXPSource>;
+
+        if $r1 != null goto label01;
+
+        return;
+
+     label01:
+        $r2 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.Object fJAXPSource>;
+
+        $r3 = virtualinvoke $r2.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.Class: java.lang.Class getComponentType()>();
+
+        if $r4 != null goto label08;
+
+        $r54 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.Object fJAXPSource>;
+
+        $z10 = $r54 instanceof java.io.InputStream;
+
+        if $z10 != 0 goto label02;
+
+        $r80 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.Object fJAXPSource>;
+
+        $z14 = $r80 instanceof org.xml.sax.InputSource;
+
+        if $z14 == 0 goto label03;
+
+     label02:
+        $r56 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.util.WeakHashMap fJAXPCache>;
+
+        $r55 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.Object fJAXPSource>;
+
+        $r57 = virtualinvoke $r56.<java.util.WeakHashMap: java.lang.Object get(java.lang.Object)>($r55);
+
+        $r81 = (com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar) $r57;
+
+        if $r81 == null goto label03;
+
+        $r79 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket fGrammarBucket>;
+
+        virtualinvoke $r79.<com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket: void putGrammar(com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar)>($r81);
+
+        return;
+
+     label03:
+        $r58 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSDDescription fXSDDescription>;
+
+        virtualinvoke $r58.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: void reset()>();
+
+        $r59 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.Object fJAXPSource>;
+
+        $r60 = specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource xsdToXMLInputSource(java.lang.Object)>($r59);
+
+        $r61 = virtualinvoke $r60.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: java.lang.String getSystemId()>();
+
+        $r62 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSDDescription fXSDDescription>;
+
+        $r62.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: short fContextType> = 3;
+
+        if $r61 == null goto label04;
+
+        $r73 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSDDescription fXSDDescription>;
+
+        $r74 = virtualinvoke $r60.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: java.lang.String getBaseSystemId()>();
+
+        virtualinvoke $r73.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: void setBaseSystemId(java.lang.String)>($r74);
+
+        $r75 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSDDescription fXSDDescription>;
+
+        virtualinvoke $r75.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: void setLiteralSystemId(java.lang.String)>($r61);
+
+        $r76 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSDDescription fXSDDescription>;
+
+        virtualinvoke $r76.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: void setExpandedSystemId(java.lang.String)>($r61);
+
+        $r78 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSDDescription fXSDDescription>;
+
+        $r77 = newarray (java.lang.String)[1];
+
+        $r77[0] = $r61;
+
+        $r78.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: java.lang.String[] fLocationHints> = $r77;
+
+     label04:
+        $r63 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSDDescription fXSDDescription>;
+
+        $r64 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar loadSchema(com.sun.org.apache.xerces.internal.impl.xs.XSDDescription,com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource,java.util.Map)>($r63, $r60, r14);
+
+        if $r64 == null goto label07;
+
+        $r65 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.Object fJAXPSource>;
+
+        $z11 = $r65 instanceof java.io.InputStream;
+
+        if $z11 != 0 goto label05;
+
+        $r72 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.Object fJAXPSource>;
+
+        $z13 = $r72 instanceof org.xml.sax.InputSource;
+
+        if $z13 == 0 goto label06;
+
+     label05:
+        $r67 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.util.WeakHashMap fJAXPCache>;
+
+        $r66 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.Object fJAXPSource>;
+
+        virtualinvoke $r67.<java.util.WeakHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r66, $r64);
+
+        $z12 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: boolean fIsCheckedFully>;
+
+        if $z12 == 0 goto label06;
+
+        $r71 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket fGrammarBucket>;
+
+        $r70 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler fSubGroupHandler>;
+
+        $r69 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.models.CMBuilder fCMBuilder>;
+
+        $r68 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        staticinvoke <com.sun.org.apache.xerces.internal.impl.xs.XSConstraints: void fullSchemaChecking(com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket,com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler,com.sun.org.apache.xerces.internal.impl.xs.models.CMBuilder,com.sun.org.apache.xerces.internal.impl.XMLErrorReporter)>($r71, $r70, $r69, $r68);
+
+     label06:
+        $r82 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket fGrammarBucket>;
+
+        virtualinvoke $r82.<com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket: void putGrammar(com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar)>($r64);
+
+     label07:
+        return;
+
+     label08:
+        if $r4 == class "Ljava/lang/Object;" goto label09;
+
+        if $r4 == class "Ljava/lang/String;" goto label09;
+
+        $r42 = class "Ljava/io/File;";
+
+        $z6 = virtualinvoke $r42.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>($r4);
+
+        if $z6 != 0 goto label09;
+
+        $r43 = class "Ljava/io/InputStream;";
+
+        $z7 = virtualinvoke $r43.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>($r4);
+
+        if $z7 != 0 goto label09;
+
+        $r44 = class "Lorg/xml/sax/InputSource;";
+
+        $z8 = virtualinvoke $r44.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>($r4);
+
+        if $z8 != 0 goto label09;
+
+        $z9 = virtualinvoke $r4.<java.lang.Class: boolean isInterface()>();
+
+        if $z9 != 0 goto label09;
+
+        $r45 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        $r46 = virtualinvoke $r45.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: com.sun.org.apache.xerces.internal.util.MessageFormatter getMessageFormatter(java.lang.String)>("http://www.w3.org/TR/xml-schema-1");
+
+        $r47 = new com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException;
+
+        $r49 = <com.sun.org.apache.xerces.internal.util.Status: com.sun.org.apache.xerces.internal.util.Status NOT_SUPPORTED>;
+
+        $r48 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        $r50 = virtualinvoke $r48.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: java.util.Locale getLocale()>();
+
+        $r51 = newarray (java.lang.Object)[1];
+
+        $r52 = virtualinvoke $r4.<java.lang.Class: java.lang.String getName()>();
+
+        $r51[0] = $r52;
+
+        $r53 = interfaceinvoke $r46.<com.sun.org.apache.xerces.internal.util.MessageFormatter: java.lang.String formatMessage(java.util.Locale,java.lang.String,java.lang.Object[])>($r50, "jaxp12-schema-source-type.2", $r51);
+
+        specialinvoke $r47.<com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException: void <init>(com.sun.org.apache.xerces.internal.util.Status,java.lang.String)>($r49, $r53);
+
+        throw $r47;
+
+     label09:
+        $r83 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.Object fJAXPSource>;
+
+        $r84 = (java.lang.Object[]) $r83;
+
+        $r85 = (java.lang.Object[]) $r84;
+
+        $r86 = new java.util.ArrayList;
+
+        specialinvoke $r86.<java.util.ArrayList: void <init>()>();
+
+        i0 = 0;
+
+     label10:
+        $i1 = lengthof $r85;
+
+        if i0 >= $i1 goto label19;
+
+        $r5 = $r85[i0];
+
+        $z0 = $r5 instanceof java.io.InputStream;
+
+        if $z0 != 0 goto label11;
+
+        $r40 = $r85[i0];
+
+        $z5 = $r40 instanceof org.xml.sax.InputSource;
+
+        if $z5 == 0 goto label12;
+
+     label11:
+        $r7 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.util.WeakHashMap fJAXPCache>;
+
+        $r6 = $r85[i0];
+
+        $r8 = virtualinvoke $r7.<java.util.WeakHashMap: java.lang.Object get(java.lang.Object)>($r6);
+
+        $r41 = (com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar) $r8;
+
+        if $r41 == null goto label12;
+
+        $r39 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket fGrammarBucket>;
+
+        virtualinvoke $r39.<com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket: void putGrammar(com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar)>($r41);
+
+        goto label18;
+
+     label12:
+        $r9 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSDDescription fXSDDescription>;
+
+        virtualinvoke $r9.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: void reset()>();
+
+        $r10 = $r85[i0];
+
+        $r11 = specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource xsdToXMLInputSource(java.lang.Object)>($r10);
+
+        $r12 = virtualinvoke $r11.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: java.lang.String getSystemId()>();
+
+        $r13 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSDDescription fXSDDescription>;
+
+        $r13.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: short fContextType> = 3;
+
+        if $r12 == null goto label13;
+
+        $r33 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSDDescription fXSDDescription>;
+
+        $r34 = virtualinvoke $r11.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: java.lang.String getBaseSystemId()>();
+
+        virtualinvoke $r33.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: void setBaseSystemId(java.lang.String)>($r34);
+
+        $r35 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSDDescription fXSDDescription>;
+
+        virtualinvoke $r35.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: void setLiteralSystemId(java.lang.String)>($r12);
+
+        $r36 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSDDescription fXSDDescription>;
+
+        virtualinvoke $r36.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: void setExpandedSystemId(java.lang.String)>($r12);
+
+        $r38 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSDDescription fXSDDescription>;
+
+        $r37 = newarray (java.lang.String)[1];
+
+        $r37[0] = $r12;
+
+        $r38.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: java.lang.String[] fLocationHints> = $r37;
+
+     label13:
+        $r16 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler fSchemaHandler>;
+
+        $r15 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSDDescription fXSDDescription>;
+
+        $r17 = virtualinvoke $r16.<com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler: com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar parseSchema(com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource,com.sun.org.apache.xerces.internal.impl.xs.XSDDescription,java.util.Map)>($r11, $r15, r14);
+
+        $z1 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: boolean fIsCheckedFully>;
+
+        if $z1 == 0 goto label14;
+
+        $r32 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket fGrammarBucket>;
+
+        $r31 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler fSubGroupHandler>;
+
+        $r30 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.models.CMBuilder fCMBuilder>;
+
+        $r29 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        staticinvoke <com.sun.org.apache.xerces.internal.impl.xs.XSConstraints: void fullSchemaChecking(com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket,com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler,com.sun.org.apache.xerces.internal.impl.xs.models.CMBuilder,com.sun.org.apache.xerces.internal.impl.XMLErrorReporter)>($r32, $r31, $r30, $r29);
+
+     label14:
+        if $r17 == null goto label18;
+
+        $r18 = virtualinvoke $r17.<com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar: java.lang.String getTargetNamespace()>();
+
+        $z2 = virtualinvoke $r86.<java.util.ArrayList: boolean contains(java.lang.Object)>($r18);
+
+        if $z2 == 0 goto label15;
+
+        $r23 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        $r24 = virtualinvoke $r23.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: com.sun.org.apache.xerces.internal.util.MessageFormatter getMessageFormatter(java.lang.String)>("http://www.w3.org/TR/xml-schema-1");
+
+        $r25 = new java.lang.IllegalArgumentException;
+
+        $r26 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        $r27 = virtualinvoke $r26.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: java.util.Locale getLocale()>();
+
+        $r28 = interfaceinvoke $r24.<com.sun.org.apache.xerces.internal.util.MessageFormatter: java.lang.String formatMessage(java.util.Locale,java.lang.String,java.lang.Object[])>($r27, "jaxp12-schema-source-ns", null);
+
+        specialinvoke $r25.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r28);
+
+        throw $r25;
+
+     label15:
+        virtualinvoke $r86.<java.util.ArrayList: boolean add(java.lang.Object)>($r18);
+
+        $r19 = $r85[i0];
+
+        $z3 = $r19 instanceof java.io.InputStream;
+
+        if $z3 != 0 goto label16;
+
+        $r22 = $r85[i0];
+
+        $z4 = $r22 instanceof org.xml.sax.InputSource;
+
+        if $z4 == 0 goto label17;
+
+     label16:
+        $r21 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.util.WeakHashMap fJAXPCache>;
+
+        $r20 = $r85[i0];
+
+        virtualinvoke $r21.<java.util.WeakHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r20, $r17);
+
+     label17:
+        $r87 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket fGrammarBucket>;
+
+        virtualinvoke $r87.<com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket: void putGrammar(com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar)>($r17);
+
+     label18:
+        i0 = i0 + 1;
+
+        goto label10;
+
+     label19:
+        return;
+    }
+
+    private com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource xsdToXMLInputSource(java.lang.Object)
+    {
+        com.sun.org.apache.xerces.internal.util.Status $r6;
+        java.io.BufferedInputStream $r11, r35;
+        java.util.Locale $r7;
+        java.net.URI $r14;
+        com.sun.org.apache.xerces.internal.impl.xs.XSDDescription $r20, $r21, $r22;
+        boolean $z0, $z1, $z2, $z3;
+        java.io.FileNotFoundException $r25;
+        java.lang.Object[] $r8, $r26, $r30;
+        com.sun.org.apache.xerces.internal.impl.XMLErrorReporter $r2, $r5, $r27, $r31;
+        com.sun.org.apache.xerces.internal.impl.XMLEntityManager $r23;
+        com.sun.org.apache.xerces.internal.util.MessageFormatter $r3;
+        java.lang.String $r9, $r15, $r28, r32, $r36;
+        org.xml.sax.InputSource $r18;
+        java.io.IOException $r29;
+        java.io.FileInputStream $r12;
+        java.io.File r34;
+        java.lang.Object r0;
+        java.lang.Class $r10;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r1;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource $r13, $r16, $r19, $r24, r33;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException $r4;
+        java.io.InputStream $r17;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $z0 = r0 instanceof java.lang.String;
+
+        if $z0 == 0 goto label06;
+
+        r32 = (java.lang.String) r0;
+
+        $r20 = r1.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSDDescription fXSDDescription>;
+
+        virtualinvoke $r20.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: void reset()>();
+
+        $r21 = r1.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSDDescription fXSDDescription>;
+
+        virtualinvoke $r21.<com.sun.org.apache.xerces.internal.impl.xs.XSDDescription: void setValues(java.lang.String,java.lang.String,java.lang.String,java.lang.String)>(null, r32, null, null);
+
+        r33 = null;
+
+     label01:
+        $r23 = r1.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLEntityManager fEntityManager>;
+
+        $r22 = r1.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSDDescription fXSDDescription>;
+
+        r33 = virtualinvoke $r23.<com.sun.org.apache.xerces.internal.impl.XMLEntityManager: com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource resolveEntity(com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier)>($r22);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r29 := @caughtexception;
+
+        $r31 = r1.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        $r30 = newarray (java.lang.Object)[1];
+
+        $r30[0] = r32;
+
+        virtualinvoke $r31.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: java.lang.String reportError(java.lang.String,java.lang.String,java.lang.Object[],short)>("http://www.w3.org/TR/xml-schema-1", "schema_reference.4", $r30, 1);
+
+     label04:
+        if r33 != null goto label05;
+
+        $r24 = new com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
+
+        specialinvoke $r24.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: void <init>(java.lang.String,java.lang.String,java.lang.String)>(null, r32, null);
+
+        return $r24;
+
+     label05:
+        return r33;
+
+     label06:
+        $z1 = r0 instanceof org.xml.sax.InputSource;
+
+        if $z1 == 0 goto label07;
+
+        $r18 = (org.xml.sax.InputSource) r0;
+
+        $r19 = staticinvoke <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource saxToXMLInputSource(org.xml.sax.InputSource)>($r18);
+
+        return $r19;
+
+     label07:
+        $z2 = r0 instanceof java.io.InputStream;
+
+        if $z2 == 0 goto label08;
+
+        $r16 = new com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
+
+        $r17 = (java.io.InputStream) r0;
+
+        specialinvoke $r16.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: void <init>(java.lang.String,java.lang.String,java.lang.String,java.io.InputStream,java.lang.String)>(null, null, null, $r17, null);
+
+        return $r16;
+
+     label08:
+        $z3 = r0 instanceof java.io.File;
+
+        if $z3 == 0 goto label13;
+
+        r34 = (java.io.File) r0;
+
+        r35 = null;
+
+     label09:
+        $r11 = new java.io.BufferedInputStream;
+
+        $r12 = new java.io.FileInputStream;
+
+        specialinvoke $r12.<java.io.FileInputStream: void <init>(java.io.File)>(r34);
+
+        specialinvoke $r11.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>($r12);
+
+        r35 = $r11;
+
+     label10:
+        goto label12;
+
+     label11:
+        $r25 := @caughtexception;
+
+        $r27 = r1.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        $r26 = newarray (java.lang.Object)[1];
+
+        $r28 = virtualinvoke r34.<java.io.File: java.lang.String toString()>();
+
+        $r26[0] = $r28;
+
+        virtualinvoke $r27.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: java.lang.String reportError(java.lang.String,java.lang.String,java.lang.Object[],short)>("http://www.w3.org/TR/xml-schema-1", "schema_reference.4", $r26, 1);
+
+     label12:
+        $r13 = new com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
+
+        $r14 = virtualinvoke r34.<java.io.File: java.net.URI toURI()>();
+
+        $r15 = virtualinvoke $r14.<java.net.URI: java.lang.String toString()>();
+
+        specialinvoke $r13.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: void <init>(java.lang.String,java.lang.String,java.lang.String,java.io.InputStream,java.lang.String)>(null, $r15, null, r35, null);
+
+        return $r13;
+
+     label13:
+        $r2 = r1.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        $r3 = virtualinvoke $r2.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: com.sun.org.apache.xerces.internal.util.MessageFormatter getMessageFormatter(java.lang.String)>("http://www.w3.org/TR/xml-schema-1");
+
+        $r4 = new com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException;
+
+        $r6 = <com.sun.org.apache.xerces.internal.util.Status: com.sun.org.apache.xerces.internal.util.Status NOT_SUPPORTED>;
+
+        $r5 = r1.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        $r7 = virtualinvoke $r5.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: java.util.Locale getLocale()>();
+
+        $r8 = newarray (java.lang.Object)[1];
+
+        if r0 == null goto label14;
+
+        $r10 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r36 = virtualinvoke $r10.<java.lang.Class: java.lang.String getName()>();
+
+        goto label15;
+
+     label14:
+        $r36 = "null";
+
+     label15:
+        $r8[0] = $r36;
+
+        $r9 = interfaceinvoke $r3.<com.sun.org.apache.xerces.internal.util.MessageFormatter: java.lang.String formatMessage(java.util.Locale,java.lang.String,java.lang.Object[])>($r7, "jaxp12-schema-source-type.1", $r8);
+
+        specialinvoke $r4.<com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException: void <init>(com.sun.org.apache.xerces.internal.util.Status,java.lang.String)>($r6, $r9);
+
+        throw $r4;
+
+        catch java.io.IOException from label01 to label02 with label03;
+        catch java.io.FileNotFoundException from label09 to label10 with label11;
+    }
+
+    private static com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource saxToXMLInputSource(org.xml.sax.InputSource)
+    {
+        org.xml.sax.InputSource r0;
+        java.io.Reader $r3;
+        java.lang.String $r1, $r2, $r7;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource $r5, $r6, $r8;
+        java.io.InputStream $r4;
+
+        r0 := @parameter0: org.xml.sax.InputSource;
+
+        $r1 = virtualinvoke r0.<org.xml.sax.InputSource: java.lang.String getPublicId()>();
+
+        $r2 = virtualinvoke r0.<org.xml.sax.InputSource: java.lang.String getSystemId()>();
+
+        $r3 = virtualinvoke r0.<org.xml.sax.InputSource: java.io.Reader getCharacterStream()>();
+
+        if $r3 == null goto label1;
+
+        $r8 = new com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
+
+        specialinvoke $r8.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: void <init>(java.lang.String,java.lang.String,java.lang.String,java.io.Reader,java.lang.String)>($r1, $r2, null, $r3, null);
+
+        return $r8;
+
+     label1:
+        $r4 = virtualinvoke r0.<org.xml.sax.InputSource: java.io.InputStream getByteStream()>();
+
+        if $r4 == null goto label2;
+
+        $r6 = new com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
+
+        $r7 = virtualinvoke r0.<org.xml.sax.InputSource: java.lang.String getEncoding()>();
+
+        specialinvoke $r6.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: void <init>(java.lang.String,java.lang.String,java.lang.String,java.io.InputStream,java.lang.String)>($r1, $r2, null, $r4, $r7);
+
+        return $r6;
+
+     label2:
+        $r5 = new com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
+
+        specialinvoke $r5.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: void <init>(java.lang.String,java.lang.String,java.lang.String)>($r1, $r2, null);
+
+        return $r5;
+    }
+
+    public java.lang.Boolean getFeatureDefault(java.lang.String)
+    {
+        java.lang.Boolean $r1;
+        java.lang.String r0;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r2;
+        boolean $z0;
+
+        r2 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/features/validation/schema/augment-psvi");
+
+        if $z0 == 0 goto label1;
+
+        $r1 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        return $r1;
+
+     label1:
+        return null;
+    }
+
+    public java.lang.Object getPropertyDefault(java.lang.String)
+    {
+        java.lang.String r1;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r1 := @parameter0: java.lang.String;
+
+        return null;
+    }
+
+    public void reset(com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager) throws com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException
+    {
+        com.sun.org.apache.xerces.internal.impl.xs.models.CMNodeFactory $r11;
+        com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager $r35, r39;
+        com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler $r7;
+        com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler $r16, $r26, $r27, $r28, $r33;
+        com.sun.org.apache.xerces.internal.impl.dv.xs.SchemaDVFactoryImpl $r30;
+        com.sun.org.apache.xerces.internal.impl.dv.SchemaDVFactory $r17, $r32, r40;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, z6;
+        com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket $r6;
+        com.sun.org.apache.xerces.internal.impl.XMLErrorReporter $r15, $r29;
+        com.sun.org.apache.xerces.internal.impl.XMLEntityManager $r13;
+        java.lang.String $r5, $r19, $r21;
+        com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings $r8;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager r0;
+        com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager$Property $r4;
+        com.sun.org.apache.xerces.internal.impl.xs.models.CMBuilder $r25;
+        com.sun.org.apache.xerces.internal.impl.xs.XSDeclarationPool $r9, $r10;
+        com.sun.org.apache.xerces.internal.utils.XMLSecurityManager $r34, $r36;
+        java.lang.Object $r1, $r2, $r12, $r14, $r18, $r20, $r22, $r23;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r3;
+        com.sun.org.apache.xerces.internal.xni.grammars.XMLGrammarPool $r24, $r31;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException $r37, $r38;
+
+        r3 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r0 := @parameter0: com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager;
+
+        $r1 = interfaceinvoke r0.<com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager: java.lang.Object getProperty(java.lang.String)>("http://www.oracle.com/xml/jaxp/properties/xmlSecurityPropertyManager");
+
+        r39 = (com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager) $r1;
+
+        if r39 != null goto label01;
+
+        $r35 = new com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager;
+
+        specialinvoke $r35.<com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager: void <init>()>();
+
+        r39 = $r35;
+
+        virtualinvoke r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: void setProperty(java.lang.String,java.lang.Object)>("http://www.oracle.com/xml/jaxp/properties/xmlSecurityPropertyManager", $r35);
+
+     label01:
+        $r2 = interfaceinvoke r0.<com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager: java.lang.Object getProperty(java.lang.String)>("http://apache.org/xml/properties/security-manager");
+
+        $r36 = (com.sun.org.apache.xerces.internal.utils.XMLSecurityManager) $r2;
+
+        if $r36 != null goto label02;
+
+        $r34 = new com.sun.org.apache.xerces.internal.utils.XMLSecurityManager;
+
+        specialinvoke $r34.<com.sun.org.apache.xerces.internal.utils.XMLSecurityManager: void <init>(boolean)>(1);
+
+        virtualinvoke r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: void setProperty(java.lang.String,java.lang.Object)>("http://apache.org/xml/properties/security-manager", $r34);
+
+     label02:
+        $r4 = <com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager$Property: com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager$Property ACCESS_EXTERNAL_SCHEMA>;
+
+        $r5 = virtualinvoke r39.<com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager: java.lang.String getValue(com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager$Property)>($r4);
+
+        r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String faccessExternalSchema> = $r5;
+
+        $r6 = r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket fGrammarBucket>;
+
+        virtualinvoke $r6.<com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket: void reset()>();
+
+        $r7 = r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler fSubGroupHandler>;
+
+        virtualinvoke $r7.<com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler: void reset()>();
+
+        z6 = 1;
+
+        $r8 = r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.ParserConfigurationSettings fLoaderConfig>;
+
+        if r0 == $r8 goto label03;
+
+        z6 = interfaceinvoke r0.<com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager: boolean getFeature(java.lang.String,boolean)>("http://apache.org/xml/features/internal/parser-settings", 1);
+
+     label03:
+        if z6 == 0 goto label04;
+
+        $z0 = r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: boolean fSettingsChanged>;
+
+        if $z0 != 0 goto label06;
+
+     label04:
+        r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: boolean fJAXPProcessed> = 0;
+
+        specialinvoke r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: void initGrammarBucket()>();
+
+        $r9 = r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSDeclarationPool fDeclPool>;
+
+        if $r9 == null goto label05;
+
+        $r10 = r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSDeclarationPool fDeclPool>;
+
+        virtualinvoke $r10.<com.sun.org.apache.xerces.internal.impl.xs.XSDeclarationPool: void reset()>();
+
+     label05:
+        return;
+
+     label06:
+        $r11 = r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.models.CMNodeFactory fNodeFactory>;
+
+        virtualinvoke $r11.<com.sun.org.apache.xerces.internal.impl.xs.models.CMNodeFactory: void reset(com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager)>(r0);
+
+        $r12 = interfaceinvoke r0.<com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager: java.lang.Object getProperty(java.lang.String)>("http://apache.org/xml/properties/internal/entity-manager");
+
+        $r13 = (com.sun.org.apache.xerces.internal.impl.XMLEntityManager) $r12;
+
+        r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLEntityManager fEntityManager> = $r13;
+
+        $r14 = interfaceinvoke r0.<com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager: java.lang.Object getProperty(java.lang.String)>("http://apache.org/xml/properties/internal/error-reporter");
+
+        $r15 = (com.sun.org.apache.xerces.internal.impl.XMLErrorReporter) $r14;
+
+        r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter> = $r15;
+
+        $r16 = r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler fSchemaHandler>;
+
+        $r17 = virtualinvoke $r16.<com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler: com.sun.org.apache.xerces.internal.impl.dv.SchemaDVFactory getDVFactory()>();
+
+        r40 = $r17;
+
+        if $r17 != null goto label07;
+
+        $r32 = staticinvoke <com.sun.org.apache.xerces.internal.impl.dv.SchemaDVFactory: com.sun.org.apache.xerces.internal.impl.dv.SchemaDVFactory getInstance()>();
+
+        r40 = $r32;
+
+        $r33 = r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler fSchemaHandler>;
+
+        virtualinvoke $r33.<com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler: void setDVFactory(com.sun.org.apache.xerces.internal.impl.dv.SchemaDVFactory)>($r32);
+
+     label07:
+        $r18 = interfaceinvoke r0.<com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager: java.lang.Object getProperty(java.lang.String)>("http://apache.org/xml/properties/schema/external-schemaLocation");
+
+        $r19 = (java.lang.String) $r18;
+
+        r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String fExternalSchemas> = $r19;
+
+        $r20 = interfaceinvoke r0.<com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager: java.lang.Object getProperty(java.lang.String)>("http://apache.org/xml/properties/schema/external-noNamespaceSchemaLocation");
+
+        $r21 = (java.lang.String) $r20;
+
+        r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String fExternalNoNSSchema> = $r21;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r38 := @caughtexception;
+
+        r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String fExternalSchemas> = null;
+
+        r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String fExternalNoNSSchema> = null;
+
+     label10:
+        $r22 = interfaceinvoke r0.<com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager: java.lang.Object getProperty(java.lang.String,java.lang.Object)>("http://java.sun.com/xml/jaxp/properties/schemaSource", null);
+
+        r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.Object fJAXPSource> = $r22;
+
+        r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: boolean fJAXPProcessed> = 0;
+
+        $r23 = interfaceinvoke r0.<com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager: java.lang.Object getProperty(java.lang.String,java.lang.Object)>("http://apache.org/xml/properties/internal/grammar-pool", null);
+
+        $r24 = (com.sun.org.apache.xerces.internal.xni.grammars.XMLGrammarPool) $r23;
+
+        r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.xni.grammars.XMLGrammarPool fGrammarPool> = $r24;
+
+        specialinvoke r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: void initGrammarBucket()>();
+
+        $z1 = interfaceinvoke r0.<com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager: boolean getFeature(java.lang.String,boolean)>("http://apache.org/xml/features/validation/schema/augment-psvi", 0);
+
+        if $z1 != 0 goto label11;
+
+        $r31 = r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.xni.grammars.XMLGrammarPool fGrammarPool>;
+
+        if $r31 != null goto label11;
+
+     label11:
+        $r25 = r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.models.CMBuilder fCMBuilder>;
+
+        virtualinvoke $r25.<com.sun.org.apache.xerces.internal.impl.xs.models.CMBuilder: void setDeclPool(com.sun.org.apache.xerces.internal.impl.xs.XSDeclarationPool)>(null);
+
+        $r26 = r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler fSchemaHandler>;
+
+        virtualinvoke $r26.<com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler: void setDeclPool(com.sun.org.apache.xerces.internal.impl.xs.XSDeclarationPool)>(null);
+
+        $z2 = r40 instanceof com.sun.org.apache.xerces.internal.impl.dv.xs.SchemaDVFactoryImpl;
+
+        if $z2 == 0 goto label12;
+
+        $r30 = (com.sun.org.apache.xerces.internal.impl.dv.xs.SchemaDVFactoryImpl) r40;
+
+        virtualinvoke $r30.<com.sun.org.apache.xerces.internal.impl.dv.xs.SchemaDVFactoryImpl: void setDeclPool(com.sun.org.apache.xerces.internal.impl.xs.XSDeclarationPool)>(null);
+
+     label12:
+        $z3 = interfaceinvoke r0.<com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager: boolean getFeature(java.lang.String,boolean)>("http://apache.org/xml/features/continue-after-fatal-error", 0);
+
+        if $z3 != 0 goto label13;
+
+        $r29 = r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        virtualinvoke $r29.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: void setFeature(java.lang.String,boolean)>("http://apache.org/xml/features/continue-after-fatal-error", $z3);
+
+     label13:
+        goto label15;
+
+     label14:
+        $r37 := @caughtexception;
+
+     label15:
+        $z4 = interfaceinvoke r0.<com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager: boolean getFeature(java.lang.String,boolean)>("http://apache.org/xml/features/validation/schema-full-checking", 0);
+
+        r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: boolean fIsCheckedFully> = $z4;
+
+        $r27 = r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler fSchemaHandler>;
+
+        $z5 = interfaceinvoke r0.<com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager: boolean getFeature(java.lang.String,boolean)>("http://apache.org/xml/features/generate-synthetic-annotations", 0);
+
+        virtualinvoke $r27.<com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler: void setGenerateSyntheticAnnotations(boolean)>($z5);
+
+        $r28 = r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler fSchemaHandler>;
+
+        virtualinvoke $r28.<com.sun.org.apache.xerces.internal.impl.xs.traversers.XSDHandler: void reset(com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager)>(r0);
+
+        return;
+
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label07 to label08 with label09;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label12 to label13 with label14;
+    }
+
+    private void initGrammarBucket()
+    {
+        com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar $r5, $r6;
+        com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket $r7;
+        com.sun.org.apache.xerces.internal.impl.XMLErrorReporter $r8;
+        com.sun.org.apache.xerces.internal.xni.grammars.Grammar[] $r3;
+        int i0, $i1, i2;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r0;
+        com.sun.org.apache.xerces.internal.xni.grammars.XMLGrammarPool $r1, $r2;
+        com.sun.org.apache.xerces.internal.xni.grammars.Grammar $r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.xni.grammars.XMLGrammarPool fGrammarPool>;
+
+        if $r1 == null goto label5;
+
+        $r2 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.xni.grammars.XMLGrammarPool fGrammarPool>;
+
+        $r3 = interfaceinvoke $r2.<com.sun.org.apache.xerces.internal.xni.grammars.XMLGrammarPool: com.sun.org.apache.xerces.internal.xni.grammars.Grammar[] retrieveInitialGrammarSet(java.lang.String)>("http://www.w3.org/2001/XMLSchema");
+
+        if $r3 == null goto label1;
+
+        $i1 = lengthof $r3;
+
+        goto label2;
+
+     label1:
+        $i1 = 0;
+
+     label2:
+        i0 = $i1;
+
+        i2 = 0;
+
+     label3:
+        if i2 >= i0 goto label5;
+
+        $r7 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket fGrammarBucket>;
+
+        $r4 = $r3[i2];
+
+        $r5 = (com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar) $r4;
+
+        $r6 = (com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar) $r5;
+
+        $z0 = virtualinvoke $r7.<com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket: boolean putGrammar(com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar,boolean)>($r6, 1);
+
+        if $z0 != 0 goto label4;
+
+        $r8 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.XMLErrorReporter fErrorReporter>;
+
+        virtualinvoke $r8.<com.sun.org.apache.xerces.internal.impl.XMLErrorReporter: java.lang.String reportError(java.lang.String,java.lang.String,java.lang.Object[],short)>("http://www.w3.org/TR/xml-schema-1", "GrammarConflict", null, 0);
+
+     label4:
+        i2 = i2 + 1;
+
+        goto label3;
+
+     label5:
+        return;
+    }
+
+    public org.w3c.dom.DOMConfiguration getConfig()
+    {
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        return r0;
+    }
+
+    public com.sun.org.apache.xerces.internal.xs.XSModel load(org.w3c.dom.ls.LSInput)
+    {
+        com.sun.org.apache.xerces.internal.xni.grammars.XSGrammar $r4;
+        com.sun.org.apache.xerces.internal.xs.XSModel $r5;
+        org.w3c.dom.ls.LSInput r1;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r0;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource $r2;
+        com.sun.org.apache.xerces.internal.xni.grammars.Grammar $r3;
+        java.lang.Exception $r6;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r1 := @parameter0: org.w3c.dom.ls.LSInput;
+
+     label1:
+        $r2 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource dom2xmlInputSource(org.w3c.dom.ls.LSInput)>(r1);
+
+        $r3 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.xni.grammars.Grammar loadGrammar(com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource)>($r2);
+
+        $r4 = (com.sun.org.apache.xerces.internal.xni.grammars.XSGrammar) $r3;
+
+        $r5 = interfaceinvoke $r4.<com.sun.org.apache.xerces.internal.xni.grammars.XSGrammar: com.sun.org.apache.xerces.internal.xs.XSModel toXSModel()>();
+
+     label2:
+        return $r5;
+
+     label3:
+        $r6 := @caughtexception;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: void reportDOMFatalError(java.lang.Exception)>($r6);
+
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public com.sun.org.apache.xerces.internal.xs.XSModel loadInputList(com.sun.org.apache.xerces.internal.xs.LSInputList)
+    {
+        com.sun.org.apache.xerces.internal.xs.LSInputList r0;
+        com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar $r7;
+        java.lang.Exception $r8;
+        int $i0, i1;
+        com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar[] r1;
+        org.w3c.dom.ls.LSInput $r4;
+        com.sun.org.apache.xerces.internal.impl.xs.XSModelImpl $r2;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r3;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource $r5;
+        com.sun.org.apache.xerces.internal.xni.grammars.Grammar $r6;
+
+        r3 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r0 := @parameter0: com.sun.org.apache.xerces.internal.xs.LSInputList;
+
+        $i0 = interfaceinvoke r0.<com.sun.org.apache.xerces.internal.xs.LSInputList: int getLength()>();
+
+        r1 = newarray (com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar)[$i0];
+
+        i1 = 0;
+
+     label1:
+        if i1 >= $i0 goto label6;
+
+     label2:
+        $r4 = interfaceinvoke r0.<com.sun.org.apache.xerces.internal.xs.LSInputList: org.w3c.dom.ls.LSInput item(int)>(i1);
+
+        $r5 = virtualinvoke r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource dom2xmlInputSource(org.w3c.dom.ls.LSInput)>($r4);
+
+        $r6 = virtualinvoke r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.xni.grammars.Grammar loadGrammar(com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource)>($r5);
+
+        $r7 = (com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar) $r6;
+
+        r1[i1] = $r7;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r8 := @caughtexception;
+
+        virtualinvoke r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: void reportDOMFatalError(java.lang.Exception)>($r8);
+
+        return null;
+
+     label5:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label6:
+        $r2 = new com.sun.org.apache.xerces.internal.impl.xs.XSModelImpl;
+
+        specialinvoke $r2.<com.sun.org.apache.xerces.internal.impl.xs.XSModelImpl: void <init>(com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar[])>(r1);
+
+        return $r2;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    public com.sun.org.apache.xerces.internal.xs.XSModel loadURI(java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.xni.grammars.XSGrammar $r4;
+        com.sun.org.apache.xerces.internal.xs.XSModel $r5;
+        java.lang.String r2;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r0;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource $r1;
+        com.sun.org.apache.xerces.internal.xni.grammars.Grammar $r3;
+        java.lang.Exception $r6;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r2 := @parameter0: java.lang.String;
+
+     label1:
+        $r1 = new com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
+
+        specialinvoke $r1.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: void <init>(java.lang.String,java.lang.String,java.lang.String)>(null, r2, null);
+
+        $r3 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.xni.grammars.Grammar loadGrammar(com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource)>($r1);
+
+        $r4 = (com.sun.org.apache.xerces.internal.xni.grammars.XSGrammar) $r3;
+
+        $r5 = interfaceinvoke $r4.<com.sun.org.apache.xerces.internal.xni.grammars.XSGrammar: com.sun.org.apache.xerces.internal.xs.XSModel toXSModel()>();
+
+     label2:
+        return $r5;
+
+     label3:
+        $r6 := @caughtexception;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: void reportDOMFatalError(java.lang.Exception)>($r6);
+
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public com.sun.org.apache.xerces.internal.xs.XSModel loadURIList(com.sun.org.apache.xerces.internal.xs.StringList)
+    {
+        com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar $r7;
+        java.lang.Exception $r8;
+        com.sun.org.apache.xerces.internal.xs.StringList r0;
+        int $i0, i1;
+        com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar[] r1;
+        com.sun.org.apache.xerces.internal.impl.xs.XSModelImpl $r2;
+        java.lang.String $r5;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r3;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource $r4;
+        com.sun.org.apache.xerces.internal.xni.grammars.Grammar $r6;
+
+        r3 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r0 := @parameter0: com.sun.org.apache.xerces.internal.xs.StringList;
+
+        $i0 = interfaceinvoke r0.<com.sun.org.apache.xerces.internal.xs.StringList: int getLength()>();
+
+        r1 = newarray (com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar)[$i0];
+
+        i1 = 0;
+
+     label1:
+        if i1 >= $i0 goto label6;
+
+     label2:
+        $r4 = new com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
+
+        $r5 = interfaceinvoke r0.<com.sun.org.apache.xerces.internal.xs.StringList: java.lang.String item(int)>(i1);
+
+        specialinvoke $r4.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: void <init>(java.lang.String,java.lang.String,java.lang.String)>(null, $r5, null);
+
+        $r6 = virtualinvoke r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.xni.grammars.Grammar loadGrammar(com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource)>($r4);
+
+        $r7 = (com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar) $r6;
+
+        r1[i1] = $r7;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r8 := @caughtexception;
+
+        virtualinvoke r3.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: void reportDOMFatalError(java.lang.Exception)>($r8);
+
+        return null;
+
+     label5:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label6:
+        $r2 = new com.sun.org.apache.xerces.internal.impl.xs.XSModelImpl;
+
+        specialinvoke $r2.<com.sun.org.apache.xerces.internal.impl.xs.XSModelImpl: void <init>(com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar[])>(r1);
+
+        return $r2;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    void reportDOMFatalError(java.lang.Exception)
+    {
+        com.sun.org.apache.xerces.internal.util.DOMErrorHandlerWrapper $r1, $r5;
+        org.w3c.dom.DOMErrorHandler $r6;
+        java.lang.String $r4;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r0;
+        com.sun.org.apache.xerces.internal.dom.DOMErrorImpl $r2;
+        java.lang.Exception r3;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r3 := @parameter0: java.lang.Exception;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.DOMErrorHandlerWrapper fErrorHandler>;
+
+        if $r1 == null goto label1;
+
+        $r2 = new com.sun.org.apache.xerces.internal.dom.DOMErrorImpl;
+
+        specialinvoke $r2.<com.sun.org.apache.xerces.internal.dom.DOMErrorImpl: void <init>()>();
+
+        $r2.<com.sun.org.apache.xerces.internal.dom.DOMErrorImpl: java.lang.Exception fException> = r3;
+
+        $r4 = virtualinvoke r3.<java.lang.Exception: java.lang.String getMessage()>();
+
+        $r2.<com.sun.org.apache.xerces.internal.dom.DOMErrorImpl: java.lang.String fMessage> = $r4;
+
+        $r2.<com.sun.org.apache.xerces.internal.dom.DOMErrorImpl: short fSeverity> = 3;
+
+        $r5 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.DOMErrorHandlerWrapper fErrorHandler>;
+
+        $r6 = virtualinvoke $r5.<com.sun.org.apache.xerces.internal.util.DOMErrorHandlerWrapper: org.w3c.dom.DOMErrorHandler getErrorHandler()>();
+
+        interfaceinvoke $r6.<org.w3c.dom.DOMErrorHandler: boolean handleError(org.w3c.dom.DOMError)>($r2);
+
+     label1:
+        return;
+    }
+
+    public boolean canSetParameter(java.lang.String, java.lang.Object)
+    {
+        java.lang.String r1;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19, $z20, $z21, $z22;
+        java.lang.Object r0;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r2;
+
+        r2 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.lang.Object;
+
+        $z0 = r0 instanceof java.lang.Boolean;
+
+        if $z0 == 0 goto label3;
+
+        $z12 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("validate");
+
+        if $z12 != 0 goto label1;
+
+        $z13 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/features/validation/schema-full-checking");
+
+        if $z13 != 0 goto label1;
+
+        $z14 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/features/validate-annotations");
+
+        if $z14 != 0 goto label1;
+
+        $z15 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/features/continue-after-fatal-error");
+
+        if $z15 != 0 goto label1;
+
+        $z16 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/features/allow-java-encodings");
+
+        if $z16 != 0 goto label1;
+
+        $z17 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/features/standard-uri-conformant");
+
+        if $z17 != 0 goto label1;
+
+        $z18 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/features/generate-synthetic-annotations");
+
+        if $z18 != 0 goto label1;
+
+        $z19 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/features/honour-all-schemaLocations");
+
+        if $z19 != 0 goto label1;
+
+        $z20 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/features/namespace-growth");
+
+        if $z20 != 0 goto label1;
+
+        $z21 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/features/internal/tolerate-duplicates");
+
+        if $z21 != 0 goto label1;
+
+        $z22 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("jdk.xml.overrideDefaultParser");
+
+        if $z22 == 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+
+     label3:
+        $z1 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("error-handler");
+
+        if $z1 != 0 goto label4;
+
+        $z2 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("resource-resolver");
+
+        if $z2 != 0 goto label4;
+
+        $z3 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/properties/internal/symbol-table");
+
+        if $z3 != 0 goto label4;
+
+        $z4 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/properties/internal/error-reporter");
+
+        if $z4 != 0 goto label4;
+
+        $z5 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/properties/internal/error-handler");
+
+        if $z5 != 0 goto label4;
+
+        $z6 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/properties/internal/entity-resolver");
+
+        if $z6 != 0 goto label4;
+
+        $z7 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/properties/internal/grammar-pool");
+
+        if $z7 != 0 goto label4;
+
+        $z8 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/properties/schema/external-schemaLocation");
+
+        if $z8 != 0 goto label4;
+
+        $z9 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/properties/schema/external-noNamespaceSchemaLocation");
+
+        if $z9 != 0 goto label4;
+
+        $z10 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://java.sun.com/xml/jaxp/properties/schemaSource");
+
+        if $z10 != 0 goto label4;
+
+        $z11 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("http://apache.org/xml/properties/internal/validation/schema/dv-factory");
+
+        if $z11 == 0 goto label5;
+
+     label4:
+        return 1;
+
+     label5:
+        return 0;
+    }
+
+    public java.lang.Object getParameter(java.lang.String) throws org.w3c.dom.DOMException
+    {
+        java.lang.Object[] $r7;
+        com.sun.org.apache.xerces.internal.util.DOMErrorHandlerWrapper $r4, $r5;
+        com.sun.org.apache.xerces.internal.util.DOMEntityResolverWrapper $r2, $r3;
+        org.w3c.dom.DOMException $r9;
+        java.lang.Boolean $r14;
+        java.lang.String r0, $r8;
+        boolean $z0, $z1, $z2;
+        java.lang.Exception $r6, $r10;
+        org.w3c.dom.DOMErrorHandler $r12;
+        org.w3c.dom.ls.LSResourceResolver $r13;
+        java.lang.Object $r11;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r1;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("error-handler");
+
+        if $z0 == 0 goto label03;
+
+        $r4 = r1.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.DOMErrorHandlerWrapper fErrorHandler>;
+
+        if $r4 == null goto label01;
+
+        $r5 = r1.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.DOMErrorHandlerWrapper fErrorHandler>;
+
+        $r12 = virtualinvoke $r5.<com.sun.org.apache.xerces.internal.util.DOMErrorHandlerWrapper: org.w3c.dom.DOMErrorHandler getErrorHandler()>();
+
+        goto label02;
+
+     label01:
+        $r12 = null;
+
+     label02:
+        return $r12;
+
+     label03:
+        $z1 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("resource-resolver");
+
+        if $z1 == 0 goto label06;
+
+        $r2 = r1.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.DOMEntityResolverWrapper fResourceResolver>;
+
+        if $r2 == null goto label04;
+
+        $r3 = r1.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.DOMEntityResolverWrapper fResourceResolver>;
+
+        $r13 = virtualinvoke $r3.<com.sun.org.apache.xerces.internal.util.DOMEntityResolverWrapper: org.w3c.dom.ls.LSResourceResolver getEntityResolver()>();
+
+        goto label05;
+
+     label04:
+        $r13 = null;
+
+     label05:
+        return $r13;
+
+     label06:
+        $z2 = virtualinvoke r1.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: boolean getFeature(java.lang.String)>(r0);
+
+        if $z2 == 0 goto label07;
+
+        $r14 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        goto label08;
+
+     label07:
+        $r14 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+     label08:
+        return $r14;
+
+     label09:
+        $r10 := @caughtexception;
+
+     label10:
+        $r11 = virtualinvoke r1.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.Object getProperty(java.lang.String)>(r0);
+
+     label11:
+        return $r11;
+
+     label12:
+        $r6 := @caughtexception;
+
+        $r7 = newarray (java.lang.Object)[1];
+
+        $r7[0] = r0;
+
+        $r8 = staticinvoke <com.sun.org.apache.xerces.internal.dom.DOMMessageFormatter: java.lang.String formatMessage(java.lang.String,java.lang.String,java.lang.Object[])>("http://www.w3.org/dom/DOMTR", "FEATURE_NOT_SUPPORTED", $r7);
+
+        $r9 = new org.w3c.dom.DOMException;
+
+        specialinvoke $r9.<org.w3c.dom.DOMException: void <init>(short,java.lang.String)>(9, $r8);
+
+        throw $r9;
+
+        catch java.lang.Exception from label06 to label08 with label09;
+        catch java.lang.Exception from label10 to label11 with label12;
+    }
+
+    public org.w3c.dom.DOMStringList getParameterNames()
+    {
+        org.w3c.dom.DOMStringList $r1, $r2;
+        com.sun.org.apache.xerces.internal.dom.DOMStringListImpl $r4;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r0;
+        java.util.ArrayList $r3;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: org.w3c.dom.DOMStringList fRecognizedParameters>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>()>();
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>("validate");
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>("error-handler");
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>("resource-resolver");
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>("http://apache.org/xml/properties/internal/symbol-table");
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>("http://apache.org/xml/properties/internal/error-reporter");
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>("http://apache.org/xml/properties/internal/error-handler");
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>("http://apache.org/xml/properties/internal/entity-resolver");
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>("http://apache.org/xml/properties/internal/grammar-pool");
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>("http://apache.org/xml/properties/schema/external-schemaLocation");
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>("http://apache.org/xml/properties/schema/external-noNamespaceSchemaLocation");
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>("http://java.sun.com/xml/jaxp/properties/schemaSource");
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>("http://apache.org/xml/features/validation/schema-full-checking");
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>("http://apache.org/xml/features/continue-after-fatal-error");
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>("http://apache.org/xml/features/allow-java-encodings");
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>("http://apache.org/xml/features/standard-uri-conformant");
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>("http://apache.org/xml/features/validate-annotations");
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>("http://apache.org/xml/features/generate-synthetic-annotations");
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>("http://apache.org/xml/features/honour-all-schemaLocations");
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>("http://apache.org/xml/features/namespace-growth");
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>("http://apache.org/xml/features/internal/tolerate-duplicates");
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>("jdk.xml.overrideDefaultParser");
+
+        $r4 = new com.sun.org.apache.xerces.internal.dom.DOMStringListImpl;
+
+        specialinvoke $r4.<com.sun.org.apache.xerces.internal.dom.DOMStringListImpl: void <init>(java.util.List)>($r3);
+
+        r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: org.w3c.dom.DOMStringList fRecognizedParameters> = $r4;
+
+     label1:
+        $r2 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: org.w3c.dom.DOMStringList fRecognizedParameters>;
+
+        return $r2;
+    }
+
+    public void setParameter(java.lang.String, java.lang.Object) throws org.w3c.dom.DOMException
+    {
+        com.sun.org.apache.xerces.internal.util.DOMEntityResolverWrapper $r6, $r8;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.lang.Exception $r16, $r22;
+        java.lang.Object[] $r3, $r9, $r17, $r23;
+        com.sun.org.apache.xerces.internal.util.DOMErrorHandlerWrapper $r12, $r14;
+        org.w3c.dom.DOMException $r5, $r11, $r19, $r25;
+        java.lang.Boolean $r15;
+        java.lang.String r1, $r4, $r10, $r18, $r24;
+        org.w3c.dom.DOMErrorHandler $r13;
+        org.w3c.dom.ls.LSResourceResolver $r7;
+        java.lang.Object r0;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r2;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException $r20, $r21;
+
+        r2 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.lang.Object;
+
+        $z0 = r0 instanceof java.lang.Boolean;
+
+        if $z0 == 0 goto label05;
+
+        $r15 = (java.lang.Boolean) r0;
+
+        $z5 = virtualinvoke $r15.<java.lang.Boolean: boolean booleanValue()>();
+
+        $z6 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("validate");
+
+        if $z6 == 0 goto label01;
+
+        if $z5 == 0 goto label01;
+
+        return;
+
+     label01:
+        virtualinvoke r2.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: void setFeature(java.lang.String,boolean)>(r1, $z5);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r22 := @caughtexception;
+
+        $r23 = newarray (java.lang.Object)[1];
+
+        $r23[0] = r1;
+
+        $r24 = staticinvoke <com.sun.org.apache.xerces.internal.dom.DOMMessageFormatter: java.lang.String formatMessage(java.lang.String,java.lang.String,java.lang.Object[])>("http://www.w3.org/dom/DOMTR", "FEATURE_NOT_SUPPORTED", $r23);
+
+        $r25 = new org.w3c.dom.DOMException;
+
+        specialinvoke $r25.<org.w3c.dom.DOMException: void <init>(short,java.lang.String)>(9, $r24);
+
+        throw $r25;
+
+     label04:
+        return;
+
+     label05:
+        $z1 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("error-handler");
+
+        if $z1 == 0 goto label11;
+
+        $z4 = r0 instanceof org.w3c.dom.DOMErrorHandler;
+
+        if $z4 == 0 goto label09;
+
+     label06:
+        $r12 = new com.sun.org.apache.xerces.internal.util.DOMErrorHandlerWrapper;
+
+        $r13 = (org.w3c.dom.DOMErrorHandler) r0;
+
+        specialinvoke $r12.<com.sun.org.apache.xerces.internal.util.DOMErrorHandlerWrapper: void <init>(org.w3c.dom.DOMErrorHandler)>($r13);
+
+        r2.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.DOMErrorHandlerWrapper fErrorHandler> = $r12;
+
+        $r14 = r2.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.DOMErrorHandlerWrapper fErrorHandler>;
+
+        virtualinvoke r2.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: void setErrorHandler(com.sun.org.apache.xerces.internal.xni.parser.XMLErrorHandler)>($r14);
+
+     label07:
+        goto label10;
+
+     label08:
+        $r21 := @caughtexception;
+
+        goto label10;
+
+     label09:
+        $r9 = newarray (java.lang.Object)[1];
+
+        $r9[0] = r1;
+
+        $r10 = staticinvoke <com.sun.org.apache.xerces.internal.dom.DOMMessageFormatter: java.lang.String formatMessage(java.lang.String,java.lang.String,java.lang.Object[])>("http://www.w3.org/dom/DOMTR", "FEATURE_NOT_SUPPORTED", $r9);
+
+        $r11 = new org.w3c.dom.DOMException;
+
+        specialinvoke $r11.<org.w3c.dom.DOMException: void <init>(short,java.lang.String)>(9, $r10);
+
+        throw $r11;
+
+     label10:
+        return;
+
+     label11:
+        $z2 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("resource-resolver");
+
+        if $z2 == 0 goto label17;
+
+        $z3 = r0 instanceof org.w3c.dom.ls.LSResourceResolver;
+
+        if $z3 == 0 goto label15;
+
+     label12:
+        $r6 = new com.sun.org.apache.xerces.internal.util.DOMEntityResolverWrapper;
+
+        $r7 = (org.w3c.dom.ls.LSResourceResolver) r0;
+
+        specialinvoke $r6.<com.sun.org.apache.xerces.internal.util.DOMEntityResolverWrapper: void <init>(org.w3c.dom.ls.LSResourceResolver)>($r7);
+
+        r2.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.DOMEntityResolverWrapper fResourceResolver> = $r6;
+
+        $r8 = r2.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.util.DOMEntityResolverWrapper fResourceResolver>;
+
+        virtualinvoke r2.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: void setEntityResolver(com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver)>($r8);
+
+     label13:
+        goto label16;
+
+     label14:
+        $r20 := @caughtexception;
+
+        goto label16;
+
+     label15:
+        $r3 = newarray (java.lang.Object)[1];
+
+        $r3[0] = r1;
+
+        $r4 = staticinvoke <com.sun.org.apache.xerces.internal.dom.DOMMessageFormatter: java.lang.String formatMessage(java.lang.String,java.lang.String,java.lang.Object[])>("http://www.w3.org/dom/DOMTR", "FEATURE_NOT_SUPPORTED", $r3);
+
+        $r5 = new org.w3c.dom.DOMException;
+
+        specialinvoke $r5.<org.w3c.dom.DOMException: void <init>(short,java.lang.String)>(9, $r4);
+
+        throw $r5;
+
+     label16:
+        return;
+
+     label17:
+        virtualinvoke r2.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: void setProperty(java.lang.String,java.lang.Object)>(r1, r0);
+
+     label18:
+        goto label20;
+
+     label19:
+        $r16 := @caughtexception;
+
+        $r17 = newarray (java.lang.Object)[1];
+
+        $r17[0] = r1;
+
+        $r18 = staticinvoke <com.sun.org.apache.xerces.internal.dom.DOMMessageFormatter: java.lang.String formatMessage(java.lang.String,java.lang.String,java.lang.Object[])>("http://www.w3.org/dom/DOMTR", "FEATURE_NOT_SUPPORTED", $r17);
+
+        $r19 = new org.w3c.dom.DOMException;
+
+        specialinvoke $r19.<org.w3c.dom.DOMException: void <init>(short,java.lang.String)>(9, $r18);
+
+        throw $r19;
+
+     label20:
+        return;
+
+        catch java.lang.Exception from label01 to label02 with label03;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label06 to label07 with label08;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label12 to label13 with label14;
+        catch java.lang.Exception from label17 to label18 with label19;
+    }
+
+    com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource dom2xmlInputSource(org.w3c.dom.ls.LSInput)
+    {
+        int $i0;
+        java.lang.String $r3, $r5, $r6, $r7, $r8, $r10, $r11, $r12, $r14, $r16, $r17, $r18, $r20, $r22, $r23, $r24;
+        java.io.Reader $r1, $r25;
+        java.io.StringReader $r13;
+        org.w3c.dom.ls.LSInput r0;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource $r4, $r9, $r15, $r21, r27;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r26;
+        java.io.InputStream $r2, $r19;
+
+        r26 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r0 := @parameter0: org.w3c.dom.ls.LSInput;
+
+        $r1 = interfaceinvoke r0.<org.w3c.dom.ls.LSInput: java.io.Reader getCharacterStream()>();
+
+        if $r1 == null goto label1;
+
+        $r21 = new com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
+
+        $r22 = interfaceinvoke r0.<org.w3c.dom.ls.LSInput: java.lang.String getPublicId()>();
+
+        $r23 = interfaceinvoke r0.<org.w3c.dom.ls.LSInput: java.lang.String getSystemId()>();
+
+        $r24 = interfaceinvoke r0.<org.w3c.dom.ls.LSInput: java.lang.String getBaseURI()>();
+
+        $r25 = interfaceinvoke r0.<org.w3c.dom.ls.LSInput: java.io.Reader getCharacterStream()>();
+
+        specialinvoke $r21.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: void <init>(java.lang.String,java.lang.String,java.lang.String,java.io.Reader,java.lang.String)>($r22, $r23, $r24, $r25, "UTF-16");
+
+        r27 = $r21;
+
+        goto label4;
+
+     label1:
+        $r2 = interfaceinvoke r0.<org.w3c.dom.ls.LSInput: java.io.InputStream getByteStream()>();
+
+        if $r2 == null goto label2;
+
+        $r15 = new com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
+
+        $r16 = interfaceinvoke r0.<org.w3c.dom.ls.LSInput: java.lang.String getPublicId()>();
+
+        $r17 = interfaceinvoke r0.<org.w3c.dom.ls.LSInput: java.lang.String getSystemId()>();
+
+        $r18 = interfaceinvoke r0.<org.w3c.dom.ls.LSInput: java.lang.String getBaseURI()>();
+
+        $r19 = interfaceinvoke r0.<org.w3c.dom.ls.LSInput: java.io.InputStream getByteStream()>();
+
+        $r20 = interfaceinvoke r0.<org.w3c.dom.ls.LSInput: java.lang.String getEncoding()>();
+
+        specialinvoke $r15.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: void <init>(java.lang.String,java.lang.String,java.lang.String,java.io.InputStream,java.lang.String)>($r16, $r17, $r18, $r19, $r20);
+
+        r27 = $r15;
+
+        goto label4;
+
+     label2:
+        $r3 = interfaceinvoke r0.<org.w3c.dom.ls.LSInput: java.lang.String getStringData()>();
+
+        if $r3 == null goto label3;
+
+        $r8 = interfaceinvoke r0.<org.w3c.dom.ls.LSInput: java.lang.String getStringData()>();
+
+        $i0 = virtualinvoke $r8.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label3;
+
+        $r9 = new com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
+
+        $r10 = interfaceinvoke r0.<org.w3c.dom.ls.LSInput: java.lang.String getPublicId()>();
+
+        $r11 = interfaceinvoke r0.<org.w3c.dom.ls.LSInput: java.lang.String getSystemId()>();
+
+        $r12 = interfaceinvoke r0.<org.w3c.dom.ls.LSInput: java.lang.String getBaseURI()>();
+
+        $r13 = new java.io.StringReader;
+
+        $r14 = interfaceinvoke r0.<org.w3c.dom.ls.LSInput: java.lang.String getStringData()>();
+
+        specialinvoke $r13.<java.io.StringReader: void <init>(java.lang.String)>($r14);
+
+        specialinvoke $r9.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: void <init>(java.lang.String,java.lang.String,java.lang.String,java.io.Reader,java.lang.String)>($r10, $r11, $r12, $r13, "UTF-16");
+
+        r27 = $r9;
+
+        goto label4;
+
+     label3:
+        $r4 = new com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
+
+        $r5 = interfaceinvoke r0.<org.w3c.dom.ls.LSInput: java.lang.String getPublicId()>();
+
+        $r6 = interfaceinvoke r0.<org.w3c.dom.ls.LSInput: java.lang.String getSystemId()>();
+
+        $r7 = interfaceinvoke r0.<org.w3c.dom.ls.LSInput: java.lang.String getBaseURI()>();
+
+        specialinvoke $r4.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: void <init>(java.lang.String,java.lang.String,java.lang.String)>($r5, $r6, $r7);
+
+        r27 = $r4;
+
+     label4:
+        return r27;
+    }
+
+    public com.sun.org.apache.xerces.internal.impl.xs.XSElementDecl getGlobalElementDecl(com.sun.org.apache.xerces.internal.xni.QName)
+    {
+        com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar $r4;
+        com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket $r3;
+        com.sun.org.apache.xerces.internal.impl.xs.XSElementDecl $r6;
+        java.lang.String $r2, $r5;
+        com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader r0;
+        com.sun.org.apache.xerces.internal.xni.QName r1;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader;
+
+        r1 := @parameter0: com.sun.org.apache.xerces.internal.xni.QName;
+
+        $r3 = r0.<com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket fGrammarBucket>;
+
+        $r2 = r1.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        $r4 = virtualinvoke $r3.<com.sun.org.apache.xerces.internal.impl.xs.XSGrammarBucket: com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar getGrammar(java.lang.String)>($r2);
+
+        if $r4 == null goto label1;
+
+        $r5 = r1.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String localpart>;
+
+        $r6 = virtualinvoke $r4.<com.sun.org.apache.xerces.internal.impl.xs.SchemaGrammar: com.sun.org.apache.xerces.internal.impl.xs.XSElementDecl getGlobalElementDecl(java.lang.String)>($r5);
+
+        return $r6;
+
+     label1:
+        return null;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.String[] $r0, $r1;
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String ACCESS_EXTERNAL_SCHEMA> = "http://javax.xml.XMLConstants/property/accessExternalSchema";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String ACCESS_EXTERNAL_DTD> = "http://javax.xml.XMLConstants/property/accessExternalDTD";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String XML_SECURITY_PROPERTY_MANAGER> = "http://www.oracle.com/xml/jaxp/properties/xmlSecurityPropertyManager";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String ENTITY_MANAGER> = "http://apache.org/xml/properties/internal/entity-manager";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String LOCALE> = "http://apache.org/xml/properties/locale";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String SECURITY_MANAGER> = "http://apache.org/xml/properties/security-manager";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String JAXP_SCHEMA_SOURCE> = "http://java.sun.com/xml/jaxp/properties/schemaSource";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String SCHEMA_NONS_LOCATION> = "http://apache.org/xml/properties/schema/external-noNamespaceSchemaLocation";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String SCHEMA_LOCATION> = "http://apache.org/xml/properties/schema/external-schemaLocation";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String XMLGRAMMAR_POOL> = "http://apache.org/xml/properties/internal/grammar-pool";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String ENTITY_RESOLVER> = "http://apache.org/xml/properties/internal/entity-resolver";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String ERROR_HANDLER> = "http://apache.org/xml/properties/internal/error-handler";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String ERROR_REPORTER> = "http://apache.org/xml/properties/internal/error-reporter";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String SYMBOL_TABLE> = "http://apache.org/xml/properties/internal/symbol-table";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String OVERRIDE_PARSER> = "jdk.xml.overrideDefaultParser";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String SCHEMA_DV_FACTORY> = "http://apache.org/xml/properties/internal/validation/schema/dv-factory";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String TOLERATE_DUPLICATES> = "http://apache.org/xml/features/internal/tolerate-duplicates";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String NAMESPACE_GROWTH> = "http://apache.org/xml/features/namespace-growth";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String PARSER_SETTINGS> = "http://apache.org/xml/features/internal/parser-settings";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String AUGMENT_PSVI> = "http://apache.org/xml/features/validation/schema/augment-psvi";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String HONOUR_ALL_SCHEMALOCATIONS> = "http://apache.org/xml/features/honour-all-schemaLocations";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String GENERATE_SYNTHETIC_ANNOTATIONS> = "http://apache.org/xml/features/generate-synthetic-annotations";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String DISALLOW_DOCTYPE> = "http://apache.org/xml/features/disallow-doctype-decl";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String VALIDATE_ANNOTATIONS> = "http://apache.org/xml/features/validate-annotations";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String STANDARD_URI_CONFORMANT_FEATURE> = "http://apache.org/xml/features/standard-uri-conformant";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String ALLOW_JAVA_ENCODINGS> = "http://apache.org/xml/features/allow-java-encodings";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String CONTINUE_AFTER_FATAL_ERROR> = "http://apache.org/xml/features/continue-after-fatal-error";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String SCHEMA_FULL_CHECKING> = "http://apache.org/xml/features/validation/schema-full-checking";
+
+        $r0 = newarray (java.lang.String)[12];
+
+        $r0[0] = "http://apache.org/xml/features/validation/schema-full-checking";
+
+        $r0[1] = "http://apache.org/xml/features/validation/schema/augment-psvi";
+
+        $r0[2] = "http://apache.org/xml/features/continue-after-fatal-error";
+
+        $r0[3] = "http://apache.org/xml/features/allow-java-encodings";
+
+        $r0[4] = "http://apache.org/xml/features/standard-uri-conformant";
+
+        $r0[5] = "http://apache.org/xml/features/disallow-doctype-decl";
+
+        $r0[6] = "http://apache.org/xml/features/generate-synthetic-annotations";
+
+        $r0[7] = "http://apache.org/xml/features/validate-annotations";
+
+        $r0[8] = "http://apache.org/xml/features/honour-all-schemaLocations";
+
+        $r0[9] = "http://apache.org/xml/features/namespace-growth";
+
+        $r0[10] = "http://apache.org/xml/features/internal/tolerate-duplicates";
+
+        $r0[11] = "jdk.xml.overrideDefaultParser";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String[] RECOGNIZED_FEATURES> = $r0;
+
+        $r1 = newarray (java.lang.String)[13];
+
+        $r1[0] = "http://apache.org/xml/properties/internal/entity-manager";
+
+        $r1[1] = "http://apache.org/xml/properties/internal/symbol-table";
+
+        $r1[2] = "http://apache.org/xml/properties/internal/error-reporter";
+
+        $r1[3] = "http://apache.org/xml/properties/internal/error-handler";
+
+        $r1[4] = "http://apache.org/xml/properties/internal/entity-resolver";
+
+        $r1[5] = "http://apache.org/xml/properties/internal/grammar-pool";
+
+        $r1[6] = "http://apache.org/xml/properties/schema/external-schemaLocation";
+
+        $r1[7] = "http://apache.org/xml/properties/schema/external-noNamespaceSchemaLocation";
+
+        $r1[8] = "http://java.sun.com/xml/jaxp/properties/schemaSource";
+
+        $r1[9] = "http://apache.org/xml/properties/security-manager";
+
+        $r1[10] = "http://apache.org/xml/properties/locale";
+
+        $r1[11] = "http://apache.org/xml/properties/internal/validation/schema/dv-factory";
+
+        $r1[12] = "http://www.oracle.com/xml/jaxp/properties/xmlSecurityPropertyManager";
+
+        <com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaLoader: java.lang.String[] RECOGNIZED_PROPERTIES> = $r1;
+
+        return;
+    }
+}

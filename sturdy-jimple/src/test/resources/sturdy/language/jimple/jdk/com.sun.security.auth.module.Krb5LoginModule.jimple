@@ -1,0 +1,2627 @@
+public class com.sun.security.auth.module.Krb5LoginModule extends java.lang.Object implements javax.security.auth.spi.LoginModule
+{
+    private javax.security.auth.Subject subject;
+    private javax.security.auth.callback.CallbackHandler callbackHandler;
+    private java.util.Map sharedState;
+    private java.util.Map options;
+    private boolean debug;
+    private boolean storeKey;
+    private boolean doNotPrompt;
+    private boolean useTicketCache;
+    private boolean useKeyTab;
+    private java.lang.String ticketCacheName;
+    private java.lang.String keyTabName;
+    private java.lang.String princName;
+    private boolean useFirstPass;
+    private boolean tryFirstPass;
+    private boolean storePass;
+    private boolean clearPass;
+    private boolean refreshKrb5Config;
+    private boolean renewTGT;
+    private boolean isInitiator;
+    private boolean succeeded;
+    private boolean commitSucceeded;
+    private java.lang.String username;
+    private sun.security.krb5.EncryptionKey[] encKeys;
+    javax.security.auth.kerberos.KeyTab ktab;
+    private sun.security.krb5.Credentials cred;
+    private sun.security.krb5.PrincipalName principal;
+    private javax.security.auth.kerberos.KerberosPrincipal kerbClientPrinc;
+    private javax.security.auth.kerberos.KerberosTicket kerbTicket;
+    private javax.security.auth.kerberos.KerberosKey[] kerbKeys;
+    private java.lang.StringBuffer krb5PrincName;
+    private boolean unboundServer;
+    private char[] password;
+    private static final java.lang.String NAME;
+    private static final java.lang.String PWD;
+    private static final java.util.ResourceBundle rb;
+
+    public void <init>()
+    {
+        com.sun.security.auth.module.Krb5LoginModule r0;
+
+        r0 := @this: com.sun.security.auth.module.Krb5LoginModule;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean debug> = 0;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean storeKey> = 0;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean doNotPrompt> = 0;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean useTicketCache> = 0;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean useKeyTab> = 0;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String ticketCacheName> = null;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String keyTabName> = null;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String princName> = null;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean useFirstPass> = 0;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean tryFirstPass> = 0;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean storePass> = 0;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean clearPass> = 0;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean refreshKrb5Config> = 0;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean renewTGT> = 0;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean isInitiator> = 1;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean succeeded> = 0;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean commitSucceeded> = 0;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.EncryptionKey[] encKeys> = null;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KeyTab ktab> = null;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.Credentials cred> = null;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.PrincipalName principal> = null;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosPrincipal kerbClientPrinc> = null;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosTicket kerbTicket> = null;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosKey[] kerbKeys> = null;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.StringBuffer krb5PrincName> = null;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean unboundServer> = 0;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: char[] password> = null;
+
+        return;
+    }
+
+    public void initialize(javax.security.auth.Subject, javax.security.auth.callback.CallbackHandler, java.util.Map, java.util.Map)
+    {
+        java.util.Map r3, r4;
+        java.lang.StringBuilder $r47, $r49, $r50, $r51, $r52, $r53, $r54, $r55, $r56, $r57, $r58, $r59, $r61, $r62, $r63, $r64, $r66, $r67, $r68, $r69, $r71, $r72, $r73, $r74, $r75, $r76, $r77, $r78, $r79, $r80;
+        com.sun.security.auth.module.Krb5LoginModule r0;
+        java.lang.String $r5, $r7, $r8, $r10, $r11, $r13, $r14, $r16, $r17, $r19, $r21, $r23, $r24, $r26, $r27, $r29, $r30, $r32, $r34, $r35, $r37, $r38, $r40, $r41, $r43, $r44, $r46, $r60, $r65, $r70, $r81, $r82, $r83, $r84;
+        javax.security.auth.callback.CallbackHandler r2;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19, $z20, $z21, $z22, $z23;
+        java.io.PrintStream $r48;
+        javax.security.auth.Subject r1;
+        java.lang.Object $r6, $r9, $r12, $r15, $r18, $r20, $r22, $r25, $r28, $r31, $r33, $r36, $r39, $r42, $r45;
+
+        r0 := @this: com.sun.security.auth.module.Krb5LoginModule;
+
+        r1 := @parameter0: javax.security.auth.Subject;
+
+        r2 := @parameter1: javax.security.auth.callback.CallbackHandler;
+
+        r3 := @parameter2: java.util.Map;
+
+        r4 := @parameter3: java.util.Map;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.Subject subject> = r1;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.callback.CallbackHandler callbackHandler> = r2;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: java.util.Map sharedState> = r3;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: java.util.Map options> = r4;
+
+        $r5 = "true";
+
+        $r6 = interfaceinvoke r4.<java.util.Map: java.lang.Object get(java.lang.Object)>("debug");
+
+        $r7 = (java.lang.String) $r6;
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r7);
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean debug> = $z0;
+
+        $r8 = "true";
+
+        $r9 = interfaceinvoke r4.<java.util.Map: java.lang.Object get(java.lang.Object)>("storeKey");
+
+        $r10 = (java.lang.String) $r9;
+
+        $z1 = virtualinvoke $r8.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r10);
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean storeKey> = $z1;
+
+        $r11 = "true";
+
+        $r12 = interfaceinvoke r4.<java.util.Map: java.lang.Object get(java.lang.Object)>("doNotPrompt");
+
+        $r13 = (java.lang.String) $r12;
+
+        $z2 = virtualinvoke $r11.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r13);
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean doNotPrompt> = $z2;
+
+        $r14 = "true";
+
+        $r15 = interfaceinvoke r4.<java.util.Map: java.lang.Object get(java.lang.Object)>("useTicketCache");
+
+        $r16 = (java.lang.String) $r15;
+
+        $z3 = virtualinvoke $r14.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r16);
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean useTicketCache> = $z3;
+
+        $r17 = "true";
+
+        $r18 = interfaceinvoke r4.<java.util.Map: java.lang.Object get(java.lang.Object)>("useKeyTab");
+
+        $r19 = (java.lang.String) $r18;
+
+        $z4 = virtualinvoke $r17.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r19);
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean useKeyTab> = $z4;
+
+        $r20 = interfaceinvoke r4.<java.util.Map: java.lang.Object get(java.lang.Object)>("ticketCache");
+
+        $r21 = (java.lang.String) $r20;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String ticketCacheName> = $r21;
+
+        $r22 = interfaceinvoke r4.<java.util.Map: java.lang.Object get(java.lang.Object)>("keyTab");
+
+        $r23 = (java.lang.String) $r22;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String keyTabName> = $r23;
+
+        $r24 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String keyTabName>;
+
+        if $r24 == null goto label1;
+
+        $r82 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String keyTabName>;
+
+        $r83 = staticinvoke <sun.security.krb5.internal.ktab.KeyTab: java.lang.String normalize(java.lang.String)>($r82);
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String keyTabName> = $r83;
+
+     label1:
+        $r25 = interfaceinvoke r4.<java.util.Map: java.lang.Object get(java.lang.Object)>("principal");
+
+        $r26 = (java.lang.String) $r25;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String princName> = $r26;
+
+        $r27 = "true";
+
+        $r28 = interfaceinvoke r4.<java.util.Map: java.lang.Object get(java.lang.Object)>("refreshKrb5Config");
+
+        $r29 = (java.lang.String) $r28;
+
+        $z5 = virtualinvoke $r27.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r29);
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean refreshKrb5Config> = $z5;
+
+        $r30 = "true";
+
+        $r31 = interfaceinvoke r4.<java.util.Map: java.lang.Object get(java.lang.Object)>("renewTGT");
+
+        $r32 = (java.lang.String) $r31;
+
+        $z6 = virtualinvoke $r30.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r32);
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean renewTGT> = $z6;
+
+        $r33 = interfaceinvoke r4.<java.util.Map: java.lang.Object get(java.lang.Object)>("isInitiator");
+
+        $r84 = (java.lang.String) $r33;
+
+        if $r84 != null goto label2;
+
+        goto label3;
+
+     label2:
+        $r34 = "true";
+
+        $z7 = virtualinvoke $r34.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r84);
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean isInitiator> = $z7;
+
+     label3:
+        $r35 = "true";
+
+        $r36 = interfaceinvoke r4.<java.util.Map: java.lang.Object get(java.lang.Object)>("tryFirstPass");
+
+        $r37 = (java.lang.String) $r36;
+
+        $z8 = virtualinvoke $r35.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r37);
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean tryFirstPass> = $z8;
+
+        $r38 = "true";
+
+        $r39 = interfaceinvoke r4.<java.util.Map: java.lang.Object get(java.lang.Object)>("useFirstPass");
+
+        $r40 = (java.lang.String) $r39;
+
+        $z9 = virtualinvoke $r38.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r40);
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean useFirstPass> = $z9;
+
+        $r41 = "true";
+
+        $r42 = interfaceinvoke r4.<java.util.Map: java.lang.Object get(java.lang.Object)>("storePass");
+
+        $r43 = (java.lang.String) $r42;
+
+        $z10 = virtualinvoke $r41.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r43);
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean storePass> = $z10;
+
+        $r44 = "true";
+
+        $r45 = interfaceinvoke r4.<java.util.Map: java.lang.Object get(java.lang.Object)>("clearPass");
+
+        $r46 = (java.lang.String) $r45;
+
+        $z11 = virtualinvoke $r44.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r46);
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean clearPass> = $z11;
+
+        $z12 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean debug>;
+
+        if $z12 == 0 goto label4;
+
+        $r48 = <java.lang.System: java.io.PrintStream out>;
+
+        $r47 = new java.lang.StringBuilder;
+
+        specialinvoke $r47.<java.lang.StringBuilder: void <init>()>();
+
+        $r49 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Debug is  ");
+
+        $z13 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean debug>;
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z13);
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" storeKey ");
+
+        $z14 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean storeKey>;
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z14);
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" useTicketCache ");
+
+        $z15 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean useTicketCache>;
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z15);
+
+        $r55 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" useKeyTab ");
+
+        $z16 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean useKeyTab>;
+
+        $r56 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z16);
+
+        $r57 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" doNotPrompt ");
+
+        $z17 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean doNotPrompt>;
+
+        $r58 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z17);
+
+        $r59 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ticketCache is ");
+
+        $r60 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String ticketCacheName>;
+
+        $r61 = virtualinvoke $r59.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r60);
+
+        $r62 = virtualinvoke $r61.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" isInitiator ");
+
+        $z18 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean isInitiator>;
+
+        $r63 = virtualinvoke $r62.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z18);
+
+        $r64 = virtualinvoke $r63.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" KeyTab is ");
+
+        $r65 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String keyTabName>;
+
+        $r66 = virtualinvoke $r64.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r65);
+
+        $r67 = virtualinvoke $r66.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" refreshKrb5Config is ");
+
+        $z19 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean refreshKrb5Config>;
+
+        $r68 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z19);
+
+        $r69 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" principal is ");
+
+        $r70 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String princName>;
+
+        $r71 = virtualinvoke $r69.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r70);
+
+        $r72 = virtualinvoke $r71.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" tryFirstPass is ");
+
+        $z20 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean tryFirstPass>;
+
+        $r73 = virtualinvoke $r72.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z20);
+
+        $r74 = virtualinvoke $r73.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" useFirstPass is ");
+
+        $z21 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean useFirstPass>;
+
+        $r75 = virtualinvoke $r74.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z21);
+
+        $r76 = virtualinvoke $r75.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" storePass is ");
+
+        $z22 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean storePass>;
+
+        $r77 = virtualinvoke $r76.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z22);
+
+        $r78 = virtualinvoke $r77.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" clearPass is ");
+
+        $z23 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean clearPass>;
+
+        $r79 = virtualinvoke $r78.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z23);
+
+        $r80 = virtualinvoke $r79.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r81 = virtualinvoke $r80.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r48.<java.io.PrintStream: void print(java.lang.String)>($r81);
+
+     label4:
+        return;
+    }
+
+    public boolean login() throws javax.security.auth.login.LoginException
+    {
+        javax.security.auth.login.LoginException $r10, $r17, $r24, $r32;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        java.lang.StringBuilder $r11, $r13, $r15, $r18, $r20, $r22, $r25, $r27, $r29;
+        sun.security.krb5.KrbException $r31;
+        java.lang.StringBuffer $r4, $r6, $r8, $r34;
+        com.sun.security.auth.module.Krb5LoginModule r0;
+        java.lang.String $r1, $r2, $r5, $r7, $r14, $r16, $r21, $r23, $r28, $r30, $r33;
+        java.io.PrintStream $r3, $r9, $r12, $r19, $r26;
+
+        r0 := @this: com.sun.security.auth.module.Krb5LoginModule;
+
+        $z0 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean refreshKrb5Config>;
+
+        if $z0 == 0 goto label05;
+
+     label01:
+        $z4 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean debug>;
+
+        if $z4 == 0 goto label02;
+
+        $r9 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r9.<java.io.PrintStream: void println(java.lang.String)>("Refreshing Kerberos configuration");
+
+     label02:
+        staticinvoke <sun.security.krb5.Config: void refresh()>();
+
+     label03:
+        goto label05;
+
+     label04:
+        $r31 := @caughtexception;
+
+        $r32 = new javax.security.auth.login.LoginException;
+
+        $r33 = virtualinvoke $r31.<sun.security.krb5.KrbException: java.lang.String getMessage()>();
+
+        specialinvoke $r32.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>($r33);
+
+        virtualinvoke $r32.<javax.security.auth.login.LoginException: java.lang.Throwable initCause(java.lang.Throwable)>($r31);
+
+        throw $r32;
+
+     label05:
+        $r1 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("sun.security.krb5.principal");
+
+        if $r1 == null goto label06;
+
+        $r8 = new java.lang.StringBuffer;
+
+        specialinvoke $r8.<java.lang.StringBuffer: void <init>(java.lang.String)>($r1);
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.StringBuffer krb5PrincName> = $r8;
+
+        goto label07;
+
+     label06:
+        $r2 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String princName>;
+
+        if $r2 == null goto label07;
+
+        $r6 = new java.lang.StringBuffer;
+
+        $r7 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String princName>;
+
+        specialinvoke $r6.<java.lang.StringBuffer: void <init>(java.lang.String)>($r7);
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.StringBuffer krb5PrincName> = $r6;
+
+     label07:
+        specialinvoke r0.<com.sun.security.auth.module.Krb5LoginModule: void validateConfiguration()>();
+
+        $r34 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.StringBuffer krb5PrincName>;
+
+        if $r34 == null goto label08;
+
+        $r4 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.StringBuffer krb5PrincName>;
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $z3 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("*");
+
+        if $z3 == 0 goto label08;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean unboundServer> = 1;
+
+     label08:
+        $z8 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean tryFirstPass>;
+
+        if $z8 == 0 goto label14;
+
+     label09:
+        specialinvoke r0.<com.sun.security.auth.module.Krb5LoginModule: void attemptAuthentication(boolean)>(1);
+
+        $z2 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean debug>;
+
+        if $z2 == 0 goto label10;
+
+        $r3 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>("\t\t[Krb5LoginModule] authentication succeeded");
+
+     label10:
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean succeeded> = 1;
+
+        specialinvoke r0.<com.sun.security.auth.module.Krb5LoginModule: void cleanState()>();
+
+     label11:
+        return 1;
+
+     label12:
+        $r24 := @caughtexception;
+
+        specialinvoke r0.<com.sun.security.auth.module.Krb5LoginModule: void cleanState()>();
+
+        $z7 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean debug>;
+
+        if $z7 == 0 goto label13;
+
+        $r26 = <java.lang.System: java.io.PrintStream out>;
+
+        $r25 = new java.lang.StringBuilder;
+
+        specialinvoke $r25.<java.lang.StringBuilder: void <init>()>();
+
+        $r27 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\t\t[Krb5LoginModule] tryFirstPass failed with:");
+
+        $r28 = virtualinvoke $r24.<javax.security.auth.login.LoginException: java.lang.String getMessage()>();
+
+        $r29 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r28);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r26.<java.io.PrintStream: void println(java.lang.String)>($r30);
+
+     label13:
+        goto label19;
+
+     label14:
+        $z1 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean useFirstPass>;
+
+        if $z1 == 0 goto label19;
+
+     label15:
+        specialinvoke r0.<com.sun.security.auth.module.Krb5LoginModule: void attemptAuthentication(boolean)>(1);
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean succeeded> = 1;
+
+        specialinvoke r0.<com.sun.security.auth.module.Krb5LoginModule: void cleanState()>();
+
+     label16:
+        return 1;
+
+     label17:
+        $r17 := @caughtexception;
+
+        $z6 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean debug>;
+
+        if $z6 == 0 goto label18;
+
+        $r19 = <java.lang.System: java.io.PrintStream out>;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\t\t[Krb5LoginModule] authentication failed \n");
+
+        $r21 = virtualinvoke $r17.<javax.security.auth.login.LoginException: java.lang.String getMessage()>();
+
+        $r22 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r21);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r19.<java.io.PrintStream: void println(java.lang.String)>($r23);
+
+     label18:
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean succeeded> = 0;
+
+        specialinvoke r0.<com.sun.security.auth.module.Krb5LoginModule: void cleanState()>();
+
+        throw $r17;
+
+     label19:
+        specialinvoke r0.<com.sun.security.auth.module.Krb5LoginModule: void attemptAuthentication(boolean)>(0);
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean succeeded> = 1;
+
+        specialinvoke r0.<com.sun.security.auth.module.Krb5LoginModule: void cleanState()>();
+
+     label20:
+        return 1;
+
+     label21:
+        $r10 := @caughtexception;
+
+        $z5 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean debug>;
+
+        if $z5 == 0 goto label22;
+
+        $r12 = <java.lang.System: java.io.PrintStream out>;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\t\t[Krb5LoginModule] authentication failed \n");
+
+        $r14 = virtualinvoke $r10.<javax.security.auth.login.LoginException: java.lang.String getMessage()>();
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r12.<java.io.PrintStream: void println(java.lang.String)>($r16);
+
+     label22:
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean succeeded> = 0;
+
+        specialinvoke r0.<com.sun.security.auth.module.Krb5LoginModule: void cleanState()>();
+
+        throw $r10;
+
+        catch sun.security.krb5.KrbException from label01 to label03 with label04;
+        catch javax.security.auth.login.LoginException from label09 to label11 with label12;
+        catch javax.security.auth.login.LoginException from label15 to label16 with label17;
+        catch javax.security.auth.login.LoginException from label19 to label20 with label21;
+    }
+
+    private void attemptAuthentication(boolean) throws javax.security.auth.login.LoginException
+    {
+        byte[] $r26;
+        sun.security.krb5.EncryptionKey $r21, $r25;
+        java.lang.StringBuilder $r8, $r10, $r12, $r17, $r19, $r22, $r23, $r28, $r45, $r47, $r49, $r50, $r52, $r67, $r69, $r71;
+        sun.security.krb5.EncryptionKey[] $r16, $r20, $r24, $r36, $r44;
+        java.lang.StringBuffer $r1, $r61, $r89;
+        sun.misc.HexDumpEncoder $r14;
+        java.io.IOException $r91;
+        sun.security.krb5.PrincipalName $r2, $r5, $r11, $r35, $r42, $r48, $r55, $r60, $r64, $r70, $r75, $r88, $r101;
+        sun.security.krb5.KrbException $r94, $r97;
+        int $i0, $i1, $i2, i3;
+        java.io.PrintStream $r9, $r18, $r30, $r46, $r68, $r74, $r82, $r87;
+        sun.security.krb5.KrbAsReqBuilder $r3, $r31, $r33, $r37, r107;
+        javax.security.auth.kerberos.KeyTab $r4, $r15, $r43, $r103, $r104, $r106;
+        sun.security.krb5.Credentials $r6, $r32, $r38, $r65, $r66, $r73, $r76, $r77, $r78, $r79, $r80, $r81, $r83, $r84, $r85, $r86, $r100, $r102;
+        com.sun.security.auth.module.Krb5LoginModule r0;
+        java.lang.String $r13, $r27, $r29, $r39, $r41, $r51, $r53, $r56, $r57, $r59, $r62, $r63, $r72, $r90, $r93, $r96, $r99, $r105;
+        java.io.File $r40, $r58;
+        char[] $r34;
+        javax.security.auth.login.LoginException $r7, $r92, $r95, $r98;
+        boolean $z0, $z1, $z2, $z3, z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17;
+        javax.security.auth.kerberos.KerberosPrincipal $r54;
+
+        r0 := @this: com.sun.security.auth.module.Krb5LoginModule;
+
+        z4 := @parameter0: boolean;
+
+        $r1 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.StringBuffer krb5PrincName>;
+
+        if $r1 == null goto label04;
+
+     label01:
+        $r88 = new sun.security.krb5.PrincipalName;
+
+        $r89 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.StringBuffer krb5PrincName>;
+
+        $r90 = virtualinvoke $r89.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        specialinvoke $r88.<sun.security.krb5.PrincipalName: void <init>(java.lang.String,int)>($r90, 1);
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.PrincipalName principal> = $r88;
+
+     label02:
+        goto label04;
+
+     label03:
+        $r97 := @caughtexception;
+
+        $r98 = new javax.security.auth.login.LoginException;
+
+        $r99 = virtualinvoke $r97.<sun.security.krb5.KrbException: java.lang.String getMessage()>();
+
+        specialinvoke $r98.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>($r99);
+
+        virtualinvoke $r98.<javax.security.auth.login.LoginException: java.lang.Throwable initCause(java.lang.Throwable)>($r97);
+
+        throw $r98;
+
+     label04:
+        $z0 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean useTicketCache>;
+
+        if $z0 == 0 goto label12;
+
+        $z10 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean debug>;
+
+        if $z10 == 0 goto label05;
+
+        $r87 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r87.<java.io.PrintStream: void println(java.lang.String)>("Acquire TGT from Cache");
+
+     label05:
+        $r64 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.PrincipalName principal>;
+
+        $r63 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String ticketCacheName>;
+
+        $r65 = staticinvoke <sun.security.krb5.Credentials: sun.security.krb5.Credentials acquireTGTFromCache(sun.security.krb5.PrincipalName,java.lang.String)>($r64, $r63);
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.Credentials cred> = $r65;
+
+        $r66 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.Credentials cred>;
+
+        if $r66 == null goto label08;
+
+        $r81 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.Credentials cred>;
+
+        $z11 = specialinvoke r0.<com.sun.security.auth.module.Krb5LoginModule: boolean isCurrent(sun.security.krb5.Credentials)>($r81);
+
+        if $z11 != 0 goto label08;
+
+        $z12 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean renewTGT>;
+
+        if $z12 == 0 goto label07;
+
+        $r83 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.Credentials cred>;
+
+        $r84 = specialinvoke r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.Credentials renewCredentials(sun.security.krb5.Credentials)>($r83);
+
+        if $r84 == null goto label06;
+
+        $r85 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.Credentials cred>;
+
+        $r86 = virtualinvoke $r85.<sun.security.krb5.Credentials: sun.security.krb5.Credentials getProxy()>();
+
+        virtualinvoke $r84.<sun.security.krb5.Credentials: sun.security.krb5.Credentials setProxy(sun.security.krb5.Credentials)>($r86);
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.Credentials cred> = $r84;
+
+     label06:
+        goto label08;
+
+     label07:
+        r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.Credentials cred> = null;
+
+        $z13 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean debug>;
+
+        if $z13 == 0 goto label08;
+
+        $r82 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r82.<java.io.PrintStream: void println(java.lang.String)>("Credentials are no longer valid");
+
+     label08:
+        $r100 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.Credentials cred>;
+
+        if $r100 == null goto label11;
+
+        $r75 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.PrincipalName principal>;
+
+        if $r75 != null goto label11;
+
+        $r76 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.Credentials cred>;
+
+        $r77 = virtualinvoke $r76.<sun.security.krb5.Credentials: sun.security.krb5.Credentials getProxy()>();
+
+        if $r77 == null goto label09;
+
+        $r79 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.Credentials cred>;
+
+        $r80 = virtualinvoke $r79.<sun.security.krb5.Credentials: sun.security.krb5.Credentials getProxy()>();
+
+        $r101 = virtualinvoke $r80.<sun.security.krb5.Credentials: sun.security.krb5.PrincipalName getClient()>();
+
+        goto label10;
+
+     label09:
+        $r78 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.Credentials cred>;
+
+        $r101 = virtualinvoke $r78.<sun.security.krb5.Credentials: sun.security.krb5.PrincipalName getClient()>();
+
+     label10:
+        r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.PrincipalName principal> = $r101;
+
+     label11:
+        $z14 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean debug>;
+
+        if $z14 == 0 goto label12;
+
+        $r68 = <java.lang.System: java.io.PrintStream out>;
+
+        $r67 = new java.lang.StringBuilder;
+
+        specialinvoke $r67.<java.lang.StringBuilder: void <init>()>();
+
+        $r69 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Principal is ");
+
+        $r70 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.PrincipalName principal>;
+
+        $r71 = virtualinvoke $r69.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r70);
+
+        $r72 = virtualinvoke $r71.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r68.<java.io.PrintStream: void println(java.lang.String)>($r72);
+
+        $r73 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.Credentials cred>;
+
+        if $r73 != null goto label12;
+
+        $r74 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r74.<java.io.PrintStream: void println(java.lang.String)>("null credentials from Ticket Cache");
+
+     label12:
+        $r102 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.Credentials cred>;
+
+        if $r102 != null goto label29;
+
+        $r2 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.PrincipalName principal>;
+
+        if $r2 != null goto label13;
+
+        specialinvoke r0.<com.sun.security.auth.module.Krb5LoginModule: void promptForName(boolean)>(z4);
+
+        $r60 = new sun.security.krb5.PrincipalName;
+
+        $r61 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.StringBuffer krb5PrincName>;
+
+        $r62 = virtualinvoke $r61.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        specialinvoke $r60.<sun.security.krb5.PrincipalName: void <init>(java.lang.String,int)>($r62, 1);
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.PrincipalName principal> = $r60;
+
+     label13:
+        $z1 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean useKeyTab>;
+
+        if $z1 == 0 goto label22;
+
+        $z8 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean unboundServer>;
+
+        if $z8 != 0 goto label16;
+
+        $r54 = new javax.security.auth.kerberos.KerberosPrincipal;
+
+        $r55 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.PrincipalName principal>;
+
+        $r56 = virtualinvoke $r55.<sun.security.krb5.PrincipalName: java.lang.String getName()>();
+
+        specialinvoke $r54.<javax.security.auth.kerberos.KerberosPrincipal: void <init>(java.lang.String)>($r56);
+
+        $r57 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String keyTabName>;
+
+        if $r57 != null goto label14;
+
+        $r103 = staticinvoke <javax.security.auth.kerberos.KeyTab: javax.security.auth.kerberos.KeyTab getInstance(javax.security.auth.kerberos.KerberosPrincipal)>($r54);
+
+        goto label15;
+
+     label14:
+        $r58 = new java.io.File;
+
+        $r59 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String keyTabName>;
+
+        specialinvoke $r58.<java.io.File: void <init>(java.lang.String)>($r59);
+
+        $r103 = staticinvoke <javax.security.auth.kerberos.KeyTab: javax.security.auth.kerberos.KeyTab getInstance(javax.security.auth.kerberos.KerberosPrincipal,java.io.File)>($r54, $r58);
+
+     label15:
+        r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KeyTab ktab> = $r103;
+
+        goto label19;
+
+     label16:
+        $r39 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String keyTabName>;
+
+        if $r39 != null goto label17;
+
+        $r104 = staticinvoke <javax.security.auth.kerberos.KeyTab: javax.security.auth.kerberos.KeyTab getUnboundInstance()>();
+
+        goto label18;
+
+     label17:
+        $r40 = new java.io.File;
+
+        $r41 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String keyTabName>;
+
+        specialinvoke $r40.<java.io.File: void <init>(java.lang.String)>($r41);
+
+        $r104 = staticinvoke <javax.security.auth.kerberos.KeyTab: javax.security.auth.kerberos.KeyTab getUnboundInstance(java.io.File)>($r40);
+
+     label18:
+        r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KeyTab ktab> = $r104;
+
+     label19:
+        $z15 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean isInitiator>;
+
+        if $z15 == 0 goto label22;
+
+        $r43 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KeyTab ktab>;
+
+        $r42 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.PrincipalName principal>;
+
+        $r44 = staticinvoke <sun.security.jgss.krb5.Krb5Util: sun.security.krb5.EncryptionKey[] keysFromJavaxKeyTab(javax.security.auth.kerberos.KeyTab,sun.security.krb5.PrincipalName)>($r43, $r42);
+
+        $i2 = lengthof $r44;
+
+        if $i2 != 0 goto label22;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KeyTab ktab> = null;
+
+        $z9 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean debug>;
+
+        if $z9 == 0 goto label22;
+
+        $r46 = <java.lang.System: java.io.PrintStream out>;
+
+        $r45 = new java.lang.StringBuilder;
+
+        specialinvoke $r45.<java.lang.StringBuilder: void <init>()>();
+
+        $r47 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Key for the principal ");
+
+        $r48 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.PrincipalName principal>;
+
+        $r49 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r48);
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" not available in ");
+
+        $r51 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String keyTabName>;
+
+        if $r51 != null goto label20;
+
+        $r105 = "default key tab";
+
+        goto label21;
+
+     label20:
+        $r105 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String keyTabName>;
+
+     label21:
+        $r52 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r105);
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r46.<java.io.PrintStream: void println(java.lang.String)>($r53);
+
+     label22:
+        $r106 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KeyTab ktab>;
+
+        if $r106 != null goto label24;
+
+        specialinvoke r0.<com.sun.security.auth.module.Krb5LoginModule: void promptForPass(boolean)>(z4);
+
+        $r33 = new sun.security.krb5.KrbAsReqBuilder;
+
+        $r35 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.PrincipalName principal>;
+
+        $r34 = r0.<com.sun.security.auth.module.Krb5LoginModule: char[] password>;
+
+        specialinvoke $r33.<sun.security.krb5.KrbAsReqBuilder: void <init>(sun.security.krb5.PrincipalName,char[])>($r35, $r34);
+
+        r107 = $r33;
+
+        $z5 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean isInitiator>;
+
+        if $z5 == 0 goto label23;
+
+        $r37 = virtualinvoke $r33.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.KrbAsReqBuilder action()>();
+
+        $r38 = virtualinvoke $r37.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.Credentials getCreds()>();
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.Credentials cred> = $r38;
+
+     label23:
+        $z6 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean storeKey>;
+
+        if $z6 == 0 goto label25;
+
+        $z7 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean isInitiator>;
+
+        $r36 = virtualinvoke $r33.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.EncryptionKey[] getKeys(boolean)>($z7);
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.EncryptionKey[] encKeys> = $r36;
+
+        goto label25;
+
+     label24:
+        $r3 = new sun.security.krb5.KrbAsReqBuilder;
+
+        $r5 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.PrincipalName principal>;
+
+        $r4 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KeyTab ktab>;
+
+        specialinvoke $r3.<sun.security.krb5.KrbAsReqBuilder: void <init>(sun.security.krb5.PrincipalName,javax.security.auth.kerberos.KeyTab)>($r5, $r4);
+
+        r107 = $r3;
+
+        $z2 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean isInitiator>;
+
+        if $z2 == 0 goto label25;
+
+        $r31 = virtualinvoke $r3.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.KrbAsReqBuilder action()>();
+
+        $r32 = virtualinvoke $r31.<sun.security.krb5.KrbAsReqBuilder: sun.security.krb5.Credentials getCreds()>();
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.Credentials cred> = $r32;
+
+     label25:
+        virtualinvoke r107.<sun.security.krb5.KrbAsReqBuilder: void destroy()>();
+
+        $z16 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean debug>;
+
+        if $z16 == 0 goto label28;
+
+        $r9 = <java.lang.System: java.io.PrintStream out>;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("principal is ");
+
+        $r11 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.PrincipalName principal>;
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r9.<java.io.PrintStream: void println(java.lang.String)>($r13);
+
+        $r14 = new sun.misc.HexDumpEncoder;
+
+        specialinvoke $r14.<sun.misc.HexDumpEncoder: void <init>()>();
+
+        $r15 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KeyTab ktab>;
+
+        if $r15 == null goto label26;
+
+        $r30 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r30.<java.io.PrintStream: void println(java.lang.String)>("Will use keytab");
+
+        goto label28;
+
+     label26:
+        $z3 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean storeKey>;
+
+        if $z3 == 0 goto label28;
+
+        i3 = 0;
+
+     label27:
+        $r16 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.EncryptionKey[] encKeys>;
+
+        $i0 = lengthof $r16;
+
+        if i3 >= $i0 goto label28;
+
+        $r18 = <java.lang.System: java.io.PrintStream out>;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("EncryptionKey: keyType=");
+
+        $r20 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.EncryptionKey[] encKeys>;
+
+        $r21 = $r20[i3];
+
+        $i1 = virtualinvoke $r21.<sun.security.krb5.EncryptionKey: int getEType()>();
+
+        $r22 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" keyBytes (hex dump)=");
+
+        $r24 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.EncryptionKey[] encKeys>;
+
+        $r25 = $r24[i3];
+
+        $r26 = virtualinvoke $r25.<sun.security.krb5.EncryptionKey: byte[] getBytes()>();
+
+        $r27 = virtualinvoke $r14.<sun.misc.HexDumpEncoder: java.lang.String encodeBuffer(byte[])>($r26);
+
+        $r28 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r27);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r18.<java.io.PrintStream: void println(java.lang.String)>($r29);
+
+        i3 = i3 + 1;
+
+        goto label27;
+
+     label28:
+        $z17 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean isInitiator>;
+
+        if $z17 == 0 goto label29;
+
+        $r6 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.Credentials cred>;
+
+        if $r6 != null goto label29;
+
+        $r7 = new javax.security.auth.login.LoginException;
+
+        specialinvoke $r7.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>("TGT Can not be obtained from the KDC ");
+
+        throw $r7;
+
+     label29:
+        goto label32;
+
+     label30:
+        $r94 := @caughtexception;
+
+        $r95 = new javax.security.auth.login.LoginException;
+
+        $r96 = virtualinvoke $r94.<sun.security.krb5.KrbException: java.lang.String getMessage()>();
+
+        specialinvoke $r95.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>($r96);
+
+        virtualinvoke $r95.<javax.security.auth.login.LoginException: java.lang.Throwable initCause(java.lang.Throwable)>($r94);
+
+        throw $r95;
+
+     label31:
+        $r91 := @caughtexception;
+
+        $r92 = new javax.security.auth.login.LoginException;
+
+        $r93 = virtualinvoke $r91.<java.io.IOException: java.lang.String getMessage()>();
+
+        specialinvoke $r92.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>($r93);
+
+        virtualinvoke $r92.<javax.security.auth.login.LoginException: java.lang.Throwable initCause(java.lang.Throwable)>($r91);
+
+        throw $r92;
+
+     label32:
+        return;
+
+        catch sun.security.krb5.KrbException from label01 to label02 with label03;
+        catch sun.security.krb5.KrbException from label04 to label29 with label30;
+        catch java.io.IOException from label04 to label29 with label31;
+    }
+
+    private void promptForName(boolean) throws javax.security.auth.login.LoginException
+    {
+        javax.security.auth.login.LoginException $r17, $r18, $r35, $r44, $r51;
+        javax.security.auth.callback.UnsupportedCallbackException $r43;
+        javax.security.auth.callback.CallbackHandler $r2, $r11;
+        java.util.Map $r19;
+        boolean z0, $z1, $z2, $z3;
+        java.lang.StringBuilder $r27, $r29, $r31, $r32, $r36, $r38, $r40, $r41, $r45, $r47, $r48;
+        javax.security.auth.callback.Callback $r12;
+        java.lang.Object[] $r8;
+        java.text.MessageFormat $r5;
+        javax.security.auth.callback.Callback[] r4;
+        java.util.ResourceBundle $r6;
+        java.lang.StringBuffer $r1, $r26, $r53;
+        int $i0, $i1;
+        com.sun.security.auth.module.Krb5LoginModule r0;
+        java.lang.String $r3, $r7, $r10, $r14, $r15, $r16, $r21, $r22, $r23, $r24, $r25, $r30, $r33, $r39, $r42, $r46, $r49, $r52, $r54;
+        java.io.PrintStream $r28, $r34, $r37;
+        java.io.IOException $r50;
+        javax.security.auth.callback.NameCallback $r9, $r13;
+        java.lang.Object $r20;
+
+        r0 := @this: com.sun.security.auth.module.Krb5LoginModule;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = new java.lang.StringBuffer;
+
+        specialinvoke $r1.<java.lang.StringBuffer: void <init>(java.lang.String)>("");
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.StringBuffer krb5PrincName> = $r1;
+
+        if z0 == 0 goto label04;
+
+        $r19 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.util.Map sharedState>;
+
+        $r20 = interfaceinvoke $r19.<java.util.Map: java.lang.Object get(java.lang.Object)>("javax.security.auth.login.name");
+
+        $r21 = (java.lang.String) $r20;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String username> = $r21;
+
+        $z1 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean debug>;
+
+        if $z1 == 0 goto label01;
+
+        $r37 = <java.lang.System: java.io.PrintStream out>;
+
+        $r36 = new java.lang.StringBuilder;
+
+        specialinvoke $r36.<java.lang.StringBuilder: void <init>()>();
+
+        $r38 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("username from shared state is ");
+
+        $r39 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String username>;
+
+        $r40 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r39);
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r37.<java.io.PrintStream: void println(java.lang.String)>($r42);
+
+     label01:
+        $r22 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String username>;
+
+        if $r22 != null goto label02;
+
+        $r34 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r34.<java.io.PrintStream: void println(java.lang.String)>("username from shared state is null\n");
+
+        $r35 = new javax.security.auth.login.LoginException;
+
+        specialinvoke $r35.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>("Username can not be obtained from sharedstate ");
+
+        throw $r35;
+
+     label02:
+        $z2 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean debug>;
+
+        if $z2 == 0 goto label03;
+
+        $r28 = <java.lang.System: java.io.PrintStream out>;
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r29 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("username from shared state is ");
+
+        $r30 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String username>;
+
+        $r31 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r30);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r28.<java.io.PrintStream: void println(java.lang.String)>($r33);
+
+     label03:
+        $r23 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String username>;
+
+        if $r23 == null goto label04;
+
+        $r24 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String username>;
+
+        $i1 = virtualinvoke $r24.<java.lang.String: int length()>();
+
+        if $i1 <= 0 goto label04;
+
+        $r26 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.StringBuffer krb5PrincName>;
+
+        $r25 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String username>;
+
+        virtualinvoke $r26.<java.lang.StringBuffer: java.lang.StringBuffer insert(int,java.lang.String)>(0, $r25);
+
+        return;
+
+     label04:
+        $z3 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean doNotPrompt>;
+
+        if $z3 == 0 goto label05;
+
+        $r18 = new javax.security.auth.login.LoginException;
+
+        specialinvoke $r18.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>("Unable to obtain Principal Name for authentication ");
+
+        throw $r18;
+
+     label05:
+        $r2 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.callback.CallbackHandler callbackHandler>;
+
+        if $r2 != null goto label06;
+
+        $r17 = new javax.security.auth.login.LoginException;
+
+        specialinvoke $r17.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>("No CallbackHandler available to garner authentication information from the user");
+
+        throw $r17;
+
+     label06:
+        $r3 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("user.name");
+
+        r4 = newarray (javax.security.auth.callback.Callback)[1];
+
+        $r5 = new java.text.MessageFormat;
+
+        $r6 = <com.sun.security.auth.module.Krb5LoginModule: java.util.ResourceBundle rb>;
+
+        $r7 = virtualinvoke $r6.<java.util.ResourceBundle: java.lang.String getString(java.lang.String)>("Kerberos.username.defUsername.");
+
+        specialinvoke $r5.<java.text.MessageFormat: void <init>(java.lang.String)>($r7);
+
+        $r8 = newarray (java.lang.Object)[1];
+
+        $r8[0] = $r3;
+
+        $r9 = new javax.security.auth.callback.NameCallback;
+
+        $r10 = virtualinvoke $r5.<java.text.MessageFormat: java.lang.String format(java.lang.Object)>($r8);
+
+        specialinvoke $r9.<javax.security.auth.callback.NameCallback: void <init>(java.lang.String)>($r10);
+
+        r4[0] = $r9;
+
+        $r11 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.callback.CallbackHandler callbackHandler>;
+
+        interfaceinvoke $r11.<javax.security.auth.callback.CallbackHandler: void handle(javax.security.auth.callback.Callback[])>(r4);
+
+        $r12 = r4[0];
+
+        $r13 = (javax.security.auth.callback.NameCallback) $r12;
+
+        $r14 = virtualinvoke $r13.<javax.security.auth.callback.NameCallback: java.lang.String getName()>();
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String username> = $r14;
+
+        $r15 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String username>;
+
+        if $r15 == null goto label07;
+
+        $r16 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String username>;
+
+        $i0 = virtualinvoke $r16.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label08;
+
+     label07:
+        r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String username> = $r3;
+
+     label08:
+        $r53 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.StringBuffer krb5PrincName>;
+
+        $r54 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String username>;
+
+        virtualinvoke $r53.<java.lang.StringBuffer: java.lang.StringBuffer insert(int,java.lang.String)>(0, $r54);
+
+     label09:
+        goto label12;
+
+     label10:
+        $r50 := @caughtexception;
+
+        $r51 = new javax.security.auth.login.LoginException;
+
+        $r52 = virtualinvoke $r50.<java.io.IOException: java.lang.String getMessage()>();
+
+        specialinvoke $r51.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>($r52);
+
+        throw $r51;
+
+     label11:
+        $r43 := @caughtexception;
+
+        $r44 = new javax.security.auth.login.LoginException;
+
+        $r45 = new java.lang.StringBuilder;
+
+        specialinvoke $r45.<java.lang.StringBuilder: void <init>()>();
+
+        $r46 = virtualinvoke $r43.<javax.security.auth.callback.UnsupportedCallbackException: java.lang.String getMessage()>();
+
+        $r47 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r46);
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" not available to garner  authentication information  from the user");
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r44.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>($r49);
+
+        throw $r44;
+
+     label12:
+        return;
+
+        catch java.io.IOException from label06 to label09 with label10;
+        catch javax.security.auth.callback.UnsupportedCallbackException from label06 to label09 with label11;
+    }
+
+    private void promptForPass(boolean) throws javax.security.auth.login.LoginException
+    {
+        javax.security.auth.login.LoginException $r25, $r26, $r27, $r40, $r43, $r50;
+        javax.security.auth.callback.UnsupportedCallbackException $r42;
+        javax.security.auth.callback.CallbackHandler $r1, $r10;
+        java.util.Map $r28;
+        boolean z0, $z1, $z2, $z3, $z4;
+        javax.security.auth.callback.PasswordCallback $r8, $r12, $r17;
+        java.lang.StringBuilder $r18, $r20, $r22, $r33, $r35, $r38, $r44, $r46, $r47;
+        javax.security.auth.callback.Callback $r11, $r16;
+        java.lang.Object[] $r7;
+        java.text.MessageFormat $r4;
+        javax.security.auth.callback.Callback[] r52;
+        java.util.ResourceBundle $r5;
+        java.lang.StringBuffer $r2, $r21;
+        int $i0, $i1, $i2, i3;
+        com.sun.security.auth.module.Krb5LoginModule r0;
+        java.lang.String $r3, $r6, $r9, $r23, $r36, $r39, $r45, $r48, $r51;
+        java.io.PrintStream $r19, $r24, $r34, $r41;
+        java.io.IOException $r49;
+        char[] $r13, $r14, $r15, $r30, $r31, $r32, $r37;
+        java.lang.Object $r29;
+
+        r0 := @this: com.sun.security.auth.module.Krb5LoginModule;
+
+        z0 := @parameter0: boolean;
+
+        if z0 == 0 goto label04;
+
+        $r28 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.util.Map sharedState>;
+
+        $r29 = interfaceinvoke $r28.<java.util.Map: java.lang.Object get(java.lang.Object)>("javax.security.auth.login.password");
+
+        $r30 = (char[]) $r29;
+
+        $r31 = (char[]) $r30;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: char[] password> = $r31;
+
+        $r32 = r0.<com.sun.security.auth.module.Krb5LoginModule: char[] password>;
+
+        if $r32 != null goto label02;
+
+        $z4 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean debug>;
+
+        if $z4 == 0 goto label01;
+
+        $r41 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r41.<java.io.PrintStream: void println(java.lang.String)>("Password from shared state is null");
+
+     label01:
+        $r40 = new javax.security.auth.login.LoginException;
+
+        specialinvoke $r40.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>("Password can not be obtained from sharedstate ");
+
+        throw $r40;
+
+     label02:
+        $z3 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean debug>;
+
+        if $z3 == 0 goto label03;
+
+        $r34 = <java.lang.System: java.io.PrintStream out>;
+
+        $r33 = new java.lang.StringBuilder;
+
+        specialinvoke $r33.<java.lang.StringBuilder: void <init>()>();
+
+        $r35 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("password is ");
+
+        $r36 = new java.lang.String;
+
+        $r37 = r0.<com.sun.security.auth.module.Krb5LoginModule: char[] password>;
+
+        specialinvoke $r36.<java.lang.String: void <init>(char[])>($r37);
+
+        $r38 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r36);
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r34.<java.io.PrintStream: void println(java.lang.String)>($r39);
+
+     label03:
+        return;
+
+     label04:
+        $z1 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean doNotPrompt>;
+
+        if $z1 == 0 goto label05;
+
+        $r27 = new javax.security.auth.login.LoginException;
+
+        specialinvoke $r27.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>("Unable to obtain password from user\n");
+
+        throw $r27;
+
+     label05:
+        $r1 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.callback.CallbackHandler callbackHandler>;
+
+        if $r1 != null goto label06;
+
+        $r26 = new javax.security.auth.login.LoginException;
+
+        specialinvoke $r26.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>("No CallbackHandler available to garner authentication information from the user");
+
+        throw $r26;
+
+     label06:
+        r52 = newarray (javax.security.auth.callback.Callback)[1];
+
+        $r2 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.StringBuffer krb5PrincName>;
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $r4 = new java.text.MessageFormat;
+
+        $r5 = <com.sun.security.auth.module.Krb5LoginModule: java.util.ResourceBundle rb>;
+
+        $r6 = virtualinvoke $r5.<java.util.ResourceBundle: java.lang.String getString(java.lang.String)>("Kerberos.password.for.username.");
+
+        specialinvoke $r4.<java.text.MessageFormat: void <init>(java.lang.String)>($r6);
+
+        $r7 = newarray (java.lang.Object)[1];
+
+        $r7[0] = $r3;
+
+        $r8 = new javax.security.auth.callback.PasswordCallback;
+
+        $r9 = virtualinvoke $r4.<java.text.MessageFormat: java.lang.String format(java.lang.Object)>($r7);
+
+        specialinvoke $r8.<javax.security.auth.callback.PasswordCallback: void <init>(java.lang.String,boolean)>($r9, 0);
+
+        r52[0] = $r8;
+
+        $r10 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.callback.CallbackHandler callbackHandler>;
+
+        interfaceinvoke $r10.<javax.security.auth.callback.CallbackHandler: void handle(javax.security.auth.callback.Callback[])>(r52);
+
+        $r11 = r52[0];
+
+        $r12 = (javax.security.auth.callback.PasswordCallback) $r11;
+
+        $r13 = virtualinvoke $r12.<javax.security.auth.callback.PasswordCallback: char[] getPassword()>();
+
+        if $r13 != null goto label07;
+
+        $r25 = new javax.security.auth.login.LoginException;
+
+        specialinvoke $r25.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>("No password provided");
+
+        throw $r25;
+
+     label07:
+        $i0 = lengthof $r13;
+
+        $r14 = newarray (char)[$i0];
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: char[] password> = $r14;
+
+        $r15 = r0.<com.sun.security.auth.module.Krb5LoginModule: char[] password>;
+
+        $i1 = lengthof $r13;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r13, 0, $r15, 0, $i1);
+
+        $r16 = r52[0];
+
+        $r17 = (javax.security.auth.callback.PasswordCallback) $r16;
+
+        virtualinvoke $r17.<javax.security.auth.callback.PasswordCallback: void clearPassword()>();
+
+        i3 = 0;
+
+     label08:
+        $i2 = lengthof $r13;
+
+        if i3 >= $i2 goto label09;
+
+        $r13[i3] = 32;
+
+        i3 = i3 + 1;
+
+        goto label08;
+
+     label09:
+        $z2 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean debug>;
+
+        if $z2 == 0 goto label10;
+
+        $r19 = <java.lang.System: java.io.PrintStream out>;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\t\t[Krb5LoginModule] user entered username: ");
+
+        $r21 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.StringBuffer krb5PrincName>;
+
+        $r22 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r21);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r19.<java.io.PrintStream: void println(java.lang.String)>($r23);
+
+        $r24 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r24.<java.io.PrintStream: void println()>();
+
+     label10:
+        goto label13;
+
+     label11:
+        $r49 := @caughtexception;
+
+        $r50 = new javax.security.auth.login.LoginException;
+
+        $r51 = virtualinvoke $r49.<java.io.IOException: java.lang.String getMessage()>();
+
+        specialinvoke $r50.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>($r51);
+
+        throw $r50;
+
+     label12:
+        $r42 := @caughtexception;
+
+        $r43 = new javax.security.auth.login.LoginException;
+
+        $r44 = new java.lang.StringBuilder;
+
+        specialinvoke $r44.<java.lang.StringBuilder: void <init>()>();
+
+        $r45 = virtualinvoke $r42.<javax.security.auth.callback.UnsupportedCallbackException: java.lang.String getMessage()>();
+
+        $r46 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r45);
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" not available to garner  authentication information from the user");
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r43.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>($r48);
+
+        throw $r43;
+
+     label13:
+        return;
+
+        catch java.io.IOException from label06 to label10 with label11;
+        catch javax.security.auth.callback.UnsupportedCallbackException from label06 to label10 with label12;
+    }
+
+    private void validateConfiguration() throws javax.security.auth.login.LoginException
+    {
+        javax.security.auth.login.LoginException $r5, $r6, $r7, $r8, $r14, $r20;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18;
+        java.lang.StringBuilder $r9, $r10, $r12, $r15, $r16, $r18;
+        java.lang.StringBuffer $r2, $r3;
+        com.sun.security.auth.module.Krb5LoginModule r0;
+        java.lang.String $r1, $r4, $r11, $r13, $r17, $r19, $r21;
+
+        r0 := @this: com.sun.security.auth.module.Krb5LoginModule;
+
+        $z0 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean doNotPrompt>;
+
+        if $z0 == 0 goto label01;
+
+        $z11 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean useTicketCache>;
+
+        if $z11 != 0 goto label01;
+
+        $z12 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean useKeyTab>;
+
+        if $z12 != 0 goto label01;
+
+        $z13 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean tryFirstPass>;
+
+        if $z13 != 0 goto label01;
+
+        $z14 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean useFirstPass>;
+
+        if $z14 != 0 goto label01;
+
+        $r20 = new javax.security.auth.login.LoginException;
+
+        specialinvoke $r20.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>("Configuration Error - either doNotPrompt should be  false or at least one of useTicketCache,  useKeyTab, tryFirstPass and useFirstPass should be true");
+
+        throw $r20;
+
+     label01:
+        $r21 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String ticketCacheName>;
+
+        if $r21 == null goto label02;
+
+        $z10 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean useTicketCache>;
+
+        if $z10 != 0 goto label02;
+
+        $r14 = new javax.security.auth.login.LoginException;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Configuration Error  - useTicketCache should be set to true to use the ticket cache");
+
+        $r17 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String ticketCacheName>;
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r14.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>($r19);
+
+        throw $r14;
+
+     label02:
+        $r1 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String keyTabName>;
+
+        if $r1 == null goto label03;
+
+        $z15 = 1;
+
+        goto label04;
+
+     label03:
+        $z15 = 0;
+
+     label04:
+        $z1 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean useKeyTab>;
+
+        if $z1 != 0 goto label05;
+
+        $z16 = 1;
+
+        goto label06;
+
+     label05:
+        $z16 = 0;
+
+     label06:
+        $z17 = $z15 & $z16;
+
+        if $z17 == 0 goto label07;
+
+        $r8 = new javax.security.auth.login.LoginException;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Configuration Error - useKeyTab should be set to true to use the keytab");
+
+        $r11 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String keyTabName>;
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>($r13);
+
+        throw $r8;
+
+     label07:
+        $z2 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean storeKey>;
+
+        if $z2 == 0 goto label08;
+
+        $z6 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean doNotPrompt>;
+
+        if $z6 == 0 goto label08;
+
+        $z7 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean useKeyTab>;
+
+        if $z7 != 0 goto label08;
+
+        $z8 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean tryFirstPass>;
+
+        if $z8 != 0 goto label08;
+
+        $z9 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean useFirstPass>;
+
+        if $z9 != 0 goto label08;
+
+        $r7 = new javax.security.auth.login.LoginException;
+
+        specialinvoke $r7.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>("Configuration Error - either doNotPrompt should be set to  false or at least one of tryFirstPass, useFirstPass or useKeyTab must be set to true for storeKey option");
+
+        throw $r7;
+
+     label08:
+        $z18 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean renewTGT>;
+
+        if $z18 == 0 goto label09;
+
+        $z5 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean useTicketCache>;
+
+        if $z5 != 0 goto label09;
+
+        $r6 = new javax.security.auth.login.LoginException;
+
+        specialinvoke $r6.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>("Configuration Error - either useTicketCache should be  true or renewTGT should be false");
+
+        throw $r6;
+
+     label09:
+        $r2 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.StringBuffer krb5PrincName>;
+
+        if $r2 == null goto label10;
+
+        $r3 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.StringBuffer krb5PrincName>;
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $z3 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("*");
+
+        if $z3 == 0 goto label10;
+
+        $z4 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean isInitiator>;
+
+        if $z4 == 0 goto label10;
+
+        $r5 = new javax.security.auth.login.LoginException;
+
+        specialinvoke $r5.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>("Configuration Error - principal cannot be * when isInitiator is true");
+
+        throw $r5;
+
+     label10:
+        return;
+    }
+
+    private boolean isCurrent(sun.security.krb5.Credentials)
+    {
+        java.util.Date $r1;
+        long $l0, $l1;
+        sun.security.krb5.Credentials r0;
+        byte $b2;
+        int $i3;
+        com.sun.security.auth.module.Krb5LoginModule r2;
+        boolean $z0;
+
+        r2 := @this: com.sun.security.auth.module.Krb5LoginModule;
+
+        r0 := @parameter0: sun.security.krb5.Credentials;
+
+        $r1 = virtualinvoke r0.<sun.security.krb5.Credentials: java.util.Date getEndTime()>();
+
+        if $r1 == null goto label3;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l1 = virtualinvoke $r1.<java.util.Date: long getTime()>();
+
+        $b2 = $l0 cmp $l1;
+
+        $i3 = (int) $b2;
+
+        if $i3 > 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+
+     label3:
+        return 1;
+    }
+
+    private sun.security.krb5.Credentials renewCredentials(sun.security.krb5.Credentials)
+    {
+        java.util.Date $r3;
+        long $l0, $l1;
+        byte $b2;
+        int $i3;
+        com.sun.security.auth.module.Krb5LoginModule r1;
+        java.lang.String $r11, $r13;
+        boolean $z0, $z1, $z2;
+        java.io.PrintStream $r4, $r9;
+        sun.security.krb5.Credentials r0, $r2, r14;
+        java.lang.Exception $r7;
+        java.lang.StringBuilder $r10, $r12, $r17;
+        javax.security.auth.RefreshFailedException $r15, $r16;
+
+        r1 := @this: com.sun.security.auth.module.Krb5LoginModule;
+
+        r0 := @parameter0: sun.security.krb5.Credentials;
+
+     label1:
+        $z0 = virtualinvoke r0.<sun.security.krb5.Credentials: boolean isRenewable()>();
+
+        if $z0 != 0 goto label2;
+
+        $r15 = new javax.security.auth.RefreshFailedException;
+
+        specialinvoke $r15.<javax.security.auth.RefreshFailedException: void <init>(java.lang.String)>("This ticket is not renewable");
+
+        throw $r15;
+
+     label2:
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r2 = r1.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.Credentials cred>;
+
+        $r3 = virtualinvoke $r2.<sun.security.krb5.Credentials: java.util.Date getRenewTill()>();
+
+        $l1 = virtualinvoke $r3.<java.util.Date: long getTime()>();
+
+        $b2 = $l0 cmp $l1;
+
+        $i3 = (int) $b2;
+
+        if $i3 <= 0 goto label3;
+
+        $r16 = new javax.security.auth.RefreshFailedException;
+
+        specialinvoke $r16.<javax.security.auth.RefreshFailedException: void <init>(java.lang.String)>("This ticket is past its last renewal time.");
+
+        throw $r16;
+
+     label3:
+        r14 = virtualinvoke r0.<sun.security.krb5.Credentials: sun.security.krb5.Credentials renew()>();
+
+        $z1 = r1.<com.sun.security.auth.module.Krb5LoginModule: boolean debug>;
+
+        if $z1 == 0 goto label4;
+
+        $r4 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r4.<java.io.PrintStream: void println(java.lang.String)>("Renewed Kerberos Ticket");
+
+     label4:
+        goto label6;
+
+     label5:
+        $r7 := @caughtexception;
+
+        r14 = null;
+
+        $z2 = r1.<com.sun.security.auth.module.Krb5LoginModule: boolean debug>;
+
+        if $z2 == 0 goto label6;
+
+        $r9 = <java.lang.System: java.io.PrintStream out>;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ticket could not be renewed : ");
+
+        $r11 = virtualinvoke $r7.<java.lang.Exception: java.lang.String getMessage()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r9.<java.io.PrintStream: void println(java.lang.String)>($r13);
+
+     label6:
+        return r14;
+
+        catch java.lang.Exception from label1 to label4 with label5;
+    }
+
+    public boolean commit() throws javax.security.auth.login.LoginException
+    {
+        byte[] $r55;
+        java.lang.Integer $r49;
+        java.util.Set $r3, $r5;
+        sun.security.krb5.EncryptionKey $r15, $r48, $r52, $r57;
+        sun.security.krb5.Credentials $r59, $r61, $r62, $r64, $r66, $r69;
+        java.lang.StringBuilder $r17, $r19, $r22, $r24, $r26, $r29, $r30;
+        sun.security.krb5.EncryptionKey[] $r10, $r14, $r16, $r42, $r43, $r44, $r46, $r47, $r51, $r56;
+        com.sun.security.auth.module.Krb5LoginModule r0;
+        java.lang.String $r8, $r23, $r28, $r31;
+        javax.security.auth.kerberos.KerberosKey $r13, $r21, $r33, $r50;
+        sun.security.krb5.JavaxSecurityAuthKerberosAccess $r63;
+        javax.security.auth.login.LoginException $r35, $r58, $r68, $r70;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12;
+        javax.security.auth.kerberos.KerberosPrincipal $r6, $r27, $r40, $r41, $r54;
+        javax.security.auth.kerberos.KerberosTicket $r38, $r39, $r60, $r65, $r67, $r71;
+        sun.security.krb5.PrincipalName $r7;
+        javax.security.auth.kerberos.KerberosKey[] $r11, $r12, $r20, $r32, $r45, $r53;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, $i7, i8;
+        java.io.PrintStream $r9, $r18, $r25;
+        javax.security.auth.Subject $r1, $r2, $r4;
+        javax.security.auth.kerberos.KeyTab $r34, $r36, $r37;
+
+        r0 := @this: com.sun.security.auth.module.Krb5LoginModule;
+
+        $z0 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean succeeded>;
+
+        if $z0 != 0 goto label01;
+
+        return 0;
+
+     label01:
+        $z1 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean isInitiator>;
+
+        if $z1 == 0 goto label02;
+
+        $r69 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.Credentials cred>;
+
+        if $r69 != null goto label02;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean succeeded> = 0;
+
+        $r70 = new javax.security.auth.login.LoginException;
+
+        specialinvoke $r70.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>("Null Client Credential");
+
+        throw $r70;
+
+     label02:
+        $r1 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.Subject subject>;
+
+        $z2 = virtualinvoke $r1.<javax.security.auth.Subject: boolean isReadOnly()>();
+
+        if $z2 == 0 goto label03;
+
+        specialinvoke r0.<com.sun.security.auth.module.Krb5LoginModule: void cleanKerberosCred()>();
+
+        $r68 = new javax.security.auth.login.LoginException;
+
+        specialinvoke $r68.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>("Subject is Readonly");
+
+        throw $r68;
+
+     label03:
+        $r2 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.Subject subject>;
+
+        $r3 = virtualinvoke $r2.<javax.security.auth.Subject: java.util.Set getPrivateCredentials()>();
+
+        $r4 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.Subject subject>;
+
+        $r5 = virtualinvoke $r4.<javax.security.auth.Subject: java.util.Set getPrincipals()>();
+
+        $r6 = new javax.security.auth.kerberos.KerberosPrincipal;
+
+        $r7 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.PrincipalName principal>;
+
+        $r8 = virtualinvoke $r7.<sun.security.krb5.PrincipalName: java.lang.String getName()>();
+
+        specialinvoke $r6.<javax.security.auth.kerberos.KerberosPrincipal: void <init>(java.lang.String)>($r8);
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosPrincipal kerbClientPrinc> = $r6;
+
+        $z3 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean isInitiator>;
+
+        if $z3 == 0 goto label04;
+
+        $r59 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.Credentials cred>;
+
+        $r60 = staticinvoke <sun.security.jgss.krb5.Krb5Util: javax.security.auth.kerberos.KerberosTicket credsToTicket(sun.security.krb5.Credentials)>($r59);
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosTicket kerbTicket> = $r60;
+
+        $r61 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.Credentials cred>;
+
+        $r62 = virtualinvoke $r61.<sun.security.krb5.Credentials: sun.security.krb5.Credentials getProxy()>();
+
+        if $r62 == null goto label04;
+
+        $r63 = staticinvoke <sun.security.krb5.KerberosSecrets: sun.security.krb5.JavaxSecurityAuthKerberosAccess getJavaxSecurityAuthKerberosAccess()>();
+
+        $r65 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosTicket kerbTicket>;
+
+        $r64 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.Credentials cred>;
+
+        $r66 = virtualinvoke $r64.<sun.security.krb5.Credentials: sun.security.krb5.Credentials getProxy()>();
+
+        $r67 = staticinvoke <sun.security.jgss.krb5.Krb5Util: javax.security.auth.kerberos.KerberosTicket credsToTicket(sun.security.krb5.Credentials)>($r66);
+
+        interfaceinvoke $r63.<sun.security.krb5.JavaxSecurityAuthKerberosAccess: void kerberosTicketSetProxy(javax.security.auth.kerberos.KerberosTicket,javax.security.auth.kerberos.KerberosTicket)>($r65, $r67);
+
+     label04:
+        $z9 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean storeKey>;
+
+        if $z9 == 0 goto label09;
+
+        $r42 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.EncryptionKey[] encKeys>;
+
+        if $r42 == null goto label09;
+
+        $r43 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.EncryptionKey[] encKeys>;
+
+        $i1 = lengthof $r43;
+
+        if $i1 != 0 goto label05;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean succeeded> = 0;
+
+        $r58 = new javax.security.auth.login.LoginException;
+
+        specialinvoke $r58.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>("Null Server Key ");
+
+        throw $r58;
+
+     label05:
+        $r44 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.EncryptionKey[] encKeys>;
+
+        $i2 = lengthof $r44;
+
+        $r45 = newarray (javax.security.auth.kerberos.KerberosKey)[$i2];
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosKey[] kerbKeys> = $r45;
+
+        i6 = 0;
+
+     label06:
+        $r46 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.EncryptionKey[] encKeys>;
+
+        $i3 = lengthof $r46;
+
+        if i6 >= $i3 goto label09;
+
+        $r47 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.EncryptionKey[] encKeys>;
+
+        $r48 = $r47[i6];
+
+        $r49 = virtualinvoke $r48.<sun.security.krb5.EncryptionKey: java.lang.Integer getKeyVersionNumber()>();
+
+        $r53 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosKey[] kerbKeys>;
+
+        $i5 = i6;
+
+        $r50 = new javax.security.auth.kerberos.KerberosKey;
+
+        $r54 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosPrincipal kerbClientPrinc>;
+
+        $r51 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.EncryptionKey[] encKeys>;
+
+        $r52 = $r51[i6];
+
+        $r55 = virtualinvoke $r52.<sun.security.krb5.EncryptionKey: byte[] getBytes()>();
+
+        $r56 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.EncryptionKey[] encKeys>;
+
+        $r57 = $r56[i6];
+
+        $i4 = virtualinvoke $r57.<sun.security.krb5.EncryptionKey: int getEType()>();
+
+        if $r49 != null goto label07;
+
+        $i7 = 0;
+
+        goto label08;
+
+     label07:
+        $i7 = virtualinvoke $r49.<java.lang.Integer: int intValue()>();
+
+     label08:
+        specialinvoke $r50.<javax.security.auth.kerberos.KerberosKey: void <init>(javax.security.auth.kerberos.KerberosPrincipal,byte[],int,int)>($r54, $r55, $i4, $i7);
+
+        $r53[$i5] = $r50;
+
+        i6 = i6 + 1;
+
+        goto label06;
+
+     label09:
+        $z10 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean unboundServer>;
+
+        if $z10 != 0 goto label10;
+
+        $r40 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosPrincipal kerbClientPrinc>;
+
+        $z8 = interfaceinvoke $r5.<java.util.Set: boolean contains(java.lang.Object)>($r40);
+
+        if $z8 != 0 goto label10;
+
+        $r41 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosPrincipal kerbClientPrinc>;
+
+        interfaceinvoke $r5.<java.util.Set: boolean add(java.lang.Object)>($r41);
+
+     label10:
+        $r71 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosTicket kerbTicket>;
+
+        if $r71 == null goto label11;
+
+        $r38 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosTicket kerbTicket>;
+
+        $z7 = interfaceinvoke $r3.<java.util.Set: boolean contains(java.lang.Object)>($r38);
+
+        if $z7 != 0 goto label11;
+
+        $r39 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosTicket kerbTicket>;
+
+        interfaceinvoke $r3.<java.util.Set: boolean add(java.lang.Object)>($r39);
+
+     label11:
+        $z11 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean storeKey>;
+
+        if $z11 == 0 goto label17;
+
+        $r10 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.EncryptionKey[] encKeys>;
+
+        if $r10 != null goto label13;
+
+        $r34 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KeyTab ktab>;
+
+        if $r34 == null goto label12;
+
+        $r36 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KeyTab ktab>;
+
+        $z6 = interfaceinvoke $r3.<java.util.Set: boolean contains(java.lang.Object)>($r36);
+
+        if $z6 != 0 goto label17;
+
+        $r37 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KeyTab ktab>;
+
+        interfaceinvoke $r3.<java.util.Set: boolean add(java.lang.Object)>($r37);
+
+        goto label17;
+
+     label12:
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean succeeded> = 0;
+
+        $r35 = new javax.security.auth.login.LoginException;
+
+        specialinvoke $r35.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>("No key to store");
+
+        throw $r35;
+
+     label13:
+        i8 = 0;
+
+     label14:
+        $r11 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosKey[] kerbKeys>;
+
+        $i0 = lengthof $r11;
+
+        if i8 >= $i0 goto label17;
+
+        $r12 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosKey[] kerbKeys>;
+
+        $r13 = $r12[i8];
+
+        $z4 = interfaceinvoke $r3.<java.util.Set: boolean contains(java.lang.Object)>($r13);
+
+        if $z4 != 0 goto label15;
+
+        $r32 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosKey[] kerbKeys>;
+
+        $r33 = $r32[i8];
+
+        interfaceinvoke $r3.<java.util.Set: boolean add(java.lang.Object)>($r33);
+
+     label15:
+        $r14 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.EncryptionKey[] encKeys>;
+
+        $r15 = $r14[i8];
+
+        virtualinvoke $r15.<sun.security.krb5.EncryptionKey: void destroy()>();
+
+        $r16 = r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.EncryptionKey[] encKeys>;
+
+        $r16[i8] = null;
+
+        $z5 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean debug>;
+
+        if $z5 == 0 goto label16;
+
+        $r18 = <java.lang.System: java.io.PrintStream out>;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Added server\'s key");
+
+        $r20 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosKey[] kerbKeys>;
+
+        $r21 = $r20[i8];
+
+        $r22 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r21);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r18.<java.io.PrintStream: void println(java.lang.String)>($r23);
+
+        $r25 = <java.lang.System: java.io.PrintStream out>;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\t\t[Krb5LoginModule] added Krb5Principal  ");
+
+        $r27 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosPrincipal kerbClientPrinc>;
+
+        $r28 = virtualinvoke $r27.<javax.security.auth.kerberos.KerberosPrincipal: java.lang.String toString()>();
+
+        $r29 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r28);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" to Subject");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r25.<java.io.PrintStream: void println(java.lang.String)>($r31);
+
+     label16:
+        i8 = i8 + 1;
+
+        goto label14;
+
+     label17:
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean commitSucceeded> = 1;
+
+        $z12 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean debug>;
+
+        if $z12 == 0 goto label18;
+
+        $r9 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r9.<java.io.PrintStream: void println(java.lang.String)>("Commit Succeeded \n");
+
+     label18:
+        return 1;
+    }
+
+    public boolean abort() throws javax.security.auth.login.LoginException
+    {
+        com.sun.security.auth.module.Krb5LoginModule r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: com.sun.security.auth.module.Krb5LoginModule;
+
+        $z0 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean succeeded>;
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $z1 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean succeeded>;
+
+        if $z1 != 1 goto label2;
+
+        $z2 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean commitSucceeded>;
+
+        if $z2 != 0 goto label2;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean succeeded> = 0;
+
+        specialinvoke r0.<com.sun.security.auth.module.Krb5LoginModule: void cleanKerberosCred()>();
+
+        goto label3;
+
+     label2:
+        virtualinvoke r0.<com.sun.security.auth.module.Krb5LoginModule: boolean logout()>();
+
+     label3:
+        return 1;
+    }
+
+    public boolean logout() throws javax.security.auth.login.LoginException
+    {
+        javax.security.auth.login.LoginException $r10;
+        com.sun.security.auth.module.Krb5LoginModule r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.io.PrintStream $r8, $r11;
+        java.util.Iterator $r7;
+        javax.security.auth.kerberos.KerberosPrincipal $r4;
+        java.util.Set $r3, $r6;
+        javax.security.auth.Subject $r1, $r2, $r5;
+        java.lang.Object $r9;
+
+        r0 := @this: com.sun.security.auth.module.Krb5LoginModule;
+
+        $z0 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean debug>;
+
+        if $z0 == 0 goto label1;
+
+        $r11 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r11.<java.io.PrintStream: void println(java.lang.String)>("\t\t[Krb5LoginModule]: Entering logout");
+
+     label1:
+        $r1 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.Subject subject>;
+
+        $z1 = virtualinvoke $r1.<javax.security.auth.Subject: boolean isReadOnly()>();
+
+        if $z1 == 0 goto label2;
+
+        specialinvoke r0.<com.sun.security.auth.module.Krb5LoginModule: void cleanKerberosCred()>();
+
+        $r10 = new javax.security.auth.login.LoginException;
+
+        specialinvoke $r10.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>("Subject is Readonly");
+
+        throw $r10;
+
+     label2:
+        $r2 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.Subject subject>;
+
+        $r3 = virtualinvoke $r2.<javax.security.auth.Subject: java.util.Set getPrincipals()>();
+
+        $r4 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosPrincipal kerbClientPrinc>;
+
+        interfaceinvoke $r3.<java.util.Set: boolean remove(java.lang.Object)>($r4);
+
+        $r5 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.Subject subject>;
+
+        $r6 = virtualinvoke $r5.<javax.security.auth.Subject: java.util.Set getPrivateCredentials()>();
+
+        $r7 = interfaceinvoke $r6.<java.util.Set: java.util.Iterator iterator()>();
+
+     label3:
+        $z2 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label6;
+
+        $r9 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        $z4 = $r9 instanceof javax.security.auth.kerberos.KerberosTicket;
+
+        if $z4 != 0 goto label4;
+
+        $z5 = $r9 instanceof javax.security.auth.kerberos.KerberosKey;
+
+        if $z5 != 0 goto label4;
+
+        $z6 = $r9 instanceof javax.security.auth.kerberos.KeyTab;
+
+        if $z6 == 0 goto label5;
+
+     label4:
+        interfaceinvoke $r7.<java.util.Iterator: void remove()>();
+
+     label5:
+        goto label3;
+
+     label6:
+        specialinvoke r0.<com.sun.security.auth.module.Krb5LoginModule: void cleanKerberosCred()>();
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean succeeded> = 0;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: boolean commitSucceeded> = 0;
+
+        $z3 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean debug>;
+
+        if $z3 == 0 goto label7;
+
+        $r8 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r8.<java.io.PrintStream: void println(java.lang.String)>("\t\t[Krb5LoginModule]: logged out Subject");
+
+     label7:
+        return 1;
+    }
+
+    private void cleanKerberosCred() throws javax.security.auth.login.LoginException
+    {
+        javax.security.auth.login.LoginException $r8;
+        javax.security.auth.DestroyFailedException $r7;
+        javax.security.auth.kerberos.KerberosKey $r5;
+        javax.security.auth.kerberos.KerberosTicket $r1, $r6;
+        javax.security.auth.kerberos.KerberosKey[] $r2, $r3, $r4;
+        int $i0, i1;
+        com.sun.security.auth.module.Krb5LoginModule r0;
+
+        r0 := @this: com.sun.security.auth.module.Krb5LoginModule;
+
+     label1:
+        $r1 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosTicket kerbTicket>;
+
+        if $r1 == null goto label2;
+
+        $r6 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosTicket kerbTicket>;
+
+        virtualinvoke $r6.<javax.security.auth.kerberos.KerberosTicket: void destroy()>();
+
+     label2:
+        $r2 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosKey[] kerbKeys>;
+
+        if $r2 == null goto label4;
+
+        i1 = 0;
+
+     label3:
+        $r3 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosKey[] kerbKeys>;
+
+        $i0 = lengthof $r3;
+
+        if i1 >= $i0 goto label4;
+
+        $r4 = r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosKey[] kerbKeys>;
+
+        $r5 = $r4[i1];
+
+        virtualinvoke $r5.<javax.security.auth.kerberos.KerberosKey: void destroy()>();
+
+        i1 = i1 + 1;
+
+        goto label3;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r7 := @caughtexception;
+
+        $r8 = new javax.security.auth.login.LoginException;
+
+        specialinvoke $r8.<javax.security.auth.login.LoginException: void <init>(java.lang.String)>("Destroy Failed on Kerberos Private Credentials");
+
+        throw $r8;
+
+     label6:
+        r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosTicket kerbTicket> = null;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosKey[] kerbKeys> = null;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KerberosPrincipal kerbClientPrinc> = null;
+
+        return;
+
+        catch javax.security.auth.DestroyFailedException from label1 to label4 with label5;
+    }
+
+    private void cleanState()
+    {
+        java.lang.StringBuffer $r3, $r4, $r5, $r12;
+        java.util.Map $r1, $r2, $r6, $r7, $r9, $r11;
+        int $i0, $i1;
+        com.sun.security.auth.module.Krb5LoginModule r0;
+        java.lang.String $r8;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        char[] $r10;
+
+        r0 := @this: com.sun.security.auth.module.Krb5LoginModule;
+
+        $z0 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean succeeded>;
+
+        if $z0 == 0 goto label1;
+
+        $z1 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean storePass>;
+
+        if $z1 == 0 goto label2;
+
+        $r6 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.util.Map sharedState>;
+
+        $z2 = interfaceinvoke $r6.<java.util.Map: boolean containsKey(java.lang.Object)>("javax.security.auth.login.name");
+
+        if $z2 != 0 goto label2;
+
+        $r7 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.util.Map sharedState>;
+
+        $z3 = interfaceinvoke $r7.<java.util.Map: boolean containsKey(java.lang.Object)>("javax.security.auth.login.password");
+
+        if $z3 != 0 goto label2;
+
+        $r9 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.util.Map sharedState>;
+
+        $r8 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String username>;
+
+        interfaceinvoke $r9.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("javax.security.auth.login.name", $r8);
+
+        $r11 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.util.Map sharedState>;
+
+        $r10 = r0.<com.sun.security.auth.module.Krb5LoginModule: char[] password>;
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("javax.security.auth.login.password", $r10);
+
+        goto label2;
+
+     label1:
+        r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.EncryptionKey[] encKeys> = null;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: javax.security.auth.kerberos.KeyTab ktab> = null;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: sun.security.krb5.PrincipalName principal> = null;
+
+     label2:
+        r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.String username> = null;
+
+        r0.<com.sun.security.auth.module.Krb5LoginModule: char[] password> = null;
+
+        $r12 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.StringBuffer krb5PrincName>;
+
+        if $r12 == null goto label3;
+
+        $r3 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.StringBuffer krb5PrincName>;
+
+        $i0 = virtualinvoke $r3.<java.lang.StringBuffer: int length()>();
+
+        if $i0 == 0 goto label3;
+
+        $r5 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.StringBuffer krb5PrincName>;
+
+        $r4 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.StringBuffer krb5PrincName>;
+
+        $i1 = virtualinvoke $r4.<java.lang.StringBuffer: int length()>();
+
+        virtualinvoke $r5.<java.lang.StringBuffer: java.lang.StringBuffer delete(int,int)>(0, $i1);
+
+     label3:
+        r0.<com.sun.security.auth.module.Krb5LoginModule: java.lang.StringBuffer krb5PrincName> = null;
+
+        $z4 = r0.<com.sun.security.auth.module.Krb5LoginModule: boolean clearPass>;
+
+        if $z4 == 0 goto label4;
+
+        $r1 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.util.Map sharedState>;
+
+        interfaceinvoke $r1.<java.util.Map: java.lang.Object remove(java.lang.Object)>("javax.security.auth.login.name");
+
+        $r2 = r0.<com.sun.security.auth.module.Krb5LoginModule: java.util.Map sharedState>;
+
+        interfaceinvoke $r2.<java.util.Map: java.lang.Object remove(java.lang.Object)>("javax.security.auth.login.password");
+
+     label4:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        com.sun.security.auth.module.Krb5LoginModule$1 $r0;
+        java.lang.Object $r1;
+        java.util.ResourceBundle $r2;
+
+        <com.sun.security.auth.module.Krb5LoginModule: java.lang.String PWD> = "javax.security.auth.login.password";
+
+        <com.sun.security.auth.module.Krb5LoginModule: java.lang.String NAME> = "javax.security.auth.login.name";
+
+        $r0 = new com.sun.security.auth.module.Krb5LoginModule$1;
+
+        specialinvoke $r0.<com.sun.security.auth.module.Krb5LoginModule$1: void <init>()>();
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r2 = (java.util.ResourceBundle) $r1;
+
+        <com.sun.security.auth.module.Krb5LoginModule: java.util.ResourceBundle rb> = $r2;
+
+        return;
+    }
+}

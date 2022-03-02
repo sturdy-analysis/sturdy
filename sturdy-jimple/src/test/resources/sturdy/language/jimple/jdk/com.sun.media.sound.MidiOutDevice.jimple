@@ -1,0 +1,169 @@
+final class com.sun.media.sound.MidiOutDevice extends com.sun.media.sound.AbstractMidiDevice
+{
+
+    void <init>(com.sun.media.sound.AbstractMidiDeviceProvider$Info)
+    {
+        com.sun.media.sound.AbstractMidiDeviceProvider$Info r1;
+        com.sun.media.sound.MidiOutDevice r0;
+
+        r0 := @this: com.sun.media.sound.MidiOutDevice;
+
+        r1 := @parameter0: com.sun.media.sound.AbstractMidiDeviceProvider$Info;
+
+        specialinvoke r0.<com.sun.media.sound.AbstractMidiDevice: void <init>(javax.sound.midi.MidiDevice$Info)>(r1);
+
+        return;
+    }
+
+    protected synchronized void implOpen() throws javax.sound.midi.MidiUnavailableException
+    {
+        com.sun.media.sound.MidiOutDevice r0;
+        long $l1, $l2;
+        javax.sound.midi.MidiUnavailableException $r3;
+        com.sun.media.sound.AbstractMidiDeviceProvider$Info $r2;
+        byte $b3;
+        javax.sound.midi.MidiDevice$Info $r1;
+        int $i0;
+
+        r0 := @this: com.sun.media.sound.MidiOutDevice;
+
+        $r1 = virtualinvoke r0.<com.sun.media.sound.MidiOutDevice: javax.sound.midi.MidiDevice$Info getDeviceInfo()>();
+
+        $r2 = (com.sun.media.sound.AbstractMidiDeviceProvider$Info) $r1;
+
+        $i0 = virtualinvoke $r2.<com.sun.media.sound.AbstractMidiDeviceProvider$Info: int getIndex()>();
+
+        $l1 = specialinvoke r0.<com.sun.media.sound.MidiOutDevice: long nOpen(int)>($i0);
+
+        r0.<com.sun.media.sound.MidiOutDevice: long id> = $l1;
+
+        $l2 = r0.<com.sun.media.sound.MidiOutDevice: long id>;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 != 0 goto label1;
+
+        $r3 = new javax.sound.midi.MidiUnavailableException;
+
+        specialinvoke $r3.<javax.sound.midi.MidiUnavailableException: void <init>(java.lang.String)>("Unable to open native device");
+
+        throw $r3;
+
+     label1:
+        return;
+    }
+
+    protected synchronized void implClose()
+    {
+        long l0;
+        com.sun.media.sound.MidiOutDevice r0;
+
+        r0 := @this: com.sun.media.sound.MidiOutDevice;
+
+        l0 = r0.<com.sun.media.sound.MidiOutDevice: long id>;
+
+        r0.<com.sun.media.sound.MidiOutDevice: long id> = 0L;
+
+        specialinvoke r0.<com.sun.media.sound.AbstractMidiDevice: void implClose()>();
+
+        specialinvoke r0.<com.sun.media.sound.MidiOutDevice: void nClose(long)>(l0);
+
+        return;
+    }
+
+    public long getMicrosecondPosition()
+    {
+        com.sun.media.sound.MidiOutDevice r0;
+        long $l0, l1;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.MidiOutDevice;
+
+        l1 = -1L;
+
+        $z0 = virtualinvoke r0.<com.sun.media.sound.MidiOutDevice: boolean isOpen()>();
+
+        if $z0 == 0 goto label1;
+
+        $l0 = r0.<com.sun.media.sound.MidiOutDevice: long id>;
+
+        l1 = specialinvoke r0.<com.sun.media.sound.MidiOutDevice: long nGetTimeStamp(long)>($l0);
+
+     label1:
+        return l1;
+    }
+
+    protected boolean hasReceivers()
+    {
+        com.sun.media.sound.MidiOutDevice r0;
+
+        r0 := @this: com.sun.media.sound.MidiOutDevice;
+
+        return 1;
+    }
+
+    protected javax.sound.midi.Receiver createReceiver()
+    {
+        com.sun.media.sound.MidiOutDevice$MidiOutReceiver $r0;
+        com.sun.media.sound.MidiOutDevice r1;
+
+        r1 := @this: com.sun.media.sound.MidiOutDevice;
+
+        $r0 = new com.sun.media.sound.MidiOutDevice$MidiOutReceiver;
+
+        specialinvoke $r0.<com.sun.media.sound.MidiOutDevice$MidiOutReceiver: void <init>(com.sun.media.sound.MidiOutDevice)>(r1);
+
+        return $r0;
+    }
+
+    private native long nOpen(int) throws javax.sound.midi.MidiUnavailableException;
+
+    private native void nClose(long);
+
+    private native void nSendShortMessage(long, int, long);
+
+    private native void nSendLongMessage(long, byte[], int, long);
+
+    private native long nGetTimeStamp(long);
+
+    static void access$000(com.sun.media.sound.MidiOutDevice, long, int, long)
+    {
+        com.sun.media.sound.MidiOutDevice r0;
+        int i1;
+        long l0, l2;
+
+        r0 := @parameter0: com.sun.media.sound.MidiOutDevice;
+
+        l0 := @parameter1: long;
+
+        i1 := @parameter2: int;
+
+        l2 := @parameter3: long;
+
+        specialinvoke r0.<com.sun.media.sound.MidiOutDevice: void nSendShortMessage(long,int,long)>(l0, i1, l2);
+
+        return;
+    }
+
+    static void access$100(com.sun.media.sound.MidiOutDevice, long, byte[], int, long)
+    {
+        byte[] r1;
+        com.sun.media.sound.MidiOutDevice r0;
+        int i1;
+        long l0, l2;
+
+        r0 := @parameter0: com.sun.media.sound.MidiOutDevice;
+
+        l0 := @parameter1: long;
+
+        r1 := @parameter2: byte[];
+
+        i1 := @parameter3: int;
+
+        l2 := @parameter4: long;
+
+        specialinvoke r0.<com.sun.media.sound.MidiOutDevice: void nSendLongMessage(long,byte[],int,long)>(l0, r1, i1, l2);
+
+        return;
+    }
+}

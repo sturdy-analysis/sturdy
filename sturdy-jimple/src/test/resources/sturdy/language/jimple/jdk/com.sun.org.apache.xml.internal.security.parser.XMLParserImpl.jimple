@@ -1,0 +1,304 @@
+public class com.sun.org.apache.xml.internal.security.parser.XMLParserImpl extends java.lang.Object implements com.sun.org.apache.xml.internal.security.parser.XMLParser
+{
+    private static int parserPoolSize;
+    private static final java.util.Map DOCUMENT_BUILDERS;
+    private static final java.util.Map DOCUMENT_BUILDERS_DISALLOW_DOCTYPE;
+
+    public void <init>()
+    {
+        com.sun.org.apache.xml.internal.security.parser.XMLParserImpl r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.parser.XMLParserImpl;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public org.w3c.dom.Document parse(java.io.InputStream, boolean) throws com.sun.org.apache.xml.internal.security.parser.XMLParserException
+    {
+        com.sun.org.apache.xml.internal.security.parser.XMLParserException $r8;
+        java.lang.Object[] $r9;
+        com.sun.org.apache.xml.internal.security.parser.XMLParserImpl r10;
+        java.lang.Exception $r7;
+        org.w3c.dom.Document $r4, $r6;
+        javax.xml.parsers.DocumentBuilder $r2, $r5;
+        java.lang.ClassLoader $r0, r11;
+        java.util.Queue $r1;
+        boolean z0;
+        java.io.InputStream r3;
+
+        r10 := @this: com.sun.org.apache.xml.internal.security.parser.XMLParserImpl;
+
+        r3 := @parameter0: java.io.InputStream;
+
+        z0 := @parameter1: boolean;
+
+     label1:
+        $r0 = staticinvoke <com.sun.org.apache.xml.internal.security.parser.XMLParserImpl: java.lang.ClassLoader getContextClassLoader()>();
+
+        r11 = $r0;
+
+        if $r0 != null goto label2;
+
+        r11 = staticinvoke <com.sun.org.apache.xml.internal.security.parser.XMLParserImpl: java.lang.ClassLoader getClassLoader(java.lang.Class)>(class "Lcom/sun/org/apache/xml/internal/security/utils/XMLUtils;");
+
+     label2:
+        if r11 != null goto label4;
+
+        $r5 = staticinvoke <com.sun.org.apache.xml.internal.security.parser.XMLParserImpl: javax.xml.parsers.DocumentBuilder createDocumentBuilder(boolean)>(z0);
+
+        $r6 = virtualinvoke $r5.<javax.xml.parsers.DocumentBuilder: org.w3c.dom.Document parse(java.io.InputStream)>(r3);
+
+     label3:
+        return $r6;
+
+     label4:
+        $r1 = staticinvoke <com.sun.org.apache.xml.internal.security.parser.XMLParserImpl: java.util.Queue getDocumentBuilderQueue(boolean,java.lang.ClassLoader)>(z0, r11);
+
+        $r2 = staticinvoke <com.sun.org.apache.xml.internal.security.parser.XMLParserImpl: javax.xml.parsers.DocumentBuilder getDocumentBuilder(boolean,java.util.Queue)>(z0, $r1);
+
+        $r4 = virtualinvoke $r2.<javax.xml.parsers.DocumentBuilder: org.w3c.dom.Document parse(java.io.InputStream)>(r3);
+
+        staticinvoke <com.sun.org.apache.xml.internal.security.parser.XMLParserImpl: void repoolDocumentBuilder(javax.xml.parsers.DocumentBuilder,java.util.Queue)>($r2, $r1);
+
+     label5:
+        return $r4;
+
+     label6:
+        $r7 := @caughtexception;
+
+        $r8 = new com.sun.org.apache.xml.internal.security.parser.XMLParserException;
+
+        $r9 = newarray (java.lang.Object)[1];
+
+        $r9[0] = "Error parsing the inputstream";
+
+        specialinvoke $r8.<com.sun.org.apache.xml.internal.security.parser.XMLParserException: void <init>(java.lang.Exception,java.lang.String,java.lang.Object[])>($r7, "empty", $r9);
+
+        throw $r8;
+
+        catch javax.xml.parsers.ParserConfigurationException from label1 to label3 with label6;
+        catch org.xml.sax.SAXException from label1 to label3 with label6;
+        catch java.io.IOException from label1 to label3 with label6;
+        catch javax.xml.parsers.ParserConfigurationException from label4 to label5 with label6;
+        catch org.xml.sax.SAXException from label4 to label5 with label6;
+        catch java.io.IOException from label4 to label5 with label6;
+    }
+
+    private static java.util.Queue getDocumentBuilderQueue(boolean, java.lang.ClassLoader) throws javax.xml.parsers.ParserConfigurationException
+    {
+        java.util.concurrent.ArrayBlockingQueue $r2;
+        java.util.Map $r4;
+        int $i0;
+        java.lang.Object $r1;
+        java.lang.ClassLoader r0;
+        java.util.Queue $r3, r5;
+        boolean z0;
+
+        z0 := @parameter0: boolean;
+
+        r0 := @parameter1: java.lang.ClassLoader;
+
+        if z0 == 0 goto label1;
+
+        $r4 = <com.sun.org.apache.xml.internal.security.parser.XMLParserImpl: java.util.Map DOCUMENT_BUILDERS_DISALLOW_DOCTYPE>;
+
+        goto label2;
+
+     label1:
+        $r4 = <com.sun.org.apache.xml.internal.security.parser.XMLParserImpl: java.util.Map DOCUMENT_BUILDERS>;
+
+     label2:
+        $r1 = interfaceinvoke $r4.<java.util.Map: java.lang.Object get(java.lang.Object)>(r0);
+
+        $r3 = (java.util.Queue) $r1;
+
+        r5 = $r3;
+
+        if $r3 != null goto label3;
+
+        $r2 = new java.util.concurrent.ArrayBlockingQueue;
+
+        $i0 = <com.sun.org.apache.xml.internal.security.parser.XMLParserImpl: int parserPoolSize>;
+
+        specialinvoke $r2.<java.util.concurrent.ArrayBlockingQueue: void <init>(int)>($i0);
+
+        r5 = $r2;
+
+        interfaceinvoke $r4.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r0, $r2);
+
+     label3:
+        return r5;
+    }
+
+    private static javax.xml.parsers.DocumentBuilder getDocumentBuilder(boolean, java.util.Queue) throws javax.xml.parsers.ParserConfigurationException
+    {
+        javax.xml.parsers.DocumentBuilder r2;
+        java.lang.Object $r1;
+        java.util.Queue r0;
+        boolean z0;
+
+        z0 := @parameter0: boolean;
+
+        r0 := @parameter1: java.util.Queue;
+
+        $r1 = interfaceinvoke r0.<java.util.Queue: java.lang.Object poll()>();
+
+        r2 = (javax.xml.parsers.DocumentBuilder) $r1;
+
+        if r2 != null goto label1;
+
+        r2 = staticinvoke <com.sun.org.apache.xml.internal.security.parser.XMLParserImpl: javax.xml.parsers.DocumentBuilder createDocumentBuilder(boolean)>(z0);
+
+     label1:
+        return r2;
+    }
+
+    private static javax.xml.parsers.DocumentBuilder createDocumentBuilder(boolean) throws javax.xml.parsers.ParserConfigurationException
+    {
+        javax.xml.parsers.DocumentBuilderFactory $r0;
+        boolean z0;
+        javax.xml.parsers.DocumentBuilder $r1;
+
+        z0 := @parameter0: boolean;
+
+        $r0 = staticinvoke <javax.xml.parsers.DocumentBuilderFactory: javax.xml.parsers.DocumentBuilderFactory newInstance()>();
+
+        virtualinvoke $r0.<javax.xml.parsers.DocumentBuilderFactory: void setNamespaceAware(boolean)>(1);
+
+        virtualinvoke $r0.<javax.xml.parsers.DocumentBuilderFactory: void setFeature(java.lang.String,boolean)>("http://javax.xml.XMLConstants/feature/secure-processing", 1);
+
+        virtualinvoke $r0.<javax.xml.parsers.DocumentBuilderFactory: void setFeature(java.lang.String,boolean)>("http://apache.org/xml/features/disallow-doctype-decl", z0);
+
+        $r1 = virtualinvoke $r0.<javax.xml.parsers.DocumentBuilderFactory: javax.xml.parsers.DocumentBuilder newDocumentBuilder()>();
+
+        return $r1;
+    }
+
+    private static void repoolDocumentBuilder(javax.xml.parsers.DocumentBuilder, java.util.Queue)
+    {
+        java.util.Queue r0;
+        javax.xml.parsers.DocumentBuilder r1;
+
+        r1 := @parameter0: javax.xml.parsers.DocumentBuilder;
+
+        r0 := @parameter1: java.util.Queue;
+
+        if r0 == null goto label1;
+
+        virtualinvoke r1.<javax.xml.parsers.DocumentBuilder: void reset()>();
+
+        interfaceinvoke r0.<java.util.Queue: boolean offer(java.lang.Object)>(r1);
+
+     label1:
+        return;
+    }
+
+    private static java.lang.ClassLoader getContextClassLoader()
+    {
+        com.sun.org.apache.xml.internal.security.parser.XMLParserImpl$1 $r3;
+        java.lang.Thread $r1;
+        java.lang.Object $r4;
+        java.lang.ClassLoader $r2, $r5;
+        java.lang.SecurityManager $r0;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r3 = new com.sun.org.apache.xml.internal.security.parser.XMLParserImpl$1;
+
+        specialinvoke $r3.<com.sun.org.apache.xml.internal.security.parser.XMLParserImpl$1: void <init>()>();
+
+        $r4 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r3);
+
+        $r5 = (java.lang.ClassLoader) $r4;
+
+        return $r5;
+
+     label1:
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.Thread: java.lang.ClassLoader getContextClassLoader()>();
+
+        return $r2;
+    }
+
+    private static java.lang.ClassLoader getClassLoader(java.lang.Class)
+    {
+        java.lang.Class r1;
+        com.sun.org.apache.xml.internal.security.parser.XMLParserImpl$2 $r3;
+        java.lang.Object $r4;
+        java.lang.ClassLoader $r2, $r5;
+        java.lang.SecurityManager $r0;
+
+        r1 := @parameter0: java.lang.Class;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r3 = new com.sun.org.apache.xml.internal.security.parser.XMLParserImpl$2;
+
+        specialinvoke $r3.<com.sun.org.apache.xml.internal.security.parser.XMLParserImpl$2: void <init>(java.lang.Class)>(r1);
+
+        $r4 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r3);
+
+        $r5 = (java.lang.ClassLoader) $r4;
+
+        return $r5;
+
+     label1:
+        $r2 = virtualinvoke r1.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        return $r2;
+    }
+
+    public static java.lang.Integer lambda$static$0()
+    {
+        java.lang.Integer $r0;
+
+        $r0 = staticinvoke <java.lang.Integer: java.lang.Integer getInteger(java.lang.String,int)>("com.sun.org.apache.xml.internal.security.parser.pool-size", 20);
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.security.PrivilegedAction $r0;
+        java.lang.Integer $r2;
+        java.util.Map $r4, $r6;
+        int $i0;
+        java.lang.Object $r1;
+        java.util.WeakHashMap $r3, $r5;
+
+        $r0 = staticinvoke <com.sun.org.apache.xml.internal.security.parser.XMLParserImpl$lambda_static_0__18: java.security.PrivilegedAction bootstrap$()>();
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r2 = (java.lang.Integer) $r1;
+
+        $i0 = virtualinvoke $r2.<java.lang.Integer: int intValue()>();
+
+        <com.sun.org.apache.xml.internal.security.parser.XMLParserImpl: int parserPoolSize> = $i0;
+
+        $r3 = new java.util.WeakHashMap;
+
+        specialinvoke $r3.<java.util.WeakHashMap: void <init>()>();
+
+        $r4 = staticinvoke <java.util.Collections: java.util.Map synchronizedMap(java.util.Map)>($r3);
+
+        <com.sun.org.apache.xml.internal.security.parser.XMLParserImpl: java.util.Map DOCUMENT_BUILDERS> = $r4;
+
+        $r5 = new java.util.WeakHashMap;
+
+        specialinvoke $r5.<java.util.WeakHashMap: void <init>()>();
+
+        $r6 = staticinvoke <java.util.Collections: java.util.Map synchronizedMap(java.util.Map)>($r5);
+
+        <com.sun.org.apache.xml.internal.security.parser.XMLParserImpl: java.util.Map DOCUMENT_BUILDERS_DISALLOW_DOCTYPE> = $r6;
+
+        return;
+    }
+}

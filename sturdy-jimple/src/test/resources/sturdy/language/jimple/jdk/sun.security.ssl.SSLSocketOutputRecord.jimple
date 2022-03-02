@@ -1,0 +1,1243 @@
+final class sun.security.ssl.SSLSocketOutputRecord extends sun.security.ssl.OutputRecord implements sun.security.ssl.SSLRecord
+{
+    private java.io.OutputStream deliverStream;
+
+    void <init>(sun.security.ssl.HandshakeHash)
+    {
+        sun.security.ssl.SSLSocketOutputRecord r0;
+        sun.security.ssl.HandshakeHash r1;
+
+        r0 := @this: sun.security.ssl.SSLSocketOutputRecord;
+
+        r1 := @parameter0: sun.security.ssl.HandshakeHash;
+
+        specialinvoke r0.<sun.security.ssl.SSLSocketOutputRecord: void <init>(sun.security.ssl.HandshakeHash,sun.security.ssl.TransportContext)>(r1, null);
+
+        return;
+    }
+
+    void <init>(sun.security.ssl.HandshakeHash, sun.security.ssl.TransportContext)
+    {
+        sun.security.ssl.SSLSocketOutputRecord r0;
+        sun.security.ssl.HandshakeHash r1;
+        sun.security.ssl.SSLCipher$SSLWriteCipher $r2;
+        sun.security.ssl.TransportContext r3;
+        sun.security.ssl.ProtocolVersion $r4;
+
+        r0 := @this: sun.security.ssl.SSLSocketOutputRecord;
+
+        r1 := @parameter0: sun.security.ssl.HandshakeHash;
+
+        r3 := @parameter1: sun.security.ssl.TransportContext;
+
+        $r2 = staticinvoke <sun.security.ssl.SSLCipher$SSLWriteCipher: sun.security.ssl.SSLCipher$SSLWriteCipher nullTlsWriteCipher()>();
+
+        specialinvoke r0.<sun.security.ssl.OutputRecord: void <init>(sun.security.ssl.HandshakeHash,sun.security.ssl.SSLCipher$SSLWriteCipher)>(r1, $r2);
+
+        r0.<sun.security.ssl.SSLSocketOutputRecord: java.io.OutputStream deliverStream> = null;
+
+        r0.<sun.security.ssl.SSLSocketOutputRecord: sun.security.ssl.TransportContext tc> = r3;
+
+        r0.<sun.security.ssl.SSLSocketOutputRecord: int packetSize> = 16709;
+
+        $r4 = <sun.security.ssl.ProtocolVersion: sun.security.ssl.ProtocolVersion NONE>;
+
+        r0.<sun.security.ssl.SSLSocketOutputRecord: sun.security.ssl.ProtocolVersion protocolVersion> = $r4;
+
+        return;
+    }
+
+    void encodeAlert(byte, byte) throws java.io.IOException
+    {
+        byte[] $r5, $r33;
+        byte b2, b3, $b7;
+        sun.security.ssl.ContentType $r11, $r31;
+        java.io.ByteArrayInputStream $r38;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        sun.security.ssl.SSLSocketOutputRecord r0;
+        java.lang.StringBuilder $r7, $r9, $r10, $r13, $r14, $r16, $r17, $r18, $r22, $r24, $r36, $r37;
+        java.lang.Throwable $r27;
+        java.lang.Object[] $r3, $r20, $r26;
+        sun.security.ssl.ProtocolVersion $r8;
+        int $i0, i1, $i4, $i5, $i6, $i8, $i9, $i10;
+        java.lang.String $r12, $r15, $r19, $r23, $r25;
+        java.io.OutputStream $r32, $r34;
+        java.util.concurrent.locks.ReentrantLock $r1, $r28, $r29, $r35;
+        sun.security.ssl.SSLCipher$SSLWriteCipher $r2, $r30;
+
+        r0 := @this: sun.security.ssl.SSLSocketOutputRecord;
+
+        b2 := @parameter0: byte;
+
+        b3 := @parameter1: byte;
+
+        $r1 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.util.concurrent.locks.ReentrantLock recordLock>;
+
+        virtualinvoke $r1.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label1:
+        $z0 = virtualinvoke r0.<sun.security.ssl.SSLSocketOutputRecord: boolean isClosed()>();
+
+        if $z0 == 0 goto label3;
+
+        $z4 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z4 == 0 goto label2;
+
+        $z5 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl");
+
+        if $z5 == 0 goto label2;
+
+        $r36 = new java.lang.StringBuilder;
+
+        specialinvoke $r36.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("outbound has closed, ignore outbound alert message: ");
+
+        $r23 = staticinvoke <sun.security.ssl.Alert: java.lang.String nameOf(byte)>(b3);
+
+        $r24 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r23);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r26 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void warning(java.lang.String,java.lang.Object[])>($r25, $r26);
+
+     label2:
+        $r29 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.util.concurrent.locks.ReentrantLock recordLock>;
+
+        virtualinvoke $r29.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return;
+
+     label3:
+        $r2 = r0.<sun.security.ssl.SSLSocketOutputRecord: sun.security.ssl.SSLCipher$SSLWriteCipher writeCipher>;
+
+        $i0 = virtualinvoke $r2.<sun.security.ssl.SSLCipher$SSLWriteCipher: int getExplicitNonceSize()>();
+
+        i1 = 5 + $i0;
+
+        r0.<sun.security.ssl.SSLSocketOutputRecord: int count> = i1;
+
+        $i9 = (int) b2;
+
+        virtualinvoke r0.<sun.security.ssl.SSLSocketOutputRecord: void write(int)>($i9);
+
+        $i10 = (int) b3;
+
+        virtualinvoke r0.<sun.security.ssl.SSLSocketOutputRecord: void write(int)>($i10);
+
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label4;
+
+        $z3 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("record");
+
+        if $z3 == 0 goto label4;
+
+        $r37 = new java.lang.StringBuilder;
+
+        specialinvoke $r37.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("WRITE: ");
+
+        $r8 = r0.<sun.security.ssl.SSLSocketOutputRecord: sun.security.ssl.ProtocolVersion protocolVersion>;
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r11 = <sun.security.ssl.ContentType: sun.security.ssl.ContentType ALERT>;
+
+        $r12 = $r11.<sun.security.ssl.ContentType: java.lang.String name>;
+
+        $r13 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(");
+
+        $r15 = staticinvoke <sun.security.ssl.Alert: java.lang.String nameOf(byte)>(b3);
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("), length = ");
+
+        $i5 = r0.<sun.security.ssl.SSLSocketOutputRecord: int count>;
+
+        $i6 = $i5 - 5;
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i6);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r20 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r19, $r20);
+
+     label4:
+        $r30 = r0.<sun.security.ssl.SSLSocketOutputRecord: sun.security.ssl.SSLCipher$SSLWriteCipher writeCipher>;
+
+        $r31 = <sun.security.ssl.ContentType: sun.security.ssl.ContentType ALERT>;
+
+        $b7 = $r31.<sun.security.ssl.ContentType: byte id>;
+
+        virtualinvoke r0.<sun.security.ssl.SSLSocketOutputRecord: long encrypt(sun.security.ssl.SSLCipher$SSLWriteCipher,byte,int)>($r30, $b7, 5);
+
+        $r32 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.io.OutputStream deliverStream>;
+
+        $r33 = r0.<sun.security.ssl.SSLSocketOutputRecord: byte[] buf>;
+
+        $i8 = r0.<sun.security.ssl.SSLSocketOutputRecord: int count>;
+
+        virtualinvoke $r32.<java.io.OutputStream: void write(byte[],int,int)>($r33, 0, $i8);
+
+        $r34 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.io.OutputStream deliverStream>;
+
+        virtualinvoke $r34.<java.io.OutputStream: void flush()>();
+
+        $z6 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z6 == 0 goto label5;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("packet");
+
+        if $z2 == 0 goto label5;
+
+        $r3 = newarray (java.lang.Object)[1];
+
+        $r38 = new java.io.ByteArrayInputStream;
+
+        $r5 = r0.<sun.security.ssl.SSLSocketOutputRecord: byte[] buf>;
+
+        $i4 = r0.<sun.security.ssl.SSLSocketOutputRecord: int count>;
+
+        specialinvoke $r38.<java.io.ByteArrayInputStream: void <init>(byte[],int,int)>($r5, 0, $i4);
+
+        $r3[0] = $r38;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Raw write", $r3);
+
+     label5:
+        r0.<sun.security.ssl.SSLSocketOutputRecord: int count> = 0;
+
+     label6:
+        $r35 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.util.concurrent.locks.ReentrantLock recordLock>;
+
+        virtualinvoke $r35.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        goto label9;
+
+     label7:
+        $r27 := @caughtexception;
+
+     label8:
+        $r28 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.util.concurrent.locks.ReentrantLock recordLock>;
+
+        virtualinvoke $r28.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r27;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label3 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    void encodeHandshake(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r2, $r7, $r27, $r48;
+        sun.security.ssl.ContentType $r13, $r46;
+        byte $b17, $b18, $b22, $b28, $b29;
+        sun.security.ssl.HandshakeHash $r22, $r28, $r44;
+        java.lang.StringBuilder $r9, $r11, $r12, $r15, $r16, $r17, $r32, $r33, $r50, $r52;
+        java.lang.Throwable $r38;
+        java.lang.Object[] $r5, $r19, $r29, $r35, $r36;
+        sun.security.ssl.ProtocolVersion $r10, $r23, $r24;
+        java.lang.String $r14, $r18, $r34;
+        sun.security.ssl.SSLCipher$SSLWriteCipher $r3, $r45;
+        java.nio.ByteBuffer $r26, $r37;
+        java.io.ByteArrayInputStream $r51, $r53;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12;
+        sun.security.ssl.SSLSocketOutputRecord r0;
+        sun.security.ssl.SSLHandshake $r25;
+        int $i0, $i1, $i2, $i3, i4, $i5, $i6, i7, $i8, $i9, $i10, i11, $i12, $i13, $i14, $i15, $i16, $i19, $i20, $i21, $i23, $i24, $i25, $i26, i27, $i30, $i31, $i32;
+        java.io.OutputStream $r41, $r42, $r47, $r49;
+        java.util.concurrent.locks.ReentrantLock $r1, $r4, $r20, $r21, $r39, $r40, $r43;
+
+        r0 := @this: sun.security.ssl.SSLSocketOutputRecord;
+
+        r2 := @parameter0: byte[];
+
+        i27 := @parameter1: int;
+
+        i4 := @parameter2: int;
+
+        $r1 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.util.concurrent.locks.ReentrantLock recordLock>;
+
+        virtualinvoke $r1.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label01:
+        $z0 = virtualinvoke r0.<sun.security.ssl.SSLSocketOutputRecord: boolean isClosed()>();
+
+        if $z0 == 0 goto label03;
+
+        $z8 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z8 == 0 goto label02;
+
+        $z9 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl");
+
+        if $z9 == 0 goto label02;
+
+        $r36 = newarray (java.lang.Object)[1];
+
+        $r37 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[],int,int)>(r2, i27, i4);
+
+        $r36[0] = $r37;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void warning(java.lang.String,java.lang.Object[])>("outbound has closed, ignore outbound handshake message", $r36);
+
+     label02:
+        $r40 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.util.concurrent.locks.ReentrantLock recordLock>;
+
+        virtualinvoke $r40.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return;
+
+     label03:
+        $z1 = r0.<sun.security.ssl.SSLSocketOutputRecord: boolean firstMessage>;
+
+        if $z1 == 0 goto label06;
+
+        r0.<sun.security.ssl.SSLSocketOutputRecord: boolean firstMessage> = 0;
+
+        $r24 = r0.<sun.security.ssl.SSLSocketOutputRecord: sun.security.ssl.ProtocolVersion helloVersion>;
+
+        $r23 = <sun.security.ssl.ProtocolVersion: sun.security.ssl.ProtocolVersion SSL20Hello>;
+
+        if $r24 != $r23 goto label06;
+
+        $b18 = r2[i27];
+
+        $r25 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake CLIENT_HELLO>;
+
+        $b17 = $r25.<sun.security.ssl.SSLHandshake: byte id>;
+
+        $i31 = (int) $b18;
+
+        $i32 = (int) $b17;
+
+        if $i31 != $i32 goto label06;
+
+        $i19 = i27 + 4;
+
+        $i20 = $i19 + 2;
+
+        $i21 = $i20 + 32;
+
+        $b22 = r2[$i21];
+
+        if $b22 != 0 goto label06;
+
+        $i24 = i27 + 4;
+
+        $i23 = i4 - 4;
+
+        $r26 = staticinvoke <sun.security.ssl.SSLSocketOutputRecord: java.nio.ByteBuffer encodeV2ClientHello(byte[],int,int)>(r2, $i24, $i23);
+
+        $r27 = virtualinvoke $r26.<java.nio.ByteBuffer: byte[] array()>();
+
+        $i25 = virtualinvoke $r26.<java.nio.ByteBuffer: int limit()>();
+
+        $r28 = r0.<sun.security.ssl.SSLSocketOutputRecord: sun.security.ssl.HandshakeHash handshakeHash>;
+
+        $i26 = $i25 - 2;
+
+        virtualinvoke $r28.<sun.security.ssl.HandshakeHash: void deliver(byte[],int,int)>($r27, 2, $i26);
+
+        $z5 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z5 == 0 goto label04;
+
+        $z7 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("record");
+
+        if $z7 == 0 goto label04;
+
+        $r50 = new java.lang.StringBuilder;
+
+        specialinvoke $r50.<java.lang.StringBuilder: void <init>()>();
+
+        $r32 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("WRITE: SSLv2 ClientHello message, length = ");
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i25);
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r35 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r34, $r35);
+
+     label04:
+        $r41 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.io.OutputStream deliverStream>;
+
+        virtualinvoke $r41.<java.io.OutputStream: void write(byte[],int,int)>($r27, 0, $i25);
+
+        $r42 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.io.OutputStream deliverStream>;
+
+        virtualinvoke $r42.<java.io.OutputStream: void flush()>();
+
+        $z10 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z10 == 0 goto label05;
+
+        $z6 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("packet");
+
+        if $z6 == 0 goto label05;
+
+        $r29 = newarray (java.lang.Object)[1];
+
+        $r51 = new java.io.ByteArrayInputStream;
+
+        specialinvoke $r51.<java.io.ByteArrayInputStream: void <init>(byte[],int,int)>($r27, 0, $i25);
+
+        $r29[0] = $r51;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Raw write", $r29);
+
+     label05:
+        $r43 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.util.concurrent.locks.ReentrantLock recordLock>;
+
+        virtualinvoke $r43.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return;
+
+     label06:
+        $b28 = r2[0];
+
+        $r44 = r0.<sun.security.ssl.SSLSocketOutputRecord: sun.security.ssl.HandshakeHash handshakeHash>;
+
+        $z11 = virtualinvoke $r44.<sun.security.ssl.HandshakeHash: boolean isHashable(byte)>($b28);
+
+        if $z11 == 0 goto label07;
+
+        $r22 = r0.<sun.security.ssl.SSLSocketOutputRecord: sun.security.ssl.HandshakeHash handshakeHash>;
+
+        virtualinvoke $r22.<sun.security.ssl.HandshakeHash: void deliver(byte[],int,int)>(r2, i27, i4);
+
+     label07:
+        $i0 = specialinvoke r0.<sun.security.ssl.SSLSocketOutputRecord: int getFragLimit()>();
+
+        $r3 = r0.<sun.security.ssl.SSLSocketOutputRecord: sun.security.ssl.SSLCipher$SSLWriteCipher writeCipher>;
+
+        $i1 = virtualinvoke $r3.<sun.security.ssl.SSLCipher$SSLWriteCipher: int getExplicitNonceSize()>();
+
+        $i16 = 5 + $i1;
+
+        $i2 = r0.<sun.security.ssl.SSLSocketOutputRecord: int count>;
+
+        if $i2 != 0 goto label08;
+
+        r0.<sun.security.ssl.SSLSocketOutputRecord: int count> = $i16;
+
+     label08:
+        $i3 = r0.<sun.security.ssl.SSLSocketOutputRecord: int count>;
+
+        $i6 = $i3 - $i16;
+
+        $i5 = $i0 - i4;
+
+        if $i6 >= $i5 goto label10;
+
+        virtualinvoke r0.<sun.security.ssl.SSLSocketOutputRecord: void write(byte[],int,int)>(r2, i27, i4);
+
+     label09:
+        $r21 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.util.concurrent.locks.ReentrantLock recordLock>;
+
+        virtualinvoke $r21.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return;
+
+     label10:
+        i7 = i27 + i4;
+
+     label11:
+        if i27 >= i7 goto label16;
+
+        $i10 = i7 - i27;
+
+        $i8 = r0.<sun.security.ssl.SSLSocketOutputRecord: int count>;
+
+        $i9 = $i8 - $i16;
+
+        i11 = $i10 + $i9;
+
+        $i12 = staticinvoke <java.lang.Math: int min(int,int)>($i0, i11);
+
+        virtualinvoke r0.<sun.security.ssl.SSLSocketOutputRecord: void write(byte[],int,int)>(r2, i27, $i12);
+
+        if i11 >= $i0 goto label13;
+
+     label12:
+        $r20 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.util.concurrent.locks.ReentrantLock recordLock>;
+
+        virtualinvoke $r20.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return;
+
+     label13:
+        $z2 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z2 == 0 goto label14;
+
+        $z4 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("record");
+
+        if $z4 == 0 goto label14;
+
+        $r52 = new java.lang.StringBuilder;
+
+        specialinvoke $r52.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("WRITE: ");
+
+        $r10 = r0.<sun.security.ssl.SSLSocketOutputRecord: sun.security.ssl.ProtocolVersion protocolVersion>;
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r13 = <sun.security.ssl.ContentType: sun.security.ssl.ContentType HANDSHAKE>;
+
+        $r14 = $r13.<sun.security.ssl.ContentType: java.lang.String name>;
+
+        $r15 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", length = ");
+
+        $i14 = r0.<sun.security.ssl.SSLSocketOutputRecord: int count>;
+
+        $i15 = $i14 - 5;
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i15);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r19 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r18, $r19);
+
+     label14:
+        $r45 = r0.<sun.security.ssl.SSLSocketOutputRecord: sun.security.ssl.SSLCipher$SSLWriteCipher writeCipher>;
+
+        $r46 = <sun.security.ssl.ContentType: sun.security.ssl.ContentType HANDSHAKE>;
+
+        $b29 = $r46.<sun.security.ssl.ContentType: byte id>;
+
+        virtualinvoke r0.<sun.security.ssl.SSLSocketOutputRecord: long encrypt(sun.security.ssl.SSLCipher$SSLWriteCipher,byte,int)>($r45, $b29, 5);
+
+        $r47 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.io.OutputStream deliverStream>;
+
+        $r48 = r0.<sun.security.ssl.SSLSocketOutputRecord: byte[] buf>;
+
+        $i30 = r0.<sun.security.ssl.SSLSocketOutputRecord: int count>;
+
+        virtualinvoke $r47.<java.io.OutputStream: void write(byte[],int,int)>($r48, 0, $i30);
+
+        $r49 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.io.OutputStream deliverStream>;
+
+        virtualinvoke $r49.<java.io.OutputStream: void flush()>();
+
+        $z12 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z12 == 0 goto label15;
+
+        $z3 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("packet");
+
+        if $z3 == 0 goto label15;
+
+        $r5 = newarray (java.lang.Object)[1];
+
+        $r53 = new java.io.ByteArrayInputStream;
+
+        $r7 = r0.<sun.security.ssl.SSLSocketOutputRecord: byte[] buf>;
+
+        $i13 = r0.<sun.security.ssl.SSLSocketOutputRecord: int count>;
+
+        specialinvoke $r53.<java.io.ByteArrayInputStream: void <init>(byte[],int,int)>($r7, 0, $i13);
+
+        $r5[0] = $r53;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Raw write", $r5);
+
+     label15:
+        i27 = i27 + $i12;
+
+        r0.<sun.security.ssl.SSLSocketOutputRecord: int count> = $i16;
+
+        goto label11;
+
+     label16:
+        $r4 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.util.concurrent.locks.ReentrantLock recordLock>;
+
+        virtualinvoke $r4.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        goto label19;
+
+     label17:
+        $r38 := @caughtexception;
+
+     label18:
+        $r39 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.util.concurrent.locks.ReentrantLock recordLock>;
+
+        virtualinvoke $r39.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r38;
+
+     label19:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label17;
+        catch java.lang.Throwable from label03 to label05 with label17;
+        catch java.lang.Throwable from label06 to label09 with label17;
+        catch java.lang.Throwable from label10 to label12 with label17;
+        catch java.lang.Throwable from label13 to label16 with label17;
+        catch java.lang.Throwable from label17 to label18 with label17;
+    }
+
+    void encodeChangeCipherSpec() throws java.io.IOException
+    {
+        java.lang.Throwable $r11;
+        byte[] $r5, $r9;
+        java.lang.Object[] $r7, $r10;
+        sun.security.ssl.ContentType $r3;
+        byte $b2;
+        java.io.ByteArrayInputStream $r8;
+        int $i0, i1, $i3, $i4;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.io.OutputStream $r6;
+        sun.security.ssl.SSLSocketOutputRecord r0;
+        java.util.concurrent.locks.ReentrantLock $r1, $r12, $r13, $r14;
+        sun.security.ssl.SSLCipher$SSLWriteCipher $r2, $r4;
+
+        r0 := @this: sun.security.ssl.SSLSocketOutputRecord;
+
+        $r1 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.util.concurrent.locks.ReentrantLock recordLock>;
+
+        virtualinvoke $r1.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label1:
+        $z0 = virtualinvoke r0.<sun.security.ssl.SSLSocketOutputRecord: boolean isClosed()>();
+
+        if $z0 == 0 goto label3;
+
+        $z3 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z3 == 0 goto label2;
+
+        $z4 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl");
+
+        if $z4 == 0 goto label2;
+
+        $r10 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void warning(java.lang.String,java.lang.Object[])>("outbound has closed, ignore outbound change_cipher_spec message", $r10);
+
+     label2:
+        $r13 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.util.concurrent.locks.ReentrantLock recordLock>;
+
+        virtualinvoke $r13.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return;
+
+     label3:
+        $r2 = r0.<sun.security.ssl.SSLSocketOutputRecord: sun.security.ssl.SSLCipher$SSLWriteCipher writeCipher>;
+
+        $i0 = virtualinvoke $r2.<sun.security.ssl.SSLCipher$SSLWriteCipher: int getExplicitNonceSize()>();
+
+        i1 = 5 + $i0;
+
+        r0.<sun.security.ssl.SSLSocketOutputRecord: int count> = i1;
+
+        virtualinvoke r0.<sun.security.ssl.SSLSocketOutputRecord: void write(int)>(1);
+
+        $r4 = r0.<sun.security.ssl.SSLSocketOutputRecord: sun.security.ssl.SSLCipher$SSLWriteCipher writeCipher>;
+
+        $r3 = <sun.security.ssl.ContentType: sun.security.ssl.ContentType CHANGE_CIPHER_SPEC>;
+
+        $b2 = $r3.<sun.security.ssl.ContentType: byte id>;
+
+        virtualinvoke r0.<sun.security.ssl.SSLSocketOutputRecord: long encrypt(sun.security.ssl.SSLCipher$SSLWriteCipher,byte,int)>($r4, $b2, 5);
+
+        $r6 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.io.OutputStream deliverStream>;
+
+        $r5 = r0.<sun.security.ssl.SSLSocketOutputRecord: byte[] buf>;
+
+        $i3 = r0.<sun.security.ssl.SSLSocketOutputRecord: int count>;
+
+        virtualinvoke $r6.<java.io.OutputStream: void write(byte[],int,int)>($r5, 0, $i3);
+
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label4;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("packet");
+
+        if $z2 == 0 goto label4;
+
+        $r7 = newarray (java.lang.Object)[1];
+
+        $r8 = new java.io.ByteArrayInputStream;
+
+        $r9 = r0.<sun.security.ssl.SSLSocketOutputRecord: byte[] buf>;
+
+        $i4 = r0.<sun.security.ssl.SSLSocketOutputRecord: int count>;
+
+        specialinvoke $r8.<java.io.ByteArrayInputStream: void <init>(byte[],int,int)>($r9, 0, $i4);
+
+        $r7[0] = $r8;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Raw write", $r7);
+
+     label4:
+        r0.<sun.security.ssl.SSLSocketOutputRecord: int count> = 0;
+
+     label5:
+        $r14 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.util.concurrent.locks.ReentrantLock recordLock>;
+
+        virtualinvoke $r14.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        goto label7;
+
+     label6:
+        $r11 := @caughtexception;
+
+        $r12 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.util.concurrent.locks.ReentrantLock recordLock>;
+
+        virtualinvoke $r12.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r11;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label3 to label5 with label6;
+    }
+
+    public void flush() throws java.io.IOException
+    {
+        byte[] $r5, $r24;
+        java.io.ByteArrayInputStream $r4;
+        sun.security.ssl.ContentType $r11, $r22;
+        byte $b6;
+        boolean $z0, $z1, $z2, $z3;
+        sun.security.ssl.SSLSocketOutputRecord r0;
+        java.lang.StringBuilder $r6, $r7, $r9, $r10, $r13, $r14, $r15;
+        java.lang.Throwable $r19;
+        java.lang.Object[] $r3, $r17;
+        sun.security.ssl.ProtocolVersion $r8;
+        int $i0, i1, $i2, $i3, $i4, $i5, $i7;
+        java.lang.String $r12, $r16;
+        java.io.OutputStream $r23, $r25;
+        java.util.concurrent.locks.ReentrantLock $r1, $r18, $r20, $r26;
+        sun.security.ssl.SSLCipher$SSLWriteCipher $r2, $r21;
+
+        r0 := @this: sun.security.ssl.SSLSocketOutputRecord;
+
+        $r1 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.util.concurrent.locks.ReentrantLock recordLock>;
+
+        virtualinvoke $r1.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label1:
+        $r2 = r0.<sun.security.ssl.SSLSocketOutputRecord: sun.security.ssl.SSLCipher$SSLWriteCipher writeCipher>;
+
+        $i0 = virtualinvoke $r2.<sun.security.ssl.SSLCipher$SSLWriteCipher: int getExplicitNonceSize()>();
+
+        i1 = 5 + $i0;
+
+        $i2 = r0.<sun.security.ssl.SSLSocketOutputRecord: int count>;
+
+        if $i2 > i1 goto label3;
+
+     label2:
+        $r18 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.util.concurrent.locks.ReentrantLock recordLock>;
+
+        virtualinvoke $r18.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        return;
+
+     label3:
+        $z0 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z0 == 0 goto label4;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("record");
+
+        if $z2 == 0 goto label4;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("WRITE: ");
+
+        $r8 = r0.<sun.security.ssl.SSLSocketOutputRecord: sun.security.ssl.ProtocolVersion protocolVersion>;
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r11 = <sun.security.ssl.ContentType: sun.security.ssl.ContentType HANDSHAKE>;
+
+        $r12 = $r11.<sun.security.ssl.ContentType: java.lang.String name>;
+
+        $r13 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", length = ");
+
+        $i4 = r0.<sun.security.ssl.SSLSocketOutputRecord: int count>;
+
+        $i5 = $i4 - 5;
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r17 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r16, $r17);
+
+     label4:
+        $r21 = r0.<sun.security.ssl.SSLSocketOutputRecord: sun.security.ssl.SSLCipher$SSLWriteCipher writeCipher>;
+
+        $r22 = <sun.security.ssl.ContentType: sun.security.ssl.ContentType HANDSHAKE>;
+
+        $b6 = $r22.<sun.security.ssl.ContentType: byte id>;
+
+        virtualinvoke r0.<sun.security.ssl.SSLSocketOutputRecord: long encrypt(sun.security.ssl.SSLCipher$SSLWriteCipher,byte,int)>($r21, $b6, 5);
+
+        $r23 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.io.OutputStream deliverStream>;
+
+        $r24 = r0.<sun.security.ssl.SSLSocketOutputRecord: byte[] buf>;
+
+        $i7 = r0.<sun.security.ssl.SSLSocketOutputRecord: int count>;
+
+        virtualinvoke $r23.<java.io.OutputStream: void write(byte[],int,int)>($r24, 0, $i7);
+
+        $r25 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.io.OutputStream deliverStream>;
+
+        virtualinvoke $r25.<java.io.OutputStream: void flush()>();
+
+        $z3 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z3 == 0 goto label5;
+
+        $z1 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("packet");
+
+        if $z1 == 0 goto label5;
+
+        $r3 = newarray (java.lang.Object)[1];
+
+        $r4 = new java.io.ByteArrayInputStream;
+
+        $r5 = r0.<sun.security.ssl.SSLSocketOutputRecord: byte[] buf>;
+
+        $i3 = r0.<sun.security.ssl.SSLSocketOutputRecord: int count>;
+
+        specialinvoke $r4.<java.io.ByteArrayInputStream: void <init>(byte[],int,int)>($r5, 0, $i3);
+
+        $r3[0] = $r4;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Raw write", $r3);
+
+     label5:
+        r0.<sun.security.ssl.SSLSocketOutputRecord: int count> = 0;
+
+     label6:
+        $r26 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.util.concurrent.locks.ReentrantLock recordLock>;
+
+        virtualinvoke $r26.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        goto label8;
+
+     label7:
+        $r19 := @caughtexception;
+
+        $r20 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.util.concurrent.locks.ReentrantLock recordLock>;
+
+        virtualinvoke $r20.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r19;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label3 to label6 with label7;
+    }
+
+    void deliver(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r5, $r8, $r31;
+        java.io.ByteArrayInputStream $r7;
+        sun.security.ssl.ContentType $r14, $r29;
+        byte $b16;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, z7, $z8, $z9, $z10;
+        sun.security.ssl.SSLSocketOutputRecord r0;
+        javax.net.ssl.SSLHandshakeException $r26;
+        java.lang.StringBuilder $r9, $r10, $r12, $r13, $r16, $r17, $r18;
+        java.lang.Throwable $r24;
+        java.lang.Object[] $r6, $r20, $r22;
+        sun.security.ssl.ProtocolVersion $r11;
+        java.net.SocketException $r23;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, i11, i12, i13, $i14, $i15, $i17;
+        java.lang.String $r15, $r19;
+        java.io.OutputStream $r30, $r32;
+        java.util.concurrent.locks.ReentrantLock $r1, $r4, $r25;
+        sun.security.ssl.SSLCipher$SSLWriteCipher $r2, $r21, $r27, $r28;
+        sun.security.ssl.Authenticator $r3;
+
+        r0 := @this: sun.security.ssl.SSLSocketOutputRecord;
+
+        r5 := @parameter0: byte[];
+
+        i11 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        $r1 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.util.concurrent.locks.ReentrantLock recordLock>;
+
+        virtualinvoke $r1.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label01:
+        $z0 = virtualinvoke r0.<sun.security.ssl.SSLSocketOutputRecord: boolean isClosed()>();
+
+        if $z0 == 0 goto label02;
+
+        $r23 = new java.net.SocketException;
+
+        specialinvoke $r23.<java.net.SocketException: void <init>(java.lang.String)>("Connection or outbound has been closed");
+
+        throw $r23;
+
+     label02:
+        $r2 = r0.<sun.security.ssl.SSLSocketOutputRecord: sun.security.ssl.SSLCipher$SSLWriteCipher writeCipher>;
+
+        $r3 = $r2.<sun.security.ssl.SSLCipher$SSLWriteCipher: sun.security.ssl.Authenticator authenticator>;
+
+        $z1 = virtualinvoke $r3.<sun.security.ssl.Authenticator: boolean seqNumOverflow()>();
+
+        if $z1 == 0 goto label04;
+
+        $z5 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z5 == 0 goto label03;
+
+        $z6 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl");
+
+        if $z6 == 0 goto label03;
+
+        $r22 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("sequence number extremely close to overflow (2^64-1 packets). Closing connection.", $r22);
+
+     label03:
+        $r26 = new javax.net.ssl.SSLHandshakeException;
+
+        specialinvoke $r26.<javax.net.ssl.SSLHandshakeException: void <init>(java.lang.String)>("sequence number overflow");
+
+        throw $r26;
+
+     label04:
+        z7 = 1;
+
+        i1 = i11 + i0;
+
+     label05:
+        if i11 >= i1 goto label13;
+
+        $i2 = r0.<sun.security.ssl.SSLSocketOutputRecord: int packetSize>;
+
+        if $i2 <= 0 goto label06;
+
+        $i8 = r0.<sun.security.ssl.SSLSocketOutputRecord: int packetSize>;
+
+        $i9 = staticinvoke <java.lang.Math: int min(int,int)>(16709, $i8);
+
+        $r21 = r0.<sun.security.ssl.SSLSocketOutputRecord: sun.security.ssl.SSLCipher$SSLWriteCipher writeCipher>;
+
+        $i10 = virtualinvoke $r21.<sun.security.ssl.SSLCipher$SSLWriteCipher: int calculateFragmentSize(int,int)>($i9, 5);
+
+        i12 = staticinvoke <java.lang.Math: int min(int,int)>($i10, 16384);
+
+        goto label07;
+
+     label06:
+        i12 = 16384;
+
+     label07:
+        $i3 = virtualinvoke r0.<sun.security.ssl.SSLSocketOutputRecord: int calculateFragmentSize(int)>(i12);
+
+        if z7 == 0 goto label08;
+
+        $z4 = specialinvoke r0.<sun.security.ssl.SSLSocketOutputRecord: boolean needToSplitPayload()>();
+
+        if $z4 == 0 goto label08;
+
+        i13 = 1;
+
+        z7 = 0;
+
+        goto label09;
+
+     label08:
+        $i4 = i1 - i11;
+
+        i13 = staticinvoke <java.lang.Math: int min(int,int)>($i3, $i4);
+
+     label09:
+        $r27 = r0.<sun.security.ssl.SSLSocketOutputRecord: sun.security.ssl.SSLCipher$SSLWriteCipher writeCipher>;
+
+        $i14 = virtualinvoke $r27.<sun.security.ssl.SSLCipher$SSLWriteCipher: int getExplicitNonceSize()>();
+
+        $i15 = 5 + $i14;
+
+        r0.<sun.security.ssl.SSLSocketOutputRecord: int count> = $i15;
+
+        virtualinvoke r0.<sun.security.ssl.SSLSocketOutputRecord: void write(byte[],int,int)>(r5, i11, i13);
+
+        $z8 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z8 == 0 goto label10;
+
+        $z3 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("record");
+
+        if $z3 == 0 goto label10;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("WRITE: ");
+
+        $r11 = r0.<sun.security.ssl.SSLSocketOutputRecord: sun.security.ssl.ProtocolVersion protocolVersion>;
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r14 = <sun.security.ssl.ContentType: sun.security.ssl.ContentType APPLICATION_DATA>;
+
+        $r15 = $r14.<sun.security.ssl.ContentType: java.lang.String name>;
+
+        $r16 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", length = ");
+
+        $i6 = r0.<sun.security.ssl.SSLSocketOutputRecord: int count>;
+
+        $i7 = $i6 - $i15;
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i7);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r20 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r19, $r20);
+
+     label10:
+        $r28 = r0.<sun.security.ssl.SSLSocketOutputRecord: sun.security.ssl.SSLCipher$SSLWriteCipher writeCipher>;
+
+        $r29 = <sun.security.ssl.ContentType: sun.security.ssl.ContentType APPLICATION_DATA>;
+
+        $b16 = $r29.<sun.security.ssl.ContentType: byte id>;
+
+        virtualinvoke r0.<sun.security.ssl.SSLSocketOutputRecord: long encrypt(sun.security.ssl.SSLCipher$SSLWriteCipher,byte,int)>($r28, $b16, 5);
+
+        $r30 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.io.OutputStream deliverStream>;
+
+        $r31 = r0.<sun.security.ssl.SSLSocketOutputRecord: byte[] buf>;
+
+        $i17 = r0.<sun.security.ssl.SSLSocketOutputRecord: int count>;
+
+        virtualinvoke $r30.<java.io.OutputStream: void write(byte[],int,int)>($r31, 0, $i17);
+
+        $r32 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.io.OutputStream deliverStream>;
+
+        virtualinvoke $r32.<java.io.OutputStream: void flush()>();
+
+        $z9 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z9 == 0 goto label11;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("packet");
+
+        if $z2 == 0 goto label11;
+
+        $r6 = newarray (java.lang.Object)[1];
+
+        $r7 = new java.io.ByteArrayInputStream;
+
+        $r8 = r0.<sun.security.ssl.SSLSocketOutputRecord: byte[] buf>;
+
+        $i5 = r0.<sun.security.ssl.SSLSocketOutputRecord: int count>;
+
+        specialinvoke $r7.<java.io.ByteArrayInputStream: void <init>(byte[],int,int)>($r8, 0, $i5);
+
+        $r6[0] = $r7;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Raw write", $r6);
+
+     label11:
+        r0.<sun.security.ssl.SSLSocketOutputRecord: int count> = 0;
+
+        $z10 = r0.<sun.security.ssl.SSLSocketOutputRecord: boolean isFirstAppOutputRecord>;
+
+        if $z10 == 0 goto label12;
+
+        r0.<sun.security.ssl.SSLSocketOutputRecord: boolean isFirstAppOutputRecord> = 0;
+
+     label12:
+        i11 = i11 + i13;
+
+        goto label05;
+
+     label13:
+        $r4 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.util.concurrent.locks.ReentrantLock recordLock>;
+
+        virtualinvoke $r4.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        goto label16;
+
+     label14:
+        $r24 := @caughtexception;
+
+     label15:
+        $r25 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.util.concurrent.locks.ReentrantLock recordLock>;
+
+        virtualinvoke $r25.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r24;
+
+     label16:
+        return;
+
+        catch java.lang.Throwable from label01 to label13 with label14;
+        catch java.lang.Throwable from label14 to label15 with label14;
+    }
+
+    void setDeliverStream(java.io.OutputStream)
+    {
+        java.io.OutputStream r2;
+        java.lang.Throwable $r4;
+        sun.security.ssl.SSLSocketOutputRecord r0;
+        java.util.concurrent.locks.ReentrantLock $r1, $r3, $r5;
+
+        r0 := @this: sun.security.ssl.SSLSocketOutputRecord;
+
+        r2 := @parameter0: java.io.OutputStream;
+
+        $r1 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.util.concurrent.locks.ReentrantLock recordLock>;
+
+        virtualinvoke $r1.<java.util.concurrent.locks.ReentrantLock: void lock()>();
+
+     label1:
+        r0.<sun.security.ssl.SSLSocketOutputRecord: java.io.OutputStream deliverStream> = r2;
+
+     label2:
+        $r3 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.util.concurrent.locks.ReentrantLock recordLock>;
+
+        virtualinvoke $r3.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = r0.<sun.security.ssl.SSLSocketOutputRecord: java.util.concurrent.locks.ReentrantLock recordLock>;
+
+        virtualinvoke $r5.<java.util.concurrent.locks.ReentrantLock: void unlock()>();
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private boolean needToSplitPayload()
+    {
+        sun.security.ssl.SSLSocketOutputRecord r0;
+        sun.security.ssl.SSLCipher$SSLWriteCipher $r2;
+        sun.security.ssl.ProtocolVersion $r1;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        r0 := @this: sun.security.ssl.SSLSocketOutputRecord;
+
+        $r1 = r0.<sun.security.ssl.SSLSocketOutputRecord: sun.security.ssl.ProtocolVersion protocolVersion>;
+
+        $z0 = virtualinvoke $r1.<sun.security.ssl.ProtocolVersion: boolean useTLS11PlusSpec()>();
+
+        if $z0 != 0 goto label1;
+
+        $r2 = r0.<sun.security.ssl.SSLSocketOutputRecord: sun.security.ssl.SSLCipher$SSLWriteCipher writeCipher>;
+
+        $z1 = virtualinvoke $r2.<sun.security.ssl.SSLCipher$SSLWriteCipher: boolean isCBCMode()>();
+
+        if $z1 == 0 goto label1;
+
+        $z2 = r0.<sun.security.ssl.SSLSocketOutputRecord: boolean isFirstAppOutputRecord>;
+
+        if $z2 != 0 goto label1;
+
+        $z3 = <sun.security.ssl.Record: boolean enableCBCProtection>;
+
+        if $z3 == 0 goto label1;
+
+        $z4 = 1;
+
+        goto label2;
+
+     label1:
+        $z4 = 0;
+
+     label2:
+        return $z4;
+    }
+
+    private int getFragLimit()
+    {
+        sun.security.ssl.SSLSocketOutputRecord r0;
+        sun.security.ssl.SSLCipher$SSLWriteCipher $r1;
+        int $i0, $i1, $i2, $i3, $i4, i5;
+
+        r0 := @this: sun.security.ssl.SSLSocketOutputRecord;
+
+        $i0 = r0.<sun.security.ssl.SSLSocketOutputRecord: int packetSize>;
+
+        if $i0 <= 0 goto label1;
+
+        $i2 = r0.<sun.security.ssl.SSLSocketOutputRecord: int packetSize>;
+
+        $i3 = staticinvoke <java.lang.Math: int min(int,int)>(16709, $i2);
+
+        $r1 = r0.<sun.security.ssl.SSLSocketOutputRecord: sun.security.ssl.SSLCipher$SSLWriteCipher writeCipher>;
+
+        $i4 = virtualinvoke $r1.<sun.security.ssl.SSLCipher$SSLWriteCipher: int calculateFragmentSize(int,int)>($i3, 5);
+
+        i5 = staticinvoke <java.lang.Math: int min(int,int)>($i4, 16384);
+
+        goto label2;
+
+     label1:
+        i5 = 16384;
+
+     label2:
+        $i1 = virtualinvoke r0.<sun.security.ssl.SSLSocketOutputRecord: int calculateFragmentSize(int)>(i5);
+
+        return $i1;
+    }
+}

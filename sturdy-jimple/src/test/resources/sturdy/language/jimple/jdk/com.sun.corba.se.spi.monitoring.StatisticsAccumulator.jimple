@@ -1,0 +1,461 @@
+public class com.sun.corba.se.spi.monitoring.StatisticsAccumulator extends java.lang.Object
+{
+    protected double max;
+    protected double min;
+    private double sampleSum;
+    private double sampleSquareSum;
+    private long sampleCount;
+    protected java.lang.String unit;
+
+    public void sample(double)
+    {
+        com.sun.corba.se.spi.monitoring.StatisticsAccumulator r0;
+        long $l0, $l1;
+        byte $b2, $b3;
+        int $i4, $i5;
+        double d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7;
+
+        r0 := @this: com.sun.corba.se.spi.monitoring.StatisticsAccumulator;
+
+        d0 := @parameter0: double;
+
+        $l0 = r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: long sampleCount>;
+
+        $l1 = $l0 + 1L;
+
+        r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: long sampleCount> = $l1;
+
+        $d1 = r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double min>;
+
+        $b2 = d0 cmpg $d1;
+
+        $i4 = (int) $b2;
+
+        if $i4 >= 0 goto label1;
+
+        r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double min> = d0;
+
+     label1:
+        $d2 = r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double max>;
+
+        $b3 = d0 cmpl $d2;
+
+        $i5 = (int) $b3;
+
+        if $i5 <= 0 goto label2;
+
+        r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double max> = d0;
+
+     label2:
+        $d3 = r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double sampleSum>;
+
+        $d4 = $d3 + d0;
+
+        r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double sampleSum> = $d4;
+
+        $d6 = r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double sampleSquareSum>;
+
+        $d5 = d0 * d0;
+
+        $d7 = $d6 + $d5;
+
+        r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double sampleSquareSum> = $d7;
+
+        return;
+    }
+
+    public java.lang.String getValue()
+    {
+        java.lang.String $r1;
+        com.sun.corba.se.spi.monitoring.StatisticsAccumulator r0;
+
+        r0 := @this: com.sun.corba.se.spi.monitoring.StatisticsAccumulator;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: java.lang.String toString()>();
+
+        return $r1;
+    }
+
+    public java.lang.String toString()
+    {
+        long $l0;
+        java.lang.String $r5, $r10, $r15, $r20, $r24;
+        double $d0, $d1, $d2, $d3;
+        com.sun.corba.se.spi.monitoring.StatisticsAccumulator r2;
+        java.lang.StringBuilder $r0, $r1, $r3, $r4, $r6, $r7, $r8, $r9, $r11, $r12, $r13, $r14, $r16, $r17, $r18, $r19, $r21, $r22, $r23;
+
+        r2 := @this: com.sun.corba.se.spi.monitoring.StatisticsAccumulator;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Minimum Value = ");
+
+        $d0 = r2.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double min>;
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r5 = r2.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: java.lang.String unit>;
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" Maximum Value = ");
+
+        $d1 = r2.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double max>;
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d1);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r10 = r2.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: java.lang.String unit>;
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" Average Value = ");
+
+        $d2 = virtualinvoke r2.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double computeAverage()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d2);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r15 = r2.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: java.lang.String unit>;
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" Standard Deviation = ");
+
+        $d3 = virtualinvoke r2.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double computeStandardDeviation()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d3);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r20 = r2.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: java.lang.String unit>;
+
+        $r21 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" Samples Collected = ");
+
+        $l0 = r2.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: long sampleCount>;
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r24;
+    }
+
+    protected double computeAverage()
+    {
+        com.sun.corba.se.spi.monitoring.StatisticsAccumulator r0;
+        long $l0;
+        double $d0, $d1, $d2;
+
+        r0 := @this: com.sun.corba.se.spi.monitoring.StatisticsAccumulator;
+
+        $d1 = r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double sampleSum>;
+
+        $l0 = r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: long sampleCount>;
+
+        $d0 = (double) $l0;
+
+        $d2 = $d1 / $d0;
+
+        return $d2;
+    }
+
+    protected double computeStandardDeviation()
+    {
+        com.sun.corba.se.spi.monitoring.StatisticsAccumulator r0;
+        long $l0, $l1, $l2;
+        double $d0, $d1, d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9;
+
+        r0 := @this: com.sun.corba.se.spi.monitoring.StatisticsAccumulator;
+
+        $d1 = r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double sampleSum>;
+
+        $d0 = r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double sampleSum>;
+
+        d2 = $d1 * $d0;
+
+        $d5 = r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double sampleSquareSum>;
+
+        $l0 = r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: long sampleCount>;
+
+        $d3 = (double) $l0;
+
+        $d4 = d2 / $d3;
+
+        $d7 = $d5 - $d4;
+
+        $l1 = r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: long sampleCount>;
+
+        $l2 = $l1 - 1L;
+
+        $d6 = (double) $l2;
+
+        $d8 = $d7 / $d6;
+
+        $d9 = staticinvoke <java.lang.Math: double sqrt(double)>($d8);
+
+        return $d9;
+    }
+
+    public void <init>(java.lang.String)
+    {
+        java.lang.String r1;
+        com.sun.corba.se.spi.monitoring.StatisticsAccumulator r0;
+
+        r0 := @this: com.sun.corba.se.spi.monitoring.StatisticsAccumulator;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double max> = 4.9E-324;
+
+        r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double min> = 1.7976931348623157E308;
+
+        r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: java.lang.String unit> = r1;
+
+        r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: long sampleCount> = 0L;
+
+        r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double sampleSum> = 0.0;
+
+        r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double sampleSquareSum> = 0.0;
+
+        return;
+    }
+
+    void clearState()
+    {
+        com.sun.corba.se.spi.monitoring.StatisticsAccumulator r0;
+
+        r0 := @this: com.sun.corba.se.spi.monitoring.StatisticsAccumulator;
+
+        r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double min> = 1.7976931348623157E308;
+
+        r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double max> = 4.9E-324;
+
+        r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: long sampleCount> = 0L;
+
+        r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double sampleSum> = 0.0;
+
+        r0.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double sampleSquareSum> = 0.0;
+
+        return;
+    }
+
+    public void unitTestValidate(java.lang.String, double, double, long, double, double)
+    {
+        byte $b0, $b1, $b4, $b5, $b6;
+        com.sun.corba.se.spi.monitoring.StatisticsAccumulator r1;
+        java.lang.StringBuilder $r5, $r6, $r7, $r8, $r12, $r13, $r14, $r15, $r19, $r20, $r21, $r22, $r26, $r27, $r28, $r29, $r33, $r34, $r35, $r36, $r40, $r42, $r43, $r44, $r46, $r48, $r50, $r52, $r54, $r56;
+        long l2, $l3, $l7;
+        java.lang.String r0, $r2, $r9, $r16, $r23, $r30, $r37, $r41, $r45;
+        java.lang.RuntimeException $r47, $r49, $r51, $r53, $r55, $r57;
+        boolean $z0;
+        int $i8;
+        double d0, $d1, d2, $d3, $d4, d5, $d6, d7, $d8, $d9, $d10, $d11, $d12, $d13;
+
+        r1 := @this: com.sun.corba.se.spi.monitoring.StatisticsAccumulator;
+
+        r0 := @parameter0: java.lang.String;
+
+        d0 := @parameter1: double;
+
+        d2 := @parameter2: double;
+
+        l2 := @parameter3: long;
+
+        d5 := @parameter4: double;
+
+        d7 := @parameter5: double;
+
+        $r2 = r1.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: java.lang.String unit>;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 != 0 goto label1;
+
+        $r47 = new java.lang.RuntimeException;
+
+        $r46 = new java.lang.StringBuilder;
+
+        specialinvoke $r46.<java.lang.StringBuilder: void <init>()>();
+
+        $r40 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unit is not same as expected Unit\nUnit = ");
+
+        $r41 = r1.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: java.lang.String unit>;
+
+        $r42 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r41);
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ExpectedUnit = ");
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r47.<java.lang.RuntimeException: void <init>(java.lang.String)>($r45);
+
+        throw $r47;
+
+     label1:
+        $d1 = r1.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double min>;
+
+        $b0 = $d1 cmpl d0;
+
+        if $b0 == 0 goto label2;
+
+        $r49 = new java.lang.RuntimeException;
+
+        $r48 = new java.lang.StringBuilder;
+
+        specialinvoke $r48.<java.lang.StringBuilder: void <init>()>();
+
+        $r33 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Minimum value is not same as expected minimum value\nMin Value = ");
+
+        $d13 = r1.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double min>;
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d13);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected Min Value = ");
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>(d0);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r49.<java.lang.RuntimeException: void <init>(java.lang.String)>($r37);
+
+        throw $r49;
+
+     label2:
+        $d3 = r1.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double max>;
+
+        $b1 = $d3 cmpl d2;
+
+        if $b1 == 0 goto label3;
+
+        $r51 = new java.lang.RuntimeException;
+
+        $r50 = new java.lang.StringBuilder;
+
+        specialinvoke $r50.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Maximum value is not same as expected maximum value\nMax Value = ");
+
+        $d12 = r1.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double max>;
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d12);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected Max Value = ");
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>(d2);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r51.<java.lang.RuntimeException: void <init>(java.lang.String)>($r30);
+
+        throw $r51;
+
+     label3:
+        $l3 = r1.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: long sampleCount>;
+
+        $b4 = $l3 cmp l2;
+
+        if $b4 == 0 goto label4;
+
+        $r53 = new java.lang.RuntimeException;
+
+        $r52 = new java.lang.StringBuilder;
+
+        specialinvoke $r52.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Sample count is not same as expected Sample Count\nSampleCount = ");
+
+        $l7 = r1.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: long sampleCount>;
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l7);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected Sample Count = ");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>(l2);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r53.<java.lang.RuntimeException: void <init>(java.lang.String)>($r23);
+
+        throw $r53;
+
+     label4:
+        $d4 = virtualinvoke r1.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double computeAverage()>();
+
+        $b5 = $d4 cmpl d5;
+
+        if $b5 == 0 goto label5;
+
+        $r55 = new java.lang.RuntimeException;
+
+        $r54 = new java.lang.StringBuilder;
+
+        specialinvoke $r54.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Average is not same as expected Average\nAverage = ");
+
+        $d11 = virtualinvoke r1.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double computeAverage()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d11);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected Average = ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>(d5);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r55.<java.lang.RuntimeException: void <init>(java.lang.String)>($r16);
+
+        throw $r55;
+
+     label5:
+        $d6 = virtualinvoke r1.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double computeStandardDeviation()>();
+
+        $d8 = $d6 - d7;
+
+        $d9 = staticinvoke <java.lang.Math: double abs(double)>($d8);
+
+        $b6 = $d9 cmpl 1.0;
+
+        $i8 = (int) $b6;
+
+        if $i8 <= 0 goto label6;
+
+        $r57 = new java.lang.RuntimeException;
+
+        $r56 = new java.lang.StringBuilder;
+
+        specialinvoke $r56.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Standard Deviation is not same as expected Std Deviation\nStandard Dev = ");
+
+        $d10 = virtualinvoke r1.<com.sun.corba.se.spi.monitoring.StatisticsAccumulator: double computeStandardDeviation()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d10);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected Standard Dev = ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>(d7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r57.<java.lang.RuntimeException: void <init>(java.lang.String)>($r9);
+
+        throw $r57;
+
+     label6:
+        return;
+    }
+}

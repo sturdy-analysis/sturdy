@@ -1,0 +1,319 @@
+public class com.sun.org.apache.bcel.internal.util.ModularRuntimeImage extends java.lang.Object implements java.io.Closeable
+{
+    static final java.lang.String MODULES_PATH;
+    static final java.lang.String PACKAGES_PATH;
+    private final java.net.URLClassLoader classLoader;
+    private final java.nio.file.FileSystem fileSystem;
+
+    public void <init>() throws java.io.IOException
+    {
+        com.sun.org.apache.bcel.internal.util.ModularRuntimeImage r0;
+        java.net.URI $r1;
+        java.nio.file.FileSystem $r2;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.util.ModularRuntimeImage;
+
+        $r1 = staticinvoke <java.net.URI: java.net.URI create(java.lang.String)>("jrt:/");
+
+        $r2 = staticinvoke <java.nio.file.FileSystems: java.nio.file.FileSystem getFileSystem(java.net.URI)>($r1);
+
+        specialinvoke r0.<com.sun.org.apache.bcel.internal.util.ModularRuntimeImage: void <init>(java.net.URLClassLoader,java.nio.file.FileSystem)>(null, $r2);
+
+        return;
+    }
+
+    public void <init>(java.lang.String) throws java.io.IOException
+    {
+        java.net.URL $r10;
+        com.sun.org.apache.bcel.internal.util.ModularRuntimeImage r0;
+        java.lang.String[] $r3;
+        java.nio.file.FileSystem $r13;
+        java.net.URL[] $r8;
+        java.net.URLClassLoader $r7, $r12;
+        java.util.Map $r1;
+        java.lang.String r2;
+        java.net.URI $r9, $r11;
+        java.nio.file.Path $r4, $r5, $r6;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.util.ModularRuntimeImage;
+
+        r2 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = staticinvoke <java.util.Collections: java.util.Map emptyMap()>();
+
+        $r3 = newarray (java.lang.String)[0];
+
+        $r4 = staticinvoke <java.nio.file.Paths: java.nio.file.Path get(java.lang.String,java.lang.String[])>(r2, $r3);
+
+        $r5 = interfaceinvoke $r4.<java.nio.file.Path: java.nio.file.Path resolve(java.lang.String)>("lib");
+
+        $r6 = interfaceinvoke $r5.<java.nio.file.Path: java.nio.file.Path resolve(java.lang.String)>("jrt-fs.jar");
+
+        $r7 = new java.net.URLClassLoader;
+
+        $r8 = newarray (java.net.URL)[1];
+
+        $r9 = interfaceinvoke $r6.<java.nio.file.Path: java.net.URI toUri()>();
+
+        $r10 = virtualinvoke $r9.<java.net.URI: java.net.URL toURL()>();
+
+        $r8[0] = $r10;
+
+        specialinvoke $r7.<java.net.URLClassLoader: void <init>(java.net.URL[])>($r8);
+
+        r0.<com.sun.org.apache.bcel.internal.util.ModularRuntimeImage: java.net.URLClassLoader classLoader> = $r7;
+
+        $r11 = staticinvoke <java.net.URI: java.net.URI create(java.lang.String)>("jrt:/");
+
+        $r12 = r0.<com.sun.org.apache.bcel.internal.util.ModularRuntimeImage: java.net.URLClassLoader classLoader>;
+
+        $r13 = staticinvoke <java.nio.file.FileSystems: java.nio.file.FileSystem newFileSystem(java.net.URI,java.util.Map,java.lang.ClassLoader)>($r11, $r1, $r12);
+
+        r0.<com.sun.org.apache.bcel.internal.util.ModularRuntimeImage: java.nio.file.FileSystem fileSystem> = $r13;
+
+        return;
+    }
+
+    private void <init>(java.net.URLClassLoader, java.nio.file.FileSystem)
+    {
+        com.sun.org.apache.bcel.internal.util.ModularRuntimeImage r0;
+        java.net.URLClassLoader r1;
+        java.nio.file.FileSystem r2;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.util.ModularRuntimeImage;
+
+        r1 := @parameter0: java.net.URLClassLoader;
+
+        r2 := @parameter1: java.nio.file.FileSystem;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.org.apache.bcel.internal.util.ModularRuntimeImage: java.net.URLClassLoader classLoader> = r1;
+
+        r0.<com.sun.org.apache.bcel.internal.util.ModularRuntimeImage: java.nio.file.FileSystem fileSystem> = r2;
+
+        return;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        java.net.URLClassLoader $r1, $r4;
+        com.sun.org.apache.bcel.internal.util.ModularRuntimeImage r0;
+        java.nio.file.FileSystem $r2, $r3;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.util.ModularRuntimeImage;
+
+        $r1 = r0.<com.sun.org.apache.bcel.internal.util.ModularRuntimeImage: java.net.URLClassLoader classLoader>;
+
+        if $r1 == null goto label1;
+
+        $r4 = r0.<com.sun.org.apache.bcel.internal.util.ModularRuntimeImage: java.net.URLClassLoader classLoader>;
+
+        virtualinvoke $r4.<java.net.URLClassLoader: void close()>();
+
+     label1:
+        $r2 = r0.<com.sun.org.apache.bcel.internal.util.ModularRuntimeImage: java.nio.file.FileSystem fileSystem>;
+
+        if $r2 == null goto label2;
+
+        $r3 = r0.<com.sun.org.apache.bcel.internal.util.ModularRuntimeImage: java.nio.file.FileSystem fileSystem>;
+
+        virtualinvoke $r3.<java.nio.file.FileSystem: void close()>();
+
+     label2:
+        return;
+    }
+
+    public java.util.List list(java.nio.file.Path) throws java.io.IOException
+    {
+        java.lang.Throwable $r5, $r6, $r7, r10;
+        java.util.Iterator $r3;
+        com.sun.org.apache.bcel.internal.util.ModularRuntimeImage r9;
+        java.util.ArrayList $r0;
+        java.nio.file.DirectoryStream $r2;
+        java.lang.Object $r4;
+        java.nio.file.Path r1;
+        boolean $z0;
+
+        r9 := @this: com.sun.org.apache.bcel.internal.util.ModularRuntimeImage;
+
+        r1 := @parameter0: java.nio.file.Path;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+        $r2 = staticinvoke <java.nio.file.Files: java.nio.file.DirectoryStream newDirectoryStream(java.nio.file.Path)>(r1);
+
+        r10 = null;
+
+     label01:
+        $r3 = interfaceinvoke $r2.<java.nio.file.DirectoryStream: java.util.Iterator iterator()>();
+
+     label02:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label03;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>($r4);
+
+        goto label02;
+
+     label03:
+        if $r2 == null goto label13;
+
+        goto label04;
+
+     label04:
+        interfaceinvoke $r2.<java.nio.file.DirectoryStream: void close()>();
+
+        goto label13;
+
+     label05:
+        $r7 := @caughtexception;
+
+        r10 = $r7;
+
+        throw $r7;
+
+     label06:
+        $r6 := @caughtexception;
+
+     label07:
+        if $r2 == null goto label12;
+
+        if r10 == null goto label11;
+
+     label08:
+        interfaceinvoke $r2.<java.nio.file.DirectoryStream: void close()>();
+
+     label09:
+        goto label12;
+
+     label10:
+        $r5 := @caughtexception;
+
+        virtualinvoke r10.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r5);
+
+        goto label12;
+
+     label11:
+        interfaceinvoke $r2.<java.nio.file.DirectoryStream: void close()>();
+
+     label12:
+        throw $r6;
+
+     label13:
+        return $r0;
+
+        catch java.lang.Throwable from label01 to label03 with label05;
+        catch java.lang.Throwable from label08 to label09 with label10;
+        catch java.lang.Throwable from label05 to label07 with label06;
+    }
+
+    public java.util.List list(java.lang.String) throws java.io.IOException
+    {
+        java.util.List $r5;
+        com.sun.org.apache.bcel.internal.util.ModularRuntimeImage r0;
+        java.lang.String[] $r2;
+        java.lang.String r1;
+        java.nio.file.FileSystem $r3;
+        java.nio.file.Path $r4;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.util.ModularRuntimeImage;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r3 = r0.<com.sun.org.apache.bcel.internal.util.ModularRuntimeImage: java.nio.file.FileSystem fileSystem>;
+
+        $r2 = newarray (java.lang.String)[0];
+
+        $r4 = virtualinvoke $r3.<java.nio.file.FileSystem: java.nio.file.Path getPath(java.lang.String,java.lang.String[])>(r1, $r2);
+
+        $r5 = virtualinvoke r0.<com.sun.org.apache.bcel.internal.util.ModularRuntimeImage: java.util.List list(java.nio.file.Path)>($r4);
+
+        return $r5;
+    }
+
+    public java.util.List modules() throws java.io.IOException
+    {
+        com.sun.org.apache.bcel.internal.util.ModularRuntimeImage r0;
+        java.util.List $r2;
+        java.lang.String $r1;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.util.ModularRuntimeImage;
+
+        $r1 = <com.sun.org.apache.bcel.internal.util.ModularRuntimeImage: java.lang.String MODULES_PATH>;
+
+        $r2 = virtualinvoke r0.<com.sun.org.apache.bcel.internal.util.ModularRuntimeImage: java.util.List list(java.lang.String)>($r1);
+
+        return $r2;
+    }
+
+    public java.util.List packages() throws java.io.IOException
+    {
+        com.sun.org.apache.bcel.internal.util.ModularRuntimeImage r0;
+        java.util.List $r2;
+        java.lang.String $r1;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.util.ModularRuntimeImage;
+
+        $r1 = <com.sun.org.apache.bcel.internal.util.ModularRuntimeImage: java.lang.String PACKAGES_PATH>;
+
+        $r2 = virtualinvoke r0.<com.sun.org.apache.bcel.internal.util.ModularRuntimeImage: java.util.List list(java.lang.String)>($r1);
+
+        return $r2;
+    }
+
+    public java.nio.file.FileSystem getFileSystem()
+    {
+        com.sun.org.apache.bcel.internal.util.ModularRuntimeImage r0;
+        java.nio.file.FileSystem $r1;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.util.ModularRuntimeImage;
+
+        $r1 = r0.<com.sun.org.apache.bcel.internal.util.ModularRuntimeImage: java.nio.file.FileSystem fileSystem>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.StringBuilder $r0, $r2, $r3, $r5, $r7, $r8;
+        java.lang.String $r1, $r4, $r6, $r9;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = <java.io.File: java.lang.String separator>;
+
+        $r2 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("modules");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        <com.sun.org.apache.bcel.internal.util.ModularRuntimeImage: java.lang.String MODULES_PATH> = $r4;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = <java.io.File: java.lang.String separator>;
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("packages");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        <com.sun.org.apache.bcel.internal.util.ModularRuntimeImage: java.lang.String PACKAGES_PATH> = $r9;
+
+        return;
+    }
+}

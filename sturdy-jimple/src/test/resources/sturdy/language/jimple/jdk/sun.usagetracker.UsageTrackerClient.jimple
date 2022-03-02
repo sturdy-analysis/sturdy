@@ -1,0 +1,1641 @@
+public final class sun.usagetracker.UsageTrackerClient extends java.lang.Object
+{
+    private static final java.lang.Object LOCK;
+    private static final java.lang.String ORCL_UT_CONFIG_FILE_NAME;
+    private static final java.lang.String ORCL_UT_USAGE_DIR;
+    private static final java.lang.String ORCL_UT_PROPERTY_NAME;
+    private static final java.lang.String ORCL_UT_PROPERTY_RUN_SYNCHRONOUSLY;
+    private static final java.lang.String ORCL_UT_PROPERTY_CONFIG_FILE_NAME;
+    private static final java.lang.String ORCL_UT_LOGTOFILE;
+    private static final java.lang.String ORCL_UT_LOGFILEMAXSIZE;
+    private static final java.lang.String ORCL_UT_LOGTOUDP;
+    private static final java.lang.String ORCL_UT_RECORD_MAXSIZE;
+    private static final java.lang.String ORCL_UT_RECORD_MAXFIELDSIZE;
+    private static final java.lang.String ORCL_UT_SEND_TRUNCATED;
+    private static final java.lang.String ORCL_UT_TRACK_LAST_USAGE;
+    private static final java.lang.String ORCL_UT_VERBOSE;
+    private static final java.lang.String ORCL_UT_DEBUG;
+    private static final java.lang.String ORCL_UT_ADDITIONALPROPERTIES;
+    private static final java.lang.String ORCL_UT_SEPARATOR;
+    private static final java.lang.String ORCL_UT_QUOTE;
+    private static final java.lang.String ORCL_UT_QUOTE_INNER;
+    private static final java.lang.String DISABLE_LAST_USAGE_PROP_NAME;
+    private static final java.lang.String DEFAULT_SEP;
+    private static final java.lang.String DEFAULT_QUOTE;
+    private static final java.lang.String DEFAULT_QUOTE_INNER;
+    private static final java.util.concurrent.atomic.AtomicBoolean isFirstRun;
+    private static final java.lang.String javaHome;
+    private static final java.lang.String userHomeKeyword;
+    private static java.lang.String separator;
+    private static java.lang.String quote;
+    private static java.lang.String innerQuote;
+    private static boolean enabled;
+    private static boolean verbose;
+    private static boolean debug;
+    private static boolean trackTime;
+    private static java.lang.String[] additionalProperties;
+    private static java.lang.String fullLogFilename;
+    private static long logFileMaxSize;
+    private static int maxSize;
+    private static int maxFieldSize;
+    private static boolean sendTruncated;
+    private static java.lang.String datagramHost;
+    private static int datagramPort;
+    private static java.lang.String staticMessage;
+    private static boolean staticMessageIsTruncated;
+
+    private static java.lang.String getPropertyPrivileged(java.lang.String)
+    {
+        java.lang.String r0, $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <sun.usagetracker.UsageTrackerClient: java.lang.String getPropertyPrivileged(java.lang.String,java.lang.String)>(r0, null);
+
+        return $r1;
+    }
+
+    private static java.lang.String getPropertyPrivileged(java.lang.String, java.lang.String)
+    {
+        sun.usagetracker.UsageTrackerClient$1 $r0;
+        java.lang.Object $r3;
+        java.lang.String r1, r2, $r4;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        $r0 = new sun.usagetracker.UsageTrackerClient$1;
+
+        specialinvoke $r0.<sun.usagetracker.UsageTrackerClient$1: void <init>(java.lang.String,java.lang.String)>(r1, r2);
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r4 = (java.lang.String) $r3;
+
+        return $r4;
+    }
+
+    private static java.lang.String getEnvPrivileged(java.lang.String)
+    {
+        sun.usagetracker.UsageTrackerClient$2 $r0;
+        java.lang.Object $r2;
+        java.lang.String r1, $r3;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = new sun.usagetracker.UsageTrackerClient$2;
+
+        specialinvoke $r0.<sun.usagetracker.UsageTrackerClient$2: void <init>(java.lang.String)>(r1);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r3 = (java.lang.String) $r2;
+
+        return $r3;
+    }
+
+    private static boolean initTrackTime()
+    {
+        java.lang.String $r0, $r1, $r2;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        $r0 = staticinvoke <sun.usagetracker.UsageTrackerClient: java.lang.String getPropertyPrivileged(java.lang.String)>("jdk.disableLastUsageTracking");
+
+        if $r0 != null goto label3;
+
+        $r1 = staticinvoke <sun.usagetracker.UsageTrackerClient: java.lang.String getPropertyPrivileged(java.lang.String)>("os.name");
+
+        if $r1 == null goto label2;
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $z2 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>("sunos");
+
+        if $z2 != 0 goto label1;
+
+        $z3 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>("linux");
+
+        if $z3 == 0 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        return 1;
+
+     label3:
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 != 0 goto label4;
+
+        $z1 = virtualinvoke $r0.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("true");
+
+        if $z1 != 0 goto label4;
+
+        $z4 = 1;
+
+        goto label5;
+
+     label4:
+        $z4 = 0;
+
+     label5:
+        return $z4;
+    }
+
+    private static java.io.File getConfigFilePrivileged()
+    {
+        java.lang.String[] r0;
+        int i0, i1;
+        java.lang.String $r1, $r2, $r4, $r6, $r9, $r12, $r15, r16;
+        sun.usagetracker.UsageTrackerClient$3 $r17;
+        java.io.File r19;
+        java.lang.StringBuilder $r3, $r5, $r7, $r8, $r10, $r11, $r13, $r14;
+        java.lang.Object $r18;
+
+        r19 = null;
+
+        r0 = newarray (java.lang.String)[3];
+
+        $r1 = staticinvoke <sun.usagetracker.UsageTrackerClient: java.lang.String getPropertyPrivileged(java.lang.String)>("com.oracle.usagetracker.config.file");
+
+        r0[0] = $r1;
+
+        $r2 = staticinvoke <sun.usagetracker.UsageTrackerClient: java.lang.String getOSSpecificConfigFilePath()>();
+
+        r0[1] = $r2;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = <sun.usagetracker.UsageTrackerClient: java.lang.String javaHome>;
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = <java.io.File: java.lang.String separator>;
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("lib");
+
+        $r9 = <java.io.File: java.lang.String separator>;
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("management");
+
+        $r12 = <java.io.File: java.lang.String separator>;
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("usagetracker.properties");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r0[2] = $r15;
+
+        i0 = lengthof r0;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label3;
+
+        r16 = r0[i1];
+
+        if r16 == null goto label2;
+
+        $r17 = new sun.usagetracker.UsageTrackerClient$3;
+
+        specialinvoke $r17.<sun.usagetracker.UsageTrackerClient$3: void <init>(java.lang.String)>(r16);
+
+        $r18 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r17);
+
+        r19 = (java.io.File) $r18;
+
+        if r19 == null goto label2;
+
+        goto label3;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        return r19;
+    }
+
+    private static java.lang.String getOSSpecificConfigFilePath()
+    {
+        java.lang.StringBuilder $r6, $r7, $r8, $r9;
+        java.lang.String $r0, $r1, $r2, $r3, $r4, $r5, $r10;
+        boolean $z0, $z1, $z2, $z3;
+
+        $r0 = staticinvoke <sun.usagetracker.UsageTrackerClient: java.lang.String getPropertyPrivileged(java.lang.String)>("os.name");
+
+        if $r0 == null goto label6;
+
+        $r1 = virtualinvoke $r0.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("sunos");
+
+        if $z0 == 0 goto label1;
+
+        return "/etc/oracle/java/usagetracker.properties";
+
+     label1:
+        $r2 = virtualinvoke $r0.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>("mac");
+
+        if $z1 == 0 goto label2;
+
+        return "/Library/Application Support/Oracle/Java/usagetracker.properties";
+
+     label2:
+        $r3 = virtualinvoke $r0.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $z2 = virtualinvoke $r3.<java.lang.String: boolean startsWith(java.lang.String)>("win");
+
+        if $z2 == 0 goto label5;
+
+        $r5 = staticinvoke <sun.usagetracker.UsageTrackerClient: java.lang.String getEnvPrivileged(java.lang.String)>("ProgramFiles");
+
+        if $r5 != null goto label3;
+
+        $r10 = null;
+
+        goto label4;
+
+     label3:
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\\Java\\conf\\");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("usagetracker.properties");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label4:
+        return $r10;
+
+     label5:
+        $r4 = virtualinvoke $r0.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $z3 = virtualinvoke $r4.<java.lang.String: boolean startsWith(java.lang.String)>("linux");
+
+        if $z3 == 0 goto label6;
+
+        return "/etc/oracle/java/usagetracker.properties";
+
+     label6:
+        return null;
+    }
+
+    private java.lang.String getFullLogFilename(java.util.Properties)
+    {
+        int $i0, $i1, $i2;
+        java.lang.String $r1, $r4, $r6, $r8, $r9, r11;
+        boolean $z0, $z1, $z2;
+        java.util.Properties r0;
+        java.io.File $r2;
+        sun.usagetracker.UsageTrackerClient r3;
+        java.lang.StringBuilder $r5, $r7, $r10;
+
+        r3 := @this: sun.usagetracker.UsageTrackerClient;
+
+        r0 := @parameter0: java.util.Properties;
+
+        $r1 = virtualinvoke r0.<java.util.Properties: java.lang.String getProperty(java.lang.String,java.lang.String)>("com.oracle.usagetracker.logToFile", "");
+
+        r11 = $r1;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        return null;
+
+     label1:
+        $z1 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("${user.home}");
+
+        if $z1 == 0 goto label3;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $r4 = "${user.home}";
+
+        $i1 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        if $i0 <= $i1 goto label2;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = staticinvoke <sun.usagetracker.UsageTrackerClient: java.lang.String getPropertyPrivileged(java.lang.String)>("user.home");
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = "${user.home}";
+
+        $i2 = virtualinvoke $r8.<java.lang.String: int length()>();
+
+        $r9 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>($i2);
+
+        $r10 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label4;
+
+     label2:
+        specialinvoke r3.<sun.usagetracker.UsageTrackerClient: void printVerbose(java.lang.String)>("UsageTracker: blank filename after user.home.");
+
+        return null;
+
+     label3:
+        $r2 = new java.io.File;
+
+        specialinvoke $r2.<java.io.File: void <init>(java.lang.String)>($r1);
+
+        $z2 = virtualinvoke $r2.<java.io.File: boolean isAbsolute()>();
+
+        if $z2 != 0 goto label4;
+
+        specialinvoke r3.<sun.usagetracker.UsageTrackerClient: void printVerbose(java.lang.String)>("UsageTracker: relative path disallowed.");
+
+        return null;
+
+     label4:
+        return r11;
+    }
+
+    private long getPropertyValueLong(java.util.Properties, java.lang.String)
+    {
+        java.util.Properties r0;
+        long $l0;
+        java.lang.NumberFormatException $r3;
+        sun.usagetracker.UsageTrackerClient r4;
+        java.lang.StringBuilder $r5, $r6, $r7;
+        java.lang.String r1, $r2, $r8;
+        boolean $z0;
+
+        r4 := @this: sun.usagetracker.UsageTrackerClient;
+
+        r0 := @parameter0: java.util.Properties;
+
+        r1 := @parameter1: java.lang.String;
+
+        $r2 = virtualinvoke r0.<java.util.Properties: java.lang.String getProperty(java.lang.String,java.lang.String)>(r1, "");
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 != 0 goto label4;
+
+     label1:
+        $l0 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>($r2);
+
+     label2:
+        return $l0;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("UsageTracker: bad value: ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r4.<sun.usagetracker.UsageTrackerClient: void printVerbose(java.lang.String)>($r8);
+
+     label4:
+        return -1L;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label3;
+    }
+
+    private boolean getPropertyValueBoolean(java.util.Properties, java.lang.String, boolean)
+    {
+        java.util.Properties r0;
+        sun.usagetracker.UsageTrackerClient r3;
+        java.lang.String r1, $r2;
+        boolean $z0, z1, $z2;
+
+        r3 := @this: sun.usagetracker.UsageTrackerClient;
+
+        r0 := @parameter0: java.util.Properties;
+
+        r1 := @parameter1: java.lang.String;
+
+        z1 := @parameter2: boolean;
+
+        $r2 = virtualinvoke r0.<java.util.Properties: java.lang.String getProperty(java.lang.String,java.lang.String)>(r1, "");
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 != 0 goto label1;
+
+        $z2 = staticinvoke <java.lang.Boolean: boolean parseBoolean(java.lang.String)>($r2);
+
+        return $z2;
+
+     label1:
+        return z1;
+    }
+
+    private java.lang.String[] getAdditionalProperties(java.util.Properties)
+    {
+        java.util.Properties r0;
+        sun.usagetracker.UsageTrackerClient r2;
+        java.lang.String[] $r3;
+        java.lang.String $r1;
+        boolean $z0;
+
+        r2 := @this: sun.usagetracker.UsageTrackerClient;
+
+        r0 := @parameter0: java.util.Properties;
+
+        $r1 = virtualinvoke r0.<java.util.Properties: java.lang.String getProperty(java.lang.String,java.lang.String)>("com.oracle.usagetracker.additionalProperties", "");
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        $r3 = newarray (java.lang.String)[0];
+
+        goto label2;
+
+     label1:
+        $r3 = virtualinvoke $r1.<java.lang.String: java.lang.String[] split(java.lang.String)>(",");
+
+     label2:
+        return $r3;
+    }
+
+    private java.lang.String parseDatagramHost(java.lang.String)
+    {
+        sun.usagetracker.UsageTrackerClient r1;
+        int $i0, $i1, $i2;
+        java.lang.String r0, $r2;
+
+        r1 := @this: sun.usagetracker.UsageTrackerClient;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 == null goto label2;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int indexOf(int)>(58);
+
+        if $i0 <= 0 goto label1;
+
+        $i1 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $i2 = $i1 - 1;
+
+        if $i0 >= $i2 goto label1;
+
+        $r2 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        return $r2;
+
+     label1:
+        specialinvoke r1.<sun.usagetracker.UsageTrackerClient: void printVerbose(java.lang.String)>("UsageTracker: bad UDP details.");
+
+     label2:
+        return null;
+    }
+
+    private int parseDatagramPort(java.lang.String)
+    {
+        sun.usagetracker.UsageTrackerClient r3;
+        int $i0, $i1, $i2;
+        java.lang.String r0, $r1;
+        java.lang.Exception $r2;
+
+        r3 := @this: sun.usagetracker.UsageTrackerClient;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 == null goto label4;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int indexOf(int)>(58);
+
+     label1:
+        $i1 = $i0 + 1;
+
+        $r1 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>($i1);
+
+        $i2 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r1);
+
+     label2:
+        return $i2;
+
+     label3:
+        $r2 := @caughtexception;
+
+        specialinvoke r3.<sun.usagetracker.UsageTrackerClient: void printVerbose(java.lang.String)>("UsageTracker: bad UDP port.");
+
+     label4:
+        return 0;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    private void printVerbose(java.lang.String)
+    {
+        java.io.PrintStream $r1;
+        sun.usagetracker.UsageTrackerClient r2;
+        java.lang.String r0;
+        boolean $z0;
+
+        r2 := @this: sun.usagetracker.UsageTrackerClient;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = <sun.usagetracker.UsageTrackerClient: boolean verbose>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>(r0);
+
+     label1:
+        return;
+    }
+
+    private void printDebug(java.lang.String)
+    {
+        java.io.PrintStream $r1;
+        sun.usagetracker.UsageTrackerClient r2;
+        java.lang.String r0;
+        boolean $z0;
+
+        r2 := @this: sun.usagetracker.UsageTrackerClient;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = <sun.usagetracker.UsageTrackerClient: boolean debug>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>(r0);
+
+     label1:
+        return;
+    }
+
+    private void printDebugStackTrace(java.lang.Throwable)
+    {
+        java.lang.Throwable r0;
+        sun.usagetracker.UsageTrackerClient r1;
+        boolean $z0;
+
+        r1 := @this: sun.usagetracker.UsageTrackerClient;
+
+        r0 := @parameter0: java.lang.Throwable;
+
+        $z0 = <sun.usagetracker.UsageTrackerClient: boolean debug>;
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r0.<java.lang.Throwable: void printStackTrace()>();
+
+     label1:
+        return;
+    }
+
+    public void <init>()
+    {
+        sun.usagetracker.UsageTrackerClient r0;
+
+        r0 := @this: sun.usagetracker.UsageTrackerClient;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private void setupAndTimestamp(long)
+    {
+        sun.usagetracker.UsageTrackerClient r2;
+        java.util.concurrent.atomic.AtomicBoolean $r0;
+        long l0;
+        java.io.File $r1;
+        boolean $z0, $z1;
+
+        r2 := @this: sun.usagetracker.UsageTrackerClient;
+
+        l0 := @parameter0: long;
+
+        $r0 = <sun.usagetracker.UsageTrackerClient: java.util.concurrent.atomic.AtomicBoolean isFirstRun>;
+
+        $z0 = virtualinvoke $r0.<java.util.concurrent.atomic.AtomicBoolean: boolean compareAndSet(boolean,boolean)>(1, 0);
+
+        if $z0 == 0 goto label2;
+
+        $r1 = staticinvoke <sun.usagetracker.UsageTrackerClient: java.io.File getConfigFilePrivileged()>();
+
+        if $r1 == null goto label1;
+
+        specialinvoke r2.<sun.usagetracker.UsageTrackerClient: void setup(java.io.File)>($r1);
+
+     label1:
+        $z1 = <sun.usagetracker.UsageTrackerClient: boolean trackTime>;
+
+        if $z1 == 0 goto label2;
+
+        specialinvoke r2.<sun.usagetracker.UsageTrackerClient: void registerUsage(long)>(l0);
+
+     label2:
+        return;
+    }
+
+    public void run(java.lang.String, java.lang.String)
+    {
+        java.lang.Throwable $r10;
+        sun.usagetracker.UsageTrackerClient$4 $r9;
+        sun.usagetracker.UsageTrackerClient r0;
+        java.lang.StringBuilder $r1, $r2, $r4, $r5, $r7;
+        java.lang.String r3, r6, $r8;
+
+        r0 := @this: sun.usagetracker.UsageTrackerClient;
+
+        r3 := @parameter0: java.lang.String;
+
+        r6 := @parameter1: java.lang.String;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("UsageTracker.run: ");
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", javaCommand: ");
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<sun.usagetracker.UsageTrackerClient: void printDebug(java.lang.String)>($r8);
+
+     label1:
+        $r9 = new sun.usagetracker.UsageTrackerClient$4;
+
+        specialinvoke $r9.<sun.usagetracker.UsageTrackerClient$4: void <init>(sun.usagetracker.UsageTrackerClient,java.lang.String,java.lang.String)>(r0, r3, r6);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r9);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r10 := @caughtexception;
+
+        specialinvoke r0.<sun.usagetracker.UsageTrackerClient: void printVerbose(java.lang.String)>("UsageTracker: error in starting thread.");
+
+        specialinvoke r0.<sun.usagetracker.UsageTrackerClient: void printDebugStackTrace(java.lang.Throwable)>($r10);
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private void setup(java.io.File)
+    {
+        java.io.BufferedInputStream $r5;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.lang.Exception $r6;
+        java.lang.Throwable $r7, $r8, $r9, $r11, $r12, $r13, r15, r16;
+        long $l1, $l2, $l4;
+        java.lang.String[] $r21;
+        int $i0, $i3, $i5, $i6;
+        java.lang.String $r3, $r17, $r18, $r19, $r20, $r22, $r23, $r24;
+        java.util.Properties $r0;
+        java.io.FileInputStream $r4;
+        java.io.File r1;
+        sun.usagetracker.UsageTrackerClient r2;
+
+        r2 := @this: sun.usagetracker.UsageTrackerClient;
+
+        r1 := @parameter0: java.io.File;
+
+        $r0 = new java.util.Properties;
+
+        specialinvoke $r0.<java.util.Properties: void <init>()>();
+
+        if r1 == null goto label26;
+
+     label01:
+        $r4 = new java.io.FileInputStream;
+
+        specialinvoke $r4.<java.io.FileInputStream: void <init>(java.io.File)>(r1);
+
+        r15 = null;
+
+     label02:
+        $r5 = new java.io.BufferedInputStream;
+
+        specialinvoke $r5.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>($r4);
+
+        r16 = null;
+
+     label03:
+        virtualinvoke $r0.<java.util.Properties: void load(java.io.InputStream)>($r5);
+
+     label04:
+        if $r5 == null goto label14;
+
+        goto label05;
+
+     label05:
+        virtualinvoke $r5.<java.io.BufferedInputStream: void close()>();
+
+        goto label14;
+
+     label06:
+        $r13 := @caughtexception;
+
+        r16 = $r13;
+
+        throw $r13;
+
+     label07:
+        $r12 := @caughtexception;
+
+     label08:
+        if $r5 == null goto label13;
+
+        if r16 == null goto label12;
+
+     label09:
+        virtualinvoke $r5.<java.io.BufferedInputStream: void close()>();
+
+     label10:
+        goto label13;
+
+     label11:
+        $r11 := @caughtexception;
+
+        virtualinvoke r16.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r11);
+
+        goto label13;
+
+     label12:
+        virtualinvoke $r5.<java.io.BufferedInputStream: void close()>();
+
+     label13:
+        throw $r12;
+
+     label14:
+        if $r4 == null goto label24;
+
+        goto label15;
+
+     label15:
+        virtualinvoke $r4.<java.io.FileInputStream: void close()>();
+
+        goto label24;
+
+     label16:
+        $r9 := @caughtexception;
+
+        r15 = $r9;
+
+        throw $r9;
+
+     label17:
+        $r8 := @caughtexception;
+
+     label18:
+        if $r4 == null goto label23;
+
+        if r15 == null goto label22;
+
+     label19:
+        virtualinvoke $r4.<java.io.FileInputStream: void close()>();
+
+     label20:
+        goto label23;
+
+     label21:
+        $r7 := @caughtexception;
+
+        virtualinvoke r15.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r7);
+
+        goto label23;
+
+     label22:
+        virtualinvoke $r4.<java.io.FileInputStream: void close()>();
+
+     label23:
+        throw $r8;
+
+     label24:
+        goto label26;
+
+     label25:
+        $r6 := @caughtexception;
+
+        virtualinvoke $r0.<java.util.Properties: void clear()>();
+
+     label26:
+        $z2 = specialinvoke r2.<sun.usagetracker.UsageTrackerClient: boolean getPropertyValueBoolean(java.util.Properties,java.lang.String,boolean)>($r0, "com.oracle.usagetracker.verbose", 0);
+
+        <sun.usagetracker.UsageTrackerClient: boolean verbose> = $z2;
+
+        $z3 = specialinvoke r2.<sun.usagetracker.UsageTrackerClient: boolean getPropertyValueBoolean(java.util.Properties,java.lang.String,boolean)>($r0, "com.oracle.usagetracker.debug", 0);
+
+        <sun.usagetracker.UsageTrackerClient: boolean debug> = $z3;
+
+        $r17 = virtualinvoke $r0.<java.util.Properties: java.lang.String getProperty(java.lang.String,java.lang.String)>("com.oracle.usagetracker.separator", ",");
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String separator> = $r17;
+
+        $r18 = virtualinvoke $r0.<java.util.Properties: java.lang.String getProperty(java.lang.String,java.lang.String)>("com.oracle.usagetracker.quote", "\"");
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String quote> = $r18;
+
+        $r19 = virtualinvoke $r0.<java.util.Properties: java.lang.String getProperty(java.lang.String,java.lang.String)>("com.oracle.usagetracker.innerQuote", "\'");
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String innerQuote> = $r19;
+
+        $r20 = specialinvoke r2.<sun.usagetracker.UsageTrackerClient: java.lang.String getFullLogFilename(java.util.Properties)>($r0);
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String fullLogFilename> = $r20;
+
+        $l1 = specialinvoke r2.<sun.usagetracker.UsageTrackerClient: long getPropertyValueLong(java.util.Properties,java.lang.String)>($r0, "com.oracle.usagetracker.logFileMaxSize");
+
+        <sun.usagetracker.UsageTrackerClient: long logFileMaxSize> = $l1;
+
+        $l2 = specialinvoke r2.<sun.usagetracker.UsageTrackerClient: long getPropertyValueLong(java.util.Properties,java.lang.String)>($r0, "com.oracle.usagetracker.maxSize");
+
+        $i3 = (int) $l2;
+
+        <sun.usagetracker.UsageTrackerClient: int maxSize> = $i3;
+
+        $l4 = specialinvoke r2.<sun.usagetracker.UsageTrackerClient: long getPropertyValueLong(java.util.Properties,java.lang.String)>($r0, "com.oracle.usagetracker.maxFieldSize");
+
+        $i5 = (int) $l4;
+
+        <sun.usagetracker.UsageTrackerClient: int maxFieldSize> = $i5;
+
+        $z4 = specialinvoke r2.<sun.usagetracker.UsageTrackerClient: boolean getPropertyValueBoolean(java.util.Properties,java.lang.String,boolean)>($r0, "com.oracle.usagetracker.sendTruncatedRecords", 1);
+
+        <sun.usagetracker.UsageTrackerClient: boolean sendTruncated> = $z4;
+
+        $r21 = specialinvoke r2.<sun.usagetracker.UsageTrackerClient: java.lang.String[] getAdditionalProperties(java.util.Properties)>($r0);
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String[] additionalProperties> = $r21;
+
+        $r22 = virtualinvoke $r0.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("com.oracle.usagetracker.logToUDP");
+
+        $r23 = specialinvoke r2.<sun.usagetracker.UsageTrackerClient: java.lang.String parseDatagramHost(java.lang.String)>($r22);
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String datagramHost> = $r23;
+
+        $i6 = specialinvoke r2.<sun.usagetracker.UsageTrackerClient: int parseDatagramPort(java.lang.String)>($r22);
+
+        <sun.usagetracker.UsageTrackerClient: int datagramPort> = $i6;
+
+        $r24 = <sun.usagetracker.UsageTrackerClient: java.lang.String fullLogFilename>;
+
+        if $r24 != null goto label27;
+
+        $r3 = <sun.usagetracker.UsageTrackerClient: java.lang.String datagramHost>;
+
+        if $r3 == null goto label28;
+
+        $i0 = <sun.usagetracker.UsageTrackerClient: int datagramPort>;
+
+        if $i0 <= 0 goto label28;
+
+     label27:
+        $z5 = 1;
+
+        goto label29;
+
+     label28:
+        $z5 = 0;
+
+     label29:
+        if $z5 != 1 goto label30;
+
+        $z6 = 1;
+
+        goto label31;
+
+     label30:
+        $z6 = 0;
+
+     label31:
+        <sun.usagetracker.UsageTrackerClient: boolean enabled> = $z6;
+
+        $z0 = <sun.usagetracker.UsageTrackerClient: boolean trackTime>;
+
+        if $z0 == 0 goto label32;
+
+        $z1 = specialinvoke r2.<sun.usagetracker.UsageTrackerClient: boolean getPropertyValueBoolean(java.util.Properties,java.lang.String,boolean)>($r0, "com.oracle.usagetracker.track.last.usage", 1);
+
+        <sun.usagetracker.UsageTrackerClient: boolean trackTime> = $z1;
+
+     label32:
+        return;
+
+        catch java.lang.Throwable from label03 to label04 with label06;
+        catch java.lang.Throwable from label09 to label10 with label11;
+        catch java.lang.Throwable from label06 to label08 with label07;
+        catch java.lang.Throwable from label02 to label14 with label16;
+        catch java.lang.Throwable from label19 to label20 with label21;
+        catch java.lang.Throwable from label16 to label18 with label17;
+        catch java.lang.Exception from label01 to label24 with label25;
+    }
+
+    private void registerUsage(long)
+    {
+        byte[] $r15;
+        java.lang.Runtime $r63;
+        java.lang.StringBuilder $r7, $r8, $r10, $r11, $r13, $r17, $r18, $r20, $r21, $r23, $r26, $r27, $r33, $r34, $r36, $r37, $r39, $r40, $r42, $r43, $r45, $r47, $r48, $r54, $r55, $r57, $r58, $r60, $r61, $r64, $r65, $r66, $r68, $r69;
+        java.lang.Throwable $r73, $r74, $r75, r78;
+        long l0;
+        java.lang.String $r1, $r2, $r3, $r4, $r5, $r9, $r12, $r14, $r19, $r22, $r25, $r28, $r31, $r35, $r38, $r41, $r44, $r46, $r49, $r52, $r56, $r59, $r62, $r70;
+        java.io.FileOutputStream $r6;
+        java.io.IOException $r71, $r72;
+        java.io.File $r0, $r16, $r29, $r30, $r32, $r50, $r51, $r53, $r67, r77;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        sun.usagetracker.UsageTrackerClient r24;
+
+        r24 := @this: sun.usagetracker.UsageTrackerClient;
+
+        l0 := @parameter0: long;
+
+     label01:
+        $r0 = new java.io.File;
+
+        $r1 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.home");
+
+        specialinvoke $r0.<java.io.File: void <init>(java.lang.String)>($r1);
+
+        $r2 = virtualinvoke $r0.<java.io.File: java.lang.String getCanonicalPath()>();
+
+        $r3 = staticinvoke <sun.usagetracker.UsageTrackerClient: java.lang.String getPropertyPrivileged(java.lang.String)>("os.name");
+
+        r77 = null;
+
+        $r4 = virtualinvoke $r3.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean startsWith(java.lang.String)>("win");
+
+        if $z0 == 0 goto label06;
+
+        $r31 = staticinvoke <sun.usagetracker.UsageTrackerClient: java.lang.String getEnvPrivileged(java.lang.String)>("ProgramData");
+
+        if $r31 == null goto label05;
+
+        $r32 = new java.io.File;
+
+        $r33 = new java.lang.StringBuilder;
+
+        specialinvoke $r33.<java.lang.StringBuilder: void <init>()>();
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r31);
+
+        $r35 = <java.io.File: java.lang.String separator>;
+
+        $r36 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r35);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Oracle");
+
+        $r38 = <java.io.File: java.lang.String separator>;
+
+        $r39 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r38);
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Java");
+
+        $r41 = <java.io.File: java.lang.String separator>;
+
+        $r42 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r41);
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".oracle_jre_usage");
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r45 = new java.lang.StringBuilder;
+
+        specialinvoke $r45.<java.lang.StringBuilder: void <init>()>();
+
+        $r46 = specialinvoke r24.<sun.usagetracker.UsageTrackerClient: java.lang.String getPathHash(java.lang.String)>($r2);
+
+        $r47 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r46);
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".timestamp");
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r32.<java.io.File: void <init>(java.lang.String,java.lang.String)>($r44, $r49);
+
+        r77 = $r32;
+
+        $z3 = virtualinvoke $r32.<java.io.File: boolean exists()>();
+
+        if $z3 != 0 goto label05;
+
+        $r50 = virtualinvoke $r32.<java.io.File: java.io.File getParentFile()>();
+
+        $z4 = virtualinvoke $r50.<java.io.File: boolean exists()>();
+
+        if $z4 != 0 goto label04;
+
+        $r51 = virtualinvoke $r32.<java.io.File: java.io.File getParentFile()>();
+
+        $z5 = virtualinvoke $r51.<java.io.File: boolean mkdirs()>();
+
+        if $z5 == 0 goto label03;
+
+        $r52 = staticinvoke <sun.usagetracker.UsageTrackerClient: java.lang.String getEnvPrivileged(java.lang.String)>("SYSTEMROOT");
+
+        $r53 = new java.io.File;
+
+        $r54 = new java.lang.StringBuilder;
+
+        specialinvoke $r54.<java.lang.StringBuilder: void <init>()>();
+
+        $r55 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r52);
+
+        $r56 = <java.io.File: java.lang.String separator>;
+
+        $r57 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r56);
+
+        $r58 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("system32");
+
+        $r59 = <java.io.File: java.lang.String separator>;
+
+        $r60 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r59);
+
+        $r61 = virtualinvoke $r60.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("icacls.exe");
+
+        $r62 = virtualinvoke $r61.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r53.<java.io.File: void <init>(java.lang.String)>($r62);
+
+        $z6 = virtualinvoke $r53.<java.io.File: boolean exists()>();
+
+        if $z6 == 0 goto label02;
+
+        $r63 = staticinvoke <java.lang.Runtime: java.lang.Runtime getRuntime()>();
+
+        $r64 = new java.lang.StringBuilder;
+
+        specialinvoke $r64.<java.lang.StringBuilder: void <init>()>();
+
+        $r65 = virtualinvoke $r64.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r53);
+
+        $r66 = virtualinvoke $r65.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r67 = virtualinvoke $r32.<java.io.File: java.io.File getParentFile()>();
+
+        $r68 = virtualinvoke $r66.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r67);
+
+        $r69 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" /grant \"everyone\":(OI)(CI)M");
+
+        $r70 = virtualinvoke $r69.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r63.<java.lang.Runtime: java.lang.Process exec(java.lang.String)>($r70);
+
+     label02:
+        goto label04;
+
+     label03:
+        r77 = null;
+
+     label04:
+        if r77 == null goto label05;
+
+        virtualinvoke r77.<java.io.File: boolean createNewFile()>();
+
+     label05:
+        goto label08;
+
+     label06:
+        $r5 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("user.home");
+
+        if $r5 == null goto label08;
+
+        $r16 = new java.io.File;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r19 = <java.io.File: java.lang.String separator>;
+
+        $r20 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".oracle_jre_usage");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = specialinvoke r24.<sun.usagetracker.UsageTrackerClient: java.lang.String getPathHash(java.lang.String)>($r2);
+
+        $r26 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r25);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".timestamp");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r16.<java.io.File: void <init>(java.lang.String,java.lang.String)>($r22, $r28);
+
+        r77 = $r16;
+
+        $z1 = virtualinvoke $r16.<java.io.File: boolean exists()>();
+
+        if $z1 != 0 goto label08;
+
+        $r29 = virtualinvoke $r16.<java.io.File: java.io.File getParentFile()>();
+
+        $z2 = virtualinvoke $r29.<java.io.File: boolean exists()>();
+
+        if $z2 != 0 goto label07;
+
+        $r30 = virtualinvoke $r16.<java.io.File: java.io.File getParentFile()>();
+
+        virtualinvoke $r30.<java.io.File: boolean mkdirs()>();
+
+     label07:
+        virtualinvoke $r16.<java.io.File: boolean createNewFile()>();
+
+     label08:
+        if r77 == null goto label23;
+
+     label09:
+        $r6 = new java.io.FileOutputStream;
+
+        specialinvoke $r6.<java.io.FileOutputStream: void <init>(java.io.File)>(r77);
+
+        r78 = null;
+
+     label10:
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r9 = staticinvoke <java.lang.System: java.lang.String lineSeparator()>();
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>(l0);
+
+        $r12 = staticinvoke <java.lang.System: java.lang.String lineSeparator()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.String: byte[] getBytes(java.lang.String)>("UTF-8");
+
+        virtualinvoke $r6.<java.io.FileOutputStream: void write(byte[])>($r15);
+
+     label11:
+        if $r6 == null goto label21;
+
+        goto label12;
+
+     label12:
+        virtualinvoke $r6.<java.io.FileOutputStream: void close()>();
+
+        goto label21;
+
+     label13:
+        $r75 := @caughtexception;
+
+        r78 = $r75;
+
+        throw $r75;
+
+     label14:
+        $r74 := @caughtexception;
+
+     label15:
+        if $r6 == null goto label20;
+
+        if r78 == null goto label19;
+
+     label16:
+        virtualinvoke $r6.<java.io.FileOutputStream: void close()>();
+
+     label17:
+        goto label20;
+
+     label18:
+        $r73 := @caughtexception;
+
+        virtualinvoke r78.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r73);
+
+        goto label20;
+
+     label19:
+        virtualinvoke $r6.<java.io.FileOutputStream: void close()>();
+
+     label20:
+        throw $r74;
+
+     label21:
+        goto label23;
+
+     label22:
+        $r72 := @caughtexception;
+
+        specialinvoke r24.<sun.usagetracker.UsageTrackerClient: void printDebugStackTrace(java.lang.Throwable)>($r72);
+
+     label23:
+        goto label25;
+
+     label24:
+        $r71 := @caughtexception;
+
+        specialinvoke r24.<sun.usagetracker.UsageTrackerClient: void printDebugStackTrace(java.lang.Throwable)>($r71);
+
+     label25:
+        return;
+
+        catch java.lang.Throwable from label10 to label11 with label13;
+        catch java.lang.Throwable from label16 to label17 with label18;
+        catch java.lang.Throwable from label13 to label15 with label14;
+        catch java.io.IOException from label09 to label21 with label22;
+        catch java.io.IOException from label01 to label23 with label24;
+    }
+
+    private java.lang.String getPathHash(java.lang.String)
+    {
+        long $l1, $l3, l4;
+        char $c2;
+        sun.usagetracker.UsageTrackerClient r2;
+        int $i0, i5;
+        java.lang.String r0, $r1;
+
+        r2 := @this: sun.usagetracker.UsageTrackerClient;
+
+        r0 := @parameter0: java.lang.String;
+
+        l4 = 0L;
+
+        i5 = 0;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if i5 >= $i0 goto label2;
+
+        $l1 = 31L * l4;
+
+        $c2 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i5);
+
+        $l3 = (long) $c2;
+
+        l4 = $l1 + $l3;
+
+        i5 = i5 + 1;
+
+        goto label1;
+
+     label2:
+        $r1 = staticinvoke <java.lang.Long: java.lang.String toHexString(long)>(l4);
+
+        return $r1;
+    }
+
+    static void access$000(sun.usagetracker.UsageTrackerClient, long)
+    {
+        long l0;
+        sun.usagetracker.UsageTrackerClient r0;
+
+        r0 := @parameter0: sun.usagetracker.UsageTrackerClient;
+
+        l0 := @parameter1: long;
+
+        specialinvoke r0.<sun.usagetracker.UsageTrackerClient: void setupAndTimestamp(long)>(l0);
+
+        return;
+    }
+
+    static void access$100(sun.usagetracker.UsageTrackerClient, java.lang.String)
+    {
+        java.lang.String r1;
+        sun.usagetracker.UsageTrackerClient r0;
+
+        r0 := @parameter0: sun.usagetracker.UsageTrackerClient;
+
+        r1 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<sun.usagetracker.UsageTrackerClient: void printVerbose(java.lang.String)>(r1);
+
+        return;
+    }
+
+    static boolean access$200()
+    {
+        boolean $z0;
+
+        $z0 = <sun.usagetracker.UsageTrackerClient: boolean enabled>;
+
+        return $z0;
+    }
+
+    static void access$300(sun.usagetracker.UsageTrackerClient, java.lang.String)
+    {
+        java.lang.String r1;
+        sun.usagetracker.UsageTrackerClient r0;
+
+        r0 := @parameter0: sun.usagetracker.UsageTrackerClient;
+
+        r1 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<sun.usagetracker.UsageTrackerClient: void printDebug(java.lang.String)>(r1);
+
+        return;
+    }
+
+    static int access$400()
+    {
+        int $i0;
+
+        $i0 = <sun.usagetracker.UsageTrackerClient: int maxFieldSize>;
+
+        return $i0;
+    }
+
+    static boolean access$500()
+    {
+        boolean $z0;
+
+        $z0 = <sun.usagetracker.UsageTrackerClient: boolean sendTruncated>;
+
+        return $z0;
+    }
+
+    static java.lang.String access$600()
+    {
+        java.lang.String $r0;
+
+        $r0 = <sun.usagetracker.UsageTrackerClient: java.lang.String separator>;
+
+        return $r0;
+    }
+
+    static int access$700()
+    {
+        int $i0;
+
+        $i0 = <sun.usagetracker.UsageTrackerClient: int maxSize>;
+
+        return $i0;
+    }
+
+    static java.lang.Object access$800()
+    {
+        java.lang.Object $r0;
+
+        $r0 = <sun.usagetracker.UsageTrackerClient: java.lang.Object LOCK>;
+
+        return $r0;
+    }
+
+    static java.lang.String access$900()
+    {
+        java.lang.String $r0;
+
+        $r0 = <sun.usagetracker.UsageTrackerClient: java.lang.String staticMessage>;
+
+        return $r0;
+    }
+
+    static java.lang.String access$1000()
+    {
+        java.lang.String $r0;
+
+        $r0 = <sun.usagetracker.UsageTrackerClient: java.lang.String javaHome>;
+
+        return $r0;
+    }
+
+    static java.lang.String access$1100(java.lang.String)
+    {
+        java.lang.String r0, $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <sun.usagetracker.UsageTrackerClient: java.lang.String getPropertyPrivileged(java.lang.String)>(r0);
+
+        return $r1;
+    }
+
+    static java.lang.String access$1200()
+    {
+        java.lang.String $r0;
+
+        $r0 = <sun.usagetracker.UsageTrackerClient: java.lang.String innerQuote>;
+
+        return $r0;
+    }
+
+    static java.lang.String[] access$1300()
+    {
+        java.lang.String[] $r0;
+
+        $r0 = <sun.usagetracker.UsageTrackerClient: java.lang.String[] additionalProperties>;
+
+        return $r0;
+    }
+
+    static java.lang.String access$902(java.lang.String)
+    {
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String staticMessage> = r0;
+
+        return r0;
+    }
+
+    static boolean access$1402(boolean)
+    {
+        boolean z0;
+
+        z0 := @parameter0: boolean;
+
+        <sun.usagetracker.UsageTrackerClient: boolean staticMessageIsTruncated> = z0;
+
+        return z0;
+    }
+
+    static boolean access$1400()
+    {
+        boolean $z0;
+
+        $z0 = <sun.usagetracker.UsageTrackerClient: boolean staticMessageIsTruncated>;
+
+        return $z0;
+    }
+
+    static java.lang.String access$1500()
+    {
+        java.lang.String $r0;
+
+        $r0 = <sun.usagetracker.UsageTrackerClient: java.lang.String quote>;
+
+        return $r0;
+    }
+
+    static java.lang.String access$1600()
+    {
+        java.lang.String $r0;
+
+        $r0 = <sun.usagetracker.UsageTrackerClient: java.lang.String datagramHost>;
+
+        return $r0;
+    }
+
+    static int access$1700()
+    {
+        int $i0;
+
+        $i0 = <sun.usagetracker.UsageTrackerClient: int datagramPort>;
+
+        return $i0;
+    }
+
+    static void access$1800(sun.usagetracker.UsageTrackerClient, java.lang.Throwable)
+    {
+        java.lang.Throwable r1;
+        sun.usagetracker.UsageTrackerClient r0;
+
+        r0 := @parameter0: sun.usagetracker.UsageTrackerClient;
+
+        r1 := @parameter1: java.lang.Throwable;
+
+        specialinvoke r0.<sun.usagetracker.UsageTrackerClient: void printDebugStackTrace(java.lang.Throwable)>(r1);
+
+        return;
+    }
+
+    static java.lang.String access$1900()
+    {
+        java.lang.String $r0;
+
+        $r0 = <sun.usagetracker.UsageTrackerClient: java.lang.String fullLogFilename>;
+
+        return $r0;
+    }
+
+    static long access$2000()
+    {
+        long $l0;
+
+        $l0 = <sun.usagetracker.UsageTrackerClient: long logFileMaxSize>;
+
+        return $l0;
+    }
+
+    static void <clinit>()
+    {
+        java.util.concurrent.atomic.AtomicBoolean $r1;
+        java.lang.Object $r0;
+        java.lang.String $r2;
+        boolean $z0;
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String userHomeKeyword> = "${user.home}";
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String DEFAULT_QUOTE_INNER> = "\'";
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String DEFAULT_QUOTE> = "\"";
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String DEFAULT_SEP> = ",";
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String DISABLE_LAST_USAGE_PROP_NAME> = "jdk.disableLastUsageTracking";
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String ORCL_UT_QUOTE_INNER> = "com.oracle.usagetracker.innerQuote";
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String ORCL_UT_QUOTE> = "com.oracle.usagetracker.quote";
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String ORCL_UT_SEPARATOR> = "com.oracle.usagetracker.separator";
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String ORCL_UT_ADDITIONALPROPERTIES> = "com.oracle.usagetracker.additionalProperties";
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String ORCL_UT_DEBUG> = "com.oracle.usagetracker.debug";
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String ORCL_UT_VERBOSE> = "com.oracle.usagetracker.verbose";
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String ORCL_UT_TRACK_LAST_USAGE> = "com.oracle.usagetracker.track.last.usage";
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String ORCL_UT_SEND_TRUNCATED> = "com.oracle.usagetracker.sendTruncatedRecords";
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String ORCL_UT_RECORD_MAXFIELDSIZE> = "com.oracle.usagetracker.maxFieldSize";
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String ORCL_UT_RECORD_MAXSIZE> = "com.oracle.usagetracker.maxSize";
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String ORCL_UT_LOGTOUDP> = "com.oracle.usagetracker.logToUDP";
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String ORCL_UT_LOGFILEMAXSIZE> = "com.oracle.usagetracker.logFileMaxSize";
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String ORCL_UT_LOGTOFILE> = "com.oracle.usagetracker.logToFile";
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String ORCL_UT_PROPERTY_CONFIG_FILE_NAME> = "com.oracle.usagetracker.config.file";
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String ORCL_UT_PROPERTY_RUN_SYNCHRONOUSLY> = "com.oracle.usagetracker.run.synchronous";
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String ORCL_UT_PROPERTY_NAME> = "com.oracle.usagetracker.";
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String ORCL_UT_USAGE_DIR> = ".oracle_jre_usage";
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String ORCL_UT_CONFIG_FILE_NAME> = "usagetracker.properties";
+
+        $r0 = new java.lang.Object;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.Object LOCK> = $r0;
+
+        $r1 = new java.util.concurrent.atomic.AtomicBoolean;
+
+        specialinvoke $r1.<java.util.concurrent.atomic.AtomicBoolean: void <init>(boolean)>(1);
+
+        <sun.usagetracker.UsageTrackerClient: java.util.concurrent.atomic.AtomicBoolean isFirstRun> = $r1;
+
+        $r2 = staticinvoke <sun.usagetracker.UsageTrackerClient: java.lang.String getPropertyPrivileged(java.lang.String)>("java.home");
+
+        <sun.usagetracker.UsageTrackerClient: java.lang.String javaHome> = $r2;
+
+        $z0 = staticinvoke <sun.usagetracker.UsageTrackerClient: boolean initTrackTime()>();
+
+        <sun.usagetracker.UsageTrackerClient: boolean trackTime> = $z0;
+
+        return;
+    }
+}

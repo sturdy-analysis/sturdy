@@ -1,0 +1,337 @@
+class sun.management.GarbageCollectorImpl extends sun.management.MemoryManagerImpl implements com.sun.management.GarbageCollectorMXBean
+{
+    private java.lang.String[] poolNames;
+    private sun.management.GcInfoBuilder gcInfoBuilder;
+    private static final java.lang.String notifName;
+    private static final java.lang.String[] gcNotifTypes;
+    private static long seqNumber;
+
+    void <init>(java.lang.String)
+    {
+        sun.management.GarbageCollectorImpl r0;
+        java.lang.String r1;
+
+        r0 := @this: sun.management.GarbageCollectorImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<sun.management.MemoryManagerImpl: void <init>(java.lang.String)>(r1);
+
+        r0.<sun.management.GarbageCollectorImpl: java.lang.String[] poolNames> = null;
+
+        return;
+    }
+
+    public native long getCollectionCount();
+
+    public native long getCollectionTime();
+
+    synchronized java.lang.String[] getAllPoolNames()
+    {
+        sun.management.GarbageCollectorImpl r0;
+        java.util.Iterator $r5;
+        java.lang.String[] $r1, $r2, $r4, $r8;
+        java.util.List $r3;
+        java.lang.management.MemoryPoolMXBean r7;
+        int $i0, $i1, i2;
+        java.lang.Object $r6;
+        java.lang.String $r9;
+        boolean $z0;
+
+        r0 := @this: sun.management.GarbageCollectorImpl;
+
+        $r1 = r0.<sun.management.GarbageCollectorImpl: java.lang.String[] poolNames>;
+
+        if $r1 != null goto label2;
+
+        $r3 = staticinvoke <java.lang.management.ManagementFactory: java.util.List getMemoryPoolMXBeans()>();
+
+        $i0 = interfaceinvoke $r3.<java.util.List: int size()>();
+
+        $r4 = newarray (java.lang.String)[$i0];
+
+        r0.<sun.management.GarbageCollectorImpl: java.lang.String[] poolNames> = $r4;
+
+        i2 = 0;
+
+        $r5 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (java.lang.management.MemoryPoolMXBean) $r6;
+
+        $r8 = r0.<sun.management.GarbageCollectorImpl: java.lang.String[] poolNames>;
+
+        $i1 = i2;
+
+        i2 = i2 + 1;
+
+        $r9 = interfaceinvoke r7.<java.lang.management.MemoryPoolMXBean: java.lang.String getName()>();
+
+        $r8[$i1] = $r9;
+
+        goto label1;
+
+     label2:
+        $r2 = r0.<sun.management.GarbageCollectorImpl: java.lang.String[] poolNames>;
+
+        return $r2;
+    }
+
+    private synchronized sun.management.GcInfoBuilder getGcInfoBuilder()
+    {
+        sun.management.GarbageCollectorImpl r0;
+        sun.management.GcInfoBuilder $r1, $r2, $r3;
+        java.lang.String[] $r4;
+
+        r0 := @this: sun.management.GarbageCollectorImpl;
+
+        $r1 = r0.<sun.management.GarbageCollectorImpl: sun.management.GcInfoBuilder gcInfoBuilder>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new sun.management.GcInfoBuilder;
+
+        $r4 = virtualinvoke r0.<sun.management.GarbageCollectorImpl: java.lang.String[] getAllPoolNames()>();
+
+        specialinvoke $r3.<sun.management.GcInfoBuilder: void <init>(java.lang.management.GarbageCollectorMXBean,java.lang.String[])>(r0, $r4);
+
+        r0.<sun.management.GarbageCollectorImpl: sun.management.GcInfoBuilder gcInfoBuilder> = $r3;
+
+     label1:
+        $r2 = r0.<sun.management.GarbageCollectorImpl: sun.management.GcInfoBuilder gcInfoBuilder>;
+
+        return $r2;
+    }
+
+    public com.sun.management.GcInfo getLastGcInfo()
+    {
+        sun.management.GcInfoBuilder $r1;
+        sun.management.GarbageCollectorImpl r0;
+        com.sun.management.GcInfo $r2;
+
+        r0 := @this: sun.management.GarbageCollectorImpl;
+
+        $r1 = specialinvoke r0.<sun.management.GarbageCollectorImpl: sun.management.GcInfoBuilder getGcInfoBuilder()>();
+
+        $r2 = virtualinvoke $r1.<sun.management.GcInfoBuilder: com.sun.management.GcInfo getLastGcInfo()>();
+
+        return $r2;
+    }
+
+    public javax.management.MBeanNotificationInfo[] getNotificationInfo()
+    {
+        sun.management.GarbageCollectorImpl r3;
+        java.lang.String[] $r2;
+        javax.management.MBeanNotificationInfo[] $r0;
+        javax.management.MBeanNotificationInfo $r1;
+
+        r3 := @this: sun.management.GarbageCollectorImpl;
+
+        $r0 = newarray (javax.management.MBeanNotificationInfo)[1];
+
+        $r1 = new javax.management.MBeanNotificationInfo;
+
+        $r2 = <sun.management.GarbageCollectorImpl: java.lang.String[] gcNotifTypes>;
+
+        specialinvoke $r1.<javax.management.MBeanNotificationInfo: void <init>(java.lang.String[],java.lang.String,java.lang.String)>($r2, "javax.management.Notification", "GC Notification");
+
+        $r0[0] = $r1;
+
+        return $r0;
+    }
+
+    private static long getNextSeqNumber()
+    {
+        long $l0, $l1;
+
+        $l0 = <sun.management.GarbageCollectorImpl: long seqNumber>;
+
+        $l1 = $l0 + 1L;
+
+        <sun.management.GarbageCollectorImpl: long seqNumber> = $l1;
+
+        return $l1;
+    }
+
+    void createGCNotification(long, java.lang.String, java.lang.String, java.lang.String, com.sun.management.GcInfo)
+    {
+        sun.management.GarbageCollectorImpl r0;
+        javax.management.openmbean.CompositeData $r8;
+        long $l0, l1;
+        javax.management.ObjectName $r2;
+        javax.management.Notification $r1;
+        com.sun.management.GarbageCollectionNotificationInfo $r4;
+        java.lang.String r3, r5, r6;
+        com.sun.management.GcInfo r7;
+        boolean $z0;
+
+        r0 := @this: sun.management.GarbageCollectorImpl;
+
+        l1 := @parameter0: long;
+
+        r3 := @parameter1: java.lang.String;
+
+        r5 := @parameter2: java.lang.String;
+
+        r6 := @parameter3: java.lang.String;
+
+        r7 := @parameter4: com.sun.management.GcInfo;
+
+        $z0 = virtualinvoke r0.<sun.management.GarbageCollectorImpl: boolean hasListeners()>();
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = new javax.management.Notification;
+
+        $r2 = virtualinvoke r0.<sun.management.GarbageCollectorImpl: javax.management.ObjectName getObjectName()>();
+
+        $l0 = staticinvoke <sun.management.GarbageCollectorImpl: long getNextSeqNumber()>();
+
+        specialinvoke $r1.<javax.management.Notification: void <init>(java.lang.String,java.lang.Object,long,long,java.lang.String)>("com.sun.management.gc.notification", $r2, $l0, l1, r3);
+
+        $r4 = new com.sun.management.GarbageCollectionNotificationInfo;
+
+        specialinvoke $r4.<com.sun.management.GarbageCollectionNotificationInfo: void <init>(java.lang.String,java.lang.String,java.lang.String,com.sun.management.GcInfo)>(r3, r5, r6, r7);
+
+        $r8 = staticinvoke <sun.management.GarbageCollectionNotifInfoCompositeData: javax.management.openmbean.CompositeData toCompositeData(com.sun.management.GarbageCollectionNotificationInfo)>($r4);
+
+        virtualinvoke $r1.<javax.management.Notification: void setUserData(java.lang.Object)>($r8);
+
+        virtualinvoke r0.<sun.management.GarbageCollectorImpl: void sendNotification(javax.management.Notification)>($r1);
+
+        return;
+    }
+
+    public synchronized void addNotificationListener(javax.management.NotificationListener, javax.management.NotificationFilter, java.lang.Object)
+    {
+        sun.management.GarbageCollectorImpl r0;
+        javax.management.NotificationListener r1;
+        javax.management.NotificationFilter r2;
+        java.lang.Object r3;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.management.GarbageCollectorImpl;
+
+        r1 := @parameter0: javax.management.NotificationListener;
+
+        r2 := @parameter1: javax.management.NotificationFilter;
+
+        r3 := @parameter2: java.lang.Object;
+
+        $z0 = virtualinvoke r0.<sun.management.GarbageCollectorImpl: boolean hasListeners()>();
+
+        specialinvoke r0.<sun.management.MemoryManagerImpl: void addNotificationListener(javax.management.NotificationListener,javax.management.NotificationFilter,java.lang.Object)>(r1, r2, r3);
+
+        $z1 = virtualinvoke r0.<sun.management.GarbageCollectorImpl: boolean hasListeners()>();
+
+        if $z0 != 0 goto label1;
+
+        if $z1 == 0 goto label1;
+
+        virtualinvoke r0.<sun.management.GarbageCollectorImpl: void setNotificationEnabled(com.sun.management.GarbageCollectorMXBean,boolean)>(r0, 1);
+
+     label1:
+        return;
+    }
+
+    public synchronized void removeNotificationListener(javax.management.NotificationListener) throws javax.management.ListenerNotFoundException
+    {
+        sun.management.GarbageCollectorImpl r0;
+        javax.management.NotificationListener r1;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.management.GarbageCollectorImpl;
+
+        r1 := @parameter0: javax.management.NotificationListener;
+
+        $z0 = virtualinvoke r0.<sun.management.GarbageCollectorImpl: boolean hasListeners()>();
+
+        specialinvoke r0.<sun.management.MemoryManagerImpl: void removeNotificationListener(javax.management.NotificationListener)>(r1);
+
+        $z1 = virtualinvoke r0.<sun.management.GarbageCollectorImpl: boolean hasListeners()>();
+
+        if $z0 == 0 goto label1;
+
+        if $z1 != 0 goto label1;
+
+        virtualinvoke r0.<sun.management.GarbageCollectorImpl: void setNotificationEnabled(com.sun.management.GarbageCollectorMXBean,boolean)>(r0, 0);
+
+     label1:
+        return;
+    }
+
+    public synchronized void removeNotificationListener(javax.management.NotificationListener, javax.management.NotificationFilter, java.lang.Object) throws javax.management.ListenerNotFoundException
+    {
+        sun.management.GarbageCollectorImpl r0;
+        javax.management.NotificationListener r1;
+        javax.management.NotificationFilter r2;
+        java.lang.Object r3;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.management.GarbageCollectorImpl;
+
+        r1 := @parameter0: javax.management.NotificationListener;
+
+        r2 := @parameter1: javax.management.NotificationFilter;
+
+        r3 := @parameter2: java.lang.Object;
+
+        $z0 = virtualinvoke r0.<sun.management.GarbageCollectorImpl: boolean hasListeners()>();
+
+        specialinvoke r0.<sun.management.MemoryManagerImpl: void removeNotificationListener(javax.management.NotificationListener,javax.management.NotificationFilter,java.lang.Object)>(r1, r2, r3);
+
+        $z1 = virtualinvoke r0.<sun.management.GarbageCollectorImpl: boolean hasListeners()>();
+
+        if $z0 == 0 goto label1;
+
+        if $z1 != 0 goto label1;
+
+        virtualinvoke r0.<sun.management.GarbageCollectorImpl: void setNotificationEnabled(com.sun.management.GarbageCollectorMXBean,boolean)>(r0, 0);
+
+     label1:
+        return;
+    }
+
+    public javax.management.ObjectName getObjectName()
+    {
+        sun.management.GarbageCollectorImpl r0;
+        java.lang.String $r1;
+        javax.management.ObjectName $r2;
+
+        r0 := @this: sun.management.GarbageCollectorImpl;
+
+        $r1 = virtualinvoke r0.<sun.management.GarbageCollectorImpl: java.lang.String getName()>();
+
+        $r2 = staticinvoke <sun.management.Util: javax.management.ObjectName newObjectName(java.lang.String,java.lang.String)>("java.lang:type=GarbageCollector", $r1);
+
+        return $r2;
+    }
+
+    native void setNotificationEnabled(com.sun.management.GarbageCollectorMXBean, boolean);
+
+    static void <clinit>()
+    {
+        java.lang.String[] $r0;
+
+        <sun.management.GarbageCollectorImpl: java.lang.String notifName> = "javax.management.Notification";
+
+        $r0 = newarray (java.lang.String)[1];
+
+        $r0[0] = "com.sun.management.gc.notification";
+
+        <sun.management.GarbageCollectorImpl: java.lang.String[] gcNotifTypes> = $r0;
+
+        <sun.management.GarbageCollectorImpl: long seqNumber> = 0L;
+
+        return;
+    }
+}

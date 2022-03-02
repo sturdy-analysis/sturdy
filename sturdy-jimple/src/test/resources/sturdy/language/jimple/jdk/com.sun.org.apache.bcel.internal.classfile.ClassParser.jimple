@@ -1,0 +1,703 @@
+public final class com.sun.org.apache.bcel.internal.classfile.ClassParser extends java.lang.Object
+{
+    private java.io.DataInputStream dataInputStream;
+    private final boolean fileOwned;
+    private final java.lang.String file_name;
+    private java.lang.String zip_file;
+    private int class_name_index;
+    private int superclass_name_index;
+    private int major;
+    private int minor;
+    private int access_flags;
+    private int[] interfaces;
+    private com.sun.org.apache.bcel.internal.classfile.ConstantPool constant_pool;
+    private com.sun.org.apache.bcel.internal.classfile.Field[] fields;
+    private com.sun.org.apache.bcel.internal.classfile.Method[] methods;
+    private com.sun.org.apache.bcel.internal.classfile.Attribute[] attributes;
+    private final boolean is_zip;
+    private static final int BUFSIZE;
+
+    public void <init>(java.io.InputStream, java.lang.String)
+    {
+        java.io.DataInputStream $r5, $r7;
+        java.io.BufferedInputStream $r6;
+        com.sun.org.apache.bcel.internal.classfile.ClassParser r0;
+        java.lang.Class $r3;
+        java.lang.String r1, $r4;
+        java.io.InputStream r2;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.classfile.ClassParser;
+
+        r2 := @parameter0: java.io.InputStream;
+
+        r1 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.lang.String file_name> = r1;
+
+        r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: boolean fileOwned> = 0;
+
+        $r3 = virtualinvoke r2.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.Class: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean startsWith(java.lang.String)>("java.util.zip.");
+
+        if $z0 != 0 goto label1;
+
+        $z2 = virtualinvoke $r4.<java.lang.String: boolean startsWith(java.lang.String)>("java.util.jar.");
+
+        if $z2 == 0 goto label2;
+
+     label1:
+        $z3 = 1;
+
+        goto label3;
+
+     label2:
+        $z3 = 0;
+
+     label3:
+        r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: boolean is_zip> = $z3;
+
+        $z1 = r2 instanceof java.io.DataInputStream;
+
+        if $z1 == 0 goto label4;
+
+        $r7 = (java.io.DataInputStream) r2;
+
+        r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.io.DataInputStream dataInputStream> = $r7;
+
+        goto label5;
+
+     label4:
+        $r5 = new java.io.DataInputStream;
+
+        $r6 = new java.io.BufferedInputStream;
+
+        specialinvoke $r6.<java.io.BufferedInputStream: void <init>(java.io.InputStream,int)>(r2, 8192);
+
+        specialinvoke $r5.<java.io.DataInputStream: void <init>(java.io.InputStream)>($r6);
+
+        r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.io.DataInputStream dataInputStream> = $r5;
+
+     label5:
+        return;
+    }
+
+    public void <init>(java.lang.String)
+    {
+        com.sun.org.apache.bcel.internal.classfile.ClassParser r0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.classfile.ClassParser;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: boolean is_zip> = 0;
+
+        r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.lang.String file_name> = r1;
+
+        r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: boolean fileOwned> = 1;
+
+        return;
+    }
+
+    public void <init>(java.lang.String, java.lang.String)
+    {
+        com.sun.org.apache.bcel.internal.classfile.ClassParser r0;
+        java.lang.String r1, r2;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.classfile.ClassParser;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: boolean is_zip> = 1;
+
+        r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: boolean fileOwned> = 1;
+
+        r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.lang.String zip_file> = r1;
+
+        r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.lang.String file_name> = r2;
+
+        return;
+    }
+
+    public com.sun.org.apache.bcel.internal.classfile.JavaClass parse() throws java.io.IOException, com.sun.org.apache.bcel.internal.classfile.ClassFormatException
+    {
+        java.io.BufferedInputStream $r11, $r19;
+        byte $b5;
+        int[] $r5;
+        java.util.zip.ZipFile $r14, r35;
+        java.util.zip.ZipEntry $r17;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.lang.StringBuilder $r22, $r23, $r25, $r26;
+        java.lang.Throwable $r30;
+        java.io.DataInputStream $r8, $r9, $r10, $r18, $r31, $r32;
+        com.sun.org.apache.bcel.internal.classfile.ClassParser r0;
+        com.sun.org.apache.bcel.internal.classfile.ConstantPool $r6;
+        com.sun.org.apache.bcel.internal.classfile.JavaClass $r1;
+        com.sun.org.apache.bcel.internal.classfile.Method[] $r3;
+        int $i0, $i1, $i2, $i3, $i4;
+        com.sun.org.apache.bcel.internal.classfile.Field[] $r4;
+        java.lang.String $r7, $r13, $r15, $r16, $r24, $r27;
+        java.io.IOException $r21, $r28, $r29, $r33, $r34;
+        java.io.FileInputStream $r12;
+        com.sun.org.apache.bcel.internal.classfile.Attribute[] $r2;
+        java.io.InputStream $r20;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.classfile.ClassParser;
+
+        r35 = null;
+
+     label01:
+        $z0 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: boolean fileOwned>;
+
+        if $z0 == 0 goto label04;
+
+        $z2 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: boolean is_zip>;
+
+        if $z2 == 0 goto label03;
+
+        $r14 = new java.util.zip.ZipFile;
+
+        $r15 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.lang.String zip_file>;
+
+        specialinvoke $r14.<java.util.zip.ZipFile: void <init>(java.lang.String)>($r15);
+
+        r35 = $r14;
+
+        $r16 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.lang.String file_name>;
+
+        $r17 = virtualinvoke $r14.<java.util.zip.ZipFile: java.util.zip.ZipEntry getEntry(java.lang.String)>($r16);
+
+        if $r17 != null goto label02;
+
+        $r21 = new java.io.IOException;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("File ");
+
+        $r24 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.lang.String file_name>;
+
+        $r25 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r24);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" not found");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r21.<java.io.IOException: void <init>(java.lang.String)>($r27);
+
+        throw $r21;
+
+     label02:
+        $r18 = new java.io.DataInputStream;
+
+        $r19 = new java.io.BufferedInputStream;
+
+        $r20 = virtualinvoke $r14.<java.util.zip.ZipFile: java.io.InputStream getInputStream(java.util.zip.ZipEntry)>($r17);
+
+        specialinvoke $r19.<java.io.BufferedInputStream: void <init>(java.io.InputStream,int)>($r20, 8192);
+
+        specialinvoke $r18.<java.io.DataInputStream: void <init>(java.io.InputStream)>($r19);
+
+        r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.io.DataInputStream dataInputStream> = $r18;
+
+        goto label04;
+
+     label03:
+        $r10 = new java.io.DataInputStream;
+
+        $r11 = new java.io.BufferedInputStream;
+
+        $r12 = new java.io.FileInputStream;
+
+        $r13 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.lang.String file_name>;
+
+        specialinvoke $r12.<java.io.FileInputStream: void <init>(java.lang.String)>($r13);
+
+        specialinvoke $r11.<java.io.BufferedInputStream: void <init>(java.io.InputStream,int)>($r12, 8192);
+
+        specialinvoke $r10.<java.io.DataInputStream: void <init>(java.io.InputStream)>($r11);
+
+        r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.io.DataInputStream dataInputStream> = $r10;
+
+     label04:
+        specialinvoke r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: void readID()>();
+
+        specialinvoke r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: void readVersion()>();
+
+        specialinvoke r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: void readConstantPool()>();
+
+        specialinvoke r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: void readClassInfo()>();
+
+        specialinvoke r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: void readInterfaces()>();
+
+        specialinvoke r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: void readFields()>();
+
+        specialinvoke r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: void readMethods()>();
+
+        specialinvoke r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: void readAttributes()>();
+
+     label05:
+        $z4 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: boolean fileOwned>;
+
+        if $z4 == 0 goto label09;
+
+     label06:
+        $r8 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.io.DataInputStream dataInputStream>;
+
+        if $r8 == null goto label07;
+
+        $r9 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.io.DataInputStream dataInputStream>;
+
+        virtualinvoke $r9.<java.io.DataInputStream: void close()>();
+
+     label07:
+        goto label09;
+
+     label08:
+        $r34 := @caughtexception;
+
+     label09:
+        if r35 == null goto label10;
+
+        virtualinvoke r35.<java.util.zip.ZipFile: void close()>();
+
+     label10:
+        goto label20;
+
+     label11:
+        $r33 := @caughtexception;
+
+        goto label20;
+
+     label12:
+        $r30 := @caughtexception;
+
+        $z3 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: boolean fileOwned>;
+
+        if $z3 == 0 goto label16;
+
+     label13:
+        $r31 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.io.DataInputStream dataInputStream>;
+
+        if $r31 == null goto label14;
+
+        $r32 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.io.DataInputStream dataInputStream>;
+
+        virtualinvoke $r32.<java.io.DataInputStream: void close()>();
+
+     label14:
+        goto label16;
+
+     label15:
+        $r29 := @caughtexception;
+
+     label16:
+        if r35 == null goto label17;
+
+        virtualinvoke r35.<java.util.zip.ZipFile: void close()>();
+
+     label17:
+        goto label19;
+
+     label18:
+        $r28 := @caughtexception;
+
+     label19:
+        throw $r30;
+
+     label20:
+        $r1 = new com.sun.org.apache.bcel.internal.classfile.JavaClass;
+
+        $i4 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: int class_name_index>;
+
+        $i3 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: int superclass_name_index>;
+
+        $r7 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.lang.String file_name>;
+
+        $i2 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: int major>;
+
+        $i1 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: int minor>;
+
+        $i0 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: int access_flags>;
+
+        $r6 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: com.sun.org.apache.bcel.internal.classfile.ConstantPool constant_pool>;
+
+        $r5 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: int[] interfaces>;
+
+        $r4 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: com.sun.org.apache.bcel.internal.classfile.Field[] fields>;
+
+        $r3 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: com.sun.org.apache.bcel.internal.classfile.Method[] methods>;
+
+        $r2 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: com.sun.org.apache.bcel.internal.classfile.Attribute[] attributes>;
+
+        $z1 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: boolean is_zip>;
+
+        if $z1 == 0 goto label21;
+
+        $b5 = 3;
+
+        goto label22;
+
+     label21:
+        $b5 = 2;
+
+     label22:
+        specialinvoke $r1.<com.sun.org.apache.bcel.internal.classfile.JavaClass: void <init>(int,int,java.lang.String,int,int,int,com.sun.org.apache.bcel.internal.classfile.ConstantPool,int[],com.sun.org.apache.bcel.internal.classfile.Field[],com.sun.org.apache.bcel.internal.classfile.Method[],com.sun.org.apache.bcel.internal.classfile.Attribute[],byte)>($i4, $i3, $r7, $i2, $i1, $i0, $r6, $r5, $r4, $r3, $r2, $b5);
+
+        return $r1;
+
+        catch java.io.IOException from label06 to label07 with label08;
+        catch java.io.IOException from label09 to label10 with label11;
+        catch java.lang.Throwable from label01 to label05 with label12;
+        catch java.io.IOException from label13 to label14 with label15;
+        catch java.io.IOException from label16 to label17 with label18;
+    }
+
+    private void readAttributes() throws java.io.IOException, com.sun.org.apache.bcel.internal.classfile.ClassFormatException
+    {
+        com.sun.org.apache.bcel.internal.classfile.Attribute $r6;
+        java.io.DataInputStream $r1, $r4;
+        com.sun.org.apache.bcel.internal.classfile.ClassParser r0;
+        com.sun.org.apache.bcel.internal.classfile.ConstantPool $r3;
+        com.sun.org.apache.bcel.internal.classfile.Attribute[] $r2, $r5;
+        int $i0, i1;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.classfile.ClassParser;
+
+        $r1 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.io.DataInputStream dataInputStream>;
+
+        $i0 = virtualinvoke $r1.<java.io.DataInputStream: int readUnsignedShort()>();
+
+        $r2 = newarray (com.sun.org.apache.bcel.internal.classfile.Attribute)[$i0];
+
+        r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: com.sun.org.apache.bcel.internal.classfile.Attribute[] attributes> = $r2;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= $i0 goto label2;
+
+        $r5 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: com.sun.org.apache.bcel.internal.classfile.Attribute[] attributes>;
+
+        $r4 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.io.DataInputStream dataInputStream>;
+
+        $r3 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: com.sun.org.apache.bcel.internal.classfile.ConstantPool constant_pool>;
+
+        $r6 = staticinvoke <com.sun.org.apache.bcel.internal.classfile.Attribute: com.sun.org.apache.bcel.internal.classfile.Attribute readAttribute(java.io.DataInputStream,com.sun.org.apache.bcel.internal.classfile.ConstantPool)>($r4, $r3);
+
+        $r5[i1] = $r6;
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private void readClassInfo() throws java.io.IOException, com.sun.org.apache.bcel.internal.classfile.ClassFormatException
+    {
+        java.io.DataInputStream $r1, $r2, $r3;
+        com.sun.org.apache.bcel.internal.classfile.ClassParser r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10;
+        java.lang.String $r7, $r10;
+        java.lang.StringBuilder $r5, $r6, $r8, $r9;
+        com.sun.org.apache.bcel.internal.classfile.ClassFormatException $r4;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.classfile.ClassParser;
+
+        $r1 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.io.DataInputStream dataInputStream>;
+
+        $i0 = virtualinvoke $r1.<java.io.DataInputStream: int readUnsignedShort()>();
+
+        r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: int access_flags> = $i0;
+
+        $i1 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: int access_flags>;
+
+        $i2 = $i1 & 512;
+
+        if $i2 == 0 goto label1;
+
+        $i9 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: int access_flags>;
+
+        $i10 = $i9 | 1024;
+
+        r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: int access_flags> = $i10;
+
+     label1:
+        $i3 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: int access_flags>;
+
+        $i4 = $i3 & 1024;
+
+        if $i4 == 0 goto label2;
+
+        $i7 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: int access_flags>;
+
+        $i8 = $i7 & 16;
+
+        if $i8 == 0 goto label2;
+
+        $r4 = new com.sun.org.apache.bcel.internal.classfile.ClassFormatException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Class ");
+
+        $r7 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.lang.String file_name>;
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" can\'t be both final and abstract");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<com.sun.org.apache.bcel.internal.classfile.ClassFormatException: void <init>(java.lang.String)>($r10);
+
+        throw $r4;
+
+     label2:
+        $r2 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.io.DataInputStream dataInputStream>;
+
+        $i5 = virtualinvoke $r2.<java.io.DataInputStream: int readUnsignedShort()>();
+
+        r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: int class_name_index> = $i5;
+
+        $r3 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.io.DataInputStream dataInputStream>;
+
+        $i6 = virtualinvoke $r3.<java.io.DataInputStream: int readUnsignedShort()>();
+
+        r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: int superclass_name_index> = $i6;
+
+        return;
+    }
+
+    private void readConstantPool() throws java.io.IOException, com.sun.org.apache.bcel.internal.classfile.ClassFormatException
+    {
+        java.io.DataInputStream $r2;
+        com.sun.org.apache.bcel.internal.classfile.ClassParser r0;
+        com.sun.org.apache.bcel.internal.classfile.ConstantPool $r1;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.classfile.ClassParser;
+
+        $r1 = new com.sun.org.apache.bcel.internal.classfile.ConstantPool;
+
+        $r2 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.io.DataInputStream dataInputStream>;
+
+        specialinvoke $r1.<com.sun.org.apache.bcel.internal.classfile.ConstantPool: void <init>(java.io.DataInput)>($r2);
+
+        r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: com.sun.org.apache.bcel.internal.classfile.ConstantPool constant_pool> = $r1;
+
+        return;
+    }
+
+    private void readFields() throws java.io.IOException, com.sun.org.apache.bcel.internal.classfile.ClassFormatException
+    {
+        java.io.DataInputStream $r1, $r5;
+        com.sun.org.apache.bcel.internal.classfile.Field $r3;
+        com.sun.org.apache.bcel.internal.classfile.ClassParser r0;
+        com.sun.org.apache.bcel.internal.classfile.ConstantPool $r4;
+        int $i0, i1;
+        com.sun.org.apache.bcel.internal.classfile.Field[] $r2, $r6;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.classfile.ClassParser;
+
+        $r1 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.io.DataInputStream dataInputStream>;
+
+        $i0 = virtualinvoke $r1.<java.io.DataInputStream: int readUnsignedShort()>();
+
+        $r2 = newarray (com.sun.org.apache.bcel.internal.classfile.Field)[$i0];
+
+        r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: com.sun.org.apache.bcel.internal.classfile.Field[] fields> = $r2;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= $i0 goto label2;
+
+        $r6 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: com.sun.org.apache.bcel.internal.classfile.Field[] fields>;
+
+        $r3 = new com.sun.org.apache.bcel.internal.classfile.Field;
+
+        $r5 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.io.DataInputStream dataInputStream>;
+
+        $r4 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: com.sun.org.apache.bcel.internal.classfile.ConstantPool constant_pool>;
+
+        specialinvoke $r3.<com.sun.org.apache.bcel.internal.classfile.Field: void <init>(java.io.DataInput,com.sun.org.apache.bcel.internal.classfile.ConstantPool)>($r5, $r4);
+
+        $r6[i1] = $r3;
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private void readID() throws java.io.IOException, com.sun.org.apache.bcel.internal.classfile.ClassFormatException
+    {
+        java.io.DataInputStream $r1;
+        com.sun.org.apache.bcel.internal.classfile.ClassParser r0;
+        int $i0;
+        java.lang.StringBuilder $r3, $r5, $r6;
+        java.lang.String $r4, $r7;
+        com.sun.org.apache.bcel.internal.classfile.ClassFormatException $r2;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.classfile.ClassParser;
+
+        $r1 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.io.DataInputStream dataInputStream>;
+
+        $i0 = virtualinvoke $r1.<java.io.DataInputStream: int readInt()>();
+
+        if $i0 == -889275714 goto label1;
+
+        $r2 = new com.sun.org.apache.bcel.internal.classfile.ClassFormatException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.lang.String file_name>;
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is not a Java .class file");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<com.sun.org.apache.bcel.internal.classfile.ClassFormatException: void <init>(java.lang.String)>($r7);
+
+        throw $r2;
+
+     label1:
+        return;
+    }
+
+    private void readInterfaces() throws java.io.IOException, com.sun.org.apache.bcel.internal.classfile.ClassFormatException
+    {
+        java.io.DataInputStream $r1, $r3;
+        com.sun.org.apache.bcel.internal.classfile.ClassParser r0;
+        int[] $r2, $r4;
+        int $i0, $i1, i2;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.classfile.ClassParser;
+
+        $r1 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.io.DataInputStream dataInputStream>;
+
+        $i0 = virtualinvoke $r1.<java.io.DataInputStream: int readUnsignedShort()>();
+
+        $r2 = newarray (int)[$i0];
+
+        r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: int[] interfaces> = $r2;
+
+        i2 = 0;
+
+     label1:
+        if i2 >= $i0 goto label2;
+
+        $r4 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: int[] interfaces>;
+
+        $r3 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.io.DataInputStream dataInputStream>;
+
+        $i1 = virtualinvoke $r3.<java.io.DataInputStream: int readUnsignedShort()>();
+
+        $r4[i2] = $i1;
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private void readMethods() throws java.io.IOException, com.sun.org.apache.bcel.internal.classfile.ClassFormatException
+    {
+        java.io.DataInputStream $r1, $r5;
+        com.sun.org.apache.bcel.internal.classfile.Method $r3;
+        com.sun.org.apache.bcel.internal.classfile.ClassParser r0;
+        com.sun.org.apache.bcel.internal.classfile.ConstantPool $r4;
+        com.sun.org.apache.bcel.internal.classfile.Method[] $r2, $r6;
+        int $i0, i1;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.classfile.ClassParser;
+
+        $r1 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.io.DataInputStream dataInputStream>;
+
+        $i0 = virtualinvoke $r1.<java.io.DataInputStream: int readUnsignedShort()>();
+
+        $r2 = newarray (com.sun.org.apache.bcel.internal.classfile.Method)[$i0];
+
+        r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: com.sun.org.apache.bcel.internal.classfile.Method[] methods> = $r2;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= $i0 goto label2;
+
+        $r6 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: com.sun.org.apache.bcel.internal.classfile.Method[] methods>;
+
+        $r3 = new com.sun.org.apache.bcel.internal.classfile.Method;
+
+        $r5 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.io.DataInputStream dataInputStream>;
+
+        $r4 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: com.sun.org.apache.bcel.internal.classfile.ConstantPool constant_pool>;
+
+        specialinvoke $r3.<com.sun.org.apache.bcel.internal.classfile.Method: void <init>(java.io.DataInput,com.sun.org.apache.bcel.internal.classfile.ConstantPool)>($r5, $r4);
+
+        $r6[i1] = $r3;
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private void readVersion() throws java.io.IOException, com.sun.org.apache.bcel.internal.classfile.ClassFormatException
+    {
+        java.io.DataInputStream $r1, $r2;
+        int $i0, $i1;
+        com.sun.org.apache.bcel.internal.classfile.ClassParser r0;
+
+        r0 := @this: com.sun.org.apache.bcel.internal.classfile.ClassParser;
+
+        $r1 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.io.DataInputStream dataInputStream>;
+
+        $i0 = virtualinvoke $r1.<java.io.DataInputStream: int readUnsignedShort()>();
+
+        r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: int minor> = $i0;
+
+        $r2 = r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: java.io.DataInputStream dataInputStream>;
+
+        $i1 = virtualinvoke $r2.<java.io.DataInputStream: int readUnsignedShort()>();
+
+        r0.<com.sun.org.apache.bcel.internal.classfile.ClassParser: int major> = $i1;
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.org.apache.bcel.internal.classfile.ClassParser: int BUFSIZE> = 8192;
+
+        return;
+    }
+}

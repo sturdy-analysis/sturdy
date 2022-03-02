@@ -1,0 +1,532 @@
+public abstract class sun.security.ssl.SunJSSE extends java.security.Provider
+{
+    private static final long serialVersionUID;
+    private static java.lang.String info;
+    private static java.lang.String fipsInfo;
+    private static java.lang.Boolean fips;
+    static java.security.Provider cryptoProvider;
+
+    protected static synchronized boolean isFIPS()
+    {
+        java.lang.Boolean $r0, $r1, $r2;
+        boolean $z0;
+
+        $r0 = <sun.security.ssl.SunJSSE: java.lang.Boolean fips>;
+
+        if $r0 != null goto label1;
+
+        $r2 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(0);
+
+        <sun.security.ssl.SunJSSE: java.lang.Boolean fips> = $r2;
+
+     label1:
+        $r1 = <sun.security.ssl.SunJSSE: java.lang.Boolean fips>;
+
+        $z0 = virtualinvoke $r1.<java.lang.Boolean: boolean booleanValue()>();
+
+        return $z0;
+    }
+
+    private static synchronized void ensureFIPS(java.security.Provider)
+    {
+        java.security.ProviderException $r4, $r10;
+        java.security.Provider r2, $r3, $r7;
+        java.lang.Boolean $r0, $r1, $r11;
+        java.lang.StringBuilder $r5, $r6, $r8;
+        java.lang.String $r9;
+        boolean $z0;
+
+        r2 := @parameter0: java.security.Provider;
+
+        $r0 = <sun.security.ssl.SunJSSE: java.lang.Boolean fips>;
+
+        if $r0 != null goto label1;
+
+        $r11 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(1);
+
+        <sun.security.ssl.SunJSSE: java.lang.Boolean fips> = $r11;
+
+        <sun.security.ssl.SunJSSE: java.security.Provider cryptoProvider> = r2;
+
+        goto label3;
+
+     label1:
+        $r1 = <sun.security.ssl.SunJSSE: java.lang.Boolean fips>;
+
+        $z0 = virtualinvoke $r1.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z0 != 0 goto label2;
+
+        $r10 = new java.security.ProviderException;
+
+        specialinvoke $r10.<java.security.ProviderException: void <init>(java.lang.String)>("SunJSSE already initialized in non-FIPS mode");
+
+        throw $r10;
+
+     label2:
+        $r3 = <sun.security.ssl.SunJSSE: java.security.Provider cryptoProvider>;
+
+        if $r3 == r2 goto label3;
+
+        $r4 = new java.security.ProviderException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SunJSSE already initialized with FIPS crypto provider ");
+
+        $r7 = <sun.security.ssl.SunJSSE: java.security.Provider cryptoProvider>;
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.security.ProviderException: void <init>(java.lang.String)>($r9);
+
+        throw $r4;
+
+     label3:
+        return;
+    }
+
+    protected void <init>()
+    {
+        java.lang.Boolean $r2, $r3;
+        java.security.ProviderException $r4;
+        sun.security.ssl.SunJSSE r0;
+        java.lang.String $r1;
+        boolean $z0;
+
+        r0 := @this: sun.security.ssl.SunJSSE;
+
+        $r1 = <sun.security.ssl.SunJSSE: java.lang.String info>;
+
+        specialinvoke r0.<java.security.Provider: void <init>(java.lang.String,double,java.lang.String)>("SunJSSE", 1.8, $r1);
+
+        specialinvoke r0.<sun.security.ssl.SunJSSE: void subclassCheck()>();
+
+        $r3 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r2 = <sun.security.ssl.SunJSSE: java.lang.Boolean fips>;
+
+        $z0 = virtualinvoke $r3.<java.lang.Boolean: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        $r4 = new java.security.ProviderException;
+
+        specialinvoke $r4.<java.security.ProviderException: void <init>(java.lang.String)>("SunJSSE is already initialized in FIPS mode");
+
+        throw $r4;
+
+     label1:
+        specialinvoke r0.<sun.security.ssl.SunJSSE: void registerAlgorithms(boolean)>(0);
+
+        return;
+    }
+
+    protected void <init>(java.security.Provider)
+    {
+        java.lang.Object $r2;
+        sun.security.ssl.SunJSSE r0;
+        java.lang.String $r4;
+        java.security.Provider r1, $r3;
+
+        r0 := @this: sun.security.ssl.SunJSSE;
+
+        r1 := @parameter0: java.security.Provider;
+
+        $r2 = staticinvoke <sun.security.ssl.SunJSSE: java.lang.Object checkNull(java.lang.Object)>(r1);
+
+        $r3 = (java.security.Provider) $r2;
+
+        $r4 = virtualinvoke r1.<java.security.Provider: java.lang.String getName()>();
+
+        specialinvoke r0.<sun.security.ssl.SunJSSE: void <init>(java.security.Provider,java.lang.String)>($r3, $r4);
+
+        return;
+    }
+
+    protected void <init>(java.lang.String)
+    {
+        java.lang.Object $r2;
+        sun.security.ssl.SunJSSE r0;
+        java.lang.String r1, $r3;
+
+        r0 := @this: sun.security.ssl.SunJSSE;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = staticinvoke <sun.security.ssl.SunJSSE: java.lang.Object checkNull(java.lang.Object)>(r1);
+
+        $r3 = (java.lang.String) $r2;
+
+        specialinvoke r0.<sun.security.ssl.SunJSSE: void <init>(java.security.Provider,java.lang.String)>(null, $r3);
+
+        return;
+    }
+
+    private static java.lang.Object checkNull(java.lang.Object)
+    {
+        java.security.ProviderException $r1;
+        java.lang.Object r0;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        $r1 = new java.security.ProviderException;
+
+        specialinvoke $r1.<java.security.ProviderException: void <init>(java.lang.String)>("cryptoProvider must not be null");
+
+        throw $r1;
+
+     label1:
+        return r0;
+    }
+
+    private void <init>(java.security.Provider, java.lang.String)
+    {
+        java.security.ProviderException $r9;
+        java.security.Provider $r8, r14;
+        java.lang.StringBuilder $r1, $r3, $r5, $r6, $r10, $r11, $r12;
+        sun.security.ssl.SunJSSE r0;
+        java.lang.String $r2, r4, $r7, $r13;
+
+        r0 := @this: sun.security.ssl.SunJSSE;
+
+        r14 := @parameter0: java.security.Provider;
+
+        r4 := @parameter1: java.lang.String;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = <sun.security.ssl.SunJSSE: java.lang.String fipsInfo>;
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.security.Provider: void <init>(java.lang.String,double,java.lang.String)>("SunJSSE", 1.8, $r7);
+
+        specialinvoke r0.<sun.security.ssl.SunJSSE: void subclassCheck()>();
+
+        if r14 != null goto label1;
+
+        $r8 = staticinvoke <java.security.Security: java.security.Provider getProvider(java.lang.String)>(r4);
+
+        r14 = $r8;
+
+        if $r8 != null goto label1;
+
+        $r9 = new java.security.ProviderException;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Crypto provider not installed: ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<java.security.ProviderException: void <init>(java.lang.String)>($r13);
+
+        throw $r9;
+
+     label1:
+        staticinvoke <sun.security.ssl.SunJSSE: void ensureFIPS(java.security.Provider)>(r14);
+
+        specialinvoke r0.<sun.security.ssl.SunJSSE: void registerAlgorithms(boolean)>(1);
+
+        return;
+    }
+
+    private void registerAlgorithms(boolean)
+    {
+        sun.security.ssl.SunJSSE r1;
+        sun.security.ssl.SunJSSE$1 $r0;
+        boolean z0;
+
+        r1 := @this: sun.security.ssl.SunJSSE;
+
+        z0 := @parameter0: boolean;
+
+        $r0 = new sun.security.ssl.SunJSSE$1;
+
+        specialinvoke $r0.<sun.security.ssl.SunJSSE$1: void <init>(sun.security.ssl.SunJSSE,boolean)>(r1, z0);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        return;
+    }
+
+    private void ps(java.lang.String, java.lang.String, java.lang.String, java.util.List, java.util.HashMap)
+    {
+        java.util.List r5;
+        java.security.Provider$Service $r1;
+        java.util.HashMap r6;
+        sun.security.ssl.SunJSSE r0;
+        java.lang.String r2, r3, r4;
+
+        r0 := @this: sun.security.ssl.SunJSSE;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        r4 := @parameter2: java.lang.String;
+
+        r5 := @parameter3: java.util.List;
+
+        r6 := @parameter4: java.util.HashMap;
+
+        $r1 = new java.security.Provider$Service;
+
+        specialinvoke $r1.<java.security.Provider$Service: void <init>(java.security.Provider,java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.Map)>(r0, r2, r3, r4, r5, r6);
+
+        virtualinvoke r0.<sun.security.ssl.SunJSSE: void putService(java.security.Provider$Service)>($r1);
+
+        return;
+    }
+
+    private void doRegister(boolean)
+    {
+        java.lang.String[] $r1, $r3, $r5, $r6, $r7, $r10, $r16, $r22;
+        java.util.HashMap $r9;
+        java.lang.String $r14, $r20, $r26;
+        boolean z0;
+        java.util.List $r2, $r4, $r8, $r15, $r21, $r27, $r28, $r29;
+        java.lang.StringBuilder $r11, $r12, $r13, $r17, $r18, $r19, $r23, $r24, $r25;
+        sun.security.ssl.SunJSSE r0;
+
+        r0 := @this: sun.security.ssl.SunJSSE;
+
+        z0 := @parameter0: boolean;
+
+        if z0 != 0 goto label1;
+
+        $r7 = newarray (java.lang.String)[1];
+
+        $r7[0] = "1.2.840.113549.1.1";
+
+        $r8 = staticinvoke <sun.security.provider.SunEntries: java.util.List createAliasesWithOid(java.lang.String[])>($r7);
+
+        $r9 = new java.util.HashMap;
+
+        specialinvoke $r9.<java.util.HashMap: void <init>(int)>(3);
+
+        virtualinvoke $r9.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("SupportedKeyClasses", "java.security.interfaces.RSAPublicKey|java.security.interfaces.RSAPrivateKey");
+
+        specialinvoke r0.<sun.security.ssl.SunJSSE: void ps(java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>("KeyFactory", "RSA", "sun.security.rsa.RSAKeyFactory$Legacy", $r8, null);
+
+        specialinvoke r0.<sun.security.ssl.SunJSSE: void ps(java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>("KeyPairGenerator", "RSA", "sun.security.rsa.RSAKeyPairGenerator$Legacy", $r8, null);
+
+        $r10 = newarray (java.lang.String)[1];
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("1.2.840.113549.1.1");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".2");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r10[0] = $r14;
+
+        $r15 = staticinvoke <sun.security.provider.SunEntries: java.util.List createAliasesWithOid(java.lang.String[])>($r10);
+
+        specialinvoke r0.<sun.security.ssl.SunJSSE: void ps(java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>("Signature", "MD2withRSA", "sun.security.rsa.RSASignature$MD2withRSA", $r15, $r9);
+
+        $r16 = newarray (java.lang.String)[1];
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("1.2.840.113549.1.1");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".4");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r16[0] = $r20;
+
+        $r21 = staticinvoke <sun.security.provider.SunEntries: java.util.List createAliasesWithOid(java.lang.String[])>($r16);
+
+        specialinvoke r0.<sun.security.ssl.SunJSSE: void ps(java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>("Signature", "MD5withRSA", "sun.security.rsa.RSASignature$MD5withRSA", $r21, $r9);
+
+        $r22 = newarray (java.lang.String)[2];
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("1.2.840.113549.1.1");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".5");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r22[0] = $r26;
+
+        $r22[1] = "1.3.14.3.2.29";
+
+        $r27 = staticinvoke <sun.security.provider.SunEntries: java.util.List createAliasesWithOid(java.lang.String[])>($r22);
+
+        specialinvoke r0.<sun.security.ssl.SunJSSE: void ps(java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>("Signature", "SHA1withRSA", "sun.security.rsa.RSASignature$SHA1withRSA", $r27, $r9);
+
+     label1:
+        specialinvoke r0.<sun.security.ssl.SunJSSE: void ps(java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>("Signature", "MD5andSHA1withRSA", "sun.security.ssl.RSASignature", null, null);
+
+        specialinvoke r0.<sun.security.ssl.SunJSSE: void ps(java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>("KeyManagerFactory", "SunX509", "sun.security.ssl.KeyManagerFactoryImpl$SunX509", null, null);
+
+        $r1 = newarray (java.lang.String)[1];
+
+        $r1[0] = "PKIX";
+
+        $r2 = staticinvoke <sun.security.provider.SunEntries: java.util.List createAliases(java.lang.String[])>($r1);
+
+        specialinvoke r0.<sun.security.ssl.SunJSSE: void ps(java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>("KeyManagerFactory", "NewSunX509", "sun.security.ssl.KeyManagerFactoryImpl$X509", $r2, null);
+
+        specialinvoke r0.<sun.security.ssl.SunJSSE: void ps(java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>("TrustManagerFactory", "SunX509", "sun.security.ssl.TrustManagerFactoryImpl$SimpleFactory", null, null);
+
+        $r3 = newarray (java.lang.String)[3];
+
+        $r3[0] = "SunPKIX";
+
+        $r3[1] = "X509";
+
+        $r3[2] = "X.509";
+
+        $r4 = staticinvoke <sun.security.provider.SunEntries: java.util.List createAliases(java.lang.String[])>($r3);
+
+        specialinvoke r0.<sun.security.ssl.SunJSSE: void ps(java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>("TrustManagerFactory", "PKIX", "sun.security.ssl.TrustManagerFactoryImpl$PKIXFactory", $r4, null);
+
+        if z0 == 0 goto label2;
+
+        $r28 = null;
+
+        goto label3;
+
+     label2:
+        $r5 = newarray (java.lang.String)[1];
+
+        $r5[0] = "SSLv3";
+
+        $r28 = staticinvoke <sun.security.provider.SunEntries: java.util.List createAliases(java.lang.String[])>($r5);
+
+     label3:
+        specialinvoke r0.<sun.security.ssl.SunJSSE: void ps(java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>("SSLContext", "TLSv1", "sun.security.ssl.SSLContextImpl$TLS10Context", $r28, null);
+
+        specialinvoke r0.<sun.security.ssl.SunJSSE: void ps(java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>("SSLContext", "TLSv1.1", "sun.security.ssl.SSLContextImpl$TLS11Context", null, null);
+
+        specialinvoke r0.<sun.security.ssl.SunJSSE: void ps(java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>("SSLContext", "TLSv1.2", "sun.security.ssl.SSLContextImpl$TLS12Context", null, null);
+
+        specialinvoke r0.<sun.security.ssl.SunJSSE: void ps(java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>("SSLContext", "TLSv1.3", "sun.security.ssl.SSLContextImpl$TLS13Context", null, null);
+
+        if z0 == 0 goto label4;
+
+        $r29 = null;
+
+        goto label5;
+
+     label4:
+        $r6 = newarray (java.lang.String)[1];
+
+        $r6[0] = "SSL";
+
+        $r29 = staticinvoke <sun.security.provider.SunEntries: java.util.List createAliases(java.lang.String[])>($r6);
+
+     label5:
+        specialinvoke r0.<sun.security.ssl.SunJSSE: void ps(java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>("SSLContext", "TLS", "sun.security.ssl.SSLContextImpl$TLSContext", $r29, null);
+
+        specialinvoke r0.<sun.security.ssl.SunJSSE: void ps(java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>("SSLContext", "Default", "sun.security.ssl.SSLContextImpl$DefaultSSLContext", null, null);
+
+        specialinvoke r0.<sun.security.ssl.SunJSSE: void ps(java.lang.String,java.lang.String,java.lang.String,java.util.List,java.util.HashMap)>("KeyStore", "PKCS12", "sun.security.pkcs12.PKCS12KeyStore", null, null);
+
+        return;
+    }
+
+    private void subclassCheck()
+    {
+        java.lang.AssertionError $r2;
+        java.lang.Class $r1, $r5;
+        java.lang.StringBuilder $r3, $r4, $r6;
+        sun.security.ssl.SunJSSE r0;
+        java.lang.String $r7;
+
+        r0 := @this: sun.security.ssl.SunJSSE;
+
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        if $r1 == class "Lcom/sun/net/ssl/internal/ssl/Provider;" goto label1;
+
+        $r2 = new java.lang.AssertionError;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Illegal subclass: ");
+
+        $r5 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.AssertionError: void <init>(java.lang.Object)>($r7);
+
+        throw $r2;
+
+     label1:
+        return;
+    }
+
+    protected final void finalize() throws java.lang.Throwable
+    {
+        sun.security.ssl.SunJSSE r0;
+
+        r0 := @this: sun.security.ssl.SunJSSE;
+
+        specialinvoke r0.<java.lang.Object: void finalize()>();
+
+        return;
+    }
+
+    static void access$000(sun.security.ssl.SunJSSE, boolean)
+    {
+        sun.security.ssl.SunJSSE r0;
+        boolean z0;
+
+        r0 := @parameter0: sun.security.ssl.SunJSSE;
+
+        z0 := @parameter1: boolean;
+
+        specialinvoke r0.<sun.security.ssl.SunJSSE: void doRegister(boolean)>(z0);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        <sun.security.ssl.SunJSSE: long serialVersionUID> = 3231825739635378733L;
+
+        <sun.security.ssl.SunJSSE: java.lang.String info> = "Sun JSSE provider(PKCS12, SunX509/PKIX key/trust factories, SSLv3/TLSv1/TLSv1.1/TLSv1.2/TLSv1.3)";
+
+        <sun.security.ssl.SunJSSE: java.lang.String fipsInfo> = "Sun JSSE provider (FIPS mode, crypto provider ";
+
+        return;
+    }
+}

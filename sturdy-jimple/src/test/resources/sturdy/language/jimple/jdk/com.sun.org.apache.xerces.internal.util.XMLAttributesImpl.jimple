@@ -1,0 +1,2609 @@
+public class com.sun.org.apache.xerces.internal.util.XMLAttributesImpl extends java.lang.Object implements com.sun.org.apache.xerces.internal.xni.XMLAttributes, com.sun.xml.internal.stream.XMLBufferListener
+{
+    protected static final int TABLE_SIZE;
+    protected static final int MAX_HASH_COLLISIONS;
+    protected static final int MULTIPLIERS_SIZE;
+    protected static final int MULTIPLIERS_MASK;
+    protected static final int SIZE_LIMIT;
+    protected boolean fNamespaces;
+    protected int fLargeCount;
+    protected int fLength;
+    protected com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes;
+    protected com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributeTableView;
+    protected int[] fAttributeTableViewChainState;
+    protected int fTableViewBuckets;
+    protected boolean fIsTableViewConsistent;
+    protected int[] fHashMultipliers;
+
+    public void <init>()
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: void <init>(int)>(101);
+
+        return;
+    }
+
+    public void <init>(int)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1, $r2, $r4;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute $r3;
+        int i0, $i1, i2;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: boolean fNamespaces> = 1;
+
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLargeCount> = 1;
+
+        $r1 = newarray (com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute)[4];
+
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes> = $r1;
+
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fTableViewBuckets> = i0;
+
+        i2 = 0;
+
+     label1:
+        $r2 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $i1 = lengthof $r2;
+
+        if i2 >= $i1 goto label2;
+
+        $r4 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r3 = new com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute;
+
+        specialinvoke $r3.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: void <init>()>();
+
+        $r4[i2] = $r3;
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void setNamespaces(boolean)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        boolean z0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        z0 := @parameter0: boolean;
+
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: boolean fNamespaces> = z0;
+
+        return;
+    }
+
+    public int addAttribute(com.sun.org.apache.xerces.internal.xni.QName, java.lang.String, java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        int $i0;
+        java.lang.String r2, r3;
+        com.sun.org.apache.xerces.internal.xni.QName r1;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        r1 := @parameter0: com.sun.org.apache.xerces.internal.xni.QName;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.String;
+
+        $i0 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int addAttribute(com.sun.org.apache.xerces.internal.xni.QName,java.lang.String,java.lang.String,com.sun.org.apache.xerces.internal.xni.XMLString)>(r1, r2, r3, null);
+
+        return $i0;
+    }
+
+    public int addAttribute(com.sun.org.apache.xerces.internal.xni.QName, java.lang.String, java.lang.String, com.sun.org.apache.xerces.internal.xni.XMLString)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r3, $r9, $r10, $r11, $r14, $r16, $r17, $r20, r21, $r22, $r23, $r24, $r29, $r31, $r33, $r35, $r36, $r37, $r38, $r39, $r46, $r47, $r48, $r49, $r50, r55, r58, $r60;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute $r12, $r13, $r15, $r18, $r32, $r34, r59, $r61, $r64, $r65, $r66;
+        com.sun.org.apache.xerces.internal.xni.QName r1, $r19, $r26, $r62;
+        java.lang.String $r2, $r4, r5, r6, $r27, $r28, $r41, $r42, $r43, $r44, $r45, $r52, $r53, $r54, $r56;
+        com.sun.org.apache.xerces.internal.xni.XMLString r7;
+        com.sun.org.apache.xerces.internal.xni.Augmentations $r8, $r63;
+        int[] $r30, $r57;
+        boolean $z0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, i32, i33, $i34, $i35, $i36, i37, i38, i39, $i41, $i43;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        r1 := @parameter0: com.sun.org.apache.xerces.internal.xni.QName;
+
+        r5 := @parameter1: java.lang.String;
+
+        r6 := @parameter2: java.lang.String;
+
+        r7 := @parameter3: com.sun.org.apache.xerces.internal.xni.XMLString;
+
+        $i0 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        if $i0 >= 20 goto label05;
+
+        $r44 = r1.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        if $r44 == null goto label01;
+
+        $r52 = r1.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        $i30 = virtualinvoke $r52.<java.lang.String: int length()>();
+
+        if $i30 == 0 goto label01;
+
+        $r54 = r1.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        $r53 = r1.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String localpart>;
+
+        $i31 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int getIndexFast(java.lang.String,java.lang.String)>($r54, $r53);
+
+        goto label02;
+
+     label01:
+        $r45 = r1.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String rawname>;
+
+        $i31 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int getIndexFast(java.lang.String)>($r45);
+
+     label02:
+        i32 = $i31;
+
+        $i41 = (int) -1;
+
+        if $i31 != $i41 goto label21;
+
+        i32 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        $i23 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        $i24 = $i23 + 1;
+
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength> = $i24;
+
+        $r46 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $i25 = lengthof $r46;
+
+        if $i23 != $i25 goto label21;
+
+        $r47 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $i26 = lengthof $r47;
+
+        $i27 = $i26 + 4;
+
+        r55 = newarray (com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute)[$i27];
+
+        $r49 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r48 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $i28 = lengthof $r48;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r49, 0, r55, 0, $i28);
+
+        $r50 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        i33 = lengthof $r50;
+
+     label03:
+        $i29 = lengthof r55;
+
+        if i33 >= $i29 goto label04;
+
+        $r64 = new com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute;
+
+        specialinvoke $r64.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: void <init>()>();
+
+        r55[i33] = $r64;
+
+        i33 = i33 + 1;
+
+        goto label03;
+
+     label04:
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes> = r55;
+
+        goto label21;
+
+     label05:
+        $r2 = r1.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        if $r2 == null goto label06;
+
+        $r41 = r1.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        $i21 = virtualinvoke $r41.<java.lang.String: int length()>();
+
+        if $i21 == 0 goto label06;
+
+        $r43 = r1.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        $r42 = r1.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String localpart>;
+
+        $i22 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int getIndexFast(java.lang.String,java.lang.String)>($r43, $r42);
+
+        i32 = $i22;
+
+        $i43 = (int) -1;
+
+        if $i22 != $i43 goto label21;
+
+     label06:
+        $z0 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: boolean fIsTableViewConsistent>;
+
+        if $z0 == 0 goto label07;
+
+        $i17 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        if $i17 == 20 goto label07;
+
+        $i18 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        if $i18 <= 20 goto label08;
+
+        $i20 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        $i19 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fTableViewBuckets>;
+
+        if $i20 <= $i19 goto label08;
+
+     label07:
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: void prepareAndPopulateTableView()>();
+
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: boolean fIsTableViewConsistent> = 1;
+
+     label08:
+        $r56 = r1.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String rawname>;
+
+        $i34 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int getTableViewBucket(java.lang.String)>($r56);
+
+        $r57 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int[] fAttributeTableViewChainState>;
+
+        $i35 = $r57[$i34];
+
+        $i36 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLargeCount>;
+
+        if $i35 == $i36 goto label12;
+
+        i32 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        $i9 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        $i10 = $i9 + 1;
+
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength> = $i10;
+
+        $r29 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $i11 = lengthof $r29;
+
+        if $i9 != $i11 goto label11;
+
+        $r36 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $i13 = lengthof $r36;
+
+        $i14 = $i13 << 1;
+
+        r58 = newarray (com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute)[$i14];
+
+        $r38 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r37 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $i15 = lengthof $r37;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r38, 0, r58, 0, $i15);
+
+        $r39 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        i37 = lengthof $r39;
+
+     label09:
+        $i16 = lengthof r58;
+
+        if i37 >= $i16 goto label10;
+
+        $r65 = new com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute;
+
+        specialinvoke $r65.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: void <init>()>();
+
+        r58[i37] = $r65;
+
+        i37 = i37 + 1;
+
+        goto label09;
+
+     label10:
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes> = r58;
+
+     label11:
+        $r30 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int[] fAttributeTableViewChainState>;
+
+        $i12 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLargeCount>;
+
+        $r30[$i34] = $i12;
+
+        $r31 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r32 = $r31[i32];
+
+        $r32.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute next> = null;
+
+        $r35 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributeTableView>;
+
+        $r33 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r34 = $r33[i32];
+
+        $r35[$i34] = $r34;
+
+        goto label21;
+
+     label12:
+        i38 = 0;
+
+        $r3 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributeTableView>;
+
+        r59 = $r3[$i34];
+
+     label13:
+        if r59 == null goto label15;
+
+        $r26 = r59.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r28 = $r26.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String rawname>;
+
+        $r27 = r1.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String rawname>;
+
+        if $r28 != $r27 goto label14;
+
+        goto label15;
+
+     label14:
+        r59 = r59.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute next>;
+
+        i38 = i38 + 1;
+
+        goto label13;
+
+     label15:
+        if r59 != null goto label20;
+
+        i32 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        $i1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        $i2 = $i1 + 1;
+
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength> = $i2;
+
+        $r9 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $i3 = lengthof $r9;
+
+        if $i1 != $i3 goto label18;
+
+        $r20 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $i5 = lengthof $r20;
+
+        $i6 = $i5 << 1;
+
+        r21 = newarray (com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute)[$i6];
+
+        $r23 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r22 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $i7 = lengthof $r22;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r23, 0, r21, 0, $i7);
+
+        $r24 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        i39 = lengthof $r24;
+
+     label16:
+        $i8 = lengthof r21;
+
+        if i39 >= $i8 goto label17;
+
+        $r66 = new com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute;
+
+        specialinvoke $r66.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: void <init>()>();
+
+        r21[i39] = $r66;
+
+        i39 = i39 + 1;
+
+        goto label16;
+
+     label17:
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes> = r21;
+
+     label18:
+        if i38 < 40 goto label19;
+
+        $r17 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r18 = $r17[i32];
+
+        $r19 = $r18.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        virtualinvoke $r19.<com.sun.org.apache.xerces.internal.xni.QName: void setValues(com.sun.org.apache.xerces.internal.xni.QName)>(r1);
+
+        $i4 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: void rebalanceTableView(int)>($i4);
+
+        goto label21;
+
+     label19:
+        $r10 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r13 = $r10[i32];
+
+        $r11 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributeTableView>;
+
+        $r12 = $r11[$i34];
+
+        $r13.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute next> = $r12;
+
+        $r16 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributeTableView>;
+
+        $r14 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r15 = $r14[i32];
+
+        $r16[$i34] = $r15;
+
+        goto label21;
+
+     label20:
+        $r4 = r1.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String rawname>;
+
+        i32 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int getIndexFast(java.lang.String)>($r4);
+
+     label21:
+        $r60 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r61 = $r60[i32];
+
+        $r62 = $r61.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        virtualinvoke $r62.<com.sun.org.apache.xerces.internal.xni.QName: void setValues(com.sun.org.apache.xerces.internal.xni.QName)>(r1);
+
+        $r61.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: java.lang.String type> = r5;
+
+        $r61.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: java.lang.String value> = r6;
+
+        $r61.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.XMLString xmlValue> = r7;
+
+        $r61.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: java.lang.String nonNormalizedValue> = r6;
+
+        $r61.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: boolean specified> = 0;
+
+        $r63 = $r61.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.Augmentations augs>;
+
+        if $r63 == null goto label22;
+
+        $r8 = $r61.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.Augmentations augs>;
+
+        interfaceinvoke $r8.<com.sun.org.apache.xerces.internal.xni.Augmentations: void removeAllItems()>();
+
+     label22:
+        return i32;
+    }
+
+    public void removeAllAttributes()
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength> = 0;
+
+        return;
+    }
+
+    public void removeAttributeAt(int)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1, $r3, $r4, $r5;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute r2;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: boolean fIsTableViewConsistent> = 0;
+
+        $i1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        $i2 = $i1 - 1;
+
+        if i0 >= $i2 goto label1;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        r2 = $r1[i0];
+
+        $r4 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $i8 = i0 + 1;
+
+        $r3 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $i5 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        $i6 = $i5 - i0;
+
+        $i7 = $i6 - 1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, $i8, $r3, i0, $i7);
+
+        $r5 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $i9 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        $i10 = $i9 - 1;
+
+        $r5[$i10] = r2;
+
+     label1:
+        $i3 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        $i4 = $i3 - 1;
+
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength> = $i4;
+
+        return;
+    }
+
+    public void setName(int, com.sun.org.apache.xerces.internal.xni.QName)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute $r2;
+        int i0;
+        com.sun.org.apache.xerces.internal.xni.QName r3, $r4;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        r3 := @parameter1: com.sun.org.apache.xerces.internal.xni.QName;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r2 = $r1[i0];
+
+        $r4 = $r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        virtualinvoke $r4.<com.sun.org.apache.xerces.internal.xni.QName: void setValues(com.sun.org.apache.xerces.internal.xni.QName)>(r3);
+
+        return;
+    }
+
+    public void getName(int, com.sun.org.apache.xerces.internal.xni.QName)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r1;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r2;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute $r3;
+        int i0;
+        com.sun.org.apache.xerces.internal.xni.QName r0, $r4;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: com.sun.org.apache.xerces.internal.xni.QName;
+
+        $r2 = r1.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r3 = $r2[i0];
+
+        $r4 = $r3.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.xni.QName: void setValues(com.sun.org.apache.xerces.internal.xni.QName)>($r4);
+
+        return;
+    }
+
+    public void setType(int, java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute $r3;
+        int i0;
+        java.lang.String r2;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.lang.String;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r3 = $r1[i0];
+
+        $r3.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: java.lang.String type> = r2;
+
+        return;
+    }
+
+    public void setValue(int, java.lang.String)
+    {
+        int i0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.lang.String;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: void setValue(int,java.lang.String,com.sun.org.apache.xerces.internal.xni.XMLString)>(i0, r1, null);
+
+        return;
+    }
+
+    public void setValue(int, java.lang.String, com.sun.org.apache.xerces.internal.xni.XMLString)
+    {
+        com.sun.org.apache.xerces.internal.xni.XMLString r4;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute r2;
+        int i0;
+        java.lang.String r3;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        r3 := @parameter1: java.lang.String;
+
+        r4 := @parameter2: com.sun.org.apache.xerces.internal.xni.XMLString;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        r2 = $r1[i0];
+
+        r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: java.lang.String value> = r3;
+
+        r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: java.lang.String nonNormalizedValue> = r3;
+
+        r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.XMLString xmlValue> = r4;
+
+        return;
+    }
+
+    public void setNonNormalizedValue(int, java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1, $r3;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute $r2, $r4;
+        int i0;
+        java.lang.String r5;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        r5 := @parameter1: java.lang.String;
+
+        if r5 != null goto label1;
+
+        $r3 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r4 = $r3[i0];
+
+        r5 = $r4.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: java.lang.String value>;
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r2 = $r1[i0];
+
+        $r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: java.lang.String nonNormalizedValue> = r5;
+
+        return;
+    }
+
+    public java.lang.String getNonNormalizedValue(int)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute $r2;
+        int i0;
+        java.lang.String r3;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r2 = $r1[i0];
+
+        r3 = $r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: java.lang.String nonNormalizedValue>;
+
+        return r3;
+    }
+
+    public void setSpecified(int, boolean)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute $r2;
+        int i0;
+        boolean z0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        z0 := @parameter1: boolean;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r2 = $r1[i0];
+
+        $r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: boolean specified> = z0;
+
+        return;
+    }
+
+    public boolean isSpecified(int)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute $r2;
+        int i0;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r2 = $r1[i0];
+
+        $z0 = $r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: boolean specified>;
+
+        return $z0;
+    }
+
+    public int getLength()
+    {
+        int $i0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        $i0 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        return $i0;
+    }
+
+    public java.lang.String getType(int)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute $r2;
+        int i0, $i1;
+        java.lang.String $r3, $r4;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        if i0 < 0 goto label1;
+
+        $i1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        if i0 < $i1 goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r2 = $r1[i0];
+
+        $r3 = $r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: java.lang.String type>;
+
+        $r4 = specialinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: java.lang.String getReportableType(java.lang.String)>($r3);
+
+        return $r4;
+    }
+
+    public java.lang.String getType(java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r2;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute $r3;
+        int $i0, $i2;
+        java.lang.String r1, $r4, $r5;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int getIndex(java.lang.String)>(r1);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label1;
+
+        $r2 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r3 = $r2[$i0];
+
+        $r4 = $r3.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: java.lang.String type>;
+
+        $r5 = specialinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: java.lang.String getReportableType(java.lang.String)>($r4);
+
+        goto label2;
+
+     label1:
+        $r5 = null;
+
+     label2:
+        return $r5;
+    }
+
+    public java.lang.String getValue(int)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1, $r4, $r7, $r8, $r13;
+        int i0, $i1;
+        java.lang.String $r3, $r12, $r15;
+        com.sun.org.apache.xerces.internal.xni.XMLString $r6, $r10;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute $r2, $r5, $r9, $r11, $r14;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        if i0 < 0 goto label1;
+
+        $i1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        if i0 < $i1 goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r2 = $r1[i0];
+
+        $r3 = $r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: java.lang.String value>;
+
+        if $r3 != null goto label3;
+
+        $r4 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r5 = $r4[i0];
+
+        $r6 = $r5.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.XMLString xmlValue>;
+
+        if $r6 == null goto label3;
+
+        $r7 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r11 = $r7[i0];
+
+        $r8 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r9 = $r8[i0];
+
+        $r10 = $r9.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.XMLString xmlValue>;
+
+        $r12 = virtualinvoke $r10.<com.sun.org.apache.xerces.internal.xni.XMLString: java.lang.String toString()>();
+
+        $r11.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: java.lang.String value> = $r12;
+
+     label3:
+        $r13 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r14 = $r13[i0];
+
+        $r15 = $r14.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: java.lang.String value>;
+
+        return $r15;
+    }
+
+    public java.lang.String getValue(java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r2, $r5, $r8, $r9;
+        int $i0, $i2;
+        java.lang.String r1, $r4, $r7, $r13;
+        com.sun.org.apache.xerces.internal.xni.XMLString $r11;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute $r3, $r6, $r10, $r12;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int getIndex(java.lang.String)>(r1);
+
+        $i2 = (int) -1;
+
+        if $i0 != $i2 goto label1;
+
+        return null;
+
+     label1:
+        $r2 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r3 = $r2[$i0];
+
+        $r4 = $r3.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: java.lang.String value>;
+
+        if $r4 != null goto label2;
+
+        $r8 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r12 = $r8[$i0];
+
+        $r9 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r10 = $r9[$i0];
+
+        $r11 = $r10.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.XMLString xmlValue>;
+
+        $r13 = virtualinvoke $r11.<com.sun.org.apache.xerces.internal.xni.XMLString: java.lang.String toString()>();
+
+        $r12.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: java.lang.String value> = $r13;
+
+     label2:
+        $r5 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r6 = $r5[$i0];
+
+        $r7 = $r6.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: java.lang.String value>;
+
+        return $r7;
+    }
+
+    public java.lang.String getName(int)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute $r2;
+        int i0, $i1;
+        java.lang.String $r4;
+        com.sun.org.apache.xerces.internal.xni.QName $r3;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        if i0 < 0 goto label1;
+
+        $i1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        if i0 < $i1 goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r2 = $r1[i0];
+
+        $r3 = $r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r4 = $r3.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String rawname>;
+
+        return $r4;
+    }
+
+    public int getIndex(java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute r2;
+        int $i0, i1, $i3;
+        java.lang.String $r4, r6, $r7;
+        com.sun.org.apache.xerces.internal.xni.QName $r3, $r5;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        r6 := @parameter0: java.lang.String;
+
+        i1 = 0;
+
+     label1:
+        $i0 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        if i1 >= $i0 goto label3;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        r2 = $r1[i1];
+
+        $r3 = r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r4 = $r3.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String rawname>;
+
+        if $r4 == null goto label2;
+
+        $r5 = r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r7 = $r5.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String rawname>;
+
+        $z0 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>(r6);
+
+        if $z0 == 0 goto label2;
+
+        return i1;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        $i3 = (int) -1;
+
+        return $i3;
+    }
+
+    public int getIndex(java.lang.String, java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1;
+        int $i0, i1, $i3;
+        java.lang.String $r4, r6, $r7, r8, $r10, $r12, $r14;
+        boolean $z0, $z1;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute r2;
+        com.sun.org.apache.xerces.internal.xni.QName $r3, $r5, $r9, $r11, $r13;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        r8 := @parameter0: java.lang.String;
+
+        r6 := @parameter1: java.lang.String;
+
+        i1 = 0;
+
+     label1:
+        $i0 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        if i1 >= $i0 goto label4;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        r2 = $r1[i1];
+
+        $r3 = r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r4 = $r3.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String localpart>;
+
+        if $r4 == null goto label3;
+
+        $r5 = r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r7 = $r5.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String localpart>;
+
+        $z0 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>(r6);
+
+        if $z0 == 0 goto label3;
+
+        $r9 = r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r10 = $r9.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        if r8 == $r10 goto label2;
+
+        if r8 == null goto label3;
+
+        $r11 = r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r12 = $r11.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        if $r12 == null goto label3;
+
+        $r13 = r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r14 = $r13.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        $z1 = virtualinvoke $r14.<java.lang.String: boolean equals(java.lang.Object)>(r8);
+
+        if $z1 == 0 goto label3;
+
+     label2:
+        return i1;
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label4:
+        $i3 = (int) -1;
+
+        return $i3;
+    }
+
+    public int getIndexByLocalName(java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute r2;
+        int $i0, i1, $i3;
+        java.lang.String $r4, r6, $r7;
+        com.sun.org.apache.xerces.internal.xni.QName $r3, $r5;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        r6 := @parameter0: java.lang.String;
+
+        i1 = 0;
+
+     label1:
+        $i0 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        if i1 >= $i0 goto label3;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        r2 = $r1[i1];
+
+        $r3 = r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r4 = $r3.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String localpart>;
+
+        if $r4 == null goto label2;
+
+        $r5 = r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r7 = $r5.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String localpart>;
+
+        $z0 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>(r6);
+
+        if $z0 == 0 goto label2;
+
+        return i1;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        $i3 = (int) -1;
+
+        return $i3;
+    }
+
+    public java.lang.String getLocalName(int)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute $r2;
+        int i0, $i1;
+        java.lang.String $r4;
+        com.sun.org.apache.xerces.internal.xni.QName $r3;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        $z0 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: boolean fNamespaces>;
+
+        if $z0 != 0 goto label1;
+
+        return "";
+
+     label1:
+        if i0 < 0 goto label2;
+
+        $i1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        if i0 < $i1 goto label3;
+
+     label2:
+        return null;
+
+     label3:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r2 = $r1[i0];
+
+        $r3 = $r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r4 = $r3.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String localpart>;
+
+        return $r4;
+    }
+
+    public java.lang.String getQName(int)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute $r2;
+        int i0, $i1;
+        java.lang.String r4, $r5;
+        com.sun.org.apache.xerces.internal.xni.QName $r3;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        if i0 < 0 goto label1;
+
+        $i1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        if i0 < $i1 goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r2 = $r1[i0];
+
+        $r3 = $r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        r4 = $r3.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String rawname>;
+
+        if r4 == null goto label3;
+
+        $r5 = r4;
+
+        goto label4;
+
+     label3:
+        $r5 = "";
+
+     label4:
+        return $r5;
+    }
+
+    public com.sun.org.apache.xerces.internal.xni.QName getQualifiedName(int)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute $r2;
+        int i0, $i1;
+        com.sun.org.apache.xerces.internal.xni.QName $r3;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        if i0 < 0 goto label1;
+
+        $i1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        if i0 < $i1 goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r2 = $r1[i0];
+
+        $r3 = $r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        return $r3;
+    }
+
+    public java.lang.String getType(java.lang.String, java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        int $i0, $i2;
+        java.lang.String r1, r2, $r3;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        $z0 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: boolean fNamespaces>;
+
+        if $z0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $i0 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int getIndex(java.lang.String,java.lang.String)>(r1, r2);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label2;
+
+        $r3 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: java.lang.String getType(int)>($i0);
+
+        goto label3;
+
+     label2:
+        $r3 = null;
+
+     label3:
+        return $r3;
+    }
+
+    public int getIndexFast(java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute r2;
+        int $i0, i1, $i3;
+        java.lang.String r4, $r5;
+        com.sun.org.apache.xerces.internal.xni.QName $r3;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        r4 := @parameter0: java.lang.String;
+
+        i1 = 0;
+
+     label1:
+        $i0 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        if i1 >= $i0 goto label3;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        r2 = $r1[i1];
+
+        $r3 = r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r5 = $r3.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String rawname>;
+
+        if $r5 != r4 goto label2;
+
+        return i1;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        $i3 = (int) -1;
+
+        return $i3;
+    }
+
+    public void addAttributeNS(com.sun.org.apache.xerces.internal.xni.QName, java.lang.String, java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1, $r2, $r8, $r9, $r10, $r11, $r14, r15;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, i10, $i11;
+        java.lang.String r5, r6;
+        com.sun.org.apache.xerces.internal.xni.Augmentations $r7;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute $r12, $r13;
+        com.sun.org.apache.xerces.internal.xni.QName r3, $r4;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        r3 := @parameter0: com.sun.org.apache.xerces.internal.xni.QName;
+
+        r5 := @parameter1: java.lang.String;
+
+        r6 := @parameter2: java.lang.String;
+
+        i0 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        $i1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        $i2 = $i1 + 1;
+
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength> = $i2;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $i3 = lengthof $r1;
+
+        if $i1 != $i3 goto label5;
+
+        $i4 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        if $i4 >= 20 goto label1;
+
+        $r14 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $i8 = lengthof $r14;
+
+        $i9 = $i8 + 4;
+
+        r15 = newarray (com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute)[$i9];
+
+        goto label2;
+
+     label1:
+        $r8 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $i5 = lengthof $r8;
+
+        $i6 = $i5 << 1;
+
+        r15 = newarray (com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute)[$i6];
+
+     label2:
+        $r10 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r9 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $i7 = lengthof $r9;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r10, 0, r15, 0, $i7);
+
+        $r11 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        i10 = lengthof $r11;
+
+     label3:
+        $i11 = lengthof r15;
+
+        if i10 >= $i11 goto label4;
+
+        $r13 = new com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute;
+
+        specialinvoke $r13.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: void <init>()>();
+
+        r15[i10] = $r13;
+
+        i10 = i10 + 1;
+
+        goto label3;
+
+     label4:
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes> = r15;
+
+     label5:
+        $r2 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r12 = $r2[i0];
+
+        $r4 = $r12.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        virtualinvoke $r4.<com.sun.org.apache.xerces.internal.xni.QName: void setValues(com.sun.org.apache.xerces.internal.xni.QName)>(r3);
+
+        $r12.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: java.lang.String type> = r5;
+
+        $r12.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: java.lang.String value> = r6;
+
+        $r12.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: java.lang.String nonNormalizedValue> = r6;
+
+        $r12.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: boolean specified> = 0;
+
+        $r7 = $r12.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.Augmentations augs>;
+
+        interfaceinvoke $r7.<com.sun.org.apache.xerces.internal.xni.Augmentations: void removeAllItems()>();
+
+        return;
+    }
+
+    public com.sun.org.apache.xerces.internal.xni.QName checkDuplicatesNS()
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] r2;
+        int i0, $i1, i2, i3;
+        java.lang.String $r7, $r8, $r11, $r12;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute r3, r4;
+        com.sun.org.apache.xerces.internal.xni.QName $r1, $r5, $r6, $r9, $r10, $r13;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        if i0 > 20 goto label6;
+
+        r2 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        i2 = 0;
+
+     label1:
+        $i1 = i0 - 1;
+
+        if i2 >= $i1 goto label5;
+
+        r3 = r2[i2];
+
+        i3 = i2 + 1;
+
+     label2:
+        if i3 >= i0 goto label4;
+
+        r4 = r2[i3];
+
+        $r5 = r3.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r8 = $r5.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String localpart>;
+
+        $r6 = r4.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r7 = $r6.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String localpart>;
+
+        if $r8 != $r7 goto label3;
+
+        $r9 = r3.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r12 = $r9.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        $r10 = r4.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r11 = $r10.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        if $r12 != $r11 goto label3;
+
+        $r13 = r4.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        return $r13;
+
+     label3:
+        i3 = i3 + 1;
+
+        goto label2;
+
+     label4:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label5:
+        return null;
+
+     label6:
+        $r1 = specialinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.xni.QName checkManyDuplicatesNS()>();
+
+        return $r1;
+    }
+
+    private com.sun.org.apache.xerces.internal.xni.QName checkManyDuplicatesNS()
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] r1, r2;
+        int[] r3;
+        int i0, $i1, $i2, $i3, i4, i5, i6;
+        java.lang.String $r7, $r8, $r12, $r13, $r16, $r17;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute r4, $r9, r19;
+        com.sun.org.apache.xerces.internal.xni.QName $r5, $r6, $r10, $r11, $r14, $r15, $r18;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: boolean fIsTableViewConsistent> = 0;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: void prepareTableView()>();
+
+        i0 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        r2 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributeTableView>;
+
+        r3 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int[] fAttributeTableViewChainState>;
+
+        i4 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLargeCount>;
+
+        i5 = 0;
+
+     label1:
+        if i5 >= i0 goto label8;
+
+        r4 = r1[i5];
+
+        $r5 = r4.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r8 = $r5.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String localpart>;
+
+        $r6 = r4.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r7 = $r6.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        $i1 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int getTableViewBucket(java.lang.String,java.lang.String)>($r8, $r7);
+
+        $i2 = r3[$i1];
+
+        if $i2 == i4 goto label2;
+
+        r3[$i1] = i4;
+
+        r4.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute next> = null;
+
+        r2[$i1] = r4;
+
+        goto label7;
+
+     label2:
+        i6 = 0;
+
+        r19 = r2[$i1];
+
+     label3:
+        if r19 == null goto label5;
+
+        $r10 = r19.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r13 = $r10.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String localpart>;
+
+        $r11 = r4.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r12 = $r11.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String localpart>;
+
+        if $r13 != $r12 goto label4;
+
+        $r14 = r19.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r17 = $r14.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        $r15 = r4.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r16 = $r15.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        if $r17 != $r16 goto label4;
+
+        $r18 = r4.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        return $r18;
+
+     label4:
+        r19 = r19.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute next>;
+
+        i6 = i6 + 1;
+
+        goto label3;
+
+     label5:
+        if i6 < 40 goto label6;
+
+        $i3 = i5 + 1;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: void rebalanceTableViewNS(int)>($i3);
+
+        i4 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLargeCount>;
+
+        goto label7;
+
+     label6:
+        $r9 = r2[$i1];
+
+        r4.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute next> = $r9;
+
+        r2[$i1] = r4;
+
+     label7:
+        i5 = i5 + 1;
+
+        goto label1;
+
+     label8:
+        return null;
+    }
+
+    public int getIndexFast(java.lang.String, java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute r2;
+        int $i0, i1, $i3;
+        java.lang.String r4, $r5, r7, $r8;
+        com.sun.org.apache.xerces.internal.xni.QName $r3, $r6;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        r7 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.lang.String;
+
+        i1 = 0;
+
+     label1:
+        $i0 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        if i1 >= $i0 goto label3;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        r2 = $r1[i1];
+
+        $r3 = r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r5 = $r3.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String localpart>;
+
+        if $r5 != r4 goto label2;
+
+        $r6 = r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r8 = $r6.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        if $r8 != r7 goto label2;
+
+        return i1;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        $i3 = (int) -1;
+
+        return $i3;
+    }
+
+    private java.lang.String getReportableType(java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r1;
+        int $i1;
+        char $c0;
+        java.lang.String r0;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        $c0 = virtualinvoke r0.<java.lang.String: char charAt(int)>(0);
+
+        $i1 = (int) $c0;
+
+        if $i1 != 40 goto label1;
+
+        return "NMTOKEN";
+
+     label1:
+        return r0;
+    }
+
+    protected int getTableViewBucket(java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $i0 = specialinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int hash(java.lang.String)>(r1);
+
+        $i2 = $i0 & 2147483647;
+
+        $i1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fTableViewBuckets>;
+
+        $i3 = $i2 % $i1;
+
+        return $i3;
+    }
+
+    protected int getTableViewBucket(java.lang.String, java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7;
+        java.lang.String r0, r2;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.lang.String;
+
+        if r0 != null goto label1;
+
+        $i4 = specialinvoke r1.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int hash(java.lang.String)>(r2);
+
+        $i6 = $i4 & 2147483647;
+
+        $i5 = r1.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fTableViewBuckets>;
+
+        $i7 = $i6 % $i5;
+
+        return $i7;
+
+     label1:
+        $i0 = specialinvoke r1.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int hash(java.lang.String,java.lang.String)>(r2, r0);
+
+        $i2 = $i0 & 2147483647;
+
+        $i1 = r1.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fTableViewBuckets>;
+
+        $i3 = $i2 % $i1;
+
+        return $i3;
+    }
+
+    private int hash(java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        int[] $r1;
+        int $i0, $i1;
+        java.lang.String r2;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int[] fHashMultipliers>;
+
+        if $r1 != null goto label1;
+
+        $i1 = virtualinvoke r2.<java.lang.String: int hashCode()>();
+
+        return $i1;
+
+     label1:
+        $i0 = specialinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int hash0(java.lang.String)>(r2);
+
+        return $i0;
+    }
+
+    private int hash(java.lang.String, java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        int[] $r1, $r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        java.lang.String r2, r3;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int[] fHashMultipliers>;
+
+        if $r1 != null goto label1;
+
+        $i5 = virtualinvoke r2.<java.lang.String: int hashCode()>();
+
+        $i6 = virtualinvoke r3.<java.lang.String: int hashCode()>();
+
+        $i7 = $i6 * 31;
+
+        $i8 = $i5 + $i7;
+
+        return $i8;
+
+     label1:
+        $i0 = specialinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int hash0(java.lang.String)>(r2);
+
+        $i1 = specialinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int hash0(java.lang.String)>(r3);
+
+        $r4 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int[] fHashMultipliers>;
+
+        $i2 = $r4[32];
+
+        $i3 = $i1 * $i2;
+
+        $i4 = $i0 + $i3;
+
+        return $i4;
+    }
+
+    private int hash0(java.lang.String)
+    {
+        char $c4;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r1;
+        int[] r2;
+        int $i0, $i1, $i2, $i3, i5, i6, $i7;
+        java.lang.String r0;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        i5 = 0;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        r2 = r1.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int[] fHashMultipliers>;
+
+        i6 = 0;
+
+     label1:
+        if i6 >= $i0 goto label2;
+
+        $i1 = i6 & 31;
+
+        $i2 = r2[$i1];
+
+        $i3 = i5 * $i2;
+
+        $c4 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i6);
+
+        $i7 = (int) $c4;
+
+        i5 = $i3 + $i7;
+
+        i6 = i6 + 1;
+
+        goto label1;
+
+     label2:
+        return i5;
+    }
+
+    protected void cleanTableView()
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        int[] $r1, $r2;
+        int $i0, $i1, $i2, i3, $i5;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        $i0 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLargeCount>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLargeCount> = $i1;
+
+        if $i1 >= 0 goto label3;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int[] fAttributeTableViewChainState>;
+
+        if $r1 == null goto label2;
+
+        $i2 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fTableViewBuckets>;
+
+        i3 = $i2 - 1;
+
+     label1:
+        if i3 < 0 goto label2;
+
+        $r2 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int[] fAttributeTableViewChainState>;
+
+        $r2[i3] = 0;
+
+        $i5 = (int) -1;
+
+        i3 = i3 + $i5;
+
+        goto label1;
+
+     label2:
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLargeCount> = 1;
+
+     label3:
+        return;
+    }
+
+    private void growTableView()
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        int i0, $i1, $i2, i3;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        i3 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fTableViewBuckets>;
+
+     label1:
+        $i1 = i3 << 1;
+
+        $i2 = $i1 + 1;
+
+        i3 = $i2;
+
+        if $i2 >= 0 goto label2;
+
+        i3 = 2147483647;
+
+        goto label3;
+
+     label2:
+        if i0 > $i2 goto label1;
+
+     label3:
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fTableViewBuckets> = i3;
+
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributeTableView> = null;
+
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLargeCount> = 1;
+
+        return;
+    }
+
+    protected void prepareTableView()
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1, $r2;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        int[] $r3;
+        int $i0, $i1, $i2, $i3;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        $i1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        $i0 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fTableViewBuckets>;
+
+        if $i1 <= $i0 goto label1;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: void growTableView()>();
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributeTableView>;
+
+        if $r1 != null goto label2;
+
+        $i2 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fTableViewBuckets>;
+
+        $r2 = newarray (com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute)[$i2];
+
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributeTableView> = $r2;
+
+        $i3 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fTableViewBuckets>;
+
+        $r3 = newarray (int)[$i3];
+
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int[] fAttributeTableViewChainState> = $r3;
+
+        goto label3;
+
+     label2:
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: void cleanTableView()>();
+
+     label3:
+        return;
+    }
+
+    protected void prepareAndPopulateTableView()
+    {
+        int $i0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        $i0 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: void prepareAndPopulateTableView(int)>($i0);
+
+        return;
+    }
+
+    private void prepareAndPopulateTableView(int)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1, $r6, $r8, $r10;
+        int[] $r5, $r9;
+        int i0, $i1, $i2, $i3, $i4, i5;
+        java.lang.String $r4;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute r2, $r7;
+        com.sun.org.apache.xerces.internal.xni.QName $r3;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: void prepareTableView()>();
+
+        i5 = 0;
+
+     label1:
+        if i5 >= i0 goto label4;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        r2 = $r1[i5];
+
+        $r3 = r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r4 = $r3.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String rawname>;
+
+        $i1 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int getTableViewBucket(java.lang.String)>($r4);
+
+        $r5 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int[] fAttributeTableViewChainState>;
+
+        $i3 = $r5[$i1];
+
+        $i2 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLargeCount>;
+
+        if $i3 == $i2 goto label2;
+
+        $r9 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int[] fAttributeTableViewChainState>;
+
+        $i4 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLargeCount>;
+
+        $r9[$i1] = $i4;
+
+        r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute next> = null;
+
+        $r10 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributeTableView>;
+
+        $r10[$i1] = r2;
+
+        goto label3;
+
+     label2:
+        $r6 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributeTableView>;
+
+        $r7 = $r6[$i1];
+
+        r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute next> = $r7;
+
+        $r8 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributeTableView>;
+
+        $r8[$i1] = r2;
+
+     label3:
+        i5 = i5 + 1;
+
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    public java.lang.String getPrefix(int)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute $r2;
+        int i0, $i1;
+        java.lang.String r4, $r5;
+        com.sun.org.apache.xerces.internal.xni.QName $r3;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        if i0 < 0 goto label1;
+
+        $i1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        if i0 < $i1 goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r2 = $r1[i0];
+
+        $r3 = $r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        r4 = $r3.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix>;
+
+        if r4 == null goto label3;
+
+        $r5 = r4;
+
+        goto label4;
+
+     label3:
+        $r5 = "";
+
+     label4:
+        return $r5;
+    }
+
+    public java.lang.String getURI(int)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute $r2;
+        int i0, $i1;
+        java.lang.String r4;
+        com.sun.org.apache.xerces.internal.xni.QName $r3;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        if i0 < 0 goto label1;
+
+        $i1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        if i0 < $i1 goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r2 = $r1[i0];
+
+        $r3 = $r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        r4 = $r3.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        return r4;
+    }
+
+    public java.lang.String getValue(java.lang.String, java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        int $i0, $i2;
+        java.lang.String r1, r2, $r3;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        $i0 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int getIndex(java.lang.String,java.lang.String)>(r1, r2);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label1;
+
+        $r3 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: java.lang.String getValue(int)>($i0);
+
+        goto label2;
+
+     label1:
+        $r3 = null;
+
+     label2:
+        return $r3;
+    }
+
+    public com.sun.org.apache.xerces.internal.xni.Augmentations getAugmentations(java.lang.String, java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r3;
+        com.sun.org.apache.xerces.internal.xni.Augmentations $r5;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute $r4;
+        int $i0, $i2;
+        java.lang.String r1, r2;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        $i0 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int getIndex(java.lang.String,java.lang.String)>(r1, r2);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label1;
+
+        $r3 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r4 = $r3[$i0];
+
+        $r5 = $r4.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.Augmentations augs>;
+
+        goto label2;
+
+     label1:
+        $r5 = null;
+
+     label2:
+        return $r5;
+    }
+
+    public com.sun.org.apache.xerces.internal.xni.Augmentations getAugmentations(java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.xni.Augmentations $r4;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r2;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute $r3;
+        int $i0, $i2;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int getIndex(java.lang.String)>(r1);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label1;
+
+        $r2 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r3 = $r2[$i0];
+
+        $r4 = $r3.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.Augmentations augs>;
+
+        goto label2;
+
+     label1:
+        $r4 = null;
+
+     label2:
+        return $r4;
+    }
+
+    public com.sun.org.apache.xerces.internal.xni.Augmentations getAugmentations(int)
+    {
+        com.sun.org.apache.xerces.internal.xni.Augmentations $r3;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute $r2;
+        int i0, $i1;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        if i0 < 0 goto label1;
+
+        $i1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        if i0 < $i1 goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r2 = $r1[i0];
+
+        $r3 = $r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.Augmentations augs>;
+
+        return $r3;
+    }
+
+    public void setAugmentations(int, com.sun.org.apache.xerces.internal.xni.Augmentations)
+    {
+        com.sun.org.apache.xerces.internal.xni.Augmentations r2;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute $r3;
+        int i0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r3 = $r1[i0];
+
+        $r3.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.Augmentations augs> = r2;
+
+        return;
+    }
+
+    public void setURI(int, java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute $r2;
+        int i0;
+        java.lang.String r3;
+        com.sun.org.apache.xerces.internal.xni.QName $r4;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        r3 := @parameter1: java.lang.String;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        $r2 = $r1[i0];
+
+        $r4 = $r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r4.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri> = r3;
+
+        return;
+    }
+
+    public void refresh()
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        int $i0, $i1, i2;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        $i0 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        if $i0 <= 0 goto label2;
+
+        i2 = 0;
+
+     label1:
+        $i1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLength>;
+
+        if i2 >= $i1 goto label2;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: java.lang.String getValue(int)>(i2);
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void refresh(int)
+    {
+        int i0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        return;
+    }
+
+    private void prepareAndPopulateTableViewNS(int)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] $r1, $r8, $r10, $r12;
+        int[] $r7, $r11;
+        int i0, $i1, $i2, $i3, $i4, i5;
+        java.lang.String $r5, $r6;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute r2, $r9;
+        com.sun.org.apache.xerces.internal.xni.QName $r3, $r4;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: void prepareTableView()>();
+
+        i5 = 0;
+
+     label1:
+        if i5 >= i0 goto label4;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributes>;
+
+        r2 = $r1[i5];
+
+        $r3 = r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r6 = $r3.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String localpart>;
+
+        $r4 = r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.xni.QName name>;
+
+        $r5 = $r4.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        $i1 = virtualinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int getTableViewBucket(java.lang.String,java.lang.String)>($r6, $r5);
+
+        $r7 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int[] fAttributeTableViewChainState>;
+
+        $i3 = $r7[$i1];
+
+        $i2 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLargeCount>;
+
+        if $i3 == $i2 goto label2;
+
+        $r11 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int[] fAttributeTableViewChainState>;
+
+        $i4 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int fLargeCount>;
+
+        $r11[$i1] = $i4;
+
+        r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute next> = null;
+
+        $r12 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributeTableView>;
+
+        $r12[$i1] = r2;
+
+        goto label3;
+
+     label2:
+        $r8 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributeTableView>;
+
+        $r9 = $r8[$i1];
+
+        r2.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute next> = $r9;
+
+        $r10 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl$Attribute[] fAttributeTableView>;
+
+        $r10[$i1] = r2;
+
+     label3:
+        i5 = i5 + 1;
+
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    private void rebalanceTableView(int)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        int[] $r1, $r2, $r3;
+        int i0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int[] fHashMultipliers>;
+
+        if $r1 != null goto label1;
+
+        $r3 = newarray (int)[33];
+
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int[] fHashMultipliers> = $r3;
+
+     label1:
+        $r2 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int[] fHashMultipliers>;
+
+        staticinvoke <com.sun.org.apache.xerces.internal.util.PrimeNumberSequenceGenerator: void generateSequence(int[])>($r2);
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: void prepareAndPopulateTableView(int)>(i0);
+
+        return;
+    }
+
+    private void rebalanceTableViewNS(int)
+    {
+        com.sun.org.apache.xerces.internal.util.XMLAttributesImpl r0;
+        int[] $r1, $r2, $r3;
+        int i0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int[] fHashMultipliers>;
+
+        if $r1 != null goto label1;
+
+        $r3 = newarray (int)[33];
+
+        r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int[] fHashMultipliers> = $r3;
+
+     label1:
+        $r2 = r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int[] fHashMultipliers>;
+
+        staticinvoke <com.sun.org.apache.xerces.internal.util.PrimeNumberSequenceGenerator: void generateSequence(int[])>($r2);
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: void prepareAndPopulateTableViewNS(int)>(i0);
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int SIZE_LIMIT> = 20;
+
+        <com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int MULTIPLIERS_MASK> = 31;
+
+        <com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int MULTIPLIERS_SIZE> = 32;
+
+        <com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int MAX_HASH_COLLISIONS> = 40;
+
+        <com.sun.org.apache.xerces.internal.util.XMLAttributesImpl: int TABLE_SIZE> = 101;
+
+        return;
+    }
+}

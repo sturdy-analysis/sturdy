@@ -1,0 +1,679 @@
+public class javax.security.sasl.Sasl extends java.lang.Object
+{
+    private static java.util.List disabledMechanisms;
+    private static final java.lang.String SASL_LOGGER_NAME;
+    private static final java.util.logging.Logger logger;
+    public static final java.lang.String QOP;
+    public static final java.lang.String STRENGTH;
+    public static final java.lang.String SERVER_AUTH;
+    public static final java.lang.String BOUND_SERVER_NAME;
+    public static final java.lang.String MAX_BUFFER;
+    public static final java.lang.String RAW_SEND_SIZE;
+    public static final java.lang.String REUSE;
+    public static final java.lang.String POLICY_NOPLAINTEXT;
+    public static final java.lang.String POLICY_NOACTIVE;
+    public static final java.lang.String POLICY_NODICTIONARY;
+    public static final java.lang.String POLICY_NOANONYMOUS;
+    public static final java.lang.String POLICY_FORWARD_SECRECY;
+    public static final java.lang.String POLICY_PASS_CREDENTIALS;
+    public static final java.lang.String CREDENTIALS;
+
+    private void <init>()
+    {
+        javax.security.sasl.Sasl r0;
+
+        r0 := @this: javax.security.sasl.Sasl;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static javax.security.sasl.SaslClient createSaslClient(java.lang.String[], java.lang.String, java.lang.String, java.lang.String, java.util.Map, javax.security.auth.callback.CallbackHandler) throws javax.security.sasl.SaslException
+    {
+        java.lang.NullPointerException $r27;
+        javax.security.sasl.SaslClient $r19;
+        javax.security.auth.callback.CallbackHandler r18;
+        java.util.Map r17;
+        boolean $z0;
+        java.util.logging.Logger $r21;
+        java.security.Provider $r7, $r9;
+        java.lang.StringBuilder $r2, $r3, $r4, $r20, $r23, $r24, $r25;
+        java.security.Provider[] $r6;
+        javax.security.sasl.SaslClientFactory r11;
+        java.lang.String[] r0, $r12;
+        java.util.logging.Level $r22;
+        int $i0, $i1, $i2, i3, i4;
+        java.lang.String $r1, $r5, $r8, $r13, r14, r15, r16, $r26;
+        java.lang.Object $r10;
+
+        r0 := @parameter0: java.lang.String[];
+
+        r14 := @parameter1: java.lang.String;
+
+        r15 := @parameter2: java.lang.String;
+
+        r16 := @parameter3: java.lang.String;
+
+        r17 := @parameter4: java.util.Map;
+
+        r18 := @parameter5: javax.security.auth.callback.CallbackHandler;
+
+        i3 = 0;
+
+     label1:
+        $i0 = lengthof r0;
+
+        if i3 >= $i0 goto label9;
+
+        $r1 = r0[i3];
+
+        if $r1 != null goto label2;
+
+        $r27 = new java.lang.NullPointerException;
+
+        specialinvoke $r27.<java.lang.NullPointerException: void <init>(java.lang.String)>("Mechanism name cannot be null");
+
+        throw $r27;
+
+     label2:
+        $i1 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i1 != 0 goto label3;
+
+        goto label8;
+
+     label3:
+        $z0 = staticinvoke <javax.security.sasl.Sasl: boolean isDisabled(java.lang.String)>($r1);
+
+        if $z0 == 0 goto label4;
+
+        $r21 = <javax.security.sasl.Sasl: java.util.logging.Logger logger>;
+
+        $r22 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Disabled ");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mechanism ignored");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r21.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String)>($r22, $r26);
+
+        goto label8;
+
+     label4:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SaslClientFactory.");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = staticinvoke <java.security.Security: java.security.Provider[] getProviders(java.lang.String)>($r5);
+
+        i4 = 0;
+
+     label5:
+        if $r6 == null goto label8;
+
+        $i2 = lengthof $r6;
+
+        if i4 >= $i2 goto label8;
+
+        $r7 = $r6[i4];
+
+        $r8 = virtualinvoke $r7.<java.security.Provider: java.lang.String getProperty(java.lang.String)>($r5);
+
+        if $r8 != null goto label6;
+
+        goto label7;
+
+     label6:
+        $r9 = $r6[i4];
+
+        $r10 = staticinvoke <javax.security.sasl.Sasl: java.lang.Object loadFactory(java.security.Provider,java.lang.String)>($r9, $r8);
+
+        r11 = (javax.security.sasl.SaslClientFactory) $r10;
+
+        if r11 == null goto label7;
+
+        $r12 = newarray (java.lang.String)[1];
+
+        $r13 = r0[i3];
+
+        $r12[0] = $r13;
+
+        $r19 = interfaceinvoke r11.<javax.security.sasl.SaslClientFactory: javax.security.sasl.SaslClient createSaslClient(java.lang.String[],java.lang.String,java.lang.String,java.lang.String,java.util.Map,javax.security.auth.callback.CallbackHandler)>($r12, r14, r15, r16, r17, r18);
+
+        if $r19 == null goto label7;
+
+        return $r19;
+
+     label7:
+        i4 = i4 + 1;
+
+        goto label5;
+
+     label8:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label9:
+        return null;
+    }
+
+    private static java.lang.Object loadFactory(java.security.Provider, java.lang.String) throws javax.security.sasl.SaslException
+    {
+        javax.security.sasl.SaslException $r7, $r13, $r19, $r25;
+        java.lang.InstantiationException $r18;
+        java.lang.SecurityException $r6;
+        java.lang.String r3, $r11, $r17, $r23, $r29;
+        java.lang.IllegalAccessException $r12;
+        java.security.Provider r0;
+        java.lang.Class $r1, $r4;
+        java.lang.Object $r5;
+        java.lang.StringBuilder $r8, $r9, $r10, $r14, $r15, $r16, $r20, $r21, $r22, $r26, $r27, $r28;
+        java.lang.ClassNotFoundException $r24;
+        java.lang.ClassLoader $r2;
+
+        r0 := @parameter0: java.security.Provider;
+
+        r3 := @parameter1: java.lang.String;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $r4 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>(r3, 1, $r2);
+
+        $r5 = virtualinvoke $r4.<java.lang.Class: java.lang.Object newInstance()>();
+
+     label2:
+        return $r5;
+
+     label3:
+        $r24 := @caughtexception;
+
+        $r25 = new javax.security.sasl.SaslException;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot load class ");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r25.<javax.security.sasl.SaslException: void <init>(java.lang.String,java.lang.Throwable)>($r29, $r24);
+
+        throw $r25;
+
+     label4:
+        $r18 := @caughtexception;
+
+        $r19 = new javax.security.sasl.SaslException;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot instantiate class ");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r19.<javax.security.sasl.SaslException: void <init>(java.lang.String,java.lang.Throwable)>($r23, $r18);
+
+        throw $r19;
+
+     label5:
+        $r12 := @caughtexception;
+
+        $r13 = new javax.security.sasl.SaslException;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot access class ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<javax.security.sasl.SaslException: void <init>(java.lang.String,java.lang.Throwable)>($r17, $r12);
+
+        throw $r13;
+
+     label6:
+        $r6 := @caughtexception;
+
+        $r7 = new javax.security.sasl.SaslException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot access class ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<javax.security.sasl.SaslException: void <init>(java.lang.String,java.lang.Throwable)>($r11, $r6);
+
+        throw $r7;
+
+        catch java.lang.ClassNotFoundException from label1 to label2 with label3;
+        catch java.lang.InstantiationException from label1 to label2 with label4;
+        catch java.lang.IllegalAccessException from label1 to label2 with label5;
+        catch java.lang.SecurityException from label1 to label2 with label6;
+    }
+
+    public static javax.security.sasl.SaslServer createSaslServer(java.lang.String, java.lang.String, java.lang.String, java.util.Map, javax.security.auth.callback.CallbackHandler) throws javax.security.sasl.SaslException
+    {
+        javax.security.sasl.SaslException $r16;
+        java.lang.NullPointerException $r28;
+        javax.security.auth.callback.CallbackHandler r14;
+        java.util.Map r13;
+        boolean $z0;
+        java.util.logging.Logger $r22;
+        java.security.Provider $r6, $r8;
+        java.lang.StringBuilder $r1, $r2, $r3, $r17, $r18, $r19, $r21, $r24, $r25, $r26;
+        java.security.Provider[] $r5;
+        javax.security.sasl.SaslServerFactory r10;
+        java.util.logging.Level $r23;
+        int $i0, $i1, i2;
+        java.lang.String r0, $r4, $r7, r11, r12, $r20, $r27;
+        java.lang.Object $r9;
+        javax.security.sasl.SaslServer $r15;
+
+        r0 := @parameter0: java.lang.String;
+
+        r11 := @parameter1: java.lang.String;
+
+        r12 := @parameter2: java.lang.String;
+
+        r13 := @parameter3: java.util.Map;
+
+        r14 := @parameter4: javax.security.auth.callback.CallbackHandler;
+
+        if r0 != null goto label1;
+
+        $r28 = new java.lang.NullPointerException;
+
+        specialinvoke $r28.<java.lang.NullPointerException: void <init>(java.lang.String)>("Mechanism name cannot be null");
+
+        throw $r28;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label2;
+
+        return null;
+
+     label2:
+        $z0 = staticinvoke <javax.security.sasl.Sasl: boolean isDisabled(java.lang.String)>(r0);
+
+        if $z0 == 0 goto label3;
+
+        $r22 = <javax.security.sasl.Sasl: java.util.logging.Logger logger>;
+
+        $r23 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Disabled ");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mechanism ignored");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r22.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String)>($r23, $r27);
+
+        return null;
+
+     label3:
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SaslServerFactory.");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r5 = staticinvoke <java.security.Security: java.security.Provider[] getProviders(java.lang.String)>($r4);
+
+        i2 = 0;
+
+     label4:
+        if $r5 == null goto label7;
+
+        $i1 = lengthof $r5;
+
+        if i2 >= $i1 goto label7;
+
+        $r6 = $r5[i2];
+
+        $r7 = virtualinvoke $r6.<java.security.Provider: java.lang.String getProperty(java.lang.String)>($r4);
+
+        if $r7 != null goto label5;
+
+        $r16 = new javax.security.sasl.SaslException;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Provider does not support ");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r16.<javax.security.sasl.SaslException: void <init>(java.lang.String)>($r20);
+
+        throw $r16;
+
+     label5:
+        $r8 = $r5[i2];
+
+        $r9 = staticinvoke <javax.security.sasl.Sasl: java.lang.Object loadFactory(java.security.Provider,java.lang.String)>($r8, $r7);
+
+        r10 = (javax.security.sasl.SaslServerFactory) $r9;
+
+        if r10 == null goto label6;
+
+        $r15 = interfaceinvoke r10.<javax.security.sasl.SaslServerFactory: javax.security.sasl.SaslServer createSaslServer(java.lang.String,java.lang.String,java.lang.String,java.util.Map,javax.security.auth.callback.CallbackHandler)>(r0, r11, r12, r13, r14);
+
+        if $r15 == null goto label6;
+
+        return $r15;
+
+     label6:
+        i2 = i2 + 1;
+
+        goto label4;
+
+     label7:
+        return null;
+    }
+
+    public static java.util.Enumeration getSaslClientFactories()
+    {
+        java.util.Set $r0;
+        java.util.Iterator $r1;
+        javax.security.sasl.Sasl$1 $r2;
+
+        $r0 = staticinvoke <javax.security.sasl.Sasl: java.util.Set getFactories(java.lang.String)>("SaslClientFactory");
+
+        $r1 = interfaceinvoke $r0.<java.util.Set: java.util.Iterator iterator()>();
+
+        $r2 = new javax.security.sasl.Sasl$1;
+
+        specialinvoke $r2.<javax.security.sasl.Sasl$1: void <init>(java.util.Iterator)>($r1);
+
+        return $r2;
+    }
+
+    public static java.util.Enumeration getSaslServerFactories()
+    {
+        java.util.Set $r0;
+        java.util.Iterator $r1;
+        javax.security.sasl.Sasl$2 $r2;
+
+        $r0 = staticinvoke <javax.security.sasl.Sasl: java.util.Set getFactories(java.lang.String)>("SaslServerFactory");
+
+        $r1 = interfaceinvoke $r0.<java.util.Set: java.util.Iterator iterator()>();
+
+        $r2 = new javax.security.sasl.Sasl$2;
+
+        specialinvoke $r2.<javax.security.sasl.Sasl$2: void <init>(java.util.Iterator)>($r1);
+
+        return $r2;
+    }
+
+    private static java.util.Set getFactories(java.lang.String)
+    {
+        java.util.Enumeration $r6;
+        java.util.HashSet $r0, $r3;
+        int $i0, $i1, $i2, i3;
+        java.lang.String r1, r8, $r10;
+        boolean $z0, $z1, $z2, $z3;
+        java.util.Set $r4;
+        java.lang.Exception $r13;
+        java.security.Provider $r5, $r9, $r11;
+        java.lang.Object $r7, $r12;
+        java.security.Provider[] $r2;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = new java.util.HashSet;
+
+        specialinvoke $r0.<java.util.HashSet: void <init>()>();
+
+        if r1 == null goto label01;
+
+        $i0 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label01;
+
+        $z0 = virtualinvoke r1.<java.lang.String: boolean endsWith(java.lang.String)>(".");
+
+        if $z0 == 0 goto label02;
+
+     label01:
+        return $r0;
+
+     label02:
+        $r2 = staticinvoke <java.security.Security: java.security.Provider[] getProviders()>();
+
+        $r3 = new java.util.HashSet;
+
+        specialinvoke $r3.<java.util.HashSet: void <init>()>();
+
+        i3 = 0;
+
+     label03:
+        $i1 = lengthof $r2;
+
+        if i3 >= $i1 goto label10;
+
+        virtualinvoke $r3.<java.util.HashSet: void clear()>();
+
+        $r5 = $r2[i3];
+
+        $r6 = virtualinvoke $r5.<java.security.Provider: java.util.Enumeration keys()>();
+
+     label04:
+        $z1 = interfaceinvoke $r6.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z1 == 0 goto label09;
+
+        $r7 = interfaceinvoke $r6.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r8 = (java.lang.String) $r7;
+
+        $z2 = virtualinvoke r8.<java.lang.String: boolean startsWith(java.lang.String)>(r1);
+
+        if $z2 == 0 goto label08;
+
+        $i2 = virtualinvoke r8.<java.lang.String: int indexOf(java.lang.String)>(" ");
+
+        if $i2 >= 0 goto label08;
+
+        $r9 = $r2[i3];
+
+        $r10 = virtualinvoke $r9.<java.security.Provider: java.lang.String getProperty(java.lang.String)>(r8);
+
+        $z3 = virtualinvoke $r3.<java.util.HashSet: boolean contains(java.lang.Object)>($r10);
+
+        if $z3 != 0 goto label08;
+
+        virtualinvoke $r3.<java.util.HashSet: boolean add(java.lang.Object)>($r10);
+
+     label05:
+        $r11 = $r2[i3];
+
+        $r12 = staticinvoke <javax.security.sasl.Sasl: java.lang.Object loadFactory(java.security.Provider,java.lang.String)>($r11, $r10);
+
+        if $r12 == null goto label06;
+
+        virtualinvoke $r0.<java.util.HashSet: boolean add(java.lang.Object)>($r12);
+
+     label06:
+        goto label08;
+
+     label07:
+        $r13 := @caughtexception;
+
+     label08:
+        goto label04;
+
+     label09:
+        i3 = i3 + 1;
+
+        goto label03;
+
+     label10:
+        $r4 = staticinvoke <java.util.Collections: java.util.Set unmodifiableSet(java.util.Set)>($r0);
+
+        return $r4;
+
+        catch java.lang.Exception from label05 to label06 with label07;
+    }
+
+    private static boolean isDisabled(java.lang.String)
+    {
+        java.util.List $r1;
+        java.lang.String r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = <javax.security.sasl.Sasl: java.util.List disabledMechanisms>;
+
+        $z0 = interfaceinvoke $r1.<java.util.List: boolean contains(java.lang.Object)>(r0);
+
+        return $z0;
+    }
+
+    public static java.lang.String lambda$static$0()
+    {
+        java.lang.String $r0;
+
+        $r0 = staticinvoke <java.security.Security: java.lang.String getProperty(java.lang.String)>("jdk.sasl.disabledMechanisms");
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.String[] $r5;
+        java.security.PrivilegedAction $r1;
+        java.util.logging.Logger $r4;
+        java.util.ArrayList $r0;
+        java.util.List $r7;
+        int i0, i1;
+        java.lang.Object $r2;
+        java.lang.String r3, r6;
+        boolean $z0;
+
+        <javax.security.sasl.Sasl: java.lang.String CREDENTIALS> = "javax.security.sasl.credentials";
+
+        <javax.security.sasl.Sasl: java.lang.String POLICY_PASS_CREDENTIALS> = "javax.security.sasl.policy.credentials";
+
+        <javax.security.sasl.Sasl: java.lang.String POLICY_FORWARD_SECRECY> = "javax.security.sasl.policy.forward";
+
+        <javax.security.sasl.Sasl: java.lang.String POLICY_NOANONYMOUS> = "javax.security.sasl.policy.noanonymous";
+
+        <javax.security.sasl.Sasl: java.lang.String POLICY_NODICTIONARY> = "javax.security.sasl.policy.nodictionary";
+
+        <javax.security.sasl.Sasl: java.lang.String POLICY_NOACTIVE> = "javax.security.sasl.policy.noactive";
+
+        <javax.security.sasl.Sasl: java.lang.String POLICY_NOPLAINTEXT> = "javax.security.sasl.policy.noplaintext";
+
+        <javax.security.sasl.Sasl: java.lang.String REUSE> = "javax.security.sasl.reuse";
+
+        <javax.security.sasl.Sasl: java.lang.String RAW_SEND_SIZE> = "javax.security.sasl.rawsendsize";
+
+        <javax.security.sasl.Sasl: java.lang.String MAX_BUFFER> = "javax.security.sasl.maxbuffer";
+
+        <javax.security.sasl.Sasl: java.lang.String BOUND_SERVER_NAME> = "javax.security.sasl.bound.server.name";
+
+        <javax.security.sasl.Sasl: java.lang.String SERVER_AUTH> = "javax.security.sasl.server.authentication";
+
+        <javax.security.sasl.Sasl: java.lang.String STRENGTH> = "javax.security.sasl.strength";
+
+        <javax.security.sasl.Sasl: java.lang.String QOP> = "javax.security.sasl.qop";
+
+        <javax.security.sasl.Sasl: java.lang.String SASL_LOGGER_NAME> = "javax.security.sasl";
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+        <javax.security.sasl.Sasl: java.util.List disabledMechanisms> = $r0;
+
+        $r1 = staticinvoke <javax.security.sasl.Sasl$lambda_static_0__330: java.security.PrivilegedAction bootstrap$()>();
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        r3 = (java.lang.String) $r2;
+
+        if r3 == null goto label3;
+
+        $r5 = virtualinvoke r3.<java.lang.String: java.lang.String[] split(java.lang.String)>("\\s*,\\s*");
+
+        i0 = lengthof $r5;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label3;
+
+        r6 = $r5[i1];
+
+        $z0 = virtualinvoke r6.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 != 0 goto label2;
+
+        $r7 = <javax.security.sasl.Sasl: java.util.List disabledMechanisms>;
+
+        interfaceinvoke $r7.<java.util.List: boolean add(java.lang.Object)>(r6);
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        $r4 = staticinvoke <java.util.logging.Logger: java.util.logging.Logger getLogger(java.lang.String)>("javax.security.sasl");
+
+        <javax.security.sasl.Sasl: java.util.logging.Logger logger> = $r4;
+
+        return;
+    }
+}

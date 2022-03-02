@@ -1,0 +1,553 @@
+public class com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream extends java.io.FilterInputStream
+{
+    private java.lang.String name;
+    private int mode;
+    private byte[] buffer;
+    private int bufsize;
+    private int index;
+    private boolean gotPrefix;
+    private boolean gotEnd;
+    private com.sun.xml.internal.messaging.saaj.packaging.mime.util.LineInputStream lin;
+
+    public void <init>(java.io.InputStream)
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream r0;
+        byte[] $r3;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.util.LineInputStream $r2;
+        java.io.InputStream r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        specialinvoke r0.<java.io.FilterInputStream: void <init>(java.io.InputStream)>(r1);
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: int bufsize> = 0;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: int index> = 0;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: boolean gotPrefix> = 0;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: boolean gotEnd> = 0;
+
+        $r2 = new com.sun.xml.internal.messaging.saaj.packaging.mime.util.LineInputStream;
+
+        specialinvoke $r2.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.LineInputStream: void <init>(java.io.InputStream)>(r1);
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: com.sun.xml.internal.messaging.saaj.packaging.mime.util.LineInputStream lin> = $r2;
+
+        $r3 = newarray (byte)[45];
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: byte[] buffer> = $r3;
+
+        return;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream r0;
+        byte[] $r1;
+        short $s5, $s8;
+        byte $b4;
+        int $i0, $i1, $i2, $i3, $i7, $i9;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream;
+
+        $i1 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: int index>;
+
+        $i0 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: int bufsize>;
+
+        if $i1 < $i0 goto label2;
+
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: void readPrefix()>();
+
+        $z0 = specialinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: boolean decode()>();
+
+        if $z0 != 0 goto label1;
+
+        $i7 = (int) -1;
+
+        return $i7;
+
+     label1:
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: int index> = 0;
+
+     label2:
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: byte[] buffer>;
+
+        $i2 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: int index>;
+
+        $i3 = $i2 + 1;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: int index> = $i3;
+
+        $b4 = $r1[$i2];
+
+        $s8 = (short) $b4;
+
+        $s5 = $s8 & 255;
+
+        $i9 = (int) $s5;
+
+        return $i9;
+    }
+
+    public int read(byte[], int, int) throws java.io.IOException
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream r0;
+        byte[] r1;
+        byte $b3;
+        int i0, $i1, i2, $i4, i5, $i7, $i9;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream;
+
+        r1 := @parameter0: byte[];
+
+        i2 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i5 = 0;
+
+     label1:
+        if i5 >= i0 goto label3;
+
+        $i1 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: int read()>();
+
+        $i7 = (int) -1;
+
+        if $i1 != $i7 goto label2;
+
+        if i5 != 0 goto label3;
+
+        $i9 = (int) -1;
+
+        i5 = $i9;
+
+        goto label3;
+
+     label2:
+        $i4 = i2 + i5;
+
+        $b3 = (byte) $i1;
+
+        r1[$i4] = $b3;
+
+        i5 = i5 + 1;
+
+        goto label1;
+
+     label3:
+        return i5;
+    }
+
+    public boolean markSupported()
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream r0;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream;
+
+        return 0;
+    }
+
+    public int available() throws java.io.IOException
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        java.io.InputStream $r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream;
+
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: java.io.InputStream in>;
+
+        $i0 = virtualinvoke $r1.<java.io.InputStream: int available()>();
+
+        $i1 = $i0 * 3;
+
+        $i5 = $i1 / 4;
+
+        $i3 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: int bufsize>;
+
+        $i2 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: int index>;
+
+        $i4 = $i3 - $i2;
+
+        $i6 = $i5 + $i4;
+
+        return $i6;
+    }
+
+    public java.lang.String getName() throws java.io.IOException
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream r0;
+        java.lang.String $r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream;
+
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: void readPrefix()>();
+
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: java.lang.String name>;
+
+        return $r1;
+    }
+
+    public int getMode() throws java.io.IOException
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream r0;
+        int $i0;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream;
+
+        specialinvoke r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: void readPrefix()>();
+
+        $i0 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: int mode>;
+
+        return $i0;
+    }
+
+    private void readPrefix() throws java.io.IOException
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream r0;
+        int $i0;
+        java.lang.String $r2, $r3, $r4, $r10, $r12;
+        boolean $z0, $z1;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.util.LineInputStream $r1;
+        java.io.IOException $r5, $r7;
+        java.lang.NumberFormatException $r6;
+        java.lang.StringBuilder $r8, $r9, $r11;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream;
+
+        $z0 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: boolean gotPrefix>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: com.sun.xml.internal.messaging.saaj.packaging.mime.util.LineInputStream lin>;
+
+        $r2 = virtualinvoke $r1.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.LineInputStream: java.lang.String readLine()>();
+
+        if $r2 != null goto label2;
+
+        $r5 = new java.io.IOException;
+
+        specialinvoke $r5.<java.io.IOException: void <init>(java.lang.String)>("UUDecoder error: No Begin");
+
+        throw $r5;
+
+     label2:
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean regionMatches(boolean,int,java.lang.String,int,int)>(1, 0, "begin", 0, 5);
+
+        if $z1 == 0 goto label1;
+
+     label3:
+        $r3 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int,int)>(6, 9);
+
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r3);
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: int mode> = $i0;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r6 := @caughtexception;
+
+        $r7 = new java.io.IOException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("UUDecoder error: ");
+
+        $r10 = virtualinvoke $r6.<java.lang.NumberFormatException: java.lang.String toString()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.io.IOException: void <init>(java.lang.String)>($r12);
+
+        throw $r7;
+
+     label6:
+        $r4 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int)>(10);
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: java.lang.String name> = $r4;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: boolean gotPrefix> = 1;
+
+        return;
+
+        catch java.lang.NumberFormatException from label3 to label4 with label5;
+    }
+
+    private boolean decode() throws java.io.IOException
+    {
+        byte[] $r3, $r4, $r5;
+        byte $b21, $b31, $b34, $b46, b51, b52, b53, b54;
+        java.lang.String $r2, $r8;
+        java.io.IOException $r12, $r13, $r14, $r15;
+        boolean $z0, $z1, $z2;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.util.LineInputStream $r1, $r7;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream r0;
+        int $i0, $i2, $i3, $i4, i5, $i6, $i7, $i9, $i10, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i22, $i23, $i24, $i26, $i27, $i28, $i29, $i30, $i32, $i33, $i35, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, i47, i48, $i49, i50, $i55, $i56, $i57, $i58, $i59, $i60, $i61, $i62, $i63, $i64, $i65, $i66;
+        char $c1, $c8, $c11, $c25, $c36;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream;
+
+        $z0 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: boolean gotEnd>;
+
+        if $z0 == 0 goto label01;
+
+        return 0;
+
+     label01:
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: int bufsize> = 0;
+
+     label02:
+        $r1 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: com.sun.xml.internal.messaging.saaj.packaging.mime.util.LineInputStream lin>;
+
+        $r2 = virtualinvoke $r1.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.LineInputStream: java.lang.String readLine()>();
+
+        if $r2 != null goto label03;
+
+        $r12 = new java.io.IOException;
+
+        specialinvoke $r12.<java.io.IOException: void <init>(java.lang.String)>("Missing End");
+
+        throw $r12;
+
+     label03:
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean regionMatches(boolean,int,java.lang.String,int,int)>(1, 0, "end", 0, 3);
+
+        if $z1 == 0 goto label04;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: boolean gotEnd> = 1;
+
+        return 0;
+
+     label04:
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label02;
+
+        $c1 = virtualinvoke $r2.<java.lang.String: char charAt(int)>(0);
+
+        $i55 = (int) $c1;
+
+        if $i55 >= 32 goto label05;
+
+        $r13 = new java.io.IOException;
+
+        specialinvoke $r13.<java.io.IOException: void <init>(java.lang.String)>("Buffer format error");
+
+        throw $r13;
+
+     label05:
+        $i56 = (int) $c1;
+
+        $i2 = $i56 - 32;
+
+        i47 = $i2 & 63;
+
+        if i47 != 0 goto label08;
+
+        $r7 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: com.sun.xml.internal.messaging.saaj.packaging.mime.util.LineInputStream lin>;
+
+        $r8 = virtualinvoke $r7.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.LineInputStream: java.lang.String readLine()>();
+
+        if $r8 == null goto label06;
+
+        $z2 = virtualinvoke $r8.<java.lang.String: boolean regionMatches(boolean,int,java.lang.String,int,int)>(1, 0, "end", 0, 3);
+
+        if $z2 != 0 goto label07;
+
+     label06:
+        $r14 = new java.io.IOException;
+
+        specialinvoke $r14.<java.io.IOException: void <init>(java.lang.String)>("Missing End");
+
+        throw $r14;
+
+     label07:
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: boolean gotEnd> = 1;
+
+        return 0;
+
+     label08:
+        $i3 = i47 * 8;
+
+        $i4 = $i3 + 5;
+
+        i5 = $i4 / 6;
+
+        $i6 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        $i7 = i5 + 1;
+
+        if $i6 >= $i7 goto label09;
+
+        $r15 = new java.io.IOException;
+
+        specialinvoke $r15.<java.io.IOException: void <init>(java.lang.String)>("Short buffer error");
+
+        throw $r15;
+
+     label09:
+        i48 = 1;
+
+     label10:
+        $i49 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: int bufsize>;
+
+        if $i49 >= i47 goto label12;
+
+        i50 = i48 + 1;
+
+        $c8 = virtualinvoke $r2.<java.lang.String: char charAt(int)>(i48);
+
+        $i57 = (int) $c8;
+
+        $i9 = $i57 - 32;
+
+        $i10 = $i9 & 63;
+
+        b51 = (byte) $i10;
+
+        i48 = i50 + 1;
+
+        $c11 = virtualinvoke $r2.<java.lang.String: char charAt(int)>(i50);
+
+        $i58 = (int) $c11;
+
+        $i12 = $i58 - 32;
+
+        $i13 = $i12 & 63;
+
+        b52 = (byte) $i13;
+
+        $r3 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: byte[] buffer>;
+
+        $i14 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: int bufsize>;
+
+        $i15 = $i14 + 1;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: int bufsize> = $i15;
+
+        $i59 = (int) b51;
+
+        $i16 = $i59 << 2;
+
+        $i19 = $i16 & 252;
+
+        $i60 = (int) b52;
+
+        $i17 = $i60 >>> 4;
+
+        $i18 = $i17 & 3;
+
+        $i20 = $i19 | $i18;
+
+        $b21 = (byte) $i20;
+
+        $r3[$i14] = $b21;
+
+        $i22 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: int bufsize>;
+
+        if $i22 >= i47 goto label11;
+
+        b53 = b52;
+
+        $i35 = i48;
+
+        i48 = i48 + 1;
+
+        $c36 = virtualinvoke $r2.<java.lang.String: char charAt(int)>($i35);
+
+        $i61 = (int) $c36;
+
+        $i37 = $i61 - 32;
+
+        $i38 = $i37 & 63;
+
+        b52 = (byte) $i38;
+
+        $r5 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: byte[] buffer>;
+
+        $i39 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: int bufsize>;
+
+        $i40 = $i39 + 1;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: int bufsize> = $i40;
+
+        $i62 = (int) b53;
+
+        $i41 = $i62 << 4;
+
+        $i44 = $i41 & 240;
+
+        $i63 = (int) b52;
+
+        $i42 = $i63 >>> 2;
+
+        $i43 = $i42 & 15;
+
+        $i45 = $i44 | $i43;
+
+        $b46 = (byte) $i45;
+
+        $r5[$i39] = $b46;
+
+     label11:
+        $i23 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: int bufsize>;
+
+        if $i23 >= i47 goto label10;
+
+        $i24 = i48;
+
+        i48 = i48 + 1;
+
+        $c25 = virtualinvoke $r2.<java.lang.String: char charAt(int)>($i24);
+
+        $i64 = (int) $c25;
+
+        $i26 = $i64 - 32;
+
+        $i27 = $i26 & 63;
+
+        b54 = (byte) $i27;
+
+        $r4 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: byte[] buffer>;
+
+        $i28 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: int bufsize>;
+
+        $i29 = $i28 + 1;
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.UUDecoderStream: int bufsize> = $i29;
+
+        $i65 = (int) b52;
+
+        $i30 = $i65 << 6;
+
+        $i32 = $i30 & 192;
+
+        $b31 = b54 & 63;
+
+        $i66 = (int) $b31;
+
+        $i33 = $i32 | $i66;
+
+        $b34 = (byte) $i33;
+
+        $r4[$i28] = $b34;
+
+        goto label10;
+
+     label12:
+        return 1;
+    }
+}

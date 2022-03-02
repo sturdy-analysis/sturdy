@@ -1,0 +1,779 @@
+final class com.sun.jndi.ldap.NamingEventNotifier extends java.lang.Object implements java.lang.Runnable
+{
+    private static final boolean debug;
+    private java.util.Vector namingListeners;
+    private java.lang.Thread worker;
+    private com.sun.jndi.ldap.LdapCtx context;
+    private javax.naming.event.EventContext eventSrc;
+    private com.sun.jndi.ldap.EventSupport support;
+    private javax.naming.NamingEnumeration results;
+    com.sun.jndi.ldap.NotifierArgs info;
+
+    void <init>(com.sun.jndi.ldap.EventSupport, com.sun.jndi.ldap.LdapCtx, com.sun.jndi.ldap.NotifierArgs, javax.naming.event.NamingListener) throws javax.naming.NamingException
+    {
+        javax.naming.event.NamingListener r9;
+        javax.naming.NamingException $r16;
+        com.sun.jndi.ldap.EventSupport r2;
+        java.util.Vector $r8, $r10;
+        java.lang.Thread $r12, $r13, $r14;
+        int $i0;
+        com.sun.jndi.ldap.VersionHelper $r11;
+        com.sun.jndi.ldap.NamingEventNotifier r0;
+        com.sun.jndi.ldap.PersistentSearchControl $r3;
+        com.sun.jndi.ldap.NotifierArgs r1;
+        java.io.IOException $r15;
+        com.sun.jndi.ldap.LdapCtx r4, $r7;
+        javax.naming.ldap.LdapContext $r6;
+        javax.naming.ldap.Control[] $r5;
+
+        r0 := @this: com.sun.jndi.ldap.NamingEventNotifier;
+
+        r2 := @parameter0: com.sun.jndi.ldap.EventSupport;
+
+        r4 := @parameter1: com.sun.jndi.ldap.LdapCtx;
+
+        r1 := @parameter2: com.sun.jndi.ldap.NotifierArgs;
+
+        r9 := @parameter3: javax.naming.event.NamingListener;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.jndi.ldap.NamingEventNotifier: com.sun.jndi.ldap.NotifierArgs info> = r1;
+
+        r0.<com.sun.jndi.ldap.NamingEventNotifier: com.sun.jndi.ldap.EventSupport support> = r2;
+
+     label1:
+        $r3 = new com.sun.jndi.ldap.PersistentSearchControl;
+
+        $i0 = r1.<com.sun.jndi.ldap.NotifierArgs: int mask>;
+
+        specialinvoke $r3.<com.sun.jndi.ldap.PersistentSearchControl: void <init>(int,boolean,boolean,boolean)>($i0, 1, 1, 1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r15 := @caughtexception;
+
+        $r16 = new javax.naming.NamingException;
+
+        specialinvoke $r16.<javax.naming.NamingException: void <init>(java.lang.String)>("Problem creating persistent search control");
+
+        virtualinvoke $r16.<javax.naming.NamingException: void setRootCause(java.lang.Throwable)>($r15);
+
+        throw $r16;
+
+     label4:
+        $r5 = newarray (javax.naming.ldap.Control)[1];
+
+        $r5[0] = $r3;
+
+        $r6 = virtualinvoke r4.<com.sun.jndi.ldap.LdapCtx: javax.naming.ldap.LdapContext newInstance(javax.naming.ldap.Control[])>($r5);
+
+        $r7 = (com.sun.jndi.ldap.LdapCtx) $r6;
+
+        r0.<com.sun.jndi.ldap.NamingEventNotifier: com.sun.jndi.ldap.LdapCtx context> = $r7;
+
+        r0.<com.sun.jndi.ldap.NamingEventNotifier: javax.naming.event.EventContext eventSrc> = r4;
+
+        $r8 = new java.util.Vector;
+
+        specialinvoke $r8.<java.util.Vector: void <init>()>();
+
+        r0.<com.sun.jndi.ldap.NamingEventNotifier: java.util.Vector namingListeners> = $r8;
+
+        $r10 = r0.<com.sun.jndi.ldap.NamingEventNotifier: java.util.Vector namingListeners>;
+
+        virtualinvoke $r10.<java.util.Vector: void addElement(java.lang.Object)>(r9);
+
+        $r11 = <com.sun.jndi.ldap.Obj: com.sun.jndi.ldap.VersionHelper helper>;
+
+        $r12 = virtualinvoke $r11.<com.sun.jndi.ldap.VersionHelper: java.lang.Thread createThread(java.lang.Runnable)>(r0);
+
+        r0.<com.sun.jndi.ldap.NamingEventNotifier: java.lang.Thread worker> = $r12;
+
+        $r13 = r0.<com.sun.jndi.ldap.NamingEventNotifier: java.lang.Thread worker>;
+
+        virtualinvoke $r13.<java.lang.Thread: void setDaemon(boolean)>(1);
+
+        $r14 = r0.<com.sun.jndi.ldap.NamingEventNotifier: java.lang.Thread worker>;
+
+        virtualinvoke $r14.<java.lang.Thread: void start()>();
+
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    void addNamingListener(javax.naming.event.NamingListener)
+    {
+        javax.naming.event.NamingListener r1;
+        java.util.Vector $r2;
+        com.sun.jndi.ldap.NamingEventNotifier r0;
+
+        r0 := @this: com.sun.jndi.ldap.NamingEventNotifier;
+
+        r1 := @parameter0: javax.naming.event.NamingListener;
+
+        $r2 = r0.<com.sun.jndi.ldap.NamingEventNotifier: java.util.Vector namingListeners>;
+
+        virtualinvoke $r2.<java.util.Vector: void addElement(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    void removeNamingListener(javax.naming.event.NamingListener)
+    {
+        javax.naming.event.NamingListener r1;
+        java.util.Vector $r2;
+        com.sun.jndi.ldap.NamingEventNotifier r0;
+
+        r0 := @this: com.sun.jndi.ldap.NamingEventNotifier;
+
+        r1 := @parameter0: javax.naming.event.NamingListener;
+
+        $r2 = r0.<com.sun.jndi.ldap.NamingEventNotifier: java.util.Vector namingListeners>;
+
+        virtualinvoke $r2.<java.util.Vector: boolean removeElement(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    boolean hasNamingListeners()
+    {
+        java.util.Vector $r1;
+        int $i0;
+        com.sun.jndi.ldap.NamingEventNotifier r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.NamingEventNotifier;
+
+        $r1 = r0.<com.sun.jndi.ldap.NamingEventNotifier: java.util.Vector namingListeners>;
+
+        $i0 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        if $i0 <= 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public void run()
+    {
+        com.sun.jndi.toolkit.ctx.Continuation $r37;
+        javax.naming.ldap.HasControls $r23;
+        javax.naming.NamingException $r30;
+        com.sun.jndi.ldap.EventSupport $r32;
+        com.sun.jndi.ldap.NamingEventNotifier r1;
+        boolean $z0, $z1, $z2, $z3;
+        com.sun.jndi.ldap.NotifierArgs $r2, $r4, $r6, $r7, $r24, $r27, $r31;
+        com.sun.jndi.ldap.LdapCtx $r10, $r13;
+        javax.naming.NamingEnumeration $r11, $r12, $r16, $r35;
+        javax.naming.directory.SearchResult r18;
+        javax.naming.ldap.Control[] $r36;
+        java.lang.Throwable $r29;
+        javax.naming.ldap.Control $r19, $r20;
+        long $l1;
+        javax.naming.directory.SearchControls $r8;
+        javax.naming.InterruptedNamingException $r33;
+        int $i0, $i2;
+        java.lang.String $r3, $r5, $r9, $r22, $r25, $r28;
+        javax.naming.CompositeName $r38, $r39;
+        javax.naming.Name $r14, $r34;
+        com.sun.jndi.ldap.EntryChangeResponseControl r21;
+        com.sun.jndi.ldap.LdapSearchEnumeration $r15;
+        java.lang.Object $r17;
+
+        r1 := @this: com.sun.jndi.ldap.NamingEventNotifier;
+
+     label01:
+        $r37 = new com.sun.jndi.toolkit.ctx.Continuation;
+
+        specialinvoke $r37.<com.sun.jndi.toolkit.ctx.Continuation: void <init>()>();
+
+        $r2 = r1.<com.sun.jndi.ldap.NamingEventNotifier: com.sun.jndi.ldap.NotifierArgs info>;
+
+        $r3 = $r2.<com.sun.jndi.ldap.NotifierArgs: java.lang.String name>;
+
+        virtualinvoke $r37.<com.sun.jndi.toolkit.ctx.Continuation: void setError(java.lang.Object,java.lang.String)>(r1, $r3);
+
+        $r4 = r1.<com.sun.jndi.ldap.NamingEventNotifier: com.sun.jndi.ldap.NotifierArgs info>;
+
+        $r5 = $r4.<com.sun.jndi.ldap.NotifierArgs: java.lang.String name>;
+
+        if $r5 == null goto label02;
+
+        $r24 = r1.<com.sun.jndi.ldap.NamingEventNotifier: com.sun.jndi.ldap.NotifierArgs info>;
+
+        $r25 = $r24.<com.sun.jndi.ldap.NotifierArgs: java.lang.String name>;
+
+        $z2 = virtualinvoke $r25.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z2 == 0 goto label03;
+
+     label02:
+        $r38 = new javax.naming.CompositeName;
+
+        $r34 = $r38;
+
+        specialinvoke $r38.<javax.naming.CompositeName: void <init>()>();
+
+        goto label04;
+
+     label03:
+        $r39 = new javax.naming.CompositeName;
+
+        specialinvoke $r39.<javax.naming.CompositeName: void <init>()>();
+
+        $r27 = r1.<com.sun.jndi.ldap.NamingEventNotifier: com.sun.jndi.ldap.NotifierArgs info>;
+
+        $r28 = $r27.<com.sun.jndi.ldap.NotifierArgs: java.lang.String name>;
+
+        $r34 = virtualinvoke $r39.<javax.naming.CompositeName: javax.naming.Name add(java.lang.String)>($r28);
+
+     label04:
+        $r10 = r1.<com.sun.jndi.ldap.NamingEventNotifier: com.sun.jndi.ldap.LdapCtx context>;
+
+        $r6 = r1.<com.sun.jndi.ldap.NamingEventNotifier: com.sun.jndi.ldap.NotifierArgs info>;
+
+        $r9 = $r6.<com.sun.jndi.ldap.NotifierArgs: java.lang.String filter>;
+
+        $r7 = r1.<com.sun.jndi.ldap.NamingEventNotifier: com.sun.jndi.ldap.NotifierArgs info>;
+
+        $r8 = $r7.<com.sun.jndi.ldap.NotifierArgs: javax.naming.directory.SearchControls controls>;
+
+        $r11 = virtualinvoke $r10.<com.sun.jndi.ldap.LdapCtx: javax.naming.NamingEnumeration searchAux(javax.naming.Name,java.lang.String,javax.naming.directory.SearchControls,boolean,boolean,com.sun.jndi.toolkit.ctx.Continuation)>($r34, $r9, $r8, 1, 0, $r37);
+
+        r1.<com.sun.jndi.ldap.NamingEventNotifier: javax.naming.NamingEnumeration results> = $r11;
+
+        $r12 = r1.<com.sun.jndi.ldap.NamingEventNotifier: javax.naming.NamingEnumeration results>;
+
+        $r15 = (com.sun.jndi.ldap.LdapSearchEnumeration) $r12;
+
+        $r13 = r1.<com.sun.jndi.ldap.NamingEventNotifier: com.sun.jndi.ldap.LdapCtx context>;
+
+        $r14 = $r13.<com.sun.jndi.ldap.LdapCtx: javax.naming.Name currentParsedDN>;
+
+        virtualinvoke $r15.<com.sun.jndi.ldap.LdapSearchEnumeration: void setStartName(javax.naming.Name)>($r14);
+
+     label05:
+        $r35 = r1.<com.sun.jndi.ldap.NamingEventNotifier: javax.naming.NamingEnumeration results>;
+
+        $z3 = interfaceinvoke $r35.<javax.naming.NamingEnumeration: boolean hasMore()>();
+
+        if $z3 == 0 goto label13;
+
+        $r16 = r1.<com.sun.jndi.ldap.NamingEventNotifier: javax.naming.NamingEnumeration results>;
+
+        $r17 = interfaceinvoke $r16.<javax.naming.NamingEnumeration: java.lang.Object next()>();
+
+        r18 = (javax.naming.directory.SearchResult) $r17;
+
+        $z0 = r18 instanceof javax.naming.ldap.HasControls;
+
+        if $z0 == 0 goto label06;
+
+        $r23 = (javax.naming.ldap.HasControls) r18;
+
+        $r36 = interfaceinvoke $r23.<javax.naming.ldap.HasControls: javax.naming.ldap.Control[] getControls()>();
+
+        goto label07;
+
+     label06:
+        $r36 = null;
+
+     label07:
+        if $r36 == null goto label05;
+
+        $i0 = lengthof $r36;
+
+        if 0 >= $i0 goto label12;
+
+        $r19 = $r36[0];
+
+        $z1 = $r19 instanceof com.sun.jndi.ldap.EntryChangeResponseControl;
+
+        if $z1 == 0 goto label12;
+
+        $r20 = $r36[0];
+
+        r21 = (com.sun.jndi.ldap.EntryChangeResponseControl) $r20;
+
+        $l1 = virtualinvoke r21.<com.sun.jndi.ldap.EntryChangeResponseControl: long getChangeNumber()>();
+
+        $i2 = virtualinvoke r21.<com.sun.jndi.ldap.EntryChangeResponseControl: int getChangeType()>();
+
+        tableswitch($i2)
+        {
+            case 1: goto label08;
+            case 2: goto label09;
+            case 3: goto label12;
+            case 4: goto label10;
+            case 5: goto label12;
+            case 6: goto label12;
+            case 7: goto label12;
+            case 8: goto label11;
+            default: goto label12;
+        };
+
+     label08:
+        specialinvoke r1.<com.sun.jndi.ldap.NamingEventNotifier: void fireObjectAdded(javax.naming.Binding,long)>(r18, $l1);
+
+        goto label12;
+
+     label09:
+        specialinvoke r1.<com.sun.jndi.ldap.NamingEventNotifier: void fireObjectRemoved(javax.naming.Binding,long)>(r18, $l1);
+
+        goto label12;
+
+     label10:
+        specialinvoke r1.<com.sun.jndi.ldap.NamingEventNotifier: void fireObjectChanged(javax.naming.Binding,long)>(r18, $l1);
+
+        goto label12;
+
+     label11:
+        $r22 = virtualinvoke r21.<com.sun.jndi.ldap.EntryChangeResponseControl: java.lang.String getPreviousDN()>();
+
+        specialinvoke r1.<com.sun.jndi.ldap.NamingEventNotifier: void fireObjectRenamed(javax.naming.Binding,java.lang.String,long)>(r18, $r22, $l1);
+
+     label12:
+        goto label05;
+
+     label13:
+        specialinvoke r1.<com.sun.jndi.ldap.NamingEventNotifier: void cleanup()>();
+
+        goto label19;
+
+     label14:
+        $r33 := @caughtexception;
+
+        specialinvoke r1.<com.sun.jndi.ldap.NamingEventNotifier: void cleanup()>();
+
+        goto label19;
+
+     label15:
+        $r30 := @caughtexception;
+
+        specialinvoke r1.<com.sun.jndi.ldap.NamingEventNotifier: void fireNamingException(javax.naming.NamingException)>($r30);
+
+        $r32 = r1.<com.sun.jndi.ldap.NamingEventNotifier: com.sun.jndi.ldap.EventSupport support>;
+
+        $r31 = r1.<com.sun.jndi.ldap.NamingEventNotifier: com.sun.jndi.ldap.NotifierArgs info>;
+
+        virtualinvoke $r32.<com.sun.jndi.ldap.EventSupport: void removeDeadNotifier(com.sun.jndi.ldap.NotifierArgs)>($r31);
+
+     label16:
+        specialinvoke r1.<com.sun.jndi.ldap.NamingEventNotifier: void cleanup()>();
+
+        goto label19;
+
+     label17:
+        $r29 := @caughtexception;
+
+     label18:
+        specialinvoke r1.<com.sun.jndi.ldap.NamingEventNotifier: void cleanup()>();
+
+        throw $r29;
+
+     label19:
+        return;
+
+        catch javax.naming.InterruptedNamingException from label01 to label13 with label14;
+        catch javax.naming.NamingException from label01 to label13 with label15;
+        catch java.lang.Throwable from label01 to label13 with label17;
+        catch java.lang.Throwable from label15 to label16 with label17;
+        catch java.lang.Throwable from label17 to label18 with label17;
+    }
+
+    private void cleanup()
+    {
+        javax.naming.NamingEnumeration $r1, $r4;
+        javax.naming.NamingException $r5;
+        com.sun.jndi.ldap.NamingEventNotifier r0;
+        com.sun.jndi.ldap.LdapCtx $r2, $r3;
+
+        r0 := @this: com.sun.jndi.ldap.NamingEventNotifier;
+
+     label1:
+        $r1 = r0.<com.sun.jndi.ldap.NamingEventNotifier: javax.naming.NamingEnumeration results>;
+
+        if $r1 == null goto label2;
+
+        $r4 = r0.<com.sun.jndi.ldap.NamingEventNotifier: javax.naming.NamingEnumeration results>;
+
+        interfaceinvoke $r4.<javax.naming.NamingEnumeration: void close()>();
+
+        r0.<com.sun.jndi.ldap.NamingEventNotifier: javax.naming.NamingEnumeration results> = null;
+
+     label2:
+        $r2 = r0.<com.sun.jndi.ldap.NamingEventNotifier: com.sun.jndi.ldap.LdapCtx context>;
+
+        if $r2 == null goto label3;
+
+        $r3 = r0.<com.sun.jndi.ldap.NamingEventNotifier: com.sun.jndi.ldap.LdapCtx context>;
+
+        virtualinvoke $r3.<com.sun.jndi.ldap.LdapCtx: void close()>();
+
+        r0.<com.sun.jndi.ldap.NamingEventNotifier: com.sun.jndi.ldap.LdapCtx context> = null;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r5 := @caughtexception;
+
+     label5:
+        return;
+
+        catch javax.naming.NamingException from label1 to label3 with label4;
+    }
+
+    void stop()
+    {
+        com.sun.jndi.ldap.NamingEventNotifier r0;
+        java.lang.Thread $r1, $r2;
+
+        r0 := @this: com.sun.jndi.ldap.NamingEventNotifier;
+
+        $r1 = r0.<com.sun.jndi.ldap.NamingEventNotifier: java.lang.Thread worker>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<com.sun.jndi.ldap.NamingEventNotifier: java.lang.Thread worker>;
+
+        virtualinvoke $r2.<java.lang.Thread: void interrupt()>();
+
+        r0.<com.sun.jndi.ldap.NamingEventNotifier: java.lang.Thread worker> = null;
+
+     label1:
+        return;
+    }
+
+    private void fireObjectAdded(javax.naming.Binding, long)
+    {
+        javax.naming.event.NamingEvent $r3;
+        long l1;
+        com.sun.jndi.ldap.EventSupport $r8;
+        javax.naming.event.EventContext $r6;
+        java.util.Vector $r1, $r2, $r7;
+        java.lang.Long $r5;
+        int $i0;
+        javax.naming.Binding r4;
+        com.sun.jndi.ldap.NamingEventNotifier r0;
+
+        r0 := @this: com.sun.jndi.ldap.NamingEventNotifier;
+
+        r4 := @parameter0: javax.naming.Binding;
+
+        l1 := @parameter1: long;
+
+        $r1 = r0.<com.sun.jndi.ldap.NamingEventNotifier: java.util.Vector namingListeners>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<com.sun.jndi.ldap.NamingEventNotifier: java.util.Vector namingListeners>;
+
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        $r3 = new javax.naming.event.NamingEvent;
+
+        $r6 = r0.<com.sun.jndi.ldap.NamingEventNotifier: javax.naming.event.EventContext eventSrc>;
+
+        $r5 = new java.lang.Long;
+
+        specialinvoke $r5.<java.lang.Long: void <init>(long)>(l1);
+
+        specialinvoke $r3.<javax.naming.event.NamingEvent: void <init>(javax.naming.event.EventContext,int,javax.naming.Binding,javax.naming.Binding,java.lang.Object)>($r6, 0, r4, null, $r5);
+
+        $r8 = r0.<com.sun.jndi.ldap.NamingEventNotifier: com.sun.jndi.ldap.EventSupport support>;
+
+        $r7 = r0.<com.sun.jndi.ldap.NamingEventNotifier: java.util.Vector namingListeners>;
+
+        virtualinvoke $r8.<com.sun.jndi.ldap.EventSupport: void queueEvent(java.util.EventObject,java.util.Vector)>($r3, $r7);
+
+        return;
+    }
+
+    private void fireObjectRemoved(javax.naming.Binding, long)
+    {
+        javax.naming.event.NamingEvent $r3;
+        long l1;
+        com.sun.jndi.ldap.EventSupport $r8;
+        javax.naming.event.EventContext $r6;
+        java.util.Vector $r1, $r2, $r7;
+        java.lang.Long $r5;
+        int $i0;
+        javax.naming.Binding r4;
+        com.sun.jndi.ldap.NamingEventNotifier r0;
+
+        r0 := @this: com.sun.jndi.ldap.NamingEventNotifier;
+
+        r4 := @parameter0: javax.naming.Binding;
+
+        l1 := @parameter1: long;
+
+        $r1 = r0.<com.sun.jndi.ldap.NamingEventNotifier: java.util.Vector namingListeners>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<com.sun.jndi.ldap.NamingEventNotifier: java.util.Vector namingListeners>;
+
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        $r3 = new javax.naming.event.NamingEvent;
+
+        $r6 = r0.<com.sun.jndi.ldap.NamingEventNotifier: javax.naming.event.EventContext eventSrc>;
+
+        $r5 = new java.lang.Long;
+
+        specialinvoke $r5.<java.lang.Long: void <init>(long)>(l1);
+
+        specialinvoke $r3.<javax.naming.event.NamingEvent: void <init>(javax.naming.event.EventContext,int,javax.naming.Binding,javax.naming.Binding,java.lang.Object)>($r6, 1, null, r4, $r5);
+
+        $r8 = r0.<com.sun.jndi.ldap.NamingEventNotifier: com.sun.jndi.ldap.EventSupport support>;
+
+        $r7 = r0.<com.sun.jndi.ldap.NamingEventNotifier: java.util.Vector namingListeners>;
+
+        virtualinvoke $r8.<com.sun.jndi.ldap.EventSupport: void queueEvent(java.util.EventObject,java.util.Vector)>($r3, $r7);
+
+        return;
+    }
+
+    private void fireObjectChanged(javax.naming.Binding, long)
+    {
+        javax.naming.event.NamingEvent $r6;
+        long l1;
+        com.sun.jndi.ldap.EventSupport $r10;
+        javax.naming.event.EventContext $r8;
+        java.util.Vector $r1, $r2, $r9;
+        java.lang.Long $r7;
+        int $i0;
+        javax.naming.Binding $r3, r4;
+        java.lang.String $r5;
+        com.sun.jndi.ldap.NamingEventNotifier r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.NamingEventNotifier;
+
+        r4 := @parameter0: javax.naming.Binding;
+
+        l1 := @parameter1: long;
+
+        $r1 = r0.<com.sun.jndi.ldap.NamingEventNotifier: java.util.Vector namingListeners>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<com.sun.jndi.ldap.NamingEventNotifier: java.util.Vector namingListeners>;
+
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        $r3 = new javax.naming.Binding;
+
+        $r5 = virtualinvoke r4.<javax.naming.Binding: java.lang.String getName()>();
+
+        $z0 = virtualinvoke r4.<javax.naming.Binding: boolean isRelative()>();
+
+        specialinvoke $r3.<javax.naming.Binding: void <init>(java.lang.String,java.lang.Object,boolean)>($r5, null, $z0);
+
+        $r6 = new javax.naming.event.NamingEvent;
+
+        $r8 = r0.<com.sun.jndi.ldap.NamingEventNotifier: javax.naming.event.EventContext eventSrc>;
+
+        $r7 = new java.lang.Long;
+
+        specialinvoke $r7.<java.lang.Long: void <init>(long)>(l1);
+
+        specialinvoke $r6.<javax.naming.event.NamingEvent: void <init>(javax.naming.event.EventContext,int,javax.naming.Binding,javax.naming.Binding,java.lang.Object)>($r8, 3, r4, $r3, $r7);
+
+        $r10 = r0.<com.sun.jndi.ldap.NamingEventNotifier: com.sun.jndi.ldap.EventSupport support>;
+
+        $r9 = r0.<com.sun.jndi.ldap.NamingEventNotifier: java.util.Vector namingListeners>;
+
+        virtualinvoke $r10.<com.sun.jndi.ldap.EventSupport: void queueEvent(java.util.EventObject,java.util.Vector)>($r6, $r9);
+
+        return;
+    }
+
+    private void fireObjectRenamed(javax.naming.Binding, java.lang.String, long)
+    {
+        javax.naming.event.NamingEvent $r7;
+        javax.naming.ldap.LdapName $r3;
+        long l1;
+        javax.naming.NamingException $r19;
+        com.sun.jndi.ldap.EventSupport $r12;
+        java.util.Vector $r1, $r2, $r11;
+        java.lang.Long $r9;
+        int $i0, $i2;
+        java.lang.String r4, $r17;
+        com.sun.jndi.ldap.NamingEventNotifier r0;
+        boolean $z0;
+        javax.naming.Name $r6, $r15, $r16;
+        com.sun.jndi.ldap.LdapCtx $r5, $r14;
+        javax.naming.event.EventContext $r10;
+        javax.naming.Binding r8, $r13, $r18, r20;
+
+        r0 := @this: com.sun.jndi.ldap.NamingEventNotifier;
+
+        r8 := @parameter0: javax.naming.Binding;
+
+        r4 := @parameter1: java.lang.String;
+
+        l1 := @parameter2: long;
+
+        $r1 = r0.<com.sun.jndi.ldap.NamingEventNotifier: java.util.Vector namingListeners>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<com.sun.jndi.ldap.NamingEventNotifier: java.util.Vector namingListeners>;
+
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        r20 = null;
+
+     label3:
+        $r3 = new javax.naming.ldap.LdapName;
+
+        specialinvoke $r3.<javax.naming.ldap.LdapName: void <init>(java.lang.String)>(r4);
+
+        $r5 = r0.<com.sun.jndi.ldap.NamingEventNotifier: com.sun.jndi.ldap.LdapCtx context>;
+
+        $r6 = $r5.<com.sun.jndi.ldap.LdapCtx: javax.naming.Name currentParsedDN>;
+
+        $z0 = virtualinvoke $r3.<javax.naming.ldap.LdapName: boolean startsWith(javax.naming.Name)>($r6);
+
+        if $z0 == 0 goto label4;
+
+        $r14 = r0.<com.sun.jndi.ldap.NamingEventNotifier: com.sun.jndi.ldap.LdapCtx context>;
+
+        $r15 = $r14.<com.sun.jndi.ldap.LdapCtx: javax.naming.Name currentParsedDN>;
+
+        $i2 = interfaceinvoke $r15.<javax.naming.Name: int size()>();
+
+        $r16 = virtualinvoke $r3.<javax.naming.ldap.LdapName: javax.naming.Name getSuffix(int)>($i2);
+
+        $r17 = virtualinvoke $r16.<java.lang.Object: java.lang.String toString()>();
+
+        $r18 = new javax.naming.Binding;
+
+        specialinvoke $r18.<javax.naming.Binding: void <init>(java.lang.String,java.lang.Object)>($r17, null);
+
+        r20 = $r18;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r19 := @caughtexception;
+
+     label6:
+        if r20 != null goto label7;
+
+        $r13 = new javax.naming.Binding;
+
+        specialinvoke $r13.<javax.naming.Binding: void <init>(java.lang.String,java.lang.Object,boolean)>(r4, null, 0);
+
+        r20 = $r13;
+
+     label7:
+        $r7 = new javax.naming.event.NamingEvent;
+
+        $r10 = r0.<com.sun.jndi.ldap.NamingEventNotifier: javax.naming.event.EventContext eventSrc>;
+
+        $r9 = new java.lang.Long;
+
+        specialinvoke $r9.<java.lang.Long: void <init>(long)>(l1);
+
+        specialinvoke $r7.<javax.naming.event.NamingEvent: void <init>(javax.naming.event.EventContext,int,javax.naming.Binding,javax.naming.Binding,java.lang.Object)>($r10, 2, r8, r20, $r9);
+
+        $r12 = r0.<com.sun.jndi.ldap.NamingEventNotifier: com.sun.jndi.ldap.EventSupport support>;
+
+        $r11 = r0.<com.sun.jndi.ldap.NamingEventNotifier: java.util.Vector namingListeners>;
+
+        virtualinvoke $r12.<com.sun.jndi.ldap.EventSupport: void queueEvent(java.util.EventObject,java.util.Vector)>($r7, $r11);
+
+        return;
+
+        catch javax.naming.NamingException from label3 to label4 with label5;
+    }
+
+    private void fireNamingException(javax.naming.NamingException)
+    {
+        javax.naming.NamingException r4;
+        com.sun.jndi.ldap.EventSupport $r7;
+        javax.naming.event.EventContext $r5;
+        javax.naming.event.NamingExceptionEvent $r3;
+        java.util.Vector $r1, $r2, $r6;
+        int $i0;
+        com.sun.jndi.ldap.NamingEventNotifier r0;
+
+        r0 := @this: com.sun.jndi.ldap.NamingEventNotifier;
+
+        r4 := @parameter0: javax.naming.NamingException;
+
+        $r1 = r0.<com.sun.jndi.ldap.NamingEventNotifier: java.util.Vector namingListeners>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<com.sun.jndi.ldap.NamingEventNotifier: java.util.Vector namingListeners>;
+
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        $r3 = new javax.naming.event.NamingExceptionEvent;
+
+        $r5 = r0.<com.sun.jndi.ldap.NamingEventNotifier: javax.naming.event.EventContext eventSrc>;
+
+        specialinvoke $r3.<javax.naming.event.NamingExceptionEvent: void <init>(javax.naming.event.EventContext,javax.naming.NamingException)>($r5, r4);
+
+        $r7 = r0.<com.sun.jndi.ldap.NamingEventNotifier: com.sun.jndi.ldap.EventSupport support>;
+
+        $r6 = r0.<com.sun.jndi.ldap.NamingEventNotifier: java.util.Vector namingListeners>;
+
+        virtualinvoke $r7.<com.sun.jndi.ldap.EventSupport: void queueEvent(java.util.EventObject,java.util.Vector)>($r3, $r6);
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.jndi.ldap.NamingEventNotifier: boolean debug> = 0;
+
+        return;
+    }
+}

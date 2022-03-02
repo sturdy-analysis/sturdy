@@ -1,0 +1,119 @@
+class com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB extends java.lang.Object implements java.io.Serializable
+{
+    java.io.File db;
+    java.util.Hashtable serverTable;
+    java.lang.Integer serverIdCounter;
+    final com.sun.corba.se.impl.activation.RepositoryImpl this$0;
+
+    void <init>(com.sun.corba.se.impl.activation.RepositoryImpl, java.io.File)
+    {
+        com.sun.corba.se.impl.activation.RepositoryImpl r1;
+        java.lang.Integer $r4;
+        com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB r0;
+        java.io.File r2;
+        java.util.Hashtable $r3;
+
+        r0 := @this: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB;
+
+        r1 := @parameter0: com.sun.corba.se.impl.activation.RepositoryImpl;
+
+        r2 := @parameter1: java.io.File;
+
+        r0.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: com.sun.corba.se.impl.activation.RepositoryImpl this$0> = r1;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: java.io.File db> = r2;
+
+        $r3 = new java.util.Hashtable;
+
+        specialinvoke $r3.<java.util.Hashtable: void <init>(int)>(255);
+
+        r0.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: java.util.Hashtable serverTable> = $r3;
+
+        $r4 = new java.lang.Integer;
+
+        specialinvoke $r4.<java.lang.Integer: void <init>(int)>(256);
+
+        r0.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: java.lang.Integer serverIdCounter> = $r4;
+
+        return;
+    }
+
+    int incrementServerIdCounter()
+    {
+        int $i0, i1;
+        java.lang.Integer $r1, $r2;
+        com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB r0;
+
+        r0 := @this: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB;
+
+        $r1 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: java.lang.Integer serverIdCounter>;
+
+        $i0 = virtualinvoke $r1.<java.lang.Integer: int intValue()>();
+
+        $r2 = new java.lang.Integer;
+
+        i1 = $i0 + 1;
+
+        specialinvoke $r2.<java.lang.Integer: void <init>(int)>(i1);
+
+        r0.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: java.lang.Integer serverIdCounter> = $r2;
+
+        return i1;
+    }
+
+    void flush()
+    {
+        org.omg.CORBA.INTERNAL $r8;
+        com.sun.corba.se.impl.activation.RepositoryImpl $r6;
+        java.io.FileOutputStream $r2;
+        com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB r0;
+        java.io.File $r1, $r3;
+        java.lang.Exception $r5;
+        com.sun.corba.se.impl.logging.ActivationSystemException $r7;
+        java.io.ObjectOutputStream $r4;
+
+        r0 := @this: com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: java.io.File db>;
+
+        virtualinvoke $r1.<java.io.File: boolean delete()>();
+
+        $r2 = new java.io.FileOutputStream;
+
+        $r3 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: java.io.File db>;
+
+        specialinvoke $r2.<java.io.FileOutputStream: void <init>(java.io.File)>($r3);
+
+        $r4 = new java.io.ObjectOutputStream;
+
+        specialinvoke $r4.<java.io.ObjectOutputStream: void <init>(java.io.OutputStream)>($r2);
+
+        virtualinvoke $r4.<java.io.ObjectOutputStream: void writeObject(java.lang.Object)>(r0);
+
+        virtualinvoke $r4.<java.io.ObjectOutputStream: void flush()>();
+
+        virtualinvoke $r4.<java.io.ObjectOutputStream: void close()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = r0.<com.sun.corba.se.impl.activation.RepositoryImpl$RepositoryDB: com.sun.corba.se.impl.activation.RepositoryImpl this$0>;
+
+        $r7 = $r6.<com.sun.corba.se.impl.activation.RepositoryImpl: com.sun.corba.se.impl.logging.ActivationSystemException wrapper>;
+
+        $r8 = virtualinvoke $r7.<com.sun.corba.se.impl.logging.ActivationSystemException: org.omg.CORBA.INTERNAL cannotWriteRepositoryDb(java.lang.Throwable)>($r5);
+
+        throw $r8;
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+}

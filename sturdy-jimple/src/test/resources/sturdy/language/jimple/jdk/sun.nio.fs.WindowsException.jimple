@@ -1,0 +1,287 @@
+class sun.nio.fs.WindowsException extends java.lang.Exception
+{
+    static final long serialVersionUID;
+    private int lastError;
+    private java.lang.String msg;
+
+    void <init>(int)
+    {
+        sun.nio.fs.WindowsException r0;
+        int i0;
+
+        r0 := @this: sun.nio.fs.WindowsException;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.lang.Exception: void <init>()>();
+
+        r0.<sun.nio.fs.WindowsException: int lastError> = i0;
+
+        r0.<sun.nio.fs.WindowsException: java.lang.String msg> = null;
+
+        return;
+    }
+
+    void <init>(java.lang.String)
+    {
+        sun.nio.fs.WindowsException r0;
+        java.lang.String r1;
+
+        r0 := @this: sun.nio.fs.WindowsException;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.lang.Exception: void <init>()>();
+
+        r0.<sun.nio.fs.WindowsException: int lastError> = 0;
+
+        r0.<sun.nio.fs.WindowsException: java.lang.String msg> = r1;
+
+        return;
+    }
+
+    int lastError()
+    {
+        sun.nio.fs.WindowsException r0;
+        int $i0;
+
+        r0 := @this: sun.nio.fs.WindowsException;
+
+        $i0 = r0.<sun.nio.fs.WindowsException: int lastError>;
+
+        return $i0;
+    }
+
+    java.lang.String errorString()
+    {
+        sun.nio.fs.WindowsException r0;
+        int $i0, $i1;
+        java.lang.StringBuilder $r4, $r5, $r7;
+        java.lang.String $r1, $r2, $r3, $r6, $r8, $r9;
+
+        r0 := @this: sun.nio.fs.WindowsException;
+
+        $r1 = r0.<sun.nio.fs.WindowsException: java.lang.String msg>;
+
+        if $r1 != null goto label1;
+
+        $i0 = r0.<sun.nio.fs.WindowsException: int lastError>;
+
+        $r2 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: java.lang.String FormatMessage(int)>($i0);
+
+        r0.<sun.nio.fs.WindowsException: java.lang.String msg> = $r2;
+
+        $r3 = r0.<sun.nio.fs.WindowsException: java.lang.String msg>;
+
+        if $r3 != null goto label1;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown error: 0x");
+
+        $i1 = r0.<sun.nio.fs.WindowsException: int lastError>;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i1);
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r0.<sun.nio.fs.WindowsException: java.lang.String msg> = $r8;
+
+     label1:
+        $r9 = r0.<sun.nio.fs.WindowsException: java.lang.String msg>;
+
+        return $r9;
+    }
+
+    public java.lang.String getMessage()
+    {
+        sun.nio.fs.WindowsException r0;
+        java.lang.String $r1;
+
+        r0 := @this: sun.nio.fs.WindowsException;
+
+        $r1 = virtualinvoke r0.<sun.nio.fs.WindowsException: java.lang.String errorString()>();
+
+        return $r1;
+    }
+
+    private java.io.IOException translateToIOException(java.lang.String, java.lang.String)
+    {
+        java.nio.file.NoSuchFileException $r1;
+        sun.nio.fs.WindowsException r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.lang.String r2, r3, $r6, $r9;
+        java.nio.file.FileSystemException $r5;
+        java.io.IOException $r8;
+        java.nio.file.FileAlreadyExistsException $r4;
+        java.nio.file.AccessDeniedException $r7;
+
+        r0 := @this: sun.nio.fs.WindowsException;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        $i0 = virtualinvoke r0.<sun.nio.fs.WindowsException: int lastError()>();
+
+        if $i0 != 0 goto label1;
+
+        $r8 = new java.io.IOException;
+
+        $r9 = virtualinvoke r0.<sun.nio.fs.WindowsException: java.lang.String errorString()>();
+
+        specialinvoke $r8.<java.io.IOException: void <init>(java.lang.String)>($r9);
+
+        return $r8;
+
+     label1:
+        $i1 = virtualinvoke r0.<sun.nio.fs.WindowsException: int lastError()>();
+
+        if $i1 == 2 goto label2;
+
+        $i2 = virtualinvoke r0.<sun.nio.fs.WindowsException: int lastError()>();
+
+        if $i2 != 3 goto label3;
+
+     label2:
+        $r1 = new java.nio.file.NoSuchFileException;
+
+        specialinvoke $r1.<java.nio.file.NoSuchFileException: void <init>(java.lang.String,java.lang.String,java.lang.String)>(r2, r3, null);
+
+        return $r1;
+
+     label3:
+        $i3 = virtualinvoke r0.<sun.nio.fs.WindowsException: int lastError()>();
+
+        if $i3 == 80 goto label4;
+
+        $i4 = virtualinvoke r0.<sun.nio.fs.WindowsException: int lastError()>();
+
+        if $i4 != 183 goto label5;
+
+     label4:
+        $r4 = new java.nio.file.FileAlreadyExistsException;
+
+        specialinvoke $r4.<java.nio.file.FileAlreadyExistsException: void <init>(java.lang.String,java.lang.String,java.lang.String)>(r2, r3, null);
+
+        return $r4;
+
+     label5:
+        $i5 = virtualinvoke r0.<sun.nio.fs.WindowsException: int lastError()>();
+
+        if $i5 != 5 goto label6;
+
+        $r7 = new java.nio.file.AccessDeniedException;
+
+        specialinvoke $r7.<java.nio.file.AccessDeniedException: void <init>(java.lang.String,java.lang.String,java.lang.String)>(r2, r3, null);
+
+        return $r7;
+
+     label6:
+        $r5 = new java.nio.file.FileSystemException;
+
+        $r6 = virtualinvoke r0.<sun.nio.fs.WindowsException: java.lang.String errorString()>();
+
+        specialinvoke $r5.<java.nio.file.FileSystemException: void <init>(java.lang.String,java.lang.String,java.lang.String)>(r2, r3, $r6);
+
+        return $r5;
+    }
+
+    void rethrowAsIOException(java.lang.String) throws java.io.IOException
+    {
+        sun.nio.fs.WindowsException r0;
+        java.io.IOException $r2;
+        java.lang.String r1;
+
+        r0 := @this: sun.nio.fs.WindowsException;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = specialinvoke r0.<sun.nio.fs.WindowsException: java.io.IOException translateToIOException(java.lang.String,java.lang.String)>(r1, null);
+
+        throw $r2;
+    }
+
+    void rethrowAsIOException(sun.nio.fs.WindowsPath, sun.nio.fs.WindowsPath) throws java.io.IOException
+    {
+        sun.nio.fs.WindowsPath r0, r2;
+        sun.nio.fs.WindowsException r3;
+        java.io.IOException $r4;
+        java.lang.String r1, $r5, $r6;
+
+        r3 := @this: sun.nio.fs.WindowsException;
+
+        r0 := @parameter0: sun.nio.fs.WindowsPath;
+
+        r2 := @parameter1: sun.nio.fs.WindowsPath;
+
+        if r0 != null goto label1;
+
+        $r5 = null;
+
+        goto label2;
+
+     label1:
+        $r5 = virtualinvoke r0.<sun.nio.fs.WindowsPath: java.lang.String getPathForExceptionMessage()>();
+
+     label2:
+        r1 = $r5;
+
+        if r2 != null goto label3;
+
+        $r6 = null;
+
+        goto label4;
+
+     label3:
+        $r6 = virtualinvoke r2.<sun.nio.fs.WindowsPath: java.lang.String getPathForExceptionMessage()>();
+
+     label4:
+        $r4 = specialinvoke r3.<sun.nio.fs.WindowsException: java.io.IOException translateToIOException(java.lang.String,java.lang.String)>(r1, $r6);
+
+        throw $r4;
+    }
+
+    void rethrowAsIOException(sun.nio.fs.WindowsPath) throws java.io.IOException
+    {
+        sun.nio.fs.WindowsException r0;
+        sun.nio.fs.WindowsPath r1;
+
+        r0 := @this: sun.nio.fs.WindowsException;
+
+        r1 := @parameter0: sun.nio.fs.WindowsPath;
+
+        virtualinvoke r0.<sun.nio.fs.WindowsException: void rethrowAsIOException(sun.nio.fs.WindowsPath,sun.nio.fs.WindowsPath)>(r1, null);
+
+        return;
+    }
+
+    java.io.IOException asIOException(sun.nio.fs.WindowsPath)
+    {
+        sun.nio.fs.WindowsPath r1;
+        sun.nio.fs.WindowsException r0;
+        java.io.IOException $r3;
+        java.lang.String $r2;
+
+        r0 := @this: sun.nio.fs.WindowsException;
+
+        r1 := @parameter0: sun.nio.fs.WindowsPath;
+
+        $r2 = virtualinvoke r1.<sun.nio.fs.WindowsPath: java.lang.String getPathForExceptionMessage()>();
+
+        $r3 = specialinvoke r0.<sun.nio.fs.WindowsException: java.io.IOException translateToIOException(java.lang.String,java.lang.String)>($r2, null);
+
+        return $r3;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.nio.fs.WindowsException: long serialVersionUID> = 2765039493083748820L;
+
+        return;
+    }
+}

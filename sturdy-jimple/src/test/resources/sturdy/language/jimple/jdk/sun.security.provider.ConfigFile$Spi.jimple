@@ -1,0 +1,1621 @@
+public final class sun.security.provider.ConfigFile$Spi extends javax.security.auth.login.ConfigurationSpi
+{
+    private java.net.URL url;
+    private boolean expandProp;
+    private java.util.Map configuration;
+    private int linenum;
+    private java.io.StreamTokenizer st;
+    private int lookahead;
+    private static sun.security.util.Debug debugConfig;
+    private static sun.security.util.Debug debugParser;
+
+    public void <init>()
+    {
+        sun.security.provider.ConfigFile$Spi r0;
+        java.io.IOException $r1;
+        java.lang.SecurityException $r2;
+
+        r0 := @this: sun.security.provider.ConfigFile$Spi;
+
+        specialinvoke r0.<javax.security.auth.login.ConfigurationSpi: void <init>()>();
+
+        r0.<sun.security.provider.ConfigFile$Spi: boolean expandProp> = 1;
+
+     label1:
+        specialinvoke r0.<sun.security.provider.ConfigFile$Spi: void init()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r1 := @caughtexception;
+
+        $r2 = new java.lang.SecurityException;
+
+        specialinvoke $r2.<java.lang.SecurityException: void <init>(java.lang.Throwable)>($r1);
+
+        throw $r2;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public void <init>(java.net.URI)
+    {
+        java.net.URL $r2;
+        sun.security.provider.ConfigFile$Spi r0;
+        java.io.IOException $r3;
+        java.lang.SecurityException $r4;
+        java.net.URI r1;
+
+        r0 := @this: sun.security.provider.ConfigFile$Spi;
+
+        r1 := @parameter0: java.net.URI;
+
+        specialinvoke r0.<javax.security.auth.login.ConfigurationSpi: void <init>()>();
+
+        r0.<sun.security.provider.ConfigFile$Spi: boolean expandProp> = 1;
+
+     label1:
+        $r2 = virtualinvoke r1.<java.net.URI: java.net.URL toURL()>();
+
+        r0.<sun.security.provider.ConfigFile$Spi: java.net.URL url> = $r2;
+
+        specialinvoke r0.<sun.security.provider.ConfigFile$Spi: void init()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.lang.SecurityException;
+
+        specialinvoke $r4.<java.lang.SecurityException: void <init>(java.lang.Throwable)>($r3);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public void <init>(javax.security.auth.login.Configuration$Parameters) throws java.io.IOException
+    {
+        java.security.PrivilegedActionException $r3;
+        javax.security.auth.login.Configuration$Parameters r2;
+        sun.security.provider.ConfigFile$Spi$1 $r1;
+        sun.security.provider.ConfigFile$Spi r0;
+        java.io.IOException $r5;
+        java.lang.Exception $r4;
+
+        r0 := @this: sun.security.provider.ConfigFile$Spi;
+
+        r2 := @parameter0: javax.security.auth.login.Configuration$Parameters;
+
+        specialinvoke r0.<javax.security.auth.login.ConfigurationSpi: void <init>()>();
+
+        r0.<sun.security.provider.ConfigFile$Spi: boolean expandProp> = 1;
+
+     label1:
+        $r1 = new sun.security.provider.ConfigFile$Spi$1;
+
+        specialinvoke $r1.<sun.security.provider.ConfigFile$Spi$1: void <init>(sun.security.provider.ConfigFile$Spi,javax.security.auth.login.Configuration$Parameters)>(r0, r2);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = virtualinvoke $r3.<java.security.PrivilegedActionException: java.lang.Exception getException()>();
+
+        $r5 = (java.io.IOException) $r4;
+
+        throw $r5;
+
+     label4:
+        return;
+
+        catch java.security.PrivilegedActionException from label1 to label2 with label3;
+    }
+
+    private void init() throws java.io.IOException
+    {
+        sun.security.util.Debug $r7, $r18, $r21, $r24, $r31, $r32, $r33, $r35, $r39, $r42;
+        java.lang.StringBuilder $r9, $r10, $r11, $r12, $r23, $r25, $r26, $r34, $r36, $r37, $r41, $r43, $r45, $r61, $r62, $r63;
+        java.lang.Object[] $r48, $r52, $r56;
+        java.lang.String $r0, $r1, $r5, $r6, $r8, $r13, $r19, $r20, $r27, $r28, $r29, $r38, $r46, r58, r59, $r64, $r65, r66;
+        java.io.IOException $r49, $r53, $r57;
+        java.io.File $r14, $r15, $r51;
+        sun.security.util.PropertyExpander$ExpandException $r47, $r55;
+        java.net.URL $r4, $r17, $r22, $r30, $r40, $r44, r60;
+        java.net.URI $r16, $r54;
+        boolean $z0, $z1, $z2, $z3, $z4, z5, z6;
+        java.util.HashMap $r2;
+        int i2;
+        sun.security.provider.ConfigFile$Spi r3;
+        java.net.MalformedURLException $r50;
+        char $c0, $c1;
+
+        r3 := @this: sun.security.provider.ConfigFile$Spi;
+
+        z5 = 0;
+
+        $r0 = staticinvoke <java.security.Security: java.lang.String getProperty(java.lang.String)>("policy.expandProperties");
+
+        r58 = $r0;
+
+        if $r0 != null goto label01;
+
+        r58 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("policy.expandProperties");
+
+     label01:
+        $r1 = "false";
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>(r58);
+
+        if $z0 == 0 goto label02;
+
+        r3.<sun.security.provider.ConfigFile$Spi: boolean expandProp> = 0;
+
+     label02:
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        $r4 = r3.<sun.security.provider.ConfigFile$Spi: java.net.URL url>;
+
+        if $r4 == null goto label04;
+
+        $r39 = <sun.security.provider.ConfigFile$Spi: sun.security.util.Debug debugConfig>;
+
+        if $r39 == null goto label03;
+
+        $r42 = <sun.security.provider.ConfigFile$Spi: sun.security.util.Debug debugConfig>;
+
+        $r41 = new java.lang.StringBuilder;
+
+        specialinvoke $r41.<java.lang.StringBuilder: void <init>()>();
+
+        $r43 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("reading ");
+
+        $r44 = r3.<sun.security.provider.ConfigFile$Spi: java.net.URL url>;
+
+        $r45 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r44);
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r42.<sun.security.util.Debug: void println(java.lang.String)>($r46);
+
+     label03:
+        $r40 = r3.<sun.security.provider.ConfigFile$Spi: java.net.URL url>;
+
+        specialinvoke r3.<sun.security.provider.ConfigFile$Spi: void init(java.net.URL,java.util.Map)>($r40, $r2);
+
+        r3.<sun.security.provider.ConfigFile$Spi: java.util.Map configuration> = $r2;
+
+        return;
+
+     label04:
+        $r5 = staticinvoke <java.security.Security: java.lang.String getProperty(java.lang.String)>("policy.allowSystemProperty");
+
+        $r6 = "true";
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r5);
+
+        if $z1 == 0 goto label15;
+
+        $r28 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.security.auth.login.config");
+
+        r59 = $r28;
+
+        if $r28 == null goto label15;
+
+        z6 = 0;
+
+        $z3 = virtualinvoke $r28.<java.lang.String: boolean startsWith(java.lang.String)>("=");
+
+        if $z3 == 0 goto label05;
+
+        z6 = 1;
+
+        r59 = virtualinvoke $r28.<java.lang.String: java.lang.String substring(int)>(1);
+
+     label05:
+        $r29 = staticinvoke <sun.security.util.PropertyExpander: java.lang.String expand(java.lang.String)>(r59);
+
+     label06:
+        goto label08;
+
+     label07:
+        $r55 := @caughtexception;
+
+        $r56 = newarray (java.lang.Object)[1];
+
+        $r56[0] = r59;
+
+        $r57 = specialinvoke r3.<sun.security.provider.ConfigFile$Spi: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("Unable.to.properly.expand.config", $r56);
+
+        throw $r57;
+
+     label08:
+        $r30 = new java.net.URL;
+
+        specialinvoke $r30.<java.net.URL: void <init>(java.lang.String)>($r29);
+
+        r60 = $r30;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r50 := @caughtexception;
+
+        $r51 = new java.io.File;
+
+        specialinvoke $r51.<java.io.File: void <init>(java.lang.String)>($r29);
+
+        $z4 = virtualinvoke $r51.<java.io.File: boolean exists()>();
+
+        if $z4 == 0 goto label11;
+
+        $r54 = virtualinvoke $r51.<java.io.File: java.net.URI toURI()>();
+
+        r60 = virtualinvoke $r54.<java.net.URI: java.net.URL toURL()>();
+
+        goto label12;
+
+     label11:
+        $r52 = newarray (java.lang.Object)[1];
+
+        $r52[0] = $r29;
+
+        $r53 = specialinvoke r3.<sun.security.provider.ConfigFile$Spi: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("extra.config.No.such.file.or.directory.", $r52);
+
+        throw $r53;
+
+     label12:
+        $r31 = <sun.security.provider.ConfigFile$Spi: sun.security.util.Debug debugConfig>;
+
+        if $r31 == null goto label13;
+
+        $r35 = <sun.security.provider.ConfigFile$Spi: sun.security.util.Debug debugConfig>;
+
+        $r34 = new java.lang.StringBuilder;
+
+        specialinvoke $r34.<java.lang.StringBuilder: void <init>()>();
+
+        $r36 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("reading ");
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r60);
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r35.<sun.security.util.Debug: void println(java.lang.String)>($r38);
+
+     label13:
+        specialinvoke r3.<sun.security.provider.ConfigFile$Spi: void init(java.net.URL,java.util.Map)>(r60, $r2);
+
+        z5 = 1;
+
+        if z6 == 0 goto label15;
+
+        $r32 = <sun.security.provider.ConfigFile$Spi: sun.security.util.Debug debugConfig>;
+
+        if $r32 == null goto label14;
+
+        $r33 = <sun.security.provider.ConfigFile$Spi: sun.security.util.Debug debugConfig>;
+
+        virtualinvoke $r33.<sun.security.util.Debug: void println(java.lang.String)>("overriding other policies!");
+
+     label14:
+        r3.<sun.security.provider.ConfigFile$Spi: java.util.Map configuration> = $r2;
+
+        return;
+
+     label15:
+        i2 = 1;
+
+     label16:
+        $r61 = new java.lang.StringBuilder;
+
+        specialinvoke $r61.<java.lang.StringBuilder: void <init>()>();
+
+        $r62 = virtualinvoke $r61.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("login.config.url.");
+
+        $r63 = virtualinvoke $r62.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i2);
+
+        $r64 = virtualinvoke $r63.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r65 = staticinvoke <java.security.Security: java.lang.String getProperty(java.lang.String)>($r64);
+
+        r66 = $r65;
+
+        if $r65 == null goto label22;
+
+     label17:
+        $r19 = staticinvoke <sun.security.util.PropertyExpander: java.lang.String expand(java.lang.String)>($r65);
+
+        $c1 = <java.io.File: char separatorChar>;
+
+        $r20 = virtualinvoke $r19.<java.lang.String: java.lang.String replace(char,char)>($c1, 47);
+
+        r66 = $r20;
+
+        $r21 = <sun.security.provider.ConfigFile$Spi: sun.security.util.Debug debugConfig>;
+
+        if $r21 == null goto label18;
+
+        $r24 = <sun.security.provider.ConfigFile$Spi: sun.security.util.Debug debugConfig>;
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\tReading config: ");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r24.<sun.security.util.Debug: void println(java.lang.String)>($r27);
+
+     label18:
+        $r22 = new java.net.URL;
+
+        specialinvoke $r22.<java.net.URL: void <init>(java.lang.String)>($r20);
+
+        specialinvoke r3.<sun.security.provider.ConfigFile$Spi: void init(java.net.URL,java.util.Map)>($r22, $r2);
+
+        z5 = 1;
+
+     label19:
+        goto label21;
+
+     label20:
+        $r47 := @caughtexception;
+
+        $r48 = newarray (java.lang.Object)[1];
+
+        $r48[0] = r66;
+
+        $r49 = specialinvoke r3.<sun.security.provider.ConfigFile$Spi: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("Unable.to.properly.expand.config", $r48);
+
+        throw $r49;
+
+     label21:
+        i2 = i2 + 1;
+
+        goto label16;
+
+     label22:
+        if z5 != 0 goto label24;
+
+        if i2 != 1 goto label24;
+
+        if $r65 != null goto label24;
+
+        $r7 = <sun.security.provider.ConfigFile$Spi: sun.security.util.Debug debugConfig>;
+
+        if $r7 == null goto label23;
+
+        $r18 = <sun.security.provider.ConfigFile$Spi: sun.security.util.Debug debugConfig>;
+
+        virtualinvoke $r18.<sun.security.util.Debug: void println(java.lang.String)>("\tReading Policy from ~/.java.login.config");
+
+     label23:
+        $r8 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("user.home");
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $c0 = <java.io.File: char separatorChar>;
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c0);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".java.login.config");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r14 = new java.io.File;
+
+        specialinvoke $r14.<java.io.File: void <init>(java.lang.String)>($r13);
+
+        $z2 = virtualinvoke $r14.<java.io.File: boolean exists()>();
+
+        if $z2 == 0 goto label24;
+
+        $r15 = new java.io.File;
+
+        specialinvoke $r15.<java.io.File: void <init>(java.lang.String)>($r13);
+
+        $r16 = virtualinvoke $r15.<java.io.File: java.net.URI toURI()>();
+
+        $r17 = virtualinvoke $r16.<java.net.URI: java.net.URL toURL()>();
+
+        specialinvoke r3.<sun.security.provider.ConfigFile$Spi: void init(java.net.URL,java.util.Map)>($r17, $r2);
+
+     label24:
+        r3.<sun.security.provider.ConfigFile$Spi: java.util.Map configuration> = $r2;
+
+        return;
+
+        catch sun.security.util.PropertyExpander$ExpandException from label05 to label06 with label07;
+        catch java.net.MalformedURLException from label08 to label09 with label10;
+        catch sun.security.util.PropertyExpander$ExpandException from label17 to label19 with label20;
+    }
+
+    private void init(java.net.URL, java.util.Map) throws java.io.IOException
+    {
+        java.lang.Throwable $r11, $r12, $r13, r15;
+        java.net.URL r2;
+        java.io.IOException $r7;
+        java.io.InputStreamReader $r0;
+        sun.security.util.Debug $r6, $r9;
+        java.io.FileNotFoundException $r5;
+        java.util.Map r4;
+        sun.security.provider.ConfigFile$Spi r1;
+        java.lang.String $r8, $r10;
+        java.io.InputStream $r3;
+
+        r1 := @this: sun.security.provider.ConfigFile$Spi;
+
+        r2 := @parameter0: java.net.URL;
+
+        r4 := @parameter1: java.util.Map;
+
+     label01:
+        $r0 = new java.io.InputStreamReader;
+
+        $r3 = specialinvoke r1.<sun.security.provider.ConfigFile$Spi: java.io.InputStream getInputStream(java.net.URL)>(r2);
+
+        specialinvoke $r0.<java.io.InputStreamReader: void <init>(java.io.InputStream,java.lang.String)>($r3, "UTF-8");
+
+        r15 = null;
+
+     label02:
+        specialinvoke r1.<sun.security.provider.ConfigFile$Spi: void readConfig(java.io.Reader,java.util.Map)>($r0, r4);
+
+     label03:
+        if $r0 == null goto label13;
+
+        goto label04;
+
+     label04:
+        virtualinvoke $r0.<java.io.InputStreamReader: void close()>();
+
+        goto label13;
+
+     label05:
+        $r13 := @caughtexception;
+
+        r15 = $r13;
+
+        throw $r13;
+
+     label06:
+        $r12 := @caughtexception;
+
+     label07:
+        if $r0 == null goto label12;
+
+        if r15 == null goto label11;
+
+     label08:
+        virtualinvoke $r0.<java.io.InputStreamReader: void close()>();
+
+     label09:
+        goto label12;
+
+     label10:
+        $r11 := @caughtexception;
+
+        virtualinvoke r15.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r11);
+
+        goto label12;
+
+     label11:
+        virtualinvoke $r0.<java.io.InputStreamReader: void close()>();
+
+     label12:
+        throw $r12;
+
+     label13:
+        goto label16;
+
+     label14:
+        $r5 := @caughtexception;
+
+        $r6 = <sun.security.provider.ConfigFile$Spi: sun.security.util.Debug debugConfig>;
+
+        if $r6 == null goto label15;
+
+        $r9 = <sun.security.provider.ConfigFile$Spi: sun.security.util.Debug debugConfig>;
+
+        $r10 = virtualinvoke $r5.<java.io.FileNotFoundException: java.lang.String toString()>();
+
+        virtualinvoke $r9.<sun.security.util.Debug: void println(java.lang.String)>($r10);
+
+     label15:
+        $r7 = new java.io.IOException;
+
+        $r8 = staticinvoke <sun.security.util.ResourcesMgr: java.lang.String getString(java.lang.String,java.lang.String)>("Configuration.Error.No.such.file.or.directory", "sun.security.util.AuthResources");
+
+        specialinvoke $r7.<java.io.IOException: void <init>(java.lang.String)>($r8);
+
+        throw $r7;
+
+     label16:
+        return;
+
+        catch java.lang.Throwable from label02 to label03 with label05;
+        catch java.lang.Throwable from label08 to label09 with label10;
+        catch java.lang.Throwable from label05 to label07 with label06;
+        catch java.io.FileNotFoundException from label01 to label13 with label14;
+    }
+
+    public javax.security.auth.login.AppConfigurationEntry[] engineGetAppConfigurationEntry(java.lang.String)
+    {
+        java.lang.Throwable $r12;
+        javax.security.auth.login.AppConfigurationEntry r7, $r8;
+        java.util.Map $r1, $r3, $r11;
+        int $i0, $i1, i2;
+        sun.security.provider.ConfigFile$Spi r0;
+        java.lang.String r2, $r9;
+        javax.security.auth.login.AppConfigurationEntry$LoginModuleControlFlag $r10;
+        boolean $z0;
+        java.util.Iterator $r5;
+        java.util.List r13;
+        javax.security.auth.login.AppConfigurationEntry[] r14;
+        java.lang.Object $r4, $r6;
+
+        r0 := @this: sun.security.provider.ConfigFile$Spi;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = r0.<sun.security.provider.ConfigFile$Spi: java.util.Map configuration>;
+
+        entermonitor $r1;
+
+     label1:
+        $r3 = r0.<sun.security.provider.ConfigFile$Spi: java.util.Map configuration>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>(r2);
+
+        r13 = (java.util.List) $r4;
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r12 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r12;
+
+     label5:
+        if r13 == null goto label6;
+
+        $i0 = interfaceinvoke r13.<java.util.List: int size()>();
+
+        if $i0 != 0 goto label7;
+
+     label6:
+        return null;
+
+     label7:
+        $i1 = interfaceinvoke r13.<java.util.List: int size()>();
+
+        r14 = newarray (javax.security.auth.login.AppConfigurationEntry)[$i1];
+
+        $r5 = interfaceinvoke r13.<java.util.List: java.util.Iterator iterator()>();
+
+        i2 = 0;
+
+     label8:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label9;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (javax.security.auth.login.AppConfigurationEntry) $r6;
+
+        $r8 = new javax.security.auth.login.AppConfigurationEntry;
+
+        $r9 = virtualinvoke r7.<javax.security.auth.login.AppConfigurationEntry: java.lang.String getLoginModuleName()>();
+
+        $r10 = virtualinvoke r7.<javax.security.auth.login.AppConfigurationEntry: javax.security.auth.login.AppConfigurationEntry$LoginModuleControlFlag getControlFlag()>();
+
+        $r11 = virtualinvoke r7.<javax.security.auth.login.AppConfigurationEntry: java.util.Map getOptions()>();
+
+        specialinvoke $r8.<javax.security.auth.login.AppConfigurationEntry: void <init>(java.lang.String,javax.security.auth.login.AppConfigurationEntry$LoginModuleControlFlag,java.util.Map)>($r9, $r10, $r11);
+
+        r14[i2] = $r8;
+
+        i2 = i2 + 1;
+
+        goto label8;
+
+     label9:
+        return r14;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public synchronized void engineRefresh()
+    {
+        sun.security.provider.ConfigFile$Spi$2 $r1;
+        sun.security.provider.ConfigFile$Spi r2;
+        java.lang.SecurityManager $r0;
+        javax.security.auth.AuthPermission $r3;
+
+        r2 := @this: sun.security.provider.ConfigFile$Spi;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r3 = new javax.security.auth.AuthPermission;
+
+        specialinvoke $r3.<javax.security.auth.AuthPermission: void <init>(java.lang.String)>("refreshLoginConfiguration");
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r3);
+
+     label1:
+        $r1 = new sun.security.provider.ConfigFile$Spi$2;
+
+        specialinvoke $r1.<sun.security.provider.ConfigFile$Spi$2: void <init>(sun.security.provider.ConfigFile$Spi)>(r2);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        return;
+    }
+
+    private void readConfig(java.io.Reader, java.util.Map) throws java.io.IOException
+    {
+        java.util.Map r11;
+        int $i0, $i1, $i3;
+        java.io.StreamTokenizer $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r15;
+        sun.security.provider.ConfigFile$Spi r0;
+        boolean $z0;
+        java.io.Reader r13;
+        java.io.BufferedReader $r14;
+
+        r0 := @this: sun.security.provider.ConfigFile$Spi;
+
+        r13 := @parameter0: java.io.Reader;
+
+        r11 := @parameter1: java.util.Map;
+
+        r0.<sun.security.provider.ConfigFile$Spi: int linenum> = 1;
+
+        $z0 = r13 instanceof java.io.BufferedReader;
+
+        if $z0 != 0 goto label1;
+
+        $r14 = new java.io.BufferedReader;
+
+        specialinvoke $r14.<java.io.BufferedReader: void <init>(java.io.Reader)>(r13);
+
+        r13 = $r14;
+
+     label1:
+        $r15 = new java.io.StreamTokenizer;
+
+        specialinvoke $r15.<java.io.StreamTokenizer: void <init>(java.io.Reader)>(r13);
+
+        r0.<sun.security.provider.ConfigFile$Spi: java.io.StreamTokenizer st> = $r15;
+
+        $r2 = r0.<sun.security.provider.ConfigFile$Spi: java.io.StreamTokenizer st>;
+
+        virtualinvoke $r2.<java.io.StreamTokenizer: void quoteChar(int)>(34);
+
+        $r3 = r0.<sun.security.provider.ConfigFile$Spi: java.io.StreamTokenizer st>;
+
+        virtualinvoke $r3.<java.io.StreamTokenizer: void wordChars(int,int)>(36, 36);
+
+        $r4 = r0.<sun.security.provider.ConfigFile$Spi: java.io.StreamTokenizer st>;
+
+        virtualinvoke $r4.<java.io.StreamTokenizer: void wordChars(int,int)>(95, 95);
+
+        $r5 = r0.<sun.security.provider.ConfigFile$Spi: java.io.StreamTokenizer st>;
+
+        virtualinvoke $r5.<java.io.StreamTokenizer: void wordChars(int,int)>(45, 45);
+
+        $r6 = r0.<sun.security.provider.ConfigFile$Spi: java.io.StreamTokenizer st>;
+
+        virtualinvoke $r6.<java.io.StreamTokenizer: void wordChars(int,int)>(42, 42);
+
+        $r7 = r0.<sun.security.provider.ConfigFile$Spi: java.io.StreamTokenizer st>;
+
+        virtualinvoke $r7.<java.io.StreamTokenizer: void lowerCaseMode(boolean)>(0);
+
+        $r8 = r0.<sun.security.provider.ConfigFile$Spi: java.io.StreamTokenizer st>;
+
+        virtualinvoke $r8.<java.io.StreamTokenizer: void slashSlashComments(boolean)>(1);
+
+        $r9 = r0.<sun.security.provider.ConfigFile$Spi: java.io.StreamTokenizer st>;
+
+        virtualinvoke $r9.<java.io.StreamTokenizer: void slashStarComments(boolean)>(1);
+
+        $r10 = r0.<sun.security.provider.ConfigFile$Spi: java.io.StreamTokenizer st>;
+
+        virtualinvoke $r10.<java.io.StreamTokenizer: void eolIsSignificant(boolean)>(1);
+
+        $i0 = specialinvoke r0.<sun.security.provider.ConfigFile$Spi: int nextToken()>();
+
+        r0.<sun.security.provider.ConfigFile$Spi: int lookahead> = $i0;
+
+     label2:
+        $i1 = r0.<sun.security.provider.ConfigFile$Spi: int lookahead>;
+
+        $i3 = (int) -1;
+
+        if $i1 == $i3 goto label3;
+
+        specialinvoke r0.<sun.security.provider.ConfigFile$Spi: void parseLoginEntry(java.util.Map)>(r11);
+
+        goto label2;
+
+     label3:
+        return;
+    }
+
+    private void parseLoginEntry(java.util.Map) throws java.io.IOException
+    {
+        byte b3;
+        java.util.Locale $r10;
+        java.util.Map r5;
+        java.io.StreamTokenizer $r2;
+        javax.security.auth.login.AppConfigurationEntry$LoginModuleControlFlag r46;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        java.util.Set $r21;
+        sun.security.util.Debug $r4, $r12, $r15, $r25, $r39;
+        java.lang.StringBuilder $r14, $r16, $r17, $r18, $r19, $r24, $r26, $r27, $r28, $r31, $r38, $r40, $r41;
+        java.lang.Object[] $r6, $r36;
+        javax.security.auth.login.AppConfigurationEntry $r13;
+        java.util.HashMap $r47;
+        int $i0, $i1, $i2;
+        sun.security.provider.ConfigFile$Spi r1;
+        java.lang.String r3, $r8, $r9, $r11, $r20, $r30, $r32, $r33, $r34, $r35, $r42, $r45, r48;
+        java.util.LinkedList $r0;
+        java.util.Iterator $r22;
+        java.io.IOException $r7, $r37, $r44;
+        java.lang.Object $r23, $r29;
+        sun.security.util.PropertyExpander$ExpandException $r43;
+
+        r1 := @this: sun.security.provider.ConfigFile$Spi;
+
+        r5 := @parameter0: java.util.Map;
+
+        $r0 = new java.util.LinkedList;
+
+        specialinvoke $r0.<java.util.LinkedList: void <init>()>();
+
+        $r2 = r1.<sun.security.provider.ConfigFile$Spi: java.io.StreamTokenizer st>;
+
+        r3 = $r2.<java.io.StreamTokenizer: java.lang.String sval>;
+
+        $i0 = specialinvoke r1.<sun.security.provider.ConfigFile$Spi: int nextToken()>();
+
+        r1.<sun.security.provider.ConfigFile$Spi: int lookahead> = $i0;
+
+        $r4 = <sun.security.provider.ConfigFile$Spi: sun.security.util.Debug debugParser>;
+
+        if $r4 == null goto label01;
+
+        $r39 = <sun.security.provider.ConfigFile$Spi: sun.security.util.Debug debugParser>;
+
+        $r38 = new java.lang.StringBuilder;
+
+        specialinvoke $r38.<java.lang.StringBuilder: void <init>()>();
+
+        $r40 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\tReading next config entry: ");
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r39.<sun.security.util.Debug: void println(java.lang.String)>($r42);
+
+     label01:
+        specialinvoke r1.<sun.security.provider.ConfigFile$Spi: java.lang.String match(java.lang.String)>("{");
+
+     label02:
+        $z6 = specialinvoke r1.<sun.security.provider.ConfigFile$Spi: boolean peek(java.lang.String)>("}");
+
+        if $z6 != 0 goto label22;
+
+        $r8 = specialinvoke r1.<sun.security.provider.ConfigFile$Spi: java.lang.String match(java.lang.String)>("module class name");
+
+        $r9 = specialinvoke r1.<sun.security.provider.ConfigFile$Spi: java.lang.String match(java.lang.String)>("controlFlag");
+
+        $r10 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r11 = virtualinvoke $r9.<java.lang.String: java.lang.String toUpperCase(java.util.Locale)>($r10);
+
+        b3 = -1;
+
+        $i1 = virtualinvoke $r11.<java.lang.String: int hashCode()>();
+
+        lookupswitch($i1)
+        {
+            case -848090850: goto label05;
+            case -810754599: goto label04;
+            case 389487519: goto label03;
+            case 703609696: goto label06;
+            default: goto label07;
+        };
+
+     label03:
+        $z3 = virtualinvoke $r11.<java.lang.String: boolean equals(java.lang.Object)>("REQUIRED");
+
+        if $z3 == 0 goto label07;
+
+        b3 = 0;
+
+        goto label07;
+
+     label04:
+        $z4 = virtualinvoke $r11.<java.lang.String: boolean equals(java.lang.Object)>("REQUISITE");
+
+        if $z4 == 0 goto label07;
+
+        b3 = 1;
+
+        goto label07;
+
+     label05:
+        $z5 = virtualinvoke $r11.<java.lang.String: boolean equals(java.lang.Object)>("SUFFICIENT");
+
+        if $z5 == 0 goto label07;
+
+        b3 = 2;
+
+        goto label07;
+
+     label06:
+        $z1 = virtualinvoke $r11.<java.lang.String: boolean equals(java.lang.Object)>("OPTIONAL");
+
+        if $z1 == 0 goto label07;
+
+        b3 = 3;
+
+     label07:
+        tableswitch(b3)
+        {
+            case 0: goto label08;
+            case 1: goto label09;
+            case 2: goto label10;
+            case 3: goto label11;
+            default: goto label12;
+        };
+
+     label08:
+        r46 = <javax.security.auth.login.AppConfigurationEntry$LoginModuleControlFlag: javax.security.auth.login.AppConfigurationEntry$LoginModuleControlFlag REQUIRED>;
+
+        goto label13;
+
+     label09:
+        r46 = <javax.security.auth.login.AppConfigurationEntry$LoginModuleControlFlag: javax.security.auth.login.AppConfigurationEntry$LoginModuleControlFlag REQUISITE>;
+
+        goto label13;
+
+     label10:
+        r46 = <javax.security.auth.login.AppConfigurationEntry$LoginModuleControlFlag: javax.security.auth.login.AppConfigurationEntry$LoginModuleControlFlag SUFFICIENT>;
+
+        goto label13;
+
+     label11:
+        r46 = <javax.security.auth.login.AppConfigurationEntry$LoginModuleControlFlag: javax.security.auth.login.AppConfigurationEntry$LoginModuleControlFlag OPTIONAL>;
+
+        goto label13;
+
+     label12:
+        $r36 = newarray (java.lang.Object)[1];
+
+        $r36[0] = $r11;
+
+        $r37 = specialinvoke r1.<sun.security.provider.ConfigFile$Spi: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("Configuration.Error.Invalid.control.flag.flag", $r36);
+
+        throw $r37;
+
+     label13:
+        $r47 = new java.util.HashMap;
+
+        specialinvoke $r47.<java.util.HashMap: void <init>()>();
+
+     label14:
+        $z7 = specialinvoke r1.<sun.security.provider.ConfigFile$Spi: boolean peek(java.lang.String)>(";");
+
+        if $z7 != 0 goto label19;
+
+        $r33 = specialinvoke r1.<sun.security.provider.ConfigFile$Spi: java.lang.String match(java.lang.String)>("option key");
+
+        specialinvoke r1.<sun.security.provider.ConfigFile$Spi: java.lang.String match(java.lang.String)>("=");
+
+     label15:
+        $r34 = specialinvoke r1.<sun.security.provider.ConfigFile$Spi: java.lang.String match(java.lang.String)>("option value");
+
+        $r35 = specialinvoke r1.<sun.security.provider.ConfigFile$Spi: java.lang.String expand(java.lang.String)>($r34);
+
+        interfaceinvoke $r47.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r33, $r35);
+
+     label16:
+        goto label18;
+
+     label17:
+        $r43 := @caughtexception;
+
+        $r44 = new java.io.IOException;
+
+        $r45 = virtualinvoke $r43.<sun.security.util.PropertyExpander$ExpandException: java.lang.String getLocalizedMessage()>();
+
+        specialinvoke $r44.<java.io.IOException: void <init>(java.lang.String)>($r45);
+
+        throw $r44;
+
+     label18:
+        goto label14;
+
+     label19:
+        $i2 = specialinvoke r1.<sun.security.provider.ConfigFile$Spi: int nextToken()>();
+
+        r1.<sun.security.provider.ConfigFile$Spi: int lookahead> = $i2;
+
+        $r12 = <sun.security.provider.ConfigFile$Spi: sun.security.util.Debug debugParser>;
+
+        if $r12 == null goto label21;
+
+        $r15 = <sun.security.provider.ConfigFile$Spi: sun.security.util.Debug debugParser>;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\t\t");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r15.<sun.security.util.Debug: void println(java.lang.String)>($r20);
+
+        $r21 = interfaceinvoke $r47.<java.util.Map: java.util.Set keySet()>();
+
+        $r22 = interfaceinvoke $r21.<java.util.Set: java.util.Iterator iterator()>();
+
+     label20:
+        $z2 = interfaceinvoke $r22.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label21;
+
+        $r23 = interfaceinvoke $r22.<java.util.Iterator: java.lang.Object next()>();
+
+        r48 = (java.lang.String) $r23;
+
+        $r25 = <sun.security.provider.ConfigFile$Spi: sun.security.util.Debug debugParser>;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\t\t\t");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r48);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("=");
+
+        $r29 = interfaceinvoke $r47.<java.util.Map: java.lang.Object get(java.lang.Object)>(r48);
+
+        $r30 = (java.lang.String) $r29;
+
+        $r31 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r30);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r25.<sun.security.util.Debug: void println(java.lang.String)>($r32);
+
+        goto label20;
+
+     label21:
+        $r13 = new javax.security.auth.login.AppConfigurationEntry;
+
+        specialinvoke $r13.<javax.security.auth.login.AppConfigurationEntry: void <init>(java.lang.String,javax.security.auth.login.AppConfigurationEntry$LoginModuleControlFlag,java.util.Map)>($r8, r46, $r47);
+
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>($r13);
+
+        goto label02;
+
+     label22:
+        specialinvoke r1.<sun.security.provider.ConfigFile$Spi: java.lang.String match(java.lang.String)>("}");
+
+        specialinvoke r1.<sun.security.provider.ConfigFile$Spi: java.lang.String match(java.lang.String)>(";");
+
+        $z0 = interfaceinvoke r5.<java.util.Map: boolean containsKey(java.lang.Object)>(r3);
+
+        if $z0 == 0 goto label23;
+
+        $r6 = newarray (java.lang.Object)[1];
+
+        $r6[0] = r3;
+
+        $r7 = specialinvoke r1.<sun.security.provider.ConfigFile$Spi: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("Configuration.Error.Can.not.specify.multiple.entries.for.appName", $r6);
+
+        throw $r7;
+
+     label23:
+        interfaceinvoke r5.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r3, $r0);
+
+        return;
+
+        catch sun.security.util.PropertyExpander$ExpandException from label15 to label16 with label17;
+    }
+
+    private java.lang.String match(java.lang.String) throws java.io.IOException
+    {
+        java.lang.Integer $r3, $r8, $r13, $r18, $r25, $r30;
+        java.io.StreamTokenizer $r4, $r9, $r14, $r19, $r26, $r31, $r35;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        java.lang.Object[] $r2, $r7, $r12, $r17, $r22, $r24, $r29;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11;
+        sun.security.provider.ConfigFile$Spi r0;
+        java.lang.String r1, $r5, $r10, $r15, $r20, $r27, $r32, r34;
+        java.io.IOException $r6, $r11, $r16, $r21, $r23, $r28, $r33;
+
+        r0 := @this: sun.security.provider.ConfigFile$Spi;
+
+        r1 := @parameter0: java.lang.String;
+
+        r34 = null;
+
+        $i0 = r0.<sun.security.provider.ConfigFile$Spi: int lookahead>;
+
+        lookupswitch($i0)
+        {
+            case -3: goto label02;
+            case -1: goto label01;
+            case 34: goto label02;
+            case 59: goto label07;
+            case 61: goto label11;
+            case 123: goto label05;
+            case 125: goto label09;
+            default: goto label13;
+        };
+
+     label01:
+        $r22 = newarray (java.lang.Object)[1];
+
+        $r22[0] = r1;
+
+        $r23 = specialinvoke r0.<sun.security.provider.ConfigFile$Spi: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("Configuration.Error.expected.expect.read.end.of.file.", $r22);
+
+        throw $r23;
+
+     label02:
+        $z4 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("module class name");
+
+        if $z4 != 0 goto label03;
+
+        $z5 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("controlFlag");
+
+        if $z5 != 0 goto label03;
+
+        $z6 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("option key");
+
+        if $z6 != 0 goto label03;
+
+        $z7 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("option value");
+
+        if $z7 == 0 goto label04;
+
+     label03:
+        $r35 = r0.<sun.security.provider.ConfigFile$Spi: java.io.StreamTokenizer st>;
+
+        r34 = $r35.<java.io.StreamTokenizer: java.lang.String sval>;
+
+        $i11 = specialinvoke r0.<sun.security.provider.ConfigFile$Spi: int nextToken()>();
+
+        r0.<sun.security.provider.ConfigFile$Spi: int lookahead> = $i11;
+
+        goto label14;
+
+     label04:
+        $r24 = newarray (java.lang.Object)[3];
+
+        $r25 = new java.lang.Integer;
+
+        $i9 = r0.<sun.security.provider.ConfigFile$Spi: int linenum>;
+
+        specialinvoke $r25.<java.lang.Integer: void <init>(int)>($i9);
+
+        $r24[0] = $r25;
+
+        $r24[1] = r1;
+
+        $r26 = r0.<sun.security.provider.ConfigFile$Spi: java.io.StreamTokenizer st>;
+
+        $r27 = $r26.<java.io.StreamTokenizer: java.lang.String sval>;
+
+        $r24[2] = $r27;
+
+        $r28 = specialinvoke r0.<sun.security.provider.ConfigFile$Spi: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("Configuration.Error.Line.line.expected.expect.found.value.", $r24);
+
+        throw $r28;
+
+     label05:
+        $z1 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("{");
+
+        if $z1 == 0 goto label06;
+
+        $i4 = specialinvoke r0.<sun.security.provider.ConfigFile$Spi: int nextToken()>();
+
+        r0.<sun.security.provider.ConfigFile$Spi: int lookahead> = $i4;
+
+        goto label14;
+
+     label06:
+        $r7 = newarray (java.lang.Object)[3];
+
+        $r8 = new java.lang.Integer;
+
+        $i3 = r0.<sun.security.provider.ConfigFile$Spi: int linenum>;
+
+        specialinvoke $r8.<java.lang.Integer: void <init>(int)>($i3);
+
+        $r7[0] = $r8;
+
+        $r7[1] = r1;
+
+        $r9 = r0.<sun.security.provider.ConfigFile$Spi: java.io.StreamTokenizer st>;
+
+        $r10 = $r9.<java.io.StreamTokenizer: java.lang.String sval>;
+
+        $r7[2] = $r10;
+
+        $r11 = specialinvoke r0.<sun.security.provider.ConfigFile$Spi: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("Configuration.Error.Line.line.expected.expect.", $r7);
+
+        throw $r11;
+
+     label07:
+        $z3 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(";");
+
+        if $z3 == 0 goto label08;
+
+        $i8 = specialinvoke r0.<sun.security.provider.ConfigFile$Spi: int nextToken()>();
+
+        r0.<sun.security.provider.ConfigFile$Spi: int lookahead> = $i8;
+
+        goto label14;
+
+     label08:
+        $r17 = newarray (java.lang.Object)[3];
+
+        $r18 = new java.lang.Integer;
+
+        $i7 = r0.<sun.security.provider.ConfigFile$Spi: int linenum>;
+
+        specialinvoke $r18.<java.lang.Integer: void <init>(int)>($i7);
+
+        $r17[0] = $r18;
+
+        $r17[1] = r1;
+
+        $r19 = r0.<sun.security.provider.ConfigFile$Spi: java.io.StreamTokenizer st>;
+
+        $r20 = $r19.<java.io.StreamTokenizer: java.lang.String sval>;
+
+        $r17[2] = $r20;
+
+        $r21 = specialinvoke r0.<sun.security.provider.ConfigFile$Spi: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("Configuration.Error.Line.line.expected.expect.", $r17);
+
+        throw $r21;
+
+     label09:
+        $z0 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("}");
+
+        if $z0 == 0 goto label10;
+
+        $i2 = specialinvoke r0.<sun.security.provider.ConfigFile$Spi: int nextToken()>();
+
+        r0.<sun.security.provider.ConfigFile$Spi: int lookahead> = $i2;
+
+        goto label14;
+
+     label10:
+        $r2 = newarray (java.lang.Object)[3];
+
+        $r3 = new java.lang.Integer;
+
+        $i1 = r0.<sun.security.provider.ConfigFile$Spi: int linenum>;
+
+        specialinvoke $r3.<java.lang.Integer: void <init>(int)>($i1);
+
+        $r2[0] = $r3;
+
+        $r2[1] = r1;
+
+        $r4 = r0.<sun.security.provider.ConfigFile$Spi: java.io.StreamTokenizer st>;
+
+        $r5 = $r4.<java.io.StreamTokenizer: java.lang.String sval>;
+
+        $r2[2] = $r5;
+
+        $r6 = specialinvoke r0.<sun.security.provider.ConfigFile$Spi: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("Configuration.Error.Line.line.expected.expect.", $r2);
+
+        throw $r6;
+
+     label11:
+        $z2 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("=");
+
+        if $z2 == 0 goto label12;
+
+        $i6 = specialinvoke r0.<sun.security.provider.ConfigFile$Spi: int nextToken()>();
+
+        r0.<sun.security.provider.ConfigFile$Spi: int lookahead> = $i6;
+
+        goto label14;
+
+     label12:
+        $r12 = newarray (java.lang.Object)[3];
+
+        $r13 = new java.lang.Integer;
+
+        $i5 = r0.<sun.security.provider.ConfigFile$Spi: int linenum>;
+
+        specialinvoke $r13.<java.lang.Integer: void <init>(int)>($i5);
+
+        $r12[0] = $r13;
+
+        $r12[1] = r1;
+
+        $r14 = r0.<sun.security.provider.ConfigFile$Spi: java.io.StreamTokenizer st>;
+
+        $r15 = $r14.<java.io.StreamTokenizer: java.lang.String sval>;
+
+        $r12[2] = $r15;
+
+        $r16 = specialinvoke r0.<sun.security.provider.ConfigFile$Spi: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("Configuration.Error.Line.line.expected.expect.", $r12);
+
+        throw $r16;
+
+     label13:
+        $r29 = newarray (java.lang.Object)[3];
+
+        $r30 = new java.lang.Integer;
+
+        $i10 = r0.<sun.security.provider.ConfigFile$Spi: int linenum>;
+
+        specialinvoke $r30.<java.lang.Integer: void <init>(int)>($i10);
+
+        $r29[0] = $r30;
+
+        $r29[1] = r1;
+
+        $r31 = r0.<sun.security.provider.ConfigFile$Spi: java.io.StreamTokenizer st>;
+
+        $r32 = $r31.<java.io.StreamTokenizer: java.lang.String sval>;
+
+        $r29[2] = $r32;
+
+        $r33 = specialinvoke r0.<sun.security.provider.ConfigFile$Spi: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("Configuration.Error.Line.line.expected.expect.found.value.", $r29);
+
+        throw $r33;
+
+     label14:
+        return r34;
+    }
+
+    private boolean peek(java.lang.String)
+    {
+        int $i0;
+        sun.security.provider.ConfigFile$Spi r0;
+        java.lang.String r1;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: sun.security.provider.ConfigFile$Spi;
+
+        r1 := @parameter0: java.lang.String;
+
+        $i0 = r0.<sun.security.provider.ConfigFile$Spi: int lookahead>;
+
+        lookupswitch($i0)
+        {
+            case 44: goto label1;
+            case 59: goto label2;
+            case 123: goto label3;
+            case 125: goto label4;
+            default: goto label5;
+        };
+
+     label1:
+        $z3 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(",");
+
+        return $z3;
+
+     label2:
+        $z2 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(";");
+
+        return $z2;
+
+     label3:
+        $z1 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("{");
+
+        return $z1;
+
+     label4:
+        $z0 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("}");
+
+        return $z0;
+
+     label5:
+        return 0;
+    }
+
+    private int nextToken() throws java.io.IOException
+    {
+        int $i0, $i1, $i2;
+        java.io.StreamTokenizer $r1;
+        sun.security.provider.ConfigFile$Spi r0;
+
+        r0 := @this: sun.security.provider.ConfigFile$Spi;
+
+     label1:
+        $r1 = r0.<sun.security.provider.ConfigFile$Spi: java.io.StreamTokenizer st>;
+
+        $i0 = virtualinvoke $r1.<java.io.StreamTokenizer: int nextToken()>();
+
+        if $i0 != 10 goto label2;
+
+        $i1 = r0.<sun.security.provider.ConfigFile$Spi: int linenum>;
+
+        $i2 = $i1 + 1;
+
+        r0.<sun.security.provider.ConfigFile$Spi: int linenum> = $i2;
+
+        goto label1;
+
+     label2:
+        return $i0;
+    }
+
+    private java.io.InputStream getInputStream(java.net.URL) throws java.io.IOException
+    {
+        java.net.URL r0;
+        sun.security.provider.ConfigFile$Spi r22;
+        java.lang.String $r1, $r2, $r6, $r7, $r16, $r19, r23;
+        boolean $z0, $z1;
+        java.io.FileInputStream $r9;
+        sun.security.util.Debug $r8, $r11;
+        java.lang.Exception $r5;
+        java.lang.StringBuilder $r10, $r12, $r13, $r14, $r15, $r17, $r18, $r20, $r21;
+        java.io.InputStream $r3, $r4;
+
+        r22 := @this: sun.security.provider.ConfigFile$Spi;
+
+        r0 := @parameter0: java.net.URL;
+
+        $r1 = "file";
+
+        $r2 = virtualinvoke r0.<java.net.URL: java.lang.String getProtocol()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r2);
+
+        if $z0 == 0 goto label6;
+
+     label1:
+        $r4 = virtualinvoke r0.<java.net.URL: java.io.InputStream openStream()>();
+
+     label2:
+        return $r4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = virtualinvoke r0.<java.net.URL: java.lang.String getPath()>();
+
+        r23 = $r6;
+
+        $r7 = virtualinvoke r0.<java.net.URL: java.lang.String getHost()>();
+
+        $z1 = virtualinvoke $r7.<java.lang.String: boolean isEmpty()>();
+
+        if $z1 != 0 goto label4;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("//");
+
+        $r19 = virtualinvoke r0.<java.net.URL: java.lang.String getHost()>();
+
+        $r20 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        r23 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label4:
+        $r8 = <sun.security.provider.ConfigFile$Spi: sun.security.util.Debug debugConfig>;
+
+        if $r8 == null goto label5;
+
+        $r11 = <sun.security.provider.ConfigFile$Spi: sun.security.util.Debug debugConfig>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("cannot read ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", try ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r23);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r11.<sun.security.util.Debug: void println(java.lang.String)>($r16);
+
+     label5:
+        $r9 = new java.io.FileInputStream;
+
+        specialinvoke $r9.<java.io.FileInputStream: void <init>(java.lang.String)>(r23);
+
+        return $r9;
+
+     label6:
+        $r3 = virtualinvoke r0.<java.net.URL: java.io.InputStream openStream()>();
+
+        return $r3;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    private java.lang.String expand(java.lang.String) throws sun.security.util.PropertyExpander$ExpandException, java.io.IOException
+    {
+        java.lang.Object[] $r3;
+        java.io.IOException $r5;
+        java.lang.Integer $r4;
+        int $i0;
+        sun.security.provider.ConfigFile$Spi r1;
+        java.lang.String r0, $r2;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: sun.security.provider.ConfigFile$Spi;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        return r0;
+
+     label1:
+        $z1 = r1.<sun.security.provider.ConfigFile$Spi: boolean expandProp>;
+
+        if $z1 != 0 goto label2;
+
+        return r0;
+
+     label2:
+        $r2 = staticinvoke <sun.security.util.PropertyExpander: java.lang.String expand(java.lang.String)>(r0);
+
+        if $r2 == null goto label3;
+
+        $z2 = virtualinvoke $r2.<java.lang.String: boolean isEmpty()>();
+
+        if $z2 == 0 goto label4;
+
+     label3:
+        $r3 = newarray (java.lang.Object)[2];
+
+        $r4 = new java.lang.Integer;
+
+        $i0 = r1.<sun.security.provider.ConfigFile$Spi: int linenum>;
+
+        specialinvoke $r4.<java.lang.Integer: void <init>(int)>($i0);
+
+        $r3[0] = $r4;
+
+        $r3[1] = r0;
+
+        $r5 = specialinvoke r1.<sun.security.provider.ConfigFile$Spi: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("Configuration.Error.Line.line.system.property.value.expanded.to.empty.value", $r3);
+
+        throw $r5;
+
+     label4:
+        return $r2;
+    }
+
+    private transient java.io.IOException ioException(java.lang.String, java.lang.Object[])
+    {
+        java.lang.Object[] r4;
+        java.io.IOException $r3;
+        sun.security.provider.ConfigFile$Spi r6;
+        java.lang.String r1, $r2, $r5;
+        java.text.MessageFormat $r0;
+
+        r6 := @this: sun.security.provider.ConfigFile$Spi;
+
+        r1 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.lang.Object[];
+
+        $r0 = new java.text.MessageFormat;
+
+        $r2 = staticinvoke <sun.security.util.ResourcesMgr: java.lang.String getString(java.lang.String,java.lang.String)>(r1, "sun.security.util.AuthResources");
+
+        specialinvoke $r0.<java.text.MessageFormat: void <init>(java.lang.String)>($r2);
+
+        $r3 = new java.io.IOException;
+
+        $r5 = virtualinvoke $r0.<java.text.MessageFormat: java.lang.String format(java.lang.Object)>(r4);
+
+        specialinvoke $r3.<java.io.IOException: void <init>(java.lang.String)>($r5);
+
+        return $r3;
+    }
+
+    static void access$000(sun.security.provider.ConfigFile$Spi) throws java.io.IOException
+    {
+        sun.security.provider.ConfigFile$Spi r0;
+
+        r0 := @parameter0: sun.security.provider.ConfigFile$Spi;
+
+        specialinvoke r0.<sun.security.provider.ConfigFile$Spi: void init()>();
+
+        return;
+    }
+
+    static java.net.URL access$102(sun.security.provider.ConfigFile$Spi, java.net.URL)
+    {
+        sun.security.provider.ConfigFile$Spi r0;
+        java.net.URL r1;
+
+        r0 := @parameter0: sun.security.provider.ConfigFile$Spi;
+
+        r1 := @parameter1: java.net.URL;
+
+        r0.<sun.security.provider.ConfigFile$Spi: java.net.URL url> = r1;
+
+        return r1;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.util.Debug $r0, $r1;
+
+        $r0 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String)>("configfile");
+
+        <sun.security.provider.ConfigFile$Spi: sun.security.util.Debug debugConfig> = $r0;
+
+        $r1 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String)>("configparser");
+
+        <sun.security.provider.ConfigFile$Spi: sun.security.util.Debug debugParser> = $r1;
+
+        return;
+    }
+}

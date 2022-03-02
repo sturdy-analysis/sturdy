@@ -1,0 +1,144 @@
+public abstract class com.sun.corba.se.impl.protocol.ServantCacheLocalCRDBase extends com.sun.corba.se.impl.protocol.LocalClientRequestDispatcherBase
+{
+    private com.sun.corba.se.spi.oa.OAInvocationInfo cachedInfo;
+    protected com.sun.corba.se.impl.logging.POASystemException wrapper;
+
+    protected void <init>(com.sun.corba.se.spi.orb.ORB, int, com.sun.corba.se.spi.ior.IOR)
+    {
+        com.sun.corba.se.spi.ior.IOR r2;
+        com.sun.corba.se.impl.logging.POASystemException $r3;
+        com.sun.corba.se.impl.protocol.ServantCacheLocalCRDBase r0;
+        int i0;
+        com.sun.corba.se.spi.orb.ORB r1;
+
+        r0 := @this: com.sun.corba.se.impl.protocol.ServantCacheLocalCRDBase;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        i0 := @parameter1: int;
+
+        r2 := @parameter2: com.sun.corba.se.spi.ior.IOR;
+
+        specialinvoke r0.<com.sun.corba.se.impl.protocol.LocalClientRequestDispatcherBase: void <init>(com.sun.corba.se.spi.orb.ORB,int,com.sun.corba.se.spi.ior.IOR)>(r1, i0, r2);
+
+        $r3 = staticinvoke <com.sun.corba.se.impl.logging.POASystemException: com.sun.corba.se.impl.logging.POASystemException get(com.sun.corba.se.spi.orb.ORB,java.lang.String)>(r1, "rpc.protocol");
+
+        r0.<com.sun.corba.se.impl.protocol.ServantCacheLocalCRDBase: com.sun.corba.se.impl.logging.POASystemException wrapper> = $r3;
+
+        return;
+    }
+
+    protected synchronized com.sun.corba.se.spi.oa.OAInvocationInfo getCachedInfo()
+    {
+        org.omg.CORBA.INTERNAL $r13;
+        java.lang.Throwable $r14;
+        byte[] $r6;
+        com.sun.corba.se.impl.protocol.ServantCacheLocalCRDBase r0;
+        org.omg.CORBA.BAD_OPERATION $r21;
+        boolean $z0;
+        com.sun.corba.se.impl.logging.POASystemException $r12, $r17, $r20;
+        com.sun.corba.se.spi.oa.ObjectAdapterFactory $r4;
+        com.sun.corba.se.spi.oa.OADestroyed $r16;
+        com.sun.corba.se.spi.ior.ObjectAdapterId $r3;
+        com.sun.corba.se.spi.oa.ObjectAdapter $r5;
+        com.sun.corba.se.spi.orb.ORB $r9, $r11, $r15;
+        com.sun.corba.se.spi.protocol.ForwardException $r19;
+        com.sun.corba.se.spi.oa.OAInvocationInfo $r1, $r2, $r7, $r8, $r10;
+        org.omg.CORBA.OBJECT_NOT_EXIST $r18;
+
+        r0 := @this: com.sun.corba.se.impl.protocol.ServantCacheLocalCRDBase;
+
+        $z0 = r0.<com.sun.corba.se.impl.protocol.ServantCacheLocalCRDBase: boolean servantIsLocal>;
+
+        if $z0 != 0 goto label1;
+
+        $r12 = r0.<com.sun.corba.se.impl.protocol.ServantCacheLocalCRDBase: com.sun.corba.se.impl.logging.POASystemException wrapper>;
+
+        $r13 = virtualinvoke $r12.<com.sun.corba.se.impl.logging.POASystemException: org.omg.CORBA.INTERNAL servantMustBeLocal()>();
+
+        throw $r13;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.protocol.ServantCacheLocalCRDBase: com.sun.corba.se.spi.oa.OAInvocationInfo cachedInfo>;
+
+        if $r1 != null goto label8;
+
+        $r4 = r0.<com.sun.corba.se.impl.protocol.ServantCacheLocalCRDBase: com.sun.corba.se.spi.oa.ObjectAdapterFactory oaf>;
+
+        $r3 = r0.<com.sun.corba.se.impl.protocol.ServantCacheLocalCRDBase: com.sun.corba.se.spi.ior.ObjectAdapterId oaid>;
+
+        $r5 = interfaceinvoke $r4.<com.sun.corba.se.spi.oa.ObjectAdapterFactory: com.sun.corba.se.spi.oa.ObjectAdapter find(com.sun.corba.se.spi.ior.ObjectAdapterId)>($r3);
+
+        $r6 = r0.<com.sun.corba.se.impl.protocol.ServantCacheLocalCRDBase: byte[] objectId>;
+
+        $r7 = interfaceinvoke $r5.<com.sun.corba.se.spi.oa.ObjectAdapter: com.sun.corba.se.spi.oa.OAInvocationInfo makeInvocationInfo(byte[])>($r6);
+
+        r0.<com.sun.corba.se.impl.protocol.ServantCacheLocalCRDBase: com.sun.corba.se.spi.oa.OAInvocationInfo cachedInfo> = $r7;
+
+        $r9 = r0.<com.sun.corba.se.impl.protocol.ServantCacheLocalCRDBase: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r8 = r0.<com.sun.corba.se.impl.protocol.ServantCacheLocalCRDBase: com.sun.corba.se.spi.oa.OAInvocationInfo cachedInfo>;
+
+        virtualinvoke $r9.<com.sun.corba.se.spi.orb.ORB: void pushInvocationInfo(com.sun.corba.se.spi.oa.OAInvocationInfo)>($r8);
+
+     label2:
+        interfaceinvoke $r5.<com.sun.corba.se.spi.oa.ObjectAdapter: void enter()>();
+
+        $r10 = r0.<com.sun.corba.se.impl.protocol.ServantCacheLocalCRDBase: com.sun.corba.se.spi.oa.OAInvocationInfo cachedInfo>;
+
+        interfaceinvoke $r5.<com.sun.corba.se.spi.oa.ObjectAdapter: void getInvocationServant(com.sun.corba.se.spi.oa.OAInvocationInfo)>($r10);
+
+     label3:
+        interfaceinvoke $r5.<com.sun.corba.se.spi.oa.ObjectAdapter: void returnServant()>();
+
+        interfaceinvoke $r5.<com.sun.corba.se.spi.oa.ObjectAdapter: void exit()>();
+
+        $r11 = r0.<com.sun.corba.se.impl.protocol.ServantCacheLocalCRDBase: com.sun.corba.se.spi.orb.ORB orb>;
+
+        virtualinvoke $r11.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.oa.OAInvocationInfo popInvocationInfo()>();
+
+        goto label8;
+
+     label4:
+        $r19 := @caughtexception;
+
+        $r20 = r0.<com.sun.corba.se.impl.protocol.ServantCacheLocalCRDBase: com.sun.corba.se.impl.logging.POASystemException wrapper>;
+
+        $r21 = virtualinvoke $r20.<com.sun.corba.se.impl.logging.POASystemException: org.omg.CORBA.BAD_OPERATION illegalForwardRequest(java.lang.Throwable)>($r19);
+
+        throw $r21;
+
+     label5:
+        $r16 := @caughtexception;
+
+        $r17 = r0.<com.sun.corba.se.impl.protocol.ServantCacheLocalCRDBase: com.sun.corba.se.impl.logging.POASystemException wrapper>;
+
+        $r18 = virtualinvoke $r17.<com.sun.corba.se.impl.logging.POASystemException: org.omg.CORBA.OBJECT_NOT_EXIST adapterDestroyed(java.lang.Throwable)>($r16);
+
+        throw $r18;
+
+     label6:
+        $r14 := @caughtexception;
+
+     label7:
+        interfaceinvoke $r5.<com.sun.corba.se.spi.oa.ObjectAdapter: void returnServant()>();
+
+        interfaceinvoke $r5.<com.sun.corba.se.spi.oa.ObjectAdapter: void exit()>();
+
+        $r15 = r0.<com.sun.corba.se.impl.protocol.ServantCacheLocalCRDBase: com.sun.corba.se.spi.orb.ORB orb>;
+
+        virtualinvoke $r15.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.oa.OAInvocationInfo popInvocationInfo()>();
+
+        throw $r14;
+
+     label8:
+        $r2 = r0.<com.sun.corba.se.impl.protocol.ServantCacheLocalCRDBase: com.sun.corba.se.spi.oa.OAInvocationInfo cachedInfo>;
+
+        return $r2;
+
+        catch com.sun.corba.se.spi.protocol.ForwardException from label2 to label3 with label4;
+        catch com.sun.corba.se.spi.oa.OADestroyed from label2 to label3 with label5;
+        catch java.lang.Throwable from label2 to label3 with label6;
+        catch java.lang.Throwable from label4 to label7 with label6;
+    }
+}

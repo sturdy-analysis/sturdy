@@ -1,0 +1,337 @@
+public class java.util.concurrent.locks.LockSupport extends java.lang.Object
+{
+    private static final sun.misc.Unsafe UNSAFE;
+    private static final long parkBlockerOffset;
+    private static final long SEED;
+    private static final long PROBE;
+    private static final long SECONDARY;
+
+    private void <init>()
+    {
+        java.util.concurrent.locks.LockSupport r0;
+
+        r0 := @this: java.util.concurrent.locks.LockSupport;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static void setBlocker(java.lang.Thread, java.lang.Object)
+    {
+        sun.misc.Unsafe $r2;
+        java.lang.Thread r0;
+        java.lang.Object r1;
+        long $l0;
+
+        r0 := @parameter0: java.lang.Thread;
+
+        r1 := @parameter1: java.lang.Object;
+
+        $r2 = <java.util.concurrent.locks.LockSupport: sun.misc.Unsafe UNSAFE>;
+
+        $l0 = <java.util.concurrent.locks.LockSupport: long parkBlockerOffset>;
+
+        virtualinvoke $r2.<sun.misc.Unsafe: void putObject(java.lang.Object,long,java.lang.Object)>(r0, $l0, r1);
+
+        return;
+    }
+
+    public static void unpark(java.lang.Thread)
+    {
+        sun.misc.Unsafe $r1;
+        java.lang.Thread r0;
+
+        r0 := @parameter0: java.lang.Thread;
+
+        if r0 == null goto label1;
+
+        $r1 = <java.util.concurrent.locks.LockSupport: sun.misc.Unsafe UNSAFE>;
+
+        virtualinvoke $r1.<sun.misc.Unsafe: void unpark(java.lang.Object)>(r0);
+
+     label1:
+        return;
+    }
+
+    public static void park(java.lang.Object)
+    {
+        sun.misc.Unsafe $r2;
+        java.lang.Object r1;
+        java.lang.Thread $r0;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        staticinvoke <java.util.concurrent.locks.LockSupport: void setBlocker(java.lang.Thread,java.lang.Object)>($r0, r1);
+
+        $r2 = <java.util.concurrent.locks.LockSupport: sun.misc.Unsafe UNSAFE>;
+
+        virtualinvoke $r2.<sun.misc.Unsafe: void park(boolean,long)>(0, 0L);
+
+        staticinvoke <java.util.concurrent.locks.LockSupport: void setBlocker(java.lang.Thread,java.lang.Object)>($r0, null);
+
+        return;
+    }
+
+    public static void parkNanos(java.lang.Object, long)
+    {
+        sun.misc.Unsafe $r2;
+        byte $b1;
+        java.lang.Thread $r0;
+        int $i2;
+        long l0;
+        java.lang.Object r1;
+
+        r1 := @parameter0: java.lang.Object;
+
+        l0 := @parameter1: long;
+
+        $b1 = l0 cmp 0L;
+
+        $i2 = (int) $b1;
+
+        if $i2 <= 0 goto label1;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        staticinvoke <java.util.concurrent.locks.LockSupport: void setBlocker(java.lang.Thread,java.lang.Object)>($r0, r1);
+
+        $r2 = <java.util.concurrent.locks.LockSupport: sun.misc.Unsafe UNSAFE>;
+
+        virtualinvoke $r2.<sun.misc.Unsafe: void park(boolean,long)>(0, l0);
+
+        staticinvoke <java.util.concurrent.locks.LockSupport: void setBlocker(java.lang.Thread,java.lang.Object)>($r0, null);
+
+     label1:
+        return;
+    }
+
+    public static void parkUntil(java.lang.Object, long)
+    {
+        sun.misc.Unsafe $r2;
+        java.lang.Thread $r0;
+        java.lang.Object r1;
+        long l0;
+
+        r1 := @parameter0: java.lang.Object;
+
+        l0 := @parameter1: long;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        staticinvoke <java.util.concurrent.locks.LockSupport: void setBlocker(java.lang.Thread,java.lang.Object)>($r0, r1);
+
+        $r2 = <java.util.concurrent.locks.LockSupport: sun.misc.Unsafe UNSAFE>;
+
+        virtualinvoke $r2.<sun.misc.Unsafe: void park(boolean,long)>(1, l0);
+
+        staticinvoke <java.util.concurrent.locks.LockSupport: void setBlocker(java.lang.Thread,java.lang.Object)>($r0, null);
+
+        return;
+    }
+
+    public static java.lang.Object getBlocker(java.lang.Thread)
+    {
+        sun.misc.Unsafe $r1;
+        java.lang.Thread r0;
+        long $l0;
+        java.lang.Object $r2;
+        java.lang.NullPointerException $r3;
+
+        r0 := @parameter0: java.lang.Thread;
+
+        if r0 != null goto label1;
+
+        $r3 = new java.lang.NullPointerException;
+
+        specialinvoke $r3.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $r1 = <java.util.concurrent.locks.LockSupport: sun.misc.Unsafe UNSAFE>;
+
+        $l0 = <java.util.concurrent.locks.LockSupport: long parkBlockerOffset>;
+
+        $r2 = virtualinvoke $r1.<sun.misc.Unsafe: java.lang.Object getObjectVolatile(java.lang.Object,long)>(r0, $l0);
+
+        return $r2;
+    }
+
+    public static void park()
+    {
+        sun.misc.Unsafe $r0;
+
+        $r0 = <java.util.concurrent.locks.LockSupport: sun.misc.Unsafe UNSAFE>;
+
+        virtualinvoke $r0.<sun.misc.Unsafe: void park(boolean,long)>(0, 0L);
+
+        return;
+    }
+
+    public static void parkNanos(long)
+    {
+        sun.misc.Unsafe $r0;
+        byte $b1;
+        int $i2;
+        long l0;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        $i2 = (int) $b1;
+
+        if $i2 <= 0 goto label1;
+
+        $r0 = <java.util.concurrent.locks.LockSupport: sun.misc.Unsafe UNSAFE>;
+
+        virtualinvoke $r0.<sun.misc.Unsafe: void park(boolean,long)>(0, l0);
+
+     label1:
+        return;
+    }
+
+    public static void parkUntil(long)
+    {
+        sun.misc.Unsafe $r0;
+        long l0;
+
+        l0 := @parameter0: long;
+
+        $r0 = <java.util.concurrent.locks.LockSupport: sun.misc.Unsafe UNSAFE>;
+
+        virtualinvoke $r0.<sun.misc.Unsafe: void park(boolean,long)>(1, l0);
+
+        return;
+    }
+
+    static final int nextSecondarySeed()
+    {
+        sun.misc.Unsafe $r1, $r3;
+        long $l0, $l9;
+        java.lang.Thread $r0;
+        java.util.concurrent.ThreadLocalRandom $r2;
+        int $i1, $i2, $i3, $i4, $i5, i6, i7, i8;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r1 = <java.util.concurrent.locks.LockSupport: sun.misc.Unsafe UNSAFE>;
+
+        $l0 = <java.util.concurrent.locks.LockSupport: long SECONDARY>;
+
+        $i1 = virtualinvoke $r1.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>($r0, $l0);
+
+        if $i1 == 0 goto label1;
+
+        $i3 = $i1 << 13;
+
+        i6 = $i1 ^ $i3;
+
+        $i4 = i6 >>> 17;
+
+        i7 = i6 ^ $i4;
+
+        $i5 = i7 << 5;
+
+        i8 = i7 ^ $i5;
+
+        goto label2;
+
+     label1:
+        $r2 = staticinvoke <java.util.concurrent.ThreadLocalRandom: java.util.concurrent.ThreadLocalRandom current()>();
+
+        $i2 = virtualinvoke $r2.<java.util.concurrent.ThreadLocalRandom: int nextInt()>();
+
+        i8 = $i2;
+
+        if $i2 != 0 goto label2;
+
+        i8 = 1;
+
+     label2:
+        $r3 = <java.util.concurrent.locks.LockSupport: sun.misc.Unsafe UNSAFE>;
+
+        $l9 = <java.util.concurrent.locks.LockSupport: long SECONDARY>;
+
+        virtualinvoke $r3.<sun.misc.Unsafe: void putInt(java.lang.Object,long,int)>($r0, $l9, i8);
+
+        return i8;
+    }
+
+    static void <clinit>()
+    {
+        sun.misc.Unsafe $r0, $r1, $r3, $r5, $r7;
+        java.lang.Error $r10;
+        long $l0, $l1, $l2, $l3;
+        java.lang.reflect.Field $r2, $r4, $r6, $r8;
+        java.lang.Exception $r9;
+        java.lang.Class r11, r12, r13, r14, r15;
+
+     label1:
+        $r0 = staticinvoke <sun.misc.Unsafe: sun.misc.Unsafe getUnsafe()>();
+
+        <java.util.concurrent.locks.LockSupport: sun.misc.Unsafe UNSAFE> = $r0;
+
+        r11 = class "Ljava/lang/Thread;";
+
+        r15 = class "Ljava/lang/Thread;";
+
+        r14 = class "Ljava/lang/Thread;";
+
+        r13 = class "Ljava/lang/Thread;";
+
+        r12 = class "Ljava/lang/Thread;";
+
+        $r1 = <java.util.concurrent.locks.LockSupport: sun.misc.Unsafe UNSAFE>;
+
+        $r2 = virtualinvoke r14.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("parkBlocker");
+
+        $l0 = virtualinvoke $r1.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r2);
+
+        <java.util.concurrent.locks.LockSupport: long parkBlockerOffset> = $l0;
+
+        $r3 = <java.util.concurrent.locks.LockSupport: sun.misc.Unsafe UNSAFE>;
+
+        $r4 = virtualinvoke r15.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("threadLocalRandomSeed");
+
+        $l1 = virtualinvoke $r3.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r4);
+
+        <java.util.concurrent.locks.LockSupport: long SEED> = $l1;
+
+        $r5 = <java.util.concurrent.locks.LockSupport: sun.misc.Unsafe UNSAFE>;
+
+        $r6 = virtualinvoke r12.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("threadLocalRandomProbe");
+
+        $l2 = virtualinvoke $r5.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r6);
+
+        <java.util.concurrent.locks.LockSupport: long PROBE> = $l2;
+
+        $r7 = <java.util.concurrent.locks.LockSupport: sun.misc.Unsafe UNSAFE>;
+
+        $r8 = virtualinvoke r13.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("threadLocalRandomSecondarySeed");
+
+        $l3 = virtualinvoke $r7.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r8);
+
+        <java.util.concurrent.locks.LockSupport: long SECONDARY> = $l3;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r9 := @caughtexception;
+
+        $r10 = new java.lang.Error;
+
+        specialinvoke $r10.<java.lang.Error: void <init>(java.lang.Throwable)>($r9);
+
+        throw $r10;
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+}

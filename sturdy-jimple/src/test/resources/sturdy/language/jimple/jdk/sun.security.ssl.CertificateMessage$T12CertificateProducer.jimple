@@ -1,0 +1,348 @@
+final class sun.security.ssl.CertificateMessage$T12CertificateProducer extends java.lang.Object implements sun.security.ssl.HandshakeProducer
+{
+
+    private void <init>()
+    {
+        sun.security.ssl.CertificateMessage$T12CertificateProducer r0;
+
+        r0 := @this: sun.security.ssl.CertificateMessage$T12CertificateProducer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public byte[] produce(sun.security.ssl.ConnectionContext, sun.security.ssl.SSLHandshake$HandshakeMessage) throws java.io.IOException
+    {
+        byte[] $r6, $r8;
+        sun.security.ssl.SSLHandshake$HandshakeMessage r4;
+        sun.security.ssl.ServerHandshakeContext $r5;
+        sun.security.ssl.ClientHandshakeContext $r7;
+        sun.security.ssl.CertificateMessage$T12CertificateProducer r3;
+        sun.security.ssl.ConnectionContext r0;
+        sun.security.ssl.SSLConfiguration $r2;
+        sun.security.ssl.HandshakeContext r1;
+        boolean $z0;
+
+        r3 := @this: sun.security.ssl.CertificateMessage$T12CertificateProducer;
+
+        r0 := @parameter0: sun.security.ssl.ConnectionContext;
+
+        r4 := @parameter1: sun.security.ssl.SSLHandshake$HandshakeMessage;
+
+        r1 = (sun.security.ssl.HandshakeContext) r0;
+
+        $r2 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $z0 = $r2.<sun.security.ssl.SSLConfiguration: boolean isClientMode>;
+
+        if $z0 == 0 goto label1;
+
+        $r7 = (sun.security.ssl.ClientHandshakeContext) r0;
+
+        $r8 = specialinvoke r3.<sun.security.ssl.CertificateMessage$T12CertificateProducer: byte[] onProduceCertificate(sun.security.ssl.ClientHandshakeContext,sun.security.ssl.SSLHandshake$HandshakeMessage)>($r7, r4);
+
+        return $r8;
+
+     label1:
+        $r5 = (sun.security.ssl.ServerHandshakeContext) r0;
+
+        $r6 = specialinvoke r3.<sun.security.ssl.CertificateMessage$T12CertificateProducer: byte[] onProduceCertificate(sun.security.ssl.ServerHandshakeContext,sun.security.ssl.SSLHandshake$HandshakeMessage)>($r5, r4);
+
+        return $r6;
+    }
+
+    private byte[] onProduceCertificate(sun.security.ssl.ServerHandshakeContext, sun.security.ssl.SSLHandshake$HandshakeMessage) throws java.io.IOException
+    {
+        sun.security.ssl.SSLHandshake$HandshakeMessage r16;
+        java.lang.Object[] $r9;
+        boolean $z0, $z1, $z2, $z3;
+        sun.security.ssl.ServerHandshakeContext r0;
+        java.util.Iterator $r2;
+        sun.security.ssl.X509Authentication$X509Possession r17;
+        sun.security.ssl.CertificateMessage$T12CertificateMessage $r7;
+        sun.security.ssl.TransportContext $r11;
+        sun.security.ssl.HandshakeOutStream $r18, $r19;
+        sun.security.ssl.CertificateMessage$T12CertificateProducer r15;
+        java.util.List $r1;
+        javax.net.ssl.SSLException $r12;
+        java.security.PrivateKey $r3;
+        sun.security.ssl.Alert $r10;
+        sun.security.ssl.SSLPossession r14;
+        java.lang.Object $r13;
+        sun.security.ssl.SSLSessionImpl $r4, $r6;
+        java.security.cert.X509Certificate[] $r5, $r8;
+
+        r15 := @this: sun.security.ssl.CertificateMessage$T12CertificateProducer;
+
+        r0 := @parameter0: sun.security.ssl.ServerHandshakeContext;
+
+        r16 := @parameter1: sun.security.ssl.SSLHandshake$HandshakeMessage;
+
+        r17 = null;
+
+        $r1 = r0.<sun.security.ssl.ServerHandshakeContext: java.util.List handshakePossessions>;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r13 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r14 = (sun.security.ssl.SSLPossession) $r13;
+
+        $z3 = r14 instanceof sun.security.ssl.X509Authentication$X509Possession;
+
+        if $z3 == 0 goto label2;
+
+        r17 = (sun.security.ssl.X509Authentication$X509Possession) r14;
+
+        goto label3;
+
+     label2:
+        goto label1;
+
+     label3:
+        if r17 != null goto label4;
+
+        $r11 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r10 = <sun.security.ssl.Alert: sun.security.ssl.Alert INTERNAL_ERROR>;
+
+        $r12 = virtualinvoke $r11.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r10, "No expected X.509 certificate for server authentication");
+
+        throw $r12;
+
+     label4:
+        $r4 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        $r3 = r17.<sun.security.ssl.X509Authentication$X509Possession: java.security.PrivateKey popPrivateKey>;
+
+        virtualinvoke $r4.<sun.security.ssl.SSLSessionImpl: void setLocalPrivateKey(java.security.PrivateKey)>($r3);
+
+        $r6 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        $r5 = r17.<sun.security.ssl.X509Authentication$X509Possession: java.security.cert.X509Certificate[] popCerts>;
+
+        virtualinvoke $r6.<sun.security.ssl.SSLSessionImpl: void setLocalCertificates(java.security.cert.X509Certificate[])>($r5);
+
+        $r7 = new sun.security.ssl.CertificateMessage$T12CertificateMessage;
+
+        $r8 = r17.<sun.security.ssl.X509Authentication$X509Possession: java.security.cert.X509Certificate[] popCerts>;
+
+        specialinvoke $r7.<sun.security.ssl.CertificateMessage$T12CertificateMessage: void <init>(sun.security.ssl.HandshakeContext,java.security.cert.X509Certificate[])>(r0, $r8);
+
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label5;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z2 == 0 goto label5;
+
+        $r9 = newarray (java.lang.Object)[1];
+
+        $r9[0] = $r7;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Produced server Certificate handshake message", $r9);
+
+     label5:
+        $r18 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.HandshakeOutStream handshakeOutput>;
+
+        virtualinvoke $r7.<sun.security.ssl.CertificateMessage$T12CertificateMessage: void write(sun.security.ssl.HandshakeOutStream)>($r18);
+
+        $r19 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.HandshakeOutStream handshakeOutput>;
+
+        virtualinvoke $r19.<sun.security.ssl.HandshakeOutStream: void flush()>();
+
+        return null;
+    }
+
+    private byte[] onProduceCertificate(sun.security.ssl.ClientHandshakeContext, sun.security.ssl.SSLHandshake$HandshakeMessage) throws java.io.IOException
+    {
+        sun.security.ssl.SSLHandshake$HandshakeMessage r17;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        sun.security.ssl.X509Authentication$X509Possession r18, $r19;
+        sun.security.ssl.CertificateMessage$T12CertificateMessage $r23;
+        sun.security.ssl.HandshakeOutStream $r25, $r26;
+        java.util.List $r1;
+        java.security.PrivateKey $r3;
+        sun.security.ssl.SSLPossession r15;
+        java.security.cert.X509Certificate[] $r5, $r8, $r9, $r20, $r24;
+        java.lang.Object[] $r7, $r12, $r13;
+        sun.security.ssl.ProtocolVersion $r11;
+        int $i0;
+        java.util.Iterator $r2;
+        sun.security.ssl.ClientHandshakeContext r0;
+        sun.security.ssl.TransportContext $r21;
+        sun.security.ssl.CertificateMessage$T12CertificateProducer r16;
+        sun.security.ssl.Alert $r22;
+        java.lang.Object $r14;
+        sun.security.ssl.SSLSessionImpl $r4, $r6, $r10;
+
+        r16 := @this: sun.security.ssl.CertificateMessage$T12CertificateProducer;
+
+        r0 := @parameter0: sun.security.ssl.ClientHandshakeContext;
+
+        r17 := @parameter1: sun.security.ssl.SSLHandshake$HandshakeMessage;
+
+        r18 = null;
+
+        $r1 = r0.<sun.security.ssl.ClientHandshakeContext: java.util.List handshakePossessions>;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label01:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label03;
+
+        $r14 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r15 = (sun.security.ssl.SSLPossession) $r14;
+
+        $z7 = r15 instanceof sun.security.ssl.X509Authentication$X509Possession;
+
+        if $z7 == 0 goto label02;
+
+        r18 = (sun.security.ssl.X509Authentication$X509Possession) r15;
+
+        goto label03;
+
+     label02:
+        goto label01;
+
+     label03:
+        if r18 != null goto label07;
+
+        $r11 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $z2 = virtualinvoke $r11.<sun.security.ssl.ProtocolVersion: boolean useTLS10PlusSpec()>();
+
+        if $z2 == 0 goto label05;
+
+        $z5 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z5 == 0 goto label04;
+
+        $z6 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z6 == 0 goto label04;
+
+        $r13 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("No X.509 certificate for client authentication, use empty Certificate message instead", $r13);
+
+     label04:
+        $r19 = new sun.security.ssl.X509Authentication$X509Possession;
+
+        $r20 = newarray (java.security.cert.X509Certificate)[0];
+
+        specialinvoke $r19.<sun.security.ssl.X509Authentication$X509Possession: void <init>(java.security.PrivateKey,java.security.cert.X509Certificate[])>(null, $r20);
+
+        r18 = $r19;
+
+        goto label07;
+
+     label05:
+        $z3 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z3 == 0 goto label06;
+
+        $z4 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z4 == 0 goto label06;
+
+        $r12 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("No X.509 certificate for client authentication, send a no_certificate alert", $r12);
+
+     label06:
+        $r21 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r22 = <sun.security.ssl.Alert: sun.security.ssl.Alert NO_CERTIFICATE>;
+
+        virtualinvoke $r21.<sun.security.ssl.TransportContext: void warning(sun.security.ssl.Alert)>($r22);
+
+        return null;
+
+     label07:
+        $r4 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        $r3 = r18.<sun.security.ssl.X509Authentication$X509Possession: java.security.PrivateKey popPrivateKey>;
+
+        virtualinvoke $r4.<sun.security.ssl.SSLSessionImpl: void setLocalPrivateKey(java.security.PrivateKey)>($r3);
+
+        $r5 = r18.<sun.security.ssl.X509Authentication$X509Possession: java.security.cert.X509Certificate[] popCerts>;
+
+        if $r5 == null goto label08;
+
+        $r8 = r18.<sun.security.ssl.X509Authentication$X509Possession: java.security.cert.X509Certificate[] popCerts>;
+
+        $i0 = lengthof $r8;
+
+        if $i0 == 0 goto label08;
+
+        $r10 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        $r9 = r18.<sun.security.ssl.X509Authentication$X509Possession: java.security.cert.X509Certificate[] popCerts>;
+
+        virtualinvoke $r10.<sun.security.ssl.SSLSessionImpl: void setLocalCertificates(java.security.cert.X509Certificate[])>($r9);
+
+        goto label09;
+
+     label08:
+        $r6 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        virtualinvoke $r6.<sun.security.ssl.SSLSessionImpl: void setLocalCertificates(java.security.cert.X509Certificate[])>(null);
+
+     label09:
+        $r23 = new sun.security.ssl.CertificateMessage$T12CertificateMessage;
+
+        $r24 = r18.<sun.security.ssl.X509Authentication$X509Possession: java.security.cert.X509Certificate[] popCerts>;
+
+        specialinvoke $r23.<sun.security.ssl.CertificateMessage$T12CertificateMessage: void <init>(sun.security.ssl.HandshakeContext,java.security.cert.X509Certificate[])>(r0, $r24);
+
+        $z8 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z8 == 0 goto label10;
+
+        $z1 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z1 == 0 goto label10;
+
+        $r7 = newarray (java.lang.Object)[1];
+
+        $r7[0] = $r23;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Produced client Certificate handshake message", $r7);
+
+     label10:
+        $r25 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.HandshakeOutStream handshakeOutput>;
+
+        virtualinvoke $r23.<sun.security.ssl.CertificateMessage$T12CertificateMessage: void write(sun.security.ssl.HandshakeOutStream)>($r25);
+
+        $r26 = r0.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.HandshakeOutStream handshakeOutput>;
+
+        virtualinvoke $r26.<sun.security.ssl.HandshakeOutStream: void flush()>();
+
+        return null;
+    }
+
+    void <init>(sun.security.ssl.CertificateMessage$1)
+    {
+        sun.security.ssl.CertificateMessage$T12CertificateProducer r0;
+        sun.security.ssl.CertificateMessage$1 r1;
+
+        r0 := @this: sun.security.ssl.CertificateMessage$T12CertificateProducer;
+
+        r1 := @parameter0: sun.security.ssl.CertificateMessage$1;
+
+        specialinvoke r0.<sun.security.ssl.CertificateMessage$T12CertificateProducer: void <init>()>();
+
+        return;
+    }
+}

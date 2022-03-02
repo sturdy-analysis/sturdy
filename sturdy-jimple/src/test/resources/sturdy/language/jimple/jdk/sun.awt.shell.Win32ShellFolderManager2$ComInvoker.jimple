@@ -1,0 +1,202 @@
+class sun.awt.shell.Win32ShellFolderManager2$ComInvoker extends java.util.concurrent.ThreadPoolExecutor implements java.util.concurrent.ThreadFactory, sun.awt.shell.ShellFolder$Invoker
+{
+    private static java.lang.Thread comThread;
+
+    private void <init>()
+    {
+        java.util.concurrent.TimeUnit $r2;
+        sun.awt.shell.Win32ShellFolderManager2$ComInvoker$1 $r3;
+        sun.awt.shell.Win32ShellFolderManager2$ComInvoker$2 $r4;
+        java.util.concurrent.LinkedBlockingQueue $r1;
+        sun.awt.shell.Win32ShellFolderManager2$ComInvoker r0;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolderManager2$ComInvoker;
+
+        $r2 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit DAYS>;
+
+        $r1 = new java.util.concurrent.LinkedBlockingQueue;
+
+        specialinvoke $r1.<java.util.concurrent.LinkedBlockingQueue: void <init>()>();
+
+        specialinvoke r0.<java.util.concurrent.ThreadPoolExecutor: void <init>(int,int,long,java.util.concurrent.TimeUnit,java.util.concurrent.BlockingQueue)>(1, 1, 0L, $r2, $r1);
+
+        virtualinvoke r0.<sun.awt.shell.Win32ShellFolderManager2$ComInvoker: void allowCoreThreadTimeOut(boolean)>(0);
+
+        virtualinvoke r0.<sun.awt.shell.Win32ShellFolderManager2$ComInvoker: void setThreadFactory(java.util.concurrent.ThreadFactory)>(r0);
+
+        $r3 = new sun.awt.shell.Win32ShellFolderManager2$ComInvoker$1;
+
+        specialinvoke $r3.<sun.awt.shell.Win32ShellFolderManager2$ComInvoker$1: void <init>(sun.awt.shell.Win32ShellFolderManager2$ComInvoker)>(r0);
+
+        $r4 = new sun.awt.shell.Win32ShellFolderManager2$ComInvoker$2;
+
+        specialinvoke $r4.<sun.awt.shell.Win32ShellFolderManager2$ComInvoker$2: void <init>(sun.awt.shell.Win32ShellFolderManager2$ComInvoker,java.lang.Runnable)>(r0, $r3);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r4);
+
+        return;
+    }
+
+    public synchronized java.lang.Thread newThread(java.lang.Runnable)
+    {
+        sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3 $r0;
+        java.lang.Thread $r5, $r6;
+        java.lang.Object $r4;
+        java.security.PrivilegedAction $r3;
+        java.lang.Runnable r2;
+        sun.awt.shell.Win32ShellFolderManager2$ComInvoker r1;
+
+        r1 := @this: sun.awt.shell.Win32ShellFolderManager2$ComInvoker;
+
+        r2 := @parameter0: java.lang.Runnable;
+
+        $r0 = new sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3;
+
+        specialinvoke $r0.<sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3: void <init>(sun.awt.shell.Win32ShellFolderManager2$ComInvoker,java.lang.Runnable)>(r1, r2);
+
+        $r3 = staticinvoke <sun.awt.shell.Win32ShellFolderManager2$ComInvoker$lambda_newThread_0__373: java.security.PrivilegedAction bootstrap$(java.lang.Runnable)>($r0);
+
+        $r4 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r3);
+
+        $r5 = (java.lang.Thread) $r4;
+
+        <sun.awt.shell.Win32ShellFolderManager2$ComInvoker: java.lang.Thread comThread> = $r5;
+
+        $r6 = <sun.awt.shell.Win32ShellFolderManager2$ComInvoker: java.lang.Thread comThread>;
+
+        return $r6;
+    }
+
+    public java.lang.Object invoke(java.util.concurrent.Callable) throws java.lang.Exception
+    {
+        java.lang.Throwable $r8;
+        sun.awt.shell.Win32ShellFolderManager2$ComInvoker$4 $r13;
+        java.lang.Error $r10;
+        java.util.concurrent.Callable r3;
+        java.util.concurrent.Future $r4;
+        java.util.concurrent.RejectedExecutionException $r14;
+        java.lang.Thread $r0, $r1;
+        java.lang.String $r16;
+        sun.awt.shell.Win32ShellFolderManager2$ComInvoker r2;
+        boolean $z0, $z1;
+        java.lang.RuntimeException $r9;
+        java.lang.Exception $r11;
+        java.util.concurrent.ExecutionException $r7;
+        java.lang.InterruptedException $r12, $r15;
+        java.lang.Object $r5, $r6;
+
+        r2 := @this: sun.awt.shell.Win32ShellFolderManager2$ComInvoker;
+
+        r3 := @parameter0: java.util.concurrent.Callable;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r1 = <sun.awt.shell.Win32ShellFolderManager2$ComInvoker: java.lang.Thread comThread>;
+
+        if $r0 != $r1 goto label1;
+
+        $r6 = interfaceinvoke r3.<java.util.concurrent.Callable: java.lang.Object call()>();
+
+        return $r6;
+
+     label1:
+        $r4 = virtualinvoke r2.<sun.awt.shell.Win32ShellFolderManager2$ComInvoker: java.util.concurrent.Future submit(java.util.concurrent.Callable)>(r3);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r14 := @caughtexception;
+
+        $r15 = new java.lang.InterruptedException;
+
+        $r16 = virtualinvoke $r14.<java.util.concurrent.RejectedExecutionException: java.lang.String getMessage()>();
+
+        specialinvoke $r15.<java.lang.InterruptedException: void <init>(java.lang.String)>($r16);
+
+        throw $r15;
+
+     label4:
+        $r5 = interfaceinvoke $r4.<java.util.concurrent.Future: java.lang.Object get()>();
+
+     label5:
+        return $r5;
+
+     label6:
+        $r12 := @caughtexception;
+
+        $r13 = new sun.awt.shell.Win32ShellFolderManager2$ComInvoker$4;
+
+        specialinvoke $r13.<sun.awt.shell.Win32ShellFolderManager2$ComInvoker$4: void <init>(sun.awt.shell.Win32ShellFolderManager2$ComInvoker,java.util.concurrent.Future)>(r2, $r4);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r13);
+
+        throw $r12;
+
+     label7:
+        $r7 := @caughtexception;
+
+        $r8 = virtualinvoke $r7.<java.util.concurrent.ExecutionException: java.lang.Throwable getCause()>();
+
+        $z0 = $r8 instanceof java.lang.Exception;
+
+        if $z0 == 0 goto label8;
+
+        $r11 = (java.lang.Exception) $r8;
+
+        throw $r11;
+
+     label8:
+        $z1 = $r8 instanceof java.lang.Error;
+
+        if $z1 == 0 goto label9;
+
+        $r10 = (java.lang.Error) $r8;
+
+        throw $r10;
+
+     label9:
+        $r9 = new java.lang.RuntimeException;
+
+        specialinvoke $r9.<java.lang.RuntimeException: void <init>(java.lang.String,java.lang.Throwable)>("Unexpected error", $r8);
+
+        throw $r9;
+
+        catch java.util.concurrent.RejectedExecutionException from label1 to label2 with label3;
+        catch java.lang.InterruptedException from label4 to label5 with label6;
+        catch java.util.concurrent.ExecutionException from label4 to label5 with label7;
+    }
+
+    public static java.lang.Thread lambda$newThread$0(java.lang.Runnable)
+    {
+        java.lang.ThreadGroup $r0;
+        java.lang.Runnable r2;
+        java.lang.Thread $r1;
+
+        r2 := @parameter0: java.lang.Runnable;
+
+        $r0 = staticinvoke <sun.misc.ThreadGroupUtils: java.lang.ThreadGroup getRootThreadGroup()>();
+
+        $r1 = new java.lang.Thread;
+
+        specialinvoke $r1.<java.lang.Thread: void <init>(java.lang.ThreadGroup,java.lang.Runnable,java.lang.String)>($r0, r2, "Swing-Shell");
+
+        virtualinvoke $r1.<java.lang.Thread: void setDaemon(boolean)>(1);
+
+        return $r1;
+    }
+
+    void <init>(sun.awt.shell.Win32ShellFolderManager2$1)
+    {
+        sun.awt.shell.Win32ShellFolderManager2$ComInvoker r0;
+        sun.awt.shell.Win32ShellFolderManager2$1 r1;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolderManager2$ComInvoker;
+
+        r1 := @parameter0: sun.awt.shell.Win32ShellFolderManager2$1;
+
+        specialinvoke r0.<sun.awt.shell.Win32ShellFolderManager2$ComInvoker: void <init>()>();
+
+        return;
+    }
+}

@@ -1,0 +1,1053 @@
+class sun.security.provider.certpath.URICertStore extends java.security.cert.CertStoreSpi
+{
+    private static final sun.security.util.Debug debug;
+    private static final int CHECK_INTERVAL;
+    private static final int CACHE_SIZE;
+    private final java.security.cert.CertificateFactory factory;
+    private java.util.Collection certs;
+    private java.security.cert.X509CRL crl;
+    private long lastChecked;
+    private long lastModified;
+    private java.net.URI uri;
+    private boolean ldap;
+    private sun.security.provider.certpath.CertStoreHelper ldapHelper;
+    private java.security.cert.CertStore ldapCertStore;
+    private java.lang.String ldapPath;
+    private static final int DEFAULT_CRL_CONNECT_TIMEOUT;
+    private static final int CRL_CONNECT_TIMEOUT;
+    private static final sun.security.util.Cache certStoreCache;
+
+    private static int initializeTimeout()
+    {
+        sun.security.action.GetIntegerAction $r0;
+        int $i0, $i1, $i2;
+        java.lang.Object $r1;
+        java.lang.Integer r2;
+
+        $r0 = new sun.security.action.GetIntegerAction;
+
+        specialinvoke $r0.<sun.security.action.GetIntegerAction: void <init>(java.lang.String)>("com.sun.security.crl.timeout");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r2 = (java.lang.Integer) $r1;
+
+        if r2 == null goto label1;
+
+        $i0 = virtualinvoke r2.<java.lang.Integer: int intValue()>();
+
+        if $i0 >= 0 goto label2;
+
+     label1:
+        return 15000;
+
+     label2:
+        $i1 = virtualinvoke r2.<java.lang.Integer: int intValue()>();
+
+        $i2 = $i1 * 1000;
+
+        return $i2;
+    }
+
+    void <init>(java.security.cert.CertStoreParameters) throws java.security.InvalidAlgorithmParameterException, java.security.NoSuchAlgorithmException
+    {
+        java.security.cert.CertificateFactory $r21;
+        sun.security.provider.certpath.URICertStore r0;
+        java.security.InvalidAlgorithmParameterException $r22;
+        java.security.cert.CertStoreParameters r1;
+        java.util.Locale $r7;
+        sun.security.provider.certpath.CertStoreHelper $r9, $r11;
+        int $i1;
+        sun.security.provider.certpath.URICertStore$URICertStoreParameters $r3;
+        java.net.URI $r4, $r5, $r10, $r13;
+        java.lang.String $r6, $r8, $r14, $r15, $r16, $r17;
+        boolean $z0, $z1;
+        java.util.Set $r2;
+        char $c0;
+        java.security.cert.CertificateException $r19;
+        java.lang.RuntimeException $r23;
+        java.security.cert.CertStore $r12;
+
+        r0 := @this: sun.security.provider.certpath.URICertStore;
+
+        r1 := @parameter0: java.security.cert.CertStoreParameters;
+
+        specialinvoke r0.<java.security.cert.CertStoreSpi: void <init>(java.security.cert.CertStoreParameters)>(r1);
+
+        $r2 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+        r0.<sun.security.provider.certpath.URICertStore: java.util.Collection certs> = $r2;
+
+        r0.<sun.security.provider.certpath.URICertStore: boolean ldap> = 0;
+
+        $z0 = r1 instanceof sun.security.provider.certpath.URICertStore$URICertStoreParameters;
+
+        if $z0 != 0 goto label1;
+
+        $r22 = new java.security.InvalidAlgorithmParameterException;
+
+        specialinvoke $r22.<java.security.InvalidAlgorithmParameterException: void <init>(java.lang.String)>("params must be instanceof URICertStoreParameters");
+
+        throw $r22;
+
+     label1:
+        $r3 = (sun.security.provider.certpath.URICertStore$URICertStoreParameters) r1;
+
+        $r4 = staticinvoke <sun.security.provider.certpath.URICertStore$URICertStoreParameters: java.net.URI access$000(sun.security.provider.certpath.URICertStore$URICertStoreParameters)>($r3);
+
+        r0.<sun.security.provider.certpath.URICertStore: java.net.URI uri> = $r4;
+
+        $r5 = r0.<sun.security.provider.certpath.URICertStore: java.net.URI uri>;
+
+        $r6 = virtualinvoke $r5.<java.net.URI: java.lang.String getScheme()>();
+
+        $r7 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r8 = virtualinvoke $r6.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r7);
+
+        $z1 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>("ldap");
+
+        if $z1 == 0 goto label2;
+
+        r0.<sun.security.provider.certpath.URICertStore: boolean ldap> = 1;
+
+        $r9 = staticinvoke <sun.security.provider.certpath.CertStoreHelper: sun.security.provider.certpath.CertStoreHelper getInstance(java.lang.String)>("LDAP");
+
+        r0.<sun.security.provider.certpath.URICertStore: sun.security.provider.certpath.CertStoreHelper ldapHelper> = $r9;
+
+        $r11 = r0.<sun.security.provider.certpath.URICertStore: sun.security.provider.certpath.CertStoreHelper ldapHelper>;
+
+        $r10 = r0.<sun.security.provider.certpath.URICertStore: java.net.URI uri>;
+
+        $r12 = virtualinvoke $r11.<sun.security.provider.certpath.CertStoreHelper: java.security.cert.CertStore getCertStore(java.net.URI)>($r10);
+
+        r0.<sun.security.provider.certpath.URICertStore: java.security.cert.CertStore ldapCertStore> = $r12;
+
+        $r13 = r0.<sun.security.provider.certpath.URICertStore: java.net.URI uri>;
+
+        $r14 = virtualinvoke $r13.<java.net.URI: java.lang.String getPath()>();
+
+        r0.<sun.security.provider.certpath.URICertStore: java.lang.String ldapPath> = $r14;
+
+        $r15 = r0.<sun.security.provider.certpath.URICertStore: java.lang.String ldapPath>;
+
+        $c0 = virtualinvoke $r15.<java.lang.String: char charAt(int)>(0);
+
+        $i1 = (int) $c0;
+
+        if $i1 != 47 goto label2;
+
+        $r16 = r0.<sun.security.provider.certpath.URICertStore: java.lang.String ldapPath>;
+
+        $r17 = virtualinvoke $r16.<java.lang.String: java.lang.String substring(int)>(1);
+
+        r0.<sun.security.provider.certpath.URICertStore: java.lang.String ldapPath> = $r17;
+
+     label2:
+        $r21 = staticinvoke <java.security.cert.CertificateFactory: java.security.cert.CertificateFactory getInstance(java.lang.String)>("X.509");
+
+        r0.<sun.security.provider.certpath.URICertStore: java.security.cert.CertificateFactory factory> = $r21;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r19 := @caughtexception;
+
+        $r23 = new java.lang.RuntimeException;
+
+        specialinvoke $r23.<java.lang.RuntimeException: void <init>()>();
+
+        throw $r23;
+
+     label5:
+        return;
+
+        catch java.security.cert.CertificateException from label2 to label3 with label4;
+    }
+
+    static synchronized java.security.cert.CertStore getInstance(sun.security.provider.certpath.URICertStore$URICertStoreParameters) throws java.security.NoSuchAlgorithmException, java.security.InvalidAlgorithmParameterException
+    {
+        sun.security.provider.certpath.URICertStore $r7;
+        sun.security.provider.certpath.URICertStore$UCS $r6;
+        sun.security.provider.certpath.URICertStore$URICertStoreParameters r1;
+        java.net.URI $r12;
+        java.lang.String $r14;
+        sun.security.util.Cache $r2, $r8;
+        sun.security.util.Debug $r0, $r4, $r5, $r10;
+        java.security.cert.CertStore $r15, r16;
+        java.lang.Object $r3;
+        java.lang.StringBuilder $r9, $r11, $r13;
+
+        r1 := @parameter0: sun.security.provider.certpath.URICertStore$URICertStoreParameters;
+
+        $r0 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        if $r0 == null goto label1;
+
+        $r10 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("CertStore URI:");
+
+        $r12 = staticinvoke <sun.security.provider.certpath.URICertStore$URICertStoreParameters: java.net.URI access$000(sun.security.provider.certpath.URICertStore$URICertStoreParameters)>(r1);
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r10.<sun.security.util.Debug: void println(java.lang.String)>($r14);
+
+     label1:
+        $r2 = <sun.security.provider.certpath.URICertStore: sun.security.util.Cache certStoreCache>;
+
+        $r3 = virtualinvoke $r2.<sun.security.util.Cache: java.lang.Object get(java.lang.Object)>(r1);
+
+        $r15 = (java.security.cert.CertStore) $r3;
+
+        r16 = $r15;
+
+        if $r15 != null goto label2;
+
+        $r6 = new sun.security.provider.certpath.URICertStore$UCS;
+
+        $r7 = new sun.security.provider.certpath.URICertStore;
+
+        specialinvoke $r7.<sun.security.provider.certpath.URICertStore: void <init>(java.security.cert.CertStoreParameters)>(r1);
+
+        specialinvoke $r6.<sun.security.provider.certpath.URICertStore$UCS: void <init>(java.security.cert.CertStoreSpi,java.security.Provider,java.lang.String,java.security.cert.CertStoreParameters)>($r7, null, "URI", r1);
+
+        r16 = $r6;
+
+        $r8 = <sun.security.provider.certpath.URICertStore: sun.security.util.Cache certStoreCache>;
+
+        virtualinvoke $r8.<sun.security.util.Cache: void put(java.lang.Object,java.lang.Object)>(r1, $r6);
+
+        goto label3;
+
+     label2:
+        $r4 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        if $r4 == null goto label3;
+
+        $r5 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        virtualinvoke $r5.<sun.security.util.Debug: void println(java.lang.String)>("URICertStore.getInstance: cache hit");
+
+     label3:
+        return r16;
+    }
+
+    static java.security.cert.CertStore getInstance(sun.security.x509.AccessDescription)
+    {
+        sun.security.x509.GeneralName $r3;
+        sun.security.x509.AccessDescription r0;
+        sun.security.x509.URIName $r5;
+        sun.security.util.ObjectIdentifier $r1, $r2;
+        sun.security.provider.certpath.URICertStore$URICertStoreParameters $r7;
+        java.net.URI $r6;
+        java.lang.String $r15;
+        boolean $z0, $z1;
+        sun.security.util.Debug $r10, $r12;
+        java.lang.Exception $r9;
+        java.security.cert.CertStore $r8;
+        sun.security.x509.GeneralNameInterface $r4;
+        java.lang.StringBuilder $r11, $r13, $r14;
+
+        r0 := @parameter0: sun.security.x509.AccessDescription;
+
+        $r1 = virtualinvoke r0.<sun.security.x509.AccessDescription: sun.security.util.ObjectIdentifier getAccessMethod()>();
+
+        $r2 = <sun.security.x509.AccessDescription: sun.security.util.ObjectIdentifier Ad_CAISSUERS_Id>;
+
+        $z0 = virtualinvoke $r1.<sun.security.util.ObjectIdentifier: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r3 = virtualinvoke r0.<sun.security.x509.AccessDescription: sun.security.x509.GeneralName getAccessLocation()>();
+
+        $r4 = virtualinvoke $r3.<sun.security.x509.GeneralName: sun.security.x509.GeneralNameInterface getName()>();
+
+        $z1 = $r4 instanceof sun.security.x509.URIName;
+
+        if $z1 != 0 goto label2;
+
+        return null;
+
+     label2:
+        $r5 = (sun.security.x509.URIName) $r4;
+
+        $r6 = virtualinvoke $r5.<sun.security.x509.URIName: java.net.URI getURI()>();
+
+     label3:
+        $r7 = new sun.security.provider.certpath.URICertStore$URICertStoreParameters;
+
+        specialinvoke $r7.<sun.security.provider.certpath.URICertStore$URICertStoreParameters: void <init>(java.net.URI)>($r6);
+
+        $r8 = staticinvoke <sun.security.provider.certpath.URICertStore: java.security.cert.CertStore getInstance(sun.security.provider.certpath.URICertStore$URICertStoreParameters)>($r7);
+
+     label4:
+        return $r8;
+
+     label5:
+        $r9 := @caughtexception;
+
+        $r10 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        if $r10 == null goto label6;
+
+        $r12 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("exception creating CertStore: ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r12.<sun.security.util.Debug: void println(java.lang.String)>($r15);
+
+        virtualinvoke $r9.<java.lang.Exception: void printStackTrace()>();
+
+     label6:
+        return null;
+
+        catch java.lang.Exception from label3 to label4 with label5;
+    }
+
+    public synchronized java.util.Collection engineGetCertificates(java.security.cert.CertSelector) throws java.security.cert.CertStoreException
+    {
+        java.net.HttpURLConnection r42;
+        java.security.cert.CertificateFactory $r5;
+        java.net.URL $r2;
+        sun.security.provider.certpath.URICertStore r0;
+        byte $b3, $b5, $b7, $b9;
+        java.net.URI $r1;
+        boolean $z0, $z1;
+        java.util.Collection $r6, $r10, $r11, $r14, $r15, $r18, $r19, $r26, $r30, $r44, $r45;
+        java.security.cert.X509CertSelector $r24, r40;
+        java.util.Set $r29;
+        sun.security.util.Debug $r8, $r9, $r12, $r13, $r16, $r17, $r20, $r28, $r31, $r43;
+        java.lang.Exception $r27;
+        java.security.cert.CertStoreException $r46;
+        java.lang.Throwable $r32, $r33, $r34, r41;
+        javax.security.auth.x500.X500Principal $r22;
+        long $l0, $l1, $l2, $l4, $l6, $l8, $l11, $l12;
+        java.net.URLConnection $r3;
+        int $i10, $i13;
+        sun.security.provider.certpath.CertStoreHelper $r21;
+        java.lang.String $r23;
+        java.io.IOException $r38;
+        java.security.cert.CertSelector r7;
+        java.security.cert.CertStore $r25;
+        java.io.InputStream $r4;
+
+        r0 := @this: sun.security.provider.certpath.URICertStore;
+
+        r7 := @parameter0: java.security.cert.CertSelector;
+
+        $z0 = r0.<sun.security.provider.certpath.URICertStore: boolean ldap>;
+
+        if $z0 == 0 goto label05;
+
+        r40 = (java.security.cert.X509CertSelector) r7;
+
+     label01:
+        $r21 = r0.<sun.security.provider.certpath.URICertStore: sun.security.provider.certpath.CertStoreHelper ldapHelper>;
+
+        $r22 = virtualinvoke r40.<java.security.cert.X509CertSelector: javax.security.auth.x500.X500Principal getSubject()>();
+
+        $r23 = r0.<sun.security.provider.certpath.URICertStore: java.lang.String ldapPath>;
+
+        $r24 = virtualinvoke $r21.<sun.security.provider.certpath.CertStoreHelper: java.security.cert.X509CertSelector wrap(java.security.cert.X509CertSelector,javax.security.auth.x500.X500Principal,java.lang.String)>(r40, $r22, $r23);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r38 := @caughtexception;
+
+        $r46 = new java.security.cert.CertStoreException;
+
+        specialinvoke $r46.<java.security.cert.CertStoreException: void <init>(java.lang.Throwable)>($r38);
+
+        throw $r46;
+
+     label04:
+        $r25 = r0.<sun.security.provider.certpath.URICertStore: java.security.cert.CertStore ldapCertStore>;
+
+        $r26 = virtualinvoke $r25.<java.security.cert.CertStore: java.util.Collection getCertificates(java.security.cert.CertSelector)>($r24);
+
+        return $r26;
+
+     label05:
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l1 = r0.<sun.security.provider.certpath.URICertStore: long lastChecked>;
+
+        $l2 = $l0 - $l1;
+
+        $b3 = $l2 cmp 30000L;
+
+        $i13 = (int) $b3;
+
+        if $i13 >= 0 goto label07;
+
+        $r17 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        if $r17 == null goto label06;
+
+        $r20 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        virtualinvoke $r20.<sun.security.util.Debug: void println(java.lang.String)>("Returning certificates from cache");
+
+     label06:
+        $r18 = r0.<sun.security.provider.certpath.URICertStore: java.util.Collection certs>;
+
+        $r19 = staticinvoke <sun.security.provider.certpath.URICertStore: java.util.Collection getMatchingCerts(java.util.Collection,java.security.cert.CertSelector)>($r18, r7);
+
+        return $r19;
+
+     label07:
+        r0.<sun.security.provider.certpath.URICertStore: long lastChecked> = $l0;
+
+     label08:
+        $r1 = r0.<sun.security.provider.certpath.URICertStore: java.net.URI uri>;
+
+        $r2 = virtualinvoke $r1.<java.net.URI: java.net.URL toURL()>();
+
+        $r3 = virtualinvoke $r2.<java.net.URL: java.net.URLConnection openConnection()>();
+
+        $l4 = r0.<sun.security.provider.certpath.URICertStore: long lastModified>;
+
+        $b5 = $l4 cmp 0L;
+
+        if $b5 == 0 goto label09;
+
+        $l11 = r0.<sun.security.provider.certpath.URICertStore: long lastModified>;
+
+        virtualinvoke $r3.<java.net.URLConnection: void setIfModifiedSince(long)>($l11);
+
+     label09:
+        $l12 = r0.<sun.security.provider.certpath.URICertStore: long lastModified>;
+
+        $r4 = virtualinvoke $r3.<java.net.URLConnection: java.io.InputStream getInputStream()>();
+
+        r41 = null;
+
+     label10:
+        $l6 = virtualinvoke $r3.<java.net.URLConnection: long getLastModified()>();
+
+        r0.<sun.security.provider.certpath.URICertStore: long lastModified> = $l6;
+
+        $b7 = $l12 cmp 0L;
+
+        if $b7 == 0 goto label20;
+
+        $l8 = r0.<sun.security.provider.certpath.URICertStore: long lastModified>;
+
+        $b9 = $l12 cmp $l8;
+
+        if $b9 != 0 goto label15;
+
+        $r13 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        if $r13 == null goto label11;
+
+        $r16 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        virtualinvoke $r16.<sun.security.util.Debug: void println(java.lang.String)>("Not modified, using cached copy");
+
+     label11:
+        $r14 = r0.<sun.security.provider.certpath.URICertStore: java.util.Collection certs>;
+
+        $r15 = staticinvoke <sun.security.provider.certpath.URICertStore: java.util.Collection getMatchingCerts(java.util.Collection,java.security.cert.CertSelector)>($r14, r7);
+
+     label12:
+        if $r4 == null goto label14;
+
+        goto label13;
+
+     label13:
+        virtualinvoke $r4.<java.io.InputStream: void close()>();
+
+     label14:
+        return $r15;
+
+     label15:
+        $z1 = $r3 instanceof java.net.HttpURLConnection;
+
+        if $z1 == 0 goto label20;
+
+        r42 = (java.net.HttpURLConnection) $r3;
+
+        $i10 = virtualinvoke r42.<java.net.HttpURLConnection: int getResponseCode()>();
+
+        if $i10 != 304 goto label20;
+
+        $r9 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        if $r9 == null goto label16;
+
+        $r12 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        virtualinvoke $r12.<sun.security.util.Debug: void println(java.lang.String)>("Not modified, using cached copy");
+
+     label16:
+        $r10 = r0.<sun.security.provider.certpath.URICertStore: java.util.Collection certs>;
+
+        $r11 = staticinvoke <sun.security.provider.certpath.URICertStore: java.util.Collection getMatchingCerts(java.util.Collection,java.security.cert.CertSelector)>($r10, r7);
+
+     label17:
+        if $r4 == null goto label19;
+
+        goto label18;
+
+     label18:
+        virtualinvoke $r4.<java.io.InputStream: void close()>();
+
+     label19:
+        return $r11;
+
+     label20:
+        $r43 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        if $r43 == null goto label21;
+
+        $r8 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        virtualinvoke $r8.<sun.security.util.Debug: void println(java.lang.String)>("Downloading new certificates...");
+
+     label21:
+        $r5 = r0.<sun.security.provider.certpath.URICertStore: java.security.cert.CertificateFactory factory>;
+
+        $r6 = virtualinvoke $r5.<java.security.cert.CertificateFactory: java.util.Collection generateCertificates(java.io.InputStream)>($r4);
+
+        r0.<sun.security.provider.certpath.URICertStore: java.util.Collection certs> = $r6;
+
+     label22:
+        if $r4 == null goto label32;
+
+        goto label23;
+
+     label23:
+        virtualinvoke $r4.<java.io.InputStream: void close()>();
+
+        goto label32;
+
+     label24:
+        $r34 := @caughtexception;
+
+        r41 = $r34;
+
+        throw $r34;
+
+     label25:
+        $r33 := @caughtexception;
+
+     label26:
+        if $r4 == null goto label31;
+
+        if r41 == null goto label30;
+
+     label27:
+        virtualinvoke $r4.<java.io.InputStream: void close()>();
+
+     label28:
+        goto label31;
+
+     label29:
+        $r32 := @caughtexception;
+
+        virtualinvoke r41.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r32);
+
+        goto label31;
+
+     label30:
+        virtualinvoke $r4.<java.io.InputStream: void close()>();
+
+     label31:
+        throw $r33;
+
+     label32:
+        $r44 = r0.<sun.security.provider.certpath.URICertStore: java.util.Collection certs>;
+
+        $r45 = staticinvoke <sun.security.provider.certpath.URICertStore: java.util.Collection getMatchingCerts(java.util.Collection,java.security.cert.CertSelector)>($r44, r7);
+
+     label33:
+        return $r45;
+
+     label34:
+        $r27 := @caughtexception;
+
+        $r28 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        if $r28 == null goto label35;
+
+        $r31 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        virtualinvoke $r31.<sun.security.util.Debug: void println(java.lang.String)>("Exception fetching certificates:");
+
+        virtualinvoke $r27.<java.lang.Exception: void printStackTrace()>();
+
+     label35:
+        r0.<sun.security.provider.certpath.URICertStore: long lastModified> = 0L;
+
+        $r29 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+        r0.<sun.security.provider.certpath.URICertStore: java.util.Collection certs> = $r29;
+
+        $r30 = r0.<sun.security.provider.certpath.URICertStore: java.util.Collection certs>;
+
+        return $r30;
+
+        catch java.io.IOException from label01 to label02 with label03;
+        catch java.lang.Throwable from label10 to label12 with label24;
+        catch java.lang.Throwable from label15 to label17 with label24;
+        catch java.lang.Throwable from label20 to label22 with label24;
+        catch java.lang.Throwable from label27 to label28 with label29;
+        catch java.lang.Throwable from label24 to label26 with label25;
+        catch java.io.IOException from label08 to label14 with label34;
+        catch java.security.cert.CertificateException from label08 to label14 with label34;
+        catch java.io.IOException from label15 to label19 with label34;
+        catch java.security.cert.CertificateException from label15 to label19 with label34;
+        catch java.io.IOException from label20 to label33 with label34;
+        catch java.security.cert.CertificateException from label20 to label33 with label34;
+    }
+
+    private static java.util.Collection getMatchingCerts(java.util.Collection, java.security.cert.CertSelector)
+    {
+        java.security.cert.X509Certificate r5;
+        java.util.Iterator $r3;
+        java.util.Collection r2;
+        java.security.cert.CertSelector r0;
+        java.util.ArrayList $r1;
+        int $i0;
+        java.lang.Object $r4;
+        boolean $z0, $z1;
+
+        r2 := @parameter0: java.util.Collection;
+
+        r0 := @parameter1: java.security.cert.CertSelector;
+
+        if r0 != null goto label1;
+
+        return r2;
+
+     label1:
+        $r1 = new java.util.ArrayList;
+
+        $i0 = interfaceinvoke r2.<java.util.Collection: int size()>();
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>(int)>($i0);
+
+        $r3 = interfaceinvoke r2.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (java.security.cert.X509Certificate) $r4;
+
+        $z1 = interfaceinvoke r0.<java.security.cert.CertSelector: boolean match(java.security.cert.Certificate)>(r5);
+
+        if $z1 == 0 goto label3;
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>(r5);
+
+     label3:
+        goto label2;
+
+     label4:
+        return $r1;
+    }
+
+    public synchronized java.util.Collection engineGetCRLs(java.security.cert.CRLSelector) throws java.security.cert.CertStoreException
+    {
+        java.net.HttpURLConnection r44;
+        java.security.cert.CertificateFactory $r5;
+        java.net.URL $r2;
+        java.security.cert.X509CRL $r7, $r11, $r15, $r19, $r46;
+        sun.security.provider.certpath.URICertStore r0;
+        byte $b3, $b5, $b8, $b10;
+        java.net.URI $r1;
+        java.security.cert.CRL $r6;
+        java.security.cert.X509CRLSelector $r24, r42;
+        boolean $z0, $z1;
+        java.util.Collection $r12, $r16, $r20, $r26, $r47;
+        sun.security.util.Debug $r9, $r10, $r13, $r14, $r17, $r18, $r21, $r28, $r31, $r45;
+        java.lang.Exception $r27;
+        java.security.cert.CertStoreException $r38, $r48, $r50;
+        sun.security.provider.certpath.PKIX$CertStoreTypeException $r49, $r51;
+        java.lang.Throwable $r32, $r33, $r34, r43;
+        long $l0, $l1, $l2, $l4, $l7, $l9, $l12, $l13;
+        java.security.cert.CRLSelector r8;
+        java.net.URLConnection $r3;
+        int $i6, $i11, $i14;
+        sun.security.provider.certpath.CertStoreHelper $r23;
+        java.lang.String $r22;
+        java.io.IOException $r40;
+        java.security.cert.CertStore $r25;
+        java.io.InputStream $r4;
+
+        r0 := @this: sun.security.provider.certpath.URICertStore;
+
+        r8 := @parameter0: java.security.cert.CRLSelector;
+
+        $z0 = r0.<sun.security.provider.certpath.URICertStore: boolean ldap>;
+
+        if $z0 == 0 goto label07;
+
+        r42 = (java.security.cert.X509CRLSelector) r8;
+
+     label01:
+        $r23 = r0.<sun.security.provider.certpath.URICertStore: sun.security.provider.certpath.CertStoreHelper ldapHelper>;
+
+        $r22 = r0.<sun.security.provider.certpath.URICertStore: java.lang.String ldapPath>;
+
+        $r24 = virtualinvoke $r23.<sun.security.provider.certpath.CertStoreHelper: java.security.cert.X509CRLSelector wrap(java.security.cert.X509CRLSelector,java.util.Collection,java.lang.String)>(r42, null, $r22);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r40 := @caughtexception;
+
+        $r48 = new java.security.cert.CertStoreException;
+
+        specialinvoke $r48.<java.security.cert.CertStoreException: void <init>(java.lang.Throwable)>($r40);
+
+        throw $r48;
+
+     label04:
+        $r25 = r0.<sun.security.provider.certpath.URICertStore: java.security.cert.CertStore ldapCertStore>;
+
+        $r26 = virtualinvoke $r25.<java.security.cert.CertStore: java.util.Collection getCRLs(java.security.cert.CRLSelector)>($r24);
+
+     label05:
+        return $r26;
+
+     label06:
+        $r38 := @caughtexception;
+
+        $r49 = new sun.security.provider.certpath.PKIX$CertStoreTypeException;
+
+        specialinvoke $r49.<sun.security.provider.certpath.PKIX$CertStoreTypeException: void <init>(java.lang.String,java.security.cert.CertStoreException)>("LDAP", $r38);
+
+        throw $r49;
+
+     label07:
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l1 = r0.<sun.security.provider.certpath.URICertStore: long lastChecked>;
+
+        $l2 = $l0 - $l1;
+
+        $b3 = $l2 cmp 30000L;
+
+        $i14 = (int) $b3;
+
+        if $i14 >= 0 goto label09;
+
+        $r18 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        if $r18 == null goto label08;
+
+        $r21 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        virtualinvoke $r21.<sun.security.util.Debug: void println(java.lang.String)>("Returning CRL from cache");
+
+     label08:
+        $r19 = r0.<sun.security.provider.certpath.URICertStore: java.security.cert.X509CRL crl>;
+
+        $r20 = staticinvoke <sun.security.provider.certpath.URICertStore: java.util.Collection getMatchingCRLs(java.security.cert.X509CRL,java.security.cert.CRLSelector)>($r19, r8);
+
+        return $r20;
+
+     label09:
+        r0.<sun.security.provider.certpath.URICertStore: long lastChecked> = $l0;
+
+     label10:
+        $r1 = r0.<sun.security.provider.certpath.URICertStore: java.net.URI uri>;
+
+        $r2 = virtualinvoke $r1.<java.net.URI: java.net.URL toURL()>();
+
+        $r3 = virtualinvoke $r2.<java.net.URL: java.net.URLConnection openConnection()>();
+
+        $l4 = r0.<sun.security.provider.certpath.URICertStore: long lastModified>;
+
+        $b5 = $l4 cmp 0L;
+
+        if $b5 == 0 goto label11;
+
+        $l12 = r0.<sun.security.provider.certpath.URICertStore: long lastModified>;
+
+        virtualinvoke $r3.<java.net.URLConnection: void setIfModifiedSince(long)>($l12);
+
+     label11:
+        $l13 = r0.<sun.security.provider.certpath.URICertStore: long lastModified>;
+
+        $i6 = <sun.security.provider.certpath.URICertStore: int CRL_CONNECT_TIMEOUT>;
+
+        virtualinvoke $r3.<java.net.URLConnection: void setConnectTimeout(int)>($i6);
+
+        $r4 = virtualinvoke $r3.<java.net.URLConnection: java.io.InputStream getInputStream()>();
+
+        r43 = null;
+
+     label12:
+        $l7 = virtualinvoke $r3.<java.net.URLConnection: long getLastModified()>();
+
+        r0.<sun.security.provider.certpath.URICertStore: long lastModified> = $l7;
+
+        $b8 = $l13 cmp 0L;
+
+        if $b8 == 0 goto label22;
+
+        $l9 = r0.<sun.security.provider.certpath.URICertStore: long lastModified>;
+
+        $b10 = $l13 cmp $l9;
+
+        if $b10 != 0 goto label17;
+
+        $r14 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        if $r14 == null goto label13;
+
+        $r17 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        virtualinvoke $r17.<sun.security.util.Debug: void println(java.lang.String)>("Not modified, using cached copy");
+
+     label13:
+        $r15 = r0.<sun.security.provider.certpath.URICertStore: java.security.cert.X509CRL crl>;
+
+        $r16 = staticinvoke <sun.security.provider.certpath.URICertStore: java.util.Collection getMatchingCRLs(java.security.cert.X509CRL,java.security.cert.CRLSelector)>($r15, r8);
+
+     label14:
+        if $r4 == null goto label16;
+
+        goto label15;
+
+     label15:
+        virtualinvoke $r4.<java.io.InputStream: void close()>();
+
+     label16:
+        return $r16;
+
+     label17:
+        $z1 = $r3 instanceof java.net.HttpURLConnection;
+
+        if $z1 == 0 goto label22;
+
+        r44 = (java.net.HttpURLConnection) $r3;
+
+        $i11 = virtualinvoke r44.<java.net.HttpURLConnection: int getResponseCode()>();
+
+        if $i11 != 304 goto label22;
+
+        $r10 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        if $r10 == null goto label18;
+
+        $r13 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        virtualinvoke $r13.<sun.security.util.Debug: void println(java.lang.String)>("Not modified, using cached copy");
+
+     label18:
+        $r11 = r0.<sun.security.provider.certpath.URICertStore: java.security.cert.X509CRL crl>;
+
+        $r12 = staticinvoke <sun.security.provider.certpath.URICertStore: java.util.Collection getMatchingCRLs(java.security.cert.X509CRL,java.security.cert.CRLSelector)>($r11, r8);
+
+     label19:
+        if $r4 == null goto label21;
+
+        goto label20;
+
+     label20:
+        virtualinvoke $r4.<java.io.InputStream: void close()>();
+
+     label21:
+        return $r12;
+
+     label22:
+        $r45 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        if $r45 == null goto label23;
+
+        $r9 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        virtualinvoke $r9.<sun.security.util.Debug: void println(java.lang.String)>("Downloading new CRL...");
+
+     label23:
+        $r5 = r0.<sun.security.provider.certpath.URICertStore: java.security.cert.CertificateFactory factory>;
+
+        $r6 = virtualinvoke $r5.<java.security.cert.CertificateFactory: java.security.cert.CRL generateCRL(java.io.InputStream)>($r4);
+
+        $r7 = (java.security.cert.X509CRL) $r6;
+
+        r0.<sun.security.provider.certpath.URICertStore: java.security.cert.X509CRL crl> = $r7;
+
+     label24:
+        if $r4 == null goto label34;
+
+        goto label25;
+
+     label25:
+        virtualinvoke $r4.<java.io.InputStream: void close()>();
+
+        goto label34;
+
+     label26:
+        $r34 := @caughtexception;
+
+        r43 = $r34;
+
+        throw $r34;
+
+     label27:
+        $r33 := @caughtexception;
+
+     label28:
+        if $r4 == null goto label33;
+
+        if r43 == null goto label32;
+
+     label29:
+        virtualinvoke $r4.<java.io.InputStream: void close()>();
+
+     label30:
+        goto label33;
+
+     label31:
+        $r32 := @caughtexception;
+
+        virtualinvoke r43.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r32);
+
+        goto label33;
+
+     label32:
+        virtualinvoke $r4.<java.io.InputStream: void close()>();
+
+     label33:
+        throw $r33;
+
+     label34:
+        $r46 = r0.<sun.security.provider.certpath.URICertStore: java.security.cert.X509CRL crl>;
+
+        $r47 = staticinvoke <sun.security.provider.certpath.URICertStore: java.util.Collection getMatchingCRLs(java.security.cert.X509CRL,java.security.cert.CRLSelector)>($r46, r8);
+
+     label35:
+        return $r47;
+
+     label36:
+        $r27 := @caughtexception;
+
+        $r28 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        if $r28 == null goto label37;
+
+        $r31 = <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug>;
+
+        virtualinvoke $r31.<sun.security.util.Debug: void println(java.lang.String)>("Exception fetching CRL:");
+
+        virtualinvoke $r27.<java.lang.Exception: void printStackTrace()>();
+
+     label37:
+        r0.<sun.security.provider.certpath.URICertStore: long lastModified> = 0L;
+
+        r0.<sun.security.provider.certpath.URICertStore: java.security.cert.X509CRL crl> = null;
+
+        $r51 = new sun.security.provider.certpath.PKIX$CertStoreTypeException;
+
+        $r50 = new java.security.cert.CertStoreException;
+
+        specialinvoke $r50.<java.security.cert.CertStoreException: void <init>(java.lang.Throwable)>($r27);
+
+        specialinvoke $r51.<sun.security.provider.certpath.PKIX$CertStoreTypeException: void <init>(java.lang.String,java.security.cert.CertStoreException)>("URI", $r50);
+
+        throw $r51;
+
+        catch java.io.IOException from label01 to label02 with label03;
+        catch java.security.cert.CertStoreException from label04 to label05 with label06;
+        catch java.lang.Throwable from label12 to label14 with label26;
+        catch java.lang.Throwable from label17 to label19 with label26;
+        catch java.lang.Throwable from label22 to label24 with label26;
+        catch java.lang.Throwable from label29 to label30 with label31;
+        catch java.lang.Throwable from label26 to label28 with label27;
+        catch java.io.IOException from label10 to label16 with label36;
+        catch java.security.cert.CRLException from label10 to label16 with label36;
+        catch java.io.IOException from label17 to label21 with label36;
+        catch java.security.cert.CRLException from label17 to label21 with label36;
+        catch java.io.IOException from label22 to label35 with label36;
+        catch java.security.cert.CRLException from label22 to label35 with label36;
+    }
+
+    private static java.util.Collection getMatchingCRLs(java.security.cert.X509CRL, java.security.cert.CRLSelector)
+    {
+        java.security.cert.CRLSelector r0;
+        java.util.List $r2, $r3;
+        java.security.cert.X509CRL r1;
+        boolean $z0;
+
+        r1 := @parameter0: java.security.cert.X509CRL;
+
+        r0 := @parameter1: java.security.cert.CRLSelector;
+
+        if r0 == null goto label1;
+
+        if r1 == null goto label2;
+
+        $z0 = interfaceinvoke r0.<java.security.cert.CRLSelector: boolean match(java.security.cert.CRL)>(r1);
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        $r2 = staticinvoke <java.util.Collections: java.util.List singletonList(java.lang.Object)>(r1);
+
+        return $r2;
+
+     label2:
+        $r3 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+        return $r3;
+    }
+
+    static void <clinit>()
+    {
+        int $i0;
+        sun.security.util.Cache $r1;
+        sun.security.util.Debug $r0;
+
+        <sun.security.provider.certpath.URICertStore: int DEFAULT_CRL_CONNECT_TIMEOUT> = 15000;
+
+        <sun.security.provider.certpath.URICertStore: int CACHE_SIZE> = 185;
+
+        <sun.security.provider.certpath.URICertStore: int CHECK_INTERVAL> = 30000;
+
+        $r0 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String)>("certpath");
+
+        <sun.security.provider.certpath.URICertStore: sun.security.util.Debug debug> = $r0;
+
+        $i0 = staticinvoke <sun.security.provider.certpath.URICertStore: int initializeTimeout()>();
+
+        <sun.security.provider.certpath.URICertStore: int CRL_CONNECT_TIMEOUT> = $i0;
+
+        $r1 = staticinvoke <sun.security.util.Cache: sun.security.util.Cache newSoftMemoryCache(int)>(185);
+
+        <sun.security.provider.certpath.URICertStore: sun.security.util.Cache certStoreCache> = $r1;
+
+        return;
+    }
+}

@@ -1,0 +1,649 @@
+public class com.sun.corba.se.impl.resolver.INSURLOperationImpl extends java.lang.Object implements com.sun.corba.se.spi.orb.Operation
+{
+    com.sun.corba.se.spi.orb.ORB orb;
+    com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper;
+    com.sun.corba.se.impl.logging.OMGSystemException omgWrapper;
+    com.sun.corba.se.spi.resolver.Resolver bootstrapResolver;
+    private org.omg.CosNaming.NamingContextExt rootNamingContextExt;
+    private java.lang.Object rootContextCacheLock;
+    private com.sun.corba.se.impl.naming.namingutil.INSURLHandler insURLHandler;
+    private static final int NIBBLES_PER_BYTE;
+    private static final int UN_SHIFT;
+
+    public void <init>(com.sun.corba.se.spi.orb.ORB, com.sun.corba.se.spi.resolver.Resolver)
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r4;
+        com.sun.corba.se.spi.resolver.Resolver r6;
+        com.sun.corba.se.impl.logging.OMGSystemException $r5;
+        com.sun.corba.se.impl.resolver.INSURLOperationImpl r0;
+        com.sun.corba.se.impl.naming.namingutil.INSURLHandler $r2;
+        java.lang.Object $r1;
+        com.sun.corba.se.spi.orb.ORB r3;
+
+        r0 := @this: com.sun.corba.se.impl.resolver.INSURLOperationImpl;
+
+        r3 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        r6 := @parameter1: com.sun.corba.se.spi.resolver.Resolver;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: java.lang.Object rootContextCacheLock> = $r1;
+
+        $r2 = staticinvoke <com.sun.corba.se.impl.naming.namingutil.INSURLHandler: com.sun.corba.se.impl.naming.namingutil.INSURLHandler getINSURLHandler()>();
+
+        r0.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: com.sun.corba.se.impl.naming.namingutil.INSURLHandler insURLHandler> = $r2;
+
+        r0.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: com.sun.corba.se.spi.orb.ORB orb> = r3;
+
+        $r4 = staticinvoke <com.sun.corba.se.impl.logging.ORBUtilSystemException: com.sun.corba.se.impl.logging.ORBUtilSystemException get(com.sun.corba.se.spi.orb.ORB,java.lang.String)>(r3, "orb.resolver");
+
+        r0.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper> = $r4;
+
+        $r5 = staticinvoke <com.sun.corba.se.impl.logging.OMGSystemException: com.sun.corba.se.impl.logging.OMGSystemException get(com.sun.corba.se.spi.orb.ORB,java.lang.String)>(r3, "orb.resolver");
+
+        r0.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: com.sun.corba.se.impl.logging.OMGSystemException omgWrapper> = $r5;
+
+        r0.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: com.sun.corba.se.spi.resolver.Resolver bootstrapResolver> = r6;
+
+        return;
+    }
+
+    private org.omg.CORBA.Object getIORFromString(java.lang.String)
+    {
+        byte[] r2;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r11;
+        byte $b12, $b14, $b18, $b19, $b20;
+        com.sun.corba.se.spi.ior.iiop.GIOPVersion $r8;
+        org.omg.CORBA.DATA_CONVERSION $r12;
+        com.sun.corba.se.impl.resolver.INSURLOperationImpl r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i9, $i10, $i11, $i13, $i16, $i17, i21, i22;
+        com.sun.corba.se.impl.encoding.EncapsInputStream $r9;
+        java.lang.String r0, $r1, $r3;
+        char $c8, $c15;
+        com.sun.corba.se.spi.orb.ORB $r5, $r6;
+        org.omg.CORBA.Object $r10;
+        com.sun.corba.se.spi.orb.ORBData $r7;
+
+        r4 := @this: com.sun.corba.se.impl.resolver.INSURLOperationImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $i1 = $i0 & 1;
+
+        if $i1 != 1 goto label1;
+
+        $r11 = r4.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r12 = virtualinvoke $r11.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.DATA_CONVERSION badStringifiedIorLen()>();
+
+        throw $r12;
+
+     label1:
+        $i2 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $r1 = "IOR:";
+
+        $i3 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $i4 = $i2 - $i3;
+
+        $i5 = $i4 / 2;
+
+        r2 = newarray (byte)[$i5];
+
+        $r3 = "IOR:";
+
+        i21 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        i22 = 0;
+
+     label2:
+        $i6 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if i21 >= $i6 goto label3;
+
+        $c8 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i21);
+
+        $i9 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: int hexOf(char)>($c8);
+
+        $i10 = $i9 << 4;
+
+        $i11 = $i10 & 240;
+
+        $b12 = (byte) $i11;
+
+        r2[i22] = $b12;
+
+        $b14 = r2[i22];
+
+        $i13 = i21 + 1;
+
+        $c15 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i13);
+
+        $i16 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: int hexOf(char)>($c15);
+
+        $i17 = $i16 & 15;
+
+        $b18 = (byte) $i17;
+
+        $b19 = $b14 | $b18;
+
+        $b20 = (byte) $b19;
+
+        r2[i22] = $b20;
+
+        i21 = i21 + 2;
+
+        i22 = i22 + 1;
+
+        goto label2;
+
+     label3:
+        $r6 = r4.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $i7 = lengthof r2;
+
+        $r5 = r4.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r7 = virtualinvoke $r5.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $r8 = interfaceinvoke $r7.<com.sun.corba.se.spi.orb.ORBData: com.sun.corba.se.spi.ior.iiop.GIOPVersion getGIOPVersion()>();
+
+        $r9 = staticinvoke <sun.corba.EncapsInputStreamFactory: com.sun.corba.se.impl.encoding.EncapsInputStream newEncapsInputStream(org.omg.CORBA.ORB,byte[],int,com.sun.corba.se.spi.ior.iiop.GIOPVersion)>($r6, r2, $i7, $r8);
+
+        virtualinvoke $r9.<com.sun.corba.se.impl.encoding.EncapsInputStream: void consumeEndian()>();
+
+        $r10 = virtualinvoke $r9.<com.sun.corba.se.impl.encoding.EncapsInputStream: org.omg.CORBA.Object read_Object()>();
+
+        return $r10;
+    }
+
+    public java.lang.Object operate(java.lang.Object)
+    {
+        org.omg.CORBA.BAD_PARAM $r3, $r9;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r2;
+        com.sun.corba.se.impl.logging.OMGSystemException $r8;
+        com.sun.corba.se.impl.naming.namingutil.INSURLHandler $r5;
+        org.omg.CORBA.Object $r7, $r10;
+        com.sun.corba.se.impl.resolver.INSURLOperationImpl r1;
+        java.lang.Object r0;
+        java.lang.String r4;
+        boolean $z0, $z1;
+        com.sun.corba.se.impl.naming.namingutil.INSURL $r6;
+
+        r1 := @this: com.sun.corba.se.impl.resolver.INSURLOperationImpl;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $z0 = r0 instanceof java.lang.String;
+
+        if $z0 == 0 goto label3;
+
+        r4 = (java.lang.String) r0;
+
+        $z1 = virtualinvoke r4.<java.lang.String: boolean startsWith(java.lang.String)>("IOR:");
+
+        if $z1 == 0 goto label1;
+
+        $r10 = specialinvoke r1.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: org.omg.CORBA.Object getIORFromString(java.lang.String)>(r4);
+
+        return $r10;
+
+     label1:
+        $r5 = r1.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: com.sun.corba.se.impl.naming.namingutil.INSURLHandler insURLHandler>;
+
+        $r6 = virtualinvoke $r5.<com.sun.corba.se.impl.naming.namingutil.INSURLHandler: com.sun.corba.se.impl.naming.namingutil.INSURL parseURL(java.lang.String)>(r4);
+
+        if $r6 != null goto label2;
+
+        $r8 = r1.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: com.sun.corba.se.impl.logging.OMGSystemException omgWrapper>;
+
+        $r9 = virtualinvoke $r8.<com.sun.corba.se.impl.logging.OMGSystemException: org.omg.CORBA.BAD_PARAM soBadSchemeName()>();
+
+        throw $r9;
+
+     label2:
+        $r7 = specialinvoke r1.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: org.omg.CORBA.Object resolveINSURL(com.sun.corba.se.impl.naming.namingutil.INSURL)>($r6);
+
+        return $r7;
+
+     label3:
+        $r2 = r1.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r3 = virtualinvoke $r2.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.BAD_PARAM stringExpected()>();
+
+        throw $r3;
+    }
+
+    private org.omg.CORBA.Object resolveINSURL(com.sun.corba.se.impl.naming.namingutil.INSURL)
+    {
+        com.sun.corba.se.impl.naming.namingutil.CorbanameURL $r4;
+        org.omg.CORBA.Object $r3, $r5;
+        com.sun.corba.se.impl.resolver.INSURLOperationImpl r1;
+        com.sun.corba.se.impl.naming.namingutil.CorbalocURL $r2;
+        com.sun.corba.se.impl.naming.namingutil.INSURL r0;
+        boolean $z0;
+
+        r1 := @this: com.sun.corba.se.impl.resolver.INSURLOperationImpl;
+
+        r0 := @parameter0: com.sun.corba.se.impl.naming.namingutil.INSURL;
+
+        $z0 = interfaceinvoke r0.<com.sun.corba.se.impl.naming.namingutil.INSURL: boolean isCorbanameURL()>();
+
+        if $z0 == 0 goto label1;
+
+        $r4 = (com.sun.corba.se.impl.naming.namingutil.CorbanameURL) r0;
+
+        $r5 = specialinvoke r1.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: org.omg.CORBA.Object resolveCorbaname(com.sun.corba.se.impl.naming.namingutil.CorbanameURL)>($r4);
+
+        return $r5;
+
+     label1:
+        $r2 = (com.sun.corba.se.impl.naming.namingutil.CorbalocURL) r0;
+
+        $r3 = specialinvoke r1.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: org.omg.CORBA.Object resolveCorbaloc(com.sun.corba.se.impl.naming.namingutil.CorbalocURL)>($r2);
+
+        return $r3;
+    }
+
+    private org.omg.CORBA.Object resolveCorbaloc(com.sun.corba.se.impl.naming.namingutil.CorbalocURL)
+    {
+        com.sun.corba.se.spi.resolver.Resolver $r2;
+        org.omg.CORBA.Object r4;
+        com.sun.corba.se.impl.resolver.INSURLOperationImpl r1;
+        com.sun.corba.se.impl.naming.namingutil.CorbalocURL r0;
+        java.lang.String $r3;
+        boolean $z0;
+
+        r1 := @this: com.sun.corba.se.impl.resolver.INSURLOperationImpl;
+
+        r0 := @parameter0: com.sun.corba.se.impl.naming.namingutil.CorbalocURL;
+
+        $z0 = virtualinvoke r0.<com.sun.corba.se.impl.naming.namingutil.CorbalocURL: boolean getRIRFlag()>();
+
+        if $z0 == 0 goto label1;
+
+        $r2 = r1.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: com.sun.corba.se.spi.resolver.Resolver bootstrapResolver>;
+
+        $r3 = virtualinvoke r0.<com.sun.corba.se.impl.naming.namingutil.CorbalocURL: java.lang.String getKeyString()>();
+
+        r4 = interfaceinvoke $r2.<com.sun.corba.se.spi.resolver.Resolver: org.omg.CORBA.Object resolve(java.lang.String)>($r3);
+
+        goto label2;
+
+     label1:
+        r4 = specialinvoke r1.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: org.omg.CORBA.Object getIORUsingCorbaloc(com.sun.corba.se.impl.naming.namingutil.INSURL)>(r0);
+
+     label2:
+        return r4;
+    }
+
+    private org.omg.CORBA.Object resolveCorbaname(com.sun.corba.se.impl.naming.namingutil.CorbanameURL)
+    {
+        java.lang.Exception $r5;
+        com.sun.corba.se.impl.naming.namingutil.CorbanameURL r0;
+        org.omg.CORBA.Object $r2, $r4;
+        org.omg.CosNaming.NamingContextExt r6;
+        com.sun.corba.se.impl.resolver.INSURLOperationImpl r1;
+        java.lang.String $r3;
+        boolean $z0;
+
+        r1 := @this: com.sun.corba.se.impl.resolver.INSURLOperationImpl;
+
+        r0 := @parameter0: com.sun.corba.se.impl.naming.namingutil.CorbanameURL;
+
+     label1:
+        $z0 = virtualinvoke r0.<com.sun.corba.se.impl.naming.namingutil.CorbanameURL: boolean getRIRFlag()>();
+
+        if $z0 == 0 goto label2;
+
+        r6 = specialinvoke r1.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: org.omg.CosNaming.NamingContextExt getDefaultRootNamingContext()>();
+
+        goto label5;
+
+     label2:
+        $r2 = specialinvoke r1.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: org.omg.CORBA.Object getIORUsingCorbaloc(com.sun.corba.se.impl.naming.namingutil.INSURL)>(r0);
+
+        if $r2 != null goto label4;
+
+     label3:
+        return null;
+
+     label4:
+        r6 = staticinvoke <org.omg.CosNaming.NamingContextExtHelper: org.omg.CosNaming.NamingContextExt narrow(org.omg.CORBA.Object)>($r2);
+
+     label5:
+        $r3 = virtualinvoke r0.<com.sun.corba.se.impl.naming.namingutil.CorbanameURL: java.lang.String getStringifiedName()>();
+
+        if $r3 != null goto label7;
+
+     label6:
+        return r6;
+
+     label7:
+        $r4 = interfaceinvoke r6.<org.omg.CosNaming.NamingContextExt: org.omg.CORBA.Object resolve_str(java.lang.String)>($r3);
+
+     label8:
+        return $r4;
+
+     label9:
+        $r5 := @caughtexception;
+
+        specialinvoke r1.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: void clearRootNamingContextCache()>();
+
+        return null;
+
+        catch java.lang.Exception from label1 to label3 with label9;
+        catch java.lang.Exception from label4 to label6 with label9;
+        catch java.lang.Exception from label7 to label8 with label9;
+    }
+
+    private org.omg.CORBA.Object getIORUsingCorbaloc(com.sun.corba.se.impl.naming.namingutil.INSURL)
+    {
+        byte[] $r8;
+        com.sun.corba.se.spi.ior.iiop.AlternateIIOPAddressComponent $r35;
+        byte $b2, $b4;
+        com.sun.corba.se.spi.ior.IORTemplate $r11;
+        boolean $z0, $z1, $z2;
+        com.sun.corba.se.spi.ior.iiop.GIOPVersion $r15, $r31, $r32;
+        com.sun.corba.se.spi.ior.IOR $r23;
+        java.util.Set $r19;
+        com.sun.corba.se.impl.resolver.INSURLOperationImpl$1 $r17;
+        com.sun.corba.se.spi.ior.ObjectKeyFactory $r7;
+        com.sun.corba.se.spi.ior.iiop.IIOPAddress $r30;
+        java.util.List $r3;
+        com.sun.corba.se.spi.ior.ObjectKey $r9;
+        com.sun.corba.se.impl.resolver.INSURLOperationImpl r5;
+        com.sun.corba.se.spi.ior.ObjectId $r22;
+        java.util.HashMap $r0;
+        java.util.ArrayList $r1, $r18;
+        com.sun.corba.se.spi.ior.ObjectKeyTemplate $r10;
+        int $i0, $i1, $i3;
+        java.lang.String $r4, $r29;
+        com.sun.corba.se.impl.naming.namingutil.INSURL r2;
+        java.util.Iterator $r12, $r20;
+        com.sun.corba.se.impl.naming.namingutil.IIOPEndpointInfo r40;
+        com.sun.corba.se.spi.orb.ORB $r6, $r13, $r21, $r28, $r36, $r38;
+        com.sun.corba.se.spi.ior.iiop.IIOPProfileTemplate $r37, $r39, r41, r42, r43;
+        org.omg.CORBA.Object $r24;
+        java.lang.Object $r16, $r25, $r26, $r27, $r33, $r34;
+        com.sun.corba.se.spi.orb.ORBData $r14;
+
+        r5 := @this: com.sun.corba.se.impl.resolver.INSURLOperationImpl;
+
+        r2 := @parameter0: com.sun.corba.se.impl.naming.namingutil.INSURL;
+
+        $r0 = new java.util.HashMap;
+
+        specialinvoke $r0.<java.util.HashMap: void <init>()>();
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        $r3 = interfaceinvoke r2.<com.sun.corba.se.impl.naming.namingutil.INSURL: java.util.List getEndpointInfo()>();
+
+        $r4 = interfaceinvoke r2.<com.sun.corba.se.impl.naming.namingutil.INSURL: java.lang.String getKeyString()>();
+
+        if $r4 != null goto label1;
+
+        return null;
+
+     label1:
+        $r6 = r5.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r7 = virtualinvoke $r6.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.ior.ObjectKeyFactory getObjectKeyFactory()>();
+
+        $r8 = virtualinvoke $r4.<java.lang.String: byte[] getBytes()>();
+
+        $r9 = interfaceinvoke $r7.<com.sun.corba.se.spi.ior.ObjectKeyFactory: com.sun.corba.se.spi.ior.ObjectKey create(byte[])>($r8);
+
+        $r10 = interfaceinvoke $r9.<com.sun.corba.se.spi.ior.ObjectKey: com.sun.corba.se.spi.ior.ObjectKeyTemplate getTemplate()>();
+
+        $r11 = staticinvoke <com.sun.corba.se.spi.ior.IORFactories: com.sun.corba.se.spi.ior.IORTemplate makeIORTemplate(com.sun.corba.se.spi.ior.ObjectKeyTemplate)>($r10);
+
+        $r12 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r12.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label6;
+
+        $r27 = interfaceinvoke $r12.<java.util.Iterator: java.lang.Object next()>();
+
+        r40 = (com.sun.corba.se.impl.naming.namingutil.IIOPEndpointInfo) $r27;
+
+        $r28 = r5.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r29 = virtualinvoke r40.<com.sun.corba.se.impl.naming.namingutil.IIOPEndpointInfo: java.lang.String getHost()>();
+
+        $i0 = virtualinvoke r40.<com.sun.corba.se.impl.naming.namingutil.IIOPEndpointInfo: int getPort()>();
+
+        $r30 = staticinvoke <com.sun.corba.se.spi.ior.iiop.IIOPFactories: com.sun.corba.se.spi.ior.iiop.IIOPAddress makeIIOPAddress(com.sun.corba.se.spi.orb.ORB,java.lang.String,int)>($r28, $r29, $i0);
+
+        $i1 = virtualinvoke r40.<com.sun.corba.se.impl.naming.namingutil.IIOPEndpointInfo: int getMajor()>();
+
+        $b2 = (byte) $i1;
+
+        $i3 = virtualinvoke r40.<com.sun.corba.se.impl.naming.namingutil.IIOPEndpointInfo: int getMinor()>();
+
+        $b4 = (byte) $i3;
+
+        $r31 = staticinvoke <com.sun.corba.se.spi.ior.iiop.GIOPVersion: com.sun.corba.se.spi.ior.iiop.GIOPVersion getInstance(byte,byte)>($b2, $b4);
+
+        $r32 = <com.sun.corba.se.spi.ior.iiop.GIOPVersion: com.sun.corba.se.spi.ior.iiop.GIOPVersion V1_0>;
+
+        $z1 = virtualinvoke $r31.<com.sun.corba.se.spi.ior.iiop.GIOPVersion: boolean equals(com.sun.corba.se.spi.ior.iiop.GIOPVersion)>($r32);
+
+        if $z1 == 0 goto label3;
+
+        $r38 = r5.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r39 = staticinvoke <com.sun.corba.se.spi.ior.iiop.IIOPFactories: com.sun.corba.se.spi.ior.iiop.IIOPProfileTemplate makeIIOPProfileTemplate(com.sun.corba.se.spi.orb.ORB,com.sun.corba.se.spi.ior.iiop.GIOPVersion,com.sun.corba.se.spi.ior.iiop.IIOPAddress)>($r38, $r31, $r30);
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>($r39);
+
+        goto label5;
+
+     label3:
+        $r33 = interfaceinvoke $r0.<java.util.Map: java.lang.Object get(java.lang.Object)>($r31);
+
+        if $r33 != null goto label4;
+
+        $r36 = r5.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r37 = staticinvoke <com.sun.corba.se.spi.ior.iiop.IIOPFactories: com.sun.corba.se.spi.ior.iiop.IIOPProfileTemplate makeIIOPProfileTemplate(com.sun.corba.se.spi.orb.ORB,com.sun.corba.se.spi.ior.iiop.GIOPVersion,com.sun.corba.se.spi.ior.iiop.IIOPAddress)>($r36, $r31, $r30);
+
+        interfaceinvoke $r0.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r31, $r37);
+
+        goto label5;
+
+     label4:
+        $r34 = interfaceinvoke $r0.<java.util.Map: java.lang.Object get(java.lang.Object)>($r31);
+
+        r41 = (com.sun.corba.se.spi.ior.iiop.IIOPProfileTemplate) $r34;
+
+        $r35 = staticinvoke <com.sun.corba.se.spi.ior.iiop.IIOPFactories: com.sun.corba.se.spi.ior.iiop.AlternateIIOPAddressComponent makeAlternateIIOPAddressComponent(com.sun.corba.se.spi.ior.iiop.IIOPAddress)>($r30);
+
+        interfaceinvoke r41.<com.sun.corba.se.spi.ior.iiop.IIOPProfileTemplate: boolean add(java.lang.Object)>($r35);
+
+     label5:
+        goto label2;
+
+     label6:
+        $r13 = r5.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r14 = virtualinvoke $r13.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $r15 = interfaceinvoke $r14.<com.sun.corba.se.spi.orb.ORBData: com.sun.corba.se.spi.ior.iiop.GIOPVersion getGIOPVersion()>();
+
+        $r16 = interfaceinvoke $r0.<java.util.Map: java.lang.Object get(java.lang.Object)>($r15);
+
+        r42 = (com.sun.corba.se.spi.ior.iiop.IIOPProfileTemplate) $r16;
+
+        if r42 == null goto label7;
+
+        interfaceinvoke $r11.<com.sun.corba.se.spi.ior.IORTemplate: boolean add(java.lang.Object)>(r42);
+
+        interfaceinvoke $r0.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r15);
+
+     label7:
+        $r17 = new com.sun.corba.se.impl.resolver.INSURLOperationImpl$1;
+
+        specialinvoke $r17.<com.sun.corba.se.impl.resolver.INSURLOperationImpl$1: void <init>(com.sun.corba.se.impl.resolver.INSURLOperationImpl)>(r5);
+
+        $r18 = new java.util.ArrayList;
+
+        $r19 = interfaceinvoke $r0.<java.util.Map: java.util.Set keySet()>();
+
+        specialinvoke $r18.<java.util.ArrayList: void <init>(java.util.Collection)>($r19);
+
+        staticinvoke <java.util.Collections: void sort(java.util.List,java.util.Comparator)>($r18, $r17);
+
+        $r20 = interfaceinvoke $r18.<java.util.List: java.util.Iterator iterator()>();
+
+     label8:
+        $z2 = interfaceinvoke $r20.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label9;
+
+        $r25 = interfaceinvoke $r20.<java.util.Iterator: java.lang.Object next()>();
+
+        $r26 = interfaceinvoke $r0.<java.util.Map: java.lang.Object get(java.lang.Object)>($r25);
+
+        r43 = (com.sun.corba.se.spi.ior.iiop.IIOPProfileTemplate) $r26;
+
+        interfaceinvoke $r11.<com.sun.corba.se.spi.ior.IORTemplate: boolean add(java.lang.Object)>(r43);
+
+        goto label8;
+
+     label9:
+        interfaceinvoke $r11.<com.sun.corba.se.spi.ior.IORTemplate: boolean addAll(java.util.Collection)>($r1);
+
+        $r21 = r5.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r22 = interfaceinvoke $r9.<com.sun.corba.se.spi.ior.ObjectKey: com.sun.corba.se.spi.ior.ObjectId getId()>();
+
+        $r23 = interfaceinvoke $r11.<com.sun.corba.se.spi.ior.IORTemplate: com.sun.corba.se.spi.ior.IOR makeIOR(com.sun.corba.se.spi.orb.ORB,java.lang.String,com.sun.corba.se.spi.ior.ObjectId)>($r21, "", $r22);
+
+        $r24 = staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: org.omg.CORBA.Object makeObjectReference(com.sun.corba.se.spi.ior.IOR)>($r23);
+
+        return $r24;
+    }
+
+    private org.omg.CosNaming.NamingContextExt getDefaultRootNamingContext()
+    {
+        java.lang.Throwable $r8;
+        com.sun.corba.se.spi.resolver.LocalResolver $r5;
+        com.sun.corba.se.spi.orb.ORB $r4;
+        java.lang.Exception $r9;
+        org.omg.CosNaming.NamingContextExt $r2, $r3, $r7;
+        org.omg.CORBA.Object $r6;
+        com.sun.corba.se.impl.resolver.INSURLOperationImpl r0;
+        java.lang.Object $r1;
+
+        r0 := @this: com.sun.corba.se.impl.resolver.INSURLOperationImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: java.lang.Object rootContextCacheLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: org.omg.CosNaming.NamingContextExt rootNamingContextExt>;
+
+        if $r2 != null goto label5;
+
+     label2:
+        $r4 = r0.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r5 = virtualinvoke $r4.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.resolver.LocalResolver getLocalResolver()>();
+
+        $r6 = interfaceinvoke $r5.<com.sun.corba.se.spi.resolver.LocalResolver: org.omg.CORBA.Object resolve(java.lang.String)>("NameService");
+
+        $r7 = staticinvoke <org.omg.CosNaming.NamingContextExtHelper: org.omg.CosNaming.NamingContextExt narrow(org.omg.CORBA.Object)>($r6);
+
+        r0.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: org.omg.CosNaming.NamingContextExt rootNamingContextExt> = $r7;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r9 := @caughtexception;
+
+        r0.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: org.omg.CosNaming.NamingContextExt rootNamingContextExt> = null;
+
+     label5:
+        exitmonitor $r1;
+
+     label6:
+        goto label9;
+
+     label7:
+        $r8 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label8:
+        throw $r8;
+
+     label9:
+        $r3 = r0.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: org.omg.CosNaming.NamingContextExt rootNamingContextExt>;
+
+        return $r3;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+        catch java.lang.Throwable from label1 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    private void clearRootNamingContextCache()
+    {
+        com.sun.corba.se.impl.resolver.INSURLOperationImpl r0;
+        java.lang.Throwable $r2;
+        java.lang.Object $r1;
+
+        r0 := @this: com.sun.corba.se.impl.resolver.INSURLOperationImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: java.lang.Object rootContextCacheLock>;
+
+        entermonitor $r1;
+
+     label1:
+        r0.<com.sun.corba.se.impl.resolver.INSURLOperationImpl: org.omg.CosNaming.NamingContextExt rootNamingContextExt> = null;
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.corba.se.impl.resolver.INSURLOperationImpl: int UN_SHIFT> = 4;
+
+        <com.sun.corba.se.impl.resolver.INSURLOperationImpl: int NIBBLES_PER_BYTE> = 2;
+
+        return;
+    }
+}

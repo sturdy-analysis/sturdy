@@ -1,0 +1,1281 @@
+public class sun.invoke.util.BytecodeName extends java.lang.Object
+{
+    static char ESCAPE_C;
+    static char NULL_ESCAPE_C;
+    static java.lang.String NULL_ESCAPE;
+    static final java.lang.String DANGEROUS_CHARS;
+    static final java.lang.String REPLACEMENT_CHARS;
+    static final int DANGEROUS_CHAR_FIRST_INDEX;
+    static char[] DANGEROUS_CHARS_A;
+    static char[] REPLACEMENT_CHARS_A;
+    static final java.lang.Character[] DANGEROUS_CHARS_CA;
+    static final long[] SPECIAL_BITMAP;
+    static final boolean $assertionsDisabled;
+
+    private void <init>()
+    {
+        sun.invoke.util.BytecodeName r0;
+
+        r0 := @this: sun.invoke.util.BytecodeName;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static java.lang.String toBytecodeName(java.lang.String)
+    {
+        java.lang.AssertionError $r3, $r4;
+        java.lang.String r0, $r1, $r2;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <sun.invoke.util.BytecodeName: java.lang.String mangle(java.lang.String)>(r0);
+
+        $z0 = <sun.invoke.util.BytecodeName: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        if $r1 == r0 goto label1;
+
+        $z2 = staticinvoke <sun.invoke.util.BytecodeName: boolean looksMangled(java.lang.String)>($r1);
+
+        if $z2 != 0 goto label1;
+
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>(java.lang.Object)>($r1);
+
+        throw $r4;
+
+     label1:
+        $z3 = <sun.invoke.util.BytecodeName: boolean $assertionsDisabled>;
+
+        if $z3 != 0 goto label2;
+
+        $r2 = staticinvoke <sun.invoke.util.BytecodeName: java.lang.String toSourceName(java.lang.String)>($r1);
+
+        $z1 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z1 != 0 goto label2;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>(java.lang.Object)>(r0);
+
+        throw $r3;
+
+     label2:
+        return $r1;
+    }
+
+    public static java.lang.String toSourceName(java.lang.String)
+    {
+        java.lang.AssertionError $r3;
+        java.lang.String r0, $r1, $r2, $r9, $r11, r12;
+        boolean $z0, $z1, $z2;
+        java.lang.StringBuilder $r4, $r5, $r6, $r7, $r8, $r10;
+
+        r0 := @parameter0: java.lang.String;
+
+        staticinvoke <sun.invoke.util.BytecodeName: void checkSafeBytecodeName(java.lang.String)>(r0);
+
+        r12 = r0;
+
+        $z0 = staticinvoke <sun.invoke.util.BytecodeName: boolean looksMangled(java.lang.String)>(r0);
+
+        if $z0 == 0 goto label1;
+
+        $r1 = staticinvoke <sun.invoke.util.BytecodeName: java.lang.String demangle(java.lang.String)>(r0);
+
+        r12 = $r1;
+
+        $z1 = <sun.invoke.util.BytecodeName: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label1;
+
+        $r2 = staticinvoke <sun.invoke.util.BytecodeName: java.lang.String mangle(java.lang.String)>($r1);
+
+        $z2 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z2 != 0 goto label1;
+
+        $r3 = new java.lang.AssertionError;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" => ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" => ");
+
+        $r9 = staticinvoke <sun.invoke.util.BytecodeName: java.lang.String mangle(java.lang.String)>($r1);
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>(java.lang.Object)>($r11);
+
+        throw $r3;
+
+     label1:
+        return r12;
+    }
+
+    public static java.lang.Object[] parseBytecodeName(java.lang.String)
+    {
+        java.lang.Object[] r7;
+        java.lang.Character $r3;
+        int $i0, $i2, i3, i4, i5, i6, i7, $i9, $i10;
+        java.lang.String r0, $r1, $r4, $r5, $r6;
+        char $c1;
+        java.lang.Character[] $r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        r7 = null;
+
+        i3 = 0;
+
+     label01:
+        if i3 > 1 goto label11;
+
+        i4 = 0;
+
+        i5 = 0;
+
+        i6 = 0;
+
+     label02:
+        if i6 > $i0 goto label08;
+
+        $i9 = (int) -1;
+
+        i7 = $i9;
+
+        if i6 >= $i0 goto label03;
+
+        $r6 = "\\/.;:$[]<>";
+
+        $c1 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i6);
+
+        $i10 = (int) $c1;
+
+        $i2 = virtualinvoke $r6.<java.lang.String: int indexOf(int)>($i10);
+
+        i7 = $i2;
+
+        if $i2 >= 1 goto label03;
+
+        goto label07;
+
+     label03:
+        if i5 >= i6 goto label05;
+
+        if i3 == 0 goto label04;
+
+        $r4 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(i5, i6);
+
+        $r5 = staticinvoke <sun.invoke.util.BytecodeName: java.lang.String toSourceName(java.lang.String)>($r4);
+
+        r7[i4] = $r5;
+
+     label04:
+        i4 = i4 + 1;
+
+        i5 = i6 + 1;
+
+     label05:
+        if i7 < 1 goto label07;
+
+        if i3 == 0 goto label06;
+
+        $r2 = <sun.invoke.util.BytecodeName: java.lang.Character[] DANGEROUS_CHARS_CA>;
+
+        $r3 = $r2[i7];
+
+        r7[i4] = $r3;
+
+     label06:
+        i4 = i4 + 1;
+
+        i5 = i6 + 1;
+
+     label07:
+        i6 = i6 + 1;
+
+        goto label02;
+
+     label08:
+        if i3 == 0 goto label09;
+
+        goto label11;
+
+     label09:
+        r7 = newarray (java.lang.Object)[i4];
+
+        if i4 > 1 goto label10;
+
+        if i5 != 0 goto label10;
+
+        if i4 == 0 goto label11;
+
+        $r1 = staticinvoke <sun.invoke.util.BytecodeName: java.lang.String toSourceName(java.lang.String)>(r0);
+
+        r7[0] = $r1;
+
+        goto label11;
+
+     label10:
+        i3 = i3 + 1;
+
+        goto label01;
+
+     label11:
+        return r7;
+    }
+
+    public static java.lang.String unparseBytecodeName(java.lang.Object[])
+    {
+        java.lang.Object[] r0, r5;
+        int $i0, $i1, i2;
+        java.lang.Object $r4, r6;
+        java.lang.String $r1, $r2, $r3;
+        boolean $z0;
+
+        r5 := @parameter0: java.lang.Object[];
+
+        r0 = r5;
+
+        i2 = 0;
+
+     label1:
+        $i0 = lengthof r5;
+
+        if i2 >= $i0 goto label5;
+
+        r6 = r5[i2];
+
+        $z0 = r6 instanceof java.lang.String;
+
+        if $z0 == 0 goto label4;
+
+        $r2 = (java.lang.String) r6;
+
+        $r3 = staticinvoke <sun.invoke.util.BytecodeName: java.lang.String toBytecodeName(java.lang.String)>($r2);
+
+        if i2 != 0 goto label2;
+
+        $i1 = lengthof r5;
+
+        if $i1 != 1 goto label2;
+
+        return $r3;
+
+     label2:
+        if $r3 == r6 goto label4;
+
+        if r5 != r0 goto label3;
+
+        $r4 = virtualinvoke r5.<java.lang.Object: java.lang.Object clone()>();
+
+        r5 = (java.lang.Object[]) $r4;
+
+     label3:
+        r5[i2] = $r3;
+
+     label4:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label5:
+        $r1 = staticinvoke <sun.invoke.util.BytecodeName: java.lang.String appendAll(java.lang.Object[])>(r5);
+
+        return $r1;
+    }
+
+    private static java.lang.String appendAll(java.lang.Object[])
+    {
+        java.lang.Object[] r0;
+        int $i0, $i1, $i2, i3, i4, i5, i6, i7;
+        java.lang.String $r2, $r4, $r6;
+        boolean $z0;
+        java.lang.StringBuilder $r1;
+        java.lang.Object r3, $r5, r7;
+
+        r0 := @parameter0: java.lang.Object[];
+
+        $i0 = lengthof r0;
+
+        if $i0 > 1 goto label2;
+
+        $i2 = lengthof r0;
+
+        if $i2 != 1 goto label1;
+
+        $r5 = r0[0];
+
+        $r6 = staticinvoke <java.lang.String: java.lang.String valueOf(java.lang.Object)>($r5);
+
+        return $r6;
+
+     label1:
+        return "";
+
+     label2:
+        i3 = 0;
+
+        i4 = lengthof r0;
+
+        i5 = 0;
+
+     label3:
+        if i5 >= i4 goto label6;
+
+        r7 = r0[i5];
+
+        $z0 = r7 instanceof java.lang.String;
+
+        if $z0 == 0 goto label4;
+
+        $r4 = staticinvoke <java.lang.String: java.lang.String valueOf(java.lang.Object)>(r7);
+
+        $i1 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        i3 = i3 + $i1;
+
+        goto label5;
+
+     label4:
+        i3 = i3 + 1;
+
+     label5:
+        i5 = i5 + 1;
+
+        goto label3;
+
+     label6:
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>(int)>(i3);
+
+        i6 = lengthof r0;
+
+        i7 = 0;
+
+     label7:
+        if i7 >= i6 goto label8;
+
+        r3 = r0[i7];
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r3);
+
+        i7 = i7 + 1;
+
+        goto label7;
+
+     label8:
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r2;
+    }
+
+    public static java.lang.String toDisplayName(java.lang.String)
+    {
+        java.lang.Object[] $r1;
+        int $i0, $i1, i2;
+        java.lang.Object $r3, $r4;
+        java.lang.String r0, $r2, r5, $r6;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <sun.invoke.util.BytecodeName: java.lang.Object[] parseBytecodeName(java.lang.String)>(r0);
+
+        i2 = 0;
+
+     label1:
+        $i0 = lengthof $r1;
+
+        if i2 >= $i0 goto label5;
+
+        $r3 = $r1[i2];
+
+        $z0 = $r3 instanceof java.lang.String;
+
+        if $z0 != 0 goto label2;
+
+        goto label4;
+
+     label2:
+        $r4 = $r1[i2];
+
+        r5 = (java.lang.String) $r4;
+
+        $z1 = staticinvoke <sun.invoke.util.BytecodeName: boolean isJavaIdent(java.lang.String)>(r5);
+
+        if $z1 == 0 goto label3;
+
+        $i1 = virtualinvoke r5.<java.lang.String: int indexOf(int)>(36);
+
+        if $i1 < 0 goto label4;
+
+     label3:
+        $r6 = staticinvoke <sun.invoke.util.BytecodeName: java.lang.String quoteDisplay(java.lang.String)>(r5);
+
+        $r1[i2] = $r6;
+
+     label4:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label5:
+        $r2 = staticinvoke <sun.invoke.util.BytecodeName: java.lang.String appendAll(java.lang.Object[])>($r1);
+
+        return $r2;
+    }
+
+    private static boolean isJavaIdent(java.lang.String)
+    {
+        int $i0, i3;
+        char $c1, $c2;
+        java.lang.String r0;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $c1 = virtualinvoke r0.<java.lang.String: char charAt(int)>(0);
+
+        $z0 = staticinvoke <java.lang.Character: boolean isJavaIdentifierStart(char)>($c1);
+
+        if $z0 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        i3 = 1;
+
+     label3:
+        if i3 >= $i0 goto label5;
+
+        $c2 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i3);
+
+        $z1 = staticinvoke <java.lang.Character: boolean isJavaIdentifierPart(char)>($c2);
+
+        if $z1 != 0 goto label4;
+
+        return 0;
+
+     label4:
+        i3 = i3 + 1;
+
+        goto label3;
+
+     label5:
+        return 1;
+    }
+
+    private static java.lang.String quoteDisplay(java.lang.String)
+    {
+        java.lang.StringBuilder $r0, $r1, $r4, $r5;
+        java.lang.String r2, $r3, $r6;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r3 = virtualinvoke r2.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>("[\'\\\\]", "\\\\$0");
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r6;
+    }
+
+    private static void checkSafeBytecodeName(java.lang.String) throws java.lang.IllegalArgumentException
+    {
+        java.lang.String r0;
+        java.lang.IllegalArgumentException $r1;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = staticinvoke <sun.invoke.util.BytecodeName: boolean isSafeBytecodeName(java.lang.String)>(r0);
+
+        if $z0 != 0 goto label1;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>(r0);
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+
+    public static boolean isSafeBytecodeName(java.lang.String)
+    {
+        char c1, $c2;
+        int i0, $i3, i4, $i5, $i6, $i7;
+        char[] r1;
+        java.lang.String r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        return 0;
+
+     label1:
+        r1 = <sun.invoke.util.BytecodeName: char[] DANGEROUS_CHARS_A>;
+
+        i0 = lengthof r1;
+
+        i4 = 0;
+
+     label2:
+        if i4 >= i0 goto label5;
+
+        c1 = r1[i4];
+
+        $c2 = <sun.invoke.util.BytecodeName: char ESCAPE_C>;
+
+        $i5 = (int) c1;
+
+        $i6 = (int) $c2;
+
+        if $i5 != $i6 goto label3;
+
+        goto label4;
+
+     label3:
+        $i7 = (int) c1;
+
+        $i3 = virtualinvoke r0.<java.lang.String: int indexOf(int)>($i7);
+
+        if $i3 < 0 goto label4;
+
+        return 0;
+
+     label4:
+        i4 = i4 + 1;
+
+        goto label2;
+
+     label5:
+        return 1;
+    }
+
+    public static boolean isSafeBytecodeChar(char)
+    {
+        int $i1, $i2;
+        char c0;
+        java.lang.String $r0;
+        boolean $z0;
+
+        c0 := @parameter0: char;
+
+        $r0 = "\\/.;:$[]<>";
+
+        $i2 = (int) c0;
+
+        $i1 = virtualinvoke $r0.<java.lang.String: int indexOf(int)>($i2);
+
+        if $i1 >= 1 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private static boolean looksMangled(java.lang.String)
+    {
+        int $i2, $i3;
+        char $c0, $c1;
+        java.lang.String r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        $c0 = virtualinvoke r0.<java.lang.String: char charAt(int)>(0);
+
+        $c1 = <sun.invoke.util.BytecodeName: char ESCAPE_C>;
+
+        $i2 = (int) $c0;
+
+        $i3 = (int) $c1;
+
+        if $i2 != $i3 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private static java.lang.String mangle(java.lang.String)
+    {
+        boolean $z0, z1;
+        java.lang.StringBuilder r5, $r7;
+        int $i0, $i3, $i4, $i7, $i8, i12, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22;
+        java.lang.String r0, $r1, $r3, $r4, $r6;
+        char $c1, $c2, $c5, $c6, $c9, $c10, $c11, $c13, $c14;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 == 0 goto label01;
+
+        $r4 = <sun.invoke.util.BytecodeName: java.lang.String NULL_ESCAPE>;
+
+        return $r4;
+
+     label01:
+        r5 = null;
+
+        i12 = 0;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+     label02:
+        if i12 >= $i0 goto label12;
+
+        $c1 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i12);
+
+        z1 = 0;
+
+        $c2 = <sun.invoke.util.BytecodeName: char ESCAPE_C>;
+
+        $i15 = (int) $c1;
+
+        $i16 = (int) $c2;
+
+        if $i15 != $i16 goto label06;
+
+        $i7 = i12 + 1;
+
+        if $i7 >= $i0 goto label07;
+
+        $i8 = i12 + 1;
+
+        $c9 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i8);
+
+        if i12 != 0 goto label03;
+
+        $c11 = <sun.invoke.util.BytecodeName: char NULL_ESCAPE_C>;
+
+        $i17 = (int) $c9;
+
+        $i18 = (int) $c11;
+
+        if $i17 == $i18 goto label04;
+
+     label03:
+        $c10 = staticinvoke <sun.invoke.util.BytecodeName: char originalOfReplacement(char)>($c9);
+
+        $i19 = (int) $c9;
+
+        $i20 = (int) $c10;
+
+        if $i19 == $i20 goto label05;
+
+     label04:
+        z1 = 1;
+
+     label05:
+        goto label07;
+
+     label06:
+        z1 = staticinvoke <sun.invoke.util.BytecodeName: boolean isDangerous(char)>($c1);
+
+     label07:
+        if z1 != 0 goto label08;
+
+        if r5 == null goto label11;
+
+        virtualinvoke r5.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c1);
+
+        goto label11;
+
+     label08:
+        if r5 != null goto label10;
+
+        $r7 = new java.lang.StringBuilder;
+
+        $i3 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $i4 = $i3 + 10;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>(int)>($i4);
+
+        r5 = $r7;
+
+        $c5 = virtualinvoke r0.<java.lang.String: char charAt(int)>(0);
+
+        $c6 = <sun.invoke.util.BytecodeName: char ESCAPE_C>;
+
+        $i21 = (int) $c5;
+
+        $i22 = (int) $c6;
+
+        if $i21 == $i22 goto label09;
+
+        if i12 <= 0 goto label09;
+
+        $r3 = <sun.invoke.util.BytecodeName: java.lang.String NULL_ESCAPE>;
+
+        virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+     label09:
+        $r6 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, i12);
+
+        virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+     label10:
+        $c13 = <sun.invoke.util.BytecodeName: char ESCAPE_C>;
+
+        virtualinvoke r5.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c13);
+
+        $c14 = staticinvoke <sun.invoke.util.BytecodeName: char replacementOf(char)>($c1);
+
+        virtualinvoke r5.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c14);
+
+     label11:
+        i12 = i12 + 1;
+
+        goto label02;
+
+     label12:
+        if r5 == null goto label13;
+
+        $r1 = virtualinvoke r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r1;
+
+     label13:
+        return r0;
+    }
+
+    private static java.lang.String demangle(java.lang.String)
+    {
+        byte b8, b11, b12, b13;
+        int $i0, $i3, $i4, $i7, i9, $i14, $i15, $i16, $i17;
+        java.lang.String r0, $r1, $r2, $r3, $r5;
+        boolean $z0;
+        char $c1, $c2, $c5, $c6, c10;
+        java.lang.StringBuilder r6, $r7;
+
+        r0 := @parameter0: java.lang.String;
+
+        r6 = null;
+
+        b8 = 0;
+
+        b13 = 0;
+
+        b12 = 0;
+
+        b11 = 0;
+
+        $r1 = <sun.invoke.util.BytecodeName: java.lang.String NULL_ESCAPE>;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        b8 = 2;
+
+        b13 = 2;
+
+        b12 = 2;
+
+        b11 = 2;
+
+     label1:
+        i9 = b12;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+     label2:
+        if i9 >= $i0 goto label6;
+
+        $c1 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i9);
+
+        c10 = $c1;
+
+        $c2 = <sun.invoke.util.BytecodeName: char ESCAPE_C>;
+
+        $i14 = (int) $c1;
+
+        $i15 = (int) $c2;
+
+        if $i14 != $i15 goto label4;
+
+        $i3 = i9 + 1;
+
+        if $i3 >= $i0 goto label4;
+
+        $i4 = i9 + 1;
+
+        $c5 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i4);
+
+        $c6 = staticinvoke <sun.invoke.util.BytecodeName: char originalOfReplacement(char)>($c5);
+
+        $i16 = (int) $c6;
+
+        $i17 = (int) $c5;
+
+        if $i16 == $i17 goto label4;
+
+        if r6 != null goto label3;
+
+        $r7 = new java.lang.StringBuilder;
+
+        $i7 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>(int)>($i7);
+
+        r6 = $r7;
+
+        $r5 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(b13, i9);
+
+        virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+     label3:
+        i9 = i9 + 1;
+
+        c10 = $c6;
+
+     label4:
+        if r6 == null goto label5;
+
+        virtualinvoke r6.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(c10);
+
+     label5:
+        i9 = i9 + 1;
+
+        goto label2;
+
+     label6:
+        if r6 == null goto label7;
+
+        $r3 = virtualinvoke r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+
+     label7:
+        $r2 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>(b11);
+
+        return $r2;
+    }
+
+    static boolean isSpecial(char)
+    {
+        char c0;
+        long $l4, $l5, $l6;
+        long[] $r0, $r1;
+        byte $b7;
+        int $i1, $i2, $i3, $i8, $i9;
+        boolean $z0;
+
+        c0 := @parameter0: char;
+
+        $i8 = (int) c0;
+
+        $i2 = $i8 >>> 6;
+
+        $r0 = <sun.invoke.util.BytecodeName: long[] SPECIAL_BITMAP>;
+
+        $i1 = lengthof $r0;
+
+        if $i2 >= $i1 goto label3;
+
+        $r1 = <sun.invoke.util.BytecodeName: long[] SPECIAL_BITMAP>;
+
+        $i9 = (int) c0;
+
+        $i3 = $i9 >>> 6;
+
+        $l4 = $r1[$i3];
+
+        $l5 = $l4 >> c0;
+
+        $l6 = $l5 & 1L;
+
+        $b7 = $l6 cmp 0L;
+
+        if $b7 == 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+
+     label3:
+        return 0;
+    }
+
+    static char replacementOf(char)
+    {
+        int $i1, $i3;
+        char c0, $c2;
+        java.lang.String $r0, $r1;
+        boolean $z0;
+
+        c0 := @parameter0: char;
+
+        $z0 = staticinvoke <sun.invoke.util.BytecodeName: boolean isSpecial(char)>(c0);
+
+        if $z0 != 0 goto label1;
+
+        return c0;
+
+     label1:
+        $r0 = "\\/.;:$[]<>";
+
+        $i3 = (int) c0;
+
+        $i1 = virtualinvoke $r0.<java.lang.String: int indexOf(int)>($i3);
+
+        if $i1 >= 0 goto label2;
+
+        return c0;
+
+     label2:
+        $r1 = "-|,?!%{}^_";
+
+        $c2 = virtualinvoke $r1.<java.lang.String: char charAt(int)>($i1);
+
+        return $c2;
+    }
+
+    static char originalOfReplacement(char)
+    {
+        int $i1, $i3;
+        char c0, $c2;
+        java.lang.String $r0, $r1;
+        boolean $z0;
+
+        c0 := @parameter0: char;
+
+        $z0 = staticinvoke <sun.invoke.util.BytecodeName: boolean isSpecial(char)>(c0);
+
+        if $z0 != 0 goto label1;
+
+        return c0;
+
+     label1:
+        $r0 = "-|,?!%{}^_";
+
+        $i3 = (int) c0;
+
+        $i1 = virtualinvoke $r0.<java.lang.String: int indexOf(int)>($i3);
+
+        if $i1 >= 0 goto label2;
+
+        return c0;
+
+     label2:
+        $r1 = "\\/.;:$[]<>";
+
+        $c2 = virtualinvoke $r1.<java.lang.String: char charAt(int)>($i1);
+
+        return $c2;
+    }
+
+    static boolean isDangerous(char)
+    {
+        int $i1, $i2;
+        char c0;
+        java.lang.String $r0;
+        boolean $z0, $z1;
+
+        c0 := @parameter0: char;
+
+        $z0 = staticinvoke <sun.invoke.util.BytecodeName: boolean isSpecial(char)>(c0);
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r0 = "\\/.;:$[]<>";
+
+        $i2 = (int) c0;
+
+        $i1 = virtualinvoke $r0.<java.lang.String: int indexOf(int)>($i2);
+
+        if $i1 < 1 goto label2;
+
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        return $z1;
+    }
+
+    static int indexOfDangerousChar(java.lang.String, int)
+    {
+        int i0, $i1, i3, $i5;
+        char $c2;
+        java.lang.String r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        i3 = i0;
+
+        $i1 = virtualinvoke r0.<java.lang.String: int length()>();
+
+     label1:
+        if i3 >= $i1 goto label3;
+
+        $c2 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i3);
+
+        $z0 = staticinvoke <sun.invoke.util.BytecodeName: boolean isDangerous(char)>($c2);
+
+        if $z0 == 0 goto label2;
+
+        return i3;
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        $i5 = (int) -1;
+
+        return $i5;
+    }
+
+    static int lastIndexOfDangerousChar(java.lang.String, int)
+    {
+        char $c3;
+        int i0, $i1, $i2, i4, $i6, $i8;
+        java.lang.String r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $i1 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $i2 = $i1 - 1;
+
+        i4 = staticinvoke <java.lang.Math: int min(int,int)>(i0, $i2);
+
+     label1:
+        if i4 < 0 goto label3;
+
+        $c3 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i4);
+
+        $z0 = staticinvoke <sun.invoke.util.BytecodeName: boolean isDangerous(char)>($c3);
+
+        if $z0 == 0 goto label2;
+
+        return i4;
+
+     label2:
+        $i6 = (int) -1;
+
+        i4 = i4 + $i6;
+
+        goto label1;
+
+     label3:
+        $i8 = (int) -1;
+
+        return $i8;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Character $r15;
+        boolean $z0, $z1;
+        java.lang.StringBuilder $r2, $r3, $r4, $r18;
+        long $l6, $l7, $l8;
+        long[] $r11, $r13;
+        int $i2, i3, $i5, i10, $i11, i12, $i13;
+        java.lang.String $r5, $r6, $r8, $r10, $r14, r17;
+        char $c0, $c1, c4, $c9;
+        char[] $r7, $r9, $r12;
+        java.lang.Character[] $r16;
+        java.lang.Class $r0;
+
+        <sun.invoke.util.BytecodeName: int DANGEROUS_CHAR_FIRST_INDEX> = 1;
+
+        <sun.invoke.util.BytecodeName: java.lang.String REPLACEMENT_CHARS> = "-|,?!%{}^_";
+
+        <sun.invoke.util.BytecodeName: java.lang.String DANGEROUS_CHARS> = "\\/.;:$[]<>";
+
+        $r0 = class "Lsun/invoke/util/BytecodeName;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.invoke.util.BytecodeName: boolean $assertionsDisabled> = $z1;
+
+        <sun.invoke.util.BytecodeName: char ESCAPE_C> = 92;
+
+        <sun.invoke.util.BytecodeName: char NULL_ESCAPE_C> = 61;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $c0 = <sun.invoke.util.BytecodeName: char ESCAPE_C>;
+
+        $r2 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c0);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $c1 = <sun.invoke.util.BytecodeName: char NULL_ESCAPE_C>;
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        <sun.invoke.util.BytecodeName: java.lang.String NULL_ESCAPE> = $r5;
+
+        $r6 = "\\/.;:$[]<>";
+
+        $r7 = virtualinvoke $r6.<java.lang.String: char[] toCharArray()>();
+
+        <sun.invoke.util.BytecodeName: char[] DANGEROUS_CHARS_A> = $r7;
+
+        $r8 = "-|,?!%{}^_";
+
+        $r9 = virtualinvoke $r8.<java.lang.String: char[] toCharArray()>();
+
+        <sun.invoke.util.BytecodeName: char[] REPLACEMENT_CHARS_A> = $r9;
+
+        $r10 = "\\/.;:$[]<>";
+
+        $i2 = virtualinvoke $r10.<java.lang.String: int length()>();
+
+        $r16 = newarray (java.lang.Character)[$i2];
+
+        i10 = 0;
+
+     label3:
+        $i11 = lengthof $r16;
+
+        if i10 >= $i11 goto label4;
+
+        $r14 = "\\/.;:$[]<>";
+
+        $c9 = virtualinvoke $r14.<java.lang.String: char charAt(int)>(i10);
+
+        $r15 = staticinvoke <java.lang.Character: java.lang.Character valueOf(char)>($c9);
+
+        $r16[i10] = $r15;
+
+        i10 = i10 + 1;
+
+        goto label3;
+
+     label4:
+        <sun.invoke.util.BytecodeName: java.lang.Character[] DANGEROUS_CHARS_CA> = $r16;
+
+        $r11 = newarray (long)[2];
+
+        <sun.invoke.util.BytecodeName: long[] SPECIAL_BITMAP> = $r11;
+
+        r17 = "\\/.;:$[]<>-|,?!%{}^_";
+
+        $r12 = virtualinvoke r17.<java.lang.String: char[] toCharArray()>();
+
+        i3 = lengthof $r12;
+
+        i12 = 0;
+
+     label5:
+        if i12 >= i3 goto label6;
+
+        c4 = $r12[i12];
+
+        $r13 = <sun.invoke.util.BytecodeName: long[] SPECIAL_BITMAP>;
+
+        $i13 = (int) c4;
+
+        $i5 = $i13 >>> 6;
+
+        $l7 = $r13[$i5];
+
+        $l6 = 1L << c4;
+
+        $l8 = $l7 | $l6;
+
+        $r13[$i5] = $l8;
+
+        i12 = i12 + 1;
+
+        goto label5;
+
+     label6:
+        return;
+    }
+}

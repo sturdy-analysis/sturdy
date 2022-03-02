@@ -1,0 +1,289 @@
+class sun.nio.fs.WindowsSecurity extends java.lang.Object
+{
+    static final long processTokenWithDuplicateAccess;
+    static final long processTokenWithQueryAccess;
+
+    private void <init>()
+    {
+        sun.nio.fs.WindowsSecurity r0;
+
+        r0 := @this: sun.nio.fs.WindowsSecurity;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static long openProcessToken(int)
+    {
+        int i1;
+        sun.nio.fs.WindowsException $r0;
+        long $l0, $l2;
+
+        i1 := @parameter0: int;
+
+     label1:
+        $l0 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: long GetCurrentProcess()>();
+
+        $l2 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: long OpenProcessToken(long,int)>($l0, i1);
+
+     label2:
+        return $l2;
+
+     label3:
+        $r0 := @caughtexception;
+
+        return 0L;
+
+        catch sun.nio.fs.WindowsException from label1 to label2 with label3;
+    }
+
+    static sun.nio.fs.WindowsSecurity$Privilege enablePrivilege(java.lang.String)
+    {
+        long $l0, $l1, $l2, $l4, $l6, $l7, l8;
+        java.lang.AssertionError $r4;
+        byte $b3, $b5, $b9;
+        sun.nio.fs.WindowsSecurity$Privilege $r1;
+        sun.nio.fs.WindowsException $r2, $r3;
+        java.lang.String r0;
+        boolean z0, z1;
+
+        r0 := @parameter0: java.lang.String;
+
+     label1:
+        $l0 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: long LookupPrivilegeValue(java.lang.String)>(r0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>(java.lang.Object)>($r3);
+
+        throw $r4;
+
+     label4:
+        l8 = 0L;
+
+        z0 = 0;
+
+        z1 = 0;
+
+     label5:
+        $l1 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: long GetCurrentThread()>();
+
+        $l2 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: long OpenThreadToken(long,int,boolean)>($l1, 32, 0);
+
+        l8 = $l2;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 != 0 goto label6;
+
+        $l4 = <sun.nio.fs.WindowsSecurity: long processTokenWithDuplicateAccess>;
+
+        $b5 = $l4 cmp 0L;
+
+        if $b5 == 0 goto label6;
+
+        $l6 = <sun.nio.fs.WindowsSecurity: long processTokenWithDuplicateAccess>;
+
+        $l7 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: long DuplicateTokenEx(long,int)>($l6, 36);
+
+        l8 = $l7;
+
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void SetThreadToken(long,long)>(0L, $l7);
+
+        z0 = 1;
+
+     label6:
+        $b9 = l8 cmp 0L;
+
+        if $b9 == 0 goto label7;
+
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void AdjustTokenPrivileges(long,long,int)>(l8, $l0, 2);
+
+        z1 = 1;
+
+     label7:
+        goto label9;
+
+     label8:
+        $r2 := @caughtexception;
+
+     label9:
+        $r1 = staticinvoke <sun.nio.fs.WindowsSecurity$lambda_enablePrivilege_0__406: sun.nio.fs.WindowsSecurity$Privilege bootstrap$(long,boolean,boolean,long)>(l8, z0, z1, $l0);
+
+        return $r1;
+
+        catch sun.nio.fs.WindowsException from label1 to label2 with label3;
+        catch sun.nio.fs.WindowsException from label5 to label7 with label8;
+    }
+
+    static boolean checkAccessMask(long, int, int, int, int, int) throws sun.nio.fs.WindowsException
+    {
+        java.lang.Throwable $r0;
+        long $l0, $l1, l3, $l9, $l11, l12;
+        byte $b2, $b10, $b13;
+        int i4, i5, i6, i7, i8;
+        boolean z0;
+
+        l3 := @parameter0: long;
+
+        i4 := @parameter1: int;
+
+        i5 := @parameter2: int;
+
+        i6 := @parameter3: int;
+
+        i7 := @parameter4: int;
+
+        i8 := @parameter5: int;
+
+        $l0 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: long GetCurrentThread()>();
+
+        $l1 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: long OpenThreadToken(long,int,boolean)>($l0, 8, 0);
+
+        l12 = $l1;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 != 0 goto label1;
+
+        $l9 = <sun.nio.fs.WindowsSecurity: long processTokenWithDuplicateAccess>;
+
+        $b10 = $l9 cmp 0L;
+
+        if $b10 == 0 goto label1;
+
+        $l11 = <sun.nio.fs.WindowsSecurity: long processTokenWithDuplicateAccess>;
+
+        l12 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: long DuplicateTokenEx(long,int)>($l11, 8);
+
+     label1:
+        z0 = 0;
+
+        $b13 = l12 cmp 0L;
+
+        if $b13 == 0 goto label6;
+
+     label2:
+        z0 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: boolean AccessCheck(long,long,int,int,int,int,int)>(l12, l3, i4, i5, i6, i7, i8);
+
+     label3:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CloseHandle(long)>(l12);
+
+        goto label6;
+
+     label4:
+        $r0 := @caughtexception;
+
+     label5:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CloseHandle(long)>(l12);
+
+        throw $r0;
+
+     label6:
+        return z0;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public static void lambda$enablePrivilege$0(long, boolean, boolean, long)
+    {
+        java.lang.Throwable $r0, $r1;
+        long l0, l2;
+        java.lang.AssertionError $r3;
+        byte $b1;
+        sun.nio.fs.WindowsException $r2;
+        boolean z0, z1;
+
+        l0 := @parameter0: long;
+
+        z0 := @parameter1: boolean;
+
+        z1 := @parameter2: boolean;
+
+        l2 := @parameter3: long;
+
+     label01:
+        $b1 = l0 cmp 0L;
+
+        if $b1 == 0 goto label08;
+
+     label02:
+        if z0 == 0 goto label03;
+
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void SetThreadToken(long,long)>(0L, 0L);
+
+        goto label04;
+
+     label03:
+        if z1 == 0 goto label04;
+
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void AdjustTokenPrivileges(long,long,int)>(l0, l2, 0);
+
+     label04:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CloseHandle(long)>(l0);
+
+        goto label08;
+
+     label05:
+        $r2 := @caughtexception;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>(java.lang.Object)>($r2);
+
+        throw $r3;
+
+     label06:
+        $r1 := @caughtexception;
+
+     label07:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void CloseHandle(long)>(l0);
+
+        throw $r1;
+
+     label08:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void LocalFree(long)>(l2);
+
+        goto label11;
+
+     label09:
+        $r0 := @caughtexception;
+
+     label10:
+        staticinvoke <sun.nio.fs.WindowsNativeDispatcher: void LocalFree(long)>(l2);
+
+        throw $r0;
+
+     label11:
+        return;
+
+        catch sun.nio.fs.WindowsException from label02 to label04 with label05;
+        catch java.lang.Throwable from label02 to label04 with label06;
+        catch java.lang.Throwable from label05 to label07 with label06;
+        catch java.lang.Throwable from label01 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    static void <clinit>()
+    {
+        long $l0, $l1;
+
+        $l0 = staticinvoke <sun.nio.fs.WindowsSecurity: long openProcessToken(int)>(2);
+
+        <sun.nio.fs.WindowsSecurity: long processTokenWithDuplicateAccess> = $l0;
+
+        $l1 = staticinvoke <sun.nio.fs.WindowsSecurity: long openProcessToken(int)>(8);
+
+        <sun.nio.fs.WindowsSecurity: long processTokenWithQueryAccess> = $l1;
+
+        return;
+    }
+}

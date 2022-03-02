@@ -1,0 +1,224 @@
+final class sun.security.ssl.ServerHello extends java.lang.Object
+{
+    static final sun.security.ssl.SSLConsumer handshakeConsumer;
+    static final sun.security.ssl.HandshakeProducer t12HandshakeProducer;
+    static final sun.security.ssl.HandshakeProducer t13HandshakeProducer;
+    static final sun.security.ssl.HandshakeProducer hrrHandshakeProducer;
+    static final sun.security.ssl.HandshakeProducer hrrReproducer;
+    private static final sun.security.ssl.HandshakeConsumer t12HandshakeConsumer;
+    private static final sun.security.ssl.HandshakeConsumer t13HandshakeConsumer;
+    private static final sun.security.ssl.HandshakeConsumer d12HandshakeConsumer;
+    private static final sun.security.ssl.HandshakeConsumer d13HandshakeConsumer;
+    private static final sun.security.ssl.HandshakeConsumer t13HrrHandshakeConsumer;
+    private static final sun.security.ssl.HandshakeConsumer d13HrrHandshakeConsumer;
+
+    void <init>()
+    {
+        sun.security.ssl.ServerHello r0;
+
+        r0 := @this: sun.security.ssl.ServerHello;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static void setUpPskKD(sun.security.ssl.HandshakeContext, javax.crypto.SecretKey) throws javax.net.ssl.SSLHandshakeException
+    {
+        java.lang.Throwable $r5;
+        byte[] $r11;
+        java.lang.Object[] $r2;
+        java.security.GeneralSecurityException $r3;
+        sun.security.ssl.CipherSuite$HashAlg $r8;
+        int $i0;
+        java.lang.String $r10;
+        boolean $z0, $z1;
+        javax.net.ssl.SSLHandshakeException $r4, $r6;
+        sun.security.ssl.SSLSecretDerivation $r13;
+        javax.crypto.SecretKey r1, $r12;
+        sun.security.ssl.CipherSuite $r7;
+        sun.security.ssl.HandshakeContext r0;
+        sun.security.ssl.HKDF $r9;
+
+        r0 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        r1 := @parameter1: javax.crypto.SecretKey;
+
+        $z0 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z0 == 0 goto label1;
+
+        $z1 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z1 == 0 goto label1;
+
+        $r2 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Using PSK to derive early secret", $r2);
+
+     label1:
+        $r7 = r0.<sun.security.ssl.HandshakeContext: sun.security.ssl.CipherSuite negotiatedCipherSuite>;
+
+        $r8 = $r7.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$HashAlg hashAlg>;
+
+        $r9 = new sun.security.ssl.HKDF;
+
+        $r10 = $r8.<sun.security.ssl.CipherSuite$HashAlg: java.lang.String name>;
+
+        specialinvoke $r9.<sun.security.ssl.HKDF: void <init>(java.lang.String)>($r10);
+
+        $i0 = $r8.<sun.security.ssl.CipherSuite$HashAlg: int hashLength>;
+
+        $r11 = newarray (byte)[$i0];
+
+        $r12 = virtualinvoke $r9.<sun.security.ssl.HKDF: javax.crypto.SecretKey extract(byte[],javax.crypto.SecretKey,java.lang.String)>($r11, r1, "TlsEarlySecret");
+
+        $r13 = new sun.security.ssl.SSLSecretDerivation;
+
+        specialinvoke $r13.<sun.security.ssl.SSLSecretDerivation: void <init>(sun.security.ssl.HandshakeContext,javax.crypto.SecretKey)>(r0, $r12);
+
+        r0.<sun.security.ssl.HandshakeContext: sun.security.ssl.SSLKeyDerivation handshakeKeyDerivation> = $r13;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new javax.net.ssl.SSLHandshakeException;
+
+        specialinvoke $r4.<javax.net.ssl.SSLHandshakeException: void <init>(java.lang.String)>("Could not generate secret");
+
+        $r5 = virtualinvoke $r4.<javax.net.ssl.SSLHandshakeException: java.lang.Throwable initCause(java.lang.Throwable)>($r3);
+
+        $r6 = (javax.net.ssl.SSLHandshakeException) $r5;
+
+        throw $r6;
+
+     label4:
+        return;
+
+        catch java.security.GeneralSecurityException from label1 to label2 with label3;
+    }
+
+    static void access$900(sun.security.ssl.HandshakeContext, javax.crypto.SecretKey) throws javax.net.ssl.SSLHandshakeException
+    {
+        javax.crypto.SecretKey r1;
+        sun.security.ssl.HandshakeContext r0;
+
+        r0 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        r1 := @parameter1: javax.crypto.SecretKey;
+
+        staticinvoke <sun.security.ssl.ServerHello: void setUpPskKD(sun.security.ssl.HandshakeContext,javax.crypto.SecretKey)>(r0, r1);
+
+        return;
+    }
+
+    static sun.security.ssl.HandshakeConsumer access$1100()
+    {
+        sun.security.ssl.HandshakeConsumer $r0;
+
+        $r0 = <sun.security.ssl.ServerHello: sun.security.ssl.HandshakeConsumer t13HrrHandshakeConsumer>;
+
+        return $r0;
+    }
+
+    static sun.security.ssl.HandshakeConsumer access$1200()
+    {
+        sun.security.ssl.HandshakeConsumer $r0;
+
+        $r0 = <sun.security.ssl.ServerHello: sun.security.ssl.HandshakeConsumer t13HandshakeConsumer>;
+
+        return $r0;
+    }
+
+    static sun.security.ssl.HandshakeConsumer access$1300()
+    {
+        sun.security.ssl.HandshakeConsumer $r0;
+
+        $r0 = <sun.security.ssl.ServerHello: sun.security.ssl.HandshakeConsumer t12HandshakeConsumer>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.ssl.ServerHello$T13HelloRetryRequestProducer $r3;
+        sun.security.ssl.ServerHello$ServerHelloConsumer $r0;
+        sun.security.ssl.ServerHello$T12ServerHelloConsumer $r5, $r7;
+        sun.security.ssl.ServerHello$T13HelloRetryRequestConsumer $r9, $r10;
+        sun.security.ssl.ServerHello$T13ServerHelloProducer $r2;
+        sun.security.ssl.ServerHello$T13ServerHelloConsumer $r6, $r8;
+        sun.security.ssl.ServerHello$T12ServerHelloProducer $r1;
+        sun.security.ssl.ServerHello$T13HelloRetryRequestReproducer $r4;
+
+        $r0 = new sun.security.ssl.ServerHello$ServerHelloConsumer;
+
+        specialinvoke $r0.<sun.security.ssl.ServerHello$ServerHelloConsumer: void <init>(sun.security.ssl.ServerHello$1)>(null);
+
+        <sun.security.ssl.ServerHello: sun.security.ssl.SSLConsumer handshakeConsumer> = $r0;
+
+        $r1 = new sun.security.ssl.ServerHello$T12ServerHelloProducer;
+
+        specialinvoke $r1.<sun.security.ssl.ServerHello$T12ServerHelloProducer: void <init>(sun.security.ssl.ServerHello$1)>(null);
+
+        <sun.security.ssl.ServerHello: sun.security.ssl.HandshakeProducer t12HandshakeProducer> = $r1;
+
+        $r2 = new sun.security.ssl.ServerHello$T13ServerHelloProducer;
+
+        specialinvoke $r2.<sun.security.ssl.ServerHello$T13ServerHelloProducer: void <init>(sun.security.ssl.ServerHello$1)>(null);
+
+        <sun.security.ssl.ServerHello: sun.security.ssl.HandshakeProducer t13HandshakeProducer> = $r2;
+
+        $r3 = new sun.security.ssl.ServerHello$T13HelloRetryRequestProducer;
+
+        specialinvoke $r3.<sun.security.ssl.ServerHello$T13HelloRetryRequestProducer: void <init>(sun.security.ssl.ServerHello$1)>(null);
+
+        <sun.security.ssl.ServerHello: sun.security.ssl.HandshakeProducer hrrHandshakeProducer> = $r3;
+
+        $r4 = new sun.security.ssl.ServerHello$T13HelloRetryRequestReproducer;
+
+        specialinvoke $r4.<sun.security.ssl.ServerHello$T13HelloRetryRequestReproducer: void <init>(sun.security.ssl.ServerHello$1)>(null);
+
+        <sun.security.ssl.ServerHello: sun.security.ssl.HandshakeProducer hrrReproducer> = $r4;
+
+        $r5 = new sun.security.ssl.ServerHello$T12ServerHelloConsumer;
+
+        specialinvoke $r5.<sun.security.ssl.ServerHello$T12ServerHelloConsumer: void <init>(sun.security.ssl.ServerHello$1)>(null);
+
+        <sun.security.ssl.ServerHello: sun.security.ssl.HandshakeConsumer t12HandshakeConsumer> = $r5;
+
+        $r6 = new sun.security.ssl.ServerHello$T13ServerHelloConsumer;
+
+        specialinvoke $r6.<sun.security.ssl.ServerHello$T13ServerHelloConsumer: void <init>(sun.security.ssl.ServerHello$1)>(null);
+
+        <sun.security.ssl.ServerHello: sun.security.ssl.HandshakeConsumer t13HandshakeConsumer> = $r6;
+
+        $r7 = new sun.security.ssl.ServerHello$T12ServerHelloConsumer;
+
+        specialinvoke $r7.<sun.security.ssl.ServerHello$T12ServerHelloConsumer: void <init>(sun.security.ssl.ServerHello$1)>(null);
+
+        <sun.security.ssl.ServerHello: sun.security.ssl.HandshakeConsumer d12HandshakeConsumer> = $r7;
+
+        $r8 = new sun.security.ssl.ServerHello$T13ServerHelloConsumer;
+
+        specialinvoke $r8.<sun.security.ssl.ServerHello$T13ServerHelloConsumer: void <init>(sun.security.ssl.ServerHello$1)>(null);
+
+        <sun.security.ssl.ServerHello: sun.security.ssl.HandshakeConsumer d13HandshakeConsumer> = $r8;
+
+        $r9 = new sun.security.ssl.ServerHello$T13HelloRetryRequestConsumer;
+
+        specialinvoke $r9.<sun.security.ssl.ServerHello$T13HelloRetryRequestConsumer: void <init>(sun.security.ssl.ServerHello$1)>(null);
+
+        <sun.security.ssl.ServerHello: sun.security.ssl.HandshakeConsumer t13HrrHandshakeConsumer> = $r9;
+
+        $r10 = new sun.security.ssl.ServerHello$T13HelloRetryRequestConsumer;
+
+        specialinvoke $r10.<sun.security.ssl.ServerHello$T13HelloRetryRequestConsumer: void <init>(sun.security.ssl.ServerHello$1)>(null);
+
+        <sun.security.ssl.ServerHello: sun.security.ssl.HandshakeConsumer d13HrrHandshakeConsumer> = $r10;
+
+        return;
+    }
+}

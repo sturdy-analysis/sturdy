@@ -1,0 +1,2085 @@
+public class javax.swing.plaf.basic.BasicSplitPaneUI extends javax.swing.plaf.SplitPaneUI
+{
+    protected static final java.lang.String NON_CONTINUOUS_DIVIDER;
+    protected static int KEYBOARD_DIVIDER_MOVE_OFFSET;
+    protected javax.swing.JSplitPane splitPane;
+    protected javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager layoutManager;
+    protected javax.swing.plaf.basic.BasicSplitPaneDivider divider;
+    protected java.beans.PropertyChangeListener propertyChangeListener;
+    protected java.awt.event.FocusListener focusListener;
+    private javax.swing.plaf.basic.BasicSplitPaneUI$Handler handler;
+    private java.util.Set managingFocusForwardTraversalKeys;
+    private java.util.Set managingFocusBackwardTraversalKeys;
+    protected int dividerSize;
+    protected java.awt.Component nonContinuousLayoutDivider;
+    protected boolean draggingHW;
+    protected int beginDragDividerLocation;
+    protected javax.swing.KeyStroke upKey;
+    protected javax.swing.KeyStroke downKey;
+    protected javax.swing.KeyStroke leftKey;
+    protected javax.swing.KeyStroke rightKey;
+    protected javax.swing.KeyStroke homeKey;
+    protected javax.swing.KeyStroke endKey;
+    protected javax.swing.KeyStroke dividerResizeToggleKey;
+    protected java.awt.event.ActionListener keyboardUpLeftListener;
+    protected java.awt.event.ActionListener keyboardDownRightListener;
+    protected java.awt.event.ActionListener keyboardHomeListener;
+    protected java.awt.event.ActionListener keyboardEndListener;
+    protected java.awt.event.ActionListener keyboardResizeToggleListener;
+    private int orientation;
+    private int lastDragLocation;
+    private boolean continuousLayout;
+    private boolean dividerKeyboardResize;
+    private boolean dividerLocationIsSet;
+    private java.awt.Color dividerDraggingColor;
+    private boolean rememberPaneSizes;
+    private boolean keepHidden;
+    boolean painted;
+    boolean ignoreDividerLocationChange;
+
+    public void <init>()
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        specialinvoke r0.<javax.swing.plaf.SplitPaneUI: void <init>()>();
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean keepHidden> = 0;
+
+        return;
+    }
+
+    public static javax.swing.plaf.ComponentUI createUI(javax.swing.JComponent)
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI $r0;
+        javax.swing.JComponent r1;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        $r0 = new javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        specialinvoke $r0.<javax.swing.plaf.basic.BasicSplitPaneUI: void <init>()>();
+
+        return $r0;
+    }
+
+    static void loadActionMap(javax.swing.plaf.basic.LazyActionMap)
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI$Actions $r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8;
+        javax.swing.plaf.basic.LazyActionMap r0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.LazyActionMap;
+
+        $r1 = new javax.swing.plaf.basic.BasicSplitPaneUI$Actions;
+
+        specialinvoke $r1.<javax.swing.plaf.basic.BasicSplitPaneUI$Actions: void <init>(java.lang.String)>("negativeIncrement");
+
+        virtualinvoke r0.<javax.swing.plaf.basic.LazyActionMap: void put(javax.swing.Action)>($r1);
+
+        $r2 = new javax.swing.plaf.basic.BasicSplitPaneUI$Actions;
+
+        specialinvoke $r2.<javax.swing.plaf.basic.BasicSplitPaneUI$Actions: void <init>(java.lang.String)>("positiveIncrement");
+
+        virtualinvoke r0.<javax.swing.plaf.basic.LazyActionMap: void put(javax.swing.Action)>($r2);
+
+        $r3 = new javax.swing.plaf.basic.BasicSplitPaneUI$Actions;
+
+        specialinvoke $r3.<javax.swing.plaf.basic.BasicSplitPaneUI$Actions: void <init>(java.lang.String)>("selectMin");
+
+        virtualinvoke r0.<javax.swing.plaf.basic.LazyActionMap: void put(javax.swing.Action)>($r3);
+
+        $r4 = new javax.swing.plaf.basic.BasicSplitPaneUI$Actions;
+
+        specialinvoke $r4.<javax.swing.plaf.basic.BasicSplitPaneUI$Actions: void <init>(java.lang.String)>("selectMax");
+
+        virtualinvoke r0.<javax.swing.plaf.basic.LazyActionMap: void put(javax.swing.Action)>($r4);
+
+        $r5 = new javax.swing.plaf.basic.BasicSplitPaneUI$Actions;
+
+        specialinvoke $r5.<javax.swing.plaf.basic.BasicSplitPaneUI$Actions: void <init>(java.lang.String)>("startResize");
+
+        virtualinvoke r0.<javax.swing.plaf.basic.LazyActionMap: void put(javax.swing.Action)>($r5);
+
+        $r6 = new javax.swing.plaf.basic.BasicSplitPaneUI$Actions;
+
+        specialinvoke $r6.<javax.swing.plaf.basic.BasicSplitPaneUI$Actions: void <init>(java.lang.String)>("toggleFocus");
+
+        virtualinvoke r0.<javax.swing.plaf.basic.LazyActionMap: void put(javax.swing.Action)>($r6);
+
+        $r7 = new javax.swing.plaf.basic.BasicSplitPaneUI$Actions;
+
+        specialinvoke $r7.<javax.swing.plaf.basic.BasicSplitPaneUI$Actions: void <init>(java.lang.String)>("focusOutForward");
+
+        virtualinvoke r0.<javax.swing.plaf.basic.LazyActionMap: void put(javax.swing.Action)>($r7);
+
+        $r8 = new javax.swing.plaf.basic.BasicSplitPaneUI$Actions;
+
+        specialinvoke $r8.<javax.swing.plaf.basic.BasicSplitPaneUI$Actions: void <init>(java.lang.String)>("focusOutBackward");
+
+        virtualinvoke r0.<javax.swing.plaf.basic.LazyActionMap: void put(javax.swing.Action)>($r8);
+
+        return;
+    }
+
+    public void installUI(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r1;
+        javax.swing.JSplitPane $r2;
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        int $i1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        $r2 = (javax.swing.JSplitPane) r1;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane> = $r2;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean dividerLocationIsSet> = 0;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean dividerKeyboardResize> = 0;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean keepHidden> = 0;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: void installDefaults()>();
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: void installListeners()>();
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: void installKeyboardActions()>();
+
+        $i1 = (int) -1;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: void setLastDragLocation(int)>($i1);
+
+        return;
+    }
+
+    protected void installDefaults()
+    {
+        java.awt.Color $r35;
+        java.lang.Integer $r12, $r38;
+        javax.swing.border.Border $r8, $r10;
+        boolean $z0, $z1;
+        javax.swing.KeyStroke $r29, $r32;
+        java.util.Set $r21, $r22, $r24, $r25, $r28, $r31;
+        java.awt.Component $r19, $r20, $r33;
+        javax.swing.JSplitPane $r1, $r2, $r4, $r11, $r13, $r17, $r18, $r23, $r26, $r36;
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        java.util.HashSet $r27, $r30;
+        int $i0, $i1, $i2, $i3;
+        java.lang.Boolean $r3;
+        java.lang.Object $r37;
+        javax.swing.plaf.basic.BasicSplitPaneDivider $r5, $r6, $r7, $r9, $r14, $r15, $r16, $r34;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        staticinvoke <javax.swing.LookAndFeel: void installBorder(javax.swing.JComponent,java.lang.String)>($r1, "SplitPane.border");
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        staticinvoke <javax.swing.LookAndFeel: void installColors(javax.swing.JComponent,java.lang.String,java.lang.String)>($r2, "SplitPane.background", "SplitPane.foreground");
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r3 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        staticinvoke <javax.swing.LookAndFeel: void installProperty(javax.swing.JComponent,java.lang.String,java.lang.Object)>($r4, "opaque", $r3);
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneDivider divider>;
+
+        if $r5 != null goto label1;
+
+        $r34 = virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneDivider createDefaultDivider()>();
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneDivider divider> = $r34;
+
+     label1:
+        $r6 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneDivider divider>;
+
+        virtualinvoke $r6.<javax.swing.plaf.basic.BasicSplitPaneDivider: void setBasicSplitPaneUI(javax.swing.plaf.basic.BasicSplitPaneUI)>(r0);
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneDivider divider>;
+
+        $r8 = virtualinvoke $r7.<javax.swing.plaf.basic.BasicSplitPaneDivider: javax.swing.border.Border getBorder()>();
+
+        if $r8 == null goto label2;
+
+        $z1 = $r8 instanceof javax.swing.plaf.UIResource;
+
+        if $z1 != 0 goto label3;
+
+     label2:
+        $r9 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneDivider divider>;
+
+        $r10 = staticinvoke <javax.swing.UIManager: javax.swing.border.Border getBorder(java.lang.Object)>("SplitPaneDivider.border");
+
+        virtualinvoke $r9.<javax.swing.plaf.basic.BasicSplitPaneDivider: void setBorder(javax.swing.border.Border)>($r10);
+
+     label3:
+        $r35 = staticinvoke <javax.swing.UIManager: java.awt.Color getColor(java.lang.Object)>("SplitPaneDivider.draggingColor");
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.Color dividerDraggingColor> = $r35;
+
+        $r36 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $i2 = virtualinvoke $r36.<javax.swing.JSplitPane: int getOrientation()>();
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: void setOrientation(int)>($i2);
+
+        $r37 = staticinvoke <javax.swing.UIManager: java.lang.Object get(java.lang.Object)>("SplitPane.dividerSize");
+
+        $r38 = (java.lang.Integer) $r37;
+
+        $r11 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        if $r38 != null goto label4;
+
+        $i3 = 10;
+
+        goto label5;
+
+     label4:
+        $i3 = virtualinvoke $r38.<java.lang.Integer: int intValue()>();
+
+     label5:
+        $r12 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i3);
+
+        staticinvoke <javax.swing.LookAndFeel: void installProperty(javax.swing.JComponent,java.lang.String,java.lang.Object)>($r11, "dividerSize", $r12);
+
+        $r14 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneDivider divider>;
+
+        $r13 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $i0 = virtualinvoke $r13.<javax.swing.JSplitPane: int getDividerSize()>();
+
+        virtualinvoke $r14.<javax.swing.plaf.basic.BasicSplitPaneDivider: void setDividerSize(int)>($i0);
+
+        $r15 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneDivider divider>;
+
+        $i1 = virtualinvoke $r15.<javax.swing.plaf.basic.BasicSplitPaneDivider: int getDividerSize()>();
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int dividerSize> = $i1;
+
+        $r17 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r16 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneDivider divider>;
+
+        virtualinvoke $r17.<javax.swing.JSplitPane: void add(java.awt.Component,java.lang.Object)>($r16, "divider");
+
+        $r18 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $z0 = virtualinvoke $r18.<javax.swing.JSplitPane: boolean isContinuousLayout()>();
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: void setContinuousLayout(boolean)>($z0);
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: void resetLayoutManager()>();
+
+        $r19 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.Component nonContinuousLayoutDivider>;
+
+        if $r19 != null goto label6;
+
+        $r33 = virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.Component createDefaultNonContinuousLayoutDivider()>();
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: void setNonContinuousLayoutDivider(java.awt.Component,boolean)>($r33, 1);
+
+        goto label7;
+
+     label6:
+        $r20 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.Component nonContinuousLayoutDivider>;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: void setNonContinuousLayoutDivider(java.awt.Component,boolean)>($r20, 1);
+
+     label7:
+        $r21 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.util.Set managingFocusForwardTraversalKeys>;
+
+        if $r21 != null goto label8;
+
+        $r30 = new java.util.HashSet;
+
+        specialinvoke $r30.<java.util.HashSet: void <init>()>();
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.util.Set managingFocusForwardTraversalKeys> = $r30;
+
+        $r31 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.util.Set managingFocusForwardTraversalKeys>;
+
+        $r32 = staticinvoke <javax.swing.KeyStroke: javax.swing.KeyStroke getKeyStroke(int,int)>(9, 0);
+
+        interfaceinvoke $r31.<java.util.Set: boolean add(java.lang.Object)>($r32);
+
+     label8:
+        $r23 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r22 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.util.Set managingFocusForwardTraversalKeys>;
+
+        virtualinvoke $r23.<javax.swing.JSplitPane: void setFocusTraversalKeys(int,java.util.Set)>(0, $r22);
+
+        $r24 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.util.Set managingFocusBackwardTraversalKeys>;
+
+        if $r24 != null goto label9;
+
+        $r27 = new java.util.HashSet;
+
+        specialinvoke $r27.<java.util.HashSet: void <init>()>();
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.util.Set managingFocusBackwardTraversalKeys> = $r27;
+
+        $r28 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.util.Set managingFocusBackwardTraversalKeys>;
+
+        $r29 = staticinvoke <javax.swing.KeyStroke: javax.swing.KeyStroke getKeyStroke(int,int)>(9, 1);
+
+        interfaceinvoke $r28.<java.util.Set: boolean add(java.lang.Object)>($r29);
+
+     label9:
+        $r26 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r25 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.util.Set managingFocusBackwardTraversalKeys>;
+
+        virtualinvoke $r26.<javax.swing.JSplitPane: void setFocusTraversalKeys(int,java.util.Set)>(1, $r25);
+
+        return;
+    }
+
+    protected void installListeners()
+    {
+        java.awt.event.FocusListener $r2, $r3;
+        javax.swing.JSplitPane $r4, $r6;
+        java.beans.PropertyChangeListener $r1, $r5;
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $r1 = virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.beans.PropertyChangeListener createPropertyChangeListener()>();
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.beans.PropertyChangeListener propertyChangeListener> = $r1;
+
+        if $r1 == null goto label1;
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.beans.PropertyChangeListener propertyChangeListener>;
+
+        virtualinvoke $r6.<javax.swing.JSplitPane: void addPropertyChangeListener(java.beans.PropertyChangeListener)>($r5);
+
+     label1:
+        $r2 = virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.event.FocusListener createFocusListener()>();
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.event.FocusListener focusListener> = $r2;
+
+        if $r2 == null goto label2;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.event.FocusListener focusListener>;
+
+        virtualinvoke $r4.<javax.swing.JSplitPane: void addFocusListener(java.awt.event.FocusListener)>($r3);
+
+     label2:
+        return;
+    }
+
+    protected void installKeyboardActions()
+    {
+        javax.swing.JSplitPane $r2, $r3;
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        javax.swing.InputMap $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $r1 = virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.InputMap getInputMap(int)>(1);
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        staticinvoke <javax.swing.SwingUtilities: void replaceUIInputMap(javax.swing.JComponent,int,javax.swing.InputMap)>($r2, 1, $r1);
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        staticinvoke <javax.swing.plaf.basic.LazyActionMap: void installLazyActionMap(javax.swing.JComponent,java.lang.Class,java.lang.String)>($r3, class "Ljavax/swing/plaf/basic/BasicSplitPaneUI;", "SplitPane.actionMap");
+
+        return;
+    }
+
+    javax.swing.InputMap getInputMap(int)
+    {
+        javax.swing.JSplitPane $r1;
+        int i0;
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        java.lang.Object $r2;
+        javax.swing.InputMap $r3;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        i0 := @parameter0: int;
+
+        if i0 != 1 goto label1;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r2 = staticinvoke <sun.swing.DefaultLookup: java.lang.Object get(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String)>($r1, r0, "SplitPane.ancestorInputMap");
+
+        $r3 = (javax.swing.InputMap) $r2;
+
+        return $r3;
+
+     label1:
+        return null;
+    }
+
+    public void uninstallUI(javax.swing.JComponent)
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        javax.swing.JComponent r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: void uninstallKeyboardActions()>();
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: void uninstallListeners()>();
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: void uninstallDefaults()>();
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean dividerLocationIsSet> = 0;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean dividerKeyboardResize> = 0;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane> = null;
+
+        return;
+    }
+
+    protected void uninstallDefaults()
+    {
+        javax.swing.JSplitPane $r1, $r5, $r9, $r11, $r12, $r15, $r16;
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        javax.swing.border.Border $r7;
+        javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager $r3;
+        java.awt.LayoutManager $r2;
+        boolean $z0;
+        java.awt.Component $r4, $r14;
+        javax.swing.plaf.basic.BasicSplitPaneDivider $r6, $r8, $r10, $r13;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.JSplitPane: java.awt.LayoutManager getLayout()>();
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager layoutManager>;
+
+        if $r2 != $r3 goto label1;
+
+        $r16 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        virtualinvoke $r16.<javax.swing.JSplitPane: void setLayout(java.awt.LayoutManager)>(null);
+
+     label1:
+        $r4 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.Component nonContinuousLayoutDivider>;
+
+        if $r4 == null goto label2;
+
+        $r15 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r14 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.Component nonContinuousLayoutDivider>;
+
+        virtualinvoke $r15.<javax.swing.JSplitPane: void remove(java.awt.Component)>($r14);
+
+     label2:
+        $r5 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        staticinvoke <javax.swing.LookAndFeel: void uninstallBorder(javax.swing.JComponent)>($r5);
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneDivider divider>;
+
+        $r7 = virtualinvoke $r6.<javax.swing.plaf.basic.BasicSplitPaneDivider: javax.swing.border.Border getBorder()>();
+
+        $z0 = $r7 instanceof javax.swing.plaf.UIResource;
+
+        if $z0 == 0 goto label3;
+
+        $r13 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneDivider divider>;
+
+        virtualinvoke $r13.<javax.swing.plaf.basic.BasicSplitPaneDivider: void setBorder(javax.swing.border.Border)>(null);
+
+     label3:
+        $r9 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r8 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneDivider divider>;
+
+        virtualinvoke $r9.<javax.swing.JSplitPane: void remove(java.awt.Component)>($r8);
+
+        $r10 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneDivider divider>;
+
+        virtualinvoke $r10.<javax.swing.plaf.basic.BasicSplitPaneDivider: void setBasicSplitPaneUI(javax.swing.plaf.basic.BasicSplitPaneUI)>(null);
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager layoutManager> = null;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneDivider divider> = null;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.Component nonContinuousLayoutDivider> = null;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: void setNonContinuousLayoutDivider(java.awt.Component)>(null);
+
+        $r11 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        virtualinvoke $r11.<javax.swing.JSplitPane: void setFocusTraversalKeys(int,java.util.Set)>(0, null);
+
+        $r12 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        virtualinvoke $r12.<javax.swing.JSplitPane: void setFocusTraversalKeys(int,java.util.Set)>(1, null);
+
+        return;
+    }
+
+    protected void uninstallListeners()
+    {
+        java.awt.event.FocusListener $r2, $r3;
+        javax.swing.JSplitPane $r4, $r6;
+        java.beans.PropertyChangeListener $r1, $r5;
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.beans.PropertyChangeListener propertyChangeListener>;
+
+        if $r1 == null goto label1;
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.beans.PropertyChangeListener propertyChangeListener>;
+
+        virtualinvoke $r6.<javax.swing.JSplitPane: void removePropertyChangeListener(java.beans.PropertyChangeListener)>($r5);
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.beans.PropertyChangeListener propertyChangeListener> = null;
+
+     label1:
+        $r2 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.event.FocusListener focusListener>;
+
+        if $r2 == null goto label2;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.event.FocusListener focusListener>;
+
+        virtualinvoke $r4.<javax.swing.JSplitPane: void removeFocusListener(java.awt.event.FocusListener)>($r3);
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.event.FocusListener focusListener> = null;
+
+     label2:
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.event.ActionListener keyboardUpLeftListener> = null;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.event.ActionListener keyboardDownRightListener> = null;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.event.ActionListener keyboardHomeListener> = null;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.event.ActionListener keyboardEndListener> = null;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.event.ActionListener keyboardResizeToggleListener> = null;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneUI$Handler handler> = null;
+
+        return;
+    }
+
+    protected void uninstallKeyboardActions()
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        javax.swing.JSplitPane $r1, $r2;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        staticinvoke <javax.swing.SwingUtilities: void replaceUIActionMap(javax.swing.JComponent,javax.swing.ActionMap)>($r1, null);
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        staticinvoke <javax.swing.SwingUtilities: void replaceUIInputMap(javax.swing.JComponent,int,javax.swing.InputMap)>($r2, 1, null);
+
+        return;
+    }
+
+    protected java.beans.PropertyChangeListener createPropertyChangeListener()
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        javax.swing.plaf.basic.BasicSplitPaneUI$Handler $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneUI$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    private javax.swing.plaf.basic.BasicSplitPaneUI$Handler getHandler()
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        javax.swing.plaf.basic.BasicSplitPaneUI$Handler $r1, $r2, $r3;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneUI$Handler handler>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new javax.swing.plaf.basic.BasicSplitPaneUI$Handler;
+
+        specialinvoke $r3.<javax.swing.plaf.basic.BasicSplitPaneUI$Handler: void <init>(javax.swing.plaf.basic.BasicSplitPaneUI,javax.swing.plaf.basic.BasicSplitPaneUI$1)>(r0, null);
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneUI$Handler handler> = $r3;
+
+     label1:
+        $r2 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneUI$Handler handler>;
+
+        return $r2;
+    }
+
+    protected java.awt.event.FocusListener createFocusListener()
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        javax.swing.plaf.basic.BasicSplitPaneUI$Handler $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneUI$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    protected java.awt.event.ActionListener createKeyboardUpLeftListener()
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r1;
+        javax.swing.plaf.basic.BasicSplitPaneUI$KeyboardUpLeftHandler $r0;
+
+        r1 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $r0 = new javax.swing.plaf.basic.BasicSplitPaneUI$KeyboardUpLeftHandler;
+
+        specialinvoke $r0.<javax.swing.plaf.basic.BasicSplitPaneUI$KeyboardUpLeftHandler: void <init>(javax.swing.plaf.basic.BasicSplitPaneUI)>(r1);
+
+        return $r0;
+    }
+
+    protected java.awt.event.ActionListener createKeyboardDownRightListener()
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r1;
+        javax.swing.plaf.basic.BasicSplitPaneUI$KeyboardDownRightHandler $r0;
+
+        r1 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $r0 = new javax.swing.plaf.basic.BasicSplitPaneUI$KeyboardDownRightHandler;
+
+        specialinvoke $r0.<javax.swing.plaf.basic.BasicSplitPaneUI$KeyboardDownRightHandler: void <init>(javax.swing.plaf.basic.BasicSplitPaneUI)>(r1);
+
+        return $r0;
+    }
+
+    protected java.awt.event.ActionListener createKeyboardHomeListener()
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r1;
+        javax.swing.plaf.basic.BasicSplitPaneUI$KeyboardHomeHandler $r0;
+
+        r1 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $r0 = new javax.swing.plaf.basic.BasicSplitPaneUI$KeyboardHomeHandler;
+
+        specialinvoke $r0.<javax.swing.plaf.basic.BasicSplitPaneUI$KeyboardHomeHandler: void <init>(javax.swing.plaf.basic.BasicSplitPaneUI)>(r1);
+
+        return $r0;
+    }
+
+    protected java.awt.event.ActionListener createKeyboardEndListener()
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r1;
+        javax.swing.plaf.basic.BasicSplitPaneUI$KeyboardEndHandler $r0;
+
+        r1 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $r0 = new javax.swing.plaf.basic.BasicSplitPaneUI$KeyboardEndHandler;
+
+        specialinvoke $r0.<javax.swing.plaf.basic.BasicSplitPaneUI$KeyboardEndHandler: void <init>(javax.swing.plaf.basic.BasicSplitPaneUI)>(r1);
+
+        return $r0;
+    }
+
+    protected java.awt.event.ActionListener createKeyboardResizeToggleListener()
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r1;
+        javax.swing.plaf.basic.BasicSplitPaneUI$KeyboardResizeToggleHandler $r0;
+
+        r1 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $r0 = new javax.swing.plaf.basic.BasicSplitPaneUI$KeyboardResizeToggleHandler;
+
+        specialinvoke $r0.<javax.swing.plaf.basic.BasicSplitPaneUI$KeyboardResizeToggleHandler: void <init>(javax.swing.plaf.basic.BasicSplitPaneUI)>(r1);
+
+        return $r0;
+    }
+
+    public int getOrientation()
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        int $i0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $i0 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int orientation>;
+
+        return $i0;
+    }
+
+    public void setOrientation(int)
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        int i0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        i0 := @parameter0: int;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int orientation> = i0;
+
+        return;
+    }
+
+    public boolean isContinuousLayout()
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $z0 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean continuousLayout>;
+
+        return $z0;
+    }
+
+    public void setContinuousLayout(boolean)
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        boolean z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        z0 := @parameter0: boolean;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean continuousLayout> = z0;
+
+        return;
+    }
+
+    public int getLastDragLocation()
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        int $i0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $i0 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int lastDragLocation>;
+
+        return $i0;
+    }
+
+    public void setLastDragLocation(int)
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        int i0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        i0 := @parameter0: int;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int lastDragLocation> = i0;
+
+        return;
+    }
+
+    int getKeyboardMoveIncrement()
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        return 3;
+    }
+
+    public javax.swing.plaf.basic.BasicSplitPaneDivider getDivider()
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        javax.swing.plaf.basic.BasicSplitPaneDivider $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneDivider divider>;
+
+        return $r1;
+    }
+
+    protected java.awt.Component createDefaultNonContinuousLayoutDivider()
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI$1 $r0;
+        javax.swing.plaf.basic.BasicSplitPaneUI r1;
+
+        r1 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $r0 = new javax.swing.plaf.basic.BasicSplitPaneUI$1;
+
+        specialinvoke $r0.<javax.swing.plaf.basic.BasicSplitPaneUI$1: void <init>(javax.swing.plaf.basic.BasicSplitPaneUI)>(r1);
+
+        return $r0;
+    }
+
+    protected void setNonContinuousLayoutDivider(java.awt.Component)
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        java.awt.Component r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        r1 := @parameter0: java.awt.Component;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: void setNonContinuousLayoutDivider(java.awt.Component,boolean)>(r1, 1);
+
+        return;
+    }
+
+    protected void setNonContinuousLayoutDivider(java.awt.Component, boolean)
+    {
+        javax.swing.JSplitPane $r3, $r5;
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        java.awt.Component $r1, r2, $r4;
+        boolean z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        r2 := @parameter0: java.awt.Component;
+
+        z0 := @parameter1: boolean;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean rememberPaneSizes> = z0;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.Component nonContinuousLayoutDivider>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        if $r3 == null goto label1;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.Component nonContinuousLayoutDivider>;
+
+        virtualinvoke $r5.<javax.swing.JSplitPane: void remove(java.awt.Component)>($r4);
+
+     label1:
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.Component nonContinuousLayoutDivider> = r2;
+
+        return;
+    }
+
+    private void addHeavyweightDivider()
+    {
+        javax.swing.JSplitPane $r2, $r3, $r5, $r7, $r9, $r10, $r11, $r13, $r14, $r16, $r17, $r18, $r19;
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        int $i0, $i1;
+        boolean $z0;
+        java.awt.Component $r1, $r4, $r6, $r12;
+        javax.swing.plaf.basic.BasicSplitPaneDivider $r8, $r15;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.Component nonContinuousLayoutDivider>;
+
+        if $r1 == null goto label3;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        if $r2 == null goto label3;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r4 = virtualinvoke $r3.<javax.swing.JSplitPane: java.awt.Component getLeftComponent()>();
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r6 = virtualinvoke $r5.<javax.swing.JSplitPane: java.awt.Component getRightComponent()>();
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $i0 = virtualinvoke $r7.<javax.swing.JSplitPane: int getDividerLocation()>();
+
+        if $r4 == null goto label1;
+
+        $r19 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        virtualinvoke $r19.<javax.swing.JSplitPane: void setLeftComponent(java.awt.Component)>(null);
+
+     label1:
+        if $r6 == null goto label2;
+
+        $r18 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        virtualinvoke $r18.<javax.swing.JSplitPane: void setRightComponent(java.awt.Component)>(null);
+
+     label2:
+        $r9 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r8 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneDivider divider>;
+
+        virtualinvoke $r9.<javax.swing.JSplitPane: void remove(java.awt.Component)>($r8);
+
+        $r11 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r12 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.Component nonContinuousLayoutDivider>;
+
+        $r10 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $i1 = virtualinvoke $r10.<javax.swing.JSplitPane: int getComponentCount()>();
+
+        virtualinvoke $r11.<javax.swing.JSplitPane: void add(java.awt.Component,java.lang.Object,int)>($r12, "nonContinuousDivider", $i1);
+
+        $r13 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        virtualinvoke $r13.<javax.swing.JSplitPane: void setLeftComponent(java.awt.Component)>($r4);
+
+        $r14 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        virtualinvoke $r14.<javax.swing.JSplitPane: void setRightComponent(java.awt.Component)>($r6);
+
+        $r16 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r15 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneDivider divider>;
+
+        virtualinvoke $r16.<javax.swing.JSplitPane: void add(java.awt.Component,java.lang.Object)>($r15, "divider");
+
+        $z0 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean rememberPaneSizes>;
+
+        if $z0 == 0 goto label3;
+
+        $r17 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        virtualinvoke $r17.<javax.swing.JSplitPane: void setDividerLocation(int)>($i0);
+
+     label3:
+        return;
+    }
+
+    public java.awt.Component getNonContinuousLayoutDivider()
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        java.awt.Component $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.Component nonContinuousLayoutDivider>;
+
+        return $r1;
+    }
+
+    public javax.swing.JSplitPane getSplitPane()
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        javax.swing.JSplitPane $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        return $r1;
+    }
+
+    public javax.swing.plaf.basic.BasicSplitPaneDivider createDefaultDivider()
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r1;
+        javax.swing.plaf.basic.BasicSplitPaneDivider $r0;
+
+        r1 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $r0 = new javax.swing.plaf.basic.BasicSplitPaneDivider;
+
+        specialinvoke $r0.<javax.swing.plaf.basic.BasicSplitPaneDivider: void <init>(javax.swing.plaf.basic.BasicSplitPaneUI)>(r1);
+
+        return $r0;
+    }
+
+    public void resetToPreferredSizes(javax.swing.JSplitPane)
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager $r2;
+        javax.swing.JSplitPane $r1, $r3, $r4, r5;
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        r5 := @parameter0: javax.swing.JSplitPane;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager layoutManager>;
+
+        virtualinvoke $r2.<javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager: void resetToPreferredSizes()>();
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        virtualinvoke $r3.<javax.swing.JSplitPane: void revalidate()>();
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        virtualinvoke $r4.<javax.swing.JSplitPane: void repaint()>();
+
+     label1:
+        return;
+    }
+
+    public void setDividerLocation(javax.swing.JSplitPane, int)
+    {
+        java.awt.Insets $r4;
+        javax.swing.JSplitPane $r1, $r2, $r3, $r5, $r6, $r8, r10;
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        int $i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13;
+        boolean $z0, $z1;
+        javax.swing.plaf.basic.BasicSplitPaneDivider $r7, $r9;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        r10 := @parameter0: javax.swing.JSplitPane;
+
+        i1 := @parameter1: int;
+
+        $z0 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean ignoreDividerLocationChange>;
+
+        if $z0 != 0 goto label4;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean dividerLocationIsSet> = 1;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        virtualinvoke $r1.<javax.swing.JSplitPane: void revalidate()>();
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        virtualinvoke $r2.<javax.swing.JSplitPane: void repaint()>();
+
+        $z1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean keepHidden>;
+
+        if $z1 == 0 goto label5;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r4 = virtualinvoke $r3.<javax.swing.JSplitPane: java.awt.Insets getInsets()>();
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $i0 = virtualinvoke $r5.<javax.swing.JSplitPane: int getOrientation()>();
+
+        if $i0 != 0 goto label1;
+
+        $i8 = $r4.<java.awt.Insets: int top>;
+
+        if i1 == $i8 goto label1;
+
+        $r8 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $i9 = virtualinvoke $r8.<javax.swing.JSplitPane: int getHeight()>();
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneDivider divider>;
+
+        $i10 = virtualinvoke $r9.<javax.swing.plaf.basic.BasicSplitPaneDivider: int getHeight()>();
+
+        $i12 = $i9 - $i10;
+
+        $i11 = $r4.<java.awt.Insets: int top>;
+
+        $i13 = $i12 - $i11;
+
+        if i1 != $i13 goto label2;
+
+     label1:
+        if $i0 != 1 goto label3;
+
+        $i2 = $r4.<java.awt.Insets: int left>;
+
+        if i1 == $i2 goto label3;
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $i3 = virtualinvoke $r6.<javax.swing.JSplitPane: int getWidth()>();
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneDivider divider>;
+
+        $i4 = virtualinvoke $r7.<javax.swing.plaf.basic.BasicSplitPaneDivider: int getWidth()>();
+
+        $i6 = $i3 - $i4;
+
+        $i5 = $r4.<java.awt.Insets: int left>;
+
+        $i7 = $i6 - $i5;
+
+        if i1 == $i7 goto label3;
+
+     label2:
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: void setKeepHidden(boolean)>(0);
+
+     label3:
+        goto label5;
+
+     label4:
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean ignoreDividerLocationChange> = 0;
+
+     label5:
+        return;
+    }
+
+    public int getDividerLocation(javax.swing.JSplitPane)
+    {
+        javax.swing.JSplitPane r5;
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        java.awt.Point $r2, $r4;
+        int $i0, $i1, $i2;
+        javax.swing.plaf.basic.BasicSplitPaneDivider $r1, $r3;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        r5 := @parameter0: javax.swing.JSplitPane;
+
+        $i0 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int orientation>;
+
+        if $i0 != 1 goto label1;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneDivider divider>;
+
+        $r4 = virtualinvoke $r3.<javax.swing.plaf.basic.BasicSplitPaneDivider: java.awt.Point getLocation()>();
+
+        $i2 = $r4.<java.awt.Point: int x>;
+
+        return $i2;
+
+     label1:
+        $r1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneDivider divider>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.plaf.basic.BasicSplitPaneDivider: java.awt.Point getLocation()>();
+
+        $i1 = $r2.<java.awt.Point: int y>;
+
+        return $i1;
+    }
+
+    public int getMinimumDividerLocation(javax.swing.JSplitPane)
+    {
+        java.awt.Insets $r4;
+        javax.swing.JSplitPane $r1, $r3, r6;
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        java.awt.Component $r2;
+        java.awt.Dimension $r5;
+        int $i0, $i1, $i2, $i3, i4;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        r6 := @parameter0: javax.swing.JSplitPane;
+
+        i4 = 0;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.JSplitPane: java.awt.Component getLeftComponent()>();
+
+        if $r2 == null goto label4;
+
+        $z0 = virtualinvoke $r2.<java.awt.Component: boolean isVisible()>();
+
+        if $z0 == 0 goto label4;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r4 = virtualinvoke $r3.<javax.swing.JSplitPane: java.awt.Insets getInsets()>();
+
+        $r5 = virtualinvoke $r2.<java.awt.Component: java.awt.Dimension getMinimumSize()>();
+
+        $i0 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int orientation>;
+
+        if $i0 != 1 goto label1;
+
+        i4 = $r5.<java.awt.Dimension: int width>;
+
+        goto label2;
+
+     label1:
+        i4 = $r5.<java.awt.Dimension: int height>;
+
+     label2:
+        if $r4 == null goto label4;
+
+        $i1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int orientation>;
+
+        if $i1 != 1 goto label3;
+
+        $i3 = $r4.<java.awt.Insets: int left>;
+
+        i4 = i4 + $i3;
+
+        goto label4;
+
+     label3:
+        $i2 = $r4.<java.awt.Insets: int top>;
+
+        i4 = i4 + $i2;
+
+     label4:
+        return i4;
+    }
+
+    public int getMaximumDividerLocation(javax.swing.JSplitPane)
+    {
+        java.awt.Insets $r6;
+        javax.swing.JSplitPane $r1, $r3, $r5, r8, $r10;
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, i10, i11, $i12, $i13;
+        boolean $z0;
+        java.awt.Component $r4;
+        java.awt.Dimension $r2, $r7, r9;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        r8 := @parameter0: javax.swing.JSplitPane;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.JSplitPane: java.awt.Dimension getSize()>();
+
+        i10 = 0;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r4 = virtualinvoke $r3.<javax.swing.JSplitPane: java.awt.Component getRightComponent()>();
+
+        if $r4 == null goto label5;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r6 = virtualinvoke $r5.<javax.swing.JSplitPane: java.awt.Insets getInsets()>();
+
+        $r7 = new java.awt.Dimension;
+
+        specialinvoke $r7.<java.awt.Dimension: void <init>(int,int)>(0, 0);
+
+        r9 = $r7;
+
+        $z0 = virtualinvoke $r4.<java.awt.Component: boolean isVisible()>();
+
+        if $z0 == 0 goto label1;
+
+        r9 = virtualinvoke $r4.<java.awt.Component: java.awt.Dimension getMinimumSize()>();
+
+     label1:
+        $i0 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int orientation>;
+
+        if $i0 != 1 goto label2;
+
+        $i8 = $r2.<java.awt.Dimension: int width>;
+
+        $i7 = r9.<java.awt.Dimension: int width>;
+
+        i11 = $i8 - $i7;
+
+        goto label3;
+
+     label2:
+        $i2 = $r2.<java.awt.Dimension: int height>;
+
+        $i1 = r9.<java.awt.Dimension: int height>;
+
+        i11 = $i2 - $i1;
+
+     label3:
+        $i3 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int dividerSize>;
+
+        $i9 = i11 - $i3;
+
+        i10 = $i9;
+
+        if $r6 == null goto label5;
+
+        $i4 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int orientation>;
+
+        if $i4 != 1 goto label4;
+
+        $i6 = $r6.<java.awt.Insets: int right>;
+
+        i10 = $i9 - $i6;
+
+        goto label5;
+
+     label4:
+        $i5 = $r6.<java.awt.Insets: int top>;
+
+        i10 = $i9 - $i5;
+
+     label5:
+        $r10 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $i12 = virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int getMinimumDividerLocation(javax.swing.JSplitPane)>($r10);
+
+        $i13 = staticinvoke <java.lang.Math: int max(int,int)>($i12, i10);
+
+        return $i13;
+    }
+
+    public void finishedPaintingChildren(javax.swing.JSplitPane, java.awt.Graphics)
+    {
+        java.awt.Color $r6;
+        javax.swing.JSplitPane r0, $r2, $r3;
+        javax.swing.plaf.basic.BasicSplitPaneUI r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i13;
+        boolean $z0, $z1;
+        java.awt.Dimension $r4;
+        java.awt.Graphics r5;
+
+        r1 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        r0 := @parameter0: javax.swing.JSplitPane;
+
+        r5 := @parameter1: java.awt.Graphics;
+
+        $r2 = r1.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        if r0 != $r2 goto label2;
+
+        $i0 = virtualinvoke r1.<javax.swing.plaf.basic.BasicSplitPaneUI: int getLastDragLocation()>();
+
+        $i13 = (int) -1;
+
+        if $i0 == $i13 goto label2;
+
+        $z0 = virtualinvoke r1.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean isContinuousLayout()>();
+
+        if $z0 != 0 goto label2;
+
+        $z1 = r1.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean draggingHW>;
+
+        if $z1 != 0 goto label2;
+
+        $r3 = r1.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r4 = virtualinvoke $r3.<javax.swing.JSplitPane: java.awt.Dimension getSize()>();
+
+        $r6 = r1.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.Color dividerDraggingColor>;
+
+        virtualinvoke r5.<java.awt.Graphics: void setColor(java.awt.Color)>($r6);
+
+        $i1 = r1.<javax.swing.plaf.basic.BasicSplitPaneUI: int orientation>;
+
+        if $i1 != 1 goto label1;
+
+        $i7 = virtualinvoke r1.<javax.swing.plaf.basic.BasicSplitPaneUI: int getLastDragLocation()>();
+
+        $i8 = r1.<javax.swing.plaf.basic.BasicSplitPaneUI: int dividerSize>;
+
+        $i11 = $i8 - 1;
+
+        $i9 = $r4.<java.awt.Dimension: int height>;
+
+        $i10 = $i9 - 1;
+
+        virtualinvoke r5.<java.awt.Graphics: void fillRect(int,int,int,int)>($i7, 0, $i11, $i10);
+
+        goto label2;
+
+     label1:
+        $i6 = r1.<javax.swing.plaf.basic.BasicSplitPaneUI: int lastDragLocation>;
+
+        $i2 = $r4.<java.awt.Dimension: int width>;
+
+        $i5 = $i2 - 1;
+
+        $i3 = r1.<javax.swing.plaf.basic.BasicSplitPaneUI: int dividerSize>;
+
+        $i4 = $i3 - 1;
+
+        virtualinvoke r5.<java.awt.Graphics: void fillRect(int,int,int,int)>(0, $i6, $i5, $i4);
+
+     label2:
+        return;
+    }
+
+    public void paint(java.awt.Graphics, javax.swing.JComponent)
+    {
+        javax.swing.JComponent r5;
+        javax.swing.JSplitPane $r1, $r2, $r3;
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        int $i0, $i1;
+        java.awt.Graphics r4;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        r4 := @parameter0: java.awt.Graphics;
+
+        r5 := @parameter1: javax.swing.JComponent;
+
+        $z0 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean painted>;
+
+        if $z0 != 0 goto label1;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $i0 = virtualinvoke $r1.<javax.swing.JSplitPane: int getDividerLocation()>();
+
+        if $i0 >= 0 goto label1;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean ignoreDividerLocationChange> = 1;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $i1 = virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int getDividerLocation(javax.swing.JSplitPane)>($r2);
+
+        virtualinvoke $r3.<javax.swing.JSplitPane: void setDividerLocation(int)>($i1);
+
+     label1:
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean painted> = 1;
+
+        return;
+    }
+
+    public java.awt.Dimension getPreferredSize(javax.swing.JComponent)
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager $r4;
+        javax.swing.JComponent r6;
+        java.awt.Dimension $r2, $r5;
+        javax.swing.JSplitPane $r1, $r3;
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        r6 := @parameter0: javax.swing.JComponent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        if $r1 == null goto label1;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager layoutManager>;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r5 = virtualinvoke $r4.<javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager: java.awt.Dimension preferredLayoutSize(java.awt.Container)>($r3);
+
+        return $r5;
+
+     label1:
+        $r2 = new java.awt.Dimension;
+
+        specialinvoke $r2.<java.awt.Dimension: void <init>(int,int)>(0, 0);
+
+        return $r2;
+    }
+
+    public java.awt.Dimension getMinimumSize(javax.swing.JComponent)
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager $r4;
+        javax.swing.JComponent r6;
+        java.awt.Dimension $r2, $r5;
+        javax.swing.JSplitPane $r1, $r3;
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        r6 := @parameter0: javax.swing.JComponent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        if $r1 == null goto label1;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager layoutManager>;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r5 = virtualinvoke $r4.<javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager: java.awt.Dimension minimumLayoutSize(java.awt.Container)>($r3);
+
+        return $r5;
+
+     label1:
+        $r2 = new java.awt.Dimension;
+
+        specialinvoke $r2.<java.awt.Dimension: void <init>(int,int)>(0, 0);
+
+        return $r2;
+    }
+
+    public java.awt.Dimension getMaximumSize(javax.swing.JComponent)
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager $r4;
+        javax.swing.JComponent r6;
+        java.awt.Dimension $r2, $r5;
+        javax.swing.JSplitPane $r1, $r3;
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        r6 := @parameter0: javax.swing.JComponent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        if $r1 == null goto label1;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager layoutManager>;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r5 = virtualinvoke $r4.<javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager: java.awt.Dimension maximumLayoutSize(java.awt.Container)>($r3);
+
+        return $r5;
+
+     label1:
+        $r2 = new java.awt.Dimension;
+
+        specialinvoke $r2.<java.awt.Dimension: void <init>(int,int)>(0, 0);
+
+        return $r2;
+    }
+
+    public java.awt.Insets getInsets(javax.swing.JComponent)
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        javax.swing.JComponent r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        return null;
+    }
+
+    protected void resetLayoutManager()
+    {
+        javax.swing.JSplitPane $r3, $r5, $r6;
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager $r1, $r2, $r4, $r7;
+        int $i0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $i0 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int orientation>;
+
+        if $i0 != 1 goto label1;
+
+        $r7 = new javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager;
+
+        specialinvoke $r7.<javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager: void <init>(javax.swing.plaf.basic.BasicSplitPaneUI,int)>(r0, 0);
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager layoutManager> = $r7;
+
+        goto label2;
+
+     label1:
+        $r1 = new javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager;
+
+        specialinvoke $r1.<javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager: void <init>(javax.swing.plaf.basic.BasicSplitPaneUI,int)>(r0, 1);
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager layoutManager> = $r1;
+
+     label2:
+        $r3 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager layoutManager>;
+
+        virtualinvoke $r3.<javax.swing.JSplitPane: void setLayout(java.awt.LayoutManager)>($r2);
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager layoutManager>;
+
+        virtualinvoke $r4.<javax.swing.plaf.basic.BasicSplitPaneUI$BasicHorizontalLayoutManager: void updateComponents()>();
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        virtualinvoke $r5.<javax.swing.JSplitPane: void revalidate()>();
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        virtualinvoke $r6.<javax.swing.JSplitPane: void repaint()>();
+
+        return;
+    }
+
+    void setKeepHidden(boolean)
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        boolean z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        z0 := @parameter0: boolean;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean keepHidden> = z0;
+
+        return;
+    }
+
+    private boolean getKeepHidden()
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $z0 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean keepHidden>;
+
+        return $z0;
+    }
+
+    protected void startDragging()
+    {
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.awt.peer.ComponentPeer $r18, $r19;
+        java.awt.Component $r2, $r4, $r10, $r16;
+        java.awt.Dimension $r9, $r15;
+        java.awt.Rectangle $r7, $r13;
+        javax.swing.JSplitPane $r1, $r3, $r5, $r11, $r17;
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11;
+        javax.swing.plaf.basic.BasicSplitPaneDivider $r6, $r8, $r12, $r14;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.JSplitPane: java.awt.Component getLeftComponent()>();
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r4 = virtualinvoke $r3.<javax.swing.JSplitPane: java.awt.Component getRightComponent()>();
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $i0 = virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int getDividerLocation(javax.swing.JSplitPane)>($r5);
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int beginDragDividerLocation> = $i0;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean draggingHW> = 0;
+
+        if $r2 == null goto label1;
+
+        $r19 = virtualinvoke $r2.<java.awt.Component: java.awt.peer.ComponentPeer getPeer()>();
+
+        if $r19 == null goto label1;
+
+        $z5 = $r19 instanceof java.awt.peer.LightweightPeer;
+
+        if $z5 != 0 goto label1;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean draggingHW> = 1;
+
+        goto label2;
+
+     label1:
+        if $r4 == null goto label2;
+
+        $r18 = virtualinvoke $r4.<java.awt.Component: java.awt.peer.ComponentPeer getPeer()>();
+
+        if $r18 == null goto label2;
+
+        $z4 = $r18 instanceof java.awt.peer.LightweightPeer;
+
+        if $z4 != 0 goto label2;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean draggingHW> = 1;
+
+     label2:
+        $i11 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int orientation>;
+
+        if $i11 != 1 goto label3;
+
+        $r12 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneDivider divider>;
+
+        $r13 = virtualinvoke $r12.<javax.swing.plaf.basic.BasicSplitPaneDivider: java.awt.Rectangle getBounds()>();
+
+        $i6 = $r13.<java.awt.Rectangle: int x>;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: void setLastDragLocation(int)>($i6);
+
+        $r14 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneDivider divider>;
+
+        $r15 = virtualinvoke $r14.<javax.swing.plaf.basic.BasicSplitPaneDivider: java.awt.Dimension getSize()>();
+
+        $i7 = $r15.<java.awt.Dimension: int width>;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int dividerSize> = $i7;
+
+        $z2 = virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean isContinuousLayout()>();
+
+        if $z2 != 0 goto label4;
+
+        $z3 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean draggingHW>;
+
+        if $z3 == 0 goto label4;
+
+        $r16 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.Component nonContinuousLayoutDivider>;
+
+        $i8 = virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int getLastDragLocation()>();
+
+        $i9 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int dividerSize>;
+
+        $r17 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $i10 = virtualinvoke $r17.<javax.swing.JSplitPane: int getHeight()>();
+
+        virtualinvoke $r16.<java.awt.Component: void setBounds(int,int,int,int)>($i8, 0, $i9, $i10);
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: void addHeavyweightDivider()>();
+
+        goto label4;
+
+     label3:
+        $r6 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneDivider divider>;
+
+        $r7 = virtualinvoke $r6.<javax.swing.plaf.basic.BasicSplitPaneDivider: java.awt.Rectangle getBounds()>();
+
+        $i1 = $r7.<java.awt.Rectangle: int y>;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: void setLastDragLocation(int)>($i1);
+
+        $r8 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneDivider divider>;
+
+        $r9 = virtualinvoke $r8.<javax.swing.plaf.basic.BasicSplitPaneDivider: java.awt.Dimension getSize()>();
+
+        $i2 = $r9.<java.awt.Dimension: int height>;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int dividerSize> = $i2;
+
+        $z0 = virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean isContinuousLayout()>();
+
+        if $z0 != 0 goto label4;
+
+        $z1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean draggingHW>;
+
+        if $z1 == 0 goto label4;
+
+        $r10 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.Component nonContinuousLayoutDivider>;
+
+        $i3 = virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int getLastDragLocation()>();
+
+        $r11 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $i4 = virtualinvoke $r11.<javax.swing.JSplitPane: int getWidth()>();
+
+        $i5 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int dividerSize>;
+
+        virtualinvoke $r10.<java.awt.Component: void setBounds(int,int,int,int)>(0, $i3, $i4, $i5);
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: void addHeavyweightDivider()>();
+
+     label4:
+        return;
+    }
+
+    protected void dragDividerTo(int)
+    {
+        javax.swing.JSplitPane $r1, $r2, $r3, $r5, $r6, $r7, $r9;
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        int $i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11;
+        boolean $z0, $z1, $z2;
+        java.awt.Component $r4, $r8;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        i1 := @parameter0: int;
+
+        $i0 = virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int getLastDragLocation()>();
+
+        if $i0 == i1 goto label5;
+
+        $z0 = virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean isContinuousLayout()>();
+
+        if $z0 == 0 goto label1;
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        virtualinvoke $r9.<javax.swing.JSplitPane: void setDividerLocation(int)>(i1);
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: void setLastDragLocation(int)>(i1);
+
+        goto label5;
+
+     label1:
+        $i2 = virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int getLastDragLocation()>();
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: void setLastDragLocation(int)>(i1);
+
+        $i3 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int orientation>;
+
+        if $i3 != 1 goto label3;
+
+        $z2 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean draggingHW>;
+
+        if $z2 == 0 goto label2;
+
+        $r8 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.Component nonContinuousLayoutDivider>;
+
+        $i11 = virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int getLastDragLocation()>();
+
+        virtualinvoke $r8.<java.awt.Component: void setLocation(int,int)>($i11, 0);
+
+        goto label5;
+
+     label2:
+        $r5 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $i8 = virtualinvoke $r5.<javax.swing.JSplitPane: int getHeight()>();
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $i9 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int dividerSize>;
+
+        virtualinvoke $r6.<javax.swing.JSplitPane: void repaint(int,int,int,int)>($i2, 0, $i9, $i8);
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $i10 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int dividerSize>;
+
+        virtualinvoke $r7.<javax.swing.JSplitPane: void repaint(int,int,int,int)>(i1, 0, $i10, $i8);
+
+        goto label5;
+
+     label3:
+        $z1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean draggingHW>;
+
+        if $z1 == 0 goto label4;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.Component nonContinuousLayoutDivider>;
+
+        $i7 = virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int getLastDragLocation()>();
+
+        virtualinvoke $r4.<java.awt.Component: void setLocation(int,int)>(0, $i7);
+
+        goto label5;
+
+     label4:
+        $r1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $i4 = virtualinvoke $r1.<javax.swing.JSplitPane: int getWidth()>();
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $i5 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int dividerSize>;
+
+        virtualinvoke $r2.<javax.swing.JSplitPane: void repaint(int,int,int,int)>(0, $i2, $i4, $i5);
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $i6 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int dividerSize>;
+
+        virtualinvoke $r3.<javax.swing.JSplitPane: void repaint(int,int,int,int)>(0, i1, $i4, $i6);
+
+     label5:
+        return;
+    }
+
+    protected void finishDraggingTo(int)
+    {
+        javax.swing.JSplitPane $r1, $r5, $r7;
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i7;
+        boolean $z0, $z1;
+        java.awt.Component $r2, $r3, $r4, $r6;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        i0 := @parameter0: int;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: void dragDividerTo(int)>(i0);
+
+        $i7 = (int) -1;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: void setLastDragLocation(int)>($i7);
+
+        $z0 = virtualinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean isContinuousLayout()>();
+
+        if $z0 != 0 goto label4;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.JSplitPane: java.awt.Component getLeftComponent()>();
+
+        virtualinvoke $r2.<java.awt.Component: java.awt.Rectangle getBounds()>();
+
+        $z1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean draggingHW>;
+
+        if $z1 == 0 goto label3;
+
+        $i1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int orientation>;
+
+        if $i1 != 1 goto label1;
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.Component nonContinuousLayoutDivider>;
+
+        $i4 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int dividerSize>;
+
+        $i5 = neg $i4;
+
+        virtualinvoke $r6.<java.awt.Component: void setLocation(int,int)>($i5, 0);
+
+        goto label2;
+
+     label1:
+        $r3 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.Component nonContinuousLayoutDivider>;
+
+        $i2 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int dividerSize>;
+
+        $i3 = neg $i2;
+
+        virtualinvoke $r3.<java.awt.Component: void setLocation(int,int)>(0, $i3);
+
+     label2:
+        $r5 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.Component nonContinuousLayoutDivider>;
+
+        virtualinvoke $r5.<javax.swing.JSplitPane: void remove(java.awt.Component)>($r4);
+
+     label3:
+        $r7 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.JSplitPane splitPane>;
+
+        virtualinvoke $r7.<javax.swing.JSplitPane: void setDividerLocation(int)>(i0);
+
+     label4:
+        return;
+    }
+
+    protected int getDividerBorderSize()
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        return 1;
+    }
+
+    static javax.swing.plaf.basic.BasicSplitPaneUI$Handler access$100(javax.swing.plaf.basic.BasicSplitPaneUI)
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        javax.swing.plaf.basic.BasicSplitPaneUI$Handler $r1;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: javax.swing.plaf.basic.BasicSplitPaneUI$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    static boolean access$200(javax.swing.plaf.basic.BasicSplitPaneUI)
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        boolean $z0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $z0 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean dividerKeyboardResize>;
+
+        return $z0;
+    }
+
+    static int access$300(javax.swing.plaf.basic.BasicSplitPaneUI)
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        int $i0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $i0 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int orientation>;
+
+        return $i0;
+    }
+
+    static java.awt.Color access$400(javax.swing.plaf.basic.BasicSplitPaneUI)
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        java.awt.Color $r1;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: java.awt.Color dividerDraggingColor>;
+
+        return $r1;
+    }
+
+    static boolean access$500(javax.swing.plaf.basic.BasicSplitPaneUI)
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        boolean $z0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $z0 = r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean dividerLocationIsSet>;
+
+        return $z0;
+    }
+
+    static boolean access$502(javax.swing.plaf.basic.BasicSplitPaneUI, boolean)
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        boolean z0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        z0 := @parameter1: boolean;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean dividerLocationIsSet> = z0;
+
+        return z0;
+    }
+
+    static boolean access$600(javax.swing.plaf.basic.BasicSplitPaneUI)
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        boolean $z0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        $z0 = specialinvoke r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean getKeepHidden()>();
+
+        return $z0;
+    }
+
+    static int access$302(javax.swing.plaf.basic.BasicSplitPaneUI, int)
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        int i0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        i0 := @parameter1: int;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: int orientation> = i0;
+
+        return i0;
+    }
+
+    static boolean access$202(javax.swing.plaf.basic.BasicSplitPaneUI, boolean)
+    {
+        javax.swing.plaf.basic.BasicSplitPaneUI r0;
+        boolean z0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicSplitPaneUI;
+
+        z0 := @parameter1: boolean;
+
+        r0.<javax.swing.plaf.basic.BasicSplitPaneUI: boolean dividerKeyboardResize> = z0;
+
+        return z0;
+    }
+
+    static void <clinit>()
+    {
+        <javax.swing.plaf.basic.BasicSplitPaneUI: java.lang.String NON_CONTINUOUS_DIVIDER> = "nonContinuousDivider";
+
+        <javax.swing.plaf.basic.BasicSplitPaneUI: int KEYBOARD_DIVIDER_MOVE_OFFSET> = 3;
+
+        return;
+    }
+}

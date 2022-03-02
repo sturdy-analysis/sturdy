@@ -1,0 +1,395 @@
+final class sun.security.ssl.SSLContextImpl$DefaultManagersHolder extends java.lang.Object
+{
+    private static final java.lang.String NONE;
+    private static final java.lang.String P11KEYSTORE;
+    private static final javax.net.ssl.TrustManager[] trustManagers;
+    private static final javax.net.ssl.KeyManager[] keyManagers;
+    private static final java.lang.Exception reservedException;
+
+    private void <init>()
+    {
+        sun.security.ssl.SSLContextImpl$DefaultManagersHolder r0;
+
+        r0 := @this: sun.security.ssl.SSLContextImpl$DefaultManagersHolder;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static javax.net.ssl.TrustManager[] getTrustManagers() throws java.lang.Exception
+    {
+        javax.net.ssl.TrustManagerFactory $r1;
+        java.security.KeyStore $r5;
+        java.security.Provider $r3;
+        javax.net.ssl.TrustManager[] $r6;
+        java.lang.String $r0, $r2, $r4;
+        boolean $z0;
+
+        $r0 = staticinvoke <javax.net.ssl.TrustManagerFactory: java.lang.String getDefaultAlgorithm()>();
+
+        $r1 = staticinvoke <javax.net.ssl.TrustManagerFactory: javax.net.ssl.TrustManagerFactory getInstance(java.lang.String)>($r0);
+
+        $r2 = "SunJSSE";
+
+        $r3 = virtualinvoke $r1.<javax.net.ssl.TrustManagerFactory: java.security.Provider getProvider()>();
+
+        $r4 = virtualinvoke $r3.<java.security.Provider: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke $r1.<javax.net.ssl.TrustManagerFactory: void init(java.security.KeyStore)>(null);
+
+        goto label2;
+
+     label1:
+        $r5 = staticinvoke <sun.security.ssl.TrustStoreManager: java.security.KeyStore getTrustedKeyStore()>();
+
+        virtualinvoke $r1.<javax.net.ssl.TrustManagerFactory: void init(java.security.KeyStore)>($r5);
+
+     label2:
+        $r6 = virtualinvoke $r1.<javax.net.ssl.TrustManagerFactory: javax.net.ssl.TrustManager[] getTrustManagers()>();
+
+        return $r6;
+    }
+
+    private static javax.net.ssl.KeyManager[] getKeyManagers() throws java.lang.Exception
+    {
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12;
+        java.security.KeyStore r39;
+        java.lang.StringBuilder $r9, $r10, $r12, $r21, $r22, $r23, $r26, $r27, $r28, $r31, $r32, $r33;
+        java.lang.Throwable $r36;
+        java.lang.Object[] $r14, $r15, $r25, $r30, $r35;
+        java.util.HashMap $r0;
+        sun.security.ssl.SSLContextImpl$DefaultManagersHolder$1 $r1;
+        sun.security.ssl.SSLContextImpl$DefaultManagersHolder$2 $r17;
+        int $i0;
+        java.lang.String r3, r5, r7, $r11, $r13, $r16, $r19, $r24, $r29, $r34, $r37, $r42, $r43, $r45;
+        javax.net.ssl.KeyManagerFactory $r44;
+        java.io.FileInputStream r38;
+        java.lang.IllegalArgumentException $r20;
+        char[] r40;
+        java.lang.Object $r2, $r4, $r6, $r18, $r41;
+        javax.net.ssl.KeyManager[] $r8;
+
+        $r0 = new java.util.HashMap;
+
+        specialinvoke $r0.<java.util.HashMap: void <init>()>();
+
+        $r1 = new sun.security.ssl.SSLContextImpl$DefaultManagersHolder$1;
+
+        specialinvoke $r1.<sun.security.ssl.SSLContextImpl$DefaultManagersHolder$1: void <init>(java.util.Map)>($r0);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r1);
+
+        $r2 = interfaceinvoke $r0.<java.util.Map: java.lang.Object get(java.lang.Object)>("keyStore");
+
+        r3 = (java.lang.String) $r2;
+
+        $r4 = interfaceinvoke $r0.<java.util.Map: java.lang.Object get(java.lang.Object)>("keyStoreType");
+
+        r5 = (java.lang.String) $r4;
+
+        $r6 = interfaceinvoke $r0.<java.util.Map: java.lang.Object get(java.lang.Object)>("keyStoreProvider");
+
+        r7 = (java.lang.String) $r6;
+
+        $z0 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z0 == 0 goto label01;
+
+        $z8 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,defaultctx");
+
+        if $z8 == 0 goto label01;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("keyStore is : ");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r25 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r24, $r25);
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("keyStore type is : ");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r30 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r29, $r30);
+
+        $r31 = new java.lang.StringBuilder;
+
+        specialinvoke $r31.<java.lang.StringBuilder: void <init>()>();
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("keyStore provider is : ");
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r7);
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r35 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r34, $r35);
+
+     label01:
+        $r37 = "PKCS11";
+
+        $z9 = virtualinvoke $r37.<java.lang.String: boolean equals(java.lang.Object)>(r5);
+
+        if $z9 == 0 goto label02;
+
+        $r19 = "NONE";
+
+        $z7 = virtualinvoke $r19.<java.lang.String: boolean equals(java.lang.Object)>(r3);
+
+        if $z7 != 0 goto label02;
+
+        $r20 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r20.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("if keyStoreType is PKCS11, then keyStore must be NONE");
+
+        throw $r20;
+
+     label02:
+        r38 = null;
+
+        r39 = null;
+
+        r40 = null;
+
+     label03:
+        $z1 = virtualinvoke r3.<java.lang.String: boolean isEmpty()>();
+
+        if $z1 != 0 goto label04;
+
+        $r16 = "NONE";
+
+        $z6 = virtualinvoke $r16.<java.lang.String: boolean equals(java.lang.Object)>(r3);
+
+        if $z6 != 0 goto label04;
+
+        $r17 = new sun.security.ssl.SSLContextImpl$DefaultManagersHolder$2;
+
+        specialinvoke $r17.<sun.security.ssl.SSLContextImpl$DefaultManagersHolder$2: void <init>(java.lang.String)>(r3);
+
+        $r18 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r17);
+
+        r38 = (java.io.FileInputStream) $r18;
+
+     label04:
+        $r41 = interfaceinvoke $r0.<java.util.Map: java.lang.Object get(java.lang.Object)>("keyStorePasswd");
+
+        $r42 = (java.lang.String) $r41;
+
+        $z10 = virtualinvoke $r42.<java.lang.String: boolean isEmpty()>();
+
+        if $z10 != 0 goto label05;
+
+        r40 = virtualinvoke $r42.<java.lang.String: char[] toCharArray()>();
+
+     label05:
+        $i0 = virtualinvoke r5.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label09;
+
+        $z4 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z4 == 0 goto label06;
+
+        $z5 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,defaultctx");
+
+        if $z5 == 0 goto label06;
+
+        $r15 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>("init keystore", $r15);
+
+     label06:
+        $z11 = virtualinvoke r7.<java.lang.String: boolean isEmpty()>();
+
+        if $z11 == 0 goto label07;
+
+        r39 = staticinvoke <java.security.KeyStore: java.security.KeyStore getInstance(java.lang.String)>(r5);
+
+        goto label08;
+
+     label07:
+        r39 = staticinvoke <java.security.KeyStore: java.security.KeyStore getInstance(java.lang.String,java.lang.String)>(r5, r7);
+
+     label08:
+        virtualinvoke r39.<java.security.KeyStore: void load(java.io.InputStream,char[])>(r38, r40);
+
+     label09:
+        if r38 == null goto label13;
+
+        virtualinvoke r38.<java.io.FileInputStream: void close()>();
+
+        goto label13;
+
+     label10:
+        $r36 := @caughtexception;
+
+     label11:
+        if r38 == null goto label12;
+
+        virtualinvoke r38.<java.io.FileInputStream: void close()>();
+
+     label12:
+        throw $r36;
+
+     label13:
+        $z2 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z2 == 0 goto label14;
+
+        $z3 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,defaultctx");
+
+        if $z3 == 0 goto label14;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("init keymanager of type ");
+
+        $r11 = staticinvoke <javax.net.ssl.KeyManagerFactory: java.lang.String getDefaultAlgorithm()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r14 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r13, $r14);
+
+     label14:
+        $r43 = staticinvoke <javax.net.ssl.KeyManagerFactory: java.lang.String getDefaultAlgorithm()>();
+
+        $r44 = staticinvoke <javax.net.ssl.KeyManagerFactory: javax.net.ssl.KeyManagerFactory getInstance(java.lang.String)>($r43);
+
+        $r45 = "PKCS11";
+
+        $z12 = virtualinvoke $r45.<java.lang.String: boolean equals(java.lang.Object)>(r5);
+
+        if $z12 == 0 goto label15;
+
+        virtualinvoke $r44.<javax.net.ssl.KeyManagerFactory: void init(java.security.KeyStore,char[])>(r39, null);
+
+        goto label16;
+
+     label15:
+        virtualinvoke $r44.<javax.net.ssl.KeyManagerFactory: void init(java.security.KeyStore,char[])>(r39, r40);
+
+     label16:
+        $r8 = virtualinvoke $r44.<javax.net.ssl.KeyManagerFactory: javax.net.ssl.KeyManager[] getKeyManagers()>();
+
+        return $r8;
+
+        catch java.lang.Throwable from label03 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    static java.lang.Exception access$400()
+    {
+        java.lang.Exception $r0;
+
+        $r0 = <sun.security.ssl.SSLContextImpl$DefaultManagersHolder: java.lang.Exception reservedException>;
+
+        return $r0;
+    }
+
+    static javax.net.ssl.KeyManager[] access$500()
+    {
+        javax.net.ssl.KeyManager[] $r0;
+
+        $r0 = <sun.security.ssl.SSLContextImpl$DefaultManagersHolder: javax.net.ssl.KeyManager[] keyManagers>;
+
+        return $r0;
+    }
+
+    static javax.net.ssl.TrustManager[] access$600()
+    {
+        javax.net.ssl.TrustManager[] $r0;
+
+        $r0 = <sun.security.ssl.SSLContextImpl$DefaultManagersHolder: javax.net.ssl.TrustManager[] trustManagers>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        javax.net.ssl.TrustManager[] r4;
+        java.lang.Exception $r1, $r2, r3;
+        javax.net.ssl.KeyManager[] $r0, r5;
+
+        <sun.security.ssl.SSLContextImpl$DefaultManagersHolder: java.lang.String P11KEYSTORE> = "PKCS11";
+
+        <sun.security.ssl.SSLContextImpl$DefaultManagersHolder: java.lang.String NONE> = "NONE";
+
+        r3 = null;
+
+     label01:
+        r4 = staticinvoke <sun.security.ssl.SSLContextImpl$DefaultManagersHolder: javax.net.ssl.TrustManager[] getTrustManagers()>();
+
+     label02:
+        goto label04;
+
+     label03:
+        $r2 := @caughtexception;
+
+        r3 = $r2;
+
+        r4 = newarray (javax.net.ssl.TrustManager)[0];
+
+     label04:
+        <sun.security.ssl.SSLContextImpl$DefaultManagersHolder: javax.net.ssl.TrustManager[] trustManagers> = r4;
+
+        if r3 != null goto label09;
+
+     label05:
+        r5 = staticinvoke <sun.security.ssl.SSLContextImpl$DefaultManagersHolder: javax.net.ssl.KeyManager[] getKeyManagers()>();
+
+     label06:
+        goto label08;
+
+     label07:
+        $r1 := @caughtexception;
+
+        r3 = $r1;
+
+        r5 = newarray (javax.net.ssl.KeyManager)[0];
+
+     label08:
+        <sun.security.ssl.SSLContextImpl$DefaultManagersHolder: javax.net.ssl.KeyManager[] keyManagers> = r5;
+
+        goto label10;
+
+     label09:
+        $r0 = newarray (javax.net.ssl.KeyManager)[0];
+
+        <sun.security.ssl.SSLContextImpl$DefaultManagersHolder: javax.net.ssl.KeyManager[] keyManagers> = $r0;
+
+     label10:
+        <sun.security.ssl.SSLContextImpl$DefaultManagersHolder: java.lang.Exception reservedException> = r3;
+
+        return;
+
+        catch java.lang.Exception from label01 to label02 with label03;
+        catch java.lang.Exception from label05 to label06 with label07;
+    }
+}

@@ -1,0 +1,612 @@
+class sun.management.counter.perf.PerfDataEntry extends java.lang.Object
+{
+    private java.lang.String name;
+    private int entryStart;
+    private int entryLength;
+    private int vectorLength;
+    private sun.management.counter.perf.PerfDataType dataType;
+    private int flags;
+    private sun.management.counter.Units unit;
+    private sun.management.counter.Variability variability;
+    private int dataOffset;
+    private int dataSize;
+    private java.nio.ByteBuffer data;
+    static final boolean $assertionsDisabled;
+
+    void <init>(java.nio.ByteBuffer)
+    {
+        sun.management.counter.Units $r8, $r14, $r15;
+        byte[] r10;
+        byte $b21, $b24, $b27, $b30, $b36, $b58;
+        java.nio.ByteOrder $r19;
+        java.lang.StringBuilder $r4, $r5, $r23, $r24, $r25, $r26, $r27, $r28, $r29, $r30, $r35, $r37, $r41, $r43, $r47, $r48, $r49, $r50, $r51, $r52, $r56, $r57, $r58, $r59, $r60, $r61, $r66, $r68, $r70, $r74, $r76, $r78;
+        sun.management.counter.perf.PerfDataType $r7, $r16, $r32;
+        sun.management.counter.perf.InstrumentationException $r67, $r69, $r71, $r75, $r77, $r79;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i22, $i23, $i25, $i26, $i28, $i29, $i31, $i32, $i33, $i34, $i35, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57, $i59, $i60, $i61, $i62, $i63, i64, i65, $i66, $i67, $i68;
+        java.lang.InternalError $r73;
+        java.lang.String $r6, $r31, $r36, $r38, $r42, $r44, $r53, $r62, $r65, $r72;
+        sun.management.counter.perf.PerfDataEntry r0;
+        sun.management.counter.Variability $r9, $r12, $r13;
+        java.nio.ByteBuffer r1, $r17, $r18, $r20;
+        java.io.UnsupportedEncodingException $r63;
+
+        r0 := @this: sun.management.counter.perf.PerfDataEntry;
+
+        r1 := @parameter0: java.nio.ByteBuffer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $i0 = virtualinvoke r1.<java.nio.ByteBuffer: int position()>();
+
+        r0.<sun.management.counter.perf.PerfDataEntry: int entryStart> = $i0;
+
+        $i1 = virtualinvoke r1.<java.nio.ByteBuffer: int getInt()>();
+
+        r0.<sun.management.counter.perf.PerfDataEntry: int entryLength> = $i1;
+
+        $i2 = r0.<sun.management.counter.perf.PerfDataEntry: int entryLength>;
+
+        if $i2 <= 0 goto label01;
+
+        $i4 = r0.<sun.management.counter.perf.PerfDataEntry: int entryLength>;
+
+        $i5 = virtualinvoke r1.<java.nio.ByteBuffer: int limit()>();
+
+        if $i4 <= $i5 goto label02;
+
+     label01:
+        $r67 = new sun.management.counter.perf.InstrumentationException;
+
+        $r66 = new java.lang.StringBuilder;
+
+        specialinvoke $r66.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r66.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid entry length:  entryLength = ");
+
+        $i3 = r0.<sun.management.counter.perf.PerfDataEntry: int entryLength>;
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r67.<sun.management.counter.perf.InstrumentationException: void <init>(java.lang.String)>($r6);
+
+        throw $r67;
+
+     label02:
+        $i7 = r0.<sun.management.counter.perf.PerfDataEntry: int entryStart>;
+
+        $i6 = r0.<sun.management.counter.perf.PerfDataEntry: int entryLength>;
+
+        $i8 = $i7 + $i6;
+
+        $i9 = virtualinvoke r1.<java.nio.ByteBuffer: int limit()>();
+
+        if $i8 <= $i9 goto label03;
+
+        $r69 = new sun.management.counter.perf.InstrumentationException;
+
+        $r68 = new java.lang.StringBuilder;
+
+        specialinvoke $r68.<java.lang.StringBuilder: void <init>()>();
+
+        $r56 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Entry extends beyond end of buffer:  entryStart = ");
+
+        $i61 = r0.<sun.management.counter.perf.PerfDataEntry: int entryStart>;
+
+        $r57 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i61);
+
+        $r58 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" entryLength = ");
+
+        $i62 = r0.<sun.management.counter.perf.PerfDataEntry: int entryLength>;
+
+        $r59 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i62);
+
+        $r60 = virtualinvoke $r59.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" buffer limit = ");
+
+        $i63 = virtualinvoke r1.<java.nio.ByteBuffer: int limit()>();
+
+        $r61 = virtualinvoke $r60.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i63);
+
+        $r62 = virtualinvoke $r61.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r69.<sun.management.counter.perf.InstrumentationException: void <init>(java.lang.String)>($r62);
+
+        throw $r69;
+
+     label03:
+        $i10 = r0.<sun.management.counter.perf.PerfDataEntry: int entryStart>;
+
+        $i11 = $i10 + 4;
+
+        virtualinvoke r1.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i11);
+
+        $i12 = virtualinvoke r1.<java.nio.ByteBuffer: int getInt()>();
+
+        $i13 = r0.<sun.management.counter.perf.PerfDataEntry: int entryStart>;
+
+        $i14 = $i13 + $i12;
+
+        $i15 = virtualinvoke r1.<java.nio.ByteBuffer: int limit()>();
+
+        if $i14 <= $i15 goto label04;
+
+        $r71 = new sun.management.counter.perf.InstrumentationException;
+
+        $r70 = new java.lang.StringBuilder;
+
+        specialinvoke $r70.<java.lang.StringBuilder: void <init>()>();
+
+        $r47 = virtualinvoke $r70.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid name offset:  entryStart = ");
+
+        $i59 = r0.<sun.management.counter.perf.PerfDataEntry: int entryStart>;
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i59);
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" nameOffset = ");
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i12);
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" buffer limit = ");
+
+        $i60 = virtualinvoke r1.<java.nio.ByteBuffer: int limit()>();
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i60);
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r71.<sun.management.counter.perf.InstrumentationException: void <init>(java.lang.String)>($r53);
+
+        throw $r71;
+
+     label04:
+        $i16 = r0.<sun.management.counter.perf.PerfDataEntry: int entryStart>;
+
+        $i17 = $i16 + 8;
+
+        virtualinvoke r1.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i17);
+
+        $i18 = virtualinvoke r1.<java.nio.ByteBuffer: int getInt()>();
+
+        r0.<sun.management.counter.perf.PerfDataEntry: int vectorLength> = $i18;
+
+        $i19 = r0.<sun.management.counter.perf.PerfDataEntry: int entryStart>;
+
+        $i20 = $i19 + 12;
+
+        virtualinvoke r1.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i20);
+
+        $b21 = virtualinvoke r1.<java.nio.ByteBuffer: byte get()>();
+
+        $r7 = staticinvoke <sun.management.counter.perf.PerfDataType: sun.management.counter.perf.PerfDataType toPerfDataType(byte)>($b21);
+
+        r0.<sun.management.counter.perf.PerfDataEntry: sun.management.counter.perf.PerfDataType dataType> = $r7;
+
+        $i22 = r0.<sun.management.counter.perf.PerfDataEntry: int entryStart>;
+
+        $i23 = $i22 + 13;
+
+        virtualinvoke r1.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i23);
+
+        $b24 = virtualinvoke r1.<java.nio.ByteBuffer: byte get()>();
+
+        $i66 = (int) $b24;
+
+        r0.<sun.management.counter.perf.PerfDataEntry: int flags> = $i66;
+
+        $i25 = r0.<sun.management.counter.perf.PerfDataEntry: int entryStart>;
+
+        $i26 = $i25 + 14;
+
+        virtualinvoke r1.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i26);
+
+        $b27 = virtualinvoke r1.<java.nio.ByteBuffer: byte get()>();
+
+        $i67 = (int) $b27;
+
+        $r8 = staticinvoke <sun.management.counter.Units: sun.management.counter.Units toUnits(int)>($i67);
+
+        r0.<sun.management.counter.perf.PerfDataEntry: sun.management.counter.Units unit> = $r8;
+
+        $i28 = r0.<sun.management.counter.perf.PerfDataEntry: int entryStart>;
+
+        $i29 = $i28 + 15;
+
+        virtualinvoke r1.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i29);
+
+        $b30 = virtualinvoke r1.<java.nio.ByteBuffer: byte get()>();
+
+        $i68 = (int) $b30;
+
+        $r9 = staticinvoke <sun.management.counter.Variability: sun.management.counter.Variability toVariability(int)>($i68);
+
+        r0.<sun.management.counter.perf.PerfDataEntry: sun.management.counter.Variability variability> = $r9;
+
+        $i31 = r0.<sun.management.counter.perf.PerfDataEntry: int entryStart>;
+
+        $i32 = $i31 + 16;
+
+        virtualinvoke r1.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i32);
+
+        $i33 = virtualinvoke r1.<java.nio.ByteBuffer: int getInt()>();
+
+        r0.<sun.management.counter.perf.PerfDataEntry: int dataOffset> = $i33;
+
+        $i34 = r0.<sun.management.counter.perf.PerfDataEntry: int entryStart>;
+
+        $i35 = $i34 + $i12;
+
+        virtualinvoke r1.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i35);
+
+        i64 = 0;
+
+     label05:
+        $b36 = virtualinvoke r1.<java.nio.ByteBuffer: byte get()>();
+
+        if $b36 == 0 goto label06;
+
+        i64 = i64 + 1;
+
+        goto label05;
+
+     label06:
+        r10 = newarray (byte)[i64];
+
+        $i37 = r0.<sun.management.counter.perf.PerfDataEntry: int entryStart>;
+
+        $i38 = $i37 + $i12;
+
+        virtualinvoke r1.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i38);
+
+        i65 = 0;
+
+     label07:
+        if i65 >= i64 goto label08;
+
+        $b58 = virtualinvoke r1.<java.nio.ByteBuffer: byte get()>();
+
+        r10[i65] = $b58;
+
+        i65 = i65 + 1;
+
+        goto label07;
+
+     label08:
+        $r72 = new java.lang.String;
+
+        specialinvoke $r72.<java.lang.String: void <init>(byte[],java.lang.String)>(r10, "UTF-8");
+
+        r0.<sun.management.counter.perf.PerfDataEntry: java.lang.String name> = $r72;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r63 := @caughtexception;
+
+        $r73 = new java.lang.InternalError;
+
+        $r65 = virtualinvoke $r63.<java.io.UnsupportedEncodingException: java.lang.String getMessage()>();
+
+        specialinvoke $r73.<java.lang.InternalError: void <init>(java.lang.String,java.lang.Throwable)>($r65, $r63);
+
+        throw $r73;
+
+     label11:
+        $r13 = r0.<sun.management.counter.perf.PerfDataEntry: sun.management.counter.Variability variability>;
+
+        $r12 = <sun.management.counter.Variability: sun.management.counter.Variability INVALID>;
+
+        if $r13 != $r12 goto label12;
+
+        $r75 = new sun.management.counter.perf.InstrumentationException;
+
+        $r74 = new java.lang.StringBuilder;
+
+        specialinvoke $r74.<java.lang.StringBuilder: void <init>()>();
+
+        $r41 = virtualinvoke $r74.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid variability attribute: name = ");
+
+        $r42 = r0.<sun.management.counter.perf.PerfDataEntry: java.lang.String name>;
+
+        $r43 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r42);
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r75.<sun.management.counter.perf.InstrumentationException: void <init>(java.lang.String)>($r44);
+
+        throw $r75;
+
+     label12:
+        $r15 = r0.<sun.management.counter.perf.PerfDataEntry: sun.management.counter.Units unit>;
+
+        $r14 = <sun.management.counter.Units: sun.management.counter.Units INVALID>;
+
+        if $r15 != $r14 goto label13;
+
+        $r77 = new sun.management.counter.perf.InstrumentationException;
+
+        $r76 = new java.lang.StringBuilder;
+
+        specialinvoke $r76.<java.lang.StringBuilder: void <init>()>();
+
+        $r35 = virtualinvoke $r76.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid units attribute:  name = ");
+
+        $r36 = r0.<sun.management.counter.perf.PerfDataEntry: java.lang.String name>;
+
+        $r37 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r36);
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r77.<sun.management.counter.perf.InstrumentationException: void <init>(java.lang.String)>($r38);
+
+        throw $r77;
+
+     label13:
+        $i39 = r0.<sun.management.counter.perf.PerfDataEntry: int vectorLength>;
+
+        if $i39 <= 0 goto label14;
+
+        $i55 = r0.<sun.management.counter.perf.PerfDataEntry: int vectorLength>;
+
+        $r32 = r0.<sun.management.counter.perf.PerfDataEntry: sun.management.counter.perf.PerfDataType dataType>;
+
+        $i56 = virtualinvoke $r32.<sun.management.counter.perf.PerfDataType: int size()>();
+
+        $i57 = $i55 * $i56;
+
+        r0.<sun.management.counter.perf.PerfDataEntry: int dataSize> = $i57;
+
+        goto label15;
+
+     label14:
+        $r16 = r0.<sun.management.counter.perf.PerfDataEntry: sun.management.counter.perf.PerfDataType dataType>;
+
+        $i40 = virtualinvoke $r16.<sun.management.counter.perf.PerfDataType: int size()>();
+
+        r0.<sun.management.counter.perf.PerfDataEntry: int dataSize> = $i40;
+
+     label15:
+        $i42 = r0.<sun.management.counter.perf.PerfDataEntry: int entryStart>;
+
+        $i41 = r0.<sun.management.counter.perf.PerfDataEntry: int dataOffset>;
+
+        $i44 = $i42 + $i41;
+
+        $i43 = r0.<sun.management.counter.perf.PerfDataEntry: int dataSize>;
+
+        $i45 = $i44 + $i43;
+
+        $i46 = virtualinvoke r1.<java.nio.ByteBuffer: int limit()>();
+
+        if $i45 <= $i46 goto label16;
+
+        $r79 = new sun.management.counter.perf.InstrumentationException;
+
+        $r78 = new java.lang.StringBuilder;
+
+        specialinvoke $r78.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r78.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Data extends beyond end of buffer:  entryStart = ");
+
+        $i51 = r0.<sun.management.counter.perf.PerfDataEntry: int entryStart>;
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i51);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" dataOffset = ");
+
+        $i52 = r0.<sun.management.counter.perf.PerfDataEntry: int dataOffset>;
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i52);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" dataSize = ");
+
+        $i53 = r0.<sun.management.counter.perf.PerfDataEntry: int dataSize>;
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i53);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" buffer limit = ");
+
+        $i54 = virtualinvoke r1.<java.nio.ByteBuffer: int limit()>();
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i54);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r79.<sun.management.counter.perf.InstrumentationException: void <init>(java.lang.String)>($r31);
+
+        throw $r79;
+
+     label16:
+        $i48 = r0.<sun.management.counter.perf.PerfDataEntry: int entryStart>;
+
+        $i47 = r0.<sun.management.counter.perf.PerfDataEntry: int dataOffset>;
+
+        $i49 = $i48 + $i47;
+
+        virtualinvoke r1.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i49);
+
+        $r17 = virtualinvoke r1.<java.nio.ByteBuffer: java.nio.ByteBuffer slice()>();
+
+        r0.<sun.management.counter.perf.PerfDataEntry: java.nio.ByteBuffer data> = $r17;
+
+        $r18 = r0.<sun.management.counter.perf.PerfDataEntry: java.nio.ByteBuffer data>;
+
+        $r19 = virtualinvoke r1.<java.nio.ByteBuffer: java.nio.ByteOrder order()>();
+
+        virtualinvoke $r18.<java.nio.ByteBuffer: java.nio.ByteBuffer order(java.nio.ByteOrder)>($r19);
+
+        $r20 = r0.<sun.management.counter.perf.PerfDataEntry: java.nio.ByteBuffer data>;
+
+        $i50 = r0.<sun.management.counter.perf.PerfDataEntry: int dataSize>;
+
+        virtualinvoke $r20.<java.nio.ByteBuffer: java.nio.Buffer limit(int)>($i50);
+
+        return;
+
+        catch java.io.UnsupportedEncodingException from label08 to label09 with label10;
+    }
+
+    public int size()
+    {
+        int $i0;
+        sun.management.counter.perf.PerfDataEntry r0;
+
+        r0 := @this: sun.management.counter.perf.PerfDataEntry;
+
+        $i0 = r0.<sun.management.counter.perf.PerfDataEntry: int entryLength>;
+
+        return $i0;
+    }
+
+    public java.lang.String name()
+    {
+        java.lang.String $r1;
+        sun.management.counter.perf.PerfDataEntry r0;
+
+        r0 := @this: sun.management.counter.perf.PerfDataEntry;
+
+        $r1 = r0.<sun.management.counter.perf.PerfDataEntry: java.lang.String name>;
+
+        return $r1;
+    }
+
+    public sun.management.counter.perf.PerfDataType type()
+    {
+        sun.management.counter.perf.PerfDataType $r1;
+        sun.management.counter.perf.PerfDataEntry r0;
+
+        r0 := @this: sun.management.counter.perf.PerfDataEntry;
+
+        $r1 = r0.<sun.management.counter.perf.PerfDataEntry: sun.management.counter.perf.PerfDataType dataType>;
+
+        return $r1;
+    }
+
+    public sun.management.counter.Units units()
+    {
+        sun.management.counter.Units $r1;
+        sun.management.counter.perf.PerfDataEntry r0;
+
+        r0 := @this: sun.management.counter.perf.PerfDataEntry;
+
+        $r1 = r0.<sun.management.counter.perf.PerfDataEntry: sun.management.counter.Units unit>;
+
+        return $r1;
+    }
+
+    public int flags()
+    {
+        int $i0;
+        sun.management.counter.perf.PerfDataEntry r0;
+
+        r0 := @this: sun.management.counter.perf.PerfDataEntry;
+
+        $i0 = r0.<sun.management.counter.perf.PerfDataEntry: int flags>;
+
+        return $i0;
+    }
+
+    public int vectorLength()
+    {
+        int $i0;
+        sun.management.counter.perf.PerfDataEntry r0;
+
+        r0 := @this: sun.management.counter.perf.PerfDataEntry;
+
+        $i0 = r0.<sun.management.counter.perf.PerfDataEntry: int vectorLength>;
+
+        return $i0;
+    }
+
+    public sun.management.counter.Variability variability()
+    {
+        sun.management.counter.Variability $r1;
+        sun.management.counter.perf.PerfDataEntry r0;
+
+        r0 := @this: sun.management.counter.perf.PerfDataEntry;
+
+        $r1 = r0.<sun.management.counter.perf.PerfDataEntry: sun.management.counter.Variability variability>;
+
+        return $r1;
+    }
+
+    public java.nio.ByteBuffer byteData()
+    {
+        java.lang.AssertionError $r5;
+        java.nio.ByteBuffer $r1, $r2, $r3, $r4;
+        sun.management.counter.perf.PerfDataEntry r0;
+        int $i0, $i1;
+        boolean $z0;
+
+        r0 := @this: sun.management.counter.perf.PerfDataEntry;
+
+        $r1 = r0.<sun.management.counter.perf.PerfDataEntry: java.nio.ByteBuffer data>;
+
+        virtualinvoke $r1.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(0);
+
+        $z0 = <sun.management.counter.perf.PerfDataEntry: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $r4 = r0.<sun.management.counter.perf.PerfDataEntry: java.nio.ByteBuffer data>;
+
+        $i0 = virtualinvoke $r4.<java.nio.ByteBuffer: int remaining()>();
+
+        $i1 = virtualinvoke r0.<sun.management.counter.perf.PerfDataEntry: int vectorLength()>();
+
+        if $i0 == $i1 goto label1;
+
+        $r5 = new java.lang.AssertionError;
+
+        specialinvoke $r5.<java.lang.AssertionError: void <init>()>();
+
+        throw $r5;
+
+     label1:
+        $r2 = r0.<sun.management.counter.perf.PerfDataEntry: java.nio.ByteBuffer data>;
+
+        $r3 = virtualinvoke $r2.<java.nio.ByteBuffer: java.nio.ByteBuffer duplicate()>();
+
+        return $r3;
+    }
+
+    public java.nio.LongBuffer longData()
+    {
+        java.nio.LongBuffer $r2;
+        java.nio.ByteBuffer $r1;
+        sun.management.counter.perf.PerfDataEntry r0;
+
+        r0 := @this: sun.management.counter.perf.PerfDataEntry;
+
+        $r1 = r0.<sun.management.counter.perf.PerfDataEntry: java.nio.ByteBuffer data>;
+
+        $r2 = virtualinvoke $r1.<java.nio.ByteBuffer: java.nio.LongBuffer asLongBuffer()>();
+
+        return $r2;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        $r0 = class "Lsun/management/counter/perf/PerfDataEntry;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.management.counter.perf.PerfDataEntry: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

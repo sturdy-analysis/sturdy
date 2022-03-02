@@ -1,0 +1,364 @@
+class com.sun.jndi.dns.Resolver extends java.lang.Object
+{
+    private com.sun.jndi.dns.DnsClient dnsClient;
+    private int timeout;
+    private int retries;
+
+    void <init>(java.lang.String[], int, int) throws javax.naming.NamingException
+    {
+        int i0, i1;
+        com.sun.jndi.dns.DnsClient $r1;
+        com.sun.jndi.dns.Resolver r0;
+        java.lang.String[] r2;
+
+        r0 := @this: com.sun.jndi.dns.Resolver;
+
+        r2 := @parameter0: java.lang.String[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.jndi.dns.Resolver: int timeout> = i0;
+
+        r0.<com.sun.jndi.dns.Resolver: int retries> = i1;
+
+        $r1 = new com.sun.jndi.dns.DnsClient;
+
+        specialinvoke $r1.<com.sun.jndi.dns.DnsClient: void <init>(java.lang.String[],int,int)>(r2, i0, i1);
+
+        r0.<com.sun.jndi.dns.Resolver: com.sun.jndi.dns.DnsClient dnsClient> = $r1;
+
+        return;
+    }
+
+    public void close()
+    {
+        com.sun.jndi.dns.DnsClient $r1;
+        com.sun.jndi.dns.Resolver r0;
+
+        r0 := @this: com.sun.jndi.dns.Resolver;
+
+        $r1 = r0.<com.sun.jndi.dns.Resolver: com.sun.jndi.dns.DnsClient dnsClient>;
+
+        virtualinvoke $r1.<com.sun.jndi.dns.DnsClient: void close()>();
+
+        r0.<com.sun.jndi.dns.Resolver: com.sun.jndi.dns.DnsClient dnsClient> = null;
+
+        return;
+    }
+
+    com.sun.jndi.dns.ResourceRecords query(com.sun.jndi.dns.DnsName, int, int, boolean, boolean) throws javax.naming.NamingException
+    {
+        com.sun.jndi.dns.ResourceRecords $r3;
+        com.sun.jndi.dns.DnsClient $r2;
+        com.sun.jndi.dns.Resolver r0;
+        com.sun.jndi.dns.DnsName r1;
+        int i0, i1;
+        boolean z0, z1;
+
+        r0 := @this: com.sun.jndi.dns.Resolver;
+
+        r1 := @parameter0: com.sun.jndi.dns.DnsName;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        z0 := @parameter3: boolean;
+
+        z1 := @parameter4: boolean;
+
+        $r2 = r0.<com.sun.jndi.dns.Resolver: com.sun.jndi.dns.DnsClient dnsClient>;
+
+        $r3 = virtualinvoke $r2.<com.sun.jndi.dns.DnsClient: com.sun.jndi.dns.ResourceRecords query(com.sun.jndi.dns.DnsName,int,int,boolean,boolean)>(r1, i0, i1, z0, z1);
+
+        return $r3;
+    }
+
+    com.sun.jndi.dns.ResourceRecords queryZone(com.sun.jndi.dns.DnsName, int, boolean) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r5;
+        com.sun.jndi.dns.ResourceRecords $r4;
+        com.sun.jndi.dns.DnsClient $r0;
+        com.sun.jndi.dns.Resolver r1;
+        java.lang.String[] $r3;
+        com.sun.jndi.dns.DnsName r2;
+        int $i0, $i1, i2;
+        boolean z0;
+
+        r1 := @this: com.sun.jndi.dns.Resolver;
+
+        r2 := @parameter0: com.sun.jndi.dns.DnsName;
+
+        i2 := @parameter1: int;
+
+        z0 := @parameter2: boolean;
+
+        $r0 = new com.sun.jndi.dns.DnsClient;
+
+        $r3 = specialinvoke r1.<com.sun.jndi.dns.Resolver: java.lang.String[] findNameServers(com.sun.jndi.dns.DnsName,boolean)>(r2, z0);
+
+        $i1 = r1.<com.sun.jndi.dns.Resolver: int timeout>;
+
+        $i0 = r1.<com.sun.jndi.dns.Resolver: int retries>;
+
+        specialinvoke $r0.<com.sun.jndi.dns.DnsClient: void <init>(java.lang.String[],int,int)>($r3, $i1, $i0);
+
+     label1:
+        $r4 = virtualinvoke $r0.<com.sun.jndi.dns.DnsClient: com.sun.jndi.dns.ResourceRecords queryZone(com.sun.jndi.dns.DnsName,int,boolean)>(r2, i2, z0);
+
+     label2:
+        virtualinvoke $r0.<com.sun.jndi.dns.DnsClient: void close()>();
+
+        return $r4;
+
+     label3:
+        $r5 := @caughtexception;
+
+     label4:
+        virtualinvoke $r0.<com.sun.jndi.dns.DnsClient: void close()>();
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    com.sun.jndi.dns.DnsName findZoneName(com.sun.jndi.dns.DnsName, int, boolean) throws javax.naming.NamingException
+    {
+        com.sun.jndi.dns.ResourceRecord r6;
+        com.sun.jndi.dns.ResourceRecords r12;
+        com.sun.jndi.dns.Resolver r1;
+        javax.naming.NamingException $r8;
+        com.sun.jndi.dns.DnsName $r7, r10, r11;
+        java.util.Vector $r2, $r3, $r4;
+        int $i0, i1, $i2, $i3, $i4, $i5, $i6, i7;
+        javax.naming.NameNotFoundException $r9;
+        boolean z0, $z1;
+        java.lang.Object $r0, $r5;
+
+        r1 := @this: com.sun.jndi.dns.Resolver;
+
+        r10 := @parameter0: com.sun.jndi.dns.DnsName;
+
+        i1 := @parameter1: int;
+
+        z0 := @parameter2: boolean;
+
+        $r0 = virtualinvoke r10.<com.sun.jndi.dns.DnsName: java.lang.Object clone()>();
+
+        r11 = (com.sun.jndi.dns.DnsName) $r0;
+
+     label01:
+        $i0 = virtualinvoke r11.<com.sun.jndi.dns.DnsName: int size()>();
+
+        if $i0 <= 1 goto label11;
+
+        r12 = null;
+
+     label02:
+        r12 = virtualinvoke r1.<com.sun.jndi.dns.Resolver: com.sun.jndi.dns.ResourceRecords query(com.sun.jndi.dns.DnsName,int,int,boolean,boolean)>(r11, i1, 6, z0, 0);
+
+     label03:
+        goto label06;
+
+     label04:
+        $r9 := @caughtexception;
+
+        throw $r9;
+
+     label05:
+        $r8 := @caughtexception;
+
+     label06:
+        if r12 == null goto label10;
+
+        $r2 = r12.<com.sun.jndi.dns.ResourceRecords: java.util.Vector answer>;
+
+        $i4 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        if $i4 <= 0 goto label07;
+
+        return r11;
+
+     label07:
+        i7 = 0;
+
+     label08:
+        $r3 = r12.<com.sun.jndi.dns.ResourceRecords: java.util.Vector authority>;
+
+        $i5 = virtualinvoke $r3.<java.util.Vector: int size()>();
+
+        if i7 >= $i5 goto label10;
+
+        $r4 = r12.<com.sun.jndi.dns.ResourceRecords: java.util.Vector authority>;
+
+        $r5 = virtualinvoke $r4.<java.util.Vector: java.lang.Object elementAt(int)>(i7);
+
+        r6 = (com.sun.jndi.dns.ResourceRecord) $r5;
+
+        $i6 = virtualinvoke r6.<com.sun.jndi.dns.ResourceRecord: int getType()>();
+
+        if $i6 != 6 goto label09;
+
+        $r7 = virtualinvoke r6.<com.sun.jndi.dns.ResourceRecord: com.sun.jndi.dns.DnsName getName()>();
+
+        $z1 = virtualinvoke r11.<com.sun.jndi.dns.DnsName: boolean endsWith(javax.naming.Name)>($r7);
+
+        if $z1 == 0 goto label09;
+
+        return $r7;
+
+     label09:
+        i7 = i7 + 1;
+
+        goto label08;
+
+     label10:
+        $i2 = virtualinvoke r11.<com.sun.jndi.dns.DnsName: int size()>();
+
+        $i3 = $i2 - 1;
+
+        virtualinvoke r11.<com.sun.jndi.dns.DnsName: java.lang.Object remove(int)>($i3);
+
+        goto label01;
+
+     label11:
+        return r11;
+
+        catch javax.naming.NameNotFoundException from label02 to label03 with label04;
+        catch javax.naming.NamingException from label02 to label03 with label05;
+    }
+
+    com.sun.jndi.dns.ResourceRecord findSoa(com.sun.jndi.dns.DnsName, int, boolean) throws javax.naming.NamingException
+    {
+        com.sun.jndi.dns.ResourceRecord r6;
+        com.sun.jndi.dns.ResourceRecords $r2;
+        com.sun.jndi.dns.Resolver r0;
+        com.sun.jndi.dns.DnsName r1;
+        java.util.Vector $r3, $r4;
+        int i0, $i1, $i2, i3;
+        java.lang.Object $r5;
+        boolean z0;
+
+        r0 := @this: com.sun.jndi.dns.Resolver;
+
+        r1 := @parameter0: com.sun.jndi.dns.DnsName;
+
+        i0 := @parameter1: int;
+
+        z0 := @parameter2: boolean;
+
+        $r2 = virtualinvoke r0.<com.sun.jndi.dns.Resolver: com.sun.jndi.dns.ResourceRecords query(com.sun.jndi.dns.DnsName,int,int,boolean,boolean)>(r1, i0, 6, z0, 0);
+
+        i3 = 0;
+
+     label1:
+        $r3 = $r2.<com.sun.jndi.dns.ResourceRecords: java.util.Vector answer>;
+
+        $i1 = virtualinvoke $r3.<java.util.Vector: int size()>();
+
+        if i3 >= $i1 goto label3;
+
+        $r4 = $r2.<com.sun.jndi.dns.ResourceRecords: java.util.Vector answer>;
+
+        $r5 = virtualinvoke $r4.<java.util.Vector: java.lang.Object elementAt(int)>(i3);
+
+        r6 = (com.sun.jndi.dns.ResourceRecord) $r5;
+
+        $i2 = virtualinvoke r6.<com.sun.jndi.dns.ResourceRecord: int getType()>();
+
+        if $i2 != 6 goto label2;
+
+        return r6;
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    private java.lang.String[] findNameServers(com.sun.jndi.dns.DnsName, boolean) throws javax.naming.NamingException
+    {
+        com.sun.jndi.dns.ResourceRecord r7;
+        com.sun.jndi.dns.ResourceRecords $r2;
+        com.sun.jndi.dns.Resolver r0;
+        java.lang.String[] r4;
+        com.sun.jndi.dns.DnsName r1;
+        java.util.Vector $r3, $r5;
+        int $i0, $i1, $i2, $i3, $i4, i5;
+        java.lang.String $r9, $r10, $r11, $r12;
+        boolean z0;
+        java.lang.Object $r6, $r8;
+        javax.naming.CommunicationException $r13;
+
+        r0 := @this: com.sun.jndi.dns.Resolver;
+
+        r1 := @parameter0: com.sun.jndi.dns.DnsName;
+
+        z0 := @parameter1: boolean;
+
+        $r2 = virtualinvoke r0.<com.sun.jndi.dns.Resolver: com.sun.jndi.dns.ResourceRecords query(com.sun.jndi.dns.DnsName,int,int,boolean,boolean)>(r1, 1, 2, z0, 0);
+
+        $r3 = $r2.<com.sun.jndi.dns.ResourceRecords: java.util.Vector answer>;
+
+        $i0 = virtualinvoke $r3.<java.util.Vector: int size()>();
+
+        r4 = newarray (java.lang.String)[$i0];
+
+        i5 = 0;
+
+     label1:
+        $i1 = lengthof r4;
+
+        if i5 >= $i1 goto label3;
+
+        $r5 = $r2.<com.sun.jndi.dns.ResourceRecords: java.util.Vector answer>;
+
+        $r6 = virtualinvoke $r5.<java.util.Vector: java.lang.Object elementAt(int)>(i5);
+
+        r7 = (com.sun.jndi.dns.ResourceRecord) $r6;
+
+        $i2 = virtualinvoke r7.<com.sun.jndi.dns.ResourceRecord: int getType()>();
+
+        if $i2 == 2 goto label2;
+
+        $r13 = new javax.naming.CommunicationException;
+
+        specialinvoke $r13.<javax.naming.CommunicationException: void <init>(java.lang.String)>("Corrupted DNS message");
+
+        throw $r13;
+
+     label2:
+        $r8 = virtualinvoke r7.<com.sun.jndi.dns.ResourceRecord: java.lang.Object getRdata()>();
+
+        $r9 = (java.lang.String) $r8;
+
+        r4[i5] = $r9;
+
+        $r11 = r4[i5];
+
+        $r10 = r4[i5];
+
+        $i3 = virtualinvoke $r10.<java.lang.String: int length()>();
+
+        $i4 = $i3 - 1;
+
+        $r12 = virtualinvoke $r11.<java.lang.String: java.lang.String substring(int,int)>(0, $i4);
+
+        r4[i5] = $r12;
+
+        i5 = i5 + 1;
+
+        goto label1;
+
+     label3:
+        return r4;
+    }
+}

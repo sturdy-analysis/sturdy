@@ -1,0 +1,306 @@
+class javax.swing.plaf.basic.DragRecognitionSupport extends java.lang.Object
+{
+    private int motionThreshold;
+    private java.awt.event.MouseEvent dndArmedEvent;
+    private javax.swing.JComponent component;
+
+    void <init>()
+    {
+        javax.swing.plaf.basic.DragRecognitionSupport r0;
+
+        r0 := @this: javax.swing.plaf.basic.DragRecognitionSupport;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static javax.swing.plaf.basic.DragRecognitionSupport getDragRecognitionSupport()
+    {
+        javax.swing.plaf.basic.DragRecognitionSupport $r2, r4;
+        sun.awt.AppContext $r0, $r3;
+        java.lang.Object $r1;
+
+        $r0 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r1 = virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>(class "Ljavax/swing/plaf/basic/DragRecognitionSupport;");
+
+        r4 = (javax.swing.plaf.basic.DragRecognitionSupport) $r1;
+
+        if r4 != null goto label1;
+
+        $r2 = new javax.swing.plaf.basic.DragRecognitionSupport;
+
+        specialinvoke $r2.<javax.swing.plaf.basic.DragRecognitionSupport: void <init>()>();
+
+        r4 = $r2;
+
+        $r3 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        virtualinvoke $r3.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>(class "Ljavax/swing/plaf/basic/DragRecognitionSupport;", $r2);
+
+     label1:
+        return r4;
+    }
+
+    public static boolean mousePressed(java.awt.event.MouseEvent)
+    {
+        javax.swing.plaf.basic.DragRecognitionSupport $r0;
+        java.awt.event.MouseEvent r1;
+        boolean $z0;
+
+        r1 := @parameter0: java.awt.event.MouseEvent;
+
+        $r0 = staticinvoke <javax.swing.plaf.basic.DragRecognitionSupport: javax.swing.plaf.basic.DragRecognitionSupport getDragRecognitionSupport()>();
+
+        $z0 = specialinvoke $r0.<javax.swing.plaf.basic.DragRecognitionSupport: boolean mousePressedImpl(java.awt.event.MouseEvent)>(r1);
+
+        return $z0;
+    }
+
+    public static java.awt.event.MouseEvent mouseReleased(java.awt.event.MouseEvent)
+    {
+        javax.swing.plaf.basic.DragRecognitionSupport $r0;
+        java.awt.event.MouseEvent r1, $r2;
+
+        r1 := @parameter0: java.awt.event.MouseEvent;
+
+        $r0 = staticinvoke <javax.swing.plaf.basic.DragRecognitionSupport: javax.swing.plaf.basic.DragRecognitionSupport getDragRecognitionSupport()>();
+
+        $r2 = specialinvoke $r0.<javax.swing.plaf.basic.DragRecognitionSupport: java.awt.event.MouseEvent mouseReleasedImpl(java.awt.event.MouseEvent)>(r1);
+
+        return $r2;
+    }
+
+    public static boolean mouseDragged(java.awt.event.MouseEvent, javax.swing.plaf.basic.DragRecognitionSupport$BeforeDrag)
+    {
+        javax.swing.plaf.basic.DragRecognitionSupport $r0;
+        javax.swing.plaf.basic.DragRecognitionSupport$BeforeDrag r2;
+        java.awt.event.MouseEvent r1;
+        boolean $z0;
+
+        r1 := @parameter0: java.awt.event.MouseEvent;
+
+        r2 := @parameter1: javax.swing.plaf.basic.DragRecognitionSupport$BeforeDrag;
+
+        $r0 = staticinvoke <javax.swing.plaf.basic.DragRecognitionSupport: javax.swing.plaf.basic.DragRecognitionSupport getDragRecognitionSupport()>();
+
+        $z0 = specialinvoke $r0.<javax.swing.plaf.basic.DragRecognitionSupport: boolean mouseDraggedImpl(java.awt.event.MouseEvent,javax.swing.plaf.basic.DragRecognitionSupport$BeforeDrag)>(r1, r2);
+
+        return $z0;
+    }
+
+    private void clearState()
+    {
+        javax.swing.plaf.basic.DragRecognitionSupport r0;
+
+        r0 := @this: javax.swing.plaf.basic.DragRecognitionSupport;
+
+        r0.<javax.swing.plaf.basic.DragRecognitionSupport: java.awt.event.MouseEvent dndArmedEvent> = null;
+
+        r0.<javax.swing.plaf.basic.DragRecognitionSupport: javax.swing.JComponent component> = null;
+
+        return;
+    }
+
+    private int mapDragOperationFromModifiers(java.awt.event.MouseEvent, javax.swing.TransferHandler)
+    {
+        javax.swing.JComponent $r3;
+        javax.swing.plaf.basic.DragRecognitionSupport r2;
+        java.awt.event.MouseEvent r1;
+        javax.swing.TransferHandler r0;
+        int $i0, $i1, $i2;
+        boolean $z0;
+
+        r2 := @this: javax.swing.plaf.basic.DragRecognitionSupport;
+
+        r1 := @parameter0: java.awt.event.MouseEvent;
+
+        r0 := @parameter1: javax.swing.TransferHandler;
+
+        if r0 == null goto label1;
+
+        $z0 = staticinvoke <javax.swing.SwingUtilities: boolean isLeftMouseButton(java.awt.event.MouseEvent)>(r1);
+
+        if $z0 != 0 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $i0 = virtualinvoke r1.<java.awt.event.MouseEvent: int getModifiersEx()>();
+
+        $r3 = r2.<javax.swing.plaf.basic.DragRecognitionSupport: javax.swing.JComponent component>;
+
+        $i1 = virtualinvoke r0.<javax.swing.TransferHandler: int getSourceActions(javax.swing.JComponent)>($r3);
+
+        $i2 = staticinvoke <sun.awt.dnd.SunDragSourceContextPeer: int convertModifiersToDropAction(int,int)>($i0, $i1);
+
+        return $i2;
+    }
+
+    private boolean mousePressedImpl(java.awt.event.MouseEvent)
+    {
+        javax.swing.JComponent $r3, $r4;
+        javax.swing.plaf.basic.DragRecognitionSupport r0;
+        java.awt.event.MouseEvent r1;
+        javax.swing.TransferHandler $r5;
+        int $i0, $i1;
+        java.lang.Object $r2;
+
+        r0 := @this: javax.swing.plaf.basic.DragRecognitionSupport;
+
+        r1 := @parameter0: java.awt.event.MouseEvent;
+
+        $r2 = virtualinvoke r1.<java.awt.event.MouseEvent: java.lang.Object getSource()>();
+
+        $r3 = (javax.swing.JComponent) $r2;
+
+        r0.<javax.swing.plaf.basic.DragRecognitionSupport: javax.swing.JComponent component> = $r3;
+
+        $r4 = r0.<javax.swing.plaf.basic.DragRecognitionSupport: javax.swing.JComponent component>;
+
+        $r5 = virtualinvoke $r4.<javax.swing.JComponent: javax.swing.TransferHandler getTransferHandler()>();
+
+        $i0 = specialinvoke r0.<javax.swing.plaf.basic.DragRecognitionSupport: int mapDragOperationFromModifiers(java.awt.event.MouseEvent,javax.swing.TransferHandler)>(r1, $r5);
+
+        if $i0 == 0 goto label1;
+
+        $i1 = staticinvoke <java.awt.dnd.DragSource: int getDragThreshold()>();
+
+        r0.<javax.swing.plaf.basic.DragRecognitionSupport: int motionThreshold> = $i1;
+
+        r0.<javax.swing.plaf.basic.DragRecognitionSupport: java.awt.event.MouseEvent dndArmedEvent> = r1;
+
+        return 1;
+
+     label1:
+        specialinvoke r0.<javax.swing.plaf.basic.DragRecognitionSupport: void clearState()>();
+
+        return 0;
+    }
+
+    private java.awt.event.MouseEvent mouseReleasedImpl(java.awt.event.MouseEvent)
+    {
+        javax.swing.JComponent $r4;
+        javax.swing.plaf.basic.DragRecognitionSupport r0;
+        java.lang.Object $r3;
+        java.awt.event.MouseEvent $r1, r2, r5;
+
+        r0 := @this: javax.swing.plaf.basic.DragRecognitionSupport;
+
+        r2 := @parameter0: java.awt.event.MouseEvent;
+
+        $r1 = r0.<javax.swing.plaf.basic.DragRecognitionSupport: java.awt.event.MouseEvent dndArmedEvent>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        r5 = null;
+
+        $r3 = virtualinvoke r2.<java.awt.event.MouseEvent: java.lang.Object getSource()>();
+
+        $r4 = r0.<javax.swing.plaf.basic.DragRecognitionSupport: javax.swing.JComponent component>;
+
+        if $r3 != $r4 goto label2;
+
+        r5 = r0.<javax.swing.plaf.basic.DragRecognitionSupport: java.awt.event.MouseEvent dndArmedEvent>;
+
+     label2:
+        specialinvoke r0.<javax.swing.plaf.basic.DragRecognitionSupport: void clearState()>();
+
+        return r5;
+    }
+
+    private boolean mouseDraggedImpl(java.awt.event.MouseEvent, javax.swing.plaf.basic.DragRecognitionSupport$BeforeDrag)
+    {
+        javax.swing.plaf.basic.DragRecognitionSupport r0;
+        javax.swing.TransferHandler $r8;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10;
+        javax.swing.JComponent $r4, $r7, $r11;
+        javax.swing.plaf.basic.DragRecognitionSupport$BeforeDrag r9;
+        java.awt.event.MouseEvent $r1, r2, $r5, $r6, $r10, $r12;
+        java.lang.Object $r3;
+
+        r0 := @this: javax.swing.plaf.basic.DragRecognitionSupport;
+
+        r2 := @parameter0: java.awt.event.MouseEvent;
+
+        r9 := @parameter1: javax.swing.plaf.basic.DragRecognitionSupport$BeforeDrag;
+
+        $r1 = r0.<javax.swing.plaf.basic.DragRecognitionSupport: java.awt.event.MouseEvent dndArmedEvent>;
+
+        if $r1 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r3 = virtualinvoke r2.<java.awt.event.MouseEvent: java.lang.Object getSource()>();
+
+        $r4 = r0.<javax.swing.plaf.basic.DragRecognitionSupport: javax.swing.JComponent component>;
+
+        if $r3 == $r4 goto label2;
+
+        specialinvoke r0.<javax.swing.plaf.basic.DragRecognitionSupport: void clearState()>();
+
+        return 0;
+
+     label2:
+        $i0 = virtualinvoke r2.<java.awt.event.MouseEvent: int getX()>();
+
+        $r5 = r0.<javax.swing.plaf.basic.DragRecognitionSupport: java.awt.event.MouseEvent dndArmedEvent>;
+
+        $i1 = virtualinvoke $r5.<java.awt.event.MouseEvent: int getX()>();
+
+        $i2 = $i0 - $i1;
+
+        $i3 = staticinvoke <java.lang.Math: int abs(int)>($i2);
+
+        $i4 = virtualinvoke r2.<java.awt.event.MouseEvent: int getY()>();
+
+        $r6 = r0.<javax.swing.plaf.basic.DragRecognitionSupport: java.awt.event.MouseEvent dndArmedEvent>;
+
+        $i5 = virtualinvoke $r6.<java.awt.event.MouseEvent: int getY()>();
+
+        $i6 = $i4 - $i5;
+
+        $i7 = staticinvoke <java.lang.Math: int abs(int)>($i6);
+
+        $i8 = r0.<javax.swing.plaf.basic.DragRecognitionSupport: int motionThreshold>;
+
+        if $i3 > $i8 goto label3;
+
+        $i10 = r0.<javax.swing.plaf.basic.DragRecognitionSupport: int motionThreshold>;
+
+        if $i7 <= $i10 goto label5;
+
+     label3:
+        $r7 = r0.<javax.swing.plaf.basic.DragRecognitionSupport: javax.swing.JComponent component>;
+
+        $r8 = virtualinvoke $r7.<javax.swing.JComponent: javax.swing.TransferHandler getTransferHandler()>();
+
+        $i9 = specialinvoke r0.<javax.swing.plaf.basic.DragRecognitionSupport: int mapDragOperationFromModifiers(java.awt.event.MouseEvent,javax.swing.TransferHandler)>(r2, $r8);
+
+        if $i9 == 0 goto label5;
+
+        if r9 == null goto label4;
+
+        $r12 = r0.<javax.swing.plaf.basic.DragRecognitionSupport: java.awt.event.MouseEvent dndArmedEvent>;
+
+        interfaceinvoke r9.<javax.swing.plaf.basic.DragRecognitionSupport$BeforeDrag: void dragStarting(java.awt.event.MouseEvent)>($r12);
+
+     label4:
+        $r11 = r0.<javax.swing.plaf.basic.DragRecognitionSupport: javax.swing.JComponent component>;
+
+        $r10 = r0.<javax.swing.plaf.basic.DragRecognitionSupport: java.awt.event.MouseEvent dndArmedEvent>;
+
+        virtualinvoke $r8.<javax.swing.TransferHandler: void exportAsDrag(javax.swing.JComponent,java.awt.event.InputEvent,int)>($r11, $r10, $i9);
+
+        specialinvoke r0.<javax.swing.plaf.basic.DragRecognitionSupport: void clearState()>();
+
+     label5:
+        return 1;
+    }
+}

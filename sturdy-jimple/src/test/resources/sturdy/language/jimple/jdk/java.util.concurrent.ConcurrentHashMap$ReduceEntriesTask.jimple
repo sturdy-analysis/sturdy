@@ -1,0 +1,197 @@
+final class java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask extends java.util.concurrent.ConcurrentHashMap$BulkTask
+{
+    final java.util.function.BiFunction reducer;
+    java.util.Map$Entry result;
+    java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask rights;
+    java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask nextRight;
+
+    void <init>(java.util.concurrent.ConcurrentHashMap$BulkTask, int, int, int, java.util.concurrent.ConcurrentHashMap$Node[], java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask, java.util.function.BiFunction)
+    {
+        java.util.function.BiFunction r4;
+        java.util.concurrent.ConcurrentHashMap$BulkTask r1;
+        java.util.concurrent.ConcurrentHashMap$Node[] r2;
+        java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask r0, r3;
+        int i0, i1, i2;
+
+        r0 := @this: java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask;
+
+        r1 := @parameter0: java.util.concurrent.ConcurrentHashMap$BulkTask;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        r2 := @parameter4: java.util.concurrent.ConcurrentHashMap$Node[];
+
+        r3 := @parameter5: java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask;
+
+        r4 := @parameter6: java.util.function.BiFunction;
+
+        specialinvoke r0.<java.util.concurrent.ConcurrentHashMap$BulkTask: void <init>(java.util.concurrent.ConcurrentHashMap$BulkTask,int,int,int,java.util.concurrent.ConcurrentHashMap$Node[])>(r1, i0, i1, i2, r2);
+
+        r0.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask nextRight> = r3;
+
+        r0.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: java.util.function.BiFunction reducer> = r4;
+
+        return;
+    }
+
+    public final java.util.Map$Entry getRawResult()
+    {
+        java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask r0;
+        java.util.Map$Entry $r1;
+
+        r0 := @this: java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask;
+
+        $r1 = r0.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: java.util.Map$Entry result>;
+
+        return $r1;
+    }
+
+    public final void compute()
+    {
+        java.util.concurrent.ConcurrentHashMap$Node $r10;
+        java.util.function.BiFunction $r1;
+        java.util.concurrent.CountedCompleter r12;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6;
+        java.util.Map$Entry $r2, $r3, r9, $r11, $r15;
+        java.util.concurrent.ConcurrentHashMap$Node[] $r8;
+        java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask r0, $r6, $r7, r13, r14, $r16;
+        java.lang.Object $r4, $r5;
+
+        r0 := @this: java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask;
+
+        $r1 = r0.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: java.util.function.BiFunction reducer>;
+
+        if $r1 == null goto label13;
+
+        i6 = r0.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: int baseIndex>;
+
+     label01:
+        $i0 = r0.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: int batch>;
+
+        if $i0 <= 0 goto label02;
+
+        $i1 = r0.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: int baseLimit>;
+
+        $i2 = $i1 + i6;
+
+        $i3 = $i2 >>> 1;
+
+        if $i3 <= i6 goto label02;
+
+        virtualinvoke r0.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: void addToPendingCount(int)>(1);
+
+        $r6 = new java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask;
+
+        $i4 = r0.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: int batch>;
+
+        $i5 = $i4 >>> 1;
+
+        r0.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: int batch> = $i5;
+
+        r0.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: int baseLimit> = $i3;
+
+        $r8 = r0.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: java.util.concurrent.ConcurrentHashMap$Node[] tab>;
+
+        $r7 = r0.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask rights>;
+
+        specialinvoke $r6.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: void <init>(java.util.concurrent.ConcurrentHashMap$BulkTask,int,int,int,java.util.concurrent.ConcurrentHashMap$Node[],java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask,java.util.function.BiFunction)>(r0, $i5, $i3, $i1, $r8, $r7, $r1);
+
+        r0.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask rights> = $r6;
+
+        virtualinvoke $r6.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: java.util.concurrent.ForkJoinTask fork()>();
+
+        goto label01;
+
+     label02:
+        r9 = null;
+
+     label03:
+        $r10 = virtualinvoke r0.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: java.util.concurrent.ConcurrentHashMap$Node advance()>();
+
+        if $r10 == null goto label06;
+
+        if r9 != null goto label04;
+
+        $r11 = $r10;
+
+        goto label05;
+
+     label04:
+        $r5 = interfaceinvoke $r1.<java.util.function.BiFunction: java.lang.Object apply(java.lang.Object,java.lang.Object)>(r9, $r10);
+
+        $r11 = (java.util.Map$Entry) $r5;
+
+     label05:
+        r9 = $r11;
+
+        goto label03;
+
+     label06:
+        r0.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: java.util.Map$Entry result> = r9;
+
+        r12 = virtualinvoke r0.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: java.util.concurrent.CountedCompleter firstComplete()>();
+
+     label07:
+        if r12 == null goto label13;
+
+        r13 = (java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask) r12;
+
+        r14 = r13.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask rights>;
+
+     label08:
+        if r14 == null goto label12;
+
+        $r2 = r14.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: java.util.Map$Entry result>;
+
+        if $r2 == null goto label11;
+
+        $r3 = r13.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: java.util.Map$Entry result>;
+
+        if $r3 != null goto label09;
+
+        $r15 = $r2;
+
+        goto label10;
+
+     label09:
+        $r4 = interfaceinvoke $r1.<java.util.function.BiFunction: java.lang.Object apply(java.lang.Object,java.lang.Object)>($r3, $r2);
+
+        $r15 = (java.util.Map$Entry) $r4;
+
+     label10:
+        r13.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: java.util.Map$Entry result> = $r15;
+
+     label11:
+        $r16 = r14.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask nextRight>;
+
+        r13.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask rights> = $r16;
+
+        r14 = $r16;
+
+        goto label08;
+
+     label12:
+        r12 = virtualinvoke r12.<java.util.concurrent.CountedCompleter: java.util.concurrent.CountedCompleter nextComplete()>();
+
+        goto label07;
+
+     label13:
+        return;
+    }
+
+    public volatile java.lang.Object getRawResult()
+    {
+        java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask r0;
+        java.util.Map$Entry $r1;
+
+        r0 := @this: java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask;
+
+        $r1 = virtualinvoke r0.<java.util.concurrent.ConcurrentHashMap$ReduceEntriesTask: java.util.Map$Entry getRawResult()>();
+
+        return $r1;
+    }
+}

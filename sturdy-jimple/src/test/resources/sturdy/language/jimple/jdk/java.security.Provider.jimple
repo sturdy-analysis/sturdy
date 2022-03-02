@@ -1,0 +1,3398 @@
+public abstract class java.security.Provider extends java.util.Properties
+{
+    static final long serialVersionUID;
+    private static final sun.security.util.Debug debug;
+    private java.lang.String name;
+    private java.lang.String info;
+    private double version;
+    private transient java.util.Set entrySet;
+    private transient int entrySetCallCount;
+    private transient boolean initialized;
+    private transient boolean legacyChanged;
+    private transient volatile boolean servicesChanged;
+    private transient java.util.Map legacyStrings;
+    private transient java.util.Map serviceMap;
+    private transient java.util.Set prngAlgos;
+    private transient java.util.Map legacyMap;
+    private transient java.util.Set serviceSet;
+    private static final java.lang.String ALIAS_PREFIX;
+    private static final java.lang.String ALIAS_PREFIX_LOWER;
+    private static final int ALIAS_LENGTH;
+    private static volatile java.security.Provider$ServiceKey previousKey;
+    private static final java.util.Map knownEngines;
+
+    protected void <init>(java.lang.String, double, java.lang.String)
+    {
+        java.util.concurrent.ConcurrentHashMap $r3;
+        java.lang.String r1, r2;
+        java.security.Provider r0;
+        double d0;
+
+        r0 := @this: java.security.Provider;
+
+        r1 := @parameter0: java.lang.String;
+
+        d0 := @parameter1: double;
+
+        r2 := @parameter2: java.lang.String;
+
+        specialinvoke r0.<java.util.Properties: void <init>()>();
+
+        r0.<java.security.Provider: java.util.Set entrySet> = null;
+
+        r0.<java.security.Provider: int entrySetCallCount> = 0;
+
+        r0.<java.security.Provider: java.lang.String name> = r1;
+
+        r0.<java.security.Provider: double version> = d0;
+
+        r0.<java.security.Provider: java.lang.String info> = r2;
+
+        $r3 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r3.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r0.<java.security.Provider: java.util.Map serviceMap> = $r3;
+
+        specialinvoke r0.<java.security.Provider: void putId()>();
+
+        r0.<java.security.Provider: boolean initialized> = 1;
+
+        return;
+    }
+
+    public java.lang.String getName()
+    {
+        java.lang.String $r1;
+        java.security.Provider r0;
+
+        r0 := @this: java.security.Provider;
+
+        $r1 = r0.<java.security.Provider: java.lang.String name>;
+
+        return $r1;
+    }
+
+    public double getVersion()
+    {
+        java.security.Provider r0;
+        double $d0;
+
+        r0 := @this: java.security.Provider;
+
+        $d0 = r0.<java.security.Provider: double version>;
+
+        return $d0;
+    }
+
+    public java.lang.String getInfo()
+    {
+        java.lang.String $r1;
+        java.security.Provider r0;
+
+        r0 := @this: java.security.Provider;
+
+        $r1 = r0.<java.security.Provider: java.lang.String info>;
+
+        return $r1;
+    }
+
+    public java.lang.String toString()
+    {
+        java.security.Provider r1;
+        java.lang.StringBuilder $r0, $r3, $r4, $r5;
+        java.lang.String $r2, $r6;
+        double $d0;
+
+        r1 := @this: java.security.Provider;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = r1.<java.security.Provider: java.lang.String name>;
+
+        $r3 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" version ");
+
+        $d0 = r1.<java.security.Provider: double version>;
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r6;
+    }
+
+    public synchronized void clear()
+    {
+        sun.security.util.Debug $r6, $r8;
+        java.security.Provider r0;
+        java.lang.StringBuilder $r1, $r2, $r4, $r7, $r9, $r11, $r12;
+        java.lang.String $r3, $r5, $r10, $r13;
+
+        r0 := @this: java.security.Provider;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("clearProviderProperties.");
+
+        $r3 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.security.Provider: void check(java.lang.String)>($r5);
+
+        $r6 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        if $r6 == null goto label1;
+
+        $r8 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Remove ");
+
+        $r10 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" provider properties");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r8.<sun.security.util.Debug: void println(java.lang.String)>($r13);
+
+     label1:
+        specialinvoke r0.<java.security.Provider: void implClear()>();
+
+        return;
+    }
+
+    public synchronized void load(java.io.InputStream) throws java.io.IOException
+    {
+        java.lang.String $r3, $r5, $r12, $r15;
+        java.util.Properties $r7;
+        sun.security.util.Debug $r6, $r10;
+        java.security.Provider r0;
+        java.lang.StringBuilder $r1, $r2, $r4, $r9, $r11, $r13, $r14;
+        java.io.InputStream r8;
+
+        r0 := @this: java.security.Provider;
+
+        r8 := @parameter0: java.io.InputStream;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("putProviderProperty.");
+
+        $r3 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.security.Provider: void check(java.lang.String)>($r5);
+
+        $r6 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        if $r6 == null goto label1;
+
+        $r10 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Load ");
+
+        $r12 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" provider properties");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r10.<sun.security.util.Debug: void println(java.lang.String)>($r15);
+
+     label1:
+        $r7 = new java.util.Properties;
+
+        specialinvoke $r7.<java.util.Properties: void <init>()>();
+
+        virtualinvoke $r7.<java.util.Properties: void load(java.io.InputStream)>(r8);
+
+        specialinvoke r0.<java.security.Provider: void implPutAll(java.util.Map)>($r7);
+
+        return;
+    }
+
+    public synchronized void putAll(java.util.Map)
+    {
+        sun.security.util.Debug $r6, $r9;
+        java.security.Provider r0;
+        java.util.Map r7;
+        java.lang.StringBuilder $r1, $r2, $r4, $r8, $r10, $r12, $r13;
+        java.lang.String $r3, $r5, $r11, $r14;
+
+        r0 := @this: java.security.Provider;
+
+        r7 := @parameter0: java.util.Map;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("putProviderProperty.");
+
+        $r3 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.security.Provider: void check(java.lang.String)>($r5);
+
+        $r6 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        if $r6 == null goto label1;
+
+        $r9 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Put all ");
+
+        $r11 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" provider properties");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r9.<sun.security.util.Debug: void println(java.lang.String)>($r14);
+
+     label1:
+        specialinvoke r0.<java.security.Provider: void implPutAll(java.util.Map)>(r7);
+
+        return;
+    }
+
+    public synchronized java.util.Set entrySet()
+    {
+        java.util.Set $r1, $r2, $r4, $r6;
+        java.lang.RuntimeException $r3;
+        java.security.Provider r0;
+        java.util.Map $r5;
+        int $i0, $i1, $i2;
+
+        r0 := @this: java.security.Provider;
+
+        specialinvoke r0.<java.security.Provider: void checkInitialized()>();
+
+        $r1 = r0.<java.security.Provider: java.util.Set entrySet>;
+
+        if $r1 != null goto label2;
+
+        $i1 = r0.<java.security.Provider: int entrySetCallCount>;
+
+        $i2 = $i1 + 1;
+
+        r0.<java.security.Provider: int entrySetCallCount> = $i2;
+
+        if $i1 != 0 goto label1;
+
+        $r5 = staticinvoke <java.util.Collections: java.util.Map unmodifiableMap(java.util.Map)>(r0);
+
+        $r6 = interfaceinvoke $r5.<java.util.Map: java.util.Set entrySet()>();
+
+        r0.<java.security.Provider: java.util.Set entrySet> = $r6;
+
+        goto label2;
+
+     label1:
+        $r4 = specialinvoke r0.<java.util.Properties: java.util.Set entrySet()>();
+
+        return $r4;
+
+     label2:
+        $i0 = r0.<java.security.Provider: int entrySetCallCount>;
+
+        if $i0 == 2 goto label3;
+
+        $r3 = new java.lang.RuntimeException;
+
+        specialinvoke $r3.<java.lang.RuntimeException: void <init>(java.lang.String)>("Internal error.");
+
+        throw $r3;
+
+     label3:
+        $r2 = r0.<java.security.Provider: java.util.Set entrySet>;
+
+        return $r2;
+    }
+
+    public java.util.Set keySet()
+    {
+        java.util.Set $r1, $r2;
+        java.security.Provider r0;
+
+        r0 := @this: java.security.Provider;
+
+        specialinvoke r0.<java.security.Provider: void checkInitialized()>();
+
+        $r1 = specialinvoke r0.<java.util.Properties: java.util.Set keySet()>();
+
+        $r2 = staticinvoke <java.util.Collections: java.util.Set unmodifiableSet(java.util.Set)>($r1);
+
+        return $r2;
+    }
+
+    public java.util.Collection values()
+    {
+        java.security.Provider r0;
+        java.util.Collection $r1, $r2;
+
+        r0 := @this: java.security.Provider;
+
+        specialinvoke r0.<java.security.Provider: void checkInitialized()>();
+
+        $r1 = specialinvoke r0.<java.util.Properties: java.util.Collection values()>();
+
+        $r2 = staticinvoke <java.util.Collections: java.util.Collection unmodifiableCollection(java.util.Collection)>($r1);
+
+        return $r2;
+    }
+
+    public synchronized java.lang.Object put(java.lang.Object, java.lang.Object)
+    {
+        java.lang.String $r3, $r5, $r13, $r20;
+        sun.security.util.Debug $r6, $r11;
+        java.security.Provider r0;
+        java.lang.StringBuilder $r1, $r2, $r4, $r10, $r12, $r14, $r15, $r16, $r17, $r18, $r19;
+        java.lang.Object r7, r8, $r9;
+
+        r0 := @this: java.security.Provider;
+
+        r7 := @parameter0: java.lang.Object;
+
+        r8 := @parameter1: java.lang.Object;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("putProviderProperty.");
+
+        $r3 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.security.Provider: void check(java.lang.String)>($r5);
+
+        $r6 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        if $r6 == null goto label1;
+
+        $r11 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Set ");
+
+        $r13 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" provider property [");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r7);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r8);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r11.<sun.security.util.Debug: void println(java.lang.String)>($r20);
+
+     label1:
+        $r9 = specialinvoke r0.<java.security.Provider: java.lang.Object implPut(java.lang.Object,java.lang.Object)>(r7, r8);
+
+        return $r9;
+    }
+
+    public synchronized java.lang.Object putIfAbsent(java.lang.Object, java.lang.Object)
+    {
+        java.lang.String $r3, $r5, $r13, $r20;
+        sun.security.util.Debug $r6, $r11;
+        java.security.Provider r0;
+        java.lang.StringBuilder $r1, $r2, $r4, $r10, $r12, $r14, $r15, $r16, $r17, $r18, $r19;
+        java.lang.Object r7, r8, $r9;
+
+        r0 := @this: java.security.Provider;
+
+        r7 := @parameter0: java.lang.Object;
+
+        r8 := @parameter1: java.lang.Object;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("putProviderProperty.");
+
+        $r3 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.security.Provider: void check(java.lang.String)>($r5);
+
+        $r6 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        if $r6 == null goto label1;
+
+        $r11 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Set ");
+
+        $r13 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" provider property [");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r7);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r8);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r11.<sun.security.util.Debug: void println(java.lang.String)>($r20);
+
+     label1:
+        $r9 = specialinvoke r0.<java.security.Provider: java.lang.Object implPutIfAbsent(java.lang.Object,java.lang.Object)>(r7, r8);
+
+        return $r9;
+    }
+
+    public synchronized java.lang.Object remove(java.lang.Object)
+    {
+        java.lang.String $r3, $r5, $r12, $r16;
+        sun.security.util.Debug $r6, $r10;
+        java.security.Provider r0;
+        java.lang.StringBuilder $r1, $r2, $r4, $r9, $r11, $r13, $r14, $r15;
+        java.lang.Object r7, $r8;
+
+        r0 := @this: java.security.Provider;
+
+        r7 := @parameter0: java.lang.Object;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("removeProviderProperty.");
+
+        $r3 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.security.Provider: void check(java.lang.String)>($r5);
+
+        $r6 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        if $r6 == null goto label1;
+
+        $r10 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Remove ");
+
+        $r12 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" provider property ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r7);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r10.<sun.security.util.Debug: void println(java.lang.String)>($r16);
+
+     label1:
+        $r8 = specialinvoke r0.<java.security.Provider: java.lang.Object implRemove(java.lang.Object)>(r7);
+
+        return $r8;
+    }
+
+    public synchronized boolean remove(java.lang.Object, java.lang.Object)
+    {
+        java.lang.String $r3, $r5, $r12, $r16;
+        boolean $z0;
+        sun.security.util.Debug $r6, $r10;
+        java.security.Provider r0;
+        java.lang.StringBuilder $r1, $r2, $r4, $r9, $r11, $r13, $r14, $r15;
+        java.lang.Object r7, r8;
+
+        r0 := @this: java.security.Provider;
+
+        r7 := @parameter0: java.lang.Object;
+
+        r8 := @parameter1: java.lang.Object;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("removeProviderProperty.");
+
+        $r3 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.security.Provider: void check(java.lang.String)>($r5);
+
+        $r6 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        if $r6 == null goto label1;
+
+        $r10 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Remove ");
+
+        $r12 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" provider property ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r7);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r10.<sun.security.util.Debug: void println(java.lang.String)>($r16);
+
+     label1:
+        $z0 = specialinvoke r0.<java.security.Provider: boolean implRemove(java.lang.Object,java.lang.Object)>(r7, r8);
+
+        return $z0;
+    }
+
+    public synchronized boolean replace(java.lang.Object, java.lang.Object, java.lang.Object)
+    {
+        java.lang.String $r3, $r5, $r13, $r17;
+        boolean $z0;
+        sun.security.util.Debug $r6, $r11;
+        java.security.Provider r0;
+        java.lang.StringBuilder $r1, $r2, $r4, $r10, $r12, $r14, $r15, $r16;
+        java.lang.Object r7, r8, r9;
+
+        r0 := @this: java.security.Provider;
+
+        r7 := @parameter0: java.lang.Object;
+
+        r8 := @parameter1: java.lang.Object;
+
+        r9 := @parameter2: java.lang.Object;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("putProviderProperty.");
+
+        $r3 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.security.Provider: void check(java.lang.String)>($r5);
+
+        $r6 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        if $r6 == null goto label1;
+
+        $r11 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Replace ");
+
+        $r13 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" provider property ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r7);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r11.<sun.security.util.Debug: void println(java.lang.String)>($r17);
+
+     label1:
+        $z0 = specialinvoke r0.<java.security.Provider: boolean implReplace(java.lang.Object,java.lang.Object,java.lang.Object)>(r7, r8, r9);
+
+        return $z0;
+    }
+
+    public synchronized java.lang.Object replace(java.lang.Object, java.lang.Object)
+    {
+        java.lang.String $r3, $r5, $r13, $r17;
+        sun.security.util.Debug $r6, $r11;
+        java.security.Provider r0;
+        java.lang.StringBuilder $r1, $r2, $r4, $r10, $r12, $r14, $r15, $r16;
+        java.lang.Object r7, r8, $r9;
+
+        r0 := @this: java.security.Provider;
+
+        r7 := @parameter0: java.lang.Object;
+
+        r8 := @parameter1: java.lang.Object;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("putProviderProperty.");
+
+        $r3 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.security.Provider: void check(java.lang.String)>($r5);
+
+        $r6 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        if $r6 == null goto label1;
+
+        $r11 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Replace ");
+
+        $r13 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" provider property ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r7);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r11.<sun.security.util.Debug: void println(java.lang.String)>($r17);
+
+     label1:
+        $r9 = specialinvoke r0.<java.security.Provider: java.lang.Object implReplace(java.lang.Object,java.lang.Object)>(r7, r8);
+
+        return $r9;
+    }
+
+    public synchronized void replaceAll(java.util.function.BiFunction)
+    {
+        java.util.function.BiFunction r7;
+        sun.security.util.Debug $r6, $r9;
+        java.security.Provider r0;
+        java.lang.StringBuilder $r1, $r2, $r4, $r8, $r10, $r12, $r13;
+        java.lang.String $r3, $r5, $r11, $r14;
+
+        r0 := @this: java.security.Provider;
+
+        r7 := @parameter0: java.util.function.BiFunction;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("putProviderProperty.");
+
+        $r3 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.security.Provider: void check(java.lang.String)>($r5);
+
+        $r6 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        if $r6 == null goto label1;
+
+        $r9 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ReplaceAll ");
+
+        $r11 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" provider property ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r9.<sun.security.util.Debug: void println(java.lang.String)>($r14);
+
+     label1:
+        specialinvoke r0.<java.security.Provider: void implReplaceAll(java.util.function.BiFunction)>(r7);
+
+        return;
+    }
+
+    public synchronized java.lang.Object compute(java.lang.Object, java.util.function.BiFunction)
+    {
+        java.util.function.BiFunction r13;
+        java.lang.String $r3, $r5, $r8, $r10, $r18, $r22;
+        sun.security.util.Debug $r11, $r16;
+        java.security.Provider r0;
+        java.lang.StringBuilder $r1, $r2, $r4, $r6, $r7, $r9, $r15, $r17, $r19, $r20, $r21;
+        java.lang.Object r12, $r14;
+
+        r0 := @this: java.security.Provider;
+
+        r12 := @parameter0: java.lang.Object;
+
+        r13 := @parameter1: java.util.function.BiFunction;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("putProviderProperty.");
+
+        $r3 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.security.Provider: void check(java.lang.String)>($r5);
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("removeProviderProperty");
+
+        $r8 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.security.Provider: void check(java.lang.String)>($r10);
+
+        $r11 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        if $r11 == null goto label1;
+
+        $r16 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Compute ");
+
+        $r18 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" provider property ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r12);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r16.<sun.security.util.Debug: void println(java.lang.String)>($r22);
+
+     label1:
+        $r14 = specialinvoke r0.<java.security.Provider: java.lang.Object implCompute(java.lang.Object,java.util.function.BiFunction)>(r12, r13);
+
+        return $r14;
+    }
+
+    public synchronized java.lang.Object computeIfAbsent(java.lang.Object, java.util.function.Function)
+    {
+        java.util.function.Function r13;
+        java.lang.String $r3, $r5, $r8, $r10, $r18, $r22;
+        sun.security.util.Debug $r11, $r16;
+        java.security.Provider r0;
+        java.lang.StringBuilder $r1, $r2, $r4, $r6, $r7, $r9, $r15, $r17, $r19, $r20, $r21;
+        java.lang.Object r12, $r14;
+
+        r0 := @this: java.security.Provider;
+
+        r12 := @parameter0: java.lang.Object;
+
+        r13 := @parameter1: java.util.function.Function;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("putProviderProperty.");
+
+        $r3 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.security.Provider: void check(java.lang.String)>($r5);
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("removeProviderProperty");
+
+        $r8 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.security.Provider: void check(java.lang.String)>($r10);
+
+        $r11 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        if $r11 == null goto label1;
+
+        $r16 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ComputeIfAbsent ");
+
+        $r18 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" provider property ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r12);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r16.<sun.security.util.Debug: void println(java.lang.String)>($r22);
+
+     label1:
+        $r14 = specialinvoke r0.<java.security.Provider: java.lang.Object implComputeIfAbsent(java.lang.Object,java.util.function.Function)>(r12, r13);
+
+        return $r14;
+    }
+
+    public synchronized java.lang.Object computeIfPresent(java.lang.Object, java.util.function.BiFunction)
+    {
+        java.util.function.BiFunction r13;
+        java.lang.String $r3, $r5, $r8, $r10, $r18, $r22;
+        sun.security.util.Debug $r11, $r16;
+        java.security.Provider r0;
+        java.lang.StringBuilder $r1, $r2, $r4, $r6, $r7, $r9, $r15, $r17, $r19, $r20, $r21;
+        java.lang.Object r12, $r14;
+
+        r0 := @this: java.security.Provider;
+
+        r12 := @parameter0: java.lang.Object;
+
+        r13 := @parameter1: java.util.function.BiFunction;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("putProviderProperty.");
+
+        $r3 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.security.Provider: void check(java.lang.String)>($r5);
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("removeProviderProperty");
+
+        $r8 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.security.Provider: void check(java.lang.String)>($r10);
+
+        $r11 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        if $r11 == null goto label1;
+
+        $r16 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ComputeIfPresent ");
+
+        $r18 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" provider property ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r12);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r16.<sun.security.util.Debug: void println(java.lang.String)>($r22);
+
+     label1:
+        $r14 = specialinvoke r0.<java.security.Provider: java.lang.Object implComputeIfPresent(java.lang.Object,java.util.function.BiFunction)>(r12, r13);
+
+        return $r14;
+    }
+
+    public synchronized java.lang.Object merge(java.lang.Object, java.lang.Object, java.util.function.BiFunction)
+    {
+        java.util.function.BiFunction r14;
+        java.lang.String $r3, $r5, $r8, $r10, $r19, $r23;
+        sun.security.util.Debug $r11, $r17;
+        java.security.Provider r0;
+        java.lang.StringBuilder $r1, $r2, $r4, $r6, $r7, $r9, $r16, $r18, $r20, $r21, $r22;
+        java.lang.Object r12, r13, $r15;
+
+        r0 := @this: java.security.Provider;
+
+        r12 := @parameter0: java.lang.Object;
+
+        r13 := @parameter1: java.lang.Object;
+
+        r14 := @parameter2: java.util.function.BiFunction;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("putProviderProperty.");
+
+        $r3 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.security.Provider: void check(java.lang.String)>($r5);
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("removeProviderProperty");
+
+        $r8 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.security.Provider: void check(java.lang.String)>($r10);
+
+        $r11 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        if $r11 == null goto label1;
+
+        $r17 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Merge ");
+
+        $r19 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r20 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" provider property ");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r12);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r17.<sun.security.util.Debug: void println(java.lang.String)>($r23);
+
+     label1:
+        $r15 = specialinvoke r0.<java.security.Provider: java.lang.Object implMerge(java.lang.Object,java.lang.Object,java.util.function.BiFunction)>(r12, r13, r14);
+
+        return $r15;
+    }
+
+    public java.lang.Object get(java.lang.Object)
+    {
+        java.lang.Object r1, $r2;
+        java.security.Provider r0;
+
+        r0 := @this: java.security.Provider;
+
+        r1 := @parameter0: java.lang.Object;
+
+        specialinvoke r0.<java.security.Provider: void checkInitialized()>();
+
+        $r2 = specialinvoke r0.<java.util.Properties: java.lang.Object get(java.lang.Object)>(r1);
+
+        return $r2;
+    }
+
+    public synchronized java.lang.Object getOrDefault(java.lang.Object, java.lang.Object)
+    {
+        java.lang.Object r1, r2, $r3;
+        java.security.Provider r0;
+
+        r0 := @this: java.security.Provider;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.lang.Object;
+
+        specialinvoke r0.<java.security.Provider: void checkInitialized()>();
+
+        $r3 = specialinvoke r0.<java.util.Properties: java.lang.Object getOrDefault(java.lang.Object,java.lang.Object)>(r1, r2);
+
+        return $r3;
+    }
+
+    public synchronized void forEach(java.util.function.BiConsumer)
+    {
+        java.util.function.BiConsumer r1;
+        java.security.Provider r0;
+
+        r0 := @this: java.security.Provider;
+
+        r1 := @parameter0: java.util.function.BiConsumer;
+
+        specialinvoke r0.<java.security.Provider: void checkInitialized()>();
+
+        specialinvoke r0.<java.util.Properties: void forEach(java.util.function.BiConsumer)>(r1);
+
+        return;
+    }
+
+    public java.util.Enumeration keys()
+    {
+        java.util.Enumeration $r1;
+        java.security.Provider r0;
+
+        r0 := @this: java.security.Provider;
+
+        specialinvoke r0.<java.security.Provider: void checkInitialized()>();
+
+        $r1 = specialinvoke r0.<java.util.Properties: java.util.Enumeration keys()>();
+
+        return $r1;
+    }
+
+    public java.util.Enumeration elements()
+    {
+        java.util.Enumeration $r1;
+        java.security.Provider r0;
+
+        r0 := @this: java.security.Provider;
+
+        specialinvoke r0.<java.security.Provider: void checkInitialized()>();
+
+        $r1 = specialinvoke r0.<java.util.Properties: java.util.Enumeration elements()>();
+
+        return $r1;
+    }
+
+    public java.lang.String getProperty(java.lang.String)
+    {
+        java.lang.String r1, $r2;
+        java.security.Provider r0;
+
+        r0 := @this: java.security.Provider;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.security.Provider: void checkInitialized()>();
+
+        $r2 = specialinvoke r0.<java.util.Properties: java.lang.String getProperty(java.lang.String)>(r1);
+
+        return $r2;
+    }
+
+    private void checkInitialized()
+    {
+        java.lang.IllegalStateException $r1;
+        java.security.Provider r0;
+        boolean $z0;
+
+        r0 := @this: java.security.Provider;
+
+        $z0 = r0.<java.security.Provider: boolean initialized>;
+
+        if $z0 != 0 goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+
+    private void check(java.lang.String)
+    {
+        java.lang.String r2;
+        java.lang.SecurityManager $r1;
+        java.security.Provider r0;
+
+        r0 := @this: java.security.Provider;
+
+        r2 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.security.Provider: void checkInitialized()>();
+
+        $r1 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r1 == null goto label1;
+
+        virtualinvoke $r1.<java.lang.SecurityManager: void checkSecurityAccess(java.lang.String)>(r2);
+
+     label1:
+        return;
+    }
+
+    private void putId()
+    {
+        java.security.Provider r0;
+        java.lang.Class $r6;
+        java.lang.String $r1, $r2, $r3, $r4, $r5, $r7;
+        double $d0;
+
+        r0 := @this: java.security.Provider;
+
+        $r1 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r2 = staticinvoke <java.lang.String: java.lang.String valueOf(java.lang.Object)>($r1);
+
+        specialinvoke r0.<java.util.Properties: java.lang.Object put(java.lang.Object,java.lang.Object)>("Provider.id name", $r2);
+
+        $d0 = r0.<java.security.Provider: double version>;
+
+        $r3 = staticinvoke <java.lang.String: java.lang.String valueOf(double)>($d0);
+
+        specialinvoke r0.<java.util.Properties: java.lang.Object put(java.lang.Object,java.lang.Object)>("Provider.id version", $r3);
+
+        $r4 = r0.<java.security.Provider: java.lang.String info>;
+
+        $r5 = staticinvoke <java.lang.String: java.lang.String valueOf(java.lang.Object)>($r4);
+
+        specialinvoke r0.<java.util.Properties: java.lang.Object put(java.lang.Object,java.lang.Object)>("Provider.id info", $r5);
+
+        $r6 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.Class: java.lang.String getName()>();
+
+        specialinvoke r0.<java.util.Properties: java.lang.Object put(java.lang.Object,java.lang.Object)>("Provider.id className", $r7);
+
+        return;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.util.Map$Entry r7;
+        java.util.Iterator $r3;
+        java.io.ObjectInputStream r4;
+        java.util.concurrent.ConcurrentHashMap $r5;
+        java.util.Set $r2;
+        java.util.HashMap $r0;
+        java.security.Provider r1;
+        java.lang.Object $r6, $r8, $r9;
+        boolean $z0;
+
+        r1 := @this: java.security.Provider;
+
+        r4 := @parameter0: java.io.ObjectInputStream;
+
+        $r0 = new java.util.HashMap;
+
+        specialinvoke $r0.<java.util.HashMap: void <init>()>();
+
+        $r2 = specialinvoke r1.<java.util.Properties: java.util.Set entrySet()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r6 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (java.util.Map$Entry) $r6;
+
+        $r8 = interfaceinvoke r7.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r9 = interfaceinvoke r7.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        interfaceinvoke $r0.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r8, $r9);
+
+        goto label1;
+
+     label2:
+        r1.<java.security.Provider: java.util.Properties defaults> = null;
+
+        virtualinvoke r4.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        $r5 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r5.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r1.<java.security.Provider: java.util.Map serviceMap> = $r5;
+
+        specialinvoke r1.<java.security.Provider: void implClear()>();
+
+        r1.<java.security.Provider: boolean initialized> = 1;
+
+        virtualinvoke r1.<java.security.Provider: void putAll(java.util.Map)>($r0);
+
+        return;
+    }
+
+    private boolean checkLegacy(java.lang.Object)
+    {
+        java.util.LinkedHashMap $r4;
+        java.util.Map $r3;
+        java.lang.Object r0;
+        java.lang.String r1;
+        boolean $z0;
+        java.security.Provider r2;
+
+        r2 := @this: java.security.Provider;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r1 = (java.lang.String) r0;
+
+        $z0 = virtualinvoke r1.<java.lang.String: boolean startsWith(java.lang.String)>("Provider.");
+
+        if $z0 == 0 goto label1;
+
+        return 0;
+
+     label1:
+        r2.<java.security.Provider: boolean legacyChanged> = 1;
+
+        $r3 = r2.<java.security.Provider: java.util.Map legacyStrings>;
+
+        if $r3 != null goto label2;
+
+        $r4 = new java.util.LinkedHashMap;
+
+        specialinvoke $r4.<java.util.LinkedHashMap: void <init>()>();
+
+        r2.<java.security.Provider: java.util.Map legacyStrings> = $r4;
+
+     label2:
+        return 1;
+    }
+
+    private void implPutAll(java.util.Map)
+    {
+        java.util.Map$Entry r4;
+        java.util.Iterator $r2;
+        java.util.Set $r1;
+        java.security.Provider r5;
+        java.util.Map r0;
+        java.lang.Object $r3, $r6, $r7;
+        boolean $z0;
+
+        r5 := @this: java.security.Provider;
+
+        r0 := @parameter0: java.util.Map;
+
+        $r1 = interfaceinvoke r0.<java.util.Map: java.util.Set entrySet()>();
+
+        $r2 = interfaceinvoke $r1.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (java.util.Map$Entry) $r3;
+
+        $r6 = interfaceinvoke r4.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r7 = interfaceinvoke r4.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        specialinvoke r5.<java.security.Provider: java.lang.Object implPut(java.lang.Object,java.lang.Object)>($r6, $r7);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private java.lang.Object implRemove(java.lang.Object)
+    {
+        java.util.Map $r4;
+        java.lang.Object r0, $r2;
+        java.lang.String $r3;
+        boolean $z0, $z1;
+        java.security.Provider r1;
+
+        r1 := @this: java.security.Provider;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $z0 = r0 instanceof java.lang.String;
+
+        if $z0 == 0 goto label2;
+
+        $z1 = specialinvoke r1.<java.security.Provider: boolean checkLegacy(java.lang.Object)>(r0);
+
+        if $z1 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r4 = r1.<java.security.Provider: java.util.Map legacyStrings>;
+
+        $r3 = (java.lang.String) r0;
+
+        interfaceinvoke $r4.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r3);
+
+     label2:
+        $r2 = specialinvoke r1.<java.util.Properties: java.lang.Object remove(java.lang.Object)>(r0);
+
+        return $r2;
+    }
+
+    private boolean implRemove(java.lang.Object, java.lang.Object)
+    {
+        java.security.Provider r1;
+        java.util.Map $r5;
+        java.lang.Object r0, r2;
+        java.lang.String $r3, $r4;
+        boolean $z0, $z1, $z2, $z3;
+
+        r1 := @this: java.security.Provider;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.lang.Object;
+
+        $z0 = r0 instanceof java.lang.String;
+
+        if $z0 == 0 goto label2;
+
+        $z1 = r2 instanceof java.lang.String;
+
+        if $z1 == 0 goto label2;
+
+        $z2 = specialinvoke r1.<java.security.Provider: boolean checkLegacy(java.lang.Object)>(r0);
+
+        if $z2 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r5 = r1.<java.security.Provider: java.util.Map legacyStrings>;
+
+        $r4 = (java.lang.String) r0;
+
+        $r3 = (java.lang.String) r2;
+
+        interfaceinvoke $r5.<java.util.Map: boolean remove(java.lang.Object,java.lang.Object)>($r4, $r3);
+
+     label2:
+        $z3 = specialinvoke r1.<java.util.Properties: boolean remove(java.lang.Object,java.lang.Object)>(r0, r2);
+
+        return $z3;
+    }
+
+    private boolean implReplace(java.lang.Object, java.lang.Object, java.lang.Object)
+    {
+        java.security.Provider r1;
+        java.util.Map $r7;
+        java.lang.Object r0, r2, r3;
+        java.lang.String $r4, $r5, $r6;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        r1 := @this: java.security.Provider;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.lang.Object;
+
+        r3 := @parameter2: java.lang.Object;
+
+        $z0 = r0 instanceof java.lang.String;
+
+        if $z0 == 0 goto label2;
+
+        $z1 = r2 instanceof java.lang.String;
+
+        if $z1 == 0 goto label2;
+
+        $z2 = r3 instanceof java.lang.String;
+
+        if $z2 == 0 goto label2;
+
+        $z3 = specialinvoke r1.<java.security.Provider: boolean checkLegacy(java.lang.Object)>(r0);
+
+        if $z3 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r7 = r1.<java.security.Provider: java.util.Map legacyStrings>;
+
+        $r6 = (java.lang.String) r0;
+
+        $r5 = (java.lang.String) r2;
+
+        $r4 = (java.lang.String) r3;
+
+        interfaceinvoke $r7.<java.util.Map: boolean replace(java.lang.Object,java.lang.Object,java.lang.Object)>($r6, $r5, $r4);
+
+     label2:
+        $z4 = specialinvoke r1.<java.util.Properties: boolean replace(java.lang.Object,java.lang.Object,java.lang.Object)>(r0, r2, r3);
+
+        return $z4;
+    }
+
+    private java.lang.Object implReplace(java.lang.Object, java.lang.Object)
+    {
+        java.security.Provider r1;
+        java.util.Map $r5;
+        java.lang.Object r0, r2, $r6;
+        java.lang.String $r3, $r4;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: java.security.Provider;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.lang.Object;
+
+        $z0 = r0 instanceof java.lang.String;
+
+        if $z0 == 0 goto label2;
+
+        $z1 = r2 instanceof java.lang.String;
+
+        if $z1 == 0 goto label2;
+
+        $z2 = specialinvoke r1.<java.security.Provider: boolean checkLegacy(java.lang.Object)>(r0);
+
+        if $z2 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r5 = r1.<java.security.Provider: java.util.Map legacyStrings>;
+
+        $r4 = (java.lang.String) r0;
+
+        $r3 = (java.lang.String) r2;
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object replace(java.lang.Object,java.lang.Object)>($r4, $r3);
+
+     label2:
+        $r6 = specialinvoke r1.<java.util.Properties: java.lang.Object replace(java.lang.Object,java.lang.Object)>(r0, r2);
+
+        return $r6;
+    }
+
+    private void implReplaceAll(java.util.function.BiFunction)
+    {
+        java.util.LinkedHashMap $r4;
+        java.util.Map $r1, $r3;
+        java.util.function.BiFunction r2;
+        java.security.Provider r0;
+
+        r0 := @this: java.security.Provider;
+
+        r2 := @parameter0: java.util.function.BiFunction;
+
+        r0.<java.security.Provider: boolean legacyChanged> = 1;
+
+        $r1 = r0.<java.security.Provider: java.util.Map legacyStrings>;
+
+        if $r1 != null goto label1;
+
+        $r4 = new java.util.LinkedHashMap;
+
+        specialinvoke $r4.<java.util.LinkedHashMap: void <init>()>();
+
+        r0.<java.security.Provider: java.util.Map legacyStrings> = $r4;
+
+        goto label2;
+
+     label1:
+        $r3 = r0.<java.security.Provider: java.util.Map legacyStrings>;
+
+        interfaceinvoke $r3.<java.util.Map: void replaceAll(java.util.function.BiFunction)>(r2);
+
+     label2:
+        specialinvoke r0.<java.util.Properties: void replaceAll(java.util.function.BiFunction)>(r2);
+
+        return;
+    }
+
+    private java.lang.Object implMerge(java.lang.Object, java.lang.Object, java.util.function.BiFunction)
+    {
+        java.util.function.BiFunction r3;
+        java.security.Provider r1;
+        java.util.Map $r6;
+        java.lang.Object r0, r2, $r7;
+        java.lang.String $r4, $r5;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: java.security.Provider;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.lang.Object;
+
+        r3 := @parameter2: java.util.function.BiFunction;
+
+        $z0 = r0 instanceof java.lang.String;
+
+        if $z0 == 0 goto label2;
+
+        $z1 = r2 instanceof java.lang.String;
+
+        if $z1 == 0 goto label2;
+
+        $z2 = specialinvoke r1.<java.security.Provider: boolean checkLegacy(java.lang.Object)>(r0);
+
+        if $z2 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r6 = r1.<java.security.Provider: java.util.Map legacyStrings>;
+
+        $r5 = (java.lang.String) r0;
+
+        $r4 = (java.lang.String) r2;
+
+        interfaceinvoke $r6.<java.util.Map: java.lang.Object merge(java.lang.Object,java.lang.Object,java.util.function.BiFunction)>($r5, $r4, r3);
+
+     label2:
+        $r7 = specialinvoke r1.<java.util.Properties: java.lang.Object merge(java.lang.Object,java.lang.Object,java.util.function.BiFunction)>(r0, r2, r3);
+
+        return $r7;
+    }
+
+    private java.lang.Object implCompute(java.lang.Object, java.util.function.BiFunction)
+    {
+        java.util.function.BiFunction r2;
+        java.security.Provider r1;
+        java.util.Map $r5;
+        java.lang.Object r0, $r3;
+        java.lang.String $r4;
+        boolean $z0, $z1;
+
+        r1 := @this: java.security.Provider;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.util.function.BiFunction;
+
+        $z0 = r0 instanceof java.lang.String;
+
+        if $z0 == 0 goto label2;
+
+        $z1 = specialinvoke r1.<java.security.Provider: boolean checkLegacy(java.lang.Object)>(r0);
+
+        if $z1 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r5 = r1.<java.security.Provider: java.util.Map legacyStrings>;
+
+        $r4 = (java.lang.String) r0;
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object compute(java.lang.Object,java.util.function.BiFunction)>($r4, r2);
+
+     label2:
+        $r3 = specialinvoke r1.<java.util.Properties: java.lang.Object compute(java.lang.Object,java.util.function.BiFunction)>(r0, r2);
+
+        return $r3;
+    }
+
+    private java.lang.Object implComputeIfAbsent(java.lang.Object, java.util.function.Function)
+    {
+        java.util.function.Function r2;
+        java.security.Provider r1;
+        java.util.Map $r5;
+        java.lang.Object r0, $r3;
+        java.lang.String $r4;
+        boolean $z0, $z1;
+
+        r1 := @this: java.security.Provider;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.util.function.Function;
+
+        $z0 = r0 instanceof java.lang.String;
+
+        if $z0 == 0 goto label2;
+
+        $z1 = specialinvoke r1.<java.security.Provider: boolean checkLegacy(java.lang.Object)>(r0);
+
+        if $z1 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r5 = r1.<java.security.Provider: java.util.Map legacyStrings>;
+
+        $r4 = (java.lang.String) r0;
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object computeIfAbsent(java.lang.Object,java.util.function.Function)>($r4, r2);
+
+     label2:
+        $r3 = specialinvoke r1.<java.util.Properties: java.lang.Object computeIfAbsent(java.lang.Object,java.util.function.Function)>(r0, r2);
+
+        return $r3;
+    }
+
+    private java.lang.Object implComputeIfPresent(java.lang.Object, java.util.function.BiFunction)
+    {
+        java.util.function.BiFunction r2;
+        java.security.Provider r1;
+        java.util.Map $r5;
+        java.lang.Object r0, $r3;
+        java.lang.String $r4;
+        boolean $z0, $z1;
+
+        r1 := @this: java.security.Provider;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.util.function.BiFunction;
+
+        $z0 = r0 instanceof java.lang.String;
+
+        if $z0 == 0 goto label2;
+
+        $z1 = specialinvoke r1.<java.security.Provider: boolean checkLegacy(java.lang.Object)>(r0);
+
+        if $z1 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r5 = r1.<java.security.Provider: java.util.Map legacyStrings>;
+
+        $r4 = (java.lang.String) r0;
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object computeIfPresent(java.lang.Object,java.util.function.BiFunction)>($r4, r2);
+
+     label2:
+        $r3 = specialinvoke r1.<java.util.Properties: java.lang.Object computeIfPresent(java.lang.Object,java.util.function.BiFunction)>(r0, r2);
+
+        return $r3;
+    }
+
+    private java.lang.Object implPut(java.lang.Object, java.lang.Object)
+    {
+        java.security.Provider r1;
+        java.util.Map $r5;
+        java.lang.Object r0, r2, $r6;
+        java.lang.String $r3, $r4;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: java.security.Provider;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.lang.Object;
+
+        $z0 = r0 instanceof java.lang.String;
+
+        if $z0 == 0 goto label2;
+
+        $z1 = r2 instanceof java.lang.String;
+
+        if $z1 == 0 goto label2;
+
+        $z2 = specialinvoke r1.<java.security.Provider: boolean checkLegacy(java.lang.Object)>(r0);
+
+        if $z2 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r5 = r1.<java.security.Provider: java.util.Map legacyStrings>;
+
+        $r4 = (java.lang.String) r0;
+
+        $r3 = (java.lang.String) r2;
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r4, $r3);
+
+     label2:
+        $r6 = specialinvoke r1.<java.util.Properties: java.lang.Object put(java.lang.Object,java.lang.Object)>(r0, r2);
+
+        return $r6;
+    }
+
+    private java.lang.Object implPutIfAbsent(java.lang.Object, java.lang.Object)
+    {
+        java.security.Provider r1;
+        java.util.Map $r5;
+        java.lang.Object r0, r2, $r6;
+        java.lang.String $r3, $r4;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: java.security.Provider;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.lang.Object;
+
+        $z0 = r0 instanceof java.lang.String;
+
+        if $z0 == 0 goto label2;
+
+        $z1 = r2 instanceof java.lang.String;
+
+        if $z1 == 0 goto label2;
+
+        $z2 = specialinvoke r1.<java.security.Provider: boolean checkLegacy(java.lang.Object)>(r0);
+
+        if $z2 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r5 = r1.<java.security.Provider: java.util.Map legacyStrings>;
+
+        $r4 = (java.lang.String) r0;
+
+        $r3 = (java.lang.String) r2;
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object putIfAbsent(java.lang.Object,java.lang.Object)>($r4, $r3);
+
+     label2:
+        $r6 = specialinvoke r1.<java.util.Properties: java.lang.Object putIfAbsent(java.lang.Object,java.lang.Object)>(r0, r2);
+
+        return $r6;
+    }
+
+    private void implClear()
+    {
+        java.util.Map $r1, $r2, $r3, $r4, $r5;
+        java.security.Provider r0;
+
+        r0 := @this: java.security.Provider;
+
+        $r1 = r0.<java.security.Provider: java.util.Map legacyStrings>;
+
+        if $r1 == null goto label1;
+
+        $r5 = r0.<java.security.Provider: java.util.Map legacyStrings>;
+
+        interfaceinvoke $r5.<java.util.Map: void clear()>();
+
+     label1:
+        $r2 = r0.<java.security.Provider: java.util.Map legacyMap>;
+
+        if $r2 == null goto label2;
+
+        $r4 = r0.<java.security.Provider: java.util.Map legacyMap>;
+
+        interfaceinvoke $r4.<java.util.Map: void clear()>();
+
+     label2:
+        $r3 = r0.<java.security.Provider: java.util.Map serviceMap>;
+
+        interfaceinvoke $r3.<java.util.Map: void clear()>();
+
+        r0.<java.security.Provider: boolean legacyChanged> = 0;
+
+        r0.<java.security.Provider: boolean servicesChanged> = 0;
+
+        r0.<java.security.Provider: java.util.Set serviceSet> = null;
+
+        r0.<java.security.Provider: java.util.Set prngAlgos> = null;
+
+        specialinvoke r0.<java.util.Properties: void clear()>();
+
+        specialinvoke r0.<java.security.Provider: void putId()>();
+
+        return;
+    }
+
+    private void ensureLegacyParsed()
+    {
+        java.util.Map $r1, $r2, $r3, $r4, $r7, $r8;
+        java.lang.String $r12, $r14;
+        boolean $z0, $z1;
+        java.util.Map$Entry r10;
+        java.util.Iterator $r6;
+        java.util.concurrent.ConcurrentHashMap $r15;
+        java.util.Set $r5;
+        java.security.Provider r0;
+        java.lang.Object $r9, $r11, $r13;
+
+        r0 := @this: java.security.Provider;
+
+        $z0 = r0.<java.security.Provider: boolean legacyChanged>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = r0.<java.security.Provider: java.util.Map legacyStrings>;
+
+        if $r1 != null goto label2;
+
+     label1:
+        return;
+
+     label2:
+        r0.<java.security.Provider: java.util.Set serviceSet> = null;
+
+        $r2 = r0.<java.security.Provider: java.util.Map legacyMap>;
+
+        if $r2 != null goto label3;
+
+        $r15 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r15.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r0.<java.security.Provider: java.util.Map legacyMap> = $r15;
+
+        goto label4;
+
+     label3:
+        $r3 = r0.<java.security.Provider: java.util.Map legacyMap>;
+
+        interfaceinvoke $r3.<java.util.Map: void clear()>();
+
+     label4:
+        $r4 = r0.<java.security.Provider: java.util.Map legacyStrings>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Map: java.util.Set entrySet()>();
+
+        $r6 = interfaceinvoke $r5.<java.util.Set: java.util.Iterator iterator()>();
+
+     label5:
+        $z1 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label6;
+
+        $r9 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r10 = (java.util.Map$Entry) $r9;
+
+        $r11 = interfaceinvoke r10.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r12 = (java.lang.String) $r11;
+
+        $r13 = interfaceinvoke r10.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r14 = (java.lang.String) $r13;
+
+        specialinvoke r0.<java.security.Provider: void parseLegacyPut(java.lang.String,java.lang.String)>($r12, $r14);
+
+        goto label5;
+
+     label6:
+        $r8 = r0.<java.security.Provider: java.util.Map legacyMap>;
+
+        $r7 = r0.<java.security.Provider: java.util.Map serviceMap>;
+
+        staticinvoke <java.security.Provider: void removeInvalidServices(java.util.Map,java.util.Map)>($r8, $r7);
+
+        r0.<java.security.Provider: boolean legacyChanged> = 0;
+
+        return;
+    }
+
+    private static void removeInvalidServices(java.util.Map, java.util.Map)
+    {
+        java.util.Map r0, r20;
+        java.lang.String $r9, $r10, $r15, $r16, $r18, $r19;
+        boolean $z0, $z1, $z2;
+        java.util.Map$Entry r4;
+        java.util.Iterator $r2;
+        java.util.Set $r1;
+        sun.security.util.Debug $r12, $r23;
+        java.security.Provider$Service r6, r22;
+        java.lang.Object $r3, $r5, $r7, $r21;
+        java.lang.StringBuilder $r11, $r13, $r14;
+        java.security.Provider$ServiceKey r8, $r17;
+
+        r0 := @parameter0: java.util.Map;
+
+        r20 := @parameter1: java.util.Map;
+
+        $r1 = interfaceinvoke r0.<java.util.Map: java.util.Set entrySet()>();
+
+        $r2 = interfaceinvoke $r1.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z2 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label5;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (java.util.Map$Entry) $r3;
+
+        $r5 = interfaceinvoke r4.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        r6 = (java.security.Provider$Service) $r5;
+
+        $z0 = staticinvoke <java.security.Provider$Service: boolean access$000(java.security.Provider$Service)>(r6);
+
+        if $z0 != 0 goto label4;
+
+        $r7 = interfaceinvoke r4.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        r8 = (java.security.Provider$ServiceKey) $r7;
+
+        $r9 = staticinvoke <java.security.Provider$ServiceKey: java.lang.String access$200(java.security.Provider$ServiceKey)>(r8);
+
+        $r10 = staticinvoke <java.security.Provider$Service: java.lang.String access$100(java.security.Provider$Service)>(r6);
+
+        $z1 = virtualinvoke $r9.<java.lang.String: boolean equals(java.lang.Object)>($r10);
+
+        if $z1 != 0 goto label2;
+
+        $r16 = staticinvoke <java.security.Provider$Service: java.lang.String access$300(java.security.Provider$Service)>(r6);
+
+        if $r16 != null goto label2;
+
+        $r17 = new java.security.Provider$ServiceKey;
+
+        $r18 = staticinvoke <java.security.Provider$Service: java.lang.String access$400(java.security.Provider$Service)>(r6);
+
+        $r19 = staticinvoke <java.security.Provider$Service: java.lang.String access$100(java.security.Provider$Service)>(r6);
+
+        specialinvoke $r17.<java.security.Provider$ServiceKey: void <init>(java.lang.String,java.lang.String,boolean,java.security.Provider$1)>($r18, $r19, 1, null);
+
+        $r21 = interfaceinvoke r20.<java.util.Map: java.lang.Object get(java.lang.Object)>($r17);
+
+        r22 = (java.security.Provider$Service) $r21;
+
+        if r22 == null goto label2;
+
+        interfaceinvoke r4.<java.util.Map$Entry: java.lang.Object setValue(java.lang.Object)>(r22);
+
+        goto label1;
+
+     label2:
+        $r23 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        if $r23 == null goto label3;
+
+        $r12 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Remove invalid legacy mapping under ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r8);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r12.<sun.security.util.Debug: void println(java.lang.String)>($r15);
+
+     label3:
+        interfaceinvoke $r2.<java.util.Iterator: void remove()>();
+
+     label4:
+        goto label1;
+
+     label5:
+        return;
+    }
+
+    private static java.lang.String[] getTypeAndAlgorithm(java.lang.String)
+    {
+        java.lang.String[] $r3;
+        sun.security.util.Debug $r4, $r6;
+        int $i0, $i1;
+        java.lang.StringBuilder $r5, $r7, $r8;
+        java.lang.String r0, $r1, $r2, $r9;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int indexOf(int)>(46);
+
+        if $i0 >= 1 goto label2;
+
+        $r4 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        if $r4 == null goto label1;
+
+        $r6 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignoring invalid entry in provider: ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<sun.security.util.Debug: void println(java.lang.String)>($r9);
+
+     label1:
+        return null;
+
+     label2:
+        $r1 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $i1 = $i0 + 1;
+
+        $r2 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>($i1);
+
+        $r3 = newarray (java.lang.String)[2];
+
+        $r3[0] = $r1;
+
+        $r3[1] = $r2;
+
+        return $r3;
+    }
+
+    private void parseLegacyPut(java.lang.String, java.lang.String)
+    {
+        java.util.Locale $r1;
+        java.util.Map $r13, $r16, $r22, $r26, $r34, $r37, $r39;
+        boolean $z0, $z1, $z2;
+        java.security.Provider r12;
+        java.lang.String[] $r3, $r28;
+        int $i0, $i1, $i2, $i4;
+        java.lang.String r0, $r2, $r4, r5, $r6, $r7, $r8, $r9, $r10, $r17, $r18, $r19, $r20, $r24, $r27, $r29, $r30, $r31, $r32, r42, r43;
+        java.security.Provider$Service r40, r41, r44, $r46, $r49, $r51;
+        java.lang.Object $r14, $r23, $r35;
+        java.security.Provider$ServiceKey $r45, $r47, $r48, $r50;
+
+        r12 := @this: java.security.Provider;
+
+        r0 := @parameter0: java.lang.String;
+
+        r5 := @parameter1: java.lang.String;
+
+        $r1 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r2 = virtualinvoke r0.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r1);
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>("alg.alias.");
+
+        if $z0 == 0 goto label03;
+
+        $i2 = <java.security.Provider: int ALIAS_LENGTH>;
+
+        $r27 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>($i2);
+
+        $r28 = staticinvoke <java.security.Provider: java.lang.String[] getTypeAndAlgorithm(java.lang.String)>($r27);
+
+        if $r28 != null goto label01;
+
+        return;
+
+     label01:
+        $r29 = $r28[0];
+
+        $r30 = staticinvoke <java.security.Provider: java.lang.String getEngineName(java.lang.String)>($r29);
+
+        $r31 = $r28[1];
+
+        $r32 = virtualinvoke $r31.<java.lang.String: java.lang.String intern()>();
+
+        $r45 = new java.security.Provider$ServiceKey;
+
+        specialinvoke $r45.<java.security.Provider$ServiceKey: void <init>(java.lang.String,java.lang.String,boolean,java.security.Provider$1)>($r30, r5, 1, null);
+
+        $r34 = r12.<java.security.Provider: java.util.Map legacyMap>;
+
+        $r35 = interfaceinvoke $r34.<java.util.Map: java.lang.Object get(java.lang.Object)>($r45);
+
+        r40 = (java.security.Provider$Service) $r35;
+
+        if r40 != null goto label02;
+
+        $r46 = new java.security.Provider$Service;
+
+        specialinvoke $r46.<java.security.Provider$Service: void <init>(java.security.Provider,java.security.Provider$1)>(r12, null);
+
+        r40 = $r46;
+
+        staticinvoke <java.security.Provider$Service: java.lang.String access$402(java.security.Provider$Service,java.lang.String)>($r46, $r30);
+
+        staticinvoke <java.security.Provider$Service: java.lang.String access$102(java.security.Provider$Service,java.lang.String)>($r46, r5);
+
+        $r39 = r12.<java.security.Provider: java.util.Map legacyMap>;
+
+        interfaceinvoke $r39.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r45, $r46);
+
+     label02:
+        $r37 = r12.<java.security.Provider: java.util.Map legacyMap>;
+
+        $r47 = new java.security.Provider$ServiceKey;
+
+        specialinvoke $r47.<java.security.Provider$ServiceKey: void <init>(java.lang.String,java.lang.String,boolean,java.security.Provider$1)>($r30, $r32, 1, null);
+
+        interfaceinvoke $r37.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r47, r40);
+
+        staticinvoke <java.security.Provider$Service: void access$700(java.security.Provider$Service,java.lang.String)>(r40, $r32);
+
+        goto label11;
+
+     label03:
+        $r3 = staticinvoke <java.security.Provider: java.lang.String[] getTypeAndAlgorithm(java.lang.String)>(r0);
+
+        if $r3 != null goto label04;
+
+        return;
+
+     label04:
+        $r4 = $r3[1];
+
+        $i0 = virtualinvoke $r4.<java.lang.String: int indexOf(int)>(32);
+
+        $i4 = (int) -1;
+
+        if $i0 != $i4 goto label07;
+
+        $r17 = $r3[0];
+
+        $r18 = staticinvoke <java.security.Provider: java.lang.String getEngineName(java.lang.String)>($r17);
+
+        $r19 = $r3[1];
+
+        $r20 = virtualinvoke $r19.<java.lang.String: java.lang.String intern()>();
+
+        $r48 = new java.security.Provider$ServiceKey;
+
+        specialinvoke $r48.<java.security.Provider$ServiceKey: void <init>(java.lang.String,java.lang.String,boolean,java.security.Provider$1)>($r18, $r20, 1, null);
+
+        $r22 = r12.<java.security.Provider: java.util.Map legacyMap>;
+
+        $r23 = interfaceinvoke $r22.<java.util.Map: java.lang.Object get(java.lang.Object)>($r48);
+
+        r41 = (java.security.Provider$Service) $r23;
+
+        if r41 != null goto label05;
+
+        $r49 = new java.security.Provider$Service;
+
+        specialinvoke $r49.<java.security.Provider$Service: void <init>(java.security.Provider,java.security.Provider$1)>(r12, null);
+
+        r41 = $r49;
+
+        staticinvoke <java.security.Provider$Service: java.lang.String access$402(java.security.Provider$Service,java.lang.String)>($r49, $r18);
+
+        staticinvoke <java.security.Provider$Service: java.lang.String access$102(java.security.Provider$Service,java.lang.String)>($r49, $r20);
+
+        $r26 = r12.<java.security.Provider: java.util.Map legacyMap>;
+
+        interfaceinvoke $r26.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r48, $r49);
+
+     label05:
+        staticinvoke <java.security.Provider$Service: java.lang.String access$302(java.security.Provider$Service,java.lang.String)>(r41, r5);
+
+        $z2 = virtualinvoke $r18.<java.lang.String: boolean equals(java.lang.Object)>("SecureRandom");
+
+        if $z2 == 0 goto label06;
+
+        $r24 = staticinvoke <java.security.Provider$Service: java.lang.String access$100(java.security.Provider$Service)>(r41);
+
+        specialinvoke r12.<java.security.Provider: void updateSecureRandomEntries(boolean,java.lang.String)>(1, $r24);
+
+     label06:
+        goto label11;
+
+     label07:
+        $r6 = $r3[0];
+
+        $r7 = staticinvoke <java.security.Provider: java.lang.String getEngineName(java.lang.String)>($r6);
+
+        r42 = $r3[1];
+
+        $r8 = virtualinvoke r42.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $r9 = virtualinvoke $r8.<java.lang.String: java.lang.String intern()>();
+
+        $i1 = $i0 + 1;
+
+        r43 = virtualinvoke r42.<java.lang.String: java.lang.String substring(int)>($i1);
+
+     label08:
+        $z1 = virtualinvoke r43.<java.lang.String: boolean startsWith(java.lang.String)>(" ");
+
+        if $z1 == 0 goto label09;
+
+        r43 = virtualinvoke r43.<java.lang.String: java.lang.String substring(int)>(1);
+
+        goto label08;
+
+     label09:
+        $r10 = virtualinvoke r43.<java.lang.String: java.lang.String intern()>();
+
+        $r50 = new java.security.Provider$ServiceKey;
+
+        specialinvoke $r50.<java.security.Provider$ServiceKey: void <init>(java.lang.String,java.lang.String,boolean,java.security.Provider$1)>($r7, $r9, 1, null);
+
+        $r13 = r12.<java.security.Provider: java.util.Map legacyMap>;
+
+        $r14 = interfaceinvoke $r13.<java.util.Map: java.lang.Object get(java.lang.Object)>($r50);
+
+        r44 = (java.security.Provider$Service) $r14;
+
+        if r44 != null goto label10;
+
+        $r51 = new java.security.Provider$Service;
+
+        specialinvoke $r51.<java.security.Provider$Service: void <init>(java.security.Provider,java.security.Provider$1)>(r12, null);
+
+        r44 = $r51;
+
+        staticinvoke <java.security.Provider$Service: java.lang.String access$402(java.security.Provider$Service,java.lang.String)>($r51, $r7);
+
+        staticinvoke <java.security.Provider$Service: java.lang.String access$102(java.security.Provider$Service,java.lang.String)>($r51, $r9);
+
+        $r16 = r12.<java.security.Provider: java.util.Map legacyMap>;
+
+        interfaceinvoke $r16.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r50, $r51);
+
+     label10:
+        virtualinvoke r44.<java.security.Provider$Service: void addAttribute(java.lang.String,java.lang.String)>($r10, r5);
+
+     label11:
+        return;
+    }
+
+    public java.security.Provider$Service getService(java.lang.String, java.lang.String)
+    {
+        java.lang.Throwable $r12;
+        java.util.Map $r3, $r4, $r5, $r6, $r9;
+        java.lang.String r1, r2;
+        boolean $z0, $z1, $z2;
+        java.security.Provider r0;
+        java.security.Provider$Service $r8, r14;
+        java.lang.Object $r7, $r10;
+        java.security.Provider$ServiceKey $r11, r13;
+
+        r0 := @this: java.security.Provider;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<java.security.Provider: void checkInitialized()>();
+
+        r13 = <java.security.Provider: java.security.Provider$ServiceKey previousKey>;
+
+        $z0 = virtualinvoke r13.<java.security.Provider$ServiceKey: boolean matches(java.lang.String,java.lang.String)>(r1, r2);
+
+        if $z0 != 0 goto label1;
+
+        $r11 = new java.security.Provider$ServiceKey;
+
+        specialinvoke $r11.<java.security.Provider$ServiceKey: void <init>(java.lang.String,java.lang.String,boolean,java.security.Provider$1)>(r1, r2, 0, null);
+
+        r13 = $r11;
+
+        <java.security.Provider: java.security.Provider$ServiceKey previousKey> = $r11;
+
+     label1:
+        $r3 = r0.<java.security.Provider: java.util.Map serviceMap>;
+
+        $z1 = interfaceinvoke $r3.<java.util.Map: boolean isEmpty()>();
+
+        if $z1 != 0 goto label2;
+
+        $r9 = r0.<java.security.Provider: java.util.Map serviceMap>;
+
+        $r10 = interfaceinvoke $r9.<java.util.Map: java.lang.Object get(java.lang.Object)>(r13);
+
+        r14 = (java.security.Provider$Service) $r10;
+
+        if r14 == null goto label2;
+
+        return r14;
+
+     label2:
+        entermonitor r0;
+
+     label3:
+        specialinvoke r0.<java.security.Provider: void ensureLegacyParsed()>();
+
+        $r4 = r0.<java.security.Provider: java.util.Map legacyMap>;
+
+        if $r4 == null goto label5;
+
+        $r5 = r0.<java.security.Provider: java.util.Map legacyMap>;
+
+        $z2 = interfaceinvoke $r5.<java.util.Map: boolean isEmpty()>();
+
+        if $z2 != 0 goto label5;
+
+        $r6 = r0.<java.security.Provider: java.util.Map legacyMap>;
+
+        $r7 = interfaceinvoke $r6.<java.util.Map: java.lang.Object get(java.lang.Object)>(r13);
+
+        $r8 = (java.security.Provider$Service) $r7;
+
+        exitmonitor r0;
+
+     label4:
+        return $r8;
+
+     label5:
+        exitmonitor r0;
+
+     label6:
+        goto label9;
+
+     label7:
+        $r12 := @caughtexception;
+
+        exitmonitor r0;
+
+     label8:
+        throw $r12;
+
+     label9:
+        return null;
+
+        catch java.lang.Throwable from label3 to label4 with label7;
+        catch java.lang.Throwable from label5 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public synchronized java.util.Set getServices()
+    {
+        java.util.Map $r2, $r3, $r4, $r5, $r7;
+        java.util.LinkedHashSet $r1;
+        boolean $z0, $z1, $z2, $z3;
+        java.util.Collection $r6, $r8;
+        java.util.Set $r9, $r10, $r11;
+        java.security.Provider r0;
+
+        r0 := @this: java.security.Provider;
+
+        specialinvoke r0.<java.security.Provider: void checkInitialized()>();
+
+        $z0 = r0.<java.security.Provider: boolean legacyChanged>;
+
+        if $z0 != 0 goto label1;
+
+        $z3 = r0.<java.security.Provider: boolean servicesChanged>;
+
+        if $z3 == 0 goto label2;
+
+     label1:
+        r0.<java.security.Provider: java.util.Set serviceSet> = null;
+
+     label2:
+        $r9 = r0.<java.security.Provider: java.util.Set serviceSet>;
+
+        if $r9 != null goto label5;
+
+        specialinvoke r0.<java.security.Provider: void ensureLegacyParsed()>();
+
+        $r1 = new java.util.LinkedHashSet;
+
+        specialinvoke $r1.<java.util.LinkedHashSet: void <init>()>();
+
+        $r2 = r0.<java.security.Provider: java.util.Map serviceMap>;
+
+        $z1 = interfaceinvoke $r2.<java.util.Map: boolean isEmpty()>();
+
+        if $z1 != 0 goto label3;
+
+        $r7 = r0.<java.security.Provider: java.util.Map serviceMap>;
+
+        $r8 = interfaceinvoke $r7.<java.util.Map: java.util.Collection values()>();
+
+        interfaceinvoke $r1.<java.util.Set: boolean addAll(java.util.Collection)>($r8);
+
+     label3:
+        $r3 = r0.<java.security.Provider: java.util.Map legacyMap>;
+
+        if $r3 == null goto label4;
+
+        $r4 = r0.<java.security.Provider: java.util.Map legacyMap>;
+
+        $z2 = interfaceinvoke $r4.<java.util.Map: boolean isEmpty()>();
+
+        if $z2 != 0 goto label4;
+
+        $r5 = r0.<java.security.Provider: java.util.Map legacyMap>;
+
+        $r6 = interfaceinvoke $r5.<java.util.Map: java.util.Collection values()>();
+
+        interfaceinvoke $r1.<java.util.Set: boolean addAll(java.util.Collection)>($r6);
+
+     label4:
+        $r10 = staticinvoke <java.util.Collections: java.util.Set unmodifiableSet(java.util.Set)>($r1);
+
+        r0.<java.security.Provider: java.util.Set serviceSet> = $r10;
+
+        r0.<java.security.Provider: boolean servicesChanged> = 0;
+
+     label5:
+        $r11 = r0.<java.security.Provider: java.util.Set serviceSet>;
+
+        return $r11;
+    }
+
+    protected void putService(java.security.Provider$Service)
+    {
+        java.lang.NullPointerException $r24;
+        java.util.Map $r12, $r15, $r22;
+        boolean $z0, $z1;
+        sun.security.util.Debug $r6, $r26;
+        java.security.Provider r0, $r8;
+        java.util.List $r16;
+        java.lang.StringBuilder $r1, $r2, $r4, $r25, $r28, $r29, $r30;
+        java.lang.Throwable $r32;
+        java.lang.String $r3, $r5, $r9, $r10, $r18, r20, $r27, $r31;
+        java.util.Iterator $r17;
+        java.lang.IllegalArgumentException $r23;
+        java.security.Provider$Service r7, $r14;
+        java.lang.Object $r13, $r19;
+        java.security.Provider$ServiceKey $r11, $r21;
+
+        r0 := @this: java.security.Provider;
+
+        r7 := @parameter0: java.security.Provider$Service;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("putProviderProperty.");
+
+        $r3 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.security.Provider: void check(java.lang.String)>($r5);
+
+        $r6 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        if $r6 == null goto label01;
+
+        $r26 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        $r25 = new java.lang.StringBuilder;
+
+        specialinvoke $r25.<java.lang.StringBuilder: void <init>()>();
+
+        $r27 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r28 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r27);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".putService(): ");
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r7);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r26.<sun.security.util.Debug: void println(java.lang.String)>($r31);
+
+     label01:
+        if r7 != null goto label02;
+
+        $r24 = new java.lang.NullPointerException;
+
+        specialinvoke $r24.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r24;
+
+     label02:
+        $r8 = virtualinvoke r7.<java.security.Provider$Service: java.security.Provider getProvider()>();
+
+        if $r8 == r0 goto label03;
+
+        $r23 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r23.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("service.getProvider() must match this Provider object");
+
+        throw $r23;
+
+     label03:
+        $r9 = virtualinvoke r7.<java.security.Provider$Service: java.lang.String getType()>();
+
+        $r10 = virtualinvoke r7.<java.security.Provider$Service: java.lang.String getAlgorithm()>();
+
+        $r11 = new java.security.Provider$ServiceKey;
+
+        specialinvoke $r11.<java.security.Provider$ServiceKey: void <init>(java.lang.String,java.lang.String,boolean,java.security.Provider$1)>($r9, $r10, 1, null);
+
+        $r12 = r0.<java.security.Provider: java.util.Map serviceMap>;
+
+        $r13 = interfaceinvoke $r12.<java.util.Map: java.lang.Object get(java.lang.Object)>($r11);
+
+        $r14 = (java.security.Provider$Service) $r13;
+
+        specialinvoke r0.<java.security.Provider: void implRemoveService(java.security.Provider$Service)>($r14);
+
+        $r15 = r0.<java.security.Provider: java.util.Map serviceMap>;
+
+        interfaceinvoke $r15.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r11, r7);
+
+        $r16 = staticinvoke <java.security.Provider$Service: java.util.List access$800(java.security.Provider$Service)>(r7);
+
+        $r17 = interfaceinvoke $r16.<java.util.List: java.util.Iterator iterator()>();
+
+     label04:
+        $z0 = interfaceinvoke $r17.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label05;
+
+        $r19 = interfaceinvoke $r17.<java.util.Iterator: java.lang.Object next()>();
+
+        r20 = (java.lang.String) $r19;
+
+        $r22 = r0.<java.security.Provider: java.util.Map serviceMap>;
+
+        $r21 = new java.security.Provider$ServiceKey;
+
+        specialinvoke $r21.<java.security.Provider$ServiceKey: void <init>(java.lang.String,java.lang.String,boolean,java.security.Provider$1)>($r9, r20, 1, null);
+
+        interfaceinvoke $r22.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r21, r7);
+
+        goto label04;
+
+     label05:
+        r0.<java.security.Provider: boolean servicesChanged> = 1;
+
+        entermonitor r0;
+
+     label06:
+        specialinvoke r0.<java.security.Provider: void putPropertyStrings(java.security.Provider$Service)>(r7);
+
+        $z1 = virtualinvoke $r9.<java.lang.String: boolean equals(java.lang.Object)>("SecureRandom");
+
+        if $z1 == 0 goto label07;
+
+        $r18 = staticinvoke <java.security.Provider$Service: java.lang.String access$100(java.security.Provider$Service)>(r7);
+
+        specialinvoke r0.<java.security.Provider: void updateSecureRandomEntries(boolean,java.lang.String)>(1, $r18);
+
+     label07:
+        exitmonitor r0;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r32 := @caughtexception;
+
+        exitmonitor r0;
+
+     label10:
+        throw $r32;
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label06 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    private void updateSecureRandomEntries(boolean, java.lang.String)
+    {
+        java.util.Set $r2, $r10, $r11;
+        sun.security.util.Debug $r3, $r5;
+        java.security.Provider r1;
+        java.lang.StringBuilder $r4, $r6, $r7, $r8;
+        java.lang.String r0, $r9, $r13;
+        java.util.LinkedHashSet $r12;
+        boolean z0;
+
+        r1 := @this: java.security.Provider;
+
+        z0 := @parameter0: boolean;
+
+        r0 := @parameter1: java.lang.String;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r0);
+
+        if z0 == 0 goto label2;
+
+        $r10 = r1.<java.security.Provider: java.util.Set prngAlgos>;
+
+        if $r10 != null goto label1;
+
+        $r12 = new java.util.LinkedHashSet;
+
+        specialinvoke $r12.<java.util.LinkedHashSet: void <init>()>();
+
+        r1.<java.security.Provider: java.util.Set prngAlgos> = $r12;
+
+     label1:
+        $r11 = r1.<java.security.Provider: java.util.Set prngAlgos>;
+
+        interfaceinvoke $r11.<java.util.Set: boolean add(java.lang.Object)>(r0);
+
+        goto label3;
+
+     label2:
+        $r2 = r1.<java.security.Provider: java.util.Set prngAlgos>;
+
+        interfaceinvoke $r2.<java.util.Set: boolean remove(java.lang.Object)>(r0);
+
+     label3:
+        $r3 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        if $r3 == null goto label6;
+
+        $r5 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        if z0 == 0 goto label4;
+
+        $r13 = "Add";
+
+        goto label5;
+
+     label4:
+        $r13 = "Remove";
+
+     label5:
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" SecureRandom algo ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<sun.security.util.Debug: void println(java.lang.String)>($r9);
+
+     label6:
+        return;
+    }
+
+    synchronized java.security.Provider$Service getDefaultSecureRandomService()
+    {
+        java.util.Iterator $r4;
+        java.util.Set $r1, $r2, $r3;
+        java.security.Provider r0;
+        java.security.Provider$Service $r7;
+        java.lang.Object $r5;
+        java.lang.String $r6;
+        boolean $z0, $z1;
+
+        r0 := @this: java.security.Provider;
+
+        specialinvoke r0.<java.security.Provider: void checkInitialized()>();
+
+        $z0 = r0.<java.security.Provider: boolean legacyChanged>;
+
+        if $z0 == 0 goto label1;
+
+        r0.<java.security.Provider: java.util.Set prngAlgos> = null;
+
+        specialinvoke r0.<java.security.Provider: void ensureLegacyParsed()>();
+
+     label1:
+        $r1 = r0.<java.security.Provider: java.util.Set prngAlgos>;
+
+        if $r1 == null goto label2;
+
+        $r2 = r0.<java.security.Provider: java.util.Set prngAlgos>;
+
+        $z1 = interfaceinvoke $r2.<java.util.Set: boolean isEmpty()>();
+
+        if $z1 != 0 goto label2;
+
+        $r3 = r0.<java.security.Provider: java.util.Set prngAlgos>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Set: java.util.Iterator iterator()>();
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        $r6 = (java.lang.String) $r5;
+
+        $r7 = virtualinvoke r0.<java.security.Provider: java.security.Provider$Service getService(java.lang.String,java.lang.String)>("SecureRandom", $r6);
+
+        return $r7;
+
+     label2:
+        return null;
+    }
+
+    private void putPropertyStrings(java.security.Provider$Service)
+    {
+        java.util.Map $r12;
+        boolean $z0, $z1;
+        java.util.Set $r13;
+        java.security.Provider r3;
+        java.util.List $r10;
+        java.lang.StringBuilder $r4, $r5, $r6, $r7, $r16, $r17, $r18, $r19, $r20, $r22, $r26, $r27, $r28, $r29, $r30;
+        java.lang.String $r1, $r2, $r8, $r9, $r23, $r31, r32;
+        java.util.Map$Entry r33;
+        java.util.Iterator $r11, $r14;
+        java.security.Provider$Service r0;
+        java.lang.Object $r15, $r21, $r24, $r25;
+
+        r3 := @this: java.security.Provider;
+
+        r0 := @parameter0: java.security.Provider$Service;
+
+        $r1 = virtualinvoke r0.<java.security.Provider$Service: java.lang.String getType()>();
+
+        $r2 = virtualinvoke r0.<java.security.Provider$Service: java.lang.String getAlgorithm()>();
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r9 = virtualinvoke r0.<java.security.Provider$Service: java.lang.String getClassName()>();
+
+        specialinvoke r3.<java.util.Properties: java.lang.Object put(java.lang.Object,java.lang.Object)>($r8, $r9);
+
+        $r10 = staticinvoke <java.security.Provider$Service: java.util.List access$800(java.security.Provider$Service)>(r0);
+
+        $r11 = interfaceinvoke $r10.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r11.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r25 = interfaceinvoke $r11.<java.util.Iterator: java.lang.Object next()>();
+
+        r32 = (java.lang.String) $r25;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Alg.Alias.");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r32);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r3.<java.util.Properties: java.lang.Object put(java.lang.Object,java.lang.Object)>($r31, $r2);
+
+        goto label1;
+
+     label2:
+        $r12 = staticinvoke <java.security.Provider$Service: java.util.Map access$900(java.security.Provider$Service)>(r0);
+
+        $r13 = interfaceinvoke $r12.<java.util.Map: java.util.Set entrySet()>();
+
+        $r14 = interfaceinvoke $r13.<java.util.Set: java.util.Iterator iterator()>();
+
+     label3:
+        $z1 = interfaceinvoke $r14.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label4;
+
+        $r15 = interfaceinvoke $r14.<java.util.Iterator: java.lang.Object next()>();
+
+        r33 = (java.util.Map$Entry) $r15;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r21 = interfaceinvoke r33.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r22 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r21);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r24 = interfaceinvoke r33.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        specialinvoke r3.<java.util.Properties: java.lang.Object put(java.lang.Object,java.lang.Object)>($r23, $r24);
+
+        goto label3;
+
+     label4:
+        return;
+    }
+
+    private void removePropertyStrings(java.security.Provider$Service)
+    {
+        java.util.Map $r11;
+        boolean $z0, $z1;
+        java.util.Set $r12;
+        java.security.Provider r3;
+        java.util.List $r9;
+        java.lang.StringBuilder $r4, $r5, $r6, $r7, $r15, $r16, $r17, $r18, $r19, $r21, $r24, $r25, $r26, $r27, $r28;
+        java.lang.String $r1, $r2, $r8, $r22, $r29, r30;
+        java.util.Map$Entry r31;
+        java.util.Iterator $r10, $r13;
+        java.security.Provider$Service r0;
+        java.lang.Object $r14, $r20, $r23;
+
+        r3 := @this: java.security.Provider;
+
+        r0 := @parameter0: java.security.Provider$Service;
+
+        $r1 = virtualinvoke r0.<java.security.Provider$Service: java.lang.String getType()>();
+
+        $r2 = virtualinvoke r0.<java.security.Provider$Service: java.lang.String getAlgorithm()>();
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r3.<java.util.Properties: java.lang.Object remove(java.lang.Object)>($r8);
+
+        $r9 = staticinvoke <java.security.Provider$Service: java.util.List access$800(java.security.Provider$Service)>(r0);
+
+        $r10 = interfaceinvoke $r9.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r23 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        r30 = (java.lang.String) $r23;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Alg.Alias.");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r30);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r3.<java.util.Properties: java.lang.Object remove(java.lang.Object)>($r29);
+
+        goto label1;
+
+     label2:
+        $r11 = staticinvoke <java.security.Provider$Service: java.util.Map access$900(java.security.Provider$Service)>(r0);
+
+        $r12 = interfaceinvoke $r11.<java.util.Map: java.util.Set entrySet()>();
+
+        $r13 = interfaceinvoke $r12.<java.util.Set: java.util.Iterator iterator()>();
+
+     label3:
+        $z1 = interfaceinvoke $r13.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label4;
+
+        $r14 = interfaceinvoke $r13.<java.util.Iterator: java.lang.Object next()>();
+
+        r31 = (java.util.Map$Entry) $r14;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r20 = interfaceinvoke r31.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r21 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r20);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r3.<java.util.Properties: java.lang.Object remove(java.lang.Object)>($r22);
+
+        goto label3;
+
+     label4:
+        return;
+    }
+
+    protected void removeService(java.security.Provider$Service)
+    {
+        java.lang.NullPointerException $r8;
+        java.lang.String $r3, $r5, $r11, $r15;
+        sun.security.util.Debug $r6, $r10;
+        java.security.Provider r0;
+        java.security.Provider$Service r7;
+        java.lang.StringBuilder $r1, $r2, $r4, $r9, $r12, $r13, $r14;
+
+        r0 := @this: java.security.Provider;
+
+        r7 := @parameter0: java.security.Provider$Service;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("removeProviderProperty.");
+
+        $r3 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<java.security.Provider: void check(java.lang.String)>($r5);
+
+        $r6 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        if $r6 == null goto label1;
+
+        $r10 = <java.security.Provider: sun.security.util.Debug debug>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = r0.<java.security.Provider: java.lang.String name>;
+
+        $r12 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".removeService(): ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r7);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r10.<sun.security.util.Debug: void println(java.lang.String)>($r15);
+
+     label1:
+        if r7 != null goto label2;
+
+        $r8 = new java.lang.NullPointerException;
+
+        specialinvoke $r8.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r8;
+
+     label2:
+        specialinvoke r0.<java.security.Provider: void implRemoveService(java.security.Provider$Service)>(r7);
+
+        return;
+    }
+
+    private void implRemoveService(java.security.Provider$Service)
+    {
+        java.lang.Throwable $r17;
+        java.util.Map $r2, $r6, $r9, $r16;
+        java.lang.String $r3, $r4, $r12, r14;
+        boolean $z0, $z1, $z2;
+        java.util.Iterator $r11;
+        java.security.Provider r1;
+        java.util.List $r10;
+        java.security.Provider$Service r0, r8;
+        java.lang.Object $r7, $r13;
+        java.security.Provider$ServiceKey $r5, $r15;
+
+        r1 := @this: java.security.Provider;
+
+        r0 := @parameter0: java.security.Provider$Service;
+
+        if r0 == null goto label01;
+
+        $r2 = r1.<java.security.Provider: java.util.Map serviceMap>;
+
+        $z0 = interfaceinvoke $r2.<java.util.Map: boolean isEmpty()>();
+
+        if $z0 == 0 goto label02;
+
+     label01:
+        return;
+
+     label02:
+        $r3 = virtualinvoke r0.<java.security.Provider$Service: java.lang.String getType()>();
+
+        $r4 = virtualinvoke r0.<java.security.Provider$Service: java.lang.String getAlgorithm()>();
+
+        $r5 = new java.security.Provider$ServiceKey;
+
+        specialinvoke $r5.<java.security.Provider$ServiceKey: void <init>(java.lang.String,java.lang.String,boolean,java.security.Provider$1)>($r3, $r4, 0, null);
+
+        $r6 = r1.<java.security.Provider: java.util.Map serviceMap>;
+
+        $r7 = interfaceinvoke $r6.<java.util.Map: java.lang.Object get(java.lang.Object)>($r5);
+
+        r8 = (java.security.Provider$Service) $r7;
+
+        if r0 == r8 goto label03;
+
+        return;
+
+     label03:
+        r1.<java.security.Provider: boolean servicesChanged> = 1;
+
+        $r9 = r1.<java.security.Provider: java.util.Map serviceMap>;
+
+        interfaceinvoke $r9.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r5);
+
+        $r10 = staticinvoke <java.security.Provider$Service: java.util.List access$800(java.security.Provider$Service)>(r0);
+
+        $r11 = interfaceinvoke $r10.<java.util.List: java.util.Iterator iterator()>();
+
+     label04:
+        $z1 = interfaceinvoke $r11.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label05;
+
+        $r13 = interfaceinvoke $r11.<java.util.Iterator: java.lang.Object next()>();
+
+        r14 = (java.lang.String) $r13;
+
+        $r16 = r1.<java.security.Provider: java.util.Map serviceMap>;
+
+        $r15 = new java.security.Provider$ServiceKey;
+
+        specialinvoke $r15.<java.security.Provider$ServiceKey: void <init>(java.lang.String,java.lang.String,boolean,java.security.Provider$1)>($r3, r14, 0, null);
+
+        interfaceinvoke $r16.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r15);
+
+        goto label04;
+
+     label05:
+        entermonitor r1;
+
+     label06:
+        specialinvoke r1.<java.security.Provider: void removePropertyStrings(java.security.Provider$Service)>(r0);
+
+        $z2 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("SecureRandom");
+
+        if $z2 == 0 goto label07;
+
+        $r12 = staticinvoke <java.security.Provider$Service: java.lang.String access$100(java.security.Provider$Service)>(r0);
+
+        specialinvoke r1.<java.security.Provider: void updateSecureRandomEntries(boolean,java.lang.String)>(0, $r12);
+
+     label07:
+        exitmonitor r1;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r17 := @caughtexception;
+
+        exitmonitor r1;
+
+     label10:
+        throw $r17;
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label06 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    private static void addEngine(java.lang.String, boolean, java.lang.String)
+    {
+        java.security.Provider$EngineDescription $r0;
+        java.util.Locale $r3;
+        java.util.Map $r4, $r6;
+        java.lang.String r1, r2, $r5;
+        boolean z0;
+
+        r1 := @parameter0: java.lang.String;
+
+        z0 := @parameter1: boolean;
+
+        r2 := @parameter2: java.lang.String;
+
+        $r0 = new java.security.Provider$EngineDescription;
+
+        specialinvoke $r0.<java.security.Provider$EngineDescription: void <init>(java.lang.String,boolean,java.lang.String)>(r1, z0, r2);
+
+        $r4 = <java.security.Provider: java.util.Map knownEngines>;
+
+        $r3 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r5 = virtualinvoke r1.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r3);
+
+        interfaceinvoke $r4.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r5, $r0);
+
+        $r6 = <java.security.Provider: java.util.Map knownEngines>;
+
+        interfaceinvoke $r6.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+        return;
+    }
+
+    private static java.lang.String getEngineName(java.lang.String)
+    {
+        java.security.Provider$EngineDescription r7;
+        java.util.Locale $r3;
+        java.util.Map $r1, $r4;
+        java.lang.Object $r2, $r6;
+        java.lang.String r0, $r5, $r8;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = <java.security.Provider: java.util.Map knownEngines>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.lang.Object get(java.lang.Object)>(r0);
+
+        r7 = (java.security.Provider$EngineDescription) $r2;
+
+        if r7 != null goto label1;
+
+        $r4 = <java.security.Provider: java.util.Map knownEngines>;
+
+        $r3 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r5 = virtualinvoke r0.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r3);
+
+        $r6 = interfaceinvoke $r4.<java.util.Map: java.lang.Object get(java.lang.Object)>($r5);
+
+        r7 = (java.security.Provider$EngineDescription) $r6;
+
+     label1:
+        if r7 != null goto label2;
+
+        $r8 = r0;
+
+        goto label3;
+
+     label2:
+        $r8 = r7.<java.security.Provider$EngineDescription: java.lang.String name>;
+
+     label3:
+        return $r8;
+    }
+
+    static java.lang.String access$1000(java.lang.String)
+    {
+        java.lang.String r0, $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <java.security.Provider: java.lang.String getEngineName(java.lang.String)>(r0);
+
+        return $r1;
+    }
+
+    static java.util.Map access$1100()
+    {
+        java.util.Map $r0;
+
+        $r0 = <java.security.Provider: java.util.Map knownEngines>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        int $i0;
+        java.util.HashMap $r3;
+        java.lang.String $r1;
+        java.security.Provider$ServiceKey $r2;
+        sun.security.util.Debug $r0;
+
+        <java.security.Provider: java.lang.String ALIAS_PREFIX_LOWER> = "alg.alias.";
+
+        <java.security.Provider: java.lang.String ALIAS_PREFIX> = "Alg.Alias.";
+
+        <java.security.Provider: long serialVersionUID> = -4298000515446427739L;
+
+        $r0 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String,java.lang.String)>("provider", "Provider");
+
+        <java.security.Provider: sun.security.util.Debug debug> = $r0;
+
+        $r1 = "Alg.Alias.";
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        <java.security.Provider: int ALIAS_LENGTH> = $i0;
+
+        $r2 = new java.security.Provider$ServiceKey;
+
+        specialinvoke $r2.<java.security.Provider$ServiceKey: void <init>(java.lang.String,java.lang.String,boolean,java.security.Provider$1)>("", "", 0, null);
+
+        <java.security.Provider: java.security.Provider$ServiceKey previousKey> = $r2;
+
+        $r3 = new java.util.HashMap;
+
+        specialinvoke $r3.<java.util.HashMap: void <init>()>();
+
+        <java.security.Provider: java.util.Map knownEngines> = $r3;
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("AlgorithmParameterGenerator", 0, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("AlgorithmParameters", 0, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("KeyFactory", 0, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("KeyPairGenerator", 0, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("KeyStore", 0, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("MessageDigest", 0, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("SecureRandom", 0, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("Signature", 1, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("CertificateFactory", 0, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("CertPathBuilder", 0, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("CertPathValidator", 0, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("CertStore", 0, "java.security.cert.CertStoreParameters");
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("Cipher", 1, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("ExemptionMechanism", 0, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("Mac", 1, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("KeyAgreement", 1, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("KeyGenerator", 0, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("SecretKeyFactory", 0, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("KeyManagerFactory", 0, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("SSLContext", 0, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("TrustManagerFactory", 0, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("GssApiMechanism", 0, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("SaslClientFactory", 0, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("SaslServerFactory", 0, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("Policy", 0, "java.security.Policy$Parameters");
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("Configuration", 0, "javax.security.auth.login.Configuration$Parameters");
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("XMLSignatureFactory", 0, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("KeyInfoFactory", 0, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("TransformService", 0, null);
+
+        staticinvoke <java.security.Provider: void addEngine(java.lang.String,boolean,java.lang.String)>("TerminalFactory", 0, "java.lang.Object");
+
+        return;
+    }
+}

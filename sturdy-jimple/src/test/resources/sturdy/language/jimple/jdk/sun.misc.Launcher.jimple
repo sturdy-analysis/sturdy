@@ -1,0 +1,457 @@
+public class sun.misc.Launcher extends java.lang.Object
+{
+    private static java.net.URLStreamHandlerFactory factory;
+    private static sun.misc.Launcher launcher;
+    private static java.lang.String bootClassPath;
+    private java.lang.ClassLoader loader;
+    private static java.net.URLStreamHandler fileHandler;
+
+    public static sun.misc.Launcher getLauncher()
+    {
+        sun.misc.Launcher $r0;
+
+        $r0 = <sun.misc.Launcher: sun.misc.Launcher launcher>;
+
+        return $r0;
+    }
+
+    public void <init>()
+    {
+        sun.misc.Launcher r0;
+        java.lang.ClassCastException $r17;
+        java.lang.Thread $r3;
+        java.lang.InstantiationException $r19;
+        java.lang.InternalError $r8, $r22, $r24;
+        java.lang.String $r5, $r6, $r12, $r13;
+        boolean $z0, $z1;
+        java.lang.IllegalAccessException $r20;
+        sun.misc.Launcher$ExtClassLoader $r1;
+        java.io.IOException $r21, $r23;
+        java.lang.SecurityManager $r7, r25;
+        java.lang.StringBuilder $r9, $r10, $r11;
+        java.lang.Class $r15;
+        java.lang.Object $r16;
+        java.lang.ClassNotFoundException $r18;
+        java.lang.ClassLoader $r2, $r4, $r14;
+
+        r0 := @this: sun.misc.Launcher;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+     label01:
+        $r1 = staticinvoke <sun.misc.Launcher$ExtClassLoader: sun.misc.Launcher$ExtClassLoader getExtClassLoader()>();
+
+     label02:
+        goto label04;
+
+     label03:
+        $r23 := @caughtexception;
+
+        $r24 = new java.lang.InternalError;
+
+        specialinvoke $r24.<java.lang.InternalError: void <init>(java.lang.String,java.lang.Throwable)>("Could not create extension class loader", $r23);
+
+        throw $r24;
+
+     label04:
+        $r2 = staticinvoke <sun.misc.Launcher$AppClassLoader: java.lang.ClassLoader getAppClassLoader(java.lang.ClassLoader)>($r1);
+
+        r0.<sun.misc.Launcher: java.lang.ClassLoader loader> = $r2;
+
+     label05:
+        goto label07;
+
+     label06:
+        $r21 := @caughtexception;
+
+        $r22 = new java.lang.InternalError;
+
+        specialinvoke $r22.<java.lang.InternalError: void <init>(java.lang.String,java.lang.Throwable)>("Could not create application class loader", $r21);
+
+        throw $r22;
+
+     label07:
+        $r3 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r4 = r0.<sun.misc.Launcher: java.lang.ClassLoader loader>;
+
+        virtualinvoke $r3.<java.lang.Thread: void setContextClassLoader(java.lang.ClassLoader)>($r4);
+
+        $r5 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.security.manager");
+
+        if $r5 == null goto label17;
+
+        r25 = null;
+
+        $r6 = "";
+
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 != 0 goto label08;
+
+        $r13 = "default";
+
+        $z1 = virtualinvoke $r13.<java.lang.String: boolean equals(java.lang.Object)>($r5);
+
+        if $z1 == 0 goto label09;
+
+     label08:
+        $r7 = new java.lang.SecurityManager;
+
+        specialinvoke $r7.<java.lang.SecurityManager: void <init>()>();
+
+        r25 = $r7;
+
+        goto label15;
+
+     label09:
+        $r14 = r0.<sun.misc.Launcher: java.lang.ClassLoader loader>;
+
+        $r15 = virtualinvoke $r14.<java.lang.ClassLoader: java.lang.Class loadClass(java.lang.String)>($r5);
+
+        $r16 = virtualinvoke $r15.<java.lang.Class: java.lang.Object newInstance()>();
+
+        r25 = (java.lang.SecurityManager) $r16;
+
+     label10:
+        goto label15;
+
+     label11:
+        $r20 := @caughtexception;
+
+        goto label15;
+
+     label12:
+        $r19 := @caughtexception;
+
+        goto label15;
+
+     label13:
+        $r18 := @caughtexception;
+
+        goto label15;
+
+     label14:
+        $r17 := @caughtexception;
+
+     label15:
+        if r25 == null goto label16;
+
+        staticinvoke <java.lang.System: void setSecurityManager(java.lang.SecurityManager)>(r25);
+
+        goto label17;
+
+     label16:
+        $r8 = new java.lang.InternalError;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not create SecurityManager: ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<java.lang.InternalError: void <init>(java.lang.String)>($r12);
+
+        throw $r8;
+
+     label17:
+        return;
+
+        catch java.io.IOException from label01 to label02 with label03;
+        catch java.io.IOException from label04 to label05 with label06;
+        catch java.lang.IllegalAccessException from label09 to label10 with label11;
+        catch java.lang.InstantiationException from label09 to label10 with label12;
+        catch java.lang.ClassNotFoundException from label09 to label10 with label13;
+        catch java.lang.ClassCastException from label09 to label10 with label14;
+    }
+
+    public java.lang.ClassLoader getClassLoader()
+    {
+        sun.misc.Launcher r0;
+        java.lang.ClassLoader $r1;
+
+        r0 := @this: sun.misc.Launcher;
+
+        $r1 = r0.<sun.misc.Launcher: java.lang.ClassLoader loader>;
+
+        return $r1;
+    }
+
+    public static sun.misc.URLClassPath getBootstrapClassPath()
+    {
+        sun.misc.URLClassPath $r0;
+
+        $r0 = <sun.misc.Launcher$BootClassPathHolder: sun.misc.URLClassPath bcp>;
+
+        return $r0;
+    }
+
+    private static java.net.URL[] pathToURLs(java.io.File[])
+    {
+        java.net.URL[] r1;
+        java.net.URL $r3;
+        int $i0, $i1, i2;
+        java.io.File[] r0;
+        java.io.File $r2;
+
+        r0 := @parameter0: java.io.File[];
+
+        $i0 = lengthof r0;
+
+        r1 = newarray (java.net.URL)[$i0];
+
+        i2 = 0;
+
+     label1:
+        $i1 = lengthof r0;
+
+        if i2 >= $i1 goto label2;
+
+        $r2 = r0[i2];
+
+        $r3 = staticinvoke <sun.misc.Launcher: java.net.URL getFileURL(java.io.File)>($r2);
+
+        r1[i2] = $r3;
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return r1;
+    }
+
+    private static java.io.File[] getClassPath(java.lang.String)
+    {
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, i7, i8, i9, i10, $i12, $i14;
+        java.lang.String r0, $r1, $r2, $r6, $r9;
+        java.io.File $r11, $r12, $r13, $r14;
+        java.io.File[] r4, r10;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 == null goto label10;
+
+        i6 = 0;
+
+        i7 = 1;
+
+        i8 = 0;
+
+     label01:
+        $r1 = <java.io.File: java.lang.String pathSeparator>;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int indexOf(java.lang.String,int)>($r1, i8);
+
+        $i12 = (int) -1;
+
+        if $i0 == $i12 goto label02;
+
+        i7 = i7 + 1;
+
+        i8 = $i0 + 1;
+
+        goto label01;
+
+     label02:
+        r10 = newarray (java.io.File)[i7];
+
+        i9 = 0;
+
+     label03:
+        $r2 = <java.io.File: java.lang.String pathSeparator>;
+
+        $i1 = virtualinvoke r0.<java.lang.String: int indexOf(java.lang.String,int)>($r2, i9);
+
+        $i14 = (int) -1;
+
+        if $i1 == $i14 goto label06;
+
+        $i3 = $i1 - i9;
+
+        if $i3 <= 0 goto label04;
+
+        $i5 = i6;
+
+        i6 = i6 + 1;
+
+        $r11 = new java.io.File;
+
+        $r9 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(i9, $i1);
+
+        specialinvoke $r11.<java.io.File: void <init>(java.lang.String)>($r9);
+
+        r10[$i5] = $r11;
+
+        goto label05;
+
+     label04:
+        $i4 = i6;
+
+        i6 = i6 + 1;
+
+        $r12 = new java.io.File;
+
+        specialinvoke $r12.<java.io.File: void <init>(java.lang.String)>(".");
+
+        r10[$i4] = $r12;
+
+     label05:
+        i9 = $i1 + 1;
+
+        goto label03;
+
+     label06:
+        $i2 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if i9 >= $i2 goto label07;
+
+        i10 = i6 + 1;
+
+        $r13 = new java.io.File;
+
+        $r6 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>(i9);
+
+        specialinvoke $r13.<java.io.File: void <init>(java.lang.String)>($r6);
+
+        r10[i6] = $r13;
+
+        goto label08;
+
+     label07:
+        i10 = i6 + 1;
+
+        $r14 = new java.io.File;
+
+        specialinvoke $r14.<java.io.File: void <init>(java.lang.String)>(".");
+
+        r10[i6] = $r14;
+
+     label08:
+        if i10 == i7 goto label09;
+
+        r4 = newarray (java.io.File)[i10];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r10, 0, r4, 0, i10);
+
+        r10 = r4;
+
+     label09:
+        goto label11;
+
+     label10:
+        r10 = newarray (java.io.File)[0];
+
+     label11:
+        return r10;
+    }
+
+    static java.net.URL getFileURL(java.io.File)
+    {
+        java.net.MalformedURLException $r1;
+        java.net.URL $r0;
+        java.lang.InternalError $r2;
+        java.io.IOException $r3;
+        java.io.File r4;
+
+        r4 := @parameter0: java.io.File;
+
+     label1:
+        r4 = virtualinvoke r4.<java.io.File: java.io.File getCanonicalFile()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+     label4:
+        $r0 = staticinvoke <sun.net.www.ParseUtil: java.net.URL fileToEncodedURL(java.io.File)>(r4);
+
+     label5:
+        return $r0;
+
+     label6:
+        $r1 := @caughtexception;
+
+        $r2 = new java.lang.InternalError;
+
+        specialinvoke $r2.<java.lang.InternalError: void <init>(java.lang.Throwable)>($r1);
+
+        throw $r2;
+
+        catch java.io.IOException from label1 to label2 with label3;
+        catch java.net.MalformedURLException from label4 to label5 with label6;
+    }
+
+    static java.net.URLStreamHandlerFactory access$200()
+    {
+        java.net.URLStreamHandlerFactory $r0;
+
+        $r0 = <sun.misc.Launcher: java.net.URLStreamHandlerFactory factory>;
+
+        return $r0;
+    }
+
+    static java.io.File[] access$300(java.lang.String)
+    {
+        java.lang.String r0;
+        java.io.File[] $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <sun.misc.Launcher: java.io.File[] getClassPath(java.lang.String)>(r0);
+
+        return $r1;
+    }
+
+    static java.net.URL[] access$400(java.io.File[])
+    {
+        java.net.URL[] $r1;
+        java.io.File[] r0;
+
+        r0 := @parameter0: java.io.File[];
+
+        $r1 = staticinvoke <sun.misc.Launcher: java.net.URL[] pathToURLs(java.io.File[])>(r0);
+
+        return $r1;
+    }
+
+    static java.lang.String access$500()
+    {
+        java.lang.String $r0;
+
+        $r0 = <sun.misc.Launcher: java.lang.String bootClassPath>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        sun.misc.Launcher $r1;
+        java.lang.String $r2;
+        sun.misc.Launcher$Factory $r0;
+
+        $r0 = new sun.misc.Launcher$Factory;
+
+        specialinvoke $r0.<sun.misc.Launcher$Factory: void <init>(sun.misc.Launcher$1)>(null);
+
+        <sun.misc.Launcher: java.net.URLStreamHandlerFactory factory> = $r0;
+
+        $r1 = new sun.misc.Launcher;
+
+        specialinvoke $r1.<sun.misc.Launcher: void <init>()>();
+
+        <sun.misc.Launcher: sun.misc.Launcher launcher> = $r1;
+
+        $r2 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("sun.boot.class.path");
+
+        <sun.misc.Launcher: java.lang.String bootClassPath> = $r2;
+
+        return;
+    }
+}

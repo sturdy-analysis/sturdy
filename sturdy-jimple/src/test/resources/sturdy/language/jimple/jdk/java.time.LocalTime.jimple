@@ -1,0 +1,2940 @@
+public final class java.time.LocalTime extends java.lang.Object implements java.time.temporal.Temporal, java.time.temporal.TemporalAdjuster, java.lang.Comparable, java.io.Serializable
+{
+    public static final java.time.LocalTime MIN;
+    public static final java.time.LocalTime MAX;
+    public static final java.time.LocalTime MIDNIGHT;
+    public static final java.time.LocalTime NOON;
+    private static final java.time.LocalTime[] HOURS;
+    static final int HOURS_PER_DAY;
+    static final int MINUTES_PER_HOUR;
+    static final int MINUTES_PER_DAY;
+    static final int SECONDS_PER_MINUTE;
+    static final int SECONDS_PER_HOUR;
+    static final int SECONDS_PER_DAY;
+    static final long MILLIS_PER_DAY;
+    static final long MICROS_PER_DAY;
+    static final long NANOS_PER_SECOND;
+    static final long NANOS_PER_MINUTE;
+    static final long NANOS_PER_HOUR;
+    static final long NANOS_PER_DAY;
+    private static final long serialVersionUID;
+    private final byte hour;
+    private final byte minute;
+    private final byte second;
+    private final int nano;
+
+    public static java.time.LocalTime now()
+    {
+        java.time.LocalTime $r1;
+        java.time.Clock $r0;
+
+        $r0 = staticinvoke <java.time.Clock: java.time.Clock systemDefaultZone()>();
+
+        $r1 = staticinvoke <java.time.LocalTime: java.time.LocalTime now(java.time.Clock)>($r0);
+
+        return $r1;
+    }
+
+    public static java.time.LocalTime now(java.time.ZoneId)
+    {
+        java.time.LocalTime $r2;
+        java.time.Clock $r1;
+        java.time.ZoneId r0;
+
+        r0 := @parameter0: java.time.ZoneId;
+
+        $r1 = staticinvoke <java.time.Clock: java.time.Clock system(java.time.ZoneId)>(r0);
+
+        $r2 = staticinvoke <java.time.LocalTime: java.time.LocalTime now(java.time.Clock)>($r1);
+
+        return $r2;
+    }
+
+    public static java.time.LocalTime now(java.time.Clock)
+    {
+        long $l0, $l2, l3, $l4, $l6, $l7, $l9, $l10;
+        java.time.zone.ZoneRules $r3;
+        int $i1, i5, $i8;
+        java.time.LocalTime $r5;
+        java.time.ZoneOffset $r4;
+        java.time.Instant $r1;
+        java.time.ZoneId $r2;
+        java.time.Clock r0;
+
+        r0 := @parameter0: java.time.Clock;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "clock");
+
+        $r1 = virtualinvoke r0.<java.time.Clock: java.time.Instant instant()>();
+
+        $r2 = virtualinvoke r0.<java.time.Clock: java.time.ZoneId getZone()>();
+
+        $r3 = virtualinvoke $r2.<java.time.ZoneId: java.time.zone.ZoneRules getRules()>();
+
+        $r4 = virtualinvoke $r3.<java.time.zone.ZoneRules: java.time.ZoneOffset getOffset(java.time.Instant)>($r1);
+
+        $l0 = virtualinvoke $r1.<java.time.Instant: long getEpochSecond()>();
+
+        $i1 = virtualinvoke $r4.<java.time.ZoneOffset: int getTotalSeconds()>();
+
+        $l2 = (long) $i1;
+
+        l3 = $l0 + $l2;
+
+        $l4 = staticinvoke <java.lang.Math: long floorMod(long,long)>(l3, 86400L);
+
+        i5 = (int) $l4;
+
+        $l6 = (long) i5;
+
+        $l7 = $l6 * 1000000000L;
+
+        $i8 = virtualinvoke $r1.<java.time.Instant: int getNano()>();
+
+        $l9 = (long) $i8;
+
+        $l10 = $l7 + $l9;
+
+        $r5 = staticinvoke <java.time.LocalTime: java.time.LocalTime ofNanoOfDay(long)>($l10);
+
+        return $r5;
+    }
+
+    public static java.time.LocalTime of(int, int)
+    {
+        java.time.temporal.ChronoField $r0, $r1;
+        long $l1, $l3;
+        java.time.LocalTime[] $r3;
+        int i0, i2;
+        java.time.LocalTime $r2, $r4;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        $r0 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField HOUR_OF_DAY>;
+
+        $l1 = (long) i0;
+
+        virtualinvoke $r0.<java.time.temporal.ChronoField: long checkValidValue(long)>($l1);
+
+        if i2 != 0 goto label1;
+
+        $r3 = <java.time.LocalTime: java.time.LocalTime[] HOURS>;
+
+        $r4 = $r3[i0];
+
+        return $r4;
+
+     label1:
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MINUTE_OF_HOUR>;
+
+        $l3 = (long) i2;
+
+        virtualinvoke $r1.<java.time.temporal.ChronoField: long checkValidValue(long)>($l3);
+
+        $r2 = new java.time.LocalTime;
+
+        specialinvoke $r2.<java.time.LocalTime: void <init>(int,int,int,int)>(i0, i2, 0, 0);
+
+        return $r2;
+    }
+
+    public static java.time.LocalTime of(int, int, int)
+    {
+        java.time.temporal.ChronoField $r0, $r1, $r2;
+        long $l1, $l5, $l6;
+        java.time.LocalTime[] $r4;
+        int i0, i2, i3, $i4;
+        java.time.LocalTime $r3, $r5;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        $r0 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField HOUR_OF_DAY>;
+
+        $l1 = (long) i0;
+
+        virtualinvoke $r0.<java.time.temporal.ChronoField: long checkValidValue(long)>($l1);
+
+        $i4 = i2 | i3;
+
+        if $i4 != 0 goto label1;
+
+        $r4 = <java.time.LocalTime: java.time.LocalTime[] HOURS>;
+
+        $r5 = $r4[i0];
+
+        return $r5;
+
+     label1:
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MINUTE_OF_HOUR>;
+
+        $l5 = (long) i2;
+
+        virtualinvoke $r1.<java.time.temporal.ChronoField: long checkValidValue(long)>($l5);
+
+        $r2 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField SECOND_OF_MINUTE>;
+
+        $l6 = (long) i3;
+
+        virtualinvoke $r2.<java.time.temporal.ChronoField: long checkValidValue(long)>($l6);
+
+        $r3 = new java.time.LocalTime;
+
+        specialinvoke $r3.<java.time.LocalTime: void <init>(int,int,int,int)>(i0, i2, i3, 0);
+
+        return $r3;
+    }
+
+    public static java.time.LocalTime of(int, int, int, int)
+    {
+        java.time.temporal.ChronoField $r0, $r1, $r2, $r3;
+        long $l1, $l3, $l5, $l7;
+        int i0, i2, i4, i6;
+        java.time.LocalTime $r4;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        i4 := @parameter2: int;
+
+        i6 := @parameter3: int;
+
+        $r0 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField HOUR_OF_DAY>;
+
+        $l1 = (long) i0;
+
+        virtualinvoke $r0.<java.time.temporal.ChronoField: long checkValidValue(long)>($l1);
+
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MINUTE_OF_HOUR>;
+
+        $l3 = (long) i2;
+
+        virtualinvoke $r1.<java.time.temporal.ChronoField: long checkValidValue(long)>($l3);
+
+        $r2 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField SECOND_OF_MINUTE>;
+
+        $l5 = (long) i4;
+
+        virtualinvoke $r2.<java.time.temporal.ChronoField: long checkValidValue(long)>($l5);
+
+        $r3 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField NANO_OF_SECOND>;
+
+        $l7 = (long) i6;
+
+        virtualinvoke $r3.<java.time.temporal.ChronoField: long checkValidValue(long)>($l7);
+
+        $r4 = staticinvoke <java.time.LocalTime: java.time.LocalTime create(int,int,int,int)>(i0, i2, i4, i6);
+
+        return $r4;
+    }
+
+    public static java.time.LocalTime ofSecondOfDay(long)
+    {
+        java.time.temporal.ChronoField $r0;
+        long $l0, $l3, $l4, $l7, l9, l10, l11;
+        int i1, $i2, i5, $i6, $i8;
+        java.time.LocalTime $r1;
+
+        l9 := @parameter0: long;
+
+        $r0 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField SECOND_OF_DAY>;
+
+        virtualinvoke $r0.<java.time.temporal.ChronoField: long checkValidValue(long)>(l9);
+
+        $l0 = l9 / 3600L;
+
+        i1 = (int) $l0;
+
+        $i2 = i1 * 3600;
+
+        $l3 = (long) $i2;
+
+        l10 = l9 - $l3;
+
+        $l4 = l10 / 60L;
+
+        i5 = (int) $l4;
+
+        $i6 = i5 * 60;
+
+        $l7 = (long) $i6;
+
+        l11 = l10 - $l7;
+
+        $i8 = (int) l11;
+
+        $r1 = staticinvoke <java.time.LocalTime: java.time.LocalTime create(int,int,int,int)>(i1, i5, $i8, 0);
+
+        return $r1;
+    }
+
+    public static java.time.LocalTime ofNanoOfDay(long)
+    {
+        java.time.temporal.ChronoField $r0;
+        long $l0, $l2, $l3, $l4, $l6, $l7, $l8, $l10, $l11, l13, l14, l15, l16;
+        int i1, i5, i9, $i12;
+        java.time.LocalTime $r1;
+
+        l13 := @parameter0: long;
+
+        $r0 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField NANO_OF_DAY>;
+
+        virtualinvoke $r0.<java.time.temporal.ChronoField: long checkValidValue(long)>(l13);
+
+        $l0 = l13 / 3600000000000L;
+
+        i1 = (int) $l0;
+
+        $l2 = (long) i1;
+
+        $l3 = $l2 * 3600000000000L;
+
+        l14 = l13 - $l3;
+
+        $l4 = l14 / 60000000000L;
+
+        i5 = (int) $l4;
+
+        $l6 = (long) i5;
+
+        $l7 = $l6 * 60000000000L;
+
+        l15 = l14 - $l7;
+
+        $l8 = l15 / 1000000000L;
+
+        i9 = (int) $l8;
+
+        $l10 = (long) i9;
+
+        $l11 = $l10 * 1000000000L;
+
+        l16 = l15 - $l11;
+
+        $i12 = (int) l16;
+
+        $r1 = staticinvoke <java.time.LocalTime: java.time.LocalTime create(int,int,int,int)>(i1, i5, i9, $i12);
+
+        return $r1;
+    }
+
+    public static java.time.LocalTime 'from'(java.time.temporal.TemporalAccessor)
+    {
+        java.time.temporal.TemporalQuery $r1;
+        java.time.temporal.TemporalAccessor r0;
+        java.time.LocalTime r3;
+        java.lang.Object $r2;
+        java.lang.StringBuilder $r5, $r6, $r7, $r8, $r11;
+        java.lang.Class $r9;
+        java.lang.String $r10, $r12;
+        java.time.DateTimeException $r4;
+
+        r0 := @parameter0: java.time.temporal.TemporalAccessor;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "temporal");
+
+        $r1 = staticinvoke <java.time.temporal.TemporalQueries: java.time.temporal.TemporalQuery localTime()>();
+
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalAccessor: java.lang.Object query(java.time.temporal.TemporalQuery)>($r1);
+
+        r3 = (java.time.LocalTime) $r2;
+
+        if r3 != null goto label1;
+
+        $r4 = new java.time.DateTimeException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to obtain LocalTime from TemporalAccessor: ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" of type ");
+
+        $r9 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.Class: java.lang.String getName()>();
+
+        $r11 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.time.DateTimeException: void <init>(java.lang.String)>($r12);
+
+        throw $r4;
+
+     label1:
+        return r3;
+    }
+
+    public static java.time.LocalTime parse(java.lang.CharSequence)
+    {
+        java.time.LocalTime $r2;
+        java.lang.CharSequence r0;
+        java.time.format.DateTimeFormatter $r1;
+
+        r0 := @parameter0: java.lang.CharSequence;
+
+        $r1 = <java.time.format.DateTimeFormatter: java.time.format.DateTimeFormatter ISO_LOCAL_TIME>;
+
+        $r2 = staticinvoke <java.time.LocalTime: java.time.LocalTime parse(java.lang.CharSequence,java.time.format.DateTimeFormatter)>(r0, $r1);
+
+        return $r2;
+    }
+
+    public static java.time.LocalTime parse(java.lang.CharSequence, java.time.format.DateTimeFormatter)
+    {
+        java.lang.CharSequence r1;
+        java.time.format.DateTimeFormatter r0;
+        java.time.temporal.TemporalQuery $r2;
+        java.time.LocalTime $r4;
+        java.lang.Object $r3;
+
+        r1 := @parameter0: java.lang.CharSequence;
+
+        r0 := @parameter1: java.time.format.DateTimeFormatter;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "formatter");
+
+        $r2 = staticinvoke <java.time.LocalTime$from__39: java.time.temporal.TemporalQuery bootstrap$()>();
+
+        $r3 = virtualinvoke r0.<java.time.format.DateTimeFormatter: java.lang.Object parse(java.lang.CharSequence,java.time.temporal.TemporalQuery)>(r1, $r2);
+
+        $r4 = (java.time.LocalTime) $r3;
+
+        return $r4;
+    }
+
+    private static java.time.LocalTime create(int, int, int, int)
+    {
+        java.time.LocalTime[] $r1;
+        int i0, i1, i2, $i3, $i4, i5;
+        java.time.LocalTime $r0, $r2;
+
+        i5 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        $i3 = i0 | i1;
+
+        $i4 = $i3 | i2;
+
+        if $i4 != 0 goto label1;
+
+        $r1 = <java.time.LocalTime: java.time.LocalTime[] HOURS>;
+
+        $r2 = $r1[i5];
+
+        return $r2;
+
+     label1:
+        $r0 = new java.time.LocalTime;
+
+        specialinvoke $r0.<java.time.LocalTime: void <init>(int,int,int,int)>(i5, i0, i1, i2);
+
+        return $r0;
+    }
+
+    private void <init>(int, int, int, int)
+    {
+        byte $b1, $b3, $b5;
+        java.time.LocalTime r0;
+        int i0, i2, i4, i6;
+
+        r0 := @this: java.time.LocalTime;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        i4 := @parameter2: int;
+
+        i6 := @parameter3: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $b1 = (byte) i0;
+
+        r0.<java.time.LocalTime: byte hour> = $b1;
+
+        $b3 = (byte) i2;
+
+        r0.<java.time.LocalTime: byte minute> = $b3;
+
+        $b5 = (byte) i4;
+
+        r0.<java.time.LocalTime: byte second> = $b5;
+
+        r0.<java.time.LocalTime: int nano> = i6;
+
+        return;
+    }
+
+    public boolean isSupported(java.time.temporal.TemporalField)
+    {
+        java.time.temporal.TemporalField r0;
+        java.time.LocalTime r1;
+        boolean $z0, $z1, $z2, $z3;
+
+        r1 := @this: java.time.LocalTime;
+
+        r0 := @parameter0: java.time.temporal.TemporalField;
+
+        $z0 = r0 instanceof java.time.temporal.ChronoField;
+
+        if $z0 == 0 goto label1;
+
+        $z2 = interfaceinvoke r0.<java.time.temporal.TemporalField: boolean isTimeBased()>();
+
+        return $z2;
+
+     label1:
+        if r0 == null goto label2;
+
+        $z1 = interfaceinvoke r0.<java.time.temporal.TemporalField: boolean isSupportedBy(java.time.temporal.TemporalAccessor)>(r1);
+
+        if $z1 == 0 goto label2;
+
+        $z3 = 1;
+
+        goto label3;
+
+     label2:
+        $z3 = 0;
+
+     label3:
+        return $z3;
+    }
+
+    public boolean isSupported(java.time.temporal.TemporalUnit)
+    {
+        java.time.temporal.TemporalUnit r0;
+        java.time.LocalTime r1;
+        boolean $z0, $z1, $z2, $z3;
+
+        r1 := @this: java.time.LocalTime;
+
+        r0 := @parameter0: java.time.temporal.TemporalUnit;
+
+        $z0 = r0 instanceof java.time.temporal.ChronoUnit;
+
+        if $z0 == 0 goto label1;
+
+        $z2 = interfaceinvoke r0.<java.time.temporal.TemporalUnit: boolean isTimeBased()>();
+
+        return $z2;
+
+     label1:
+        if r0 == null goto label2;
+
+        $z1 = interfaceinvoke r0.<java.time.temporal.TemporalUnit: boolean isSupportedBy(java.time.temporal.Temporal)>(r1);
+
+        if $z1 == 0 goto label2;
+
+        $z3 = 1;
+
+        goto label3;
+
+     label2:
+        $z3 = 0;
+
+     label3:
+        return $z3;
+    }
+
+    public java.time.temporal.ValueRange range(java.time.temporal.TemporalField)
+    {
+        java.time.LocalTime r0;
+        java.time.temporal.ValueRange $r2;
+        java.time.temporal.TemporalField r1;
+
+        r0 := @this: java.time.LocalTime;
+
+        r1 := @parameter0: java.time.temporal.TemporalField;
+
+        $r2 = specialinvoke r0.<java.time.temporal.Temporal: java.time.temporal.ValueRange range(java.time.temporal.TemporalField)>(r1);
+
+        return $r2;
+    }
+
+    public int get(java.time.temporal.TemporalField)
+    {
+        java.time.temporal.TemporalField r0;
+        java.time.LocalTime r1;
+        int $i0, $i1;
+        boolean $z0;
+
+        r1 := @this: java.time.LocalTime;
+
+        r0 := @parameter0: java.time.temporal.TemporalField;
+
+        $z0 = r0 instanceof java.time.temporal.ChronoField;
+
+        if $z0 == 0 goto label1;
+
+        $i1 = specialinvoke r1.<java.time.LocalTime: int get0(java.time.temporal.TemporalField)>(r0);
+
+        return $i1;
+
+     label1:
+        $i0 = specialinvoke r1.<java.time.temporal.Temporal: int get(java.time.temporal.TemporalField)>(r0);
+
+        return $i0;
+    }
+
+    public long getLong(java.time.temporal.TemporalField)
+    {
+        java.time.temporal.ChronoField $r2, $r3;
+        java.time.temporal.TemporalField r0;
+        long $l0, $l2, $l3, $l4, $l5;
+        java.time.LocalTime r1;
+        int $i1;
+        boolean $z0;
+
+        r1 := @this: java.time.LocalTime;
+
+        r0 := @parameter0: java.time.temporal.TemporalField;
+
+        $z0 = r0 instanceof java.time.temporal.ChronoField;
+
+        if $z0 == 0 goto label3;
+
+        $r2 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField NANO_OF_DAY>;
+
+        if r0 != $r2 goto label1;
+
+        $l5 = virtualinvoke r1.<java.time.LocalTime: long toNanoOfDay()>();
+
+        return $l5;
+
+     label1:
+        $r3 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MICRO_OF_DAY>;
+
+        if r0 != $r3 goto label2;
+
+        $l3 = virtualinvoke r1.<java.time.LocalTime: long toNanoOfDay()>();
+
+        $l4 = $l3 / 1000L;
+
+        return $l4;
+
+     label2:
+        $i1 = specialinvoke r1.<java.time.LocalTime: int get0(java.time.temporal.TemporalField)>(r0);
+
+        $l2 = (long) $i1;
+
+        return $l2;
+
+     label3:
+        $l0 = interfaceinvoke r0.<java.time.temporal.TemporalField: long getFrom(java.time.temporal.TemporalAccessor)>(r1);
+
+        return $l0;
+    }
+
+    private int get0(java.time.temporal.TemporalField)
+    {
+        byte $b2, $b4, $b5, $b6, $b9, $b11, $b12, $b15, $b17, $b27;
+        int[] $r2;
+        java.time.LocalTime r3;
+        java.time.temporal.TemporalField r0;
+        java.lang.StringBuilder $r8, $r9, $r13;
+        java.time.temporal.ChronoField $r1;
+        long $l18, $l19;
+        int $i0, $i1, $i3, i7, $i8, $i10, $i13, $i14, $i16, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35;
+        java.lang.String $r10;
+        java.time.temporal.UnsupportedTemporalTypeException $r11, $r12, $r14;
+
+        r3 := @this: java.time.LocalTime;
+
+        r0 := @parameter0: java.time.temporal.TemporalField;
+
+        $r2 = <java.time.LocalTime$1: int[] $SwitchMap$java$time$temporal$ChronoField>;
+
+        $r1 = (java.time.temporal.ChronoField) r0;
+
+        $i0 = virtualinvoke $r1.<java.time.temporal.ChronoField: int ordinal()>();
+
+        $i1 = $r2[$i0];
+
+        tableswitch($i1)
+        {
+            case 1: goto label01;
+            case 2: goto label02;
+            case 3: goto label03;
+            case 4: goto label04;
+            case 5: goto label05;
+            case 6: goto label06;
+            case 7: goto label07;
+            case 8: goto label08;
+            case 9: goto label09;
+            case 10: goto label10;
+            case 11: goto label11;
+            case 12: goto label12;
+            case 13: goto label15;
+            case 14: goto label16;
+            case 15: goto label19;
+            default: goto label20;
+        };
+
+     label01:
+        $i25 = r3.<java.time.LocalTime: int nano>;
+
+        return $i25;
+
+     label02:
+        $r11 = new java.time.temporal.UnsupportedTemporalTypeException;
+
+        specialinvoke $r11.<java.time.temporal.UnsupportedTemporalTypeException: void <init>(java.lang.String)>("Invalid field \'NanoOfDay\' for get() method, use getLong() instead");
+
+        throw $r11;
+
+     label03:
+        $i23 = r3.<java.time.LocalTime: int nano>;
+
+        $i24 = $i23 / 1000;
+
+        return $i24;
+
+     label04:
+        $r12 = new java.time.temporal.UnsupportedTemporalTypeException;
+
+        specialinvoke $r12.<java.time.temporal.UnsupportedTemporalTypeException: void <init>(java.lang.String)>("Invalid field \'MicroOfDay\' for get() method, use getLong() instead");
+
+        throw $r12;
+
+     label05:
+        $i21 = r3.<java.time.LocalTime: int nano>;
+
+        $i22 = $i21 / 1000000;
+
+        return $i22;
+
+     label06:
+        $l18 = virtualinvoke r3.<java.time.LocalTime: long toNanoOfDay()>();
+
+        $l19 = $l18 / 1000000L;
+
+        $i20 = (int) $l19;
+
+        return $i20;
+
+     label07:
+        $b17 = r3.<java.time.LocalTime: byte second>;
+
+        $i28 = (int) $b17;
+
+        return $i28;
+
+     label08:
+        $i16 = virtualinvoke r3.<java.time.LocalTime: int toSecondOfDay()>();
+
+        return $i16;
+
+     label09:
+        $b15 = r3.<java.time.LocalTime: byte minute>;
+
+        $i29 = (int) $b15;
+
+        return $i29;
+
+     label10:
+        $b11 = r3.<java.time.LocalTime: byte hour>;
+
+        $i30 = (int) $b11;
+
+        $i13 = $i30 * 60;
+
+        $b12 = r3.<java.time.LocalTime: byte minute>;
+
+        $i31 = (int) $b12;
+
+        $i14 = $i13 + $i31;
+
+        return $i14;
+
+     label11:
+        $b9 = r3.<java.time.LocalTime: byte hour>;
+
+        $i32 = (int) $b9;
+
+        $i10 = $i32 % 12;
+
+        return $i10;
+
+     label12:
+        $b6 = r3.<java.time.LocalTime: byte hour>;
+
+        $i33 = (int) $b6;
+
+        i7 = $i33 % 12;
+
+        $i8 = i7 % 12;
+
+        if $i8 != 0 goto label13;
+
+        $i26 = 12;
+
+        goto label14;
+
+     label13:
+        $i26 = i7;
+
+     label14:
+        return $i26;
+
+     label15:
+        $b5 = r3.<java.time.LocalTime: byte hour>;
+
+        $i34 = (int) $b5;
+
+        return $i34;
+
+     label16:
+        $b4 = r3.<java.time.LocalTime: byte hour>;
+
+        if $b4 != 0 goto label17;
+
+        $b27 = 24;
+
+        goto label18;
+
+     label17:
+        $b27 = r3.<java.time.LocalTime: byte hour>;
+
+     label18:
+        return $b27;
+
+     label19:
+        $b2 = r3.<java.time.LocalTime: byte hour>;
+
+        $i35 = (int) $b2;
+
+        $i3 = $i35 / 12;
+
+        return $i3;
+
+     label20:
+        $r14 = new java.time.temporal.UnsupportedTemporalTypeException;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported field: ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r14.<java.time.temporal.UnsupportedTemporalTypeException: void <init>(java.lang.String)>($r10);
+
+        throw $r14;
+    }
+
+    public int getHour()
+    {
+        java.time.LocalTime r0;
+        int $i1;
+        byte $b0;
+
+        r0 := @this: java.time.LocalTime;
+
+        $b0 = r0.<java.time.LocalTime: byte hour>;
+
+        $i1 = (int) $b0;
+
+        return $i1;
+    }
+
+    public int getMinute()
+    {
+        java.time.LocalTime r0;
+        int $i1;
+        byte $b0;
+
+        r0 := @this: java.time.LocalTime;
+
+        $b0 = r0.<java.time.LocalTime: byte minute>;
+
+        $i1 = (int) $b0;
+
+        return $i1;
+    }
+
+    public int getSecond()
+    {
+        java.time.LocalTime r0;
+        int $i1;
+        byte $b0;
+
+        r0 := @this: java.time.LocalTime;
+
+        $b0 = r0.<java.time.LocalTime: byte second>;
+
+        $i1 = (int) $b0;
+
+        return $i1;
+    }
+
+    public int getNano()
+    {
+        java.time.LocalTime r0;
+        int $i0;
+
+        r0 := @this: java.time.LocalTime;
+
+        $i0 = r0.<java.time.LocalTime: int nano>;
+
+        return $i0;
+    }
+
+    public java.time.LocalTime 'with'(java.time.temporal.TemporalAdjuster)
+    {
+        java.time.LocalTime r1, $r3, $r4;
+        java.time.temporal.TemporalAdjuster r0;
+        java.time.temporal.Temporal $r2;
+        boolean $z0;
+
+        r1 := @this: java.time.LocalTime;
+
+        r0 := @parameter0: java.time.temporal.TemporalAdjuster;
+
+        $z0 = r0 instanceof java.time.LocalTime;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = (java.time.LocalTime) r0;
+
+        return $r4;
+
+     label1:
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalAdjuster: java.time.temporal.Temporal adjustInto(java.time.temporal.Temporal)>(r1);
+
+        $r3 = (java.time.LocalTime) $r2;
+
+        return $r3;
+    }
+
+    public java.time.LocalTime 'with'(java.time.temporal.TemporalField, long)
+    {
+        byte $b3, $b8, $b11, $b12, $b16, $b20, $b21;
+        java.time.temporal.TemporalField r0;
+        java.lang.StringBuilder $r23, $r24, $r26;
+        long l0, $l5, $l6, $l7, $l14, $l15, $l18, $l19, $l24, $l25, $l28, $l29, $l31, $l34, $l38, $l39;
+        java.lang.String $r25;
+        java.time.temporal.UnsupportedTemporalTypeException $r27;
+        int[] $r5;
+        java.time.LocalTime r1, $r3, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20;
+        boolean $z0;
+        java.time.temporal.Temporal $r2;
+        java.time.temporal.ChronoField r4;
+        int $i1, $i2, $i4, $i9, $i10, $i13, $i17, $i22, $i23, $i26, $i27, $i30, $i32, $i33, $i35, $i36, $i37, $i40, $i41, $i42, $i43, $i44;
+
+        r1 := @this: java.time.LocalTime;
+
+        r0 := @parameter0: java.time.temporal.TemporalField;
+
+        l0 := @parameter1: long;
+
+        $z0 = r0 instanceof java.time.temporal.ChronoField;
+
+        if $z0 == 0 goto label21;
+
+        r4 = (java.time.temporal.ChronoField) r0;
+
+        virtualinvoke r4.<java.time.temporal.ChronoField: long checkValidValue(long)>(l0);
+
+        $r5 = <java.time.LocalTime$1: int[] $SwitchMap$java$time$temporal$ChronoField>;
+
+        $i1 = virtualinvoke r4.<java.time.temporal.ChronoField: int ordinal()>();
+
+        $i2 = $r5[$i1];
+
+        tableswitch($i2)
+        {
+            case 1: goto label01;
+            case 2: goto label02;
+            case 3: goto label03;
+            case 4: goto label04;
+            case 5: goto label05;
+            case 6: goto label06;
+            case 7: goto label07;
+            case 8: goto label08;
+            case 9: goto label09;
+            case 10: goto label10;
+            case 11: goto label11;
+            case 12: goto label12;
+            case 13: goto label15;
+            case 14: goto label16;
+            case 15: goto label19;
+            default: goto label20;
+        };
+
+     label01:
+        $i37 = (int) l0;
+
+        $r20 = virtualinvoke r1.<java.time.LocalTime: java.time.LocalTime withNano(int)>($i37);
+
+        return $r20;
+
+     label02:
+        $r19 = staticinvoke <java.time.LocalTime: java.time.LocalTime ofNanoOfDay(long)>(l0);
+
+        return $r19;
+
+     label03:
+        $i35 = (int) l0;
+
+        $i36 = $i35 * 1000;
+
+        $r18 = virtualinvoke r1.<java.time.LocalTime: java.time.LocalTime withNano(int)>($i36);
+
+        return $r18;
+
+     label04:
+        $l34 = l0 * 1000L;
+
+        $r17 = staticinvoke <java.time.LocalTime: java.time.LocalTime ofNanoOfDay(long)>($l34);
+
+        return $r17;
+
+     label05:
+        $i32 = (int) l0;
+
+        $i33 = $i32 * 1000000;
+
+        $r16 = virtualinvoke r1.<java.time.LocalTime: java.time.LocalTime withNano(int)>($i33);
+
+        return $r16;
+
+     label06:
+        $l31 = l0 * 1000000L;
+
+        $r15 = staticinvoke <java.time.LocalTime: java.time.LocalTime ofNanoOfDay(long)>($l31);
+
+        return $r15;
+
+     label07:
+        $i30 = (int) l0;
+
+        $r14 = virtualinvoke r1.<java.time.LocalTime: java.time.LocalTime withSecond(int)>($i30);
+
+        return $r14;
+
+     label08:
+        $i27 = virtualinvoke r1.<java.time.LocalTime: int toSecondOfDay()>();
+
+        $l28 = (long) $i27;
+
+        $l29 = l0 - $l28;
+
+        $r13 = virtualinvoke r1.<java.time.LocalTime: java.time.LocalTime plusSeconds(long)>($l29);
+
+        return $r13;
+
+     label09:
+        $i26 = (int) l0;
+
+        $r12 = virtualinvoke r1.<java.time.LocalTime: java.time.LocalTime withMinute(int)>($i26);
+
+        return $r12;
+
+     label10:
+        $b20 = r1.<java.time.LocalTime: byte hour>;
+
+        $i40 = (int) $b20;
+
+        $i22 = $i40 * 60;
+
+        $b21 = r1.<java.time.LocalTime: byte minute>;
+
+        $i41 = (int) $b21;
+
+        $i23 = $i22 + $i41;
+
+        $l24 = (long) $i23;
+
+        $l25 = l0 - $l24;
+
+        $r11 = virtualinvoke r1.<java.time.LocalTime: java.time.LocalTime plusMinutes(long)>($l25);
+
+        return $r11;
+
+     label11:
+        $b16 = r1.<java.time.LocalTime: byte hour>;
+
+        $i42 = (int) $b16;
+
+        $i17 = $i42 % 12;
+
+        $l18 = (long) $i17;
+
+        $l19 = l0 - $l18;
+
+        $r10 = virtualinvoke r1.<java.time.LocalTime: java.time.LocalTime plusHours(long)>($l19);
+
+        return $r10;
+
+     label12:
+        $b11 = l0 cmp 12L;
+
+        if $b11 != 0 goto label13;
+
+        $l38 = 0L;
+
+        goto label14;
+
+     label13:
+        $l38 = l0;
+
+     label14:
+        $b12 = r1.<java.time.LocalTime: byte hour>;
+
+        $i43 = (int) $b12;
+
+        $i13 = $i43 % 12;
+
+        $l14 = (long) $i13;
+
+        $l15 = $l38 - $l14;
+
+        $r9 = virtualinvoke r1.<java.time.LocalTime: java.time.LocalTime plusHours(long)>($l15);
+
+        return $r9;
+
+     label15:
+        $i10 = (int) l0;
+
+        $r8 = virtualinvoke r1.<java.time.LocalTime: java.time.LocalTime withHour(int)>($i10);
+
+        return $r8;
+
+     label16:
+        $b8 = l0 cmp 24L;
+
+        if $b8 != 0 goto label17;
+
+        $l39 = 0L;
+
+        goto label18;
+
+     label17:
+        $l39 = l0;
+
+     label18:
+        $i9 = (int) $l39;
+
+        $r7 = virtualinvoke r1.<java.time.LocalTime: java.time.LocalTime withHour(int)>($i9);
+
+        return $r7;
+
+     label19:
+        $b3 = r1.<java.time.LocalTime: byte hour>;
+
+        $i44 = (int) $b3;
+
+        $i4 = $i44 / 12;
+
+        $l5 = (long) $i4;
+
+        $l6 = l0 - $l5;
+
+        $l7 = $l6 * 12L;
+
+        $r6 = virtualinvoke r1.<java.time.LocalTime: java.time.LocalTime plusHours(long)>($l7);
+
+        return $r6;
+
+     label20:
+        $r27 = new java.time.temporal.UnsupportedTemporalTypeException;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported field: ");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r27.<java.time.temporal.UnsupportedTemporalTypeException: void <init>(java.lang.String)>($r25);
+
+        throw $r27;
+
+     label21:
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalField: java.time.temporal.Temporal adjustInto(java.time.temporal.Temporal,long)>(r1, l0);
+
+        $r3 = (java.time.LocalTime) $r2;
+
+        return $r3;
+    }
+
+    public java.time.LocalTime withHour(int)
+    {
+        java.time.temporal.ChronoField $r1;
+        long $l2;
+        byte $b1, $b4, $b5;
+        java.time.LocalTime r0, $r2;
+        int i0, $i3, $i6, $i7, $i8;
+
+        r0 := @this: java.time.LocalTime;
+
+        i0 := @parameter0: int;
+
+        $b1 = r0.<java.time.LocalTime: byte hour>;
+
+        $i6 = (int) $b1;
+
+        if $i6 != i0 goto label1;
+
+        return r0;
+
+     label1:
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField HOUR_OF_DAY>;
+
+        $l2 = (long) i0;
+
+        virtualinvoke $r1.<java.time.temporal.ChronoField: long checkValidValue(long)>($l2);
+
+        $b5 = r0.<java.time.LocalTime: byte minute>;
+
+        $b4 = r0.<java.time.LocalTime: byte second>;
+
+        $i3 = r0.<java.time.LocalTime: int nano>;
+
+        $i7 = (int) $b5;
+
+        $i8 = (int) $b4;
+
+        $r2 = staticinvoke <java.time.LocalTime: java.time.LocalTime create(int,int,int,int)>(i0, $i7, $i8, $i3);
+
+        return $r2;
+    }
+
+    public java.time.LocalTime withMinute(int)
+    {
+        java.time.temporal.ChronoField $r1;
+        long $l2;
+        byte $b1, $b4, $b5;
+        java.time.LocalTime r0, $r2;
+        int i0, $i3, $i6, $i7, $i8;
+
+        r0 := @this: java.time.LocalTime;
+
+        i0 := @parameter0: int;
+
+        $b1 = r0.<java.time.LocalTime: byte minute>;
+
+        $i6 = (int) $b1;
+
+        if $i6 != i0 goto label1;
+
+        return r0;
+
+     label1:
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MINUTE_OF_HOUR>;
+
+        $l2 = (long) i0;
+
+        virtualinvoke $r1.<java.time.temporal.ChronoField: long checkValidValue(long)>($l2);
+
+        $b5 = r0.<java.time.LocalTime: byte hour>;
+
+        $b4 = r0.<java.time.LocalTime: byte second>;
+
+        $i3 = r0.<java.time.LocalTime: int nano>;
+
+        $i7 = (int) $b5;
+
+        $i8 = (int) $b4;
+
+        $r2 = staticinvoke <java.time.LocalTime: java.time.LocalTime create(int,int,int,int)>($i7, i0, $i8, $i3);
+
+        return $r2;
+    }
+
+    public java.time.LocalTime withSecond(int)
+    {
+        java.time.temporal.ChronoField $r1;
+        long $l2;
+        byte $b1, $b4, $b5;
+        java.time.LocalTime r0, $r2;
+        int i0, $i3, $i6, $i7, $i8;
+
+        r0 := @this: java.time.LocalTime;
+
+        i0 := @parameter0: int;
+
+        $b1 = r0.<java.time.LocalTime: byte second>;
+
+        $i6 = (int) $b1;
+
+        if $i6 != i0 goto label1;
+
+        return r0;
+
+     label1:
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField SECOND_OF_MINUTE>;
+
+        $l2 = (long) i0;
+
+        virtualinvoke $r1.<java.time.temporal.ChronoField: long checkValidValue(long)>($l2);
+
+        $b5 = r0.<java.time.LocalTime: byte hour>;
+
+        $b4 = r0.<java.time.LocalTime: byte minute>;
+
+        $i3 = r0.<java.time.LocalTime: int nano>;
+
+        $i7 = (int) $b5;
+
+        $i8 = (int) $b4;
+
+        $r2 = staticinvoke <java.time.LocalTime: java.time.LocalTime create(int,int,int,int)>($i7, $i8, i0, $i3);
+
+        return $r2;
+    }
+
+    public java.time.LocalTime withNano(int)
+    {
+        java.time.temporal.ChronoField $r1;
+        long $l2;
+        byte $b3, $b4, $b5;
+        java.time.LocalTime r0, $r2;
+        int i0, $i1, $i6, $i7, $i8;
+
+        r0 := @this: java.time.LocalTime;
+
+        i0 := @parameter0: int;
+
+        $i1 = r0.<java.time.LocalTime: int nano>;
+
+        if $i1 != i0 goto label1;
+
+        return r0;
+
+     label1:
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField NANO_OF_SECOND>;
+
+        $l2 = (long) i0;
+
+        virtualinvoke $r1.<java.time.temporal.ChronoField: long checkValidValue(long)>($l2);
+
+        $b5 = r0.<java.time.LocalTime: byte hour>;
+
+        $b4 = r0.<java.time.LocalTime: byte minute>;
+
+        $b3 = r0.<java.time.LocalTime: byte second>;
+
+        $i6 = (int) $b5;
+
+        $i7 = (int) $b4;
+
+        $i8 = (int) $b3;
+
+        $r2 = staticinvoke <java.time.LocalTime: java.time.LocalTime create(int,int,int,int)>($i6, $i7, $i8, i0);
+
+        return $r2;
+    }
+
+    public java.time.LocalTime truncatedTo(java.time.temporal.TemporalUnit)
+    {
+        java.time.temporal.TemporalUnit r0;
+        long $l0, $l2, $l3, $l5, $l6, $l7;
+        byte $b1, $b4;
+        java.time.Duration $r2;
+        java.time.LocalTime r3, $r4;
+        int $i8;
+        java.time.temporal.UnsupportedTemporalTypeException $r7, $r8;
+        java.time.temporal.ChronoUnit $r1;
+
+        r3 := @this: java.time.LocalTime;
+
+        r0 := @parameter0: java.time.temporal.TemporalUnit;
+
+        $r1 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit NANOS>;
+
+        if r0 != $r1 goto label1;
+
+        return r3;
+
+     label1:
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalUnit: java.time.Duration getDuration()>();
+
+        $l0 = virtualinvoke $r2.<java.time.Duration: long getSeconds()>();
+
+        $b1 = $l0 cmp 86400L;
+
+        $i8 = (int) $b1;
+
+        if $i8 <= 0 goto label2;
+
+        $r7 = new java.time.temporal.UnsupportedTemporalTypeException;
+
+        specialinvoke $r7.<java.time.temporal.UnsupportedTemporalTypeException: void <init>(java.lang.String)>("Unit is too large to be used for truncation");
+
+        throw $r7;
+
+     label2:
+        $l2 = virtualinvoke $r2.<java.time.Duration: long toNanos()>();
+
+        $l3 = 86400000000000L % $l2;
+
+        $b4 = $l3 cmp 0L;
+
+        if $b4 == 0 goto label3;
+
+        $r8 = new java.time.temporal.UnsupportedTemporalTypeException;
+
+        specialinvoke $r8.<java.time.temporal.UnsupportedTemporalTypeException: void <init>(java.lang.String)>("Unit must divide into a standard day without remainder");
+
+        throw $r8;
+
+     label3:
+        $l5 = virtualinvoke r3.<java.time.LocalTime: long toNanoOfDay()>();
+
+        $l6 = $l5 / $l2;
+
+        $l7 = $l6 * $l2;
+
+        $r4 = staticinvoke <java.time.LocalTime: java.time.LocalTime ofNanoOfDay(long)>($l7);
+
+        return $r4;
+    }
+
+    public java.time.LocalTime plus(java.time.temporal.TemporalAmount)
+    {
+        java.time.LocalTime r1, $r3;
+        java.time.temporal.TemporalAmount r0;
+        java.time.temporal.Temporal $r2;
+
+        r1 := @this: java.time.LocalTime;
+
+        r0 := @parameter0: java.time.temporal.TemporalAmount;
+
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalAmount: java.time.temporal.Temporal addTo(java.time.temporal.Temporal)>(r1);
+
+        $r3 = (java.time.LocalTime) $r2;
+
+        return $r3;
+    }
+
+    public java.time.LocalTime plus(long, java.time.temporal.TemporalUnit)
+    {
+        java.time.temporal.TemporalUnit r0;
+        long l0, $l3, $l4, $l5, $l6, $l7, $l8;
+        int[] $r5;
+        java.time.LocalTime r1, $r3, $r6, $r7, $r8, $r9, $r10, $r11, $r12;
+        int $i1, $i2;
+        java.lang.String $r17;
+        boolean $z0;
+        java.time.temporal.UnsupportedTemporalTypeException $r13;
+        java.time.temporal.ChronoUnit $r4;
+        java.lang.StringBuilder $r14, $r15, $r16;
+        java.time.temporal.Temporal $r2;
+
+        r1 := @this: java.time.LocalTime;
+
+        l0 := @parameter0: long;
+
+        r0 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $z0 = r0 instanceof java.time.temporal.ChronoUnit;
+
+        if $z0 == 0 goto label9;
+
+        $r5 = <java.time.LocalTime$1: int[] $SwitchMap$java$time$temporal$ChronoUnit>;
+
+        $r4 = (java.time.temporal.ChronoUnit) r0;
+
+        $i1 = virtualinvoke $r4.<java.time.temporal.ChronoUnit: int ordinal()>();
+
+        $i2 = $r5[$i1];
+
+        tableswitch($i2)
+        {
+            case 1: goto label1;
+            case 2: goto label2;
+            case 3: goto label3;
+            case 4: goto label4;
+            case 5: goto label5;
+            case 6: goto label6;
+            case 7: goto label7;
+            default: goto label8;
+        };
+
+     label1:
+        $r12 = virtualinvoke r1.<java.time.LocalTime: java.time.LocalTime plusNanos(long)>(l0);
+
+        return $r12;
+
+     label2:
+        $l7 = l0 % 86400000000L;
+
+        $l8 = $l7 * 1000L;
+
+        $r11 = virtualinvoke r1.<java.time.LocalTime: java.time.LocalTime plusNanos(long)>($l8);
+
+        return $r11;
+
+     label3:
+        $l5 = l0 % 86400000L;
+
+        $l6 = $l5 * 1000000L;
+
+        $r10 = virtualinvoke r1.<java.time.LocalTime: java.time.LocalTime plusNanos(long)>($l6);
+
+        return $r10;
+
+     label4:
+        $r9 = virtualinvoke r1.<java.time.LocalTime: java.time.LocalTime plusSeconds(long)>(l0);
+
+        return $r9;
+
+     label5:
+        $r8 = virtualinvoke r1.<java.time.LocalTime: java.time.LocalTime plusMinutes(long)>(l0);
+
+        return $r8;
+
+     label6:
+        $r7 = virtualinvoke r1.<java.time.LocalTime: java.time.LocalTime plusHours(long)>(l0);
+
+        return $r7;
+
+     label7:
+        $l3 = l0 % 2L;
+
+        $l4 = $l3 * 12L;
+
+        $r6 = virtualinvoke r1.<java.time.LocalTime: java.time.LocalTime plusHours(long)>($l4);
+
+        return $r6;
+
+     label8:
+        $r13 = new java.time.temporal.UnsupportedTemporalTypeException;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported unit: ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<java.time.temporal.UnsupportedTemporalTypeException: void <init>(java.lang.String)>($r17);
+
+        throw $r13;
+
+     label9:
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalUnit: java.time.temporal.Temporal addTo(java.time.temporal.Temporal,long)>(r1, l0);
+
+        $r3 = (java.time.LocalTime) $r2;
+
+        return $r3;
+    }
+
+    public java.time.LocalTime plusHours(long)
+    {
+        long l0, $l2;
+        byte $b1, $b3, $b9, $b10;
+        java.time.LocalTime r0, $r1;
+        int $i4, $i5, $i6, i7, $i8, $i11, $i12, $i13;
+
+        r0 := @this: java.time.LocalTime;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        return r0;
+
+     label1:
+        $l2 = l0 % 24L;
+
+        $i4 = (int) $l2;
+
+        $b3 = r0.<java.time.LocalTime: byte hour>;
+
+        $i11 = (int) $b3;
+
+        $i5 = $i4 + $i11;
+
+        $i6 = $i5 + 24;
+
+        i7 = $i6 % 24;
+
+        $b10 = r0.<java.time.LocalTime: byte minute>;
+
+        $b9 = r0.<java.time.LocalTime: byte second>;
+
+        $i8 = r0.<java.time.LocalTime: int nano>;
+
+        $i12 = (int) $b10;
+
+        $i13 = (int) $b9;
+
+        $r1 = staticinvoke <java.time.LocalTime: java.time.LocalTime create(int,int,int,int)>(i7, $i12, $i13, $i8);
+
+        return $r1;
+    }
+
+    public java.time.LocalTime plusMinutes(long)
+    {
+        long l0, $l6;
+        byte $b1, $b2, $b3, $b14;
+        java.time.LocalTime r0, $r1;
+        int $i4, i5, $i7, $i8, $i9, i10, i11, i12, $i13, $i15, $i16, $i17;
+
+        r0 := @this: java.time.LocalTime;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        return r0;
+
+     label1:
+        $b2 = r0.<java.time.LocalTime: byte hour>;
+
+        $i15 = (int) $b2;
+
+        $i4 = $i15 * 60;
+
+        $b3 = r0.<java.time.LocalTime: byte minute>;
+
+        $i16 = (int) $b3;
+
+        i5 = $i4 + $i16;
+
+        $l6 = l0 % 1440L;
+
+        $i7 = (int) $l6;
+
+        $i8 = $i7 + i5;
+
+        $i9 = $i8 + 1440;
+
+        i10 = $i9 % 1440;
+
+        if i5 != i10 goto label2;
+
+        return r0;
+
+     label2:
+        i11 = i10 / 60;
+
+        i12 = i10 % 60;
+
+        $b14 = r0.<java.time.LocalTime: byte second>;
+
+        $i13 = r0.<java.time.LocalTime: int nano>;
+
+        $i17 = (int) $b14;
+
+        $r1 = staticinvoke <java.time.LocalTime: java.time.LocalTime create(int,int,int,int)>(i11, i12, $i17, $i13);
+
+        return $r1;
+    }
+
+    public java.time.LocalTime plusSeconds(long)
+    {
+        long l0, $l9;
+        byte $b1, $b2, $b3, $b6;
+        java.time.LocalTime r0, $r1;
+        int $i4, $i5, $i7, i8, $i10, $i11, $i12, i13, i14, $i15, i16, i17, $i18, $i19, $i20, $i21;
+
+        r0 := @this: java.time.LocalTime;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        return r0;
+
+     label1:
+        $b2 = r0.<java.time.LocalTime: byte hour>;
+
+        $i19 = (int) $b2;
+
+        $i5 = $i19 * 3600;
+
+        $b3 = r0.<java.time.LocalTime: byte minute>;
+
+        $i20 = (int) $b3;
+
+        $i4 = $i20 * 60;
+
+        $i7 = $i5 + $i4;
+
+        $b6 = r0.<java.time.LocalTime: byte second>;
+
+        $i21 = (int) $b6;
+
+        i8 = $i7 + $i21;
+
+        $l9 = l0 % 86400L;
+
+        $i10 = (int) $l9;
+
+        $i11 = $i10 + i8;
+
+        $i12 = $i11 + 86400;
+
+        i13 = $i12 % 86400;
+
+        if i8 != i13 goto label2;
+
+        return r0;
+
+     label2:
+        i14 = i13 / 3600;
+
+        $i15 = i13 / 60;
+
+        i16 = $i15 % 60;
+
+        i17 = i13 % 60;
+
+        $i18 = r0.<java.time.LocalTime: int nano>;
+
+        $r1 = staticinvoke <java.time.LocalTime: java.time.LocalTime create(int,int,int,int)>(i14, i16, i17, $i18);
+
+        return $r1;
+    }
+
+    public java.time.LocalTime plusNanos(long)
+    {
+        long l0, $l2, $l3, $l4, $l5, l6, $l8, $l10, $l11, $l13, $l14, $l16;
+        byte $b1, $b7;
+        java.time.LocalTime r0, $r1;
+        int i9, i12, i15, i17;
+
+        r0 := @this: java.time.LocalTime;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        return r0;
+
+     label1:
+        $l2 = virtualinvoke r0.<java.time.LocalTime: long toNanoOfDay()>();
+
+        $l3 = l0 % 86400000000000L;
+
+        $l4 = $l3 + $l2;
+
+        $l5 = $l4 + 86400000000000L;
+
+        l6 = $l5 % 86400000000000L;
+
+        $b7 = $l2 cmp l6;
+
+        if $b7 != 0 goto label2;
+
+        return r0;
+
+     label2:
+        $l8 = l6 / 3600000000000L;
+
+        i9 = (int) $l8;
+
+        $l10 = l6 / 60000000000L;
+
+        $l11 = $l10 % 60L;
+
+        i12 = (int) $l11;
+
+        $l13 = l6 / 1000000000L;
+
+        $l14 = $l13 % 60L;
+
+        i15 = (int) $l14;
+
+        $l16 = l6 % 1000000000L;
+
+        i17 = (int) $l16;
+
+        $r1 = staticinvoke <java.time.LocalTime: java.time.LocalTime create(int,int,int,int)>(i9, i12, i15, i17);
+
+        return $r1;
+    }
+
+    public java.time.LocalTime minus(java.time.temporal.TemporalAmount)
+    {
+        java.time.LocalTime r1, $r3;
+        java.time.temporal.TemporalAmount r0;
+        java.time.temporal.Temporal $r2;
+
+        r1 := @this: java.time.LocalTime;
+
+        r0 := @parameter0: java.time.temporal.TemporalAmount;
+
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalAmount: java.time.temporal.Temporal subtractFrom(java.time.temporal.Temporal)>(r1);
+
+        $r3 = (java.time.LocalTime) $r2;
+
+        return $r3;
+    }
+
+    public java.time.LocalTime minus(long, java.time.temporal.TemporalUnit)
+    {
+        byte $b1;
+        java.time.temporal.TemporalUnit r1;
+        java.time.LocalTime r0, $r2, $r3;
+        long l0, $l2;
+
+        r0 := @this: java.time.LocalTime;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $b1 = l0 cmp -9223372036854775808L;
+
+        if $b1 != 0 goto label1;
+
+        $r2 = virtualinvoke r0.<java.time.LocalTime: java.time.LocalTime plus(long,java.time.temporal.TemporalUnit)>(9223372036854775807L, r1);
+
+        $r3 = virtualinvoke $r2.<java.time.LocalTime: java.time.LocalTime plus(long,java.time.temporal.TemporalUnit)>(1L, r1);
+
+        goto label2;
+
+     label1:
+        $l2 = neg l0;
+
+        $r3 = virtualinvoke r0.<java.time.LocalTime: java.time.LocalTime plus(long,java.time.temporal.TemporalUnit)>($l2, r1);
+
+     label2:
+        return $r3;
+    }
+
+    public java.time.LocalTime minusHours(long)
+    {
+        java.time.LocalTime r0, $r1;
+        long l0, $l1, $l2;
+
+        r0 := @this: java.time.LocalTime;
+
+        l0 := @parameter0: long;
+
+        $l1 = l0 % 24L;
+
+        $l2 = neg $l1;
+
+        $r1 = virtualinvoke r0.<java.time.LocalTime: java.time.LocalTime plusHours(long)>($l2);
+
+        return $r1;
+    }
+
+    public java.time.LocalTime minusMinutes(long)
+    {
+        java.time.LocalTime r0, $r1;
+        long l0, $l1, $l2;
+
+        r0 := @this: java.time.LocalTime;
+
+        l0 := @parameter0: long;
+
+        $l1 = l0 % 1440L;
+
+        $l2 = neg $l1;
+
+        $r1 = virtualinvoke r0.<java.time.LocalTime: java.time.LocalTime plusMinutes(long)>($l2);
+
+        return $r1;
+    }
+
+    public java.time.LocalTime minusSeconds(long)
+    {
+        java.time.LocalTime r0, $r1;
+        long l0, $l1, $l2;
+
+        r0 := @this: java.time.LocalTime;
+
+        l0 := @parameter0: long;
+
+        $l1 = l0 % 86400L;
+
+        $l2 = neg $l1;
+
+        $r1 = virtualinvoke r0.<java.time.LocalTime: java.time.LocalTime plusSeconds(long)>($l2);
+
+        return $r1;
+    }
+
+    public java.time.LocalTime minusNanos(long)
+    {
+        java.time.LocalTime r0, $r1;
+        long l0, $l1, $l2;
+
+        r0 := @this: java.time.LocalTime;
+
+        l0 := @parameter0: long;
+
+        $l1 = l0 % 86400000000000L;
+
+        $l2 = neg $l1;
+
+        $r1 = virtualinvoke r0.<java.time.LocalTime: java.time.LocalTime plusNanos(long)>($l2);
+
+        return $r1;
+    }
+
+    public java.lang.Object query(java.time.temporal.TemporalQuery)
+    {
+        java.time.temporal.TemporalQuery r0, $r1, $r2, $r3, $r4, $r5, $r6, $r7;
+        java.time.temporal.ChronoUnit $r10;
+        java.time.LocalTime r8;
+        java.lang.Object $r9;
+
+        r8 := @this: java.time.LocalTime;
+
+        r0 := @parameter0: java.time.temporal.TemporalQuery;
+
+        $r1 = staticinvoke <java.time.temporal.TemporalQueries: java.time.temporal.TemporalQuery chronology()>();
+
+        if r0 == $r1 goto label1;
+
+        $r2 = staticinvoke <java.time.temporal.TemporalQueries: java.time.temporal.TemporalQuery zoneId()>();
+
+        if r0 == $r2 goto label1;
+
+        $r3 = staticinvoke <java.time.temporal.TemporalQueries: java.time.temporal.TemporalQuery zone()>();
+
+        if r0 == $r3 goto label1;
+
+        $r4 = staticinvoke <java.time.temporal.TemporalQueries: java.time.temporal.TemporalQuery offset()>();
+
+        if r0 != $r4 goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r5 = staticinvoke <java.time.temporal.TemporalQueries: java.time.temporal.TemporalQuery localTime()>();
+
+        if r0 != $r5 goto label3;
+
+        return r8;
+
+     label3:
+        $r6 = staticinvoke <java.time.temporal.TemporalQueries: java.time.temporal.TemporalQuery localDate()>();
+
+        if r0 != $r6 goto label4;
+
+        return null;
+
+     label4:
+        $r7 = staticinvoke <java.time.temporal.TemporalQueries: java.time.temporal.TemporalQuery precision()>();
+
+        if r0 != $r7 goto label5;
+
+        $r10 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit NANOS>;
+
+        return $r10;
+
+     label5:
+        $r9 = interfaceinvoke r0.<java.time.temporal.TemporalQuery: java.lang.Object queryFrom(java.time.temporal.TemporalAccessor)>(r8);
+
+        return $r9;
+    }
+
+    public java.time.temporal.Temporal adjustInto(java.time.temporal.Temporal)
+    {
+        java.time.temporal.ChronoField $r2;
+        java.time.LocalTime r1;
+        long $l0;
+        java.time.temporal.Temporal r0, $r3;
+
+        r1 := @this: java.time.LocalTime;
+
+        r0 := @parameter0: java.time.temporal.Temporal;
+
+        $r2 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField NANO_OF_DAY>;
+
+        $l0 = virtualinvoke r1.<java.time.LocalTime: long toNanoOfDay()>();
+
+        $r3 = interfaceinvoke r0.<java.time.temporal.Temporal: java.time.temporal.Temporal 'with'(java.time.temporal.TemporalField,long)>($r2, $l0);
+
+        return $r3;
+    }
+
+    public long until(java.time.temporal.Temporal, java.time.temporal.TemporalUnit)
+    {
+        java.time.temporal.TemporalUnit r2;
+        long $l0, $l1, $l2, l3, $l6, $l7, $l8, $l9, $l10, $l11;
+        int[] $r5;
+        java.time.LocalTime $r1, r3;
+        int $i4, $i5;
+        java.lang.String $r10;
+        boolean $z0;
+        java.time.temporal.UnsupportedTemporalTypeException $r6;
+        java.time.temporal.ChronoUnit $r4;
+        java.lang.StringBuilder $r7, $r8, $r9;
+        java.time.temporal.Temporal r0;
+
+        r3 := @this: java.time.LocalTime;
+
+        r0 := @parameter0: java.time.temporal.Temporal;
+
+        r2 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $r1 = staticinvoke <java.time.LocalTime: java.time.LocalTime 'from'(java.time.temporal.TemporalAccessor)>(r0);
+
+        $z0 = r2 instanceof java.time.temporal.ChronoUnit;
+
+        if $z0 == 0 goto label9;
+
+        $l1 = virtualinvoke $r1.<java.time.LocalTime: long toNanoOfDay()>();
+
+        $l2 = virtualinvoke r3.<java.time.LocalTime: long toNanoOfDay()>();
+
+        l3 = $l1 - $l2;
+
+        $r5 = <java.time.LocalTime$1: int[] $SwitchMap$java$time$temporal$ChronoUnit>;
+
+        $r4 = (java.time.temporal.ChronoUnit) r2;
+
+        $i4 = virtualinvoke $r4.<java.time.temporal.ChronoUnit: int ordinal()>();
+
+        $i5 = $r5[$i4];
+
+        tableswitch($i5)
+        {
+            case 1: goto label1;
+            case 2: goto label2;
+            case 3: goto label3;
+            case 4: goto label4;
+            case 5: goto label5;
+            case 6: goto label6;
+            case 7: goto label7;
+            default: goto label8;
+        };
+
+     label1:
+        return l3;
+
+     label2:
+        $l11 = l3 / 1000L;
+
+        return $l11;
+
+     label3:
+        $l10 = l3 / 1000000L;
+
+        return $l10;
+
+     label4:
+        $l9 = l3 / 1000000000L;
+
+        return $l9;
+
+     label5:
+        $l8 = l3 / 60000000000L;
+
+        return $l8;
+
+     label6:
+        $l7 = l3 / 3600000000000L;
+
+        return $l7;
+
+     label7:
+        $l6 = l3 / 43200000000000L;
+
+        return $l6;
+
+     label8:
+        $r6 = new java.time.temporal.UnsupportedTemporalTypeException;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported unit: ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.time.temporal.UnsupportedTemporalTypeException: void <init>(java.lang.String)>($r10);
+
+        throw $r6;
+
+     label9:
+        $l0 = interfaceinvoke r2.<java.time.temporal.TemporalUnit: long between(java.time.temporal.Temporal,java.time.temporal.Temporal)>(r3, $r1);
+
+        return $l0;
+    }
+
+    public java.lang.String format(java.time.format.DateTimeFormatter)
+    {
+        java.time.LocalTime r1;
+        java.lang.String $r2;
+        java.time.format.DateTimeFormatter r0;
+
+        r1 := @this: java.time.LocalTime;
+
+        r0 := @parameter0: java.time.format.DateTimeFormatter;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "formatter");
+
+        $r2 = virtualinvoke r0.<java.time.format.DateTimeFormatter: java.lang.String format(java.time.temporal.TemporalAccessor)>(r1);
+
+        return $r2;
+    }
+
+    public java.time.LocalDateTime atDate(java.time.LocalDate)
+    {
+        java.time.LocalTime r1;
+        java.time.LocalDateTime $r2;
+        java.time.LocalDate r0;
+
+        r1 := @this: java.time.LocalTime;
+
+        r0 := @parameter0: java.time.LocalDate;
+
+        $r2 = staticinvoke <java.time.LocalDateTime: java.time.LocalDateTime of(java.time.LocalDate,java.time.LocalTime)>(r0, r1);
+
+        return $r2;
+    }
+
+    public java.time.OffsetTime atOffset(java.time.ZoneOffset)
+    {
+        java.time.LocalTime r0;
+        java.time.OffsetTime $r2;
+        java.time.ZoneOffset r1;
+
+        r0 := @this: java.time.LocalTime;
+
+        r1 := @parameter0: java.time.ZoneOffset;
+
+        $r2 = staticinvoke <java.time.OffsetTime: java.time.OffsetTime of(java.time.LocalTime,java.time.ZoneOffset)>(r0, r1);
+
+        return $r2;
+    }
+
+    public int toSecondOfDay()
+    {
+        byte $b0, $b1, $b3;
+        java.time.LocalTime r0;
+        int $i2, i4, i5, i6, $i7, $i8, $i9;
+
+        r0 := @this: java.time.LocalTime;
+
+        $b0 = r0.<java.time.LocalTime: byte hour>;
+
+        $i7 = (int) $b0;
+
+        i4 = $i7 * 3600;
+
+        $b1 = r0.<java.time.LocalTime: byte minute>;
+
+        $i8 = (int) $b1;
+
+        $i2 = $i8 * 60;
+
+        i5 = i4 + $i2;
+
+        $b3 = r0.<java.time.LocalTime: byte second>;
+
+        $i9 = (int) $b3;
+
+        i6 = i5 + $i9;
+
+        return i6;
+    }
+
+    public long toNanoOfDay()
+    {
+        long $l1, $l3, $l4, $l6, $l7, $l9, l10, l11, l12, l13;
+        byte $b0, $b2, $b5;
+        java.time.LocalTime r0;
+        int $i8;
+
+        r0 := @this: java.time.LocalTime;
+
+        $b0 = r0.<java.time.LocalTime: byte hour>;
+
+        $l1 = (long) $b0;
+
+        l10 = $l1 * 3600000000000L;
+
+        $b2 = r0.<java.time.LocalTime: byte minute>;
+
+        $l3 = (long) $b2;
+
+        $l4 = $l3 * 60000000000L;
+
+        l11 = l10 + $l4;
+
+        $b5 = r0.<java.time.LocalTime: byte second>;
+
+        $l6 = (long) $b5;
+
+        $l7 = $l6 * 1000000000L;
+
+        l12 = l11 + $l7;
+
+        $i8 = r0.<java.time.LocalTime: int nano>;
+
+        $l9 = (long) $i8;
+
+        l13 = l12 + $l9;
+
+        return l13;
+    }
+
+    public int compareTo(java.time.LocalTime)
+    {
+        byte $b0, $b1, $b3, $b4, $b6, $b7;
+        java.time.LocalTime r0, r1;
+        int $i2, $i5, $i8, $i9, $i10, i11, $i12, $i13, $i14, $i15, $i16, $i17;
+
+        r0 := @this: java.time.LocalTime;
+
+        r1 := @parameter0: java.time.LocalTime;
+
+        $b1 = r0.<java.time.LocalTime: byte hour>;
+
+        $b0 = r1.<java.time.LocalTime: byte hour>;
+
+        $i12 = (int) $b1;
+
+        $i13 = (int) $b0;
+
+        $i2 = staticinvoke <java.lang.Integer: int compare(int,int)>($i12, $i13);
+
+        i11 = $i2;
+
+        if $i2 != 0 goto label1;
+
+        $b4 = r0.<java.time.LocalTime: byte minute>;
+
+        $b3 = r1.<java.time.LocalTime: byte minute>;
+
+        $i14 = (int) $b4;
+
+        $i15 = (int) $b3;
+
+        $i5 = staticinvoke <java.lang.Integer: int compare(int,int)>($i14, $i15);
+
+        i11 = $i5;
+
+        if $i5 != 0 goto label1;
+
+        $b7 = r0.<java.time.LocalTime: byte second>;
+
+        $b6 = r1.<java.time.LocalTime: byte second>;
+
+        $i16 = (int) $b7;
+
+        $i17 = (int) $b6;
+
+        $i8 = staticinvoke <java.lang.Integer: int compare(int,int)>($i16, $i17);
+
+        i11 = $i8;
+
+        if $i8 != 0 goto label1;
+
+        $i10 = r0.<java.time.LocalTime: int nano>;
+
+        $i9 = r1.<java.time.LocalTime: int nano>;
+
+        i11 = staticinvoke <java.lang.Integer: int compare(int,int)>($i10, $i9);
+
+     label1:
+        return i11;
+    }
+
+    public boolean isAfter(java.time.LocalTime)
+    {
+        java.time.LocalTime r0, r1;
+        int $i0;
+        boolean $z0;
+
+        r0 := @this: java.time.LocalTime;
+
+        r1 := @parameter0: java.time.LocalTime;
+
+        $i0 = virtualinvoke r0.<java.time.LocalTime: int compareTo(java.time.LocalTime)>(r1);
+
+        if $i0 <= 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean isBefore(java.time.LocalTime)
+    {
+        java.time.LocalTime r0, r1;
+        int $i0;
+        boolean $z0;
+
+        r0 := @this: java.time.LocalTime;
+
+        r1 := @parameter0: java.time.LocalTime;
+
+        $i0 = virtualinvoke r0.<java.time.LocalTime: int compareTo(java.time.LocalTime)>(r1);
+
+        if $i0 >= 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        byte $b0, $b1, $b2, $b3, $b4, $b5;
+        java.time.LocalTime r0, r2;
+        int $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13;
+        boolean $z0, $z1;
+        java.lang.Object r1;
+
+        r0 := @this: java.time.LocalTime;
+
+        r1 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        $z0 = r1 instanceof java.time.LocalTime;
+
+        if $z0 == 0 goto label4;
+
+        r2 = (java.time.LocalTime) r1;
+
+        $b1 = r0.<java.time.LocalTime: byte hour>;
+
+        $b0 = r2.<java.time.LocalTime: byte hour>;
+
+        $i8 = (int) $b1;
+
+        $i9 = (int) $b0;
+
+        if $i8 != $i9 goto label2;
+
+        $b3 = r0.<java.time.LocalTime: byte minute>;
+
+        $b2 = r2.<java.time.LocalTime: byte minute>;
+
+        $i10 = (int) $b3;
+
+        $i11 = (int) $b2;
+
+        if $i10 != $i11 goto label2;
+
+        $b5 = r0.<java.time.LocalTime: byte second>;
+
+        $b4 = r2.<java.time.LocalTime: byte second>;
+
+        $i12 = (int) $b5;
+
+        $i13 = (int) $b4;
+
+        if $i12 != $i13 goto label2;
+
+        $i7 = r0.<java.time.LocalTime: int nano>;
+
+        $i6 = r2.<java.time.LocalTime: int nano>;
+
+        if $i7 != $i6 goto label2;
+
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        return $z1;
+
+     label4:
+        return 0;
+    }
+
+    public int hashCode()
+    {
+        java.time.LocalTime r0;
+        int $i3;
+        long $l0, $l1, $l2;
+
+        r0 := @this: java.time.LocalTime;
+
+        $l0 = virtualinvoke r0.<java.time.LocalTime: long toNanoOfDay()>();
+
+        $l1 = $l0 >>> 32;
+
+        $l2 = $l0 ^ $l1;
+
+        $i3 = (int) $l2;
+
+        return $i3;
+    }
+
+    public java.lang.String toString()
+    {
+        byte b0, b1, b2;
+        java.time.LocalTime r1;
+        java.lang.StringBuilder $r2, $r3, $r4, $r5, $r16;
+        int i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17;
+        java.lang.String $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15;
+
+        r1 := @this: java.time.LocalTime;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>(int)>(18);
+
+        b0 = r1.<java.time.LocalTime: byte hour>;
+
+        b1 = r1.<java.time.LocalTime: byte minute>;
+
+        b2 = r1.<java.time.LocalTime: byte second>;
+
+        i3 = r1.<java.time.LocalTime: int nano>;
+
+        $i11 = (int) b0;
+
+        if $i11 >= 10 goto label01;
+
+        $r12 = "0";
+
+        goto label02;
+
+     label01:
+        $r12 = "";
+
+     label02:
+        $r2 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $i12 = (int) b0;
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i12);
+
+        $i13 = (int) b1;
+
+        if $i13 >= 10 goto label03;
+
+        $r13 = ":0";
+
+        goto label04;
+
+     label03:
+        $r13 = ":";
+
+     label04:
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $i14 = (int) b1;
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i14);
+
+        $i15 = (int) b2;
+
+        if $i15 > 0 goto label05;
+
+        if i3 <= 0 goto label10;
+
+     label05:
+        $i16 = (int) b2;
+
+        if $i16 >= 10 goto label06;
+
+        $r14 = ":0";
+
+        goto label07;
+
+     label06:
+        $r14 = ":";
+
+     label07:
+        $r5 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $i17 = (int) b2;
+
+        virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i17);
+
+        if i3 <= 0 goto label10;
+
+        virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(46);
+
+        $i4 = i3 % 1000000;
+
+        if $i4 != 0 goto label08;
+
+        $i9 = i3 / 1000000;
+
+        $i10 = $i9 + 1000;
+
+        $r10 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i10);
+
+        $r11 = virtualinvoke $r10.<java.lang.String: java.lang.String substring(int)>(1);
+
+        virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        goto label10;
+
+     label08:
+        $i5 = i3 % 1000;
+
+        if $i5 != 0 goto label09;
+
+        $i7 = i3 / 1000;
+
+        $i8 = $i7 + 1000000;
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i8);
+
+        $r9 = virtualinvoke $r8.<java.lang.String: java.lang.String substring(int)>(1);
+
+        virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        goto label10;
+
+     label09:
+        $i6 = i3 + 1000000000;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i6);
+
+        $r7 = virtualinvoke $r6.<java.lang.String: java.lang.String substring(int)>(1);
+
+        virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+     label10:
+        $r15 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r15;
+    }
+
+    private java.lang.Object writeReplace()
+    {
+        java.time.LocalTime r1;
+        java.time.Ser $r0;
+
+        r1 := @this: java.time.LocalTime;
+
+        $r0 = new java.time.Ser;
+
+        specialinvoke $r0.<java.time.Ser: void <init>(byte,java.lang.Object)>(4, r1);
+
+        return $r0;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.InvalidObjectException
+    {
+        java.time.LocalTime r1;
+        java.io.ObjectInputStream r2;
+        java.io.InvalidObjectException $r0;
+
+        r1 := @this: java.time.LocalTime;
+
+        r2 := @parameter0: java.io.ObjectInputStream;
+
+        $r0 = new java.io.InvalidObjectException;
+
+        specialinvoke $r0.<java.io.InvalidObjectException: void <init>(java.lang.String)>("Deserialization via serialization delegate");
+
+        throw $r0;
+    }
+
+    void writeExternal(java.io.DataOutput) throws java.io.IOException
+    {
+        byte $b1, $b2, $b3, $b5, $b6, $b7, $b8, $b9, $b10, $b11, $b12, $b13, $b14, $b15;
+        java.time.LocalTime r0;
+        int $i0, $i4, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24;
+        java.io.DataOutput r1;
+
+        r0 := @this: java.time.LocalTime;
+
+        r1 := @parameter0: java.io.DataOutput;
+
+        $i0 = r0.<java.time.LocalTime: int nano>;
+
+        if $i0 != 0 goto label3;
+
+        $b5 = r0.<java.time.LocalTime: byte second>;
+
+        if $b5 != 0 goto label2;
+
+        $b10 = r0.<java.time.LocalTime: byte minute>;
+
+        if $b10 != 0 goto label1;
+
+        $b14 = r0.<java.time.LocalTime: byte hour>;
+
+        $b15 = $b14 ^ -1;
+
+        $i16 = (int) $b15;
+
+        interfaceinvoke r1.<java.io.DataOutput: void writeByte(int)>($i16);
+
+        goto label4;
+
+     label1:
+        $b11 = r0.<java.time.LocalTime: byte hour>;
+
+        $i17 = (int) $b11;
+
+        interfaceinvoke r1.<java.io.DataOutput: void writeByte(int)>($i17);
+
+        $b12 = r0.<java.time.LocalTime: byte minute>;
+
+        $b13 = $b12 ^ -1;
+
+        $i18 = (int) $b13;
+
+        interfaceinvoke r1.<java.io.DataOutput: void writeByte(int)>($i18);
+
+        goto label4;
+
+     label2:
+        $b6 = r0.<java.time.LocalTime: byte hour>;
+
+        $i19 = (int) $b6;
+
+        interfaceinvoke r1.<java.io.DataOutput: void writeByte(int)>($i19);
+
+        $b7 = r0.<java.time.LocalTime: byte minute>;
+
+        $i20 = (int) $b7;
+
+        interfaceinvoke r1.<java.io.DataOutput: void writeByte(int)>($i20);
+
+        $b8 = r0.<java.time.LocalTime: byte second>;
+
+        $b9 = $b8 ^ -1;
+
+        $i21 = (int) $b9;
+
+        interfaceinvoke r1.<java.io.DataOutput: void writeByte(int)>($i21);
+
+        goto label4;
+
+     label3:
+        $b1 = r0.<java.time.LocalTime: byte hour>;
+
+        $i22 = (int) $b1;
+
+        interfaceinvoke r1.<java.io.DataOutput: void writeByte(int)>($i22);
+
+        $b2 = r0.<java.time.LocalTime: byte minute>;
+
+        $i23 = (int) $b2;
+
+        interfaceinvoke r1.<java.io.DataOutput: void writeByte(int)>($i23);
+
+        $b3 = r0.<java.time.LocalTime: byte second>;
+
+        $i24 = (int) $b3;
+
+        interfaceinvoke r1.<java.io.DataOutput: void writeByte(int)>($i24);
+
+        $i4 = r0.<java.time.LocalTime: int nano>;
+
+        interfaceinvoke r1.<java.io.DataOutput: void writeInt(int)>($i4);
+
+     label4:
+        return;
+    }
+
+    static java.time.LocalTime readExternal(java.io.DataInput) throws java.io.IOException
+    {
+        byte $b0, $b1, $b2, b3, b4, b5;
+        java.io.DataInput r0;
+        int i6, $i7, $i8, $i9, $i10;
+        java.time.LocalTime $r1;
+
+        r0 := @parameter0: java.io.DataInput;
+
+        $b0 = interfaceinvoke r0.<java.io.DataInput: byte readByte()>();
+
+        b3 = $b0;
+
+        b4 = 0;
+
+        b5 = 0;
+
+        i6 = 0;
+
+        $i7 = (int) $b0;
+
+        if $i7 >= 0 goto label1;
+
+        b3 = $b0 ^ -1;
+
+        goto label4;
+
+     label1:
+        $b1 = interfaceinvoke r0.<java.io.DataInput: byte readByte()>();
+
+        b4 = $b1;
+
+        $i8 = (int) $b1;
+
+        if $i8 >= 0 goto label2;
+
+        b4 = $b1 ^ -1;
+
+        goto label4;
+
+     label2:
+        $b2 = interfaceinvoke r0.<java.io.DataInput: byte readByte()>();
+
+        b5 = $b2;
+
+        $i9 = (int) $b2;
+
+        if $i9 >= 0 goto label3;
+
+        b5 = $b2 ^ -1;
+
+        goto label4;
+
+     label3:
+        i6 = interfaceinvoke r0.<java.io.DataInput: int readInt()>();
+
+     label4:
+        $i10 = (int) b3;
+
+        $r1 = staticinvoke <java.time.LocalTime: java.time.LocalTime of(int,int,int,int)>($i10, b4, b5, i6);
+
+        return $r1;
+    }
+
+    public volatile java.time.temporal.Temporal minus(long, java.time.temporal.TemporalUnit)
+    {
+        java.time.temporal.TemporalUnit r1;
+        java.time.LocalTime r0, $r2;
+        long l0;
+
+        r0 := @this: java.time.LocalTime;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $r2 = virtualinvoke r0.<java.time.LocalTime: java.time.LocalTime minus(long,java.time.temporal.TemporalUnit)>(l0, r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.temporal.Temporal minus(java.time.temporal.TemporalAmount)
+    {
+        java.time.LocalTime r0, $r2;
+        java.time.temporal.TemporalAmount r1;
+
+        r0 := @this: java.time.LocalTime;
+
+        r1 := @parameter0: java.time.temporal.TemporalAmount;
+
+        $r2 = virtualinvoke r0.<java.time.LocalTime: java.time.LocalTime minus(java.time.temporal.TemporalAmount)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.temporal.Temporal plus(long, java.time.temporal.TemporalUnit)
+    {
+        java.time.temporal.TemporalUnit r1;
+        java.time.LocalTime r0, $r2;
+        long l0;
+
+        r0 := @this: java.time.LocalTime;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $r2 = virtualinvoke r0.<java.time.LocalTime: java.time.LocalTime plus(long,java.time.temporal.TemporalUnit)>(l0, r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.temporal.Temporal plus(java.time.temporal.TemporalAmount)
+    {
+        java.time.LocalTime r0, $r2;
+        java.time.temporal.TemporalAmount r1;
+
+        r0 := @this: java.time.LocalTime;
+
+        r1 := @parameter0: java.time.temporal.TemporalAmount;
+
+        $r2 = virtualinvoke r0.<java.time.LocalTime: java.time.LocalTime plus(java.time.temporal.TemporalAmount)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.temporal.Temporal 'with'(java.time.temporal.TemporalField, long)
+    {
+        java.time.temporal.TemporalField r1;
+        java.time.LocalTime r0, $r2;
+        long l0;
+
+        r0 := @this: java.time.LocalTime;
+
+        r1 := @parameter0: java.time.temporal.TemporalField;
+
+        l0 := @parameter1: long;
+
+        $r2 = virtualinvoke r0.<java.time.LocalTime: java.time.LocalTime 'with'(java.time.temporal.TemporalField,long)>(r1, l0);
+
+        return $r2;
+    }
+
+    public volatile java.time.temporal.Temporal 'with'(java.time.temporal.TemporalAdjuster)
+    {
+        java.time.LocalTime r0, $r2;
+        java.time.temporal.TemporalAdjuster r1;
+
+        r0 := @this: java.time.LocalTime;
+
+        r1 := @parameter0: java.time.temporal.TemporalAdjuster;
+
+        $r2 = virtualinvoke r0.<java.time.LocalTime: java.time.LocalTime 'with'(java.time.temporal.TemporalAdjuster)>(r1);
+
+        return $r2;
+    }
+
+    public volatile int compareTo(java.lang.Object)
+    {
+        java.time.LocalTime r0, $r2;
+        int $i0;
+        java.lang.Object r1;
+
+        r0 := @this: java.time.LocalTime;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = (java.time.LocalTime) r1;
+
+        $i0 = virtualinvoke r0.<java.time.LocalTime: int compareTo(java.time.LocalTime)>($r2);
+
+        return $i0;
+    }
+
+    static void <clinit>()
+    {
+        java.time.LocalTime[] $r0, $r1, $r2, $r4, $r6, $r10;
+        int $i0, i1;
+        java.time.LocalTime $r3, $r5, $r7, $r8, $r9;
+
+        <java.time.LocalTime: long serialVersionUID> = 6414437269572265201L;
+
+        <java.time.LocalTime: long NANOS_PER_DAY> = 86400000000000L;
+
+        <java.time.LocalTime: long NANOS_PER_HOUR> = 3600000000000L;
+
+        <java.time.LocalTime: long NANOS_PER_MINUTE> = 60000000000L;
+
+        <java.time.LocalTime: long NANOS_PER_SECOND> = 1000000000L;
+
+        <java.time.LocalTime: long MICROS_PER_DAY> = 86400000000L;
+
+        <java.time.LocalTime: long MILLIS_PER_DAY> = 86400000L;
+
+        <java.time.LocalTime: int SECONDS_PER_DAY> = 86400;
+
+        <java.time.LocalTime: int SECONDS_PER_HOUR> = 3600;
+
+        <java.time.LocalTime: int SECONDS_PER_MINUTE> = 60;
+
+        <java.time.LocalTime: int MINUTES_PER_DAY> = 1440;
+
+        <java.time.LocalTime: int MINUTES_PER_HOUR> = 60;
+
+        <java.time.LocalTime: int HOURS_PER_DAY> = 24;
+
+        $r0 = newarray (java.time.LocalTime)[24];
+
+        <java.time.LocalTime: java.time.LocalTime[] HOURS> = $r0;
+
+        i1 = 0;
+
+     label1:
+        $r1 = <java.time.LocalTime: java.time.LocalTime[] HOURS>;
+
+        $i0 = lengthof $r1;
+
+        if i1 >= $i0 goto label2;
+
+        $r10 = <java.time.LocalTime: java.time.LocalTime[] HOURS>;
+
+        $r9 = new java.time.LocalTime;
+
+        specialinvoke $r9.<java.time.LocalTime: void <init>(int,int,int,int)>(i1, 0, 0, 0);
+
+        $r10[i1] = $r9;
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        $r2 = <java.time.LocalTime: java.time.LocalTime[] HOURS>;
+
+        $r3 = $r2[0];
+
+        <java.time.LocalTime: java.time.LocalTime MIDNIGHT> = $r3;
+
+        $r4 = <java.time.LocalTime: java.time.LocalTime[] HOURS>;
+
+        $r5 = $r4[12];
+
+        <java.time.LocalTime: java.time.LocalTime NOON> = $r5;
+
+        $r6 = <java.time.LocalTime: java.time.LocalTime[] HOURS>;
+
+        $r7 = $r6[0];
+
+        <java.time.LocalTime: java.time.LocalTime MIN> = $r7;
+
+        $r8 = new java.time.LocalTime;
+
+        specialinvoke $r8.<java.time.LocalTime: void <init>(int,int,int,int)>(23, 59, 59, 999999999);
+
+        <java.time.LocalTime: java.time.LocalTime MAX> = $r8;
+
+        return;
+    }
+}

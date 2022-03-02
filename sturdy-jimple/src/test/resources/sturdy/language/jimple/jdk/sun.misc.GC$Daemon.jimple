@@ -1,0 +1,135 @@
+class sun.misc.GC$Daemon extends java.lang.Thread
+{
+
+    public void run()
+    {
+        java.lang.Throwable $r1;
+        long $l0, $l2, $l3, l5;
+        sun.misc.GC$Daemon r3;
+        byte $b1, $b4;
+        java.lang.InterruptedException $r2;
+        int $i6;
+        java.lang.Object $r0, $r4;
+
+        r3 := @this: sun.misc.GC$Daemon;
+
+     label01:
+        $r4 = staticinvoke <sun.misc.GC: java.lang.Object access$100()>();
+
+        entermonitor $r4;
+
+     label02:
+        $l3 = staticinvoke <sun.misc.GC: long access$200()>();
+
+        $b4 = $l3 cmp 9223372036854775807L;
+
+        if $b4 != 0 goto label04;
+
+        staticinvoke <sun.misc.GC: java.lang.Thread access$302(java.lang.Thread)>(null);
+
+        exitmonitor $r4;
+
+     label03:
+        return;
+
+     label04:
+        $l0 = staticinvoke <sun.misc.GC: long maxObjectInspectionAge()>();
+
+        l5 = $l0;
+
+        $b1 = $l0 cmp $l3;
+
+        $i6 = (int) $b1;
+
+        if $i6 < 0 goto label05;
+
+        staticinvoke <java.lang.System: void gc()>();
+
+        l5 = 0L;
+
+     label05:
+        $r0 = staticinvoke <sun.misc.GC: java.lang.Object access$100()>();
+
+        $l2 = $l3 - l5;
+
+        virtualinvoke $r0.<java.lang.Object: void wait(long)>($l2);
+
+     label06:
+        goto label09;
+
+     label07:
+        $r2 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label08:
+        goto label01;
+
+     label09:
+        exitmonitor $r4;
+
+     label10:
+        goto label13;
+
+     label11:
+        $r1 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label12:
+        throw $r1;
+
+     label13:
+        goto label01;
+
+        catch java.lang.InterruptedException from label05 to label06 with label07;
+        catch java.lang.Throwable from label02 to label03 with label11;
+        catch java.lang.Throwable from label04 to label08 with label11;
+        catch java.lang.Throwable from label09 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+    }
+
+    private void <init>(java.lang.ThreadGroup)
+    {
+        sun.misc.GC$Daemon r0;
+        java.lang.ThreadGroup r1;
+
+        r0 := @this: sun.misc.GC$Daemon;
+
+        r1 := @parameter0: java.lang.ThreadGroup;
+
+        specialinvoke r0.<java.lang.Thread: void <init>(java.lang.ThreadGroup,java.lang.String)>(r1, "GC Daemon");
+
+        return;
+    }
+
+    public static void create()
+    {
+        sun.misc.GC$Daemon$1 $r0;
+
+        $r0 = new sun.misc.GC$Daemon$1;
+
+        specialinvoke $r0.<sun.misc.GC$Daemon$1: void <init>()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        return;
+    }
+
+    void <init>(java.lang.ThreadGroup, sun.misc.GC$1)
+    {
+        sun.misc.GC$Daemon r0;
+        sun.misc.GC$1 r2;
+        java.lang.ThreadGroup r1;
+
+        r0 := @this: sun.misc.GC$Daemon;
+
+        r1 := @parameter0: java.lang.ThreadGroup;
+
+        r2 := @parameter1: sun.misc.GC$1;
+
+        specialinvoke r0.<sun.misc.GC$Daemon: void <init>(java.lang.ThreadGroup)>(r1);
+
+        return;
+    }
+}

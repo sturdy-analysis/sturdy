@@ -1,0 +1,173 @@
+class sun.security.krb5.internal.UDPClient extends sun.security.krb5.internal.NetClient
+{
+    java.net.InetAddress iaddr;
+    int iport;
+    int bufSize;
+    java.net.DatagramSocket dgSocket;
+    java.net.DatagramPacket dgPacketIn;
+
+    void <init>(java.lang.String, int, int) throws java.net.UnknownHostException, java.net.SocketException
+    {
+        sun.security.krb5.internal.UDPClient r0;
+        java.net.InetAddress $r2, $r5;
+        java.net.DatagramSocket $r4, $r6, $r7;
+        int i0, i1, $i2, $i4;
+        java.lang.String r1;
+
+        r0 := @this: sun.security.krb5.internal.UDPClient;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<sun.security.krb5.internal.NetClient: void <init>()>();
+
+        $i4 = (int) 65507;
+
+        r0.<sun.security.krb5.internal.UDPClient: int bufSize> = $i4;
+
+        $r2 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByName(java.lang.String)>(r1);
+
+        r0.<sun.security.krb5.internal.UDPClient: java.net.InetAddress iaddr> = $r2;
+
+        r0.<sun.security.krb5.internal.UDPClient: int iport> = i0;
+
+        $r7 = new java.net.DatagramSocket;
+
+        specialinvoke $r7.<java.net.DatagramSocket: void <init>()>();
+
+        r0.<sun.security.krb5.internal.UDPClient: java.net.DatagramSocket dgSocket> = $r7;
+
+        $r4 = r0.<sun.security.krb5.internal.UDPClient: java.net.DatagramSocket dgSocket>;
+
+        virtualinvoke $r4.<java.net.DatagramSocket: void setSoTimeout(int)>(i1);
+
+        $r6 = r0.<sun.security.krb5.internal.UDPClient: java.net.DatagramSocket dgSocket>;
+
+        $r5 = r0.<sun.security.krb5.internal.UDPClient: java.net.InetAddress iaddr>;
+
+        $i2 = r0.<sun.security.krb5.internal.UDPClient: int iport>;
+
+        virtualinvoke $r6.<java.net.DatagramSocket: void connect(java.net.InetAddress,int)>($r5, $i2);
+
+        return;
+    }
+
+    public void send(byte[]) throws java.io.IOException
+    {
+        java.net.InetAddress $r3;
+        java.net.DatagramSocket $r4;
+        byte[] r1;
+        sun.security.krb5.internal.UDPClient r2;
+        int $i0, $i1;
+        java.net.DatagramPacket $r0;
+
+        r2 := @this: sun.security.krb5.internal.UDPClient;
+
+        r1 := @parameter0: byte[];
+
+        $r0 = new java.net.DatagramPacket;
+
+        $i1 = lengthof r1;
+
+        $r3 = r2.<sun.security.krb5.internal.UDPClient: java.net.InetAddress iaddr>;
+
+        $i0 = r2.<sun.security.krb5.internal.UDPClient: int iport>;
+
+        specialinvoke $r0.<java.net.DatagramPacket: void <init>(byte[],int,java.net.InetAddress,int)>(r1, $i1, $r3, $i0);
+
+        $r4 = r2.<sun.security.krb5.internal.UDPClient: java.net.DatagramSocket dgSocket>;
+
+        virtualinvoke $r4.<java.net.DatagramSocket: void send(java.net.DatagramPacket)>($r0);
+
+        return;
+    }
+
+    public byte[] receive() throws java.io.IOException
+    {
+        byte[] r1, $r7, $r12;
+        sun.security.krb5.internal.UDPClient r0;
+        java.net.DatagramSocket $r4, $r11;
+        java.net.SocketException $r9;
+        int $i0, $i1, $i2, $i3;
+        boolean $z0;
+        java.net.DatagramPacket $r2, $r3, $r5, $r6, $r8, $r10;
+
+        r0 := @this: sun.security.krb5.internal.UDPClient;
+
+        $i0 = r0.<sun.security.krb5.internal.UDPClient: int bufSize>;
+
+        r1 = newarray (byte)[$i0];
+
+        $r2 = new java.net.DatagramPacket;
+
+        $i1 = lengthof r1;
+
+        specialinvoke $r2.<java.net.DatagramPacket: void <init>(byte[],int)>(r1, $i1);
+
+        r0.<sun.security.krb5.internal.UDPClient: java.net.DatagramPacket dgPacketIn> = $r2;
+
+     label1:
+        $r4 = r0.<sun.security.krb5.internal.UDPClient: java.net.DatagramSocket dgSocket>;
+
+        $r3 = r0.<sun.security.krb5.internal.UDPClient: java.net.DatagramPacket dgPacketIn>;
+
+        virtualinvoke $r4.<java.net.DatagramSocket: void receive(java.net.DatagramPacket)>($r3);
+
+     label2:
+        goto label5;
+
+     label3:
+        $r9 := @caughtexception;
+
+        $z0 = $r9 instanceof java.net.PortUnreachableException;
+
+        if $z0 == 0 goto label4;
+
+        throw $r9;
+
+     label4:
+        $r11 = r0.<sun.security.krb5.internal.UDPClient: java.net.DatagramSocket dgSocket>;
+
+        $r10 = r0.<sun.security.krb5.internal.UDPClient: java.net.DatagramPacket dgPacketIn>;
+
+        virtualinvoke $r11.<java.net.DatagramSocket: void receive(java.net.DatagramPacket)>($r10);
+
+     label5:
+        $r5 = r0.<sun.security.krb5.internal.UDPClient: java.net.DatagramPacket dgPacketIn>;
+
+        $i2 = virtualinvoke $r5.<java.net.DatagramPacket: int getLength()>();
+
+        $r12 = newarray (byte)[$i2];
+
+        $r6 = r0.<sun.security.krb5.internal.UDPClient: java.net.DatagramPacket dgPacketIn>;
+
+        $r7 = virtualinvoke $r6.<java.net.DatagramPacket: byte[] getData()>();
+
+        $r8 = r0.<sun.security.krb5.internal.UDPClient: java.net.DatagramPacket dgPacketIn>;
+
+        $i3 = virtualinvoke $r8.<java.net.DatagramPacket: int getLength()>();
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r7, 0, $r12, 0, $i3);
+
+        return $r12;
+
+        catch java.net.SocketException from label1 to label2 with label3;
+    }
+
+    public void close()
+    {
+        sun.security.krb5.internal.UDPClient r0;
+        java.net.DatagramSocket $r1;
+
+        r0 := @this: sun.security.krb5.internal.UDPClient;
+
+        $r1 = r0.<sun.security.krb5.internal.UDPClient: java.net.DatagramSocket dgSocket>;
+
+        virtualinvoke $r1.<java.net.DatagramSocket: void close()>();
+
+        return;
+    }
+}

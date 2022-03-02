@@ -1,0 +1,106 @@
+public final class sun.security.validator.TrustStoreUtil extends java.lang.Object
+{
+
+    private void <init>()
+    {
+        sun.security.validator.TrustStoreUtil r0;
+
+        r0 := @this: sun.security.validator.TrustStoreUtil;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static java.util.Set getTrustedCerts(java.security.KeyStore)
+    {
+        java.security.cert.X509Certificate $r9, $r11;
+        java.util.Enumeration $r2;
+        java.security.KeyStoreException $r12;
+        java.util.HashSet $r0;
+        int $i0;
+        java.lang.String r5;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.util.Set $r3;
+        java.security.KeyStore r1;
+        java.security.cert.Certificate $r7, $r8, $r10;
+        java.lang.Object $r4;
+        java.security.cert.Certificate[] $r6;
+
+        r1 := @parameter0: java.security.KeyStore;
+
+        $r0 = new java.util.HashSet;
+
+        specialinvoke $r0.<java.util.HashSet: void <init>()>();
+
+     label1:
+        $r2 = virtualinvoke r1.<java.security.KeyStore: java.util.Enumeration aliases()>();
+
+     label2:
+        $z0 = interfaceinvoke $r2.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label6;
+
+        $r4 = interfaceinvoke $r2.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r5 = (java.lang.String) $r4;
+
+        $z1 = virtualinvoke r1.<java.security.KeyStore: boolean isCertificateEntry(java.lang.String)>(r5);
+
+        if $z1 == 0 goto label4;
+
+        $r10 = virtualinvoke r1.<java.security.KeyStore: java.security.cert.Certificate getCertificate(java.lang.String)>(r5);
+
+        $z4 = $r10 instanceof java.security.cert.X509Certificate;
+
+        if $z4 == 0 goto label3;
+
+        $r11 = (java.security.cert.X509Certificate) $r10;
+
+        interfaceinvoke $r0.<java.util.Set: boolean add(java.lang.Object)>($r11);
+
+     label3:
+        goto label5;
+
+     label4:
+        $z2 = virtualinvoke r1.<java.security.KeyStore: boolean isKeyEntry(java.lang.String)>(r5);
+
+        if $z2 == 0 goto label5;
+
+        $r6 = virtualinvoke r1.<java.security.KeyStore: java.security.cert.Certificate[] getCertificateChain(java.lang.String)>(r5);
+
+        if $r6 == null goto label5;
+
+        $i0 = lengthof $r6;
+
+        if $i0 <= 0 goto label5;
+
+        $r7 = $r6[0];
+
+        $z3 = $r7 instanceof java.security.cert.X509Certificate;
+
+        if $z3 == 0 goto label5;
+
+        $r8 = $r6[0];
+
+        $r9 = (java.security.cert.X509Certificate) $r8;
+
+        interfaceinvoke $r0.<java.util.Set: boolean add(java.lang.Object)>($r9);
+
+     label5:
+        goto label2;
+
+     label6:
+        goto label8;
+
+     label7:
+        $r12 := @caughtexception;
+
+     label8:
+        $r3 = staticinvoke <java.util.Collections: java.util.Set unmodifiableSet(java.util.Set)>($r0);
+
+        return $r3;
+
+        catch java.security.KeyStoreException from label1 to label6 with label7;
+    }
+}

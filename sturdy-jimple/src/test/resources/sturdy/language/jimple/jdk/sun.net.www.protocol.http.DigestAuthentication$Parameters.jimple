@@ -1,0 +1,390 @@
+class sun.net.www.protocol.http.DigestAuthentication$Parameters extends java.lang.Object implements java.io.Serializable
+{
+    private static final long serialVersionUID;
+    private boolean serverQop;
+    private java.lang.String opaque;
+    private java.lang.String cnonce;
+    private java.lang.String nonce;
+    private java.lang.String algorithm;
+    private int NCcount;
+    private java.lang.String cachedHA1;
+    private boolean redoCachedHA1;
+    private static final int cnonceRepeat;
+    private static final int cnoncelen;
+    private static java.util.Random random;
+    int cnonce_count;
+
+    void <init>()
+    {
+        sun.net.www.protocol.http.DigestAuthentication$Parameters r0;
+
+        r0 := @this: sun.net.www.protocol.http.DigestAuthentication$Parameters;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: int NCcount> = 0;
+
+        r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: boolean redoCachedHA1> = 1;
+
+        r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: int cnonce_count> = 0;
+
+        r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: boolean serverQop> = 0;
+
+        r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: java.lang.String opaque> = null;
+
+        r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: java.lang.String algorithm> = null;
+
+        r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: java.lang.String cachedHA1> = null;
+
+        r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: java.lang.String nonce> = null;
+
+        virtualinvoke r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: void setNewCnonce()>();
+
+        return;
+    }
+
+    boolean authQop()
+    {
+        sun.net.www.protocol.http.DigestAuthentication$Parameters r0;
+        boolean $z0;
+
+        r0 := @this: sun.net.www.protocol.http.DigestAuthentication$Parameters;
+
+        $z0 = r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: boolean serverQop>;
+
+        return $z0;
+    }
+
+    synchronized void incrementNC()
+    {
+        sun.net.www.protocol.http.DigestAuthentication$Parameters r0;
+        int $i0, $i1;
+
+        r0 := @this: sun.net.www.protocol.http.DigestAuthentication$Parameters;
+
+        $i0 = r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: int NCcount>;
+
+        $i1 = $i0 + 1;
+
+        r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: int NCcount> = $i1;
+
+        return;
+    }
+
+    synchronized int getNCCount()
+    {
+        sun.net.www.protocol.http.DigestAuthentication$Parameters r0;
+        int $i0;
+
+        r0 := @this: sun.net.www.protocol.http.DigestAuthentication$Parameters;
+
+        $i0 = r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: int NCcount>;
+
+        return $i0;
+    }
+
+    synchronized java.lang.String getCnonce()
+    {
+        sun.net.www.protocol.http.DigestAuthentication$Parameters r0;
+        int $i0, $i1, $i2;
+        java.lang.String $r1;
+
+        r0 := @this: sun.net.www.protocol.http.DigestAuthentication$Parameters;
+
+        $i0 = r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: int cnonce_count>;
+
+        if $i0 < 5 goto label1;
+
+        virtualinvoke r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: void setNewCnonce()>();
+
+     label1:
+        $i1 = r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: int cnonce_count>;
+
+        $i2 = $i1 + 1;
+
+        r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: int cnonce_count> = $i2;
+
+        $r1 = r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: java.lang.String cnonce>;
+
+        return $r1;
+    }
+
+    synchronized void setNewCnonce()
+    {
+        byte[] r0;
+        java.util.Random $r2;
+        byte $b0;
+        int i1, $i2, $i3, $i5, $i6, $i7, $i8, $i10, i11, $i12;
+        java.lang.String $r5;
+        sun.net.www.protocol.http.DigestAuthentication$Parameters r3;
+        char $c4, $c9;
+        char[] r1;
+
+        r3 := @this: sun.net.www.protocol.http.DigestAuthentication$Parameters;
+
+        r0 = newarray (byte)[20];
+
+        r1 = newarray (char)[40];
+
+        $r2 = <sun.net.www.protocol.http.DigestAuthentication$Parameters: java.util.Random random>;
+
+        virtualinvoke $r2.<java.util.Random: void nextBytes(byte[])>(r0);
+
+        i11 = 0;
+
+     label1:
+        if i11 >= 20 goto label2;
+
+        $b0 = r0[i11];
+
+        $i12 = (int) $b0;
+
+        i1 = $i12 + 128;
+
+        $i5 = i11 * 2;
+
+        $i2 = i1 / 16;
+
+        $i3 = 65 + $i2;
+
+        $c4 = (char) $i3;
+
+        r1[$i5] = $c4;
+
+        $i6 = i11 * 2;
+
+        $i10 = $i6 + 1;
+
+        $i7 = i1 % 16;
+
+        $i8 = 65 + $i7;
+
+        $c9 = (char) $i8;
+
+        r1[$i10] = $c9;
+
+        i11 = i11 + 1;
+
+        goto label1;
+
+     label2:
+        $r5 = new java.lang.String;
+
+        specialinvoke $r5.<java.lang.String: void <init>(char[],int,int)>(r1, 0, 40);
+
+        r3.<sun.net.www.protocol.http.DigestAuthentication$Parameters: java.lang.String cnonce> = $r5;
+
+        r3.<sun.net.www.protocol.http.DigestAuthentication$Parameters: int cnonce_count> = 0;
+
+        r3.<sun.net.www.protocol.http.DigestAuthentication$Parameters: boolean redoCachedHA1> = 1;
+
+        return;
+    }
+
+    synchronized void setQop(java.lang.String)
+    {
+        java.util.StringTokenizer $r2;
+        sun.net.www.protocol.http.DigestAuthentication$Parameters r1;
+        java.lang.String r0, $r3;
+        boolean $z0, $z1;
+
+        r1 := @this: sun.net.www.protocol.http.DigestAuthentication$Parameters;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 == null goto label2;
+
+        $r2 = new java.util.StringTokenizer;
+
+        specialinvoke $r2.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>(r0, " ");
+
+     label1:
+        $z0 = virtualinvoke $r2.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("auth");
+
+        if $z1 == 0 goto label1;
+
+        r1.<sun.net.www.protocol.http.DigestAuthentication$Parameters: boolean serverQop> = 1;
+
+        return;
+
+     label2:
+        r1.<sun.net.www.protocol.http.DigestAuthentication$Parameters: boolean serverQop> = 0;
+
+        return;
+    }
+
+    synchronized java.lang.String getOpaque()
+    {
+        sun.net.www.protocol.http.DigestAuthentication$Parameters r0;
+        java.lang.String $r1;
+
+        r0 := @this: sun.net.www.protocol.http.DigestAuthentication$Parameters;
+
+        $r1 = r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: java.lang.String opaque>;
+
+        return $r1;
+    }
+
+    synchronized void setOpaque(java.lang.String)
+    {
+        sun.net.www.protocol.http.DigestAuthentication$Parameters r0;
+        java.lang.String r1;
+
+        r0 := @this: sun.net.www.protocol.http.DigestAuthentication$Parameters;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: java.lang.String opaque> = r1;
+
+        return;
+    }
+
+    synchronized java.lang.String getNonce()
+    {
+        sun.net.www.protocol.http.DigestAuthentication$Parameters r0;
+        java.lang.String $r1;
+
+        r0 := @this: sun.net.www.protocol.http.DigestAuthentication$Parameters;
+
+        $r1 = r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: java.lang.String nonce>;
+
+        return $r1;
+    }
+
+    synchronized void setNonce(java.lang.String)
+    {
+        sun.net.www.protocol.http.DigestAuthentication$Parameters r1;
+        java.lang.String r0, $r2;
+        boolean $z0;
+
+        r1 := @this: sun.net.www.protocol.http.DigestAuthentication$Parameters;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r2 = r1.<sun.net.www.protocol.http.DigestAuthentication$Parameters: java.lang.String nonce>;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 != 0 goto label1;
+
+        r1.<sun.net.www.protocol.http.DigestAuthentication$Parameters: java.lang.String nonce> = r0;
+
+        r1.<sun.net.www.protocol.http.DigestAuthentication$Parameters: int NCcount> = 0;
+
+        r1.<sun.net.www.protocol.http.DigestAuthentication$Parameters: boolean redoCachedHA1> = 1;
+
+     label1:
+        return;
+    }
+
+    synchronized java.lang.String getCachedHA1()
+    {
+        sun.net.www.protocol.http.DigestAuthentication$Parameters r0;
+        java.lang.String $r1;
+        boolean $z0;
+
+        r0 := @this: sun.net.www.protocol.http.DigestAuthentication$Parameters;
+
+        $z0 = r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: boolean redoCachedHA1>;
+
+        if $z0 == 0 goto label1;
+
+        return null;
+
+     label1:
+        $r1 = r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: java.lang.String cachedHA1>;
+
+        return $r1;
+    }
+
+    synchronized void setCachedHA1(java.lang.String)
+    {
+        sun.net.www.protocol.http.DigestAuthentication$Parameters r0;
+        java.lang.String r1;
+
+        r0 := @this: sun.net.www.protocol.http.DigestAuthentication$Parameters;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: java.lang.String cachedHA1> = r1;
+
+        r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: boolean redoCachedHA1> = 0;
+
+        return;
+    }
+
+    synchronized java.lang.String getAlgorithm()
+    {
+        sun.net.www.protocol.http.DigestAuthentication$Parameters r0;
+        java.lang.String $r1;
+
+        r0 := @this: sun.net.www.protocol.http.DigestAuthentication$Parameters;
+
+        $r1 = r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: java.lang.String algorithm>;
+
+        return $r1;
+    }
+
+    synchronized void setAlgorithm(java.lang.String)
+    {
+        sun.net.www.protocol.http.DigestAuthentication$Parameters r0;
+        java.lang.String r1;
+
+        r0 := @this: sun.net.www.protocol.http.DigestAuthentication$Parameters;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: java.lang.String algorithm> = r1;
+
+        return;
+    }
+
+    static java.lang.String access$000(sun.net.www.protocol.http.DigestAuthentication$Parameters)
+    {
+        sun.net.www.protocol.http.DigestAuthentication$Parameters r0;
+        java.lang.String $r1;
+
+        r0 := @parameter0: sun.net.www.protocol.http.DigestAuthentication$Parameters;
+
+        $r1 = r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: java.lang.String nonce>;
+
+        return $r1;
+    }
+
+    static java.lang.String access$100(sun.net.www.protocol.http.DigestAuthentication$Parameters)
+    {
+        sun.net.www.protocol.http.DigestAuthentication$Parameters r0;
+        java.lang.String $r1;
+
+        r0 := @parameter0: sun.net.www.protocol.http.DigestAuthentication$Parameters;
+
+        $r1 = r0.<sun.net.www.protocol.http.DigestAuthentication$Parameters: java.lang.String cnonce>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        java.util.Random $r0;
+
+        <sun.net.www.protocol.http.DigestAuthentication$Parameters: int cnoncelen> = 40;
+
+        <sun.net.www.protocol.http.DigestAuthentication$Parameters: int cnonceRepeat> = 5;
+
+        <sun.net.www.protocol.http.DigestAuthentication$Parameters: long serialVersionUID> = -3584543755194526252L;
+
+        $r0 = new java.util.Random;
+
+        specialinvoke $r0.<java.util.Random: void <init>()>();
+
+        <sun.net.www.protocol.http.DigestAuthentication$Parameters: java.util.Random random> = $r0;
+
+        return;
+    }
+}

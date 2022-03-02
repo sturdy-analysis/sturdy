@@ -1,0 +1,269 @@
+public class sun.security.provider.certpath.CollectionCertStore extends java.security.cert.CertStoreSpi
+{
+    private java.util.Collection coll;
+
+    public void <init>(java.security.cert.CertStoreParameters) throws java.security.InvalidAlgorithmParameterException
+    {
+        java.security.cert.CollectionCertStoreParameters $r2;
+        java.security.cert.CertStoreParameters r1;
+        sun.security.provider.certpath.CollectionCertStore r0;
+        java.util.Collection $r3;
+        boolean $z0;
+        java.security.InvalidAlgorithmParameterException $r4;
+
+        r0 := @this: sun.security.provider.certpath.CollectionCertStore;
+
+        r1 := @parameter0: java.security.cert.CertStoreParameters;
+
+        specialinvoke r0.<java.security.cert.CertStoreSpi: void <init>(java.security.cert.CertStoreParameters)>(r1);
+
+        $z0 = r1 instanceof java.security.cert.CollectionCertStoreParameters;
+
+        if $z0 != 0 goto label1;
+
+        $r4 = new java.security.InvalidAlgorithmParameterException;
+
+        specialinvoke $r4.<java.security.InvalidAlgorithmParameterException: void <init>(java.lang.String)>("parameters must be CollectionCertStoreParameters");
+
+        throw $r4;
+
+     label1:
+        $r2 = (java.security.cert.CollectionCertStoreParameters) r1;
+
+        $r3 = virtualinvoke $r2.<java.security.cert.CollectionCertStoreParameters: java.util.Collection getCollection()>();
+
+        r0.<sun.security.provider.certpath.CollectionCertStore: java.util.Collection coll> = $r3;
+
+        return;
+    }
+
+    public java.util.Collection engineGetCertificates(java.security.cert.CertSelector) throws java.security.cert.CertStoreException
+    {
+        sun.security.provider.certpath.CollectionCertStore r0;
+        java.util.HashSet $r3;
+        int i0;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.util.Iterator $r6, $r10;
+        java.util.Collection $r1, $r5, $r9;
+        java.security.cert.CertSelector r4;
+        java.security.cert.CertStoreException $r14;
+        java.security.cert.Certificate $r8, $r12, $r13;
+        java.lang.Object $r7, $r11;
+        java.util.ConcurrentModificationException $r2, $r15;
+
+        r0 := @this: sun.security.provider.certpath.CollectionCertStore;
+
+        r4 := @parameter0: java.security.cert.CertSelector;
+
+        $r1 = r0.<sun.security.provider.certpath.CollectionCertStore: java.util.Collection coll>;
+
+        if $r1 != null goto label01;
+
+        $r14 = new java.security.cert.CertStoreException;
+
+        specialinvoke $r14.<java.security.cert.CertStoreException: void <init>(java.lang.String)>("Collection is null");
+
+        throw $r14;
+
+     label01:
+        i0 = 0;
+
+     label02:
+        if i0 >= 10 goto label12;
+
+     label03:
+        $r3 = new java.util.HashSet;
+
+        specialinvoke $r3.<java.util.HashSet: void <init>()>();
+
+        if r4 == null goto label07;
+
+        $r9 = r0.<sun.security.provider.certpath.CollectionCertStore: java.util.Collection coll>;
+
+        $r10 = interfaceinvoke $r9.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label04:
+        $z2 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label06;
+
+        $r11 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        $z3 = $r11 instanceof java.security.cert.Certificate;
+
+        if $z3 == 0 goto label05;
+
+        $r12 = (java.security.cert.Certificate) $r11;
+
+        $z4 = interfaceinvoke r4.<java.security.cert.CertSelector: boolean match(java.security.cert.Certificate)>($r12);
+
+        if $z4 == 0 goto label05;
+
+        $r13 = (java.security.cert.Certificate) $r11;
+
+        virtualinvoke $r3.<java.util.HashSet: boolean add(java.lang.Object)>($r13);
+
+     label05:
+        goto label04;
+
+     label06:
+        goto label10;
+
+     label07:
+        $r5 = r0.<sun.security.provider.certpath.CollectionCertStore: java.util.Collection coll>;
+
+        $r6 = interfaceinvoke $r5.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label08:
+        $z0 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label10;
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        $z1 = $r7 instanceof java.security.cert.Certificate;
+
+        if $z1 == 0 goto label09;
+
+        $r8 = (java.security.cert.Certificate) $r7;
+
+        virtualinvoke $r3.<java.util.HashSet: boolean add(java.lang.Object)>($r8);
+
+     label09:
+        goto label08;
+
+     label10:
+        return $r3;
+
+     label11:
+        $r15 := @caughtexception;
+
+        i0 = i0 + 1;
+
+        goto label02;
+
+     label12:
+        $r2 = new java.util.ConcurrentModificationException;
+
+        specialinvoke $r2.<java.util.ConcurrentModificationException: void <init>(java.lang.String)>("Too many ConcurrentModificationExceptions");
+
+        throw $r2;
+
+        catch java.util.ConcurrentModificationException from label03 to label10 with label11;
+    }
+
+    public java.util.Collection engineGetCRLs(java.security.cert.CRLSelector) throws java.security.cert.CertStoreException
+    {
+        sun.security.provider.certpath.CollectionCertStore r0;
+        java.util.HashSet $r3;
+        java.security.cert.CRLSelector r4;
+        int i0;
+        java.security.cert.CRL $r8, $r12, $r13;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.util.Iterator $r6, $r10;
+        java.util.Collection $r1, $r5, $r9;
+        java.security.cert.CertStoreException $r14;
+        java.lang.Object $r7, $r11;
+        java.util.ConcurrentModificationException $r2, $r15;
+
+        r0 := @this: sun.security.provider.certpath.CollectionCertStore;
+
+        r4 := @parameter0: java.security.cert.CRLSelector;
+
+        $r1 = r0.<sun.security.provider.certpath.CollectionCertStore: java.util.Collection coll>;
+
+        if $r1 != null goto label01;
+
+        $r14 = new java.security.cert.CertStoreException;
+
+        specialinvoke $r14.<java.security.cert.CertStoreException: void <init>(java.lang.String)>("Collection is null");
+
+        throw $r14;
+
+     label01:
+        i0 = 0;
+
+     label02:
+        if i0 >= 10 goto label12;
+
+     label03:
+        $r3 = new java.util.HashSet;
+
+        specialinvoke $r3.<java.util.HashSet: void <init>()>();
+
+        if r4 == null goto label07;
+
+        $r9 = r0.<sun.security.provider.certpath.CollectionCertStore: java.util.Collection coll>;
+
+        $r10 = interfaceinvoke $r9.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label04:
+        $z2 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label06;
+
+        $r11 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        $z3 = $r11 instanceof java.security.cert.CRL;
+
+        if $z3 == 0 goto label05;
+
+        $r12 = (java.security.cert.CRL) $r11;
+
+        $z4 = interfaceinvoke r4.<java.security.cert.CRLSelector: boolean match(java.security.cert.CRL)>($r12);
+
+        if $z4 == 0 goto label05;
+
+        $r13 = (java.security.cert.CRL) $r11;
+
+        virtualinvoke $r3.<java.util.HashSet: boolean add(java.lang.Object)>($r13);
+
+     label05:
+        goto label04;
+
+     label06:
+        goto label10;
+
+     label07:
+        $r5 = r0.<sun.security.provider.certpath.CollectionCertStore: java.util.Collection coll>;
+
+        $r6 = interfaceinvoke $r5.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label08:
+        $z0 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label10;
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        $z1 = $r7 instanceof java.security.cert.CRL;
+
+        if $z1 == 0 goto label09;
+
+        $r8 = (java.security.cert.CRL) $r7;
+
+        virtualinvoke $r3.<java.util.HashSet: boolean add(java.lang.Object)>($r8);
+
+     label09:
+        goto label08;
+
+     label10:
+        return $r3;
+
+     label11:
+        $r15 := @caughtexception;
+
+        i0 = i0 + 1;
+
+        goto label02;
+
+     label12:
+        $r2 = new java.util.ConcurrentModificationException;
+
+        specialinvoke $r2.<java.util.ConcurrentModificationException: void <init>(java.lang.String)>("Too many ConcurrentModificationExceptions");
+
+        throw $r2;
+
+        catch java.util.ConcurrentModificationException from label03 to label10 with label11;
+    }
+}

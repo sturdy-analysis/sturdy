@@ -1,0 +1,381 @@
+final class com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap extends java.lang.Object
+{
+    private static final int CHUNK_SHIFT;
+    private static final int CHUNK_SIZE;
+    private static final int CHUNK_MASK;
+    private static final int INITIAL_CHUNK_COUNT;
+    private static int[][][] caseInsensitiveMap;
+    private static final int LOWER_CASE_MATCH;
+    private static final int UPPER_CASE_MATCH;
+
+    void <init>()
+    {
+        com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static int[] get(int)
+    {
+        int i0;
+        int[] $r0;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 65536 goto label1;
+
+        $r0 = staticinvoke <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: int[] getMapping(int)>(i0);
+
+        goto label2;
+
+     label1:
+        $r0 = null;
+
+     label2:
+        return $r0;
+    }
+
+    private static int[] getMapping(int)
+    {
+        int[][] $r1;
+        int[][][] $r0;
+        int[] $r2;
+        int i0, i1, i2;
+
+        i0 := @parameter0: int;
+
+        i1 = i0 >>> 10;
+
+        i2 = i0 & 1023;
+
+        $r0 = <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: int[][][] caseInsensitiveMap>;
+
+        $r1 = $r0[i1];
+
+        $r2 = $r1[i2];
+
+        return $r2;
+    }
+
+    private static void buildCaseInsensitiveMap()
+    {
+        int[][][] $r0;
+        byte b4, b6, b7, b8;
+        int[] $r1, $r2, $r3, r4;
+        int $i0, $i1, $i2, i3, i5;
+
+        $r0 = newmultiarray (int)[64][1024][];
+
+        <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: int[][][] caseInsensitiveMap> = $r0;
+
+        i3 = 0;
+
+     label1:
+        if i3 >= 65536 goto label7;
+
+        $i0 = staticinvoke <java.lang.Character: int toLowerCase(int)>(i3);
+
+        $i1 = staticinvoke <java.lang.Character: int toUpperCase(int)>(i3);
+
+        if $i0 != $i1 goto label2;
+
+        if $i0 == i3 goto label6;
+
+     label2:
+        $r3 = newarray (int)[2];
+
+        r4 = $r3;
+
+        b4 = 0;
+
+        b8 = 0;
+
+        b7 = 0;
+
+        b6 = 0;
+
+        if $i0 == i3 goto label3;
+
+        $r3[0] = $i0;
+
+        b4 = 2;
+
+        b8 = 2;
+
+        b7 = 2;
+
+        b6 = 2;
+
+        $r3[1] = 1;
+
+        $r2 = staticinvoke <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: int[] getMapping(int)>($i0);
+
+        if $r2 == null goto label3;
+
+        r4 = staticinvoke <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: int[] updateMap(int,int[],int,int[],int)>(i3, $r3, $i0, $r2, 1);
+
+     label3:
+        if $i1 == i3 goto label5;
+
+        $i2 = lengthof r4;
+
+        if b7 != $i2 goto label4;
+
+        r4 = staticinvoke <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: int[] expandMap(int[],int)>(r4, 2);
+
+     label4:
+        i5 = b6 + 1;
+
+        r4[b8] = $i1;
+
+        r4[i5] = 2;
+
+        $r1 = staticinvoke <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: int[] getMapping(int)>($i1);
+
+        if $r1 == null goto label5;
+
+        r4 = staticinvoke <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: int[] updateMap(int,int[],int,int[],int)>(i3, r4, $i1, $r1, 2);
+
+     label5:
+        staticinvoke <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: void set(int,int[])>(i3, r4);
+
+     label6:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label7:
+        return;
+    }
+
+    private static int[] expandMap(int[], int)
+    {
+        int[] r0, r1;
+        int i0, i1, $i2;
+
+        r0 := @parameter0: int[];
+
+        i1 := @parameter1: int;
+
+        i0 = lengthof r0;
+
+        $i2 = i0 + i1;
+
+        r1 = newarray (int)[$i2];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, 0, r1, 0, i0);
+
+        return r1;
+    }
+
+    private static void set(int, int[])
+    {
+        int[][] $r2;
+        int[][][] $r0;
+        int[] r1;
+        int i0, i1, i2;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: int[];
+
+        i1 = i0 >>> 10;
+
+        i2 = i0 & 1023;
+
+        $r0 = <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: int[][][] caseInsensitiveMap>;
+
+        $r2 = $r0[i1];
+
+        $r2[i2] = r1;
+
+        return;
+    }
+
+    private static int[] updateMap(int, int[], int, int[], int)
+    {
+        int[] $r0, $r1, $r2, r3, r4;
+        int $i0, i1, i2, i3, i4, i5;
+        boolean $z0, $z1, $z2, $z3;
+
+        i1 := @parameter0: int;
+
+        r3 := @parameter1: int[];
+
+        i3 := @parameter2: int;
+
+        r4 := @parameter3: int[];
+
+        i2 := @parameter4: int;
+
+        i5 = 0;
+
+     label1:
+        $i0 = lengthof r4;
+
+        if i5 >= $i0 goto label4;
+
+        i4 = r4[i5];
+
+        $r1 = staticinvoke <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: int[] getMapping(int)>(i4);
+
+        if $r1 == null goto label3;
+
+        $z1 = staticinvoke <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: boolean contains(int[],int,int)>($r1, i3, i2);
+
+        if $z1 == 0 goto label3;
+
+        $z2 = staticinvoke <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: boolean contains(int[],int)>($r1, i1);
+
+        if $z2 != 0 goto label2;
+
+        $r2 = staticinvoke <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: int[] expandAndAdd(int[],int,int)>($r1, i1, i2);
+
+        staticinvoke <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: void set(int,int[])>(i4, $r2);
+
+     label2:
+        $z3 = staticinvoke <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: boolean contains(int[],int)>(r3, i4);
+
+        if $z3 != 0 goto label3;
+
+        r3 = staticinvoke <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: int[] expandAndAdd(int[],int,int)>(r3, i4, i2);
+
+     label3:
+        i5 = i5 + 2;
+
+        goto label1;
+
+     label4:
+        $z0 = staticinvoke <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: boolean contains(int[],int)>(r4, i1);
+
+        if $z0 != 0 goto label5;
+
+        $r0 = staticinvoke <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: int[] expandAndAdd(int[],int,int)>(r4, i1, i2);
+
+        staticinvoke <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: void set(int,int[])>(i3, $r0);
+
+     label5:
+        return r3;
+    }
+
+    private static boolean contains(int[], int)
+    {
+        int[] r0;
+        int $i0, i1, $i2, i3;
+
+        r0 := @parameter0: int[];
+
+        i1 := @parameter1: int;
+
+        i3 = 0;
+
+     label1:
+        $i0 = lengthof r0;
+
+        if i3 >= $i0 goto label3;
+
+        $i2 = r0[i3];
+
+        if $i2 != i1 goto label2;
+
+        return 1;
+
+     label2:
+        i3 = i3 + 2;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    private static boolean contains(int[], int, int)
+    {
+        int[] r0;
+        int $i0, i1, $i2, $i3, i4, $i5, i6;
+
+        r0 := @parameter0: int[];
+
+        i1 := @parameter1: int;
+
+        i4 := @parameter2: int;
+
+        i6 = 0;
+
+     label1:
+        $i0 = lengthof r0;
+
+        if i6 >= $i0 goto label3;
+
+        $i2 = r0[i6];
+
+        if $i2 != i1 goto label2;
+
+        $i3 = i6 + 1;
+
+        $i5 = r0[$i3];
+
+        if $i5 != i4 goto label2;
+
+        return 1;
+
+     label2:
+        i6 = i6 + 2;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    private static int[] expandAndAdd(int[], int, int)
+    {
+        int[] r0, r1;
+        int i0, $i1, i2, i3, $i4;
+
+        r0 := @parameter0: int[];
+
+        i2 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        i0 = lengthof r0;
+
+        $i1 = i0 + 2;
+
+        r1 = newarray (int)[$i1];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, 0, r1, 0, i0);
+
+        r1[i0] = i2;
+
+        $i4 = i0 + 1;
+
+        r1[$i4] = i3;
+
+        return r1;
+    }
+
+    static void <clinit>()
+    {
+        <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: int UPPER_CASE_MATCH> = 2;
+
+        <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: int LOWER_CASE_MATCH> = 1;
+
+        <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: int INITIAL_CHUNK_COUNT> = 64;
+
+        <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: int CHUNK_MASK> = 1023;
+
+        <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: int CHUNK_SIZE> = 1024;
+
+        <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: int CHUNK_SHIFT> = 10;
+
+        staticinvoke <com.sun.org.apache.xerces.internal.impl.xpath.regex.CaseInsensitiveMap: void buildCaseInsensitiveMap()>();
+
+        return;
+    }
+}

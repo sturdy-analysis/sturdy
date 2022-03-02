@@ -1,0 +1,2301 @@
+class sun.security.jgss.wrapper.NativeGSSContext extends java.lang.Object implements sun.security.jgss.spi.GSSContextSpi
+{
+    private static final int GSS_C_DELEG_FLAG;
+    private static final int GSS_C_MUTUAL_FLAG;
+    private static final int GSS_C_REPLAY_FLAG;
+    private static final int GSS_C_SEQUENCE_FLAG;
+    private static final int GSS_C_CONF_FLAG;
+    private static final int GSS_C_INTEG_FLAG;
+    private static final int GSS_C_ANON_FLAG;
+    private static final int GSS_C_PROT_READY_FLAG;
+    private static final int GSS_C_TRANS_FLAG;
+    private static final int NUM_OF_INQUIRE_VALUES;
+    private long pContext;
+    private sun.security.jgss.wrapper.GSSNameElement srcName;
+    private sun.security.jgss.wrapper.GSSNameElement targetName;
+    private sun.security.jgss.wrapper.GSSCredElement cred;
+    private boolean isInitiator;
+    private boolean isEstablished;
+    private org.ietf.jgss.Oid actualMech;
+    private org.ietf.jgss.ChannelBinding cb;
+    private sun.security.jgss.wrapper.GSSCredElement delegatedCred;
+    private int flags;
+    private int lifetime;
+    private final sun.security.jgss.wrapper.GSSLibStub cStub;
+    private boolean skipDelegPermCheck;
+    private boolean skipServicePermCheck;
+    static final boolean $assertionsDisabled;
+
+    private static org.ietf.jgss.Oid getMechFromSpNegoToken(byte[], boolean) throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.spnego.NegTokenTarg $r0;
+        byte[] r1, r4, $r6;
+        org.ietf.jgss.Oid[] $r7;
+        java.io.ByteArrayInputStream $r3;
+        sun.security.jgss.spnego.NegTokenInit $r5;
+        int $i0, $i1, $i2, $i3;
+        boolean z0;
+        org.ietf.jgss.Oid r10;
+        java.io.IOException $r8;
+        sun.security.jgss.GSSHeader $r2;
+        sun.security.jgss.GSSExceptionImpl $r9;
+
+        r1 := @parameter0: byte[];
+
+        z0 := @parameter1: boolean;
+
+        r10 = null;
+
+        if z0 == 0 goto label6;
+
+     label1:
+        $r2 = new sun.security.jgss.GSSHeader;
+
+        $r3 = new java.io.ByteArrayInputStream;
+
+        specialinvoke $r3.<java.io.ByteArrayInputStream: void <init>(byte[])>(r1);
+
+        specialinvoke $r2.<sun.security.jgss.GSSHeader: void <init>(java.io.InputStream)>($r3);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r8 := @caughtexception;
+
+        $r9 = new sun.security.jgss.GSSExceptionImpl;
+
+        specialinvoke $r9.<sun.security.jgss.GSSExceptionImpl: void <init>(int,java.lang.Exception)>(11, $r8);
+
+        throw $r9;
+
+     label4:
+        $i0 = virtualinvoke $r2.<sun.security.jgss.GSSHeader: int getMechTokenLength()>();
+
+        r4 = newarray (byte)[$i0];
+
+        $i1 = lengthof r1;
+
+        $i3 = $i1 - $i0;
+
+        $i2 = lengthof r4;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, $i3, r4, 0, $i2);
+
+        $r5 = new sun.security.jgss.spnego.NegTokenInit;
+
+        specialinvoke $r5.<sun.security.jgss.spnego.NegTokenInit: void <init>(byte[])>(r4);
+
+        $r6 = virtualinvoke $r5.<sun.security.jgss.spnego.NegTokenInit: byte[] getMechToken()>();
+
+        if $r6 == null goto label5;
+
+        $r7 = virtualinvoke $r5.<sun.security.jgss.spnego.NegTokenInit: org.ietf.jgss.Oid[] getMechTypeList()>();
+
+        r10 = $r7[0];
+
+     label5:
+        goto label7;
+
+     label6:
+        $r0 = new sun.security.jgss.spnego.NegTokenTarg;
+
+        specialinvoke $r0.<sun.security.jgss.spnego.NegTokenTarg: void <init>(byte[])>(r1);
+
+        r10 = virtualinvoke $r0.<sun.security.jgss.spnego.NegTokenTarg: org.ietf.jgss.Oid getSupportedMech()>();
+
+     label7:
+        return r10;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    private void doServicePermCheck() throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.wrapper.GSSCredElement $r8;
+        sun.security.jgss.wrapper.NativeGSSContext r1;
+        sun.security.jgss.wrapper.GSSNameElement $r5, $r6, $r12;
+        int $i0;
+        java.lang.String r2, $r7, $r13, $r14, $r15;
+        boolean $z0, $z1, $z2, $z3;
+        org.ietf.jgss.Oid $r4, $r9;
+        java.lang.SecurityManager $r0;
+        sun.security.jgss.wrapper.GSSLibStub $r3, $r10;
+
+        r1 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label5;
+
+        $z0 = r1.<sun.security.jgss.wrapper.NativeGSSContext: boolean isInitiator>;
+
+        if $z0 == 0 goto label1;
+
+        $r15 = "initiate";
+
+        $r14 = "initiate";
+
+        goto label2;
+
+     label1:
+        $r15 = "accept";
+
+        $r14 = "accept";
+
+     label2:
+        r2 = $r15;
+
+        $r3 = r1.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        $r4 = virtualinvoke $r3.<sun.security.jgss.wrapper.GSSLibStub: org.ietf.jgss.Oid getMech()>();
+
+        $z1 = staticinvoke <sun.security.jgss.GSSUtil: boolean isSpNegoMech(org.ietf.jgss.Oid)>($r4);
+
+        if $z1 == 0 goto label4;
+
+        $z2 = r1.<sun.security.jgss.wrapper.NativeGSSContext: boolean isInitiator>;
+
+        if $z2 == 0 goto label4;
+
+        $z3 = r1.<sun.security.jgss.wrapper.NativeGSSContext: boolean isEstablished>;
+
+        if $z3 != 0 goto label4;
+
+        $r5 = r1.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSNameElement srcName>;
+
+        if $r5 != null goto label3;
+
+        $r8 = new sun.security.jgss.wrapper.GSSCredElement;
+
+        $i0 = r1.<sun.security.jgss.wrapper.NativeGSSContext: int lifetime>;
+
+        $r9 = <sun.security.jgss.GSSUtil: org.ietf.jgss.Oid GSS_KRB5_MECH_OID>;
+
+        $r10 = staticinvoke <sun.security.jgss.wrapper.GSSLibStub: sun.security.jgss.wrapper.GSSLibStub getInstance(org.ietf.jgss.Oid)>($r9);
+
+        specialinvoke $r8.<sun.security.jgss.wrapper.GSSCredElement: void <init>(sun.security.jgss.wrapper.GSSNameElement,int,int,sun.security.jgss.wrapper.GSSLibStub)>(null, $i0, 1, $r10);
+
+        virtualinvoke $r8.<sun.security.jgss.wrapper.GSSCredElement: void dispose()>();
+
+        goto label4;
+
+     label3:
+        $r6 = r1.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSNameElement srcName>;
+
+        $r7 = staticinvoke <sun.security.jgss.wrapper.Krb5Util: java.lang.String getTGSName(sun.security.jgss.wrapper.GSSNameElement)>($r6);
+
+        staticinvoke <sun.security.jgss.wrapper.Krb5Util: void checkServicePermission(java.lang.String,java.lang.String)>($r7, $r14);
+
+     label4:
+        $r12 = r1.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSNameElement targetName>;
+
+        $r13 = virtualinvoke $r12.<sun.security.jgss.wrapper.GSSNameElement: java.lang.String getKrbName()>();
+
+        staticinvoke <sun.security.jgss.wrapper.Krb5Util: void checkServicePermission(java.lang.String,java.lang.String)>($r13, r2);
+
+        r1.<sun.security.jgss.wrapper.NativeGSSContext: boolean skipServicePermCheck> = 1;
+
+     label5:
+        return;
+    }
+
+    private void doDelegPermCheck() throws org.ietf.jgss.GSSException
+    {
+        javax.security.auth.kerberos.DelegationPermission $r15;
+        sun.security.jgss.wrapper.NativeGSSContext r1;
+        sun.security.jgss.wrapper.GSSNameElement $r2, $r4;
+        java.lang.StringBuffer $r6, $r7, $r8;
+        java.lang.String $r3, $r5, $r9, $r14;
+        java.lang.SecurityManager $r0;
+        java.lang.StringBuilder $r10, $r11, $r12, $r13;
+
+        r1 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r2 = r1.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSNameElement targetName>;
+
+        $r3 = virtualinvoke $r2.<sun.security.jgss.wrapper.GSSNameElement: java.lang.String getKrbName()>();
+
+        $r4 = r1.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSNameElement targetName>;
+
+        $r5 = staticinvoke <sun.security.jgss.wrapper.Krb5Util: java.lang.String getTGSName(sun.security.jgss.wrapper.GSSNameElement)>($r4);
+
+        $r6 = new java.lang.StringBuffer;
+
+        specialinvoke $r6.<java.lang.StringBuffer: void <init>(java.lang.String)>("\"");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r3);
+
+        virtualinvoke $r7.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("\" \"");
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r5);
+
+        virtualinvoke $r8.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(34);
+
+        $r9 = virtualinvoke $r6.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Checking DelegationPermission (");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.security.jgss.wrapper.SunNativeProvider: void debug(java.lang.String)>($r14);
+
+        $r15 = new javax.security.auth.kerberos.DelegationPermission;
+
+        specialinvoke $r15.<javax.security.auth.kerberos.DelegationPermission: void <init>(java.lang.String)>($r9);
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r15);
+
+        r1.<sun.security.jgss.wrapper.NativeGSSContext: boolean skipDelegPermCheck> = 1;
+
+     label1:
+        return;
+    }
+
+    private byte[] retrieveToken(java.io.InputStream, int) throws org.ietf.jgss.GSSException
+    {
+        byte[] r14, r18;
+        java.io.ByteArrayOutputStream $r26;
+        sun.security.jgss.wrapper.NativeGSSContext r9;
+        java.lang.AssertionError $r27, $r28;
+        int i0, $i1, $i2, $i4, $i6;
+        sun.security.util.ObjectIdentifier $r24;
+        java.lang.String $r6, $r12, $r22;
+        boolean $z0, $z1;
+        sun.security.util.DerValue $r29;
+        org.ietf.jgss.Oid $r11;
+        java.io.IOException $r16;
+        sun.security.jgss.GSSHeader $r25;
+        sun.security.jgss.wrapper.GSSLibStub $r10;
+        sun.security.jgss.GSSExceptionImpl $r31;
+        java.lang.StringBuilder $r4, $r5, $r20, $r21, $r23, $r30;
+        java.io.InputStream r1;
+
+        r9 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        i0 := @parameter1: int;
+
+     label1:
+        $i4 = (int) -1;
+
+        if i0 == $i4 goto label3;
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Precomputed mechToken length: ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.security.jgss.wrapper.SunNativeProvider: void debug(java.lang.String)>($r6);
+
+        $r25 = new sun.security.jgss.GSSHeader;
+
+        $r24 = new sun.security.util.ObjectIdentifier;
+
+        $r10 = r9.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        $r11 = virtualinvoke $r10.<sun.security.jgss.wrapper.GSSLibStub: org.ietf.jgss.Oid getMech()>();
+
+        $r12 = virtualinvoke $r11.<org.ietf.jgss.Oid: java.lang.String toString()>();
+
+        specialinvoke $r24.<sun.security.util.ObjectIdentifier: void <init>(java.lang.String)>($r12);
+
+        specialinvoke $r25.<sun.security.jgss.GSSHeader: void <init>(sun.security.util.ObjectIdentifier,int)>($r24, i0);
+
+        $r26 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r26.<java.io.ByteArrayOutputStream: void <init>(int)>(600);
+
+        r14 = newarray (byte)[i0];
+
+        $i1 = virtualinvoke r1.<java.io.InputStream: int read(byte[])>(r14);
+
+        $z1 = <sun.security.jgss.wrapper.NativeGSSContext: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label2;
+
+        if i0 == $i1 goto label2;
+
+        $r27 = new java.lang.AssertionError;
+
+        specialinvoke $r27.<java.lang.AssertionError: void <init>()>();
+
+        throw $r27;
+
+     label2:
+        virtualinvoke $r25.<sun.security.jgss.GSSHeader: int encode(java.io.OutputStream)>($r26);
+
+        virtualinvoke $r26.<java.io.ByteArrayOutputStream: void write(byte[])>(r14);
+
+        r18 = virtualinvoke $r26.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        goto label5;
+
+     label3:
+        $z0 = <sun.security.jgss.wrapper.NativeGSSContext: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label4;
+
+        $i6 = (int) -1;
+
+        if i0 == $i6 goto label4;
+
+        $r28 = new java.lang.AssertionError;
+
+        specialinvoke $r28.<java.lang.AssertionError: void <init>()>();
+
+        throw $r28;
+
+     label4:
+        $r29 = new sun.security.util.DerValue;
+
+        specialinvoke $r29.<sun.security.util.DerValue: void <init>(java.io.InputStream)>(r1);
+
+        r18 = virtualinvoke $r29.<sun.security.util.DerValue: byte[] toByteArray()>();
+
+     label5:
+        $r30 = new java.lang.StringBuilder;
+
+        specialinvoke $r30.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Complete Token length: ");
+
+        $i2 = lengthof r18;
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.security.jgss.wrapper.SunNativeProvider: void debug(java.lang.String)>($r22);
+
+     label6:
+        return r18;
+
+     label7:
+        $r16 := @caughtexception;
+
+        $r31 = new sun.security.jgss.GSSExceptionImpl;
+
+        specialinvoke $r31.<sun.security.jgss.GSSExceptionImpl: void <init>(int,java.lang.Exception)>(11, $r16);
+
+        throw $r31;
+
+        catch java.io.IOException from label1 to label6 with label7;
+    }
+
+    void <init>(sun.security.jgss.wrapper.GSSNameElement, sun.security.jgss.wrapper.GSSCredElement, int, sun.security.jgss.wrapper.GSSLibStub) throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.wrapper.GSSCredElement r3, $r6, $r7, $r9;
+        org.ietf.jgss.Oid $r5;
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        org.ietf.jgss.GSSException $r11;
+        sun.security.jgss.wrapper.GSSNameElement r1, $r8;
+        sun.security.jgss.wrapper.GSSLibStub r2, $r4, $r10;
+        int i0, $i1;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        r1 := @parameter0: sun.security.jgss.wrapper.GSSNameElement;
+
+        r3 := @parameter1: sun.security.jgss.wrapper.GSSCredElement;
+
+        i0 := @parameter2: int;
+
+        r2 := @parameter3: sun.security.jgss.wrapper.GSSLibStub;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: long pContext> = 0L;
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: int lifetime> = 0;
+
+        if r1 != null goto label1;
+
+        $r11 = new org.ietf.jgss.GSSException;
+
+        specialinvoke $r11.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, 1, "null peer");
+
+        throw $r11;
+
+     label1:
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub> = r2;
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSCredElement cred> = r3;
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSNameElement targetName> = r1;
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean isInitiator> = 1;
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: int lifetime> = i0;
+
+        $r4 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        $r5 = virtualinvoke $r4.<sun.security.jgss.wrapper.GSSLibStub: org.ietf.jgss.Oid getMech()>();
+
+        $z0 = staticinvoke <sun.security.jgss.GSSUtil: boolean isKerberosMech(org.ietf.jgss.Oid)>($r5);
+
+        if $z0 == 0 goto label3;
+
+        specialinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: void doServicePermCheck()>();
+
+        $r6 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSCredElement cred>;
+
+        if $r6 != null goto label2;
+
+        $r9 = new sun.security.jgss.wrapper.GSSCredElement;
+
+        $i1 = r0.<sun.security.jgss.wrapper.NativeGSSContext: int lifetime>;
+
+        $r10 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        specialinvoke $r9.<sun.security.jgss.wrapper.GSSCredElement: void <init>(sun.security.jgss.wrapper.GSSNameElement,int,int,sun.security.jgss.wrapper.GSSLibStub)>(null, $i1, 1, $r10);
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSCredElement cred> = $r9;
+
+     label2:
+        $r7 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSCredElement cred>;
+
+        $r8 = virtualinvoke $r7.<sun.security.jgss.wrapper.GSSCredElement: sun.security.jgss.wrapper.GSSNameElement getName()>();
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSNameElement srcName> = $r8;
+
+     label3:
+        return;
+    }
+
+    void <init>(sun.security.jgss.wrapper.GSSCredElement, sun.security.jgss.wrapper.GSSLibStub) throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.wrapper.GSSCredElement r2, $r3, $r7;
+        org.ietf.jgss.Oid $r5;
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        sun.security.jgss.wrapper.GSSNameElement $r6, $r8;
+        sun.security.jgss.wrapper.GSSLibStub r1, $r4;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        r2 := @parameter0: sun.security.jgss.wrapper.GSSCredElement;
+
+        r1 := @parameter1: sun.security.jgss.wrapper.GSSLibStub;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: long pContext> = 0L;
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: int lifetime> = 0;
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub> = r1;
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSCredElement cred> = r2;
+
+        $r3 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSCredElement cred>;
+
+        if $r3 == null goto label1;
+
+        $r7 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSCredElement cred>;
+
+        $r8 = virtualinvoke $r7.<sun.security.jgss.wrapper.GSSCredElement: sun.security.jgss.wrapper.GSSNameElement getName()>();
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSNameElement targetName> = $r8;
+
+     label1:
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean isInitiator> = 0;
+
+        $r4 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        $r5 = virtualinvoke $r4.<sun.security.jgss.wrapper.GSSLibStub: org.ietf.jgss.Oid getMech()>();
+
+        $z0 = staticinvoke <sun.security.jgss.GSSUtil: boolean isKerberosMech(org.ietf.jgss.Oid)>($r5);
+
+        if $z0 == 0 goto label2;
+
+        $r6 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSNameElement targetName>;
+
+        if $r6 == null goto label2;
+
+        specialinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: void doServicePermCheck()>();
+
+     label2:
+        return;
+    }
+
+    void <init>(long, sun.security.jgss.wrapper.GSSLibStub) throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        sun.security.jgss.wrapper.GSSNameElement $r4, $r6;
+        byte $b6, $b8, $b14;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        org.ietf.jgss.Oid $r9;
+        sun.security.jgss.wrapper.GSSLibStub r1, $r2, $r5, $r7, $r8;
+        long l0, $l1, $l3, $l4, $l5, $l7, $l9, $l11, $l13;
+        java.lang.AssertionError $r11;
+        long[] $r3;
+        int $i2, $i10, $i12;
+        java.lang.RuntimeException $r10;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: sun.security.jgss.wrapper.GSSLibStub;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: long pContext> = 0L;
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: int lifetime> = 0;
+
+        $z0 = <sun.security.jgss.wrapper.NativeGSSContext: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $l13 = r0.<sun.security.jgss.wrapper.NativeGSSContext: long pContext>;
+
+        $b14 = $l13 cmp 0L;
+
+        if $b14 != 0 goto label1;
+
+        $r11 = new java.lang.AssertionError;
+
+        specialinvoke $r11.<java.lang.AssertionError: void <init>()>();
+
+        throw $r11;
+
+     label1:
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: long pContext> = l0;
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub> = r1;
+
+        $r2 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        $l1 = r0.<sun.security.jgss.wrapper.NativeGSSContext: long pContext>;
+
+        $r3 = virtualinvoke $r2.<sun.security.jgss.wrapper.GSSLibStub: long[] inquireContext(long)>($l1);
+
+        $i2 = lengthof $r3;
+
+        if $i2 == 6 goto label2;
+
+        $r10 = new java.lang.RuntimeException;
+
+        specialinvoke $r10.<java.lang.RuntimeException: void <init>(java.lang.String)>("Bug w/ GSSLibStub.inquireContext()");
+
+        throw $r10;
+
+     label2:
+        $r4 = new sun.security.jgss.wrapper.GSSNameElement;
+
+        $l3 = $r3[0];
+
+        $r5 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        specialinvoke $r4.<sun.security.jgss.wrapper.GSSNameElement: void <init>(long,sun.security.jgss.wrapper.GSSLibStub)>($l3, $r5);
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSNameElement srcName> = $r4;
+
+        $r6 = new sun.security.jgss.wrapper.GSSNameElement;
+
+        $l4 = $r3[1];
+
+        $r7 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        specialinvoke $r6.<sun.security.jgss.wrapper.GSSNameElement: void <init>(long,sun.security.jgss.wrapper.GSSLibStub)>($l4, $r7);
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSNameElement targetName> = $r6;
+
+        $l5 = $r3[2];
+
+        $b6 = $l5 cmp 0L;
+
+        if $b6 == 0 goto label3;
+
+        $z3 = 1;
+
+        goto label4;
+
+     label3:
+        $z3 = 0;
+
+     label4:
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean isInitiator> = $z3;
+
+        $l7 = $r3[3];
+
+        $b8 = $l7 cmp 0L;
+
+        if $b8 == 0 goto label5;
+
+        $z4 = 1;
+
+        goto label6;
+
+     label5:
+        $z4 = 0;
+
+     label6:
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean isEstablished> = $z4;
+
+        $l9 = $r3[4];
+
+        $i10 = (int) $l9;
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: int flags> = $i10;
+
+        $l11 = $r3[5];
+
+        $i12 = (int) $l11;
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: int lifetime> = $i12;
+
+        $r8 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        $r9 = virtualinvoke $r8.<sun.security.jgss.wrapper.GSSLibStub: org.ietf.jgss.Oid getMech()>();
+
+        $z1 = staticinvoke <sun.security.jgss.GSSUtil: boolean isSpNegoMech(org.ietf.jgss.Oid)>($r9);
+
+        if $z1 != 0 goto label7;
+
+        $z2 = staticinvoke <sun.security.jgss.GSSUtil: boolean isKerberosMech(org.ietf.jgss.Oid)>($r9);
+
+        if $z2 == 0 goto label8;
+
+     label7:
+        specialinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: void doServicePermCheck()>();
+
+     label8:
+        return;
+    }
+
+    public java.security.Provider getProvider()
+    {
+        sun.security.jgss.wrapper.NativeGSSContext r1;
+        java.security.Provider $r0;
+
+        r1 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        $r0 = <sun.security.jgss.wrapper.SunNativeProvider: java.security.Provider INSTANCE>;
+
+        return $r0;
+    }
+
+    public byte[] initSecContext(java.io.InputStream, int) throws org.ietf.jgss.GSSException
+    {
+        byte[] $r7, $r25, r30, r31;
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        sun.security.jgss.wrapper.GSSNameElement $r4, $r14, $r18, $r19;
+        byte $b1;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        org.ietf.jgss.Oid $r2, $r13, $r22, $r23;
+        sun.security.jgss.wrapper.GSSLibStub $r1, $r6, $r12, $r17, $r20, $r21;
+        java.lang.StringBuilder $r8, $r9, $r10, $r26, $r27, $r28;
+        sun.security.jgss.wrapper.GSSCredElement $r3, $r15, $r16, $r32;
+        long $l0, $l2, $l4, $l5, $l8;
+        int $i3, i6, $i7, $i9;
+        java.lang.String $r11, $r29;
+        org.ietf.jgss.ChannelBinding $r5;
+        java.io.InputStream r24;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        r24 := @parameter0: java.io.InputStream;
+
+        i6 := @parameter1: int;
+
+        r30 = null;
+
+        $z0 = r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean isEstablished>;
+
+        if $z0 != 0 goto label11;
+
+        $z1 = r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean isInitiator>;
+
+        if $z1 == 0 goto label11;
+
+        r31 = null;
+
+        $l0 = r0.<sun.security.jgss.wrapper.NativeGSSContext: long pContext>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 == 0 goto label01;
+
+        $r25 = specialinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: byte[] retrieveToken(java.io.InputStream,int)>(r24, i6);
+
+        r31 = $r25;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("initSecContext=> inToken len=");
+
+        $i7 = lengthof $r25;
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i7);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.security.jgss.wrapper.SunNativeProvider: void debug(java.lang.String)>($r29);
+
+     label01:
+        $z2 = virtualinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean getCredDelegState()>();
+
+        if $z2 != 0 goto label02;
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean skipDelegPermCheck> = 1;
+
+     label02:
+        $r1 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        $r2 = virtualinvoke $r1.<sun.security.jgss.wrapper.GSSLibStub: org.ietf.jgss.Oid getMech()>();
+
+        $z3 = staticinvoke <sun.security.jgss.GSSUtil: boolean isKerberosMech(org.ietf.jgss.Oid)>($r2);
+
+        if $z3 == 0 goto label03;
+
+        $z8 = r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean skipDelegPermCheck>;
+
+        if $z8 != 0 goto label03;
+
+        specialinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: void doDelegPermCheck()>();
+
+     label03:
+        $r32 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSCredElement cred>;
+
+        if $r32 != null goto label04;
+
+        $l8 = 0L;
+
+        goto label05;
+
+     label04:
+        $r3 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSCredElement cred>;
+
+        $l8 = $r3.<sun.security.jgss.wrapper.GSSCredElement: long pCred>;
+
+     label05:
+        $r6 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        $r4 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSNameElement targetName>;
+
+        $l2 = $r4.<sun.security.jgss.wrapper.GSSNameElement: long pName>;
+
+        $r5 = r0.<sun.security.jgss.wrapper.NativeGSSContext: org.ietf.jgss.ChannelBinding cb>;
+
+        $r7 = virtualinvoke $r6.<sun.security.jgss.wrapper.GSSLibStub: byte[] initContext(long,long,org.ietf.jgss.ChannelBinding,byte[],sun.security.jgss.wrapper.NativeGSSContext)>($l8, $l2, $r5, r31, r0);
+
+        r30 = $r7;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("initSecContext=> outToken len=");
+
+        if $r7 != null goto label06;
+
+        $i9 = 0;
+
+        goto label07;
+
+     label06:
+        $i9 = lengthof $r7;
+
+     label07:
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.security.jgss.wrapper.SunNativeProvider: void debug(java.lang.String)>($r11);
+
+        $r12 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        $r13 = virtualinvoke $r12.<sun.security.jgss.wrapper.GSSLibStub: org.ietf.jgss.Oid getMech()>();
+
+        $z4 = staticinvoke <sun.security.jgss.GSSUtil: boolean isSpNegoMech(org.ietf.jgss.Oid)>($r13);
+
+        if $z4 == 0 goto label09;
+
+        if $r7 == null goto label09;
+
+        $r22 = staticinvoke <sun.security.jgss.wrapper.NativeGSSContext: org.ietf.jgss.Oid getMechFromSpNegoToken(byte[],boolean)>($r7, 1);
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: org.ietf.jgss.Oid actualMech> = $r22;
+
+        $r23 = r0.<sun.security.jgss.wrapper.NativeGSSContext: org.ietf.jgss.Oid actualMech>;
+
+        $z5 = staticinvoke <sun.security.jgss.GSSUtil: boolean isKerberosMech(org.ietf.jgss.Oid)>($r23);
+
+        if $z5 == 0 goto label09;
+
+        $z6 = r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean skipServicePermCheck>;
+
+        if $z6 != 0 goto label08;
+
+        specialinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: void doServicePermCheck()>();
+
+     label08:
+        $z7 = r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean skipDelegPermCheck>;
+
+        if $z7 != 0 goto label09;
+
+        specialinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: void doDelegPermCheck()>();
+
+     label09:
+        $z9 = r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean isEstablished>;
+
+        if $z9 == 0 goto label11;
+
+        $r14 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSNameElement srcName>;
+
+        if $r14 != null goto label10;
+
+        $r19 = new sun.security.jgss.wrapper.GSSNameElement;
+
+        $r20 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        $l4 = r0.<sun.security.jgss.wrapper.NativeGSSContext: long pContext>;
+
+        $l5 = virtualinvoke $r20.<sun.security.jgss.wrapper.GSSLibStub: long getContextName(long,boolean)>($l4, 1);
+
+        $r21 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        specialinvoke $r19.<sun.security.jgss.wrapper.GSSNameElement: void <init>(long,sun.security.jgss.wrapper.GSSLibStub)>($l5, $r21);
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSNameElement srcName> = $r19;
+
+     label10:
+        $r15 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSCredElement cred>;
+
+        if $r15 != null goto label11;
+
+        $r16 = new sun.security.jgss.wrapper.GSSCredElement;
+
+        $r18 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSNameElement srcName>;
+
+        $i3 = r0.<sun.security.jgss.wrapper.NativeGSSContext: int lifetime>;
+
+        $r17 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        specialinvoke $r16.<sun.security.jgss.wrapper.GSSCredElement: void <init>(sun.security.jgss.wrapper.GSSNameElement,int,int,sun.security.jgss.wrapper.GSSLibStub)>($r18, $i3, 1, $r17);
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSCredElement cred> = $r16;
+
+     label11:
+        return r30;
+    }
+
+    public byte[] acceptSecContext(java.io.InputStream, int) throws org.ietf.jgss.GSSException
+    {
+        byte[] $r2, $r11, r26;
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        sun.security.jgss.wrapper.GSSNameElement $r16, $r18, $r24;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        org.ietf.jgss.Oid $r17, $r28;
+        sun.security.jgss.wrapper.GSSLibStub $r10, $r19, $r20, $r23, $r27;
+        java.lang.StringBuilder $r3, $r4, $r5, $r12, $r13, $r14;
+        sun.security.jgss.wrapper.GSSCredElement $r7, $r8, $r21, $r22, $r25;
+        long $l2, $l3, $l5;
+        int i0, $i1, $i4, $i6;
+        java.lang.String $r6, $r15;
+        org.ietf.jgss.ChannelBinding $r9;
+        java.io.InputStream r1;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        i0 := @parameter1: int;
+
+        r26 = null;
+
+        $z0 = r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean isEstablished>;
+
+        if $z0 != 0 goto label7;
+
+        $z1 = r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean isInitiator>;
+
+        if $z1 != 0 goto label7;
+
+        $r2 = specialinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: byte[] retrieveToken(java.io.InputStream,int)>(r1, i0);
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("acceptSecContext=> inToken len=");
+
+        $i1 = lengthof $r2;
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.security.jgss.wrapper.SunNativeProvider: void debug(java.lang.String)>($r6);
+
+        $r7 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSCredElement cred>;
+
+        if $r7 != null goto label1;
+
+        $l5 = 0L;
+
+        goto label2;
+
+     label1:
+        $r8 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSCredElement cred>;
+
+        $l5 = $r8.<sun.security.jgss.wrapper.GSSCredElement: long pCred>;
+
+     label2:
+        $r10 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        $r9 = r0.<sun.security.jgss.wrapper.NativeGSSContext: org.ietf.jgss.ChannelBinding cb>;
+
+        $r11 = virtualinvoke $r10.<sun.security.jgss.wrapper.GSSLibStub: byte[] acceptContext(long,org.ietf.jgss.ChannelBinding,byte[],sun.security.jgss.wrapper.NativeGSSContext)>($l5, $r9, $r2, r0);
+
+        r26 = $r11;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("acceptSecContext=> outToken len=");
+
+        if $r11 != null goto label3;
+
+        $i6 = 0;
+
+        goto label4;
+
+     label3:
+        $i6 = lengthof $r11;
+
+     label4:
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i6);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.security.jgss.wrapper.SunNativeProvider: void debug(java.lang.String)>($r15);
+
+        $r16 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSNameElement targetName>;
+
+        if $r16 != null goto label6;
+
+        $r18 = new sun.security.jgss.wrapper.GSSNameElement;
+
+        $r19 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        $l2 = r0.<sun.security.jgss.wrapper.NativeGSSContext: long pContext>;
+
+        $l3 = virtualinvoke $r19.<sun.security.jgss.wrapper.GSSLibStub: long getContextName(long,boolean)>($l2, 0);
+
+        $r20 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        specialinvoke $r18.<sun.security.jgss.wrapper.GSSNameElement: void <init>(long,sun.security.jgss.wrapper.GSSLibStub)>($l3, $r20);
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSNameElement targetName> = $r18;
+
+        $r21 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSCredElement cred>;
+
+        if $r21 == null goto label5;
+
+        $r25 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSCredElement cred>;
+
+        virtualinvoke $r25.<sun.security.jgss.wrapper.GSSCredElement: void dispose()>();
+
+     label5:
+        $r22 = new sun.security.jgss.wrapper.GSSCredElement;
+
+        $r24 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSNameElement targetName>;
+
+        $i4 = r0.<sun.security.jgss.wrapper.NativeGSSContext: int lifetime>;
+
+        $r23 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        specialinvoke $r22.<sun.security.jgss.wrapper.GSSCredElement: void <init>(sun.security.jgss.wrapper.GSSNameElement,int,int,sun.security.jgss.wrapper.GSSLibStub)>($r24, $i4, 2, $r23);
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSCredElement cred> = $r22;
+
+     label6:
+        $r27 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        $r28 = virtualinvoke $r27.<sun.security.jgss.wrapper.GSSLibStub: org.ietf.jgss.Oid getMech()>();
+
+        $z4 = staticinvoke <sun.security.jgss.GSSUtil: boolean isSpNegoMech(org.ietf.jgss.Oid)>($r28);
+
+        if $z4 == 0 goto label7;
+
+        if $r11 == null goto label7;
+
+        $z2 = r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean skipServicePermCheck>;
+
+        if $z2 != 0 goto label7;
+
+        $r17 = staticinvoke <sun.security.jgss.wrapper.NativeGSSContext: org.ietf.jgss.Oid getMechFromSpNegoToken(byte[],boolean)>($r11, 0);
+
+        $z3 = staticinvoke <sun.security.jgss.GSSUtil: boolean isKerberosMech(org.ietf.jgss.Oid)>($r17);
+
+        if $z3 == 0 goto label7;
+
+        specialinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: void doServicePermCheck()>();
+
+     label7:
+        return r26;
+    }
+
+    public boolean isEstablished()
+    {
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        $z0 = r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean isEstablished>;
+
+        return $z0;
+    }
+
+    public void dispose() throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.wrapper.GSSLibStub $r1;
+        byte $b1;
+        long $l0, $l2, $l3;
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSNameElement srcName> = null;
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSNameElement targetName> = null;
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSCredElement cred> = null;
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSCredElement delegatedCred> = null;
+
+        $l0 = r0.<sun.security.jgss.wrapper.NativeGSSContext: long pContext>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 == 0 goto label1;
+
+        $r1 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        $l2 = r0.<sun.security.jgss.wrapper.NativeGSSContext: long pContext>;
+
+        $l3 = virtualinvoke $r1.<sun.security.jgss.wrapper.GSSLibStub: long deleteContext(long)>($l2);
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: long pContext> = $l3;
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: long pContext> = 0L;
+
+     label1:
+        return;
+    }
+
+    public int getWrapSizeLimit(int, boolean, int) throws org.ietf.jgss.GSSException
+    {
+        long $l2;
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        sun.security.jgss.wrapper.GSSLibStub $r1;
+        byte $b4;
+        int i0, i1, $i3;
+        boolean z0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        i0 := @parameter0: int;
+
+        z0 := @parameter1: boolean;
+
+        i1 := @parameter2: int;
+
+        $r1 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        $l2 = r0.<sun.security.jgss.wrapper.NativeGSSContext: long pContext>;
+
+        if z0 == 0 goto label1;
+
+        $b4 = 1;
+
+        goto label2;
+
+     label1:
+        $b4 = 0;
+
+     label2:
+        $i3 = virtualinvoke $r1.<sun.security.jgss.wrapper.GSSLibStub: int wrapSizeLimit(long,int,int,int)>($l2, $b4, i0, i1);
+
+        return $i3;
+    }
+
+    public byte[] wrap(byte[], int, int, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        byte[] r0, $r3, r4, $r6;
+        long $l3;
+        sun.security.jgss.wrapper.NativeGSSContext r1;
+        org.ietf.jgss.MessageProp r2;
+        sun.security.jgss.wrapper.GSSLibStub $r5;
+        int i0, i1, $i2;
+
+        r1 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r2 := @parameter3: org.ietf.jgss.MessageProp;
+
+        r4 = r0;
+
+        if i0 != 0 goto label1;
+
+        $i2 = lengthof r0;
+
+        if i1 == $i2 goto label2;
+
+     label1:
+        $r3 = newarray (byte)[i1];
+
+        r4 = $r3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, i0, $r3, 0, i1);
+
+     label2:
+        $r5 = r1.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        $l3 = r1.<sun.security.jgss.wrapper.NativeGSSContext: long pContext>;
+
+        $r6 = virtualinvoke $r5.<sun.security.jgss.wrapper.GSSLibStub: byte[] wrap(long,byte[],org.ietf.jgss.MessageProp)>($l3, r4, r2);
+
+        return $r6;
+    }
+
+    public void wrap(byte[], int, int, java.io.OutputStream, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        java.io.OutputStream r4;
+        byte[] r1, $r3;
+        java.io.IOException $r5;
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        org.ietf.jgss.MessageProp r2;
+        sun.security.jgss.GSSExceptionImpl $r6;
+        int i0, i1;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r4 := @parameter3: java.io.OutputStream;
+
+        r2 := @parameter4: org.ietf.jgss.MessageProp;
+
+     label1:
+        $r3 = virtualinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: byte[] wrap(byte[],int,int,org.ietf.jgss.MessageProp)>(r1, i0, i1, r2);
+
+        virtualinvoke r4.<java.io.OutputStream: void write(byte[])>($r3);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new sun.security.jgss.GSSExceptionImpl;
+
+        specialinvoke $r6.<sun.security.jgss.GSSExceptionImpl: void <init>(int,java.lang.Exception)>(11, $r5);
+
+        throw $r6;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public int wrap(byte[], int, int, byte[], int, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        byte[] r1, $r3, r4;
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        org.ietf.jgss.MessageProp r2;
+        int i0, i1, i2, $i3, $i4;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r4 := @parameter3: byte[];
+
+        i2 := @parameter4: int;
+
+        r2 := @parameter5: org.ietf.jgss.MessageProp;
+
+        $r3 = virtualinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: byte[] wrap(byte[],int,int,org.ietf.jgss.MessageProp)>(r1, i0, i1, r2);
+
+        $i3 = lengthof $r3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, 0, r4, i2, $i3);
+
+        $i4 = lengthof $r3;
+
+        return $i4;
+    }
+
+    public void wrap(java.io.InputStream, java.io.OutputStream, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        java.io.OutputStream r4;
+        byte[] $r3, r7;
+        java.io.IOException $r5;
+        sun.security.jgss.wrapper.NativeGSSContext r1;
+        org.ietf.jgss.MessageProp r2;
+        sun.security.jgss.GSSExceptionImpl $r6;
+        int $i0, $i1;
+        java.io.InputStream r0;
+
+        r1 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        r0 := @parameter0: java.io.InputStream;
+
+        r4 := @parameter1: java.io.OutputStream;
+
+        r2 := @parameter2: org.ietf.jgss.MessageProp;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.io.InputStream: int available()>();
+
+        r7 = newarray (byte)[$i0];
+
+        $i1 = virtualinvoke r0.<java.io.InputStream: int read(byte[])>(r7);
+
+        $r3 = virtualinvoke r1.<sun.security.jgss.wrapper.NativeGSSContext: byte[] wrap(byte[],int,int,org.ietf.jgss.MessageProp)>(r7, 0, $i1, r2);
+
+        virtualinvoke r4.<java.io.OutputStream: void write(byte[])>($r3);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new sun.security.jgss.GSSExceptionImpl;
+
+        specialinvoke $r6.<sun.security.jgss.GSSExceptionImpl: void <init>(int,java.lang.Exception)>(11, $r5);
+
+        throw $r6;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public byte[] unwrap(byte[], int, int, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        byte[] r0, $r4, $r6, $r7;
+        long $l2, $l4;
+        sun.security.jgss.wrapper.NativeGSSContext r1;
+        org.ietf.jgss.MessageProp r2;
+        sun.security.jgss.wrapper.GSSLibStub $r3, $r5;
+        int i0, i1, $i3;
+
+        r1 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r2 := @parameter3: org.ietf.jgss.MessageProp;
+
+        if i0 != 0 goto label1;
+
+        $i3 = lengthof r0;
+
+        if i1 == $i3 goto label2;
+
+     label1:
+        $r7 = newarray (byte)[i1];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, i0, $r7, 0, i1);
+
+        $r3 = r1.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        $l2 = r1.<sun.security.jgss.wrapper.NativeGSSContext: long pContext>;
+
+        $r4 = virtualinvoke $r3.<sun.security.jgss.wrapper.GSSLibStub: byte[] unwrap(long,byte[],org.ietf.jgss.MessageProp)>($l2, $r7, r2);
+
+        return $r4;
+
+     label2:
+        $r5 = r1.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        $l4 = r1.<sun.security.jgss.wrapper.NativeGSSContext: long pContext>;
+
+        $r6 = virtualinvoke $r5.<sun.security.jgss.wrapper.GSSLibStub: byte[] unwrap(long,byte[],org.ietf.jgss.MessageProp)>($l4, r0, r2);
+
+        return $r6;
+    }
+
+    public int unwrap(byte[], int, int, byte[], int, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        byte[] r0, r4, $r6, r7;
+        long $l2, $l7;
+        sun.security.jgss.wrapper.NativeGSSContext r1;
+        int i0, i1, i3, $i4, $i5, $i6;
+        org.ietf.jgss.MessageProp r2;
+        sun.security.jgss.wrapper.GSSLibStub $r3, $r5;
+
+        r1 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r4 := @parameter3: byte[];
+
+        i3 := @parameter4: int;
+
+        r2 := @parameter5: org.ietf.jgss.MessageProp;
+
+        if i0 != 0 goto label1;
+
+        $i6 = lengthof r0;
+
+        if i1 == $i6 goto label2;
+
+     label1:
+        $r6 = newarray (byte)[i1];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, i0, $r6, 0, i1);
+
+        $r3 = r1.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        $l2 = r1.<sun.security.jgss.wrapper.NativeGSSContext: long pContext>;
+
+        r7 = virtualinvoke $r3.<sun.security.jgss.wrapper.GSSLibStub: byte[] unwrap(long,byte[],org.ietf.jgss.MessageProp)>($l2, $r6, r2);
+
+        goto label3;
+
+     label2:
+        $r5 = r1.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        $l7 = r1.<sun.security.jgss.wrapper.NativeGSSContext: long pContext>;
+
+        r7 = virtualinvoke $r5.<sun.security.jgss.wrapper.GSSLibStub: byte[] unwrap(long,byte[],org.ietf.jgss.MessageProp)>($l7, r0, r2);
+
+     label3:
+        $i4 = lengthof r7;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r7, 0, r4, i3, $i4);
+
+        $i5 = lengthof r7;
+
+        return $i5;
+    }
+
+    public void unwrap(java.io.InputStream, java.io.OutputStream, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        java.io.OutputStream r4;
+        byte[] $r3, r7;
+        java.io.IOException $r5;
+        sun.security.jgss.wrapper.NativeGSSContext r1;
+        org.ietf.jgss.MessageProp r2;
+        sun.security.jgss.GSSExceptionImpl $r6;
+        int $i0, $i1;
+        java.io.InputStream r0;
+
+        r1 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        r0 := @parameter0: java.io.InputStream;
+
+        r4 := @parameter1: java.io.OutputStream;
+
+        r2 := @parameter2: org.ietf.jgss.MessageProp;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.io.InputStream: int available()>();
+
+        r7 = newarray (byte)[$i0];
+
+        $i1 = virtualinvoke r0.<java.io.InputStream: int read(byte[])>(r7);
+
+        $r3 = virtualinvoke r1.<sun.security.jgss.wrapper.NativeGSSContext: byte[] unwrap(byte[],int,int,org.ietf.jgss.MessageProp)>(r7, 0, $i1, r2);
+
+        virtualinvoke r4.<java.io.OutputStream: void write(byte[])>($r3);
+
+        virtualinvoke r4.<java.io.OutputStream: void flush()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new sun.security.jgss.GSSExceptionImpl;
+
+        specialinvoke $r6.<sun.security.jgss.GSSExceptionImpl: void <init>(int,java.lang.Exception)>(11, $r5);
+
+        throw $r6;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public int unwrap(java.io.InputStream, byte[], int, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        byte[] $r3, r4, r7;
+        java.io.IOException $r5;
+        sun.security.jgss.wrapper.NativeGSSContext r1;
+        org.ietf.jgss.MessageProp r2;
+        sun.security.jgss.GSSExceptionImpl $r6;
+        int $i0, $i1, i2, $i3, $i4;
+        java.io.InputStream r0;
+
+        r1 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        r0 := @parameter0: java.io.InputStream;
+
+        r4 := @parameter1: byte[];
+
+        i2 := @parameter2: int;
+
+        r2 := @parameter3: org.ietf.jgss.MessageProp;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.io.InputStream: int available()>();
+
+        r7 = newarray (byte)[$i0];
+
+        $i1 = virtualinvoke r0.<java.io.InputStream: int read(byte[])>(r7);
+
+        virtualinvoke r1.<sun.security.jgss.wrapper.NativeGSSContext: byte[] unwrap(byte[],int,int,org.ietf.jgss.MessageProp)>(r7, 0, $i1, r2);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new sun.security.jgss.GSSExceptionImpl;
+
+        specialinvoke $r6.<sun.security.jgss.GSSExceptionImpl: void <init>(int,java.lang.Exception)>(11, $r5);
+
+        throw $r6;
+
+     label4:
+        $r3 = virtualinvoke r1.<sun.security.jgss.wrapper.NativeGSSContext: byte[] unwrap(byte[],int,int,org.ietf.jgss.MessageProp)>(r7, 0, $i1, r2);
+
+        $i3 = lengthof $r3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, 0, r4, i2, $i3);
+
+        $i4 = lengthof $r3;
+
+        return $i4;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public byte[] getMIC(byte[], int, int, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        byte[] r1, $r3, r4, $r6;
+        long $l5;
+        sun.security.jgss.wrapper.NativeGSSContext r2;
+        org.ietf.jgss.MessageProp r0;
+        sun.security.jgss.wrapper.GSSLibStub $r5;
+        int i0, i1, i2, $i3, $i4;
+
+        r2 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        r1 := @parameter0: byte[];
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        r0 := @parameter3: org.ietf.jgss.MessageProp;
+
+        if r0 != null goto label1;
+
+        $i4 = 0;
+
+        goto label2;
+
+     label1:
+        $i4 = virtualinvoke r0.<org.ietf.jgss.MessageProp: int getQOP()>();
+
+     label2:
+        i0 = $i4;
+
+        r4 = r1;
+
+        if i1 != 0 goto label3;
+
+        $i3 = lengthof r1;
+
+        if i2 == $i3 goto label4;
+
+     label3:
+        $r3 = newarray (byte)[i2];
+
+        r4 = $r3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, i1, $r3, 0, i2);
+
+     label4:
+        $r5 = r2.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        $l5 = r2.<sun.security.jgss.wrapper.NativeGSSContext: long pContext>;
+
+        $r6 = virtualinvoke $r5.<sun.security.jgss.wrapper.GSSLibStub: byte[] getMic(long,int,byte[])>($l5, i0, r4);
+
+        return $r6;
+    }
+
+    public void getMIC(java.io.InputStream, java.io.OutputStream, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        java.io.OutputStream r5;
+        byte[] r1, $r4;
+        java.io.IOException $r6;
+        sun.security.jgss.wrapper.NativeGSSContext r2;
+        org.ietf.jgss.MessageProp r3;
+        sun.security.jgss.GSSExceptionImpl $r7;
+        int $i0, $i1, $i2;
+        java.io.InputStream r0;
+
+        r2 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        r0 := @parameter0: java.io.InputStream;
+
+        r5 := @parameter1: java.io.OutputStream;
+
+        r3 := @parameter2: org.ietf.jgss.MessageProp;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.io.InputStream: int available()>();
+
+        r1 = newarray (byte)[$i0];
+
+        $i1 = virtualinvoke r0.<java.io.InputStream: int read(byte[])>(r1);
+
+        $r4 = virtualinvoke r2.<sun.security.jgss.wrapper.NativeGSSContext: byte[] getMIC(byte[],int,int,org.ietf.jgss.MessageProp)>(r1, 0, $i1, r3);
+
+        if $r4 == null goto label2;
+
+        $i2 = lengthof $r4;
+
+        if $i2 == 0 goto label2;
+
+        virtualinvoke r5.<java.io.OutputStream: void write(byte[])>($r4);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = new sun.security.jgss.GSSExceptionImpl;
+
+        specialinvoke $r7.<sun.security.jgss.GSSExceptionImpl: void <init>(int,java.lang.Exception)>(11, $r6);
+
+        throw $r7;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public void verifyMIC(byte[], int, int, byte[], int, int, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        byte[] r0, r1, $r4, $r5, r6, r7;
+        long $l6;
+        sun.security.jgss.wrapper.NativeGSSContext r2;
+        int i0, i1, i2, i3, $i4, $i5;
+        org.ietf.jgss.MessageProp r3;
+        sun.security.jgss.wrapper.GSSLibStub $r8;
+
+        r2 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r1 := @parameter3: byte[];
+
+        i2 := @parameter4: int;
+
+        i3 := @parameter5: int;
+
+        r3 := @parameter6: org.ietf.jgss.MessageProp;
+
+        r6 = r0;
+
+        r7 = r1;
+
+        if i0 != 0 goto label1;
+
+        $i5 = lengthof r0;
+
+        if i1 == $i5 goto label2;
+
+     label1:
+        $r5 = newarray (byte)[i1];
+
+        r6 = $r5;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, i0, $r5, 0, i1);
+
+     label2:
+        if i2 != 0 goto label3;
+
+        $i4 = lengthof r1;
+
+        if i3 == $i4 goto label4;
+
+     label3:
+        $r4 = newarray (byte)[i3];
+
+        r7 = $r4;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, i2, $r4, 0, i3);
+
+     label4:
+        $r8 = r2.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        $l6 = r2.<sun.security.jgss.wrapper.NativeGSSContext: long pContext>;
+
+        virtualinvoke $r8.<sun.security.jgss.wrapper.GSSLibStub: void verifyMic(long,byte[],byte[],org.ietf.jgss.MessageProp)>($l6, r6, r7, r3);
+
+        return;
+    }
+
+    public void verifyMIC(java.io.InputStream, java.io.InputStream, org.ietf.jgss.MessageProp) throws org.ietf.jgss.GSSException
+    {
+        byte[] r2, r7;
+        java.io.IOException $r5;
+        sun.security.jgss.wrapper.NativeGSSContext r3;
+        org.ietf.jgss.MessageProp r4;
+        sun.security.jgss.GSSExceptionImpl $r6;
+        int $i0, $i1, $i2, $i3;
+        java.io.InputStream r0, r1;
+
+        r3 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        r0 := @parameter1: java.io.InputStream;
+
+        r4 := @parameter2: org.ietf.jgss.MessageProp;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.io.InputStream: int available()>();
+
+        r7 = newarray (byte)[$i0];
+
+        $i1 = virtualinvoke r0.<java.io.InputStream: int read(byte[])>(r7);
+
+        $i2 = virtualinvoke r1.<java.io.InputStream: int available()>();
+
+        r2 = newarray (byte)[$i2];
+
+        $i3 = virtualinvoke r1.<java.io.InputStream: int read(byte[])>(r2);
+
+        virtualinvoke r3.<sun.security.jgss.wrapper.NativeGSSContext: void verifyMIC(byte[],int,int,byte[],int,int,org.ietf.jgss.MessageProp)>(r2, 0, $i3, r7, 0, $i1, r4);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new sun.security.jgss.GSSExceptionImpl;
+
+        specialinvoke $r6.<sun.security.jgss.GSSExceptionImpl: void <init>(int,java.lang.Exception)>(11, $r5);
+
+        throw $r6;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public byte[] export() throws org.ietf.jgss.GSSException
+    {
+        byte[] $r2;
+        sun.security.jgss.wrapper.GSSLibStub $r1;
+        long $l0;
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        $r1 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        $l0 = r0.<sun.security.jgss.wrapper.NativeGSSContext: long pContext>;
+
+        $r2 = virtualinvoke $r1.<sun.security.jgss.wrapper.GSSLibStub: byte[] exportContext(long)>($l0);
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: long pContext> = 0L;
+
+        return $r2;
+    }
+
+    private void changeFlags(int, boolean)
+    {
+        long $l0;
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        byte $b1;
+        int i2, $i3, $i4, $i5, $i6, $i7, $i9;
+        boolean $z0, z1;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        i2 := @parameter0: int;
+
+        z1 := @parameter1: boolean;
+
+        $z0 = r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean isInitiator>;
+
+        if $z0 == 0 goto label2;
+
+        $l0 = r0.<sun.security.jgss.wrapper.NativeGSSContext: long pContext>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label2;
+
+        if z1 == 0 goto label1;
+
+        $i6 = r0.<sun.security.jgss.wrapper.NativeGSSContext: int flags>;
+
+        $i7 = $i6 | i2;
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: int flags> = $i7;
+
+        goto label2;
+
+     label1:
+        $i4 = r0.<sun.security.jgss.wrapper.NativeGSSContext: int flags>;
+
+        $i9 = (int) -1;
+
+        $i3 = i2 ^ $i9;
+
+        $i5 = $i4 & $i3;
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: int flags> = $i5;
+
+     label2:
+        return;
+    }
+
+    public void requestMutualAuth(boolean) throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        boolean z0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        z0 := @parameter0: boolean;
+
+        specialinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: void changeFlags(int,boolean)>(2, z0);
+
+        return;
+    }
+
+    public void requestReplayDet(boolean) throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        boolean z0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        z0 := @parameter0: boolean;
+
+        specialinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: void changeFlags(int,boolean)>(4, z0);
+
+        return;
+    }
+
+    public void requestSequenceDet(boolean) throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        boolean z0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        z0 := @parameter0: boolean;
+
+        specialinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: void changeFlags(int,boolean)>(8, z0);
+
+        return;
+    }
+
+    public void requestCredDeleg(boolean) throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        boolean z0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        z0 := @parameter0: boolean;
+
+        specialinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: void changeFlags(int,boolean)>(1, z0);
+
+        return;
+    }
+
+    public void requestAnonymity(boolean) throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        boolean z0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        z0 := @parameter0: boolean;
+
+        specialinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: void changeFlags(int,boolean)>(64, z0);
+
+        return;
+    }
+
+    public void requestConf(boolean) throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        boolean z0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        z0 := @parameter0: boolean;
+
+        specialinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: void changeFlags(int,boolean)>(16, z0);
+
+        return;
+    }
+
+    public void requestInteg(boolean) throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        boolean z0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        z0 := @parameter0: boolean;
+
+        specialinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: void changeFlags(int,boolean)>(32, z0);
+
+        return;
+    }
+
+    public void requestDelegPolicy(boolean) throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        boolean z0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        z0 := @parameter0: boolean;
+
+        return;
+    }
+
+    public void requestLifetime(int) throws org.ietf.jgss.GSSException
+    {
+        byte $b1;
+        int i2;
+        long $l0;
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        i2 := @parameter0: int;
+
+        $z0 = r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean isInitiator>;
+
+        if $z0 == 0 goto label1;
+
+        $l0 = r0.<sun.security.jgss.wrapper.NativeGSSContext: long pContext>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: int lifetime> = i2;
+
+     label1:
+        return;
+    }
+
+    public void setChannelBinding(org.ietf.jgss.ChannelBinding) throws org.ietf.jgss.GSSException
+    {
+        org.ietf.jgss.ChannelBinding r1;
+        byte $b1;
+        long $l0;
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        r1 := @parameter0: org.ietf.jgss.ChannelBinding;
+
+        $l0 = r0.<sun.security.jgss.wrapper.NativeGSSContext: long pContext>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        r0.<sun.security.jgss.wrapper.NativeGSSContext: org.ietf.jgss.ChannelBinding cb> = r1;
+
+     label1:
+        return;
+    }
+
+    private boolean checkFlags(int)
+    {
+        int i0, $i1, $i2;
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        i0 := @parameter0: int;
+
+        $i1 = r0.<sun.security.jgss.wrapper.NativeGSSContext: int flags>;
+
+        $i2 = $i1 & i0;
+
+        if $i2 == 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean getCredDelegState()
+    {
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        $z0 = specialinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean checkFlags(int)>(1);
+
+        return $z0;
+    }
+
+    public boolean getMutualAuthState()
+    {
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        $z0 = specialinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean checkFlags(int)>(2);
+
+        return $z0;
+    }
+
+    public boolean getReplayDetState()
+    {
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        $z0 = specialinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean checkFlags(int)>(4);
+
+        return $z0;
+    }
+
+    public boolean getSequenceDetState()
+    {
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        $z0 = specialinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean checkFlags(int)>(8);
+
+        return $z0;
+    }
+
+    public boolean getAnonymityState()
+    {
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        $z0 = specialinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean checkFlags(int)>(64);
+
+        return $z0;
+    }
+
+    public boolean isTransferable() throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        $z0 = specialinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean checkFlags(int)>(256);
+
+        return $z0;
+    }
+
+    public boolean isProtReady()
+    {
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        $z0 = specialinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean checkFlags(int)>(128);
+
+        return $z0;
+    }
+
+    public boolean getConfState()
+    {
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        $z0 = specialinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean checkFlags(int)>(16);
+
+        return $z0;
+    }
+
+    public boolean getIntegState()
+    {
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        $z0 = specialinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean checkFlags(int)>(32);
+
+        return $z0;
+    }
+
+    public boolean getDelegPolicyState()
+    {
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        return 0;
+    }
+
+    public int getLifetime()
+    {
+        sun.security.jgss.wrapper.GSSLibStub $r1;
+        int $i1;
+        long $l0;
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        $r1 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        $l0 = r0.<sun.security.jgss.wrapper.NativeGSSContext: long pContext>;
+
+        $i1 = virtualinvoke $r1.<sun.security.jgss.wrapper.GSSLibStub: int getContextTime(long)>($l0);
+
+        return $i1;
+    }
+
+    public sun.security.jgss.spi.GSSNameSpi getSrcName() throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.wrapper.GSSNameElement $r1;
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        $r1 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSNameElement srcName>;
+
+        return $r1;
+    }
+
+    public sun.security.jgss.spi.GSSNameSpi getTargName() throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.wrapper.GSSNameElement $r1;
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        $r1 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSNameElement targetName>;
+
+        return $r1;
+    }
+
+    public org.ietf.jgss.Oid getMech() throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.wrapper.GSSLibStub $r1;
+        org.ietf.jgss.Oid $r2, $r3, $r4;
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        $z0 = r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean isEstablished>;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = r0.<sun.security.jgss.wrapper.NativeGSSContext: org.ietf.jgss.Oid actualMech>;
+
+        if $r3 == null goto label1;
+
+        $r4 = r0.<sun.security.jgss.wrapper.NativeGSSContext: org.ietf.jgss.Oid actualMech>;
+
+        return $r4;
+
+     label1:
+        $r1 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSLibStub cStub>;
+
+        $r2 = virtualinvoke $r1.<sun.security.jgss.wrapper.GSSLibStub: org.ietf.jgss.Oid getMech()>();
+
+        return $r2;
+    }
+
+    public sun.security.jgss.spi.GSSCredentialSpi getDelegCred() throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        sun.security.jgss.wrapper.GSSCredElement $r1;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        $r1 = r0.<sun.security.jgss.wrapper.NativeGSSContext: sun.security.jgss.wrapper.GSSCredElement delegatedCred>;
+
+        return $r1;
+    }
+
+    public boolean isInitiator()
+    {
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        $z0 = r0.<sun.security.jgss.wrapper.NativeGSSContext: boolean isInitiator>;
+
+        return $z0;
+    }
+
+    protected void finalize() throws java.lang.Throwable
+    {
+        sun.security.jgss.wrapper.NativeGSSContext r0;
+
+        r0 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        virtualinvoke r0.<sun.security.jgss.wrapper.NativeGSSContext: void dispose()>();
+
+        return;
+    }
+
+    public java.lang.Object inquireSecContext(com.sun.security.jgss.InquireType) throws org.ietf.jgss.GSSException
+    {
+        com.sun.security.jgss.InquireType r2;
+        int $i1;
+        sun.security.jgss.wrapper.NativeGSSContext r1;
+        org.ietf.jgss.GSSException $r3;
+
+        r1 := @this: sun.security.jgss.wrapper.NativeGSSContext;
+
+        r2 := @parameter0: com.sun.security.jgss.InquireType;
+
+        $r3 = new org.ietf.jgss.GSSException;
+
+        $i1 = (int) -1;
+
+        specialinvoke $r3.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(16, $i1, "Inquire type not supported.");
+
+        throw $r3;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        <sun.security.jgss.wrapper.NativeGSSContext: int NUM_OF_INQUIRE_VALUES> = 6;
+
+        <sun.security.jgss.wrapper.NativeGSSContext: int GSS_C_TRANS_FLAG> = 256;
+
+        <sun.security.jgss.wrapper.NativeGSSContext: int GSS_C_PROT_READY_FLAG> = 128;
+
+        <sun.security.jgss.wrapper.NativeGSSContext: int GSS_C_ANON_FLAG> = 64;
+
+        <sun.security.jgss.wrapper.NativeGSSContext: int GSS_C_INTEG_FLAG> = 32;
+
+        <sun.security.jgss.wrapper.NativeGSSContext: int GSS_C_CONF_FLAG> = 16;
+
+        <sun.security.jgss.wrapper.NativeGSSContext: int GSS_C_SEQUENCE_FLAG> = 8;
+
+        <sun.security.jgss.wrapper.NativeGSSContext: int GSS_C_REPLAY_FLAG> = 4;
+
+        <sun.security.jgss.wrapper.NativeGSSContext: int GSS_C_MUTUAL_FLAG> = 2;
+
+        <sun.security.jgss.wrapper.NativeGSSContext: int GSS_C_DELEG_FLAG> = 1;
+
+        $r0 = class "Lsun/security/jgss/wrapper/NativeGSSContext;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.security.jgss.wrapper.NativeGSSContext: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

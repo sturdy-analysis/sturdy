@@ -1,0 +1,169 @@
+public final class jdk.management.resource.internal.inst.ThreadRMHooks extends java.lang.Object
+{
+    private long tid;
+
+    public void <init>()
+    {
+        jdk.management.resource.internal.inst.ThreadRMHooks r0;
+
+        r0 := @this: jdk.management.resource.internal.inst.ThreadRMHooks;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static synchronized long nextThreadID()
+    {
+        return 0L;
+    }
+
+    private void init(java.lang.ThreadGroup, java.lang.Runnable, java.lang.String, long, java.security.AccessControlContext, boolean)
+    {
+        java.security.AccessControlContext r8;
+        java.lang.Throwable $r14;
+        jdk.management.resource.internal.SimpleResourceContext r11;
+        jdk.management.resource.internal.inst.ThreadRMHooks r2;
+        long $l0, $l1, l3, $l4, $l5, $l6, $l7, l8;
+        java.lang.ThreadGroup r5;
+        jdk.management.resource.ResourceRequestDeniedException $r13;
+        java.lang.Runnable r6;
+        jdk.management.resource.ResourceContext $r10;
+        byte $b2;
+        java.lang.Long $r0;
+        java.lang.Thread $r9, $r12;
+        java.lang.String r7;
+        jdk.management.resource.internal.ApproverGroup $r3;
+        boolean z0;
+        jdk.management.resource.internal.ResourceIdImpl $r1;
+        jdk.management.resource.ResourceRequest $r4;
+
+        r2 := @this: jdk.management.resource.internal.inst.ThreadRMHooks;
+
+        r5 := @parameter0: java.lang.ThreadGroup;
+
+        r6 := @parameter1: java.lang.Runnable;
+
+        r7 := @parameter2: java.lang.String;
+
+        l3 := @parameter3: long;
+
+        r8 := @parameter4: java.security.AccessControlContext;
+
+        z0 := @parameter5: boolean;
+
+        $l0 = staticinvoke <jdk.management.resource.internal.inst.ThreadRMHooks: long nextThreadID()>();
+
+        $r0 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+        $r1 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.lang.Object)>($r0);
+
+        $r3 = <jdk.management.resource.internal.ApproverGroup: jdk.management.resource.internal.ApproverGroup THREAD_CREATED_GROUP>;
+
+        $r4 = virtualinvoke $r3.<jdk.management.resource.internal.ApproverGroup: jdk.management.resource.ResourceRequest getApprover(java.lang.Object)>(r2);
+
+        l8 = 0L;
+
+     label1:
+        $l1 = interfaceinvoke $r4.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>(1L, $r1);
+
+        l8 = $l1;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 != 0 goto label2;
+
+        $r13 = new jdk.management.resource.ResourceRequestDeniedException;
+
+        specialinvoke $r13.<jdk.management.resource.ResourceRequestDeniedException: void <init>(java.lang.String)>("Resource limited: thread creation denied by resource manager");
+
+        throw $r13;
+
+     label2:
+        specialinvoke r2.<jdk.management.resource.internal.inst.ThreadRMHooks: void init(java.lang.ThreadGroup,java.lang.Runnable,java.lang.String,long,java.security.AccessControlContext,boolean)>(r5, r6, r7, l3, r8, z0);
+
+        $r9 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r10 = staticinvoke <jdk.management.resource.internal.SimpleResourceContext: jdk.management.resource.ResourceContext getThreadContext(java.lang.Thread)>($r9);
+
+        r11 = (jdk.management.resource.internal.SimpleResourceContext) $r10;
+
+        $r12 = (java.lang.Thread) r2;
+
+        virtualinvoke r11.<jdk.management.resource.internal.SimpleResourceContext: void bindNewThreadContext(java.lang.Thread)>($r12);
+
+     label3:
+        $l4 = $l1 - 1L;
+
+        $l5 = neg $l4;
+
+        interfaceinvoke $r4.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>($l5, $r1);
+
+        goto label6;
+
+     label4:
+        $r14 := @caughtexception;
+
+     label5:
+        $l6 = l8 - 1L;
+
+        $l7 = neg $l6;
+
+        interfaceinvoke $r4.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>($l7, $r1);
+
+        throw $r14;
+
+     label6:
+        r2.<jdk.management.resource.internal.inst.ThreadRMHooks: long tid> = $l0;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private void exit()
+    {
+        java.lang.Throwable $r5;
+        jdk.management.resource.internal.inst.ThreadRMHooks r0;
+        java.lang.Long $r1;
+        jdk.management.resource.ResourceRequest $r4;
+        jdk.management.resource.internal.ResourceIdImpl $r2;
+        long $l0;
+        jdk.management.resource.internal.ApproverGroup $r3;
+
+        r0 := @this: jdk.management.resource.internal.inst.ThreadRMHooks;
+
+        $l0 = r0.<jdk.management.resource.internal.inst.ThreadRMHooks: long tid>;
+
+        $r1 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+        $r2 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.lang.Object)>($r1);
+
+        $r3 = <jdk.management.resource.internal.ApproverGroup: jdk.management.resource.internal.ApproverGroup THREAD_CREATED_GROUP>;
+
+        $r4 = virtualinvoke $r3.<jdk.management.resource.internal.ApproverGroup: jdk.management.resource.ResourceRequest getApprover(java.lang.Object)>(r0);
+
+     label1:
+        interfaceinvoke $r4.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>(-1L, $r2);
+
+        staticinvoke <jdk.management.resource.internal.SimpleResourceContext: void removeThreadContext()>();
+
+     label2:
+        specialinvoke r0.<jdk.management.resource.internal.inst.ThreadRMHooks: void exit()>();
+
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        specialinvoke r0.<jdk.management.resource.internal.inst.ThreadRMHooks: void exit()>();
+
+        throw $r5;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+}

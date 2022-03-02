@@ -1,0 +1,886 @@
+class java.awt.GradientPaintContext extends java.lang.Object implements java.awt.PaintContext
+{
+    static java.awt.image.ColorModel xrgbmodel;
+    static java.awt.image.ColorModel xbgrmodel;
+    static java.awt.image.ColorModel cachedModel;
+    static java.lang.ref.WeakReference cached;
+    double x1;
+    double y1;
+    double dx;
+    double dy;
+    boolean cyclic;
+    int[] interp;
+    java.awt.image.Raster saved;
+    java.awt.image.ColorModel model;
+
+    static synchronized java.awt.image.Raster getCachedRaster(java.awt.image.ColorModel, int, int)
+    {
+        java.awt.image.ColorModel r0, $r1;
+        int i0, i1, $i2, $i3;
+        java.awt.image.Raster r5;
+        java.lang.Object $r4;
+        java.awt.image.WritableRaster $r6;
+        java.lang.ref.WeakReference $r2, $r3;
+
+        r0 := @parameter0: java.awt.image.ColorModel;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r1 = <java.awt.GradientPaintContext: java.awt.image.ColorModel cachedModel>;
+
+        if r0 != $r1 goto label1;
+
+        $r2 = <java.awt.GradientPaintContext: java.lang.ref.WeakReference cached>;
+
+        if $r2 == null goto label1;
+
+        $r3 = <java.awt.GradientPaintContext: java.lang.ref.WeakReference cached>;
+
+        $r4 = virtualinvoke $r3.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        r5 = (java.awt.image.Raster) $r4;
+
+        if r5 == null goto label1;
+
+        $i2 = virtualinvoke r5.<java.awt.image.Raster: int getWidth()>();
+
+        if $i2 < i0 goto label1;
+
+        $i3 = virtualinvoke r5.<java.awt.image.Raster: int getHeight()>();
+
+        if $i3 < i1 goto label1;
+
+        <java.awt.GradientPaintContext: java.lang.ref.WeakReference cached> = null;
+
+        return r5;
+
+     label1:
+        $r6 = virtualinvoke r0.<java.awt.image.ColorModel: java.awt.image.WritableRaster createCompatibleWritableRaster(int,int)>(i0, i1);
+
+        return $r6;
+    }
+
+    static synchronized void putCachedRaster(java.awt.image.ColorModel, java.awt.image.Raster)
+    {
+        java.awt.image.ColorModel r1;
+        java.awt.image.Raster r2, r5;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.lang.Object $r4;
+        java.lang.ref.WeakReference $r0, $r3, $r6;
+
+        r1 := @parameter0: java.awt.image.ColorModel;
+
+        r2 := @parameter1: java.awt.image.Raster;
+
+        $r0 = <java.awt.GradientPaintContext: java.lang.ref.WeakReference cached>;
+
+        if $r0 == null goto label2;
+
+        $r3 = <java.awt.GradientPaintContext: java.lang.ref.WeakReference cached>;
+
+        $r4 = virtualinvoke $r3.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        r5 = (java.awt.image.Raster) $r4;
+
+        if r5 == null goto label2;
+
+        $i0 = virtualinvoke r5.<java.awt.image.Raster: int getWidth()>();
+
+        $i1 = virtualinvoke r5.<java.awt.image.Raster: int getHeight()>();
+
+        $i2 = virtualinvoke r2.<java.awt.image.Raster: int getWidth()>();
+
+        $i3 = virtualinvoke r2.<java.awt.image.Raster: int getHeight()>();
+
+        if $i0 < $i2 goto label1;
+
+        if $i1 < $i3 goto label1;
+
+        return;
+
+     label1:
+        $i5 = $i0 * $i1;
+
+        $i4 = $i2 * $i3;
+
+        if $i5 < $i4 goto label2;
+
+        return;
+
+     label2:
+        <java.awt.GradientPaintContext: java.awt.image.ColorModel cachedModel> = r1;
+
+        $r6 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r6.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>(r2);
+
+        <java.awt.GradientPaintContext: java.lang.ref.WeakReference cached> = $r6;
+
+        return;
+    }
+
+    public void <init>(java.awt.image.ColorModel, java.awt.geom.Point2D, java.awt.geom.Point2D, java.awt.geom.AffineTransform, java.awt.Color, java.awt.Color, boolean)
+    {
+        java.awt.Color r15, r16, r17;
+        byte $b0, $b1;
+        java.awt.image.DirectColorModel r19;
+        java.awt.geom.AffineTransform r3, $r4;
+        short $s41;
+        java.awt.geom.Point2D$Double $r20, $r21;
+        java.awt.geom.Point2D r13, r14, $r18;
+        int[] $r6, $r7, $r8;
+        java.awt.GradientPaintContext r0;
+        java.awt.geom.NoninvertibleTransformException $r12;
+        boolean z0, $z1;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $f10, $f11, $f12, $f13, $f14, $f15, $f16, f17;
+        int $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, i23, $i24, $i25, $i26, i27, $i28, $i29, $i30, $i31, $i32, $i33, i34, $i35, $i36, $i37, $i38, $i39, i40, i42, $i43, $i44, $i46;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15, $d16, $d17, $d18, $d19, $d20, $d21, $d22, $d23, $d24, $d25, $d26, $d27, $d28, $d29, $d30, $d31;
+        java.awt.image.ColorModel $r5, $r9, r10, $r11;
+
+        r0 := @this: java.awt.GradientPaintContext;
+
+        r10 := @parameter0: java.awt.image.ColorModel;
+
+        r13 := @parameter1: java.awt.geom.Point2D;
+
+        r14 := @parameter2: java.awt.geom.Point2D;
+
+        r3 := @parameter3: java.awt.geom.AffineTransform;
+
+        r15 := @parameter4: java.awt.Color;
+
+        r16 := @parameter5: java.awt.Color;
+
+        z0 := @parameter6: boolean;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r20 = new java.awt.geom.Point2D$Double;
+
+        specialinvoke $r20.<java.awt.geom.Point2D$Double: void <init>(double,double)>(1.0, 0.0);
+
+        $r21 = new java.awt.geom.Point2D$Double;
+
+        specialinvoke $r21.<java.awt.geom.Point2D$Double: void <init>(double,double)>(0.0, 1.0);
+
+     label01:
+        $r4 = virtualinvoke r3.<java.awt.geom.AffineTransform: java.awt.geom.AffineTransform createInverse()>();
+
+        virtualinvoke $r4.<java.awt.geom.AffineTransform: java.awt.geom.Point2D deltaTransform(java.awt.geom.Point2D,java.awt.geom.Point2D)>($r20, $r20);
+
+        virtualinvoke $r4.<java.awt.geom.AffineTransform: java.awt.geom.Point2D deltaTransform(java.awt.geom.Point2D,java.awt.geom.Point2D)>($r21, $r21);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r12 := @caughtexception;
+
+        virtualinvoke $r20.<java.awt.geom.Point2D: void setLocation(double,double)>(0.0, 0.0);
+
+        virtualinvoke $r21.<java.awt.geom.Point2D: void setLocation(double,double)>(0.0, 0.0);
+
+     label04:
+        $d0 = virtualinvoke r14.<java.awt.geom.Point2D: double getX()>();
+
+        $d1 = virtualinvoke r13.<java.awt.geom.Point2D: double getX()>();
+
+        $d27 = $d0 - $d1;
+
+        $d2 = virtualinvoke r14.<java.awt.geom.Point2D: double getY()>();
+
+        $d3 = virtualinvoke r13.<java.awt.geom.Point2D: double getY()>();
+
+        $d28 = $d2 - $d3;
+
+        $d5 = $d27 * $d27;
+
+        $d4 = $d28 * $d28;
+
+        $d29 = $d5 + $d4;
+
+        $b0 = $d29 cmpg 4.9E-324;
+
+        $i43 = (int) $b0;
+
+        if $i43 > 0 goto label05;
+
+        r0.<java.awt.GradientPaintContext: double dx> = 0.0;
+
+        r0.<java.awt.GradientPaintContext: double dy> = 0.0;
+
+        goto label07;
+
+     label05:
+        $d6 = virtualinvoke $r20.<java.awt.geom.Point2D: double getX()>();
+
+        $d7 = $d6 * $d27;
+
+        $d8 = virtualinvoke $r20.<java.awt.geom.Point2D: double getY()>();
+
+        $d9 = $d8 * $d28;
+
+        $d10 = $d7 + $d9;
+
+        $d11 = $d10 / $d29;
+
+        r0.<java.awt.GradientPaintContext: double dx> = $d11;
+
+        $d12 = virtualinvoke $r21.<java.awt.geom.Point2D: double getX()>();
+
+        $d13 = $d12 * $d27;
+
+        $d14 = virtualinvoke $r21.<java.awt.geom.Point2D: double getY()>();
+
+        $d15 = $d14 * $d28;
+
+        $d16 = $d13 + $d15;
+
+        $d17 = $d16 / $d29;
+
+        r0.<java.awt.GradientPaintContext: double dy> = $d17;
+
+        if z0 == 0 goto label06;
+
+        $d23 = r0.<java.awt.GradientPaintContext: double dx>;
+
+        $d24 = $d23 % 1.0;
+
+        r0.<java.awt.GradientPaintContext: double dx> = $d24;
+
+        $d25 = r0.<java.awt.GradientPaintContext: double dy>;
+
+        $d26 = $d25 % 1.0;
+
+        r0.<java.awt.GradientPaintContext: double dy> = $d26;
+
+        goto label07;
+
+     label06:
+        $d18 = r0.<java.awt.GradientPaintContext: double dx>;
+
+        $b1 = $d18 cmpg 0.0;
+
+        $i44 = (int) $b1;
+
+        if $i44 >= 0 goto label07;
+
+        r13 = r14;
+
+        r17 = r15;
+
+        r15 = r16;
+
+        r16 = r17;
+
+        $d19 = r0.<java.awt.GradientPaintContext: double dx>;
+
+        $d20 = neg $d19;
+
+        r0.<java.awt.GradientPaintContext: double dx> = $d20;
+
+        $d21 = r0.<java.awt.GradientPaintContext: double dy>;
+
+        $d22 = neg $d21;
+
+        r0.<java.awt.GradientPaintContext: double dy> = $d22;
+
+     label07:
+        $r18 = virtualinvoke r3.<java.awt.geom.AffineTransform: java.awt.geom.Point2D transform(java.awt.geom.Point2D,java.awt.geom.Point2D)>(r13, null);
+
+        $d30 = virtualinvoke $r18.<java.awt.geom.Point2D: double getX()>();
+
+        r0.<java.awt.GradientPaintContext: double x1> = $d30;
+
+        $d31 = virtualinvoke $r18.<java.awt.geom.Point2D: double getY()>();
+
+        r0.<java.awt.GradientPaintContext: double y1> = $d31;
+
+        r0.<java.awt.GradientPaintContext: boolean cyclic> = z0;
+
+        $i17 = virtualinvoke r15.<java.awt.Color: int getRGB()>();
+
+        $i18 = virtualinvoke r16.<java.awt.Color: int getRGB()>();
+
+        $i19 = $i17 >> 24;
+
+        $i20 = $i19 & 255;
+
+        $i21 = $i17 >> 16;
+
+        $i22 = $i21 & 255;
+
+        i23 = $i22;
+
+        $i24 = $i17 >> 8;
+
+        $i25 = $i24 & 255;
+
+        $i26 = $i17 & 255;
+
+        i27 = $i26;
+
+        $i28 = $i18 >> 24;
+
+        $i29 = $i28 & 255;
+
+        $i30 = $i29 - $i20;
+
+        $i31 = $i18 >> 16;
+
+        $i32 = $i31 & 255;
+
+        $i33 = $i32 - $i22;
+
+        i34 = $i33;
+
+        $i35 = $i18 >> 8;
+
+        $i36 = $i35 & 255;
+
+        $i37 = $i36 - $i25;
+
+        $i38 = $i18 & 255;
+
+        $i39 = $i38 - $i26;
+
+        i40 = $i39;
+
+        if $i20 != 255 goto label10;
+
+        if $i30 != 0 goto label10;
+
+        $r9 = <java.awt.GradientPaintContext: java.awt.image.ColorModel xrgbmodel>;
+
+        r0.<java.awt.GradientPaintContext: java.awt.image.ColorModel model> = $r9;
+
+        $z1 = r10 instanceof java.awt.image.DirectColorModel;
+
+        if $z1 == 0 goto label11;
+
+        r19 = (java.awt.image.DirectColorModel) r10;
+
+        $i13 = virtualinvoke r19.<java.awt.image.DirectColorModel: int getAlphaMask()>();
+
+        if $i13 == 0 goto label08;
+
+        if $i13 != 255 goto label09;
+
+     label08:
+        $i14 = virtualinvoke r19.<java.awt.image.DirectColorModel: int getRedMask()>();
+
+        if $i14 != 255 goto label09;
+
+        $i15 = virtualinvoke r19.<java.awt.image.DirectColorModel: int getGreenMask()>();
+
+        $i46 = (int) 65280;
+
+        if $i15 != $i46 goto label09;
+
+        $i16 = virtualinvoke r19.<java.awt.image.DirectColorModel: int getBlueMask()>();
+
+        if $i16 != 16711680 goto label09;
+
+        $r11 = <java.awt.GradientPaintContext: java.awt.image.ColorModel xbgrmodel>;
+
+        r0.<java.awt.GradientPaintContext: java.awt.image.ColorModel model> = $r11;
+
+        i23 = $i26;
+
+        i27 = $i22;
+
+        i34 = $i39;
+
+        i40 = $i33;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r5 = staticinvoke <java.awt.image.ColorModel: java.awt.image.ColorModel getRGBdefault()>();
+
+        r0.<java.awt.GradientPaintContext: java.awt.image.ColorModel model> = $r5;
+
+     label11:
+        if z0 == 0 goto label12;
+
+        $s41 = 513;
+
+        goto label13;
+
+     label12:
+        $s41 = 257;
+
+     label13:
+        $r6 = newarray (int)[$s41];
+
+        r0.<java.awt.GradientPaintContext: int[] interp> = $r6;
+
+        i42 = 0;
+
+     label14:
+        if i42 > 256 goto label16;
+
+        $f0 = (float) i42;
+
+        f17 = $f0 / 256.0F;
+
+        $f3 = (float) $i20;
+
+        $f1 = (float) $i30;
+
+        $f2 = $f1 * f17;
+
+        $f4 = $f3 + $f2;
+
+        $i2 = (int) $f4;
+
+        $i5 = $i2 << 24;
+
+        $f7 = (float) i23;
+
+        $f5 = (float) i34;
+
+        $f6 = $f5 * f17;
+
+        $f8 = $f7 + $f6;
+
+        $i3 = (int) $f8;
+
+        $i4 = $i3 << 16;
+
+        $i8 = $i5 | $i4;
+
+        $f11 = (float) $i25;
+
+        $f9 = (float) $i37;
+
+        $f10 = $f9 * f17;
+
+        $f12 = $f11 + $f10;
+
+        $i6 = (int) $f12;
+
+        $i7 = $i6 << 8;
+
+        $i10 = $i8 | $i7;
+
+        $f15 = (float) i27;
+
+        $f13 = (float) i40;
+
+        $f14 = $f13 * f17;
+
+        $f16 = $f15 + $f14;
+
+        $i9 = (int) $f16;
+
+        i11 = $i10 | $i9;
+
+        $r7 = r0.<java.awt.GradientPaintContext: int[] interp>;
+
+        $r7[i42] = i11;
+
+        if z0 == 0 goto label15;
+
+        $r8 = r0.<java.awt.GradientPaintContext: int[] interp>;
+
+        $i12 = 512 - i42;
+
+        $r8[$i12] = i11;
+
+     label15:
+        i42 = i42 + 1;
+
+        goto label14;
+
+     label16:
+        return;
+
+        catch java.awt.geom.NoninvertibleTransformException from label01 to label02 with label03;
+    }
+
+    public void dispose()
+    {
+        java.awt.image.ColorModel $r3;
+        java.awt.GradientPaintContext r0;
+        java.awt.image.Raster $r1, $r2;
+
+        r0 := @this: java.awt.GradientPaintContext;
+
+        $r1 = r0.<java.awt.GradientPaintContext: java.awt.image.Raster saved>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<java.awt.GradientPaintContext: java.awt.image.ColorModel model>;
+
+        $r2 = r0.<java.awt.GradientPaintContext: java.awt.image.Raster saved>;
+
+        staticinvoke <java.awt.GradientPaintContext: void putCachedRaster(java.awt.image.ColorModel,java.awt.image.Raster)>($r3, $r2);
+
+        r0.<java.awt.GradientPaintContext: java.awt.image.Raster saved> = null;
+
+     label1:
+        return;
+    }
+
+    public java.awt.image.ColorModel getColorModel()
+    {
+        java.awt.GradientPaintContext r0;
+        java.awt.image.ColorModel $r1;
+
+        r0 := @this: java.awt.GradientPaintContext;
+
+        $r1 = r0.<java.awt.GradientPaintContext: java.awt.image.ColorModel model>;
+
+        return $r1;
+    }
+
+    public java.awt.image.Raster getRaster(int, int, int, int)
+    {
+        int[] $r5;
+        int i0, i1, i2, i3, $i4, $i5, $i6, $i7, $i8;
+        java.awt.GradientPaintContext r0;
+        java.awt.image.Raster r1, $r3;
+        sun.awt.image.IntegerComponentRaster $r4;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, d10, $d11, $d12, $d13, $d14;
+        boolean $z0;
+        java.awt.image.ColorModel $r2;
+
+        r0 := @this: java.awt.GradientPaintContext;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        $d1 = (double) i0;
+
+        $d0 = r0.<java.awt.GradientPaintContext: double x1>;
+
+        $d3 = $d1 - $d0;
+
+        $d2 = r0.<java.awt.GradientPaintContext: double dx>;
+
+        $d9 = $d3 * $d2;
+
+        $d5 = (double) i1;
+
+        $d4 = r0.<java.awt.GradientPaintContext: double y1>;
+
+        $d7 = $d5 - $d4;
+
+        $d6 = r0.<java.awt.GradientPaintContext: double dy>;
+
+        $d8 = $d7 * $d6;
+
+        d10 = $d9 + $d8;
+
+        r1 = r0.<java.awt.GradientPaintContext: java.awt.image.Raster saved>;
+
+        if r1 == null goto label1;
+
+        $i4 = virtualinvoke r1.<java.awt.image.Raster: int getWidth()>();
+
+        if $i4 < i2 goto label1;
+
+        $i5 = virtualinvoke r1.<java.awt.image.Raster: int getHeight()>();
+
+        if $i5 >= i3 goto label2;
+
+     label1:
+        $r2 = r0.<java.awt.GradientPaintContext: java.awt.image.ColorModel model>;
+
+        $r3 = staticinvoke <java.awt.GradientPaintContext: java.awt.image.Raster getCachedRaster(java.awt.image.ColorModel,int,int)>($r2, i2, i3);
+
+        r1 = $r3;
+
+        r0.<java.awt.GradientPaintContext: java.awt.image.Raster saved> = $r3;
+
+     label2:
+        $r4 = (sun.awt.image.IntegerComponentRaster) r1;
+
+        $i6 = virtualinvoke $r4.<sun.awt.image.IntegerComponentRaster: int getDataOffset(int)>(0);
+
+        $i7 = virtualinvoke $r4.<sun.awt.image.IntegerComponentRaster: int getScanlineStride()>();
+
+        $i8 = $i7 - i2;
+
+        $r5 = virtualinvoke $r4.<sun.awt.image.IntegerComponentRaster: int[] getDataStorage()>();
+
+        $z0 = r0.<java.awt.GradientPaintContext: boolean cyclic>;
+
+        if $z0 == 0 goto label3;
+
+        $d14 = r0.<java.awt.GradientPaintContext: double dx>;
+
+        $d13 = r0.<java.awt.GradientPaintContext: double dy>;
+
+        virtualinvoke r0.<java.awt.GradientPaintContext: void cycleFillRaster(int[],int,int,int,int,double,double,double)>($r5, $i6, $i8, i2, i3, d10, $d14, $d13);
+
+        goto label4;
+
+     label3:
+        $d12 = r0.<java.awt.GradientPaintContext: double dx>;
+
+        $d11 = r0.<java.awt.GradientPaintContext: double dy>;
+
+        virtualinvoke r0.<java.awt.GradientPaintContext: void clipFillRaster(int[],int,int,int,int,double,double,double)>($r5, $i6, $i8, i2, i3, d10, $d12, $d11);
+
+     label4:
+        virtualinvoke $r4.<sun.awt.image.IntegerComponentRaster: void markDirty()>();
+
+        return r1;
+    }
+
+    void cycleFillRaster(int[], int, int, int, int, double, double, double)
+    {
+        int[] r0, $r2;
+        int $i0, i1, i2, i3, i4, $i5, $i6, $i7, i8, i9, i10, i11, i12, $i14, $i16;
+        java.awt.GradientPaintContext r1;
+        double $d0, d1, $d2, $d3, d4, $d5, $d6, d7, d8;
+
+        r1 := @this: java.awt.GradientPaintContext;
+
+        r0 := @parameter0: int[];
+
+        i8 := @parameter1: int;
+
+        i4 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        i9 := @parameter4: int;
+
+        d7 := @parameter5: double;
+
+        d1 := @parameter6: double;
+
+        d4 := @parameter7: double;
+
+        d8 = d7 % 2.0;
+
+        $d0 = d8 * 1.073741824E9;
+
+        $i0 = (int) $d0;
+
+        i10 = $i0 << 1;
+
+        $d2 = neg d1;
+
+        $d3 = $d2 * -2.147483648E9;
+
+        i1 = (int) $d3;
+
+        $d5 = neg d4;
+
+        $d6 = $d5 * -2.147483648E9;
+
+        i2 = (int) $d6;
+
+     label1:
+        $i14 = (int) -1;
+
+        i9 = i9 + $i14;
+
+        if i9 < 0 goto label4;
+
+        i11 = i10;
+
+        i12 = i3;
+
+     label2:
+        if i12 <= 0 goto label3;
+
+        $i5 = i8;
+
+        i8 = i8 + 1;
+
+        $r2 = r1.<java.awt.GradientPaintContext: int[] interp>;
+
+        $i6 = i11 >>> 23;
+
+        $i7 = $r2[$i6];
+
+        r0[$i5] = $i7;
+
+        i11 = i11 + i1;
+
+        $i16 = (int) -1;
+
+        i12 = i12 + $i16;
+
+        goto label2;
+
+     label3:
+        i8 = i8 + i4;
+
+        i10 = i10 + i2;
+
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    void clipFillRaster(int[], int, int, int, int, double, double, double)
+    {
+        byte $b1, $b8, $b13;
+        int[] $r1, r2, $r3, $r4;
+        java.awt.GradientPaintContext r0;
+        int i0, i2, $i3, $i4, $i5, $i6, $i7, i9, i10, i11, i12, i14, $i16, $i17, $i19, $i20, $i21, $i23, $i25;
+        double d0, $d1, d2, $d3, d4, d5;
+
+        r0 := @this: java.awt.GradientPaintContext;
+
+        r2 := @parameter0: int[];
+
+        i9 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        i10 := @parameter4: int;
+
+        d4 := @parameter5: double;
+
+        d2 := @parameter6: double;
+
+        d0 := @parameter7: double;
+
+     label1:
+        $i16 = (int) -1;
+
+        i10 = i10 + $i16;
+
+        if i10 < 0 goto label7;
+
+        d5 = d4;
+
+        i11 = i0;
+
+        $b1 = d4 cmpg 0.0;
+
+        $i17 = (int) $b1;
+
+        if $i17 > 0 goto label3;
+
+        $r4 = r0.<java.awt.GradientPaintContext: int[] interp>;
+
+        i12 = $r4[0];
+
+     label2:
+        $i7 = i9;
+
+        i9 = i9 + 1;
+
+        r2[$i7] = i12;
+
+        $d3 = d5 + d2;
+
+        d5 = $d3;
+
+        $i19 = (int) -1;
+
+        i11 = i11 + $i19;
+
+        if i11 <= 0 goto label3;
+
+        $b8 = $d3 cmpg 0.0;
+
+        $i20 = (int) $b8;
+
+        if $i20 <= 0 goto label2;
+
+     label3:
+        $b13 = d5 cmpg 1.0;
+
+        $i21 = (int) $b13;
+
+        if $i21 >= 0 goto label4;
+
+        $i23 = (int) -1;
+
+        i11 = i11 + $i23;
+
+        if i11 < 0 goto label4;
+
+        $i4 = i9;
+
+        i9 = i9 + 1;
+
+        $r3 = r0.<java.awt.GradientPaintContext: int[] interp>;
+
+        $d1 = d5 * 256.0;
+
+        $i5 = (int) $d1;
+
+        $i6 = $r3[$i5];
+
+        r2[$i4] = $i6;
+
+        d5 = d5 + d2;
+
+        goto label3;
+
+     label4:
+        if i11 <= 0 goto label6;
+
+        $r1 = r0.<java.awt.GradientPaintContext: int[] interp>;
+
+        i14 = $r1[256];
+
+     label5:
+        $i3 = i9;
+
+        i9 = i9 + 1;
+
+        r2[$i3] = i14;
+
+        $i25 = (int) -1;
+
+        i11 = i11 + $i25;
+
+        if i11 > 0 goto label5;
+
+     label6:
+        i9 = i9 + i2;
+
+        d4 = d4 + d0;
+
+        goto label1;
+
+     label7:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.awt.image.DirectColorModel $r2, $r3;
+        int $i1, $i3;
+
+        $r2 = new java.awt.image.DirectColorModel;
+
+        $i1 = (int) 65280;
+
+        specialinvoke $r2.<java.awt.image.DirectColorModel: void <init>(int,int,int,int)>(24, 16711680, $i1, 255);
+
+        <java.awt.GradientPaintContext: java.awt.image.ColorModel xrgbmodel> = $r2;
+
+        $r3 = new java.awt.image.DirectColorModel;
+
+        $i3 = (int) 65280;
+
+        specialinvoke $r3.<java.awt.image.DirectColorModel: void <init>(int,int,int,int)>(24, 255, $i3, 16711680);
+
+        <java.awt.GradientPaintContext: java.awt.image.ColorModel xbgrmodel> = $r3;
+
+        return;
+    }
+}

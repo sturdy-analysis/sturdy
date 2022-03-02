@@ -1,0 +1,995 @@
+public class java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject extends java.lang.Object implements java.util.concurrent.locks.Condition, java.io.Serializable
+{
+    private static final long serialVersionUID;
+    private transient java.util.concurrent.locks.AbstractQueuedSynchronizer$Node firstWaiter;
+    private transient java.util.concurrent.locks.AbstractQueuedSynchronizer$Node lastWaiter;
+    private static final int REINTERRUPT;
+    private static final int THROW_IE;
+    final java.util.concurrent.locks.AbstractQueuedSynchronizer this$0;
+
+    public void <init>(java.util.concurrent.locks.AbstractQueuedSynchronizer)
+    {
+        java.util.concurrent.locks.AbstractQueuedSynchronizer r1;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject r0;
+
+        r0 := @this: java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject;
+
+        r1 := @parameter0: java.util.concurrent.locks.AbstractQueuedSynchronizer;
+
+        r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0> = r1;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private java.util.concurrent.locks.AbstractQueuedSynchronizer$Node addConditionWaiter()
+    {
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$Node r1, $r4;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject r0;
+        java.lang.Thread $r3;
+        int $i0, $i2, $i4;
+
+        r0 := @this: java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject;
+
+        r1 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node lastWaiter>;
+
+        if r1 == null goto label1;
+
+        $i0 = r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer$Node: int waitStatus>;
+
+        $i2 = (int) -2;
+
+        if $i0 == $i2 goto label1;
+
+        specialinvoke r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: void unlinkCancelledWaiters()>();
+
+        r1 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node lastWaiter>;
+
+     label1:
+        $r4 = new java.util.concurrent.locks.AbstractQueuedSynchronizer$Node;
+
+        $r3 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $i4 = (int) -2;
+
+        specialinvoke $r4.<java.util.concurrent.locks.AbstractQueuedSynchronizer$Node: void <init>(java.lang.Thread,int)>($r3, $i4);
+
+        if r1 != null goto label2;
+
+        r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node firstWaiter> = $r4;
+
+        goto label3;
+
+     label2:
+        r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer$Node: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node nextWaiter> = $r4;
+
+     label3:
+        r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node lastWaiter> = $r4;
+
+        return $r4;
+    }
+
+    private void doSignal(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node)
+    {
+        java.util.concurrent.locks.AbstractQueuedSynchronizer $r2;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$Node $r1, $r3, r4;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject r0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject;
+
+        r4 := @parameter0: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node;
+
+     label1:
+        $r1 = r4.<java.util.concurrent.locks.AbstractQueuedSynchronizer$Node: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node nextWaiter>;
+
+        r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node firstWaiter> = $r1;
+
+        if $r1 != null goto label2;
+
+        r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node lastWaiter> = null;
+
+     label2:
+        r4.<java.util.concurrent.locks.AbstractQueuedSynchronizer$Node: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node nextWaiter> = null;
+
+        $r2 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        $z0 = virtualinvoke $r2.<java.util.concurrent.locks.AbstractQueuedSynchronizer: boolean transferForSignal(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node)>(r4);
+
+        if $z0 != 0 goto label3;
+
+        $r3 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node firstWaiter>;
+
+        r4 = $r3;
+
+        if $r3 != null goto label1;
+
+     label3:
+        return;
+    }
+
+    private void doSignalAll(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node)
+    {
+        java.util.concurrent.locks.AbstractQueuedSynchronizer $r1;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$Node $r2, r3;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject r0;
+
+        r0 := @this: java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject;
+
+        r3 := @parameter0: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node;
+
+        r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node firstWaiter> = null;
+
+        r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node lastWaiter> = null;
+
+     label1:
+        $r2 = r3.<java.util.concurrent.locks.AbstractQueuedSynchronizer$Node: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node nextWaiter>;
+
+        r3.<java.util.concurrent.locks.AbstractQueuedSynchronizer$Node: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node nextWaiter> = null;
+
+        $r1 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        virtualinvoke $r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer: boolean transferForSignal(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node)>(r3);
+
+        r3 = $r2;
+
+        if $r2 != null goto label1;
+
+        return;
+    }
+
+    private void unlinkCancelledWaiters()
+    {
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$Node r1, r2, r3;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject r0;
+        int $i0, $i2;
+
+        r0 := @this: java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject;
+
+        r2 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node firstWaiter>;
+
+        r3 = null;
+
+     label1:
+        if r2 == null goto label6;
+
+        r1 = r2.<java.util.concurrent.locks.AbstractQueuedSynchronizer$Node: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node nextWaiter>;
+
+        $i0 = r2.<java.util.concurrent.locks.AbstractQueuedSynchronizer$Node: int waitStatus>;
+
+        $i2 = (int) -2;
+
+        if $i0 == $i2 goto label4;
+
+        r2.<java.util.concurrent.locks.AbstractQueuedSynchronizer$Node: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node nextWaiter> = null;
+
+        if r3 != null goto label2;
+
+        r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node firstWaiter> = r1;
+
+        goto label3;
+
+     label2:
+        r3.<java.util.concurrent.locks.AbstractQueuedSynchronizer$Node: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node nextWaiter> = r1;
+
+     label3:
+        if r1 != null goto label5;
+
+        r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node lastWaiter> = r3;
+
+        goto label5;
+
+     label4:
+        r3 = r2;
+
+     label5:
+        r2 = r1;
+
+        goto label1;
+
+     label6:
+        return;
+    }
+
+    public final void signal()
+    {
+        java.util.concurrent.locks.AbstractQueuedSynchronizer $r1;
+        java.lang.IllegalMonitorStateException $r3;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$Node r2;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject r0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject;
+
+        $r1 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        $z0 = virtualinvoke $r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer: boolean isHeldExclusively()>();
+
+        if $z0 != 0 goto label1;
+
+        $r3 = new java.lang.IllegalMonitorStateException;
+
+        specialinvoke $r3.<java.lang.IllegalMonitorStateException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        r2 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node firstWaiter>;
+
+        if r2 == null goto label2;
+
+        specialinvoke r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: void doSignal(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node)>(r2);
+
+     label2:
+        return;
+    }
+
+    public final void signalAll()
+    {
+        java.util.concurrent.locks.AbstractQueuedSynchronizer $r1;
+        java.lang.IllegalMonitorStateException $r3;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$Node r2;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject r0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject;
+
+        $r1 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        $z0 = virtualinvoke $r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer: boolean isHeldExclusively()>();
+
+        if $z0 != 0 goto label1;
+
+        $r3 = new java.lang.IllegalMonitorStateException;
+
+        specialinvoke $r3.<java.lang.IllegalMonitorStateException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        r2 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node firstWaiter>;
+
+        if r2 == null goto label2;
+
+        specialinvoke r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: void doSignalAll(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node)>(r2);
+
+     label2:
+        return;
+    }
+
+    public final void awaitUninterruptibly()
+    {
+        java.util.concurrent.locks.AbstractQueuedSynchronizer $r2, $r3, $r4;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$Node $r1;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject r0;
+        int $i0;
+        boolean $z0, $z1, z2, $z3;
+
+        r0 := @this: java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject;
+
+        $r1 = specialinvoke r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node addConditionWaiter()>();
+
+        $r2 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        $i0 = virtualinvoke $r2.<java.util.concurrent.locks.AbstractQueuedSynchronizer: int fullyRelease(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node)>($r1);
+
+        z2 = 0;
+
+     label1:
+        $r4 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        $z3 = virtualinvoke $r4.<java.util.concurrent.locks.AbstractQueuedSynchronizer: boolean isOnSyncQueue(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node)>($r1);
+
+        if $z3 != 0 goto label2;
+
+        staticinvoke <java.util.concurrent.locks.LockSupport: void park(java.lang.Object)>(r0);
+
+        $z1 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z1 == 0 goto label1;
+
+        z2 = 1;
+
+        goto label1;
+
+     label2:
+        $r3 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        $z0 = virtualinvoke $r3.<java.util.concurrent.locks.AbstractQueuedSynchronizer: boolean acquireQueued(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node,int)>($r1, $i0);
+
+        if $z0 != 0 goto label3;
+
+        if z2 == 0 goto label4;
+
+     label3:
+        staticinvoke <java.util.concurrent.locks.AbstractQueuedSynchronizer: void selfInterrupt()>();
+
+     label4:
+        return;
+    }
+
+    private int checkInterruptWhileWaiting(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node)
+    {
+        java.util.concurrent.locks.AbstractQueuedSynchronizer $r2;
+        byte $b0;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$Node r1;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject r0;
+        boolean $z0, $z1;
+
+        r0 := @this: java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject;
+
+        r1 := @parameter0: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node;
+
+        $z0 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z0 == 0 goto label2;
+
+        $r2 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        $z1 = virtualinvoke $r2.<java.util.concurrent.locks.AbstractQueuedSynchronizer: boolean transferAfterCancelledWait(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node)>(r1);
+
+        if $z1 == 0 goto label1;
+
+        $b0 = -1;
+
+        goto label3;
+
+     label1:
+        $b0 = 1;
+
+        goto label3;
+
+     label2:
+        $b0 = 0;
+
+     label3:
+        return $b0;
+    }
+
+    private void reportInterruptAfterWait(int) throws java.lang.InterruptedException
+    {
+        java.lang.InterruptedException $r2;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject r1;
+        int i0, $i2;
+
+        r1 := @this: java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject;
+
+        i0 := @parameter0: int;
+
+        $i2 = (int) -1;
+
+        if i0 != $i2 goto label1;
+
+        $r2 = new java.lang.InterruptedException;
+
+        specialinvoke $r2.<java.lang.InterruptedException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        if i0 != 1 goto label2;
+
+        staticinvoke <java.util.concurrent.locks.AbstractQueuedSynchronizer: void selfInterrupt()>();
+
+     label2:
+        return;
+    }
+
+    public final void await() throws java.lang.InterruptedException
+    {
+        java.util.concurrent.locks.AbstractQueuedSynchronizer $r2, $r3, $r4;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$Node $r1, $r6;
+        java.lang.InterruptedException $r7;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject r0;
+        int $i0, $i1, i2, $i4;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject;
+
+        $z0 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z0 == 0 goto label1;
+
+        $r7 = new java.lang.InterruptedException;
+
+        specialinvoke $r7.<java.lang.InterruptedException: void <init>()>();
+
+        throw $r7;
+
+     label1:
+        $r1 = specialinvoke r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node addConditionWaiter()>();
+
+        $r2 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        $i0 = virtualinvoke $r2.<java.util.concurrent.locks.AbstractQueuedSynchronizer: int fullyRelease(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node)>($r1);
+
+        i2 = 0;
+
+     label2:
+        $r3 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        $z1 = virtualinvoke $r3.<java.util.concurrent.locks.AbstractQueuedSynchronizer: boolean isOnSyncQueue(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node)>($r1);
+
+        if $z1 != 0 goto label3;
+
+        staticinvoke <java.util.concurrent.locks.LockSupport: void park(java.lang.Object)>(r0);
+
+        $i1 = specialinvoke r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: int checkInterruptWhileWaiting(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node)>($r1);
+
+        i2 = $i1;
+
+        if $i1 == 0 goto label2;
+
+        goto label3;
+
+     label3:
+        $r4 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        $z2 = virtualinvoke $r4.<java.util.concurrent.locks.AbstractQueuedSynchronizer: boolean acquireQueued(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node,int)>($r1, $i0);
+
+        if $z2 == 0 goto label4;
+
+        $i4 = (int) -1;
+
+        if i2 == $i4 goto label4;
+
+        i2 = 1;
+
+     label4:
+        $r6 = $r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer$Node: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node nextWaiter>;
+
+        if $r6 == null goto label5;
+
+        specialinvoke r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: void unlinkCancelledWaiters()>();
+
+     label5:
+        if i2 == 0 goto label6;
+
+        specialinvoke r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: void reportInterruptAfterWait(int)>(i2);
+
+     label6:
+        return;
+    }
+
+    public final long awaitNanos(long) throws java.lang.InterruptedException
+    {
+        java.util.concurrent.locks.AbstractQueuedSynchronizer $r2, $r3, $r4, $r6;
+        long $l1, l2, $l3, $l4, $l8, l9;
+        byte $b5, $b6;
+        int $i0, $i7, i10, $i11, $i12, $i14;
+        boolean $z0, $z1, $z2;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$Node $r1, $r7;
+        java.lang.InterruptedException $r8;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject r0;
+
+        r0 := @this: java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject;
+
+        l9 := @parameter0: long;
+
+        $z0 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z0 == 0 goto label1;
+
+        $r8 = new java.lang.InterruptedException;
+
+        specialinvoke $r8.<java.lang.InterruptedException: void <init>()>();
+
+        throw $r8;
+
+     label1:
+        $r1 = specialinvoke r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node addConditionWaiter()>();
+
+        $r2 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        $i0 = virtualinvoke $r2.<java.util.concurrent.locks.AbstractQueuedSynchronizer: int fullyRelease(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node)>($r1);
+
+        $l1 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        l2 = $l1 + l9;
+
+        i10 = 0;
+
+     label2:
+        $r3 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        $z1 = virtualinvoke $r3.<java.util.concurrent.locks.AbstractQueuedSynchronizer: boolean isOnSyncQueue(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node)>($r1);
+
+        if $z1 != 0 goto label6;
+
+        $b5 = l9 cmp 0L;
+
+        $i11 = (int) $b5;
+
+        if $i11 > 0 goto label3;
+
+        $r4 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        virtualinvoke $r4.<java.util.concurrent.locks.AbstractQueuedSynchronizer: boolean transferAfterCancelledWait(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node)>($r1);
+
+        goto label6;
+
+     label3:
+        $b6 = l9 cmp 1000L;
+
+        $i12 = (int) $b6;
+
+        if $i12 < 0 goto label4;
+
+        staticinvoke <java.util.concurrent.locks.LockSupport: void parkNanos(java.lang.Object,long)>(r0, l9);
+
+     label4:
+        $i7 = specialinvoke r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: int checkInterruptWhileWaiting(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node)>($r1);
+
+        i10 = $i7;
+
+        if $i7 == 0 goto label5;
+
+        goto label6;
+
+     label5:
+        $l8 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        l9 = l2 - $l8;
+
+        goto label2;
+
+     label6:
+        $r6 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        $z2 = virtualinvoke $r6.<java.util.concurrent.locks.AbstractQueuedSynchronizer: boolean acquireQueued(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node,int)>($r1, $i0);
+
+        if $z2 == 0 goto label7;
+
+        $i14 = (int) -1;
+
+        if i10 == $i14 goto label7;
+
+        i10 = 1;
+
+     label7:
+        $r7 = $r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer$Node: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node nextWaiter>;
+
+        if $r7 == null goto label8;
+
+        specialinvoke r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: void unlinkCancelledWaiters()>();
+
+     label8:
+        if i10 == 0 goto label9;
+
+        specialinvoke r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: void reportInterruptAfterWait(int)>(i10);
+
+     label9:
+        $l3 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        $l4 = l2 - $l3;
+
+        return $l4;
+    }
+
+    public final boolean awaitUntil(java.util.Date) throws java.lang.InterruptedException
+    {
+        java.util.concurrent.locks.AbstractQueuedSynchronizer $r3, $r4, $r5, $r7;
+        java.util.Date r0;
+        long $l0, $l2;
+        byte $b3;
+        int $i1, $i4, i5, $i6, $i8;
+        boolean $z0, $z1, z2, $z3, $z4;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$Node $r2, $r8;
+        java.lang.InterruptedException $r9;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject r1;
+
+        r1 := @this: java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject;
+
+        r0 := @parameter0: java.util.Date;
+
+        $l0 = virtualinvoke r0.<java.util.Date: long getTime()>();
+
+        $z0 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z0 == 0 goto label1;
+
+        $r9 = new java.lang.InterruptedException;
+
+        specialinvoke $r9.<java.lang.InterruptedException: void <init>()>();
+
+        throw $r9;
+
+     label1:
+        $r2 = specialinvoke r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node addConditionWaiter()>();
+
+        $r3 = r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        $i1 = virtualinvoke $r3.<java.util.concurrent.locks.AbstractQueuedSynchronizer: int fullyRelease(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node)>($r2);
+
+        z2 = 0;
+
+        i5 = 0;
+
+     label2:
+        $r4 = r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        $z1 = virtualinvoke $r4.<java.util.concurrent.locks.AbstractQueuedSynchronizer: boolean isOnSyncQueue(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node)>($r2);
+
+        if $z1 != 0 goto label4;
+
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $b3 = $l2 cmp $l0;
+
+        $i6 = (int) $b3;
+
+        if $i6 <= 0 goto label3;
+
+        $r5 = r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        z2 = virtualinvoke $r5.<java.util.concurrent.locks.AbstractQueuedSynchronizer: boolean transferAfterCancelledWait(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node)>($r2);
+
+        goto label4;
+
+     label3:
+        staticinvoke <java.util.concurrent.locks.LockSupport: void parkUntil(java.lang.Object,long)>(r1, $l0);
+
+        $i4 = specialinvoke r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: int checkInterruptWhileWaiting(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node)>($r2);
+
+        i5 = $i4;
+
+        if $i4 == 0 goto label2;
+
+        goto label4;
+
+     label4:
+        $r7 = r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        $z3 = virtualinvoke $r7.<java.util.concurrent.locks.AbstractQueuedSynchronizer: boolean acquireQueued(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node,int)>($r2, $i1);
+
+        if $z3 == 0 goto label5;
+
+        $i8 = (int) -1;
+
+        if i5 == $i8 goto label5;
+
+        i5 = 1;
+
+     label5:
+        $r8 = $r2.<java.util.concurrent.locks.AbstractQueuedSynchronizer$Node: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node nextWaiter>;
+
+        if $r8 == null goto label6;
+
+        specialinvoke r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: void unlinkCancelledWaiters()>();
+
+     label6:
+        if i5 == 0 goto label7;
+
+        specialinvoke r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: void reportInterruptAfterWait(int)>(i5);
+
+     label7:
+        if z2 != 0 goto label8;
+
+        $z4 = 1;
+
+        goto label9;
+
+     label8:
+        $z4 = 0;
+
+     label9:
+        return $z4;
+    }
+
+    public final boolean await(long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException
+    {
+        java.util.concurrent.locks.AbstractQueuedSynchronizer $r3, $r4, $r5, $r7;
+        long l0, $l1, $l3, l4, $l8, l9;
+        byte $b5, $b6;
+        int $i2, $i7, i10, $i11, $i12, $i14;
+        boolean $z0, $z1, z2, $z3, $z4;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$Node $r2, $r8;
+        java.util.concurrent.TimeUnit r0;
+        java.lang.InterruptedException $r9;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject r1;
+
+        r1 := @this: java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject;
+
+        l0 := @parameter0: long;
+
+        r0 := @parameter1: java.util.concurrent.TimeUnit;
+
+        $l1 = virtualinvoke r0.<java.util.concurrent.TimeUnit: long toNanos(long)>(l0);
+
+        l9 = $l1;
+
+        $z0 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z0 == 0 goto label01;
+
+        $r9 = new java.lang.InterruptedException;
+
+        specialinvoke $r9.<java.lang.InterruptedException: void <init>()>();
+
+        throw $r9;
+
+     label01:
+        $r2 = specialinvoke r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node addConditionWaiter()>();
+
+        $r3 = r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        $i2 = virtualinvoke $r3.<java.util.concurrent.locks.AbstractQueuedSynchronizer: int fullyRelease(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node)>($r2);
+
+        $l3 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        l4 = $l3 + $l1;
+
+        z2 = 0;
+
+        i10 = 0;
+
+     label02:
+        $r4 = r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        $z1 = virtualinvoke $r4.<java.util.concurrent.locks.AbstractQueuedSynchronizer: boolean isOnSyncQueue(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node)>($r2);
+
+        if $z1 != 0 goto label06;
+
+        $b5 = l9 cmp 0L;
+
+        $i11 = (int) $b5;
+
+        if $i11 > 0 goto label03;
+
+        $r5 = r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        z2 = virtualinvoke $r5.<java.util.concurrent.locks.AbstractQueuedSynchronizer: boolean transferAfterCancelledWait(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node)>($r2);
+
+        goto label06;
+
+     label03:
+        $b6 = l9 cmp 1000L;
+
+        $i12 = (int) $b6;
+
+        if $i12 < 0 goto label04;
+
+        staticinvoke <java.util.concurrent.locks.LockSupport: void parkNanos(java.lang.Object,long)>(r1, l9);
+
+     label04:
+        $i7 = specialinvoke r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: int checkInterruptWhileWaiting(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node)>($r2);
+
+        i10 = $i7;
+
+        if $i7 == 0 goto label05;
+
+        goto label06;
+
+     label05:
+        $l8 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        l9 = l4 - $l8;
+
+        goto label02;
+
+     label06:
+        $r7 = r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        $z3 = virtualinvoke $r7.<java.util.concurrent.locks.AbstractQueuedSynchronizer: boolean acquireQueued(java.util.concurrent.locks.AbstractQueuedSynchronizer$Node,int)>($r2, $i2);
+
+        if $z3 == 0 goto label07;
+
+        $i14 = (int) -1;
+
+        if i10 == $i14 goto label07;
+
+        i10 = 1;
+
+     label07:
+        $r8 = $r2.<java.util.concurrent.locks.AbstractQueuedSynchronizer$Node: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node nextWaiter>;
+
+        if $r8 == null goto label08;
+
+        specialinvoke r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: void unlinkCancelledWaiters()>();
+
+     label08:
+        if i10 == 0 goto label09;
+
+        specialinvoke r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: void reportInterruptAfterWait(int)>(i10);
+
+     label09:
+        if z2 != 0 goto label10;
+
+        $z4 = 1;
+
+        goto label11;
+
+     label10:
+        $z4 = 0;
+
+     label11:
+        return $z4;
+    }
+
+    final boolean isOwnedBy(java.util.concurrent.locks.AbstractQueuedSynchronizer)
+    {
+        java.util.concurrent.locks.AbstractQueuedSynchronizer r0, $r2;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject r1;
+        boolean $z0;
+
+        r1 := @this: java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject;
+
+        r0 := @parameter0: java.util.concurrent.locks.AbstractQueuedSynchronizer;
+
+        $r2 = r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        if r0 != $r2 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    protected final boolean hasWaiters()
+    {
+        java.util.concurrent.locks.AbstractQueuedSynchronizer $r1;
+        java.lang.IllegalMonitorStateException $r4;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$Node r3;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject r0;
+        int $i0, $i2;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject;
+
+        $r1 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        $z0 = virtualinvoke $r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer: boolean isHeldExclusively()>();
+
+        if $z0 != 0 goto label1;
+
+        $r4 = new java.lang.IllegalMonitorStateException;
+
+        specialinvoke $r4.<java.lang.IllegalMonitorStateException: void <init>()>();
+
+        throw $r4;
+
+     label1:
+        r3 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node firstWaiter>;
+
+     label2:
+        if r3 == null goto label4;
+
+        $i0 = r3.<java.util.concurrent.locks.AbstractQueuedSynchronizer$Node: int waitStatus>;
+
+        $i2 = (int) -2;
+
+        if $i0 != $i2 goto label3;
+
+        return 1;
+
+     label3:
+        r3 = r3.<java.util.concurrent.locks.AbstractQueuedSynchronizer$Node: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node nextWaiter>;
+
+        goto label2;
+
+     label4:
+        return 0;
+    }
+
+    protected final int getWaitQueueLength()
+    {
+        java.util.concurrent.locks.AbstractQueuedSynchronizer $r1;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$Node r3;
+        java.lang.IllegalMonitorStateException $r4;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject r0;
+        int $i0, i1, $i3;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject;
+
+        $r1 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        $z0 = virtualinvoke $r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer: boolean isHeldExclusively()>();
+
+        if $z0 != 0 goto label1;
+
+        $r4 = new java.lang.IllegalMonitorStateException;
+
+        specialinvoke $r4.<java.lang.IllegalMonitorStateException: void <init>()>();
+
+        throw $r4;
+
+     label1:
+        i1 = 0;
+
+        r3 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node firstWaiter>;
+
+     label2:
+        if r3 == null goto label4;
+
+        $i0 = r3.<java.util.concurrent.locks.AbstractQueuedSynchronizer$Node: int waitStatus>;
+
+        $i3 = (int) -2;
+
+        if $i0 != $i3 goto label3;
+
+        i1 = i1 + 1;
+
+     label3:
+        r3 = r3.<java.util.concurrent.locks.AbstractQueuedSynchronizer$Node: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node nextWaiter>;
+
+        goto label2;
+
+     label4:
+        return i1;
+    }
+
+    protected final java.util.Collection getWaitingThreads()
+    {
+        java.util.concurrent.locks.AbstractQueuedSynchronizer $r1;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$Node r5;
+        java.util.ArrayList $r7;
+        java.lang.IllegalMonitorStateException $r6;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject r0;
+        java.lang.Thread r3;
+        int $i0, $i2;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject;
+
+        $r1 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer this$0>;
+
+        $z0 = virtualinvoke $r1.<java.util.concurrent.locks.AbstractQueuedSynchronizer: boolean isHeldExclusively()>();
+
+        if $z0 != 0 goto label1;
+
+        $r6 = new java.lang.IllegalMonitorStateException;
+
+        specialinvoke $r6.<java.lang.IllegalMonitorStateException: void <init>()>();
+
+        throw $r6;
+
+     label1:
+        $r7 = new java.util.ArrayList;
+
+        specialinvoke $r7.<java.util.ArrayList: void <init>()>();
+
+        r5 = r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node firstWaiter>;
+
+     label2:
+        if r5 == null goto label4;
+
+        $i0 = r5.<java.util.concurrent.locks.AbstractQueuedSynchronizer$Node: int waitStatus>;
+
+        $i2 = (int) -2;
+
+        if $i0 != $i2 goto label3;
+
+        r3 = r5.<java.util.concurrent.locks.AbstractQueuedSynchronizer$Node: java.lang.Thread thread>;
+
+        if r3 == null goto label3;
+
+        virtualinvoke $r7.<java.util.ArrayList: boolean add(java.lang.Object)>(r3);
+
+     label3:
+        r5 = r5.<java.util.concurrent.locks.AbstractQueuedSynchronizer$Node: java.util.concurrent.locks.AbstractQueuedSynchronizer$Node nextWaiter>;
+
+        goto label2;
+
+     label4:
+        return $r7;
+    }
+
+    public static void <clinit>()
+    {
+        <java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: int THROW_IE> = -1;
+
+        <java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: int REINTERRUPT> = 1;
+
+        <java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: long serialVersionUID> = 1173984872572414699L;
+
+        return;
+    }
+}

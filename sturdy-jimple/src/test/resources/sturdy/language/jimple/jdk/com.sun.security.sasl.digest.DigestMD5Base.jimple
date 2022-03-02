@@ -1,0 +1,3188 @@
+abstract class com.sun.security.sasl.digest.DigestMD5Base extends com.sun.security.sasl.util.AbstractSaslImpl
+{
+    private static final java.lang.String DI_CLASS_NAME;
+    private static final java.lang.String DP_CLASS_NAME;
+    protected static final int MAX_CHALLENGE_LENGTH;
+    protected static final int MAX_RESPONSE_LENGTH;
+    protected static final int DEFAULT_MAXBUF;
+    protected static final int DES3;
+    protected static final int RC4;
+    protected static final int DES;
+    protected static final int RC4_56;
+    protected static final int RC4_40;
+    protected static final java.lang.String[] CIPHER_TOKENS;
+    private static final java.lang.String[] JCE_CIPHER_NAME;
+    protected static final byte DES_3_STRENGTH;
+    protected static final byte RC4_STRENGTH;
+    protected static final byte DES_STRENGTH;
+    protected static final byte RC4_56_STRENGTH;
+    protected static final byte RC4_40_STRENGTH;
+    protected static final byte UNSET;
+    protected static final byte[] CIPHER_MASKS;
+    private static final java.lang.String SECURITY_LAYER_MARKER;
+    protected static final byte[] EMPTY_BYTE_ARRAY;
+    protected int step;
+    protected javax.security.auth.callback.CallbackHandler cbh;
+    protected com.sun.security.sasl.digest.SecurityCtx secCtx;
+    protected byte[] H_A1;
+    protected byte[] nonce;
+    protected java.lang.String negotiatedStrength;
+    protected java.lang.String negotiatedCipher;
+    protected java.lang.String negotiatedQop;
+    protected java.lang.String negotiatedRealm;
+    protected boolean useUTF8;
+    protected java.lang.String encoding;
+    protected java.lang.String digestUri;
+    protected java.lang.String authzid;
+    private static final char[] pem_array;
+    private static final int RAW_NONCE_SIZE;
+    private static final int ENCODED_NONCE_SIZE;
+    private static final java.math.BigInteger MASK;
+
+    protected void <init>(java.util.Map, java.lang.String, int, java.lang.String, javax.security.auth.callback.CallbackHandler) throws javax.security.sasl.SaslException
+    {
+        javax.security.auth.callback.CallbackHandler r4;
+        java.util.Map r1;
+        int i0;
+        com.sun.security.sasl.digest.DigestMD5Base r0;
+        java.lang.String r2, r3;
+
+        r0 := @this: com.sun.security.sasl.digest.DigestMD5Base;
+
+        r1 := @parameter0: java.util.Map;
+
+        r2 := @parameter1: java.lang.String;
+
+        i0 := @parameter2: int;
+
+        r3 := @parameter3: java.lang.String;
+
+        r4 := @parameter4: javax.security.auth.callback.CallbackHandler;
+
+        specialinvoke r0.<com.sun.security.sasl.util.AbstractSaslImpl: void <init>(java.util.Map,java.lang.String)>(r1, r2);
+
+        r0.<com.sun.security.sasl.digest.DigestMD5Base: boolean useUTF8> = 0;
+
+        r0.<com.sun.security.sasl.digest.DigestMD5Base: java.lang.String encoding> = "8859_1";
+
+        r0.<com.sun.security.sasl.digest.DigestMD5Base: int step> = i0;
+
+        r0.<com.sun.security.sasl.digest.DigestMD5Base: java.lang.String digestUri> = r3;
+
+        r0.<com.sun.security.sasl.digest.DigestMD5Base: javax.security.auth.callback.CallbackHandler cbh> = r4;
+
+        return;
+    }
+
+    public java.lang.String getMechanismName()
+    {
+        com.sun.security.sasl.digest.DigestMD5Base r0;
+
+        r0 := @this: com.sun.security.sasl.digest.DigestMD5Base;
+
+        return "DIGEST-MD5";
+    }
+
+    public byte[] unwrap(byte[], int, int) throws javax.security.sasl.SaslException
+    {
+        byte[] r2, $r4;
+        java.lang.IllegalStateException $r5, $r6;
+        int i0, i1;
+        com.sun.security.sasl.digest.DigestMD5Base r0;
+        com.sun.security.sasl.digest.SecurityCtx $r1, $r3;
+        boolean $z0;
+
+        r0 := @this: com.sun.security.sasl.digest.DigestMD5Base;
+
+        r2 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $z0 = r0.<com.sun.security.sasl.digest.DigestMD5Base: boolean completed>;
+
+        if $z0 != 0 goto label1;
+
+        $r6 = new java.lang.IllegalStateException;
+
+        specialinvoke $r6.<java.lang.IllegalStateException: void <init>(java.lang.String)>("DIGEST-MD5 authentication not completed");
+
+        throw $r6;
+
+     label1:
+        $r1 = r0.<com.sun.security.sasl.digest.DigestMD5Base: com.sun.security.sasl.digest.SecurityCtx secCtx>;
+
+        if $r1 != null goto label2;
+
+        $r5 = new java.lang.IllegalStateException;
+
+        specialinvoke $r5.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Neither integrity nor privacy was negotiated");
+
+        throw $r5;
+
+     label2:
+        $r3 = r0.<com.sun.security.sasl.digest.DigestMD5Base: com.sun.security.sasl.digest.SecurityCtx secCtx>;
+
+        $r4 = interfaceinvoke $r3.<com.sun.security.sasl.digest.SecurityCtx: byte[] unwrap(byte[],int,int)>(r2, i0, i1);
+
+        return $r4;
+    }
+
+    public byte[] wrap(byte[], int, int) throws javax.security.sasl.SaslException
+    {
+        byte[] r2, $r4;
+        java.lang.IllegalStateException $r5, $r6;
+        int i0, i1;
+        com.sun.security.sasl.digest.DigestMD5Base r0;
+        com.sun.security.sasl.digest.SecurityCtx $r1, $r3;
+        boolean $z0;
+
+        r0 := @this: com.sun.security.sasl.digest.DigestMD5Base;
+
+        r2 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $z0 = r0.<com.sun.security.sasl.digest.DigestMD5Base: boolean completed>;
+
+        if $z0 != 0 goto label1;
+
+        $r6 = new java.lang.IllegalStateException;
+
+        specialinvoke $r6.<java.lang.IllegalStateException: void <init>(java.lang.String)>("DIGEST-MD5 authentication not completed");
+
+        throw $r6;
+
+     label1:
+        $r1 = r0.<com.sun.security.sasl.digest.DigestMD5Base: com.sun.security.sasl.digest.SecurityCtx secCtx>;
+
+        if $r1 != null goto label2;
+
+        $r5 = new java.lang.IllegalStateException;
+
+        specialinvoke $r5.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Neither integrity nor privacy was negotiated");
+
+        throw $r5;
+
+     label2:
+        $r3 = r0.<com.sun.security.sasl.digest.DigestMD5Base: com.sun.security.sasl.digest.SecurityCtx secCtx>;
+
+        $r4 = interfaceinvoke $r3.<com.sun.security.sasl.digest.SecurityCtx: byte[] wrap(byte[],int,int)>(r2, i0, i1);
+
+        return $r4;
+    }
+
+    public void dispose() throws javax.security.sasl.SaslException
+    {
+        com.sun.security.sasl.digest.DigestMD5Base r0;
+        com.sun.security.sasl.digest.SecurityCtx $r1;
+
+        r0 := @this: com.sun.security.sasl.digest.DigestMD5Base;
+
+        $r1 = r0.<com.sun.security.sasl.digest.DigestMD5Base: com.sun.security.sasl.digest.SecurityCtx secCtx>;
+
+        if $r1 == null goto label1;
+
+        r0.<com.sun.security.sasl.digest.DigestMD5Base: com.sun.security.sasl.digest.SecurityCtx secCtx> = null;
+
+     label1:
+        return;
+    }
+
+    public java.lang.Object getNegotiatedProperty(java.lang.String)
+    {
+        java.lang.IllegalStateException $r1;
+        int $i0, $i1;
+        com.sun.security.sasl.digest.DigestMD5Base r0;
+        java.lang.Object $r3;
+        java.lang.String r2, $r4, $r5, $r6, $r7;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: com.sun.security.sasl.digest.DigestMD5Base;
+
+        r2 := @parameter0: java.lang.String;
+
+        $z0 = r0.<com.sun.security.sasl.digest.DigestMD5Base: boolean completed>;
+
+        if $z0 == 0 goto label3;
+
+        $z1 = virtualinvoke r2.<java.lang.String: boolean equals(java.lang.Object)>("javax.security.sasl.strength");
+
+        if $z1 == 0 goto label1;
+
+        $r7 = r0.<com.sun.security.sasl.digest.DigestMD5Base: java.lang.String negotiatedStrength>;
+
+        return $r7;
+
+     label1:
+        $z2 = virtualinvoke r2.<java.lang.String: boolean equals(java.lang.Object)>("javax.security.sasl.bound.server.name");
+
+        if $z2 == 0 goto label2;
+
+        $r5 = r0.<com.sun.security.sasl.digest.DigestMD5Base: java.lang.String digestUri>;
+
+        $r4 = r0.<com.sun.security.sasl.digest.DigestMD5Base: java.lang.String digestUri>;
+
+        $i0 = virtualinvoke $r4.<java.lang.String: int indexOf(int)>(47);
+
+        $i1 = $i0 + 1;
+
+        $r6 = virtualinvoke $r5.<java.lang.String: java.lang.String substring(int)>($i1);
+
+        return $r6;
+
+     label2:
+        $r3 = specialinvoke r0.<com.sun.security.sasl.util.AbstractSaslImpl: java.lang.Object getNegotiatedProperty(java.lang.String)>(r2);
+
+        return $r3;
+
+     label3:
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("DIGEST-MD5 authentication not completed");
+
+        throw $r1;
+    }
+
+    protected static final byte[] generateNonce()
+    {
+        byte[] r1, r2;
+        java.util.Random $r7;
+        byte b1, b3, b5, $b9, $b16, $b23, $b24, $b26;
+        int $i0, $i2, $i4, $i6, $i7, $i10, $i11, $i12, $i13, $i14, $i17, $i18, $i19, $i20, $i21, i27, i28, i29, i30, i31, $i32, $i33, $i34, $i35, $i36, $i37;
+        char $c8, $c15, $c22, $c25;
+        char[] $r3, $r4, $r5, $r6;
+
+        $r7 = new java.util.Random;
+
+        specialinvoke $r7.<java.util.Random: void <init>()>();
+
+        r1 = newarray (byte)[30];
+
+        virtualinvoke $r7.<java.util.Random: void nextBytes(byte[])>(r1);
+
+        r2 = newarray (byte)[40];
+
+        i27 = 0;
+
+        i28 = 0;
+
+     label1:
+        $i0 = lengthof r1;
+
+        if i28 >= $i0 goto label2;
+
+        b1 = r1[i28];
+
+        $i2 = i28 + 1;
+
+        b3 = r1[$i2];
+
+        $i4 = i28 + 2;
+
+        b5 = r1[$i4];
+
+        i29 = i27 + 1;
+
+        $r3 = <com.sun.security.sasl.digest.DigestMD5Base: char[] pem_array>;
+
+        $i32 = (int) b1;
+
+        $i6 = $i32 >>> 2;
+
+        $i7 = $i6 & 63;
+
+        $c8 = $r3[$i7];
+
+        $b9 = (byte) $c8;
+
+        r2[i27] = $b9;
+
+        i30 = i29 + 1;
+
+        $r4 = <com.sun.security.sasl.digest.DigestMD5Base: char[] pem_array>;
+
+        $i33 = (int) b1;
+
+        $i10 = $i33 << 4;
+
+        $i13 = $i10 & 48;
+
+        $i34 = (int) b3;
+
+        $i11 = $i34 >>> 4;
+
+        $i12 = $i11 & 15;
+
+        $i14 = $i13 + $i12;
+
+        $c15 = $r4[$i14];
+
+        $b16 = (byte) $c15;
+
+        r2[i29] = $b16;
+
+        i31 = i30 + 1;
+
+        $r5 = <com.sun.security.sasl.digest.DigestMD5Base: char[] pem_array>;
+
+        $i35 = (int) b3;
+
+        $i17 = $i35 << 2;
+
+        $i20 = $i17 & 60;
+
+        $i36 = (int) b5;
+
+        $i18 = $i36 >>> 6;
+
+        $i19 = $i18 & 3;
+
+        $i21 = $i20 + $i19;
+
+        $c22 = $r5[$i21];
+
+        $b23 = (byte) $c22;
+
+        r2[i30] = $b23;
+
+        i27 = i31 + 1;
+
+        $r6 = <com.sun.security.sasl.digest.DigestMD5Base: char[] pem_array>;
+
+        $b24 = b5 & 63;
+
+        $i37 = (int) $b24;
+
+        $c25 = $r6[$i37];
+
+        $b26 = (byte) $c25;
+
+        r2[i31] = $b26;
+
+        i28 = i28 + 3;
+
+        goto label1;
+
+     label2:
+        return r2;
+    }
+
+    protected static void writeQuotedStringValue(java.io.ByteArrayOutputStream, byte[])
+    {
+        byte[] r0;
+        java.io.ByteArrayOutputStream r1;
+        char $c2;
+        byte b1;
+        int i0, i3, $i4;
+        boolean $z0;
+
+        r1 := @parameter0: java.io.ByteArrayOutputStream;
+
+        r0 := @parameter1: byte[];
+
+        i0 = lengthof r0;
+
+        i3 = 0;
+
+     label1:
+        if i3 >= i0 goto label3;
+
+        b1 = r0[i3];
+
+        $c2 = (char) b1;
+
+        $z0 = staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: boolean needEscape(char)>($c2);
+
+        if $z0 == 0 goto label2;
+
+        virtualinvoke r1.<java.io.ByteArrayOutputStream: void write(int)>(92);
+
+     label2:
+        $i4 = (int) b1;
+
+        virtualinvoke r1.<java.io.ByteArrayOutputStream: void write(int)>($i4);
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    private static boolean needEscape(java.lang.String)
+    {
+        int $i0, i2;
+        char $c1;
+        java.lang.String r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        i2 = 0;
+
+     label1:
+        if i2 >= $i0 goto label3;
+
+        $c1 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i2);
+
+        $z0 = staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: boolean needEscape(char)>($c1);
+
+        if $z0 == 0 goto label2;
+
+        return 1;
+
+     label2:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    private static boolean needEscape(char)
+    {
+        char c0;
+        int $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        boolean $z0;
+
+        c0 := @parameter0: char;
+
+        $i1 = (int) c0;
+
+        if $i1 == 34 goto label1;
+
+        $i2 = (int) c0;
+
+        if $i2 == 92 goto label1;
+
+        $i3 = (int) c0;
+
+        if $i3 == 127 goto label1;
+
+        $i4 = (int) c0;
+
+        if $i4 < 0 goto label2;
+
+        $i5 = (int) c0;
+
+        if $i5 > 31 goto label2;
+
+        $i6 = (int) c0;
+
+        if $i6 == 13 goto label2;
+
+        $i7 = (int) c0;
+
+        if $i7 == 9 goto label2;
+
+        $i8 = (int) c0;
+
+        if $i8 == 10 goto label2;
+
+     label1:
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+    }
+
+    protected static java.lang.String quotedStringValue(java.lang.String)
+    {
+        char $c2;
+        int $i0, $i1, $i3, $i4, i5, i6;
+        char[] r1;
+        java.lang.String r0, $r2;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: boolean needEscape(java.lang.String)>(r0);
+
+        if $z0 == 0 goto label4;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $i1 = $i0 + $i0;
+
+        r1 = newarray (char)[$i1];
+
+        i5 = 0;
+
+        i6 = 0;
+
+     label1:
+        if i6 >= $i0 goto label3;
+
+        $c2 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i6);
+
+        $z1 = staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: boolean needEscape(char)>($c2);
+
+        if $z1 == 0 goto label2;
+
+        $i4 = i5;
+
+        i5 = i5 + 1;
+
+        r1[$i4] = 92;
+
+     label2:
+        $i3 = i5;
+
+        i5 = i5 + 1;
+
+        r1[$i3] = $c2;
+
+        i6 = i6 + 1;
+
+        goto label1;
+
+     label3:
+        $r2 = new java.lang.String;
+
+        specialinvoke $r2.<java.lang.String: void <init>(char[],int,int)>(r1, 0, i5);
+
+        return $r2;
+
+     label4:
+        return r0;
+    }
+
+    protected byte[] binaryToHex(byte[]) throws java.io.UnsupportedEncodingException
+    {
+        byte[] r1, $r5;
+        short $s2, $s4, $s6, $s8, $s10, $s12;
+        byte $b1, $b3, $b5;
+        java.lang.StringBuffer $r12;
+        int $i0, i7, $i9, $i11, $i13;
+        java.lang.String $r2, $r4, $r6, $r9, $r11;
+        com.sun.security.sasl.digest.DigestMD5Base r3;
+        java.lang.StringBuilder $r8, $r10, $r13;
+
+        r3 := @this: com.sun.security.sasl.digest.DigestMD5Base;
+
+        r1 := @parameter0: byte[];
+
+        $r12 = new java.lang.StringBuffer;
+
+        specialinvoke $r12.<java.lang.StringBuffer: void <init>()>();
+
+        i7 = 0;
+
+     label1:
+        $i0 = lengthof r1;
+
+        if i7 >= $i0 goto label4;
+
+        $b1 = r1[i7];
+
+        $s8 = (short) $b1;
+
+        $s2 = $s8 & 255;
+
+        $i9 = (int) $s2;
+
+        if $i9 >= 16 goto label2;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("0");
+
+        $b5 = r1[i7];
+
+        $s10 = (short) $b5;
+
+        $s6 = $s10 & 255;
+
+        $i11 = (int) $s6;
+
+        $r9 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i11);
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r12.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r11);
+
+        goto label3;
+
+     label2:
+        $b3 = r1[i7];
+
+        $s12 = (short) $b3;
+
+        $s4 = $s12 & 255;
+
+        $i13 = (int) $s4;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i13);
+
+        virtualinvoke $r12.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r6);
+
+     label3:
+        i7 = i7 + 1;
+
+        goto label1;
+
+     label4:
+        $r2 = virtualinvoke $r12.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $r4 = r3.<com.sun.security.sasl.digest.DigestMD5Base: java.lang.String encoding>;
+
+        $r5 = virtualinvoke $r2.<java.lang.String: byte[] getBytes(java.lang.String)>($r4);
+
+        return $r5;
+    }
+
+    protected byte[] stringToByte_8859_1(java.lang.String) throws javax.security.sasl.SaslException
+    {
+        byte[] $r3, $r4;
+        char $c1;
+        javax.security.sasl.SaslException $r7;
+        int $i0, i2, $i3;
+        char[] $r1;
+        com.sun.security.sasl.digest.DigestMD5Base r2;
+        java.lang.String r0;
+        java.io.UnsupportedEncodingException $r5;
+        boolean $z0;
+
+        r2 := @this: com.sun.security.sasl.digest.DigestMD5Base;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = virtualinvoke r0.<java.lang.String: char[] toCharArray()>();
+
+     label1:
+        $z0 = r2.<com.sun.security.sasl.digest.DigestMD5Base: boolean useUTF8>;
+
+        if $z0 == 0 goto label5;
+
+        i2 = 0;
+
+     label2:
+        $i0 = lengthof $r1;
+
+        if i2 >= $i0 goto label5;
+
+        $c1 = $r1[i2];
+
+        $i3 = (int) $c1;
+
+        if $i3 <= 255 goto label4;
+
+        $r4 = virtualinvoke r0.<java.lang.String: byte[] getBytes(java.lang.String)>("UTF8");
+
+     label3:
+        return $r4;
+
+     label4:
+        i2 = i2 + 1;
+
+        goto label2;
+
+     label5:
+        $r3 = virtualinvoke r0.<java.lang.String: byte[] getBytes(java.lang.String)>("8859_1");
+
+     label6:
+        return $r3;
+
+     label7:
+        $r5 := @caughtexception;
+
+        $r7 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r7.<javax.security.sasl.SaslException: void <init>(java.lang.String,java.lang.Throwable)>("cannot encode string in UTF8 or 8859-1 (Latin-1)", $r5);
+
+        throw $r7;
+
+        catch java.io.UnsupportedEncodingException from label1 to label3 with label7;
+        catch java.io.UnsupportedEncodingException from label4 to label6 with label7;
+    }
+
+    protected static byte[] getPlatformCiphers()
+    {
+        byte[] r1, $r3, $r4, $r11;
+        java.lang.String[] $r0, $r2, $r5, $r7;
+        java.util.logging.Level $r9;
+        byte $b2, $b3, $b4, $b5, $b6, $b7, $b8, $b9, $b10, $b11, $b12, $b13, $b14;
+        javax.crypto.NoSuchPaddingException $r12;
+        int $i0, $i1, i15;
+        java.lang.String $r6, $r8;
+        java.util.logging.Logger $r10;
+        java.security.NoSuchAlgorithmException $r13;
+
+        $r0 = <com.sun.security.sasl.digest.DigestMD5Base: java.lang.String[] CIPHER_TOKENS>;
+
+        $i0 = lengthof $r0;
+
+        r1 = newarray (byte)[$i0];
+
+        i15 = 0;
+
+     label1:
+        $r2 = <com.sun.security.sasl.digest.DigestMD5Base: java.lang.String[] JCE_CIPHER_NAME>;
+
+        $i1 = lengthof $r2;
+
+        if i15 >= $i1 goto label7;
+
+     label2:
+        $r5 = <com.sun.security.sasl.digest.DigestMD5Base: java.lang.String[] JCE_CIPHER_NAME>;
+
+        $r6 = $r5[i15];
+
+        staticinvoke <javax.crypto.Cipher: javax.crypto.Cipher getInstance(java.lang.String)>($r6);
+
+        $r10 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        $r9 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r7 = <com.sun.security.sasl.digest.DigestMD5Base: java.lang.String[] JCE_CIPHER_NAME>;
+
+        $r8 = $r7[i15];
+
+        virtualinvoke $r10.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r9, "DIGEST01:Platform supports {0}", $r8);
+
+        $b12 = r1[i15];
+
+        $r11 = <com.sun.security.sasl.digest.DigestMD5Base: byte[] CIPHER_MASKS>;
+
+        $b11 = $r11[i15];
+
+        $b13 = $b12 | $b11;
+
+        $b14 = (byte) $b13;
+
+        r1[i15] = $b14;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r13 := @caughtexception;
+
+        goto label6;
+
+     label5:
+        $r12 := @caughtexception;
+
+     label6:
+        i15 = i15 + 1;
+
+        goto label1;
+
+     label7:
+        $b2 = r1[1];
+
+        if $b2 == 0 goto label8;
+
+        $b4 = r1[3];
+
+        $r3 = <com.sun.security.sasl.digest.DigestMD5Base: byte[] CIPHER_MASKS>;
+
+        $b3 = $r3[3];
+
+        $b5 = $b4 | $b3;
+
+        $b6 = (byte) $b5;
+
+        r1[3] = $b6;
+
+        $b8 = r1[4];
+
+        $r4 = <com.sun.security.sasl.digest.DigestMD5Base: byte[] CIPHER_MASKS>;
+
+        $b7 = $r4[4];
+
+        $b9 = $b8 | $b7;
+
+        $b10 = (byte) $b9;
+
+        r1[4] = $b10;
+
+     label8:
+        return r1;
+
+        catch java.security.NoSuchAlgorithmException from label2 to label3 with label4;
+        catch javax.crypto.NoSuchPaddingException from label2 to label3 with label5;
+    }
+
+    protected byte[] generateResponseValue(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, char[], byte[], byte[], int, byte[]) throws java.security.NoSuchAlgorithmException, java.io.UnsupportedEncodingException, java.io.IOException
+    {
+        byte[] $r11, $r17, $r18, $r19, $r20, $r25, $r27, $r30, $r31, $r32, r36, r37, r38, $r39, $r40, $r41, $r47, $r49, $r52, $r53, $r54, $r71;
+        java.lang.StringBuilder $r2, $r4, $r5, $r7;
+        java.lang.Object[] $r66;
+        java.io.ByteArrayOutputStream $r1, $r23, $r35, $r44;
+        java.lang.String r3, r6, $r8, $r10, r12, $r15, $r16, r24, r26, $r28, $r45, $r46, $r48, $r57, $r62, $r63, $r69, $r70, $r72, $r77;
+        char[] r29;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        java.util.logging.Logger $r14, $r22, $r34, $r43, $r51, $r56, $r58, $r60, $r64, $r67, $r73, $r75, $r78;
+        java.security.MessageDigest $r0;
+        java.util.logging.Level $r13, $r21, $r33, $r42, $r50, $r55, $r59, $r61, $r65, $r68, $r74, $r76, $r79;
+        int i0;
+        com.sun.security.sasl.digest.DigestMD5Base r9;
+
+        r9 := @this: com.sun.security.sasl.digest.DigestMD5Base;
+
+        r3 := @parameter0: java.lang.String;
+
+        r6 := @parameter1: java.lang.String;
+
+        r12 := @parameter2: java.lang.String;
+
+        r24 := @parameter3: java.lang.String;
+
+        r26 := @parameter4: java.lang.String;
+
+        r29 := @parameter5: char[];
+
+        r36 := @parameter6: byte[];
+
+        r37 := @parameter7: byte[];
+
+        i0 := @parameter8: int;
+
+        r38 := @parameter9: byte[];
+
+        $r0 = staticinvoke <java.security.MessageDigest: java.security.MessageDigest getInstance(java.lang.String)>("MD5");
+
+        $r1 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r1.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r10 = r9.<com.sun.security.sasl.digest.DigestMD5Base: java.lang.String encoding>;
+
+        $r11 = virtualinvoke $r8.<java.lang.String: byte[] getBytes(java.lang.String)>($r10);
+
+        virtualinvoke $r1.<java.io.ByteArrayOutputStream: void write(byte[])>($r11);
+
+        $z0 = virtualinvoke r12.<java.lang.String: boolean equals(java.lang.Object)>("auth-conf");
+
+        if $z0 != 0 goto label1;
+
+        $z6 = virtualinvoke r12.<java.lang.String: boolean equals(java.lang.Object)>("auth-int");
+
+        if $z6 == 0 goto label2;
+
+     label1:
+        $r14 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        $r13 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        virtualinvoke $r14.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r13, "DIGEST04:QOP: {0}", r12);
+
+        $r16 = ":00000000000000000000000000000000";
+
+        $r15 = r9.<com.sun.security.sasl.digest.DigestMD5Base: java.lang.String encoding>;
+
+        $r17 = virtualinvoke $r16.<java.lang.String: byte[] getBytes(java.lang.String)>($r15);
+
+        virtualinvoke $r1.<java.io.ByteArrayOutputStream: void write(byte[])>($r17);
+
+     label2:
+        $r78 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        $r79 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $z7 = virtualinvoke $r78.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r79);
+
+        if $z7 == 0 goto label3;
+
+        $r75 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        $r76 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r77 = virtualinvoke $r1.<java.io.ByteArrayOutputStream: java.lang.String toString()>();
+
+        virtualinvoke $r75.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r76, "DIGEST05:A2: {0}", $r77);
+
+     label3:
+        $r18 = virtualinvoke $r1.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        virtualinvoke $r0.<java.security.MessageDigest: void update(byte[])>($r18);
+
+        $r19 = virtualinvoke $r0.<java.security.MessageDigest: byte[] digest()>();
+
+        $r20 = virtualinvoke r9.<com.sun.security.sasl.digest.DigestMD5Base: byte[] binaryToHex(byte[])>($r19);
+
+        $r22 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        $r21 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $z1 = virtualinvoke $r22.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r21);
+
+        if $z1 == 0 goto label4;
+
+        $r73 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        $r74 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r72 = new java.lang.String;
+
+        specialinvoke $r72.<java.lang.String: void <init>(byte[])>($r20);
+
+        virtualinvoke $r73.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r74, "DIGEST06:HEX(H(A2)): {0}", $r72);
+
+     label4:
+        $r23 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r23.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $r25 = virtualinvoke r9.<com.sun.security.sasl.digest.DigestMD5Base: byte[] stringToByte_8859_1(java.lang.String)>(r24);
+
+        virtualinvoke $r23.<java.io.ByteArrayOutputStream: void write(byte[])>($r25);
+
+        virtualinvoke $r23.<java.io.ByteArrayOutputStream: void write(int)>(58);
+
+        $r27 = virtualinvoke r9.<com.sun.security.sasl.digest.DigestMD5Base: byte[] stringToByte_8859_1(java.lang.String)>(r26);
+
+        virtualinvoke $r23.<java.io.ByteArrayOutputStream: void write(byte[])>($r27);
+
+        virtualinvoke $r23.<java.io.ByteArrayOutputStream: void write(int)>(58);
+
+        $r28 = new java.lang.String;
+
+        specialinvoke $r28.<java.lang.String: void <init>(char[])>(r29);
+
+        $r30 = virtualinvoke r9.<com.sun.security.sasl.digest.DigestMD5Base: byte[] stringToByte_8859_1(java.lang.String)>($r28);
+
+        virtualinvoke $r23.<java.io.ByteArrayOutputStream: void write(byte[])>($r30);
+
+        $r31 = virtualinvoke $r23.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        virtualinvoke $r0.<java.security.MessageDigest: void update(byte[])>($r31);
+
+        $r32 = virtualinvoke $r0.<java.security.MessageDigest: byte[] digest()>();
+
+        $r34 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        $r33 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $z2 = virtualinvoke $r34.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r33);
+
+        if $z2 == 0 goto label5;
+
+        $r67 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        $r68 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r66 = newarray (java.lang.Object)[2];
+
+        $r69 = virtualinvoke $r23.<java.io.ByteArrayOutputStream: java.lang.String toString()>();
+
+        $r66[0] = $r69;
+
+        $r70 = new java.lang.String;
+
+        $r71 = virtualinvoke r9.<com.sun.security.sasl.digest.DigestMD5Base: byte[] binaryToHex(byte[])>($r32);
+
+        specialinvoke $r70.<java.lang.String: void <init>(byte[])>($r71);
+
+        $r66[1] = $r70;
+
+        virtualinvoke $r67.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r68, "DIGEST07:H({0}) = {1}", $r66);
+
+     label5:
+        $r35 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r35.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        virtualinvoke $r35.<java.io.ByteArrayOutputStream: void write(byte[])>($r32);
+
+        virtualinvoke $r35.<java.io.ByteArrayOutputStream: void write(int)>(58);
+
+        virtualinvoke $r35.<java.io.ByteArrayOutputStream: void write(byte[])>(r36);
+
+        virtualinvoke $r35.<java.io.ByteArrayOutputStream: void write(int)>(58);
+
+        virtualinvoke $r35.<java.io.ByteArrayOutputStream: void write(byte[])>(r37);
+
+        if r38 == null goto label6;
+
+        virtualinvoke $r35.<java.io.ByteArrayOutputStream: void write(int)>(58);
+
+        virtualinvoke $r35.<java.io.ByteArrayOutputStream: void write(byte[])>(r38);
+
+     label6:
+        $r39 = virtualinvoke $r35.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        virtualinvoke $r0.<java.security.MessageDigest: void update(byte[])>($r39);
+
+        $r40 = virtualinvoke $r0.<java.security.MessageDigest: byte[] digest()>();
+
+        r9.<com.sun.security.sasl.digest.DigestMD5Base: byte[] H_A1> = $r40;
+
+        $r41 = virtualinvoke r9.<com.sun.security.sasl.digest.DigestMD5Base: byte[] binaryToHex(byte[])>($r40);
+
+        $r43 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        $r42 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $z3 = virtualinvoke $r43.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r42);
+
+        if $z3 == 0 goto label7;
+
+        $r64 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        $r65 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r63 = new java.lang.String;
+
+        specialinvoke $r63.<java.lang.String: void <init>(byte[])>($r41);
+
+        virtualinvoke $r64.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r65, "DIGEST08:H(A1) = {0}", $r63);
+
+     label7:
+        $r44 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r44.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        virtualinvoke $r44.<java.io.ByteArrayOutputStream: void write(byte[])>($r41);
+
+        virtualinvoke $r44.<java.io.ByteArrayOutputStream: void write(int)>(58);
+
+        virtualinvoke $r44.<java.io.ByteArrayOutputStream: void write(byte[])>(r36);
+
+        virtualinvoke $r44.<java.io.ByteArrayOutputStream: void write(int)>(58);
+
+        $r45 = staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: java.lang.String nonceCountToHex(int)>(i0);
+
+        $r46 = r9.<com.sun.security.sasl.digest.DigestMD5Base: java.lang.String encoding>;
+
+        $r47 = virtualinvoke $r45.<java.lang.String: byte[] getBytes(java.lang.String)>($r46);
+
+        virtualinvoke $r44.<java.io.ByteArrayOutputStream: void write(byte[])>($r47);
+
+        virtualinvoke $r44.<java.io.ByteArrayOutputStream: void write(int)>(58);
+
+        virtualinvoke $r44.<java.io.ByteArrayOutputStream: void write(byte[])>(r37);
+
+        virtualinvoke $r44.<java.io.ByteArrayOutputStream: void write(int)>(58);
+
+        $r48 = r9.<com.sun.security.sasl.digest.DigestMD5Base: java.lang.String encoding>;
+
+        $r49 = virtualinvoke r12.<java.lang.String: byte[] getBytes(java.lang.String)>($r48);
+
+        virtualinvoke $r44.<java.io.ByteArrayOutputStream: void write(byte[])>($r49);
+
+        virtualinvoke $r44.<java.io.ByteArrayOutputStream: void write(int)>(58);
+
+        virtualinvoke $r44.<java.io.ByteArrayOutputStream: void write(byte[])>($r20);
+
+        $r51 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        $r50 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $z4 = virtualinvoke $r51.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r50);
+
+        if $z4 == 0 goto label8;
+
+        $r60 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        $r61 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r62 = virtualinvoke $r44.<java.io.ByteArrayOutputStream: java.lang.String toString()>();
+
+        virtualinvoke $r60.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r61, "DIGEST09:KD: {0}", $r62);
+
+     label8:
+        $r52 = virtualinvoke $r44.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        virtualinvoke $r0.<java.security.MessageDigest: void update(byte[])>($r52);
+
+        $r53 = virtualinvoke $r0.<java.security.MessageDigest: byte[] digest()>();
+
+        $r54 = virtualinvoke r9.<com.sun.security.sasl.digest.DigestMD5Base: byte[] binaryToHex(byte[])>($r53);
+
+        $r56 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        $r55 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $z5 = virtualinvoke $r56.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r55);
+
+        if $z5 == 0 goto label9;
+
+        $r58 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        $r59 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r57 = new java.lang.String;
+
+        specialinvoke $r57.<java.lang.String: void <init>(byte[])>($r54);
+
+        virtualinvoke $r58.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r59, "DIGEST10:response-value: {0}", $r57);
+
+     label9:
+        return $r54;
+    }
+
+    protected static java.lang.String nonceCountToHex(int)
+    {
+        java.lang.StringBuffer $r1;
+        int i0, $i1, $i2, $i3, i4;
+        java.lang.StringBuilder $r2, $r4, $r5;
+        java.lang.String $r0, $r3, $r6;
+
+        i0 := @parameter0: int;
+
+        $r0 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>(i0);
+
+        $r1 = new java.lang.StringBuffer;
+
+        specialinvoke $r1.<java.lang.StringBuffer: void <init>()>();
+
+        $i1 = virtualinvoke $r0.<java.lang.String: int length()>();
+
+        if $i1 >= 8 goto label2;
+
+        i4 = 0;
+
+     label1:
+        $i2 = virtualinvoke $r0.<java.lang.String: int length()>();
+
+        $i3 = 8 - $i2;
+
+        if i4 >= $i3 goto label2;
+
+        virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("0");
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label2:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r6;
+    }
+
+    protected static byte[][] parseDirectives(byte[], java.lang.String[], java.util.List, int) throws javax.security.sasl.SaslException
+    {
+        byte[] r4, $r6, $r18;
+        javax.security.sasl.SaslException $r62, $r63, $r65, $r67, $r69, $r71, $r73, $r75;
+        byte b3, $b6, $b10, $b15;
+        byte[][] r1;
+        java.lang.StringBuilder $r10, $r12, $r13, $r15, $r21, $r23, $r24, $r28, $r30, $r31, $r33, $r37, $r39, $r43, $r45, $r49, $r51, $r56, $r57, $r61, $r64, $r66, $r68, $r70, $r72, $r74;
+        java.io.ByteArrayOutputStream $r59, $r60;
+        java.lang.String $r5, $r11, $r14, $r16, $r17, $r22, $r25, $r29, $r32, $r34, $r38, $r40, $r44, $r46, $r50, $r52, $r58;
+        boolean $z0, $z1, z2, z3, z4, z5, z6;
+        java.util.List r7;
+        java.lang.String[] r0;
+        int $i0, $i1, i2, $i4, $i5, $i7, $i8, $i9, $i11, $i12, $i13, $i14, $i16, $i17, i18, $i19, i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31;
+
+        r4 := @parameter0: byte[];
+
+        r0 := @parameter1: java.lang.String[];
+
+        r7 := @parameter2: java.util.List;
+
+        i2 := @parameter3: int;
+
+        $i0 = lengthof r0;
+
+        r1 = newarray (byte[])[$i0];
+
+        $r59 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r59.<java.io.ByteArrayOutputStream: void <init>(int)>(10);
+
+        $r60 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r60.<java.io.ByteArrayOutputStream: void <init>(int)>(10);
+
+        z2 = 1;
+
+        z3 = 0;
+
+        z6 = 0;
+
+        z5 = 0;
+
+        z4 = 0;
+
+        i18 = staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: int skipLws(byte[],int)>(r4, 0);
+
+     label01:
+        $i19 = lengthof r4;
+
+        if i18 >= $i19 goto label17;
+
+        b3 = r4[i18];
+
+        if z2 == 0 goto label09;
+
+        $i21 = (int) b3;
+
+        if $i21 != 44 goto label03;
+
+        $i16 = virtualinvoke $r59.<java.io.ByteArrayOutputStream: int size()>();
+
+        if $i16 == 0 goto label02;
+
+        $r62 = new javax.security.sasl.SaslException;
+
+        $r61 = new java.lang.StringBuilder;
+
+        specialinvoke $r61.<java.lang.StringBuilder: void <init>()>();
+
+        $r56 = virtualinvoke $r61.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Directive key contains a \',\':");
+
+        $r57 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r59);
+
+        $r58 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r62.<javax.security.sasl.SaslException: void <init>(java.lang.String)>($r58);
+
+        throw $r62;
+
+     label02:
+        $i17 = i18 + 1;
+
+        i18 = staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: int skipLws(byte[],int)>(r4, $i17);
+
+        goto label01;
+
+     label03:
+        $i22 = (int) b3;
+
+        if $i22 != 61 goto label06;
+
+        $i11 = virtualinvoke $r59.<java.io.ByteArrayOutputStream: int size()>();
+
+        if $i11 != 0 goto label04;
+
+        $r63 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r63.<javax.security.sasl.SaslException: void <init>(java.lang.String)>("Empty directive key");
+
+        throw $r63;
+
+     label04:
+        z2 = 0;
+
+        $i12 = i18 + 1;
+
+        $i13 = staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: int skipLws(byte[],int)>(r4, $i12);
+
+        i18 = $i13;
+
+        $i14 = lengthof r4;
+
+        if $i13 >= $i14 goto label05;
+
+        $b15 = r4[$i13];
+
+        $i23 = (int) $b15;
+
+        if $i23 != 34 goto label01;
+
+        z3 = 1;
+
+        z6 = 1;
+
+        z5 = 1;
+
+        i18 = $i13 + 1;
+
+        goto label01;
+
+     label05:
+        $r65 = new javax.security.sasl.SaslException;
+
+        $r64 = new java.lang.StringBuilder;
+
+        specialinvoke $r64.<java.lang.StringBuilder: void <init>()>();
+
+        $r49 = virtualinvoke $r64.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Valueless directive found: ");
+
+        $r50 = virtualinvoke $r59.<java.io.ByteArrayOutputStream: java.lang.String toString()>();
+
+        $r51 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r50);
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r65.<javax.security.sasl.SaslException: void <init>(java.lang.String)>($r52);
+
+        throw $r65;
+
+     label06:
+        $z1 = staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: boolean isLws(byte)>(b3);
+
+        if $z1 == 0 goto label08;
+
+        $i7 = i18 + 1;
+
+        $i8 = staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: int skipLws(byte[],int)>(r4, $i7);
+
+        i18 = $i8;
+
+        $i9 = lengthof r4;
+
+        if $i8 >= $i9 goto label07;
+
+        $b10 = r4[$i8];
+
+        $i24 = (int) $b10;
+
+        if $i24 == 61 goto label01;
+
+        $r67 = new javax.security.sasl.SaslException;
+
+        $r66 = new java.lang.StringBuilder;
+
+        specialinvoke $r66.<java.lang.StringBuilder: void <init>()>();
+
+        $r43 = virtualinvoke $r66.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'=\' expected after key: ");
+
+        $r44 = virtualinvoke $r59.<java.io.ByteArrayOutputStream: java.lang.String toString()>();
+
+        $r45 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r44);
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r67.<javax.security.sasl.SaslException: void <init>(java.lang.String)>($r46);
+
+        throw $r67;
+
+     label07:
+        $r69 = new javax.security.sasl.SaslException;
+
+        $r68 = new java.lang.StringBuilder;
+
+        specialinvoke $r68.<java.lang.StringBuilder: void <init>()>();
+
+        $r37 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'=\' expected after key: ");
+
+        $r38 = virtualinvoke $r59.<java.io.ByteArrayOutputStream: java.lang.String toString()>();
+
+        $r39 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r38);
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r69.<javax.security.sasl.SaslException: void <init>(java.lang.String)>($r40);
+
+        throw $r69;
+
+     label08:
+        $i25 = (int) b3;
+
+        virtualinvoke $r59.<java.io.ByteArrayOutputStream: void write(int)>($i25);
+
+        i18 = i18 + 1;
+
+        goto label01;
+
+     label09:
+        if z5 == 0 goto label13;
+
+        $i26 = (int) b3;
+
+        if $i26 != 92 goto label11;
+
+        i20 = i18 + 1;
+
+        $i5 = lengthof r4;
+
+        if i20 >= $i5 goto label10;
+
+        $b6 = r4[i20];
+
+        $i27 = (int) $b6;
+
+        virtualinvoke $r60.<java.io.ByteArrayOutputStream: void write(int)>($i27);
+
+        i18 = i20 + 1;
+
+        goto label01;
+
+     label10:
+        $r71 = new javax.security.sasl.SaslException;
+
+        $r70 = new java.lang.StringBuilder;
+
+        specialinvoke $r70.<java.lang.StringBuilder: void <init>()>();
+
+        $r28 = virtualinvoke $r70.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unmatched quote found for directive: ");
+
+        $r29 = virtualinvoke $r59.<java.io.ByteArrayOutputStream: java.lang.String toString()>();
+
+        $r30 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r29);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" with value: ");
+
+        $r32 = virtualinvoke $r60.<java.io.ByteArrayOutputStream: java.lang.String toString()>();
+
+        $r33 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r32);
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r71.<javax.security.sasl.SaslException: void <init>(java.lang.String)>($r34);
+
+        throw $r71;
+
+     label11:
+        $i28 = (int) b3;
+
+        if $i28 != 34 goto label12;
+
+        i18 = i18 + 1;
+
+        z3 = 0;
+
+        z6 = 0;
+
+        z5 = 0;
+
+        z4 = 1;
+
+        goto label01;
+
+     label12:
+        $i29 = (int) b3;
+
+        virtualinvoke $r60.<java.io.ByteArrayOutputStream: void write(int)>($i29);
+
+        i18 = i18 + 1;
+
+        goto label01;
+
+     label13:
+        $z0 = staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: boolean isLws(byte)>(b3);
+
+        if $z0 != 0 goto label14;
+
+        $i30 = (int) b3;
+
+        if $i30 != 44 goto label15;
+
+     label14:
+        $r17 = virtualinvoke $r59.<java.io.ByteArrayOutputStream: java.lang.String toString()>();
+
+        $r18 = virtualinvoke $r60.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void extractDirective(java.lang.String,byte[],java.lang.String[],byte[][],java.util.List,int)>($r17, $r18, r0, r1, r7, i2);
+
+        virtualinvoke $r59.<java.io.ByteArrayOutputStream: void reset()>();
+
+        virtualinvoke $r60.<java.io.ByteArrayOutputStream: void reset()>();
+
+        z2 = 1;
+
+        z4 = 0;
+
+        z3 = 0;
+
+        z6 = 0;
+
+        z5 = 0;
+
+        $i4 = i18 + 1;
+
+        i18 = staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: int skipLws(byte[],int)>(r4, $i4);
+
+        goto label01;
+
+     label15:
+        if z4 == 0 goto label16;
+
+        $r73 = new javax.security.sasl.SaslException;
+
+        $r72 = new java.lang.StringBuilder;
+
+        specialinvoke $r72.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r72.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expecting comma or linear whitespace after quoted string: \"");
+
+        $r22 = virtualinvoke $r60.<java.io.ByteArrayOutputStream: java.lang.String toString()>();
+
+        $r23 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r73.<javax.security.sasl.SaslException: void <init>(java.lang.String)>($r25);
+
+        throw $r73;
+
+     label16:
+        $i31 = (int) b3;
+
+        virtualinvoke $r60.<java.io.ByteArrayOutputStream: void write(int)>($i31);
+
+        i18 = i18 + 1;
+
+        goto label01;
+
+     label17:
+        if z6 == 0 goto label18;
+
+        $r75 = new javax.security.sasl.SaslException;
+
+        $r74 = new java.lang.StringBuilder;
+
+        specialinvoke $r74.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r74.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unmatched quote found for directive: ");
+
+        $r11 = virtualinvoke $r59.<java.io.ByteArrayOutputStream: java.lang.String toString()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" with value: ");
+
+        $r14 = virtualinvoke $r60.<java.io.ByteArrayOutputStream: java.lang.String toString()>();
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r75.<javax.security.sasl.SaslException: void <init>(java.lang.String)>($r16);
+
+        throw $r75;
+
+     label18:
+        $i1 = virtualinvoke $r59.<java.io.ByteArrayOutputStream: int size()>();
+
+        if $i1 <= 0 goto label19;
+
+        $r5 = virtualinvoke $r59.<java.io.ByteArrayOutputStream: java.lang.String toString()>();
+
+        $r6 = virtualinvoke $r60.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void extractDirective(java.lang.String,byte[],java.lang.String[],byte[][],java.util.List,int)>($r5, $r6, r0, r1, r7, i2);
+
+     label19:
+        return r1;
+    }
+
+    private static boolean isLws(byte)
+    {
+        int $i1;
+        byte b0;
+
+        b0 := @parameter0: byte;
+
+        $i1 = (int) b0;
+
+        lookupswitch($i1)
+        {
+            case 9: goto label1;
+            case 10: goto label1;
+            case 13: goto label1;
+            case 32: goto label1;
+            default: goto label2;
+        };
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    private static int skipLws(byte[], int)
+    {
+        byte[] r0;
+        byte $b2;
+        int i0, $i1, i3;
+        boolean $z0;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i3 = i0;
+
+     label1:
+        $i1 = lengthof r0;
+
+        if i3 >= $i1 goto label3;
+
+        $b2 = r0[i3];
+
+        $z0 = staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: boolean isLws(byte)>($b2);
+
+        if $z0 != 0 goto label2;
+
+        return i3;
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        return i3;
+    }
+
+    private static void extractDirective(java.lang.String, byte[], java.lang.String[], byte[][], java.util.List, int) throws javax.security.sasl.SaslException
+    {
+        byte[] $r4, r12, $r15, $r21;
+        java.lang.Object[] $r18;
+        java.lang.String[] r0;
+        javax.security.sasl.SaslException $r6;
+        java.util.logging.Level $r16, $r23;
+        int $i0, i1, i2;
+        java.lang.String r1, $r2, $r11, $r14, $r19, $r20;
+        boolean $z0, $z1, $z2;
+        java.util.logging.Logger $r17, $r22;
+        byte[][] r3;
+        java.util.List r5;
+        java.lang.StringBuilder $r7, $r8, $r9, $r10, $r13;
+
+        r1 := @parameter0: java.lang.String;
+
+        r12 := @parameter1: byte[];
+
+        r0 := @parameter2: java.lang.String[];
+
+        r3 := @parameter3: byte[][];
+
+        r5 := @parameter4: java.util.List;
+
+        i1 := @parameter5: int;
+
+        i2 = 0;
+
+     label1:
+        $i0 = lengthof r0;
+
+        if i2 >= $i0 goto label6;
+
+        $r2 = r0[i2];
+
+        $z0 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r2);
+
+        if $z0 == 0 goto label5;
+
+        $r4 = r3[i2];
+
+        if $r4 != null goto label2;
+
+        r3[i2] = r12;
+
+        $r17 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        $r16 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $z2 = virtualinvoke $r17.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r16);
+
+        if $z2 == 0 goto label6;
+
+        $r22 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        $r23 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r18 = newarray (java.lang.Object)[2];
+
+        $r19 = r0[i2];
+
+        $r18[0] = $r19;
+
+        $r20 = new java.lang.String;
+
+        $r21 = r3[i2];
+
+        specialinvoke $r20.<java.lang.String: void <init>(byte[])>($r21);
+
+        $r18[1] = $r20;
+
+        virtualinvoke $r22.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r23, "DIGEST11:Directive {0} = {1}", $r18);
+
+        goto label6;
+
+     label2:
+        if r5 == null goto label4;
+
+        if i2 != i1 goto label4;
+
+        $z1 = interfaceinvoke r5.<java.util.List: boolean isEmpty()>();
+
+        if $z1 == 0 goto label3;
+
+        $r15 = r3[i2];
+
+        interfaceinvoke r5.<java.util.List: boolean add(java.lang.Object)>($r15);
+
+     label3:
+        interfaceinvoke r5.<java.util.List: boolean add(java.lang.Object)>(r12);
+
+        goto label6;
+
+     label4:
+        $r6 = new javax.security.sasl.SaslException;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DIGEST-MD5: peer sent more than one ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" directive: ");
+
+        $r11 = new java.lang.String;
+
+        specialinvoke $r11.<java.lang.String: void <init>(byte[])>(r12);
+
+        $r13 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<javax.security.sasl.SaslException: void <init>(java.lang.String)>($r14);
+
+        throw $r6;
+
+     label5:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label6:
+        return;
+    }
+
+    private static void setParityBit(byte[])
+    {
+        byte[] r0;
+        short s7, $s9;
+        byte $b1, $b5;
+        int $i0, $i2, $i3, $i4, i6, i8, $i10, $i11;
+
+        r0 := @parameter0: byte[];
+
+        i6 = 0;
+
+     label1:
+        $i0 = lengthof r0;
+
+        if i6 >= $i0 goto label2;
+
+        $b1 = r0[i6];
+
+        $s9 = (short) $b1;
+
+        s7 = $s9 & 254;
+
+        $i10 = (int) s7;
+
+        $i2 = staticinvoke <java.lang.Integer: int bitCount(int)>($i10);
+
+        $i3 = $i2 & 1;
+
+        $i4 = $i3 ^ 1;
+
+        $i11 = (int) s7;
+
+        i8 = $i11 | $i4;
+
+        $b5 = (byte) i8;
+
+        r0[i6] = $b5;
+
+        i6 = i6 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private static byte[] addDesParity(byte[], int, int)
+    {
+        byte[] r0, r1, r2, $r6;
+        byte $b3, $b4, $b6;
+        int i0, i1, $i2, $i5, i7, $i8, $i10;
+        java.math.BigInteger $r4, $r5, r12, $r15;
+        java.lang.String $r11;
+        java.lang.IllegalArgumentException $r14;
+        java.lang.StringBuilder $r9, $r10, $r13;
+
+        r1 := @parameter0: byte[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        if i0 == 7 goto label1;
+
+        $r14 = new java.lang.IllegalArgumentException;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid length of DES Key Value:");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r14.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r11);
+
+        throw $r14;
+
+     label1:
+        r0 = newarray (byte)[7];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, i1, r0, 0, i0);
+
+        r2 = newarray (byte)[8];
+
+        $r15 = new java.math.BigInteger;
+
+        specialinvoke $r15.<java.math.BigInteger: void <init>(byte[])>(r0);
+
+        r12 = $r15;
+
+        $i2 = lengthof r2;
+
+        i7 = $i2 - 1;
+
+     label2:
+        if i7 < 0 goto label3;
+
+        $r4 = <com.sun.security.sasl.digest.DigestMD5Base: java.math.BigInteger MASK>;
+
+        $r5 = virtualinvoke r12.<java.math.BigInteger: java.math.BigInteger and(java.math.BigInteger)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.math.BigInteger: byte[] toByteArray()>();
+
+        $b3 = $r6[0];
+
+        r2[i7] = $b3;
+
+        $b4 = r2[i7];
+
+        $i8 = (int) $b4;
+
+        $i5 = $i8 << 1;
+
+        $b6 = (byte) $i5;
+
+        r2[i7] = $b6;
+
+        r12 = virtualinvoke r12.<java.math.BigInteger: java.math.BigInteger shiftRight(int)>(7);
+
+        $i10 = (int) -1;
+
+        i7 = i7 + $i10;
+
+        goto label2;
+
+     label3:
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void setParityBit(byte[])>(r2);
+
+        return r2;
+    }
+
+    private static javax.crypto.SecretKey makeDesKeys(byte[], java.lang.String) throws java.security.NoSuchAlgorithmException, java.security.InvalidKeyException, java.security.spec.InvalidKeySpecException
+    {
+        byte[] r0, $r1, $r4, r5, $r13, $r24;
+        java.security.spec.KeySpec r33;
+        byte b12;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.util.logging.Logger $r8, $r14, $r19, $r25;
+        java.lang.StringBuilder $r29, $r30, $r31;
+        javax.crypto.SecretKey $r34;
+        javax.crypto.spec.DESKeySpec $r17, $r22;
+        javax.crypto.spec.DESedeKeySpec $r6, $r11;
+        java.util.logging.Level $r7, $r15, $r18, $r26;
+        javax.crypto.SecretKeyFactory $r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11;
+        java.lang.Boolean $r16, $r27;
+        java.lang.String r2, $r9, $r10, $r12, $r20, $r21, $r23, $r32;
+        java.lang.IllegalArgumentException $r28;
+
+        r0 := @parameter0: byte[];
+
+        r2 := @parameter1: java.lang.String;
+
+        $r1 = staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: byte[] addDesParity(byte[],int,int)>(r0, 0, 7);
+
+        $r3 = staticinvoke <javax.crypto.SecretKeyFactory: javax.crypto.SecretKeyFactory getInstance(java.lang.String)>(r2);
+
+        b12 = -1;
+
+        $i0 = virtualinvoke r2.<java.lang.String: int hashCode()>();
+
+        lookupswitch($i0)
+        {
+            case -1335250348: goto label2;
+            case 99346: goto label1;
+            default: goto label3;
+        };
+
+     label1:
+        $z0 = virtualinvoke r2.<java.lang.String: boolean equals(java.lang.Object)>("des");
+
+        if $z0 == 0 goto label3;
+
+        b12 = 0;
+
+        goto label3;
+
+     label2:
+        $z5 = virtualinvoke r2.<java.lang.String: boolean equals(java.lang.Object)>("desede");
+
+        if $z5 == 0 goto label3;
+
+        b12 = 1;
+
+     label3:
+        lookupswitch(b12)
+        {
+            case 0: goto label4;
+            case 1: goto label5;
+            default: goto label6;
+        };
+
+     label4:
+        $r17 = new javax.crypto.spec.DESKeySpec;
+
+        specialinvoke $r17.<javax.crypto.spec.DESKeySpec: void <init>(byte[],int)>($r1, 0);
+
+        r33 = $r17;
+
+        $r19 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        $r18 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z3 = virtualinvoke $r19.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r18);
+
+        if $z3 == 0 goto label7;
+
+        $r20 = <com.sun.security.sasl.digest.DigestMD5Base: java.lang.String DP_CLASS_NAME>;
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>($r20, "makeDesKeys", "DIGEST42:DES key input: ", r0);
+
+        $r21 = <com.sun.security.sasl.digest.DigestMD5Base: java.lang.String DP_CLASS_NAME>;
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>($r21, "makeDesKeys", "DIGEST43:DES key parity-adjusted: ", $r1);
+
+        $r23 = <com.sun.security.sasl.digest.DigestMD5Base: java.lang.String DP_CLASS_NAME>;
+
+        $r22 = (javax.crypto.spec.DESKeySpec) $r17;
+
+        $r24 = virtualinvoke $r22.<javax.crypto.spec.DESKeySpec: byte[] getKey()>();
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>($r23, "makeDesKeys", "DIGEST44:DES key material: ", $r24);
+
+        $r25 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        $r26 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z4 = staticinvoke <javax.crypto.spec.DESKeySpec: boolean isParityAdjusted(byte[],int)>($r1, 0);
+
+        $r27 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z4);
+
+        virtualinvoke $r25.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r26, "DIGEST45: is parity-adjusted? {0}", $r27);
+
+        goto label7;
+
+     label5:
+        $r4 = staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: byte[] addDesParity(byte[],int,int)>(r0, 7, 7);
+
+        $i1 = lengthof $r1;
+
+        $i3 = $i1 * 2;
+
+        $i2 = lengthof $r4;
+
+        $i4 = $i3 + $i2;
+
+        r5 = newarray (byte)[$i4];
+
+        $i5 = lengthof $r1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, 0, r5, 0, $i5);
+
+        $i7 = lengthof $r1;
+
+        $i6 = lengthof $r4;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, r5, $i7, $i6);
+
+        $i9 = lengthof $r1;
+
+        $i8 = lengthof $r4;
+
+        $i11 = $i9 + $i8;
+
+        $i10 = lengthof $r1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, 0, r5, $i11, $i10);
+
+        $r6 = new javax.crypto.spec.DESedeKeySpec;
+
+        specialinvoke $r6.<javax.crypto.spec.DESedeKeySpec: void <init>(byte[],int)>(r5, 0);
+
+        r33 = $r6;
+
+        $r8 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        $r7 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z1 = virtualinvoke $r8.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r7);
+
+        if $z1 == 0 goto label7;
+
+        $r9 = <com.sun.security.sasl.digest.DigestMD5Base: java.lang.String DP_CLASS_NAME>;
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>($r9, "makeDesKeys", "DIGEST46:3DES key input: ", r0);
+
+        $r10 = <com.sun.security.sasl.digest.DigestMD5Base: java.lang.String DP_CLASS_NAME>;
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>($r10, "makeDesKeys", "DIGEST47:3DES key ede: ", r5);
+
+        $r12 = <com.sun.security.sasl.digest.DigestMD5Base: java.lang.String DP_CLASS_NAME>;
+
+        $r11 = (javax.crypto.spec.DESedeKeySpec) $r6;
+
+        $r13 = virtualinvoke $r11.<javax.crypto.spec.DESedeKeySpec: byte[] getKey()>();
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>($r12, "makeDesKeys", "DIGEST48:3DES key material: ", $r13);
+
+        $r14 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        $r15 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z2 = staticinvoke <javax.crypto.spec.DESedeKeySpec: boolean isParityAdjusted(byte[],int)>(r5, 0);
+
+        $r16 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z2);
+
+        virtualinvoke $r14.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r15, "DIGEST49: is parity-adjusted? ", $r16);
+
+        goto label7;
+
+     label6:
+        $r28 = new java.lang.IllegalArgumentException;
+
+        $r29 = new java.lang.StringBuilder;
+
+        specialinvoke $r29.<java.lang.StringBuilder: void <init>()>();
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid DES strength:");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r28.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r32);
+
+        throw $r28;
+
+     label7:
+        $r34 = virtualinvoke $r3.<javax.crypto.SecretKeyFactory: javax.crypto.SecretKey generateSecret(java.security.spec.KeySpec)>(r33);
+
+        return $r34;
+    }
+
+    static void access$000(int, byte[], int, int)
+    {
+        byte[] r0;
+        int i0, i1, i2;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: byte[];
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void intToNetworkByteOrder(int,byte[],int,int)>(i0, r0, i1, i2);
+
+        return;
+    }
+
+    static java.util.logging.Logger access$100()
+    {
+        java.util.logging.Logger $r0;
+
+        $r0 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        return $r0;
+    }
+
+    static java.lang.String access$200()
+    {
+        java.lang.String $r0;
+
+        $r0 = <com.sun.security.sasl.digest.DigestMD5Base: java.lang.String DI_CLASS_NAME>;
+
+        return $r0;
+    }
+
+    static void access$300(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static void access$400(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static java.util.logging.Logger access$500()
+    {
+        java.util.logging.Logger $r0;
+
+        $r0 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        return $r0;
+    }
+
+    static void access$600(java.lang.String, java.lang.String, java.lang.String, byte[], int, int)
+    {
+        byte[] r3;
+        int i0, i1;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        i0 := @parameter4: int;
+
+        i1 := @parameter5: int;
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[],int,int)>(r0, r1, r2, r3, i0, i1);
+
+        return;
+    }
+
+    static void access$700(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static void access$800(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static java.util.logging.Logger access$900()
+    {
+        java.util.logging.Logger $r0;
+
+        $r0 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        return $r0;
+    }
+
+    static void access$1000(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static java.util.logging.Logger access$1100()
+    {
+        java.util.logging.Logger $r0;
+
+        $r0 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        return $r0;
+    }
+
+    static void access$1200(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static void access$1300(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static void access$1400(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static void access$1500(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static void access$1600(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static java.util.logging.Logger access$1700()
+    {
+        java.util.logging.Logger $r0;
+
+        $r0 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        return $r0;
+    }
+
+    static int access$1800(byte[], int, int)
+    {
+        byte[] r0;
+        int i0, i1, $i2;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $i2 = staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: int networkByteOrderToInt(byte[],int,int)>(r0, i0, i1);
+
+        return $i2;
+    }
+
+    static int access$1900(byte[], int, int)
+    {
+        byte[] r0;
+        int i0, i1, $i2;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $i2 = staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: int networkByteOrderToInt(byte[],int,int)>(r0, i0, i1);
+
+        return $i2;
+    }
+
+    static int access$2000(byte[], int, int)
+    {
+        byte[] r0;
+        int i0, i1, $i2;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $i2 = staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: int networkByteOrderToInt(byte[],int,int)>(r0, i0, i1);
+
+        return $i2;
+    }
+
+    static void access$2100(int, byte[], int, int)
+    {
+        byte[] r0;
+        int i0, i1, i2;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: byte[];
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void intToNetworkByteOrder(int,byte[],int,int)>(i0, r0, i1, i2);
+
+        return;
+    }
+
+    static java.util.logging.Logger access$2200()
+    {
+        java.util.logging.Logger $r0;
+
+        $r0 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        return $r0;
+    }
+
+    static java.lang.String access$2300()
+    {
+        java.lang.String $r0;
+
+        $r0 = <com.sun.security.sasl.digest.DigestMD5Base: java.lang.String DP_CLASS_NAME>;
+
+        return $r0;
+    }
+
+    static void access$2400(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static void access$2500(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static javax.crypto.SecretKey access$2600(byte[], java.lang.String) throws java.security.NoSuchAlgorithmException, java.security.InvalidKeyException, java.security.spec.InvalidKeySpecException
+    {
+        byte[] r0;
+        java.lang.String r1;
+        javax.crypto.SecretKey $r2;
+
+        r0 := @parameter0: byte[];
+
+        r1 := @parameter1: java.lang.String;
+
+        $r2 = staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: javax.crypto.SecretKey makeDesKeys(byte[],java.lang.String)>(r0, r1);
+
+        return $r2;
+    }
+
+    static java.util.logging.Logger access$2700()
+    {
+        java.util.logging.Logger $r0;
+
+        $r0 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        return $r0;
+    }
+
+    static void access$2800(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static void access$2900(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static void access$3000(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static void access$3100(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static java.util.logging.Logger access$3200()
+    {
+        java.util.logging.Logger $r0;
+
+        $r0 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        return $r0;
+    }
+
+    static void access$3300(java.lang.String, java.lang.String, java.lang.String, byte[], int, int)
+    {
+        byte[] r3;
+        int i0, i1;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        i0 := @parameter4: int;
+
+        i1 := @parameter5: int;
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[],int,int)>(r0, r1, r2, r3, i0, i1);
+
+        return;
+    }
+
+    static void access$3400(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static void access$3500(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static java.util.logging.Logger access$3600()
+    {
+        java.util.logging.Logger $r0;
+
+        $r0 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        return $r0;
+    }
+
+    static void access$3700(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static java.util.logging.Logger access$3800()
+    {
+        java.util.logging.Logger $r0;
+
+        $r0 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        return $r0;
+    }
+
+    static void access$3900(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static java.util.logging.Logger access$4000()
+    {
+        java.util.logging.Logger $r0;
+
+        $r0 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        return $r0;
+    }
+
+    static java.util.logging.Logger access$4100()
+    {
+        java.util.logging.Logger $r0;
+
+        $r0 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        return $r0;
+    }
+
+    static void access$4200(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static java.util.logging.Logger access$4300()
+    {
+        java.util.logging.Logger $r0;
+
+        $r0 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        return $r0;
+    }
+
+    static void access$4400(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static void access$4500(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static void access$4600(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static void access$4700(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static java.util.logging.Logger access$4800()
+    {
+        java.util.logging.Logger $r0;
+
+        $r0 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        return $r0;
+    }
+
+    static java.util.logging.Logger access$4900()
+    {
+        java.util.logging.Logger $r0;
+
+        $r0 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        return $r0;
+    }
+
+    static java.util.logging.Logger access$5000()
+    {
+        java.util.logging.Logger $r0;
+
+        $r0 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        return $r0;
+    }
+
+    static void access$5100(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[])>(r0, r1, r2, r3);
+
+        return;
+    }
+
+    static java.util.logging.Logger access$5200()
+    {
+        java.util.logging.Logger $r0;
+
+        $r0 = <com.sun.security.sasl.digest.DigestMD5Base: java.util.logging.Logger logger>;
+
+        return $r0;
+    }
+
+    static int access$5300(byte[], int, int)
+    {
+        byte[] r0;
+        int i0, i1, $i2;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $i2 = staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: int networkByteOrderToInt(byte[],int,int)>(r0, i0, i1);
+
+        return $i2;
+    }
+
+    static int access$5400(byte[], int, int)
+    {
+        byte[] r0;
+        int i0, i1, $i2;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $i2 = staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: int networkByteOrderToInt(byte[],int,int)>(r0, i0, i1);
+
+        return $i2;
+    }
+
+    static int access$5500(byte[], int, int)
+    {
+        byte[] r0;
+        int i0, i1, $i2;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $i2 = staticinvoke <com.sun.security.sasl.digest.DigestMD5Base: int networkByteOrderToInt(byte[],int,int)>(r0, i0, i1);
+
+        return $i2;
+    }
+
+    static void <clinit>()
+    {
+        byte[] $r6, $r7;
+        java.lang.String[] $r4, $r5;
+        char[] $r8;
+        java.lang.Class $r0, $r2;
+        java.math.BigInteger $r9;
+        java.lang.String $r1, $r3;
+
+        <com.sun.security.sasl.digest.DigestMD5Base: int ENCODED_NONCE_SIZE> = 40;
+
+        <com.sun.security.sasl.digest.DigestMD5Base: int RAW_NONCE_SIZE> = 30;
+
+        <com.sun.security.sasl.digest.DigestMD5Base: java.lang.String SECURITY_LAYER_MARKER> = ":00000000000000000000000000000000";
+
+        <com.sun.security.sasl.digest.DigestMD5Base: byte UNSET> = 0;
+
+        <com.sun.security.sasl.digest.DigestMD5Base: byte RC4_40_STRENGTH> = 1;
+
+        <com.sun.security.sasl.digest.DigestMD5Base: byte RC4_56_STRENGTH> = 2;
+
+        <com.sun.security.sasl.digest.DigestMD5Base: byte DES_STRENGTH> = 2;
+
+        <com.sun.security.sasl.digest.DigestMD5Base: byte RC4_STRENGTH> = 4;
+
+        <com.sun.security.sasl.digest.DigestMD5Base: byte DES_3_STRENGTH> = 4;
+
+        <com.sun.security.sasl.digest.DigestMD5Base: int RC4_40> = 4;
+
+        <com.sun.security.sasl.digest.DigestMD5Base: int RC4_56> = 3;
+
+        <com.sun.security.sasl.digest.DigestMD5Base: int DES> = 2;
+
+        <com.sun.security.sasl.digest.DigestMD5Base: int RC4> = 1;
+
+        <com.sun.security.sasl.digest.DigestMD5Base: int DES3> = 0;
+
+        <com.sun.security.sasl.digest.DigestMD5Base: int DEFAULT_MAXBUF> = 65536;
+
+        <com.sun.security.sasl.digest.DigestMD5Base: int MAX_RESPONSE_LENGTH> = 4096;
+
+        <com.sun.security.sasl.digest.DigestMD5Base: int MAX_CHALLENGE_LENGTH> = 2048;
+
+        $r0 = class "Lcom/sun/security/sasl/digest/DigestMD5Base$DigestIntegrity;";
+
+        $r1 = virtualinvoke $r0.<java.lang.Class: java.lang.String getName()>();
+
+        <com.sun.security.sasl.digest.DigestMD5Base: java.lang.String DI_CLASS_NAME> = $r1;
+
+        $r2 = class "Lcom/sun/security/sasl/digest/DigestMD5Base$DigestPrivacy;";
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        <com.sun.security.sasl.digest.DigestMD5Base: java.lang.String DP_CLASS_NAME> = $r3;
+
+        $r4 = newarray (java.lang.String)[5];
+
+        $r4[0] = "3des";
+
+        $r4[1] = "rc4";
+
+        $r4[2] = "des";
+
+        $r4[3] = "rc4-56";
+
+        $r4[4] = "rc4-40";
+
+        <com.sun.security.sasl.digest.DigestMD5Base: java.lang.String[] CIPHER_TOKENS> = $r4;
+
+        $r5 = newarray (java.lang.String)[3];
+
+        $r5[0] = "DESede/CBC/NoPadding";
+
+        $r5[1] = "RC4";
+
+        $r5[2] = "DES/CBC/NoPadding";
+
+        <com.sun.security.sasl.digest.DigestMD5Base: java.lang.String[] JCE_CIPHER_NAME> = $r5;
+
+        $r6 = newarray (byte)[5];
+
+        $r6[0] = 4;
+
+        $r6[1] = 4;
+
+        $r6[2] = 2;
+
+        $r6[3] = 2;
+
+        $r6[4] = 1;
+
+        <com.sun.security.sasl.digest.DigestMD5Base: byte[] CIPHER_MASKS> = $r6;
+
+        $r7 = newarray (byte)[0];
+
+        <com.sun.security.sasl.digest.DigestMD5Base: byte[] EMPTY_BYTE_ARRAY> = $r7;
+
+        $r8 = newarray (char)[64];
+
+        $r8[0] = 65;
+
+        $r8[1] = 66;
+
+        $r8[2] = 67;
+
+        $r8[3] = 68;
+
+        $r8[4] = 69;
+
+        $r8[5] = 70;
+
+        $r8[6] = 71;
+
+        $r8[7] = 72;
+
+        $r8[8] = 73;
+
+        $r8[9] = 74;
+
+        $r8[10] = 75;
+
+        $r8[11] = 76;
+
+        $r8[12] = 77;
+
+        $r8[13] = 78;
+
+        $r8[14] = 79;
+
+        $r8[15] = 80;
+
+        $r8[16] = 81;
+
+        $r8[17] = 82;
+
+        $r8[18] = 83;
+
+        $r8[19] = 84;
+
+        $r8[20] = 85;
+
+        $r8[21] = 86;
+
+        $r8[22] = 87;
+
+        $r8[23] = 88;
+
+        $r8[24] = 89;
+
+        $r8[25] = 90;
+
+        $r8[26] = 97;
+
+        $r8[27] = 98;
+
+        $r8[28] = 99;
+
+        $r8[29] = 100;
+
+        $r8[30] = 101;
+
+        $r8[31] = 102;
+
+        $r8[32] = 103;
+
+        $r8[33] = 104;
+
+        $r8[34] = 105;
+
+        $r8[35] = 106;
+
+        $r8[36] = 107;
+
+        $r8[37] = 108;
+
+        $r8[38] = 109;
+
+        $r8[39] = 110;
+
+        $r8[40] = 111;
+
+        $r8[41] = 112;
+
+        $r8[42] = 113;
+
+        $r8[43] = 114;
+
+        $r8[44] = 115;
+
+        $r8[45] = 116;
+
+        $r8[46] = 117;
+
+        $r8[47] = 118;
+
+        $r8[48] = 119;
+
+        $r8[49] = 120;
+
+        $r8[50] = 121;
+
+        $r8[51] = 122;
+
+        $r8[52] = 48;
+
+        $r8[53] = 49;
+
+        $r8[54] = 50;
+
+        $r8[55] = 51;
+
+        $r8[56] = 52;
+
+        $r8[57] = 53;
+
+        $r8[58] = 54;
+
+        $r8[59] = 55;
+
+        $r8[60] = 56;
+
+        $r8[61] = 57;
+
+        $r8[62] = 43;
+
+        $r8[63] = 47;
+
+        <com.sun.security.sasl.digest.DigestMD5Base: char[] pem_array> = $r8;
+
+        $r9 = new java.math.BigInteger;
+
+        specialinvoke $r9.<java.math.BigInteger: void <init>(java.lang.String,int)>("7f", 16);
+
+        <com.sun.security.sasl.digest.DigestMD5Base: java.math.BigInteger MASK> = $r9;
+
+        return;
+    }
+}

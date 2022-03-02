@@ -1,0 +1,278 @@
+public abstract class javax.security.auth.Policy extends java.lang.Object
+{
+    private static javax.security.auth.Policy policy;
+    private static final java.lang.String AUTH_POLICY;
+    private final java.security.AccessControlContext acc;
+    private static boolean isCustomPolicy;
+
+    protected void <init>()
+    {
+        java.security.AccessControlContext $r1;
+        javax.security.auth.Policy r0;
+
+        r0 := @this: javax.security.auth.Policy;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = staticinvoke <java.security.AccessController: java.security.AccessControlContext getContext()>();
+
+        r0.<javax.security.auth.Policy: java.security.AccessControlContext acc> = $r1;
+
+        return;
+    }
+
+    public static javax.security.auth.Policy getPolicy()
+    {
+        javax.security.auth.Policy $r1;
+        java.lang.SecurityManager $r0;
+        javax.security.auth.AuthPermission $r2;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r2 = new javax.security.auth.AuthPermission;
+
+        specialinvoke $r2.<javax.security.auth.AuthPermission: void <init>(java.lang.String)>("getPolicy");
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r2);
+
+     label1:
+        $r1 = staticinvoke <javax.security.auth.Policy: javax.security.auth.Policy getPolicyNoCheck()>();
+
+        return $r1;
+    }
+
+    static javax.security.auth.Policy getPolicyNoCheck()
+    {
+        java.security.AccessControlContext $r8, $r10;
+        java.lang.Throwable $r12;
+        javax.security.auth.Policy$3 $r7;
+        javax.security.auth.Policy$2 $r5;
+        javax.security.auth.Policy$1 $r3;
+        java.lang.SecurityException $r14;
+        java.lang.String $r15, r16;
+        javax.security.auth.Policy $r0, $r1, $r2, $r11;
+        java.lang.Exception $r13;
+        java.lang.Object $r4, $r6, $r9;
+
+        $r0 = <javax.security.auth.Policy: javax.security.auth.Policy policy>;
+
+        if $r0 != null goto label9;
+
+        entermonitor class "Ljavax/security/auth/Policy;";
+
+     label1:
+        $r2 = <javax.security.auth.Policy: javax.security.auth.Policy policy>;
+
+        if $r2 != null goto label5;
+
+        $r3 = new javax.security.auth.Policy$1;
+
+        specialinvoke $r3.<javax.security.auth.Policy$1: void <init>()>();
+
+        $r4 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r3);
+
+        r16 = (java.lang.String) $r4;
+
+        if r16 != null goto label2;
+
+        r16 = "sun.security.provider.AuthPolicyFile";
+
+     label2:
+        $r5 = new javax.security.auth.Policy$2;
+
+        specialinvoke $r5.<javax.security.auth.Policy$2: void <init>(java.lang.String)>(r16);
+
+        $r6 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r5);
+
+        $r11 = (javax.security.auth.Policy) $r6;
+
+        $r7 = new javax.security.auth.Policy$3;
+
+        specialinvoke $r7.<javax.security.auth.Policy$3: void <init>(javax.security.auth.Policy,java.lang.String)>($r11, r16);
+
+        $r8 = $r11.<javax.security.auth.Policy: java.security.AccessControlContext acc>;
+
+        $r9 = staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>($r8);
+
+        $r10 = (java.security.AccessControlContext) $r9;
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction,java.security.AccessControlContext)>($r7, $r10);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r13 := @caughtexception;
+
+        $r14 = new java.lang.SecurityException;
+
+        $r15 = staticinvoke <sun.security.util.ResourcesMgr: java.lang.String getString(java.lang.String)>("unable.to.instantiate.Subject.based.policy");
+
+        specialinvoke $r14.<java.lang.SecurityException: void <init>(java.lang.String)>($r15);
+
+        throw $r14;
+
+     label5:
+        exitmonitor class "Ljavax/security/auth/Policy;";
+
+     label6:
+        goto label9;
+
+     label7:
+        $r12 := @caughtexception;
+
+        exitmonitor class "Ljavax/security/auth/Policy;";
+
+     label8:
+        throw $r12;
+
+     label9:
+        $r1 = <javax.security.auth.Policy: javax.security.auth.Policy policy>;
+
+        return $r1;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+        catch java.lang.Throwable from label1 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public static void setPolicy(javax.security.auth.Policy)
+    {
+        javax.security.auth.Policy r1;
+        java.lang.SecurityManager $r0;
+        javax.security.auth.AuthPermission $r2;
+        boolean $z0;
+
+        r1 := @parameter0: javax.security.auth.Policy;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r2 = new javax.security.auth.AuthPermission;
+
+        specialinvoke $r2.<javax.security.auth.AuthPermission: void <init>(java.lang.String)>("setPolicy");
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r2);
+
+     label1:
+        <javax.security.auth.Policy: javax.security.auth.Policy policy> = r1;
+
+        if r1 == null goto label2;
+
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        <javax.security.auth.Policy: boolean isCustomPolicy> = $z0;
+
+        return;
+    }
+
+    static boolean isCustomPolicySet(sun.security.util.Debug)
+    {
+        javax.security.auth.Policy$4 $r1;
+        java.lang.String r3, $r8, $r12, $r14;
+        boolean $z0, $z1, $z2;
+        javax.security.auth.Policy $r0, $r11;
+        sun.security.util.Debug r4;
+        java.lang.Object $r2;
+        java.lang.StringBuilder $r5, $r6, $r7, $r9, $r10, $r13;
+
+        r4 := @parameter0: sun.security.util.Debug;
+
+        $r0 = <javax.security.auth.Policy: javax.security.auth.Policy policy>;
+
+        if $r0 == null goto label2;
+
+        if r4 == null goto label1;
+
+        $z1 = <javax.security.auth.Policy: boolean isCustomPolicy>;
+
+        if $z1 == 0 goto label1;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Providing backwards compatibility for javax.security.auth.policy implementation: ");
+
+        $r11 = <javax.security.auth.Policy: javax.security.auth.Policy policy>;
+
+        $r12 = virtualinvoke $r11.<java.lang.Object: java.lang.String toString()>();
+
+        $r13 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r4.<sun.security.util.Debug: void println(java.lang.String)>($r14);
+
+     label1:
+        $z2 = <javax.security.auth.Policy: boolean isCustomPolicy>;
+
+        return $z2;
+
+     label2:
+        $r1 = new javax.security.auth.Policy$4;
+
+        specialinvoke $r1.<javax.security.auth.Policy$4: void <init>()>();
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        r3 = (java.lang.String) $r2;
+
+        if r3 == null goto label4;
+
+        $z0 = virtualinvoke r3.<java.lang.String: boolean equals(java.lang.Object)>("sun.security.provider.AuthPolicyFile");
+
+        if $z0 != 0 goto label4;
+
+        if r4 == null goto label3;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Providing backwards compatibility for javax.security.auth.policy implementation: ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r4.<sun.security.util.Debug: void println(java.lang.String)>($r8);
+
+     label3:
+        return 1;
+
+     label4:
+        return 0;
+    }
+
+    public abstract java.security.PermissionCollection getPermissions(javax.security.auth.Subject, java.security.CodeSource);
+
+    public abstract void refresh();
+
+    static boolean access$002(boolean)
+    {
+        boolean z0;
+
+        z0 := @parameter0: boolean;
+
+        <javax.security.auth.Policy: boolean isCustomPolicy> = z0;
+
+        return z0;
+    }
+
+    public static void <clinit>()
+    {
+        <javax.security.auth.Policy: java.lang.String AUTH_POLICY> = "sun.security.provider.AuthPolicyFile";
+
+        return;
+    }
+}

@@ -1,0 +1,211 @@
+class sun.security.ssl.SSLEngineImpl$DelegatedTask extends java.lang.Object implements java.lang.Runnable
+{
+    private final sun.security.ssl.SSLEngineImpl engine;
+
+    void <init>(sun.security.ssl.SSLEngineImpl)
+    {
+        sun.security.ssl.SSLEngineImpl r1;
+        sun.security.ssl.SSLEngineImpl$DelegatedTask r0;
+
+        r0 := @this: sun.security.ssl.SSLEngineImpl$DelegatedTask;
+
+        r1 := @parameter0: sun.security.ssl.SSLEngineImpl;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.ssl.SSLEngineImpl$DelegatedTask: sun.security.ssl.SSLEngineImpl engine> = r1;
+
+        return;
+    }
+
+    public void run()
+    {
+        java.security.AccessControlContext $r8;
+        boolean $z0;
+        java.lang.Exception $r13, $r18, $r25, $r28, $r33;
+        sun.security.ssl.SSLEngineImpl$DelegatedTask$DelegatedAction $r5;
+        javax.net.ssl.SSLException $r36;
+        java.util.Queue $r4;
+        sun.security.ssl.SSLEngineImpl$DelegatedTask r0;
+        java.lang.Throwable $r9;
+        sun.security.ssl.SSLEngineImpl $r1, $r2, $r6, $r11, $r14, $r16, $r19, $r21, $r26, $r29, $r31, $r34, $r37, $r41;
+        java.security.PrivilegedActionException $r24;
+        java.lang.RuntimeException $r10;
+        sun.security.ssl.TransportContext $r3, $r7, $r12, $r15, $r17, $r20, $r22, $r27, $r30, $r32, $r35, $r38, $r42;
+        sun.security.ssl.HandshakeContext $r23, $r39, r40, $r43;
+
+        r0 := @this: sun.security.ssl.SSLEngineImpl$DelegatedTask;
+
+        $r1 = r0.<sun.security.ssl.SSLEngineImpl$DelegatedTask: sun.security.ssl.SSLEngineImpl engine>;
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = r0.<sun.security.ssl.SSLEngineImpl$DelegatedTask: sun.security.ssl.SSLEngineImpl engine>;
+
+        $r3 = $r2.<sun.security.ssl.SSLEngineImpl: sun.security.ssl.TransportContext conContext>;
+
+        r40 = $r3.<sun.security.ssl.TransportContext: sun.security.ssl.HandshakeContext handshakeContext>;
+
+        if r40 == null goto label02;
+
+        $r4 = r40.<sun.security.ssl.HandshakeContext: java.util.Queue delegatedActions>;
+
+        $z0 = interfaceinvoke $r4.<java.util.Queue: boolean isEmpty()>();
+
+        if $z0 == 0 goto label04;
+
+     label02:
+        exitmonitor $r1;
+
+     label03:
+        return;
+
+     label04:
+        $r5 = new sun.security.ssl.SSLEngineImpl$DelegatedTask$DelegatedAction;
+
+        specialinvoke $r5.<sun.security.ssl.SSLEngineImpl$DelegatedTask$DelegatedAction: void <init>(sun.security.ssl.HandshakeContext)>(r40);
+
+        $r6 = r0.<sun.security.ssl.SSLEngineImpl$DelegatedTask: sun.security.ssl.SSLEngineImpl engine>;
+
+        $r7 = $r6.<sun.security.ssl.SSLEngineImpl: sun.security.ssl.TransportContext conContext>;
+
+        $r8 = $r7.<sun.security.ssl.TransportContext: java.security.AccessControlContext acc>;
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction,java.security.AccessControlContext)>($r5, $r8);
+
+     label05:
+        goto label13;
+
+     label06:
+        $r24 := @caughtexception;
+
+        $r25 = virtualinvoke $r24.<java.security.PrivilegedActionException: java.lang.Exception getException()>();
+
+        $r26 = r0.<sun.security.ssl.SSLEngineImpl$DelegatedTask: sun.security.ssl.SSLEngineImpl engine>;
+
+        $r27 = $r26.<sun.security.ssl.SSLEngineImpl: sun.security.ssl.TransportContext conContext>;
+
+        $r28 = $r27.<sun.security.ssl.TransportContext: java.lang.Exception delegatedThrown>;
+
+        if $r28 != null goto label07;
+
+        $r37 = r0.<sun.security.ssl.SSLEngineImpl$DelegatedTask: sun.security.ssl.SSLEngineImpl engine>;
+
+        $r38 = $r37.<sun.security.ssl.SSLEngineImpl: sun.security.ssl.TransportContext conContext>;
+
+        $r38.<sun.security.ssl.TransportContext: java.lang.Exception delegatedThrown> = $r25;
+
+     label07:
+        $r29 = r0.<sun.security.ssl.SSLEngineImpl$DelegatedTask: sun.security.ssl.SSLEngineImpl engine>;
+
+        $r30 = $r29.<sun.security.ssl.SSLEngineImpl: sun.security.ssl.TransportContext conContext>;
+
+        $r39 = $r30.<sun.security.ssl.TransportContext: sun.security.ssl.HandshakeContext handshakeContext>;
+
+        if $r39 == null goto label08;
+
+        $r39.<sun.security.ssl.HandshakeContext: java.lang.Exception delegatedThrown> = $r25;
+
+        goto label09;
+
+     label08:
+        $r31 = r0.<sun.security.ssl.SSLEngineImpl$DelegatedTask: sun.security.ssl.SSLEngineImpl engine>;
+
+        $r32 = $r31.<sun.security.ssl.SSLEngineImpl: sun.security.ssl.TransportContext conContext>;
+
+        $r33 = $r32.<sun.security.ssl.TransportContext: java.lang.Exception closeReason>;
+
+        if $r33 == null goto label09;
+
+        $r34 = r0.<sun.security.ssl.SSLEngineImpl$DelegatedTask: sun.security.ssl.SSLEngineImpl engine>;
+
+        $r35 = $r34.<sun.security.ssl.SSLEngineImpl: sun.security.ssl.TransportContext conContext>;
+
+        $r36 = staticinvoke <sun.security.ssl.SSLEngineImpl: javax.net.ssl.SSLException access$000(java.lang.Exception)>($r25);
+
+        $r35.<sun.security.ssl.TransportContext: java.lang.Exception closeReason> = $r36;
+
+     label09:
+        goto label13;
+
+     label10:
+        $r10 := @caughtexception;
+
+        $r11 = r0.<sun.security.ssl.SSLEngineImpl$DelegatedTask: sun.security.ssl.SSLEngineImpl engine>;
+
+        $r12 = $r11.<sun.security.ssl.SSLEngineImpl: sun.security.ssl.TransportContext conContext>;
+
+        $r13 = $r12.<sun.security.ssl.TransportContext: java.lang.Exception delegatedThrown>;
+
+        if $r13 != null goto label11;
+
+        $r21 = r0.<sun.security.ssl.SSLEngineImpl$DelegatedTask: sun.security.ssl.SSLEngineImpl engine>;
+
+        $r22 = $r21.<sun.security.ssl.SSLEngineImpl: sun.security.ssl.TransportContext conContext>;
+
+        $r22.<sun.security.ssl.TransportContext: java.lang.Exception delegatedThrown> = $r10;
+
+     label11:
+        $r14 = r0.<sun.security.ssl.SSLEngineImpl$DelegatedTask: sun.security.ssl.SSLEngineImpl engine>;
+
+        $r15 = $r14.<sun.security.ssl.SSLEngineImpl: sun.security.ssl.TransportContext conContext>;
+
+        $r23 = $r15.<sun.security.ssl.TransportContext: sun.security.ssl.HandshakeContext handshakeContext>;
+
+        if $r23 == null goto label12;
+
+        $r23.<sun.security.ssl.HandshakeContext: java.lang.Exception delegatedThrown> = $r10;
+
+        goto label13;
+
+     label12:
+        $r16 = r0.<sun.security.ssl.SSLEngineImpl$DelegatedTask: sun.security.ssl.SSLEngineImpl engine>;
+
+        $r17 = $r16.<sun.security.ssl.SSLEngineImpl: sun.security.ssl.TransportContext conContext>;
+
+        $r18 = $r17.<sun.security.ssl.TransportContext: java.lang.Exception closeReason>;
+
+        if $r18 == null goto label13;
+
+        $r19 = r0.<sun.security.ssl.SSLEngineImpl$DelegatedTask: sun.security.ssl.SSLEngineImpl engine>;
+
+        $r20 = $r19.<sun.security.ssl.SSLEngineImpl: sun.security.ssl.TransportContext conContext>;
+
+        $r20.<sun.security.ssl.TransportContext: java.lang.Exception closeReason> = $r10;
+
+     label13:
+        $r41 = r0.<sun.security.ssl.SSLEngineImpl$DelegatedTask: sun.security.ssl.SSLEngineImpl engine>;
+
+        $r42 = $r41.<sun.security.ssl.SSLEngineImpl: sun.security.ssl.TransportContext conContext>;
+
+        $r43 = $r42.<sun.security.ssl.TransportContext: sun.security.ssl.HandshakeContext handshakeContext>;
+
+        if $r43 == null goto label14;
+
+        $r43.<sun.security.ssl.HandshakeContext: boolean taskDelegated> = 0;
+
+     label14:
+        exitmonitor $r1;
+
+     label15:
+        goto label18;
+
+     label16:
+        $r9 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label17:
+        throw $r9;
+
+     label18:
+        return;
+
+        catch java.security.PrivilegedActionException from label04 to label05 with label06;
+        catch java.lang.RuntimeException from label04 to label05 with label10;
+        catch java.lang.Throwable from label01 to label03 with label16;
+        catch java.lang.Throwable from label04 to label15 with label16;
+        catch java.lang.Throwable from label16 to label17 with label16;
+    }
+}

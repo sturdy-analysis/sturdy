@@ -1,0 +1,389 @@
+public final class sun.misc.InnocuousThread extends java.lang.Thread
+{
+    private static final sun.misc.Unsafe UNSAFE;
+    private static final long THREAD_LOCALS;
+    private static final long INHERITABLE_THREAD_LOCALS;
+    private static final java.lang.ThreadGroup INNOCUOUSTHREADGROUP;
+    private static final java.security.AccessControlContext ACC;
+    private static final long INHERITEDACCESSCONTROLCONTEXT;
+    private static final long CONTEXTCLASSLOADER;
+    private static final java.util.concurrent.atomic.AtomicInteger threadNumber;
+    private volatile boolean hasRun;
+
+    private static java.lang.String newName()
+    {
+        java.util.concurrent.atomic.AtomicInteger $r2;
+        int $i0;
+        java.lang.StringBuilder $r0, $r1, $r3;
+        java.lang.String $r4;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("InnocuousThread-");
+
+        $r2 = <sun.misc.InnocuousThread: java.util.concurrent.atomic.AtomicInteger threadNumber>;
+
+        $i0 = virtualinvoke $r2.<java.util.concurrent.atomic.AtomicInteger: int getAndIncrement()>();
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r4;
+    }
+
+    public static java.lang.Thread newSystemThread(java.lang.Runnable)
+    {
+        java.lang.String $r0;
+        java.lang.Runnable r1;
+        java.lang.Thread $r2;
+
+        r1 := @parameter0: java.lang.Runnable;
+
+        $r0 = staticinvoke <sun.misc.InnocuousThread: java.lang.String newName()>();
+
+        $r2 = staticinvoke <sun.misc.InnocuousThread: java.lang.Thread newSystemThread(java.lang.String,java.lang.Runnable)>($r0, r1);
+
+        return $r2;
+    }
+
+    public static java.lang.Thread newSystemThread(java.lang.String, java.lang.Runnable)
+    {
+        sun.misc.InnocuousThread $r0;
+        java.lang.String r2;
+        java.lang.ThreadGroup $r3;
+        java.lang.Runnable r1;
+
+        r2 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.Runnable;
+
+        $r0 = new sun.misc.InnocuousThread;
+
+        $r3 = <sun.misc.InnocuousThread: java.lang.ThreadGroup INNOCUOUSTHREADGROUP>;
+
+        specialinvoke $r0.<sun.misc.InnocuousThread: void <init>(java.lang.ThreadGroup,java.lang.Runnable,java.lang.String,java.lang.ClassLoader)>($r3, r1, r2, null);
+
+        return $r0;
+    }
+
+    public void <init>(java.lang.Runnable)
+    {
+        java.security.AccessControlContext $r4;
+        sun.misc.Unsafe $r5;
+        sun.misc.InnocuousThread r0;
+        long $l0;
+        java.lang.ThreadGroup $r2;
+        java.lang.String $r3;
+        java.lang.Runnable r1;
+
+        r0 := @this: sun.misc.InnocuousThread;
+
+        r1 := @parameter0: java.lang.Runnable;
+
+        $r2 = <sun.misc.InnocuousThread: java.lang.ThreadGroup INNOCUOUSTHREADGROUP>;
+
+        $r3 = staticinvoke <sun.misc.InnocuousThread: java.lang.String newName()>();
+
+        specialinvoke r0.<java.lang.Thread: void <init>(java.lang.ThreadGroup,java.lang.Runnable,java.lang.String)>($r2, r1, $r3);
+
+        $r5 = <sun.misc.InnocuousThread: sun.misc.Unsafe UNSAFE>;
+
+        $l0 = <sun.misc.InnocuousThread: long INHERITEDACCESSCONTROLCONTEXT>;
+
+        $r4 = <sun.misc.InnocuousThread: java.security.AccessControlContext ACC>;
+
+        virtualinvoke $r5.<sun.misc.Unsafe: void putOrderedObject(java.lang.Object,long,java.lang.Object)>(r0, $l0, $r4);
+
+        virtualinvoke r0.<sun.misc.InnocuousThread: void eraseThreadLocals()>();
+
+        return;
+    }
+
+    private void <init>(java.lang.ThreadGroup, java.lang.Runnable, java.lang.String, java.lang.ClassLoader)
+    {
+        java.security.AccessControlContext $r4;
+        sun.misc.Unsafe $r5, $r7;
+        long $l0, $l1;
+        java.lang.ThreadGroup r1;
+        java.lang.Runnable r2;
+        sun.misc.InnocuousThread r0;
+        java.lang.String r3;
+        java.lang.ClassLoader r6;
+
+        r0 := @this: sun.misc.InnocuousThread;
+
+        r1 := @parameter0: java.lang.ThreadGroup;
+
+        r2 := @parameter1: java.lang.Runnable;
+
+        r3 := @parameter2: java.lang.String;
+
+        r6 := @parameter3: java.lang.ClassLoader;
+
+        specialinvoke r0.<java.lang.Thread: void <init>(java.lang.ThreadGroup,java.lang.Runnable,java.lang.String,long)>(r1, r2, r3, 0L);
+
+        $r5 = <sun.misc.InnocuousThread: sun.misc.Unsafe UNSAFE>;
+
+        $l0 = <sun.misc.InnocuousThread: long INHERITEDACCESSCONTROLCONTEXT>;
+
+        $r4 = <sun.misc.InnocuousThread: java.security.AccessControlContext ACC>;
+
+        virtualinvoke $r5.<sun.misc.Unsafe: void putOrderedObject(java.lang.Object,long,java.lang.Object)>(r0, $l0, $r4);
+
+        $r7 = <sun.misc.InnocuousThread: sun.misc.Unsafe UNSAFE>;
+
+        $l1 = <sun.misc.InnocuousThread: long CONTEXTCLASSLOADER>;
+
+        virtualinvoke $r7.<sun.misc.Unsafe: void putOrderedObject(java.lang.Object,long,java.lang.Object)>(r0, $l1, r6);
+
+        virtualinvoke r0.<sun.misc.InnocuousThread: void eraseThreadLocals()>();
+
+        return;
+    }
+
+    public java.lang.ClassLoader getContextClassLoader()
+    {
+        sun.misc.InnocuousThread r1;
+        java.lang.ClassLoader $r0;
+
+        r1 := @this: sun.misc.InnocuousThread;
+
+        $r0 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getSystemClassLoader()>();
+
+        return $r0;
+    }
+
+    public void setUncaughtExceptionHandler(java.lang.Thread$UncaughtExceptionHandler)
+    {
+        sun.misc.InnocuousThread r0;
+        java.lang.Thread$UncaughtExceptionHandler r1;
+
+        r0 := @this: sun.misc.InnocuousThread;
+
+        r1 := @parameter0: java.lang.Thread$UncaughtExceptionHandler;
+
+        return;
+    }
+
+    public void setContextClassLoader(java.lang.ClassLoader)
+    {
+        java.lang.SecurityException $r0;
+        sun.misc.InnocuousThread r1;
+        java.lang.ClassLoader r2;
+
+        r1 := @this: sun.misc.InnocuousThread;
+
+        r2 := @parameter0: java.lang.ClassLoader;
+
+        $r0 = new java.lang.SecurityException;
+
+        specialinvoke $r0.<java.lang.SecurityException: void <init>(java.lang.String)>("setContextClassLoader");
+
+        throw $r0;
+    }
+
+    public void run()
+    {
+        sun.misc.InnocuousThread r1;
+        java.lang.Thread $r0;
+        boolean $z0;
+
+        r1 := @this: sun.misc.InnocuousThread;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        if $r0 != r1 goto label1;
+
+        $z0 = r1.<sun.misc.InnocuousThread: boolean hasRun>;
+
+        if $z0 != 0 goto label1;
+
+        r1.<sun.misc.InnocuousThread: boolean hasRun> = 1;
+
+        specialinvoke r1.<java.lang.Thread: void run()>();
+
+     label1:
+        return;
+    }
+
+    public void eraseThreadLocals()
+    {
+        sun.misc.Unsafe $r1, $r2;
+        sun.misc.InnocuousThread r0;
+        long $l0, $l1;
+
+        r0 := @this: sun.misc.InnocuousThread;
+
+        $r1 = <sun.misc.InnocuousThread: sun.misc.Unsafe UNSAFE>;
+
+        $l0 = <sun.misc.InnocuousThread: long THREAD_LOCALS>;
+
+        virtualinvoke $r1.<sun.misc.Unsafe: void putObject(java.lang.Object,long,java.lang.Object)>(r0, $l0, null);
+
+        $r2 = <sun.misc.InnocuousThread: sun.misc.Unsafe UNSAFE>;
+
+        $l1 = <sun.misc.InnocuousThread: long INHERITABLE_THREAD_LOCALS>;
+
+        virtualinvoke $r2.<sun.misc.Unsafe: void putObject(java.lang.Object,long,java.lang.Object)>(r0, $l1, null);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.security.AccessControlContext $r1;
+        java.lang.ThreadGroup $r23, r29, r30;
+        java.util.concurrent.atomic.AtomicInteger $r0;
+        java.lang.Thread $r19;
+        java.lang.Exception $r26;
+        sun.misc.Unsafe $r4, $r6, $r8, $r10, $r12, $r14, $r16, $r18, $r24;
+        java.lang.Error $r27;
+        long $l0, $l1, $l2, $l3, $l4, $l5;
+        java.lang.reflect.Field $r7, $r9, $r11, $r13, $r15, $r17;
+        java.security.ProtectionDomain[] $r2;
+        java.security.ProtectionDomain $r3;
+        java.lang.Class r5, r28, r31, r32, r33, r34, r35;
+        java.lang.Object $r20, $r22, $r25;
+        sun.misc.InnocuousThread$1 $r21;
+
+        $r0 = new java.util.concurrent.atomic.AtomicInteger;
+
+        specialinvoke $r0.<java.util.concurrent.atomic.AtomicInteger: void <init>(int)>(1);
+
+        <sun.misc.InnocuousThread: java.util.concurrent.atomic.AtomicInteger threadNumber> = $r0;
+
+     label1:
+        $r1 = new java.security.AccessControlContext;
+
+        $r2 = newarray (java.security.ProtectionDomain)[1];
+
+        $r3 = new java.security.ProtectionDomain;
+
+        specialinvoke $r3.<java.security.ProtectionDomain: void <init>(java.security.CodeSource,java.security.PermissionCollection)>(null, null);
+
+        $r2[0] = $r3;
+
+        specialinvoke $r1.<java.security.AccessControlContext: void <init>(java.security.ProtectionDomain[])>($r2);
+
+        <sun.misc.InnocuousThread: java.security.AccessControlContext ACC> = $r1;
+
+        $r4 = staticinvoke <sun.misc.Unsafe: sun.misc.Unsafe getUnsafe()>();
+
+        <sun.misc.InnocuousThread: sun.misc.Unsafe UNSAFE> = $r4;
+
+        r28 = class "Ljava/lang/Thread;";
+
+        r35 = class "Ljava/lang/Thread;";
+
+        r34 = class "Ljava/lang/Thread;";
+
+        r33 = class "Ljava/lang/Thread;";
+
+        r32 = class "Ljava/lang/Thread;";
+
+        r31 = class "Ljava/lang/Thread;";
+
+        r5 = class "Ljava/lang/ThreadGroup;";
+
+        $r6 = <sun.misc.InnocuousThread: sun.misc.Unsafe UNSAFE>;
+
+        $r7 = virtualinvoke r32.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("threadLocals");
+
+        $l0 = virtualinvoke $r6.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r7);
+
+        <sun.misc.InnocuousThread: long THREAD_LOCALS> = $l0;
+
+        $r8 = <sun.misc.InnocuousThread: sun.misc.Unsafe UNSAFE>;
+
+        $r9 = virtualinvoke r31.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("inheritableThreadLocals");
+
+        $l1 = virtualinvoke $r8.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r9);
+
+        <sun.misc.InnocuousThread: long INHERITABLE_THREAD_LOCALS> = $l1;
+
+        $r10 = <sun.misc.InnocuousThread: sun.misc.Unsafe UNSAFE>;
+
+        $r11 = virtualinvoke r34.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("inheritedAccessControlContext");
+
+        $l2 = virtualinvoke $r10.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r11);
+
+        <sun.misc.InnocuousThread: long INHERITEDACCESSCONTROLCONTEXT> = $l2;
+
+        $r12 = <sun.misc.InnocuousThread: sun.misc.Unsafe UNSAFE>;
+
+        $r13 = virtualinvoke r35.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("contextClassLoader");
+
+        $l3 = virtualinvoke $r12.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r13);
+
+        <sun.misc.InnocuousThread: long CONTEXTCLASSLOADER> = $l3;
+
+        $r14 = <sun.misc.InnocuousThread: sun.misc.Unsafe UNSAFE>;
+
+        $r15 = virtualinvoke r33.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("group");
+
+        $l4 = virtualinvoke $r14.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r15);
+
+        $r16 = <sun.misc.InnocuousThread: sun.misc.Unsafe UNSAFE>;
+
+        $r17 = virtualinvoke r5.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("parent");
+
+        $l5 = virtualinvoke $r16.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r17);
+
+        $r18 = <sun.misc.InnocuousThread: sun.misc.Unsafe UNSAFE>;
+
+        $r19 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r20 = virtualinvoke $r18.<sun.misc.Unsafe: java.lang.Object getObject(java.lang.Object,long)>($r19, $l4);
+
+        r29 = (java.lang.ThreadGroup) $r20;
+
+     label2:
+        if r29 == null goto label4;
+
+        $r24 = <sun.misc.InnocuousThread: sun.misc.Unsafe UNSAFE>;
+
+        $r25 = virtualinvoke $r24.<sun.misc.Unsafe: java.lang.Object getObject(java.lang.Object,long)>(r29, $l5);
+
+        r30 = (java.lang.ThreadGroup) $r25;
+
+        if r30 != null goto label3;
+
+        goto label4;
+
+     label3:
+        r29 = r30;
+
+        goto label2;
+
+     label4:
+        $r21 = new sun.misc.InnocuousThread$1;
+
+        specialinvoke $r21.<sun.misc.InnocuousThread$1: void <init>(java.lang.ThreadGroup)>(r29);
+
+        $r22 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r21);
+
+        $r23 = (java.lang.ThreadGroup) $r22;
+
+        <sun.misc.InnocuousThread: java.lang.ThreadGroup INNOCUOUSTHREADGROUP> = $r23;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r26 := @caughtexception;
+
+        $r27 = new java.lang.Error;
+
+        specialinvoke $r27.<java.lang.Error: void <init>(java.lang.Throwable)>($r26);
+
+        throw $r27;
+
+     label7:
+        return;
+
+        catch java.lang.Exception from label1 to label5 with label6;
+    }
+}

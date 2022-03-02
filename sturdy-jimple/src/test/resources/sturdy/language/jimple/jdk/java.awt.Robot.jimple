@@ -1,0 +1,863 @@
+public class java.awt.Robot extends java.lang.Object
+{
+    private static final int MAX_DELAY;
+    private java.awt.peer.RobotPeer peer;
+    private boolean isAutoWaitForIdle;
+    private int autoDelay;
+    private static int LEGAL_BUTTON_MASK;
+    private java.awt.image.DirectColorModel screenCapCM;
+    private transient java.lang.Object anchor;
+    private transient java.awt.Robot$RobotDisposer disposer;
+
+    public void <init>() throws java.awt.AWTException
+    {
+        java.awt.Robot r0;
+        java.awt.GraphicsDevice $r3;
+        java.awt.AWTException $r4;
+        java.lang.Object $r1;
+        java.awt.GraphicsEnvironment $r2;
+        boolean $z0;
+
+        r0 := @this: java.awt.Robot;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.awt.Robot: boolean isAutoWaitForIdle> = 0;
+
+        r0.<java.awt.Robot: int autoDelay> = 0;
+
+        r0.<java.awt.Robot: java.awt.image.DirectColorModel screenCapCM> = null;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<java.awt.Robot: java.lang.Object anchor> = $r1;
+
+        $z0 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        if $z0 == 0 goto label1;
+
+        $r4 = new java.awt.AWTException;
+
+        specialinvoke $r4.<java.awt.AWTException: void <init>(java.lang.String)>("headless environment");
+
+        throw $r4;
+
+     label1:
+        $r2 = staticinvoke <java.awt.GraphicsEnvironment: java.awt.GraphicsEnvironment getLocalGraphicsEnvironment()>();
+
+        $r3 = virtualinvoke $r2.<java.awt.GraphicsEnvironment: java.awt.GraphicsDevice getDefaultScreenDevice()>();
+
+        specialinvoke r0.<java.awt.Robot: void init(java.awt.GraphicsDevice)>($r3);
+
+        return;
+    }
+
+    public void <init>(java.awt.GraphicsDevice) throws java.awt.AWTException
+    {
+        java.lang.Object $r1;
+        java.awt.Robot r0;
+        java.awt.GraphicsDevice r2;
+
+        r0 := @this: java.awt.Robot;
+
+        r2 := @parameter0: java.awt.GraphicsDevice;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.awt.Robot: boolean isAutoWaitForIdle> = 0;
+
+        r0.<java.awt.Robot: int autoDelay> = 0;
+
+        r0.<java.awt.Robot: java.awt.image.DirectColorModel screenCapCM> = null;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<java.awt.Robot: java.lang.Object anchor> = $r1;
+
+        specialinvoke r0.<java.awt.Robot: void checkIsScreenDevice(java.awt.GraphicsDevice)>(r2);
+
+        specialinvoke r0.<java.awt.Robot: void init(java.awt.GraphicsDevice)>(r2);
+
+        return;
+    }
+
+    private void init(java.awt.GraphicsDevice) throws java.awt.AWTException
+    {
+        java.awt.GraphicsDevice r2;
+        java.awt.Robot$RobotDisposer $r5, $r7;
+        java.awt.Robot r0;
+        java.awt.peer.RobotPeer $r4, $r6;
+        java.lang.Object $r8;
+        sun.awt.ComponentFactory $r3;
+        java.awt.Toolkit $r1;
+        boolean $z0;
+
+        r0 := @this: java.awt.Robot;
+
+        r2 := @parameter0: java.awt.GraphicsDevice;
+
+        specialinvoke r0.<java.awt.Robot: void checkRobotAllowed()>();
+
+        $r1 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $z0 = $r1 instanceof sun.awt.ComponentFactory;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = (sun.awt.ComponentFactory) $r1;
+
+        $r4 = interfaceinvoke $r3.<sun.awt.ComponentFactory: java.awt.peer.RobotPeer createRobot(java.awt.Robot,java.awt.GraphicsDevice)>(r0, r2);
+
+        r0.<java.awt.Robot: java.awt.peer.RobotPeer peer> = $r4;
+
+        $r5 = new java.awt.Robot$RobotDisposer;
+
+        $r6 = r0.<java.awt.Robot: java.awt.peer.RobotPeer peer>;
+
+        specialinvoke $r5.<java.awt.Robot$RobotDisposer: void <init>(java.awt.peer.RobotPeer)>($r6);
+
+        r0.<java.awt.Robot: java.awt.Robot$RobotDisposer disposer> = $r5;
+
+        $r8 = r0.<java.awt.Robot: java.lang.Object anchor>;
+
+        $r7 = r0.<java.awt.Robot: java.awt.Robot$RobotDisposer disposer>;
+
+        staticinvoke <sun.java2d.Disposer: void addRecord(java.lang.Object,sun.java2d.DisposerRecord)>($r8, $r7);
+
+     label1:
+        staticinvoke <java.awt.Robot: void initLegalButtonMask()>();
+
+        return;
+    }
+
+    private static synchronized void initLegalButtonMask()
+    {
+        sun.awt.SunToolkit $r3, $r4;
+        int $i0, $i1, $i2, $i3, i4, i5, $i6;
+        java.awt.Toolkit $r0, $r1, $r2;
+        boolean $z0, $z1;
+
+        $i0 = <java.awt.Robot: int LEGAL_BUTTON_MASK>;
+
+        if $i0 == 0 goto label1;
+
+        return;
+
+     label1:
+        i4 = 0;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $z0 = virtualinvoke $r0.<java.awt.Toolkit: boolean areExtraMouseButtonsEnabled()>();
+
+        if $z0 == 0 goto label3;
+
+        $r1 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $z1 = $r1 instanceof sun.awt.SunToolkit;
+
+        if $z1 == 0 goto label3;
+
+        $r2 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r3 = (sun.awt.SunToolkit) $r2;
+
+        $r4 = (sun.awt.SunToolkit) $r3;
+
+        $i1 = virtualinvoke $r4.<sun.awt.SunToolkit: int getNumberOfButtons()>();
+
+        i5 = 0;
+
+     label2:
+        if i5 >= $i1 goto label3;
+
+        $i2 = i5 + 1;
+
+        $i3 = staticinvoke <java.awt.event.InputEvent: int getMaskForButton(int)>($i2);
+
+        i4 = i4 | $i3;
+
+        i5 = i5 + 1;
+
+        goto label2;
+
+     label3:
+        $i6 = i4 | 7196;
+
+        <java.awt.Robot: int LEGAL_BUTTON_MASK> = $i6;
+
+        return;
+    }
+
+    private void checkRobotAllowed()
+    {
+        java.awt.Robot r2;
+        java.security.Permission $r1;
+        java.lang.SecurityManager $r0;
+
+        r2 := @this: java.awt.Robot;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r1 = <sun.security.util.SecurityConstants$AWT: java.security.Permission CREATE_ROBOT_PERMISSION>;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r1);
+
+     label1:
+        return;
+    }
+
+    private void checkIsScreenDevice(java.awt.GraphicsDevice)
+    {
+        java.awt.Robot r2;
+        java.awt.GraphicsDevice r0;
+        int $i0;
+        java.lang.IllegalArgumentException $r1;
+
+        r2 := @this: java.awt.Robot;
+
+        r0 := @parameter0: java.awt.GraphicsDevice;
+
+        if r0 == null goto label1;
+
+        $i0 = virtualinvoke r0.<java.awt.GraphicsDevice: int getType()>();
+
+        if $i0 == 0 goto label2;
+
+     label1:
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("not a valid screen device");
+
+        throw $r1;
+
+     label2:
+        return;
+    }
+
+    public synchronized void mouseMove(int, int)
+    {
+        java.awt.Robot r0;
+        int i0, i1;
+        java.awt.peer.RobotPeer $r1;
+
+        r0 := @this: java.awt.Robot;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r1 = r0.<java.awt.Robot: java.awt.peer.RobotPeer peer>;
+
+        interfaceinvoke $r1.<java.awt.peer.RobotPeer: void mouseMove(int,int)>(i0, i1);
+
+        specialinvoke r0.<java.awt.Robot: void afterEvent()>();
+
+        return;
+    }
+
+    public synchronized void mousePress(int)
+    {
+        int i0;
+        java.awt.peer.RobotPeer $r1;
+        java.awt.Robot r0;
+
+        r0 := @this: java.awt.Robot;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.awt.Robot: void checkButtonsArgument(int)>(i0);
+
+        $r1 = r0.<java.awt.Robot: java.awt.peer.RobotPeer peer>;
+
+        interfaceinvoke $r1.<java.awt.peer.RobotPeer: void mousePress(int)>(i0);
+
+        specialinvoke r0.<java.awt.Robot: void afterEvent()>();
+
+        return;
+    }
+
+    public synchronized void mouseRelease(int)
+    {
+        int i0;
+        java.awt.peer.RobotPeer $r1;
+        java.awt.Robot r0;
+
+        r0 := @this: java.awt.Robot;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.awt.Robot: void checkButtonsArgument(int)>(i0);
+
+        $r1 = r0.<java.awt.Robot: java.awt.peer.RobotPeer peer>;
+
+        interfaceinvoke $r1.<java.awt.peer.RobotPeer: void mouseRelease(int)>(i0);
+
+        specialinvoke r0.<java.awt.Robot: void afterEvent()>();
+
+        return;
+    }
+
+    private void checkButtonsArgument(int)
+    {
+        java.awt.Robot r1;
+        int i0, $i1, $i2, $i3;
+        java.lang.IllegalArgumentException $r0;
+
+        r1 := @this: java.awt.Robot;
+
+        i0 := @parameter0: int;
+
+        $i1 = <java.awt.Robot: int LEGAL_BUTTON_MASK>;
+
+        $i3 = i0 | $i1;
+
+        $i2 = <java.awt.Robot: int LEGAL_BUTTON_MASK>;
+
+        if $i3 == $i2 goto label1;
+
+        $r0 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r0.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid combination of button flags");
+
+        throw $r0;
+
+     label1:
+        return;
+    }
+
+    public synchronized void mouseWheel(int)
+    {
+        int i0;
+        java.awt.peer.RobotPeer $r1;
+        java.awt.Robot r0;
+
+        r0 := @this: java.awt.Robot;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.awt.Robot: java.awt.peer.RobotPeer peer>;
+
+        interfaceinvoke $r1.<java.awt.peer.RobotPeer: void mouseWheel(int)>(i0);
+
+        specialinvoke r0.<java.awt.Robot: void afterEvent()>();
+
+        return;
+    }
+
+    public synchronized void keyPress(int)
+    {
+        int i0;
+        java.awt.peer.RobotPeer $r1;
+        java.awt.Robot r0;
+
+        r0 := @this: java.awt.Robot;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.awt.Robot: void checkKeycodeArgument(int)>(i0);
+
+        $r1 = r0.<java.awt.Robot: java.awt.peer.RobotPeer peer>;
+
+        interfaceinvoke $r1.<java.awt.peer.RobotPeer: void keyPress(int)>(i0);
+
+        specialinvoke r0.<java.awt.Robot: void afterEvent()>();
+
+        return;
+    }
+
+    public synchronized void keyRelease(int)
+    {
+        int i0;
+        java.awt.peer.RobotPeer $r1;
+        java.awt.Robot r0;
+
+        r0 := @this: java.awt.Robot;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.awt.Robot: void checkKeycodeArgument(int)>(i0);
+
+        $r1 = r0.<java.awt.Robot: java.awt.peer.RobotPeer peer>;
+
+        interfaceinvoke $r1.<java.awt.peer.RobotPeer: void keyRelease(int)>(i0);
+
+        specialinvoke r0.<java.awt.Robot: void afterEvent()>();
+
+        return;
+    }
+
+    private void checkKeycodeArgument(int)
+    {
+        int i0;
+        java.lang.IllegalArgumentException $r0;
+        java.awt.Robot r1;
+
+        r1 := @this: java.awt.Robot;
+
+        i0 := @parameter0: int;
+
+        if i0 != 0 goto label1;
+
+        $r0 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r0.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid key code");
+
+        throw $r0;
+
+     label1:
+        return;
+    }
+
+    public synchronized java.awt.Color getPixelColor(int, int)
+    {
+        java.awt.Color $r0;
+        java.awt.Robot r1;
+        int i0, i1, $i2;
+        java.awt.peer.RobotPeer $r2;
+
+        r1 := @this: java.awt.Robot;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        staticinvoke <java.awt.Robot: void checkScreenCaptureAllowed()>();
+
+        $r0 = new java.awt.Color;
+
+        $r2 = r1.<java.awt.Robot: java.awt.peer.RobotPeer peer>;
+
+        $i2 = interfaceinvoke $r2.<java.awt.peer.RobotPeer: int getRGBPixel(int,int)>(i0, i1);
+
+        specialinvoke $r0.<java.awt.Color: void <init>(int)>($i2);
+
+        return $r0;
+    }
+
+    public synchronized java.awt.image.BufferedImage createScreenCapture(java.awt.Rectangle)
+    {
+        java.awt.Rectangle r0;
+        java.awt.image.DataBufferInt $r16;
+        java.awt.Robot r1;
+        int[] $r5, $r14;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i8;
+        java.awt.peer.RobotPeer $r4;
+        java.awt.image.BufferedImage $r17;
+        java.awt.image.DirectColorModel $r2, $r7, $r8, $r9, $r12, $r15;
+        java.awt.image.WritableRaster $r10;
+        java.awt.Toolkit $r3;
+
+        r1 := @this: java.awt.Robot;
+
+        r0 := @parameter0: java.awt.Rectangle;
+
+        staticinvoke <java.awt.Robot: void checkScreenCaptureAllowed()>();
+
+        staticinvoke <java.awt.Robot: void checkValidRect(java.awt.Rectangle)>(r0);
+
+        $r2 = r1.<java.awt.Robot: java.awt.image.DirectColorModel screenCapCM>;
+
+        if $r2 != null goto label1;
+
+        $r15 = new java.awt.image.DirectColorModel;
+
+        $i8 = (int) 65280;
+
+        specialinvoke $r15.<java.awt.image.DirectColorModel: void <init>(int,int,int,int)>(24, 16711680, $i8, 255);
+
+        r1.<java.awt.Robot: java.awt.image.DirectColorModel screenCapCM> = $r15;
+
+     label1:
+        $r3 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        virtualinvoke $r3.<java.awt.Toolkit: void sync()>();
+
+        $r14 = newarray (int)[3];
+
+        $r4 = r1.<java.awt.Robot: java.awt.peer.RobotPeer peer>;
+
+        $r5 = interfaceinvoke $r4.<java.awt.peer.RobotPeer: int[] getRGBPixels(java.awt.Rectangle)>(r0);
+
+        $r16 = new java.awt.image.DataBufferInt;
+
+        $i0 = lengthof $r5;
+
+        specialinvoke $r16.<java.awt.image.DataBufferInt: void <init>(int[],int)>($r5, $i0);
+
+        $r7 = r1.<java.awt.Robot: java.awt.image.DirectColorModel screenCapCM>;
+
+        $i1 = virtualinvoke $r7.<java.awt.image.DirectColorModel: int getRedMask()>();
+
+        $r14[0] = $i1;
+
+        $r8 = r1.<java.awt.Robot: java.awt.image.DirectColorModel screenCapCM>;
+
+        $i2 = virtualinvoke $r8.<java.awt.image.DirectColorModel: int getGreenMask()>();
+
+        $r14[1] = $i2;
+
+        $r9 = r1.<java.awt.Robot: java.awt.image.DirectColorModel screenCapCM>;
+
+        $i3 = virtualinvoke $r9.<java.awt.image.DirectColorModel: int getBlueMask()>();
+
+        $r14[2] = $i3;
+
+        $i6 = r0.<java.awt.Rectangle: int width>;
+
+        $i5 = r0.<java.awt.Rectangle: int height>;
+
+        $i4 = r0.<java.awt.Rectangle: int width>;
+
+        $r10 = staticinvoke <java.awt.image.Raster: java.awt.image.WritableRaster createPackedRaster(java.awt.image.DataBuffer,int,int,int,int[],java.awt.Point)>($r16, $i6, $i5, $i4, $r14, null);
+
+        staticinvoke <sun.awt.image.SunWritableRaster: void makeTrackable(java.awt.image.DataBuffer)>($r16);
+
+        $r17 = new java.awt.image.BufferedImage;
+
+        $r12 = r1.<java.awt.Robot: java.awt.image.DirectColorModel screenCapCM>;
+
+        specialinvoke $r17.<java.awt.image.BufferedImage: void <init>(java.awt.image.ColorModel,java.awt.image.WritableRaster,boolean,java.util.Hashtable)>($r12, $r10, 0, null);
+
+        return $r17;
+    }
+
+    private static void checkValidRect(java.awt.Rectangle)
+    {
+        java.awt.Rectangle r0;
+        int $i0, $i1;
+        java.lang.IllegalArgumentException $r1;
+
+        r0 := @parameter0: java.awt.Rectangle;
+
+        $i0 = r0.<java.awt.Rectangle: int width>;
+
+        if $i0 <= 0 goto label1;
+
+        $i1 = r0.<java.awt.Rectangle: int height>;
+
+        if $i1 > 0 goto label2;
+
+     label1:
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Rectangle width and height must be > 0");
+
+        throw $r1;
+
+     label2:
+        return;
+    }
+
+    private static void checkScreenCaptureAllowed()
+    {
+        java.security.Permission $r1;
+        java.lang.SecurityManager $r0;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r1 = <sun.security.util.SecurityConstants$AWT: java.security.Permission READ_DISPLAY_PIXELS_PERMISSION>;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r1);
+
+     label1:
+        return;
+    }
+
+    private void afterEvent()
+    {
+        java.awt.Robot r0;
+
+        r0 := @this: java.awt.Robot;
+
+        specialinvoke r0.<java.awt.Robot: void autoWaitForIdle()>();
+
+        specialinvoke r0.<java.awt.Robot: void autoDelay()>();
+
+        return;
+    }
+
+    public synchronized boolean isAutoWaitForIdle()
+    {
+        java.awt.Robot r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.Robot;
+
+        $z0 = r0.<java.awt.Robot: boolean isAutoWaitForIdle>;
+
+        return $z0;
+    }
+
+    public synchronized void setAutoWaitForIdle(boolean)
+    {
+        java.awt.Robot r0;
+        boolean z0;
+
+        r0 := @this: java.awt.Robot;
+
+        z0 := @parameter0: boolean;
+
+        r0.<java.awt.Robot: boolean isAutoWaitForIdle> = z0;
+
+        return;
+    }
+
+    private void autoWaitForIdle()
+    {
+        java.awt.Robot r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.Robot;
+
+        $z0 = r0.<java.awt.Robot: boolean isAutoWaitForIdle>;
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r0.<java.awt.Robot: void waitForIdle()>();
+
+     label1:
+        return;
+    }
+
+    public synchronized int getAutoDelay()
+    {
+        int $i0;
+        java.awt.Robot r0;
+
+        r0 := @this: java.awt.Robot;
+
+        $i0 = r0.<java.awt.Robot: int autoDelay>;
+
+        return $i0;
+    }
+
+    public synchronized void setAutoDelay(int)
+    {
+        int i0;
+        java.awt.Robot r0;
+
+        r0 := @this: java.awt.Robot;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.awt.Robot: void checkDelayArgument(int)>(i0);
+
+        r0.<java.awt.Robot: int autoDelay> = i0;
+
+        return;
+    }
+
+    private void autoDelay()
+    {
+        int $i0;
+        java.awt.Robot r0;
+
+        r0 := @this: java.awt.Robot;
+
+        $i0 = r0.<java.awt.Robot: int autoDelay>;
+
+        virtualinvoke r0.<java.awt.Robot: void delay(int)>($i0);
+
+        return;
+    }
+
+    public synchronized void delay(int)
+    {
+        java.awt.Robot r0;
+        java.lang.InterruptedException $r1;
+        int i0;
+        long $l1;
+
+        r0 := @this: java.awt.Robot;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.awt.Robot: void checkDelayArgument(int)>(i0);
+
+     label1:
+        $l1 = (long) i0;
+
+        staticinvoke <java.lang.Thread: void sleep(long)>($l1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r1 := @caughtexception;
+
+        virtualinvoke $r1.<java.lang.InterruptedException: void printStackTrace()>();
+
+     label4:
+        return;
+
+        catch java.lang.InterruptedException from label1 to label2 with label3;
+    }
+
+    private void checkDelayArgument(int)
+    {
+        java.awt.Robot r1;
+        int i0, $i2;
+        java.lang.IllegalArgumentException $r2;
+
+        r1 := @this: java.awt.Robot;
+
+        i0 := @parameter0: int;
+
+        if i0 < 0 goto label1;
+
+        $i2 = (int) 60000;
+
+        if i0 <= $i2 goto label2;
+
+     label1:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Delay must be to 0 to 60,000ms");
+
+        throw $r2;
+
+     label2:
+        return;
+    }
+
+    public synchronized void waitForIdle()
+    {
+        java.io.PrintStream $r3, $r5;
+        java.awt.Robot$1 $r1;
+        java.awt.Robot r0;
+        java.lang.InterruptedException $r4;
+        java.lang.reflect.InvocationTargetException $r2;
+
+        r0 := @this: java.awt.Robot;
+
+        specialinvoke r0.<java.awt.Robot: void checkNotDispatchThread()>();
+
+     label1:
+        staticinvoke <sun.awt.SunToolkit: void flushPendingEvents()>();
+
+        $r1 = new java.awt.Robot$1;
+
+        specialinvoke $r1.<java.awt.Robot$1: void <init>(java.awt.Robot)>(r0);
+
+        staticinvoke <java.awt.EventQueue: void invokeAndWait(java.lang.Runnable)>($r1);
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>("Robot.waitForIdle, non-fatal exception caught:");
+
+        virtualinvoke $r4.<java.lang.InterruptedException: void printStackTrace()>();
+
+        goto label5;
+
+     label4:
+        $r2 := @caughtexception;
+
+        $r3 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>("Robot.waitForIdle, non-fatal exception caught:");
+
+        virtualinvoke $r2.<java.lang.reflect.InvocationTargetException: void printStackTrace()>();
+
+     label5:
+        return;
+
+        catch java.lang.InterruptedException from label1 to label2 with label3;
+        catch java.lang.reflect.InvocationTargetException from label1 to label2 with label4;
+    }
+
+    private void checkNotDispatchThread()
+    {
+        java.lang.IllegalThreadStateException $r0;
+        java.awt.Robot r1;
+        boolean $z0;
+
+        r1 := @this: java.awt.Robot;
+
+        $z0 = staticinvoke <java.awt.EventQueue: boolean isDispatchThread()>();
+
+        if $z0 == 0 goto label1;
+
+        $r0 = new java.lang.IllegalThreadStateException;
+
+        specialinvoke $r0.<java.lang.IllegalThreadStateException: void <init>(java.lang.String)>("Cannot call method from the event dispatcher thread");
+
+        throw $r0;
+
+     label1:
+        return;
+    }
+
+    public synchronized java.lang.String toString()
+    {
+        java.awt.Robot r2;
+        int $i0;
+        java.lang.String $r6, $r9, $r14;
+        boolean $z0;
+        java.lang.StringBuilder $r0, $r1, $r3, $r4, $r5, $r7, $r10, $r11, $r12, $r13;
+        java.lang.Class $r8;
+
+        r2 := @this: java.awt.Robot;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("autoDelay = ");
+
+        $i0 = virtualinvoke r2.<java.awt.Robot: int getAutoDelay()>();
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", autoWaitForIdle = ");
+
+        $z0 = virtualinvoke r2.<java.awt.Robot: boolean isAutoWaitForIdle()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke r2.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.Class: java.lang.String getName()>();
+
+        $r10 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[ ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ]");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r14;
+    }
+
+    static void <clinit>()
+    {
+        <java.awt.Robot: int MAX_DELAY> = 60000;
+
+        <java.awt.Robot: int LEGAL_BUTTON_MASK> = 0;
+
+        return;
+    }
+}

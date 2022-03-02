@@ -1,0 +1,948 @@
+class sun.security.provider.SeedGenerator$ThreadedSeedGenerator extends sun.security.provider.SeedGenerator implements java.lang.Runnable
+{
+    private byte[] pool;
+    private int start;
+    private int end;
+    private int count;
+    java.lang.ThreadGroup seedGroup;
+    private static byte[] rndTab;
+
+    void <init>()
+    {
+        byte[] $r1;
+        sun.security.provider.SeedGenerator$ThreadedSeedGenerator r0;
+        java.lang.ThreadGroup $r5;
+        java.lang.Thread r4;
+        java.security.NoSuchAlgorithmException $r6;
+        java.lang.InternalError $r7;
+        java.lang.Object $r3;
+        java.lang.ThreadGroup[] r8;
+        sun.security.provider.SeedGenerator$ThreadedSeedGenerator$1 $r2;
+
+        r0 := @this: sun.security.provider.SeedGenerator$ThreadedSeedGenerator;
+
+        specialinvoke r0.<sun.security.provider.SeedGenerator: void <init>()>();
+
+        $r1 = newarray (byte)[20];
+
+        r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: byte[] pool> = $r1;
+
+        r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: int end> = 0;
+
+        r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: int start> = 0;
+
+     label1:
+        staticinvoke <java.security.MessageDigest: java.security.MessageDigest getInstance(java.lang.String)>("SHA");
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = new java.lang.InternalError;
+
+        specialinvoke $r7.<java.lang.InternalError: void <init>(java.lang.String,java.lang.Throwable)>("internal error: SHA-1 not available.", $r6);
+
+        throw $r7;
+
+     label4:
+        r8 = newarray (java.lang.ThreadGroup)[1];
+
+        $r2 = new sun.security.provider.SeedGenerator$ThreadedSeedGenerator$1;
+
+        specialinvoke $r2.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator$1: void <init>(sun.security.provider.SeedGenerator$ThreadedSeedGenerator,java.lang.ThreadGroup[])>(r0, r8);
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        r4 = (java.lang.Thread) $r3;
+
+        $r5 = r8[0];
+
+        r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: java.lang.ThreadGroup seedGroup> = $r5;
+
+        virtualinvoke r4.<java.lang.Thread: void start()>();
+
+        return;
+
+        catch java.security.NoSuchAlgorithmException from label1 to label2 with label3;
+    }
+
+    public final void run()
+    {
+        byte[] $r1, $r2, $r6, $r14;
+        sun.security.provider.SeedGenerator$ThreadedSeedGenerator r0;
+        java.lang.ThreadGroup $r5;
+        sun.security.provider.SeedGenerator$ThreadedSeedGenerator$BogusThread $r15;
+        byte $b9, $b11, $b12, b15;
+        java.lang.Thread $r16;
+        java.lang.InternalError $r17, $r18;
+        java.lang.Exception $r7, $r11;
+        java.lang.Throwable $r9, $r10, $r13;
+        long $l7, $l8, l19;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i10, $i13, $i14, i16, i17, i18, $i21, $i22;
+
+        r0 := @this: sun.security.provider.SeedGenerator$ThreadedSeedGenerator;
+
+     label01:
+        entermonitor r0;
+
+     label02:
+        $i13 = r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: int count>;
+
+        $r14 = r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: byte[] pool>;
+
+        $i14 = lengthof $r14;
+
+        if $i13 < $i14 goto label03;
+
+        virtualinvoke r0.<java.lang.Object: void wait()>();
+
+        goto label02;
+
+     label03:
+        exitmonitor r0;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r13 := @caughtexception;
+
+        exitmonitor r0;
+
+     label06:
+        throw $r13;
+
+     label07:
+        b15 = 0;
+
+        i16 = 0;
+
+        i17 = 0;
+
+     label08:
+        $i21 = (int) 64000;
+
+        if i17 >= $i21 goto label20;
+
+        if i16 >= 6 goto label20;
+
+     label09:
+        $r15 = new sun.security.provider.SeedGenerator$ThreadedSeedGenerator$BogusThread;
+
+        specialinvoke $r15.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator$BogusThread: void <init>(sun.security.provider.SeedGenerator$1)>(null);
+
+        $r16 = new java.lang.Thread;
+
+        $r5 = r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: java.lang.ThreadGroup seedGroup>;
+
+        specialinvoke $r16.<java.lang.Thread: void <init>(java.lang.ThreadGroup,java.lang.Runnable,java.lang.String)>($r5, $r15, "SeedGenerator Thread");
+
+        virtualinvoke $r16.<java.lang.Thread: void start()>();
+
+     label10:
+        goto label12;
+
+     label11:
+        $r11 := @caughtexception;
+
+        $r17 = new java.lang.InternalError;
+
+        specialinvoke $r17.<java.lang.InternalError: void <init>(java.lang.String,java.lang.Throwable)>("internal error: SeedGenerator thread creation error.", $r11);
+
+        throw $r17;
+
+     label12:
+        i18 = 0;
+
+        $l7 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        l19 = $l7 + 250L;
+
+     label13:
+        $l8 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $b9 = $l8 cmp l19;
+
+        $i22 = (int) $b9;
+
+        if $i22 >= 0 goto label19;
+
+        entermonitor r0;
+
+     label14:
+        exitmonitor r0;
+
+     label15:
+        goto label18;
+
+     label16:
+        $r10 := @caughtexception;
+
+        exitmonitor r0;
+
+     label17:
+        throw $r10;
+
+     label18:
+        i18 = i18 + 1;
+
+        goto label13;
+
+     label19:
+        $r6 = <sun.security.provider.SeedGenerator$ThreadedSeedGenerator: byte[] rndTab>;
+
+        $i10 = i18 % 255;
+
+        $b11 = $r6[$i10];
+
+        $b12 = b15 ^ $b11;
+
+        b15 = (byte) $b12;
+
+        i17 = i17 + i18;
+
+        i16 = i16 + 1;
+
+        goto label08;
+
+     label20:
+        entermonitor r0;
+
+     label21:
+        $r1 = r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: byte[] pool>;
+
+        $i0 = r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: int end>;
+
+        $r1[$i0] = b15;
+
+        $i1 = r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: int end>;
+
+        $i2 = $i1 + 1;
+
+        r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: int end> = $i2;
+
+        $i3 = r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: int count>;
+
+        $i4 = $i3 + 1;
+
+        r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: int count> = $i4;
+
+        $i6 = r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: int end>;
+
+        $r2 = r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: byte[] pool>;
+
+        $i5 = lengthof $r2;
+
+        if $i6 < $i5 goto label22;
+
+        r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: int end> = 0;
+
+     label22:
+        virtualinvoke r0.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor r0;
+
+     label23:
+        goto label26;
+
+     label24:
+        $r9 := @caughtexception;
+
+        exitmonitor r0;
+
+     label25:
+        throw $r9;
+
+     label26:
+        goto label01;
+
+     label27:
+        $r7 := @caughtexception;
+
+        $r18 = new java.lang.InternalError;
+
+        specialinvoke $r18.<java.lang.InternalError: void <init>(java.lang.String,java.lang.Throwable)>("internal error: SeedGenerator thread generated an exception.", $r7);
+
+        throw $r18;
+
+        catch java.lang.Throwable from label02 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.lang.Exception from label09 to label10 with label11;
+        catch java.lang.Throwable from label14 to label15 with label16;
+        catch java.lang.Throwable from label16 to label17 with label16;
+        catch java.lang.Throwable from label21 to label23 with label24;
+        catch java.lang.Throwable from label24 to label25 with label24;
+        catch java.lang.Exception from label01 to label27 with label27;
+    }
+
+    void getSeedBytes(byte[])
+    {
+        byte[] r0;
+        sun.security.provider.SeedGenerator$ThreadedSeedGenerator r1;
+        byte $b1;
+        int $i0, i2;
+
+        r1 := @this: sun.security.provider.SeedGenerator$ThreadedSeedGenerator;
+
+        r0 := @parameter0: byte[];
+
+        i2 = 0;
+
+     label1:
+        $i0 = lengthof r0;
+
+        if i2 >= $i0 goto label2;
+
+        $b1 = virtualinvoke r1.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: byte getSeedByte()>();
+
+        r0[i2] = $b1;
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    byte getSeedByte()
+    {
+        java.lang.Throwable $r4, $r7;
+        byte[] $r1, $r2, $r3;
+        sun.security.provider.SeedGenerator$ThreadedSeedGenerator r0;
+        byte $b10;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9;
+        java.lang.InternalError $r6;
+        java.lang.Exception $r5;
+
+        r0 := @this: sun.security.provider.SeedGenerator$ThreadedSeedGenerator;
+
+     label01:
+        entermonitor r0;
+
+     label02:
+        $i0 = r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: int count>;
+
+        if $i0 > 0 goto label03;
+
+        virtualinvoke r0.<java.lang.Object: void wait()>();
+
+        goto label02;
+
+     label03:
+        exitmonitor r0;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r7 := @caughtexception;
+
+        exitmonitor r0;
+
+     label06:
+        throw $r7;
+
+     label07:
+        goto label09;
+
+     label08:
+        $r5 := @caughtexception;
+
+        $i9 = r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: int count>;
+
+        if $i9 > 0 goto label09;
+
+        $r6 = new java.lang.InternalError;
+
+        specialinvoke $r6.<java.lang.InternalError: void <init>(java.lang.String,java.lang.Throwable)>("internal error: SeedGenerator thread generated an exception.", $r5);
+
+        throw $r6;
+
+     label09:
+        entermonitor r0;
+
+     label10:
+        $r1 = r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: byte[] pool>;
+
+        $i1 = r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: int start>;
+
+        $b10 = $r1[$i1];
+
+        $r2 = r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: byte[] pool>;
+
+        $i2 = r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: int start>;
+
+        $r2[$i2] = 0;
+
+        $i3 = r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: int start>;
+
+        $i4 = $i3 + 1;
+
+        r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: int start> = $i4;
+
+        $i5 = r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: int count>;
+
+        $i6 = $i5 - 1;
+
+        r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: int count> = $i6;
+
+        $i8 = r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: int start>;
+
+        $r3 = r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: byte[] pool>;
+
+        $i7 = lengthof $r3;
+
+        if $i8 != $i7 goto label11;
+
+        r0.<sun.security.provider.SeedGenerator$ThreadedSeedGenerator: int start> = 0;
+
+     label11:
+        virtualinvoke r0.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor r0;
+
+     label12:
+        goto label15;
+
+     label13:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+     label14:
+        throw $r4;
+
+     label15:
+        return $b10;
+
+        catch java.lang.Throwable from label02 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.lang.Exception from label01 to label07 with label08;
+        catch java.lang.Throwable from label10 to label12 with label13;
+        catch java.lang.Throwable from label13 to label14 with label13;
+    }
+
+    static void <clinit>()
+    {
+        byte[] $r0;
+
+        $r0 = newarray (byte)[255];
+
+        $r0[0] = 56;
+
+        $r0[1] = 30;
+
+        $r0[2] = -107;
+
+        $r0[3] = -6;
+
+        $r0[4] = -86;
+
+        $r0[5] = 25;
+
+        $r0[6] = -83;
+
+        $r0[7] = 75;
+
+        $r0[8] = -12;
+
+        $r0[9] = -64;
+
+        $r0[10] = 5;
+
+        $r0[11] = -128;
+
+        $r0[12] = 78;
+
+        $r0[13] = 21;
+
+        $r0[14] = 16;
+
+        $r0[15] = 32;
+
+        $r0[16] = 70;
+
+        $r0[17] = -81;
+
+        $r0[18] = 37;
+
+        $r0[19] = -51;
+
+        $r0[20] = -43;
+
+        $r0[21] = -46;
+
+        $r0[22] = -108;
+
+        $r0[23] = 87;
+
+        $r0[24] = 29;
+
+        $r0[25] = 17;
+
+        $r0[26] = -55;
+
+        $r0[27] = 22;
+
+        $r0[28] = -11;
+
+        $r0[29] = -111;
+
+        $r0[30] = -115;
+
+        $r0[31] = 84;
+
+        $r0[32] = -100;
+
+        $r0[33] = 108;
+
+        $r0[34] = -45;
+
+        $r0[35] = -15;
+
+        $r0[36] = -98;
+
+        $r0[37] = 72;
+
+        $r0[38] = -33;
+
+        $r0[39] = -28;
+
+        $r0[40] = 31;
+
+        $r0[41] = -52;
+
+        $r0[42] = -37;
+
+        $r0[43] = -117;
+
+        $r0[44] = -97;
+
+        $r0[45] = -27;
+
+        $r0[46] = 93;
+
+        $r0[47] = -123;
+
+        $r0[48] = 47;
+
+        $r0[49] = 126;
+
+        $r0[50] = -80;
+
+        $r0[51] = -62;
+
+        $r0[52] = -93;
+
+        $r0[53] = -79;
+
+        $r0[54] = 61;
+
+        $r0[55] = -96;
+
+        $r0[56] = -65;
+
+        $r0[57] = -5;
+
+        $r0[58] = -47;
+
+        $r0[59] = -119;
+
+        $r0[60] = 14;
+
+        $r0[61] = 89;
+
+        $r0[62] = 81;
+
+        $r0[63] = -118;
+
+        $r0[64] = -88;
+
+        $r0[65] = 20;
+
+        $r0[66] = 67;
+
+        $r0[67] = -126;
+
+        $r0[68] = -113;
+
+        $r0[69] = 60;
+
+        $r0[70] = -102;
+
+        $r0[71] = 55;
+
+        $r0[72] = 110;
+
+        $r0[73] = 28;
+
+        $r0[74] = 85;
+
+        $r0[75] = 121;
+
+        $r0[76] = 122;
+
+        $r0[77] = -58;
+
+        $r0[78] = 2;
+
+        $r0[79] = 45;
+
+        $r0[80] = 43;
+
+        $r0[81] = 24;
+
+        $r0[82] = -9;
+
+        $r0[83] = 103;
+
+        $r0[84] = -13;
+
+        $r0[85] = 102;
+
+        $r0[86] = -68;
+
+        $r0[87] = -54;
+
+        $r0[88] = -101;
+
+        $r0[89] = -104;
+
+        $r0[90] = 19;
+
+        $r0[91] = 13;
+
+        $r0[92] = -39;
+
+        $r0[93] = -26;
+
+        $r0[94] = -103;
+
+        $r0[95] = 62;
+
+        $r0[96] = 77;
+
+        $r0[97] = 51;
+
+        $r0[98] = 44;
+
+        $r0[99] = 111;
+
+        $r0[100] = 73;
+
+        $r0[101] = 18;
+
+        $r0[102] = -127;
+
+        $r0[103] = -82;
+
+        $r0[104] = 4;
+
+        $r0[105] = -30;
+
+        $r0[106] = 11;
+
+        $r0[107] = -99;
+
+        $r0[108] = -74;
+
+        $r0[109] = 40;
+
+        $r0[110] = -89;
+
+        $r0[111] = 42;
+
+        $r0[112] = -76;
+
+        $r0[113] = -77;
+
+        $r0[114] = -94;
+
+        $r0[115] = -35;
+
+        $r0[116] = -69;
+
+        $r0[117] = 35;
+
+        $r0[118] = 120;
+
+        $r0[119] = 76;
+
+        $r0[120] = 33;
+
+        $r0[121] = -73;
+
+        $r0[122] = -7;
+
+        $r0[123] = 82;
+
+        $r0[124] = -25;
+
+        $r0[125] = -10;
+
+        $r0[126] = 88;
+
+        $r0[127] = 125;
+
+        $r0[128] = -112;
+
+        $r0[129] = 58;
+
+        $r0[130] = 83;
+
+        $r0[131] = 95;
+
+        $r0[132] = 6;
+
+        $r0[133] = 10;
+
+        $r0[134] = 98;
+
+        $r0[135] = -34;
+
+        $r0[136] = 80;
+
+        $r0[137] = 15;
+
+        $r0[138] = -91;
+
+        $r0[139] = 86;
+
+        $r0[140] = -19;
+
+        $r0[141] = 52;
+
+        $r0[142] = -17;
+
+        $r0[143] = 117;
+
+        $r0[144] = 49;
+
+        $r0[145] = -63;
+
+        $r0[146] = 118;
+
+        $r0[147] = -90;
+
+        $r0[148] = 36;
+
+        $r0[149] = -116;
+
+        $r0[150] = -40;
+
+        $r0[151] = -71;
+
+        $r0[152] = 97;
+
+        $r0[153] = -53;
+
+        $r0[154] = -109;
+
+        $r0[155] = -85;
+
+        $r0[156] = 109;
+
+        $r0[157] = -16;
+
+        $r0[158] = -3;
+
+        $r0[159] = 104;
+
+        $r0[160] = -95;
+
+        $r0[161] = 68;
+
+        $r0[162] = 54;
+
+        $r0[163] = 34;
+
+        $r0[164] = 26;
+
+        $r0[165] = 114;
+
+        $r0[166] = -1;
+
+        $r0[167] = 106;
+
+        $r0[168] = -121;
+
+        $r0[169] = 3;
+
+        $r0[170] = 66;
+
+        $r0[171] = 0;
+
+        $r0[172] = 100;
+
+        $r0[173] = -84;
+
+        $r0[174] = 57;
+
+        $r0[175] = 107;
+
+        $r0[176] = 119;
+
+        $r0[177] = -42;
+
+        $r0[178] = 112;
+
+        $r0[179] = -61;
+
+        $r0[180] = 1;
+
+        $r0[181] = 48;
+
+        $r0[182] = 38;
+
+        $r0[183] = 12;
+
+        $r0[184] = -56;
+
+        $r0[185] = -57;
+
+        $r0[186] = 39;
+
+        $r0[187] = -106;
+
+        $r0[188] = -72;
+
+        $r0[189] = 41;
+
+        $r0[190] = 7;
+
+        $r0[191] = 71;
+
+        $r0[192] = -29;
+
+        $r0[193] = -59;
+
+        $r0[194] = -8;
+
+        $r0[195] = -38;
+
+        $r0[196] = 79;
+
+        $r0[197] = -31;
+
+        $r0[198] = 124;
+
+        $r0[199] = -124;
+
+        $r0[200] = 8;
+
+        $r0[201] = 91;
+
+        $r0[202] = 116;
+
+        $r0[203] = 99;
+
+        $r0[204] = -4;
+
+        $r0[205] = 9;
+
+        $r0[206] = -36;
+
+        $r0[207] = -78;
+
+        $r0[208] = 63;
+
+        $r0[209] = -49;
+
+        $r0[210] = -67;
+
+        $r0[211] = -87;
+
+        $r0[212] = 59;
+
+        $r0[213] = 101;
+
+        $r0[214] = -32;
+
+        $r0[215] = 92;
+
+        $r0[216] = 94;
+
+        $r0[217] = 53;
+
+        $r0[218] = -41;
+
+        $r0[219] = 115;
+
+        $r0[220] = -66;
+
+        $r0[221] = -70;
+
+        $r0[222] = -122;
+
+        $r0[223] = 50;
+
+        $r0[224] = -50;
+
+        $r0[225] = -22;
+
+        $r0[226] = -20;
+
+        $r0[227] = -18;
+
+        $r0[228] = -21;
+
+        $r0[229] = 23;
+
+        $r0[230] = -2;
+
+        $r0[231] = -48;
+
+        $r0[232] = 96;
+
+        $r0[233] = 65;
+
+        $r0[234] = -105;
+
+        $r0[235] = 123;
+
+        $r0[236] = -14;
+
+        $r0[237] = -110;
+
+        $r0[238] = 69;
+
+        $r0[239] = -24;
+
+        $r0[240] = -120;
+
+        $r0[241] = -75;
+
+        $r0[242] = 74;
+
+        $r0[243] = 127;
+
+        $r0[244] = -60;
+
+        $r0[245] = 113;
+
+        $r0[246] = 90;
+
+        $r0[247] = -114;
+
+        $r0[248] = 105;
+
+        $r0[249] = 46;
+
+        $r0[250] = 27;
+
+        $r0[251] = -125;
+
+        $r0[252] = -23;
+
+        $r0[253] = -44;
+
+        $r0[254] = 64;
+
+        <sun.security.provider.SeedGenerator$ThreadedSeedGenerator: byte[] rndTab> = $r0;
+
+        return;
+    }
+}

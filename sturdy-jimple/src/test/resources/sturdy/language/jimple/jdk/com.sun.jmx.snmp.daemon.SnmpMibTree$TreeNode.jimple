@@ -1,0 +1,597 @@
+final class com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode extends java.lang.Object
+{
+    private java.util.Vector children;
+    private java.util.Vector agents;
+    private long nodeValue;
+    private com.sun.jmx.snmp.agent.SnmpMibAgent agent;
+    private com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode parent;
+    final com.sun.jmx.snmp.daemon.SnmpMibTree this$0;
+
+    void registerNode(com.sun.jmx.snmp.agent.SnmpMibAgent)
+    {
+        com.sun.jmx.snmp.agent.SnmpMibAgent r0;
+        long[] $r1;
+        com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode r2;
+
+        r2 := @this: com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode;
+
+        r0 := @parameter0: com.sun.jmx.snmp.agent.SnmpMibAgent;
+
+        $r1 = virtualinvoke r0.<com.sun.jmx.snmp.agent.SnmpMibAgent: long[] getRootOid()>();
+
+        specialinvoke r2.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: void registerNode(long[],int,com.sun.jmx.snmp.agent.SnmpMibAgent)>($r1, 0, r0);
+
+        return;
+    }
+
+    com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode retrieveMatchingBranch(long[], int)
+    {
+        com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode r0, $r2, $r4, $r6;
+        com.sun.jmx.snmp.agent.SnmpMibAgent $r5;
+        long[] r1;
+        java.util.Vector $r3;
+        int i0, $i1, $i2, $i3;
+        boolean $z0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode;
+
+        r1 := @parameter0: long[];
+
+        i0 := @parameter1: int;
+
+        $r2 = specialinvoke r0.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode retrieveChild(long[],int)>(r1, i0);
+
+        if $r2 != null goto label1;
+
+        return r0;
+
+     label1:
+        $r3 = r0.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: java.util.Vector children>;
+
+        $z0 = virtualinvoke $r3.<java.util.Vector: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+        return $r2;
+
+     label2:
+        $i2 = i0 + 1;
+
+        $i1 = lengthof r1;
+
+        if $i2 != $i1 goto label3;
+
+        return $r2;
+
+     label3:
+        $i3 = i0 + 1;
+
+        $r4 = virtualinvoke $r2.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode retrieveMatchingBranch(long[],int)>(r1, $i3);
+
+        $r5 = $r4.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: com.sun.jmx.snmp.agent.SnmpMibAgent agent>;
+
+        if $r5 != null goto label4;
+
+        $r6 = r0;
+
+        goto label5;
+
+     label4:
+        $r6 = $r4;
+
+     label5:
+        return $r6;
+    }
+
+    com.sun.jmx.snmp.agent.SnmpMibAgent getAgentMib()
+    {
+        com.sun.jmx.snmp.agent.SnmpMibAgent $r1;
+        com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode r0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode;
+
+        $r1 = r0.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: com.sun.jmx.snmp.agent.SnmpMibAgent agent>;
+
+        return $r1;
+    }
+
+    public void printTree(java.lang.String)
+    {
+        java.util.Enumeration $r4, $r11;
+        java.util.Vector $r2, $r3, $r9, $r10;
+        java.lang.String $r8, $r14, r16;
+        boolean $z0, $z1;
+        com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode r1, r18;
+        com.sun.jmx.snmp.agent.SnmpMibAgent r17;
+        java.lang.StringBuilder $r0, $r5, $r6, $r7, $r15;
+        java.lang.Object $r12, $r13;
+
+        r1 := @this: com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode;
+
+        r16 := @parameter0: java.lang.String;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = r1.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: java.util.Vector agents>;
+
+        if $r2 != null goto label1;
+
+        return;
+
+     label1:
+        $r3 = r1.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: java.util.Vector agents>;
+
+        $r4 = virtualinvoke $r3.<java.util.Vector: java.util.Enumeration elements()>();
+
+     label2:
+        $z0 = interfaceinvoke $r4.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label5;
+
+        $r13 = interfaceinvoke $r4.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r17 = (com.sun.jmx.snmp.agent.SnmpMibAgent) $r13;
+
+        if r17 != null goto label3;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("empty ");
+
+        goto label4;
+
+     label3:
+        $r14 = virtualinvoke r17.<com.sun.jmx.snmp.agent.SnmpMibAgent: java.lang.String getMibName()>();
+
+        $r15 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+     label4:
+        goto label2;
+
+     label5:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r16);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r9 = r1.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: java.util.Vector children>;
+
+        if $r9 != null goto label6;
+
+        return;
+
+     label6:
+        $r10 = r1.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: java.util.Vector children>;
+
+        $r11 = virtualinvoke $r10.<java.util.Vector: java.util.Enumeration elements()>();
+
+     label7:
+        $z1 = interfaceinvoke $r11.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z1 == 0 goto label8;
+
+        $r12 = interfaceinvoke $r11.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r18 = (com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode) $r12;
+
+        virtualinvoke r18.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: void printTree(java.lang.String)>($r8);
+
+        goto label7;
+
+     label8:
+        return;
+    }
+
+    private void <init>(com.sun.jmx.snmp.daemon.SnmpMibTree, long, com.sun.jmx.snmp.agent.SnmpMibAgent, com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode)
+    {
+        com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode r0, r4;
+        com.sun.jmx.snmp.agent.SnmpMibAgent r5;
+        long l0;
+        com.sun.jmx.snmp.daemon.SnmpMibTree r1;
+        java.util.Vector $r2, $r3, $r6;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode;
+
+        r1 := @parameter0: com.sun.jmx.snmp.daemon.SnmpMibTree;
+
+        l0 := @parameter1: long;
+
+        r5 := @parameter2: com.sun.jmx.snmp.agent.SnmpMibAgent;
+
+        r4 := @parameter3: com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: com.sun.jmx.snmp.daemon.SnmpMibTree this$0> = r1;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r2 = new java.util.Vector;
+
+        specialinvoke $r2.<java.util.Vector: void <init>()>();
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: java.util.Vector children> = $r2;
+
+        $r3 = new java.util.Vector;
+
+        specialinvoke $r3.<java.util.Vector: void <init>()>();
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: java.util.Vector agents> = $r3;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: long nodeValue> = l0;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode parent> = r4;
+
+        $r6 = r0.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: java.util.Vector agents>;
+
+        virtualinvoke $r6.<java.util.Vector: void addElement(java.lang.Object)>(r5);
+
+        return;
+    }
+
+    private void removeAgentFully(com.sun.jmx.snmp.agent.SnmpMibAgent)
+    {
+        java.util.Enumeration $r3, $r4;
+        com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode r1, r9;
+        com.sun.jmx.snmp.agent.SnmpMibAgent r5;
+        java.util.Vector $r0, $r2, $r6, $r10;
+        java.lang.Object $r7, $r8;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode;
+
+        r5 := @parameter0: com.sun.jmx.snmp.agent.SnmpMibAgent;
+
+        $r0 = new java.util.Vector;
+
+        specialinvoke $r0.<java.util.Vector: void <init>()>();
+
+        $r2 = r1.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: java.util.Vector children>;
+
+        $r3 = virtualinvoke $r2.<java.util.Vector: java.util.Enumeration elements()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label3;
+
+        $r8 = interfaceinvoke $r3.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r9 = (com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode) $r8;
+
+        specialinvoke r9.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: void removeAgentFully(com.sun.jmx.snmp.agent.SnmpMibAgent)>(r5);
+
+        $r10 = r9.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: java.util.Vector agents>;
+
+        $z2 = virtualinvoke $r10.<java.util.Vector: boolean isEmpty()>();
+
+        if $z2 == 0 goto label2;
+
+        virtualinvoke $r0.<java.util.Vector: boolean add(java.lang.Object)>(r9);
+
+     label2:
+        goto label1;
+
+     label3:
+        $r4 = virtualinvoke $r0.<java.util.Vector: java.util.Enumeration elements()>();
+
+     label4:
+        $z1 = interfaceinvoke $r4.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z1 == 0 goto label5;
+
+        $r6 = r1.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: java.util.Vector children>;
+
+        $r7 = interfaceinvoke $r4.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        virtualinvoke $r6.<java.util.Vector: boolean removeElement(java.lang.Object)>($r7);
+
+        goto label4;
+
+     label5:
+        specialinvoke r1.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: void removeAgent(com.sun.jmx.snmp.agent.SnmpMibAgent)>(r5);
+
+        return;
+    }
+
+    private void removeAgent(com.sun.jmx.snmp.agent.SnmpMibAgent)
+    {
+        com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode r0;
+        com.sun.jmx.snmp.agent.SnmpMibAgent r1, $r7;
+        java.util.Vector $r2, $r3, $r4, $r5;
+        java.lang.Object $r6;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode;
+
+        r1 := @parameter0: com.sun.jmx.snmp.agent.SnmpMibAgent;
+
+        $r2 = r0.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: java.util.Vector agents>;
+
+        $z0 = virtualinvoke $r2.<java.util.Vector: boolean contains(java.lang.Object)>(r1);
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r3 = r0.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: java.util.Vector agents>;
+
+        virtualinvoke $r3.<java.util.Vector: boolean removeElement(java.lang.Object)>(r1);
+
+        $r4 = r0.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: java.util.Vector agents>;
+
+        $z1 = virtualinvoke $r4.<java.util.Vector: boolean isEmpty()>();
+
+        if $z1 != 0 goto label2;
+
+        $r5 = r0.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: java.util.Vector agents>;
+
+        $r6 = virtualinvoke $r5.<java.util.Vector: java.lang.Object firstElement()>();
+
+        $r7 = (com.sun.jmx.snmp.agent.SnmpMibAgent) $r6;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: com.sun.jmx.snmp.agent.SnmpMibAgent agent> = $r7;
+
+     label2:
+        return;
+    }
+
+    private void setAgent(com.sun.jmx.snmp.agent.SnmpMibAgent)
+    {
+        com.sun.jmx.snmp.agent.SnmpMibAgent r1;
+        com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode r0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode;
+
+        r1 := @parameter0: com.sun.jmx.snmp.agent.SnmpMibAgent;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: com.sun.jmx.snmp.agent.SnmpMibAgent agent> = r1;
+
+        return;
+    }
+
+    private void registerNode(long[], int, com.sun.jmx.snmp.agent.SnmpMibAgent)
+    {
+        long l3;
+        long[] r0;
+        java.util.Vector $r4, $r5, $r8;
+        int i0, $i1, $i2, $i4, $i5;
+        boolean $z0;
+        com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode r1, $r2, $r6, r9;
+        com.sun.jmx.snmp.agent.SnmpMibAgent r3;
+        com.sun.jmx.snmp.daemon.SnmpMibTree $r7;
+
+        r1 := @this: com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode;
+
+        r0 := @parameter0: long[];
+
+        i0 := @parameter1: int;
+
+        r3 := @parameter2: com.sun.jmx.snmp.agent.SnmpMibAgent;
+
+        $i1 = lengthof r0;
+
+        if i0 < $i1 goto label1;
+
+        return;
+
+     label1:
+        $r2 = specialinvoke r1.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode retrieveChild(long[],int)>(r0, i0);
+
+        r9 = $r2;
+
+        if $r2 != null goto label2;
+
+        l3 = r0[i0];
+
+        $r6 = new com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode;
+
+        $r7 = r1.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: com.sun.jmx.snmp.daemon.SnmpMibTree this$0>;
+
+        specialinvoke $r6.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: void <init>(com.sun.jmx.snmp.daemon.SnmpMibTree,long,com.sun.jmx.snmp.agent.SnmpMibAgent,com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode)>($r7, l3, r3, r1);
+
+        r9 = $r6;
+
+        $r8 = r1.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: java.util.Vector children>;
+
+        virtualinvoke $r8.<java.util.Vector: void addElement(java.lang.Object)>($r6);
+
+        goto label3;
+
+     label2:
+        $r4 = r1.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: java.util.Vector agents>;
+
+        $z0 = virtualinvoke $r4.<java.util.Vector: boolean contains(java.lang.Object)>(r3);
+
+        if $z0 != 0 goto label3;
+
+        $r5 = r1.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: java.util.Vector agents>;
+
+        virtualinvoke $r5.<java.util.Vector: void addElement(java.lang.Object)>(r3);
+
+     label3:
+        $i4 = lengthof r0;
+
+        $i5 = $i4 - 1;
+
+        if i0 != $i5 goto label4;
+
+        specialinvoke r9.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: void setAgent(com.sun.jmx.snmp.agent.SnmpMibAgent)>(r3);
+
+        goto label5;
+
+     label4:
+        $i2 = i0 + 1;
+
+        specialinvoke r9.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: void registerNode(long[],int,com.sun.jmx.snmp.agent.SnmpMibAgent)>(r0, $i2, r3);
+
+     label5:
+        return;
+    }
+
+    private com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode retrieveChild(long[], int)
+    {
+        java.util.Enumeration $r3;
+        com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode r1, r5;
+        long l1;
+        long[] r0;
+        java.util.Vector $r2;
+        int i0;
+        java.lang.Object $r4;
+        boolean $z0, $z1;
+
+        r1 := @this: com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode;
+
+        r0 := @parameter0: long[];
+
+        i0 := @parameter1: int;
+
+        l1 = r0[i0];
+
+        $r2 = r1.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: java.util.Vector children>;
+
+        $r3 = virtualinvoke $r2.<java.util.Vector: java.util.Enumeration elements()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label3;
+
+        $r4 = interfaceinvoke $r3.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r5 = (com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode) $r4;
+
+        $z1 = specialinvoke r5.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: boolean match(long)>(l1);
+
+        if $z1 == 0 goto label2;
+
+        return r5;
+
+     label2:
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    private boolean match(long)
+    {
+        byte $b2;
+        com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode r0;
+        long l0, $l1;
+        boolean $z0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode;
+
+        l0 := @parameter0: long;
+
+        $l1 = r0.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: long nodeValue>;
+
+        $b2 = $l1 cmp l0;
+
+        if $b2 != 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    void <init>(com.sun.jmx.snmp.daemon.SnmpMibTree, long, com.sun.jmx.snmp.agent.SnmpMibAgent, com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode, com.sun.jmx.snmp.daemon.SnmpMibTree$1)
+    {
+        com.sun.jmx.snmp.daemon.SnmpMibTree r1;
+        com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode r0, r3;
+        com.sun.jmx.snmp.agent.SnmpMibAgent r2;
+        com.sun.jmx.snmp.daemon.SnmpMibTree$1 r4;
+        long l0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode;
+
+        r1 := @parameter0: com.sun.jmx.snmp.daemon.SnmpMibTree;
+
+        l0 := @parameter1: long;
+
+        r2 := @parameter2: com.sun.jmx.snmp.agent.SnmpMibAgent;
+
+        r3 := @parameter3: com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode;
+
+        r4 := @parameter4: com.sun.jmx.snmp.daemon.SnmpMibTree$1;
+
+        specialinvoke r0.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: void <init>(com.sun.jmx.snmp.daemon.SnmpMibTree,long,com.sun.jmx.snmp.agent.SnmpMibAgent,com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode)>(r1, l0, r2, r3);
+
+        return;
+    }
+
+    static com.sun.jmx.snmp.agent.SnmpMibAgent access$102(com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode, com.sun.jmx.snmp.agent.SnmpMibAgent)
+    {
+        com.sun.jmx.snmp.agent.SnmpMibAgent r1;
+        com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode r0;
+
+        r0 := @parameter0: com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode;
+
+        r1 := @parameter1: com.sun.jmx.snmp.agent.SnmpMibAgent;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: com.sun.jmx.snmp.agent.SnmpMibAgent agent> = r1;
+
+        return r1;
+    }
+
+    static void access$200(com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode, long[], int, com.sun.jmx.snmp.agent.SnmpMibAgent)
+    {
+        long[] r1;
+        com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode r0;
+        int i0;
+        com.sun.jmx.snmp.agent.SnmpMibAgent r2;
+
+        r0 := @parameter0: com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode;
+
+        r1 := @parameter1: long[];
+
+        i0 := @parameter2: int;
+
+        r2 := @parameter3: com.sun.jmx.snmp.agent.SnmpMibAgent;
+
+        specialinvoke r0.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: void registerNode(long[],int,com.sun.jmx.snmp.agent.SnmpMibAgent)>(r1, i0, r2);
+
+        return;
+    }
+
+    static void access$300(com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode, com.sun.jmx.snmp.agent.SnmpMibAgent)
+    {
+        com.sun.jmx.snmp.agent.SnmpMibAgent r1;
+        com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode r0;
+
+        r0 := @parameter0: com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode;
+
+        r1 := @parameter1: com.sun.jmx.snmp.agent.SnmpMibAgent;
+
+        specialinvoke r0.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: void removeAgent(com.sun.jmx.snmp.agent.SnmpMibAgent)>(r1);
+
+        return;
+    }
+
+    static void access$400(com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode, com.sun.jmx.snmp.agent.SnmpMibAgent)
+    {
+        com.sun.jmx.snmp.agent.SnmpMibAgent r1;
+        com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode r0;
+
+        r0 := @parameter0: com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode;
+
+        r1 := @parameter1: com.sun.jmx.snmp.agent.SnmpMibAgent;
+
+        specialinvoke r0.<com.sun.jmx.snmp.daemon.SnmpMibTree$TreeNode: void removeAgentFully(com.sun.jmx.snmp.agent.SnmpMibAgent)>(r1);
+
+        return;
+    }
+}

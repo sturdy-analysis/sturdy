@@ -1,0 +1,381 @@
+public final class com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter extends java.io.Writer
+{
+    java.io.OutputStream out;
+    int lastUTF16CodePoint;
+
+    public void <init>(java.io.OutputStream)
+    {
+        java.io.OutputStream r1;
+        com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter r0;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter;
+
+        r1 := @parameter0: java.io.OutputStream;
+
+        specialinvoke r0.<java.io.Writer: void <init>()>();
+
+        r0.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: int lastUTF16CodePoint> = 0;
+
+        r0.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: java.io.OutputStream out> = r1;
+
+        return;
+    }
+
+    public java.lang.String getEncoding()
+    {
+        com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter r0;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter;
+
+        return "UTF-8";
+    }
+
+    public void write(int) throws java.io.IOException
+    {
+        boolean $z0, $z1;
+        java.lang.StringBuilder $r9, $r10, $r11, $r17;
+        int $i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i30;
+        java.lang.String $r12;
+        java.io.OutputStream $r1, $r2, $r3, $r4, $r5, $r6, $r13, $r14, $r15, $r16;
+        java.io.IOException $r18;
+        com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter r0;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter;
+
+        i1 := @parameter0: int;
+
+        $i0 = r0.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: int lastUTF16CodePoint>;
+
+        if $i0 == 0 goto label3;
+
+        $i13 = r0.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: int lastUTF16CodePoint>;
+
+        $i14 = $i13 & 1023;
+
+        $i16 = $i14 << 10;
+
+        $i15 = i1 & 1023;
+
+        $i17 = $i16 | $i15;
+
+        i18 = $i17 + 65536;
+
+        if i18 < 0 goto label1;
+
+        if i18 < 2097152 goto label2;
+
+     label1:
+        $r18 = new java.io.IOException;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Atttempting to write invalid Unicode code point \'");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i18);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r18.<java.io.IOException: void <init>(java.lang.String)>($r12);
+
+        throw $r18;
+
+     label2:
+        $r13 = r0.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: java.io.OutputStream out>;
+
+        $i19 = i18 >> 18;
+
+        $i20 = 240 | $i19;
+
+        virtualinvoke $r13.<java.io.OutputStream: void write(int)>($i20);
+
+        $r14 = r0.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: java.io.OutputStream out>;
+
+        $i21 = i18 >> 12;
+
+        $i22 = $i21 & 63;
+
+        $i23 = 128 | $i22;
+
+        virtualinvoke $r14.<java.io.OutputStream: void write(int)>($i23);
+
+        $r15 = r0.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: java.io.OutputStream out>;
+
+        $i24 = i18 >> 6;
+
+        $i25 = $i24 & 63;
+
+        $i26 = 128 | $i25;
+
+        virtualinvoke $r15.<java.io.OutputStream: void write(int)>($i26);
+
+        $r16 = r0.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: java.io.OutputStream out>;
+
+        $i27 = i18 & 63;
+
+        $i28 = 128 | $i27;
+
+        virtualinvoke $r16.<java.io.OutputStream: void write(int)>($i28);
+
+        r0.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: int lastUTF16CodePoint> = 0;
+
+        return;
+
+     label3:
+        if i1 >= 128 goto label4;
+
+        $r6 = r0.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: java.io.OutputStream out>;
+
+        virtualinvoke $r6.<java.io.OutputStream: void write(int)>(i1);
+
+        goto label7;
+
+     label4:
+        if i1 >= 2048 goto label5;
+
+        $r4 = r0.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: java.io.OutputStream out>;
+
+        $i9 = i1 >> 6;
+
+        $i10 = 192 | $i9;
+
+        virtualinvoke $r4.<java.io.OutputStream: void write(int)>($i10);
+
+        $r5 = r0.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: java.io.OutputStream out>;
+
+        $i11 = i1 & 63;
+
+        $i12 = 128 | $i11;
+
+        virtualinvoke $r5.<java.io.OutputStream: void write(int)>($i12);
+
+        goto label7;
+
+     label5:
+        $i30 = (int) 65535;
+
+        if i1 > $i30 goto label7;
+
+        $z0 = staticinvoke <com.sun.org.apache.xerces.internal.util.XMLChar: boolean isHighSurrogate(int)>(i1);
+
+        if $z0 != 0 goto label6;
+
+        $z1 = staticinvoke <com.sun.org.apache.xerces.internal.util.XMLChar: boolean isLowSurrogate(int)>(i1);
+
+        if $z1 != 0 goto label6;
+
+        $r1 = r0.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: java.io.OutputStream out>;
+
+        $i2 = i1 >> 12;
+
+        $i3 = 224 | $i2;
+
+        virtualinvoke $r1.<java.io.OutputStream: void write(int)>($i3);
+
+        $r2 = r0.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: java.io.OutputStream out>;
+
+        $i4 = i1 >> 6;
+
+        $i5 = $i4 & 63;
+
+        $i6 = 128 | $i5;
+
+        virtualinvoke $r2.<java.io.OutputStream: void write(int)>($i6);
+
+        $r3 = r0.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: java.io.OutputStream out>;
+
+        $i7 = i1 & 63;
+
+        $i8 = 128 | $i7;
+
+        virtualinvoke $r3.<java.io.OutputStream: void write(int)>($i8);
+
+        goto label7;
+
+     label6:
+        r0.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: int lastUTF16CodePoint> = i1;
+
+     label7:
+        return;
+    }
+
+    public void write(char[]) throws java.io.IOException
+    {
+        int $i0, i2, $i3;
+        char[] r0;
+        char $c1;
+        com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter r1;
+
+        r1 := @this: com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter;
+
+        r0 := @parameter0: char[];
+
+        i2 = 0;
+
+     label1:
+        $i0 = lengthof r0;
+
+        if i2 >= $i0 goto label2;
+
+        $c1 = r0[i2];
+
+        $i3 = (int) $c1;
+
+        virtualinvoke r1.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: void write(int)>($i3);
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void write(char[], int, int) throws java.io.IOException
+    {
+        char $c3;
+        int i0, i1, $i2, i4, $i5;
+        char[] r1;
+        com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter r0;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter;
+
+        r1 := @parameter0: char[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i4 = 0;
+
+     label1:
+        if i4 >= i0 goto label2;
+
+        $i2 = i1 + i4;
+
+        $c3 = r1[$i2];
+
+        $i5 = (int) $c3;
+
+        virtualinvoke r0.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: void write(int)>($i5);
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void write(java.lang.String) throws java.io.IOException
+    {
+        int $i0, i2, $i3;
+        char $c1;
+        java.lang.String r0;
+        com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter r1;
+
+        r1 := @this: com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        i2 = 0;
+
+     label1:
+        if i2 >= $i0 goto label2;
+
+        $c1 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i2);
+
+        $i3 = (int) $c1;
+
+        virtualinvoke r1.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: void write(int)>($i3);
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void write(java.lang.String, int, int) throws java.io.IOException
+    {
+        char $c3;
+        int i0, i1, $i2, i4, $i5;
+        java.lang.String r1;
+        com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter r0;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter;
+
+        r1 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i4 = 0;
+
+     label1:
+        if i4 >= i0 goto label2;
+
+        $i2 = i1 + i4;
+
+        $c3 = virtualinvoke r1.<java.lang.String: char charAt(int)>($i2);
+
+        $i5 = (int) $c3;
+
+        virtualinvoke r0.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: void write(int)>($i5);
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void flush() throws java.io.IOException
+    {
+        java.io.OutputStream $r1;
+        com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter r0;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter;
+
+        $r1 = r0.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: java.io.OutputStream out>;
+
+        virtualinvoke $r1.<java.io.OutputStream: void flush()>();
+
+        return;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        java.io.OutputStream $r1;
+        java.lang.IllegalStateException $r2;
+        int $i0;
+        com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter r0;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter;
+
+        $i0 = r0.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: int lastUTF16CodePoint>;
+
+        if $i0 == 0 goto label1;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Attempting to close a UTF8OutputStreamWriter while awaiting for a UTF-16 code unit");
+
+        throw $r2;
+
+     label1:
+        $r1 = r0.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: java.io.OutputStream out>;
+
+        virtualinvoke $r1.<java.io.OutputStream: void close()>();
+
+        return;
+    }
+}

@@ -1,0 +1,96 @@
+public abstract class sun.java2d.ReentrantContextProviderCLQ extends sun.java2d.ReentrantContextProvider
+{
+    private final java.util.concurrent.ConcurrentLinkedQueue ctxQueue;
+
+    public void <init>(int)
+    {
+        int i0;
+        sun.java2d.ReentrantContextProviderCLQ r0;
+        java.util.concurrent.ConcurrentLinkedQueue $r1;
+
+        r0 := @this: sun.java2d.ReentrantContextProviderCLQ;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<sun.java2d.ReentrantContextProvider: void <init>(int)>(i0);
+
+        $r1 = new java.util.concurrent.ConcurrentLinkedQueue;
+
+        specialinvoke $r1.<java.util.concurrent.ConcurrentLinkedQueue: void <init>()>();
+
+        r0.<sun.java2d.ReentrantContextProviderCLQ: java.util.concurrent.ConcurrentLinkedQueue ctxQueue> = $r1;
+
+        return;
+    }
+
+    public final sun.java2d.ReentrantContext acquire()
+    {
+        java.lang.ref.Reference $r4;
+        sun.java2d.ReentrantContextProviderCLQ r0;
+        sun.java2d.ReentrantContext $r1, r6;
+        java.lang.Object $r3, $r5;
+        java.util.concurrent.ConcurrentLinkedQueue $r2;
+
+        r0 := @this: sun.java2d.ReentrantContextProviderCLQ;
+
+        r6 = null;
+
+     label1:
+        if r6 != null goto label2;
+
+        $r2 = r0.<sun.java2d.ReentrantContextProviderCLQ: java.util.concurrent.ConcurrentLinkedQueue ctxQueue>;
+
+        $r3 = virtualinvoke $r2.<java.util.concurrent.ConcurrentLinkedQueue: java.lang.Object poll()>();
+
+        $r4 = (java.lang.ref.Reference) $r3;
+
+        if $r4 == null goto label2;
+
+        $r5 = virtualinvoke $r4.<java.lang.ref.Reference: java.lang.Object get()>();
+
+        r6 = (sun.java2d.ReentrantContext) $r5;
+
+        goto label1;
+
+     label2:
+        if r6 != null goto label3;
+
+        $r1 = virtualinvoke r0.<sun.java2d.ReentrantContextProviderCLQ: sun.java2d.ReentrantContext newContext()>();
+
+        r6 = $r1;
+
+        $r1.<sun.java2d.ReentrantContext: byte usage> = 2;
+
+     label3:
+        return r6;
+    }
+
+    public final void release(sun.java2d.ReentrantContext)
+    {
+        java.lang.ref.Reference $r3;
+        sun.java2d.ReentrantContext r0;
+        sun.java2d.ReentrantContextProviderCLQ r1;
+        byte $b0;
+        int $i1;
+        java.util.concurrent.ConcurrentLinkedQueue $r2;
+
+        r1 := @this: sun.java2d.ReentrantContextProviderCLQ;
+
+        r0 := @parameter0: sun.java2d.ReentrantContext;
+
+        $b0 = r0.<sun.java2d.ReentrantContext: byte usage>;
+
+        $i1 = (int) $b0;
+
+        if $i1 != 2 goto label1;
+
+        $r2 = r1.<sun.java2d.ReentrantContextProviderCLQ: java.util.concurrent.ConcurrentLinkedQueue ctxQueue>;
+
+        $r3 = virtualinvoke r1.<sun.java2d.ReentrantContextProviderCLQ: java.lang.ref.Reference getOrCreateReference(sun.java2d.ReentrantContext)>(r0);
+
+        virtualinvoke $r2.<java.util.concurrent.ConcurrentLinkedQueue: boolean offer(java.lang.Object)>($r3);
+
+     label1:
+        return;
+    }
+}

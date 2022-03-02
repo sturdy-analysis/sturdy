@@ -1,0 +1,287 @@
+final class sun.security.ssl.AlpnExtension$SHAlpnProducer extends java.lang.Object implements sun.security.ssl.HandshakeProducer
+{
+
+    private void <init>()
+    {
+        sun.security.ssl.AlpnExtension$SHAlpnProducer r0;
+
+        r0 := @this: sun.security.ssl.AlpnExtension$SHAlpnProducer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public byte[] produce(sun.security.ssl.ConnectionContext, sun.security.ssl.SSLHandshake$HandshakeMessage) throws java.io.IOException
+    {
+        sun.security.ssl.SSLTransport $r8, $r24, $r38;
+        byte[] $r16, r17;
+        sun.security.ssl.SSLHandshake$HandshakeMessage r57;
+        sun.security.ssl.AlpnExtension$AlpnSpec r5;
+        java.util.Map $r3, $r22;
+        sun.security.ssl.SSLConfiguration $r9, $r25, $r35, $r39;
+        sun.security.ssl.ServerHandshakeContext r1;
+        javax.net.ssl.SSLException $r32, $r46;
+        java.lang.StringBuilder $r49, $r50, $r53;
+        java.lang.Object[] $r12, $r55;
+        sun.security.ssl.ConnectionContext r0;
+        java.lang.String $r13, $r15, $r19, $r28, $r29, $r33, $r34, $r42, $r43, $r47, $r48, $r52, $r54, $r61;
+        sun.security.ssl.AlpnExtension$SHAlpnProducer r56;
+        sun.security.ssl.TransportContext $r7, $r11, $r20, $r23, $r31, $r37, $r45, $r58;
+        sun.security.ssl.Alert $r30, $r44;
+        java.util.function.BiFunction $r10, $r26, $r36, $r40;
+        javax.net.ssl.SSLSocket r60;
+        java.nio.ByteBuffer $r18;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        java.util.List r6;
+        javax.net.ssl.SSLEngine r59;
+        java.nio.charset.Charset $r14;
+        int $i0, i1, $i2;
+        sun.security.ssl.SSLExtension $r2, $r21, $r51;
+        java.lang.Object $r4, $r27, $r41;
+
+        r56 := @this: sun.security.ssl.AlpnExtension$SHAlpnProducer;
+
+        r0 := @parameter0: sun.security.ssl.ConnectionContext;
+
+        r57 := @parameter1: sun.security.ssl.SSLHandshake$HandshakeMessage;
+
+        r1 = (sun.security.ssl.ServerHandshakeContext) r0;
+
+        $r3 = r1.<sun.security.ssl.ServerHandshakeContext: java.util.Map handshakeExtensions>;
+
+        $r2 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension CH_ALPN>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>($r2);
+
+        r5 = (sun.security.ssl.AlpnExtension$AlpnSpec) $r4;
+
+        if r5 != null goto label02;
+
+        $z8 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z8 == 0 goto label01;
+
+        $z9 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z9 == 0 goto label01;
+
+        $r49 = new java.lang.StringBuilder;
+
+        specialinvoke $r49.<java.lang.StringBuilder: void <init>()>();
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignore unavailable extension: ");
+
+        $r51 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension SH_ALPN>;
+
+        $r52 = $r51.<sun.security.ssl.SSLExtension: java.lang.String name>;
+
+        $r53 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r52);
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r55 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r54, $r55);
+
+     label01:
+        r1.<sun.security.ssl.ServerHandshakeContext: java.lang.String applicationProtocol> = "";
+
+        $r58 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r58.<sun.security.ssl.TransportContext: java.lang.String applicationProtocol> = "";
+
+        return null;
+
+     label02:
+        r6 = r5.<sun.security.ssl.AlpnExtension$AlpnSpec: java.util.List applicationProtocols>;
+
+        $r7 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r8 = $r7.<sun.security.ssl.TransportContext: sun.security.ssl.SSLTransport transport>;
+
+        $z0 = $r8 instanceof javax.net.ssl.SSLEngine;
+
+        if $z0 == 0 goto label05;
+
+        $r35 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $r36 = $r35.<sun.security.ssl.SSLConfiguration: java.util.function.BiFunction engineAPSelector>;
+
+        if $r36 == null goto label07;
+
+        $r37 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r38 = $r37.<sun.security.ssl.TransportContext: sun.security.ssl.SSLTransport transport>;
+
+        r59 = (javax.net.ssl.SSLEngine) $r38;
+
+        $r39 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $r40 = $r39.<sun.security.ssl.SSLConfiguration: java.util.function.BiFunction engineAPSelector>;
+
+        $r41 = interfaceinvoke $r40.<java.util.function.BiFunction: java.lang.Object apply(java.lang.Object,java.lang.Object)>(r59, r6);
+
+        $r42 = (java.lang.String) $r41;
+
+        r1.<sun.security.ssl.ServerHandshakeContext: java.lang.String applicationProtocol> = $r42;
+
+        $r43 = r1.<sun.security.ssl.ServerHandshakeContext: java.lang.String applicationProtocol>;
+
+        if $r43 == null goto label03;
+
+        $r47 = r1.<sun.security.ssl.ServerHandshakeContext: java.lang.String applicationProtocol>;
+
+        $z6 = virtualinvoke $r47.<java.lang.String: boolean isEmpty()>();
+
+        if $z6 != 0 goto label04;
+
+        $r48 = r1.<sun.security.ssl.ServerHandshakeContext: java.lang.String applicationProtocol>;
+
+        $z7 = interfaceinvoke r6.<java.util.List: boolean contains(java.lang.Object)>($r48);
+
+        if $z7 != 0 goto label04;
+
+     label03:
+        $r45 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r44 = <sun.security.ssl.Alert: sun.security.ssl.Alert NO_APPLICATION_PROTOCOL>;
+
+        $r46 = virtualinvoke $r45.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r44, "No matching application layer protocol values");
+
+        throw $r46;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r9 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $r10 = $r9.<sun.security.ssl.SSLConfiguration: java.util.function.BiFunction socketAPSelector>;
+
+        if $r10 == null goto label07;
+
+        $r23 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r24 = $r23.<sun.security.ssl.TransportContext: sun.security.ssl.SSLTransport transport>;
+
+        r60 = (javax.net.ssl.SSLSocket) $r24;
+
+        $r25 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $r26 = $r25.<sun.security.ssl.SSLConfiguration: java.util.function.BiFunction socketAPSelector>;
+
+        $r27 = interfaceinvoke $r26.<java.util.function.BiFunction: java.lang.Object apply(java.lang.Object,java.lang.Object)>(r60, r6);
+
+        $r28 = (java.lang.String) $r27;
+
+        r1.<sun.security.ssl.ServerHandshakeContext: java.lang.String applicationProtocol> = $r28;
+
+        $r29 = r1.<sun.security.ssl.ServerHandshakeContext: java.lang.String applicationProtocol>;
+
+        if $r29 == null goto label06;
+
+        $r33 = r1.<sun.security.ssl.ServerHandshakeContext: java.lang.String applicationProtocol>;
+
+        $z4 = virtualinvoke $r33.<java.lang.String: boolean isEmpty()>();
+
+        if $z4 != 0 goto label07;
+
+        $r34 = r1.<sun.security.ssl.ServerHandshakeContext: java.lang.String applicationProtocol>;
+
+        $z5 = interfaceinvoke r6.<java.util.List: boolean contains(java.lang.Object)>($r34);
+
+        if $z5 != 0 goto label07;
+
+     label06:
+        $r31 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r30 = <sun.security.ssl.Alert: sun.security.ssl.Alert NO_APPLICATION_PROTOCOL>;
+
+        $r32 = virtualinvoke $r31.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r30, "No matching application layer protocol values");
+
+        throw $r32;
+
+     label07:
+        $r61 = r1.<sun.security.ssl.ServerHandshakeContext: java.lang.String applicationProtocol>;
+
+        if $r61 == null goto label08;
+
+        $r13 = r1.<sun.security.ssl.ServerHandshakeContext: java.lang.String applicationProtocol>;
+
+        $z3 = virtualinvoke $r13.<java.lang.String: boolean isEmpty()>();
+
+        if $z3 == 0 goto label10;
+
+     label08:
+        r1.<sun.security.ssl.ServerHandshakeContext: java.lang.String applicationProtocol> = "";
+
+        $r11 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r11.<sun.security.ssl.TransportContext: java.lang.String applicationProtocol> = "";
+
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label09;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z2 == 0 goto label09;
+
+        $r12 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void warning(java.lang.String,java.lang.Object[])>("Ignore, no negotiated application layer protocol", $r12);
+
+     label09:
+        return null;
+
+     label10:
+        $r15 = r1.<sun.security.ssl.ServerHandshakeContext: java.lang.String applicationProtocol>;
+
+        $r14 = <sun.security.ssl.AlpnExtension: java.nio.charset.Charset alpnCharset>;
+
+        $r16 = virtualinvoke $r15.<java.lang.String: byte[] getBytes(java.nio.charset.Charset)>($r14);
+
+        $i0 = lengthof $r16;
+
+        i1 = $i0 + 1;
+
+        $i2 = i1 + 2;
+
+        r17 = newarray (byte)[$i2];
+
+        $r18 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>(r17);
+
+        staticinvoke <sun.security.ssl.Record: void putInt16(java.nio.ByteBuffer,int)>($r18, i1);
+
+        staticinvoke <sun.security.ssl.Record: void putBytes8(java.nio.ByteBuffer,byte[])>($r18, $r16);
+
+        $r20 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r19 = r1.<sun.security.ssl.ServerHandshakeContext: java.lang.String applicationProtocol>;
+
+        $r20.<sun.security.ssl.TransportContext: java.lang.String applicationProtocol> = $r19;
+
+        $r22 = r1.<sun.security.ssl.ServerHandshakeContext: java.util.Map handshakeExtensions>;
+
+        $r21 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension CH_ALPN>;
+
+        interfaceinvoke $r22.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r21);
+
+        return r17;
+    }
+
+    void <init>(sun.security.ssl.AlpnExtension$1)
+    {
+        sun.security.ssl.AlpnExtension$1 r1;
+        sun.security.ssl.AlpnExtension$SHAlpnProducer r0;
+
+        r0 := @this: sun.security.ssl.AlpnExtension$SHAlpnProducer;
+
+        r1 := @parameter0: sun.security.ssl.AlpnExtension$1;
+
+        specialinvoke r0.<sun.security.ssl.AlpnExtension$SHAlpnProducer: void <init>()>();
+
+        return;
+    }
+}

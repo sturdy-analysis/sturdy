@@ -1,0 +1,156 @@
+public final class sun.text.normalizer.ICUBinary extends java.lang.Object
+{
+    private static final byte MAGIC1;
+    private static final byte MAGIC2;
+    private static final byte BIG_ENDIAN_;
+    private static final byte CHAR_SET_;
+    private static final byte CHAR_SIZE_;
+    private static final java.lang.String MAGIC_NUMBER_AUTHENTICATION_FAILED_;
+    private static final java.lang.String HEADER_AUTHENTICATION_FAILED_;
+
+    public void <init>()
+    {
+        sun.text.normalizer.ICUBinary r0;
+
+        r0 := @this: sun.text.normalizer.ICUBinary;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static final byte[] readHeader(java.io.InputStream, byte[], sun.text.normalizer.ICUBinary$Authenticate) throws java.io.IOException
+    {
+        byte[] r3, r4, r5, r6;
+        java.io.DataInputStream $r10;
+        sun.text.normalizer.ICUBinary$Authenticate r7;
+        byte $b1, $b2, $b3, $b4, $b5;
+        int $i6, $i7, $i9, $i10, $i11, $i12, $i13;
+        boolean $z0, $z1;
+        char $c0;
+        java.io.IOException $r11, $r12, $r13;
+        java.io.InputStream r1;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        r6 := @parameter1: byte[];
+
+        r7 := @parameter2: sun.text.normalizer.ICUBinary$Authenticate;
+
+        $r10 = new java.io.DataInputStream;
+
+        specialinvoke $r10.<java.io.DataInputStream: void <init>(java.io.InputStream)>(r1);
+
+        $c0 = virtualinvoke $r10.<java.io.DataInputStream: char readChar()>();
+
+        $b1 = virtualinvoke $r10.<java.io.DataInputStream: byte readByte()>();
+
+        $b2 = virtualinvoke $r10.<java.io.DataInputStream: byte readByte()>();
+
+        $i7 = (int) $b1;
+
+        $i9 = (int) -38;
+
+        if $i7 != $i9 goto label1;
+
+        $i10 = (int) $b2;
+
+        if $i10 == 39 goto label2;
+
+     label1:
+        $r11 = new java.io.IOException;
+
+        specialinvoke $r11.<java.io.IOException: void <init>(java.lang.String)>("ICU data file error: Not an ICU data file");
+
+        throw $r11;
+
+     label2:
+        virtualinvoke $r10.<java.io.DataInputStream: char readChar()>();
+
+        virtualinvoke $r10.<java.io.DataInputStream: char readChar()>();
+
+        $b3 = virtualinvoke $r10.<java.io.DataInputStream: byte readByte()>();
+
+        $b4 = virtualinvoke $r10.<java.io.DataInputStream: byte readByte()>();
+
+        $b5 = virtualinvoke $r10.<java.io.DataInputStream: byte readByte()>();
+
+        virtualinvoke $r10.<java.io.DataInputStream: byte readByte()>();
+
+        r3 = newarray (byte)[4];
+
+        virtualinvoke $r10.<java.io.DataInputStream: void readFully(byte[])>(r3);
+
+        r4 = newarray (byte)[4];
+
+        virtualinvoke $r10.<java.io.DataInputStream: void readFully(byte[])>(r4);
+
+        r5 = newarray (byte)[4];
+
+        virtualinvoke $r10.<java.io.DataInputStream: void readFully(byte[])>(r5);
+
+        $i11 = (int) $c0;
+
+        if $i11 >= 24 goto label3;
+
+        $r12 = new java.io.IOException;
+
+        specialinvoke $r12.<java.io.IOException: void <init>(java.lang.String)>("Internal Error: Header size error");
+
+        throw $r12;
+
+     label3:
+        $i12 = (int) $c0;
+
+        $i6 = $i12 - 24;
+
+        virtualinvoke $r10.<java.io.DataInputStream: int skipBytes(int)>($i6);
+
+        if $b3 != 1 goto label4;
+
+        if $b4 != 0 goto label4;
+
+        $i13 = (int) $b5;
+
+        if $i13 != 2 goto label4;
+
+        $z0 = staticinvoke <java.util.Arrays: boolean equals(byte[],byte[])>(r6, r3);
+
+        if $z0 == 0 goto label4;
+
+        if r7 == null goto label5;
+
+        $z1 = interfaceinvoke r7.<sun.text.normalizer.ICUBinary$Authenticate: boolean isDataVersionAcceptable(byte[])>(r4);
+
+        if $z1 != 0 goto label5;
+
+     label4:
+        $r13 = new java.io.IOException;
+
+        specialinvoke $r13.<java.io.IOException: void <init>(java.lang.String)>("ICU data file error: Header authentication failed, please check if you have a valid ICU data file");
+
+        throw $r13;
+
+     label5:
+        return r5;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.text.normalizer.ICUBinary: java.lang.String HEADER_AUTHENTICATION_FAILED_> = "ICU data file error: Header authentication failed, please check if you have a valid ICU data file";
+
+        <sun.text.normalizer.ICUBinary: java.lang.String MAGIC_NUMBER_AUTHENTICATION_FAILED_> = "ICU data file error: Not an ICU data file";
+
+        <sun.text.normalizer.ICUBinary: byte CHAR_SIZE_> = 2;
+
+        <sun.text.normalizer.ICUBinary: byte CHAR_SET_> = 0;
+
+        <sun.text.normalizer.ICUBinary: byte BIG_ENDIAN_> = 1;
+
+        <sun.text.normalizer.ICUBinary: byte MAGIC2> = 39;
+
+        <sun.text.normalizer.ICUBinary: byte MAGIC1> = -38;
+
+        return;
+    }
+}

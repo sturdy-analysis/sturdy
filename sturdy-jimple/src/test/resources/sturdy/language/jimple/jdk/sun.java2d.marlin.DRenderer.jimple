@@ -1,0 +1,3518 @@
+final class sun.java2d.marlin.DRenderer extends java.lang.Object implements sun.java2d.marlin.DPathConsumer2D, sun.java2d.marlin.MarlinRenderer
+{
+    static final boolean DISABLE_RENDER;
+    static final boolean ENABLE_BLOCK_FLAGS;
+    static final boolean ENABLE_BLOCK_FLAGS_HEURISTICS;
+    private static final int ALL_BUT_LSB;
+    private static final int ERR_STEP_MAX;
+    private static final double POWER_2_TO_32;
+    static final double SUBPIXEL_SCALE_X;
+    static final double SUBPIXEL_SCALE_Y;
+    static final int SUBPIXEL_MASK_X;
+    static final int SUBPIXEL_MASK_Y;
+    static final double RDR_OFFSET_X;
+    static final double RDR_OFFSET_Y;
+    private static final int SUBPIXEL_TILE;
+    static final int INITIAL_BUCKET_ARRAY;
+    static final int INITIAL_CROSSING_COUNT;
+    public static final long OFF_CURX_OR;
+    public static final long OFF_ERROR;
+    public static final long OFF_BUMP_X;
+    public static final long OFF_BUMP_ERR;
+    public static final long OFF_NEXT;
+    public static final long OFF_YMAX;
+    public static final int SIZEOF_EDGE_BYTES;
+    private static final double CUB_DEC_ERR_SUBPIX;
+    private static final double CUB_INC_ERR_SUBPIX;
+    public static final double SCALE_DY;
+    public static final double CUB_DEC_BND;
+    public static final double CUB_INC_BND;
+    public static final int CUB_COUNT_LG;
+    private static final int CUB_COUNT;
+    private static final int CUB_COUNT_2;
+    private static final int CUB_COUNT_3;
+    private static final double CUB_INV_COUNT;
+    private static final double CUB_INV_COUNT_2;
+    private static final double CUB_INV_COUNT_3;
+    private static final double QUAD_DEC_ERR_SUBPIX;
+    public static final double QUAD_DEC_BND;
+    private int[] crossings;
+    private int[] aux_crossings;
+    private int edgeCount;
+    private int[] edgePtrs;
+    private int[] aux_edgePtrs;
+    private int activeEdgeMaxUsed;
+    private final sun.java2d.marlin.IntArrayCache$Reference crossings_ref;
+    private final sun.java2d.marlin.IntArrayCache$Reference edgePtrs_ref;
+    private final sun.java2d.marlin.IntArrayCache$Reference aux_crossings_ref;
+    private final sun.java2d.marlin.IntArrayCache$Reference aux_edgePtrs_ref;
+    private int edgeMinY;
+    private int edgeMaxY;
+    private double edgeMinX;
+    private double edgeMaxX;
+    private final sun.java2d.marlin.OffHeapArray edges;
+    private int[] edgeBuckets;
+    private int[] edgeBucketCounts;
+    private int buckets_minY;
+    private int buckets_maxY;
+    private final sun.java2d.marlin.IntArrayCache$Reference edgeBuckets_ref;
+    private final sun.java2d.marlin.IntArrayCache$Reference edgeBucketCounts_ref;
+    final sun.java2d.marlin.MarlinCache cache;
+    private int boundsMinX;
+    private int boundsMinY;
+    private int boundsMaxX;
+    private int boundsMaxY;
+    private int windingRule;
+    private double x0;
+    private double y0;
+    private double sx0;
+    private double sy0;
+    final sun.java2d.marlin.DRendererContext rdrCtx;
+    private final sun.java2d.marlin.DCurve curve;
+    private int[] alphaLine;
+    private final sun.java2d.marlin.IntArrayCache$Reference alphaLine_ref;
+    private boolean enableBlkFlags;
+    private boolean prevUseBlkFlags;
+    private int[] blkFlags;
+    private final sun.java2d.marlin.IntArrayCache$Reference blkFlags_ref;
+    private int bbox_spminX;
+    private int bbox_spmaxX;
+    private int bbox_spminY;
+    private int bbox_spmaxY;
+
+    private void quadBreakIntoLinesAndAdd(double, double, sun.java2d.marlin.DCurve, double, double)
+    {
+        byte $b2;
+        boolean $z0, $z1;
+        sun.java2d.marlin.RendererStats $r3, $r6;
+        sun.java2d.marlin.stats.StatLong $r4, $r7;
+        sun.java2d.marlin.DRendererContext $r2, $r5;
+        int i0, i1, $i3, $i5;
+        sun.java2d.marlin.DRenderer r1;
+        double $d0, $d1, $d2, $d3, $d4, $d5, d6, d7, d8, $d9, d10, d11, $d12, d13, $d14, d15, $d16, $d17, $d18, $d19, $d20, $d21, $d22, $d23, d24, d25, d26, d27, d28, d29, d30;
+        sun.java2d.marlin.DCurve r0;
+
+        r1 := @this: sun.java2d.marlin.DRenderer;
+
+        d24 := @parameter0: double;
+
+        d25 := @parameter1: double;
+
+        r0 := @parameter2: sun.java2d.marlin.DCurve;
+
+        d7 := @parameter3: double;
+
+        d8 := @parameter4: double;
+
+        i1 = 1;
+
+        $d0 = r0.<sun.java2d.marlin.DCurve: double dbx>;
+
+        $d1 = staticinvoke <java.lang.Math: double abs(double)>($d0);
+
+        $d2 = r0.<sun.java2d.marlin.DCurve: double dby>;
+
+        $d3 = staticinvoke <java.lang.Math: double abs(double)>($d2);
+
+        $d4 = <sun.java2d.marlin.DRenderer: double SCALE_DY>;
+
+        $d5 = $d3 * $d4;
+
+        d26 = $d1 + $d5;
+
+        d6 = <sun.java2d.marlin.DRenderer: double QUAD_DEC_BND>;
+
+     label1:
+        $b2 = d26 cmpl d6;
+
+        $i3 = (int) $b2;
+
+        if $i3 < 0 goto label2;
+
+        d26 = d26 / 4.0;
+
+        i1 = i1 << 1;
+
+        $z1 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z1 == 0 goto label1;
+
+        $r5 = r1.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r6 = $r5.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r7 = $r6.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_rdr_quadBreak_dec>;
+
+        virtualinvoke $r7.<sun.java2d.marlin.stats.StatLong: void add(int)>(i1);
+
+        goto label1;
+
+     label2:
+        i0 = i1;
+
+        if i1 <= 1 goto label4;
+
+        $d9 = (double) i1;
+
+        d10 = 1.0 / $d9;
+
+        d11 = d10 * d10;
+
+        $d12 = r0.<sun.java2d.marlin.DCurve: double dbx>;
+
+        d13 = $d12 * d11;
+
+        $d14 = r0.<sun.java2d.marlin.DCurve: double dby>;
+
+        d15 = $d14 * d11;
+
+        $d16 = r0.<sun.java2d.marlin.DCurve: double bx>;
+
+        $d19 = $d16 * d11;
+
+        $d17 = r0.<sun.java2d.marlin.DCurve: double cx>;
+
+        $d18 = $d17 * d10;
+
+        d27 = $d19 + $d18;
+
+        $d20 = r0.<sun.java2d.marlin.DCurve: double by>;
+
+        $d23 = $d20 * d11;
+
+        $d21 = r0.<sun.java2d.marlin.DCurve: double cy>;
+
+        $d22 = $d21 * d10;
+
+        d28 = $d23 + $d22;
+
+        d29 = d24;
+
+        d30 = d25;
+
+     label3:
+        $i5 = (int) -1;
+
+        i1 = i1 + $i5;
+
+        if i1 <= 0 goto label4;
+
+        d29 = d29 + d27;
+
+        d30 = d30 + d28;
+
+        specialinvoke r1.<sun.java2d.marlin.DRenderer: void addLine(double,double,double,double)>(d24, d25, d29, d30);
+
+        d24 = d29;
+
+        d25 = d30;
+
+        d27 = d27 + d13;
+
+        d28 = d28 + d15;
+
+        goto label3;
+
+     label4:
+        specialinvoke r1.<sun.java2d.marlin.DRenderer: void addLine(double,double,double,double)>(d24, d25, d7, d8);
+
+        $z0 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z0 == 0 goto label5;
+
+        $r2 = r1.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r3 = $r2.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r4 = $r3.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_rdr_quadBreak>;
+
+        virtualinvoke $r4.<sun.java2d.marlin.stats.StatLong: void add(int)>(i0);
+
+     label5:
+        return;
+    }
+
+    private void curveBreakIntoLinesAndAdd(double, double, sun.java2d.marlin.DCurve, double, double)
+    {
+        byte $b0, $b3;
+        sun.java2d.marlin.RendererStats $r3, $r6, $r9;
+        sun.java2d.marlin.stats.StatLong $r4, $r7, $r10;
+        sun.java2d.marlin.DCurve r0;
+        boolean $z0, $z1, $z2;
+        sun.java2d.marlin.DRendererContext $r2, $r5, $r8;
+        int i1, $i2, $i4, $i5, $i7;
+        sun.java2d.marlin.DRenderer r1;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15, $d16, $d17, $d18, $d19, $d20, $d21, d22, d23, d24, d25, d26, $d27, $d28, $d29, $d30, $d31, $d32, $d33, $d34, $d35, $d36, $d37, $d38, d39, d40, d41, d42, d43, d44, d45, d46, d47, d48, $d49, $d50, $d51, $d52;
+
+        r1 := @this: sun.java2d.marlin.DRenderer;
+
+        d39 := @parameter0: double;
+
+        d40 := @parameter1: double;
+
+        r0 := @parameter2: sun.java2d.marlin.DCurve;
+
+        d25 := @parameter3: double;
+
+        d26 := @parameter4: double;
+
+        i1 = 4;
+
+        $d0 = r0.<sun.java2d.marlin.DCurve: double dax>;
+
+        $d1 = 2.0 * $d0;
+
+        d41 = $d1 * 0.015625;
+
+        $d2 = r0.<sun.java2d.marlin.DCurve: double day>;
+
+        $d3 = 2.0 * $d2;
+
+        d42 = $d3 * 0.015625;
+
+        $d4 = r0.<sun.java2d.marlin.DCurve: double dbx>;
+
+        $d5 = $d4 * 0.0625;
+
+        d43 = d41 + $d5;
+
+        $d6 = r0.<sun.java2d.marlin.DCurve: double dby>;
+
+        $d7 = $d6 * 0.0625;
+
+        d44 = d42 + $d7;
+
+        $d8 = r0.<sun.java2d.marlin.DCurve: double ax>;
+
+        $d11 = $d8 * 0.015625;
+
+        $d9 = r0.<sun.java2d.marlin.DCurve: double bx>;
+
+        $d10 = $d9 * 0.0625;
+
+        $d14 = $d11 + $d10;
+
+        $d12 = r0.<sun.java2d.marlin.DCurve: double cx>;
+
+        $d13 = $d12 * 0.25;
+
+        d45 = $d14 + $d13;
+
+        $d15 = r0.<sun.java2d.marlin.DCurve: double ay>;
+
+        $d18 = $d15 * 0.015625;
+
+        $d16 = r0.<sun.java2d.marlin.DCurve: double by>;
+
+        $d17 = $d16 * 0.0625;
+
+        $d21 = $d18 + $d17;
+
+        $d19 = r0.<sun.java2d.marlin.DCurve: double cy>;
+
+        $d20 = $d19 * 0.25;
+
+        d46 = $d21 + $d20;
+
+        d22 = <sun.java2d.marlin.DRenderer: double CUB_DEC_BND>;
+
+        d23 = <sun.java2d.marlin.DRenderer: double CUB_INC_BND>;
+
+        d24 = <sun.java2d.marlin.DRenderer: double SCALE_DY>;
+
+        d47 = d39;
+
+        d48 = d40;
+
+     label1:
+        if i1 <= 0 goto label6;
+
+     label2:
+        $i2 = i1 % 2;
+
+        if $i2 != 0 goto label3;
+
+        $d31 = staticinvoke <java.lang.Math: double abs(double)>(d43);
+
+        $d32 = staticinvoke <java.lang.Math: double abs(double)>(d44);
+
+        $d33 = $d32 * d24;
+
+        $d34 = $d31 + $d33;
+
+        $b0 = $d34 cmpg d23;
+
+        $i4 = (int) $b0;
+
+        if $i4 > 0 goto label3;
+
+        $d35 = 2.0 * d45;
+
+        d45 = $d35 + d43;
+
+        $d36 = 2.0 * d46;
+
+        d46 = $d36 + d44;
+
+        $d37 = d43 + d41;
+
+        d43 = 4.0 * $d37;
+
+        $d38 = d44 + d42;
+
+        d44 = 4.0 * $d38;
+
+        d41 = d41 * 8.0;
+
+        d42 = d42 * 8.0;
+
+        i1 = i1 >> 1;
+
+        $z2 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z2 == 0 goto label2;
+
+        $r8 = r1.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r9 = $r8.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r10 = $r9.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_rdr_curveBreak_inc>;
+
+        virtualinvoke $r10.<sun.java2d.marlin.stats.StatLong: void add(int)>(i1);
+
+        goto label2;
+
+     label3:
+        $d49 = staticinvoke <java.lang.Math: double abs(double)>(d43);
+
+        $d50 = staticinvoke <java.lang.Math: double abs(double)>(d44);
+
+        $d51 = $d50 * d24;
+
+        $d52 = $d49 + $d51;
+
+        $b3 = $d52 cmpl d22;
+
+        $i5 = (int) $b3;
+
+        if $i5 < 0 goto label4;
+
+        d41 = d41 / 8.0;
+
+        d42 = d42 / 8.0;
+
+        $d27 = d43 / 4.0;
+
+        d43 = $d27 - d41;
+
+        $d28 = d44 / 4.0;
+
+        d44 = $d28 - d42;
+
+        $d29 = d45 - d43;
+
+        d45 = $d29 / 2.0;
+
+        $d30 = d46 - d44;
+
+        d46 = $d30 / 2.0;
+
+        i1 = i1 << 1;
+
+        $z1 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z1 == 0 goto label3;
+
+        $r5 = r1.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r6 = $r5.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r7 = $r6.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_rdr_curveBreak_dec>;
+
+        virtualinvoke $r7.<sun.java2d.marlin.stats.StatLong: void add(int)>(i1);
+
+        goto label3;
+
+     label4:
+        $i7 = (int) -1;
+
+        i1 = i1 + $i7;
+
+        if i1 != 0 goto label5;
+
+        goto label6;
+
+     label5:
+        d47 = d47 + d45;
+
+        d48 = d48 + d46;
+
+        d45 = d45 + d43;
+
+        d46 = d46 + d44;
+
+        d43 = d43 + d41;
+
+        d44 = d44 + d42;
+
+        specialinvoke r1.<sun.java2d.marlin.DRenderer: void addLine(double,double,double,double)>(d39, d40, d47, d48);
+
+        d39 = d47;
+
+        d40 = d48;
+
+        goto label1;
+
+     label6:
+        specialinvoke r1.<sun.java2d.marlin.DRenderer: void addLine(double,double,double,double)>(d39, d40, d25, d26);
+
+        $z0 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z0 == 0 goto label7;
+
+        $r2 = r1.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r3 = $r2.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r4 = $r3.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_rdr_curveBreak>;
+
+        virtualinvoke $r4.<sun.java2d.marlin.stats.StatLong: void add(int)>(1);
+
+     label7:
+        return;
+    }
+
+    private void addLine(double, double, double, double)
+    {
+        byte $b0, $b9, $b10, $b11, $b16, $b17, $b24;
+        sun.java2d.marlin.RendererStats $r2, $r5, $r8;
+        sun.java2d.marlin.stats.StatLong $r3, $r6, $r9;
+        sun.misc.Unsafe $r11;
+        long $l13, $l14, $l15, $l20, $l21, $l22, $l23, $l25, $l26, $l27, $l28, $l29, $l30, $l34, $l37, $l38, $l39, $l42, $l45, $l49;
+        int[] $r12, $r13;
+        sun.java2d.marlin.OffHeapArray $r10;
+        boolean $z0, $z1, $z2, z3;
+        sun.java2d.marlin.DRendererContext $r1, $r4, $r7;
+        int $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i12, $i18, $i19, $i31, $i32, $i33, $i35, $i36, $i40, $i41, $i43, $i44, $i46, $i47, $i48, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57, $i58, $i59, $i60, $i61, $i62, $i63, $i65, $i67;
+        sun.java2d.marlin.DRenderer r0;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, d7, d8, d9, d10, d11, d12, $d13, $d14, $d15, $d16, $d17, $d18;
+
+        r0 := @this: sun.java2d.marlin.DRenderer;
+
+        d7 := @parameter0: double;
+
+        d8 := @parameter1: double;
+
+        d9 := @parameter2: double;
+
+        d10 := @parameter3: double;
+
+        $z0 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z0 == 0 goto label01;
+
+        $r7 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r8 = $r7.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r9 = $r8.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_rdr_addLine>;
+
+        virtualinvoke $r9.<sun.java2d.marlin.stats.StatLong: void add(int)>(1);
+
+     label01:
+        z3 = 1;
+
+        $b0 = d10 cmpg d8;
+
+        $i57 = (int) $b0;
+
+        if $i57 >= 0 goto label02;
+
+        z3 = 0;
+
+        d11 = d10;
+
+        d10 = d8;
+
+        d8 = d11;
+
+        d12 = d9;
+
+        d9 = d7;
+
+        d7 = d12;
+
+     label02:
+        $i1 = staticinvoke <sun.java2d.marlin.FloatMath: int ceil_int(double)>(d8);
+
+        $i2 = r0.<sun.java2d.marlin.DRenderer: int boundsMinY>;
+
+        $i3 = staticinvoke <sun.java2d.marlin.FloatMath: int max(int,int)>($i1, $i2);
+
+        $i4 = staticinvoke <sun.java2d.marlin.FloatMath: int ceil_int(double)>(d10);
+
+        $i5 = r0.<sun.java2d.marlin.DRenderer: int boundsMaxY>;
+
+        $i6 = staticinvoke <sun.java2d.marlin.FloatMath: int min(int,int)>($i4, $i5);
+
+        if $i3 < $i6 goto label04;
+
+        $z2 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z2 == 0 goto label03;
+
+        $r4 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r5 = $r4.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r6 = $r5.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_rdr_addLine_skip>;
+
+        virtualinvoke $r6.<sun.java2d.marlin.stats.StatLong: void add(int)>(1);
+
+     label03:
+        return;
+
+     label04:
+        $i7 = r0.<sun.java2d.marlin.DRenderer: int edgeMinY>;
+
+        if $i3 >= $i7 goto label05;
+
+        r0.<sun.java2d.marlin.DRenderer: int edgeMinY> = $i3;
+
+     label05:
+        $i8 = r0.<sun.java2d.marlin.DRenderer: int edgeMaxY>;
+
+        if $i6 <= $i8 goto label06;
+
+        r0.<sun.java2d.marlin.DRenderer: int edgeMaxY> = $i6;
+
+     label06:
+        $d1 = d7 - d9;
+
+        $d0 = d8 - d10;
+
+        $d6 = $d1 / $d0;
+
+        $b9 = $d6 cmpl 0.0;
+
+        $i58 = (int) $b9;
+
+        if $i58 < 0 goto label08;
+
+        $d4 = r0.<sun.java2d.marlin.DRenderer: double edgeMinX>;
+
+        $b16 = d7 cmpg $d4;
+
+        $i59 = (int) $b16;
+
+        if $i59 >= 0 goto label07;
+
+        r0.<sun.java2d.marlin.DRenderer: double edgeMinX> = d7;
+
+     label07:
+        $d5 = r0.<sun.java2d.marlin.DRenderer: double edgeMaxX>;
+
+        $b17 = d9 cmpl $d5;
+
+        $i60 = (int) $b17;
+
+        if $i60 <= 0 goto label10;
+
+        r0.<sun.java2d.marlin.DRenderer: double edgeMaxX> = d9;
+
+        goto label10;
+
+     label08:
+        $d2 = r0.<sun.java2d.marlin.DRenderer: double edgeMinX>;
+
+        $b10 = d9 cmpg $d2;
+
+        $i61 = (int) $b10;
+
+        if $i61 >= 0 goto label09;
+
+        r0.<sun.java2d.marlin.DRenderer: double edgeMinX> = d9;
+
+     label09:
+        $d3 = r0.<sun.java2d.marlin.DRenderer: double edgeMaxX>;
+
+        $b11 = d7 cmpl $d3;
+
+        $i62 = (int) $b11;
+
+        if $i62 <= 0 goto label10;
+
+        r0.<sun.java2d.marlin.DRenderer: double edgeMaxX> = d7;
+
+     label10:
+        $i18 = <sun.java2d.marlin.DRenderer: int SIZEOF_EDGE_BYTES>;
+
+        $r10 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.OffHeapArray edges>;
+
+        $i19 = $r10.<sun.java2d.marlin.OffHeapArray: int used>;
+
+        $l20 = $r10.<sun.java2d.marlin.OffHeapArray: long length>;
+
+        $l21 = (long) $i19;
+
+        $l22 = $l20 - $l21;
+
+        $l23 = (long) $i18;
+
+        $b24 = $l22 cmp $l23;
+
+        $i63 = (int) $b24;
+
+        if $i63 >= 0 goto label12;
+
+        $l14 = $r10.<sun.java2d.marlin.OffHeapArray: long length>;
+
+        $i12 = $i19 + $i18;
+
+        $l13 = (long) $i12;
+
+        $l15 = staticinvoke <sun.java2d.marlin.ArrayCacheConst: long getNewLargeSize(long,long)>($l14, $l13);
+
+        $z1 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z1 == 0 goto label11;
+
+        $r1 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r2 = $r1.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r3 = $r2.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_rdr_edges_resizes>;
+
+        virtualinvoke $r3.<sun.java2d.marlin.stats.StatLong: void add(long)>($l15);
+
+     label11:
+        virtualinvoke $r10.<sun.java2d.marlin.OffHeapArray: void resize(long)>($l15);
+
+     label12:
+        $r11 = <sun.java2d.marlin.OffHeapArray: sun.misc.Unsafe UNSAFE>;
+
+        $l25 = $r10.<sun.java2d.marlin.OffHeapArray: long address>;
+
+        $l26 = (long) $i19;
+
+        $l27 = $l25 + $l26;
+
+        $d13 = (double) $i3;
+
+        $d14 = $d13 - d8;
+
+        $d15 = $d14 * $d6;
+
+        $d16 = d7 + $d15;
+
+        $d17 = 4.294967296E9 * $d16;
+
+        $l28 = (long) $d17;
+
+        $l29 = $l28 + 2147483647L;
+
+        $l30 = $l29 >> 31;
+
+        $i31 = (int) $l30;
+
+        $i65 = (int) -2;
+
+        $i32 = $i31 & $i65;
+
+        $i33 = $i32 | z3;
+
+        virtualinvoke $r11.<sun.misc.Unsafe: void putInt(long,int)>($l27, $i33);
+
+        $l34 = $l27 + 4L;
+
+        $i35 = (int) $l29;
+
+        $i36 = $i35 >>> 1;
+
+        virtualinvoke $r11.<sun.misc.Unsafe: void putInt(long,int)>($l34, $i36);
+
+        $l37 = $l34 + 4L;
+
+        $d18 = 4.294967296E9 * $d6;
+
+        $l38 = (long) $d18;
+
+        $l39 = $l38 >> 31;
+
+        $i40 = (int) $l39;
+
+        $i67 = (int) -2;
+
+        $i41 = $i40 & $i67;
+
+        virtualinvoke $r11.<sun.misc.Unsafe: void putInt(long,int)>($l37, $i41);
+
+        $l42 = $l37 + 4L;
+
+        $i43 = (int) $l38;
+
+        $i44 = $i43 >>> 1;
+
+        virtualinvoke $r11.<sun.misc.Unsafe: void putInt(long,int)>($l42, $i44);
+
+        $l45 = $l42 + 4L;
+
+        $r12 = r0.<sun.java2d.marlin.DRenderer: int[] edgeBuckets>;
+
+        $r13 = r0.<sun.java2d.marlin.DRenderer: int[] edgeBucketCounts>;
+
+        $i46 = r0.<sun.java2d.marlin.DRenderer: int boundsMinY>;
+
+        $i47 = $i3 - $i46;
+
+        $i48 = $r12[$i47];
+
+        virtualinvoke $r11.<sun.misc.Unsafe: void putInt(long,int)>($l45, $i48);
+
+        $l49 = $l45 + 4L;
+
+        virtualinvoke $r11.<sun.misc.Unsafe: void putInt(long,int)>($l49, $i6);
+
+        $r12[$i47] = $i19;
+
+        $i50 = $r13[$i47];
+
+        $i51 = $i50 + 2;
+
+        $r13[$i47] = $i51;
+
+        $i52 = $i6 - $i46;
+
+        $i53 = $r13[$i52];
+
+        $i54 = $i53 | 1;
+
+        $r13[$i52] = $i54;
+
+        $i55 = $r10.<sun.java2d.marlin.OffHeapArray: int used>;
+
+        $i56 = $i55 + $i18;
+
+        $r10.<sun.java2d.marlin.OffHeapArray: int used> = $i56;
+
+        return;
+    }
+
+    void <init>(sun.java2d.marlin.DRendererContext)
+    {
+        int[] $r8, $r10, $r13, $r19, $r21, $r23, $r25, $r28;
+        sun.java2d.marlin.OffHeapArray $r4;
+        sun.java2d.marlin.MarlinCache $r3;
+        long $l1;
+        sun.java2d.marlin.DRendererContext r1;
+        int $i0, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        sun.java2d.marlin.DRenderer r0;
+        sun.java2d.marlin.DCurve $r2;
+        sun.java2d.marlin.IntArrayCache$Reference $r5, $r6, $r7, $r9, $r11, $r12, $r14, $r15, $r16, $r17, $r18, $r20, $r22, $r24, $r26, $r27;
+
+        r0 := @this: sun.java2d.marlin.DRenderer;
+
+        r1 := @parameter0: sun.java2d.marlin.DRendererContext;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.java2d.marlin.DRenderer: int edgeMinY> = 2147483647;
+
+        r0.<sun.java2d.marlin.DRenderer: int edgeMaxY> = -2147483648;
+
+        r0.<sun.java2d.marlin.DRenderer: double edgeMinX> = #Infinity;
+
+        r0.<sun.java2d.marlin.DRenderer: double edgeMaxX> = #-Infinity;
+
+        r0.<sun.java2d.marlin.DRenderer: boolean enableBlkFlags> = 0;
+
+        r0.<sun.java2d.marlin.DRenderer: boolean prevUseBlkFlags> = 0;
+
+        r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx> = r1;
+
+        $r2 = r1.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.DCurve curve>;
+
+        r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DCurve curve> = $r2;
+
+        $r3 = r1.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.MarlinCache cache>;
+
+        r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.MarlinCache cache> = $r3;
+
+        $i0 = <sun.java2d.marlin.DRenderer: int INITIAL_EDGES_CAPACITY>;
+
+        $l1 = (long) $i0;
+
+        $r4 = virtualinvoke r1.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.OffHeapArray newOffHeapArray(long)>($l1);
+
+        r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.OffHeapArray edges> = $r4;
+
+        $i2 = <sun.java2d.marlin.DRenderer: int INITIAL_BUCKET_ARRAY>;
+
+        $r5 = virtualinvoke r1.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.IntArrayCache$Reference newCleanIntArrayRef(int)>($i2);
+
+        r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference edgeBuckets_ref> = $r5;
+
+        $i3 = <sun.java2d.marlin.DRenderer: int INITIAL_BUCKET_ARRAY>;
+
+        $r6 = virtualinvoke r1.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.IntArrayCache$Reference newCleanIntArrayRef(int)>($i3);
+
+        r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference edgeBucketCounts_ref> = $r6;
+
+        $r7 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference edgeBuckets_ref>;
+
+        $r8 = $r7.<sun.java2d.marlin.IntArrayCache$Reference: int[] initial>;
+
+        r0.<sun.java2d.marlin.DRenderer: int[] edgeBuckets> = $r8;
+
+        $r9 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference edgeBucketCounts_ref>;
+
+        $r10 = $r9.<sun.java2d.marlin.IntArrayCache$Reference: int[] initial>;
+
+        r0.<sun.java2d.marlin.DRenderer: int[] edgeBucketCounts> = $r10;
+
+        $i4 = <sun.java2d.marlin.DRenderer: int INITIAL_AA_ARRAY>;
+
+        $r11 = virtualinvoke r1.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.IntArrayCache$Reference newCleanIntArrayRef(int)>($i4);
+
+        r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference alphaLine_ref> = $r11;
+
+        $r12 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference alphaLine_ref>;
+
+        $r13 = $r12.<sun.java2d.marlin.IntArrayCache$Reference: int[] initial>;
+
+        r0.<sun.java2d.marlin.DRenderer: int[] alphaLine> = $r13;
+
+        $i5 = <sun.java2d.marlin.DRenderer: int INITIAL_CROSSING_COUNT>;
+
+        $r14 = virtualinvoke r1.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.IntArrayCache$Reference newDirtyIntArrayRef(int)>($i5);
+
+        r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference crossings_ref> = $r14;
+
+        $i6 = <sun.java2d.marlin.DRenderer: int INITIAL_CROSSING_COUNT>;
+
+        $r15 = virtualinvoke r1.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.IntArrayCache$Reference newDirtyIntArrayRef(int)>($i6);
+
+        r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference aux_crossings_ref> = $r15;
+
+        $i7 = <sun.java2d.marlin.DRenderer: int INITIAL_CROSSING_COUNT>;
+
+        $r16 = virtualinvoke r1.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.IntArrayCache$Reference newDirtyIntArrayRef(int)>($i7);
+
+        r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference edgePtrs_ref> = $r16;
+
+        $i8 = <sun.java2d.marlin.DRenderer: int INITIAL_CROSSING_COUNT>;
+
+        $r17 = virtualinvoke r1.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.IntArrayCache$Reference newDirtyIntArrayRef(int)>($i8);
+
+        r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference aux_edgePtrs_ref> = $r17;
+
+        $r18 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference crossings_ref>;
+
+        $r19 = $r18.<sun.java2d.marlin.IntArrayCache$Reference: int[] initial>;
+
+        r0.<sun.java2d.marlin.DRenderer: int[] crossings> = $r19;
+
+        $r20 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference aux_crossings_ref>;
+
+        $r21 = $r20.<sun.java2d.marlin.IntArrayCache$Reference: int[] initial>;
+
+        r0.<sun.java2d.marlin.DRenderer: int[] aux_crossings> = $r21;
+
+        $r22 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference edgePtrs_ref>;
+
+        $r23 = $r22.<sun.java2d.marlin.IntArrayCache$Reference: int[] initial>;
+
+        r0.<sun.java2d.marlin.DRenderer: int[] edgePtrs> = $r23;
+
+        $r24 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference aux_edgePtrs_ref>;
+
+        $r25 = $r24.<sun.java2d.marlin.IntArrayCache$Reference: int[] initial>;
+
+        r0.<sun.java2d.marlin.DRenderer: int[] aux_edgePtrs> = $r25;
+
+        $r26 = virtualinvoke r1.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.IntArrayCache$Reference newCleanIntArrayRef(int)>(256);
+
+        r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference blkFlags_ref> = $r26;
+
+        $r27 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference blkFlags_ref>;
+
+        $r28 = $r27.<sun.java2d.marlin.IntArrayCache$Reference: int[] initial>;
+
+        r0.<sun.java2d.marlin.DRenderer: int[] blkFlags> = $r28;
+
+        return;
+    }
+
+    sun.java2d.marlin.DRenderer init(int, int, int, int, int)
+    {
+        int[] $r2, $r4;
+        sun.java2d.marlin.OffHeapArray $r22;
+        boolean $z0, $z1;
+        sun.java2d.marlin.RendererStats $r6, $r9;
+        sun.java2d.marlin.stats.StatLong $r7, $r10;
+        java.lang.StringBuilder $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20;
+        sun.java2d.marlin.DRendererContext $r5, $r8;
+        int i0, i1, $i2, $i3, i4, $i5, $i6, $i7, i8, $i9, $i10, i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23;
+        sun.java2d.marlin.DRenderer r0;
+        java.lang.String $r21;
+        sun.java2d.marlin.IntArrayCache$Reference $r1, $r3;
+
+        r0 := @this: sun.java2d.marlin.DRenderer;
+
+        i1 := @parameter0: int;
+
+        i8 := @parameter1: int;
+
+        i4 := @parameter2: int;
+
+        i11 := @parameter3: int;
+
+        i0 := @parameter4: int;
+
+        r0.<sun.java2d.marlin.DRenderer: int windingRule> = i0;
+
+        $i2 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_LG_POSITIONS_X>;
+
+        $i3 = i1 << $i2;
+
+        r0.<sun.java2d.marlin.DRenderer: int boundsMinX> = $i3;
+
+        $i6 = i1 + i4;
+
+        $i5 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_LG_POSITIONS_X>;
+
+        $i7 = $i6 << $i5;
+
+        r0.<sun.java2d.marlin.DRenderer: int boundsMaxX> = $i7;
+
+        $i9 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_LG_POSITIONS_Y>;
+
+        $i10 = i8 << $i9;
+
+        r0.<sun.java2d.marlin.DRenderer: int boundsMinY> = $i10;
+
+        $i13 = i8 + i11;
+
+        $i12 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_LG_POSITIONS_Y>;
+
+        $i14 = $i13 << $i12;
+
+        r0.<sun.java2d.marlin.DRenderer: int boundsMaxY> = $i14;
+
+        $z0 = <sun.java2d.marlin.DRenderer: boolean DO_LOG_BOUNDS>;
+
+        if $z0 == 0 goto label1;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("boundsXY = [");
+
+        $i19 = r0.<sun.java2d.marlin.DRenderer: int boundsMinX>;
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i19);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ... ");
+
+        $i20 = r0.<sun.java2d.marlin.DRenderer: int boundsMaxX>;
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i20);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[ [");
+
+        $i21 = r0.<sun.java2d.marlin.DRenderer: int boundsMinY>;
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i21);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ... ");
+
+        $i22 = r0.<sun.java2d.marlin.DRenderer: int boundsMaxY>;
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i22);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.java2d.marlin.MarlinUtils: void logInfo(java.lang.String)>($r21);
+
+     label1:
+        $i16 = r0.<sun.java2d.marlin.DRenderer: int boundsMaxY>;
+
+        $i15 = r0.<sun.java2d.marlin.DRenderer: int boundsMinY>;
+
+        $i17 = $i16 - $i15;
+
+        $i23 = $i17 + 1;
+
+        $i18 = <sun.java2d.marlin.DRenderer: int INITIAL_BUCKET_ARRAY>;
+
+        if $i23 <= $i18 goto label3;
+
+        $z1 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z1 == 0 goto label2;
+
+        $r5 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r6 = $r5.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r7 = $r6.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_array_renderer_edgeBuckets>;
+
+        virtualinvoke $r7.<sun.java2d.marlin.stats.StatLong: void add(int)>($i23);
+
+        $r8 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r9 = $r8.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r10 = $r9.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_array_renderer_edgeBucketCounts>;
+
+        virtualinvoke $r10.<sun.java2d.marlin.stats.StatLong: void add(int)>($i23);
+
+     label2:
+        $r1 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference edgeBuckets_ref>;
+
+        $r2 = virtualinvoke $r1.<sun.java2d.marlin.IntArrayCache$Reference: int[] getArray(int)>($i23);
+
+        r0.<sun.java2d.marlin.DRenderer: int[] edgeBuckets> = $r2;
+
+        $r3 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference edgeBucketCounts_ref>;
+
+        $r4 = virtualinvoke $r3.<sun.java2d.marlin.IntArrayCache$Reference: int[] getArray(int)>($i23);
+
+        r0.<sun.java2d.marlin.DRenderer: int[] edgeBucketCounts> = $r4;
+
+     label3:
+        r0.<sun.java2d.marlin.DRenderer: int edgeMinY> = 2147483647;
+
+        r0.<sun.java2d.marlin.DRenderer: int edgeMaxY> = -2147483648;
+
+        r0.<sun.java2d.marlin.DRenderer: double edgeMinX> = #Infinity;
+
+        r0.<sun.java2d.marlin.DRenderer: double edgeMaxX> = #-Infinity;
+
+        r0.<sun.java2d.marlin.DRenderer: int edgeCount> = 0;
+
+        r0.<sun.java2d.marlin.DRenderer: int activeEdgeMaxUsed> = 0;
+
+        $r22 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.OffHeapArray edges>;
+
+        $r22.<sun.java2d.marlin.OffHeapArray: int used> = 0;
+
+        return r0;
+    }
+
+    void dispose()
+    {
+        byte $b4;
+        sun.java2d.marlin.RendererStats $r36, $r39, $r43, $r47, $r51;
+        sun.java2d.marlin.stats.StatLong $r37, $r41, $r45;
+        long $l2, $l3, $l6, $l23, $l24, $l25;
+        sun.java2d.marlin.stats.Histogram $r49;
+        sun.java2d.marlin.IntArrayCache$Reference $r2, $r5, $r8, $r11, $r14, $r17, $r20, $r23, $r30, $r33;
+        int[] $r1, $r3, $r4, $r6, $r7, $r9, $r10, $r12, $r13, $r15, $r16, $r18, $r19, $r21, $r22, $r24, $r29, $r31, $r32, $r34;
+        sun.java2d.marlin.OffHeapArray $r25, $r27, $r40, $r44, $r48, $r52;
+        boolean $z0, $z1;
+        sun.java2d.marlin.DRendererContext $r26, $r28, $r35, $r38, $r42, $r46, $r50;
+        int $i0, $i1, $i5, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22;
+        sun.java2d.marlin.DRenderer r0;
+
+        r0 := @this: sun.java2d.marlin.DRenderer;
+
+        $z0 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z0 == 0 goto label1;
+
+        $r35 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r36 = $r35.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r37 = $r36.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_rdr_activeEdges>;
+
+        $i15 = r0.<sun.java2d.marlin.DRenderer: int activeEdgeMaxUsed>;
+
+        virtualinvoke $r37.<sun.java2d.marlin.stats.StatLong: void add(int)>($i15);
+
+        $r38 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r39 = $r38.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r41 = $r39.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_rdr_edges>;
+
+        $r40 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.OffHeapArray edges>;
+
+        $i16 = $r40.<sun.java2d.marlin.OffHeapArray: int used>;
+
+        virtualinvoke $r41.<sun.java2d.marlin.stats.StatLong: void add(int)>($i16);
+
+        $r42 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r43 = $r42.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r45 = $r43.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_rdr_edges_count>;
+
+        $r44 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.OffHeapArray edges>;
+
+        $i18 = $r44.<sun.java2d.marlin.OffHeapArray: int used>;
+
+        $i17 = <sun.java2d.marlin.DRenderer: int SIZEOF_EDGE_BYTES>;
+
+        $i19 = $i18 / $i17;
+
+        virtualinvoke $r45.<sun.java2d.marlin.stats.StatLong: void add(int)>($i19);
+
+        $r46 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r47 = $r46.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r49 = $r47.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.Histogram hist_rdr_edges_count>;
+
+        $r48 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.OffHeapArray edges>;
+
+        $i21 = $r48.<sun.java2d.marlin.OffHeapArray: int used>;
+
+        $i20 = <sun.java2d.marlin.DRenderer: int SIZEOF_EDGE_BYTES>;
+
+        $i22 = $i21 / $i20;
+
+        virtualinvoke $r49.<sun.java2d.marlin.stats.Histogram: void add(int)>($i22);
+
+        $r50 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r51 = $r50.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $l24 = $r51.<sun.java2d.marlin.RendererStats: long totalOffHeap>;
+
+        $r52 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.OffHeapArray edges>;
+
+        $l23 = $r52.<sun.java2d.marlin.OffHeapArray: long length>;
+
+        $l25 = $l24 + $l23;
+
+        $r51.<sun.java2d.marlin.RendererStats: long totalOffHeap> = $l25;
+
+     label1:
+        $r2 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference crossings_ref>;
+
+        $r1 = r0.<sun.java2d.marlin.DRenderer: int[] crossings>;
+
+        $r3 = virtualinvoke $r2.<sun.java2d.marlin.IntArrayCache$Reference: int[] putArray(int[])>($r1);
+
+        r0.<sun.java2d.marlin.DRenderer: int[] crossings> = $r3;
+
+        $r5 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference aux_crossings_ref>;
+
+        $r4 = r0.<sun.java2d.marlin.DRenderer: int[] aux_crossings>;
+
+        $r6 = virtualinvoke $r5.<sun.java2d.marlin.IntArrayCache$Reference: int[] putArray(int[])>($r4);
+
+        r0.<sun.java2d.marlin.DRenderer: int[] aux_crossings> = $r6;
+
+        $r8 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference edgePtrs_ref>;
+
+        $r7 = r0.<sun.java2d.marlin.DRenderer: int[] edgePtrs>;
+
+        $r9 = virtualinvoke $r8.<sun.java2d.marlin.IntArrayCache$Reference: int[] putArray(int[])>($r7);
+
+        r0.<sun.java2d.marlin.DRenderer: int[] edgePtrs> = $r9;
+
+        $r11 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference aux_edgePtrs_ref>;
+
+        $r10 = r0.<sun.java2d.marlin.DRenderer: int[] aux_edgePtrs>;
+
+        $r12 = virtualinvoke $r11.<sun.java2d.marlin.IntArrayCache$Reference: int[] putArray(int[])>($r10);
+
+        r0.<sun.java2d.marlin.DRenderer: int[] aux_edgePtrs> = $r12;
+
+        $r14 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference alphaLine_ref>;
+
+        $r13 = r0.<sun.java2d.marlin.DRenderer: int[] alphaLine>;
+
+        $r15 = virtualinvoke $r14.<sun.java2d.marlin.IntArrayCache$Reference: int[] putArray(int[],int,int)>($r13, 0, 0);
+
+        r0.<sun.java2d.marlin.DRenderer: int[] alphaLine> = $r15;
+
+        $r17 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference blkFlags_ref>;
+
+        $r16 = r0.<sun.java2d.marlin.DRenderer: int[] blkFlags>;
+
+        $r18 = virtualinvoke $r17.<sun.java2d.marlin.IntArrayCache$Reference: int[] putArray(int[],int,int)>($r16, 0, 0);
+
+        r0.<sun.java2d.marlin.DRenderer: int[] blkFlags> = $r18;
+
+        $i0 = r0.<sun.java2d.marlin.DRenderer: int edgeMinY>;
+
+        if $i0 == 2147483647 goto label3;
+
+        $r28 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $z1 = $r28.<sun.java2d.marlin.DRendererContext: boolean dirty>;
+
+        if $z1 == 0 goto label2;
+
+        r0.<sun.java2d.marlin.DRenderer: int buckets_minY> = 0;
+
+        $i13 = r0.<sun.java2d.marlin.DRenderer: int boundsMaxY>;
+
+        $i12 = r0.<sun.java2d.marlin.DRenderer: int boundsMinY>;
+
+        $i14 = $i13 - $i12;
+
+        r0.<sun.java2d.marlin.DRenderer: int buckets_maxY> = $i14;
+
+     label2:
+        $r30 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference edgeBuckets_ref>;
+
+        $r29 = r0.<sun.java2d.marlin.DRenderer: int[] edgeBuckets>;
+
+        $i8 = r0.<sun.java2d.marlin.DRenderer: int buckets_minY>;
+
+        $i7 = r0.<sun.java2d.marlin.DRenderer: int buckets_maxY>;
+
+        $r31 = virtualinvoke $r30.<sun.java2d.marlin.IntArrayCache$Reference: int[] putArray(int[],int,int)>($r29, $i8, $i7);
+
+        r0.<sun.java2d.marlin.DRenderer: int[] edgeBuckets> = $r31;
+
+        $r33 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference edgeBucketCounts_ref>;
+
+        $r32 = r0.<sun.java2d.marlin.DRenderer: int[] edgeBucketCounts>;
+
+        $i11 = r0.<sun.java2d.marlin.DRenderer: int buckets_minY>;
+
+        $i9 = r0.<sun.java2d.marlin.DRenderer: int buckets_maxY>;
+
+        $i10 = $i9 + 1;
+
+        $r34 = virtualinvoke $r33.<sun.java2d.marlin.IntArrayCache$Reference: int[] putArray(int[],int,int)>($r32, $i11, $i10);
+
+        r0.<sun.java2d.marlin.DRenderer: int[] edgeBucketCounts> = $r34;
+
+        goto label4;
+
+     label3:
+        $r20 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference edgeBuckets_ref>;
+
+        $r19 = r0.<sun.java2d.marlin.DRenderer: int[] edgeBuckets>;
+
+        $r21 = virtualinvoke $r20.<sun.java2d.marlin.IntArrayCache$Reference: int[] putArray(int[],int,int)>($r19, 0, 0);
+
+        r0.<sun.java2d.marlin.DRenderer: int[] edgeBuckets> = $r21;
+
+        $r23 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference edgeBucketCounts_ref>;
+
+        $r22 = r0.<sun.java2d.marlin.DRenderer: int[] edgeBucketCounts>;
+
+        $r24 = virtualinvoke $r23.<sun.java2d.marlin.IntArrayCache$Reference: int[] putArray(int[],int,int)>($r22, 0, 0);
+
+        r0.<sun.java2d.marlin.DRenderer: int[] edgeBucketCounts> = $r24;
+
+     label4:
+        $r25 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.OffHeapArray edges>;
+
+        $l3 = $r25.<sun.java2d.marlin.OffHeapArray: long length>;
+
+        $i1 = <sun.java2d.marlin.DRenderer: int INITIAL_EDGES_CAPACITY>;
+
+        $l2 = (long) $i1;
+
+        $b4 = $l3 cmp $l2;
+
+        if $b4 == 0 goto label5;
+
+        $r27 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.OffHeapArray edges>;
+
+        $i5 = <sun.java2d.marlin.DRenderer: int INITIAL_EDGES_CAPACITY>;
+
+        $l6 = (long) $i5;
+
+        virtualinvoke $r27.<sun.java2d.marlin.OffHeapArray: void resize(long)>($l6);
+
+     label5:
+        $r26 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        staticinvoke <sun.java2d.marlin.DMarlinRenderingEngine: void returnRendererContext(sun.java2d.marlin.DRendererContext)>($r26);
+
+        return;
+    }
+
+    private static double tosubpixx(double)
+    {
+        double d0, $d1, $d2;
+
+        d0 := @parameter0: double;
+
+        $d1 = <sun.java2d.marlin.DRenderer: double SUBPIXEL_SCALE_X>;
+
+        $d2 = $d1 * d0;
+
+        return $d2;
+    }
+
+    private static double tosubpixy(double)
+    {
+        double d0, $d1, $d2, $d3;
+
+        d0 := @parameter0: double;
+
+        $d1 = <sun.java2d.marlin.DRenderer: double SUBPIXEL_SCALE_Y>;
+
+        $d2 = $d1 * d0;
+
+        $d3 = $d2 - 0.5;
+
+        return $d3;
+    }
+
+    public void moveTo(double, double)
+    {
+        sun.java2d.marlin.DRenderer r0;
+        double d0, $d1, d2, $d3;
+
+        r0 := @this: sun.java2d.marlin.DRenderer;
+
+        d0 := @parameter0: double;
+
+        d2 := @parameter1: double;
+
+        virtualinvoke r0.<sun.java2d.marlin.DRenderer: void closePath()>();
+
+        $d1 = staticinvoke <sun.java2d.marlin.DRenderer: double tosubpixx(double)>(d0);
+
+        $d3 = staticinvoke <sun.java2d.marlin.DRenderer: double tosubpixy(double)>(d2);
+
+        r0.<sun.java2d.marlin.DRenderer: double sx0> = $d1;
+
+        r0.<sun.java2d.marlin.DRenderer: double sy0> = $d3;
+
+        r0.<sun.java2d.marlin.DRenderer: double x0> = $d1;
+
+        r0.<sun.java2d.marlin.DRenderer: double y0> = $d3;
+
+        return;
+    }
+
+    public void lineTo(double, double)
+    {
+        sun.java2d.marlin.DRenderer r0;
+        double d0, $d1, d2, $d3, $d4, $d5;
+
+        r0 := @this: sun.java2d.marlin.DRenderer;
+
+        d0 := @parameter0: double;
+
+        d2 := @parameter1: double;
+
+        $d1 = staticinvoke <sun.java2d.marlin.DRenderer: double tosubpixx(double)>(d0);
+
+        $d3 = staticinvoke <sun.java2d.marlin.DRenderer: double tosubpixy(double)>(d2);
+
+        $d5 = r0.<sun.java2d.marlin.DRenderer: double x0>;
+
+        $d4 = r0.<sun.java2d.marlin.DRenderer: double y0>;
+
+        specialinvoke r0.<sun.java2d.marlin.DRenderer: void addLine(double,double,double,double)>($d5, $d4, $d1, $d3);
+
+        r0.<sun.java2d.marlin.DRenderer: double x0> = $d1;
+
+        r0.<sun.java2d.marlin.DRenderer: double y0> = $d3;
+
+        return;
+    }
+
+    public void curveTo(double, double, double, double, double, double)
+    {
+        sun.java2d.marlin.DRenderer r0;
+        double d0, $d1, d2, $d3, d4, $d5, $d6, $d7, d8, $d9, d10, $d11, d12, $d13, $d14, $d15;
+        sun.java2d.marlin.DCurve $r1, $r2;
+
+        r0 := @this: sun.java2d.marlin.DRenderer;
+
+        d4 := @parameter0: double;
+
+        d8 := @parameter1: double;
+
+        d10 := @parameter2: double;
+
+        d12 := @parameter3: double;
+
+        d0 := @parameter4: double;
+
+        d2 := @parameter5: double;
+
+        $d1 = staticinvoke <sun.java2d.marlin.DRenderer: double tosubpixx(double)>(d0);
+
+        $d3 = staticinvoke <sun.java2d.marlin.DRenderer: double tosubpixy(double)>(d2);
+
+        $r1 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DCurve curve>;
+
+        $d5 = r0.<sun.java2d.marlin.DRenderer: double x0>;
+
+        $d6 = r0.<sun.java2d.marlin.DRenderer: double y0>;
+
+        $d7 = staticinvoke <sun.java2d.marlin.DRenderer: double tosubpixx(double)>(d4);
+
+        $d9 = staticinvoke <sun.java2d.marlin.DRenderer: double tosubpixy(double)>(d8);
+
+        $d11 = staticinvoke <sun.java2d.marlin.DRenderer: double tosubpixx(double)>(d10);
+
+        $d13 = staticinvoke <sun.java2d.marlin.DRenderer: double tosubpixy(double)>(d12);
+
+        virtualinvoke $r1.<sun.java2d.marlin.DCurve: void set(double,double,double,double,double,double,double,double)>($d5, $d6, $d7, $d9, $d11, $d13, $d1, $d3);
+
+        $d15 = r0.<sun.java2d.marlin.DRenderer: double x0>;
+
+        $d14 = r0.<sun.java2d.marlin.DRenderer: double y0>;
+
+        $r2 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DCurve curve>;
+
+        specialinvoke r0.<sun.java2d.marlin.DRenderer: void curveBreakIntoLinesAndAdd(double,double,sun.java2d.marlin.DCurve,double,double)>($d15, $d14, $r2, $d1, $d3);
+
+        r0.<sun.java2d.marlin.DRenderer: double x0> = $d1;
+
+        r0.<sun.java2d.marlin.DRenderer: double y0> = $d3;
+
+        return;
+    }
+
+    public void quadTo(double, double, double, double)
+    {
+        sun.java2d.marlin.DCurve $r1, $r2;
+        sun.java2d.marlin.DRenderer r0;
+        double d0, $d1, d2, $d3, d4, $d5, $d6, $d7, d8, $d9, $d10, $d11;
+
+        r0 := @this: sun.java2d.marlin.DRenderer;
+
+        d4 := @parameter0: double;
+
+        d8 := @parameter1: double;
+
+        d0 := @parameter2: double;
+
+        d2 := @parameter3: double;
+
+        $d1 = staticinvoke <sun.java2d.marlin.DRenderer: double tosubpixx(double)>(d0);
+
+        $d3 = staticinvoke <sun.java2d.marlin.DRenderer: double tosubpixy(double)>(d2);
+
+        $r1 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DCurve curve>;
+
+        $d5 = r0.<sun.java2d.marlin.DRenderer: double x0>;
+
+        $d6 = r0.<sun.java2d.marlin.DRenderer: double y0>;
+
+        $d7 = staticinvoke <sun.java2d.marlin.DRenderer: double tosubpixx(double)>(d4);
+
+        $d9 = staticinvoke <sun.java2d.marlin.DRenderer: double tosubpixy(double)>(d8);
+
+        virtualinvoke $r1.<sun.java2d.marlin.DCurve: void set(double,double,double,double,double,double)>($d5, $d6, $d7, $d9, $d1, $d3);
+
+        $d11 = r0.<sun.java2d.marlin.DRenderer: double x0>;
+
+        $d10 = r0.<sun.java2d.marlin.DRenderer: double y0>;
+
+        $r2 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DCurve curve>;
+
+        specialinvoke r0.<sun.java2d.marlin.DRenderer: void quadBreakIntoLinesAndAdd(double,double,sun.java2d.marlin.DCurve,double,double)>($d11, $d10, $r2, $d1, $d3);
+
+        r0.<sun.java2d.marlin.DRenderer: double x0> = $d1;
+
+        r0.<sun.java2d.marlin.DRenderer: double y0> = $d3;
+
+        return;
+    }
+
+    public void closePath()
+    {
+        byte $b0, $b1;
+        sun.java2d.marlin.DRenderer r0;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9;
+
+        r0 := @this: sun.java2d.marlin.DRenderer;
+
+        $d1 = r0.<sun.java2d.marlin.DRenderer: double x0>;
+
+        $d0 = r0.<sun.java2d.marlin.DRenderer: double sx0>;
+
+        $b0 = $d1 cmpl $d0;
+
+        if $b0 != 0 goto label1;
+
+        $d9 = r0.<sun.java2d.marlin.DRenderer: double y0>;
+
+        $d8 = r0.<sun.java2d.marlin.DRenderer: double sy0>;
+
+        $b1 = $d9 cmpl $d8;
+
+        if $b1 == 0 goto label2;
+
+     label1:
+        $d5 = r0.<sun.java2d.marlin.DRenderer: double x0>;
+
+        $d4 = r0.<sun.java2d.marlin.DRenderer: double y0>;
+
+        $d3 = r0.<sun.java2d.marlin.DRenderer: double sx0>;
+
+        $d2 = r0.<sun.java2d.marlin.DRenderer: double sy0>;
+
+        specialinvoke r0.<sun.java2d.marlin.DRenderer: void addLine(double,double,double,double)>($d5, $d4, $d3, $d2);
+
+        $d6 = r0.<sun.java2d.marlin.DRenderer: double sx0>;
+
+        r0.<sun.java2d.marlin.DRenderer: double x0> = $d6;
+
+        $d7 = r0.<sun.java2d.marlin.DRenderer: double sy0>;
+
+        r0.<sun.java2d.marlin.DRenderer: double y0> = $d7;
+
+     label2:
+        return;
+    }
+
+    public void pathDone()
+    {
+        sun.java2d.marlin.DRenderer r0;
+
+        r0 := @this: sun.java2d.marlin.DRenderer;
+
+        virtualinvoke r0.<sun.java2d.marlin.DRenderer: void closePath()>();
+
+        return;
+    }
+
+    public long getNativeConsumer()
+    {
+        java.lang.InternalError $r0;
+        sun.java2d.marlin.DRenderer r1;
+
+        r1 := @this: sun.java2d.marlin.DRenderer;
+
+        $r0 = new java.lang.InternalError;
+
+        specialinvoke $r0.<java.lang.InternalError: void <init>(java.lang.String)>("Renderer does not use a native consumer.");
+
+        throw $r0;
+    }
+
+    private void _endRendering(int, int)
+    {
+        int[] $r39, $r42, $r50, $r53, $r69, $r72, $r73, $r74, $r75, $r77, r78, r79, r80, r81;
+        int i0, i1, $i2, i3, $i4, i5, $i6, $i7, $i8, i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57, $i58, $i59, $i60, $i61, $i62, $i63, $i64, $i65, $i66, $i67, $i68, $i69, $i70, $i71, $i72, $i73, $i75, $i77, $i79, $i81, $i82, $i83, $i84, $i85, $i87, $i88, $i89, $i90, $i91, $i92, $i93, $i94, $i95, $i96, $i97, $i98, $i99, $i100, $i101, $i102, $i104, $i106, $i108, $i110, $i111, $i112, $i113, $i114, $i116, $i117, $i118, $i119, $i120, $i121, $i122, $i123, $i124, $i125, $i126, $i127, $i128, $i131, $i132, $i135, $i136, $i143, $i144, $i145, $i146, $i147, $i148, $i149, i150, i151, i152, i153, i154, i155, i156, i157, i158, $i159, i160, i161, i163, i164, i165, $i166, i168, i169, i170, i171, i173, i174, i175, i176, $i177, $i178, $i179, i180, i181, i182, i183, i184, i186, i187, i188, i189, i190, i191, i192, i193, i194, i195, i196, $i197, i198, i199, i200, i201, i202, i203, i204, i205, i206, i207, i208, i209, $i210, i211, i212, i213, i214, i215, i216, i217, i218, i219, i220, i221, $i222, i223, i224, i225, i226, i227, i228, i229, $i231, $i233, $i235, $i237, $i239, $i241, $i243;
+        sun.java2d.marlin.DRenderer r0;
+        sun.java2d.marlin.stats.StatLong $r6, $r9, $r12, $r21, $r24, $r27, $r45, $r48, $r56, $r59, $r62, $r65, $r68;
+        sun.misc.Unsafe $r76;
+        sun.java2d.marlin.OffHeapArray $r71;
+        boolean z0, $z1, z2, $z3, z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19, z20, $z21, $z22, $z23, $z24, $z25;
+        sun.java2d.marlin.DRendererContext $r1, $r4, $r7, $r10, $r13, $r16, $r19, $r22, $r25, $r28, $r31, $r34, $r43, $r46, $r54, $r57, $r60, $r63, $r66, $r82;
+        long $l74, $l76, $l78, $l80, $l86, $l103, $l105, $l107, $l109, $l115, $l129, $l130, $l133, $l134, $l137, $l138, $l139, $l140, $l141, $l142, l162, $l167, l172, l185;
+        sun.java2d.marlin.IntArrayCache$Reference $r37, $r38, $r40, $r41, $r49, $r51, $r52;
+        sun.java2d.marlin.MarlinCache $r70;
+        sun.java2d.marlin.RendererStats $r2, $r5, $r8, $r11, $r14, $r17, $r20, $r23, $r26, $r29, $r32, $r35, $r44, $r47, $r55, $r58, $r61, $r64, $r67;
+        sun.java2d.marlin.stats.Histogram $r3, $r15, $r18, $r30, $r33, $r36;
+
+        r0 := @this: sun.java2d.marlin.DRenderer;
+
+        i3 := @parameter0: int;
+
+        i5 := @parameter1: int;
+
+        i0 = r0.<sun.java2d.marlin.DRenderer: int bbox_spminX>;
+
+        i1 = r0.<sun.java2d.marlin.DRenderer: int bbox_spmaxX>;
+
+        $i2 = r0.<sun.java2d.marlin.DRenderer: int windingRule>;
+
+        if $i2 != 0 goto label01;
+
+        $z18 = 1;
+
+        goto label02;
+
+     label01:
+        $z18 = 0;
+
+     label02:
+        z0 = $z18;
+
+        $r69 = r0.<sun.java2d.marlin.DRenderer: int[] alphaLine>;
+
+        $r70 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.MarlinCache cache>;
+
+        $r71 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.OffHeapArray edges>;
+
+        $r72 = r0.<sun.java2d.marlin.DRenderer: int[] edgeBuckets>;
+
+        $r73 = r0.<sun.java2d.marlin.DRenderer: int[] edgeBucketCounts>;
+
+        $r74 = r0.<sun.java2d.marlin.DRenderer: int[] crossings>;
+
+        r78 = $r74;
+
+        $r75 = r0.<sun.java2d.marlin.DRenderer: int[] edgePtrs>;
+
+        r79 = $r75;
+
+        r80 = r0.<sun.java2d.marlin.DRenderer: int[] aux_crossings>;
+
+        r81 = r0.<sun.java2d.marlin.DRenderer: int[] aux_edgePtrs>;
+
+        $l137 = <sun.java2d.marlin.DRenderer: long OFF_ERROR>;
+
+        $l138 = <sun.java2d.marlin.DRenderer: long OFF_BUMP_X>;
+
+        $l139 = <sun.java2d.marlin.DRenderer: long OFF_BUMP_ERR>;
+
+        $l140 = <sun.java2d.marlin.DRenderer: long OFF_NEXT>;
+
+        $l141 = <sun.java2d.marlin.DRenderer: long OFF_YMAX>;
+
+        $r76 = <sun.java2d.marlin.OffHeapArray: sun.misc.Unsafe UNSAFE>;
+
+        $l142 = $r71.<sun.java2d.marlin.OffHeapArray: long address>;
+
+        $i143 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_LG_POSITIONS_X>;
+
+        $i144 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_LG_POSITIONS_Y>;
+
+        $i145 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_MASK_X>;
+
+        $i146 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_MASK_Y>;
+
+        $i147 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_POSITIONS_X>;
+
+        i150 = 2147483647;
+
+        i151 = -2147483648;
+
+        i152 = i3;
+
+        $i4 = r0.<sun.java2d.marlin.DRenderer: int boundsMinY>;
+
+        i153 = i3 - $i4;
+
+        i154 = r0.<sun.java2d.marlin.DRenderer: int edgeCount>;
+
+        i155 = lengthof $r75;
+
+        i156 = lengthof $r74;
+
+        i157 = r0.<sun.java2d.marlin.DRenderer: int activeEdgeMaxUsed>;
+
+        i158 = 0;
+
+        $r77 = r0.<sun.java2d.marlin.DRenderer: int[] blkFlags>;
+
+        $i148 = <sun.java2d.marlin.DRenderer: int BLOCK_SIZE_LG>;
+
+        $i149 = <sun.java2d.marlin.DRenderer: int BLOCK_SIZE>;
+
+        $z1 = <sun.java2d.marlin.DRenderer: boolean ENABLE_BLOCK_FLAGS_HEURISTICS>;
+
+        if $z1 == 0 goto label03;
+
+        $z17 = r0.<sun.java2d.marlin.DRenderer: boolean enableBlkFlags>;
+
+        if $z17 == 0 goto label03;
+
+        $z19 = 1;
+
+        goto label04;
+
+     label03:
+        $z19 = 0;
+
+     label04:
+        z2 = $z19;
+
+        z20 = r0.<sun.java2d.marlin.DRenderer: boolean prevUseBlkFlags>;
+
+        $r82 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $i159 = $r82.<sun.java2d.marlin.DRendererContext: int stroking>;
+
+        $i231 = (int) -1;
+
+        i160 = $i231;
+
+     label05:
+        if i152 >= i5 goto label77;
+
+        i9 = $r73[i153];
+
+        i161 = i154;
+
+        if i9 == 0 goto label20;
+
+        $z11 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z11 == 0 goto label06;
+
+        $r66 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r67 = $r66.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r68 = $r67.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_rdr_activeEdges_updates>;
+
+        virtualinvoke $r68.<sun.java2d.marlin.stats.StatLong: void add(int)>(i154);
+
+     label06:
+        $i128 = i9 & 1;
+
+        if $i128 == 0 goto label10;
+
+        l162 = $l142 + $l141;
+
+        i163 = 0;
+
+        i164 = 0;
+
+     label07:
+        if i163 >= i154 goto label09;
+
+        i165 = r79[i163];
+
+        $l133 = (long) i165;
+
+        $l134 = l162 + $l133;
+
+        $i135 = virtualinvoke $r76.<sun.misc.Unsafe: int getInt(long)>($l134);
+
+        if $i135 <= i152 goto label08;
+
+        $i136 = i164;
+
+        i164 = i164 + 1;
+
+        r79[$i136] = i165;
+
+     label08:
+        i163 = i163 + 1;
+
+        goto label07;
+
+     label09:
+        i154 = i164;
+
+        i161 = i164;
+
+     label10:
+        $i132 = i9 >> 1;
+
+        i158 = $i132;
+
+        if $i132 == 0 goto label20;
+
+        $z12 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z12 == 0 goto label11;
+
+        $r60 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r61 = $r60.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r62 = $r61.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_rdr_activeEdges_adds>;
+
+        virtualinvoke $r62.<sun.java2d.marlin.stats.StatLong: void add(int)>($i132);
+
+        if $i132 <= 10 goto label11;
+
+        $r63 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r64 = $r63.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r65 = $r64.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_rdr_activeEdges_adds_high>;
+
+        virtualinvoke $r65.<sun.java2d.marlin.stats.StatLong: void add(int)>($i132);
+
+     label11:
+        $i166 = i154 + $i132;
+
+        if i155 >= $i166 goto label14;
+
+        $z15 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z15 == 0 goto label12;
+
+        $r57 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r58 = $r57.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r59 = $r58.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_array_renderer_edgePtrs>;
+
+        virtualinvoke $r59.<sun.java2d.marlin.stats.StatLong: void add(int)>($i166);
+
+     label12:
+        $r49 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference edgePtrs_ref>;
+
+        $r50 = virtualinvoke $r49.<sun.java2d.marlin.IntArrayCache$Reference: int[] widenArray(int[],int,int)>(r79, i154, $i166);
+
+        r79 = $r50;
+
+        r0.<sun.java2d.marlin.DRenderer: int[] edgePtrs> = $r50;
+
+        i155 = lengthof $r50;
+
+        $r51 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference aux_edgePtrs_ref>;
+
+        virtualinvoke $r51.<sun.java2d.marlin.IntArrayCache$Reference: int[] putArray(int[])>(r81);
+
+        $z16 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z16 == 0 goto label13;
+
+        $r54 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r55 = $r54.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r56 = $r55.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_array_renderer_aux_edgePtrs>;
+
+        virtualinvoke $r56.<sun.java2d.marlin.stats.StatLong: void add(int)>($i166);
+
+     label13:
+        $r52 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference aux_edgePtrs_ref>;
+
+        $i131 = staticinvoke <sun.java2d.marlin.ArrayCacheConst: int getNewSize(int,int)>(i154, $i166);
+
+        $r53 = virtualinvoke $r52.<sun.java2d.marlin.IntArrayCache$Reference: int[] getArray(int)>($i131);
+
+        r81 = $r53;
+
+        r0.<sun.java2d.marlin.DRenderer: int[] aux_edgePtrs> = $r53;
+
+     label14:
+        $l167 = $l142 + $l140;
+
+        i168 = $r72[i153];
+
+     label15:
+        if i154 >= $i166 goto label16;
+
+        r79[i154] = i168;
+
+        $l129 = (long) i168;
+
+        $l130 = $l167 + $l129;
+
+        i168 = virtualinvoke $r76.<sun.misc.Unsafe: int getInt(long)>($l130);
+
+        i154 = i154 + 1;
+
+        goto label15;
+
+     label16:
+        if i156 >= i154 goto label19;
+
+        $r37 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference crossings_ref>;
+
+        virtualinvoke $r37.<sun.java2d.marlin.IntArrayCache$Reference: int[] putArray(int[])>(r78);
+
+        $z13 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z13 == 0 goto label17;
+
+        $r46 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r47 = $r46.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r48 = $r47.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_array_renderer_crossings>;
+
+        virtualinvoke $r48.<sun.java2d.marlin.stats.StatLong: void add(int)>(i154);
+
+     label17:
+        $r38 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference crossings_ref>;
+
+        $r39 = virtualinvoke $r38.<sun.java2d.marlin.IntArrayCache$Reference: int[] getArray(int)>(i154);
+
+        r78 = $r39;
+
+        r0.<sun.java2d.marlin.DRenderer: int[] crossings> = $r39;
+
+        $r40 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference aux_crossings_ref>;
+
+        virtualinvoke $r40.<sun.java2d.marlin.IntArrayCache$Reference: int[] putArray(int[])>(r80);
+
+        $z14 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z14 == 0 goto label18;
+
+        $r43 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r44 = $r43.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r45 = $r44.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_array_renderer_aux_crossings>;
+
+        virtualinvoke $r45.<sun.java2d.marlin.stats.StatLong: void add(int)>(i154);
+
+     label18:
+        $r41 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference aux_crossings_ref>;
+
+        $r42 = virtualinvoke $r41.<sun.java2d.marlin.IntArrayCache$Reference: int[] getArray(int)>(i154);
+
+        r80 = $r42;
+
+        r0.<sun.java2d.marlin.DRenderer: int[] aux_crossings> = $r42;
+
+        i156 = lengthof $r39;
+
+     label19:
+        $z21 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z21 == 0 goto label20;
+
+        if i154 <= i157 goto label20;
+
+        i157 = i154;
+
+     label20:
+        if i154 == 0 goto label71;
+
+        if i158 < 10 goto label21;
+
+        if i154 >= 40 goto label39;
+
+     label21:
+        $z3 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z3 == 0 goto label22;
+
+        $r13 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r14 = $r13.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r15 = $r14.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.Histogram hist_rdr_crossings>;
+
+        virtualinvoke $r15.<sun.java2d.marlin.stats.Histogram: void add(int)>(i154);
+
+        $r16 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r17 = $r16.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r18 = $r17.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.Histogram hist_rdr_crossings_adds>;
+
+        virtualinvoke $r18.<sun.java2d.marlin.stats.Histogram: void add(int)>(i158);
+
+     label22:
+        if i154 < 20 goto label23;
+
+        $z22 = 1;
+
+        goto label24;
+
+     label23:
+        $z22 = 0;
+
+     label24:
+        z4 = $z22;
+
+        i169 = -2147483648;
+
+        i170 = 0;
+
+     label25:
+        if i170 >= i154 goto label50;
+
+        i171 = r79[i170];
+
+        $l74 = (long) i171;
+
+        l172 = $l142 + $l74;
+
+        $i75 = virtualinvoke $r76.<sun.misc.Unsafe: int getInt(long)>(l172);
+
+        $l76 = l172 + $l138;
+
+        $i77 = virtualinvoke $r76.<sun.misc.Unsafe: int getInt(long)>($l76);
+
+        i173 = $i75 + $i77;
+
+        $l78 = l172 + $l137;
+
+        $i79 = virtualinvoke $r76.<sun.misc.Unsafe: int getInt(long)>($l78);
+
+        $l80 = l172 + $l139;
+
+        $i81 = virtualinvoke $r76.<sun.misc.Unsafe: int getInt(long)>($l80);
+
+        i174 = $i79 + $i81;
+
+        $i82 = i174 >> 30;
+
+        $i233 = (int) -2;
+
+        $i83 = $i82 & $i233;
+
+        $i84 = i173 - $i83;
+
+        virtualinvoke $r76.<sun.misc.Unsafe: void putInt(long,int)>(l172, $i84);
+
+        $l86 = l172 + $l137;
+
+        $i85 = i174 & 2147483647;
+
+        virtualinvoke $r76.<sun.misc.Unsafe: void putInt(long,int)>($l86, $i85);
+
+        $z5 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z5 == 0 goto label26;
+
+        $r10 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r11 = $r10.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r12 = $r11.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_rdr_crossings_updates>;
+
+        virtualinvoke $r12.<sun.java2d.marlin.stats.StatLong: void add(int)>(i154);
+
+     label26:
+        if $i75 >= i169 goto label37;
+
+        $z6 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z6 == 0 goto label27;
+
+        $r7 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r8 = $r7.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r9 = $r8.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_rdr_crossings_sorts>;
+
+        virtualinvoke $r9.<sun.java2d.marlin.stats.StatLong: void add(int)>(i170);
+
+     label27:
+        if z4 == 0 goto label34;
+
+        if i170 < i161 goto label34;
+
+        $z7 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z7 == 0 goto label28;
+
+        $r4 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r5 = $r4.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r6 = $r5.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_rdr_crossings_bsearch>;
+
+        virtualinvoke $r6.<sun.java2d.marlin.stats.StatLong: void add(int)>(i170);
+
+     label28:
+        i175 = 0;
+
+        i176 = i170 - 1;
+
+     label29:
+        $i177 = i175 + i176;
+
+        $i178 = $i177 >> 1;
+
+        $i179 = r78[$i178];
+
+        if $i179 >= $i75 goto label30;
+
+        i175 = $i178 + 1;
+
+        goto label31;
+
+     label30:
+        i176 = $i178 - 1;
+
+     label31:
+        if i175 <= i176 goto label29;
+
+        i180 = i170 - 1;
+
+     label32:
+        if i180 < i175 goto label33;
+
+        $i98 = i180 + 1;
+
+        $i97 = r78[i180];
+
+        r78[$i98] = $i97;
+
+        $i100 = i180 + 1;
+
+        $i99 = r79[i180];
+
+        r79[$i100] = $i99;
+
+        $i235 = (int) -1;
+
+        i180 = i180 + $i235;
+
+        goto label32;
+
+     label33:
+        r78[i175] = $i75;
+
+        r79[i175] = i171;
+
+        goto label38;
+
+     label34:
+        $i96 = i170 - 1;
+
+        i181 = $i96;
+
+        $i87 = r78[$i96];
+
+        r78[i170] = $i87;
+
+        $i88 = r79[$i96];
+
+        r79[i170] = $i88;
+
+     label35:
+        $i237 = (int) -1;
+
+        i181 = i181 + $i237;
+
+        if i181 < 0 goto label36;
+
+        $i91 = r78[i181];
+
+        if $i91 <= $i75 goto label36;
+
+        $i93 = i181 + 1;
+
+        $i92 = r78[i181];
+
+        r78[$i93] = $i92;
+
+        $i95 = i181 + 1;
+
+        $i94 = r79[i181];
+
+        r79[$i95] = $i94;
+
+        goto label35;
+
+     label36:
+        $i89 = i181 + 1;
+
+        r78[$i89] = $i75;
+
+        $i90 = i181 + 1;
+
+        r79[$i90] = i171;
+
+        goto label38;
+
+     label37:
+        i169 = $i75;
+
+        r78[i170] = $i75;
+
+     label38:
+        i170 = i170 + 1;
+
+        goto label25;
+
+     label39:
+        $z8 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z8 == 0 goto label40;
+
+        $r25 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r26 = $r25.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r27 = $r26.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_rdr_crossings_msorts>;
+
+        virtualinvoke $r27.<sun.java2d.marlin.stats.StatLong: void add(int)>(i154);
+
+        $r28 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r29 = $r28.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r30 = $r29.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.Histogram hist_rdr_crossings_ratio>;
+
+        $i126 = 1000 * i158;
+
+        $i127 = $i126 / i154;
+
+        virtualinvoke $r30.<sun.java2d.marlin.stats.Histogram: void add(int)>($i127);
+
+        $r31 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r32 = $r31.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r33 = $r32.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.Histogram hist_rdr_crossings_msorts>;
+
+        virtualinvoke $r33.<sun.java2d.marlin.stats.Histogram: void add(int)>(i154);
+
+        $r34 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r35 = $r34.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r36 = $r35.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.Histogram hist_rdr_crossings_msorts_adds>;
+
+        virtualinvoke $r36.<sun.java2d.marlin.stats.Histogram: void add(int)>(i158);
+
+     label40:
+        i182 = -2147483648;
+
+        i183 = 0;
+
+     label41:
+        if i183 >= i154 goto label49;
+
+        i184 = r79[i183];
+
+        $l103 = (long) i184;
+
+        l185 = $l142 + $l103;
+
+        $i104 = virtualinvoke $r76.<sun.misc.Unsafe: int getInt(long)>(l185);
+
+        $l105 = l185 + $l138;
+
+        $i106 = virtualinvoke $r76.<sun.misc.Unsafe: int getInt(long)>($l105);
+
+        i186 = $i104 + $i106;
+
+        $l107 = l185 + $l137;
+
+        $i108 = virtualinvoke $r76.<sun.misc.Unsafe: int getInt(long)>($l107);
+
+        $l109 = l185 + $l139;
+
+        $i110 = virtualinvoke $r76.<sun.misc.Unsafe: int getInt(long)>($l109);
+
+        i187 = $i108 + $i110;
+
+        $i111 = i187 >> 30;
+
+        $i239 = (int) -2;
+
+        $i112 = $i111 & $i239;
+
+        $i113 = i186 - $i112;
+
+        virtualinvoke $r76.<sun.misc.Unsafe: void putInt(long,int)>(l185, $i113);
+
+        $l115 = l185 + $l137;
+
+        $i114 = i187 & 2147483647;
+
+        virtualinvoke $r76.<sun.misc.Unsafe: void putInt(long,int)>($l115, $i114);
+
+        $z9 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z9 == 0 goto label42;
+
+        $r22 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r23 = $r22.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r24 = $r23.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_rdr_crossings_updates>;
+
+        virtualinvoke $r24.<sun.java2d.marlin.stats.StatLong: void add(int)>(i154);
+
+     label42:
+        if i183 < i161 goto label43;
+
+        r78[i183] = $i104;
+
+        goto label48;
+
+     label43:
+        if $i104 >= i182 goto label47;
+
+        $z10 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z10 == 0 goto label44;
+
+        $r19 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r20 = $r19.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r21 = $r20.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_rdr_crossings_sorts>;
+
+        virtualinvoke $r21.<sun.java2d.marlin.stats.StatLong: void add(int)>(i183);
+
+     label44:
+        $i125 = i183 - 1;
+
+        i188 = $i125;
+
+        $i116 = r80[$i125];
+
+        r80[i183] = $i116;
+
+        $i117 = r81[$i125];
+
+        r81[i183] = $i117;
+
+     label45:
+        $i241 = (int) -1;
+
+        i188 = i188 + $i241;
+
+        if i188 < 0 goto label46;
+
+        $i120 = r80[i188];
+
+        if $i120 <= $i104 goto label46;
+
+        $i122 = i188 + 1;
+
+        $i121 = r80[i188];
+
+        r80[$i122] = $i121;
+
+        $i124 = i188 + 1;
+
+        $i123 = r81[i188];
+
+        r81[$i124] = $i123;
+
+        goto label45;
+
+     label46:
+        $i118 = i188 + 1;
+
+        r80[$i118] = $i104;
+
+        $i119 = i188 + 1;
+
+        r81[$i119] = i184;
+
+        goto label48;
+
+     label47:
+        i182 = $i104;
+
+        r80[i183] = $i104;
+
+        r81[i183] = i184;
+
+     label48:
+        i183 = i183 + 1;
+
+        goto label41;
+
+     label49:
+        staticinvoke <sun.java2d.marlin.MergeSort: void mergeSortNoCopy(int[],int[],int[],int[],int,int)>(r78, r79, r80, r81, i154, i161);
+
+     label50:
+        i158 = 0;
+
+        $i101 = r78[0];
+
+        $i102 = $i101 >> 1;
+
+        if $i102 >= i150 goto label51;
+
+        i150 = $i102;
+
+     label51:
+        $i20 = i154 - 1;
+
+        $i21 = r78[$i20];
+
+        $i73 = $i21 >> 1;
+
+        if $i73 <= i151 goto label52;
+
+        i151 = $i73;
+
+     label52:
+        i189 = $i102;
+
+        i190 = $i102;
+
+        $i22 = $i101 & 1;
+
+        $i23 = $i22 << 1;
+
+        $i72 = $i23 - 1;
+
+        i191 = $i72;
+
+        if z0 == 0 goto label60;
+
+        i192 = $i72;
+
+        i193 = 1;
+
+     label53:
+        if i193 >= i154 goto label71;
+
+        i194 = r78[i193];
+
+        i195 = i194 >> 1;
+
+        $i48 = i194 & 1;
+
+        $i49 = $i48 << 1;
+
+        i196 = $i49 - 1;
+
+        $i50 = i192 & 1;
+
+        if $i50 == 0 goto label59;
+
+        if i190 <= i0 goto label54;
+
+        $i197 = i190;
+
+        goto label55;
+
+     label54:
+        $i197 = i0;
+
+     label55:
+        i198 = $i197;
+
+        if i195 >= i1 goto label56;
+
+        i199 = i195;
+
+        goto label57;
+
+     label56:
+        i199 = i1;
+
+        i193 = i154;
+
+     label57:
+        if i198 >= i199 goto label59;
+
+        i200 = i198 - i0;
+
+        i201 = i199 - i0;
+
+        i202 = i200 >> $i143;
+
+        $i51 = i201 - 1;
+
+        i203 = $i51 >> $i143;
+
+        if i202 != i203 goto label58;
+
+        i204 = i201 - i200;
+
+        $i66 = $r69[i202];
+
+        $i67 = $i66 + i204;
+
+        $r69[i202] = $i67;
+
+        $i68 = i202 + 1;
+
+        $i69 = $r69[$i68];
+
+        $i70 = $i69 - i204;
+
+        $r69[$i68] = $i70;
+
+        if z20 == 0 goto label59;
+
+        $i71 = i202 >> $i148;
+
+        $r77[$i71] = 1;
+
+        goto label59;
+
+     label58:
+        i205 = i200 & $i145;
+
+        $i53 = $r69[i202];
+
+        $i52 = $i147 - i205;
+
+        $i54 = $i53 + $i52;
+
+        $r69[i202] = $i54;
+
+        $i55 = i202 + 1;
+
+        $i56 = $r69[$i55];
+
+        $i57 = $i56 + i205;
+
+        $r69[$i55] = $i57;
+
+        i206 = i201 >> $i143;
+
+        i207 = i201 & $i145;
+
+        $i59 = $r69[i206];
+
+        $i58 = $i147 - i207;
+
+        $i60 = $i59 - $i58;
+
+        $r69[i206] = $i60;
+
+        $i61 = i206 + 1;
+
+        $i62 = $r69[$i61];
+
+        $i63 = $i62 - i207;
+
+        $r69[$i61] = $i63;
+
+        if z20 == 0 goto label59;
+
+        $i64 = i202 >> $i148;
+
+        $r77[$i64] = 1;
+
+        $i65 = i206 >> $i148;
+
+        $r77[$i65] = 1;
+
+     label59:
+        i192 = i192 + i196;
+
+        i190 = i195;
+
+        i193 = i193 + 1;
+
+        goto label53;
+
+     label60:
+        i208 = 1;
+
+        i209 = 0;
+
+     label61:
+        $i26 = i209 + i191;
+
+        i209 = $i26;
+
+        if $i26 == 0 goto label62;
+
+        if i190 <= i189 goto label69;
+
+        i190 = i189;
+
+        goto label69;
+
+     label62:
+        if i190 <= i0 goto label63;
+
+        $i210 = i190;
+
+        goto label64;
+
+     label63:
+        $i210 = i0;
+
+     label64:
+        i211 = $i210;
+
+        if i189 >= i1 goto label65;
+
+        i212 = i189;
+
+        goto label66;
+
+     label65:
+        i212 = i1;
+
+        i208 = i154;
+
+     label66:
+        if i211 >= i212 goto label68;
+
+        i213 = i211 - i0;
+
+        i214 = i212 - i0;
+
+        i215 = i213 >> $i143;
+
+        $i27 = i214 - 1;
+
+        i216 = $i27 >> $i143;
+
+        if i215 != i216 goto label67;
+
+        i217 = i214 - i213;
+
+        $i42 = $r69[i215];
+
+        $i43 = $i42 + i217;
+
+        $r69[i215] = $i43;
+
+        $i44 = i215 + 1;
+
+        $i45 = $r69[$i44];
+
+        $i46 = $i45 - i217;
+
+        $r69[$i44] = $i46;
+
+        if z20 == 0 goto label68;
+
+        $i47 = i215 >> $i148;
+
+        $r77[$i47] = 1;
+
+        goto label68;
+
+     label67:
+        i218 = i213 & $i145;
+
+        $i29 = $r69[i215];
+
+        $i28 = $i147 - i218;
+
+        $i30 = $i29 + $i28;
+
+        $r69[i215] = $i30;
+
+        $i31 = i215 + 1;
+
+        $i32 = $r69[$i31];
+
+        $i33 = $i32 + i218;
+
+        $r69[$i31] = $i33;
+
+        i219 = i214 >> $i143;
+
+        i220 = i214 & $i145;
+
+        $i35 = $r69[i219];
+
+        $i34 = $i147 - i220;
+
+        $i36 = $i35 - $i34;
+
+        $r69[i219] = $i36;
+
+        $i37 = i219 + 1;
+
+        $i38 = $r69[$i37];
+
+        $i39 = $i38 - i220;
+
+        $r69[$i37] = $i39;
+
+        if z20 == 0 goto label68;
+
+        $i40 = i215 >> $i148;
+
+        $r77[$i40] = 1;
+
+        $i41 = i219 >> $i148;
+
+        $r77[$i41] = 1;
+
+     label68:
+        i190 = 2147483647;
+
+     label69:
+        if i208 != i154 goto label70;
+
+        goto label71;
+
+     label70:
+        i221 = r78[i208];
+
+        i189 = i221 >> 1;
+
+        $i24 = i221 & 1;
+
+        $i25 = $i24 << 1;
+
+        i191 = $i25 - 1;
+
+        i208 = i208 + 1;
+
+        goto label61;
+
+     label71:
+        $i222 = i152 & $i146;
+
+        if $i222 != $i146 goto label76;
+
+        i160 = i152 >> $i144;
+
+        $i10 = staticinvoke <sun.java2d.marlin.FloatMath: int max(int,int)>(i150, i0);
+
+        i223 = $i10 >> $i143;
+
+        $i11 = staticinvoke <sun.java2d.marlin.FloatMath: int min(int,int)>(i151, i1);
+
+        i224 = $i11 >> $i143;
+
+        if i224 < i223 goto label74;
+
+        $i12 = i224 + 1;
+
+        virtualinvoke r0.<sun.java2d.marlin.DRenderer: void copyAARow(int[],int,int,int,boolean)>($r69, i160, i223, $i12, z20);
+
+        if z2 == 0 goto label75;
+
+        i225 = i224 - i223;
+
+        if i225 <= $i149 goto label72;
+
+        $i17 = i154 >> $i159;
+
+        $i18 = $i17 - 1;
+
+        $i19 = $i18 << $i148;
+
+        if i225 <= $i19 goto label72;
+
+        $z23 = 1;
+
+        goto label73;
+
+     label72:
+        $z23 = 0;
+
+     label73:
+        z20 = $z23;
+
+        $z24 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z24 == 0 goto label75;
+
+        $i13 = i154 >> $i159;
+
+        $i14 = $i13 - 1;
+
+        $i15 = staticinvoke <sun.java2d.marlin.FloatMath: int max(int,int)>(1, $i14);
+
+        $r1 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r2 = $r1.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r3 = $r2.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.Histogram hist_tile_generator_encoding_dist>;
+
+        $i16 = i225 / $i15;
+
+        virtualinvoke $r3.<sun.java2d.marlin.stats.Histogram: void add(int)>($i16);
+
+        goto label75;
+
+     label74:
+        virtualinvoke $r70.<sun.java2d.marlin.MarlinCache: void clearAARow(int)>(i160);
+
+     label75:
+        i150 = 2147483647;
+
+        i151 = -2147483648;
+
+     label76:
+        i152 = i152 + 1;
+
+        i153 = i153 + 1;
+
+        goto label05;
+
+     label77:
+        $i243 = (int) -1;
+
+        i226 = i152 + $i243;
+
+        i227 = i226 >> $i144;
+
+        $i6 = staticinvoke <sun.java2d.marlin.FloatMath: int max(int,int)>(i150, i0);
+
+        i228 = $i6 >> $i143;
+
+        $i7 = staticinvoke <sun.java2d.marlin.FloatMath: int min(int,int)>(i151, i1);
+
+        i229 = $i7 >> $i143;
+
+        if i229 < i228 goto label78;
+
+        $i8 = i229 + 1;
+
+        virtualinvoke r0.<sun.java2d.marlin.DRenderer: void copyAARow(int[],int,int,int,boolean)>($r69, i227, i228, $i8, z20);
+
+        goto label79;
+
+     label78:
+        if i227 == i160 goto label79;
+
+        virtualinvoke $r70.<sun.java2d.marlin.MarlinCache: void clearAARow(int)>(i227);
+
+     label79:
+        r0.<sun.java2d.marlin.DRenderer: int edgeCount> = i154;
+
+        r0.<sun.java2d.marlin.DRenderer: boolean prevUseBlkFlags> = z20;
+
+        $z25 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z25 == 0 goto label80;
+
+        r0.<sun.java2d.marlin.DRenderer: int activeEdgeMaxUsed> = i157;
+
+     label80:
+        return;
+    }
+
+    boolean endRendering()
+    {
+        sun.java2d.marlin.RendererStats $r5;
+        sun.java2d.marlin.stats.StatLong $r6;
+        java.lang.StringBuilder $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26, $r27, $r32, $r33, $r34, $r35, $r36, $r37, $r38, $r39, $r40, $r41, $r43, $r44, $r45, $r46, $r47, $r48, $r49, $r50, $r51, $r52;
+        java.lang.String $r17, $r28, $r42, $r53;
+        sun.java2d.marlin.IntArrayCache$Reference $r2, $r30;
+        int[] $r3, $r31;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        sun.java2d.marlin.MarlinCache $r1, $r29;
+        sun.java2d.marlin.DRendererContext $r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, i7, i8, $i9, $i10, $i11, $i12, $i13, i14, $i15, $i16, $i17, i18, $i19, i20, $i21, $i22, $i23, i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, i37, $i38, $i39, $i40, $i41;
+        sun.java2d.marlin.DRenderer r0;
+        double $d0, $d1, $d2, $d3, $d4, $d5;
+
+        r0 := @this: sun.java2d.marlin.DRenderer;
+
+        $i0 = r0.<sun.java2d.marlin.DRenderer: int edgeMinY>;
+
+        if $i0 != 2147483647 goto label01;
+
+        return 0;
+
+     label01:
+        $d0 = r0.<sun.java2d.marlin.DRenderer: double edgeMinX>;
+
+        $d1 = $d0 - 0.5;
+
+        $i1 = staticinvoke <sun.java2d.marlin.FloatMath: int ceil_int(double)>($d1);
+
+        $i2 = r0.<sun.java2d.marlin.DRenderer: int boundsMinX>;
+
+        $i3 = staticinvoke <sun.java2d.marlin.FloatMath: int max(int,int)>($i1, $i2);
+
+        $d2 = r0.<sun.java2d.marlin.DRenderer: double edgeMaxX>;
+
+        $d3 = $d2 - 0.5;
+
+        $i4 = staticinvoke <sun.java2d.marlin.FloatMath: int ceil_int(double)>($d3);
+
+        $i5 = r0.<sun.java2d.marlin.DRenderer: int boundsMaxX>;
+
+        $i6 = staticinvoke <sun.java2d.marlin.FloatMath: int min(int,int)>($i4, $i5);
+
+        i7 = r0.<sun.java2d.marlin.DRenderer: int edgeMinY>;
+
+        i8 = r0.<sun.java2d.marlin.DRenderer: int edgeMaxY>;
+
+        $i9 = r0.<sun.java2d.marlin.DRenderer: int boundsMinY>;
+
+        $i10 = i7 - $i9;
+
+        r0.<sun.java2d.marlin.DRenderer: int buckets_minY> = $i10;
+
+        $i11 = r0.<sun.java2d.marlin.DRenderer: int boundsMinY>;
+
+        $i12 = i8 - $i11;
+
+        r0.<sun.java2d.marlin.DRenderer: int buckets_maxY> = $i12;
+
+        $z0 = <sun.java2d.marlin.DRenderer: boolean DO_LOG_BOUNDS>;
+
+        if $z0 == 0 goto label02;
+
+        $r32 = new java.lang.StringBuilder;
+
+        specialinvoke $r32.<java.lang.StringBuilder: void <init>()>();
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("edgesXY = [");
+
+        $d4 = r0.<sun.java2d.marlin.DRenderer: double edgeMinX>;
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d4);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ... ");
+
+        $d5 = r0.<sun.java2d.marlin.DRenderer: double edgeMaxX>;
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d5);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[ [");
+
+        $i35 = r0.<sun.java2d.marlin.DRenderer: int edgeMinY>;
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i35);
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ... ");
+
+        $i36 = r0.<sun.java2d.marlin.DRenderer: int edgeMaxY>;
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i36);
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.java2d.marlin.MarlinUtils: void logInfo(java.lang.String)>($r42);
+
+        $r43 = new java.lang.StringBuilder;
+
+        specialinvoke $r43.<java.lang.StringBuilder: void <init>()>();
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("spXY    = [");
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ... ");
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i6);
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[ [");
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i7);
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ... ");
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i8);
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.java2d.marlin.MarlinUtils: void logInfo(java.lang.String)>($r53);
+
+     label02:
+        if $i3 >= $i6 goto label03;
+
+        if i7 < i8 goto label04;
+
+     label03:
+        return 0;
+
+     label04:
+        $i13 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_LG_POSITIONS_X>;
+
+        i14 = $i3 >> $i13;
+
+        $i15 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_MASK_X>;
+
+        $i17 = $i6 + $i15;
+
+        $i16 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_LG_POSITIONS_X>;
+
+        i18 = $i17 >> $i16;
+
+        $i19 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_LG_POSITIONS_Y>;
+
+        i20 = i7 >> $i19;
+
+        $i21 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_MASK_Y>;
+
+        $i23 = i8 + $i21;
+
+        $i22 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_LG_POSITIONS_Y>;
+
+        i24 = $i23 >> $i22;
+
+        $r1 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.MarlinCache cache>;
+
+        virtualinvoke $r1.<sun.java2d.marlin.MarlinCache: void init(int,int,int,int)>(i14, i20, i18, i24);
+
+        $z1 = <sun.java2d.marlin.DRenderer: boolean ENABLE_BLOCK_FLAGS>;
+
+        if $z1 == 0 goto label07;
+
+        $r29 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.MarlinCache cache>;
+
+        $z3 = $r29.<sun.java2d.marlin.MarlinCache: boolean useRLE>;
+
+        r0.<sun.java2d.marlin.DRenderer: boolean enableBlkFlags> = $z3;
+
+        $z4 = r0.<sun.java2d.marlin.DRenderer: boolean enableBlkFlags>;
+
+        if $z4 == 0 goto label05;
+
+        $z5 = <sun.java2d.marlin.DRenderer: boolean ENABLE_BLOCK_FLAGS_HEURISTICS>;
+
+        if $z5 != 0 goto label05;
+
+        $z6 = 1;
+
+        goto label06;
+
+     label05:
+        $z6 = 0;
+
+     label06:
+        r0.<sun.java2d.marlin.DRenderer: boolean prevUseBlkFlags> = $z6;
+
+        $z7 = r0.<sun.java2d.marlin.DRenderer: boolean enableBlkFlags>;
+
+        if $z7 == 0 goto label07;
+
+        $i33 = i18 - i14;
+
+        $i32 = <sun.java2d.marlin.DRenderer: int BLOCK_SIZE_LG>;
+
+        $i34 = $i33 >> $i32;
+
+        i37 = $i34 + 2;
+
+        if i37 <= 256 goto label07;
+
+        $r30 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference blkFlags_ref>;
+
+        $r31 = virtualinvoke $r30.<sun.java2d.marlin.IntArrayCache$Reference: int[] getArray(int)>(i37);
+
+        r0.<sun.java2d.marlin.DRenderer: int[] blkFlags> = $r31;
+
+     label07:
+        $i38 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_LG_POSITIONS_X>;
+
+        $i39 = i14 << $i38;
+
+        r0.<sun.java2d.marlin.DRenderer: int bbox_spminX> = $i39;
+
+        $i40 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_LG_POSITIONS_X>;
+
+        $i41 = i18 << $i40;
+
+        r0.<sun.java2d.marlin.DRenderer: int bbox_spmaxX> = $i41;
+
+        r0.<sun.java2d.marlin.DRenderer: int bbox_spminY> = i7;
+
+        r0.<sun.java2d.marlin.DRenderer: int bbox_spmaxY> = i8;
+
+        $z8 = <sun.java2d.marlin.DRenderer: boolean DO_LOG_BOUNDS>;
+
+        if $z8 == 0 goto label08;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("pXY       = [");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i14);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ... ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i18);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[ [");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i20);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ... ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i24);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.java2d.marlin.MarlinUtils: void logInfo(java.lang.String)>($r17);
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("bbox_spXY = [");
+
+        $i27 = r0.<sun.java2d.marlin.DRenderer: int bbox_spminX>;
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i27);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ... ");
+
+        $i28 = r0.<sun.java2d.marlin.DRenderer: int bbox_spmaxX>;
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i28);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[ [");
+
+        $i29 = r0.<sun.java2d.marlin.DRenderer: int bbox_spminY>;
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i29);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ... ");
+
+        $i30 = r0.<sun.java2d.marlin.DRenderer: int bbox_spmaxY>;
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i30);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.java2d.marlin.MarlinUtils: void logInfo(java.lang.String)>($r28);
+
+     label08:
+        $i25 = i18 - i14;
+
+        $i31 = $i25 + 2;
+
+        $i26 = <sun.java2d.marlin.DRenderer: int INITIAL_AA_ARRAY>;
+
+        if $i31 <= $i26 goto label10;
+
+        $z2 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z2 == 0 goto label09;
+
+        $r4 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r5 = $r4.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r6 = $r5.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.StatLong stat_array_renderer_alphaline>;
+
+        virtualinvoke $r6.<sun.java2d.marlin.stats.StatLong: void add(int)>($i31);
+
+     label09:
+        $r2 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.IntArrayCache$Reference alphaLine_ref>;
+
+        $r3 = virtualinvoke $r2.<sun.java2d.marlin.IntArrayCache$Reference: int[] getArray(int)>($i31);
+
+        r0.<sun.java2d.marlin.DRenderer: int[] alphaLine> = $r3;
+
+     label10:
+        virtualinvoke r0.<sun.java2d.marlin.DRenderer: void endRendering(int)>(i20);
+
+        return 1;
+    }
+
+    void endRendering(int)
+    {
+        sun.java2d.marlin.MarlinCache $r1;
+        int i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9;
+        sun.java2d.marlin.DRenderer r0;
+
+        r0 := @this: sun.java2d.marlin.DRenderer;
+
+        i0 := @parameter0: int;
+
+        $i1 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_LG_POSITIONS_Y>;
+
+        i2 = i0 << $i1;
+
+        $i3 = r0.<sun.java2d.marlin.DRenderer: int bbox_spminY>;
+
+        $i4 = staticinvoke <sun.java2d.marlin.FloatMath: int max(int,int)>($i3, i2);
+
+        $i5 = r0.<sun.java2d.marlin.DRenderer: int bbox_spmaxY>;
+
+        if $i4 >= $i5 goto label1;
+
+        $i8 = r0.<sun.java2d.marlin.DRenderer: int bbox_spmaxY>;
+
+        $i6 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_TILE>;
+
+        $i7 = i2 + $i6;
+
+        $i9 = staticinvoke <sun.java2d.marlin.FloatMath: int min(int,int)>($i8, $i7);
+
+        $r1 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.MarlinCache cache>;
+
+        virtualinvoke $r1.<sun.java2d.marlin.MarlinCache: void resetTileLine(int)>(i0);
+
+        specialinvoke r0.<sun.java2d.marlin.DRenderer: void _endRendering(int,int)>($i4, $i9);
+
+     label1:
+        return;
+    }
+
+    void copyAARow(int[], int, int, int, boolean)
+    {
+        sun.java2d.marlin.MarlinCache $r2, $r7;
+        int[] r1, $r6;
+        sun.java2d.marlin.DRendererContext $r3, $r8;
+        int i0, i1, i2;
+        sun.java2d.marlin.DRenderer r0;
+        boolean z0, $z1, $z2;
+        sun.java2d.marlin.RendererStats $r4, $r9;
+        sun.java2d.marlin.stats.Histogram $r5, $r10;
+
+        r0 := @this: sun.java2d.marlin.DRenderer;
+
+        r1 := @parameter0: int[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        z0 := @parameter4: boolean;
+
+        if z0 == 0 goto label2;
+
+        $z2 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z2 == 0 goto label1;
+
+        $r8 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r9 = $r8.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r10 = $r9.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.Histogram hist_tile_generator_encoding>;
+
+        virtualinvoke $r10.<sun.java2d.marlin.stats.Histogram: void add(int)>(1);
+
+     label1:
+        $r7 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.MarlinCache cache>;
+
+        $r6 = r0.<sun.java2d.marlin.DRenderer: int[] blkFlags>;
+
+        virtualinvoke $r7.<sun.java2d.marlin.MarlinCache: void copyAARowRLE_WithBlockFlags(int[],int[],int,int,int)>($r6, r1, i0, i1, i2);
+
+        goto label4;
+
+     label2:
+        $z1 = <sun.java2d.marlin.DRenderer: boolean DO_STATS>;
+
+        if $z1 == 0 goto label3;
+
+        $r3 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.DRendererContext rdrCtx>;
+
+        $r4 = $r3.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.RendererStats stats>;
+
+        $r5 = $r4.<sun.java2d.marlin.RendererStats: sun.java2d.marlin.stats.Histogram hist_tile_generator_encoding>;
+
+        virtualinvoke $r5.<sun.java2d.marlin.stats.Histogram: void add(int)>(0);
+
+     label3:
+        $r2 = r0.<sun.java2d.marlin.DRenderer: sun.java2d.marlin.MarlinCache cache>;
+
+        virtualinvoke $r2.<sun.java2d.marlin.MarlinCache: void copyAARowNoRLE(int[],int,int,int)>(r1, i0, i1, i2);
+
+     label4:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        long $l15, $l16, $l18, $l19, $l20, $l22, $l23, $l24, $l26, $l27, $l28, $l30, $l31, $l32, $l34, $l35, $l36;
+        boolean $z0, $z1;
+        float $f0, $f1, $f2;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i17, $i21, $i25, $i29, $i33, $i37, $i38, $i39, $i40, $i41, $i42;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15, $d16, $d17, $d18, $d19, $d20, $d21, $d22, $d23, $d24, $d25, $d26;
+
+        <sun.java2d.marlin.DRenderer: double CUB_INV_COUNT_3> = 0.015625;
+
+        <sun.java2d.marlin.DRenderer: double CUB_INV_COUNT_2> = 0.0625;
+
+        <sun.java2d.marlin.DRenderer: double CUB_INV_COUNT> = 0.25;
+
+        <sun.java2d.marlin.DRenderer: int CUB_COUNT_3> = 64;
+
+        <sun.java2d.marlin.DRenderer: int CUB_COUNT_2> = 16;
+
+        <sun.java2d.marlin.DRenderer: int CUB_COUNT> = 4;
+
+        <sun.java2d.marlin.DRenderer: int CUB_COUNT_LG> = 2;
+
+        <sun.java2d.marlin.DRenderer: long OFF_CURX_OR> = 0L;
+
+        <sun.java2d.marlin.DRenderer: double POWER_2_TO_32> = 4.294967296E9;
+
+        <sun.java2d.marlin.DRenderer: int ERR_STEP_MAX> = 2147483647;
+
+        <sun.java2d.marlin.DRenderer: int ALL_BUT_LSB> = -2;
+
+        <sun.java2d.marlin.DRenderer: boolean DISABLE_RENDER> = 0;
+
+        $z0 = staticinvoke <sun.java2d.marlin.MarlinProperties: boolean isUseTileFlags()>();
+
+        <sun.java2d.marlin.DRenderer: boolean ENABLE_BLOCK_FLAGS> = $z0;
+
+        $z1 = staticinvoke <sun.java2d.marlin.MarlinProperties: boolean isUseTileFlagsWithHeuristics()>();
+
+        <sun.java2d.marlin.DRenderer: boolean ENABLE_BLOCK_FLAGS_HEURISTICS> = $z1;
+
+        $i0 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_POSITIONS_X>;
+
+        $d0 = (double) $i0;
+
+        <sun.java2d.marlin.DRenderer: double SUBPIXEL_SCALE_X> = $d0;
+
+        $i1 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_POSITIONS_Y>;
+
+        $d1 = (double) $i1;
+
+        <sun.java2d.marlin.DRenderer: double SUBPIXEL_SCALE_Y> = $d1;
+
+        $i2 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_POSITIONS_X>;
+
+        $i3 = $i2 - 1;
+
+        <sun.java2d.marlin.DRenderer: int SUBPIXEL_MASK_X> = $i3;
+
+        $i4 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_POSITIONS_Y>;
+
+        $i5 = $i4 - 1;
+
+        <sun.java2d.marlin.DRenderer: int SUBPIXEL_MASK_Y> = $i5;
+
+        $d2 = <sun.java2d.marlin.DRenderer: double SUBPIXEL_SCALE_X>;
+
+        $d3 = 0.5 / $d2;
+
+        <sun.java2d.marlin.DRenderer: double RDR_OFFSET_X> = $d3;
+
+        $d4 = <sun.java2d.marlin.DRenderer: double SUBPIXEL_SCALE_Y>;
+
+        $d5 = 0.5 / $d4;
+
+        <sun.java2d.marlin.DRenderer: double RDR_OFFSET_Y> = $d5;
+
+        $i7 = <sun.java2d.marlin.DRenderer: int TILE_H>;
+
+        $i6 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_LG_POSITIONS_Y>;
+
+        $i8 = $i7 << $i6;
+
+        <sun.java2d.marlin.DRenderer: int SUBPIXEL_TILE> = $i8;
+
+        $i10 = <sun.java2d.marlin.DRenderer: int INITIAL_PIXEL_HEIGHT>;
+
+        $i9 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_POSITIONS_Y>;
+
+        $i11 = $i10 * $i9;
+
+        <sun.java2d.marlin.DRenderer: int INITIAL_BUCKET_ARRAY> = $i11;
+
+        $i12 = <sun.java2d.marlin.DRenderer: int INITIAL_EDGES_COUNT>;
+
+        $i13 = $i12 >> 2;
+
+        <sun.java2d.marlin.DRenderer: int INITIAL_CROSSING_COUNT> = $i13;
+
+        $i14 = <sun.java2d.marlin.OffHeapArray: int SIZE_INT>;
+
+        $l15 = (long) $i14;
+
+        $l16 = 0L + $l15;
+
+        <sun.java2d.marlin.DRenderer: long OFF_ERROR> = $l16;
+
+        $l19 = <sun.java2d.marlin.DRenderer: long OFF_ERROR>;
+
+        $i17 = <sun.java2d.marlin.OffHeapArray: int SIZE_INT>;
+
+        $l18 = (long) $i17;
+
+        $l20 = $l19 + $l18;
+
+        <sun.java2d.marlin.DRenderer: long OFF_BUMP_X> = $l20;
+
+        $l23 = <sun.java2d.marlin.DRenderer: long OFF_BUMP_X>;
+
+        $i21 = <sun.java2d.marlin.OffHeapArray: int SIZE_INT>;
+
+        $l22 = (long) $i21;
+
+        $l24 = $l23 + $l22;
+
+        <sun.java2d.marlin.DRenderer: long OFF_BUMP_ERR> = $l24;
+
+        $l27 = <sun.java2d.marlin.DRenderer: long OFF_BUMP_ERR>;
+
+        $i25 = <sun.java2d.marlin.OffHeapArray: int SIZE_INT>;
+
+        $l26 = (long) $i25;
+
+        $l28 = $l27 + $l26;
+
+        <sun.java2d.marlin.DRenderer: long OFF_NEXT> = $l28;
+
+        $l31 = <sun.java2d.marlin.DRenderer: long OFF_NEXT>;
+
+        $i29 = <sun.java2d.marlin.OffHeapArray: int SIZE_INT>;
+
+        $l30 = (long) $i29;
+
+        $l32 = $l31 + $l30;
+
+        <sun.java2d.marlin.DRenderer: long OFF_YMAX> = $l32;
+
+        $l35 = <sun.java2d.marlin.DRenderer: long OFF_YMAX>;
+
+        $i33 = <sun.java2d.marlin.OffHeapArray: int SIZE_INT>;
+
+        $l34 = (long) $i33;
+
+        $l36 = $l35 + $l34;
+
+        $i37 = (int) $l36;
+
+        <sun.java2d.marlin.DRenderer: int SIZEOF_EDGE_BYTES> = $i37;
+
+        $f0 = staticinvoke <sun.java2d.marlin.MarlinProperties: float getCubicDecD2()>();
+
+        $d8 = (double) $f0;
+
+        $i38 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_POSITIONS_X>;
+
+        $d6 = (double) $i38;
+
+        $d7 = $d6 / 8.0;
+
+        $d9 = $d8 * $d7;
+
+        <sun.java2d.marlin.DRenderer: double CUB_DEC_ERR_SUBPIX> = $d9;
+
+        $f1 = staticinvoke <sun.java2d.marlin.MarlinProperties: float getCubicIncD1()>();
+
+        $d12 = (double) $f1;
+
+        $i39 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_POSITIONS_X>;
+
+        $d10 = (double) $i39;
+
+        $d11 = $d10 / 8.0;
+
+        $d13 = $d12 * $d11;
+
+        <sun.java2d.marlin.DRenderer: double CUB_INC_ERR_SUBPIX> = $d13;
+
+        $i40 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_POSITIONS_X>;
+
+        $d15 = (double) $i40;
+
+        $i41 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_POSITIONS_Y>;
+
+        $d14 = (double) $i41;
+
+        $d16 = $d15 / $d14;
+
+        <sun.java2d.marlin.DRenderer: double SCALE_DY> = $d16;
+
+        $d17 = <sun.java2d.marlin.DRenderer: double CUB_DEC_ERR_SUBPIX>;
+
+        $d18 = 8.0 * $d17;
+
+        <sun.java2d.marlin.DRenderer: double CUB_DEC_BND> = $d18;
+
+        $d19 = <sun.java2d.marlin.DRenderer: double CUB_INC_ERR_SUBPIX>;
+
+        $d20 = 8.0 * $d19;
+
+        <sun.java2d.marlin.DRenderer: double CUB_INC_BND> = $d20;
+
+        $f2 = staticinvoke <sun.java2d.marlin.MarlinProperties: float getQuadDecD2()>();
+
+        $d23 = (double) $f2;
+
+        $i42 = <sun.java2d.marlin.DRenderer: int SUBPIXEL_POSITIONS_X>;
+
+        $d21 = (double) $i42;
+
+        $d22 = $d21 / 8.0;
+
+        $d24 = $d23 * $d22;
+
+        <sun.java2d.marlin.DRenderer: double QUAD_DEC_ERR_SUBPIX> = $d24;
+
+        $d25 = <sun.java2d.marlin.DRenderer: double QUAD_DEC_ERR_SUBPIX>;
+
+        $d26 = 8.0 * $d25;
+
+        <sun.java2d.marlin.DRenderer: double QUAD_DEC_BND> = $d26;
+
+        return;
+    }
+}

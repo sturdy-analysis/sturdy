@@ -1,0 +1,255 @@
+class sun.management.jmxremote.ConnectorBootstrap$AccessFileCheckerAuthenticator extends java.lang.Object implements javax.management.remote.JMXAuthenticator
+{
+    private final java.util.Map environment;
+    private final java.util.Properties properties;
+    private final java.lang.String accessFile;
+
+    public void <init>(java.util.Map) throws java.io.IOException
+    {
+        java.util.Properties $r5;
+        java.util.Map r1;
+        java.lang.Object $r2;
+        sun.management.jmxremote.ConnectorBootstrap$AccessFileCheckerAuthenticator r0;
+        java.lang.String $r3, $r4;
+
+        r0 := @this: sun.management.jmxremote.ConnectorBootstrap$AccessFileCheckerAuthenticator;
+
+        r1 := @parameter0: java.util.Map;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.management.jmxremote.ConnectorBootstrap$AccessFileCheckerAuthenticator: java.util.Map environment> = r1;
+
+        $r2 = interfaceinvoke r1.<java.util.Map: java.lang.Object get(java.lang.Object)>("jmx.remote.x.access.file");
+
+        $r3 = (java.lang.String) $r2;
+
+        r0.<sun.management.jmxremote.ConnectorBootstrap$AccessFileCheckerAuthenticator: java.lang.String accessFile> = $r3;
+
+        $r4 = r0.<sun.management.jmxremote.ConnectorBootstrap$AccessFileCheckerAuthenticator: java.lang.String accessFile>;
+
+        $r5 = staticinvoke <sun.management.jmxremote.ConnectorBootstrap$AccessFileCheckerAuthenticator: java.util.Properties propertiesFromFile(java.lang.String)>($r4);
+
+        r0.<sun.management.jmxremote.ConnectorBootstrap$AccessFileCheckerAuthenticator: java.util.Properties properties> = $r5;
+
+        return;
+    }
+
+    public javax.security.auth.Subject authenticate(java.lang.Object)
+    {
+        java.util.Map $r2;
+        com.sun.jmx.remote.security.JMXPluggableAuthenticator $r0;
+        java.lang.Object r3;
+        sun.management.jmxremote.ConnectorBootstrap$AccessFileCheckerAuthenticator r1;
+        javax.security.auth.Subject $r4;
+
+        r1 := @this: sun.management.jmxremote.ConnectorBootstrap$AccessFileCheckerAuthenticator;
+
+        r3 := @parameter0: java.lang.Object;
+
+        $r0 = new com.sun.jmx.remote.security.JMXPluggableAuthenticator;
+
+        $r2 = r1.<sun.management.jmxremote.ConnectorBootstrap$AccessFileCheckerAuthenticator: java.util.Map environment>;
+
+        specialinvoke $r0.<com.sun.jmx.remote.security.JMXPluggableAuthenticator: void <init>(java.util.Map)>($r2);
+
+        $r4 = interfaceinvoke $r0.<javax.management.remote.JMXAuthenticator: javax.security.auth.Subject authenticate(java.lang.Object)>(r3);
+
+        specialinvoke r1.<sun.management.jmxremote.ConnectorBootstrap$AccessFileCheckerAuthenticator: void checkAccessFileEntries(javax.security.auth.Subject)>($r4);
+
+        return $r4;
+    }
+
+    private void checkAccessFileEntries(javax.security.auth.Subject)
+    {
+        sun.management.jmxremote.ConnectorBootstrap$AccessFileCheckerAuthenticator r8;
+        java.util.HashSet $r3;
+        java.lang.SecurityException $r5, $r20;
+        java.lang.String $r9, $r13, $r16, $r19, $r23, $r26;
+        boolean $z0, $z1, $z2;
+        java.util.Properties $r18;
+        java.util.Iterator $r2, $r4;
+        java.util.Set $r1;
+        javax.security.auth.Subject r0;
+        java.security.Principal r15, r27;
+        java.lang.StringBuilder $r6, $r7, $r10, $r11, $r12, $r21, $r22, $r24, $r25;
+        java.lang.Object $r14, $r17;
+
+        r8 := @this: sun.management.jmxremote.ConnectorBootstrap$AccessFileCheckerAuthenticator;
+
+        r0 := @parameter0: javax.security.auth.Subject;
+
+        if r0 != null goto label1;
+
+        $r20 = new java.lang.SecurityException;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Access denied! No matching entries found in the access file [");
+
+        $r23 = r8.<sun.management.jmxremote.ConnectorBootstrap$AccessFileCheckerAuthenticator: java.lang.String accessFile>;
+
+        $r24 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r23);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("] as the authenticated Subject is null");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r20.<java.lang.SecurityException: void <init>(java.lang.String)>($r26);
+
+        throw $r20;
+
+     label1:
+        $r1 = virtualinvoke r0.<javax.security.auth.Subject: java.util.Set getPrincipals()>();
+
+        $r2 = interfaceinvoke $r1.<java.util.Set: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r17 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r27 = (java.security.Principal) $r17;
+
+        $r18 = r8.<sun.management.jmxremote.ConnectorBootstrap$AccessFileCheckerAuthenticator: java.util.Properties properties>;
+
+        $r19 = interfaceinvoke r27.<java.security.Principal: java.lang.String getName()>();
+
+        $z2 = virtualinvoke $r18.<java.util.Properties: boolean containsKey(java.lang.Object)>($r19);
+
+        if $z2 == 0 goto label3;
+
+        return;
+
+     label3:
+        goto label2;
+
+     label4:
+        $r3 = new java.util.HashSet;
+
+        specialinvoke $r3.<java.util.HashSet: void <init>()>();
+
+        $r4 = interfaceinvoke $r1.<java.util.Set: java.util.Iterator iterator()>();
+
+     label5:
+        $z1 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label6;
+
+        $r14 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r15 = (java.security.Principal) $r14;
+
+        $r16 = interfaceinvoke r15.<java.security.Principal: java.lang.String getName()>();
+
+        interfaceinvoke $r3.<java.util.Set: boolean add(java.lang.Object)>($r16);
+
+        goto label5;
+
+     label6:
+        $r5 = new java.lang.SecurityException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Access denied! No entries found in the access file [");
+
+        $r9 = r8.<sun.management.jmxremote.ConnectorBootstrap$AccessFileCheckerAuthenticator: java.lang.String accessFile>;
+
+        $r10 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("] for any of the authenticated identities ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r3);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.lang.SecurityException: void <init>(java.lang.String)>($r13);
+
+        throw $r5;
+    }
+
+    private static java.util.Properties propertiesFromFile(java.lang.String) throws java.io.IOException
+    {
+        java.lang.Throwable $r3, $r4, $r5, r7;
+        java.util.Properties $r0;
+        java.lang.String r1;
+        java.io.FileInputStream $r2;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = new java.util.Properties;
+
+        specialinvoke $r0.<java.util.Properties: void <init>()>();
+
+        if r1 != null goto label01;
+
+        return $r0;
+
+     label01:
+        $r2 = new java.io.FileInputStream;
+
+        specialinvoke $r2.<java.io.FileInputStream: void <init>(java.lang.String)>(r1);
+
+        r7 = null;
+
+     label02:
+        virtualinvoke $r0.<java.util.Properties: void load(java.io.InputStream)>($r2);
+
+     label03:
+        if $r2 == null goto label13;
+
+        goto label04;
+
+     label04:
+        virtualinvoke $r2.<java.io.FileInputStream: void close()>();
+
+        goto label13;
+
+     label05:
+        $r5 := @caughtexception;
+
+        r7 = $r5;
+
+        throw $r5;
+
+     label06:
+        $r4 := @caughtexception;
+
+     label07:
+        if $r2 == null goto label12;
+
+        if r7 == null goto label11;
+
+     label08:
+        virtualinvoke $r2.<java.io.FileInputStream: void close()>();
+
+     label09:
+        goto label12;
+
+     label10:
+        $r3 := @caughtexception;
+
+        virtualinvoke r7.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r3);
+
+        goto label12;
+
+     label11:
+        virtualinvoke $r2.<java.io.FileInputStream: void close()>();
+
+     label12:
+        throw $r4;
+
+     label13:
+        return $r0;
+
+        catch java.lang.Throwable from label02 to label03 with label05;
+        catch java.lang.Throwable from label08 to label09 with label10;
+        catch java.lang.Throwable from label05 to label07 with label06;
+    }
+}

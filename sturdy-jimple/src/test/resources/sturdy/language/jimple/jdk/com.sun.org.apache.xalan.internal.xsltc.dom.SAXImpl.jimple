@@ -1,0 +1,3465 @@
+public final class com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl extends com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2 implements com.sun.org.apache.xalan.internal.xsltc.DOMEnhancedForDTM, com.sun.org.apache.xalan.internal.xsltc.dom.DOMBuilder
+{
+    private int _uriCount;
+    private int[] _xmlSpaceStack;
+    private int _idx;
+    private boolean _preserve;
+    private static final java.lang.String XML_PREFIX;
+    private static final java.lang.String XMLSPACE_STRING;
+    private static final java.lang.String PRESERVE_STRING;
+    private static final java.lang.String XML_URI;
+    private boolean _escaping;
+    private boolean _disableEscaping;
+    private int _textNodeToProcess;
+    private static final java.lang.String EMPTYSTRING;
+    private static final com.sun.org.apache.xml.internal.dtm.DTMAxisIterator EMPTYITERATOR;
+    private int _namesSize;
+    private java.util.Map _nsIndex;
+    private int _size;
+    private com.sun.org.apache.xalan.internal.xsltc.dom.BitArray _dontEscape;
+    private static int _documentURIIndex;
+    private org.w3c.dom.Document _document;
+    private java.util.Map _node2Ids;
+    private boolean _hasDOMSource;
+    private com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager _dtmManager;
+    private org.w3c.dom.Node[] _nodes;
+    private org.w3c.dom.NodeList[] _nodeLists;
+
+    public void setDocumentURI(java.lang.String)
+    {
+        java.lang.String r0, $r2;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r1;
+
+        r1 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 == null goto label1;
+
+        $r2 = staticinvoke <com.sun.org.apache.xml.internal.utils.SystemIDResolver: java.lang.String getAbsoluteURI(java.lang.String)>(r0);
+
+        virtualinvoke r1.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void setDocumentBaseURI(java.lang.String)>($r2);
+
+     label1:
+        return;
+    }
+
+    public java.lang.String getDocumentURI()
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        int $i0, $i1;
+        java.lang.StringBuilder $r2, $r3, $r4;
+        java.lang.String $r1, $r5;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        $r1 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getDocumentBaseURI()>();
+
+        if $r1 == null goto label1;
+
+        $r5 = $r1;
+
+        goto label2;
+
+     label1:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("rtf");
+
+        $i0 = <com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _documentURIIndex>;
+
+        $i1 = $i0 + 1;
+
+        <com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _documentURIIndex> = $i1;
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label2:
+        return $r5;
+    }
+
+    public java.lang.String getDocumentURI(int)
+    {
+        int i0;
+        java.lang.String $r1;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getDocumentURI()>();
+
+        return $r1;
+    }
+
+    public void setupMapping(java.lang.String[], java.lang.String[], int[], java.lang.String[])
+    {
+        int[] r3;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        java.lang.String[] r1, r2, r4;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r1 := @parameter0: java.lang.String[];
+
+        r2 := @parameter1: java.lang.String[];
+
+        r3 := @parameter2: int[];
+
+        r4 := @parameter3: java.lang.String[];
+
+        return;
+    }
+
+    public java.lang.String lookupNamespace(int, java.lang.String) throws com.sun.org.apache.xalan.internal.xsltc.TransletException
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r1;
+        com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$AncestorIterator $r6;
+        com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators$NamespaceIterator $r7;
+        int i0, $i1, $i2, $i4, $i6;
+        java.lang.String r2, $r4, $r5;
+        boolean $z0, $z1;
+
+        r1 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.lang.String;
+
+        $r6 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$AncestorIterator;
+
+        specialinvoke $r6.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$AncestorIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2)>(r1);
+
+        $z0 = virtualinvoke r1.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: boolean isElement(int)>(i0);
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke $r6.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$AncestorIterator: com.sun.org.apache.xml.internal.dtm.DTMAxisIterator includeSelf()>();
+
+     label1:
+        virtualinvoke $r6.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$AncestorIterator: com.sun.org.apache.xml.internal.dtm.DTMAxisIterator setStartNode(int)>(i0);
+
+     label2:
+        $i2 = virtualinvoke $r6.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$AncestorIterator: int next()>();
+
+        $i4 = (int) -1;
+
+        if $i2 == $i4 goto label5;
+
+        $r7 = new com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators$NamespaceIterator;
+
+        specialinvoke $r7.<com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators$NamespaceIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators)>(r1);
+
+        virtualinvoke $r7.<com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators$NamespaceIterator: com.sun.org.apache.xml.internal.dtm.DTMAxisIterator setStartNode(int)>($i2);
+
+     label3:
+        $i1 = virtualinvoke $r7.<com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators$NamespaceIterator: int next()>();
+
+        $i6 = (int) -1;
+
+        if $i1 == $i6 goto label4;
+
+        $r4 = virtualinvoke r1.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getLocalName(int)>($i1);
+
+        $z1 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>(r2);
+
+        if $z1 == 0 goto label3;
+
+        $r5 = virtualinvoke r1.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getNodeValue(int)>($i1);
+
+        return $r5;
+
+     label4:
+        goto label2;
+
+     label5:
+        staticinvoke <com.sun.org.apache.xalan.internal.xsltc.runtime.BasisLibrary: void runTimeError(java.lang.String,java.lang.Object)>("NAMESPACE_PREFIX_ERR", r2);
+
+        return null;
+    }
+
+    public boolean isElement(int)
+    {
+        short $s1;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        int i0;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        $s1 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: short getNodeType(int)>(i0);
+
+        if $s1 != 1 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean isAttribute(int)
+    {
+        short $s1;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        int i0, $i2;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        $s1 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: short getNodeType(int)>(i0);
+
+        $i2 = (int) $s1;
+
+        if $i2 != 2 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public int getSize()
+    {
+        int $i0;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        $i0 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int getNumberOfNodes()>();
+
+        return $i0;
+    }
+
+    public void setFilter(com.sun.org.apache.xalan.internal.xsltc.StripFilter)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.StripFilter r1;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r1 := @parameter0: com.sun.org.apache.xalan.internal.xsltc.StripFilter;
+
+        return;
+    }
+
+    public boolean lessThan(int, int)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        int i0, i1, $i3, $i5;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $i3 = (int) -1;
+
+        if i0 != $i3 goto label1;
+
+        return 0;
+
+     label1:
+        $i5 = (int) -1;
+
+        if i1 != $i5 goto label2;
+
+        return 1;
+
+     label2:
+        if i0 >= i1 goto label3;
+
+        $z0 = 1;
+
+        goto label4;
+
+     label3:
+        $z0 = 0;
+
+     label4:
+        return $z0;
+    }
+
+    public org.w3c.dom.Node makeNode(int)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        org.w3c.dom.Node[] $r1, $r2, $r4, $r6, $r7, $r8;
+        org.w3c.dom.Node $r5, $r9;
+        int i0, $i1, $i2, $i3;
+        com.sun.org.apache.xml.internal.dtm.ref.DTMNodeProxy $r10, $r11;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: org.w3c.dom.Node[] _nodes>;
+
+        if $r1 != null goto label1;
+
+        $i3 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _namesSize>;
+
+        $r8 = newarray (org.w3c.dom.Node)[$i3];
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: org.w3c.dom.Node[] _nodes> = $r8;
+
+     label1:
+        $i1 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int makeNodeIdentity(int)>(i0);
+
+        if $i1 >= 0 goto label2;
+
+        return null;
+
+     label2:
+        $r2 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: org.w3c.dom.Node[] _nodes>;
+
+        $i2 = lengthof $r2;
+
+        if $i1 >= $i2 goto label5;
+
+        $r4 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: org.w3c.dom.Node[] _nodes>;
+
+        $r5 = $r4[$i1];
+
+        if $r5 == null goto label3;
+
+        $r7 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: org.w3c.dom.Node[] _nodes>;
+
+        $r9 = $r7[$i1];
+
+        goto label4;
+
+     label3:
+        $r6 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: org.w3c.dom.Node[] _nodes>;
+
+        $r10 = new com.sun.org.apache.xml.internal.dtm.ref.DTMNodeProxy;
+
+        $r9 = $r10;
+
+        specialinvoke $r10.<com.sun.org.apache.xml.internal.dtm.ref.DTMNodeProxy: void <init>(com.sun.org.apache.xml.internal.dtm.DTM,int)>(r0, i0);
+
+        $r6[$i1] = $r10;
+
+     label4:
+        return $r9;
+
+     label5:
+        $r11 = new com.sun.org.apache.xml.internal.dtm.ref.DTMNodeProxy;
+
+        specialinvoke $r11.<com.sun.org.apache.xml.internal.dtm.ref.DTMNodeProxy: void <init>(com.sun.org.apache.xml.internal.dtm.DTM,int)>(r0, i0);
+
+        return $r11;
+    }
+
+    public org.w3c.dom.Node makeNode(com.sun.org.apache.xml.internal.dtm.DTMAxisIterator)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        org.w3c.dom.Node $r2;
+        int $i0;
+        com.sun.org.apache.xml.internal.dtm.DTMAxisIterator r1;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r1 := @parameter0: com.sun.org.apache.xml.internal.dtm.DTMAxisIterator;
+
+        $i0 = interfaceinvoke r1.<com.sun.org.apache.xml.internal.dtm.DTMAxisIterator: int next()>();
+
+        $r2 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: org.w3c.dom.Node makeNode(int)>($i0);
+
+        return $r2;
+    }
+
+    public org.w3c.dom.NodeList makeNodeList(int)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        com.sun.org.apache.xml.internal.dtm.ref.DTMAxisIterNodeList $r13, $r15;
+        int i0, $i1, $i2, $i3;
+        org.w3c.dom.NodeList $r6, $r11;
+        org.w3c.dom.NodeList[] $r1, $r2, $r5, $r8, $r9, $r10;
+        com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators$SingletonIterator $r12, $r14;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: org.w3c.dom.NodeList[] _nodeLists>;
+
+        if $r1 != null goto label1;
+
+        $i3 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _namesSize>;
+
+        $r10 = newarray (org.w3c.dom.NodeList)[$i3];
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: org.w3c.dom.NodeList[] _nodeLists> = $r10;
+
+     label1:
+        $i1 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int makeNodeIdentity(int)>(i0);
+
+        if $i1 >= 0 goto label2;
+
+        return null;
+
+     label2:
+        $r2 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: org.w3c.dom.NodeList[] _nodeLists>;
+
+        $i2 = lengthof $r2;
+
+        if $i1 >= $i2 goto label5;
+
+        $r5 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: org.w3c.dom.NodeList[] _nodeLists>;
+
+        $r6 = $r5[$i1];
+
+        if $r6 == null goto label3;
+
+        $r9 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: org.w3c.dom.NodeList[] _nodeLists>;
+
+        $r11 = $r9[$i1];
+
+        goto label4;
+
+     label3:
+        $r8 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: org.w3c.dom.NodeList[] _nodeLists>;
+
+        $r13 = new com.sun.org.apache.xml.internal.dtm.ref.DTMAxisIterNodeList;
+
+        $r11 = $r13;
+
+        $r12 = new com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators$SingletonIterator;
+
+        specialinvoke $r12.<com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators$SingletonIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators,int)>(r0, i0);
+
+        specialinvoke $r13.<com.sun.org.apache.xml.internal.dtm.ref.DTMAxisIterNodeList: void <init>(com.sun.org.apache.xml.internal.dtm.DTM,com.sun.org.apache.xml.internal.dtm.DTMAxisIterator)>(r0, $r12);
+
+        $r8[$i1] = $r13;
+
+     label4:
+        return $r11;
+
+     label5:
+        $r15 = new com.sun.org.apache.xml.internal.dtm.ref.DTMAxisIterNodeList;
+
+        $r14 = new com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators$SingletonIterator;
+
+        specialinvoke $r14.<com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators$SingletonIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators,int)>(r0, i0);
+
+        specialinvoke $r15.<com.sun.org.apache.xml.internal.dtm.ref.DTMAxisIterNodeList: void <init>(com.sun.org.apache.xml.internal.dtm.DTM,com.sun.org.apache.xml.internal.dtm.DTMAxisIterator)>(r0, $r14);
+
+        return $r15;
+    }
+
+    public org.w3c.dom.NodeList makeNodeList(com.sun.org.apache.xml.internal.dtm.DTMAxisIterator)
+    {
+        com.sun.org.apache.xml.internal.dtm.DTMAxisIterator r2;
+        com.sun.org.apache.xml.internal.dtm.ref.DTMAxisIterNodeList $r0;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r1;
+
+        r1 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r2 := @parameter0: com.sun.org.apache.xml.internal.dtm.DTMAxisIterator;
+
+        $r0 = new com.sun.org.apache.xml.internal.dtm.ref.DTMAxisIterNodeList;
+
+        specialinvoke $r0.<com.sun.org.apache.xml.internal.dtm.ref.DTMAxisIterNodeList: void <init>(com.sun.org.apache.xml.internal.dtm.DTM,com.sun.org.apache.xml.internal.dtm.DTMAxisIterator)>(r1, r2);
+
+        return $r0;
+    }
+
+    public com.sun.org.apache.xml.internal.dtm.DTMAxisIterator getNodeValueIterator(com.sun.org.apache.xml.internal.dtm.DTMAxisIterator, int, java.lang.String, boolean)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl$NodeValueIterator $r0;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r1;
+        int i0;
+        com.sun.org.apache.xml.internal.dtm.DTMAxisIterator r2;
+        java.lang.String r3;
+        boolean z0;
+
+        r1 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r2 := @parameter0: com.sun.org.apache.xml.internal.dtm.DTMAxisIterator;
+
+        i0 := @parameter1: int;
+
+        r3 := @parameter2: java.lang.String;
+
+        z0 := @parameter3: boolean;
+
+        $r0 = new com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl$NodeValueIterator;
+
+        specialinvoke $r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl$NodeValueIterator: void <init>(com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl,com.sun.org.apache.xml.internal.dtm.DTMAxisIterator,int,java.lang.String,boolean)>(r1, r2, i0, r3, z0);
+
+        return $r0;
+    }
+
+    public com.sun.org.apache.xml.internal.dtm.DTMAxisIterator orderNodes(com.sun.org.apache.xml.internal.dtm.DTMAxisIterator, int)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r2;
+        int i0;
+        com.sun.org.apache.xalan.internal.xsltc.dom.DupFilterIterator $r0;
+        com.sun.org.apache.xml.internal.dtm.DTMAxisIterator r1;
+
+        r2 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r1 := @parameter0: com.sun.org.apache.xml.internal.dtm.DTMAxisIterator;
+
+        i0 := @parameter1: int;
+
+        $r0 = new com.sun.org.apache.xalan.internal.xsltc.dom.DupFilterIterator;
+
+        specialinvoke $r0.<com.sun.org.apache.xalan.internal.xsltc.dom.DupFilterIterator: void <init>(com.sun.org.apache.xml.internal.dtm.DTMAxisIterator)>(r1);
+
+        return $r0;
+    }
+
+    public com.sun.org.apache.xml.internal.dtm.DTMAxisIterator getIterator()
+    {
+        int $i0;
+        com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators$SingletonIterator $r0;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r1;
+
+        r1 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        $r0 = new com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators$SingletonIterator;
+
+        $i0 = virtualinvoke r1.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int getDocument()>();
+
+        specialinvoke $r0.<com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators$SingletonIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators,int,boolean)>(r1, $i0, 1);
+
+        return $r0;
+    }
+
+    public int getNSType(int)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        java.lang.Integer $r3, $r5;
+        java.util.Map $r2;
+        int i0, $i1, $i2;
+        java.lang.Object $r4;
+        java.lang.String $r1;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getNamespaceURI(int)>(i0);
+
+        if $r1 != null goto label1;
+
+        return 0;
+
+     label1:
+        $i1 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int getIdForNamespace(java.lang.String)>($r1);
+
+        $r2 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.util.Map _nsIndex>;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r4 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>($r3);
+
+        $r5 = (java.lang.Integer) $r4;
+
+        $i2 = virtualinvoke $r5.<java.lang.Integer: int intValue()>();
+
+        return $i2;
+    }
+
+    public int getNamespaceType(int)
+    {
+        int i0, $i1;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        $i1 = specialinvoke r0.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2: int getNamespaceType(int)>(i0);
+
+        return $i1;
+    }
+
+    public int getGeneralizedType(java.lang.String)
+    {
+        int $i0;
+        java.lang.String r1;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int getGeneralizedType(java.lang.String,boolean)>(r1, 1);
+
+        return $i0;
+    }
+
+    public int getGeneralizedType(java.lang.String, boolean)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r1;
+        char $c1;
+        byte b5;
+        int $i0, $i2, $i3, i4, $i7, $i8;
+        java.lang.String r0, r3, $r4;
+        com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable $r2;
+        boolean z0;
+
+        r1 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        z0 := @parameter1: boolean;
+
+        r3 = null;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int lastIndexOf(java.lang.String)>(":");
+
+        $i7 = (int) -1;
+
+        if $i0 <= $i7 goto label1;
+
+        r3 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+     label1:
+        $i3 = $i0 + 1;
+
+        i4 = $i3;
+
+        $c1 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i3);
+
+        $i8 = (int) $c1;
+
+        if $i8 != 64 goto label2;
+
+        b5 = 2;
+
+        i4 = $i3 + 1;
+
+        goto label3;
+
+     label2:
+        b5 = 1;
+
+     label3:
+        if i4 != 0 goto label4;
+
+        $r4 = r0;
+
+        goto label5;
+
+     label4:
+        $r4 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>(i4);
+
+     label5:
+        $r2 = r1.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable m_expandedNameTable>;
+
+        $i2 = virtualinvoke $r2.<com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable: int getExpandedTypeID(java.lang.String,java.lang.String,int,boolean)>(r3, $r4, b5, z0);
+
+        return $i2;
+    }
+
+    public short[] getMapping(java.lang.String[], java.lang.String[], int[])
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        java.lang.String[] r1, r4;
+        short $s6, $s7, $s8;
+        int[] r5;
+        int $i0, i1, $i2, $i3, $i4, $i5, i9, i10, i11;
+        java.lang.String $r6, $r7;
+        short[] r3, $r10;
+        com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable $r2, $r8, $r9;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r1 := @parameter0: java.lang.String[];
+
+        r4 := @parameter1: java.lang.String[];
+
+        r5 := @parameter2: int[];
+
+        $i0 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _namesSize>;
+
+        if $i0 >= 0 goto label1;
+
+        $r10 = specialinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: short[] getMapping2(java.lang.String[],java.lang.String[],int[])>(r1, r4, r5);
+
+        return $r10;
+
+     label1:
+        i1 = lengthof r1;
+
+        $r2 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable m_expandedNameTable>;
+
+        $i2 = virtualinvoke $r2.<com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable: int getSize()>();
+
+        r3 = newarray (short)[$i2];
+
+        i9 = 0;
+
+     label2:
+        if i9 >= 14 goto label3;
+
+        $s8 = (short) i9;
+
+        r3[i9] = $s8;
+
+        i9 = i9 + 1;
+
+        goto label2;
+
+     label3:
+        i10 = 14;
+
+     label4:
+        if i10 >= $i2 goto label5;
+
+        $r9 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable m_expandedNameTable>;
+
+        $s7 = virtualinvoke $r9.<com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable: short getType(int)>(i10);
+
+        r3[i10] = $s7;
+
+        i10 = i10 + 1;
+
+        goto label4;
+
+     label5:
+        i11 = 0;
+
+     label6:
+        if i11 >= i1 goto label8;
+
+        $r8 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable m_expandedNameTable>;
+
+        $r7 = r4[i11];
+
+        $r6 = r1[i11];
+
+        $i3 = r5[i11];
+
+        $i4 = virtualinvoke $r8.<com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable: int getExpandedTypeID(java.lang.String,java.lang.String,int,boolean)>($r7, $r6, $i3, 1);
+
+        if $i4 < 0 goto label7;
+
+        if $i4 >= $i2 goto label7;
+
+        $i5 = i11 + 14;
+
+        $s6 = (short) $i5;
+
+        r3[$i4] = $s6;
+
+     label7:
+        i11 = i11 + 1;
+
+        goto label6;
+
+     label8:
+        return r3;
+    }
+
+    public int[] getReverseMapping(java.lang.String[], java.lang.String[], int[])
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r2;
+        java.lang.String[] r0, r3;
+        int[] r1, r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, i7;
+        java.lang.String $r5, $r6;
+        com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable $r7;
+
+        r2 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r0 := @parameter0: java.lang.String[];
+
+        r3 := @parameter1: java.lang.String[];
+
+        r4 := @parameter2: int[];
+
+        $i0 = lengthof r0;
+
+        $i1 = $i0 + 14;
+
+        r1 = newarray (int)[$i1];
+
+        i6 = 0;
+
+     label1:
+        if i6 >= 14 goto label2;
+
+        r1[i6] = i6;
+
+        i6 = i6 + 1;
+
+        goto label1;
+
+     label2:
+        i7 = 0;
+
+     label3:
+        $i2 = lengthof r0;
+
+        if i7 >= $i2 goto label4;
+
+        $r7 = r2.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable m_expandedNameTable>;
+
+        $r6 = r3[i7];
+
+        $r5 = r0[i7];
+
+        $i3 = r4[i7];
+
+        $i4 = virtualinvoke $r7.<com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable: int getExpandedTypeID(java.lang.String,java.lang.String,int,boolean)>($r6, $r5, $i3, 1);
+
+        $i5 = i7 + 14;
+
+        r1[$i5] = $i4;
+
+        i7 = i7 + 1;
+
+        goto label3;
+
+     label4:
+        return r1;
+    }
+
+    private short[] getMapping2(java.lang.String[], java.lang.String[], int[])
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r1;
+        java.lang.String[] r0, r5;
+        short $s4, $s5, $s6;
+        int[] r6, r10;
+        int i0, $i1, i2, $i3, $i7, $i8, $i9, $i10, $i11, i12, i13, i14, i15, i16;
+        java.lang.String $r7, $r8;
+        short[] r3;
+        com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable $r2, $r4, $r9;
+
+        r1 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r0 := @parameter0: java.lang.String[];
+
+        r5 := @parameter1: java.lang.String[];
+
+        r6 := @parameter2: int[];
+
+        i0 = lengthof r0;
+
+        $r2 = r1.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable m_expandedNameTable>;
+
+        $i1 = virtualinvoke $r2.<com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable: int getSize()>();
+
+        r10 = null;
+
+        if i0 <= 0 goto label01;
+
+        r10 = newarray (int)[i0];
+
+     label01:
+        i12 = $i1;
+
+        i13 = 0;
+
+     label02:
+        if i13 >= i0 goto label04;
+
+        $r9 = r1.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable m_expandedNameTable>;
+
+        $r8 = r5[i13];
+
+        $r7 = r0[i13];
+
+        $i7 = r6[i13];
+
+        $i8 = virtualinvoke $r9.<com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable: int getExpandedTypeID(java.lang.String,java.lang.String,int,boolean)>($r8, $r7, $i7, 0);
+
+        r10[i13] = $i8;
+
+        $i9 = r1.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _namesSize>;
+
+        if $i9 >= 0 goto label03;
+
+        $i10 = r10[i13];
+
+        if $i10 < i12 goto label03;
+
+        $i11 = r10[i13];
+
+        i12 = $i11 + 1;
+
+     label03:
+        i13 = i13 + 1;
+
+        goto label02;
+
+     label04:
+        r3 = newarray (short)[i12];
+
+        i14 = 0;
+
+     label05:
+        if i14 >= 14 goto label06;
+
+        $s6 = (short) i14;
+
+        r3[i14] = $s6;
+
+        i14 = i14 + 1;
+
+        goto label05;
+
+     label06:
+        i15 = 14;
+
+     label07:
+        if i15 >= $i1 goto label08;
+
+        $r4 = r1.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable m_expandedNameTable>;
+
+        $s5 = virtualinvoke $r4.<com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable: short getType(int)>(i15);
+
+        r3[i15] = $s5;
+
+        i15 = i15 + 1;
+
+        goto label07;
+
+     label08:
+        i16 = 0;
+
+     label09:
+        if i16 >= i0 goto label11;
+
+        i2 = r10[i16];
+
+        if i2 < 0 goto label10;
+
+        if i2 >= i12 goto label10;
+
+        $i3 = i16 + 14;
+
+        $s4 = (short) $i3;
+
+        r3[i2] = $s4;
+
+     label10:
+        i16 = i16 + 1;
+
+        goto label09;
+
+     label11:
+        return r3;
+    }
+
+    public short[] getNamespaceMapping(java.lang.String[])
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r1;
+        java.lang.String[] r0;
+        java.lang.Integer $r5, r7;
+        short $s4, $s8;
+        java.util.Map $r4;
+        int i0, i1, $i2, $i3, i5, i6;
+        java.lang.String $r3;
+        java.lang.Object $r6;
+        short[] r2;
+
+        r1 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r0 := @parameter0: java.lang.String[];
+
+        i0 = lengthof r0;
+
+        i1 = r1.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _uriCount>;
+
+        r2 = newarray (short)[i1];
+
+        i5 = 0;
+
+     label1:
+        if i5 >= i1 goto label2;
+
+        $s8 = (short) -1;
+
+        r2[i5] = $s8;
+
+        i5 = i5 + 1;
+
+        goto label1;
+
+     label2:
+        i6 = 0;
+
+     label3:
+        if i6 >= i0 goto label5;
+
+        $r3 = r0[i6];
+
+        $i2 = virtualinvoke r1.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int getIdForNamespace(java.lang.String)>($r3);
+
+        $r4 = r1.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.util.Map _nsIndex>;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r6 = interfaceinvoke $r4.<java.util.Map: java.lang.Object get(java.lang.Object)>($r5);
+
+        r7 = (java.lang.Integer) $r6;
+
+        if r7 == null goto label4;
+
+        $i3 = virtualinvoke r7.<java.lang.Integer: int intValue()>();
+
+        $s4 = (short) i6;
+
+        r2[$i3] = $s4;
+
+     label4:
+        i6 = i6 + 1;
+
+        goto label3;
+
+     label5:
+        return r2;
+    }
+
+    public short[] getReverseNamespaceMapping(java.lang.String[])
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r2;
+        java.lang.String[] r0;
+        java.lang.Integer $r5, r7;
+        short $s4;
+        java.util.Map $r4;
+        int i0, $i1, $i2, i3;
+        java.lang.Object $r6;
+        short[] r1;
+        java.lang.String $r3;
+
+        r2 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r0 := @parameter0: java.lang.String[];
+
+        i0 = lengthof r0;
+
+        r1 = newarray (short)[i0];
+
+        i3 = 0;
+
+     label1:
+        if i3 >= i0 goto label4;
+
+        $r3 = r0[i3];
+
+        $i1 = virtualinvoke r2.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int getIdForNamespace(java.lang.String)>($r3);
+
+        $r4 = r2.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.util.Map _nsIndex>;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r6 = interfaceinvoke $r4.<java.util.Map: java.lang.Object get(java.lang.Object)>($r5);
+
+        r7 = (java.lang.Integer) $r6;
+
+        $i2 = i3;
+
+        if r7 != null goto label2;
+
+        $s4 = -1;
+
+        goto label3;
+
+     label2:
+        $s4 = virtualinvoke r7.<java.lang.Integer: short shortValue()>();
+
+     label3:
+        r1[$i2] = $s4;
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label4:
+        return r1;
+    }
+
+    public void <init>(com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager, javax.xml.transform.Source, int, com.sun.org.apache.xml.internal.dtm.DTMWSFilter, com.sun.org.apache.xml.internal.utils.XMLStringFactory, boolean, boolean)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager r1;
+        com.sun.org.apache.xml.internal.dtm.DTMWSFilter r3;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        javax.xml.transform.Source r2;
+        int i0;
+        com.sun.org.apache.xml.internal.utils.XMLStringFactory r4;
+        boolean z0, z1;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r1 := @parameter0: com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager;
+
+        r2 := @parameter1: javax.xml.transform.Source;
+
+        i0 := @parameter2: int;
+
+        r3 := @parameter3: com.sun.org.apache.xml.internal.dtm.DTMWSFilter;
+
+        r4 := @parameter4: com.sun.org.apache.xml.internal.utils.XMLStringFactory;
+
+        z0 := @parameter5: boolean;
+
+        z1 := @parameter6: boolean;
+
+        specialinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void <init>(com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager,javax.xml.transform.Source,int,com.sun.org.apache.xml.internal.dtm.DTMWSFilter,com.sun.org.apache.xml.internal.utils.XMLStringFactory,boolean,int,boolean,boolean)>(r1, r2, i0, r3, r4, z0, 512, z1, 0);
+
+        return;
+    }
+
+    public void <init>(com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager, javax.xml.transform.Source, int, com.sun.org.apache.xml.internal.dtm.DTMWSFilter, com.sun.org.apache.xml.internal.utils.XMLStringFactory, boolean, int, boolean, boolean)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager r1;
+        javax.xml.transform.dom.DOMSource r8;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        java.util.HashMap $r13, $r14;
+        javax.xml.transform.Source r2;
+        byte $b2;
+        int[] $r6, $r7;
+        org.w3c.dom.Document $r10, $r12;
+        org.w3c.dom.Node $r9;
+        int i0, i1, $i4, $i6;
+        boolean z0, z1, z2, $z3, $z4;
+        com.sun.org.apache.xml.internal.dtm.DTMWSFilter r3;
+        com.sun.org.apache.xml.internal.utils.XMLStringFactory r4;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r1 := @parameter0: com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager;
+
+        r2 := @parameter1: javax.xml.transform.Source;
+
+        i0 := @parameter2: int;
+
+        r3 := @parameter3: com.sun.org.apache.xml.internal.dtm.DTMWSFilter;
+
+        r4 := @parameter4: com.sun.org.apache.xml.internal.utils.XMLStringFactory;
+
+        z0 := @parameter5: boolean;
+
+        i1 := @parameter6: int;
+
+        z1 := @parameter7: boolean;
+
+        z2 := @parameter8: boolean;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2: void <init>(com.sun.org.apache.xml.internal.dtm.DTMManager,javax.xml.transform.Source,int,com.sun.org.apache.xml.internal.dtm.DTMWSFilter,com.sun.org.apache.xml.internal.utils.XMLStringFactory,boolean,int,boolean,boolean,boolean)>(r1, r2, i0, r3, r4, z0, i1, 0, z1, z2);
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _uriCount> = 0;
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _idx> = 1;
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: boolean _preserve> = 0;
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: boolean _escaping> = 1;
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: boolean _disableEscaping> = 0;
+
+        $i4 = (int) -1;
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _textNodeToProcess> = $i4;
+
+        $i6 = (int) -1;
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _namesSize> = $i6;
+
+        $r13 = new java.util.HashMap;
+
+        specialinvoke $r13.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.util.Map _nsIndex> = $r13;
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _size> = 0;
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xalan.internal.xsltc.dom.BitArray _dontEscape> = null;
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.util.Map _node2Ids> = null;
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: boolean _hasDOMSource> = 0;
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager _dtmManager> = r1;
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _size> = i1;
+
+        if i1 > 64 goto label1;
+
+        $b2 = 4;
+
+        goto label2;
+
+     label1:
+        $b2 = 64;
+
+     label2:
+        $r6 = newarray (int)[$b2];
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int[] _xmlSpaceStack> = $r6;
+
+        $r7 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int[] _xmlSpaceStack>;
+
+        $r7[0] = 0;
+
+        $z3 = r2 instanceof javax.xml.transform.dom.DOMSource;
+
+        if $z3 == 0 goto label5;
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: boolean _hasDOMSource> = 1;
+
+        r8 = (javax.xml.transform.dom.DOMSource) r2;
+
+        $r9 = virtualinvoke r8.<javax.xml.transform.dom.DOMSource: org.w3c.dom.Node getNode()>();
+
+        $z4 = $r9 instanceof org.w3c.dom.Document;
+
+        if $z4 == 0 goto label3;
+
+        $r12 = (org.w3c.dom.Document) $r9;
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: org.w3c.dom.Document _document> = $r12;
+
+        goto label4;
+
+     label3:
+        $r10 = interfaceinvoke $r9.<org.w3c.dom.Node: org.w3c.dom.Document getOwnerDocument()>();
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: org.w3c.dom.Document _document> = $r10;
+
+     label4:
+        $r14 = new java.util.HashMap;
+
+        specialinvoke $r14.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.util.Map _node2Ids> = $r14;
+
+     label5:
+        return;
+    }
+
+    public void migrateTo(com.sun.org.apache.xml.internal.dtm.DTMManager)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager $r2;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        com.sun.org.apache.xml.internal.dtm.DTMManager r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r1 := @parameter0: com.sun.org.apache.xml.internal.dtm.DTMManager;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2: void migrateTo(com.sun.org.apache.xml.internal.dtm.DTMManager)>(r1);
+
+        $z0 = r1 instanceof com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = (com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager) r1;
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager _dtmManager> = $r2;
+
+     label1:
+        return;
+    }
+
+    public int getElementById(java.lang.String)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        java.lang.Integer r6;
+        org.w3c.dom.Element $r3;
+        org.w3c.dom.Document $r2;
+        java.util.Map $r4;
+        int $i0, $i2, $i4;
+        java.lang.Object $r5;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: org.w3c.dom.Document _document>;
+
+        $r3 = interfaceinvoke $r2.<org.w3c.dom.Document: org.w3c.dom.Element getElementById(java.lang.String)>(r1);
+
+        if $r3 == null goto label3;
+
+        $r4 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.util.Map _node2Ids>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Map: java.lang.Object get(java.lang.Object)>($r3);
+
+        r6 = (java.lang.Integer) $r5;
+
+        if r6 == null goto label1;
+
+        $i0 = virtualinvoke r6.<java.lang.Integer: int intValue()>();
+
+        goto label2;
+
+     label1:
+        $i2 = (int) -1;
+
+        $i0 = $i2;
+
+     label2:
+        return $i0;
+
+     label3:
+        $i4 = (int) -1;
+
+        return $i4;
+    }
+
+    public boolean hasDOMSource()
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        $z0 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: boolean _hasDOMSource>;
+
+        return $z0;
+    }
+
+    private void xmlSpaceDefine(java.lang.String, int)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r1;
+        int[] $r2;
+        int $i0, $i1, i2;
+        java.lang.String r0;
+        boolean $z0, $z1;
+
+        r1 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        i2 := @parameter1: int;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("preserve");
+
+        $z1 = r1.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: boolean _preserve>;
+
+        if $z0 == $z1 goto label1;
+
+        $r2 = r1.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int[] _xmlSpaceStack>;
+
+        $i0 = r1.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _idx>;
+
+        $i1 = $i0 + 1;
+
+        r1.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _idx> = $i1;
+
+        $r2[$i0] = i2;
+
+        r1.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: boolean _preserve> = $z0;
+
+     label1:
+        return;
+    }
+
+    private void xmlSpaceRevert(int)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        int[] $r1;
+        int i0, $i1, $i2, $i3, $i4, $i5;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int[] _xmlSpaceStack>;
+
+        $i1 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _idx>;
+
+        $i2 = $i1 - 1;
+
+        $i3 = $r1[$i2];
+
+        if i0 != $i3 goto label3;
+
+        $i4 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _idx>;
+
+        $i5 = $i4 - 1;
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _idx> = $i5;
+
+        $z0 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: boolean _preserve>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: boolean _preserve> = $z1;
+
+     label3:
+        return;
+    }
+
+    protected boolean getShouldStripWhitespace()
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        $z0 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: boolean _preserve>;
+
+        if $z0 == 0 goto label1;
+
+        $z1 = 0;
+
+        goto label2;
+
+     label1:
+        $z1 = specialinvoke r0.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2: boolean getShouldStripWhitespace()>();
+
+     label2:
+        return $z1;
+    }
+
+    private void handleTextEscaping()
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        short $s2;
+        int $i0, $i1, $i3, $i4, $i5, $i6, $i7, $i8, $i10, $i11, $i13;
+        boolean $z0;
+        com.sun.org.apache.xalan.internal.xsltc.dom.BitArray $r1, $r2, $r3, $r4, $r5, $r7;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        $z0 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: boolean _disableEscaping>;
+
+        if $z0 == 0 goto label3;
+
+        $i0 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _textNodeToProcess>;
+
+        $i10 = (int) -1;
+
+        if $i0 == $i10 goto label3;
+
+        $i1 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _textNodeToProcess>;
+
+        $s2 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: short _type(int)>($i1);
+
+        $i11 = (int) $s2;
+
+        if $i11 != 3 goto label3;
+
+        $r1 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xalan.internal.xsltc.dom.BitArray _dontEscape>;
+
+        if $r1 != null goto label1;
+
+        $r7 = new com.sun.org.apache.xalan.internal.xsltc.dom.BitArray;
+
+        $i8 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _size>;
+
+        specialinvoke $r7.<com.sun.org.apache.xalan.internal.xsltc.dom.BitArray: void <init>(int)>($i8);
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xalan.internal.xsltc.dom.BitArray _dontEscape> = $r7;
+
+     label1:
+        $i3 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _textNodeToProcess>;
+
+        $r2 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xalan.internal.xsltc.dom.BitArray _dontEscape>;
+
+        $i4 = virtualinvoke $r2.<com.sun.org.apache.xalan.internal.xsltc.dom.BitArray: int size()>();
+
+        if $i3 < $i4 goto label2;
+
+        $r5 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xalan.internal.xsltc.dom.BitArray _dontEscape>;
+
+        $r4 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xalan.internal.xsltc.dom.BitArray _dontEscape>;
+
+        $i6 = virtualinvoke $r4.<com.sun.org.apache.xalan.internal.xsltc.dom.BitArray: int size()>();
+
+        $i7 = $i6 * 2;
+
+        virtualinvoke $r5.<com.sun.org.apache.xalan.internal.xsltc.dom.BitArray: void resize(int)>($i7);
+
+     label2:
+        $r3 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xalan.internal.xsltc.dom.BitArray _dontEscape>;
+
+        $i5 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _textNodeToProcess>;
+
+        virtualinvoke $r3.<com.sun.org.apache.xalan.internal.xsltc.dom.BitArray: void setBit(int)>($i5);
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: boolean _disableEscaping> = 0;
+
+     label3:
+        $i13 = (int) -1;
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _textNodeToProcess> = $i13;
+
+        return;
+    }
+
+    public void characters(char[], int, int) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        int i0, i1, $i2;
+        char[] r1;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r1 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2: void characters(char[],int,int)>(r1, i0, i1);
+
+        $z0 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: boolean _escaping>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: boolean _disableEscaping> = $z1;
+
+        $i2 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int getNumberOfNodes()>();
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _textNodeToProcess> = $i2;
+
+        return;
+    }
+
+    public void startDocument() throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        java.util.Map $r1;
+        int $i0, $i1;
+        java.lang.Integer $r2, $r3;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2: void startDocument()>();
+
+        $r1 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.util.Map _nsIndex>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        $i0 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _uriCount>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _uriCount> = $i1;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        interfaceinvoke $r1.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, $r3);
+
+        specialinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void definePrefixAndUri(java.lang.String,java.lang.String)>("xml", "http://www.w3.org/XML/1998/namespace");
+
+        return;
+    }
+
+    public void endDocument() throws org.xml.sax.SAXException
+    {
+        int $i0;
+        com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable $r1;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2: void endDocument()>();
+
+        specialinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void handleTextEscaping()>();
+
+        $r1 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable m_expandedNameTable>;
+
+        $i0 = virtualinvoke $r1.<com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable: int getSize()>();
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _namesSize> = $i0;
+
+        return;
+    }
+
+    public void startElement(java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes, org.w3c.dom.Node) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        java.lang.Integer $r8;
+        com.sun.org.apache.xml.internal.utils.IntStack $r6;
+        org.w3c.dom.Node r5;
+        java.util.Map $r7;
+        org.xml.sax.Attributes r4;
+        int $i0;
+        java.lang.String r1, r2, r3;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.String;
+
+        r4 := @parameter3: org.xml.sax.Attributes;
+
+        r5 := @parameter4: org.w3c.dom.Node;
+
+        virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void startElement(java.lang.String,java.lang.String,java.lang.String,org.xml.sax.Attributes)>(r1, r2, r3, r4);
+
+        $z0 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: boolean m_buildIdIndex>;
+
+        if $z0 == 0 goto label1;
+
+        $r7 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.util.Map _node2Ids>;
+
+        $r6 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xml.internal.utils.IntStack m_parents>;
+
+        $i0 = virtualinvoke $r6.<com.sun.org.apache.xml.internal.utils.IntStack: int peek()>();
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        interfaceinvoke $r7.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r5, $r8);
+
+     label1:
+        return;
+    }
+
+    public void startElement(java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.dtm.DTMWSFilter $r5;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        com.sun.org.apache.xml.internal.utils.IntStack $r7;
+        org.xml.sax.Attributes r4;
+        int $i0, $i1;
+        java.lang.String r1, r2, r3, $r6;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.String;
+
+        r4 := @parameter3: org.xml.sax.Attributes;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2: void startElement(java.lang.String,java.lang.String,java.lang.String,org.xml.sax.Attributes)>(r1, r2, r3, r4);
+
+        specialinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void handleTextEscaping()>();
+
+        $r5 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xml.internal.dtm.DTMWSFilter m_wsfilter>;
+
+        if $r5 == null goto label1;
+
+        $i0 = interfaceinvoke r4.<org.xml.sax.Attributes: int getIndex(java.lang.String)>("xml:space");
+
+        if $i0 < 0 goto label1;
+
+        $r6 = interfaceinvoke r4.<org.xml.sax.Attributes: java.lang.String getValue(int)>($i0);
+
+        $r7 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xml.internal.utils.IntStack m_parents>;
+
+        $i1 = virtualinvoke $r7.<com.sun.org.apache.xml.internal.utils.IntStack: int peek()>();
+
+        specialinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void xmlSpaceDefine(java.lang.String,int)>($r6, $i1);
+
+     label1:
+        return;
+    }
+
+    public void endElement(java.lang.String, java.lang.String, java.lang.String) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xml.internal.dtm.DTMWSFilter $r4;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        int $i0;
+        java.lang.String r1, r2, r3;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.String;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2: void endElement(java.lang.String,java.lang.String,java.lang.String)>(r1, r2, r3);
+
+        specialinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void handleTextEscaping()>();
+
+        $r4 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xml.internal.dtm.DTMWSFilter m_wsfilter>;
+
+        if $r4 == null goto label1;
+
+        $i0 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int m_previous>;
+
+        specialinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void xmlSpaceRevert(int)>($i0);
+
+     label1:
+        return;
+    }
+
+    public void processingInstruction(java.lang.String, java.lang.String) throws org.xml.sax.SAXException
+    {
+        java.lang.String r1, r2;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2: void processingInstruction(java.lang.String,java.lang.String)>(r1, r2);
+
+        specialinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void handleTextEscaping()>();
+
+        return;
+    }
+
+    public void ignorableWhitespace(char[], int, int) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        int i0, i1, $i2;
+        char[] r1;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r1 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2: void ignorableWhitespace(char[],int,int)>(r1, i0, i1);
+
+        $i2 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int getNumberOfNodes()>();
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _textNodeToProcess> = $i2;
+
+        return;
+    }
+
+    public void startPrefixMapping(java.lang.String, java.lang.String) throws org.xml.sax.SAXException
+    {
+        java.lang.String r1, r2;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2: void startPrefixMapping(java.lang.String,java.lang.String)>(r1, r2);
+
+        specialinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void handleTextEscaping()>();
+
+        specialinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void definePrefixAndUri(java.lang.String,java.lang.String)>(r1, r2);
+
+        return;
+    }
+
+    private void definePrefixAndUri(java.lang.String, java.lang.String) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        java.lang.Integer $r2, $r6;
+        java.util.Map $r3, $r5;
+        int $i0, $i1, $i2;
+        java.lang.Object $r4;
+        java.lang.String r1, r7;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r7 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        $i0 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int getIdForNamespace(java.lang.String)>(r1);
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.util.Map _nsIndex>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>($r2);
+
+        if $r4 != null goto label1;
+
+        $r5 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.util.Map _nsIndex>;
+
+        $i1 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _uriCount>;
+
+        $i2 = $i1 + 1;
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _uriCount> = $i2;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, $r6);
+
+     label1:
+        return;
+    }
+
+    public void comment(char[], int, int) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        int i0, i1;
+        char[] r1;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r1 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2: void comment(char[],int,int)>(r1, i0, i1);
+
+        specialinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void handleTextEscaping()>();
+
+        return;
+    }
+
+    public boolean setEscaping(boolean)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        boolean z0, z1;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        z1 := @parameter0: boolean;
+
+        z0 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: boolean _escaping>;
+
+        r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: boolean _escaping> = z1;
+
+        return z0;
+    }
+
+    public void print(int, int)
+    {
+        java.lang.StringBuilder $r6, $r7, $r12, $r13, $r14, $r18, $r20, $r21, $r23, $r24, $r26, $r27, $r28;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        short $s1;
+        int i0, $i2, i3, $i4, i5, i6, $i7, $i9, $i11;
+        java.lang.String $r2, $r3, $r8, $r15, $r19, $r22, $r25;
+        java.io.PrintStream $r1, $r5, $r9, $r11, $r17;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        i3 := @parameter1: int;
+
+        $s1 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: short getNodeType(int)>(i0);
+
+        $i7 = (int) $s1;
+
+        tableswitch($i7)
+        {
+            case 0: goto label1;
+            case 1: goto label3;
+            case 2: goto label3;
+            case 3: goto label2;
+            case 4: goto label3;
+            case 5: goto label3;
+            case 6: goto label3;
+            case 7: goto label2;
+            case 8: goto label2;
+            case 9: goto label1;
+            default: goto label3;
+        };
+
+     label1:
+        $i2 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int getFirstChild(int)>(i0);
+
+        virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void print(int,int)>($i2, i3);
+
+        goto label8;
+
+     label2:
+        $r1 = <java.lang.System: java.io.PrintStream out>;
+
+        $r2 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getStringValueX(int)>(i0);
+
+        virtualinvoke $r1.<java.io.PrintStream: void print(java.lang.String)>($r2);
+
+        goto label8;
+
+     label3:
+        $r3 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getNodeName(int)>(i0);
+
+        $r5 = <java.lang.System: java.io.PrintStream out>;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintStream: void print(java.lang.String)>($r8);
+
+        i5 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int getFirstAttribute(int)>(i0);
+
+     label4:
+        $i9 = (int) -1;
+
+        if i5 == $i9 goto label5;
+
+        $r17 = <java.lang.System: java.io.PrintStream out>;
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r19 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getNodeName(int)>(i5);
+
+        $r20 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("=\"");
+
+        $r22 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getStringValueX(int)>(i5);
+
+        $r23 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r17.<java.io.PrintStream: void print(java.lang.String)>($r25);
+
+        i5 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int getNextAttribute(int)>(i5);
+
+        goto label4;
+
+     label5:
+        $r9 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r9.<java.io.PrintStream: void print(char)>(62);
+
+        i6 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int getFirstChild(int)>(i0);
+
+     label6:
+        $i11 = (int) -1;
+
+        if i6 == $i11 goto label7;
+
+        $i4 = i3 + 1;
+
+        virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void print(int,int)>(i6, $i4);
+
+        i6 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int getNextSibling(int)>(i6);
+
+        goto label6;
+
+     label7:
+        $r11 = <java.lang.System: java.io.PrintStream out>;
+
+        $r28 = new java.lang.StringBuilder;
+
+        specialinvoke $r28.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(62);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r11.<java.io.PrintStream: void println(java.lang.String)>($r15);
+
+     label8:
+        return;
+    }
+
+    public java.lang.String getNodeName(int)
+    {
+        short $s1;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        int i0, $i2;
+        java.lang.String $r1, $r2;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        $s1 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: short getNodeType(int)>(i0);
+
+        $i2 = (int) $s1;
+
+        tableswitch($i2)
+        {
+            case 0: goto label1;
+            case 1: goto label3;
+            case 2: goto label3;
+            case 3: goto label1;
+            case 4: goto label3;
+            case 5: goto label3;
+            case 6: goto label3;
+            case 7: goto label3;
+            case 8: goto label1;
+            case 9: goto label1;
+            case 10: goto label3;
+            case 11: goto label3;
+            case 12: goto label3;
+            case 13: goto label2;
+            default: goto label3;
+        };
+
+     label1:
+        return "";
+
+     label2:
+        $r1 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getLocalName(int)>(i0);
+
+        return $r1;
+
+     label3:
+        $r2 = specialinvoke r0.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2: java.lang.String getNodeName(int)>(i0);
+
+        return $r2;
+    }
+
+    public java.lang.String getNamespaceName(int)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        int i0, $i2;
+        java.lang.String $r1, $r2;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        $i2 = (int) -1;
+
+        if i0 != $i2 goto label1;
+
+        return "";
+
+     label1:
+        $r1 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getNamespaceURI(int)>(i0);
+
+        if $r1 != null goto label2;
+
+        $r2 = "";
+
+        goto label3;
+
+     label2:
+        $r2 = $r1;
+
+     label3:
+        return $r2;
+    }
+
+    public int getAttributeNode(int, int)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        int i0, $i1, i2, i3, $i5, $i7;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i2 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        i3 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int getFirstAttribute(int)>(i0);
+
+     label1:
+        $i5 = (int) -1;
+
+        if i3 == $i5 goto label3;
+
+        $i1 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int getExpandedTypeID(int)>(i3);
+
+        if $i1 != i2 goto label2;
+
+        return i3;
+
+     label2:
+        i3 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int getNextAttribute(int)>(i3);
+
+        goto label1;
+
+     label3:
+        $i7 = (int) -1;
+
+        return $i7;
+    }
+
+    public java.lang.String getAttributeValue(int, int)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        int i0, i1, $i2, $i4;
+        java.lang.String $r1;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $i2 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int getAttributeNode(int,int)>(i0, i1);
+
+        $i4 = (int) -1;
+
+        if $i2 == $i4 goto label1;
+
+        $r1 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getStringValueX(int)>($i2);
+
+        goto label2;
+
+     label1:
+        $r1 = "";
+
+     label2:
+        return $r1;
+    }
+
+    public java.lang.String getAttributeValue(java.lang.String, int)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        int $i0, i1;
+        java.lang.String r1, $r2;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        $i0 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int getGeneralizedType(java.lang.String)>(r1);
+
+        $r2 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getAttributeValue(int,int)>($i0, i1);
+
+        return $r2;
+    }
+
+    public com.sun.org.apache.xml.internal.dtm.DTMAxisIterator getChildren(int)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r1;
+        int i0;
+        com.sun.org.apache.xml.internal.dtm.DTMAxisIterator $r2;
+        com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$ChildrenIterator $r0;
+
+        r1 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        $r0 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$ChildrenIterator;
+
+        specialinvoke $r0.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$ChildrenIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2)>(r1);
+
+        $r2 = virtualinvoke $r0.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$ChildrenIterator: com.sun.org.apache.xml.internal.dtm.DTMAxisIterator setStartNode(int)>(i0);
+
+        return $r2;
+    }
+
+    public com.sun.org.apache.xml.internal.dtm.DTMAxisIterator getTypedChildren(int)
+    {
+        int i0;
+        com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedChildrenIterator $r0;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r1;
+
+        r1 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        $r0 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedChildrenIterator;
+
+        specialinvoke $r0.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedChildrenIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2,int)>(r1, i0);
+
+        return $r0;
+    }
+
+    public com.sun.org.apache.xml.internal.dtm.DTMAxisIterator getAxisIterator(int)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r1;
+        com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$PrecedingIterator $r4;
+        com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$ParentIterator $r5;
+        com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$FollowingSiblingIterator $r7;
+        com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators$RootIterator $r0;
+        int i0;
+        com.sun.org.apache.xml.internal.dtm.DTMAxisIterator $r10, $r15;
+        java.lang.String $r17;
+        com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$FollowingIterator $r8;
+        com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$ChildrenIterator $r12;
+        com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$AncestorIterator $r14, $r16;
+        com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$DescendantIterator $r9, $r11;
+        com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators$NamespaceIterator $r6;
+        com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$PrecedingSiblingIterator $r3;
+        com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$AttributeIterator $r13;
+        com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators$SingletonIterator $r2;
+
+        r1 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        tableswitch(i0)
+        {
+            case 0: goto label04;
+            case 1: goto label05;
+            case 2: goto label06;
+            case 3: goto label02;
+            case 4: goto label07;
+            case 5: goto label08;
+            case 6: goto label09;
+            case 7: goto label11;
+            case 8: goto label15;
+            case 9: goto label13;
+            case 10: goto label03;
+            case 11: goto label10;
+            case 12: goto label12;
+            case 13: goto label01;
+            case 14: goto label15;
+            case 15: goto label15;
+            case 16: goto label15;
+            case 17: goto label15;
+            case 18: goto label15;
+            case 19: goto label14;
+            default: goto label15;
+        };
+
+     label01:
+        $r2 = new com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators$SingletonIterator;
+
+        specialinvoke $r2.<com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators$SingletonIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators)>(r1);
+
+        return $r2;
+
+     label02:
+        $r12 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$ChildrenIterator;
+
+        specialinvoke $r12.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$ChildrenIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2)>(r1);
+
+        return $r12;
+
+     label03:
+        $r5 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$ParentIterator;
+
+        specialinvoke $r5.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$ParentIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2)>(r1);
+
+        return $r5;
+
+     label04:
+        $r16 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$AncestorIterator;
+
+        specialinvoke $r16.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$AncestorIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2)>(r1);
+
+        return $r16;
+
+     label05:
+        $r14 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$AncestorIterator;
+
+        specialinvoke $r14.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$AncestorIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2)>(r1);
+
+        $r15 = virtualinvoke $r14.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$AncestorIterator: com.sun.org.apache.xml.internal.dtm.DTMAxisIterator includeSelf()>();
+
+        return $r15;
+
+     label06:
+        $r13 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$AttributeIterator;
+
+        specialinvoke $r13.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$AttributeIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2)>(r1);
+
+        return $r13;
+
+     label07:
+        $r11 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$DescendantIterator;
+
+        specialinvoke $r11.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$DescendantIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2)>(r1);
+
+        return $r11;
+
+     label08:
+        $r9 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$DescendantIterator;
+
+        specialinvoke $r9.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$DescendantIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2)>(r1);
+
+        $r10 = virtualinvoke $r9.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$DescendantIterator: com.sun.org.apache.xml.internal.dtm.DTMAxisIterator includeSelf()>();
+
+        return $r10;
+
+     label09:
+        $r8 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$FollowingIterator;
+
+        specialinvoke $r8.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$FollowingIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2)>(r1);
+
+        return $r8;
+
+     label10:
+        $r4 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$PrecedingIterator;
+
+        specialinvoke $r4.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$PrecedingIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2)>(r1);
+
+        return $r4;
+
+     label11:
+        $r7 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$FollowingSiblingIterator;
+
+        specialinvoke $r7.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$FollowingSiblingIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2)>(r1);
+
+        return $r7;
+
+     label12:
+        $r3 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$PrecedingSiblingIterator;
+
+        specialinvoke $r3.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$PrecedingSiblingIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2)>(r1);
+
+        return $r3;
+
+     label13:
+        $r6 = new com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators$NamespaceIterator;
+
+        specialinvoke $r6.<com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators$NamespaceIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators)>(r1);
+
+        return $r6;
+
+     label14:
+        $r0 = new com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators$RootIterator;
+
+        specialinvoke $r0.<com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators$RootIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators)>(r1);
+
+        return $r0;
+
+     label15:
+        $r17 = staticinvoke <com.sun.org.apache.xml.internal.dtm.Axis: java.lang.String getNames(int)>(i0);
+
+        staticinvoke <com.sun.org.apache.xalan.internal.xsltc.runtime.BasisLibrary: void runTimeError(java.lang.String,java.lang.Object)>("AXIS_SUPPORT_ERR", $r17);
+
+        return null;
+    }
+
+    public com.sun.org.apache.xml.internal.dtm.DTMAxisIterator getTypedAxisIterator(int, int)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r1;
+        com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$ParentIterator $r24;
+        com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedFollowingIterator $r30;
+        com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedDescendantIterator $r28, $r29;
+        int i0, i1, $i3;
+        com.sun.org.apache.xml.internal.dtm.DTMAxisIterator $r6, $r11, $r16, $r19;
+        java.lang.String $r18;
+        com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedRootIterator $r35;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl$TypedNamespaceIterator $r34;
+        com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedAncestorIterator $r25, $r26;
+        com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedFollowingSiblingIterator $r32;
+        com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedSingletonIterator $r22;
+        com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedAttributeIterator $r27;
+        com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedChildrenIterator $r21, $r23;
+        com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedPrecedingSiblingIterator $r33;
+        com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedPrecedingIterator $r31;
+
+        r1 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        if i0 != 3 goto label01;
+
+        $r21 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedChildrenIterator;
+
+        specialinvoke $r21.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedChildrenIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2,int)>(r1, i1);
+
+        return $r21;
+
+     label01:
+        $i3 = (int) -1;
+
+        if i1 != $i3 goto label02;
+
+        $r19 = <com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xml.internal.dtm.DTMAxisIterator EMPTYITERATOR>;
+
+        return $r19;
+
+     label02:
+        tableswitch(i0)
+        {
+            case 0: goto label06;
+            case 1: goto label07;
+            case 2: goto label08;
+            case 3: goto label04;
+            case 4: goto label09;
+            case 5: goto label10;
+            case 6: goto label11;
+            case 7: goto label13;
+            case 8: goto label17;
+            case 9: goto label15;
+            case 10: goto label05;
+            case 11: goto label12;
+            case 12: goto label14;
+            case 13: goto label03;
+            case 14: goto label17;
+            case 15: goto label17;
+            case 16: goto label17;
+            case 17: goto label17;
+            case 18: goto label17;
+            case 19: goto label16;
+            default: goto label17;
+        };
+
+     label03:
+        $r22 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedSingletonIterator;
+
+        specialinvoke $r22.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedSingletonIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2,int)>(r1, i1);
+
+        return $r22;
+
+     label04:
+        $r23 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedChildrenIterator;
+
+        specialinvoke $r23.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedChildrenIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2,int)>(r1, i1);
+
+        return $r23;
+
+     label05:
+        $r24 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$ParentIterator;
+
+        specialinvoke $r24.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$ParentIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2)>(r1);
+
+        $r6 = virtualinvoke $r24.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$ParentIterator: com.sun.org.apache.xml.internal.dtm.DTMAxisIterator setNodeType(int)>(i1);
+
+        return $r6;
+
+     label06:
+        $r25 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedAncestorIterator;
+
+        specialinvoke $r25.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedAncestorIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2,int)>(r1, i1);
+
+        return $r25;
+
+     label07:
+        $r26 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedAncestorIterator;
+
+        specialinvoke $r26.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedAncestorIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2,int)>(r1, i1);
+
+        $r16 = virtualinvoke $r26.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedAncestorIterator: com.sun.org.apache.xml.internal.dtm.DTMAxisIterator includeSelf()>();
+
+        return $r16;
+
+     label08:
+        $r27 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedAttributeIterator;
+
+        specialinvoke $r27.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedAttributeIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2,int)>(r1, i1);
+
+        return $r27;
+
+     label09:
+        $r28 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedDescendantIterator;
+
+        specialinvoke $r28.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedDescendantIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2,int)>(r1, i1);
+
+        return $r28;
+
+     label10:
+        $r29 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedDescendantIterator;
+
+        specialinvoke $r29.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedDescendantIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2,int)>(r1, i1);
+
+        $r11 = virtualinvoke $r29.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedDescendantIterator: com.sun.org.apache.xml.internal.dtm.DTMAxisIterator includeSelf()>();
+
+        return $r11;
+
+     label11:
+        $r30 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedFollowingIterator;
+
+        specialinvoke $r30.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedFollowingIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2,int)>(r1, i1);
+
+        return $r30;
+
+     label12:
+        $r31 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedPrecedingIterator;
+
+        specialinvoke $r31.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedPrecedingIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2,int)>(r1, i1);
+
+        return $r31;
+
+     label13:
+        $r32 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedFollowingSiblingIterator;
+
+        specialinvoke $r32.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedFollowingSiblingIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2,int)>(r1, i1);
+
+        return $r32;
+
+     label14:
+        $r33 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedPrecedingSiblingIterator;
+
+        specialinvoke $r33.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedPrecedingSiblingIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2,int)>(r1, i1);
+
+        return $r33;
+
+     label15:
+        $r34 = new com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl$TypedNamespaceIterator;
+
+        specialinvoke $r34.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl$TypedNamespaceIterator: void <init>(com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl,int)>(r1, i1);
+
+        return $r34;
+
+     label16:
+        $r35 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedRootIterator;
+
+        specialinvoke $r35.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedRootIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2,int)>(r1, i1);
+
+        return $r35;
+
+     label17:
+        $r18 = staticinvoke <com.sun.org.apache.xml.internal.dtm.Axis: java.lang.String getNames(int)>(i0);
+
+        staticinvoke <com.sun.org.apache.xalan.internal.xsltc.runtime.BasisLibrary: void runTimeError(java.lang.String,java.lang.Object)>("TYPED_AXIS_SUPPORT_ERR", $r18);
+
+        return null;
+    }
+
+    public com.sun.org.apache.xml.internal.dtm.DTMAxisIterator getNamespaceAxisIterator(int, int)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl$NamespaceChildrenIterator $r5;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r1;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl$NamespaceAttributeIterator $r6;
+        int i0, i1, $i3;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl$NamespaceWildcardIterator $r7;
+        com.sun.org.apache.xml.internal.dtm.DTMAxisIterator $r4;
+
+        r1 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        $i3 = (int) -1;
+
+        if i0 != $i3 goto label1;
+
+        $r4 = <com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xml.internal.dtm.DTMAxisIterator EMPTYITERATOR>;
+
+        return $r4;
+
+     label1:
+        lookupswitch(i1)
+        {
+            case 2: goto label3;
+            case 3: goto label2;
+            default: goto label4;
+        };
+
+     label2:
+        $r5 = new com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl$NamespaceChildrenIterator;
+
+        specialinvoke $r5.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl$NamespaceChildrenIterator: void <init>(com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl,int)>(r1, i0);
+
+        return $r5;
+
+     label3:
+        $r6 = new com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl$NamespaceAttributeIterator;
+
+        specialinvoke $r6.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl$NamespaceAttributeIterator: void <init>(com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl,int)>(r1, i0);
+
+        return $r6;
+
+     label4:
+        $r7 = new com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl$NamespaceWildcardIterator;
+
+        specialinvoke $r7.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl$NamespaceWildcardIterator: void <init>(com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl,int,int)>(r1, i1, i0);
+
+        return $r7;
+    }
+
+    public com.sun.org.apache.xml.internal.dtm.DTMAxisIterator getTypedDescendantIterator(int)
+    {
+        int i0;
+        com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedDescendantIterator $r0;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r1;
+
+        r1 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        $r0 = new com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedDescendantIterator;
+
+        specialinvoke $r0.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2$TypedDescendantIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2,int)>(r1, i0);
+
+        return $r0;
+    }
+
+    public com.sun.org.apache.xml.internal.dtm.DTMAxisIterator getNthDescendant(int, int, boolean)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r1;
+        int i0, i1;
+        com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators$NthDescendantIterator $r0;
+        boolean z0;
+
+        r1 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        z0 := @parameter2: boolean;
+
+        $r0 = new com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators$NthDescendantIterator;
+
+        specialinvoke $r0.<com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators$NthDescendantIterator: void <init>(com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators,int)>(r1, i0);
+
+        return $r0;
+    }
+
+    public void characters(int, com.sun.org.apache.xml.internal.serializer.SerializationHandler) throws com.sun.org.apache.xalan.internal.xsltc.TransletException
+    {
+        com.sun.org.apache.xalan.internal.xsltc.TransletException $r4;
+        com.sun.org.apache.xml.internal.serializer.SerializationHandler r1;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        org.xml.sax.SAXException $r2;
+        int i0, $i2;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: com.sun.org.apache.xml.internal.serializer.SerializationHandler;
+
+        $i2 = (int) -1;
+
+        if i0 == $i2 goto label4;
+
+     label1:
+        virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void dispatchCharactersEvents(int,org.xml.sax.ContentHandler,boolean)>(i0, r1, 0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r4 = new com.sun.org.apache.xalan.internal.xsltc.TransletException;
+
+        specialinvoke $r4.<com.sun.org.apache.xalan.internal.xsltc.TransletException: void <init>(java.lang.Exception)>($r2);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch org.xml.sax.SAXException from label1 to label2 with label3;
+    }
+
+    public void copy(com.sun.org.apache.xml.internal.dtm.DTMAxisIterator, com.sun.org.apache.xml.internal.serializer.SerializationHandler) throws com.sun.org.apache.xalan.internal.xsltc.TransletException
+    {
+        com.sun.org.apache.xml.internal.serializer.SerializationHandler r2;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r1;
+        int $i0, $i2;
+        com.sun.org.apache.xml.internal.dtm.DTMAxisIterator r0;
+
+        r1 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r0 := @parameter0: com.sun.org.apache.xml.internal.dtm.DTMAxisIterator;
+
+        r2 := @parameter1: com.sun.org.apache.xml.internal.serializer.SerializationHandler;
+
+     label1:
+        $i0 = interfaceinvoke r0.<com.sun.org.apache.xml.internal.dtm.DTMAxisIterator: int next()>();
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label2;
+
+        virtualinvoke r1.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void copy(int,com.sun.org.apache.xml.internal.serializer.SerializationHandler)>($i0, r2);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void copy(com.sun.org.apache.xml.internal.serializer.SerializationHandler) throws com.sun.org.apache.xalan.internal.xsltc.TransletException
+    {
+        int $i0;
+        com.sun.org.apache.xml.internal.serializer.SerializationHandler r1;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r1 := @parameter0: com.sun.org.apache.xml.internal.serializer.SerializationHandler;
+
+        $i0 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int getDocument()>();
+
+        virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void copy(int,com.sun.org.apache.xml.internal.serializer.SerializationHandler)>($i0, r1);
+
+        return;
+    }
+
+    public void copy(int, com.sun.org.apache.xml.internal.serializer.SerializationHandler) throws com.sun.org.apache.xalan.internal.xsltc.TransletException
+    {
+        int i0;
+        com.sun.org.apache.xml.internal.serializer.SerializationHandler r1;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: com.sun.org.apache.xml.internal.serializer.SerializationHandler;
+
+        specialinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void copy(int,com.sun.org.apache.xml.internal.serializer.SerializationHandler,boolean)>(i0, r1, 0);
+
+        return;
+    }
+
+    private final void copy(int, com.sun.org.apache.xml.internal.serializer.SerializationHandler, boolean) throws com.sun.org.apache.xalan.internal.xsltc.TransletException
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        com.sun.org.apache.xml.internal.serializer.SerializationHandler r1;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, i8, i9, $i11, $i13;
+        java.lang.String $r2, $r3, $r4, $r7, $r8, $r9, $r10, $r11;
+        boolean $z0, z1, z2, z3, $z4;
+        com.sun.org.apache.xalan.internal.xsltc.TransletException $r14;
+        java.lang.Exception $r12;
+        com.sun.org.apache.xalan.internal.xsltc.dom.BitArray $r5, $r6;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: com.sun.org.apache.xml.internal.serializer.SerializationHandler;
+
+        z1 := @parameter2: boolean;
+
+        $i1 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int makeNodeIdentity(int)>(i0);
+
+        $i2 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _exptype2(int)>($i1);
+
+        $i3 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _exptype2Type(int)>($i2);
+
+     label01:
+        tableswitch($i3)
+        {
+            case 0: goto label02;
+            case 1: goto label11;
+            case 2: goto label09;
+            case 3: goto label07;
+            case 4: goto label11;
+            case 5: goto label11;
+            case 6: goto label11;
+            case 7: goto label05;
+            case 8: goto label06;
+            case 9: goto label02;
+            case 10: goto label11;
+            case 11: goto label11;
+            case 12: goto label11;
+            case 13: goto label10;
+            default: goto label11;
+        };
+
+     label02:
+        i8 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _firstch2(int)>($i1);
+
+     label03:
+        $i11 = (int) -1;
+
+        if i8 == $i11 goto label04;
+
+        $i5 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int makeNodeHandle(int)>(i8);
+
+        specialinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void copy(int,com.sun.org.apache.xml.internal.serializer.SerializationHandler,boolean)>($i5, r1, 1);
+
+        i8 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _nextsib2(int)>(i8);
+
+        goto label03;
+
+     label04:
+        goto label18;
+
+     label05:
+        specialinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void copyPI(int,com.sun.org.apache.xml.internal.serializer.SerializationHandler)>(i0, r1);
+
+        goto label18;
+
+     label06:
+        $r4 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getStringValueX(int)>(i0);
+
+        interfaceinvoke r1.<com.sun.org.apache.xml.internal.serializer.SerializationHandler: void comment(java.lang.String)>($r4);
+
+        goto label18;
+
+     label07:
+        z2 = 0;
+
+        z3 = 0;
+
+        $r5 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xalan.internal.xsltc.dom.BitArray _dontEscape>;
+
+        if $r5 == null goto label08;
+
+        $r6 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xalan.internal.xsltc.dom.BitArray _dontEscape>;
+
+        $i4 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int getNodeIdent(int)>(i0);
+
+        $z0 = virtualinvoke $r6.<com.sun.org.apache.xalan.internal.xsltc.dom.BitArray: boolean getBit(int)>($i4);
+
+        z3 = $z0;
+
+        if $z0 == 0 goto label08;
+
+        z2 = interfaceinvoke r1.<com.sun.org.apache.xml.internal.serializer.SerializationHandler: boolean setEscaping(boolean)>(0);
+
+     label08:
+        virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void copyTextNode(int,com.sun.org.apache.xml.internal.serializer.SerializationHandler)>($i1, r1);
+
+        if z3 == 0 goto label18;
+
+        interfaceinvoke r1.<com.sun.org.apache.xml.internal.serializer.SerializationHandler: boolean setEscaping(boolean)>(z2);
+
+        goto label18;
+
+     label09:
+        virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void copyAttribute(int,int,com.sun.org.apache.xml.internal.serializer.SerializationHandler)>($i1, $i2, r1);
+
+        goto label18;
+
+     label10:
+        $r2 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getNodeNameX(int)>(i0);
+
+        $r3 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getNodeValue(int)>(i0);
+
+        interfaceinvoke r1.<com.sun.org.apache.xml.internal.serializer.SerializationHandler: void namespaceAfterStartElement(java.lang.String,java.lang.String)>($r2, $r3);
+
+        goto label18;
+
+     label11:
+        if $i3 != 1 goto label16;
+
+        $r11 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String copyElement(int,int,com.sun.org.apache.xml.internal.serializer.SerializationHandler)>($i1, $i2, r1);
+
+        if z1 != 0 goto label12;
+
+        $z4 = 1;
+
+        goto label13;
+
+     label12:
+        $z4 = 0;
+
+     label13:
+        virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void copyNS(int,com.sun.org.apache.xml.internal.serializer.SerializationHandler,boolean)>($i1, r1, $z4);
+
+        virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void copyAttributes(int,com.sun.org.apache.xml.internal.serializer.SerializationHandler)>($i1, r1);
+
+        i9 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _firstch2(int)>($i1);
+
+     label14:
+        $i13 = (int) -1;
+
+        if i9 == $i13 goto label15;
+
+        $i7 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int makeNodeHandle(int)>(i9);
+
+        specialinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void copy(int,com.sun.org.apache.xml.internal.serializer.SerializationHandler,boolean)>($i7, r1, 1);
+
+        i9 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _nextsib2(int)>(i9);
+
+        goto label14;
+
+     label15:
+        interfaceinvoke r1.<com.sun.org.apache.xml.internal.serializer.SerializationHandler: void endElement(java.lang.String)>($r11);
+
+        goto label18;
+
+     label16:
+        $r7 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getNamespaceName(int)>(i0);
+
+        $i6 = virtualinvoke $r7.<java.lang.String: int length()>();
+
+        if $i6 == 0 goto label17;
+
+        $r10 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getPrefix(int)>(i0);
+
+        interfaceinvoke r1.<com.sun.org.apache.xml.internal.serializer.SerializationHandler: void namespaceAfterStartElement(java.lang.String,java.lang.String)>($r10, $r7);
+
+     label17:
+        $r8 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getNodeName(int)>(i0);
+
+        $r9 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getNodeValue(int)>(i0);
+
+        interfaceinvoke r1.<com.sun.org.apache.xml.internal.serializer.SerializationHandler: void addAttribute(java.lang.String,java.lang.String)>($r8, $r9);
+
+     label18:
+        goto label20;
+
+     label19:
+        $r12 := @caughtexception;
+
+        $r14 = new com.sun.org.apache.xalan.internal.xsltc.TransletException;
+
+        specialinvoke $r14.<com.sun.org.apache.xalan.internal.xsltc.TransletException: void <init>(java.lang.Exception)>($r12);
+
+        throw $r14;
+
+     label20:
+        return;
+
+        catch java.lang.Exception from label01 to label18 with label19;
+    }
+
+    private void copyPI(int, com.sun.org.apache.xml.internal.serializer.SerializationHandler) throws com.sun.org.apache.xalan.internal.xsltc.TransletException
+    {
+        com.sun.org.apache.xalan.internal.xsltc.TransletException $r5;
+        com.sun.org.apache.xml.internal.serializer.SerializationHandler r3;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        int i0;
+        java.lang.String $r1, $r2;
+        java.lang.Exception $r4;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        r3 := @parameter1: com.sun.org.apache.xml.internal.serializer.SerializationHandler;
+
+        $r1 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getNodeName(int)>(i0);
+
+        $r2 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getStringValueX(int)>(i0);
+
+     label1:
+        interfaceinvoke r3.<com.sun.org.apache.xml.internal.serializer.SerializationHandler: void processingInstruction(java.lang.String,java.lang.String)>($r1, $r2);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = new com.sun.org.apache.xalan.internal.xsltc.TransletException;
+
+        specialinvoke $r5.<com.sun.org.apache.xalan.internal.xsltc.TransletException: void <init>(java.lang.Exception)>($r4);
+
+        throw $r5;
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public java.lang.String shallowCopy(int, com.sun.org.apache.xml.internal.serializer.SerializationHandler) throws com.sun.org.apache.xalan.internal.xsltc.TransletException
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        com.sun.org.apache.xml.internal.serializer.SerializationHandler r1;
+        int i0, $i1, $i2, $i3, $i4;
+        java.lang.String $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9;
+        com.sun.org.apache.xalan.internal.xsltc.TransletException $r11;
+        java.lang.Exception $r10;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: com.sun.org.apache.xml.internal.serializer.SerializationHandler;
+
+        $i1 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int makeNodeIdentity(int)>(i0);
+
+        $i2 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _exptype2(int)>($i1);
+
+        $i3 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _exptype2Type(int)>($i2);
+
+     label01:
+        tableswitch($i3)
+        {
+            case 0: goto label04;
+            case 1: goto label02;
+            case 2: goto label13;
+            case 3: goto label05;
+            case 4: goto label15;
+            case 5: goto label15;
+            case 6: goto label15;
+            case 7: goto label07;
+            case 8: goto label09;
+            case 9: goto label04;
+            case 10: goto label15;
+            case 11: goto label15;
+            case 12: goto label15;
+            case 13: goto label11;
+            default: goto label15;
+        };
+
+     label02:
+        $r5 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String copyElement(int,int,com.sun.org.apache.xml.internal.serializer.SerializationHandler)>($i1, $i2, r1);
+
+        virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void copyNS(int,com.sun.org.apache.xml.internal.serializer.SerializationHandler,boolean)>($i1, r1, 1);
+
+     label03:
+        return $r5;
+
+     label04:
+        return "";
+
+     label05:
+        virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void copyTextNode(int,com.sun.org.apache.xml.internal.serializer.SerializationHandler)>($i1, r1);
+
+     label06:
+        return null;
+
+     label07:
+        specialinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void copyPI(int,com.sun.org.apache.xml.internal.serializer.SerializationHandler)>(i0, r1);
+
+     label08:
+        return null;
+
+     label09:
+        $r4 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getStringValueX(int)>(i0);
+
+        interfaceinvoke r1.<com.sun.org.apache.xml.internal.serializer.SerializationHandler: void comment(java.lang.String)>($r4);
+
+     label10:
+        return null;
+
+     label11:
+        $r2 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getNodeNameX(int)>(i0);
+
+        $r3 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getNodeValue(int)>(i0);
+
+        interfaceinvoke r1.<com.sun.org.apache.xml.internal.serializer.SerializationHandler: void namespaceAfterStartElement(java.lang.String,java.lang.String)>($r2, $r3);
+
+     label12:
+        return null;
+
+     label13:
+        virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: void copyAttribute(int,int,com.sun.org.apache.xml.internal.serializer.SerializationHandler)>($i1, $i2, r1);
+
+     label14:
+        return null;
+
+     label15:
+        $r6 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getNamespaceName(int)>(i0);
+
+        $i4 = virtualinvoke $r6.<java.lang.String: int length()>();
+
+        if $i4 == 0 goto label16;
+
+        $r9 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getPrefix(int)>(i0);
+
+        interfaceinvoke r1.<com.sun.org.apache.xml.internal.serializer.SerializationHandler: void namespaceAfterStartElement(java.lang.String,java.lang.String)>($r9, $r6);
+
+     label16:
+        $r7 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getNodeName(int)>(i0);
+
+        $r8 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getNodeValue(int)>(i0);
+
+        interfaceinvoke r1.<com.sun.org.apache.xml.internal.serializer.SerializationHandler: void addAttribute(java.lang.String,java.lang.String)>($r7, $r8);
+
+     label17:
+        return null;
+
+     label18:
+        $r10 := @caughtexception;
+
+        $r11 = new com.sun.org.apache.xalan.internal.xsltc.TransletException;
+
+        specialinvoke $r11.<com.sun.org.apache.xalan.internal.xsltc.TransletException: void <init>(java.lang.Exception)>($r10);
+
+        throw $r11;
+
+        catch java.lang.Exception from label01 to label03 with label18;
+        catch java.lang.Exception from label05 to label06 with label18;
+        catch java.lang.Exception from label07 to label08 with label18;
+        catch java.lang.Exception from label09 to label10 with label18;
+        catch java.lang.Exception from label11 to label12 with label18;
+        catch java.lang.Exception from label13 to label14 with label18;
+        catch java.lang.Exception from label15 to label17 with label18;
+    }
+
+    public java.lang.String getLanguage(int)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        short $s1;
+        int i0, $i2, i3, $i5, $i7;
+        java.lang.String $r1;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        i3 = i0;
+
+     label1:
+        $i5 = (int) -1;
+
+        if $i5 == i3 goto label3;
+
+        $s1 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: short getNodeType(int)>(i3);
+
+        if 1 != $s1 goto label2;
+
+        $i2 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int getAttributeNode(int,java.lang.String,java.lang.String)>(i3, "http://www.w3.org/XML/1998/namespace", "lang");
+
+        $i7 = (int) -1;
+
+        if $i7 == $i2 goto label2;
+
+        $r1 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String getNodeValue(int)>($i2);
+
+        return $r1;
+
+     label2:
+        i3 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int getParent(int)>(i3);
+
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    public com.sun.org.apache.xalan.internal.xsltc.dom.DOMBuilder getBuilder()
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        return r0;
+    }
+
+    public com.sun.org.apache.xml.internal.serializer.SerializationHandler getOutputDomBuilder()
+    {
+        com.sun.org.apache.xml.internal.serializer.ToXMLSAXHandler $r0;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r1;
+
+        r1 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        $r0 = new com.sun.org.apache.xml.internal.serializer.ToXMLSAXHandler;
+
+        specialinvoke $r0.<com.sun.org.apache.xml.internal.serializer.ToXMLSAXHandler: void <init>(org.xml.sax.ContentHandler,java.lang.String)>(r1, "UTF-8");
+
+        return $r0;
+    }
+
+    public com.sun.org.apache.xalan.internal.xsltc.DOM getResultTreeFrag(int, int)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.DOM $r1;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        int i0, i1;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r1 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xalan.internal.xsltc.DOM getResultTreeFrag(int,int,boolean)>(i0, i1, 1);
+
+        return $r1;
+    }
+
+    public com.sun.org.apache.xalan.internal.xsltc.DOM getResultTreeFrag(int, int, boolean)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager $r2, $r7, $r8, $r11, $r12, $r14, $r15, $r17, $r18;
+        com.sun.org.apache.xalan.internal.xsltc.DOM $r4;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        com.sun.org.apache.xml.internal.dtm.DTM $r3;
+        int i0, i1, $i2, $i3, $i4, $i5;
+        boolean $z0, z1, $z2, $z3;
+        com.sun.org.apache.xalan.internal.xsltc.dom.AdaptiveResultTreeImpl $r5, $r9;
+        com.sun.org.apache.xml.internal.dtm.DTMWSFilter $r1, $r6, $r10;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SimpleResultTreeImpl $r13, $r16;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        z1 := @parameter2: boolean;
+
+        if i0 != 0 goto label2;
+
+        if z1 == 0 goto label1;
+
+        $r15 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager _dtmManager>;
+
+        $i4 = virtualinvoke $r15.<com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager: int getFirstFreeDTMID()>();
+
+        $r16 = new com.sun.org.apache.xalan.internal.xsltc.dom.SimpleResultTreeImpl;
+
+        $r17 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager _dtmManager>;
+
+        $i5 = $i4 << 16;
+
+        specialinvoke $r16.<com.sun.org.apache.xalan.internal.xsltc.dom.SimpleResultTreeImpl: void <init>(com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager,int)>($r17, $i5);
+
+        $r18 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager _dtmManager>;
+
+        virtualinvoke $r18.<com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager: void addDTM(com.sun.org.apache.xml.internal.dtm.DTM,int,int)>($r16, $i4, 0);
+
+        return $r16;
+
+     label1:
+        $r13 = new com.sun.org.apache.xalan.internal.xsltc.dom.SimpleResultTreeImpl;
+
+        $r14 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager _dtmManager>;
+
+        specialinvoke $r13.<com.sun.org.apache.xalan.internal.xsltc.dom.SimpleResultTreeImpl: void <init>(com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager,int)>($r14, 0);
+
+        return $r13;
+
+     label2:
+        if i0 != 1 goto label4;
+
+        if z1 == 0 goto label3;
+
+        $r8 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager _dtmManager>;
+
+        $i2 = virtualinvoke $r8.<com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager: int getFirstFreeDTMID()>();
+
+        $r9 = new com.sun.org.apache.xalan.internal.xsltc.dom.AdaptiveResultTreeImpl;
+
+        $r11 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager _dtmManager>;
+
+        $i3 = $i2 << 16;
+
+        $r10 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xml.internal.dtm.DTMWSFilter m_wsfilter>;
+
+        $z3 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: boolean m_buildIdIndex>;
+
+        specialinvoke $r9.<com.sun.org.apache.xalan.internal.xsltc.dom.AdaptiveResultTreeImpl: void <init>(com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager,int,com.sun.org.apache.xml.internal.dtm.DTMWSFilter,int,boolean)>($r11, $i3, $r10, i1, $z3);
+
+        $r12 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager _dtmManager>;
+
+        virtualinvoke $r12.<com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager: void addDTM(com.sun.org.apache.xml.internal.dtm.DTM,int,int)>($r9, $i2, 0);
+
+        return $r9;
+
+     label3:
+        $r5 = new com.sun.org.apache.xalan.internal.xsltc.dom.AdaptiveResultTreeImpl;
+
+        $r7 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager _dtmManager>;
+
+        $r6 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xml.internal.dtm.DTMWSFilter m_wsfilter>;
+
+        $z2 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: boolean m_buildIdIndex>;
+
+        specialinvoke $r5.<com.sun.org.apache.xalan.internal.xsltc.dom.AdaptiveResultTreeImpl: void <init>(com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager,int,com.sun.org.apache.xml.internal.dtm.DTMWSFilter,int,boolean)>($r7, 0, $r6, i1, $z2);
+
+        return $r5;
+
+     label4:
+        $r2 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager _dtmManager>;
+
+        $r1 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xml.internal.dtm.DTMWSFilter m_wsfilter>;
+
+        $z0 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: boolean m_buildIdIndex>;
+
+        $r3 = virtualinvoke $r2.<com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager: com.sun.org.apache.xml.internal.dtm.DTM getDTM(javax.xml.transform.Source,boolean,com.sun.org.apache.xml.internal.dtm.DTMWSFilter,boolean,boolean,boolean,int,boolean)>(null, 1, $r1, 1, 0, 0, i1, $z0);
+
+        $r4 = (com.sun.org.apache.xalan.internal.xsltc.DOM) $r3;
+
+        return $r4;
+    }
+
+    public java.util.Map getElementsWithIDs()
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        java.util.Map $r1;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        $r1 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.util.Map m_idAttributes>;
+
+        return $r1;
+    }
+
+    public java.lang.String getUnparsedEntityURI(java.lang.String)
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+        org.w3c.dom.DocumentType $r5;
+        org.w3c.dom.Document $r1, $r4;
+        org.w3c.dom.Node $r7;
+        org.w3c.dom.NamedNodeMap $r6;
+        java.lang.String r2, $r3, $r9, $r10, r11;
+        org.w3c.dom.Entity r8;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: org.w3c.dom.Document _document>;
+
+        if $r1 == null goto label4;
+
+        r11 = "";
+
+        $r4 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: org.w3c.dom.Document _document>;
+
+        $r5 = interfaceinvoke $r4.<org.w3c.dom.Document: org.w3c.dom.DocumentType getDoctype()>();
+
+        if $r5 == null goto label3;
+
+        $r6 = interfaceinvoke $r5.<org.w3c.dom.DocumentType: org.w3c.dom.NamedNodeMap getEntities()>();
+
+        if $r6 != null goto label1;
+
+        return "";
+
+     label1:
+        $r7 = interfaceinvoke $r6.<org.w3c.dom.NamedNodeMap: org.w3c.dom.Node getNamedItem(java.lang.String)>(r2);
+
+        r8 = (org.w3c.dom.Entity) $r7;
+
+        if r8 != null goto label2;
+
+        return "";
+
+     label2:
+        $r9 = interfaceinvoke r8.<org.w3c.dom.Entity: java.lang.String getNotationName()>();
+
+        if $r9 == null goto label3;
+
+        $r10 = interfaceinvoke r8.<org.w3c.dom.Entity: java.lang.String getSystemId()>();
+
+        r11 = $r10;
+
+        if $r10 != null goto label3;
+
+        r11 = interfaceinvoke r8.<org.w3c.dom.Entity: java.lang.String getPublicId()>();
+
+     label3:
+        return r11;
+
+     label4:
+        $r3 = specialinvoke r0.<com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2: java.lang.String getUnparsedEntityURI(java.lang.String)>(r2);
+
+        return $r3;
+    }
+
+    public void release()
+    {
+        com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager $r1;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+
+        r0 := @this: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        $r1 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager _dtmManager>;
+
+        virtualinvoke $r1.<com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager: boolean release(com.sun.org.apache.xml.internal.dtm.DTM,boolean)>(r0, 1);
+
+        return;
+    }
+
+    static com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable access$000(com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl)
+    {
+        com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable $r1;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+
+        r0 := @parameter0: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        $r1 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable m_expandedNameTable>;
+
+        return $r1;
+    }
+
+    static com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable access$100(com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl)
+    {
+        com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable $r1;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+
+        r0 := @parameter0: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        $r1 = r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xml.internal.dtm.ref.ExpandedNameTable m_expandedNameTable>;
+
+        return $r1;
+    }
+
+    static int access$200(com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl, int)
+    {
+        int i0, $i1;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+
+        r0 := @parameter0: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter1: int;
+
+        $i1 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _firstch(int)>(i0);
+
+        return $i1;
+    }
+
+    static int access$300(com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl, int)
+    {
+        int i0, $i1;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+
+        r0 := @parameter0: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter1: int;
+
+        $i1 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _nextsib(int)>(i0);
+
+        return $i1;
+    }
+
+    static int access$400(com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl, int)
+    {
+        int i0, $i1;
+        com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl r0;
+
+        r0 := @parameter0: com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl;
+
+        i0 := @parameter1: int;
+
+        $i1 = virtualinvoke r0.<com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _nextsib(int)>(i0);
+
+        return $i1;
+    }
+
+    static void <clinit>()
+    {
+        com.sun.org.apache.xml.internal.dtm.DTMAxisIterator $r0;
+
+        <com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String EMPTYSTRING> = "";
+
+        <com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String XML_URI> = "http://www.w3.org/XML/1998/namespace";
+
+        <com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String PRESERVE_STRING> = "preserve";
+
+        <com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String XMLSPACE_STRING> = "xml:space";
+
+        <com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: java.lang.String XML_PREFIX> = "xml";
+
+        $r0 = staticinvoke <com.sun.org.apache.xml.internal.dtm.ref.EmptyIterator: com.sun.org.apache.xml.internal.dtm.DTMAxisIterator getInstance()>();
+
+        <com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: com.sun.org.apache.xml.internal.dtm.DTMAxisIterator EMPTYITERATOR> = $r0;
+
+        <com.sun.org.apache.xalan.internal.xsltc.dom.SAXImpl: int _documentURIIndex> = 0;
+
+        return;
+    }
+}

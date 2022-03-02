@@ -1,0 +1,124 @@
+final class java.util.stream.SortedOps$OfDouble extends java.util.stream.DoublePipeline$StatefulOp
+{
+
+    void <init>(java.util.stream.AbstractPipeline)
+    {
+        java.util.stream.SortedOps$OfDouble r0;
+        int $i0, $i1, $i2;
+        java.util.stream.AbstractPipeline r1;
+        java.util.stream.StreamShape $r2;
+
+        r0 := @this: java.util.stream.SortedOps$OfDouble;
+
+        r1 := @parameter0: java.util.stream.AbstractPipeline;
+
+        $r2 = <java.util.stream.StreamShape: java.util.stream.StreamShape DOUBLE_VALUE>;
+
+        $i1 = <java.util.stream.StreamOpFlag: int IS_ORDERED>;
+
+        $i0 = <java.util.stream.StreamOpFlag: int IS_SORTED>;
+
+        $i2 = $i1 | $i0;
+
+        specialinvoke r0.<java.util.stream.DoublePipeline$StatefulOp: void <init>(java.util.stream.AbstractPipeline,java.util.stream.StreamShape,int)>(r1, $r2, $i2);
+
+        return;
+    }
+
+    public java.util.stream.Sink opWrapSink(int, java.util.stream.Sink)
+    {
+        java.util.stream.SortedOps$DoubleSortingSink $r3;
+        java.util.stream.SortedOps$OfDouble r5;
+        java.util.stream.SortedOps$SizedDoubleSortingSink $r4;
+        int i0;
+        java.util.stream.StreamOpFlag $r1, $r2;
+        java.util.stream.Sink r0;
+        boolean $z0, $z1;
+
+        r5 := @this: java.util.stream.SortedOps$OfDouble;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: java.util.stream.Sink;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r0);
+
+        $r1 = <java.util.stream.StreamOpFlag: java.util.stream.StreamOpFlag SORTED>;
+
+        $z0 = virtualinvoke $r1.<java.util.stream.StreamOpFlag: boolean isKnown(int)>(i0);
+
+        if $z0 == 0 goto label1;
+
+        return r0;
+
+     label1:
+        $r2 = <java.util.stream.StreamOpFlag: java.util.stream.StreamOpFlag SIZED>;
+
+        $z1 = virtualinvoke $r2.<java.util.stream.StreamOpFlag: boolean isKnown(int)>(i0);
+
+        if $z1 == 0 goto label2;
+
+        $r4 = new java.util.stream.SortedOps$SizedDoubleSortingSink;
+
+        specialinvoke $r4.<java.util.stream.SortedOps$SizedDoubleSortingSink: void <init>(java.util.stream.Sink)>(r0);
+
+        return $r4;
+
+     label2:
+        $r3 = new java.util.stream.SortedOps$DoubleSortingSink;
+
+        specialinvoke $r3.<java.util.stream.SortedOps$DoubleSortingSink: void <init>(java.util.stream.Sink)>(r0);
+
+        return $r3;
+    }
+
+    public java.util.stream.Node opEvaluateParallel(java.util.stream.PipelineHelper, java.util.Spliterator, java.util.function.IntFunction)
+    {
+        java.util.stream.SortedOps$OfDouble r10;
+        double[] r7;
+        java.util.stream.PipelineHelper r0;
+        java.util.stream.Node $r4, $r9;
+        java.util.stream.Node$OfDouble r5, $r8;
+        int $i0;
+        java.lang.Object $r6;
+        java.util.stream.StreamOpFlag $r1;
+        java.util.Spliterator r2;
+        boolean $z0;
+        java.util.function.IntFunction r3;
+
+        r10 := @this: java.util.stream.SortedOps$OfDouble;
+
+        r0 := @parameter0: java.util.stream.PipelineHelper;
+
+        r2 := @parameter1: java.util.Spliterator;
+
+        r3 := @parameter2: java.util.function.IntFunction;
+
+        $r1 = <java.util.stream.StreamOpFlag: java.util.stream.StreamOpFlag SORTED>;
+
+        $i0 = virtualinvoke r0.<java.util.stream.PipelineHelper: int getStreamAndOpFlags()>();
+
+        $z0 = virtualinvoke $r1.<java.util.stream.StreamOpFlag: boolean isKnown(int)>($i0);
+
+        if $z0 == 0 goto label1;
+
+        $r9 = virtualinvoke r0.<java.util.stream.PipelineHelper: java.util.stream.Node evaluate(java.util.Spliterator,boolean,java.util.function.IntFunction)>(r2, 0, r3);
+
+        return $r9;
+
+     label1:
+        $r4 = virtualinvoke r0.<java.util.stream.PipelineHelper: java.util.stream.Node evaluate(java.util.Spliterator,boolean,java.util.function.IntFunction)>(r2, 1, r3);
+
+        r5 = (java.util.stream.Node$OfDouble) $r4;
+
+        $r6 = interfaceinvoke r5.<java.util.stream.Node$OfDouble: java.lang.Object asPrimitiveArray()>();
+
+        r7 = (double[]) $r6;
+
+        staticinvoke <java.util.Arrays: void parallelSort(double[])>(r7);
+
+        $r8 = staticinvoke <java.util.stream.Nodes: java.util.stream.Node$OfDouble node(double[])>(r7);
+
+        return $r8;
+    }
+}

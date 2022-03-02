@@ -1,0 +1,893 @@
+class java.lang.StringCoding extends java.lang.Object
+{
+    private static final java.lang.ThreadLocal decoder;
+    private static final java.lang.ThreadLocal encoder;
+    private static boolean warnUnsupportedCharset;
+
+    private void <init>()
+    {
+        java.lang.StringCoding r0;
+
+        r0 := @this: java.lang.StringCoding;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static java.lang.Object deref(java.lang.ThreadLocal)
+    {
+        java.lang.ThreadLocal r0;
+        java.lang.Object $r1, $r3;
+        java.lang.ref.SoftReference r2;
+
+        r0 := @parameter0: java.lang.ThreadLocal;
+
+        $r1 = virtualinvoke r0.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        r2 = (java.lang.ref.SoftReference) $r1;
+
+        if r2 != null goto label1;
+
+        return null;
+
+     label1:
+        $r3 = virtualinvoke r2.<java.lang.ref.SoftReference: java.lang.Object get()>();
+
+        return $r3;
+    }
+
+    private static void set(java.lang.ThreadLocal, java.lang.Object)
+    {
+        java.lang.ThreadLocal r0;
+        java.lang.Object r2;
+        java.lang.ref.SoftReference $r1;
+
+        r0 := @parameter0: java.lang.ThreadLocal;
+
+        r2 := @parameter1: java.lang.Object;
+
+        $r1 = new java.lang.ref.SoftReference;
+
+        specialinvoke $r1.<java.lang.ref.SoftReference: void <init>(java.lang.Object)>(r2);
+
+        virtualinvoke r0.<java.lang.ThreadLocal: void set(java.lang.Object)>($r1);
+
+        return;
+    }
+
+    private static byte[] safeTrim(byte[], int, java.nio.charset.Charset, boolean)
+    {
+        byte[] r0, $r1;
+        java.nio.charset.Charset r3;
+        int i0, $i1;
+        java.lang.SecurityManager $r2;
+        boolean z0;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        r3 := @parameter2: java.nio.charset.Charset;
+
+        z0 := @parameter3: boolean;
+
+        $i1 = lengthof r0;
+
+        if i0 != $i1 goto label2;
+
+        if z0 != 0 goto label1;
+
+        $r2 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r2 != null goto label2;
+
+     label1:
+        return r0;
+
+     label2:
+        $r1 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>(r0, i0);
+
+        return $r1;
+    }
+
+    private static char[] safeTrim(char[], int, java.nio.charset.Charset, boolean)
+    {
+        java.nio.charset.Charset r3;
+        int i0, $i1;
+        char[] r0, $r1;
+        java.lang.SecurityManager $r2;
+        boolean z0;
+
+        r0 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        r3 := @parameter2: java.nio.charset.Charset;
+
+        z0 := @parameter3: boolean;
+
+        $i1 = lengthof r0;
+
+        if i0 != $i1 goto label2;
+
+        if z0 != 0 goto label1;
+
+        $r2 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r2 != null goto label2;
+
+     label1:
+        return r0;
+
+     label2:
+        $r1 = staticinvoke <java.util.Arrays: char[] copyOf(char[],int)>(r0, i0);
+
+        return $r1;
+    }
+
+    private static int scale(int, float)
+    {
+        int i0, $i1;
+        float f0;
+        double $d0, $d1, $d2;
+
+        i0 := @parameter0: int;
+
+        f0 := @parameter1: float;
+
+        $d1 = (double) i0;
+
+        $d0 = (double) f0;
+
+        $d2 = $d1 * $d0;
+
+        $i1 = (int) $d2;
+
+        return $i1;
+    }
+
+    private static java.nio.charset.Charset lookupCharset(java.lang.String)
+    {
+        java.nio.charset.Charset $r1;
+        java.lang.Error $r3;
+        java.lang.String r0;
+        java.nio.charset.UnsupportedCharsetException $r2;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = staticinvoke <java.nio.charset.Charset: boolean isSupported(java.lang.String)>(r0);
+
+        if $z0 == 0 goto label4;
+
+     label1:
+        $r1 = staticinvoke <java.nio.charset.Charset: java.nio.charset.Charset forName(java.lang.String)>(r0);
+
+     label2:
+        return $r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new java.lang.Error;
+
+        specialinvoke $r3.<java.lang.Error: void <init>(java.lang.Throwable)>($r2);
+
+        throw $r3;
+
+     label4:
+        return null;
+
+        catch java.nio.charset.UnsupportedCharsetException from label1 to label2 with label3;
+    }
+
+    private static void warnUnsupportedCharset(java.lang.String)
+    {
+        java.lang.StringBuilder $r0, $r1, $r3, $r4;
+        java.lang.String r2, $r5;
+        boolean $z0;
+
+        r2 := @parameter0: java.lang.String;
+
+        $z0 = <java.lang.StringCoding: boolean warnUnsupportedCharset>;
+
+        if $z0 == 0 goto label1;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("WARNING: Default charset ");
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" not supported, using ISO-8859-1 instead");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.misc.MessageUtils: void err(java.lang.String)>($r5);
+
+        <java.lang.StringCoding: boolean warnUnsupportedCharset> = 0;
+
+     label1:
+        return;
+    }
+
+    static char[] decode(java.lang.String, byte[], int, int) throws java.io.UnsupportedEncodingException
+    {
+        byte[] r6;
+        java.nio.charset.Charset $r4;
+        int i0, i1;
+        java.nio.charset.IllegalCharsetNameException $r11;
+        java.lang.String r2, r3, $r9, $r10, $r13;
+        java.lang.StringCoding$StringDecoder $r8, r12;
+        boolean $z0, $z1;
+        java.lang.ThreadLocal $r0, $r5;
+        char[] $r14;
+        java.lang.Object $r1;
+        java.io.UnsupportedEncodingException $r7;
+
+        r2 := @parameter0: java.lang.String;
+
+        r6 := @parameter1: byte[];
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        $r0 = <java.lang.StringCoding: java.lang.ThreadLocal decoder>;
+
+        $r1 = staticinvoke <java.lang.StringCoding: java.lang.Object deref(java.lang.ThreadLocal)>($r0);
+
+        r12 = (java.lang.StringCoding$StringDecoder) $r1;
+
+        if r2 != null goto label1;
+
+        $r13 = "ISO-8859-1";
+
+        goto label2;
+
+     label1:
+        $r13 = r2;
+
+     label2:
+        r3 = $r13;
+
+        if r12 == null goto label3;
+
+        $r9 = virtualinvoke r12.<java.lang.StringCoding$StringDecoder: java.lang.String requestedCharsetName()>();
+
+        $z0 = virtualinvoke $r13.<java.lang.String: boolean equals(java.lang.Object)>($r9);
+
+        if $z0 != 0 goto label9;
+
+        $r10 = virtualinvoke r12.<java.lang.StringCoding$StringDecoder: java.lang.String charsetName()>();
+
+        $z1 = virtualinvoke $r13.<java.lang.String: boolean equals(java.lang.Object)>($r10);
+
+        if $z1 != 0 goto label9;
+
+     label3:
+        r12 = null;
+
+     label4:
+        $r4 = staticinvoke <java.lang.StringCoding: java.nio.charset.Charset lookupCharset(java.lang.String)>(r3);
+
+        if $r4 == null goto label5;
+
+        $r8 = new java.lang.StringCoding$StringDecoder;
+
+        specialinvoke $r8.<java.lang.StringCoding$StringDecoder: void <init>(java.nio.charset.Charset,java.lang.String,java.lang.StringCoding$1)>($r4, r3, null);
+
+        r12 = $r8;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r11 := @caughtexception;
+
+     label7:
+        if r12 != null goto label8;
+
+        $r7 = new java.io.UnsupportedEncodingException;
+
+        specialinvoke $r7.<java.io.UnsupportedEncodingException: void <init>(java.lang.String)>(r3);
+
+        throw $r7;
+
+     label8:
+        $r5 = <java.lang.StringCoding: java.lang.ThreadLocal decoder>;
+
+        staticinvoke <java.lang.StringCoding: void set(java.lang.ThreadLocal,java.lang.Object)>($r5, r12);
+
+     label9:
+        $r14 = virtualinvoke r12.<java.lang.StringCoding$StringDecoder: char[] decode(byte[],int,int)>(r6, i0, i1);
+
+        return $r14;
+
+        catch java.nio.charset.IllegalCharsetNameException from label4 to label5 with label6;
+    }
+
+    static char[] decode(java.nio.charset.Charset, byte[], int, int)
+    {
+        byte[] r15;
+        java.nio.ByteBuffer $r4;
+        boolean $z0, $z1, z2, $z4, $z5, $z6;
+        java.nio.CharBuffer $r5;
+        java.nio.charset.CharsetDecoder $r1, $r17, $r19;
+        float $f0;
+        java.lang.ClassLoader $r12;
+        sun.nio.cs.ArrayDecoder $r9;
+        java.nio.charset.CharacterCodingException $r13;
+        java.lang.Error $r14;
+        java.nio.charset.CoderResult $r6, $r7;
+        java.nio.charset.Charset r0;
+        java.nio.charset.CodingErrorAction $r16, $r18;
+        int i0, $i1, $i2, $i3, $i4, i5;
+        java.lang.SecurityManager $r3;
+        char[] r2, $r8, $r10;
+        java.lang.Class $r11;
+
+        r0 := @parameter0: java.nio.charset.Charset;
+
+        r15 := @parameter1: byte[];
+
+        i5 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        $r1 = virtualinvoke r0.<java.nio.charset.Charset: java.nio.charset.CharsetDecoder newDecoder()>();
+
+        $f0 = virtualinvoke $r1.<java.nio.charset.CharsetDecoder: float maxCharsPerByte()>();
+
+        $i1 = staticinvoke <java.lang.StringCoding: int scale(int,float)>(i0, $f0);
+
+        r2 = newarray (char)[$i1];
+
+        if i0 != 0 goto label01;
+
+        return r2;
+
+     label01:
+        z2 = 0;
+
+        $r3 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r3 == null goto label04;
+
+        $r11 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.Class: java.lang.ClassLoader getClassLoader0()>();
+
+        if $r12 != null goto label02;
+
+        $z6 = 1;
+
+        $z5 = 1;
+
+        goto label03;
+
+     label02:
+        $z6 = 0;
+
+        $z5 = 0;
+
+     label03:
+        z2 = $z6;
+
+        if $z5 != 0 goto label04;
+
+        $i4 = i5 + i0;
+
+        r15 = staticinvoke <java.util.Arrays: byte[] copyOfRange(byte[],int,int)>(r15, i5, $i4);
+
+        i5 = 0;
+
+     label04:
+        $r16 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPLACE>;
+
+        $r17 = virtualinvoke $r1.<java.nio.charset.CharsetDecoder: java.nio.charset.CharsetDecoder onMalformedInput(java.nio.charset.CodingErrorAction)>($r16);
+
+        $r18 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPLACE>;
+
+        $r19 = virtualinvoke $r17.<java.nio.charset.CharsetDecoder: java.nio.charset.CharsetDecoder onUnmappableCharacter(java.nio.charset.CodingErrorAction)>($r18);
+
+        virtualinvoke $r19.<java.nio.charset.CharsetDecoder: java.nio.charset.CharsetDecoder reset()>();
+
+        $z4 = $r1 instanceof sun.nio.cs.ArrayDecoder;
+
+        if $z4 == 0 goto label05;
+
+        $r9 = (sun.nio.cs.ArrayDecoder) $r1;
+
+        $i3 = interfaceinvoke $r9.<sun.nio.cs.ArrayDecoder: int decode(byte[],int,int,char[])>(r15, i5, i0, r2);
+
+        $r10 = staticinvoke <java.lang.StringCoding: char[] safeTrim(char[],int,java.nio.charset.Charset,boolean)>(r2, $i3, r0, z2);
+
+        return $r10;
+
+     label05:
+        $r4 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[],int,int)>(r15, i5, i0);
+
+        $r5 = staticinvoke <java.nio.CharBuffer: java.nio.CharBuffer wrap(char[])>(r2);
+
+     label06:
+        $r6 = virtualinvoke $r1.<java.nio.charset.CharsetDecoder: java.nio.charset.CoderResult decode(java.nio.ByteBuffer,java.nio.CharBuffer,boolean)>($r4, $r5, 1);
+
+        $z0 = virtualinvoke $r6.<java.nio.charset.CoderResult: boolean isUnderflow()>();
+
+        if $z0 != 0 goto label07;
+
+        virtualinvoke $r6.<java.nio.charset.CoderResult: void throwException()>();
+
+     label07:
+        $r7 = virtualinvoke $r1.<java.nio.charset.CharsetDecoder: java.nio.charset.CoderResult flush(java.nio.CharBuffer)>($r5);
+
+        $z1 = virtualinvoke $r7.<java.nio.charset.CoderResult: boolean isUnderflow()>();
+
+        if $z1 != 0 goto label08;
+
+        virtualinvoke $r7.<java.nio.charset.CoderResult: void throwException()>();
+
+     label08:
+        goto label10;
+
+     label09:
+        $r13 := @caughtexception;
+
+        $r14 = new java.lang.Error;
+
+        specialinvoke $r14.<java.lang.Error: void <init>(java.lang.Throwable)>($r13);
+
+        throw $r14;
+
+     label10:
+        $i2 = virtualinvoke $r5.<java.nio.CharBuffer: int position()>();
+
+        $r8 = staticinvoke <java.lang.StringCoding: char[] safeTrim(char[],int,java.nio.charset.Charset,boolean)>(r2, $i2, r0, z2);
+
+        return $r8;
+
+        catch java.nio.charset.CharacterCodingException from label06 to label08 with label09;
+    }
+
+    static char[] decode(byte[], int, int)
+    {
+        byte[] r2;
+        java.nio.charset.Charset $r0;
+        int i0, i1;
+        char[] $r3, $r11;
+        java.lang.StringBuilder $r5, $r6, $r8;
+        java.lang.String $r1, $r7, $r9;
+        java.io.UnsupportedEncodingException $r4, $r10;
+
+        r2 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r0 = staticinvoke <java.nio.charset.Charset: java.nio.charset.Charset defaultCharset()>();
+
+        $r1 = virtualinvoke $r0.<java.nio.charset.Charset: java.lang.String name()>();
+
+     label1:
+        $r3 = staticinvoke <java.lang.StringCoding: char[] decode(java.lang.String,byte[],int,int)>($r1, r2, i0, i1);
+
+     label2:
+        return $r3;
+
+     label3:
+        $r10 := @caughtexception;
+
+        staticinvoke <java.lang.StringCoding: void warnUnsupportedCharset(java.lang.String)>($r1);
+
+     label4:
+        $r11 = staticinvoke <java.lang.StringCoding: char[] decode(java.lang.String,byte[],int,int)>("ISO-8859-1", r2, i0, i1);
+
+     label5:
+        return $r11;
+
+     label6:
+        $r4 := @caughtexception;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ISO-8859-1 charset not available: ");
+
+        $r7 = virtualinvoke $r4.<java.io.UnsupportedEncodingException: java.lang.String toString()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.misc.MessageUtils: void err(java.lang.String)>($r9);
+
+        staticinvoke <java.lang.System: void exit(int)>(1);
+
+        return null;
+
+        catch java.io.UnsupportedEncodingException from label1 to label2 with label3;
+        catch java.io.UnsupportedEncodingException from label4 to label5 with label6;
+    }
+
+    static byte[] encode(java.lang.String, char[], int, int) throws java.io.UnsupportedEncodingException
+    {
+        byte[] $r14;
+        java.nio.charset.Charset $r4;
+        int i0, i1;
+        java.nio.charset.IllegalCharsetNameException $r11;
+        java.lang.String r2, r3, $r9, $r10, $r13;
+        boolean $z0, $z1;
+        java.lang.ThreadLocal $r0, $r5;
+        java.lang.StringCoding$StringEncoder $r8, r12;
+        char[] r6;
+        java.lang.Object $r1;
+        java.io.UnsupportedEncodingException $r7;
+
+        r2 := @parameter0: java.lang.String;
+
+        r6 := @parameter1: char[];
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        $r0 = <java.lang.StringCoding: java.lang.ThreadLocal encoder>;
+
+        $r1 = staticinvoke <java.lang.StringCoding: java.lang.Object deref(java.lang.ThreadLocal)>($r0);
+
+        r12 = (java.lang.StringCoding$StringEncoder) $r1;
+
+        if r2 != null goto label1;
+
+        $r13 = "ISO-8859-1";
+
+        goto label2;
+
+     label1:
+        $r13 = r2;
+
+     label2:
+        r3 = $r13;
+
+        if r12 == null goto label3;
+
+        $r9 = virtualinvoke r12.<java.lang.StringCoding$StringEncoder: java.lang.String requestedCharsetName()>();
+
+        $z0 = virtualinvoke $r13.<java.lang.String: boolean equals(java.lang.Object)>($r9);
+
+        if $z0 != 0 goto label9;
+
+        $r10 = virtualinvoke r12.<java.lang.StringCoding$StringEncoder: java.lang.String charsetName()>();
+
+        $z1 = virtualinvoke $r13.<java.lang.String: boolean equals(java.lang.Object)>($r10);
+
+        if $z1 != 0 goto label9;
+
+     label3:
+        r12 = null;
+
+     label4:
+        $r4 = staticinvoke <java.lang.StringCoding: java.nio.charset.Charset lookupCharset(java.lang.String)>(r3);
+
+        if $r4 == null goto label5;
+
+        $r8 = new java.lang.StringCoding$StringEncoder;
+
+        specialinvoke $r8.<java.lang.StringCoding$StringEncoder: void <init>(java.nio.charset.Charset,java.lang.String,java.lang.StringCoding$1)>($r4, r3, null);
+
+        r12 = $r8;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r11 := @caughtexception;
+
+     label7:
+        if r12 != null goto label8;
+
+        $r7 = new java.io.UnsupportedEncodingException;
+
+        specialinvoke $r7.<java.io.UnsupportedEncodingException: void <init>(java.lang.String)>(r3);
+
+        throw $r7;
+
+     label8:
+        $r5 = <java.lang.StringCoding: java.lang.ThreadLocal encoder>;
+
+        staticinvoke <java.lang.StringCoding: void set(java.lang.ThreadLocal,java.lang.Object)>($r5, r12);
+
+     label9:
+        $r14 = virtualinvoke r12.<java.lang.StringCoding$StringEncoder: byte[] encode(char[],int,int)>(r6, i0, i1);
+
+        return $r14;
+
+        catch java.nio.charset.IllegalCharsetNameException from label4 to label5 with label6;
+    }
+
+    static byte[] encode(java.nio.charset.Charset, char[], int, int)
+    {
+        byte[] r2, $r8, $r10;
+        java.nio.ByteBuffer $r4;
+        boolean $z0, $z1, z2, $z4, $z5, $z6;
+        java.nio.CharBuffer $r5;
+        java.nio.charset.CharsetEncoder $r1, $r17, $r19;
+        float $f0;
+        java.lang.ClassLoader $r12;
+        java.nio.charset.CharacterCodingException $r13;
+        java.lang.Error $r14;
+        java.nio.charset.CoderResult $r6, $r7;
+        java.nio.charset.Charset r0;
+        java.nio.charset.CodingErrorAction $r16, $r18;
+        int i0, $i1, $i2, $i3, $i4, i5;
+        java.lang.SecurityManager $r3;
+        sun.nio.cs.ArrayEncoder $r9;
+        char[] r15;
+        java.lang.Class $r11;
+
+        r0 := @parameter0: java.nio.charset.Charset;
+
+        r15 := @parameter1: char[];
+
+        i5 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        $r1 = virtualinvoke r0.<java.nio.charset.Charset: java.nio.charset.CharsetEncoder newEncoder()>();
+
+        $f0 = virtualinvoke $r1.<java.nio.charset.CharsetEncoder: float maxBytesPerChar()>();
+
+        $i1 = staticinvoke <java.lang.StringCoding: int scale(int,float)>(i0, $f0);
+
+        r2 = newarray (byte)[$i1];
+
+        if i0 != 0 goto label01;
+
+        return r2;
+
+     label01:
+        z2 = 0;
+
+        $r3 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r3 == null goto label04;
+
+        $r11 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.Class: java.lang.ClassLoader getClassLoader0()>();
+
+        if $r12 != null goto label02;
+
+        $z6 = 1;
+
+        $z5 = 1;
+
+        goto label03;
+
+     label02:
+        $z6 = 0;
+
+        $z5 = 0;
+
+     label03:
+        z2 = $z5;
+
+        if $z6 != 0 goto label04;
+
+        $i4 = i5 + i0;
+
+        r15 = staticinvoke <java.util.Arrays: char[] copyOfRange(char[],int,int)>(r15, i5, $i4);
+
+        i5 = 0;
+
+     label04:
+        $r16 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPLACE>;
+
+        $r17 = virtualinvoke $r1.<java.nio.charset.CharsetEncoder: java.nio.charset.CharsetEncoder onMalformedInput(java.nio.charset.CodingErrorAction)>($r16);
+
+        $r18 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPLACE>;
+
+        $r19 = virtualinvoke $r17.<java.nio.charset.CharsetEncoder: java.nio.charset.CharsetEncoder onUnmappableCharacter(java.nio.charset.CodingErrorAction)>($r18);
+
+        virtualinvoke $r19.<java.nio.charset.CharsetEncoder: java.nio.charset.CharsetEncoder reset()>();
+
+        $z4 = $r1 instanceof sun.nio.cs.ArrayEncoder;
+
+        if $z4 == 0 goto label05;
+
+        $r9 = (sun.nio.cs.ArrayEncoder) $r1;
+
+        $i3 = interfaceinvoke $r9.<sun.nio.cs.ArrayEncoder: int encode(char[],int,int,byte[])>(r15, i5, i0, r2);
+
+        $r10 = staticinvoke <java.lang.StringCoding: byte[] safeTrim(byte[],int,java.nio.charset.Charset,boolean)>(r2, $i3, r0, z2);
+
+        return $r10;
+
+     label05:
+        $r4 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>(r2);
+
+        $r5 = staticinvoke <java.nio.CharBuffer: java.nio.CharBuffer wrap(char[],int,int)>(r15, i5, i0);
+
+     label06:
+        $r6 = virtualinvoke $r1.<java.nio.charset.CharsetEncoder: java.nio.charset.CoderResult encode(java.nio.CharBuffer,java.nio.ByteBuffer,boolean)>($r5, $r4, 1);
+
+        $z0 = virtualinvoke $r6.<java.nio.charset.CoderResult: boolean isUnderflow()>();
+
+        if $z0 != 0 goto label07;
+
+        virtualinvoke $r6.<java.nio.charset.CoderResult: void throwException()>();
+
+     label07:
+        $r7 = virtualinvoke $r1.<java.nio.charset.CharsetEncoder: java.nio.charset.CoderResult flush(java.nio.ByteBuffer)>($r4);
+
+        $z1 = virtualinvoke $r7.<java.nio.charset.CoderResult: boolean isUnderflow()>();
+
+        if $z1 != 0 goto label08;
+
+        virtualinvoke $r7.<java.nio.charset.CoderResult: void throwException()>();
+
+     label08:
+        goto label10;
+
+     label09:
+        $r13 := @caughtexception;
+
+        $r14 = new java.lang.Error;
+
+        specialinvoke $r14.<java.lang.Error: void <init>(java.lang.Throwable)>($r13);
+
+        throw $r14;
+
+     label10:
+        $i2 = virtualinvoke $r4.<java.nio.ByteBuffer: int position()>();
+
+        $r8 = staticinvoke <java.lang.StringCoding: byte[] safeTrim(byte[],int,java.nio.charset.Charset,boolean)>(r2, $i2, r0, z2);
+
+        return $r8;
+
+        catch java.nio.charset.CharacterCodingException from label06 to label08 with label09;
+    }
+
+    static byte[] encode(char[], int, int)
+    {
+        byte[] $r3, $r11;
+        java.nio.charset.Charset $r0;
+        int i0, i1;
+        char[] r2;
+        java.lang.StringBuilder $r5, $r6, $r8;
+        java.lang.String $r1, $r7, $r9;
+        java.io.UnsupportedEncodingException $r4, $r10;
+
+        r2 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r0 = staticinvoke <java.nio.charset.Charset: java.nio.charset.Charset defaultCharset()>();
+
+        $r1 = virtualinvoke $r0.<java.nio.charset.Charset: java.lang.String name()>();
+
+     label1:
+        $r3 = staticinvoke <java.lang.StringCoding: byte[] encode(java.lang.String,char[],int,int)>($r1, r2, i0, i1);
+
+     label2:
+        return $r3;
+
+     label3:
+        $r10 := @caughtexception;
+
+        staticinvoke <java.lang.StringCoding: void warnUnsupportedCharset(java.lang.String)>($r1);
+
+     label4:
+        $r11 = staticinvoke <java.lang.StringCoding: byte[] encode(java.lang.String,char[],int,int)>("ISO-8859-1", r2, i0, i1);
+
+     label5:
+        return $r11;
+
+     label6:
+        $r4 := @caughtexception;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ISO-8859-1 charset not available: ");
+
+        $r7 = virtualinvoke $r4.<java.io.UnsupportedEncodingException: java.lang.String toString()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.misc.MessageUtils: void err(java.lang.String)>($r9);
+
+        staticinvoke <java.lang.System: void exit(int)>(1);
+
+        return null;
+
+        catch java.io.UnsupportedEncodingException from label1 to label2 with label3;
+        catch java.io.UnsupportedEncodingException from label4 to label5 with label6;
+    }
+
+    static int access$000(int, float)
+    {
+        int i0, $i1;
+        float f0;
+
+        i0 := @parameter0: int;
+
+        f0 := @parameter1: float;
+
+        $i1 = staticinvoke <java.lang.StringCoding: int scale(int,float)>(i0, f0);
+
+        return $i1;
+    }
+
+    static char[] access$100(char[], int, java.nio.charset.Charset, boolean)
+    {
+        java.nio.charset.Charset r1;
+        int i0;
+        char[] r0, $r2;
+        boolean z0;
+
+        r0 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        r1 := @parameter2: java.nio.charset.Charset;
+
+        z0 := @parameter3: boolean;
+
+        $r2 = staticinvoke <java.lang.StringCoding: char[] safeTrim(char[],int,java.nio.charset.Charset,boolean)>(r0, i0, r1, z0);
+
+        return $r2;
+    }
+
+    static byte[] access$300(byte[], int, java.nio.charset.Charset, boolean)
+    {
+        byte[] r0, $r2;
+        java.nio.charset.Charset r1;
+        int i0;
+        boolean z0;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        r1 := @parameter2: java.nio.charset.Charset;
+
+        z0 := @parameter3: boolean;
+
+        $r2 = staticinvoke <java.lang.StringCoding: byte[] safeTrim(byte[],int,java.nio.charset.Charset,boolean)>(r0, i0, r1, z0);
+
+        return $r2;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.ThreadLocal $r0, $r1;
+
+        $r0 = new java.lang.ThreadLocal;
+
+        specialinvoke $r0.<java.lang.ThreadLocal: void <init>()>();
+
+        <java.lang.StringCoding: java.lang.ThreadLocal decoder> = $r0;
+
+        $r1 = new java.lang.ThreadLocal;
+
+        specialinvoke $r1.<java.lang.ThreadLocal: void <init>()>();
+
+        <java.lang.StringCoding: java.lang.ThreadLocal encoder> = $r1;
+
+        <java.lang.StringCoding: boolean warnUnsupportedCharset> = 1;
+
+        return;
+    }
+}

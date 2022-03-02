@@ -1,0 +1,265 @@
+final class sun.nio.ch.WindowsSelectorImpl$FinishLock extends java.lang.Object
+{
+    private int threadsToFinish;
+    java.io.IOException exception;
+    final sun.nio.ch.WindowsSelectorImpl this$0;
+
+    private void <init>(sun.nio.ch.WindowsSelectorImpl)
+    {
+        sun.nio.ch.WindowsSelectorImpl$FinishLock r0;
+        sun.nio.ch.WindowsSelectorImpl r1;
+
+        r0 := @this: sun.nio.ch.WindowsSelectorImpl$FinishLock;
+
+        r1 := @parameter0: sun.nio.ch.WindowsSelectorImpl;
+
+        r0.<sun.nio.ch.WindowsSelectorImpl$FinishLock: sun.nio.ch.WindowsSelectorImpl this$0> = r1;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.nio.ch.WindowsSelectorImpl$FinishLock: java.io.IOException exception> = null;
+
+        return;
+    }
+
+    private void reset()
+    {
+        java.util.List $r2;
+        sun.nio.ch.WindowsSelectorImpl$FinishLock r0;
+        sun.nio.ch.WindowsSelectorImpl $r1;
+        int $i0;
+
+        r0 := @this: sun.nio.ch.WindowsSelectorImpl$FinishLock;
+
+        $r1 = r0.<sun.nio.ch.WindowsSelectorImpl$FinishLock: sun.nio.ch.WindowsSelectorImpl this$0>;
+
+        $r2 = staticinvoke <sun.nio.ch.WindowsSelectorImpl: java.util.List access$1200(sun.nio.ch.WindowsSelectorImpl)>($r1);
+
+        $i0 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        r0.<sun.nio.ch.WindowsSelectorImpl$FinishLock: int threadsToFinish> = $i0;
+
+        return;
+    }
+
+    private synchronized void threadFinished()
+    {
+        java.util.List $r2;
+        sun.nio.ch.WindowsSelectorImpl$FinishLock r0;
+        sun.nio.ch.WindowsSelectorImpl $r1, $r3;
+        int $i0, $i1, $i2, $i3, $i4;
+
+        r0 := @this: sun.nio.ch.WindowsSelectorImpl$FinishLock;
+
+        $i0 = r0.<sun.nio.ch.WindowsSelectorImpl$FinishLock: int threadsToFinish>;
+
+        $r1 = r0.<sun.nio.ch.WindowsSelectorImpl$FinishLock: sun.nio.ch.WindowsSelectorImpl this$0>;
+
+        $r2 = staticinvoke <sun.nio.ch.WindowsSelectorImpl: java.util.List access$1200(sun.nio.ch.WindowsSelectorImpl)>($r1);
+
+        $i1 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        if $i0 != $i1 goto label1;
+
+        $r3 = r0.<sun.nio.ch.WindowsSelectorImpl$FinishLock: sun.nio.ch.WindowsSelectorImpl this$0>;
+
+        virtualinvoke $r3.<sun.nio.ch.WindowsSelectorImpl: java.nio.channels.Selector wakeup()>();
+
+     label1:
+        $i2 = r0.<sun.nio.ch.WindowsSelectorImpl$FinishLock: int threadsToFinish>;
+
+        $i3 = $i2 - 1;
+
+        r0.<sun.nio.ch.WindowsSelectorImpl$FinishLock: int threadsToFinish> = $i3;
+
+        $i4 = r0.<sun.nio.ch.WindowsSelectorImpl$FinishLock: int threadsToFinish>;
+
+        if $i4 != 0 goto label2;
+
+        virtualinvoke r0.<java.lang.Object: void notify()>();
+
+     label2:
+        return;
+    }
+
+    private synchronized void waitForHelperThreads()
+    {
+        java.util.List $r2;
+        sun.nio.ch.WindowsSelectorImpl$FinishLock r0, $r4;
+        java.lang.InterruptedException $r6;
+        sun.nio.ch.WindowsSelectorImpl $r1, $r3, $r5;
+        java.lang.Thread $r7;
+        int $i0, $i1, $i2;
+
+        r0 := @this: sun.nio.ch.WindowsSelectorImpl$FinishLock;
+
+        $i0 = r0.<sun.nio.ch.WindowsSelectorImpl$FinishLock: int threadsToFinish>;
+
+        $r1 = r0.<sun.nio.ch.WindowsSelectorImpl$FinishLock: sun.nio.ch.WindowsSelectorImpl this$0>;
+
+        $r2 = staticinvoke <sun.nio.ch.WindowsSelectorImpl: java.util.List access$1200(sun.nio.ch.WindowsSelectorImpl)>($r1);
+
+        $i1 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        if $i0 != $i1 goto label1;
+
+        $r5 = r0.<sun.nio.ch.WindowsSelectorImpl$FinishLock: sun.nio.ch.WindowsSelectorImpl this$0>;
+
+        virtualinvoke $r5.<sun.nio.ch.WindowsSelectorImpl: java.nio.channels.Selector wakeup()>();
+
+     label1:
+        $i2 = r0.<sun.nio.ch.WindowsSelectorImpl$FinishLock: int threadsToFinish>;
+
+        if $i2 == 0 goto label5;
+
+     label2:
+        $r3 = r0.<sun.nio.ch.WindowsSelectorImpl$FinishLock: sun.nio.ch.WindowsSelectorImpl this$0>;
+
+        $r4 = staticinvoke <sun.nio.ch.WindowsSelectorImpl: sun.nio.ch.WindowsSelectorImpl$FinishLock access$1300(sun.nio.ch.WindowsSelectorImpl)>($r3);
+
+        virtualinvoke $r4.<java.lang.Object: void wait()>();
+
+     label3:
+        goto label1;
+
+     label4:
+        $r6 := @caughtexception;
+
+        $r7 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r7.<java.lang.Thread: void interrupt()>();
+
+        goto label1;
+
+     label5:
+        return;
+
+        catch java.lang.InterruptedException from label2 to label3 with label4;
+    }
+
+    private synchronized void setException(java.io.IOException)
+    {
+        java.io.IOException r1;
+        sun.nio.ch.WindowsSelectorImpl$FinishLock r0;
+
+        r0 := @this: sun.nio.ch.WindowsSelectorImpl$FinishLock;
+
+        r1 := @parameter0: java.io.IOException;
+
+        r0.<sun.nio.ch.WindowsSelectorImpl$FinishLock: java.io.IOException exception> = r1;
+
+        return;
+    }
+
+    private void checkForException() throws java.io.IOException
+    {
+        sun.nio.ch.WindowsSelectorImpl$FinishLock r0;
+        java.lang.StringBuffer $r2;
+        java.io.IOException $r1, $r3, $r4;
+        java.lang.String $r5;
+
+        r0 := @this: sun.nio.ch.WindowsSelectorImpl$FinishLock;
+
+        $r1 = r0.<sun.nio.ch.WindowsSelectorImpl$FinishLock: java.io.IOException exception>;
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = new java.lang.StringBuffer;
+
+        specialinvoke $r2.<java.lang.StringBuffer: void <init>(java.lang.String)>("An exception occurred during the execution of select(): \n");
+
+        $r3 = r0.<sun.nio.ch.WindowsSelectorImpl$FinishLock: java.io.IOException exception>;
+
+        virtualinvoke $r2.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.Object)>($r3);
+
+        virtualinvoke $r2.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(10);
+
+        r0.<sun.nio.ch.WindowsSelectorImpl$FinishLock: java.io.IOException exception> = null;
+
+        $r4 = new java.io.IOException;
+
+        $r5 = virtualinvoke $r2.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.io.IOException: void <init>(java.lang.String)>($r5);
+
+        throw $r4;
+    }
+
+    static void access$200(sun.nio.ch.WindowsSelectorImpl$FinishLock)
+    {
+        sun.nio.ch.WindowsSelectorImpl$FinishLock r0;
+
+        r0 := @parameter0: sun.nio.ch.WindowsSelectorImpl$FinishLock;
+
+        specialinvoke r0.<sun.nio.ch.WindowsSelectorImpl$FinishLock: void reset()>();
+
+        return;
+    }
+
+    static void access$500(sun.nio.ch.WindowsSelectorImpl$FinishLock, java.io.IOException)
+    {
+        java.io.IOException r1;
+        sun.nio.ch.WindowsSelectorImpl$FinishLock r0;
+
+        r0 := @parameter0: sun.nio.ch.WindowsSelectorImpl$FinishLock;
+
+        r1 := @parameter1: java.io.IOException;
+
+        specialinvoke r0.<sun.nio.ch.WindowsSelectorImpl$FinishLock: void setException(java.io.IOException)>(r1);
+
+        return;
+    }
+
+    static void access$600(sun.nio.ch.WindowsSelectorImpl$FinishLock)
+    {
+        sun.nio.ch.WindowsSelectorImpl$FinishLock r0;
+
+        r0 := @parameter0: sun.nio.ch.WindowsSelectorImpl$FinishLock;
+
+        specialinvoke r0.<sun.nio.ch.WindowsSelectorImpl$FinishLock: void waitForHelperThreads()>();
+
+        return;
+    }
+
+    static void access$700(sun.nio.ch.WindowsSelectorImpl$FinishLock) throws java.io.IOException
+    {
+        sun.nio.ch.WindowsSelectorImpl$FinishLock r0;
+
+        r0 := @parameter0: sun.nio.ch.WindowsSelectorImpl$FinishLock;
+
+        specialinvoke r0.<sun.nio.ch.WindowsSelectorImpl$FinishLock: void checkForException()>();
+
+        return;
+    }
+
+    void <init>(sun.nio.ch.WindowsSelectorImpl, sun.nio.ch.WindowsSelectorImpl$1)
+    {
+        sun.nio.ch.WindowsSelectorImpl$1 r2;
+        sun.nio.ch.WindowsSelectorImpl$FinishLock r0;
+        sun.nio.ch.WindowsSelectorImpl r1;
+
+        r0 := @this: sun.nio.ch.WindowsSelectorImpl$FinishLock;
+
+        r1 := @parameter0: sun.nio.ch.WindowsSelectorImpl;
+
+        r2 := @parameter1: sun.nio.ch.WindowsSelectorImpl$1;
+
+        specialinvoke r0.<sun.nio.ch.WindowsSelectorImpl$FinishLock: void <init>(sun.nio.ch.WindowsSelectorImpl)>(r1);
+
+        return;
+    }
+
+    static void access$2700(sun.nio.ch.WindowsSelectorImpl$FinishLock)
+    {
+        sun.nio.ch.WindowsSelectorImpl$FinishLock r0;
+
+        r0 := @parameter0: sun.nio.ch.WindowsSelectorImpl$FinishLock;
+
+        specialinvoke r0.<sun.nio.ch.WindowsSelectorImpl$FinishLock: void threadFinished()>();
+
+        return;
+    }
+}

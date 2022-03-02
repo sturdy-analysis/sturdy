@@ -1,0 +1,576 @@
+class com.sun.jndi.dns.DNSDatagramSocketFactory extends java.lang.Object
+{
+    static final int DEVIATION;
+    static final int THRESHOLD;
+    static final int BIT_DEVIATION;
+    static final int HISTORY;
+    static final int MAX_RANDOM_TRIES;
+    int lastport;
+    int suitablePortCount;
+    int unsuitablePortCount;
+    final java.net.ProtocolFamily family;
+    final int thresholdCount;
+    final int deviation;
+    final java.util.Random random;
+    final com.sun.jndi.dns.DNSDatagramSocketFactory$PortHistory history;
+    static final boolean $assertionsDisabled;
+
+    void <init>()
+    {
+        java.util.Random $r1;
+        com.sun.jndi.dns.DNSDatagramSocketFactory r0;
+
+        r0 := @this: com.sun.jndi.dns.DNSDatagramSocketFactory;
+
+        $r1 = new java.util.Random;
+
+        specialinvoke $r1.<java.util.Random: void <init>()>();
+
+        specialinvoke r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: void <init>(java.util.Random)>($r1);
+
+        return;
+    }
+
+    void <init>(java.util.Random)
+    {
+        java.util.Random r1, $r3;
+        java.lang.Object $r2;
+        com.sun.jndi.dns.DNSDatagramSocketFactory r0;
+
+        r0 := @this: com.sun.jndi.dns.DNSDatagramSocketFactory;
+
+        r1 := @parameter0: java.util.Random;
+
+        $r2 = staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r1);
+
+        $r3 = (java.util.Random) $r2;
+
+        specialinvoke r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: void <init>(java.util.Random,java.net.ProtocolFamily,int,int)>($r3, null, 3, 6);
+
+        return;
+    }
+
+    void <init>(java.util.Random, java.net.ProtocolFamily, int, int)
+    {
+        java.net.ProtocolFamily r5;
+        java.util.Random r1, $r3;
+        com.sun.jndi.dns.DNSDatagramSocketFactory r0;
+        int i0, $i1, i2, $i3;
+        java.lang.Object $r2;
+        com.sun.jndi.dns.DNSDatagramSocketFactory$PortHistory $r4;
+
+        r0 := @this: com.sun.jndi.dns.DNSDatagramSocketFactory;
+
+        r1 := @parameter0: java.util.Random;
+
+        r5 := @parameter1: java.net.ProtocolFamily;
+
+        i0 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int lastport> = 0;
+
+        $r2 = staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r1);
+
+        $r3 = (java.util.Random) $r2;
+
+        r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: java.util.Random random> = $r3;
+
+        $r4 = new com.sun.jndi.dns.DNSDatagramSocketFactory$PortHistory;
+
+        specialinvoke $r4.<com.sun.jndi.dns.DNSDatagramSocketFactory$PortHistory: void <init>(int,java.util.Random)>(32, r1);
+
+        r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: com.sun.jndi.dns.DNSDatagramSocketFactory$PortHistory history> = $r4;
+
+        r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: java.net.ProtocolFamily family> = r5;
+
+        $i1 = staticinvoke <java.lang.Math: int max(int,int)>(1, i0);
+
+        r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int deviation> = $i1;
+
+        $i3 = staticinvoke <java.lang.Math: int max(int,int)>(2, i2);
+
+        r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int thresholdCount> = $i3;
+
+        return;
+    }
+
+    public synchronized java.net.DatagramSocket open() throws java.net.SocketException
+    {
+        boolean z0, z1, $z2, $z3, $z4, z5, $z7, $z9, $z10, $z11, $z12;
+        com.sun.jndi.dns.DNSDatagramSocketFactory r0;
+        java.lang.AssertionError $r3;
+        java.net.DatagramSocket $r1, $r2, $r6;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, i20, $i21;
+        com.sun.jndi.dns.DNSDatagramSocketFactory$PortHistory $r4, $r5, $r7;
+
+        r0 := @this: com.sun.jndi.dns.DNSDatagramSocketFactory;
+
+        i20 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int lastport>;
+
+        $i1 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int unsuitablePortCount>;
+
+        $i0 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int thresholdCount>;
+
+        if $i1 <= $i0 goto label01;
+
+        $z3 = 1;
+
+        goto label02;
+
+     label01:
+        $z3 = 0;
+
+     label02:
+        if $z3 == 0 goto label04;
+
+        $r6 = specialinvoke r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: java.net.DatagramSocket openRandom()>();
+
+        if $r6 == null goto label03;
+
+        return $r6;
+
+     label03:
+        r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int unsuitablePortCount> = 0;
+
+        r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int suitablePortCount> = 0;
+
+        i20 = 0;
+
+     label04:
+        $r1 = specialinvoke r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: java.net.DatagramSocket openDefault()>();
+
+        $i2 = virtualinvoke $r1.<java.net.DatagramSocket: int getLocalPort()>();
+
+        r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int lastport> = $i2;
+
+        if i20 != 0 goto label05;
+
+        $r5 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: com.sun.jndi.dns.DNSDatagramSocketFactory$PortHistory history>;
+
+        $i19 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int lastport>;
+
+        virtualinvoke $r5.<com.sun.jndi.dns.DNSDatagramSocketFactory$PortHistory: boolean offer(int)>($i19);
+
+        return $r1;
+
+     label05:
+        $i4 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int suitablePortCount>;
+
+        $i3 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int thresholdCount>;
+
+        if $i4 <= $i3 goto label06;
+
+        $z4 = 1;
+
+        goto label07;
+
+     label06:
+        $z4 = 0;
+
+     label07:
+        z5 = $z4;
+
+        $i5 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int lastport>;
+
+        $i6 = i20 ^ $i5;
+
+        $i7 = staticinvoke <java.lang.Integer: int bitCount(int)>($i6);
+
+        if $i7 <= 2 goto label08;
+
+        $i15 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int lastport>;
+
+        $i16 = $i15 - i20;
+
+        $i17 = staticinvoke <java.lang.Math: int abs(int)>($i16);
+
+        $i18 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int deviation>;
+
+        if $i17 <= $i18 goto label08;
+
+        $z12 = 1;
+
+        $z11 = 1;
+
+        goto label09;
+
+     label08:
+        $z12 = 0;
+
+        $z11 = 0;
+
+     label09:
+        z0 = $z11;
+
+        $r7 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: com.sun.jndi.dns.DNSDatagramSocketFactory$PortHistory history>;
+
+        $i21 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int lastport>;
+
+        $z7 = virtualinvoke $r7.<com.sun.jndi.dns.DNSDatagramSocketFactory$PortHistory: boolean contains(int)>($i21);
+
+        if z5 != 0 goto label10;
+
+        if $z12 == 0 goto label11;
+
+        if $z7 != 0 goto label11;
+
+     label10:
+        $z10 = 1;
+
+        $z9 = 1;
+
+        goto label12;
+
+     label11:
+        $z10 = 0;
+
+        $z9 = 0;
+
+     label12:
+        z1 = $z10;
+
+        if $z9 == 0 goto label13;
+
+        if $z7 != 0 goto label13;
+
+        $r4 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: com.sun.jndi.dns.DNSDatagramSocketFactory$PortHistory history>;
+
+        $i14 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int lastport>;
+
+        virtualinvoke $r4.<com.sun.jndi.dns.DNSDatagramSocketFactory$PortHistory: boolean add(int)>($i14);
+
+     label13:
+        if z1 == 0 goto label17;
+
+        if z5 != 0 goto label14;
+
+        $i12 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int suitablePortCount>;
+
+        $i13 = $i12 + 1;
+
+        r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int suitablePortCount> = $i13;
+
+        goto label16;
+
+     label14:
+        if z0 == 0 goto label15;
+
+        if $z7 == 0 goto label16;
+
+     label15:
+        r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int unsuitablePortCount> = 1;
+
+        $i10 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int thresholdCount>;
+
+        $i11 = $i10 / 2;
+
+        r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int suitablePortCount> = $i11;
+
+     label16:
+        return $r1;
+
+     label17:
+        $z2 = <com.sun.jndi.dns.DNSDatagramSocketFactory: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label18;
+
+        if z5 == 0 goto label18;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>()>();
+
+        throw $r3;
+
+     label18:
+        $r2 = specialinvoke r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: java.net.DatagramSocket openRandom()>();
+
+        if $r2 != null goto label19;
+
+        return $r1;
+
+     label19:
+        $i8 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int unsuitablePortCount>;
+
+        $i9 = $i8 + 1;
+
+        r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int unsuitablePortCount> = $i9;
+
+        virtualinvoke $r1.<java.net.DatagramSocket: void close()>();
+
+        return $r2;
+    }
+
+    private java.net.DatagramSocket openDefault() throws java.net.SocketException
+    {
+        java.lang.Throwable $r10;
+        java.net.ProtocolFamily $r1, $r3;
+        java.nio.channels.DatagramChannel $r4;
+        java.io.IOException $r6;
+        com.sun.jndi.dns.DNSDatagramSocketFactory r0;
+        java.net.DatagramSocket $r2, $r5;
+        java.net.SocketException $r7, $r9;
+        java.lang.String $r8;
+
+        r0 := @this: com.sun.jndi.dns.DNSDatagramSocketFactory;
+
+        $r1 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: java.net.ProtocolFamily family>;
+
+        if $r1 == null goto label7;
+
+     label1:
+        $r3 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: java.net.ProtocolFamily family>;
+
+        $r4 = staticinvoke <java.nio.channels.DatagramChannel: java.nio.channels.DatagramChannel open(java.net.ProtocolFamily)>($r3);
+
+     label2:
+        $r5 = virtualinvoke $r4.<java.nio.channels.DatagramChannel: java.net.DatagramSocket socket()>();
+
+        virtualinvoke $r5.<java.net.DatagramSocket: void bind(java.net.SocketAddress)>(null);
+
+     label3:
+        return $r5;
+
+     label4:
+        $r10 := @caughtexception;
+
+        virtualinvoke $r4.<java.nio.channels.DatagramChannel: void close()>();
+
+        throw $r10;
+
+     label5:
+        $r9 := @caughtexception;
+
+        throw $r9;
+
+     label6:
+        $r6 := @caughtexception;
+
+        $r7 = new java.net.SocketException;
+
+        $r8 = virtualinvoke $r6.<java.io.IOException: java.lang.String getMessage()>();
+
+        specialinvoke $r7.<java.net.SocketException: void <init>(java.lang.String)>($r8);
+
+        virtualinvoke $r7.<java.net.SocketException: java.lang.Throwable initCause(java.lang.Throwable)>($r6);
+
+        throw $r7;
+
+     label7:
+        $r2 = new java.net.DatagramSocket;
+
+        specialinvoke $r2.<java.net.DatagramSocket: void <init>()>();
+
+        return $r2;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.net.SocketException from label1 to label3 with label5;
+        catch java.net.SocketException from label4 to label5 with label5;
+        catch java.io.IOException from label1 to label3 with label6;
+        catch java.io.IOException from label4 to label5 with label6;
+    }
+
+    synchronized boolean isUsingNativePortRandomization()
+    {
+        int $i0, $i1, $i2, $i3;
+        com.sun.jndi.dns.DNSDatagramSocketFactory r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.dns.DNSDatagramSocketFactory;
+
+        $i1 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int unsuitablePortCount>;
+
+        $i0 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int thresholdCount>;
+
+        if $i1 > $i0 goto label1;
+
+        $i3 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int suitablePortCount>;
+
+        $i2 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int thresholdCount>;
+
+        if $i3 <= $i2 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    synchronized boolean isUsingJavaPortRandomization()
+    {
+        int $i0, $i1;
+        com.sun.jndi.dns.DNSDatagramSocketFactory r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.dns.DNSDatagramSocketFactory;
+
+        $i1 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int unsuitablePortCount>;
+
+        $i0 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: int thresholdCount>;
+
+        if $i1 <= $i0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    synchronized boolean isUndecided()
+    {
+        com.sun.jndi.dns.DNSDatagramSocketFactory r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: com.sun.jndi.dns.DNSDatagramSocketFactory;
+
+        $z0 = virtualinvoke r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: boolean isUsingJavaPortRandomization()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = virtualinvoke r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: boolean isUsingNativePortRandomization()>();
+
+        if $z1 != 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+    }
+
+    private java.net.DatagramSocket openRandom()
+    {
+        java.lang.Throwable $r9;
+        java.net.ProtocolFamily $r2, $r4;
+        java.nio.channels.DatagramChannel $r5;
+        java.util.Random $r1;
+        java.net.DatagramSocket $r6, $r11;
+        int $i0, $i1, $i2, $i3, i4, i5, $i7;
+        java.io.IOException $r8;
+        com.sun.jndi.dns.DNSDatagramSocketFactory r0;
+        java.net.InetSocketAddress $r10;
+
+        r0 := @this: com.sun.jndi.dns.DNSDatagramSocketFactory;
+
+        i5 = 5;
+
+     label1:
+        $i0 = i5;
+
+        $i7 = (int) -1;
+
+        i5 = i5 + $i7;
+
+        if $i0 <= 0 goto label9;
+
+        $i2 = <com.sun.jndi.dns.DNSDatagramSocketFactory$EphemeralPortRange: int LOWER>;
+
+        $r1 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: java.util.Random random>;
+
+        $i1 = <com.sun.jndi.dns.DNSDatagramSocketFactory$EphemeralPortRange: int RANGE>;
+
+        $i3 = virtualinvoke $r1.<java.util.Random: int nextInt(int)>($i1);
+
+        i4 = $i2 + $i3;
+
+     label2:
+        $r2 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: java.net.ProtocolFamily family>;
+
+        if $r2 == null goto label6;
+
+        $r4 = r0.<com.sun.jndi.dns.DNSDatagramSocketFactory: java.net.ProtocolFamily family>;
+
+        $r5 = staticinvoke <java.nio.channels.DatagramChannel: java.nio.channels.DatagramChannel open(java.net.ProtocolFamily)>($r4);
+
+     label3:
+        $r6 = virtualinvoke $r5.<java.nio.channels.DatagramChannel: java.net.DatagramSocket socket()>();
+
+        $r10 = new java.net.InetSocketAddress;
+
+        specialinvoke $r10.<java.net.InetSocketAddress: void <init>(int)>(i4);
+
+        virtualinvoke $r6.<java.net.DatagramSocket: void bind(java.net.SocketAddress)>($r10);
+
+     label4:
+        return $r6;
+
+     label5:
+        $r9 := @caughtexception;
+
+        virtualinvoke $r5.<java.nio.channels.DatagramChannel: void close()>();
+
+        throw $r9;
+
+     label6:
+        $r11 = new java.net.DatagramSocket;
+
+        specialinvoke $r11.<java.net.DatagramSocket: void <init>(int)>(i4);
+
+     label7:
+        return $r11;
+
+     label8:
+        $r8 := @caughtexception;
+
+        goto label1;
+
+     label9:
+        return null;
+
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.io.IOException from label2 to label4 with label8;
+        catch java.io.IOException from label5 to label7 with label8;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        <com.sun.jndi.dns.DNSDatagramSocketFactory: int MAX_RANDOM_TRIES> = 5;
+
+        <com.sun.jndi.dns.DNSDatagramSocketFactory: int HISTORY> = 32;
+
+        <com.sun.jndi.dns.DNSDatagramSocketFactory: int BIT_DEVIATION> = 2;
+
+        <com.sun.jndi.dns.DNSDatagramSocketFactory: int THRESHOLD> = 6;
+
+        <com.sun.jndi.dns.DNSDatagramSocketFactory: int DEVIATION> = 3;
+
+        $r0 = class "Lcom/sun/jndi/dns/DNSDatagramSocketFactory;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <com.sun.jndi.dns.DNSDatagramSocketFactory: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

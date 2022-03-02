@@ -1,0 +1,258 @@
+class com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter extends com.sun.media.sound.AudioFloatConverter
+{
+    private final com.sun.media.sound.AudioFloatConverter converter;
+    private final int offset;
+    private final int stepsize;
+    private final byte mask;
+    private byte[] mask_buffer;
+
+    void <init>(com.sun.media.sound.AudioFloatConverter, javax.sound.sampled.AudioFormat)
+    {
+        com.sun.media.sound.AudioFloatConverter r2;
+        javax.sound.sampled.AudioFormat r1;
+        com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter;
+
+        r2 := @parameter0: com.sun.media.sound.AudioFloatConverter;
+
+        r1 := @parameter1: javax.sound.sampled.AudioFormat;
+
+        specialinvoke r0.<com.sun.media.sound.AudioFloatConverter: void <init>()>();
+
+        $i0 = virtualinvoke r1.<javax.sound.sampled.AudioFormat: int getSampleSizeInBits()>();
+
+        $z0 = virtualinvoke r1.<javax.sound.sampled.AudioFormat: boolean isBigEndian()>();
+
+        r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: com.sun.media.sound.AudioFloatConverter converter> = r2;
+
+        $i1 = $i0 + 7;
+
+        $i2 = $i1 / 8;
+
+        r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: int stepsize> = $i2;
+
+        if $z0 == 0 goto label01;
+
+        $i3 = r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: int stepsize>;
+
+        $i5 = $i3 - 1;
+
+        goto label02;
+
+     label01:
+        $i5 = 0;
+
+     label02:
+        r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: int offset> = $i5;
+
+        $i4 = $i0 % 8;
+
+        if $i4 != 0 goto label03;
+
+        r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: byte mask> = 0;
+
+        goto label11;
+
+     label03:
+        if $i4 != 1 goto label04;
+
+        r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: byte mask> = -128;
+
+        goto label11;
+
+     label04:
+        if $i4 != 2 goto label05;
+
+        r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: byte mask> = -64;
+
+        goto label11;
+
+     label05:
+        if $i4 != 3 goto label06;
+
+        r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: byte mask> = -32;
+
+        goto label11;
+
+     label06:
+        if $i4 != 4 goto label07;
+
+        r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: byte mask> = -16;
+
+        goto label11;
+
+     label07:
+        if $i4 != 5 goto label08;
+
+        r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: byte mask> = -8;
+
+        goto label11;
+
+     label08:
+        if $i4 != 6 goto label09;
+
+        r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: byte mask> = -4;
+
+        goto label11;
+
+     label09:
+        if $i4 != 7 goto label10;
+
+        r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: byte mask> = -2;
+
+        goto label11;
+
+     label10:
+        r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: byte mask> = -1;
+
+     label11:
+        return;
+    }
+
+    public byte[] toByteArray(float[], int, int, byte[], int)
+    {
+        byte[] r2, $r4;
+        com.sun.media.sound.AudioFloatConverter $r3;
+        float[] r1;
+        com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter r0;
+        byte $b6, $b7, $b8, $b9;
+        int i0, i1, i2, $i3, i4, $i5, $i10, i11;
+
+        r0 := @this: com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter;
+
+        r1 := @parameter0: float[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r2 := @parameter3: byte[];
+
+        i2 := @parameter4: int;
+
+        $r3 = r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: com.sun.media.sound.AudioFloatConverter converter>;
+
+        $r4 = virtualinvoke $r3.<com.sun.media.sound.AudioFloatConverter: byte[] toByteArray(float[],int,int,byte[],int)>(r1, i0, i1, r2, i2);
+
+        $i3 = r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: int stepsize>;
+
+        i4 = i1 * $i3;
+
+        $i5 = r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: int offset>;
+
+        i11 = i2 + $i5;
+
+     label1:
+        if i11 >= i4 goto label2;
+
+        $b7 = r2[i11];
+
+        $b6 = r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: byte mask>;
+
+        $b8 = $b7 & $b6;
+
+        $b9 = (byte) $b8;
+
+        r2[i11] = $b9;
+
+        $i10 = r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: int stepsize>;
+
+        i11 = i11 + $i10;
+
+        goto label1;
+
+     label2:
+        return $r4;
+    }
+
+    public float[] toFloatArray(byte[], int, float[], int, int)
+    {
+        byte[] $r1, r2, $r3, $r5, $r8, $r9, $r10, $r11;
+        com.sun.media.sound.AudioFloatConverter $r6;
+        float[] r4, $r7;
+        com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter r0;
+        byte $b4, $b5, $b6, $b7;
+        int $i0, i1, i2, i3, $i8, $i9, $i10, $i11, $i12, $i13, $i14, i15;
+
+        r0 := @this: com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter;
+
+        r2 := @parameter0: byte[];
+
+        i2 := @parameter1: int;
+
+        r4 := @parameter2: float[];
+
+        i3 := @parameter3: int;
+
+        i1 := @parameter4: int;
+
+        $r1 = r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: byte[] mask_buffer>;
+
+        if $r1 == null goto label1;
+
+        $r10 = r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: byte[] mask_buffer>;
+
+        $i10 = lengthof $r10;
+
+        $i9 = lengthof r2;
+
+        if $i10 >= $i9 goto label2;
+
+     label1:
+        $i0 = lengthof r2;
+
+        $r3 = newarray (byte)[$i0];
+
+        r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: byte[] mask_buffer> = $r3;
+
+     label2:
+        $r11 = r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: byte[] mask_buffer>;
+
+        $i11 = lengthof r2;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r2, 0, $r11, 0, $i11);
+
+        $i12 = r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: int stepsize>;
+
+        $i13 = i1 * $i12;
+
+        $i14 = r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: int offset>;
+
+        i15 = i2 + $i14;
+
+     label3:
+        if i15 >= $i13 goto label4;
+
+        $r9 = r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: byte[] mask_buffer>;
+
+        $r8 = r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: byte[] mask_buffer>;
+
+        $b5 = $r8[i15];
+
+        $b4 = r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: byte mask>;
+
+        $b6 = $b5 & $b4;
+
+        $b7 = (byte) $b6;
+
+        $r9[i15] = $b7;
+
+        $i8 = r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: int stepsize>;
+
+        i15 = i15 + $i8;
+
+        goto label3;
+
+     label4:
+        $r6 = r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: com.sun.media.sound.AudioFloatConverter converter>;
+
+        $r5 = r0.<com.sun.media.sound.AudioFloatConverter$AudioFloatLSBFilter: byte[] mask_buffer>;
+
+        $r7 = virtualinvoke $r6.<com.sun.media.sound.AudioFloatConverter: float[] toFloatArray(byte[],int,float[],int,int)>($r5, i2, r4, i3, i1);
+
+        return $r7;
+    }
+}

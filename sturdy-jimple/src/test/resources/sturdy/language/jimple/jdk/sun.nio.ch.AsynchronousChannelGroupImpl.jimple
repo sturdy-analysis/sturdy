@@ -1,0 +1,783 @@
+abstract class sun.nio.ch.AsynchronousChannelGroupImpl extends java.nio.channels.AsynchronousChannelGroup implements java.util.concurrent.Executor
+{
+    private static final int internalThreadCount;
+    private final sun.nio.ch.ThreadPool pool;
+    private final java.util.concurrent.atomic.AtomicInteger threadCount;
+    private java.util.concurrent.ScheduledThreadPoolExecutor timeoutExecutor;
+    private final java.util.Queue taskQueue;
+    private final java.util.concurrent.atomic.AtomicBoolean shutdown;
+    private final java.lang.Object shutdownNowLock;
+    private volatile boolean terminateInitiated;
+
+    void <init>(java.nio.channels.spi.AsynchronousChannelProvider, sun.nio.ch.ThreadPool)
+    {
+        java.util.concurrent.atomic.AtomicBoolean $r3;
+        java.util.concurrent.ScheduledThreadPoolExecutor $r8, $r9;
+        java.util.concurrent.atomic.AtomicInteger $r2;
+        sun.nio.ch.ThreadPool r5;
+        sun.nio.ch.AsynchronousChannelGroupImpl r0;
+        java.util.concurrent.ScheduledExecutorService $r7;
+        java.lang.Object $r4;
+        java.util.concurrent.ThreadFactory $r6;
+        java.nio.channels.spi.AsynchronousChannelProvider r1;
+        boolean $z0;
+        java.util.concurrent.ConcurrentLinkedQueue $r10;
+
+        r0 := @this: sun.nio.ch.AsynchronousChannelGroupImpl;
+
+        r1 := @parameter0: java.nio.channels.spi.AsynchronousChannelProvider;
+
+        r5 := @parameter1: sun.nio.ch.ThreadPool;
+
+        specialinvoke r0.<java.nio.channels.AsynchronousChannelGroup: void <init>(java.nio.channels.spi.AsynchronousChannelProvider)>(r1);
+
+        $r2 = new java.util.concurrent.atomic.AtomicInteger;
+
+        specialinvoke $r2.<java.util.concurrent.atomic.AtomicInteger: void <init>()>();
+
+        r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.util.concurrent.atomic.AtomicInteger threadCount> = $r2;
+
+        $r3 = new java.util.concurrent.atomic.AtomicBoolean;
+
+        specialinvoke $r3.<java.util.concurrent.atomic.AtomicBoolean: void <init>()>();
+
+        r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.util.concurrent.atomic.AtomicBoolean shutdown> = $r3;
+
+        $r4 = new java.lang.Object;
+
+        specialinvoke $r4.<java.lang.Object: void <init>()>();
+
+        r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.lang.Object shutdownNowLock> = $r4;
+
+        r0.<sun.nio.ch.AsynchronousChannelGroupImpl: sun.nio.ch.ThreadPool pool> = r5;
+
+        $z0 = virtualinvoke r5.<sun.nio.ch.ThreadPool: boolean isFixedThreadPool()>();
+
+        if $z0 == 0 goto label1;
+
+        $r10 = new java.util.concurrent.ConcurrentLinkedQueue;
+
+        specialinvoke $r10.<java.util.concurrent.ConcurrentLinkedQueue: void <init>()>();
+
+        r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.util.Queue taskQueue> = $r10;
+
+        goto label2;
+
+     label1:
+        r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.util.Queue taskQueue> = null;
+
+     label2:
+        $r6 = staticinvoke <sun.nio.ch.ThreadPool: java.util.concurrent.ThreadFactory defaultThreadFactory()>();
+
+        $r7 = staticinvoke <java.util.concurrent.Executors: java.util.concurrent.ScheduledExecutorService newScheduledThreadPool(int,java.util.concurrent.ThreadFactory)>(1, $r6);
+
+        $r8 = (java.util.concurrent.ScheduledThreadPoolExecutor) $r7;
+
+        r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.util.concurrent.ScheduledThreadPoolExecutor timeoutExecutor> = $r8;
+
+        $r9 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.util.concurrent.ScheduledThreadPoolExecutor timeoutExecutor>;
+
+        virtualinvoke $r9.<java.util.concurrent.ScheduledThreadPoolExecutor: void setRemoveOnCancelPolicy(boolean)>(1);
+
+        return;
+    }
+
+    final java.util.concurrent.ExecutorService executor()
+    {
+        sun.nio.ch.ThreadPool $r1;
+        java.util.concurrent.ExecutorService $r2;
+        sun.nio.ch.AsynchronousChannelGroupImpl r0;
+
+        r0 := @this: sun.nio.ch.AsynchronousChannelGroupImpl;
+
+        $r1 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: sun.nio.ch.ThreadPool pool>;
+
+        $r2 = virtualinvoke $r1.<sun.nio.ch.ThreadPool: java.util.concurrent.ExecutorService executor()>();
+
+        return $r2;
+    }
+
+    final boolean isFixedThreadPool()
+    {
+        sun.nio.ch.ThreadPool $r1;
+        sun.nio.ch.AsynchronousChannelGroupImpl r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.AsynchronousChannelGroupImpl;
+
+        $r1 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: sun.nio.ch.ThreadPool pool>;
+
+        $z0 = virtualinvoke $r1.<sun.nio.ch.ThreadPool: boolean isFixedThreadPool()>();
+
+        return $z0;
+    }
+
+    final int fixedThreadCount()
+    {
+        sun.nio.ch.ThreadPool $r1, $r2;
+        sun.nio.ch.AsynchronousChannelGroupImpl r0;
+        int $i0, $i1, $i2, $i3;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.AsynchronousChannelGroupImpl;
+
+        $z0 = virtualinvoke r0.<sun.nio.ch.AsynchronousChannelGroupImpl: boolean isFixedThreadPool()>();
+
+        if $z0 == 0 goto label1;
+
+        $r2 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: sun.nio.ch.ThreadPool pool>;
+
+        $i3 = virtualinvoke $r2.<sun.nio.ch.ThreadPool: int poolSize()>();
+
+        return $i3;
+
+     label1:
+        $r1 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: sun.nio.ch.ThreadPool pool>;
+
+        $i0 = virtualinvoke $r1.<sun.nio.ch.ThreadPool: int poolSize()>();
+
+        $i1 = <sun.nio.ch.AsynchronousChannelGroupImpl: int internalThreadCount>;
+
+        $i2 = $i0 + $i1;
+
+        return $i2;
+    }
+
+    private java.lang.Runnable bindToGroup(java.lang.Runnable)
+    {
+        sun.nio.ch.AsynchronousChannelGroupImpl$1 $r1;
+        java.lang.Runnable r2;
+        sun.nio.ch.AsynchronousChannelGroupImpl r0;
+
+        r0 := @this: sun.nio.ch.AsynchronousChannelGroupImpl;
+
+        r2 := @parameter0: java.lang.Runnable;
+
+        $r1 = new sun.nio.ch.AsynchronousChannelGroupImpl$1;
+
+        specialinvoke $r1.<sun.nio.ch.AsynchronousChannelGroupImpl$1: void <init>(sun.nio.ch.AsynchronousChannelGroupImpl,sun.nio.ch.AsynchronousChannelGroupImpl,java.lang.Runnable)>(r0, r0, r2);
+
+        return $r1;
+    }
+
+    private void startInternalThread(java.lang.Runnable)
+    {
+        sun.nio.ch.AsynchronousChannelGroupImpl$2 $r0;
+        java.lang.Runnable r2;
+        sun.nio.ch.AsynchronousChannelGroupImpl r1;
+
+        r1 := @this: sun.nio.ch.AsynchronousChannelGroupImpl;
+
+        r2 := @parameter0: java.lang.Runnable;
+
+        $r0 = new sun.nio.ch.AsynchronousChannelGroupImpl$2;
+
+        specialinvoke $r0.<sun.nio.ch.AsynchronousChannelGroupImpl$2: void <init>(sun.nio.ch.AsynchronousChannelGroupImpl,java.lang.Runnable)>(r1, r2);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        return;
+    }
+
+    protected final void startThreads(java.lang.Runnable)
+    {
+        java.lang.Runnable $r2, r9;
+        java.util.concurrent.RejectedExecutionException $r8;
+        sun.nio.ch.ThreadPool $r1, $r3, $r4;
+        java.util.concurrent.atomic.AtomicInteger $r6, $r7;
+        int $i0, $i1, $i2, i3, i4;
+        java.util.concurrent.ExecutorService $r5;
+        boolean $z0;
+        sun.nio.ch.AsynchronousChannelGroupImpl r0;
+
+        r0 := @this: sun.nio.ch.AsynchronousChannelGroupImpl;
+
+        r9 := @parameter0: java.lang.Runnable;
+
+        $z0 = virtualinvoke r0.<sun.nio.ch.AsynchronousChannelGroupImpl: boolean isFixedThreadPool()>();
+
+        if $z0 != 0 goto label2;
+
+        i3 = 0;
+
+     label1:
+        $i2 = <sun.nio.ch.AsynchronousChannelGroupImpl: int internalThreadCount>;
+
+        if i3 >= $i2 goto label2;
+
+        specialinvoke r0.<sun.nio.ch.AsynchronousChannelGroupImpl: void startInternalThread(java.lang.Runnable)>(r9);
+
+        $r7 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.util.concurrent.atomic.AtomicInteger threadCount>;
+
+        virtualinvoke $r7.<java.util.concurrent.atomic.AtomicInteger: int incrementAndGet()>();
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label2:
+        $r1 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: sun.nio.ch.ThreadPool pool>;
+
+        $i0 = virtualinvoke $r1.<sun.nio.ch.ThreadPool: int poolSize()>();
+
+        if $i0 <= 0 goto label7;
+
+        $r2 = specialinvoke r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.lang.Runnable bindToGroup(java.lang.Runnable)>(r9);
+
+     label3:
+        i4 = 0;
+
+     label4:
+        $r3 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: sun.nio.ch.ThreadPool pool>;
+
+        $i1 = virtualinvoke $r3.<sun.nio.ch.ThreadPool: int poolSize()>();
+
+        if i4 >= $i1 goto label5;
+
+        $r4 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: sun.nio.ch.ThreadPool pool>;
+
+        $r5 = virtualinvoke $r4.<sun.nio.ch.ThreadPool: java.util.concurrent.ExecutorService executor()>();
+
+        interfaceinvoke $r5.<java.util.concurrent.ExecutorService: void execute(java.lang.Runnable)>($r2);
+
+        $r6 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.util.concurrent.atomic.AtomicInteger threadCount>;
+
+        virtualinvoke $r6.<java.util.concurrent.atomic.AtomicInteger: int incrementAndGet()>();
+
+        i4 = i4 + 1;
+
+        goto label4;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r8 := @caughtexception;
+
+     label7:
+        return;
+
+        catch java.util.concurrent.RejectedExecutionException from label3 to label5 with label6;
+    }
+
+    final int threadCount()
+    {
+        int $i0;
+        java.util.concurrent.atomic.AtomicInteger $r1;
+        sun.nio.ch.AsynchronousChannelGroupImpl r0;
+
+        r0 := @this: sun.nio.ch.AsynchronousChannelGroupImpl;
+
+        $r1 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.util.concurrent.atomic.AtomicInteger threadCount>;
+
+        $i0 = virtualinvoke $r1.<java.util.concurrent.atomic.AtomicInteger: int get()>();
+
+        return $i0;
+    }
+
+    final int threadExit(java.lang.Runnable, boolean)
+    {
+        java.lang.Runnable r2, $r6;
+        java.util.concurrent.RejectedExecutionException $r7;
+        java.util.concurrent.atomic.AtomicInteger $r1, $r3;
+        sun.nio.ch.ThreadPool $r4;
+        sun.nio.ch.AsynchronousChannelGroupImpl r0;
+        int $i0, $i1;
+        java.util.concurrent.ExecutorService $r5;
+        boolean z0, $z1;
+
+        r0 := @this: sun.nio.ch.AsynchronousChannelGroupImpl;
+
+        r2 := @parameter0: java.lang.Runnable;
+
+        z0 := @parameter1: boolean;
+
+        if z0 == 0 goto label6;
+
+     label1:
+        $z1 = staticinvoke <sun.nio.ch.Invoker: boolean isBoundToAnyGroup()>();
+
+        if $z1 == 0 goto label2;
+
+        $r4 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: sun.nio.ch.ThreadPool pool>;
+
+        $r5 = virtualinvoke $r4.<sun.nio.ch.ThreadPool: java.util.concurrent.ExecutorService executor()>();
+
+        $r6 = specialinvoke r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.lang.Runnable bindToGroup(java.lang.Runnable)>(r2);
+
+        interfaceinvoke $r5.<java.util.concurrent.ExecutorService: void execute(java.lang.Runnable)>($r6);
+
+        goto label3;
+
+     label2:
+        specialinvoke r0.<sun.nio.ch.AsynchronousChannelGroupImpl: void startInternalThread(java.lang.Runnable)>(r2);
+
+     label3:
+        $r3 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.util.concurrent.atomic.AtomicInteger threadCount>;
+
+        $i1 = virtualinvoke $r3.<java.util.concurrent.atomic.AtomicInteger: int get()>();
+
+     label4:
+        return $i1;
+
+     label5:
+        $r7 := @caughtexception;
+
+     label6:
+        $r1 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.util.concurrent.atomic.AtomicInteger threadCount>;
+
+        $i0 = virtualinvoke $r1.<java.util.concurrent.atomic.AtomicInteger: int decrementAndGet()>();
+
+        return $i0;
+
+        catch java.util.concurrent.RejectedExecutionException from label1 to label4 with label5;
+    }
+
+    abstract void executeOnHandlerTask(java.lang.Runnable);
+
+    final void executeOnPooledThread(java.lang.Runnable)
+    {
+        sun.nio.ch.ThreadPool $r1;
+        sun.nio.ch.AsynchronousChannelGroupImpl r0;
+        java.lang.Runnable r3, $r4;
+        java.util.concurrent.ExecutorService $r2;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.AsynchronousChannelGroupImpl;
+
+        r3 := @parameter0: java.lang.Runnable;
+
+        $z0 = virtualinvoke r0.<sun.nio.ch.AsynchronousChannelGroupImpl: boolean isFixedThreadPool()>();
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r0.<sun.nio.ch.AsynchronousChannelGroupImpl: void executeOnHandlerTask(java.lang.Runnable)>(r3);
+
+        goto label2;
+
+     label1:
+        $r1 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: sun.nio.ch.ThreadPool pool>;
+
+        $r2 = virtualinvoke $r1.<sun.nio.ch.ThreadPool: java.util.concurrent.ExecutorService executor()>();
+
+        $r4 = specialinvoke r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.lang.Runnable bindToGroup(java.lang.Runnable)>(r3);
+
+        interfaceinvoke $r2.<java.util.concurrent.ExecutorService: void execute(java.lang.Runnable)>($r4);
+
+     label2:
+        return;
+    }
+
+    final void offerTask(java.lang.Runnable)
+    {
+        java.util.Queue $r2;
+        java.lang.Runnable r1;
+        sun.nio.ch.AsynchronousChannelGroupImpl r0;
+
+        r0 := @this: sun.nio.ch.AsynchronousChannelGroupImpl;
+
+        r1 := @parameter0: java.lang.Runnable;
+
+        $r2 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.util.Queue taskQueue>;
+
+        interfaceinvoke $r2.<java.util.Queue: boolean offer(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    final java.lang.Runnable pollTask()
+    {
+        sun.nio.ch.AsynchronousChannelGroupImpl r0;
+        java.lang.Object $r3;
+        java.util.Queue $r1, $r2;
+        java.lang.Runnable $r4;
+
+        r0 := @this: sun.nio.ch.AsynchronousChannelGroupImpl;
+
+        $r1 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.util.Queue taskQueue>;
+
+        if $r1 != null goto label1;
+
+        $r4 = null;
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.util.Queue taskQueue>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Queue: java.lang.Object poll()>();
+
+        $r4 = (java.lang.Runnable) $r3;
+
+     label2:
+        return $r4;
+    }
+
+    final java.util.concurrent.Future schedule(java.lang.Runnable, long, java.util.concurrent.TimeUnit)
+    {
+        java.util.concurrent.ScheduledFuture $r4;
+        long l0;
+        java.util.concurrent.ScheduledThreadPoolExecutor $r3;
+        java.lang.AssertionError $r6;
+        java.lang.Runnable r1;
+        java.util.concurrent.TimeUnit r2;
+        java.util.concurrent.RejectedExecutionException $r5;
+        sun.nio.ch.AsynchronousChannelGroupImpl r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.AsynchronousChannelGroupImpl;
+
+        r1 := @parameter0: java.lang.Runnable;
+
+        l0 := @parameter1: long;
+
+        r2 := @parameter2: java.util.concurrent.TimeUnit;
+
+     label1:
+        $r3 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.util.concurrent.ScheduledThreadPoolExecutor timeoutExecutor>;
+
+        $r4 = virtualinvoke $r3.<java.util.concurrent.ScheduledThreadPoolExecutor: java.util.concurrent.ScheduledFuture schedule(java.lang.Runnable,long,java.util.concurrent.TimeUnit)>(r1, l0, r2);
+
+     label2:
+        return $r4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $z0 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: boolean terminateInitiated>;
+
+        if $z0 == 0 goto label4;
+
+        return null;
+
+     label4:
+        $r6 = new java.lang.AssertionError;
+
+        specialinvoke $r6.<java.lang.AssertionError: void <init>(java.lang.Object)>($r5);
+
+        throw $r6;
+
+        catch java.util.concurrent.RejectedExecutionException from label1 to label2 with label3;
+    }
+
+    public final boolean isShutdown()
+    {
+        java.util.concurrent.atomic.AtomicBoolean $r1;
+        sun.nio.ch.AsynchronousChannelGroupImpl r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.AsynchronousChannelGroupImpl;
+
+        $r1 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.util.concurrent.atomic.AtomicBoolean shutdown>;
+
+        $z0 = virtualinvoke $r1.<java.util.concurrent.atomic.AtomicBoolean: boolean get()>();
+
+        return $z0;
+    }
+
+    public final boolean isTerminated()
+    {
+        sun.nio.ch.ThreadPool $r1;
+        sun.nio.ch.AsynchronousChannelGroupImpl r0;
+        java.util.concurrent.ExecutorService $r2;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.AsynchronousChannelGroupImpl;
+
+        $r1 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: sun.nio.ch.ThreadPool pool>;
+
+        $r2 = virtualinvoke $r1.<sun.nio.ch.ThreadPool: java.util.concurrent.ExecutorService executor()>();
+
+        $z0 = interfaceinvoke $r2.<java.util.concurrent.ExecutorService: boolean isTerminated()>();
+
+        return $z0;
+    }
+
+    abstract boolean isEmpty();
+
+    abstract java.lang.Object attachForeignChannel(java.nio.channels.Channel, java.io.FileDescriptor) throws java.io.IOException;
+
+    abstract void detachForeignChannel(java.lang.Object);
+
+    abstract void closeAllChannels() throws java.io.IOException;
+
+    abstract void shutdownHandlerTasks();
+
+    private void shutdownExecutors()
+    {
+        java.security.Permission[] $r2;
+        sun.nio.ch.AsynchronousChannelGroupImpl$3 $r0;
+        sun.nio.ch.AsynchronousChannelGroupImpl r1;
+        java.lang.RuntimePermission $r3;
+
+        r1 := @this: sun.nio.ch.AsynchronousChannelGroupImpl;
+
+        $r0 = new sun.nio.ch.AsynchronousChannelGroupImpl$3;
+
+        specialinvoke $r0.<sun.nio.ch.AsynchronousChannelGroupImpl$3: void <init>(sun.nio.ch.AsynchronousChannelGroupImpl)>(r1);
+
+        $r2 = newarray (java.security.Permission)[1];
+
+        $r3 = new java.lang.RuntimePermission;
+
+        specialinvoke $r3.<java.lang.RuntimePermission: void <init>(java.lang.String)>("modifyThread");
+
+        $r2[0] = $r3;
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction,java.security.AccessControlContext,java.security.Permission[])>($r0, null, $r2);
+
+        return;
+    }
+
+    public final void shutdown()
+    {
+        java.lang.Throwable $r3;
+        sun.nio.ch.AsynchronousChannelGroupImpl r0;
+        java.util.concurrent.atomic.AtomicBoolean $r1;
+        java.lang.Object $r2;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.nio.ch.AsynchronousChannelGroupImpl;
+
+        $r1 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.util.concurrent.atomic.AtomicBoolean shutdown>;
+
+        $z0 = virtualinvoke $r1.<java.util.concurrent.atomic.AtomicBoolean: boolean getAndSet(boolean)>(1);
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $z1 = virtualinvoke r0.<sun.nio.ch.AsynchronousChannelGroupImpl: boolean isEmpty()>();
+
+        if $z1 != 0 goto label2;
+
+        return;
+
+     label2:
+        $r2 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.lang.Object shutdownNowLock>;
+
+        entermonitor $r2;
+
+     label3:
+        $z2 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: boolean terminateInitiated>;
+
+        if $z2 != 0 goto label4;
+
+        r0.<sun.nio.ch.AsynchronousChannelGroupImpl: boolean terminateInitiated> = 1;
+
+        virtualinvoke r0.<sun.nio.ch.AsynchronousChannelGroupImpl: void shutdownHandlerTasks()>();
+
+        specialinvoke r0.<sun.nio.ch.AsynchronousChannelGroupImpl: void shutdownExecutors()>();
+
+     label4:
+        exitmonitor $r2;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r3 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label7:
+        throw $r3;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label3 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public final void shutdownNow() throws java.io.IOException
+    {
+        java.lang.Throwable $r3;
+        sun.nio.ch.AsynchronousChannelGroupImpl r0;
+        java.util.concurrent.atomic.AtomicBoolean $r1;
+        java.lang.Object $r2;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.AsynchronousChannelGroupImpl;
+
+        $r1 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.util.concurrent.atomic.AtomicBoolean shutdown>;
+
+        virtualinvoke $r1.<java.util.concurrent.atomic.AtomicBoolean: void set(boolean)>(1);
+
+        $r2 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.lang.Object shutdownNowLock>;
+
+        entermonitor $r2;
+
+     label1:
+        $z0 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: boolean terminateInitiated>;
+
+        if $z0 != 0 goto label2;
+
+        r0.<sun.nio.ch.AsynchronousChannelGroupImpl: boolean terminateInitiated> = 1;
+
+        virtualinvoke r0.<sun.nio.ch.AsynchronousChannelGroupImpl: void closeAllChannels()>();
+
+        virtualinvoke r0.<sun.nio.ch.AsynchronousChannelGroupImpl: void shutdownHandlerTasks()>();
+
+        specialinvoke r0.<sun.nio.ch.AsynchronousChannelGroupImpl: void shutdownExecutors()>();
+
+     label2:
+        exitmonitor $r2;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r3 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label5:
+        throw $r3;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    final void detachFromThreadPool()
+    {
+        sun.nio.ch.AsynchronousChannelGroupImpl r0;
+        java.util.concurrent.atomic.AtomicBoolean $r1;
+        java.lang.AssertionError $r2, $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.nio.ch.AsynchronousChannelGroupImpl;
+
+        $r1 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.util.concurrent.atomic.AtomicBoolean shutdown>;
+
+        $z0 = virtualinvoke $r1.<java.util.concurrent.atomic.AtomicBoolean: boolean getAndSet(boolean)>(1);
+
+        if $z0 == 0 goto label1;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>(java.lang.Object)>("Already shutdown");
+
+        throw $r3;
+
+     label1:
+        $z1 = virtualinvoke r0.<sun.nio.ch.AsynchronousChannelGroupImpl: boolean isEmpty()>();
+
+        if $z1 != 0 goto label2;
+
+        $r2 = new java.lang.AssertionError;
+
+        specialinvoke $r2.<java.lang.AssertionError: void <init>(java.lang.Object)>("Group not empty");
+
+        throw $r2;
+
+     label2:
+        virtualinvoke r0.<sun.nio.ch.AsynchronousChannelGroupImpl: void shutdownHandlerTasks()>();
+
+        return;
+    }
+
+    public final boolean awaitTermination(long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException
+    {
+        java.util.concurrent.TimeUnit r3;
+        sun.nio.ch.ThreadPool $r1;
+        sun.nio.ch.AsynchronousChannelGroupImpl r0;
+        long l0;
+        java.util.concurrent.ExecutorService $r2;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.AsynchronousChannelGroupImpl;
+
+        l0 := @parameter0: long;
+
+        r3 := @parameter1: java.util.concurrent.TimeUnit;
+
+        $r1 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: sun.nio.ch.ThreadPool pool>;
+
+        $r2 = virtualinvoke $r1.<sun.nio.ch.ThreadPool: java.util.concurrent.ExecutorService executor()>();
+
+        $z0 = interfaceinvoke $r2.<java.util.concurrent.ExecutorService: boolean awaitTermination(long,java.util.concurrent.TimeUnit)>(l0, r3);
+
+        return $z0;
+    }
+
+    public final void execute(java.lang.Runnable)
+    {
+        java.security.AccessControlContext $r2;
+        sun.nio.ch.AsynchronousChannelGroupImpl$4 $r3;
+        sun.nio.ch.AsynchronousChannelGroupImpl r1;
+        java.lang.Runnable r4;
+        java.lang.SecurityManager $r0;
+
+        r1 := @this: sun.nio.ch.AsynchronousChannelGroupImpl;
+
+        r4 := @parameter0: java.lang.Runnable;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r2 = staticinvoke <java.security.AccessController: java.security.AccessControlContext getContext()>();
+
+        $r3 = new sun.nio.ch.AsynchronousChannelGroupImpl$4;
+
+        specialinvoke $r3.<sun.nio.ch.AsynchronousChannelGroupImpl$4: void <init>(sun.nio.ch.AsynchronousChannelGroupImpl,java.lang.Runnable,java.security.AccessControlContext)>(r1, r4, $r2);
+
+        r4 = $r3;
+
+     label1:
+        virtualinvoke r1.<sun.nio.ch.AsynchronousChannelGroupImpl: void executeOnPooledThread(java.lang.Runnable)>(r4);
+
+        return;
+    }
+
+    static sun.nio.ch.ThreadPool access$000(sun.nio.ch.AsynchronousChannelGroupImpl)
+    {
+        sun.nio.ch.ThreadPool $r1;
+        sun.nio.ch.AsynchronousChannelGroupImpl r0;
+
+        r0 := @parameter0: sun.nio.ch.AsynchronousChannelGroupImpl;
+
+        $r1 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: sun.nio.ch.ThreadPool pool>;
+
+        return $r1;
+    }
+
+    static java.util.concurrent.ScheduledThreadPoolExecutor access$100(sun.nio.ch.AsynchronousChannelGroupImpl)
+    {
+        java.util.concurrent.ScheduledThreadPoolExecutor $r1;
+        sun.nio.ch.AsynchronousChannelGroupImpl r0;
+
+        r0 := @parameter0: sun.nio.ch.AsynchronousChannelGroupImpl;
+
+        $r1 = r0.<sun.nio.ch.AsynchronousChannelGroupImpl: java.util.concurrent.ScheduledThreadPoolExecutor timeoutExecutor>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.action.GetIntegerAction $r0;
+        int $i0;
+        java.lang.Object $r1;
+        java.lang.Integer $r2;
+
+        $r0 = new sun.security.action.GetIntegerAction;
+
+        specialinvoke $r0.<sun.security.action.GetIntegerAction: void <init>(java.lang.String,int)>("sun.nio.ch.internalThreadPoolSize", 1);
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r2 = (java.lang.Integer) $r1;
+
+        $i0 = virtualinvoke $r2.<java.lang.Integer: int intValue()>();
+
+        <sun.nio.ch.AsynchronousChannelGroupImpl: int internalThreadCount> = $i0;
+
+        return;
+    }
+}

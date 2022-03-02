@@ -1,0 +1,1189 @@
+public abstract class sun.font.Font2D extends java.lang.Object
+{
+    public static final int FONT_CONFIG_RANK;
+    public static final int JRE_RANK;
+    public static final int TTF_RANK;
+    public static final int TYPE1_RANK;
+    public static final int NATIVE_RANK;
+    public static final int UNKNOWN_RANK;
+    public static final int DEFAULT_RANK;
+    private static final java.lang.String[] boldNames;
+    private static final java.lang.String[] italicNames;
+    private static final java.lang.String[] boldItalicNames;
+    private static final java.awt.font.FontRenderContext DEFAULT_FRC;
+    public sun.font.Font2DHandle handle;
+    protected java.lang.String familyName;
+    protected java.lang.String fullName;
+    protected int style;
+    protected sun.font.FontFamily family;
+    protected int fontRank;
+    protected sun.font.CharToGlyphMapper mapper;
+    protected java.util.concurrent.ConcurrentHashMap strikeCache;
+    protected java.lang.ref.Reference lastFontStrike;
+    private int strikeCacheMax;
+    private boolean useWeak;
+    public static final int FWIDTH_NORMAL;
+    public static final int FWEIGHT_NORMAL;
+    public static final int FWEIGHT_BOLD;
+
+    public void <init>()
+    {
+        java.util.concurrent.ConcurrentHashMap $r1;
+        sun.font.Font2D r0;
+        java.lang.ref.WeakReference $r2;
+
+        r0 := @this: sun.font.Font2D;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.font.Font2D: int style> = 0;
+
+        r0.<sun.font.Font2D: int fontRank> = 4;
+
+        $r1 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r1.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r0.<sun.font.Font2D: java.util.concurrent.ConcurrentHashMap strikeCache> = $r1;
+
+        $r2 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r2.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>(null);
+
+        r0.<sun.font.Font2D: java.lang.ref.Reference lastFontStrike> = $r2;
+
+        r0.<sun.font.Font2D: int strikeCacheMax> = 0;
+
+        return;
+    }
+
+    void setUseWeakRefs(boolean, int)
+    {
+        sun.font.Font2D r0;
+        int i0, $i1;
+        boolean z0;
+
+        r0 := @this: sun.font.Font2D;
+
+        z0 := @parameter0: boolean;
+
+        i0 := @parameter1: int;
+
+        r0.<sun.font.Font2D: boolean useWeak> = z0;
+
+        if z0 == 0 goto label1;
+
+        if i0 <= 0 goto label1;
+
+        $i1 = i0;
+
+        goto label2;
+
+     label1:
+        $i1 = 0;
+
+     label2:
+        r0.<sun.font.Font2D: int strikeCacheMax> = $i1;
+
+        return;
+    }
+
+    public int getStyle()
+    {
+        int $i0;
+        sun.font.Font2D r0;
+
+        r0 := @this: sun.font.Font2D;
+
+        $i0 = r0.<sun.font.Font2D: int style>;
+
+        return $i0;
+    }
+
+    protected void setStyle()
+    {
+        java.lang.String[] $r3, $r4, $r5, $r6, $r8, $r10;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, i7, i8, $i10, $i12, $i14;
+        java.lang.String $r1, $r2, $r7, $r9, $r11;
+        sun.font.Font2D r0;
+
+        r0 := @this: sun.font.Font2D;
+
+        $r1 = r0.<sun.font.Font2D: java.lang.String fullName>;
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String toLowerCase()>();
+
+        i6 = 0;
+
+     label1:
+        $r3 = <sun.font.Font2D: java.lang.String[] boldItalicNames>;
+
+        $i0 = lengthof $r3;
+
+        if i6 >= $i0 goto label3;
+
+        $r10 = <sun.font.Font2D: java.lang.String[] boldItalicNames>;
+
+        $r11 = $r10[i6];
+
+        $i5 = virtualinvoke $r2.<java.lang.String: int indexOf(java.lang.String)>($r11);
+
+        $i10 = (int) -1;
+
+        if $i5 == $i10 goto label2;
+
+        r0.<sun.font.Font2D: int style> = 3;
+
+        return;
+
+     label2:
+        i6 = i6 + 1;
+
+        goto label1;
+
+     label3:
+        i7 = 0;
+
+     label4:
+        $r4 = <sun.font.Font2D: java.lang.String[] italicNames>;
+
+        $i1 = lengthof $r4;
+
+        if i7 >= $i1 goto label6;
+
+        $r8 = <sun.font.Font2D: java.lang.String[] italicNames>;
+
+        $r9 = $r8[i7];
+
+        $i4 = virtualinvoke $r2.<java.lang.String: int indexOf(java.lang.String)>($r9);
+
+        $i12 = (int) -1;
+
+        if $i4 == $i12 goto label5;
+
+        r0.<sun.font.Font2D: int style> = 2;
+
+        return;
+
+     label5:
+        i7 = i7 + 1;
+
+        goto label4;
+
+     label6:
+        i8 = 0;
+
+     label7:
+        $r5 = <sun.font.Font2D: java.lang.String[] boldNames>;
+
+        $i2 = lengthof $r5;
+
+        if i8 >= $i2 goto label9;
+
+        $r6 = <sun.font.Font2D: java.lang.String[] boldNames>;
+
+        $r7 = $r6[i8];
+
+        $i3 = virtualinvoke $r2.<java.lang.String: int indexOf(java.lang.String)>($r7);
+
+        $i14 = (int) -1;
+
+        if $i3 == $i14 goto label8;
+
+        r0.<sun.font.Font2D: int style> = 1;
+
+        return;
+
+     label8:
+        i8 = i8 + 1;
+
+        goto label7;
+
+     label9:
+        return;
+    }
+
+    public int getWidth()
+    {
+        sun.font.Font2D r0;
+
+        r0 := @this: sun.font.Font2D;
+
+        return 5;
+    }
+
+    public int getWeight()
+    {
+        int $i0, $i1;
+        sun.font.Font2D r0;
+
+        r0 := @this: sun.font.Font2D;
+
+        $i0 = r0.<sun.font.Font2D: int style>;
+
+        $i1 = $i0 & 1;
+
+        if $i1 == 0 goto label1;
+
+        return 700;
+
+     label1:
+        return 400;
+    }
+
+    int getRank()
+    {
+        int $i0;
+        sun.font.Font2D r0;
+
+        r0 := @this: sun.font.Font2D;
+
+        $i0 = r0.<sun.font.Font2D: int fontRank>;
+
+        return $i0;
+    }
+
+    void setRank(int)
+    {
+        int i0;
+        sun.font.Font2D r0;
+
+        r0 := @this: sun.font.Font2D;
+
+        i0 := @parameter0: int;
+
+        r0.<sun.font.Font2D: int fontRank> = i0;
+
+        return;
+    }
+
+    abstract sun.font.CharToGlyphMapper getMapper();
+
+    protected int getValidatedGlyphCode(int)
+    {
+        sun.font.Font2D r0;
+        sun.font.CharToGlyphMapper $r1, $r2;
+        int $i0, i1;
+
+        r0 := @this: sun.font.Font2D;
+
+        i1 := @parameter0: int;
+
+        if i1 < 0 goto label1;
+
+        $r2 = virtualinvoke r0.<sun.font.Font2D: sun.font.CharToGlyphMapper getMapper()>();
+
+        $i0 = virtualinvoke $r2.<sun.font.CharToGlyphMapper: int getNumGlyphs()>();
+
+        if i1 < $i0 goto label2;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.font.Font2D: sun.font.CharToGlyphMapper getMapper()>();
+
+        i1 = virtualinvoke $r1.<sun.font.CharToGlyphMapper: int getMissingGlyphCode()>();
+
+     label2:
+        return i1;
+    }
+
+    abstract sun.font.FontStrike createStrike(sun.font.FontStrikeDesc);
+
+    public sun.font.FontStrike getStrike(java.awt.Font)
+    {
+        java.lang.ref.Reference $r1;
+        sun.font.Font2D r0;
+        java.awt.font.FontRenderContext $r5;
+        java.awt.Font r4;
+        java.lang.Object $r2;
+        sun.font.FontStrike r3, $r6;
+
+        r0 := @this: sun.font.Font2D;
+
+        r4 := @parameter0: java.awt.Font;
+
+        $r1 = r0.<sun.font.Font2D: java.lang.ref.Reference lastFontStrike>;
+
+        $r2 = virtualinvoke $r1.<java.lang.ref.Reference: java.lang.Object get()>();
+
+        r3 = (sun.font.FontStrike) $r2;
+
+        if r3 == null goto label1;
+
+        return r3;
+
+     label1:
+        $r5 = <sun.font.Font2D: java.awt.font.FontRenderContext DEFAULT_FRC>;
+
+        $r6 = virtualinvoke r0.<sun.font.Font2D: sun.font.FontStrike getStrike(java.awt.Font,java.awt.font.FontRenderContext)>(r4, $r5);
+
+        return $r6;
+    }
+
+    public sun.font.FontStrike getStrike(java.awt.Font, java.awt.geom.AffineTransform, int, int)
+    {
+        byte $b0, $b3;
+        int i1, i2, $i4;
+        sun.font.FontStrikeDesc $r6;
+        double d0, $d1, $d2, $d3, $d4, $d5, $d6;
+        boolean $z0;
+        java.awt.Font r0;
+        java.awt.geom.AffineTransform r1, r3, $r5;
+        sun.font.FontStrike $r7;
+        sun.font.Font2D r4;
+        float $f0;
+        java.lang.Object $r2;
+
+        r4 := @this: sun.font.Font2D;
+
+        r0 := @parameter0: java.awt.Font;
+
+        r1 := @parameter1: java.awt.geom.AffineTransform;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        $f0 = virtualinvoke r0.<java.awt.Font: float getSize2D()>();
+
+        d0 = (double) $f0;
+
+        $r2 = virtualinvoke r1.<java.awt.geom.AffineTransform: java.lang.Object clone()>();
+
+        r3 = (java.awt.geom.AffineTransform) $r2;
+
+        virtualinvoke r3.<java.awt.geom.AffineTransform: void scale(double,double)>(d0, d0);
+
+        $z0 = virtualinvoke r0.<java.awt.Font: boolean isTransformed()>();
+
+        if $z0 == 0 goto label1;
+
+        $r5 = virtualinvoke r0.<java.awt.Font: java.awt.geom.AffineTransform getTransform()>();
+
+        virtualinvoke r3.<java.awt.geom.AffineTransform: void concatenate(java.awt.geom.AffineTransform)>($r5);
+
+     label1:
+        $d1 = virtualinvoke r3.<java.awt.geom.AffineTransform: double getTranslateX()>();
+
+        $b0 = $d1 cmpl 0.0;
+
+        if $b0 != 0 goto label2;
+
+        $d6 = virtualinvoke r3.<java.awt.geom.AffineTransform: double getTranslateY()>();
+
+        $b3 = $d6 cmpl 0.0;
+
+        if $b3 == 0 goto label3;
+
+     label2:
+        $d2 = virtualinvoke r3.<java.awt.geom.AffineTransform: double getScaleX()>();
+
+        $d3 = virtualinvoke r3.<java.awt.geom.AffineTransform: double getShearY()>();
+
+        $d4 = virtualinvoke r3.<java.awt.geom.AffineTransform: double getShearX()>();
+
+        $d5 = virtualinvoke r3.<java.awt.geom.AffineTransform: double getScaleY()>();
+
+        virtualinvoke r3.<java.awt.geom.AffineTransform: void setTransform(double,double,double,double,double,double)>($d2, $d3, $d4, $d5, 0.0, 0.0);
+
+     label3:
+        $r6 = new sun.font.FontStrikeDesc;
+
+        $i4 = virtualinvoke r0.<java.awt.Font: int getStyle()>();
+
+        specialinvoke $r6.<sun.font.FontStrikeDesc: void <init>(java.awt.geom.AffineTransform,java.awt.geom.AffineTransform,int,int,int)>(r1, r3, $i4, i1, i2);
+
+        $r7 = specialinvoke r4.<sun.font.Font2D: sun.font.FontStrike getStrike(sun.font.FontStrikeDesc,boolean)>($r6, 0);
+
+        return $r7;
+    }
+
+    public sun.font.FontStrike getStrike(java.awt.Font, java.awt.geom.AffineTransform, java.awt.geom.AffineTransform, int, int)
+    {
+        java.awt.Font r3;
+        java.awt.geom.AffineTransform r1, r2;
+        sun.font.FontStrike $r5;
+        sun.font.Font2D r4;
+        int $i0, i1, i2;
+        sun.font.FontStrikeDesc $r0;
+
+        r4 := @this: sun.font.Font2D;
+
+        r3 := @parameter0: java.awt.Font;
+
+        r1 := @parameter1: java.awt.geom.AffineTransform;
+
+        r2 := @parameter2: java.awt.geom.AffineTransform;
+
+        i1 := @parameter3: int;
+
+        i2 := @parameter4: int;
+
+        $r0 = new sun.font.FontStrikeDesc;
+
+        $i0 = virtualinvoke r3.<java.awt.Font: int getStyle()>();
+
+        specialinvoke $r0.<sun.font.FontStrikeDesc: void <init>(java.awt.geom.AffineTransform,java.awt.geom.AffineTransform,int,int,int)>(r1, r2, $i0, i1, i2);
+
+        $r5 = specialinvoke r4.<sun.font.Font2D: sun.font.FontStrike getStrike(sun.font.FontStrikeDesc,boolean)>($r0, 0);
+
+        return $r5;
+    }
+
+    public sun.font.FontStrike getStrike(java.awt.Font, java.awt.font.FontRenderContext)
+    {
+        byte $b0, $b1;
+        int $i2, $i3, $i4;
+        sun.font.FontStrikeDesc $r6;
+        double d0, $d1, $d2, $d3, $d4, $d5, $d6;
+        boolean $z0;
+        java.awt.Font r2;
+        java.awt.geom.AffineTransform $r1, $r4, $r7;
+        sun.font.FontStrike $r8;
+        sun.font.Font2D r3;
+        java.awt.font.FontRenderContext r0;
+        float $f0;
+        java.lang.Object $r5;
+
+        r3 := @this: sun.font.Font2D;
+
+        r2 := @parameter0: java.awt.Font;
+
+        r0 := @parameter1: java.awt.font.FontRenderContext;
+
+        $r1 = virtualinvoke r0.<java.awt.font.FontRenderContext: java.awt.geom.AffineTransform getTransform()>();
+
+        $f0 = virtualinvoke r2.<java.awt.Font: float getSize2D()>();
+
+        d0 = (double) $f0;
+
+        virtualinvoke $r1.<java.awt.geom.AffineTransform: void scale(double,double)>(d0, d0);
+
+        $z0 = virtualinvoke r2.<java.awt.Font: boolean isTransformed()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = virtualinvoke r2.<java.awt.Font: java.awt.geom.AffineTransform getTransform()>();
+
+        virtualinvoke $r1.<java.awt.geom.AffineTransform: void concatenate(java.awt.geom.AffineTransform)>($r4);
+
+        $d1 = virtualinvoke $r1.<java.awt.geom.AffineTransform: double getTranslateX()>();
+
+        $b0 = $d1 cmpl 0.0;
+
+        if $b0 != 0 goto label1;
+
+        $d6 = virtualinvoke $r1.<java.awt.geom.AffineTransform: double getTranslateY()>();
+
+        $b1 = $d6 cmpl 0.0;
+
+        if $b1 == 0 goto label2;
+
+     label1:
+        $d2 = virtualinvoke $r1.<java.awt.geom.AffineTransform: double getScaleX()>();
+
+        $d3 = virtualinvoke $r1.<java.awt.geom.AffineTransform: double getShearY()>();
+
+        $d4 = virtualinvoke $r1.<java.awt.geom.AffineTransform: double getShearX()>();
+
+        $d5 = virtualinvoke $r1.<java.awt.geom.AffineTransform: double getScaleY()>();
+
+        virtualinvoke $r1.<java.awt.geom.AffineTransform: void setTransform(double,double,double,double,double,double)>($d2, $d3, $d4, $d5, 0.0, 0.0);
+
+     label2:
+        $i2 = staticinvoke <sun.font.FontStrikeDesc: int getAAHintIntVal(sun.font.Font2D,java.awt.Font,java.awt.font.FontRenderContext)>(r3, r2, r0);
+
+        $r5 = virtualinvoke r0.<java.awt.font.FontRenderContext: java.lang.Object getFractionalMetricsHint()>();
+
+        $i3 = staticinvoke <sun.font.FontStrikeDesc: int getFMHintIntVal(java.lang.Object)>($r5);
+
+        $r6 = new sun.font.FontStrikeDesc;
+
+        $r7 = virtualinvoke r0.<java.awt.font.FontRenderContext: java.awt.geom.AffineTransform getTransform()>();
+
+        $i4 = virtualinvoke r2.<java.awt.Font: int getStyle()>();
+
+        specialinvoke $r6.<sun.font.FontStrikeDesc: void <init>(java.awt.geom.AffineTransform,java.awt.geom.AffineTransform,int,int,int)>($r7, $r1, $i4, $i2, $i3);
+
+        $r8 = specialinvoke r3.<sun.font.Font2D: sun.font.FontStrike getStrike(sun.font.FontStrikeDesc,boolean)>($r6, 0);
+
+        return $r8;
+    }
+
+    void updateLastStrikeRef(sun.font.FontStrike)
+    {
+        java.lang.ref.Reference $r1;
+        sun.font.Font2D r0;
+        java.lang.ref.SoftReference $r2;
+        java.lang.ref.WeakReference $r4;
+        sun.font.FontStrike r3;
+        boolean $z0;
+
+        r0 := @this: sun.font.Font2D;
+
+        r3 := @parameter0: sun.font.FontStrike;
+
+        $r1 = r0.<sun.font.Font2D: java.lang.ref.Reference lastFontStrike>;
+
+        virtualinvoke $r1.<java.lang.ref.Reference: void clear()>();
+
+        $z0 = r0.<sun.font.Font2D: boolean useWeak>;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r4.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>(r3);
+
+        r0.<sun.font.Font2D: java.lang.ref.Reference lastFontStrike> = $r4;
+
+        goto label2;
+
+     label1:
+        $r2 = new java.lang.ref.SoftReference;
+
+        specialinvoke $r2.<java.lang.ref.SoftReference: void <init>(java.lang.Object)>(r3);
+
+        r0.<sun.font.Font2D: java.lang.ref.Reference lastFontStrike> = $r2;
+
+     label2:
+        return;
+    }
+
+    sun.font.FontStrike getStrike(sun.font.FontStrikeDesc)
+    {
+        sun.font.Font2D r0;
+        sun.font.FontStrikeDesc r1;
+        sun.font.FontStrike $r2;
+
+        r0 := @this: sun.font.Font2D;
+
+        r1 := @parameter0: sun.font.FontStrikeDesc;
+
+        $r2 = specialinvoke r0.<sun.font.Font2D: sun.font.FontStrike getStrike(sun.font.FontStrikeDesc,boolean)>(r1, 1);
+
+        return $r2;
+    }
+
+    private sun.font.FontStrike getStrike(sun.font.FontStrikeDesc, boolean)
+    {
+        int $i0, $i1, $i2;
+        sun.font.FontStrikeDesc $r8, $r10, r12;
+        boolean z0, $z1, $z2, $z3;
+        java.util.concurrent.ConcurrentHashMap $r3, $r7, $r16;
+        java.awt.geom.AffineTransform $r6;
+        sun.font.FontStrike $r5, r13, r14;
+        java.lang.ref.Reference $r1, $r11, r15;
+        sun.font.Font2D r0;
+        java.lang.Object $r2, $r4, $r9;
+
+        r0 := @this: sun.font.Font2D;
+
+        r12 := @parameter0: sun.font.FontStrikeDesc;
+
+        z0 := @parameter1: boolean;
+
+        $r1 = r0.<sun.font.Font2D: java.lang.ref.Reference lastFontStrike>;
+
+        $r2 = virtualinvoke $r1.<java.lang.ref.Reference: java.lang.Object get()>();
+
+        r13 = (sun.font.FontStrike) $r2;
+
+        if r13 == null goto label1;
+
+        $r10 = r13.<sun.font.FontStrike: sun.font.FontStrikeDesc desc>;
+
+        $z3 = virtualinvoke r12.<sun.font.FontStrikeDesc: boolean equals(java.lang.Object)>($r10);
+
+        if $z3 == 0 goto label1;
+
+        return r13;
+
+     label1:
+        $r3 = r0.<sun.font.Font2D: java.util.concurrent.ConcurrentHashMap strikeCache>;
+
+        $r4 = virtualinvoke $r3.<java.util.concurrent.ConcurrentHashMap: java.lang.Object get(java.lang.Object)>(r12);
+
+        $r11 = (java.lang.ref.Reference) $r4;
+
+        if $r11 == null goto label2;
+
+        $r9 = virtualinvoke $r11.<java.lang.ref.Reference: java.lang.Object get()>();
+
+        r14 = (sun.font.FontStrike) $r9;
+
+        if r14 == null goto label2;
+
+        virtualinvoke r0.<sun.font.Font2D: void updateLastStrikeRef(sun.font.FontStrike)>(r14);
+
+        staticinvoke <sun.font.StrikeCache: void refStrike(sun.font.FontStrike)>(r14);
+
+        return r14;
+
+     label2:
+        if z0 == 0 goto label3;
+
+        $r8 = new sun.font.FontStrikeDesc;
+
+        specialinvoke $r8.<sun.font.FontStrikeDesc: void <init>(sun.font.FontStrikeDesc)>(r12);
+
+        r12 = $r8;
+
+     label3:
+        $r5 = virtualinvoke r0.<sun.font.Font2D: sun.font.FontStrike createStrike(sun.font.FontStrikeDesc)>(r12);
+
+        $r6 = r12.<sun.font.FontStrikeDesc: java.awt.geom.AffineTransform glyphTx>;
+
+        $i0 = virtualinvoke $r6.<java.awt.geom.AffineTransform: int getType()>();
+
+        $z1 = r0.<sun.font.Font2D: boolean useWeak>;
+
+        if $z1 != 0 goto label4;
+
+        if $i0 == 32 goto label4;
+
+        $i1 = $i0 & 16;
+
+        if $i1 == 0 goto label5;
+
+        $r7 = r0.<sun.font.Font2D: java.util.concurrent.ConcurrentHashMap strikeCache>;
+
+        $i2 = virtualinvoke $r7.<java.util.concurrent.ConcurrentHashMap: int size()>();
+
+        if $i2 <= 10 goto label5;
+
+     label4:
+        r15 = staticinvoke <sun.font.StrikeCache: java.lang.ref.Reference getStrikeRef(sun.font.FontStrike,boolean)>($r5, 1);
+
+        goto label6;
+
+     label5:
+        $z2 = r0.<sun.font.Font2D: boolean useWeak>;
+
+        r15 = staticinvoke <sun.font.StrikeCache: java.lang.ref.Reference getStrikeRef(sun.font.FontStrike,boolean)>($r5, $z2);
+
+     label6:
+        $r16 = r0.<sun.font.Font2D: java.util.concurrent.ConcurrentHashMap strikeCache>;
+
+        virtualinvoke $r16.<java.util.concurrent.ConcurrentHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r12, r15);
+
+        virtualinvoke r0.<sun.font.Font2D: void updateLastStrikeRef(sun.font.FontStrike)>($r5);
+
+        staticinvoke <sun.font.StrikeCache: void refStrike(sun.font.FontStrike)>($r5);
+
+        return $r5;
+    }
+
+    public void getFontMetrics(java.awt.Font, java.awt.geom.AffineTransform, java.lang.Object, java.lang.Object, float[])
+    {
+        float[] r7;
+        int $i0, $i1, $i2;
+        sun.font.StrikeMetrics $r6;
+        java.awt.Font r2;
+        java.awt.geom.AffineTransform r4;
+        sun.font.FontStrike $r5;
+        sun.font.Font2D r1;
+        float $f0, $f1, $f2, $f3, $f4;
+        java.lang.Object r0, r3;
+
+        r1 := @this: sun.font.Font2D;
+
+        r2 := @parameter0: java.awt.Font;
+
+        r4 := @parameter1: java.awt.geom.AffineTransform;
+
+        r0 := @parameter2: java.lang.Object;
+
+        r3 := @parameter3: java.lang.Object;
+
+        r7 := @parameter4: float[];
+
+        $i0 = virtualinvoke r2.<java.awt.Font: int getSize()>();
+
+        $i1 = staticinvoke <sun.font.FontStrikeDesc: int getAAHintIntVal(java.lang.Object,sun.font.Font2D,int)>(r0, r1, $i0);
+
+        $i2 = staticinvoke <sun.font.FontStrikeDesc: int getFMHintIntVal(java.lang.Object)>(r3);
+
+        $r5 = virtualinvoke r1.<sun.font.Font2D: sun.font.FontStrike getStrike(java.awt.Font,java.awt.geom.AffineTransform,int,int)>(r2, r4, $i1, $i2);
+
+        $r6 = virtualinvoke $r5.<sun.font.FontStrike: sun.font.StrikeMetrics getFontMetrics()>();
+
+        $f0 = virtualinvoke $r6.<sun.font.StrikeMetrics: float getAscent()>();
+
+        r7[0] = $f0;
+
+        $f1 = virtualinvoke $r6.<sun.font.StrikeMetrics: float getDescent()>();
+
+        r7[1] = $f1;
+
+        $f2 = virtualinvoke $r6.<sun.font.StrikeMetrics: float getLeading()>();
+
+        r7[2] = $f2;
+
+        $f3 = virtualinvoke $r6.<sun.font.StrikeMetrics: float getMaxAdvance()>();
+
+        r7[3] = $f3;
+
+        $f4 = virtualinvoke r2.<java.awt.Font: float getSize2D()>();
+
+        virtualinvoke r1.<sun.font.Font2D: void getStyleMetrics(float,float[],int)>($f4, r7, 4);
+
+        return;
+    }
+
+    public void getStyleMetrics(float, float[], int)
+    {
+        float[] r0;
+        int i0, $i1, $i2, $i3, $i4, $i5;
+        sun.font.Font2D r1;
+        float $f0, $f1, $f2, f3, $f4, $f5, $f6, $f7;
+
+        r1 := @this: sun.font.Font2D;
+
+        f3 := @parameter0: float;
+
+        r0 := @parameter1: float[];
+
+        i0 := @parameter2: int;
+
+        $f0 = r0[0];
+
+        $f1 = neg $f0;
+
+        $f2 = $f1 / 2.5F;
+
+        r0[i0] = $f2;
+
+        $i1 = i0 + 1;
+
+        $f4 = f3 / 12.0F;
+
+        r0[$i1] = $f4;
+
+        $i3 = i0 + 2;
+
+        $i2 = i0 + 1;
+
+        $f5 = r0[$i2];
+
+        $f6 = $f5 / 1.5F;
+
+        r0[$i3] = $f6;
+
+        $i5 = i0 + 3;
+
+        $i4 = i0 + 1;
+
+        $f7 = r0[$i4];
+
+        r0[$i5] = $f7;
+
+        return;
+    }
+
+    public void getFontMetrics(java.awt.Font, java.awt.font.FontRenderContext, float[])
+    {
+        sun.font.StrikeMetrics $r4;
+        java.awt.Font r1;
+        float[] r5;
+        sun.font.FontStrike $r3;
+        sun.font.Font2D r0;
+        java.awt.font.FontRenderContext r2;
+        float $f0, $f1, $f2, $f3;
+
+        r0 := @this: sun.font.Font2D;
+
+        r1 := @parameter0: java.awt.Font;
+
+        r2 := @parameter1: java.awt.font.FontRenderContext;
+
+        r5 := @parameter2: float[];
+
+        $r3 = virtualinvoke r0.<sun.font.Font2D: sun.font.FontStrike getStrike(java.awt.Font,java.awt.font.FontRenderContext)>(r1, r2);
+
+        $r4 = virtualinvoke $r3.<sun.font.FontStrike: sun.font.StrikeMetrics getFontMetrics()>();
+
+        $f0 = virtualinvoke $r4.<sun.font.StrikeMetrics: float getAscent()>();
+
+        r5[0] = $f0;
+
+        $f1 = virtualinvoke $r4.<sun.font.StrikeMetrics: float getDescent()>();
+
+        r5[1] = $f1;
+
+        $f2 = virtualinvoke $r4.<sun.font.StrikeMetrics: float getLeading()>();
+
+        r5[2] = $f2;
+
+        $f3 = virtualinvoke $r4.<sun.font.StrikeMetrics: float getMaxAdvance()>();
+
+        r5[3] = $f3;
+
+        return;
+    }
+
+    protected byte[] getTableBytes(int)
+    {
+        int i0;
+        sun.font.Font2D r0;
+
+        r0 := @this: sun.font.Font2D;
+
+        i0 := @parameter0: int;
+
+        return null;
+    }
+
+    protected long getLayoutTableCache()
+    {
+        sun.font.Font2D r0;
+
+        r0 := @this: sun.font.Font2D;
+
+        return 0L;
+    }
+
+    protected long getUnitsPerEm()
+    {
+        sun.font.Font2D r0;
+
+        r0 := @this: sun.font.Font2D;
+
+        return 2048L;
+    }
+
+    boolean supportsEncoding(java.lang.String)
+    {
+        sun.font.Font2D r0;
+        java.lang.String r1;
+
+        r0 := @this: sun.font.Font2D;
+
+        r1 := @parameter0: java.lang.String;
+
+        return 0;
+    }
+
+    public boolean canDoStyle(int)
+    {
+        sun.font.Font2D r0;
+        int i0, $i1;
+        boolean $z0;
+
+        r0 := @this: sun.font.Font2D;
+
+        i0 := @parameter0: int;
+
+        $i1 = r0.<sun.font.Font2D: int style>;
+
+        if i0 != $i1 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean useAAForPtSize(int)
+    {
+        int i0;
+        sun.font.Font2D r0;
+
+        r0 := @this: sun.font.Font2D;
+
+        i0 := @parameter0: int;
+
+        return 1;
+    }
+
+    public boolean hasSupplementaryChars()
+    {
+        sun.font.Font2D r0;
+
+        r0 := @this: sun.font.Font2D;
+
+        return 0;
+    }
+
+    public java.lang.String getPostscriptName()
+    {
+        sun.font.Font2D r0;
+        java.lang.String $r1;
+
+        r0 := @this: sun.font.Font2D;
+
+        $r1 = r0.<sun.font.Font2D: java.lang.String fullName>;
+
+        return $r1;
+    }
+
+    public java.lang.String getFontName(java.util.Locale)
+    {
+        sun.font.Font2D r0;
+        java.lang.String $r1;
+        java.util.Locale r2;
+
+        r0 := @this: sun.font.Font2D;
+
+        r2 := @parameter0: java.util.Locale;
+
+        $r1 = r0.<sun.font.Font2D: java.lang.String fullName>;
+
+        return $r1;
+    }
+
+    public java.lang.String getFamilyName(java.util.Locale)
+    {
+        sun.font.Font2D r0;
+        java.lang.String $r1;
+        java.util.Locale r2;
+
+        r0 := @this: sun.font.Font2D;
+
+        r2 := @parameter0: java.util.Locale;
+
+        $r1 = r0.<sun.font.Font2D: java.lang.String familyName>;
+
+        return $r1;
+    }
+
+    public int getNumGlyphs()
+    {
+        int $i0;
+        sun.font.Font2D r0;
+        sun.font.CharToGlyphMapper $r1;
+
+        r0 := @this: sun.font.Font2D;
+
+        $r1 = virtualinvoke r0.<sun.font.Font2D: sun.font.CharToGlyphMapper getMapper()>();
+
+        $i0 = virtualinvoke $r1.<sun.font.CharToGlyphMapper: int getNumGlyphs()>();
+
+        return $i0;
+    }
+
+    public int charToGlyph(int)
+    {
+        sun.font.Font2D r0;
+        sun.font.CharToGlyphMapper $r1;
+        int i0, $i1;
+
+        r0 := @this: sun.font.Font2D;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<sun.font.Font2D: sun.font.CharToGlyphMapper getMapper()>();
+
+        $i1 = virtualinvoke $r1.<sun.font.CharToGlyphMapper: int charToGlyph(int)>(i0);
+
+        return $i1;
+    }
+
+    public int getMissingGlyphCode()
+    {
+        int $i0;
+        sun.font.Font2D r0;
+        sun.font.CharToGlyphMapper $r1;
+
+        r0 := @this: sun.font.Font2D;
+
+        $r1 = virtualinvoke r0.<sun.font.Font2D: sun.font.CharToGlyphMapper getMapper()>();
+
+        $i0 = virtualinvoke $r1.<sun.font.CharToGlyphMapper: int getMissingGlyphCode()>();
+
+        return $i0;
+    }
+
+    public boolean canDisplay(char)
+    {
+        sun.font.Font2D r0;
+        sun.font.CharToGlyphMapper $r1;
+        char c0;
+        boolean $z0;
+
+        r0 := @this: sun.font.Font2D;
+
+        c0 := @parameter0: char;
+
+        $r1 = virtualinvoke r0.<sun.font.Font2D: sun.font.CharToGlyphMapper getMapper()>();
+
+        $z0 = virtualinvoke $r1.<sun.font.CharToGlyphMapper: boolean canDisplay(char)>(c0);
+
+        return $z0;
+    }
+
+    public boolean canDisplay(int)
+    {
+        sun.font.Font2D r0;
+        sun.font.CharToGlyphMapper $r1;
+        int i0;
+        boolean $z0;
+
+        r0 := @this: sun.font.Font2D;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<sun.font.Font2D: sun.font.CharToGlyphMapper getMapper()>();
+
+        $z0 = virtualinvoke $r1.<sun.font.CharToGlyphMapper: boolean canDisplay(int)>(i0);
+
+        return $z0;
+    }
+
+    public byte getBaselineFor(char)
+    {
+        sun.font.Font2D r0;
+        char c0;
+
+        r0 := @this: sun.font.Font2D;
+
+        c0 := @parameter0: char;
+
+        return 0;
+    }
+
+    public float getItalicAngle(java.awt.Font, java.awt.geom.AffineTransform, java.lang.Object, java.lang.Object)
+    {
+        byte $b2, $b3;
+        int $i0, $i1;
+        sun.font.StrikeMetrics $r6;
+        java.awt.Font r3;
+        java.awt.geom.AffineTransform r4;
+        sun.font.FontStrike $r5;
+        sun.font.Font2D r1;
+        float $f0, $f1, $f2, $f3, $f4, $f5;
+        java.lang.Object r0, r2;
+
+        r1 := @this: sun.font.Font2D;
+
+        r3 := @parameter0: java.awt.Font;
+
+        r4 := @parameter1: java.awt.geom.AffineTransform;
+
+        r0 := @parameter2: java.lang.Object;
+
+        r2 := @parameter3: java.lang.Object;
+
+        $i0 = staticinvoke <sun.font.FontStrikeDesc: int getAAHintIntVal(java.lang.Object,sun.font.Font2D,int)>(r0, r1, 12);
+
+        $i1 = staticinvoke <sun.font.FontStrikeDesc: int getFMHintIntVal(java.lang.Object)>(r2);
+
+        $r5 = virtualinvoke r1.<sun.font.Font2D: sun.font.FontStrike getStrike(java.awt.Font,java.awt.geom.AffineTransform,int,int)>(r3, r4, $i0, $i1);
+
+        $r6 = virtualinvoke $r5.<sun.font.FontStrike: sun.font.StrikeMetrics getFontMetrics()>();
+
+        $f0 = $r6.<sun.font.StrikeMetrics: float ascentY>;
+
+        $b2 = $f0 cmpl 0.0F;
+
+        if $b2 == 0 goto label1;
+
+        $f1 = $r6.<sun.font.StrikeMetrics: float ascentX>;
+
+        $b3 = $f1 cmpl 0.0F;
+
+        if $b3 != 0 goto label2;
+
+     label1:
+        return 0.0F;
+
+     label2:
+        $f4 = $r6.<sun.font.StrikeMetrics: float ascentX>;
+
+        $f2 = $r6.<sun.font.StrikeMetrics: float ascentY>;
+
+        $f3 = neg $f2;
+
+        $f5 = $f4 / $f3;
+
+        return $f5;
+    }
+
+    static void <clinit>()
+    {
+        java.awt.font.FontRenderContext $r3;
+        java.lang.String[] $r0, $r1, $r2;
+
+        <sun.font.Font2D: int FWEIGHT_BOLD> = 700;
+
+        <sun.font.Font2D: int FWEIGHT_NORMAL> = 400;
+
+        <sun.font.Font2D: int FWIDTH_NORMAL> = 5;
+
+        <sun.font.Font2D: int DEFAULT_RANK> = 4;
+
+        <sun.font.Font2D: int UNKNOWN_RANK> = 6;
+
+        <sun.font.Font2D: int NATIVE_RANK> = 5;
+
+        <sun.font.Font2D: int TYPE1_RANK> = 4;
+
+        <sun.font.Font2D: int TTF_RANK> = 3;
+
+        <sun.font.Font2D: int JRE_RANK> = 2;
+
+        <sun.font.Font2D: int FONT_CONFIG_RANK> = 2;
+
+        $r0 = newarray (java.lang.String)[6];
+
+        $r0[0] = "bold";
+
+        $r0[1] = "demibold";
+
+        $r0[2] = "demi-bold";
+
+        $r0[3] = "demi bold";
+
+        $r0[4] = "negreta";
+
+        $r0[5] = "demi";
+
+        <sun.font.Font2D: java.lang.String[] boldNames> = $r0;
+
+        $r1 = newarray (java.lang.String)[4];
+
+        $r1[0] = "italic";
+
+        $r1[1] = "cursiva";
+
+        $r1[2] = "oblique";
+
+        $r1[3] = "inclined";
+
+        <sun.font.Font2D: java.lang.String[] italicNames> = $r1;
+
+        $r2 = newarray (java.lang.String)[9];
+
+        $r2[0] = "bolditalic";
+
+        $r2[1] = "bold-italic";
+
+        $r2[2] = "bold italic";
+
+        $r2[3] = "boldoblique";
+
+        $r2[4] = "bold-oblique";
+
+        $r2[5] = "bold oblique";
+
+        $r2[6] = "demibold italic";
+
+        $r2[7] = "negreta cursiva";
+
+        $r2[8] = "demi oblique";
+
+        <sun.font.Font2D: java.lang.String[] boldItalicNames> = $r2;
+
+        $r3 = new java.awt.font.FontRenderContext;
+
+        specialinvoke $r3.<java.awt.font.FontRenderContext: void <init>(java.awt.geom.AffineTransform,boolean,boolean)>(null, 0, 0);
+
+        <sun.font.Font2D: java.awt.font.FontRenderContext DEFAULT_FRC> = $r3;
+
+        return;
+    }
+}

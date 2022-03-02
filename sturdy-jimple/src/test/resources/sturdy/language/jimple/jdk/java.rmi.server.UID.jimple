@@ -1,0 +1,407 @@
+public final class java.rmi.server.UID extends java.lang.Object implements java.io.Serializable
+{
+    private static int hostUnique;
+    private static boolean hostUniqueSet;
+    private static final java.lang.Object lock;
+    private static long lastTime;
+    private static short lastCount;
+    private static final long serialVersionUID;
+    private final int unique;
+    private final long time;
+    private final short count;
+
+    public void <init>()
+    {
+        java.lang.Throwable $r4;
+        long $l2, $l3, $l5, $l7, $l9, $l10;
+        java.security.SecureRandom $r6;
+        short $s1, $s11, $s13;
+        byte $b4, $b6;
+        java.lang.Thread $r2;
+        int $i0, $i8, $i12, $i14, $i15, $i16;
+        java.rmi.server.UID r0;
+        boolean $z0, z1, z2;
+        java.lang.InterruptedException $r5;
+        java.lang.Object $r1;
+
+        r0 := @this: java.rmi.server.UID;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = <java.rmi.server.UID: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label01:
+        $z0 = <java.rmi.server.UID: boolean hostUniqueSet>;
+
+        if $z0 != 0 goto label02;
+
+        $r6 = new java.security.SecureRandom;
+
+        specialinvoke $r6.<java.security.SecureRandom: void <init>()>();
+
+        $i8 = virtualinvoke $r6.<java.security.SecureRandom: int nextInt()>();
+
+        <java.rmi.server.UID: int hostUnique> = $i8;
+
+        <java.rmi.server.UID: boolean hostUniqueSet> = 1;
+
+     label02:
+        $i0 = <java.rmi.server.UID: int hostUnique>;
+
+        r0.<java.rmi.server.UID: int unique> = $i0;
+
+        $s1 = <java.rmi.server.UID: short lastCount>;
+
+        $i14 = (int) $s1;
+
+        if $i14 != 32767 goto label12;
+
+        z1 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        z2 = 0;
+
+     label03:
+        if z2 != 0 goto label11;
+
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l3 = <java.rmi.server.UID: long lastTime>;
+
+        $b4 = $l2 cmp $l3;
+
+        if $b4 != 0 goto label07;
+
+     label04:
+        staticinvoke <java.lang.Thread: void sleep(long)>(1L);
+
+     label05:
+        goto label10;
+
+     label06:
+        $r5 := @caughtexception;
+
+        z1 = 1;
+
+        goto label10;
+
+     label07:
+        $l5 = <java.rmi.server.UID: long lastTime>;
+
+        $b6 = $l2 cmp $l5;
+
+        $i15 = (int) $b6;
+
+        if $i15 >= 0 goto label08;
+
+        $l7 = <java.rmi.server.UID: long lastTime>;
+
+        $l9 = $l7 + 1L;
+
+        goto label09;
+
+     label08:
+        $l9 = $l2;
+
+     label09:
+        <java.rmi.server.UID: long lastTime> = $l9;
+
+        <java.rmi.server.UID: short lastCount> = -32768;
+
+        z2 = 1;
+
+     label10:
+        goto label03;
+
+     label11:
+        if z1 == 0 goto label12;
+
+        $r2 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r2.<java.lang.Thread: void interrupt()>();
+
+     label12:
+        $l10 = <java.rmi.server.UID: long lastTime>;
+
+        r0.<java.rmi.server.UID: long time> = $l10;
+
+        $s11 = <java.rmi.server.UID: short lastCount>;
+
+        $i16 = (int) $s11;
+
+        $i12 = $i16 + 1;
+
+        $s13 = (short) $i12;
+
+        <java.rmi.server.UID: short lastCount> = $s13;
+
+        r0.<java.rmi.server.UID: short count> = $s11;
+
+        exitmonitor $r1;
+
+     label13:
+        goto label16;
+
+     label14:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label15:
+        throw $r4;
+
+     label16:
+        return;
+
+        catch java.lang.InterruptedException from label04 to label05 with label06;
+        catch java.lang.Throwable from label01 to label13 with label14;
+        catch java.lang.Throwable from label14 to label15 with label14;
+    }
+
+    public void <init>(short)
+    {
+        short s0;
+        java.rmi.server.UID r0;
+
+        r0 := @this: java.rmi.server.UID;
+
+        s0 := @parameter0: short;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.rmi.server.UID: int unique> = 0;
+
+        r0.<java.rmi.server.UID: long time> = 0L;
+
+        r0.<java.rmi.server.UID: short count> = s0;
+
+        return;
+    }
+
+    private void <init>(int, long, short)
+    {
+        short s2;
+        int i0;
+        long l1;
+        java.rmi.server.UID r0;
+
+        r0 := @this: java.rmi.server.UID;
+
+        i0 := @parameter0: int;
+
+        l1 := @parameter1: long;
+
+        s2 := @parameter2: short;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.rmi.server.UID: int unique> = i0;
+
+        r0.<java.rmi.server.UID: long time> = l1;
+
+        r0.<java.rmi.server.UID: short count> = s2;
+
+        return;
+    }
+
+    public int hashCode()
+    {
+        short $s1;
+        int $i2, $i3, $i4;
+        long $l0;
+        java.rmi.server.UID r0;
+
+        r0 := @this: java.rmi.server.UID;
+
+        $l0 = r0.<java.rmi.server.UID: long time>;
+
+        $i2 = (int) $l0;
+
+        $s1 = r0.<java.rmi.server.UID: short count>;
+
+        $i4 = (int) $s1;
+
+        $i3 = $i2 + $i4;
+
+        return $i3;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        long $l4, $l5;
+        short $s2, $s3;
+        byte $b6;
+        int $i0, $i1, $i7, $i8;
+        java.lang.Object r0;
+        java.rmi.server.UID r1, r2;
+        boolean $z0, $z1;
+
+        r2 := @this: java.rmi.server.UID;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $z0 = r0 instanceof java.rmi.server.UID;
+
+        if $z0 == 0 goto label3;
+
+        r1 = (java.rmi.server.UID) r0;
+
+        $i1 = r2.<java.rmi.server.UID: int unique>;
+
+        $i0 = r1.<java.rmi.server.UID: int unique>;
+
+        if $i1 != $i0 goto label1;
+
+        $s3 = r2.<java.rmi.server.UID: short count>;
+
+        $s2 = r1.<java.rmi.server.UID: short count>;
+
+        $i7 = (int) $s3;
+
+        $i8 = (int) $s2;
+
+        if $i7 != $i8 goto label1;
+
+        $l5 = r2.<java.rmi.server.UID: long time>;
+
+        $l4 = r1.<java.rmi.server.UID: long time>;
+
+        $b6 = $l5 cmp $l4;
+
+        if $b6 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+
+     label3:
+        return 0;
+    }
+
+    public java.lang.String toString()
+    {
+        long $l1;
+        short $s2;
+        int $i0, $i3;
+        java.lang.StringBuilder $r3, $r4, $r6, $r7, $r9, $r11;
+        java.lang.String $r2, $r5, $r8, $r10;
+        java.rmi.server.UID r1;
+
+        r1 := @this: java.rmi.server.UID;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $i0 = r1.<java.rmi.server.UID: int unique>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.String toString(int,int)>($i0, 16);
+
+        $r3 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $l1 = r1.<java.rmi.server.UID: long time>;
+
+        $r5 = staticinvoke <java.lang.Long: java.lang.String toString(long,int)>($l1, 16);
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $s2 = r1.<java.rmi.server.UID: short count>;
+
+        $i3 = (int) $s2;
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.String toString(int,int)>($i3, 16);
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r10;
+    }
+
+    public void write(java.io.DataOutput) throws java.io.IOException
+    {
+        java.io.DataOutput r0;
+        short $s2;
+        int $i0, $i3;
+        long $l1;
+        java.rmi.server.UID r1;
+
+        r1 := @this: java.rmi.server.UID;
+
+        r0 := @parameter0: java.io.DataOutput;
+
+        $i0 = r1.<java.rmi.server.UID: int unique>;
+
+        interfaceinvoke r0.<java.io.DataOutput: void writeInt(int)>($i0);
+
+        $l1 = r1.<java.rmi.server.UID: long time>;
+
+        interfaceinvoke r0.<java.io.DataOutput: void writeLong(long)>($l1);
+
+        $s2 = r1.<java.rmi.server.UID: short count>;
+
+        $i3 = (int) $s2;
+
+        interfaceinvoke r0.<java.io.DataOutput: void writeShort(int)>($i3);
+
+        return;
+    }
+
+    public static java.rmi.server.UID read(java.io.DataInput) throws java.io.IOException
+    {
+        short $s2;
+        java.io.DataInput r0;
+        int $i0;
+        long $l1;
+        java.rmi.server.UID $r1;
+
+        r0 := @parameter0: java.io.DataInput;
+
+        $i0 = interfaceinvoke r0.<java.io.DataInput: int readInt()>();
+
+        $l1 = interfaceinvoke r0.<java.io.DataInput: long readLong()>();
+
+        $s2 = interfaceinvoke r0.<java.io.DataInput: short readShort()>();
+
+        $r1 = new java.rmi.server.UID;
+
+        specialinvoke $r1.<java.rmi.server.UID: void <init>(int,long,short)>($i0, $l1, $s2);
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Object $r0;
+        long $l0;
+
+        <java.rmi.server.UID: long serialVersionUID> = 1086053664494604050L;
+
+        <java.rmi.server.UID: boolean hostUniqueSet> = 0;
+
+        $r0 = new java.lang.Object;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        <java.rmi.server.UID: java.lang.Object lock> = $r0;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        <java.rmi.server.UID: long lastTime> = $l0;
+
+        <java.rmi.server.UID: short lastCount> = -32768;
+
+        return;
+    }
+}

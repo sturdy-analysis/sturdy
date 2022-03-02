@@ -1,0 +1,188 @@
+public class sun.awt.image.OffScreenImage extends java.awt.image.BufferedImage
+{
+    protected java.awt.Component c;
+    private sun.awt.image.OffScreenImageSource osis;
+    private java.awt.Font defaultFont;
+
+    public void <init>(java.awt.Component, java.awt.image.ColorModel, java.awt.image.WritableRaster, boolean)
+    {
+        java.awt.image.ColorModel r1;
+        int $i0, $i1;
+        java.awt.image.WritableRaster r2;
+        sun.awt.image.OffScreenImage r0;
+        java.awt.Component r3;
+        boolean z0;
+
+        r0 := @this: sun.awt.image.OffScreenImage;
+
+        r3 := @parameter0: java.awt.Component;
+
+        r1 := @parameter1: java.awt.image.ColorModel;
+
+        r2 := @parameter2: java.awt.image.WritableRaster;
+
+        z0 := @parameter3: boolean;
+
+        specialinvoke r0.<java.awt.image.BufferedImage: void <init>(java.awt.image.ColorModel,java.awt.image.WritableRaster,boolean,java.util.Hashtable)>(r1, r2, z0, null);
+
+        r0.<sun.awt.image.OffScreenImage: java.awt.Component c> = r3;
+
+        $i0 = virtualinvoke r2.<java.awt.image.WritableRaster: int getWidth()>();
+
+        $i1 = virtualinvoke r2.<java.awt.image.WritableRaster: int getHeight()>();
+
+        specialinvoke r0.<sun.awt.image.OffScreenImage: void initSurface(int,int)>($i0, $i1);
+
+        return;
+    }
+
+    public java.awt.Graphics getGraphics()
+    {
+        sun.awt.image.OffScreenImage r0;
+        java.awt.Graphics2D $r1;
+
+        r0 := @this: sun.awt.image.OffScreenImage;
+
+        $r1 = virtualinvoke r0.<sun.awt.image.OffScreenImage: java.awt.Graphics2D createGraphics()>();
+
+        return $r1;
+    }
+
+    public java.awt.Graphics2D createGraphics()
+    {
+        java.awt.Color $r3, $r5, r12, r13;
+        sun.awt.image.OffScreenImage r0;
+        java.awt.GraphicsEnvironment $r10;
+        java.awt.Graphics2D $r11;
+        java.awt.Font $r7, $r8, $r9, r14;
+        sun.java2d.SurfaceData $r16;
+        java.awt.Component $r1, $r2, $r4, $r6;
+        sun.java2d.SunGraphics2D $r15;
+
+        r0 := @this: sun.awt.image.OffScreenImage;
+
+        $r1 = r0.<sun.awt.image.OffScreenImage: java.awt.Component c>;
+
+        if $r1 != null goto label1;
+
+        $r10 = staticinvoke <java.awt.GraphicsEnvironment: java.awt.GraphicsEnvironment getLocalGraphicsEnvironment()>();
+
+        $r11 = virtualinvoke $r10.<java.awt.GraphicsEnvironment: java.awt.Graphics2D createGraphics(java.awt.image.BufferedImage)>(r0);
+
+        return $r11;
+
+     label1:
+        $r2 = r0.<sun.awt.image.OffScreenImage: java.awt.Component c>;
+
+        $r3 = virtualinvoke $r2.<java.awt.Component: java.awt.Color getBackground()>();
+
+        r12 = $r3;
+
+        if $r3 != null goto label2;
+
+        r12 = <java.awt.SystemColor: java.awt.SystemColor window>;
+
+     label2:
+        $r4 = r0.<sun.awt.image.OffScreenImage: java.awt.Component c>;
+
+        $r5 = virtualinvoke $r4.<java.awt.Component: java.awt.Color getForeground()>();
+
+        r13 = $r5;
+
+        if $r5 != null goto label3;
+
+        r13 = <java.awt.SystemColor: java.awt.SystemColor windowText>;
+
+     label3:
+        $r6 = r0.<sun.awt.image.OffScreenImage: java.awt.Component c>;
+
+        $r7 = virtualinvoke $r6.<java.awt.Component: java.awt.Font getFont()>();
+
+        r14 = $r7;
+
+        if $r7 != null goto label5;
+
+        $r8 = r0.<sun.awt.image.OffScreenImage: java.awt.Font defaultFont>;
+
+        if $r8 != null goto label4;
+
+        $r9 = new java.awt.Font;
+
+        specialinvoke $r9.<java.awt.Font: void <init>(java.lang.String,int,int)>("Dialog", 0, 12);
+
+        r0.<sun.awt.image.OffScreenImage: java.awt.Font defaultFont> = $r9;
+
+     label4:
+        r14 = r0.<sun.awt.image.OffScreenImage: java.awt.Font defaultFont>;
+
+     label5:
+        $r15 = new sun.java2d.SunGraphics2D;
+
+        $r16 = staticinvoke <sun.java2d.SurfaceData: sun.java2d.SurfaceData getPrimarySurfaceData(java.awt.Image)>(r0);
+
+        specialinvoke $r15.<sun.java2d.SunGraphics2D: void <init>(sun.java2d.SurfaceData,java.awt.Color,java.awt.Color,java.awt.Font)>($r16, r13, r12, r14);
+
+        return $r15;
+    }
+
+    private void initSurface(int, int)
+    {
+        java.lang.Throwable $r2;
+        java.awt.Graphics2D $r1;
+        int i0, i1;
+        sun.awt.image.OffScreenImage r0;
+
+        r0 := @this: sun.awt.image.OffScreenImage;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r1 = virtualinvoke r0.<sun.awt.image.OffScreenImage: java.awt.Graphics2D createGraphics()>();
+
+     label1:
+        virtualinvoke $r1.<java.awt.Graphics2D: void clearRect(int,int,int,int)>(0, 0, i0, i1);
+
+     label2:
+        virtualinvoke $r1.<java.awt.Graphics2D: void dispose()>();
+
+        goto label5;
+
+     label3:
+        $r2 := @caughtexception;
+
+     label4:
+        virtualinvoke $r1.<java.awt.Graphics2D: void dispose()>();
+
+        throw $r2;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public java.awt.image.ImageProducer getSource()
+    {
+        sun.awt.image.OffScreenImage r0;
+        sun.awt.image.OffScreenImageSource $r1, $r2, $r3;
+
+        r0 := @this: sun.awt.image.OffScreenImage;
+
+        $r1 = r0.<sun.awt.image.OffScreenImage: sun.awt.image.OffScreenImageSource osis>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new sun.awt.image.OffScreenImageSource;
+
+        specialinvoke $r3.<sun.awt.image.OffScreenImageSource: void <init>(java.awt.image.BufferedImage)>(r0);
+
+        r0.<sun.awt.image.OffScreenImage: sun.awt.image.OffScreenImageSource osis> = $r3;
+
+     label1:
+        $r2 = r0.<sun.awt.image.OffScreenImage: sun.awt.image.OffScreenImageSource osis>;
+
+        return $r2;
+    }
+}

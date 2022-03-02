@@ -1,0 +1,1920 @@
+public class javax.swing.DefaultDesktopManager extends java.lang.Object implements javax.swing.DesktopManager, java.io.Serializable
+{
+    static final java.lang.String HAS_BEEN_ICONIFIED_PROPERTY;
+    static final int DEFAULT_DRAG_MODE;
+    static final int OUTLINE_DRAG_MODE;
+    static final int FASTER_DRAG_MODE;
+    int dragMode;
+    private transient java.awt.Rectangle currentBounds;
+    private transient java.awt.Graphics desktopGraphics;
+    private transient java.awt.Rectangle desktopBounds;
+    private transient java.awt.Rectangle[] floatingItems;
+    private transient boolean didDrag;
+    private transient java.awt.Point currentLoc;
+
+    public void <init>()
+    {
+        javax.swing.DefaultDesktopManager r0;
+        java.awt.Rectangle[] $r1;
+
+        r0 := @this: javax.swing.DefaultDesktopManager;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<javax.swing.DefaultDesktopManager: int dragMode> = 0;
+
+        r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds> = null;
+
+        r0.<javax.swing.DefaultDesktopManager: java.awt.Graphics desktopGraphics> = null;
+
+        r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle desktopBounds> = null;
+
+        $r1 = newarray (java.awt.Rectangle)[0];
+
+        r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle[] floatingItems> = $r1;
+
+        r0.<javax.swing.DefaultDesktopManager: java.awt.Point currentLoc> = null;
+
+        return;
+    }
+
+    public void openFrame(javax.swing.JInternalFrame)
+    {
+        javax.swing.JInternalFrame$JDesktopIcon $r1, $r3;
+        javax.swing.JInternalFrame r0;
+        javax.swing.DefaultDesktopManager r5;
+        java.awt.Container $r2, $r4;
+
+        r5 := @this: javax.swing.DefaultDesktopManager;
+
+        r0 := @parameter0: javax.swing.JInternalFrame;
+
+        $r1 = virtualinvoke r0.<javax.swing.JInternalFrame: javax.swing.JInternalFrame$JDesktopIcon getDesktopIcon()>();
+
+        $r2 = virtualinvoke $r1.<javax.swing.JInternalFrame$JDesktopIcon: java.awt.Container getParent()>();
+
+        if $r2 == null goto label1;
+
+        $r3 = virtualinvoke r0.<javax.swing.JInternalFrame: javax.swing.JInternalFrame$JDesktopIcon getDesktopIcon()>();
+
+        $r4 = virtualinvoke $r3.<javax.swing.JInternalFrame$JDesktopIcon: java.awt.Container getParent()>();
+
+        virtualinvoke $r4.<java.awt.Container: java.awt.Component add(java.awt.Component)>(r0);
+
+        virtualinvoke r5.<javax.swing.DefaultDesktopManager: void removeIconFor(javax.swing.JInternalFrame)>(r0);
+
+     label1:
+        return;
+    }
+
+    public void closeFrame(javax.swing.JInternalFrame)
+    {
+        java.awt.Rectangle $r4;
+        javax.swing.JDesktopPane $r1;
+        javax.swing.JInternalFrame r0, r7;
+        java.beans.PropertyVetoException $r5, $r6;
+        int $i0, $i1, $i2, $i3, $i4;
+        javax.swing.DefaultDesktopManager r3;
+        java.awt.Container $r2;
+        boolean $z0, $z1;
+
+        r3 := @this: javax.swing.DefaultDesktopManager;
+
+        r0 := @parameter0: javax.swing.JInternalFrame;
+
+        $r1 = virtualinvoke r0.<javax.swing.JInternalFrame: javax.swing.JDesktopPane getDesktopPane()>();
+
+        if $r1 != null goto label01;
+
+        return;
+
+     label01:
+        $z0 = virtualinvoke r0.<javax.swing.JInternalFrame: boolean isSelected()>();
+
+        $r2 = virtualinvoke r0.<javax.swing.JInternalFrame: java.awt.Container getParent()>();
+
+        r7 = null;
+
+        if $z0 == 0 goto label05;
+
+        r7 = virtualinvoke $r1.<javax.swing.JDesktopPane: javax.swing.JInternalFrame getNextFrame(javax.swing.JInternalFrame)>(r0);
+
+     label02:
+        virtualinvoke r0.<javax.swing.JInternalFrame: void setSelected(boolean)>(0);
+
+     label03:
+        goto label05;
+
+     label04:
+        $r6 := @caughtexception;
+
+     label05:
+        if $r2 == null goto label06;
+
+        virtualinvoke $r2.<java.awt.Container: void remove(java.awt.Component)>(r0);
+
+        $i1 = virtualinvoke r0.<javax.swing.JInternalFrame: int getX()>();
+
+        $i2 = virtualinvoke r0.<javax.swing.JInternalFrame: int getY()>();
+
+        $i3 = virtualinvoke r0.<javax.swing.JInternalFrame: int getWidth()>();
+
+        $i4 = virtualinvoke r0.<javax.swing.JInternalFrame: int getHeight()>();
+
+        virtualinvoke $r2.<java.awt.Container: void repaint(int,int,int,int)>($i1, $i2, $i3, $i4);
+
+     label06:
+        virtualinvoke r3.<javax.swing.DefaultDesktopManager: void removeIconFor(javax.swing.JInternalFrame)>(r0);
+
+        $r4 = virtualinvoke r0.<javax.swing.JInternalFrame: java.awt.Rectangle getNormalBounds()>();
+
+        if $r4 == null goto label07;
+
+        virtualinvoke r0.<javax.swing.JInternalFrame: void setNormalBounds(java.awt.Rectangle)>(null);
+
+     label07:
+        $z1 = virtualinvoke r3.<javax.swing.DefaultDesktopManager: boolean wasIcon(javax.swing.JInternalFrame)>(r0);
+
+        if $z1 == 0 goto label08;
+
+        virtualinvoke r3.<javax.swing.DefaultDesktopManager: void setWasIcon(javax.swing.JInternalFrame,java.lang.Boolean)>(r0, null);
+
+     label08:
+        if r7 == null goto label12;
+
+     label09:
+        virtualinvoke r7.<javax.swing.JInternalFrame: void setSelected(boolean)>(1);
+
+     label10:
+        goto label13;
+
+     label11:
+        $r5 := @caughtexception;
+
+        goto label13;
+
+     label12:
+        if $z0 == 0 goto label13;
+
+        $i0 = virtualinvoke $r1.<javax.swing.JDesktopPane: int getComponentCount()>();
+
+        if $i0 != 0 goto label13;
+
+        virtualinvoke $r1.<javax.swing.JDesktopPane: void requestFocus()>();
+
+     label13:
+        return;
+
+        catch java.beans.PropertyVetoException from label02 to label03 with label04;
+        catch java.beans.PropertyVetoException from label09 to label10 with label11;
+    }
+
+    public void maximizeFrame(javax.swing.JInternalFrame)
+    {
+        java.awt.Rectangle $r1, $r3;
+        javax.swing.JInternalFrame r0;
+        java.beans.PropertyVetoException $r5, $r6;
+        int $i0, $i1;
+        javax.swing.DefaultDesktopManager r4;
+        java.awt.Container $r2;
+        boolean $z0;
+
+        r4 := @this: javax.swing.DefaultDesktopManager;
+
+        r0 := @parameter0: javax.swing.JInternalFrame;
+
+        $z0 = virtualinvoke r0.<javax.swing.JInternalFrame: boolean isIcon()>();
+
+        if $z0 == 0 goto label4;
+
+     label1:
+        virtualinvoke r0.<javax.swing.JInternalFrame: void setIcon(boolean)>(0);
+
+     label2:
+        goto label5;
+
+     label3:
+        $r6 := @caughtexception;
+
+        goto label5;
+
+     label4:
+        $r1 = virtualinvoke r0.<javax.swing.JInternalFrame: java.awt.Rectangle getBounds()>();
+
+        virtualinvoke r0.<javax.swing.JInternalFrame: void setNormalBounds(java.awt.Rectangle)>($r1);
+
+        $r2 = virtualinvoke r0.<javax.swing.JInternalFrame: java.awt.Container getParent()>();
+
+        $r3 = virtualinvoke $r2.<java.awt.Container: java.awt.Rectangle getBounds()>();
+
+        $i1 = $r3.<java.awt.Rectangle: int width>;
+
+        $i0 = $r3.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r4.<javax.swing.DefaultDesktopManager: void setBoundsForFrame(javax.swing.JComponent,int,int,int,int)>(r0, 0, 0, $i1, $i0);
+
+     label5:
+        virtualinvoke r0.<javax.swing.JInternalFrame: void setSelected(boolean)>(1);
+
+     label6:
+        goto label8;
+
+     label7:
+        $r5 := @caughtexception;
+
+     label8:
+        return;
+
+        catch java.beans.PropertyVetoException from label1 to label2 with label3;
+        catch java.beans.PropertyVetoException from label5 to label6 with label7;
+    }
+
+    public void minimizeFrame(javax.swing.JInternalFrame)
+    {
+        java.awt.Rectangle $r1, $r2;
+        javax.swing.JInternalFrame r0;
+        java.beans.PropertyVetoException $r4;
+        int $i0, $i1, $i2, $i3;
+        javax.swing.DefaultDesktopManager r3;
+        boolean $z0;
+
+        r3 := @this: javax.swing.DefaultDesktopManager;
+
+        r0 := @parameter0: javax.swing.JInternalFrame;
+
+        $z0 = virtualinvoke r0.<javax.swing.JInternalFrame: boolean isIcon()>();
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r3.<javax.swing.DefaultDesktopManager: void iconifyFrame(javax.swing.JInternalFrame)>(r0);
+
+        return;
+
+     label1:
+        $r1 = virtualinvoke r0.<javax.swing.JInternalFrame: java.awt.Rectangle getNormalBounds()>();
+
+        if $r1 == null goto label6;
+
+        $r2 = virtualinvoke r0.<javax.swing.JInternalFrame: java.awt.Rectangle getNormalBounds()>();
+
+        virtualinvoke r0.<javax.swing.JInternalFrame: void setNormalBounds(java.awt.Rectangle)>(null);
+
+     label2:
+        virtualinvoke r0.<javax.swing.JInternalFrame: void setSelected(boolean)>(1);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r4 := @caughtexception;
+
+     label5:
+        $i3 = $r2.<java.awt.Rectangle: int x>;
+
+        $i2 = $r2.<java.awt.Rectangle: int y>;
+
+        $i1 = $r2.<java.awt.Rectangle: int width>;
+
+        $i0 = $r2.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r3.<javax.swing.DefaultDesktopManager: void setBoundsForFrame(javax.swing.JComponent,int,int,int,int)>(r0, $i3, $i2, $i1, $i0);
+
+     label6:
+        return;
+
+        catch java.beans.PropertyVetoException from label2 to label3 with label4;
+    }
+
+    public void iconifyFrame(javax.swing.JInternalFrame)
+    {
+        java.awt.Rectangle $r6, $r7;
+        javax.swing.JInternalFrame r0, $r5;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        javax.swing.DefaultDesktopManager r4;
+        java.lang.Boolean $r8;
+        java.awt.Container $r1;
+        boolean $z0, $z1, $z2, $z3;
+        javax.swing.JDesktopPane $r2;
+        javax.swing.JInternalFrame$JDesktopIcon $r3;
+        javax.swing.JLayeredPane r9;
+
+        r4 := @this: javax.swing.DefaultDesktopManager;
+
+        r0 := @parameter0: javax.swing.JInternalFrame;
+
+        $r1 = virtualinvoke r0.<javax.swing.JInternalFrame: java.awt.Container getParent()>();
+
+        $r2 = virtualinvoke r0.<javax.swing.JInternalFrame: javax.swing.JDesktopPane getDesktopPane()>();
+
+        $z0 = virtualinvoke r0.<javax.swing.JInternalFrame: boolean isSelected()>();
+
+        $r3 = virtualinvoke r0.<javax.swing.JInternalFrame: javax.swing.JInternalFrame$JDesktopIcon getDesktopIcon()>();
+
+        $z1 = virtualinvoke r4.<javax.swing.DefaultDesktopManager: boolean wasIcon(javax.swing.JInternalFrame)>(r0);
+
+        if $z1 != 0 goto label1;
+
+        $r7 = virtualinvoke r4.<javax.swing.DefaultDesktopManager: java.awt.Rectangle getBoundsForIconOf(javax.swing.JInternalFrame)>(r0);
+
+        $i8 = $r7.<java.awt.Rectangle: int x>;
+
+        $i7 = $r7.<java.awt.Rectangle: int y>;
+
+        $i6 = $r7.<java.awt.Rectangle: int width>;
+
+        $i5 = $r7.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r3.<javax.swing.JInternalFrame$JDesktopIcon: void setBounds(int,int,int,int)>($i8, $i7, $i6, $i5);
+
+        virtualinvoke $r3.<javax.swing.JInternalFrame$JDesktopIcon: void revalidate()>();
+
+        $r8 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke r4.<javax.swing.DefaultDesktopManager: void setWasIcon(javax.swing.JInternalFrame,java.lang.Boolean)>(r0, $r8);
+
+     label1:
+        if $r1 == null goto label2;
+
+        if $r2 != null goto label3;
+
+     label2:
+        return;
+
+     label3:
+        $z2 = $r1 instanceof javax.swing.JLayeredPane;
+
+        if $z2 == 0 goto label4;
+
+        r9 = (javax.swing.JLayeredPane) $r1;
+
+        $i4 = staticinvoke <javax.swing.JLayeredPane: int getLayer(javax.swing.JComponent)>(r0);
+
+        staticinvoke <javax.swing.JLayeredPane: void putLayer(javax.swing.JComponent,int)>($r3, $i4);
+
+     label4:
+        $z3 = virtualinvoke r0.<javax.swing.JInternalFrame: boolean isMaximum()>();
+
+        if $z3 != 0 goto label5;
+
+        $r6 = virtualinvoke r0.<javax.swing.JInternalFrame: java.awt.Rectangle getBounds()>();
+
+        virtualinvoke r0.<javax.swing.JInternalFrame: void setNormalBounds(java.awt.Rectangle)>($r6);
+
+     label5:
+        virtualinvoke $r2.<javax.swing.JDesktopPane: void setComponentOrderCheckingEnabled(boolean)>(0);
+
+        virtualinvoke $r1.<java.awt.Container: void remove(java.awt.Component)>(r0);
+
+        virtualinvoke $r1.<java.awt.Container: java.awt.Component add(java.awt.Component)>($r3);
+
+        virtualinvoke $r2.<javax.swing.JDesktopPane: void setComponentOrderCheckingEnabled(boolean)>(1);
+
+        $i0 = virtualinvoke r0.<javax.swing.JInternalFrame: int getX()>();
+
+        $i1 = virtualinvoke r0.<javax.swing.JInternalFrame: int getY()>();
+
+        $i2 = virtualinvoke r0.<javax.swing.JInternalFrame: int getWidth()>();
+
+        $i3 = virtualinvoke r0.<javax.swing.JInternalFrame: int getHeight()>();
+
+        virtualinvoke $r1.<java.awt.Container: void repaint(int,int,int,int)>($i0, $i1, $i2, $i3);
+
+        if $z0 == 0 goto label6;
+
+        $r5 = virtualinvoke $r2.<javax.swing.JDesktopPane: javax.swing.JInternalFrame selectFrame(boolean)>(1);
+
+        if $r5 != null goto label6;
+
+        virtualinvoke r0.<javax.swing.JInternalFrame: void restoreSubcomponentFocus()>();
+
+     label6:
+        return;
+    }
+
+    public void deiconifyFrame(javax.swing.JInternalFrame)
+    {
+        java.awt.Rectangle $r5;
+        javax.swing.JDesktopPane $r3;
+        javax.swing.JInternalFrame r0;
+        java.beans.PropertyVetoException $r6;
+        javax.swing.JInternalFrame$JDesktopIcon $r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        javax.swing.DefaultDesktopManager r4;
+        java.awt.Container $r2;
+        boolean $z0, $z1;
+
+        r4 := @this: javax.swing.DefaultDesktopManager;
+
+        r0 := @parameter0: javax.swing.JInternalFrame;
+
+        $r1 = virtualinvoke r0.<javax.swing.JInternalFrame: javax.swing.JInternalFrame$JDesktopIcon getDesktopIcon()>();
+
+        $r2 = virtualinvoke $r1.<javax.swing.JInternalFrame$JDesktopIcon: java.awt.Container getParent()>();
+
+        $r3 = virtualinvoke r0.<javax.swing.JInternalFrame: javax.swing.JDesktopPane getDesktopPane()>();
+
+        if $r2 == null goto label6;
+
+        if $r3 == null goto label6;
+
+        virtualinvoke $r2.<java.awt.Container: java.awt.Component add(java.awt.Component)>(r0);
+
+        $z0 = virtualinvoke r0.<javax.swing.JInternalFrame: boolean isMaximum()>();
+
+        if $z0 == 0 goto label2;
+
+        $r5 = virtualinvoke $r2.<java.awt.Container: java.awt.Rectangle getBounds()>();
+
+        $i0 = virtualinvoke r0.<javax.swing.JInternalFrame: int getWidth()>();
+
+        $i1 = $r5.<java.awt.Rectangle: int width>;
+
+        if $i0 != $i1 goto label1;
+
+        $i4 = virtualinvoke r0.<javax.swing.JInternalFrame: int getHeight()>();
+
+        $i5 = $r5.<java.awt.Rectangle: int height>;
+
+        if $i4 == $i5 goto label2;
+
+     label1:
+        $i3 = $r5.<java.awt.Rectangle: int width>;
+
+        $i2 = $r5.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r4.<javax.swing.DefaultDesktopManager: void setBoundsForFrame(javax.swing.JComponent,int,int,int,int)>(r0, 0, 0, $i3, $i2);
+
+     label2:
+        virtualinvoke r4.<javax.swing.DefaultDesktopManager: void removeIconFor(javax.swing.JInternalFrame)>(r0);
+
+        $z1 = virtualinvoke r0.<javax.swing.JInternalFrame: boolean isSelected()>();
+
+        if $z1 == 0 goto label3;
+
+        virtualinvoke r0.<javax.swing.JInternalFrame: void moveToFront()>();
+
+        virtualinvoke r0.<javax.swing.JInternalFrame: void restoreSubcomponentFocus()>();
+
+        goto label6;
+
+     label3:
+        virtualinvoke r0.<javax.swing.JInternalFrame: void setSelected(boolean)>(1);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r6 := @caughtexception;
+
+     label6:
+        return;
+
+        catch java.beans.PropertyVetoException from label3 to label4 with label5;
+    }
+
+    public void activateFrame(javax.swing.JInternalFrame)
+    {
+        javax.swing.JDesktopPane $r2;
+        javax.swing.JInternalFrame r0, r3, $r8;
+        java.beans.PropertyVetoException $r6;
+        javax.swing.JInternalFrame$JDesktopIcon $r4;
+        javax.swing.DefaultDesktopManager r7;
+        java.awt.Container $r1, $r5;
+        boolean $z0;
+
+        r7 := @this: javax.swing.DefaultDesktopManager;
+
+        r0 := @parameter0: javax.swing.JInternalFrame;
+
+        $r1 = virtualinvoke r0.<javax.swing.JInternalFrame: java.awt.Container getParent()>();
+
+        $r2 = virtualinvoke r0.<javax.swing.JInternalFrame: javax.swing.JDesktopPane getDesktopPane()>();
+
+        if $r2 != null goto label1;
+
+        $r8 = null;
+
+        goto label2;
+
+     label1:
+        $r8 = virtualinvoke $r2.<javax.swing.JDesktopPane: javax.swing.JInternalFrame getSelectedFrame()>();
+
+     label2:
+        r3 = $r8;
+
+        if $r1 != null goto label3;
+
+        $r4 = virtualinvoke r0.<javax.swing.JInternalFrame: javax.swing.JInternalFrame$JDesktopIcon getDesktopIcon()>();
+
+        $r5 = virtualinvoke $r4.<javax.swing.JInternalFrame$JDesktopIcon: java.awt.Container getParent()>();
+
+        if $r5 != null goto label3;
+
+        return;
+
+     label3:
+        if r3 != null goto label4;
+
+        if $r2 == null goto label9;
+
+        virtualinvoke $r2.<javax.swing.JDesktopPane: void setSelectedFrame(javax.swing.JInternalFrame)>(r0);
+
+        goto label9;
+
+     label4:
+        if r3 == r0 goto label9;
+
+        $z0 = virtualinvoke r3.<javax.swing.JInternalFrame: boolean isSelected()>();
+
+        if $z0 == 0 goto label8;
+
+     label5:
+        virtualinvoke r3.<javax.swing.JInternalFrame: void setSelected(boolean)>(0);
+
+     label6:
+        goto label8;
+
+     label7:
+        $r6 := @caughtexception;
+
+     label8:
+        if $r2 == null goto label9;
+
+        virtualinvoke $r2.<javax.swing.JDesktopPane: void setSelectedFrame(javax.swing.JInternalFrame)>(r0);
+
+     label9:
+        virtualinvoke r0.<javax.swing.JInternalFrame: void moveToFront()>();
+
+        return;
+
+        catch java.beans.PropertyVetoException from label5 to label6 with label7;
+    }
+
+    public void deactivateFrame(javax.swing.JInternalFrame)
+    {
+        javax.swing.JDesktopPane $r1;
+        javax.swing.JInternalFrame r0, $r3;
+        javax.swing.DefaultDesktopManager r2;
+
+        r2 := @this: javax.swing.DefaultDesktopManager;
+
+        r0 := @parameter0: javax.swing.JInternalFrame;
+
+        $r1 = virtualinvoke r0.<javax.swing.JInternalFrame: javax.swing.JDesktopPane getDesktopPane()>();
+
+        if $r1 != null goto label1;
+
+        $r3 = null;
+
+        goto label2;
+
+     label1:
+        $r3 = virtualinvoke $r1.<javax.swing.JDesktopPane: javax.swing.JInternalFrame getSelectedFrame()>();
+
+     label2:
+        if $r3 != r0 goto label3;
+
+        virtualinvoke $r1.<javax.swing.JDesktopPane: void setSelectedFrame(javax.swing.JInternalFrame)>(null);
+
+     label3:
+        return;
+    }
+
+    public void beginDraggingFrame(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r1, $r10;
+        java.awt.Rectangle $r4, $r5, $r6, $r7, $r11;
+        javax.swing.JInternalFrame $r9;
+        java.awt.Rectangle[] $r3;
+        int $i0;
+        java.awt.Graphics $r8;
+        javax.swing.DefaultDesktopManager r0;
+        java.awt.Container $r2;
+        boolean $z0;
+
+        r0 := @this: javax.swing.DefaultDesktopManager;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        specialinvoke r0.<javax.swing.DefaultDesktopManager: void setupDragMode(javax.swing.JComponent)>(r1);
+
+        $i0 = r0.<javax.swing.DefaultDesktopManager: int dragMode>;
+
+        if $i0 != 2 goto label3;
+
+        $r2 = virtualinvoke r1.<javax.swing.JComponent: java.awt.Container getParent()>();
+
+        $r3 = specialinvoke r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle[] findFloatingItems(javax.swing.JComponent)>(r1);
+
+        r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle[] floatingItems> = $r3;
+
+        $r4 = virtualinvoke r1.<javax.swing.JComponent: java.awt.Rectangle getBounds()>();
+
+        r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds> = $r4;
+
+        $z0 = $r2 instanceof javax.swing.JComponent;
+
+        if $z0 == 0 goto label1;
+
+        $r10 = (javax.swing.JComponent) $r2;
+
+        $r11 = virtualinvoke $r10.<javax.swing.JComponent: java.awt.Rectangle getVisibleRect()>();
+
+        r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle desktopBounds> = $r11;
+
+        goto label2;
+
+     label1:
+        $r5 = virtualinvoke $r2.<java.awt.Component: java.awt.Rectangle getBounds()>();
+
+        r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle desktopBounds> = $r5;
+
+        $r7 = r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle desktopBounds>;
+
+        $r6 = r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle desktopBounds>;
+
+        $r6.<java.awt.Rectangle: int y> = 0;
+
+        $r7.<java.awt.Rectangle: int x> = 0;
+
+     label2:
+        $r8 = staticinvoke <javax.swing.JComponent: java.awt.Graphics safelyGetGraphics(java.awt.Component)>($r2);
+
+        r0.<javax.swing.DefaultDesktopManager: java.awt.Graphics desktopGraphics> = $r8;
+
+        $r9 = (javax.swing.JInternalFrame) r1;
+
+        $r9.<javax.swing.JInternalFrame: boolean isDragging> = 1;
+
+        r0.<javax.swing.DefaultDesktopManager: boolean didDrag> = 0;
+
+     label3:
+        return;
+    }
+
+    private void setupDragMode(javax.swing.JComponent)
+    {
+        javax.swing.JInternalFrame $r7, $r8;
+        int $i0, $i1;
+        javax.swing.DefaultDesktopManager r0;
+        java.awt.Container $r3;
+        java.lang.String r5;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        javax.swing.JComponent r1;
+        javax.swing.JDesktopPane $r2;
+        java.awt.Window $r6;
+        java.lang.Object $r4;
+
+        r0 := @this: javax.swing.DefaultDesktopManager;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        $r2 = virtualinvoke r0.<javax.swing.DefaultDesktopManager: javax.swing.JDesktopPane getDesktopPane(javax.swing.JComponent)>(r1);
+
+        $r3 = virtualinvoke r1.<javax.swing.JComponent: java.awt.Container getParent()>();
+
+        r0.<javax.swing.DefaultDesktopManager: int dragMode> = 0;
+
+        if $r2 == null goto label7;
+
+        $r4 = virtualinvoke $r2.<javax.swing.JDesktopPane: java.lang.Object getClientProperty(java.lang.Object)>("JDesktopPane.dragMode");
+
+        r5 = (java.lang.String) $r4;
+
+        $r6 = staticinvoke <javax.swing.SwingUtilities: java.awt.Window getWindowAncestor(java.awt.Component)>(r1);
+
+        if $r6 == null goto label1;
+
+        $z7 = staticinvoke <com.sun.awt.AWTUtilities: boolean isWindowOpaque(java.awt.Window)>($r6);
+
+        if $z7 != 0 goto label1;
+
+        r0.<javax.swing.DefaultDesktopManager: int dragMode> = 0;
+
+        goto label7;
+
+     label1:
+        if r5 == null goto label2;
+
+        $z6 = virtualinvoke r5.<java.lang.String: boolean equals(java.lang.Object)>("outline");
+
+        if $z6 == 0 goto label2;
+
+        r0.<javax.swing.DefaultDesktopManager: int dragMode> = 1;
+
+        goto label7;
+
+     label2:
+        if r5 == null goto label4;
+
+        $z2 = virtualinvoke r5.<java.lang.String: boolean equals(java.lang.Object)>("faster");
+
+        if $z2 == 0 goto label4;
+
+        $z3 = r1 instanceof javax.swing.JInternalFrame;
+
+        if $z3 == 0 goto label4;
+
+        $r8 = (javax.swing.JInternalFrame) r1;
+
+        $z4 = virtualinvoke $r8.<javax.swing.JInternalFrame: boolean isOpaque()>();
+
+        if $z4 == 0 goto label4;
+
+        if $r3 == null goto label3;
+
+        $z5 = virtualinvoke $r3.<java.awt.Container: boolean isOpaque()>();
+
+        if $z5 == 0 goto label4;
+
+     label3:
+        r0.<javax.swing.DefaultDesktopManager: int dragMode> = 2;
+
+        goto label7;
+
+     label4:
+        $i1 = virtualinvoke $r2.<javax.swing.JDesktopPane: int getDragMode()>();
+
+        if $i1 != 1 goto label5;
+
+        r0.<javax.swing.DefaultDesktopManager: int dragMode> = 1;
+
+        goto label7;
+
+     label5:
+        $i0 = virtualinvoke $r2.<javax.swing.JDesktopPane: int getDragMode()>();
+
+        if $i0 != 0 goto label6;
+
+        $z0 = r1 instanceof javax.swing.JInternalFrame;
+
+        if $z0 == 0 goto label6;
+
+        $r7 = (javax.swing.JInternalFrame) r1;
+
+        $z1 = virtualinvoke $r7.<javax.swing.JInternalFrame: boolean isOpaque()>();
+
+        if $z1 == 0 goto label6;
+
+        r0.<javax.swing.DefaultDesktopManager: int dragMode> = 2;
+
+        goto label7;
+
+     label6:
+        r0.<javax.swing.DefaultDesktopManager: int dragMode> = 0;
+
+     label7:
+        return;
+    }
+
+    public void dragFrame(javax.swing.JComponent, int, int)
+    {
+        java.awt.Color $r4;
+        java.awt.Point $r5, $r8, $r9, $r10;
+        int $i0, $i1, i2, i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15;
+        javax.swing.DefaultDesktopManager r0;
+        boolean $z0;
+        javax.swing.JComponent r1;
+        javax.swing.JDesktopPane $r2;
+        sun.java2d.SurfaceData $r7;
+        java.awt.Graphics $r3;
+        sun.java2d.SunGraphics2D $r6;
+
+        r0 := @this: javax.swing.DefaultDesktopManager;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        i2 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        $i0 = r0.<javax.swing.DefaultDesktopManager: int dragMode>;
+
+        if $i0 != 1 goto label4;
+
+        $r2 = virtualinvoke r0.<javax.swing.DefaultDesktopManager: javax.swing.JDesktopPane getDesktopPane(javax.swing.JComponent)>(r1);
+
+        if $r2 == null goto label3;
+
+        $r3 = staticinvoke <javax.swing.JComponent: java.awt.Graphics safelyGetGraphics(java.awt.Component)>($r2);
+
+        $r4 = <java.awt.Color: java.awt.Color white>;
+
+        virtualinvoke $r3.<java.awt.Graphics: void setXORMode(java.awt.Color)>($r4);
+
+        $r5 = r0.<javax.swing.DefaultDesktopManager: java.awt.Point currentLoc>;
+
+        if $r5 == null goto label1;
+
+        $r9 = r0.<javax.swing.DefaultDesktopManager: java.awt.Point currentLoc>;
+
+        $i10 = $r9.<java.awt.Point: int x>;
+
+        $r10 = r0.<javax.swing.DefaultDesktopManager: java.awt.Point currentLoc>;
+
+        $i11 = $r10.<java.awt.Point: int y>;
+
+        $i12 = virtualinvoke r1.<javax.swing.JComponent: int getWidth()>();
+
+        $i13 = $i12 - 1;
+
+        $i14 = virtualinvoke r1.<javax.swing.JComponent: int getHeight()>();
+
+        $i15 = $i14 - 1;
+
+        virtualinvoke $r3.<java.awt.Graphics: void drawRect(int,int,int,int)>($i10, $i11, $i13, $i15);
+
+     label1:
+        $i6 = virtualinvoke r1.<javax.swing.JComponent: int getWidth()>();
+
+        $i7 = $i6 - 1;
+
+        $i8 = virtualinvoke r1.<javax.swing.JComponent: int getHeight()>();
+
+        $i9 = $i8 - 1;
+
+        virtualinvoke $r3.<java.awt.Graphics: void drawRect(int,int,int,int)>(i2, i3, $i7, $i9);
+
+        $r6 = (sun.java2d.SunGraphics2D) $r3;
+
+        $r7 = virtualinvoke $r6.<sun.java2d.SunGraphics2D: sun.java2d.SurfaceData getSurfaceData()>();
+
+        $z0 = virtualinvoke $r7.<sun.java2d.SurfaceData: boolean isSurfaceLost()>();
+
+        if $z0 != 0 goto label2;
+
+        $r8 = new java.awt.Point;
+
+        specialinvoke $r8.<java.awt.Point: void <init>(int,int)>(i2, i3);
+
+        r0.<javax.swing.DefaultDesktopManager: java.awt.Point currentLoc> = $r8;
+
+     label2:
+        virtualinvoke $r3.<java.awt.Graphics: void dispose()>();
+
+     label3:
+        goto label6;
+
+     label4:
+        $i1 = r0.<javax.swing.DefaultDesktopManager: int dragMode>;
+
+        if $i1 != 2 goto label5;
+
+        specialinvoke r0.<javax.swing.DefaultDesktopManager: void dragFrameFaster(javax.swing.JComponent,int,int)>(r1, i2, i3);
+
+        goto label6;
+
+     label5:
+        $i4 = virtualinvoke r1.<javax.swing.JComponent: int getWidth()>();
+
+        $i5 = virtualinvoke r1.<javax.swing.JComponent: int getHeight()>();
+
+        virtualinvoke r0.<javax.swing.DefaultDesktopManager: void setBoundsForFrame(javax.swing.JComponent,int,int,int,int)>(r1, i2, i3, $i4, $i5);
+
+     label6:
+        return;
+    }
+
+    public void endDraggingFrame(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r2;
+        javax.swing.JInternalFrame $r3;
+        java.awt.Point $r5, $r6, $r7;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.awt.Graphics $r1, $r4;
+        javax.swing.DefaultDesktopManager r0;
+
+        r0 := @this: javax.swing.DefaultDesktopManager;
+
+        r2 := @parameter0: javax.swing.JComponent;
+
+        $i0 = r0.<javax.swing.DefaultDesktopManager: int dragMode>;
+
+        if $i0 != 1 goto label1;
+
+        $r5 = r0.<javax.swing.DefaultDesktopManager: java.awt.Point currentLoc>;
+
+        if $r5 == null goto label1;
+
+        $r6 = r0.<javax.swing.DefaultDesktopManager: java.awt.Point currentLoc>;
+
+        $i2 = $r6.<java.awt.Point: int x>;
+
+        $r7 = r0.<javax.swing.DefaultDesktopManager: java.awt.Point currentLoc>;
+
+        $i3 = $r7.<java.awt.Point: int y>;
+
+        $i4 = virtualinvoke r2.<javax.swing.JComponent: int getWidth()>();
+
+        $i5 = virtualinvoke r2.<javax.swing.JComponent: int getHeight()>();
+
+        virtualinvoke r0.<javax.swing.DefaultDesktopManager: void setBoundsForFrame(javax.swing.JComponent,int,int,int,int)>(r2, $i2, $i3, $i4, $i5);
+
+        r0.<javax.swing.DefaultDesktopManager: java.awt.Point currentLoc> = null;
+
+        goto label3;
+
+     label1:
+        $i1 = r0.<javax.swing.DefaultDesktopManager: int dragMode>;
+
+        if $i1 != 2 goto label3;
+
+        r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds> = null;
+
+        $r1 = r0.<javax.swing.DefaultDesktopManager: java.awt.Graphics desktopGraphics>;
+
+        if $r1 == null goto label2;
+
+        $r4 = r0.<javax.swing.DefaultDesktopManager: java.awt.Graphics desktopGraphics>;
+
+        virtualinvoke $r4.<java.awt.Graphics: void dispose()>();
+
+        r0.<javax.swing.DefaultDesktopManager: java.awt.Graphics desktopGraphics> = null;
+
+     label2:
+        r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle desktopBounds> = null;
+
+        $r3 = (javax.swing.JInternalFrame) r2;
+
+        $r3.<javax.swing.JInternalFrame: boolean isDragging> = 0;
+
+     label3:
+        return;
+    }
+
+    public void beginResizingFrame(javax.swing.JComponent, int)
+    {
+        javax.swing.JComponent r1;
+        int i0;
+        javax.swing.DefaultDesktopManager r0;
+
+        r0 := @this: javax.swing.DefaultDesktopManager;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<javax.swing.DefaultDesktopManager: void setupDragMode(javax.swing.JComponent)>(r1);
+
+        return;
+    }
+
+    public void resizeFrame(javax.swing.JComponent, int, int, int, int)
+    {
+        java.awt.Color $r4;
+        java.awt.Rectangle $r5, $r8, $r9, $r10, $r11, $r12;
+        int $i0, i1, i2, i3, i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13;
+        javax.swing.DefaultDesktopManager r0;
+        boolean $z0;
+        javax.swing.JComponent r1;
+        javax.swing.JDesktopPane $r2;
+        sun.java2d.SurfaceData $r7;
+        java.awt.Graphics $r3;
+        sun.java2d.SunGraphics2D $r6;
+
+        r0 := @this: javax.swing.DefaultDesktopManager;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        i4 := @parameter4: int;
+
+        $i0 = r0.<javax.swing.DefaultDesktopManager: int dragMode>;
+
+        if $i0 == 0 goto label1;
+
+        $i5 = r0.<javax.swing.DefaultDesktopManager: int dragMode>;
+
+        if $i5 != 2 goto label2;
+
+     label1:
+        virtualinvoke r0.<javax.swing.DefaultDesktopManager: void setBoundsForFrame(javax.swing.JComponent,int,int,int,int)>(r1, i1, i2, i3, i4);
+
+        goto label5;
+
+     label2:
+        $r2 = virtualinvoke r0.<javax.swing.DefaultDesktopManager: javax.swing.JDesktopPane getDesktopPane(javax.swing.JComponent)>(r1);
+
+        if $r2 == null goto label5;
+
+        $r3 = staticinvoke <javax.swing.JComponent: java.awt.Graphics safelyGetGraphics(java.awt.Component)>($r2);
+
+        $r4 = <java.awt.Color: java.awt.Color white>;
+
+        virtualinvoke $r3.<java.awt.Graphics: void setXORMode(java.awt.Color)>($r4);
+
+        $r5 = r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds>;
+
+        if $r5 == null goto label3;
+
+        $r9 = r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds>;
+
+        $i13 = $r9.<java.awt.Rectangle: int x>;
+
+        $r10 = r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds>;
+
+        $i12 = $r10.<java.awt.Rectangle: int y>;
+
+        $r11 = r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds>;
+
+        $i8 = $r11.<java.awt.Rectangle: int width>;
+
+        $i11 = $i8 - 1;
+
+        $r12 = r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds>;
+
+        $i9 = $r12.<java.awt.Rectangle: int height>;
+
+        $i10 = $i9 - 1;
+
+        virtualinvoke $r3.<java.awt.Graphics: void drawRect(int,int,int,int)>($i13, $i12, $i11, $i10);
+
+     label3:
+        $i7 = i3 - 1;
+
+        $i6 = i4 - 1;
+
+        virtualinvoke $r3.<java.awt.Graphics: void drawRect(int,int,int,int)>(i1, i2, $i7, $i6);
+
+        $r6 = (sun.java2d.SunGraphics2D) $r3;
+
+        $r7 = virtualinvoke $r6.<sun.java2d.SunGraphics2D: sun.java2d.SurfaceData getSurfaceData()>();
+
+        $z0 = virtualinvoke $r7.<sun.java2d.SurfaceData: boolean isSurfaceLost()>();
+
+        if $z0 != 0 goto label4;
+
+        $r8 = new java.awt.Rectangle;
+
+        specialinvoke $r8.<java.awt.Rectangle: void <init>(int,int,int,int)>(i1, i2, i3, i4);
+
+        r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds> = $r8;
+
+     label4:
+        virtualinvoke $r3.<java.awt.Graphics: void setPaintMode()>();
+
+        virtualinvoke $r3.<java.awt.Graphics: void dispose()>();
+
+     label5:
+        return;
+    }
+
+    public void endResizingFrame(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r2;
+        java.awt.Rectangle $r1, $r3, $r4, $r5, $r6;
+        int $i0, $i1, $i2, $i3, $i4;
+        javax.swing.DefaultDesktopManager r0;
+
+        r0 := @this: javax.swing.DefaultDesktopManager;
+
+        r2 := @parameter0: javax.swing.JComponent;
+
+        $i0 = r0.<javax.swing.DefaultDesktopManager: int dragMode>;
+
+        if $i0 != 1 goto label1;
+
+        $r1 = r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds>;
+
+        $i4 = $r3.<java.awt.Rectangle: int x>;
+
+        $r4 = r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds>;
+
+        $i3 = $r4.<java.awt.Rectangle: int y>;
+
+        $r5 = r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds>;
+
+        $i2 = $r5.<java.awt.Rectangle: int width>;
+
+        $r6 = r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds>;
+
+        $i1 = $r6.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r0.<javax.swing.DefaultDesktopManager: void setBoundsForFrame(javax.swing.JComponent,int,int,int,int)>(r2, $i4, $i3, $i2, $i1);
+
+        r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds> = null;
+
+     label1:
+        return;
+    }
+
+    public void setBoundsForFrame(javax.swing.JComponent, int, int, int, int)
+    {
+        javax.swing.JComponent r0;
+        int i0, i1, i2, i3;
+        javax.swing.DefaultDesktopManager r1;
+
+        r1 := @this: javax.swing.DefaultDesktopManager;
+
+        r0 := @parameter0: javax.swing.JComponent;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        i3 := @parameter4: int;
+
+        virtualinvoke r0.<javax.swing.JComponent: void setBounds(int,int,int,int)>(i0, i1, i2, i3);
+
+        virtualinvoke r0.<javax.swing.JComponent: void revalidate()>();
+
+        return;
+    }
+
+    protected void removeIconFor(javax.swing.JInternalFrame)
+    {
+        javax.swing.JInternalFrame r0;
+        javax.swing.JInternalFrame$JDesktopIcon $r1;
+        int $i0, $i1, $i2, $i3;
+        javax.swing.DefaultDesktopManager r3;
+        java.awt.Container $r2;
+
+        r3 := @this: javax.swing.DefaultDesktopManager;
+
+        r0 := @parameter0: javax.swing.JInternalFrame;
+
+        $r1 = virtualinvoke r0.<javax.swing.JInternalFrame: javax.swing.JInternalFrame$JDesktopIcon getDesktopIcon()>();
+
+        $r2 = virtualinvoke $r1.<javax.swing.JInternalFrame$JDesktopIcon: java.awt.Container getParent()>();
+
+        if $r2 == null goto label1;
+
+        virtualinvoke $r2.<java.awt.Container: void remove(java.awt.Component)>($r1);
+
+        $i0 = virtualinvoke $r1.<javax.swing.JInternalFrame$JDesktopIcon: int getX()>();
+
+        $i1 = virtualinvoke $r1.<javax.swing.JInternalFrame$JDesktopIcon: int getY()>();
+
+        $i2 = virtualinvoke $r1.<javax.swing.JInternalFrame$JDesktopIcon: int getWidth()>();
+
+        $i3 = virtualinvoke $r1.<javax.swing.JInternalFrame$JDesktopIcon: int getHeight()>();
+
+        virtualinvoke $r2.<java.awt.Container: void repaint(int,int,int,int)>($i0, $i1, $i2, $i3);
+
+     label1:
+        return;
+    }
+
+    protected java.awt.Rectangle getBoundsForIconOf(javax.swing.JInternalFrame)
+    {
+        boolean $z0, $z1, $z2, $z3, z4;
+        java.awt.Component $r8, $r9, $r10, $r12;
+        java.awt.Dimension $r2;
+        javax.swing.JInternalFrame$JDesktopIcon $r1, $r15, r19;
+        java.awt.Rectangle $r4, $r6, $r7, $r11, $r14, r18;
+        javax.swing.JInternalFrame r0, $r13;
+        java.awt.Component[] $r5;
+        int $i0, $i1, i2, i3, $i4, $i5, $i6, $i7, $i8, $i9, i10, i11, i12;
+        javax.swing.DefaultDesktopManager r16;
+        java.awt.Container $r3, r17;
+
+        r16 := @this: javax.swing.DefaultDesktopManager;
+
+        r0 := @parameter0: javax.swing.JInternalFrame;
+
+        $r1 = virtualinvoke r0.<javax.swing.JInternalFrame: javax.swing.JInternalFrame$JDesktopIcon getDesktopIcon()>();
+
+        $r2 = virtualinvoke $r1.<javax.swing.JInternalFrame$JDesktopIcon: java.awt.Dimension getPreferredSize()>();
+
+        $r3 = virtualinvoke r0.<javax.swing.JInternalFrame: java.awt.Container getParent()>();
+
+        r17 = $r3;
+
+        if $r3 != null goto label01;
+
+        $r15 = virtualinvoke r0.<javax.swing.JInternalFrame: javax.swing.JInternalFrame$JDesktopIcon getDesktopIcon()>();
+
+        r17 = virtualinvoke $r15.<javax.swing.JInternalFrame$JDesktopIcon: java.awt.Container getParent()>();
+
+     label01:
+        if r17 != null goto label02;
+
+        $r14 = new java.awt.Rectangle;
+
+        $i9 = $r2.<java.awt.Dimension: int width>;
+
+        $i8 = $r2.<java.awt.Dimension: int height>;
+
+        specialinvoke $r14.<java.awt.Rectangle: void <init>(int,int,int,int)>(0, 0, $i9, $i8);
+
+        return $r14;
+
+     label02:
+        $r4 = virtualinvoke r17.<java.awt.Container: java.awt.Rectangle getBounds()>();
+
+        $r5 = virtualinvoke r17.<java.awt.Container: java.awt.Component[] getComponents()>();
+
+        r18 = null;
+
+        r19 = null;
+
+        i10 = 0;
+
+        $i1 = $r4.<java.awt.Rectangle: int height>;
+
+        $i0 = $r2.<java.awt.Dimension: int height>;
+
+        i11 = $i1 - $i0;
+
+        i2 = $r2.<java.awt.Dimension: int width>;
+
+        i3 = $r2.<java.awt.Dimension: int height>;
+
+        z4 = 0;
+
+     label03:
+        if z4 != 0 goto label10;
+
+        $r6 = new java.awt.Rectangle;
+
+        specialinvoke $r6.<java.awt.Rectangle: void <init>(int,int,int,int)>(i10, i11, i2, i3);
+
+        r18 = $r6;
+
+        z4 = 1;
+
+        i12 = 0;
+
+     label04:
+        $i4 = lengthof $r5;
+
+        if i12 >= $i4 goto label08;
+
+        $r8 = $r5[i12];
+
+        $z0 = $r8 instanceof javax.swing.JInternalFrame;
+
+        if $z0 == 0 goto label05;
+
+        $r12 = $r5[i12];
+
+        $r13 = (javax.swing.JInternalFrame) $r12;
+
+        r19 = virtualinvoke $r13.<javax.swing.JInternalFrame: javax.swing.JInternalFrame$JDesktopIcon getDesktopIcon()>();
+
+        goto label06;
+
+     label05:
+        $r9 = $r5[i12];
+
+        $z1 = $r9 instanceof javax.swing.JInternalFrame$JDesktopIcon;
+
+        if $z1 == 0 goto label07;
+
+        $r10 = $r5[i12];
+
+        r19 = (javax.swing.JInternalFrame$JDesktopIcon) $r10;
+
+     label06:
+        $z2 = virtualinvoke r19.<java.lang.Object: boolean equals(java.lang.Object)>($r1);
+
+        if $z2 != 0 goto label07;
+
+        $r11 = virtualinvoke r19.<javax.swing.JInternalFrame$JDesktopIcon: java.awt.Rectangle getBounds()>();
+
+        $z3 = virtualinvoke $r6.<java.awt.Rectangle: boolean intersects(java.awt.Rectangle)>($r11);
+
+        if $z3 == 0 goto label07;
+
+        z4 = 0;
+
+        goto label08;
+
+     label07:
+        i12 = i12 + 1;
+
+        goto label04;
+
+     label08:
+        if r19 != null goto label09;
+
+        return $r6;
+
+     label09:
+        $r7 = virtualinvoke r19.<javax.swing.JInternalFrame$JDesktopIcon: java.awt.Rectangle getBounds()>();
+
+        $i5 = $r7.<java.awt.Rectangle: int width>;
+
+        i10 = i10 + $i5;
+
+        $i7 = i10 + i2;
+
+        $i6 = $r4.<java.awt.Rectangle: int width>;
+
+        if $i7 <= $i6 goto label03;
+
+        i10 = 0;
+
+        i11 = i11 - i3;
+
+        goto label03;
+
+     label10:
+        return r18;
+    }
+
+    protected void setPreviousBounds(javax.swing.JInternalFrame, java.awt.Rectangle)
+    {
+        java.awt.Rectangle r1;
+        javax.swing.DefaultDesktopManager r2;
+        javax.swing.JInternalFrame r0;
+
+        r2 := @this: javax.swing.DefaultDesktopManager;
+
+        r0 := @parameter0: javax.swing.JInternalFrame;
+
+        r1 := @parameter1: java.awt.Rectangle;
+
+        virtualinvoke r0.<javax.swing.JInternalFrame: void setNormalBounds(java.awt.Rectangle)>(r1);
+
+        return;
+    }
+
+    protected java.awt.Rectangle getPreviousBounds(javax.swing.JInternalFrame)
+    {
+        java.awt.Rectangle $r1;
+        javax.swing.DefaultDesktopManager r2;
+        javax.swing.JInternalFrame r0;
+
+        r2 := @this: javax.swing.DefaultDesktopManager;
+
+        r0 := @parameter0: javax.swing.JInternalFrame;
+
+        $r1 = virtualinvoke r0.<javax.swing.JInternalFrame: java.awt.Rectangle getNormalBounds()>();
+
+        return $r1;
+    }
+
+    protected void setWasIcon(javax.swing.JInternalFrame, java.lang.Boolean)
+    {
+        java.lang.Boolean r0;
+        javax.swing.DefaultDesktopManager r2;
+        javax.swing.JInternalFrame r1;
+
+        r2 := @this: javax.swing.DefaultDesktopManager;
+
+        r1 := @parameter0: javax.swing.JInternalFrame;
+
+        r0 := @parameter1: java.lang.Boolean;
+
+        if r0 == null goto label1;
+
+        virtualinvoke r1.<javax.swing.JInternalFrame: void putClientProperty(java.lang.Object,java.lang.Object)>("wasIconOnce", r0);
+
+     label1:
+        return;
+    }
+
+    protected boolean wasIcon(javax.swing.JInternalFrame)
+    {
+        javax.swing.JInternalFrame r0;
+        java.lang.Boolean $r2;
+        javax.swing.DefaultDesktopManager r3;
+        java.lang.Object $r1;
+        boolean $z0;
+
+        r3 := @this: javax.swing.DefaultDesktopManager;
+
+        r0 := @parameter0: javax.swing.JInternalFrame;
+
+        $r1 = virtualinvoke r0.<javax.swing.JInternalFrame: java.lang.Object getClientProperty(java.lang.Object)>("wasIconOnce");
+
+        $r2 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        if $r1 != $r2 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    javax.swing.JDesktopPane getDesktopPane(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r0;
+        javax.swing.JDesktopPane r2;
+        javax.swing.DefaultDesktopManager r1;
+        java.awt.Container r3;
+        boolean $z0;
+
+        r1 := @this: javax.swing.DefaultDesktopManager;
+
+        r0 := @parameter0: javax.swing.JComponent;
+
+        r2 = null;
+
+        r3 = virtualinvoke r0.<javax.swing.JComponent: java.awt.Container getParent()>();
+
+     label1:
+        if r2 != null goto label4;
+
+        $z0 = r3 instanceof javax.swing.JDesktopPane;
+
+        if $z0 == 0 goto label2;
+
+        r2 = (javax.swing.JDesktopPane) r3;
+
+        goto label1;
+
+     label2:
+        if r3 != null goto label3;
+
+        goto label4;
+
+     label3:
+        r3 = virtualinvoke r3.<java.awt.Component: java.awt.Container getParent()>();
+
+        goto label1;
+
+     label4:
+        return r2;
+    }
+
+    private void dragFrameFaster(javax.swing.JComponent, int, int)
+    {
+        sun.awt.AWTAccessor$WindowAccessor $r20;
+        java.lang.Throwable $r35;
+        java.awt.Rectangle[] $r22, r37;
+        java.awt.Container $r11;
+        java.awt.Window $r17;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        sun.awt.SunToolkit $r19;
+        java.awt.Graphics $r33;
+        java.awt.Toolkit $r18;
+        java.awt.Rectangle $r0, $r2, $r3, $r4, $r5, $r6, $r7, $r10, $r12, $r13, $r15, $r16, $r21, $r23, $r24, $r26, $r28, $r29, $r31, r36, r38, r39;
+        javax.swing.JInternalFrame $r9, $r25, $r27, $r30, $r32;
+        int $i0, $i1, $i2, $i3, i4, i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, i35, $i36, i37;
+        javax.swing.DefaultDesktopManager r1;
+        javax.swing.JComponent r8, $r34;
+        javax.swing.RepaintManager $r14;
+
+        r1 := @this: javax.swing.DefaultDesktopManager;
+
+        r8 := @parameter0: javax.swing.JComponent;
+
+        i4 := @parameter1: int;
+
+        i5 := @parameter2: int;
+
+        $r0 = new java.awt.Rectangle;
+
+        $r2 = r1.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds>;
+
+        $i3 = $r2.<java.awt.Rectangle: int x>;
+
+        $r3 = r1.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds>;
+
+        $i2 = $r3.<java.awt.Rectangle: int y>;
+
+        $r4 = r1.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds>;
+
+        $i1 = $r4.<java.awt.Rectangle: int width>;
+
+        $r5 = r1.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds>;
+
+        $i0 = $r5.<java.awt.Rectangle: int height>;
+
+        specialinvoke $r0.<java.awt.Rectangle: void <init>(int,int,int,int)>($i3, $i2, $i1, $i0);
+
+        $r6 = r1.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds>;
+
+        $r6.<java.awt.Rectangle: int x> = i4;
+
+        $r7 = r1.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds>;
+
+        $r7.<java.awt.Rectangle: int y> = i5;
+
+        $z0 = r1.<javax.swing.DefaultDesktopManager: boolean didDrag>;
+
+        if $z0 == 0 goto label01;
+
+        specialinvoke r1.<javax.swing.DefaultDesktopManager: void emergencyCleanup(javax.swing.JComponent)>(r8);
+
+        goto label02;
+
+     label01:
+        r1.<javax.swing.DefaultDesktopManager: boolean didDrag> = 1;
+
+        $r9 = (javax.swing.JInternalFrame) r8;
+
+        $r9.<javax.swing.JInternalFrame: boolean danger> = 0;
+
+     label02:
+        $r10 = r1.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds>;
+
+        $z1 = specialinvoke r1.<javax.swing.DefaultDesktopManager: boolean isFloaterCollision(java.awt.Rectangle,java.awt.Rectangle)>($r0, $r10);
+
+        $r11 = virtualinvoke r8.<javax.swing.JComponent: java.awt.Container getParent()>();
+
+        $r34 = (javax.swing.JComponent) $r11;
+
+        $r12 = r1.<javax.swing.DefaultDesktopManager: java.awt.Rectangle desktopBounds>;
+
+        $r13 = virtualinvoke $r0.<java.awt.Rectangle: java.awt.Rectangle intersection(java.awt.Rectangle)>($r12);
+
+        $r14 = staticinvoke <javax.swing.RepaintManager: javax.swing.RepaintManager currentManager(javax.swing.JComponent)>(r8);
+
+        virtualinvoke $r14.<javax.swing.RepaintManager: void beginPaint()>();
+
+     label03:
+        if $z1 != 0 goto label04;
+
+        $r33 = r1.<javax.swing.DefaultDesktopManager: java.awt.Graphics desktopGraphics>;
+
+        $i34 = $r13.<java.awt.Rectangle: int x>;
+
+        $i33 = $r13.<java.awt.Rectangle: int y>;
+
+        $i32 = $r13.<java.awt.Rectangle: int width>;
+
+        $i31 = $r13.<java.awt.Rectangle: int height>;
+
+        $i27 = $r0.<java.awt.Rectangle: int x>;
+
+        $i30 = i4 - $i27;
+
+        $i28 = $r0.<java.awt.Rectangle: int y>;
+
+        $i29 = i5 - $i28;
+
+        virtualinvoke $r14.<javax.swing.RepaintManager: void copyArea(javax.swing.JComponent,java.awt.Graphics,int,int,int,int,int,int,boolean)>($r34, $r33, $i34, $i33, $i32, $i31, $i30, $i29, 1);
+
+     label04:
+        $r15 = r1.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds>;
+
+        virtualinvoke r8.<javax.swing.JComponent: void setBounds(java.awt.Rectangle)>($r15);
+
+        if $z1 != 0 goto label05;
+
+        r36 = r1.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds>;
+
+        $i26 = r36.<java.awt.Rectangle: int x>;
+
+        $i25 = r36.<java.awt.Rectangle: int y>;
+
+        $i24 = r36.<java.awt.Rectangle: int width>;
+
+        $i23 = r36.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r14.<javax.swing.RepaintManager: void notifyRepaintPerformed(javax.swing.JComponent,int,int,int,int)>($r34, $i26, $i25, $i24, $i23);
+
+     label05:
+        if $z1 == 0 goto label06;
+
+        $r30 = (javax.swing.JInternalFrame) r8;
+
+        $r30.<javax.swing.JInternalFrame: boolean isDragging> = 0;
+
+        $r31 = r1.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds>;
+
+        virtualinvoke $r34.<javax.swing.JComponent: void paintImmediately(java.awt.Rectangle)>($r31);
+
+        $r32 = (javax.swing.JInternalFrame) r8;
+
+        $r32.<javax.swing.JInternalFrame: boolean isDragging> = 1;
+
+     label06:
+        virtualinvoke $r14.<javax.swing.RepaintManager: void markCompletelyClean(javax.swing.JComponent)>($r34);
+
+        virtualinvoke $r14.<javax.swing.RepaintManager: void markCompletelyClean(javax.swing.JComponent)>(r8);
+
+        $r16 = r1.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds>;
+
+        $z2 = virtualinvoke $r0.<java.awt.Rectangle: boolean intersects(java.awt.Rectangle)>($r16);
+
+        if $z2 == 0 goto label07;
+
+        $r29 = r1.<javax.swing.DefaultDesktopManager: java.awt.Rectangle currentBounds>;
+
+        r37 = staticinvoke <javax.swing.SwingUtilities: java.awt.Rectangle[] computeDifference(java.awt.Rectangle,java.awt.Rectangle)>($r0, $r29);
+
+        goto label08;
+
+     label07:
+        r37 = newarray (java.awt.Rectangle)[1];
+
+        r37[0] = $r0;
+
+     label08:
+        i35 = 0;
+
+     label09:
+        $i36 = lengthof r37;
+
+        if i35 >= $i36 goto label10;
+
+        $r28 = r37[i35];
+
+        virtualinvoke $r34.<javax.swing.JComponent: void paintImmediately(java.awt.Rectangle)>($r28);
+
+        r38 = r37[i35];
+
+        $i22 = r38.<java.awt.Rectangle: int x>;
+
+        $i21 = r38.<java.awt.Rectangle: int y>;
+
+        $i20 = r38.<java.awt.Rectangle: int width>;
+
+        $i19 = r38.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r14.<javax.swing.RepaintManager: void notifyRepaintPerformed(javax.swing.JComponent,int,int,int,int)>($r34, $i22, $i21, $i20, $i19);
+
+        i35 = i35 + 1;
+
+        goto label09;
+
+     label10:
+        $z3 = virtualinvoke $r13.<java.awt.Rectangle: boolean equals(java.lang.Object)>($r0);
+
+        if $z3 != 0 goto label12;
+
+        $r21 = r1.<javax.swing.DefaultDesktopManager: java.awt.Rectangle desktopBounds>;
+
+        $r22 = staticinvoke <javax.swing.SwingUtilities: java.awt.Rectangle[] computeDifference(java.awt.Rectangle,java.awt.Rectangle)>($r0, $r21);
+
+        i37 = 0;
+
+     label11:
+        $i6 = lengthof $r22;
+
+        if i37 >= $i6 goto label12;
+
+        $r23 = $r22[i37];
+
+        $i9 = $r23.<java.awt.Rectangle: int x>;
+
+        $i7 = $r0.<java.awt.Rectangle: int x>;
+
+        $i8 = i4 - $i7;
+
+        $i10 = $i9 + $i8;
+
+        $r23.<java.awt.Rectangle: int x> = $i10;
+
+        $r24 = $r22[i37];
+
+        $i13 = $r24.<java.awt.Rectangle: int y>;
+
+        $i11 = $r0.<java.awt.Rectangle: int y>;
+
+        $i12 = i5 - $i11;
+
+        $i14 = $i13 + $i12;
+
+        $r24.<java.awt.Rectangle: int y> = $i14;
+
+        $r25 = (javax.swing.JInternalFrame) r8;
+
+        $r25.<javax.swing.JInternalFrame: boolean isDragging> = 0;
+
+        $r26 = $r22[i37];
+
+        virtualinvoke $r34.<javax.swing.JComponent: void paintImmediately(java.awt.Rectangle)>($r26);
+
+        $r27 = (javax.swing.JInternalFrame) r8;
+
+        $r27.<javax.swing.JInternalFrame: boolean isDragging> = 1;
+
+        r39 = $r22[i37];
+
+        $i18 = r39.<java.awt.Rectangle: int x>;
+
+        $i17 = r39.<java.awt.Rectangle: int y>;
+
+        $i16 = r39.<java.awt.Rectangle: int width>;
+
+        $i15 = r39.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r14.<javax.swing.RepaintManager: void notifyRepaintPerformed(javax.swing.JComponent,int,int,int,int)>($r34, $i18, $i17, $i16, $i15);
+
+        i37 = i37 + 1;
+
+        goto label11;
+
+     label12:
+        virtualinvoke $r14.<javax.swing.RepaintManager: void endPaint()>();
+
+        goto label15;
+
+     label13:
+        $r35 := @caughtexception;
+
+     label14:
+        virtualinvoke $r14.<javax.swing.RepaintManager: void endPaint()>();
+
+        throw $r35;
+
+     label15:
+        $r17 = staticinvoke <javax.swing.SwingUtilities: java.awt.Window getWindowAncestor(java.awt.Component)>(r8);
+
+        $r18 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $z4 = virtualinvoke $r17.<java.awt.Window: boolean isOpaque()>();
+
+        if $z4 != 0 goto label16;
+
+        $z5 = $r18 instanceof sun.awt.SunToolkit;
+
+        if $z5 == 0 goto label16;
+
+        $r19 = (sun.awt.SunToolkit) $r18;
+
+        $z6 = virtualinvoke $r19.<sun.awt.SunToolkit: boolean needUpdateWindow()>();
+
+        if $z6 == 0 goto label16;
+
+        $r20 = staticinvoke <sun.awt.AWTAccessor: sun.awt.AWTAccessor$WindowAccessor getWindowAccessor()>();
+
+        interfaceinvoke $r20.<sun.awt.AWTAccessor$WindowAccessor: void updateWindow(java.awt.Window)>($r17);
+
+     label16:
+        return;
+
+        catch java.lang.Throwable from label03 to label12 with label13;
+        catch java.lang.Throwable from label13 to label14 with label13;
+    }
+
+    private boolean isFloaterCollision(java.awt.Rectangle, java.awt.Rectangle)
+    {
+        java.awt.Rectangle r3, $r5, r6, $r8;
+        java.awt.Rectangle[] $r1, $r2, $r4, $r7;
+        int $i0, $i1, i2;
+        javax.swing.DefaultDesktopManager r0;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.swing.DefaultDesktopManager;
+
+        r3 := @parameter0: java.awt.Rectangle;
+
+        r6 := @parameter1: java.awt.Rectangle;
+
+        $r1 = r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle[] floatingItems>;
+
+        $i0 = lengthof $r1;
+
+        if $i0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        i2 = 0;
+
+     label2:
+        $r2 = r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle[] floatingItems>;
+
+        $i1 = lengthof $r2;
+
+        if i2 >= $i1 goto label5;
+
+        $r4 = r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle[] floatingItems>;
+
+        $r5 = $r4[i2];
+
+        $z0 = virtualinvoke r3.<java.awt.Rectangle: boolean intersects(java.awt.Rectangle)>($r5);
+
+        if $z0 == 0 goto label3;
+
+        return 1;
+
+     label3:
+        $r7 = r0.<javax.swing.DefaultDesktopManager: java.awt.Rectangle[] floatingItems>;
+
+        $r8 = $r7[i2];
+
+        $z1 = virtualinvoke r6.<java.awt.Rectangle: boolean intersects(java.awt.Rectangle)>($r8);
+
+        if $z1 == 0 goto label4;
+
+        return 1;
+
+     label4:
+        i2 = i2 + 1;
+
+        goto label2;
+
+     label5:
+        return 0;
+    }
+
+    private java.awt.Rectangle[] findFloatingItems(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r0;
+        java.awt.Rectangle $r4;
+        java.awt.Component $r3, $r5;
+        java.awt.Rectangle[] $r6;
+        java.awt.Component[] $r2;
+        int $i0, i1, i2, $i3;
+        javax.swing.DefaultDesktopManager r7;
+        java.awt.Container $r1;
+
+        r7 := @this: javax.swing.DefaultDesktopManager;
+
+        r0 := @parameter0: javax.swing.JComponent;
+
+        $r1 = virtualinvoke r0.<javax.swing.JComponent: java.awt.Container getParent()>();
+
+        $r2 = virtualinvoke $r1.<java.awt.Container: java.awt.Component[] getComponents()>();
+
+        i1 = 0;
+
+     label1:
+        $i0 = lengthof $r2;
+
+        if i1 >= $i0 goto label3;
+
+        $r5 = $r2[i1];
+
+        if $r5 != r0 goto label2;
+
+        goto label3;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        $r6 = newarray (java.awt.Rectangle)[i1];
+
+        i2 = 0;
+
+     label4:
+        $i3 = lengthof $r6;
+
+        if i2 >= $i3 goto label5;
+
+        $r3 = $r2[i2];
+
+        $r4 = virtualinvoke $r3.<java.awt.Component: java.awt.Rectangle getBounds()>();
+
+        $r6[i2] = $r4;
+
+        i2 = i2 + 1;
+
+        goto label4;
+
+     label5:
+        return $r6;
+    }
+
+    private void emergencyCleanup(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r0;
+        javax.swing.DefaultDesktopManager$1 $r2;
+        javax.swing.JInternalFrame $r1, $r4;
+        javax.swing.DefaultDesktopManager r3;
+        boolean $z0;
+
+        r3 := @this: javax.swing.DefaultDesktopManager;
+
+        r0 := @parameter0: javax.swing.JComponent;
+
+        $r1 = (javax.swing.JInternalFrame) r0;
+
+        $z0 = $r1.<javax.swing.JInternalFrame: boolean danger>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new javax.swing.DefaultDesktopManager$1;
+
+        specialinvoke $r2.<javax.swing.DefaultDesktopManager$1: void <init>(javax.swing.DefaultDesktopManager,javax.swing.JComponent)>(r3, r0);
+
+        staticinvoke <javax.swing.SwingUtilities: void invokeLater(java.lang.Runnable)>($r2);
+
+        $r4 = (javax.swing.JInternalFrame) r0;
+
+        $r4.<javax.swing.JInternalFrame: boolean danger> = 0;
+
+     label1:
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <javax.swing.DefaultDesktopManager: int FASTER_DRAG_MODE> = 2;
+
+        <javax.swing.DefaultDesktopManager: int OUTLINE_DRAG_MODE> = 1;
+
+        <javax.swing.DefaultDesktopManager: int DEFAULT_DRAG_MODE> = 0;
+
+        <javax.swing.DefaultDesktopManager: java.lang.String HAS_BEEN_ICONIFIED_PROPERTY> = "wasIconOnce";
+
+        return;
+    }
+}

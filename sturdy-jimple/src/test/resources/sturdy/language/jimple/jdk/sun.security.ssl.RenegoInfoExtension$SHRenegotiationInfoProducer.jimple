@@ -1,0 +1,173 @@
+final class sun.security.ssl.RenegoInfoExtension$SHRenegotiationInfoProducer extends java.lang.Object implements sun.security.ssl.HandshakeProducer
+{
+
+    private void <init>()
+    {
+        sun.security.ssl.RenegoInfoExtension$SHRenegotiationInfoProducer r0;
+
+        r0 := @this: sun.security.ssl.RenegoInfoExtension$SHRenegotiationInfoProducer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public byte[] produce(sun.security.ssl.ConnectionContext, sun.security.ssl.SSLHandshake$HandshakeMessage) throws java.io.IOException
+    {
+        byte[] $r9, $r11, r12, $r15, $r17, $r21;
+        sun.security.ssl.SSLHandshake$HandshakeMessage r29;
+        sun.security.ssl.RenegoInfoExtension$SHRenegotiationInfoProducer r28;
+        java.nio.ByteBuffer $r13;
+        java.util.Map $r3, $r20, $r24;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        sun.security.ssl.ServerHandshakeContext r1;
+        sun.security.ssl.RenegoInfoExtension$RenegotiationInfoSpec r5, $r18, $r22;
+        java.lang.Object[] $r25, $r27;
+        sun.security.ssl.ConnectionContext r0;
+        int $i0, $i1, $i2, i3;
+        sun.security.ssl.SSLExtension $r2, $r19, $r23;
+        sun.security.ssl.TransportContext $r6, $r7, $r8, $r10, $r14, $r16, $r26;
+        java.lang.Object $r4;
+
+        r28 := @this: sun.security.ssl.RenegoInfoExtension$SHRenegotiationInfoProducer;
+
+        r0 := @parameter0: sun.security.ssl.ConnectionContext;
+
+        r29 := @parameter1: sun.security.ssl.SSLHandshake$HandshakeMessage;
+
+        r1 = (sun.security.ssl.ServerHandshakeContext) r0;
+
+        $r3 = r1.<sun.security.ssl.ServerHandshakeContext: java.util.Map handshakeExtensions>;
+
+        $r2 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension CH_RENEGOTIATION_INFO>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>($r2);
+
+        r5 = (sun.security.ssl.RenegoInfoExtension$RenegotiationInfoSpec) $r4;
+
+        if r5 != null goto label2;
+
+        $r26 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $z4 = $r26.<sun.security.ssl.TransportContext: boolean secureRenegotiation>;
+
+        if $z4 != 0 goto label2;
+
+        $z5 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z5 == 0 goto label1;
+
+        $z6 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z6 == 0 goto label1;
+
+        $r27 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>("Ignore unavailable renegotiation_info extension", $r27);
+
+     label1:
+        return null;
+
+     label2:
+        $r6 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $z0 = $r6.<sun.security.ssl.TransportContext: boolean secureRenegotiation>;
+
+        if $z0 != 0 goto label4;
+
+        $z2 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z2 == 0 goto label3;
+
+        $z3 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z3 == 0 goto label3;
+
+        $r25 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>("No secure renegotiation has been negotiated", $r25);
+
+     label3:
+        return null;
+
+     label4:
+        $r7 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $z1 = $r7.<sun.security.ssl.TransportContext: boolean isNegotiated>;
+
+        if $z1 != 0 goto label5;
+
+        $r21 = newarray (byte)[1];
+
+        $r21[0] = 0;
+
+        $r24 = r1.<sun.security.ssl.ServerHandshakeContext: java.util.Map handshakeExtensions>;
+
+        $r23 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension SH_RENEGOTIATION_INFO>;
+
+        $r22 = <sun.security.ssl.RenegoInfoExtension$RenegotiationInfoSpec: sun.security.ssl.RenegoInfoExtension$RenegotiationInfoSpec NOMINAL>;
+
+        interfaceinvoke $r24.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r23, $r22);
+
+        return $r21;
+
+     label5:
+        $r8 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r9 = $r8.<sun.security.ssl.TransportContext: byte[] clientVerifyData>;
+
+        $i1 = lengthof $r9;
+
+        $r10 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r11 = $r10.<sun.security.ssl.TransportContext: byte[] serverVerifyData>;
+
+        $i0 = lengthof $r11;
+
+        i3 = $i1 + $i0;
+
+        $i2 = i3 + 1;
+
+        r12 = newarray (byte)[$i2];
+
+        $r13 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>(r12);
+
+        staticinvoke <sun.security.ssl.Record: void putInt8(java.nio.ByteBuffer,int)>($r13, i3);
+
+        $r14 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r15 = $r14.<sun.security.ssl.TransportContext: byte[] clientVerifyData>;
+
+        virtualinvoke $r13.<java.nio.ByteBuffer: java.nio.ByteBuffer put(byte[])>($r15);
+
+        $r16 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r17 = $r16.<sun.security.ssl.TransportContext: byte[] serverVerifyData>;
+
+        virtualinvoke $r13.<java.nio.ByteBuffer: java.nio.ByteBuffer put(byte[])>($r17);
+
+        $r20 = r1.<sun.security.ssl.ServerHandshakeContext: java.util.Map handshakeExtensions>;
+
+        $r19 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension SH_RENEGOTIATION_INFO>;
+
+        $r18 = <sun.security.ssl.RenegoInfoExtension$RenegotiationInfoSpec: sun.security.ssl.RenegoInfoExtension$RenegotiationInfoSpec NOMINAL>;
+
+        interfaceinvoke $r20.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r19, $r18);
+
+        return r12;
+    }
+
+    void <init>(sun.security.ssl.RenegoInfoExtension$1)
+    {
+        sun.security.ssl.RenegoInfoExtension$SHRenegotiationInfoProducer r0;
+        sun.security.ssl.RenegoInfoExtension$1 r1;
+
+        r0 := @this: sun.security.ssl.RenegoInfoExtension$SHRenegotiationInfoProducer;
+
+        r1 := @parameter0: sun.security.ssl.RenegoInfoExtension$1;
+
+        specialinvoke r0.<sun.security.ssl.RenegoInfoExtension$SHRenegotiationInfoProducer: void <init>()>();
+
+        return;
+    }
+}

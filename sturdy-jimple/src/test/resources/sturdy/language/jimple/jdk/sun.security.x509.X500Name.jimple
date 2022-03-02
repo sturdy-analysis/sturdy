@@ -1,0 +1,3030 @@
+public class sun.security.x509.X500Name extends java.lang.Object implements sun.security.x509.GeneralNameInterface, java.security.Principal
+{
+    private java.lang.String dn;
+    private java.lang.String rfc1779Dn;
+    private java.lang.String rfc2253Dn;
+    private java.lang.String canonicalDn;
+    private sun.security.x509.RDN[] names;
+    private javax.security.auth.x500.X500Principal x500Principal;
+    private byte[] encoded;
+    private volatile java.util.List rdnList;
+    private volatile java.util.List allAvaList;
+    private static final int[] commonName_data;
+    private static final int[] SURNAME_DATA;
+    private static final int[] SERIALNUMBER_DATA;
+    private static final int[] countryName_data;
+    private static final int[] localityName_data;
+    private static final int[] stateName_data;
+    private static final int[] streetAddress_data;
+    private static final int[] orgName_data;
+    private static final int[] orgUnitName_data;
+    private static final int[] title_data;
+    private static final int[] GIVENNAME_DATA;
+    private static final int[] INITIALS_DATA;
+    private static final int[] GENERATIONQUALIFIER_DATA;
+    private static final int[] DNQUALIFIER_DATA;
+    private static final int[] ipAddress_data;
+    private static final int[] DOMAIN_COMPONENT_DATA;
+    private static final int[] userid_data;
+    public static final sun.security.util.ObjectIdentifier commonName_oid;
+    public static final sun.security.util.ObjectIdentifier SERIALNUMBER_OID;
+    public static final sun.security.util.ObjectIdentifier countryName_oid;
+    public static final sun.security.util.ObjectIdentifier localityName_oid;
+    public static final sun.security.util.ObjectIdentifier orgName_oid;
+    public static final sun.security.util.ObjectIdentifier orgUnitName_oid;
+    public static final sun.security.util.ObjectIdentifier stateName_oid;
+    public static final sun.security.util.ObjectIdentifier streetAddress_oid;
+    public static final sun.security.util.ObjectIdentifier title_oid;
+    public static final sun.security.util.ObjectIdentifier DNQUALIFIER_OID;
+    public static final sun.security.util.ObjectIdentifier SURNAME_OID;
+    public static final sun.security.util.ObjectIdentifier GIVENNAME_OID;
+    public static final sun.security.util.ObjectIdentifier INITIALS_OID;
+    public static final sun.security.util.ObjectIdentifier GENERATIONQUALIFIER_OID;
+    public static final sun.security.util.ObjectIdentifier ipAddress_oid;
+    public static final sun.security.util.ObjectIdentifier DOMAIN_COMPONENT_OID;
+    public static final sun.security.util.ObjectIdentifier userid_oid;
+    private static final java.lang.reflect.Constructor principalConstructor;
+    private static final java.lang.reflect.Field principalField;
+
+    public void <init>(java.lang.String) throws java.io.IOException
+    {
+        java.lang.String r1;
+        sun.security.x509.X500Name r0;
+        java.util.Map $r2;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = staticinvoke <java.util.Collections: java.util.Map emptyMap()>();
+
+        specialinvoke r0.<sun.security.x509.X500Name: void <init>(java.lang.String,java.util.Map)>(r1, $r2);
+
+        return;
+    }
+
+    public void <init>(java.lang.String, java.util.Map) throws java.io.IOException
+    {
+        java.lang.String r1;
+        sun.security.x509.X500Name r0;
+        java.util.Map r2;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.util.Map;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        specialinvoke r0.<sun.security.x509.X500Name: void parseDN(java.lang.String,java.util.Map)>(r1, r2);
+
+        return;
+    }
+
+    public void <init>(java.lang.String, java.lang.String) throws java.io.IOException
+    {
+        java.io.IOException $r3;
+        java.lang.NullPointerException $r9;
+        sun.security.x509.X500Name r0;
+        java.util.Map $r8;
+        java.lang.StringBuilder $r4, $r5, $r6;
+        java.lang.String r1, r2, $r7;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        if r1 != null goto label1;
+
+        $r9 = new java.lang.NullPointerException;
+
+        specialinvoke $r9.<java.lang.NullPointerException: void <init>(java.lang.String)>("Name must not be null");
+
+        throw $r9;
+
+     label1:
+        $z0 = virtualinvoke r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("RFC2253");
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke r0.<sun.security.x509.X500Name: void parseRFC2253DN(java.lang.String)>(r1);
+
+        goto label4;
+
+     label2:
+        $z1 = virtualinvoke r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("DEFAULT");
+
+        if $z1 == 0 goto label3;
+
+        $r8 = staticinvoke <java.util.Collections: java.util.Map emptyMap()>();
+
+        specialinvoke r0.<sun.security.x509.X500Name: void parseDN(java.lang.String,java.util.Map)>(r1, $r8);
+
+        goto label4;
+
+     label3:
+        $r3 = new java.io.IOException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported format ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.io.IOException: void <init>(java.lang.String)>($r7);
+
+        throw $r3;
+
+     label4:
+        return;
+    }
+
+    public void <init>(java.lang.String, java.lang.String, java.lang.String, java.lang.String) throws java.io.IOException
+    {
+        sun.security.x509.RDN[] $r1, $r3, $r4, $r12, $r13, $r21, $r22, $r30, $r31;
+        sun.security.x509.X500Name r0;
+        sun.security.util.ObjectIdentifier $r10, $r19, $r28, $r37;
+        sun.security.x509.RDN $r2, $r5, $r11, $r14, $r20, $r23, $r29, $r32;
+        sun.security.util.DerValue $r7, $r16, $r25, $r34;
+        sun.security.x509.AVA $r6, $r15, $r24, $r33;
+        java.lang.String r8, r17, r26, r35;
+        sun.security.x509.AVA[] $r9, $r18, $r27, $r36;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        r8 := @parameter0: java.lang.String;
+
+        r17 := @parameter1: java.lang.String;
+
+        r26 := @parameter2: java.lang.String;
+
+        r35 := @parameter3: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = newarray (sun.security.x509.RDN)[4];
+
+        r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names> = $r1;
+
+        $r3 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r2 = new sun.security.x509.RDN;
+
+        specialinvoke $r2.<sun.security.x509.RDN: void <init>(int)>(1);
+
+        $r3[3] = $r2;
+
+        $r4 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r5 = $r4[3];
+
+        $r9 = $r5.<sun.security.x509.RDN: sun.security.x509.AVA[] assertion>;
+
+        $r6 = new sun.security.x509.AVA;
+
+        $r10 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier commonName_oid>;
+
+        $r7 = new sun.security.util.DerValue;
+
+        specialinvoke $r7.<sun.security.util.DerValue: void <init>(java.lang.String)>(r8);
+
+        specialinvoke $r6.<sun.security.x509.AVA: void <init>(sun.security.util.ObjectIdentifier,sun.security.util.DerValue)>($r10, $r7);
+
+        $r9[0] = $r6;
+
+        $r12 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r11 = new sun.security.x509.RDN;
+
+        specialinvoke $r11.<sun.security.x509.RDN: void <init>(int)>(1);
+
+        $r12[2] = $r11;
+
+        $r13 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r14 = $r13[2];
+
+        $r18 = $r14.<sun.security.x509.RDN: sun.security.x509.AVA[] assertion>;
+
+        $r15 = new sun.security.x509.AVA;
+
+        $r19 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier orgUnitName_oid>;
+
+        $r16 = new sun.security.util.DerValue;
+
+        specialinvoke $r16.<sun.security.util.DerValue: void <init>(java.lang.String)>(r17);
+
+        specialinvoke $r15.<sun.security.x509.AVA: void <init>(sun.security.util.ObjectIdentifier,sun.security.util.DerValue)>($r19, $r16);
+
+        $r18[0] = $r15;
+
+        $r21 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r20 = new sun.security.x509.RDN;
+
+        specialinvoke $r20.<sun.security.x509.RDN: void <init>(int)>(1);
+
+        $r21[1] = $r20;
+
+        $r22 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r23 = $r22[1];
+
+        $r27 = $r23.<sun.security.x509.RDN: sun.security.x509.AVA[] assertion>;
+
+        $r24 = new sun.security.x509.AVA;
+
+        $r28 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier orgName_oid>;
+
+        $r25 = new sun.security.util.DerValue;
+
+        specialinvoke $r25.<sun.security.util.DerValue: void <init>(java.lang.String)>(r26);
+
+        specialinvoke $r24.<sun.security.x509.AVA: void <init>(sun.security.util.ObjectIdentifier,sun.security.util.DerValue)>($r28, $r25);
+
+        $r27[0] = $r24;
+
+        $r30 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r29 = new sun.security.x509.RDN;
+
+        specialinvoke $r29.<sun.security.x509.RDN: void <init>(int)>(1);
+
+        $r30[0] = $r29;
+
+        $r31 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r32 = $r31[0];
+
+        $r36 = $r32.<sun.security.x509.RDN: sun.security.x509.AVA[] assertion>;
+
+        $r33 = new sun.security.x509.AVA;
+
+        $r37 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier countryName_oid>;
+
+        $r34 = new sun.security.util.DerValue;
+
+        specialinvoke $r34.<sun.security.util.DerValue: void <init>(java.lang.String)>(r35);
+
+        specialinvoke $r33.<sun.security.x509.AVA: void <init>(sun.security.util.ObjectIdentifier,sun.security.util.DerValue)>($r37, $r34);
+
+        $r36[0] = $r33;
+
+        return;
+    }
+
+    public void <init>(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String) throws java.io.IOException
+    {
+        sun.security.x509.RDN[] $r1, $r3, $r4, $r12, $r13, $r21, $r22, $r30, $r31, $r39, $r40, $r48, $r49;
+        sun.security.x509.X500Name r0;
+        sun.security.util.ObjectIdentifier $r10, $r19, $r28, $r37, $r46, $r55;
+        sun.security.x509.RDN $r2, $r5, $r11, $r14, $r20, $r23, $r29, $r32, $r38, $r41, $r47, $r50;
+        sun.security.util.DerValue $r7, $r16, $r25, $r34, $r43, $r52;
+        sun.security.x509.AVA $r6, $r15, $r24, $r33, $r42, $r51;
+        java.lang.String r8, r17, r26, r35, r44, r53;
+        sun.security.x509.AVA[] $r9, $r18, $r27, $r36, $r45, $r54;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        r8 := @parameter0: java.lang.String;
+
+        r17 := @parameter1: java.lang.String;
+
+        r26 := @parameter2: java.lang.String;
+
+        r35 := @parameter3: java.lang.String;
+
+        r44 := @parameter4: java.lang.String;
+
+        r53 := @parameter5: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = newarray (sun.security.x509.RDN)[6];
+
+        r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names> = $r1;
+
+        $r3 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r2 = new sun.security.x509.RDN;
+
+        specialinvoke $r2.<sun.security.x509.RDN: void <init>(int)>(1);
+
+        $r3[5] = $r2;
+
+        $r4 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r5 = $r4[5];
+
+        $r9 = $r5.<sun.security.x509.RDN: sun.security.x509.AVA[] assertion>;
+
+        $r6 = new sun.security.x509.AVA;
+
+        $r10 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier commonName_oid>;
+
+        $r7 = new sun.security.util.DerValue;
+
+        specialinvoke $r7.<sun.security.util.DerValue: void <init>(java.lang.String)>(r8);
+
+        specialinvoke $r6.<sun.security.x509.AVA: void <init>(sun.security.util.ObjectIdentifier,sun.security.util.DerValue)>($r10, $r7);
+
+        $r9[0] = $r6;
+
+        $r12 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r11 = new sun.security.x509.RDN;
+
+        specialinvoke $r11.<sun.security.x509.RDN: void <init>(int)>(1);
+
+        $r12[4] = $r11;
+
+        $r13 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r14 = $r13[4];
+
+        $r18 = $r14.<sun.security.x509.RDN: sun.security.x509.AVA[] assertion>;
+
+        $r15 = new sun.security.x509.AVA;
+
+        $r19 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier orgUnitName_oid>;
+
+        $r16 = new sun.security.util.DerValue;
+
+        specialinvoke $r16.<sun.security.util.DerValue: void <init>(java.lang.String)>(r17);
+
+        specialinvoke $r15.<sun.security.x509.AVA: void <init>(sun.security.util.ObjectIdentifier,sun.security.util.DerValue)>($r19, $r16);
+
+        $r18[0] = $r15;
+
+        $r21 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r20 = new sun.security.x509.RDN;
+
+        specialinvoke $r20.<sun.security.x509.RDN: void <init>(int)>(1);
+
+        $r21[3] = $r20;
+
+        $r22 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r23 = $r22[3];
+
+        $r27 = $r23.<sun.security.x509.RDN: sun.security.x509.AVA[] assertion>;
+
+        $r24 = new sun.security.x509.AVA;
+
+        $r28 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier orgName_oid>;
+
+        $r25 = new sun.security.util.DerValue;
+
+        specialinvoke $r25.<sun.security.util.DerValue: void <init>(java.lang.String)>(r26);
+
+        specialinvoke $r24.<sun.security.x509.AVA: void <init>(sun.security.util.ObjectIdentifier,sun.security.util.DerValue)>($r28, $r25);
+
+        $r27[0] = $r24;
+
+        $r30 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r29 = new sun.security.x509.RDN;
+
+        specialinvoke $r29.<sun.security.x509.RDN: void <init>(int)>(1);
+
+        $r30[2] = $r29;
+
+        $r31 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r32 = $r31[2];
+
+        $r36 = $r32.<sun.security.x509.RDN: sun.security.x509.AVA[] assertion>;
+
+        $r33 = new sun.security.x509.AVA;
+
+        $r37 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier localityName_oid>;
+
+        $r34 = new sun.security.util.DerValue;
+
+        specialinvoke $r34.<sun.security.util.DerValue: void <init>(java.lang.String)>(r35);
+
+        specialinvoke $r33.<sun.security.x509.AVA: void <init>(sun.security.util.ObjectIdentifier,sun.security.util.DerValue)>($r37, $r34);
+
+        $r36[0] = $r33;
+
+        $r39 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r38 = new sun.security.x509.RDN;
+
+        specialinvoke $r38.<sun.security.x509.RDN: void <init>(int)>(1);
+
+        $r39[1] = $r38;
+
+        $r40 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r41 = $r40[1];
+
+        $r45 = $r41.<sun.security.x509.RDN: sun.security.x509.AVA[] assertion>;
+
+        $r42 = new sun.security.x509.AVA;
+
+        $r46 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier stateName_oid>;
+
+        $r43 = new sun.security.util.DerValue;
+
+        specialinvoke $r43.<sun.security.util.DerValue: void <init>(java.lang.String)>(r44);
+
+        specialinvoke $r42.<sun.security.x509.AVA: void <init>(sun.security.util.ObjectIdentifier,sun.security.util.DerValue)>($r46, $r43);
+
+        $r45[0] = $r42;
+
+        $r48 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r47 = new sun.security.x509.RDN;
+
+        specialinvoke $r47.<sun.security.x509.RDN: void <init>(int)>(1);
+
+        $r48[0] = $r47;
+
+        $r49 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r50 = $r49[0];
+
+        $r54 = $r50.<sun.security.x509.RDN: sun.security.x509.AVA[] assertion>;
+
+        $r51 = new sun.security.x509.AVA;
+
+        $r55 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier countryName_oid>;
+
+        $r52 = new sun.security.util.DerValue;
+
+        specialinvoke $r52.<sun.security.util.DerValue: void <init>(java.lang.String)>(r53);
+
+        specialinvoke $r51.<sun.security.x509.AVA: void <init>(sun.security.util.ObjectIdentifier,sun.security.util.DerValue)>($r55, $r52);
+
+        $r54[0] = $r51;
+
+        return;
+    }
+
+    public void <init>(sun.security.x509.RDN[]) throws java.io.IOException
+    {
+        java.io.IOException $r7;
+        sun.security.x509.RDN[] r1, $r3, $r4, $r5, $r8;
+        sun.security.x509.X500Name r0;
+        int $i0, i1;
+        java.lang.Object $r2;
+        sun.security.x509.RDN $r6;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        r1 := @parameter0: sun.security.x509.RDN[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        if r1 != null goto label1;
+
+        $r8 = newarray (sun.security.x509.RDN)[0];
+
+        r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names> = $r8;
+
+        goto label4;
+
+     label1:
+        $r2 = virtualinvoke r1.<java.lang.Object: java.lang.Object clone()>();
+
+        $r3 = (sun.security.x509.RDN[]) $r2;
+
+        r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names> = $r3;
+
+        i1 = 0;
+
+     label2:
+        $r4 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i0 = lengthof $r4;
+
+        if i1 >= $i0 goto label4;
+
+        $r5 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r6 = $r5[i1];
+
+        if $r6 != null goto label3;
+
+        $r7 = new java.io.IOException;
+
+        specialinvoke $r7.<java.io.IOException: void <init>(java.lang.String)>("Cannot create an X500Name");
+
+        throw $r7;
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label4:
+        return;
+    }
+
+    public void <init>(sun.security.util.DerValue) throws java.io.IOException
+    {
+        sun.security.util.DerValue r1;
+        sun.security.x509.X500Name r0;
+        sun.security.util.DerInputStream $r2;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        r1 := @parameter0: sun.security.util.DerValue;
+
+        $r2 = virtualinvoke r1.<sun.security.util.DerValue: sun.security.util.DerInputStream toDerInputStream()>();
+
+        specialinvoke r0.<sun.security.x509.X500Name: void <init>(sun.security.util.DerInputStream)>($r2);
+
+        return;
+    }
+
+    public void <init>(sun.security.util.DerInputStream) throws java.io.IOException
+    {
+        sun.security.x509.X500Name r0;
+        sun.security.util.DerInputStream r1;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        r1 := @parameter0: sun.security.util.DerInputStream;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        specialinvoke r0.<sun.security.x509.X500Name: void parseDER(sun.security.util.DerInputStream)>(r1);
+
+        return;
+    }
+
+    public void <init>(byte[]) throws java.io.IOException
+    {
+        byte[] r2;
+        sun.security.x509.X500Name r0;
+        sun.security.util.DerInputStream $r1;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        r2 := @parameter0: byte[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new sun.security.util.DerInputStream;
+
+        specialinvoke $r1.<sun.security.util.DerInputStream: void <init>(byte[])>(r2);
+
+        specialinvoke r0.<sun.security.x509.X500Name: void parseDER(sun.security.util.DerInputStream)>($r1);
+
+        return;
+    }
+
+    public java.util.List rdns()
+    {
+        java.util.List $r2, $r3, r4;
+        sun.security.x509.X500Name r0;
+        sun.security.x509.RDN[] $r1;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        r4 = r0.<sun.security.x509.X500Name: java.util.List rdnList>;
+
+        if r4 != null goto label1;
+
+        $r1 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r2 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r1);
+
+        $r3 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r2);
+
+        r4 = $r3;
+
+        r0.<sun.security.x509.X500Name: java.util.List rdnList> = $r3;
+
+     label1:
+        return r4;
+    }
+
+    public int size()
+    {
+        int $i0;
+        sun.security.x509.X500Name r0;
+        sun.security.x509.RDN[] $r1;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i0 = lengthof $r1;
+
+        return $i0;
+    }
+
+    public java.util.List allAvas()
+    {
+        sun.security.x509.RDN[] $r2, $r4;
+        java.util.ArrayList $r1;
+        java.util.List $r3, $r6, r7;
+        sun.security.x509.X500Name r0;
+        int $i0, i1;
+        sun.security.x509.RDN $r5;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        r7 = r0.<sun.security.x509.X500Name: java.util.List allAvaList>;
+
+        if r7 != null goto label3;
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        i1 = 0;
+
+     label1:
+        $r2 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i0 = lengthof $r2;
+
+        if i1 >= $i0 goto label2;
+
+        $r4 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r5 = $r4[i1];
+
+        $r6 = virtualinvoke $r5.<sun.security.x509.RDN: java.util.List avas()>();
+
+        interfaceinvoke $r1.<java.util.List: boolean addAll(java.util.Collection)>($r6);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        $r3 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r1);
+
+        r7 = $r3;
+
+        r0.<sun.security.x509.X500Name: java.util.List allAvaList> = $r3;
+
+     label3:
+        return r7;
+    }
+
+    public int avaSize()
+    {
+        int $i0;
+        java.util.List $r1;
+        sun.security.x509.X500Name r0;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = virtualinvoke r0.<sun.security.x509.X500Name: java.util.List allAvas()>();
+
+        $i0 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        return $i0;
+    }
+
+    public boolean isEmpty()
+    {
+        sun.security.x509.RDN[] $r1, $r2;
+        sun.security.x509.X500Name r0;
+        int i0, $i1, i2;
+        sun.security.x509.AVA[] $r4;
+        sun.security.x509.RDN $r3;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        i0 = lengthof $r1;
+
+        i2 = 0;
+
+     label1:
+        if i2 >= i0 goto label3;
+
+        $r2 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r3 = $r2[i2];
+
+        $r4 = $r3.<sun.security.x509.RDN: sun.security.x509.AVA[] assertion>;
+
+        $i1 = lengthof $r4;
+
+        if $i1 == 0 goto label2;
+
+        return 0;
+
+     label2:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label3:
+        return 1;
+    }
+
+    public int hashCode()
+    {
+        int $i0;
+        java.lang.String $r1;
+        sun.security.x509.X500Name r0;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = virtualinvoke r0.<sun.security.x509.X500Name: java.lang.String getRFC2253CanonicalName()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int hashCode()>();
+
+        return $i0;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        sun.security.x509.RDN[] $r4, $r5, $r8, $r9;
+        sun.security.x509.X500Name r0, r2;
+        int $i0, $i1, $i2, $i3, i4;
+        java.lang.String $r3, $r6, $r7, $r13, $r14, $r15;
+        sun.security.x509.AVA[] $r11, $r12;
+        sun.security.x509.RDN r10, r16;
+        boolean $z0, $z1, $z2;
+        java.lang.Object r1;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        r1 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        $z0 = r1 instanceof sun.security.x509.X500Name;
+
+        if $z0 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        r2 = (sun.security.x509.X500Name) r1;
+
+        $r3 = r0.<sun.security.x509.X500Name: java.lang.String canonicalDn>;
+
+        if $r3 == null goto label3;
+
+        $r13 = r2.<sun.security.x509.X500Name: java.lang.String canonicalDn>;
+
+        if $r13 == null goto label3;
+
+        $r15 = r0.<sun.security.x509.X500Name: java.lang.String canonicalDn>;
+
+        $r14 = r2.<sun.security.x509.X500Name: java.lang.String canonicalDn>;
+
+        $z2 = virtualinvoke $r15.<java.lang.String: boolean equals(java.lang.Object)>($r14);
+
+        return $z2;
+
+     label3:
+        $r4 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i3 = lengthof $r4;
+
+        $r5 = r2.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i0 = lengthof $r5;
+
+        if $i3 == $i0 goto label4;
+
+        return 0;
+
+     label4:
+        i4 = 0;
+
+     label5:
+        if i4 >= $i3 goto label7;
+
+        $r8 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        r16 = $r8[i4];
+
+        $r9 = r2.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        r10 = $r9[i4];
+
+        $r11 = r16.<sun.security.x509.RDN: sun.security.x509.AVA[] assertion>;
+
+        $i2 = lengthof $r11;
+
+        $r12 = r10.<sun.security.x509.RDN: sun.security.x509.AVA[] assertion>;
+
+        $i1 = lengthof $r12;
+
+        if $i2 == $i1 goto label6;
+
+        return 0;
+
+     label6:
+        i4 = i4 + 1;
+
+        goto label5;
+
+     label7:
+        $r6 = virtualinvoke r0.<sun.security.x509.X500Name: java.lang.String getRFC2253CanonicalName()>();
+
+        $r7 = virtualinvoke r2.<sun.security.x509.X500Name: java.lang.String getRFC2253CanonicalName()>();
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r7);
+
+        return $z1;
+    }
+
+    private java.lang.String getString(sun.security.util.DerValue) throws java.io.IOException
+    {
+        sun.security.util.DerValue r0;
+        java.io.IOException $r9;
+        byte $b0;
+        sun.security.x509.X500Name r7;
+        int $i1;
+        java.lang.StringBuilder $r4, $r5, $r8;
+        java.lang.String $r1, $r6;
+
+        r7 := @this: sun.security.x509.X500Name;
+
+        r0 := @parameter0: sun.security.util.DerValue;
+
+        if r0 != null goto label1;
+
+        return null;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.security.util.DerValue: java.lang.String getAsString()>();
+
+        if $r1 != null goto label2;
+
+        $r9 = new java.io.IOException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("not a DER string encoding, ");
+
+        $b0 = r0.<sun.security.util.DerValue: byte tag>;
+
+        $i1 = (int) $b0;
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<java.io.IOException: void <init>(java.lang.String)>($r6);
+
+        throw $r9;
+
+     label2:
+        return $r1;
+    }
+
+    public int getType()
+    {
+        sun.security.x509.X500Name r0;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        return 4;
+    }
+
+    public java.lang.String getCountry() throws java.io.IOException
+    {
+        sun.security.util.DerValue $r2;
+        sun.security.x509.X500Name r0;
+        sun.security.util.ObjectIdentifier $r1;
+        java.lang.String $r3;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier countryName_oid>;
+
+        $r2 = specialinvoke r0.<sun.security.x509.X500Name: sun.security.util.DerValue findAttribute(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = specialinvoke r0.<sun.security.x509.X500Name: java.lang.String getString(sun.security.util.DerValue)>($r2);
+
+        return $r3;
+    }
+
+    public java.lang.String getOrganization() throws java.io.IOException
+    {
+        sun.security.util.DerValue $r2;
+        sun.security.x509.X500Name r0;
+        sun.security.util.ObjectIdentifier $r1;
+        java.lang.String $r3;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier orgName_oid>;
+
+        $r2 = specialinvoke r0.<sun.security.x509.X500Name: sun.security.util.DerValue findAttribute(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = specialinvoke r0.<sun.security.x509.X500Name: java.lang.String getString(sun.security.util.DerValue)>($r2);
+
+        return $r3;
+    }
+
+    public java.lang.String getOrganizationalUnit() throws java.io.IOException
+    {
+        sun.security.util.DerValue $r2;
+        sun.security.x509.X500Name r0;
+        sun.security.util.ObjectIdentifier $r1;
+        java.lang.String $r3;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier orgUnitName_oid>;
+
+        $r2 = specialinvoke r0.<sun.security.x509.X500Name: sun.security.util.DerValue findAttribute(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = specialinvoke r0.<sun.security.x509.X500Name: java.lang.String getString(sun.security.util.DerValue)>($r2);
+
+        return $r3;
+    }
+
+    public java.lang.String getCommonName() throws java.io.IOException
+    {
+        sun.security.util.DerValue $r2;
+        sun.security.x509.X500Name r0;
+        sun.security.util.ObjectIdentifier $r1;
+        java.lang.String $r3;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier commonName_oid>;
+
+        $r2 = specialinvoke r0.<sun.security.x509.X500Name: sun.security.util.DerValue findAttribute(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = specialinvoke r0.<sun.security.x509.X500Name: java.lang.String getString(sun.security.util.DerValue)>($r2);
+
+        return $r3;
+    }
+
+    public java.lang.String getLocality() throws java.io.IOException
+    {
+        sun.security.util.DerValue $r2;
+        sun.security.x509.X500Name r0;
+        sun.security.util.ObjectIdentifier $r1;
+        java.lang.String $r3;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier localityName_oid>;
+
+        $r2 = specialinvoke r0.<sun.security.x509.X500Name: sun.security.util.DerValue findAttribute(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = specialinvoke r0.<sun.security.x509.X500Name: java.lang.String getString(sun.security.util.DerValue)>($r2);
+
+        return $r3;
+    }
+
+    public java.lang.String getState() throws java.io.IOException
+    {
+        sun.security.util.DerValue $r2;
+        sun.security.x509.X500Name r0;
+        sun.security.util.ObjectIdentifier $r1;
+        java.lang.String $r3;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier stateName_oid>;
+
+        $r2 = specialinvoke r0.<sun.security.x509.X500Name: sun.security.util.DerValue findAttribute(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = specialinvoke r0.<sun.security.x509.X500Name: java.lang.String getString(sun.security.util.DerValue)>($r2);
+
+        return $r3;
+    }
+
+    public java.lang.String getDomain() throws java.io.IOException
+    {
+        sun.security.util.DerValue $r2;
+        sun.security.x509.X500Name r0;
+        sun.security.util.ObjectIdentifier $r1;
+        java.lang.String $r3;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier DOMAIN_COMPONENT_OID>;
+
+        $r2 = specialinvoke r0.<sun.security.x509.X500Name: sun.security.util.DerValue findAttribute(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = specialinvoke r0.<sun.security.x509.X500Name: java.lang.String getString(sun.security.util.DerValue)>($r2);
+
+        return $r3;
+    }
+
+    public java.lang.String getDNQualifier() throws java.io.IOException
+    {
+        sun.security.util.DerValue $r2;
+        sun.security.x509.X500Name r0;
+        sun.security.util.ObjectIdentifier $r1;
+        java.lang.String $r3;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier DNQUALIFIER_OID>;
+
+        $r2 = specialinvoke r0.<sun.security.x509.X500Name: sun.security.util.DerValue findAttribute(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = specialinvoke r0.<sun.security.x509.X500Name: java.lang.String getString(sun.security.util.DerValue)>($r2);
+
+        return $r3;
+    }
+
+    public java.lang.String getSurname() throws java.io.IOException
+    {
+        sun.security.util.DerValue $r2;
+        sun.security.x509.X500Name r0;
+        sun.security.util.ObjectIdentifier $r1;
+        java.lang.String $r3;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier SURNAME_OID>;
+
+        $r2 = specialinvoke r0.<sun.security.x509.X500Name: sun.security.util.DerValue findAttribute(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = specialinvoke r0.<sun.security.x509.X500Name: java.lang.String getString(sun.security.util.DerValue)>($r2);
+
+        return $r3;
+    }
+
+    public java.lang.String getGivenName() throws java.io.IOException
+    {
+        sun.security.util.DerValue $r2;
+        sun.security.x509.X500Name r0;
+        sun.security.util.ObjectIdentifier $r1;
+        java.lang.String $r3;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier GIVENNAME_OID>;
+
+        $r2 = specialinvoke r0.<sun.security.x509.X500Name: sun.security.util.DerValue findAttribute(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = specialinvoke r0.<sun.security.x509.X500Name: java.lang.String getString(sun.security.util.DerValue)>($r2);
+
+        return $r3;
+    }
+
+    public java.lang.String getInitials() throws java.io.IOException
+    {
+        sun.security.util.DerValue $r2;
+        sun.security.x509.X500Name r0;
+        sun.security.util.ObjectIdentifier $r1;
+        java.lang.String $r3;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier INITIALS_OID>;
+
+        $r2 = specialinvoke r0.<sun.security.x509.X500Name: sun.security.util.DerValue findAttribute(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = specialinvoke r0.<sun.security.x509.X500Name: java.lang.String getString(sun.security.util.DerValue)>($r2);
+
+        return $r3;
+    }
+
+    public java.lang.String getGeneration() throws java.io.IOException
+    {
+        sun.security.util.DerValue $r2;
+        sun.security.x509.X500Name r0;
+        sun.security.util.ObjectIdentifier $r1;
+        java.lang.String $r3;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier GENERATIONQUALIFIER_OID>;
+
+        $r2 = specialinvoke r0.<sun.security.x509.X500Name: sun.security.util.DerValue findAttribute(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = specialinvoke r0.<sun.security.x509.X500Name: java.lang.String getString(sun.security.util.DerValue)>($r2);
+
+        return $r3;
+    }
+
+    public java.lang.String getIP() throws java.io.IOException
+    {
+        sun.security.util.DerValue $r2;
+        sun.security.x509.X500Name r0;
+        sun.security.util.ObjectIdentifier $r1;
+        java.lang.String $r3;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier ipAddress_oid>;
+
+        $r2 = specialinvoke r0.<sun.security.x509.X500Name: sun.security.util.DerValue findAttribute(sun.security.util.ObjectIdentifier)>($r1);
+
+        $r3 = specialinvoke r0.<sun.security.x509.X500Name: java.lang.String getString(sun.security.util.DerValue)>($r2);
+
+        return $r3;
+    }
+
+    public java.lang.String toString()
+    {
+        java.lang.String $r1, $r2;
+        sun.security.x509.X500Name r0;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = r0.<sun.security.x509.X500Name: java.lang.String dn>;
+
+        if $r1 != null goto label1;
+
+        specialinvoke r0.<sun.security.x509.X500Name: void generateDN()>();
+
+     label1:
+        $r2 = r0.<sun.security.x509.X500Name: java.lang.String dn>;
+
+        return $r2;
+    }
+
+    public java.lang.String getRFC1779Name()
+    {
+        java.lang.String $r2;
+        sun.security.x509.X500Name r0;
+        java.util.Map $r1;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = staticinvoke <java.util.Collections: java.util.Map emptyMap()>();
+
+        $r2 = virtualinvoke r0.<sun.security.x509.X500Name: java.lang.String getRFC1779Name(java.util.Map)>($r1);
+
+        return $r2;
+    }
+
+    public java.lang.String getRFC1779Name(java.util.Map) throws java.lang.IllegalArgumentException
+    {
+        sun.security.x509.X500Name r1;
+        java.util.Map r0;
+        java.lang.String $r2, $r3, $r4, $r5, $r6;
+        boolean $z0;
+
+        r1 := @this: sun.security.x509.X500Name;
+
+        r0 := @parameter0: java.util.Map;
+
+        $z0 = interfaceinvoke r0.<java.util.Map: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = r1.<sun.security.x509.X500Name: java.lang.String rfc1779Dn>;
+
+        if $r3 == null goto label1;
+
+        $r6 = r1.<sun.security.x509.X500Name: java.lang.String rfc1779Dn>;
+
+        return $r6;
+
+     label1:
+        $r4 = specialinvoke r1.<sun.security.x509.X500Name: java.lang.String generateRFC1779DN(java.util.Map)>(r0);
+
+        r1.<sun.security.x509.X500Name: java.lang.String rfc1779Dn> = $r4;
+
+        $r5 = r1.<sun.security.x509.X500Name: java.lang.String rfc1779Dn>;
+
+        return $r5;
+
+     label2:
+        $r2 = specialinvoke r1.<sun.security.x509.X500Name: java.lang.String generateRFC1779DN(java.util.Map)>(r0);
+
+        return $r2;
+    }
+
+    public java.lang.String getRFC2253Name()
+    {
+        java.lang.String $r2;
+        sun.security.x509.X500Name r0;
+        java.util.Map $r1;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = staticinvoke <java.util.Collections: java.util.Map emptyMap()>();
+
+        $r2 = virtualinvoke r0.<sun.security.x509.X500Name: java.lang.String getRFC2253Name(java.util.Map)>($r1);
+
+        return $r2;
+    }
+
+    public java.lang.String getRFC2253Name(java.util.Map)
+    {
+        sun.security.x509.X500Name r1;
+        java.util.Map r0;
+        java.lang.String $r2, $r3, $r4, $r5, $r6;
+        boolean $z0;
+
+        r1 := @this: sun.security.x509.X500Name;
+
+        r0 := @parameter0: java.util.Map;
+
+        $z0 = interfaceinvoke r0.<java.util.Map: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = r1.<sun.security.x509.X500Name: java.lang.String rfc2253Dn>;
+
+        if $r3 == null goto label1;
+
+        $r6 = r1.<sun.security.x509.X500Name: java.lang.String rfc2253Dn>;
+
+        return $r6;
+
+     label1:
+        $r4 = specialinvoke r1.<sun.security.x509.X500Name: java.lang.String generateRFC2253DN(java.util.Map)>(r0);
+
+        r1.<sun.security.x509.X500Name: java.lang.String rfc2253Dn> = $r4;
+
+        $r5 = r1.<sun.security.x509.X500Name: java.lang.String rfc2253Dn>;
+
+        return $r5;
+
+     label2:
+        $r2 = specialinvoke r1.<sun.security.x509.X500Name: java.lang.String generateRFC2253DN(java.util.Map)>(r0);
+
+        return $r2;
+    }
+
+    private java.lang.String generateRFC2253DN(java.util.Map)
+    {
+        sun.security.x509.RDN[] $r1, $r3, $r5, $r6;
+        sun.security.x509.X500Name r0;
+        java.util.Map r7;
+        int $i0, $i1, $i2, $i3, i4, $i6;
+        java.lang.String $r4, $r9;
+        sun.security.x509.RDN $r8;
+        java.lang.StringBuilder $r10;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        r7 := @parameter0: java.util.Map;
+
+        $r1 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i0 = lengthof $r1;
+
+        if $i0 != 0 goto label1;
+
+        return "";
+
+     label1:
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>(int)>(48);
+
+        $r3 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i1 = lengthof $r3;
+
+        i4 = $i1 - 1;
+
+     label2:
+        if i4 < 0 goto label4;
+
+        $r5 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i2 = lengthof $r5;
+
+        $i3 = $i2 - 1;
+
+        if i4 >= $i3 goto label3;
+
+        virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+     label3:
+        $r6 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r8 = $r6[i4];
+
+        $r9 = virtualinvoke $r8.<sun.security.x509.RDN: java.lang.String toRFC2253String(java.util.Map)>(r7);
+
+        virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $i6 = (int) -1;
+
+        i4 = i4 + $i6;
+
+        goto label2;
+
+     label4:
+        $r4 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r4;
+    }
+
+    public java.lang.String getRFC2253CanonicalName()
+    {
+        sun.security.x509.RDN[] $r2, $r4, $r7, $r8;
+        sun.security.x509.X500Name r0;
+        int $i0, $i1, $i2, $i3, i4, $i6;
+        java.lang.String $r1, $r5, $r6, $r10, $r11, $r12;
+        sun.security.x509.RDN $r9;
+        java.lang.StringBuilder $r13;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = r0.<sun.security.x509.X500Name: java.lang.String canonicalDn>;
+
+        if $r1 == null goto label1;
+
+        $r12 = r0.<sun.security.x509.X500Name: java.lang.String canonicalDn>;
+
+        return $r12;
+
+     label1:
+        $r2 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i0 = lengthof $r2;
+
+        if $i0 != 0 goto label2;
+
+        r0.<sun.security.x509.X500Name: java.lang.String canonicalDn> = "";
+
+        $r11 = r0.<sun.security.x509.X500Name: java.lang.String canonicalDn>;
+
+        return $r11;
+
+     label2:
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>(int)>(48);
+
+        $r4 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i1 = lengthof $r4;
+
+        i4 = $i1 - 1;
+
+     label3:
+        if i4 < 0 goto label5;
+
+        $r7 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i2 = lengthof $r7;
+
+        $i3 = $i2 - 1;
+
+        if i4 >= $i3 goto label4;
+
+        virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+     label4:
+        $r8 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r9 = $r8[i4];
+
+        $r10 = virtualinvoke $r9.<sun.security.x509.RDN: java.lang.String toRFC2253String(boolean)>(1);
+
+        virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $i6 = (int) -1;
+
+        i4 = i4 + $i6;
+
+        goto label3;
+
+     label5:
+        $r5 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r0.<sun.security.x509.X500Name: java.lang.String canonicalDn> = $r5;
+
+        $r6 = r0.<sun.security.x509.X500Name: java.lang.String canonicalDn>;
+
+        return $r6;
+    }
+
+    public java.lang.String getName()
+    {
+        java.lang.String $r1;
+        sun.security.x509.X500Name r0;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = virtualinvoke r0.<sun.security.x509.X500Name: java.lang.String toString()>();
+
+        return $r1;
+    }
+
+    private sun.security.util.DerValue findAttribute(sun.security.util.ObjectIdentifier)
+    {
+        sun.security.util.DerValue $r6;
+        sun.security.x509.RDN[] $r1, $r2, $r3;
+        sun.security.x509.X500Name r0;
+        int $i0, i1;
+        sun.security.util.ObjectIdentifier r4;
+        sun.security.x509.RDN $r5;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        r4 := @parameter0: sun.security.util.ObjectIdentifier;
+
+        $r1 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        if $r1 == null goto label3;
+
+        i1 = 0;
+
+     label1:
+        $r2 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i0 = lengthof $r2;
+
+        if i1 >= $i0 goto label3;
+
+        $r3 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r5 = $r3[i1];
+
+        $r6 = virtualinvoke $r5.<sun.security.x509.RDN: sun.security.util.DerValue findAttribute(sun.security.util.ObjectIdentifier)>(r4);
+
+        if $r6 == null goto label2;
+
+        return $r6;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    public sun.security.util.DerValue findMostSpecificAttribute(sun.security.util.ObjectIdentifier)
+    {
+        sun.security.util.DerValue $r6;
+        sun.security.x509.RDN[] $r1, $r2, $r3;
+        sun.security.x509.X500Name r0;
+        int $i0, i1, $i3;
+        sun.security.util.ObjectIdentifier r4;
+        sun.security.x509.RDN $r5;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        r4 := @parameter0: sun.security.util.ObjectIdentifier;
+
+        $r1 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        if $r1 == null goto label3;
+
+        $r2 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i0 = lengthof $r2;
+
+        i1 = $i0 - 1;
+
+     label1:
+        if i1 < 0 goto label3;
+
+        $r3 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r5 = $r3[i1];
+
+        $r6 = virtualinvoke $r5.<sun.security.x509.RDN: sun.security.util.DerValue findAttribute(sun.security.util.ObjectIdentifier)>(r4);
+
+        if $r6 == null goto label2;
+
+        return $r6;
+
+     label2:
+        $i3 = (int) -1;
+
+        i1 = i1 + $i3;
+
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    private void parseDER(sun.security.util.DerInputStream) throws java.io.IOException
+    {
+        byte[] $r1, $r10;
+        sun.security.util.DerInputStream r0, $r11;
+        sun.security.x509.RDN[] $r3, $r6, $r7;
+        sun.security.util.DerValue[] r12;
+        sun.security.x509.X500Name r2;
+        int $i0, $i1, i2;
+        sun.security.x509.RDN $r4;
+        sun.security.util.DerValue $r5, $r9;
+        java.io.IOException $r8;
+
+        r2 := @this: sun.security.x509.X500Name;
+
+        r0 := @parameter0: sun.security.util.DerInputStream;
+
+        $r1 = virtualinvoke r0.<sun.security.util.DerInputStream: byte[] toByteArray()>();
+
+     label1:
+        r12 = virtualinvoke r0.<sun.security.util.DerInputStream: sun.security.util.DerValue[] getSequence(int)>(5);
+
+     label2:
+        goto label5;
+
+     label3:
+        $r8 := @caughtexception;
+
+        if $r1 != null goto label4;
+
+        r12 = null;
+
+        goto label5;
+
+     label4:
+        $r9 = new sun.security.util.DerValue;
+
+        specialinvoke $r9.<sun.security.util.DerValue: void <init>(byte,byte[])>(48, $r1);
+
+        $r10 = virtualinvoke $r9.<sun.security.util.DerValue: byte[] toByteArray()>();
+
+        $r11 = new sun.security.util.DerInputStream;
+
+        specialinvoke $r11.<sun.security.util.DerInputStream: void <init>(byte[])>($r10);
+
+        r12 = virtualinvoke $r11.<sun.security.util.DerInputStream: sun.security.util.DerValue[] getSequence(int)>(5);
+
+     label5:
+        if r12 != null goto label6;
+
+        $r7 = newarray (sun.security.x509.RDN)[0];
+
+        r2.<sun.security.x509.X500Name: sun.security.x509.RDN[] names> = $r7;
+
+        goto label8;
+
+     label6:
+        $i0 = lengthof r12;
+
+        $r3 = newarray (sun.security.x509.RDN)[$i0];
+
+        r2.<sun.security.x509.X500Name: sun.security.x509.RDN[] names> = $r3;
+
+        i2 = 0;
+
+     label7:
+        $i1 = lengthof r12;
+
+        if i2 >= $i1 goto label8;
+
+        $r6 = r2.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r4 = new sun.security.x509.RDN;
+
+        $r5 = r12[i2];
+
+        specialinvoke $r4.<sun.security.x509.RDN: void <init>(sun.security.util.DerValue)>($r5);
+
+        $r6[i2] = $r4;
+
+        i2 = i2 + 1;
+
+        goto label7;
+
+     label8:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public void emit(sun.security.util.DerOutputStream) throws java.io.IOException
+    {
+        sun.security.x509.X500Name r0;
+        sun.security.util.DerOutputStream r1;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        r1 := @parameter0: sun.security.util.DerOutputStream;
+
+        virtualinvoke r0.<sun.security.x509.X500Name: void encode(sun.security.util.DerOutputStream)>(r1);
+
+        return;
+    }
+
+    public void encode(sun.security.util.DerOutputStream) throws java.io.IOException
+    {
+        sun.security.x509.RDN[] $r2, $r4;
+        sun.security.x509.X500Name r1;
+        sun.security.util.DerOutputStream $r0, r3;
+        int $i0, i1;
+        sun.security.x509.RDN $r5;
+
+        r1 := @this: sun.security.x509.X500Name;
+
+        r3 := @parameter0: sun.security.util.DerOutputStream;
+
+        $r0 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r0.<sun.security.util.DerOutputStream: void <init>()>();
+
+        i1 = 0;
+
+     label1:
+        $r2 = r1.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i0 = lengthof $r2;
+
+        if i1 >= $i0 goto label2;
+
+        $r4 = r1.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r5 = $r4[i1];
+
+        virtualinvoke $r5.<sun.security.x509.RDN: void encode(sun.security.util.DerOutputStream)>($r0);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        virtualinvoke r3.<sun.security.util.DerOutputStream: void write(byte,sun.security.util.DerOutputStream)>(48, $r0);
+
+        return;
+    }
+
+    public byte[] getEncodedInternal() throws java.io.IOException
+    {
+        byte[] $r1, $r2, $r6;
+        sun.security.x509.RDN[] $r5, $r7;
+        sun.security.x509.X500Name r0;
+        sun.security.util.DerOutputStream $r3, $r4;
+        int $i0, i1;
+        sun.security.x509.RDN $r8;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = r0.<sun.security.x509.X500Name: byte[] encoded>;
+
+        if $r1 != null goto label3;
+
+        $r3 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r3.<sun.security.util.DerOutputStream: void <init>()>();
+
+        $r4 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r4.<sun.security.util.DerOutputStream: void <init>()>();
+
+        i1 = 0;
+
+     label1:
+        $r5 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i0 = lengthof $r5;
+
+        if i1 >= $i0 goto label2;
+
+        $r7 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r8 = $r7[i1];
+
+        virtualinvoke $r8.<sun.security.x509.RDN: void encode(sun.security.util.DerOutputStream)>($r4);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        virtualinvoke $r3.<sun.security.util.DerOutputStream: void write(byte,sun.security.util.DerOutputStream)>(48, $r4);
+
+        $r6 = virtualinvoke $r3.<sun.security.util.DerOutputStream: byte[] toByteArray()>();
+
+        r0.<sun.security.x509.X500Name: byte[] encoded> = $r6;
+
+     label3:
+        $r2 = r0.<sun.security.x509.X500Name: byte[] encoded>;
+
+        return $r2;
+    }
+
+    public byte[] getEncoded() throws java.io.IOException
+    {
+        byte[] $r1, $r3;
+        sun.security.x509.X500Name r0;
+        java.lang.Object $r2;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = virtualinvoke r0.<sun.security.x509.X500Name: byte[] getEncodedInternal()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.Object: java.lang.Object clone()>();
+
+        $r3 = (byte[]) $r2;
+
+        return $r3;
+    }
+
+    private void parseDN(java.lang.String, java.util.Map) throws java.io.IOException
+    {
+        java.lang.Object[] $r10;
+        sun.security.x509.RDN[] $r2, $r9, $r11;
+        java.util.ArrayList $r3;
+        sun.security.x509.X500Name r1;
+        java.util.Map r6;
+        int $i0, i1, i2, i3, i4, i5, i6, $i7, $i8, $i9;
+        java.lang.String r0, $r4, $r7;
+        sun.security.x509.RDN $r5, $r8;
+        boolean $z0, $z1;
+
+        r1 := @this: sun.security.x509.X500Name;
+
+        r0 := @parameter0: java.lang.String;
+
+        r6 := @parameter1: java.util.Map;
+
+        if r0 == null goto label1;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        $r2 = newarray (sun.security.x509.RDN)[0];
+
+        r1.<sun.security.x509.X500Name: sun.security.x509.RDN[] names> = $r2;
+
+        return;
+
+     label2:
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>()>();
+
+        i1 = 0;
+
+        i2 = 0;
+
+        i3 = 0;
+
+        i4 = virtualinvoke r0.<java.lang.String: int indexOf(int)>(44);
+
+        i5 = virtualinvoke r0.<java.lang.String: int indexOf(int)>(59);
+
+     label3:
+        if i4 >= 0 goto label4;
+
+        if i5 < 0 goto label9;
+
+     label4:
+        if i5 >= 0 goto label5;
+
+        i6 = i4;
+
+        goto label7;
+
+     label5:
+        if i4 >= 0 goto label6;
+
+        i6 = i5;
+
+        goto label7;
+
+     label6:
+        i6 = staticinvoke <java.lang.Math: int min(int,int)>(i4, i5);
+
+     label7:
+        $i7 = staticinvoke <sun.security.x509.X500Name: int countQuotes(java.lang.String,int,int)>(r0, i3, i6);
+
+        $i8 = i2 + $i7;
+
+        i2 = $i8;
+
+        if i6 < 0 goto label8;
+
+        if $i8 == 1 goto label8;
+
+        $z1 = staticinvoke <sun.security.x509.X500Name: boolean escaped(int,int,java.lang.String)>(i6, i3, r0);
+
+        if $z1 != 0 goto label8;
+
+        $r4 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(i1, i6);
+
+        $r5 = new sun.security.x509.RDN;
+
+        specialinvoke $r5.<sun.security.x509.RDN: void <init>(java.lang.String,java.util.Map)>($r4, r6);
+
+        interfaceinvoke $r3.<java.util.List: boolean add(java.lang.Object)>($r5);
+
+        i1 = i6 + 1;
+
+        i2 = 0;
+
+     label8:
+        $i9 = i6 + 1;
+
+        i3 = $i9;
+
+        i4 = virtualinvoke r0.<java.lang.String: int indexOf(int,int)>(44, $i9);
+
+        i5 = virtualinvoke r0.<java.lang.String: int indexOf(int,int)>(59, $i9);
+
+        goto label3;
+
+     label9:
+        $r7 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>(i1);
+
+        $r8 = new sun.security.x509.RDN;
+
+        specialinvoke $r8.<sun.security.x509.RDN: void <init>(java.lang.String,java.util.Map)>($r7, r6);
+
+        interfaceinvoke $r3.<java.util.List: boolean add(java.lang.Object)>($r8);
+
+        staticinvoke <java.util.Collections: void reverse(java.util.List)>($r3);
+
+        $i0 = interfaceinvoke $r3.<java.util.List: int size()>();
+
+        $r9 = newarray (sun.security.x509.RDN)[$i0];
+
+        $r10 = interfaceinvoke $r3.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r9);
+
+        $r11 = (sun.security.x509.RDN[]) $r10;
+
+        r1.<sun.security.x509.X500Name: sun.security.x509.RDN[] names> = $r11;
+
+        return;
+    }
+
+    private void parseRFC2253DN(java.lang.String) throws java.io.IOException
+    {
+        java.lang.Object[] $r6;
+        sun.security.x509.RDN[] $r5, $r7, $r10;
+        java.util.ArrayList $r1;
+        sun.security.x509.X500Name r4;
+        int $i0, i1, i2, i3, $i4;
+        java.lang.String r0, $r2, $r8;
+        sun.security.x509.RDN $r3, $r9;
+        boolean $z0, $z1;
+
+        r4 := @this: sun.security.x509.X500Name;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        $r10 = newarray (sun.security.x509.RDN)[0];
+
+        r4.<sun.security.x509.X500Name: sun.security.x509.RDN[] names> = $r10;
+
+        return;
+
+     label1:
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        i1 = 0;
+
+        i2 = 0;
+
+        i3 = virtualinvoke r0.<java.lang.String: int indexOf(int)>(44);
+
+     label2:
+        if i3 < 0 goto label4;
+
+        if i3 <= 0 goto label3;
+
+        $z1 = staticinvoke <sun.security.x509.X500Name: boolean escaped(int,int,java.lang.String)>(i3, i2, r0);
+
+        if $z1 != 0 goto label3;
+
+        $r8 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(i1, i3);
+
+        $r9 = new sun.security.x509.RDN;
+
+        specialinvoke $r9.<sun.security.x509.RDN: void <init>(java.lang.String,java.lang.String)>($r8, "RFC2253");
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>($r9);
+
+        i1 = i3 + 1;
+
+     label3:
+        $i4 = i3 + 1;
+
+        i2 = $i4;
+
+        i3 = virtualinvoke r0.<java.lang.String: int indexOf(int,int)>(44, $i4);
+
+        goto label2;
+
+     label4:
+        $r2 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>(i1);
+
+        $r3 = new sun.security.x509.RDN;
+
+        specialinvoke $r3.<sun.security.x509.RDN: void <init>(java.lang.String,java.lang.String)>($r2, "RFC2253");
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>($r3);
+
+        staticinvoke <java.util.Collections: void reverse(java.util.List)>($r1);
+
+        $i0 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        $r5 = newarray (sun.security.x509.RDN)[$i0];
+
+        $r6 = interfaceinvoke $r1.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r5);
+
+        $r7 = (sun.security.x509.RDN[]) $r6;
+
+        r4.<sun.security.x509.X500Name: sun.security.x509.RDN[] names> = $r7;
+
+        return;
+    }
+
+    static int countQuotes(java.lang.String, int, int)
+    {
+        char $c2, $c3, $c5;
+        int i0, i1, $i4, i6, i7, $i8, $i9, $i10;
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i6 = 0;
+
+        i7 = i0;
+
+     label1:
+        if i7 >= i1 goto label5;
+
+        $c2 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i7);
+
+        $i8 = (int) $c2;
+
+        if $i8 != 34 goto label2;
+
+        if i7 == i0 goto label3;
+
+     label2:
+        $c3 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i7);
+
+        $i9 = (int) $c3;
+
+        if $i9 != 34 goto label4;
+
+        $i4 = i7 - 1;
+
+        $c5 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i4);
+
+        $i10 = (int) $c5;
+
+        if $i10 == 92 goto label4;
+
+     label3:
+        i6 = i6 + 1;
+
+     label4:
+        i7 = i7 + 1;
+
+        goto label1;
+
+     label5:
+        return i6;
+    }
+
+    private static boolean escaped(int, int, java.lang.String)
+    {
+        int $i0, $i2, i4, $i5, $i7, $i9, $i11, i13, i14, i15, $i16, $i17, $i18, $i19, $i20, $i22, $i23, $i25;
+        java.lang.String r0;
+        boolean $z0;
+        char $c1, $c3, $c6, $c8, $c10, $c12;
+
+        i13 := @parameter0: int;
+
+        i4 := @parameter1: int;
+
+        r0 := @parameter2: java.lang.String;
+
+        if i13 != 1 goto label1;
+
+        $i11 = i13 - 1;
+
+        $c12 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i11);
+
+        $i16 = (int) $c12;
+
+        if $i16 != 92 goto label1;
+
+        return 1;
+
+     label1:
+        if i13 <= 1 goto label2;
+
+        $i7 = i13 - 1;
+
+        $c8 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i7);
+
+        $i17 = (int) $c8;
+
+        if $i17 != 92 goto label2;
+
+        $i9 = i13 - 2;
+
+        $c10 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i9);
+
+        $i18 = (int) $c10;
+
+        if $i18 == 92 goto label2;
+
+        return 1;
+
+     label2:
+        if i13 <= 1 goto label8;
+
+        $i0 = i13 - 1;
+
+        $c1 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i0);
+
+        $i19 = (int) $c1;
+
+        if $i19 != 92 goto label8;
+
+        $i2 = i13 - 2;
+
+        $c3 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i2);
+
+        $i20 = (int) $c3;
+
+        if $i20 != 92 goto label8;
+
+        i14 = 0;
+
+        $i22 = (int) -1;
+
+        i15 = i13 + $i22;
+
+     label3:
+        if i15 < i4 goto label5;
+
+        $c6 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i15);
+
+        $i23 = (int) $c6;
+
+        if $i23 != 92 goto label4;
+
+        i14 = i14 + 1;
+
+     label4:
+        $i25 = (int) -1;
+
+        i15 = i15 + $i25;
+
+        goto label3;
+
+     label5:
+        $i5 = i14 % 2;
+
+        if $i5 == 0 goto label6;
+
+        $z0 = 1;
+
+        goto label7;
+
+     label6:
+        $z0 = 0;
+
+     label7:
+        return $z0;
+
+     label8:
+        return 0;
+    }
+
+    private void generateDN()
+    {
+        sun.security.x509.RDN[] $r1, $r3, $r5, $r6, $r7, $r10;
+        sun.security.x509.X500Name r0;
+        int $i0, $i1, $i2, $i3, i4, $i6;
+        java.lang.String $r4, $r9, $r12;
+        sun.security.x509.RDN $r8, $r11;
+        java.lang.StringBuilder $r13;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i0 = lengthof $r1;
+
+        if $i0 != 1 goto label1;
+
+        $r10 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r11 = $r10[0];
+
+        $r12 = virtualinvoke $r11.<sun.security.x509.RDN: java.lang.String toString()>();
+
+        r0.<sun.security.x509.X500Name: java.lang.String dn> = $r12;
+
+        return;
+
+     label1:
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>(int)>(48);
+
+        $r3 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        if $r3 == null goto label4;
+
+        $r5 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i1 = lengthof $r5;
+
+        i4 = $i1 - 1;
+
+     label2:
+        if i4 < 0 goto label4;
+
+        $r6 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i2 = lengthof $r6;
+
+        $i3 = $i2 - 1;
+
+        if i4 == $i3 goto label3;
+
+        virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+     label3:
+        $r7 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r8 = $r7[i4];
+
+        $r9 = virtualinvoke $r8.<sun.security.x509.RDN: java.lang.String toString()>();
+
+        virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $i6 = (int) -1;
+
+        i4 = i4 + $i6;
+
+        goto label2;
+
+     label4:
+        $r4 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r0.<sun.security.x509.X500Name: java.lang.String dn> = $r4;
+
+        return;
+    }
+
+    private java.lang.String generateRFC1779DN(java.util.Map)
+    {
+        sun.security.x509.RDN[] $r1, $r3, $r5, $r6, $r7, $r11;
+        sun.security.x509.X500Name r0;
+        java.util.Map r8;
+        int $i0, $i1, $i2, $i3, i4, $i6;
+        java.lang.String $r4, $r10, $r13;
+        sun.security.x509.RDN $r9, $r12;
+        java.lang.StringBuilder $r14;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        r8 := @parameter0: java.util.Map;
+
+        $r1 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i0 = lengthof $r1;
+
+        if $i0 != 1 goto label1;
+
+        $r11 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r12 = $r11[0];
+
+        $r13 = virtualinvoke $r12.<sun.security.x509.RDN: java.lang.String toRFC1779String(java.util.Map)>(r8);
+
+        return $r13;
+
+     label1:
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>(int)>(48);
+
+        $r3 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        if $r3 == null goto label4;
+
+        $r5 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i1 = lengthof $r5;
+
+        i4 = $i1 - 1;
+
+     label2:
+        if i4 < 0 goto label4;
+
+        $r6 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i2 = lengthof $r6;
+
+        $i3 = $i2 - 1;
+
+        if i4 == $i3 goto label3;
+
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+     label3:
+        $r7 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r9 = $r7[i4];
+
+        $r10 = virtualinvoke $r9.<sun.security.x509.RDN: java.lang.String toRFC1779String(java.util.Map)>(r8);
+
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $i6 = (int) -1;
+
+        i4 = i4 + $i6;
+
+        goto label2;
+
+     label4:
+        $r4 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r4;
+    }
+
+    public int constrains(sun.security.x509.GeneralNameInterface) throws java.lang.UnsupportedOperationException
+    {
+        sun.security.x509.RDN[] $r3, $r4;
+        byte b3;
+        sun.security.x509.X500Name r1, r2;
+        sun.security.x509.GeneralNameInterface r0;
+        int $i0, $i1, $i2;
+        boolean $z0, $z1, $z2;
+
+        r2 := @this: sun.security.x509.X500Name;
+
+        r0 := @parameter0: sun.security.x509.GeneralNameInterface;
+
+        if r0 != null goto label1;
+
+        b3 = -1;
+
+        goto label8;
+
+     label1:
+        $i0 = interfaceinvoke r0.<sun.security.x509.GeneralNameInterface: int getType()>();
+
+        if $i0 == 4 goto label2;
+
+        b3 = -1;
+
+        goto label8;
+
+     label2:
+        r1 = (sun.security.x509.X500Name) r0;
+
+        $z0 = virtualinvoke r1.<sun.security.x509.X500Name: boolean equals(java.lang.Object)>(r2);
+
+        if $z0 == 0 goto label3;
+
+        b3 = 0;
+
+        goto label8;
+
+     label3:
+        $r3 = r1.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i1 = lengthof $r3;
+
+        if $i1 != 0 goto label4;
+
+        b3 = 2;
+
+        goto label8;
+
+     label4:
+        $r4 = r2.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i2 = lengthof $r4;
+
+        if $i2 != 0 goto label5;
+
+        b3 = 1;
+
+        goto label8;
+
+     label5:
+        $z1 = specialinvoke r1.<sun.security.x509.X500Name: boolean isWithinSubtree(sun.security.x509.X500Name)>(r2);
+
+        if $z1 == 0 goto label6;
+
+        b3 = 1;
+
+        goto label8;
+
+     label6:
+        $z2 = specialinvoke r2.<sun.security.x509.X500Name: boolean isWithinSubtree(sun.security.x509.X500Name)>(r1);
+
+        if $z2 == 0 goto label7;
+
+        b3 = 2;
+
+        goto label8;
+
+     label7:
+        b3 = 3;
+
+     label8:
+        return b3;
+    }
+
+    private boolean isWithinSubtree(sun.security.x509.X500Name)
+    {
+        sun.security.x509.RDN[] $r2, $r3, $r4, $r5, $r6, $r7, $r8;
+        sun.security.x509.X500Name r0, r1;
+        int $i0, $i1, $i2, $i3, $i4, i5;
+        sun.security.x509.RDN $r9, $r10;
+        boolean $z0;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        r1 := @parameter0: sun.security.x509.X500Name;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        if r1 != null goto label2;
+
+        return 0;
+
+     label2:
+        $r2 = r1.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i0 = lengthof $r2;
+
+        if $i0 != 0 goto label3;
+
+        return 1;
+
+     label3:
+        $r3 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i1 = lengthof $r3;
+
+        if $i1 != 0 goto label4;
+
+        return 0;
+
+     label4:
+        $r4 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i3 = lengthof $r4;
+
+        $r5 = r1.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i2 = lengthof $r5;
+
+        if $i3 >= $i2 goto label5;
+
+        return 0;
+
+     label5:
+        i5 = 0;
+
+     label6:
+        $r6 = r1.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i4 = lengthof $r6;
+
+        if i5 >= $i4 goto label8;
+
+        $r7 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r10 = $r7[i5];
+
+        $r8 = r1.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r9 = $r8[i5];
+
+        $z0 = virtualinvoke $r10.<sun.security.x509.RDN: boolean equals(java.lang.Object)>($r9);
+
+        if $z0 != 0 goto label7;
+
+        return 0;
+
+     label7:
+        i5 = i5 + 1;
+
+        goto label6;
+
+     label8:
+        return 1;
+    }
+
+    public int subtreeDepth() throws java.lang.UnsupportedOperationException
+    {
+        int $i0;
+        sun.security.x509.X500Name r0;
+        sun.security.x509.RDN[] $r1;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $i0 = lengthof $r1;
+
+        return $i0;
+    }
+
+    public sun.security.x509.X500Name commonAncestor(sun.security.x509.X500Name)
+    {
+        sun.security.x509.RDN[] $r1, $r3, $r5, $r7, $r8, $r11;
+        sun.security.x509.X500Name r0, r2, $r4;
+        int i0, i1, i2, $i3, i4, i5;
+        sun.security.x509.RDN $r6, $r9, $r10;
+        boolean $z0;
+        java.io.IOException $r12;
+
+        r2 := @this: sun.security.x509.X500Name;
+
+        r0 := @parameter0: sun.security.x509.X500Name;
+
+        if r0 != null goto label01;
+
+        return null;
+
+     label01:
+        $r1 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        i0 = lengthof $r1;
+
+        $r3 = r2.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        i1 = lengthof $r3;
+
+        if i1 == 0 goto label02;
+
+        if i0 != 0 goto label03;
+
+     label02:
+        return null;
+
+     label03:
+        if i1 >= i0 goto label04;
+
+        $i3 = i1;
+
+        goto label05;
+
+     label04:
+        $i3 = i0;
+
+     label05:
+        i2 = $i3;
+
+        i4 = 0;
+
+     label06:
+        if i4 >= i2 goto label08;
+
+        $r7 = r2.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r10 = $r7[i4];
+
+        $r8 = r0.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r9 = $r8[i4];
+
+        $z0 = virtualinvoke $r10.<sun.security.x509.RDN: boolean equals(java.lang.Object)>($r9);
+
+        if $z0 != 0 goto label07;
+
+        if i4 != 0 goto label08;
+
+        return null;
+
+     label07:
+        i4 = i4 + 1;
+
+        goto label06;
+
+     label08:
+        $r11 = newarray (sun.security.x509.RDN)[i4];
+
+        i5 = 0;
+
+     label09:
+        if i5 >= i4 goto label10;
+
+        $r5 = r2.<sun.security.x509.X500Name: sun.security.x509.RDN[] names>;
+
+        $r6 = $r5[i5];
+
+        $r11[i5] = $r6;
+
+        i5 = i5 + 1;
+
+        goto label09;
+
+     label10:
+        $r4 = new sun.security.x509.X500Name;
+
+        specialinvoke $r4.<sun.security.x509.X500Name: void <init>(sun.security.x509.RDN[])>($r11);
+
+     label11:
+        goto label13;
+
+     label12:
+        $r12 := @caughtexception;
+
+        return null;
+
+     label13:
+        return $r4;
+
+        catch java.io.IOException from label10 to label11 with label12;
+    }
+
+    public javax.security.auth.x500.X500Principal asX500Principal()
+    {
+        javax.security.auth.x500.X500Principal $r1, $r2, $r6;
+        java.lang.Object[] $r3;
+        java.lang.RuntimeException $r8;
+        java.lang.reflect.Constructor $r4;
+        java.lang.Exception $r7;
+        sun.security.x509.X500Name r0;
+        java.lang.Object $r5;
+
+        r0 := @this: sun.security.x509.X500Name;
+
+        $r1 = r0.<sun.security.x509.X500Name: javax.security.auth.x500.X500Principal x500Principal>;
+
+        if $r1 != null goto label4;
+
+     label1:
+        $r3 = newarray (java.lang.Object)[1];
+
+        $r3[0] = r0;
+
+        $r4 = <sun.security.x509.X500Name: java.lang.reflect.Constructor principalConstructor>;
+
+        $r5 = virtualinvoke $r4.<java.lang.reflect.Constructor: java.lang.Object newInstance(java.lang.Object[])>($r3);
+
+        $r6 = (javax.security.auth.x500.X500Principal) $r5;
+
+        r0.<sun.security.x509.X500Name: javax.security.auth.x500.X500Principal x500Principal> = $r6;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $r8 = new java.lang.RuntimeException;
+
+        specialinvoke $r8.<java.lang.RuntimeException: void <init>(java.lang.String,java.lang.Throwable)>("Unexpected exception", $r7);
+
+        throw $r8;
+
+     label4:
+        $r2 = r0.<sun.security.x509.X500Name: javax.security.auth.x500.X500Principal x500Principal>;
+
+        return $r2;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public static sun.security.x509.X500Name asX500Name(javax.security.auth.x500.X500Principal)
+    {
+        javax.security.auth.x500.X500Principal r0;
+        sun.security.x509.X500Name r5;
+        java.lang.Object $r2;
+        java.lang.RuntimeException $r4;
+        java.lang.reflect.Field $r1;
+        java.lang.Exception $r3;
+
+        r0 := @parameter0: javax.security.auth.x500.X500Principal;
+
+     label1:
+        $r1 = <sun.security.x509.X500Name: java.lang.reflect.Field principalField>;
+
+        $r2 = virtualinvoke $r1.<java.lang.reflect.Field: java.lang.Object get(java.lang.Object)>(r0);
+
+        r5 = (sun.security.x509.X500Name) $r2;
+
+        r5.<sun.security.x509.X500Name: javax.security.auth.x500.X500Principal x500Principal> = r0;
+
+     label2:
+        return r5;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.lang.RuntimeException;
+
+        specialinvoke $r4.<java.lang.RuntimeException: void <init>(java.lang.String,java.lang.Throwable)>("Unexpected exception", $r3);
+
+        throw $r4;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.x509.X500Name$1 $r51;
+        int[] $r0, $r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r19, $r21, $r23, $r25, $r27, $r29, $r31, $r33, $r35, $r37, $r39, $r41, $r43, $r45, $r47, $r49;
+        java.lang.InternalError $r58;
+        sun.security.util.ObjectIdentifier $r18, $r20, $r22, $r24, $r26, $r28, $r30, $r32, $r34, $r36, $r38, $r40, $r42, $r44, $r46, $r48, $r50;
+        java.lang.Exception $r57;
+        java.lang.Object[] r59;
+        java.lang.reflect.Constructor r54;
+        java.lang.reflect.Field $r56;
+        java.lang.Object $r52, $r53, $r55;
+
+        $r0 = newarray (int)[4];
+
+        $r0[0] = 2;
+
+        $r0[1] = 5;
+
+        $r0[2] = 4;
+
+        $r0[3] = 3;
+
+        <sun.security.x509.X500Name: int[] commonName_data> = $r0;
+
+        $r1 = newarray (int)[4];
+
+        $r1[0] = 2;
+
+        $r1[1] = 5;
+
+        $r1[2] = 4;
+
+        $r1[3] = 4;
+
+        <sun.security.x509.X500Name: int[] SURNAME_DATA> = $r1;
+
+        $r2 = newarray (int)[4];
+
+        $r2[0] = 2;
+
+        $r2[1] = 5;
+
+        $r2[2] = 4;
+
+        $r2[3] = 5;
+
+        <sun.security.x509.X500Name: int[] SERIALNUMBER_DATA> = $r2;
+
+        $r3 = newarray (int)[4];
+
+        $r3[0] = 2;
+
+        $r3[1] = 5;
+
+        $r3[2] = 4;
+
+        $r3[3] = 6;
+
+        <sun.security.x509.X500Name: int[] countryName_data> = $r3;
+
+        $r4 = newarray (int)[4];
+
+        $r4[0] = 2;
+
+        $r4[1] = 5;
+
+        $r4[2] = 4;
+
+        $r4[3] = 7;
+
+        <sun.security.x509.X500Name: int[] localityName_data> = $r4;
+
+        $r5 = newarray (int)[4];
+
+        $r5[0] = 2;
+
+        $r5[1] = 5;
+
+        $r5[2] = 4;
+
+        $r5[3] = 8;
+
+        <sun.security.x509.X500Name: int[] stateName_data> = $r5;
+
+        $r6 = newarray (int)[4];
+
+        $r6[0] = 2;
+
+        $r6[1] = 5;
+
+        $r6[2] = 4;
+
+        $r6[3] = 9;
+
+        <sun.security.x509.X500Name: int[] streetAddress_data> = $r6;
+
+        $r7 = newarray (int)[4];
+
+        $r7[0] = 2;
+
+        $r7[1] = 5;
+
+        $r7[2] = 4;
+
+        $r7[3] = 10;
+
+        <sun.security.x509.X500Name: int[] orgName_data> = $r7;
+
+        $r8 = newarray (int)[4];
+
+        $r8[0] = 2;
+
+        $r8[1] = 5;
+
+        $r8[2] = 4;
+
+        $r8[3] = 11;
+
+        <sun.security.x509.X500Name: int[] orgUnitName_data> = $r8;
+
+        $r9 = newarray (int)[4];
+
+        $r9[0] = 2;
+
+        $r9[1] = 5;
+
+        $r9[2] = 4;
+
+        $r9[3] = 12;
+
+        <sun.security.x509.X500Name: int[] title_data> = $r9;
+
+        $r10 = newarray (int)[4];
+
+        $r10[0] = 2;
+
+        $r10[1] = 5;
+
+        $r10[2] = 4;
+
+        $r10[3] = 42;
+
+        <sun.security.x509.X500Name: int[] GIVENNAME_DATA> = $r10;
+
+        $r11 = newarray (int)[4];
+
+        $r11[0] = 2;
+
+        $r11[1] = 5;
+
+        $r11[2] = 4;
+
+        $r11[3] = 43;
+
+        <sun.security.x509.X500Name: int[] INITIALS_DATA> = $r11;
+
+        $r12 = newarray (int)[4];
+
+        $r12[0] = 2;
+
+        $r12[1] = 5;
+
+        $r12[2] = 4;
+
+        $r12[3] = 44;
+
+        <sun.security.x509.X500Name: int[] GENERATIONQUALIFIER_DATA> = $r12;
+
+        $r13 = newarray (int)[4];
+
+        $r13[0] = 2;
+
+        $r13[1] = 5;
+
+        $r13[2] = 4;
+
+        $r13[3] = 46;
+
+        <sun.security.x509.X500Name: int[] DNQUALIFIER_DATA> = $r13;
+
+        $r14 = newarray (int)[11];
+
+        $r14[0] = 1;
+
+        $r14[1] = 3;
+
+        $r14[2] = 6;
+
+        $r14[3] = 1;
+
+        $r14[4] = 4;
+
+        $r14[5] = 1;
+
+        $r14[6] = 42;
+
+        $r14[7] = 2;
+
+        $r14[8] = 11;
+
+        $r14[9] = 2;
+
+        $r14[10] = 1;
+
+        <sun.security.x509.X500Name: int[] ipAddress_data> = $r14;
+
+        $r15 = newarray (int)[7];
+
+        $r15[0] = 0;
+
+        $r15[1] = 9;
+
+        $r15[2] = 2342;
+
+        $r15[3] = 19200300;
+
+        $r15[4] = 100;
+
+        $r15[5] = 1;
+
+        $r15[6] = 25;
+
+        <sun.security.x509.X500Name: int[] DOMAIN_COMPONENT_DATA> = $r15;
+
+        $r16 = newarray (int)[7];
+
+        $r16[0] = 0;
+
+        $r16[1] = 9;
+
+        $r16[2] = 2342;
+
+        $r16[3] = 19200300;
+
+        $r16[4] = 100;
+
+        $r16[5] = 1;
+
+        $r16[6] = 1;
+
+        <sun.security.x509.X500Name: int[] userid_data> = $r16;
+
+        $r17 = <sun.security.x509.X500Name: int[] commonName_data>;
+
+        $r18 = staticinvoke <sun.security.util.ObjectIdentifier: sun.security.util.ObjectIdentifier newInternal(int[])>($r17);
+
+        <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier commonName_oid> = $r18;
+
+        $r19 = <sun.security.x509.X500Name: int[] SERIALNUMBER_DATA>;
+
+        $r20 = staticinvoke <sun.security.util.ObjectIdentifier: sun.security.util.ObjectIdentifier newInternal(int[])>($r19);
+
+        <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier SERIALNUMBER_OID> = $r20;
+
+        $r21 = <sun.security.x509.X500Name: int[] countryName_data>;
+
+        $r22 = staticinvoke <sun.security.util.ObjectIdentifier: sun.security.util.ObjectIdentifier newInternal(int[])>($r21);
+
+        <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier countryName_oid> = $r22;
+
+        $r23 = <sun.security.x509.X500Name: int[] localityName_data>;
+
+        $r24 = staticinvoke <sun.security.util.ObjectIdentifier: sun.security.util.ObjectIdentifier newInternal(int[])>($r23);
+
+        <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier localityName_oid> = $r24;
+
+        $r25 = <sun.security.x509.X500Name: int[] orgName_data>;
+
+        $r26 = staticinvoke <sun.security.util.ObjectIdentifier: sun.security.util.ObjectIdentifier newInternal(int[])>($r25);
+
+        <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier orgName_oid> = $r26;
+
+        $r27 = <sun.security.x509.X500Name: int[] orgUnitName_data>;
+
+        $r28 = staticinvoke <sun.security.util.ObjectIdentifier: sun.security.util.ObjectIdentifier newInternal(int[])>($r27);
+
+        <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier orgUnitName_oid> = $r28;
+
+        $r29 = <sun.security.x509.X500Name: int[] stateName_data>;
+
+        $r30 = staticinvoke <sun.security.util.ObjectIdentifier: sun.security.util.ObjectIdentifier newInternal(int[])>($r29);
+
+        <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier stateName_oid> = $r30;
+
+        $r31 = <sun.security.x509.X500Name: int[] streetAddress_data>;
+
+        $r32 = staticinvoke <sun.security.util.ObjectIdentifier: sun.security.util.ObjectIdentifier newInternal(int[])>($r31);
+
+        <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier streetAddress_oid> = $r32;
+
+        $r33 = <sun.security.x509.X500Name: int[] title_data>;
+
+        $r34 = staticinvoke <sun.security.util.ObjectIdentifier: sun.security.util.ObjectIdentifier newInternal(int[])>($r33);
+
+        <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier title_oid> = $r34;
+
+        $r35 = <sun.security.x509.X500Name: int[] DNQUALIFIER_DATA>;
+
+        $r36 = staticinvoke <sun.security.util.ObjectIdentifier: sun.security.util.ObjectIdentifier newInternal(int[])>($r35);
+
+        <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier DNQUALIFIER_OID> = $r36;
+
+        $r37 = <sun.security.x509.X500Name: int[] SURNAME_DATA>;
+
+        $r38 = staticinvoke <sun.security.util.ObjectIdentifier: sun.security.util.ObjectIdentifier newInternal(int[])>($r37);
+
+        <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier SURNAME_OID> = $r38;
+
+        $r39 = <sun.security.x509.X500Name: int[] GIVENNAME_DATA>;
+
+        $r40 = staticinvoke <sun.security.util.ObjectIdentifier: sun.security.util.ObjectIdentifier newInternal(int[])>($r39);
+
+        <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier GIVENNAME_OID> = $r40;
+
+        $r41 = <sun.security.x509.X500Name: int[] INITIALS_DATA>;
+
+        $r42 = staticinvoke <sun.security.util.ObjectIdentifier: sun.security.util.ObjectIdentifier newInternal(int[])>($r41);
+
+        <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier INITIALS_OID> = $r42;
+
+        $r43 = <sun.security.x509.X500Name: int[] GENERATIONQUALIFIER_DATA>;
+
+        $r44 = staticinvoke <sun.security.util.ObjectIdentifier: sun.security.util.ObjectIdentifier newInternal(int[])>($r43);
+
+        <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier GENERATIONQUALIFIER_OID> = $r44;
+
+        $r45 = <sun.security.x509.X500Name: int[] ipAddress_data>;
+
+        $r46 = staticinvoke <sun.security.util.ObjectIdentifier: sun.security.util.ObjectIdentifier newInternal(int[])>($r45);
+
+        <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier ipAddress_oid> = $r46;
+
+        $r47 = <sun.security.x509.X500Name: int[] DOMAIN_COMPONENT_DATA>;
+
+        $r48 = staticinvoke <sun.security.util.ObjectIdentifier: sun.security.util.ObjectIdentifier newInternal(int[])>($r47);
+
+        <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier DOMAIN_COMPONENT_OID> = $r48;
+
+        $r49 = <sun.security.x509.X500Name: int[] userid_data>;
+
+        $r50 = staticinvoke <sun.security.util.ObjectIdentifier: sun.security.util.ObjectIdentifier newInternal(int[])>($r49);
+
+        <sun.security.x509.X500Name: sun.security.util.ObjectIdentifier userid_oid> = $r50;
+
+        $r51 = new sun.security.x509.X500Name$1;
+
+        specialinvoke $r51.<sun.security.x509.X500Name$1: void <init>()>();
+
+     label1:
+        $r52 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r51);
+
+        r59 = (java.lang.Object[]) $r52;
+
+        $r53 = r59[0];
+
+        r54 = (java.lang.reflect.Constructor) $r53;
+
+        <sun.security.x509.X500Name: java.lang.reflect.Constructor principalConstructor> = r54;
+
+        $r55 = r59[1];
+
+        $r56 = (java.lang.reflect.Field) $r55;
+
+        <sun.security.x509.X500Name: java.lang.reflect.Field principalField> = $r56;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r57 := @caughtexception;
+
+        $r58 = new java.lang.InternalError;
+
+        specialinvoke $r58.<java.lang.InternalError: void <init>(java.lang.String,java.lang.Throwable)>("Could not obtain X500Principal access", $r57);
+
+        throw $r58;
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+}

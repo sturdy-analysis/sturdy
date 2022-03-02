@@ -1,0 +1,145 @@
+public class sun.net.www.http.HttpCaptureInputStream extends java.io.FilterInputStream
+{
+    private sun.net.www.http.HttpCapture capture;
+
+    public void <init>(java.io.InputStream, sun.net.www.http.HttpCapture)
+    {
+        sun.net.www.http.HttpCaptureInputStream r0;
+        sun.net.www.http.HttpCapture r2;
+        java.io.InputStream r1;
+
+        r0 := @this: sun.net.www.http.HttpCaptureInputStream;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        r2 := @parameter1: sun.net.www.http.HttpCapture;
+
+        specialinvoke r0.<java.io.FilterInputStream: void <init>(java.io.InputStream)>(r1);
+
+        r0.<sun.net.www.http.HttpCaptureInputStream: sun.net.www.http.HttpCapture capture> = null;
+
+        r0.<sun.net.www.http.HttpCaptureInputStream: sun.net.www.http.HttpCapture capture> = r2;
+
+        return;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        int $i0;
+        sun.net.www.http.HttpCaptureInputStream r0;
+        sun.net.www.http.HttpCapture $r1;
+
+        r0 := @this: sun.net.www.http.HttpCaptureInputStream;
+
+        $i0 = specialinvoke r0.<java.io.FilterInputStream: int read()>();
+
+        $r1 = r0.<sun.net.www.http.HttpCaptureInputStream: sun.net.www.http.HttpCapture capture>;
+
+        virtualinvoke $r1.<sun.net.www.http.HttpCapture: void received(int)>($i0);
+
+        return $i0;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        java.io.IOException $r2;
+        sun.net.www.http.HttpCaptureInputStream r0;
+        sun.net.www.http.HttpCapture $r1;
+
+        r0 := @this: sun.net.www.http.HttpCaptureInputStream;
+
+     label1:
+        $r1 = r0.<sun.net.www.http.HttpCaptureInputStream: sun.net.www.http.HttpCapture capture>;
+
+        virtualinvoke $r1.<sun.net.www.http.HttpCapture: void flush()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+     label4:
+        specialinvoke r0.<java.io.FilterInputStream: void close()>();
+
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public int read(byte[]) throws java.io.IOException
+    {
+        byte[] r1;
+        byte $b1;
+        sun.net.www.http.HttpCaptureInputStream r0;
+        int $i0, i2, $i3;
+        sun.net.www.http.HttpCapture $r2;
+
+        r0 := @this: sun.net.www.http.HttpCaptureInputStream;
+
+        r1 := @parameter0: byte[];
+
+        $i0 = specialinvoke r0.<java.io.FilterInputStream: int read(byte[])>(r1);
+
+        i2 = 0;
+
+     label1:
+        if i2 >= $i0 goto label2;
+
+        $r2 = r0.<sun.net.www.http.HttpCaptureInputStream: sun.net.www.http.HttpCapture capture>;
+
+        $b1 = r1[i2];
+
+        $i3 = (int) $b1;
+
+        virtualinvoke $r2.<sun.net.www.http.HttpCapture: void received(int)>($i3);
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return $i0;
+    }
+
+    public int read(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r1;
+        sun.net.www.http.HttpCapture $r2;
+        byte $b4;
+        sun.net.www.http.HttpCaptureInputStream r0;
+        int i0, i1, $i2, $i3, i5, $i6;
+
+        r0 := @this: sun.net.www.http.HttpCaptureInputStream;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $i2 = specialinvoke r0.<java.io.FilterInputStream: int read(byte[],int,int)>(r1, i0, i1);
+
+        i5 = 0;
+
+     label1:
+        if i5 >= $i2 goto label2;
+
+        $r2 = r0.<sun.net.www.http.HttpCaptureInputStream: sun.net.www.http.HttpCapture capture>;
+
+        $i3 = i0 + i5;
+
+        $b4 = r1[$i3];
+
+        $i6 = (int) $b4;
+
+        virtualinvoke $r2.<sun.net.www.http.HttpCapture: void received(int)>($i6);
+
+        i5 = i5 + 1;
+
+        goto label1;
+
+     label2:
+        return $i2;
+    }
+}

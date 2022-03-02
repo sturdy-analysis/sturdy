@@ -1,0 +1,1338 @@
+final class sun.security.ssl.SSLExtensions extends java.lang.Object
+{
+    private final sun.security.ssl.SSLHandshake$HandshakeMessage handshakeMessage;
+    private java.util.Map extMap;
+    private int encodedLength;
+    private final java.util.Map logMap;
+
+    void <init>(sun.security.ssl.SSLHandshake$HandshakeMessage)
+    {
+        java.util.LinkedHashMap $r1, $r3;
+        sun.security.ssl.SSLHandshake$HandshakeMessage r2;
+        sun.security.ssl.SSLExtensions r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.ssl.SSLExtensions;
+
+        r2 := @parameter0: sun.security.ssl.SSLHandshake$HandshakeMessage;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.LinkedHashMap;
+
+        specialinvoke $r1.<java.util.LinkedHashMap: void <init>()>();
+
+        r0.<sun.security.ssl.SSLExtensions: java.util.Map extMap> = $r1;
+
+        $z0 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = new java.util.LinkedHashMap;
+
+        specialinvoke $r3.<java.util.LinkedHashMap: void <init>()>();
+
+        goto label2;
+
+     label1:
+        $r3 = null;
+
+     label2:
+        r0.<sun.security.ssl.SSLExtensions: java.util.Map logMap> = $r3;
+
+        r0.<sun.security.ssl.SSLExtensions: sun.security.ssl.SSLHandshake$HandshakeMessage handshakeMessage> = r2;
+
+        r0.<sun.security.ssl.SSLExtensions: int encodedLength> = 2;
+
+        return;
+    }
+
+    void <init>(sun.security.ssl.SSLHandshake$HandshakeMessage, java.nio.ByteBuffer, sun.security.ssl.SSLExtension[]) throws java.io.IOException
+    {
+        byte[] r14, r56;
+        sun.security.ssl.SSLHandshake$HandshakeMessage r2;
+        java.lang.Integer $r7, $r18;
+        java.util.Map $r5, $r6, $r15, $r16, $r17;
+        javax.net.ssl.SSLException $r29, $r43, $r54;
+        java.lang.StringBuilder $r20, $r23, $r24, $r25, $r27, $r34, $r37, $r38, $r39, $r41, $r47, $r50, $r51, $r52;
+        java.lang.Object[] $r8, $r45;
+        java.util.LinkedHashMap $r1, $r55;
+        java.lang.String $r9, $r26, $r28, $r40, $r42, $r53;
+        sun.security.ssl.TransportContext $r21, $r35, $r48;
+        sun.security.ssl.Alert $r22, $r36, $r49;
+        sun.security.ssl.HandshakeContext $r19, $r33, $r46;
+        sun.security.ssl.SSLExtensions r0;
+        sun.security.ssl.SSLExtension$ExtensionConsumer $r12;
+        java.nio.ByteBuffer r3;
+        sun.security.ssl.SSLExtension[] r10;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, z6, z7, z8;
+        sun.security.ssl.SSLHandshake $r4, $r13, $r32, $r44;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, $i7, $i8, i9, i10, i11, $i12;
+        sun.security.ssl.SSLExtension r11, $r30, $r31;
+
+        r0 := @this: sun.security.ssl.SSLExtensions;
+
+        r2 := @parameter0: sun.security.ssl.SSLHandshake$HandshakeMessage;
+
+        r3 := @parameter1: java.nio.ByteBuffer;
+
+        r10 := @parameter2: sun.security.ssl.SSLExtension[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.LinkedHashMap;
+
+        specialinvoke $r1.<java.util.LinkedHashMap: void <init>()>();
+
+        r0.<sun.security.ssl.SSLExtensions: java.util.Map extMap> = $r1;
+
+        $z0 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z0 == 0 goto label01;
+
+        $r55 = new java.util.LinkedHashMap;
+
+        specialinvoke $r55.<java.util.LinkedHashMap: void <init>()>();
+
+        goto label02;
+
+     label01:
+        $r55 = null;
+
+     label02:
+        r0.<sun.security.ssl.SSLExtensions: java.util.Map logMap> = $r55;
+
+        r0.<sun.security.ssl.SSLExtensions: sun.security.ssl.SSLHandshake$HandshakeMessage handshakeMessage> = r2;
+
+        $i0 = staticinvoke <sun.security.ssl.Record: int getInt16(java.nio.ByteBuffer)>(r3);
+
+        i9 = $i0;
+
+        $i1 = $i0 + 2;
+
+        r0.<sun.security.ssl.SSLExtensions: int encodedLength> = $i1;
+
+     label03:
+        if i9 <= 0 goto label17;
+
+        $i2 = staticinvoke <sun.security.ssl.Record: int getInt16(java.nio.ByteBuffer)>(r3);
+
+        $i3 = staticinvoke <sun.security.ssl.Record: int getInt16(java.nio.ByteBuffer)>(r3);
+
+        $i4 = virtualinvoke r3.<java.nio.ByteBuffer: int remaining()>();
+
+        if $i3 <= $i4 goto label04;
+
+        $r46 = r2.<sun.security.ssl.SSLHandshake$HandshakeMessage: sun.security.ssl.HandshakeContext handshakeContext>;
+
+        $r48 = $r46.<sun.security.ssl.HandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r49 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r47 = new java.lang.StringBuilder;
+
+        specialinvoke $r47.<java.lang.StringBuilder: void <init>()>();
+
+        $r50 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error parsing extension (");
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("): no sufficient data");
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r54 = virtualinvoke $r48.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r49, $r53);
+
+        throw $r54;
+
+     label04:
+        z6 = 1;
+
+        z8 = 1;
+
+        z7 = 1;
+
+        $r4 = virtualinvoke r2.<sun.security.ssl.SSLHandshake$HandshakeMessage: sun.security.ssl.SSLHandshake handshakeType()>();
+
+        $z1 = staticinvoke <sun.security.ssl.SSLExtension: boolean isConsumable(int)>($i2);
+
+        if $z1 == 0 goto label07;
+
+        $r30 = staticinvoke <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension valueOf(sun.security.ssl.SSLHandshake,int)>($r4, $i2);
+
+        if $r30 != null goto label07;
+
+        $r31 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension CH_SUPPORTED_GROUPS>;
+
+        $i8 = $r31.<sun.security.ssl.SSLExtension: int id>;
+
+        if $i2 != $i8 goto label05;
+
+        $r44 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake SERVER_HELLO>;
+
+        if $r4 != $r44 goto label05;
+
+        z6 = 0;
+
+        z8 = 0;
+
+        z7 = 0;
+
+        $z4 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z4 == 0 goto label07;
+
+        $z5 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z5 == 0 goto label07;
+
+        $r45 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void warning(java.lang.String,java.lang.Object[])>("Received buggy supported_groups extension in the ServerHello handshake message", $r45);
+
+        goto label07;
+
+     label05:
+        $r32 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake SERVER_HELLO>;
+
+        if $r4 != $r32 goto label06;
+
+        $r33 = r2.<sun.security.ssl.SSLHandshake$HandshakeMessage: sun.security.ssl.HandshakeContext handshakeContext>;
+
+        $r35 = $r33.<sun.security.ssl.HandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r36 = <sun.security.ssl.Alert: sun.security.ssl.Alert UNSUPPORTED_EXTENSION>;
+
+        $r34 = new java.lang.StringBuilder;
+
+        specialinvoke $r34.<java.lang.StringBuilder: void <init>()>();
+
+        $r37 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("extension (");
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") should not be presented in ");
+
+        $r40 = $r4.<sun.security.ssl.SSLHandshake: java.lang.String name>;
+
+        $r41 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r40);
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r43 = virtualinvoke $r35.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r36, $r42);
+
+        throw $r43;
+
+     label06:
+        z6 = 0;
+
+        z8 = 0;
+
+        z7 = 0;
+
+     label07:
+        if z8 == 0 goto label13;
+
+        z6 = 0;
+
+        z7 = 0;
+
+        i6 = lengthof r10;
+
+        i10 = 0;
+
+     label08:
+        if i10 >= i6 goto label13;
+
+        r11 = r10[i10];
+
+        $i7 = r11.<sun.security.ssl.SSLExtension: int id>;
+
+        if $i7 != $i2 goto label12;
+
+        $r12 = r11.<sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension$ExtensionConsumer onLoadConsumer>;
+
+        if $r12 != null goto label09;
+
+        goto label12;
+
+     label09:
+        $r13 = r11.<sun.security.ssl.SSLExtension: sun.security.ssl.SSLHandshake handshakeType>;
+
+        if $r13 == $r4 goto label10;
+
+        $r19 = r2.<sun.security.ssl.SSLHandshake$HandshakeMessage: sun.security.ssl.HandshakeContext handshakeContext>;
+
+        $r21 = $r19.<sun.security.ssl.HandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r22 = <sun.security.ssl.Alert: sun.security.ssl.Alert UNSUPPORTED_EXTENSION>;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("extension (");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") should not be presented in ");
+
+        $r26 = $r4.<sun.security.ssl.SSLHandshake: java.lang.String name>;
+
+        $r27 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r26);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r29 = virtualinvoke $r21.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r22, $r28);
+
+        throw $r29;
+
+     label10:
+        r14 = newarray (byte)[$i3];
+
+        virtualinvoke r3.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[])>(r14);
+
+        $r15 = r0.<sun.security.ssl.SSLExtensions: java.util.Map extMap>;
+
+        interfaceinvoke $r15.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r11, r14);
+
+        $r16 = r0.<sun.security.ssl.SSLExtensions: java.util.Map logMap>;
+
+        if $r16 == null goto label11;
+
+        $r17 = r0.<sun.security.ssl.SSLExtensions: java.util.Map logMap>;
+
+        $r18 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        interfaceinvoke $r17.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r18, r14);
+
+     label11:
+        z6 = 1;
+
+        z7 = 1;
+
+        goto label13;
+
+     label12:
+        i10 = i10 + 1;
+
+        goto label08;
+
+     label13:
+        if z7 != 0 goto label16;
+
+        $r5 = r0.<sun.security.ssl.SSLExtensions: java.util.Map logMap>;
+
+        if $r5 == null goto label15;
+
+        r56 = newarray (byte)[$i3];
+
+        virtualinvoke r3.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[])>(r56);
+
+        $r6 = r0.<sun.security.ssl.SSLExtensions: java.util.Map logMap>;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        interfaceinvoke $r6.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r7, r56);
+
+        $z2 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z2 == 0 goto label14;
+
+        $z3 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z3 == 0 goto label14;
+
+        $r8 = newarray (java.lang.Object)[1];
+
+        $r9 = staticinvoke <sun.security.ssl.SSLExtensions: java.lang.String toString(int,byte[])>($i2, r56);
+
+        $r8[0] = $r9;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Ignore unknown or unsupported extension", $r8);
+
+     label14:
+        goto label16;
+
+     label15:
+        $i5 = virtualinvoke r3.<java.nio.ByteBuffer: int position()>();
+
+        i11 = $i5 + $i3;
+
+        virtualinvoke r3.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i11);
+
+     label16:
+        $i12 = $i3 + 4;
+
+        i9 = i9 - $i12;
+
+        goto label03;
+
+     label17:
+        return;
+    }
+
+    byte[] get(sun.security.ssl.SSLExtension)
+    {
+        byte[] $r4;
+        sun.security.ssl.SSLExtension r1;
+        java.util.Map $r2;
+        sun.security.ssl.SSLExtensions r0;
+        java.lang.Object $r3;
+
+        r0 := @this: sun.security.ssl.SSLExtensions;
+
+        r1 := @parameter0: sun.security.ssl.SSLExtension;
+
+        $r2 = r0.<sun.security.ssl.SSLExtensions: java.util.Map extMap>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        $r4 = (byte[]) $r3;
+
+        return $r4;
+    }
+
+    void consumeOnLoad(sun.security.ssl.HandshakeContext, sun.security.ssl.SSLExtension[]) throws java.io.IOException
+    {
+        byte[] $r9;
+        sun.security.ssl.SSLHandshake$HandshakeMessage $r11, $r31;
+        sun.security.ssl.SSLExtensions r4;
+        sun.security.ssl.SSLExtension$ExtensionConsumer $r6;
+        java.nio.ByteBuffer $r10;
+        sun.security.ssl.SSLExtension[] r0;
+        java.util.Map $r5, $r7;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        sun.security.ssl.HandshakeAbsence $r24;
+        java.lang.StringBuilder $r12, $r13, $r15, $r18, $r19, $r21, $r25, $r26, $r28, $r33, $r34, $r36;
+        java.lang.Object[] $r17, $r23, $r30, $r38;
+        sun.security.ssl.ProtocolVersion $r3, $r32;
+        int i0, i1;
+        java.lang.String $r14, $r16, $r20, $r22, $r27, $r29, $r35, $r37;
+        sun.security.ssl.SSLExtension r1;
+        java.lang.Object $r8;
+        sun.security.ssl.HandshakeContext r2;
+
+        r4 := @this: sun.security.ssl.SSLExtensions;
+
+        r2 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        r0 := @parameter1: sun.security.ssl.SSLExtension[];
+
+        i0 = lengthof r0;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label7;
+
+        r1 = r0[i1];
+
+        $r3 = r2.<sun.security.ssl.HandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        if $r3 == null goto label2;
+
+        $r32 = r2.<sun.security.ssl.HandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $z7 = virtualinvoke r1.<sun.security.ssl.SSLExtension: boolean isAvailable(sun.security.ssl.ProtocolVersion)>($r32);
+
+        if $z7 != 0 goto label2;
+
+        $z8 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z8 == 0 goto label6;
+
+        $z9 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z9 == 0 goto label6;
+
+        $r33 = new java.lang.StringBuilder;
+
+        specialinvoke $r33.<java.lang.StringBuilder: void <init>()>();
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignore unsupported extension: ");
+
+        $r35 = r1.<sun.security.ssl.SSLExtension: java.lang.String name>;
+
+        $r36 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r35);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r38 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r37, $r38);
+
+        goto label6;
+
+     label2:
+        $r5 = r4.<sun.security.ssl.SSLExtensions: java.util.Map extMap>;
+
+        $z0 = interfaceinvoke $r5.<java.util.Map: boolean containsKey(java.lang.Object)>(r1);
+
+        if $z0 != 0 goto label4;
+
+        $r24 = r1.<sun.security.ssl.SSLExtension: sun.security.ssl.HandshakeAbsence onLoadAbsence>;
+
+        if $r24 == null goto label3;
+
+        $r31 = r4.<sun.security.ssl.SSLExtensions: sun.security.ssl.SSLHandshake$HandshakeMessage handshakeMessage>;
+
+        virtualinvoke r1.<sun.security.ssl.SSLExtension: void absentOnLoad(sun.security.ssl.ConnectionContext,sun.security.ssl.SSLHandshake$HandshakeMessage)>(r2, $r31);
+
+        goto label6;
+
+     label3:
+        $z5 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z5 == 0 goto label6;
+
+        $z6 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z6 == 0 goto label6;
+
+        $r25 = new java.lang.StringBuilder;
+
+        specialinvoke $r25.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignore unavailable extension: ");
+
+        $r27 = r1.<sun.security.ssl.SSLExtension: java.lang.String name>;
+
+        $r28 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r27);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r30 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r29, $r30);
+
+        goto label6;
+
+     label4:
+        $r6 = r1.<sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension$ExtensionConsumer onLoadConsumer>;
+
+        if $r6 != null goto label5;
+
+        $z3 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z3 == 0 goto label6;
+
+        $z4 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z4 == 0 goto label6;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignore unsupported extension: ");
+
+        $r20 = r1.<sun.security.ssl.SSLExtension: java.lang.String name>;
+
+        $r21 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r23 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void warning(java.lang.String,java.lang.Object[])>($r22, $r23);
+
+        goto label6;
+
+     label5:
+        $r7 = r4.<sun.security.ssl.SSLExtensions: java.util.Map extMap>;
+
+        $r8 = interfaceinvoke $r7.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        $r9 = (byte[]) $r8;
+
+        $r10 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>($r9);
+
+        $r11 = r4.<sun.security.ssl.SSLExtensions: sun.security.ssl.SSLHandshake$HandshakeMessage handshakeMessage>;
+
+        virtualinvoke r1.<sun.security.ssl.SSLExtension: void consumeOnLoad(sun.security.ssl.ConnectionContext,sun.security.ssl.SSLHandshake$HandshakeMessage,java.nio.ByteBuffer)>(r2, $r11, $r10);
+
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label6;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z2 == 0 goto label6;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Consumed extension: ");
+
+        $r14 = r1.<sun.security.ssl.SSLExtension: java.lang.String name>;
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r17 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r16, $r17);
+
+     label6:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label7:
+        return;
+    }
+
+    void consumeOnTrade(sun.security.ssl.HandshakeContext, sun.security.ssl.SSLExtension[]) throws java.io.IOException
+    {
+        sun.security.ssl.SSLHandshake$HandshakeMessage $r6, $r26;
+        sun.security.ssl.SSLExtensions r2;
+        sun.security.ssl.SSLExtension[] r0;
+        java.util.Map $r3;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        sun.security.ssl.HandshakeAbsence $r19;
+        sun.security.ssl.HandshakeConsumer $r4;
+        java.lang.StringBuilder $r7, $r8, $r10, $r13, $r14, $r16, $r20, $r21, $r23;
+        java.lang.Object[] $r12, $r18, $r25;
+        int i0, i1;
+        java.lang.String $r9, $r11, $r15, $r17, $r22, $r24;
+        sun.security.ssl.SSLExtension r1;
+        sun.security.ssl.HandshakeContext r5;
+
+        r2 := @this: sun.security.ssl.SSLExtensions;
+
+        r5 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        r0 := @parameter1: sun.security.ssl.SSLExtension[];
+
+        i0 = lengthof r0;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label6;
+
+        r1 = r0[i1];
+
+        $r3 = r2.<sun.security.ssl.SSLExtensions: java.util.Map extMap>;
+
+        $z0 = interfaceinvoke $r3.<java.util.Map: boolean containsKey(java.lang.Object)>(r1);
+
+        if $z0 != 0 goto label3;
+
+        $r19 = r1.<sun.security.ssl.SSLExtension: sun.security.ssl.HandshakeAbsence onTradeAbsence>;
+
+        if $r19 == null goto label2;
+
+        $r26 = r2.<sun.security.ssl.SSLExtensions: sun.security.ssl.SSLHandshake$HandshakeMessage handshakeMessage>;
+
+        virtualinvoke r1.<sun.security.ssl.SSLExtension: void absentOnTrade(sun.security.ssl.ConnectionContext,sun.security.ssl.SSLHandshake$HandshakeMessage)>(r5, $r26);
+
+        goto label5;
+
+     label2:
+        $z5 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z5 == 0 goto label5;
+
+        $z6 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z6 == 0 goto label5;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignore unavailable extension: ");
+
+        $r22 = r1.<sun.security.ssl.SSLExtension: java.lang.String name>;
+
+        $r23 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r25 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r24, $r25);
+
+        goto label5;
+
+     label3:
+        $r4 = r1.<sun.security.ssl.SSLExtension: sun.security.ssl.HandshakeConsumer onTradeConsumer>;
+
+        if $r4 != null goto label4;
+
+        $z3 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z3 == 0 goto label5;
+
+        $z4 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z4 == 0 goto label5;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignore impact of unsupported extension: ");
+
+        $r15 = r1.<sun.security.ssl.SSLExtension: java.lang.String name>;
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r18 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void warning(java.lang.String,java.lang.Object[])>($r17, $r18);
+
+        goto label5;
+
+     label4:
+        $r6 = r2.<sun.security.ssl.SSLExtensions: sun.security.ssl.SSLHandshake$HandshakeMessage handshakeMessage>;
+
+        virtualinvoke r1.<sun.security.ssl.SSLExtension: void consumeOnTrade(sun.security.ssl.ConnectionContext,sun.security.ssl.SSLHandshake$HandshakeMessage)>(r5, $r6);
+
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label5;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z2 == 0 goto label5;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Populated with extension: ");
+
+        $r9 = r1.<sun.security.ssl.SSLExtension: java.lang.String name>;
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r12 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r11, $r12);
+
+     label5:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label6:
+        return;
+    }
+
+    void produce(sun.security.ssl.HandshakeContext, sun.security.ssl.SSLExtension[]) throws java.io.IOException
+    {
+        byte[] $r7;
+        sun.security.ssl.SSLHandshake$HandshakeMessage $r6;
+        sun.security.ssl.SSLExtensions r2;
+        sun.security.ssl.SSLExtension[] r0;
+        java.util.Map $r3, $r14;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.lang.StringBuilder $r8, $r9, $r11, $r15, $r16, $r18, $r21, $r22, $r24;
+        java.lang.Object[] $r13, $r20, $r26;
+        sun.security.ssl.HandshakeProducer $r4;
+        int i0, $i1, $i2, $i3, $i4, i5;
+        java.lang.String $r10, $r12, $r17, $r19, $r23, $r25;
+        sun.security.ssl.SSLExtension r1;
+        sun.security.ssl.HandshakeContext r5;
+
+        r2 := @this: sun.security.ssl.SSLExtensions;
+
+        r5 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        r0 := @parameter1: sun.security.ssl.SSLExtension[];
+
+        i0 = lengthof r0;
+
+        i5 = 0;
+
+     label1:
+        if i5 >= i0 goto label6;
+
+        r1 = r0[i5];
+
+        $r3 = r2.<sun.security.ssl.SSLExtensions: java.util.Map extMap>;
+
+        $z0 = interfaceinvoke $r3.<java.util.Map: boolean containsKey(java.lang.Object)>(r1);
+
+        if $z0 == 0 goto label2;
+
+        $z5 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z5 == 0 goto label5;
+
+        $z6 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z6 == 0 goto label5;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignore, duplicated extension: ");
+
+        $r23 = r1.<sun.security.ssl.SSLExtension: java.lang.String name>;
+
+        $r24 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r23);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r26 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r25, $r26);
+
+        goto label5;
+
+     label2:
+        $r4 = r1.<sun.security.ssl.SSLExtension: sun.security.ssl.HandshakeProducer networkProducer>;
+
+        if $r4 != null goto label3;
+
+        $z3 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z3 == 0 goto label5;
+
+        $z4 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z4 == 0 goto label5;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignore, no extension producer defined: ");
+
+        $r17 = r1.<sun.security.ssl.SSLExtension: java.lang.String name>;
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r20 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void warning(java.lang.String,java.lang.Object[])>($r19, $r20);
+
+        goto label5;
+
+     label3:
+        $r6 = r2.<sun.security.ssl.SSLExtensions: sun.security.ssl.SSLHandshake$HandshakeMessage handshakeMessage>;
+
+        $r7 = virtualinvoke r1.<sun.security.ssl.SSLExtension: byte[] produce(sun.security.ssl.ConnectionContext,sun.security.ssl.SSLHandshake$HandshakeMessage)>(r5, $r6);
+
+        if $r7 == null goto label4;
+
+        $r14 = r2.<sun.security.ssl.SSLExtensions: java.util.Map extMap>;
+
+        interfaceinvoke $r14.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r7);
+
+        $i3 = r2.<sun.security.ssl.SSLExtensions: int encodedLength>;
+
+        $i1 = lengthof $r7;
+
+        $i2 = $i1 + 4;
+
+        $i4 = $i3 + $i2;
+
+        r2.<sun.security.ssl.SSLExtensions: int encodedLength> = $i4;
+
+        goto label5;
+
+     label4:
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label5;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z2 == 0 goto label5;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignore, context unavailable extension: ");
+
+        $r10 = r1.<sun.security.ssl.SSLExtension: java.lang.String name>;
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r13 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r12, $r13);
+
+     label5:
+        i5 = i5 + 1;
+
+        goto label1;
+
+     label6:
+        return;
+    }
+
+    void reproduce(sun.security.ssl.HandshakeContext, sun.security.ssl.SSLExtension[]) throws java.io.IOException
+    {
+        byte[] $r6, r17;
+        sun.security.ssl.SSLHandshake$HandshakeMessage $r5;
+        sun.security.ssl.SSLExtensions r4;
+        sun.security.ssl.SSLExtension[] r0;
+        java.util.Map $r13, $r14, $r15;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.lang.StringBuilder $r7, $r8, $r10, $r18, $r19, $r21;
+        java.lang.Object[] $r12, $r23;
+        sun.security.ssl.HandshakeProducer $r2;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, i13;
+        java.lang.String $r9, $r11, $r20, $r22;
+        sun.security.ssl.SSLExtension r1;
+        java.lang.Object $r16;
+        sun.security.ssl.HandshakeContext r3;
+
+        r4 := @this: sun.security.ssl.SSLExtensions;
+
+        r3 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        r0 := @parameter1: sun.security.ssl.SSLExtension[];
+
+        i0 = lengthof r0;
+
+        i13 = 0;
+
+     label1:
+        if i13 >= i0 goto label7;
+
+        r1 = r0[i13];
+
+        $r2 = r1.<sun.security.ssl.SSLExtension: sun.security.ssl.HandshakeProducer networkProducer>;
+
+        if $r2 != null goto label2;
+
+        $z3 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z3 == 0 goto label6;
+
+        $z4 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z4 == 0 goto label6;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignore, no extension producer defined: ");
+
+        $r20 = r1.<sun.security.ssl.SSLExtension: java.lang.String name>;
+
+        $r21 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r23 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void warning(java.lang.String,java.lang.Object[])>($r22, $r23);
+
+        goto label6;
+
+     label2:
+        $r5 = r4.<sun.security.ssl.SSLExtensions: sun.security.ssl.SSLHandshake$HandshakeMessage handshakeMessage>;
+
+        $r6 = virtualinvoke r1.<sun.security.ssl.SSLExtension: byte[] produce(sun.security.ssl.ConnectionContext,sun.security.ssl.SSLHandshake$HandshakeMessage)>(r3, $r5);
+
+        if $r6 == null goto label5;
+
+        $r13 = r4.<sun.security.ssl.SSLExtensions: java.util.Map extMap>;
+
+        $z2 = interfaceinvoke $r13.<java.util.Map: boolean containsKey(java.lang.Object)>(r1);
+
+        if $z2 == 0 goto label4;
+
+        $r15 = r4.<sun.security.ssl.SSLExtensions: java.util.Map extMap>;
+
+        $r16 = interfaceinvoke $r15.<java.util.Map: java.lang.Object replace(java.lang.Object,java.lang.Object)>(r1, $r6);
+
+        r17 = (byte[]) $r16;
+
+        if r17 == null goto label3;
+
+        $i11 = r4.<sun.security.ssl.SSLExtensions: int encodedLength>;
+
+        $i9 = lengthof r17;
+
+        $i10 = $i9 + 4;
+
+        $i12 = $i11 - $i10;
+
+        r4.<sun.security.ssl.SSLExtensions: int encodedLength> = $i12;
+
+     label3:
+        $i7 = r4.<sun.security.ssl.SSLExtensions: int encodedLength>;
+
+        $i5 = lengthof $r6;
+
+        $i6 = $i5 + 4;
+
+        $i8 = $i7 + $i6;
+
+        r4.<sun.security.ssl.SSLExtensions: int encodedLength> = $i8;
+
+        goto label6;
+
+     label4:
+        $r14 = r4.<sun.security.ssl.SSLExtensions: java.util.Map extMap>;
+
+        interfaceinvoke $r14.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r6);
+
+        $i3 = r4.<sun.security.ssl.SSLExtensions: int encodedLength>;
+
+        $i1 = lengthof $r6;
+
+        $i2 = $i1 + 4;
+
+        $i4 = $i3 + $i2;
+
+        r4.<sun.security.ssl.SSLExtensions: int encodedLength> = $i4;
+
+        goto label6;
+
+     label5:
+        $z0 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z0 == 0 goto label6;
+
+        $z1 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z1 == 0 goto label6;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignore, context unavailable extension: ");
+
+        $r9 = r1.<sun.security.ssl.SSLExtension: java.lang.String name>;
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r12 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r11, $r12);
+
+     label6:
+        i13 = i13 + 1;
+
+        goto label1;
+
+     label7:
+        return;
+    }
+
+    int length()
+    {
+        java.util.Map $r1;
+        sun.security.ssl.SSLExtensions r0;
+        int $i0;
+        boolean $z0;
+
+        r0 := @this: sun.security.ssl.SSLExtensions;
+
+        $r1 = r0.<sun.security.ssl.SSLExtensions: java.util.Map extMap>;
+
+        $z0 = interfaceinvoke $r1.<java.util.Map: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        return 0;
+
+     label1:
+        $i0 = r0.<sun.security.ssl.SSLExtensions: int encodedLength>;
+
+        return $i0;
+    }
+
+    void send(sun.security.ssl.HandshakeOutStream) throws java.io.IOException
+    {
+        byte[] r6;
+        sun.security.ssl.SSLExtension r3;
+        sun.security.ssl.SSLExtensions r0;
+        sun.security.ssl.HandshakeOutStream r1;
+        sun.security.ssl.SSLExtension[] $r2;
+        java.util.Map $r4;
+        int $i0, $i1, i2, $i3, i4;
+        java.lang.Object $r5;
+
+        r0 := @this: sun.security.ssl.SSLExtensions;
+
+        r1 := @parameter0: sun.security.ssl.HandshakeOutStream;
+
+        $i0 = virtualinvoke r0.<sun.security.ssl.SSLExtensions: int length()>();
+
+        if $i0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $i1 = $i0 - 2;
+
+        virtualinvoke r1.<sun.security.ssl.HandshakeOutStream: void putInt16(int)>($i1);
+
+        $r2 = staticinvoke <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension[] values()>();
+
+        i2 = lengthof $r2;
+
+        i4 = 0;
+
+     label2:
+        if i4 >= i2 goto label4;
+
+        r3 = $r2[i4];
+
+        $r4 = r0.<sun.security.ssl.SSLExtensions: java.util.Map extMap>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Map: java.lang.Object get(java.lang.Object)>(r3);
+
+        r6 = (byte[]) $r5;
+
+        if r6 == null goto label3;
+
+        $i3 = r3.<sun.security.ssl.SSLExtension: int id>;
+
+        virtualinvoke r1.<sun.security.ssl.HandshakeOutStream: void putInt16(int)>($i3);
+
+        virtualinvoke r1.<sun.security.ssl.HandshakeOutStream: void putBytes16(byte[])>(r6);
+
+     label3:
+        i4 = i4 + 1;
+
+        goto label2;
+
+     label4:
+        return;
+    }
+
+    public java.lang.String toString()
+    {
+        byte[] $r12, $r29, $r32;
+        sun.security.ssl.SSLHandshake$HandshakeMessage $r21;
+        sun.security.ssl.SSLExtensions r0;
+        java.lang.Integer $r24, $r27;
+        java.nio.ByteBuffer $r13, $r33;
+        java.util.Map $r1, $r3, $r4, $r15, $r16, $r35, $r36;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        sun.security.ssl.SSLHandshake $r22;
+        java.util.Set $r5, $r17;
+        java.lang.StringBuilder $r2;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String $r7, $r14, $r19, $r30, $r34;
+        java.util.Map$Entry r37, r38;
+        java.util.Iterator $r6, $r18;
+        sun.security.ssl.SSLExtension $r10, $r25;
+        java.lang.Object $r8, $r9, $r11, $r20, $r23, $r26, $r28, $r31;
+
+        r0 := @this: sun.security.ssl.SSLExtensions;
+
+        $r1 = r0.<sun.security.ssl.SSLExtensions: java.util.Map extMap>;
+
+        $z0 = interfaceinvoke $r1.<java.util.Map: boolean isEmpty()>();
+
+        if $z0 == 0 goto label02;
+
+        $r35 = r0.<sun.security.ssl.SSLExtensions: java.util.Map logMap>;
+
+        if $r35 == null goto label01;
+
+        $r36 = r0.<sun.security.ssl.SSLExtensions: java.util.Map logMap>;
+
+        $z3 = interfaceinvoke $r36.<java.util.Map: boolean isEmpty()>();
+
+        if $z3 == 0 goto label02;
+
+     label01:
+        return "<no extension>";
+
+     label02:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>(int)>(512);
+
+        $r3 = r0.<sun.security.ssl.SSLExtensions: java.util.Map logMap>;
+
+        if $r3 == null goto label08;
+
+        $r15 = r0.<sun.security.ssl.SSLExtensions: java.util.Map logMap>;
+
+        $z1 = interfaceinvoke $r15.<java.util.Map: boolean isEmpty()>();
+
+        if $z1 != 0 goto label08;
+
+        $r16 = r0.<sun.security.ssl.SSLExtensions: java.util.Map logMap>;
+
+        $r17 = interfaceinvoke $r16.<java.util.Map: java.util.Set entrySet()>();
+
+        $r18 = interfaceinvoke $r17.<java.util.Set: java.util.Iterator iterator()>();
+
+     label03:
+        $z2 = interfaceinvoke $r18.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label07;
+
+        $r20 = interfaceinvoke $r18.<java.util.Iterator: java.lang.Object next()>();
+
+        r37 = (java.util.Map$Entry) $r20;
+
+        $r21 = r0.<sun.security.ssl.SSLExtensions: sun.security.ssl.SSLHandshake$HandshakeMessage handshakeMessage>;
+
+        $r22 = virtualinvoke $r21.<sun.security.ssl.SSLHandshake$HandshakeMessage: sun.security.ssl.SSLHandshake handshakeType()>();
+
+        $r23 = interfaceinvoke r37.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r24 = (java.lang.Integer) $r23;
+
+        $i1 = virtualinvoke $r24.<java.lang.Integer: int intValue()>();
+
+        $r25 = staticinvoke <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension valueOf(sun.security.ssl.SSLHandshake,int)>($r22, $i1);
+
+        $i2 = virtualinvoke $r2.<java.lang.StringBuilder: int length()>();
+
+        if $i2 == 0 goto label04;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",\n");
+
+     label04:
+        if $r25 == null goto label05;
+
+        $r31 = interfaceinvoke r37.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r32 = (byte[]) $r31;
+
+        $r33 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>($r32);
+
+        $r34 = virtualinvoke $r25.<sun.security.ssl.SSLExtension: java.lang.String toString(java.nio.ByteBuffer)>($r33);
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r34);
+
+        goto label06;
+
+     label05:
+        $r26 = interfaceinvoke r37.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r27 = (java.lang.Integer) $r26;
+
+        $i3 = virtualinvoke $r27.<java.lang.Integer: int intValue()>();
+
+        $r28 = interfaceinvoke r37.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r29 = (byte[]) $r28;
+
+        $r30 = staticinvoke <sun.security.ssl.SSLExtensions: java.lang.String toString(int,byte[])>($i3, $r29);
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r30);
+
+     label06:
+        goto label03;
+
+     label07:
+        $r19 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r19;
+
+     label08:
+        $r4 = r0.<sun.security.ssl.SSLExtensions: java.util.Map extMap>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Map: java.util.Set entrySet()>();
+
+        $r6 = interfaceinvoke $r5.<java.util.Set: java.util.Iterator iterator()>();
+
+     label09:
+        $z4 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z4 == 0 goto label11;
+
+        $r8 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r38 = (java.util.Map$Entry) $r8;
+
+        $i0 = virtualinvoke $r2.<java.lang.StringBuilder: int length()>();
+
+        if $i0 == 0 goto label10;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",\n");
+
+     label10:
+        $r9 = interfaceinvoke r38.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r10 = (sun.security.ssl.SSLExtension) $r9;
+
+        $r11 = interfaceinvoke r38.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r12 = (byte[]) $r11;
+
+        $r13 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>($r12);
+
+        $r14 = virtualinvoke $r10.<sun.security.ssl.SSLExtension: java.lang.String toString(java.nio.ByteBuffer)>($r13);
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        goto label09;
+
+     label11:
+        $r7 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r7;
+    }
+
+    private static java.lang.String toString(int, byte[])
+    {
+        byte[] r4;
+        java.lang.Object[] $r6;
+        java.lang.Integer $r7;
+        java.text.MessageFormat $r1;
+        java.util.Locale $r2;
+        int i0;
+        java.lang.String $r0, $r5, $r8, $r9;
+        sun.misc.HexDumpEncoder $r3;
+
+        i0 := @parameter0: int;
+
+        r4 := @parameter1: byte[];
+
+        $r0 = staticinvoke <sun.security.ssl.SSLExtension: java.lang.String nameOf(int)>(i0);
+
+        $r1 = new java.text.MessageFormat;
+
+        $r2 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        specialinvoke $r1.<java.text.MessageFormat: void <init>(java.lang.String,java.util.Locale)>("\"{0} ({1})\": \'{\'\n{2}\n\'}\'", $r2);
+
+        $r3 = new sun.misc.HexDumpEncoder;
+
+        specialinvoke $r3.<sun.misc.HexDumpEncoder: void <init>()>();
+
+        $r5 = virtualinvoke $r3.<sun.misc.HexDumpEncoder: java.lang.String encodeBuffer(byte[])>(r4);
+
+        $r6 = newarray (java.lang.Object)[3];
+
+        $r6[0] = $r0;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        $r6[1] = $r7;
+
+        $r8 = staticinvoke <sun.security.ssl.Utilities: java.lang.String indent(java.lang.String)>($r5);
+
+        $r6[2] = $r8;
+
+        $r9 = virtualinvoke $r1.<java.text.MessageFormat: java.lang.String format(java.lang.Object)>($r6);
+
+        return $r9;
+    }
+}

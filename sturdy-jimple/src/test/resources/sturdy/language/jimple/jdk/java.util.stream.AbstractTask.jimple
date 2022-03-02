@@ -1,0 +1,385 @@
+abstract class java.util.stream.AbstractTask extends java.util.concurrent.CountedCompleter
+{
+    static final int LEAF_TARGET;
+    protected final java.util.stream.PipelineHelper helper;
+    protected java.util.Spliterator spliterator;
+    protected long targetSize;
+    protected java.util.stream.AbstractTask leftChild;
+    protected java.util.stream.AbstractTask rightChild;
+    private java.lang.Object localResult;
+
+    protected void <init>(java.util.stream.PipelineHelper, java.util.Spliterator)
+    {
+        java.util.stream.PipelineHelper r1;
+        java.util.stream.AbstractTask r0;
+        java.util.Spliterator r2;
+
+        r0 := @this: java.util.stream.AbstractTask;
+
+        r1 := @parameter0: java.util.stream.PipelineHelper;
+
+        r2 := @parameter1: java.util.Spliterator;
+
+        specialinvoke r0.<java.util.concurrent.CountedCompleter: void <init>(java.util.concurrent.CountedCompleter)>(null);
+
+        r0.<java.util.stream.AbstractTask: java.util.stream.PipelineHelper helper> = r1;
+
+        r0.<java.util.stream.AbstractTask: java.util.Spliterator spliterator> = r2;
+
+        r0.<java.util.stream.AbstractTask: long targetSize> = 0L;
+
+        return;
+    }
+
+    protected void <init>(java.util.stream.AbstractTask, java.util.Spliterator)
+    {
+        java.util.stream.PipelineHelper $r3;
+        long $l0;
+        java.util.stream.AbstractTask r0, r1;
+        java.util.Spliterator r2;
+
+        r0 := @this: java.util.stream.AbstractTask;
+
+        r1 := @parameter0: java.util.stream.AbstractTask;
+
+        r2 := @parameter1: java.util.Spliterator;
+
+        specialinvoke r0.<java.util.concurrent.CountedCompleter: void <init>(java.util.concurrent.CountedCompleter)>(r1);
+
+        r0.<java.util.stream.AbstractTask: java.util.Spliterator spliterator> = r2;
+
+        $r3 = r1.<java.util.stream.AbstractTask: java.util.stream.PipelineHelper helper>;
+
+        r0.<java.util.stream.AbstractTask: java.util.stream.PipelineHelper helper> = $r3;
+
+        $l0 = r1.<java.util.stream.AbstractTask: long targetSize>;
+
+        r0.<java.util.stream.AbstractTask: long targetSize> = $l0;
+
+        return;
+    }
+
+    protected abstract java.util.stream.AbstractTask makeChild(java.util.Spliterator);
+
+    protected abstract java.lang.Object doLeaf();
+
+    public static long suggestTargetSize(long)
+    {
+        byte $b4;
+        int $i1, $i6;
+        long l0, $l2, l3, $l5;
+
+        l0 := @parameter0: long;
+
+        $i1 = <java.util.stream.AbstractTask: int LEAF_TARGET>;
+
+        $l2 = (long) $i1;
+
+        l3 = l0 / $l2;
+
+        $b4 = l3 cmp 0L;
+
+        $i6 = (int) $b4;
+
+        if $i6 <= 0 goto label1;
+
+        $l5 = l3;
+
+        goto label2;
+
+     label1:
+        $l5 = 1L;
+
+     label2:
+        return $l5;
+    }
+
+    protected final long getTargetSize(long)
+    {
+        byte $b1;
+        long $l0, l2, $l3;
+        java.util.stream.AbstractTask r0;
+
+        r0 := @this: java.util.stream.AbstractTask;
+
+        l2 := @parameter0: long;
+
+        $l0 = r0.<java.util.stream.AbstractTask: long targetSize>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 == 0 goto label1;
+
+        $l3 = $l0;
+
+        goto label2;
+
+     label1:
+        $l3 = staticinvoke <java.util.stream.AbstractTask: long suggestTargetSize(long)>(l2);
+
+        r0.<java.util.stream.AbstractTask: long targetSize> = $l3;
+
+     label2:
+        return $l3;
+    }
+
+    public java.lang.Object getRawResult()
+    {
+        java.lang.Object $r1;
+        java.util.stream.AbstractTask r0;
+
+        r0 := @this: java.util.stream.AbstractTask;
+
+        $r1 = r0.<java.util.stream.AbstractTask: java.lang.Object localResult>;
+
+        return $r1;
+    }
+
+    protected void setRawResult(java.lang.Object)
+    {
+        java.lang.IllegalStateException $r1;
+        java.lang.Object r0;
+        java.util.stream.AbstractTask r2;
+
+        r2 := @this: java.util.stream.AbstractTask;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 == null goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+
+    protected java.lang.Object getLocalResult()
+    {
+        java.lang.Object $r1;
+        java.util.stream.AbstractTask r0;
+
+        r0 := @this: java.util.stream.AbstractTask;
+
+        $r1 = r0.<java.util.stream.AbstractTask: java.lang.Object localResult>;
+
+        return $r1;
+    }
+
+    protected void setLocalResult(java.lang.Object)
+    {
+        java.lang.Object r1;
+        java.util.stream.AbstractTask r0;
+
+        r0 := @this: java.util.stream.AbstractTask;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r0.<java.util.stream.AbstractTask: java.lang.Object localResult> = r1;
+
+        return;
+    }
+
+    protected boolean isLeaf()
+    {
+        java.util.stream.AbstractTask r0, $r1;
+        boolean $z0;
+
+        r0 := @this: java.util.stream.AbstractTask;
+
+        $r1 = r0.<java.util.stream.AbstractTask: java.util.stream.AbstractTask leftChild>;
+
+        if $r1 != null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    protected boolean isRoot()
+    {
+        java.util.stream.AbstractTask r0, $r1;
+        boolean $z0;
+
+        r0 := @this: java.util.stream.AbstractTask;
+
+        $r1 = virtualinvoke r0.<java.util.stream.AbstractTask: java.util.stream.AbstractTask getParent()>();
+
+        if $r1 != null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    protected java.util.stream.AbstractTask getParent()
+    {
+        java.util.concurrent.CountedCompleter $r1;
+        java.util.stream.AbstractTask r0, $r2;
+
+        r0 := @this: java.util.stream.AbstractTask;
+
+        $r1 = virtualinvoke r0.<java.util.stream.AbstractTask: java.util.concurrent.CountedCompleter getCompleter()>();
+
+        $r2 = (java.util.stream.AbstractTask) $r1;
+
+        return $r2;
+    }
+
+    public void compute()
+    {
+        long $l0, $l1, l3;
+        byte $b2;
+        int $i4;
+        java.lang.Object $r1;
+        java.util.stream.AbstractTask r0, $r3, $r4, r6, r7;
+        java.util.Spliterator $r2, r5;
+        boolean z0;
+
+        r0 := @this: java.util.stream.AbstractTask;
+
+        r5 = r0.<java.util.stream.AbstractTask: java.util.Spliterator spliterator>;
+
+        $l0 = interfaceinvoke r5.<java.util.Spliterator: long estimateSize()>();
+
+        l3 = $l0;
+
+        $l1 = virtualinvoke r0.<java.util.stream.AbstractTask: long getTargetSize(long)>($l0);
+
+        z0 = 0;
+
+        r6 = r0;
+
+     label1:
+        $b2 = l3 cmp $l1;
+
+        $i4 = (int) $b2;
+
+        if $i4 <= 0 goto label4;
+
+        $r2 = interfaceinvoke r5.<java.util.Spliterator: java.util.Spliterator trySplit()>();
+
+        if $r2 == null goto label4;
+
+        $r3 = virtualinvoke r6.<java.util.stream.AbstractTask: java.util.stream.AbstractTask makeChild(java.util.Spliterator)>($r2);
+
+        r6.<java.util.stream.AbstractTask: java.util.stream.AbstractTask leftChild> = $r3;
+
+        $r4 = virtualinvoke r6.<java.util.stream.AbstractTask: java.util.stream.AbstractTask makeChild(java.util.Spliterator)>(r5);
+
+        r6.<java.util.stream.AbstractTask: java.util.stream.AbstractTask rightChild> = $r4;
+
+        virtualinvoke r6.<java.util.stream.AbstractTask: void setPendingCount(int)>(1);
+
+        if z0 == 0 goto label2;
+
+        z0 = 0;
+
+        r5 = $r2;
+
+        r6 = $r3;
+
+        r7 = $r4;
+
+        goto label3;
+
+     label2:
+        z0 = 1;
+
+        r6 = $r4;
+
+        r7 = $r3;
+
+     label3:
+        virtualinvoke r7.<java.util.stream.AbstractTask: java.util.concurrent.ForkJoinTask fork()>();
+
+        l3 = interfaceinvoke r5.<java.util.Spliterator: long estimateSize()>();
+
+        goto label1;
+
+     label4:
+        $r1 = virtualinvoke r6.<java.util.stream.AbstractTask: java.lang.Object doLeaf()>();
+
+        virtualinvoke r6.<java.util.stream.AbstractTask: void setLocalResult(java.lang.Object)>($r1);
+
+        virtualinvoke r6.<java.util.stream.AbstractTask: void tryComplete()>();
+
+        return;
+    }
+
+    public void onCompletion(java.util.concurrent.CountedCompleter)
+    {
+        java.util.concurrent.CountedCompleter r1;
+        java.util.stream.AbstractTask r0;
+
+        r0 := @this: java.util.stream.AbstractTask;
+
+        r1 := @parameter0: java.util.concurrent.CountedCompleter;
+
+        r0.<java.util.stream.AbstractTask: java.util.Spliterator spliterator> = null;
+
+        r0.<java.util.stream.AbstractTask: java.util.stream.AbstractTask rightChild> = null;
+
+        r0.<java.util.stream.AbstractTask: java.util.stream.AbstractTask leftChild> = null;
+
+        return;
+    }
+
+    protected boolean isLeftmostNode()
+    {
+        java.util.stream.AbstractTask r0, $r1, $r2, r3;
+
+        r0 := @this: java.util.stream.AbstractTask;
+
+        r3 = r0;
+
+     label1:
+        if r3 == null goto label3;
+
+        $r1 = virtualinvoke r3.<java.util.stream.AbstractTask: java.util.stream.AbstractTask getParent()>();
+
+        if $r1 == null goto label2;
+
+        $r2 = $r1.<java.util.stream.AbstractTask: java.util.stream.AbstractTask leftChild>;
+
+        if $r2 == r3 goto label2;
+
+        return 0;
+
+     label2:
+        r3 = $r1;
+
+        goto label1;
+
+     label3:
+        return 1;
+    }
+
+    static void <clinit>()
+    {
+        int $i0, $i1;
+
+        $i0 = staticinvoke <java.util.concurrent.ForkJoinPool: int getCommonPoolParallelism()>();
+
+        $i1 = $i0 << 2;
+
+        <java.util.stream.AbstractTask: int LEAF_TARGET> = $i1;
+
+        return;
+    }
+}

@@ -1,0 +1,624 @@
+class sun.rmi.transport.proxy.HttpSendSocket extends java.net.Socket implements sun.rmi.transport.proxy.RMISocketInfo
+{
+    protected java.lang.String host;
+    protected int port;
+    protected java.net.URL url;
+    protected java.net.URLConnection conn;
+    protected java.io.InputStream in;
+    protected java.io.OutputStream out;
+    protected sun.rmi.transport.proxy.HttpSendInputStream inNotifier;
+    protected sun.rmi.transport.proxy.HttpSendOutputStream outNotifier;
+    private java.lang.String lineSeparator;
+
+    public void <init>(java.lang.String, int, java.net.URL) throws java.io.IOException
+    {
+        java.net.URL r7;
+        sun.security.action.GetPropertyAction $r1;
+        java.util.logging.Level $r4, $r13;
+        int i0;
+        java.lang.String $r3, r6, $r20;
+        boolean $z0;
+        java.io.OutputStream $r10;
+        sun.rmi.transport.proxy.HttpSendInputStream $r8;
+        sun.rmi.transport.proxy.HttpSendSocket r0;
+        sun.rmi.runtime.Log $r5, $r12;
+        java.lang.Object $r2;
+        java.lang.StringBuilder $r11, $r14, $r15, $r16, $r17, $r18, $r19;
+        sun.rmi.transport.proxy.HttpSendOutputStream $r9;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpSendSocket;
+
+        r6 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        r7 := @parameter2: java.net.URL;
+
+        specialinvoke r0.<java.net.Socket: void <init>(java.net.SocketImpl)>(null);
+
+        r0.<sun.rmi.transport.proxy.HttpSendSocket: java.net.URLConnection conn> = null;
+
+        r0.<sun.rmi.transport.proxy.HttpSendSocket: java.io.InputStream in> = null;
+
+        r0.<sun.rmi.transport.proxy.HttpSendSocket: java.io.OutputStream out> = null;
+
+        $r1 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r1.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("line.separator");
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        $r3 = (java.lang.String) $r2;
+
+        r0.<sun.rmi.transport.proxy.HttpSendSocket: java.lang.String lineSeparator> = $r3;
+
+        $r5 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r4 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z0 = virtualinvoke $r5.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r4);
+
+        if $z0 == 0 goto label1;
+
+        $r12 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r13 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("host = ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", port = ");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", url = ");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r7);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r12.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r13, $r20);
+
+     label1:
+        r0.<sun.rmi.transport.proxy.HttpSendSocket: java.lang.String host> = r6;
+
+        r0.<sun.rmi.transport.proxy.HttpSendSocket: int port> = i0;
+
+        r0.<sun.rmi.transport.proxy.HttpSendSocket: java.net.URL url> = r7;
+
+        $r8 = new sun.rmi.transport.proxy.HttpSendInputStream;
+
+        specialinvoke $r8.<sun.rmi.transport.proxy.HttpSendInputStream: void <init>(java.io.InputStream,sun.rmi.transport.proxy.HttpSendSocket)>(null, r0);
+
+        r0.<sun.rmi.transport.proxy.HttpSendSocket: sun.rmi.transport.proxy.HttpSendInputStream inNotifier> = $r8;
+
+        $r9 = new sun.rmi.transport.proxy.HttpSendOutputStream;
+
+        $r10 = virtualinvoke r0.<sun.rmi.transport.proxy.HttpSendSocket: java.io.OutputStream writeNotify()>();
+
+        specialinvoke $r9.<sun.rmi.transport.proxy.HttpSendOutputStream: void <init>(java.io.OutputStream,sun.rmi.transport.proxy.HttpSendSocket)>($r10, r0);
+
+        r0.<sun.rmi.transport.proxy.HttpSendSocket: sun.rmi.transport.proxy.HttpSendOutputStream outNotifier> = $r9;
+
+        return;
+    }
+
+    public void <init>(java.lang.String, int) throws java.io.IOException
+    {
+        java.net.URL $r2;
+        int i0;
+        java.lang.String r1;
+        sun.rmi.transport.proxy.HttpSendSocket r0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpSendSocket;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $r2 = new java.net.URL;
+
+        specialinvoke $r2.<java.net.URL: void <init>(java.lang.String,java.lang.String,int,java.lang.String)>("http", r1, i0, "/");
+
+        specialinvoke r0.<sun.rmi.transport.proxy.HttpSendSocket: void <init>(java.lang.String,int,java.net.URL)>(r1, i0, $r2);
+
+        return;
+    }
+
+    public void <init>(java.net.InetAddress, int) throws java.io.IOException
+    {
+        java.net.InetAddress r1;
+        int i0;
+        java.lang.String $r2;
+        sun.rmi.transport.proxy.HttpSendSocket r0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpSendSocket;
+
+        r1 := @parameter0: java.net.InetAddress;
+
+        i0 := @parameter1: int;
+
+        $r2 = virtualinvoke r1.<java.net.InetAddress: java.lang.String getHostName()>();
+
+        specialinvoke r0.<sun.rmi.transport.proxy.HttpSendSocket: void <init>(java.lang.String,int)>($r2, i0);
+
+        return;
+    }
+
+    public boolean isReusable()
+    {
+        sun.rmi.transport.proxy.HttpSendSocket r0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpSendSocket;
+
+        return 0;
+    }
+
+    public synchronized java.io.OutputStream writeNotify() throws java.io.IOException
+    {
+        java.io.OutputStream $r9;
+        sun.rmi.transport.proxy.HttpSendInputStream $r7;
+        java.net.URL $r2;
+        java.io.IOException $r10;
+        sun.rmi.transport.proxy.HttpSendSocket r0;
+        java.net.URLConnection $r1, $r3, $r4, $r5, $r6, $r8;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpSendSocket;
+
+        $r1 = r0.<sun.rmi.transport.proxy.HttpSendSocket: java.net.URLConnection conn>;
+
+        if $r1 == null goto label1;
+
+        $r10 = new java.io.IOException;
+
+        specialinvoke $r10.<java.io.IOException: void <init>(java.lang.String)>("attempt to write on HttpSendSocket after request has been sent");
+
+        throw $r10;
+
+     label1:
+        $r2 = r0.<sun.rmi.transport.proxy.HttpSendSocket: java.net.URL url>;
+
+        $r3 = virtualinvoke $r2.<java.net.URL: java.net.URLConnection openConnection()>();
+
+        r0.<sun.rmi.transport.proxy.HttpSendSocket: java.net.URLConnection conn> = $r3;
+
+        $r4 = r0.<sun.rmi.transport.proxy.HttpSendSocket: java.net.URLConnection conn>;
+
+        virtualinvoke $r4.<java.net.URLConnection: void setDoOutput(boolean)>(1);
+
+        $r5 = r0.<sun.rmi.transport.proxy.HttpSendSocket: java.net.URLConnection conn>;
+
+        virtualinvoke $r5.<java.net.URLConnection: void setUseCaches(boolean)>(0);
+
+        $r6 = r0.<sun.rmi.transport.proxy.HttpSendSocket: java.net.URLConnection conn>;
+
+        virtualinvoke $r6.<java.net.URLConnection: void setRequestProperty(java.lang.String,java.lang.String)>("Content-type", "application/octet-stream");
+
+        $r7 = r0.<sun.rmi.transport.proxy.HttpSendSocket: sun.rmi.transport.proxy.HttpSendInputStream inNotifier>;
+
+        virtualinvoke $r7.<sun.rmi.transport.proxy.HttpSendInputStream: void deactivate()>();
+
+        r0.<sun.rmi.transport.proxy.HttpSendSocket: java.io.InputStream in> = null;
+
+        $r8 = r0.<sun.rmi.transport.proxy.HttpSendSocket: java.net.URLConnection conn>;
+
+        $r9 = virtualinvoke $r8.<java.net.URLConnection: java.io.OutputStream getOutputStream()>();
+
+        r0.<sun.rmi.transport.proxy.HttpSendSocket: java.io.OutputStream out> = $r9;
+
+        return $r9;
+    }
+
+    public synchronized java.io.InputStream readNotify() throws java.io.IOException
+    {
+        boolean $z0, $z1;
+        sun.rmi.runtime.Log $r1, $r10, $r23, $r39;
+        java.lang.StringBuilder $r11, $r12, $r13, $r15, $r16, $r17, $r18, $r24, $r25, $r26, $r28, $r29, $r30, $r32;
+        java.util.logging.Level $r0, $r9, $r22, $r38;
+        java.net.URLConnection $r5, $r7, $r33;
+        java.lang.String $r8, $r14, $r27, $r31, $r34, r41, r42, $r43;
+        java.io.OutputStream $r4;
+        java.io.IOException $r36, $r37, $r40, $r44;
+        sun.rmi.transport.proxy.HttpSendSocket r2;
+        java.io.InputStreamReader $r20;
+        java.io.BufferedReader $r19;
+        sun.rmi.transport.proxy.HttpSendOutputStream $r3;
+        java.io.InputStream $r6, $r21, $r35;
+
+        r2 := @this: sun.rmi.transport.proxy.HttpSendSocket;
+
+        $r1 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r0 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        virtualinvoke $r1.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r0, "sending request and activating input stream");
+
+        $r3 = r2.<sun.rmi.transport.proxy.HttpSendSocket: sun.rmi.transport.proxy.HttpSendOutputStream outNotifier>;
+
+        virtualinvoke $r3.<sun.rmi.transport.proxy.HttpSendOutputStream: void deactivate()>();
+
+        $r4 = r2.<sun.rmi.transport.proxy.HttpSendSocket: java.io.OutputStream out>;
+
+        virtualinvoke $r4.<java.io.OutputStream: void close()>();
+
+        r2.<sun.rmi.transport.proxy.HttpSendSocket: java.io.OutputStream out> = null;
+
+     label01:
+        $r5 = r2.<sun.rmi.transport.proxy.HttpSendSocket: java.net.URLConnection conn>;
+
+        $r6 = virtualinvoke $r5.<java.net.URLConnection: java.io.InputStream getInputStream()>();
+
+        r2.<sun.rmi.transport.proxy.HttpSendSocket: java.io.InputStream in> = $r6;
+
+     label02:
+        goto label04;
+
+     label03:
+        $r37 := @caughtexception;
+
+        $r39 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r38 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        virtualinvoke $r39.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r38, "failed to get input stream, exception: ", $r37);
+
+        $r40 = new java.io.IOException;
+
+        specialinvoke $r40.<java.io.IOException: void <init>(java.lang.String)>("HTTP request failed");
+
+        throw $r40;
+
+     label04:
+        $r7 = r2.<sun.rmi.transport.proxy.HttpSendSocket: java.net.URLConnection conn>;
+
+        $r8 = virtualinvoke $r7.<java.net.URLConnection: java.lang.String getContentType()>();
+
+        if $r8 == null goto label05;
+
+        $r33 = r2.<sun.rmi.transport.proxy.HttpSendSocket: java.net.URLConnection conn>;
+
+        $r34 = virtualinvoke $r33.<java.net.URLConnection: java.lang.String getContentType()>();
+
+        $z1 = virtualinvoke $r34.<java.lang.String: boolean equals(java.lang.Object)>("application/octet-stream");
+
+        if $z1 != 0 goto label14;
+
+     label05:
+        $r10 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r9 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z0 = virtualinvoke $r10.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r9);
+
+        if $z0 == 0 goto label13;
+
+        if $r8 != null goto label06;
+
+        $r29 = new java.lang.StringBuilder;
+
+        specialinvoke $r29.<java.lang.StringBuilder: void <init>()>();
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("missing content type in response");
+
+        $r31 = r2.<sun.rmi.transport.proxy.HttpSendSocket: java.lang.String lineSeparator>;
+
+        $r32 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r31);
+
+        r41 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label07;
+
+     label06:
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("invalid content type in response: ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r14 = r2.<sun.rmi.transport.proxy.HttpSendSocket: java.lang.String lineSeparator>;
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        r41 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label07:
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r41);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("HttpSendSocket.readNotify: response body: ");
+
+        r42 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label08:
+        $r19 = new java.io.BufferedReader;
+
+        $r20 = new java.io.InputStreamReader;
+
+        $r21 = r2.<sun.rmi.transport.proxy.HttpSendSocket: java.io.InputStream in>;
+
+        specialinvoke $r20.<java.io.InputStreamReader: void <init>(java.io.InputStream)>($r21);
+
+        specialinvoke $r19.<java.io.BufferedReader: void <init>(java.io.Reader)>($r20);
+
+     label09:
+        $r43 = virtualinvoke $r19.<java.io.BufferedReader: java.lang.String readLine()>();
+
+        if $r43 == null goto label10;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r42);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r43);
+
+        $r27 = r2.<sun.rmi.transport.proxy.HttpSendSocket: java.lang.String lineSeparator>;
+
+        $r28 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r27);
+
+        r42 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label09;
+
+     label10:
+        goto label12;
+
+     label11:
+        $r36 := @caughtexception;
+
+     label12:
+        $r23 = <sun.rmi.transport.proxy.RMIMasterSocketFactory: sun.rmi.runtime.Log proxyLog>;
+
+        $r22 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        virtualinvoke $r23.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r22, r42);
+
+     label13:
+        $r44 = new java.io.IOException;
+
+        specialinvoke $r44.<java.io.IOException: void <init>(java.lang.String)>("HTTP request failed");
+
+        throw $r44;
+
+     label14:
+        $r35 = r2.<sun.rmi.transport.proxy.HttpSendSocket: java.io.InputStream in>;
+
+        return $r35;
+
+        catch java.io.IOException from label01 to label02 with label03;
+        catch java.io.IOException from label08 to label10 with label11;
+    }
+
+    public java.net.InetAddress getInetAddress()
+    {
+        java.net.InetAddress $r2;
+        java.lang.String $r1;
+        sun.rmi.transport.proxy.HttpSendSocket r0;
+        java.net.UnknownHostException $r3;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpSendSocket;
+
+     label1:
+        $r1 = r0.<sun.rmi.transport.proxy.HttpSendSocket: java.lang.String host>;
+
+        $r2 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByName(java.lang.String)>($r1);
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        return null;
+
+        catch java.net.UnknownHostException from label1 to label2 with label3;
+    }
+
+    public java.net.InetAddress getLocalAddress()
+    {
+        java.net.InetAddress $r0;
+        sun.rmi.transport.proxy.HttpSendSocket r2;
+        java.net.UnknownHostException $r1;
+
+        r2 := @this: sun.rmi.transport.proxy.HttpSendSocket;
+
+     label1:
+        $r0 = staticinvoke <java.net.InetAddress: java.net.InetAddress getLocalHost()>();
+
+     label2:
+        return $r0;
+
+     label3:
+        $r1 := @caughtexception;
+
+        return null;
+
+        catch java.net.UnknownHostException from label1 to label2 with label3;
+    }
+
+    public int getPort()
+    {
+        int $i0;
+        sun.rmi.transport.proxy.HttpSendSocket r0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpSendSocket;
+
+        $i0 = r0.<sun.rmi.transport.proxy.HttpSendSocket: int port>;
+
+        return $i0;
+    }
+
+    public int getLocalPort()
+    {
+        int $i1;
+        sun.rmi.transport.proxy.HttpSendSocket r0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpSendSocket;
+
+        $i1 = (int) -1;
+
+        return $i1;
+    }
+
+    public java.io.InputStream getInputStream() throws java.io.IOException
+    {
+        sun.rmi.transport.proxy.HttpSendInputStream $r1;
+        sun.rmi.transport.proxy.HttpSendSocket r0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpSendSocket;
+
+        $r1 = r0.<sun.rmi.transport.proxy.HttpSendSocket: sun.rmi.transport.proxy.HttpSendInputStream inNotifier>;
+
+        return $r1;
+    }
+
+    public java.io.OutputStream getOutputStream() throws java.io.IOException
+    {
+        sun.rmi.transport.proxy.HttpSendSocket r0;
+        sun.rmi.transport.proxy.HttpSendOutputStream $r1;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpSendSocket;
+
+        $r1 = r0.<sun.rmi.transport.proxy.HttpSendSocket: sun.rmi.transport.proxy.HttpSendOutputStream outNotifier>;
+
+        return $r1;
+    }
+
+    public void setTcpNoDelay(boolean) throws java.net.SocketException
+    {
+        sun.rmi.transport.proxy.HttpSendSocket r0;
+        boolean z0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpSendSocket;
+
+        z0 := @parameter0: boolean;
+
+        return;
+    }
+
+    public boolean getTcpNoDelay() throws java.net.SocketException
+    {
+        sun.rmi.transport.proxy.HttpSendSocket r0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpSendSocket;
+
+        return 0;
+    }
+
+    public void setSoLinger(boolean, int) throws java.net.SocketException
+    {
+        int i0;
+        sun.rmi.transport.proxy.HttpSendSocket r0;
+        boolean z0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpSendSocket;
+
+        z0 := @parameter0: boolean;
+
+        i0 := @parameter1: int;
+
+        return;
+    }
+
+    public int getSoLinger() throws java.net.SocketException
+    {
+        int $i1;
+        sun.rmi.transport.proxy.HttpSendSocket r0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpSendSocket;
+
+        $i1 = (int) -1;
+
+        return $i1;
+    }
+
+    public synchronized void setSoTimeout(int) throws java.net.SocketException
+    {
+        int i0;
+        sun.rmi.transport.proxy.HttpSendSocket r0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpSendSocket;
+
+        i0 := @parameter0: int;
+
+        return;
+    }
+
+    public synchronized int getSoTimeout() throws java.net.SocketException
+    {
+        sun.rmi.transport.proxy.HttpSendSocket r0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpSendSocket;
+
+        return 0;
+    }
+
+    public synchronized void close() throws java.io.IOException
+    {
+        java.io.OutputStream $r1, $r2;
+        sun.rmi.transport.proxy.HttpSendSocket r0;
+
+        r0 := @this: sun.rmi.transport.proxy.HttpSendSocket;
+
+        $r1 = r0.<sun.rmi.transport.proxy.HttpSendSocket: java.io.OutputStream out>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.rmi.transport.proxy.HttpSendSocket: java.io.OutputStream out>;
+
+        virtualinvoke $r2.<java.io.OutputStream: void close()>();
+
+     label1:
+        return;
+    }
+
+    public java.lang.String toString()
+    {
+        java.net.URL $r8;
+        sun.rmi.transport.proxy.HttpSendSocket r2;
+        int $i0;
+        java.lang.StringBuilder $r0, $r1, $r4, $r5, $r6, $r7, $r9, $r10;
+        java.lang.String $r3, $r11;
+
+        r2 := @this: sun.rmi.transport.proxy.HttpSendSocket;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("HttpSendSocket[host=");
+
+        $r3 = r2.<sun.rmi.transport.proxy.HttpSendSocket: java.lang.String host>;
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",port=");
+
+        $i0 = r2.<sun.rmi.transport.proxy.HttpSendSocket: int port>;
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",url=");
+
+        $r8 = r2.<sun.rmi.transport.proxy.HttpSendSocket: java.net.URL url>;
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r11;
+    }
+}

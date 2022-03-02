@@ -1,0 +1,440 @@
+class sun.security.jgss.krb5.InitSecContextToken extends sun.security.jgss.krb5.InitialToken
+{
+    private static final boolean ACCEPTOR_USE_INITIATOR_SEQNUM;
+    private sun.security.krb5.KrbApReq apReq;
+
+    void <init>(sun.security.jgss.krb5.Krb5Context, sun.security.krb5.Credentials, sun.security.krb5.Credentials) throws sun.security.krb5.KrbException, java.io.IOException, org.ietf.jgss.GSSException
+    {
+        java.util.Date $r8;
+        java.lang.Integer $r12, $r17;
+        sun.security.krb5.internal.KerberosTime $r7;
+        sun.security.jgss.krb5.InitSecContextToken r0;
+        int $i0, $i1;
+        java.lang.String $r9;
+        sun.security.krb5.Checksum $r5;
+        boolean $z0, $z1;
+        boolean[] $r6;
+        sun.security.jgss.krb5.Krb5Context r1;
+        sun.security.krb5.Credentials r3, r4;
+        sun.security.krb5.EncryptionKey $r14, $r15;
+        sun.security.jgss.krb5.InitialToken$OverloadedChecksum $r2;
+        sun.security.krb5.KrbApReq $r10, $r11, $r13, $r16;
+
+        r0 := @this: sun.security.jgss.krb5.InitSecContextToken;
+
+        r1 := @parameter0: sun.security.jgss.krb5.Krb5Context;
+
+        r3 := @parameter1: sun.security.krb5.Credentials;
+
+        r4 := @parameter2: sun.security.krb5.Credentials;
+
+        specialinvoke r0.<sun.security.jgss.krb5.InitialToken: void <init>()>();
+
+        r0.<sun.security.jgss.krb5.InitSecContextToken: sun.security.krb5.KrbApReq apReq> = null;
+
+        $z0 = virtualinvoke r1.<sun.security.jgss.krb5.Krb5Context: boolean getMutualAuthState()>();
+
+        $r2 = new sun.security.jgss.krb5.InitialToken$OverloadedChecksum;
+
+        specialinvoke $r2.<sun.security.jgss.krb5.InitialToken$OverloadedChecksum: void <init>(sun.security.jgss.krb5.InitialToken,sun.security.jgss.krb5.Krb5Context,sun.security.krb5.Credentials,sun.security.krb5.Credentials)>(r0, r1, r3, r4);
+
+        $r5 = virtualinvoke $r2.<sun.security.jgss.krb5.InitialToken$OverloadedChecksum: sun.security.krb5.Checksum getChecksum()>();
+
+        $r6 = virtualinvoke r4.<sun.security.krb5.Credentials: boolean[] getFlags()>();
+
+        virtualinvoke r1.<sun.security.jgss.krb5.Krb5Context: void setTktFlags(boolean[])>($r6);
+
+        $r7 = new sun.security.krb5.internal.KerberosTime;
+
+        $r8 = virtualinvoke r4.<sun.security.krb5.Credentials: java.util.Date getAuthTime()>();
+
+        specialinvoke $r7.<sun.security.krb5.internal.KerberosTime: void <init>(java.util.Date)>($r8);
+
+        $r9 = virtualinvoke $r7.<sun.security.krb5.internal.KerberosTime: java.lang.String toString()>();
+
+        virtualinvoke r1.<sun.security.jgss.krb5.Krb5Context: void setAuthTime(java.lang.String)>($r9);
+
+        $r10 = new sun.security.krb5.KrbApReq;
+
+        specialinvoke $r10.<sun.security.krb5.KrbApReq: void <init>(sun.security.krb5.Credentials,boolean,boolean,boolean,sun.security.krb5.Checksum)>(r4, $z0, 1, 1, $r5);
+
+        r0.<sun.security.jgss.krb5.InitSecContextToken: sun.security.krb5.KrbApReq apReq> = $r10;
+
+        $r11 = r0.<sun.security.jgss.krb5.InitSecContextToken: sun.security.krb5.KrbApReq apReq>;
+
+        $r12 = virtualinvoke $r11.<sun.security.krb5.KrbApReq: java.lang.Integer getSeqNumber()>();
+
+        $i0 = virtualinvoke $r12.<java.lang.Integer: int intValue()>();
+
+        virtualinvoke r1.<sun.security.jgss.krb5.Krb5Context: void resetMySequenceNumber(int)>($i0);
+
+        $r13 = r0.<sun.security.jgss.krb5.InitSecContextToken: sun.security.krb5.KrbApReq apReq>;
+
+        $r14 = virtualinvoke $r13.<sun.security.krb5.KrbApReq: sun.security.krb5.EncryptionKey getSubKey()>();
+
+        if $r14 == null goto label1;
+
+        virtualinvoke r1.<sun.security.jgss.krb5.Krb5Context: void setKey(int,sun.security.krb5.EncryptionKey)>(1, $r14);
+
+        goto label2;
+
+     label1:
+        $r15 = virtualinvoke r4.<sun.security.krb5.Credentials: sun.security.krb5.EncryptionKey getSessionKey()>();
+
+        virtualinvoke r1.<sun.security.jgss.krb5.Krb5Context: void setKey(int,sun.security.krb5.EncryptionKey)>(0, $r15);
+
+     label2:
+        if $z0 != 0 goto label5;
+
+        $z1 = <sun.security.jgss.krb5.InitSecContextToken: boolean ACCEPTOR_USE_INITIATOR_SEQNUM>;
+
+        if $z1 == 0 goto label3;
+
+        $r16 = r0.<sun.security.jgss.krb5.InitSecContextToken: sun.security.krb5.KrbApReq apReq>;
+
+        $r17 = virtualinvoke $r16.<sun.security.krb5.KrbApReq: java.lang.Integer getSeqNumber()>();
+
+        $i1 = virtualinvoke $r17.<java.lang.Integer: int intValue()>();
+
+        goto label4;
+
+     label3:
+        $i1 = 0;
+
+     label4:
+        virtualinvoke r1.<sun.security.jgss.krb5.Krb5Context: void resetPeerSequenceNumber(int)>($i1);
+
+     label5:
+        return;
+    }
+
+    void <init>(sun.security.jgss.krb5.Krb5Context, sun.security.jgss.krb5.Krb5AcceptCredential, java.io.InputStream) throws java.io.IOException, org.ietf.jgss.GSSException, sun.security.krb5.KrbException
+    {
+        byte[] $r3, $r23;
+        java.util.Date $r33;
+        java.lang.Integer $r18;
+        java.net.InetAddress r29;
+        com.sun.security.jgss.AuthorizationDataEntry[] r19;
+        sun.security.jgss.krb5.Krb5AcceptCredential r7;
+        sun.security.krb5.Checksum $r15;
+        boolean $z0, $z1;
+        sun.security.util.DerValue $r42;
+        sun.security.krb5.internal.AuthorizationDataEntry $r21, $r22;
+        com.sun.security.jgss.AuthorizationDataEntry $r46;
+        org.ietf.jgss.GSSException $r41;
+        sun.security.jgss.krb5.Krb5Context r4;
+        sun.security.krb5.Credentials $r9, $r16, $r32, $r36, $r39;
+        sun.security.krb5.EncryptionKey $r10, $r12;
+        sun.security.jgss.krb5.Krb5InitCredential $r26;
+        sun.security.krb5.KrbApReq $r8, $r11, $r14, $r17, $r31, $r35, $r38, $r43;
+        sun.security.jgss.krb5.Krb5NameElement $r25;
+        sun.security.krb5.internal.KerberosTime $r45;
+        sun.security.jgss.spi.GSSNameSpi $r24;
+        sun.security.jgss.krb5.InitSecContextToken r0;
+        int $i0, $i1, $i2, i3, $i4, $i5, $i6, $i7, $i8, i9, $i11;
+        java.lang.String $r34;
+        org.ietf.jgss.ChannelBinding $r5, $r27;
+        boolean[] $r37;
+        sun.security.krb5.internal.AuthorizationData $r40;
+        sun.security.jgss.krb5.InitialToken$OverloadedChecksum $r44;
+        java.io.InputStream r1;
+
+        r0 := @this: sun.security.jgss.krb5.InitSecContextToken;
+
+        r4 := @parameter0: sun.security.jgss.krb5.Krb5Context;
+
+        r7 := @parameter1: sun.security.jgss.krb5.Krb5AcceptCredential;
+
+        r1 := @parameter2: java.io.InputStream;
+
+        specialinvoke r0.<sun.security.jgss.krb5.InitialToken: void <init>()>();
+
+        r0.<sun.security.jgss.krb5.InitSecContextToken: sun.security.krb5.KrbApReq apReq> = null;
+
+        $i0 = virtualinvoke r1.<java.io.InputStream: int read()>();
+
+        $i1 = $i0 << 8;
+
+        $i2 = virtualinvoke r1.<java.io.InputStream: int read()>();
+
+        i3 = $i1 | $i2;
+
+        if i3 == 256 goto label01;
+
+        $r41 = new org.ietf.jgss.GSSException;
+
+        $i11 = (int) -1;
+
+        specialinvoke $r41.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(10, $i11, "AP_REQ token id does not match!");
+
+        throw $r41;
+
+     label01:
+        $r42 = new sun.security.util.DerValue;
+
+        specialinvoke $r42.<sun.security.util.DerValue: void <init>(java.io.InputStream)>(r1);
+
+        $r3 = virtualinvoke $r42.<sun.security.util.DerValue: byte[] toByteArray()>();
+
+        r29 = null;
+
+        $r5 = virtualinvoke r4.<sun.security.jgss.krb5.Krb5Context: org.ietf.jgss.ChannelBinding getChannelBinding()>();
+
+        if $r5 == null goto label02;
+
+        $r27 = virtualinvoke r4.<sun.security.jgss.krb5.Krb5Context: org.ietf.jgss.ChannelBinding getChannelBinding()>();
+
+        r29 = virtualinvoke $r27.<org.ietf.jgss.ChannelBinding: java.net.InetAddress getInitiatorAddress()>();
+
+     label02:
+        $r43 = new sun.security.krb5.KrbApReq;
+
+        specialinvoke $r43.<sun.security.krb5.KrbApReq: void <init>(byte[],sun.security.jgss.krb5.Krb5AcceptCredential,java.net.InetAddress)>($r3, r7, r29);
+
+        r0.<sun.security.jgss.krb5.InitSecContextToken: sun.security.krb5.KrbApReq apReq> = $r43;
+
+        $r8 = r0.<sun.security.jgss.krb5.InitSecContextToken: sun.security.krb5.KrbApReq apReq>;
+
+        $r9 = virtualinvoke $r8.<sun.security.krb5.KrbApReq: sun.security.krb5.Credentials getCreds()>();
+
+        $r10 = virtualinvoke $r9.<sun.security.krb5.Credentials: sun.security.krb5.EncryptionKey getSessionKey()>();
+
+        $r11 = r0.<sun.security.jgss.krb5.InitSecContextToken: sun.security.krb5.KrbApReq apReq>;
+
+        $r12 = virtualinvoke $r11.<sun.security.krb5.KrbApReq: sun.security.krb5.EncryptionKey getSubKey()>();
+
+        if $r12 == null goto label03;
+
+        virtualinvoke r4.<sun.security.jgss.krb5.Krb5Context: void setKey(int,sun.security.krb5.EncryptionKey)>(1, $r12);
+
+        goto label04;
+
+     label03:
+        virtualinvoke r4.<sun.security.jgss.krb5.Krb5Context: void setKey(int,sun.security.krb5.EncryptionKey)>(0, $r10);
+
+     label04:
+        $r44 = new sun.security.jgss.krb5.InitialToken$OverloadedChecksum;
+
+        $r14 = r0.<sun.security.jgss.krb5.InitSecContextToken: sun.security.krb5.KrbApReq apReq>;
+
+        $r15 = virtualinvoke $r14.<sun.security.krb5.KrbApReq: sun.security.krb5.Checksum getChecksum()>();
+
+        specialinvoke $r44.<sun.security.jgss.krb5.InitialToken$OverloadedChecksum: void <init>(sun.security.jgss.krb5.InitialToken,sun.security.jgss.krb5.Krb5Context,sun.security.krb5.Checksum,sun.security.krb5.EncryptionKey,sun.security.krb5.EncryptionKey)>(r0, r4, $r15, $r10, $r12);
+
+        virtualinvoke $r44.<sun.security.jgss.krb5.InitialToken$OverloadedChecksum: void setContextFlags(sun.security.jgss.krb5.Krb5Context)>(r4);
+
+        $r16 = virtualinvoke $r44.<sun.security.jgss.krb5.InitialToken$OverloadedChecksum: sun.security.krb5.Credentials getDelegatedCreds()>();
+
+        if $r16 == null goto label05;
+
+        $r24 = virtualinvoke r4.<sun.security.jgss.krb5.Krb5Context: sun.security.jgss.spi.GSSNameSpi getSrcName()>();
+
+        $r25 = (sun.security.jgss.krb5.Krb5NameElement) $r24;
+
+        $r26 = staticinvoke <sun.security.jgss.krb5.Krb5InitCredential: sun.security.jgss.krb5.Krb5InitCredential getInstance(sun.security.jgss.krb5.Krb5NameElement,sun.security.krb5.Credentials)>($r25, $r16);
+
+        virtualinvoke r4.<sun.security.jgss.krb5.Krb5Context: void setDelegCred(sun.security.jgss.krb5.Krb5CredElement)>($r26);
+
+     label05:
+        $r17 = r0.<sun.security.jgss.krb5.InitSecContextToken: sun.security.krb5.KrbApReq apReq>;
+
+        $r18 = virtualinvoke $r17.<sun.security.krb5.KrbApReq: java.lang.Integer getSeqNumber()>();
+
+        if $r18 == null goto label06;
+
+        $i7 = virtualinvoke $r18.<java.lang.Integer: int intValue()>();
+
+        goto label07;
+
+     label06:
+        $i7 = 0;
+
+     label07:
+        virtualinvoke r4.<sun.security.jgss.krb5.Krb5Context: void resetPeerSequenceNumber(int)>($i7);
+
+        $z0 = virtualinvoke r4.<sun.security.jgss.krb5.Krb5Context: boolean getMutualAuthState()>();
+
+        if $z0 != 0 goto label10;
+
+        $z1 = <sun.security.jgss.krb5.InitSecContextToken: boolean ACCEPTOR_USE_INITIATOR_SEQNUM>;
+
+        if $z1 == 0 goto label08;
+
+        $i8 = $i7;
+
+        goto label09;
+
+     label08:
+        $i8 = 0;
+
+     label09:
+        virtualinvoke r4.<sun.security.jgss.krb5.Krb5Context: void resetMySequenceNumber(int)>($i8);
+
+     label10:
+        $r45 = new sun.security.krb5.internal.KerberosTime;
+
+        $r31 = r0.<sun.security.jgss.krb5.InitSecContextToken: sun.security.krb5.KrbApReq apReq>;
+
+        $r32 = virtualinvoke $r31.<sun.security.krb5.KrbApReq: sun.security.krb5.Credentials getCreds()>();
+
+        $r33 = virtualinvoke $r32.<sun.security.krb5.Credentials: java.util.Date getAuthTime()>();
+
+        specialinvoke $r45.<sun.security.krb5.internal.KerberosTime: void <init>(java.util.Date)>($r33);
+
+        $r34 = virtualinvoke $r45.<sun.security.krb5.internal.KerberosTime: java.lang.String toString()>();
+
+        virtualinvoke r4.<sun.security.jgss.krb5.Krb5Context: void setAuthTime(java.lang.String)>($r34);
+
+        $r35 = r0.<sun.security.jgss.krb5.InitSecContextToken: sun.security.krb5.KrbApReq apReq>;
+
+        $r36 = virtualinvoke $r35.<sun.security.krb5.KrbApReq: sun.security.krb5.Credentials getCreds()>();
+
+        $r37 = virtualinvoke $r36.<sun.security.krb5.Credentials: boolean[] getFlags()>();
+
+        virtualinvoke r4.<sun.security.jgss.krb5.Krb5Context: void setTktFlags(boolean[])>($r37);
+
+        $r38 = r0.<sun.security.jgss.krb5.InitSecContextToken: sun.security.krb5.KrbApReq apReq>;
+
+        $r39 = virtualinvoke $r38.<sun.security.krb5.KrbApReq: sun.security.krb5.Credentials getCreds()>();
+
+        $r40 = virtualinvoke $r39.<sun.security.krb5.Credentials: sun.security.krb5.internal.AuthorizationData getAuthzData()>();
+
+        if $r40 != null goto label11;
+
+        virtualinvoke r4.<sun.security.jgss.krb5.Krb5Context: void setAuthzData(com.sun.security.jgss.AuthorizationDataEntry[])>(null);
+
+        goto label14;
+
+     label11:
+        $i4 = virtualinvoke $r40.<sun.security.krb5.internal.AuthorizationData: int count()>();
+
+        r19 = newarray (com.sun.security.jgss.AuthorizationDataEntry)[$i4];
+
+        i9 = 0;
+
+     label12:
+        $i5 = virtualinvoke $r40.<sun.security.krb5.internal.AuthorizationData: int count()>();
+
+        if i9 >= $i5 goto label13;
+
+        $r46 = new com.sun.security.jgss.AuthorizationDataEntry;
+
+        $r21 = virtualinvoke $r40.<sun.security.krb5.internal.AuthorizationData: sun.security.krb5.internal.AuthorizationDataEntry item(int)>(i9);
+
+        $i6 = $r21.<sun.security.krb5.internal.AuthorizationDataEntry: int adType>;
+
+        $r22 = virtualinvoke $r40.<sun.security.krb5.internal.AuthorizationData: sun.security.krb5.internal.AuthorizationDataEntry item(int)>(i9);
+
+        $r23 = $r22.<sun.security.krb5.internal.AuthorizationDataEntry: byte[] adData>;
+
+        specialinvoke $r46.<com.sun.security.jgss.AuthorizationDataEntry: void <init>(int,byte[])>($i6, $r23);
+
+        r19[i9] = $r46;
+
+        i9 = i9 + 1;
+
+        goto label12;
+
+     label13:
+        virtualinvoke r4.<sun.security.jgss.krb5.Krb5Context: void setAuthzData(com.sun.security.jgss.AuthorizationDataEntry[])>(r19);
+
+     label14:
+        return;
+    }
+
+    public final sun.security.krb5.KrbApReq getKrbApReq()
+    {
+        sun.security.jgss.krb5.InitSecContextToken r0;
+        sun.security.krb5.KrbApReq $r1;
+
+        r0 := @this: sun.security.jgss.krb5.InitSecContextToken;
+
+        $r1 = r0.<sun.security.jgss.krb5.InitSecContextToken: sun.security.krb5.KrbApReq apReq>;
+
+        return $r1;
+    }
+
+    public final byte[] encode() throws java.io.IOException
+    {
+        byte[] $r2, r3;
+        sun.security.jgss.krb5.InitSecContextToken r0;
+        int $i0, $i1, $i2;
+        sun.security.krb5.KrbApReq $r1;
+
+        r0 := @this: sun.security.jgss.krb5.InitSecContextToken;
+
+        $r1 = r0.<sun.security.jgss.krb5.InitSecContextToken: sun.security.krb5.KrbApReq apReq>;
+
+        $r2 = virtualinvoke $r1.<sun.security.krb5.KrbApReq: byte[] getMessage()>();
+
+        $i0 = lengthof $r2;
+
+        $i1 = 2 + $i0;
+
+        r3 = newarray (byte)[$i1];
+
+        staticinvoke <sun.security.jgss.krb5.InitSecContextToken: int writeInt(int,byte[],int)>(256, r3, 0);
+
+        $i2 = lengthof $r2;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, 0, r3, 2, $i2);
+
+        return r3;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.AssertionError $r1;
+        java.lang.StringBuilder $r2, $r3, $r4, $r5, $r6;
+        java.lang.String $r0, $r7;
+        boolean $z0, $z1, $z2;
+
+        $r0 = staticinvoke <sun.security.action.GetPropertyAction: java.lang.String privilegedGetProperty(java.lang.String,java.lang.String)>("sun.security.krb5.acceptor.sequence.number.nonmutual", "initiator");
+
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean equals(java.lang.Object)>("initiator");
+
+        if $z0 == 0 goto label1;
+
+        <sun.security.jgss.krb5.InitSecContextToken: boolean ACCEPTOR_USE_INITIATOR_SEQNUM> = 1;
+
+        goto label4;
+
+     label1:
+        $z1 = virtualinvoke $r0.<java.lang.String: boolean equals(java.lang.Object)>("zero");
+
+        if $z1 != 0 goto label2;
+
+        $z2 = virtualinvoke $r0.<java.lang.String: boolean equals(java.lang.Object)>("0");
+
+        if $z2 == 0 goto label3;
+
+     label2:
+        <sun.security.jgss.krb5.InitSecContextToken: boolean ACCEPTOR_USE_INITIATOR_SEQNUM> = 0;
+
+        goto label4;
+
+     label3:
+        $r1 = new java.lang.AssertionError;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unrecognized value for ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("sun.security.krb5.acceptor.sequence.number.nonmutual");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.lang.AssertionError: void <init>(java.lang.Object)>($r7);
+
+        throw $r1;
+
+     label4:
+        return;
+    }
+}

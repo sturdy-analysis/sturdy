@@ -1,0 +1,247 @@
+public final class sun.management.jdp.JdpPacketReader extends java.lang.Object
+{
+    private final java.io.DataInputStream pkt;
+    private java.util.Map pmap;
+
+    public void <init>(byte[]) throws sun.management.jdp.JdpException
+    {
+        byte[] r2;
+        java.io.DataInputStream $r3, $r4, $r5;
+        sun.management.jdp.JdpException $r7, $r9;
+        sun.management.jdp.JdpPacketReader r0;
+        java.io.IOException $r6, $r8;
+        short $s1;
+        java.io.ByteArrayInputStream $r1;
+        int $i0;
+
+        r0 := @this: sun.management.jdp.JdpPacketReader;
+
+        r2 := @parameter0: byte[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.management.jdp.JdpPacketReader: java.util.Map pmap> = null;
+
+        $r1 = new java.io.ByteArrayInputStream;
+
+        specialinvoke $r1.<java.io.ByteArrayInputStream: void <init>(byte[])>(r2);
+
+        $r3 = new java.io.DataInputStream;
+
+        specialinvoke $r3.<java.io.DataInputStream: void <init>(java.io.InputStream)>($r1);
+
+        r0.<sun.management.jdp.JdpPacketReader: java.io.DataInputStream pkt> = $r3;
+
+     label1:
+        $r4 = r0.<sun.management.jdp.JdpPacketReader: java.io.DataInputStream pkt>;
+
+        $i0 = virtualinvoke $r4.<java.io.DataInputStream: int readInt()>();
+
+        staticinvoke <sun.management.jdp.JdpGenericPacket: void checkMagic(int)>($i0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r8 := @caughtexception;
+
+        $r9 = new sun.management.jdp.JdpException;
+
+        specialinvoke $r9.<sun.management.jdp.JdpException: void <init>(java.lang.String)>("Invalid JDP packet received, bad magic");
+
+        throw $r9;
+
+     label4:
+        $r5 = r0.<sun.management.jdp.JdpPacketReader: java.io.DataInputStream pkt>;
+
+        $s1 = virtualinvoke $r5.<java.io.DataInputStream: short readShort()>();
+
+        staticinvoke <sun.management.jdp.JdpGenericPacket: void checkVersion(short)>($s1);
+
+     label5:
+        goto label7;
+
+     label6:
+        $r6 := @caughtexception;
+
+        $r7 = new sun.management.jdp.JdpException;
+
+        specialinvoke $r7.<sun.management.jdp.JdpException: void <init>(java.lang.String)>("Invalid JDP packet received, bad protocol version");
+
+        throw $r7;
+
+     label7:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+        catch java.io.IOException from label4 to label5 with label6;
+    }
+
+    public java.lang.String getEntry() throws java.io.EOFException, sun.management.jdp.JdpException
+    {
+        java.io.DataInputStream $r1, $r2, $r5;
+        byte[] $r6;
+        short $s0;
+        int $i1, $i2, $i3, $i4, $i5, $i6;
+        java.lang.String $r15;
+        sun.management.jdp.JdpException $r13, $r14, $r16, $r17;
+        sun.management.jdp.JdpPacketReader r0;
+        java.io.IOException $r8;
+        java.io.EOFException $r12;
+        java.io.UnsupportedEncodingException $r10;
+
+        r0 := @this: sun.management.jdp.JdpPacketReader;
+
+     label1:
+        $r1 = r0.<sun.management.jdp.JdpPacketReader: java.io.DataInputStream pkt>;
+
+        $s0 = virtualinvoke $r1.<java.io.DataInputStream: short readShort()>();
+
+        $i3 = (int) $s0;
+
+        if $i3 >= 1 goto label2;
+
+        $r5 = r0.<sun.management.jdp.JdpPacketReader: java.io.DataInputStream pkt>;
+
+        $i2 = virtualinvoke $r5.<java.io.DataInputStream: int available()>();
+
+        $i4 = (int) $s0;
+
+        if $i4 <= $i2 goto label2;
+
+        $r13 = new sun.management.jdp.JdpException;
+
+        specialinvoke $r13.<sun.management.jdp.JdpException: void <init>(java.lang.String)>("Broken JDP packet. Invalid entry length field.");
+
+        throw $r13;
+
+     label2:
+        $i5 = (int) $s0;
+
+        $r6 = newarray (byte)[$i5];
+
+        $r2 = r0.<sun.management.jdp.JdpPacketReader: java.io.DataInputStream pkt>;
+
+        $i1 = virtualinvoke $r2.<java.io.DataInputStream: int read(byte[])>($r6);
+
+        $i6 = (int) $s0;
+
+        if $i1 == $i6 goto label3;
+
+        $r14 = new sun.management.jdp.JdpException;
+
+        specialinvoke $r14.<sun.management.jdp.JdpException: void <init>(java.lang.String)>("Broken JDP packet. Unable to read entry.");
+
+        throw $r14;
+
+     label3:
+        $r15 = new java.lang.String;
+
+        specialinvoke $r15.<java.lang.String: void <init>(byte[],java.lang.String)>($r6, "UTF-8");
+
+     label4:
+        return $r15;
+
+     label5:
+        $r12 := @caughtexception;
+
+        throw $r12;
+
+     label6:
+        $r10 := @caughtexception;
+
+        $r16 = new sun.management.jdp.JdpException;
+
+        specialinvoke $r16.<sun.management.jdp.JdpException: void <init>(java.lang.String)>("Broken JDP packet. Unable to decode entry.");
+
+        throw $r16;
+
+     label7:
+        $r8 := @caughtexception;
+
+        $r17 = new sun.management.jdp.JdpException;
+
+        specialinvoke $r17.<sun.management.jdp.JdpException: void <init>(java.lang.String)>("Broken JDP packet. Unable to read entry.");
+
+        throw $r17;
+
+        catch java.io.EOFException from label1 to label4 with label5;
+        catch java.io.UnsupportedEncodingException from label1 to label4 with label6;
+        catch java.io.IOException from label1 to label4 with label7;
+    }
+
+    public java.util.Map getDiscoveryDataAsMap() throws sun.management.jdp.JdpException
+    {
+        java.util.HashMap $r2;
+        java.util.Map $r1, $r5, $r7, $r8;
+        java.lang.String $r3, $r4, $r13, r14, r15;
+        sun.management.jdp.JdpException $r9;
+        sun.management.jdp.JdpPacketReader r0;
+        java.io.EOFException $r6;
+        java.lang.StringBuilder $r10, $r11, $r12;
+
+        r0 := @this: sun.management.jdp.JdpPacketReader;
+
+        $r1 = r0.<sun.management.jdp.JdpPacketReader: java.util.Map pmap>;
+
+        if $r1 == null goto label1;
+
+        $r5 = r0.<sun.management.jdp.JdpPacketReader: java.util.Map pmap>;
+
+        return $r5;
+
+     label1:
+        r14 = null;
+
+        r15 = null;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+     label2:
+        $r3 = virtualinvoke r0.<sun.management.jdp.JdpPacketReader: java.lang.String getEntry()>();
+
+        r14 = $r3;
+
+        $r4 = virtualinvoke r0.<sun.management.jdp.JdpPacketReader: java.lang.String getEntry()>();
+
+        r15 = $r4;
+
+        interfaceinvoke $r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, $r4);
+
+        goto label2;
+
+     label3:
+        $r6 := @caughtexception;
+
+        if r15 != null goto label4;
+
+        $r9 = new sun.management.jdp.JdpException;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Broken JDP packet. Key without value.");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r14);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<sun.management.jdp.JdpException: void <init>(java.lang.String)>($r13);
+
+        throw $r9;
+
+     label4:
+        $r7 = staticinvoke <java.util.Collections: java.util.Map unmodifiableMap(java.util.Map)>($r2);
+
+        r0.<sun.management.jdp.JdpPacketReader: java.util.Map pmap> = $r7;
+
+        $r8 = r0.<sun.management.jdp.JdpPacketReader: java.util.Map pmap>;
+
+        return $r8;
+
+        catch java.io.EOFException from label2 to label3 with label3;
+    }
+}

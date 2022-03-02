@@ -1,0 +1,1852 @@
+public class java.awt.List extends java.awt.Component implements java.awt.ItemSelectable, javax.accessibility.Accessible
+{
+    java.util.Vector items;
+    int rows;
+    boolean multipleMode;
+    int[] selected;
+    int visibleIndex;
+    transient java.awt.event.ActionListener actionListener;
+    transient java.awt.event.ItemListener itemListener;
+    private static final java.lang.String base;
+    private static int nameCounter;
+    private static final long serialVersionUID;
+    static final int DEFAULT_VISIBLE_ROWS;
+    private int listSerializedDataVersion;
+
+    public void <init>() throws java.awt.HeadlessException
+    {
+        java.awt.List r0;
+
+        r0 := @this: java.awt.List;
+
+        specialinvoke r0.<java.awt.List: void <init>(int,boolean)>(0, 0);
+
+        return;
+    }
+
+    public void <init>(int) throws java.awt.HeadlessException
+    {
+        int i0;
+        java.awt.List r0;
+
+        r0 := @this: java.awt.List;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.awt.List: void <init>(int,boolean)>(i0, 0);
+
+        return;
+    }
+
+    public void <init>(int, boolean) throws java.awt.HeadlessException
+    {
+        java.util.Vector $r3;
+        int[] $r2;
+        int i0, $i1, $i3;
+        java.awt.List r0;
+        boolean z0;
+
+        r0 := @this: java.awt.List;
+
+        i0 := @parameter0: int;
+
+        z0 := @parameter1: boolean;
+
+        specialinvoke r0.<java.awt.Component: void <init>()>();
+
+        $r3 = new java.util.Vector;
+
+        specialinvoke $r3.<java.util.Vector: void <init>()>();
+
+        r0.<java.awt.List: java.util.Vector items> = $r3;
+
+        r0.<java.awt.List: int rows> = 0;
+
+        r0.<java.awt.List: boolean multipleMode> = 0;
+
+        $r2 = newarray (int)[0];
+
+        r0.<java.awt.List: int[] selected> = $r2;
+
+        $i3 = (int) -1;
+
+        r0.<java.awt.List: int visibleIndex> = $i3;
+
+        r0.<java.awt.List: int listSerializedDataVersion> = 1;
+
+        staticinvoke <java.awt.GraphicsEnvironment: void checkHeadless()>();
+
+        if i0 == 0 goto label1;
+
+        $i1 = i0;
+
+        goto label2;
+
+     label1:
+        $i1 = 4;
+
+     label2:
+        r0.<java.awt.List: int rows> = $i1;
+
+        r0.<java.awt.List: boolean multipleMode> = z0;
+
+        return;
+    }
+
+    java.lang.String constructComponentName()
+    {
+        java.lang.Throwable $r4;
+        java.awt.List r5;
+        int $i0, $i1;
+        java.lang.StringBuilder $r0, $r1, $r2;
+        java.lang.String $r3;
+
+        r5 := @this: java.awt.List;
+
+        entermonitor class "Ljava/awt/List;";
+
+     label1:
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("list");
+
+        $i0 = <java.awt.List: int nameCounter>;
+
+        $i1 = $i0 + 1;
+
+        <java.awt.List: int nameCounter> = $i1;
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        exitmonitor class "Ljava/awt/List;";
+
+     label2:
+        return $r3;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor class "Ljava/awt/List;";
+
+     label4:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void addNotify()
+    {
+        java.lang.Throwable $r5;
+        java.awt.peer.ComponentPeer $r2;
+        java.awt.peer.ListPeer $r4;
+        java.awt.List r0;
+        java.lang.Object $r1;
+        java.awt.Toolkit $r3;
+
+        r0 := @this: java.awt.List;
+
+        $r1 = virtualinvoke r0.<java.awt.List: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<java.awt.List: java.awt.peer.ComponentPeer peer>;
+
+        if $r2 != null goto label2;
+
+        $r3 = virtualinvoke r0.<java.awt.List: java.awt.Toolkit getToolkit()>();
+
+        $r4 = virtualinvoke $r3.<java.awt.Toolkit: java.awt.peer.ListPeer createList(java.awt.List)>(r0);
+
+        r0.<java.awt.List: java.awt.peer.ComponentPeer peer> = $r4;
+
+     label2:
+        specialinvoke r0.<java.awt.Component: void addNotify()>();
+
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r5;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void removeNotify()
+    {
+        java.lang.Throwable $r5;
+        java.awt.peer.ComponentPeer $r2;
+        java.awt.peer.ListPeer r3;
+        int[] $r4;
+        java.awt.List r0;
+        java.lang.Object $r1;
+
+        r0 := @this: java.awt.List;
+
+        $r1 = virtualinvoke r0.<java.awt.List: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<java.awt.List: java.awt.peer.ComponentPeer peer>;
+
+        r3 = (java.awt.peer.ListPeer) $r2;
+
+        if r3 == null goto label2;
+
+        $r4 = interfaceinvoke r3.<java.awt.peer.ListPeer: int[] getSelectedIndexes()>();
+
+        r0.<java.awt.List: int[] selected> = $r4;
+
+     label2:
+        specialinvoke r0.<java.awt.Component: void removeNotify()>();
+
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r5;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public int getItemCount()
+    {
+        int $i0;
+        java.awt.List r0;
+
+        r0 := @this: java.awt.List;
+
+        $i0 = virtualinvoke r0.<java.awt.List: int countItems()>();
+
+        return $i0;
+    }
+
+    public int countItems()
+    {
+        int $i0;
+        java.awt.List r0;
+        java.util.Vector $r1;
+
+        r0 := @this: java.awt.List;
+
+        $r1 = r0.<java.awt.List: java.util.Vector items>;
+
+        $i0 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        return $i0;
+    }
+
+    public java.lang.String getItem(int)
+    {
+        int i0;
+        java.awt.List r0;
+        java.lang.String $r1;
+
+        r0 := @this: java.awt.List;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<java.awt.List: java.lang.String getItemImpl(int)>(i0);
+
+        return $r1;
+    }
+
+    final java.lang.String getItemImpl(int)
+    {
+        java.util.Vector $r1;
+        int i0;
+        java.awt.List r0;
+        java.lang.Object $r2;
+        java.lang.String $r3;
+
+        r0 := @this: java.awt.List;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.awt.List: java.util.Vector items>;
+
+        $r2 = virtualinvoke $r1.<java.util.Vector: java.lang.Object elementAt(int)>(i0);
+
+        $r3 = (java.lang.String) $r2;
+
+        return $r3;
+    }
+
+    public synchronized java.lang.String[] getItems()
+    {
+        java.util.Vector $r1, $r3;
+        int $i0;
+        java.awt.List r0;
+        java.lang.String[] r2;
+
+        r0 := @this: java.awt.List;
+
+        $r1 = r0.<java.awt.List: java.util.Vector items>;
+
+        $i0 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        r2 = newarray (java.lang.String)[$i0];
+
+        $r3 = r0.<java.awt.List: java.util.Vector items>;
+
+        virtualinvoke $r3.<java.util.Vector: void copyInto(java.lang.Object[])>(r2);
+
+        return r2;
+    }
+
+    public void add(java.lang.String)
+    {
+        java.awt.List r0;
+        java.lang.String r1;
+
+        r0 := @this: java.awt.List;
+
+        r1 := @parameter0: java.lang.String;
+
+        virtualinvoke r0.<java.awt.List: void addItem(java.lang.String)>(r1);
+
+        return;
+    }
+
+    public void addItem(java.lang.String)
+    {
+        int $i1;
+        java.awt.List r0;
+        java.lang.String r1;
+
+        r0 := @this: java.awt.List;
+
+        r1 := @parameter0: java.lang.String;
+
+        $i1 = (int) -1;
+
+        virtualinvoke r0.<java.awt.List: void addItem(java.lang.String,int)>(r1, $i1);
+
+        return;
+    }
+
+    public void add(java.lang.String, int)
+    {
+        int i0;
+        java.awt.List r0;
+        java.lang.String r1;
+
+        r0 := @this: java.awt.List;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        virtualinvoke r0.<java.awt.List: void addItem(java.lang.String,int)>(r1, i0);
+
+        return;
+    }
+
+    public synchronized void addItem(java.lang.String, int)
+    {
+        java.awt.peer.ComponentPeer $r2;
+        java.awt.peer.ListPeer $r4;
+        java.awt.List r0;
+        java.util.Vector $r1, $r3, $r5;
+        int $i0, i1, $i3, $i5, $i7;
+        java.lang.String r6;
+
+        r0 := @this: java.awt.List;
+
+        r6 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        $i3 = (int) -1;
+
+        if i1 < $i3 goto label1;
+
+        $r5 = r0.<java.awt.List: java.util.Vector items>;
+
+        $i0 = virtualinvoke $r5.<java.util.Vector: int size()>();
+
+        if i1 < $i0 goto label2;
+
+     label1:
+        $i5 = (int) -1;
+
+        i1 = $i5;
+
+     label2:
+        if r6 != null goto label3;
+
+        r6 = "";
+
+     label3:
+        $i7 = (int) -1;
+
+        if i1 != $i7 goto label4;
+
+        $r3 = r0.<java.awt.List: java.util.Vector items>;
+
+        virtualinvoke $r3.<java.util.Vector: void addElement(java.lang.Object)>(r6);
+
+        goto label5;
+
+     label4:
+        $r1 = r0.<java.awt.List: java.util.Vector items>;
+
+        virtualinvoke $r1.<java.util.Vector: void insertElementAt(java.lang.Object,int)>(r6, i1);
+
+     label5:
+        $r2 = r0.<java.awt.List: java.awt.peer.ComponentPeer peer>;
+
+        $r4 = (java.awt.peer.ListPeer) $r2;
+
+        if $r4 == null goto label6;
+
+        interfaceinvoke $r4.<java.awt.peer.ListPeer: void add(java.lang.String,int)>(r6, i1);
+
+     label6:
+        return;
+    }
+
+    public synchronized void replaceItem(java.lang.String, int)
+    {
+        int i0;
+        java.awt.List r0;
+        java.lang.String r1;
+
+        r0 := @this: java.awt.List;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        virtualinvoke r0.<java.awt.List: void remove(int)>(i0);
+
+        virtualinvoke r0.<java.awt.List: void add(java.lang.String,int)>(r1, i0);
+
+        return;
+    }
+
+    public void removeAll()
+    {
+        java.awt.List r0;
+
+        r0 := @this: java.awt.List;
+
+        virtualinvoke r0.<java.awt.List: void clear()>();
+
+        return;
+    }
+
+    public synchronized void clear()
+    {
+        java.awt.peer.ComponentPeer $r1;
+        java.util.Vector $r3;
+        java.awt.peer.ListPeer r2;
+        int[] $r4;
+        java.awt.List r0;
+
+        r0 := @this: java.awt.List;
+
+        $r1 = r0.<java.awt.List: java.awt.peer.ComponentPeer peer>;
+
+        r2 = (java.awt.peer.ListPeer) $r1;
+
+        if r2 == null goto label1;
+
+        interfaceinvoke r2.<java.awt.peer.ListPeer: void removeAll()>();
+
+     label1:
+        $r3 = new java.util.Vector;
+
+        specialinvoke $r3.<java.util.Vector: void <init>()>();
+
+        r0.<java.awt.List: java.util.Vector items> = $r3;
+
+        $r4 = newarray (int)[0];
+
+        r0.<java.awt.List: int[] selected> = $r4;
+
+        return;
+    }
+
+    public synchronized void remove(java.lang.String)
+    {
+        java.awt.List r0;
+        java.lang.IllegalArgumentException $r3;
+        java.util.Vector $r2;
+        int $i0;
+        java.lang.StringBuilder $r4, $r5, $r6, $r7;
+        java.lang.String r1, $r8;
+
+        r0 := @this: java.awt.List;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<java.awt.List: java.util.Vector items>;
+
+        $i0 = virtualinvoke $r2.<java.util.Vector: int indexOf(java.lang.Object)>(r1);
+
+        if $i0 >= 0 goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("item ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" not found in list");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r8);
+
+        throw $r3;
+
+     label1:
+        virtualinvoke r0.<java.awt.List: void remove(int)>($i0);
+
+        return;
+    }
+
+    public void remove(int)
+    {
+        int i0;
+        java.awt.List r0;
+
+        r0 := @this: java.awt.List;
+
+        i0 := @parameter0: int;
+
+        virtualinvoke r0.<java.awt.List: void delItem(int)>(i0);
+
+        return;
+    }
+
+    public void delItem(int)
+    {
+        int i0;
+        java.awt.List r0;
+
+        r0 := @this: java.awt.List;
+
+        i0 := @parameter0: int;
+
+        virtualinvoke r0.<java.awt.List: void delItems(int,int)>(i0, i0);
+
+        return;
+    }
+
+    public synchronized int getSelectedIndex()
+    {
+        int[] $r1;
+        int $i0, $i1, $i3;
+        java.awt.List r0;
+
+        r0 := @this: java.awt.List;
+
+        $r1 = virtualinvoke r0.<java.awt.List: int[] getSelectedIndexes()>();
+
+        $i0 = lengthof $r1;
+
+        if $i0 != 1 goto label1;
+
+        $i1 = $r1[0];
+
+        goto label2;
+
+     label1:
+        $i3 = (int) -1;
+
+        $i1 = $i3;
+
+     label2:
+        return $i1;
+    }
+
+    public synchronized int[] getSelectedIndexes()
+    {
+        java.awt.peer.ComponentPeer $r1;
+        java.awt.peer.ListPeer r2;
+        int[] $r3, $r5, $r6;
+        java.awt.List r0;
+        java.lang.Object $r4;
+
+        r0 := @this: java.awt.List;
+
+        $r1 = r0.<java.awt.List: java.awt.peer.ComponentPeer peer>;
+
+        r2 = (java.awt.peer.ListPeer) $r1;
+
+        if r2 == null goto label1;
+
+        $r6 = interfaceinvoke r2.<java.awt.peer.ListPeer: int[] getSelectedIndexes()>();
+
+        r0.<java.awt.List: int[] selected> = $r6;
+
+     label1:
+        $r3 = r0.<java.awt.List: int[] selected>;
+
+        $r4 = virtualinvoke $r3.<java.lang.Object: java.lang.Object clone()>();
+
+        $r5 = (int[]) $r4;
+
+        return $r5;
+    }
+
+    public synchronized java.lang.String getSelectedItem()
+    {
+        int $i0;
+        java.awt.List r0;
+        java.lang.String $r1;
+
+        r0 := @this: java.awt.List;
+
+        $i0 = virtualinvoke r0.<java.awt.List: int getSelectedIndex()>();
+
+        if $i0 >= 0 goto label1;
+
+        $r1 = null;
+
+        goto label2;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.awt.List: java.lang.String getItem(int)>($i0);
+
+     label2:
+        return $r1;
+    }
+
+    public synchronized java.lang.String[] getSelectedItems()
+    {
+        java.awt.List r0;
+        java.lang.String[] r2;
+        int[] $r1;
+        int $i0, $i1, $i2, i3;
+        java.lang.String $r3;
+
+        r0 := @this: java.awt.List;
+
+        $r1 = virtualinvoke r0.<java.awt.List: int[] getSelectedIndexes()>();
+
+        $i0 = lengthof $r1;
+
+        r2 = newarray (java.lang.String)[$i0];
+
+        i3 = 0;
+
+     label1:
+        $i1 = lengthof $r1;
+
+        if i3 >= $i1 goto label2;
+
+        $i2 = $r1[i3];
+
+        $r3 = virtualinvoke r0.<java.awt.List: java.lang.String getItem(int)>($i2);
+
+        r2[i3] = $r3;
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label2:
+        return r2;
+    }
+
+    public java.lang.Object[] getSelectedObjects()
+    {
+        java.awt.List r0;
+        java.lang.String[] $r1;
+
+        r0 := @this: java.awt.List;
+
+        $r1 = virtualinvoke r0.<java.awt.List: java.lang.String[] getSelectedItems()>();
+
+        return $r1;
+    }
+
+    public void select(int)
+    {
+        java.lang.Throwable $r12;
+        java.awt.peer.ListPeer $r4;
+        int[] $r2, $r5, $r6, $r7, $r8, $r9, $r10, $r11, r13;
+        int $i0, $i1, $i2, $i3, i4, $i5, $i6, i7;
+        boolean $z0, z1;
+        java.awt.peer.ComponentPeer $r1, $r3;
+        java.awt.List r0;
+
+        r0 := @this: java.awt.List;
+
+        i4 := @parameter0: int;
+
+     label01:
+        $r1 = r0.<java.awt.List: java.awt.peer.ComponentPeer peer>;
+
+        $r4 = (java.awt.peer.ListPeer) $r1;
+
+        if $r4 == null goto label02;
+
+        interfaceinvoke $r4.<java.awt.peer.ListPeer: void select(int)>(i4);
+
+        return;
+
+     label02:
+        entermonitor r0;
+
+     label03:
+        z1 = 0;
+
+        i7 = 0;
+
+     label04:
+        $r2 = r0.<java.awt.List: int[] selected>;
+
+        $i0 = lengthof $r2;
+
+        if i7 >= $i0 goto label06;
+
+        $r11 = r0.<java.awt.List: int[] selected>;
+
+        $i6 = $r11[i7];
+
+        if $i6 != i4 goto label05;
+
+        z1 = 1;
+
+        goto label06;
+
+     label05:
+        i7 = i7 + 1;
+
+        goto label04;
+
+     label06:
+        if z1 != 0 goto label08;
+
+        $z0 = r0.<java.awt.List: boolean multipleMode>;
+
+        if $z0 != 0 goto label07;
+
+        $r9 = newarray (int)[1];
+
+        r0.<java.awt.List: int[] selected> = $r9;
+
+        $r10 = r0.<java.awt.List: int[] selected>;
+
+        $r10[0] = i4;
+
+        goto label08;
+
+     label07:
+        $r5 = r0.<java.awt.List: int[] selected>;
+
+        $i1 = lengthof $r5;
+
+        $i2 = $i1 + 1;
+
+        r13 = newarray (int)[$i2];
+
+        $r7 = r0.<java.awt.List: int[] selected>;
+
+        $r6 = r0.<java.awt.List: int[] selected>;
+
+        $i3 = lengthof $r6;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r7, 0, r13, 0, $i3);
+
+        $r8 = r0.<java.awt.List: int[] selected>;
+
+        $i5 = lengthof $r8;
+
+        r13[$i5] = i4;
+
+        r0.<java.awt.List: int[] selected> = r13;
+
+     label08:
+        exitmonitor r0;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r12 := @caughtexception;
+
+        exitmonitor r0;
+
+     label11:
+        throw $r12;
+
+     label12:
+        $r3 = r0.<java.awt.List: java.awt.peer.ComponentPeer peer>;
+
+        if $r4 != $r3 goto label01;
+
+        return;
+
+        catch java.lang.Throwable from label03 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    public synchronized void deselect(int)
+    {
+        java.awt.peer.ListPeer r2;
+        int[] $r3, $r4, r5, $r6, $r7, $r8, $r9;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, $i10;
+        boolean $z0;
+        java.awt.peer.ComponentPeer $r1;
+        java.awt.List r0;
+
+        r0 := @this: java.awt.List;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.awt.List: java.awt.peer.ComponentPeer peer>;
+
+        r2 = (java.awt.peer.ListPeer) $r1;
+
+        if r2 == null goto label2;
+
+        $z0 = virtualinvoke r0.<java.awt.List: boolean isMultipleMode()>();
+
+        if $z0 != 0 goto label1;
+
+        $i8 = virtualinvoke r0.<java.awt.List: int getSelectedIndex()>();
+
+        if $i8 != i0 goto label2;
+
+     label1:
+        interfaceinvoke r2.<java.awt.peer.ListPeer: void deselect(int)>(i0);
+
+     label2:
+        i9 = 0;
+
+     label3:
+        $r9 = r0.<java.awt.List: int[] selected>;
+
+        $i10 = lengthof $r9;
+
+        if i9 >= $i10 goto label5;
+
+        $r3 = r0.<java.awt.List: int[] selected>;
+
+        $i1 = $r3[i9];
+
+        if $i1 != i0 goto label4;
+
+        $r4 = r0.<java.awt.List: int[] selected>;
+
+        $i2 = lengthof $r4;
+
+        $i3 = $i2 - 1;
+
+        r5 = newarray (int)[$i3];
+
+        $r6 = r0.<java.awt.List: int[] selected>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r6, 0, r5, 0, i9);
+
+        $r8 = r0.<java.awt.List: int[] selected>;
+
+        $i7 = i9 + 1;
+
+        $r7 = r0.<java.awt.List: int[] selected>;
+
+        $i5 = lengthof $r7;
+
+        $i4 = i9 + 1;
+
+        $i6 = $i5 - $i4;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r8, $i7, r5, i9, $i6);
+
+        r0.<java.awt.List: int[] selected> = r5;
+
+        return;
+
+     label4:
+        i9 = i9 + 1;
+
+        goto label3;
+
+     label5:
+        return;
+    }
+
+    public boolean isIndexSelected(int)
+    {
+        int i0;
+        java.awt.List r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.List;
+
+        i0 := @parameter0: int;
+
+        $z0 = virtualinvoke r0.<java.awt.List: boolean isSelected(int)>(i0);
+
+        return $z0;
+    }
+
+    public boolean isSelected(int)
+    {
+        int[] $r1;
+        int $i0, i1, $i2, i3;
+        java.awt.List r0;
+
+        r0 := @this: java.awt.List;
+
+        i1 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<java.awt.List: int[] getSelectedIndexes()>();
+
+        i3 = 0;
+
+     label1:
+        $i0 = lengthof $r1;
+
+        if i3 >= $i0 goto label3;
+
+        $i2 = $r1[i3];
+
+        if $i2 != i1 goto label2;
+
+        return 1;
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    public int getRows()
+    {
+        int $i0;
+        java.awt.List r0;
+
+        r0 := @this: java.awt.List;
+
+        $i0 = r0.<java.awt.List: int rows>;
+
+        return $i0;
+    }
+
+    public boolean isMultipleMode()
+    {
+        java.awt.List r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.List;
+
+        $z0 = virtualinvoke r0.<java.awt.List: boolean allowsMultipleSelections()>();
+
+        return $z0;
+    }
+
+    public boolean allowsMultipleSelections()
+    {
+        java.awt.List r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.List;
+
+        $z0 = r0.<java.awt.List: boolean multipleMode>;
+
+        return $z0;
+    }
+
+    public void setMultipleMode(boolean)
+    {
+        java.awt.List r0;
+        boolean z0;
+
+        r0 := @this: java.awt.List;
+
+        z0 := @parameter0: boolean;
+
+        virtualinvoke r0.<java.awt.List: void setMultipleSelections(boolean)>(z0);
+
+        return;
+    }
+
+    public synchronized void setMultipleSelections(boolean)
+    {
+        java.awt.peer.ComponentPeer $r1;
+        java.awt.peer.ListPeer r2;
+        java.awt.List r0;
+        boolean z0, $z1;
+
+        r0 := @this: java.awt.List;
+
+        z0 := @parameter0: boolean;
+
+        $z1 = r0.<java.awt.List: boolean multipleMode>;
+
+        if z0 == $z1 goto label1;
+
+        r0.<java.awt.List: boolean multipleMode> = z0;
+
+        $r1 = r0.<java.awt.List: java.awt.peer.ComponentPeer peer>;
+
+        r2 = (java.awt.peer.ListPeer) $r1;
+
+        if r2 == null goto label1;
+
+        interfaceinvoke r2.<java.awt.peer.ListPeer: void setMultipleMode(boolean)>(z0);
+
+     label1:
+        return;
+    }
+
+    public int getVisibleIndex()
+    {
+        int $i0;
+        java.awt.List r0;
+
+        r0 := @this: java.awt.List;
+
+        $i0 = r0.<java.awt.List: int visibleIndex>;
+
+        return $i0;
+    }
+
+    public synchronized void makeVisible(int)
+    {
+        java.awt.peer.ComponentPeer $r1;
+        java.awt.peer.ListPeer r2;
+        int i0;
+        java.awt.List r0;
+
+        r0 := @this: java.awt.List;
+
+        i0 := @parameter0: int;
+
+        r0.<java.awt.List: int visibleIndex> = i0;
+
+        $r1 = r0.<java.awt.List: java.awt.peer.ComponentPeer peer>;
+
+        r2 = (java.awt.peer.ListPeer) $r1;
+
+        if r2 == null goto label1;
+
+        interfaceinvoke r2.<java.awt.peer.ListPeer: void makeVisible(int)>(i0);
+
+     label1:
+        return;
+    }
+
+    public java.awt.Dimension getPreferredSize(int)
+    {
+        int i0;
+        java.awt.List r0;
+        java.awt.Dimension $r1;
+
+        r0 := @this: java.awt.List;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<java.awt.List: java.awt.Dimension preferredSize(int)>(i0);
+
+        return $r1;
+    }
+
+    public java.awt.Dimension preferredSize(int)
+    {
+        java.lang.Throwable $r4;
+        java.awt.peer.ComponentPeer $r2;
+        java.awt.Dimension $r5;
+        java.awt.peer.ListPeer r3;
+        int i0;
+        java.awt.List r0;
+        java.lang.Object $r1;
+
+        r0 := @this: java.awt.List;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<java.awt.List: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<java.awt.List: java.awt.peer.ComponentPeer peer>;
+
+        r3 = (java.awt.peer.ListPeer) $r2;
+
+        if r3 == null goto label2;
+
+        $r5 = interfaceinvoke r3.<java.awt.peer.ListPeer: java.awt.Dimension getPreferredSize(int)>(i0);
+
+        goto label3;
+
+     label2:
+        $r5 = specialinvoke r0.<java.awt.Component: java.awt.Dimension preferredSize()>();
+
+     label3:
+        exitmonitor $r1;
+
+     label4:
+        return $r5;
+
+     label5:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public java.awt.Dimension getPreferredSize()
+    {
+        java.awt.List r0;
+        java.awt.Dimension $r1;
+
+        r0 := @this: java.awt.List;
+
+        $r1 = virtualinvoke r0.<java.awt.List: java.awt.Dimension preferredSize()>();
+
+        return $r1;
+    }
+
+    public java.awt.Dimension preferredSize()
+    {
+        java.lang.Throwable $r2;
+        java.awt.Dimension $r3;
+        int $i0, $i1;
+        java.awt.List r0;
+        java.lang.Object $r1;
+
+        r0 := @this: java.awt.List;
+
+        $r1 = virtualinvoke r0.<java.awt.List: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label1:
+        $i0 = r0.<java.awt.List: int rows>;
+
+        if $i0 <= 0 goto label2;
+
+        $i1 = r0.<java.awt.List: int rows>;
+
+        $r3 = virtualinvoke r0.<java.awt.List: java.awt.Dimension preferredSize(int)>($i1);
+
+        goto label3;
+
+     label2:
+        $r3 = specialinvoke r0.<java.awt.Component: java.awt.Dimension preferredSize()>();
+
+     label3:
+        exitmonitor $r1;
+
+     label4:
+        return $r3;
+
+     label5:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public java.awt.Dimension getMinimumSize(int)
+    {
+        int i0;
+        java.awt.List r0;
+        java.awt.Dimension $r1;
+
+        r0 := @this: java.awt.List;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<java.awt.List: java.awt.Dimension minimumSize(int)>(i0);
+
+        return $r1;
+    }
+
+    public java.awt.Dimension minimumSize(int)
+    {
+        java.lang.Throwable $r4;
+        java.awt.peer.ComponentPeer $r2;
+        java.awt.Dimension $r5;
+        java.awt.peer.ListPeer r3;
+        int i0;
+        java.awt.List r0;
+        java.lang.Object $r1;
+
+        r0 := @this: java.awt.List;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<java.awt.List: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<java.awt.List: java.awt.peer.ComponentPeer peer>;
+
+        r3 = (java.awt.peer.ListPeer) $r2;
+
+        if r3 == null goto label2;
+
+        $r5 = interfaceinvoke r3.<java.awt.peer.ListPeer: java.awt.Dimension getMinimumSize(int)>(i0);
+
+        goto label3;
+
+     label2:
+        $r5 = specialinvoke r0.<java.awt.Component: java.awt.Dimension minimumSize()>();
+
+     label3:
+        exitmonitor $r1;
+
+     label4:
+        return $r5;
+
+     label5:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public java.awt.Dimension getMinimumSize()
+    {
+        java.awt.List r0;
+        java.awt.Dimension $r1;
+
+        r0 := @this: java.awt.List;
+
+        $r1 = virtualinvoke r0.<java.awt.List: java.awt.Dimension minimumSize()>();
+
+        return $r1;
+    }
+
+    public java.awt.Dimension minimumSize()
+    {
+        java.lang.Throwable $r2;
+        java.awt.Dimension $r3;
+        int $i0, $i1;
+        java.awt.List r0;
+        java.lang.Object $r1;
+
+        r0 := @this: java.awt.List;
+
+        $r1 = virtualinvoke r0.<java.awt.List: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label1:
+        $i0 = r0.<java.awt.List: int rows>;
+
+        if $i0 <= 0 goto label2;
+
+        $i1 = r0.<java.awt.List: int rows>;
+
+        $r3 = virtualinvoke r0.<java.awt.List: java.awt.Dimension minimumSize(int)>($i1);
+
+        goto label3;
+
+     label2:
+        $r3 = specialinvoke r0.<java.awt.Component: java.awt.Dimension minimumSize()>();
+
+     label3:
+        exitmonitor $r1;
+
+     label4:
+        return $r3;
+
+     label5:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public synchronized void addItemListener(java.awt.event.ItemListener)
+    {
+        java.awt.List r1;
+        java.awt.event.ItemListener r0, $r2, $r3;
+
+        r1 := @this: java.awt.List;
+
+        r0 := @parameter0: java.awt.event.ItemListener;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = r1.<java.awt.List: java.awt.event.ItemListener itemListener>;
+
+        $r3 = staticinvoke <java.awt.AWTEventMulticaster: java.awt.event.ItemListener add(java.awt.event.ItemListener,java.awt.event.ItemListener)>($r2, r0);
+
+        r1.<java.awt.List: java.awt.event.ItemListener itemListener> = $r3;
+
+        r1.<java.awt.List: boolean newEventsOnly> = 1;
+
+        return;
+    }
+
+    public synchronized void removeItemListener(java.awt.event.ItemListener)
+    {
+        java.awt.List r1;
+        java.awt.event.ItemListener r0, $r2, $r3;
+
+        r1 := @this: java.awt.List;
+
+        r0 := @parameter0: java.awt.event.ItemListener;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = r1.<java.awt.List: java.awt.event.ItemListener itemListener>;
+
+        $r3 = staticinvoke <java.awt.AWTEventMulticaster: java.awt.event.ItemListener remove(java.awt.event.ItemListener,java.awt.event.ItemListener)>($r2, r0);
+
+        r1.<java.awt.List: java.awt.event.ItemListener itemListener> = $r3;
+
+        return;
+    }
+
+    public synchronized java.awt.event.ItemListener[] getItemListeners()
+    {
+        java.awt.List r0;
+        java.util.EventListener[] $r1;
+        java.awt.event.ItemListener[] $r2;
+
+        r0 := @this: java.awt.List;
+
+        $r1 = virtualinvoke r0.<java.awt.List: java.util.EventListener[] getListeners(java.lang.Class)>(class "Ljava/awt/event/ItemListener;");
+
+        $r2 = (java.awt.event.ItemListener[]) $r1;
+
+        return $r2;
+    }
+
+    public synchronized void addActionListener(java.awt.event.ActionListener)
+    {
+        java.awt.event.ActionListener r0, $r2, $r3;
+        java.awt.List r1;
+
+        r1 := @this: java.awt.List;
+
+        r0 := @parameter0: java.awt.event.ActionListener;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = r1.<java.awt.List: java.awt.event.ActionListener actionListener>;
+
+        $r3 = staticinvoke <java.awt.AWTEventMulticaster: java.awt.event.ActionListener add(java.awt.event.ActionListener,java.awt.event.ActionListener)>($r2, r0);
+
+        r1.<java.awt.List: java.awt.event.ActionListener actionListener> = $r3;
+
+        r1.<java.awt.List: boolean newEventsOnly> = 1;
+
+        return;
+    }
+
+    public synchronized void removeActionListener(java.awt.event.ActionListener)
+    {
+        java.awt.event.ActionListener r0, $r2, $r3;
+        java.awt.List r1;
+
+        r1 := @this: java.awt.List;
+
+        r0 := @parameter0: java.awt.event.ActionListener;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = r1.<java.awt.List: java.awt.event.ActionListener actionListener>;
+
+        $r3 = staticinvoke <java.awt.AWTEventMulticaster: java.awt.event.ActionListener remove(java.awt.event.ActionListener,java.awt.event.ActionListener)>($r2, r0);
+
+        r1.<java.awt.List: java.awt.event.ActionListener actionListener> = $r3;
+
+        return;
+    }
+
+    public synchronized java.awt.event.ActionListener[] getActionListeners()
+    {
+        java.awt.List r0;
+        java.util.EventListener[] $r1;
+        java.awt.event.ActionListener[] $r2;
+
+        r0 := @this: java.awt.List;
+
+        $r1 = virtualinvoke r0.<java.awt.List: java.util.EventListener[] getListeners(java.lang.Class)>(class "Ljava/awt/event/ActionListener;");
+
+        $r2 = (java.awt.event.ActionListener[]) $r1;
+
+        return $r2;
+    }
+
+    public java.util.EventListener[] getListeners(java.lang.Class)
+    {
+        java.util.EventListener r4;
+        java.util.EventListener[] $r2, $r3;
+        java.lang.Class r0;
+        java.awt.List r1;
+
+        r1 := @this: java.awt.List;
+
+        r0 := @parameter0: java.lang.Class;
+
+        if r0 != class "Ljava/awt/event/ActionListener;" goto label1;
+
+        r4 = r1.<java.awt.List: java.awt.event.ActionListener actionListener>;
+
+        goto label3;
+
+     label1:
+        if r0 != class "Ljava/awt/event/ItemListener;" goto label2;
+
+        r4 = r1.<java.awt.List: java.awt.event.ItemListener itemListener>;
+
+        goto label3;
+
+     label2:
+        $r2 = specialinvoke r1.<java.awt.Component: java.util.EventListener[] getListeners(java.lang.Class)>(r0);
+
+        return $r2;
+
+     label3:
+        $r3 = staticinvoke <java.awt.AWTEventMulticaster: java.util.EventListener[] getListeners(java.util.EventListener,java.lang.Class)>(r4, r0);
+
+        return $r3;
+    }
+
+    boolean eventEnabled(java.awt.AWTEvent)
+    {
+        java.awt.event.ActionListener $r2;
+        java.awt.List r1;
+        long $l1, $l2, $l4, $l5;
+        java.awt.event.ItemListener $r3;
+        java.awt.AWTEvent r0;
+        byte $b3, $b6;
+        int $i0;
+        boolean $z0;
+
+        r1 := @this: java.awt.List;
+
+        r0 := @parameter0: java.awt.AWTEvent;
+
+        $i0 = r0.<java.awt.AWTEvent: int id>;
+
+        lookupswitch($i0)
+        {
+            case 701: goto label4;
+            case 1001: goto label1;
+            default: goto label7;
+        };
+
+     label1:
+        $l1 = r1.<java.awt.List: long eventMask>;
+
+        $l2 = $l1 & 128L;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 != 0 goto label2;
+
+        $r2 = r1.<java.awt.List: java.awt.event.ActionListener actionListener>;
+
+        if $r2 == null goto label3;
+
+     label2:
+        return 1;
+
+     label3:
+        return 0;
+
+     label4:
+        $l4 = r1.<java.awt.List: long eventMask>;
+
+        $l5 = $l4 & 512L;
+
+        $b6 = $l5 cmp 0L;
+
+        if $b6 != 0 goto label5;
+
+        $r3 = r1.<java.awt.List: java.awt.event.ItemListener itemListener>;
+
+        if $r3 == null goto label6;
+
+     label5:
+        return 1;
+
+     label6:
+        return 0;
+
+     label7:
+        $z0 = specialinvoke r1.<java.awt.Component: boolean eventEnabled(java.awt.AWTEvent)>(r0);
+
+        return $z0;
+    }
+
+    protected void processEvent(java.awt.AWTEvent)
+    {
+        java.awt.AWTEvent r0;
+        java.awt.event.ItemEvent $r3;
+        java.awt.List r1;
+        java.awt.event.ActionEvent $r2;
+        boolean $z0, $z1;
+
+        r1 := @this: java.awt.List;
+
+        r0 := @parameter0: java.awt.AWTEvent;
+
+        $z0 = r0 instanceof java.awt.event.ItemEvent;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = (java.awt.event.ItemEvent) r0;
+
+        virtualinvoke r1.<java.awt.List: void processItemEvent(java.awt.event.ItemEvent)>($r3);
+
+        return;
+
+     label1:
+        $z1 = r0 instanceof java.awt.event.ActionEvent;
+
+        if $z1 == 0 goto label2;
+
+        $r2 = (java.awt.event.ActionEvent) r0;
+
+        virtualinvoke r1.<java.awt.List: void processActionEvent(java.awt.event.ActionEvent)>($r2);
+
+        return;
+
+     label2:
+        specialinvoke r1.<java.awt.Component: void processEvent(java.awt.AWTEvent)>(r0);
+
+        return;
+    }
+
+    protected void processItemEvent(java.awt.event.ItemEvent)
+    {
+        java.awt.event.ItemEvent r2;
+        java.awt.List r0;
+        java.awt.event.ItemListener r1;
+
+        r0 := @this: java.awt.List;
+
+        r2 := @parameter0: java.awt.event.ItemEvent;
+
+        r1 = r0.<java.awt.List: java.awt.event.ItemListener itemListener>;
+
+        if r1 == null goto label1;
+
+        interfaceinvoke r1.<java.awt.event.ItemListener: void itemStateChanged(java.awt.event.ItemEvent)>(r2);
+
+     label1:
+        return;
+    }
+
+    protected void processActionEvent(java.awt.event.ActionEvent)
+    {
+        java.awt.List r0;
+        java.awt.event.ActionListener r1;
+        java.awt.event.ActionEvent r2;
+
+        r0 := @this: java.awt.List;
+
+        r2 := @parameter0: java.awt.event.ActionEvent;
+
+        r1 = r0.<java.awt.List: java.awt.event.ActionListener actionListener>;
+
+        if r1 == null goto label1;
+
+        interfaceinvoke r1.<java.awt.event.ActionListener: void actionPerformed(java.awt.event.ActionEvent)>(r2);
+
+     label1:
+        return;
+    }
+
+    protected java.lang.String paramString()
+    {
+        java.awt.List r1;
+        java.lang.StringBuilder $r0, $r3, $r4, $r6;
+        java.lang.String $r2, $r5, $r7;
+
+        r1 := @this: java.awt.List;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = specialinvoke r1.<java.awt.Component: java.lang.String paramString()>();
+
+        $r3 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",selected=");
+
+        $r5 = virtualinvoke r1.<java.awt.List: java.lang.String getSelectedItem()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r7;
+    }
+
+    public synchronized void delItems(int, int)
+    {
+        java.awt.peer.ComponentPeer $r1;
+        java.awt.peer.ListPeer r3;
+        java.awt.List r0;
+        java.util.Vector $r2;
+        int i0, i1, i2, $i4;
+
+        r0 := @this: java.awt.List;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        i2 = i0;
+
+     label1:
+        if i2 < i1 goto label2;
+
+        $r2 = r0.<java.awt.List: java.util.Vector items>;
+
+        virtualinvoke $r2.<java.util.Vector: void removeElementAt(int)>(i2);
+
+        $i4 = (int) -1;
+
+        i2 = i2 + $i4;
+
+        goto label1;
+
+     label2:
+        $r1 = r0.<java.awt.List: java.awt.peer.ComponentPeer peer>;
+
+        r3 = (java.awt.peer.ListPeer) $r1;
+
+        if r3 == null goto label3;
+
+        interfaceinvoke r3.<java.awt.peer.ListPeer: void delItems(int,int)>(i1, i0);
+
+     label3:
+        return;
+    }
+
+    private void writeObject(java.io.ObjectOutputStream) throws java.io.IOException
+    {
+        java.lang.Throwable $r7;
+        java.awt.peer.ComponentPeer $r1;
+        java.awt.event.ActionListener $r5;
+        java.awt.peer.ListPeer r2;
+        java.awt.List r0;
+        java.awt.event.ItemListener $r4;
+        int[] $r6;
+        java.io.ObjectOutputStream r3;
+
+        r0 := @this: java.awt.List;
+
+        r3 := @parameter0: java.io.ObjectOutputStream;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = r0.<java.awt.List: java.awt.peer.ComponentPeer peer>;
+
+        r2 = (java.awt.peer.ListPeer) $r1;
+
+        if r2 == null goto label2;
+
+        $r6 = interfaceinvoke r2.<java.awt.peer.ListPeer: int[] getSelectedIndexes()>();
+
+        r0.<java.awt.List: int[] selected> = $r6;
+
+     label2:
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r7 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r7;
+
+     label6:
+        virtualinvoke r3.<java.io.ObjectOutputStream: void defaultWriteObject()>();
+
+        $r4 = r0.<java.awt.List: java.awt.event.ItemListener itemListener>;
+
+        staticinvoke <java.awt.AWTEventMulticaster: void save(java.io.ObjectOutputStream,java.lang.String,java.util.EventListener)>(r3, "itemL", $r4);
+
+        $r5 = r0.<java.awt.List: java.awt.event.ActionListener actionListener>;
+
+        staticinvoke <java.awt.AWTEventMulticaster: void save(java.io.ObjectOutputStream,java.lang.String,java.util.EventListener)>(r3, "actionL", $r5);
+
+        virtualinvoke r3.<java.io.ObjectOutputStream: void writeObject(java.lang.Object)>(null);
+
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.lang.ClassNotFoundException, java.io.IOException, java.awt.HeadlessException
+    {
+        java.awt.event.ActionListener $r6, $r7;
+        java.io.ObjectInputStream r0;
+        java.awt.List r4;
+        java.awt.event.ItemListener $r9, $r10;
+        java.lang.Object $r1, $r5, $r8;
+        java.lang.String $r2, $r3;
+
+        r4 := @this: java.awt.List;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        staticinvoke <java.awt.GraphicsEnvironment: void checkHeadless()>();
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+     label1:
+        $r1 = virtualinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        if null == $r1 goto label5;
+
+        $r2 = (java.lang.String) $r1;
+
+        $r3 = virtualinvoke $r2.<java.lang.String: java.lang.String intern()>();
+
+        if "itemL" != $r3 goto label2;
+
+        $r8 = virtualinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        $r9 = (java.awt.event.ItemListener) $r8;
+
+        $r10 = (java.awt.event.ItemListener) $r9;
+
+        virtualinvoke r4.<java.awt.List: void addItemListener(java.awt.event.ItemListener)>($r10);
+
+        goto label4;
+
+     label2:
+        if "actionL" != $r3 goto label3;
+
+        $r5 = virtualinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        $r6 = (java.awt.event.ActionListener) $r5;
+
+        $r7 = (java.awt.event.ActionListener) $r6;
+
+        virtualinvoke r4.<java.awt.List: void addActionListener(java.awt.event.ActionListener)>($r7);
+
+        goto label4;
+
+     label3:
+        virtualinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+     label4:
+        goto label1;
+
+     label5:
+        return;
+    }
+
+    public javax.accessibility.AccessibleContext getAccessibleContext()
+    {
+        java.awt.List$AccessibleAWTList $r3;
+        java.awt.List r0;
+        javax.accessibility.AccessibleContext $r1, $r2;
+
+        r0 := @this: java.awt.List;
+
+        $r1 = r0.<java.awt.List: javax.accessibility.AccessibleContext accessibleContext>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.awt.List$AccessibleAWTList;
+
+        specialinvoke $r3.<java.awt.List$AccessibleAWTList: void <init>(java.awt.List)>(r0);
+
+        r0.<java.awt.List: javax.accessibility.AccessibleContext accessibleContext> = $r3;
+
+     label1:
+        $r2 = r0.<java.awt.List: javax.accessibility.AccessibleContext accessibleContext>;
+
+        return $r2;
+    }
+
+    static void <clinit>()
+    {
+        <java.awt.List: int DEFAULT_VISIBLE_ROWS> = 4;
+
+        <java.awt.List: long serialVersionUID> = -3304312411574666869L;
+
+        <java.awt.List: java.lang.String base> = "list";
+
+        <java.awt.List: int nameCounter> = 0;
+
+        return;
+    }
+}

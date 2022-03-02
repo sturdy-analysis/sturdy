@@ -1,0 +1,141 @@
+final class sun.security.ssl.SSLBasicKeyDerivation extends java.lang.Object implements sun.security.ssl.SSLKeyDerivation
+{
+    private final java.lang.String hashAlg;
+    private final javax.crypto.SecretKey secret;
+    private final byte[] hkdfInfo;
+
+    void <init>(javax.crypto.SecretKey, java.lang.String, byte[], byte[], int)
+    {
+        byte[] r4, r5, $r6;
+        sun.security.ssl.SSLBasicKeyDerivation r0;
+        int i0;
+        java.lang.String r1, $r2;
+        javax.crypto.SecretKey r3;
+
+        r0 := @this: sun.security.ssl.SSLBasicKeyDerivation;
+
+        r3 := @parameter0: javax.crypto.SecretKey;
+
+        r1 := @parameter1: java.lang.String;
+
+        r4 := @parameter2: byte[];
+
+        r5 := @parameter3: byte[];
+
+        i0 := @parameter4: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r2 = virtualinvoke r1.<java.lang.String: java.lang.String replace(java.lang.CharSequence,java.lang.CharSequence)>("-", "");
+
+        r0.<sun.security.ssl.SSLBasicKeyDerivation: java.lang.String hashAlg> = $r2;
+
+        r0.<sun.security.ssl.SSLBasicKeyDerivation: javax.crypto.SecretKey secret> = r3;
+
+        $r6 = staticinvoke <sun.security.ssl.SSLBasicKeyDerivation: byte[] createHkdfInfo(byte[],byte[],int)>(r4, r5, i0);
+
+        r0.<sun.security.ssl.SSLBasicKeyDerivation: byte[] hkdfInfo> = $r6;
+
+        return;
+    }
+
+    public javax.crypto.SecretKey deriveKey(java.lang.String, java.security.spec.AlgorithmParameterSpec) throws java.io.IOException
+    {
+        java.lang.Throwable $r11;
+        byte[] $r6;
+        javax.net.ssl.SSLHandshakeException $r10, $r12;
+        sun.security.ssl.SSLBasicKeyDerivation r1;
+        java.security.GeneralSecurityException $r9;
+        int $i0;
+        java.lang.String $r2, r5;
+        java.security.spec.AlgorithmParameterSpec r3;
+        sun.security.ssl.SSLBasicKeyDerivation$SecretSizeSpec $r4;
+        javax.crypto.SecretKey $r7, $r8;
+        sun.security.ssl.HKDF $r0;
+
+        r1 := @this: sun.security.ssl.SSLBasicKeyDerivation;
+
+        r5 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.security.spec.AlgorithmParameterSpec;
+
+     label1:
+        $r0 = new sun.security.ssl.HKDF;
+
+        $r2 = r1.<sun.security.ssl.SSLBasicKeyDerivation: java.lang.String hashAlg>;
+
+        specialinvoke $r0.<sun.security.ssl.HKDF: void <init>(java.lang.String)>($r2);
+
+        $r7 = r1.<sun.security.ssl.SSLBasicKeyDerivation: javax.crypto.SecretKey secret>;
+
+        $r6 = r1.<sun.security.ssl.SSLBasicKeyDerivation: byte[] hkdfInfo>;
+
+        $r4 = (sun.security.ssl.SSLBasicKeyDerivation$SecretSizeSpec) r3;
+
+        $i0 = $r4.<sun.security.ssl.SSLBasicKeyDerivation$SecretSizeSpec: int length>;
+
+        $r8 = virtualinvoke $r0.<sun.security.ssl.HKDF: javax.crypto.SecretKey expand(javax.crypto.SecretKey,byte[],int,java.lang.String)>($r7, $r6, $i0, r5);
+
+     label2:
+        return $r8;
+
+     label3:
+        $r9 := @caughtexception;
+
+        $r10 = new javax.net.ssl.SSLHandshakeException;
+
+        specialinvoke $r10.<javax.net.ssl.SSLHandshakeException: void <init>(java.lang.String)>("Could not generate secret");
+
+        $r11 = virtualinvoke $r10.<javax.net.ssl.SSLHandshakeException: java.lang.Throwable initCause(java.lang.Throwable)>($r9);
+
+        $r12 = (javax.net.ssl.SSLHandshakeException) $r11;
+
+        throw $r12;
+
+        catch java.security.GeneralSecurityException from label1 to label2 with label3;
+    }
+
+    private static byte[] createHkdfInfo(byte[], byte[], int)
+    {
+        byte[] r0, r1, r2;
+        java.io.IOException $r4;
+        java.nio.ByteBuffer $r3;
+        int $i0, $i1, $i2, $i3, i4;
+
+        r0 := @parameter0: byte[];
+
+        r1 := @parameter1: byte[];
+
+        i4 := @parameter2: int;
+
+        $i0 = lengthof r0;
+
+        $i2 = 4 + $i0;
+
+        $i1 = lengthof r1;
+
+        $i3 = $i2 + $i1;
+
+        r2 = newarray (byte)[$i3];
+
+        $r3 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>(r2);
+
+     label1:
+        staticinvoke <sun.security.ssl.Record: void putInt16(java.nio.ByteBuffer,int)>($r3, i4);
+
+        staticinvoke <sun.security.ssl.Record: void putBytes8(java.nio.ByteBuffer,byte[])>($r3, r0);
+
+        staticinvoke <sun.security.ssl.Record: void putBytes8(java.nio.ByteBuffer,byte[])>($r3, r1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+     label4:
+        return r2;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+}

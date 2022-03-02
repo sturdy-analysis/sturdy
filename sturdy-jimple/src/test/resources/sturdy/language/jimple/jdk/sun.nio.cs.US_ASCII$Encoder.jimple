@@ -1,0 +1,605 @@
+class sun.nio.cs.US_ASCII$Encoder extends java.nio.charset.CharsetEncoder implements sun.nio.cs.ArrayEncoder
+{
+    private final sun.nio.cs.Surrogate$Parser sgp;
+    private byte repl;
+    static final boolean $assertionsDisabled;
+
+    private void <init>(java.nio.charset.Charset)
+    {
+        sun.nio.cs.US_ASCII$Encoder r0;
+        java.nio.charset.Charset r1;
+        sun.nio.cs.Surrogate$Parser $r2;
+
+        r0 := @this: sun.nio.cs.US_ASCII$Encoder;
+
+        r1 := @parameter0: java.nio.charset.Charset;
+
+        specialinvoke r0.<java.nio.charset.CharsetEncoder: void <init>(java.nio.charset.Charset,float,float)>(r1, 1.0F, 1.0F);
+
+        $r2 = new sun.nio.cs.Surrogate$Parser;
+
+        specialinvoke $r2.<sun.nio.cs.Surrogate$Parser: void <init>()>();
+
+        r0.<sun.nio.cs.US_ASCII$Encoder: sun.nio.cs.Surrogate$Parser sgp> = $r2;
+
+        r0.<sun.nio.cs.US_ASCII$Encoder: byte repl> = 63;
+
+        return;
+    }
+
+    public boolean canEncode(char)
+    {
+        sun.nio.cs.US_ASCII$Encoder r0;
+        int $i1;
+        char c0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.cs.US_ASCII$Encoder;
+
+        c0 := @parameter0: char;
+
+        $i1 = (int) c0;
+
+        if $i1 >= 128 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean isLegalReplacement(byte[])
+    {
+        sun.nio.cs.US_ASCII$Encoder r1;
+        byte[] r0;
+        byte $b1;
+        int $i0, $i2;
+        boolean $z0, $z1;
+
+        r1 := @this: sun.nio.cs.US_ASCII$Encoder;
+
+        r0 := @parameter0: byte[];
+
+        $i0 = lengthof r0;
+
+        if $i0 != 1 goto label1;
+
+        $b1 = r0[0];
+
+        $i2 = (int) $b1;
+
+        if $i2 >= 0 goto label2;
+
+     label1:
+        $z0 = specialinvoke r1.<java.nio.charset.CharsetEncoder: boolean isLegalReplacement(byte[])>(r0);
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        $z1 = 1;
+
+        goto label4;
+
+     label3:
+        $z1 = 0;
+
+     label4:
+        return $z1;
+    }
+
+    private java.nio.charset.CoderResult encodeArrayLoop(java.nio.CharBuffer, java.nio.ByteBuffer)
+    {
+        sun.nio.cs.US_ASCII$Encoder r4;
+        byte[] $r3;
+        java.nio.ByteBuffer r2;
+        byte $b22;
+        boolean $z0, $z1;
+        java.nio.CharBuffer r0;
+        java.lang.Throwable $r12;
+        java.lang.AssertionError $r15, $r16;
+        sun.nio.cs.Surrogate$Parser $r5, $r6, $r8;
+        java.nio.charset.CoderResult $r7, $r9, r13, r14;
+        int $i0, $i1, $i2, $i3, i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, i33, $i34, i35, $i36, i37, $i39;
+        char c38;
+        char[] $r1;
+
+        r4 := @this: sun.nio.cs.US_ASCII$Encoder;
+
+        r0 := @parameter0: java.nio.CharBuffer;
+
+        r2 := @parameter1: java.nio.ByteBuffer;
+
+        $r1 = virtualinvoke r0.<java.nio.CharBuffer: char[] array()>();
+
+        $i0 = virtualinvoke r0.<java.nio.CharBuffer: int arrayOffset()>();
+
+        $i1 = virtualinvoke r0.<java.nio.CharBuffer: int position()>();
+
+        i33 = $i0 + $i1;
+
+        $i2 = virtualinvoke r0.<java.nio.CharBuffer: int arrayOffset()>();
+
+        $i3 = virtualinvoke r0.<java.nio.CharBuffer: int limit()>();
+
+        i4 = $i2 + $i3;
+
+        $z0 = <sun.nio.cs.US_ASCII$Encoder: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label01;
+
+        if i33 <= i4 goto label01;
+
+        $r15 = new java.lang.AssertionError;
+
+        specialinvoke $r15.<java.lang.AssertionError: void <init>()>();
+
+        throw $r15;
+
+     label01:
+        if i33 > i4 goto label02;
+
+        $i34 = i33;
+
+        goto label03;
+
+     label02:
+        $i34 = i4;
+
+     label03:
+        i35 = $i34;
+
+        $r3 = virtualinvoke r2.<java.nio.ByteBuffer: byte[] array()>();
+
+        $i5 = virtualinvoke r2.<java.nio.ByteBuffer: int arrayOffset()>();
+
+        $i6 = virtualinvoke r2.<java.nio.ByteBuffer: int position()>();
+
+        $i27 = $i5 + $i6;
+
+        $i7 = virtualinvoke r2.<java.nio.ByteBuffer: int arrayOffset()>();
+
+        $i8 = virtualinvoke r2.<java.nio.ByteBuffer: int limit()>();
+
+        $i28 = $i7 + $i8;
+
+        $z1 = <sun.nio.cs.US_ASCII$Encoder: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label04;
+
+        if $i27 <= $i28 goto label04;
+
+        $r16 = new java.lang.AssertionError;
+
+        specialinvoke $r16.<java.lang.AssertionError: void <init>()>();
+
+        throw $r16;
+
+     label04:
+        if $i27 > $i28 goto label05;
+
+        $i36 = $i27;
+
+        goto label06;
+
+     label05:
+        $i36 = $i28;
+
+     label06:
+        i37 = $i36;
+
+     label07:
+        if i35 >= i4 goto label14;
+
+        c38 = $r1[i35];
+
+        $i39 = (int) c38;
+
+        if $i39 >= 128 goto label10;
+
+        if i37 < $i28 goto label09;
+
+        r13 = <java.nio.charset.CoderResult: java.nio.charset.CoderResult OVERFLOW>;
+
+     label08:
+        $i23 = virtualinvoke r0.<java.nio.CharBuffer: int arrayOffset()>();
+
+        $i24 = i35 - $i23;
+
+        virtualinvoke r0.<java.nio.CharBuffer: java.nio.Buffer position(int)>($i24);
+
+        $i25 = virtualinvoke r2.<java.nio.ByteBuffer: int arrayOffset()>();
+
+        $i26 = i37 - $i25;
+
+        virtualinvoke r2.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i26);
+
+        return r13;
+
+     label09:
+        $b22 = (byte) c38;
+
+        $r3[i37] = $b22;
+
+        i35 = i35 + 1;
+
+        i37 = i37 + 1;
+
+        goto label07;
+
+     label10:
+        $r5 = r4.<sun.nio.cs.US_ASCII$Encoder: sun.nio.cs.Surrogate$Parser sgp>;
+
+        $i13 = virtualinvoke $r5.<sun.nio.cs.Surrogate$Parser: int parse(char,char[],int,int)>(c38, $r1, i35, i4);
+
+        if $i13 >= 0 goto label12;
+
+        $r8 = r4.<sun.nio.cs.US_ASCII$Encoder: sun.nio.cs.Surrogate$Parser sgp>;
+
+        $r9 = virtualinvoke $r8.<sun.nio.cs.Surrogate$Parser: java.nio.charset.CoderResult error()>();
+
+     label11:
+        $i18 = virtualinvoke r0.<java.nio.CharBuffer: int arrayOffset()>();
+
+        $i19 = i35 - $i18;
+
+        virtualinvoke r0.<java.nio.CharBuffer: java.nio.Buffer position(int)>($i19);
+
+        $i20 = virtualinvoke r2.<java.nio.ByteBuffer: int arrayOffset()>();
+
+        $i21 = i37 - $i20;
+
+        virtualinvoke r2.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i21);
+
+        return $r9;
+
+     label12:
+        $r6 = r4.<sun.nio.cs.US_ASCII$Encoder: sun.nio.cs.Surrogate$Parser sgp>;
+
+        $r7 = virtualinvoke $r6.<sun.nio.cs.Surrogate$Parser: java.nio.charset.CoderResult unmappableResult()>();
+
+     label13:
+        $i14 = virtualinvoke r0.<java.nio.CharBuffer: int arrayOffset()>();
+
+        $i15 = i35 - $i14;
+
+        virtualinvoke r0.<java.nio.CharBuffer: java.nio.Buffer position(int)>($i15);
+
+        $i16 = virtualinvoke r2.<java.nio.ByteBuffer: int arrayOffset()>();
+
+        $i17 = i37 - $i16;
+
+        virtualinvoke r2.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i17);
+
+        return $r7;
+
+     label14:
+        r14 = <java.nio.charset.CoderResult: java.nio.charset.CoderResult UNDERFLOW>;
+
+     label15:
+        $i9 = virtualinvoke r0.<java.nio.CharBuffer: int arrayOffset()>();
+
+        $i10 = i35 - $i9;
+
+        virtualinvoke r0.<java.nio.CharBuffer: java.nio.Buffer position(int)>($i10);
+
+        $i11 = virtualinvoke r2.<java.nio.ByteBuffer: int arrayOffset()>();
+
+        $i12 = i37 - $i11;
+
+        virtualinvoke r2.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i12);
+
+        return r14;
+
+     label16:
+        $r12 := @caughtexception;
+
+     label17:
+        $i29 = virtualinvoke r0.<java.nio.CharBuffer: int arrayOffset()>();
+
+        $i30 = i35 - $i29;
+
+        virtualinvoke r0.<java.nio.CharBuffer: java.nio.Buffer position(int)>($i30);
+
+        $i31 = virtualinvoke r2.<java.nio.ByteBuffer: int arrayOffset()>();
+
+        $i32 = i37 - $i31;
+
+        virtualinvoke r2.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i32);
+
+        throw $r12;
+
+        catch java.lang.Throwable from label07 to label08 with label16;
+        catch java.lang.Throwable from label09 to label11 with label16;
+        catch java.lang.Throwable from label12 to label13 with label16;
+        catch java.lang.Throwable from label14 to label15 with label16;
+        catch java.lang.Throwable from label16 to label17 with label16;
+    }
+
+    private java.nio.charset.CoderResult encodeBufferLoop(java.nio.CharBuffer, java.nio.ByteBuffer)
+    {
+        sun.nio.cs.US_ASCII$Encoder r1;
+        java.lang.Throwable $r8;
+        sun.nio.cs.Surrogate$Parser $r2, $r3, $r5;
+        java.nio.ByteBuffer r7;
+        java.nio.charset.CoderResult $r4, $r6, r9, r10;
+        byte $b2;
+        int $i1, i3, $i4;
+        boolean $z0, $z1;
+        java.nio.CharBuffer r0;
+        char $c0;
+
+        r1 := @this: sun.nio.cs.US_ASCII$Encoder;
+
+        r0 := @parameter0: java.nio.CharBuffer;
+
+        r7 := @parameter1: java.nio.ByteBuffer;
+
+        i3 = virtualinvoke r0.<java.nio.CharBuffer: int position()>();
+
+     label01:
+        $z0 = virtualinvoke r0.<java.nio.CharBuffer: boolean hasRemaining()>();
+
+        if $z0 == 0 goto label08;
+
+        $c0 = virtualinvoke r0.<java.nio.CharBuffer: char get()>();
+
+        $i4 = (int) $c0;
+
+        if $i4 >= 128 goto label04;
+
+        $z1 = virtualinvoke r7.<java.nio.ByteBuffer: boolean hasRemaining()>();
+
+        if $z1 != 0 goto label03;
+
+        r9 = <java.nio.charset.CoderResult: java.nio.charset.CoderResult OVERFLOW>;
+
+     label02:
+        virtualinvoke r0.<java.nio.CharBuffer: java.nio.Buffer position(int)>(i3);
+
+        return r9;
+
+     label03:
+        $b2 = (byte) $c0;
+
+        virtualinvoke r7.<java.nio.ByteBuffer: java.nio.ByteBuffer put(byte)>($b2);
+
+        i3 = i3 + 1;
+
+        goto label01;
+
+     label04:
+        $r2 = r1.<sun.nio.cs.US_ASCII$Encoder: sun.nio.cs.Surrogate$Parser sgp>;
+
+        $i1 = virtualinvoke $r2.<sun.nio.cs.Surrogate$Parser: int parse(char,java.nio.CharBuffer)>($c0, r0);
+
+        if $i1 >= 0 goto label06;
+
+        $r5 = r1.<sun.nio.cs.US_ASCII$Encoder: sun.nio.cs.Surrogate$Parser sgp>;
+
+        $r6 = virtualinvoke $r5.<sun.nio.cs.Surrogate$Parser: java.nio.charset.CoderResult error()>();
+
+     label05:
+        virtualinvoke r0.<java.nio.CharBuffer: java.nio.Buffer position(int)>(i3);
+
+        return $r6;
+
+     label06:
+        $r3 = r1.<sun.nio.cs.US_ASCII$Encoder: sun.nio.cs.Surrogate$Parser sgp>;
+
+        $r4 = virtualinvoke $r3.<sun.nio.cs.Surrogate$Parser: java.nio.charset.CoderResult unmappableResult()>();
+
+     label07:
+        virtualinvoke r0.<java.nio.CharBuffer: java.nio.Buffer position(int)>(i3);
+
+        return $r4;
+
+     label08:
+        r10 = <java.nio.charset.CoderResult: java.nio.charset.CoderResult UNDERFLOW>;
+
+     label09:
+        virtualinvoke r0.<java.nio.CharBuffer: java.nio.Buffer position(int)>(i3);
+
+        return r10;
+
+     label10:
+        $r8 := @caughtexception;
+
+     label11:
+        virtualinvoke r0.<java.nio.CharBuffer: java.nio.Buffer position(int)>(i3);
+
+        throw $r8;
+
+        catch java.lang.Throwable from label01 to label02 with label10;
+        catch java.lang.Throwable from label03 to label05 with label10;
+        catch java.lang.Throwable from label06 to label07 with label10;
+        catch java.lang.Throwable from label08 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    protected java.nio.charset.CoderResult encodeLoop(java.nio.CharBuffer, java.nio.ByteBuffer)
+    {
+        sun.nio.cs.US_ASCII$Encoder r1;
+        java.nio.charset.CoderResult $r3, $r4;
+        java.nio.CharBuffer r0;
+        java.nio.ByteBuffer r2;
+        boolean $z0, $z1;
+
+        r1 := @this: sun.nio.cs.US_ASCII$Encoder;
+
+        r0 := @parameter0: java.nio.CharBuffer;
+
+        r2 := @parameter1: java.nio.ByteBuffer;
+
+        $z0 = virtualinvoke r0.<java.nio.CharBuffer: boolean hasArray()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = virtualinvoke r2.<java.nio.ByteBuffer: boolean hasArray()>();
+
+        if $z1 == 0 goto label1;
+
+        $r4 = specialinvoke r1.<sun.nio.cs.US_ASCII$Encoder: java.nio.charset.CoderResult encodeArrayLoop(java.nio.CharBuffer,java.nio.ByteBuffer)>(r0, r2);
+
+        return $r4;
+
+     label1:
+        $r3 = specialinvoke r1.<sun.nio.cs.US_ASCII$Encoder: java.nio.charset.CoderResult encodeBufferLoop(java.nio.CharBuffer,java.nio.ByteBuffer)>(r0, r2);
+
+        return $r3;
+    }
+
+    protected void implReplaceWith(byte[])
+    {
+        sun.nio.cs.US_ASCII$Encoder r0;
+        byte[] r1;
+        byte $b0;
+
+        r0 := @this: sun.nio.cs.US_ASCII$Encoder;
+
+        r1 := @parameter0: byte[];
+
+        $b0 = r1[0];
+
+        r0.<sun.nio.cs.US_ASCII$Encoder: byte repl> = $b0;
+
+        return;
+    }
+
+    public int encode(char[], int, int, byte[])
+    {
+        sun.nio.cs.US_ASCII$Encoder r2;
+        byte[] r0;
+        byte $b7, $b13;
+        int $i0, $i1, $i2, $i5, $i6, i8, i9, i10, i11, $i12, $i14, $i16;
+        boolean $z0, $z1;
+        char c3, $c4;
+        char[] r1;
+
+        r2 := @this: sun.nio.cs.US_ASCII$Encoder;
+
+        r1 := @parameter0: char[];
+
+        i8 := @parameter1: int;
+
+        i9 := @parameter2: int;
+
+        r0 := @parameter3: byte[];
+
+        i10 = 0;
+
+        $i0 = lengthof r0;
+
+        $i1 = staticinvoke <java.lang.Math: int min(int,int)>(i9, $i0);
+
+        i11 = i8 + $i1;
+
+     label1:
+        if i8 >= i11 goto label5;
+
+        $i2 = i8;
+
+        i8 = i8 + 1;
+
+        c3 = r1[$i2];
+
+        $i14 = (int) c3;
+
+        if $i14 >= 128 goto label2;
+
+        $i6 = i10;
+
+        i10 = i10 + 1;
+
+        $b7 = (byte) c3;
+
+        r0[$i6] = $b7;
+
+        goto label1;
+
+     label2:
+        $z0 = staticinvoke <java.lang.Character: boolean isHighSurrogate(char)>(c3);
+
+        if $z0 == 0 goto label4;
+
+        if i8 >= i11 goto label4;
+
+        $c4 = r1[i8];
+
+        $z1 = staticinvoke <java.lang.Character: boolean isLowSurrogate(char)>($c4);
+
+        if $z1 == 0 goto label4;
+
+        $i5 = lengthof r0;
+
+        if i9 <= $i5 goto label3;
+
+        i11 = i11 + 1;
+
+        $i16 = (int) -1;
+
+        i9 = i9 + $i16;
+
+     label3:
+        i8 = i8 + 1;
+
+     label4:
+        $i12 = i10;
+
+        i10 = i10 + 1;
+
+        $b13 = r2.<sun.nio.cs.US_ASCII$Encoder: byte repl>;
+
+        r0[$i12] = $b13;
+
+        goto label1;
+
+     label5:
+        return i10;
+    }
+
+    void <init>(java.nio.charset.Charset, sun.nio.cs.US_ASCII$1)
+    {
+        sun.nio.cs.US_ASCII$Encoder r0;
+        sun.nio.cs.US_ASCII$1 r2;
+        java.nio.charset.Charset r1;
+
+        r0 := @this: sun.nio.cs.US_ASCII$Encoder;
+
+        r1 := @parameter0: java.nio.charset.Charset;
+
+        r2 := @parameter1: sun.nio.cs.US_ASCII$1;
+
+        specialinvoke r0.<sun.nio.cs.US_ASCII$Encoder: void <init>(java.nio.charset.Charset)>(r1);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        $r0 = class "Lsun/nio/cs/US_ASCII;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.nio.cs.US_ASCII$Encoder: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

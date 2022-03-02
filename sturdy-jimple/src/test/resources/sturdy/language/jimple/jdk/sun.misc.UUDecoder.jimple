@@ -1,0 +1,516 @@
+public class sun.misc.UUDecoder extends sun.misc.CharacterDecoder
+{
+    public java.lang.String bufferName;
+    public int mode;
+    private byte[] decoderBuffer;
+
+    public void <init>()
+    {
+        byte[] $r1;
+        sun.misc.UUDecoder r0;
+
+        r0 := @this: sun.misc.UUDecoder;
+
+        specialinvoke r0.<sun.misc.CharacterDecoder: void <init>()>();
+
+        $r1 = newarray (byte)[4];
+
+        r0.<sun.misc.UUDecoder: byte[] decoderBuffer> = $r1;
+
+        return;
+    }
+
+    protected int bytesPerAtom()
+    {
+        sun.misc.UUDecoder r0;
+
+        r0 := @this: sun.misc.UUDecoder;
+
+        return 3;
+    }
+
+    protected int bytesPerLine()
+    {
+        sun.misc.UUDecoder r0;
+
+        r0 := @this: sun.misc.UUDecoder;
+
+        return 45;
+    }
+
+    protected void decodeAtom(java.io.PushbackInputStream, java.io.OutputStream, int) throws java.io.IOException
+    {
+        byte[] $r2, $r3, $r4, $r5, $r6, $r7, $r10;
+        java.io.PushbackInputStream r9;
+        byte $b0, $b2, $b7, $b9, $b14, $b16, $b17, $b21, $b24, $b26, $b31;
+        java.lang.StringBuffer $r12;
+        int $i1, $i3, $i4, $i5, i6, $i8, $i10, $i11, $i12, i13, $i15, $i18, i19, $i20, i22, $i23, $i25, $i27, $i29, $i30, i32, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43;
+        java.io.OutputStream r8;
+        sun.misc.UUDecoder r1;
+        char $c28;
+        sun.misc.CEStreamExhausted $r13;
+
+        r1 := @this: sun.misc.UUDecoder;
+
+        r9 := @parameter0: java.io.PushbackInputStream;
+
+        r8 := @parameter1: java.io.OutputStream;
+
+        i22 := @parameter2: int;
+
+        $r12 = new java.lang.StringBuffer;
+
+        specialinvoke $r12.<java.lang.StringBuffer: void <init>()>();
+
+        i32 = 0;
+
+     label1:
+        if i32 >= 4 goto label3;
+
+        $i27 = virtualinvoke r9.<java.io.PushbackInputStream: int read()>();
+
+        $i34 = (int) -1;
+
+        if $i27 != $i34 goto label2;
+
+        $r13 = new sun.misc.CEStreamExhausted;
+
+        specialinvoke $r13.<sun.misc.CEStreamExhausted: void <init>()>();
+
+        throw $r13;
+
+     label2:
+        $c28 = (char) $i27;
+
+        virtualinvoke $r12.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c28);
+
+        $r10 = r1.<sun.misc.UUDecoder: byte[] decoderBuffer>;
+
+        $i29 = $i27 - 32;
+
+        $i30 = $i29 & 63;
+
+        $b31 = (byte) $i30;
+
+        $r10[i32] = $b31;
+
+        i32 = i32 + 1;
+
+        goto label1;
+
+     label3:
+        $r2 = r1.<sun.misc.UUDecoder: byte[] decoderBuffer>;
+
+        $b0 = $r2[0];
+
+        $i35 = (int) $b0;
+
+        $i1 = $i35 << 2;
+
+        $i5 = $i1 & 252;
+
+        $r3 = r1.<sun.misc.UUDecoder: byte[] decoderBuffer>;
+
+        $b2 = $r3[1];
+
+        $i36 = (int) $b2;
+
+        $i3 = $i36 >>> 4;
+
+        $i4 = $i3 & 3;
+
+        i6 = $i5 | $i4;
+
+        $r4 = r1.<sun.misc.UUDecoder: byte[] decoderBuffer>;
+
+        $b7 = $r4[1];
+
+        $i37 = (int) $b7;
+
+        $i8 = $i37 << 4;
+
+        $i12 = $i8 & 240;
+
+        $r5 = r1.<sun.misc.UUDecoder: byte[] decoderBuffer>;
+
+        $b9 = $r5[2];
+
+        $i38 = (int) $b9;
+
+        $i10 = $i38 >>> 2;
+
+        $i11 = $i10 & 15;
+
+        i13 = $i12 | $i11;
+
+        $r6 = r1.<sun.misc.UUDecoder: byte[] decoderBuffer>;
+
+        $b14 = $r6[2];
+
+        $i39 = (int) $b14;
+
+        $i15 = $i39 << 6;
+
+        $i18 = $i15 & 192;
+
+        $r7 = r1.<sun.misc.UUDecoder: byte[] decoderBuffer>;
+
+        $b16 = $r7[3];
+
+        $b17 = $b16 & 63;
+
+        $i40 = (int) $b17;
+
+        i19 = $i18 | $i40;
+
+        $i20 = i6 & 255;
+
+        $b21 = (byte) $i20;
+
+        $i41 = (int) $b21;
+
+        virtualinvoke r8.<java.io.OutputStream: void write(int)>($i41);
+
+        if i22 <= 1 goto label4;
+
+        $i25 = i13 & 255;
+
+        $b26 = (byte) $i25;
+
+        $i42 = (int) $b26;
+
+        virtualinvoke r8.<java.io.OutputStream: void write(int)>($i42);
+
+     label4:
+        if i22 <= 2 goto label5;
+
+        $i23 = i19 & 255;
+
+        $b24 = (byte) $i23;
+
+        $i43 = (int) $b24;
+
+        virtualinvoke r8.<java.io.OutputStream: void write(int)>($i43);
+
+     label5:
+        return;
+    }
+
+    protected void decodeBufferPrefix(java.io.PushbackInputStream, java.io.OutputStream) throws java.io.IOException
+    {
+        java.io.PushbackInputStream r1;
+        java.lang.StringBuffer $r10;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, i9, $i11, $i13, $i15;
+        java.lang.String $r2, $r4, $r5;
+        boolean z0, $z1;
+        java.io.OutputStream r9;
+        sun.misc.UUDecoder r3;
+        sun.misc.CEFormatException $r11, $r12, $r13;
+        char $c8;
+
+        r3 := @this: sun.misc.UUDecoder;
+
+        r1 := @parameter0: java.io.PushbackInputStream;
+
+        r9 := @parameter1: java.io.OutputStream;
+
+        $r10 = new java.lang.StringBuffer;
+
+        specialinvoke $r10.<java.lang.StringBuffer: void <init>(int)>(32);
+
+        z0 = 1;
+
+     label01:
+        $i0 = virtualinvoke r1.<java.io.PushbackInputStream: int read()>();
+
+        i9 = $i0;
+
+        $i11 = (int) -1;
+
+        if $i0 != $i11 goto label02;
+
+        $r11 = new sun.misc.CEFormatException;
+
+        specialinvoke $r11.<sun.misc.CEFormatException: void <init>(java.lang.String)>("UUDecoder: No begin line.");
+
+        throw $r11;
+
+     label02:
+        if $i0 != 98 goto label03;
+
+        if z0 == 0 goto label03;
+
+        $i1 = virtualinvoke r1.<java.io.PushbackInputStream: int read()>();
+
+        i9 = $i1;
+
+        if $i1 != 101 goto label03;
+
+        goto label07;
+
+     label03:
+        if i9 == 10 goto label04;
+
+        if i9 != 13 goto label05;
+
+     label04:
+        $z1 = 1;
+
+        goto label06;
+
+     label05:
+        $z1 = 0;
+
+     label06:
+        z0 = $z1;
+
+        goto label01;
+
+     label07:
+        if i9 == 10 goto label09;
+
+        if i9 == 13 goto label09;
+
+        $i7 = virtualinvoke r1.<java.io.PushbackInputStream: int read()>();
+
+        i9 = $i7;
+
+        $i13 = (int) -1;
+
+        if $i7 != $i13 goto label08;
+
+        $r12 = new sun.misc.CEFormatException;
+
+        specialinvoke $r12.<sun.misc.CEFormatException: void <init>(java.lang.String)>("UUDecoder: No begin line.");
+
+        throw $r12;
+
+     label08:
+        if $i7 == 10 goto label07;
+
+        if $i7 == 13 goto label07;
+
+        $c8 = (char) $i7;
+
+        virtualinvoke $r10.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c8);
+
+        goto label07;
+
+     label09:
+        $r2 = virtualinvoke $r10.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $i2 = virtualinvoke $r2.<java.lang.String: int indexOf(int)>(32);
+
+        if $i2 == 3 goto label10;
+
+        $r13 = new sun.misc.CEFormatException;
+
+        specialinvoke $r13.<sun.misc.CEFormatException: void <init>(java.lang.String)>("UUDecoder: Malformed begin line.");
+
+        throw $r13;
+
+     label10:
+        $r4 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int,int)>(4, 7);
+
+        $i3 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r4);
+
+        r3.<sun.misc.UUDecoder: int mode> = $i3;
+
+        $i4 = virtualinvoke $r2.<java.lang.String: int indexOf(int,int)>(32, 6);
+
+        $i5 = $i4 + 1;
+
+        $r5 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int)>($i5);
+
+        r3.<sun.misc.UUDecoder: java.lang.String bufferName> = $r5;
+
+        if i9 != 13 goto label11;
+
+        $i6 = virtualinvoke r1.<java.io.PushbackInputStream: int read()>();
+
+        if $i6 == 10 goto label11;
+
+        $i15 = (int) -1;
+
+        if $i6 == $i15 goto label11;
+
+        virtualinvoke r1.<java.io.PushbackInputStream: void unread(int)>($i6);
+
+     label11:
+        return;
+    }
+
+    protected int decodeLinePrefix(java.io.PushbackInputStream, java.io.OutputStream) throws java.io.IOException
+    {
+        java.io.OutputStream r4;
+        sun.misc.UUDecoder r1;
+        java.io.PushbackInputStream r0;
+        sun.misc.CEFormatException $r7, $r8;
+        int $i0, $i1, $i2, $i3, i4, $i6, $i8;
+        sun.misc.CEStreamExhausted $r6;
+
+        r1 := @this: sun.misc.UUDecoder;
+
+        r0 := @parameter0: java.io.PushbackInputStream;
+
+        r4 := @parameter1: java.io.OutputStream;
+
+        $i0 = virtualinvoke r0.<java.io.PushbackInputStream: int read()>();
+
+        if $i0 != 32 goto label2;
+
+        virtualinvoke r0.<java.io.PushbackInputStream: int read()>();
+
+        $i3 = virtualinvoke r0.<java.io.PushbackInputStream: int read()>();
+
+        if $i3 == 10 goto label1;
+
+        $i6 = (int) -1;
+
+        if $i3 == $i6 goto label1;
+
+        virtualinvoke r0.<java.io.PushbackInputStream: void unread(int)>($i3);
+
+     label1:
+        $r6 = new sun.misc.CEStreamExhausted;
+
+        specialinvoke $r6.<sun.misc.CEStreamExhausted: void <init>()>();
+
+        throw $r6;
+
+     label2:
+        $i8 = (int) -1;
+
+        if $i0 != $i8 goto label3;
+
+        $r7 = new sun.misc.CEFormatException;
+
+        specialinvoke $r7.<sun.misc.CEFormatException: void <init>(java.lang.String)>("UUDecoder: Short Buffer.");
+
+        throw $r7;
+
+     label3:
+        $i1 = $i0 - 32;
+
+        i4 = $i1 & 63;
+
+        $i2 = virtualinvoke r1.<sun.misc.UUDecoder: int bytesPerLine()>();
+
+        if i4 <= $i2 goto label4;
+
+        $r8 = new sun.misc.CEFormatException;
+
+        specialinvoke $r8.<sun.misc.CEFormatException: void <init>(java.lang.String)>("UUDecoder: Bad Line Length.");
+
+        throw $r8;
+
+     label4:
+        return i4;
+    }
+
+    protected void decodeLineSuffix(java.io.PushbackInputStream, java.io.OutputStream) throws java.io.IOException
+    {
+        java.io.OutputStream r3;
+        sun.misc.UUDecoder r2;
+        java.io.PushbackInputStream r0;
+        int $i0, $i1, $i3, $i5;
+        sun.misc.CEStreamExhausted $r4;
+
+        r2 := @this: sun.misc.UUDecoder;
+
+        r0 := @parameter0: java.io.PushbackInputStream;
+
+        r3 := @parameter1: java.io.OutputStream;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.io.PushbackInputStream: int read()>();
+
+        $i3 = (int) -1;
+
+        if $i0 != $i3 goto label2;
+
+        $r4 = new sun.misc.CEStreamExhausted;
+
+        specialinvoke $r4.<sun.misc.CEStreamExhausted: void <init>()>();
+
+        throw $r4;
+
+     label2:
+        if $i0 != 10 goto label3;
+
+        goto label4;
+
+     label3:
+        if $i0 != 13 goto label1;
+
+        $i1 = virtualinvoke r0.<java.io.PushbackInputStream: int read()>();
+
+        if $i1 == 10 goto label4;
+
+        $i5 = (int) -1;
+
+        if $i1 == $i5 goto label4;
+
+        virtualinvoke r0.<java.io.PushbackInputStream: void unread(int)>($i1);
+
+        goto label4;
+
+     label4:
+        return;
+    }
+
+    protected void decodeBufferSuffix(java.io.PushbackInputStream, java.io.OutputStream) throws java.io.IOException
+    {
+        java.io.OutputStream r6;
+        byte[] $r2, $r3, $r4, $r5;
+        sun.misc.UUDecoder r1;
+        java.io.PushbackInputStream r0;
+        sun.misc.CEFormatException $r8;
+        byte $b0, $b1, $b2;
+        int $i3, $i4, $i5;
+
+        r1 := @this: sun.misc.UUDecoder;
+
+        r0 := @parameter0: java.io.PushbackInputStream;
+
+        r6 := @parameter1: java.io.OutputStream;
+
+        $r2 = r1.<sun.misc.UUDecoder: byte[] decoderBuffer>;
+
+        virtualinvoke r0.<java.io.PushbackInputStream: int read(byte[])>($r2);
+
+        $r3 = r1.<sun.misc.UUDecoder: byte[] decoderBuffer>;
+
+        $b0 = $r3[0];
+
+        $i3 = (int) $b0;
+
+        if $i3 != 101 goto label1;
+
+        $r4 = r1.<sun.misc.UUDecoder: byte[] decoderBuffer>;
+
+        $b1 = $r4[1];
+
+        $i4 = (int) $b1;
+
+        if $i4 != 110 goto label1;
+
+        $r5 = r1.<sun.misc.UUDecoder: byte[] decoderBuffer>;
+
+        $b2 = $r5[2];
+
+        $i5 = (int) $b2;
+
+        if $i5 == 100 goto label2;
+
+     label1:
+        $r8 = new sun.misc.CEFormatException;
+
+        specialinvoke $r8.<sun.misc.CEFormatException: void <init>(java.lang.String)>("UUDecoder: Missing \'end\' line.");
+
+        throw $r8;
+
+     label2:
+        return;
+    }
+}

@@ -1,0 +1,1925 @@
+public final class java.time.YearMonth extends java.lang.Object implements java.time.temporal.Temporal, java.time.temporal.TemporalAdjuster, java.lang.Comparable, java.io.Serializable
+{
+    private static final long serialVersionUID;
+    private static final java.time.format.DateTimeFormatter PARSER;
+    private final int year;
+    private final int month;
+
+    public static java.time.YearMonth now()
+    {
+        java.time.YearMonth $r1;
+        java.time.Clock $r0;
+
+        $r0 = staticinvoke <java.time.Clock: java.time.Clock systemDefaultZone()>();
+
+        $r1 = staticinvoke <java.time.YearMonth: java.time.YearMonth now(java.time.Clock)>($r0);
+
+        return $r1;
+    }
+
+    public static java.time.YearMonth now(java.time.ZoneId)
+    {
+        java.time.YearMonth $r2;
+        java.time.Clock $r1;
+        java.time.ZoneId r0;
+
+        r0 := @parameter0: java.time.ZoneId;
+
+        $r1 = staticinvoke <java.time.Clock: java.time.Clock system(java.time.ZoneId)>(r0);
+
+        $r2 = staticinvoke <java.time.YearMonth: java.time.YearMonth now(java.time.Clock)>($r1);
+
+        return $r2;
+    }
+
+    public static java.time.YearMonth now(java.time.Clock)
+    {
+        java.time.Month $r2;
+        java.time.LocalDate $r1;
+        int $i0;
+        java.time.YearMonth $r3;
+        java.time.Clock r0;
+
+        r0 := @parameter0: java.time.Clock;
+
+        $r1 = staticinvoke <java.time.LocalDate: java.time.LocalDate now(java.time.Clock)>(r0);
+
+        $i0 = virtualinvoke $r1.<java.time.LocalDate: int getYear()>();
+
+        $r2 = virtualinvoke $r1.<java.time.LocalDate: java.time.Month getMonth()>();
+
+        $r3 = staticinvoke <java.time.YearMonth: java.time.YearMonth of(int,java.time.Month)>($i0, $r2);
+
+        return $r3;
+    }
+
+    public static java.time.YearMonth of(int, java.time.Month)
+    {
+        java.time.Month r0;
+        int i0, $i1;
+        java.time.YearMonth $r1;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: java.time.Month;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "month");
+
+        $i1 = virtualinvoke r0.<java.time.Month: int getValue()>();
+
+        $r1 = staticinvoke <java.time.YearMonth: java.time.YearMonth of(int,int)>(i0, $i1);
+
+        return $r1;
+    }
+
+    public static java.time.YearMonth of(int, int)
+    {
+        java.time.temporal.ChronoField $r0, $r1;
+        int i0, i2;
+        java.time.YearMonth $r2;
+        long $l1, $l3;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        $r0 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $l1 = (long) i0;
+
+        virtualinvoke $r0.<java.time.temporal.ChronoField: long checkValidValue(long)>($l1);
+
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MONTH_OF_YEAR>;
+
+        $l3 = (long) i2;
+
+        virtualinvoke $r1.<java.time.temporal.ChronoField: long checkValidValue(long)>($l3);
+
+        $r2 = new java.time.YearMonth;
+
+        specialinvoke $r2.<java.time.YearMonth: void <init>(int,int)>(i0, i2);
+
+        return $r2;
+    }
+
+    public static java.time.YearMonth 'from'(java.time.temporal.TemporalAccessor)
+    {
+        java.time.temporal.ChronoField $r2, $r3;
+        java.time.temporal.TemporalAccessor r16;
+        java.time.chrono.IsoChronology $r0;
+        int $i0, $i1;
+        java.lang.String $r13, $r15;
+        java.time.DateTimeException $r6, $r7;
+        boolean $z0, $z1;
+        java.time.chrono.Chronology $r1;
+        java.time.YearMonth $r4, $r5;
+        java.lang.StringBuilder $r8, $r9, $r10, $r11, $r14;
+        java.lang.Class $r12;
+
+        r16 := @parameter0: java.time.temporal.TemporalAccessor;
+
+        $z0 = r16 instanceof java.time.YearMonth;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = (java.time.YearMonth) r16;
+
+        return $r5;
+
+     label1:
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r16, "temporal");
+
+     label2:
+        $r0 = <java.time.chrono.IsoChronology: java.time.chrono.IsoChronology INSTANCE>;
+
+        $r1 = staticinvoke <java.time.chrono.Chronology: java.time.chrono.Chronology 'from'(java.time.temporal.TemporalAccessor)>(r16);
+
+        $z1 = virtualinvoke $r0.<java.time.chrono.IsoChronology: boolean equals(java.lang.Object)>($r1);
+
+        if $z1 != 0 goto label3;
+
+        r16 = staticinvoke <java.time.LocalDate: java.time.LocalDate 'from'(java.time.temporal.TemporalAccessor)>(r16);
+
+     label3:
+        $r2 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $i0 = interfaceinvoke r16.<java.time.temporal.TemporalAccessor: int get(java.time.temporal.TemporalField)>($r2);
+
+        $r3 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MONTH_OF_YEAR>;
+
+        $i1 = interfaceinvoke r16.<java.time.temporal.TemporalAccessor: int get(java.time.temporal.TemporalField)>($r3);
+
+        $r4 = staticinvoke <java.time.YearMonth: java.time.YearMonth of(int,int)>($i0, $i1);
+
+     label4:
+        return $r4;
+
+     label5:
+        $r6 := @caughtexception;
+
+        $r7 = new java.time.DateTimeException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to obtain YearMonth from TemporalAccessor: ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r16);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" of type ");
+
+        $r12 = virtualinvoke r16.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.Class: java.lang.String getName()>();
+
+        $r14 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.time.DateTimeException: void <init>(java.lang.String,java.lang.Throwable)>($r15, $r6);
+
+        throw $r7;
+
+        catch java.time.DateTimeException from label2 to label4 with label5;
+    }
+
+    public static java.time.YearMonth parse(java.lang.CharSequence)
+    {
+        java.time.YearMonth $r2;
+        java.lang.CharSequence r0;
+        java.time.format.DateTimeFormatter $r1;
+
+        r0 := @parameter0: java.lang.CharSequence;
+
+        $r1 = <java.time.YearMonth: java.time.format.DateTimeFormatter PARSER>;
+
+        $r2 = staticinvoke <java.time.YearMonth: java.time.YearMonth parse(java.lang.CharSequence,java.time.format.DateTimeFormatter)>(r0, $r1);
+
+        return $r2;
+    }
+
+    public static java.time.YearMonth parse(java.lang.CharSequence, java.time.format.DateTimeFormatter)
+    {
+        java.lang.CharSequence r1;
+        java.time.format.DateTimeFormatter r0;
+        java.time.temporal.TemporalQuery $r2;
+        java.time.YearMonth $r4;
+        java.lang.Object $r3;
+
+        r1 := @parameter0: java.lang.CharSequence;
+
+        r0 := @parameter1: java.time.format.DateTimeFormatter;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "formatter");
+
+        $r2 = staticinvoke <java.time.YearMonth$from__45: java.time.temporal.TemporalQuery bootstrap$()>();
+
+        $r3 = virtualinvoke r0.<java.time.format.DateTimeFormatter: java.lang.Object parse(java.lang.CharSequence,java.time.temporal.TemporalQuery)>(r1, $r2);
+
+        $r4 = (java.time.YearMonth) $r3;
+
+        return $r4;
+    }
+
+    private void <init>(int, int)
+    {
+        java.time.YearMonth r0;
+        int i0, i1;
+
+        r0 := @this: java.time.YearMonth;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.time.YearMonth: int year> = i0;
+
+        r0.<java.time.YearMonth: int month> = i1;
+
+        return;
+    }
+
+    private java.time.YearMonth 'with'(int, int)
+    {
+        java.time.YearMonth r0, $r1;
+        int i0, $i1, i2, $i3;
+
+        r0 := @this: java.time.YearMonth;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        $i1 = r0.<java.time.YearMonth: int year>;
+
+        if $i1 != i0 goto label1;
+
+        $i3 = r0.<java.time.YearMonth: int month>;
+
+        if $i3 != i2 goto label1;
+
+        return r0;
+
+     label1:
+        $r1 = new java.time.YearMonth;
+
+        specialinvoke $r1.<java.time.YearMonth: void <init>(int,int)>(i0, i2);
+
+        return $r1;
+    }
+
+    public boolean isSupported(java.time.temporal.TemporalField)
+    {
+        java.time.temporal.ChronoField $r2, $r3, $r4, $r5, $r6;
+        java.time.temporal.TemporalField r0;
+        java.time.YearMonth r1;
+        boolean $z0, $z1, $z2, $z3;
+
+        r1 := @this: java.time.YearMonth;
+
+        r0 := @parameter0: java.time.temporal.TemporalField;
+
+        $z0 = r0 instanceof java.time.temporal.ChronoField;
+
+        if $z0 == 0 goto label4;
+
+        $r2 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        if r0 == $r2 goto label1;
+
+        $r3 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MONTH_OF_YEAR>;
+
+        if r0 == $r3 goto label1;
+
+        $r4 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField PROLEPTIC_MONTH>;
+
+        if r0 == $r4 goto label1;
+
+        $r5 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR_OF_ERA>;
+
+        if r0 == $r5 goto label1;
+
+        $r6 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ERA>;
+
+        if r0 != $r6 goto label2;
+
+     label1:
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+
+     label4:
+        if r0 == null goto label5;
+
+        $z1 = interfaceinvoke r0.<java.time.temporal.TemporalField: boolean isSupportedBy(java.time.temporal.TemporalAccessor)>(r1);
+
+        if $z1 == 0 goto label5;
+
+        $z3 = 1;
+
+        goto label6;
+
+     label5:
+        $z3 = 0;
+
+     label6:
+        return $z3;
+    }
+
+    public boolean isSupported(java.time.temporal.TemporalUnit)
+    {
+        java.time.temporal.TemporalUnit r0;
+        java.time.temporal.ChronoUnit $r2, $r3, $r4, $r5, $r6, $r7;
+        java.time.YearMonth r1;
+        boolean $z0, $z1, $z2, $z3;
+
+        r1 := @this: java.time.YearMonth;
+
+        r0 := @parameter0: java.time.temporal.TemporalUnit;
+
+        $z0 = r0 instanceof java.time.temporal.ChronoUnit;
+
+        if $z0 == 0 goto label4;
+
+        $r2 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit MONTHS>;
+
+        if r0 == $r2 goto label1;
+
+        $r3 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit YEARS>;
+
+        if r0 == $r3 goto label1;
+
+        $r4 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit DECADES>;
+
+        if r0 == $r4 goto label1;
+
+        $r5 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit CENTURIES>;
+
+        if r0 == $r5 goto label1;
+
+        $r6 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit MILLENNIA>;
+
+        if r0 == $r6 goto label1;
+
+        $r7 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit ERAS>;
+
+        if r0 != $r7 goto label2;
+
+     label1:
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+
+     label4:
+        if r0 == null goto label5;
+
+        $z1 = interfaceinvoke r0.<java.time.temporal.TemporalUnit: boolean isSupportedBy(java.time.temporal.Temporal)>(r1);
+
+        if $z1 == 0 goto label5;
+
+        $z3 = 1;
+
+        goto label6;
+
+     label5:
+        $z3 = 0;
+
+     label6:
+        return $z3;
+    }
+
+    public java.time.temporal.ValueRange range(java.time.temporal.TemporalField)
+    {
+        java.time.temporal.ChronoField $r1;
+        java.time.temporal.ValueRange $r3, $r4;
+        java.time.temporal.TemporalField r0;
+        java.time.YearMonth r2;
+        int $i0;
+
+        r2 := @this: java.time.YearMonth;
+
+        r0 := @parameter0: java.time.temporal.TemporalField;
+
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR_OF_ERA>;
+
+        if r0 != $r1 goto label3;
+
+        $i0 = virtualinvoke r2.<java.time.YearMonth: int getYear()>();
+
+        if $i0 > 0 goto label1;
+
+        $r4 = staticinvoke <java.time.temporal.ValueRange: java.time.temporal.ValueRange of(long,long)>(1L, 1000000000L);
+
+        goto label2;
+
+     label1:
+        $r4 = staticinvoke <java.time.temporal.ValueRange: java.time.temporal.ValueRange of(long,long)>(1L, 999999999L);
+
+     label2:
+        return $r4;
+
+     label3:
+        $r3 = specialinvoke r2.<java.time.temporal.Temporal: java.time.temporal.ValueRange range(java.time.temporal.TemporalField)>(r0);
+
+        return $r3;
+    }
+
+    public int get(java.time.temporal.TemporalField)
+    {
+        java.time.temporal.ValueRange $r2;
+        java.time.temporal.TemporalField r1;
+        java.time.YearMonth r0;
+        int $i1;
+        long $l0;
+
+        r0 := @this: java.time.YearMonth;
+
+        r1 := @parameter0: java.time.temporal.TemporalField;
+
+        $r2 = virtualinvoke r0.<java.time.YearMonth: java.time.temporal.ValueRange range(java.time.temporal.TemporalField)>(r1);
+
+        $l0 = virtualinvoke r0.<java.time.YearMonth: long getLong(java.time.temporal.TemporalField)>(r1);
+
+        $i1 = virtualinvoke $r2.<java.time.temporal.ValueRange: int checkValidIntValue(long,java.time.temporal.TemporalField)>($l0, r1);
+
+        return $i1;
+    }
+
+    public long getLong(java.time.temporal.TemporalField)
+    {
+        java.time.temporal.ChronoField $r2;
+        long $l0, $l4, $l6, $l8, $l10, $l12, $l13, $l14;
+        int[] $r3;
+        int $i1, $i2, $i3, $i5, $i7, $i9, $i11, $i15, $i16;
+        java.lang.String $r8;
+        boolean $z0;
+        java.time.temporal.TemporalField r0;
+        java.time.temporal.UnsupportedTemporalTypeException $r4;
+        java.time.YearMonth r1;
+        java.lang.StringBuilder $r5, $r6, $r7;
+
+        r1 := @this: java.time.YearMonth;
+
+        r0 := @parameter0: java.time.temporal.TemporalField;
+
+        $z0 = r0 instanceof java.time.temporal.ChronoField;
+
+        if $z0 == 0 goto label9;
+
+        $r3 = <java.time.YearMonth$1: int[] $SwitchMap$java$time$temporal$ChronoField>;
+
+        $r2 = (java.time.temporal.ChronoField) r0;
+
+        $i1 = virtualinvoke $r2.<java.time.temporal.ChronoField: int ordinal()>();
+
+        $i2 = $r3[$i1];
+
+        tableswitch($i2)
+        {
+            case 1: goto label1;
+            case 2: goto label2;
+            case 3: goto label3;
+            case 4: goto label5;
+            case 5: goto label6;
+            default: goto label8;
+        };
+
+     label1:
+        $i11 = r1.<java.time.YearMonth: int month>;
+
+        $l12 = (long) $i11;
+
+        return $l12;
+
+     label2:
+        $l10 = specialinvoke r1.<java.time.YearMonth: long getProlepticMonth()>();
+
+        return $l10;
+
+     label3:
+        $i7 = r1.<java.time.YearMonth: int year>;
+
+        if $i7 >= 1 goto label4;
+
+        $i9 = r1.<java.time.YearMonth: int year>;
+
+        $i15 = 1 - $i9;
+
+        $l13 = (long) $i15;
+
+        return $l13;
+
+     label4:
+        $i16 = r1.<java.time.YearMonth: int year>;
+
+        $l8 = (long) $i16;
+
+        return $l8;
+
+     label5:
+        $i5 = r1.<java.time.YearMonth: int year>;
+
+        $l6 = (long) $i5;
+
+        return $l6;
+
+     label6:
+        $i3 = r1.<java.time.YearMonth: int year>;
+
+        if $i3 >= 1 goto label7;
+
+        $l14 = (long) 0;
+
+        return $l14;
+
+     label7:
+        $l4 = (long) 1;
+
+        return $l4;
+
+     label8:
+        $r4 = new java.time.temporal.UnsupportedTemporalTypeException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported field: ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.time.temporal.UnsupportedTemporalTypeException: void <init>(java.lang.String)>($r8);
+
+        throw $r4;
+
+     label9:
+        $l0 = interfaceinvoke r0.<java.time.temporal.TemporalField: long getFrom(java.time.temporal.TemporalAccessor)>(r1);
+
+        return $l0;
+    }
+
+    private long getProlepticMonth()
+    {
+        long $l1, $l3, $l4, $l5, $l6;
+        java.time.YearMonth r0;
+        int $i0, $i2;
+
+        r0 := @this: java.time.YearMonth;
+
+        $i0 = r0.<java.time.YearMonth: int year>;
+
+        $l1 = (long) $i0;
+
+        $l4 = $l1 * 12L;
+
+        $i2 = r0.<java.time.YearMonth: int month>;
+
+        $l3 = (long) $i2;
+
+        $l5 = $l4 + $l3;
+
+        $l6 = $l5 - 1L;
+
+        return $l6;
+    }
+
+    public int getYear()
+    {
+        java.time.YearMonth r0;
+        int $i0;
+
+        r0 := @this: java.time.YearMonth;
+
+        $i0 = r0.<java.time.YearMonth: int year>;
+
+        return $i0;
+    }
+
+    public int getMonthValue()
+    {
+        java.time.YearMonth r0;
+        int $i0;
+
+        r0 := @this: java.time.YearMonth;
+
+        $i0 = r0.<java.time.YearMonth: int month>;
+
+        return $i0;
+    }
+
+    public java.time.Month getMonth()
+    {
+        java.time.YearMonth r0;
+        int $i0;
+        java.time.Month $r1;
+
+        r0 := @this: java.time.YearMonth;
+
+        $i0 = r0.<java.time.YearMonth: int month>;
+
+        $r1 = staticinvoke <java.time.Month: java.time.Month of(int)>($i0);
+
+        return $r1;
+    }
+
+    public boolean isLeapYear()
+    {
+        java.time.chrono.IsoChronology $r1;
+        java.time.YearMonth r0;
+        int $i0;
+        long $l1;
+        boolean $z0;
+
+        r0 := @this: java.time.YearMonth;
+
+        $r1 = <java.time.chrono.IsoChronology: java.time.chrono.IsoChronology INSTANCE>;
+
+        $i0 = r0.<java.time.YearMonth: int year>;
+
+        $l1 = (long) $i0;
+
+        $z0 = virtualinvoke $r1.<java.time.chrono.IsoChronology: boolean isLeapYear(long)>($l1);
+
+        return $z0;
+    }
+
+    public boolean isValidDay(int)
+    {
+        int i0, $i1;
+        java.time.YearMonth r0;
+        boolean $z0;
+
+        r0 := @this: java.time.YearMonth;
+
+        i0 := @parameter0: int;
+
+        if i0 < 1 goto label1;
+
+        $i1 = virtualinvoke r0.<java.time.YearMonth: int lengthOfMonth()>();
+
+        if i0 > $i1 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public int lengthOfMonth()
+    {
+        java.time.Month $r1;
+        java.time.YearMonth r0;
+        int $i0;
+        boolean $z0;
+
+        r0 := @this: java.time.YearMonth;
+
+        $r1 = virtualinvoke r0.<java.time.YearMonth: java.time.Month getMonth()>();
+
+        $z0 = virtualinvoke r0.<java.time.YearMonth: boolean isLeapYear()>();
+
+        $i0 = virtualinvoke $r1.<java.time.Month: int length(boolean)>($z0);
+
+        return $i0;
+    }
+
+    public int lengthOfYear()
+    {
+        java.time.YearMonth r0;
+        short $s0;
+        boolean $z0;
+
+        r0 := @this: java.time.YearMonth;
+
+        $z0 = virtualinvoke r0.<java.time.YearMonth: boolean isLeapYear()>();
+
+        if $z0 == 0 goto label1;
+
+        $s0 = 366;
+
+        goto label2;
+
+     label1:
+        $s0 = 365;
+
+     label2:
+        return $s0;
+    }
+
+    public java.time.YearMonth 'with'(java.time.temporal.TemporalAdjuster)
+    {
+        java.time.YearMonth r1, $r3;
+        java.time.temporal.TemporalAdjuster r0;
+        java.time.temporal.Temporal $r2;
+
+        r1 := @this: java.time.YearMonth;
+
+        r0 := @parameter0: java.time.temporal.TemporalAdjuster;
+
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalAdjuster: java.time.temporal.Temporal adjustInto(java.time.temporal.Temporal)>(r1);
+
+        $r3 = (java.time.YearMonth) $r2;
+
+        return $r3;
+    }
+
+    public java.time.YearMonth 'with'(java.time.temporal.TemporalField, long)
+    {
+        byte $b4;
+        int[] $r5;
+        boolean $z0;
+        java.time.temporal.TemporalField r0;
+        java.lang.StringBuilder $r12, $r13, $r14;
+        java.time.temporal.Temporal $r2;
+        java.time.temporal.ChronoField r4, $r6;
+        long l0, $l3, $l10, $l11, $l13;
+        int $i1, $i2, $i5, $i6, $i7, $i8, $i9, $i12;
+        java.lang.String $r15;
+        java.time.temporal.UnsupportedTemporalTypeException $r11;
+        java.time.YearMonth r1, $r3, $r7, $r8, $r9, $r10, $r16;
+
+        r1 := @this: java.time.YearMonth;
+
+        r0 := @parameter0: java.time.temporal.TemporalField;
+
+        l0 := @parameter1: long;
+
+        $z0 = r0 instanceof java.time.temporal.ChronoField;
+
+        if $z0 == 0 goto label11;
+
+        r4 = (java.time.temporal.ChronoField) r0;
+
+        virtualinvoke r4.<java.time.temporal.ChronoField: long checkValidValue(long)>(l0);
+
+        $r5 = <java.time.YearMonth$1: int[] $SwitchMap$java$time$temporal$ChronoField>;
+
+        $i1 = virtualinvoke r4.<java.time.temporal.ChronoField: int ordinal()>();
+
+        $i2 = $r5[$i1];
+
+        tableswitch($i2)
+        {
+            case 1: goto label01;
+            case 2: goto label02;
+            case 3: goto label03;
+            case 4: goto label06;
+            case 5: goto label07;
+            default: goto label10;
+        };
+
+     label01:
+        $i12 = (int) l0;
+
+        $r10 = virtualinvoke r1.<java.time.YearMonth: java.time.YearMonth withMonth(int)>($i12);
+
+        return $r10;
+
+     label02:
+        $l10 = specialinvoke r1.<java.time.YearMonth: long getProlepticMonth()>();
+
+        $l11 = l0 - $l10;
+
+        $r9 = virtualinvoke r1.<java.time.YearMonth: java.time.YearMonth plusMonths(long)>($l11);
+
+        return $r9;
+
+     label03:
+        $i8 = r1.<java.time.YearMonth: int year>;
+
+        if $i8 >= 1 goto label04;
+
+        $l13 = 1L - l0;
+
+        goto label05;
+
+     label04:
+        $l13 = l0;
+
+     label05:
+        $i9 = (int) $l13;
+
+        $r8 = virtualinvoke r1.<java.time.YearMonth: java.time.YearMonth withYear(int)>($i9);
+
+        return $r8;
+
+     label06:
+        $i7 = (int) l0;
+
+        $r7 = virtualinvoke r1.<java.time.YearMonth: java.time.YearMonth withYear(int)>($i7);
+
+        return $r7;
+
+     label07:
+        $r6 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ERA>;
+
+        $l3 = virtualinvoke r1.<java.time.YearMonth: long getLong(java.time.temporal.TemporalField)>($r6);
+
+        $b4 = $l3 cmp l0;
+
+        if $b4 != 0 goto label08;
+
+        $r16 = r1;
+
+        goto label09;
+
+     label08:
+        $i5 = r1.<java.time.YearMonth: int year>;
+
+        $i6 = 1 - $i5;
+
+        $r16 = virtualinvoke r1.<java.time.YearMonth: java.time.YearMonth withYear(int)>($i6);
+
+     label09:
+        return $r16;
+
+     label10:
+        $r11 = new java.time.temporal.UnsupportedTemporalTypeException;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported field: ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r11.<java.time.temporal.UnsupportedTemporalTypeException: void <init>(java.lang.String)>($r15);
+
+        throw $r11;
+
+     label11:
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalField: java.time.temporal.Temporal adjustInto(java.time.temporal.Temporal,long)>(r1, l0);
+
+        $r3 = (java.time.YearMonth) $r2;
+
+        return $r3;
+    }
+
+    public java.time.YearMonth withYear(int)
+    {
+        java.time.temporal.ChronoField $r0;
+        int i0, $i2;
+        java.time.YearMonth r1, $r2;
+        long $l1;
+
+        r1 := @this: java.time.YearMonth;
+
+        i0 := @parameter0: int;
+
+        $r0 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $l1 = (long) i0;
+
+        virtualinvoke $r0.<java.time.temporal.ChronoField: long checkValidValue(long)>($l1);
+
+        $i2 = r1.<java.time.YearMonth: int month>;
+
+        $r2 = specialinvoke r1.<java.time.YearMonth: java.time.YearMonth 'with'(int,int)>(i0, $i2);
+
+        return $r2;
+    }
+
+    public java.time.YearMonth withMonth(int)
+    {
+        java.time.temporal.ChronoField $r0;
+        int i0, $i2;
+        java.time.YearMonth r1, $r2;
+        long $l1;
+
+        r1 := @this: java.time.YearMonth;
+
+        i0 := @parameter0: int;
+
+        $r0 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MONTH_OF_YEAR>;
+
+        $l1 = (long) i0;
+
+        virtualinvoke $r0.<java.time.temporal.ChronoField: long checkValidValue(long)>($l1);
+
+        $i2 = r1.<java.time.YearMonth: int year>;
+
+        $r2 = specialinvoke r1.<java.time.YearMonth: java.time.YearMonth 'with'(int,int)>($i2, i0);
+
+        return $r2;
+    }
+
+    public java.time.YearMonth plus(java.time.temporal.TemporalAmount)
+    {
+        java.time.YearMonth r1, $r3;
+        java.time.temporal.TemporalAmount r0;
+        java.time.temporal.Temporal $r2;
+
+        r1 := @this: java.time.YearMonth;
+
+        r0 := @parameter0: java.time.temporal.TemporalAmount;
+
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalAmount: java.time.temporal.Temporal addTo(java.time.temporal.Temporal)>(r1);
+
+        $r3 = (java.time.YearMonth) $r2;
+
+        return $r3;
+    }
+
+    public java.time.YearMonth plus(long, java.time.temporal.TemporalUnit)
+    {
+        java.time.temporal.ChronoField $r6, $r7;
+        java.time.temporal.TemporalUnit r0;
+        long l0, $l3, $l4, $l5, $l6, $l7;
+        int[] $r5;
+        int $i1, $i2;
+        java.lang.String $r18;
+        boolean $z0;
+        java.time.temporal.UnsupportedTemporalTypeException $r14;
+        java.time.temporal.ChronoUnit $r4;
+        java.time.YearMonth r1, $r3, $r8, $r9, $r10, $r11, $r12, $r13;
+        java.lang.StringBuilder $r15, $r16, $r17;
+        java.time.temporal.Temporal $r2;
+
+        r1 := @this: java.time.YearMonth;
+
+        l0 := @parameter0: long;
+
+        r0 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $z0 = r0 instanceof java.time.temporal.ChronoUnit;
+
+        if $z0 == 0 goto label8;
+
+        $r5 = <java.time.YearMonth$1: int[] $SwitchMap$java$time$temporal$ChronoUnit>;
+
+        $r4 = (java.time.temporal.ChronoUnit) r0;
+
+        $i1 = virtualinvoke $r4.<java.time.temporal.ChronoUnit: int ordinal()>();
+
+        $i2 = $r5[$i1];
+
+        tableswitch($i2)
+        {
+            case 1: goto label1;
+            case 2: goto label2;
+            case 3: goto label3;
+            case 4: goto label4;
+            case 5: goto label5;
+            case 6: goto label6;
+            default: goto label7;
+        };
+
+     label1:
+        $r13 = virtualinvoke r1.<java.time.YearMonth: java.time.YearMonth plusMonths(long)>(l0);
+
+        return $r13;
+
+     label2:
+        $r12 = virtualinvoke r1.<java.time.YearMonth: java.time.YearMonth plusYears(long)>(l0);
+
+        return $r12;
+
+     label3:
+        $l7 = staticinvoke <java.lang.Math: long multiplyExact(long,long)>(l0, 10L);
+
+        $r11 = virtualinvoke r1.<java.time.YearMonth: java.time.YearMonth plusYears(long)>($l7);
+
+        return $r11;
+
+     label4:
+        $l6 = staticinvoke <java.lang.Math: long multiplyExact(long,long)>(l0, 100L);
+
+        $r10 = virtualinvoke r1.<java.time.YearMonth: java.time.YearMonth plusYears(long)>($l6);
+
+        return $r10;
+
+     label5:
+        $l5 = staticinvoke <java.lang.Math: long multiplyExact(long,long)>(l0, 1000L);
+
+        $r9 = virtualinvoke r1.<java.time.YearMonth: java.time.YearMonth plusYears(long)>($l5);
+
+        return $r9;
+
+     label6:
+        $r7 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ERA>;
+
+        $r6 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ERA>;
+
+        $l3 = virtualinvoke r1.<java.time.YearMonth: long getLong(java.time.temporal.TemporalField)>($r6);
+
+        $l4 = staticinvoke <java.lang.Math: long addExact(long,long)>($l3, l0);
+
+        $r8 = virtualinvoke r1.<java.time.YearMonth: java.time.YearMonth 'with'(java.time.temporal.TemporalField,long)>($r7, $l4);
+
+        return $r8;
+
+     label7:
+        $r14 = new java.time.temporal.UnsupportedTemporalTypeException;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported unit: ");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r14.<java.time.temporal.UnsupportedTemporalTypeException: void <init>(java.lang.String)>($r18);
+
+        throw $r14;
+
+     label8:
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalUnit: java.time.temporal.Temporal addTo(java.time.temporal.Temporal,long)>(r1, l0);
+
+        $r3 = (java.time.YearMonth) $r2;
+
+        return $r3;
+    }
+
+    public java.time.YearMonth plusYears(long)
+    {
+        java.time.temporal.ChronoField $r1;
+        long l0, $l3, $l4;
+        byte $b1;
+        java.time.YearMonth r0, $r2;
+        int $i2, $i5, $i6;
+
+        r0 := @this: java.time.YearMonth;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        return r0;
+
+     label1:
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $i2 = r0.<java.time.YearMonth: int year>;
+
+        $l3 = (long) $i2;
+
+        $l4 = $l3 + l0;
+
+        $i5 = virtualinvoke $r1.<java.time.temporal.ChronoField: int checkValidIntValue(long)>($l4);
+
+        $i6 = r0.<java.time.YearMonth: int month>;
+
+        $r2 = specialinvoke r0.<java.time.YearMonth: java.time.YearMonth 'with'(int,int)>($i5, $i6);
+
+        return $r2;
+    }
+
+    public java.time.YearMonth plusMonths(long)
+    {
+        java.time.temporal.ChronoField $r1;
+        long l0, $l3, $l6, $l7, l8, l9, $l10, $l12;
+        byte $b1;
+        int $i2, $i4, $i5, $i11, $i13, i14;
+        java.time.YearMonth r0, $r2;
+
+        r0 := @this: java.time.YearMonth;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        return r0;
+
+     label1:
+        $i2 = r0.<java.time.YearMonth: int year>;
+
+        $l3 = (long) $i2;
+
+        $l7 = $l3 * 12L;
+
+        $i4 = r0.<java.time.YearMonth: int month>;
+
+        $i5 = $i4 - 1;
+
+        $l6 = (long) $i5;
+
+        l8 = $l7 + $l6;
+
+        l9 = l8 + l0;
+
+        $r1 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $l10 = staticinvoke <java.lang.Math: long floorDiv(long,long)>(l9, 12L);
+
+        $i11 = virtualinvoke $r1.<java.time.temporal.ChronoField: int checkValidIntValue(long)>($l10);
+
+        $l12 = staticinvoke <java.lang.Math: long floorMod(long,long)>(l9, 12L);
+
+        $i13 = (int) $l12;
+
+        i14 = $i13 + 1;
+
+        $r2 = specialinvoke r0.<java.time.YearMonth: java.time.YearMonth 'with'(int,int)>($i11, i14);
+
+        return $r2;
+    }
+
+    public java.time.YearMonth minus(java.time.temporal.TemporalAmount)
+    {
+        java.time.YearMonth r1, $r3;
+        java.time.temporal.TemporalAmount r0;
+        java.time.temporal.Temporal $r2;
+
+        r1 := @this: java.time.YearMonth;
+
+        r0 := @parameter0: java.time.temporal.TemporalAmount;
+
+        $r2 = interfaceinvoke r0.<java.time.temporal.TemporalAmount: java.time.temporal.Temporal subtractFrom(java.time.temporal.Temporal)>(r1);
+
+        $r3 = (java.time.YearMonth) $r2;
+
+        return $r3;
+    }
+
+    public java.time.YearMonth minus(long, java.time.temporal.TemporalUnit)
+    {
+        byte $b1;
+        java.time.temporal.TemporalUnit r1;
+        java.time.YearMonth r0, $r2, $r3;
+        long l0, $l2;
+
+        r0 := @this: java.time.YearMonth;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $b1 = l0 cmp -9223372036854775808L;
+
+        if $b1 != 0 goto label1;
+
+        $r2 = virtualinvoke r0.<java.time.YearMonth: java.time.YearMonth plus(long,java.time.temporal.TemporalUnit)>(9223372036854775807L, r1);
+
+        $r3 = virtualinvoke $r2.<java.time.YearMonth: java.time.YearMonth plus(long,java.time.temporal.TemporalUnit)>(1L, r1);
+
+        goto label2;
+
+     label1:
+        $l2 = neg l0;
+
+        $r3 = virtualinvoke r0.<java.time.YearMonth: java.time.YearMonth plus(long,java.time.temporal.TemporalUnit)>($l2, r1);
+
+     label2:
+        return $r3;
+    }
+
+    public java.time.YearMonth minusYears(long)
+    {
+        byte $b1;
+        java.time.YearMonth r0, $r1, $r2;
+        long l0, $l2;
+
+        r0 := @this: java.time.YearMonth;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp -9223372036854775808L;
+
+        if $b1 != 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.time.YearMonth: java.time.YearMonth plusYears(long)>(9223372036854775807L);
+
+        $r2 = virtualinvoke $r1.<java.time.YearMonth: java.time.YearMonth plusYears(long)>(1L);
+
+        goto label2;
+
+     label1:
+        $l2 = neg l0;
+
+        $r2 = virtualinvoke r0.<java.time.YearMonth: java.time.YearMonth plusYears(long)>($l2);
+
+     label2:
+        return $r2;
+    }
+
+    public java.time.YearMonth minusMonths(long)
+    {
+        byte $b1;
+        java.time.YearMonth r0, $r1, $r2;
+        long l0, $l2;
+
+        r0 := @this: java.time.YearMonth;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp -9223372036854775808L;
+
+        if $b1 != 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.time.YearMonth: java.time.YearMonth plusMonths(long)>(9223372036854775807L);
+
+        $r2 = virtualinvoke $r1.<java.time.YearMonth: java.time.YearMonth plusMonths(long)>(1L);
+
+        goto label2;
+
+     label1:
+        $l2 = neg l0;
+
+        $r2 = virtualinvoke r0.<java.time.YearMonth: java.time.YearMonth plusMonths(long)>($l2);
+
+     label2:
+        return $r2;
+    }
+
+    public java.lang.Object query(java.time.temporal.TemporalQuery)
+    {
+        java.time.temporal.ChronoUnit $r5;
+        java.time.chrono.IsoChronology $r6;
+        java.time.temporal.TemporalQuery r0, $r1, $r2;
+        java.time.YearMonth r3;
+        java.lang.Object $r4;
+
+        r3 := @this: java.time.YearMonth;
+
+        r0 := @parameter0: java.time.temporal.TemporalQuery;
+
+        $r1 = staticinvoke <java.time.temporal.TemporalQueries: java.time.temporal.TemporalQuery chronology()>();
+
+        if r0 != $r1 goto label1;
+
+        $r6 = <java.time.chrono.IsoChronology: java.time.chrono.IsoChronology INSTANCE>;
+
+        return $r6;
+
+     label1:
+        $r2 = staticinvoke <java.time.temporal.TemporalQueries: java.time.temporal.TemporalQuery precision()>();
+
+        if r0 != $r2 goto label2;
+
+        $r5 = <java.time.temporal.ChronoUnit: java.time.temporal.ChronoUnit MONTHS>;
+
+        return $r5;
+
+     label2:
+        $r4 = specialinvoke r3.<java.time.temporal.Temporal: java.lang.Object query(java.time.temporal.TemporalQuery)>(r0);
+
+        return $r4;
+    }
+
+    public java.time.temporal.Temporal adjustInto(java.time.temporal.Temporal)
+    {
+        java.time.temporal.ChronoField $r4;
+        long $l0;
+        java.time.chrono.Chronology $r1;
+        java.time.chrono.IsoChronology $r2;
+        java.time.YearMonth r3;
+        java.time.temporal.Temporal r0, $r5;
+        java.time.DateTimeException $r6;
+        boolean $z0;
+
+        r3 := @this: java.time.YearMonth;
+
+        r0 := @parameter0: java.time.temporal.Temporal;
+
+        $r1 = staticinvoke <java.time.chrono.Chronology: java.time.chrono.Chronology 'from'(java.time.temporal.TemporalAccessor)>(r0);
+
+        $r2 = <java.time.chrono.IsoChronology: java.time.chrono.IsoChronology INSTANCE>;
+
+        $z0 = interfaceinvoke $r1.<java.time.chrono.Chronology: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 != 0 goto label1;
+
+        $r6 = new java.time.DateTimeException;
+
+        specialinvoke $r6.<java.time.DateTimeException: void <init>(java.lang.String)>("Adjustment only supported on ISO date-time");
+
+        throw $r6;
+
+     label1:
+        $r4 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField PROLEPTIC_MONTH>;
+
+        $l0 = specialinvoke r3.<java.time.YearMonth: long getProlepticMonth()>();
+
+        $r5 = interfaceinvoke r0.<java.time.temporal.Temporal: java.time.temporal.Temporal 'with'(java.time.temporal.TemporalField,long)>($r4, $l0);
+
+        return $r5;
+    }
+
+    public long until(java.time.temporal.Temporal, java.time.temporal.TemporalUnit)
+    {
+        java.time.temporal.ChronoField $r6, $r7;
+        java.time.temporal.TemporalUnit r2;
+        long $l0, $l1, $l2, l3, $l6, $l7, $l8, $l9, $l10, $l11, $l12;
+        int[] $r5;
+        int $i4, $i5;
+        java.lang.String $r12;
+        boolean $z0;
+        java.time.temporal.UnsupportedTemporalTypeException $r8;
+        java.time.temporal.ChronoUnit $r4;
+        java.time.YearMonth $r1, r3;
+        java.lang.StringBuilder $r9, $r10, $r11;
+        java.time.temporal.Temporal r0;
+
+        r3 := @this: java.time.YearMonth;
+
+        r0 := @parameter0: java.time.temporal.Temporal;
+
+        r2 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $r1 = staticinvoke <java.time.YearMonth: java.time.YearMonth 'from'(java.time.temporal.TemporalAccessor)>(r0);
+
+        $z0 = r2 instanceof java.time.temporal.ChronoUnit;
+
+        if $z0 == 0 goto label8;
+
+        $l1 = specialinvoke $r1.<java.time.YearMonth: long getProlepticMonth()>();
+
+        $l2 = specialinvoke r3.<java.time.YearMonth: long getProlepticMonth()>();
+
+        l3 = $l1 - $l2;
+
+        $r5 = <java.time.YearMonth$1: int[] $SwitchMap$java$time$temporal$ChronoUnit>;
+
+        $r4 = (java.time.temporal.ChronoUnit) r2;
+
+        $i4 = virtualinvoke $r4.<java.time.temporal.ChronoUnit: int ordinal()>();
+
+        $i5 = $r5[$i4];
+
+        tableswitch($i5)
+        {
+            case 1: goto label1;
+            case 2: goto label2;
+            case 3: goto label3;
+            case 4: goto label4;
+            case 5: goto label5;
+            case 6: goto label6;
+            default: goto label7;
+        };
+
+     label1:
+        return l3;
+
+     label2:
+        $l12 = l3 / 12L;
+
+        return $l12;
+
+     label3:
+        $l11 = l3 / 120L;
+
+        return $l11;
+
+     label4:
+        $l10 = l3 / 1200L;
+
+        return $l10;
+
+     label5:
+        $l9 = l3 / 12000L;
+
+        return $l9;
+
+     label6:
+        $r6 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ERA>;
+
+        $l6 = virtualinvoke $r1.<java.time.YearMonth: long getLong(java.time.temporal.TemporalField)>($r6);
+
+        $r7 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField ERA>;
+
+        $l7 = virtualinvoke r3.<java.time.YearMonth: long getLong(java.time.temporal.TemporalField)>($r7);
+
+        $l8 = $l6 - $l7;
+
+        return $l8;
+
+     label7:
+        $r8 = new java.time.temporal.UnsupportedTemporalTypeException;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported unit: ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<java.time.temporal.UnsupportedTemporalTypeException: void <init>(java.lang.String)>($r12);
+
+        throw $r8;
+
+     label8:
+        $l0 = interfaceinvoke r2.<java.time.temporal.TemporalUnit: long between(java.time.temporal.Temporal,java.time.temporal.Temporal)>(r3, $r1);
+
+        return $l0;
+    }
+
+    public java.lang.String format(java.time.format.DateTimeFormatter)
+    {
+        java.time.YearMonth r1;
+        java.lang.String $r2;
+        java.time.format.DateTimeFormatter r0;
+
+        r1 := @this: java.time.YearMonth;
+
+        r0 := @parameter0: java.time.format.DateTimeFormatter;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object,java.lang.String)>(r0, "formatter");
+
+        $r2 = virtualinvoke r0.<java.time.format.DateTimeFormatter: java.lang.String format(java.time.temporal.TemporalAccessor)>(r1);
+
+        return $r2;
+    }
+
+    public java.time.LocalDate atDay(int)
+    {
+        java.time.LocalDate $r1;
+        java.time.YearMonth r0;
+        int i0, $i1, $i2;
+
+        r0 := @this: java.time.YearMonth;
+
+        i0 := @parameter0: int;
+
+        $i2 = r0.<java.time.YearMonth: int year>;
+
+        $i1 = r0.<java.time.YearMonth: int month>;
+
+        $r1 = staticinvoke <java.time.LocalDate: java.time.LocalDate of(int,int,int)>($i2, $i1, i0);
+
+        return $r1;
+    }
+
+    public java.time.LocalDate atEndOfMonth()
+    {
+        java.time.LocalDate $r1;
+        java.time.YearMonth r0;
+        int $i0, $i1, $i2;
+
+        r0 := @this: java.time.YearMonth;
+
+        $i0 = r0.<java.time.YearMonth: int year>;
+
+        $i1 = r0.<java.time.YearMonth: int month>;
+
+        $i2 = virtualinvoke r0.<java.time.YearMonth: int lengthOfMonth()>();
+
+        $r1 = staticinvoke <java.time.LocalDate: java.time.LocalDate of(int,int,int)>($i0, $i1, $i2);
+
+        return $r1;
+    }
+
+    public int compareTo(java.time.YearMonth)
+    {
+        java.time.YearMonth r0, r1;
+        int $i0, $i1, $i2, $i3, i4;
+
+        r0 := @this: java.time.YearMonth;
+
+        r1 := @parameter0: java.time.YearMonth;
+
+        $i1 = r0.<java.time.YearMonth: int year>;
+
+        $i0 = r1.<java.time.YearMonth: int year>;
+
+        i4 = $i1 - $i0;
+
+        if i4 != 0 goto label1;
+
+        $i3 = r0.<java.time.YearMonth: int month>;
+
+        $i2 = r1.<java.time.YearMonth: int month>;
+
+        i4 = $i3 - $i2;
+
+     label1:
+        return i4;
+    }
+
+    public boolean isAfter(java.time.YearMonth)
+    {
+        java.time.YearMonth r0, r1;
+        int $i0;
+        boolean $z0;
+
+        r0 := @this: java.time.YearMonth;
+
+        r1 := @parameter0: java.time.YearMonth;
+
+        $i0 = virtualinvoke r0.<java.time.YearMonth: int compareTo(java.time.YearMonth)>(r1);
+
+        if $i0 <= 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean isBefore(java.time.YearMonth)
+    {
+        java.time.YearMonth r0, r1;
+        int $i0;
+        boolean $z0;
+
+        r0 := @this: java.time.YearMonth;
+
+        r1 := @parameter0: java.time.YearMonth;
+
+        $i0 = virtualinvoke r0.<java.time.YearMonth: int compareTo(java.time.YearMonth)>(r1);
+
+        if $i0 >= 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        java.time.YearMonth r0, r2;
+        int $i0, $i1, $i2, $i3;
+        java.lang.Object r1;
+        boolean $z0, $z1;
+
+        r0 := @this: java.time.YearMonth;
+
+        r1 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        $z0 = r1 instanceof java.time.YearMonth;
+
+        if $z0 == 0 goto label4;
+
+        r2 = (java.time.YearMonth) r1;
+
+        $i1 = r0.<java.time.YearMonth: int year>;
+
+        $i0 = r2.<java.time.YearMonth: int year>;
+
+        if $i1 != $i0 goto label2;
+
+        $i3 = r0.<java.time.YearMonth: int month>;
+
+        $i2 = r2.<java.time.YearMonth: int month>;
+
+        if $i3 != $i2 goto label2;
+
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        return $z1;
+
+     label4:
+        return 0;
+    }
+
+    public int hashCode()
+    {
+        java.time.YearMonth r0;
+        int $i0, $i1, $i2, $i3;
+
+        r0 := @this: java.time.YearMonth;
+
+        $i2 = r0.<java.time.YearMonth: int year>;
+
+        $i0 = r0.<java.time.YearMonth: int month>;
+
+        $i1 = $i0 << 27;
+
+        $i3 = $i2 ^ $i1;
+
+        return $i3;
+    }
+
+    public java.lang.String toString()
+    {
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9;
+        java.lang.String $r4, $r7;
+        java.time.YearMonth r0;
+        java.lang.StringBuilder $r1, $r2, $r3, $r5, $r6;
+
+        r0 := @this: java.time.YearMonth;
+
+        $i0 = r0.<java.time.YearMonth: int year>;
+
+        $i1 = staticinvoke <java.lang.Math: int abs(int)>($i0);
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>(int)>(9);
+
+        if $i1 >= 1000 goto label2;
+
+        $i4 = r0.<java.time.YearMonth: int year>;
+
+        if $i4 >= 0 goto label1;
+
+        $i7 = r0.<java.time.YearMonth: int year>;
+
+        $i8 = $i7 - 10000;
+
+        $r6 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i8);
+
+        virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder deleteCharAt(int)>(1);
+
+        goto label3;
+
+     label1:
+        $i5 = r0.<java.time.YearMonth: int year>;
+
+        $i6 = $i5 + 10000;
+
+        $r5 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i6);
+
+        virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder deleteCharAt(int)>(0);
+
+        goto label3;
+
+     label2:
+        $i2 = r0.<java.time.YearMonth: int year>;
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+     label3:
+        $i9 = r0.<java.time.YearMonth: int month>;
+
+        if $i9 >= 10 goto label4;
+
+        $r7 = "-0";
+
+        goto label5;
+
+     label4:
+        $r7 = "-";
+
+     label5:
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $i3 = r0.<java.time.YearMonth: int month>;
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r4;
+    }
+
+    private java.lang.Object writeReplace()
+    {
+        java.time.YearMonth r1;
+        java.time.Ser $r0;
+
+        r1 := @this: java.time.YearMonth;
+
+        $r0 = new java.time.Ser;
+
+        specialinvoke $r0.<java.time.Ser: void <init>(byte,java.lang.Object)>(12, r1);
+
+        return $r0;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.InvalidObjectException
+    {
+        java.time.YearMonth r1;
+        java.io.ObjectInputStream r2;
+        java.io.InvalidObjectException $r0;
+
+        r1 := @this: java.time.YearMonth;
+
+        r2 := @parameter0: java.io.ObjectInputStream;
+
+        $r0 = new java.io.InvalidObjectException;
+
+        specialinvoke $r0.<java.io.InvalidObjectException: void <init>(java.lang.String)>("Deserialization via serialization delegate");
+
+        throw $r0;
+    }
+
+    void writeExternal(java.io.DataOutput) throws java.io.IOException
+    {
+        java.io.DataOutput r0;
+        java.time.YearMonth r1;
+        int $i0, $i1;
+
+        r1 := @this: java.time.YearMonth;
+
+        r0 := @parameter0: java.io.DataOutput;
+
+        $i0 = r1.<java.time.YearMonth: int year>;
+
+        interfaceinvoke r0.<java.io.DataOutput: void writeInt(int)>($i0);
+
+        $i1 = r1.<java.time.YearMonth: int month>;
+
+        interfaceinvoke r0.<java.io.DataOutput: void writeByte(int)>($i1);
+
+        return;
+    }
+
+    static java.time.YearMonth readExternal(java.io.DataInput) throws java.io.IOException
+    {
+        byte $b1;
+        java.io.DataInput r0;
+        int $i0, $i2;
+        java.time.YearMonth $r1;
+
+        r0 := @parameter0: java.io.DataInput;
+
+        $i0 = interfaceinvoke r0.<java.io.DataInput: int readInt()>();
+
+        $b1 = interfaceinvoke r0.<java.io.DataInput: byte readByte()>();
+
+        $i2 = (int) $b1;
+
+        $r1 = staticinvoke <java.time.YearMonth: java.time.YearMonth of(int,int)>($i0, $i2);
+
+        return $r1;
+    }
+
+    public volatile java.time.temporal.Temporal minus(long, java.time.temporal.TemporalUnit)
+    {
+        java.time.temporal.TemporalUnit r1;
+        java.time.YearMonth r0, $r2;
+        long l0;
+
+        r0 := @this: java.time.YearMonth;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $r2 = virtualinvoke r0.<java.time.YearMonth: java.time.YearMonth minus(long,java.time.temporal.TemporalUnit)>(l0, r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.temporal.Temporal minus(java.time.temporal.TemporalAmount)
+    {
+        java.time.YearMonth r0, $r2;
+        java.time.temporal.TemporalAmount r1;
+
+        r0 := @this: java.time.YearMonth;
+
+        r1 := @parameter0: java.time.temporal.TemporalAmount;
+
+        $r2 = virtualinvoke r0.<java.time.YearMonth: java.time.YearMonth minus(java.time.temporal.TemporalAmount)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.temporal.Temporal plus(long, java.time.temporal.TemporalUnit)
+    {
+        java.time.temporal.TemporalUnit r1;
+        java.time.YearMonth r0, $r2;
+        long l0;
+
+        r0 := @this: java.time.YearMonth;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: java.time.temporal.TemporalUnit;
+
+        $r2 = virtualinvoke r0.<java.time.YearMonth: java.time.YearMonth plus(long,java.time.temporal.TemporalUnit)>(l0, r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.temporal.Temporal plus(java.time.temporal.TemporalAmount)
+    {
+        java.time.YearMonth r0, $r2;
+        java.time.temporal.TemporalAmount r1;
+
+        r0 := @this: java.time.YearMonth;
+
+        r1 := @parameter0: java.time.temporal.TemporalAmount;
+
+        $r2 = virtualinvoke r0.<java.time.YearMonth: java.time.YearMonth plus(java.time.temporal.TemporalAmount)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.time.temporal.Temporal 'with'(java.time.temporal.TemporalField, long)
+    {
+        java.time.temporal.TemporalField r1;
+        java.time.YearMonth r0, $r2;
+        long l0;
+
+        r0 := @this: java.time.YearMonth;
+
+        r1 := @parameter0: java.time.temporal.TemporalField;
+
+        l0 := @parameter1: long;
+
+        $r2 = virtualinvoke r0.<java.time.YearMonth: java.time.YearMonth 'with'(java.time.temporal.TemporalField,long)>(r1, l0);
+
+        return $r2;
+    }
+
+    public volatile java.time.temporal.Temporal 'with'(java.time.temporal.TemporalAdjuster)
+    {
+        java.time.YearMonth r0, $r2;
+        java.time.temporal.TemporalAdjuster r1;
+
+        r0 := @this: java.time.YearMonth;
+
+        r1 := @parameter0: java.time.temporal.TemporalAdjuster;
+
+        $r2 = virtualinvoke r0.<java.time.YearMonth: java.time.YearMonth 'with'(java.time.temporal.TemporalAdjuster)>(r1);
+
+        return $r2;
+    }
+
+    public volatile int compareTo(java.lang.Object)
+    {
+        java.time.YearMonth r0, $r2;
+        int $i0;
+        java.lang.Object r1;
+
+        r0 := @this: java.time.YearMonth;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = (java.time.YearMonth) r1;
+
+        $i0 = virtualinvoke r0.<java.time.YearMonth: int compareTo(java.time.YearMonth)>($r2);
+
+        return $i0;
+    }
+
+    static void <clinit>()
+    {
+        java.time.format.DateTimeFormatterBuilder $r0, $r3, $r4, $r6;
+        java.time.temporal.ChronoField $r2, $r5;
+        java.time.format.SignStyle $r1;
+        java.time.format.DateTimeFormatter $r7;
+
+        <java.time.YearMonth: long serialVersionUID> = 4183400860270640070L;
+
+        $r0 = new java.time.format.DateTimeFormatterBuilder;
+
+        specialinvoke $r0.<java.time.format.DateTimeFormatterBuilder: void <init>()>();
+
+        $r2 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField YEAR>;
+
+        $r1 = <java.time.format.SignStyle: java.time.format.SignStyle EXCEEDS_PAD>;
+
+        $r3 = virtualinvoke $r0.<java.time.format.DateTimeFormatterBuilder: java.time.format.DateTimeFormatterBuilder appendValue(java.time.temporal.TemporalField,int,int,java.time.format.SignStyle)>($r2, 4, 10, $r1);
+
+        $r4 = virtualinvoke $r3.<java.time.format.DateTimeFormatterBuilder: java.time.format.DateTimeFormatterBuilder appendLiteral(char)>(45);
+
+        $r5 = <java.time.temporal.ChronoField: java.time.temporal.ChronoField MONTH_OF_YEAR>;
+
+        $r6 = virtualinvoke $r4.<java.time.format.DateTimeFormatterBuilder: java.time.format.DateTimeFormatterBuilder appendValue(java.time.temporal.TemporalField,int)>($r5, 2);
+
+        $r7 = virtualinvoke $r6.<java.time.format.DateTimeFormatterBuilder: java.time.format.DateTimeFormatter toFormatter()>();
+
+        <java.time.YearMonth: java.time.format.DateTimeFormatter PARSER> = $r7;
+
+        return;
+    }
+}

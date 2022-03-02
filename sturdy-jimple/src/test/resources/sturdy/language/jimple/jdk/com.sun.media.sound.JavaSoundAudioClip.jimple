@@ -1,0 +1,948 @@
+public final class com.sun.media.sound.JavaSoundAudioClip extends java.lang.Object implements java.applet.AudioClip, javax.sound.midi.MetaEventListener, javax.sound.sampled.LineListener
+{
+    private static final boolean DEBUG;
+    private static final int BUFFER_SIZE;
+    private long lastPlayCall;
+    private static final int MINIMUM_PLAY_DELAY;
+    private byte[] loadedAudio;
+    private int loadedAudioByteLength;
+    private javax.sound.sampled.AudioFormat loadedAudioFormat;
+    private com.sun.media.sound.AutoClosingClip clip;
+    private boolean clipLooping;
+    private com.sun.media.sound.DataPusher datapusher;
+    private javax.sound.midi.Sequencer sequencer;
+    private javax.sound.midi.Sequence sequence;
+    private boolean sequencerloop;
+    private static final long CLIP_THRESHOLD;
+    private static final int STREAM_BUFFER_SIZE;
+
+    public void <init>(java.io.InputStream) throws java.io.IOException
+    {
+        java.io.BufferedInputStream $r7;
+        javax.sound.midi.InvalidMidiDataException $r5;
+        javax.sound.sampled.UnsupportedAudioFileException $r6;
+        long $l1;
+        java.io.IOException $r8;
+        com.sun.media.sound.JavaSoundAudioClip r0;
+        byte $b2;
+        javax.sound.sampled.AudioInputStream $r3;
+        int $i0, $i3;
+        java.io.InputStream r2;
+        boolean $z0, z1;
+
+        r0 := @this: com.sun.media.sound.JavaSoundAudioClip;
+
+        r2 := @parameter0: java.io.InputStream;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.media.sound.JavaSoundAudioClip: long lastPlayCall> = 0L;
+
+        r0.<com.sun.media.sound.JavaSoundAudioClip: byte[] loadedAudio> = null;
+
+        r0.<com.sun.media.sound.JavaSoundAudioClip: int loadedAudioByteLength> = 0;
+
+        r0.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.sampled.AudioFormat loadedAudioFormat> = null;
+
+        r0.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.AutoClosingClip clip> = null;
+
+        r0.<com.sun.media.sound.JavaSoundAudioClip: boolean clipLooping> = 0;
+
+        r0.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.DataPusher datapusher> = null;
+
+        r0.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.midi.Sequencer sequencer> = null;
+
+        r0.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.midi.Sequence sequence> = null;
+
+        r0.<com.sun.media.sound.JavaSoundAudioClip: boolean sequencerloop> = 0;
+
+        $r7 = new java.io.BufferedInputStream;
+
+        specialinvoke $r7.<java.io.BufferedInputStream: void <init>(java.io.InputStream,int)>(r2, 1024);
+
+        virtualinvoke $r7.<java.io.BufferedInputStream: void mark(int)>(1024);
+
+     label1:
+        $r3 = staticinvoke <javax.sound.sampled.AudioSystem: javax.sound.sampled.AudioInputStream getAudioInputStream(java.io.InputStream)>($r7);
+
+        $z0 = specialinvoke r0.<com.sun.media.sound.JavaSoundAudioClip: boolean loadAudioData(javax.sound.sampled.AudioInputStream)>($r3);
+
+        z1 = $z0;
+
+        if $z0 == 0 goto label3;
+
+        z1 = 0;
+
+        $i0 = r0.<com.sun.media.sound.JavaSoundAudioClip: int loadedAudioByteLength>;
+
+        $l1 = (long) $i0;
+
+        $b2 = $l1 cmp 1048576L;
+
+        $i3 = (int) $b2;
+
+        if $i3 >= 0 goto label2;
+
+        z1 = specialinvoke r0.<com.sun.media.sound.JavaSoundAudioClip: boolean createClip()>();
+
+     label2:
+        if z1 != 0 goto label3;
+
+        z1 = specialinvoke r0.<com.sun.media.sound.JavaSoundAudioClip: boolean createSourceDataLine()>();
+
+     label3:
+        goto label8;
+
+     label4:
+        $r6 := @caughtexception;
+
+     label5:
+        staticinvoke <javax.sound.midi.MidiSystem: javax.sound.midi.MidiFileFormat getMidiFileFormat(java.io.InputStream)>($r7);
+
+        z1 = specialinvoke r0.<com.sun.media.sound.JavaSoundAudioClip: boolean createSequencer(java.io.BufferedInputStream)>($r7);
+
+     label6:
+        goto label8;
+
+     label7:
+        $r5 := @caughtexception;
+
+        z1 = 0;
+
+     label8:
+        if z1 != 0 goto label9;
+
+        $r8 = new java.io.IOException;
+
+        specialinvoke $r8.<java.io.IOException: void <init>(java.lang.String)>("Unable to create AudioClip from input stream");
+
+        throw $r8;
+
+     label9:
+        return;
+
+        catch javax.sound.sampled.UnsupportedAudioFileException from label1 to label3 with label4;
+        catch javax.sound.midi.InvalidMidiDataException from label5 to label6 with label7;
+    }
+
+    public synchronized void play()
+    {
+        com.sun.media.sound.JavaSoundAudioClip r0;
+
+        r0 := @this: com.sun.media.sound.JavaSoundAudioClip;
+
+        specialinvoke r0.<com.sun.media.sound.JavaSoundAudioClip: void startImpl(boolean)>(0);
+
+        return;
+    }
+
+    public synchronized void loop()
+    {
+        com.sun.media.sound.JavaSoundAudioClip r0;
+
+        r0 := @this: com.sun.media.sound.JavaSoundAudioClip;
+
+        specialinvoke r0.<com.sun.media.sound.JavaSoundAudioClip: void startImpl(boolean)>(1);
+
+        return;
+    }
+
+    private synchronized void startImpl(boolean)
+    {
+        byte[] $r18;
+        javax.sound.midi.Sequencer $r3, $r4, $r5, $r6, $r8, $r9, $r28, $r29;
+        javax.sound.sampled.AudioFormat $r19;
+        com.sun.media.sound.DataPusher $r2, $r10;
+        com.sun.media.sound.JavaSoundAudioClip r0;
+        byte $b3;
+        boolean z0, $z1, $z2, $z3, $z4;
+        java.lang.Exception $r21, $r22;
+        java.lang.Throwable $r25;
+        javax.sound.midi.InvalidMidiDataException $r24;
+        long $l0, $l1, l2;
+        javax.sound.midi.Sequence $r7;
+        int $i4, $i5, $i7;
+        javax.sound.midi.MidiUnavailableException $r23;
+        com.sun.media.sound.AutoClosingClip $r1, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r20, $r26, $r27;
+
+        r0 := @this: com.sun.media.sound.JavaSoundAudioClip;
+
+        z0 := @parameter0: boolean;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l1 = r0.<com.sun.media.sound.JavaSoundAudioClip: long lastPlayCall>;
+
+        l2 = $l0 - $l1;
+
+        $b3 = l2 cmp 30L;
+
+        $i5 = (int) $b3;
+
+        if $i5 >= 0 goto label01;
+
+        return;
+
+     label01:
+        r0.<com.sun.media.sound.JavaSoundAudioClip: long lastPlayCall> = $l0;
+
+     label02:
+        $r1 = r0.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.AutoClosingClip clip>;
+
+        if $r1 == null goto label12;
+
+        $r11 = r0.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.AutoClosingClip clip>;
+
+        interfaceinvoke $r11.<com.sun.media.sound.AutoClosingClip: void setAutoClosing(boolean)>(0);
+
+     label03:
+        $r12 = r0.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.AutoClosingClip clip>;
+
+        $z3 = interfaceinvoke $r12.<com.sun.media.sound.AutoClosingClip: boolean isOpen()>();
+
+        if $z3 != 0 goto label04;
+
+        $r20 = r0.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.AutoClosingClip clip>;
+
+        $r19 = r0.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.sampled.AudioFormat loadedAudioFormat>;
+
+        $r18 = r0.<com.sun.media.sound.JavaSoundAudioClip: byte[] loadedAudio>;
+
+        $i4 = r0.<com.sun.media.sound.JavaSoundAudioClip: int loadedAudioByteLength>;
+
+        interfaceinvoke $r20.<com.sun.media.sound.AutoClosingClip: void open(javax.sound.sampled.AudioFormat,byte[],int,int)>($r19, $r18, 0, $i4);
+
+        goto label05;
+
+     label04:
+        $r13 = r0.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.AutoClosingClip clip>;
+
+        interfaceinvoke $r13.<com.sun.media.sound.AutoClosingClip: void flush()>();
+
+        $z4 = r0.<com.sun.media.sound.JavaSoundAudioClip: boolean clipLooping>;
+
+        if z0 == $z4 goto label05;
+
+        $r17 = r0.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.AutoClosingClip clip>;
+
+        interfaceinvoke $r17.<com.sun.media.sound.AutoClosingClip: void stop()>();
+
+     label05:
+        $r27 = r0.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.AutoClosingClip clip>;
+
+        interfaceinvoke $r27.<com.sun.media.sound.AutoClosingClip: void setFramePosition(int)>(0);
+
+        if z0 == 0 goto label06;
+
+        $r16 = r0.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.AutoClosingClip clip>;
+
+        $i7 = (int) -1;
+
+        interfaceinvoke $r16.<com.sun.media.sound.AutoClosingClip: void loop(int)>($i7);
+
+        goto label07;
+
+     label06:
+        $r14 = r0.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.AutoClosingClip clip>;
+
+        interfaceinvoke $r14.<com.sun.media.sound.AutoClosingClip: void start()>();
+
+     label07:
+        r0.<com.sun.media.sound.JavaSoundAudioClip: boolean clipLooping> = z0;
+
+     label08:
+        $r15 = r0.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.AutoClosingClip clip>;
+
+        interfaceinvoke $r15.<com.sun.media.sound.AutoClosingClip: void setAutoClosing(boolean)>(1);
+
+        goto label11;
+
+     label09:
+        $r25 := @caughtexception;
+
+     label10:
+        $r26 = r0.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.AutoClosingClip clip>;
+
+        interfaceinvoke $r26.<com.sun.media.sound.AutoClosingClip: void setAutoClosing(boolean)>(1);
+
+        throw $r25;
+
+     label11:
+        goto label23;
+
+     label12:
+        $r2 = r0.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.DataPusher datapusher>;
+
+        if $r2 == null goto label13;
+
+        $r10 = r0.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.DataPusher datapusher>;
+
+        virtualinvoke $r10.<com.sun.media.sound.DataPusher: void start(boolean)>(z0);
+
+        goto label23;
+
+     label13:
+        $r3 = r0.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.midi.Sequencer sequencer>;
+
+        if $r3 == null goto label23;
+
+        r0.<com.sun.media.sound.JavaSoundAudioClip: boolean sequencerloop> = z0;
+
+        $r4 = r0.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.midi.Sequencer sequencer>;
+
+        $z1 = interfaceinvoke $r4.<javax.sound.midi.Sequencer: boolean isRunning()>();
+
+        if $z1 == 0 goto label14;
+
+        $r9 = r0.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.midi.Sequencer sequencer>;
+
+        interfaceinvoke $r9.<javax.sound.midi.Sequencer: void setMicrosecondPosition(long)>(0L);
+
+     label14:
+        $r5 = r0.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.midi.Sequencer sequencer>;
+
+        $z2 = interfaceinvoke $r5.<javax.sound.midi.Sequencer: boolean isOpen()>();
+
+        if $z2 != 0 goto label19;
+
+     label15:
+        $r6 = r0.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.midi.Sequencer sequencer>;
+
+        interfaceinvoke $r6.<javax.sound.midi.Sequencer: void open()>();
+
+        $r8 = r0.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.midi.Sequencer sequencer>;
+
+        $r7 = r0.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.midi.Sequence sequence>;
+
+        interfaceinvoke $r8.<javax.sound.midi.Sequencer: void setSequence(javax.sound.midi.Sequence)>($r7);
+
+     label16:
+        goto label19;
+
+     label17:
+        $r24 := @caughtexception;
+
+        goto label19;
+
+     label18:
+        $r23 := @caughtexception;
+
+     label19:
+        $r28 = r0.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.midi.Sequencer sequencer>;
+
+        interfaceinvoke $r28.<javax.sound.midi.Sequencer: boolean addMetaEventListener(javax.sound.midi.MetaEventListener)>(r0);
+
+     label20:
+        $r29 = r0.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.midi.Sequencer sequencer>;
+
+        interfaceinvoke $r29.<javax.sound.midi.Sequencer: void start()>();
+
+     label21:
+        goto label23;
+
+     label22:
+        $r22 := @caughtexception;
+
+     label23:
+        goto label25;
+
+     label24:
+        $r21 := @caughtexception;
+
+     label25:
+        return;
+
+        catch java.lang.Throwable from label03 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+        catch javax.sound.midi.InvalidMidiDataException from label15 to label16 with label17;
+        catch javax.sound.midi.MidiUnavailableException from label15 to label16 with label18;
+        catch java.lang.Exception from label20 to label21 with label22;
+        catch java.lang.Exception from label02 to label23 with label24;
+    }
+
+    public synchronized void stop()
+    {
+        javax.sound.midi.Sequencer $r3, $r4, $r5, $r6;
+        com.sun.media.sound.DataPusher $r2, $r7;
+        java.lang.Exception $r10, $r11, $r12, $r13;
+        com.sun.media.sound.JavaSoundAudioClip r0;
+        com.sun.media.sound.AutoClosingClip $r1, $r8, $r9;
+
+        r0 := @this: com.sun.media.sound.JavaSoundAudioClip;
+
+        r0.<com.sun.media.sound.JavaSoundAudioClip: long lastPlayCall> = 0L;
+
+        $r1 = r0.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.AutoClosingClip clip>;
+
+        if $r1 == null goto label07;
+
+     label01:
+        $r8 = r0.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.AutoClosingClip clip>;
+
+        interfaceinvoke $r8.<com.sun.media.sound.AutoClosingClip: void flush()>();
+
+     label02:
+        goto label04;
+
+     label03:
+        $r13 := @caughtexception;
+
+     label04:
+        $r9 = r0.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.AutoClosingClip clip>;
+
+        interfaceinvoke $r9.<com.sun.media.sound.AutoClosingClip: void stop()>();
+
+     label05:
+        goto label15;
+
+     label06:
+        $r12 := @caughtexception;
+
+        goto label15;
+
+     label07:
+        $r2 = r0.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.DataPusher datapusher>;
+
+        if $r2 == null goto label08;
+
+        $r7 = r0.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.DataPusher datapusher>;
+
+        virtualinvoke $r7.<com.sun.media.sound.DataPusher: void stop()>();
+
+        goto label15;
+
+     label08:
+        $r3 = r0.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.midi.Sequencer sequencer>;
+
+        if $r3 == null goto label15;
+
+     label09:
+        r0.<com.sun.media.sound.JavaSoundAudioClip: boolean sequencerloop> = 0;
+
+        $r4 = r0.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.midi.Sequencer sequencer>;
+
+        interfaceinvoke $r4.<javax.sound.midi.Sequencer: boolean addMetaEventListener(javax.sound.midi.MetaEventListener)>(r0);
+
+        $r5 = r0.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.midi.Sequencer sequencer>;
+
+        interfaceinvoke $r5.<javax.sound.midi.Sequencer: void stop()>();
+
+     label10:
+        goto label12;
+
+     label11:
+        $r11 := @caughtexception;
+
+     label12:
+        $r6 = r0.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.midi.Sequencer sequencer>;
+
+        interfaceinvoke $r6.<javax.sound.midi.Sequencer: void close()>();
+
+     label13:
+        goto label15;
+
+     label14:
+        $r10 := @caughtexception;
+
+     label15:
+        return;
+
+        catch java.lang.Exception from label01 to label02 with label03;
+        catch java.lang.Exception from label04 to label05 with label06;
+        catch java.lang.Exception from label09 to label10 with label11;
+        catch java.lang.Exception from label12 to label13 with label14;
+    }
+
+    public synchronized void update(javax.sound.sampled.LineEvent)
+    {
+        javax.sound.sampled.LineEvent r1;
+        com.sun.media.sound.JavaSoundAudioClip r0;
+
+        r0 := @this: com.sun.media.sound.JavaSoundAudioClip;
+
+        r1 := @parameter0: javax.sound.sampled.LineEvent;
+
+        return;
+    }
+
+    public synchronized void meta(javax.sound.midi.MetaMessage)
+    {
+        com.sun.media.sound.JavaSoundAudioClip r1;
+        javax.sound.midi.MetaMessage r0;
+        javax.sound.midi.Sequencer $r2;
+        int $i0;
+        boolean $z0;
+
+        r1 := @this: com.sun.media.sound.JavaSoundAudioClip;
+
+        r0 := @parameter0: javax.sound.midi.MetaMessage;
+
+        $i0 = virtualinvoke r0.<javax.sound.midi.MetaMessage: int getType()>();
+
+        if $i0 != 47 goto label2;
+
+        $z0 = r1.<com.sun.media.sound.JavaSoundAudioClip: boolean sequencerloop>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = r1.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.midi.Sequencer sequencer>;
+
+        interfaceinvoke $r2.<javax.sound.midi.Sequencer: void setMicrosecondPosition(long)>(0L);
+
+        virtualinvoke r1.<com.sun.media.sound.JavaSoundAudioClip: void loop()>();
+
+        goto label2;
+
+     label1:
+        virtualinvoke r1.<com.sun.media.sound.JavaSoundAudioClip: void stop()>();
+
+     label2:
+        return;
+    }
+
+    public java.lang.String toString()
+    {
+        java.lang.Class $r1;
+        com.sun.media.sound.JavaSoundAudioClip r0;
+        java.lang.String $r2;
+
+        r0 := @this: com.sun.media.sound.JavaSoundAudioClip;
+
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.String toString()>();
+
+        return $r2;
+    }
+
+    protected void finalize()
+    {
+        com.sun.media.sound.JavaSoundAudioClip r0;
+        javax.sound.midi.Sequencer $r3, $r4;
+        com.sun.media.sound.AutoClosingClip $r1, $r6;
+        com.sun.media.sound.DataPusher $r2, $r5;
+
+        r0 := @this: com.sun.media.sound.JavaSoundAudioClip;
+
+        $r1 = r0.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.AutoClosingClip clip>;
+
+        if $r1 == null goto label1;
+
+        $r6 = r0.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.AutoClosingClip clip>;
+
+        interfaceinvoke $r6.<com.sun.media.sound.AutoClosingClip: void close()>();
+
+     label1:
+        $r2 = r0.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.DataPusher datapusher>;
+
+        if $r2 == null goto label2;
+
+        $r5 = r0.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.DataPusher datapusher>;
+
+        virtualinvoke $r5.<com.sun.media.sound.DataPusher: void close()>();
+
+     label2:
+        $r3 = r0.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.midi.Sequencer sequencer>;
+
+        if $r3 == null goto label3;
+
+        $r4 = r0.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.midi.Sequencer sequencer>;
+
+        interfaceinvoke $r4.<javax.sound.midi.Sequencer: void close()>();
+
+     label3:
+        return;
+    }
+
+    private boolean loadAudioData(javax.sound.sampled.AudioInputStream) throws java.io.IOException, javax.sound.sampled.UnsupportedAudioFileException
+    {
+        javax.sound.sampled.AudioFormat $r2, $r3;
+        long $l0, $l4, l5;
+        com.sun.media.sound.JavaSoundAudioClip r1;
+        byte $b2, $b3, $b6;
+        javax.sound.sampled.AudioInputStream $r0, r4;
+        int $i1, $i7, $i9;
+
+        r1 := @this: com.sun.media.sound.JavaSoundAudioClip;
+
+        r4 := @parameter0: javax.sound.sampled.AudioInputStream;
+
+        $r0 = staticinvoke <com.sun.media.sound.Toolkit: javax.sound.sampled.AudioInputStream getPCMConvertedAudioInputStream(javax.sound.sampled.AudioInputStream)>(r4);
+
+        if $r0 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r2 = virtualinvoke $r0.<javax.sound.sampled.AudioInputStream: javax.sound.sampled.AudioFormat getFormat()>();
+
+        r1.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.sampled.AudioFormat loadedAudioFormat> = $r2;
+
+        $l0 = virtualinvoke $r0.<javax.sound.sampled.AudioInputStream: long getFrameLength()>();
+
+        $r3 = r1.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.sampled.AudioFormat loadedAudioFormat>;
+
+        $i1 = virtualinvoke $r3.<javax.sound.sampled.AudioFormat: int getFrameSize()>();
+
+        l5 = -1L;
+
+        $b2 = $l0 cmp -1L;
+
+        if $b2 == 0 goto label2;
+
+        $b3 = $l0 cmp 0L;
+
+        $i7 = (int) $b3;
+
+        if $i7 <= 0 goto label2;
+
+        $i9 = (int) -1;
+
+        if $i1 == $i9 goto label2;
+
+        if $i1 <= 0 goto label2;
+
+        $l4 = (long) $i1;
+
+        l5 = $l0 * $l4;
+
+     label2:
+        $b6 = l5 cmp -1L;
+
+        if $b6 == 0 goto label3;
+
+        specialinvoke r1.<com.sun.media.sound.JavaSoundAudioClip: void readStream(javax.sound.sampled.AudioInputStream,long)>($r0, l5);
+
+        goto label4;
+
+     label3:
+        specialinvoke r1.<com.sun.media.sound.JavaSoundAudioClip: void readStream(javax.sound.sampled.AudioInputStream)>($r0);
+
+     label4:
+        return 1;
+    }
+
+    private void readStream(javax.sound.sampled.AudioInputStream, long) throws java.io.IOException
+    {
+        byte[] $r1, $r3;
+        long l0;
+        com.sun.media.sound.JavaSoundAudioClip r0;
+        byte $b1;
+        javax.sound.sampled.AudioInputStream r2;
+        int $i2, $i3, i4, $i5, $i6, $i7, $i8, $i9;
+
+        r0 := @this: com.sun.media.sound.JavaSoundAudioClip;
+
+        r2 := @parameter0: javax.sound.sampled.AudioInputStream;
+
+        l0 := @parameter1: long;
+
+        $b1 = l0 cmp 2147483647L;
+
+        $i9 = (int) $b1;
+
+        if $i9 <= 0 goto label1;
+
+        i4 = 2147483647;
+
+        goto label2;
+
+     label1:
+        i4 = (int) l0;
+
+     label2:
+        $r1 = newarray (byte)[i4];
+
+        r0.<com.sun.media.sound.JavaSoundAudioClip: byte[] loadedAudio> = $r1;
+
+        r0.<com.sun.media.sound.JavaSoundAudioClip: int loadedAudioByteLength> = 0;
+
+     label3:
+        $r3 = r0.<com.sun.media.sound.JavaSoundAudioClip: byte[] loadedAudio>;
+
+        $i5 = r0.<com.sun.media.sound.JavaSoundAudioClip: int loadedAudioByteLength>;
+
+        $i6 = r0.<com.sun.media.sound.JavaSoundAudioClip: int loadedAudioByteLength>;
+
+        $i7 = i4 - $i6;
+
+        $i8 = virtualinvoke r2.<javax.sound.sampled.AudioInputStream: int read(byte[],int,int)>($r3, $i5, $i7);
+
+        if $i8 > 0 goto label4;
+
+        virtualinvoke r2.<javax.sound.sampled.AudioInputStream: void close()>();
+
+        goto label5;
+
+     label4:
+        $i2 = r0.<com.sun.media.sound.JavaSoundAudioClip: int loadedAudioByteLength>;
+
+        $i3 = $i2 + $i8;
+
+        r0.<com.sun.media.sound.JavaSoundAudioClip: int loadedAudioByteLength> = $i3;
+
+        goto label3;
+
+     label5:
+        return;
+    }
+
+    private void readStream(javax.sound.sampled.AudioInputStream) throws java.io.IOException
+    {
+        byte[] r1, $r4;
+        com.sun.media.sound.JavaSoundAudioClip$DirectBAOS $r0;
+        com.sun.media.sound.JavaSoundAudioClip r3;
+        javax.sound.sampled.AudioInputStream r2;
+        int $i0, $i1, i2;
+
+        r3 := @this: com.sun.media.sound.JavaSoundAudioClip;
+
+        r2 := @parameter0: javax.sound.sampled.AudioInputStream;
+
+        $r0 = new com.sun.media.sound.JavaSoundAudioClip$DirectBAOS;
+
+        specialinvoke $r0.<com.sun.media.sound.JavaSoundAudioClip$DirectBAOS: void <init>()>();
+
+        r1 = newarray (byte)[16384];
+
+        i2 = 0;
+
+     label1:
+        $i0 = lengthof r1;
+
+        $i1 = virtualinvoke r2.<javax.sound.sampled.AudioInputStream: int read(byte[],int,int)>(r1, 0, $i0);
+
+        if $i1 > 0 goto label2;
+
+        virtualinvoke r2.<javax.sound.sampled.AudioInputStream: void close()>();
+
+        goto label3;
+
+     label2:
+        i2 = i2 + $i1;
+
+        virtualinvoke $r0.<com.sun.media.sound.JavaSoundAudioClip$DirectBAOS: void write(byte[],int,int)>(r1, 0, $i1);
+
+        goto label1;
+
+     label3:
+        $r4 = virtualinvoke $r0.<com.sun.media.sound.JavaSoundAudioClip$DirectBAOS: byte[] getInternalBuffer()>();
+
+        r3.<com.sun.media.sound.JavaSoundAudioClip: byte[] loadedAudio> = $r4;
+
+        r3.<com.sun.media.sound.JavaSoundAudioClip: int loadedAudioByteLength> = i2;
+
+        return;
+    }
+
+    private boolean createClip()
+    {
+        javax.sound.sampled.AudioFormat $r2;
+        java.lang.Exception $r7;
+        com.sun.media.sound.JavaSoundAudioClip r1;
+        com.sun.media.sound.AutoClosingClip $r4, $r5, $r6;
+        javax.sound.sampled.Line $r3;
+        javax.sound.sampled.DataLine$Info $r0;
+        boolean $z0, $z1;
+
+        r1 := @this: com.sun.media.sound.JavaSoundAudioClip;
+
+     label1:
+        $r0 = new javax.sound.sampled.DataLine$Info;
+
+        $r2 = r1.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.sampled.AudioFormat loadedAudioFormat>;
+
+        specialinvoke $r0.<javax.sound.sampled.DataLine$Info: void <init>(java.lang.Class,javax.sound.sampled.AudioFormat)>(class "Ljavax/sound/sampled/Clip;", $r2);
+
+        $z0 = staticinvoke <javax.sound.sampled.AudioSystem: boolean isLineSupported(javax.sound.sampled.Line$Info)>($r0);
+
+        if $z0 != 0 goto label3;
+
+     label2:
+        return 0;
+
+     label3:
+        $r3 = staticinvoke <javax.sound.sampled.AudioSystem: javax.sound.sampled.Line getLine(javax.sound.sampled.Line$Info)>($r0);
+
+        $z1 = $r3 instanceof com.sun.media.sound.AutoClosingClip;
+
+        if $z1 != 0 goto label5;
+
+     label4:
+        return 0;
+
+     label5:
+        $r4 = (com.sun.media.sound.AutoClosingClip) $r3;
+
+        r1.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.AutoClosingClip clip> = $r4;
+
+        $r5 = r1.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.AutoClosingClip clip>;
+
+        interfaceinvoke $r5.<com.sun.media.sound.AutoClosingClip: void setAutoClosing(boolean)>(1);
+
+     label6:
+        goto label8;
+
+     label7:
+        $r7 := @caughtexception;
+
+        return 0;
+
+     label8:
+        $r6 = r1.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.AutoClosingClip clip>;
+
+        if $r6 != null goto label9;
+
+        return 0;
+
+     label9:
+        return 1;
+
+        catch java.lang.Exception from label1 to label2 with label7;
+        catch java.lang.Exception from label3 to label4 with label7;
+        catch java.lang.Exception from label5 to label6 with label7;
+    }
+
+    private boolean createSourceDataLine()
+    {
+        byte[] $r6;
+        javax.sound.sampled.AudioFormat $r2, $r7;
+        com.sun.media.sound.DataPusher $r5, $r8;
+        java.lang.Exception $r9;
+        com.sun.media.sound.JavaSoundAudioClip r1;
+        int $i0;
+        javax.sound.sampled.Line $r3;
+        javax.sound.sampled.DataLine$Info $r0;
+        boolean $z0;
+        javax.sound.sampled.SourceDataLine r4;
+
+        r1 := @this: com.sun.media.sound.JavaSoundAudioClip;
+
+     label1:
+        $r0 = new javax.sound.sampled.DataLine$Info;
+
+        $r2 = r1.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.sampled.AudioFormat loadedAudioFormat>;
+
+        specialinvoke $r0.<javax.sound.sampled.DataLine$Info: void <init>(java.lang.Class,javax.sound.sampled.AudioFormat)>(class "Ljavax/sound/sampled/SourceDataLine;", $r2);
+
+        $z0 = staticinvoke <javax.sound.sampled.AudioSystem: boolean isLineSupported(javax.sound.sampled.Line$Info)>($r0);
+
+        if $z0 != 0 goto label3;
+
+     label2:
+        return 0;
+
+     label3:
+        $r3 = staticinvoke <javax.sound.sampled.AudioSystem: javax.sound.sampled.Line getLine(javax.sound.sampled.Line$Info)>($r0);
+
+        r4 = (javax.sound.sampled.SourceDataLine) $r3;
+
+        $r5 = new com.sun.media.sound.DataPusher;
+
+        $r7 = r1.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.sampled.AudioFormat loadedAudioFormat>;
+
+        $r6 = r1.<com.sun.media.sound.JavaSoundAudioClip: byte[] loadedAudio>;
+
+        $i0 = r1.<com.sun.media.sound.JavaSoundAudioClip: int loadedAudioByteLength>;
+
+        specialinvoke $r5.<com.sun.media.sound.DataPusher: void <init>(javax.sound.sampled.SourceDataLine,javax.sound.sampled.AudioFormat,byte[],int)>(r4, $r7, $r6, $i0);
+
+        r1.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.DataPusher datapusher> = $r5;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r9 := @caughtexception;
+
+        return 0;
+
+     label6:
+        $r8 = r1.<com.sun.media.sound.JavaSoundAudioClip: com.sun.media.sound.DataPusher datapusher>;
+
+        if $r8 != null goto label7;
+
+        return 0;
+
+     label7:
+        return 1;
+
+        catch java.lang.Exception from label1 to label2 with label5;
+        catch java.lang.Exception from label3 to label4 with label5;
+    }
+
+    private boolean createSequencer(java.io.BufferedInputStream) throws java.io.IOException
+    {
+        java.io.BufferedInputStream r3;
+        javax.sound.midi.Sequencer $r1, $r2;
+        javax.sound.midi.InvalidMidiDataException $r6;
+        javax.sound.midi.MidiUnavailableException $r7;
+        com.sun.media.sound.JavaSoundAudioClip r0;
+        javax.sound.midi.Sequence $r4, $r5;
+
+        r0 := @this: com.sun.media.sound.JavaSoundAudioClip;
+
+        r3 := @parameter0: java.io.BufferedInputStream;
+
+     label1:
+        $r1 = staticinvoke <javax.sound.midi.MidiSystem: javax.sound.midi.Sequencer getSequencer()>();
+
+        r0.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.midi.Sequencer sequencer> = $r1;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+        return 0;
+
+     label4:
+        $r2 = r0.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.midi.Sequencer sequencer>;
+
+        if $r2 != null goto label5;
+
+        return 0;
+
+     label5:
+        $r4 = staticinvoke <javax.sound.midi.MidiSystem: javax.sound.midi.Sequence getSequence(java.io.InputStream)>(r3);
+
+        r0.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.midi.Sequence sequence> = $r4;
+
+        $r5 = r0.<com.sun.media.sound.JavaSoundAudioClip: javax.sound.midi.Sequence sequence>;
+
+        if $r5 != null goto label7;
+
+     label6:
+        return 0;
+
+     label7:
+        goto label9;
+
+     label8:
+        $r6 := @caughtexception;
+
+        return 0;
+
+     label9:
+        return 1;
+
+        catch javax.sound.midi.MidiUnavailableException from label1 to label2 with label3;
+        catch javax.sound.midi.InvalidMidiDataException from label5 to label6 with label8;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.media.sound.JavaSoundAudioClip: int STREAM_BUFFER_SIZE> = 1024;
+
+        <com.sun.media.sound.JavaSoundAudioClip: long CLIP_THRESHOLD> = 1048576L;
+
+        <com.sun.media.sound.JavaSoundAudioClip: int MINIMUM_PLAY_DELAY> = 30;
+
+        <com.sun.media.sound.JavaSoundAudioClip: int BUFFER_SIZE> = 16384;
+
+        <com.sun.media.sound.JavaSoundAudioClip: boolean DEBUG> = 0;
+
+        return;
+    }
+}

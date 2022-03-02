@@ -1,0 +1,259 @@
+class com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream extends java.io.InputStream
+{
+    private final com.sun.media.sound.AudioFloatConverter converter;
+    private final com.sun.media.sound.AudioFloatInputStream stream;
+    private float[] readfloatbuffer;
+    private final int fsize;
+
+    void <init>(javax.sound.sampled.AudioFormat, com.sun.media.sound.AudioFloatInputStream)
+    {
+        com.sun.media.sound.AudioFloatConverter $r3;
+        com.sun.media.sound.AudioFloatInputStream r1;
+        int $i0, $i1, $i2;
+        com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream r0;
+        javax.sound.sampled.AudioFormat r2;
+
+        r0 := @this: com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream;
+
+        r2 := @parameter0: javax.sound.sampled.AudioFormat;
+
+        r1 := @parameter1: com.sun.media.sound.AudioFloatInputStream;
+
+        specialinvoke r0.<java.io.InputStream: void <init>()>();
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream: com.sun.media.sound.AudioFloatInputStream stream> = r1;
+
+        $r3 = staticinvoke <com.sun.media.sound.AudioFloatConverter: com.sun.media.sound.AudioFloatConverter getConverter(javax.sound.sampled.AudioFormat)>(r2);
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream: com.sun.media.sound.AudioFloatConverter converter> = $r3;
+
+        $i0 = virtualinvoke r2.<javax.sound.sampled.AudioFormat: int getSampleSizeInBits()>();
+
+        $i1 = $i0 + 7;
+
+        $i2 = $i1 / 8;
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream: int fsize> = $i2;
+
+        return;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        byte[] r0;
+        short $s2, $s3;
+        byte $b1;
+        int $i0, $i4;
+        com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream r1;
+
+        r1 := @this: com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream;
+
+        r0 = newarray (byte)[1];
+
+        $i0 = virtualinvoke r1.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream: int read(byte[])>(r0);
+
+        if $i0 >= 0 goto label1;
+
+        return $i0;
+
+     label1:
+        $b1 = r0[0];
+
+        $s3 = (short) $b1;
+
+        $s2 = $s3 & 255;
+
+        $i4 = (int) $s2;
+
+        return $i4;
+    }
+
+    public int read(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r3;
+        com.sun.media.sound.AudioFloatConverter $r5;
+        com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream r0;
+        float[] $r1, $r2, $r4, $r6, $r8;
+        com.sun.media.sound.AudioFloatInputStream $r7;
+        int i0, $i1, i2, i3, $i4, $i5, $i6, $i7;
+
+        r0 := @this: com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream;
+
+        r3 := @parameter0: byte[];
+
+        i3 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        $i1 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream: int fsize>;
+
+        i2 = i0 / $i1;
+
+        $r1 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream: float[] readfloatbuffer>;
+
+        if $r1 == null goto label1;
+
+        $r6 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream: float[] readfloatbuffer>;
+
+        $i6 = lengthof $r6;
+
+        if $i6 >= i2 goto label2;
+
+     label1:
+        $r2 = newarray (float)[i2];
+
+        r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream: float[] readfloatbuffer> = $r2;
+
+     label2:
+        $r7 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream: com.sun.media.sound.AudioFloatInputStream stream>;
+
+        $r8 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream: float[] readfloatbuffer>;
+
+        $i7 = virtualinvoke $r7.<com.sun.media.sound.AudioFloatInputStream: int read(float[],int,int)>($r8, 0, i2);
+
+        if $i7 >= 0 goto label3;
+
+        return $i7;
+
+     label3:
+        $r5 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream: com.sun.media.sound.AudioFloatConverter converter>;
+
+        $r4 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream: float[] readfloatbuffer>;
+
+        virtualinvoke $r5.<com.sun.media.sound.AudioFloatConverter: byte[] toByteArray(float[],int,int,byte[],int)>($r4, 0, $i7, r3, i3);
+
+        $i4 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream: int fsize>;
+
+        $i5 = $i7 * $i4;
+
+        return $i5;
+    }
+
+    public int available() throws java.io.IOException
+    {
+        com.sun.media.sound.AudioFloatInputStream $r1;
+        int $i0, $i1, $i2;
+        com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream r0;
+
+        r0 := @this: com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream;
+
+        $r1 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream: com.sun.media.sound.AudioFloatInputStream stream>;
+
+        $i0 = virtualinvoke $r1.<com.sun.media.sound.AudioFloatInputStream: int available()>();
+
+        if $i0 >= 0 goto label1;
+
+        return $i0;
+
+     label1:
+        $i1 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream: int fsize>;
+
+        $i2 = $i0 * $i1;
+
+        return $i2;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream r0;
+        com.sun.media.sound.AudioFloatInputStream $r1;
+
+        r0 := @this: com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream;
+
+        $r1 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream: com.sun.media.sound.AudioFloatInputStream stream>;
+
+        virtualinvoke $r1.<com.sun.media.sound.AudioFloatInputStream: void close()>();
+
+        return;
+    }
+
+    public synchronized void mark(int)
+    {
+        com.sun.media.sound.AudioFloatInputStream $r1;
+        int i0, $i1, $i2;
+        com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream r0;
+
+        r0 := @this: com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream: com.sun.media.sound.AudioFloatInputStream stream>;
+
+        $i1 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream: int fsize>;
+
+        $i2 = i0 * $i1;
+
+        virtualinvoke $r1.<com.sun.media.sound.AudioFloatInputStream: void mark(int)>($i2);
+
+        return;
+    }
+
+    public boolean markSupported()
+    {
+        com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream r0;
+        com.sun.media.sound.AudioFloatInputStream $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream;
+
+        $r1 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream: com.sun.media.sound.AudioFloatInputStream stream>;
+
+        $z0 = virtualinvoke $r1.<com.sun.media.sound.AudioFloatInputStream: boolean markSupported()>();
+
+        return $z0;
+    }
+
+    public synchronized void reset() throws java.io.IOException
+    {
+        com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream r0;
+        com.sun.media.sound.AudioFloatInputStream $r1;
+
+        r0 := @this: com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream;
+
+        $r1 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream: com.sun.media.sound.AudioFloatInputStream stream>;
+
+        virtualinvoke $r1.<com.sun.media.sound.AudioFloatInputStream: void reset()>();
+
+        return;
+    }
+
+    public long skip(long) throws java.io.IOException
+    {
+        com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream r0;
+        long l0, $l2, $l3, $l4, $l7, $l8;
+        byte $b5;
+        com.sun.media.sound.AudioFloatInputStream $r1;
+        int $i1, $i6, $i9;
+
+        r0 := @this: com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream;
+
+        l0 := @parameter0: long;
+
+        $r1 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream: com.sun.media.sound.AudioFloatInputStream stream>;
+
+        $i1 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream: int fsize>;
+
+        $l2 = (long) $i1;
+
+        $l3 = l0 / $l2;
+
+        $l4 = virtualinvoke $r1.<com.sun.media.sound.AudioFloatInputStream: long skip(long)>($l3);
+
+        $b5 = $l4 cmp 0L;
+
+        $i9 = (int) $b5;
+
+        if $i9 >= 0 goto label1;
+
+        return $l4;
+
+     label1:
+        $i6 = r0.<com.sun.media.sound.AudioFloatFormatConverter$AudioFloatFormatConverterInputStream: int fsize>;
+
+        $l7 = (long) $i6;
+
+        $l8 = $l4 * $l7;
+
+        return $l8;
+    }
+}

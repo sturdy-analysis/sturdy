@@ -1,0 +1,850 @@
+public abstract class sun.awt.EmbeddedFrame extends java.awt.Frame implements java.awt.KeyEventDispatcher, java.beans.PropertyChangeListener
+{
+    private boolean isCursorAllowed;
+    private boolean supportsXEmbed;
+    private java.awt.KeyboardFocusManager appletKFM;
+    private static final long serialVersionUID;
+    protected static final boolean FORWARD;
+    protected static final boolean BACKWARD;
+
+    public boolean supportsXEmbed()
+    {
+        sun.awt.EmbeddedFrame r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        $z0 = r0.<sun.awt.EmbeddedFrame: boolean supportsXEmbed>;
+
+        if $z0 == 0 goto label1;
+
+        $z1 = staticinvoke <sun.awt.SunToolkit: boolean needsXEmbed()>();
+
+        if $z1 == 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+    }
+
+    protected void <init>(boolean)
+    {
+        sun.awt.EmbeddedFrame r0;
+        boolean z0;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        z0 := @parameter0: boolean;
+
+        specialinvoke r0.<sun.awt.EmbeddedFrame: void <init>(long,boolean)>(0L, z0);
+
+        return;
+    }
+
+    protected void <init>()
+    {
+        sun.awt.EmbeddedFrame r0;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        specialinvoke r0.<sun.awt.EmbeddedFrame: void <init>(long)>(0L);
+
+        return;
+    }
+
+    protected void <init>(int)
+    {
+        int i0;
+        sun.awt.EmbeddedFrame r0;
+        long $l1;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        i0 := @parameter0: int;
+
+        $l1 = (long) i0;
+
+        specialinvoke r0.<sun.awt.EmbeddedFrame: void <init>(long)>($l1);
+
+        return;
+    }
+
+    protected void <init>(long)
+    {
+        sun.awt.EmbeddedFrame r0;
+        long l0;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        l0 := @parameter0: long;
+
+        specialinvoke r0.<sun.awt.EmbeddedFrame: void <init>(long,boolean)>(l0, 0);
+
+        return;
+    }
+
+    protected void <init>(long, boolean)
+    {
+        sun.awt.EmbeddedFrame r0;
+        long l0;
+        boolean z0;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        l0 := @parameter0: long;
+
+        z0 := @parameter1: boolean;
+
+        specialinvoke r0.<java.awt.Frame: void <init>()>();
+
+        r0.<sun.awt.EmbeddedFrame: boolean isCursorAllowed> = 1;
+
+        r0.<sun.awt.EmbeddedFrame: boolean supportsXEmbed> = 0;
+
+        r0.<sun.awt.EmbeddedFrame: boolean supportsXEmbed> = z0;
+
+        virtualinvoke r0.<sun.awt.EmbeddedFrame: void registerListeners()>();
+
+        return;
+    }
+
+    public java.awt.Container getParent()
+    {
+        sun.awt.EmbeddedFrame r0;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        return null;
+    }
+
+    public void propertyChange(java.beans.PropertyChangeEvent)
+    {
+        sun.awt.EmbeddedFrame r4;
+        java.awt.KeyboardFocusManager $r6, $r7, $r8;
+        java.lang.Boolean $r3;
+        java.lang.Object $r2, $r5;
+        java.lang.String $r1;
+        java.beans.PropertyChangeEvent r0;
+        boolean $z0, $z1;
+
+        r4 := @this: sun.awt.EmbeddedFrame;
+
+        r0 := @parameter0: java.beans.PropertyChangeEvent;
+
+        $r1 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.String getPropertyName()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("managingFocus");
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r2 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.Object getNewValue()>();
+
+        $r3 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        if $r2 != $r3 goto label2;
+
+        return;
+
+     label2:
+        $r5 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.Object getSource()>();
+
+        $r6 = (java.awt.KeyboardFocusManager) $r5;
+
+        specialinvoke r4.<sun.awt.EmbeddedFrame: void removeTraversingOutListeners(java.awt.KeyboardFocusManager)>($r6);
+
+        $r7 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager()>();
+
+        r4.<sun.awt.EmbeddedFrame: java.awt.KeyboardFocusManager appletKFM> = $r7;
+
+        $z1 = virtualinvoke r4.<sun.awt.EmbeddedFrame: boolean isVisible()>();
+
+        if $z1 == 0 goto label3;
+
+        $r8 = r4.<sun.awt.EmbeddedFrame: java.awt.KeyboardFocusManager appletKFM>;
+
+        specialinvoke r4.<sun.awt.EmbeddedFrame: void addTraversingOutListeners(java.awt.KeyboardFocusManager)>($r8);
+
+     label3:
+        return;
+    }
+
+    private void addTraversingOutListeners(java.awt.KeyboardFocusManager)
+    {
+        sun.awt.EmbeddedFrame r1;
+        java.awt.KeyboardFocusManager r0;
+
+        r1 := @this: sun.awt.EmbeddedFrame;
+
+        r0 := @parameter0: java.awt.KeyboardFocusManager;
+
+        virtualinvoke r0.<java.awt.KeyboardFocusManager: void addKeyEventDispatcher(java.awt.KeyEventDispatcher)>(r1);
+
+        virtualinvoke r0.<java.awt.KeyboardFocusManager: void addPropertyChangeListener(java.lang.String,java.beans.PropertyChangeListener)>("managingFocus", r1);
+
+        return;
+    }
+
+    private void removeTraversingOutListeners(java.awt.KeyboardFocusManager)
+    {
+        sun.awt.EmbeddedFrame r1;
+        java.awt.KeyboardFocusManager r0;
+
+        r1 := @this: sun.awt.EmbeddedFrame;
+
+        r0 := @parameter0: java.awt.KeyboardFocusManager;
+
+        virtualinvoke r0.<java.awt.KeyboardFocusManager: void removeKeyEventDispatcher(java.awt.KeyEventDispatcher)>(r1);
+
+        virtualinvoke r0.<java.awt.KeyboardFocusManager: void removePropertyChangeListener(java.lang.String,java.beans.PropertyChangeListener)>("managingFocus", r1);
+
+        return;
+    }
+
+    public void registerListeners()
+    {
+        sun.awt.EmbeddedFrame r0;
+        java.awt.KeyboardFocusManager $r1, $r2, $r3, $r4;
+        boolean $z0;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        $r1 = r0.<sun.awt.EmbeddedFrame: java.awt.KeyboardFocusManager appletKFM>;
+
+        if $r1 == null goto label1;
+
+        $r4 = r0.<sun.awt.EmbeddedFrame: java.awt.KeyboardFocusManager appletKFM>;
+
+        specialinvoke r0.<sun.awt.EmbeddedFrame: void removeTraversingOutListeners(java.awt.KeyboardFocusManager)>($r4);
+
+     label1:
+        $r2 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager()>();
+
+        r0.<sun.awt.EmbeddedFrame: java.awt.KeyboardFocusManager appletKFM> = $r2;
+
+        $z0 = virtualinvoke r0.<sun.awt.EmbeddedFrame: boolean isVisible()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = r0.<sun.awt.EmbeddedFrame: java.awt.KeyboardFocusManager appletKFM>;
+
+        specialinvoke r0.<sun.awt.EmbeddedFrame: void addTraversingOutListeners(java.awt.KeyboardFocusManager)>($r3);
+
+     label2:
+        return;
+    }
+
+    public void show()
+    {
+        sun.awt.EmbeddedFrame r0;
+        java.awt.KeyboardFocusManager $r1, $r2;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        $r1 = r0.<sun.awt.EmbeddedFrame: java.awt.KeyboardFocusManager appletKFM>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.awt.EmbeddedFrame: java.awt.KeyboardFocusManager appletKFM>;
+
+        specialinvoke r0.<sun.awt.EmbeddedFrame: void addTraversingOutListeners(java.awt.KeyboardFocusManager)>($r2);
+
+     label1:
+        specialinvoke r0.<java.awt.Frame: void show()>();
+
+        return;
+    }
+
+    public void hide()
+    {
+        sun.awt.EmbeddedFrame r0;
+        java.awt.KeyboardFocusManager $r1, $r2;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        $r1 = r0.<sun.awt.EmbeddedFrame: java.awt.KeyboardFocusManager appletKFM>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.awt.EmbeddedFrame: java.awt.KeyboardFocusManager appletKFM>;
+
+        specialinvoke r0.<sun.awt.EmbeddedFrame: void removeTraversingOutListeners(java.awt.KeyboardFocusManager)>($r2);
+
+     label1:
+        specialinvoke r0.<java.awt.Frame: void hide()>();
+
+        return;
+    }
+
+    public boolean dispatchKeyEvent(java.awt.event.KeyEvent)
+    {
+        sun.awt.AWTAccessor$KeyboardFocusManagerAccessor $r0;
+        sun.awt.EmbeddedFrame r2;
+        java.awt.AWTKeyStroke $r4;
+        int $i0;
+        java.awt.Container $r1;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.awt.FocusTraversalPolicy $r7, $r9;
+        java.util.Set $r6, $r11;
+        java.awt.event.KeyEvent r3;
+        java.awt.Component $r5, $r8, $r10;
+
+        r2 := @this: sun.awt.EmbeddedFrame;
+
+        r3 := @parameter0: java.awt.event.KeyEvent;
+
+        $r0 = staticinvoke <sun.awt.AWTAccessor: sun.awt.AWTAccessor$KeyboardFocusManagerAccessor getKeyboardFocusManagerAccessor()>();
+
+        $r1 = interfaceinvoke $r0.<sun.awt.AWTAccessor$KeyboardFocusManagerAccessor: java.awt.Container getCurrentFocusCycleRoot()>();
+
+        if r2 == $r1 goto label1;
+
+        return 0;
+
+     label1:
+        $i0 = virtualinvoke r3.<java.awt.event.KeyEvent: int getID()>();
+
+        if $i0 != 400 goto label2;
+
+        return 0;
+
+     label2:
+        $z0 = virtualinvoke r2.<sun.awt.EmbeddedFrame: boolean getFocusTraversalKeysEnabled()>();
+
+        if $z0 == 0 goto label3;
+
+        $z1 = virtualinvoke r3.<java.awt.event.KeyEvent: boolean isConsumed()>();
+
+        if $z1 == 0 goto label4;
+
+     label3:
+        return 0;
+
+     label4:
+        $r4 = staticinvoke <java.awt.AWTKeyStroke: java.awt.AWTKeyStroke getAWTKeyStrokeForEvent(java.awt.event.KeyEvent)>(r3);
+
+        $r5 = virtualinvoke r3.<java.awt.event.KeyEvent: java.awt.Component getComponent()>();
+
+        $r6 = virtualinvoke r2.<sun.awt.EmbeddedFrame: java.util.Set getFocusTraversalKeys(int)>(0);
+
+        $z2 = interfaceinvoke $r6.<java.util.Set: boolean contains(java.lang.Object)>($r4);
+
+        if $z2 == 0 goto label6;
+
+        $r9 = virtualinvoke r2.<sun.awt.EmbeddedFrame: java.awt.FocusTraversalPolicy getFocusTraversalPolicy()>();
+
+        $r10 = virtualinvoke $r9.<java.awt.FocusTraversalPolicy: java.awt.Component getLastComponent(java.awt.Container)>(r2);
+
+        if $r5 == $r10 goto label5;
+
+        if $r10 != null goto label6;
+
+     label5:
+        $z4 = virtualinvoke r2.<sun.awt.EmbeddedFrame: boolean traverseOut(boolean)>(1);
+
+        if $z4 == 0 goto label6;
+
+        virtualinvoke r3.<java.awt.event.KeyEvent: void consume()>();
+
+        return 1;
+
+     label6:
+        $r11 = virtualinvoke r2.<sun.awt.EmbeddedFrame: java.util.Set getFocusTraversalKeys(int)>(1);
+
+        $z5 = interfaceinvoke $r11.<java.util.Set: boolean contains(java.lang.Object)>($r4);
+
+        if $z5 == 0 goto label8;
+
+        $r7 = virtualinvoke r2.<sun.awt.EmbeddedFrame: java.awt.FocusTraversalPolicy getFocusTraversalPolicy()>();
+
+        $r8 = virtualinvoke $r7.<java.awt.FocusTraversalPolicy: java.awt.Component getFirstComponent(java.awt.Container)>(r2);
+
+        if $r5 == $r8 goto label7;
+
+        if $r8 != null goto label8;
+
+     label7:
+        $z3 = virtualinvoke r2.<sun.awt.EmbeddedFrame: boolean traverseOut(boolean)>(0);
+
+        if $z3 == 0 goto label8;
+
+        virtualinvoke r3.<java.awt.event.KeyEvent: void consume()>();
+
+        return 1;
+
+     label8:
+        return 0;
+    }
+
+    public boolean traverseIn(boolean)
+    {
+        sun.awt.EmbeddedFrame r0;
+        sun.awt.AWTAccessor$KeyboardFocusManagerAccessor $r2;
+        java.awt.FocusTraversalPolicy $r1, $r3;
+        java.awt.Component r4;
+        boolean z0, $z1;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        z0 := @parameter0: boolean;
+
+        if z0 != 1 goto label1;
+
+        $r3 = virtualinvoke r0.<sun.awt.EmbeddedFrame: java.awt.FocusTraversalPolicy getFocusTraversalPolicy()>();
+
+        r4 = virtualinvoke $r3.<java.awt.FocusTraversalPolicy: java.awt.Component getFirstComponent(java.awt.Container)>(r0);
+
+        goto label2;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.awt.EmbeddedFrame: java.awt.FocusTraversalPolicy getFocusTraversalPolicy()>();
+
+        r4 = virtualinvoke $r1.<java.awt.FocusTraversalPolicy: java.awt.Component getLastComponent(java.awt.Container)>(r0);
+
+     label2:
+        if r4 == null goto label3;
+
+        $r2 = staticinvoke <sun.awt.AWTAccessor: sun.awt.AWTAccessor$KeyboardFocusManagerAccessor getKeyboardFocusManagerAccessor()>();
+
+        interfaceinvoke $r2.<sun.awt.AWTAccessor$KeyboardFocusManagerAccessor: void setMostRecentFocusOwner(java.awt.Window,java.awt.Component)>(r0, r4);
+
+        virtualinvoke r0.<sun.awt.EmbeddedFrame: void synthesizeWindowActivation(boolean)>(1);
+
+     label3:
+        if null == r4 goto label4;
+
+        $z1 = 1;
+
+        goto label5;
+
+     label4:
+        $z1 = 0;
+
+     label5:
+        return $z1;
+    }
+
+    protected boolean traverseOut(boolean)
+    {
+        sun.awt.EmbeddedFrame r0;
+        boolean z0;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        z0 := @parameter0: boolean;
+
+        return 0;
+    }
+
+    public void setTitle(java.lang.String)
+    {
+        sun.awt.EmbeddedFrame r0;
+        java.lang.String r1;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        r1 := @parameter0: java.lang.String;
+
+        return;
+    }
+
+    public void setIconImage(java.awt.Image)
+    {
+        sun.awt.EmbeddedFrame r0;
+        java.awt.Image r1;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        r1 := @parameter0: java.awt.Image;
+
+        return;
+    }
+
+    public void setIconImages(java.util.List)
+    {
+        sun.awt.EmbeddedFrame r0;
+        java.util.List r1;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        r1 := @parameter0: java.util.List;
+
+        return;
+    }
+
+    public void setMenuBar(java.awt.MenuBar)
+    {
+        sun.awt.EmbeddedFrame r0;
+        java.awt.MenuBar r1;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        r1 := @parameter0: java.awt.MenuBar;
+
+        return;
+    }
+
+    public void setResizable(boolean)
+    {
+        sun.awt.EmbeddedFrame r0;
+        boolean z0;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        z0 := @parameter0: boolean;
+
+        return;
+    }
+
+    public void remove(java.awt.MenuComponent)
+    {
+        java.awt.MenuComponent r1;
+        sun.awt.EmbeddedFrame r0;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        r1 := @parameter0: java.awt.MenuComponent;
+
+        return;
+    }
+
+    public boolean isResizable()
+    {
+        sun.awt.EmbeddedFrame r0;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        return 1;
+    }
+
+    public void addNotify()
+    {
+        sun.awt.EmbeddedFrame$NullEmbeddedFramePeer $r3;
+        java.lang.Throwable $r4;
+        sun.awt.EmbeddedFrame r0;
+        java.awt.peer.ComponentPeer $r2;
+        java.lang.Object $r1;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        $r1 = virtualinvoke r0.<sun.awt.EmbeddedFrame: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = virtualinvoke r0.<sun.awt.EmbeddedFrame: java.awt.peer.ComponentPeer getPeer()>();
+
+        if $r2 != null goto label2;
+
+        $r3 = new sun.awt.EmbeddedFrame$NullEmbeddedFramePeer;
+
+        specialinvoke $r3.<sun.awt.EmbeddedFrame$NullEmbeddedFramePeer: void <init>(sun.awt.EmbeddedFrame$1)>(null);
+
+        virtualinvoke r0.<sun.awt.EmbeddedFrame: void setPeer(java.awt.peer.ComponentPeer)>($r3);
+
+     label2:
+        specialinvoke r0.<java.awt.Frame: void addNotify()>();
+
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r4;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void setCursorAllowed(boolean)
+    {
+        sun.awt.EmbeddedFrame r0;
+        java.awt.peer.ComponentPeer $r1;
+        boolean z0;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        z0 := @parameter0: boolean;
+
+        r0.<sun.awt.EmbeddedFrame: boolean isCursorAllowed> = z0;
+
+        $r1 = virtualinvoke r0.<sun.awt.EmbeddedFrame: java.awt.peer.ComponentPeer getPeer()>();
+
+        interfaceinvoke $r1.<java.awt.peer.ComponentPeer: void updateCursorImmediately()>();
+
+        return;
+    }
+
+    public boolean isCursorAllowed()
+    {
+        sun.awt.EmbeddedFrame r0;
+        boolean $z0;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        $z0 = r0.<sun.awt.EmbeddedFrame: boolean isCursorAllowed>;
+
+        return $z0;
+    }
+
+    public java.awt.Cursor getCursor()
+    {
+        sun.awt.EmbeddedFrame r0;
+        boolean $z0;
+        java.awt.Cursor $r1;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        $z0 = r0.<sun.awt.EmbeddedFrame: boolean isCursorAllowed>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = specialinvoke r0.<java.awt.Frame: java.awt.Cursor getCursor()>();
+
+        goto label2;
+
+     label1:
+        $r1 = staticinvoke <java.awt.Cursor: java.awt.Cursor getPredefinedCursor(int)>(0);
+
+     label2:
+        return $r1;
+    }
+
+    protected void setPeer(java.awt.peer.ComponentPeer)
+    {
+        sun.awt.EmbeddedFrame r1;
+        java.awt.peer.ComponentPeer r2;
+        sun.awt.AWTAccessor$ComponentAccessor $r0;
+
+        r1 := @this: sun.awt.EmbeddedFrame;
+
+        r2 := @parameter0: java.awt.peer.ComponentPeer;
+
+        $r0 = staticinvoke <sun.awt.AWTAccessor: sun.awt.AWTAccessor$ComponentAccessor getComponentAccessor()>();
+
+        interfaceinvoke $r0.<sun.awt.AWTAccessor$ComponentAccessor: void setPeer(java.awt.Component,java.awt.peer.ComponentPeer)>(r1, r2);
+
+        return;
+    }
+
+    public void synthesizeWindowActivation(boolean)
+    {
+        sun.awt.EmbeddedFrame r0;
+        boolean z0;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        z0 := @parameter0: boolean;
+
+        return;
+    }
+
+    protected void setLocationPrivate(int, int)
+    {
+        sun.awt.EmbeddedFrame r0;
+        java.awt.Dimension $r1;
+        int i0, i1, $i2, $i3;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r1 = virtualinvoke r0.<sun.awt.EmbeddedFrame: java.awt.Dimension getSize()>();
+
+        $i3 = $r1.<java.awt.Dimension: int width>;
+
+        $i2 = $r1.<java.awt.Dimension: int height>;
+
+        virtualinvoke r0.<sun.awt.EmbeddedFrame: void setBoundsPrivate(int,int,int,int)>(i0, i1, $i3, $i2);
+
+        return;
+    }
+
+    protected java.awt.Point getLocationPrivate()
+    {
+        sun.awt.EmbeddedFrame r0;
+        java.awt.Rectangle $r1;
+        int $i0, $i1;
+        java.awt.Point $r2;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        $r1 = virtualinvoke r0.<sun.awt.EmbeddedFrame: java.awt.Rectangle getBoundsPrivate()>();
+
+        $r2 = new java.awt.Point;
+
+        $i1 = $r1.<java.awt.Rectangle: int x>;
+
+        $i0 = $r1.<java.awt.Rectangle: int y>;
+
+        specialinvoke $r2.<java.awt.Point: void <init>(int,int)>($i1, $i0);
+
+        return $r2;
+    }
+
+    protected void setBoundsPrivate(int, int, int, int)
+    {
+        sun.awt.EmbeddedFrame r0;
+        java.awt.peer.ComponentPeer $r1;
+        int i0, i1, i2, i3;
+        java.awt.peer.FramePeer r2;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        $r1 = virtualinvoke r0.<sun.awt.EmbeddedFrame: java.awt.peer.ComponentPeer getPeer()>();
+
+        r2 = (java.awt.peer.FramePeer) $r1;
+
+        if r2 == null goto label1;
+
+        interfaceinvoke r2.<java.awt.peer.FramePeer: void setBoundsPrivate(int,int,int,int)>(i0, i1, i2, i3);
+
+     label1:
+        return;
+    }
+
+    protected java.awt.Rectangle getBoundsPrivate()
+    {
+        sun.awt.EmbeddedFrame r0;
+        java.awt.Rectangle $r3, $r4;
+        java.awt.peer.ComponentPeer $r1;
+        java.awt.peer.FramePeer r2;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        $r1 = virtualinvoke r0.<sun.awt.EmbeddedFrame: java.awt.peer.ComponentPeer getPeer()>();
+
+        r2 = (java.awt.peer.FramePeer) $r1;
+
+        if r2 == null goto label1;
+
+        $r4 = interfaceinvoke r2.<java.awt.peer.FramePeer: java.awt.Rectangle getBoundsPrivate()>();
+
+        return $r4;
+
+     label1:
+        $r3 = virtualinvoke r0.<sun.awt.EmbeddedFrame: java.awt.Rectangle getBounds()>();
+
+        return $r3;
+    }
+
+    public void toFront()
+    {
+        sun.awt.EmbeddedFrame r0;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        return;
+    }
+
+    public void toBack()
+    {
+        sun.awt.EmbeddedFrame r0;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        return;
+    }
+
+    public abstract void registerAccelerator(java.awt.AWTKeyStroke);
+
+    public abstract void unregisterAccelerator(java.awt.AWTKeyStroke);
+
+    public static java.applet.Applet getAppletIfAncestorOf(java.awt.Component)
+    {
+        java.applet.Applet r2, $r3;
+        java.awt.Container r1;
+        java.awt.Component r0;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.awt.Component;
+
+        r1 = virtualinvoke r0.<java.awt.Component: java.awt.Container getParent()>();
+
+        r2 = null;
+
+     label1:
+        if r1 == null goto label3;
+
+        $z0 = r1 instanceof sun.awt.EmbeddedFrame;
+
+        if $z0 != 0 goto label3;
+
+        $z1 = r1 instanceof java.applet.Applet;
+
+        if $z1 == 0 goto label2;
+
+        r2 = (java.applet.Applet) r1;
+
+     label2:
+        r1 = virtualinvoke r1.<java.awt.Container: java.awt.Container getParent()>();
+
+        goto label1;
+
+     label3:
+        if r1 != null goto label4;
+
+        $r3 = null;
+
+        goto label5;
+
+     label4:
+        $r3 = r2;
+
+     label5:
+        return $r3;
+    }
+
+    public void notifyModalBlocked(java.awt.Dialog, boolean)
+    {
+        sun.awt.EmbeddedFrame r0;
+        java.awt.Dialog r1;
+        boolean z0;
+
+        r0 := @this: sun.awt.EmbeddedFrame;
+
+        r1 := @parameter0: java.awt.Dialog;
+
+        z0 := @parameter1: boolean;
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.awt.EmbeddedFrame: boolean BACKWARD> = 0;
+
+        <sun.awt.EmbeddedFrame: boolean FORWARD> = 1;
+
+        <sun.awt.EmbeddedFrame: long serialVersionUID> = 2967042741780317130L;
+
+        return;
+    }
+}

@@ -1,0 +1,1028 @@
+abstract class java.util.concurrent.locks.ReentrantReadWriteLock$Sync extends java.util.concurrent.locks.AbstractQueuedSynchronizer
+{
+    private static final long serialVersionUID;
+    static final int SHARED_SHIFT;
+    static final int SHARED_UNIT;
+    static final int MAX_COUNT;
+    static final int EXCLUSIVE_MASK;
+    private transient java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter readHolds;
+    private transient java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter cachedHoldCounter;
+    private transient java.lang.Thread firstReader;
+    private transient int firstReaderHoldCount;
+
+    static int sharedCount(int)
+    {
+        int i0, $i1;
+
+        i0 := @parameter0: int;
+
+        $i1 = i0 >>> 16;
+
+        return $i1;
+    }
+
+    static int exclusiveCount(int)
+    {
+        int i0, $i1, $i3;
+
+        i0 := @parameter0: int;
+
+        $i3 = (int) 65535;
+
+        $i1 = i0 & $i3;
+
+        return $i1;
+    }
+
+    void <init>()
+    {
+        int $i0;
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync r0;
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter $r1;
+
+        r0 := @this: java.util.concurrent.locks.ReentrantReadWriteLock$Sync;
+
+        specialinvoke r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer: void <init>()>();
+
+        r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.lang.Thread firstReader> = null;
+
+        $r1 = new java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter;
+
+        specialinvoke $r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter: void <init>()>();
+
+        r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter readHolds> = $r1;
+
+        $i0 = virtualinvoke r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int getState()>();
+
+        virtualinvoke r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: void setState(int)>($i0);
+
+        return;
+    }
+
+    abstract boolean readerShouldBlock();
+
+    abstract boolean writerShouldBlock();
+
+    protected final boolean tryRelease(int)
+    {
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync r0;
+        java.lang.IllegalMonitorStateException $r1;
+        int $i0, i1, i2, $i3;
+        boolean $z0, z1, $z3, $z4;
+
+        r0 := @this: java.util.concurrent.locks.ReentrantReadWriteLock$Sync;
+
+        i1 := @parameter0: int;
+
+        $z0 = virtualinvoke r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: boolean isHeldExclusively()>();
+
+        if $z0 != 0 goto label1;
+
+        $r1 = new java.lang.IllegalMonitorStateException;
+
+        specialinvoke $r1.<java.lang.IllegalMonitorStateException: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int getState()>();
+
+        i2 = $i0 - i1;
+
+        $i3 = staticinvoke <java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int exclusiveCount(int)>(i2);
+
+        if $i3 != 0 goto label2;
+
+        $z4 = 1;
+
+        $z3 = 1;
+
+        goto label3;
+
+     label2:
+        $z4 = 0;
+
+        $z3 = 0;
+
+     label3:
+        z1 = $z3;
+
+        if $z4 == 0 goto label4;
+
+        virtualinvoke r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: void setExclusiveOwnerThread(java.lang.Thread)>(null);
+
+     label4:
+        virtualinvoke r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: void setState(int)>(i2);
+
+        return z1;
+    }
+
+    protected final boolean tryAcquire(int)
+    {
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync r1;
+        java.lang.Error $r4;
+        java.lang.Thread $r0, $r2;
+        int $i0, $i1, i2, $i3, $i4, $i5, $i6, $i8;
+        boolean $z0, $z1;
+
+        r1 := @this: java.util.concurrent.locks.ReentrantReadWriteLock$Sync;
+
+        i2 := @parameter0: int;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $i0 = virtualinvoke r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int getState()>();
+
+        $i1 = staticinvoke <java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int exclusiveCount(int)>($i0);
+
+        if $i0 == 0 goto label4;
+
+        if $i1 == 0 goto label1;
+
+        $r2 = virtualinvoke r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.lang.Thread getExclusiveOwnerThread()>();
+
+        if $r0 == $r2 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $i4 = staticinvoke <java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int exclusiveCount(int)>(i2);
+
+        $i5 = $i1 + $i4;
+
+        $i8 = (int) 65535;
+
+        if $i5 <= $i8 goto label3;
+
+        $r4 = new java.lang.Error;
+
+        specialinvoke $r4.<java.lang.Error: void <init>(java.lang.String)>("Maximum lock count exceeded");
+
+        throw $r4;
+
+     label3:
+        $i6 = $i0 + i2;
+
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: void setState(int)>($i6);
+
+        return 1;
+
+     label4:
+        $z0 = virtualinvoke r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: boolean writerShouldBlock()>();
+
+        if $z0 != 0 goto label5;
+
+        $i3 = $i0 + i2;
+
+        $z1 = virtualinvoke r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: boolean compareAndSetState(int,int)>($i0, $i3);
+
+        if $z1 != 0 goto label6;
+
+     label5:
+        return 0;
+
+     label6:
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: void setExclusiveOwnerThread(java.lang.Thread)>($r0);
+
+        return 1;
+    }
+
+    protected final boolean tryReleaseShared(int)
+    {
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync r1;
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter r7;
+        long $l2, $l3;
+        java.lang.IllegalMonitorStateException $r6;
+        byte $b4;
+        java.lang.Thread $r0, $r2;
+        int $i0, $i1, $i5, $i6, $i7, i8, $i9, $i10, $i11;
+        boolean $z0, $z1;
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter $r3, $r5;
+        java.lang.Object $r4;
+
+        r1 := @this: java.util.concurrent.locks.ReentrantReadWriteLock$Sync;
+
+        i8 := @parameter0: int;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.lang.Thread firstReader>;
+
+        if $r2 != $r0 goto label2;
+
+        $i5 = r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int firstReaderHoldCount>;
+
+        if $i5 != 1 goto label1;
+
+        r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.lang.Thread firstReader> = null;
+
+        goto label6;
+
+     label1:
+        $i6 = r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int firstReaderHoldCount>;
+
+        $i7 = $i6 - 1;
+
+        r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int firstReaderHoldCount> = $i7;
+
+        goto label6;
+
+     label2:
+        r7 = r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter cachedHoldCounter>;
+
+        if r7 == null goto label3;
+
+        $l2 = r7.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter: long tid>;
+
+        $l3 = staticinvoke <java.util.concurrent.locks.ReentrantReadWriteLock: long getThreadId(java.lang.Thread)>($r0);
+
+        $b4 = $l2 cmp $l3;
+
+        if $b4 == 0 goto label4;
+
+     label3:
+        $r3 = r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter readHolds>;
+
+        $r4 = virtualinvoke $r3.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter: java.lang.Object get()>();
+
+        r7 = (java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter) $r4;
+
+     label4:
+        $i9 = r7.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter: int count>;
+
+        if $i9 > 1 goto label5;
+
+        $r5 = r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter readHolds>;
+
+        virtualinvoke $r5.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter: void remove()>();
+
+        if $i9 > 0 goto label5;
+
+        $r6 = specialinvoke r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.lang.IllegalMonitorStateException unmatchedUnlockException()>();
+
+        throw $r6;
+
+     label5:
+        $i0 = r7.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter: int count>;
+
+        $i1 = $i0 - 1;
+
+        r7.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter: int count> = $i1;
+
+     label6:
+        $i10 = virtualinvoke r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int getState()>();
+
+        $i11 = $i10 - 65536;
+
+        $z0 = virtualinvoke r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: boolean compareAndSetState(int,int)>($i10, $i11);
+
+        if $z0 == 0 goto label9;
+
+        if $i11 != 0 goto label7;
+
+        $z1 = 1;
+
+        goto label8;
+
+     label7:
+        $z1 = 0;
+
+     label8:
+        return $z1;
+
+     label9:
+        goto label6;
+    }
+
+    private java.lang.IllegalMonitorStateException unmatchedUnlockException()
+    {
+        java.lang.IllegalMonitorStateException $r0;
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync r1;
+
+        r1 := @this: java.util.concurrent.locks.ReentrantReadWriteLock$Sync;
+
+        $r0 = new java.lang.IllegalMonitorStateException;
+
+        specialinvoke $r0.<java.lang.IllegalMonitorStateException: void <init>(java.lang.String)>("attempt to unlock read lock, not locked by current thread");
+
+        return $r0;
+    }
+
+    protected final int tryAcquireShared(int)
+    {
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync r1;
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter $r5, r8;
+        long $l4, $l5;
+        byte $b6;
+        java.lang.Thread $r0, $r2, $r7;
+        int $i0, $i1, $i2, $i3, $i7, $i8, $i9, i10, $i11, $i12, $i13, $i15, $i17;
+        boolean $z0, $z1;
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter $r3, $r6;
+        java.lang.Object $r4;
+
+        r1 := @this: java.util.concurrent.locks.ReentrantReadWriteLock$Sync;
+
+        i10 := @parameter0: int;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $i0 = virtualinvoke r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int getState()>();
+
+        $i1 = staticinvoke <java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int exclusiveCount(int)>($i0);
+
+        if $i1 == 0 goto label1;
+
+        $r7 = virtualinvoke r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.lang.Thread getExclusiveOwnerThread()>();
+
+        if $r7 == $r0 goto label1;
+
+        $i15 = (int) -1;
+
+        return $i15;
+
+     label1:
+        $i2 = staticinvoke <java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int sharedCount(int)>($i0);
+
+        $z0 = virtualinvoke r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: boolean readerShouldBlock()>();
+
+        if $z0 != 0 goto label8;
+
+        $i17 = (int) 65535;
+
+        if $i2 >= $i17 goto label8;
+
+        $i3 = $i0 + 65536;
+
+        $z1 = virtualinvoke r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: boolean compareAndSetState(int,int)>($i0, $i3);
+
+        if $z1 == 0 goto label8;
+
+        if $i2 != 0 goto label2;
+
+        r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.lang.Thread firstReader> = $r0;
+
+        r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int firstReaderHoldCount> = 1;
+
+        goto label7;
+
+     label2:
+        $r2 = r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.lang.Thread firstReader>;
+
+        if $r2 != $r0 goto label3;
+
+        $i8 = r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int firstReaderHoldCount>;
+
+        $i9 = $i8 + 1;
+
+        r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int firstReaderHoldCount> = $i9;
+
+        goto label7;
+
+     label3:
+        r8 = r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter cachedHoldCounter>;
+
+        if r8 == null goto label4;
+
+        $l4 = r8.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter: long tid>;
+
+        $l5 = staticinvoke <java.util.concurrent.locks.ReentrantReadWriteLock: long getThreadId(java.lang.Thread)>($r0);
+
+        $b6 = $l4 cmp $l5;
+
+        if $b6 == 0 goto label5;
+
+     label4:
+        $r3 = r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter readHolds>;
+
+        $r4 = virtualinvoke $r3.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter: java.lang.Object get()>();
+
+        $r5 = (java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter) $r4;
+
+        r8 = $r5;
+
+        r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter cachedHoldCounter> = $r5;
+
+        goto label6;
+
+     label5:
+        $i7 = r8.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter: int count>;
+
+        if $i7 != 0 goto label6;
+
+        $r6 = r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter readHolds>;
+
+        virtualinvoke $r6.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter: void set(java.lang.Object)>(r8);
+
+     label6:
+        $i11 = r8.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter: int count>;
+
+        $i12 = $i11 + 1;
+
+        r8.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter: int count> = $i12;
+
+     label7:
+        return 1;
+
+     label8:
+        $i13 = virtualinvoke r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int fullTryAcquireShared(java.lang.Thread)>($r0);
+
+        return $i13;
+    }
+
+    final int fullTryAcquireShared(java.lang.Thread)
+    {
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter $r11, r13;
+        byte $b6, $b13;
+        java.lang.Thread r1, $r2, $r7, $r12;
+        boolean $z0, $z1;
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter $r3, $r5, $r8, $r10;
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync r0;
+        java.lang.Error $r14;
+        long $l4, $l5, $l11, $l12;
+        int $i0, $i1, $i2, $i3, $i7, $i8, $i9, $i10, $i14, $i15, $i16, $i17, $i19, $i21, $i23;
+        java.lang.Object $r4, $r9;
+
+        r0 := @this: java.util.concurrent.locks.ReentrantReadWriteLock$Sync;
+
+        r1 := @parameter0: java.lang.Thread;
+
+        r13 = null;
+
+     label01:
+        $i0 = virtualinvoke r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int getState()>();
+
+        $i1 = staticinvoke <java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int exclusiveCount(int)>($i0);
+
+        if $i1 == 0 goto label02;
+
+        $r12 = virtualinvoke r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.lang.Thread getExclusiveOwnerThread()>();
+
+        if $r12 == r1 goto label06;
+
+        $i19 = (int) -1;
+
+        return $i19;
+
+     label02:
+        $z0 = virtualinvoke r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: boolean readerShouldBlock()>();
+
+        if $z0 == 0 goto label06;
+
+        $r7 = r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.lang.Thread firstReader>;
+
+        if $r7 != r1 goto label03;
+
+        goto label06;
+
+     label03:
+        if r13 != null goto label05;
+
+        r13 = r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter cachedHoldCounter>;
+
+        if r13 == null goto label04;
+
+        $l11 = r13.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter: long tid>;
+
+        $l12 = staticinvoke <java.util.concurrent.locks.ReentrantReadWriteLock: long getThreadId(java.lang.Thread)>(r1);
+
+        $b13 = $l11 cmp $l12;
+
+        if $b13 == 0 goto label05;
+
+     label04:
+        $r8 = r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter readHolds>;
+
+        $r9 = virtualinvoke $r8.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter: java.lang.Object get()>();
+
+        $r11 = (java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter) $r9;
+
+        r13 = $r11;
+
+        $i10 = $r11.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter: int count>;
+
+        if $i10 != 0 goto label05;
+
+        $r10 = r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter readHolds>;
+
+        virtualinvoke $r10.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter: void remove()>();
+
+     label05:
+        $i14 = r13.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter: int count>;
+
+        if $i14 != 0 goto label06;
+
+        $i21 = (int) -1;
+
+        return $i21;
+
+     label06:
+        $i15 = staticinvoke <java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int sharedCount(int)>($i0);
+
+        $i23 = (int) 65535;
+
+        if $i15 != $i23 goto label07;
+
+        $r14 = new java.lang.Error;
+
+        specialinvoke $r14.<java.lang.Error: void <init>(java.lang.String)>("Maximum lock count exceeded");
+
+        throw $r14;
+
+     label07:
+        $i2 = $i0 + 65536;
+
+        $z1 = virtualinvoke r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: boolean compareAndSetState(int,int)>($i0, $i2);
+
+        if $z1 == 0 goto label15;
+
+        $i3 = staticinvoke <java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int sharedCount(int)>($i0);
+
+        if $i3 != 0 goto label08;
+
+        r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.lang.Thread firstReader> = r1;
+
+        r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int firstReaderHoldCount> = 1;
+
+        goto label14;
+
+     label08:
+        $r2 = r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.lang.Thread firstReader>;
+
+        if $r2 != r1 goto label09;
+
+        $i8 = r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int firstReaderHoldCount>;
+
+        $i9 = $i8 + 1;
+
+        r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int firstReaderHoldCount> = $i9;
+
+        goto label14;
+
+     label09:
+        if r13 != null goto label10;
+
+        r13 = r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter cachedHoldCounter>;
+
+     label10:
+        if r13 == null goto label11;
+
+        $l4 = r13.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter: long tid>;
+
+        $l5 = staticinvoke <java.util.concurrent.locks.ReentrantReadWriteLock: long getThreadId(java.lang.Thread)>(r1);
+
+        $b6 = $l4 cmp $l5;
+
+        if $b6 == 0 goto label12;
+
+     label11:
+        $r3 = r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter readHolds>;
+
+        $r4 = virtualinvoke $r3.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter: java.lang.Object get()>();
+
+        r13 = (java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter) $r4;
+
+        goto label13;
+
+     label12:
+        $i7 = r13.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter: int count>;
+
+        if $i7 != 0 goto label13;
+
+        $r5 = r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter readHolds>;
+
+        virtualinvoke $r5.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter: void set(java.lang.Object)>(r13);
+
+     label13:
+        $i16 = r13.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter: int count>;
+
+        $i17 = $i16 + 1;
+
+        r13.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter: int count> = $i17;
+
+        r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter cachedHoldCounter> = r13;
+
+     label14:
+        return 1;
+
+     label15:
+        goto label01;
+    }
+
+    final boolean tryWriteLock()
+    {
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync r1;
+        java.lang.Error $r4;
+        java.lang.Thread $r0, $r2;
+        int $i0, $i1, $i2, $i4;
+        boolean $z0;
+
+        r1 := @this: java.util.concurrent.locks.ReentrantReadWriteLock$Sync;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $i0 = virtualinvoke r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int getState()>();
+
+        if $i0 == 0 goto label3;
+
+        $i2 = staticinvoke <java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int exclusiveCount(int)>($i0);
+
+        if $i2 == 0 goto label1;
+
+        $r2 = virtualinvoke r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.lang.Thread getExclusiveOwnerThread()>();
+
+        if $r0 == $r2 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $i4 = (int) 65535;
+
+        if $i2 != $i4 goto label3;
+
+        $r4 = new java.lang.Error;
+
+        specialinvoke $r4.<java.lang.Error: void <init>(java.lang.String)>("Maximum lock count exceeded");
+
+        throw $r4;
+
+     label3:
+        $i1 = $i0 + 1;
+
+        $z0 = virtualinvoke r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: boolean compareAndSetState(int,int)>($i0, $i1);
+
+        if $z0 != 0 goto label4;
+
+        return 0;
+
+     label4:
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: void setExclusiveOwnerThread(java.lang.Thread)>($r0);
+
+        return 1;
+    }
+
+    final boolean tryReadLock()
+    {
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync r1;
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter $r5, r9;
+        java.lang.Error $r10;
+        long $l4, $l5;
+        byte $b6;
+        java.lang.Thread $r0, $r2, $r8;
+        int $i0, $i1, $i2, $i3, $i7, $i8, $i9, $i10, $i11, $i13;
+        boolean $z0;
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter $r3, $r6;
+        java.lang.Object $r4;
+
+        r1 := @this: java.util.concurrent.locks.ReentrantReadWriteLock$Sync;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+     label01:
+        $i0 = virtualinvoke r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int getState()>();
+
+        $i1 = staticinvoke <java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int exclusiveCount(int)>($i0);
+
+        if $i1 == 0 goto label02;
+
+        $r8 = virtualinvoke r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.lang.Thread getExclusiveOwnerThread()>();
+
+        if $r8 == $r0 goto label02;
+
+        return 0;
+
+     label02:
+        $i2 = staticinvoke <java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int sharedCount(int)>($i0);
+
+        $i13 = (int) 65535;
+
+        if $i2 != $i13 goto label03;
+
+        $r10 = new java.lang.Error;
+
+        specialinvoke $r10.<java.lang.Error: void <init>(java.lang.String)>("Maximum lock count exceeded");
+
+        throw $r10;
+
+     label03:
+        $i3 = $i0 + 65536;
+
+        $z0 = virtualinvoke r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: boolean compareAndSetState(int,int)>($i0, $i3);
+
+        if $z0 == 0 goto label10;
+
+        if $i2 != 0 goto label04;
+
+        r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.lang.Thread firstReader> = $r0;
+
+        r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int firstReaderHoldCount> = 1;
+
+        goto label09;
+
+     label04:
+        $r2 = r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.lang.Thread firstReader>;
+
+        if $r2 != $r0 goto label05;
+
+        $i8 = r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int firstReaderHoldCount>;
+
+        $i9 = $i8 + 1;
+
+        r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int firstReaderHoldCount> = $i9;
+
+        goto label09;
+
+     label05:
+        r9 = r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter cachedHoldCounter>;
+
+        if r9 == null goto label06;
+
+        $l4 = r9.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter: long tid>;
+
+        $l5 = staticinvoke <java.util.concurrent.locks.ReentrantReadWriteLock: long getThreadId(java.lang.Thread)>($r0);
+
+        $b6 = $l4 cmp $l5;
+
+        if $b6 == 0 goto label07;
+
+     label06:
+        $r3 = r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter readHolds>;
+
+        $r4 = virtualinvoke $r3.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter: java.lang.Object get()>();
+
+        $r5 = (java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter) $r4;
+
+        r9 = $r5;
+
+        r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter cachedHoldCounter> = $r5;
+
+        goto label08;
+
+     label07:
+        $i7 = r9.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter: int count>;
+
+        if $i7 != 0 goto label08;
+
+        $r6 = r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter readHolds>;
+
+        virtualinvoke $r6.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter: void set(java.lang.Object)>(r9);
+
+     label08:
+        $i10 = r9.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter: int count>;
+
+        $i11 = $i10 + 1;
+
+        r9.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter: int count> = $i11;
+
+     label09:
+        return 1;
+
+     label10:
+        goto label01;
+    }
+
+    protected final boolean isHeldExclusively()
+    {
+        java.lang.Thread $r1, $r2;
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync r0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.locks.ReentrantReadWriteLock$Sync;
+
+        $r1 = virtualinvoke r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.lang.Thread getExclusiveOwnerThread()>();
+
+        $r2 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        if $r1 != $r2 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    final java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject newCondition()
+    {
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync r1;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject $r0;
+
+        r1 := @this: java.util.concurrent.locks.ReentrantReadWriteLock$Sync;
+
+        $r0 = new java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject;
+
+        specialinvoke $r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: void <init>(java.util.concurrent.locks.AbstractQueuedSynchronizer)>(r1);
+
+        return $r0;
+    }
+
+    final java.lang.Thread getOwner()
+    {
+        java.lang.Thread $r1;
+        int $i0, $i1;
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync r0;
+
+        r0 := @this: java.util.concurrent.locks.ReentrantReadWriteLock$Sync;
+
+        $i0 = virtualinvoke r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int getState()>();
+
+        $i1 = staticinvoke <java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int exclusiveCount(int)>($i0);
+
+        if $i1 != 0 goto label1;
+
+        $r1 = null;
+
+        goto label2;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.lang.Thread getExclusiveOwnerThread()>();
+
+     label2:
+        return $r1;
+    }
+
+    final int getReadLockCount()
+    {
+        int $i0, $i1;
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync r0;
+
+        r0 := @this: java.util.concurrent.locks.ReentrantReadWriteLock$Sync;
+
+        $i0 = virtualinvoke r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int getState()>();
+
+        $i1 = staticinvoke <java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int sharedCount(int)>($i0);
+
+        return $i1;
+    }
+
+    final boolean isWriteLocked()
+    {
+        int $i0, $i1;
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync r0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.locks.ReentrantReadWriteLock$Sync;
+
+        $i0 = virtualinvoke r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int getState()>();
+
+        $i1 = staticinvoke <java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int exclusiveCount(int)>($i0);
+
+        if $i1 == 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    final int getWriteHoldCount()
+    {
+        int $i0, $i1;
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync r0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.locks.ReentrantReadWriteLock$Sync;
+
+        $z0 = virtualinvoke r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: boolean isHeldExclusively()>();
+
+        if $z0 == 0 goto label1;
+
+        $i0 = virtualinvoke r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int getState()>();
+
+        $i1 = staticinvoke <java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int exclusiveCount(int)>($i0);
+
+        goto label2;
+
+     label1:
+        $i1 = 0;
+
+     label2:
+        return $i1;
+    }
+
+    final int getReadHoldCount()
+    {
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync r0;
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter r3, $r6;
+        long $l1, $l2;
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter $r4, $r7;
+        byte $b3;
+        java.lang.Thread $r1, $r2;
+        int $i0, $i4, $i5, $i6;
+        java.lang.Object $r5;
+
+        r0 := @this: java.util.concurrent.locks.ReentrantReadWriteLock$Sync;
+
+        $i0 = virtualinvoke r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int getReadLockCount()>();
+
+        if $i0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.lang.Thread firstReader>;
+
+        if $r2 != $r1 goto label2;
+
+        $i6 = r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int firstReaderHoldCount>;
+
+        return $i6;
+
+     label2:
+        r3 = r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter cachedHoldCounter>;
+
+        if r3 == null goto label3;
+
+        $l1 = r3.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter: long tid>;
+
+        $l2 = staticinvoke <java.util.concurrent.locks.ReentrantReadWriteLock: long getThreadId(java.lang.Thread)>($r1);
+
+        $b3 = $l1 cmp $l2;
+
+        if $b3 != 0 goto label3;
+
+        $i5 = r3.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter: int count>;
+
+        return $i5;
+
+     label3:
+        $r4 = r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter readHolds>;
+
+        $r5 = virtualinvoke $r4.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter: java.lang.Object get()>();
+
+        $r6 = (java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter) $r5;
+
+        $i4 = $r6.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$HoldCounter: int count>;
+
+        if $i4 != 0 goto label4;
+
+        $r7 = r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter readHolds>;
+
+        virtualinvoke $r7.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter: void remove()>();
+
+     label4:
+        return $i4;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.ObjectInputStream r0;
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync r1;
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter $r2;
+
+        r1 := @this: java.util.concurrent.locks.ReentrantReadWriteLock$Sync;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        $r2 = new java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter;
+
+        specialinvoke $r2.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter: void <init>()>();
+
+        r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter readHolds> = $r2;
+
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: void setState(int)>(0);
+
+        return;
+    }
+
+    final int getCount()
+    {
+        int $i0;
+        java.util.concurrent.locks.ReentrantReadWriteLock$Sync r0;
+
+        r0 := @this: java.util.concurrent.locks.ReentrantReadWriteLock$Sync;
+
+        $i0 = virtualinvoke r0.<java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int getState()>();
+
+        return $i0;
+    }
+
+    public static void <clinit>()
+    {
+        <java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int EXCLUSIVE_MASK> = 65535;
+
+        <java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int MAX_COUNT> = 65535;
+
+        <java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int SHARED_UNIT> = 65536;
+
+        <java.util.concurrent.locks.ReentrantReadWriteLock$Sync: int SHARED_SHIFT> = 16;
+
+        <java.util.concurrent.locks.ReentrantReadWriteLock$Sync: long serialVersionUID> = 6317671515068378041L;
+
+        return;
+    }
+}

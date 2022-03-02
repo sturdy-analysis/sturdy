@@ -1,0 +1,197 @@
+class sun.net.ftp.impl.FtpClient$FtpFileIterator extends java.lang.Object implements java.util.Iterator, java.io.Closeable
+{
+    private java.io.BufferedReader in;
+    private sun.net.ftp.FtpDirEntry nextFile;
+    private sun.net.ftp.FtpDirParser fparser;
+    private boolean eof;
+    final sun.net.ftp.impl.FtpClient this$0;
+
+    public void <init>(sun.net.ftp.impl.FtpClient, sun.net.ftp.FtpDirParser, java.io.BufferedReader)
+    {
+        sun.net.ftp.impl.FtpClient$FtpFileIterator r0;
+        sun.net.ftp.impl.FtpClient r1;
+        java.io.BufferedReader r2;
+        sun.net.ftp.FtpDirParser r3;
+
+        r0 := @this: sun.net.ftp.impl.FtpClient$FtpFileIterator;
+
+        r1 := @parameter0: sun.net.ftp.impl.FtpClient;
+
+        r3 := @parameter1: sun.net.ftp.FtpDirParser;
+
+        r2 := @parameter2: java.io.BufferedReader;
+
+        r0.<sun.net.ftp.impl.FtpClient$FtpFileIterator: sun.net.ftp.impl.FtpClient this$0> = r1;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.net.ftp.impl.FtpClient$FtpFileIterator: java.io.BufferedReader in> = null;
+
+        r0.<sun.net.ftp.impl.FtpClient$FtpFileIterator: sun.net.ftp.FtpDirEntry nextFile> = null;
+
+        r0.<sun.net.ftp.impl.FtpClient$FtpFileIterator: sun.net.ftp.FtpDirParser fparser> = null;
+
+        r0.<sun.net.ftp.impl.FtpClient$FtpFileIterator: boolean eof> = 0;
+
+        r0.<sun.net.ftp.impl.FtpClient$FtpFileIterator: java.io.BufferedReader in> = r2;
+
+        r0.<sun.net.ftp.impl.FtpClient$FtpFileIterator: sun.net.ftp.FtpDirParser fparser> = r3;
+
+        specialinvoke r0.<sun.net.ftp.impl.FtpClient$FtpFileIterator: void readNext()>();
+
+        return;
+    }
+
+    private void readNext()
+    {
+        java.io.IOException $r7;
+        sun.net.ftp.FtpDirParser $r4;
+        sun.net.ftp.FtpDirEntry $r5, $r6;
+        sun.net.ftp.impl.FtpClient$FtpFileIterator r0;
+        java.io.BufferedReader $r1, $r3;
+        java.lang.String $r2;
+        boolean $z0;
+
+        r0 := @this: sun.net.ftp.impl.FtpClient$FtpFileIterator;
+
+        r0.<sun.net.ftp.impl.FtpClient$FtpFileIterator: sun.net.ftp.FtpDirEntry nextFile> = null;
+
+        $z0 = r0.<sun.net.ftp.impl.FtpClient$FtpFileIterator: boolean eof>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = r0.<sun.net.ftp.impl.FtpClient$FtpFileIterator: java.io.BufferedReader in>;
+
+        $r2 = virtualinvoke $r1.<java.io.BufferedReader: java.lang.String readLine()>();
+
+        if $r2 == null goto label3;
+
+        $r4 = r0.<sun.net.ftp.impl.FtpClient$FtpFileIterator: sun.net.ftp.FtpDirParser fparser>;
+
+        $r5 = interfaceinvoke $r4.<sun.net.ftp.FtpDirParser: sun.net.ftp.FtpDirEntry parseLine(java.lang.String)>($r2);
+
+        r0.<sun.net.ftp.impl.FtpClient$FtpFileIterator: sun.net.ftp.FtpDirEntry nextFile> = $r5;
+
+        $r6 = r0.<sun.net.ftp.impl.FtpClient$FtpFileIterator: sun.net.ftp.FtpDirEntry nextFile>;
+
+        if $r6 == null goto label3;
+
+     label2:
+        return;
+
+     label3:
+        if $r2 != null goto label1;
+
+        $r3 = r0.<sun.net.ftp.impl.FtpClient$FtpFileIterator: java.io.BufferedReader in>;
+
+        virtualinvoke $r3.<java.io.BufferedReader: void close()>();
+
+     label4:
+        goto label6;
+
+     label5:
+        $r7 := @caughtexception;
+
+     label6:
+        r0.<sun.net.ftp.impl.FtpClient$FtpFileIterator: boolean eof> = 1;
+
+        return;
+
+        catch java.io.IOException from label1 to label2 with label5;
+        catch java.io.IOException from label3 to label4 with label5;
+    }
+
+    public boolean hasNext()
+    {
+        sun.net.ftp.FtpDirEntry $r1;
+        sun.net.ftp.impl.FtpClient$FtpFileIterator r0;
+        boolean $z0;
+
+        r0 := @this: sun.net.ftp.impl.FtpClient$FtpFileIterator;
+
+        $r1 = r0.<sun.net.ftp.impl.FtpClient$FtpFileIterator: sun.net.ftp.FtpDirEntry nextFile>;
+
+        if $r1 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public sun.net.ftp.FtpDirEntry next()
+    {
+        sun.net.ftp.FtpDirEntry r1;
+        sun.net.ftp.impl.FtpClient$FtpFileIterator r0;
+
+        r0 := @this: sun.net.ftp.impl.FtpClient$FtpFileIterator;
+
+        r1 = r0.<sun.net.ftp.impl.FtpClient$FtpFileIterator: sun.net.ftp.FtpDirEntry nextFile>;
+
+        specialinvoke r0.<sun.net.ftp.impl.FtpClient$FtpFileIterator: void readNext()>();
+
+        return r1;
+    }
+
+    public void remove()
+    {
+        java.lang.UnsupportedOperationException $r0;
+        sun.net.ftp.impl.FtpClient$FtpFileIterator r1;
+
+        r1 := @this: sun.net.ftp.impl.FtpClient$FtpFileIterator;
+
+        $r0 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r0.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("Not supported yet.");
+
+        throw $r0;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        sun.net.ftp.impl.FtpClient$FtpFileIterator r0;
+        java.io.BufferedReader $r1, $r2;
+        boolean $z0;
+
+        r0 := @this: sun.net.ftp.impl.FtpClient$FtpFileIterator;
+
+        $r1 = r0.<sun.net.ftp.impl.FtpClient$FtpFileIterator: java.io.BufferedReader in>;
+
+        if $r1 == null goto label1;
+
+        $z0 = r0.<sun.net.ftp.impl.FtpClient$FtpFileIterator: boolean eof>;
+
+        if $z0 != 0 goto label1;
+
+        $r2 = r0.<sun.net.ftp.impl.FtpClient$FtpFileIterator: java.io.BufferedReader in>;
+
+        virtualinvoke $r2.<java.io.BufferedReader: void close()>();
+
+     label1:
+        r0.<sun.net.ftp.impl.FtpClient$FtpFileIterator: boolean eof> = 1;
+
+        r0.<sun.net.ftp.impl.FtpClient$FtpFileIterator: sun.net.ftp.FtpDirEntry nextFile> = null;
+
+        return;
+    }
+
+    public volatile java.lang.Object next()
+    {
+        sun.net.ftp.FtpDirEntry $r1;
+        sun.net.ftp.impl.FtpClient$FtpFileIterator r0;
+
+        r0 := @this: sun.net.ftp.impl.FtpClient$FtpFileIterator;
+
+        $r1 = virtualinvoke r0.<sun.net.ftp.impl.FtpClient$FtpFileIterator: sun.net.ftp.FtpDirEntry next()>();
+
+        return $r1;
+    }
+}

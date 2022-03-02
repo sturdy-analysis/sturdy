@@ -1,0 +1,163 @@
+final class sun.security.ssl.Finished$T12VerifyDataGenerator extends java.lang.Object implements sun.security.ssl.Finished$VerifyDataGenerator
+{
+
+    private void <init>()
+    {
+        sun.security.ssl.Finished$T12VerifyDataGenerator r0;
+
+        r0 := @this: sun.security.ssl.Finished$T12VerifyDataGenerator;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public byte[] createVerifyData(sun.security.ssl.HandshakeContext, boolean) throws java.io.IOException
+    {
+        byte[] $r7, $r14;
+        javax.crypto.KeyGenerator $r10;
+        java.security.GeneralSecurityException $r22;
+        sun.security.ssl.SSLConfiguration $r5, $r6;
+        boolean $z0, $z1, $z2, z3, $z4;
+        java.security.ProviderException $r15;
+        sun.security.ssl.HandshakeHash r2;
+        java.lang.StringBuilder $r16, $r17, $r19;
+        sun.security.ssl.CipherSuite r1;
+        javax.crypto.SecretKey $r4, $r11;
+        sun.security.ssl.CipherSuite$HashAlg $r21;
+        sun.security.ssl.Finished$T12VerifyDataGenerator r24;
+        int $i0, $i1;
+        java.lang.String $r9, $r12, $r13, $r18, $r20, r25;
+        java.lang.RuntimeException $r23;
+        sun.security.internal.spec.TlsPrfParameterSpec $r8;
+        sun.security.ssl.SSLSessionImpl $r3;
+        sun.security.ssl.HandshakeContext r0;
+
+        r24 := @this: sun.security.ssl.Finished$T12VerifyDataGenerator;
+
+        r0 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        z3 := @parameter1: boolean;
+
+        r1 = r0.<sun.security.ssl.HandshakeContext: sun.security.ssl.CipherSuite negotiatedCipherSuite>;
+
+        r2 = r0.<sun.security.ssl.HandshakeContext: sun.security.ssl.HandshakeHash handshakeHash>;
+
+        $r3 = r0.<sun.security.ssl.HandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        $r4 = virtualinvoke $r3.<sun.security.ssl.SSLSessionImpl: javax.crypto.SecretKey getMasterSecret()>();
+
+        $r5 = r0.<sun.security.ssl.HandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $z0 = $r5.<sun.security.ssl.SSLConfiguration: boolean isClientMode>;
+
+        if $z0 == 0 goto label1;
+
+        if z3 == 0 goto label2;
+
+     label1:
+        $r6 = r0.<sun.security.ssl.HandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $z1 = $r6.<sun.security.ssl.SSLConfiguration: boolean isClientMode>;
+
+        if $z1 != 0 goto label3;
+
+        if z3 == 0 goto label3;
+
+     label2:
+        $z4 = 1;
+
+        goto label4;
+
+     label3:
+        $z4 = 0;
+
+     label4:
+        if $z4 == 0 goto label5;
+
+        r25 = "client finished";
+
+        goto label6;
+
+     label5:
+        r25 = "server finished";
+
+     label6:
+        $r7 = virtualinvoke r2.<sun.security.ssl.HandshakeHash: byte[] digest()>();
+
+        $r21 = r1.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$HashAlg hashAlg>;
+
+        $r8 = new sun.security.internal.spec.TlsPrfParameterSpec;
+
+        $r9 = $r21.<sun.security.ssl.CipherSuite$HashAlg: java.lang.String name>;
+
+        $i1 = $r21.<sun.security.ssl.CipherSuite$HashAlg: int hashLength>;
+
+        $i0 = $r21.<sun.security.ssl.CipherSuite$HashAlg: int blockSize>;
+
+        specialinvoke $r8.<sun.security.internal.spec.TlsPrfParameterSpec: void <init>(javax.crypto.SecretKey,java.lang.String,byte[],int,java.lang.String,int,int)>($r4, r25, $r7, 12, $r9, $i1, $i0);
+
+        $r10 = staticinvoke <sun.security.ssl.JsseJce: javax.crypto.KeyGenerator getKeyGenerator(java.lang.String)>("SunTls12Prf");
+
+        virtualinvoke $r10.<javax.crypto.KeyGenerator: void init(java.security.spec.AlgorithmParameterSpec)>($r8);
+
+        $r11 = virtualinvoke $r10.<javax.crypto.KeyGenerator: javax.crypto.SecretKey generateKey()>();
+
+        $r12 = "RAW";
+
+        $r13 = interfaceinvoke $r11.<javax.crypto.SecretKey: java.lang.String getFormat()>();
+
+        $z2 = virtualinvoke $r12.<java.lang.String: boolean equals(java.lang.Object)>($r13);
+
+        if $z2 != 0 goto label7;
+
+        $r15 = new java.security.ProviderException;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid PRF output, format must be RAW. Format received: ");
+
+        $r18 = interfaceinvoke $r11.<javax.crypto.SecretKey: java.lang.String getFormat()>();
+
+        $r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r15.<java.security.ProviderException: void <init>(java.lang.String)>($r20);
+
+        throw $r15;
+
+     label7:
+        $r14 = interfaceinvoke $r11.<javax.crypto.SecretKey: byte[] getEncoded()>();
+
+     label8:
+        return $r14;
+
+     label9:
+        $r22 := @caughtexception;
+
+        $r23 = new java.lang.RuntimeException;
+
+        specialinvoke $r23.<java.lang.RuntimeException: void <init>(java.lang.String,java.lang.Throwable)>("PRF failed", $r22);
+
+        throw $r23;
+
+        catch java.security.GeneralSecurityException from label6 to label8 with label9;
+    }
+
+    void <init>(sun.security.ssl.Finished$1)
+    {
+        sun.security.ssl.Finished$1 r1;
+        sun.security.ssl.Finished$T12VerifyDataGenerator r0;
+
+        r0 := @this: sun.security.ssl.Finished$T12VerifyDataGenerator;
+
+        r1 := @parameter0: sun.security.ssl.Finished$1;
+
+        specialinvoke r0.<sun.security.ssl.Finished$T12VerifyDataGenerator: void <init>()>();
+
+        return;
+    }
+}

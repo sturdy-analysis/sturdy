@@ -1,0 +1,1165 @@
+class com.sun.java.util.jar.pack.NativeUnpack extends java.lang.Object
+{
+    private long unpackerPtr;
+    private java.io.BufferedInputStream in;
+    private int _verbose;
+    private long _byteCount;
+    private int _segCount;
+    private int _fileCount;
+    private long _estByteLimit;
+    private int _estSegLimit;
+    private int _estFileLimit;
+    private int _prevPercent;
+    private final java.util.zip.CRC32 _crc32;
+    private byte[] _buf;
+    private com.sun.java.util.jar.pack.UnpackerImpl _p200;
+    private com.sun.java.util.jar.pack.PropMap _props;
+    static final boolean $assertionsDisabled;
+
+    private static synchronized native void initIDs();
+
+    private synchronized native long start(java.nio.ByteBuffer, long);
+
+    private synchronized native boolean getNextFile(java.lang.Object[]);
+
+    private synchronized native java.nio.ByteBuffer getUnusedInput();
+
+    private synchronized native long finish();
+
+    protected synchronized native boolean setOption(java.lang.String, java.lang.String);
+
+    protected synchronized native java.lang.String getOption(java.lang.String);
+
+    void <init>(com.sun.java.util.jar.pack.UnpackerImpl)
+    {
+        byte[] $r2;
+        int $i1;
+        com.sun.java.util.jar.pack.NativeUnpack r0;
+        java.util.zip.CRC32 $r5;
+        com.sun.java.util.jar.pack.UnpackerImpl r3;
+        com.sun.java.util.jar.pack.PropMap $r4;
+
+        r0 := @this: com.sun.java.util.jar.pack.NativeUnpack;
+
+        r3 := @parameter0: com.sun.java.util.jar.pack.UnpackerImpl;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $i1 = (int) -1;
+
+        r0.<com.sun.java.util.jar.pack.NativeUnpack: int _prevPercent> = $i1;
+
+        $r5 = new java.util.zip.CRC32;
+
+        specialinvoke $r5.<java.util.zip.CRC32: void <init>()>();
+
+        r0.<com.sun.java.util.jar.pack.NativeUnpack: java.util.zip.CRC32 _crc32> = $r5;
+
+        $r2 = newarray (byte)[16384];
+
+        r0.<com.sun.java.util.jar.pack.NativeUnpack: byte[] _buf> = $r2;
+
+        r0.<com.sun.java.util.jar.pack.NativeUnpack: com.sun.java.util.jar.pack.UnpackerImpl _p200> = r3;
+
+        $r4 = r3.<com.sun.java.util.jar.pack.UnpackerImpl: com.sun.java.util.jar.pack.PropMap props>;
+
+        r0.<com.sun.java.util.jar.pack.NativeUnpack: com.sun.java.util.jar.pack.PropMap _props> = $r4;
+
+        r3.<com.sun.java.util.jar.pack.UnpackerImpl: java.lang.Object _nunp> = r0;
+
+        return;
+    }
+
+    private static java.lang.Object currentInstance()
+    {
+        com.sun.java.util.jar.pack.TLGlobals $r0;
+        com.sun.java.util.jar.pack.UnpackerImpl r1;
+        java.lang.Object $r2;
+
+        $r0 = staticinvoke <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.TLGlobals getTLGlobals()>();
+
+        r1 = (com.sun.java.util.jar.pack.UnpackerImpl) $r0;
+
+        if r1 != null goto label1;
+
+        $r2 = null;
+
+        goto label2;
+
+     label1:
+        $r2 = r1.<com.sun.java.util.jar.pack.UnpackerImpl: java.lang.Object _nunp>;
+
+     label2:
+        return $r2;
+    }
+
+    private synchronized long getUnpackerPtr()
+    {
+        com.sun.java.util.jar.pack.NativeUnpack r0;
+        long $l0;
+
+        r0 := @this: com.sun.java.util.jar.pack.NativeUnpack;
+
+        $l0 = r0.<com.sun.java.util.jar.pack.NativeUnpack: long unpackerPtr>;
+
+        return $l0;
+    }
+
+    private long readInputFn(java.nio.ByteBuffer, long) throws java.io.IOException
+    {
+        byte[] $r14, $r15, $r17;
+        java.io.BufferedInputStream $r1, $r16;
+        java.nio.ByteBuffer r2;
+        com.sun.java.util.jar.pack.Utils$Pack200Logger $r4;
+        byte $b6, $b16, $b19, $b21, $b24;
+        boolean $z0, $z1;
+        java.lang.StringBuilder $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r22;
+        com.sun.java.util.jar.pack.NativeUnpack r0;
+        long l3, l4, $l7, $l8, $l9, $l10, $l11, $l12, $l13, $l14, $l15, $l18, $l20, l22;
+        java.lang.AssertionError $r20, $r21;
+        int $i0, $i1, $i2, $i5, $i17, i23, i25, $i26, $i27, $i28, $i29, $i30;
+        java.lang.String $r13;
+
+        r0 := @this: com.sun.java.util.jar.pack.NativeUnpack;
+
+        r2 := @parameter0: java.nio.ByteBuffer;
+
+        l4 := @parameter1: long;
+
+        $r1 = r0.<com.sun.java.util.jar.pack.NativeUnpack: java.io.BufferedInputStream in>;
+
+        if $r1 != null goto label01;
+
+        return 0L;
+
+     label01:
+        $i0 = virtualinvoke r2.<java.nio.ByteBuffer: int capacity()>();
+
+        $i1 = virtualinvoke r2.<java.nio.ByteBuffer: int position()>();
+
+        $i2 = $i0 - $i1;
+
+        l3 = (long) $i2;
+
+        $z0 = <com.sun.java.util.jar.pack.NativeUnpack: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label02;
+
+        $b21 = l4 cmp l3;
+
+        $i26 = (int) $b21;
+
+        if $i26 <= 0 goto label02;
+
+        $r20 = new java.lang.AssertionError;
+
+        specialinvoke $r20.<java.lang.AssertionError: void <init>()>();
+
+        throw $r20;
+
+     label02:
+        l22 = 0L;
+
+        i23 = 0;
+
+     label03:
+        $b24 = l22 cmp l4;
+
+        $i27 = (int) $b24;
+
+        if $i27 >= 0 goto label07;
+
+        i23 = i23 + 1;
+
+        $r14 = r0.<com.sun.java.util.jar.pack.NativeUnpack: byte[] _buf>;
+
+        i25 = lengthof $r14;
+
+        $l15 = (long) i25;
+
+        $l14 = l3 - l22;
+
+        $b16 = $l15 cmp $l14;
+
+        $i28 = (int) $b16;
+
+        if $i28 <= 0 goto label04;
+
+        $l20 = l3 - l22;
+
+        i25 = (int) $l20;
+
+     label04:
+        $r16 = r0.<com.sun.java.util.jar.pack.NativeUnpack: java.io.BufferedInputStream in>;
+
+        $r15 = r0.<com.sun.java.util.jar.pack.NativeUnpack: byte[] _buf>;
+
+        $i17 = virtualinvoke $r16.<java.io.BufferedInputStream: int read(byte[],int,int)>($r15, 0, i25);
+
+        if $i17 > 0 goto label05;
+
+        goto label07;
+
+     label05:
+        $l18 = (long) $i17;
+
+        l22 = l22 + $l18;
+
+        $z1 = <com.sun.java.util.jar.pack.NativeUnpack: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label06;
+
+        $b19 = l22 cmp l3;
+
+        $i29 = (int) $b19;
+
+        if $i29 <= 0 goto label06;
+
+        $r21 = new java.lang.AssertionError;
+
+        specialinvoke $r21.<java.lang.AssertionError: void <init>()>();
+
+        throw $r21;
+
+     label06:
+        $r17 = r0.<com.sun.java.util.jar.pack.NativeUnpack: byte[] _buf>;
+
+        virtualinvoke r2.<java.nio.ByteBuffer: java.nio.ByteBuffer put(byte[],int,int)>($r17, 0, $i17);
+
+        goto label03;
+
+     label07:
+        $i5 = r0.<com.sun.java.util.jar.pack.NativeUnpack: int _verbose>;
+
+        if $i5 <= 1 goto label08;
+
+        $r4 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("readInputFn(");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>(l4);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>(l3);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") => ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>(l22);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" steps=");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i23);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void fine(java.lang.String)>($r13);
+
+     label08:
+        $b6 = l3 cmp 100L;
+
+        $i30 = (int) $b6;
+
+        if $i30 <= 0 goto label09;
+
+        $l12 = r0.<com.sun.java.util.jar.pack.NativeUnpack: long _byteCount>;
+
+        $l13 = $l12 + l3;
+
+        r0.<com.sun.java.util.jar.pack.NativeUnpack: long _estByteLimit> = $l13;
+
+        goto label10;
+
+     label09:
+        $l7 = r0.<com.sun.java.util.jar.pack.NativeUnpack: long _byteCount>;
+
+        $l8 = $l7 + l22;
+
+        $l9 = $l8 * 20L;
+
+        r0.<com.sun.java.util.jar.pack.NativeUnpack: long _estByteLimit> = $l9;
+
+     label10:
+        $l10 = r0.<com.sun.java.util.jar.pack.NativeUnpack: long _byteCount>;
+
+        $l11 = $l10 + l22;
+
+        r0.<com.sun.java.util.jar.pack.NativeUnpack: long _byteCount> = $l11;
+
+        specialinvoke r0.<com.sun.java.util.jar.pack.NativeUnpack: void updateProgress()>();
+
+        return l22;
+    }
+
+    private void updateProgress()
+    {
+        com.sun.java.util.jar.pack.Utils$Pack200Logger $r3;
+        byte $b2, $b6;
+        com.sun.java.util.jar.pack.PropMap $r1;
+        java.lang.StringBuilder $r4, $r5, $r7;
+        com.sun.java.util.jar.pack.NativeUnpack r0;
+        long $l1, $l5, $l7, $l8, $l14;
+        int $i0, $i3, $i4, $i9, $i10, $i11, $i12, $i13, $i15, i16, $i17, $i18;
+        java.lang.String $r6;
+        double $d0, $d1, $d2, d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11, $d12;
+
+        r0 := @this: com.sun.java.util.jar.pack.NativeUnpack;
+
+        $i0 = r0.<com.sun.java.util.jar.pack.NativeUnpack: int _segCount>;
+
+        d3 = (double) $i0;
+
+        $l1 = r0.<com.sun.java.util.jar.pack.NativeUnpack: long _estByteLimit>;
+
+        $b2 = $l1 cmp 0L;
+
+        $i17 = (int) $b2;
+
+        if $i17 <= 0 goto label1;
+
+        $l5 = r0.<com.sun.java.util.jar.pack.NativeUnpack: long _byteCount>;
+
+        $b6 = $l5 cmp 0L;
+
+        $i18 = (int) $b6;
+
+        if $i18 <= 0 goto label1;
+
+        $l7 = r0.<com.sun.java.util.jar.pack.NativeUnpack: long _byteCount>;
+
+        $d1 = (double) $l7;
+
+        $l8 = r0.<com.sun.java.util.jar.pack.NativeUnpack: long _estByteLimit>;
+
+        $d0 = (double) $l8;
+
+        $d2 = $d1 / $d0;
+
+        d3 = d3 + $d2;
+
+     label1:
+        $i9 = r0.<com.sun.java.util.jar.pack.NativeUnpack: int _fileCount>;
+
+        $d4 = (double) $i9;
+
+        $d5 = 0.33 * d3;
+
+        $i10 = r0.<com.sun.java.util.jar.pack.NativeUnpack: int _estSegLimit>;
+
+        $i11 = staticinvoke <java.lang.Math: int max(int,int)>($i10, 1);
+
+        $d6 = (double) $i11;
+
+        $d7 = $d5 / $d6;
+
+        $d8 = 0.67 * $d4;
+
+        $i12 = r0.<com.sun.java.util.jar.pack.NativeUnpack: int _estFileLimit>;
+
+        $i13 = staticinvoke <java.lang.Math: int max(int,int)>($i12, 1);
+
+        $d9 = (double) $i13;
+
+        $d10 = $d8 / $d9;
+
+        $d11 = $d7 + $d10;
+
+        $d12 = 100.0 * $d11;
+
+        $l14 = staticinvoke <java.lang.Math: long round(double)>($d12);
+
+        $i15 = (int) $l14;
+
+        i16 = $i15;
+
+        if $i15 <= 100 goto label2;
+
+        i16 = 100;
+
+     label2:
+        $i3 = r0.<com.sun.java.util.jar.pack.NativeUnpack: int _prevPercent>;
+
+        if i16 <= $i3 goto label3;
+
+        r0.<com.sun.java.util.jar.pack.NativeUnpack: int _prevPercent> = i16;
+
+        $r1 = r0.<com.sun.java.util.jar.pack.NativeUnpack: com.sun.java.util.jar.pack.PropMap _props>;
+
+        virtualinvoke $r1.<com.sun.java.util.jar.pack.PropMap: int setInteger(java.lang.String,int)>("unpack.progress", i16);
+
+        $i4 = r0.<com.sun.java.util.jar.pack.NativeUnpack: int _verbose>;
+
+        if $i4 <= 0 goto label3;
+
+        $r3 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("progress = ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i16);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r3.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r6);
+
+     label3:
+        return;
+    }
+
+    private void copyInOption(java.lang.String)
+    {
+        com.sun.java.util.jar.pack.NativeUnpack r0;
+        com.sun.java.util.jar.pack.Utils$Pack200Logger $r5, $r12;
+        int $i0;
+        java.lang.String r1, $r3, $r10, $r17;
+        boolean $z0;
+        com.sun.java.util.jar.pack.PropMap $r2;
+        java.lang.StringBuilder $r4, $r6, $r7, $r8, $r9, $r11, $r13, $r14, $r15, $r16;
+
+        r0 := @this: com.sun.java.util.jar.pack.NativeUnpack;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.java.util.jar.pack.NativeUnpack: com.sun.java.util.jar.pack.PropMap _props>;
+
+        $r3 = virtualinvoke $r2.<com.sun.java.util.jar.pack.PropMap: java.lang.String getProperty(java.lang.String)>(r1);
+
+        $i0 = r0.<com.sun.java.util.jar.pack.NativeUnpack: int _verbose>;
+
+        if $i0 <= 0 goto label1;
+
+        $r12 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("set ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("=");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r12.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r17);
+
+     label1:
+        if $r3 == null goto label2;
+
+        $z0 = virtualinvoke r0.<com.sun.java.util.jar.pack.NativeUnpack: boolean setOption(java.lang.String,java.lang.String)>(r1, $r3);
+
+        if $z0 != 0 goto label2;
+
+        $r5 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid option ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("=");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void warning(java.lang.String)>($r10);
+
+     label2:
+        return;
+    }
+
+    void run(java.io.InputStream, java.util.jar.JarOutputStream, java.nio.ByteBuffer) throws java.io.IOException
+    {
+        byte[] $r14;
+        java.io.BufferedInputStream $r0;
+        java.lang.StringBuilder $r9, $r11, $r12, $r15, $r17, $r18;
+        java.lang.Object[] $r28;
+        com.sun.java.util.jar.pack.NativeUnpack r2;
+        long $l2, $l6, $l8, $l9, $l10, $l11, l12, l14, $l19, $l22, $l24, $l33;
+        java.lang.String $r5, $r6, $r13, $r19, r29;
+        java.nio.ByteBuffer $r8, $r24, $r25, r26;
+        com.sun.java.util.jar.pack.Utils$Pack200Logger $r10, $r16;
+        int[] $r27;
+        boolean $z0, $z1, $z2, $z3;
+        com.sun.java.util.jar.pack.PropMap $r3, $r4, $r7;
+        int $i0, i1, $i3, $i4, $i5, $i7, $i13, $i15, $i16, $i17, $i18, $i20, $i21, $i23, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32;
+        java.util.jar.JarOutputStream r23;
+        double $d0, $d1, $d2, $d3, $d4;
+        java.lang.Object $r20, $r21, $r22;
+        java.io.InputStream r1;
+
+        r2 := @this: com.sun.java.util.jar.pack.NativeUnpack;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        r23 := @parameter1: java.util.jar.JarOutputStream;
+
+        r26 := @parameter2: java.nio.ByteBuffer;
+
+        $r0 = new java.io.BufferedInputStream;
+
+        specialinvoke $r0.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>(r1);
+
+        r2.<com.sun.java.util.jar.pack.NativeUnpack: java.io.BufferedInputStream in> = $r0;
+
+        $r3 = r2.<com.sun.java.util.jar.pack.NativeUnpack: com.sun.java.util.jar.pack.PropMap _props>;
+
+        $i0 = virtualinvoke $r3.<com.sun.java.util.jar.pack.PropMap: int getInteger(java.lang.String)>("com.sun.java.util.jar.pack.verbose");
+
+        r2.<com.sun.java.util.jar.pack.NativeUnpack: int _verbose> = $i0;
+
+        $r5 = "keep";
+
+        $r4 = r2.<com.sun.java.util.jar.pack.NativeUnpack: com.sun.java.util.jar.pack.PropMap _props>;
+
+        $r6 = virtualinvoke $r4.<com.sun.java.util.jar.pack.PropMap: java.lang.String getProperty(java.lang.String,java.lang.String)>("com.sun.java.util.jar.pack.unpack.modification.time", "0");
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 == 0 goto label01;
+
+        $i18 = 0;
+
+        goto label02;
+
+     label01:
+        $r7 = r2.<com.sun.java.util.jar.pack.NativeUnpack: com.sun.java.util.jar.pack.PropMap _props>;
+
+        $i18 = virtualinvoke $r7.<com.sun.java.util.jar.pack.PropMap: int getTime(java.lang.String)>("com.sun.java.util.jar.pack.unpack.modification.time");
+
+     label02:
+        i1 = $i18;
+
+        specialinvoke r2.<com.sun.java.util.jar.pack.NativeUnpack: void copyInOption(java.lang.String)>("com.sun.java.util.jar.pack.verbose");
+
+        specialinvoke r2.<com.sun.java.util.jar.pack.NativeUnpack: void copyInOption(java.lang.String)>("unpack.deflate.hint");
+
+        if $i18 != 0 goto label03;
+
+        specialinvoke r2.<com.sun.java.util.jar.pack.NativeUnpack: void copyInOption(java.lang.String)>("com.sun.java.util.jar.pack.unpack.modification.time");
+
+     label03:
+        specialinvoke r2.<com.sun.java.util.jar.pack.NativeUnpack: void updateProgress()>();
+
+     label04:
+        $l19 = specialinvoke r2.<com.sun.java.util.jar.pack.NativeUnpack: long start(java.nio.ByteBuffer,long)>(r26, 0L);
+
+        r2.<com.sun.java.util.jar.pack.NativeUnpack: long _estByteLimit> = 0L;
+
+        r2.<com.sun.java.util.jar.pack.NativeUnpack: long _byteCount> = 0L;
+
+        $i20 = r2.<com.sun.java.util.jar.pack.NativeUnpack: int _segCount>;
+
+        $i21 = $i20 + 1;
+
+        r2.<com.sun.java.util.jar.pack.NativeUnpack: int _segCount> = $i21;
+
+        $l22 = $l19 >>> 32;
+
+        $i23 = (int) $l22;
+
+        $l24 = $l19 >>> 0;
+
+        $i25 = (int) $l24;
+
+        $i26 = r2.<com.sun.java.util.jar.pack.NativeUnpack: int _segCount>;
+
+        $i27 = $i26 + $i23;
+
+        r2.<com.sun.java.util.jar.pack.NativeUnpack: int _estSegLimit> = $i27;
+
+        $i28 = r2.<com.sun.java.util.jar.pack.NativeUnpack: int _fileCount>;
+
+        $i29 = $i28 + $i25;
+
+        $d0 = (double) $i29;
+
+        $i30 = r2.<com.sun.java.util.jar.pack.NativeUnpack: int _estSegLimit>;
+
+        $d1 = (double) $i30;
+
+        $d2 = $d0 * $d1;
+
+        $i31 = r2.<com.sun.java.util.jar.pack.NativeUnpack: int _segCount>;
+
+        $d3 = (double) $i31;
+
+        $d4 = $d2 / $d3;
+
+        $i32 = (int) $d4;
+
+        r2.<com.sun.java.util.jar.pack.NativeUnpack: int _estFileLimit> = $i32;
+
+        $r27 = newarray (int)[4];
+
+        $r27[0] = 0;
+
+        $r27[1] = 0;
+
+        $r27[2] = 0;
+
+        $r27[3] = 0;
+
+        $r28 = newarray (java.lang.Object)[4];
+
+        $r28[0] = $r27;
+
+        $r28[1] = null;
+
+        $r28[2] = null;
+
+        $r28[3] = null;
+
+     label05:
+        $z2 = specialinvoke r2.<com.sun.java.util.jar.pack.NativeUnpack: boolean getNextFile(java.lang.Object[])>($r28);
+
+        if $z2 == 0 goto label10;
+
+        $r20 = $r28[1];
+
+        r29 = (java.lang.String) $r20;
+
+        $i5 = $r27[0];
+
+        $l6 = (long) $i5;
+
+        $l11 = $l6 << 32;
+
+        $i7 = $r27[1];
+
+        $l8 = (long) $i7;
+
+        $l9 = $l8 << 32;
+
+        $l10 = $l9 >>> 32;
+
+        l12 = $l11 + $l10;
+
+        if i1 == 0 goto label06;
+
+        $l33 = (long) i1;
+
+        goto label07;
+
+     label06:
+        $i13 = $r27[2];
+
+        $l33 = (long) $i13;
+
+     label07:
+        l14 = $l33;
+
+        $i15 = $r27[3];
+
+        if $i15 == 0 goto label08;
+
+        $z3 = 1;
+
+        goto label09;
+
+     label08:
+        $z3 = 0;
+
+     label09:
+        $r21 = $r28[2];
+
+        $r24 = (java.nio.ByteBuffer) $r21;
+
+        $r22 = $r28[3];
+
+        $r25 = (java.nio.ByteBuffer) $r22;
+
+        specialinvoke r2.<com.sun.java.util.jar.pack.NativeUnpack: void writeEntry(java.util.jar.JarOutputStream,java.lang.String,long,long,boolean,java.nio.ByteBuffer,java.nio.ByteBuffer)>(r23, r29, l14, l12, $z3, $r24, $r25);
+
+        $i16 = r2.<com.sun.java.util.jar.pack.NativeUnpack: int _fileCount>;
+
+        $i17 = $i16 + 1;
+
+        r2.<com.sun.java.util.jar.pack.NativeUnpack: int _fileCount> = $i17;
+
+        specialinvoke r2.<com.sun.java.util.jar.pack.NativeUnpack: void updateProgress()>();
+
+        goto label05;
+
+     label10:
+        $r8 = specialinvoke r2.<com.sun.java.util.jar.pack.NativeUnpack: java.nio.ByteBuffer getUnusedInput()>();
+
+        r26 = $r8;
+
+        $l2 = specialinvoke r2.<com.sun.java.util.jar.pack.NativeUnpack: long finish()>();
+
+        $i3 = r2.<com.sun.java.util.jar.pack.NativeUnpack: int _verbose>;
+
+        if $i3 <= 0 goto label11;
+
+        $r16 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("bytes consumed = ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l2);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r16.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r19);
+
+     label11:
+        if $r8 != null goto label12;
+
+        $r14 = staticinvoke <com.sun.java.util.jar.pack.Utils: byte[] readMagic(java.io.BufferedInputStream)>($r0);
+
+        $z1 = staticinvoke <com.sun.java.util.jar.pack.Utils: boolean isPackMagic(byte[])>($r14);
+
+        if $z1 != 0 goto label12;
+
+        goto label14;
+
+     label12:
+        $i4 = r2.<com.sun.java.util.jar.pack.NativeUnpack: int _verbose>;
+
+        if $i4 <= 0 goto label13;
+
+        if $r8 == null goto label13;
+
+        $r10 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unused input = ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r10.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r13);
+
+     label13:
+        goto label04;
+
+     label14:
+        return;
+    }
+
+    void run(java.io.InputStream, java.util.jar.JarOutputStream) throws java.io.IOException
+    {
+        com.sun.java.util.jar.pack.NativeUnpack r0;
+        java.util.jar.JarOutputStream r2;
+        java.io.InputStream r1;
+
+        r0 := @this: com.sun.java.util.jar.pack.NativeUnpack;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        r2 := @parameter1: java.util.jar.JarOutputStream;
+
+        virtualinvoke r0.<com.sun.java.util.jar.pack.NativeUnpack: void run(java.io.InputStream,java.util.jar.JarOutputStream,java.nio.ByteBuffer)>(r1, r2, null);
+
+        return;
+    }
+
+    void run(java.io.File, java.util.jar.JarOutputStream) throws java.io.IOException
+    {
+        java.lang.Throwable $r4, $r5, $r6, r8;
+        com.sun.java.util.jar.pack.NativeUnpack r2;
+        java.io.FileInputStream $r0;
+        java.io.File r1;
+        java.util.jar.JarOutputStream r3;
+
+        r2 := @this: com.sun.java.util.jar.pack.NativeUnpack;
+
+        r1 := @parameter0: java.io.File;
+
+        r3 := @parameter1: java.util.jar.JarOutputStream;
+
+        $r0 = new java.io.FileInputStream;
+
+        specialinvoke $r0.<java.io.FileInputStream: void <init>(java.io.File)>(r1);
+
+        r8 = null;
+
+     label01:
+        virtualinvoke r2.<com.sun.java.util.jar.pack.NativeUnpack: void run(java.io.InputStream,java.util.jar.JarOutputStream,java.nio.ByteBuffer)>($r0, r3, null);
+
+     label02:
+        if $r0 == null goto label12;
+
+        goto label03;
+
+     label03:
+        virtualinvoke $r0.<java.io.FileInputStream: void close()>();
+
+        goto label12;
+
+     label04:
+        $r6 := @caughtexception;
+
+        r8 = $r6;
+
+        throw $r6;
+
+     label05:
+        $r5 := @caughtexception;
+
+     label06:
+        if $r0 == null goto label11;
+
+        if r8 == null goto label10;
+
+     label07:
+        virtualinvoke $r0.<java.io.FileInputStream: void close()>();
+
+     label08:
+        goto label11;
+
+     label09:
+        $r4 := @caughtexception;
+
+        virtualinvoke r8.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r4);
+
+        goto label11;
+
+     label10:
+        virtualinvoke $r0.<java.io.FileInputStream: void close()>();
+
+     label11:
+        throw $r5;
+
+     label12:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label04;
+        catch java.lang.Throwable from label07 to label08 with label09;
+        catch java.lang.Throwable from label04 to label06 with label05;
+    }
+
+    private void writeEntry(java.util.jar.JarOutputStream, java.lang.String, long, long, boolean, java.nio.ByteBuffer, java.nio.ByteBuffer) throws java.io.IOException
+    {
+        byte[] $r13, $r14, $r15, $r18, $r19, $r20, $r22, $r23, $r38;
+        java.io.BufferedInputStream $r16;
+        java.nio.ByteBuffer r2, r3;
+        com.sun.java.util.jar.pack.Utils$Pack200Logger $r8, $r25;
+        byte $b3;
+        java.util.zip.ZipEntry $r4;
+        boolean z0, $z1;
+        java.lang.StringBuilder $r7, $r9, $r11, $r24, $r26, $r27, $r28, $r29, $r30, $r33, $r34, $r35;
+        com.sun.java.util.jar.pack.NativeUnpack r0;
+        long l0, $l2, l5, $l6, $l7, $l9, $l10, $l11;
+        java.lang.AssertionError $r21;
+        int i1, $i4, $i8, $i12, $i13, $i14, $i15, $i16, $i17, $i18, i19, i20;
+        java.lang.String r5, $r10, $r12, $r31, $r36, $r37;
+        java.util.jar.JarOutputStream r6;
+        java.io.IOException $r17, $r32;
+        java.util.zip.CRC32 r1;
+
+        r0 := @this: com.sun.java.util.jar.pack.NativeUnpack;
+
+        r6 := @parameter0: java.util.jar.JarOutputStream;
+
+        r5 := @parameter1: java.lang.String;
+
+        l5 := @parameter2: long;
+
+        l0 := @parameter3: long;
+
+        z0 := @parameter4: boolean;
+
+        r2 := @parameter5: java.nio.ByteBuffer;
+
+        r3 := @parameter6: java.nio.ByteBuffer;
+
+        i1 = (int) l0;
+
+        $l2 = (long) i1;
+
+        $b3 = $l2 cmp l0;
+
+        if $b3 == 0 goto label01;
+
+        $r32 = new java.io.IOException;
+
+        $r33 = new java.lang.StringBuilder;
+
+        specialinvoke $r33.<java.lang.StringBuilder: void <init>()>();
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("file too large: ");
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>(l0);
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r32.<java.io.IOException: void <init>(java.lang.String)>($r36);
+
+        throw $r32;
+
+     label01:
+        r1 = r0.<com.sun.java.util.jar.pack.NativeUnpack: java.util.zip.CRC32 _crc32>;
+
+        $i4 = r0.<com.sun.java.util.jar.pack.NativeUnpack: int _verbose>;
+
+        if $i4 <= 1 goto label04;
+
+        $r25 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Writing entry: ");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" size=");
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        if z0 == 0 goto label02;
+
+        $r37 = " deflated";
+
+        goto label03;
+
+     label02:
+        $r37 = "";
+
+     label03:
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r37);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r25.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void fine(java.lang.String)>($r31);
+
+     label04:
+        $r38 = r0.<com.sun.java.util.jar.pack.NativeUnpack: byte[] _buf>;
+
+        $i18 = lengthof $r38;
+
+        if $i18 >= i1 goto label07;
+
+        i19 = i1;
+
+     label05:
+        $r22 = r0.<com.sun.java.util.jar.pack.NativeUnpack: byte[] _buf>;
+
+        $i17 = lengthof $r22;
+
+        if i19 >= $i17 goto label06;
+
+        i19 = i19 << 1;
+
+        if i19 > 0 goto label05;
+
+        i19 = i1;
+
+        goto label06;
+
+     label06:
+        $r23 = newarray (byte)[i19];
+
+        r0.<com.sun.java.util.jar.pack.NativeUnpack: byte[] _buf> = $r23;
+
+     label07:
+        $z1 = <com.sun.java.util.jar.pack.NativeUnpack: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label08;
+
+        $r20 = r0.<com.sun.java.util.jar.pack.NativeUnpack: byte[] _buf>;
+
+        $i16 = lengthof $r20;
+
+        if $i16 >= i1 goto label08;
+
+        $r21 = new java.lang.AssertionError;
+
+        specialinvoke $r21.<java.lang.AssertionError: void <init>()>();
+
+        throw $r21;
+
+     label08:
+        i20 = 0;
+
+        if r2 == null goto label09;
+
+        $i15 = virtualinvoke r2.<java.nio.ByteBuffer: int capacity()>();
+
+        $r19 = r0.<com.sun.java.util.jar.pack.NativeUnpack: byte[] _buf>;
+
+        virtualinvoke r2.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[],int,int)>($r19, 0, $i15);
+
+        i20 = 0 + $i15;
+
+     label09:
+        if r3 == null goto label10;
+
+        $i14 = virtualinvoke r3.<java.nio.ByteBuffer: int capacity()>();
+
+        $r18 = r0.<com.sun.java.util.jar.pack.NativeUnpack: byte[] _buf>;
+
+        virtualinvoke r3.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[],int,int)>($r18, i20, $i14);
+
+        i20 = i20 + $i14;
+
+     label10:
+        if i20 >= i1 goto label12;
+
+        $r16 = r0.<com.sun.java.util.jar.pack.NativeUnpack: java.io.BufferedInputStream in>;
+
+        $r15 = r0.<com.sun.java.util.jar.pack.NativeUnpack: byte[] _buf>;
+
+        $i12 = i1 - i20;
+
+        $i13 = virtualinvoke $r16.<java.io.BufferedInputStream: int read(byte[],int,int)>($r15, i20, $i12);
+
+        if $i13 > 0 goto label11;
+
+        $r17 = new java.io.IOException;
+
+        specialinvoke $r17.<java.io.IOException: void <init>(java.lang.String)>("EOF at end of archive");
+
+        throw $r17;
+
+     label11:
+        i20 = i20 + $i13;
+
+        goto label10;
+
+     label12:
+        $r4 = new java.util.zip.ZipEntry;
+
+        specialinvoke $r4.<java.util.zip.ZipEntry: void <init>(java.lang.String)>(r5);
+
+        $l6 = l5 * 1000L;
+
+        virtualinvoke $r4.<java.util.zip.ZipEntry: void setTime(long)>($l6);
+
+        if i1 != 0 goto label13;
+
+        virtualinvoke $r4.<java.util.zip.ZipEntry: void setMethod(int)>(0);
+
+        virtualinvoke $r4.<java.util.zip.ZipEntry: void setSize(long)>(0L);
+
+        virtualinvoke $r4.<java.util.zip.ZipEntry: void setCrc(long)>(0L);
+
+        virtualinvoke $r4.<java.util.zip.ZipEntry: void setCompressedSize(long)>(0L);
+
+        goto label15;
+
+     label13:
+        if z0 != 0 goto label14;
+
+        virtualinvoke $r4.<java.util.zip.ZipEntry: void setMethod(int)>(0);
+
+        $l9 = (long) i1;
+
+        virtualinvoke $r4.<java.util.zip.ZipEntry: void setSize(long)>($l9);
+
+        $l10 = (long) i1;
+
+        virtualinvoke $r4.<java.util.zip.ZipEntry: void setCompressedSize(long)>($l10);
+
+        virtualinvoke r1.<java.util.zip.CRC32: void reset()>();
+
+        $r14 = r0.<com.sun.java.util.jar.pack.NativeUnpack: byte[] _buf>;
+
+        virtualinvoke r1.<java.util.zip.CRC32: void update(byte[],int,int)>($r14, 0, i1);
+
+        $l11 = virtualinvoke r1.<java.util.zip.CRC32: long getValue()>();
+
+        virtualinvoke $r4.<java.util.zip.ZipEntry: void setCrc(long)>($l11);
+
+        goto label15;
+
+     label14:
+        virtualinvoke $r4.<java.util.zip.ZipEntry: void setMethod(int)>(8);
+
+        $l7 = (long) i1;
+
+        virtualinvoke $r4.<java.util.zip.ZipEntry: void setSize(long)>($l7);
+
+     label15:
+        virtualinvoke r6.<java.util.jar.JarOutputStream: void putNextEntry(java.util.zip.ZipEntry)>($r4);
+
+        if i1 <= 0 goto label16;
+
+        $r13 = r0.<com.sun.java.util.jar.pack.NativeUnpack: byte[] _buf>;
+
+        virtualinvoke r6.<java.util.jar.JarOutputStream: void write(byte[],int,int)>($r13, 0, i1);
+
+     label16:
+        virtualinvoke r6.<java.util.jar.JarOutputStream: void closeEntry()>();
+
+        $i8 = r0.<com.sun.java.util.jar.pack.NativeUnpack: int _verbose>;
+
+        if $i8 <= 0 goto label17;
+
+        $r8 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Writing ");
+
+        $r10 = staticinvoke <com.sun.java.util.jar.pack.Utils: java.lang.String zeString(java.util.zip.ZipEntry)>($r4);
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r8.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void info(java.lang.String)>($r12);
+
+     label17:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        com.sun.java.util.jar.pack.NativeUnpack$1 $r1;
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        $r0 = class "Lcom/sun/java/util/jar/pack/NativeUnpack;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <com.sun.java.util.jar.pack.NativeUnpack: boolean $assertionsDisabled> = $z1;
+
+        $r1 = new com.sun.java.util.jar.pack.NativeUnpack$1;
+
+        specialinvoke $r1.<com.sun.java.util.jar.pack.NativeUnpack$1: void <init>()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        staticinvoke <com.sun.java.util.jar.pack.NativeUnpack: void initIDs()>();
+
+        return;
+    }
+}

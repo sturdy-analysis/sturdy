@@ -1,0 +1,2286 @@
+final class java.util.concurrent.ConcurrentSkipListMap$SubMap extends java.util.AbstractMap implements java.util.concurrent.ConcurrentNavigableMap, java.lang.Cloneable, java.io.Serializable
+{
+    private static final long serialVersionUID;
+    private final java.util.concurrent.ConcurrentSkipListMap m;
+    private final java.lang.Object lo;
+    private final java.lang.Object hi;
+    private final boolean loInclusive;
+    private final boolean hiInclusive;
+    private final boolean isDescending;
+    private transient java.util.concurrent.ConcurrentSkipListMap$KeySet keySetView;
+    private transient java.util.Set entrySetView;
+    private transient java.util.Collection valuesView;
+
+    void <init>(java.util.concurrent.ConcurrentSkipListMap, java.lang.Object, boolean, java.lang.Object, boolean, boolean)
+    {
+        java.lang.IllegalArgumentException $r5;
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.concurrent.ConcurrentSkipListMap r1;
+        int $i0;
+        java.lang.Object r3, r4;
+        java.util.Comparator r2;
+        boolean z0, z1, z2;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.util.concurrent.ConcurrentSkipListMap;
+
+        r3 := @parameter1: java.lang.Object;
+
+        z0 := @parameter2: boolean;
+
+        r4 := @parameter3: java.lang.Object;
+
+        z1 := @parameter4: boolean;
+
+        z2 := @parameter5: boolean;
+
+        specialinvoke r0.<java.util.AbstractMap: void <init>()>();
+
+        r2 = r1.<java.util.concurrent.ConcurrentSkipListMap: java.util.Comparator comparator>;
+
+        if r3 == null goto label1;
+
+        if r4 == null goto label1;
+
+        $i0 = staticinvoke <java.util.concurrent.ConcurrentSkipListMap: int cpr(java.util.Comparator,java.lang.Object,java.lang.Object)>(r2, r3, r4);
+
+        if $i0 <= 0 goto label1;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("inconsistent range");
+
+        throw $r5;
+
+     label1:
+        r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m> = r1;
+
+        r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object lo> = r3;
+
+        r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object hi> = r4;
+
+        r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean loInclusive> = z0;
+
+        r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean hiInclusive> = z1;
+
+        r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean isDescending> = z2;
+
+        return;
+    }
+
+    boolean tooLow(java.lang.Object, java.util.Comparator)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        int $i0;
+        java.lang.Object $r1, r3, $r4;
+        java.util.Comparator r2;
+        boolean $z0, $z1;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r3 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.util.Comparator;
+
+        $r1 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object lo>;
+
+        if $r1 == null goto label2;
+
+        $r4 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object lo>;
+
+        $i0 = staticinvoke <java.util.concurrent.ConcurrentSkipListMap: int cpr(java.util.Comparator,java.lang.Object,java.lang.Object)>(r2, r3, $r4);
+
+        if $i0 < 0 goto label1;
+
+        if $i0 != 0 goto label2;
+
+        $z0 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean loInclusive>;
+
+        if $z0 != 0 goto label2;
+
+     label1:
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        return $z1;
+    }
+
+    boolean tooHigh(java.lang.Object, java.util.Comparator)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        int $i0;
+        java.lang.Object $r1, r3, $r4;
+        java.util.Comparator r2;
+        boolean $z0, $z1;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r3 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.util.Comparator;
+
+        $r1 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object hi>;
+
+        if $r1 == null goto label2;
+
+        $r4 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object hi>;
+
+        $i0 = staticinvoke <java.util.concurrent.ConcurrentSkipListMap: int cpr(java.util.Comparator,java.lang.Object,java.lang.Object)>(r2, r3, $r4);
+
+        if $i0 > 0 goto label1;
+
+        if $i0 != 0 goto label2;
+
+        $z0 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean hiInclusive>;
+
+        if $z0 != 0 goto label2;
+
+     label1:
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        return $z1;
+    }
+
+    boolean inBounds(java.lang.Object, java.util.Comparator)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.lang.Object r1;
+        java.util.Comparator r2;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.util.Comparator;
+
+        $z0 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean tooLow(java.lang.Object,java.util.Comparator)>(r1, r2);
+
+        if $z0 != 0 goto label1;
+
+        $z1 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean tooHigh(java.lang.Object,java.util.Comparator)>(r1, r2);
+
+        if $z1 != 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+    }
+
+    void checkKeyBounds(java.lang.Object, java.util.Comparator)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r1;
+        java.lang.Object r0;
+        java.util.Comparator r2;
+        java.lang.IllegalArgumentException $r3;
+        java.lang.NullPointerException $r4;
+        boolean $z0;
+
+        r1 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.util.Comparator;
+
+        if r0 != null goto label1;
+
+        $r4 = new java.lang.NullPointerException;
+
+        specialinvoke $r4.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r4;
+
+     label1:
+        $z0 = virtualinvoke r1.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean inBounds(java.lang.Object,java.util.Comparator)>(r0, r2);
+
+        if $z0 != 0 goto label2;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("key out of range");
+
+        throw $r3;
+
+     label2:
+        return;
+    }
+
+    boolean isBeforeEnd(java.util.concurrent.ConcurrentSkipListMap$Node, java.util.Comparator)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r1;
+        int $i0;
+        java.lang.Object $r2, r3, $r5;
+        java.util.Comparator r4;
+        java.util.concurrent.ConcurrentSkipListMap$Node r0;
+        boolean $z0;
+
+        r1 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r0 := @parameter0: java.util.concurrent.ConcurrentSkipListMap$Node;
+
+        r4 := @parameter1: java.util.Comparator;
+
+        if r0 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r2 = r1.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object hi>;
+
+        if $r2 != null goto label2;
+
+        return 1;
+
+     label2:
+        r3 = r0.<java.util.concurrent.ConcurrentSkipListMap$Node: java.lang.Object key>;
+
+        if r3 != null goto label3;
+
+        return 1;
+
+     label3:
+        $r5 = r1.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object hi>;
+
+        $i0 = staticinvoke <java.util.concurrent.ConcurrentSkipListMap: int cpr(java.util.Comparator,java.lang.Object,java.lang.Object)>(r4, r3, $r5);
+
+        if $i0 > 0 goto label4;
+
+        if $i0 != 0 goto label5;
+
+        $z0 = r1.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean hiInclusive>;
+
+        if $z0 != 0 goto label5;
+
+     label4:
+        return 0;
+
+     label5:
+        return 1;
+    }
+
+    java.util.concurrent.ConcurrentSkipListMap$Node loNode(java.util.Comparator)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.concurrent.ConcurrentSkipListMap $r4, $r7, $r9;
+        java.lang.Object $r1, $r3, $r6;
+        java.util.Comparator r2;
+        java.util.concurrent.ConcurrentSkipListMap$Node $r5, $r8, $r10;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r2 := @parameter0: java.util.Comparator;
+
+        $r1 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object lo>;
+
+        if $r1 != null goto label1;
+
+        $r9 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r10 = virtualinvoke $r9.<java.util.concurrent.ConcurrentSkipListMap: java.util.concurrent.ConcurrentSkipListMap$Node findFirst()>();
+
+        return $r10;
+
+     label1:
+        $z0 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean loInclusive>;
+
+        if $z0 == 0 goto label2;
+
+        $r7 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r6 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object lo>;
+
+        $r8 = virtualinvoke $r7.<java.util.concurrent.ConcurrentSkipListMap: java.util.concurrent.ConcurrentSkipListMap$Node findNear(java.lang.Object,int,java.util.Comparator)>($r6, 1, r2);
+
+        return $r8;
+
+     label2:
+        $r4 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r3 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object lo>;
+
+        $r5 = virtualinvoke $r4.<java.util.concurrent.ConcurrentSkipListMap: java.util.concurrent.ConcurrentSkipListMap$Node findNear(java.lang.Object,int,java.util.Comparator)>($r3, 0, r2);
+
+        return $r5;
+    }
+
+    java.util.concurrent.ConcurrentSkipListMap$Node hiNode(java.util.Comparator)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.concurrent.ConcurrentSkipListMap $r4, $r7, $r9;
+        java.lang.Object $r1, $r3, $r6;
+        java.util.Comparator r2;
+        java.util.concurrent.ConcurrentSkipListMap$Node $r5, $r8, $r10;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r2 := @parameter0: java.util.Comparator;
+
+        $r1 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object hi>;
+
+        if $r1 != null goto label1;
+
+        $r9 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r10 = virtualinvoke $r9.<java.util.concurrent.ConcurrentSkipListMap: java.util.concurrent.ConcurrentSkipListMap$Node findLast()>();
+
+        return $r10;
+
+     label1:
+        $z0 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean hiInclusive>;
+
+        if $z0 == 0 goto label2;
+
+        $r7 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r6 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object hi>;
+
+        $r8 = virtualinvoke $r7.<java.util.concurrent.ConcurrentSkipListMap: java.util.concurrent.ConcurrentSkipListMap$Node findNear(java.lang.Object,int,java.util.Comparator)>($r6, 3, r2);
+
+        return $r8;
+
+     label2:
+        $r4 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r3 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object hi>;
+
+        $r5 = virtualinvoke $r4.<java.util.concurrent.ConcurrentSkipListMap: java.util.concurrent.ConcurrentSkipListMap$Node findNear(java.lang.Object,int,java.util.Comparator)>($r3, 2, r2);
+
+        return $r5;
+    }
+
+    java.lang.Object lowestKey()
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.concurrent.ConcurrentSkipListMap $r1;
+        java.lang.Object $r5;
+        java.util.Comparator r2;
+        java.util.NoSuchElementException $r4;
+        java.util.concurrent.ConcurrentSkipListMap$Node $r3;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $r1 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        r2 = $r1.<java.util.concurrent.ConcurrentSkipListMap: java.util.Comparator comparator>;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$Node loNode(java.util.Comparator)>(r2);
+
+        $z0 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean isBeforeEnd(java.util.concurrent.ConcurrentSkipListMap$Node,java.util.Comparator)>($r3, r2);
+
+        if $z0 == 0 goto label1;
+
+        $r5 = $r3.<java.util.concurrent.ConcurrentSkipListMap$Node: java.lang.Object key>;
+
+        return $r5;
+
+     label1:
+        $r4 = new java.util.NoSuchElementException;
+
+        specialinvoke $r4.<java.util.NoSuchElementException: void <init>()>();
+
+        throw $r4;
+    }
+
+    java.lang.Object highestKey()
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.concurrent.ConcurrentSkipListMap $r1;
+        java.lang.Object r5;
+        java.util.Comparator r2;
+        java.util.NoSuchElementException $r4;
+        java.util.concurrent.ConcurrentSkipListMap$Node $r3;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $r1 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        r2 = $r1.<java.util.concurrent.ConcurrentSkipListMap: java.util.Comparator comparator>;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$Node hiNode(java.util.Comparator)>(r2);
+
+        if $r3 == null goto label1;
+
+        r5 = $r3.<java.util.concurrent.ConcurrentSkipListMap$Node: java.lang.Object key>;
+
+        $z0 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean inBounds(java.lang.Object,java.util.Comparator)>(r5, r2);
+
+        if $z0 == 0 goto label1;
+
+        return r5;
+
+     label1:
+        $r4 = new java.util.NoSuchElementException;
+
+        specialinvoke $r4.<java.util.NoSuchElementException: void <init>()>();
+
+        throw $r4;
+    }
+
+    java.util.Map$Entry lowestEntry()
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.concurrent.ConcurrentSkipListMap $r1;
+        java.util.Comparator r2;
+        java.util.AbstractMap$SimpleImmutableEntry $r4;
+        java.util.concurrent.ConcurrentSkipListMap$Node $r3;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $r1 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        r2 = $r1.<java.util.concurrent.ConcurrentSkipListMap: java.util.Comparator comparator>;
+
+     label1:
+        $r3 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$Node loNode(java.util.Comparator)>(r2);
+
+        $z0 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean isBeforeEnd(java.util.concurrent.ConcurrentSkipListMap$Node,java.util.Comparator)>($r3, r2);
+
+        if $z0 != 0 goto label2;
+
+        return null;
+
+     label2:
+        $r4 = virtualinvoke $r3.<java.util.concurrent.ConcurrentSkipListMap$Node: java.util.AbstractMap$SimpleImmutableEntry createSnapshot()>();
+
+        if $r4 == null goto label3;
+
+        return $r4;
+
+     label3:
+        goto label1;
+    }
+
+    java.util.Map$Entry highestEntry()
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.concurrent.ConcurrentSkipListMap $r1;
+        java.lang.Object $r4;
+        java.util.Comparator r2;
+        java.util.AbstractMap$SimpleImmutableEntry $r5;
+        java.util.concurrent.ConcurrentSkipListMap$Node $r3;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $r1 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        r2 = $r1.<java.util.concurrent.ConcurrentSkipListMap: java.util.Comparator comparator>;
+
+     label1:
+        $r3 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$Node hiNode(java.util.Comparator)>(r2);
+
+        if $r3 == null goto label2;
+
+        $r4 = $r3.<java.util.concurrent.ConcurrentSkipListMap$Node: java.lang.Object key>;
+
+        $z0 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean inBounds(java.lang.Object,java.util.Comparator)>($r4, r2);
+
+        if $z0 != 0 goto label3;
+
+     label2:
+        return null;
+
+     label3:
+        $r5 = virtualinvoke $r3.<java.util.concurrent.ConcurrentSkipListMap$Node: java.util.AbstractMap$SimpleImmutableEntry createSnapshot()>();
+
+        if $r5 == null goto label4;
+
+        return $r5;
+
+     label4:
+        goto label1;
+    }
+
+    java.util.Map$Entry removeLowest()
+    {
+        java.util.AbstractMap$SimpleImmutableEntry $r7;
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.concurrent.ConcurrentSkipListMap $r1, $r5;
+        java.lang.Object r4, $r6;
+        java.util.Comparator r2;
+        java.util.concurrent.ConcurrentSkipListMap$Node $r3;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $r1 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        r2 = $r1.<java.util.concurrent.ConcurrentSkipListMap: java.util.Comparator comparator>;
+
+     label1:
+        $r3 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$Node loNode(java.util.Comparator)>(r2);
+
+        if $r3 != null goto label2;
+
+        return null;
+
+     label2:
+        r4 = $r3.<java.util.concurrent.ConcurrentSkipListMap$Node: java.lang.Object key>;
+
+        $z0 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean inBounds(java.lang.Object,java.util.Comparator)>(r4, r2);
+
+        if $z0 != 0 goto label3;
+
+        return null;
+
+     label3:
+        $r5 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r6 = virtualinvoke $r5.<java.util.concurrent.ConcurrentSkipListMap: java.lang.Object doRemove(java.lang.Object,java.lang.Object)>(r4, null);
+
+        if $r6 == null goto label4;
+
+        $r7 = new java.util.AbstractMap$SimpleImmutableEntry;
+
+        specialinvoke $r7.<java.util.AbstractMap$SimpleImmutableEntry: void <init>(java.lang.Object,java.lang.Object)>(r4, $r6);
+
+        return $r7;
+
+     label4:
+        goto label1;
+    }
+
+    java.util.Map$Entry removeHighest()
+    {
+        java.util.AbstractMap$SimpleImmutableEntry $r7;
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.concurrent.ConcurrentSkipListMap $r1, $r5;
+        java.lang.Object r4, $r6;
+        java.util.Comparator r2;
+        java.util.concurrent.ConcurrentSkipListMap$Node $r3;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $r1 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        r2 = $r1.<java.util.concurrent.ConcurrentSkipListMap: java.util.Comparator comparator>;
+
+     label1:
+        $r3 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$Node hiNode(java.util.Comparator)>(r2);
+
+        if $r3 != null goto label2;
+
+        return null;
+
+     label2:
+        r4 = $r3.<java.util.concurrent.ConcurrentSkipListMap$Node: java.lang.Object key>;
+
+        $z0 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean inBounds(java.lang.Object,java.util.Comparator)>(r4, r2);
+
+        if $z0 != 0 goto label3;
+
+        return null;
+
+     label3:
+        $r5 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r6 = virtualinvoke $r5.<java.util.concurrent.ConcurrentSkipListMap: java.lang.Object doRemove(java.lang.Object,java.lang.Object)>(r4, null);
+
+        if $r6 == null goto label4;
+
+        $r7 = new java.util.AbstractMap$SimpleImmutableEntry;
+
+        specialinvoke $r7.<java.util.AbstractMap$SimpleImmutableEntry: void <init>(java.lang.Object,java.lang.Object)>(r4, $r6);
+
+        return $r7;
+
+     label4:
+        goto label1;
+    }
+
+    java.util.Map$Entry getNearEntry(java.lang.Object, int)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        int $i0, $i1, $i2, i3, $i5;
+        boolean $z0, $z1, $z2, $z3;
+        java.util.Map$Entry $r10, $r11;
+        java.util.AbstractMap$SimpleImmutableEntry $r12;
+        java.util.concurrent.ConcurrentSkipListMap $r1, $r4;
+        java.lang.Object r3, $r6, r7, $r8;
+        java.util.Comparator r2;
+        java.util.concurrent.ConcurrentSkipListMap$Node $r5;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r3 := @parameter0: java.lang.Object;
+
+        i3 := @parameter1: int;
+
+        $r1 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        r2 = $r1.<java.util.concurrent.ConcurrentSkipListMap: java.util.Comparator comparator>;
+
+        $z0 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean isDescending>;
+
+        if $z0 == 0 goto label02;
+
+        $i2 = i3 & 2;
+
+        if $i2 != 0 goto label01;
+
+        i3 = i3 | 2;
+
+        goto label02;
+
+     label01:
+        $i5 = (int) -3;
+
+        i3 = i3 & $i5;
+
+     label02:
+        $z3 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean tooLow(java.lang.Object,java.util.Comparator)>(r3, r2);
+
+        if $z3 == 0 goto label05;
+
+        $i1 = i3 & 2;
+
+        if $i1 == 0 goto label03;
+
+        $r10 = null;
+
+        goto label04;
+
+     label03:
+        $r10 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.Map$Entry lowestEntry()>();
+
+     label04:
+        return $r10;
+
+     label05:
+        $z1 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean tooHigh(java.lang.Object,java.util.Comparator)>(r3, r2);
+
+        if $z1 == 0 goto label08;
+
+        $i0 = i3 & 2;
+
+        if $i0 == 0 goto label06;
+
+        $r11 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.Map$Entry highestEntry()>();
+
+        goto label07;
+
+     label06:
+        $r11 = null;
+
+     label07:
+        return $r11;
+
+     label08:
+        $r4 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r5 = virtualinvoke $r4.<java.util.concurrent.ConcurrentSkipListMap: java.util.concurrent.ConcurrentSkipListMap$Node findNear(java.lang.Object,int,java.util.Comparator)>(r3, i3, r2);
+
+        if $r5 == null goto label09;
+
+        $r6 = $r5.<java.util.concurrent.ConcurrentSkipListMap$Node: java.lang.Object key>;
+
+        $z2 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean inBounds(java.lang.Object,java.util.Comparator)>($r6, r2);
+
+        if $z2 != 0 goto label10;
+
+     label09:
+        return null;
+
+     label10:
+        r7 = $r5.<java.util.concurrent.ConcurrentSkipListMap$Node: java.lang.Object key>;
+
+        $r8 = virtualinvoke $r5.<java.util.concurrent.ConcurrentSkipListMap$Node: java.lang.Object getValidValue()>();
+
+        if $r8 == null goto label11;
+
+        $r12 = new java.util.AbstractMap$SimpleImmutableEntry;
+
+        specialinvoke $r12.<java.util.AbstractMap$SimpleImmutableEntry: void <init>(java.lang.Object,java.lang.Object)>(r7, $r8);
+
+        return $r12;
+
+     label11:
+        goto label08;
+    }
+
+    java.lang.Object getNearKey(java.lang.Object, int)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        int $i0, $i1, $i2, i3, $i5;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.util.concurrent.ConcurrentSkipListMap $r1, $r4;
+        java.lang.Object r3, $r6, $r7, $r10, r11, r12;
+        java.util.Comparator r2;
+        java.util.concurrent.ConcurrentSkipListMap$Node $r5, $r8, $r9;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r3 := @parameter0: java.lang.Object;
+
+        i3 := @parameter1: int;
+
+        $r1 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        r2 = $r1.<java.util.concurrent.ConcurrentSkipListMap: java.util.Comparator comparator>;
+
+        $z0 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean isDescending>;
+
+        if $z0 == 0 goto label2;
+
+        $i2 = i3 & 2;
+
+        if $i2 != 0 goto label1;
+
+        i3 = i3 | 2;
+
+        goto label2;
+
+     label1:
+        $i5 = (int) -3;
+
+        i3 = i3 & $i5;
+
+     label2:
+        $z5 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean tooLow(java.lang.Object,java.util.Comparator)>(r3, r2);
+
+        if $z5 == 0 goto label4;
+
+        $i1 = i3 & 2;
+
+        if $i1 != 0 goto label3;
+
+        $r9 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$Node loNode(java.util.Comparator)>(r2);
+
+        $z4 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean isBeforeEnd(java.util.concurrent.ConcurrentSkipListMap$Node,java.util.Comparator)>($r9, r2);
+
+        if $z4 == 0 goto label3;
+
+        $r10 = $r9.<java.util.concurrent.ConcurrentSkipListMap$Node: java.lang.Object key>;
+
+        return $r10;
+
+     label3:
+        return null;
+
+     label4:
+        $z1 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean tooHigh(java.lang.Object,java.util.Comparator)>(r3, r2);
+
+        if $z1 == 0 goto label6;
+
+        $i0 = i3 & 2;
+
+        if $i0 == 0 goto label5;
+
+        $r8 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$Node hiNode(java.util.Comparator)>(r2);
+
+        if $r8 == null goto label5;
+
+        r11 = $r8.<java.util.concurrent.ConcurrentSkipListMap$Node: java.lang.Object key>;
+
+        $z3 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean inBounds(java.lang.Object,java.util.Comparator)>(r11, r2);
+
+        if $z3 == 0 goto label5;
+
+        return r11;
+
+     label5:
+        return null;
+
+     label6:
+        $r4 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r5 = virtualinvoke $r4.<java.util.concurrent.ConcurrentSkipListMap: java.util.concurrent.ConcurrentSkipListMap$Node findNear(java.lang.Object,int,java.util.Comparator)>(r3, i3, r2);
+
+        if $r5 == null goto label7;
+
+        $r6 = $r5.<java.util.concurrent.ConcurrentSkipListMap$Node: java.lang.Object key>;
+
+        $z2 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean inBounds(java.lang.Object,java.util.Comparator)>($r6, r2);
+
+        if $z2 != 0 goto label8;
+
+     label7:
+        return null;
+
+     label8:
+        r12 = $r5.<java.util.concurrent.ConcurrentSkipListMap$Node: java.lang.Object key>;
+
+        $r7 = virtualinvoke $r5.<java.util.concurrent.ConcurrentSkipListMap$Node: java.lang.Object getValidValue()>();
+
+        if $r7 == null goto label9;
+
+        return r12;
+
+     label9:
+        goto label6;
+    }
+
+    public boolean containsKey(java.lang.Object)
+    {
+        java.lang.NullPointerException $r5;
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r1;
+        java.util.concurrent.ConcurrentSkipListMap $r2, $r4;
+        java.lang.Object r0;
+        java.util.Comparator $r3;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        $r5 = new java.lang.NullPointerException;
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r5;
+
+     label1:
+        $r2 = r1.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r3 = $r2.<java.util.concurrent.ConcurrentSkipListMap: java.util.Comparator comparator>;
+
+        $z0 = virtualinvoke r1.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean inBounds(java.lang.Object,java.util.Comparator)>(r0, $r3);
+
+        if $z0 == 0 goto label2;
+
+        $r4 = r1.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $z1 = virtualinvoke $r4.<java.util.concurrent.ConcurrentSkipListMap: boolean containsKey(java.lang.Object)>(r0);
+
+        if $z1 == 0 goto label2;
+
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+    }
+
+    public java.lang.Object get(java.lang.Object)
+    {
+        java.lang.NullPointerException $r5;
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r1;
+        java.util.concurrent.ConcurrentSkipListMap $r2, $r4;
+        java.lang.Object r0, $r6;
+        java.util.Comparator $r3;
+        boolean $z0;
+
+        r1 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        $r5 = new java.lang.NullPointerException;
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r5;
+
+     label1:
+        $r2 = r1.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r3 = $r2.<java.util.concurrent.ConcurrentSkipListMap: java.util.Comparator comparator>;
+
+        $z0 = virtualinvoke r1.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean inBounds(java.lang.Object,java.util.Comparator)>(r0, $r3);
+
+        if $z0 != 0 goto label2;
+
+        $r6 = null;
+
+        goto label3;
+
+     label2:
+        $r4 = r1.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r6 = virtualinvoke $r4.<java.util.concurrent.ConcurrentSkipListMap: java.lang.Object get(java.lang.Object)>(r0);
+
+     label3:
+        return $r6;
+    }
+
+    public java.lang.Object put(java.lang.Object, java.lang.Object)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.concurrent.ConcurrentSkipListMap $r2, $r5;
+        java.lang.Object r1, r4, $r6;
+        java.util.Comparator $r3;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r4 := @parameter1: java.lang.Object;
+
+        $r2 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r3 = $r2.<java.util.concurrent.ConcurrentSkipListMap: java.util.Comparator comparator>;
+
+        virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: void checkKeyBounds(java.lang.Object,java.util.Comparator)>(r1, $r3);
+
+        $r5 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r6 = virtualinvoke $r5.<java.util.concurrent.ConcurrentSkipListMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, r4);
+
+        return $r6;
+    }
+
+    public java.lang.Object remove(java.lang.Object)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.concurrent.ConcurrentSkipListMap $r2, $r4;
+        java.lang.Object r1, $r5;
+        java.util.Comparator $r3;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r3 = $r2.<java.util.concurrent.ConcurrentSkipListMap: java.util.Comparator comparator>;
+
+        $z0 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean inBounds(java.lang.Object,java.util.Comparator)>(r1, $r3);
+
+        if $z0 != 0 goto label1;
+
+        $r5 = null;
+
+        goto label2;
+
+     label1:
+        $r4 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r5 = virtualinvoke $r4.<java.util.concurrent.ConcurrentSkipListMap: java.lang.Object remove(java.lang.Object)>(r1);
+
+     label2:
+        return $r5;
+    }
+
+    public int size()
+    {
+        long l1;
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.concurrent.ConcurrentSkipListMap $r1;
+        byte $b0;
+        int $i2, $i3;
+        java.lang.Object $r3;
+        java.util.Comparator r2;
+        java.util.concurrent.ConcurrentSkipListMap$Node r4;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $r1 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        r2 = $r1.<java.util.concurrent.ConcurrentSkipListMap: java.util.Comparator comparator>;
+
+        l1 = 0L;
+
+        r4 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$Node loNode(java.util.Comparator)>(r2);
+
+     label1:
+        $z0 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean isBeforeEnd(java.util.concurrent.ConcurrentSkipListMap$Node,java.util.Comparator)>(r4, r2);
+
+        if $z0 == 0 goto label3;
+
+        $r3 = virtualinvoke r4.<java.util.concurrent.ConcurrentSkipListMap$Node: java.lang.Object getValidValue()>();
+
+        if $r3 == null goto label2;
+
+        l1 = l1 + 1L;
+
+     label2:
+        r4 = r4.<java.util.concurrent.ConcurrentSkipListMap$Node: java.util.concurrent.ConcurrentSkipListMap$Node next>;
+
+        goto label1;
+
+     label3:
+        $b0 = l1 cmp 2147483647L;
+
+        $i3 = (int) $b0;
+
+        if $i3 < 0 goto label4;
+
+        $i2 = 2147483647;
+
+        goto label5;
+
+     label4:
+        $i2 = (int) l1;
+
+     label5:
+        return $i2;
+    }
+
+    public boolean isEmpty()
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.concurrent.ConcurrentSkipListMap $r1;
+        java.util.Comparator r2;
+        java.util.concurrent.ConcurrentSkipListMap$Node $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $r1 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        r2 = $r1.<java.util.concurrent.ConcurrentSkipListMap: java.util.Comparator comparator>;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$Node loNode(java.util.Comparator)>(r2);
+
+        $z0 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean isBeforeEnd(java.util.concurrent.ConcurrentSkipListMap$Node,java.util.Comparator)>($r3, r2);
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public boolean containsValue(java.lang.Object)
+    {
+        java.lang.NullPointerException $r5;
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r1;
+        java.util.concurrent.ConcurrentSkipListMap $r2;
+        java.lang.Object r0, $r4;
+        java.util.Comparator r3;
+        java.util.concurrent.ConcurrentSkipListMap$Node r6;
+        boolean $z0, $z1;
+
+        r1 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        $r5 = new java.lang.NullPointerException;
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r5;
+
+     label1:
+        $r2 = r1.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        r3 = $r2.<java.util.concurrent.ConcurrentSkipListMap: java.util.Comparator comparator>;
+
+        r6 = virtualinvoke r1.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$Node loNode(java.util.Comparator)>(r3);
+
+     label2:
+        $z0 = virtualinvoke r1.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean isBeforeEnd(java.util.concurrent.ConcurrentSkipListMap$Node,java.util.Comparator)>(r6, r3);
+
+        if $z0 == 0 goto label4;
+
+        $r4 = virtualinvoke r6.<java.util.concurrent.ConcurrentSkipListMap$Node: java.lang.Object getValidValue()>();
+
+        if $r4 == null goto label3;
+
+        $z1 = virtualinvoke r0.<java.lang.Object: boolean equals(java.lang.Object)>($r4);
+
+        if $z1 == 0 goto label3;
+
+        return 1;
+
+     label3:
+        r6 = r6.<java.util.concurrent.ConcurrentSkipListMap$Node: java.util.concurrent.ConcurrentSkipListMap$Node next>;
+
+        goto label2;
+
+     label4:
+        return 0;
+    }
+
+    public void clear()
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.concurrent.ConcurrentSkipListMap $r1, $r5;
+        java.lang.Object $r3, $r4;
+        java.util.Comparator r2;
+        java.util.concurrent.ConcurrentSkipListMap$Node r6;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $r1 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        r2 = $r1.<java.util.concurrent.ConcurrentSkipListMap: java.util.Comparator comparator>;
+
+        r6 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$Node loNode(java.util.Comparator)>(r2);
+
+     label1:
+        $z0 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean isBeforeEnd(java.util.concurrent.ConcurrentSkipListMap$Node,java.util.Comparator)>(r6, r2);
+
+        if $z0 == 0 goto label3;
+
+        $r3 = virtualinvoke r6.<java.util.concurrent.ConcurrentSkipListMap$Node: java.lang.Object getValidValue()>();
+
+        if $r3 == null goto label2;
+
+        $r5 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r4 = r6.<java.util.concurrent.ConcurrentSkipListMap$Node: java.lang.Object key>;
+
+        virtualinvoke $r5.<java.util.concurrent.ConcurrentSkipListMap: java.lang.Object remove(java.lang.Object)>($r4);
+
+     label2:
+        r6 = r6.<java.util.concurrent.ConcurrentSkipListMap$Node: java.util.concurrent.ConcurrentSkipListMap$Node next>;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    public java.lang.Object putIfAbsent(java.lang.Object, java.lang.Object)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.concurrent.ConcurrentSkipListMap $r2, $r5;
+        java.lang.Object r1, r4, $r6;
+        java.util.Comparator $r3;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r4 := @parameter1: java.lang.Object;
+
+        $r2 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r3 = $r2.<java.util.concurrent.ConcurrentSkipListMap: java.util.Comparator comparator>;
+
+        virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: void checkKeyBounds(java.lang.Object,java.util.Comparator)>(r1, $r3);
+
+        $r5 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r6 = virtualinvoke $r5.<java.util.concurrent.ConcurrentSkipListMap: java.lang.Object putIfAbsent(java.lang.Object,java.lang.Object)>(r1, r4);
+
+        return $r6;
+    }
+
+    public boolean remove(java.lang.Object, java.lang.Object)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.concurrent.ConcurrentSkipListMap $r2, $r5;
+        java.lang.Object r1, r4;
+        java.util.Comparator $r3;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r4 := @parameter1: java.lang.Object;
+
+        $r2 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r3 = $r2.<java.util.concurrent.ConcurrentSkipListMap: java.util.Comparator comparator>;
+
+        $z0 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean inBounds(java.lang.Object,java.util.Comparator)>(r1, $r3);
+
+        if $z0 == 0 goto label1;
+
+        $r5 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $z1 = virtualinvoke $r5.<java.util.concurrent.ConcurrentSkipListMap: boolean remove(java.lang.Object,java.lang.Object)>(r1, r4);
+
+        if $z1 == 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+    }
+
+    public boolean replace(java.lang.Object, java.lang.Object, java.lang.Object)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.concurrent.ConcurrentSkipListMap $r2, $r6;
+        java.lang.Object r1, r4, r5;
+        java.util.Comparator $r3;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r4 := @parameter1: java.lang.Object;
+
+        r5 := @parameter2: java.lang.Object;
+
+        $r2 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r3 = $r2.<java.util.concurrent.ConcurrentSkipListMap: java.util.Comparator comparator>;
+
+        virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: void checkKeyBounds(java.lang.Object,java.util.Comparator)>(r1, $r3);
+
+        $r6 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $z0 = virtualinvoke $r6.<java.util.concurrent.ConcurrentSkipListMap: boolean replace(java.lang.Object,java.lang.Object,java.lang.Object)>(r1, r4, r5);
+
+        return $z0;
+    }
+
+    public java.lang.Object replace(java.lang.Object, java.lang.Object)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.concurrent.ConcurrentSkipListMap $r2, $r5;
+        java.lang.Object r1, r4, $r6;
+        java.util.Comparator $r3;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r4 := @parameter1: java.lang.Object;
+
+        $r2 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r3 = $r2.<java.util.concurrent.ConcurrentSkipListMap: java.util.Comparator comparator>;
+
+        virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: void checkKeyBounds(java.lang.Object,java.util.Comparator)>(r1, $r3);
+
+        $r5 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r6 = virtualinvoke $r5.<java.util.concurrent.ConcurrentSkipListMap: java.lang.Object replace(java.lang.Object,java.lang.Object)>(r1, r4);
+
+        return $r6;
+    }
+
+    public java.util.Comparator comparator()
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.concurrent.ConcurrentSkipListMap $r1;
+        java.util.Comparator $r2, $r3;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $r1 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r2 = virtualinvoke $r1.<java.util.concurrent.ConcurrentSkipListMap: java.util.Comparator comparator()>();
+
+        $z0 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean isDescending>;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = staticinvoke <java.util.Collections: java.util.Comparator reverseOrder(java.util.Comparator)>($r2);
+
+        return $r3;
+
+     label1:
+        return $r2;
+    }
+
+    java.util.concurrent.ConcurrentSkipListMap$SubMap newSubMap(java.lang.Object, boolean, java.lang.Object, boolean)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0, $r12;
+        int $i0, $i1;
+        boolean $z0, $z1, $z2, z3, z4, z5, $z6;
+        java.lang.IllegalArgumentException $r5, $r7;
+        java.util.concurrent.ConcurrentSkipListMap $r1, $r13;
+        java.lang.Object $r3, $r4, $r6, r8, r9, r10, $r11;
+        java.util.Comparator r2;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r8 := @parameter0: java.lang.Object;
+
+        z4 := @parameter1: boolean;
+
+        r9 := @parameter2: java.lang.Object;
+
+        z5 := @parameter3: boolean;
+
+        $r1 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        r2 = $r1.<java.util.concurrent.ConcurrentSkipListMap: java.util.Comparator comparator>;
+
+        $z0 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean isDescending>;
+
+        if $z0 == 0 goto label1;
+
+        r10 = r8;
+
+        r8 = r9;
+
+        r9 = r10;
+
+        z3 = z4;
+
+        z4 = z5;
+
+        z5 = z3;
+
+     label1:
+        $r3 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object lo>;
+
+        if $r3 == null goto label4;
+
+        if r8 != null goto label2;
+
+        r8 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object lo>;
+
+        z4 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean loInclusive>;
+
+        goto label4;
+
+     label2:
+        $r6 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object lo>;
+
+        $i1 = staticinvoke <java.util.concurrent.ConcurrentSkipListMap: int cpr(java.util.Comparator,java.lang.Object,java.lang.Object)>(r2, r8, $r6);
+
+        if $i1 < 0 goto label3;
+
+        if $i1 != 0 goto label4;
+
+        $z2 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean loInclusive>;
+
+        if $z2 != 0 goto label4;
+
+        if z4 == 0 goto label4;
+
+     label3:
+        $r7 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r7.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("key out of range");
+
+        throw $r7;
+
+     label4:
+        $r11 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object hi>;
+
+        if $r11 == null goto label7;
+
+        if r9 != null goto label5;
+
+        r9 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object hi>;
+
+        z5 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean hiInclusive>;
+
+        goto label7;
+
+     label5:
+        $r4 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object hi>;
+
+        $i0 = staticinvoke <java.util.concurrent.ConcurrentSkipListMap: int cpr(java.util.Comparator,java.lang.Object,java.lang.Object)>(r2, r9, $r4);
+
+        if $i0 > 0 goto label6;
+
+        if $i0 != 0 goto label7;
+
+        $z1 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean hiInclusive>;
+
+        if $z1 != 0 goto label7;
+
+        if z5 == 0 goto label7;
+
+     label6:
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("key out of range");
+
+        throw $r5;
+
+     label7:
+        $r12 = new java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $r13 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $z6 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean isDescending>;
+
+        specialinvoke $r12.<java.util.concurrent.ConcurrentSkipListMap$SubMap: void <init>(java.util.concurrent.ConcurrentSkipListMap,java.lang.Object,boolean,java.lang.Object,boolean,boolean)>($r13, r8, z4, r9, z5, $z6);
+
+        return $r12;
+    }
+
+    public java.util.concurrent.ConcurrentSkipListMap$SubMap subMap(java.lang.Object, boolean, java.lang.Object, boolean)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r3, $r4;
+        java.lang.Object r0, r2;
+        java.lang.NullPointerException $r1;
+        boolean z0, z1;
+
+        r3 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r0 := @parameter0: java.lang.Object;
+
+        z0 := @parameter1: boolean;
+
+        r2 := @parameter2: java.lang.Object;
+
+        z1 := @parameter3: boolean;
+
+        if r0 == null goto label1;
+
+        if r2 != null goto label2;
+
+     label1:
+        $r1 = new java.lang.NullPointerException;
+
+        specialinvoke $r1.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r1;
+
+     label2:
+        $r4 = virtualinvoke r3.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$SubMap newSubMap(java.lang.Object,boolean,java.lang.Object,boolean)>(r0, z0, r2, z1);
+
+        return $r4;
+    }
+
+    public java.util.concurrent.ConcurrentSkipListMap$SubMap headMap(java.lang.Object, boolean)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r1, $r2;
+        java.lang.Object r0;
+        java.lang.NullPointerException $r3;
+        boolean z0;
+
+        r1 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r0 := @parameter0: java.lang.Object;
+
+        z0 := @parameter1: boolean;
+
+        if r0 != null goto label1;
+
+        $r3 = new java.lang.NullPointerException;
+
+        specialinvoke $r3.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $r2 = virtualinvoke r1.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$SubMap newSubMap(java.lang.Object,boolean,java.lang.Object,boolean)>(null, 0, r0, z0);
+
+        return $r2;
+    }
+
+    public java.util.concurrent.ConcurrentSkipListMap$SubMap tailMap(java.lang.Object, boolean)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r1, $r2;
+        java.lang.Object r0;
+        java.lang.NullPointerException $r3;
+        boolean z0;
+
+        r1 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r0 := @parameter0: java.lang.Object;
+
+        z0 := @parameter1: boolean;
+
+        if r0 != null goto label1;
+
+        $r3 = new java.lang.NullPointerException;
+
+        specialinvoke $r3.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $r2 = virtualinvoke r1.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$SubMap newSubMap(java.lang.Object,boolean,java.lang.Object,boolean)>(r0, z0, null, 0);
+
+        return $r2;
+    }
+
+    public java.util.concurrent.ConcurrentSkipListMap$SubMap subMap(java.lang.Object, java.lang.Object)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0, $r3;
+        java.lang.Object r1, r2;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.lang.Object;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$SubMap subMap(java.lang.Object,boolean,java.lang.Object,boolean)>(r1, 1, r2, 0);
+
+        return $r3;
+    }
+
+    public java.util.concurrent.ConcurrentSkipListMap$SubMap headMap(java.lang.Object)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0, $r2;
+        java.lang.Object r1;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$SubMap headMap(java.lang.Object,boolean)>(r1, 0);
+
+        return $r2;
+    }
+
+    public java.util.concurrent.ConcurrentSkipListMap$SubMap tailMap(java.lang.Object)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0, $r2;
+        java.lang.Object r1;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$SubMap tailMap(java.lang.Object,boolean)>(r1, 1);
+
+        return $r2;
+    }
+
+    public java.util.concurrent.ConcurrentSkipListMap$SubMap descendingMap()
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap $r0, r1;
+        java.util.concurrent.ConcurrentSkipListMap $r4;
+        java.lang.Object $r2, $r3;
+        boolean $z0, $z1, $z2, $z3;
+
+        r1 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $r0 = new java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $r4 = r1.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        $r3 = r1.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object lo>;
+
+        $z2 = r1.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean loInclusive>;
+
+        $r2 = r1.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object hi>;
+
+        $z1 = r1.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean hiInclusive>;
+
+        $z0 = r1.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean isDescending>;
+
+        if $z0 != 0 goto label1;
+
+        $z3 = 1;
+
+        goto label2;
+
+     label1:
+        $z3 = 0;
+
+     label2:
+        specialinvoke $r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: void <init>(java.util.concurrent.ConcurrentSkipListMap,java.lang.Object,boolean,java.lang.Object,boolean,boolean)>($r4, $r3, $z2, $r2, $z1, $z3);
+
+        return $r0;
+    }
+
+    public java.util.Map$Entry ceilingEntry(java.lang.Object)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.lang.Object r1;
+        java.util.Map$Entry $r2;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.Map$Entry getNearEntry(java.lang.Object,int)>(r1, 1);
+
+        return $r2;
+    }
+
+    public java.lang.Object ceilingKey(java.lang.Object)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.lang.Object r1, $r2;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object getNearKey(java.lang.Object,int)>(r1, 1);
+
+        return $r2;
+    }
+
+    public java.util.Map$Entry lowerEntry(java.lang.Object)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.lang.Object r1;
+        java.util.Map$Entry $r2;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.Map$Entry getNearEntry(java.lang.Object,int)>(r1, 2);
+
+        return $r2;
+    }
+
+    public java.lang.Object lowerKey(java.lang.Object)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.lang.Object r1, $r2;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object getNearKey(java.lang.Object,int)>(r1, 2);
+
+        return $r2;
+    }
+
+    public java.util.Map$Entry floorEntry(java.lang.Object)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.lang.Object r1;
+        java.util.Map$Entry $r2;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.Map$Entry getNearEntry(java.lang.Object,int)>(r1, 3);
+
+        return $r2;
+    }
+
+    public java.lang.Object floorKey(java.lang.Object)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.lang.Object r1, $r2;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object getNearKey(java.lang.Object,int)>(r1, 3);
+
+        return $r2;
+    }
+
+    public java.util.Map$Entry higherEntry(java.lang.Object)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.lang.Object r1;
+        java.util.Map$Entry $r2;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.Map$Entry getNearEntry(java.lang.Object,int)>(r1, 0);
+
+        return $r2;
+    }
+
+    public java.lang.Object higherKey(java.lang.Object)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.lang.Object r1, $r2;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object getNearKey(java.lang.Object,int)>(r1, 0);
+
+        return $r2;
+    }
+
+    public java.lang.Object firstKey()
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.lang.Object $r1;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $z0 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean isDescending>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object highestKey()>();
+
+        goto label2;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object lowestKey()>();
+
+     label2:
+        return $r1;
+    }
+
+    public java.lang.Object lastKey()
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.lang.Object $r1;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $z0 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean isDescending>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object lowestKey()>();
+
+        goto label2;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.lang.Object highestKey()>();
+
+     label2:
+        return $r1;
+    }
+
+    public java.util.Map$Entry firstEntry()
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.Map$Entry $r1;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $z0 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean isDescending>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.Map$Entry highestEntry()>();
+
+        goto label2;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.Map$Entry lowestEntry()>();
+
+     label2:
+        return $r1;
+    }
+
+    public java.util.Map$Entry lastEntry()
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.Map$Entry $r1;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $z0 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean isDescending>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.Map$Entry lowestEntry()>();
+
+        goto label2;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.Map$Entry highestEntry()>();
+
+     label2:
+        return $r1;
+    }
+
+    public java.util.Map$Entry pollFirstEntry()
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.Map$Entry $r1;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $z0 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean isDescending>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.Map$Entry removeHighest()>();
+
+        goto label2;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.Map$Entry removeLowest()>();
+
+     label2:
+        return $r1;
+    }
+
+    public java.util.Map$Entry pollLastEntry()
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.Map$Entry $r1;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $z0 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean isDescending>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.Map$Entry removeLowest()>();
+
+        goto label2;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.Map$Entry removeHighest()>();
+
+     label2:
+        return $r1;
+    }
+
+    public java.util.NavigableSet keySet()
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.concurrent.ConcurrentSkipListMap$KeySet r1, $r2;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$KeySet keySetView>;
+
+        if r1 == null goto label1;
+
+        $r2 = r1;
+
+        goto label2;
+
+     label1:
+        $r2 = new java.util.concurrent.ConcurrentSkipListMap$KeySet;
+
+        specialinvoke $r2.<java.util.concurrent.ConcurrentSkipListMap$KeySet: void <init>(java.util.concurrent.ConcurrentNavigableMap)>(r0);
+
+        r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$KeySet keySetView> = $r2;
+
+     label2:
+        return $r2;
+    }
+
+    public java.util.NavigableSet navigableKeySet()
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.concurrent.ConcurrentSkipListMap$KeySet r1, $r2;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$KeySet keySetView>;
+
+        if r1 == null goto label1;
+
+        $r2 = r1;
+
+        goto label2;
+
+     label1:
+        $r2 = new java.util.concurrent.ConcurrentSkipListMap$KeySet;
+
+        specialinvoke $r2.<java.util.concurrent.ConcurrentSkipListMap$KeySet: void <init>(java.util.concurrent.ConcurrentNavigableMap)>(r0);
+
+        r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$KeySet keySetView> = $r2;
+
+     label2:
+        return $r2;
+    }
+
+    public java.util.Collection values()
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.Collection r1, $r2;
+        java.util.concurrent.ConcurrentSkipListMap$Values $r3;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.Collection valuesView>;
+
+        if r1 == null goto label1;
+
+        $r2 = r1;
+
+        goto label2;
+
+     label1:
+        $r3 = new java.util.concurrent.ConcurrentSkipListMap$Values;
+
+        $r2 = $r3;
+
+        specialinvoke $r3.<java.util.concurrent.ConcurrentSkipListMap$Values: void <init>(java.util.concurrent.ConcurrentNavigableMap)>(r0);
+
+        r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.Collection valuesView> = $r3;
+
+     label2:
+        return $r2;
+    }
+
+    public java.util.Set entrySet()
+    {
+        java.util.concurrent.ConcurrentSkipListMap$EntrySet $r3;
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.Set r1, $r2;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.Set entrySetView>;
+
+        if r1 == null goto label1;
+
+        $r2 = r1;
+
+        goto label2;
+
+     label1:
+        $r3 = new java.util.concurrent.ConcurrentSkipListMap$EntrySet;
+
+        $r2 = $r3;
+
+        specialinvoke $r3.<java.util.concurrent.ConcurrentSkipListMap$EntrySet: void <init>(java.util.concurrent.ConcurrentNavigableMap)>(r0);
+
+        r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.Set entrySetView> = $r3;
+
+     label2:
+        return $r2;
+    }
+
+    public java.util.NavigableSet descendingKeySet()
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0, $r1;
+        java.util.NavigableSet $r2;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $r1 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$SubMap descendingMap()>();
+
+        $r2 = virtualinvoke $r1.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.NavigableSet navigableKeySet()>();
+
+        return $r2;
+    }
+
+    java.util.Iterator keyIterator()
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r1;
+        java.util.concurrent.ConcurrentSkipListMap$SubMap$SubMapKeyIterator $r0;
+
+        r1 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $r0 = new java.util.concurrent.ConcurrentSkipListMap$SubMap$SubMapKeyIterator;
+
+        specialinvoke $r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap$SubMapKeyIterator: void <init>(java.util.concurrent.ConcurrentSkipListMap$SubMap)>(r1);
+
+        return $r0;
+    }
+
+    java.util.Iterator valueIterator()
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r1;
+        java.util.concurrent.ConcurrentSkipListMap$SubMap$SubMapValueIterator $r0;
+
+        r1 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $r0 = new java.util.concurrent.ConcurrentSkipListMap$SubMap$SubMapValueIterator;
+
+        specialinvoke $r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap$SubMapValueIterator: void <init>(java.util.concurrent.ConcurrentSkipListMap$SubMap)>(r1);
+
+        return $r0;
+    }
+
+    java.util.Iterator entryIterator()
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r1;
+        java.util.concurrent.ConcurrentSkipListMap$SubMap$SubMapEntryIterator $r0;
+
+        r1 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $r0 = new java.util.concurrent.ConcurrentSkipListMap$SubMap$SubMapEntryIterator;
+
+        specialinvoke $r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap$SubMapEntryIterator: void <init>(java.util.concurrent.ConcurrentSkipListMap$SubMap)>(r1);
+
+        return $r0;
+    }
+
+    public volatile java.util.Set keySet()
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.NavigableSet $r1;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $r1 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.NavigableSet keySet()>();
+
+        return $r1;
+    }
+
+    public volatile java.util.concurrent.ConcurrentNavigableMap descendingMap()
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0, $r1;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $r1 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$SubMap descendingMap()>();
+
+        return $r1;
+    }
+
+    public volatile java.util.concurrent.ConcurrentNavigableMap tailMap(java.lang.Object)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0, $r2;
+        java.lang.Object r1;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$SubMap tailMap(java.lang.Object)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.util.concurrent.ConcurrentNavigableMap headMap(java.lang.Object)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0, $r2;
+        java.lang.Object r1;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$SubMap headMap(java.lang.Object)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.util.concurrent.ConcurrentNavigableMap subMap(java.lang.Object, java.lang.Object)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0, $r3;
+        java.lang.Object r1, r2;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.lang.Object;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$SubMap subMap(java.lang.Object,java.lang.Object)>(r1, r2);
+
+        return $r3;
+    }
+
+    public volatile java.util.concurrent.ConcurrentNavigableMap tailMap(java.lang.Object, boolean)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0, $r2;
+        java.lang.Object r1;
+        boolean z0;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        z0 := @parameter1: boolean;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$SubMap tailMap(java.lang.Object,boolean)>(r1, z0);
+
+        return $r2;
+    }
+
+    public volatile java.util.concurrent.ConcurrentNavigableMap headMap(java.lang.Object, boolean)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0, $r2;
+        java.lang.Object r1;
+        boolean z0;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        z0 := @parameter1: boolean;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$SubMap headMap(java.lang.Object,boolean)>(r1, z0);
+
+        return $r2;
+    }
+
+    public volatile java.util.concurrent.ConcurrentNavigableMap subMap(java.lang.Object, boolean, java.lang.Object, boolean)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0, $r3;
+        java.lang.Object r1, r2;
+        boolean z0, z1;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        z0 := @parameter1: boolean;
+
+        r2 := @parameter2: java.lang.Object;
+
+        z1 := @parameter3: boolean;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$SubMap subMap(java.lang.Object,boolean,java.lang.Object,boolean)>(r1, z0, r2, z1);
+
+        return $r3;
+    }
+
+    public volatile java.util.SortedMap tailMap(java.lang.Object)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0, $r2;
+        java.lang.Object r1;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$SubMap tailMap(java.lang.Object)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.util.SortedMap headMap(java.lang.Object)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0, $r2;
+        java.lang.Object r1;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$SubMap headMap(java.lang.Object)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.util.SortedMap subMap(java.lang.Object, java.lang.Object)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0, $r3;
+        java.lang.Object r1, r2;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.lang.Object;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$SubMap subMap(java.lang.Object,java.lang.Object)>(r1, r2);
+
+        return $r3;
+    }
+
+    public volatile java.util.NavigableMap tailMap(java.lang.Object, boolean)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0, $r2;
+        java.lang.Object r1;
+        boolean z0;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        z0 := @parameter1: boolean;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$SubMap tailMap(java.lang.Object,boolean)>(r1, z0);
+
+        return $r2;
+    }
+
+    public volatile java.util.NavigableMap headMap(java.lang.Object, boolean)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0, $r2;
+        java.lang.Object r1;
+        boolean z0;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        z0 := @parameter1: boolean;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$SubMap headMap(java.lang.Object,boolean)>(r1, z0);
+
+        return $r2;
+    }
+
+    public volatile java.util.NavigableMap subMap(java.lang.Object, boolean, java.lang.Object, boolean)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0, $r3;
+        java.lang.Object r1, r2;
+        boolean z0, z1;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        z0 := @parameter1: boolean;
+
+        r2 := @parameter2: java.lang.Object;
+
+        z1 := @parameter3: boolean;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$SubMap subMap(java.lang.Object,boolean,java.lang.Object,boolean)>(r1, z0, r2, z1);
+
+        return $r3;
+    }
+
+    public volatile java.util.NavigableMap descendingMap()
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0, $r1;
+
+        r0 := @this: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $r1 = virtualinvoke r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap$SubMap descendingMap()>();
+
+        return $r1;
+    }
+
+    static java.util.concurrent.ConcurrentSkipListMap access$100(java.util.concurrent.ConcurrentSkipListMap$SubMap)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        java.util.concurrent.ConcurrentSkipListMap $r1;
+
+        r0 := @parameter0: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $r1 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: java.util.concurrent.ConcurrentSkipListMap m>;
+
+        return $r1;
+    }
+
+    static boolean access$200(java.util.concurrent.ConcurrentSkipListMap$SubMap)
+    {
+        java.util.concurrent.ConcurrentSkipListMap$SubMap r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.util.concurrent.ConcurrentSkipListMap$SubMap;
+
+        $z0 = r0.<java.util.concurrent.ConcurrentSkipListMap$SubMap: boolean isDescending>;
+
+        return $z0;
+    }
+
+    public static void <clinit>()
+    {
+        <java.util.concurrent.ConcurrentSkipListMap$SubMap: long serialVersionUID> = -7647078645895051609L;
+
+        return;
+    }
+}

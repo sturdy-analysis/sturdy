@@ -1,0 +1,1610 @@
+public final class com.sun.media.sound.FFT extends java.lang.Object
+{
+    private final double[] w;
+    private final int fftFrameSize;
+    private final int sign;
+    private final int[] bitm_array;
+    private final int fftFrameSize2;
+
+    public void <init>(int, int)
+    {
+        double[] $r1;
+        int[] $r2, $r3;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, i7, i8, i9;
+        com.sun.media.sound.FFT r0;
+
+        r0 := @this: com.sun.media.sound.FFT;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = staticinvoke <com.sun.media.sound.FFT: double[] computeTwiddleFactors(int,int)>(i0, i1);
+
+        r0.<com.sun.media.sound.FFT: double[] w> = $r1;
+
+        r0.<com.sun.media.sound.FFT: int fftFrameSize> = i0;
+
+        r0.<com.sun.media.sound.FFT: int sign> = i1;
+
+        $i2 = i0 << 1;
+
+        r0.<com.sun.media.sound.FFT: int fftFrameSize2> = $i2;
+
+        $i3 = r0.<com.sun.media.sound.FFT: int fftFrameSize2>;
+
+        $r2 = newarray (int)[$i3];
+
+        r0.<com.sun.media.sound.FFT: int[] bitm_array> = $r2;
+
+        i7 = 2;
+
+     label1:
+        $i4 = r0.<com.sun.media.sound.FFT: int fftFrameSize2>;
+
+        if i7 >= $i4 goto label5;
+
+        i8 = 2;
+
+        i9 = 0;
+
+     label2:
+        $i5 = r0.<com.sun.media.sound.FFT: int fftFrameSize2>;
+
+        if i8 >= $i5 goto label4;
+
+        $i6 = i7 & i8;
+
+        if $i6 == 0 goto label3;
+
+        i9 = i9 + 1;
+
+     label3:
+        i9 = i9 << 1;
+
+        i8 = i8 << 1;
+
+        goto label2;
+
+     label4:
+        $r3 = r0.<com.sun.media.sound.FFT: int[] bitm_array>;
+
+        $r3[i7] = i9;
+
+        i7 = i7 + 2;
+
+        goto label1;
+
+     label5:
+        return;
+    }
+
+    public void transform(double[])
+    {
+        double[] r1, $r2;
+        int $i0, $i1;
+        com.sun.media.sound.FFT r0;
+
+        r0 := @this: com.sun.media.sound.FFT;
+
+        r1 := @parameter0: double[];
+
+        specialinvoke r0.<com.sun.media.sound.FFT: void bitreversal(double[])>(r1);
+
+        $i1 = r0.<com.sun.media.sound.FFT: int fftFrameSize>;
+
+        $i0 = r0.<com.sun.media.sound.FFT: int sign>;
+
+        $r2 = r0.<com.sun.media.sound.FFT: double[] w>;
+
+        staticinvoke <com.sun.media.sound.FFT: void calc(int,double[],int,double[])>($i1, r1, $i0, $r2);
+
+        return;
+    }
+
+    private static final double[] computeTwiddleFactors(int, int)
+    {
+        double[] r0;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23;
+        double $d0, $d1, $d2, $d3, d4, d5, d6, d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, d15, $d16, $d17, $d18, d19, d20, $d21, $d22, $d23, $d24, d25, d26;
+
+        i0 := @parameter0: int;
+
+        i7 := @parameter1: int;
+
+        $d0 = (double) i0;
+
+        $d1 = staticinvoke <java.lang.Math: double log(double)>($d0);
+
+        $d2 = staticinvoke <java.lang.Math: double log(double)>(2.0);
+
+        $d3 = $d1 / $d2;
+
+        i1 = (int) $d3;
+
+        $i2 = i0 - 1;
+
+        $i3 = $i2 * 4;
+
+        r0 = newarray (double)[$i3];
+
+        i8 = 0;
+
+        i9 = 0;
+
+        i10 = 2;
+
+     label1:
+        if i9 >= i1 goto label4;
+
+        i11 = i10;
+
+        i10 = i10 << 1;
+
+        d25 = 1.0;
+
+        d26 = 0.0;
+
+        $i6 = i11 >> 1;
+
+        $d14 = (double) $i6;
+
+        d15 = 3.141592653589793 / $d14;
+
+        $d16 = staticinvoke <java.lang.Math: double cos(double)>(d15);
+
+        $d17 = (double) i7;
+
+        $d18 = staticinvoke <java.lang.Math: double sin(double)>(d15);
+
+        d19 = $d17 * $d18;
+
+        i12 = 0;
+
+     label2:
+        if i12 >= i11 goto label3;
+
+        i13 = i8 + 1;
+
+        r0[i8] = d25;
+
+        i8 = i13 + 1;
+
+        r0[i13] = d26;
+
+        d20 = d25;
+
+        $d22 = d25 * $d16;
+
+        $d21 = d26 * d19;
+
+        d25 = $d22 - $d21;
+
+        $d24 = d20 * d19;
+
+        $d23 = d26 * $d16;
+
+        d26 = $d24 + $d23;
+
+        i12 = i12 + 2;
+
+        goto label2;
+
+     label3:
+        i9 = i9 + 1;
+
+        goto label1;
+
+     label4:
+        i14 = 0;
+
+        $i4 = lengthof r0;
+
+        i15 = $i4 >> 1;
+
+        i16 = 0;
+
+        i17 = 2;
+
+     label5:
+        $i5 = i1 - 1;
+
+        if i16 >= $i5 goto label8;
+
+        i18 = i17;
+
+        i17 = i17 * 2;
+
+        i19 = i14 + i18;
+
+        i20 = 0;
+
+     label6:
+        if i20 >= i18 goto label7;
+
+        i21 = i14 + 1;
+
+        d4 = r0[i14];
+
+        i14 = i21 + 1;
+
+        d5 = r0[i21];
+
+        i22 = i19 + 1;
+
+        d6 = r0[i19];
+
+        i19 = i22 + 1;
+
+        d7 = r0[i22];
+
+        i23 = i15 + 1;
+
+        $d9 = d4 * d6;
+
+        $d8 = d5 * d7;
+
+        $d10 = $d9 - $d8;
+
+        r0[i15] = $d10;
+
+        i15 = i23 + 1;
+
+        $d12 = d4 * d7;
+
+        $d11 = d5 * d6;
+
+        $d13 = $d12 + $d11;
+
+        r0[i23] = $d13;
+
+        i20 = i20 + 2;
+
+        goto label6;
+
+     label7:
+        i16 = i16 + 1;
+
+        goto label5;
+
+     label8:
+        return r0;
+    }
+
+    private static final void calc(int, double[], int, double[])
+    {
+        int i0, i1, i2, $i4;
+        double[] r0, r1;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: double[];
+
+        i2 := @parameter2: int;
+
+        r1 := @parameter3: double[];
+
+        i1 = i0 << 1;
+
+        if 2 < i1 goto label1;
+
+        return;
+
+     label1:
+        $i4 = (int) -1;
+
+        if i2 != $i4 goto label2;
+
+        staticinvoke <com.sun.media.sound.FFT: void calcF4F(int,double[],int,int,double[])>(i0, r0, 0, 2, r1);
+
+        goto label3;
+
+     label2:
+        staticinvoke <com.sun.media.sound.FFT: void calcF4I(int,double[],int,int,double[])>(i0, r0, 0, 2, r1);
+
+     label3:
+        return;
+    }
+
+    private static final void calcF2E(int, double[], int, int, double[])
+    {
+        double[] r0, r1;
+        int i0, i1, $i2, $i3, $i4, $i5, i6, i7, i8, i9;
+        double d0, d1, d2, d3, d4, d5, $d6, $d7, d8, $d9, $d10, d11, $d12, $d13, $d14, $d15;
+
+        i6 := @parameter0: int;
+
+        r1 := @parameter1: double[];
+
+        i7 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        r0 := @parameter4: double[];
+
+        i8 = 0;
+
+     label1:
+        if i8 >= i0 goto label2;
+
+        i9 = i7 + 1;
+
+        d0 = r0[i7];
+
+        i7 = i9 + 1;
+
+        d1 = r0[i9];
+
+        i1 = i8 + i0;
+
+        d2 = r1[i1];
+
+        $i2 = i1 + 1;
+
+        d3 = r1[$i2];
+
+        d4 = r1[i8];
+
+        $i3 = i8 + 1;
+
+        d5 = r1[$i3];
+
+        $d7 = d2 * d0;
+
+        $d6 = d3 * d1;
+
+        d8 = $d7 - $d6;
+
+        $d10 = d2 * d1;
+
+        $d9 = d3 * d0;
+
+        d11 = $d10 + $d9;
+
+        $d12 = d4 - d8;
+
+        r1[i1] = $d12;
+
+        $i4 = i1 + 1;
+
+        $d13 = d5 - d11;
+
+        r1[$i4] = $d13;
+
+        $d14 = d4 + d8;
+
+        r1[i8] = $d14;
+
+        $i5 = i8 + 1;
+
+        $d15 = d5 + d11;
+
+        r1[$i5] = $d15;
+
+        i8 = i8 + 2;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private static final void calcF4F(int, double[], int, int, double[])
+    {
+        double[] r0, r1;
+        int i0, i1, $i2, i3, $i4, i5, i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34, i35, i36, i37, i38, i39, i40, i41, i42, i43, i44, i45, i46;
+        double d0, d1, d2, d3, d4, $d5, $d6, $d7, $d8, $d9, $d10, d11, $d12, $d13, d14, $d15, $d16, d17, $d18, $d19, d20, d21, d22, d23, d24, d25, d26, d27, d28, d29, d30, d31, d32, d33, d34, d35, d36, d37, d38, d39, d40, d41, d42, d43, d44, d45, d46, d47, d48, d49, d50, d51, d52, d53, d54, d55, d56, d57, d58, d59, d60, d61, d62, d63, d64, d65, d66, d67, d68, d69, d70, d71;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: double[];
+
+        i24 := @parameter2: int;
+
+        i25 := @parameter3: int;
+
+        r0 := @parameter4: double[];
+
+        i1 = i0 << 1;
+
+        $i2 = lengthof r0;
+
+        i3 = $i2 >> 1;
+
+     label01:
+        if i25 >= i1 goto label10;
+
+        $i4 = i25 << 2;
+
+        if $i4 != i1 goto label02;
+
+        staticinvoke <com.sun.media.sound.FFT: void calcF4FE(int,double[],int,int,double[])>(i0, r1, i24, i25, r0);
+
+        return;
+
+     label02:
+        i5 = i25;
+
+        i6 = i25 << 1;
+
+        if i6 != i1 goto label03;
+
+        staticinvoke <com.sun.media.sound.FFT: void calcF2E(int,double[],int,int,double[])>(i0, r1, i24, i25, r0);
+
+        return;
+
+     label03:
+        i25 = i25 << 2;
+
+        i26 = i24 + i5;
+
+        i27 = i24 + i3;
+
+        i28 = i24 + 2;
+
+        i29 = i26 + 2;
+
+        i30 = i27 + 2;
+
+        i31 = 0;
+
+     label04:
+        if i31 >= i1 goto label05;
+
+        i32 = i31 + i5;
+
+        d21 = r1[i32];
+
+        $i16 = i32 + 1;
+
+        d22 = r1[$i16];
+
+        d23 = r1[i31];
+
+        $i17 = i31 + 1;
+
+        d24 = r1[$i17];
+
+        i33 = i31 + i6;
+
+        i34 = i32 + i6;
+
+        d25 = r1[i34];
+
+        $i18 = i34 + 1;
+
+        d26 = r1[$i18];
+
+        d27 = r1[i33];
+
+        $i19 = i33 + 1;
+
+        d28 = r1[$i19];
+
+        d29 = d23 - d21;
+
+        d30 = d24 - d22;
+
+        d31 = d23 + d21;
+
+        d32 = d24 + d22;
+
+        d33 = d25 - d27;
+
+        d34 = d26 - d28;
+
+        d35 = d29 + d34;
+
+        d36 = d30 - d33;
+
+        d37 = d29 - d34;
+
+        d38 = d30 + d33;
+
+        d39 = d27 + d25;
+
+        d40 = d28 + d26;
+
+        d41 = d31 - d39;
+
+        d42 = d32 - d40;
+
+        d43 = d31 + d39;
+
+        d44 = d32 + d40;
+
+        r1[i34] = d35;
+
+        $i20 = i34 + 1;
+
+        r1[$i20] = d36;
+
+        r1[i33] = d41;
+
+        $i21 = i33 + 1;
+
+        r1[$i21] = d42;
+
+        i35 = i33 - i6;
+
+        i36 = i34 - i6;
+
+        r1[i36] = d37;
+
+        $i22 = i36 + 1;
+
+        r1[$i22] = d38;
+
+        r1[i35] = d43;
+
+        $i23 = i35 + 1;
+
+        r1[$i23] = d44;
+
+        i31 = i35 + i25;
+
+        goto label04;
+
+     label05:
+        i37 = 2;
+
+     label06:
+        if i37 >= i5 goto label09;
+
+        i38 = i28 + 1;
+
+        d45 = r0[i28];
+
+        i28 = i38 + 1;
+
+        d0 = r0[i38];
+
+        i39 = i29 + 1;
+
+        d1 = r0[i29];
+
+        i29 = i39 + 1;
+
+        d2 = r0[i39];
+
+        i40 = i30 + 1;
+
+        d3 = r0[i30];
+
+        i30 = i40 + 1;
+
+        d4 = r0[i40];
+
+        i41 = i37;
+
+     label07:
+        if i41 >= i1 goto label08;
+
+        i42 = i41 + i5;
+
+        d46 = r1[i42];
+
+        $i8 = i42 + 1;
+
+        d47 = r1[$i8];
+
+        d48 = r1[i41];
+
+        $i9 = i41 + 1;
+
+        d49 = r1[$i9];
+
+        i43 = i41 + i6;
+
+        i44 = i42 + i6;
+
+        d50 = r1[i44];
+
+        $i10 = i44 + 1;
+
+        d51 = r1[$i10];
+
+        d52 = r1[i43];
+
+        $i11 = i43 + 1;
+
+        d53 = r1[$i11];
+
+        $d6 = d46 * d45;
+
+        $d5 = d47 * d0;
+
+        d54 = $d6 - $d5;
+
+        $d8 = d46 * d0;
+
+        $d7 = d47 * d45;
+
+        d55 = $d8 + $d7;
+
+        d56 = d48 - d54;
+
+        d57 = d49 - d55;
+
+        d58 = d48 + d54;
+
+        d59 = d49 + d55;
+
+        $d10 = d52 * d1;
+
+        $d9 = d53 * d2;
+
+        d11 = $d10 - $d9;
+
+        $d13 = d52 * d2;
+
+        $d12 = d53 * d1;
+
+        d14 = $d13 + $d12;
+
+        $d16 = d50 * d3;
+
+        $d15 = d51 * d4;
+
+        d17 = $d16 - $d15;
+
+        $d19 = d50 * d4;
+
+        $d18 = d51 * d3;
+
+        d20 = $d19 + $d18;
+
+        d60 = d17 - d11;
+
+        d61 = d20 - d14;
+
+        d62 = d56 + d61;
+
+        d63 = d57 - d60;
+
+        d64 = d56 - d61;
+
+        d65 = d57 + d60;
+
+        d66 = d11 + d17;
+
+        d67 = d14 + d20;
+
+        d68 = d58 - d66;
+
+        d69 = d59 - d67;
+
+        d70 = d58 + d66;
+
+        d71 = d59 + d67;
+
+        r1[i44] = d62;
+
+        $i12 = i44 + 1;
+
+        r1[$i12] = d63;
+
+        r1[i43] = d68;
+
+        $i13 = i43 + 1;
+
+        r1[$i13] = d69;
+
+        i45 = i43 - i6;
+
+        i46 = i44 - i6;
+
+        r1[i46] = d64;
+
+        $i14 = i46 + 1;
+
+        r1[$i14] = d65;
+
+        r1[i45] = d70;
+
+        $i15 = i45 + 1;
+
+        r1[$i15] = d71;
+
+        i41 = i45 + i25;
+
+        goto label07;
+
+     label08:
+        i37 = i37 + 2;
+
+        goto label06;
+
+     label09:
+        $i7 = i5 << 1;
+
+        i24 = i28 + $i7;
+
+        goto label01;
+
+     label10:
+        staticinvoke <com.sun.media.sound.FFT: void calcF2E(int,double[],int,int,double[])>(i0, r1, i24, i25, r0);
+
+        return;
+    }
+
+    private static final void calcF4I(int, double[], int, int, double[])
+    {
+        double[] r0, r1;
+        int i0, i1, $i2, i3, $i4, i5, i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34, i35, i36, i37, i38, i39, i40, i41, i42, i43, i44, i45, i46;
+        double d0, d1, d2, d3, d4, $d5, $d6, $d7, $d8, $d9, $d10, d11, $d12, $d13, d14, $d15, $d16, d17, $d18, $d19, d20, d21, d22, d23, d24, d25, d26, d27, d28, d29, d30, d31, d32, d33, d34, d35, d36, d37, d38, d39, d40, d41, d42, d43, d44, d45, d46, d47, d48, d49, d50, d51, d52, d53, d54, d55, d56, d57, d58, d59, d60, d61, d62, d63, d64, d65, d66, d67, d68, d69, d70, d71;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: double[];
+
+        i24 := @parameter2: int;
+
+        i25 := @parameter3: int;
+
+        r0 := @parameter4: double[];
+
+        i1 = i0 << 1;
+
+        $i2 = lengthof r0;
+
+        i3 = $i2 >> 1;
+
+     label01:
+        if i25 >= i1 goto label10;
+
+        $i4 = i25 << 2;
+
+        if $i4 != i1 goto label02;
+
+        staticinvoke <com.sun.media.sound.FFT: void calcF4IE(int,double[],int,int,double[])>(i0, r1, i24, i25, r0);
+
+        return;
+
+     label02:
+        i5 = i25;
+
+        i6 = i25 << 1;
+
+        if i6 != i1 goto label03;
+
+        staticinvoke <com.sun.media.sound.FFT: void calcF2E(int,double[],int,int,double[])>(i0, r1, i24, i25, r0);
+
+        return;
+
+     label03:
+        i25 = i25 << 2;
+
+        i26 = i24 + i5;
+
+        i27 = i24 + i3;
+
+        i28 = i24 + 2;
+
+        i29 = i26 + 2;
+
+        i30 = i27 + 2;
+
+        i31 = 0;
+
+     label04:
+        if i31 >= i1 goto label05;
+
+        i32 = i31 + i5;
+
+        d21 = r1[i32];
+
+        $i16 = i32 + 1;
+
+        d22 = r1[$i16];
+
+        d23 = r1[i31];
+
+        $i17 = i31 + 1;
+
+        d24 = r1[$i17];
+
+        i33 = i31 + i6;
+
+        i34 = i32 + i6;
+
+        d25 = r1[i34];
+
+        $i18 = i34 + 1;
+
+        d26 = r1[$i18];
+
+        d27 = r1[i33];
+
+        $i19 = i33 + 1;
+
+        d28 = r1[$i19];
+
+        d29 = d23 - d21;
+
+        d30 = d24 - d22;
+
+        d31 = d23 + d21;
+
+        d32 = d24 + d22;
+
+        d33 = d27 - d25;
+
+        d34 = d28 - d26;
+
+        d35 = d29 + d34;
+
+        d36 = d30 - d33;
+
+        d37 = d29 - d34;
+
+        d38 = d30 + d33;
+
+        d39 = d27 + d25;
+
+        d40 = d28 + d26;
+
+        d41 = d31 - d39;
+
+        d42 = d32 - d40;
+
+        d43 = d31 + d39;
+
+        d44 = d32 + d40;
+
+        r1[i34] = d35;
+
+        $i20 = i34 + 1;
+
+        r1[$i20] = d36;
+
+        r1[i33] = d41;
+
+        $i21 = i33 + 1;
+
+        r1[$i21] = d42;
+
+        i35 = i33 - i6;
+
+        i36 = i34 - i6;
+
+        r1[i36] = d37;
+
+        $i22 = i36 + 1;
+
+        r1[$i22] = d38;
+
+        r1[i35] = d43;
+
+        $i23 = i35 + 1;
+
+        r1[$i23] = d44;
+
+        i31 = i35 + i25;
+
+        goto label04;
+
+     label05:
+        i37 = 2;
+
+     label06:
+        if i37 >= i5 goto label09;
+
+        i38 = i28 + 1;
+
+        d45 = r0[i28];
+
+        i28 = i38 + 1;
+
+        d0 = r0[i38];
+
+        i39 = i29 + 1;
+
+        d1 = r0[i29];
+
+        i29 = i39 + 1;
+
+        d2 = r0[i39];
+
+        i40 = i30 + 1;
+
+        d3 = r0[i30];
+
+        i30 = i40 + 1;
+
+        d4 = r0[i40];
+
+        i41 = i37;
+
+     label07:
+        if i41 >= i1 goto label08;
+
+        i42 = i41 + i5;
+
+        d46 = r1[i42];
+
+        $i8 = i42 + 1;
+
+        d47 = r1[$i8];
+
+        d48 = r1[i41];
+
+        $i9 = i41 + 1;
+
+        d49 = r1[$i9];
+
+        i43 = i41 + i6;
+
+        i44 = i42 + i6;
+
+        d50 = r1[i44];
+
+        $i10 = i44 + 1;
+
+        d51 = r1[$i10];
+
+        d52 = r1[i43];
+
+        $i11 = i43 + 1;
+
+        d53 = r1[$i11];
+
+        $d6 = d46 * d45;
+
+        $d5 = d47 * d0;
+
+        d54 = $d6 - $d5;
+
+        $d8 = d46 * d0;
+
+        $d7 = d47 * d45;
+
+        d55 = $d8 + $d7;
+
+        d56 = d48 - d54;
+
+        d57 = d49 - d55;
+
+        d58 = d48 + d54;
+
+        d59 = d49 + d55;
+
+        $d10 = d52 * d1;
+
+        $d9 = d53 * d2;
+
+        d11 = $d10 - $d9;
+
+        $d13 = d52 * d2;
+
+        $d12 = d53 * d1;
+
+        d14 = $d13 + $d12;
+
+        $d16 = d50 * d3;
+
+        $d15 = d51 * d4;
+
+        d17 = $d16 - $d15;
+
+        $d19 = d50 * d4;
+
+        $d18 = d51 * d3;
+
+        d20 = $d19 + $d18;
+
+        d60 = d11 - d17;
+
+        d61 = d14 - d20;
+
+        d62 = d56 + d61;
+
+        d63 = d57 - d60;
+
+        d64 = d56 - d61;
+
+        d65 = d57 + d60;
+
+        d66 = d11 + d17;
+
+        d67 = d14 + d20;
+
+        d68 = d58 - d66;
+
+        d69 = d59 - d67;
+
+        d70 = d58 + d66;
+
+        d71 = d59 + d67;
+
+        r1[i44] = d62;
+
+        $i12 = i44 + 1;
+
+        r1[$i12] = d63;
+
+        r1[i43] = d68;
+
+        $i13 = i43 + 1;
+
+        r1[$i13] = d69;
+
+        i45 = i43 - i6;
+
+        i46 = i44 - i6;
+
+        r1[i46] = d64;
+
+        $i14 = i46 + 1;
+
+        r1[$i14] = d65;
+
+        r1[i45] = d70;
+
+        $i15 = i45 + 1;
+
+        r1[$i15] = d71;
+
+        i41 = i45 + i25;
+
+        goto label07;
+
+     label08:
+        i37 = i37 + 2;
+
+        goto label06;
+
+     label09:
+        $i7 = i5 << 1;
+
+        i24 = i28 + $i7;
+
+        goto label01;
+
+     label10:
+        staticinvoke <com.sun.media.sound.FFT: void calcF2E(int,double[],int,int,double[])>(i0, r1, i24, i25, r0);
+
+        return;
+    }
+
+    private static final void calcF4FE(int, double[], int, int, double[])
+    {
+        double[] r0, r1;
+        int i0, i1, $i2, i3, i4, i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27;
+        double d0, d1, d2, d3, d4, d5, $d6, $d7, $d8, $d9, $d10, $d11, d12, $d13, $d14, d15, $d16, $d17, d18, $d19, $d20, d21, d22, d23, d24, d25, d26, d27, d28, d29, d30, d31, d32, d33, d34, d35, d36, d37, d38, d39, d40, d41, d42, d43, d44, d45, d46, d47;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: double[];
+
+        i15 := @parameter2: int;
+
+        i16 := @parameter3: int;
+
+        r0 := @parameter4: double[];
+
+        i1 = i0 << 1;
+
+        $i2 = lengthof r0;
+
+        i3 = $i2 >> 1;
+
+     label1:
+        if i16 >= i1 goto label5;
+
+        i4 = i16;
+
+        i5 = i16 << 1;
+
+        if i5 != i1 goto label2;
+
+        staticinvoke <com.sun.media.sound.FFT: void calcF2E(int,double[],int,int,double[])>(i0, r1, i15, i16, r0);
+
+        return;
+
+     label2:
+        i16 = i16 << 2;
+
+        i17 = i15 + i4;
+
+        i18 = i15 + i3;
+
+        i19 = 0;
+
+     label3:
+        if i19 >= i4 goto label4;
+
+        i20 = i15 + 1;
+
+        d0 = r0[i15];
+
+        i15 = i20 + 1;
+
+        d1 = r0[i20];
+
+        i21 = i17 + 1;
+
+        d2 = r0[i17];
+
+        i17 = i21 + 1;
+
+        d3 = r0[i21];
+
+        i22 = i18 + 1;
+
+        d4 = r0[i18];
+
+        i18 = i22 + 1;
+
+        d5 = r0[i22];
+
+        i23 = i19 + i4;
+
+        d22 = r1[i23];
+
+        $i7 = i23 + 1;
+
+        d23 = r1[$i7];
+
+        d24 = r1[i19];
+
+        $i8 = i19 + 1;
+
+        d25 = r1[$i8];
+
+        i24 = i19 + i5;
+
+        i25 = i23 + i5;
+
+        d26 = r1[i25];
+
+        $i9 = i25 + 1;
+
+        d27 = r1[$i9];
+
+        d28 = r1[i24];
+
+        $i10 = i24 + 1;
+
+        d29 = r1[$i10];
+
+        $d7 = d22 * d0;
+
+        $d6 = d23 * d1;
+
+        d30 = $d7 - $d6;
+
+        $d9 = d22 * d1;
+
+        $d8 = d23 * d0;
+
+        d31 = $d9 + $d8;
+
+        d32 = d24 - d30;
+
+        d33 = d25 - d31;
+
+        d34 = d24 + d30;
+
+        d35 = d25 + d31;
+
+        $d11 = d28 * d2;
+
+        $d10 = d29 * d3;
+
+        d12 = $d11 - $d10;
+
+        $d14 = d28 * d3;
+
+        $d13 = d29 * d2;
+
+        d15 = $d14 + $d13;
+
+        $d17 = d26 * d4;
+
+        $d16 = d27 * d5;
+
+        d18 = $d17 - $d16;
+
+        $d20 = d26 * d5;
+
+        $d19 = d27 * d4;
+
+        d21 = $d20 + $d19;
+
+        d36 = d18 - d12;
+
+        d37 = d21 - d15;
+
+        d38 = d32 + d37;
+
+        d39 = d33 - d36;
+
+        d40 = d32 - d37;
+
+        d41 = d33 + d36;
+
+        d42 = d12 + d18;
+
+        d43 = d15 + d21;
+
+        d44 = d34 - d42;
+
+        d45 = d35 - d43;
+
+        d46 = d34 + d42;
+
+        d47 = d35 + d43;
+
+        r1[i25] = d38;
+
+        $i11 = i25 + 1;
+
+        r1[$i11] = d39;
+
+        r1[i24] = d44;
+
+        $i12 = i24 + 1;
+
+        r1[$i12] = d45;
+
+        i26 = i24 - i5;
+
+        i27 = i25 - i5;
+
+        r1[i27] = d40;
+
+        $i13 = i27 + 1;
+
+        r1[$i13] = d41;
+
+        r1[i26] = d46;
+
+        $i14 = i26 + 1;
+
+        r1[$i14] = d47;
+
+        i19 = i26 + 2;
+
+        goto label3;
+
+     label4:
+        $i6 = i4 << 1;
+
+        i15 = i15 + $i6;
+
+        goto label1;
+
+     label5:
+        return;
+    }
+
+    private static final void calcF4IE(int, double[], int, int, double[])
+    {
+        double[] r0, r1;
+        int i0, i1, $i2, i3, i4, i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27;
+        double d0, d1, d2, d3, d4, d5, $d6, $d7, $d8, $d9, $d10, $d11, d12, $d13, $d14, d15, $d16, $d17, d18, $d19, $d20, d21, d22, d23, d24, d25, d26, d27, d28, d29, d30, d31, d32, d33, d34, d35, d36, d37, d38, d39, d40, d41, d42, d43, d44, d45, d46, d47;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: double[];
+
+        i15 := @parameter2: int;
+
+        i16 := @parameter3: int;
+
+        r0 := @parameter4: double[];
+
+        i1 = i0 << 1;
+
+        $i2 = lengthof r0;
+
+        i3 = $i2 >> 1;
+
+     label1:
+        if i16 >= i1 goto label5;
+
+        i4 = i16;
+
+        i5 = i16 << 1;
+
+        if i5 != i1 goto label2;
+
+        staticinvoke <com.sun.media.sound.FFT: void calcF2E(int,double[],int,int,double[])>(i0, r1, i15, i16, r0);
+
+        return;
+
+     label2:
+        i16 = i16 << 2;
+
+        i17 = i15 + i4;
+
+        i18 = i15 + i3;
+
+        i19 = 0;
+
+     label3:
+        if i19 >= i4 goto label4;
+
+        i20 = i15 + 1;
+
+        d0 = r0[i15];
+
+        i15 = i20 + 1;
+
+        d1 = r0[i20];
+
+        i21 = i17 + 1;
+
+        d2 = r0[i17];
+
+        i17 = i21 + 1;
+
+        d3 = r0[i21];
+
+        i22 = i18 + 1;
+
+        d4 = r0[i18];
+
+        i18 = i22 + 1;
+
+        d5 = r0[i22];
+
+        i23 = i19 + i4;
+
+        d22 = r1[i23];
+
+        $i7 = i23 + 1;
+
+        d23 = r1[$i7];
+
+        d24 = r1[i19];
+
+        $i8 = i19 + 1;
+
+        d25 = r1[$i8];
+
+        i24 = i19 + i5;
+
+        i25 = i23 + i5;
+
+        d26 = r1[i25];
+
+        $i9 = i25 + 1;
+
+        d27 = r1[$i9];
+
+        d28 = r1[i24];
+
+        $i10 = i24 + 1;
+
+        d29 = r1[$i10];
+
+        $d7 = d22 * d0;
+
+        $d6 = d23 * d1;
+
+        d30 = $d7 - $d6;
+
+        $d9 = d22 * d1;
+
+        $d8 = d23 * d0;
+
+        d31 = $d9 + $d8;
+
+        d32 = d24 - d30;
+
+        d33 = d25 - d31;
+
+        d34 = d24 + d30;
+
+        d35 = d25 + d31;
+
+        $d11 = d28 * d2;
+
+        $d10 = d29 * d3;
+
+        d12 = $d11 - $d10;
+
+        $d14 = d28 * d3;
+
+        $d13 = d29 * d2;
+
+        d15 = $d14 + $d13;
+
+        $d17 = d26 * d4;
+
+        $d16 = d27 * d5;
+
+        d18 = $d17 - $d16;
+
+        $d20 = d26 * d5;
+
+        $d19 = d27 * d4;
+
+        d21 = $d20 + $d19;
+
+        d36 = d12 - d18;
+
+        d37 = d15 - d21;
+
+        d38 = d32 + d37;
+
+        d39 = d33 - d36;
+
+        d40 = d32 - d37;
+
+        d41 = d33 + d36;
+
+        d42 = d12 + d18;
+
+        d43 = d15 + d21;
+
+        d44 = d34 - d42;
+
+        d45 = d35 - d43;
+
+        d46 = d34 + d42;
+
+        d47 = d35 + d43;
+
+        r1[i25] = d38;
+
+        $i11 = i25 + 1;
+
+        r1[$i11] = d39;
+
+        r1[i24] = d44;
+
+        $i12 = i24 + 1;
+
+        r1[$i12] = d45;
+
+        i26 = i24 - i5;
+
+        i27 = i25 - i5;
+
+        r1[i27] = d40;
+
+        $i13 = i27 + 1;
+
+        r1[$i13] = d41;
+
+        r1[i26] = d46;
+
+        $i14 = i26 + 1;
+
+        r1[$i14] = d47;
+
+        i19 = i26 + 2;
+
+        goto label3;
+
+     label4:
+        $i6 = i4 << 1;
+
+        i15 = i15 + $i6;
+
+        goto label1;
+
+     label5:
+        return;
+    }
+
+    private final void bitreversal(double[])
+    {
+        int[] $r1;
+        com.sun.media.sound.FFT r0;
+        double[] r2;
+        int $i0, $i1, i2, $i3, i4, $i5, $i6, $i7, i8, i9, i10, i11, i12, i13, i14, i15, i16;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, d8, d9, d10, d11;
+
+        r0 := @this: com.sun.media.sound.FFT;
+
+        r2 := @parameter0: double[];
+
+        $i0 = r0.<com.sun.media.sound.FFT: int fftFrameSize>;
+
+        if $i0 >= 4 goto label1;
+
+        return;
+
+     label1:
+        $i1 = r0.<com.sun.media.sound.FFT: int fftFrameSize2>;
+
+        i2 = $i1 - 2;
+
+        i8 = 0;
+
+     label2:
+        $i3 = r0.<com.sun.media.sound.FFT: int fftFrameSize>;
+
+        if i8 >= $i3 goto label4;
+
+        $r1 = r0.<com.sun.media.sound.FFT: int[] bitm_array>;
+
+        i4 = $r1[i8];
+
+        if i8 >= i4 goto label3;
+
+        d8 = r2[i8];
+
+        $d2 = r2[i4];
+
+        r2[i8] = $d2;
+
+        r2[i4] = d8;
+
+        i9 = i8 + 1;
+
+        i10 = i4 + 1;
+
+        d9 = r2[i9];
+
+        $d3 = r2[i10];
+
+        r2[i9] = $d3;
+
+        r2[i10] = d9;
+
+        i11 = i2 - i8;
+
+        i12 = i2 - i4;
+
+        d10 = r2[i11];
+
+        $d4 = r2[i12];
+
+        r2[i11] = $d4;
+
+        r2[i12] = d10;
+
+        i13 = i11 + 1;
+
+        i14 = i12 + 1;
+
+        d11 = r2[i13];
+
+        $d5 = r2[i14];
+
+        r2[i13] = $d5;
+
+        r2[i14] = d11;
+
+     label3:
+        $i5 = r0.<com.sun.media.sound.FFT: int fftFrameSize>;
+
+        $i6 = i4 + $i5;
+
+        $i7 = i8 + 2;
+
+        $d6 = r2[$i7];
+
+        $d0 = r2[$i6];
+
+        r2[$i7] = $d0;
+
+        r2[$i6] = $d6;
+
+        i15 = $i7 + 1;
+
+        i16 = $i6 + 1;
+
+        $d7 = r2[i15];
+
+        $d1 = r2[i16];
+
+        r2[i15] = $d1;
+
+        r2[i16] = $d7;
+
+        i8 = i8 + 4;
+
+        goto label2;
+
+     label4:
+        return;
+    }
+}

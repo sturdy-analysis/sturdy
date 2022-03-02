@@ -1,0 +1,363 @@
+public class com.sun.corba.se.impl.encoding.BufferManagerWriteCollect extends com.sun.corba.se.impl.encoding.BufferManagerWrite
+{
+    private com.sun.corba.se.impl.encoding.BufferQueue queue;
+    private boolean sentFragment;
+    private boolean debug;
+
+    void <init>(com.sun.corba.se.spi.orb.ORB)
+    {
+        com.sun.corba.se.impl.encoding.BufferQueue $r2;
+        com.sun.corba.se.impl.encoding.BufferManagerWriteCollect r0;
+        com.sun.corba.se.spi.orb.ORB r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.BufferManagerWriteCollect;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        specialinvoke r0.<com.sun.corba.se.impl.encoding.BufferManagerWrite: void <init>(com.sun.corba.se.spi.orb.ORB)>(r1);
+
+        $r2 = new com.sun.corba.se.impl.encoding.BufferQueue;
+
+        specialinvoke $r2.<com.sun.corba.se.impl.encoding.BufferQueue: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: com.sun.corba.se.impl.encoding.BufferQueue queue> = $r2;
+
+        r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: boolean sentFragment> = 0;
+
+        r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: boolean debug> = 0;
+
+        if r1 == null goto label1;
+
+        $z0 = r1.<com.sun.corba.se.spi.orb.ORB: boolean transportDebugFlag>;
+
+        r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: boolean debug> = $z0;
+
+     label1:
+        return;
+    }
+
+    public boolean sentFragment()
+    {
+        com.sun.corba.se.impl.encoding.BufferManagerWriteCollect r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.BufferManagerWriteCollect;
+
+        $z0 = r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: boolean sentFragment>;
+
+        return $z0;
+    }
+
+    public int getBufferSize()
+    {
+        int $i0;
+        com.sun.corba.se.spi.orb.ORBData $r2;
+        com.sun.corba.se.impl.encoding.BufferManagerWriteCollect r0;
+        com.sun.corba.se.spi.orb.ORB $r1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.BufferManagerWriteCollect;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.orb.ORBData getORBData()>();
+
+        $i0 = interfaceinvoke $r2.<com.sun.corba.se.spi.orb.ORBData: int getGIOPFragmentSize()>();
+
+        return $i0;
+    }
+
+    public void overflow(com.sun.corba.se.impl.encoding.ByteBufferWithInfo)
+    {
+        com.sun.corba.se.impl.encoding.CDROutputObject $r7, $r9, $r13;
+        com.sun.corba.se.impl.protocol.giopmsgheaders.FragmentMessage $r11;
+        java.nio.ByteBuffer $r1;
+        com.sun.corba.se.spi.orb.ORB $r5;
+        java.lang.Object $r6, $r8, $r12;
+        com.sun.corba.se.impl.encoding.ByteBufferWithInfo r0, $r4;
+        com.sun.corba.se.impl.encoding.BufferQueue $r3;
+        com.sun.corba.se.impl.encoding.BufferManagerWriteCollect r2;
+        com.sun.corba.se.impl.protocol.giopmsgheaders.Message $r10;
+
+        r2 := @this: com.sun.corba.se.impl.encoding.BufferManagerWriteCollect;
+
+        r0 := @parameter0: com.sun.corba.se.impl.encoding.ByteBufferWithInfo;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: java.nio.ByteBuffer byteBuffer>;
+
+        staticinvoke <com.sun.corba.se.impl.protocol.giopmsgheaders.MessageBase: void setFlag(java.nio.ByteBuffer,int)>($r1, 2);
+
+        $r3 = r2.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: com.sun.corba.se.impl.encoding.BufferQueue queue>;
+
+        virtualinvoke $r3.<com.sun.corba.se.impl.encoding.BufferQueue: void enqueue(com.sun.corba.se.impl.encoding.ByteBufferWithInfo)>(r0);
+
+        $r4 = new com.sun.corba.se.impl.encoding.ByteBufferWithInfo;
+
+        $r5 = r2.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: com.sun.corba.se.spi.orb.ORB orb>;
+
+        specialinvoke $r4.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: void <init>(org.omg.CORBA.ORB,com.sun.corba.se.impl.encoding.BufferManagerWrite)>($r5, r2);
+
+        $r4.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: boolean fragmented> = 1;
+
+        $r6 = r2.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: java.lang.Object outputObject>;
+
+        $r7 = (com.sun.corba.se.impl.encoding.CDROutputObject) $r6;
+
+        virtualinvoke $r7.<com.sun.corba.se.impl.encoding.CDROutputObject: void setByteBufferWithInfo(com.sun.corba.se.impl.encoding.ByteBufferWithInfo)>($r4);
+
+        $r8 = r2.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: java.lang.Object outputObject>;
+
+        $r9 = (com.sun.corba.se.impl.encoding.CDROutputObject) $r8;
+
+        $r10 = virtualinvoke $r9.<com.sun.corba.se.impl.encoding.CDROutputObject: com.sun.corba.se.impl.protocol.giopmsgheaders.Message getMessageHeader()>();
+
+        $r11 = interfaceinvoke $r10.<com.sun.corba.se.impl.protocol.giopmsgheaders.Message: com.sun.corba.se.impl.protocol.giopmsgheaders.FragmentMessage createFragmentMessage()>();
+
+        $r12 = r2.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: java.lang.Object outputObject>;
+
+        $r13 = (com.sun.corba.se.impl.encoding.CDROutputObject) $r12;
+
+        interfaceinvoke $r11.<com.sun.corba.se.impl.protocol.giopmsgheaders.FragmentMessage: void write(org.omg.CORBA.portable.OutputStream)>($r13);
+
+        return;
+    }
+
+    public void sendMessage()
+    {
+        java.lang.Throwable $r22;
+        com.sun.corba.se.impl.encoding.CDROutputObject $r2, $r14, $r16;
+        com.sun.corba.se.pept.protocol.MessageMediator $r8;
+        java.nio.ByteBuffer $r17, $r18;
+        com.sun.corba.se.pept.transport.Connection $r9;
+        com.sun.corba.se.pept.encoding.OutputObject $r7;
+        java.lang.StringBuffer $r19, $r20;
+        int $i0;
+        java.lang.String $r21;
+        com.sun.corba.se.impl.encoding.BufferQueue $r3;
+        com.sun.corba.se.impl.encoding.ByteBufferWithInfo $r4, r23;
+        com.sun.corba.se.impl.encoding.BufferManagerWriteCollect r0;
+        boolean $z0, $z1;
+        java.util.Iterator $r5;
+        com.sun.corba.se.spi.orb.ORB $r10;
+        com.sun.corba.se.pept.transport.ByteBufferPool $r11;
+        java.lang.Object $r1, $r6, $r12, $r13, $r15;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.BufferManagerWriteCollect;
+
+        $r3 = r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: com.sun.corba.se.impl.encoding.BufferQueue queue>;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: java.lang.Object outputObject>;
+
+        $r2 = (com.sun.corba.se.impl.encoding.CDROutputObject) $r1;
+
+        $r4 = virtualinvoke $r2.<com.sun.corba.se.impl.encoding.CDROutputObject: com.sun.corba.se.impl.encoding.ByteBufferWithInfo getByteBufferWithInfo()>();
+
+        virtualinvoke $r3.<com.sun.corba.se.impl.encoding.BufferQueue: void enqueue(com.sun.corba.se.impl.encoding.ByteBufferWithInfo)>($r4);
+
+        $r5 = specialinvoke r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: java.util.Iterator iterator()>();
+
+        $r6 = r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: java.lang.Object outputObject>;
+
+        $r7 = (com.sun.corba.se.pept.encoding.OutputObject) $r6;
+
+        $r8 = interfaceinvoke $r7.<com.sun.corba.se.pept.encoding.OutputObject: com.sun.corba.se.pept.protocol.MessageMediator getMessageMediator()>();
+
+        $r9 = interfaceinvoke $r8.<com.sun.corba.se.pept.protocol.MessageMediator: com.sun.corba.se.pept.transport.Connection getConnection()>();
+
+        interfaceinvoke $r9.<com.sun.corba.se.pept.transport.Connection: void writeLock()>();
+
+     label1:
+        $r10 = r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r11 = virtualinvoke $r10.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.pept.transport.ByteBufferPool getByteBufferPool()>();
+
+     label2:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r12 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r23 = (com.sun.corba.se.impl.encoding.ByteBufferWithInfo) $r12;
+
+        $r13 = r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: java.lang.Object outputObject>;
+
+        $r14 = (com.sun.corba.se.impl.encoding.CDROutputObject) $r13;
+
+        virtualinvoke $r14.<com.sun.corba.se.impl.encoding.CDROutputObject: void setByteBufferWithInfo(com.sun.corba.se.impl.encoding.ByteBufferWithInfo)>(r23);
+
+        $r15 = r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: java.lang.Object outputObject>;
+
+        $r16 = (com.sun.corba.se.impl.encoding.CDROutputObject) $r15;
+
+        interfaceinvoke $r9.<com.sun.corba.se.pept.transport.Connection: void sendWithoutLock(com.sun.corba.se.pept.encoding.OutputObject)>($r16);
+
+        r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: boolean sentFragment> = 1;
+
+        $z1 = r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: boolean debug>;
+
+        if $z1 == 0 goto label3;
+
+        $r18 = r23.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: java.nio.ByteBuffer byteBuffer>;
+
+        $i0 = staticinvoke <java.lang.System: int identityHashCode(java.lang.Object)>($r18);
+
+        $r19 = new java.lang.StringBuffer;
+
+        specialinvoke $r19.<java.lang.StringBuffer: void <init>(int)>(80);
+
+        virtualinvoke $r19.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("sendMessage() - releasing ByteBuffer id (");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuffer: java.lang.StringBuffer append(int)>($i0);
+
+        virtualinvoke $r20.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>(") to ByteBufferPool.");
+
+        $r21 = virtualinvoke $r19.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: void dprint(java.lang.String)>($r21);
+
+     label3:
+        $r17 = r23.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: java.nio.ByteBuffer byteBuffer>;
+
+        interfaceinvoke $r11.<com.sun.corba.se.pept.transport.ByteBufferPool: void releaseByteBuffer(java.nio.ByteBuffer)>($r17);
+
+        r23.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: java.nio.ByteBuffer byteBuffer> = null;
+
+        goto label2;
+
+     label4:
+        r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: boolean sentFullMessage> = 1;
+
+     label5:
+        interfaceinvoke $r9.<com.sun.corba.se.pept.transport.Connection: void writeUnlock()>();
+
+        goto label8;
+
+     label6:
+        $r22 := @caughtexception;
+
+     label7:
+        interfaceinvoke $r9.<com.sun.corba.se.pept.transport.Connection: void writeUnlock()>();
+
+        throw $r22;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public void close()
+    {
+        java.util.Iterator $r1;
+        com.sun.corba.se.spi.orb.ORB $r2;
+        java.nio.ByteBuffer $r5, $r6, $r7;
+        com.sun.corba.se.pept.transport.ByteBufferPool $r3;
+        java.lang.StringBuffer $r8, $r9;
+        int $i0;
+        java.lang.Object $r4;
+        java.lang.String $r10;
+        com.sun.corba.se.impl.encoding.ByteBufferWithInfo r11;
+        com.sun.corba.se.impl.encoding.BufferManagerWriteCollect r0;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.BufferManagerWriteCollect;
+
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: java.util.Iterator iterator()>();
+
+        $r2 = r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r3 = virtualinvoke $r2.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.pept.transport.ByteBufferPool getByteBufferPool()>();
+
+     label1:
+        $z0 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r4 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        r11 = (com.sun.corba.se.impl.encoding.ByteBufferWithInfo) $r4;
+
+        if r11 == null goto label3;
+
+        $r5 = r11.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: java.nio.ByteBuffer byteBuffer>;
+
+        if $r5 == null goto label3;
+
+        $z1 = r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: boolean debug>;
+
+        if $z1 == 0 goto label2;
+
+        $r7 = r11.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: java.nio.ByteBuffer byteBuffer>;
+
+        $i0 = staticinvoke <java.lang.System: int identityHashCode(java.lang.Object)>($r7);
+
+        $r8 = new java.lang.StringBuffer;
+
+        specialinvoke $r8.<java.lang.StringBuffer: void <init>(int)>(80);
+
+        virtualinvoke $r8.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("close() - releasing ByteBuffer id (");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuffer: java.lang.StringBuffer append(int)>($i0);
+
+        virtualinvoke $r9.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>(") to ByteBufferPool.");
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: void dprint(java.lang.String)>($r10);
+
+     label2:
+        $r6 = r11.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: java.nio.ByteBuffer byteBuffer>;
+
+        interfaceinvoke $r3.<com.sun.corba.se.pept.transport.ByteBufferPool: void releaseByteBuffer(java.nio.ByteBuffer)>($r6);
+
+        r11.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: java.nio.ByteBuffer byteBuffer> = null;
+
+     label3:
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    private void dprint(java.lang.String)
+    {
+        java.lang.String r0;
+        com.sun.corba.se.impl.encoding.BufferManagerWriteCollect r1;
+
+        r1 := @this: com.sun.corba.se.impl.encoding.BufferManagerWriteCollect;
+
+        r0 := @parameter0: java.lang.String;
+
+        staticinvoke <com.sun.corba.se.impl.orbutil.ORBUtility: void dprint(java.lang.String,java.lang.String)>("BufferManagerWriteCollect", r0);
+
+        return;
+    }
+
+    private java.util.Iterator iterator()
+    {
+        com.sun.corba.se.impl.encoding.BufferManagerWriteCollect$BufferManagerWriteCollectIterator $r0;
+        com.sun.corba.se.impl.encoding.BufferManagerWriteCollect r1;
+
+        r1 := @this: com.sun.corba.se.impl.encoding.BufferManagerWriteCollect;
+
+        $r0 = new com.sun.corba.se.impl.encoding.BufferManagerWriteCollect$BufferManagerWriteCollectIterator;
+
+        specialinvoke $r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect$BufferManagerWriteCollectIterator: void <init>(com.sun.corba.se.impl.encoding.BufferManagerWriteCollect,com.sun.corba.se.impl.encoding.BufferManagerWriteCollect$1)>(r1, null);
+
+        return $r0;
+    }
+
+    static com.sun.corba.se.impl.encoding.BufferQueue access$100(com.sun.corba.se.impl.encoding.BufferManagerWriteCollect)
+    {
+        com.sun.corba.se.impl.encoding.BufferQueue $r1;
+        com.sun.corba.se.impl.encoding.BufferManagerWriteCollect r0;
+
+        r0 := @parameter0: com.sun.corba.se.impl.encoding.BufferManagerWriteCollect;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.BufferManagerWriteCollect: com.sun.corba.se.impl.encoding.BufferQueue queue>;
+
+        return $r1;
+    }
+}

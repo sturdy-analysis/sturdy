@@ -1,0 +1,259 @@
+class sun.misc.Launcher$AppClassLoader extends java.net.URLClassLoader
+{
+    final sun.misc.URLClassPath ucp;
+    static final boolean $assertionsDisabled;
+
+    public static java.lang.ClassLoader getAppClassLoader(java.lang.ClassLoader) throws java.io.IOException
+    {
+        sun.misc.Launcher$AppClassLoader$1 $r1;
+        java.lang.Object $r3;
+        java.lang.String $r0;
+        java.lang.ClassLoader r2, $r4;
+        java.io.File[] $r5;
+
+        r2 := @parameter0: java.lang.ClassLoader;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.class.path");
+
+        if $r0 != null goto label1;
+
+        $r5 = newarray (java.io.File)[0];
+
+        goto label2;
+
+     label1:
+        $r5 = staticinvoke <sun.misc.Launcher: java.io.File[] access$300(java.lang.String)>($r0);
+
+     label2:
+        $r1 = new sun.misc.Launcher$AppClassLoader$1;
+
+        specialinvoke $r1.<sun.misc.Launcher$AppClassLoader$1: void <init>(java.lang.String,java.io.File[],java.lang.ClassLoader)>($r0, $r5, r2);
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        $r4 = (java.lang.ClassLoader) $r3;
+
+        return $r4;
+    }
+
+    void <init>(java.net.URL[], java.lang.ClassLoader)
+    {
+        java.net.URL[] r1;
+        sun.misc.URLClassPath $r5, $r6;
+        sun.misc.Launcher$AppClassLoader r0;
+        java.lang.ClassLoader r2;
+        sun.misc.JavaNetAccess $r4;
+        java.net.URLStreamHandlerFactory $r3;
+
+        r0 := @this: sun.misc.Launcher$AppClassLoader;
+
+        r1 := @parameter0: java.net.URL[];
+
+        r2 := @parameter1: java.lang.ClassLoader;
+
+        $r3 = staticinvoke <sun.misc.Launcher: java.net.URLStreamHandlerFactory access$200()>();
+
+        specialinvoke r0.<java.net.URLClassLoader: void <init>(java.net.URL[],java.lang.ClassLoader,java.net.URLStreamHandlerFactory)>(r1, r2, $r3);
+
+        $r4 = staticinvoke <sun.misc.SharedSecrets: sun.misc.JavaNetAccess getJavaNetAccess()>();
+
+        $r5 = interfaceinvoke $r4.<sun.misc.JavaNetAccess: sun.misc.URLClassPath getURLClassPath(java.net.URLClassLoader)>(r0);
+
+        r0.<sun.misc.Launcher$AppClassLoader: sun.misc.URLClassPath ucp> = $r5;
+
+        $r6 = r0.<sun.misc.Launcher$AppClassLoader: sun.misc.URLClassPath ucp>;
+
+        virtualinvoke $r6.<sun.misc.URLClassPath: void initLookupCache(java.lang.ClassLoader)>(r0);
+
+        return;
+    }
+
+    public java.lang.Class loadClass(java.lang.String, boolean) throws java.lang.ClassNotFoundException
+    {
+        sun.misc.URLClassPath $r7;
+        java.lang.SecurityManager $r5;
+        int $i0, $i2;
+        sun.misc.Launcher$AppClassLoader r1;
+        java.lang.Class $r2, $r3;
+        java.lang.ClassNotFoundException $r8;
+        java.lang.String r0, $r6;
+        boolean z0, $z1;
+
+        r1 := @this: sun.misc.Launcher$AppClassLoader;
+
+        r0 := @parameter0: java.lang.String;
+
+        z0 := @parameter1: boolean;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int lastIndexOf(int)>(46);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label1;
+
+        $r5 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r5 == null goto label1;
+
+        $r6 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        virtualinvoke $r5.<java.lang.SecurityManager: void checkPackageAccess(java.lang.String)>($r6);
+
+     label1:
+        $r7 = r1.<sun.misc.Launcher$AppClassLoader: sun.misc.URLClassPath ucp>;
+
+        $z1 = virtualinvoke $r7.<sun.misc.URLClassPath: boolean knownToNotExist(java.lang.String)>(r0);
+
+        if $z1 == 0 goto label4;
+
+        $r3 = virtualinvoke r1.<sun.misc.Launcher$AppClassLoader: java.lang.Class findLoadedClass(java.lang.String)>(r0);
+
+        if $r3 == null goto label3;
+
+        if z0 == 0 goto label2;
+
+        virtualinvoke r1.<sun.misc.Launcher$AppClassLoader: void resolveClass(java.lang.Class)>($r3);
+
+     label2:
+        return $r3;
+
+     label3:
+        $r8 = new java.lang.ClassNotFoundException;
+
+        specialinvoke $r8.<java.lang.ClassNotFoundException: void <init>(java.lang.String)>(r0);
+
+        throw $r8;
+
+     label4:
+        $r2 = specialinvoke r1.<java.net.URLClassLoader: java.lang.Class loadClass(java.lang.String,boolean)>(r0, z0);
+
+        return $r2;
+    }
+
+    protected java.security.PermissionCollection getPermissions(java.security.CodeSource)
+    {
+        sun.misc.Launcher$AppClassLoader r0;
+        java.lang.RuntimePermission $r3;
+        java.security.CodeSource r1;
+        java.security.PermissionCollection $r2;
+
+        r0 := @this: sun.misc.Launcher$AppClassLoader;
+
+        r1 := @parameter0: java.security.CodeSource;
+
+        $r2 = specialinvoke r0.<java.net.URLClassLoader: java.security.PermissionCollection getPermissions(java.security.CodeSource)>(r1);
+
+        $r3 = new java.lang.RuntimePermission;
+
+        specialinvoke $r3.<java.lang.RuntimePermission: void <init>(java.lang.String)>("exitVM");
+
+        virtualinvoke $r2.<java.security.PermissionCollection: void add(java.security.Permission)>($r3);
+
+        return $r2;
+    }
+
+    private void appendToClassPathForInstrumentation(java.lang.String)
+    {
+        java.net.URL $r3;
+        sun.misc.Launcher$AppClassLoader r0;
+        java.lang.String r2;
+        java.lang.AssertionError $r4;
+        java.io.File $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.misc.Launcher$AppClassLoader;
+
+        r2 := @parameter0: java.lang.String;
+
+        $z0 = <sun.misc.Launcher$AppClassLoader: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = staticinvoke <java.lang.Thread: boolean holdsLock(java.lang.Object)>(r0);
+
+        if $z1 != 0 goto label1;
+
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>()>();
+
+        throw $r4;
+
+     label1:
+        $r1 = new java.io.File;
+
+        specialinvoke $r1.<java.io.File: void <init>(java.lang.String)>(r2);
+
+        $r3 = staticinvoke <sun.misc.Launcher: java.net.URL getFileURL(java.io.File)>($r1);
+
+        specialinvoke r0.<java.net.URLClassLoader: void addURL(java.net.URL)>($r3);
+
+        return;
+    }
+
+    private static java.security.AccessControlContext getContext(java.io.File[]) throws java.net.MalformedURLException
+    {
+        java.security.AccessControlContext $r6;
+        java.net.URL $r4;
+        sun.misc.PathPermissions $r0;
+        java.security.ProtectionDomain[] $r7;
+        java.security.ProtectionDomain $r2;
+        java.security.cert.Certificate[] $r5;
+        java.security.CodeSource $r3;
+        java.io.File[] r1;
+
+        r1 := @parameter0: java.io.File[];
+
+        $r0 = new sun.misc.PathPermissions;
+
+        specialinvoke $r0.<sun.misc.PathPermissions: void <init>(java.io.File[])>(r1);
+
+        $r2 = new java.security.ProtectionDomain;
+
+        $r3 = new java.security.CodeSource;
+
+        $r4 = virtualinvoke $r0.<sun.misc.PathPermissions: java.net.URL getCodeBase()>();
+
+        $r5 = (java.security.cert.Certificate[]) null;
+
+        specialinvoke $r3.<java.security.CodeSource: void <init>(java.net.URL,java.security.cert.Certificate[])>($r4, $r5);
+
+        specialinvoke $r2.<java.security.ProtectionDomain: void <init>(java.security.CodeSource,java.security.PermissionCollection)>($r3, $r0);
+
+        $r6 = new java.security.AccessControlContext;
+
+        $r7 = newarray (java.security.ProtectionDomain)[1];
+
+        $r7[0] = $r2;
+
+        specialinvoke $r6.<java.security.AccessControlContext: void <init>(java.security.ProtectionDomain[])>($r7);
+
+        return $r6;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        $r0 = class "Lsun/misc/Launcher;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.misc.Launcher$AppClassLoader: boolean $assertionsDisabled> = $z1;
+
+        staticinvoke <java.lang.ClassLoader: boolean registerAsParallelCapable()>();
+
+        return;
+    }
+}

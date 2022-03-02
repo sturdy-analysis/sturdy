@@ -1,0 +1,292 @@
+public final class com.sun.media.sound.AudioFileSoundbankReader extends javax.sound.midi.spi.SoundbankReader
+{
+
+    public void <init>()
+    {
+        com.sun.media.sound.AudioFileSoundbankReader r0;
+
+        r0 := @this: com.sun.media.sound.AudioFileSoundbankReader;
+
+        specialinvoke r0.<javax.sound.midi.spi.SoundbankReader: void <init>()>();
+
+        return;
+    }
+
+    public javax.sound.midi.Soundbank getSoundbank(java.net.URL) throws javax.sound.midi.InvalidMidiDataException, java.io.IOException
+    {
+        com.sun.media.sound.AudioFileSoundbankReader r2;
+        java.net.URL r0;
+        javax.sound.sampled.AudioInputStream $r1;
+        javax.sound.midi.Soundbank $r3;
+        javax.sound.sampled.UnsupportedAudioFileException $r5;
+        java.io.IOException $r4;
+
+        r2 := @this: com.sun.media.sound.AudioFileSoundbankReader;
+
+        r0 := @parameter0: java.net.URL;
+
+     label1:
+        $r1 = staticinvoke <javax.sound.sampled.AudioSystem: javax.sound.sampled.AudioInputStream getAudioInputStream(java.net.URL)>(r0);
+
+        $r3 = virtualinvoke r2.<com.sun.media.sound.AudioFileSoundbankReader: javax.sound.midi.Soundbank getSoundbank(javax.sound.sampled.AudioInputStream)>($r1);
+
+        virtualinvoke $r1.<javax.sound.sampled.AudioInputStream: void close()>();
+
+     label2:
+        return $r3;
+
+     label3:
+        $r5 := @caughtexception;
+
+        return null;
+
+     label4:
+        $r4 := @caughtexception;
+
+        return null;
+
+        catch javax.sound.sampled.UnsupportedAudioFileException from label1 to label2 with label3;
+        catch java.io.IOException from label1 to label2 with label4;
+    }
+
+    public javax.sound.midi.Soundbank getSoundbank(java.io.InputStream) throws javax.sound.midi.InvalidMidiDataException, java.io.IOException
+    {
+        com.sun.media.sound.AudioFileSoundbankReader r2;
+        javax.sound.sampled.AudioInputStream $r1;
+        javax.sound.midi.Soundbank $r3;
+        javax.sound.sampled.UnsupportedAudioFileException $r5;
+        java.io.IOException $r4;
+        java.io.InputStream r0;
+
+        r2 := @this: com.sun.media.sound.AudioFileSoundbankReader;
+
+        r0 := @parameter0: java.io.InputStream;
+
+        virtualinvoke r0.<java.io.InputStream: void mark(int)>(512);
+
+     label1:
+        $r1 = staticinvoke <javax.sound.sampled.AudioSystem: javax.sound.sampled.AudioInputStream getAudioInputStream(java.io.InputStream)>(r0);
+
+        $r3 = virtualinvoke r2.<com.sun.media.sound.AudioFileSoundbankReader: javax.sound.midi.Soundbank getSoundbank(javax.sound.sampled.AudioInputStream)>($r1);
+
+        if $r3 == null goto label3;
+
+     label2:
+        return $r3;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        goto label6;
+
+     label5:
+        $r4 := @caughtexception;
+
+     label6:
+        virtualinvoke r0.<java.io.InputStream: void reset()>();
+
+        return null;
+
+        catch javax.sound.sampled.UnsupportedAudioFileException from label1 to label2 with label4;
+        catch java.io.IOException from label1 to label2 with label5;
+    }
+
+    public javax.sound.midi.Soundbank getSoundbank(javax.sound.sampled.AudioInputStream) throws javax.sound.midi.InvalidMidiDataException, java.io.IOException
+    {
+        byte[] r14, r15;
+        java.io.DataInputStream $r17;
+        com.sun.media.sound.SimpleInstrument $r22;
+        com.sun.media.sound.AudioFileSoundbankReader r13;
+        java.io.ByteArrayOutputStream $r16;
+        javax.sound.sampled.AudioFormat $r1, $r5, $r11;
+        long $l0, $l2, $l4, $l5;
+        byte $b1;
+        javax.sound.sampled.AudioInputStream r0;
+        int $i3, $i6, $i7, $i8, $i9, $i10, $i12;
+        com.sun.media.sound.ModelByteBufferWavetable $r19;
+        java.lang.Exception $r12;
+        java.util.List $r7;
+        com.sun.media.sound.SimpleSoundbank $r21;
+        com.sun.media.sound.ModelByteBuffer $r18;
+        com.sun.media.sound.ModelPerformer $r20;
+
+        r13 := @this: com.sun.media.sound.AudioFileSoundbankReader;
+
+        r0 := @parameter0: javax.sound.sampled.AudioInputStream;
+
+     label1:
+        $l0 = virtualinvoke r0.<javax.sound.sampled.AudioInputStream: long getFrameLength()>();
+
+        $b1 = $l0 cmp -1L;
+
+        if $b1 != 0 goto label4;
+
+        $r16 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r16.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $r11 = virtualinvoke r0.<javax.sound.sampled.AudioInputStream: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $i7 = virtualinvoke $r11.<javax.sound.sampled.AudioFormat: int getFrameSize()>();
+
+        $i8 = 1024 % $i7;
+
+        $i9 = 1024 - $i8;
+
+        r14 = newarray (byte)[$i9];
+
+     label2:
+        $i10 = virtualinvoke r0.<javax.sound.sampled.AudioInputStream: int read(byte[])>(r14);
+
+        $i12 = (int) -1;
+
+        if $i10 == $i12 goto label3;
+
+        virtualinvoke $r16.<java.io.ByteArrayOutputStream: void write(byte[],int,int)>(r14, 0, $i10);
+
+        goto label2;
+
+     label3:
+        virtualinvoke r0.<javax.sound.sampled.AudioInputStream: void close()>();
+
+        r15 = virtualinvoke $r16.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        goto label5;
+
+     label4:
+        $l2 = virtualinvoke r0.<javax.sound.sampled.AudioInputStream: long getFrameLength()>();
+
+        $r1 = virtualinvoke r0.<javax.sound.sampled.AudioInputStream: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $i3 = virtualinvoke $r1.<javax.sound.sampled.AudioFormat: int getFrameSize()>();
+
+        $l4 = (long) $i3;
+
+        $l5 = $l2 * $l4;
+
+        $i6 = (int) $l5;
+
+        r15 = newarray (byte)[$i6];
+
+        $r17 = new java.io.DataInputStream;
+
+        specialinvoke $r17.<java.io.DataInputStream: void <init>(java.io.InputStream)>(r0);
+
+        virtualinvoke $r17.<java.io.DataInputStream: void readFully(byte[])>(r15);
+
+     label5:
+        $r19 = new com.sun.media.sound.ModelByteBufferWavetable;
+
+        $r18 = new com.sun.media.sound.ModelByteBuffer;
+
+        specialinvoke $r18.<com.sun.media.sound.ModelByteBuffer: void <init>(byte[])>(r15);
+
+        $r5 = virtualinvoke r0.<javax.sound.sampled.AudioInputStream: javax.sound.sampled.AudioFormat getFormat()>();
+
+        specialinvoke $r19.<com.sun.media.sound.ModelByteBufferWavetable: void <init>(com.sun.media.sound.ModelByteBuffer,javax.sound.sampled.AudioFormat,float)>($r18, $r5, -4800.0F);
+
+        $r20 = new com.sun.media.sound.ModelPerformer;
+
+        specialinvoke $r20.<com.sun.media.sound.ModelPerformer: void <init>()>();
+
+        $r7 = virtualinvoke $r20.<com.sun.media.sound.ModelPerformer: java.util.List getOscillators()>();
+
+        interfaceinvoke $r7.<java.util.List: boolean add(java.lang.Object)>($r19);
+
+        $r21 = new com.sun.media.sound.SimpleSoundbank;
+
+        specialinvoke $r21.<com.sun.media.sound.SimpleSoundbank: void <init>()>();
+
+        $r22 = new com.sun.media.sound.SimpleInstrument;
+
+        specialinvoke $r22.<com.sun.media.sound.SimpleInstrument: void <init>()>();
+
+        virtualinvoke $r22.<com.sun.media.sound.SimpleInstrument: void add(com.sun.media.sound.ModelPerformer)>($r20);
+
+        virtualinvoke $r21.<com.sun.media.sound.SimpleSoundbank: void addInstrument(javax.sound.midi.Instrument)>($r22);
+
+     label6:
+        return $r21;
+
+     label7:
+        $r12 := @caughtexception;
+
+        return null;
+
+        catch java.lang.Exception from label1 to label6 with label7;
+    }
+
+    public javax.sound.midi.Soundbank getSoundbank(java.io.File) throws javax.sound.midi.InvalidMidiDataException, java.io.IOException
+    {
+        com.sun.media.sound.ModelByteBufferWavetable $r2;
+        com.sun.media.sound.SimpleInstrument $r7;
+        com.sun.media.sound.AudioFileSoundbankReader r10;
+        javax.sound.sampled.UnsupportedAudioFileException $r9;
+        long $l0;
+        java.io.IOException $r8;
+        java.io.File r0;
+        java.util.List $r5;
+        com.sun.media.sound.SimpleSoundbank $r6;
+        javax.sound.sampled.AudioInputStream $r1;
+        com.sun.media.sound.ModelByteBuffer $r3;
+        com.sun.media.sound.ModelPerformer $r4;
+
+        r10 := @this: com.sun.media.sound.AudioFileSoundbankReader;
+
+        r0 := @parameter0: java.io.File;
+
+     label1:
+        $r1 = staticinvoke <javax.sound.sampled.AudioSystem: javax.sound.sampled.AudioInputStream getAudioInputStream(java.io.File)>(r0);
+
+        virtualinvoke $r1.<javax.sound.sampled.AudioInputStream: void close()>();
+
+        $r2 = new com.sun.media.sound.ModelByteBufferWavetable;
+
+        $r3 = new com.sun.media.sound.ModelByteBuffer;
+
+        $l0 = virtualinvoke r0.<java.io.File: long length()>();
+
+        specialinvoke $r3.<com.sun.media.sound.ModelByteBuffer: void <init>(java.io.File,long,long)>(r0, 0L, $l0);
+
+        specialinvoke $r2.<com.sun.media.sound.ModelByteBufferWavetable: void <init>(com.sun.media.sound.ModelByteBuffer,float)>($r3, -4800.0F);
+
+        $r4 = new com.sun.media.sound.ModelPerformer;
+
+        specialinvoke $r4.<com.sun.media.sound.ModelPerformer: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<com.sun.media.sound.ModelPerformer: java.util.List getOscillators()>();
+
+        interfaceinvoke $r5.<java.util.List: boolean add(java.lang.Object)>($r2);
+
+        $r6 = new com.sun.media.sound.SimpleSoundbank;
+
+        specialinvoke $r6.<com.sun.media.sound.SimpleSoundbank: void <init>()>();
+
+        $r7 = new com.sun.media.sound.SimpleInstrument;
+
+        specialinvoke $r7.<com.sun.media.sound.SimpleInstrument: void <init>()>();
+
+        virtualinvoke $r7.<com.sun.media.sound.SimpleInstrument: void add(com.sun.media.sound.ModelPerformer)>($r4);
+
+        virtualinvoke $r6.<com.sun.media.sound.SimpleSoundbank: void addInstrument(javax.sound.midi.Instrument)>($r7);
+
+     label2:
+        return $r6;
+
+     label3:
+        $r9 := @caughtexception;
+
+        return null;
+
+     label4:
+        $r8 := @caughtexception;
+
+        return null;
+
+        catch javax.sound.sampled.UnsupportedAudioFileException from label1 to label2 with label3;
+        catch java.io.IOException from label1 to label2 with label4;
+    }
+}

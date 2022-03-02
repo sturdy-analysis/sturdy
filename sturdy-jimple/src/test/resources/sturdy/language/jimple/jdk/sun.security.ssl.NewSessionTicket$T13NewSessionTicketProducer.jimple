@@ -1,0 +1,269 @@
+final class sun.security.ssl.NewSessionTicket$T13NewSessionTicketProducer extends java.lang.Object implements sun.security.ssl.SSLProducer
+{
+
+    private void <init>()
+    {
+        sun.security.ssl.NewSessionTicket$T13NewSessionTicketProducer r0;
+
+        r0 := @this: sun.security.ssl.NewSessionTicket$T13NewSessionTicketProducer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public byte[] produce(sun.security.ssl.ConnectionContext) throws java.io.IOException
+    {
+        byte[] $r20, $r27, $r39;
+        sun.security.ssl.NewSessionTicket$T13NewSessionTicketProducer r35;
+        java.security.SecureRandom $r15, $r26;
+        java.util.Map $r5;
+        java.math.BigInteger $r19;
+        javax.net.ssl.SSLSessionContext $r11;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13;
+        sun.security.ssl.ServerHandshakeContext r1;
+        sun.security.ssl.SSLContextImpl $r10, $r14, $r25;
+        sun.security.ssl.HandshakeOutStream $r40, $r41;
+        sun.security.ssl.SSLSessionContextImpl r12;
+        javax.crypto.SecretKey $r17, $r23;
+        sun.security.ssl.CipherSuite $r21;
+        java.lang.Object[] $r8, $r29, $r30, $r31, $r32;
+        sun.security.ssl.CipherSuite$HashAlg $r22;
+        sun.security.ssl.ConnectionContext r0;
+        int $i0, $i1;
+        sun.security.ssl.PskKeyExchangeModesExtension$PskKeyExchangeMode $r9;
+        sun.security.ssl.SSLExtension $r4;
+        sun.security.ssl.PskKeyExchangeModesExtension$PskKeyExchangeModesSpec r7;
+        sun.security.ssl.TransportContext $r2, $r28, $r33, $r34, $r42;
+        sun.security.ssl.NewSessionTicket$NewSessionTicketMessage $r24;
+        sun.security.ssl.SessionId $r13;
+        java.lang.Object $r6;
+        sun.security.ssl.SSLSessionImpl $r3, $r16, $r18, $r36, $r37, $r38;
+
+        r35 := @this: sun.security.ssl.NewSessionTicket$T13NewSessionTicketProducer;
+
+        r0 := @parameter0: sun.security.ssl.ConnectionContext;
+
+        r1 = (sun.security.ssl.ServerHandshakeContext) r0;
+
+        $r2 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $z0 = $r2.<sun.security.ssl.TransportContext: boolean hasDelegatedFinished>;
+
+        if $z0 == 0 goto label01;
+
+        $r33 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r33.<sun.security.ssl.TransportContext: boolean hasDelegatedFinished> = 0;
+
+        $r34 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r34.<sun.security.ssl.TransportContext: boolean needHandshakeFinishedStatus> = 1;
+
+     label01:
+        $r3 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        $z1 = virtualinvoke $r3.<sun.security.ssl.SSLSessionImpl: boolean isRejoinable()>();
+
+        if $z1 != 0 goto label03;
+
+        $z11 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z11 == 0 goto label02;
+
+        $z12 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z12 == 0 goto label02;
+
+        $r32 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("No session ticket produced: session is not resumable", $r32);
+
+     label02:
+        return null;
+
+     label03:
+        $r5 = r1.<sun.security.ssl.ServerHandshakeContext: java.util.Map handshakeExtensions>;
+
+        $r4 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension PSK_KEY_EXCHANGE_MODES>;
+
+        $r6 = interfaceinvoke $r5.<java.util.Map: java.lang.Object get(java.lang.Object)>($r4);
+
+        r7 = (sun.security.ssl.PskKeyExchangeModesExtension$PskKeyExchangeModesSpec) $r6;
+
+        if r7 == null goto label04;
+
+        $r9 = <sun.security.ssl.PskKeyExchangeModesExtension$PskKeyExchangeMode: sun.security.ssl.PskKeyExchangeModesExtension$PskKeyExchangeMode PSK_DHE_KE>;
+
+        $z4 = virtualinvoke r7.<sun.security.ssl.PskKeyExchangeModesExtension$PskKeyExchangeModesSpec: boolean contains(sun.security.ssl.PskKeyExchangeModesExtension$PskKeyExchangeMode)>($r9);
+
+        if $z4 != 0 goto label06;
+
+     label04:
+        $z2 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z2 == 0 goto label05;
+
+        $z3 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z3 == 0 goto label05;
+
+        $r8 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("No session ticket produced: client does not support psk_dhe_ke", $r8);
+
+     label05:
+        return null;
+
+     label06:
+        $r10 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLContextImpl sslContext>;
+
+        $r11 = virtualinvoke $r10.<sun.security.ssl.SSLContextImpl: javax.net.ssl.SSLSessionContext engineGetServerSessionContext()>();
+
+        r12 = (sun.security.ssl.SSLSessionContextImpl) $r11;
+
+        $r13 = new sun.security.ssl.SessionId;
+
+        $r14 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLContextImpl sslContext>;
+
+        $r15 = virtualinvoke $r14.<sun.security.ssl.SSLContextImpl: java.security.SecureRandom getSecureRandom()>();
+
+        specialinvoke $r13.<sun.security.ssl.SessionId: void <init>(boolean,java.security.SecureRandom)>(1, $r15);
+
+        $r16 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        $r17 = virtualinvoke $r16.<sun.security.ssl.SSLSessionImpl: javax.crypto.SecretKey getResumptionMasterSecret()>();
+
+        if $r17 != null goto label08;
+
+        $z9 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z9 == 0 goto label07;
+
+        $z10 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z10 == 0 goto label07;
+
+        $r31 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("No session ticket produced: no resumption secret", $r31);
+
+     label07:
+        return null;
+
+     label08:
+        $r18 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        $r19 = virtualinvoke $r18.<sun.security.ssl.SSLSessionImpl: java.math.BigInteger incrTicketNonceCounter()>();
+
+        $r20 = virtualinvoke $r19.<java.math.BigInteger: byte[] toByteArray()>();
+
+        $r21 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.CipherSuite negotiatedCipherSuite>;
+
+        $r22 = $r21.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$HashAlg hashAlg>;
+
+        $r23 = staticinvoke <sun.security.ssl.NewSessionTicket: javax.crypto.SecretKey access$300(sun.security.ssl.CipherSuite$HashAlg,javax.crypto.SecretKey,byte[])>($r22, $r17, $r20);
+
+        $i0 = virtualinvoke r12.<sun.security.ssl.SSLSessionContextImpl: int getSessionTimeout()>();
+
+        if $i0 <= 604800 goto label10;
+
+        $z7 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z7 == 0 goto label09;
+
+        $z8 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z8 == 0 goto label09;
+
+        $r30 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("No session ticket produced: session timeout", $r30);
+
+     label09:
+        return null;
+
+     label10:
+        $r24 = new sun.security.ssl.NewSessionTicket$NewSessionTicketMessage;
+
+        $r25 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLContextImpl sslContext>;
+
+        $r26 = virtualinvoke $r25.<sun.security.ssl.SSLContextImpl: java.security.SecureRandom getSecureRandom()>();
+
+        $r27 = virtualinvoke $r13.<sun.security.ssl.SessionId: byte[] getId()>();
+
+        specialinvoke $r24.<sun.security.ssl.NewSessionTicket$NewSessionTicketMessage: void <init>(sun.security.ssl.HandshakeContext,int,java.security.SecureRandom,byte[],byte[])>(r1, $i0, $r26, $r20, $r27);
+
+        $z5 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z5 == 0 goto label11;
+
+        $z6 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z6 == 0 goto label11;
+
+        $r29 = newarray (java.lang.Object)[1];
+
+        $r29[0] = $r24;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Produced NewSessionTicket handshake message", $r29);
+
+     label11:
+        $r36 = new sun.security.ssl.SSLSessionImpl;
+
+        $r37 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        specialinvoke $r36.<sun.security.ssl.SSLSessionImpl: void <init>(sun.security.ssl.SSLSessionImpl,sun.security.ssl.SessionId)>($r37, $r13);
+
+        $r38 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        virtualinvoke $r38.<sun.security.ssl.SSLSessionImpl: void addChild(sun.security.ssl.SSLSessionImpl)>($r36);
+
+        virtualinvoke $r36.<sun.security.ssl.SSLSessionImpl: void setPreSharedKey(javax.crypto.SecretKey)>($r23);
+
+        $r39 = virtualinvoke $r13.<sun.security.ssl.SessionId: byte[] getId()>();
+
+        virtualinvoke $r36.<sun.security.ssl.SSLSessionImpl: void setPskIdentity(byte[])>($r39);
+
+        $i1 = $r24.<sun.security.ssl.NewSessionTicket$NewSessionTicketMessage: int ticketAgeAdd>;
+
+        virtualinvoke $r36.<sun.security.ssl.SSLSessionImpl: void setTicketAgeAdd(int)>($i1);
+
+        virtualinvoke r12.<sun.security.ssl.SSLSessionContextImpl: void put(sun.security.ssl.SSLSessionImpl)>($r36);
+
+        $r40 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.HandshakeOutStream handshakeOutput>;
+
+        virtualinvoke $r24.<sun.security.ssl.NewSessionTicket$NewSessionTicketMessage: void write(sun.security.ssl.HandshakeOutStream)>($r40);
+
+        $r41 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.HandshakeOutStream handshakeOutput>;
+
+        virtualinvoke $r41.<sun.security.ssl.HandshakeOutStream: void flush()>();
+
+        $r42 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $z13 = $r42.<sun.security.ssl.TransportContext: boolean needHandshakeFinishedStatus>;
+
+        if $z13 == 0 goto label12;
+
+        $r28 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r28.<sun.security.ssl.TransportContext: boolean needHandshakeFinishedStatus> = 0;
+
+     label12:
+        return null;
+    }
+
+    void <init>(sun.security.ssl.NewSessionTicket$1)
+    {
+        sun.security.ssl.NewSessionTicket$T13NewSessionTicketProducer r0;
+        sun.security.ssl.NewSessionTicket$1 r1;
+
+        r0 := @this: sun.security.ssl.NewSessionTicket$T13NewSessionTicketProducer;
+
+        r1 := @parameter0: sun.security.ssl.NewSessionTicket$1;
+
+        specialinvoke r0.<sun.security.ssl.NewSessionTicket$T13NewSessionTicketProducer: void <init>()>();
+
+        return;
+    }
+}

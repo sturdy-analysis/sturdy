@@ -1,0 +1,309 @@
+public class javax.swing.undo.UndoableEditSupport extends java.lang.Object
+{
+    protected int updateLevel;
+    protected javax.swing.undo.CompoundEdit compoundEdit;
+    protected java.util.Vector listeners;
+    protected java.lang.Object realSource;
+
+    public void <init>()
+    {
+        javax.swing.undo.UndoableEditSupport r0;
+
+        r0 := @this: javax.swing.undo.UndoableEditSupport;
+
+        specialinvoke r0.<javax.swing.undo.UndoableEditSupport: void <init>(java.lang.Object)>(null);
+
+        return;
+    }
+
+    public void <init>(java.lang.Object)
+    {
+        java.util.Vector $r2;
+        javax.swing.undo.UndoableEditSupport r0;
+        java.lang.Object r1, $r3;
+
+        r0 := @this: javax.swing.undo.UndoableEditSupport;
+
+        r1 := @parameter0: java.lang.Object;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        if r1 != null goto label1;
+
+        $r3 = r0;
+
+        goto label2;
+
+     label1:
+        $r3 = r1;
+
+     label2:
+        r0.<javax.swing.undo.UndoableEditSupport: java.lang.Object realSource> = $r3;
+
+        r0.<javax.swing.undo.UndoableEditSupport: int updateLevel> = 0;
+
+        r0.<javax.swing.undo.UndoableEditSupport: javax.swing.undo.CompoundEdit compoundEdit> = null;
+
+        $r2 = new java.util.Vector;
+
+        specialinvoke $r2.<java.util.Vector: void <init>()>();
+
+        r0.<javax.swing.undo.UndoableEditSupport: java.util.Vector listeners> = $r2;
+
+        return;
+    }
+
+    public synchronized void addUndoableEditListener(javax.swing.event.UndoableEditListener)
+    {
+        javax.swing.undo.UndoableEditSupport r0;
+        javax.swing.event.UndoableEditListener r1;
+        java.util.Vector $r2;
+
+        r0 := @this: javax.swing.undo.UndoableEditSupport;
+
+        r1 := @parameter0: javax.swing.event.UndoableEditListener;
+
+        $r2 = r0.<javax.swing.undo.UndoableEditSupport: java.util.Vector listeners>;
+
+        virtualinvoke $r2.<java.util.Vector: void addElement(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    public synchronized void removeUndoableEditListener(javax.swing.event.UndoableEditListener)
+    {
+        javax.swing.undo.UndoableEditSupport r0;
+        javax.swing.event.UndoableEditListener r1;
+        java.util.Vector $r2;
+
+        r0 := @this: javax.swing.undo.UndoableEditSupport;
+
+        r1 := @parameter0: javax.swing.event.UndoableEditListener;
+
+        $r2 = r0.<javax.swing.undo.UndoableEditSupport: java.util.Vector listeners>;
+
+        virtualinvoke $r2.<java.util.Vector: boolean removeElement(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    public synchronized javax.swing.event.UndoableEditListener[] getUndoableEditListeners()
+    {
+        javax.swing.event.UndoableEditListener[] $r1, $r4;
+        java.util.Vector $r2;
+        java.lang.Object[] $r3;
+        javax.swing.undo.UndoableEditSupport r0;
+
+        r0 := @this: javax.swing.undo.UndoableEditSupport;
+
+        $r2 = r0.<javax.swing.undo.UndoableEditSupport: java.util.Vector listeners>;
+
+        $r1 = newarray (javax.swing.event.UndoableEditListener)[0];
+
+        $r3 = virtualinvoke $r2.<java.util.Vector: java.lang.Object[] toArray(java.lang.Object[])>($r1);
+
+        $r4 = (javax.swing.event.UndoableEditListener[]) $r3;
+
+        return $r4;
+    }
+
+    protected void _postEdit(javax.swing.undo.UndoableEdit)
+    {
+        javax.swing.event.UndoableEditListener $r9;
+        javax.swing.undo.UndoableEdit r2;
+        java.util.Enumeration $r7;
+        javax.swing.undo.UndoableEditSupport r1;
+        java.util.Vector $r4, $r6;
+        java.lang.Object $r3, $r5, $r8;
+        javax.swing.event.UndoableEditEvent $r0;
+        boolean $z0;
+
+        r1 := @this: javax.swing.undo.UndoableEditSupport;
+
+        r2 := @parameter0: javax.swing.undo.UndoableEdit;
+
+        $r0 = new javax.swing.event.UndoableEditEvent;
+
+        $r3 = r1.<javax.swing.undo.UndoableEditSupport: java.lang.Object realSource>;
+
+        specialinvoke $r0.<javax.swing.event.UndoableEditEvent: void <init>(java.lang.Object,javax.swing.undo.UndoableEdit)>($r3, r2);
+
+        $r4 = r1.<javax.swing.undo.UndoableEditSupport: java.util.Vector listeners>;
+
+        $r5 = virtualinvoke $r4.<java.util.Vector: java.lang.Object clone()>();
+
+        $r6 = (java.util.Vector) $r5;
+
+        $r7 = virtualinvoke $r6.<java.util.Vector: java.util.Enumeration elements()>();
+
+     label1:
+        $z0 = interfaceinvoke $r7.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label2;
+
+        $r8 = interfaceinvoke $r7.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        $r9 = (javax.swing.event.UndoableEditListener) $r8;
+
+        interfaceinvoke $r9.<javax.swing.event.UndoableEditListener: void undoableEditHappened(javax.swing.event.UndoableEditEvent)>($r0);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public synchronized void postEdit(javax.swing.undo.UndoableEdit)
+    {
+        javax.swing.undo.UndoableEdit r1;
+        javax.swing.undo.CompoundEdit $r2;
+        int $i0;
+        javax.swing.undo.UndoableEditSupport r0;
+
+        r0 := @this: javax.swing.undo.UndoableEditSupport;
+
+        r1 := @parameter0: javax.swing.undo.UndoableEdit;
+
+        $i0 = r0.<javax.swing.undo.UndoableEditSupport: int updateLevel>;
+
+        if $i0 != 0 goto label1;
+
+        virtualinvoke r0.<javax.swing.undo.UndoableEditSupport: void _postEdit(javax.swing.undo.UndoableEdit)>(r1);
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<javax.swing.undo.UndoableEditSupport: javax.swing.undo.CompoundEdit compoundEdit>;
+
+        virtualinvoke $r2.<javax.swing.undo.CompoundEdit: boolean addEdit(javax.swing.undo.UndoableEdit)>(r1);
+
+     label2:
+        return;
+    }
+
+    public int getUpdateLevel()
+    {
+        int $i0;
+        javax.swing.undo.UndoableEditSupport r0;
+
+        r0 := @this: javax.swing.undo.UndoableEditSupport;
+
+        $i0 = r0.<javax.swing.undo.UndoableEditSupport: int updateLevel>;
+
+        return $i0;
+    }
+
+    public synchronized void beginUpdate()
+    {
+        javax.swing.undo.CompoundEdit $r1;
+        int $i0, $i1, $i2;
+        javax.swing.undo.UndoableEditSupport r0;
+
+        r0 := @this: javax.swing.undo.UndoableEditSupport;
+
+        $i0 = r0.<javax.swing.undo.UndoableEditSupport: int updateLevel>;
+
+        if $i0 != 0 goto label1;
+
+        $r1 = virtualinvoke r0.<javax.swing.undo.UndoableEditSupport: javax.swing.undo.CompoundEdit createCompoundEdit()>();
+
+        r0.<javax.swing.undo.UndoableEditSupport: javax.swing.undo.CompoundEdit compoundEdit> = $r1;
+
+     label1:
+        $i1 = r0.<javax.swing.undo.UndoableEditSupport: int updateLevel>;
+
+        $i2 = $i1 + 1;
+
+        r0.<javax.swing.undo.UndoableEditSupport: int updateLevel> = $i2;
+
+        return;
+    }
+
+    protected javax.swing.undo.CompoundEdit createCompoundEdit()
+    {
+        javax.swing.undo.UndoableEditSupport r1;
+        javax.swing.undo.CompoundEdit $r0;
+
+        r1 := @this: javax.swing.undo.UndoableEditSupport;
+
+        $r0 = new javax.swing.undo.CompoundEdit;
+
+        specialinvoke $r0.<javax.swing.undo.CompoundEdit: void <init>()>();
+
+        return $r0;
+    }
+
+    public synchronized void endUpdate()
+    {
+        javax.swing.undo.CompoundEdit $r1, $r2;
+        int $i0, $i1, $i2;
+        javax.swing.undo.UndoableEditSupport r0;
+
+        r0 := @this: javax.swing.undo.UndoableEditSupport;
+
+        $i0 = r0.<javax.swing.undo.UndoableEditSupport: int updateLevel>;
+
+        $i1 = $i0 - 1;
+
+        r0.<javax.swing.undo.UndoableEditSupport: int updateLevel> = $i1;
+
+        $i2 = r0.<javax.swing.undo.UndoableEditSupport: int updateLevel>;
+
+        if $i2 != 0 goto label1;
+
+        $r1 = r0.<javax.swing.undo.UndoableEditSupport: javax.swing.undo.CompoundEdit compoundEdit>;
+
+        virtualinvoke $r1.<javax.swing.undo.CompoundEdit: void end()>();
+
+        $r2 = r0.<javax.swing.undo.UndoableEditSupport: javax.swing.undo.CompoundEdit compoundEdit>;
+
+        virtualinvoke r0.<javax.swing.undo.UndoableEditSupport: void _postEdit(javax.swing.undo.UndoableEdit)>($r2);
+
+        r0.<javax.swing.undo.UndoableEditSupport: javax.swing.undo.CompoundEdit compoundEdit> = null;
+
+     label1:
+        return;
+    }
+
+    public java.lang.String toString()
+    {
+        javax.swing.undo.CompoundEdit $r10;
+        javax.swing.undo.UndoableEditSupport r1;
+        java.util.Vector $r7;
+        int $i0;
+        java.lang.StringBuilder $r0, $r3, $r4, $r5, $r6, $r8, $r9, $r11;
+        java.lang.String $r2, $r12;
+
+        r1 := @this: javax.swing.undo.UndoableEditSupport;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = specialinvoke r1.<java.lang.Object: java.lang.String toString()>();
+
+        $r3 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" updateLevel: ");
+
+        $i0 = r1.<javax.swing.undo.UndoableEditSupport: int updateLevel>;
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" listeners: ");
+
+        $r7 = r1.<javax.swing.undo.UndoableEditSupport: java.util.Vector listeners>;
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" compoundEdit: ");
+
+        $r10 = r1.<javax.swing.undo.UndoableEditSupport: javax.swing.undo.CompoundEdit compoundEdit>;
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r12;
+    }
+}

@@ -1,0 +1,359 @@
+public final class com.sun.jndi.ldap.sasl.LdapSasl extends java.lang.Object
+{
+    private static final java.lang.String SASL_CALLBACK;
+    private static final java.lang.String SASL_AUTHZ_ID;
+    private static final java.lang.String SASL_REALM;
+    private static final int LDAP_SUCCESS;
+    private static final int LDAP_SASL_BIND_IN_PROGRESS;
+    private static final byte[] NO_BYTES;
+
+    private void <init>()
+    {
+        com.sun.jndi.ldap.sasl.LdapSasl r0;
+
+        r0 := @this: com.sun.jndi.ldap.sasl.LdapSasl;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static com.sun.jndi.ldap.LdapResult saslBind(com.sun.jndi.ldap.LdapClient, com.sun.jndi.ldap.Connection, java.lang.String, java.lang.String, java.lang.Object, java.lang.String, java.util.Hashtable, javax.naming.ldap.Control[]) throws java.io.IOException, javax.naming.NamingException
+    {
+        com.sun.jndi.ldap.sasl.DefaultCallbackHandler $r8, $r22, $r29;
+        byte[] $r16, $r17, $r19, $r35, $r37;
+        javax.security.sasl.SaslException $r30;
+        javax.naming.AuthenticationException $r15, $r18, $r31;
+        javax.security.sasl.SaslClient $r4;
+        com.sun.jndi.ldap.sasl.SaslInputStream $r10;
+        javax.security.auth.callback.CallbackHandler $r32, r33;
+        boolean $z0, $z1, $z2, $z3, z4, $z5, z6, z7;
+        javax.naming.ldap.Control[] r7;
+        java.lang.Throwable $r28;
+        java.lang.String[] $r2;
+        int $i0, $i1, $i2, $i3;
+        javax.naming.AuthenticationNotSupportedException $r20;
+        java.lang.String r1, r3, $r5, r23, $r26, $r34, r38;
+        java.util.Hashtable r0;
+        java.io.OutputStream $r14;
+        com.sun.jndi.ldap.sasl.SaslOutputStream $r13;
+        com.sun.jndi.ldap.LdapClient r6;
+        com.sun.jndi.ldap.Connection r11;
+        java.lang.Object $r9, $r21, r24, $r25, $r27;
+        java.io.InputStream $r12;
+        com.sun.jndi.ldap.LdapResult r36, r39;
+
+        r6 := @parameter0: com.sun.jndi.ldap.LdapClient;
+
+        r11 := @parameter1: com.sun.jndi.ldap.Connection;
+
+        r3 := @parameter2: java.lang.String;
+
+        r23 := @parameter3: java.lang.String;
+
+        r24 := @parameter4: java.lang.Object;
+
+        r1 := @parameter5: java.lang.String;
+
+        r0 := @parameter6: java.util.Hashtable;
+
+        r7 := @parameter7: javax.naming.ldap.Control[];
+
+        z4 = 0;
+
+        z7 = 0;
+
+        z6 = 0;
+
+        if r0 == null goto label01;
+
+        $r27 = virtualinvoke r0.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>("java.naming.security.sasl.callback");
+
+        $r32 = (javax.security.auth.callback.CallbackHandler) $r27;
+
+        goto label02;
+
+     label01:
+        $r32 = null;
+
+     label02:
+        r33 = $r32;
+
+        if $r32 != null goto label03;
+
+        $r22 = new com.sun.jndi.ldap.sasl.DefaultCallbackHandler;
+
+        $r25 = virtualinvoke r0.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>("java.naming.security.sasl.realm");
+
+        $r26 = (java.lang.String) $r25;
+
+        specialinvoke $r22.<com.sun.jndi.ldap.sasl.DefaultCallbackHandler: void <init>(java.lang.String,java.lang.Object,java.lang.String)>(r23, r24, $r26);
+
+        r33 = $r22;
+
+        z4 = 1;
+
+        z7 = 1;
+
+        z6 = 1;
+
+     label03:
+        if r0 == null goto label04;
+
+        $r21 = virtualinvoke r0.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>("java.naming.security.sasl.authorizationId");
+
+        $r34 = (java.lang.String) $r21;
+
+        goto label05;
+
+     label04:
+        $r34 = null;
+
+     label05:
+        $r2 = staticinvoke <com.sun.jndi.ldap.sasl.LdapSasl: java.lang.String[] getSaslMechanismNames(java.lang.String)>(r1);
+
+     label06:
+        $r4 = staticinvoke <javax.security.sasl.Sasl: javax.security.sasl.SaslClient createSaslClient(java.lang.String[],java.lang.String,java.lang.String,java.lang.String,java.util.Map,javax.security.auth.callback.CallbackHandler)>($r2, $r34, "ldap", r3, r0, r33);
+
+        if $r4 != null goto label07;
+
+        $r20 = new javax.naming.AuthenticationNotSupportedException;
+
+        specialinvoke $r20.<javax.naming.AuthenticationNotSupportedException: void <init>(java.lang.String)>(r1);
+
+        throw $r20;
+
+     label07:
+        $r5 = interfaceinvoke $r4.<javax.security.sasl.SaslClient: java.lang.String getMechanismName()>();
+
+        $z0 = interfaceinvoke $r4.<javax.security.sasl.SaslClient: boolean hasInitialResponse()>();
+
+        if $z0 == 0 goto label08;
+
+        $r19 = <com.sun.jndi.ldap.sasl.LdapSasl: byte[] NO_BYTES>;
+
+        $r35 = interfaceinvoke $r4.<javax.security.sasl.SaslClient: byte[] evaluateChallenge(byte[])>($r19);
+
+        goto label09;
+
+     label08:
+        $r35 = null;
+
+     label09:
+        r36 = virtualinvoke r6.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.LdapResult ldapBind(java.lang.String,byte[],javax.naming.ldap.Control[],java.lang.String,boolean)>(null, $r35, r7, $r5, 1);
+
+     label10:
+        $z5 = interfaceinvoke $r4.<javax.security.sasl.SaslClient: boolean isComplete()>();
+
+        if $z5 != 0 goto label15;
+
+        $i0 = r36.<com.sun.jndi.ldap.LdapResult: int status>;
+
+        if $i0 == 14 goto label11;
+
+        $i2 = r36.<com.sun.jndi.ldap.LdapResult: int status>;
+
+        if $i2 != 0 goto label15;
+
+     label11:
+        $r16 = r36.<com.sun.jndi.ldap.LdapResult: byte[] serverCreds>;
+
+        if $r16 == null goto label12;
+
+        $r37 = r36.<com.sun.jndi.ldap.LdapResult: byte[] serverCreds>;
+
+        goto label13;
+
+     label12:
+        $r37 = <com.sun.jndi.ldap.sasl.LdapSasl: byte[] NO_BYTES>;
+
+     label13:
+        $r17 = interfaceinvoke $r4.<javax.security.sasl.SaslClient: byte[] evaluateChallenge(byte[])>($r37);
+
+        $i1 = r36.<com.sun.jndi.ldap.LdapResult: int status>;
+
+        if $i1 != 0 goto label14;
+
+        if $r17 == null goto label15;
+
+        $r18 = new javax.naming.AuthenticationException;
+
+        specialinvoke $r18.<javax.naming.AuthenticationException: void <init>(java.lang.String)>("SASL client generated response after success");
+
+        throw $r18;
+
+     label14:
+        r36 = virtualinvoke r6.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.LdapResult ldapBind(java.lang.String,byte[],javax.naming.ldap.Control[],java.lang.String,boolean)>(null, $r17, r7, $r5, 1);
+
+        goto label10;
+
+     label15:
+        $i3 = r36.<com.sun.jndi.ldap.LdapResult: int status>;
+
+        if $i3 != 0 goto label19;
+
+        $z1 = interfaceinvoke $r4.<javax.security.sasl.SaslClient: boolean isComplete()>();
+
+        if $z1 != 0 goto label16;
+
+        $r15 = new javax.naming.AuthenticationException;
+
+        specialinvoke $r15.<javax.naming.AuthenticationException: void <init>(java.lang.String)>("SASL authentication not complete despite server claims");
+
+        throw $r15;
+
+     label16:
+        $r9 = interfaceinvoke $r4.<javax.security.sasl.SaslClient: java.lang.Object getNegotiatedProperty(java.lang.String)>("javax.security.sasl.qop");
+
+        r38 = (java.lang.String) $r9;
+
+        if r38 == null goto label18;
+
+        $z2 = virtualinvoke r38.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("auth-int");
+
+        if $z2 != 0 goto label17;
+
+        $z3 = virtualinvoke r38.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("auth-conf");
+
+        if $z3 == 0 goto label18;
+
+     label17:
+        $r10 = new com.sun.jndi.ldap.sasl.SaslInputStream;
+
+        $r12 = r11.<com.sun.jndi.ldap.Connection: java.io.InputStream inStream>;
+
+        specialinvoke $r10.<com.sun.jndi.ldap.sasl.SaslInputStream: void <init>(javax.security.sasl.SaslClient,java.io.InputStream)>($r4, $r12);
+
+        $r13 = new com.sun.jndi.ldap.sasl.SaslOutputStream;
+
+        $r14 = r11.<com.sun.jndi.ldap.Connection: java.io.OutputStream outStream>;
+
+        specialinvoke $r13.<com.sun.jndi.ldap.sasl.SaslOutputStream: void <init>(javax.security.sasl.SaslClient,java.io.OutputStream)>($r4, $r14);
+
+        virtualinvoke r11.<com.sun.jndi.ldap.Connection: void replaceStreams(java.io.InputStream,java.io.OutputStream)>($r10, $r13);
+
+        goto label19;
+
+     label18:
+        interfaceinvoke $r4.<javax.security.sasl.SaslClient: void dispose()>();
+
+     label19:
+        r39 = r36;
+
+     label20:
+        if z6 == 0 goto label21;
+
+        $r8 = (com.sun.jndi.ldap.sasl.DefaultCallbackHandler) r33;
+
+        virtualinvoke $r8.<com.sun.jndi.ldap.sasl.DefaultCallbackHandler: void clearPassword()>();
+
+     label21:
+        return r39;
+
+     label22:
+        $r30 := @caughtexception;
+
+        $r31 = new javax.naming.AuthenticationException;
+
+        specialinvoke $r31.<javax.naming.AuthenticationException: void <init>(java.lang.String)>(r1);
+
+        virtualinvoke $r31.<javax.naming.NamingException: void setRootCause(java.lang.Throwable)>($r30);
+
+        throw $r31;
+
+     label23:
+        $r28 := @caughtexception;
+
+     label24:
+        if z7 == 0 goto label25;
+
+        $r29 = (com.sun.jndi.ldap.sasl.DefaultCallbackHandler) r33;
+
+        virtualinvoke $r29.<com.sun.jndi.ldap.sasl.DefaultCallbackHandler: void clearPassword()>();
+
+     label25:
+        throw $r28;
+
+        catch javax.security.sasl.SaslException from label06 to label20 with label22;
+        catch java.lang.Throwable from label06 to label20 with label23;
+        catch java.lang.Throwable from label22 to label24 with label23;
+    }
+
+    private static java.lang.String[] getSaslMechanismNames(java.lang.String)
+    {
+        java.lang.String[] r3;
+        java.util.Vector $r2;
+        java.util.StringTokenizer $r0;
+        int $i0, $i1, i2;
+        java.lang.Object $r4;
+        java.lang.String r1, $r5, $r6;
+        boolean $z0;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = new java.util.StringTokenizer;
+
+        specialinvoke $r0.<java.util.StringTokenizer: void <init>(java.lang.String)>(r1);
+
+        $r2 = new java.util.Vector;
+
+        specialinvoke $r2.<java.util.Vector: void <init>(int)>(10);
+
+     label1:
+        $z0 = virtualinvoke $r0.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label2;
+
+        $r6 = virtualinvoke $r0.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        virtualinvoke $r2.<java.util.Vector: void addElement(java.lang.Object)>($r6);
+
+        goto label1;
+
+     label2:
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        r3 = newarray (java.lang.String)[$i0];
+
+        i2 = 0;
+
+     label3:
+        $i1 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        if i2 >= $i1 goto label4;
+
+        $r4 = virtualinvoke $r2.<java.util.Vector: java.lang.Object elementAt(int)>(i2);
+
+        $r5 = (java.lang.String) $r4;
+
+        r3[i2] = $r5;
+
+        i2 = i2 + 1;
+
+        goto label3;
+
+     label4:
+        return r3;
+    }
+
+    static void <clinit>()
+    {
+        byte[] $r0;
+
+        <com.sun.jndi.ldap.sasl.LdapSasl: int LDAP_SASL_BIND_IN_PROGRESS> = 14;
+
+        <com.sun.jndi.ldap.sasl.LdapSasl: int LDAP_SUCCESS> = 0;
+
+        <com.sun.jndi.ldap.sasl.LdapSasl: java.lang.String SASL_REALM> = "java.naming.security.sasl.realm";
+
+        <com.sun.jndi.ldap.sasl.LdapSasl: java.lang.String SASL_AUTHZ_ID> = "java.naming.security.sasl.authorizationId";
+
+        <com.sun.jndi.ldap.sasl.LdapSasl: java.lang.String SASL_CALLBACK> = "java.naming.security.sasl.callback";
+
+        $r0 = newarray (byte)[0];
+
+        <com.sun.jndi.ldap.sasl.LdapSasl: byte[] NO_BYTES> = $r0;
+
+        return;
+    }
+}

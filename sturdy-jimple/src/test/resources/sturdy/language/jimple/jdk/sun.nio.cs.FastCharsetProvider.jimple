@@ -1,0 +1,339 @@
+public class sun.nio.cs.FastCharsetProvider extends java.nio.charset.spi.CharsetProvider
+{
+    private java.util.Map classMap;
+    private java.util.Map aliasMap;
+    private java.util.Map cache;
+    private java.lang.String packagePrefix;
+
+    protected void <init>(java.lang.String, java.util.Map, java.util.Map, java.util.Map)
+    {
+        java.util.Map r2, r3, r4;
+        java.lang.String r1;
+        sun.nio.cs.FastCharsetProvider r0;
+
+        r0 := @this: sun.nio.cs.FastCharsetProvider;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.util.Map;
+
+        r3 := @parameter2: java.util.Map;
+
+        r4 := @parameter3: java.util.Map;
+
+        specialinvoke r0.<java.nio.charset.spi.CharsetProvider: void <init>()>();
+
+        r0.<sun.nio.cs.FastCharsetProvider: java.lang.String packagePrefix> = r1;
+
+        r0.<sun.nio.cs.FastCharsetProvider: java.util.Map aliasMap> = r2;
+
+        r0.<sun.nio.cs.FastCharsetProvider: java.util.Map classMap> = r3;
+
+        r0.<sun.nio.cs.FastCharsetProvider: java.util.Map cache> = r4;
+
+        return;
+    }
+
+    private java.lang.String canonicalize(java.lang.String)
+    {
+        java.util.Map $r2;
+        java.lang.Object $r3;
+        java.lang.String r1, r4, $r5;
+        sun.nio.cs.FastCharsetProvider r0;
+
+        r0 := @this: sun.nio.cs.FastCharsetProvider;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<sun.nio.cs.FastCharsetProvider: java.util.Map aliasMap>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r4 = (java.lang.String) $r3;
+
+        if r4 == null goto label1;
+
+        $r5 = r4;
+
+        goto label2;
+
+     label1:
+        $r5 = r1;
+
+     label2:
+        return $r5;
+    }
+
+    private static java.lang.String toLower(java.lang.String)
+    {
+        int $i0, $i2, $i3, $i4, $i6, $i9, $i10, $i11, i12, i13, $i14, $i15, $i16, $i17, $i18;
+        java.lang.String r0, $r3;
+        boolean z0;
+        char $c1, $c5, $c7, $c8;
+        char[] r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        z0 = 1;
+
+        i12 = 0;
+
+     label1:
+        if i12 >= $i0 goto label3;
+
+        $c8 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i12);
+
+        $i14 = (int) $c8;
+
+        $i10 = $i14 - 65;
+
+        $i15 = (int) $c8;
+
+        $i9 = 90 - $i15;
+
+        $i11 = $i10 | $i9;
+
+        if $i11 < 0 goto label2;
+
+        z0 = 0;
+
+        goto label3;
+
+     label2:
+        i12 = i12 + 1;
+
+        goto label1;
+
+     label3:
+        if z0 == 0 goto label4;
+
+        return r0;
+
+     label4:
+        r2 = newarray (char)[$i0];
+
+        i13 = 0;
+
+     label5:
+        if i13 >= $i0 goto label8;
+
+        $c1 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i13);
+
+        $i16 = (int) $c1;
+
+        $i3 = $i16 - 65;
+
+        $i17 = (int) $c1;
+
+        $i2 = 90 - $i17;
+
+        $i4 = $i3 | $i2;
+
+        if $i4 < 0 goto label6;
+
+        $i18 = (int) $c1;
+
+        $i6 = $i18 + 32;
+
+        $c7 = (char) $i6;
+
+        r2[i13] = $c7;
+
+        goto label7;
+
+     label6:
+        $c5 = (char) $c1;
+
+        r2[i13] = $c5;
+
+     label7:
+        i13 = i13 + 1;
+
+        goto label5;
+
+     label8:
+        $r3 = new java.lang.String;
+
+        specialinvoke $r3.<java.lang.String: void <init>(char[])>(r2);
+
+        return $r3;
+    }
+
+    private java.nio.charset.Charset lookup(java.lang.String)
+    {
+        java.lang.ReflectiveOperationException $r22;
+        sun.nio.cs.US_ASCII $r20;
+        java.nio.charset.Charset r23, r24;
+        java.util.Map $r4, $r6, $r19, $r21;
+        java.lang.String r1, $r2, $r3, r8, $r10, $r14;
+        boolean $z0;
+        java.lang.Object $r5, $r7, $r18;
+        java.lang.StringBuilder $r9, $r11, $r12, $r13;
+        java.lang.Class $r15, $r17;
+        java.lang.ClassLoader $r16;
+        sun.nio.cs.FastCharsetProvider r0;
+
+        r0 := @this: sun.nio.cs.FastCharsetProvider;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = staticinvoke <sun.nio.cs.FastCharsetProvider: java.lang.String toLower(java.lang.String)>(r1);
+
+        $r3 = specialinvoke r0.<sun.nio.cs.FastCharsetProvider: java.lang.String canonicalize(java.lang.String)>($r2);
+
+        $r4 = r0.<sun.nio.cs.FastCharsetProvider: java.util.Map cache>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Map: java.lang.Object get(java.lang.Object)>($r3);
+
+        r23 = (java.nio.charset.Charset) $r5;
+
+        if r23 == null goto label1;
+
+        return r23;
+
+     label1:
+        $r6 = r0.<sun.nio.cs.FastCharsetProvider: java.util.Map classMap>;
+
+        $r7 = interfaceinvoke $r6.<java.util.Map: java.lang.Object get(java.lang.Object)>($r3);
+
+        r8 = (java.lang.String) $r7;
+
+        if r8 != null goto label2;
+
+        return null;
+
+     label2:
+        $z0 = virtualinvoke r8.<java.lang.String: boolean equals(java.lang.Object)>("US_ASCII");
+
+        if $z0 == 0 goto label3;
+
+        $r20 = new sun.nio.cs.US_ASCII;
+
+        specialinvoke $r20.<sun.nio.cs.US_ASCII: void <init>()>();
+
+        $r21 = r0.<sun.nio.cs.FastCharsetProvider: java.util.Map cache>;
+
+        interfaceinvoke $r21.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, $r20);
+
+        return $r20;
+
+     label3:
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = r0.<sun.nio.cs.FastCharsetProvider: java.lang.String packagePrefix>;
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r8);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r15 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $r17 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>($r14, 1, $r16);
+
+        $r18 = virtualinvoke $r17.<java.lang.Class: java.lang.Object newInstance()>();
+
+        r24 = (java.nio.charset.Charset) $r18;
+
+        $r19 = r0.<sun.nio.cs.FastCharsetProvider: java.util.Map cache>;
+
+        interfaceinvoke $r19.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, r24);
+
+     label4:
+        return r24;
+
+     label5:
+        $r22 := @caughtexception;
+
+        return null;
+
+        catch java.lang.ClassNotFoundException from label3 to label4 with label5;
+        catch java.lang.IllegalAccessException from label3 to label4 with label5;
+        catch java.lang.InstantiationException from label3 to label4 with label5;
+    }
+
+    public final java.nio.charset.Charset charsetForName(java.lang.String)
+    {
+        java.lang.Throwable $r4;
+        java.nio.charset.Charset $r3;
+        java.lang.String r1, $r2;
+        sun.nio.cs.FastCharsetProvider r0;
+
+        r0 := @this: sun.nio.cs.FastCharsetProvider;
+
+        r1 := @parameter0: java.lang.String;
+
+        entermonitor r0;
+
+     label1:
+        $r2 = specialinvoke r0.<sun.nio.cs.FastCharsetProvider: java.lang.String canonicalize(java.lang.String)>(r1);
+
+        $r3 = specialinvoke r0.<sun.nio.cs.FastCharsetProvider: java.nio.charset.Charset lookup(java.lang.String)>($r2);
+
+        exitmonitor r0;
+
+     label2:
+        return $r3;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public final java.util.Iterator charsets()
+    {
+        sun.nio.cs.FastCharsetProvider$1 $r0;
+        sun.nio.cs.FastCharsetProvider r1;
+
+        r1 := @this: sun.nio.cs.FastCharsetProvider;
+
+        $r0 = new sun.nio.cs.FastCharsetProvider$1;
+
+        specialinvoke $r0.<sun.nio.cs.FastCharsetProvider$1: void <init>(sun.nio.cs.FastCharsetProvider)>(r1);
+
+        return $r0;
+    }
+
+    static java.util.Map access$000(sun.nio.cs.FastCharsetProvider)
+    {
+        sun.nio.cs.FastCharsetProvider r0;
+        java.util.Map $r1;
+
+        r0 := @parameter0: sun.nio.cs.FastCharsetProvider;
+
+        $r1 = r0.<sun.nio.cs.FastCharsetProvider: java.util.Map classMap>;
+
+        return $r1;
+    }
+
+    static java.nio.charset.Charset access$100(sun.nio.cs.FastCharsetProvider, java.lang.String)
+    {
+        java.lang.String r1;
+        sun.nio.cs.FastCharsetProvider r0;
+        java.nio.charset.Charset $r2;
+
+        r0 := @parameter0: sun.nio.cs.FastCharsetProvider;
+
+        r1 := @parameter1: java.lang.String;
+
+        $r2 = specialinvoke r0.<sun.nio.cs.FastCharsetProvider: java.nio.charset.Charset lookup(java.lang.String)>(r1);
+
+        return $r2;
+    }
+}

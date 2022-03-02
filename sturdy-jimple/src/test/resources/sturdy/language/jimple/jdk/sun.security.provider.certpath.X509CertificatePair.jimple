@@ -1,0 +1,681 @@
+public class sun.security.provider.certpath.X509CertificatePair extends java.lang.Object
+{
+    private static final byte TAG_FORWARD;
+    private static final byte TAG_REVERSE;
+    private java.security.cert.X509Certificate forward;
+    private java.security.cert.X509Certificate reverse;
+    private byte[] encoded;
+    private static final sun.security.util.Cache cache;
+
+    public void <init>()
+    {
+        sun.security.provider.certpath.X509CertificatePair r0;
+
+        r0 := @this: sun.security.provider.certpath.X509CertificatePair;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void <init>(java.security.cert.X509Certificate, java.security.cert.X509Certificate) throws java.security.cert.CertificateException
+    {
+        java.security.cert.X509Certificate r1, r2;
+        sun.security.provider.certpath.X509CertificatePair r0;
+        java.security.cert.CertificateException $r3;
+
+        r0 := @this: sun.security.provider.certpath.X509CertificatePair;
+
+        r1 := @parameter0: java.security.cert.X509Certificate;
+
+        r2 := @parameter1: java.security.cert.X509Certificate;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        if r1 != null goto label1;
+
+        if r2 != null goto label1;
+
+        $r3 = new java.security.cert.CertificateException;
+
+        specialinvoke $r3.<java.security.cert.CertificateException: void <init>(java.lang.String)>("at least one of certificate pair must be non-null");
+
+        throw $r3;
+
+     label1:
+        r0.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate forward> = r1;
+
+        r0.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate reverse> = r2;
+
+        specialinvoke r0.<sun.security.provider.certpath.X509CertificatePair: void checkPair()>();
+
+        return;
+    }
+
+    private void <init>(byte[]) throws java.security.cert.CertificateException
+    {
+        sun.security.util.DerValue $r1;
+        byte[] r2;
+        sun.security.provider.certpath.X509CertificatePair r0;
+        java.io.IOException $r3;
+        java.security.cert.CertificateException $r4;
+        java.lang.String $r5;
+
+        r0 := @this: sun.security.provider.certpath.X509CertificatePair;
+
+        r2 := @parameter0: byte[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+     label1:
+        $r1 = new sun.security.util.DerValue;
+
+        specialinvoke $r1.<sun.security.util.DerValue: void <init>(byte[])>(r2);
+
+        specialinvoke r0.<sun.security.provider.certpath.X509CertificatePair: void parse(sun.security.util.DerValue)>($r1);
+
+        r0.<sun.security.provider.certpath.X509CertificatePair: byte[] encoded> = r2;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.security.cert.CertificateException;
+
+        $r5 = virtualinvoke $r3.<java.io.IOException: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.security.cert.CertificateException: void <init>(java.lang.String)>($r5);
+
+        throw $r4;
+
+     label4:
+        specialinvoke r0.<sun.security.provider.certpath.X509CertificatePair: void checkPair()>();
+
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public static synchronized void clearCache()
+    {
+        sun.security.util.Cache $r0;
+
+        $r0 = <sun.security.provider.certpath.X509CertificatePair: sun.security.util.Cache cache>;
+
+        virtualinvoke $r0.<sun.security.util.Cache: void clear()>();
+
+        return;
+    }
+
+    public static synchronized sun.security.provider.certpath.X509CertificatePair generateCertificatePair(byte[]) throws java.security.cert.CertificateException
+    {
+        byte[] r1, $r6;
+        sun.security.provider.certpath.X509CertificatePair $r4, r8;
+        sun.security.util.Cache$EqualByteArray $r0, $r5;
+        sun.security.util.Cache $r2, $r7;
+        java.lang.Object $r3;
+
+        r1 := @parameter0: byte[];
+
+        $r0 = new sun.security.util.Cache$EqualByteArray;
+
+        specialinvoke $r0.<sun.security.util.Cache$EqualByteArray: void <init>(byte[])>(r1);
+
+        $r2 = <sun.security.provider.certpath.X509CertificatePair: sun.security.util.Cache cache>;
+
+        $r3 = virtualinvoke $r2.<sun.security.util.Cache: java.lang.Object get(java.lang.Object)>($r0);
+
+        r8 = (sun.security.provider.certpath.X509CertificatePair) $r3;
+
+        if r8 == null goto label1;
+
+        return r8;
+
+     label1:
+        $r4 = new sun.security.provider.certpath.X509CertificatePair;
+
+        specialinvoke $r4.<sun.security.provider.certpath.X509CertificatePair: void <init>(byte[])>(r1);
+
+        $r5 = new sun.security.util.Cache$EqualByteArray;
+
+        $r6 = $r4.<sun.security.provider.certpath.X509CertificatePair: byte[] encoded>;
+
+        specialinvoke $r5.<sun.security.util.Cache$EqualByteArray: void <init>(byte[])>($r6);
+
+        $r7 = <sun.security.provider.certpath.X509CertificatePair: sun.security.util.Cache cache>;
+
+        virtualinvoke $r7.<sun.security.util.Cache: void put(java.lang.Object,java.lang.Object)>($r5, $r4);
+
+        return $r4;
+    }
+
+    public void setForward(java.security.cert.X509Certificate) throws java.security.cert.CertificateException
+    {
+        java.security.cert.X509Certificate r1;
+        sun.security.provider.certpath.X509CertificatePair r0;
+
+        r0 := @this: sun.security.provider.certpath.X509CertificatePair;
+
+        r1 := @parameter0: java.security.cert.X509Certificate;
+
+        specialinvoke r0.<sun.security.provider.certpath.X509CertificatePair: void checkPair()>();
+
+        r0.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate forward> = r1;
+
+        return;
+    }
+
+    public void setReverse(java.security.cert.X509Certificate) throws java.security.cert.CertificateException
+    {
+        java.security.cert.X509Certificate r1;
+        sun.security.provider.certpath.X509CertificatePair r0;
+
+        r0 := @this: sun.security.provider.certpath.X509CertificatePair;
+
+        r1 := @parameter0: java.security.cert.X509Certificate;
+
+        specialinvoke r0.<sun.security.provider.certpath.X509CertificatePair: void checkPair()>();
+
+        r0.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate reverse> = r1;
+
+        return;
+    }
+
+    public java.security.cert.X509Certificate getForward()
+    {
+        java.security.cert.X509Certificate $r1;
+        sun.security.provider.certpath.X509CertificatePair r0;
+
+        r0 := @this: sun.security.provider.certpath.X509CertificatePair;
+
+        $r1 = r0.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate forward>;
+
+        return $r1;
+    }
+
+    public java.security.cert.X509Certificate getReverse()
+    {
+        java.security.cert.X509Certificate $r1;
+        sun.security.provider.certpath.X509CertificatePair r0;
+
+        r0 := @this: sun.security.provider.certpath.X509CertificatePair;
+
+        $r1 = r0.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate reverse>;
+
+        return $r1;
+    }
+
+    public byte[] getEncoded() throws java.security.cert.CertificateEncodingException
+    {
+        byte[] $r1, $r2, $r4;
+        sun.security.provider.certpath.X509CertificatePair r0;
+        java.io.IOException $r5;
+        sun.security.util.DerOutputStream $r3;
+        java.lang.String $r7;
+        java.security.cert.CertificateEncodingException $r6;
+
+        r0 := @this: sun.security.provider.certpath.X509CertificatePair;
+
+     label1:
+        $r1 = r0.<sun.security.provider.certpath.X509CertificatePair: byte[] encoded>;
+
+        if $r1 != null goto label2;
+
+        $r3 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r3.<sun.security.util.DerOutputStream: void <init>()>();
+
+        specialinvoke r0.<sun.security.provider.certpath.X509CertificatePair: void emit(sun.security.util.DerOutputStream)>($r3);
+
+        $r4 = virtualinvoke $r3.<sun.security.util.DerOutputStream: byte[] toByteArray()>();
+
+        r0.<sun.security.provider.certpath.X509CertificatePair: byte[] encoded> = $r4;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new java.security.cert.CertificateEncodingException;
+
+        $r7 = virtualinvoke $r5.<java.io.IOException: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.security.cert.CertificateEncodingException: void <init>(java.lang.String)>($r7);
+
+        throw $r6;
+
+     label4:
+        $r2 = r0.<sun.security.provider.certpath.X509CertificatePair: byte[] encoded>;
+
+        return $r2;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public java.lang.String toString()
+    {
+        java.security.cert.X509Certificate $r2, $r3, $r6, $r9;
+        sun.security.provider.certpath.X509CertificatePair r1;
+        java.lang.StringBuilder $r0, $r5, $r7, $r8, $r10;
+        java.lang.String $r4;
+
+        r1 := @this: sun.security.provider.certpath.X509CertificatePair;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("X.509 Certificate Pair: [\n");
+
+        $r2 = r1.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate forward>;
+
+        if $r2 == null goto label1;
+
+        $r8 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  Forward: ");
+
+        $r9 = r1.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate forward>;
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+     label1:
+        $r3 = r1.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate reverse>;
+
+        if $r3 == null goto label2;
+
+        $r5 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  Reverse: ");
+
+        $r6 = r1.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate reverse>;
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+     label2:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r4 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r4;
+    }
+
+    private void parse(sun.security.util.DerValue) throws java.io.IOException, java.security.cert.CertificateException
+    {
+        java.security.cert.X509Certificate $r3, $r4, $r9, $r16;
+        byte[] $r13, $r20;
+        byte $b0, $b2, $b3, $b4;
+        boolean $z0, $z1, $z2, $z3;
+        sun.security.util.DerValue r0, $r8, $r11, $r18;
+        sun.security.x509.X509CertImpl $r14, $r21, $r27, $r29;
+        sun.security.util.DerInputStream $r1, $r6, $r7, $r10, $r17;
+        short s5;
+        int $i1, $i6, $i7;
+        sun.security.provider.certpath.X509CertificatePair r2;
+        java.io.IOException $r25, $r26, $r28, $r30;
+        java.security.cert.CertificateException $r31;
+
+        r2 := @this: sun.security.provider.certpath.X509CertificatePair;
+
+        r0 := @parameter0: sun.security.util.DerValue;
+
+        $b0 = r0.<sun.security.util.DerValue: byte tag>;
+
+        $i6 = (int) $b0;
+
+        if $i6 == 48 goto label1;
+
+        $r25 = new java.io.IOException;
+
+        specialinvoke $r25.<java.io.IOException: void <init>(java.lang.String)>("Sequence tag missing for X509CertificatePair");
+
+        throw $r25;
+
+     label1:
+        $r1 = r0.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        if $r1 == null goto label8;
+
+        $r6 = r0.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $i1 = virtualinvoke $r6.<sun.security.util.DerInputStream: int available()>();
+
+        if $i1 == 0 goto label8;
+
+        $r7 = r0.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $r8 = virtualinvoke $r7.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+        $b2 = $r8.<sun.security.util.DerValue: byte tag>;
+
+        $b3 = $b2 & 31;
+
+        $b4 = (byte) $b3;
+
+        s5 = (short) $b4;
+
+        $i7 = (int) s5;
+
+        lookupswitch($i7)
+        {
+            case 0: goto label2;
+            case 1: goto label4;
+            default: goto label6;
+        };
+
+     label2:
+        $z2 = virtualinvoke $r8.<sun.security.util.DerValue: boolean isContextSpecific()>();
+
+        if $z2 == 0 goto label7;
+
+        $z3 = virtualinvoke $r8.<sun.security.util.DerValue: boolean isConstructed()>();
+
+        if $z3 == 0 goto label7;
+
+        $r16 = r2.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate forward>;
+
+        if $r16 == null goto label3;
+
+        $r26 = new java.io.IOException;
+
+        specialinvoke $r26.<java.io.IOException: void <init>(java.lang.String)>("Duplicate forward certificate in X509CertificatePair");
+
+        throw $r26;
+
+     label3:
+        $r17 = $r8.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $r18 = virtualinvoke $r17.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+        $r27 = new sun.security.x509.X509CertImpl;
+
+        $r20 = virtualinvoke $r18.<sun.security.util.DerValue: byte[] toByteArray()>();
+
+        specialinvoke $r27.<sun.security.x509.X509CertImpl: void <init>(byte[])>($r20);
+
+        $r21 = staticinvoke <sun.security.provider.X509Factory: sun.security.x509.X509CertImpl intern(java.security.cert.X509Certificate)>($r27);
+
+        r2.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate forward> = $r21;
+
+        goto label7;
+
+     label4:
+        $z0 = virtualinvoke $r8.<sun.security.util.DerValue: boolean isContextSpecific()>();
+
+        if $z0 == 0 goto label7;
+
+        $z1 = virtualinvoke $r8.<sun.security.util.DerValue: boolean isConstructed()>();
+
+        if $z1 == 0 goto label7;
+
+        $r9 = r2.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate reverse>;
+
+        if $r9 == null goto label5;
+
+        $r28 = new java.io.IOException;
+
+        specialinvoke $r28.<java.io.IOException: void <init>(java.lang.String)>("Duplicate reverse certificate in X509CertificatePair");
+
+        throw $r28;
+
+     label5:
+        $r10 = $r8.<sun.security.util.DerValue: sun.security.util.DerInputStream data>;
+
+        $r11 = virtualinvoke $r10.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+        $r29 = new sun.security.x509.X509CertImpl;
+
+        $r13 = virtualinvoke $r11.<sun.security.util.DerValue: byte[] toByteArray()>();
+
+        specialinvoke $r29.<sun.security.x509.X509CertImpl: void <init>(byte[])>($r13);
+
+        $r14 = staticinvoke <sun.security.provider.X509Factory: sun.security.x509.X509CertImpl intern(java.security.cert.X509Certificate)>($r29);
+
+        r2.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate reverse> = $r14;
+
+        goto label7;
+
+     label6:
+        $r30 = new java.io.IOException;
+
+        specialinvoke $r30.<java.io.IOException: void <init>(java.lang.String)>("Invalid encoding of X509CertificatePair");
+
+        throw $r30;
+
+     label7:
+        goto label1;
+
+     label8:
+        $r3 = r2.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate forward>;
+
+        if $r3 != null goto label9;
+
+        $r4 = r2.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate reverse>;
+
+        if $r4 != null goto label9;
+
+        $r31 = new java.security.cert.CertificateException;
+
+        specialinvoke $r31.<java.security.cert.CertificateException: void <init>(java.lang.String)>("at least one of certificate pair must be non-null");
+
+        throw $r31;
+
+     label9:
+        return;
+    }
+
+    private void emit(sun.security.util.DerOutputStream) throws java.io.IOException, java.security.cert.CertificateEncodingException
+    {
+        java.security.cert.X509Certificate $r2, $r3, $r7, $r11;
+        sun.security.util.DerValue $r6, $r10;
+        byte[] $r8, $r12;
+        sun.security.provider.certpath.X509CertificatePair r1;
+        byte $b0, $b1;
+        sun.security.util.DerOutputStream $r0, r4, $r5, $r9;
+
+        r1 := @this: sun.security.provider.certpath.X509CertificatePair;
+
+        r4 := @parameter0: sun.security.util.DerOutputStream;
+
+        $r0 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r0.<sun.security.util.DerOutputStream: void <init>()>();
+
+        $r2 = r1.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate forward>;
+
+        if $r2 == null goto label1;
+
+        $r9 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r9.<sun.security.util.DerOutputStream: void <init>()>();
+
+        $r10 = new sun.security.util.DerValue;
+
+        $r11 = r1.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate forward>;
+
+        $r12 = virtualinvoke $r11.<java.security.cert.X509Certificate: byte[] getEncoded()>();
+
+        specialinvoke $r10.<sun.security.util.DerValue: void <init>(byte[])>($r12);
+
+        virtualinvoke $r9.<sun.security.util.DerOutputStream: void putDerValue(sun.security.util.DerValue)>($r10);
+
+        $b1 = staticinvoke <sun.security.util.DerValue: byte createTag(byte,boolean,byte)>(-128, 1, 0);
+
+        virtualinvoke $r0.<sun.security.util.DerOutputStream: void write(byte,sun.security.util.DerOutputStream)>($b1, $r9);
+
+     label1:
+        $r3 = r1.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate reverse>;
+
+        if $r3 == null goto label2;
+
+        $r5 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r5.<sun.security.util.DerOutputStream: void <init>()>();
+
+        $r6 = new sun.security.util.DerValue;
+
+        $r7 = r1.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate reverse>;
+
+        $r8 = virtualinvoke $r7.<java.security.cert.X509Certificate: byte[] getEncoded()>();
+
+        specialinvoke $r6.<sun.security.util.DerValue: void <init>(byte[])>($r8);
+
+        virtualinvoke $r5.<sun.security.util.DerOutputStream: void putDerValue(sun.security.util.DerValue)>($r6);
+
+        $b0 = staticinvoke <sun.security.util.DerValue: byte createTag(byte,boolean,byte)>(-128, 1, 1);
+
+        virtualinvoke $r0.<sun.security.util.DerOutputStream: void write(byte,sun.security.util.DerOutputStream)>($b0, $r5);
+
+     label2:
+        virtualinvoke r4.<sun.security.util.DerOutputStream: void write(byte,sun.security.util.DerOutputStream)>(48, $r0);
+
+        return;
+    }
+
+    private void checkPair() throws java.security.cert.CertificateException
+    {
+        java.security.cert.X509Certificate $r1, $r2, $r3, $r5, $r7, $r9, $r12, $r14, $r15, $r27;
+        java.security.GeneralSecurityException $r20;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.StringBuilder $r22, $r23, $r25;
+        javax.security.auth.x500.X500Principal $r4, $r6, $r8, $r10;
+        java.lang.String $r24, $r26;
+        sun.security.provider.certpath.X509CertificatePair r0;
+        java.security.PublicKey $r13, $r28;
+        java.security.cert.CertificateException $r11, $r21;
+        java.security.interfaces.DSAPublicKey $r16, $r18;
+        java.security.interfaces.DSAParams $r17, $r19;
+
+        r0 := @this: sun.security.provider.certpath.X509CertificatePair;
+
+        $r1 = r0.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate forward>;
+
+        if $r1 == null goto label01;
+
+        $r2 = r0.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate reverse>;
+
+        if $r2 != null goto label02;
+
+     label01:
+        return;
+
+     label02:
+        $r3 = r0.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate forward>;
+
+        $r4 = virtualinvoke $r3.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        $r5 = r0.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate forward>;
+
+        $r6 = virtualinvoke $r5.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getIssuerX500Principal()>();
+
+        $r7 = r0.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate reverse>;
+
+        $r8 = virtualinvoke $r7.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        $r9 = r0.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate reverse>;
+
+        $r10 = virtualinvoke $r9.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getIssuerX500Principal()>();
+
+        $z0 = virtualinvoke $r6.<javax.security.auth.x500.X500Principal: boolean equals(java.lang.Object)>($r8);
+
+        if $z0 == 0 goto label03;
+
+        $z1 = virtualinvoke $r10.<javax.security.auth.x500.X500Principal: boolean equals(java.lang.Object)>($r4);
+
+        if $z1 != 0 goto label04;
+
+     label03:
+        $r11 = new java.security.cert.CertificateException;
+
+        specialinvoke $r11.<java.security.cert.CertificateException: void <init>(java.lang.String)>("subject and issuer names in forward and reverse certificates do not match");
+
+        throw $r11;
+
+     label04:
+        $r12 = r0.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate reverse>;
+
+        $r13 = virtualinvoke $r12.<java.security.cert.X509Certificate: java.security.PublicKey getPublicKey()>();
+
+        $z2 = $r13 instanceof java.security.interfaces.DSAPublicKey;
+
+        if $z2 == 0 goto label05;
+
+        $r18 = (java.security.interfaces.DSAPublicKey) $r13;
+
+        $r19 = interfaceinvoke $r18.<java.security.interfaces.DSAPublicKey: java.security.interfaces.DSAParams getParams()>();
+
+        if $r19 == null goto label06;
+
+     label05:
+        $r14 = r0.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate forward>;
+
+        virtualinvoke $r14.<java.security.cert.X509Certificate: void verify(java.security.PublicKey)>($r13);
+
+     label06:
+        $r27 = r0.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate forward>;
+
+        $r28 = virtualinvoke $r27.<java.security.cert.X509Certificate: java.security.PublicKey getPublicKey()>();
+
+        $z3 = $r28 instanceof java.security.interfaces.DSAPublicKey;
+
+        if $z3 == 0 goto label07;
+
+        $r16 = (java.security.interfaces.DSAPublicKey) $r28;
+
+        $r17 = interfaceinvoke $r16.<java.security.interfaces.DSAPublicKey: java.security.interfaces.DSAParams getParams()>();
+
+        if $r17 == null goto label08;
+
+     label07:
+        $r15 = r0.<sun.security.provider.certpath.X509CertificatePair: java.security.cert.X509Certificate reverse>;
+
+        virtualinvoke $r15.<java.security.cert.X509Certificate: void verify(java.security.PublicKey)>($r28);
+
+     label08:
+        goto label10;
+
+     label09:
+        $r20 := @caughtexception;
+
+        $r21 = new java.security.cert.CertificateException;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("invalid signature: ");
+
+        $r24 = virtualinvoke $r20.<java.security.GeneralSecurityException: java.lang.String getMessage()>();
+
+        $r25 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r24);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r21.<java.security.cert.CertificateException: void <init>(java.lang.String)>($r26);
+
+        throw $r21;
+
+     label10:
+        return;
+
+        catch java.security.GeneralSecurityException from label04 to label08 with label09;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.util.Cache $r0;
+
+        <sun.security.provider.certpath.X509CertificatePair: byte TAG_REVERSE> = 1;
+
+        <sun.security.provider.certpath.X509CertificatePair: byte TAG_FORWARD> = 0;
+
+        $r0 = staticinvoke <sun.security.util.Cache: sun.security.util.Cache newSoftMemoryCache(int)>(750);
+
+        <sun.security.provider.certpath.X509CertificatePair: sun.security.util.Cache cache> = $r0;
+
+        return;
+    }
+}

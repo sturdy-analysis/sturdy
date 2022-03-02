@@ -1,0 +1,207 @@
+public class com.sun.corba.se.impl.protocol.BootstrapServerRequestDispatcher extends java.lang.Object implements com.sun.corba.se.spi.protocol.CorbaServerRequestDispatcher
+{
+    private com.sun.corba.se.spi.orb.ORB orb;
+    com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper;
+    private static final boolean debug;
+
+    public void <init>(com.sun.corba.se.spi.orb.ORB)
+    {
+        com.sun.corba.se.impl.protocol.BootstrapServerRequestDispatcher r0;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r2;
+        com.sun.corba.se.spi.orb.ORB r1;
+
+        r0 := @this: com.sun.corba.se.impl.protocol.BootstrapServerRequestDispatcher;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.protocol.BootstrapServerRequestDispatcher: com.sun.corba.se.spi.orb.ORB orb> = r1;
+
+        $r2 = staticinvoke <com.sun.corba.se.impl.logging.ORBUtilSystemException: com.sun.corba.se.impl.logging.ORBUtilSystemException get(com.sun.corba.se.spi.orb.ORB,java.lang.String)>(r1, "rpc.protocol");
+
+        r0.<com.sun.corba.se.impl.protocol.BootstrapServerRequestDispatcher: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper> = $r2;
+
+        return;
+    }
+
+    public void dispatch(com.sun.corba.se.pept.protocol.MessageMediator)
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r9, $r22, $r26;
+        com.sun.corba.se.pept.protocol.MessageMediator r0;
+        org.omg.CORBA.SystemException $r29;
+        boolean $z0, $z1, $z2;
+        com.sun.corba.se.pept.encoding.InputObject $r2;
+        com.sun.corba.se.impl.protocol.BootstrapServerRequestDispatcher r8;
+        java.util.Set $r13;
+        com.sun.corba.se.spi.resolver.LocalResolver $r12, $r19;
+        com.sun.corba.se.impl.encoding.MarshalInputStream r31;
+        java.lang.Exception $r21;
+        com.sun.corba.se.spi.protocol.CorbaProtocolHandler $r4, $r24, $r28, $r30;
+        com.sun.corba.se.impl.encoding.MarshalOutputStream r7;
+        com.sun.corba.se.pept.encoding.OutputObject $r6;
+        int $i0;
+        java.lang.String $r3, r16, $r17;
+        org.omg.CORBA.BAD_PARAM $r10, $r23, $r27;
+        java.util.Iterator $r14;
+        java.lang.RuntimeException $r25;
+        com.sun.corba.se.spi.orb.ORB $r11, $r18;
+        com.sun.corba.se.spi.protocol.CorbaMessageMediator r1, $r5;
+        org.omg.CORBA.Object $r20;
+        java.lang.Object $r15;
+
+        r8 := @this: com.sun.corba.se.impl.protocol.BootstrapServerRequestDispatcher;
+
+        r0 := @parameter0: com.sun.corba.se.pept.protocol.MessageMediator;
+
+        r1 = (com.sun.corba.se.spi.protocol.CorbaMessageMediator) r0;
+
+     label01:
+        $r2 = interfaceinvoke r1.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.encoding.InputObject getInputObject()>();
+
+        r31 = (com.sun.corba.se.impl.encoding.MarshalInputStream) $r2;
+
+        $r3 = interfaceinvoke r1.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: java.lang.String getOperationName()>();
+
+        $r4 = interfaceinvoke r1.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.spi.protocol.CorbaProtocolHandler getProtocolHandler()>();
+
+        $r5 = interfaceinvoke $r4.<com.sun.corba.se.spi.protocol.CorbaProtocolHandler: com.sun.corba.se.spi.protocol.CorbaMessageMediator createResponse(com.sun.corba.se.spi.protocol.CorbaMessageMediator,com.sun.corba.se.spi.servicecontext.ServiceContexts)>(r1, null);
+
+        $r6 = interfaceinvoke $r5.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.pept.encoding.OutputObject getOutputObject()>();
+
+        r7 = (com.sun.corba.se.impl.encoding.MarshalOutputStream) $r6;
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("get");
+
+        if $z0 == 0 goto label02;
+
+        $r17 = interfaceinvoke r31.<com.sun.corba.se.impl.encoding.MarshalInputStream: java.lang.String read_string()>();
+
+        $r18 = r8.<com.sun.corba.se.impl.protocol.BootstrapServerRequestDispatcher: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r19 = virtualinvoke $r18.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.resolver.LocalResolver getLocalResolver()>();
+
+        $r20 = interfaceinvoke $r19.<com.sun.corba.se.spi.resolver.LocalResolver: org.omg.CORBA.Object resolve(java.lang.String)>($r17);
+
+        interfaceinvoke r7.<com.sun.corba.se.impl.encoding.MarshalOutputStream: void write_Object(org.omg.CORBA.Object)>($r20);
+
+        goto label06;
+
+     label02:
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("list");
+
+        if $z1 == 0 goto label05;
+
+        $r11 = r8.<com.sun.corba.se.impl.protocol.BootstrapServerRequestDispatcher: com.sun.corba.se.spi.orb.ORB orb>;
+
+        $r12 = virtualinvoke $r11.<com.sun.corba.se.spi.orb.ORB: com.sun.corba.se.spi.resolver.LocalResolver getLocalResolver()>();
+
+        $r13 = interfaceinvoke $r12.<com.sun.corba.se.spi.resolver.LocalResolver: java.util.Set list()>();
+
+        $i0 = interfaceinvoke $r13.<java.util.Set: int size()>();
+
+        interfaceinvoke r7.<com.sun.corba.se.impl.encoding.MarshalOutputStream: void write_long(int)>($i0);
+
+        $r14 = interfaceinvoke $r13.<java.util.Set: java.util.Iterator iterator()>();
+
+     label03:
+        $z2 = interfaceinvoke $r14.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label04;
+
+        $r15 = interfaceinvoke $r14.<java.util.Iterator: java.lang.Object next()>();
+
+        r16 = (java.lang.String) $r15;
+
+        interfaceinvoke r7.<com.sun.corba.se.impl.encoding.MarshalOutputStream: void write_string(java.lang.String)>(r16);
+
+        goto label03;
+
+     label04:
+        goto label06;
+
+     label05:
+        $r9 = r8.<com.sun.corba.se.impl.protocol.BootstrapServerRequestDispatcher: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r10 = virtualinvoke $r9.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.BAD_PARAM illegalBootstrapOperation(java.lang.Object)>($r3);
+
+        throw $r10;
+
+     label06:
+        goto label10;
+
+     label07:
+        $r29 := @caughtexception;
+
+        $r30 = interfaceinvoke r1.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.spi.protocol.CorbaProtocolHandler getProtocolHandler()>();
+
+        interfaceinvoke $r30.<com.sun.corba.se.spi.protocol.CorbaProtocolHandler: com.sun.corba.se.spi.protocol.CorbaMessageMediator createSystemExceptionResponse(com.sun.corba.se.spi.protocol.CorbaMessageMediator,org.omg.CORBA.SystemException,com.sun.corba.se.spi.servicecontext.ServiceContexts)>(r1, $r29, null);
+
+        goto label10;
+
+     label08:
+        $r25 := @caughtexception;
+
+        $r26 = r8.<com.sun.corba.se.impl.protocol.BootstrapServerRequestDispatcher: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r27 = virtualinvoke $r26.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.BAD_PARAM bootstrapRuntimeException(java.lang.Throwable)>($r25);
+
+        $r28 = interfaceinvoke r1.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.spi.protocol.CorbaProtocolHandler getProtocolHandler()>();
+
+        interfaceinvoke $r28.<com.sun.corba.se.spi.protocol.CorbaProtocolHandler: com.sun.corba.se.spi.protocol.CorbaMessageMediator createSystemExceptionResponse(com.sun.corba.se.spi.protocol.CorbaMessageMediator,org.omg.CORBA.SystemException,com.sun.corba.se.spi.servicecontext.ServiceContexts)>(r1, $r27, null);
+
+        goto label10;
+
+     label09:
+        $r21 := @caughtexception;
+
+        $r22 = r8.<com.sun.corba.se.impl.protocol.BootstrapServerRequestDispatcher: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r23 = virtualinvoke $r22.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.BAD_PARAM bootstrapException(java.lang.Throwable)>($r21);
+
+        $r24 = interfaceinvoke r1.<com.sun.corba.se.spi.protocol.CorbaMessageMediator: com.sun.corba.se.spi.protocol.CorbaProtocolHandler getProtocolHandler()>();
+
+        interfaceinvoke $r24.<com.sun.corba.se.spi.protocol.CorbaProtocolHandler: com.sun.corba.se.spi.protocol.CorbaMessageMediator createSystemExceptionResponse(com.sun.corba.se.spi.protocol.CorbaMessageMediator,org.omg.CORBA.SystemException,com.sun.corba.se.spi.servicecontext.ServiceContexts)>(r1, $r23, null);
+
+     label10:
+        return;
+
+        catch org.omg.CORBA.SystemException from label01 to label06 with label07;
+        catch java.lang.RuntimeException from label01 to label06 with label08;
+        catch java.lang.Exception from label01 to label06 with label09;
+    }
+
+    public com.sun.corba.se.spi.ior.IOR locate(com.sun.corba.se.spi.ior.ObjectKey)
+    {
+        com.sun.corba.se.impl.protocol.BootstrapServerRequestDispatcher r0;
+        com.sun.corba.se.spi.ior.ObjectKey r1;
+
+        r0 := @this: com.sun.corba.se.impl.protocol.BootstrapServerRequestDispatcher;
+
+        r1 := @parameter0: com.sun.corba.se.spi.ior.ObjectKey;
+
+        return null;
+    }
+
+    public int getId()
+    {
+        com.sun.corba.se.impl.protocol.BootstrapServerRequestDispatcher r0;
+        org.omg.CORBA.NO_IMPLEMENT $r2;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r1;
+
+        r0 := @this: com.sun.corba.se.impl.protocol.BootstrapServerRequestDispatcher;
+
+        $r1 = r0.<com.sun.corba.se.impl.protocol.BootstrapServerRequestDispatcher: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.NO_IMPLEMENT genericNoImpl()>();
+
+        throw $r2;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.corba.se.impl.protocol.BootstrapServerRequestDispatcher: boolean debug> = 0;
+
+        return;
+    }
+}

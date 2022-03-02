@@ -1,0 +1,1441 @@
+public class java.util.logging.FileHandler extends java.util.logging.StreamHandler
+{
+    private java.util.logging.FileHandler$MeteredStream meter;
+    private boolean append;
+    private int limit;
+    private int count;
+    private java.lang.String pattern;
+    private java.lang.String lockFileName;
+    private java.nio.channels.FileChannel lockFileChannel;
+    private java.io.File[] files;
+    private static final int DEFAULT_MAX_LOCKS;
+    private static int maxLocks;
+    private static final java.util.Set locks;
+
+    private void open(java.io.File, boolean) throws java.io.IOException
+    {
+        java.io.FileOutputStream $r0;
+        long $l0;
+        java.io.File r1;
+        java.io.BufferedOutputStream $r3;
+        java.util.logging.FileHandler r4;
+        int i1;
+        java.lang.String $r2;
+        java.util.logging.FileHandler$MeteredStream $r5, $r6;
+        boolean z0;
+
+        r4 := @this: java.util.logging.FileHandler;
+
+        r1 := @parameter0: java.io.File;
+
+        z0 := @parameter1: boolean;
+
+        i1 = 0;
+
+        if z0 == 0 goto label1;
+
+        $l0 = virtualinvoke r1.<java.io.File: long length()>();
+
+        i1 = (int) $l0;
+
+     label1:
+        $r0 = new java.io.FileOutputStream;
+
+        $r2 = virtualinvoke r1.<java.io.File: java.lang.String toString()>();
+
+        specialinvoke $r0.<java.io.FileOutputStream: void <init>(java.lang.String,boolean)>($r2, z0);
+
+        $r3 = new java.io.BufferedOutputStream;
+
+        specialinvoke $r3.<java.io.BufferedOutputStream: void <init>(java.io.OutputStream)>($r0);
+
+        $r5 = new java.util.logging.FileHandler$MeteredStream;
+
+        specialinvoke $r5.<java.util.logging.FileHandler$MeteredStream: void <init>(java.util.logging.FileHandler,java.io.OutputStream,int)>(r4, $r3, i1);
+
+        r4.<java.util.logging.FileHandler: java.util.logging.FileHandler$MeteredStream meter> = $r5;
+
+        $r6 = r4.<java.util.logging.FileHandler: java.util.logging.FileHandler$MeteredStream meter>;
+
+        virtualinvoke r4.<java.util.logging.FileHandler: void setOutputStream(java.io.OutputStream)>($r6);
+
+        return;
+    }
+
+    private void configure()
+    {
+        java.util.logging.LogManager $r0;
+        java.util.logging.Formatter $r37;
+        java.util.logging.FileHandler r1;
+        boolean $z0;
+        java.util.logging.Filter $r31;
+        java.lang.Exception $r43, $r44;
+        java.lang.StringBuilder $r4, $r5, $r6, $r9, $r10, $r11, $r13, $r14, $r15, $r17, $r18, $r19, $r21, $r22, $r23, $r27, $r28, $r29, $r32, $r33, $r34, $r38, $r39, $r40;
+        java.util.logging.Level $r25, $r26;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String $r3, $r7, $r8, $r12, $r16, $r20, $r24, $r30, $r35, $r41, $r42;
+        java.util.logging.XMLFormatter $r36;
+        java.lang.Class $r2;
+
+        r1 := @this: java.util.logging.FileHandler;
+
+        $r0 = staticinvoke <java.util.logging.LogManager: java.util.logging.LogManager getLogManager()>();
+
+        $r2 = virtualinvoke r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".pattern");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r8 = virtualinvoke $r0.<java.util.logging.LogManager: java.lang.String getStringProperty(java.lang.String,java.lang.String)>($r7, "%h/java%u.log");
+
+        r1.<java.util.logging.FileHandler: java.lang.String pattern> = $r8;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".limit");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i0 = virtualinvoke $r0.<java.util.logging.LogManager: int getIntProperty(java.lang.String,int)>($r12, 0);
+
+        r1.<java.util.logging.FileHandler: int limit> = $i0;
+
+        $i1 = r1.<java.util.logging.FileHandler: int limit>;
+
+        if $i1 >= 0 goto label1;
+
+        r1.<java.util.logging.FileHandler: int limit> = 0;
+
+     label1:
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".count");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i2 = virtualinvoke $r0.<java.util.logging.LogManager: int getIntProperty(java.lang.String,int)>($r16, 1);
+
+        r1.<java.util.logging.FileHandler: int count> = $i2;
+
+        $i3 = r1.<java.util.logging.FileHandler: int count>;
+
+        if $i3 > 0 goto label2;
+
+        r1.<java.util.logging.FileHandler: int count> = 1;
+
+     label2:
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".append");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $z0 = virtualinvoke $r0.<java.util.logging.LogManager: boolean getBooleanProperty(java.lang.String,boolean)>($r20, 0);
+
+        r1.<java.util.logging.FileHandler: boolean append> = $z0;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".level");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r25 = <java.util.logging.Level: java.util.logging.Level ALL>;
+
+        $r26 = virtualinvoke $r0.<java.util.logging.LogManager: java.util.logging.Level getLevelProperty(java.lang.String,java.util.logging.Level)>($r24, $r25);
+
+        virtualinvoke r1.<java.util.logging.FileHandler: void setLevel(java.util.logging.Level)>($r26);
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".filter");
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r31 = virtualinvoke $r0.<java.util.logging.LogManager: java.util.logging.Filter getFilterProperty(java.lang.String,java.util.logging.Filter)>($r30, null);
+
+        virtualinvoke r1.<java.util.logging.FileHandler: void setFilter(java.util.logging.Filter)>($r31);
+
+        $r32 = new java.lang.StringBuilder;
+
+        specialinvoke $r32.<java.lang.StringBuilder: void <init>()>();
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".formatter");
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r36 = new java.util.logging.XMLFormatter;
+
+        specialinvoke $r36.<java.util.logging.XMLFormatter: void <init>()>();
+
+        $r37 = virtualinvoke $r0.<java.util.logging.LogManager: java.util.logging.Formatter getFormatterProperty(java.lang.String,java.util.logging.Formatter)>($r35, $r36);
+
+        virtualinvoke r1.<java.util.logging.FileHandler: void setFormatter(java.util.logging.Formatter)>($r37);
+
+     label3:
+        $r38 = new java.lang.StringBuilder;
+
+        specialinvoke $r38.<java.lang.StringBuilder: void <init>()>();
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".encoding");
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r42 = virtualinvoke $r0.<java.util.logging.LogManager: java.lang.String getStringProperty(java.lang.String,java.lang.String)>($r41, null);
+
+        virtualinvoke r1.<java.util.logging.FileHandler: void setEncoding(java.lang.String)>($r42);
+
+     label4:
+        goto label9;
+
+     label5:
+        $r44 := @caughtexception;
+
+     label6:
+        virtualinvoke r1.<java.util.logging.FileHandler: void setEncoding(java.lang.String)>(null);
+
+     label7:
+        goto label9;
+
+     label8:
+        $r43 := @caughtexception;
+
+     label9:
+        return;
+
+        catch java.lang.Exception from label3 to label4 with label5;
+        catch java.lang.Exception from label6 to label7 with label8;
+    }
+
+    public void <init>() throws java.io.IOException, java.lang.SecurityException
+    {
+        java.util.logging.FileHandler r0;
+
+        r0 := @this: java.util.logging.FileHandler;
+
+        specialinvoke r0.<java.util.logging.StreamHandler: void <init>()>();
+
+        virtualinvoke r0.<java.util.logging.FileHandler: void checkPermission()>();
+
+        specialinvoke r0.<java.util.logging.FileHandler: void configure()>();
+
+        specialinvoke r0.<java.util.logging.FileHandler: void openFiles()>();
+
+        return;
+    }
+
+    public void <init>(java.lang.String) throws java.io.IOException, java.lang.SecurityException
+    {
+        java.util.logging.FileHandler r0;
+        int $i0;
+        java.lang.String r1;
+        java.lang.IllegalArgumentException $r2;
+
+        r0 := @this: java.util.logging.FileHandler;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.util.logging.StreamHandler: void <init>()>();
+
+        $i0 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if $i0 >= 1 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        virtualinvoke r0.<java.util.logging.FileHandler: void checkPermission()>();
+
+        specialinvoke r0.<java.util.logging.FileHandler: void configure()>();
+
+        r0.<java.util.logging.FileHandler: java.lang.String pattern> = r1;
+
+        r0.<java.util.logging.FileHandler: int limit> = 0;
+
+        r0.<java.util.logging.FileHandler: int count> = 1;
+
+        specialinvoke r0.<java.util.logging.FileHandler: void openFiles()>();
+
+        return;
+    }
+
+    public void <init>(java.lang.String, boolean) throws java.io.IOException, java.lang.SecurityException
+    {
+        java.util.logging.FileHandler r0;
+        int $i0;
+        java.lang.String r1;
+        java.lang.IllegalArgumentException $r2;
+        boolean z0;
+
+        r0 := @this: java.util.logging.FileHandler;
+
+        r1 := @parameter0: java.lang.String;
+
+        z0 := @parameter1: boolean;
+
+        specialinvoke r0.<java.util.logging.StreamHandler: void <init>()>();
+
+        $i0 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if $i0 >= 1 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        virtualinvoke r0.<java.util.logging.FileHandler: void checkPermission()>();
+
+        specialinvoke r0.<java.util.logging.FileHandler: void configure()>();
+
+        r0.<java.util.logging.FileHandler: java.lang.String pattern> = r1;
+
+        r0.<java.util.logging.FileHandler: int limit> = 0;
+
+        r0.<java.util.logging.FileHandler: int count> = 1;
+
+        r0.<java.util.logging.FileHandler: boolean append> = z0;
+
+        specialinvoke r0.<java.util.logging.FileHandler: void openFiles()>();
+
+        return;
+    }
+
+    public void <init>(java.lang.String, int, int) throws java.io.IOException, java.lang.SecurityException
+    {
+        java.util.logging.FileHandler r0;
+        int i0, i1, $i2;
+        java.lang.String r1;
+        java.lang.IllegalArgumentException $r2;
+
+        r0 := @this: java.util.logging.FileHandler;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<java.util.logging.StreamHandler: void <init>()>();
+
+        if i0 < 0 goto label1;
+
+        if i1 < 1 goto label1;
+
+        $i2 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if $i2 >= 1 goto label2;
+
+     label1:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r2;
+
+     label2:
+        virtualinvoke r0.<java.util.logging.FileHandler: void checkPermission()>();
+
+        specialinvoke r0.<java.util.logging.FileHandler: void configure()>();
+
+        r0.<java.util.logging.FileHandler: java.lang.String pattern> = r1;
+
+        r0.<java.util.logging.FileHandler: int limit> = i0;
+
+        r0.<java.util.logging.FileHandler: int count> = i1;
+
+        specialinvoke r0.<java.util.logging.FileHandler: void openFiles()>();
+
+        return;
+    }
+
+    public void <init>(java.lang.String, int, int, boolean) throws java.io.IOException, java.lang.SecurityException
+    {
+        java.util.logging.FileHandler r0;
+        int i0, i1, $i2;
+        java.lang.String r1;
+        java.lang.IllegalArgumentException $r2;
+        boolean z0;
+
+        r0 := @this: java.util.logging.FileHandler;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        z0 := @parameter3: boolean;
+
+        specialinvoke r0.<java.util.logging.StreamHandler: void <init>()>();
+
+        if i0 < 0 goto label1;
+
+        if i1 < 1 goto label1;
+
+        $i2 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if $i2 >= 1 goto label2;
+
+     label1:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r2;
+
+     label2:
+        virtualinvoke r0.<java.util.logging.FileHandler: void checkPermission()>();
+
+        specialinvoke r0.<java.util.logging.FileHandler: void configure()>();
+
+        r0.<java.util.logging.FileHandler: java.lang.String pattern> = r1;
+
+        r0.<java.util.logging.FileHandler: int limit> = i0;
+
+        r0.<java.util.logging.FileHandler: int count> = i1;
+
+        r0.<java.util.logging.FileHandler: boolean append> = z0;
+
+        specialinvoke r0.<java.util.logging.FileHandler: void openFiles()>();
+
+        return;
+    }
+
+    private boolean isParentWritable(java.nio.file.Path)
+    {
+        java.util.logging.FileHandler r3;
+        java.nio.file.Path r0, $r1, $r2, r4;
+        boolean $z0, $z1;
+
+        r3 := @this: java.util.logging.FileHandler;
+
+        r0 := @parameter0: java.nio.file.Path;
+
+        $r1 = interfaceinvoke r0.<java.nio.file.Path: java.nio.file.Path getParent()>();
+
+        r4 = $r1;
+
+        if $r1 != null goto label1;
+
+        $r2 = interfaceinvoke r0.<java.nio.file.Path: java.nio.file.Path toAbsolutePath()>();
+
+        r4 = interfaceinvoke $r2.<java.nio.file.Path: java.nio.file.Path getParent()>();
+
+     label1:
+        if r4 == null goto label2;
+
+        $z0 = staticinvoke <java.nio.file.Files: boolean isWritable(java.nio.file.Path)>(r4);
+
+        if $z0 == 0 goto label2;
+
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        return $z1;
+    }
+
+    private void openFiles() throws java.io.IOException
+    {
+        java.nio.channels.OverlappingFileLockException $r53;
+        java.util.logging.FileHandler r1;
+        java.nio.file.Path $r15;
+        java.util.Set $r10, $r12, $r20;
+        java.util.logging.ErrorManager $r75;
+        java.lang.Exception $r32;
+        java.lang.StringBuilder $r7, $r8, $r25, $r26, $r41, $r43, $r44, $r45, $r49, $r50, $r67, $r70, $r72, $r73;
+        java.nio.file.AccessDeniedException $r63;
+        java.lang.Throwable $r52;
+        java.nio.file.OpenOption[] $r36, $r60;
+        java.lang.String $r4, $r6, $r9, $r11, $r14, $r19, $r27, $r33, $r42, $r46, $r51;
+        java.nio.file.LinkOption[] $r58, $r64;
+        java.io.IOException $r29, $r54, $r55, $r71, $r74;
+        java.io.File $r5, $r31, $r35;
+        java.nio.file.NoSuchFileException $r56;
+        java.util.logging.LogManager $r0;
+        java.nio.channels.FileLock $r17;
+        java.lang.SecurityException $r28;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, z8, $z9, z10;
+        java.nio.file.StandardOpenOption $r37, $r38, $r61, $r62;
+        java.lang.String[] $r13;
+        java.nio.file.LinkOption $r59, $r65;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, i7, $i8, i9, i10, $i12, $i14;
+        java.util.logging.FileHandler$InitializationErrorManager $r69;
+        java.nio.file.FileAlreadyExistsException $r57;
+        java.lang.IllegalArgumentException $r68;
+        java.nio.channels.FileChannel $r16, $r18, r66;
+        java.io.File[] $r21, $r30, $r34;
+
+        r1 := @this: java.util.logging.FileHandler;
+
+        $r0 = staticinvoke <java.util.logging.LogManager: java.util.logging.LogManager getLogManager()>();
+
+        virtualinvoke $r0.<java.util.logging.LogManager: void checkPermission()>();
+
+        $i0 = r1.<java.util.logging.FileHandler: int count>;
+
+        if $i0 >= 1 goto label01;
+
+        $r68 = new java.lang.IllegalArgumentException;
+
+        $r67 = new java.lang.StringBuilder;
+
+        specialinvoke $r67.<java.lang.StringBuilder: void <init>()>();
+
+        $r49 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("file count = ");
+
+        $i6 = r1.<java.util.logging.FileHandler: int count>;
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i6);
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r68.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r51);
+
+        throw $r68;
+
+     label01:
+        $i1 = r1.<java.util.logging.FileHandler: int limit>;
+
+        if $i1 >= 0 goto label02;
+
+        r1.<java.util.logging.FileHandler: int limit> = 0;
+
+     label02:
+        $r69 = new java.util.logging.FileHandler$InitializationErrorManager;
+
+        specialinvoke $r69.<java.util.logging.FileHandler$InitializationErrorManager: void <init>(java.util.logging.FileHandler$1)>(null);
+
+        virtualinvoke r1.<java.util.logging.FileHandler: void setErrorManager(java.util.logging.ErrorManager)>($r69);
+
+        $i12 = (int) -1;
+
+        i7 = $i12;
+
+     label03:
+        i7 = i7 + 1;
+
+        $i8 = <java.util.logging.FileHandler: int maxLocks>;
+
+        if i7 <= $i8 goto label04;
+
+        $r71 = new java.io.IOException;
+
+        $r70 = new java.lang.StringBuilder;
+
+        specialinvoke $r70.<java.lang.StringBuilder: void <init>()>();
+
+        $r41 = virtualinvoke $r70.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Couldn\'t get lock for ");
+
+        $r42 = r1.<java.util.logging.FileHandler: java.lang.String pattern>;
+
+        $r43 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r42);
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", maxLocks: ");
+
+        $i5 = <java.util.logging.FileHandler: int maxLocks>;
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r71.<java.io.IOException: void <init>(java.lang.String)>($r46);
+
+        throw $r71;
+
+     label04:
+        $r72 = new java.lang.StringBuilder;
+
+        specialinvoke $r72.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = r1.<java.util.logging.FileHandler: java.lang.String pattern>;
+
+        $r5 = specialinvoke r1.<java.util.logging.FileHandler: java.io.File generate(java.lang.String,int,int)>($r4, 0, i7);
+
+        $r6 = virtualinvoke $r5.<java.io.File: java.lang.String toString()>();
+
+        $r7 = virtualinvoke $r72.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".lck");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r1.<java.util.logging.FileHandler: java.lang.String lockFileName> = $r9;
+
+        $r10 = <java.util.logging.FileHandler: java.util.Set locks>;
+
+        entermonitor $r10;
+
+     label05:
+        $r12 = <java.util.logging.FileHandler: java.util.Set locks>;
+
+        $r11 = r1.<java.util.logging.FileHandler: java.lang.String lockFileName>;
+
+        $z0 = interfaceinvoke $r12.<java.util.Set: boolean contains(java.lang.Object)>($r11);
+
+        if $z0 == 0 goto label07;
+
+        exitmonitor $r10;
+
+     label06:
+        goto label03;
+
+     label07:
+        $r14 = r1.<java.util.logging.FileHandler: java.lang.String lockFileName>;
+
+        $r13 = newarray (java.lang.String)[0];
+
+        $r15 = staticinvoke <java.nio.file.Paths: java.nio.file.Path get(java.lang.String,java.lang.String[])>($r14, $r13);
+
+        r66 = null;
+
+        $i14 = (int) -1;
+
+        i9 = $i14;
+
+        z8 = 0;
+
+     label08:
+        if r66 != null goto label20;
+
+        $i4 = i9;
+
+        i9 = i9 + 1;
+
+        if $i4 >= 1 goto label20;
+
+     label09:
+        $r36 = newarray (java.nio.file.OpenOption)[2];
+
+        $r37 = <java.nio.file.StandardOpenOption: java.nio.file.StandardOpenOption CREATE_NEW>;
+
+        $r36[0] = $r37;
+
+        $r38 = <java.nio.file.StandardOpenOption: java.nio.file.StandardOpenOption WRITE>;
+
+        $r36[1] = $r38;
+
+        r66 = staticinvoke <java.nio.channels.FileChannel: java.nio.channels.FileChannel open(java.nio.file.Path,java.nio.file.OpenOption[])>($r15, $r36);
+
+        z8 = 1;
+
+     label10:
+        goto label08;
+
+     label11:
+        $r63 := @caughtexception;
+
+        $r64 = newarray (java.nio.file.LinkOption)[1];
+
+        $r65 = <java.nio.file.LinkOption: java.nio.file.LinkOption NOFOLLOW_LINKS>;
+
+        $r64[0] = $r65;
+
+        $z6 = staticinvoke <java.nio.file.Files: boolean isRegularFile(java.nio.file.Path,java.nio.file.LinkOption[])>($r15, $r64);
+
+        if $z6 == 0 goto label12;
+
+        $z7 = specialinvoke r1.<java.util.logging.FileHandler: boolean isParentWritable(java.nio.file.Path)>($r15);
+
+        if $z7 == 0 goto label12;
+
+        goto label08;
+
+     label12:
+        throw $r63;
+
+     label13:
+        $r57 := @caughtexception;
+
+        $r58 = newarray (java.nio.file.LinkOption)[1];
+
+        $r59 = <java.nio.file.LinkOption: java.nio.file.LinkOption NOFOLLOW_LINKS>;
+
+        $r58[0] = $r59;
+
+        $z4 = staticinvoke <java.nio.file.Files: boolean isRegularFile(java.nio.file.Path,java.nio.file.LinkOption[])>($r15, $r58);
+
+        if $z4 == 0 goto label18;
+
+        $z5 = specialinvoke r1.<java.util.logging.FileHandler: boolean isParentWritable(java.nio.file.Path)>($r15);
+
+        if $z5 == 0 goto label18;
+
+     label14:
+        $r60 = newarray (java.nio.file.OpenOption)[2];
+
+        $r61 = <java.nio.file.StandardOpenOption: java.nio.file.StandardOpenOption WRITE>;
+
+        $r60[0] = $r61;
+
+        $r62 = <java.nio.file.StandardOpenOption: java.nio.file.StandardOpenOption APPEND>;
+
+        $r60[1] = $r62;
+
+        r66 = staticinvoke <java.nio.channels.FileChannel: java.nio.channels.FileChannel open(java.nio.file.Path,java.nio.file.OpenOption[])>($r15, $r60);
+
+     label15:
+        goto label19;
+
+     label16:
+        $r56 := @caughtexception;
+
+        goto label08;
+
+     label17:
+        $r55 := @caughtexception;
+
+        goto label20;
+
+     label18:
+        goto label20;
+
+     label19:
+        goto label08;
+
+     label20:
+        if r66 != null goto label22;
+
+        exitmonitor $r10;
+
+     label21:
+        goto label03;
+
+     label22:
+        r1.<java.util.logging.FileHandler: java.nio.channels.FileChannel lockFileChannel> = r66;
+
+     label23:
+        $r16 = r1.<java.util.logging.FileHandler: java.nio.channels.FileChannel lockFileChannel>;
+
+        $r17 = virtualinvoke $r16.<java.nio.channels.FileChannel: java.nio.channels.FileLock tryLock()>();
+
+        if $r17 == null goto label24;
+
+        $z9 = 1;
+
+        goto label25;
+
+     label24:
+        $z9 = 0;
+
+     label25:
+        z10 = $z9;
+
+     label26:
+        goto label29;
+
+     label27:
+        $r54 := @caughtexception;
+
+        z10 = z8;
+
+        goto label29;
+
+     label28:
+        $r53 := @caughtexception;
+
+        z10 = 0;
+
+     label29:
+        if z10 == 0 goto label31;
+
+        $r20 = <java.util.logging.FileHandler: java.util.Set locks>;
+
+        $r19 = r1.<java.util.logging.FileHandler: java.lang.String lockFileName>;
+
+        interfaceinvoke $r20.<java.util.Set: boolean add(java.lang.Object)>($r19);
+
+        exitmonitor $r10;
+
+     label30:
+        goto label36;
+
+     label31:
+        $r18 = r1.<java.util.logging.FileHandler: java.nio.channels.FileChannel lockFileChannel>;
+
+        virtualinvoke $r18.<java.nio.channels.FileChannel: void close()>();
+
+        exitmonitor $r10;
+
+     label32:
+        goto label35;
+
+     label33:
+        $r52 := @caughtexception;
+
+        exitmonitor $r10;
+
+     label34:
+        throw $r52;
+
+     label35:
+        goto label03;
+
+     label36:
+        $i2 = r1.<java.util.logging.FileHandler: int count>;
+
+        $r21 = newarray (java.io.File)[$i2];
+
+        r1.<java.util.logging.FileHandler: java.io.File[] files> = $r21;
+
+        i10 = 0;
+
+     label37:
+        $i3 = r1.<java.util.logging.FileHandler: int count>;
+
+        if i10 >= $i3 goto label38;
+
+        $r34 = r1.<java.util.logging.FileHandler: java.io.File[] files>;
+
+        $r33 = r1.<java.util.logging.FileHandler: java.lang.String pattern>;
+
+        $r35 = specialinvoke r1.<java.util.logging.FileHandler: java.io.File generate(java.lang.String,int,int)>($r33, i10, i7);
+
+        $r34[i10] = $r35;
+
+        i10 = i10 + 1;
+
+        goto label37;
+
+     label38:
+        $z1 = r1.<java.util.logging.FileHandler: boolean append>;
+
+        if $z1 == 0 goto label39;
+
+        $r30 = r1.<java.util.logging.FileHandler: java.io.File[] files>;
+
+        $r31 = $r30[0];
+
+        specialinvoke r1.<java.util.logging.FileHandler: void open(java.io.File,boolean)>($r31, 1);
+
+        goto label40;
+
+     label39:
+        specialinvoke r1.<java.util.logging.FileHandler: void rotate()>();
+
+     label40:
+        $r32 = $r69.<java.util.logging.FileHandler$InitializationErrorManager: java.lang.Exception lastException>;
+
+        if $r32 == null goto label43;
+
+        $z2 = $r32 instanceof java.io.IOException;
+
+        if $z2 == 0 goto label41;
+
+        $r29 = (java.io.IOException) $r32;
+
+        throw $r29;
+
+     label41:
+        $z3 = $r32 instanceof java.lang.SecurityException;
+
+        if $z3 == 0 goto label42;
+
+        $r28 = (java.lang.SecurityException) $r32;
+
+        throw $r28;
+
+     label42:
+        $r74 = new java.io.IOException;
+
+        $r73 = new java.lang.StringBuilder;
+
+        specialinvoke $r73.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r73.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception: ");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r32);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r74.<java.io.IOException: void <init>(java.lang.String)>($r27);
+
+        throw $r74;
+
+     label43:
+        $r75 = new java.util.logging.ErrorManager;
+
+        specialinvoke $r75.<java.util.logging.ErrorManager: void <init>()>();
+
+        virtualinvoke r1.<java.util.logging.FileHandler: void setErrorManager(java.util.logging.ErrorManager)>($r75);
+
+        return;
+
+        catch java.nio.file.AccessDeniedException from label09 to label10 with label11;
+        catch java.nio.file.FileAlreadyExistsException from label09 to label10 with label13;
+        catch java.nio.file.NoSuchFileException from label14 to label15 with label16;
+        catch java.io.IOException from label14 to label15 with label17;
+        catch java.io.IOException from label23 to label26 with label27;
+        catch java.nio.channels.OverlappingFileLockException from label23 to label26 with label28;
+        catch java.lang.Throwable from label05 to label06 with label33;
+        catch java.lang.Throwable from label07 to label21 with label33;
+        catch java.lang.Throwable from label22 to label30 with label33;
+        catch java.lang.Throwable from label31 to label32 with label33;
+        catch java.lang.Throwable from label33 to label34 with label33;
+    }
+
+    private java.io.File generate(java.lang.String, int, int) throws java.io.IOException
+    {
+        java.util.logging.FileHandler r1;
+        boolean $z0, z1, z2;
+        java.lang.StringBuilder $r5, $r6, $r7, $r9, $r10, $r11, $r13, $r14, $r16, $r17, $r19, $r20, $r22, $r23, $r39, $r40, $r41, $r42, $r43, $r44;
+        int $i0, i1, i2, $i4, i6, $i7, i8, $i9, $i10, $i11;
+        java.lang.String r0, $r25, $r27, r32, r33;
+        char $c3, $c5;
+        java.io.IOException $r38;
+        java.io.File r31, $r34, $r35, $r36, $r37, $r45, $r46;
+
+        r1 := @this: java.util.logging.FileHandler;
+
+        r0 := @parameter0: java.lang.String;
+
+        i2 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r31 = null;
+
+        r32 = "";
+
+        i6 = 0;
+
+        z1 = 0;
+
+        z2 = 0;
+
+     label01:
+        $i7 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if i6 >= $i7 goto label13;
+
+        $c3 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i6);
+
+        i6 = i6 + 1;
+
+        i8 = 0;
+
+        $i4 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if i6 >= $i4 goto label02;
+
+        $c5 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i6);
+
+        i8 = staticinvoke <java.lang.Character: char toLowerCase(char)>($c5);
+
+     label02:
+        $i10 = (int) $c3;
+
+        if $i10 != 47 goto label05;
+
+        if r31 != null goto label03;
+
+        $r34 = new java.io.File;
+
+        specialinvoke $r34.<java.io.File: void <init>(java.lang.String)>(r32);
+
+        r31 = $r34;
+
+        goto label04;
+
+     label03:
+        $r35 = new java.io.File;
+
+        specialinvoke $r35.<java.io.File: void <init>(java.io.File,java.lang.String)>(r31, r32);
+
+        r31 = $r35;
+
+     label04:
+        r32 = "";
+
+        goto label01;
+
+     label05:
+        $i11 = (int) $c3;
+
+        if $i11 != 37 goto label12;
+
+        if i8 != 116 goto label07;
+
+        $r27 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.io.tmpdir");
+
+        r33 = $r27;
+
+        if $r27 != null goto label06;
+
+        r33 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("user.home");
+
+     label06:
+        $r36 = new java.io.File;
+
+        specialinvoke $r36.<java.io.File: void <init>(java.lang.String)>(r33);
+
+        r31 = $r36;
+
+        i6 = i6 + 1;
+
+        r32 = "";
+
+        goto label01;
+
+     label07:
+        if i8 != 104 goto label09;
+
+        $r37 = new java.io.File;
+
+        $r25 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("user.home");
+
+        specialinvoke $r37.<java.io.File: void <init>(java.lang.String)>($r25);
+
+        r31 = $r37;
+
+        $z0 = staticinvoke <java.util.logging.FileHandler: boolean isSetUID()>();
+
+        if $z0 == 0 goto label08;
+
+        $r38 = new java.io.IOException;
+
+        specialinvoke $r38.<java.io.IOException: void <init>(java.lang.String)>("can\'t use %h in set UID program");
+
+        throw $r38;
+
+     label08:
+        i6 = i6 + 1;
+
+        r32 = "";
+
+        goto label01;
+
+     label09:
+        if i8 != 103 goto label10;
+
+        $r39 = new java.lang.StringBuilder;
+
+        specialinvoke $r39.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r32);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i2);
+
+        r32 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        z1 = 1;
+
+        i6 = i6 + 1;
+
+        goto label01;
+
+     label10:
+        if i8 != 117 goto label11;
+
+        $r40 = new java.lang.StringBuilder;
+
+        specialinvoke $r40.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r32);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        r32 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        z2 = 1;
+
+        i6 = i6 + 1;
+
+        goto label01;
+
+     label11:
+        if i8 != 37 goto label12;
+
+        $r41 = new java.lang.StringBuilder;
+
+        specialinvoke $r41.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r32);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("%");
+
+        r32 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        i6 = i6 + 1;
+
+        goto label01;
+
+     label12:
+        $r42 = new java.lang.StringBuilder;
+
+        specialinvoke $r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r32);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c3);
+
+        r32 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label01;
+
+     label13:
+        $i0 = r1.<java.util.logging.FileHandler: int count>;
+
+        if $i0 <= 1 goto label14;
+
+        if z1 != 0 goto label14;
+
+        $r43 = new java.lang.StringBuilder;
+
+        specialinvoke $r43.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r32);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i2);
+
+        r32 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label14:
+        if i1 <= 0 goto label15;
+
+        if z2 != 0 goto label15;
+
+        $r44 = new java.lang.StringBuilder;
+
+        specialinvoke $r44.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r32);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        r32 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label15:
+        $i9 = virtualinvoke r32.<java.lang.String: int length()>();
+
+        if $i9 <= 0 goto label17;
+
+        if r31 != null goto label16;
+
+        $r45 = new java.io.File;
+
+        specialinvoke $r45.<java.io.File: void <init>(java.lang.String)>(r32);
+
+        r31 = $r45;
+
+        goto label17;
+
+     label16:
+        $r46 = new java.io.File;
+
+        specialinvoke $r46.<java.io.File: void <init>(java.io.File,java.lang.String)>(r31, r32);
+
+        r31 = $r46;
+
+     label17:
+        return r31;
+    }
+
+    private synchronized void rotate()
+    {
+        java.util.logging.Level $r1, $r2;
+        java.util.logging.FileHandler r0;
+        int $i0, $i1, i2, $i4;
+        boolean $z0, $z1;
+        java.io.IOException $r9;
+        java.io.File $r4, r6, r8;
+        java.io.File[] $r3, $r5, $r7;
+
+        r0 := @this: java.util.logging.FileHandler;
+
+        $r1 = virtualinvoke r0.<java.util.logging.FileHandler: java.util.logging.Level getLevel()>();
+
+        $r2 = <java.util.logging.Level: java.util.logging.Level OFF>;
+
+        virtualinvoke r0.<java.util.logging.FileHandler: void setLevel(java.util.logging.Level)>($r2);
+
+        specialinvoke r0.<java.util.logging.StreamHandler: void close()>();
+
+        $i0 = r0.<java.util.logging.FileHandler: int count>;
+
+        i2 = $i0 - 2;
+
+     label1:
+        if i2 < 0 goto label4;
+
+        $r5 = r0.<java.util.logging.FileHandler: java.io.File[] files>;
+
+        r6 = $r5[i2];
+
+        $r7 = r0.<java.util.logging.FileHandler: java.io.File[] files>;
+
+        $i1 = i2 + 1;
+
+        r8 = $r7[$i1];
+
+        $z0 = virtualinvoke r6.<java.io.File: boolean exists()>();
+
+        if $z0 == 0 goto label3;
+
+        $z1 = virtualinvoke r8.<java.io.File: boolean exists()>();
+
+        if $z1 == 0 goto label2;
+
+        virtualinvoke r8.<java.io.File: boolean delete()>();
+
+     label2:
+        virtualinvoke r6.<java.io.File: boolean renameTo(java.io.File)>(r8);
+
+     label3:
+        $i4 = (int) -1;
+
+        i2 = i2 + $i4;
+
+        goto label1;
+
+     label4:
+        $r3 = r0.<java.util.logging.FileHandler: java.io.File[] files>;
+
+        $r4 = $r3[0];
+
+        specialinvoke r0.<java.util.logging.FileHandler: void open(java.io.File,boolean)>($r4, 0);
+
+     label5:
+        goto label7;
+
+     label6:
+        $r9 := @caughtexception;
+
+        virtualinvoke r0.<java.util.logging.FileHandler: void reportError(java.lang.String,java.lang.Exception,int)>(null, $r9, 4);
+
+     label7:
+        virtualinvoke r0.<java.util.logging.FileHandler: void setLevel(java.util.logging.Level)>($r1);
+
+        return;
+
+        catch java.io.IOException from label4 to label5 with label6;
+    }
+
+    public synchronized void publish(java.util.logging.LogRecord)
+    {
+        java.util.logging.FileHandler$1 $r3;
+        java.util.logging.LogRecord r1;
+        java.util.logging.FileHandler r0;
+        int $i0, $i1, $i2;
+        java.util.logging.FileHandler$MeteredStream $r2;
+        boolean $z0;
+
+        r0 := @this: java.util.logging.FileHandler;
+
+        r1 := @parameter0: java.util.logging.LogRecord;
+
+        $z0 = virtualinvoke r0.<java.util.logging.FileHandler: boolean isLoggable(java.util.logging.LogRecord)>(r1);
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        specialinvoke r0.<java.util.logging.StreamHandler: void publish(java.util.logging.LogRecord)>(r1);
+
+        virtualinvoke r0.<java.util.logging.FileHandler: void flush()>();
+
+        $i0 = r0.<java.util.logging.FileHandler: int limit>;
+
+        if $i0 <= 0 goto label2;
+
+        $r2 = r0.<java.util.logging.FileHandler: java.util.logging.FileHandler$MeteredStream meter>;
+
+        $i2 = $r2.<java.util.logging.FileHandler$MeteredStream: int written>;
+
+        $i1 = r0.<java.util.logging.FileHandler: int limit>;
+
+        if $i2 < $i1 goto label2;
+
+        $r3 = new java.util.logging.FileHandler$1;
+
+        specialinvoke $r3.<java.util.logging.FileHandler$1: void <init>(java.util.logging.FileHandler)>(r0);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r3);
+
+     label2:
+        return;
+    }
+
+    public synchronized void close() throws java.lang.SecurityException
+    {
+        java.lang.Throwable $r8;
+        java.util.Set $r3, $r5;
+        java.io.File $r6;
+        java.lang.Exception $r9;
+        java.util.logging.FileHandler r0;
+        java.lang.String $r1, $r4, $r7;
+        java.nio.channels.FileChannel $r2;
+
+        r0 := @this: java.util.logging.FileHandler;
+
+        specialinvoke r0.<java.util.logging.StreamHandler: void close()>();
+
+        $r1 = r0.<java.util.logging.FileHandler: java.lang.String lockFileName>;
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = r0.<java.util.logging.FileHandler: java.nio.channels.FileChannel lockFileChannel>;
+
+        virtualinvoke $r2.<java.nio.channels.FileChannel: void close()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r9 := @caughtexception;
+
+     label4:
+        $r3 = <java.util.logging.FileHandler: java.util.Set locks>;
+
+        entermonitor $r3;
+
+     label5:
+        $r5 = <java.util.logging.FileHandler: java.util.Set locks>;
+
+        $r4 = r0.<java.util.logging.FileHandler: java.lang.String lockFileName>;
+
+        interfaceinvoke $r5.<java.util.Set: boolean remove(java.lang.Object)>($r4);
+
+        exitmonitor $r3;
+
+     label6:
+        goto label9;
+
+     label7:
+        $r8 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label8:
+        throw $r8;
+
+     label9:
+        $r6 = new java.io.File;
+
+        $r7 = r0.<java.util.logging.FileHandler: java.lang.String lockFileName>;
+
+        specialinvoke $r6.<java.io.File: void <init>(java.lang.String)>($r7);
+
+        virtualinvoke $r6.<java.io.File: boolean delete()>();
+
+        r0.<java.util.logging.FileHandler: java.lang.String lockFileName> = null;
+
+        r0.<java.util.logging.FileHandler: java.nio.channels.FileChannel lockFileChannel> = null;
+
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+        catch java.lang.Throwable from label5 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    private static native boolean isSetUID();
+
+    public static java.lang.Integer lambda$static$0()
+    {
+        java.lang.Integer $r0;
+
+        $r0 = staticinvoke <java.lang.Integer: java.lang.Integer getInteger(java.lang.String,int)>("jdk.internal.FileHandlerLogging.maxLocks", 100);
+
+        return $r0;
+    }
+
+    static void access$100(java.util.logging.FileHandler)
+    {
+        java.util.logging.FileHandler r0;
+
+        r0 := @parameter0: java.util.logging.FileHandler;
+
+        specialinvoke r0.<java.util.logging.FileHandler: void rotate()>();
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.util.HashSet $r0;
+        int $i0, $i1;
+        java.lang.Object $r2;
+        java.security.PrivilegedAction $r1;
+        java.lang.Integer $r3;
+
+        <java.util.logging.FileHandler: int DEFAULT_MAX_LOCKS> = 100;
+
+        $r0 = new java.util.HashSet;
+
+        specialinvoke $r0.<java.util.HashSet: void <init>()>();
+
+        <java.util.logging.FileHandler: java.util.Set locks> = $r0;
+
+        $r1 = staticinvoke <java.util.logging.FileHandler$lambda_static_0__123: java.security.PrivilegedAction bootstrap$()>();
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        $r3 = (java.lang.Integer) $r2;
+
+        $i0 = virtualinvoke $r3.<java.lang.Integer: int intValue()>();
+
+        <java.util.logging.FileHandler: int maxLocks> = $i0;
+
+        $i1 = <java.util.logging.FileHandler: int maxLocks>;
+
+        if $i1 > 0 goto label1;
+
+        <java.util.logging.FileHandler: int maxLocks> = 100;
+
+     label1:
+        return;
+    }
+}

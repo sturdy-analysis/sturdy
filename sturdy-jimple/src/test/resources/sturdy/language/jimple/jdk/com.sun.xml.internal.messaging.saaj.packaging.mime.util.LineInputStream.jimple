@@ -1,0 +1,143 @@
+public final class com.sun.xml.internal.messaging.saaj.packaging.mime.util.LineInputStream extends java.io.FilterInputStream
+{
+    private char[] lineBuffer;
+
+    public void <init>(java.io.InputStream)
+    {
+        com.sun.xml.internal.messaging.saaj.packaging.mime.util.LineInputStream r0;
+        java.io.InputStream r1;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.util.LineInputStream;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        specialinvoke r0.<java.io.FilterInputStream: void <init>(java.io.InputStream)>(r1);
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.LineInputStream: char[] lineBuffer> = null;
+
+        return;
+    }
+
+    public java.lang.String readLine() throws java.io.IOException
+    {
+        java.io.PushbackInputStream $r3, $r8;
+        int $i0, $i2, $i3, $i4, $i5, i6, i7, $i8, i9, $i11, $i13, $i15;
+        java.lang.String $r1;
+        boolean $z0;
+        com.sun.xml.internal.messaging.saaj.packaging.mime.util.LineInputStream r0;
+        char $c1;
+        char[] $r2, $r5, r7;
+        java.io.InputStream r6;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.packaging.mime.util.LineInputStream;
+
+        r6 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.LineInputStream: java.io.InputStream in>;
+
+        r7 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.LineInputStream: char[] lineBuffer>;
+
+        if r7 != null goto label1;
+
+        $r5 = newarray (char)[128];
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.LineInputStream: char[] lineBuffer> = $r5;
+
+        r7 = $r5;
+
+     label1:
+        i6 = lengthof r7;
+
+        i7 = 0;
+
+     label2:
+        $i8 = virtualinvoke r6.<java.io.InputStream: int read()>();
+
+        $i11 = (int) -1;
+
+        if $i8 == $i11 goto label8;
+
+        if $i8 != 10 goto label3;
+
+        goto label8;
+
+     label3:
+        if $i8 != 13 goto label6;
+
+        $i5 = virtualinvoke r6.<java.io.InputStream: int read()>();
+
+        i9 = $i5;
+
+        if $i5 != 13 goto label4;
+
+        i9 = virtualinvoke r6.<java.io.InputStream: int read()>();
+
+     label4:
+        if i9 == 10 goto label8;
+
+        $z0 = r6 instanceof java.io.PushbackInputStream;
+
+        if $z0 != 0 goto label5;
+
+        $r8 = new java.io.PushbackInputStream;
+
+        specialinvoke $r8.<java.io.PushbackInputStream: void <init>(java.io.InputStream)>(r6);
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.LineInputStream: java.io.InputStream in> = $r8;
+
+        r6 = $r8;
+
+     label5:
+        $r3 = (java.io.PushbackInputStream) r6;
+
+        virtualinvoke $r3.<java.io.PushbackInputStream: void unread(int)>(i9);
+
+        goto label8;
+
+     label6:
+        $i13 = (int) -1;
+
+        i6 = i6 + $i13;
+
+        if i6 >= 0 goto label7;
+
+        $i2 = i7 + 128;
+
+        r7 = newarray (char)[$i2];
+
+        $i3 = lengthof r7;
+
+        $i4 = $i3 - i7;
+
+        i6 = $i4 - 1;
+
+        $r2 = r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.LineInputStream: char[] lineBuffer>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, 0, r7, 0, i7);
+
+        r0.<com.sun.xml.internal.messaging.saaj.packaging.mime.util.LineInputStream: char[] lineBuffer> = r7;
+
+     label7:
+        $i0 = i7;
+
+        i7 = i7 + 1;
+
+        $c1 = (char) $i8;
+
+        r7[$i0] = $c1;
+
+        goto label2;
+
+     label8:
+        $i15 = (int) -1;
+
+        if $i8 != $i15 goto label9;
+
+        if i7 != 0 goto label9;
+
+        return null;
+
+     label9:
+        $r1 = staticinvoke <java.lang.String: java.lang.String copyValueOf(char[],int,int)>(r7, 0, i7);
+
+        return $r1;
+    }
+}

@@ -1,0 +1,4742 @@
+public class java.text.SimpleDateFormat extends java.text.DateFormat
+{
+    static final long serialVersionUID;
+    static final int currentSerialVersion;
+    private int serialVersionOnStream;
+    private java.lang.String pattern;
+    private transient java.text.NumberFormat originalNumberFormat;
+    private transient java.lang.String originalNumberPattern;
+    private transient char minusSign;
+    private transient boolean hasFollowingMinusSign;
+    private transient boolean forceStandaloneForm;
+    private transient char[] compiledPattern;
+    private static final int TAG_QUOTE_ASCII_CHAR;
+    private static final int TAG_QUOTE_CHARS;
+    private transient char zeroDigit;
+    private java.text.DateFormatSymbols formatData;
+    private java.util.Date defaultCenturyStart;
+    private transient int defaultCenturyStartYear;
+    private static final int MILLIS_PER_MINUTE;
+    private static final java.lang.String GMT;
+    private static final java.util.concurrent.ConcurrentMap cachedNumberFormatData;
+    private java.util.Locale locale;
+    transient boolean useDateFormatSymbols;
+    private static final int[] PATTERN_INDEX_TO_CALENDAR_FIELD;
+    private static final int[] PATTERN_INDEX_TO_DATE_FORMAT_FIELD;
+    private static final java.text.DateFormat$Field[] PATTERN_INDEX_TO_DATE_FORMAT_FIELD_ID;
+    private static final int[] REST_OF_STYLES;
+    static final boolean $assertionsDisabled;
+
+    public void <init>()
+    {
+        sun.util.locale.provider.LocaleProviderAdapter $r3;
+        sun.util.locale.provider.LocaleResources $r5;
+        java.text.SimpleDateFormat r0;
+        java.util.Calendar $r6;
+        java.util.Locale $r2, $r4;
+        java.lang.String $r7;
+        java.util.Locale$Category $r1;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        $r1 = <java.util.Locale$Category: java.util.Locale$Category FORMAT>;
+
+        $r2 = staticinvoke <java.util.Locale: java.util.Locale getDefault(java.util.Locale$Category)>($r1);
+
+        specialinvoke r0.<java.text.SimpleDateFormat: void <init>(java.lang.String,java.util.Locale)>("", $r2);
+
+        $r3 = staticinvoke <sun.util.locale.provider.LocaleProviderAdapter: sun.util.locale.provider.LocaleProviderAdapter getResourceBundleBased()>();
+
+        $r4 = r0.<java.text.SimpleDateFormat: java.util.Locale locale>;
+
+        $r5 = virtualinvoke $r3.<sun.util.locale.provider.LocaleProviderAdapter: sun.util.locale.provider.LocaleResources getLocaleResources(java.util.Locale)>($r4);
+
+        $r6 = r0.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $r7 = virtualinvoke $r5.<sun.util.locale.provider.LocaleResources: java.lang.String getDateTimePattern(int,int,java.util.Calendar)>(3, 3, $r6);
+
+        specialinvoke r0.<java.text.SimpleDateFormat: void applyPatternImpl(java.lang.String)>($r7);
+
+        return;
+    }
+
+    public void <init>(java.lang.String)
+    {
+        java.util.Locale $r3;
+        java.text.SimpleDateFormat r0;
+        java.lang.String r1;
+        java.util.Locale$Category $r2;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = <java.util.Locale$Category: java.util.Locale$Category FORMAT>;
+
+        $r3 = staticinvoke <java.util.Locale: java.util.Locale getDefault(java.util.Locale$Category)>($r2);
+
+        specialinvoke r0.<java.text.SimpleDateFormat: void <init>(java.lang.String,java.util.Locale)>(r1, $r3);
+
+        return;
+    }
+
+    public void <init>(java.lang.String, java.util.Locale)
+    {
+        java.text.DateFormatSymbols $r4;
+        java.util.Locale r3;
+        java.text.SimpleDateFormat r0;
+        java.lang.String r1;
+        java.lang.NullPointerException $r2;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.util.Locale;
+
+        specialinvoke r0.<java.text.DateFormat: void <init>()>();
+
+        r0.<java.text.SimpleDateFormat: int serialVersionOnStream> = 1;
+
+        r0.<java.text.SimpleDateFormat: char minusSign> = 45;
+
+        r0.<java.text.SimpleDateFormat: boolean hasFollowingMinusSign> = 0;
+
+        r0.<java.text.SimpleDateFormat: boolean forceStandaloneForm> = 0;
+
+        if r1 == null goto label1;
+
+        if r3 != null goto label2;
+
+     label1:
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r2;
+
+     label2:
+        specialinvoke r0.<java.text.SimpleDateFormat: void initializeCalendar(java.util.Locale)>(r3);
+
+        r0.<java.text.SimpleDateFormat: java.lang.String pattern> = r1;
+
+        $r4 = staticinvoke <java.text.DateFormatSymbols: java.text.DateFormatSymbols getInstanceRef(java.util.Locale)>(r3);
+
+        r0.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData> = $r4;
+
+        r0.<java.text.SimpleDateFormat: java.util.Locale locale> = r3;
+
+        specialinvoke r0.<java.text.SimpleDateFormat: void initialize(java.util.Locale)>(r3);
+
+        return;
+    }
+
+    public void <init>(java.lang.String, java.text.DateFormatSymbols)
+    {
+        java.text.SimpleDateFormat r0;
+        java.lang.NullPointerException $r2;
+        java.text.DateFormatSymbols r3, $r5;
+        java.util.Locale $r7, $r8, $r9;
+        java.lang.Object $r4;
+        java.lang.String r1;
+        java.util.Locale$Category $r6;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.text.DateFormatSymbols;
+
+        specialinvoke r0.<java.text.DateFormat: void <init>()>();
+
+        r0.<java.text.SimpleDateFormat: int serialVersionOnStream> = 1;
+
+        r0.<java.text.SimpleDateFormat: char minusSign> = 45;
+
+        r0.<java.text.SimpleDateFormat: boolean hasFollowingMinusSign> = 0;
+
+        r0.<java.text.SimpleDateFormat: boolean forceStandaloneForm> = 0;
+
+        if r1 == null goto label1;
+
+        if r3 != null goto label2;
+
+     label1:
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r2;
+
+     label2:
+        r0.<java.text.SimpleDateFormat: java.lang.String pattern> = r1;
+
+        $r4 = virtualinvoke r3.<java.text.DateFormatSymbols: java.lang.Object clone()>();
+
+        $r5 = (java.text.DateFormatSymbols) $r4;
+
+        r0.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData> = $r5;
+
+        $r6 = <java.util.Locale$Category: java.util.Locale$Category FORMAT>;
+
+        $r7 = staticinvoke <java.util.Locale: java.util.Locale getDefault(java.util.Locale$Category)>($r6);
+
+        r0.<java.text.SimpleDateFormat: java.util.Locale locale> = $r7;
+
+        $r8 = r0.<java.text.SimpleDateFormat: java.util.Locale locale>;
+
+        specialinvoke r0.<java.text.SimpleDateFormat: void initializeCalendar(java.util.Locale)>($r8);
+
+        $r9 = r0.<java.text.SimpleDateFormat: java.util.Locale locale>;
+
+        specialinvoke r0.<java.text.SimpleDateFormat: void initialize(java.util.Locale)>($r9);
+
+        r0.<java.text.SimpleDateFormat: boolean useDateFormatSymbols> = 1;
+
+        return;
+    }
+
+    private void initialize(java.util.Locale)
+    {
+        java.text.SimpleDateFormat r0;
+        java.text.NumberFormat $r6, $r7, $r8, $r10, $r11, $r12, $r13;
+        java.util.concurrent.ConcurrentMap $r4, $r14;
+        java.util.Locale r3;
+        char[] $r2;
+        java.lang.Object $r5, $r9;
+        java.lang.String $r1;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        r3 := @parameter0: java.util.Locale;
+
+        $r1 = r0.<java.text.SimpleDateFormat: java.lang.String pattern>;
+
+        $r2 = specialinvoke r0.<java.text.SimpleDateFormat: char[] compile(java.lang.String)>($r1);
+
+        r0.<java.text.SimpleDateFormat: char[] compiledPattern> = $r2;
+
+        $r4 = <java.text.SimpleDateFormat: java.util.concurrent.ConcurrentMap cachedNumberFormatData>;
+
+        $r5 = interfaceinvoke $r4.<java.util.concurrent.ConcurrentMap: java.lang.Object get(java.lang.Object)>(r3);
+
+        $r6 = (java.text.NumberFormat) $r5;
+
+        r0.<java.text.SimpleDateFormat: java.text.NumberFormat numberFormat> = $r6;
+
+        $r7 = r0.<java.text.SimpleDateFormat: java.text.NumberFormat numberFormat>;
+
+        if $r7 != null goto label1;
+
+        $r11 = staticinvoke <java.text.NumberFormat: java.text.NumberFormat getIntegerInstance(java.util.Locale)>(r3);
+
+        r0.<java.text.SimpleDateFormat: java.text.NumberFormat numberFormat> = $r11;
+
+        $r12 = r0.<java.text.SimpleDateFormat: java.text.NumberFormat numberFormat>;
+
+        virtualinvoke $r12.<java.text.NumberFormat: void setGroupingUsed(boolean)>(0);
+
+        $r14 = <java.text.SimpleDateFormat: java.util.concurrent.ConcurrentMap cachedNumberFormatData>;
+
+        $r13 = r0.<java.text.SimpleDateFormat: java.text.NumberFormat numberFormat>;
+
+        interfaceinvoke $r14.<java.util.concurrent.ConcurrentMap: java.lang.Object putIfAbsent(java.lang.Object,java.lang.Object)>(r3, $r13);
+
+     label1:
+        $r8 = r0.<java.text.SimpleDateFormat: java.text.NumberFormat numberFormat>;
+
+        $r9 = virtualinvoke $r8.<java.text.NumberFormat: java.lang.Object clone()>();
+
+        $r10 = (java.text.NumberFormat) $r9;
+
+        r0.<java.text.SimpleDateFormat: java.text.NumberFormat numberFormat> = $r10;
+
+        specialinvoke r0.<java.text.SimpleDateFormat: void initializeDefaultCentury()>();
+
+        return;
+    }
+
+    private void initializeCalendar(java.util.Locale)
+    {
+        java.util.Calendar $r1, $r4;
+        java.util.TimeZone $r2;
+        java.util.Locale r3;
+        java.text.SimpleDateFormat r0;
+        java.lang.AssertionError $r5;
+        boolean $z0;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        r3 := @parameter0: java.util.Locale;
+
+        $r1 = r0.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        if $r1 != null goto label2;
+
+        $z0 = <java.text.SimpleDateFormat: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        if r3 != null goto label1;
+
+        $r5 = new java.lang.AssertionError;
+
+        specialinvoke $r5.<java.lang.AssertionError: void <init>()>();
+
+        throw $r5;
+
+     label1:
+        $r2 = staticinvoke <java.util.TimeZone: java.util.TimeZone getDefault()>();
+
+        $r4 = staticinvoke <java.util.Calendar: java.util.Calendar getInstance(java.util.TimeZone,java.util.Locale)>($r2, r3);
+
+        r0.<java.text.SimpleDateFormat: java.util.Calendar calendar> = $r4;
+
+     label2:
+        return;
+    }
+
+    private char[] compile(java.lang.String)
+    {
+        java.lang.StringBuilder $r7, $r8, $r9, r12, $r14, $r15, $r16;
+        java.text.SimpleDateFormat r2;
+        short $s5, $s11, $s15;
+        java.lang.String r0, $r4, $r10;
+        char[] $r13;
+        boolean z0, $z1, z2, z3, z4, z5;
+        int $i0, $i1, $i7, $i8, $i9, $i13, i17, i18, i19, i20, i21, i22, $i23, $i24, $i26, $i28, $i30, $i31, $i32, $i34, $i36, $i37, $i38, $i39, $i40, $i41, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i51, $i52, $i54, $i56;
+        char $c2, $c3, $c4, $c6, $c10, $c12, $c14, $c16, $c25;
+        java.lang.IllegalArgumentException $r17, $r18;
+
+        r2 := @this: java.text.SimpleDateFormat;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        z0 = 0;
+
+        z5 = 0;
+
+        z4 = 0;
+
+        z3 = 0;
+
+        z2 = 0;
+
+        $r14 = new java.lang.StringBuilder;
+
+        $i1 = $i0 * 2;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>(int)>($i1);
+
+        r12 = null;
+
+        i17 = 0;
+
+        i18 = 0;
+
+        $i28 = (int) -1;
+
+        i19 = $i28;
+
+        $i30 = (int) -1;
+
+        i20 = $i30;
+
+        i21 = 0;
+
+     label01:
+        if i21 >= $i0 goto label30;
+
+        $c2 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i21);
+
+        $i31 = (int) $c2;
+
+        if $i31 != 39 goto label13;
+
+        $i8 = i21 + 1;
+
+        if $i8 >= $i0 goto label04;
+
+        $i13 = i21 + 1;
+
+        $c14 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i13);
+
+        $i32 = (int) $c14;
+
+        if $i32 != 39 goto label04;
+
+        i21 = i21 + 1;
+
+        if i17 == 0 goto label02;
+
+        staticinvoke <java.text.SimpleDateFormat: void encode(int,int,java.lang.StringBuilder)>(i19, i17, $r14);
+
+        i18 = i18 + 1;
+
+        i20 = i19;
+
+        $i34 = (int) -1;
+
+        i19 = $i34;
+
+        i17 = 0;
+
+     label02:
+        if z2 == 0 goto label03;
+
+        virtualinvoke r12.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c14);
+
+        goto label29;
+
+     label03:
+        $s15 = 25600 | $c14;
+
+        $c16 = (char) $s15;
+
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c16);
+
+        goto label29;
+
+     label04:
+        if z5 != 0 goto label08;
+
+        if i17 == 0 goto label05;
+
+        staticinvoke <java.text.SimpleDateFormat: void encode(int,int,java.lang.StringBuilder)>(i19, i17, $r14);
+
+        i18 = i18 + 1;
+
+        i20 = i19;
+
+        $i36 = (int) -1;
+
+        i19 = $i36;
+
+        i17 = 0;
+
+     label05:
+        if r12 != null goto label06;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>(int)>($i0);
+
+        r12 = $r15;
+
+        goto label07;
+
+     label06:
+        virtualinvoke r12.<java.lang.StringBuilder: void setLength(int)>(0);
+
+     label07:
+        z0 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+        z3 = 1;
+
+        z2 = 1;
+
+        goto label29;
+
+     label08:
+        $i9 = virtualinvoke r12.<java.lang.StringBuilder: int length()>();
+
+        if $i9 != 1 goto label11;
+
+        $c10 = virtualinvoke r12.<java.lang.StringBuilder: char charAt(int)>(0);
+
+        $i37 = (int) $c10;
+
+        if $i37 >= 128 goto label09;
+
+        $s11 = 25600 | $c10;
+
+        $c12 = (char) $s11;
+
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c12);
+
+        goto label10;
+
+     label09:
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(25857);
+
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c10);
+
+     label10:
+        goto label12;
+
+     label11:
+        staticinvoke <java.text.SimpleDateFormat: void encode(int,int,java.lang.StringBuilder)>(101, $i9, $r14);
+
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.CharSequence)>(r12);
+
+     label12:
+        z0 = 0;
+
+        z5 = 0;
+
+        z4 = 0;
+
+        z3 = 0;
+
+        z2 = 0;
+
+        goto label29;
+
+     label13:
+        if z3 == 0 goto label14;
+
+        virtualinvoke r12.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c2);
+
+        goto label29;
+
+     label14:
+        $i38 = (int) $c2;
+
+        if $i38 < 97 goto label15;
+
+        $i39 = (int) $c2;
+
+        if $i39 <= 122 goto label25;
+
+     label15:
+        $i40 = (int) $c2;
+
+        if $i40 < 65 goto label16;
+
+        $i41 = (int) $c2;
+
+        if $i41 <= 90 goto label25;
+
+     label16:
+        if i17 == 0 goto label17;
+
+        staticinvoke <java.text.SimpleDateFormat: void encode(int,int,java.lang.StringBuilder)>(i19, i17, $r14);
+
+        i18 = i18 + 1;
+
+        i20 = i19;
+
+        $i43 = (int) -1;
+
+        i19 = $i43;
+
+        i17 = 0;
+
+     label17:
+        $i44 = (int) $c2;
+
+        if $i44 >= 128 goto label18;
+
+        $s5 = 25600 | $c2;
+
+        $c6 = (char) $s5;
+
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c6);
+
+        goto label29;
+
+     label18:
+        i22 = i21 + 1;
+
+     label19:
+        if i22 >= $i0 goto label22;
+
+        $c4 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i22);
+
+        $i45 = (int) $c4;
+
+        if $i45 == 39 goto label22;
+
+        $i46 = (int) $c4;
+
+        if $i46 < 97 goto label20;
+
+        $i47 = (int) $c4;
+
+        if $i47 <= 122 goto label22;
+
+     label20:
+        $i48 = (int) $c4;
+
+        if $i48 < 65 goto label21;
+
+        $i49 = (int) $c4;
+
+        if $i49 > 90 goto label21;
+
+        goto label22;
+
+     label21:
+        i22 = i22 + 1;
+
+        goto label19;
+
+     label22:
+        $i23 = i22 - i21;
+
+        $i24 = 25856 | $i23;
+
+        $c25 = (char) $i24;
+
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c25);
+
+     label23:
+        if i21 >= i22 goto label24;
+
+        $c3 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i21);
+
+        virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c3);
+
+        i21 = i21 + 1;
+
+        goto label23;
+
+     label24:
+        $i51 = (int) -1;
+
+        i21 = i21 + $i51;
+
+        goto label29;
+
+     label25:
+        $r4 = "GyMdkHmsSEDFwWahKzZYuXL";
+
+        $i52 = (int) $c2;
+
+        $i7 = virtualinvoke $r4.<java.lang.String: int indexOf(int)>($i52);
+
+        $i54 = (int) -1;
+
+        if $i7 != $i54 goto label26;
+
+        $r17 = new java.lang.IllegalArgumentException;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Illegal pattern character \'");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c2);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r17.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r10);
+
+        throw $r17;
+
+     label26:
+        $i56 = (int) -1;
+
+        if i19 == $i56 goto label27;
+
+        if i19 != $i7 goto label28;
+
+     label27:
+        i19 = $i7;
+
+        i17 = i17 + 1;
+
+        goto label29;
+
+     label28:
+        staticinvoke <java.text.SimpleDateFormat: void encode(int,int,java.lang.StringBuilder)>(i19, i17, $r14);
+
+        i18 = i18 + 1;
+
+        i20 = i19;
+
+        i19 = $i7;
+
+        i17 = 1;
+
+     label29:
+        i21 = i21 + 1;
+
+        goto label01;
+
+     label30:
+        if z4 == 0 goto label31;
+
+        $r18 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r18.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Unterminated quote");
+
+        throw $r18;
+
+     label31:
+        if i17 == 0 goto label32;
+
+        staticinvoke <java.text.SimpleDateFormat: void encode(int,int,java.lang.StringBuilder)>(i19, i17, $r14);
+
+        i18 = i18 + 1;
+
+        i20 = i19;
+
+     label32:
+        if i18 != 1 goto label33;
+
+        if i20 != 2 goto label33;
+
+        $z1 = 1;
+
+        goto label34;
+
+     label33:
+        $z1 = 0;
+
+     label34:
+        r2.<java.text.SimpleDateFormat: boolean forceStandaloneForm> = $z1;
+
+        $i26 = virtualinvoke $r14.<java.lang.StringBuilder: int length()>();
+
+        $r13 = newarray (char)[$i26];
+
+        virtualinvoke $r14.<java.lang.StringBuilder: void getChars(int,int,char[],int)>(0, $i26, $r13, 0);
+
+        return $r13;
+    }
+
+    private static void encode(int, int, java.lang.StringBuilder)
+    {
+        int i0, i1, $i2, $i3, $i5, $i7, $i9, $i10, $i13;
+        java.lang.String $r5;
+        char $c4, $c6, $c8, $c11;
+        java.lang.IllegalArgumentException $r7;
+        java.lang.StringBuilder r0, $r3, $r4, $r6;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        r0 := @parameter2: java.lang.StringBuilder;
+
+        if i0 != 21 goto label1;
+
+        if i1 < 4 goto label1;
+
+        $r7 = new java.lang.IllegalArgumentException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("invalid ISO 8601 format: length=");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r5);
+
+        throw $r7;
+
+     label1:
+        if i1 >= 255 goto label2;
+
+        $i9 = i0 << 8;
+
+        $i10 = $i9 | i1;
+
+        $c11 = (char) $i10;
+
+        virtualinvoke r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c11);
+
+        goto label3;
+
+     label2:
+        $i2 = i0 << 8;
+
+        $i3 = $i2 | 255;
+
+        $c4 = (char) $i3;
+
+        virtualinvoke r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c4);
+
+        $i5 = i1 >>> 16;
+
+        $c6 = (char) $i5;
+
+        virtualinvoke r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c6);
+
+        $i13 = (int) 65535;
+
+        $i7 = i1 & $i13;
+
+        $c8 = (char) $i7;
+
+        virtualinvoke r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c8);
+
+     label3:
+        return;
+    }
+
+    private void initializeDefaultCentury()
+    {
+        java.util.Calendar $r1, $r2, $r3;
+        java.util.Date $r4;
+        int $i2;
+        java.text.SimpleDateFormat r0;
+        long $l0;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        $r1 = r0.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        virtualinvoke $r1.<java.util.Calendar: void setTimeInMillis(long)>($l0);
+
+        $r2 = r0.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $i2 = (int) -80;
+
+        virtualinvoke $r2.<java.util.Calendar: void add(int,int)>(1, $i2);
+
+        $r3 = r0.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $r4 = virtualinvoke $r3.<java.util.Calendar: java.util.Date getTime()>();
+
+        specialinvoke r0.<java.text.SimpleDateFormat: void parseAmbiguousDatesAsAfter(java.util.Date)>($r4);
+
+        return;
+    }
+
+    private void parseAmbiguousDatesAsAfter(java.util.Date)
+    {
+        java.util.Calendar $r2, $r3;
+        java.util.Date r1;
+        int $i0;
+        java.text.SimpleDateFormat r0;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        r1 := @parameter0: java.util.Date;
+
+        r0.<java.text.SimpleDateFormat: java.util.Date defaultCenturyStart> = r1;
+
+        $r2 = r0.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        virtualinvoke $r2.<java.util.Calendar: void setTime(java.util.Date)>(r1);
+
+        $r3 = r0.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $i0 = virtualinvoke $r3.<java.util.Calendar: int get(int)>(1);
+
+        r0.<java.text.SimpleDateFormat: int defaultCenturyStartYear> = $i0;
+
+        return;
+    }
+
+    public void set2DigitYearStart(java.util.Date)
+    {
+        java.util.Date $r1, r2;
+        java.text.SimpleDateFormat r0;
+        long $l0;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        r2 := @parameter0: java.util.Date;
+
+        $r1 = new java.util.Date;
+
+        $l0 = virtualinvoke r2.<java.util.Date: long getTime()>();
+
+        specialinvoke $r1.<java.util.Date: void <init>(long)>($l0);
+
+        specialinvoke r0.<java.text.SimpleDateFormat: void parseAmbiguousDatesAsAfter(java.util.Date)>($r1);
+
+        return;
+    }
+
+    public java.util.Date get2DigitYearStart()
+    {
+        java.util.Date $r1, $r3;
+        java.text.SimpleDateFormat r0;
+        java.lang.Object $r2;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        $r1 = r0.<java.text.SimpleDateFormat: java.util.Date defaultCenturyStart>;
+
+        $r2 = virtualinvoke $r1.<java.util.Date: java.lang.Object clone()>();
+
+        $r3 = (java.util.Date) $r2;
+
+        return $r3;
+    }
+
+    public java.lang.StringBuffer format(java.util.Date, java.lang.StringBuffer, java.text.FieldPosition)
+    {
+        java.text.Format$FieldDelegate $r4;
+        java.text.FieldPosition r0;
+        java.util.Date r2;
+        java.lang.StringBuffer r3, $r5;
+        java.text.SimpleDateFormat r1;
+
+        r1 := @this: java.text.SimpleDateFormat;
+
+        r2 := @parameter0: java.util.Date;
+
+        r3 := @parameter1: java.lang.StringBuffer;
+
+        r0 := @parameter2: java.text.FieldPosition;
+
+        r0.<java.text.FieldPosition: int endIndex> = 0;
+
+        r0.<java.text.FieldPosition: int beginIndex> = 0;
+
+        $r4 = virtualinvoke r0.<java.text.FieldPosition: java.text.Format$FieldDelegate getFieldDelegate()>();
+
+        $r5 = specialinvoke r1.<java.text.SimpleDateFormat: java.lang.StringBuffer format(java.util.Date,java.lang.StringBuffer,java.text.Format$FieldDelegate)>(r2, r3, $r4);
+
+        return $r5;
+    }
+
+    private java.lang.StringBuffer format(java.util.Date, java.lang.StringBuffer, java.text.Format$FieldDelegate)
+    {
+        java.util.Date r1;
+        java.text.SimpleDateFormat r0;
+        java.text.Format$FieldDelegate r8;
+        java.util.Calendar $r2;
+        java.lang.StringBuffer r4;
+        int $i0, i2, $i3, i8, i9, i10, i11, $i12, $i13, $i14, $i15;
+        boolean $z0;
+        char $c1, $c4, $c5, $c6, $c7;
+        char[] $r3, $r5, $r6, $r7, $r9, $r10;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        r1 := @parameter0: java.util.Date;
+
+        r4 := @parameter1: java.lang.StringBuffer;
+
+        r8 := @parameter2: java.text.Format$FieldDelegate;
+
+        $r2 = r0.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        virtualinvoke $r2.<java.util.Calendar: void setTime(java.util.Date)>(r1);
+
+        $z0 = specialinvoke r0.<java.text.SimpleDateFormat: boolean useDateFormatSymbols()>();
+
+        i8 = 0;
+
+     label1:
+        $r3 = r0.<java.text.SimpleDateFormat: char[] compiledPattern>;
+
+        $i0 = lengthof $r3;
+
+        if i8 >= $i0 goto label7;
+
+        $r5 = r0.<java.text.SimpleDateFormat: char[] compiledPattern>;
+
+        $c1 = $r5[i8];
+
+        $i12 = (int) $c1;
+
+        i2 = $i12 >>> 8;
+
+        $r6 = r0.<java.text.SimpleDateFormat: char[] compiledPattern>;
+
+        $i3 = i8;
+
+        i8 = i8 + 1;
+
+        $c4 = $r6[$i3];
+
+        $i13 = (int) $c4;
+
+        i9 = $i13 & 255;
+
+        if i9 != 255 goto label2;
+
+        $r9 = r0.<java.text.SimpleDateFormat: char[] compiledPattern>;
+
+        i10 = i8 + 1;
+
+        $c6 = $r9[i8];
+
+        $i14 = (int) $c6;
+
+        i11 = $i14 << 16;
+
+        $r10 = r0.<java.text.SimpleDateFormat: char[] compiledPattern>;
+
+        i8 = i10 + 1;
+
+        $c7 = $r10[i10];
+
+        $i15 = (int) $c7;
+
+        i9 = i11 | $i15;
+
+     label2:
+        lookupswitch(i2)
+        {
+            case 100: goto label3;
+            case 101: goto label4;
+            default: goto label5;
+        };
+
+     label3:
+        $c5 = (char) i9;
+
+        virtualinvoke r4.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c5);
+
+        goto label6;
+
+     label4:
+        $r7 = r0.<java.text.SimpleDateFormat: char[] compiledPattern>;
+
+        virtualinvoke r4.<java.lang.StringBuffer: java.lang.StringBuffer append(char[],int,int)>($r7, i8, i9);
+
+        i8 = i8 + i9;
+
+        goto label6;
+
+     label5:
+        specialinvoke r0.<java.text.SimpleDateFormat: void subFormat(int,int,java.text.Format$FieldDelegate,java.lang.StringBuffer,boolean)>(i2, i9, r8, r4, $z0);
+
+     label6:
+        goto label1;
+
+     label7:
+        return r4;
+    }
+
+    public java.text.AttributedCharacterIterator formatToCharacterIterator(java.lang.Object)
+    {
+        java.text.CharacterIteratorFieldDelegate $r1;
+        java.util.Date $r6, $r10;
+        java.text.SimpleDateFormat r5;
+        long $l0;
+        java.lang.IllegalArgumentException $r3;
+        java.lang.NullPointerException $r4;
+        java.text.AttributedCharacterIterator $r9;
+        java.lang.StringBuffer $r0;
+        java.lang.Object r2;
+        java.lang.String $r8;
+        java.lang.Number $r7;
+        boolean $z0, $z1;
+
+        r5 := @this: java.text.SimpleDateFormat;
+
+        r2 := @parameter0: java.lang.Object;
+
+        $r0 = new java.lang.StringBuffer;
+
+        specialinvoke $r0.<java.lang.StringBuffer: void <init>()>();
+
+        $r1 = new java.text.CharacterIteratorFieldDelegate;
+
+        specialinvoke $r1.<java.text.CharacterIteratorFieldDelegate: void <init>()>();
+
+        $z0 = r2 instanceof java.util.Date;
+
+        if $z0 == 0 goto label1;
+
+        $r10 = (java.util.Date) r2;
+
+        specialinvoke r5.<java.text.SimpleDateFormat: java.lang.StringBuffer format(java.util.Date,java.lang.StringBuffer,java.text.Format$FieldDelegate)>($r10, $r0, $r1);
+
+        goto label4;
+
+     label1:
+        $z1 = r2 instanceof java.lang.Number;
+
+        if $z1 == 0 goto label2;
+
+        $r6 = new java.util.Date;
+
+        $r7 = (java.lang.Number) r2;
+
+        $l0 = virtualinvoke $r7.<java.lang.Number: long longValue()>();
+
+        specialinvoke $r6.<java.util.Date: void <init>(long)>($l0);
+
+        specialinvoke r5.<java.text.SimpleDateFormat: java.lang.StringBuffer format(java.util.Date,java.lang.StringBuffer,java.text.Format$FieldDelegate)>($r6, $r0, $r1);
+
+        goto label4;
+
+     label2:
+        if r2 != null goto label3;
+
+        $r4 = new java.lang.NullPointerException;
+
+        specialinvoke $r4.<java.lang.NullPointerException: void <init>(java.lang.String)>("formatToCharacterIterator must be passed non-null object");
+
+        throw $r4;
+
+     label3:
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Cannot format given Object as a Date");
+
+        throw $r3;
+
+     label4:
+        $r8 = virtualinvoke $r0.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $r9 = virtualinvoke $r1.<java.text.CharacterIteratorFieldDelegate: java.text.AttributedCharacterIterator getIterator(java.lang.String)>($r8);
+
+        return $r9;
+    }
+
+    private void subFormat(int, int, java.text.Format$FieldDelegate, java.lang.StringBuffer, boolean)
+    {
+        byte b2, $b40, b42, $b45, $b46, $b47, $b48;
+        java.util.Calendar $r3, $r10, $r16, $r17, $r18, $r19, $r22, $r26, $r31, $r32, $r35, $r37, $r41, $r48, $r50, $r53, $r58, $r62, $r63, $r64, $r66, $r67;
+        java.lang.StringBuffer r0;
+        int[] $r1, $r5, $r65;
+        java.util.Locale $r4, $r9, $r21, $r39, $r49, $r52, $r61;
+        java.util.TimeZone $r24, $r36;
+        int $i0, i1, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, i32, i33, i34, $i36, i37, i39, i41, i43, i44, $i49, $i50, $i52, $i54, $i56;
+        java.text.SimpleDateFormat r2;
+        java.lang.AssertionError $r69;
+        java.text.Format$FieldDelegate r7;
+        java.lang.String $r25, $r30, $r33, $r40, $r51, r68;
+        java.lang.String[][] $r28;
+        java.text.DateFormat$Field[] $r6;
+        boolean z0, $z1, $z2, $z3, $z4, $z5, $z6, z7;
+        java.lang.String[] $r12, $r14, $r29, $r43, $r45, $r47, $r55, $r57, $r60;
+        java.text.DateFormat$Field $r8;
+        java.text.DateFormatSymbols $r11, $r13, $r20, $r23, $r27, $r34, $r38, $r42, $r44, $r46, $r54, $r56, $r59;
+
+        r2 := @this: java.text.SimpleDateFormat;
+
+        i32 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        r7 := @parameter2: java.text.Format$FieldDelegate;
+
+        r0 := @parameter3: java.lang.StringBuffer;
+
+        z0 := @parameter4: boolean;
+
+        r68 = null;
+
+        $i0 = virtualinvoke r0.<java.lang.StringBuffer: int length()>();
+
+        $r1 = <java.text.SimpleDateFormat: int[] PATTERN_INDEX_TO_CALENDAR_FIELD>;
+
+        i33 = $r1[i32];
+
+        if i33 != 17 goto label02;
+
+        $r64 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $z5 = virtualinvoke $r64.<java.util.Calendar: boolean isWeekDateSupported()>();
+
+        if $z5 == 0 goto label01;
+
+        $r67 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        i34 = virtualinvoke $r67.<java.util.Calendar: int getWeekYear()>();
+
+        goto label04;
+
+     label01:
+        i32 = 1;
+
+        $r65 = <java.text.SimpleDateFormat: int[] PATTERN_INDEX_TO_CALENDAR_FIELD>;
+
+        i33 = $r65[1];
+
+        $r66 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        i34 = virtualinvoke $r66.<java.util.Calendar: int get(int)>(i33);
+
+        goto label04;
+
+     label02:
+        if i33 != 1000 goto label03;
+
+        $r63 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $i31 = virtualinvoke $r63.<java.util.Calendar: int get(int)>(7);
+
+        i34 = staticinvoke <java.text.CalendarBuilder: int toISODayOfWeek(int)>($i31);
+
+        goto label04;
+
+     label03:
+        $r3 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        i34 = virtualinvoke $r3.<java.util.Calendar: int get(int)>(i33);
+
+     label04:
+        if i1 < 4 goto label05;
+
+        $b48 = 2;
+
+        $b47 = 2;
+
+        goto label06;
+
+     label05:
+        $b48 = 1;
+
+        $b47 = 1;
+
+     label06:
+        b2 = $b47;
+
+        if z0 != 0 goto label07;
+
+        if i33 >= 15 goto label07;
+
+        if i32 == 22 goto label07;
+
+        $r62 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $r61 = r2.<java.text.SimpleDateFormat: java.util.Locale locale>;
+
+        r68 = virtualinvoke $r62.<java.util.Calendar: java.lang.String getDisplayName(int,int,java.util.Locale)>(i33, $b48, $r61);
+
+     label07:
+        tableswitch(i32)
+        {
+            case 0: goto label08;
+            case 1: goto label10;
+            case 2: goto label15;
+            case 3: goto label56;
+            case 4: goto label27;
+            case 5: goto label56;
+            case 6: goto label56;
+            case 7: goto label56;
+            case 8: goto label56;
+            case 9: goto label29;
+            case 10: goto label56;
+            case 11: goto label56;
+            case 12: goto label56;
+            case 13: goto label56;
+            case 14: goto label32;
+            case 15: goto label33;
+            case 16: goto label56;
+            case 17: goto label35;
+            case 18: goto label47;
+            case 19: goto label10;
+            case 20: goto label56;
+            case 21: goto label50;
+            case 22: goto label21;
+            default: goto label56;
+        };
+
+     label08:
+        if z0 == 0 goto label09;
+
+        $r59 = r2.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r60 = virtualinvoke $r59.<java.text.DateFormatSymbols: java.lang.String[] getEras()>();
+
+        $i30 = lengthof $r60;
+
+        if i34 >= $i30 goto label09;
+
+        r68 = $r60[i34];
+
+     label09:
+        if r68 != null goto label57;
+
+        r68 = "";
+
+        goto label57;
+
+     label10:
+        $r58 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $z4 = $r58 instanceof java.util.GregorianCalendar;
+
+        if $z4 == 0 goto label12;
+
+        if i1 == 2 goto label11;
+
+        specialinvoke r2.<java.text.SimpleDateFormat: void zeroPaddingNumber(int,int,int,java.lang.StringBuffer)>(i34, i1, 2147483647, r0);
+
+        goto label57;
+
+     label11:
+        specialinvoke r2.<java.text.SimpleDateFormat: void zeroPaddingNumber(int,int,int,java.lang.StringBuffer)>(i34, 2, 2, r0);
+
+        goto label57;
+
+     label12:
+        if r68 != null goto label57;
+
+        $i29 = i34;
+
+        if b2 != 2 goto label13;
+
+        $i36 = 1;
+
+        goto label14;
+
+     label13:
+        $i36 = i1;
+
+     label14:
+        specialinvoke r2.<java.text.SimpleDateFormat: void zeroPaddingNumber(int,int,int,java.lang.StringBuffer)>($i29, $i36, 2147483647, r0);
+
+        goto label57;
+
+     label15:
+        if z0 == 0 goto label18;
+
+        if i1 < 4 goto label16;
+
+        $r56 = r2.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r57 = virtualinvoke $r56.<java.text.DateFormatSymbols: java.lang.String[] getMonths()>();
+
+        r68 = $r57[i34];
+
+        goto label17;
+
+     label16:
+        if i1 != 3 goto label17;
+
+        $r54 = r2.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r55 = virtualinvoke $r54.<java.text.DateFormatSymbols: java.lang.String[] getShortMonths()>();
+
+        r68 = $r55[i34];
+
+     label17:
+        goto label20;
+
+     label18:
+        if i1 >= 3 goto label19;
+
+        r68 = null;
+
+        goto label20;
+
+     label19:
+        $z3 = r2.<java.text.SimpleDateFormat: boolean forceStandaloneForm>;
+
+        if $z3 == 0 goto label20;
+
+        $r50 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $i28 = b2 | 32768;
+
+        $r49 = r2.<java.text.SimpleDateFormat: java.util.Locale locale>;
+
+        $i49 = (int) $i28;
+
+        $r51 = virtualinvoke $r50.<java.util.Calendar: java.lang.String getDisplayName(int,int,java.util.Locale)>(i33, $i49, $r49);
+
+        r68 = $r51;
+
+        if $r51 != null goto label20;
+
+        $r53 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $r52 = r2.<java.text.SimpleDateFormat: java.util.Locale locale>;
+
+        r68 = virtualinvoke $r53.<java.util.Calendar: java.lang.String getDisplayName(int,int,java.util.Locale)>(i33, b2, $r52);
+
+     label20:
+        if r68 != null goto label57;
+
+        $i27 = i34 + 1;
+
+        specialinvoke r2.<java.text.SimpleDateFormat: void zeroPaddingNumber(int,int,int,java.lang.StringBuffer)>($i27, i1, 2147483647, r0);
+
+        goto label57;
+
+     label21:
+        $z1 = <java.text.SimpleDateFormat: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label22;
+
+        if r68 == null goto label22;
+
+        $r69 = new java.lang.AssertionError;
+
+        specialinvoke $r69.<java.lang.AssertionError: void <init>()>();
+
+        throw $r69;
+
+     label22:
+        $r4 = r2.<java.text.SimpleDateFormat: java.util.Locale locale>;
+
+        if $r4 != null goto label25;
+
+        if i1 < 4 goto label23;
+
+        $r13 = r2.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r14 = virtualinvoke $r13.<java.text.DateFormatSymbols: java.lang.String[] getMonths()>();
+
+        r68 = $r14[i34];
+
+        goto label24;
+
+     label23:
+        if i1 != 3 goto label24;
+
+        $r11 = r2.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r12 = virtualinvoke $r11.<java.text.DateFormatSymbols: java.lang.String[] getShortMonths()>();
+
+        r68 = $r12[i34];
+
+     label24:
+        goto label26;
+
+     label25:
+        if i1 < 3 goto label26;
+
+        $r10 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $i6 = b2 | 32768;
+
+        $r9 = r2.<java.text.SimpleDateFormat: java.util.Locale locale>;
+
+        $i50 = (int) $i6;
+
+        r68 = virtualinvoke $r10.<java.util.Calendar: java.lang.String getDisplayName(int,int,java.util.Locale)>(i33, $i50, $r9);
+
+     label26:
+        if r68 != null goto label57;
+
+        $i5 = i34 + 1;
+
+        specialinvoke r2.<java.text.SimpleDateFormat: void zeroPaddingNumber(int,int,int,java.lang.StringBuffer)>($i5, i1, 2147483647, r0);
+
+        goto label57;
+
+     label27:
+        if r68 != null goto label57;
+
+        if i34 != 0 goto label28;
+
+        $r48 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $i25 = virtualinvoke $r48.<java.util.Calendar: int getMaximum(int)>(11);
+
+        $i26 = $i25 + 1;
+
+        specialinvoke r2.<java.text.SimpleDateFormat: void zeroPaddingNumber(int,int,int,java.lang.StringBuffer)>($i26, i1, 2147483647, r0);
+
+        goto label57;
+
+     label28:
+        specialinvoke r2.<java.text.SimpleDateFormat: void zeroPaddingNumber(int,int,int,java.lang.StringBuffer)>(i34, i1, 2147483647, r0);
+
+        goto label57;
+
+     label29:
+        if z0 == 0 goto label57;
+
+        if i1 < 4 goto label30;
+
+        $r46 = r2.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r47 = virtualinvoke $r46.<java.text.DateFormatSymbols: java.lang.String[] getWeekdays()>();
+
+        r68 = $r47[i34];
+
+        goto label31;
+
+     label30:
+        $r44 = r2.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r45 = virtualinvoke $r44.<java.text.DateFormatSymbols: java.lang.String[] getShortWeekdays()>();
+
+        r68 = $r45[i34];
+
+     label31:
+        goto label57;
+
+     label32:
+        if z0 == 0 goto label57;
+
+        $r42 = r2.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r43 = virtualinvoke $r42.<java.text.DateFormatSymbols: java.lang.String[] getAmPmStrings()>();
+
+        r68 = $r43[i34];
+
+        goto label57;
+
+     label33:
+        if r68 != null goto label57;
+
+        if i34 != 0 goto label34;
+
+        $r41 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $i23 = virtualinvoke $r41.<java.util.Calendar: int getLeastMaximum(int)>(10);
+
+        $i24 = $i23 + 1;
+
+        specialinvoke r2.<java.text.SimpleDateFormat: void zeroPaddingNumber(int,int,int,java.lang.StringBuffer)>($i24, i1, 2147483647, r0);
+
+        goto label57;
+
+     label34:
+        specialinvoke r2.<java.text.SimpleDateFormat: void zeroPaddingNumber(int,int,int,java.lang.StringBuffer)>(i34, i1, 2147483647, r0);
+
+        goto label57;
+
+     label35:
+        if r68 != null goto label57;
+
+        $r20 = r2.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r21 = $r20.<java.text.DateFormatSymbols: java.util.Locale locale>;
+
+        if $r21 == null goto label36;
+
+        $r34 = r2.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $z2 = $r34.<java.text.DateFormatSymbols: boolean isZoneStringsSet>;
+
+        if $z2 == 0 goto label42;
+
+     label36:
+        $r23 = r2.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r22 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $r24 = virtualinvoke $r22.<java.util.Calendar: java.util.TimeZone getTimeZone()>();
+
+        $r25 = virtualinvoke $r24.<java.util.TimeZone: java.lang.String getID()>();
+
+        $i18 = virtualinvoke $r23.<java.text.DateFormatSymbols: int getZoneIndex(java.lang.String)>($r25);
+
+        $i52 = (int) -1;
+
+        if $i18 != $i52 goto label37;
+
+        $r31 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $i20 = virtualinvoke $r31.<java.util.Calendar: int get(int)>(15);
+
+        $r32 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $i21 = virtualinvoke $r32.<java.util.Calendar: int get(int)>(16);
+
+        i37 = $i20 + $i21;
+
+        $r33 = staticinvoke <sun.util.calendar.ZoneInfoFile: java.lang.String toCustomID(int)>(i37);
+
+        virtualinvoke r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r33);
+
+        goto label41;
+
+     label37:
+        $r26 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $i19 = virtualinvoke $r26.<java.util.Calendar: int get(int)>(16);
+
+        if $i19 != 0 goto label38;
+
+        $b46 = 1;
+
+        $b45 = 1;
+
+        goto label39;
+
+     label38:
+        $b46 = 3;
+
+        $b45 = 3;
+
+     label39:
+        i39 = $b46;
+
+        if i1 >= 4 goto label40;
+
+        i39 = $b45 + 1;
+
+     label40:
+        $r27 = r2.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r28 = virtualinvoke $r27.<java.text.DateFormatSymbols: java.lang.String[][] getZoneStringsWrapper()>();
+
+        $r29 = $r28[$i18];
+
+        $r30 = $r29[i39];
+
+        virtualinvoke r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r30);
+
+     label41:
+        goto label57;
+
+     label42:
+        $r35 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $r36 = virtualinvoke $r35.<java.util.Calendar: java.util.TimeZone getTimeZone()>();
+
+        $r37 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $i22 = virtualinvoke $r37.<java.util.Calendar: int get(int)>(16);
+
+        if $i22 == 0 goto label43;
+
+        $z6 = 1;
+
+        goto label44;
+
+     label43:
+        $z6 = 0;
+
+     label44:
+        z7 = $z6;
+
+        if i1 >= 4 goto label45;
+
+        $b40 = 0;
+
+        goto label46;
+
+     label45:
+        $b40 = 1;
+
+     label46:
+        $r38 = r2.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r39 = $r38.<java.text.DateFormatSymbols: java.util.Locale locale>;
+
+        $r40 = virtualinvoke $r36.<java.util.TimeZone: java.lang.String getDisplayName(boolean,int,java.util.Locale)>(z7, $b40, $r39);
+
+        virtualinvoke r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r40);
+
+        goto label57;
+
+     label47:
+        $r18 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $i11 = virtualinvoke $r18.<java.util.Calendar: int get(int)>(15);
+
+        $r19 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $i12 = virtualinvoke $r19.<java.util.Calendar: int get(int)>(16);
+
+        $i13 = $i11 + $i12;
+
+        $i54 = (int) 60000;
+
+        i41 = $i13 / $i54;
+
+        b42 = 4;
+
+        if i41 < 0 goto label48;
+
+        virtualinvoke r0.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(43);
+
+        goto label49;
+
+     label48:
+        b42 = 5;
+
+     label49:
+        $i14 = i41 / 60;
+
+        $i16 = $i14 * 100;
+
+        $i15 = i41 % 60;
+
+        $i17 = $i16 + $i15;
+
+        staticinvoke <sun.util.calendar.CalendarUtils: java.lang.StringBuffer sprintf0d(java.lang.StringBuffer,int,int)>(r0, $i17, b42);
+
+        goto label57;
+
+     label50:
+        $r16 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $i7 = virtualinvoke $r16.<java.util.Calendar: int get(int)>(15);
+
+        $r17 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $i8 = virtualinvoke $r17.<java.util.Calendar: int get(int)>(16);
+
+        i43 = $i7 + $i8;
+
+        if i43 != 0 goto label51;
+
+        virtualinvoke r0.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(90);
+
+        goto label57;
+
+     label51:
+        $i56 = (int) 60000;
+
+        i44 = i43 / $i56;
+
+        if i44 < 0 goto label52;
+
+        virtualinvoke r0.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(43);
+
+        goto label53;
+
+     label52:
+        virtualinvoke r0.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(45);
+
+        i44 = neg i44;
+
+     label53:
+        $i9 = i44 / 60;
+
+        staticinvoke <sun.util.calendar.CalendarUtils: java.lang.StringBuffer sprintf0d(java.lang.StringBuffer,int,int)>(r0, $i9, 2);
+
+        if i1 != 1 goto label54;
+
+        goto label57;
+
+     label54:
+        if i1 != 3 goto label55;
+
+        virtualinvoke r0.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(58);
+
+     label55:
+        $i10 = i44 % 60;
+
+        staticinvoke <sun.util.calendar.CalendarUtils: java.lang.StringBuffer sprintf0d(java.lang.StringBuffer,int,int)>(r0, $i10, 2);
+
+        goto label57;
+
+     label56:
+        if r68 != null goto label57;
+
+        specialinvoke r2.<java.text.SimpleDateFormat: void zeroPaddingNumber(int,int,int,java.lang.StringBuffer)>(i34, i1, 2147483647, r0);
+
+     label57:
+        if r68 == null goto label58;
+
+        virtualinvoke r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>(r68);
+
+     label58:
+        $r5 = <java.text.SimpleDateFormat: int[] PATTERN_INDEX_TO_DATE_FORMAT_FIELD>;
+
+        $i4 = $r5[i32];
+
+        $r6 = <java.text.SimpleDateFormat: java.text.DateFormat$Field[] PATTERN_INDEX_TO_DATE_FORMAT_FIELD_ID>;
+
+        $r8 = $r6[i32];
+
+        $i3 = virtualinvoke r0.<java.lang.StringBuffer: int length()>();
+
+        interfaceinvoke r7.<java.text.Format$FieldDelegate: void formatted(int,java.text.Format$Field,java.lang.Object,int,int,java.lang.StringBuffer)>($i4, $r8, $r8, $i0, $i3, r0);
+
+        return;
+    }
+
+    private void zeroPaddingNumber(int, int, int, java.lang.StringBuffer)
+    {
+        java.text.DecimalFormatSymbols $r8;
+        java.text.FieldPosition $r4;
+        java.lang.Exception $r9;
+        java.text.SimpleDateFormat r0;
+        long $l3;
+        java.text.NumberFormat $r1, $r2, $r5, $r6;
+        java.lang.StringBuffer r3;
+        int i1, i2, $i4, $i5, $i7, $i9, $i11, $i13, $i15, $i17, $i19, $i21, $i23, $i25, $i27, $i30, i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41;
+        java.text.DecimalFormat $r7;
+        char $c0, $c6, $c8, $c10, $c12, $c14, $c16, $c18, $c20, $c22, $c24, $c26, $c28, $c29, $c31, $c32, $c33;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        i34 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        r3 := @parameter3: java.lang.StringBuffer;
+
+     label01:
+        $c0 = r0.<java.text.SimpleDateFormat: char zeroDigit>;
+
+        if $c0 != 0 goto label02;
+
+        $r6 = r0.<java.text.SimpleDateFormat: java.text.NumberFormat numberFormat>;
+
+        $r7 = (java.text.DecimalFormat) $r6;
+
+        $r8 = virtualinvoke $r7.<java.text.DecimalFormat: java.text.DecimalFormatSymbols getDecimalFormatSymbols()>();
+
+        $c33 = virtualinvoke $r8.<java.text.DecimalFormatSymbols: char getZeroDigit()>();
+
+        r0.<java.text.SimpleDateFormat: char zeroDigit> = $c33;
+
+     label02:
+        if i34 < 0 goto label10;
+
+        if i34 >= 100 goto label06;
+
+        if i1 < 1 goto label06;
+
+        if i1 > 2 goto label06;
+
+        if i34 >= 10 goto label04;
+
+        if i1 != 2 goto label03;
+
+        $c32 = r0.<java.text.SimpleDateFormat: char zeroDigit>;
+
+        virtualinvoke r3.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c32);
+
+     label03:
+        $c29 = r0.<java.text.SimpleDateFormat: char zeroDigit>;
+
+        $i35 = (int) $c29;
+
+        $i30 = $i35 + i34;
+
+        $c31 = (char) $i30;
+
+        virtualinvoke r3.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c31);
+
+        goto label05;
+
+     label04:
+        $c22 = r0.<java.text.SimpleDateFormat: char zeroDigit>;
+
+        $i21 = i34 / 10;
+
+        $i36 = (int) $c22;
+
+        $i23 = $i36 + $i21;
+
+        $c24 = (char) $i23;
+
+        virtualinvoke r3.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c24);
+
+        $c26 = r0.<java.text.SimpleDateFormat: char zeroDigit>;
+
+        $i25 = i34 % 10;
+
+        $i37 = (int) $c26;
+
+        $i27 = $i37 + $i25;
+
+        $c28 = (char) $i27;
+
+        virtualinvoke r3.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c28);
+
+     label05:
+        return;
+
+     label06:
+        if i34 < 1000 goto label10;
+
+        if i34 >= 10000 goto label10;
+
+        if i1 != 4 goto label08;
+
+        $c6 = r0.<java.text.SimpleDateFormat: char zeroDigit>;
+
+        $i5 = i34 / 1000;
+
+        $i38 = (int) $c6;
+
+        $i7 = $i38 + $i5;
+
+        $c8 = (char) $i7;
+
+        virtualinvoke r3.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c8);
+
+        i34 = i34 % 1000;
+
+        $c10 = r0.<java.text.SimpleDateFormat: char zeroDigit>;
+
+        $i9 = i34 / 100;
+
+        $i39 = (int) $c10;
+
+        $i11 = $i39 + $i9;
+
+        $c12 = (char) $i11;
+
+        virtualinvoke r3.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c12);
+
+        i34 = i34 % 100;
+
+        $c14 = r0.<java.text.SimpleDateFormat: char zeroDigit>;
+
+        $i13 = i34 / 10;
+
+        $i40 = (int) $c14;
+
+        $i15 = $i40 + $i13;
+
+        $c16 = (char) $i15;
+
+        virtualinvoke r3.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c16);
+
+        $c18 = r0.<java.text.SimpleDateFormat: char zeroDigit>;
+
+        $i17 = i34 % 10;
+
+        $i41 = (int) $c18;
+
+        $i19 = $i41 + $i17;
+
+        $c20 = (char) $i19;
+
+        virtualinvoke r3.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c20);
+
+     label07:
+        return;
+
+     label08:
+        if i1 != 2 goto label10;
+
+        if i2 != 2 goto label10;
+
+        $i4 = i34 % 100;
+
+        specialinvoke r0.<java.text.SimpleDateFormat: void zeroPaddingNumber(int,int,int,java.lang.StringBuffer)>($i4, 2, 2, r3);
+
+     label09:
+        return;
+
+     label10:
+        goto label12;
+
+     label11:
+        $r9 := @caughtexception;
+
+     label12:
+        $r1 = r0.<java.text.SimpleDateFormat: java.text.NumberFormat numberFormat>;
+
+        virtualinvoke $r1.<java.text.NumberFormat: void setMinimumIntegerDigits(int)>(i1);
+
+        $r2 = r0.<java.text.SimpleDateFormat: java.text.NumberFormat numberFormat>;
+
+        virtualinvoke $r2.<java.text.NumberFormat: void setMaximumIntegerDigits(int)>(i2);
+
+        $r5 = r0.<java.text.SimpleDateFormat: java.text.NumberFormat numberFormat>;
+
+        $l3 = (long) i34;
+
+        $r4 = <java.text.DontCareFieldPosition: java.text.FieldPosition INSTANCE>;
+
+        virtualinvoke $r5.<java.text.NumberFormat: java.lang.StringBuffer format(long,java.lang.StringBuffer,java.text.FieldPosition)>($l3, r3, $r4);
+
+        return;
+
+        catch java.lang.Exception from label01 to label05 with label11;
+        catch java.lang.Exception from label06 to label07 with label11;
+        catch java.lang.Exception from label08 to label09 with label11;
+    }
+
+    public java.util.Date parse(java.lang.String, java.text.ParsePosition)
+    {
+        java.text.SimpleDateFormat r0;
+        java.util.Calendar $r6, $r7, $r11, $r12;
+        java.text.CalendarBuilder $r10, $r24;
+        java.lang.String r2;
+        boolean[] $r3;
+        char[] $r5, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21;
+        java.util.Date $r8, $r9, r23;
+        boolean $z0, $z1, z2, z3, $z4;
+        java.text.ParsePosition r1;
+        int i0, $i1, $i2, $i4, $i6, $i8, $i12, i14, $i15, i20, i21, i22, i23, i24, i25, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i35, $i36, $i37, $i38, $i39, $i40;
+        char $c3, $c5, $c7, $c9, $c10, $c11, $c13, $c16, $c17, $c18, $c19, c26;
+        java.lang.IllegalArgumentException $r22;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        r2 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.text.ParsePosition;
+
+        specialinvoke r0.<java.text.SimpleDateFormat: void checkNegativeNumberExpression()>();
+
+        i20 = r1.<java.text.ParsePosition: int index>;
+
+        i0 = i20;
+
+        $i1 = virtualinvoke r2.<java.lang.String: int length()>();
+
+        $r3 = newarray (boolean)[1];
+
+        $r3[0] = 0;
+
+        $r24 = new java.text.CalendarBuilder;
+
+        specialinvoke $r24.<java.text.CalendarBuilder: void <init>()>();
+
+        i21 = 0;
+
+     label01:
+        $r5 = r0.<java.text.SimpleDateFormat: char[] compiledPattern>;
+
+        $i2 = lengthof $r5;
+
+        if i21 >= $i2 goto label16;
+
+        $r13 = r0.<java.text.SimpleDateFormat: char[] compiledPattern>;
+
+        $c3 = $r13[i21];
+
+        $i28 = (int) $c3;
+
+        i22 = $i28 >>> 8;
+
+        $r14 = r0.<java.text.SimpleDateFormat: char[] compiledPattern>;
+
+        $i4 = i21;
+
+        i21 = i21 + 1;
+
+        $c5 = $r14[$i4];
+
+        $i29 = (int) $c5;
+
+        i23 = $i29 & 255;
+
+        if i23 != 255 goto label02;
+
+        $r20 = r0.<java.text.SimpleDateFormat: char[] compiledPattern>;
+
+        i24 = i21 + 1;
+
+        $c18 = $r20[i21];
+
+        $i30 = (int) $c18;
+
+        i25 = $i30 << 16;
+
+        $r21 = r0.<java.text.SimpleDateFormat: char[] compiledPattern>;
+
+        i21 = i24 + 1;
+
+        $c19 = $r21[i24];
+
+        $i31 = (int) $c19;
+
+        i23 = i25 | $i31;
+
+     label02:
+        lookupswitch(i22)
+        {
+            case 100: goto label03;
+            case 101: goto label06;
+            default: goto label09;
+        };
+
+     label03:
+        if i20 >= $i1 goto label04;
+
+        $c10 = virtualinvoke r2.<java.lang.String: char charAt(int)>(i20);
+
+        $c11 = (char) i23;
+
+        $i32 = (int) $c10;
+
+        $i33 = (int) $c11;
+
+        if $i32 == $i33 goto label05;
+
+     label04:
+        r1.<java.text.ParsePosition: int index> = i0;
+
+        r1.<java.text.ParsePosition: int errorIndex> = i20;
+
+        return null;
+
+     label05:
+        i20 = i20 + 1;
+
+        goto label15;
+
+     label06:
+        $i6 = i23;
+
+        $i35 = (int) -1;
+
+        i23 = i23 + $i35;
+
+        if $i6 <= 0 goto label15;
+
+        if i20 >= $i1 goto label07;
+
+        $c7 = virtualinvoke r2.<java.lang.String: char charAt(int)>(i20);
+
+        $r15 = r0.<java.text.SimpleDateFormat: char[] compiledPattern>;
+
+        $i8 = i21;
+
+        i21 = i21 + 1;
+
+        $c9 = $r15[$i8];
+
+        $i36 = (int) $c7;
+
+        $i37 = (int) $c9;
+
+        if $i36 == $i37 goto label08;
+
+     label07:
+        r1.<java.text.ParsePosition: int index> = i0;
+
+        r1.<java.text.ParsePosition: int errorIndex> = i20;
+
+        return null;
+
+     label08:
+        i20 = i20 + 1;
+
+        goto label06;
+
+     label09:
+        z2 = 0;
+
+        z3 = 0;
+
+        $r16 = r0.<java.text.SimpleDateFormat: char[] compiledPattern>;
+
+        $i12 = lengthof $r16;
+
+        if i21 >= $i12 goto label14;
+
+        $r17 = r0.<java.text.SimpleDateFormat: char[] compiledPattern>;
+
+        $c13 = $r17[i21];
+
+        $i38 = (int) $c13;
+
+        i14 = $i38 >>> 8;
+
+        if i14 == 100 goto label10;
+
+        if i14 == 101 goto label10;
+
+        z2 = 1;
+
+     label10:
+        $z4 = r0.<java.text.SimpleDateFormat: boolean hasFollowingMinusSign>;
+
+        if $z4 == 0 goto label14;
+
+        if i14 == 100 goto label11;
+
+        if i14 != 101 goto label14;
+
+     label11:
+        if i14 != 100 goto label12;
+
+        $r19 = r0.<java.text.SimpleDateFormat: char[] compiledPattern>;
+
+        $c17 = $r19[i21];
+
+        c26 = $c17 & 255;
+
+        goto label13;
+
+     label12:
+        $r18 = r0.<java.text.SimpleDateFormat: char[] compiledPattern>;
+
+        $i15 = i21 + 1;
+
+        c26 = $r18[$i15];
+
+     label13:
+        $c16 = r0.<java.text.SimpleDateFormat: char minusSign>;
+
+        $i39 = (int) c26;
+
+        $i40 = (int) $c16;
+
+        if $i39 != $i40 goto label14;
+
+        z3 = 1;
+
+     label14:
+        $i27 = specialinvoke r0.<java.text.SimpleDateFormat: int subParse(java.lang.String,int,int,int,boolean,boolean[],java.text.ParsePosition,boolean,java.text.CalendarBuilder)>(r2, i20, i22, i23, z2, $r3, r1, z3, $r24);
+
+        i20 = $i27;
+
+        if $i27 >= 0 goto label15;
+
+        r1.<java.text.ParsePosition: int index> = i0;
+
+        return null;
+
+     label15:
+        goto label01;
+
+     label16:
+        r1.<java.text.ParsePosition: int index> = i20;
+
+     label17:
+        $r6 = r0.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $r7 = virtualinvoke $r24.<java.text.CalendarBuilder: java.util.Calendar establish(java.util.Calendar)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.util.Calendar: java.util.Date getTime()>();
+
+        r23 = $r8;
+
+        $z0 = $r3[0];
+
+        if $z0 == 0 goto label18;
+
+        $r9 = r0.<java.text.SimpleDateFormat: java.util.Date defaultCenturyStart>;
+
+        $z1 = virtualinvoke $r8.<java.util.Date: boolean before(java.util.Date)>($r9);
+
+        if $z1 == 0 goto label18;
+
+        $r10 = virtualinvoke $r24.<java.text.CalendarBuilder: java.text.CalendarBuilder addYear(int)>(100);
+
+        $r11 = r0.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $r12 = virtualinvoke $r10.<java.text.CalendarBuilder: java.util.Calendar establish(java.util.Calendar)>($r11);
+
+        r23 = virtualinvoke $r12.<java.util.Calendar: java.util.Date getTime()>();
+
+     label18:
+        goto label20;
+
+     label19:
+        $r22 := @caughtexception;
+
+        r1.<java.text.ParsePosition: int errorIndex> = i20;
+
+        r1.<java.text.ParsePosition: int index> = i0;
+
+        return null;
+
+     label20:
+        return r23;
+
+        catch java.lang.IllegalArgumentException from label17 to label18 with label19;
+    }
+
+    private int matchString(java.lang.String, int, int, java.lang.String[], java.text.CalendarBuilder)
+    {
+        java.text.SimpleDateFormat r5;
+        java.lang.String[] r0;
+        int i0, i1, i2, $i3, $i4, $i5, i6, i7, i8, $i10;
+        java.text.CalendarBuilder r1;
+        java.lang.String $r2, r3, $r4;
+        boolean $z0;
+
+        r5 := @this: java.text.SimpleDateFormat;
+
+        r3 := @parameter0: java.lang.String;
+
+        i2 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r0 := @parameter3: java.lang.String[];
+
+        r1 := @parameter4: java.text.CalendarBuilder;
+
+        i6 = 0;
+
+        i0 = lengthof r0;
+
+        if i1 != 7 goto label1;
+
+        i6 = 1;
+
+     label1:
+        i7 = 0;
+
+        $i10 = (int) -1;
+
+        i8 = $i10;
+
+     label2:
+        if i6 >= i0 goto label4;
+
+        $r2 = r0[i6];
+
+        $i5 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        if $i5 <= i7 goto label3;
+
+        $r4 = r0[i6];
+
+        $z0 = virtualinvoke r3.<java.lang.String: boolean regionMatches(boolean,int,java.lang.String,int,int)>(1, i2, $r4, 0, $i5);
+
+        if $z0 == 0 goto label3;
+
+        i8 = i6;
+
+        i7 = $i5;
+
+     label3:
+        i6 = i6 + 1;
+
+        goto label2;
+
+     label4:
+        if i8 < 0 goto label5;
+
+        virtualinvoke r1.<java.text.CalendarBuilder: java.text.CalendarBuilder set(int,int)>(i1, i8);
+
+        $i4 = i2 + i7;
+
+        return $i4;
+
+     label5:
+        $i3 = neg i2;
+
+        return $i3;
+    }
+
+    private int matchString(java.lang.String, int, int, java.util.Map, java.text.CalendarBuilder)
+    {
+        java.lang.Integer $r5, $r13;
+        java.util.Map r0;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.util.Set $r1, $r9;
+        java.text.SimpleDateFormat r14;
+        int i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12;
+        java.text.CalendarBuilder r3;
+        java.lang.String r7, r8, r15, r16;
+        java.util.Iterator $r2, $r10;
+        java.lang.Object $r4, $r6, $r11, $r12;
+
+        r14 := @this: java.text.SimpleDateFormat;
+
+        r8 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        r0 := @parameter3: java.util.Map;
+
+        r3 := @parameter4: java.text.CalendarBuilder;
+
+        if r0 == null goto label9;
+
+        $z0 = r0 instanceof java.util.SortedMap;
+
+        if $z0 == 0 goto label4;
+
+        $r9 = interfaceinvoke r0.<java.util.Map: java.util.Set keySet()>();
+
+        $r10 = interfaceinvoke $r9.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z3 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label3;
+
+        $r11 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        r15 = (java.lang.String) $r11;
+
+        $i9 = virtualinvoke r15.<java.lang.String: int length()>();
+
+        $z4 = virtualinvoke r8.<java.lang.String: boolean regionMatches(boolean,int,java.lang.String,int,int)>(1, i0, r15, 0, $i9);
+
+        if $z4 == 0 goto label2;
+
+        $r12 = interfaceinvoke r0.<java.util.Map: java.lang.Object get(java.lang.Object)>(r15);
+
+        $r13 = (java.lang.Integer) $r12;
+
+        $i10 = virtualinvoke $r13.<java.lang.Integer: int intValue()>();
+
+        virtualinvoke r3.<java.text.CalendarBuilder: java.text.CalendarBuilder set(int,int)>(i2, $i10);
+
+        $i11 = virtualinvoke r15.<java.lang.String: int length()>();
+
+        $i12 = i0 + $i11;
+
+        return $i12;
+
+     label2:
+        goto label1;
+
+     label3:
+        $i8 = neg i0;
+
+        return $i8;
+
+     label4:
+        r16 = null;
+
+        $r1 = interfaceinvoke r0.<java.util.Map: java.util.Set keySet()>();
+
+        $r2 = interfaceinvoke $r1.<java.util.Set: java.util.Iterator iterator()>();
+
+     label5:
+        $z1 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label8;
+
+        $r6 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (java.lang.String) $r6;
+
+        $i6 = virtualinvoke r7.<java.lang.String: int length()>();
+
+        if r16 == null goto label6;
+
+        $i7 = virtualinvoke r16.<java.lang.String: int length()>();
+
+        if $i6 <= $i7 goto label7;
+
+     label6:
+        $z2 = virtualinvoke r8.<java.lang.String: boolean regionMatches(boolean,int,java.lang.String,int,int)>(1, i0, r7, 0, $i6);
+
+        if $z2 == 0 goto label7;
+
+        r16 = r7;
+
+     label7:
+        goto label5;
+
+     label8:
+        if r16 == null goto label9;
+
+        $r4 = interfaceinvoke r0.<java.util.Map: java.lang.Object get(java.lang.Object)>(r16);
+
+        $r5 = (java.lang.Integer) $r4;
+
+        $i3 = virtualinvoke $r5.<java.lang.Integer: int intValue()>();
+
+        virtualinvoke r3.<java.text.CalendarBuilder: java.text.CalendarBuilder set(int,int)>(i2, $i3);
+
+        $i4 = virtualinvoke r16.<java.lang.String: int length()>();
+
+        $i5 = i0 + $i4;
+
+        return $i5;
+
+     label9:
+        $i1 = neg i0;
+
+        return $i1;
+    }
+
+    private int matchZoneString(java.lang.String, int, java.lang.String[])
+    {
+        java.text.SimpleDateFormat r3;
+        java.lang.String[] r0;
+        int i0, $i1, i2, $i4;
+        java.lang.String r1, r2;
+        boolean $z0;
+
+        r3 := @this: java.text.SimpleDateFormat;
+
+        r2 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        r0 := @parameter2: java.lang.String[];
+
+        i2 = 1;
+
+     label1:
+        if i2 > 4 goto label3;
+
+        r1 = r0[i2];
+
+        $i1 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        $z0 = virtualinvoke r2.<java.lang.String: boolean regionMatches(boolean,int,java.lang.String,int,int)>(1, i0, r1, 0, $i1);
+
+        if $z0 == 0 goto label2;
+
+        return i2;
+
+     label2:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label3:
+        $i4 = (int) -1;
+
+        return $i4;
+    }
+
+    private boolean matchDSTString(java.lang.String, int, int, int, java.lang.String[][])
+    {
+        java.text.SimpleDateFormat r4;
+        java.lang.String[] $r1;
+        int i0, i1, i2, i3, $i4;
+        java.lang.String r2, r3;
+        java.lang.String[][] r0;
+        boolean $z0;
+
+        r4 := @this: java.text.SimpleDateFormat;
+
+        r3 := @parameter0: java.lang.String;
+
+        i3 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        r0 := @parameter4: java.lang.String[][];
+
+        i1 = i0 + 2;
+
+        $r1 = r0[i2];
+
+        r2 = $r1[i1];
+
+        $i4 = virtualinvoke r2.<java.lang.String: int length()>();
+
+        $z0 = virtualinvoke r3.<java.lang.String: boolean regionMatches(boolean,int,java.lang.String,int,int)>(1, i3, r2, 0, $i4);
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    private int subParseZoneString(java.lang.String, int, java.text.CalendarBuilder)
+    {
+        boolean $z0, z1;
+        java.util.TimeZone $r1, $r13, r21;
+        java.text.SimpleDateFormat r0;
+        java.lang.String[] r22;
+        int $i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, i10, i11, i12, $i13, i14, $i15, $i16, $i18, $i20;
+        java.text.CalendarBuilder r6, $r7;
+        java.lang.String $r3, r8, $r9, $r10, $r11, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r23;
+        java.text.DateFormatSymbols $r2, $r4, $r12;
+        java.lang.String[][] $r5;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        r8 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        r6 := @parameter2: java.text.CalendarBuilder;
+
+        z1 = 0;
+
+        $r1 = virtualinvoke r0.<java.text.SimpleDateFormat: java.util.TimeZone getTimeZone()>();
+
+        $r2 = r0.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r3 = virtualinvoke $r1.<java.util.TimeZone: java.lang.String getID()>();
+
+        $i0 = virtualinvoke $r2.<java.text.DateFormatSymbols: int getZoneIndex(java.lang.String)>($r3);
+
+        r21 = null;
+
+        $r4 = r0.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r5 = virtualinvoke $r4.<java.text.DateFormatSymbols: java.lang.String[][] getZoneStringsWrapper()>();
+
+        r22 = null;
+
+        i10 = 0;
+
+        $i18 = (int) -1;
+
+        if $i0 == $i18 goto label02;
+
+        r22 = $r5[$i0];
+
+        $i8 = specialinvoke r0.<java.text.SimpleDateFormat: int matchZoneString(java.lang.String,int,java.lang.String[])>(r8, i1, r22);
+
+        i10 = $i8;
+
+        if $i8 <= 0 goto label02;
+
+        if $i8 > 2 goto label01;
+
+        $r20 = r22[$i8];
+
+        $i9 = $i8 + 2;
+
+        $r19 = r22[$i9];
+
+        z1 = virtualinvoke $r20.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r19);
+
+     label01:
+        $r18 = r22[0];
+
+        r21 = staticinvoke <java.util.TimeZone: java.util.TimeZone getTimeZone(java.lang.String)>($r18);
+
+     label02:
+        if r21 != null goto label04;
+
+        $r12 = r0.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r13 = staticinvoke <java.util.TimeZone: java.util.TimeZone getDefault()>();
+
+        $r14 = virtualinvoke $r13.<java.util.TimeZone: java.lang.String getID()>();
+
+        $i5 = virtualinvoke $r12.<java.text.DateFormatSymbols: int getZoneIndex(java.lang.String)>($r14);
+
+        $i20 = (int) -1;
+
+        if $i5 == $i20 goto label04;
+
+        r22 = $r5[$i5];
+
+        $i6 = specialinvoke r0.<java.text.SimpleDateFormat: int matchZoneString(java.lang.String,int,java.lang.String[])>(r8, i1, r22);
+
+        i10 = $i6;
+
+        if $i6 <= 0 goto label04;
+
+        if $i6 > 2 goto label03;
+
+        $r17 = r22[$i6];
+
+        $i7 = $i6 + 2;
+
+        $r16 = r22[$i7];
+
+        z1 = virtualinvoke $r17.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r16);
+
+     label03:
+        $r15 = r22[0];
+
+        r21 = staticinvoke <java.util.TimeZone: java.util.TimeZone getTimeZone(java.lang.String)>($r15);
+
+     label04:
+        if r21 != null goto label08;
+
+        i11 = lengthof $r5;
+
+        i12 = 0;
+
+     label05:
+        if i12 >= i11 goto label08;
+
+        r22 = $r5[i12];
+
+        $i3 = specialinvoke r0.<java.text.SimpleDateFormat: int matchZoneString(java.lang.String,int,java.lang.String[])>(r8, i1, r22);
+
+        i10 = $i3;
+
+        if $i3 <= 0 goto label07;
+
+        if $i3 > 2 goto label06;
+
+        $r11 = r22[$i3];
+
+        $i4 = $i3 + 2;
+
+        $r10 = r22[$i4];
+
+        z1 = virtualinvoke $r11.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r10);
+
+     label06:
+        $r9 = r22[0];
+
+        r21 = staticinvoke <java.util.TimeZone: java.util.TimeZone getTimeZone(java.lang.String)>($r9);
+
+        goto label08;
+
+     label07:
+        i12 = i12 + 1;
+
+        goto label05;
+
+     label08:
+        if r21 == null goto label14;
+
+        $z0 = virtualinvoke r21.<java.lang.Object: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label09;
+
+        virtualinvoke r0.<java.text.SimpleDateFormat: void setTimeZone(java.util.TimeZone)>(r21);
+
+     label09:
+        if i10 < 3 goto label10;
+
+        $i13 = virtualinvoke r21.<java.util.TimeZone: int getDSTSavings()>();
+
+        goto label11;
+
+     label10:
+        $i13 = 0;
+
+     label11:
+        i14 = $i13;
+
+        if z1 != 0 goto label13;
+
+        if i10 < 3 goto label12;
+
+        if $i13 == 0 goto label13;
+
+     label12:
+        $r7 = virtualinvoke r6.<java.text.CalendarBuilder: java.text.CalendarBuilder clear(int)>(15);
+
+        virtualinvoke $r7.<java.text.CalendarBuilder: java.text.CalendarBuilder set(int,int)>(16, i14);
+
+     label13:
+        $r23 = r22[i10];
+
+        $i15 = virtualinvoke $r23.<java.lang.String: int length()>();
+
+        $i16 = i1 + $i15;
+
+        return $i16;
+
+     label14:
+        $i2 = neg i1;
+
+        return $i2;
+    }
+
+    private int subParseNumericZone(java.lang.String, int, int, int, boolean, java.text.CalendarBuilder)
+    {
+        java.lang.IndexOutOfBoundsException $r4;
+        boolean $z0, $z1, z2, $z3, $z4;
+        java.text.SimpleDateFormat r1;
+        int i0, $i2, i4, $i5, i6, $i7, $i8, $i9, $i11, $i13, $i14, $i15, $i16, $i17, $i18, i19, i20, i21, i23, $i24, $i25, $i26, $i28, $i29, $i30, $i31, $i33;
+        java.text.CalendarBuilder r2, $r3;
+        java.lang.String r0;
+        char $c1, $c3, $c10, $c12, c22;
+
+        r1 := @this: java.text.SimpleDateFormat;
+
+        r0 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        i6 := @parameter2: int;
+
+        i4 := @parameter3: int;
+
+        z2 := @parameter4: boolean;
+
+        r2 := @parameter5: java.text.CalendarBuilder;
+
+     label01:
+        i19 = i0 + 1;
+
+        $c1 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i0);
+
+        $z0 = specialinvoke r1.<java.text.SimpleDateFormat: boolean isDigit(char)>($c1);
+
+        if $z0 != 0 goto label03;
+
+     label02:
+        goto label21;
+
+     label03:
+        $i25 = (int) $c1;
+
+        i20 = $i25 - 48;
+
+        $i2 = i19;
+
+        i19 = i19 + 1;
+
+        $c3 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i2);
+
+        $z1 = specialinvoke r1.<java.text.SimpleDateFormat: boolean isDigit(char)>($c3);
+
+        if $z1 == 0 goto label04;
+
+        $i18 = i20 * 10;
+
+        $i26 = (int) $c3;
+
+        $i17 = $i26 - 48;
+
+        i20 = $i18 + $i17;
+
+        goto label07;
+
+     label04:
+        if i4 > 0 goto label05;
+
+        if z2 != 0 goto label06;
+
+     label05:
+        goto label21;
+
+     label06:
+        $i28 = (int) -1;
+
+        i19 = i19 + $i28;
+
+     label07:
+        if i20 <= 23 goto label09;
+
+     label08:
+        goto label21;
+
+     label09:
+        i21 = 0;
+
+        if i4 == 1 goto label18;
+
+        $i9 = i19;
+
+        i19 = i19 + 1;
+
+        $c10 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i9);
+
+        c22 = $c10;
+
+        if z2 == 0 goto label12;
+
+        $i29 = (int) $c10;
+
+        if $i29 == 58 goto label11;
+
+     label10:
+        goto label21;
+
+     label11:
+        $i16 = i19;
+
+        i19 = i19 + 1;
+
+        c22 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i16);
+
+     label12:
+        $z3 = specialinvoke r1.<java.text.SimpleDateFormat: boolean isDigit(char)>(c22);
+
+        if $z3 != 0 goto label14;
+
+     label13:
+        goto label21;
+
+     label14:
+        $i30 = (int) c22;
+
+        i23 = $i30 - 48;
+
+        $i11 = i19;
+
+        i19 = i19 + 1;
+
+        $c12 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i11);
+
+        $z4 = specialinvoke r1.<java.text.SimpleDateFormat: boolean isDigit(char)>($c12);
+
+        if $z4 != 0 goto label16;
+
+     label15:
+        goto label21;
+
+     label16:
+        $i14 = i23 * 10;
+
+        $i31 = (int) $c12;
+
+        $i13 = $i31 - 48;
+
+        i21 = $i14 + $i13;
+
+        if i21 <= 59 goto label18;
+
+     label17:
+        goto label21;
+
+     label18:
+        $i5 = i20 * 60;
+
+        $i15 = i21 + $i5;
+
+        $i33 = (int) 60000;
+
+        $i7 = $i15 * $i33;
+
+        $i8 = $i7 * i6;
+
+        $r3 = virtualinvoke r2.<java.text.CalendarBuilder: java.text.CalendarBuilder set(int,int)>(15, $i8);
+
+        virtualinvoke $r3.<java.text.CalendarBuilder: java.text.CalendarBuilder set(int,int)>(16, 0);
+
+     label19:
+        return i19;
+
+     label20:
+        $r4 := @caughtexception;
+
+     label21:
+        $i24 = 1 - i19;
+
+        return $i24;
+
+        catch java.lang.IndexOutOfBoundsException from label01 to label02 with label20;
+        catch java.lang.IndexOutOfBoundsException from label03 to label05 with label20;
+        catch java.lang.IndexOutOfBoundsException from label06 to label08 with label20;
+        catch java.lang.IndexOutOfBoundsException from label09 to label10 with label20;
+        catch java.lang.IndexOutOfBoundsException from label11 to label13 with label20;
+        catch java.lang.IndexOutOfBoundsException from label14 to label15 with label20;
+        catch java.lang.IndexOutOfBoundsException from label16 to label17 with label20;
+        catch java.lang.IndexOutOfBoundsException from label18 to label19 with label20;
+    }
+
+    private boolean isDigit(char)
+    {
+        int $i1, $i2;
+        java.text.SimpleDateFormat r0;
+        char c0;
+        boolean $z0;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        c0 := @parameter0: char;
+
+        $i1 = (int) c0;
+
+        if $i1 < 48 goto label1;
+
+        $i2 = (int) c0;
+
+        if $i2 > 57 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private int subParse(java.lang.String, int, int, int, boolean, boolean[], java.text.ParsePosition, boolean, java.text.CalendarBuilder)
+    {
+        java.lang.IndexOutOfBoundsException $r47;
+        byte $b18, $b115, $b117, b121, b124, b128, b129, b130, b131;
+        java.util.Map $r13, $r19, $r26, $r35, $r37;
+        java.util.Calendar $r11, $r18, $r24, $r31, $r34, $r43, $r46;
+        boolean[] r32;
+        int[] $r16, $r48;
+        java.util.Locale $r12, $r17, $r25, $r33, $r36;
+        int i0, $i1, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i11, $i12, $i13, $i14, i15, $i16, $i17, $i19, $i20, $i21, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i44, $i45, $i46, $i47, $i48, i49, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57, $i58, $i59, $i60, $i61, $i62, $i64, $i66, $i67, $i68, $i69, $i70, $i71, $i72, $i73, $i74, $i75, $i76, $i77, $i78, $i79, $i80, $i81, $i82, $i85, $i86, $i87, $i90, $i91, $i92, $i93, $i94, $i95, $i96, $i97, $i98, $i101, $i102, $i103, $i106, $i107, $i108, i109, i110, $i111, $i112, $i113, i114, i116, $i118, i119, i120, $i122, $i123, i125, $i126, $i127, $i133, $i134, $i135, $i136, $i137, $i138, $i139, $i140, $i141, $i142, $i143, $i144, $i145, $i146, $i147, $i148, $i149, $i150, $i151, $i152, $i154;
+        java.text.SimpleDateFormat r2;
+        java.text.NumberFormat $r3, $r40, $r41, $r44;
+        java.text.CalendarBuilder r5, $r6, $r10;
+        java.lang.String r1, $r7, $r8, $r9, $r42, $r45;
+        java.lang.Number r49, r50;
+        boolean z0, z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12;
+        java.text.ParsePosition r4, $r51;
+        java.lang.String[] $r15, $r21, $r23, $r28, $r30, $r39;
+        char $c2, $c10, $c22, $c43, $c63, $c65, $c83, $c84, $c88, $c89, $c99, $c100, $c104, $c105;
+        java.text.DateFormatSymbols $r14, $r20, $r22, $r27, $r29, $r38;
+
+        r2 := @this: java.text.SimpleDateFormat;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        i109 := @parameter2: int;
+
+        i15 := @parameter3: int;
+
+        z0 := @parameter4: boolean;
+
+        r32 := @parameter5: boolean[];
+
+        r4 := @parameter6: java.text.ParsePosition;
+
+        z1 := @parameter7: boolean;
+
+        r5 := @parameter8: java.text.CalendarBuilder;
+
+        i110 = 0;
+
+        $r51 = new java.text.ParsePosition;
+
+        specialinvoke $r51.<java.text.ParsePosition: void <init>(int)>(0);
+
+        $r51.<java.text.ParsePosition: int index> = i0;
+
+        if i109 != 19 goto label01;
+
+        $r46 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $z9 = virtualinvoke $r46.<java.util.Calendar: boolean isWeekDateSupported()>();
+
+        if $z9 != 0 goto label01;
+
+        i109 = 1;
+
+     label01:
+        $r48 = <java.text.SimpleDateFormat: int[] PATTERN_INDEX_TO_CALENDAR_FIELD>;
+
+        $i111 = $r48[i109];
+
+     label02:
+        $i112 = $r51.<java.text.ParsePosition: int index>;
+
+        $i113 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if $i112 < $i113 goto label03;
+
+        r4.<java.text.ParsePosition: int errorIndex> = i0;
+
+        $i133 = (int) -1;
+
+        return $i133;
+
+     label03:
+        $i1 = $r51.<java.text.ParsePosition: int index>;
+
+        $c2 = virtualinvoke r1.<java.lang.String: char charAt(int)>($i1);
+
+        $i134 = (int) $c2;
+
+        if $i134 == 32 goto label04;
+
+        $i135 = (int) $c2;
+
+        if $i135 == 9 goto label04;
+
+        goto label05;
+
+     label04:
+        $i3 = $r51.<java.text.ParsePosition: int index>;
+
+        $i4 = $i3 + 1;
+
+        $r51.<java.text.ParsePosition: int index> = $i4;
+
+        goto label02;
+
+     label05:
+        i114 = $r51.<java.text.ParsePosition: int index>;
+
+        if i109 == 4 goto label07;
+
+        if i109 == 15 goto label07;
+
+        if i109 != 2 goto label06;
+
+        if i15 <= 2 goto label07;
+
+     label06:
+        if i109 == 1 goto label07;
+
+        if i109 != 19 goto label14;
+
+     label07:
+        if z0 == 0 goto label09;
+
+        $i106 = i0 + i15;
+
+        $i107 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if $i106 <= $i107 goto label08;
+
+        goto label86;
+
+     label08:
+        $r44 = r2.<java.text.SimpleDateFormat: java.text.NumberFormat numberFormat>;
+
+        $i108 = i0 + i15;
+
+        $r45 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int,int)>(0, $i108);
+
+        r49 = virtualinvoke $r44.<java.text.NumberFormat: java.lang.Number parse(java.lang.String,java.text.ParsePosition)>($r45, $r51);
+
+        goto label10;
+
+     label09:
+        $r3 = r2.<java.text.SimpleDateFormat: java.text.NumberFormat numberFormat>;
+
+        r49 = virtualinvoke $r3.<java.text.NumberFormat: java.lang.Number parse(java.lang.String,java.text.ParsePosition)>(r1, $r51);
+
+     label10:
+        if r49 != null goto label11;
+
+        if i109 != 1 goto label86;
+
+        $r43 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $z8 = $r43 instanceof java.util.GregorianCalendar;
+
+        if $z8 == 0 goto label14;
+
+        goto label86;
+
+     label11:
+        $i5 = virtualinvoke r49.<java.lang.Number: int intValue()>();
+
+        i110 = $i5;
+
+        if z1 == 0 goto label14;
+
+        if $i5 >= 0 goto label14;
+
+        $i93 = $r51.<java.text.ParsePosition: int index>;
+
+        $i94 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if $i93 >= $i94 goto label12;
+
+        $i103 = $r51.<java.text.ParsePosition: int index>;
+
+        $c104 = virtualinvoke r1.<java.lang.String: char charAt(int)>($i103);
+
+        $c105 = r2.<java.text.SimpleDateFormat: char minusSign>;
+
+        $i136 = (int) $c104;
+
+        $i137 = (int) $c105;
+
+        if $i136 != $i137 goto label13;
+
+     label12:
+        $i95 = $r51.<java.text.ParsePosition: int index>;
+
+        $i96 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if $i95 != $i96 goto label14;
+
+        $i97 = $r51.<java.text.ParsePosition: int index>;
+
+        $i98 = $i97 - 1;
+
+        $c99 = virtualinvoke r1.<java.lang.String: char charAt(int)>($i98);
+
+        $c100 = r2.<java.text.SimpleDateFormat: char minusSign>;
+
+        $i138 = (int) $c99;
+
+        $i139 = (int) $c100;
+
+        if $i138 != $i139 goto label14;
+
+     label13:
+        i110 = neg $i5;
+
+        $i101 = $r51.<java.text.ParsePosition: int index>;
+
+        $i102 = $i101 - 1;
+
+        $r51.<java.text.ParsePosition: int index> = $i102;
+
+     label14:
+        $z10 = specialinvoke r2.<java.text.SimpleDateFormat: boolean useDateFormatSymbols()>();
+
+        tableswitch(i109)
+        {
+            case 0: goto label15;
+            case 1: goto label18;
+            case 2: goto label28;
+            case 3: goto label79;
+            case 4: goto label34;
+            case 5: goto label79;
+            case 6: goto label79;
+            case 7: goto label79;
+            case 8: goto label79;
+            case 9: goto label37;
+            case 10: goto label79;
+            case 11: goto label79;
+            case 12: goto label79;
+            case 13: goto label79;
+            case 14: goto label44;
+            case 15: goto label47;
+            case 16: goto label79;
+            case 17: goto label50;
+            case 18: goto label50;
+            case 19: goto label18;
+            case 20: goto label79;
+            case 21: goto label70;
+            default: goto label79;
+        };
+
+     label15:
+        if $z10 == 0 goto label16;
+
+        $r38 = r2.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r39 = virtualinvoke $r38.<java.text.DateFormatSymbols: java.lang.String[] getEras()>();
+
+        $i75 = specialinvoke r2.<java.text.SimpleDateFormat: int matchString(java.lang.String,int,int,java.lang.String[],java.text.CalendarBuilder)>(r1, i0, 0, $r39, r5);
+
+        if $i75 <= 0 goto label86;
+
+        return $i75;
+
+     label16:
+        $r36 = r2.<java.text.SimpleDateFormat: java.util.Locale locale>;
+
+        $r37 = specialinvoke r2.<java.text.SimpleDateFormat: java.util.Map getDisplayNamesMap(int,java.util.Locale)>($i111, $r36);
+
+        $i74 = specialinvoke r2.<java.text.SimpleDateFormat: int matchString(java.lang.String,int,int,java.util.Map,java.text.CalendarBuilder)>(r1, i0, $i111, $r37, r5);
+
+        if $i74 <= 0 goto label17;
+
+        return $i74;
+
+     label17:
+        goto label86;
+
+     label18:
+        $r31 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $z5 = $r31 instanceof java.util.GregorianCalendar;
+
+        if $z5 != 0 goto label22;
+
+        if i15 < 4 goto label19;
+
+        $b115 = 2;
+
+        goto label20;
+
+     label19:
+        $b115 = 1;
+
+     label20:
+        $r34 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $r33 = r2.<java.text.SimpleDateFormat: java.util.Locale locale>;
+
+        $r35 = virtualinvoke $r34.<java.util.Calendar: java.util.Map getDisplayNames(int,int,java.util.Locale)>($i111, $b115, $r33);
+
+        if $r35 == null goto label21;
+
+        $i73 = specialinvoke r2.<java.text.SimpleDateFormat: int matchString(java.lang.String,int,int,java.util.Map,java.text.CalendarBuilder)>(r1, i0, $i111, $r35, r5);
+
+        if $i73 <= 0 goto label21;
+
+        return $i73;
+
+     label21:
+        virtualinvoke r5.<java.text.CalendarBuilder: java.text.CalendarBuilder set(int,int)>($i111, i110);
+
+        $i72 = $r51.<java.text.ParsePosition: int index>;
+
+        return $i72;
+
+     label22:
+        if i15 > 2 goto label27;
+
+        $i61 = $r51.<java.text.ParsePosition: int index>;
+
+        $i62 = $i61 - i114;
+
+        if $i62 != 2 goto label27;
+
+        $c63 = virtualinvoke r1.<java.lang.String: char charAt(int)>(i114);
+
+        $z6 = staticinvoke <java.lang.Character: boolean isDigit(char)>($c63);
+
+        if $z6 == 0 goto label27;
+
+        $i64 = i114 + 1;
+
+        $c65 = virtualinvoke r1.<java.lang.String: char charAt(int)>($i64);
+
+        $z7 = staticinvoke <java.lang.Character: boolean isDigit(char)>($c65);
+
+        if $z7 == 0 goto label27;
+
+        $i66 = r2.<java.text.SimpleDateFormat: int defaultCenturyStartYear>;
+
+        i116 = $i66 % 100;
+
+        if i110 != i116 goto label23;
+
+        $z11 = 1;
+
+        goto label24;
+
+     label23:
+        $z11 = 0;
+
+     label24:
+        r32[0] = $z11;
+
+        $i71 = i110;
+
+        $i67 = r2.<java.text.SimpleDateFormat: int defaultCenturyStartYear>;
+
+        $i68 = $i67 / 100;
+
+        $i69 = $i68 * 100;
+
+        if i110 >= i116 goto label25;
+
+        $b117 = 100;
+
+        goto label26;
+
+     label25:
+        $b117 = 0;
+
+     label26:
+        $i70 = $i69 + $b117;
+
+        i110 = $i71 + $i70;
+
+     label27:
+        virtualinvoke r5.<java.text.CalendarBuilder: java.text.CalendarBuilder set(int,int)>($i111, i110);
+
+        $i118 = $r51.<java.text.ParsePosition: int index>;
+
+        return $i118;
+
+     label28:
+        if i15 > 2 goto label29;
+
+        $i59 = i110 - 1;
+
+        virtualinvoke r5.<java.text.CalendarBuilder: java.text.CalendarBuilder set(int,int)>(2, $i59);
+
+        $i60 = $r51.<java.text.ParsePosition: int index>;
+
+        return $i60;
+
+     label29:
+        if $z10 == 0 goto label32;
+
+        $r27 = r2.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r28 = virtualinvoke $r27.<java.text.DateFormatSymbols: java.lang.String[] getMonths()>();
+
+        $i57 = specialinvoke r2.<java.text.SimpleDateFormat: int matchString(java.lang.String,int,int,java.lang.String[],java.text.CalendarBuilder)>(r1, i0, 2, $r28, r5);
+
+        if $i57 <= 0 goto label30;
+
+        return $i57;
+
+     label30:
+        $r29 = r2.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r30 = virtualinvoke $r29.<java.text.DateFormatSymbols: java.lang.String[] getShortMonths()>();
+
+        $i58 = specialinvoke r2.<java.text.SimpleDateFormat: int matchString(java.lang.String,int,int,java.lang.String[],java.text.CalendarBuilder)>(r1, i0, 2, $r30, r5);
+
+        if $i58 <= 0 goto label31;
+
+        return $i58;
+
+     label31:
+        goto label86;
+
+     label32:
+        $r25 = r2.<java.text.SimpleDateFormat: java.util.Locale locale>;
+
+        $r26 = specialinvoke r2.<java.text.SimpleDateFormat: java.util.Map getDisplayNamesMap(int,java.util.Locale)>($i111, $r25);
+
+        $i56 = specialinvoke r2.<java.text.SimpleDateFormat: int matchString(java.lang.String,int,int,java.util.Map,java.text.CalendarBuilder)>(r1, i0, $i111, $r26, r5);
+
+        if $i56 <= 0 goto label33;
+
+        return $i56;
+
+     label33:
+        goto label86;
+
+     label34:
+        $z4 = virtualinvoke r2.<java.text.SimpleDateFormat: boolean isLenient()>();
+
+        if $z4 != 0 goto label35;
+
+        if i110 < 1 goto label86;
+
+        if i110 <= 24 goto label35;
+
+        goto label86;
+
+     label35:
+        $r24 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $i53 = virtualinvoke $r24.<java.util.Calendar: int getMaximum(int)>(11);
+
+        $i54 = $i53 + 1;
+
+        if i110 != $i54 goto label36;
+
+        i110 = 0;
+
+     label36:
+        virtualinvoke r5.<java.text.CalendarBuilder: java.text.CalendarBuilder set(int,int)>(11, i110);
+
+        $i55 = $r51.<java.text.ParsePosition: int index>;
+
+        return $i55;
+
+     label37:
+        if $z10 == 0 goto label40;
+
+        $r20 = r2.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r21 = virtualinvoke $r20.<java.text.DateFormatSymbols: java.lang.String[] getWeekdays()>();
+
+        $i51 = specialinvoke r2.<java.text.SimpleDateFormat: int matchString(java.lang.String,int,int,java.lang.String[],java.text.CalendarBuilder)>(r1, i0, 7, $r21, r5);
+
+        if $i51 <= 0 goto label38;
+
+        return $i51;
+
+     label38:
+        $r22 = r2.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r23 = virtualinvoke $r22.<java.text.DateFormatSymbols: java.lang.String[] getShortWeekdays()>();
+
+        $i52 = specialinvoke r2.<java.text.SimpleDateFormat: int matchString(java.lang.String,int,int,java.lang.String[],java.text.CalendarBuilder)>(r1, i0, 7, $r23, r5);
+
+        if $i52 <= 0 goto label39;
+
+        return $i52;
+
+     label39:
+        goto label86;
+
+     label40:
+        $r16 = newarray (int)[2];
+
+        $r16[0] = 2;
+
+        $r16[1] = 1;
+
+        i119 = lengthof $r16;
+
+        i120 = 0;
+
+     label41:
+        if i120 >= i119 goto label43;
+
+        i49 = $r16[i120];
+
+        $r18 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $r17 = r2.<java.text.SimpleDateFormat: java.util.Locale locale>;
+
+        $r19 = virtualinvoke $r18.<java.util.Calendar: java.util.Map getDisplayNames(int,int,java.util.Locale)>($i111, i49, $r17);
+
+        $i50 = specialinvoke r2.<java.text.SimpleDateFormat: int matchString(java.lang.String,int,int,java.util.Map,java.text.CalendarBuilder)>(r1, i0, $i111, $r19, r5);
+
+        if $i50 <= 0 goto label42;
+
+        return $i50;
+
+     label42:
+        i120 = i120 + 1;
+
+        goto label41;
+
+     label43:
+        goto label86;
+
+     label44:
+        if $z10 == 0 goto label45;
+
+        $r14 = r2.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r15 = virtualinvoke $r14.<java.text.DateFormatSymbols: java.lang.String[] getAmPmStrings()>();
+
+        $i48 = specialinvoke r2.<java.text.SimpleDateFormat: int matchString(java.lang.String,int,int,java.lang.String[],java.text.CalendarBuilder)>(r1, i0, 9, $r15, r5);
+
+        if $i48 <= 0 goto label86;
+
+        return $i48;
+
+     label45:
+        $r12 = r2.<java.text.SimpleDateFormat: java.util.Locale locale>;
+
+        $r13 = specialinvoke r2.<java.text.SimpleDateFormat: java.util.Map getDisplayNamesMap(int,java.util.Locale)>($i111, $r12);
+
+        $i47 = specialinvoke r2.<java.text.SimpleDateFormat: int matchString(java.lang.String,int,int,java.util.Map,java.text.CalendarBuilder)>(r1, i0, $i111, $r13, r5);
+
+        if $i47 <= 0 goto label46;
+
+        return $i47;
+
+     label46:
+        goto label86;
+
+     label47:
+        $z3 = virtualinvoke r2.<java.text.SimpleDateFormat: boolean isLenient()>();
+
+        if $z3 != 0 goto label48;
+
+        if i110 < 1 goto label86;
+
+        if i110 <= 12 goto label48;
+
+        goto label86;
+
+     label48:
+        $r11 = r2.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $i44 = virtualinvoke $r11.<java.util.Calendar: int getLeastMaximum(int)>(10);
+
+        $i45 = $i44 + 1;
+
+        if i110 != $i45 goto label49;
+
+        i110 = 0;
+
+     label49:
+        virtualinvoke r5.<java.text.CalendarBuilder: java.text.CalendarBuilder set(int,int)>(10, i110);
+
+        $i46 = $r51.<java.text.ParsePosition: int index>;
+
+        return $i46;
+
+     label50:
+        b121 = 0;
+
+        b131 = 0;
+
+        b130 = 0;
+
+        b129 = 0;
+
+        b128 = 0;
+
+     label51:
+        $i21 = $r51.<java.text.ParsePosition: int index>;
+
+        $c22 = virtualinvoke r1.<java.lang.String: char charAt(int)>($i21);
+
+        $i140 = (int) $c22;
+
+        if $i140 != 43 goto label52;
+
+        b121 = 1;
+
+        b131 = 1;
+
+        b130 = 1;
+
+        b129 = 1;
+
+        b128 = 1;
+
+        goto label53;
+
+     label52:
+        $i141 = (int) $c22;
+
+        if $i141 != 45 goto label53;
+
+        b121 = -1;
+
+        b131 = -1;
+
+        b130 = -1;
+
+        b129 = -1;
+
+        b128 = -1;
+
+     label53:
+        if b130 != 0 goto label64;
+
+        $i142 = (int) $c22;
+
+        if $i142 == 71 goto label54;
+
+        $i143 = (int) $c22;
+
+        if $i143 != 103 goto label61;
+
+     label54:
+        $i27 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        $i28 = $i27 - i0;
+
+        $r7 = "GMT";
+
+        $i29 = virtualinvoke $r7.<java.lang.String: int length()>();
+
+        if $i28 < $i29 goto label61;
+
+        $r8 = "GMT";
+
+        $i31 = virtualinvoke $r8.<java.lang.String: int length()>();
+
+        $z2 = virtualinvoke r1.<java.lang.String: boolean regionMatches(boolean,int,java.lang.String,int,int)>(1, i0, "GMT", 0, $i31);
+
+        if $z2 == 0 goto label61;
+
+        $r9 = "GMT";
+
+        $i32 = virtualinvoke $r9.<java.lang.String: int length()>();
+
+        $i33 = i0 + $i32;
+
+        $r51.<java.text.ParsePosition: int index> = $i33;
+
+        $i34 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        $i35 = $r51.<java.text.ParsePosition: int index>;
+
+        $i36 = $i34 - $i35;
+
+        if $i36 <= 0 goto label56;
+
+        $i42 = $r51.<java.text.ParsePosition: int index>;
+
+        $c43 = virtualinvoke r1.<java.lang.String: char charAt(int)>($i42);
+
+        $i144 = (int) $c43;
+
+        if $i144 != 43 goto label55;
+
+        b121 = 1;
+
+        b129 = 1;
+
+        b128 = 1;
+
+        goto label56;
+
+     label55:
+        $i145 = (int) $c43;
+
+        if $i145 != 45 goto label56;
+
+        b121 = -1;
+
+        b129 = -1;
+
+        b128 = -1;
+
+     label56:
+        if b128 != 0 goto label58;
+
+        $r10 = virtualinvoke r5.<java.text.CalendarBuilder: java.text.CalendarBuilder set(int,int)>(15, 0);
+
+        virtualinvoke $r10.<java.text.CalendarBuilder: java.text.CalendarBuilder set(int,int)>(16, 0);
+
+        $i41 = $r51.<java.text.ParsePosition: int index>;
+
+     label57:
+        return $i41;
+
+     label58:
+        $i37 = $r51.<java.text.ParsePosition: int index>;
+
+        $i38 = $i37 + 1;
+
+        $r51.<java.text.ParsePosition: int index> = $i38;
+
+        $i39 = specialinvoke r2.<java.text.SimpleDateFormat: int subParseNumericZone(java.lang.String,int,int,int,boolean,java.text.CalendarBuilder)>(r1, $i38, b129, 0, 1, r5);
+
+        if $i39 <= 0 goto label60;
+
+     label59:
+        return $i39;
+
+     label60:
+        $i40 = neg $i39;
+
+        $r51.<java.text.ParsePosition: int index> = $i40;
+
+        goto label67;
+
+     label61:
+        $i122 = $r51.<java.text.ParsePosition: int index>;
+
+        $i123 = specialinvoke r2.<java.text.SimpleDateFormat: int subParseZoneString(java.lang.String,int,java.text.CalendarBuilder)>(r1, $i122, r5);
+
+        if $i123 <= 0 goto label63;
+
+     label62:
+        return $i123;
+
+     label63:
+        $i30 = neg $i123;
+
+        $r51.<java.text.ParsePosition: int index> = $i30;
+
+        goto label67;
+
+     label64:
+        $i23 = $r51.<java.text.ParsePosition: int index>;
+
+        $i24 = $i23 + 1;
+
+        $r51.<java.text.ParsePosition: int index> = $i24;
+
+        $i25 = specialinvoke r2.<java.text.SimpleDateFormat: int subParseNumericZone(java.lang.String,int,int,int,boolean,java.text.CalendarBuilder)>(r1, $i24, b131, 0, 0, r5);
+
+        if $i25 <= 0 goto label66;
+
+     label65:
+        return $i25;
+
+     label66:
+        $i26 = neg $i25;
+
+        $r51.<java.text.ParsePosition: int index> = $i26;
+
+     label67:
+        goto label69;
+
+     label68:
+        $r47 := @caughtexception;
+
+     label69:
+        goto label86;
+
+     label70:
+        $i6 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        $i7 = $r51.<java.text.ParsePosition: int index>;
+
+        $i8 = $i6 - $i7;
+
+        if $i8 > 0 goto label71;
+
+        goto label86;
+
+     label71:
+        $i9 = $r51.<java.text.ParsePosition: int index>;
+
+        $c10 = virtualinvoke r1.<java.lang.String: char charAt(int)>($i9);
+
+        $i146 = (int) $c10;
+
+        if $i146 != 90 goto label72;
+
+        $r6 = virtualinvoke r5.<java.text.CalendarBuilder: java.text.CalendarBuilder set(int,int)>(15, 0);
+
+        virtualinvoke $r6.<java.text.CalendarBuilder: java.text.CalendarBuilder set(int,int)>(16, 0);
+
+        $i19 = $r51.<java.text.ParsePosition: int index>;
+
+        $i20 = $i19 + 1;
+
+        $r51.<java.text.ParsePosition: int index> = $i20;
+
+        return $i20;
+
+     label72:
+        $i147 = (int) $c10;
+
+        if $i147 != 43 goto label73;
+
+        b124 = 1;
+
+        goto label75;
+
+     label73:
+        $i148 = (int) $c10;
+
+        if $i148 != 45 goto label74;
+
+        b124 = -1;
+
+        goto label75;
+
+     label74:
+        $i11 = $r51.<java.text.ParsePosition: int index>;
+
+        $i12 = $i11 + 1;
+
+        $r51.<java.text.ParsePosition: int index> = $i12;
+
+        goto label86;
+
+     label75:
+        $i13 = $r51.<java.text.ParsePosition: int index>;
+
+        $i14 = $i13 + 1;
+
+        $r51.<java.text.ParsePosition: int index> = $i14;
+
+        $b18 = b124;
+
+        if i15 != 3 goto label76;
+
+        $z12 = 1;
+
+        goto label77;
+
+     label76:
+        $z12 = 0;
+
+     label77:
+        $i16 = specialinvoke r2.<java.text.SimpleDateFormat: int subParseNumericZone(java.lang.String,int,int,int,boolean,java.text.CalendarBuilder)>(r1, $i14, $b18, i15, $z12, r5);
+
+        if $i16 <= 0 goto label78;
+
+        return $i16;
+
+     label78:
+        $i17 = neg $i16;
+
+        $r51.<java.text.ParsePosition: int index> = $i17;
+
+        goto label86;
+
+     label79:
+        if z0 == 0 goto label81;
+
+        $i90 = i0 + i15;
+
+        $i91 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if $i90 <= $i91 goto label80;
+
+        goto label86;
+
+     label80:
+        $r41 = r2.<java.text.SimpleDateFormat: java.text.NumberFormat numberFormat>;
+
+        $i92 = i0 + i15;
+
+        $r42 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int,int)>(0, $i92);
+
+        r50 = virtualinvoke $r41.<java.text.NumberFormat: java.lang.Number parse(java.lang.String,java.text.ParsePosition)>($r42, $r51);
+
+        goto label82;
+
+     label81:
+        $r40 = r2.<java.text.SimpleDateFormat: java.text.NumberFormat numberFormat>;
+
+        r50 = virtualinvoke $r40.<java.text.NumberFormat: java.lang.Number parse(java.lang.String,java.text.ParsePosition)>(r1, $r51);
+
+     label82:
+        if r50 == null goto label86;
+
+        $i76 = virtualinvoke r50.<java.lang.Number: int intValue()>();
+
+        i125 = $i76;
+
+        if z1 == 0 goto label85;
+
+        if $i76 >= 0 goto label85;
+
+        $i77 = $r51.<java.text.ParsePosition: int index>;
+
+        $i78 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if $i77 >= $i78 goto label83;
+
+        $i87 = $r51.<java.text.ParsePosition: int index>;
+
+        $c88 = virtualinvoke r1.<java.lang.String: char charAt(int)>($i87);
+
+        $c89 = r2.<java.text.SimpleDateFormat: char minusSign>;
+
+        $i149 = (int) $c88;
+
+        $i150 = (int) $c89;
+
+        if $i149 != $i150 goto label84;
+
+     label83:
+        $i79 = $r51.<java.text.ParsePosition: int index>;
+
+        $i80 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if $i79 != $i80 goto label85;
+
+        $i81 = $r51.<java.text.ParsePosition: int index>;
+
+        $i82 = $i81 - 1;
+
+        $c83 = virtualinvoke r1.<java.lang.String: char charAt(int)>($i82);
+
+        $c84 = r2.<java.text.SimpleDateFormat: char minusSign>;
+
+        $i151 = (int) $c83;
+
+        $i152 = (int) $c84;
+
+        if $i151 != $i152 goto label85;
+
+     label84:
+        i125 = neg $i76;
+
+        $i85 = $r51.<java.text.ParsePosition: int index>;
+
+        $i86 = $i85 - 1;
+
+        $r51.<java.text.ParsePosition: int index> = $i86;
+
+     label85:
+        virtualinvoke r5.<java.text.CalendarBuilder: java.text.CalendarBuilder set(int,int)>($i111, i125);
+
+        $i126 = $r51.<java.text.ParsePosition: int index>;
+
+        return $i126;
+
+     label86:
+        $i127 = $r51.<java.text.ParsePosition: int index>;
+
+        r4.<java.text.ParsePosition: int errorIndex> = $i127;
+
+        $i154 = (int) -1;
+
+        return $i154;
+
+        catch java.lang.IndexOutOfBoundsException from label51 to label57 with label68;
+        catch java.lang.IndexOutOfBoundsException from label58 to label59 with label68;
+        catch java.lang.IndexOutOfBoundsException from label60 to label62 with label68;
+        catch java.lang.IndexOutOfBoundsException from label63 to label65 with label68;
+        catch java.lang.IndexOutOfBoundsException from label66 to label67 with label68;
+    }
+
+    private boolean useDateFormatSymbols()
+    {
+        java.util.Locale $r1;
+        java.text.SimpleDateFormat r0;
+        boolean $z0, $z1;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        $z0 = r0.<java.text.SimpleDateFormat: boolean useDateFormatSymbols>;
+
+        if $z0 != 0 goto label1;
+
+        $r1 = r0.<java.text.SimpleDateFormat: java.util.Locale locale>;
+
+        if $r1 != null goto label2;
+
+     label1:
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        return $z1;
+    }
+
+    private java.lang.String translatePattern(java.lang.String, java.lang.String, java.lang.String)
+    {
+        java.text.SimpleDateFormat r12;
+        int $i0, $i2, $i3, i4, $i6, $i7, $i8, $i9, $i10, $i11, $i12;
+        java.lang.String r1, $r2, r4, $r10, r11;
+        boolean z0, z1, z2;
+        char $c1, c5;
+        java.lang.IllegalArgumentException $r15, $r16;
+        java.lang.StringBuilder $r7, $r8, $r9, $r13, $r14;
+
+        r12 := @this: java.text.SimpleDateFormat;
+
+        r1 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.lang.String;
+
+        r11 := @parameter2: java.lang.String;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        z0 = 0;
+
+        z2 = 0;
+
+        z1 = 0;
+
+        i4 = 0;
+
+     label1:
+        $i0 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if i4 >= $i0 goto label8;
+
+        $c1 = virtualinvoke r1.<java.lang.String: char charAt(int)>(i4);
+
+        c5 = $c1;
+
+        if z1 == 0 goto label2;
+
+        $i6 = (int) $c1;
+
+        if $i6 != 39 goto label7;
+
+        z0 = 0;
+
+        z2 = 0;
+
+        z1 = 0;
+
+        goto label7;
+
+     label2:
+        $i7 = (int) $c1;
+
+        if $i7 != 39 goto label3;
+
+        z0 = 1;
+
+        z2 = 1;
+
+        z1 = 1;
+
+        goto label7;
+
+     label3:
+        $i8 = (int) $c1;
+
+        if $i8 < 97 goto label4;
+
+        $i9 = (int) $c1;
+
+        if $i9 <= 122 goto label5;
+
+     label4:
+        $i10 = (int) $c1;
+
+        if $i10 < 65 goto label7;
+
+        $i11 = (int) $c1;
+
+        if $i11 > 90 goto label7;
+
+     label5:
+        $i12 = (int) $c1;
+
+        $i2 = virtualinvoke r4.<java.lang.String: int indexOf(int)>($i12);
+
+        if $i2 < 0 goto label6;
+
+        $i3 = virtualinvoke r11.<java.lang.String: int length()>();
+
+        if $i2 >= $i3 goto label7;
+
+        c5 = virtualinvoke r11.<java.lang.String: char charAt(int)>($i2);
+
+        goto label7;
+
+     label6:
+        $r15 = new java.lang.IllegalArgumentException;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Illegal pattern  character \'");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c1);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r15.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r10);
+
+        throw $r15;
+
+     label7:
+        virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(c5);
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label8:
+        if z2 == 0 goto label9;
+
+        $r16 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r16.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Unfinished quote in pattern");
+
+        throw $r16;
+
+     label9:
+        $r2 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r2;
+    }
+
+    public java.lang.String toPattern()
+    {
+        java.text.SimpleDateFormat r0;
+        java.lang.String $r1;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        $r1 = r0.<java.text.SimpleDateFormat: java.lang.String pattern>;
+
+        return $r1;
+    }
+
+    public java.lang.String toLocalizedPattern()
+    {
+        java.text.DateFormatSymbols $r1;
+        java.text.SimpleDateFormat r0;
+        java.lang.String $r2, $r3, $r4;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        $r2 = r0.<java.text.SimpleDateFormat: java.lang.String pattern>;
+
+        $r1 = r0.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r3 = virtualinvoke $r1.<java.text.DateFormatSymbols: java.lang.String getLocalPatternChars()>();
+
+        $r4 = specialinvoke r0.<java.text.SimpleDateFormat: java.lang.String translatePattern(java.lang.String,java.lang.String,java.lang.String)>($r2, "GyMdkHmsSEDFwWahKzZYuXL", $r3);
+
+        return $r4;
+    }
+
+    public void applyPattern(java.lang.String)
+    {
+        java.text.SimpleDateFormat r0;
+        java.lang.String r1;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.text.SimpleDateFormat: void applyPatternImpl(java.lang.String)>(r1);
+
+        return;
+    }
+
+    private void applyPatternImpl(java.lang.String)
+    {
+        java.text.SimpleDateFormat r0;
+        char[] $r2;
+        java.lang.String r1;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = specialinvoke r0.<java.text.SimpleDateFormat: char[] compile(java.lang.String)>(r1);
+
+        r0.<java.text.SimpleDateFormat: char[] compiledPattern> = $r2;
+
+        r0.<java.text.SimpleDateFormat: java.lang.String pattern> = r1;
+
+        return;
+    }
+
+    public void applyLocalizedPattern(java.lang.String)
+    {
+        java.text.DateFormatSymbols $r2;
+        java.text.SimpleDateFormat r0;
+        char[] $r5;
+        java.lang.String r1, $r3, $r4;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r3 = virtualinvoke $r2.<java.text.DateFormatSymbols: java.lang.String getLocalPatternChars()>();
+
+        $r4 = specialinvoke r0.<java.text.SimpleDateFormat: java.lang.String translatePattern(java.lang.String,java.lang.String,java.lang.String)>(r1, $r3, "GyMdkHmsSEDFwWahKzZYuXL");
+
+        $r5 = specialinvoke r0.<java.text.SimpleDateFormat: char[] compile(java.lang.String)>($r4);
+
+        r0.<java.text.SimpleDateFormat: char[] compiledPattern> = $r5;
+
+        r0.<java.text.SimpleDateFormat: java.lang.String pattern> = $r4;
+
+        return;
+    }
+
+    public java.text.DateFormatSymbols getDateFormatSymbols()
+    {
+        java.text.DateFormatSymbols $r1, $r3;
+        java.text.SimpleDateFormat r0;
+        java.lang.Object $r2;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        $r1 = r0.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r2 = virtualinvoke $r1.<java.text.DateFormatSymbols: java.lang.Object clone()>();
+
+        $r3 = (java.text.DateFormatSymbols) $r2;
+
+        return $r3;
+    }
+
+    public void setDateFormatSymbols(java.text.DateFormatSymbols)
+    {
+        java.text.DateFormatSymbols r1, $r3;
+        java.text.SimpleDateFormat r0;
+        java.lang.Object $r2;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        r1 := @parameter0: java.text.DateFormatSymbols;
+
+        $r2 = virtualinvoke r1.<java.text.DateFormatSymbols: java.lang.Object clone()>();
+
+        $r3 = (java.text.DateFormatSymbols) $r2;
+
+        r0.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData> = $r3;
+
+        r0.<java.text.SimpleDateFormat: boolean useDateFormatSymbols> = 1;
+
+        return;
+    }
+
+    public java.lang.Object clone()
+    {
+        java.text.DateFormatSymbols $r3, $r5;
+        java.text.SimpleDateFormat r0, r2;
+        java.lang.Object $r1, $r4;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        $r1 = specialinvoke r0.<java.text.DateFormat: java.lang.Object clone()>();
+
+        r2 = (java.text.SimpleDateFormat) $r1;
+
+        $r3 = r0.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r4 = virtualinvoke $r3.<java.text.DateFormatSymbols: java.lang.Object clone()>();
+
+        $r5 = (java.text.DateFormatSymbols) $r4;
+
+        r2.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData> = $r5;
+
+        return r2;
+    }
+
+    public int hashCode()
+    {
+        int $i0;
+        java.text.SimpleDateFormat r0;
+        java.lang.String $r1;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        $r1 = r0.<java.text.SimpleDateFormat: java.lang.String pattern>;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int hashCode()>();
+
+        return $i0;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        java.text.SimpleDateFormat r0, r2;
+        java.text.DateFormatSymbols $r5, $r6;
+        java.lang.Object r1;
+        java.lang.String $r3, $r4;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $z0 = specialinvoke r0.<java.text.DateFormat: boolean equals(java.lang.Object)>(r1);
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        r2 = (java.text.SimpleDateFormat) r1;
+
+        $r4 = r0.<java.text.SimpleDateFormat: java.lang.String pattern>;
+
+        $r3 = r2.<java.text.SimpleDateFormat: java.lang.String pattern>;
+
+        $z1 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z1 == 0 goto label2;
+
+        $r6 = r0.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $r5 = r2.<java.text.SimpleDateFormat: java.text.DateFormatSymbols formatData>;
+
+        $z2 = virtualinvoke $r6.<java.text.DateFormatSymbols: boolean equals(java.lang.Object)>($r5);
+
+        if $z2 == 0 goto label2;
+
+        $z3 = 1;
+
+        goto label3;
+
+     label2:
+        $z3 = 0;
+
+     label3:
+        return $z3;
+    }
+
+    private java.util.Map getDisplayNamesMap(int, java.util.Locale)
+    {
+        java.text.SimpleDateFormat r0;
+        java.util.Calendar $r2, $r5;
+        int[] r4;
+        java.util.Locale r1;
+        java.util.Map $r3, $r6;
+        int i0, i1, i2, i3;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.util.Locale;
+
+        $r2 = r0.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $r3 = virtualinvoke $r2.<java.util.Calendar: java.util.Map getDisplayNames(int,int,java.util.Locale)>(i0, 1, r1);
+
+        r4 = <java.text.SimpleDateFormat: int[] REST_OF_STYLES>;
+
+        i1 = lengthof r4;
+
+        i3 = 0;
+
+     label1:
+        if i3 >= i1 goto label3;
+
+        i2 = r4[i3];
+
+        $r5 = r0.<java.text.SimpleDateFormat: java.util.Calendar calendar>;
+
+        $r6 = virtualinvoke $r5.<java.util.Calendar: java.util.Map getDisplayNames(int,int,java.util.Locale)>(i0, i2, r1);
+
+        if $r6 == null goto label2;
+
+        interfaceinvoke $r3.<java.util.Map: void putAll(java.util.Map)>($r6);
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        return $r3;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.util.Date $r4;
+        java.util.TimeZone $r5, $r7;
+        java.io.ObjectInputStream r0;
+        java.text.SimpleDateFormat r1;
+        java.lang.Exception $r9;
+        int $i0;
+        char[] $r3;
+        java.io.InvalidObjectException $r10;
+        java.lang.String $r2, $r6, $r8;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: java.text.SimpleDateFormat;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+     label1:
+        $r2 = r1.<java.text.SimpleDateFormat: java.lang.String pattern>;
+
+        $r3 = specialinvoke r1.<java.text.SimpleDateFormat: char[] compile(java.lang.String)>($r2);
+
+        r1.<java.text.SimpleDateFormat: char[] compiledPattern> = $r3;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r9 := @caughtexception;
+
+        $r10 = new java.io.InvalidObjectException;
+
+        specialinvoke $r10.<java.io.InvalidObjectException: void <init>(java.lang.String)>("invalid pattern");
+
+        throw $r10;
+
+     label4:
+        $i0 = r1.<java.text.SimpleDateFormat: int serialVersionOnStream>;
+
+        if $i0 >= 1 goto label5;
+
+        specialinvoke r1.<java.text.SimpleDateFormat: void initializeDefaultCentury()>();
+
+        goto label6;
+
+     label5:
+        $r4 = r1.<java.text.SimpleDateFormat: java.util.Date defaultCenturyStart>;
+
+        specialinvoke r1.<java.text.SimpleDateFormat: void parseAmbiguousDatesAsAfter(java.util.Date)>($r4);
+
+     label6:
+        r1.<java.text.SimpleDateFormat: int serialVersionOnStream> = 1;
+
+        $r5 = virtualinvoke r1.<java.text.SimpleDateFormat: java.util.TimeZone getTimeZone()>();
+
+        $z0 = $r5 instanceof java.util.SimpleTimeZone;
+
+        if $z0 == 0 goto label7;
+
+        $r6 = virtualinvoke $r5.<java.util.TimeZone: java.lang.String getID()>();
+
+        $r7 = staticinvoke <java.util.TimeZone: java.util.TimeZone getTimeZone(java.lang.String)>($r6);
+
+        if $r7 == null goto label7;
+
+        $z1 = virtualinvoke $r7.<java.util.TimeZone: boolean hasSameRules(java.util.TimeZone)>($r5);
+
+        if $z1 == 0 goto label7;
+
+        $r8 = virtualinvoke $r7.<java.util.TimeZone: java.lang.String getID()>();
+
+        $z2 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+        if $z2 == 0 goto label7;
+
+        virtualinvoke r1.<java.text.SimpleDateFormat: void setTimeZone(java.util.TimeZone)>($r7);
+
+     label7:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    private void checkNegativeNumberExpression()
+    {
+        java.text.DecimalFormatSymbols $r10;
+        java.text.SimpleDateFormat r0;
+        java.text.NumberFormat $r1, $r2, $r3, $r4, $r8, $r11;
+        int $i0, $i1, $i2, $i3, $i6;
+        java.lang.String $r6, $r7;
+        boolean $z0, $z1, $z2;
+        java.text.DecimalFormat $r5, $r9;
+        char $c4;
+
+        r0 := @this: java.text.SimpleDateFormat;
+
+        $r1 = r0.<java.text.SimpleDateFormat: java.text.NumberFormat numberFormat>;
+
+        $z0 = $r1 instanceof java.text.DecimalFormat;
+
+        if $z0 == 0 goto label3;
+
+        $r3 = r0.<java.text.SimpleDateFormat: java.text.NumberFormat numberFormat>;
+
+        $r2 = r0.<java.text.SimpleDateFormat: java.text.NumberFormat originalNumberFormat>;
+
+        $z1 = virtualinvoke $r3.<java.text.NumberFormat: boolean equals(java.lang.Object)>($r2);
+
+        if $z1 != 0 goto label3;
+
+        $r4 = r0.<java.text.SimpleDateFormat: java.text.NumberFormat numberFormat>;
+
+        $r5 = (java.text.DecimalFormat) $r4;
+
+        $r6 = virtualinvoke $r5.<java.text.DecimalFormat: java.lang.String toPattern()>();
+
+        $r7 = r0.<java.text.SimpleDateFormat: java.lang.String originalNumberPattern>;
+
+        $z2 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r7);
+
+        if $z2 != 0 goto label2;
+
+        r0.<java.text.SimpleDateFormat: boolean hasFollowingMinusSign> = 0;
+
+        $i0 = virtualinvoke $r6.<java.lang.String: int indexOf(int)>(59);
+
+        $i6 = (int) -1;
+
+        if $i0 <= $i6 goto label1;
+
+        $i1 = virtualinvoke $r6.<java.lang.String: int indexOf(int,int)>(45, $i0);
+
+        $i2 = virtualinvoke $r6.<java.lang.String: int lastIndexOf(int)>(48);
+
+        if $i1 <= $i2 goto label1;
+
+        $i3 = virtualinvoke $r6.<java.lang.String: int lastIndexOf(int)>(35);
+
+        if $i1 <= $i3 goto label1;
+
+        r0.<java.text.SimpleDateFormat: boolean hasFollowingMinusSign> = 1;
+
+        $r8 = r0.<java.text.SimpleDateFormat: java.text.NumberFormat numberFormat>;
+
+        $r9 = (java.text.DecimalFormat) $r8;
+
+        $r10 = virtualinvoke $r9.<java.text.DecimalFormat: java.text.DecimalFormatSymbols getDecimalFormatSymbols()>();
+
+        $c4 = virtualinvoke $r10.<java.text.DecimalFormatSymbols: char getMinusSign()>();
+
+        r0.<java.text.SimpleDateFormat: char minusSign> = $c4;
+
+     label1:
+        r0.<java.text.SimpleDateFormat: java.lang.String originalNumberPattern> = $r6;
+
+     label2:
+        $r11 = r0.<java.text.SimpleDateFormat: java.text.NumberFormat numberFormat>;
+
+        r0.<java.text.SimpleDateFormat: java.text.NumberFormat originalNumberFormat> = $r11;
+
+     label3:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        int[] $r2, $r3, $r28;
+        java.text.DateFormat$Field[] $r4;
+        boolean $z0, $z1;
+        java.util.concurrent.ConcurrentHashMap $r29;
+        int $i1, $i3;
+        java.text.DateFormat$Field $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26, $r27;
+        java.lang.Class $r0;
+
+        <java.text.SimpleDateFormat: java.lang.String GMT> = "GMT";
+
+        <java.text.SimpleDateFormat: int MILLIS_PER_MINUTE> = 60000;
+
+        <java.text.SimpleDateFormat: int TAG_QUOTE_CHARS> = 101;
+
+        <java.text.SimpleDateFormat: int TAG_QUOTE_ASCII_CHAR> = 100;
+
+        <java.text.SimpleDateFormat: int currentSerialVersion> = 1;
+
+        <java.text.SimpleDateFormat: long serialVersionUID> = 4774881970558875024L;
+
+        $r0 = class "Ljava/text/SimpleDateFormat;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <java.text.SimpleDateFormat: boolean $assertionsDisabled> = $z1;
+
+        $r29 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r29.<java.util.concurrent.ConcurrentHashMap: void <init>(int)>(3);
+
+        <java.text.SimpleDateFormat: java.util.concurrent.ConcurrentMap cachedNumberFormatData> = $r29;
+
+        $r2 = newarray (int)[23];
+
+        $r2[0] = 0;
+
+        $r2[1] = 1;
+
+        $r2[2] = 2;
+
+        $r2[3] = 5;
+
+        $r2[4] = 11;
+
+        $r2[5] = 11;
+
+        $r2[6] = 12;
+
+        $r2[7] = 13;
+
+        $r2[8] = 14;
+
+        $r2[9] = 7;
+
+        $r2[10] = 6;
+
+        $r2[11] = 8;
+
+        $r2[12] = 3;
+
+        $r2[13] = 4;
+
+        $r2[14] = 9;
+
+        $r2[15] = 10;
+
+        $r2[16] = 10;
+
+        $r2[17] = 15;
+
+        $r2[18] = 15;
+
+        $r2[19] = 17;
+
+        $r2[20] = 1000;
+
+        $r2[21] = 15;
+
+        $r2[22] = 2;
+
+        <java.text.SimpleDateFormat: int[] PATTERN_INDEX_TO_CALENDAR_FIELD> = $r2;
+
+        $r3 = newarray (int)[23];
+
+        $r3[0] = 0;
+
+        $r3[1] = 1;
+
+        $r3[2] = 2;
+
+        $r3[3] = 3;
+
+        $r3[4] = 4;
+
+        $r3[5] = 5;
+
+        $r3[6] = 6;
+
+        $r3[7] = 7;
+
+        $r3[8] = 8;
+
+        $r3[9] = 9;
+
+        $r3[10] = 10;
+
+        $r3[11] = 11;
+
+        $r3[12] = 12;
+
+        $r3[13] = 13;
+
+        $r3[14] = 14;
+
+        $r3[15] = 15;
+
+        $r3[16] = 16;
+
+        $r3[17] = 17;
+
+        $r3[18] = 17;
+
+        $r3[19] = 1;
+
+        $r3[20] = 9;
+
+        $r3[21] = 17;
+
+        $r3[22] = 2;
+
+        <java.text.SimpleDateFormat: int[] PATTERN_INDEX_TO_DATE_FORMAT_FIELD> = $r3;
+
+        $r4 = newarray (java.text.DateFormat$Field)[23];
+
+        $r5 = <java.text.DateFormat$Field: java.text.DateFormat$Field ERA>;
+
+        $r4[0] = $r5;
+
+        $r6 = <java.text.DateFormat$Field: java.text.DateFormat$Field YEAR>;
+
+        $r4[1] = $r6;
+
+        $r7 = <java.text.DateFormat$Field: java.text.DateFormat$Field MONTH>;
+
+        $r4[2] = $r7;
+
+        $r8 = <java.text.DateFormat$Field: java.text.DateFormat$Field DAY_OF_MONTH>;
+
+        $r4[3] = $r8;
+
+        $r9 = <java.text.DateFormat$Field: java.text.DateFormat$Field HOUR_OF_DAY1>;
+
+        $r4[4] = $r9;
+
+        $r10 = <java.text.DateFormat$Field: java.text.DateFormat$Field HOUR_OF_DAY0>;
+
+        $r4[5] = $r10;
+
+        $r11 = <java.text.DateFormat$Field: java.text.DateFormat$Field MINUTE>;
+
+        $r4[6] = $r11;
+
+        $r12 = <java.text.DateFormat$Field: java.text.DateFormat$Field SECOND>;
+
+        $r4[7] = $r12;
+
+        $r13 = <java.text.DateFormat$Field: java.text.DateFormat$Field MILLISECOND>;
+
+        $r4[8] = $r13;
+
+        $r14 = <java.text.DateFormat$Field: java.text.DateFormat$Field DAY_OF_WEEK>;
+
+        $r4[9] = $r14;
+
+        $r15 = <java.text.DateFormat$Field: java.text.DateFormat$Field DAY_OF_YEAR>;
+
+        $r4[10] = $r15;
+
+        $r16 = <java.text.DateFormat$Field: java.text.DateFormat$Field DAY_OF_WEEK_IN_MONTH>;
+
+        $r4[11] = $r16;
+
+        $r17 = <java.text.DateFormat$Field: java.text.DateFormat$Field WEEK_OF_YEAR>;
+
+        $r4[12] = $r17;
+
+        $r18 = <java.text.DateFormat$Field: java.text.DateFormat$Field WEEK_OF_MONTH>;
+
+        $r4[13] = $r18;
+
+        $r19 = <java.text.DateFormat$Field: java.text.DateFormat$Field AM_PM>;
+
+        $r4[14] = $r19;
+
+        $r20 = <java.text.DateFormat$Field: java.text.DateFormat$Field HOUR1>;
+
+        $r4[15] = $r20;
+
+        $r21 = <java.text.DateFormat$Field: java.text.DateFormat$Field HOUR0>;
+
+        $r4[16] = $r21;
+
+        $r22 = <java.text.DateFormat$Field: java.text.DateFormat$Field TIME_ZONE>;
+
+        $r4[17] = $r22;
+
+        $r23 = <java.text.DateFormat$Field: java.text.DateFormat$Field TIME_ZONE>;
+
+        $r4[18] = $r23;
+
+        $r24 = <java.text.DateFormat$Field: java.text.DateFormat$Field YEAR>;
+
+        $r4[19] = $r24;
+
+        $r25 = <java.text.DateFormat$Field: java.text.DateFormat$Field DAY_OF_WEEK>;
+
+        $r4[20] = $r25;
+
+        $r26 = <java.text.DateFormat$Field: java.text.DateFormat$Field TIME_ZONE>;
+
+        $r4[21] = $r26;
+
+        $r27 = <java.text.DateFormat$Field: java.text.DateFormat$Field MONTH>;
+
+        $r4[22] = $r27;
+
+        <java.text.SimpleDateFormat: java.text.DateFormat$Field[] PATTERN_INDEX_TO_DATE_FORMAT_FIELD_ID> = $r4;
+
+        $r28 = newarray (int)[3];
+
+        $i1 = (int) 32769;
+
+        $r28[0] = $i1;
+
+        $r28[1] = 2;
+
+        $i3 = (int) 32770;
+
+        $r28[2] = $i3;
+
+        <java.text.SimpleDateFormat: int[] REST_OF_STYLES> = $r28;
+
+        return;
+    }
+}

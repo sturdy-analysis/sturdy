@@ -1,0 +1,1013 @@
+public abstract class javax.swing.filechooser.FileSystemView extends java.lang.Object
+{
+    static javax.swing.filechooser.FileSystemView windowsFileSystemView;
+    static javax.swing.filechooser.FileSystemView unixFileSystemView;
+    static javax.swing.filechooser.FileSystemView genericFileSystemView;
+    private boolean useSystemExtensionHiding;
+
+    public static javax.swing.filechooser.FileSystemView getFileSystemView()
+    {
+        char $c0, $c1;
+        javax.swing.filechooser.WindowsFileSystemView $r9;
+        javax.swing.filechooser.UnixFileSystemView $r10;
+        javax.swing.filechooser.GenericFileSystemView $r11;
+        javax.swing.filechooser.FileSystemView $r0, $r1, $r3, $r4, $r6, $r7;
+        int $i2, $i3;
+
+        $c0 = <java.io.File: char separatorChar>;
+
+        $i2 = (int) $c0;
+
+        if $i2 != 92 goto label2;
+
+        $r6 = <javax.swing.filechooser.FileSystemView: javax.swing.filechooser.FileSystemView windowsFileSystemView>;
+
+        if $r6 != null goto label1;
+
+        $r9 = new javax.swing.filechooser.WindowsFileSystemView;
+
+        specialinvoke $r9.<javax.swing.filechooser.WindowsFileSystemView: void <init>()>();
+
+        <javax.swing.filechooser.FileSystemView: javax.swing.filechooser.FileSystemView windowsFileSystemView> = $r9;
+
+     label1:
+        $r7 = <javax.swing.filechooser.FileSystemView: javax.swing.filechooser.FileSystemView windowsFileSystemView>;
+
+        return $r7;
+
+     label2:
+        $c1 = <java.io.File: char separatorChar>;
+
+        $i3 = (int) $c1;
+
+        if $i3 != 47 goto label4;
+
+        $r3 = <javax.swing.filechooser.FileSystemView: javax.swing.filechooser.FileSystemView unixFileSystemView>;
+
+        if $r3 != null goto label3;
+
+        $r10 = new javax.swing.filechooser.UnixFileSystemView;
+
+        specialinvoke $r10.<javax.swing.filechooser.UnixFileSystemView: void <init>()>();
+
+        <javax.swing.filechooser.FileSystemView: javax.swing.filechooser.FileSystemView unixFileSystemView> = $r10;
+
+     label3:
+        $r4 = <javax.swing.filechooser.FileSystemView: javax.swing.filechooser.FileSystemView unixFileSystemView>;
+
+        return $r4;
+
+     label4:
+        $r0 = <javax.swing.filechooser.FileSystemView: javax.swing.filechooser.FileSystemView genericFileSystemView>;
+
+        if $r0 != null goto label5;
+
+        $r11 = new javax.swing.filechooser.GenericFileSystemView;
+
+        specialinvoke $r11.<javax.swing.filechooser.GenericFileSystemView: void <init>()>();
+
+        <javax.swing.filechooser.FileSystemView: javax.swing.filechooser.FileSystemView genericFileSystemView> = $r11;
+
+     label5:
+        $r1 = <javax.swing.filechooser.FileSystemView: javax.swing.filechooser.FileSystemView genericFileSystemView>;
+
+        return $r1;
+    }
+
+    public void <init>()
+    {
+        javax.swing.filechooser.FileSystemView r0;
+        javax.swing.UIDefaults $r1;
+        javax.swing.filechooser.FileSystemView$1 $r3;
+        java.lang.ref.WeakReference $r2;
+        boolean $z0;
+
+        r0 := @this: javax.swing.filechooser.FileSystemView;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = staticinvoke <javax.swing.UIManager: javax.swing.UIDefaults getDefaults()>();
+
+        $z0 = virtualinvoke $r1.<javax.swing.UIDefaults: boolean getBoolean(java.lang.Object)>("FileChooser.useSystemExtensionHiding");
+
+        r0.<javax.swing.filechooser.FileSystemView: boolean useSystemExtensionHiding> = $z0;
+
+        $r2 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r2.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>(r0);
+
+        $r3 = new javax.swing.filechooser.FileSystemView$1;
+
+        specialinvoke $r3.<javax.swing.filechooser.FileSystemView$1: void <init>(javax.swing.filechooser.FileSystemView,java.lang.ref.WeakReference)>(r0, $r2);
+
+        staticinvoke <javax.swing.UIManager: void addPropertyChangeListener(java.beans.PropertyChangeListener)>($r3);
+
+        return;
+    }
+
+    public boolean isRoot(java.io.File)
+    {
+        java.io.File r0, r3;
+        javax.swing.filechooser.FileSystemView r1;
+        int i0, i1;
+        java.io.File[] $r2;
+        boolean $z0, $z1;
+
+        r1 := @this: javax.swing.filechooser.FileSystemView;
+
+        r0 := @parameter0: java.io.File;
+
+        if r0 == null goto label1;
+
+        $z0 = virtualinvoke r0.<java.io.File: boolean isAbsolute()>();
+
+        if $z0 != 0 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $r2 = virtualinvoke r1.<javax.swing.filechooser.FileSystemView: java.io.File[] getRoots()>();
+
+        i0 = lengthof $r2;
+
+        i1 = 0;
+
+     label3:
+        if i1 >= i0 goto label5;
+
+        r3 = $r2[i1];
+
+        $z1 = virtualinvoke r3.<java.io.File: boolean equals(java.lang.Object)>(r0);
+
+        if $z1 == 0 goto label4;
+
+        return 1;
+
+     label4:
+        i1 = i1 + 1;
+
+        goto label3;
+
+     label5:
+        return 0;
+    }
+
+    public java.lang.Boolean isTraversable(java.io.File)
+    {
+        javax.swing.filechooser.FileSystemView r2;
+        java.lang.Boolean $r1;
+        java.io.File r0;
+        boolean $z0;
+
+        r2 := @this: javax.swing.filechooser.FileSystemView;
+
+        r0 := @parameter0: java.io.File;
+
+        $z0 = virtualinvoke r0.<java.io.File: boolean isDirectory()>();
+
+        $r1 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z0);
+
+        return $r1;
+    }
+
+    public java.lang.String getSystemDisplayName(java.io.File)
+    {
+        java.io.File r0;
+        java.io.FileNotFoundException $r5;
+        javax.swing.filechooser.FileSystemView r2;
+        sun.awt.shell.ShellFolder $r3;
+        int $i0;
+        java.lang.String $r1, $r4, r6;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+
+        r2 := @this: javax.swing.filechooser.FileSystemView;
+
+        r0 := @parameter0: java.io.File;
+
+        if r0 != null goto label1;
+
+        return null;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.io.File: java.lang.String getName()>();
+
+        r6 = $r1;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("..");
+
+        if $z0 != 0 goto label8;
+
+        $z1 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>(".");
+
+        if $z1 != 0 goto label8;
+
+        $z2 = r2.<javax.swing.filechooser.FileSystemView: boolean useSystemExtensionHiding>;
+
+        if $z2 != 0 goto label2;
+
+        $z4 = virtualinvoke r2.<javax.swing.filechooser.FileSystemView: boolean isFileSystem(java.io.File)>(r0);
+
+        if $z4 == 0 goto label2;
+
+        $z5 = virtualinvoke r2.<javax.swing.filechooser.FileSystemView: boolean isFileSystemRoot(java.io.File)>(r0);
+
+        if $z5 == 0 goto label8;
+
+     label2:
+        $z6 = r0 instanceof sun.awt.shell.ShellFolder;
+
+        if $z6 != 0 goto label3;
+
+        $z3 = virtualinvoke r0.<java.io.File: boolean exists()>();
+
+        if $z3 == 0 goto label8;
+
+     label3:
+        $r3 = virtualinvoke r2.<javax.swing.filechooser.FileSystemView: sun.awt.shell.ShellFolder getShellFolder(java.io.File)>(r0);
+
+        $r4 = virtualinvoke $r3.<sun.awt.shell.ShellFolder: java.lang.String getDisplayName()>();
+
+        r6 = $r4;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r5 := @caughtexception;
+
+        return null;
+
+     label6:
+        if $r4 == null goto label7;
+
+        $i0 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label8;
+
+     label7:
+        r6 = virtualinvoke r0.<java.io.File: java.lang.String getPath()>();
+
+     label8:
+        return r6;
+
+        catch java.io.FileNotFoundException from label3 to label4 with label5;
+    }
+
+    public java.lang.String getSystemTypeDescription(java.io.File)
+    {
+        javax.swing.filechooser.FileSystemView r0;
+        java.io.File r1;
+
+        r0 := @this: javax.swing.filechooser.FileSystemView;
+
+        r1 := @parameter0: java.io.File;
+
+        return null;
+    }
+
+    public javax.swing.Icon getSystemIcon(java.io.File)
+    {
+        java.awt.Image $r3;
+        javax.swing.Icon $r4;
+        java.io.File r0;
+        java.io.FileNotFoundException $r7;
+        javax.swing.filechooser.FileSystemView r1;
+        sun.awt.shell.ShellFolder $r2;
+        javax.swing.ImageIcon $r5;
+        java.lang.String $r6, $r8;
+        boolean $z0;
+
+        r1 := @this: javax.swing.filechooser.FileSystemView;
+
+        r0 := @parameter0: java.io.File;
+
+        if r0 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = virtualinvoke r1.<javax.swing.filechooser.FileSystemView: sun.awt.shell.ShellFolder getShellFolder(java.io.File)>(r0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+        return null;
+
+     label4:
+        $r3 = virtualinvoke $r2.<sun.awt.shell.ShellFolder: java.awt.Image getIcon(boolean)>(0);
+
+        if $r3 == null goto label5;
+
+        $r5 = new javax.swing.ImageIcon;
+
+        $r6 = virtualinvoke $r2.<sun.awt.shell.ShellFolder: java.lang.String getFolderType()>();
+
+        specialinvoke $r5.<javax.swing.ImageIcon: void <init>(java.awt.Image,java.lang.String)>($r3, $r6);
+
+        return $r5;
+
+     label5:
+        $z0 = virtualinvoke r0.<java.io.File: boolean isDirectory()>();
+
+        if $z0 == 0 goto label6;
+
+        $r8 = "FileView.directoryIcon";
+
+        goto label7;
+
+     label6:
+        $r8 = "FileView.fileIcon";
+
+     label7:
+        $r4 = staticinvoke <javax.swing.UIManager: javax.swing.Icon getIcon(java.lang.Object)>($r8);
+
+        return $r4;
+
+        catch java.io.FileNotFoundException from label1 to label2 with label3;
+    }
+
+    public boolean isParent(java.io.File, java.io.File)
+    {
+        java.io.File r0, r1, $r2, $r3, r6;
+        javax.swing.filechooser.FileSystemView r4;
+        int $i0, i1;
+        java.io.File[] $r5;
+        boolean $z0, $z1, $z2, $z3;
+
+        r4 := @this: javax.swing.filechooser.FileSystemView;
+
+        r0 := @parameter0: java.io.File;
+
+        r1 := @parameter1: java.io.File;
+
+        if r0 == null goto label1;
+
+        if r1 != null goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $z0 = r0 instanceof sun.awt.shell.ShellFolder;
+
+        if $z0 == 0 goto label7;
+
+        $r3 = virtualinvoke r1.<java.io.File: java.io.File getParentFile()>();
+
+        if $r3 == null goto label3;
+
+        $z3 = virtualinvoke $r3.<java.io.File: boolean equals(java.lang.Object)>(r0);
+
+        if $z3 == 0 goto label3;
+
+        return 1;
+
+     label3:
+        $r5 = virtualinvoke r4.<javax.swing.filechooser.FileSystemView: java.io.File[] getFiles(java.io.File,boolean)>(r0, 0);
+
+        $i0 = lengthof $r5;
+
+        i1 = 0;
+
+     label4:
+        if i1 >= $i0 goto label6;
+
+        r6 = $r5[i1];
+
+        $z2 = virtualinvoke r1.<java.io.File: boolean equals(java.lang.Object)>(r6);
+
+        if $z2 == 0 goto label5;
+
+        return 1;
+
+     label5:
+        i1 = i1 + 1;
+
+        goto label4;
+
+     label6:
+        return 0;
+
+     label7:
+        $r2 = virtualinvoke r1.<java.io.File: java.io.File getParentFile()>();
+
+        $z1 = virtualinvoke r0.<java.io.File: boolean equals(java.lang.Object)>($r2);
+
+        return $z1;
+    }
+
+    public java.io.File getChild(java.io.File, java.lang.String)
+    {
+        java.io.File r0, $r3, r5;
+        javax.swing.filechooser.FileSystemView r1;
+        int i0, i1;
+        java.lang.String r2, $r6;
+        java.io.File[] $r4;
+        boolean $z0, $z1;
+
+        r1 := @this: javax.swing.filechooser.FileSystemView;
+
+        r0 := @parameter0: java.io.File;
+
+        r2 := @parameter1: java.lang.String;
+
+        $z0 = r0 instanceof sun.awt.shell.ShellFolder;
+
+        if $z0 == 0 goto label3;
+
+        $r4 = virtualinvoke r1.<javax.swing.filechooser.FileSystemView: java.io.File[] getFiles(java.io.File,boolean)>(r0, 0);
+
+        i0 = lengthof $r4;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label3;
+
+        r5 = $r4[i1];
+
+        $r6 = virtualinvoke r5.<java.io.File: java.lang.String getName()>();
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>(r2);
+
+        if $z1 == 0 goto label2;
+
+        return r5;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        $r3 = virtualinvoke r1.<javax.swing.filechooser.FileSystemView: java.io.File createFileObject(java.io.File,java.lang.String)>(r0, r2);
+
+        return $r3;
+    }
+
+    public boolean isFileSystem(java.io.File)
+    {
+        java.io.File r0;
+        javax.swing.filechooser.FileSystemView r2;
+        sun.awt.shell.ShellFolder r1;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        r2 := @this: javax.swing.filechooser.FileSystemView;
+
+        r0 := @parameter0: java.io.File;
+
+        $z0 = r0 instanceof sun.awt.shell.ShellFolder;
+
+        if $z0 == 0 goto label4;
+
+        r1 = (sun.awt.shell.ShellFolder) r0;
+
+        $z1 = virtualinvoke r1.<sun.awt.shell.ShellFolder: boolean isFileSystem()>();
+
+        if $z1 == 0 goto label2;
+
+        $z2 = virtualinvoke r1.<sun.awt.shell.ShellFolder: boolean isLink()>();
+
+        if $z2 == 0 goto label1;
+
+        $z3 = virtualinvoke r1.<sun.awt.shell.ShellFolder: boolean isDirectory()>();
+
+        if $z3 != 0 goto label2;
+
+     label1:
+        $z4 = 1;
+
+        goto label3;
+
+     label2:
+        $z4 = 0;
+
+     label3:
+        return $z4;
+
+     label4:
+        return 1;
+    }
+
+    public abstract java.io.File createNewFolder(java.io.File) throws java.io.IOException;
+
+    public boolean isHiddenFile(java.io.File)
+    {
+        javax.swing.filechooser.FileSystemView r1;
+        java.io.File r0;
+        boolean $z0;
+
+        r1 := @this: javax.swing.filechooser.FileSystemView;
+
+        r0 := @parameter0: java.io.File;
+
+        $z0 = virtualinvoke r0.<java.io.File: boolean isHidden()>();
+
+        return $z0;
+    }
+
+    public boolean isFileSystemRoot(java.io.File)
+    {
+        javax.swing.filechooser.FileSystemView r1;
+        java.io.File r0;
+        boolean $z0;
+
+        r1 := @this: javax.swing.filechooser.FileSystemView;
+
+        r0 := @parameter0: java.io.File;
+
+        $z0 = staticinvoke <sun.awt.shell.ShellFolder: boolean isFileSystemRoot(java.io.File)>(r0);
+
+        return $z0;
+    }
+
+    public boolean isDrive(java.io.File)
+    {
+        javax.swing.filechooser.FileSystemView r0;
+        java.io.File r1;
+
+        r0 := @this: javax.swing.filechooser.FileSystemView;
+
+        r1 := @parameter0: java.io.File;
+
+        return 0;
+    }
+
+    public boolean isFloppyDrive(java.io.File)
+    {
+        javax.swing.filechooser.FileSystemView r0;
+        java.io.File r1;
+
+        r0 := @this: javax.swing.filechooser.FileSystemView;
+
+        r1 := @parameter0: java.io.File;
+
+        return 0;
+    }
+
+    public boolean isComputerNode(java.io.File)
+    {
+        javax.swing.filechooser.FileSystemView r1;
+        java.io.File r0;
+        boolean $z0;
+
+        r1 := @this: javax.swing.filechooser.FileSystemView;
+
+        r0 := @parameter0: java.io.File;
+
+        $z0 = staticinvoke <sun.awt.shell.ShellFolder: boolean isComputerNode(java.io.File)>(r0);
+
+        return $z0;
+    }
+
+    public java.io.File[] getRoots()
+    {
+        java.io.File $r4, $r5, $r6;
+        javax.swing.filechooser.FileSystemView r3;
+        int $i0, i1;
+        java.lang.Object $r0;
+        java.io.File[] $r1, r2;
+        boolean $z0;
+
+        r3 := @this: javax.swing.filechooser.FileSystemView;
+
+        $r0 = staticinvoke <sun.awt.shell.ShellFolder: java.lang.Object get(java.lang.String)>("roots");
+
+        $r1 = (java.io.File[]) $r0;
+
+        r2 = (java.io.File[]) $r1;
+
+        i1 = 0;
+
+     label1:
+        $i0 = lengthof r2;
+
+        if i1 >= $i0 goto label3;
+
+        $r4 = r2[i1];
+
+        $z0 = virtualinvoke r3.<javax.swing.filechooser.FileSystemView: boolean isFileSystemRoot(java.io.File)>($r4);
+
+        if $z0 == 0 goto label2;
+
+        $r5 = r2[i1];
+
+        $r6 = virtualinvoke r3.<javax.swing.filechooser.FileSystemView: java.io.File createFileSystemRoot(java.io.File)>($r5);
+
+        r2[i1] = $r6;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        return r2;
+    }
+
+    public java.io.File getHomeDirectory()
+    {
+        javax.swing.filechooser.FileSystemView r0;
+        java.lang.String $r1;
+        java.io.File $r2;
+
+        r0 := @this: javax.swing.filechooser.FileSystemView;
+
+        $r1 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("user.home");
+
+        $r2 = virtualinvoke r0.<javax.swing.filechooser.FileSystemView: java.io.File createFileObject(java.lang.String)>($r1);
+
+        return $r2;
+    }
+
+    public java.io.File getDefaultDirectory()
+    {
+        javax.swing.filechooser.FileSystemView r1;
+        java.lang.Object $r0;
+        java.io.File r2;
+        boolean $z0;
+
+        r1 := @this: javax.swing.filechooser.FileSystemView;
+
+        $r0 = staticinvoke <sun.awt.shell.ShellFolder: java.lang.Object get(java.lang.String)>("fileChooserDefaultFolder");
+
+        r2 = (java.io.File) $r0;
+
+        $z0 = virtualinvoke r1.<javax.swing.filechooser.FileSystemView: boolean isFileSystemRoot(java.io.File)>(r2);
+
+        if $z0 == 0 goto label1;
+
+        r2 = virtualinvoke r1.<javax.swing.filechooser.FileSystemView: java.io.File createFileSystemRoot(java.io.File)>(r2);
+
+     label1:
+        return r2;
+    }
+
+    public java.io.File createFileObject(java.io.File, java.lang.String)
+    {
+        javax.swing.filechooser.FileSystemView r4;
+        java.lang.String r2;
+        java.io.File r0, $r1, $r3;
+
+        r4 := @this: javax.swing.filechooser.FileSystemView;
+
+        r0 := @parameter0: java.io.File;
+
+        r2 := @parameter1: java.lang.String;
+
+        if r0 != null goto label1;
+
+        $r3 = new java.io.File;
+
+        specialinvoke $r3.<java.io.File: void <init>(java.lang.String)>(r2);
+
+        return $r3;
+
+     label1:
+        $r1 = new java.io.File;
+
+        specialinvoke $r1.<java.io.File: void <init>(java.io.File,java.lang.String)>(r0, r2);
+
+        return $r1;
+    }
+
+    public java.io.File createFileObject(java.lang.String)
+    {
+        javax.swing.filechooser.FileSystemView r2;
+        java.lang.String r1;
+        java.io.File $r0, r3;
+        boolean $z0;
+
+        r2 := @this: javax.swing.filechooser.FileSystemView;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = new java.io.File;
+
+        specialinvoke $r0.<java.io.File: void <init>(java.lang.String)>(r1);
+
+        r3 = $r0;
+
+        $z0 = virtualinvoke r2.<javax.swing.filechooser.FileSystemView: boolean isFileSystemRoot(java.io.File)>($r0);
+
+        if $z0 == 0 goto label1;
+
+        r3 = virtualinvoke r2.<javax.swing.filechooser.FileSystemView: java.io.File createFileSystemRoot(java.io.File)>($r0);
+
+     label1:
+        return r3;
+    }
+
+    public java.io.File[] getFiles(java.io.File, boolean)
+    {
+        java.lang.Object[] $r4;
+        java.util.ArrayList $r0;
+        javax.swing.filechooser.FileSystemView r7;
+        sun.awt.shell.ShellFolder $r1;
+        java.lang.Thread $r6;
+        int i0, $i1, i2;
+        java.lang.InternalError $r9;
+        boolean $z0, z1, $z2, $z3, $z4, $z5, $z6;
+        java.io.FileNotFoundException $r10, $r11;
+        java.io.File r13, r14;
+        java.io.File[] $r2, $r3, $r5, $r8, $r12;
+
+        r7 := @this: javax.swing.filechooser.FileSystemView;
+
+        r13 := @parameter0: java.io.File;
+
+        z1 := @parameter1: boolean;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+        $z0 = r13 instanceof sun.awt.shell.ShellFolder;
+
+        if $z0 != 0 goto label04;
+
+     label01:
+        r13 = virtualinvoke r7.<javax.swing.filechooser.FileSystemView: sun.awt.shell.ShellFolder getShellFolder(java.io.File)>(r13);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r11 := @caughtexception;
+
+        $r12 = newarray (java.io.File)[0];
+
+        return $r12;
+
+     label04:
+        $r1 = (sun.awt.shell.ShellFolder) r13;
+
+        if z1 != 0 goto label05;
+
+        $z6 = 1;
+
+        goto label06;
+
+     label05:
+        $z6 = 0;
+
+     label06:
+        $r2 = virtualinvoke $r1.<sun.awt.shell.ShellFolder: java.io.File[] listFiles(boolean)>($z6);
+
+        if $r2 != null goto label07;
+
+        $r8 = newarray (java.io.File)[0];
+
+        return $r8;
+
+     label07:
+        i0 = lengthof $r2;
+
+        i2 = 0;
+
+     label08:
+        if i2 >= i0 goto label17;
+
+        r14 = $r2[i2];
+
+        $r6 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $z2 = virtualinvoke $r6.<java.lang.Thread: boolean isInterrupted()>();
+
+        if $z2 == 0 goto label09;
+
+        goto label17;
+
+     label09:
+        $z3 = r14 instanceof sun.awt.shell.ShellFolder;
+
+        if $z3 != 0 goto label14;
+
+        $z5 = virtualinvoke r7.<javax.swing.filechooser.FileSystemView: boolean isFileSystemRoot(java.io.File)>(r14);
+
+        if $z5 == 0 goto label10;
+
+        r14 = virtualinvoke r7.<javax.swing.filechooser.FileSystemView: java.io.File createFileSystemRoot(java.io.File)>(r14);
+
+     label10:
+        r14 = staticinvoke <sun.awt.shell.ShellFolder: sun.awt.shell.ShellFolder getShellFolder(java.io.File)>(r14);
+
+     label11:
+        goto label14;
+
+     label12:
+        $r10 := @caughtexception;
+
+        goto label16;
+
+     label13:
+        $r9 := @caughtexception;
+
+        goto label16;
+
+     label14:
+        if z1 == 0 goto label15;
+
+        $z4 = virtualinvoke r7.<javax.swing.filechooser.FileSystemView: boolean isHiddenFile(java.io.File)>(r14);
+
+        if $z4 != 0 goto label16;
+
+     label15:
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>(r14);
+
+     label16:
+        i2 = i2 + 1;
+
+        goto label08;
+
+     label17:
+        $i1 = interfaceinvoke $r0.<java.util.List: int size()>();
+
+        $r3 = newarray (java.io.File)[$i1];
+
+        $r4 = interfaceinvoke $r0.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r3);
+
+        $r5 = (java.io.File[]) $r4;
+
+        return $r5;
+
+        catch java.io.FileNotFoundException from label01 to label02 with label03;
+        catch java.io.FileNotFoundException from label10 to label11 with label12;
+        catch java.lang.InternalError from label10 to label11 with label13;
+    }
+
+    public java.io.File getParentDirectory(java.io.File)
+    {
+        java.io.File r0, $r3, $r4, r6;
+        java.io.FileNotFoundException $r5;
+        javax.swing.filechooser.FileSystemView r1;
+        sun.awt.shell.ShellFolder $r2;
+        boolean $z0, $z1, $z2, $z3;
+
+        r1 := @this: javax.swing.filechooser.FileSystemView;
+
+        r0 := @parameter0: java.io.File;
+
+        if r0 == null goto label1;
+
+        $z0 = virtualinvoke r0.<java.io.File: boolean exists()>();
+
+        if $z0 != 0 goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r2 = virtualinvoke r1.<javax.swing.filechooser.FileSystemView: sun.awt.shell.ShellFolder getShellFolder(java.io.File)>(r0);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r5 := @caughtexception;
+
+        return null;
+
+     label5:
+        $r3 = virtualinvoke $r2.<sun.awt.shell.ShellFolder: java.io.File getParentFile()>();
+
+        if $r3 != null goto label6;
+
+        return null;
+
+     label6:
+        $z1 = virtualinvoke r1.<javax.swing.filechooser.FileSystemView: boolean isFileSystem(java.io.File)>($r3);
+
+        if $z1 == 0 goto label9;
+
+        r6 = $r3;
+
+        $z2 = virtualinvoke $r3.<java.io.File: boolean exists()>();
+
+        if $z2 != 0 goto label8;
+
+        $r4 = virtualinvoke $r3.<java.io.File: java.io.File getParentFile()>();
+
+        if $r4 == null goto label7;
+
+        $z3 = virtualinvoke r1.<javax.swing.filechooser.FileSystemView: boolean isFileSystem(java.io.File)>($r4);
+
+        if $z3 != 0 goto label8;
+
+     label7:
+        r6 = virtualinvoke r1.<javax.swing.filechooser.FileSystemView: java.io.File createFileSystemRoot(java.io.File)>($r3);
+
+     label8:
+        return r6;
+
+     label9:
+        return $r3;
+
+        catch java.io.FileNotFoundException from label2 to label3 with label4;
+    }
+
+    sun.awt.shell.ShellFolder getShellFolder(java.io.File) throws java.io.FileNotFoundException
+    {
+        java.io.PrintStream $r3;
+        java.io.File r7;
+        javax.swing.filechooser.FileSystemView r0;
+        sun.awt.shell.ShellFolder $r8;
+        java.lang.InternalError $r1;
+        java.lang.StringBuilder $r2, $r4, $r5;
+        java.lang.String $r6;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: javax.swing.filechooser.FileSystemView;
+
+        r7 := @parameter0: java.io.File;
+
+        $z0 = r7 instanceof sun.awt.shell.ShellFolder;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = r7 instanceof javax.swing.filechooser.FileSystemView$FileSystemRoot;
+
+        if $z1 != 0 goto label1;
+
+        $z2 = virtualinvoke r0.<javax.swing.filechooser.FileSystemView: boolean isFileSystemRoot(java.io.File)>(r7);
+
+        if $z2 == 0 goto label1;
+
+        r7 = virtualinvoke r0.<javax.swing.filechooser.FileSystemView: java.io.File createFileSystemRoot(java.io.File)>(r7);
+
+     label1:
+        $r8 = staticinvoke <sun.awt.shell.ShellFolder: sun.awt.shell.ShellFolder getShellFolder(java.io.File)>(r7);
+
+     label2:
+        return $r8;
+
+     label3:
+        $r1 := @caughtexception;
+
+        $r3 = <java.lang.System: java.io.PrintStream err>;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("FileSystemView.getShellFolder: f=");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r7);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>($r6);
+
+        virtualinvoke $r1.<java.lang.InternalError: void printStackTrace()>();
+
+        return null;
+
+        catch java.lang.InternalError from label1 to label2 with label3;
+    }
+
+    protected java.io.File createFileSystemRoot(java.io.File)
+    {
+        javax.swing.filechooser.FileSystemView$FileSystemRoot $r0;
+        javax.swing.filechooser.FileSystemView r2;
+        java.io.File r1;
+
+        r2 := @this: javax.swing.filechooser.FileSystemView;
+
+        r1 := @parameter0: java.io.File;
+
+        $r0 = new javax.swing.filechooser.FileSystemView$FileSystemRoot;
+
+        specialinvoke $r0.<javax.swing.filechooser.FileSystemView$FileSystemRoot: void <init>(java.io.File)>(r1);
+
+        return $r0;
+    }
+
+    static boolean access$002(javax.swing.filechooser.FileSystemView, boolean)
+    {
+        javax.swing.filechooser.FileSystemView r0;
+        boolean z0;
+
+        r0 := @parameter0: javax.swing.filechooser.FileSystemView;
+
+        z0 := @parameter1: boolean;
+
+        r0.<javax.swing.filechooser.FileSystemView: boolean useSystemExtensionHiding> = z0;
+
+        return z0;
+    }
+
+    static void <clinit>()
+    {
+        <javax.swing.filechooser.FileSystemView: javax.swing.filechooser.FileSystemView windowsFileSystemView> = null;
+
+        <javax.swing.filechooser.FileSystemView: javax.swing.filechooser.FileSystemView unixFileSystemView> = null;
+
+        <javax.swing.filechooser.FileSystemView: javax.swing.filechooser.FileSystemView genericFileSystemView> = null;
+
+        return;
+    }
+}

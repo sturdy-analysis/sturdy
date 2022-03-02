@@ -1,0 +1,167 @@
+public abstract class com.sun.net.httpserver.BasicAuthenticator extends com.sun.net.httpserver.Authenticator
+{
+    protected java.lang.String realm;
+
+    public void <init>(java.lang.String)
+    {
+        com.sun.net.httpserver.BasicAuthenticator r0;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.net.httpserver.BasicAuthenticator;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<com.sun.net.httpserver.Authenticator: void <init>()>();
+
+        r0.<com.sun.net.httpserver.BasicAuthenticator: java.lang.String realm> = r1;
+
+        return;
+    }
+
+    public java.lang.String getRealm()
+    {
+        com.sun.net.httpserver.BasicAuthenticator r0;
+        java.lang.String $r1;
+
+        r0 := @this: com.sun.net.httpserver.BasicAuthenticator;
+
+        $r1 = r0.<com.sun.net.httpserver.BasicAuthenticator: java.lang.String realm>;
+
+        return $r1;
+    }
+
+    public com.sun.net.httpserver.Authenticator$Result authenticate(com.sun.net.httpserver.HttpExchange)
+    {
+        byte[] $r7;
+        com.sun.net.httpserver.BasicAuthenticator r11;
+        com.sun.net.httpserver.Headers $r1, $r12, $r23;
+        boolean $z0, $z1;
+        java.lang.StringBuilder $r14, $r16, $r17, $r25, $r27, $r28, $r31, $r37;
+        java.util.Base64$Decoder $r5;
+        com.sun.net.httpserver.Authenticator$Retry $r32;
+        com.sun.net.httpserver.Authenticator$Success $r36;
+        int $i0, $i1, $i2, $i3, $i5;
+        java.lang.String $r2, $r4, $r6, $r9, $r10, $r15, $r18, $r22, $r26, $r29, $r34;
+        com.sun.net.httpserver.HttpPrincipal $r35;
+        com.sun.net.httpserver.Authenticator$Failure $r33, $r38;
+        com.sun.net.httpserver.HttpExchange r0;
+
+        r11 := @this: com.sun.net.httpserver.BasicAuthenticator;
+
+        r0 := @parameter0: com.sun.net.httpserver.HttpExchange;
+
+        $r1 = virtualinvoke r0.<com.sun.net.httpserver.HttpExchange: com.sun.net.httpserver.Headers getRequestHeaders()>();
+
+        $r2 = virtualinvoke $r1.<com.sun.net.httpserver.Headers: java.lang.String getFirst(java.lang.String)>("Authorization");
+
+        if $r2 != null goto label1;
+
+        $r23 = virtualinvoke r0.<com.sun.net.httpserver.HttpExchange: com.sun.net.httpserver.Headers getResponseHeaders()>();
+
+        $r31 = new java.lang.StringBuilder;
+
+        specialinvoke $r31.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Basic realm=\"");
+
+        $r26 = r11.<com.sun.net.httpserver.BasicAuthenticator: java.lang.String realm>;
+
+        $r27 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r26);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r23.<com.sun.net.httpserver.Headers: void set(java.lang.String,java.lang.String)>("WWW-Authenticate", $r29);
+
+        $r32 = new com.sun.net.httpserver.Authenticator$Retry;
+
+        specialinvoke $r32.<com.sun.net.httpserver.Authenticator$Retry: void <init>(int)>(401);
+
+        return $r32;
+
+     label1:
+        $i0 = virtualinvoke $r2.<java.lang.String: int indexOf(int)>(32);
+
+        $i5 = (int) -1;
+
+        if $i0 == $i5 goto label2;
+
+        $r4 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("Basic");
+
+        if $z0 != 0 goto label3;
+
+     label2:
+        $r33 = new com.sun.net.httpserver.Authenticator$Failure;
+
+        specialinvoke $r33.<com.sun.net.httpserver.Authenticator$Failure: void <init>(int)>(401);
+
+        return $r33;
+
+     label3:
+        $r5 = staticinvoke <java.util.Base64: java.util.Base64$Decoder getDecoder()>();
+
+        $i1 = $i0 + 1;
+
+        $r6 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int)>($i1);
+
+        $r7 = virtualinvoke $r5.<java.util.Base64$Decoder: byte[] decode(java.lang.String)>($r6);
+
+        $r34 = new java.lang.String;
+
+        specialinvoke $r34.<java.lang.String: void <init>(byte[])>($r7);
+
+        $i2 = virtualinvoke $r34.<java.lang.String: int indexOf(int)>(58);
+
+        $r9 = virtualinvoke $r34.<java.lang.String: java.lang.String substring(int,int)>(0, $i2);
+
+        $i3 = $i2 + 1;
+
+        $r10 = virtualinvoke $r34.<java.lang.String: java.lang.String substring(int)>($i3);
+
+        $z1 = virtualinvoke r11.<com.sun.net.httpserver.BasicAuthenticator: boolean checkCredentials(java.lang.String,java.lang.String)>($r9, $r10);
+
+        if $z1 == 0 goto label4;
+
+        $r36 = new com.sun.net.httpserver.Authenticator$Success;
+
+        $r35 = new com.sun.net.httpserver.HttpPrincipal;
+
+        $r22 = r11.<com.sun.net.httpserver.BasicAuthenticator: java.lang.String realm>;
+
+        specialinvoke $r35.<com.sun.net.httpserver.HttpPrincipal: void <init>(java.lang.String,java.lang.String)>($r9, $r22);
+
+        specialinvoke $r36.<com.sun.net.httpserver.Authenticator$Success: void <init>(com.sun.net.httpserver.HttpPrincipal)>($r35);
+
+        return $r36;
+
+     label4:
+        $r12 = virtualinvoke r0.<com.sun.net.httpserver.HttpExchange: com.sun.net.httpserver.Headers getResponseHeaders()>();
+
+        $r37 = new java.lang.StringBuilder;
+
+        specialinvoke $r37.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Basic realm=\"");
+
+        $r15 = r11.<com.sun.net.httpserver.BasicAuthenticator: java.lang.String realm>;
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r12.<com.sun.net.httpserver.Headers: void set(java.lang.String,java.lang.String)>("WWW-Authenticate", $r18);
+
+        $r38 = new com.sun.net.httpserver.Authenticator$Failure;
+
+        specialinvoke $r38.<com.sun.net.httpserver.Authenticator$Failure: void <init>(int)>(401);
+
+        return $r38;
+    }
+
+    public abstract boolean checkCredentials(java.lang.String, java.lang.String);
+}

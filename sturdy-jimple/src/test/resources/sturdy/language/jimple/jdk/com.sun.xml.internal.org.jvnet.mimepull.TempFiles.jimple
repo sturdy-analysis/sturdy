@@ -1,0 +1,466 @@
+class com.sun.xml.internal.org.jvnet.mimepull.TempFiles extends java.lang.Object
+{
+    private static final java.util.logging.Logger LOGGER;
+    private static final java.lang.Class CLASS_FILES;
+    private static final java.lang.Class CLASS_PATH;
+    private static final java.lang.Class CLASS_FILE_ATTRIBUTE;
+    private static final java.lang.Class CLASS_FILE_ATTRIBUTES;
+    private static final java.lang.reflect.Method METHOD_FILE_TO_PATH;
+    private static final java.lang.reflect.Method METHOD_FILES_CREATE_TEMP_FILE;
+    private static final java.lang.reflect.Method METHOD_FILES_CREATE_TEMP_FILE_WITHPATH;
+    private static final java.lang.reflect.Method METHOD_PATH_TO_FILE;
+    private static boolean useJdk6API;
+
+    void <init>()
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.TempFiles r0;
+
+        r0 := @this: com.sun.xml.internal.org.jvnet.mimepull.TempFiles;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static boolean isJdk6()
+    {
+        java.lang.String $r0;
+        java.util.logging.Logger $r2;
+        java.util.logging.Level $r1;
+        boolean $z0;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.version");
+
+        $r2 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.util.logging.Logger LOGGER>;
+
+        $r1 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        virtualinvoke $r2.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r1, "Detected java version = {0}", $r0);
+
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean startsWith(java.lang.String)>("1.6.");
+
+        return $z0;
+    }
+
+    private static java.lang.Class safeGetClass(java.lang.String)
+    {
+        java.util.logging.Logger $r4, $r6;
+        java.util.logging.Level $r3, $r5;
+        java.lang.Class $r1;
+        java.lang.ClassNotFoundException $r2;
+        java.lang.String r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: boolean useJdk6API>;
+
+        if $z0 == 0 goto label1;
+
+        return null;
+
+     label1:
+        $r1 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String)>(r0);
+
+     label2:
+        return $r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r4 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.util.logging.Logger LOGGER>;
+
+        $r3 = <java.util.logging.Level: java.util.logging.Level SEVERE>;
+
+        virtualinvoke $r4.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r3, "Exception cought", $r2);
+
+        $r6 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.util.logging.Logger LOGGER>;
+
+        $r5 = <java.util.logging.Level: java.util.logging.Level WARNING>;
+
+        virtualinvoke $r6.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r5, "Class {0} not found. Temp files will be created using old java.io API.", r0);
+
+        <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: boolean useJdk6API> = 1;
+
+        return null;
+
+        catch java.lang.ClassNotFoundException from label1 to label2 with label3;
+    }
+
+    private static transient java.lang.reflect.Method safeGetMethod(java.lang.Class, java.lang.String, java.lang.Class[])
+    {
+        java.lang.NoSuchMethodException $r4;
+        java.lang.Class[] r2;
+        java.util.logging.Logger $r6, $r8;
+        java.util.logging.Level $r5, $r7;
+        java.lang.Class r0;
+        java.lang.String r1;
+        java.lang.reflect.Method $r3;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.Class;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.Class[];
+
+        $z0 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: boolean useJdk6API>;
+
+        if $z0 == 0 goto label1;
+
+        return null;
+
+     label1:
+        $r3 = virtualinvoke r0.<java.lang.Class: java.lang.reflect.Method getMethod(java.lang.String,java.lang.Class[])>(r1, r2);
+
+     label2:
+        return $r3;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r6 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.util.logging.Logger LOGGER>;
+
+        $r5 = <java.util.logging.Level: java.util.logging.Level SEVERE>;
+
+        virtualinvoke $r6.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r5, "Exception cought", $r4);
+
+        $r8 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.util.logging.Logger LOGGER>;
+
+        $r7 = <java.util.logging.Level: java.util.logging.Level WARNING>;
+
+        virtualinvoke $r8.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r7, "Method {0} not found. Temp files will be created using old java.io API.", r1);
+
+        <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: boolean useJdk6API> = 1;
+
+        return null;
+
+        catch java.lang.NoSuchMethodException from label1 to label2 with label3;
+    }
+
+    static java.lang.Object toPath(java.io.File) throws java.lang.reflect.InvocationTargetException, java.lang.IllegalAccessException
+    {
+        java.lang.Object[] $r1;
+        java.lang.Object $r3;
+        java.lang.reflect.Method $r2;
+        java.io.File r0;
+
+        r0 := @parameter0: java.io.File;
+
+        $r2 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.reflect.Method METHOD_FILE_TO_PATH>;
+
+        $r1 = newarray (java.lang.Object)[0];
+
+        $r3 = virtualinvoke $r2.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>(r0, $r1);
+
+        return $r3;
+    }
+
+    static java.io.File toFile(java.lang.Object) throws java.lang.reflect.InvocationTargetException, java.lang.IllegalAccessException
+    {
+        java.lang.Object[] $r1;
+        java.lang.Object r0, $r3;
+        java.lang.reflect.Method $r2;
+        java.io.File $r4;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $r2 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.reflect.Method METHOD_PATH_TO_FILE>;
+
+        $r1 = newarray (java.lang.Object)[0];
+
+        $r3 = virtualinvoke $r2.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>(r0, $r1);
+
+        $r4 = (java.io.File) $r3;
+
+        return $r4;
+    }
+
+    static java.io.File createTempFile(java.lang.String, java.lang.String, java.io.File) throws java.io.IOException
+    {
+        java.lang.reflect.Method $r8, $r19;
+        boolean $z0;
+        java.lang.IllegalAccessException $r34;
+        java.util.logging.Logger $r5, $r14, $r25, $r29, $r32, $r36, $r39;
+        java.lang.reflect.InvocationTargetException $r27;
+        java.lang.Object[] $r1, $r6, $r13, $r17, $r23, $r30, $r37;
+        java.util.logging.Level $r4, $r15, $r24, $r28, $r31, $r35, $r38;
+        java.lang.String r2, r3, $r16, $r41, $r42;
+        java.io.File r0, $r11, $r22, $r26, $r33, $r40;
+        java.lang.Class $r7, $r18;
+        java.lang.Object $r9, $r10, $r12, $r20, $r21;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        r0 := @parameter2: java.io.File;
+
+        $z0 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: boolean useJdk6API>;
+
+        if $z0 == 0 goto label01;
+
+        $r25 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.util.logging.Logger LOGGER>;
+
+        $r24 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r23 = newarray (java.lang.Object)[2];
+
+        $r23[0] = r2;
+
+        $r23[1] = r3;
+
+        virtualinvoke $r25.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r24, "Jdk6 detected, temp file (prefix:{0}, suffix:{1}) being created using old java.io API.", $r23);
+
+        $r26 = staticinvoke <java.io.File: java.io.File createTempFile(java.lang.String,java.lang.String,java.io.File)>(r2, r3, r0);
+
+        return $r26;
+
+     label01:
+        if r0 == null goto label03;
+
+        $r12 = staticinvoke <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.Object toPath(java.io.File)>(r0);
+
+        $r14 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.util.logging.Logger LOGGER>;
+
+        $r15 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r13 = newarray (java.lang.Object)[3];
+
+        $r16 = virtualinvoke r0.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        $r13[0] = $r16;
+
+        $r13[1] = r2;
+
+        $r13[2] = r3;
+
+        virtualinvoke $r14.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r15, "Temp file (path: {0}, prefix:{1}, suffix:{2}) being created using NIO API.", $r13);
+
+        $r19 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.reflect.Method METHOD_FILES_CREATE_TEMP_FILE_WITHPATH>;
+
+        $r17 = newarray (java.lang.Object)[4];
+
+        $r17[0] = $r12;
+
+        $r17[1] = r2;
+
+        $r17[2] = r3;
+
+        $r18 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.Class CLASS_FILE_ATTRIBUTE>;
+
+        $r20 = staticinvoke <java.lang.reflect.Array: java.lang.Object newInstance(java.lang.Class,int)>($r18, 0);
+
+        $r17[3] = $r20;
+
+        $r21 = virtualinvoke $r19.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>(null, $r17);
+
+        $r22 = staticinvoke <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.io.File toFile(java.lang.Object)>($r21);
+
+     label02:
+        return $r22;
+
+     label03:
+        $r5 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.util.logging.Logger LOGGER>;
+
+        $r4 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $r1 = newarray (java.lang.Object)[2];
+
+        $r1[0] = r2;
+
+        $r1[1] = r3;
+
+        virtualinvoke $r5.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r4, "Temp file (prefix:{0}, suffix:{1}) being created using NIO API.", $r1);
+
+        $r8 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.reflect.Method METHOD_FILES_CREATE_TEMP_FILE>;
+
+        $r6 = newarray (java.lang.Object)[3];
+
+        $r6[0] = r2;
+
+        $r6[1] = r3;
+
+        $r7 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.Class CLASS_FILE_ATTRIBUTE>;
+
+        $r9 = staticinvoke <java.lang.reflect.Array: java.lang.Object newInstance(java.lang.Class,int)>($r7, 0);
+
+        $r6[2] = $r9;
+
+        $r10 = virtualinvoke $r8.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>(null, $r6);
+
+        $r11 = staticinvoke <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.io.File toFile(java.lang.Object)>($r10);
+
+     label04:
+        return $r11;
+
+     label05:
+        $r34 := @caughtexception;
+
+        $r36 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.util.logging.Logger LOGGER>;
+
+        $r35 = <java.util.logging.Level: java.util.logging.Level SEVERE>;
+
+        virtualinvoke $r36.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r35, "Exception caught", $r34);
+
+        $r39 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.util.logging.Logger LOGGER>;
+
+        $r38 = <java.util.logging.Level: java.util.logging.Level WARNING>;
+
+        $r37 = newarray (java.lang.Object)[3];
+
+        if r0 == null goto label06;
+
+        $r41 = virtualinvoke r0.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        goto label07;
+
+     label06:
+        $r41 = null;
+
+     label07:
+        $r37[0] = $r41;
+
+        $r37[1] = r2;
+
+        $r37[2] = r3;
+
+        virtualinvoke $r39.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r38, "Error invoking java.nio API, temp file (path: {0}, prefix:{1}, suffix:{2}) being created using old java.io API.", $r37);
+
+        $r40 = staticinvoke <java.io.File: java.io.File createTempFile(java.lang.String,java.lang.String,java.io.File)>(r2, r3, r0);
+
+        return $r40;
+
+     label08:
+        $r27 := @caughtexception;
+
+        $r29 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.util.logging.Logger LOGGER>;
+
+        $r28 = <java.util.logging.Level: java.util.logging.Level SEVERE>;
+
+        virtualinvoke $r29.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r28, "Exception caught", $r27);
+
+        $r32 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.util.logging.Logger LOGGER>;
+
+        $r31 = <java.util.logging.Level: java.util.logging.Level WARNING>;
+
+        $r30 = newarray (java.lang.Object)[3];
+
+        if r0 == null goto label09;
+
+        $r42 = virtualinvoke r0.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        goto label10;
+
+     label09:
+        $r42 = null;
+
+     label10:
+        $r30[0] = $r42;
+
+        $r30[1] = r2;
+
+        $r30[2] = r3;
+
+        virtualinvoke $r32.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r31, "Error invoking java.nio API, temp file (path: {0}, prefix:{1}, suffix:{2}) being created using old java.io API.", $r30);
+
+        $r33 = staticinvoke <java.io.File: java.io.File createTempFile(java.lang.String,java.lang.String,java.io.File)>(r2, r3, r0);
+
+        return $r33;
+
+        catch java.lang.IllegalAccessException from label01 to label02 with label05;
+        catch java.lang.IllegalAccessException from label03 to label04 with label05;
+        catch java.lang.reflect.InvocationTargetException from label01 to label02 with label08;
+        catch java.lang.reflect.InvocationTargetException from label03 to label04 with label08;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.String $r1;
+        java.lang.reflect.Method $r8, $r12, $r17, $r20;
+        boolean $z0;
+        java.lang.Class[] $r7, $r9, $r13, $r18;
+        java.util.logging.Logger $r2;
+        java.lang.Class $r0, $r3, $r4, $r5, $r6, $r10, $r11, $r14, $r15, $r16, $r19;
+
+        $r0 = class "Lcom/sun/xml/internal/org/jvnet/mimepull/TempFiles;";
+
+        $r1 = virtualinvoke $r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r2 = staticinvoke <java.util.logging.Logger: java.util.logging.Logger getLogger(java.lang.String)>($r1);
+
+        <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.util.logging.Logger LOGGER> = $r2;
+
+        $z0 = staticinvoke <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: boolean isJdk6()>();
+
+        <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: boolean useJdk6API> = $z0;
+
+        $r3 = staticinvoke <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.Class safeGetClass(java.lang.String)>("java.nio.file.Files");
+
+        <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.Class CLASS_FILES> = $r3;
+
+        $r4 = staticinvoke <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.Class safeGetClass(java.lang.String)>("java.nio.file.Path");
+
+        <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.Class CLASS_PATH> = $r4;
+
+        $r5 = staticinvoke <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.Class safeGetClass(java.lang.String)>("java.nio.file.attribute.FileAttribute");
+
+        <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.Class CLASS_FILE_ATTRIBUTE> = $r5;
+
+        $r6 = staticinvoke <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.Class safeGetClass(java.lang.String)>("[Ljava.nio.file.attribute.FileAttribute;");
+
+        <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.Class CLASS_FILE_ATTRIBUTES> = $r6;
+
+        $r7 = newarray (java.lang.Class)[0];
+
+        $r8 = staticinvoke <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.reflect.Method safeGetMethod(java.lang.Class,java.lang.String,java.lang.Class[])>(class "Ljava/io/File;", "toPath", $r7);
+
+        <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.reflect.Method METHOD_FILE_TO_PATH> = $r8;
+
+        $r11 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.Class CLASS_FILES>;
+
+        $r9 = newarray (java.lang.Class)[3];
+
+        $r9[0] = class "Ljava/lang/String;";
+
+        $r9[1] = class "Ljava/lang/String;";
+
+        $r10 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.Class CLASS_FILE_ATTRIBUTES>;
+
+        $r9[2] = $r10;
+
+        $r12 = staticinvoke <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.reflect.Method safeGetMethod(java.lang.Class,java.lang.String,java.lang.Class[])>($r11, "createTempFile", $r9);
+
+        <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.reflect.Method METHOD_FILES_CREATE_TEMP_FILE> = $r12;
+
+        $r16 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.Class CLASS_FILES>;
+
+        $r13 = newarray (java.lang.Class)[4];
+
+        $r14 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.Class CLASS_PATH>;
+
+        $r13[0] = $r14;
+
+        $r13[1] = class "Ljava/lang/String;";
+
+        $r13[2] = class "Ljava/lang/String;";
+
+        $r15 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.Class CLASS_FILE_ATTRIBUTES>;
+
+        $r13[3] = $r15;
+
+        $r17 = staticinvoke <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.reflect.Method safeGetMethod(java.lang.Class,java.lang.String,java.lang.Class[])>($r16, "createTempFile", $r13);
+
+        <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.reflect.Method METHOD_FILES_CREATE_TEMP_FILE_WITHPATH> = $r17;
+
+        $r19 = <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.Class CLASS_PATH>;
+
+        $r18 = newarray (java.lang.Class)[0];
+
+        $r20 = staticinvoke <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.reflect.Method safeGetMethod(java.lang.Class,java.lang.String,java.lang.Class[])>($r19, "toFile", $r18);
+
+        <com.sun.xml.internal.org.jvnet.mimepull.TempFiles: java.lang.reflect.Method METHOD_PATH_TO_FILE> = $r20;
+
+        return;
+    }
+}

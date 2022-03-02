@@ -1,0 +1,324 @@
+public abstract class sun.awt.image.SurfaceManager extends java.lang.Object
+{
+    private static sun.awt.image.SurfaceManager$ImageAccessor imgaccessor;
+    private java.util.concurrent.ConcurrentHashMap cacheMap;
+
+    public void <init>()
+    {
+        sun.awt.image.SurfaceManager r0;
+
+        r0 := @this: sun.awt.image.SurfaceManager;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static void setImageAccessor(sun.awt.image.SurfaceManager$ImageAccessor)
+    {
+        java.lang.InternalError $r2;
+        sun.awt.image.SurfaceManager$ImageAccessor $r0, r1;
+
+        r1 := @parameter0: sun.awt.image.SurfaceManager$ImageAccessor;
+
+        $r0 = <sun.awt.image.SurfaceManager: sun.awt.image.SurfaceManager$ImageAccessor imgaccessor>;
+
+        if $r0 == null goto label1;
+
+        $r2 = new java.lang.InternalError;
+
+        specialinvoke $r2.<java.lang.InternalError: void <init>(java.lang.String)>("Attempt to set ImageAccessor twice");
+
+        throw $r2;
+
+     label1:
+        <sun.awt.image.SurfaceManager: sun.awt.image.SurfaceManager$ImageAccessor imgaccessor> = r1;
+
+        return;
+    }
+
+    public static sun.awt.image.SurfaceManager getManager(java.awt.Image)
+    {
+        java.awt.Image r0;
+        java.awt.image.BufferedImage r7;
+        sun.awt.image.SurfaceManager$ImageAccessor $r1;
+        java.lang.IllegalArgumentException $r5;
+        sun.awt.image.BufImgSurfaceManager $r3;
+        java.lang.ClassCastException $r4;
+        sun.awt.image.SurfaceManager $r2, r6;
+
+        r0 := @parameter0: java.awt.Image;
+
+        $r1 = <sun.awt.image.SurfaceManager: sun.awt.image.SurfaceManager$ImageAccessor imgaccessor>;
+
+        $r2 = virtualinvoke $r1.<sun.awt.image.SurfaceManager$ImageAccessor: sun.awt.image.SurfaceManager getSurfaceManager(java.awt.Image)>(r0);
+
+        r6 = $r2;
+
+        if $r2 != null goto label4;
+
+     label1:
+        r7 = (java.awt.image.BufferedImage) r0;
+
+        $r3 = new sun.awt.image.BufImgSurfaceManager;
+
+        specialinvoke $r3.<sun.awt.image.BufImgSurfaceManager: void <init>(java.awt.image.BufferedImage)>(r7);
+
+        r6 = $r3;
+
+        staticinvoke <sun.awt.image.SurfaceManager: void setManager(java.awt.Image,sun.awt.image.SurfaceManager)>(r7, $r3);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid Image variant");
+
+        throw $r5;
+
+     label4:
+        return r6;
+
+        catch java.lang.ClassCastException from label1 to label2 with label3;
+    }
+
+    public static void setManager(java.awt.Image, sun.awt.image.SurfaceManager)
+    {
+        java.awt.Image r0;
+        sun.awt.image.SurfaceManager r1;
+        sun.awt.image.SurfaceManager$ImageAccessor $r2;
+
+        r0 := @parameter0: java.awt.Image;
+
+        r1 := @parameter1: sun.awt.image.SurfaceManager;
+
+        $r2 = <sun.awt.image.SurfaceManager: sun.awt.image.SurfaceManager$ImageAccessor imgaccessor>;
+
+        virtualinvoke $r2.<sun.awt.image.SurfaceManager$ImageAccessor: void setSurfaceManager(java.awt.Image,sun.awt.image.SurfaceManager)>(r0, r1);
+
+        return;
+    }
+
+    public java.lang.Object getCacheData(java.lang.Object)
+    {
+        java.util.concurrent.ConcurrentHashMap $r1, $r3;
+        java.lang.Object r2, $r4;
+        sun.awt.image.SurfaceManager r0;
+
+        r0 := @this: sun.awt.image.SurfaceManager;
+
+        r2 := @parameter0: java.lang.Object;
+
+        $r1 = r0.<sun.awt.image.SurfaceManager: java.util.concurrent.ConcurrentHashMap cacheMap>;
+
+        if $r1 != null goto label1;
+
+        $r4 = null;
+
+        goto label2;
+
+     label1:
+        $r3 = r0.<sun.awt.image.SurfaceManager: java.util.concurrent.ConcurrentHashMap cacheMap>;
+
+        $r4 = virtualinvoke $r3.<java.util.concurrent.ConcurrentHashMap: java.lang.Object get(java.lang.Object)>(r2);
+
+     label2:
+        return $r4;
+    }
+
+    public void setCacheData(java.lang.Object, java.lang.Object)
+    {
+        java.lang.Throwable $r7;
+        java.util.concurrent.ConcurrentHashMap $r1, $r4, $r5, $r6;
+        sun.awt.image.SurfaceManager r0;
+        java.lang.Object r2, r3;
+
+        r0 := @this: sun.awt.image.SurfaceManager;
+
+        r2 := @parameter0: java.lang.Object;
+
+        r3 := @parameter1: java.lang.Object;
+
+        $r1 = r0.<sun.awt.image.SurfaceManager: java.util.concurrent.ConcurrentHashMap cacheMap>;
+
+        if $r1 != null goto label6;
+
+        entermonitor r0;
+
+     label1:
+        $r5 = r0.<sun.awt.image.SurfaceManager: java.util.concurrent.ConcurrentHashMap cacheMap>;
+
+        if $r5 != null goto label2;
+
+        $r6 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r6.<java.util.concurrent.ConcurrentHashMap: void <init>(int)>(2);
+
+        r0.<sun.awt.image.SurfaceManager: java.util.concurrent.ConcurrentHashMap cacheMap> = $r6;
+
+     label2:
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r7 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r7;
+
+     label6:
+        $r4 = r0.<sun.awt.image.SurfaceManager: java.util.concurrent.ConcurrentHashMap cacheMap>;
+
+        virtualinvoke $r4.<java.util.concurrent.ConcurrentHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r2, r3);
+
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public abstract sun.java2d.SurfaceData getPrimarySurfaceData();
+
+    public abstract sun.java2d.SurfaceData restoreContents();
+
+    public void acceleratedSurfaceLost()
+    {
+        sun.awt.image.SurfaceManager r0;
+
+        r0 := @this: sun.awt.image.SurfaceManager;
+
+        return;
+    }
+
+    public java.awt.ImageCapabilities getCapabilities(java.awt.GraphicsConfiguration)
+    {
+        sun.awt.image.SurfaceManager$ImageCapabilitiesGc $r0;
+        java.awt.GraphicsConfiguration r2;
+        sun.awt.image.SurfaceManager r1;
+
+        r1 := @this: sun.awt.image.SurfaceManager;
+
+        r2 := @parameter0: java.awt.GraphicsConfiguration;
+
+        $r0 = new sun.awt.image.SurfaceManager$ImageCapabilitiesGc;
+
+        specialinvoke $r0.<sun.awt.image.SurfaceManager$ImageCapabilitiesGc: void <init>(sun.awt.image.SurfaceManager,java.awt.GraphicsConfiguration)>(r1, r2);
+
+        return $r0;
+    }
+
+    public synchronized void flush()
+    {
+        sun.awt.image.SurfaceManager r0;
+
+        r0 := @this: sun.awt.image.SurfaceManager;
+
+        virtualinvoke r0.<sun.awt.image.SurfaceManager: void flush(boolean)>(0);
+
+        return;
+    }
+
+    synchronized void flush(boolean)
+    {
+        java.util.Iterator $r4;
+        java.util.Collection $r3;
+        java.util.concurrent.ConcurrentHashMap $r1, $r2;
+        sun.awt.image.SurfaceManager r0;
+        sun.awt.image.SurfaceManager$FlushableCacheData $r6;
+        java.lang.Object $r5;
+        boolean $z0, $z1, z2, $z3;
+
+        r0 := @this: sun.awt.image.SurfaceManager;
+
+        z2 := @parameter0: boolean;
+
+        $r1 = r0.<sun.awt.image.SurfaceManager: java.util.concurrent.ConcurrentHashMap cacheMap>;
+
+        if $r1 == null goto label3;
+
+        $r2 = r0.<sun.awt.image.SurfaceManager: java.util.concurrent.ConcurrentHashMap cacheMap>;
+
+        $r3 = virtualinvoke $r2.<java.util.concurrent.ConcurrentHashMap: java.util.Collection values()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        $z1 = $r5 instanceof sun.awt.image.SurfaceManager$FlushableCacheData;
+
+        if $z1 == 0 goto label2;
+
+        $r6 = (sun.awt.image.SurfaceManager$FlushableCacheData) $r5;
+
+        $z3 = interfaceinvoke $r6.<sun.awt.image.SurfaceManager$FlushableCacheData: boolean flush(boolean)>(z2);
+
+        if $z3 == 0 goto label2;
+
+        interfaceinvoke $r4.<java.util.Iterator: void remove()>();
+
+     label2:
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    public void setAccelerationPriority(float)
+    {
+        float f0;
+        byte $b0;
+        sun.awt.image.SurfaceManager r0;
+
+        r0 := @this: sun.awt.image.SurfaceManager;
+
+        f0 := @parameter0: float;
+
+        $b0 = f0 cmpl 0.0F;
+
+        if $b0 != 0 goto label1;
+
+        virtualinvoke r0.<sun.awt.image.SurfaceManager: void flush(boolean)>(1);
+
+     label1:
+        return;
+    }
+
+    public static int getImageScale(java.awt.Image)
+    {
+        java.awt.Image r0;
+        int $i0;
+        sun.java2d.SurfaceData $r2;
+        boolean $z0;
+        sun.awt.image.SurfaceManager $r1;
+
+        r0 := @parameter0: java.awt.Image;
+
+        $z0 = r0 instanceof java.awt.image.VolatileImage;
+
+        if $z0 != 0 goto label1;
+
+        return 1;
+
+     label1:
+        $r1 = staticinvoke <sun.awt.image.SurfaceManager: sun.awt.image.SurfaceManager getManager(java.awt.Image)>(r0);
+
+        $r2 = virtualinvoke $r1.<sun.awt.image.SurfaceManager: sun.java2d.SurfaceData getPrimarySurfaceData()>();
+
+        $i0 = virtualinvoke $r2.<sun.java2d.SurfaceData: int getDefaultScale()>();
+
+        return $i0;
+    }
+}

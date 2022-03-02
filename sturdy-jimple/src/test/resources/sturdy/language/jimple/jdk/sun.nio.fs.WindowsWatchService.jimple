@@ -1,0 +1,114 @@
+class sun.nio.fs.WindowsWatchService extends sun.nio.fs.AbstractWatchService
+{
+    private static final int WAKEUP_COMPLETION_KEY;
+    private final sun.nio.fs.WindowsWatchService$Poller poller;
+    private static final int ALL_FILE_NOTIFY_EVENTS;
+
+    void <init>(sun.nio.fs.WindowsFileSystem) throws java.io.IOException
+    {
+        sun.nio.fs.WindowsFileSystem r2;
+        long $l0;
+        java.io.IOException $r5;
+        sun.nio.fs.WindowsException $r4;
+        java.lang.String $r6;
+        sun.nio.fs.WindowsWatchService$Poller $r1, $r3;
+        sun.nio.fs.WindowsWatchService r0;
+
+        r0 := @this: sun.nio.fs.WindowsWatchService;
+
+        r2 := @parameter0: sun.nio.fs.WindowsFileSystem;
+
+        specialinvoke r0.<sun.nio.fs.AbstractWatchService: void <init>()>();
+
+     label1:
+        $l0 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: long CreateIoCompletionPort(long,long,long)>(-1L, 0L, 0L);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = new java.io.IOException;
+
+        $r6 = virtualinvoke $r4.<sun.nio.fs.WindowsException: java.lang.String getMessage()>();
+
+        specialinvoke $r5.<java.io.IOException: void <init>(java.lang.String)>($r6);
+
+        throw $r5;
+
+     label4:
+        $r1 = new sun.nio.fs.WindowsWatchService$Poller;
+
+        specialinvoke $r1.<sun.nio.fs.WindowsWatchService$Poller: void <init>(sun.nio.fs.WindowsFileSystem,sun.nio.fs.WindowsWatchService,long)>(r2, r0, $l0);
+
+        r0.<sun.nio.fs.WindowsWatchService: sun.nio.fs.WindowsWatchService$Poller poller> = $r1;
+
+        $r3 = r0.<sun.nio.fs.WindowsWatchService: sun.nio.fs.WindowsWatchService$Poller poller>;
+
+        virtualinvoke $r3.<sun.nio.fs.WindowsWatchService$Poller: void start()>();
+
+        return;
+
+        catch sun.nio.fs.WindowsException from label1 to label2 with label3;
+    }
+
+    transient java.nio.file.WatchKey register(java.nio.file.Path, java.nio.file.WatchEvent$Kind[], java.nio.file.WatchEvent$Modifier[]) throws java.io.IOException
+    {
+        java.nio.file.WatchKey $r5;
+        java.nio.file.WatchEvent$Modifier[] r3;
+        java.nio.file.WatchEvent$Kind[] r2;
+        java.nio.file.Path r1;
+        sun.nio.fs.WindowsWatchService$Poller $r4;
+        sun.nio.fs.WindowsWatchService r0;
+
+        r0 := @this: sun.nio.fs.WindowsWatchService;
+
+        r1 := @parameter0: java.nio.file.Path;
+
+        r2 := @parameter1: java.nio.file.WatchEvent$Kind[];
+
+        r3 := @parameter2: java.nio.file.WatchEvent$Modifier[];
+
+        $r4 = r0.<sun.nio.fs.WindowsWatchService: sun.nio.fs.WindowsWatchService$Poller poller>;
+
+        $r5 = virtualinvoke $r4.<sun.nio.fs.WindowsWatchService$Poller: java.nio.file.WatchKey register(java.nio.file.Path,java.nio.file.WatchEvent$Kind[],java.nio.file.WatchEvent$Modifier[])>(r1, r2, r3);
+
+        return $r5;
+    }
+
+    void implClose() throws java.io.IOException
+    {
+        sun.nio.fs.WindowsWatchService$Poller $r1;
+        sun.nio.fs.WindowsWatchService r0;
+
+        r0 := @this: sun.nio.fs.WindowsWatchService;
+
+        $r1 = r0.<sun.nio.fs.WindowsWatchService: sun.nio.fs.WindowsWatchService$Poller poller>;
+
+        virtualinvoke $r1.<sun.nio.fs.WindowsWatchService$Poller: void close()>();
+
+        return;
+    }
+
+    static sun.nio.fs.WindowsWatchService$Poller access$000(sun.nio.fs.WindowsWatchService)
+    {
+        sun.nio.fs.WindowsWatchService$Poller $r1;
+        sun.nio.fs.WindowsWatchService r0;
+
+        r0 := @parameter0: sun.nio.fs.WindowsWatchService;
+
+        $r1 = r0.<sun.nio.fs.WindowsWatchService: sun.nio.fs.WindowsWatchService$Poller poller>;
+
+        return $r1;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.nio.fs.WindowsWatchService: int ALL_FILE_NOTIFY_EVENTS> = 351;
+
+        <sun.nio.fs.WindowsWatchService: int WAKEUP_COMPLETION_KEY> = 0;
+
+        return;
+    }
+}

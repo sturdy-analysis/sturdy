@@ -1,0 +1,1741 @@
+public final class java.net.HttpCookie extends java.lang.Object implements java.lang.Cloneable
+{
+    private final java.lang.String name;
+    private java.lang.String value;
+    private java.lang.String comment;
+    private java.lang.String commentURL;
+    private boolean toDiscard;
+    private java.lang.String domain;
+    private long maxAge;
+    private java.lang.String path;
+    private java.lang.String portlist;
+    private boolean secure;
+    private boolean httpOnly;
+    private int version;
+    private final java.lang.String header;
+    private final long whenCreated;
+    private static final long MAX_AGE_UNSPECIFIED;
+    private static final java.lang.String[] COOKIE_DATE_FORMATS;
+    private static final java.lang.String SET_COOKIE;
+    private static final java.lang.String SET_COOKIE2;
+    private static final java.lang.String tspecials;
+    static final java.util.Map assignors;
+    static final java.util.TimeZone GMT;
+
+    public void <init>(java.lang.String, java.lang.String)
+    {
+        java.net.HttpCookie r0;
+        java.lang.String r1, r2;
+
+        r0 := @this: java.net.HttpCookie;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<java.net.HttpCookie: void <init>(java.lang.String,java.lang.String,java.lang.String)>(r1, r2, null);
+
+        return;
+    }
+
+    private void <init>(java.lang.String, java.lang.String, java.lang.String)
+    {
+        char $c0;
+        long $l1;
+        java.lang.IllegalArgumentException $r6;
+        java.net.HttpCookie r0;
+        int $i2;
+        java.lang.String $r1, r2, r3, r4;
+        boolean $z0, $z1;
+
+        r0 := @this: java.net.HttpCookie;
+
+        r4 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.net.HttpCookie: long maxAge> = -1L;
+
+        r0.<java.net.HttpCookie: int version> = 1;
+
+        $r1 = virtualinvoke r4.<java.lang.String: java.lang.String trim()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = staticinvoke <java.net.HttpCookie: boolean isToken(java.lang.String)>($r1);
+
+        if $z1 == 0 goto label1;
+
+        $c0 = virtualinvoke $r1.<java.lang.String: char charAt(int)>(0);
+
+        $i2 = (int) $c0;
+
+        if $i2 != 36 goto label2;
+
+     label1:
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Illegal cookie name");
+
+        throw $r6;
+
+     label2:
+        r0.<java.net.HttpCookie: java.lang.String name> = $r1;
+
+        r0.<java.net.HttpCookie: java.lang.String value> = r2;
+
+        r0.<java.net.HttpCookie: boolean toDiscard> = 0;
+
+        r0.<java.net.HttpCookie: boolean secure> = 0;
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        r0.<java.net.HttpCookie: long whenCreated> = $l1;
+
+        r0.<java.net.HttpCookie: java.lang.String portlist> = null;
+
+        r0.<java.net.HttpCookie: java.lang.String header> = r3;
+
+        return;
+    }
+
+    public static java.util.List parse(java.lang.String)
+    {
+        java.util.List $r1;
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <java.net.HttpCookie: java.util.List parse(java.lang.String,boolean)>(r0, 0);
+
+        return $r1;
+    }
+
+    private static java.util.List parse(java.lang.String, boolean)
+    {
+        java.util.ArrayList $r9;
+        java.net.HttpCookie $r4, $r5;
+        int $i0, $i1, $i2;
+        java.lang.String r3, $r6, $r7, r8;
+        boolean $z0, $z1, $z2, z3;
+        java.util.Iterator $r1;
+        java.util.List $r0;
+        java.lang.Object $r2;
+
+        r8 := @parameter0: java.lang.String;
+
+        z3 := @parameter1: boolean;
+
+        $i0 = staticinvoke <java.net.HttpCookie: int guessCookieVersion(java.lang.String)>(r8);
+
+        $z0 = staticinvoke <java.net.HttpCookie: boolean startsWithIgnoreCase(java.lang.String,java.lang.String)>(r8, "set-cookie2:");
+
+        if $z0 == 0 goto label1;
+
+        $r7 = "set-cookie2:";
+
+        $i2 = virtualinvoke $r7.<java.lang.String: int length()>();
+
+        r8 = virtualinvoke r8.<java.lang.String: java.lang.String substring(int)>($i2);
+
+        goto label2;
+
+     label1:
+        $z1 = staticinvoke <java.net.HttpCookie: boolean startsWithIgnoreCase(java.lang.String,java.lang.String)>(r8, "set-cookie:");
+
+        if $z1 == 0 goto label2;
+
+        $r6 = "set-cookie:";
+
+        $i1 = virtualinvoke $r6.<java.lang.String: int length()>();
+
+        r8 = virtualinvoke r8.<java.lang.String: java.lang.String substring(int)>($i1);
+
+     label2:
+        $r9 = new java.util.ArrayList;
+
+        specialinvoke $r9.<java.util.ArrayList: void <init>()>();
+
+        if $i0 != 0 goto label3;
+
+        $r5 = staticinvoke <java.net.HttpCookie: java.net.HttpCookie parseInternal(java.lang.String,boolean)>(r8, z3);
+
+        virtualinvoke $r5.<java.net.HttpCookie: void setVersion(int)>(0);
+
+        interfaceinvoke $r9.<java.util.List: boolean add(java.lang.Object)>($r5);
+
+        goto label5;
+
+     label3:
+        $r0 = staticinvoke <java.net.HttpCookie: java.util.List splitMultiCookies(java.lang.String)>(r8);
+
+        $r1 = interfaceinvoke $r0.<java.util.List: java.util.Iterator iterator()>();
+
+     label4:
+        $z2 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label5;
+
+        $r2 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        r3 = (java.lang.String) $r2;
+
+        $r4 = staticinvoke <java.net.HttpCookie: java.net.HttpCookie parseInternal(java.lang.String,boolean)>(r3, z3);
+
+        virtualinvoke $r4.<java.net.HttpCookie: void setVersion(int)>(1);
+
+        interfaceinvoke $r9.<java.util.List: boolean add(java.lang.Object)>($r4);
+
+        goto label4;
+
+     label5:
+        return $r9;
+    }
+
+    public boolean hasExpired()
+    {
+        long $l0, $l2, $l4, $l5, $l6, l7, $l8;
+        java.net.HttpCookie r0;
+        byte $b1, $b3, $b9;
+        int $i10;
+
+        r0 := @this: java.net.HttpCookie;
+
+        $l0 = r0.<java.net.HttpCookie: long maxAge>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        return 1;
+
+     label1:
+        $l2 = r0.<java.net.HttpCookie: long maxAge>;
+
+        $b3 = $l2 cmp -1L;
+
+        if $b3 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        $l4 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l5 = r0.<java.net.HttpCookie: long whenCreated>;
+
+        $l6 = $l4 - $l5;
+
+        l7 = $l6 / 1000L;
+
+        $l8 = r0.<java.net.HttpCookie: long maxAge>;
+
+        $b9 = l7 cmp $l8;
+
+        $i10 = (int) $b9;
+
+        if $i10 <= 0 goto label3;
+
+        return 1;
+
+     label3:
+        return 0;
+    }
+
+    public void setComment(java.lang.String)
+    {
+        java.net.HttpCookie r0;
+        java.lang.String r1;
+
+        r0 := @this: java.net.HttpCookie;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0.<java.net.HttpCookie: java.lang.String comment> = r1;
+
+        return;
+    }
+
+    public java.lang.String getComment()
+    {
+        java.net.HttpCookie r0;
+        java.lang.String $r1;
+
+        r0 := @this: java.net.HttpCookie;
+
+        $r1 = r0.<java.net.HttpCookie: java.lang.String comment>;
+
+        return $r1;
+    }
+
+    public void setCommentURL(java.lang.String)
+    {
+        java.net.HttpCookie r0;
+        java.lang.String r1;
+
+        r0 := @this: java.net.HttpCookie;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0.<java.net.HttpCookie: java.lang.String commentURL> = r1;
+
+        return;
+    }
+
+    public java.lang.String getCommentURL()
+    {
+        java.net.HttpCookie r0;
+        java.lang.String $r1;
+
+        r0 := @this: java.net.HttpCookie;
+
+        $r1 = r0.<java.net.HttpCookie: java.lang.String commentURL>;
+
+        return $r1;
+    }
+
+    public void setDiscard(boolean)
+    {
+        java.net.HttpCookie r0;
+        boolean z0;
+
+        r0 := @this: java.net.HttpCookie;
+
+        z0 := @parameter0: boolean;
+
+        r0.<java.net.HttpCookie: boolean toDiscard> = z0;
+
+        return;
+    }
+
+    public boolean getDiscard()
+    {
+        java.net.HttpCookie r0;
+        boolean $z0;
+
+        r0 := @this: java.net.HttpCookie;
+
+        $z0 = r0.<java.net.HttpCookie: boolean toDiscard>;
+
+        return $z0;
+    }
+
+    public void setPortlist(java.lang.String)
+    {
+        java.net.HttpCookie r0;
+        java.lang.String r1;
+
+        r0 := @this: java.net.HttpCookie;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0.<java.net.HttpCookie: java.lang.String portlist> = r1;
+
+        return;
+    }
+
+    public java.lang.String getPortlist()
+    {
+        java.net.HttpCookie r0;
+        java.lang.String $r1;
+
+        r0 := @this: java.net.HttpCookie;
+
+        $r1 = r0.<java.net.HttpCookie: java.lang.String portlist>;
+
+        return $r1;
+    }
+
+    public void setDomain(java.lang.String)
+    {
+        java.net.HttpCookie r1;
+        java.lang.String r0, $r2;
+
+        r1 := @this: java.net.HttpCookie;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 == null goto label1;
+
+        $r2 = virtualinvoke r0.<java.lang.String: java.lang.String toLowerCase()>();
+
+        r1.<java.net.HttpCookie: java.lang.String domain> = $r2;
+
+        goto label2;
+
+     label1:
+        r1.<java.net.HttpCookie: java.lang.String domain> = r0;
+
+     label2:
+        return;
+    }
+
+    public java.lang.String getDomain()
+    {
+        java.net.HttpCookie r0;
+        java.lang.String $r1;
+
+        r0 := @this: java.net.HttpCookie;
+
+        $r1 = r0.<java.net.HttpCookie: java.lang.String domain>;
+
+        return $r1;
+    }
+
+    public void setMaxAge(long)
+    {
+        java.net.HttpCookie r0;
+        long l0;
+
+        r0 := @this: java.net.HttpCookie;
+
+        l0 := @parameter0: long;
+
+        r0.<java.net.HttpCookie: long maxAge> = l0;
+
+        return;
+    }
+
+    public long getMaxAge()
+    {
+        java.net.HttpCookie r0;
+        long $l0;
+
+        r0 := @this: java.net.HttpCookie;
+
+        $l0 = r0.<java.net.HttpCookie: long maxAge>;
+
+        return $l0;
+    }
+
+    public void setPath(java.lang.String)
+    {
+        java.net.HttpCookie r0;
+        java.lang.String r1;
+
+        r0 := @this: java.net.HttpCookie;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0.<java.net.HttpCookie: java.lang.String path> = r1;
+
+        return;
+    }
+
+    public java.lang.String getPath()
+    {
+        java.net.HttpCookie r0;
+        java.lang.String $r1;
+
+        r0 := @this: java.net.HttpCookie;
+
+        $r1 = r0.<java.net.HttpCookie: java.lang.String path>;
+
+        return $r1;
+    }
+
+    public void setSecure(boolean)
+    {
+        java.net.HttpCookie r0;
+        boolean z0;
+
+        r0 := @this: java.net.HttpCookie;
+
+        z0 := @parameter0: boolean;
+
+        r0.<java.net.HttpCookie: boolean secure> = z0;
+
+        return;
+    }
+
+    public boolean getSecure()
+    {
+        java.net.HttpCookie r0;
+        boolean $z0;
+
+        r0 := @this: java.net.HttpCookie;
+
+        $z0 = r0.<java.net.HttpCookie: boolean secure>;
+
+        return $z0;
+    }
+
+    public java.lang.String getName()
+    {
+        java.net.HttpCookie r0;
+        java.lang.String $r1;
+
+        r0 := @this: java.net.HttpCookie;
+
+        $r1 = r0.<java.net.HttpCookie: java.lang.String name>;
+
+        return $r1;
+    }
+
+    public void setValue(java.lang.String)
+    {
+        java.net.HttpCookie r0;
+        java.lang.String r1;
+
+        r0 := @this: java.net.HttpCookie;
+
+        r1 := @parameter0: java.lang.String;
+
+        r0.<java.net.HttpCookie: java.lang.String value> = r1;
+
+        return;
+    }
+
+    public java.lang.String getValue()
+    {
+        java.net.HttpCookie r0;
+        java.lang.String $r1;
+
+        r0 := @this: java.net.HttpCookie;
+
+        $r1 = r0.<java.net.HttpCookie: java.lang.String value>;
+
+        return $r1;
+    }
+
+    public int getVersion()
+    {
+        int $i0;
+        java.net.HttpCookie r0;
+
+        r0 := @this: java.net.HttpCookie;
+
+        $i0 = r0.<java.net.HttpCookie: int version>;
+
+        return $i0;
+    }
+
+    public void setVersion(int)
+    {
+        int i0;
+        java.net.HttpCookie r0;
+        java.lang.IllegalArgumentException $r1;
+
+        r0 := @this: java.net.HttpCookie;
+
+        i0 := @parameter0: int;
+
+        if i0 == 0 goto label1;
+
+        if i0 == 1 goto label1;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("cookie version should be 0 or 1");
+
+        throw $r1;
+
+     label1:
+        r0.<java.net.HttpCookie: int version> = i0;
+
+        return;
+    }
+
+    public boolean isHttpOnly()
+    {
+        java.net.HttpCookie r0;
+        boolean $z0;
+
+        r0 := @this: java.net.HttpCookie;
+
+        $z0 = r0.<java.net.HttpCookie: boolean httpOnly>;
+
+        return $z0;
+    }
+
+    public void setHttpOnly(boolean)
+    {
+        java.net.HttpCookie r0;
+        boolean z0;
+
+        r0 := @this: java.net.HttpCookie;
+
+        z0 := @parameter0: boolean;
+
+        r0.<java.net.HttpCookie: boolean httpOnly> = z0;
+
+        return;
+    }
+
+    public static boolean domainMatches(java.lang.String, java.lang.String)
+    {
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.lang.StringBuilder $r7, $r8, $r10;
+        int $i0, $i1, $i2, $i3, $i5, $i6, $i7, $i8, i9, $i11, $i13, $i15, $i17, $i18;
+        java.lang.String r0, r1, $r2, $r3, $r4, $r5, $r9;
+        char $c4;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        if r0 == null goto label01;
+
+        if r1 != null goto label02;
+
+     label01:
+        return 0;
+
+     label02:
+        $r2 = ".local";
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r0);
+
+        $i0 = virtualinvoke r0.<java.lang.String: int indexOf(int)>(46);
+
+        i9 = $i0;
+
+        if $i0 != 0 goto label03;
+
+        i9 = virtualinvoke r0.<java.lang.String: int indexOf(int,int)>(46, 1);
+
+     label03:
+        if $z0 != 0 goto label05;
+
+        $i11 = (int) -1;
+
+        if i9 == $i11 goto label04;
+
+        $i7 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $i8 = $i7 - 1;
+
+        if i9 != $i8 goto label05;
+
+     label04:
+        return 0;
+
+     label05:
+        $i1 = virtualinvoke r1.<java.lang.String: int indexOf(int)>(46);
+
+        $i13 = (int) -1;
+
+        if $i1 != $i13 goto label07;
+
+        if $z0 != 0 goto label06;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".local");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $z4 = virtualinvoke r0.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r9);
+
+        if $z4 == 0 goto label07;
+
+     label06:
+        return 1;
+
+     label07:
+        $i2 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $i3 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        $i6 = $i3 - $i2;
+
+        if $i6 != 0 goto label08;
+
+        $z3 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r0);
+
+        return $z3;
+
+     label08:
+        if $i6 <= 0 goto label11;
+
+        $r4 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int,int)>(0, $i6);
+
+        $r5 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int)>($i6);
+
+        $i5 = virtualinvoke $r4.<java.lang.String: int indexOf(int)>(46);
+
+        $i15 = (int) -1;
+
+        if $i5 != $i15 goto label09;
+
+        $z2 = virtualinvoke $r5.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r0);
+
+        if $z2 == 0 goto label09;
+
+        $z5 = 1;
+
+        goto label10;
+
+     label09:
+        $z5 = 0;
+
+     label10:
+        return $z5;
+
+     label11:
+        $i17 = (int) -1;
+
+        if $i6 != $i17 goto label14;
+
+        $c4 = virtualinvoke r0.<java.lang.String: char charAt(int)>(0);
+
+        $i18 = (int) $c4;
+
+        if $i18 != 46 goto label12;
+
+        $r3 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>(1);
+
+        $z1 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r3);
+
+        if $z1 == 0 goto label12;
+
+        $z6 = 1;
+
+        goto label13;
+
+     label12:
+        $z6 = 0;
+
+     label13:
+        return $z6;
+
+     label14:
+        return 0;
+    }
+
+    public java.lang.String toString()
+    {
+        java.net.HttpCookie r0;
+        int $i0;
+        java.lang.String $r1, $r2;
+
+        r0 := @this: java.net.HttpCookie;
+
+        $i0 = virtualinvoke r0.<java.net.HttpCookie: int getVersion()>();
+
+        if $i0 <= 0 goto label1;
+
+        $r2 = specialinvoke r0.<java.net.HttpCookie: java.lang.String toRFC2965HeaderString()>();
+
+        return $r2;
+
+     label1:
+        $r1 = specialinvoke r0.<java.net.HttpCookie: java.lang.String toNetscapeHeaderString()>();
+
+        return $r1;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        java.net.HttpCookie r1, r2;
+        java.lang.Object r0;
+        java.lang.String $r3, $r4, $r5, $r6, $r7, $r8;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        r1 := @this: java.net.HttpCookie;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        $z0 = r0 instanceof java.net.HttpCookie;
+
+        if $z0 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        r2 = (java.net.HttpCookie) r0;
+
+        $r3 = virtualinvoke r1.<java.net.HttpCookie: java.lang.String getName()>();
+
+        $r4 = virtualinvoke r2.<java.net.HttpCookie: java.lang.String getName()>();
+
+        $z1 = staticinvoke <java.net.HttpCookie: boolean equalsIgnoreCase(java.lang.String,java.lang.String)>($r3, $r4);
+
+        if $z1 == 0 goto label3;
+
+        $r5 = virtualinvoke r1.<java.net.HttpCookie: java.lang.String getDomain()>();
+
+        $r6 = virtualinvoke r2.<java.net.HttpCookie: java.lang.String getDomain()>();
+
+        $z2 = staticinvoke <java.net.HttpCookie: boolean equalsIgnoreCase(java.lang.String,java.lang.String)>($r5, $r6);
+
+        if $z2 == 0 goto label3;
+
+        $r7 = virtualinvoke r1.<java.net.HttpCookie: java.lang.String getPath()>();
+
+        $r8 = virtualinvoke r2.<java.net.HttpCookie: java.lang.String getPath()>();
+
+        $z3 = staticinvoke <java.util.Objects: boolean equals(java.lang.Object,java.lang.Object)>($r7, $r8);
+
+        if $z3 == 0 goto label3;
+
+        $z4 = 1;
+
+        goto label4;
+
+     label3:
+        $z4 = 0;
+
+     label4:
+        return $z4;
+    }
+
+    public int hashCode()
+    {
+        java.net.HttpCookie r0;
+        int $i0, i1, $i2, $i3, $i4, $i5;
+        java.lang.String $r1, $r2, $r3, $r4, $r5, $r6, $r7;
+
+        r0 := @this: java.net.HttpCookie;
+
+        $r1 = r0.<java.net.HttpCookie: java.lang.String name>;
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int hashCode()>();
+
+        $r3 = r0.<java.net.HttpCookie: java.lang.String domain>;
+
+        if $r3 == null goto label1;
+
+        $r6 = r0.<java.net.HttpCookie: java.lang.String domain>;
+
+        $r7 = virtualinvoke $r6.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $i4 = virtualinvoke $r7.<java.lang.String: int hashCode()>();
+
+        goto label2;
+
+     label1:
+        $i4 = 0;
+
+     label2:
+        i1 = $i4;
+
+        $r4 = r0.<java.net.HttpCookie: java.lang.String path>;
+
+        if $r4 == null goto label3;
+
+        $r5 = r0.<java.net.HttpCookie: java.lang.String path>;
+
+        $i5 = virtualinvoke $r5.<java.lang.String: int hashCode()>();
+
+        goto label4;
+
+     label3:
+        $i5 = 0;
+
+     label4:
+        $i2 = $i0 + i1;
+
+        $i3 = $i2 + $i5;
+
+        return $i3;
+    }
+
+    public java.lang.Object clone()
+    {
+        java.net.HttpCookie r0;
+        java.lang.Object $r1;
+        java.lang.RuntimeException $r3;
+        java.lang.String $r4;
+        java.lang.CloneNotSupportedException $r2;
+
+        r0 := @this: java.net.HttpCookie;
+
+     label1:
+        $r1 = specialinvoke r0.<java.lang.Object: java.lang.Object clone()>();
+
+     label2:
+        return $r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new java.lang.RuntimeException;
+
+        $r4 = virtualinvoke $r2.<java.lang.CloneNotSupportedException: java.lang.String getMessage()>();
+
+        specialinvoke $r3.<java.lang.RuntimeException: void <init>(java.lang.String)>($r4);
+
+        throw $r3;
+
+        catch java.lang.CloneNotSupportedException from label1 to label2 with label3;
+    }
+
+    private static boolean isToken(java.lang.String)
+    {
+        char $c1;
+        int $i0, $i2, i3, $i4, $i5, $i6, $i8;
+        java.lang.String r0, $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        i3 = 0;
+
+     label1:
+        if i3 >= $i0 goto label4;
+
+        $c1 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i3);
+
+        $i4 = (int) $c1;
+
+        if $i4 < 32 goto label2;
+
+        $i5 = (int) $c1;
+
+        if $i5 >= 127 goto label2;
+
+        $r1 = ",; ";
+
+        $i6 = (int) $c1;
+
+        $i2 = virtualinvoke $r1.<java.lang.String: int indexOf(int)>($i6);
+
+        $i8 = (int) -1;
+
+        if $i2 == $i8 goto label3;
+
+     label2:
+        return 0;
+
+     label3:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label4:
+        return 1;
+    }
+
+    private static java.net.HttpCookie parseInternal(java.lang.String, boolean)
+    {
+        java.net.HttpCookie r17, $r21, $r22;
+        java.util.StringTokenizer $r20;
+        int $i0, $i1, $i2, $i3, $i5, $i7;
+        java.lang.String r1, $r2, $r4, $r5, $r6, $r7, $r9, $r10, $r11, $r12, $r14, r18, r19;
+        java.util.NoSuchElementException $r15;
+        boolean z0, $z1;
+        java.lang.IllegalArgumentException $r23, $r24;
+
+        r1 := @parameter0: java.lang.String;
+
+        z0 := @parameter1: boolean;
+
+        $r20 = new java.util.StringTokenizer;
+
+        specialinvoke $r20.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>(r1, ";");
+
+     label01:
+        $r2 = virtualinvoke $r20.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int indexOf(int)>(61);
+
+        $i5 = (int) -1;
+
+        if $i0 == $i5 goto label04;
+
+        $r4 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $r5 = virtualinvoke $r4.<java.lang.String: java.lang.String trim()>();
+
+        $i1 = $i0 + 1;
+
+        $r6 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int)>($i1);
+
+        $r7 = virtualinvoke $r6.<java.lang.String: java.lang.String trim()>();
+
+        if z0 == 0 goto label02;
+
+        $r21 = new java.net.HttpCookie;
+
+        $r14 = staticinvoke <java.net.HttpCookie: java.lang.String stripOffSurroundingQuote(java.lang.String)>($r7);
+
+        specialinvoke $r21.<java.net.HttpCookie: void <init>(java.lang.String,java.lang.String,java.lang.String)>($r5, $r14, r1);
+
+        r17 = $r21;
+
+        goto label03;
+
+     label02:
+        $r22 = new java.net.HttpCookie;
+
+        $r9 = staticinvoke <java.net.HttpCookie: java.lang.String stripOffSurroundingQuote(java.lang.String)>($r7);
+
+        specialinvoke $r22.<java.net.HttpCookie: void <init>(java.lang.String,java.lang.String)>($r5, $r9);
+
+        r17 = $r22;
+
+     label03:
+        goto label05;
+
+     label04:
+        $r23 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r23.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid cookie name-value pair");
+
+        throw $r23;
+
+     label05:
+        goto label07;
+
+     label06:
+        $r15 := @caughtexception;
+
+        $r24 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r24.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Empty cookie header string");
+
+        throw $r24;
+
+     label07:
+        $z1 = virtualinvoke $r20.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z1 == 0 goto label10;
+
+        $r10 = virtualinvoke $r20.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $i2 = virtualinvoke $r10.<java.lang.String: int indexOf(int)>(61);
+
+        $i7 = (int) -1;
+
+        if $i2 == $i7 goto label08;
+
+        $r11 = virtualinvoke $r10.<java.lang.String: java.lang.String substring(int,int)>(0, $i2);
+
+        r18 = virtualinvoke $r11.<java.lang.String: java.lang.String trim()>();
+
+        $i3 = $i2 + 1;
+
+        $r12 = virtualinvoke $r10.<java.lang.String: java.lang.String substring(int)>($i3);
+
+        r19 = virtualinvoke $r12.<java.lang.String: java.lang.String trim()>();
+
+        goto label09;
+
+     label08:
+        r18 = virtualinvoke $r10.<java.lang.String: java.lang.String trim()>();
+
+        r19 = null;
+
+     label09:
+        staticinvoke <java.net.HttpCookie: void assignAttribute(java.net.HttpCookie,java.lang.String,java.lang.String)>(r17, r18, r19);
+
+        goto label07;
+
+     label10:
+        return r17;
+
+        catch java.util.NoSuchElementException from label01 to label05 with label06;
+    }
+
+    private static void assignAttribute(java.net.HttpCookie, java.lang.String, java.lang.String)
+    {
+        java.net.HttpCookie$CookieAttributeAssignor r5;
+        java.net.HttpCookie r6;
+        java.util.Map $r2;
+        java.lang.Object $r4;
+        java.lang.String $r0, r1, $r3, r7;
+
+        r6 := @parameter0: java.net.HttpCookie;
+
+        r1 := @parameter1: java.lang.String;
+
+        r7 := @parameter2: java.lang.String;
+
+        $r0 = staticinvoke <java.net.HttpCookie: java.lang.String stripOffSurroundingQuote(java.lang.String)>(r7);
+
+        $r2 = <java.net.HttpCookie: java.util.Map assignors>;
+
+        $r3 = virtualinvoke r1.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $r4 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>($r3);
+
+        r5 = (java.net.HttpCookie$CookieAttributeAssignor) $r4;
+
+        if r5 == null goto label1;
+
+        interfaceinvoke r5.<java.net.HttpCookie$CookieAttributeAssignor: void assign(java.net.HttpCookie,java.lang.String,java.lang.String)>(r6, r1, $r0);
+
+     label1:
+        return;
+    }
+
+    private java.lang.String header()
+    {
+        java.net.HttpCookie r0;
+        java.lang.String $r1;
+
+        r0 := @this: java.net.HttpCookie;
+
+        $r1 = r0.<java.net.HttpCookie: java.lang.String header>;
+
+        return $r1;
+    }
+
+    private java.lang.String toNetscapeHeaderString()
+    {
+        java.net.HttpCookie r1;
+        java.lang.StringBuilder $r0, $r3, $r4, $r6;
+        java.lang.String $r2, $r5, $r7;
+
+        r1 := @this: java.net.HttpCookie;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke r1.<java.net.HttpCookie: java.lang.String getName()>();
+
+        $r3 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("=");
+
+        $r5 = virtualinvoke r1.<java.net.HttpCookie: java.lang.String getValue()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r7;
+    }
+
+    private java.lang.String toRFC2965HeaderString()
+    {
+        java.net.HttpCookie r1;
+        java.lang.String $r2, $r5, $r7, $r8, $r9, $r10, $r12, $r15, $r18;
+        java.lang.StringBuilder $r0, $r3, $r4, $r6, $r11, $r13, $r14, $r16, $r17, $r19;
+
+        r1 := @this: java.net.HttpCookie;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke r1.<java.net.HttpCookie: java.lang.String getName()>();
+
+        $r3 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("=\"");
+
+        $r5 = virtualinvoke r1.<java.net.HttpCookie: java.lang.String getValue()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(34);
+
+        $r7 = virtualinvoke r1.<java.net.HttpCookie: java.lang.String getPath()>();
+
+        if $r7 == null goto label1;
+
+        $r17 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(";$Path=\"");
+
+        $r18 = virtualinvoke r1.<java.net.HttpCookie: java.lang.String getPath()>();
+
+        $r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(34);
+
+     label1:
+        $r8 = virtualinvoke r1.<java.net.HttpCookie: java.lang.String getDomain()>();
+
+        if $r8 == null goto label2;
+
+        $r14 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(";$Domain=\"");
+
+        $r15 = virtualinvoke r1.<java.net.HttpCookie: java.lang.String getDomain()>();
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(34);
+
+     label2:
+        $r9 = virtualinvoke r1.<java.net.HttpCookie: java.lang.String getPortlist()>();
+
+        if $r9 == null goto label3;
+
+        $r11 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(";$Port=\"");
+
+        $r12 = virtualinvoke r1.<java.net.HttpCookie: java.lang.String getPortlist()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(34);
+
+     label3:
+        $r10 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r10;
+    }
+
+    private long expiryDate2DeltaSeconds(java.lang.String)
+    {
+        java.util.Date $r8, $r10;
+        java.text.SimpleDateFormat $r3;
+        java.lang.String[] $r2, $r4, $r11;
+        long $l5, $l6, $l7, $l8;
+        java.net.HttpCookie r13;
+        java.util.Locale $r5;
+        int $i0, $i1, i2, i3, i4;
+        java.lang.String $r6, r9, $r12;
+        boolean $z0;
+        java.util.GregorianCalendar $r0;
+        java.util.TimeZone $r1, $r7;
+        java.lang.Exception $r14;
+
+        r13 := @this: java.net.HttpCookie;
+
+        r9 := @parameter0: java.lang.String;
+
+        $r0 = new java.util.GregorianCalendar;
+
+        $r1 = <java.net.HttpCookie: java.util.TimeZone GMT>;
+
+        specialinvoke $r0.<java.util.GregorianCalendar: void <init>(java.util.TimeZone)>($r1);
+
+        i2 = 0;
+
+     label1:
+        $r2 = <java.net.HttpCookie: java.lang.String[] COOKIE_DATE_FORMATS>;
+
+        $i0 = lengthof $r2;
+
+        if i2 >= $i0 goto label8;
+
+        $r3 = new java.text.SimpleDateFormat;
+
+        $r4 = <java.net.HttpCookie: java.lang.String[] COOKIE_DATE_FORMATS>;
+
+        $r6 = $r4[i2];
+
+        $r5 = <java.util.Locale: java.util.Locale US>;
+
+        specialinvoke $r3.<java.text.SimpleDateFormat: void <init>(java.lang.String,java.util.Locale)>($r6, $r5);
+
+        virtualinvoke $r0.<java.util.Calendar: void set(int,int,int,int,int,int)>(1970, 0, 1, 0, 0, 0);
+
+        $r7 = <java.net.HttpCookie: java.util.TimeZone GMT>;
+
+        virtualinvoke $r3.<java.text.SimpleDateFormat: void setTimeZone(java.util.TimeZone)>($r7);
+
+        virtualinvoke $r3.<java.text.SimpleDateFormat: void setLenient(boolean)>(0);
+
+        $r8 = virtualinvoke $r0.<java.util.Calendar: java.util.Date getTime()>();
+
+        virtualinvoke $r3.<java.text.SimpleDateFormat: void set2DigitYearStart(java.util.Date)>($r8);
+
+     label2:
+        $r10 = virtualinvoke $r3.<java.text.SimpleDateFormat: java.util.Date parse(java.lang.String)>(r9);
+
+        virtualinvoke $r0.<java.util.Calendar: void setTime(java.util.Date)>($r10);
+
+        $r11 = <java.net.HttpCookie: java.lang.String[] COOKIE_DATE_FORMATS>;
+
+        $r12 = $r11[i2];
+
+        $z0 = virtualinvoke $r12.<java.lang.String: boolean contains(java.lang.CharSequence)>("yyyy");
+
+        if $z0 != 0 goto label5;
+
+        $i1 = virtualinvoke $r0.<java.util.Calendar: int get(int)>(1);
+
+        i3 = $i1 % 100;
+
+        if i3 >= 70 goto label3;
+
+        i4 = i3 + 2000;
+
+        goto label4;
+
+     label3:
+        i4 = i3 + 1900;
+
+     label4:
+        virtualinvoke $r0.<java.util.Calendar: void set(int,int)>(1, i4);
+
+     label5:
+        $l5 = virtualinvoke $r0.<java.util.Calendar: long getTimeInMillis()>();
+
+        $l6 = r13.<java.net.HttpCookie: long whenCreated>;
+
+        $l7 = $l5 - $l6;
+
+        $l8 = $l7 / 1000L;
+
+     label6:
+        return $l8;
+
+     label7:
+        $r14 := @caughtexception;
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label8:
+        return 0L;
+
+        catch java.lang.Exception from label2 to label6 with label7;
+    }
+
+    private static int guessCookieVersion(java.lang.String)
+    {
+        byte b3;
+        int $i0, $i1, $i2, $i5, $i7, $i9;
+        java.lang.String $r0, r1;
+        boolean $z0;
+
+        r1 := @parameter0: java.lang.String;
+
+        b3 = 0;
+
+        $r0 = virtualinvoke r1.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $i0 = virtualinvoke $r0.<java.lang.String: int indexOf(java.lang.String)>("expires=");
+
+        $i5 = (int) -1;
+
+        if $i0 == $i5 goto label1;
+
+        b3 = 0;
+
+        goto label4;
+
+     label1:
+        $i1 = virtualinvoke $r0.<java.lang.String: int indexOf(java.lang.String)>("version=");
+
+        $i7 = (int) -1;
+
+        if $i1 == $i7 goto label2;
+
+        b3 = 1;
+
+        goto label4;
+
+     label2:
+        $i2 = virtualinvoke $r0.<java.lang.String: int indexOf(java.lang.String)>("max-age");
+
+        $i9 = (int) -1;
+
+        if $i2 == $i9 goto label3;
+
+        b3 = 1;
+
+        goto label4;
+
+     label3:
+        $z0 = staticinvoke <java.net.HttpCookie: boolean startsWithIgnoreCase(java.lang.String,java.lang.String)>($r0, "set-cookie2:");
+
+        if $z0 == 0 goto label4;
+
+        b3 = 1;
+
+     label4:
+        return b3;
+    }
+
+    private static java.lang.String stripOffSurroundingQuote(java.lang.String)
+    {
+        int $i0, $i2, $i3, $i5, $i6, $i7, $i9, $i10, $i12, $i13, $i14, $i15, $i16, $i17;
+        java.lang.String r0, $r1, $r2;
+        char $c1, $c4, $c8, $c11;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 == null goto label1;
+
+        $i7 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i7 <= 2 goto label1;
+
+        $c8 = virtualinvoke r0.<java.lang.String: char charAt(int)>(0);
+
+        $i14 = (int) $c8;
+
+        if $i14 != 34 goto label1;
+
+        $i9 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $i10 = $i9 - 1;
+
+        $c11 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i10);
+
+        $i15 = (int) $c11;
+
+        if $i15 != 34 goto label1;
+
+        $i12 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $i13 = $i12 - 1;
+
+        $r2 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(1, $i13);
+
+        return $r2;
+
+     label1:
+        if r0 == null goto label2;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i0 <= 2 goto label2;
+
+        $c1 = virtualinvoke r0.<java.lang.String: char charAt(int)>(0);
+
+        $i16 = (int) $c1;
+
+        if $i16 != 39 goto label2;
+
+        $i2 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $i3 = $i2 - 1;
+
+        $c4 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i3);
+
+        $i17 = (int) $c4;
+
+        if $i17 != 39 goto label2;
+
+        $i5 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $i6 = $i5 - 1;
+
+        $r1 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(1, $i6);
+
+        return $r1;
+
+     label2:
+        return r0;
+    }
+
+    private static boolean equalsIgnoreCase(java.lang.String, java.lang.String)
+    {
+        java.lang.String r0, r1;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        if r0 == null goto label2;
+
+        if r1 == null goto label2;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r1);
+
+        return $z0;
+
+     label2:
+        return 0;
+    }
+
+    private static boolean startsWithIgnoreCase(java.lang.String, java.lang.String)
+    {
+        int $i0, $i1, $i2;
+        java.lang.String r0, r1, $r2;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        if r0 == null goto label1;
+
+        if r1 != null goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $i1 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if $i0 < $i1 goto label3;
+
+        $i2 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        $r2 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, $i2);
+
+        $z0 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r2);
+
+        if $z0 == 0 goto label3;
+
+        return 1;
+
+     label3:
+        return 0;
+    }
+
+    private static java.util.List splitMultiCookies(java.lang.String)
+    {
+        char $c1;
+        java.util.ArrayList $r4;
+        int $i0, $i2, i3, i4, i5, $i6, $i7;
+        java.lang.String r1, $r2, $r3;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r4 = new java.util.ArrayList;
+
+        specialinvoke $r4.<java.util.ArrayList: void <init>()>();
+
+        i3 = 0;
+
+        i4 = 0;
+
+        i5 = 0;
+
+     label1:
+        $i0 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if i4 >= $i0 goto label4;
+
+        $c1 = virtualinvoke r1.<java.lang.String: char charAt(int)>(i4);
+
+        $i6 = (int) $c1;
+
+        if $i6 != 34 goto label2;
+
+        i3 = i3 + 1;
+
+     label2:
+        $i7 = (int) $c1;
+
+        if $i7 != 44 goto label3;
+
+        $i2 = i3 % 2;
+
+        if $i2 != 0 goto label3;
+
+        $r3 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int,int)>(i5, i4);
+
+        interfaceinvoke $r4.<java.util.List: boolean add(java.lang.Object)>($r3);
+
+        i5 = i4 + 1;
+
+     label3:
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label4:
+        $r2 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int)>(i5);
+
+        interfaceinvoke $r4.<java.util.List: boolean add(java.lang.Object)>($r2);
+
+        return $r4;
+    }
+
+    static long access$000(java.net.HttpCookie, java.lang.String)
+    {
+        java.net.HttpCookie r0;
+        long $l0;
+        java.lang.String r1;
+
+        r0 := @parameter0: java.net.HttpCookie;
+
+        r1 := @parameter1: java.lang.String;
+
+        $l0 = specialinvoke r0.<java.net.HttpCookie: long expiryDate2DeltaSeconds(java.lang.String)>(r1);
+
+        return $l0;
+    }
+
+    static java.util.List access$100(java.lang.String, boolean)
+    {
+        java.util.List $r1;
+        java.lang.String r0;
+        boolean z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        z0 := @parameter1: boolean;
+
+        $r1 = staticinvoke <java.net.HttpCookie: java.util.List parse(java.lang.String,boolean)>(r0, z0);
+
+        return $r1;
+    }
+
+    static java.lang.String access$200(java.net.HttpCookie)
+    {
+        java.net.HttpCookie r0;
+        java.lang.String $r1;
+
+        r0 := @parameter0: java.net.HttpCookie;
+
+        $r1 = r0.<java.net.HttpCookie: java.lang.String header>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.String[] $r0;
+        java.util.HashMap $r1;
+        java.util.Map $r3, $r5, $r7, $r9, $r11, $r13, $r15, $r17, $r19, $r21, $r23;
+        java.net.HttpCookie$2 $r4;
+        java.net.HttpCookie$1 $r2;
+        java.util.TimeZone $r25;
+        java.net.HttpCookie$9 $r18;
+        java.net.HttpCookie$8 $r16;
+        java.net.HttpCookie$7 $r14;
+        java.net.HttpCookie$6 $r12;
+        java.net.HttpCookie$5 $r10;
+        java.net.HttpCookie$4 $r8;
+        java.net.HttpCookie$3 $r6;
+        java.net.HttpCookie$10 $r20;
+        java.net.HttpCookie$11 $r22;
+        java.net.HttpCookie$12 $r24;
+
+        <java.net.HttpCookie: java.lang.String tspecials> = ",; ";
+
+        <java.net.HttpCookie: java.lang.String SET_COOKIE2> = "set-cookie2:";
+
+        <java.net.HttpCookie: java.lang.String SET_COOKIE> = "set-cookie:";
+
+        <java.net.HttpCookie: long MAX_AGE_UNSPECIFIED> = -1L;
+
+        $r0 = newarray (java.lang.String)[6];
+
+        $r0[0] = "EEE\',\' dd-MMM-yyyy HH:mm:ss \'GMT\'";
+
+        $r0[1] = "EEE\',\' dd MMM yyyy HH:mm:ss \'GMT\'";
+
+        $r0[2] = "EEE MMM dd yyyy HH:mm:ss \'GMT\'Z";
+
+        $r0[3] = "EEE\',\' dd-MMM-yy HH:mm:ss \'GMT\'";
+
+        $r0[4] = "EEE\',\' dd MMM yy HH:mm:ss \'GMT\'";
+
+        $r0[5] = "EEE MMM dd yy HH:mm:ss \'GMT\'Z";
+
+        <java.net.HttpCookie: java.lang.String[] COOKIE_DATE_FORMATS> = $r0;
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>()>();
+
+        <java.net.HttpCookie: java.util.Map assignors> = $r1;
+
+        $r3 = <java.net.HttpCookie: java.util.Map assignors>;
+
+        $r2 = new java.net.HttpCookie$1;
+
+        specialinvoke $r2.<java.net.HttpCookie$1: void <init>()>();
+
+        interfaceinvoke $r3.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("comment", $r2);
+
+        $r5 = <java.net.HttpCookie: java.util.Map assignors>;
+
+        $r4 = new java.net.HttpCookie$2;
+
+        specialinvoke $r4.<java.net.HttpCookie$2: void <init>()>();
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("commenturl", $r4);
+
+        $r7 = <java.net.HttpCookie: java.util.Map assignors>;
+
+        $r6 = new java.net.HttpCookie$3;
+
+        specialinvoke $r6.<java.net.HttpCookie$3: void <init>()>();
+
+        interfaceinvoke $r7.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("discard", $r6);
+
+        $r9 = <java.net.HttpCookie: java.util.Map assignors>;
+
+        $r8 = new java.net.HttpCookie$4;
+
+        specialinvoke $r8.<java.net.HttpCookie$4: void <init>()>();
+
+        interfaceinvoke $r9.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("domain", $r8);
+
+        $r11 = <java.net.HttpCookie: java.util.Map assignors>;
+
+        $r10 = new java.net.HttpCookie$5;
+
+        specialinvoke $r10.<java.net.HttpCookie$5: void <init>()>();
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("max-age", $r10);
+
+        $r13 = <java.net.HttpCookie: java.util.Map assignors>;
+
+        $r12 = new java.net.HttpCookie$6;
+
+        specialinvoke $r12.<java.net.HttpCookie$6: void <init>()>();
+
+        interfaceinvoke $r13.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("path", $r12);
+
+        $r15 = <java.net.HttpCookie: java.util.Map assignors>;
+
+        $r14 = new java.net.HttpCookie$7;
+
+        specialinvoke $r14.<java.net.HttpCookie$7: void <init>()>();
+
+        interfaceinvoke $r15.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("port", $r14);
+
+        $r17 = <java.net.HttpCookie: java.util.Map assignors>;
+
+        $r16 = new java.net.HttpCookie$8;
+
+        specialinvoke $r16.<java.net.HttpCookie$8: void <init>()>();
+
+        interfaceinvoke $r17.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("secure", $r16);
+
+        $r19 = <java.net.HttpCookie: java.util.Map assignors>;
+
+        $r18 = new java.net.HttpCookie$9;
+
+        specialinvoke $r18.<java.net.HttpCookie$9: void <init>()>();
+
+        interfaceinvoke $r19.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("httponly", $r18);
+
+        $r21 = <java.net.HttpCookie: java.util.Map assignors>;
+
+        $r20 = new java.net.HttpCookie$10;
+
+        specialinvoke $r20.<java.net.HttpCookie$10: void <init>()>();
+
+        interfaceinvoke $r21.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("version", $r20);
+
+        $r23 = <java.net.HttpCookie: java.util.Map assignors>;
+
+        $r22 = new java.net.HttpCookie$11;
+
+        specialinvoke $r22.<java.net.HttpCookie$11: void <init>()>();
+
+        interfaceinvoke $r23.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("expires", $r22);
+
+        $r24 = new java.net.HttpCookie$12;
+
+        specialinvoke $r24.<java.net.HttpCookie$12: void <init>()>();
+
+        staticinvoke <sun.misc.SharedSecrets: void setJavaNetHttpCookieAccess(sun.misc.JavaNetHttpCookieAccess)>($r24);
+
+        $r25 = staticinvoke <java.util.TimeZone: java.util.TimeZone getTimeZone(java.lang.String)>("GMT");
+
+        <java.net.HttpCookie: java.util.TimeZone GMT> = $r25;
+
+        return;
+    }
+}

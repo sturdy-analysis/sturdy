@@ -1,0 +1,969 @@
+class java.awt.WaitDispatchSupport extends java.lang.Object implements java.awt.SecondaryLoop
+{
+    private static final sun.util.logging.PlatformLogger log;
+    private java.awt.EventDispatchThread dispatchThread;
+    private java.awt.EventFilter filter;
+    private volatile java.awt.Conditional extCondition;
+    private volatile java.awt.Conditional condition;
+    private long interval;
+    private static java.util.Timer timer;
+    private java.util.TimerTask timerTask;
+    private java.util.concurrent.atomic.AtomicBoolean keepBlockingEDT;
+    private java.util.concurrent.atomic.AtomicBoolean keepBlockingCT;
+    private java.util.concurrent.atomic.AtomicBoolean afterExit;
+    private final java.lang.Runnable wakingRunnable;
+
+    private static synchronized void initializeTimer()
+    {
+        java.util.Timer $r0, $r1;
+
+        $r0 = <java.awt.WaitDispatchSupport: java.util.Timer timer>;
+
+        if $r0 != null goto label1;
+
+        $r1 = new java.util.Timer;
+
+        specialinvoke $r1.<java.util.Timer: void <init>(java.lang.String,boolean)>("AWT-WaitDispatchSupport-Timer", 1);
+
+        <java.awt.WaitDispatchSupport: java.util.Timer timer> = $r1;
+
+     label1:
+        return;
+    }
+
+    public void <init>(java.awt.EventDispatchThread)
+    {
+        java.awt.EventDispatchThread r1;
+        java.awt.WaitDispatchSupport r0;
+
+        r0 := @this: java.awt.WaitDispatchSupport;
+
+        r1 := @parameter0: java.awt.EventDispatchThread;
+
+        specialinvoke r0.<java.awt.WaitDispatchSupport: void <init>(java.awt.EventDispatchThread,java.awt.Conditional)>(r1, null);
+
+        return;
+    }
+
+    public void <init>(java.awt.EventDispatchThread, java.awt.Conditional)
+    {
+        java.awt.EventDispatchThread r5;
+        java.util.concurrent.atomic.AtomicBoolean $r1, $r2, $r3;
+        java.lang.IllegalArgumentException $r8;
+        java.awt.WaitDispatchSupport r0;
+        java.awt.WaitDispatchSupport$5 $r4;
+        java.awt.WaitDispatchSupport$1 $r7;
+        java.awt.Conditional r6;
+
+        r0 := @this: java.awt.WaitDispatchSupport;
+
+        r5 := @parameter0: java.awt.EventDispatchThread;
+
+        r6 := @parameter1: java.awt.Conditional;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.concurrent.atomic.AtomicBoolean;
+
+        specialinvoke $r1.<java.util.concurrent.atomic.AtomicBoolean: void <init>(boolean)>(0);
+
+        r0.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean keepBlockingEDT> = $r1;
+
+        $r2 = new java.util.concurrent.atomic.AtomicBoolean;
+
+        specialinvoke $r2.<java.util.concurrent.atomic.AtomicBoolean: void <init>(boolean)>(0);
+
+        r0.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean keepBlockingCT> = $r2;
+
+        $r3 = new java.util.concurrent.atomic.AtomicBoolean;
+
+        specialinvoke $r3.<java.util.concurrent.atomic.AtomicBoolean: void <init>(boolean)>(0);
+
+        r0.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean afterExit> = $r3;
+
+        $r4 = new java.awt.WaitDispatchSupport$5;
+
+        specialinvoke $r4.<java.awt.WaitDispatchSupport$5: void <init>(java.awt.WaitDispatchSupport)>(r0);
+
+        r0.<java.awt.WaitDispatchSupport: java.lang.Runnable wakingRunnable> = $r4;
+
+        if r5 != null goto label1;
+
+        $r8 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("The dispatchThread can not be null");
+
+        throw $r8;
+
+     label1:
+        r0.<java.awt.WaitDispatchSupport: java.awt.EventDispatchThread dispatchThread> = r5;
+
+        r0.<java.awt.WaitDispatchSupport: java.awt.Conditional extCondition> = r6;
+
+        $r7 = new java.awt.WaitDispatchSupport$1;
+
+        specialinvoke $r7.<java.awt.WaitDispatchSupport$1: void <init>(java.awt.WaitDispatchSupport)>(r0);
+
+        r0.<java.awt.WaitDispatchSupport: java.awt.Conditional condition> = $r7;
+
+        return;
+    }
+
+    public void <init>(java.awt.EventDispatchThread, java.awt.Conditional, java.awt.EventFilter, long)
+    {
+        java.awt.EventDispatchThread r1;
+        long l0;
+        java.lang.IllegalArgumentException $r5;
+        java.awt.WaitDispatchSupport r0;
+        byte $b1, $b2;
+        int $i3;
+        java.awt.Conditional r2;
+        java.awt.EventFilter r3;
+
+        r0 := @this: java.awt.WaitDispatchSupport;
+
+        r1 := @parameter0: java.awt.EventDispatchThread;
+
+        r2 := @parameter1: java.awt.Conditional;
+
+        r3 := @parameter2: java.awt.EventFilter;
+
+        l0 := @parameter3: long;
+
+        specialinvoke r0.<java.awt.WaitDispatchSupport: void <init>(java.awt.EventDispatchThread,java.awt.Conditional)>(r1, r2);
+
+        r0.<java.awt.WaitDispatchSupport: java.awt.EventFilter filter> = r3;
+
+        $b1 = l0 cmp 0L;
+
+        $i3 = (int) $b1;
+
+        if $i3 >= 0 goto label1;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("The interval value must be >= 0");
+
+        throw $r5;
+
+     label1:
+        r0.<java.awt.WaitDispatchSupport: long interval> = l0;
+
+        $b2 = l0 cmp 0L;
+
+        if $b2 == 0 goto label2;
+
+        staticinvoke <java.awt.WaitDispatchSupport: void initializeTimer()>();
+
+     label2:
+        return;
+    }
+
+    public boolean enter()
+    {
+        byte $b1, $b6, $b9;
+        java.lang.Thread $r6;
+        java.lang.StringBuilder $r26, $r28, $r29, $r31, $r47, $r48, $r56, $r57, $r65, $r66, $r67, $r71, $r73, $r82, $r84, $r85, $r87, $r106, $r107, $r114, $r116, $r117, $r119, $r121, $r123, $r124;
+        long $l0, $l2, $l3, $l4, $l5, $l7, $l8, $l10, $l11;
+        sun.util.logging.PlatformLogger $r1, $r9, $r25, $r46, $r51, $r53, $r55, $r60, $r64, $r70, $r75, $r79, $r81, $r100, $r105, $r112;
+        java.awt.KeyboardFocusManager $r109;
+        java.util.concurrent.atomic.AtomicBoolean $r3, $r4, $r10, $r12, $r17, $r19, $r20, $r21, $r27, $r30, $r36, $r42, $r43, $r44, $r76, $r77, $r78, $r83, $r86, $r90, $r91, $r92;
+        int $i12, $i13;
+        java.awt.EventQueue $r15;
+        java.lang.Object $r11, $r34, $r38;
+        java.awt.Conditional $r33, $r35, $r37, $r39;
+        java.awt.SequencedEvent $r110;
+        java.awt.EventFilter $r13, $r18, $r22, $r40, $r95, $r96, $r101, $r102;
+        java.lang.Throwable $r89, $r93, $r94;
+        java.awt.WaitDispatchSupport r2;
+        java.lang.String $r32, $r49, $r58, $r68, $r74, $r88, $r108;
+        java.awt.EventDispatchThread $r7, $r14, $r23, $r41, $r72, $r97, $r103;
+        java.util.Timer $r62;
+        java.awt.WaitDispatchSupport$4 $r120;
+        java.awt.WaitDispatchSupport$3 $r118;
+        java.awt.WaitDispatchSupport$2 $r115;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17;
+        sun.util.logging.PlatformLogger$Level $r0, $r8, $r50, $r52, $r59, $r99, $r113;
+        sun.awt.PeerEvent $r122;
+        java.lang.InterruptedException $r98;
+
+        r2 := @this: java.awt.WaitDispatchSupport;
+
+        $r1 = <java.awt.WaitDispatchSupport: sun.util.logging.PlatformLogger log>;
+
+        $r0 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINE>;
+
+        $z0 = virtualinvoke $r1.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r0);
+
+        if $z0 == 0 goto label01;
+
+        $r81 = <java.awt.WaitDispatchSupport: sun.util.logging.PlatformLogger log>;
+
+        $r114 = new java.lang.StringBuilder;
+
+        specialinvoke $r114.<java.lang.StringBuilder: void <init>()>();
+
+        $r82 = virtualinvoke $r114.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("enter(): blockingEDT=");
+
+        $r83 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean keepBlockingEDT>;
+
+        $z14 = virtualinvoke $r83.<java.util.concurrent.atomic.AtomicBoolean: boolean get()>();
+
+        $r84 = virtualinvoke $r82.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z14);
+
+        $r85 = virtualinvoke $r84.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", blockingCT=");
+
+        $r86 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean keepBlockingCT>;
+
+        $z15 = virtualinvoke $r86.<java.util.concurrent.atomic.AtomicBoolean: boolean get()>();
+
+        $r87 = virtualinvoke $r85.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z15);
+
+        $r88 = virtualinvoke $r87.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r81.<sun.util.logging.PlatformLogger: void fine(java.lang.String)>($r88);
+
+     label01:
+        $r3 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean keepBlockingEDT>;
+
+        $z1 = virtualinvoke $r3.<java.util.concurrent.atomic.AtomicBoolean: boolean compareAndSet(boolean,boolean)>(0, 1);
+
+        if $z1 != 0 goto label02;
+
+        $r79 = <java.awt.WaitDispatchSupport: sun.util.logging.PlatformLogger log>;
+
+        virtualinvoke $r79.<sun.util.logging.PlatformLogger: void fine(java.lang.String)>("The secondary loop is already running, aborting");
+
+        return 0;
+
+     label02:
+        $r4 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean afterExit>;
+
+        $z2 = virtualinvoke $r4.<java.util.concurrent.atomic.AtomicBoolean: boolean get()>();
+
+        if $z2 == 0 goto label04;
+
+        $r75 = <java.awt.WaitDispatchSupport: sun.util.logging.PlatformLogger log>;
+
+        virtualinvoke $r75.<sun.util.logging.PlatformLogger: void fine(java.lang.String)>("Exit was called already, aborting");
+
+     label03:
+        $r76 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean keepBlockingEDT>;
+
+        virtualinvoke $r76.<java.util.concurrent.atomic.AtomicBoolean: void set(boolean)>(0);
+
+        $r77 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean keepBlockingCT>;
+
+        virtualinvoke $r77.<java.util.concurrent.atomic.AtomicBoolean: void set(boolean)>(0);
+
+        $r78 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean afterExit>;
+
+        virtualinvoke $r78.<java.util.concurrent.atomic.AtomicBoolean: void set(boolean)>(0);
+
+        return 0;
+
+     label04:
+        $r115 = new java.awt.WaitDispatchSupport$2;
+
+        specialinvoke $r115.<java.awt.WaitDispatchSupport$2: void <init>(java.awt.WaitDispatchSupport)>(r2);
+
+        $r6 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r7 = r2.<java.awt.WaitDispatchSupport: java.awt.EventDispatchThread dispatchThread>;
+
+        if $r6 != $r7 goto label10;
+
+        $r51 = <java.awt.WaitDispatchSupport: sun.util.logging.PlatformLogger log>;
+
+        $r50 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINEST>;
+
+        $z11 = virtualinvoke $r51.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r50);
+
+        if $z11 == 0 goto label05;
+
+        $r70 = <java.awt.WaitDispatchSupport: sun.util.logging.PlatformLogger log>;
+
+        $r116 = new java.lang.StringBuilder;
+
+        specialinvoke $r116.<java.lang.StringBuilder: void <init>()>();
+
+        $r71 = virtualinvoke $r116.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("On dispatch thread: ");
+
+        $r72 = r2.<java.awt.WaitDispatchSupport: java.awt.EventDispatchThread dispatchThread>;
+
+        $r73 = virtualinvoke $r71.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r72);
+
+        $r74 = virtualinvoke $r73.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r70.<sun.util.logging.PlatformLogger: void finest(java.lang.String)>($r74);
+
+     label05:
+        $l8 = r2.<java.awt.WaitDispatchSupport: long interval>;
+
+        $b9 = $l8 cmp 0L;
+
+        if $b9 == 0 goto label07;
+
+        $r60 = <java.awt.WaitDispatchSupport: sun.util.logging.PlatformLogger log>;
+
+        $r59 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINEST>;
+
+        $z13 = virtualinvoke $r60.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r59);
+
+        if $z13 == 0 goto label06;
+
+        $r64 = <java.awt.WaitDispatchSupport: sun.util.logging.PlatformLogger log>;
+
+        $r117 = new java.lang.StringBuilder;
+
+        specialinvoke $r117.<java.lang.StringBuilder: void <init>()>();
+
+        $r65 = virtualinvoke $r117.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("scheduling the timer for ");
+
+        $l11 = r2.<java.awt.WaitDispatchSupport: long interval>;
+
+        $r66 = virtualinvoke $r65.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l11);
+
+        $r67 = virtualinvoke $r66.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ms");
+
+        $r68 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r64.<sun.util.logging.PlatformLogger: void finest(java.lang.String)>($r68);
+
+     label06:
+        $r62 = <java.awt.WaitDispatchSupport: java.util.Timer timer>;
+
+        $r118 = new java.awt.WaitDispatchSupport$3;
+
+        specialinvoke $r118.<java.awt.WaitDispatchSupport$3: void <init>(java.awt.WaitDispatchSupport)>(r2);
+
+        r2.<java.awt.WaitDispatchSupport: java.util.TimerTask timerTask> = $r118;
+
+        $l10 = r2.<java.awt.WaitDispatchSupport: long interval>;
+
+        virtualinvoke $r62.<java.util.Timer: void schedule(java.util.TimerTask,long)>($r118, $l10);
+
+     label07:
+        $r109 = staticinvoke <java.awt.KeyboardFocusManager: java.awt.KeyboardFocusManager getCurrentKeyboardFocusManager()>();
+
+        $r110 = virtualinvoke $r109.<java.awt.KeyboardFocusManager: java.awt.SequencedEvent getCurrentSequencedEvent()>();
+
+        if $r110 == null goto label09;
+
+        $r53 = <java.awt.WaitDispatchSupport: sun.util.logging.PlatformLogger log>;
+
+        $r52 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINE>;
+
+        $z12 = virtualinvoke $r53.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r52);
+
+        if $z12 == 0 goto label08;
+
+        $r55 = <java.awt.WaitDispatchSupport: sun.util.logging.PlatformLogger log>;
+
+        $r119 = new java.lang.StringBuilder;
+
+        specialinvoke $r119.<java.lang.StringBuilder: void <init>()>();
+
+        $r56 = virtualinvoke $r119.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Dispose current SequencedEvent: ");
+
+        $r57 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r110);
+
+        $r58 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r55.<sun.util.logging.PlatformLogger: void fine(java.lang.String)>($r58);
+
+     label08:
+        virtualinvoke $r110.<java.awt.SequencedEvent: void dispose()>();
+
+     label09:
+        $r120 = new java.awt.WaitDispatchSupport$4;
+
+        specialinvoke $r120.<java.awt.WaitDispatchSupport$4: void <init>(java.awt.WaitDispatchSupport,java.lang.Runnable)>(r2, $r115);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r120);
+
+        goto label32;
+
+     label10:
+        $r9 = <java.awt.WaitDispatchSupport: sun.util.logging.PlatformLogger log>;
+
+        $r8 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINEST>;
+
+        $z3 = virtualinvoke $r9.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r8);
+
+        if $z3 == 0 goto label11;
+
+        $r46 = <java.awt.WaitDispatchSupport: sun.util.logging.PlatformLogger log>;
+
+        $r121 = new java.lang.StringBuilder;
+
+        specialinvoke $r121.<java.lang.StringBuilder: void <init>()>();
+
+        $r47 = virtualinvoke $r121.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("On non-dispatch thread: ");
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r46.<sun.util.logging.PlatformLogger: void finest(java.lang.String)>($r49);
+
+     label11:
+        $r10 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean keepBlockingCT>;
+
+        virtualinvoke $r10.<java.util.concurrent.atomic.AtomicBoolean: void set(boolean)>(1);
+
+        $r11 = staticinvoke <java.awt.WaitDispatchSupport: java.lang.Object getTreeLock()>();
+
+        entermonitor $r11;
+
+     label12:
+        $r12 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean afterExit>;
+
+        $z4 = virtualinvoke $r12.<java.util.concurrent.atomic.AtomicBoolean: boolean get()>();
+
+        if $z4 == 0 goto label14;
+
+        exitmonitor $r11;
+
+     label13:
+        $r42 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean keepBlockingEDT>;
+
+        virtualinvoke $r42.<java.util.concurrent.atomic.AtomicBoolean: void set(boolean)>(0);
+
+        $r43 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean keepBlockingCT>;
+
+        virtualinvoke $r43.<java.util.concurrent.atomic.AtomicBoolean: void set(boolean)>(0);
+
+        $r44 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean afterExit>;
+
+        virtualinvoke $r44.<java.util.concurrent.atomic.AtomicBoolean: void set(boolean)>(0);
+
+        return 0;
+
+     label14:
+        $r13 = r2.<java.awt.WaitDispatchSupport: java.awt.EventFilter filter>;
+
+        if $r13 == null goto label15;
+
+        $r41 = r2.<java.awt.WaitDispatchSupport: java.awt.EventDispatchThread dispatchThread>;
+
+        $r40 = r2.<java.awt.WaitDispatchSupport: java.awt.EventFilter filter>;
+
+        virtualinvoke $r41.<java.awt.EventDispatchThread: void addEventFilter(java.awt.EventFilter)>($r40);
+
+     label15:
+        $r14 = r2.<java.awt.WaitDispatchSupport: java.awt.EventDispatchThread dispatchThread>;
+
+        $r15 = virtualinvoke $r14.<java.awt.EventDispatchThread: java.awt.EventQueue getEventQueue()>();
+
+        $r122 = new sun.awt.PeerEvent;
+
+        specialinvoke $r122.<sun.awt.PeerEvent: void <init>(java.lang.Object,java.lang.Runnable,long)>(r2, $r115, 1L);
+
+        virtualinvoke $r15.<java.awt.EventQueue: void postEvent(java.awt.AWTEvent)>($r122);
+
+        $l0 = r2.<java.awt.WaitDispatchSupport: long interval>;
+
+        $b1 = $l0 cmp 0L;
+
+        $i12 = (int) $b1;
+
+        if $i12 <= 0 goto label19;
+
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+     label16:
+        $r36 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean keepBlockingCT>;
+
+        $z9 = virtualinvoke $r36.<java.util.concurrent.atomic.AtomicBoolean: boolean get()>();
+
+        if $z9 == 0 goto label18;
+
+        $r37 = r2.<java.awt.WaitDispatchSupport: java.awt.Conditional extCondition>;
+
+        if $r37 == null goto label17;
+
+        $r39 = r2.<java.awt.WaitDispatchSupport: java.awt.Conditional extCondition>;
+
+        $z10 = interfaceinvoke $r39.<java.awt.Conditional: boolean evaluate()>();
+
+        if $z10 == 0 goto label18;
+
+     label17:
+        $l3 = r2.<java.awt.WaitDispatchSupport: long interval>;
+
+        $l4 = $l2 + $l3;
+
+        $l5 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $b6 = $l4 cmp $l5;
+
+        $i13 = (int) $b6;
+
+        if $i13 <= 0 goto label18;
+
+        $r38 = staticinvoke <java.awt.WaitDispatchSupport: java.lang.Object getTreeLock()>();
+
+        $l7 = r2.<java.awt.WaitDispatchSupport: long interval>;
+
+        virtualinvoke $r38.<java.lang.Object: void wait(long)>($l7);
+
+        goto label16;
+
+     label18:
+        goto label21;
+
+     label19:
+        $r17 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean keepBlockingCT>;
+
+        $z5 = virtualinvoke $r17.<java.util.concurrent.atomic.AtomicBoolean: boolean get()>();
+
+        if $z5 == 0 goto label21;
+
+        $r33 = r2.<java.awt.WaitDispatchSupport: java.awt.Conditional extCondition>;
+
+        if $r33 == null goto label20;
+
+        $r35 = r2.<java.awt.WaitDispatchSupport: java.awt.Conditional extCondition>;
+
+        $z8 = interfaceinvoke $r35.<java.awt.Conditional: boolean evaluate()>();
+
+        if $z8 == 0 goto label21;
+
+     label20:
+        $r34 = staticinvoke <java.awt.WaitDispatchSupport: java.lang.Object getTreeLock()>();
+
+        virtualinvoke $r34.<java.lang.Object: void wait()>();
+
+        goto label19;
+
+     label21:
+        $r112 = <java.awt.WaitDispatchSupport: sun.util.logging.PlatformLogger log>;
+
+        $r113 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINE>;
+
+        $z17 = virtualinvoke $r112.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r113);
+
+        if $z17 == 0 goto label22;
+
+        $r25 = <java.awt.WaitDispatchSupport: sun.util.logging.PlatformLogger log>;
+
+        $r123 = new java.lang.StringBuilder;
+
+        specialinvoke $r123.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r123.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("waitDone ");
+
+        $r27 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean keepBlockingEDT>;
+
+        $z6 = virtualinvoke $r27.<java.util.concurrent.atomic.AtomicBoolean: boolean get()>();
+
+        $r28 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z6);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r30 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean keepBlockingCT>;
+
+        $z7 = virtualinvoke $r30.<java.util.concurrent.atomic.AtomicBoolean: boolean get()>();
+
+        $r31 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z7);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r25.<sun.util.logging.PlatformLogger: void fine(java.lang.String)>($r32);
+
+     label22:
+        $r18 = r2.<java.awt.WaitDispatchSupport: java.awt.EventFilter filter>;
+
+        if $r18 == null goto label28;
+
+        $r23 = r2.<java.awt.WaitDispatchSupport: java.awt.EventDispatchThread dispatchThread>;
+
+        $r22 = r2.<java.awt.WaitDispatchSupport: java.awt.EventFilter filter>;
+
+        virtualinvoke $r23.<java.awt.EventDispatchThread: void removeEventFilter(java.awt.EventFilter)>($r22);
+
+        goto label28;
+
+     label23:
+        $r98 := @caughtexception;
+
+        $r100 = <java.awt.WaitDispatchSupport: sun.util.logging.PlatformLogger log>;
+
+        $r99 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINE>;
+
+        $z16 = virtualinvoke $r100.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r99);
+
+        if $z16 == 0 goto label24;
+
+        $r105 = <java.awt.WaitDispatchSupport: sun.util.logging.PlatformLogger log>;
+
+        $r124 = new java.lang.StringBuilder;
+
+        specialinvoke $r124.<java.lang.StringBuilder: void <init>()>();
+
+        $r106 = virtualinvoke $r124.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception caught while waiting: ");
+
+        $r107 = virtualinvoke $r106.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r98);
+
+        $r108 = virtualinvoke $r107.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r105.<sun.util.logging.PlatformLogger: void fine(java.lang.String)>($r108);
+
+     label24:
+        $r101 = r2.<java.awt.WaitDispatchSupport: java.awt.EventFilter filter>;
+
+        if $r101 == null goto label28;
+
+        $r103 = r2.<java.awt.WaitDispatchSupport: java.awt.EventDispatchThread dispatchThread>;
+
+        $r102 = r2.<java.awt.WaitDispatchSupport: java.awt.EventFilter filter>;
+
+        virtualinvoke $r103.<java.awt.EventDispatchThread: void removeEventFilter(java.awt.EventFilter)>($r102);
+
+        goto label28;
+
+     label25:
+        $r94 := @caughtexception;
+
+     label26:
+        $r95 = r2.<java.awt.WaitDispatchSupport: java.awt.EventFilter filter>;
+
+        if $r95 == null goto label27;
+
+        $r97 = r2.<java.awt.WaitDispatchSupport: java.awt.EventDispatchThread dispatchThread>;
+
+        $r96 = r2.<java.awt.WaitDispatchSupport: java.awt.EventFilter filter>;
+
+        virtualinvoke $r97.<java.awt.EventDispatchThread: void removeEventFilter(java.awt.EventFilter)>($r96);
+
+     label27:
+        throw $r94;
+
+     label28:
+        exitmonitor $r11;
+
+     label29:
+        goto label32;
+
+     label30:
+        $r93 := @caughtexception;
+
+        exitmonitor $r11;
+
+     label31:
+        throw $r93;
+
+     label32:
+        $r19 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean keepBlockingEDT>;
+
+        virtualinvoke $r19.<java.util.concurrent.atomic.AtomicBoolean: void set(boolean)>(0);
+
+        $r20 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean keepBlockingCT>;
+
+        virtualinvoke $r20.<java.util.concurrent.atomic.AtomicBoolean: void set(boolean)>(0);
+
+        $r21 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean afterExit>;
+
+        virtualinvoke $r21.<java.util.concurrent.atomic.AtomicBoolean: void set(boolean)>(0);
+
+        return 1;
+
+     label33:
+        $r89 := @caughtexception;
+
+     label34:
+        $r90 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean keepBlockingEDT>;
+
+        virtualinvoke $r90.<java.util.concurrent.atomic.AtomicBoolean: void set(boolean)>(0);
+
+        $r91 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean keepBlockingCT>;
+
+        virtualinvoke $r91.<java.util.concurrent.atomic.AtomicBoolean: void set(boolean)>(0);
+
+        $r92 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean afterExit>;
+
+        virtualinvoke $r92.<java.util.concurrent.atomic.AtomicBoolean: void set(boolean)>(0);
+
+        throw $r89;
+
+        catch java.lang.InterruptedException from label15 to label22 with label23;
+        catch java.lang.Throwable from label15 to label22 with label25;
+        catch java.lang.Throwable from label23 to label24 with label25;
+        catch java.lang.Throwable from label25 to label26 with label25;
+        catch java.lang.Throwable from label12 to label13 with label30;
+        catch java.lang.Throwable from label14 to label29 with label30;
+        catch java.lang.Throwable from label30 to label31 with label30;
+        catch java.lang.Throwable from label02 to label03 with label33;
+        catch java.lang.Throwable from label04 to label13 with label33;
+        catch java.lang.Throwable from label14 to label32 with label33;
+        catch java.lang.Throwable from label33 to label34 with label33;
+    }
+
+    public boolean exit()
+    {
+        java.util.concurrent.atomic.AtomicBoolean $r3, $r4, $r8, $r11;
+        java.awt.WaitDispatchSupport r2;
+        java.lang.String $r13;
+        boolean $z0, $z1, $z2, $z3;
+        sun.util.logging.PlatformLogger$Level $r0;
+        sun.util.logging.PlatformLogger $r1, $r6;
+        java.lang.StringBuilder $r5, $r7, $r9, $r10, $r12;
+
+        r2 := @this: java.awt.WaitDispatchSupport;
+
+        $r1 = <java.awt.WaitDispatchSupport: sun.util.logging.PlatformLogger log>;
+
+        $r0 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINE>;
+
+        $z0 = virtualinvoke $r1.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r0);
+
+        if $z0 == 0 goto label1;
+
+        $r6 = <java.awt.WaitDispatchSupport: sun.util.logging.PlatformLogger log>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("exit(): blockingEDT=");
+
+        $r8 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean keepBlockingEDT>;
+
+        $z2 = virtualinvoke $r8.<java.util.concurrent.atomic.AtomicBoolean: boolean get()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z2);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", blockingCT=");
+
+        $r11 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean keepBlockingCT>;
+
+        $z3 = virtualinvoke $r11.<java.util.concurrent.atomic.AtomicBoolean: boolean get()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z3);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<sun.util.logging.PlatformLogger: void fine(java.lang.String)>($r13);
+
+     label1:
+        $r3 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean afterExit>;
+
+        virtualinvoke $r3.<java.util.concurrent.atomic.AtomicBoolean: void set(boolean)>(1);
+
+        $r4 = r2.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean keepBlockingEDT>;
+
+        $z1 = virtualinvoke $r4.<java.util.concurrent.atomic.AtomicBoolean: boolean getAndSet(boolean)>(0);
+
+        if $z1 == 0 goto label2;
+
+        specialinvoke r2.<java.awt.WaitDispatchSupport: void wakeupEDT()>();
+
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    private static final java.lang.Object getTreeLock()
+    {
+        java.lang.Object $r0;
+
+        $r0 = <java.awt.Component: java.lang.Object LOCK>;
+
+        return $r0;
+    }
+
+    private void wakeupEDT()
+    {
+        java.awt.EventDispatchThread $r3, $r10;
+        java.awt.EventQueue $r4;
+        sun.util.logging.PlatformLogger$Level $r0;
+        sun.util.logging.PlatformLogger $r1, $r8;
+        sun.awt.PeerEvent $r5;
+        java.lang.Runnable $r6;
+        java.awt.WaitDispatchSupport r2;
+        java.lang.StringBuilder $r7, $r9, $r11;
+        java.lang.String $r12;
+        boolean $z0;
+
+        r2 := @this: java.awt.WaitDispatchSupport;
+
+        $r1 = <java.awt.WaitDispatchSupport: sun.util.logging.PlatformLogger log>;
+
+        $r0 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINEST>;
+
+        $z0 = virtualinvoke $r1.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r0);
+
+        if $z0 == 0 goto label1;
+
+        $r8 = <java.awt.WaitDispatchSupport: sun.util.logging.PlatformLogger log>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("wakeupEDT(): EDT == ");
+
+        $r10 = r2.<java.awt.WaitDispatchSupport: java.awt.EventDispatchThread dispatchThread>;
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r8.<sun.util.logging.PlatformLogger: void finest(java.lang.String)>($r12);
+
+     label1:
+        $r3 = r2.<java.awt.WaitDispatchSupport: java.awt.EventDispatchThread dispatchThread>;
+
+        $r4 = virtualinvoke $r3.<java.awt.EventDispatchThread: java.awt.EventQueue getEventQueue()>();
+
+        $r5 = new sun.awt.PeerEvent;
+
+        $r6 = r2.<java.awt.WaitDispatchSupport: java.lang.Runnable wakingRunnable>;
+
+        specialinvoke $r5.<sun.awt.PeerEvent: void <init>(java.lang.Object,java.lang.Runnable,long)>(r2, $r6, 1L);
+
+        virtualinvoke $r4.<java.awt.EventQueue: void postEvent(java.awt.AWTEvent)>($r5);
+
+        return;
+    }
+
+    static sun.util.logging.PlatformLogger access$000()
+    {
+        sun.util.logging.PlatformLogger $r0;
+
+        $r0 = <java.awt.WaitDispatchSupport: sun.util.logging.PlatformLogger log>;
+
+        return $r0;
+    }
+
+    static java.util.concurrent.atomic.AtomicBoolean access$100(java.awt.WaitDispatchSupport)
+    {
+        java.util.concurrent.atomic.AtomicBoolean $r1;
+        java.awt.WaitDispatchSupport r0;
+
+        r0 := @parameter0: java.awt.WaitDispatchSupport;
+
+        $r1 = r0.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean keepBlockingEDT>;
+
+        return $r1;
+    }
+
+    static java.util.concurrent.atomic.AtomicBoolean access$200(java.awt.WaitDispatchSupport)
+    {
+        java.util.concurrent.atomic.AtomicBoolean $r1;
+        java.awt.WaitDispatchSupport r0;
+
+        r0 := @parameter0: java.awt.WaitDispatchSupport;
+
+        $r1 = r0.<java.awt.WaitDispatchSupport: java.util.concurrent.atomic.AtomicBoolean keepBlockingCT>;
+
+        return $r1;
+    }
+
+    static java.awt.Conditional access$300(java.awt.WaitDispatchSupport)
+    {
+        java.awt.WaitDispatchSupport r0;
+        java.awt.Conditional $r1;
+
+        r0 := @parameter0: java.awt.WaitDispatchSupport;
+
+        $r1 = r0.<java.awt.WaitDispatchSupport: java.awt.Conditional extCondition>;
+
+        return $r1;
+    }
+
+    static java.util.TimerTask access$400(java.awt.WaitDispatchSupport)
+    {
+        java.awt.WaitDispatchSupport r0;
+        java.util.TimerTask $r1;
+
+        r0 := @parameter0: java.awt.WaitDispatchSupport;
+
+        $r1 = r0.<java.awt.WaitDispatchSupport: java.util.TimerTask timerTask>;
+
+        return $r1;
+    }
+
+    static java.util.TimerTask access$402(java.awt.WaitDispatchSupport, java.util.TimerTask)
+    {
+        java.awt.WaitDispatchSupport r0;
+        java.util.TimerTask r1;
+
+        r0 := @parameter0: java.awt.WaitDispatchSupport;
+
+        r1 := @parameter1: java.util.TimerTask;
+
+        r0.<java.awt.WaitDispatchSupport: java.util.TimerTask timerTask> = r1;
+
+        return r1;
+    }
+
+    static java.awt.EventFilter access$500(java.awt.WaitDispatchSupport)
+    {
+        java.awt.WaitDispatchSupport r0;
+        java.awt.EventFilter $r1;
+
+        r0 := @parameter0: java.awt.WaitDispatchSupport;
+
+        $r1 = r0.<java.awt.WaitDispatchSupport: java.awt.EventFilter filter>;
+
+        return $r1;
+    }
+
+    static java.awt.Conditional access$600(java.awt.WaitDispatchSupport)
+    {
+        java.awt.WaitDispatchSupport r0;
+        java.awt.Conditional $r1;
+
+        r0 := @parameter0: java.awt.WaitDispatchSupport;
+
+        $r1 = r0.<java.awt.WaitDispatchSupport: java.awt.Conditional condition>;
+
+        return $r1;
+    }
+
+    static java.awt.EventDispatchThread access$700(java.awt.WaitDispatchSupport)
+    {
+        java.awt.EventDispatchThread $r1;
+        java.awt.WaitDispatchSupport r0;
+
+        r0 := @parameter0: java.awt.WaitDispatchSupport;
+
+        $r1 = r0.<java.awt.WaitDispatchSupport: java.awt.EventDispatchThread dispatchThread>;
+
+        return $r1;
+    }
+
+    static void access$800(java.awt.WaitDispatchSupport)
+    {
+        java.awt.WaitDispatchSupport r0;
+
+        r0 := @parameter0: java.awt.WaitDispatchSupport;
+
+        specialinvoke r0.<java.awt.WaitDispatchSupport: void wakeupEDT()>();
+
+        return;
+    }
+
+    static java.lang.Object access$900()
+    {
+        java.lang.Object $r0;
+
+        $r0 = staticinvoke <java.awt.WaitDispatchSupport: java.lang.Object getTreeLock()>();
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        sun.util.logging.PlatformLogger $r0;
+
+        $r0 = staticinvoke <sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger getLogger(java.lang.String)>("java.awt.event.WaitDispatchSupport");
+
+        <java.awt.WaitDispatchSupport: sun.util.logging.PlatformLogger log> = $r0;
+
+        return;
+    }
+}

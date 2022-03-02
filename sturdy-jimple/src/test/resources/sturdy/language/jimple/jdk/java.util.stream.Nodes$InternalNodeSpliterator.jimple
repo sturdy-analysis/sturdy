@@ -1,0 +1,346 @@
+abstract class java.util.stream.Nodes$InternalNodeSpliterator extends java.lang.Object implements java.util.Spliterator
+{
+    java.util.stream.Node curNode;
+    int curChildIndex;
+    java.util.Spliterator lastNodeSpliterator;
+    java.util.Spliterator tryAdvanceSpliterator;
+    java.util.Deque tryAdvanceStack;
+
+    void <init>(java.util.stream.Node)
+    {
+        java.util.stream.Nodes$InternalNodeSpliterator r0;
+        java.util.stream.Node r1;
+
+        r0 := @this: java.util.stream.Nodes$InternalNodeSpliterator;
+
+        r1 := @parameter0: java.util.stream.Node;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.stream.Node curNode> = r1;
+
+        return;
+    }
+
+    protected final java.util.Deque initStack()
+    {
+        java.util.stream.Node $r2, $r3, $r4;
+        int $i0, $i1, i2, $i4;
+        java.util.stream.Nodes$InternalNodeSpliterator r1;
+        java.util.ArrayDeque $r5;
+
+        r1 := @this: java.util.stream.Nodes$InternalNodeSpliterator;
+
+        $r5 = new java.util.ArrayDeque;
+
+        specialinvoke $r5.<java.util.ArrayDeque: void <init>(int)>(8);
+
+        $r2 = r1.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.stream.Node curNode>;
+
+        $i0 = interfaceinvoke $r2.<java.util.stream.Node: int getChildCount()>();
+
+        i2 = $i0 - 1;
+
+     label1:
+        $i1 = r1.<java.util.stream.Nodes$InternalNodeSpliterator: int curChildIndex>;
+
+        if i2 < $i1 goto label2;
+
+        $r3 = r1.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.stream.Node curNode>;
+
+        $r4 = interfaceinvoke $r3.<java.util.stream.Node: java.util.stream.Node getChild(int)>(i2);
+
+        interfaceinvoke $r5.<java.util.Deque: void addFirst(java.lang.Object)>($r4);
+
+        $i4 = (int) -1;
+
+        i2 = i2 + $i4;
+
+        goto label1;
+
+     label2:
+        return $r5;
+    }
+
+    protected final java.util.stream.Node findNextLeafNode(java.util.Deque)
+    {
+        long $l2;
+        java.util.stream.Node $r1, $r4;
+        java.util.Deque r0;
+        byte $b3;
+        int $i0, $i1, i4, $i5, $i7;
+        java.util.stream.Nodes$InternalNodeSpliterator r2;
+        java.lang.Object $r3;
+
+        r2 := @this: java.util.stream.Nodes$InternalNodeSpliterator;
+
+        r0 := @parameter0: java.util.Deque;
+
+     label1:
+        $r3 = interfaceinvoke r0.<java.util.Deque: java.lang.Object pollFirst()>();
+
+        $r4 = (java.util.stream.Node) $r3;
+
+        if $r4 == null goto label5;
+
+        $i0 = interfaceinvoke $r4.<java.util.stream.Node: int getChildCount()>();
+
+        if $i0 != 0 goto label2;
+
+        $l2 = interfaceinvoke $r4.<java.util.stream.Node: long count()>();
+
+        $b3 = $l2 cmp 0L;
+
+        $i5 = (int) $b3;
+
+        if $i5 <= 0 goto label1;
+
+        return $r4;
+
+     label2:
+        $i1 = interfaceinvoke $r4.<java.util.stream.Node: int getChildCount()>();
+
+        i4 = $i1 - 1;
+
+     label3:
+        if i4 < 0 goto label4;
+
+        $r1 = interfaceinvoke $r4.<java.util.stream.Node: java.util.stream.Node getChild(int)>(i4);
+
+        interfaceinvoke r0.<java.util.Deque: void addFirst(java.lang.Object)>($r1);
+
+        $i7 = (int) -1;
+
+        i4 = i4 + $i7;
+
+        goto label3;
+
+     label4:
+        goto label1;
+
+     label5:
+        return null;
+    }
+
+    protected final boolean initTryAdvance()
+    {
+        java.util.stream.Node $r1, $r7;
+        java.util.Deque $r5, $r6;
+        java.util.stream.Nodes$InternalNodeSpliterator r0;
+        java.util.Spliterator $r2, $r3, $r4, $r8;
+
+        r0 := @this: java.util.stream.Nodes$InternalNodeSpliterator;
+
+        $r1 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.stream.Node curNode>;
+
+        if $r1 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r2 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.Spliterator tryAdvanceSpliterator>;
+
+        if $r2 != null goto label5;
+
+        $r3 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.Spliterator lastNodeSpliterator>;
+
+        if $r3 != null goto label4;
+
+        $r5 = virtualinvoke r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.Deque initStack()>();
+
+        r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.Deque tryAdvanceStack> = $r5;
+
+        $r6 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.Deque tryAdvanceStack>;
+
+        $r7 = virtualinvoke r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.stream.Node findNextLeafNode(java.util.Deque)>($r6);
+
+        if $r7 == null goto label2;
+
+        $r8 = interfaceinvoke $r7.<java.util.stream.Node: java.util.Spliterator spliterator()>();
+
+        r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.Spliterator tryAdvanceSpliterator> = $r8;
+
+        goto label3;
+
+     label2:
+        r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.stream.Node curNode> = null;
+
+        return 0;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r4 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.Spliterator lastNodeSpliterator>;
+
+        r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.Spliterator tryAdvanceSpliterator> = $r4;
+
+     label5:
+        return 1;
+    }
+
+    public final java.util.Spliterator trySplit()
+    {
+        java.util.stream.Node $r1, $r4, $r5, $r6, $r7, $r8, $r9, $r11, $r15, $r16;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        java.util.stream.Nodes$InternalNodeSpliterator r0;
+        java.util.Spliterator $r2, $r3, $r10, $r12, $r13, $r14, $r17, $r18, $r19;
+
+        r0 := @this: java.util.stream.Nodes$InternalNodeSpliterator;
+
+        $r1 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.stream.Node curNode>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.Spliterator tryAdvanceSpliterator>;
+
+        if $r2 == null goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r3 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.Spliterator lastNodeSpliterator>;
+
+        if $r3 == null goto label3;
+
+        $r18 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.Spliterator lastNodeSpliterator>;
+
+        $r19 = interfaceinvoke $r18.<java.util.Spliterator: java.util.Spliterator trySplit()>();
+
+        return $r19;
+
+     label3:
+        $i0 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: int curChildIndex>;
+
+        $r4 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.stream.Node curNode>;
+
+        $i1 = interfaceinvoke $r4.<java.util.stream.Node: int getChildCount()>();
+
+        $i2 = $i1 - 1;
+
+        if $i0 >= $i2 goto label4;
+
+        $r15 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.stream.Node curNode>;
+
+        $i7 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: int curChildIndex>;
+
+        $i8 = $i7 + 1;
+
+        r0.<java.util.stream.Nodes$InternalNodeSpliterator: int curChildIndex> = $i8;
+
+        $r16 = interfaceinvoke $r15.<java.util.stream.Node: java.util.stream.Node getChild(int)>($i7);
+
+        $r17 = interfaceinvoke $r16.<java.util.stream.Node: java.util.Spliterator spliterator()>();
+
+        return $r17;
+
+     label4:
+        $r5 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.stream.Node curNode>;
+
+        $i3 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: int curChildIndex>;
+
+        $r6 = interfaceinvoke $r5.<java.util.stream.Node: java.util.stream.Node getChild(int)>($i3);
+
+        r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.stream.Node curNode> = $r6;
+
+        $r7 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.stream.Node curNode>;
+
+        $i4 = interfaceinvoke $r7.<java.util.stream.Node: int getChildCount()>();
+
+        if $i4 != 0 goto label5;
+
+        $r11 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.stream.Node curNode>;
+
+        $r12 = interfaceinvoke $r11.<java.util.stream.Node: java.util.Spliterator spliterator()>();
+
+        r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.Spliterator lastNodeSpliterator> = $r12;
+
+        $r13 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.Spliterator lastNodeSpliterator>;
+
+        $r14 = interfaceinvoke $r13.<java.util.Spliterator: java.util.Spliterator trySplit()>();
+
+        return $r14;
+
+     label5:
+        r0.<java.util.stream.Nodes$InternalNodeSpliterator: int curChildIndex> = 0;
+
+        $r8 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.stream.Node curNode>;
+
+        $i5 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: int curChildIndex>;
+
+        $i6 = $i5 + 1;
+
+        r0.<java.util.stream.Nodes$InternalNodeSpliterator: int curChildIndex> = $i6;
+
+        $r9 = interfaceinvoke $r8.<java.util.stream.Node: java.util.stream.Node getChild(int)>($i5);
+
+        $r10 = interfaceinvoke $r9.<java.util.stream.Node: java.util.Spliterator spliterator()>();
+
+        return $r10;
+    }
+
+    public final long estimateSize()
+    {
+        long $l1, $l2, l3;
+        java.util.stream.Node $r1, $r3, $r4, $r5;
+        int $i0, i4;
+        java.util.stream.Nodes$InternalNodeSpliterator r0;
+        java.util.Spliterator $r2, $r6;
+
+        r0 := @this: java.util.stream.Nodes$InternalNodeSpliterator;
+
+        $r1 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.stream.Node curNode>;
+
+        if $r1 != null goto label1;
+
+        return 0L;
+
+     label1:
+        $r2 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.Spliterator lastNodeSpliterator>;
+
+        if $r2 == null goto label2;
+
+        $r6 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.Spliterator lastNodeSpliterator>;
+
+        $l2 = interfaceinvoke $r6.<java.util.Spliterator: long estimateSize()>();
+
+        return $l2;
+
+     label2:
+        l3 = 0L;
+
+        i4 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: int curChildIndex>;
+
+     label3:
+        $r3 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.stream.Node curNode>;
+
+        $i0 = interfaceinvoke $r3.<java.util.stream.Node: int getChildCount()>();
+
+        if i4 >= $i0 goto label4;
+
+        $r4 = r0.<java.util.stream.Nodes$InternalNodeSpliterator: java.util.stream.Node curNode>;
+
+        $r5 = interfaceinvoke $r4.<java.util.stream.Node: java.util.stream.Node getChild(int)>(i4);
+
+        $l1 = interfaceinvoke $r5.<java.util.stream.Node: long count()>();
+
+        l3 = l3 + $l1;
+
+        i4 = i4 + 1;
+
+        goto label3;
+
+     label4:
+        return l3;
+    }
+
+    public final int characteristics()
+    {
+        java.util.stream.Nodes$InternalNodeSpliterator r0;
+
+        r0 := @this: java.util.stream.Nodes$InternalNodeSpliterator;
+
+        return 64;
+    }
+}

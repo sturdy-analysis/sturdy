@@ -1,0 +1,255 @@
+public class sun.rmi.transport.DGCAckHandler extends java.lang.Object
+{
+    private static final long dgcAckTimeout;
+    private static final java.util.concurrent.ScheduledExecutorService scheduler;
+    private static final java.util.Map idTable;
+    private final java.rmi.server.UID id;
+    private java.util.List objList;
+    private java.util.concurrent.Future task;
+    static final boolean $assertionsDisabled;
+
+    void <init>(java.rmi.server.UID)
+    {
+        java.lang.AssertionError $r5;
+        java.util.ArrayList $r1;
+        sun.rmi.transport.DGCAckHandler r0;
+        java.util.Map $r3, $r4;
+        java.rmi.server.UID r2;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.rmi.transport.DGCAckHandler;
+
+        r2 := @parameter0: java.rmi.server.UID;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        r0.<sun.rmi.transport.DGCAckHandler: java.util.List objList> = $r1;
+
+        r0.<sun.rmi.transport.DGCAckHandler: java.util.concurrent.Future task> = null;
+
+        r0.<sun.rmi.transport.DGCAckHandler: java.rmi.server.UID id> = r2;
+
+        if r2 == null goto label2;
+
+        $z0 = <sun.rmi.transport.DGCAckHandler: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $r4 = <sun.rmi.transport.DGCAckHandler: java.util.Map idTable>;
+
+        $z1 = interfaceinvoke $r4.<java.util.Map: boolean containsKey(java.lang.Object)>(r2);
+
+        if $z1 == 0 goto label1;
+
+        $r5 = new java.lang.AssertionError;
+
+        specialinvoke $r5.<java.lang.AssertionError: void <init>()>();
+
+        throw $r5;
+
+     label1:
+        $r3 = <sun.rmi.transport.DGCAckHandler: java.util.Map idTable>;
+
+        interfaceinvoke $r3.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r2, r0);
+
+     label2:
+        return;
+    }
+
+    synchronized void add(java.lang.Object)
+    {
+        java.util.List $r1, $r3;
+        sun.rmi.transport.DGCAckHandler r0;
+        java.lang.Object r2;
+
+        r0 := @this: sun.rmi.transport.DGCAckHandler;
+
+        r2 := @parameter0: java.lang.Object;
+
+        $r1 = r0.<sun.rmi.transport.DGCAckHandler: java.util.List objList>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<sun.rmi.transport.DGCAckHandler: java.util.List objList>;
+
+        interfaceinvoke $r3.<java.util.List: boolean add(java.lang.Object)>(r2);
+
+     label1:
+        return;
+    }
+
+    synchronized void startTimer()
+    {
+        java.util.concurrent.ScheduledFuture $r6;
+        long $l0;
+        java.util.concurrent.TimeUnit $r5;
+        java.util.List $r1;
+        java.util.concurrent.Future $r2;
+        sun.rmi.transport.DGCAckHandler r0;
+        java.util.concurrent.ScheduledExecutorService $r4;
+        sun.rmi.transport.DGCAckHandler$1 $r3;
+
+        r0 := @this: sun.rmi.transport.DGCAckHandler;
+
+        $r1 = r0.<sun.rmi.transport.DGCAckHandler: java.util.List objList>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.rmi.transport.DGCAckHandler: java.util.concurrent.Future task>;
+
+        if $r2 != null goto label1;
+
+        $r4 = <sun.rmi.transport.DGCAckHandler: java.util.concurrent.ScheduledExecutorService scheduler>;
+
+        $r3 = new sun.rmi.transport.DGCAckHandler$1;
+
+        specialinvoke $r3.<sun.rmi.transport.DGCAckHandler$1: void <init>(sun.rmi.transport.DGCAckHandler)>(r0);
+
+        $l0 = <sun.rmi.transport.DGCAckHandler: long dgcAckTimeout>;
+
+        $r5 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MILLISECONDS>;
+
+        $r6 = interfaceinvoke $r4.<java.util.concurrent.ScheduledExecutorService: java.util.concurrent.ScheduledFuture schedule(java.lang.Runnable,long,java.util.concurrent.TimeUnit)>($r3, $l0, $r5);
+
+        r0.<sun.rmi.transport.DGCAckHandler: java.util.concurrent.Future task> = $r6;
+
+     label1:
+        return;
+    }
+
+    synchronized void release()
+    {
+        java.util.concurrent.Future $r1, $r2;
+        sun.rmi.transport.DGCAckHandler r0;
+
+        r0 := @this: sun.rmi.transport.DGCAckHandler;
+
+        $r1 = r0.<sun.rmi.transport.DGCAckHandler: java.util.concurrent.Future task>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.rmi.transport.DGCAckHandler: java.util.concurrent.Future task>;
+
+        interfaceinvoke $r2.<java.util.concurrent.Future: boolean cancel(boolean)>(0);
+
+        r0.<sun.rmi.transport.DGCAckHandler: java.util.concurrent.Future task> = null;
+
+     label1:
+        r0.<sun.rmi.transport.DGCAckHandler: java.util.List objList> = null;
+
+        return;
+    }
+
+    public static void received(java.rmi.server.UID)
+    {
+        sun.rmi.transport.DGCAckHandler r3;
+        java.util.Map $r1;
+        java.lang.Object $r2;
+        java.rmi.server.UID r0;
+
+        r0 := @parameter0: java.rmi.server.UID;
+
+        $r1 = <sun.rmi.transport.DGCAckHandler: java.util.Map idTable>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.lang.Object remove(java.lang.Object)>(r0);
+
+        r3 = (sun.rmi.transport.DGCAckHandler) $r2;
+
+        if r3 == null goto label1;
+
+        virtualinvoke r3.<sun.rmi.transport.DGCAckHandler: void release()>();
+
+     label1:
+        return;
+    }
+
+    static java.rmi.server.UID access$000(sun.rmi.transport.DGCAckHandler)
+    {
+        sun.rmi.transport.DGCAckHandler r0;
+        java.rmi.server.UID $r1;
+
+        r0 := @parameter0: sun.rmi.transport.DGCAckHandler;
+
+        $r1 = r0.<sun.rmi.transport.DGCAckHandler: java.rmi.server.UID id>;
+
+        return $r1;
+    }
+
+    static java.util.Map access$100()
+    {
+        java.util.Map $r0;
+
+        $r0 = <sun.rmi.transport.DGCAckHandler: java.util.Map idTable>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.action.GetLongAction $r1;
+        long $l0;
+        java.util.concurrent.ScheduledThreadPoolExecutor $r7;
+        java.util.HashMap $r8;
+        sun.rmi.runtime.RuntimeUtil $r6;
+        sun.rmi.runtime.RuntimeUtil$GetInstanceAction $r4;
+        java.lang.Long $r3;
+        java.util.Map $r9;
+        java.lang.Class $r0;
+        java.lang.Object $r2, $r5;
+        boolean $z0, $z1;
+
+        $r0 = class "Lsun/rmi/transport/DGCAckHandler;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.rmi.transport.DGCAckHandler: boolean $assertionsDisabled> = $z1;
+
+        $r1 = new sun.security.action.GetLongAction;
+
+        specialinvoke $r1.<sun.security.action.GetLongAction: void <init>(java.lang.String,long)>("sun.rmi.dgc.ackTimeout", 300000L);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        $r3 = (java.lang.Long) $r2;
+
+        $l0 = virtualinvoke $r3.<java.lang.Long: long longValue()>();
+
+        <sun.rmi.transport.DGCAckHandler: long dgcAckTimeout> = $l0;
+
+        $r4 = new sun.rmi.runtime.RuntimeUtil$GetInstanceAction;
+
+        specialinvoke $r4.<sun.rmi.runtime.RuntimeUtil$GetInstanceAction: void <init>()>();
+
+        $r5 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r4);
+
+        $r6 = (sun.rmi.runtime.RuntimeUtil) $r5;
+
+        $r7 = virtualinvoke $r6.<sun.rmi.runtime.RuntimeUtil: java.util.concurrent.ScheduledThreadPoolExecutor getScheduler()>();
+
+        <sun.rmi.transport.DGCAckHandler: java.util.concurrent.ScheduledExecutorService scheduler> = $r7;
+
+        $r8 = new java.util.HashMap;
+
+        specialinvoke $r8.<java.util.HashMap: void <init>()>();
+
+        $r9 = staticinvoke <java.util.Collections: java.util.Map synchronizedMap(java.util.Map)>($r8);
+
+        <sun.rmi.transport.DGCAckHandler: java.util.Map idTable> = $r9;
+
+        return;
+    }
+}

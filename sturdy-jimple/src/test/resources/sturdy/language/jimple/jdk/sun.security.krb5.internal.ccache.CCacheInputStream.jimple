@@ -1,0 +1,1283 @@
+public class sun.security.krb5.internal.ccache.CCacheInputStream extends sun.security.krb5.internal.util.KrbDataInputStream implements sun.security.krb5.internal.ccache.FileCCacheConstants
+{
+    private static boolean DEBUG;
+
+    public void <init>(java.io.InputStream)
+    {
+        sun.security.krb5.internal.ccache.CCacheInputStream r0;
+        java.io.InputStream r1;
+
+        r0 := @this: sun.security.krb5.internal.ccache.CCacheInputStream;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        specialinvoke r0.<sun.security.krb5.internal.util.KrbDataInputStream: void <init>(java.io.InputStream)>(r1);
+
+        return;
+    }
+
+    public sun.security.krb5.internal.ccache.Tag readTag() throws java.io.IOException
+    {
+        sun.security.krb5.internal.ccache.Tag $r13;
+        java.lang.Integer r7, r8, $r11, $r12;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, i7, i8, $i10;
+        sun.security.krb5.internal.ccache.CCacheInputStream r1;
+        java.io.IOException $r9, $r10;
+        char[] r0;
+
+        r1 := @this: sun.security.krb5.internal.ccache.CCacheInputStream;
+
+        r0 = newarray (char)[1024];
+
+        $i10 = (int) -1;
+
+        i7 = $i10;
+
+        r7 = null;
+
+        r8 = null;
+
+        $i0 = virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheInputStream: int read(int)>(2);
+
+        i8 = $i0;
+
+        if $i0 >= 0 goto label1;
+
+        $r9 = new java.io.IOException;
+
+        specialinvoke $r9.<java.io.IOException: void <init>(java.lang.String)>("stop.");
+
+        throw $r9;
+
+     label1:
+        $i1 = lengthof r0;
+
+        if $i0 <= $i1 goto label2;
+
+        $r10 = new java.io.IOException;
+
+        specialinvoke $r10.<java.io.IOException: void <init>(java.lang.String)>("Invalid tag length.");
+
+        throw $r10;
+
+     label2:
+        if i8 <= 0 goto label5;
+
+        $i2 = virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheInputStream: int read(int)>(2);
+
+        i7 = $i2;
+
+        $i3 = virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheInputStream: int read(int)>(2);
+
+        lookupswitch($i2)
+        {
+            case 1: goto label3;
+            default: goto label4;
+        };
+
+     label3:
+        $r11 = new java.lang.Integer;
+
+        $i4 = virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheInputStream: int read(int)>(4);
+
+        specialinvoke $r11.<java.lang.Integer: void <init>(int)>($i4);
+
+        r7 = $r11;
+
+        $r12 = new java.lang.Integer;
+
+        $i5 = virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheInputStream: int read(int)>(4);
+
+        specialinvoke $r12.<java.lang.Integer: void <init>(int)>($i5);
+
+        r8 = $r12;
+
+        goto label4;
+
+     label4:
+        $i6 = 4 + $i3;
+
+        i8 = i8 - $i6;
+
+        goto label2;
+
+     label5:
+        $r13 = new sun.security.krb5.internal.ccache.Tag;
+
+        specialinvoke $r13.<sun.security.krb5.internal.ccache.Tag: void <init>(int,int,java.lang.Integer,java.lang.Integer)>(i8, i7, r7, r8);
+
+        return $r13;
+    }
+
+    public sun.security.krb5.PrincipalName readPrincipal(int) throws java.io.IOException, sun.security.krb5.RealmException
+    {
+        byte[] $r18;
+        sun.security.krb5.RealmException $r20;
+        boolean $z0, $z1, $z2;
+        java.lang.Object[] $r6, $r13;
+        sun.security.krb5.PrincipalName $r26, $r27;
+        java.lang.String[] $r5, $r7, $r12, $r15;
+        java.util.ArrayList $r21;
+        int i0, $i1, $i2, $i3, $i4, i5, i6, i7, $i9;
+        java.lang.String $r3, r10, $r22;
+        sun.security.krb5.internal.ccache.CCacheInputStream r0;
+        java.io.IOException $r23, $r24;
+        java.lang.Object $r2, $r9;
+        sun.security.krb5.Realm $r8, $r25;
+
+        r0 := @this: sun.security.krb5.internal.ccache.CCacheInputStream;
+
+        i0 := @parameter0: int;
+
+        if i0 != 1281 goto label01;
+
+        i5 = 0;
+
+        goto label02;
+
+     label01:
+        i5 = virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: int read(int)>(4);
+
+     label02:
+        $i1 = virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: int readLength4()>();
+
+        i6 = $i1;
+
+        $r21 = new java.util.ArrayList;
+
+        specialinvoke $r21.<java.util.ArrayList: void <init>()>();
+
+        if i0 != 1281 goto label03;
+
+        $i9 = (int) -1;
+
+        i6 = $i1 + $i9;
+
+     label03:
+        i7 = 0;
+
+     label04:
+        if i7 > i6 goto label05;
+
+        $i4 = virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: int readLength4()>();
+
+        $r18 = staticinvoke <sun.misc.IOUtils: byte[] readExactlyNBytes(java.io.InputStream,int)>(r0, $i4);
+
+        $r22 = new java.lang.String;
+
+        specialinvoke $r22.<java.lang.String: void <init>(byte[])>($r18);
+
+        interfaceinvoke $r21.<java.util.List: boolean add(java.lang.Object)>($r22);
+
+        i7 = i7 + 1;
+
+        goto label04;
+
+     label05:
+        $z0 = interfaceinvoke $r21.<java.util.List: boolean isEmpty()>();
+
+        if $z0 == 0 goto label06;
+
+        $r23 = new java.io.IOException;
+
+        specialinvoke $r23.<java.io.IOException: void <init>(java.lang.String)>("No realm or principal");
+
+        throw $r23;
+
+     label06:
+        $r2 = interfaceinvoke $r21.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r3 = (java.lang.String) $r2;
+
+        $z1 = virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: boolean isRealm(java.lang.String)>($r3);
+
+        if $z1 == 0 goto label08;
+
+        $r9 = interfaceinvoke $r21.<java.util.List: java.lang.Object remove(int)>(0);
+
+        r10 = (java.lang.String) $r9;
+
+        $z2 = interfaceinvoke $r21.<java.util.List: boolean isEmpty()>();
+
+        if $z2 == 0 goto label07;
+
+        $r24 = new java.io.IOException;
+
+        specialinvoke $r24.<java.io.IOException: void <init>(java.lang.String)>("No principal name components");
+
+        throw $r24;
+
+     label07:
+        $r26 = new sun.security.krb5.PrincipalName;
+
+        $i3 = interfaceinvoke $r21.<java.util.List: int size()>();
+
+        $r12 = newarray (java.lang.String)[$i3];
+
+        $r13 = interfaceinvoke $r21.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r12);
+
+        $r15 = (java.lang.String[]) $r13;
+
+        $r25 = new sun.security.krb5.Realm;
+
+        specialinvoke $r25.<sun.security.krb5.Realm: void <init>(java.lang.String)>(r10);
+
+        specialinvoke $r26.<sun.security.krb5.PrincipalName: void <init>(int,java.lang.String[],sun.security.krb5.Realm)>(i5, $r15, $r25);
+
+        return $r26;
+
+     label08:
+        $r27 = new sun.security.krb5.PrincipalName;
+
+        $i2 = interfaceinvoke $r21.<java.util.List: int size()>();
+
+        $r5 = newarray (java.lang.String)[$i2];
+
+        $r6 = interfaceinvoke $r21.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r5);
+
+        $r7 = (java.lang.String[]) $r6;
+
+        $r8 = staticinvoke <sun.security.krb5.Realm: sun.security.krb5.Realm getDefault()>();
+
+        specialinvoke $r27.<sun.security.krb5.PrincipalName: void <init>(int,java.lang.String[],sun.security.krb5.Realm)>(i5, $r7, $r8);
+
+     label09:
+        return $r27;
+
+     label10:
+        $r20 := @caughtexception;
+
+        return null;
+
+        catch sun.security.krb5.RealmException from label08 to label09 with label10;
+    }
+
+    boolean isRealm(java.lang.String)
+    {
+        sun.security.krb5.internal.ccache.CCacheInputStream r5;
+        char $c1;
+        java.lang.Exception $r4;
+        java.util.StringTokenizer $r7;
+        int $i0, i2, $i3;
+        sun.security.krb5.Realm $r6;
+        java.lang.String r1, $r3;
+        boolean $z0;
+
+        r5 := @this: sun.security.krb5.internal.ccache.CCacheInputStream;
+
+        r1 := @parameter0: java.lang.String;
+
+     label1:
+        $r6 = new sun.security.krb5.Realm;
+
+        specialinvoke $r6.<sun.security.krb5.Realm: void <init>(java.lang.String)>(r1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        return 0;
+
+     label4:
+        $r7 = new java.util.StringTokenizer;
+
+        specialinvoke $r7.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>(r1, ".");
+
+     label5:
+        $z0 = virtualinvoke $r7.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label9;
+
+        $r3 = virtualinvoke $r7.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        i2 = 0;
+
+     label6:
+        $i0 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        if i2 >= $i0 goto label8;
+
+        $c1 = virtualinvoke $r3.<java.lang.String: char charAt(int)>(i2);
+
+        $i3 = (int) $c1;
+
+        if $i3 < 141 goto label7;
+
+        return 0;
+
+     label7:
+        i2 = i2 + 1;
+
+        goto label6;
+
+     label8:
+        goto label5;
+
+     label9:
+        return 1;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    sun.security.krb5.EncryptionKey readKey(int) throws java.io.IOException
+    {
+        byte[] $r1;
+        sun.security.krb5.internal.ccache.CCacheInputStream r0;
+        int $i0, i1, $i2;
+        java.lang.Integer $r3;
+        sun.security.krb5.EncryptionKey $r2;
+
+        r0 := @this: sun.security.krb5.internal.ccache.CCacheInputStream;
+
+        i1 := @parameter0: int;
+
+        $i0 = virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: int read(int)>(2);
+
+        if i1 != 1283 goto label1;
+
+        virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: int read(int)>(2);
+
+     label1:
+        $i2 = virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: int readLength4()>();
+
+        $r1 = staticinvoke <sun.misc.IOUtils: byte[] readExactlyNBytes(java.io.InputStream,int)>(r0, $i2);
+
+        $r2 = new sun.security.krb5.EncryptionKey;
+
+        $r3 = new java.lang.Integer;
+
+        specialinvoke $r3.<java.lang.Integer: void <init>(int)>(i1);
+
+        specialinvoke $r2.<sun.security.krb5.EncryptionKey: void <init>(byte[],int,java.lang.Integer)>($r1, $i0, $r3);
+
+        return $r2;
+    }
+
+    long[] readTimes() throws java.io.IOException
+    {
+        sun.security.krb5.internal.ccache.CCacheInputStream r1;
+        long $l1, $l2, $l4, $l5, $l7, $l8, $l10, $l11;
+        long[] r0;
+        int $i0, $i3, $i6, $i9;
+
+        r1 := @this: sun.security.krb5.internal.ccache.CCacheInputStream;
+
+        r0 = newarray (long)[4];
+
+        $i0 = virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheInputStream: int read(int)>(4);
+
+        $l1 = (long) $i0;
+
+        $l2 = $l1 * 1000L;
+
+        r0[0] = $l2;
+
+        $i3 = virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheInputStream: int read(int)>(4);
+
+        $l4 = (long) $i3;
+
+        $l5 = $l4 * 1000L;
+
+        r0[1] = $l5;
+
+        $i6 = virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheInputStream: int read(int)>(4);
+
+        $l7 = (long) $i6;
+
+        $l8 = $l7 * 1000L;
+
+        r0[2] = $l8;
+
+        $i9 = virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheInputStream: int read(int)>(4);
+
+        $l10 = (long) $i9;
+
+        $l11 = $l10 * 1000L;
+
+        r0[3] = $l11;
+
+        return r0;
+    }
+
+    boolean readskey() throws java.io.IOException
+    {
+        int $i0;
+        sun.security.krb5.internal.ccache.CCacheInputStream r0;
+
+        r0 := @this: sun.security.krb5.internal.ccache.CCacheInputStream;
+
+        $i0 = virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: int read()>();
+
+        if $i0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        return 1;
+    }
+
+    sun.security.krb5.internal.HostAddress[] readAddr() throws java.io.IOException, sun.security.krb5.internal.KrbApErrException
+    {
+        byte[] $r6;
+        java.lang.Object[] $r3;
+        sun.security.krb5.internal.HostAddress[] $r2, $r4;
+        java.util.ArrayList $r1;
+        sun.security.krb5.internal.HostAddress $r5;
+        byte $b5;
+        int $i0, $i1, $i2, $i3, $i4, i6, i7;
+        boolean $z0;
+        java.io.PrintStream $r7;
+        sun.security.krb5.internal.ccache.CCacheInputStream r0;
+
+        r0 := @this: sun.security.krb5.internal.ccache.CCacheInputStream;
+
+        $i0 = virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: int readLength4()>();
+
+        if $i0 <= 0 goto label7;
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        i6 = 0;
+
+     label1:
+        if i6 >= $i0 goto label6;
+
+        $i2 = virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: int read(int)>(2);
+
+        $i3 = virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: int readLength4()>();
+
+        if $i3 == 4 goto label3;
+
+        if $i3 == 16 goto label3;
+
+        $z0 = <sun.security.krb5.internal.ccache.CCacheInputStream: boolean DEBUG>;
+
+        if $z0 == 0 goto label2;
+
+        $r7 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r7.<java.io.PrintStream: void println(java.lang.String)>("Incorrect address format.");
+
+     label2:
+        return null;
+
+     label3:
+        $r6 = newarray (byte)[$i3];
+
+        i7 = 0;
+
+     label4:
+        if i7 >= $i3 goto label5;
+
+        $i4 = virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: int read(int)>(1);
+
+        $b5 = (byte) $i4;
+
+        $r6[i7] = $b5;
+
+        i7 = i7 + 1;
+
+        goto label4;
+
+     label5:
+        $r5 = new sun.security.krb5.internal.HostAddress;
+
+        specialinvoke $r5.<sun.security.krb5.internal.HostAddress: void <init>(int,byte[])>($i2, $r6);
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>($r5);
+
+        i6 = i6 + 1;
+
+        goto label1;
+
+     label6:
+        $i1 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        $r2 = newarray (sun.security.krb5.internal.HostAddress)[$i1];
+
+        $r3 = interfaceinvoke $r1.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r2);
+
+        $r4 = (sun.security.krb5.internal.HostAddress[]) $r3;
+
+        return $r4;
+
+     label7:
+        return null;
+    }
+
+    sun.security.krb5.internal.AuthorizationDataEntry[] readAuth() throws java.io.IOException
+    {
+        byte[] $r5;
+        sun.security.krb5.internal.ccache.CCacheInputStream r0;
+        sun.security.krb5.internal.AuthorizationDataEntry $r6;
+        java.lang.Object[] $r3;
+        java.util.ArrayList $r1;
+        sun.security.krb5.internal.AuthorizationDataEntry[] $r2, $r4;
+        int $i0, $i1, $i2, $i3, i4;
+
+        r0 := @this: sun.security.krb5.internal.ccache.CCacheInputStream;
+
+        $i0 = virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: int readLength4()>();
+
+        if $i0 <= 0 goto label3;
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        i4 = 0;
+
+     label1:
+        if i4 >= $i0 goto label2;
+
+        $i2 = virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: int read(int)>(2);
+
+        $i3 = virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: int readLength4()>();
+
+        $r5 = staticinvoke <sun.misc.IOUtils: byte[] readExactlyNBytes(java.io.InputStream,int)>(r0, $i3);
+
+        $r6 = new sun.security.krb5.internal.AuthorizationDataEntry;
+
+        specialinvoke $r6.<sun.security.krb5.internal.AuthorizationDataEntry: void <init>(int,byte[])>($i2, $r5);
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>($r6);
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label2:
+        $i1 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        $r2 = newarray (sun.security.krb5.internal.AuthorizationDataEntry)[$i1];
+
+        $r3 = interfaceinvoke $r1.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r2);
+
+        $r4 = (sun.security.krb5.internal.AuthorizationDataEntry[]) $r3;
+
+        return $r4;
+
+     label3:
+        return null;
+    }
+
+    byte[] readData() throws java.io.IOException
+    {
+        int $i0;
+        byte[] $r1;
+        sun.security.krb5.internal.ccache.CCacheInputStream r0;
+
+        r0 := @this: sun.security.krb5.internal.ccache.CCacheInputStream;
+
+        $i0 = virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: int readLength4()>();
+
+        if $i0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r1 = staticinvoke <sun.misc.IOUtils: byte[] readExactlyNBytes(java.io.InputStream,int)>(r0, $i0);
+
+        return $r1;
+    }
+
+    boolean[] readFlags() throws java.io.IOException
+    {
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11;
+        java.lang.StringBuilder $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26, $r27, $r28, $r29, $r30, $r31, $r32, $r33, $r34, $r35;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11;
+        java.lang.String r36;
+        java.io.PrintStream $r2;
+        sun.security.krb5.internal.ccache.CCacheInputStream r1;
+        boolean[] r0;
+
+        r1 := @this: sun.security.krb5.internal.ccache.CCacheInputStream;
+
+        r0 = newarray (boolean)[32];
+
+        $i0 = virtualinvoke r1.<sun.security.krb5.internal.ccache.CCacheInputStream: int read(int)>(4);
+
+        $i1 = $i0 & 1073741824;
+
+        if $i1 != 1073741824 goto label01;
+
+        r0[1] = 1;
+
+     label01:
+        $i2 = $i0 & 536870912;
+
+        if $i2 != 536870912 goto label02;
+
+        r0[2] = 1;
+
+     label02:
+        $i3 = $i0 & 268435456;
+
+        if $i3 != 268435456 goto label03;
+
+        r0[3] = 1;
+
+     label03:
+        $i4 = $i0 & 134217728;
+
+        if $i4 != 134217728 goto label04;
+
+        r0[4] = 1;
+
+     label04:
+        $i5 = $i0 & 67108864;
+
+        if $i5 != 67108864 goto label05;
+
+        r0[5] = 1;
+
+     label05:
+        $i6 = $i0 & 33554432;
+
+        if $i6 != 33554432 goto label06;
+
+        r0[6] = 1;
+
+     label06:
+        $i7 = $i0 & 16777216;
+
+        if $i7 != 16777216 goto label07;
+
+        r0[7] = 1;
+
+     label07:
+        $i8 = $i0 & 8388608;
+
+        if $i8 != 8388608 goto label08;
+
+        r0[8] = 1;
+
+     label08:
+        $i9 = $i0 & 4194304;
+
+        if $i9 != 4194304 goto label09;
+
+        r0[9] = 1;
+
+     label09:
+        $i10 = $i0 & 2097152;
+
+        if $i10 != 2097152 goto label10;
+
+        r0[10] = 1;
+
+     label10:
+        $i11 = $i0 & 1048576;
+
+        if $i11 != 1048576 goto label11;
+
+        r0[11] = 1;
+
+     label11:
+        $z0 = <sun.security.krb5.internal.ccache.CCacheInputStream: boolean DEBUG>;
+
+        if $z0 == 0 goto label23;
+
+        r36 = ">>> CCacheInputStream: readFlags() ";
+
+        $z1 = r0[1];
+
+        if $z1 != 1 goto label12;
+
+        $r33 = new java.lang.StringBuilder;
+
+        specialinvoke $r33.<java.lang.StringBuilder: void <init>()>();
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">>> CCacheInputStream: readFlags() ");
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" FORWARDABLE;");
+
+        r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label12:
+        $z2 = r0[2];
+
+        if $z2 != 1 goto label13;
+
+        $r30 = new java.lang.StringBuilder;
+
+        specialinvoke $r30.<java.lang.StringBuilder: void <init>()>();
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r36);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" FORWARDED;");
+
+        r36 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label13:
+        $z3 = r0[3];
+
+        if $z3 != 1 goto label14;
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r36);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" PROXIABLE;");
+
+        r36 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label14:
+        $z4 = r0[4];
+
+        if $z4 != 1 goto label15;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r36);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" PROXY;");
+
+        r36 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label15:
+        $z5 = r0[5];
+
+        if $z5 != 1 goto label16;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r36);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" MAY_POSTDATE;");
+
+        r36 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label16:
+        $z6 = r0[6];
+
+        if $z6 != 1 goto label17;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r36);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" POSTDATED;");
+
+        r36 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label17:
+        $z7 = r0[7];
+
+        if $z7 != 1 goto label18;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r36);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" INVALID;");
+
+        r36 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label18:
+        $z8 = r0[8];
+
+        if $z8 != 1 goto label19;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r36);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" RENEWABLE;");
+
+        r36 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label19:
+        $z9 = r0[9];
+
+        if $z9 != 1 goto label20;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r36);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" INITIAL;");
+
+        r36 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label20:
+        $z10 = r0[10];
+
+        if $z10 != 1 goto label21;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r36);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" PRE_AUTH;");
+
+        r36 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label21:
+        $z11 = r0[11];
+
+        if $z11 != 1 goto label22;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r36);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" HW_AUTH;");
+
+        r36 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label22:
+        $r2 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>(r36);
+
+     label23:
+        return r0;
+    }
+
+    java.lang.Object readCred(int) throws java.io.IOException, sun.security.krb5.RealmException, sun.security.krb5.internal.KrbApErrException, sun.security.krb5.Asn1Exception
+    {
+        byte[] $r8, $r9;
+        byte $b3, $b7;
+        sun.security.krb5.EncryptionKey $r1;
+        java.lang.Exception $r60, $r62, $r63;
+        java.lang.StringBuilder $r19, $r21, $r24, $r26, $r28, $r30, $r32, $r34, $r37, $r39, $r41, $r43, $r45, $r47, $r48, $r50, $r52, $r53, $r55, $r57, $r58;
+        sun.security.krb5.internal.HostAddress[] $r72;
+        long $l1, $l2, $l4, $l5, $l6, $l8;
+        sun.security.krb5.internal.KerberosTime $r3, r4, $r5, r6, $r66, $r67;
+        java.lang.String $r10, $r13, $r15, $r16, $r23, $r25, $r31, $r36, $r38, $r44, $r49, $r54, $r59, $r68, $r69;
+        sun.security.krb5.internal.ccache.CCacheInputStream r0;
+        boolean[] $r70;
+        sun.security.krb5.internal.AuthorizationData $r17, r74, $r80;
+        java.util.Date $r22, $r29, $r35, $r42;
+        sun.security.krb5.internal.ccache.Credentials $r76;
+        sun.security.krb5.internal.TicketFlags $r71;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        sun.security.krb5.internal.AuthorizationDataEntry[] $r7;
+        sun.security.krb5.PrincipalName r64, r65, $r75, $r77, $r78;
+        java.lang.String[] $r12;
+        sun.security.krb5.internal.Ticket $r11, $r81, $r82, $r83;
+        sun.security.krb5.internal.HostAddresses $r18, r73, $r79;
+        sun.security.krb5.internal.ccache.CredentialsCache$ConfigEntry $r14;
+        long[] $r2;
+        int i0, $i9, $i10;
+        java.io.PrintStream $r20, $r27, $r33, $r40, $r46, $r51, $r56, $r61;
+
+        r0 := @this: sun.security.krb5.internal.ccache.CCacheInputStream;
+
+        i0 := @parameter0: int;
+
+        r64 = null;
+
+     label01:
+        r64 = virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: sun.security.krb5.PrincipalName readPrincipal(int)>(i0);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r63 := @caughtexception;
+
+     label04:
+        $z0 = <sun.security.krb5.internal.ccache.CCacheInputStream: boolean DEBUG>;
+
+        if $z0 == 0 goto label05;
+
+        $r56 = <java.lang.System: java.io.PrintStream out>;
+
+        $r55 = new java.lang.StringBuilder;
+
+        specialinvoke $r55.<java.lang.StringBuilder: void <init>()>();
+
+        $r57 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">>>DEBUG <CCacheInputStream>  client principal is ");
+
+        $r58 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r64);
+
+        $r59 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r56.<java.io.PrintStream: void println(java.lang.String)>($r59);
+
+     label05:
+        r65 = null;
+
+     label06:
+        r65 = virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: sun.security.krb5.PrincipalName readPrincipal(int)>(i0);
+
+     label07:
+        goto label09;
+
+     label08:
+        $r62 := @caughtexception;
+
+     label09:
+        $z1 = <sun.security.krb5.internal.ccache.CCacheInputStream: boolean DEBUG>;
+
+        if $z1 == 0 goto label10;
+
+        $r51 = <java.lang.System: java.io.PrintStream out>;
+
+        $r50 = new java.lang.StringBuilder;
+
+        specialinvoke $r50.<java.lang.StringBuilder: void <init>()>();
+
+        $r52 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">>>DEBUG <CCacheInputStream> server principal is ");
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r65);
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r51.<java.io.PrintStream: void println(java.lang.String)>($r54);
+
+     label10:
+        $r1 = virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: sun.security.krb5.EncryptionKey readKey(int)>(i0);
+
+        $z2 = <sun.security.krb5.internal.ccache.CCacheInputStream: boolean DEBUG>;
+
+        if $z2 == 0 goto label11;
+
+        $r46 = <java.lang.System: java.io.PrintStream out>;
+
+        $r45 = new java.lang.StringBuilder;
+
+        specialinvoke $r45.<java.lang.StringBuilder: void <init>()>();
+
+        $r47 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">>>DEBUG <CCacheInputStream> key type: ");
+
+        $i10 = virtualinvoke $r1.<sun.security.krb5.EncryptionKey: int getEType()>();
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i10);
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r46.<java.io.PrintStream: void println(java.lang.String)>($r49);
+
+     label11:
+        $r2 = virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: long[] readTimes()>();
+
+        $r3 = new sun.security.krb5.internal.KerberosTime;
+
+        $l1 = $r2[0];
+
+        specialinvoke $r3.<sun.security.krb5.internal.KerberosTime: void <init>(long)>($l1);
+
+        $l2 = $r2[1];
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 != 0 goto label12;
+
+        $r66 = null;
+
+        goto label13;
+
+     label12:
+        $r66 = new sun.security.krb5.internal.KerberosTime;
+
+        $l4 = $r2[1];
+
+        specialinvoke $r66.<sun.security.krb5.internal.KerberosTime: void <init>(long)>($l4);
+
+     label13:
+        r4 = $r66;
+
+        $r5 = new sun.security.krb5.internal.KerberosTime;
+
+        $l5 = $r2[2];
+
+        specialinvoke $r5.<sun.security.krb5.internal.KerberosTime: void <init>(long)>($l5);
+
+        $l6 = $r2[3];
+
+        $b7 = $l6 cmp 0L;
+
+        if $b7 != 0 goto label14;
+
+        $r67 = null;
+
+        goto label15;
+
+     label14:
+        $r67 = new sun.security.krb5.internal.KerberosTime;
+
+        $l8 = $r2[3];
+
+        specialinvoke $r67.<sun.security.krb5.internal.KerberosTime: void <init>(long)>($l8);
+
+     label15:
+        r6 = $r67;
+
+        $z3 = <sun.security.krb5.internal.ccache.CCacheInputStream: boolean DEBUG>;
+
+        if $z3 == 0 goto label20;
+
+        $r20 = <java.lang.System: java.io.PrintStream out>;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">>>DEBUG <CCacheInputStream> auth time: ");
+
+        $r22 = virtualinvoke $r3.<sun.security.krb5.internal.KerberosTime: java.util.Date toDate()>();
+
+        $r23 = virtualinvoke $r22.<java.util.Date: java.lang.String toString()>();
+
+        $r24 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r23);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r20.<java.io.PrintStream: void println(java.lang.String)>($r25);
+
+        $r27 = <java.lang.System: java.io.PrintStream out>;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r28 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">>>DEBUG <CCacheInputStream> start time: ");
+
+        if r4 != null goto label16;
+
+        $r68 = "null";
+
+        goto label17;
+
+     label16:
+        $r29 = virtualinvoke r4.<sun.security.krb5.internal.KerberosTime: java.util.Date toDate()>();
+
+        $r68 = virtualinvoke $r29.<java.util.Date: java.lang.String toString()>();
+
+     label17:
+        $r30 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r68);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r27.<java.io.PrintStream: void println(java.lang.String)>($r31);
+
+        $r33 = <java.lang.System: java.io.PrintStream out>;
+
+        $r32 = new java.lang.StringBuilder;
+
+        specialinvoke $r32.<java.lang.StringBuilder: void <init>()>();
+
+        $r34 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">>>DEBUG <CCacheInputStream> end time: ");
+
+        $r35 = virtualinvoke $r5.<sun.security.krb5.internal.KerberosTime: java.util.Date toDate()>();
+
+        $r36 = virtualinvoke $r35.<java.util.Date: java.lang.String toString()>();
+
+        $r37 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r36);
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r33.<java.io.PrintStream: void println(java.lang.String)>($r38);
+
+        $r40 = <java.lang.System: java.io.PrintStream out>;
+
+        $r39 = new java.lang.StringBuilder;
+
+        specialinvoke $r39.<java.lang.StringBuilder: void <init>()>();
+
+        $r41 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">>>DEBUG <CCacheInputStream> renew_till time: ");
+
+        if r6 != null goto label18;
+
+        $r69 = "null";
+
+        goto label19;
+
+     label18:
+        $r42 = virtualinvoke r6.<sun.security.krb5.internal.KerberosTime: java.util.Date toDate()>();
+
+        $r69 = virtualinvoke $r42.<java.util.Date: java.lang.String toString()>();
+
+     label19:
+        $r43 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r69);
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r40.<java.io.PrintStream: void println(java.lang.String)>($r44);
+
+     label20:
+        $z7 = virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: boolean readskey()>();
+
+        $r70 = virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: boolean[] readFlags()>();
+
+        $r71 = new sun.security.krb5.internal.TicketFlags;
+
+        specialinvoke $r71.<sun.security.krb5.internal.TicketFlags: void <init>(boolean[])>($r70);
+
+        $r72 = virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: sun.security.krb5.internal.HostAddress[] readAddr()>();
+
+        r73 = null;
+
+        if $r72 == null goto label21;
+
+        $r18 = new sun.security.krb5.internal.HostAddresses;
+
+        specialinvoke $r18.<sun.security.krb5.internal.HostAddresses: void <init>(sun.security.krb5.internal.HostAddress[])>($r72);
+
+        r73 = $r18;
+
+     label21:
+        $r7 = virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: sun.security.krb5.internal.AuthorizationDataEntry[] readAuth()>();
+
+        r74 = null;
+
+        if $r7 == null goto label22;
+
+        $r17 = new sun.security.krb5.internal.AuthorizationData;
+
+        specialinvoke $r17.<sun.security.krb5.internal.AuthorizationData: void <init>(sun.security.krb5.internal.AuthorizationDataEntry[])>($r7);
+
+        r74 = $r17;
+
+     label22:
+        $r8 = virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: byte[] readData()>();
+
+        $r9 = virtualinvoke r0.<sun.security.krb5.internal.ccache.CCacheInputStream: byte[] readData()>();
+
+        if r64 == null goto label23;
+
+        if r65 != null goto label24;
+
+     label23:
+        return null;
+
+     label24:
+        $r10 = virtualinvoke r65.<sun.security.krb5.PrincipalName: java.lang.String getRealmString()>();
+
+        $z4 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>("X-CACHECONF:");
+
+        if $z4 == 0 goto label28;
+
+        $r12 = virtualinvoke r65.<sun.security.krb5.PrincipalName: java.lang.String[] getNameStrings()>();
+
+        $r13 = $r12[0];
+
+        $z5 = virtualinvoke $r13.<java.lang.String: boolean equals(java.lang.Object)>("krb5_ccache_conf_data");
+
+        if $z5 == 0 goto label28;
+
+        $r14 = new sun.security.krb5.internal.ccache.CredentialsCache$ConfigEntry;
+
+        $r15 = $r12[1];
+
+        $i9 = lengthof $r12;
+
+        if $i9 <= 2 goto label25;
+
+        $r75 = new sun.security.krb5.PrincipalName;
+
+        $r16 = $r12[2];
+
+        specialinvoke $r75.<sun.security.krb5.PrincipalName: void <init>(java.lang.String)>($r16);
+
+        goto label26;
+
+     label25:
+        $r75 = null;
+
+     label26:
+        specialinvoke $r14.<sun.security.krb5.internal.ccache.CredentialsCache$ConfigEntry: void <init>(java.lang.String,sun.security.krb5.PrincipalName,byte[])>($r15, $r75, $r8);
+
+     label27:
+        return $r14;
+
+     label28:
+        $r76 = new sun.security.krb5.internal.ccache.Credentials;
+
+        $r77 = r64;
+
+        $r78 = r65;
+
+        $r79 = r73;
+
+        $r80 = r74;
+
+        if $r8 == null goto label29;
+
+        $r11 = new sun.security.krb5.internal.Ticket;
+
+        $r81 = $r11;
+
+        specialinvoke $r11.<sun.security.krb5.internal.Ticket: void <init>(byte[])>($r8);
+
+        goto label30;
+
+     label29:
+        $r81 = null;
+
+     label30:
+        if $r9 == null goto label31;
+
+        $r82 = new sun.security.krb5.internal.Ticket;
+
+        $r83 = $r82;
+
+        specialinvoke $r82.<sun.security.krb5.internal.Ticket: void <init>(byte[])>($r9);
+
+        goto label32;
+
+     label31:
+        $r83 = null;
+
+     label32:
+        specialinvoke $r76.<sun.security.krb5.internal.ccache.Credentials: void <init>(sun.security.krb5.PrincipalName,sun.security.krb5.PrincipalName,sun.security.krb5.EncryptionKey,sun.security.krb5.internal.KerberosTime,sun.security.krb5.internal.KerberosTime,sun.security.krb5.internal.KerberosTime,sun.security.krb5.internal.KerberosTime,boolean,sun.security.krb5.internal.TicketFlags,sun.security.krb5.internal.HostAddresses,sun.security.krb5.internal.AuthorizationData,sun.security.krb5.internal.Ticket,sun.security.krb5.internal.Ticket)>($r77, $r78, $r1, $r3, r4, $r5, r6, $z7, $r71, $r79, $r80, $r81, $r83);
+
+     label33:
+        return $r76;
+
+     label34:
+        $r60 := @caughtexception;
+
+        $z6 = <sun.security.krb5.internal.ccache.CCacheInputStream: boolean DEBUG>;
+
+        if $z6 == 0 goto label35;
+
+        $r61 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r60.<java.lang.Exception: void printStackTrace(java.io.PrintStream)>($r61);
+
+     label35:
+        return null;
+
+        catch java.lang.Exception from label01 to label02 with label03;
+        catch java.lang.Exception from label06 to label07 with label08;
+        catch java.lang.Exception from label24 to label27 with label34;
+        catch java.lang.Exception from label28 to label33 with label34;
+    }
+
+    static void <clinit>()
+    {
+        boolean $z0;
+
+        $z0 = <sun.security.krb5.internal.Krb5: boolean DEBUG>;
+
+        <sun.security.krb5.internal.ccache.CCacheInputStream: boolean DEBUG> = $z0;
+
+        return;
+    }
+}

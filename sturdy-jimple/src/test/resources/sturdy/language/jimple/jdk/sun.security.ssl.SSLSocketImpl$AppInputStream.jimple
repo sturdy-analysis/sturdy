@@ -1,0 +1,675 @@
+class sun.security.ssl.SSLSocketImpl$AppInputStream extends java.io.InputStream
+{
+    private final byte[] oneByte;
+    private java.nio.ByteBuffer buffer;
+    private volatile boolean appDataIsAvailable;
+    final sun.security.ssl.SSLSocketImpl this$0;
+
+    void <init>(sun.security.ssl.SSLSocketImpl)
+    {
+        byte[] $r2;
+        sun.security.ssl.SSLSocketImpl$AppInputStream r0;
+        sun.security.ssl.SSLSocketImpl r1;
+        java.nio.ByteBuffer $r3;
+
+        r0 := @this: sun.security.ssl.SSLSocketImpl$AppInputStream;
+
+        r1 := @parameter0: sun.security.ssl.SSLSocketImpl;
+
+        r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0> = r1;
+
+        specialinvoke r0.<java.io.InputStream: void <init>()>();
+
+        $r2 = newarray (byte)[1];
+
+        r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: byte[] oneByte> = $r2;
+
+        r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: boolean appDataIsAvailable> = 0;
+
+        $r3 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer allocate(int)>(4096);
+
+        r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: java.nio.ByteBuffer buffer> = $r3;
+
+        return;
+    }
+
+    public int available() throws java.io.IOException
+    {
+        sun.security.ssl.SSLSocketImpl$AppInputStream r0;
+        int $i0;
+        java.nio.ByteBuffer $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.security.ssl.SSLSocketImpl$AppInputStream;
+
+        $z0 = r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: boolean appDataIsAvailable>;
+
+        if $z0 == 0 goto label1;
+
+        $z1 = specialinvoke r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: boolean checkEOF()>();
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $r1 = r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: java.nio.ByteBuffer buffer>;
+
+        $i0 = virtualinvoke $r1.<java.nio.ByteBuffer: int remaining()>();
+
+        return $i0;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        byte[] $r1, $r2;
+        short $s2, $s5;
+        byte $b1;
+        sun.security.ssl.SSLSocketImpl$AppInputStream r0;
+        int $i0, $i4, $i6;
+
+        r0 := @this: sun.security.ssl.SSLSocketImpl$AppInputStream;
+
+        $r1 = r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: byte[] oneByte>;
+
+        $i0 = virtualinvoke r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: int read(byte[],int,int)>($r1, 0, 1);
+
+        if $i0 > 0 goto label1;
+
+        $i4 = (int) -1;
+
+        return $i4;
+
+     label1:
+        $r2 = r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: byte[] oneByte>;
+
+        $b1 = $r2[0];
+
+        $s5 = (short) $b1;
+
+        $s2 = $s5 & 255;
+
+        $i6 = (int) $s2;
+
+        return $i6;
+    }
+
+    public int read(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r0;
+        java.lang.IndexOutOfBoundsException $r38;
+        java.nio.ByteBuffer $r8, $r10, $r11, $r12;
+        java.lang.NullPointerException $r36;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        java.lang.Exception $r22;
+        sun.security.ssl.SSLSocketImpl$AppInputStream r1;
+        sun.security.ssl.SSLSocketImpl $r2, $r4, $r6, $r9, $r13, $r15, $r17, $r19, $r23, $r33;
+        java.lang.StringBuilder $r26, $r27, $r28, $r29, $r30, $r31, $r37;
+        java.lang.Throwable $r21;
+        java.net.SocketException $r39;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i10, $i12, $i14;
+        java.lang.String $r32;
+        sun.security.ssl.TransportContext $r3, $r5, $r7, $r14, $r16, $r18, $r34;
+
+        r1 := @this: sun.security.ssl.SSLSocketImpl$AppInputStream;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        if r0 != null goto label01;
+
+        $r36 = new java.lang.NullPointerException;
+
+        specialinvoke $r36.<java.lang.NullPointerException: void <init>(java.lang.String)>("the target buffer is null");
+
+        throw $r36;
+
+     label01:
+        if i0 < 0 goto label02;
+
+        if i1 < 0 goto label02;
+
+        $i2 = lengthof r0;
+
+        $i3 = $i2 - i0;
+
+        if i1 <= $i3 goto label03;
+
+     label02:
+        $r38 = new java.lang.IndexOutOfBoundsException;
+
+        $r37 = new java.lang.StringBuilder;
+
+        specialinvoke $r37.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("buffer length: ");
+
+        $i8 = lengthof r0;
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i8);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", offset; ");
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", bytes to read:");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r38.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>($r32);
+
+        throw $r38;
+
+     label03:
+        if i1 != 0 goto label04;
+
+        return 0;
+
+     label04:
+        $z0 = specialinvoke r1.<sun.security.ssl.SSLSocketImpl$AppInputStream: boolean checkEOF()>();
+
+        if $z0 == 0 goto label05;
+
+        $i10 = (int) -1;
+
+        return $i10;
+
+     label05:
+        $r2 = r1.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0>;
+
+        $r3 = $r2.<sun.security.ssl.SSLSocketImpl: sun.security.ssl.TransportContext conContext>;
+
+        $z1 = $r3.<sun.security.ssl.TransportContext: boolean isNegotiated>;
+
+        if $z1 != 0 goto label06;
+
+        $r13 = r1.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0>;
+
+        $r14 = $r13.<sun.security.ssl.SSLSocketImpl: sun.security.ssl.TransportContext conContext>;
+
+        $z4 = $r14.<sun.security.ssl.TransportContext: boolean isBroken>;
+
+        if $z4 != 0 goto label06;
+
+        $r15 = r1.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0>;
+
+        $r16 = $r15.<sun.security.ssl.SSLSocketImpl: sun.security.ssl.TransportContext conContext>;
+
+        $z5 = virtualinvoke $r16.<sun.security.ssl.TransportContext: boolean isInboundClosed()>();
+
+        if $z5 != 0 goto label06;
+
+        $r17 = r1.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0>;
+
+        $r18 = $r17.<sun.security.ssl.SSLSocketImpl: sun.security.ssl.TransportContext conContext>;
+
+        $z6 = virtualinvoke $r18.<sun.security.ssl.TransportContext: boolean isOutboundClosed()>();
+
+        if $z6 != 0 goto label06;
+
+        $r19 = r1.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0>;
+
+        staticinvoke <sun.security.ssl.SSLSocketImpl: void access$200(sun.security.ssl.SSLSocketImpl,boolean)>($r19, 1);
+
+     label06:
+        $r33 = r1.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0>;
+
+        $r34 = $r33.<sun.security.ssl.SSLSocketImpl: sun.security.ssl.TransportContext conContext>;
+
+        $z7 = $r34.<sun.security.ssl.TransportContext: boolean isNegotiated>;
+
+        if $z7 == 0 goto label07;
+
+        $r4 = r1.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0>;
+
+        $r5 = $r4.<sun.security.ssl.SSLSocketImpl: sun.security.ssl.TransportContext conContext>;
+
+        $z2 = $r5.<sun.security.ssl.TransportContext: boolean isBroken>;
+
+        if $z2 != 0 goto label07;
+
+        $r6 = r1.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0>;
+
+        $r7 = $r6.<sun.security.ssl.SSLSocketImpl: sun.security.ssl.TransportContext conContext>;
+
+        $z3 = virtualinvoke $r7.<sun.security.ssl.TransportContext: boolean isInboundClosed()>();
+
+        if $z3 == 0 goto label08;
+
+     label07:
+        $r39 = new java.net.SocketException;
+
+        specialinvoke $r39.<java.net.SocketException: void <init>(java.lang.String)>("Connection or inbound has closed");
+
+        throw $r39;
+
+     label08:
+        entermonitor r1;
+
+     label09:
+        $i4 = virtualinvoke r1.<sun.security.ssl.SSLSocketImpl$AppInputStream: int available()>();
+
+        if $i4 <= 0 goto label11;
+
+        $i7 = staticinvoke <java.lang.Math: int min(int,int)>($i4, i1);
+
+        $r12 = r1.<sun.security.ssl.SSLSocketImpl$AppInputStream: java.nio.ByteBuffer buffer>;
+
+        virtualinvoke $r12.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[],int,int)>(r0, i0, $i7);
+
+        exitmonitor r1;
+
+     label10:
+        return $i7;
+
+     label11:
+        r1.<sun.security.ssl.SSLSocketImpl$AppInputStream: boolean appDataIsAvailable> = 0;
+
+     label12:
+        $r9 = r1.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0>;
+
+        $r8 = r1.<sun.security.ssl.SSLSocketImpl$AppInputStream: java.nio.ByteBuffer buffer>;
+
+        $r10 = staticinvoke <sun.security.ssl.SSLSocketImpl: java.nio.ByteBuffer access$300(sun.security.ssl.SSLSocketImpl,java.nio.ByteBuffer)>($r9, $r8);
+
+        if $r10 != null goto label15;
+
+     label13:
+        exitmonitor r1;
+
+     label14:
+        $i12 = (int) -1;
+
+        return $i12;
+
+     label15:
+        r1.<sun.security.ssl.SSLSocketImpl$AppInputStream: java.nio.ByteBuffer buffer> = $r10;
+
+        virtualinvoke $r10.<java.nio.ByteBuffer: java.nio.Buffer flip()>();
+
+        $i5 = virtualinvoke $r10.<java.nio.ByteBuffer: int remaining()>();
+
+        $i6 = staticinvoke <java.lang.Math: int min(int,int)>(i1, $i5);
+
+        $r11 = r1.<sun.security.ssl.SSLSocketImpl$AppInputStream: java.nio.ByteBuffer buffer>;
+
+        virtualinvoke $r11.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[],int,int)>(r0, i0, $i6);
+
+        r1.<sun.security.ssl.SSLSocketImpl$AppInputStream: boolean appDataIsAvailable> = 1;
+
+     label16:
+        exitmonitor r1;
+
+     label17:
+        return $i6;
+
+     label18:
+        $r22 := @caughtexception;
+
+        $r23 = r1.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0>;
+
+        staticinvoke <sun.security.ssl.SSLSocketImpl: void access$400(sun.security.ssl.SSLSocketImpl,java.lang.Exception)>($r23, $r22);
+
+        exitmonitor r1;
+
+     label19:
+        $i14 = (int) -1;
+
+        return $i14;
+
+     label20:
+        $r21 := @caughtexception;
+
+        exitmonitor r1;
+
+     label21:
+        throw $r21;
+
+        catch java.lang.Exception from label12 to label13 with label18;
+        catch java.lang.Exception from label15 to label16 with label18;
+        catch java.lang.Throwable from label09 to label10 with label20;
+        catch java.lang.Throwable from label11 to label14 with label20;
+        catch java.lang.Throwable from label15 to label17 with label20;
+        catch java.lang.Throwable from label18 to label19 with label20;
+        catch java.lang.Throwable from label20 to label21 with label20;
+    }
+
+    public synchronized long skip(long) throws java.io.IOException
+    {
+        byte[] r0;
+        long $l2, $l3, $l6, $l7, l8, l9;
+        byte $b0;
+        sun.security.ssl.SSLSocketImpl$AppInputStream r1;
+        int $i1, i4, $i5, $i10;
+
+        r1 := @this: sun.security.ssl.SSLSocketImpl$AppInputStream;
+
+        l8 := @parameter0: long;
+
+        r0 = newarray (byte)[256];
+
+        l9 = 0L;
+
+     label1:
+        $b0 = l8 cmp 0L;
+
+        $i10 = (int) $b0;
+
+        if $i10 <= 0 goto label3;
+
+        $i1 = lengthof r0;
+
+        $l2 = (long) $i1;
+
+        $l3 = staticinvoke <java.lang.Math: long min(long,long)>(l8, $l2);
+
+        i4 = (int) $l3;
+
+        $i5 = virtualinvoke r1.<sun.security.ssl.SSLSocketImpl$AppInputStream: int read(byte[],int,int)>(r0, 0, i4);
+
+        if $i5 > 0 goto label2;
+
+        goto label3;
+
+     label2:
+        $l6 = (long) $i5;
+
+        l8 = l8 - $l6;
+
+        $l7 = (long) $i5;
+
+        l9 = l9 + $l7;
+
+        goto label1;
+
+     label3:
+        return l9;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        java.lang.Object[] $r1, $r3;
+        java.io.IOException $r2;
+        sun.security.ssl.SSLSocketImpl$AppInputStream r0;
+        sun.security.ssl.SSLSocketImpl $r4;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: sun.security.ssl.SSLSocketImpl$AppInputStream;
+
+        $z0 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z0 == 0 goto label1;
+
+        $z1 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl");
+
+        if $z1 == 0 goto label1;
+
+        $r1 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>("Closing input stream", $r1);
+
+     label1:
+        $r4 = r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0>;
+
+        virtualinvoke $r4.<sun.security.ssl.SSLSocketImpl: void close()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $z2 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z2 == 0 goto label4;
+
+        $z3 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl");
+
+        if $z3 == 0 goto label4;
+
+        $r3 = newarray (java.lang.Object)[1];
+
+        $r3[0] = $r2;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void warning(java.lang.String,java.lang.Object[])>("input stream close failed", $r3);
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    private boolean checkEOF() throws java.io.IOException
+    {
+        boolean $z0, $z1, $z2;
+        java.lang.Exception $r9, $r15, $r20, $r23, $r29, $r34;
+        javax.net.ssl.SSLException $r10, $r24;
+        sun.security.ssl.SSLSocketImpl$AppInputStream r0;
+        sun.security.ssl.SSLSocketImpl $r1, $r3, $r5, $r7, $r13, $r18, $r21, $r27, $r32;
+        java.lang.StringBuilder $r11, $r12, $r16, $r25, $r26, $r30;
+        java.lang.String $r17, $r31;
+        sun.security.ssl.TransportContext $r2, $r4, $r6, $r8, $r14, $r19, $r22, $r28, $r33;
+
+        r0 := @this: sun.security.ssl.SSLSocketImpl$AppInputStream;
+
+        $r1 = r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0>;
+
+        $r2 = $r1.<sun.security.ssl.SSLSocketImpl: sun.security.ssl.TransportContext conContext>;
+
+        $z0 = $r2.<sun.security.ssl.TransportContext: boolean isBroken>;
+
+        if $z0 == 0 goto label2;
+
+        $r21 = r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0>;
+
+        $r22 = $r21.<sun.security.ssl.SSLSocketImpl: sun.security.ssl.TransportContext conContext>;
+
+        $r23 = $r22.<sun.security.ssl.TransportContext: java.lang.Exception closeReason>;
+
+        if $r23 != null goto label1;
+
+        return 1;
+
+     label1:
+        $r24 = new javax.net.ssl.SSLException;
+
+        $r25 = new java.lang.StringBuilder;
+
+        specialinvoke $r25.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Connection has closed: ");
+
+        $r27 = r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0>;
+
+        $r28 = $r27.<sun.security.ssl.SSLSocketImpl: sun.security.ssl.TransportContext conContext>;
+
+        $r29 = $r28.<sun.security.ssl.TransportContext: java.lang.Exception closeReason>;
+
+        $r30 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r29);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r32 = r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0>;
+
+        $r33 = $r32.<sun.security.ssl.SSLSocketImpl: sun.security.ssl.TransportContext conContext>;
+
+        $r34 = $r33.<sun.security.ssl.TransportContext: java.lang.Exception closeReason>;
+
+        specialinvoke $r24.<javax.net.ssl.SSLException: void <init>(java.lang.String,java.lang.Throwable)>($r31, $r34);
+
+        throw $r24;
+
+     label2:
+        $r3 = r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0>;
+
+        $r4 = $r3.<sun.security.ssl.SSLSocketImpl: sun.security.ssl.TransportContext conContext>;
+
+        $z1 = virtualinvoke $r4.<sun.security.ssl.TransportContext: boolean isInboundClosed()>();
+
+        if $z1 == 0 goto label3;
+
+        return 1;
+
+     label3:
+        $r5 = r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0>;
+
+        $r6 = $r5.<sun.security.ssl.SSLSocketImpl: sun.security.ssl.TransportContext conContext>;
+
+        $z2 = $r6.<sun.security.ssl.TransportContext: boolean isInputCloseNotified>;
+
+        if $z2 == 0 goto label5;
+
+        $r7 = r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0>;
+
+        $r8 = $r7.<sun.security.ssl.SSLSocketImpl: sun.security.ssl.TransportContext conContext>;
+
+        $r9 = $r8.<sun.security.ssl.TransportContext: java.lang.Exception closeReason>;
+
+        if $r9 != null goto label4;
+
+        return 1;
+
+     label4:
+        $r10 = new javax.net.ssl.SSLException;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Connection has closed: ");
+
+        $r13 = r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0>;
+
+        $r14 = $r13.<sun.security.ssl.SSLSocketImpl: sun.security.ssl.TransportContext conContext>;
+
+        $r15 = $r14.<sun.security.ssl.TransportContext: java.lang.Exception closeReason>;
+
+        $r16 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r18 = r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0>;
+
+        $r19 = $r18.<sun.security.ssl.SSLSocketImpl: sun.security.ssl.TransportContext conContext>;
+
+        $r20 = $r19.<sun.security.ssl.TransportContext: java.lang.Exception closeReason>;
+
+        specialinvoke $r10.<javax.net.ssl.SSLException: void <init>(java.lang.String,java.lang.Throwable)>($r17, $r20);
+
+        throw $r10;
+
+     label5:
+        return 0;
+    }
+
+    private synchronized void deplete()
+    {
+        java.lang.Object[] $r14;
+        int $i0;
+        sun.security.ssl.InputRecord $r5, $r8;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        sun.security.ssl.SSLSocketInputRecord r9;
+        java.io.IOException $r13;
+        sun.security.ssl.TransportContext $r2, $r4, $r7, $r11;
+        sun.security.ssl.SSLSocketImpl$AppInputStream r0;
+        sun.security.ssl.SSLSocketImpl $r1, $r3, $r6, $r10, $r12;
+
+        r0 := @this: sun.security.ssl.SSLSocketImpl$AppInputStream;
+
+        $r1 = r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0>;
+
+        $r2 = $r1.<sun.security.ssl.SSLSocketImpl: sun.security.ssl.TransportContext conContext>;
+
+        $z0 = virtualinvoke $r2.<sun.security.ssl.TransportContext: boolean isInboundClosed()>();
+
+        if $z0 != 0 goto label7;
+
+        $r3 = r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0>;
+
+        $r4 = $r3.<sun.security.ssl.SSLSocketImpl: sun.security.ssl.TransportContext conContext>;
+
+        $r5 = $r4.<sun.security.ssl.TransportContext: sun.security.ssl.InputRecord inputRecord>;
+
+        $z1 = $r5 instanceof sun.security.ssl.SSLSocketInputRecord;
+
+        if $z1 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r6 = r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0>;
+
+        $r7 = $r6.<sun.security.ssl.SSLSocketImpl: sun.security.ssl.TransportContext conContext>;
+
+        $r8 = $r7.<sun.security.ssl.TransportContext: sun.security.ssl.InputRecord inputRecord>;
+
+        r9 = (sun.security.ssl.SSLSocketInputRecord) $r8;
+
+     label2:
+        $r10 = r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0>;
+
+        $r11 = $r10.<sun.security.ssl.SSLSocketImpl: sun.security.ssl.TransportContext conContext>;
+
+        $z2 = $r11.<sun.security.ssl.TransportContext: boolean isNegotiated>;
+
+        if $z2 == 0 goto label3;
+
+        $r12 = r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: sun.security.ssl.SSLSocketImpl this$0>;
+
+        $i0 = virtualinvoke $r12.<sun.security.ssl.SSLSocketImpl: int getSoTimeout()>();
+
+        if $i0 <= 0 goto label3;
+
+        $z5 = 1;
+
+        goto label4;
+
+     label3:
+        $z5 = 0;
+
+     label4:
+        virtualinvoke r9.<sun.security.ssl.SSLSocketInputRecord: void deplete(boolean)>($z5);
+
+     label5:
+        goto label7;
+
+     label6:
+        $r13 := @caughtexception;
+
+        $z3 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z3 == 0 goto label7;
+
+        $z4 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl");
+
+        if $z4 == 0 goto label7;
+
+        $r14 = newarray (java.lang.Object)[1];
+
+        $r14[0] = $r13;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void warning(java.lang.String,java.lang.Object[])>("input stream close depletion failed", $r14);
+
+     label7:
+        return;
+
+        catch java.io.IOException from label2 to label5 with label6;
+    }
+
+    static void access$100(sun.security.ssl.SSLSocketImpl$AppInputStream)
+    {
+        sun.security.ssl.SSLSocketImpl$AppInputStream r0;
+
+        r0 := @parameter0: sun.security.ssl.SSLSocketImpl$AppInputStream;
+
+        specialinvoke r0.<sun.security.ssl.SSLSocketImpl$AppInputStream: void deplete()>();
+
+        return;
+    }
+}

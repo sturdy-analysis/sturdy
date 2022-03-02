@@ -1,0 +1,173 @@
+class java.nio.channels.Channels$WritableByteChannelImpl extends java.nio.channels.spi.AbstractInterruptibleChannel implements java.nio.channels.WritableByteChannel
+{
+    java.io.OutputStream out;
+    private static final int TRANSFER_SIZE;
+    private byte[] buf;
+    private boolean open;
+    private java.lang.Object writeLock;
+
+    void <init>(java.io.OutputStream)
+    {
+        java.io.OutputStream r3;
+        byte[] $r1;
+        java.nio.channels.Channels$WritableByteChannelImpl r0;
+        java.lang.Object $r2;
+
+        r0 := @this: java.nio.channels.Channels$WritableByteChannelImpl;
+
+        r3 := @parameter0: java.io.OutputStream;
+
+        specialinvoke r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void <init>()>();
+
+        $r1 = newarray (byte)[0];
+
+        r0.<java.nio.channels.Channels$WritableByteChannelImpl: byte[] buf> = $r1;
+
+        r0.<java.nio.channels.Channels$WritableByteChannelImpl: boolean open> = 1;
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        r0.<java.nio.channels.Channels$WritableByteChannelImpl: java.lang.Object writeLock> = $r2;
+
+        r0.<java.nio.channels.Channels$WritableByteChannelImpl: java.io.OutputStream out> = r3;
+
+        return;
+    }
+
+    public int write(java.nio.ByteBuffer) throws java.io.IOException
+    {
+        java.lang.Throwable $r8, $r9;
+        byte[] $r3, $r4, $r5, $r7;
+        java.nio.ByteBuffer r0;
+        java.nio.channels.Channels$WritableByteChannelImpl r1;
+        int $i0, $i1, $i2, $i3, i4;
+        boolean $z0, $z1;
+        java.io.OutputStream $r6;
+        java.lang.Object $r2;
+
+        r1 := @this: java.nio.channels.Channels$WritableByteChannelImpl;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        $i0 = virtualinvoke r0.<java.nio.ByteBuffer: int remaining()>();
+
+        i4 = 0;
+
+        $r2 = r1.<java.nio.channels.Channels$WritableByteChannelImpl: java.lang.Object writeLock>;
+
+        entermonitor $r2;
+
+     label01:
+        if i4 >= $i0 goto label12;
+
+        $i1 = $i0 - i4;
+
+        $i2 = staticinvoke <java.lang.Math: int min(int,int)>($i1, 8192);
+
+        $r3 = r1.<java.nio.channels.Channels$WritableByteChannelImpl: byte[] buf>;
+
+        $i3 = lengthof $r3;
+
+        if $i3 >= $i2 goto label02;
+
+        $r7 = newarray (byte)[$i2];
+
+        r1.<java.nio.channels.Channels$WritableByteChannelImpl: byte[] buf> = $r7;
+
+     label02:
+        $r4 = r1.<java.nio.channels.Channels$WritableByteChannelImpl: byte[] buf>;
+
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[],int,int)>($r4, 0, $i2);
+
+     label03:
+        virtualinvoke r1.<java.nio.channels.Channels$WritableByteChannelImpl: void begin()>();
+
+        $r6 = r1.<java.nio.channels.Channels$WritableByteChannelImpl: java.io.OutputStream out>;
+
+        $r5 = r1.<java.nio.channels.Channels$WritableByteChannelImpl: byte[] buf>;
+
+        virtualinvoke $r6.<java.io.OutputStream: void write(byte[],int,int)>($r5, 0, $i2);
+
+     label04:
+        if $i2 <= 0 goto label05;
+
+        $z0 = 1;
+
+        goto label06;
+
+     label05:
+        $z0 = 0;
+
+     label06:
+        virtualinvoke r1.<java.nio.channels.Channels$WritableByteChannelImpl: void end(boolean)>($z0);
+
+        goto label11;
+
+     label07:
+        $r9 := @caughtexception;
+
+     label08:
+        if $i2 <= 0 goto label09;
+
+        $z1 = 1;
+
+        goto label10;
+
+     label09:
+        $z1 = 0;
+
+     label10:
+        virtualinvoke r1.<java.nio.channels.Channels$WritableByteChannelImpl: void end(boolean)>($z1);
+
+        throw $r9;
+
+     label11:
+        i4 = i4 + $i2;
+
+        goto label01;
+
+     label12:
+        exitmonitor $r2;
+
+     label13:
+        return i4;
+
+     label14:
+        $r8 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label15:
+        throw $r8;
+
+        catch java.lang.Throwable from label03 to label04 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+        catch java.lang.Throwable from label01 to label13 with label14;
+        catch java.lang.Throwable from label14 to label15 with label14;
+    }
+
+    protected void implCloseChannel() throws java.io.IOException
+    {
+        java.io.OutputStream $r1;
+        java.nio.channels.Channels$WritableByteChannelImpl r0;
+
+        r0 := @this: java.nio.channels.Channels$WritableByteChannelImpl;
+
+        $r1 = r0.<java.nio.channels.Channels$WritableByteChannelImpl: java.io.OutputStream out>;
+
+        virtualinvoke $r1.<java.io.OutputStream: void close()>();
+
+        r0.<java.nio.channels.Channels$WritableByteChannelImpl: boolean open> = 0;
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <java.nio.channels.Channels$WritableByteChannelImpl: int TRANSFER_SIZE> = 8192;
+
+        return;
+    }
+}

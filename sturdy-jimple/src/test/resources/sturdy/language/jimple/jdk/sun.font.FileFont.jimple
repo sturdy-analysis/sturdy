@@ -1,0 +1,581 @@
+public abstract class sun.font.FileFont extends sun.font.PhysicalFont
+{
+    protected boolean useJavaRasterizer;
+    protected int fileSize;
+    protected sun.font.FontScaler scaler;
+    protected boolean checkedNatives;
+    protected boolean useNatives;
+    protected sun.font.NativeFont[] nativeFonts;
+    protected char[] glyphToCharMap;
+
+    void <init>(java.lang.String, java.lang.Object) throws java.awt.FontFormatException
+    {
+        java.lang.Object r2;
+        sun.font.FileFont r0;
+        java.lang.String r1;
+
+        r0 := @this: sun.font.FileFont;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Object;
+
+        specialinvoke r0.<sun.font.PhysicalFont: void <init>(java.lang.String,java.lang.Object)>(r1, r2);
+
+        r0.<sun.font.FileFont: boolean useJavaRasterizer> = 1;
+
+        return;
+    }
+
+    sun.font.FontStrike createStrike(sun.font.FontStrikeDesc)
+    {
+        sun.font.FileFont r0;
+        sun.font.FileFontStrike $r1;
+        sun.font.FontStrikeDesc r2;
+        boolean $z0;
+
+        r0 := @this: sun.font.FileFont;
+
+        r2 := @parameter0: sun.font.FontStrikeDesc;
+
+        $z0 = r0.<sun.font.FileFont: boolean checkedNatives>;
+
+        if $z0 != 0 goto label1;
+
+        virtualinvoke r0.<sun.font.FileFont: boolean checkUseNatives()>();
+
+     label1:
+        $r1 = new sun.font.FileFontStrike;
+
+        specialinvoke $r1.<sun.font.FileFontStrike: void <init>(sun.font.FileFont,sun.font.FontStrikeDesc)>(r0, r2);
+
+        return $r1;
+    }
+
+    protected boolean checkUseNatives()
+    {
+        sun.font.FileFont r0;
+        boolean $z0;
+
+        r0 := @this: sun.font.FileFont;
+
+        r0.<sun.font.FileFont: boolean checkedNatives> = 1;
+
+        $z0 = r0.<sun.font.FileFont: boolean useNatives>;
+
+        return $z0;
+    }
+
+    protected abstract void close();
+
+    abstract java.nio.ByteBuffer readBlock(int, int);
+
+    public boolean canDoStyle(int)
+    {
+        int i0;
+        sun.font.FileFont r0;
+
+        r0 := @this: sun.font.FileFont;
+
+        i0 := @parameter0: int;
+
+        return 1;
+    }
+
+    void setFileToRemove(java.io.File, sun.font.CreatedFontTracker)
+    {
+        sun.font.FileFont$CreatedFontFileDisposerRecord $r1;
+        sun.font.FileFont r0;
+        sun.font.CreatedFontTracker r3;
+        java.io.File r2;
+
+        r0 := @this: sun.font.FileFont;
+
+        r2 := @parameter0: java.io.File;
+
+        r3 := @parameter1: sun.font.CreatedFontTracker;
+
+        $r1 = new sun.font.FileFont$CreatedFontFileDisposerRecord;
+
+        specialinvoke $r1.<sun.font.FileFont$CreatedFontFileDisposerRecord: void <init>(java.io.File,sun.font.CreatedFontTracker,sun.font.FileFont$1)>(r2, r3, null);
+
+        staticinvoke <sun.java2d.Disposer: void addObjectRecord(java.lang.Object,sun.java2d.DisposerRecord)>(r0, $r1);
+
+        return;
+    }
+
+    static void setFileToRemove(java.lang.Object, java.io.File, sun.font.CreatedFontTracker)
+    {
+        sun.font.FileFont$CreatedFontFileDisposerRecord $r1;
+        java.lang.Object r0;
+        sun.font.CreatedFontTracker r3;
+        java.io.File r2;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.io.File;
+
+        r3 := @parameter2: sun.font.CreatedFontTracker;
+
+        $r1 = new sun.font.FileFont$CreatedFontFileDisposerRecord;
+
+        specialinvoke $r1.<sun.font.FileFont$CreatedFontFileDisposerRecord: void <init>(java.io.File,sun.font.CreatedFontTracker,sun.font.FileFont$1)>(r2, r3, null);
+
+        staticinvoke <sun.java2d.Disposer: void addObjectRecord(java.lang.Object,sun.java2d.DisposerRecord)>(r0, $r1);
+
+        return;
+    }
+
+    synchronized void deregisterFontAndClearStrikeCache()
+    {
+        sun.font.FileFont r1;
+        sun.font.FileFontStrike r11;
+        long $l0, $l2;
+        byte $b1;
+        boolean $z0;
+        sun.font.SunFontManager $r0;
+        java.util.Iterator $r4;
+        java.util.Collection $r3;
+        java.util.concurrent.ConcurrentHashMap $r2;
+        sun.font.FontScaler $r5, $r6, $r7, $r12;
+        java.lang.ref.Reference r9;
+        java.lang.Object $r8, $r10;
+
+        r1 := @this: sun.font.FileFont;
+
+        $r0 = staticinvoke <sun.font.SunFontManager: sun.font.SunFontManager getInstance()>();
+
+        virtualinvoke $r0.<sun.font.SunFontManager: void deRegisterBadFont(sun.font.Font2D)>(r1);
+
+        $r2 = r1.<sun.font.FileFont: java.util.concurrent.ConcurrentHashMap strikeCache>;
+
+        $r3 = virtualinvoke $r2.<java.util.concurrent.ConcurrentHashMap: java.util.Collection values()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r8 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (java.lang.ref.Reference) $r8;
+
+        if r9 == null goto label2;
+
+        $r10 = virtualinvoke r9.<java.lang.ref.Reference: java.lang.Object get()>();
+
+        r11 = (sun.font.FileFontStrike) $r10;
+
+        if r11 == null goto label2;
+
+        $l0 = r11.<sun.font.FileFontStrike: long pScalerContext>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 == 0 goto label2;
+
+        $r12 = r1.<sun.font.FileFont: sun.font.FontScaler scaler>;
+
+        $l2 = r11.<sun.font.FileFontStrike: long pScalerContext>;
+
+        virtualinvoke $r12.<sun.font.FontScaler: void invalidateScalerContext(long)>($l2);
+
+     label2:
+        goto label1;
+
+     label3:
+        $r5 = r1.<sun.font.FileFont: sun.font.FontScaler scaler>;
+
+        if $r5 == null goto label4;
+
+        $r7 = r1.<sun.font.FileFont: sun.font.FontScaler scaler>;
+
+        virtualinvoke $r7.<sun.font.FontScaler: void dispose()>();
+
+     label4:
+        $r6 = staticinvoke <sun.font.FontScaler: sun.font.FontScaler getNullScaler()>();
+
+        r1.<sun.font.FileFont: sun.font.FontScaler scaler> = $r6;
+
+        return;
+    }
+
+    sun.font.StrikeMetrics getFontMetrics(long)
+    {
+        sun.font.FontScalerException $r3;
+        sun.font.FileFont r0;
+        sun.font.StrikeMetrics $r2, $r5;
+        sun.font.FontScaler $r1, $r4;
+        long l0;
+
+        r0 := @this: sun.font.FileFont;
+
+        l0 := @parameter0: long;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.font.FileFont: sun.font.FontScaler getScaler()>();
+
+        $r2 = virtualinvoke $r1.<sun.font.FontScaler: sun.font.StrikeMetrics getFontMetrics(long)>(l0);
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = staticinvoke <sun.font.FontScaler: sun.font.FontScaler getNullScaler()>();
+
+        r0.<sun.font.FileFont: sun.font.FontScaler scaler> = $r4;
+
+        $r5 = virtualinvoke r0.<sun.font.FileFont: sun.font.StrikeMetrics getFontMetrics(long)>(l0);
+
+        return $r5;
+
+        catch sun.font.FontScalerException from label1 to label2 with label3;
+    }
+
+    float getGlyphAdvance(long, int)
+    {
+        sun.font.FontScalerException $r2;
+        sun.font.FileFont r0;
+        sun.font.FontScaler $r1, $r3;
+        long l0;
+        int i1;
+        float $f0, $f1;
+
+        r0 := @this: sun.font.FileFont;
+
+        l0 := @parameter0: long;
+
+        i1 := @parameter1: int;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.font.FileFont: sun.font.FontScaler getScaler()>();
+
+        $f0 = virtualinvoke $r1.<sun.font.FontScaler: float getGlyphAdvance(long,int)>(l0, i1);
+
+     label2:
+        return $f0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = staticinvoke <sun.font.FontScaler: sun.font.FontScaler getNullScaler()>();
+
+        r0.<sun.font.FileFont: sun.font.FontScaler scaler> = $r3;
+
+        $f1 = virtualinvoke r0.<sun.font.FileFont: float getGlyphAdvance(long,int)>(l0, i1);
+
+        return $f1;
+
+        catch sun.font.FontScalerException from label1 to label2 with label3;
+    }
+
+    void getGlyphMetrics(long, int, java.awt.geom.Point2D$Float)
+    {
+        sun.font.FontScalerException $r3;
+        sun.font.FileFont r0;
+        java.awt.geom.Point2D$Float r2;
+        sun.font.FontScaler $r1, $r4;
+        int i1;
+        long l0;
+
+        r0 := @this: sun.font.FileFont;
+
+        l0 := @parameter0: long;
+
+        i1 := @parameter1: int;
+
+        r2 := @parameter2: java.awt.geom.Point2D$Float;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.font.FileFont: sun.font.FontScaler getScaler()>();
+
+        virtualinvoke $r1.<sun.font.FontScaler: void getGlyphMetrics(long,int,java.awt.geom.Point2D$Float)>(l0, i1, r2);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = staticinvoke <sun.font.FontScaler: sun.font.FontScaler getNullScaler()>();
+
+        r0.<sun.font.FileFont: sun.font.FontScaler scaler> = $r4;
+
+        virtualinvoke r0.<sun.font.FileFont: void getGlyphMetrics(long,int,java.awt.geom.Point2D$Float)>(l0, i1, r2);
+
+     label4:
+        return;
+
+        catch sun.font.FontScalerException from label1 to label2 with label3;
+    }
+
+    long getGlyphImage(long, int)
+    {
+        sun.font.FontScalerException $r2;
+        sun.font.FileFont r0;
+        sun.font.FontScaler $r1, $r3;
+        long l0, $l2, $l3;
+        int i1;
+
+        r0 := @this: sun.font.FileFont;
+
+        l0 := @parameter0: long;
+
+        i1 := @parameter1: int;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.font.FileFont: sun.font.FontScaler getScaler()>();
+
+        $l2 = virtualinvoke $r1.<sun.font.FontScaler: long getGlyphImage(long,int)>(l0, i1);
+
+     label2:
+        return $l2;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = staticinvoke <sun.font.FontScaler: sun.font.FontScaler getNullScaler()>();
+
+        r0.<sun.font.FileFont: sun.font.FontScaler scaler> = $r3;
+
+        $l3 = virtualinvoke r0.<sun.font.FileFont: long getGlyphImage(long,int)>(l0, i1);
+
+        return $l3;
+
+        catch sun.font.FontScalerException from label1 to label2 with label3;
+    }
+
+    java.awt.geom.Rectangle2D$Float getGlyphOutlineBounds(long, int)
+    {
+        sun.font.FontScalerException $r3;
+        sun.font.FileFont r0;
+        sun.font.FontScaler $r1, $r4;
+        long l0;
+        java.awt.geom.Rectangle2D$Float $r2, $r5;
+        int i1;
+
+        r0 := @this: sun.font.FileFont;
+
+        l0 := @parameter0: long;
+
+        i1 := @parameter1: int;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.font.FileFont: sun.font.FontScaler getScaler()>();
+
+        $r2 = virtualinvoke $r1.<sun.font.FontScaler: java.awt.geom.Rectangle2D$Float getGlyphOutlineBounds(long,int)>(l0, i1);
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = staticinvoke <sun.font.FontScaler: sun.font.FontScaler getNullScaler()>();
+
+        r0.<sun.font.FileFont: sun.font.FontScaler scaler> = $r4;
+
+        $r5 = virtualinvoke r0.<sun.font.FileFont: java.awt.geom.Rectangle2D$Float getGlyphOutlineBounds(long,int)>(l0, i1);
+
+        return $r5;
+
+        catch sun.font.FontScalerException from label1 to label2 with label3;
+    }
+
+    java.awt.geom.GeneralPath getGlyphOutline(long, int, float, float)
+    {
+        sun.font.FontScalerException $r3;
+        sun.font.FileFont r0;
+        sun.font.FontScaler $r1, $r4;
+        long l0;
+        int i1;
+        float f0, f1;
+        java.awt.geom.GeneralPath $r2, $r5;
+
+        r0 := @this: sun.font.FileFont;
+
+        l0 := @parameter0: long;
+
+        i1 := @parameter1: int;
+
+        f0 := @parameter2: float;
+
+        f1 := @parameter3: float;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.font.FileFont: sun.font.FontScaler getScaler()>();
+
+        $r2 = virtualinvoke $r1.<sun.font.FontScaler: java.awt.geom.GeneralPath getGlyphOutline(long,int,float,float)>(l0, i1, f0, f1);
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = staticinvoke <sun.font.FontScaler: sun.font.FontScaler getNullScaler()>();
+
+        r0.<sun.font.FileFont: sun.font.FontScaler scaler> = $r4;
+
+        $r5 = virtualinvoke r0.<sun.font.FileFont: java.awt.geom.GeneralPath getGlyphOutline(long,int,float,float)>(l0, i1, f0, f1);
+
+        return $r5;
+
+        catch sun.font.FontScalerException from label1 to label2 with label3;
+    }
+
+    java.awt.geom.GeneralPath getGlyphVectorOutline(long, int[], int, float, float)
+    {
+        sun.font.FontScalerException $r4;
+        sun.font.FileFont r0;
+        sun.font.FontScaler $r1, $r5;
+        long l0;
+        int[] r2;
+        int i1;
+        float f0, f1;
+        java.awt.geom.GeneralPath $r3, $r6;
+
+        r0 := @this: sun.font.FileFont;
+
+        l0 := @parameter0: long;
+
+        r2 := @parameter1: int[];
+
+        i1 := @parameter2: int;
+
+        f0 := @parameter3: float;
+
+        f1 := @parameter4: float;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.font.FileFont: sun.font.FontScaler getScaler()>();
+
+        $r3 = virtualinvoke $r1.<sun.font.FontScaler: java.awt.geom.GeneralPath getGlyphVectorOutline(long,int[],int,float,float)>(l0, r2, i1, f0, f1);
+
+     label2:
+        return $r3;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = staticinvoke <sun.font.FontScaler: sun.font.FontScaler getNullScaler()>();
+
+        r0.<sun.font.FileFont: sun.font.FontScaler scaler> = $r5;
+
+        $r6 = virtualinvoke r0.<sun.font.FileFont: java.awt.geom.GeneralPath getGlyphVectorOutline(long,int[],int,float,float)>(l0, r2, i1, f0, f1);
+
+        return $r6;
+
+        catch sun.font.FontScalerException from label1 to label2 with label3;
+    }
+
+    protected abstract sun.font.FontScaler getScaler();
+
+    protected long getUnitsPerEm()
+    {
+        sun.font.FontScaler $r1;
+        long $l0;
+        sun.font.FileFont r0;
+
+        r0 := @this: sun.font.FileFont;
+
+        $r1 = virtualinvoke r0.<sun.font.FileFont: sun.font.FontScaler getScaler()>();
+
+        $l0 = virtualinvoke $r1.<sun.font.FontScaler: long getUnitsPerEm()>();
+
+        return $l0;
+    }
+
+    protected java.lang.String getPublicFileName()
+    {
+        java.security.PrivilegedActionException $r8;
+        sun.font.FileFont r2;
+        java.lang.SecurityManager $r0;
+        java.io.File $r1;
+        sun.font.FileFont$1 $r4;
+        java.lang.Boolean r10, r11;
+        java.lang.Object $r5;
+        java.lang.SecurityException $r9;
+        java.lang.String $r3, $r6, $r7, $r12;
+        boolean $z0, z1;
+
+        r2 := @this: sun.font.FileFont;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 != null goto label01;
+
+        $r7 = r2.<sun.font.FileFont: java.lang.String platName>;
+
+        return $r7;
+
+     label01:
+        z1 = 1;
+
+     label02:
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPropertyAccess(java.lang.String)>("java.io.tmpdir");
+
+     label03:
+        goto label05;
+
+     label04:
+        $r9 := @caughtexception;
+
+        z1 = 0;
+
+     label05:
+        if z1 == 0 goto label06;
+
+        $r6 = r2.<sun.font.FileFont: java.lang.String platName>;
+
+        return $r6;
+
+     label06:
+        $r1 = new java.io.File;
+
+        $r3 = r2.<sun.font.FileFont: java.lang.String platName>;
+
+        specialinvoke $r1.<java.io.File: void <init>(java.lang.String)>($r3);
+
+        r10 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+     label07:
+        $r4 = new sun.font.FileFont$1;
+
+        specialinvoke $r4.<sun.font.FileFont$1: void <init>(sun.font.FileFont,java.io.File)>(r2, $r1);
+
+        $r5 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r4);
+
+        r11 = (java.lang.Boolean) $r5;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r8 := @caughtexception;
+
+        r11 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+     label10:
+        $z0 = virtualinvoke r11.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z0 == 0 goto label11;
+
+        $r12 = "temp file";
+
+        goto label12;
+
+     label11:
+        $r12 = r2.<sun.font.FileFont: java.lang.String platName>;
+
+     label12:
+        return $r12;
+
+        catch java.lang.SecurityException from label02 to label03 with label04;
+        catch java.security.PrivilegedActionException from label07 to label08 with label09;
+    }
+}

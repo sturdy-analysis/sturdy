@@ -1,0 +1,3745 @@
+public abstract class com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser extends com.sun.org.apache.xerces.internal.parsers.AbstractXMLDocumentParser implements com.sun.org.apache.xerces.internal.xs.PSVIProvider, org.xml.sax.Parser, org.xml.sax.XMLReader
+{
+    protected static final java.lang.String NAMESPACES;
+    protected static final java.lang.String NAMESPACE_PREFIXES;
+    protected static final java.lang.String STRING_INTERNING;
+    protected static final java.lang.String ALLOW_UE_AND_NOTATION_EVENTS;
+    private static final java.lang.String[] RECOGNIZED_FEATURES;
+    protected static final java.lang.String LEXICAL_HANDLER;
+    protected static final java.lang.String DECLARATION_HANDLER;
+    protected static final java.lang.String DOM_NODE;
+    private static final java.lang.String SECURITY_MANAGER;
+    private static final java.lang.String[] RECOGNIZED_PROPERTIES;
+    protected boolean fNamespaces;
+    protected boolean fNamespacePrefixes;
+    protected boolean fLexicalHandlerParameterEntities;
+    protected boolean fStandalone;
+    protected boolean fResolveDTDURIs;
+    protected boolean fUseEntityResolver2;
+    protected boolean fXMLNSURIs;
+    protected org.xml.sax.ContentHandler fContentHandler;
+    protected org.xml.sax.DocumentHandler fDocumentHandler;
+    protected com.sun.org.apache.xerces.internal.xni.NamespaceContext fNamespaceContext;
+    protected org.xml.sax.DTDHandler fDTDHandler;
+    protected org.xml.sax.ext.DeclHandler fDeclHandler;
+    protected org.xml.sax.ext.LexicalHandler fLexicalHandler;
+    protected com.sun.org.apache.xerces.internal.xni.QName fQName;
+    protected boolean fParseInProgress;
+    protected java.lang.String fVersion;
+    private final com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$AttributesProxy fAttributesProxy;
+    private com.sun.org.apache.xerces.internal.xni.Augmentations fAugmentations;
+    private static final int BUFFER_SIZE;
+    private char[] fCharBuffer;
+    protected com.sun.org.apache.xerces.internal.util.SymbolHash fDeclaredAttrs;
+
+    protected void <init>(com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration)
+    {
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        java.lang.String[] $r5, $r6;
+        char[] $r4;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration r1;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$AttributesProxy $r3;
+        com.sun.org.apache.xerces.internal.xni.QName $r2;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException $r7;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r1 := @parameter0: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.parsers.AbstractXMLDocumentParser: void <init>(com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration)>(r1);
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fNamespacePrefixes> = 0;
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fLexicalHandlerParameterEntities> = 1;
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fResolveDTDURIs> = 1;
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fUseEntityResolver2> = 1;
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fXMLNSURIs> = 0;
+
+        $r2 = new com.sun.org.apache.xerces.internal.xni.QName;
+
+        specialinvoke $r2.<com.sun.org.apache.xerces.internal.xni.QName: void <init>()>();
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.QName fQName> = $r2;
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fParseInProgress> = 0;
+
+        $r3 = new com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$AttributesProxy;
+
+        specialinvoke $r3.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$AttributesProxy: void <init>()>();
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$AttributesProxy fAttributesProxy> = $r3;
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.Augmentations fAugmentations> = null;
+
+        $r4 = newarray (char)[20];
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: char[] fCharBuffer> = $r4;
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.util.SymbolHash fDeclaredAttrs> = null;
+
+        $r5 = <com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: java.lang.String[] RECOGNIZED_FEATURES>;
+
+        interfaceinvoke r1.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: void addRecognizedFeatures(java.lang.String[])>($r5);
+
+        $r6 = <com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: java.lang.String[] RECOGNIZED_PROPERTIES>;
+
+        interfaceinvoke r1.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: void addRecognizedProperties(java.lang.String[])>($r6);
+
+     label1:
+        interfaceinvoke r1.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: void setFeature(java.lang.String,boolean)>("http://xml.org/sax/features/allow-dtd-events-after-endDTD", 0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+     label4:
+        return;
+
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label1 to label2 with label3;
+    }
+
+    public void startDocument(com.sun.org.apache.xerces.internal.xni.XMLLocator, java.lang.String, com.sun.org.apache.xerces.internal.xni.NamespaceContext, com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r11;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$LocatorProxy $r5, $r8;
+        com.sun.org.apache.xerces.internal.xni.NamespaceContext r1;
+        com.sun.org.apache.xerces.internal.xni.Augmentations r13;
+        org.xml.sax.SAXException $r10;
+        org.xml.sax.DocumentHandler $r2, $r7, $r9;
+        org.xml.sax.ContentHandler $r4, $r6, $r14;
+        java.lang.String r12;
+        com.sun.org.apache.xerces.internal.xni.XMLLocator r3;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r3 := @parameter0: com.sun.org.apache.xerces.internal.xni.XMLLocator;
+
+        r12 := @parameter1: java.lang.String;
+
+        r1 := @parameter2: com.sun.org.apache.xerces.internal.xni.NamespaceContext;
+
+        r13 := @parameter3: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.NamespaceContext fNamespaceContext> = r1;
+
+     label1:
+        $r2 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.DocumentHandler fDocumentHandler>;
+
+        if $r2 == null goto label3;
+
+        if r3 == null goto label2;
+
+        $r9 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.DocumentHandler fDocumentHandler>;
+
+        $r8 = new com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$LocatorProxy;
+
+        specialinvoke $r8.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$LocatorProxy: void <init>(com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser,com.sun.org.apache.xerces.internal.xni.XMLLocator)>(r0, r3);
+
+        interfaceinvoke $r9.<org.xml.sax.DocumentHandler: void setDocumentLocator(org.xml.sax.Locator)>($r8);
+
+     label2:
+        $r7 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.DocumentHandler fDocumentHandler>;
+
+        interfaceinvoke $r7.<org.xml.sax.DocumentHandler: void startDocument()>();
+
+     label3:
+        $r14 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ContentHandler fContentHandler>;
+
+        if $r14 == null goto label5;
+
+        if r3 == null goto label4;
+
+        $r6 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ContentHandler fContentHandler>;
+
+        $r5 = new com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$LocatorProxy;
+
+        specialinvoke $r5.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$LocatorProxy: void <init>(com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser,com.sun.org.apache.xerces.internal.xni.XMLLocator)>(r0, r3);
+
+        interfaceinvoke $r6.<org.xml.sax.ContentHandler: void setDocumentLocator(org.xml.sax.Locator)>($r5);
+
+     label4:
+        $r4 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ContentHandler fContentHandler>;
+
+        interfaceinvoke $r4.<org.xml.sax.ContentHandler: void startDocument()>();
+
+     label5:
+        goto label7;
+
+     label6:
+        $r10 := @caughtexception;
+
+        $r11 = new com.sun.org.apache.xerces.internal.xni.XNIException;
+
+        specialinvoke $r11.<com.sun.org.apache.xerces.internal.xni.XNIException: void <init>(java.lang.Exception)>($r10);
+
+        throw $r11;
+
+     label7:
+        return;
+
+        catch org.xml.sax.SAXException from label1 to label5 with label6;
+    }
+
+    public void xmlDecl(java.lang.String, java.lang.String, java.lang.String, com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.xni.Augmentations r5;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        java.lang.String r1, r2, $r3, r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r1 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r5 := @parameter3: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: java.lang.String fVersion> = r1;
+
+        $r3 = "yes";
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>(r2);
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fStandalone> = $z0;
+
+        return;
+    }
+
+    public void doctypeDecl(java.lang.String, java.lang.String, java.lang.String, com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.util.SymbolHash $r3;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r9;
+        org.xml.sax.ext.LexicalHandler $r1, $r7;
+        com.sun.org.apache.xerces.internal.xni.Augmentations r10;
+        org.xml.sax.ext.DeclHandler $r2;
+        org.xml.sax.SAXException $r8;
+        java.lang.String r4, r5, r6;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r4 := @parameter0: java.lang.String;
+
+        r5 := @parameter1: java.lang.String;
+
+        r6 := @parameter2: java.lang.String;
+
+        r10 := @parameter3: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fInDTD> = 1;
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.LexicalHandler fLexicalHandler>;
+
+        if $r1 == null goto label2;
+
+        $r7 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.LexicalHandler fLexicalHandler>;
+
+        interfaceinvoke $r7.<org.xml.sax.ext.LexicalHandler: void startDTD(java.lang.String,java.lang.String,java.lang.String)>(r4, r5, r6);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r8 := @caughtexception;
+
+        $r9 = new com.sun.org.apache.xerces.internal.xni.XNIException;
+
+        specialinvoke $r9.<com.sun.org.apache.xerces.internal.xni.XNIException: void <init>(java.lang.Exception)>($r8);
+
+        throw $r9;
+
+     label4:
+        $r2 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.DeclHandler fDeclHandler>;
+
+        if $r2 == null goto label5;
+
+        $r3 = new com.sun.org.apache.xerces.internal.util.SymbolHash;
+
+        specialinvoke $r3.<com.sun.org.apache.xerces.internal.util.SymbolHash: void <init>()>();
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.util.SymbolHash fDeclaredAttrs> = $r3;
+
+     label5:
+        return;
+
+        catch org.xml.sax.SAXException from label1 to label2 with label3;
+    }
+
+    public void startGeneralEntity(java.lang.String, com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier, java.lang.String, com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r1;
+        com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier r11;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r10;
+        org.xml.sax.ext.LexicalHandler $r2, $r4;
+        com.sun.org.apache.xerces.internal.xni.Augmentations r0;
+        org.xml.sax.SAXException $r9;
+        java.lang.Boolean $r5;
+        java.lang.Object $r6;
+        java.lang.String r3, r12;
+        org.xml.sax.ContentHandler $r7, $r8;
+        boolean $z0;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r3 := @parameter0: java.lang.String;
+
+        r11 := @parameter1: com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier;
+
+        r12 := @parameter2: java.lang.String;
+
+        r0 := @parameter3: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+     label1:
+        if r0 == null goto label2;
+
+        $r5 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r6 = interfaceinvoke r0.<com.sun.org.apache.xerces.internal.xni.Augmentations: java.lang.Object getItem(java.lang.String)>("ENTITY_SKIPPED");
+
+        $z0 = virtualinvoke $r5.<java.lang.Boolean: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 == 0 goto label2;
+
+        $r7 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ContentHandler fContentHandler>;
+
+        if $r7 == null goto label3;
+
+        $r8 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ContentHandler fContentHandler>;
+
+        interfaceinvoke $r8.<org.xml.sax.ContentHandler: void skippedEntity(java.lang.String)>(r3);
+
+        goto label3;
+
+     label2:
+        $r2 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.LexicalHandler fLexicalHandler>;
+
+        if $r2 == null goto label3;
+
+        $r4 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.LexicalHandler fLexicalHandler>;
+
+        interfaceinvoke $r4.<org.xml.sax.ext.LexicalHandler: void startEntity(java.lang.String)>(r3);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r9 := @caughtexception;
+
+        $r10 = new com.sun.org.apache.xerces.internal.xni.XNIException;
+
+        specialinvoke $r10.<com.sun.org.apache.xerces.internal.xni.XNIException: void <init>(java.lang.Exception)>($r9);
+
+        throw $r10;
+
+     label5:
+        return;
+
+        catch org.xml.sax.SAXException from label1 to label3 with label4;
+    }
+
+    public void endGeneralEntity(java.lang.String, com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r1;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r8;
+        org.xml.sax.ext.LexicalHandler $r2, $r4;
+        com.sun.org.apache.xerces.internal.xni.Augmentations r0;
+        org.xml.sax.SAXException $r7;
+        java.lang.Boolean $r5;
+        java.lang.Object $r6;
+        java.lang.String r3;
+        boolean $z0;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r3 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+     label1:
+        if r0 == null goto label2;
+
+        $r5 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r6 = interfaceinvoke r0.<com.sun.org.apache.xerces.internal.xni.Augmentations: java.lang.Object getItem(java.lang.String)>("ENTITY_SKIPPED");
+
+        $z0 = virtualinvoke $r5.<java.lang.Boolean: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 != 0 goto label3;
+
+     label2:
+        $r2 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.LexicalHandler fLexicalHandler>;
+
+        if $r2 == null goto label3;
+
+        $r4 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.LexicalHandler fLexicalHandler>;
+
+        interfaceinvoke $r4.<org.xml.sax.ext.LexicalHandler: void endEntity(java.lang.String)>(r3);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r7 := @caughtexception;
+
+        $r8 = new com.sun.org.apache.xerces.internal.xni.XNIException;
+
+        specialinvoke $r8.<com.sun.org.apache.xerces.internal.xni.XNIException: void <init>(java.lang.Exception)>($r7);
+
+        throw $r8;
+
+     label5:
+        return;
+
+        catch org.xml.sax.SAXException from label1 to label3 with label4;
+    }
+
+    public void startElement(com.sun.org.apache.xerces.internal.xni.QName, com.sun.org.apache.xerces.internal.xni.XMLAttributes, com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        org.xml.sax.DocumentHandler $r1, $r31;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$AttributesProxy $r6, $r7, $r28, $r29;
+        com.sun.org.apache.xerces.internal.xni.XMLAttributes r5;
+        boolean $z0, $z1, $z2, $z3;
+        org.xml.sax.SAXException $r32;
+        com.sun.org.apache.xerces.internal.xni.QName r4, $r10, $r11, $r14, $r15, $r16, $r17, $r18, $r21, $r22, $r25;
+        int $i0, i1, i2, $i4, $i6;
+        org.xml.sax.ContentHandler $r2, $r9;
+        java.lang.String $r8, $r12, $r13, $r19, $r20, $r23, $r24, $r26, $r27, $r30, $r34, $r35, r36, $r37;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r38;
+        com.sun.org.apache.xerces.internal.xni.Augmentations r3;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r4 := @parameter0: com.sun.org.apache.xerces.internal.xni.QName;
+
+        r5 := @parameter1: com.sun.org.apache.xerces.internal.xni.XMLAttributes;
+
+        r3 := @parameter2: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+     label01:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.DocumentHandler fDocumentHandler>;
+
+        if $r1 == null goto label02;
+
+        $r28 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$AttributesProxy fAttributesProxy>;
+
+        virtualinvoke $r28.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$AttributesProxy: void setAttributes(com.sun.org.apache.xerces.internal.xni.XMLAttributes)>(r5);
+
+        $r31 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.DocumentHandler fDocumentHandler>;
+
+        $r30 = r4.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String rawname>;
+
+        $r29 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$AttributesProxy fAttributesProxy>;
+
+        interfaceinvoke $r31.<org.xml.sax.DocumentHandler: void startElement(java.lang.String,org.xml.sax.AttributeList)>($r30, $r29);
+
+     label02:
+        $r2 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ContentHandler fContentHandler>;
+
+        if $r2 == null goto label16;
+
+        $z0 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fNamespaces>;
+
+        if $z0 == 0 goto label11;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: void startNamespaceMapping()>();
+
+        $i0 = interfaceinvoke r5.<com.sun.org.apache.xerces.internal.xni.XMLAttributes: int getLength()>();
+
+        $z2 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fNamespacePrefixes>;
+
+        if $z2 != 0 goto label07;
+
+        i1 = $i0 - 1;
+
+     label03:
+        if i1 < 0 goto label06;
+
+        $r21 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.QName fQName>;
+
+        interfaceinvoke r5.<com.sun.org.apache.xerces.internal.xni.XMLAttributes: void getName(int,com.sun.org.apache.xerces.internal.xni.QName)>(i1, $r21);
+
+        $r22 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.QName fQName>;
+
+        $r24 = $r22.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix>;
+
+        $r23 = <com.sun.org.apache.xerces.internal.util.XMLSymbols: java.lang.String PREFIX_XMLNS>;
+
+        if $r24 == $r23 goto label04;
+
+        $r25 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.QName fQName>;
+
+        $r27 = $r25.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String rawname>;
+
+        $r26 = <com.sun.org.apache.xerces.internal.util.XMLSymbols: java.lang.String PREFIX_XMLNS>;
+
+        if $r27 != $r26 goto label05;
+
+     label04:
+        interfaceinvoke r5.<com.sun.org.apache.xerces.internal.xni.XMLAttributes: void removeAttributeAt(int)>(i1);
+
+     label05:
+        $i4 = (int) -1;
+
+        i1 = i1 + $i4;
+
+        goto label03;
+
+     label06:
+        goto label11;
+
+     label07:
+        $z3 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fXMLNSURIs>;
+
+        if $z3 != 0 goto label11;
+
+        i2 = $i0 - 1;
+
+     label08:
+        if i2 < 0 goto label11;
+
+        $r10 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.QName fQName>;
+
+        interfaceinvoke r5.<com.sun.org.apache.xerces.internal.xni.XMLAttributes: void getName(int,com.sun.org.apache.xerces.internal.xni.QName)>(i2, $r10);
+
+        $r11 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.QName fQName>;
+
+        $r13 = $r11.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix>;
+
+        $r12 = <com.sun.org.apache.xerces.internal.util.XMLSymbols: java.lang.String PREFIX_XMLNS>;
+
+        if $r13 == $r12 goto label09;
+
+        $r18 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.QName fQName>;
+
+        $r20 = $r18.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String rawname>;
+
+        $r19 = <com.sun.org.apache.xerces.internal.util.XMLSymbols: java.lang.String PREFIX_XMLNS>;
+
+        if $r20 != $r19 goto label10;
+
+     label09:
+        $r14 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.QName fQName>;
+
+        $r14.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix> = "";
+
+        $r15 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.QName fQName>;
+
+        $r15.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri> = "";
+
+        $r16 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.QName fQName>;
+
+        $r16.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String localpart> = "";
+
+        $r17 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.QName fQName>;
+
+        interfaceinvoke r5.<com.sun.org.apache.xerces.internal.xni.XMLAttributes: void setName(int,com.sun.org.apache.xerces.internal.xni.QName)>(i2, $r17);
+
+     label10:
+        $i6 = (int) -1;
+
+        i2 = i2 + $i6;
+
+        goto label08;
+
+     label11:
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.Augmentations fAugmentations> = r3;
+
+        $r34 = r4.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        if $r34 == null goto label12;
+
+        $r35 = r4.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        goto label13;
+
+     label12:
+        $r35 = "";
+
+     label13:
+        r36 = $r35;
+
+        $z1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fNamespaces>;
+
+        if $z1 == 0 goto label14;
+
+        $r37 = r4.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String localpart>;
+
+        goto label15;
+
+     label14:
+        $r37 = "";
+
+     label15:
+        $r6 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$AttributesProxy fAttributesProxy>;
+
+        virtualinvoke $r6.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$AttributesProxy: void setAttributes(com.sun.org.apache.xerces.internal.xni.XMLAttributes)>(r5);
+
+        $r9 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ContentHandler fContentHandler>;
+
+        $r8 = r4.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String rawname>;
+
+        $r7 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$AttributesProxy fAttributesProxy>;
+
+        interfaceinvoke $r9.<org.xml.sax.ContentHandler: void startElement(java.lang.String,java.lang.String,java.lang.String,org.xml.sax.Attributes)>(r36, $r37, $r8, $r7);
+
+     label16:
+        goto label18;
+
+     label17:
+        $r32 := @caughtexception;
+
+        $r38 = new com.sun.org.apache.xerces.internal.xni.XNIException;
+
+        specialinvoke $r38.<com.sun.org.apache.xerces.internal.xni.XNIException: void <init>(java.lang.Exception)>($r32);
+
+        throw $r38;
+
+     label18:
+        return;
+
+        catch org.xml.sax.SAXException from label01 to label16 with label17;
+    }
+
+    public void characters(com.sun.org.apache.xerces.internal.xni.XMLString, com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        int $i0, $i1, $i2, $i3, $i4;
+        org.xml.sax.DocumentHandler $r2, $r7;
+        org.xml.sax.ContentHandler $r3, $r5;
+        com.sun.org.apache.xerces.internal.xni.XMLString r0;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r1;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r9;
+        com.sun.org.apache.xerces.internal.xni.Augmentations r10;
+        org.xml.sax.SAXException $r8;
+        char[] $r4, $r6;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r0 := @parameter0: com.sun.org.apache.xerces.internal.xni.XMLString;
+
+        r10 := @parameter1: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+        $i0 = r0.<com.sun.org.apache.xerces.internal.xni.XMLString: int length>;
+
+        if $i0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r2 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.DocumentHandler fDocumentHandler>;
+
+        if $r2 == null goto label2;
+
+        $r7 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.DocumentHandler fDocumentHandler>;
+
+        $r6 = r0.<com.sun.org.apache.xerces.internal.xni.XMLString: char[] ch>;
+
+        $i4 = r0.<com.sun.org.apache.xerces.internal.xni.XMLString: int offset>;
+
+        $i3 = r0.<com.sun.org.apache.xerces.internal.xni.XMLString: int length>;
+
+        interfaceinvoke $r7.<org.xml.sax.DocumentHandler: void characters(char[],int,int)>($r6, $i4, $i3);
+
+     label2:
+        $r3 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ContentHandler fContentHandler>;
+
+        if $r3 == null goto label3;
+
+        $r5 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ContentHandler fContentHandler>;
+
+        $r4 = r0.<com.sun.org.apache.xerces.internal.xni.XMLString: char[] ch>;
+
+        $i2 = r0.<com.sun.org.apache.xerces.internal.xni.XMLString: int offset>;
+
+        $i1 = r0.<com.sun.org.apache.xerces.internal.xni.XMLString: int length>;
+
+        interfaceinvoke $r5.<org.xml.sax.ContentHandler: void characters(char[],int,int)>($r4, $i2, $i1);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r8 := @caughtexception;
+
+        $r9 = new com.sun.org.apache.xerces.internal.xni.XNIException;
+
+        specialinvoke $r9.<com.sun.org.apache.xerces.internal.xni.XNIException: void <init>(java.lang.Exception)>($r8);
+
+        throw $r9;
+
+     label5:
+        return;
+
+        catch org.xml.sax.SAXException from label1 to label3 with label4;
+    }
+
+    public void ignorableWhitespace(com.sun.org.apache.xerces.internal.xni.XMLString, com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.xni.XMLString r3;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r9;
+        com.sun.org.apache.xerces.internal.xni.Augmentations r10;
+        org.xml.sax.SAXException $r8;
+        int $i0, $i1, $i2, $i3;
+        org.xml.sax.DocumentHandler $r1, $r7;
+        char[] $r4, $r6;
+        org.xml.sax.ContentHandler $r2, $r5;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r3 := @parameter0: com.sun.org.apache.xerces.internal.xni.XMLString;
+
+        r10 := @parameter1: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.DocumentHandler fDocumentHandler>;
+
+        if $r1 == null goto label2;
+
+        $r7 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.DocumentHandler fDocumentHandler>;
+
+        $r6 = r3.<com.sun.org.apache.xerces.internal.xni.XMLString: char[] ch>;
+
+        $i3 = r3.<com.sun.org.apache.xerces.internal.xni.XMLString: int offset>;
+
+        $i2 = r3.<com.sun.org.apache.xerces.internal.xni.XMLString: int length>;
+
+        interfaceinvoke $r7.<org.xml.sax.DocumentHandler: void ignorableWhitespace(char[],int,int)>($r6, $i3, $i2);
+
+     label2:
+        $r2 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ContentHandler fContentHandler>;
+
+        if $r2 == null goto label3;
+
+        $r5 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ContentHandler fContentHandler>;
+
+        $r4 = r3.<com.sun.org.apache.xerces.internal.xni.XMLString: char[] ch>;
+
+        $i1 = r3.<com.sun.org.apache.xerces.internal.xni.XMLString: int offset>;
+
+        $i0 = r3.<com.sun.org.apache.xerces.internal.xni.XMLString: int length>;
+
+        interfaceinvoke $r5.<org.xml.sax.ContentHandler: void ignorableWhitespace(char[],int,int)>($r4, $i1, $i0);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r8 := @caughtexception;
+
+        $r9 = new com.sun.org.apache.xerces.internal.xni.XNIException;
+
+        specialinvoke $r9.<com.sun.org.apache.xerces.internal.xni.XNIException: void <init>(java.lang.Exception)>($r8);
+
+        throw $r9;
+
+     label5:
+        return;
+
+        catch org.xml.sax.SAXException from label1 to label3 with label4;
+    }
+
+    public void endElement(com.sun.org.apache.xerces.internal.xni.QName, com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        org.xml.sax.DocumentHandler $r1, $r9;
+        org.xml.sax.ContentHandler $r2, $r7;
+        java.lang.String $r5, $r6, $r8, $r12, r13, $r14;
+        boolean $z0, $z1;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r11;
+        com.sun.org.apache.xerces.internal.xni.Augmentations r3;
+        org.xml.sax.SAXException $r10;
+        com.sun.org.apache.xerces.internal.xni.QName r4;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r4 := @parameter0: com.sun.org.apache.xerces.internal.xni.QName;
+
+        r3 := @parameter1: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.DocumentHandler fDocumentHandler>;
+
+        if $r1 == null goto label2;
+
+        $r9 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.DocumentHandler fDocumentHandler>;
+
+        $r8 = r4.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String rawname>;
+
+        interfaceinvoke $r9.<org.xml.sax.DocumentHandler: void endElement(java.lang.String)>($r8);
+
+     label2:
+        $r2 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ContentHandler fContentHandler>;
+
+        if $r2 == null goto label7;
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.Augmentations fAugmentations> = r3;
+
+        $r5 = r4.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        if $r5 == null goto label3;
+
+        $r12 = r4.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        goto label4;
+
+     label3:
+        $r12 = "";
+
+     label4:
+        r13 = $r12;
+
+        $z0 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fNamespaces>;
+
+        if $z0 == 0 goto label5;
+
+        $r14 = r4.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String localpart>;
+
+        goto label6;
+
+     label5:
+        $r14 = "";
+
+     label6:
+        $r7 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ContentHandler fContentHandler>;
+
+        $r6 = r4.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String rawname>;
+
+        interfaceinvoke $r7.<org.xml.sax.ContentHandler: void endElement(java.lang.String,java.lang.String,java.lang.String)>(r13, $r14, $r6);
+
+        $z1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fNamespaces>;
+
+        if $z1 == 0 goto label7;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: void endNamespaceMapping()>();
+
+     label7:
+        goto label9;
+
+     label8:
+        $r10 := @caughtexception;
+
+        $r11 = new com.sun.org.apache.xerces.internal.xni.XNIException;
+
+        specialinvoke $r11.<com.sun.org.apache.xerces.internal.xni.XNIException: void <init>(java.lang.Exception)>($r10);
+
+        throw $r11;
+
+     label9:
+        return;
+
+        catch org.xml.sax.SAXException from label1 to label7 with label8;
+    }
+
+    public void startCDATA(com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        org.xml.sax.ext.LexicalHandler $r1, $r2;
+        com.sun.org.apache.xerces.internal.xni.Augmentations r5;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        org.xml.sax.SAXException $r3;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r4;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r5 := @parameter0: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.LexicalHandler fLexicalHandler>;
+
+        if $r1 == null goto label2;
+
+        $r2 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.LexicalHandler fLexicalHandler>;
+
+        interfaceinvoke $r2.<org.xml.sax.ext.LexicalHandler: void startCDATA()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new com.sun.org.apache.xerces.internal.xni.XNIException;
+
+        specialinvoke $r4.<com.sun.org.apache.xerces.internal.xni.XNIException: void <init>(java.lang.Exception)>($r3);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch org.xml.sax.SAXException from label1 to label2 with label3;
+    }
+
+    public void endCDATA(com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        org.xml.sax.ext.LexicalHandler $r1, $r2;
+        com.sun.org.apache.xerces.internal.xni.Augmentations r5;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        org.xml.sax.SAXException $r3;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r4;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r5 := @parameter0: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.LexicalHandler fLexicalHandler>;
+
+        if $r1 == null goto label2;
+
+        $r2 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.LexicalHandler fLexicalHandler>;
+
+        interfaceinvoke $r2.<org.xml.sax.ext.LexicalHandler: void endCDATA()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new com.sun.org.apache.xerces.internal.xni.XNIException;
+
+        specialinvoke $r4.<com.sun.org.apache.xerces.internal.xni.XNIException: void <init>(java.lang.Exception)>($r3);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch org.xml.sax.SAXException from label1 to label2 with label3;
+    }
+
+    public void comment(com.sun.org.apache.xerces.internal.xni.XMLString, com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.xni.XMLString r2;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r6;
+        org.xml.sax.ext.LexicalHandler $r1, $r4;
+        com.sun.org.apache.xerces.internal.xni.Augmentations r7;
+        org.xml.sax.SAXException $r5;
+        int $i0;
+        char[] $r3;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r2 := @parameter0: com.sun.org.apache.xerces.internal.xni.XMLString;
+
+        r7 := @parameter1: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.LexicalHandler fLexicalHandler>;
+
+        if $r1 == null goto label2;
+
+        $r4 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.LexicalHandler fLexicalHandler>;
+
+        $r3 = r2.<com.sun.org.apache.xerces.internal.xni.XMLString: char[] ch>;
+
+        $i0 = r2.<com.sun.org.apache.xerces.internal.xni.XMLString: int length>;
+
+        interfaceinvoke $r4.<org.xml.sax.ext.LexicalHandler: void comment(char[],int,int)>($r3, 0, $i0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new com.sun.org.apache.xerces.internal.xni.XNIException;
+
+        specialinvoke $r6.<com.sun.org.apache.xerces.internal.xni.XNIException: void <init>(java.lang.Exception)>($r5);
+
+        throw $r6;
+
+     label4:
+        return;
+
+        catch org.xml.sax.SAXException from label1 to label2 with label3;
+    }
+
+    public void processingInstruction(java.lang.String, com.sun.org.apache.xerces.internal.xni.XMLString, com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.xni.XMLString r4;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r10;
+        com.sun.org.apache.xerces.internal.xni.Augmentations r11;
+        org.xml.sax.SAXException $r9;
+        org.xml.sax.DocumentHandler $r1, $r7;
+        org.xml.sax.ContentHandler $r2, $r5;
+        java.lang.String r3, $r6, $r8;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r3 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: com.sun.org.apache.xerces.internal.xni.XMLString;
+
+        r11 := @parameter2: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.DocumentHandler fDocumentHandler>;
+
+        if $r1 == null goto label2;
+
+        $r7 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.DocumentHandler fDocumentHandler>;
+
+        $r8 = virtualinvoke r4.<com.sun.org.apache.xerces.internal.xni.XMLString: java.lang.String toString()>();
+
+        interfaceinvoke $r7.<org.xml.sax.DocumentHandler: void processingInstruction(java.lang.String,java.lang.String)>(r3, $r8);
+
+     label2:
+        $r2 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ContentHandler fContentHandler>;
+
+        if $r2 == null goto label3;
+
+        $r5 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ContentHandler fContentHandler>;
+
+        $r6 = virtualinvoke r4.<com.sun.org.apache.xerces.internal.xni.XMLString: java.lang.String toString()>();
+
+        interfaceinvoke $r5.<org.xml.sax.ContentHandler: void processingInstruction(java.lang.String,java.lang.String)>(r3, $r6);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r9 := @caughtexception;
+
+        $r10 = new com.sun.org.apache.xerces.internal.xni.XNIException;
+
+        specialinvoke $r10.<com.sun.org.apache.xerces.internal.xni.XNIException: void <init>(java.lang.Exception)>($r9);
+
+        throw $r10;
+
+     label5:
+        return;
+
+        catch org.xml.sax.SAXException from label1 to label3 with label4;
+    }
+
+    public void endDocument(com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r6;
+        com.sun.org.apache.xerces.internal.xni.Augmentations r7;
+        org.xml.sax.SAXException $r5;
+        org.xml.sax.DocumentHandler $r1, $r4;
+        org.xml.sax.ContentHandler $r2, $r3;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r7 := @parameter0: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.DocumentHandler fDocumentHandler>;
+
+        if $r1 == null goto label2;
+
+        $r4 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.DocumentHandler fDocumentHandler>;
+
+        interfaceinvoke $r4.<org.xml.sax.DocumentHandler: void endDocument()>();
+
+     label2:
+        $r2 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ContentHandler fContentHandler>;
+
+        if $r2 == null goto label3;
+
+        $r3 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ContentHandler fContentHandler>;
+
+        interfaceinvoke $r3.<org.xml.sax.ContentHandler: void endDocument()>();
+
+     label3:
+        goto label5;
+
+     label4:
+        $r5 := @caughtexception;
+
+        $r6 = new com.sun.org.apache.xerces.internal.xni.XNIException;
+
+        specialinvoke $r6.<com.sun.org.apache.xerces.internal.xni.XNIException: void <init>(java.lang.Exception)>($r5);
+
+        throw $r6;
+
+     label5:
+        return;
+
+        catch org.xml.sax.SAXException from label1 to label3 with label4;
+    }
+
+    public void startExternalSubset(com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier, com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.xni.Augmentations r1;
+        com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier r2;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r2 := @parameter0: com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier;
+
+        r1 := @parameter1: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: void startParameterEntity(java.lang.String,com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier,java.lang.String,com.sun.org.apache.xerces.internal.xni.Augmentations)>("[dtd]", null, null, r1);
+
+        return;
+    }
+
+    public void endExternalSubset(com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.xni.Augmentations r1;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r1 := @parameter0: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: void endParameterEntity(java.lang.String,com.sun.org.apache.xerces.internal.xni.Augmentations)>("[dtd]", r1);
+
+        return;
+    }
+
+    public void startParameterEntity(java.lang.String, com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier, java.lang.String, com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r1;
+        com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier r11;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r10;
+        org.xml.sax.ext.LexicalHandler $r2, $r4;
+        com.sun.org.apache.xerces.internal.xni.Augmentations r0;
+        org.xml.sax.SAXException $r9;
+        java.lang.Boolean $r5;
+        java.lang.Object $r6;
+        java.lang.String r3, r12;
+        org.xml.sax.ContentHandler $r7, $r8;
+        boolean $z0, $z1;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r3 := @parameter0: java.lang.String;
+
+        r11 := @parameter1: com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier;
+
+        r12 := @parameter2: java.lang.String;
+
+        r0 := @parameter3: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+     label1:
+        if r0 == null goto label2;
+
+        $r5 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r6 = interfaceinvoke r0.<com.sun.org.apache.xerces.internal.xni.Augmentations: java.lang.Object getItem(java.lang.String)>("ENTITY_SKIPPED");
+
+        $z1 = virtualinvoke $r5.<java.lang.Boolean: boolean equals(java.lang.Object)>($r6);
+
+        if $z1 == 0 goto label2;
+
+        $r7 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ContentHandler fContentHandler>;
+
+        if $r7 == null goto label3;
+
+        $r8 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ContentHandler fContentHandler>;
+
+        interfaceinvoke $r8.<org.xml.sax.ContentHandler: void skippedEntity(java.lang.String)>(r3);
+
+        goto label3;
+
+     label2:
+        $r2 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.LexicalHandler fLexicalHandler>;
+
+        if $r2 == null goto label3;
+
+        $z0 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fLexicalHandlerParameterEntities>;
+
+        if $z0 == 0 goto label3;
+
+        $r4 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.LexicalHandler fLexicalHandler>;
+
+        interfaceinvoke $r4.<org.xml.sax.ext.LexicalHandler: void startEntity(java.lang.String)>(r3);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r9 := @caughtexception;
+
+        $r10 = new com.sun.org.apache.xerces.internal.xni.XNIException;
+
+        specialinvoke $r10.<com.sun.org.apache.xerces.internal.xni.XNIException: void <init>(java.lang.Exception)>($r9);
+
+        throw $r10;
+
+     label5:
+        return;
+
+        catch org.xml.sax.SAXException from label1 to label3 with label4;
+    }
+
+    public void endParameterEntity(java.lang.String, com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r1;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r8;
+        org.xml.sax.ext.LexicalHandler $r2, $r4;
+        com.sun.org.apache.xerces.internal.xni.Augmentations r0;
+        org.xml.sax.SAXException $r7;
+        java.lang.Boolean $r5;
+        java.lang.Object $r6;
+        java.lang.String r3;
+        boolean $z0, $z1;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r3 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+     label1:
+        if r0 == null goto label2;
+
+        $r5 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r6 = interfaceinvoke r0.<com.sun.org.apache.xerces.internal.xni.Augmentations: java.lang.Object getItem(java.lang.String)>("ENTITY_SKIPPED");
+
+        $z1 = virtualinvoke $r5.<java.lang.Boolean: boolean equals(java.lang.Object)>($r6);
+
+        if $z1 != 0 goto label3;
+
+     label2:
+        $r2 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.LexicalHandler fLexicalHandler>;
+
+        if $r2 == null goto label3;
+
+        $z0 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fLexicalHandlerParameterEntities>;
+
+        if $z0 == 0 goto label3;
+
+        $r4 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.LexicalHandler fLexicalHandler>;
+
+        interfaceinvoke $r4.<org.xml.sax.ext.LexicalHandler: void endEntity(java.lang.String)>(r3);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r7 := @caughtexception;
+
+        $r8 = new com.sun.org.apache.xerces.internal.xni.XNIException;
+
+        specialinvoke $r8.<com.sun.org.apache.xerces.internal.xni.XNIException: void <init>(java.lang.Exception)>($r7);
+
+        throw $r8;
+
+     label5:
+        return;
+
+        catch org.xml.sax.SAXException from label1 to label3 with label4;
+    }
+
+    public void elementDecl(java.lang.String, java.lang.String, com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r6;
+        com.sun.org.apache.xerces.internal.xni.Augmentations r7;
+        org.xml.sax.ext.DeclHandler $r1, $r4;
+        org.xml.sax.SAXException $r5;
+        java.lang.String r2, r3;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        r7 := @parameter2: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.DeclHandler fDeclHandler>;
+
+        if $r1 == null goto label2;
+
+        $r4 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.DeclHandler fDeclHandler>;
+
+        interfaceinvoke $r4.<org.xml.sax.ext.DeclHandler: void elementDecl(java.lang.String,java.lang.String)>(r2, r3);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new com.sun.org.apache.xerces.internal.xni.XNIException;
+
+        specialinvoke $r6.<com.sun.org.apache.xerces.internal.xni.XNIException: void <init>(java.lang.Exception)>($r5);
+
+        throw $r6;
+
+     label4:
+        return;
+
+        catch org.xml.sax.SAXException from label1 to label2 with label3;
+    }
+
+    public void attributeDecl(java.lang.String, java.lang.String, java.lang.String, java.lang.String[], java.lang.String, com.sun.org.apache.xerces.internal.xni.XMLString, com.sun.org.apache.xerces.internal.xni.XMLString, com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.util.SymbolHash $r8, $r11;
+        java.lang.String[] r13;
+        java.lang.StringBuffer $r2, $r4, $r6, $r12;
+        int $i0, $i1, i2, $i3;
+        java.lang.Boolean $r10;
+        java.lang.String r3, r5, $r7, r15, $r17, r22, $r23;
+        boolean $z0, $z1, $z2;
+        com.sun.org.apache.xerces.internal.xni.XMLString r14, r20;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r19;
+        com.sun.org.apache.xerces.internal.xni.Augmentations r21;
+        org.xml.sax.ext.DeclHandler $r1, $r16;
+        org.xml.sax.SAXException $r18;
+        java.lang.Object $r9;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r3 := @parameter0: java.lang.String;
+
+        r5 := @parameter1: java.lang.String;
+
+        r22 := @parameter2: java.lang.String;
+
+        r13 := @parameter3: java.lang.String[];
+
+        r15 := @parameter4: java.lang.String;
+
+        r14 := @parameter5: com.sun.org.apache.xerces.internal.xni.XMLString;
+
+        r20 := @parameter6: com.sun.org.apache.xerces.internal.xni.XMLString;
+
+        r21 := @parameter7: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+     label01:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.DeclHandler fDeclHandler>;
+
+        if $r1 == null goto label13;
+
+        $r2 = new java.lang.StringBuffer;
+
+        specialinvoke $r2.<java.lang.StringBuffer: void <init>(java.lang.String)>(r3);
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("<");
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>(r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $r8 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.util.SymbolHash fDeclaredAttrs>;
+
+        $r9 = virtualinvoke $r8.<com.sun.org.apache.xerces.internal.util.SymbolHash: java.lang.Object get(java.lang.Object)>($r7);
+
+        if $r9 == null goto label03;
+
+     label02:
+        return;
+
+     label03:
+        $r11 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.util.SymbolHash fDeclaredAttrs>;
+
+        $r10 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke $r11.<com.sun.org.apache.xerces.internal.util.SymbolHash: void put(java.lang.Object,java.lang.Object)>($r7, $r10);
+
+        $z0 = virtualinvoke r22.<java.lang.String: boolean equals(java.lang.Object)>("NOTATION");
+
+        if $z0 != 0 goto label04;
+
+        $z2 = virtualinvoke r22.<java.lang.String: boolean equals(java.lang.Object)>("ENUMERATION");
+
+        if $z2 == 0 goto label10;
+
+     label04:
+        $r12 = new java.lang.StringBuffer;
+
+        specialinvoke $r12.<java.lang.StringBuffer: void <init>()>();
+
+        $z1 = virtualinvoke r22.<java.lang.String: boolean equals(java.lang.Object)>("NOTATION");
+
+        if $z1 == 0 goto label05;
+
+        virtualinvoke $r12.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>(r22);
+
+        virtualinvoke $r12.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>(" (");
+
+        goto label06;
+
+     label05:
+        virtualinvoke $r12.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("(");
+
+     label06:
+        i2 = 0;
+
+     label07:
+        $i3 = lengthof r13;
+
+        if i2 >= $i3 goto label09;
+
+        $r17 = r13[i2];
+
+        virtualinvoke $r12.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r17);
+
+        $i0 = lengthof r13;
+
+        $i1 = $i0 - 1;
+
+        if i2 >= $i1 goto label08;
+
+        virtualinvoke $r12.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(124);
+
+     label08:
+        i2 = i2 + 1;
+
+        goto label07;
+
+     label09:
+        virtualinvoke $r12.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(41);
+
+        r22 = virtualinvoke $r12.<java.lang.StringBuffer: java.lang.String toString()>();
+
+     label10:
+        if r14 != null goto label11;
+
+        $r23 = null;
+
+        goto label12;
+
+     label11:
+        $r23 = virtualinvoke r14.<com.sun.org.apache.xerces.internal.xni.XMLString: java.lang.String toString()>();
+
+     label12:
+        $r16 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.DeclHandler fDeclHandler>;
+
+        interfaceinvoke $r16.<org.xml.sax.ext.DeclHandler: void attributeDecl(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)>(r3, r5, r22, r15, $r23);
+
+     label13:
+        goto label15;
+
+     label14:
+        $r18 := @caughtexception;
+
+        $r19 = new com.sun.org.apache.xerces.internal.xni.XNIException;
+
+        specialinvoke $r19.<com.sun.org.apache.xerces.internal.xni.XNIException: void <init>(java.lang.Exception)>($r18);
+
+        throw $r19;
+
+     label15:
+        return;
+
+        catch org.xml.sax.SAXException from label01 to label02 with label14;
+        catch org.xml.sax.SAXException from label03 to label13 with label14;
+    }
+
+    public void internalEntityDecl(java.lang.String, com.sun.org.apache.xerces.internal.xni.XMLString, com.sun.org.apache.xerces.internal.xni.XMLString, com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.xni.XMLString r3, r8;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r7;
+        com.sun.org.apache.xerces.internal.xni.Augmentations r9;
+        org.xml.sax.ext.DeclHandler $r1, $r4;
+        org.xml.sax.SAXException $r6;
+        java.lang.String r2, $r5;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: com.sun.org.apache.xerces.internal.xni.XMLString;
+
+        r8 := @parameter2: com.sun.org.apache.xerces.internal.xni.XMLString;
+
+        r9 := @parameter3: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.DeclHandler fDeclHandler>;
+
+        if $r1 == null goto label2;
+
+        $r4 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.DeclHandler fDeclHandler>;
+
+        $r5 = virtualinvoke r3.<com.sun.org.apache.xerces.internal.xni.XMLString: java.lang.String toString()>();
+
+        interfaceinvoke $r4.<org.xml.sax.ext.DeclHandler: void internalEntityDecl(java.lang.String,java.lang.String)>(r2, $r5);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = new com.sun.org.apache.xerces.internal.xni.XNIException;
+
+        specialinvoke $r7.<com.sun.org.apache.xerces.internal.xni.XNIException: void <init>(java.lang.Exception)>($r6);
+
+        throw $r7;
+
+     label4:
+        return;
+
+        catch org.xml.sax.SAXException from label1 to label2 with label3;
+    }
+
+    public void externalEntityDecl(java.lang.String, com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier, com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier r2;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r7;
+        com.sun.org.apache.xerces.internal.xni.Augmentations r8;
+        org.xml.sax.ext.DeclHandler $r1, $r5;
+        org.xml.sax.SAXException $r6;
+        java.lang.String $r3, r4, $r9;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r4 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier;
+
+        r8 := @parameter2: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.DeclHandler fDeclHandler>;
+
+        if $r1 == null goto label4;
+
+        $r3 = interfaceinvoke r2.<com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier: java.lang.String getPublicId()>();
+
+        $z0 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fResolveDTDURIs>;
+
+        if $z0 == 0 goto label2;
+
+        $r9 = interfaceinvoke r2.<com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier: java.lang.String getExpandedSystemId()>();
+
+        goto label3;
+
+     label2:
+        $r9 = interfaceinvoke r2.<com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier: java.lang.String getLiteralSystemId()>();
+
+     label3:
+        $r5 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.DeclHandler fDeclHandler>;
+
+        interfaceinvoke $r5.<org.xml.sax.ext.DeclHandler: void externalEntityDecl(java.lang.String,java.lang.String,java.lang.String)>(r4, $r3, $r9);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r6 := @caughtexception;
+
+        $r7 = new com.sun.org.apache.xerces.internal.xni.XNIException;
+
+        specialinvoke $r7.<com.sun.org.apache.xerces.internal.xni.XNIException: void <init>(java.lang.Exception)>($r6);
+
+        throw $r7;
+
+     label6:
+        return;
+
+        catch org.xml.sax.SAXException from label1 to label4 with label5;
+    }
+
+    public void unparsedEntityDecl(java.lang.String, com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier, java.lang.String, com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier r2;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r8;
+        com.sun.org.apache.xerces.internal.xni.Augmentations r9;
+        org.xml.sax.DTDHandler $r1, $r6;
+        org.xml.sax.SAXException $r7;
+        java.lang.String $r3, r4, r5, $r10;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r4 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier;
+
+        r5 := @parameter2: java.lang.String;
+
+        r9 := @parameter3: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.DTDHandler fDTDHandler>;
+
+        if $r1 == null goto label4;
+
+        $r3 = interfaceinvoke r2.<com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier: java.lang.String getPublicId()>();
+
+        $z0 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fResolveDTDURIs>;
+
+        if $z0 == 0 goto label2;
+
+        $r10 = interfaceinvoke r2.<com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier: java.lang.String getExpandedSystemId()>();
+
+        goto label3;
+
+     label2:
+        $r10 = interfaceinvoke r2.<com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier: java.lang.String getLiteralSystemId()>();
+
+     label3:
+        $r6 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.DTDHandler fDTDHandler>;
+
+        interfaceinvoke $r6.<org.xml.sax.DTDHandler: void unparsedEntityDecl(java.lang.String,java.lang.String,java.lang.String,java.lang.String)>(r4, $r3, $r10, r5);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r7 := @caughtexception;
+
+        $r8 = new com.sun.org.apache.xerces.internal.xni.XNIException;
+
+        specialinvoke $r8.<com.sun.org.apache.xerces.internal.xni.XNIException: void <init>(java.lang.Exception)>($r7);
+
+        throw $r8;
+
+     label6:
+        return;
+
+        catch org.xml.sax.SAXException from label1 to label4 with label5;
+    }
+
+    public void notationDecl(java.lang.String, com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier, com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier r2;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r7;
+        com.sun.org.apache.xerces.internal.xni.Augmentations r8;
+        org.xml.sax.DTDHandler $r1, $r5;
+        org.xml.sax.SAXException $r6;
+        java.lang.String $r3, r4, $r9;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r4 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier;
+
+        r8 := @parameter2: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.DTDHandler fDTDHandler>;
+
+        if $r1 == null goto label4;
+
+        $r3 = interfaceinvoke r2.<com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier: java.lang.String getPublicId()>();
+
+        $z0 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fResolveDTDURIs>;
+
+        if $z0 == 0 goto label2;
+
+        $r9 = interfaceinvoke r2.<com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier: java.lang.String getExpandedSystemId()>();
+
+        goto label3;
+
+     label2:
+        $r9 = interfaceinvoke r2.<com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier: java.lang.String getLiteralSystemId()>();
+
+     label3:
+        $r5 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.DTDHandler fDTDHandler>;
+
+        interfaceinvoke $r5.<org.xml.sax.DTDHandler: void notationDecl(java.lang.String,java.lang.String,java.lang.String)>(r4, $r3, $r9);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r6 := @caughtexception;
+
+        $r7 = new com.sun.org.apache.xerces.internal.xni.XNIException;
+
+        specialinvoke $r7.<com.sun.org.apache.xerces.internal.xni.XNIException: void <init>(java.lang.Exception)>($r6);
+
+        throw $r7;
+
+     label6:
+        return;
+
+        catch org.xml.sax.SAXException from label1 to label4 with label5;
+    }
+
+    public void endDTD(com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.util.SymbolHash $r2, $r3;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r6;
+        org.xml.sax.ext.LexicalHandler $r1, $r4;
+        com.sun.org.apache.xerces.internal.xni.Augmentations r7;
+        org.xml.sax.SAXException $r5;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r7 := @parameter0: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fInDTD> = 0;
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.LexicalHandler fLexicalHandler>;
+
+        if $r1 == null goto label2;
+
+        $r4 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.LexicalHandler fLexicalHandler>;
+
+        interfaceinvoke $r4.<org.xml.sax.ext.LexicalHandler: void endDTD()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new com.sun.org.apache.xerces.internal.xni.XNIException;
+
+        specialinvoke $r6.<com.sun.org.apache.xerces.internal.xni.XNIException: void <init>(java.lang.Exception)>($r5);
+
+        throw $r6;
+
+     label4:
+        $r2 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.util.SymbolHash fDeclaredAttrs>;
+
+        if $r2 == null goto label5;
+
+        $r3 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.util.SymbolHash fDeclaredAttrs>;
+
+        virtualinvoke $r3.<com.sun.org.apache.xerces.internal.util.SymbolHash: void clear()>();
+
+     label5:
+        return;
+
+        catch org.xml.sax.SAXException from label1 to label2 with label3;
+    }
+
+    public void parse(java.lang.String) throws org.xml.sax.SAXException, java.io.IOException
+    {
+        int $i0, $i1;
+        java.lang.String r1, $r9, $r13, $r14, $r15, $r16;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r2;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$1 $r12;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLParseException $r10;
+        java.io.IOException $r6, $r18;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r3;
+        java.lang.Exception $r4, $r11;
+        org.xml.sax.SAXParseException $r20;
+        org.xml.sax.SAXException $r5, $r7, $r8, $r17, $r19;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource $r0;
+
+        r2 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = new com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
+
+        specialinvoke $r0.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: void <init>(java.lang.String,java.lang.String,java.lang.String)>(null, r1, null);
+
+     label01:
+        virtualinvoke r2.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: void parse(com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource)>($r0);
+
+     label02:
+        goto label14;
+
+     label03:
+        $r10 := @caughtexception;
+
+        $r11 = virtualinvoke $r10.<com.sun.org.apache.xerces.internal.xni.parser.XMLParseException: java.lang.Exception getException()>();
+
+        if $r11 == null goto label04;
+
+        $z2 = $r11 instanceof java.io.CharConversionException;
+
+        if $z2 == 0 goto label07;
+
+     label04:
+        $r12 = new com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$1;
+
+        specialinvoke $r12.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$1: void <init>(com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser)>(r2);
+
+        $r13 = virtualinvoke $r10.<com.sun.org.apache.xerces.internal.xni.parser.XMLParseException: java.lang.String getPublicId()>();
+
+        virtualinvoke $r12.<org.xml.sax.helpers.LocatorImpl: void setPublicId(java.lang.String)>($r13);
+
+        $r14 = virtualinvoke $r10.<com.sun.org.apache.xerces.internal.xni.parser.XMLParseException: java.lang.String getExpandedSystemId()>();
+
+        virtualinvoke $r12.<org.xml.sax.helpers.LocatorImpl: void setSystemId(java.lang.String)>($r14);
+
+        $i0 = virtualinvoke $r10.<com.sun.org.apache.xerces.internal.xni.parser.XMLParseException: int getLineNumber()>();
+
+        virtualinvoke $r12.<org.xml.sax.helpers.LocatorImpl: void setLineNumber(int)>($i0);
+
+        $i1 = virtualinvoke $r10.<com.sun.org.apache.xerces.internal.xni.parser.XMLParseException: int getColumnNumber()>();
+
+        virtualinvoke $r12.<org.xml.sax.helpers.LocatorImpl: void setColumnNumber(int)>($i1);
+
+        if $r11 != null goto label05;
+
+        $r20 = new org.xml.sax.SAXParseException;
+
+        $r16 = virtualinvoke $r10.<com.sun.org.apache.xerces.internal.xni.parser.XMLParseException: java.lang.String getMessage()>();
+
+        specialinvoke $r20.<org.xml.sax.SAXParseException: void <init>(java.lang.String,org.xml.sax.Locator)>($r16, $r12);
+
+        goto label06;
+
+     label05:
+        $r20 = new org.xml.sax.SAXParseException;
+
+        $r15 = virtualinvoke $r10.<com.sun.org.apache.xerces.internal.xni.parser.XMLParseException: java.lang.String getMessage()>();
+
+        specialinvoke $r20.<org.xml.sax.SAXParseException: void <init>(java.lang.String,org.xml.sax.Locator,java.lang.Exception)>($r15, $r12, $r11);
+
+     label06:
+        throw $r20;
+
+     label07:
+        $z3 = $r11 instanceof org.xml.sax.SAXException;
+
+        if $z3 == 0 goto label08;
+
+        $r19 = (org.xml.sax.SAXException) $r11;
+
+        throw $r19;
+
+     label08:
+        $z4 = $r11 instanceof java.io.IOException;
+
+        if $z4 == 0 goto label09;
+
+        $r18 = (java.io.IOException) $r11;
+
+        throw $r18;
+
+     label09:
+        $r17 = new org.xml.sax.SAXException;
+
+        specialinvoke $r17.<org.xml.sax.SAXException: void <init>(java.lang.Exception)>($r11);
+
+        throw $r17;
+
+     label10:
+        $r3 := @caughtexception;
+
+        $r4 = virtualinvoke $r3.<com.sun.org.apache.xerces.internal.xni.XNIException: java.lang.Exception getException()>();
+
+        if $r4 != null goto label11;
+
+        $r8 = new org.xml.sax.SAXException;
+
+        $r9 = virtualinvoke $r3.<com.sun.org.apache.xerces.internal.xni.XNIException: java.lang.String getMessage()>();
+
+        specialinvoke $r8.<org.xml.sax.SAXException: void <init>(java.lang.String)>($r9);
+
+        throw $r8;
+
+     label11:
+        $z0 = $r4 instanceof org.xml.sax.SAXException;
+
+        if $z0 == 0 goto label12;
+
+        $r7 = (org.xml.sax.SAXException) $r4;
+
+        throw $r7;
+
+     label12:
+        $z1 = $r4 instanceof java.io.IOException;
+
+        if $z1 == 0 goto label13;
+
+        $r6 = (java.io.IOException) $r4;
+
+        throw $r6;
+
+     label13:
+        $r5 = new org.xml.sax.SAXException;
+
+        specialinvoke $r5.<org.xml.sax.SAXException: void <init>(java.lang.Exception)>($r4);
+
+        throw $r5;
+
+     label14:
+        return;
+
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLParseException from label01 to label02 with label03;
+        catch com.sun.org.apache.xerces.internal.xni.XNIException from label01 to label02 with label10;
+    }
+
+    public void parse(org.xml.sax.InputSource) throws org.xml.sax.SAXException, java.io.IOException
+    {
+        boolean $z0, $z1, $z2, $z3, $z4;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$2 $r17;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLParseException $r15;
+        java.io.Reader $r5;
+        java.lang.Exception $r9, $r16;
+        org.xml.sax.SAXException $r10, $r12, $r13, $r22, $r24;
+        int $i0, $i1;
+        java.lang.String $r2, $r3, $r6, $r14, $r18, $r19, $r20, $r21;
+        org.xml.sax.InputSource r1;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r7;
+        java.io.IOException $r11, $r23;
+        com.sun.org.apache.xerces.internal.xni.XNIException $r8;
+        org.xml.sax.SAXParseException $r25;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource $r0;
+        java.io.InputStream $r4;
+
+        r7 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r1 := @parameter0: org.xml.sax.InputSource;
+
+     label01:
+        $r0 = new com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
+
+        $r2 = virtualinvoke r1.<org.xml.sax.InputSource: java.lang.String getPublicId()>();
+
+        $r3 = virtualinvoke r1.<org.xml.sax.InputSource: java.lang.String getSystemId()>();
+
+        specialinvoke $r0.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: void <init>(java.lang.String,java.lang.String,java.lang.String)>($r2, $r3, null);
+
+        $r4 = virtualinvoke r1.<org.xml.sax.InputSource: java.io.InputStream getByteStream()>();
+
+        virtualinvoke $r0.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: void setByteStream(java.io.InputStream)>($r4);
+
+        $r5 = virtualinvoke r1.<org.xml.sax.InputSource: java.io.Reader getCharacterStream()>();
+
+        virtualinvoke $r0.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: void setCharacterStream(java.io.Reader)>($r5);
+
+        $r6 = virtualinvoke r1.<org.xml.sax.InputSource: java.lang.String getEncoding()>();
+
+        virtualinvoke $r0.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: void setEncoding(java.lang.String)>($r6);
+
+        virtualinvoke r7.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: void parse(com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource)>($r0);
+
+     label02:
+        goto label14;
+
+     label03:
+        $r15 := @caughtexception;
+
+        $r16 = virtualinvoke $r15.<com.sun.org.apache.xerces.internal.xni.parser.XMLParseException: java.lang.Exception getException()>();
+
+        if $r16 == null goto label04;
+
+        $z2 = $r16 instanceof java.io.CharConversionException;
+
+        if $z2 == 0 goto label07;
+
+     label04:
+        $r17 = new com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$2;
+
+        specialinvoke $r17.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$2: void <init>(com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser)>(r7);
+
+        $r18 = virtualinvoke $r15.<com.sun.org.apache.xerces.internal.xni.parser.XMLParseException: java.lang.String getPublicId()>();
+
+        virtualinvoke $r17.<org.xml.sax.helpers.LocatorImpl: void setPublicId(java.lang.String)>($r18);
+
+        $r19 = virtualinvoke $r15.<com.sun.org.apache.xerces.internal.xni.parser.XMLParseException: java.lang.String getExpandedSystemId()>();
+
+        virtualinvoke $r17.<org.xml.sax.helpers.LocatorImpl: void setSystemId(java.lang.String)>($r19);
+
+        $i0 = virtualinvoke $r15.<com.sun.org.apache.xerces.internal.xni.parser.XMLParseException: int getLineNumber()>();
+
+        virtualinvoke $r17.<org.xml.sax.helpers.LocatorImpl: void setLineNumber(int)>($i0);
+
+        $i1 = virtualinvoke $r15.<com.sun.org.apache.xerces.internal.xni.parser.XMLParseException: int getColumnNumber()>();
+
+        virtualinvoke $r17.<org.xml.sax.helpers.LocatorImpl: void setColumnNumber(int)>($i1);
+
+        if $r16 != null goto label05;
+
+        $r25 = new org.xml.sax.SAXParseException;
+
+        $r21 = virtualinvoke $r15.<com.sun.org.apache.xerces.internal.xni.parser.XMLParseException: java.lang.String getMessage()>();
+
+        specialinvoke $r25.<org.xml.sax.SAXParseException: void <init>(java.lang.String,org.xml.sax.Locator)>($r21, $r17);
+
+        goto label06;
+
+     label05:
+        $r25 = new org.xml.sax.SAXParseException;
+
+        $r20 = virtualinvoke $r15.<com.sun.org.apache.xerces.internal.xni.parser.XMLParseException: java.lang.String getMessage()>();
+
+        specialinvoke $r25.<org.xml.sax.SAXParseException: void <init>(java.lang.String,org.xml.sax.Locator,java.lang.Exception)>($r20, $r17, $r16);
+
+     label06:
+        throw $r25;
+
+     label07:
+        $z3 = $r16 instanceof org.xml.sax.SAXException;
+
+        if $z3 == 0 goto label08;
+
+        $r24 = (org.xml.sax.SAXException) $r16;
+
+        throw $r24;
+
+     label08:
+        $z4 = $r16 instanceof java.io.IOException;
+
+        if $z4 == 0 goto label09;
+
+        $r23 = (java.io.IOException) $r16;
+
+        throw $r23;
+
+     label09:
+        $r22 = new org.xml.sax.SAXException;
+
+        specialinvoke $r22.<org.xml.sax.SAXException: void <init>(java.lang.Exception)>($r16);
+
+        throw $r22;
+
+     label10:
+        $r8 := @caughtexception;
+
+        $r9 = virtualinvoke $r8.<com.sun.org.apache.xerces.internal.xni.XNIException: java.lang.Exception getException()>();
+
+        if $r9 != null goto label11;
+
+        $r13 = new org.xml.sax.SAXException;
+
+        $r14 = virtualinvoke $r8.<com.sun.org.apache.xerces.internal.xni.XNIException: java.lang.String getMessage()>();
+
+        specialinvoke $r13.<org.xml.sax.SAXException: void <init>(java.lang.String)>($r14);
+
+        throw $r13;
+
+     label11:
+        $z0 = $r9 instanceof org.xml.sax.SAXException;
+
+        if $z0 == 0 goto label12;
+
+        $r12 = (org.xml.sax.SAXException) $r9;
+
+        throw $r12;
+
+     label12:
+        $z1 = $r9 instanceof java.io.IOException;
+
+        if $z1 == 0 goto label13;
+
+        $r11 = (java.io.IOException) $r9;
+
+        throw $r11;
+
+     label13:
+        $r10 = new org.xml.sax.SAXException;
+
+        specialinvoke $r10.<org.xml.sax.SAXException: void <init>(java.lang.Exception)>($r9);
+
+        throw $r10;
+
+     label14:
+        return;
+
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLParseException from label01 to label02 with label03;
+        catch com.sun.org.apache.xerces.internal.xni.XNIException from label01 to label02 with label10;
+    }
+
+    public void setEntityResolver(org.xml.sax.EntityResolver)
+    {
+        com.sun.org.apache.xerces.internal.util.EntityResolverWrapper $r3, r13;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration $r1, $r5, $r8;
+        org.xml.sax.EntityResolver r4;
+        boolean $z0, $z1, $z2, $z3;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        com.sun.org.apache.xerces.internal.util.EntityResolver2Wrapper $r6, r12;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver r11;
+        org.xml.sax.ext.EntityResolver2 $r7, $r9;
+        java.lang.Object $r2;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException $r10;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r4 := @parameter0: org.xml.sax.EntityResolver;
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r2 = interfaceinvoke $r1.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: java.lang.Object getProperty(java.lang.String)>("http://apache.org/xml/properties/internal/entity-resolver");
+
+        r11 = (com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver) $r2;
+
+        $z0 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fUseEntityResolver2>;
+
+        if $z0 == 0 goto label3;
+
+        $z2 = r4 instanceof org.xml.sax.ext.EntityResolver2;
+
+        if $z2 == 0 goto label3;
+
+        $z3 = r11 instanceof com.sun.org.apache.xerces.internal.util.EntityResolver2Wrapper;
+
+        if $z3 == 0 goto label2;
+
+        r12 = (com.sun.org.apache.xerces.internal.util.EntityResolver2Wrapper) r11;
+
+        $r9 = (org.xml.sax.ext.EntityResolver2) r4;
+
+        virtualinvoke r12.<com.sun.org.apache.xerces.internal.util.EntityResolver2Wrapper: void setEntityResolver(org.xml.sax.ext.EntityResolver2)>($r9);
+
+        goto label5;
+
+     label2:
+        $r8 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r6 = new com.sun.org.apache.xerces.internal.util.EntityResolver2Wrapper;
+
+        $r7 = (org.xml.sax.ext.EntityResolver2) r4;
+
+        specialinvoke $r6.<com.sun.org.apache.xerces.internal.util.EntityResolver2Wrapper: void <init>(org.xml.sax.ext.EntityResolver2)>($r7);
+
+        interfaceinvoke $r8.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: void setProperty(java.lang.String,java.lang.Object)>("http://apache.org/xml/properties/internal/entity-resolver", $r6);
+
+        goto label5;
+
+     label3:
+        $z1 = r11 instanceof com.sun.org.apache.xerces.internal.util.EntityResolverWrapper;
+
+        if $z1 == 0 goto label4;
+
+        r13 = (com.sun.org.apache.xerces.internal.util.EntityResolverWrapper) r11;
+
+        virtualinvoke r13.<com.sun.org.apache.xerces.internal.util.EntityResolverWrapper: void setEntityResolver(org.xml.sax.EntityResolver)>(r4);
+
+        goto label5;
+
+     label4:
+        $r5 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r3 = new com.sun.org.apache.xerces.internal.util.EntityResolverWrapper;
+
+        specialinvoke $r3.<com.sun.org.apache.xerces.internal.util.EntityResolverWrapper: void <init>(org.xml.sax.EntityResolver)>(r4);
+
+        interfaceinvoke $r5.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: void setProperty(java.lang.String,java.lang.Object)>("http://apache.org/xml/properties/internal/entity-resolver", $r3);
+
+     label5:
+        goto label7;
+
+     label6:
+        $r10 := @caughtexception;
+
+     label7:
+        return;
+
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label1 to label5 with label6;
+    }
+
+    public org.xml.sax.EntityResolver getEntityResolver()
+    {
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        com.sun.org.apache.xerces.internal.util.EntityResolver2Wrapper $r3;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver r7;
+        com.sun.org.apache.xerces.internal.util.EntityResolverWrapper $r4;
+        java.lang.Object $r2;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration $r1;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException $r5;
+        org.xml.sax.EntityResolver r6;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r6 = null;
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r2 = interfaceinvoke $r1.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: java.lang.Object getProperty(java.lang.String)>("http://apache.org/xml/properties/internal/entity-resolver");
+
+        r7 = (com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver) $r2;
+
+        if r7 == null goto label3;
+
+        $z0 = r7 instanceof com.sun.org.apache.xerces.internal.util.EntityResolverWrapper;
+
+        if $z0 == 0 goto label2;
+
+        $r4 = (com.sun.org.apache.xerces.internal.util.EntityResolverWrapper) r7;
+
+        r6 = virtualinvoke $r4.<com.sun.org.apache.xerces.internal.util.EntityResolverWrapper: org.xml.sax.EntityResolver getEntityResolver()>();
+
+        goto label3;
+
+     label2:
+        $z1 = r7 instanceof com.sun.org.apache.xerces.internal.util.EntityResolver2Wrapper;
+
+        if $z1 == 0 goto label3;
+
+        $r3 = (com.sun.org.apache.xerces.internal.util.EntityResolver2Wrapper) r7;
+
+        r6 = virtualinvoke $r3.<com.sun.org.apache.xerces.internal.util.EntityResolver2Wrapper: org.xml.sax.ext.EntityResolver2 getEntityResolver()>();
+
+     label3:
+        goto label5;
+
+     label4:
+        $r5 := @caughtexception;
+
+     label5:
+        return r6;
+
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label1 to label3 with label4;
+    }
+
+    public void setErrorHandler(org.xml.sax.ErrorHandler)
+    {
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        com.sun.org.apache.xerces.internal.util.ErrorHandlerWrapper $r3, r6;
+        org.xml.sax.ErrorHandler r4;
+        java.lang.Object $r2;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLErrorHandler r8;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration $r1, $r5;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException $r7;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r4 := @parameter0: org.xml.sax.ErrorHandler;
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r2 = interfaceinvoke $r1.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: java.lang.Object getProperty(java.lang.String)>("http://apache.org/xml/properties/internal/error-handler");
+
+        r8 = (com.sun.org.apache.xerces.internal.xni.parser.XMLErrorHandler) $r2;
+
+        $z0 = r8 instanceof com.sun.org.apache.xerces.internal.util.ErrorHandlerWrapper;
+
+        if $z0 == 0 goto label2;
+
+        r6 = (com.sun.org.apache.xerces.internal.util.ErrorHandlerWrapper) r8;
+
+        virtualinvoke r6.<com.sun.org.apache.xerces.internal.util.ErrorHandlerWrapper: void setErrorHandler(org.xml.sax.ErrorHandler)>(r4);
+
+        goto label3;
+
+     label2:
+        $r5 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r3 = new com.sun.org.apache.xerces.internal.util.ErrorHandlerWrapper;
+
+        specialinvoke $r3.<com.sun.org.apache.xerces.internal.util.ErrorHandlerWrapper: void <init>(org.xml.sax.ErrorHandler)>(r4);
+
+        interfaceinvoke $r5.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: void setProperty(java.lang.String,java.lang.Object)>("http://apache.org/xml/properties/internal/error-handler", $r3);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r7 := @caughtexception;
+
+     label5:
+        return;
+
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label1 to label3 with label4;
+    }
+
+    public org.xml.sax.ErrorHandler getErrorHandler()
+    {
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        com.sun.org.apache.xerces.internal.util.ErrorHandlerWrapper $r3;
+        org.xml.sax.ErrorHandler r5;
+        java.lang.Object $r2;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLErrorHandler r6;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration $r1;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException $r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r5 = null;
+
+     label1:
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r2 = interfaceinvoke $r1.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: java.lang.Object getProperty(java.lang.String)>("http://apache.org/xml/properties/internal/error-handler");
+
+        r6 = (com.sun.org.apache.xerces.internal.xni.parser.XMLErrorHandler) $r2;
+
+        if r6 == null goto label2;
+
+        $z0 = r6 instanceof com.sun.org.apache.xerces.internal.util.ErrorHandlerWrapper;
+
+        if $z0 == 0 goto label2;
+
+        $r3 = (com.sun.org.apache.xerces.internal.util.ErrorHandlerWrapper) r6;
+
+        r5 = virtualinvoke $r3.<com.sun.org.apache.xerces.internal.util.ErrorHandlerWrapper: org.xml.sax.ErrorHandler getErrorHandler()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+     label4:
+        return r5;
+
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label1 to label2 with label3;
+    }
+
+    public void setLocale(java.util.Locale) throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration $r2;
+        java.util.Locale r1;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r1 := @parameter0: java.util.Locale;
+
+        $r2 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        interfaceinvoke $r2.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: void setLocale(java.util.Locale)>(r1);
+
+        return;
+    }
+
+    public void setDTDHandler(org.xml.sax.DTDHandler)
+    {
+        org.xml.sax.DTDHandler r1;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r1 := @parameter0: org.xml.sax.DTDHandler;
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.DTDHandler fDTDHandler> = r1;
+
+        return;
+    }
+
+    public void setDocumentHandler(org.xml.sax.DocumentHandler)
+    {
+        org.xml.sax.DocumentHandler r1;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r1 := @parameter0: org.xml.sax.DocumentHandler;
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.DocumentHandler fDocumentHandler> = r1;
+
+        return;
+    }
+
+    public void setContentHandler(org.xml.sax.ContentHandler)
+    {
+        org.xml.sax.ContentHandler r1;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r1 := @parameter0: org.xml.sax.ContentHandler;
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ContentHandler fContentHandler> = r1;
+
+        return;
+    }
+
+    public org.xml.sax.ContentHandler getContentHandler()
+    {
+        org.xml.sax.ContentHandler $r1;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ContentHandler fContentHandler>;
+
+        return $r1;
+    }
+
+    public org.xml.sax.DTDHandler getDTDHandler()
+    {
+        org.xml.sax.DTDHandler $r1;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.DTDHandler fDTDHandler>;
+
+        return $r1;
+    }
+
+    public void setFeature(java.lang.String, boolean) throws org.xml.sax.SAXNotRecognizedException, org.xml.sax.SAXNotSupportedException
+    {
+        com.sun.org.apache.xerces.internal.util.Status $r34, $r35;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration $r2, $r5, $r21, $r26, $r30, $r31, $r37, $r42, $r47, $r51;
+        org.xml.sax.EntityResolver $r19;
+        java.lang.Object[] $r23, $r28, $r39, $r44, $r49;
+        java.lang.String r0, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r24, $r29, $r33, $r40, $r45, $r50;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r1;
+        org.xml.sax.SAXNotSupportedException $r20, $r25, $r36, $r46;
+        java.util.Locale $r22, $r27, $r38, $r43, $r48;
+        boolean $z0, $z1, z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15;
+        org.xml.sax.SAXNotRecognizedException $r41;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, i14;
+        com.sun.org.apache.xerces.internal.utils.XMLSecurityManager $r4;
+        java.lang.Object $r3;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException $r32;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r0 := @parameter0: java.lang.String;
+
+        z2 := @parameter1: boolean;
+
+     label01:
+        $z0 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("http://xml.org/sax/features/");
+
+        if $z0 == 0 goto label23;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $r6 = "http://xml.org/sax/features/";
+
+        $i1 = virtualinvoke $r6.<java.lang.String: int length()>();
+
+        i14 = $i0 - $i1;
+
+        $r7 = "namespaces";
+
+        $i2 = virtualinvoke $r7.<java.lang.String: int length()>();
+
+        if i14 != $i2 goto label03;
+
+        $z15 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("namespaces");
+
+        if $z15 == 0 goto label03;
+
+        $r31 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        interfaceinvoke $r31.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: void setFeature(java.lang.String,boolean)>(r0, z2);
+
+        r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fNamespaces> = z2;
+
+     label02:
+        return;
+
+     label03:
+        $r8 = "namespace-prefixes";
+
+        $i3 = virtualinvoke $r8.<java.lang.String: int length()>();
+
+        if i14 != $i3 goto label05;
+
+        $z14 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("namespace-prefixes");
+
+        if $z14 == 0 goto label05;
+
+        $r30 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        interfaceinvoke $r30.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: void setFeature(java.lang.String,boolean)>(r0, z2);
+
+        r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fNamespacePrefixes> = z2;
+
+     label04:
+        return;
+
+     label05:
+        $r9 = "string-interning";
+
+        $i4 = virtualinvoke $r9.<java.lang.String: int length()>();
+
+        if i14 != $i4 goto label07;
+
+        $z13 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("string-interning");
+
+        if $z13 == 0 goto label07;
+
+        if z2 != 0 goto label06;
+
+        $r25 = new org.xml.sax.SAXNotSupportedException;
+
+        $r26 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r27 = interfaceinvoke $r26.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: java.util.Locale getLocale()>();
+
+        $r28 = newarray (java.lang.Object)[1];
+
+        $r28[0] = r0;
+
+        $r29 = staticinvoke <com.sun.org.apache.xerces.internal.util.SAXMessageFormatter: java.lang.String formatMessage(java.util.Locale,java.lang.String,java.lang.Object[])>($r27, "false-not-supported", $r28);
+
+        specialinvoke $r25.<org.xml.sax.SAXNotSupportedException: void <init>(java.lang.String)>($r29);
+
+        throw $r25;
+
+     label06:
+        return;
+
+     label07:
+        $r10 = "lexical-handler/parameter-entities";
+
+        $i5 = virtualinvoke $r10.<java.lang.String: int length()>();
+
+        if i14 != $i5 goto label09;
+
+        $z12 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("lexical-handler/parameter-entities");
+
+        if $z12 == 0 goto label09;
+
+        r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fLexicalHandlerParameterEntities> = z2;
+
+     label08:
+        return;
+
+     label09:
+        $r11 = "resolve-dtd-uris";
+
+        $i6 = virtualinvoke $r11.<java.lang.String: int length()>();
+
+        if i14 != $i6 goto label11;
+
+        $z11 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("resolve-dtd-uris");
+
+        if $z11 == 0 goto label11;
+
+        r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fResolveDTDURIs> = z2;
+
+     label10:
+        return;
+
+     label11:
+        $r12 = "unicode-normalization-checking";
+
+        $i7 = virtualinvoke $r12.<java.lang.String: int length()>();
+
+        if i14 != $i7 goto label13;
+
+        $z10 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("unicode-normalization-checking");
+
+        if $z10 == 0 goto label13;
+
+        if z2 == 0 goto label12;
+
+        $r20 = new org.xml.sax.SAXNotSupportedException;
+
+        $r21 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r22 = interfaceinvoke $r21.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: java.util.Locale getLocale()>();
+
+        $r23 = newarray (java.lang.Object)[1];
+
+        $r23[0] = r0;
+
+        $r24 = staticinvoke <com.sun.org.apache.xerces.internal.util.SAXMessageFormatter: java.lang.String formatMessage(java.util.Locale,java.lang.String,java.lang.Object[])>($r22, "true-not-supported", $r23);
+
+        specialinvoke $r20.<org.xml.sax.SAXNotSupportedException: void <init>(java.lang.String)>($r24);
+
+        throw $r20;
+
+     label12:
+        return;
+
+     label13:
+        $r13 = "xmlns-uris";
+
+        $i8 = virtualinvoke $r13.<java.lang.String: int length()>();
+
+        if i14 != $i8 goto label15;
+
+        $z9 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("xmlns-uris");
+
+        if $z9 == 0 goto label15;
+
+        r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fXMLNSURIs> = z2;
+
+     label14:
+        return;
+
+     label15:
+        $r14 = "use-entity-resolver2";
+
+        $i9 = virtualinvoke $r14.<java.lang.String: int length()>();
+
+        if i14 != $i9 goto label17;
+
+        $z7 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("use-entity-resolver2");
+
+        if $z7 == 0 goto label17;
+
+        $z8 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fUseEntityResolver2>;
+
+        if z2 == $z8 goto label16;
+
+        r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fUseEntityResolver2> = z2;
+
+        $r19 = virtualinvoke r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.EntityResolver getEntityResolver()>();
+
+        virtualinvoke r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: void setEntityResolver(org.xml.sax.EntityResolver)>($r19);
+
+     label16:
+        return;
+
+     label17:
+        $r15 = "is-standalone";
+
+        $i10 = virtualinvoke $r15.<java.lang.String: int length()>();
+
+        if i14 != $i10 goto label18;
+
+        $z6 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("is-standalone");
+
+        if $z6 != 0 goto label21;
+
+     label18:
+        $r16 = "use-attributes2";
+
+        $i11 = virtualinvoke $r16.<java.lang.String: int length()>();
+
+        if i14 != $i11 goto label19;
+
+        $z5 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("use-attributes2");
+
+        if $z5 != 0 goto label21;
+
+     label19:
+        $r17 = "use-locator2";
+
+        $i12 = virtualinvoke $r17.<java.lang.String: int length()>();
+
+        if i14 != $i12 goto label20;
+
+        $z4 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("use-locator2");
+
+        if $z4 != 0 goto label21;
+
+     label20:
+        $r18 = "xml-1.1";
+
+        $i13 = virtualinvoke $r18.<java.lang.String: int length()>();
+
+        if i14 != $i13 goto label22;
+
+        $z3 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("xml-1.1");
+
+        if $z3 == 0 goto label22;
+
+     label21:
+        $r46 = new org.xml.sax.SAXNotSupportedException;
+
+        $r47 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r48 = interfaceinvoke $r47.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: java.util.Locale getLocale()>();
+
+        $r49 = newarray (java.lang.Object)[1];
+
+        $r49[0] = r0;
+
+        $r50 = staticinvoke <com.sun.org.apache.xerces.internal.util.SAXMessageFormatter: java.lang.String formatMessage(java.util.Locale,java.lang.String,java.lang.Object[])>($r48, "feature-read-only", $r49);
+
+        specialinvoke $r46.<org.xml.sax.SAXNotSupportedException: void <init>(java.lang.String)>($r50);
+
+        throw $r46;
+
+     label22:
+        goto label24;
+
+     label23:
+        $z1 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("http://javax.xml.XMLConstants/feature/secure-processing");
+
+        if $z1 == 0 goto label24;
+
+        if z2 == 0 goto label24;
+
+        $r2 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r3 = interfaceinvoke $r2.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: java.lang.Object getProperty(java.lang.String)>("http://apache.org/xml/properties/security-manager");
+
+        if $r3 != null goto label24;
+
+        $r5 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r4 = new com.sun.org.apache.xerces.internal.utils.XMLSecurityManager;
+
+        specialinvoke $r4.<com.sun.org.apache.xerces.internal.utils.XMLSecurityManager: void <init>()>();
+
+        interfaceinvoke $r5.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: void setProperty(java.lang.String,java.lang.Object)>("http://apache.org/xml/properties/security-manager", $r4);
+
+     label24:
+        $r51 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        interfaceinvoke $r51.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: void setFeature(java.lang.String,boolean)>(r0, z2);
+
+     label25:
+        goto label28;
+
+     label26:
+        $r32 := @caughtexception;
+
+        $r33 = virtualinvoke $r32.<com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException: java.lang.String getIdentifier()>();
+
+        $r34 = virtualinvoke $r32.<com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException: com.sun.org.apache.xerces.internal.util.Status getType()>();
+
+        $r35 = <com.sun.org.apache.xerces.internal.util.Status: com.sun.org.apache.xerces.internal.util.Status NOT_RECOGNIZED>;
+
+        if $r34 != $r35 goto label27;
+
+        $r41 = new org.xml.sax.SAXNotRecognizedException;
+
+        $r42 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r43 = interfaceinvoke $r42.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: java.util.Locale getLocale()>();
+
+        $r44 = newarray (java.lang.Object)[1];
+
+        $r44[0] = $r33;
+
+        $r45 = staticinvoke <com.sun.org.apache.xerces.internal.util.SAXMessageFormatter: java.lang.String formatMessage(java.util.Locale,java.lang.String,java.lang.Object[])>($r43, "feature-not-recognized", $r44);
+
+        specialinvoke $r41.<org.xml.sax.SAXNotRecognizedException: void <init>(java.lang.String)>($r45);
+
+        throw $r41;
+
+     label27:
+        $r36 = new org.xml.sax.SAXNotSupportedException;
+
+        $r37 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r38 = interfaceinvoke $r37.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: java.util.Locale getLocale()>();
+
+        $r39 = newarray (java.lang.Object)[1];
+
+        $r39[0] = $r33;
+
+        $r40 = staticinvoke <com.sun.org.apache.xerces.internal.util.SAXMessageFormatter: java.lang.String formatMessage(java.util.Locale,java.lang.String,java.lang.Object[])>($r38, "feature-not-supported", $r39);
+
+        specialinvoke $r36.<org.xml.sax.SAXNotSupportedException: void <init>(java.lang.String)>($r40);
+
+        throw $r36;
+
+     label28:
+        return;
+
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label01 to label02 with label26;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label03 to label04 with label26;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label05 to label06 with label26;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label07 to label08 with label26;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label09 to label10 with label26;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label11 to label12 with label26;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label13 to label14 with label26;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label15 to label16 with label26;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label17 to label25 with label26;
+    }
+
+    public boolean getFeature(java.lang.String) throws org.xml.sax.SAXNotRecognizedException, org.xml.sax.SAXNotSupportedException
+    {
+        com.sun.org.apache.xerces.internal.util.Status $r18, $r19;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration $r14, $r15, $r21, $r26, $r30;
+        java.lang.Object[] $r23, $r28;
+        java.lang.String r0, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r17, $r24, $r29;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r1;
+        org.xml.sax.SAXNotSupportedException $r20;
+        java.util.Locale $r22, $r27;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19;
+        org.xml.sax.SAXNotRecognizedException $r25;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, i13;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException $r16;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r0 := @parameter0: java.lang.String;
+
+     label01:
+        $z0 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("http://xml.org/sax/features/");
+
+        if $z0 == 0 goto label22;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $r2 = "http://xml.org/sax/features/";
+
+        $i1 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        i13 = $i0 - $i1;
+
+        $r3 = "namespace-prefixes";
+
+        $i2 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        if i13 != $i2 goto label03;
+
+        $z17 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("namespace-prefixes");
+
+        if $z17 == 0 goto label03;
+
+        $r15 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $z18 = interfaceinvoke $r15.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: boolean getFeature(java.lang.String)>(r0);
+
+     label02:
+        return $z18;
+
+     label03:
+        $r4 = "string-interning";
+
+        $i3 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        if i13 != $i3 goto label05;
+
+        $z16 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("string-interning");
+
+        if $z16 == 0 goto label05;
+
+     label04:
+        return 1;
+
+     label05:
+        $r5 = "is-standalone";
+
+        $i4 = virtualinvoke $r5.<java.lang.String: int length()>();
+
+        if i13 != $i4 goto label07;
+
+        $z14 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("is-standalone");
+
+        if $z14 == 0 goto label07;
+
+        $z15 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fStandalone>;
+
+     label06:
+        return $z15;
+
+     label07:
+        $r6 = "xml-1.1";
+
+        $i5 = virtualinvoke $r6.<java.lang.String: int length()>();
+
+        if i13 != $i5 goto label09;
+
+        $z12 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("xml-1.1");
+
+        if $z12 == 0 goto label09;
+
+        $r14 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $z13 = $r14 instanceof com.sun.org.apache.xerces.internal.parsers.XML11Configurable;
+
+     label08:
+        return $z13;
+
+     label09:
+        $r7 = "lexical-handler/parameter-entities";
+
+        $i6 = virtualinvoke $r7.<java.lang.String: int length()>();
+
+        if i13 != $i6 goto label11;
+
+        $z10 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("lexical-handler/parameter-entities");
+
+        if $z10 == 0 goto label11;
+
+        $z11 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fLexicalHandlerParameterEntities>;
+
+     label10:
+        return $z11;
+
+     label11:
+        $r8 = "resolve-dtd-uris";
+
+        $i7 = virtualinvoke $r8.<java.lang.String: int length()>();
+
+        if i13 != $i7 goto label13;
+
+        $z8 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("resolve-dtd-uris");
+
+        if $z8 == 0 goto label13;
+
+        $z9 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fResolveDTDURIs>;
+
+     label12:
+        return $z9;
+
+     label13:
+        $r9 = "xmlns-uris";
+
+        $i8 = virtualinvoke $r9.<java.lang.String: int length()>();
+
+        if i13 != $i8 goto label15;
+
+        $z6 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("xmlns-uris");
+
+        if $z6 == 0 goto label15;
+
+        $z7 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fXMLNSURIs>;
+
+     label14:
+        return $z7;
+
+     label15:
+        $r10 = "unicode-normalization-checking";
+
+        $i9 = virtualinvoke $r10.<java.lang.String: int length()>();
+
+        if i13 != $i9 goto label17;
+
+        $z5 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("unicode-normalization-checking");
+
+        if $z5 == 0 goto label17;
+
+     label16:
+        return 0;
+
+     label17:
+        $r11 = "use-entity-resolver2";
+
+        $i10 = virtualinvoke $r11.<java.lang.String: int length()>();
+
+        if i13 != $i10 goto label19;
+
+        $z3 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("use-entity-resolver2");
+
+        if $z3 == 0 goto label19;
+
+        $z4 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fUseEntityResolver2>;
+
+     label18:
+        return $z4;
+
+     label19:
+        $r12 = "use-attributes2";
+
+        $i11 = virtualinvoke $r12.<java.lang.String: int length()>();
+
+        if i13 != $i11 goto label20;
+
+        $z2 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("use-attributes2");
+
+        if $z2 != 0 goto label21;
+
+     label20:
+        $r13 = "use-locator2";
+
+        $i12 = virtualinvoke $r13.<java.lang.String: int length()>();
+
+        if i13 != $i12 goto label22;
+
+        $z1 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("use-locator2");
+
+        if $z1 == 0 goto label22;
+
+     label21:
+        return 1;
+
+     label22:
+        $r30 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $z19 = interfaceinvoke $r30.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: boolean getFeature(java.lang.String)>(r0);
+
+     label23:
+        return $z19;
+
+     label24:
+        $r16 := @caughtexception;
+
+        $r17 = virtualinvoke $r16.<com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException: java.lang.String getIdentifier()>();
+
+        $r18 = virtualinvoke $r16.<com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException: com.sun.org.apache.xerces.internal.util.Status getType()>();
+
+        $r19 = <com.sun.org.apache.xerces.internal.util.Status: com.sun.org.apache.xerces.internal.util.Status NOT_RECOGNIZED>;
+
+        if $r18 != $r19 goto label25;
+
+        $r25 = new org.xml.sax.SAXNotRecognizedException;
+
+        $r26 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r27 = interfaceinvoke $r26.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: java.util.Locale getLocale()>();
+
+        $r28 = newarray (java.lang.Object)[1];
+
+        $r28[0] = $r17;
+
+        $r29 = staticinvoke <com.sun.org.apache.xerces.internal.util.SAXMessageFormatter: java.lang.String formatMessage(java.util.Locale,java.lang.String,java.lang.Object[])>($r27, "feature-not-recognized", $r28);
+
+        specialinvoke $r25.<org.xml.sax.SAXNotRecognizedException: void <init>(java.lang.String)>($r29);
+
+        throw $r25;
+
+     label25:
+        $r20 = new org.xml.sax.SAXNotSupportedException;
+
+        $r21 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r22 = interfaceinvoke $r21.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: java.util.Locale getLocale()>();
+
+        $r23 = newarray (java.lang.Object)[1];
+
+        $r23[0] = $r17;
+
+        $r24 = staticinvoke <com.sun.org.apache.xerces.internal.util.SAXMessageFormatter: java.lang.String formatMessage(java.util.Locale,java.lang.String,java.lang.Object[])>($r22, "feature-not-supported", $r23);
+
+        specialinvoke $r20.<org.xml.sax.SAXNotSupportedException: void <init>(java.lang.String)>($r24);
+
+        throw $r20;
+
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label01 to label02 with label24;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label03 to label04 with label24;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label05 to label06 with label24;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label07 to label08 with label24;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label09 to label10 with label24;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label11 to label12 with label24;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label13 to label14 with label24;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label15 to label16 with label24;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label17 to label18 with label24;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label19 to label21 with label24;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label22 to label23 with label24;
+    }
+
+    public void setProperty(java.lang.String, java.lang.Object) throws org.xml.sax.SAXNotRecognizedException, org.xml.sax.SAXNotSupportedException
+    {
+        org.xml.sax.SAXNotSupportedException $r8, $r19, $r30, $r36;
+        com.sun.org.apache.xerces.internal.util.Status $r17, $r18;
+        org.xml.sax.ext.LexicalHandler $r14;
+        java.util.Locale $r10, $r21, $r26, $r32, $r38;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration $r9, $r20, $r25, $r31, $r37, $r41;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.lang.Object[] $r11, $r22, $r27, $r33, $r39;
+        java.lang.ClassCastException $r29, $r35;
+        org.xml.sax.SAXNotRecognizedException $r24;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6;
+        java.lang.String r0, $r3, $r4, $r5, $r6, $r7, $r12, $r16, $r23, $r28, $r34, $r40;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r1;
+        org.xml.sax.ext.DeclHandler $r13;
+        java.lang.Object r2;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException $r15;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r0 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Object;
+
+     label01:
+        $z0 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("http://xml.org/sax/properties/");
+
+        if $z0 == 0 goto label14;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $r3 = "http://xml.org/sax/properties/";
+
+        $i1 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        i6 = $i0 - $i1;
+
+        $r4 = "lexical-handler";
+
+        $i2 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        if i6 != $i2 goto label06;
+
+        $z4 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("lexical-handler");
+
+        if $z4 == 0 goto label06;
+
+     label02:
+        $r14 = (org.xml.sax.ext.LexicalHandler) r2;
+
+        virtualinvoke r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: void setLexicalHandler(org.xml.sax.ext.LexicalHandler)>($r14);
+
+     label03:
+        goto label05;
+
+     label04:
+        $r35 := @caughtexception;
+
+        $r36 = new org.xml.sax.SAXNotSupportedException;
+
+        $r37 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r38 = interfaceinvoke $r37.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: java.util.Locale getLocale()>();
+
+        $r39 = newarray (java.lang.Object)[2];
+
+        $r39[0] = r0;
+
+        $r39[1] = "org.xml.sax.ext.LexicalHandler";
+
+        $r40 = staticinvoke <com.sun.org.apache.xerces.internal.util.SAXMessageFormatter: java.lang.String formatMessage(java.util.Locale,java.lang.String,java.lang.Object[])>($r38, "incompatible-class", $r39);
+
+        specialinvoke $r36.<org.xml.sax.SAXNotSupportedException: void <init>(java.lang.String)>($r40);
+
+        throw $r36;
+
+     label05:
+        return;
+
+     label06:
+        $r5 = "declaration-handler";
+
+        $i3 = virtualinvoke $r5.<java.lang.String: int length()>();
+
+        if i6 != $i3 goto label11;
+
+        $z3 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("declaration-handler");
+
+        if $z3 == 0 goto label11;
+
+     label07:
+        $r13 = (org.xml.sax.ext.DeclHandler) r2;
+
+        virtualinvoke r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: void setDeclHandler(org.xml.sax.ext.DeclHandler)>($r13);
+
+     label08:
+        goto label10;
+
+     label09:
+        $r29 := @caughtexception;
+
+        $r30 = new org.xml.sax.SAXNotSupportedException;
+
+        $r31 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r32 = interfaceinvoke $r31.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: java.util.Locale getLocale()>();
+
+        $r33 = newarray (java.lang.Object)[2];
+
+        $r33[0] = r0;
+
+        $r33[1] = "org.xml.sax.ext.DeclHandler";
+
+        $r34 = staticinvoke <com.sun.org.apache.xerces.internal.util.SAXMessageFormatter: java.lang.String formatMessage(java.util.Locale,java.lang.String,java.lang.Object[])>($r32, "incompatible-class", $r33);
+
+        specialinvoke $r30.<org.xml.sax.SAXNotSupportedException: void <init>(java.lang.String)>($r34);
+
+        throw $r30;
+
+     label10:
+        return;
+
+     label11:
+        $r6 = "dom-node";
+
+        $i4 = virtualinvoke $r6.<java.lang.String: int length()>();
+
+        if i6 != $i4 goto label12;
+
+        $z2 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("dom-node");
+
+        if $z2 != 0 goto label13;
+
+     label12:
+        $r7 = "document-xml-version";
+
+        $i5 = virtualinvoke $r7.<java.lang.String: int length()>();
+
+        if i6 != $i5 goto label14;
+
+        $z1 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("document-xml-version");
+
+        if $z1 == 0 goto label14;
+
+     label13:
+        $r8 = new org.xml.sax.SAXNotSupportedException;
+
+        $r9 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r10 = interfaceinvoke $r9.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: java.util.Locale getLocale()>();
+
+        $r11 = newarray (java.lang.Object)[1];
+
+        $r11[0] = r0;
+
+        $r12 = staticinvoke <com.sun.org.apache.xerces.internal.util.SAXMessageFormatter: java.lang.String formatMessage(java.util.Locale,java.lang.String,java.lang.Object[])>($r10, "property-read-only", $r11);
+
+        specialinvoke $r8.<org.xml.sax.SAXNotSupportedException: void <init>(java.lang.String)>($r12);
+
+        throw $r8;
+
+     label14:
+        $r41 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        interfaceinvoke $r41.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: void setProperty(java.lang.String,java.lang.Object)>(r0, r2);
+
+     label15:
+        goto label18;
+
+     label16:
+        $r15 := @caughtexception;
+
+        $r16 = virtualinvoke $r15.<com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException: java.lang.String getIdentifier()>();
+
+        $r17 = virtualinvoke $r15.<com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException: com.sun.org.apache.xerces.internal.util.Status getType()>();
+
+        $r18 = <com.sun.org.apache.xerces.internal.util.Status: com.sun.org.apache.xerces.internal.util.Status NOT_RECOGNIZED>;
+
+        if $r17 != $r18 goto label17;
+
+        $r24 = new org.xml.sax.SAXNotRecognizedException;
+
+        $r25 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r26 = interfaceinvoke $r25.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: java.util.Locale getLocale()>();
+
+        $r27 = newarray (java.lang.Object)[1];
+
+        $r27[0] = $r16;
+
+        $r28 = staticinvoke <com.sun.org.apache.xerces.internal.util.SAXMessageFormatter: java.lang.String formatMessage(java.util.Locale,java.lang.String,java.lang.Object[])>($r26, "property-not-recognized", $r27);
+
+        specialinvoke $r24.<org.xml.sax.SAXNotRecognizedException: void <init>(java.lang.String)>($r28);
+
+        throw $r24;
+
+     label17:
+        $r19 = new org.xml.sax.SAXNotSupportedException;
+
+        $r20 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r21 = interfaceinvoke $r20.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: java.util.Locale getLocale()>();
+
+        $r22 = newarray (java.lang.Object)[1];
+
+        $r22[0] = $r16;
+
+        $r23 = staticinvoke <com.sun.org.apache.xerces.internal.util.SAXMessageFormatter: java.lang.String formatMessage(java.util.Locale,java.lang.String,java.lang.Object[])>($r21, "property-not-supported", $r22);
+
+        specialinvoke $r19.<org.xml.sax.SAXNotSupportedException: void <init>(java.lang.String)>($r23);
+
+        throw $r19;
+
+     label18:
+        return;
+
+        catch java.lang.ClassCastException from label02 to label03 with label04;
+        catch java.lang.ClassCastException from label07 to label08 with label09;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label01 to label05 with label16;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label06 to label10 with label16;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label11 to label15 with label16;
+    }
+
+    public java.lang.Object getProperty(java.lang.String) throws org.xml.sax.SAXNotRecognizedException, org.xml.sax.SAXNotSupportedException
+    {
+        org.xml.sax.SAXNotSupportedException $r7, $r18;
+        com.sun.org.apache.xerces.internal.util.Status $r16, $r17;
+        org.xml.sax.ext.LexicalHandler $r12;
+        java.util.Locale $r9, $r20, $r25;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration $r8, $r19, $r24, $r28;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.lang.Object[] $r21, $r26;
+        org.xml.sax.SAXNotRecognizedException $r23;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6;
+        java.lang.String r0, $r2, $r3, $r4, $r5, $r6, $r10, $r13, $r15, $r22, $r27;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r1;
+        org.xml.sax.ext.DeclHandler $r11;
+        java.lang.Object $r29;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException $r14;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r0 := @parameter0: java.lang.String;
+
+     label01:
+        $z0 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("http://xml.org/sax/properties/");
+
+        if $z0 == 0 goto label08;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $r2 = "http://xml.org/sax/properties/";
+
+        $i1 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        i6 = $i0 - $i1;
+
+        $r3 = "document-xml-version";
+
+        $i2 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        if i6 != $i2 goto label03;
+
+        $z4 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("document-xml-version");
+
+        if $z4 == 0 goto label03;
+
+        $r13 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: java.lang.String fVersion>;
+
+     label02:
+        return $r13;
+
+     label03:
+        $r4 = "lexical-handler";
+
+        $i3 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        if i6 != $i3 goto label05;
+
+        $z3 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("lexical-handler");
+
+        if $z3 == 0 goto label05;
+
+        $r12 = virtualinvoke r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.LexicalHandler getLexicalHandler()>();
+
+     label04:
+        return $r12;
+
+     label05:
+        $r5 = "declaration-handler";
+
+        $i4 = virtualinvoke $r5.<java.lang.String: int length()>();
+
+        if i6 != $i4 goto label07;
+
+        $z2 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("declaration-handler");
+
+        if $z2 == 0 goto label07;
+
+        $r11 = virtualinvoke r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.DeclHandler getDeclHandler()>();
+
+     label06:
+        return $r11;
+
+     label07:
+        $r6 = "dom-node";
+
+        $i5 = virtualinvoke $r6.<java.lang.String: int length()>();
+
+        if i6 != $i5 goto label08;
+
+        $z1 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("dom-node");
+
+        if $z1 == 0 goto label08;
+
+        $r7 = new org.xml.sax.SAXNotSupportedException;
+
+        $r8 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r9 = interfaceinvoke $r8.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: java.util.Locale getLocale()>();
+
+        $r10 = staticinvoke <com.sun.org.apache.xerces.internal.util.SAXMessageFormatter: java.lang.String formatMessage(java.util.Locale,java.lang.String,java.lang.Object[])>($r9, "dom-node-read-not-supported", null);
+
+        specialinvoke $r7.<org.xml.sax.SAXNotSupportedException: void <init>(java.lang.String)>($r10);
+
+        throw $r7;
+
+     label08:
+        $r28 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r29 = interfaceinvoke $r28.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: java.lang.Object getProperty(java.lang.String)>(r0);
+
+     label09:
+        return $r29;
+
+     label10:
+        $r14 := @caughtexception;
+
+        $r15 = virtualinvoke $r14.<com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException: java.lang.String getIdentifier()>();
+
+        $r16 = virtualinvoke $r14.<com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException: com.sun.org.apache.xerces.internal.util.Status getType()>();
+
+        $r17 = <com.sun.org.apache.xerces.internal.util.Status: com.sun.org.apache.xerces.internal.util.Status NOT_RECOGNIZED>;
+
+        if $r16 != $r17 goto label11;
+
+        $r23 = new org.xml.sax.SAXNotRecognizedException;
+
+        $r24 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r25 = interfaceinvoke $r24.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: java.util.Locale getLocale()>();
+
+        $r26 = newarray (java.lang.Object)[1];
+
+        $r26[0] = $r15;
+
+        $r27 = staticinvoke <com.sun.org.apache.xerces.internal.util.SAXMessageFormatter: java.lang.String formatMessage(java.util.Locale,java.lang.String,java.lang.Object[])>($r25, "property-not-recognized", $r26);
+
+        specialinvoke $r23.<org.xml.sax.SAXNotRecognizedException: void <init>(java.lang.String)>($r27);
+
+        throw $r23;
+
+     label11:
+        $r18 = new org.xml.sax.SAXNotSupportedException;
+
+        $r19 = r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r20 = interfaceinvoke $r19.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: java.util.Locale getLocale()>();
+
+        $r21 = newarray (java.lang.Object)[1];
+
+        $r21[0] = $r15;
+
+        $r22 = staticinvoke <com.sun.org.apache.xerces.internal.util.SAXMessageFormatter: java.lang.String formatMessage(java.util.Locale,java.lang.String,java.lang.Object[])>($r20, "property-not-supported", $r21);
+
+        specialinvoke $r18.<org.xml.sax.SAXNotSupportedException: void <init>(java.lang.String)>($r22);
+
+        throw $r18;
+
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label01 to label02 with label10;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label03 to label04 with label10;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label05 to label06 with label10;
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label07 to label09 with label10;
+    }
+
+    protected void setDeclHandler(org.xml.sax.ext.DeclHandler) throws org.xml.sax.SAXNotRecognizedException, org.xml.sax.SAXNotSupportedException
+    {
+        org.xml.sax.SAXNotSupportedException $r2;
+        java.lang.Object[] $r5;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        org.xml.sax.ext.DeclHandler r1;
+        java.util.Locale $r4;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration $r3;
+        java.lang.String $r6;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r1 := @parameter0: org.xml.sax.ext.DeclHandler;
+
+        $z0 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fParseInProgress>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new org.xml.sax.SAXNotSupportedException;
+
+        $r3 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r4 = interfaceinvoke $r3.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: java.util.Locale getLocale()>();
+
+        $r5 = newarray (java.lang.Object)[1];
+
+        $r5[0] = "http://xml.org/sax/properties/declaration-handler";
+
+        $r6 = staticinvoke <com.sun.org.apache.xerces.internal.util.SAXMessageFormatter: java.lang.String formatMessage(java.util.Locale,java.lang.String,java.lang.Object[])>($r4, "property-not-parsing-supported", $r5);
+
+        specialinvoke $r2.<org.xml.sax.SAXNotSupportedException: void <init>(java.lang.String)>($r6);
+
+        throw $r2;
+
+     label1:
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.DeclHandler fDeclHandler> = r1;
+
+        return;
+    }
+
+    protected org.xml.sax.ext.DeclHandler getDeclHandler() throws org.xml.sax.SAXNotRecognizedException, org.xml.sax.SAXNotSupportedException
+    {
+        org.xml.sax.ext.DeclHandler $r1;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.DeclHandler fDeclHandler>;
+
+        return $r1;
+    }
+
+    protected void setLexicalHandler(org.xml.sax.ext.LexicalHandler) throws org.xml.sax.SAXNotRecognizedException, org.xml.sax.SAXNotSupportedException
+    {
+        org.xml.sax.SAXNotSupportedException $r2;
+        java.lang.Object[] $r5;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        org.xml.sax.ext.LexicalHandler r1;
+        java.util.Locale $r4;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration $r3;
+        java.lang.String $r6;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r1 := @parameter0: org.xml.sax.ext.LexicalHandler;
+
+        $z0 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fParseInProgress>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new org.xml.sax.SAXNotSupportedException;
+
+        $r3 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $r4 = interfaceinvoke $r3.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: java.util.Locale getLocale()>();
+
+        $r5 = newarray (java.lang.Object)[1];
+
+        $r5[0] = "http://xml.org/sax/properties/lexical-handler";
+
+        $r6 = staticinvoke <com.sun.org.apache.xerces.internal.util.SAXMessageFormatter: java.lang.String formatMessage(java.util.Locale,java.lang.String,java.lang.Object[])>($r4, "property-not-parsing-supported", $r5);
+
+        specialinvoke $r2.<org.xml.sax.SAXNotSupportedException: void <init>(java.lang.String)>($r6);
+
+        throw $r2;
+
+     label1:
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.LexicalHandler fLexicalHandler> = r1;
+
+        return;
+    }
+
+    protected org.xml.sax.ext.LexicalHandler getLexicalHandler() throws org.xml.sax.SAXNotRecognizedException, org.xml.sax.SAXNotSupportedException
+    {
+        org.xml.sax.ext.LexicalHandler $r1;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ext.LexicalHandler fLexicalHandler>;
+
+        return $r1;
+    }
+
+    protected final void startNamespaceMapping() throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        com.sun.org.apache.xerces.internal.xni.NamespaceContext $r1, $r2, $r4;
+        int $i0, i1;
+        java.lang.String $r3, $r5, $r7;
+        org.xml.sax.ContentHandler $r6;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.NamespaceContext fNamespaceContext>;
+
+        $i0 = interfaceinvoke $r1.<com.sun.org.apache.xerces.internal.xni.NamespaceContext: int getDeclaredPrefixCount()>();
+
+        if $i0 <= 0 goto label4;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= $i0 goto label4;
+
+        $r2 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.NamespaceContext fNamespaceContext>;
+
+        $r3 = interfaceinvoke $r2.<com.sun.org.apache.xerces.internal.xni.NamespaceContext: java.lang.String getDeclaredPrefixAt(int)>(i1);
+
+        $r4 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.NamespaceContext fNamespaceContext>;
+
+        $r5 = interfaceinvoke $r4.<com.sun.org.apache.xerces.internal.xni.NamespaceContext: java.lang.String getURI(java.lang.String)>($r3);
+
+        $r6 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ContentHandler fContentHandler>;
+
+        if $r5 != null goto label2;
+
+        $r7 = "";
+
+        goto label3;
+
+     label2:
+        $r7 = $r5;
+
+     label3:
+        interfaceinvoke $r6.<org.xml.sax.ContentHandler: void startPrefixMapping(java.lang.String,java.lang.String)>($r3, $r7);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    protected final void endNamespaceMapping() throws org.xml.sax.SAXException
+    {
+        com.sun.org.apache.xerces.internal.xni.NamespaceContext $r1, $r2;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        int $i0, i1;
+        org.xml.sax.ContentHandler $r3;
+        java.lang.String $r4;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.NamespaceContext fNamespaceContext>;
+
+        $i0 = interfaceinvoke $r1.<com.sun.org.apache.xerces.internal.xni.NamespaceContext: int getDeclaredPrefixCount()>();
+
+        if $i0 <= 0 goto label2;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= $i0 goto label2;
+
+        $r3 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: org.xml.sax.ContentHandler fContentHandler>;
+
+        $r2 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.NamespaceContext fNamespaceContext>;
+
+        $r4 = interfaceinvoke $r2.<com.sun.org.apache.xerces.internal.xni.NamespaceContext: java.lang.String getDeclaredPrefixAt(int)>(i1);
+
+        interfaceinvoke $r3.<org.xml.sax.ContentHandler: void endPrefixMapping(java.lang.String)>($r4);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void reset() throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration $r1, $r2;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.parsers.AbstractXMLDocumentParser: void reset()>();
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fInDTD> = 0;
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: java.lang.String fVersion> = "1.0";
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fStandalone> = 0;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $z0 = interfaceinvoke $r1.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: boolean getFeature(java.lang.String)>("http://xml.org/sax/features/namespaces");
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fNamespaces> = $z0;
+
+        $r2 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration fConfiguration>;
+
+        $z1 = interfaceinvoke $r2.<com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration: boolean getFeature(java.lang.String)>("http://xml.org/sax/features/namespace-prefixes");
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: boolean fNamespacePrefixes> = $z1;
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.Augmentations fAugmentations> = null;
+
+        r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.util.SymbolHash fDeclaredAttrs> = null;
+
+        return;
+    }
+
+    public com.sun.org.apache.xerces.internal.xs.ElementPSVI getElementPSVI()
+    {
+        com.sun.org.apache.xerces.internal.xni.Augmentations $r1, $r2;
+        com.sun.org.apache.xerces.internal.xs.ElementPSVI $r4;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        java.lang.Object $r3;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.Augmentations fAugmentations>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.xni.Augmentations fAugmentations>;
+
+        $r3 = interfaceinvoke $r2.<com.sun.org.apache.xerces.internal.xni.Augmentations: java.lang.Object getItem(java.lang.String)>("ELEMENT_PSVI");
+
+        $r4 = (com.sun.org.apache.xerces.internal.xs.ElementPSVI) $r3;
+
+        goto label2;
+
+     label1:
+        $r4 = null;
+
+     label2:
+        return $r4;
+    }
+
+    public com.sun.org.apache.xerces.internal.xs.AttributePSVI getAttributePSVI(int)
+    {
+        com.sun.org.apache.xerces.internal.xni.Augmentations $r3;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        int i0;
+        java.lang.Object $r4;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$AttributesProxy $r1;
+        com.sun.org.apache.xerces.internal.xni.XMLAttributes $r2;
+        com.sun.org.apache.xerces.internal.xs.AttributePSVI $r5;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$AttributesProxy fAttributesProxy>;
+
+        $r2 = $r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$AttributesProxy: com.sun.org.apache.xerces.internal.xni.XMLAttributes fAttributes>;
+
+        $r3 = interfaceinvoke $r2.<com.sun.org.apache.xerces.internal.xni.XMLAttributes: com.sun.org.apache.xerces.internal.xni.Augmentations getAugmentations(int)>(i0);
+
+        $r4 = interfaceinvoke $r3.<com.sun.org.apache.xerces.internal.xni.Augmentations: java.lang.Object getItem(java.lang.String)>("ATTRIBUTE_PSVI");
+
+        $r5 = (com.sun.org.apache.xerces.internal.xs.AttributePSVI) $r4;
+
+        return $r5;
+    }
+
+    public com.sun.org.apache.xerces.internal.xs.AttributePSVI getAttributePSVIByName(java.lang.String, java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser r0;
+        com.sun.org.apache.xerces.internal.xni.Augmentations $r5;
+        java.lang.Object $r6;
+        java.lang.String r2, r3;
+        com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$AttributesProxy $r1;
+        com.sun.org.apache.xerces.internal.xni.XMLAttributes $r4;
+        com.sun.org.apache.xerces.internal.xs.AttributePSVI $r7;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$AttributesProxy fAttributesProxy>;
+
+        $r4 = $r1.<com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser$AttributesProxy: com.sun.org.apache.xerces.internal.xni.XMLAttributes fAttributes>;
+
+        $r5 = interfaceinvoke $r4.<com.sun.org.apache.xerces.internal.xni.XMLAttributes: com.sun.org.apache.xerces.internal.xni.Augmentations getAugmentations(java.lang.String,java.lang.String)>(r2, r3);
+
+        $r6 = interfaceinvoke $r5.<com.sun.org.apache.xerces.internal.xni.Augmentations: java.lang.Object getItem(java.lang.String)>("ATTRIBUTE_PSVI");
+
+        $r7 = (com.sun.org.apache.xerces.internal.xs.AttributePSVI) $r6;
+
+        return $r7;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.String[] $r0, $r1;
+
+        <com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: int BUFFER_SIZE> = 20;
+
+        <com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: java.lang.String SECURITY_MANAGER> = "http://apache.org/xml/properties/security-manager";
+
+        <com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: java.lang.String DOM_NODE> = "http://xml.org/sax/properties/dom-node";
+
+        <com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: java.lang.String DECLARATION_HANDLER> = "http://xml.org/sax/properties/declaration-handler";
+
+        <com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: java.lang.String LEXICAL_HANDLER> = "http://xml.org/sax/properties/lexical-handler";
+
+        <com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: java.lang.String ALLOW_UE_AND_NOTATION_EVENTS> = "http://xml.org/sax/features/allow-dtd-events-after-endDTD";
+
+        <com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: java.lang.String STRING_INTERNING> = "http://xml.org/sax/features/string-interning";
+
+        <com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: java.lang.String NAMESPACE_PREFIXES> = "http://xml.org/sax/features/namespace-prefixes";
+
+        <com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: java.lang.String NAMESPACES> = "http://xml.org/sax/features/namespaces";
+
+        $r0 = newarray (java.lang.String)[3];
+
+        $r0[0] = "http://xml.org/sax/features/namespaces";
+
+        $r0[1] = "http://xml.org/sax/features/namespace-prefixes";
+
+        $r0[2] = "http://xml.org/sax/features/string-interning";
+
+        <com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: java.lang.String[] RECOGNIZED_FEATURES> = $r0;
+
+        $r1 = newarray (java.lang.String)[3];
+
+        $r1[0] = "http://xml.org/sax/properties/lexical-handler";
+
+        $r1[1] = "http://xml.org/sax/properties/declaration-handler";
+
+        $r1[2] = "http://xml.org/sax/properties/dom-node";
+
+        <com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser: java.lang.String[] RECOGNIZED_PROPERTIES> = $r1;
+
+        return;
+    }
+}

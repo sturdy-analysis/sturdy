@@ -1,0 +1,391 @@
+public class java.util.concurrent.atomic.LongAccumulator extends java.util.concurrent.atomic.Striped64 implements java.io.Serializable
+{
+    private static final long serialVersionUID;
+    private final java.util.function.LongBinaryOperator function;
+    private final long identity;
+
+    public void <init>(java.util.function.LongBinaryOperator, long)
+    {
+        long l0;
+        java.util.concurrent.atomic.LongAccumulator r0;
+        java.util.function.LongBinaryOperator r1;
+
+        r0 := @this: java.util.concurrent.atomic.LongAccumulator;
+
+        r1 := @parameter0: java.util.function.LongBinaryOperator;
+
+        l0 := @parameter1: long;
+
+        specialinvoke r0.<java.util.concurrent.atomic.Striped64: void <init>()>();
+
+        r0.<java.util.concurrent.atomic.LongAccumulator: java.util.function.LongBinaryOperator function> = r1;
+
+        r0.<java.util.concurrent.atomic.LongAccumulator: long identity> = l0;
+
+        r0.<java.util.concurrent.atomic.LongAccumulator: long base> = l0;
+
+        return;
+    }
+
+    public void accumulate(long)
+    {
+        java.util.concurrent.atomic.Striped64$Cell[] $r1;
+        java.util.function.LongBinaryOperator $r3, $r4, $r5;
+        long l0, $l5, $l6, $l8, $l9;
+        byte $b7, $b10;
+        int $i1, $i2, $i3, $i4;
+        boolean $z0, $z1, z2, $z4, $z5;
+        java.util.concurrent.atomic.Striped64$Cell $r2;
+        java.util.concurrent.atomic.LongAccumulator r0;
+
+        r0 := @this: java.util.concurrent.atomic.LongAccumulator;
+
+        l0 := @parameter0: long;
+
+        $r1 = r0.<java.util.concurrent.atomic.LongAccumulator: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        if $r1 != null goto label1;
+
+        $r4 = r0.<java.util.concurrent.atomic.LongAccumulator: java.util.function.LongBinaryOperator function>;
+
+        $l8 = r0.<java.util.concurrent.atomic.LongAccumulator: long base>;
+
+        $l9 = interfaceinvoke $r4.<java.util.function.LongBinaryOperator: long applyAsLong(long,long)>($l8, l0);
+
+        $b10 = $l9 cmp $l8;
+
+        if $b10 == 0 goto label6;
+
+        $z1 = virtualinvoke r0.<java.util.concurrent.atomic.LongAccumulator: boolean casBase(long,long)>($l8, $l9);
+
+        if $z1 != 0 goto label6;
+
+     label1:
+        z2 = 1;
+
+        if $r1 == null goto label5;
+
+        $i1 = lengthof $r1;
+
+        $i2 = $i1 - 1;
+
+        if $i2 < 0 goto label5;
+
+        $i3 = staticinvoke <java.util.concurrent.atomic.LongAccumulator: int getProbe()>();
+
+        $i4 = $i3 & $i2;
+
+        $r2 = $r1[$i4];
+
+        if $r2 == null goto label5;
+
+        $r3 = r0.<java.util.concurrent.atomic.LongAccumulator: java.util.function.LongBinaryOperator function>;
+
+        $l5 = $r2.<java.util.concurrent.atomic.Striped64$Cell: long value>;
+
+        $l6 = interfaceinvoke $r3.<java.util.function.LongBinaryOperator: long applyAsLong(long,long)>($l5, l0);
+
+        $b7 = $l6 cmp $l5;
+
+        if $b7 == 0 goto label2;
+
+        $z0 = virtualinvoke $r2.<java.util.concurrent.atomic.Striped64$Cell: boolean cas(long,long)>($l5, $l6);
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        $z5 = 1;
+
+        $z4 = 1;
+
+        goto label4;
+
+     label3:
+        $z5 = 0;
+
+        $z4 = 0;
+
+     label4:
+        z2 = $z5;
+
+        if $z4 != 0 goto label6;
+
+     label5:
+        $r5 = r0.<java.util.concurrent.atomic.LongAccumulator: java.util.function.LongBinaryOperator function>;
+
+        virtualinvoke r0.<java.util.concurrent.atomic.LongAccumulator: void longAccumulate(long,java.util.function.LongBinaryOperator,boolean)>(l0, $r5, z2);
+
+     label6:
+        return;
+    }
+
+    public long get()
+    {
+        java.util.concurrent.atomic.Striped64$Cell[] r1;
+        java.util.function.LongBinaryOperator $r3;
+        long $l1, l2;
+        java.util.concurrent.atomic.Striped64$Cell $r2;
+        java.util.concurrent.atomic.LongAccumulator r0;
+        int $i0, i3;
+
+        r0 := @this: java.util.concurrent.atomic.LongAccumulator;
+
+        r1 = r0.<java.util.concurrent.atomic.LongAccumulator: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        l2 = r0.<java.util.concurrent.atomic.LongAccumulator: long base>;
+
+        if r1 == null goto label3;
+
+        i3 = 0;
+
+     label1:
+        $i0 = lengthof r1;
+
+        if i3 >= $i0 goto label3;
+
+        $r2 = r1[i3];
+
+        if $r2 == null goto label2;
+
+        $r3 = r0.<java.util.concurrent.atomic.LongAccumulator: java.util.function.LongBinaryOperator function>;
+
+        $l1 = $r2.<java.util.concurrent.atomic.Striped64$Cell: long value>;
+
+        l2 = interfaceinvoke $r3.<java.util.function.LongBinaryOperator: long applyAsLong(long,long)>(l2, $l1);
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        return l2;
+    }
+
+    public void reset()
+    {
+        java.util.concurrent.atomic.Striped64$Cell[] r1;
+        java.util.concurrent.atomic.LongAccumulator r0;
+        int $i1, i3;
+        long $l0, $l2;
+        java.util.concurrent.atomic.Striped64$Cell $r2;
+
+        r0 := @this: java.util.concurrent.atomic.LongAccumulator;
+
+        r1 = r0.<java.util.concurrent.atomic.LongAccumulator: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        $l0 = r0.<java.util.concurrent.atomic.LongAccumulator: long identity>;
+
+        r0.<java.util.concurrent.atomic.LongAccumulator: long base> = $l0;
+
+        if r1 == null goto label3;
+
+        i3 = 0;
+
+     label1:
+        $i1 = lengthof r1;
+
+        if i3 >= $i1 goto label3;
+
+        $r2 = r1[i3];
+
+        if $r2 == null goto label2;
+
+        $l2 = r0.<java.util.concurrent.atomic.LongAccumulator: long identity>;
+
+        $r2.<java.util.concurrent.atomic.Striped64$Cell: long value> = $l2;
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    public long getThenReset()
+    {
+        java.util.concurrent.atomic.Striped64$Cell[] r1;
+        java.util.function.LongBinaryOperator $r3;
+        long $l0, l2, $l3, l4;
+        java.util.concurrent.atomic.Striped64$Cell $r2;
+        java.util.concurrent.atomic.LongAccumulator r0;
+        int $i1, i5;
+
+        r0 := @this: java.util.concurrent.atomic.LongAccumulator;
+
+        r1 = r0.<java.util.concurrent.atomic.LongAccumulator: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        l4 = r0.<java.util.concurrent.atomic.LongAccumulator: long base>;
+
+        $l0 = r0.<java.util.concurrent.atomic.LongAccumulator: long identity>;
+
+        r0.<java.util.concurrent.atomic.LongAccumulator: long base> = $l0;
+
+        if r1 == null goto label3;
+
+        i5 = 0;
+
+     label1:
+        $i1 = lengthof r1;
+
+        if i5 >= $i1 goto label3;
+
+        $r2 = r1[i5];
+
+        if $r2 == null goto label2;
+
+        l2 = $r2.<java.util.concurrent.atomic.Striped64$Cell: long value>;
+
+        $l3 = r0.<java.util.concurrent.atomic.LongAccumulator: long identity>;
+
+        $r2.<java.util.concurrent.atomic.Striped64$Cell: long value> = $l3;
+
+        $r3 = r0.<java.util.concurrent.atomic.LongAccumulator: java.util.function.LongBinaryOperator function>;
+
+        l4 = interfaceinvoke $r3.<java.util.function.LongBinaryOperator: long applyAsLong(long,long)>(l4, l2);
+
+     label2:
+        i5 = i5 + 1;
+
+        goto label1;
+
+     label3:
+        return l4;
+    }
+
+    public java.lang.String toString()
+    {
+        long $l0;
+        java.lang.String $r1;
+        java.util.concurrent.atomic.LongAccumulator r0;
+
+        r0 := @this: java.util.concurrent.atomic.LongAccumulator;
+
+        $l0 = virtualinvoke r0.<java.util.concurrent.atomic.LongAccumulator: long get()>();
+
+        $r1 = staticinvoke <java.lang.Long: java.lang.String toString(long)>($l0);
+
+        return $r1;
+    }
+
+    public long longValue()
+    {
+        long $l0;
+        java.util.concurrent.atomic.LongAccumulator r0;
+
+        r0 := @this: java.util.concurrent.atomic.LongAccumulator;
+
+        $l0 = virtualinvoke r0.<java.util.concurrent.atomic.LongAccumulator: long get()>();
+
+        return $l0;
+    }
+
+    public int intValue()
+    {
+        int $i1;
+        long $l0;
+        java.util.concurrent.atomic.LongAccumulator r0;
+
+        r0 := @this: java.util.concurrent.atomic.LongAccumulator;
+
+        $l0 = virtualinvoke r0.<java.util.concurrent.atomic.LongAccumulator: long get()>();
+
+        $i1 = (int) $l0;
+
+        return $i1;
+    }
+
+    public float floatValue()
+    {
+        float $f0;
+        long $l0;
+        java.util.concurrent.atomic.LongAccumulator r0;
+
+        r0 := @this: java.util.concurrent.atomic.LongAccumulator;
+
+        $l0 = virtualinvoke r0.<java.util.concurrent.atomic.LongAccumulator: long get()>();
+
+        $f0 = (float) $l0;
+
+        return $f0;
+    }
+
+    public double doubleValue()
+    {
+        long $l0;
+        java.util.concurrent.atomic.LongAccumulator r0;
+        double $d0;
+
+        r0 := @this: java.util.concurrent.atomic.LongAccumulator;
+
+        $l0 = virtualinvoke r0.<java.util.concurrent.atomic.LongAccumulator: long get()>();
+
+        $d0 = (double) $l0;
+
+        return $d0;
+    }
+
+    private java.lang.Object writeReplace()
+    {
+        java.util.concurrent.atomic.LongAccumulator r1;
+        java.util.concurrent.atomic.LongAccumulator$SerializationProxy $r0;
+
+        r1 := @this: java.util.concurrent.atomic.LongAccumulator;
+
+        $r0 = new java.util.concurrent.atomic.LongAccumulator$SerializationProxy;
+
+        specialinvoke $r0.<java.util.concurrent.atomic.LongAccumulator$SerializationProxy: void <init>(java.util.concurrent.atomic.LongAccumulator)>(r1);
+
+        return $r0;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.InvalidObjectException
+    {
+        java.io.ObjectInputStream r2;
+        java.io.InvalidObjectException $r0;
+        java.util.concurrent.atomic.LongAccumulator r1;
+
+        r1 := @this: java.util.concurrent.atomic.LongAccumulator;
+
+        r2 := @parameter0: java.io.ObjectInputStream;
+
+        $r0 = new java.io.InvalidObjectException;
+
+        specialinvoke $r0.<java.io.InvalidObjectException: void <init>(java.lang.String)>("Proxy required");
+
+        throw $r0;
+    }
+
+    static java.util.function.LongBinaryOperator access$000(java.util.concurrent.atomic.LongAccumulator)
+    {
+        java.util.concurrent.atomic.LongAccumulator r0;
+        java.util.function.LongBinaryOperator $r1;
+
+        r0 := @parameter0: java.util.concurrent.atomic.LongAccumulator;
+
+        $r1 = r0.<java.util.concurrent.atomic.LongAccumulator: java.util.function.LongBinaryOperator function>;
+
+        return $r1;
+    }
+
+    static long access$100(java.util.concurrent.atomic.LongAccumulator)
+    {
+        long $l0;
+        java.util.concurrent.atomic.LongAccumulator r0;
+
+        r0 := @parameter0: java.util.concurrent.atomic.LongAccumulator;
+
+        $l0 = r0.<java.util.concurrent.atomic.LongAccumulator: long identity>;
+
+        return $l0;
+    }
+
+    public static void <clinit>()
+    {
+        <java.util.concurrent.atomic.LongAccumulator: long serialVersionUID> = 7249069246863182397L;
+
+        return;
+    }
+}

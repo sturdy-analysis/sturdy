@@ -1,0 +1,165 @@
+final class sun.security.ssl.RSAServerKeyExchange$RSAServerKeyExchangeProducer extends java.lang.Object implements sun.security.ssl.HandshakeProducer
+{
+
+    private void <init>()
+    {
+        sun.security.ssl.RSAServerKeyExchange$RSAServerKeyExchangeProducer r0;
+
+        r0 := @this: sun.security.ssl.RSAServerKeyExchange$RSAServerKeyExchangeProducer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public byte[] produce(sun.security.ssl.ConnectionContext, sun.security.ssl.SSLHandshake$HandshakeMessage) throws java.io.IOException
+    {
+        sun.security.ssl.SSLHandshake$HandshakeMessage r18;
+        java.lang.Object[] $r8;
+        sun.security.ssl.RSAServerKeyExchange$RSAServerKeyExchangeProducer r17;
+        sun.security.ssl.ConnectionContext r0;
+        java.lang.String $r5, $r6;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        sun.security.ssl.ServerHandshakeContext r1;
+        java.util.Iterator $r3;
+        sun.security.ssl.X509Authentication$X509Possession r20;
+        sun.security.ssl.RSAServerKeyExchange$RSAServerKeyExchangeMessage $r7;
+        sun.security.ssl.RSAKeyExchange$EphemeralRSAPossession r19;
+        sun.security.ssl.TransportContext $r10, $r13;
+        sun.security.ssl.HandshakeOutStream $r21, $r22;
+        java.util.List $r2;
+        javax.net.ssl.SSLException $r11, $r14;
+        java.security.PrivateKey $r4;
+        sun.security.ssl.Alert $r9, $r12;
+        sun.security.ssl.SSLPossession r16;
+        java.lang.Object $r15;
+
+        r17 := @this: sun.security.ssl.RSAServerKeyExchange$RSAServerKeyExchangeProducer;
+
+        r0 := @parameter0: sun.security.ssl.ConnectionContext;
+
+        r18 := @parameter1: sun.security.ssl.SSLHandshake$HandshakeMessage;
+
+        r1 = (sun.security.ssl.ServerHandshakeContext) r0;
+
+        r19 = null;
+
+        r20 = null;
+
+        $r2 = r1.<sun.security.ssl.ServerHandshakeContext: java.util.List handshakePossessions>;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r15 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r16 = (sun.security.ssl.SSLPossession) $r15;
+
+        $z4 = r16 instanceof sun.security.ssl.RSAKeyExchange$EphemeralRSAPossession;
+
+        if $z4 == 0 goto label2;
+
+        r19 = (sun.security.ssl.RSAKeyExchange$EphemeralRSAPossession) r16;
+
+        if r20 == null goto label3;
+
+        goto label4;
+
+     label2:
+        $z5 = r16 instanceof sun.security.ssl.X509Authentication$X509Possession;
+
+        if $z5 == 0 goto label3;
+
+        r20 = (sun.security.ssl.X509Authentication$X509Possession) r16;
+
+        if r19 == null goto label3;
+
+        goto label4;
+
+     label3:
+        goto label1;
+
+     label4:
+        if r19 != null goto label5;
+
+        return null;
+
+     label5:
+        if r20 != null goto label6;
+
+        $r13 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r12 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r14 = virtualinvoke $r13.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r12, "No RSA certificate negotiated for server key exchange");
+
+        throw $r14;
+
+     label6:
+        $r5 = "RSA";
+
+        $r4 = r20.<sun.security.ssl.X509Authentication$X509Possession: java.security.PrivateKey popPrivateKey>;
+
+        $r6 = interfaceinvoke $r4.<java.security.PrivateKey: java.lang.String getAlgorithm()>();
+
+        $z1 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+        if $z1 != 0 goto label7;
+
+        $r10 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r9 = <sun.security.ssl.Alert: sun.security.ssl.Alert ILLEGAL_PARAMETER>;
+
+        $r11 = virtualinvoke $r10.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r9, "No X.509 possession can be used for ephemeral RSA ServerKeyExchange");
+
+        throw $r11;
+
+     label7:
+        $r7 = new sun.security.ssl.RSAServerKeyExchange$RSAServerKeyExchangeMessage;
+
+        specialinvoke $r7.<sun.security.ssl.RSAServerKeyExchange$RSAServerKeyExchangeMessage: void <init>(sun.security.ssl.HandshakeContext,sun.security.ssl.X509Authentication$X509Possession,sun.security.ssl.RSAKeyExchange$EphemeralRSAPossession,sun.security.ssl.RSAServerKeyExchange$1)>(r1, r20, r19, null);
+
+        $z2 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z2 == 0 goto label8;
+
+        $z3 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z3 == 0 goto label8;
+
+        $r8 = newarray (java.lang.Object)[1];
+
+        $r8[0] = $r7;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Produced RSA ServerKeyExchange handshake message", $r8);
+
+     label8:
+        $r21 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.HandshakeOutStream handshakeOutput>;
+
+        virtualinvoke $r7.<sun.security.ssl.RSAServerKeyExchange$RSAServerKeyExchangeMessage: void write(sun.security.ssl.HandshakeOutStream)>($r21);
+
+        $r22 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.HandshakeOutStream handshakeOutput>;
+
+        virtualinvoke $r22.<sun.security.ssl.HandshakeOutStream: void flush()>();
+
+        return null;
+    }
+
+    void <init>(sun.security.ssl.RSAServerKeyExchange$1)
+    {
+        sun.security.ssl.RSAServerKeyExchange$RSAServerKeyExchangeProducer r0;
+        sun.security.ssl.RSAServerKeyExchange$1 r1;
+
+        r0 := @this: sun.security.ssl.RSAServerKeyExchange$RSAServerKeyExchangeProducer;
+
+        r1 := @parameter0: sun.security.ssl.RSAServerKeyExchange$1;
+
+        specialinvoke r0.<sun.security.ssl.RSAServerKeyExchange$RSAServerKeyExchangeProducer: void <init>()>();
+
+        return;
+    }
+}

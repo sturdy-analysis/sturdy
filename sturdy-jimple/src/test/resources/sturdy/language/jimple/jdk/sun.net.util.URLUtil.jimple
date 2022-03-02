@@ -1,0 +1,186 @@
+public class sun.net.util.URLUtil extends java.lang.Object
+{
+
+    public void <init>()
+    {
+        sun.net.util.URLUtil r0;
+
+        r0 := @this: sun.net.util.URLUtil;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static java.lang.String urlNoFragString(java.net.URL)
+    {
+        java.net.URL r1;
+        int $i0, i1, $i3, $i5;
+        java.lang.StringBuilder $r6, $r9;
+        java.lang.String $r2, $r3, $r4, $r5, $r7, $r8;
+
+        r1 := @parameter0: java.net.URL;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke r1.<java.net.URL: java.lang.String getProtocol()>();
+
+        if $r2 == null goto label1;
+
+        $r7 = virtualinvoke $r2.<java.lang.String: java.lang.String toLowerCase()>();
+
+        virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("://");
+
+     label1:
+        $r3 = virtualinvoke r1.<java.net.URL: java.lang.String getHost()>();
+
+        if $r3 == null goto label3;
+
+        $r5 = virtualinvoke $r3.<java.lang.String: java.lang.String toLowerCase()>();
+
+        virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $i0 = virtualinvoke r1.<java.net.URL: int getPort()>();
+
+        i1 = $i0;
+
+        $i3 = (int) -1;
+
+        if $i0 != $i3 goto label2;
+
+        i1 = virtualinvoke r1.<java.net.URL: int getDefaultPort()>();
+
+     label2:
+        $i5 = (int) -1;
+
+        if i1 == $i5 goto label3;
+
+        $r6 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+     label3:
+        $r8 = virtualinvoke r1.<java.net.URL: java.lang.String getFile()>();
+
+        if $r8 == null goto label4;
+
+        virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+     label4:
+        $r4 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r4;
+    }
+
+    public static java.security.Permission getConnectPermission(java.net.URL) throws java.io.IOException
+    {
+        java.net.URL r0, $r10;
+        java.net.URLConnection $r8;
+        int $i0, $i1, $i3;
+        java.lang.String $r1, $r2, $r4, $r5;
+        boolean $z0, $z1, $z2, $z3;
+        java.security.Permission $r3, $r7, $r9;
+
+        r0 := @parameter0: java.net.URL;
+
+        $r1 = virtualinvoke r0.<java.net.URL: java.lang.String toString()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>("http:");
+
+        if $z0 != 0 goto label1;
+
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>("https:");
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $r3 = staticinvoke <sun.net.util.URLUtil: java.security.Permission getURLConnectPermission(java.net.URL)>(r0);
+
+        return $r3;
+
+     label2:
+        $z2 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>("jar:http:");
+
+        if $z2 != 0 goto label3;
+
+        $z3 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>("jar:https:");
+
+        if $z3 == 0 goto label6;
+
+     label3:
+        $r4 = virtualinvoke r0.<java.net.URL: java.lang.String toString()>();
+
+        $i0 = virtualinvoke $r4.<java.lang.String: int indexOf(java.lang.String)>("!/");
+
+        $i3 = (int) -1;
+
+        if $i0 <= $i3 goto label4;
+
+        $i1 = $i0;
+
+        goto label5;
+
+     label4:
+        $i1 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+     label5:
+        $r5 = virtualinvoke $r4.<java.lang.String: java.lang.String substring(int,int)>(4, $i1);
+
+        $r10 = new java.net.URL;
+
+        specialinvoke $r10.<java.net.URL: void <init>(java.lang.String)>($r5);
+
+        $r7 = staticinvoke <sun.net.util.URLUtil: java.security.Permission getURLConnectPermission(java.net.URL)>($r10);
+
+        return $r7;
+
+     label6:
+        $r8 = virtualinvoke r0.<java.net.URL: java.net.URLConnection openConnection()>();
+
+        $r9 = virtualinvoke $r8.<java.net.URLConnection: java.security.Permission getPermission()>();
+
+        return $r9;
+    }
+
+    private static java.security.Permission getURLConnectPermission(java.net.URL)
+    {
+        java.net.URL r1;
+        java.net.URLPermission $r10;
+        java.lang.StringBuilder $r0, $r3, $r4, $r6, $r8;
+        java.lang.String $r2, $r5, $r7, $r9;
+
+        r1 := @parameter0: java.net.URL;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke r1.<java.net.URL: java.lang.String getProtocol()>();
+
+        $r3 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("://");
+
+        $r5 = virtualinvoke r1.<java.net.URL: java.lang.String getAuthority()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke r1.<java.net.URL: java.lang.String getPath()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r10 = new java.net.URLPermission;
+
+        specialinvoke $r10.<java.net.URLPermission: void <init>(java.lang.String)>($r9);
+
+        return $r10;
+    }
+}

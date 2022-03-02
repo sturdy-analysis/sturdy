@@ -1,0 +1,3047 @@
+public abstract class javax.swing.plaf.basic.BasicTextUI extends javax.swing.plaf.TextUI implements javax.swing.text.ViewFactory
+{
+    private static javax.swing.plaf.basic.BasicTextUI$BasicCursor textCursor;
+    private static final javax.swing.text.EditorKit defaultKit;
+    transient javax.swing.text.JTextComponent editor;
+    transient boolean painted;
+    transient javax.swing.plaf.basic.BasicTextUI$RootView rootView;
+    transient javax.swing.plaf.basic.BasicTextUI$UpdateHandler updateHandler;
+    private static final javax.swing.TransferHandler defaultTransferHandler;
+    private final javax.swing.plaf.basic.BasicTextUI$DragListener dragListener;
+    private static final javax.swing.text.Position$Bias[] discardBias;
+    private javax.swing.text.DefaultCaret dropCaret;
+
+    public void <init>()
+    {
+        javax.swing.plaf.basic.BasicTextUI$DragListener $r3;
+        javax.swing.plaf.basic.BasicTextUI$UpdateHandler $r2;
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.plaf.basic.BasicTextUI$RootView $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        specialinvoke r0.<javax.swing.plaf.TextUI: void <init>()>();
+
+        $r1 = new javax.swing.plaf.basic.BasicTextUI$RootView;
+
+        specialinvoke $r1.<javax.swing.plaf.basic.BasicTextUI$RootView: void <init>(javax.swing.plaf.basic.BasicTextUI)>(r0);
+
+        r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$RootView rootView> = $r1;
+
+        $r2 = new javax.swing.plaf.basic.BasicTextUI$UpdateHandler;
+
+        specialinvoke $r2.<javax.swing.plaf.basic.BasicTextUI$UpdateHandler: void <init>(javax.swing.plaf.basic.BasicTextUI)>(r0);
+
+        r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$UpdateHandler updateHandler> = $r2;
+
+        $r3 = staticinvoke <javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$DragListener getDragListener()>();
+
+        r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$DragListener dragListener> = $r3;
+
+        r0.<javax.swing.plaf.basic.BasicTextUI: boolean painted> = 0;
+
+        return;
+    }
+
+    protected javax.swing.text.Caret createCaret()
+    {
+        javax.swing.plaf.basic.BasicTextUI r1;
+        javax.swing.plaf.basic.BasicTextUI$BasicCaret $r0;
+
+        r1 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        $r0 = new javax.swing.plaf.basic.BasicTextUI$BasicCaret;
+
+        specialinvoke $r0.<javax.swing.plaf.basic.BasicTextUI$BasicCaret: void <init>()>();
+
+        return $r0;
+    }
+
+    protected javax.swing.text.Highlighter createHighlighter()
+    {
+        javax.swing.plaf.basic.BasicTextUI r1;
+        javax.swing.plaf.basic.BasicTextUI$BasicHighlighter $r0;
+
+        r1 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        $r0 = new javax.swing.plaf.basic.BasicTextUI$BasicHighlighter;
+
+        specialinvoke $r0.<javax.swing.plaf.basic.BasicTextUI$BasicHighlighter: void <init>()>();
+
+        return $r0;
+    }
+
+    protected java.lang.String getKeymapName()
+    {
+        int $i0, $i1, $i2;
+        java.lang.Class $r1;
+        javax.swing.plaf.basic.BasicTextUI r0;
+        java.lang.String $r2, r3;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.String getName()>();
+
+        r3 = $r2;
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int lastIndexOf(int)>(46);
+
+        if $i0 < 0 goto label1;
+
+        $i1 = $i0 + 1;
+
+        $i2 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        r3 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int,int)>($i1, $i2);
+
+     label1:
+        return r3;
+    }
+
+    protected javax.swing.text.Keymap createKeymap()
+    {
+        javax.swing.text.JTextComponent$KeyBinding[] $r12, r13;
+        javax.swing.text.Keymap $r2, $r3, $r4, r16;
+        java.lang.String $r1, $r5, $r10;
+        javax.swing.Action[] $r15;
+        boolean $z0;
+        javax.swing.text.JTextComponent $r7, $r14;
+        java.lang.StringBuilder $r6, $r8, $r9;
+        java.lang.Object $r11;
+        javax.swing.plaf.basic.BasicTextUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        $r1 = virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: java.lang.String getKeymapName()>();
+
+        $r2 = staticinvoke <javax.swing.text.JTextComponent: javax.swing.text.Keymap getKeymap(java.lang.String)>($r1);
+
+        r16 = $r2;
+
+        if $r2 != null goto label1;
+
+        $r3 = staticinvoke <javax.swing.text.JTextComponent: javax.swing.text.Keymap getKeymap(java.lang.String)>("default");
+
+        $r4 = staticinvoke <javax.swing.text.JTextComponent: javax.swing.text.Keymap addKeymap(java.lang.String,javax.swing.text.Keymap)>($r1, $r3);
+
+        r16 = $r4;
+
+        $r5 = virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: java.lang.String getPropertyPrefix()>();
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".keyBindings");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r11 = staticinvoke <sun.swing.DefaultLookup: java.lang.Object get(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String)>($r7, r0, $r10);
+
+        if $r11 == null goto label1;
+
+        $z0 = $r11 instanceof javax.swing.text.JTextComponent$KeyBinding[];
+
+        if $z0 == 0 goto label1;
+
+        $r12 = (javax.swing.text.JTextComponent$KeyBinding[]) $r11;
+
+        r13 = (javax.swing.text.JTextComponent$KeyBinding[]) $r12;
+
+        $r14 = virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent getComponent()>();
+
+        $r15 = virtualinvoke $r14.<javax.swing.text.JTextComponent: javax.swing.Action[] getActions()>();
+
+        staticinvoke <javax.swing.text.JTextComponent: void loadKeymap(javax.swing.text.Keymap,javax.swing.text.JTextComponent$KeyBinding[],javax.swing.Action[])>($r4, r13, $r15);
+
+     label1:
+        return r16;
+    }
+
+    protected void propertyChange(java.beans.PropertyChangeEvent)
+    {
+        javax.swing.text.JTextComponent $r4;
+        java.lang.Object $r3;
+        java.lang.String $r1, $r5;
+        javax.swing.plaf.basic.BasicTextUI r2;
+        java.beans.PropertyChangeEvent r0;
+        boolean $z0, $z1;
+
+        r2 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        r0 := @parameter0: java.beans.PropertyChangeEvent;
+
+        $r1 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.String getPropertyName()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("editable");
+
+        if $z0 != 0 goto label1;
+
+        $r5 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.String getPropertyName()>();
+
+        $z1 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("enabled");
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $r3 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.Object getSource()>();
+
+        $r4 = (javax.swing.text.JTextComponent) $r3;
+
+        specialinvoke r2.<javax.swing.plaf.basic.BasicTextUI: void updateBackground(javax.swing.text.JTextComponent)>($r4);
+
+     label2:
+        return;
+    }
+
+    private void updateBackground(javax.swing.text.JTextComponent)
+    {
+        java.awt.Color $r2, $r8, $r13, $r18, r19;
+        java.lang.String $r3, $r7, $r12, $r17;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        javax.swing.text.JTextComponent r1;
+        java.lang.StringBuilder $r4, $r5, $r6, $r9, $r10, $r11, $r14, $r15, $r16;
+        javax.swing.plaf.basic.BasicTextUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        r1 := @parameter0: javax.swing.text.JTextComponent;
+
+        $z0 = r0 instanceof javax.swing.plaf.synth.SynthUI;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = r1 instanceof javax.swing.JTextArea;
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        $r2 = virtualinvoke r1.<javax.swing.text.JTextComponent: java.awt.Color getBackground()>();
+
+        $z2 = $r2 instanceof javax.swing.plaf.UIResource;
+
+        if $z2 == 0 goto label8;
+
+        $r3 = virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: java.lang.String getPropertyPrefix()>();
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".disabledBackground");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r8 = staticinvoke <sun.swing.DefaultLookup: java.awt.Color getColor(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String,java.awt.Color)>(r1, r0, $r7, null);
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".inactiveBackground");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r13 = staticinvoke <sun.swing.DefaultLookup: java.awt.Color getColor(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String,java.awt.Color)>(r1, r0, $r12, null);
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".background");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r18 = staticinvoke <sun.swing.DefaultLookup: java.awt.Color getColor(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String,java.awt.Color)>(r1, r0, $r17, null);
+
+        $z3 = r1 instanceof javax.swing.JTextArea;
+
+        if $z3 != 0 goto label3;
+
+        $z5 = r1 instanceof javax.swing.JEditorPane;
+
+        if $z5 == 0 goto label4;
+
+     label3:
+        if $r2 == $r8 goto label4;
+
+        if $r2 == $r13 goto label4;
+
+        if $r2 == $r18 goto label4;
+
+        return;
+
+     label4:
+        r19 = null;
+
+        $z6 = virtualinvoke r1.<javax.swing.text.JTextComponent: boolean isEnabled()>();
+
+        if $z6 != 0 goto label5;
+
+        r19 = $r8;
+
+     label5:
+        if r19 != null goto label6;
+
+        $z4 = virtualinvoke r1.<javax.swing.text.JTextComponent: boolean isEditable()>();
+
+        if $z4 != 0 goto label6;
+
+        r19 = $r13;
+
+     label6:
+        if r19 != null goto label7;
+
+        r19 = $r18;
+
+     label7:
+        if r19 == null goto label8;
+
+        if r19 == $r2 goto label8;
+
+        virtualinvoke r1.<javax.swing.text.JTextComponent: void setBackground(java.awt.Color)>(r19);
+
+     label8:
+        return;
+    }
+
+    protected abstract java.lang.String getPropertyPrefix();
+
+    protected void installDefaults()
+    {
+        java.awt.Color $r15, $r21, $r27, $r33, $r39, $r45, $r59, $r61, $r63, $r65, $r67, $r69;
+        javax.swing.border.Border $r51, $r71;
+        java.lang.StringBuilder $r4, $r6, $r7, $r10, $r12, $r13, $r16, $r18, $r19, $r22, $r24, $r25, $r28, $r30, $r31, $r34, $r36, $r37, $r40, $r42, $r43, $r46, $r48, $r49, $r52, $r54, $r55;
+        java.lang.String $r1, $r8, $r14, $r20, $r26, $r32, $r38, $r44, $r50, $r56;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        java.awt.Font $r3, $r9;
+        javax.swing.plaf.basic.BasicTextUI r0;
+        java.awt.Insets $r57, $r73;
+        javax.swing.text.JTextComponent $r2, $r5, $r11, $r17, $r23, $r29, $r35, $r41, $r47, $r53, $r58, $r60, $r62, $r64, $r66, $r68, $r70, $r72;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        $r1 = virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: java.lang.String getPropertyPrefix()>();
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.text.JTextComponent: java.awt.Font getFont()>();
+
+        if $r3 == null goto label01;
+
+        $z8 = $r3 instanceof javax.swing.plaf.UIResource;
+
+        if $z8 == 0 goto label02;
+
+     label01:
+        $r5 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".font");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r9 = staticinvoke <javax.swing.UIManager: java.awt.Font getFont(java.lang.Object)>($r8);
+
+        virtualinvoke $r5.<javax.swing.text.JTextComponent: void setFont(java.awt.Font)>($r9);
+
+     label02:
+        $r58 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r59 = virtualinvoke $r58.<javax.swing.text.JTextComponent: java.awt.Color getBackground()>();
+
+        if $r59 == null goto label03;
+
+        $z7 = $r59 instanceof javax.swing.plaf.UIResource;
+
+        if $z7 == 0 goto label04;
+
+     label03:
+        $r11 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".background");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r15 = staticinvoke <javax.swing.UIManager: java.awt.Color getColor(java.lang.Object)>($r14);
+
+        virtualinvoke $r11.<javax.swing.text.JTextComponent: void setBackground(java.awt.Color)>($r15);
+
+     label04:
+        $r60 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r61 = virtualinvoke $r60.<javax.swing.text.JTextComponent: java.awt.Color getForeground()>();
+
+        if $r61 == null goto label05;
+
+        $z6 = $r61 instanceof javax.swing.plaf.UIResource;
+
+        if $z6 == 0 goto label06;
+
+     label05:
+        $r17 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".foreground");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r21 = staticinvoke <javax.swing.UIManager: java.awt.Color getColor(java.lang.Object)>($r20);
+
+        virtualinvoke $r17.<javax.swing.text.JTextComponent: void setForeground(java.awt.Color)>($r21);
+
+     label06:
+        $r62 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r63 = virtualinvoke $r62.<javax.swing.text.JTextComponent: java.awt.Color getCaretColor()>();
+
+        if $r63 == null goto label07;
+
+        $z5 = $r63 instanceof javax.swing.plaf.UIResource;
+
+        if $z5 == 0 goto label08;
+
+     label07:
+        $r23 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".caretForeground");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r27 = staticinvoke <javax.swing.UIManager: java.awt.Color getColor(java.lang.Object)>($r26);
+
+        virtualinvoke $r23.<javax.swing.text.JTextComponent: void setCaretColor(java.awt.Color)>($r27);
+
+     label08:
+        $r64 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r65 = virtualinvoke $r64.<javax.swing.text.JTextComponent: java.awt.Color getSelectionColor()>();
+
+        if $r65 == null goto label09;
+
+        $z4 = $r65 instanceof javax.swing.plaf.UIResource;
+
+        if $z4 == 0 goto label10;
+
+     label09:
+        $r29 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r28 = new java.lang.StringBuilder;
+
+        specialinvoke $r28.<java.lang.StringBuilder: void <init>()>();
+
+        $r30 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".selectionBackground");
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r33 = staticinvoke <javax.swing.UIManager: java.awt.Color getColor(java.lang.Object)>($r32);
+
+        virtualinvoke $r29.<javax.swing.text.JTextComponent: void setSelectionColor(java.awt.Color)>($r33);
+
+     label10:
+        $r66 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r67 = virtualinvoke $r66.<javax.swing.text.JTextComponent: java.awt.Color getSelectedTextColor()>();
+
+        if $r67 == null goto label11;
+
+        $z3 = $r67 instanceof javax.swing.plaf.UIResource;
+
+        if $z3 == 0 goto label12;
+
+     label11:
+        $r35 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r34 = new java.lang.StringBuilder;
+
+        specialinvoke $r34.<java.lang.StringBuilder: void <init>()>();
+
+        $r36 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".selectionForeground");
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r39 = staticinvoke <javax.swing.UIManager: java.awt.Color getColor(java.lang.Object)>($r38);
+
+        virtualinvoke $r35.<javax.swing.text.JTextComponent: void setSelectedTextColor(java.awt.Color)>($r39);
+
+     label12:
+        $r68 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r69 = virtualinvoke $r68.<javax.swing.text.JTextComponent: java.awt.Color getDisabledTextColor()>();
+
+        if $r69 == null goto label13;
+
+        $z2 = $r69 instanceof javax.swing.plaf.UIResource;
+
+        if $z2 == 0 goto label14;
+
+     label13:
+        $r41 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r40 = new java.lang.StringBuilder;
+
+        specialinvoke $r40.<java.lang.StringBuilder: void <init>()>();
+
+        $r42 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".inactiveForeground");
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r45 = staticinvoke <javax.swing.UIManager: java.awt.Color getColor(java.lang.Object)>($r44);
+
+        virtualinvoke $r41.<javax.swing.text.JTextComponent: void setDisabledTextColor(java.awt.Color)>($r45);
+
+     label14:
+        $r70 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r71 = virtualinvoke $r70.<javax.swing.text.JTextComponent: javax.swing.border.Border getBorder()>();
+
+        if $r71 == null goto label15;
+
+        $z1 = $r71 instanceof javax.swing.plaf.UIResource;
+
+        if $z1 == 0 goto label16;
+
+     label15:
+        $r47 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r46 = new java.lang.StringBuilder;
+
+        specialinvoke $r46.<java.lang.StringBuilder: void <init>()>();
+
+        $r48 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".border");
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r51 = staticinvoke <javax.swing.UIManager: javax.swing.border.Border getBorder(java.lang.Object)>($r50);
+
+        virtualinvoke $r47.<javax.swing.text.JTextComponent: void setBorder(javax.swing.border.Border)>($r51);
+
+     label16:
+        $r72 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r73 = virtualinvoke $r72.<javax.swing.text.JTextComponent: java.awt.Insets getMargin()>();
+
+        if $r73 == null goto label17;
+
+        $z0 = $r73 instanceof javax.swing.plaf.UIResource;
+
+        if $z0 == 0 goto label18;
+
+     label17:
+        $r53 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r52 = new java.lang.StringBuilder;
+
+        specialinvoke $r52.<java.lang.StringBuilder: void <init>()>();
+
+        $r54 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r55 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".margin");
+
+        $r56 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r57 = staticinvoke <javax.swing.UIManager: java.awt.Insets getInsets(java.lang.Object)>($r56);
+
+        virtualinvoke $r53.<javax.swing.text.JTextComponent: void setMargin(java.awt.Insets)>($r57);
+
+     label18:
+        specialinvoke r0.<javax.swing.plaf.basic.BasicTextUI: void updateCursor()>();
+
+        return;
+    }
+
+    private void installDefaults2()
+    {
+        javax.swing.TransferHandler $r18, $r22;
+        int $i0;
+        java.lang.String $r5, $r14;
+        boolean $z0, $z1, $z2;
+        javax.swing.text.Caret $r7, $r8;
+        javax.swing.text.JTextComponent $r2, $r4, $r6, $r9, $r10, $r15, $r17, $r19, $r21;
+        javax.swing.text.Highlighter $r16, $r20;
+        javax.swing.plaf.basic.BasicTextUI$DragListener $r1, $r3;
+        java.lang.StringBuilder $r11, $r12, $r13;
+        javax.swing.plaf.basic.BasicTextUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$DragListener dragListener>;
+
+        virtualinvoke $r2.<javax.swing.text.JTextComponent: void addMouseListener(java.awt.event.MouseListener)>($r1);
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$DragListener dragListener>;
+
+        virtualinvoke $r4.<javax.swing.text.JTextComponent: void addMouseMotionListener(java.awt.event.MouseMotionListener)>($r3);
+
+        $r5 = virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: java.lang.String getPropertyPrefix()>();
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r7 = virtualinvoke $r6.<javax.swing.text.JTextComponent: javax.swing.text.Caret getCaret()>();
+
+        if $r7 == null goto label1;
+
+        $z2 = $r7 instanceof javax.swing.plaf.UIResource;
+
+        if $z2 == 0 goto label2;
+
+     label1:
+        $r8 = virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.Caret createCaret()>();
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        virtualinvoke $r9.<javax.swing.text.JTextComponent: void setCaret(javax.swing.text.Caret)>($r8);
+
+        $r10 = virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent getComponent()>();
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".caretBlinkRate");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i0 = staticinvoke <sun.swing.DefaultLookup: int getInt(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String,int)>($r10, r0, $r14, 500);
+
+        interfaceinvoke $r8.<javax.swing.text.Caret: void setBlinkRate(int)>($i0);
+
+     label2:
+        $r19 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r20 = virtualinvoke $r19.<javax.swing.text.JTextComponent: javax.swing.text.Highlighter getHighlighter()>();
+
+        if $r20 == null goto label3;
+
+        $z1 = $r20 instanceof javax.swing.plaf.UIResource;
+
+        if $z1 == 0 goto label4;
+
+     label3:
+        $r15 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r16 = virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.Highlighter createHighlighter()>();
+
+        virtualinvoke $r15.<javax.swing.text.JTextComponent: void setHighlighter(javax.swing.text.Highlighter)>($r16);
+
+     label4:
+        $r21 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r22 = virtualinvoke $r21.<javax.swing.text.JTextComponent: javax.swing.TransferHandler getTransferHandler()>();
+
+        if $r22 == null goto label5;
+
+        $z0 = $r22 instanceof javax.swing.plaf.UIResource;
+
+        if $z0 == 0 goto label6;
+
+     label5:
+        $r17 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r18 = virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.TransferHandler getTransferHandler()>();
+
+        virtualinvoke $r17.<javax.swing.text.JTextComponent: void setTransferHandler(javax.swing.TransferHandler)>($r18);
+
+     label6:
+        return;
+    }
+
+    protected void uninstallDefaults()
+    {
+        java.awt.Color $r6, $r8, $r10, $r12;
+        java.awt.Cursor $r24;
+        javax.swing.border.Border $r14;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        javax.swing.text.Highlighter $r20;
+        javax.swing.plaf.basic.BasicTextUI r0;
+        java.awt.Insets $r16;
+        javax.swing.TransferHandler $r22;
+        javax.swing.text.Caret $r18;
+        javax.swing.text.JTextComponent $r2, $r4, $r5, $r7, $r9, $r11, $r13, $r15, $r17, $r19, $r21, $r23, $r25, $r26, $r27, $r28, $r29, $r30, $r31, $r32, $r33, $r34;
+        javax.swing.plaf.basic.BasicTextUI$DragListener $r1, $r3;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$DragListener dragListener>;
+
+        virtualinvoke $r2.<javax.swing.text.JTextComponent: void removeMouseListener(java.awt.event.MouseListener)>($r1);
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$DragListener dragListener>;
+
+        virtualinvoke $r4.<javax.swing.text.JTextComponent: void removeMouseMotionListener(java.awt.event.MouseMotionListener)>($r3);
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r6 = virtualinvoke $r5.<javax.swing.text.JTextComponent: java.awt.Color getCaretColor()>();
+
+        $z0 = $r6 instanceof javax.swing.plaf.UIResource;
+
+        if $z0 == 0 goto label01;
+
+        $r34 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        virtualinvoke $r34.<javax.swing.text.JTextComponent: void setCaretColor(java.awt.Color)>(null);
+
+     label01:
+        $r7 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r8 = virtualinvoke $r7.<javax.swing.text.JTextComponent: java.awt.Color getSelectionColor()>();
+
+        $z1 = $r8 instanceof javax.swing.plaf.UIResource;
+
+        if $z1 == 0 goto label02;
+
+        $r33 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        virtualinvoke $r33.<javax.swing.text.JTextComponent: void setSelectionColor(java.awt.Color)>(null);
+
+     label02:
+        $r9 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r10 = virtualinvoke $r9.<javax.swing.text.JTextComponent: java.awt.Color getDisabledTextColor()>();
+
+        $z2 = $r10 instanceof javax.swing.plaf.UIResource;
+
+        if $z2 == 0 goto label03;
+
+        $r32 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        virtualinvoke $r32.<javax.swing.text.JTextComponent: void setDisabledTextColor(java.awt.Color)>(null);
+
+     label03:
+        $r11 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r12 = virtualinvoke $r11.<javax.swing.text.JTextComponent: java.awt.Color getSelectedTextColor()>();
+
+        $z3 = $r12 instanceof javax.swing.plaf.UIResource;
+
+        if $z3 == 0 goto label04;
+
+        $r31 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        virtualinvoke $r31.<javax.swing.text.JTextComponent: void setSelectedTextColor(java.awt.Color)>(null);
+
+     label04:
+        $r13 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r14 = virtualinvoke $r13.<javax.swing.text.JTextComponent: javax.swing.border.Border getBorder()>();
+
+        $z4 = $r14 instanceof javax.swing.plaf.UIResource;
+
+        if $z4 == 0 goto label05;
+
+        $r30 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        virtualinvoke $r30.<javax.swing.text.JTextComponent: void setBorder(javax.swing.border.Border)>(null);
+
+     label05:
+        $r15 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r16 = virtualinvoke $r15.<javax.swing.text.JTextComponent: java.awt.Insets getMargin()>();
+
+        $z5 = $r16 instanceof javax.swing.plaf.UIResource;
+
+        if $z5 == 0 goto label06;
+
+        $r29 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        virtualinvoke $r29.<javax.swing.text.JTextComponent: void setMargin(java.awt.Insets)>(null);
+
+     label06:
+        $r17 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r18 = virtualinvoke $r17.<javax.swing.text.JTextComponent: javax.swing.text.Caret getCaret()>();
+
+        $z6 = $r18 instanceof javax.swing.plaf.UIResource;
+
+        if $z6 == 0 goto label07;
+
+        $r28 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        virtualinvoke $r28.<javax.swing.text.JTextComponent: void setCaret(javax.swing.text.Caret)>(null);
+
+     label07:
+        $r19 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r20 = virtualinvoke $r19.<javax.swing.text.JTextComponent: javax.swing.text.Highlighter getHighlighter()>();
+
+        $z7 = $r20 instanceof javax.swing.plaf.UIResource;
+
+        if $z7 == 0 goto label08;
+
+        $r27 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        virtualinvoke $r27.<javax.swing.text.JTextComponent: void setHighlighter(javax.swing.text.Highlighter)>(null);
+
+     label08:
+        $r21 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r22 = virtualinvoke $r21.<javax.swing.text.JTextComponent: javax.swing.TransferHandler getTransferHandler()>();
+
+        $z8 = $r22 instanceof javax.swing.plaf.UIResource;
+
+        if $z8 == 0 goto label09;
+
+        $r26 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        virtualinvoke $r26.<javax.swing.text.JTextComponent: void setTransferHandler(javax.swing.TransferHandler)>(null);
+
+     label09:
+        $r23 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r24 = virtualinvoke $r23.<javax.swing.text.JTextComponent: java.awt.Cursor getCursor()>();
+
+        $z9 = $r24 instanceof javax.swing.plaf.UIResource;
+
+        if $z9 == 0 goto label10;
+
+        $r25 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        virtualinvoke $r25.<javax.swing.text.JTextComponent: void setCursor(java.awt.Cursor)>(null);
+
+     label10:
+        return;
+    }
+
+    protected void installListeners()
+    {
+        javax.swing.plaf.basic.BasicTextUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        return;
+    }
+
+    protected void uninstallListeners()
+    {
+        javax.swing.plaf.basic.BasicTextUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        return;
+    }
+
+    protected void installKeyboardActions()
+    {
+        javax.swing.text.Keymap $r2;
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.InputMap $r3;
+        javax.swing.text.JTextComponent $r1, $r5, $r6;
+        javax.swing.ActionMap $r4;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r2 = virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.Keymap createKeymap()>();
+
+        virtualinvoke $r1.<javax.swing.text.JTextComponent: void setKeymap(javax.swing.text.Keymap)>($r2);
+
+        $r3 = virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.InputMap getInputMap()>();
+
+        if $r3 == null goto label1;
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        staticinvoke <javax.swing.SwingUtilities: void replaceUIInputMap(javax.swing.JComponent,int,javax.swing.InputMap)>($r6, 0, $r3);
+
+     label1:
+        $r4 = virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.ActionMap getActionMap()>();
+
+        if $r4 == null goto label2;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        staticinvoke <javax.swing.SwingUtilities: void replaceUIActionMap(javax.swing.JComponent,javax.swing.ActionMap)>($r5, $r4);
+
+     label2:
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: void updateFocusAcceleratorBinding(boolean)>(0);
+
+        return;
+    }
+
+    javax.swing.InputMap getInputMap()
+    {
+        javax.swing.plaf.InputMapUIResource $r0;
+        javax.swing.text.JTextComponent $r3;
+        java.lang.StringBuilder $r2, $r5, $r6;
+        java.lang.Object $r8;
+        javax.swing.plaf.basic.BasicTextUI r1;
+        java.lang.String $r4, $r7;
+        javax.swing.InputMap r9;
+
+        r1 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        $r0 = new javax.swing.plaf.InputMapUIResource;
+
+        specialinvoke $r0.<javax.swing.plaf.InputMapUIResource: void <init>()>();
+
+        $r3 = r1.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke r1.<javax.swing.plaf.basic.BasicTextUI: java.lang.String getPropertyPrefix()>();
+
+        $r5 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".focusInputMap");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r8 = staticinvoke <sun.swing.DefaultLookup: java.lang.Object get(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String)>($r3, r1, $r7);
+
+        r9 = (javax.swing.InputMap) $r8;
+
+        if r9 == null goto label1;
+
+        virtualinvoke $r0.<javax.swing.InputMap: void setParent(javax.swing.InputMap)>(r9);
+
+     label1:
+        return $r0;
+    }
+
+    void updateFocusAcceleratorBinding(boolean)
+    {
+        javax.swing.KeyStroke $r4;
+        char $c0;
+        javax.swing.text.JTextComponent $r1, $r2, $r6, $r7, $r9;
+        javax.swing.plaf.ComponentInputMapUIResource $r11;
+        int $i1, $i2;
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.InputMap $r3, r10;
+        javax.swing.ActionMap $r8;
+        boolean z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $c0 = virtualinvoke $r1.<javax.swing.text.JTextComponent: char getFocusAccelerator()>();
+
+        if z0 != 0 goto label1;
+
+        if $c0 == 0 goto label3;
+
+     label1:
+        $r2 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r3 = staticinvoke <javax.swing.SwingUtilities: javax.swing.InputMap getUIInputMap(javax.swing.JComponent,int)>($r2, 2);
+
+        r10 = $r3;
+
+        if $r3 != null goto label2;
+
+        if $c0 == 0 goto label2;
+
+        $r11 = new javax.swing.plaf.ComponentInputMapUIResource;
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        specialinvoke $r11.<javax.swing.plaf.ComponentInputMapUIResource: void <init>(javax.swing.JComponent)>($r6);
+
+        r10 = $r11;
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        staticinvoke <javax.swing.SwingUtilities: void replaceUIInputMap(javax.swing.JComponent,int,javax.swing.InputMap)>($r7, 2, $r11);
+
+        $r8 = virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.ActionMap getActionMap()>();
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        staticinvoke <javax.swing.SwingUtilities: void replaceUIActionMap(javax.swing.JComponent,javax.swing.ActionMap)>($r9, $r8);
+
+     label2:
+        if r10 == null goto label3;
+
+        virtualinvoke r10.<javax.swing.InputMap: void clear()>();
+
+        if $c0 == 0 goto label3;
+
+        $i1 = staticinvoke <javax.swing.plaf.basic.BasicLookAndFeel: int getFocusAcceleratorKeyMask()>();
+
+        $i2 = (int) $c0;
+
+        $r4 = staticinvoke <javax.swing.KeyStroke: javax.swing.KeyStroke getKeyStroke(int,int)>($i2, $i1);
+
+        virtualinvoke r10.<javax.swing.InputMap: void put(javax.swing.KeyStroke,java.lang.Object)>($r4, "requestFocus");
+
+     label3:
+        return;
+    }
+
+    void updateFocusTraversalKeys()
+    {
+        java.util.HashSet $r7, $r8;
+        boolean $z0, $z1;
+        javax.swing.KeyStroke $r10, $r11, $r14, $r15;
+        javax.swing.text.EditorKit $r2;
+        java.util.Set $r4, $r6;
+        javax.swing.text.JTextComponent $r1, $r3, $r5, $r9, $r12, $r13;
+        javax.swing.plaf.basic.BasicTextUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r2 = virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.EditorKit getEditorKit(javax.swing.text.JTextComponent)>($r1);
+
+        if $r2 == null goto label3;
+
+        $z0 = $r2 instanceof javax.swing.text.DefaultEditorKit;
+
+        if $z0 == 0 goto label3;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r4 = virtualinvoke $r3.<javax.swing.text.JTextComponent: java.util.Set getFocusTraversalKeys(int)>(0);
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r6 = virtualinvoke $r5.<javax.swing.text.JTextComponent: java.util.Set getFocusTraversalKeys(int)>(1);
+
+        $r7 = new java.util.HashSet;
+
+        specialinvoke $r7.<java.util.HashSet: void <init>(java.util.Collection)>($r4);
+
+        $r8 = new java.util.HashSet;
+
+        specialinvoke $r8.<java.util.HashSet: void <init>(java.util.Collection)>($r6);
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $z1 = virtualinvoke $r9.<javax.swing.text.JTextComponent: boolean isEditable()>();
+
+        if $z1 == 0 goto label1;
+
+        $r14 = staticinvoke <javax.swing.KeyStroke: javax.swing.KeyStroke getKeyStroke(int,int)>(9, 0);
+
+        interfaceinvoke $r7.<java.util.Set: boolean remove(java.lang.Object)>($r14);
+
+        $r15 = staticinvoke <javax.swing.KeyStroke: javax.swing.KeyStroke getKeyStroke(int,int)>(9, 1);
+
+        interfaceinvoke $r8.<java.util.Set: boolean remove(java.lang.Object)>($r15);
+
+        goto label2;
+
+     label1:
+        $r10 = staticinvoke <javax.swing.KeyStroke: javax.swing.KeyStroke getKeyStroke(int,int)>(9, 0);
+
+        interfaceinvoke $r7.<java.util.Set: boolean add(java.lang.Object)>($r10);
+
+        $r11 = staticinvoke <javax.swing.KeyStroke: javax.swing.KeyStroke getKeyStroke(int,int)>(9, 1);
+
+        interfaceinvoke $r8.<java.util.Set: boolean add(java.lang.Object)>($r11);
+
+     label2:
+        $r12 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        staticinvoke <javax.swing.LookAndFeel: void installProperty(javax.swing.JComponent,java.lang.String,java.lang.Object)>($r12, "focusTraversalKeysForward", $r7);
+
+        $r13 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        staticinvoke <javax.swing.LookAndFeel: void installProperty(javax.swing.JComponent,java.lang.String,java.lang.Object)>($r13, "focusTraversalKeysBackward", $r8);
+
+     label3:
+        return;
+    }
+
+    private void updateCursor()
+    {
+        java.awt.Cursor $r5;
+        javax.swing.text.JTextComponent $r1, $r2, $r3, $r4;
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.plaf.basic.BasicTextUI$BasicCursor $r6;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $z0 = virtualinvoke $r1.<javax.swing.text.JTextComponent: boolean isCursorSet()>();
+
+        if $z0 == 0 goto label1;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r5 = virtualinvoke $r4.<javax.swing.text.JTextComponent: java.awt.Cursor getCursor()>();
+
+        $z2 = $r5 instanceof javax.swing.plaf.UIResource;
+
+        if $z2 == 0 goto label4;
+
+     label1:
+        $r2 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $z1 = virtualinvoke $r2.<javax.swing.text.JTextComponent: boolean isEditable()>();
+
+        if $z1 == 0 goto label2;
+
+        $r6 = <javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$BasicCursor textCursor>;
+
+        goto label3;
+
+     label2:
+        $r6 = null;
+
+     label3:
+        $r3 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        virtualinvoke $r3.<javax.swing.text.JTextComponent: void setCursor(java.awt.Cursor)>($r6);
+
+     label4:
+        return;
+    }
+
+    javax.swing.TransferHandler getTransferHandler()
+    {
+        javax.swing.plaf.basic.BasicTextUI r1;
+        javax.swing.TransferHandler $r0;
+
+        r1 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        $r0 = <javax.swing.plaf.basic.BasicTextUI: javax.swing.TransferHandler defaultTransferHandler>;
+
+        return $r0;
+    }
+
+    javax.swing.ActionMap getActionMap()
+    {
+        javax.swing.Action $r7;
+        javax.swing.plaf.ActionMapUIResource $r14;
+        java.lang.String $r2, $r5;
+        javax.swing.plaf.basic.BasicTextUI$FocusAction $r15;
+        javax.swing.ActionMap $r11, r13;
+        boolean $z0, $z1;
+        javax.swing.text.EditorKit $r17;
+        javax.swing.UIDefaults $r12;
+        javax.swing.text.TextAction $r9;
+        javax.swing.text.JTextComponent $r16;
+        javax.swing.plaf.basic.BasicTextUI$TextActionWrapper $r8;
+        java.lang.StringBuilder $r0, $r3, $r4;
+        java.lang.Object $r6, $r10;
+        javax.swing.plaf.basic.BasicTextUI r1;
+
+        r1 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke r1.<javax.swing.plaf.basic.BasicTextUI: java.lang.String getPropertyPrefix()>();
+
+        $r3 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".actionMap");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = staticinvoke <javax.swing.UIManager: java.lang.Object get(java.lang.Object)>($r5);
+
+        r13 = (javax.swing.ActionMap) $r6;
+
+        if r13 != null goto label1;
+
+        $r11 = virtualinvoke r1.<javax.swing.plaf.basic.BasicTextUI: javax.swing.ActionMap createActionMap()>();
+
+        r13 = $r11;
+
+        if $r11 == null goto label1;
+
+        $r12 = staticinvoke <javax.swing.UIManager: javax.swing.UIDefaults getLookAndFeelDefaults()>();
+
+        virtualinvoke $r12.<javax.swing.UIDefaults: java.lang.Object put(java.lang.Object,java.lang.Object)>($r5, $r11);
+
+     label1:
+        $r14 = new javax.swing.plaf.ActionMapUIResource;
+
+        specialinvoke $r14.<javax.swing.plaf.ActionMapUIResource: void <init>()>();
+
+        $r15 = new javax.swing.plaf.basic.BasicTextUI$FocusAction;
+
+        specialinvoke $r15.<javax.swing.plaf.basic.BasicTextUI$FocusAction: void <init>(javax.swing.plaf.basic.BasicTextUI)>(r1);
+
+        virtualinvoke $r14.<javax.swing.ActionMap: void put(java.lang.Object,javax.swing.Action)>("requestFocus", $r15);
+
+        $r16 = r1.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r17 = virtualinvoke r1.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.EditorKit getEditorKit(javax.swing.text.JTextComponent)>($r16);
+
+        $z1 = $r17 instanceof javax.swing.text.DefaultEditorKit;
+
+        if $z1 == 0 goto label2;
+
+        if r13 == null goto label2;
+
+        $r7 = virtualinvoke r13.<javax.swing.ActionMap: javax.swing.Action get(java.lang.Object)>("insert-break");
+
+        if $r7 == null goto label2;
+
+        $z0 = $r7 instanceof javax.swing.text.DefaultEditorKit$InsertBreakAction;
+
+        if $z0 == 0 goto label2;
+
+        $r8 = new javax.swing.plaf.basic.BasicTextUI$TextActionWrapper;
+
+        $r9 = (javax.swing.text.TextAction) $r7;
+
+        specialinvoke $r8.<javax.swing.plaf.basic.BasicTextUI$TextActionWrapper: void <init>(javax.swing.plaf.basic.BasicTextUI,javax.swing.text.TextAction)>(r1, $r9);
+
+        $r10 = interfaceinvoke $r8.<javax.swing.Action: java.lang.Object getValue(java.lang.String)>("Name");
+
+        virtualinvoke $r14.<javax.swing.ActionMap: void put(java.lang.Object,javax.swing.Action)>($r10, $r8);
+
+     label2:
+        if r13 == null goto label3;
+
+        virtualinvoke $r14.<javax.swing.ActionMap: void setParent(javax.swing.ActionMap)>(r13);
+
+     label3:
+        return $r14;
+    }
+
+    javax.swing.ActionMap createActionMap()
+    {
+        javax.swing.Action $r4, $r6, $r7, $r9, $r10, $r12, r13;
+        javax.swing.plaf.ActionMapUIResource $r0;
+        int i0, i1;
+        javax.swing.Action[] $r3;
+        javax.swing.text.JTextComponent $r2;
+        java.lang.Object $r5, $r8, $r11, $r14;
+        javax.swing.plaf.basic.BasicTextUI r1;
+
+        r1 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        $r0 = new javax.swing.plaf.ActionMapUIResource;
+
+        specialinvoke $r0.<javax.swing.plaf.ActionMapUIResource: void <init>()>();
+
+        $r2 = r1.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.text.JTextComponent: javax.swing.Action[] getActions()>();
+
+        i0 = lengthof $r3;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label2;
+
+        r13 = $r3[i1];
+
+        $r14 = interfaceinvoke r13.<javax.swing.Action: java.lang.Object getValue(java.lang.String)>("Name");
+
+        virtualinvoke $r0.<javax.swing.ActionMap: void put(java.lang.Object,javax.swing.Action)>($r14, r13);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        $r4 = staticinvoke <javax.swing.TransferHandler: javax.swing.Action getCutAction()>();
+
+        $r5 = interfaceinvoke $r4.<javax.swing.Action: java.lang.Object getValue(java.lang.String)>("Name");
+
+        $r6 = staticinvoke <javax.swing.TransferHandler: javax.swing.Action getCutAction()>();
+
+        virtualinvoke $r0.<javax.swing.ActionMap: void put(java.lang.Object,javax.swing.Action)>($r5, $r6);
+
+        $r7 = staticinvoke <javax.swing.TransferHandler: javax.swing.Action getCopyAction()>();
+
+        $r8 = interfaceinvoke $r7.<javax.swing.Action: java.lang.Object getValue(java.lang.String)>("Name");
+
+        $r9 = staticinvoke <javax.swing.TransferHandler: javax.swing.Action getCopyAction()>();
+
+        virtualinvoke $r0.<javax.swing.ActionMap: void put(java.lang.Object,javax.swing.Action)>($r8, $r9);
+
+        $r10 = staticinvoke <javax.swing.TransferHandler: javax.swing.Action getPasteAction()>();
+
+        $r11 = interfaceinvoke $r10.<javax.swing.Action: java.lang.Object getValue(java.lang.String)>("Name");
+
+        $r12 = staticinvoke <javax.swing.TransferHandler: javax.swing.Action getPasteAction()>();
+
+        virtualinvoke $r0.<javax.swing.ActionMap: void put(java.lang.Object,javax.swing.Action)>($r11, $r12);
+
+        return $r0;
+    }
+
+    protected void uninstallKeyboardActions()
+    {
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.text.JTextComponent $r1, $r2, $r3;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        virtualinvoke $r1.<javax.swing.text.JTextComponent: void setKeymap(javax.swing.text.Keymap)>(null);
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        staticinvoke <javax.swing.SwingUtilities: void replaceUIInputMap(javax.swing.JComponent,int,javax.swing.InputMap)>($r2, 2, null);
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        staticinvoke <javax.swing.SwingUtilities: void replaceUIActionMap(javax.swing.JComponent,javax.swing.ActionMap)>($r3, null);
+
+        return;
+    }
+
+    protected void paintBackground(java.awt.Graphics)
+    {
+        java.awt.Color $r3;
+        javax.swing.text.JTextComponent $r2, $r4, $r5;
+        java.awt.Graphics r0;
+        int $i0, $i1;
+        javax.swing.plaf.basic.BasicTextUI r1;
+
+        r1 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        r0 := @parameter0: java.awt.Graphics;
+
+        $r2 = r1.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.text.JTextComponent: java.awt.Color getBackground()>();
+
+        virtualinvoke r0.<java.awt.Graphics: void setColor(java.awt.Color)>($r3);
+
+        $r4 = r1.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $i0 = virtualinvoke $r4.<javax.swing.text.JTextComponent: int getWidth()>();
+
+        $r5 = r1.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $i1 = virtualinvoke $r5.<javax.swing.text.JTextComponent: int getHeight()>();
+
+        virtualinvoke r0.<java.awt.Graphics: void fillRect(int,int,int,int)>(0, 0, $i0, $i1);
+
+        return;
+    }
+
+    protected final javax.swing.text.JTextComponent getComponent()
+    {
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.text.JTextComponent $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        return $r1;
+    }
+
+    protected void modelChanged()
+    {
+        javax.swing.text.ViewFactory $r2;
+        javax.swing.text.View $r6;
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.plaf.basic.BasicTextUI$RootView $r1;
+        javax.swing.text.Document $r4;
+        javax.swing.text.Element $r5;
+        javax.swing.text.JTextComponent $r3;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$RootView rootView>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.plaf.basic.BasicTextUI$RootView: javax.swing.text.ViewFactory getViewFactory()>();
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r4 = virtualinvoke $r3.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        $r5 = interfaceinvoke $r4.<javax.swing.text.Document: javax.swing.text.Element getDefaultRootElement()>();
+
+        $r6 = interfaceinvoke $r2.<javax.swing.text.ViewFactory: javax.swing.text.View create(javax.swing.text.Element)>($r5);
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: void setView(javax.swing.text.View)>($r6);
+
+        return;
+    }
+
+    protected final void setView(javax.swing.text.View)
+    {
+        javax.swing.text.View r1;
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.plaf.basic.BasicTextUI$RootView $r2;
+        javax.swing.text.JTextComponent $r3, $r4;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        r1 := @parameter0: javax.swing.text.View;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$RootView rootView>;
+
+        virtualinvoke $r2.<javax.swing.plaf.basic.BasicTextUI$RootView: void setView(javax.swing.text.View)>(r1);
+
+        r0.<javax.swing.plaf.basic.BasicTextUI: boolean painted> = 0;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        virtualinvoke $r3.<javax.swing.text.JTextComponent: void revalidate()>();
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        virtualinvoke $r4.<javax.swing.text.JTextComponent: void repaint()>();
+
+        return;
+    }
+
+    protected void paintSafely(java.awt.Graphics)
+    {
+        java.awt.Rectangle $r6;
+        javax.swing.text.Caret $r4;
+        javax.swing.text.JTextComponent $r1, $r3, $r5;
+        javax.swing.text.Highlighter $r2;
+        java.awt.Graphics r8;
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.plaf.basic.BasicTextUI$RootView $r10;
+        javax.swing.text.DefaultCaret $r7, $r9;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        r8 := @parameter0: java.awt.Graphics;
+
+        r0.<javax.swing.plaf.basic.BasicTextUI: boolean painted> = 1;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.text.JTextComponent: javax.swing.text.Highlighter getHighlighter()>();
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r4 = virtualinvoke $r3.<javax.swing.text.JTextComponent: javax.swing.text.Caret getCaret()>();
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $z0 = virtualinvoke $r5.<javax.swing.text.JTextComponent: boolean isOpaque()>();
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: void paintBackground(java.awt.Graphics)>(r8);
+
+     label1:
+        if $r2 == null goto label2;
+
+        interfaceinvoke $r2.<javax.swing.text.Highlighter: void paint(java.awt.Graphics)>(r8);
+
+     label2:
+        $r6 = virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: java.awt.Rectangle getVisibleEditorRect()>();
+
+        if $r6 == null goto label3;
+
+        $r10 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$RootView rootView>;
+
+        virtualinvoke $r10.<javax.swing.plaf.basic.BasicTextUI$RootView: void paint(java.awt.Graphics,java.awt.Shape)>(r8, $r6);
+
+     label3:
+        if $r4 == null goto label4;
+
+        interfaceinvoke $r4.<javax.swing.text.Caret: void paint(java.awt.Graphics)>(r8);
+
+     label4:
+        $r7 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.DefaultCaret dropCaret>;
+
+        if $r7 == null goto label5;
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.DefaultCaret dropCaret>;
+
+        virtualinvoke $r9.<javax.swing.text.DefaultCaret: void paint(java.awt.Graphics)>(r8);
+
+     label5:
+        return;
+    }
+
+    public void installUI(javax.swing.JComponent)
+    {
+        java.lang.Error $r1;
+        java.lang.Boolean $r4, $r6;
+        java.awt.LayoutManager $r14;
+        boolean $z0, $z1;
+        javax.swing.JComponent r0;
+        javax.swing.text.EditorKit $r19;
+        javax.swing.plaf.basic.BasicTextUI$UpdateHandler $r8, $r12, $r15;
+        javax.swing.text.JTextComponent $r3, $r5, $r7, $r9, $r10, $r13, $r16, $r17, $r18, $r21;
+        javax.swing.plaf.basic.BasicTextUI r2;
+        javax.swing.text.Document $r11, $r20;
+
+        r2 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        r0 := @parameter0: javax.swing.JComponent;
+
+        $z0 = r0 instanceof javax.swing.text.JTextComponent;
+
+        if $z0 == 0 goto label5;
+
+        $r3 = (javax.swing.text.JTextComponent) r0;
+
+        r2.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor> = $r3;
+
+        $r5 = r2.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r4 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        staticinvoke <javax.swing.LookAndFeel: void installProperty(javax.swing.JComponent,java.lang.String,java.lang.Object)>($r5, "opaque", $r4);
+
+        $r7 = r2.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r6 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        staticinvoke <javax.swing.LookAndFeel: void installProperty(javax.swing.JComponent,java.lang.String,java.lang.Object)>($r7, "autoscrolls", $r6);
+
+        virtualinvoke r2.<javax.swing.plaf.basic.BasicTextUI: void installDefaults()>();
+
+        specialinvoke r2.<javax.swing.plaf.basic.BasicTextUI: void installDefaults2()>();
+
+        $r9 = r2.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r8 = r2.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$UpdateHandler updateHandler>;
+
+        virtualinvoke $r9.<javax.swing.text.JTextComponent: void addPropertyChangeListener(java.beans.PropertyChangeListener)>($r8);
+
+        $r10 = r2.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r11 = virtualinvoke $r10.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        if $r11 != null goto label1;
+
+        $r18 = r2.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r17 = r2.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r19 = virtualinvoke r2.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.EditorKit getEditorKit(javax.swing.text.JTextComponent)>($r17);
+
+        $r20 = virtualinvoke $r19.<javax.swing.text.EditorKit: javax.swing.text.Document createDefaultDocument()>();
+
+        virtualinvoke $r18.<javax.swing.text.JTextComponent: void setDocument(javax.swing.text.Document)>($r20);
+
+        goto label2;
+
+     label1:
+        $r12 = r2.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$UpdateHandler updateHandler>;
+
+        interfaceinvoke $r11.<javax.swing.text.Document: void addDocumentListener(javax.swing.event.DocumentListener)>($r12);
+
+        virtualinvoke r2.<javax.swing.plaf.basic.BasicTextUI: void modelChanged()>();
+
+     label2:
+        virtualinvoke r2.<javax.swing.plaf.basic.BasicTextUI: void installListeners()>();
+
+        virtualinvoke r2.<javax.swing.plaf.basic.BasicTextUI: void installKeyboardActions()>();
+
+        $r13 = r2.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r14 = virtualinvoke $r13.<javax.swing.text.JTextComponent: java.awt.LayoutManager getLayout()>();
+
+        if $r14 == null goto label3;
+
+        $z1 = $r14 instanceof javax.swing.plaf.UIResource;
+
+        if $z1 == 0 goto label4;
+
+     label3:
+        $r16 = r2.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r15 = r2.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$UpdateHandler updateHandler>;
+
+        virtualinvoke $r16.<javax.swing.text.JTextComponent: void setLayout(java.awt.LayoutManager)>($r15);
+
+     label4:
+        $r21 = r2.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        specialinvoke r2.<javax.swing.plaf.basic.BasicTextUI: void updateBackground(javax.swing.text.JTextComponent)>($r21);
+
+        goto label6;
+
+     label5:
+        $r1 = new java.lang.Error;
+
+        specialinvoke $r1.<java.lang.Error: void <init>(java.lang.String)>("TextUI needs JTextComponent");
+
+        throw $r1;
+
+     label6:
+        return;
+    }
+
+    public void uninstallUI(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r7;
+        javax.swing.plaf.basic.BasicTextUI$UpdateHandler $r1, $r5;
+        javax.swing.text.JTextComponent $r2, $r3;
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.text.Document $r4;
+        javax.swing.plaf.basic.BasicTextUI$RootView $r6;
+        java.awt.LayoutManager $r8;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        r7 := @parameter0: javax.swing.JComponent;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$UpdateHandler updateHandler>;
+
+        virtualinvoke $r2.<javax.swing.text.JTextComponent: void removePropertyChangeListener(java.beans.PropertyChangeListener)>($r1);
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r4 = virtualinvoke $r3.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$UpdateHandler updateHandler>;
+
+        interfaceinvoke $r4.<javax.swing.text.Document: void removeDocumentListener(javax.swing.event.DocumentListener)>($r5);
+
+        r0.<javax.swing.plaf.basic.BasicTextUI: boolean painted> = 0;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: void uninstallDefaults()>();
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$RootView rootView>;
+
+        virtualinvoke $r6.<javax.swing.plaf.basic.BasicTextUI$RootView: void setView(javax.swing.text.View)>(null);
+
+        virtualinvoke r7.<javax.swing.JComponent: void removeAll()>();
+
+        $r8 = virtualinvoke r7.<javax.swing.JComponent: java.awt.LayoutManager getLayout()>();
+
+        $z0 = $r8 instanceof javax.swing.plaf.UIResource;
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r7.<javax.swing.JComponent: void setLayout(java.awt.LayoutManager)>(null);
+
+     label1:
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: void uninstallKeyboardActions()>();
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: void uninstallListeners()>();
+
+        r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor> = null;
+
+        return;
+    }
+
+    public void update(java.awt.Graphics, javax.swing.JComponent)
+    {
+        java.awt.Graphics r1;
+        javax.swing.JComponent r2;
+        javax.swing.plaf.basic.BasicTextUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        r1 := @parameter0: java.awt.Graphics;
+
+        r2 := @parameter1: javax.swing.JComponent;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: void paint(java.awt.Graphics,javax.swing.JComponent)>(r1, r2);
+
+        return;
+    }
+
+    public final void paint(java.awt.Graphics, javax.swing.JComponent)
+    {
+        java.lang.Throwable $r9;
+        javax.swing.text.AbstractDocument $r7, $r8, $r10;
+        int $i0;
+        boolean $z0, $z1, $z2;
+        javax.swing.JComponent r11;
+        javax.swing.text.JTextComponent $r4;
+        java.awt.Graphics r6;
+        javax.swing.text.View $r3;
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.plaf.basic.BasicTextUI$RootView $r1, $r2;
+        javax.swing.text.Document $r5;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        r6 := @parameter0: java.awt.Graphics;
+
+        r11 := @parameter1: javax.swing.JComponent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$RootView rootView>;
+
+        $i0 = virtualinvoke $r1.<javax.swing.plaf.basic.BasicTextUI$RootView: int getViewCount()>();
+
+        if $i0 <= 0 goto label6;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$RootView rootView>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.plaf.basic.BasicTextUI$RootView: javax.swing.text.View getView(int)>(0);
+
+        if $r3 == null goto label6;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r5 = virtualinvoke $r4.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        $z0 = $r5 instanceof javax.swing.text.AbstractDocument;
+
+        if $z0 == 0 goto label1;
+
+        $r8 = (javax.swing.text.AbstractDocument) $r5;
+
+        virtualinvoke $r8.<javax.swing.text.AbstractDocument: void readLock()>();
+
+     label1:
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: void paintSafely(java.awt.Graphics)>(r6);
+
+     label2:
+        $z1 = $r5 instanceof javax.swing.text.AbstractDocument;
+
+        if $z1 == 0 goto label6;
+
+        $r7 = (javax.swing.text.AbstractDocument) $r5;
+
+        virtualinvoke $r7.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+        goto label6;
+
+     label3:
+        $r9 := @caughtexception;
+
+     label4:
+        $z2 = $r5 instanceof javax.swing.text.AbstractDocument;
+
+        if $z2 == 0 goto label5;
+
+        $r10 = (javax.swing.text.AbstractDocument) $r5;
+
+        virtualinvoke $r10.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+     label5:
+        throw $r9;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public java.awt.Dimension getPreferredSize(javax.swing.JComponent)
+    {
+        javax.swing.text.AbstractDocument $r6, $r9, $r11;
+        boolean $z0, $z1, $z2;
+        java.awt.Dimension $r5;
+        float $f0, $f1, $f2, $f3;
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.text.Document $r2;
+        java.lang.Throwable $r10;
+        java.awt.Insets $r4;
+        long $l20, $l22, $l23, $l25, $l26, $l27, $l29, $l31, $l32, $l34, $l35, $l36;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i21, $i24, $i28, $i30, $i33, $i37;
+        javax.swing.JComponent r3;
+        javax.swing.text.JTextComponent $r1;
+        javax.swing.plaf.basic.BasicTextUI$RootView $r7, $r8, $r12, $r13;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        r3 := @parameter0: javax.swing.JComponent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        $r4 = virtualinvoke r3.<javax.swing.JComponent: java.awt.Insets getInsets()>();
+
+        $r5 = virtualinvoke r3.<javax.swing.JComponent: java.awt.Dimension getSize()>();
+
+        $z0 = $r2 instanceof javax.swing.text.AbstractDocument;
+
+        if $z0 == 0 goto label1;
+
+        $r9 = (javax.swing.text.AbstractDocument) $r2;
+
+        virtualinvoke $r9.<javax.swing.text.AbstractDocument: void readLock()>();
+
+     label1:
+        $i3 = $r5.<java.awt.Dimension: int width>;
+
+        $i1 = $r4.<java.awt.Insets: int left>;
+
+        $i0 = $r4.<java.awt.Insets: int right>;
+
+        $i2 = $i1 + $i0;
+
+        if $i3 <= $i2 goto label2;
+
+        $i9 = $r5.<java.awt.Dimension: int height>;
+
+        $i7 = $r4.<java.awt.Insets: int top>;
+
+        $i6 = $r4.<java.awt.Insets: int bottom>;
+
+        $i8 = $i7 + $i6;
+
+        if $i9 <= $i8 goto label2;
+
+        $r8 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$RootView rootView>;
+
+        $i11 = $r5.<java.awt.Dimension: int width>;
+
+        $i10 = $r4.<java.awt.Insets: int left>;
+
+        $i13 = $i11 - $i10;
+
+        $i12 = $r4.<java.awt.Insets: int right>;
+
+        $i14 = $i13 - $i12;
+
+        $f1 = (float) $i14;
+
+        $i16 = $r5.<java.awt.Dimension: int height>;
+
+        $i15 = $r4.<java.awt.Insets: int top>;
+
+        $i18 = $i16 - $i15;
+
+        $i17 = $r4.<java.awt.Insets: int bottom>;
+
+        $i19 = $i18 - $i17;
+
+        $f0 = (float) $i19;
+
+        virtualinvoke $r8.<javax.swing.plaf.basic.BasicTextUI$RootView: void setSize(float,float)>($f1, $f0);
+
+        goto label3;
+
+     label2:
+        $i4 = $r5.<java.awt.Dimension: int width>;
+
+        if $i4 != 0 goto label3;
+
+        $i5 = $r5.<java.awt.Dimension: int height>;
+
+        if $i5 != 0 goto label3;
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$RootView rootView>;
+
+        virtualinvoke $r7.<javax.swing.plaf.basic.BasicTextUI$RootView: void setSize(float,float)>(2.14748365E9F, 2.14748365E9F);
+
+     label3:
+        $r12 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$RootView rootView>;
+
+        $f2 = virtualinvoke $r12.<javax.swing.plaf.basic.BasicTextUI$RootView: float getPreferredSpan(int)>(0);
+
+        $l20 = (long) $f2;
+
+        $i21 = $r4.<java.awt.Insets: int left>;
+
+        $l22 = (long) $i21;
+
+        $l23 = $l20 + $l22;
+
+        $i24 = $r4.<java.awt.Insets: int right>;
+
+        $l25 = (long) $i24;
+
+        $l26 = $l23 + $l25;
+
+        $l27 = staticinvoke <java.lang.Math: long min(long,long)>($l26, 2147483647L);
+
+        $i28 = (int) $l27;
+
+        $r5.<java.awt.Dimension: int width> = $i28;
+
+        $r13 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$RootView rootView>;
+
+        $f3 = virtualinvoke $r13.<javax.swing.plaf.basic.BasicTextUI$RootView: float getPreferredSpan(int)>(1);
+
+        $l29 = (long) $f3;
+
+        $i30 = $r4.<java.awt.Insets: int top>;
+
+        $l31 = (long) $i30;
+
+        $l32 = $l29 + $l31;
+
+        $i33 = $r4.<java.awt.Insets: int bottom>;
+
+        $l34 = (long) $i33;
+
+        $l35 = $l32 + $l34;
+
+        $l36 = staticinvoke <java.lang.Math: long min(long,long)>($l35, 2147483647L);
+
+        $i37 = (int) $l36;
+
+        $r5.<java.awt.Dimension: int height> = $i37;
+
+     label4:
+        $z2 = $r2 instanceof javax.swing.text.AbstractDocument;
+
+        if $z2 == 0 goto label8;
+
+        $r6 = (javax.swing.text.AbstractDocument) $r2;
+
+        virtualinvoke $r6.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+        goto label8;
+
+     label5:
+        $r10 := @caughtexception;
+
+     label6:
+        $z1 = $r2 instanceof javax.swing.text.AbstractDocument;
+
+        if $z1 == 0 goto label7;
+
+        $r11 = (javax.swing.text.AbstractDocument) $r2;
+
+        virtualinvoke $r11.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+     label7:
+        throw $r10;
+
+     label8:
+        return $r5;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public java.awt.Dimension getMinimumSize(javax.swing.JComponent)
+    {
+        java.lang.Throwable $r10;
+        java.awt.Insets $r4;
+        javax.swing.text.AbstractDocument $r8, $r9, $r11;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9;
+        boolean $z0, $z1, $z2;
+        javax.swing.JComponent r3;
+        javax.swing.text.JTextComponent $r1;
+        java.awt.Dimension $r5;
+        float $f0, $f1;
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.text.Document $r2;
+        javax.swing.plaf.basic.BasicTextUI$RootView $r6, $r7;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        r3 := @parameter0: javax.swing.JComponent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        $r4 = virtualinvoke r3.<javax.swing.JComponent: java.awt.Insets getInsets()>();
+
+        $r5 = new java.awt.Dimension;
+
+        specialinvoke $r5.<java.awt.Dimension: void <init>()>();
+
+        $z0 = $r2 instanceof javax.swing.text.AbstractDocument;
+
+        if $z0 == 0 goto label1;
+
+        $r9 = (javax.swing.text.AbstractDocument) $r2;
+
+        virtualinvoke $r9.<javax.swing.text.AbstractDocument: void readLock()>();
+
+     label1:
+        $r6 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$RootView rootView>;
+
+        $f0 = virtualinvoke $r6.<javax.swing.plaf.basic.BasicTextUI$RootView: float getMinimumSpan(int)>(0);
+
+        $i1 = (int) $f0;
+
+        $i0 = $r4.<java.awt.Insets: int left>;
+
+        $i3 = $i1 + $i0;
+
+        $i2 = $r4.<java.awt.Insets: int right>;
+
+        $i4 = $i3 + $i2;
+
+        $r5.<java.awt.Dimension: int width> = $i4;
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$RootView rootView>;
+
+        $f1 = virtualinvoke $r7.<javax.swing.plaf.basic.BasicTextUI$RootView: float getMinimumSpan(int)>(1);
+
+        $i6 = (int) $f1;
+
+        $i5 = $r4.<java.awt.Insets: int top>;
+
+        $i8 = $i6 + $i5;
+
+        $i7 = $r4.<java.awt.Insets: int bottom>;
+
+        $i9 = $i8 + $i7;
+
+        $r5.<java.awt.Dimension: int height> = $i9;
+
+     label2:
+        $z1 = $r2 instanceof javax.swing.text.AbstractDocument;
+
+        if $z1 == 0 goto label6;
+
+        $r8 = (javax.swing.text.AbstractDocument) $r2;
+
+        virtualinvoke $r8.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+        goto label6;
+
+     label3:
+        $r10 := @caughtexception;
+
+     label4:
+        $z2 = $r2 instanceof javax.swing.text.AbstractDocument;
+
+        if $z2 == 0 goto label5;
+
+        $r11 = (javax.swing.text.AbstractDocument) $r2;
+
+        virtualinvoke $r11.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+     label5:
+        throw $r10;
+
+     label6:
+        return $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public java.awt.Dimension getMaximumSize(javax.swing.JComponent)
+    {
+        javax.swing.text.AbstractDocument $r8, $r9, $r11;
+        boolean $z0, $z1, $z2;
+        java.awt.Dimension $r5;
+        float $f0, $f1;
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.text.Document $r2;
+        java.lang.Throwable $r10;
+        java.awt.Insets $r4;
+        long $l1, $l2, $l4, $l5, $l6, $l7, $l10, $l11, $l13, $l14, $l15, $l16;
+        int $i0, $i3, $i8, $i9, $i12, $i17;
+        javax.swing.JComponent r3;
+        javax.swing.text.JTextComponent $r1;
+        javax.swing.plaf.basic.BasicTextUI$RootView $r6, $r7;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        r3 := @parameter0: javax.swing.JComponent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        $r4 = virtualinvoke r3.<javax.swing.JComponent: java.awt.Insets getInsets()>();
+
+        $r5 = new java.awt.Dimension;
+
+        specialinvoke $r5.<java.awt.Dimension: void <init>()>();
+
+        $z0 = $r2 instanceof javax.swing.text.AbstractDocument;
+
+        if $z0 == 0 goto label1;
+
+        $r9 = (javax.swing.text.AbstractDocument) $r2;
+
+        virtualinvoke $r9.<javax.swing.text.AbstractDocument: void readLock()>();
+
+     label1:
+        $r6 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$RootView rootView>;
+
+        $f0 = virtualinvoke $r6.<javax.swing.plaf.basic.BasicTextUI$RootView: float getMaximumSpan(int)>(0);
+
+        $l2 = (long) $f0;
+
+        $i0 = $r4.<java.awt.Insets: int left>;
+
+        $l1 = (long) $i0;
+
+        $l5 = $l2 + $l1;
+
+        $i3 = $r4.<java.awt.Insets: int right>;
+
+        $l4 = (long) $i3;
+
+        $l6 = $l5 + $l4;
+
+        $l7 = staticinvoke <java.lang.Math: long min(long,long)>($l6, 2147483647L);
+
+        $i8 = (int) $l7;
+
+        $r5.<java.awt.Dimension: int width> = $i8;
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$RootView rootView>;
+
+        $f1 = virtualinvoke $r7.<javax.swing.plaf.basic.BasicTextUI$RootView: float getMaximumSpan(int)>(1);
+
+        $l11 = (long) $f1;
+
+        $i9 = $r4.<java.awt.Insets: int top>;
+
+        $l10 = (long) $i9;
+
+        $l14 = $l11 + $l10;
+
+        $i12 = $r4.<java.awt.Insets: int bottom>;
+
+        $l13 = (long) $i12;
+
+        $l15 = $l14 + $l13;
+
+        $l16 = staticinvoke <java.lang.Math: long min(long,long)>($l15, 2147483647L);
+
+        $i17 = (int) $l16;
+
+        $r5.<java.awt.Dimension: int height> = $i17;
+
+     label2:
+        $z1 = $r2 instanceof javax.swing.text.AbstractDocument;
+
+        if $z1 == 0 goto label6;
+
+        $r8 = (javax.swing.text.AbstractDocument) $r2;
+
+        virtualinvoke $r8.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+        goto label6;
+
+     label3:
+        $r10 := @caughtexception;
+
+     label4:
+        $z2 = $r2 instanceof javax.swing.text.AbstractDocument;
+
+        if $z2 == 0 goto label5;
+
+        $r11 = (javax.swing.text.AbstractDocument) $r2;
+
+        virtualinvoke $r11.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+     label5:
+        throw $r10;
+
+     label6:
+        return $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    protected java.awt.Rectangle getVisibleEditorRect()
+    {
+        java.awt.Rectangle $r2;
+        java.awt.Insets $r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17;
+        javax.swing.text.JTextComponent $r1, $r3;
+        javax.swing.plaf.basic.BasicTextUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.text.JTextComponent: java.awt.Rectangle getBounds()>();
+
+        $i0 = $r2.<java.awt.Rectangle: int width>;
+
+        if $i0 <= 0 goto label1;
+
+        $i1 = $r2.<java.awt.Rectangle: int height>;
+
+        if $i1 <= 0 goto label1;
+
+        $r2.<java.awt.Rectangle: int y> = 0;
+
+        $r2.<java.awt.Rectangle: int x> = 0;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r4 = virtualinvoke $r3.<javax.swing.text.JTextComponent: java.awt.Insets getInsets()>();
+
+        $i3 = $r2.<java.awt.Rectangle: int x>;
+
+        $i2 = $r4.<java.awt.Insets: int left>;
+
+        $i4 = $i3 + $i2;
+
+        $r2.<java.awt.Rectangle: int x> = $i4;
+
+        $i6 = $r2.<java.awt.Rectangle: int y>;
+
+        $i5 = $r4.<java.awt.Insets: int top>;
+
+        $i7 = $i6 + $i5;
+
+        $r2.<java.awt.Rectangle: int y> = $i7;
+
+        $i11 = $r2.<java.awt.Rectangle: int width>;
+
+        $i9 = $r4.<java.awt.Insets: int left>;
+
+        $i8 = $r4.<java.awt.Insets: int right>;
+
+        $i10 = $i9 + $i8;
+
+        $i12 = $i11 - $i10;
+
+        $r2.<java.awt.Rectangle: int width> = $i12;
+
+        $i16 = $r2.<java.awt.Rectangle: int height>;
+
+        $i14 = $r4.<java.awt.Insets: int top>;
+
+        $i13 = $r4.<java.awt.Insets: int bottom>;
+
+        $i15 = $i14 + $i13;
+
+        $i17 = $i16 - $i15;
+
+        $r2.<java.awt.Rectangle: int height> = $i17;
+
+        return $r2;
+
+     label1:
+        return null;
+    }
+
+    public java.awt.Rectangle modelToView(javax.swing.text.JTextComponent, int) throws javax.swing.text.BadLocationException
+    {
+        java.awt.Rectangle $r3;
+        javax.swing.text.Position$Bias $r2;
+        int i0;
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.text.JTextComponent r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        r1 := @parameter0: javax.swing.text.JTextComponent;
+
+        i0 := @parameter1: int;
+
+        $r2 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Forward>;
+
+        $r3 = virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: java.awt.Rectangle modelToView(javax.swing.text.JTextComponent,int,javax.swing.text.Position$Bias)>(r1, i0, $r2);
+
+        return $r3;
+    }
+
+    public java.awt.Rectangle modelToView(javax.swing.text.JTextComponent, int, javax.swing.text.Position$Bias) throws javax.swing.text.BadLocationException
+    {
+        java.lang.Throwable $r12;
+        java.awt.Rectangle $r3, $r9;
+        javax.swing.text.AbstractDocument $r4, $r10, $r11, $r13;
+        javax.swing.text.Position$Bias r6;
+        int $i0, $i1, i2;
+        boolean $z0, $z1, $z2, $z3;
+        java.awt.Shape $r8;
+        javax.swing.text.JTextComponent $r1, r14;
+        float $f0, $f1;
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.text.Document $r2;
+        javax.swing.plaf.basic.BasicTextUI$RootView $r5, $r7;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        r14 := @parameter0: javax.swing.text.JTextComponent;
+
+        i2 := @parameter1: int;
+
+        r6 := @parameter2: javax.swing.text.Position$Bias;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        $z0 = $r2 instanceof javax.swing.text.AbstractDocument;
+
+        if $z0 == 0 goto label1;
+
+        $r11 = (javax.swing.text.AbstractDocument) $r2;
+
+        virtualinvoke $r11.<javax.swing.text.AbstractDocument: void readLock()>();
+
+     label1:
+        $r3 = virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: java.awt.Rectangle getVisibleEditorRect()>();
+
+        if $r3 == null goto label4;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$RootView rootView>;
+
+        $i0 = $r3.<java.awt.Rectangle: int width>;
+
+        $f1 = (float) $i0;
+
+        $i1 = $r3.<java.awt.Rectangle: int height>;
+
+        $f0 = (float) $i1;
+
+        virtualinvoke $r5.<javax.swing.plaf.basic.BasicTextUI$RootView: void setSize(float,float)>($f1, $f0);
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$RootView rootView>;
+
+        $r8 = virtualinvoke $r7.<javax.swing.plaf.basic.BasicTextUI$RootView: java.awt.Shape modelToView(int,java.awt.Shape,javax.swing.text.Position$Bias)>(i2, $r3, r6);
+
+        if $r8 == null goto label4;
+
+        $r9 = interfaceinvoke $r8.<java.awt.Shape: java.awt.Rectangle getBounds()>();
+
+     label2:
+        $z2 = $r2 instanceof javax.swing.text.AbstractDocument;
+
+        if $z2 == 0 goto label3;
+
+        $r10 = (javax.swing.text.AbstractDocument) $r2;
+
+        virtualinvoke $r10.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+     label3:
+        return $r9;
+
+     label4:
+        $z1 = $r2 instanceof javax.swing.text.AbstractDocument;
+
+        if $z1 == 0 goto label8;
+
+        $r4 = (javax.swing.text.AbstractDocument) $r2;
+
+        virtualinvoke $r4.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+        goto label8;
+
+     label5:
+        $r12 := @caughtexception;
+
+     label6:
+        $z3 = $r2 instanceof javax.swing.text.AbstractDocument;
+
+        if $z3 == 0 goto label7;
+
+        $r13 = (javax.swing.text.AbstractDocument) $r2;
+
+        virtualinvoke $r13.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+     label7:
+        throw $r12;
+
+     label8:
+        return null;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public int viewToModel(javax.swing.text.JTextComponent, java.awt.Point)
+    {
+        javax.swing.text.Position$Bias[] $r3;
+        int $i0;
+        java.awt.Point r2;
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.text.JTextComponent r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        r1 := @parameter0: javax.swing.text.JTextComponent;
+
+        r2 := @parameter1: java.awt.Point;
+
+        $r3 = <javax.swing.plaf.basic.BasicTextUI: javax.swing.text.Position$Bias[] discardBias>;
+
+        $i0 = virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: int viewToModel(javax.swing.text.JTextComponent,java.awt.Point,javax.swing.text.Position$Bias[])>(r1, r2, $r3);
+
+        return $i0;
+    }
+
+    public int viewToModel(javax.swing.text.JTextComponent, java.awt.Point, javax.swing.text.Position$Bias[])
+    {
+        java.lang.Throwable $r10;
+        java.awt.Rectangle $r3;
+        javax.swing.text.AbstractDocument $r4, $r9, $r11;
+        java.awt.Point r6;
+        int $i0, $i1, $i2, $i3, i4, $i6;
+        boolean $z0, $z1, $z2;
+        javax.swing.text.Position$Bias[] r7;
+        javax.swing.text.JTextComponent $r1, r12;
+        float $f0, $f1, $f2, $f3;
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.text.Document $r2;
+        javax.swing.plaf.basic.BasicTextUI$RootView $r5, $r8;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        r12 := @parameter0: javax.swing.text.JTextComponent;
+
+        r6 := @parameter1: java.awt.Point;
+
+        r7 := @parameter2: javax.swing.text.Position$Bias[];
+
+        $i6 = (int) -1;
+
+        i4 = $i6;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        $z0 = $r2 instanceof javax.swing.text.AbstractDocument;
+
+        if $z0 == 0 goto label1;
+
+        $r9 = (javax.swing.text.AbstractDocument) $r2;
+
+        virtualinvoke $r9.<javax.swing.text.AbstractDocument: void readLock()>();
+
+     label1:
+        $r3 = virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: java.awt.Rectangle getVisibleEditorRect()>();
+
+        if $r3 == null goto label2;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$RootView rootView>;
+
+        $i0 = $r3.<java.awt.Rectangle: int width>;
+
+        $f1 = (float) $i0;
+
+        $i1 = $r3.<java.awt.Rectangle: int height>;
+
+        $f0 = (float) $i1;
+
+        virtualinvoke $r5.<javax.swing.plaf.basic.BasicTextUI$RootView: void setSize(float,float)>($f1, $f0);
+
+        $r8 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$RootView rootView>;
+
+        $i2 = r6.<java.awt.Point: int x>;
+
+        $f3 = (float) $i2;
+
+        $i3 = r6.<java.awt.Point: int y>;
+
+        $f2 = (float) $i3;
+
+        i4 = virtualinvoke $r8.<javax.swing.plaf.basic.BasicTextUI$RootView: int viewToModel(float,float,java.awt.Shape,javax.swing.text.Position$Bias[])>($f3, $f2, $r3, r7);
+
+     label2:
+        $z1 = $r2 instanceof javax.swing.text.AbstractDocument;
+
+        if $z1 == 0 goto label6;
+
+        $r4 = (javax.swing.text.AbstractDocument) $r2;
+
+        virtualinvoke $r4.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+        goto label6;
+
+     label3:
+        $r10 := @caughtexception;
+
+     label4:
+        $z2 = $r2 instanceof javax.swing.text.AbstractDocument;
+
+        if $z2 == 0 goto label5;
+
+        $r11 = (javax.swing.text.AbstractDocument) $r2;
+
+        virtualinvoke $r11.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+     label5:
+        throw $r10;
+
+     label6:
+        return i4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public int getNextVisualPositionFrom(javax.swing.text.JTextComponent, int, javax.swing.text.Position$Bias, int, javax.swing.text.Position$Bias[]) throws javax.swing.text.BadLocationException
+    {
+        java.lang.Throwable $r11;
+        java.awt.Rectangle $r4;
+        javax.swing.text.AbstractDocument $r3, $r8, $r10, $r12;
+        javax.swing.text.Position$Bias r5;
+        int i0, i1, $i2, $i3, $i4, $i6;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        javax.swing.text.Position$Bias[] r6;
+        javax.swing.text.JTextComponent $r1, r13;
+        float $f0, $f1;
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.text.Document $r2;
+        javax.swing.plaf.basic.BasicTextUI$RootView $r7, $r9;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        r13 := @parameter0: javax.swing.text.JTextComponent;
+
+        i0 := @parameter1: int;
+
+        r5 := @parameter2: javax.swing.text.Position$Bias;
+
+        i1 := @parameter3: int;
+
+        r6 := @parameter4: javax.swing.text.Position$Bias[];
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        $z0 = $r2 instanceof javax.swing.text.AbstractDocument;
+
+        if $z0 == 0 goto label1;
+
+        $r10 = (javax.swing.text.AbstractDocument) $r2;
+
+        virtualinvoke $r10.<javax.swing.text.AbstractDocument: void readLock()>();
+
+     label1:
+        $z1 = r0.<javax.swing.plaf.basic.BasicTextUI: boolean painted>;
+
+        if $z1 == 0 goto label5;
+
+        $r4 = virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: java.awt.Rectangle getVisibleEditorRect()>();
+
+        if $r4 == null goto label2;
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$RootView rootView>;
+
+        $i3 = $r4.<java.awt.Rectangle: int width>;
+
+        $f1 = (float) $i3;
+
+        $i4 = $r4.<java.awt.Rectangle: int height>;
+
+        $f0 = (float) $i4;
+
+        virtualinvoke $r9.<javax.swing.plaf.basic.BasicTextUI$RootView: void setSize(float,float)>($f1, $f0);
+
+     label2:
+        $r7 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$RootView rootView>;
+
+        $i2 = virtualinvoke $r7.<javax.swing.plaf.basic.BasicTextUI$RootView: int getNextVisualPositionFrom(int,javax.swing.text.Position$Bias,java.awt.Shape,int,javax.swing.text.Position$Bias[])>(i0, r5, $r4, i1, r6);
+
+     label3:
+        $z3 = $r2 instanceof javax.swing.text.AbstractDocument;
+
+        if $z3 == 0 goto label4;
+
+        $r8 = (javax.swing.text.AbstractDocument) $r2;
+
+        virtualinvoke $r8.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+     label4:
+        return $i2;
+
+     label5:
+        $z2 = $r2 instanceof javax.swing.text.AbstractDocument;
+
+        if $z2 == 0 goto label9;
+
+        $r3 = (javax.swing.text.AbstractDocument) $r2;
+
+        virtualinvoke $r3.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+        goto label9;
+
+     label6:
+        $r11 := @caughtexception;
+
+     label7:
+        $z4 = $r2 instanceof javax.swing.text.AbstractDocument;
+
+        if $z4 == 0 goto label8;
+
+        $r12 = (javax.swing.text.AbstractDocument) $r2;
+
+        virtualinvoke $r12.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+     label8:
+        throw $r11;
+
+     label9:
+        $i6 = (int) -1;
+
+        return $i6;
+
+        catch java.lang.Throwable from label1 to label3 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public void damageRange(javax.swing.text.JTextComponent, int, int)
+    {
+        javax.swing.text.Position$Bias $r2, $r3;
+        int i0, i1;
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.text.JTextComponent r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        r1 := @parameter0: javax.swing.text.JTextComponent;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r3 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Forward>;
+
+        $r2 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Backward>;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: void damageRange(javax.swing.text.JTextComponent,int,int,javax.swing.text.Position$Bias,javax.swing.text.Position$Bias)>(r1, i0, i1, $r3, $r2);
+
+        return;
+    }
+
+    public void damageRange(javax.swing.text.JTextComponent, int, int, javax.swing.text.Position$Bias, javax.swing.text.Position$Bias)
+    {
+        javax.swing.text.AbstractDocument $r10, $r11, $r13, $r15;
+        javax.swing.text.Position$Bias r5, r6;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.awt.Shape $r8;
+        javax.swing.text.BadLocationException $r14;
+        float $f0, $f1;
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.text.Document $r3;
+        java.lang.Throwable $r12;
+        java.awt.Rectangle $r1, $r16;
+        int $i0, $i1, i2, i3, $i4, $i5, $i6, $i7;
+        javax.swing.text.JTextComponent r2, $r9;
+        javax.swing.plaf.basic.BasicTextUI$RootView $r4, $r7;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        r2 := @parameter0: javax.swing.text.JTextComponent;
+
+        i2 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        r5 := @parameter3: javax.swing.text.Position$Bias;
+
+        r6 := @parameter4: javax.swing.text.Position$Bias;
+
+        $z0 = r0.<javax.swing.plaf.basic.BasicTextUI: boolean painted>;
+
+        if $z0 == 0 goto label10;
+
+        $r1 = virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: java.awt.Rectangle getVisibleEditorRect()>();
+
+        if $r1 == null goto label10;
+
+        $r3 = virtualinvoke r2.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        $z1 = $r3 instanceof javax.swing.text.AbstractDocument;
+
+        if $z1 == 0 goto label01;
+
+        $r11 = (javax.swing.text.AbstractDocument) $r3;
+
+        virtualinvoke $r11.<javax.swing.text.AbstractDocument: void readLock()>();
+
+     label01:
+        $r4 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$RootView rootView>;
+
+        $i0 = $r1.<java.awt.Rectangle: int width>;
+
+        $f1 = (float) $i0;
+
+        $i1 = $r1.<java.awt.Rectangle: int height>;
+
+        $f0 = (float) $i1;
+
+        virtualinvoke $r4.<javax.swing.plaf.basic.BasicTextUI$RootView: void setSize(float,float)>($f1, $f0);
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$RootView rootView>;
+
+        $r8 = virtualinvoke $r7.<javax.swing.plaf.basic.BasicTextUI$RootView: java.awt.Shape modelToView(int,javax.swing.text.Position$Bias,int,javax.swing.text.Position$Bias,java.awt.Shape)>(i2, r5, i3, r6, $r1);
+
+        $z2 = $r8 instanceof java.awt.Rectangle;
+
+        if $z2 == 0 goto label02;
+
+        $r16 = (java.awt.Rectangle) $r8;
+
+        goto label03;
+
+     label02:
+        $r16 = interfaceinvoke $r8.<java.awt.Shape: java.awt.Rectangle getBounds()>();
+
+     label03:
+        $r9 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $i7 = $r16.<java.awt.Rectangle: int x>;
+
+        $i6 = $r16.<java.awt.Rectangle: int y>;
+
+        $i5 = $r16.<java.awt.Rectangle: int width>;
+
+        $i4 = $r16.<java.awt.Rectangle: int height>;
+
+        virtualinvoke $r9.<javax.swing.text.JTextComponent: void repaint(int,int,int,int)>($i7, $i6, $i5, $i4);
+
+     label04:
+        $z3 = $r3 instanceof javax.swing.text.AbstractDocument;
+
+        if $z3 == 0 goto label10;
+
+        $r10 = (javax.swing.text.AbstractDocument) $r3;
+
+        virtualinvoke $r10.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+        goto label10;
+
+     label05:
+        $r14 := @caughtexception;
+
+     label06:
+        $z5 = $r3 instanceof javax.swing.text.AbstractDocument;
+
+        if $z5 == 0 goto label10;
+
+        $r15 = (javax.swing.text.AbstractDocument) $r3;
+
+        virtualinvoke $r15.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+        goto label10;
+
+     label07:
+        $r12 := @caughtexception;
+
+     label08:
+        $z4 = $r3 instanceof javax.swing.text.AbstractDocument;
+
+        if $z4 == 0 goto label09;
+
+        $r13 = (javax.swing.text.AbstractDocument) $r3;
+
+        virtualinvoke $r13.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+     label09:
+        throw $r12;
+
+     label10:
+        return;
+
+        catch javax.swing.text.BadLocationException from label01 to label04 with label05;
+        catch java.lang.Throwable from label01 to label04 with label07;
+        catch java.lang.Throwable from label05 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+    }
+
+    public javax.swing.text.EditorKit getEditorKit(javax.swing.text.JTextComponent)
+    {
+        javax.swing.text.EditorKit $r0;
+        javax.swing.plaf.basic.BasicTextUI r1;
+        javax.swing.text.JTextComponent r2;
+
+        r1 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        r2 := @parameter0: javax.swing.text.JTextComponent;
+
+        $r0 = <javax.swing.plaf.basic.BasicTextUI: javax.swing.text.EditorKit defaultKit>;
+
+        return $r0;
+    }
+
+    public javax.swing.text.View getRootView(javax.swing.text.JTextComponent)
+    {
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.plaf.basic.BasicTextUI$RootView $r1;
+        javax.swing.text.JTextComponent r2;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        r2 := @parameter0: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$RootView rootView>;
+
+        return $r1;
+    }
+
+    public java.lang.String getToolTipText(javax.swing.text.JTextComponent, java.awt.Point)
+    {
+        java.lang.Throwable $r8;
+        java.awt.Rectangle $r3;
+        javax.swing.text.AbstractDocument $r6, $r7, $r9;
+        java.awt.Point r4;
+        int $i0, $i1;
+        java.lang.String r11;
+        boolean $z0, $z1, $z2, $z3;
+        javax.swing.text.JTextComponent $r1, r10;
+        float $f0, $f1;
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.text.Document $r2;
+        javax.swing.plaf.basic.BasicTextUI$RootView $r5;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        r10 := @parameter0: javax.swing.text.JTextComponent;
+
+        r4 := @parameter1: java.awt.Point;
+
+        $z0 = r0.<javax.swing.plaf.basic.BasicTextUI: boolean painted>;
+
+        if $z0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r1 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.JTextComponent editor>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        r11 = null;
+
+        $r3 = virtualinvoke r0.<javax.swing.plaf.basic.BasicTextUI: java.awt.Rectangle getVisibleEditorRect()>();
+
+        if $r3 == null goto label7;
+
+        $z1 = $r2 instanceof javax.swing.text.AbstractDocument;
+
+        if $z1 == 0 goto label2;
+
+        $r7 = (javax.swing.text.AbstractDocument) $r2;
+
+        virtualinvoke $r7.<javax.swing.text.AbstractDocument: void readLock()>();
+
+     label2:
+        $r5 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$RootView rootView>;
+
+        $i0 = r4.<java.awt.Point: int x>;
+
+        $f1 = (float) $i0;
+
+        $i1 = r4.<java.awt.Point: int y>;
+
+        $f0 = (float) $i1;
+
+        r11 = virtualinvoke $r5.<javax.swing.plaf.basic.BasicTextUI$RootView: java.lang.String getToolTipText(float,float,java.awt.Shape)>($f1, $f0, $r3);
+
+     label3:
+        $z2 = $r2 instanceof javax.swing.text.AbstractDocument;
+
+        if $z2 == 0 goto label7;
+
+        $r6 = (javax.swing.text.AbstractDocument) $r2;
+
+        virtualinvoke $r6.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+        goto label7;
+
+     label4:
+        $r8 := @caughtexception;
+
+     label5:
+        $z3 = $r2 instanceof javax.swing.text.AbstractDocument;
+
+        if $z3 == 0 goto label6;
+
+        $r9 = (javax.swing.text.AbstractDocument) $r2;
+
+        virtualinvoke $r9.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+     label6:
+        throw $r8;
+
+     label7:
+        return r11;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public javax.swing.text.View create(javax.swing.text.Element)
+    {
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.text.Element r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        r1 := @parameter0: javax.swing.text.Element;
+
+        return null;
+    }
+
+    public javax.swing.text.View create(javax.swing.text.Element, int, int)
+    {
+        int i0, i1;
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.text.Element r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicTextUI;
+
+        r1 := @parameter0: javax.swing.text.Element;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        return null;
+    }
+
+    private static javax.swing.plaf.basic.BasicTextUI$DragListener getDragListener()
+    {
+        java.lang.Throwable $r4;
+        sun.awt.AppContext $r0, $r3;
+        javax.swing.plaf.basic.BasicTextUI$DragListener $r2, r5;
+        java.lang.Object $r1;
+
+        entermonitor class "Ljavax/swing/plaf/basic/BasicTextUI$DragListener;";
+
+     label1:
+        $r0 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r1 = virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>(class "Ljavax/swing/plaf/basic/BasicTextUI$DragListener;");
+
+        r5 = (javax.swing.plaf.basic.BasicTextUI$DragListener) $r1;
+
+        if r5 != null goto label2;
+
+        $r2 = new javax.swing.plaf.basic.BasicTextUI$DragListener;
+
+        specialinvoke $r2.<javax.swing.plaf.basic.BasicTextUI$DragListener: void <init>()>();
+
+        r5 = $r2;
+
+        $r3 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        virtualinvoke $r3.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>(class "Ljavax/swing/plaf/basic/BasicTextUI$DragListener;", $r2);
+
+     label2:
+        exitmonitor class "Ljavax/swing/plaf/basic/BasicTextUI$DragListener;";
+
+     label3:
+        return r5;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor class "Ljavax/swing/plaf/basic/BasicTextUI$DragListener;";
+
+     label5:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    static void access$000(javax.swing.plaf.basic.BasicTextUI)
+    {
+        javax.swing.plaf.basic.BasicTextUI r0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicTextUI;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicTextUI: void updateCursor()>();
+
+        return;
+    }
+
+    static javax.swing.text.DefaultCaret access$100(javax.swing.plaf.basic.BasicTextUI)
+    {
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.text.DefaultCaret $r1;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicTextUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.DefaultCaret dropCaret>;
+
+        return $r1;
+    }
+
+    static javax.swing.text.DefaultCaret access$102(javax.swing.plaf.basic.BasicTextUI, javax.swing.text.DefaultCaret)
+    {
+        javax.swing.plaf.basic.BasicTextUI r0;
+        javax.swing.text.DefaultCaret r1;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicTextUI;
+
+        r1 := @parameter1: javax.swing.text.DefaultCaret;
+
+        r0.<javax.swing.plaf.basic.BasicTextUI: javax.swing.text.DefaultCaret dropCaret> = r1;
+
+        return r1;
+    }
+
+    static void <clinit>()
+    {
+        javax.swing.plaf.basic.BasicTextUI$TextTransferHandler $r2;
+        javax.swing.text.Position$Bias[] $r3;
+        javax.swing.text.DefaultEditorKit $r1;
+        javax.swing.plaf.basic.BasicTextUI$BasicCursor $r0;
+
+        $r0 = new javax.swing.plaf.basic.BasicTextUI$BasicCursor;
+
+        specialinvoke $r0.<javax.swing.plaf.basic.BasicTextUI$BasicCursor: void <init>(int)>(2);
+
+        <javax.swing.plaf.basic.BasicTextUI: javax.swing.plaf.basic.BasicTextUI$BasicCursor textCursor> = $r0;
+
+        $r1 = new javax.swing.text.DefaultEditorKit;
+
+        specialinvoke $r1.<javax.swing.text.DefaultEditorKit: void <init>()>();
+
+        <javax.swing.plaf.basic.BasicTextUI: javax.swing.text.EditorKit defaultKit> = $r1;
+
+        $r2 = new javax.swing.plaf.basic.BasicTextUI$TextTransferHandler;
+
+        specialinvoke $r2.<javax.swing.plaf.basic.BasicTextUI$TextTransferHandler: void <init>()>();
+
+        <javax.swing.plaf.basic.BasicTextUI: javax.swing.TransferHandler defaultTransferHandler> = $r2;
+
+        $r3 = newarray (javax.swing.text.Position$Bias)[1];
+
+        <javax.swing.plaf.basic.BasicTextUI: javax.swing.text.Position$Bias[] discardBias> = $r3;
+
+        return;
+    }
+}

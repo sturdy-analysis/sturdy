@@ -1,0 +1,2525 @@
+final class sun.security.provider.ByteArrayAccess extends java.lang.Object
+{
+    private static final sun.misc.Unsafe unsafe;
+    private static final boolean littleEndianUnaligned;
+    private static final boolean bigEndian;
+    private static final int byteArrayOfs;
+
+    private void <init>()
+    {
+        sun.security.provider.ByteArrayAccess r0;
+
+        r0 := @this: sun.security.provider.ByteArrayAccess;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static boolean unaligned()
+    {
+        sun.security.action.GetPropertyAction $r0;
+        java.lang.Object $r1;
+        java.lang.String r2;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String,java.lang.String)>("os.arch", "");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r2 = (java.lang.String) $r1;
+
+        $z0 = virtualinvoke r2.<java.lang.String: boolean equals(java.lang.Object)>("i386");
+
+        if $z0 != 0 goto label1;
+
+        $z1 = virtualinvoke r2.<java.lang.String: boolean equals(java.lang.Object)>("x86");
+
+        if $z1 != 0 goto label1;
+
+        $z2 = virtualinvoke r2.<java.lang.String: boolean equals(java.lang.Object)>("amd64");
+
+        if $z2 != 0 goto label1;
+
+        $z3 = virtualinvoke r2.<java.lang.String: boolean equals(java.lang.Object)>("x86_64");
+
+        if $z3 != 0 goto label1;
+
+        $z4 = virtualinvoke r2.<java.lang.String: boolean equals(java.lang.Object)>("ppc64");
+
+        if $z4 != 0 goto label1;
+
+        $z5 = virtualinvoke r2.<java.lang.String: boolean equals(java.lang.Object)>("ppc64le");
+
+        if $z5 != 0 goto label1;
+
+        $z6 = virtualinvoke r2.<java.lang.String: boolean equals(java.lang.Object)>("aarch64");
+
+        if $z6 == 0 goto label2;
+
+     label1:
+        $z7 = 1;
+
+        goto label3;
+
+     label2:
+        $z7 = 0;
+
+     label3:
+        return $z7;
+    }
+
+    static void b2iLittle(byte[], int, int[], int, int)
+    {
+        byte[] r0;
+        byte $b6, $b8, $b13, $b18;
+        int[] r1;
+        boolean $z0, $z1;
+        sun.misc.Unsafe $r2, $r3;
+        long $l26, $l31;
+        short $s9, $s11, $s14, $s40, $s41, $s44;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i7, $i10, $i12, $i15, $i16, $i17, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i27, $i28, $i29, $i30, $i32, i33, i34, i35, i36, i37, i38, i39, $i42, $i43, $i45, $i46;
+        java.lang.ArrayIndexOutOfBoundsException $r5;
+
+        r0 := @parameter0: byte[];
+
+        i33 := @parameter1: int;
+
+        r1 := @parameter2: int[];
+
+        i34 := @parameter3: int;
+
+        i35 := @parameter4: int;
+
+        if i33 < 0 goto label1;
+
+        $i0 = lengthof r0;
+
+        $i1 = $i0 - i33;
+
+        if $i1 < i35 goto label1;
+
+        if i34 < 0 goto label1;
+
+        $i2 = lengthof r1;
+
+        $i4 = $i2 - i34;
+
+        $i3 = i35 / 4;
+
+        if $i4 >= $i3 goto label2;
+
+     label1:
+        $r5 = new java.lang.ArrayIndexOutOfBoundsException;
+
+        specialinvoke $r5.<java.lang.ArrayIndexOutOfBoundsException: void <init>()>();
+
+        throw $r5;
+
+     label2:
+        $z0 = <sun.security.provider.ByteArrayAccess: boolean littleEndianUnaligned>;
+
+        if $z0 == 0 goto label4;
+
+        $i29 = <sun.security.provider.ByteArrayAccess: int byteArrayOfs>;
+
+        i36 = i33 + $i29;
+
+        i37 = i35 + i36;
+
+     label3:
+        if i36 >= i37 goto label8;
+
+        $i30 = i34;
+
+        i34 = i34 + 1;
+
+        $r3 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $l31 = (long) i36;
+
+        $i32 = virtualinvoke $r3.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l31);
+
+        r1[$i30] = $i32;
+
+        i36 = i36 + 4;
+
+        goto label3;
+
+     label4:
+        $z1 = <sun.security.provider.ByteArrayAccess: boolean bigEndian>;
+
+        if $z1 == 0 goto label6;
+
+        $i22 = i33 & 3;
+
+        if $i22 != 0 goto label6;
+
+        $i24 = <sun.security.provider.ByteArrayAccess: int byteArrayOfs>;
+
+        i38 = i33 + $i24;
+
+        i39 = i35 + i38;
+
+     label5:
+        if i38 >= i39 goto label8;
+
+        $i25 = i34;
+
+        i34 = i34 + 1;
+
+        $r2 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $l26 = (long) i38;
+
+        $i27 = virtualinvoke $r2.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l26);
+
+        $i28 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i27);
+
+        r1[$i25] = $i28;
+
+        i38 = i38 + 4;
+
+        goto label5;
+
+     label6:
+        $i23 = i35 + i33;
+
+     label7:
+        if i33 >= $i23 goto label8;
+
+        $i5 = i34;
+
+        i34 = i34 + 1;
+
+        $b6 = r0[i33];
+
+        $s40 = (short) $b6;
+
+        $s11 = $s40 & 255;
+
+        $i7 = i33 + 1;
+
+        $b8 = r0[$i7];
+
+        $s41 = (short) $b8;
+
+        $s9 = $s41 & 255;
+
+        $i42 = (int) $s9;
+
+        $i10 = $i42 << 8;
+
+        $i43 = (int) $s11;
+
+        $i16 = $i43 | $i10;
+
+        $i12 = i33 + 2;
+
+        $b13 = r0[$i12];
+
+        $s44 = (short) $b13;
+
+        $s14 = $s44 & 255;
+
+        $i45 = (int) $s14;
+
+        $i15 = $i45 << 16;
+
+        $i20 = $i16 | $i15;
+
+        $i17 = i33 + 3;
+
+        $b18 = r0[$i17];
+
+        $i46 = (int) $b18;
+
+        $i19 = $i46 << 24;
+
+        $i21 = $i20 | $i19;
+
+        r1[$i5] = $i21;
+
+        i33 = i33 + 4;
+
+        goto label7;
+
+     label8:
+        return;
+    }
+
+    static void b2iLittle64(byte[], int, int[])
+    {
+        byte[] r0;
+        long $l5, $l9, $l13, $l17, $l21, $l25, $l29, $l33, $l37, $l41, $l45, $l49, $l53, $l57, $l61, $l65, $l69, $l72, $l75, $l78, $l81, $l84, $l87, $l90, $l93, $l96, $l99, $l102, $l105, $l108, $l111, $l114;
+        java.lang.ArrayIndexOutOfBoundsException $r34;
+        int[] r1;
+        int $i0, $i1, $i2, $i3, $i4, $i6, $i7, $i8, $i10, $i11, $i12, $i14, $i15, $i16, $i18, $i19, $i20, $i22, $i23, $i24, $i26, $i27, $i28, $i30, $i31, $i32, $i34, $i35, $i36, $i38, $i39, $i40, $i42, $i43, $i44, $i46, $i47, $i48, $i50, $i51, $i52, $i54, $i55, $i56, $i58, $i59, $i60, $i62, $i63, $i64, $i66, $i67, $i68, $i70, $i71, $i73, $i74, $i76, $i77, $i79, $i80, $i82, $i83, $i85, $i86, $i88, $i89, $i91, $i92, $i94, $i95, $i97, $i98, $i100, $i101, $i103, $i104, $i106, $i107, $i109, $i110, $i112, $i113, $i115, i116, i117, i118;
+        sun.misc.Unsafe $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26, $r27, $r28, $r29, $r30, $r31, $r32, $r33;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: byte[];
+
+        i116 := @parameter1: int;
+
+        r1 := @parameter2: int[];
+
+        if i116 < 0 goto label1;
+
+        $i0 = lengthof r0;
+
+        $i1 = $i0 - i116;
+
+        if $i1 < 64 goto label1;
+
+        $i2 = lengthof r1;
+
+        if $i2 >= 16 goto label2;
+
+     label1:
+        $r34 = new java.lang.ArrayIndexOutOfBoundsException;
+
+        specialinvoke $r34.<java.lang.ArrayIndexOutOfBoundsException: void <init>()>();
+
+        throw $r34;
+
+     label2:
+        $z0 = <sun.security.provider.ByteArrayAccess: boolean littleEndianUnaligned>;
+
+        if $z0 == 0 goto label3;
+
+        $i68 = <sun.security.provider.ByteArrayAccess: int byteArrayOfs>;
+
+        i117 = i116 + $i68;
+
+        $r18 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $l69 = (long) i117;
+
+        $i70 = virtualinvoke $r18.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l69);
+
+        r1[0] = $i70;
+
+        $r19 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i71 = i117 + 4;
+
+        $l72 = (long) $i71;
+
+        $i73 = virtualinvoke $r19.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l72);
+
+        r1[1] = $i73;
+
+        $r20 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i74 = i117 + 8;
+
+        $l75 = (long) $i74;
+
+        $i76 = virtualinvoke $r20.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l75);
+
+        r1[2] = $i76;
+
+        $r21 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i77 = i117 + 12;
+
+        $l78 = (long) $i77;
+
+        $i79 = virtualinvoke $r21.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l78);
+
+        r1[3] = $i79;
+
+        $r22 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i80 = i117 + 16;
+
+        $l81 = (long) $i80;
+
+        $i82 = virtualinvoke $r22.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l81);
+
+        r1[4] = $i82;
+
+        $r23 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i83 = i117 + 20;
+
+        $l84 = (long) $i83;
+
+        $i85 = virtualinvoke $r23.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l84);
+
+        r1[5] = $i85;
+
+        $r24 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i86 = i117 + 24;
+
+        $l87 = (long) $i86;
+
+        $i88 = virtualinvoke $r24.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l87);
+
+        r1[6] = $i88;
+
+        $r25 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i89 = i117 + 28;
+
+        $l90 = (long) $i89;
+
+        $i91 = virtualinvoke $r25.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l90);
+
+        r1[7] = $i91;
+
+        $r26 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i92 = i117 + 32;
+
+        $l93 = (long) $i92;
+
+        $i94 = virtualinvoke $r26.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l93);
+
+        r1[8] = $i94;
+
+        $r27 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i95 = i117 + 36;
+
+        $l96 = (long) $i95;
+
+        $i97 = virtualinvoke $r27.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l96);
+
+        r1[9] = $i97;
+
+        $r28 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i98 = i117 + 40;
+
+        $l99 = (long) $i98;
+
+        $i100 = virtualinvoke $r28.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l99);
+
+        r1[10] = $i100;
+
+        $r29 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i101 = i117 + 44;
+
+        $l102 = (long) $i101;
+
+        $i103 = virtualinvoke $r29.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l102);
+
+        r1[11] = $i103;
+
+        $r30 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i104 = i117 + 48;
+
+        $l105 = (long) $i104;
+
+        $i106 = virtualinvoke $r30.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l105);
+
+        r1[12] = $i106;
+
+        $r31 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i107 = i117 + 52;
+
+        $l108 = (long) $i107;
+
+        $i109 = virtualinvoke $r31.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l108);
+
+        r1[13] = $i109;
+
+        $r32 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i110 = i117 + 56;
+
+        $l111 = (long) $i110;
+
+        $i112 = virtualinvoke $r32.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l111);
+
+        r1[14] = $i112;
+
+        $r33 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i113 = i117 + 60;
+
+        $l114 = (long) $i113;
+
+        $i115 = virtualinvoke $r33.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l114);
+
+        r1[15] = $i115;
+
+        goto label5;
+
+     label3:
+        $z1 = <sun.security.provider.ByteArrayAccess: boolean bigEndian>;
+
+        if $z1 == 0 goto label4;
+
+        $i3 = i116 & 3;
+
+        if $i3 != 0 goto label4;
+
+        $i4 = <sun.security.provider.ByteArrayAccess: int byteArrayOfs>;
+
+        i118 = i116 + $i4;
+
+        $r2 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $l5 = (long) i118;
+
+        $i6 = virtualinvoke $r2.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l5);
+
+        $i7 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i6);
+
+        r1[0] = $i7;
+
+        $r3 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i8 = i118 + 4;
+
+        $l9 = (long) $i8;
+
+        $i10 = virtualinvoke $r3.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l9);
+
+        $i11 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i10);
+
+        r1[1] = $i11;
+
+        $r4 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i12 = i118 + 8;
+
+        $l13 = (long) $i12;
+
+        $i14 = virtualinvoke $r4.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l13);
+
+        $i15 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i14);
+
+        r1[2] = $i15;
+
+        $r5 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i16 = i118 + 12;
+
+        $l17 = (long) $i16;
+
+        $i18 = virtualinvoke $r5.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l17);
+
+        $i19 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i18);
+
+        r1[3] = $i19;
+
+        $r6 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i20 = i118 + 16;
+
+        $l21 = (long) $i20;
+
+        $i22 = virtualinvoke $r6.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l21);
+
+        $i23 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i22);
+
+        r1[4] = $i23;
+
+        $r7 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i24 = i118 + 20;
+
+        $l25 = (long) $i24;
+
+        $i26 = virtualinvoke $r7.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l25);
+
+        $i27 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i26);
+
+        r1[5] = $i27;
+
+        $r8 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i28 = i118 + 24;
+
+        $l29 = (long) $i28;
+
+        $i30 = virtualinvoke $r8.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l29);
+
+        $i31 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i30);
+
+        r1[6] = $i31;
+
+        $r9 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i32 = i118 + 28;
+
+        $l33 = (long) $i32;
+
+        $i34 = virtualinvoke $r9.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l33);
+
+        $i35 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i34);
+
+        r1[7] = $i35;
+
+        $r10 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i36 = i118 + 32;
+
+        $l37 = (long) $i36;
+
+        $i38 = virtualinvoke $r10.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l37);
+
+        $i39 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i38);
+
+        r1[8] = $i39;
+
+        $r11 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i40 = i118 + 36;
+
+        $l41 = (long) $i40;
+
+        $i42 = virtualinvoke $r11.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l41);
+
+        $i43 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i42);
+
+        r1[9] = $i43;
+
+        $r12 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i44 = i118 + 40;
+
+        $l45 = (long) $i44;
+
+        $i46 = virtualinvoke $r12.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l45);
+
+        $i47 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i46);
+
+        r1[10] = $i47;
+
+        $r13 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i48 = i118 + 44;
+
+        $l49 = (long) $i48;
+
+        $i50 = virtualinvoke $r13.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l49);
+
+        $i51 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i50);
+
+        r1[11] = $i51;
+
+        $r14 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i52 = i118 + 48;
+
+        $l53 = (long) $i52;
+
+        $i54 = virtualinvoke $r14.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l53);
+
+        $i55 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i54);
+
+        r1[12] = $i55;
+
+        $r15 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i56 = i118 + 52;
+
+        $l57 = (long) $i56;
+
+        $i58 = virtualinvoke $r15.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l57);
+
+        $i59 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i58);
+
+        r1[13] = $i59;
+
+        $r16 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i60 = i118 + 56;
+
+        $l61 = (long) $i60;
+
+        $i62 = virtualinvoke $r16.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l61);
+
+        $i63 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i62);
+
+        r1[14] = $i63;
+
+        $r17 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i64 = i118 + 60;
+
+        $l65 = (long) $i64;
+
+        $i66 = virtualinvoke $r17.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l65);
+
+        $i67 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i66);
+
+        r1[15] = $i67;
+
+        goto label5;
+
+     label4:
+        staticinvoke <sun.security.provider.ByteArrayAccess: void b2iLittle(byte[],int,int[],int,int)>(r0, i116, r1, 0, 64);
+
+     label5:
+        return;
+    }
+
+    static void i2bLittle(int[], int, byte[], int, int)
+    {
+        byte[] r1;
+        byte $b7, $b9, $b11, $b13;
+        int[] r0;
+        boolean $z0, $z1;
+        sun.misc.Unsafe $r2, $r3;
+        long $l19, $l24;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, $i8, $i10, $i12, $i14, $i15, $i16, $i17, $i18, $i20, $i21, $i22, $i23, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34;
+        java.lang.ArrayIndexOutOfBoundsException $r4;
+
+        r0 := @parameter0: int[];
+
+        i25 := @parameter1: int;
+
+        r1 := @parameter2: byte[];
+
+        i26 := @parameter3: int;
+
+        i27 := @parameter4: int;
+
+        if i25 < 0 goto label1;
+
+        $i0 = lengthof r0;
+
+        $i2 = $i0 - i25;
+
+        $i1 = i27 / 4;
+
+        if $i2 < $i1 goto label1;
+
+        if i26 < 0 goto label1;
+
+        $i3 = lengthof r1;
+
+        $i4 = $i3 - i26;
+
+        if $i4 >= i27 goto label2;
+
+     label1:
+        $r4 = new java.lang.ArrayIndexOutOfBoundsException;
+
+        specialinvoke $r4.<java.lang.ArrayIndexOutOfBoundsException: void <init>()>();
+
+        throw $r4;
+
+     label2:
+        $z0 = <sun.security.provider.ByteArrayAccess: boolean littleEndianUnaligned>;
+
+        if $z0 == 0 goto label4;
+
+        $i21 = <sun.security.provider.ByteArrayAccess: int byteArrayOfs>;
+
+        i28 = i26 + $i21;
+
+        i29 = i27 + i28;
+
+     label3:
+        if i28 >= i29 goto label8;
+
+        $r3 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $l24 = (long) i28;
+
+        $i22 = i25;
+
+        i25 = i25 + 1;
+
+        $i23 = r0[$i22];
+
+        virtualinvoke $r3.<sun.misc.Unsafe: void putInt(java.lang.Object,long,int)>(r1, $l24, $i23);
+
+        i28 = i28 + 4;
+
+        goto label3;
+
+     label4:
+        $z1 = <sun.security.provider.ByteArrayAccess: boolean bigEndian>;
+
+        if $z1 == 0 goto label6;
+
+        $i14 = i26 & 3;
+
+        if $i14 != 0 goto label6;
+
+        $i16 = <sun.security.provider.ByteArrayAccess: int byteArrayOfs>;
+
+        i30 = i26 + $i16;
+
+        i31 = i27 + i30;
+
+     label5:
+        if i30 >= i31 goto label8;
+
+        $r2 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $l19 = (long) i30;
+
+        $i17 = i25;
+
+        i25 = i25 + 1;
+
+        $i18 = r0[$i17];
+
+        $i20 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i18);
+
+        virtualinvoke $r2.<sun.misc.Unsafe: void putInt(java.lang.Object,long,int)>(r1, $l19, $i20);
+
+        i30 = i30 + 4;
+
+        goto label5;
+
+     label6:
+        $i15 = i27 + i26;
+
+     label7:
+        if i26 >= $i15 goto label8;
+
+        $i5 = i25;
+
+        i25 = i25 + 1;
+
+        i6 = r0[$i5];
+
+        i32 = i26 + 1;
+
+        $b7 = (byte) i6;
+
+        r1[i26] = $b7;
+
+        i33 = i32 + 1;
+
+        $i8 = i6 >> 8;
+
+        $b9 = (byte) $i8;
+
+        r1[i32] = $b9;
+
+        i34 = i33 + 1;
+
+        $i10 = i6 >> 16;
+
+        $b11 = (byte) $i10;
+
+        r1[i33] = $b11;
+
+        i26 = i34 + 1;
+
+        $i12 = i6 >> 24;
+
+        $b13 = (byte) $i12;
+
+        r1[i34] = $b13;
+
+        goto label7;
+
+     label8:
+        return;
+    }
+
+    static void i2bLittle4(int, byte[], int)
+    {
+        sun.misc.Unsafe $r2, $r3;
+        byte[] r1;
+        long $l17, $l21;
+        byte $b4, $b6, $b9, $b12;
+        int i0, $i1, $i2, i3, $i5, $i7, $i8, $i10, $i11, $i13, $i14, $i15, $i16, $i18, $i19, $i20;
+        boolean $z0, $z1;
+        java.lang.ArrayIndexOutOfBoundsException $r0;
+
+        i3 := @parameter0: int;
+
+        r1 := @parameter1: byte[];
+
+        i0 := @parameter2: int;
+
+        if i0 < 0 goto label1;
+
+        $i1 = lengthof r1;
+
+        $i2 = $i1 - i0;
+
+        if $i2 >= 4 goto label2;
+
+     label1:
+        $r0 = new java.lang.ArrayIndexOutOfBoundsException;
+
+        specialinvoke $r0.<java.lang.ArrayIndexOutOfBoundsException: void <init>()>();
+
+        throw $r0;
+
+     label2:
+        $z0 = <sun.security.provider.ByteArrayAccess: boolean littleEndianUnaligned>;
+
+        if $z0 == 0 goto label3;
+
+        $r3 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i19 = <sun.security.provider.ByteArrayAccess: int byteArrayOfs>;
+
+        $i20 = $i19 + i0;
+
+        $l21 = (long) $i20;
+
+        virtualinvoke $r3.<sun.misc.Unsafe: void putInt(java.lang.Object,long,int)>(r1, $l21, i3);
+
+        goto label5;
+
+     label3:
+        $z1 = <sun.security.provider.ByteArrayAccess: boolean bigEndian>;
+
+        if $z1 == 0 goto label4;
+
+        $i14 = i0 & 3;
+
+        if $i14 != 0 goto label4;
+
+        $r2 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i15 = <sun.security.provider.ByteArrayAccess: int byteArrayOfs>;
+
+        $i16 = $i15 + i0;
+
+        $l17 = (long) $i16;
+
+        $i18 = staticinvoke <java.lang.Integer: int reverseBytes(int)>(i3);
+
+        virtualinvoke $r2.<sun.misc.Unsafe: void putInt(java.lang.Object,long,int)>(r1, $l17, $i18);
+
+        goto label5;
+
+     label4:
+        $b4 = (byte) i3;
+
+        r1[i0] = $b4;
+
+        $i7 = i0 + 1;
+
+        $i5 = i3 >> 8;
+
+        $b6 = (byte) $i5;
+
+        r1[$i7] = $b6;
+
+        $i10 = i0 + 2;
+
+        $i8 = i3 >> 16;
+
+        $b9 = (byte) $i8;
+
+        r1[$i10] = $b9;
+
+        $i13 = i0 + 3;
+
+        $i11 = i3 >> 24;
+
+        $b12 = (byte) $i11;
+
+        r1[$i13] = $b12;
+
+     label5:
+        return;
+    }
+
+    static void b2iBig(byte[], int, int[], int, int)
+    {
+        byte[] r0;
+        byte $b7, $b9, $b14, $b18;
+        int[] r1;
+        boolean $z0, $z1;
+        sun.misc.Unsafe $r2, $r3;
+        long $l26, $l30;
+        short $s10, $s12, $s15, $s40, $s41, $s44;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i8, $i11, $i13, $i16, $i17, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i27, $i28, $i29, $i31, $i32, i33, i34, i35, i36, i37, i38, i39, $i42, $i43, $i45, $i46;
+        java.lang.ArrayIndexOutOfBoundsException $r5;
+
+        r0 := @parameter0: byte[];
+
+        i33 := @parameter1: int;
+
+        r1 := @parameter2: int[];
+
+        i34 := @parameter3: int;
+
+        i35 := @parameter4: int;
+
+        if i33 < 0 goto label1;
+
+        $i0 = lengthof r0;
+
+        $i1 = $i0 - i33;
+
+        if $i1 < i35 goto label1;
+
+        if i34 < 0 goto label1;
+
+        $i2 = lengthof r1;
+
+        $i4 = $i2 - i34;
+
+        $i3 = i35 / 4;
+
+        if $i4 >= $i3 goto label2;
+
+     label1:
+        $r5 = new java.lang.ArrayIndexOutOfBoundsException;
+
+        specialinvoke $r5.<java.lang.ArrayIndexOutOfBoundsException: void <init>()>();
+
+        throw $r5;
+
+     label2:
+        $z0 = <sun.security.provider.ByteArrayAccess: boolean littleEndianUnaligned>;
+
+        if $z0 == 0 goto label4;
+
+        $i28 = <sun.security.provider.ByteArrayAccess: int byteArrayOfs>;
+
+        i36 = i33 + $i28;
+
+        i37 = i35 + i36;
+
+     label3:
+        if i36 >= i37 goto label8;
+
+        $i29 = i34;
+
+        i34 = i34 + 1;
+
+        $r3 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $l30 = (long) i36;
+
+        $i31 = virtualinvoke $r3.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l30);
+
+        $i32 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i31);
+
+        r1[$i29] = $i32;
+
+        i36 = i36 + 4;
+
+        goto label3;
+
+     label4:
+        $z1 = <sun.security.provider.ByteArrayAccess: boolean bigEndian>;
+
+        if $z1 == 0 goto label6;
+
+        $i22 = i33 & 3;
+
+        if $i22 != 0 goto label6;
+
+        $i24 = <sun.security.provider.ByteArrayAccess: int byteArrayOfs>;
+
+        i38 = i33 + $i24;
+
+        i39 = i35 + i38;
+
+     label5:
+        if i38 >= i39 goto label8;
+
+        $i25 = i34;
+
+        i34 = i34 + 1;
+
+        $r2 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $l26 = (long) i38;
+
+        $i27 = virtualinvoke $r2.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l26);
+
+        r1[$i25] = $i27;
+
+        i38 = i38 + 4;
+
+        goto label5;
+
+     label6:
+        $i23 = i35 + i33;
+
+     label7:
+        if i33 >= $i23 goto label8;
+
+        $i5 = i34;
+
+        i34 = i34 + 1;
+
+        $i6 = i33 + 3;
+
+        $b7 = r0[$i6];
+
+        $s40 = (short) $b7;
+
+        $s12 = $s40 & 255;
+
+        $i8 = i33 + 2;
+
+        $b9 = r0[$i8];
+
+        $s41 = (short) $b9;
+
+        $s10 = $s41 & 255;
+
+        $i42 = (int) $s10;
+
+        $i11 = $i42 << 8;
+
+        $i43 = (int) $s12;
+
+        $i17 = $i43 | $i11;
+
+        $i13 = i33 + 1;
+
+        $b14 = r0[$i13];
+
+        $s44 = (short) $b14;
+
+        $s15 = $s44 & 255;
+
+        $i45 = (int) $s15;
+
+        $i16 = $i45 << 16;
+
+        $i20 = $i17 | $i16;
+
+        $b18 = r0[i33];
+
+        $i46 = (int) $b18;
+
+        $i19 = $i46 << 24;
+
+        $i21 = $i20 | $i19;
+
+        r1[$i5] = $i21;
+
+        i33 = i33 + 4;
+
+        goto label7;
+
+     label8:
+        return;
+    }
+
+    static void b2iBig64(byte[], int, int[])
+    {
+        byte[] r0;
+        long $l5, $l8, $l11, $l14, $l17, $l20, $l23, $l26, $l29, $l32, $l35, $l38, $l41, $l44, $l47, $l50, $l53, $l57, $l61, $l65, $l69, $l73, $l77, $l81, $l85, $l89, $l93, $l97, $l101, $l105, $l109, $l113;
+        java.lang.ArrayIndexOutOfBoundsException $r34;
+        int[] r1;
+        int $i0, $i1, $i2, $i3, $i4, $i6, $i7, $i9, $i10, $i12, $i13, $i15, $i16, $i18, $i19, $i21, $i22, $i24, $i25, $i27, $i28, $i30, $i31, $i33, $i34, $i36, $i37, $i39, $i40, $i42, $i43, $i45, $i46, $i48, $i49, $i51, $i52, $i54, $i55, $i56, $i58, $i59, $i60, $i62, $i63, $i64, $i66, $i67, $i68, $i70, $i71, $i72, $i74, $i75, $i76, $i78, $i79, $i80, $i82, $i83, $i84, $i86, $i87, $i88, $i90, $i91, $i92, $i94, $i95, $i96, $i98, $i99, $i100, $i102, $i103, $i104, $i106, $i107, $i108, $i110, $i111, $i112, $i114, $i115, i116, i117, i118;
+        sun.misc.Unsafe $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r26, $r27, $r28, $r29, $r30, $r31, $r32, $r33;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: byte[];
+
+        i116 := @parameter1: int;
+
+        r1 := @parameter2: int[];
+
+        if i116 < 0 goto label1;
+
+        $i0 = lengthof r0;
+
+        $i1 = $i0 - i116;
+
+        if $i1 < 64 goto label1;
+
+        $i2 = lengthof r1;
+
+        if $i2 >= 16 goto label2;
+
+     label1:
+        $r34 = new java.lang.ArrayIndexOutOfBoundsException;
+
+        specialinvoke $r34.<java.lang.ArrayIndexOutOfBoundsException: void <init>()>();
+
+        throw $r34;
+
+     label2:
+        $z0 = <sun.security.provider.ByteArrayAccess: boolean littleEndianUnaligned>;
+
+        if $z0 == 0 goto label3;
+
+        $i52 = <sun.security.provider.ByteArrayAccess: int byteArrayOfs>;
+
+        i117 = i116 + $i52;
+
+        $r18 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $l53 = (long) i117;
+
+        $i54 = virtualinvoke $r18.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l53);
+
+        $i55 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i54);
+
+        r1[0] = $i55;
+
+        $r19 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i56 = i117 + 4;
+
+        $l57 = (long) $i56;
+
+        $i58 = virtualinvoke $r19.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l57);
+
+        $i59 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i58);
+
+        r1[1] = $i59;
+
+        $r20 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i60 = i117 + 8;
+
+        $l61 = (long) $i60;
+
+        $i62 = virtualinvoke $r20.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l61);
+
+        $i63 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i62);
+
+        r1[2] = $i63;
+
+        $r21 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i64 = i117 + 12;
+
+        $l65 = (long) $i64;
+
+        $i66 = virtualinvoke $r21.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l65);
+
+        $i67 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i66);
+
+        r1[3] = $i67;
+
+        $r22 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i68 = i117 + 16;
+
+        $l69 = (long) $i68;
+
+        $i70 = virtualinvoke $r22.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l69);
+
+        $i71 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i70);
+
+        r1[4] = $i71;
+
+        $r23 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i72 = i117 + 20;
+
+        $l73 = (long) $i72;
+
+        $i74 = virtualinvoke $r23.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l73);
+
+        $i75 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i74);
+
+        r1[5] = $i75;
+
+        $r24 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i76 = i117 + 24;
+
+        $l77 = (long) $i76;
+
+        $i78 = virtualinvoke $r24.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l77);
+
+        $i79 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i78);
+
+        r1[6] = $i79;
+
+        $r25 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i80 = i117 + 28;
+
+        $l81 = (long) $i80;
+
+        $i82 = virtualinvoke $r25.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l81);
+
+        $i83 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i82);
+
+        r1[7] = $i83;
+
+        $r26 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i84 = i117 + 32;
+
+        $l85 = (long) $i84;
+
+        $i86 = virtualinvoke $r26.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l85);
+
+        $i87 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i86);
+
+        r1[8] = $i87;
+
+        $r27 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i88 = i117 + 36;
+
+        $l89 = (long) $i88;
+
+        $i90 = virtualinvoke $r27.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l89);
+
+        $i91 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i90);
+
+        r1[9] = $i91;
+
+        $r28 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i92 = i117 + 40;
+
+        $l93 = (long) $i92;
+
+        $i94 = virtualinvoke $r28.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l93);
+
+        $i95 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i94);
+
+        r1[10] = $i95;
+
+        $r29 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i96 = i117 + 44;
+
+        $l97 = (long) $i96;
+
+        $i98 = virtualinvoke $r29.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l97);
+
+        $i99 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i98);
+
+        r1[11] = $i99;
+
+        $r30 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i100 = i117 + 48;
+
+        $l101 = (long) $i100;
+
+        $i102 = virtualinvoke $r30.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l101);
+
+        $i103 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i102);
+
+        r1[12] = $i103;
+
+        $r31 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i104 = i117 + 52;
+
+        $l105 = (long) $i104;
+
+        $i106 = virtualinvoke $r31.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l105);
+
+        $i107 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i106);
+
+        r1[13] = $i107;
+
+        $r32 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i108 = i117 + 56;
+
+        $l109 = (long) $i108;
+
+        $i110 = virtualinvoke $r32.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l109);
+
+        $i111 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i110);
+
+        r1[14] = $i111;
+
+        $r33 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i112 = i117 + 60;
+
+        $l113 = (long) $i112;
+
+        $i114 = virtualinvoke $r33.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l113);
+
+        $i115 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i114);
+
+        r1[15] = $i115;
+
+        goto label5;
+
+     label3:
+        $z1 = <sun.security.provider.ByteArrayAccess: boolean bigEndian>;
+
+        if $z1 == 0 goto label4;
+
+        $i3 = i116 & 3;
+
+        if $i3 != 0 goto label4;
+
+        $i4 = <sun.security.provider.ByteArrayAccess: int byteArrayOfs>;
+
+        i118 = i116 + $i4;
+
+        $r2 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $l5 = (long) i118;
+
+        $i6 = virtualinvoke $r2.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l5);
+
+        r1[0] = $i6;
+
+        $r3 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i7 = i118 + 4;
+
+        $l8 = (long) $i7;
+
+        $i9 = virtualinvoke $r3.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l8);
+
+        r1[1] = $i9;
+
+        $r4 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i10 = i118 + 8;
+
+        $l11 = (long) $i10;
+
+        $i12 = virtualinvoke $r4.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l11);
+
+        r1[2] = $i12;
+
+        $r5 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i13 = i118 + 12;
+
+        $l14 = (long) $i13;
+
+        $i15 = virtualinvoke $r5.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l14);
+
+        r1[3] = $i15;
+
+        $r6 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i16 = i118 + 16;
+
+        $l17 = (long) $i16;
+
+        $i18 = virtualinvoke $r6.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l17);
+
+        r1[4] = $i18;
+
+        $r7 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i19 = i118 + 20;
+
+        $l20 = (long) $i19;
+
+        $i21 = virtualinvoke $r7.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l20);
+
+        r1[5] = $i21;
+
+        $r8 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i22 = i118 + 24;
+
+        $l23 = (long) $i22;
+
+        $i24 = virtualinvoke $r8.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l23);
+
+        r1[6] = $i24;
+
+        $r9 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i25 = i118 + 28;
+
+        $l26 = (long) $i25;
+
+        $i27 = virtualinvoke $r9.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l26);
+
+        r1[7] = $i27;
+
+        $r10 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i28 = i118 + 32;
+
+        $l29 = (long) $i28;
+
+        $i30 = virtualinvoke $r10.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l29);
+
+        r1[8] = $i30;
+
+        $r11 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i31 = i118 + 36;
+
+        $l32 = (long) $i31;
+
+        $i33 = virtualinvoke $r11.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l32);
+
+        r1[9] = $i33;
+
+        $r12 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i34 = i118 + 40;
+
+        $l35 = (long) $i34;
+
+        $i36 = virtualinvoke $r12.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l35);
+
+        r1[10] = $i36;
+
+        $r13 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i37 = i118 + 44;
+
+        $l38 = (long) $i37;
+
+        $i39 = virtualinvoke $r13.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l38);
+
+        r1[11] = $i39;
+
+        $r14 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i40 = i118 + 48;
+
+        $l41 = (long) $i40;
+
+        $i42 = virtualinvoke $r14.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l41);
+
+        r1[12] = $i42;
+
+        $r15 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i43 = i118 + 52;
+
+        $l44 = (long) $i43;
+
+        $i45 = virtualinvoke $r15.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l44);
+
+        r1[13] = $i45;
+
+        $r16 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i46 = i118 + 56;
+
+        $l47 = (long) $i46;
+
+        $i48 = virtualinvoke $r16.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l47);
+
+        r1[14] = $i48;
+
+        $r17 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i49 = i118 + 60;
+
+        $l50 = (long) $i49;
+
+        $i51 = virtualinvoke $r17.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l50);
+
+        r1[15] = $i51;
+
+        goto label5;
+
+     label4:
+        staticinvoke <sun.security.provider.ByteArrayAccess: void b2iBig(byte[],int,int[],int,int)>(r0, i116, r1, 0, 64);
+
+     label5:
+        return;
+    }
+
+    static void i2bBig(int[], int, byte[], int, int)
+    {
+        byte[] r1;
+        byte $b8, $b10, $b12, $b13;
+        int[] r0;
+        boolean $z0, $z1;
+        sun.misc.Unsafe $r2, $r3;
+        long $l19, $l23;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, $i7, $i9, $i11, $i14, $i15, $i16, $i17, $i18, $i20, $i21, $i22, $i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34;
+        java.lang.ArrayIndexOutOfBoundsException $r4;
+
+        r0 := @parameter0: int[];
+
+        i25 := @parameter1: int;
+
+        r1 := @parameter2: byte[];
+
+        i26 := @parameter3: int;
+
+        i27 := @parameter4: int;
+
+        if i25 < 0 goto label1;
+
+        $i0 = lengthof r0;
+
+        $i2 = $i0 - i25;
+
+        $i1 = i27 / 4;
+
+        if $i2 < $i1 goto label1;
+
+        if i26 < 0 goto label1;
+
+        $i3 = lengthof r1;
+
+        $i4 = $i3 - i26;
+
+        if $i4 >= i27 goto label2;
+
+     label1:
+        $r4 = new java.lang.ArrayIndexOutOfBoundsException;
+
+        specialinvoke $r4.<java.lang.ArrayIndexOutOfBoundsException: void <init>()>();
+
+        throw $r4;
+
+     label2:
+        $z0 = <sun.security.provider.ByteArrayAccess: boolean littleEndianUnaligned>;
+
+        if $z0 == 0 goto label4;
+
+        $i20 = <sun.security.provider.ByteArrayAccess: int byteArrayOfs>;
+
+        i28 = i26 + $i20;
+
+        i29 = i27 + i28;
+
+     label3:
+        if i28 >= i29 goto label8;
+
+        $r3 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $l23 = (long) i28;
+
+        $i21 = i25;
+
+        i25 = i25 + 1;
+
+        $i22 = r0[$i21];
+
+        $i24 = staticinvoke <java.lang.Integer: int reverseBytes(int)>($i22);
+
+        virtualinvoke $r3.<sun.misc.Unsafe: void putInt(java.lang.Object,long,int)>(r1, $l23, $i24);
+
+        i28 = i28 + 4;
+
+        goto label3;
+
+     label4:
+        $z1 = <sun.security.provider.ByteArrayAccess: boolean bigEndian>;
+
+        if $z1 == 0 goto label6;
+
+        $i14 = i26 & 3;
+
+        if $i14 != 0 goto label6;
+
+        $i16 = <sun.security.provider.ByteArrayAccess: int byteArrayOfs>;
+
+        i30 = i26 + $i16;
+
+        i31 = i27 + i30;
+
+     label5:
+        if i30 >= i31 goto label8;
+
+        $r2 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $l19 = (long) i30;
+
+        $i17 = i25;
+
+        i25 = i25 + 1;
+
+        $i18 = r0[$i17];
+
+        virtualinvoke $r2.<sun.misc.Unsafe: void putInt(java.lang.Object,long,int)>(r1, $l19, $i18);
+
+        i30 = i30 + 4;
+
+        goto label5;
+
+     label6:
+        $i15 = i27 + i26;
+
+     label7:
+        if i26 >= $i15 goto label8;
+
+        $i5 = i25;
+
+        i25 = i25 + 1;
+
+        i6 = r0[$i5];
+
+        i32 = i26 + 1;
+
+        $i7 = i6 >> 24;
+
+        $b8 = (byte) $i7;
+
+        r1[i26] = $b8;
+
+        i33 = i32 + 1;
+
+        $i9 = i6 >> 16;
+
+        $b10 = (byte) $i9;
+
+        r1[i32] = $b10;
+
+        i34 = i33 + 1;
+
+        $i11 = i6 >> 8;
+
+        $b12 = (byte) $i11;
+
+        r1[i33] = $b12;
+
+        i26 = i34 + 1;
+
+        $b13 = (byte) i6;
+
+        r1[i34] = $b13;
+
+        goto label7;
+
+     label8:
+        return;
+    }
+
+    static void i2bBig4(int, byte[], int)
+    {
+        sun.misc.Unsafe $r2, $r3;
+        byte[] r1;
+        long $l17, $l20;
+        byte $b5, $b7, $b10, $b12;
+        int i0, $i1, $i2, i3, $i4, $i6, $i8, $i9, $i11, $i13, $i14, $i15, $i16, $i18, $i19, $i21;
+        boolean $z0, $z1;
+        java.lang.ArrayIndexOutOfBoundsException $r0;
+
+        i3 := @parameter0: int;
+
+        r1 := @parameter1: byte[];
+
+        i0 := @parameter2: int;
+
+        if i0 < 0 goto label1;
+
+        $i1 = lengthof r1;
+
+        $i2 = $i1 - i0;
+
+        if $i2 >= 4 goto label2;
+
+     label1:
+        $r0 = new java.lang.ArrayIndexOutOfBoundsException;
+
+        specialinvoke $r0.<java.lang.ArrayIndexOutOfBoundsException: void <init>()>();
+
+        throw $r0;
+
+     label2:
+        $z0 = <sun.security.provider.ByteArrayAccess: boolean littleEndianUnaligned>;
+
+        if $z0 == 0 goto label3;
+
+        $r3 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i18 = <sun.security.provider.ByteArrayAccess: int byteArrayOfs>;
+
+        $i19 = $i18 + i0;
+
+        $l20 = (long) $i19;
+
+        $i21 = staticinvoke <java.lang.Integer: int reverseBytes(int)>(i3);
+
+        virtualinvoke $r3.<sun.misc.Unsafe: void putInt(java.lang.Object,long,int)>(r1, $l20, $i21);
+
+        goto label5;
+
+     label3:
+        $z1 = <sun.security.provider.ByteArrayAccess: boolean bigEndian>;
+
+        if $z1 == 0 goto label4;
+
+        $i14 = i0 & 3;
+
+        if $i14 != 0 goto label4;
+
+        $r2 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i15 = <sun.security.provider.ByteArrayAccess: int byteArrayOfs>;
+
+        $i16 = $i15 + i0;
+
+        $l17 = (long) $i16;
+
+        virtualinvoke $r2.<sun.misc.Unsafe: void putInt(java.lang.Object,long,int)>(r1, $l17, i3);
+
+        goto label5;
+
+     label4:
+        $i4 = i3 >> 24;
+
+        $b5 = (byte) $i4;
+
+        r1[i0] = $b5;
+
+        $i8 = i0 + 1;
+
+        $i6 = i3 >> 16;
+
+        $b7 = (byte) $i6;
+
+        r1[$i8] = $b7;
+
+        $i11 = i0 + 2;
+
+        $i9 = i3 >> 8;
+
+        $b10 = (byte) $i9;
+
+        r1[$i11] = $b10;
+
+        $i13 = i0 + 3;
+
+        $b12 = (byte) i3;
+
+        r1[$i13] = $b12;
+
+     label5:
+        return;
+    }
+
+    static void b2lBig(byte[], int, long[], int, int)
+    {
+        byte[] r0;
+        byte $b6, $b8, $b13, $b17, $b22, $b24, $b29, $b33;
+        sun.misc.Unsafe $r2, $r3, $r4;
+        long $l38, $l39, $l40, $l41, $l42, $l47, $l49, $l51, $l52, $l54, $l55, $l56, $l59, $l60, $l61;
+        short $s9, $s11, $s14, $s25, $s27, $s30, $s70, $s71, $s74, $s77, $s78, $s81;
+        java.lang.ArrayIndexOutOfBoundsException $r6;
+        boolean $z0, $z1;
+        long[] r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i7, $i10, $i12, $i15, $i16, $i18, $i19, i20, $i21, $i23, $i26, $i28, $i31, $i32, $i34, $i35, i36, $i37, $i43, $i44, $i45, $i46, $i48, $i50, $i53, $i57, $i58, i62, i63, i64, i65, i66, i67, i68, i69, $i72, $i73, $i75, $i76, $i79, $i80, $i82, $i83;
+
+        r0 := @parameter0: byte[];
+
+        i62 := @parameter1: int;
+
+        r1 := @parameter2: long[];
+
+        i63 := @parameter3: int;
+
+        i64 := @parameter4: int;
+
+        if i62 < 0 goto label1;
+
+        $i0 = lengthof r0;
+
+        $i1 = $i0 - i62;
+
+        if $i1 < i64 goto label1;
+
+        if i63 < 0 goto label1;
+
+        $i2 = lengthof r1;
+
+        $i4 = $i2 - i63;
+
+        $i3 = i64 / 8;
+
+        if $i4 >= $i3 goto label2;
+
+     label1:
+        $r6 = new java.lang.ArrayIndexOutOfBoundsException;
+
+        specialinvoke $r6.<java.lang.ArrayIndexOutOfBoundsException: void <init>()>();
+
+        throw $r6;
+
+     label2:
+        $z0 = <sun.security.provider.ByteArrayAccess: boolean littleEndianUnaligned>;
+
+        if $z0 == 0 goto label4;
+
+        $i57 = <sun.security.provider.ByteArrayAccess: int byteArrayOfs>;
+
+        i65 = i62 + $i57;
+
+        i66 = i64 + i65;
+
+     label3:
+        if i65 >= i66 goto label8;
+
+        $i58 = i63;
+
+        i63 = i63 + 1;
+
+        $r4 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $l59 = (long) i65;
+
+        $l60 = virtualinvoke $r4.<sun.misc.Unsafe: long getLong(java.lang.Object,long)>(r0, $l59);
+
+        $l61 = staticinvoke <java.lang.Long: long reverseBytes(long)>($l60);
+
+        r1[$i58] = $l61;
+
+        i65 = i65 + 8;
+
+        goto label3;
+
+     label4:
+        $z1 = <sun.security.provider.ByteArrayAccess: boolean bigEndian>;
+
+        if $z1 == 0 goto label6;
+
+        $i43 = i62 & 3;
+
+        if $i43 != 0 goto label6;
+
+        $i45 = <sun.security.provider.ByteArrayAccess: int byteArrayOfs>;
+
+        i67 = i62 + $i45;
+
+        i68 = i64 + i67;
+
+     label5:
+        if i67 >= i68 goto label8;
+
+        $i46 = i63;
+
+        i63 = i63 + 1;
+
+        $r2 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $l47 = (long) i67;
+
+        $i48 = virtualinvoke $r2.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l47);
+
+        $l49 = (long) $i48;
+
+        $l52 = $l49 << 32;
+
+        $r3 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i50 = i67 + 4;
+
+        $l51 = (long) $i50;
+
+        $i53 = virtualinvoke $r3.<sun.misc.Unsafe: int getInt(java.lang.Object,long)>(r0, $l51);
+
+        $l54 = (long) $i53;
+
+        $l55 = $l54 & 4294967295L;
+
+        $l56 = $l52 | $l55;
+
+        r1[$i46] = $l56;
+
+        i67 = i67 + 8;
+
+        goto label5;
+
+     label6:
+        $i44 = i64 + i62;
+
+     label7:
+        if i62 >= $i44 goto label8;
+
+        $i5 = i62 + 3;
+
+        $b6 = r0[$i5];
+
+        $s70 = (short) $b6;
+
+        $s11 = $s70 & 255;
+
+        $i7 = i62 + 2;
+
+        $b8 = r0[$i7];
+
+        $s71 = (short) $b8;
+
+        $s9 = $s71 & 255;
+
+        $i72 = (int) $s9;
+
+        $i10 = $i72 << 8;
+
+        $i73 = (int) $s11;
+
+        $i16 = $i73 | $i10;
+
+        $i12 = i62 + 1;
+
+        $b13 = r0[$i12];
+
+        $s74 = (short) $b13;
+
+        $s14 = $s74 & 255;
+
+        $i75 = (int) $s14;
+
+        $i15 = $i75 << 16;
+
+        $i19 = $i16 | $i15;
+
+        $b17 = r0[i62];
+
+        $i76 = (int) $b17;
+
+        $i18 = $i76 << 24;
+
+        i20 = $i19 | $i18;
+
+        i69 = i62 + 4;
+
+        $i21 = i69 + 3;
+
+        $b22 = r0[$i21];
+
+        $s77 = (short) $b22;
+
+        $s27 = $s77 & 255;
+
+        $i23 = i69 + 2;
+
+        $b24 = r0[$i23];
+
+        $s78 = (short) $b24;
+
+        $s25 = $s78 & 255;
+
+        $i79 = (int) $s25;
+
+        $i26 = $i79 << 8;
+
+        $i80 = (int) $s27;
+
+        $i32 = $i80 | $i26;
+
+        $i28 = i69 + 1;
+
+        $b29 = r0[$i28];
+
+        $s81 = (short) $b29;
+
+        $s30 = $s81 & 255;
+
+        $i82 = (int) $s30;
+
+        $i31 = $i82 << 16;
+
+        $i35 = $i32 | $i31;
+
+        $b33 = r0[i69];
+
+        $i83 = (int) $b33;
+
+        $i34 = $i83 << 24;
+
+        i36 = $i35 | $i34;
+
+        $i37 = i63;
+
+        i63 = i63 + 1;
+
+        $l38 = (long) i20;
+
+        $l41 = $l38 << 32;
+
+        $l39 = (long) i36;
+
+        $l40 = $l39 & 4294967295L;
+
+        $l42 = $l41 | $l40;
+
+        r1[$i37] = $l42;
+
+        i62 = i69 + 4;
+
+        goto label7;
+
+     label8:
+        return;
+    }
+
+    static void b2lBig128(byte[], int, long[])
+    {
+        byte[] r0;
+        sun.misc.Unsafe $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17;
+        long $l4, $l5, $l6, $l8, $l9, $l10, $l12, $l13, $l14, $l16, $l17, $l18, $l20, $l21, $l22, $l24, $l25, $l26, $l28, $l29, $l30, $l32, $l33, $l34, $l36, $l37, $l38, $l40, $l41, $l42, $l44, $l45, $l46, $l48, $l49, $l50, $l52, $l53, $l54, $l56, $l57, $l58, $l60, $l61, $l62, $l64, $l65, $l66;
+        java.lang.ArrayIndexOutOfBoundsException $r18;
+        boolean $z0;
+        long[] r1;
+        int $i0, $i1, $i2, $i3, $i7, $i11, $i15, $i19, $i23, $i27, $i31, $i35, $i39, $i43, $i47, $i51, $i55, $i59, $i63, i67, i68;
+
+        r0 := @parameter0: byte[];
+
+        i67 := @parameter1: int;
+
+        r1 := @parameter2: long[];
+
+        if i67 < 0 goto label1;
+
+        $i0 = lengthof r0;
+
+        $i1 = $i0 - i67;
+
+        if $i1 < 128 goto label1;
+
+        $i2 = lengthof r1;
+
+        if $i2 >= 16 goto label2;
+
+     label1:
+        $r18 = new java.lang.ArrayIndexOutOfBoundsException;
+
+        specialinvoke $r18.<java.lang.ArrayIndexOutOfBoundsException: void <init>()>();
+
+        throw $r18;
+
+     label2:
+        $z0 = <sun.security.provider.ByteArrayAccess: boolean littleEndianUnaligned>;
+
+        if $z0 == 0 goto label3;
+
+        $i3 = <sun.security.provider.ByteArrayAccess: int byteArrayOfs>;
+
+        i68 = i67 + $i3;
+
+        $r2 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $l4 = (long) i68;
+
+        $l5 = virtualinvoke $r2.<sun.misc.Unsafe: long getLong(java.lang.Object,long)>(r0, $l4);
+
+        $l6 = staticinvoke <java.lang.Long: long reverseBytes(long)>($l5);
+
+        r1[0] = $l6;
+
+        $r3 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i7 = i68 + 8;
+
+        $l8 = (long) $i7;
+
+        $l9 = virtualinvoke $r3.<sun.misc.Unsafe: long getLong(java.lang.Object,long)>(r0, $l8);
+
+        $l10 = staticinvoke <java.lang.Long: long reverseBytes(long)>($l9);
+
+        r1[1] = $l10;
+
+        $r4 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i11 = i68 + 16;
+
+        $l12 = (long) $i11;
+
+        $l13 = virtualinvoke $r4.<sun.misc.Unsafe: long getLong(java.lang.Object,long)>(r0, $l12);
+
+        $l14 = staticinvoke <java.lang.Long: long reverseBytes(long)>($l13);
+
+        r1[2] = $l14;
+
+        $r5 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i15 = i68 + 24;
+
+        $l16 = (long) $i15;
+
+        $l17 = virtualinvoke $r5.<sun.misc.Unsafe: long getLong(java.lang.Object,long)>(r0, $l16);
+
+        $l18 = staticinvoke <java.lang.Long: long reverseBytes(long)>($l17);
+
+        r1[3] = $l18;
+
+        $r6 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i19 = i68 + 32;
+
+        $l20 = (long) $i19;
+
+        $l21 = virtualinvoke $r6.<sun.misc.Unsafe: long getLong(java.lang.Object,long)>(r0, $l20);
+
+        $l22 = staticinvoke <java.lang.Long: long reverseBytes(long)>($l21);
+
+        r1[4] = $l22;
+
+        $r7 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i23 = i68 + 40;
+
+        $l24 = (long) $i23;
+
+        $l25 = virtualinvoke $r7.<sun.misc.Unsafe: long getLong(java.lang.Object,long)>(r0, $l24);
+
+        $l26 = staticinvoke <java.lang.Long: long reverseBytes(long)>($l25);
+
+        r1[5] = $l26;
+
+        $r8 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i27 = i68 + 48;
+
+        $l28 = (long) $i27;
+
+        $l29 = virtualinvoke $r8.<sun.misc.Unsafe: long getLong(java.lang.Object,long)>(r0, $l28);
+
+        $l30 = staticinvoke <java.lang.Long: long reverseBytes(long)>($l29);
+
+        r1[6] = $l30;
+
+        $r9 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i31 = i68 + 56;
+
+        $l32 = (long) $i31;
+
+        $l33 = virtualinvoke $r9.<sun.misc.Unsafe: long getLong(java.lang.Object,long)>(r0, $l32);
+
+        $l34 = staticinvoke <java.lang.Long: long reverseBytes(long)>($l33);
+
+        r1[7] = $l34;
+
+        $r10 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i35 = i68 + 64;
+
+        $l36 = (long) $i35;
+
+        $l37 = virtualinvoke $r10.<sun.misc.Unsafe: long getLong(java.lang.Object,long)>(r0, $l36);
+
+        $l38 = staticinvoke <java.lang.Long: long reverseBytes(long)>($l37);
+
+        r1[8] = $l38;
+
+        $r11 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i39 = i68 + 72;
+
+        $l40 = (long) $i39;
+
+        $l41 = virtualinvoke $r11.<sun.misc.Unsafe: long getLong(java.lang.Object,long)>(r0, $l40);
+
+        $l42 = staticinvoke <java.lang.Long: long reverseBytes(long)>($l41);
+
+        r1[9] = $l42;
+
+        $r12 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i43 = i68 + 80;
+
+        $l44 = (long) $i43;
+
+        $l45 = virtualinvoke $r12.<sun.misc.Unsafe: long getLong(java.lang.Object,long)>(r0, $l44);
+
+        $l46 = staticinvoke <java.lang.Long: long reverseBytes(long)>($l45);
+
+        r1[10] = $l46;
+
+        $r13 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i47 = i68 + 88;
+
+        $l48 = (long) $i47;
+
+        $l49 = virtualinvoke $r13.<sun.misc.Unsafe: long getLong(java.lang.Object,long)>(r0, $l48);
+
+        $l50 = staticinvoke <java.lang.Long: long reverseBytes(long)>($l49);
+
+        r1[11] = $l50;
+
+        $r14 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i51 = i68 + 96;
+
+        $l52 = (long) $i51;
+
+        $l53 = virtualinvoke $r14.<sun.misc.Unsafe: long getLong(java.lang.Object,long)>(r0, $l52);
+
+        $l54 = staticinvoke <java.lang.Long: long reverseBytes(long)>($l53);
+
+        r1[12] = $l54;
+
+        $r15 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i55 = i68 + 104;
+
+        $l56 = (long) $i55;
+
+        $l57 = virtualinvoke $r15.<sun.misc.Unsafe: long getLong(java.lang.Object,long)>(r0, $l56);
+
+        $l58 = staticinvoke <java.lang.Long: long reverseBytes(long)>($l57);
+
+        r1[13] = $l58;
+
+        $r16 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i59 = i68 + 112;
+
+        $l60 = (long) $i59;
+
+        $l61 = virtualinvoke $r16.<sun.misc.Unsafe: long getLong(java.lang.Object,long)>(r0, $l60);
+
+        $l62 = staticinvoke <java.lang.Long: long reverseBytes(long)>($l61);
+
+        r1[14] = $l62;
+
+        $r17 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i63 = i68 + 120;
+
+        $l64 = (long) $i63;
+
+        $l65 = virtualinvoke $r17.<sun.misc.Unsafe: long getLong(java.lang.Object,long)>(r0, $l64);
+
+        $l66 = staticinvoke <java.lang.Long: long reverseBytes(long)>($l65);
+
+        r1[15] = $l66;
+
+        goto label4;
+
+     label3:
+        staticinvoke <sun.security.provider.ByteArrayAccess: void b2lBig(byte[],int,long[],int,int)>(r0, i67, r1, 0, 128);
+
+     label4:
+        return;
+    }
+
+    static void l2bBig(long[], int, byte[], int, int)
+    {
+        byte[] r1;
+        byte $b9, $b12, $b15, $b18, $b21, $b24, $b27, $b29;
+        long l6, $l7, $l10, $l13, $l16, $l19, $l22, $l25;
+        long[] r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i8, $i11, $i14, $i17, $i20, $i23, $i26, $i28, i30, i31, i32, i33, i34, i35, i36, i37, i38, i39, i40;
+        java.lang.ArrayIndexOutOfBoundsException $r2;
+
+        r0 := @parameter0: long[];
+
+        i30 := @parameter1: int;
+
+        r1 := @parameter2: byte[];
+
+        i31 := @parameter3: int;
+
+        i32 := @parameter4: int;
+
+        if i30 < 0 goto label1;
+
+        $i0 = lengthof r0;
+
+        $i2 = $i0 - i30;
+
+        $i1 = i32 / 8;
+
+        if $i2 < $i1 goto label1;
+
+        if i31 < 0 goto label1;
+
+        $i3 = lengthof r1;
+
+        $i4 = $i3 - i31;
+
+        if $i4 >= i32 goto label2;
+
+     label1:
+        $r2 = new java.lang.ArrayIndexOutOfBoundsException;
+
+        specialinvoke $r2.<java.lang.ArrayIndexOutOfBoundsException: void <init>()>();
+
+        throw $r2;
+
+     label2:
+        i33 = i32 + i31;
+
+     label3:
+        if i31 >= i33 goto label4;
+
+        $i5 = i30;
+
+        i30 = i30 + 1;
+
+        l6 = r0[$i5];
+
+        i34 = i31 + 1;
+
+        $l7 = l6 >> 56;
+
+        $i8 = (int) $l7;
+
+        $b9 = (byte) $i8;
+
+        r1[i31] = $b9;
+
+        i35 = i34 + 1;
+
+        $l10 = l6 >> 48;
+
+        $i11 = (int) $l10;
+
+        $b12 = (byte) $i11;
+
+        r1[i34] = $b12;
+
+        i36 = i35 + 1;
+
+        $l13 = l6 >> 40;
+
+        $i14 = (int) $l13;
+
+        $b15 = (byte) $i14;
+
+        r1[i35] = $b15;
+
+        i37 = i36 + 1;
+
+        $l16 = l6 >> 32;
+
+        $i17 = (int) $l16;
+
+        $b18 = (byte) $i17;
+
+        r1[i36] = $b18;
+
+        i38 = i37 + 1;
+
+        $l19 = l6 >> 24;
+
+        $i20 = (int) $l19;
+
+        $b21 = (byte) $i20;
+
+        r1[i37] = $b21;
+
+        i39 = i38 + 1;
+
+        $l22 = l6 >> 16;
+
+        $i23 = (int) $l22;
+
+        $b24 = (byte) $i23;
+
+        r1[i38] = $b24;
+
+        i40 = i39 + 1;
+
+        $l25 = l6 >> 8;
+
+        $i26 = (int) $l25;
+
+        $b27 = (byte) $i26;
+
+        r1[i39] = $b27;
+
+        i31 = i40 + 1;
+
+        $i28 = (int) l6;
+
+        $b29 = (byte) $i28;
+
+        r1[i40] = $b29;
+
+        goto label3;
+
+     label4:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        sun.misc.Unsafe $r0, $r1, $r2, $r5, $r6;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        boolean z0, $z1, $z3, $z4, $z5, $z6;
+        java.nio.ByteOrder $r3, $r4, $r7;
+
+        $r0 = staticinvoke <sun.misc.Unsafe: sun.misc.Unsafe getUnsafe()>();
+
+        <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe> = $r0;
+
+        $r1 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i0 = virtualinvoke $r1.<sun.misc.Unsafe: int arrayBaseOffset(java.lang.Class)>(class "[B");
+
+        <sun.security.provider.ByteArrayAccess: int byteArrayOfs> = $i0;
+
+        $r2 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i1 = virtualinvoke $r2.<sun.misc.Unsafe: int arrayIndexScale(java.lang.Class)>(class "[B");
+
+        if $i1 != 1 goto label1;
+
+        $r5 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i2 = virtualinvoke $r5.<sun.misc.Unsafe: int arrayIndexScale(java.lang.Class)>(class "[I");
+
+        if $i2 != 4 goto label1;
+
+        $r6 = <sun.security.provider.ByteArrayAccess: sun.misc.Unsafe unsafe>;
+
+        $i3 = virtualinvoke $r6.<sun.misc.Unsafe: int arrayIndexScale(java.lang.Class)>(class "[J");
+
+        if $i3 != 8 goto label1;
+
+        $i4 = <sun.security.provider.ByteArrayAccess: int byteArrayOfs>;
+
+        $i5 = $i4 & 3;
+
+        if $i5 != 0 goto label1;
+
+        $z6 = 1;
+
+        $z5 = 1;
+
+        goto label2;
+
+     label1:
+        $z6 = 0;
+
+        $z5 = 0;
+
+     label2:
+        z0 = $z6;
+
+        $r7 = staticinvoke <java.nio.ByteOrder: java.nio.ByteOrder nativeOrder()>();
+
+        if $z5 == 0 goto label3;
+
+        $z1 = staticinvoke <sun.security.provider.ByteArrayAccess: boolean unaligned()>();
+
+        if $z1 == 0 goto label3;
+
+        $r4 = <java.nio.ByteOrder: java.nio.ByteOrder LITTLE_ENDIAN>;
+
+        if $r7 != $r4 goto label3;
+
+        $z3 = 1;
+
+        goto label4;
+
+     label3:
+        $z3 = 0;
+
+     label4:
+        <sun.security.provider.ByteArrayAccess: boolean littleEndianUnaligned> = $z3;
+
+        if z0 == 0 goto label5;
+
+        $r3 = <java.nio.ByteOrder: java.nio.ByteOrder BIG_ENDIAN>;
+
+        if $r7 != $r3 goto label5;
+
+        $z4 = 1;
+
+        goto label6;
+
+     label5:
+        $z4 = 0;
+
+     label6:
+        <sun.security.provider.ByteArrayAccess: boolean bigEndian> = $z4;
+
+        return;
+    }
+}

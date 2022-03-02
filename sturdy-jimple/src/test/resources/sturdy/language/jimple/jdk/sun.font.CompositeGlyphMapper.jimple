@@ -1,0 +1,743 @@
+public class sun.font.CompositeGlyphMapper extends sun.font.CharToGlyphMapper
+{
+    public static final int SLOTMASK;
+    public static final int GLYPHMASK;
+    public static final int NBLOCKS;
+    public static final int BLOCKSZ;
+    public static final int MAXUNICODE;
+    sun.font.CompositeFont font;
+    sun.font.CharToGlyphMapper[] slotMappers;
+    int[][] glyphMaps;
+    private boolean hasExcludes;
+
+    public void <init>(sun.font.CompositeFont)
+    {
+        sun.font.CompositeGlyphMapper r0;
+        int[] $r2, $r3;
+        sun.font.CompositeFont r1;
+        boolean $z0;
+
+        r0 := @this: sun.font.CompositeGlyphMapper;
+
+        r1 := @parameter0: sun.font.CompositeFont;
+
+        specialinvoke r0.<sun.font.CharToGlyphMapper: void <init>()>();
+
+        r0.<sun.font.CompositeGlyphMapper: sun.font.CompositeFont font> = r1;
+
+        specialinvoke r0.<sun.font.CompositeGlyphMapper: void initMapper()>();
+
+        $r2 = r1.<sun.font.CompositeFont: int[] exclusionRanges>;
+
+        if $r2 == null goto label1;
+
+        $r3 = r1.<sun.font.CompositeFont: int[] maxIndices>;
+
+        if $r3 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        r0.<sun.font.CompositeGlyphMapper: boolean hasExcludes> = $z0;
+
+        return;
+    }
+
+    public final int compositeGlyphCode(int, int)
+    {
+        sun.font.CompositeGlyphMapper r0;
+        int i0, i1, $i2, $i3, $i4;
+
+        r0 := @this: sun.font.CompositeGlyphMapper;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $i3 = i0 << 24;
+
+        $i2 = i1 & 16777215;
+
+        $i4 = $i3 | $i2;
+
+        return $i4;
+    }
+
+    private final void initMapper()
+    {
+        sun.font.CompositeGlyphMapper r0;
+        int[][] $r1, $r6;
+        sun.font.CharToGlyphMapper[] $r3;
+        sun.font.CompositeFont $r2, $r4;
+        int $i0, $i1, $i2, $i3, $i4, $i6;
+        sun.font.PhysicalFont $r5;
+
+        r0 := @this: sun.font.CompositeGlyphMapper;
+
+        $i0 = r0.<sun.font.CompositeGlyphMapper: int missingGlyph>;
+
+        $i6 = (int) -1;
+
+        if $i0 != $i6 goto label2;
+
+        $r1 = r0.<sun.font.CompositeGlyphMapper: int[][] glyphMaps>;
+
+        if $r1 != null goto label1;
+
+        $r6 = newarray (int[])[216];
+
+        r0.<sun.font.CompositeGlyphMapper: int[][] glyphMaps> = $r6;
+
+     label1:
+        $r2 = r0.<sun.font.CompositeGlyphMapper: sun.font.CompositeFont font>;
+
+        $i1 = $r2.<sun.font.CompositeFont: int numSlots>;
+
+        $r3 = newarray (sun.font.CharToGlyphMapper)[$i1];
+
+        r0.<sun.font.CompositeGlyphMapper: sun.font.CharToGlyphMapper[] slotMappers> = $r3;
+
+        $r4 = r0.<sun.font.CompositeGlyphMapper: sun.font.CompositeFont font>;
+
+        $r5 = virtualinvoke $r4.<sun.font.CompositeFont: sun.font.PhysicalFont getSlotFont(int)>(0);
+
+        $i2 = virtualinvoke $r5.<sun.font.PhysicalFont: int getMissingGlyphCode()>();
+
+        r0.<sun.font.CompositeGlyphMapper: int missingGlyph> = $i2;
+
+        $i3 = r0.<sun.font.CompositeGlyphMapper: int missingGlyph>;
+
+        $i4 = virtualinvoke r0.<sun.font.CompositeGlyphMapper: int compositeGlyphCode(int,int)>(0, $i3);
+
+        r0.<sun.font.CompositeGlyphMapper: int missingGlyph> = $i4;
+
+     label2:
+        return;
+    }
+
+    private int getCachedGlyphCode(int)
+    {
+        sun.font.CompositeGlyphMapper r0;
+        int[][] $r1;
+        int[] $r2;
+        int i0, $i1, $i2, $i3, $i5, $i7, $i9;
+
+        r0 := @this: sun.font.CompositeGlyphMapper;
+
+        i0 := @parameter0: int;
+
+        $i5 = (int) 55296;
+
+        if i0 < $i5 goto label1;
+
+        $i7 = (int) -1;
+
+        return $i7;
+
+     label1:
+        $r1 = r0.<sun.font.CompositeGlyphMapper: int[][] glyphMaps>;
+
+        $i1 = i0 >> 8;
+
+        $r2 = $r1[$i1];
+
+        if $r2 != null goto label2;
+
+        $i9 = (int) -1;
+
+        return $i9;
+
+     label2:
+        $i2 = i0 & 255;
+
+        $i3 = $r2[$i2];
+
+        return $i3;
+    }
+
+    private void setCachedGlyphCode(int, int)
+    {
+        sun.font.CompositeGlyphMapper r0;
+        int[][] $r1, $r3, $r6, $r7;
+        int[] $r2, $r4, $r5, $r8;
+        int i0, i1, i2, $i3, i4, $i6, $i8;
+
+        r0 := @this: sun.font.CompositeGlyphMapper;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        $i6 = (int) 55296;
+
+        if i0 < $i6 goto label1;
+
+        return;
+
+     label1:
+        i1 = i0 >> 8;
+
+        $r1 = r0.<sun.font.CompositeGlyphMapper: int[][] glyphMaps>;
+
+        $r2 = $r1[i1];
+
+        if $r2 != null goto label3;
+
+        $r6 = r0.<sun.font.CompositeGlyphMapper: int[][] glyphMaps>;
+
+        $r5 = newarray (int)[256];
+
+        $r6[i1] = $r5;
+
+        i4 = 0;
+
+     label2:
+        if i4 >= 256 goto label3;
+
+        $r7 = r0.<sun.font.CompositeGlyphMapper: int[][] glyphMaps>;
+
+        $r8 = $r7[i1];
+
+        $i8 = (int) -1;
+
+        $r8[i4] = $i8;
+
+        i4 = i4 + 1;
+
+        goto label2;
+
+     label3:
+        $r3 = r0.<sun.font.CompositeGlyphMapper: int[][] glyphMaps>;
+
+        $r4 = $r3[i1];
+
+        $i3 = i0 & 255;
+
+        $r4[$i3] = i2;
+
+        return;
+    }
+
+    private final sun.font.CharToGlyphMapper getSlotMapper(int)
+    {
+        sun.font.CompositeGlyphMapper r0;
+        sun.font.CharToGlyphMapper $r4, r6;
+        sun.font.CharToGlyphMapper[] $r1, $r5;
+        sun.font.CompositeFont $r2;
+        int i0;
+        sun.font.PhysicalFont $r3;
+
+        r0 := @this: sun.font.CompositeGlyphMapper;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.font.CompositeGlyphMapper: sun.font.CharToGlyphMapper[] slotMappers>;
+
+        r6 = $r1[i0];
+
+        if r6 != null goto label1;
+
+        $r2 = r0.<sun.font.CompositeGlyphMapper: sun.font.CompositeFont font>;
+
+        $r3 = virtualinvoke $r2.<sun.font.CompositeFont: sun.font.PhysicalFont getSlotFont(int)>(i0);
+
+        $r4 = virtualinvoke $r3.<sun.font.PhysicalFont: sun.font.CharToGlyphMapper getMapper()>();
+
+        r6 = $r4;
+
+        $r5 = r0.<sun.font.CompositeGlyphMapper: sun.font.CharToGlyphMapper[] slotMappers>;
+
+        $r5[i0] = $r4;
+
+     label1:
+        return r6;
+    }
+
+    private final int convertToGlyph(int)
+    {
+        sun.font.CompositeGlyphMapper r0;
+        sun.font.CharToGlyphMapper $r2;
+        sun.font.CompositeFont $r1, $r3;
+        int $i0, $i1, i2, $i3, $i4, $i5, i6;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.font.CompositeGlyphMapper;
+
+        i2 := @parameter0: int;
+
+        i6 = 0;
+
+     label1:
+        $r1 = r0.<sun.font.CompositeGlyphMapper: sun.font.CompositeFont font>;
+
+        $i0 = $r1.<sun.font.CompositeFont: int numSlots>;
+
+        if i6 >= $i0 goto label4;
+
+        $z0 = r0.<sun.font.CompositeGlyphMapper: boolean hasExcludes>;
+
+        if $z0 == 0 goto label2;
+
+        $r3 = r0.<sun.font.CompositeGlyphMapper: sun.font.CompositeFont font>;
+
+        $z1 = virtualinvoke $r3.<sun.font.CompositeFont: boolean isExcludedChar(int,int)>(i6, i2);
+
+        if $z1 != 0 goto label3;
+
+     label2:
+        $r2 = specialinvoke r0.<sun.font.CompositeGlyphMapper: sun.font.CharToGlyphMapper getSlotMapper(int)>(i6);
+
+        $i3 = virtualinvoke $r2.<sun.font.CharToGlyphMapper: int charToGlyph(int)>(i2);
+
+        $i4 = virtualinvoke $r2.<sun.font.CharToGlyphMapper: int getMissingGlyphCode()>();
+
+        if $i3 == $i4 goto label3;
+
+        $i5 = virtualinvoke r0.<sun.font.CompositeGlyphMapper: int compositeGlyphCode(int,int)>(i6, $i3);
+
+        specialinvoke r0.<sun.font.CompositeGlyphMapper: void setCachedGlyphCode(int,int)>(i2, $i5);
+
+        return $i5;
+
+     label3:
+        i6 = i6 + 1;
+
+        goto label1;
+
+     label4:
+        $i1 = r0.<sun.font.CompositeGlyphMapper: int missingGlyph>;
+
+        return $i1;
+    }
+
+    public int getNumGlyphs()
+    {
+        sun.font.CompositeGlyphMapper r0;
+        sun.font.CharToGlyphMapper $r4, r6;
+        sun.font.CharToGlyphMapper[] $r1, $r5;
+        sun.font.CompositeFont $r2;
+        int $i0, i1, i2;
+        sun.font.PhysicalFont $r3;
+
+        r0 := @this: sun.font.CompositeGlyphMapper;
+
+        i1 = 0;
+
+        i2 = 0;
+
+     label1:
+        if i2 >= 1 goto label3;
+
+        $r1 = r0.<sun.font.CompositeGlyphMapper: sun.font.CharToGlyphMapper[] slotMappers>;
+
+        r6 = $r1[i2];
+
+        if r6 != null goto label2;
+
+        $r2 = r0.<sun.font.CompositeGlyphMapper: sun.font.CompositeFont font>;
+
+        $r3 = virtualinvoke $r2.<sun.font.CompositeFont: sun.font.PhysicalFont getSlotFont(int)>(i2);
+
+        $r4 = virtualinvoke $r3.<sun.font.PhysicalFont: sun.font.CharToGlyphMapper getMapper()>();
+
+        r6 = $r4;
+
+        $r5 = r0.<sun.font.CompositeGlyphMapper: sun.font.CharToGlyphMapper[] slotMappers>;
+
+        $r5[i2] = $r4;
+
+     label2:
+        $i0 = virtualinvoke r6.<sun.font.CharToGlyphMapper: int getNumGlyphs()>();
+
+        i1 = i1 + $i0;
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label3:
+        return i1;
+    }
+
+    public int charToGlyph(int)
+    {
+        sun.font.CompositeGlyphMapper r0;
+        int i0, $i1, i2, $i4;
+
+        r0 := @this: sun.font.CompositeGlyphMapper;
+
+        i0 := @parameter0: int;
+
+        $i1 = specialinvoke r0.<sun.font.CompositeGlyphMapper: int getCachedGlyphCode(int)>(i0);
+
+        i2 = $i1;
+
+        $i4 = (int) -1;
+
+        if $i1 != $i4 goto label1;
+
+        i2 = specialinvoke r0.<sun.font.CompositeGlyphMapper: int convertToGlyph(int)>(i0);
+
+     label1:
+        return i2;
+    }
+
+    public int charToGlyph(int, int)
+    {
+        sun.font.CompositeGlyphMapper r0;
+        sun.font.CharToGlyphMapper $r1;
+        int i0, i1, $i2, $i3, $i4, $i5;
+
+        r0 := @this: sun.font.CompositeGlyphMapper;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        if i0 < 0 goto label1;
+
+        $r1 = specialinvoke r0.<sun.font.CompositeGlyphMapper: sun.font.CharToGlyphMapper getSlotMapper(int)>(i0);
+
+        $i3 = virtualinvoke $r1.<sun.font.CharToGlyphMapper: int charToGlyph(int)>(i1);
+
+        $i4 = virtualinvoke $r1.<sun.font.CharToGlyphMapper: int getMissingGlyphCode()>();
+
+        if $i3 == $i4 goto label1;
+
+        $i5 = virtualinvoke r0.<sun.font.CompositeGlyphMapper: int compositeGlyphCode(int,int)>(i0, $i3);
+
+        return $i5;
+
+     label1:
+        $i2 = virtualinvoke r0.<sun.font.CompositeGlyphMapper: int charToGlyph(int)>(i1);
+
+        return $i2;
+    }
+
+    public int charToGlyph(char)
+    {
+        sun.font.CompositeGlyphMapper r0;
+        int $i1, i2, $i3, $i5, $i6;
+        char c0;
+
+        r0 := @this: sun.font.CompositeGlyphMapper;
+
+        c0 := @parameter0: char;
+
+        $i3 = (int) c0;
+
+        $i1 = specialinvoke r0.<sun.font.CompositeGlyphMapper: int getCachedGlyphCode(int)>($i3);
+
+        i2 = $i1;
+
+        $i5 = (int) -1;
+
+        if $i1 != $i5 goto label1;
+
+        $i6 = (int) c0;
+
+        i2 = specialinvoke r0.<sun.font.CompositeGlyphMapper: int convertToGlyph(int)>($i6);
+
+     label1:
+        return i2;
+    }
+
+    public boolean charsToGlyphsNS(int, char[], int[])
+    {
+        sun.font.CompositeGlyphMapper r2;
+        int[] r1;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, i10, $i12, $i14, $i16, $i17, $i19, $i20, $i22, $i24, $i25, $i27, $i29, $i31;
+        boolean $z0;
+        char c11;
+        char[] r0;
+
+        r2 := @this: sun.font.CompositeGlyphMapper;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: char[];
+
+        r1 := @parameter2: int[];
+
+        i9 = 0;
+
+     label1:
+        if i9 >= i0 goto label7;
+
+        i10 = r0[i9];
+
+        $i14 = (int) 55296;
+
+        if i10 < $i14 goto label2;
+
+        $i16 = (int) 56319;
+
+        if i10 > $i16 goto label2;
+
+        $i2 = i0 - 1;
+
+        if i9 >= $i2 goto label2;
+
+        $i3 = i9 + 1;
+
+        c11 = r0[$i3];
+
+        $i17 = (int) c11;
+
+        $i19 = (int) 56320;
+
+        if $i17 < $i19 goto label2;
+
+        $i20 = (int) c11;
+
+        $i22 = (int) 57343;
+
+        if $i20 > $i22 goto label2;
+
+        $i24 = (int) 55296;
+
+        $i4 = i10 - $i24;
+
+        $i5 = $i4 * 1024;
+
+        $i25 = (int) c11;
+
+        $i6 = $i5 + $i25;
+
+        $i27 = (int) 56320;
+
+        $i7 = $i6 - $i27;
+
+        i10 = $i7 + 65536;
+
+        $i8 = i9 + 1;
+
+        $i29 = (int) 65535;
+
+        r1[$i8] = $i29;
+
+     label2:
+        $i12 = specialinvoke r2.<sun.font.CompositeGlyphMapper: int getCachedGlyphCode(int)>(i10);
+
+        r1[i9] = $i12;
+
+        $i31 = (int) -1;
+
+        if $i12 != $i31 goto label3;
+
+        $i1 = specialinvoke r2.<sun.font.CompositeGlyphMapper: int convertToGlyph(int)>(i10);
+
+        r1[i9] = $i1;
+
+     label3:
+        if i10 >= 768 goto label4;
+
+        goto label6;
+
+     label4:
+        $z0 = staticinvoke <sun.font.FontUtilities: boolean isComplexCharCode(int)>(i10);
+
+        if $z0 == 0 goto label5;
+
+        return 1;
+
+     label5:
+        if i10 < 65536 goto label6;
+
+        i9 = i9 + 1;
+
+        goto label6;
+
+     label6:
+        i9 = i9 + 1;
+
+        goto label1;
+
+     label7:
+        return 0;
+    }
+
+    public void charsToGlyphs(int, char[], int[])
+    {
+        sun.font.CompositeGlyphMapper r2;
+        int[] r1;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, i10, i13, $i14, $i15, $i17, $i18, $i20, $i21, $i23, $i24, $i26, $i27, $i29, $i30, $i32, $i34, $i36, $i37, $i39, $i40;
+        char c11, c12;
+        char[] r0;
+
+        r2 := @this: sun.font.CompositeGlyphMapper;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: char[];
+
+        r1 := @parameter2: int[];
+
+        i10 = 0;
+
+     label1:
+        if i10 >= i0 goto label5;
+
+        c11 = r0[i10];
+
+        $i15 = (int) c11;
+
+        $i17 = (int) 55296;
+
+        if $i15 < $i17 goto label3;
+
+        $i18 = (int) c11;
+
+        $i20 = (int) 56319;
+
+        if $i18 > $i20 goto label3;
+
+        $i2 = i0 - 1;
+
+        if i10 >= $i2 goto label3;
+
+        $i3 = i10 + 1;
+
+        c12 = r0[$i3];
+
+        $i21 = (int) c12;
+
+        $i23 = (int) 56320;
+
+        if $i21 < $i23 goto label3;
+
+        $i24 = (int) c12;
+
+        $i26 = (int) 57343;
+
+        if $i24 > $i26 goto label3;
+
+        $i27 = (int) c11;
+
+        $i29 = (int) 55296;
+
+        $i4 = $i27 - $i29;
+
+        $i5 = $i4 * 1024;
+
+        $i30 = (int) c12;
+
+        $i6 = $i5 + $i30;
+
+        $i32 = (int) 56320;
+
+        $i7 = $i6 - $i32;
+
+        i13 = $i7 + 65536;
+
+        $i8 = specialinvoke r2.<sun.font.CompositeGlyphMapper: int getCachedGlyphCode(int)>(i13);
+
+        r1[i10] = $i8;
+
+        $i34 = (int) -1;
+
+        if $i8 != $i34 goto label2;
+
+        $i9 = specialinvoke r2.<sun.font.CompositeGlyphMapper: int convertToGlyph(int)>(i13);
+
+        r1[i10] = $i9;
+
+     label2:
+        i10 = i10 + 1;
+
+        $i36 = (int) 65535;
+
+        r1[i10] = $i36;
+
+        goto label4;
+
+     label3:
+        $i37 = (int) c11;
+
+        $i14 = specialinvoke r2.<sun.font.CompositeGlyphMapper: int getCachedGlyphCode(int)>($i37);
+
+        r1[i10] = $i14;
+
+        $i39 = (int) -1;
+
+        if $i14 != $i39 goto label4;
+
+        $i40 = (int) c11;
+
+        $i1 = specialinvoke r2.<sun.font.CompositeGlyphMapper: int convertToGlyph(int)>($i40);
+
+        r1[i10] = $i1;
+
+     label4:
+        i10 = i10 + 1;
+
+        goto label1;
+
+     label5:
+        return;
+    }
+
+    public void charsToGlyphs(int, int[], int[])
+    {
+        sun.font.CompositeGlyphMapper r2;
+        int[] r0, r1;
+        int i0, i1, $i2, $i3, $i4, i5, $i7;
+
+        r2 := @this: sun.font.CompositeGlyphMapper;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: int[];
+
+        r1 := @parameter2: int[];
+
+        i5 = 0;
+
+     label1:
+        if i5 >= i0 goto label3;
+
+        i1 = r0[i5];
+
+        $i2 = specialinvoke r2.<sun.font.CompositeGlyphMapper: int getCachedGlyphCode(int)>(i1);
+
+        r1[i5] = $i2;
+
+        $i3 = r1[i5];
+
+        $i7 = (int) -1;
+
+        if $i3 != $i7 goto label2;
+
+        $i4 = specialinvoke r2.<sun.font.CompositeGlyphMapper: int convertToGlyph(int)>(i1);
+
+        r1[i5] = $i4;
+
+     label2:
+        i5 = i5 + 1;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.font.CompositeGlyphMapper: int MAXUNICODE> = 55296;
+
+        <sun.font.CompositeGlyphMapper: int BLOCKSZ> = 256;
+
+        <sun.font.CompositeGlyphMapper: int NBLOCKS> = 216;
+
+        <sun.font.CompositeGlyphMapper: int GLYPHMASK> = 16777215;
+
+        <sun.font.CompositeGlyphMapper: int SLOTMASK> = -16777216;
+
+        return;
+    }
+}

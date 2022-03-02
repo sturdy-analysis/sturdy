@@ -1,0 +1,1833 @@
+class java.io.ObjectOutputStream$BlockDataOutputStream extends java.io.OutputStream implements java.io.DataOutput
+{
+    private static final int MAX_BLOCK_SIZE;
+    private static final int MAX_HEADER_SIZE;
+    private static final int CHAR_BUF_SIZE;
+    private final byte[] buf;
+    private final byte[] hbuf;
+    private final char[] cbuf;
+    private boolean blkmode;
+    private int pos;
+    private final java.io.OutputStream out;
+    private final java.io.DataOutputStream dout;
+
+    void <init>(java.io.OutputStream)
+    {
+        java.io.OutputStream r4;
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+        byte[] $r1, $r2;
+        java.io.DataOutputStream $r5;
+        char[] $r3;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        r4 := @parameter0: java.io.OutputStream;
+
+        specialinvoke r0.<java.io.OutputStream: void <init>()>();
+
+        $r1 = newarray (byte)[1024];
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf> = $r1;
+
+        $r2 = newarray (byte)[5];
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] hbuf> = $r2;
+
+        $r3 = newarray (char)[256];
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: char[] cbuf> = $r3;
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean blkmode> = 0;
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos> = 0;
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: java.io.OutputStream out> = r4;
+
+        $r5 = new java.io.DataOutputStream;
+
+        specialinvoke $r5.<java.io.DataOutputStream: void <init>(java.io.OutputStream)>(r0);
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: java.io.DataOutputStream dout> = $r5;
+
+        return;
+    }
+
+    boolean setBlockDataMode(boolean) throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+        boolean z0, $z1, $z2, $z3, $z4;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        z0 := @parameter0: boolean;
+
+        $z1 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean blkmode>;
+
+        if $z1 != z0 goto label1;
+
+        $z3 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean blkmode>;
+
+        return $z3;
+
+     label1:
+        virtualinvoke r0.<java.io.ObjectOutputStream$BlockDataOutputStream: void drain()>();
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean blkmode> = z0;
+
+        $z2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean blkmode>;
+
+        if $z2 != 0 goto label2;
+
+        $z4 = 1;
+
+        goto label3;
+
+     label2:
+        $z4 = 0;
+
+     label3:
+        return $z4;
+    }
+
+    boolean getBlockDataMode()
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+        boolean $z0;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        $z0 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean blkmode>;
+
+        return $z0;
+    }
+
+    public void write(int) throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+        byte[] $r1;
+        byte $b4;
+        int $i0, $i1, $i2, i3;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        i3 := @parameter0: int;
+
+        $i0 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        if $i0 < 1024 goto label1;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream$BlockDataOutputStream: void drain()>();
+
+     label1:
+        $r1 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf>;
+
+        $i1 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i2 = $i1 + 1;
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos> = $i2;
+
+        $b4 = (byte) i3;
+
+        $r1[$i1] = $b4;
+
+        return;
+    }
+
+    public void write(byte[]) throws java.io.IOException
+    {
+        int $i0;
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+        byte[] r1;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        r1 := @parameter0: byte[];
+
+        $i0 = lengthof r1;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream$BlockDataOutputStream: void write(byte[],int,int,boolean)>(r1, 0, $i0, 0);
+
+        return;
+    }
+
+    public void write(byte[], int, int) throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+        byte[] r1;
+        int i0, i1;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream$BlockDataOutputStream: void write(byte[],int,int,boolean)>(r1, i0, i1, 0);
+
+        return;
+    }
+
+    public void flush() throws java.io.IOException
+    {
+        java.io.OutputStream $r1;
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream$BlockDataOutputStream: void drain()>();
+
+        $r1 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: java.io.OutputStream out>;
+
+        virtualinvoke $r1.<java.io.OutputStream: void flush()>();
+
+        return;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        java.io.OutputStream $r1;
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream$BlockDataOutputStream: void flush()>();
+
+        $r1 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: java.io.OutputStream out>;
+
+        virtualinvoke $r1.<java.io.OutputStream: void close()>();
+
+        return;
+    }
+
+    void write(byte[], int, int, boolean) throws java.io.IOException
+    {
+        byte[] r1, $r4;
+        int $i0, $i1, i2, i3, $i4, $i5, $i6, $i7, $i8, $i9, $i11;
+        boolean z0, $z1;
+        java.io.OutputStream $r2, $r3;
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        r1 := @parameter0: byte[];
+
+        i2 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        z0 := @parameter3: boolean;
+
+        if z0 != 0 goto label1;
+
+        $z1 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean blkmode>;
+
+        if $z1 != 0 goto label1;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream$BlockDataOutputStream: void drain()>();
+
+        $r3 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: java.io.OutputStream out>;
+
+        virtualinvoke $r3.<java.io.OutputStream: void write(byte[],int,int)>(r1, i2, i3);
+
+        return;
+
+     label1:
+        if i3 <= 0 goto label4;
+
+        $i0 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        if $i0 < 1024 goto label2;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream$BlockDataOutputStream: void drain()>();
+
+     label2:
+        if i3 < 1024 goto label3;
+
+        if z0 != 0 goto label3;
+
+        $i1 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        if $i1 != 0 goto label3;
+
+        specialinvoke r0.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeBlockHeader(int)>(1024);
+
+        $r2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: java.io.OutputStream out>;
+
+        virtualinvoke $r2.<java.io.OutputStream: void write(byte[],int,int)>(r1, i2, 1024);
+
+        i2 = i2 + 1024;
+
+        $i11 = (int) -1024;
+
+        i3 = i3 + $i11;
+
+        goto label1;
+
+     label3:
+        $i4 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i5 = 1024 - $i4;
+
+        $i6 = staticinvoke <java.lang.Math: int min(int,int)>(i3, $i5);
+
+        $r4 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf>;
+
+        $i7 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, i2, $r4, $i7, $i6);
+
+        $i8 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i9 = $i8 + $i6;
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos> = $i9;
+
+        i2 = i2 + $i6;
+
+        i3 = i3 - $i6;
+
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    void drain() throws java.io.IOException
+    {
+        java.io.OutputStream $r2;
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+        byte[] $r1;
+        int $i0, $i1, $i2;
+        boolean $z0;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        $i0 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        if $i0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $z0 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: boolean blkmode>;
+
+        if $z0 == 0 goto label2;
+
+        $i2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        specialinvoke r0.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeBlockHeader(int)>($i2);
+
+     label2:
+        $r2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: java.io.OutputStream out>;
+
+        $r1 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf>;
+
+        $i1 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        virtualinvoke $r2.<java.io.OutputStream: void write(byte[],int,int)>($r1, 0, $i1);
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos> = 0;
+
+        return;
+    }
+
+    private void writeBlockHeader(int) throws java.io.IOException
+    {
+        java.io.OutputStream $r4, $r8;
+        byte[] $r1, $r2, $r3, $r5, $r6, $r7;
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+        byte $b1;
+        int i0;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        i0 := @parameter0: int;
+
+        if i0 > 255 goto label1;
+
+        $r5 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] hbuf>;
+
+        $r5[0] = 119;
+
+        $r6 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] hbuf>;
+
+        $b1 = (byte) i0;
+
+        $r6[1] = $b1;
+
+        $r8 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: java.io.OutputStream out>;
+
+        $r7 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] hbuf>;
+
+        virtualinvoke $r8.<java.io.OutputStream: void write(byte[],int,int)>($r7, 0, 2);
+
+        goto label2;
+
+     label1:
+        $r1 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] hbuf>;
+
+        $r1[0] = 122;
+
+        $r2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] hbuf>;
+
+        staticinvoke <java.io.Bits: void putInt(byte[],int,int)>($r2, 1, i0);
+
+        $r4 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: java.io.OutputStream out>;
+
+        $r3 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] hbuf>;
+
+        virtualinvoke $r4.<java.io.OutputStream: void write(byte[],int,int)>($r3, 0, 5);
+
+     label2:
+        return;
+    }
+
+    public void writeBoolean(boolean) throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+        byte[] $r1;
+        int $i0, $i1, $i2;
+        boolean z0;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        z0 := @parameter0: boolean;
+
+        $i0 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        if $i0 < 1024 goto label1;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream$BlockDataOutputStream: void drain()>();
+
+     label1:
+        $r1 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf>;
+
+        $i1 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i2 = $i1 + 1;
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos> = $i2;
+
+        staticinvoke <java.io.Bits: void putBoolean(byte[],int,boolean)>($r1, $i1, z0);
+
+        return;
+    }
+
+    public void writeByte(int) throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+        byte[] $r1;
+        byte $b4;
+        int $i0, $i1, $i2, i3;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        i3 := @parameter0: int;
+
+        $i0 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        if $i0 < 1024 goto label1;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream$BlockDataOutputStream: void drain()>();
+
+     label1:
+        $r1 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf>;
+
+        $i1 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i2 = $i1 + 1;
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos> = $i2;
+
+        $b4 = (byte) i3;
+
+        $r1[$i1] = $b4;
+
+        return;
+    }
+
+    public void writeChar(int) throws java.io.IOException
+    {
+        byte[] $r2;
+        char $c3;
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+        java.io.DataOutputStream $r1;
+        int $i0, $i1, i2, $i4, $i5, $i6;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        i2 := @parameter0: int;
+
+        $i0 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i1 = $i0 + 2;
+
+        if $i1 > 1024 goto label1;
+
+        $r2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf>;
+
+        $i4 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $c3 = (char) i2;
+
+        staticinvoke <java.io.Bits: void putChar(byte[],int,char)>($r2, $i4, $c3);
+
+        $i5 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i6 = $i5 + 2;
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos> = $i6;
+
+        goto label2;
+
+     label1:
+        $r1 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: java.io.DataOutputStream dout>;
+
+        virtualinvoke $r1.<java.io.DataOutputStream: void writeChar(int)>(i2);
+
+     label2:
+        return;
+    }
+
+    public void writeShort(int) throws java.io.IOException
+    {
+        byte[] $r2;
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+        short $s3;
+        java.io.DataOutputStream $r1;
+        int $i0, $i1, i2, $i4, $i5, $i6;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        i2 := @parameter0: int;
+
+        $i0 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i1 = $i0 + 2;
+
+        if $i1 > 1024 goto label1;
+
+        $r2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf>;
+
+        $i4 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $s3 = (short) i2;
+
+        staticinvoke <java.io.Bits: void putShort(byte[],int,short)>($r2, $i4, $s3);
+
+        $i5 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i6 = $i5 + 2;
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos> = $i6;
+
+        goto label2;
+
+     label1:
+        $r1 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: java.io.DataOutputStream dout>;
+
+        virtualinvoke $r1.<java.io.DataOutputStream: void writeShort(int)>(i2);
+
+     label2:
+        return;
+    }
+
+    public void writeInt(int) throws java.io.IOException
+    {
+        byte[] $r2;
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+        java.io.DataOutputStream $r1;
+        int $i0, $i1, i2, $i3, $i4, $i5;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        i2 := @parameter0: int;
+
+        $i0 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i1 = $i0 + 4;
+
+        if $i1 > 1024 goto label1;
+
+        $r2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf>;
+
+        $i3 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        staticinvoke <java.io.Bits: void putInt(byte[],int,int)>($r2, $i3, i2);
+
+        $i4 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i5 = $i4 + 4;
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos> = $i5;
+
+        goto label2;
+
+     label1:
+        $r1 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: java.io.DataOutputStream dout>;
+
+        virtualinvoke $r1.<java.io.DataOutputStream: void writeInt(int)>(i2);
+
+     label2:
+        return;
+    }
+
+    public void writeFloat(float) throws java.io.IOException
+    {
+        byte[] $r2;
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+        java.io.DataOutputStream $r1;
+        int $i0, $i1, $i2, $i3, $i4;
+        float f0;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        f0 := @parameter0: float;
+
+        $i0 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i1 = $i0 + 4;
+
+        if $i1 > 1024 goto label1;
+
+        $r2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf>;
+
+        $i2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        staticinvoke <java.io.Bits: void putFloat(byte[],int,float)>($r2, $i2, f0);
+
+        $i3 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i4 = $i3 + 4;
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos> = $i4;
+
+        goto label2;
+
+     label1:
+        $r1 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: java.io.DataOutputStream dout>;
+
+        virtualinvoke $r1.<java.io.DataOutputStream: void writeFloat(float)>(f0);
+
+     label2:
+        return;
+    }
+
+    public void writeLong(long) throws java.io.IOException
+    {
+        byte[] $r2;
+        long l2;
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+        java.io.DataOutputStream $r1;
+        int $i0, $i1, $i3, $i4, $i5;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        l2 := @parameter0: long;
+
+        $i0 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i1 = $i0 + 8;
+
+        if $i1 > 1024 goto label1;
+
+        $r2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf>;
+
+        $i3 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        staticinvoke <java.io.Bits: void putLong(byte[],int,long)>($r2, $i3, l2);
+
+        $i4 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i5 = $i4 + 8;
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos> = $i5;
+
+        goto label2;
+
+     label1:
+        $r1 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: java.io.DataOutputStream dout>;
+
+        virtualinvoke $r1.<java.io.DataOutputStream: void writeLong(long)>(l2);
+
+     label2:
+        return;
+    }
+
+    public void writeDouble(double) throws java.io.IOException
+    {
+        byte[] $r2;
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+        java.io.DataOutputStream $r1;
+        int $i0, $i1, $i2, $i3, $i4;
+        double d0;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        d0 := @parameter0: double;
+
+        $i0 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i1 = $i0 + 8;
+
+        if $i1 > 1024 goto label1;
+
+        $r2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf>;
+
+        $i2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        staticinvoke <java.io.Bits: void putDouble(byte[],int,double)>($r2, $i2, d0);
+
+        $i3 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i4 = $i3 + 8;
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos> = $i4;
+
+        goto label2;
+
+     label1:
+        $r1 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: java.io.DataOutputStream dout>;
+
+        virtualinvoke $r1.<java.io.DataOutputStream: void writeDouble(double)>(d0);
+
+     label2:
+        return;
+    }
+
+    public void writeBytes(java.lang.String) throws java.io.IOException
+    {
+        byte[] $r2;
+        byte $b11;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i12, $i13, $i14, $i15, i16, i17, i18, $i19;
+        java.lang.String r0;
+        char $c10;
+        java.io.ObjectOutputStream$BlockDataOutputStream r1;
+        char[] $r3, $r4;
+
+        r1 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        i16 = 0;
+
+        i17 = 0;
+
+        i18 = 0;
+
+     label1:
+        if i18 >= $i0 goto label6;
+
+        if i16 < i17 goto label2;
+
+        i16 = 0;
+
+        $i13 = $i0 - i18;
+
+        $i14 = staticinvoke <java.lang.Math: int min(int,int)>($i13, 256);
+
+        i17 = $i14;
+
+        $i15 = i18 + $i14;
+
+        $r4 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: char[] cbuf>;
+
+        virtualinvoke r0.<java.lang.String: void getChars(int,int,char[],int)>(i18, $i15, $r4, 0);
+
+     label2:
+        $i1 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        if $i1 < 1024 goto label3;
+
+        virtualinvoke r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void drain()>();
+
+     label3:
+        $i4 = i17 - i16;
+
+        $i2 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i3 = 1024 - $i2;
+
+        $i5 = staticinvoke <java.lang.Math: int min(int,int)>($i4, $i3);
+
+        $i6 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i12 = $i6 + $i5;
+
+     label4:
+        $i19 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        if $i19 >= $i12 goto label5;
+
+        $r2 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf>;
+
+        $i7 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i8 = $i7 + 1;
+
+        r1.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos> = $i8;
+
+        $r3 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: char[] cbuf>;
+
+        $i9 = i16;
+
+        i16 = i16 + 1;
+
+        $c10 = $r3[$i9];
+
+        $b11 = (byte) $c10;
+
+        $r2[$i7] = $b11;
+
+        goto label4;
+
+     label5:
+        i18 = i18 + $i5;
+
+        goto label1;
+
+     label6:
+        return;
+    }
+
+    public void writeChars(java.lang.String) throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream r1;
+        int $i0, $i1, $i2, $i3, i4;
+        char[] $r2, $r3;
+        java.lang.String r0;
+
+        r1 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        i4 = 0;
+
+     label1:
+        if i4 >= $i0 goto label2;
+
+        $i1 = $i0 - i4;
+
+        $i2 = staticinvoke <java.lang.Math: int min(int,int)>($i1, 256);
+
+        $i3 = i4 + $i2;
+
+        $r2 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: char[] cbuf>;
+
+        virtualinvoke r0.<java.lang.String: void getChars(int,int,char[],int)>(i4, $i3, $r2, 0);
+
+        $r3 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: char[] cbuf>;
+
+        virtualinvoke r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeChars(char[],int,int)>($r3, 0, $i2);
+
+        i4 = i4 + $i2;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void writeUTF(java.lang.String) throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+        long $l0;
+        java.lang.String r1;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        r1 := @parameter0: java.lang.String;
+
+        $l0 = virtualinvoke r0.<java.io.ObjectOutputStream$BlockDataOutputStream: long getUTFLength(java.lang.String)>(r1);
+
+        virtualinvoke r0.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeUTF(java.lang.String,long)>(r1, $l0);
+
+        return;
+    }
+
+    void writeBooleans(boolean[], int, int) throws java.io.IOException
+    {
+        byte[] $r1;
+        boolean[] r2;
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, i10;
+        boolean $z0;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        r2 := @parameter0: boolean[];
+
+        i10 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i1 = i10 + i0;
+
+     label1:
+        if i10 >= i1 goto label5;
+
+        $i2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        if $i2 < 1024 goto label2;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream$BlockDataOutputStream: void drain()>();
+
+     label2:
+        $i3 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i4 = 1024 - $i3;
+
+        $i5 = i10 + $i4;
+
+        $i6 = staticinvoke <java.lang.Math: int min(int,int)>(i1, $i5);
+
+     label3:
+        if i10 >= $i6 goto label4;
+
+        $r1 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf>;
+
+        $i7 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i8 = $i7 + 1;
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos> = $i8;
+
+        $i9 = i10;
+
+        i10 = i10 + 1;
+
+        $z0 = r2[$i9];
+
+        staticinvoke <java.io.Bits: void putBoolean(byte[],int,boolean)>($r1, $i7, $z0);
+
+        goto label3;
+
+     label4:
+        goto label1;
+
+     label5:
+        return;
+    }
+
+    void writeChars(char[], int, int) throws java.io.IOException
+    {
+        byte[] $r3;
+        java.io.DataOutputStream $r2;
+        int i0, i1, $i2, $i3, $i5, $i6, i7, $i8, $i9, $i10, $i12, $i13, $i14, i15, $i16;
+        char $c4, $c11;
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+        char[] r1;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        r1 := @parameter0: char[];
+
+        i15 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i1 = i15 + i0;
+
+     label1:
+        if i15 >= i1 goto label5;
+
+        $i2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        if $i2 > 1022 goto label4;
+
+        $i5 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i6 = 1024 - $i5;
+
+        i7 = $i6 >> 1;
+
+        $i8 = i15 + i7;
+
+        $i9 = staticinvoke <java.lang.Math: int min(int,int)>(i1, $i8);
+
+     label2:
+        if i15 >= $i9 goto label3;
+
+        $r3 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf>;
+
+        $i12 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i10 = i15;
+
+        i15 = i15 + 1;
+
+        $c11 = r1[$i10];
+
+        staticinvoke <java.io.Bits: void putChar(byte[],int,char)>($r3, $i12, $c11);
+
+        $i13 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i14 = $i13 + 2;
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos> = $i14;
+
+        goto label2;
+
+     label3:
+        goto label1;
+
+     label4:
+        $r2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: java.io.DataOutputStream dout>;
+
+        $i3 = i15;
+
+        i15 = i15 + 1;
+
+        $c4 = r1[$i3];
+
+        $i16 = (int) $c4;
+
+        virtualinvoke $r2.<java.io.DataOutputStream: void writeChar(int)>($i16);
+
+        goto label1;
+
+     label5:
+        return;
+    }
+
+    void writeShorts(short[], int, int) throws java.io.IOException
+    {
+        byte[] $r3;
+        short $s4, $s11;
+        java.io.DataOutputStream $r2;
+        int i0, i1, $i2, $i3, $i5, $i6, i7, $i8, $i9, $i10, $i12, $i13, $i14, i15, $i16;
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+        short[] r1;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        r1 := @parameter0: short[];
+
+        i15 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i1 = i15 + i0;
+
+     label1:
+        if i15 >= i1 goto label5;
+
+        $i2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        if $i2 > 1022 goto label4;
+
+        $i5 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i6 = 1024 - $i5;
+
+        i7 = $i6 >> 1;
+
+        $i8 = i15 + i7;
+
+        $i9 = staticinvoke <java.lang.Math: int min(int,int)>(i1, $i8);
+
+     label2:
+        if i15 >= $i9 goto label3;
+
+        $r3 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf>;
+
+        $i12 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i10 = i15;
+
+        i15 = i15 + 1;
+
+        $s11 = r1[$i10];
+
+        staticinvoke <java.io.Bits: void putShort(byte[],int,short)>($r3, $i12, $s11);
+
+        $i13 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i14 = $i13 + 2;
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos> = $i14;
+
+        goto label2;
+
+     label3:
+        goto label1;
+
+     label4:
+        $r2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: java.io.DataOutputStream dout>;
+
+        $i3 = i15;
+
+        i15 = i15 + 1;
+
+        $s4 = r1[$i3];
+
+        $i16 = (int) $s4;
+
+        virtualinvoke $r2.<java.io.DataOutputStream: void writeShort(int)>($i16);
+
+        goto label1;
+
+     label5:
+        return;
+    }
+
+    void writeInts(int[], int, int) throws java.io.IOException
+    {
+        byte[] $r3;
+        java.io.DataOutputStream $r2;
+        int[] r1;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, i15;
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        r1 := @parameter0: int[];
+
+        i15 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i1 = i15 + i0;
+
+     label1:
+        if i15 >= i1 goto label5;
+
+        $i2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        if $i2 > 1020 goto label4;
+
+        $i5 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i6 = 1024 - $i5;
+
+        i7 = $i6 >> 2;
+
+        $i8 = i15 + i7;
+
+        $i9 = staticinvoke <java.lang.Math: int min(int,int)>(i1, $i8);
+
+     label2:
+        if i15 >= $i9 goto label3;
+
+        $r3 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf>;
+
+        $i12 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i10 = i15;
+
+        i15 = i15 + 1;
+
+        $i11 = r1[$i10];
+
+        staticinvoke <java.io.Bits: void putInt(byte[],int,int)>($r3, $i12, $i11);
+
+        $i13 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i14 = $i13 + 4;
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos> = $i14;
+
+        goto label2;
+
+     label3:
+        goto label1;
+
+     label4:
+        $r2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: java.io.DataOutputStream dout>;
+
+        $i3 = i15;
+
+        i15 = i15 + 1;
+
+        $i4 = r1[$i3];
+
+        virtualinvoke $r2.<java.io.DataOutputStream: void writeInt(int)>($i4);
+
+        goto label1;
+
+     label5:
+        return;
+    }
+
+    void writeFloats(float[], int, int) throws java.io.IOException
+    {
+        byte[] $r3;
+        float[] r1;
+        java.io.DataOutputStream $r2;
+        int i0, i1, $i2, $i3, $i4, $i5, i6, $i7, $i8, $i9, $i10, $i11, $i12, i13;
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+        float $f0;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        r1 := @parameter0: float[];
+
+        i13 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i1 = i13 + i0;
+
+     label1:
+        if i13 >= i1 goto label3;
+
+        $i2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        if $i2 > 1020 goto label2;
+
+        $i4 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i5 = 1024 - $i4;
+
+        i6 = $i5 >> 2;
+
+        $i7 = i1 - i13;
+
+        $i8 = staticinvoke <java.lang.Math: int min(int,int)>($i7, i6);
+
+        $r3 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf>;
+
+        $i9 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        staticinvoke <java.io.ObjectOutputStream: void access$400(float[],int,byte[],int,int)>(r1, i13, $r3, $i9, $i8);
+
+        i13 = i13 + $i8;
+
+        $i11 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i10 = $i8 << 2;
+
+        $i12 = $i11 + $i10;
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos> = $i12;
+
+        goto label1;
+
+     label2:
+        $r2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: java.io.DataOutputStream dout>;
+
+        $i3 = i13;
+
+        i13 = i13 + 1;
+
+        $f0 = r1[$i3];
+
+        virtualinvoke $r2.<java.io.DataOutputStream: void writeFloat(float)>($f0);
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    void writeLongs(long[], int, int) throws java.io.IOException
+    {
+        byte[] $r3;
+        long $l4, $l11;
+        long[] r1;
+        java.io.DataOutputStream $r2;
+        int i0, i1, $i2, $i3, $i5, $i6, i7, $i8, $i9, $i10, $i12, $i13, $i14, i15;
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        r1 := @parameter0: long[];
+
+        i15 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i1 = i15 + i0;
+
+     label1:
+        if i15 >= i1 goto label5;
+
+        $i2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        if $i2 > 1016 goto label4;
+
+        $i5 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i6 = 1024 - $i5;
+
+        i7 = $i6 >> 3;
+
+        $i8 = i15 + i7;
+
+        $i9 = staticinvoke <java.lang.Math: int min(int,int)>(i1, $i8);
+
+     label2:
+        if i15 >= $i9 goto label3;
+
+        $r3 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf>;
+
+        $i12 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i10 = i15;
+
+        i15 = i15 + 1;
+
+        $l11 = r1[$i10];
+
+        staticinvoke <java.io.Bits: void putLong(byte[],int,long)>($r3, $i12, $l11);
+
+        $i13 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i14 = $i13 + 8;
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos> = $i14;
+
+        goto label2;
+
+     label3:
+        goto label1;
+
+     label4:
+        $r2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: java.io.DataOutputStream dout>;
+
+        $i3 = i15;
+
+        i15 = i15 + 1;
+
+        $l4 = r1[$i3];
+
+        virtualinvoke $r2.<java.io.DataOutputStream: void writeLong(long)>($l4);
+
+        goto label1;
+
+     label5:
+        return;
+    }
+
+    void writeDoubles(double[], int, int) throws java.io.IOException
+    {
+        byte[] $r3;
+        double[] r1;
+        java.io.DataOutputStream $r2;
+        int i0, i1, $i2, $i3, $i4, $i5, i6, $i7, $i8, $i9, $i10, $i11, $i12, i13;
+        double $d0;
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        r1 := @parameter0: double[];
+
+        i13 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i1 = i13 + i0;
+
+     label1:
+        if i13 >= i1 goto label3;
+
+        $i2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        if $i2 > 1016 goto label2;
+
+        $i4 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i5 = 1024 - $i4;
+
+        i6 = $i5 >> 3;
+
+        $i7 = i1 - i13;
+
+        $i8 = staticinvoke <java.lang.Math: int min(int,int)>($i7, i6);
+
+        $r3 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf>;
+
+        $i9 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        staticinvoke <java.io.ObjectOutputStream: void access$500(double[],int,byte[],int,int)>(r1, i13, $r3, $i9, $i8);
+
+        i13 = i13 + $i8;
+
+        $i11 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i10 = $i8 << 3;
+
+        $i12 = $i11 + $i10;
+
+        r0.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos> = $i12;
+
+        goto label1;
+
+     label2:
+        $r2 = r0.<java.io.ObjectOutputStream$BlockDataOutputStream: java.io.DataOutputStream dout>;
+
+        $i3 = i13;
+
+        i13 = i13 + 1;
+
+        $d0 = r1[$i3];
+
+        virtualinvoke $r2.<java.io.DataOutputStream: void writeDouble(double)>($d0);
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    long getUTFLength(java.lang.String)
+    {
+        char c4;
+        long l5;
+        java.io.ObjectOutputStream$BlockDataOutputStream r1;
+        int $i0, $i1, $i2, $i3, i6, i7, $i8, $i9, $i10;
+        char[] $r2, $r3;
+        java.lang.String r0;
+
+        r1 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        l5 = 0L;
+
+        i6 = 0;
+
+     label1:
+        if i6 >= $i0 goto label7;
+
+        $i1 = $i0 - i6;
+
+        $i2 = staticinvoke <java.lang.Math: int min(int,int)>($i1, 256);
+
+        $i3 = i6 + $i2;
+
+        $r2 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: char[] cbuf>;
+
+        virtualinvoke r0.<java.lang.String: void getChars(int,int,char[],int)>(i6, $i3, $r2, 0);
+
+        i7 = 0;
+
+     label2:
+        if i7 >= $i2 goto label6;
+
+        $r3 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: char[] cbuf>;
+
+        c4 = $r3[i7];
+
+        $i8 = (int) c4;
+
+        if $i8 < 1 goto label3;
+
+        $i9 = (int) c4;
+
+        if $i9 > 127 goto label3;
+
+        l5 = l5 + 1L;
+
+        goto label5;
+
+     label3:
+        $i10 = (int) c4;
+
+        if $i10 <= 2047 goto label4;
+
+        l5 = l5 + 3L;
+
+        goto label5;
+
+     label4:
+        l5 = l5 + 2L;
+
+     label5:
+        i7 = i7 + 1;
+
+        goto label2;
+
+     label6:
+        i6 = i6 + $i2;
+
+        goto label1;
+
+     label7:
+        return l5;
+    }
+
+    void writeUTF(java.lang.String, long) throws java.io.IOException
+    {
+        long l0, $l4;
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+        byte $b1, $b5;
+        int $i2, $i3, $i6;
+        java.lang.String r1;
+        java.io.UTFDataFormatException $r3;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        r1 := @parameter0: java.lang.String;
+
+        l0 := @parameter1: long;
+
+        $b1 = l0 cmp 65535L;
+
+        $i6 = (int) $b1;
+
+        if $i6 <= 0 goto label1;
+
+        $r3 = new java.io.UTFDataFormatException;
+
+        specialinvoke $r3.<java.io.UTFDataFormatException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $i2 = (int) l0;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeShort(int)>($i2);
+
+        $i3 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        $l4 = (long) $i3;
+
+        $b5 = l0 cmp $l4;
+
+        if $b5 != 0 goto label2;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeBytes(java.lang.String)>(r1);
+
+        goto label3;
+
+     label2:
+        specialinvoke r0.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeUTFBody(java.lang.String)>(r1);
+
+     label3:
+        return;
+    }
+
+    void writeLongUTF(java.lang.String) throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+        long $l0;
+        java.lang.String r1;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        r1 := @parameter0: java.lang.String;
+
+        $l0 = virtualinvoke r0.<java.io.ObjectOutputStream$BlockDataOutputStream: long getUTFLength(java.lang.String)>(r1);
+
+        virtualinvoke r0.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeLongUTF(java.lang.String,long)>(r1, $l0);
+
+        return;
+    }
+
+    void writeLongUTF(java.lang.String, long) throws java.io.IOException
+    {
+        java.io.ObjectOutputStream$BlockDataOutputStream r0;
+        byte $b3;
+        int $i1;
+        long l0, $l2;
+        java.lang.String r1;
+
+        r0 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        r1 := @parameter0: java.lang.String;
+
+        l0 := @parameter1: long;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeLong(long)>(l0);
+
+        $i1 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        $l2 = (long) $i1;
+
+        $b3 = l0 cmp $l2;
+
+        if $b3 != 0 goto label1;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeBytes(java.lang.String)>(r1);
+
+        goto label2;
+
+     label1:
+        specialinvoke r0.<java.io.ObjectOutputStream$BlockDataOutputStream: void writeUTFBody(java.lang.String)>(r1);
+
+     label2:
+        return;
+    }
+
+    private void writeUTFBody(java.lang.String) throws java.io.IOException
+    {
+        byte[] $r4, $r5, $r6, $r7, $r8, $r9;
+        byte $b25, $b31, $b39, $b45, $b51, $b57;
+        java.lang.String r0;
+        java.io.ObjectOutputStream$BlockDataOutputStream r1;
+        char[] $r2, $r3;
+        int $i0, $i1, $i2, $i3, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i26, $i27, $i28, $i29, $i30, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i40, $i41, $i42, $i43, $i44, $i46, $i47, $i48, $i49, $i50, $i52, $i53, $i54, $i55, $i56, i58, i59, $i60, $i61, $i62, $i63, $i64, $i65, $i66, $i67, $i68, $i69, $i70, $i71, $i72, $i73, $i74;
+        char c4;
+
+        r1 := @this: java.io.ObjectOutputStream$BlockDataOutputStream;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        i58 = 0;
+
+     label01:
+        if i58 >= $i0 goto label10;
+
+        $i1 = $i0 - i58;
+
+        $i2 = staticinvoke <java.lang.Math: int min(int,int)>($i1, 256);
+
+        $i3 = i58 + $i2;
+
+        $r2 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: char[] cbuf>;
+
+        virtualinvoke r0.<java.lang.String: void getChars(int,int,char[],int)>(i58, $i3, $r2, 0);
+
+        i59 = 0;
+
+     label02:
+        if i59 >= $i2 goto label09;
+
+        $r3 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: char[] cbuf>;
+
+        c4 = $r3[i59];
+
+        $i5 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        if $i5 > 1021 goto label05;
+
+        $i60 = (int) c4;
+
+        if $i60 > 127 goto label03;
+
+        if c4 == 0 goto label03;
+
+        $r9 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf>;
+
+        $i55 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i56 = $i55 + 1;
+
+        r1.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos> = $i56;
+
+        $b57 = (byte) c4;
+
+        $r9[$i55] = $b57;
+
+        goto label08;
+
+     label03:
+        $i61 = (int) c4;
+
+        if $i61 <= 2047 goto label04;
+
+        $r6 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf>;
+
+        $i35 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i40 = $i35 + 2;
+
+        $i62 = (int) c4;
+
+        $i36 = $i62 >> 0;
+
+        $i37 = $i36 & 63;
+
+        $i38 = 128 | $i37;
+
+        $b39 = (byte) $i38;
+
+        $r6[$i40] = $b39;
+
+        $r7 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf>;
+
+        $i41 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i46 = $i41 + 1;
+
+        $i63 = (int) c4;
+
+        $i42 = $i63 >> 6;
+
+        $i43 = $i42 & 63;
+
+        $i44 = 128 | $i43;
+
+        $b45 = (byte) $i44;
+
+        $r7[$i46] = $b45;
+
+        $r8 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf>;
+
+        $i47 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i52 = $i47 + 0;
+
+        $i64 = (int) c4;
+
+        $i48 = $i64 >> 12;
+
+        $i49 = $i48 & 15;
+
+        $i50 = 224 | $i49;
+
+        $b51 = (byte) $i50;
+
+        $r8[$i52] = $b51;
+
+        $i53 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i54 = $i53 + 3;
+
+        r1.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos> = $i54;
+
+        goto label08;
+
+     label04:
+        $r4 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf>;
+
+        $i21 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i26 = $i21 + 1;
+
+        $i65 = (int) c4;
+
+        $i22 = $i65 >> 0;
+
+        $i23 = $i22 & 63;
+
+        $i24 = 128 | $i23;
+
+        $b25 = (byte) $i24;
+
+        $r4[$i26] = $b25;
+
+        $r5 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: byte[] buf>;
+
+        $i27 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i32 = $i27 + 0;
+
+        $i66 = (int) c4;
+
+        $i28 = $i66 >> 6;
+
+        $i29 = $i28 & 31;
+
+        $i30 = 192 | $i29;
+
+        $b31 = (byte) $i30;
+
+        $r5[$i32] = $b31;
+
+        $i33 = r1.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos>;
+
+        $i34 = $i33 + 2;
+
+        r1.<java.io.ObjectOutputStream$BlockDataOutputStream: int pos> = $i34;
+
+        goto label08;
+
+     label05:
+        $i67 = (int) c4;
+
+        if $i67 > 127 goto label06;
+
+        if c4 == 0 goto label06;
+
+        $i68 = (int) c4;
+
+        virtualinvoke r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void write(int)>($i68);
+
+        goto label08;
+
+     label06:
+        $i69 = (int) c4;
+
+        if $i69 <= 2047 goto label07;
+
+        $i70 = (int) c4;
+
+        $i12 = $i70 >> 12;
+
+        $i13 = $i12 & 15;
+
+        $i14 = 224 | $i13;
+
+        virtualinvoke r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void write(int)>($i14);
+
+        $i71 = (int) c4;
+
+        $i15 = $i71 >> 6;
+
+        $i16 = $i15 & 63;
+
+        $i17 = 128 | $i16;
+
+        virtualinvoke r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void write(int)>($i17);
+
+        $i72 = (int) c4;
+
+        $i18 = $i72 >> 0;
+
+        $i19 = $i18 & 63;
+
+        $i20 = 128 | $i19;
+
+        virtualinvoke r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void write(int)>($i20);
+
+        goto label08;
+
+     label07:
+        $i73 = (int) c4;
+
+        $i6 = $i73 >> 6;
+
+        $i7 = $i6 & 31;
+
+        $i8 = 192 | $i7;
+
+        virtualinvoke r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void write(int)>($i8);
+
+        $i74 = (int) c4;
+
+        $i9 = $i74 >> 0;
+
+        $i10 = $i9 & 63;
+
+        $i11 = 128 | $i10;
+
+        virtualinvoke r1.<java.io.ObjectOutputStream$BlockDataOutputStream: void write(int)>($i11);
+
+     label08:
+        i59 = i59 + 1;
+
+        goto label02;
+
+     label09:
+        i58 = i58 + $i2;
+
+        goto label01;
+
+     label10:
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <java.io.ObjectOutputStream$BlockDataOutputStream: int CHAR_BUF_SIZE> = 256;
+
+        <java.io.ObjectOutputStream$BlockDataOutputStream: int MAX_HEADER_SIZE> = 5;
+
+        <java.io.ObjectOutputStream$BlockDataOutputStream: int MAX_BLOCK_SIZE> = 1024;
+
+        return;
+    }
+}

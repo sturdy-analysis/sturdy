@@ -1,0 +1,1031 @@
+public abstract class sun.awt.PlatformFont extends java.lang.Object implements java.awt.peer.FontPeer
+{
+    protected sun.awt.FontDescriptor[] componentFonts;
+    protected char defaultChar;
+    protected sun.awt.FontConfiguration fontConfig;
+    protected sun.awt.FontDescriptor defaultFont;
+    protected java.lang.String familyName;
+    private java.lang.Object[] fontCache;
+    protected static int FONTCACHESIZE;
+    protected static int FONTCACHEMASK;
+    protected static java.lang.String osVersion;
+
+    public void <init>(java.lang.String, int)
+    {
+        sun.awt.FontConfiguration $r2, $r8, $r21, $r23;
+        java.util.Locale $r4;
+        sun.awt.FontDescriptor $r12, $r14, $r17, $r19;
+        boolean $z0, $z1, $z2, $z3;
+        sun.font.SunFontManager $r1;
+        java.nio.charset.CharsetEncoder $r15;
+        sun.awt.PlatformFont r0;
+        int i0, $i2, i3, $i4;
+        java.lang.String r3, $r5, $r6, $r7, $r20, $r22;
+        sun.awt.FontDescriptor[] $r9, $r10, $r11, $r13, $r16, $r18, $r24;
+        char $c1;
+
+        r0 := @this: sun.awt.PlatformFont;
+
+        r3 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = staticinvoke <sun.font.SunFontManager: sun.font.SunFontManager getInstance()>();
+
+        $z0 = $r1 instanceof sun.java2d.FontSupport;
+
+        if $z0 == 0 goto label1;
+
+        $r23 = interfaceinvoke $r1.<sun.java2d.FontSupport: sun.awt.FontConfiguration getFontConfiguration()>();
+
+        r0.<sun.awt.PlatformFont: sun.awt.FontConfiguration fontConfig> = $r23;
+
+     label1:
+        $r2 = r0.<sun.awt.PlatformFont: sun.awt.FontConfiguration fontConfig>;
+
+        if $r2 != null goto label2;
+
+        return;
+
+     label2:
+        $r4 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r5 = virtualinvoke r3.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r4);
+
+        r0.<sun.awt.PlatformFont: java.lang.String familyName> = $r5;
+
+        $r6 = r0.<sun.awt.PlatformFont: java.lang.String familyName>;
+
+        $z1 = staticinvoke <sun.awt.FontConfiguration: boolean isLogicalFontFamilyName(java.lang.String)>($r6);
+
+        if $z1 != 0 goto label3;
+
+        $r21 = r0.<sun.awt.PlatformFont: sun.awt.FontConfiguration fontConfig>;
+
+        $r20 = r0.<sun.awt.PlatformFont: java.lang.String familyName>;
+
+        $r22 = virtualinvoke $r21.<sun.awt.FontConfiguration: java.lang.String getFallbackFamilyName(java.lang.String,java.lang.String)>($r20, "sansserif");
+
+        r0.<sun.awt.PlatformFont: java.lang.String familyName> = $r22;
+
+     label3:
+        $r8 = r0.<sun.awt.PlatformFont: sun.awt.FontConfiguration fontConfig>;
+
+        $r7 = r0.<sun.awt.PlatformFont: java.lang.String familyName>;
+
+        $r9 = virtualinvoke $r8.<sun.awt.FontConfiguration: sun.awt.FontDescriptor[] getFontDescriptors(java.lang.String,int)>($r7, i0);
+
+        r0.<sun.awt.PlatformFont: sun.awt.FontDescriptor[] componentFonts> = $r9;
+
+        $c1 = virtualinvoke r0.<sun.awt.PlatformFont: char getMissingGlyphCharacter()>();
+
+        r0.<sun.awt.PlatformFont: char defaultChar> = 63;
+
+        $r10 = r0.<sun.awt.PlatformFont: sun.awt.FontDescriptor[] componentFonts>;
+
+        $i2 = lengthof $r10;
+
+        if $i2 <= 0 goto label4;
+
+        $r18 = r0.<sun.awt.PlatformFont: sun.awt.FontDescriptor[] componentFonts>;
+
+        $r19 = $r18[0];
+
+        r0.<sun.awt.PlatformFont: sun.awt.FontDescriptor defaultFont> = $r19;
+
+     label4:
+        i3 = 0;
+
+     label5:
+        $r24 = r0.<sun.awt.PlatformFont: sun.awt.FontDescriptor[] componentFonts>;
+
+        $i4 = lengthof $r24;
+
+        if i3 >= $i4 goto label8;
+
+        $r11 = r0.<sun.awt.PlatformFont: sun.awt.FontDescriptor[] componentFonts>;
+
+        $r12 = $r11[i3];
+
+        $z2 = virtualinvoke $r12.<sun.awt.FontDescriptor: boolean isExcluded(char)>($c1);
+
+        if $z2 == 0 goto label6;
+
+        goto label7;
+
+     label6:
+        $r13 = r0.<sun.awt.PlatformFont: sun.awt.FontDescriptor[] componentFonts>;
+
+        $r14 = $r13[i3];
+
+        $r15 = $r14.<sun.awt.FontDescriptor: java.nio.charset.CharsetEncoder encoder>;
+
+        $z3 = virtualinvoke $r15.<java.nio.charset.CharsetEncoder: boolean canEncode(char)>($c1);
+
+        if $z3 == 0 goto label7;
+
+        $r16 = r0.<sun.awt.PlatformFont: sun.awt.FontDescriptor[] componentFonts>;
+
+        $r17 = $r16[i3];
+
+        r0.<sun.awt.PlatformFont: sun.awt.FontDescriptor defaultFont> = $r17;
+
+        r0.<sun.awt.PlatformFont: char defaultChar> = $c1;
+
+        goto label8;
+
+     label7:
+        i3 = i3 + 1;
+
+        goto label5;
+
+     label8:
+        return;
+    }
+
+    protected abstract char getMissingGlyphCharacter();
+
+    public sun.awt.CharsetString[] makeMultiCharsetString(java.lang.String)
+    {
+        sun.awt.CharsetString[] $r3;
+        int $i0;
+        char[] $r2;
+        sun.awt.PlatformFont r0;
+        java.lang.String r1;
+
+        r0 := @this: sun.awt.PlatformFont;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = virtualinvoke r1.<java.lang.String: char[] toCharArray()>();
+
+        $i0 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        $r3 = virtualinvoke r0.<sun.awt.PlatformFont: sun.awt.CharsetString[] makeMultiCharsetString(char[],int,int,boolean)>($r2, 0, $i0, 1);
+
+        return $r3;
+    }
+
+    public sun.awt.CharsetString[] makeMultiCharsetString(java.lang.String, boolean)
+    {
+        sun.awt.CharsetString[] $r3;
+        int $i0;
+        char[] $r2;
+        sun.awt.PlatformFont r0;
+        java.lang.String r1;
+        boolean z0;
+
+        r0 := @this: sun.awt.PlatformFont;
+
+        r1 := @parameter0: java.lang.String;
+
+        z0 := @parameter1: boolean;
+
+        $r2 = virtualinvoke r1.<java.lang.String: char[] toCharArray()>();
+
+        $i0 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        $r3 = virtualinvoke r0.<sun.awt.PlatformFont: sun.awt.CharsetString[] makeMultiCharsetString(char[],int,int,boolean)>($r2, 0, $i0, z0);
+
+        return $r3;
+    }
+
+    public sun.awt.CharsetString[] makeMultiCharsetString(char[], int, int)
+    {
+        sun.awt.CharsetString[] $r2;
+        int i0, i1;
+        char[] r1;
+        sun.awt.PlatformFont r0;
+
+        r0 := @this: sun.awt.PlatformFont;
+
+        r1 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r2 = virtualinvoke r0.<sun.awt.PlatformFont: sun.awt.CharsetString[] makeMultiCharsetString(char[],int,int,boolean)>(r1, i0, i1, 1);
+
+        return $r2;
+    }
+
+    public sun.awt.CharsetString[] makeMultiCharsetString(char[], int, int, boolean)
+    {
+        java.util.Vector $r9, r23;
+        sun.awt.FontDescriptor $r11, $r13, $r17, $r19, r24, r25;
+        boolean z0, $z1, $z2, $z3, $z4, z5, z6;
+        sun.awt.CharsetString[] $r22, r26;
+        sun.awt.CharsetString $r3, $r5, $r8;
+        java.nio.charset.CharsetEncoder $r14, $r20;
+        sun.awt.PlatformFont r1;
+        int i0, $i1, $i2, $i3, $i4, i5, $i6, $i7, $i8, i12, i13, i14, i17, i18;
+        sun.awt.FontDescriptor[] $r2, $r7, $r10, $r12, $r15, $r16, $r18, $r21;
+        char $c9, $c10, c11, c15, c16;
+        char[] r0, r6;
+        java.lang.Object $r4;
+
+        r1 := @this: sun.awt.PlatformFont;
+
+        r6 := @parameter0: char[];
+
+        i5 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        z0 := @parameter3: boolean;
+
+        if i0 >= 1 goto label01;
+
+        $r22 = newarray (sun.awt.CharsetString)[0];
+
+        return $r22;
+
+     label01:
+        r23 = null;
+
+        r0 = newarray (char)[i0];
+
+        c11 = r1.<sun.awt.PlatformFont: char defaultChar>;
+
+        z5 = 0;
+
+        r24 = r1.<sun.awt.PlatformFont: sun.awt.FontDescriptor defaultFont>;
+
+        i12 = 0;
+
+     label02:
+        $r2 = r1.<sun.awt.PlatformFont: sun.awt.FontDescriptor[] componentFonts>;
+
+        $i1 = lengthof $r2;
+
+        if i12 >= $i1 goto label05;
+
+        $r16 = r1.<sun.awt.PlatformFont: sun.awt.FontDescriptor[] componentFonts>;
+
+        $r17 = $r16[i12];
+
+        $c9 = r6[i5];
+
+        $z3 = virtualinvoke $r17.<sun.awt.FontDescriptor: boolean isExcluded(char)>($c9);
+
+        if $z3 == 0 goto label03;
+
+        goto label04;
+
+     label03:
+        $r18 = r1.<sun.awt.PlatformFont: sun.awt.FontDescriptor[] componentFonts>;
+
+        $r19 = $r18[i12];
+
+        $r20 = $r19.<sun.awt.FontDescriptor: java.nio.charset.CharsetEncoder encoder>;
+
+        $c10 = r6[i5];
+
+        $z4 = virtualinvoke $r20.<java.nio.charset.CharsetEncoder: boolean canEncode(char)>($c10);
+
+        if $z4 == 0 goto label04;
+
+        $r21 = r1.<sun.awt.PlatformFont: sun.awt.FontDescriptor[] componentFonts>;
+
+        r24 = $r21[i12];
+
+        c11 = r6[i5];
+
+        z5 = 1;
+
+        goto label05;
+
+     label04:
+        i12 = i12 + 1;
+
+        goto label02;
+
+     label05:
+        if z0 != 0 goto label06;
+
+        if z5 != 0 goto label06;
+
+        return null;
+
+     label06:
+        r0[0] = c11;
+
+        i13 = 0;
+
+        i14 = 1;
+
+     label07:
+        if i14 >= i0 goto label15;
+
+        $i6 = i5 + i14;
+
+        c15 = r6[$i6];
+
+        r25 = r1.<sun.awt.PlatformFont: sun.awt.FontDescriptor defaultFont>;
+
+        c16 = r1.<sun.awt.PlatformFont: char defaultChar>;
+
+        z6 = 0;
+
+        i17 = 0;
+
+     label08:
+        $r7 = r1.<sun.awt.PlatformFont: sun.awt.FontDescriptor[] componentFonts>;
+
+        $i7 = lengthof $r7;
+
+        if i17 >= $i7 goto label11;
+
+        $r10 = r1.<sun.awt.PlatformFont: sun.awt.FontDescriptor[] componentFonts>;
+
+        $r11 = $r10[i17];
+
+        $z1 = virtualinvoke $r11.<sun.awt.FontDescriptor: boolean isExcluded(char)>(c15);
+
+        if $z1 == 0 goto label09;
+
+        goto label10;
+
+     label09:
+        $r12 = r1.<sun.awt.PlatformFont: sun.awt.FontDescriptor[] componentFonts>;
+
+        $r13 = $r12[i17];
+
+        $r14 = $r13.<sun.awt.FontDescriptor: java.nio.charset.CharsetEncoder encoder>;
+
+        $z2 = virtualinvoke $r14.<java.nio.charset.CharsetEncoder: boolean canEncode(char)>(c15);
+
+        if $z2 == 0 goto label10;
+
+        $r15 = r1.<sun.awt.PlatformFont: sun.awt.FontDescriptor[] componentFonts>;
+
+        r25 = $r15[i17];
+
+        c16 = c15;
+
+        z6 = 1;
+
+        goto label11;
+
+     label10:
+        i17 = i17 + 1;
+
+        goto label08;
+
+     label11:
+        if z0 != 0 goto label12;
+
+        if z6 != 0 goto label12;
+
+        return null;
+
+     label12:
+        r0[i14] = c16;
+
+        if r24 == r25 goto label14;
+
+        if r23 != null goto label13;
+
+        $r9 = new java.util.Vector;
+
+        specialinvoke $r9.<java.util.Vector: void <init>(int)>(3);
+
+        r23 = $r9;
+
+     label13:
+        $r8 = new sun.awt.CharsetString;
+
+        $i8 = i14 - i13;
+
+        specialinvoke $r8.<sun.awt.CharsetString: void <init>(char[],int,int,sun.awt.FontDescriptor)>(r0, i13, $i8, r24);
+
+        virtualinvoke r23.<java.util.Vector: void addElement(java.lang.Object)>($r8);
+
+        r24 = r25;
+
+        i13 = i14;
+
+     label14:
+        i14 = i14 + 1;
+
+        goto label07;
+
+     label15:
+        $r3 = new sun.awt.CharsetString;
+
+        $i2 = i0 - i13;
+
+        specialinvoke $r3.<sun.awt.CharsetString: void <init>(char[],int,int,sun.awt.FontDescriptor)>(r0, i13, $i2, r24);
+
+        if r23 != null goto label16;
+
+        r26 = newarray (sun.awt.CharsetString)[1];
+
+        r26[0] = $r3;
+
+        goto label18;
+
+     label16:
+        virtualinvoke r23.<java.util.Vector: void addElement(java.lang.Object)>($r3);
+
+        $i3 = virtualinvoke r23.<java.util.Vector: int size()>();
+
+        r26 = newarray (sun.awt.CharsetString)[$i3];
+
+        i18 = 0;
+
+     label17:
+        $i4 = virtualinvoke r23.<java.util.Vector: int size()>();
+
+        if i18 >= $i4 goto label18;
+
+        $r4 = virtualinvoke r23.<java.util.Vector: java.lang.Object elementAt(int)>(i18);
+
+        $r5 = (sun.awt.CharsetString) $r4;
+
+        r26[i18] = $r5;
+
+        i18 = i18 + 1;
+
+        goto label17;
+
+     label18:
+        return r26;
+    }
+
+    public boolean mightHaveMultiFontMetrics()
+    {
+        sun.awt.PlatformFont r0;
+        sun.awt.FontConfiguration $r1;
+        boolean $z0;
+
+        r0 := @this: sun.awt.PlatformFont;
+
+        $r1 = r0.<sun.awt.PlatformFont: sun.awt.FontConfiguration fontConfig>;
+
+        if $r1 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public java.lang.Object[] makeConvertedMultiFontString(java.lang.String)
+    {
+        java.lang.Object[] $r3;
+        int $i0;
+        char[] $r2;
+        sun.awt.PlatformFont r0;
+        java.lang.String r1;
+
+        r0 := @this: sun.awt.PlatformFont;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = virtualinvoke r1.<java.lang.String: char[] toCharArray()>();
+
+        $i0 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        $r3 = virtualinvoke r0.<sun.awt.PlatformFont: java.lang.Object[] makeConvertedMultiFontChars(char[],int,int)>($r2, 0, $i0);
+
+        return $r3;
+    }
+
+    public java.lang.Object[] makeConvertedMultiFontChars(char[], int, int)
+    {
+        byte[] r27, $r35;
+        byte $b5, $b7, $b9, $b10, $b13, $b14, $b15, $b16, $b17, $b18, $b19, $b20, $b21, $b23, $b39, $b41, $b43, $b44, $b47, $b50, $b53, $b56;
+        java.lang.Object[] $r3, r26, $r31, r32;
+        java.lang.ArrayIndexOutOfBoundsException $r37;
+        sun.awt.FontDescriptor $r10, $r11, $r13, r20, r28, r30, $r33;
+        java.nio.charset.CharsetEncoder $r7, $r12, $r14, $r21, $r22;
+        int i0, i1, i2, $i3, $i4, $i6, $i8, $i11, i12, $i22, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i40, $i42, $i46, $i55, $i59, i60, i61, i62, i65, i67, i68, $i69, i70, i71, i72, i73, i74, i75, i76, i77, $i78, $i79, $i80, $i81, $i82, $i84, $i86;
+        java.io.PrintStream $r25;
+        sun.awt.FontDescriptor[] $r5, $r19;
+        java.lang.Object $r4;
+        java.lang.Exception $r24;
+        char[] r1, $r23;
+        java.nio.ByteBuffer $r9, $r15, $r16, $r17, $r18, $r34, $r36;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.nio.CharBuffer $r8;
+        float $f0, $f1;
+        sun.awt.PlatformFont r2;
+        sun.awt.PlatformFont$PlatformFontCache r29, $r38;
+        char $c45, $c48, $c49, $c51, $c52, $c54, $c57, $c58, c63, c64, $c66;
+
+        r2 := @this: sun.awt.PlatformFont;
+
+        r1 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r26 = newarray (java.lang.Object)[2];
+
+        r27 = null;
+
+        i60 = i0;
+
+        i61 = 0;
+
+        i62 = 0;
+
+        r28 = null;
+
+        i2 = i0 + i1;
+
+        if i0 < 0 goto label01;
+
+        $i3 = lengthof r1;
+
+        if i2 <= $i3 goto label02;
+
+     label01:
+        $r37 = new java.lang.ArrayIndexOutOfBoundsException;
+
+        specialinvoke $r37.<java.lang.ArrayIndexOutOfBoundsException: void <init>()>();
+
+        throw $r37;
+
+     label02:
+        if i0 < i2 goto label03;
+
+        return null;
+
+     label03:
+        if i60 >= i2 goto label24;
+
+        c63 = r1[i60];
+
+        $i11 = <sun.awt.PlatformFont: int FONTCACHEMASK>;
+
+        $i78 = (int) c63;
+
+        i12 = $i78 & $i11;
+
+        $r3 = virtualinvoke r2.<sun.awt.PlatformFont: java.lang.Object[] getFontCache()>();
+
+        $r4 = $r3[i12];
+
+        r29 = (sun.awt.PlatformFont$PlatformFontCache) $r4;
+
+        if r29 == null goto label04;
+
+        $c57 = r29.<sun.awt.PlatformFont$PlatformFontCache: char uniChar>;
+
+        $i79 = (int) $c57;
+
+        $i80 = (int) c63;
+
+        if $i79 == $i80 goto label14;
+
+     label04:
+        r30 = r2.<sun.awt.PlatformFont: sun.awt.FontDescriptor defaultFont>;
+
+        c64 = r2.<sun.awt.PlatformFont: char defaultChar>;
+
+        $c58 = r1[i60];
+
+        $r5 = r2.<sun.awt.PlatformFont: sun.awt.FontDescriptor[] componentFonts>;
+
+        $i59 = lengthof $r5;
+
+        i65 = 0;
+
+     label05:
+        if i65 >= $i59 goto label08;
+
+        $r19 = r2.<sun.awt.PlatformFont: sun.awt.FontDescriptor[] componentFonts>;
+
+        r20 = $r19[i65];
+
+        $r21 = r20.<sun.awt.FontDescriptor: java.nio.charset.CharsetEncoder encoder>;
+
+        virtualinvoke $r21.<java.nio.charset.CharsetEncoder: java.nio.charset.CharsetEncoder reset()>();
+
+        $z2 = virtualinvoke r20.<sun.awt.FontDescriptor: boolean isExcluded(char)>($c58);
+
+        if $z2 == 0 goto label06;
+
+        goto label07;
+
+     label06:
+        $r22 = r20.<sun.awt.FontDescriptor: java.nio.charset.CharsetEncoder encoder>;
+
+        $z3 = virtualinvoke $r22.<java.nio.charset.CharsetEncoder: boolean canEncode(char)>($c58);
+
+        if $z3 == 0 goto label07;
+
+        r30 = r20;
+
+        c64 = $c58;
+
+        goto label08;
+
+     label07:
+        i65 = i65 + 1;
+
+        goto label05;
+
+     label08:
+        $r23 = newarray (char)[1];
+
+        $r23[0] = c64;
+
+        $r38 = new sun.awt.PlatformFont$PlatformFontCache;
+
+        specialinvoke $r38.<sun.awt.PlatformFont$PlatformFontCache: void <init>(sun.awt.PlatformFont)>(r2);
+
+        r29 = $r38;
+
+        $z0 = virtualinvoke r30.<sun.awt.FontDescriptor: boolean useUnicode()>();
+
+        if $z0 == 0 goto label10;
+
+        $z1 = <sun.awt.FontDescriptor: boolean isLE>;
+
+        if $z1 == 0 goto label09;
+
+        $r17 = $r38.<sun.awt.PlatformFont$PlatformFontCache: java.nio.ByteBuffer bb>;
+
+        $c51 = $r23[0];
+
+        $c52 = $c51 & 255;
+
+        $b53 = (byte) $c52;
+
+        virtualinvoke $r17.<java.nio.ByteBuffer: java.nio.ByteBuffer put(byte)>($b53);
+
+        $r18 = $r38.<sun.awt.PlatformFont$PlatformFontCache: java.nio.ByteBuffer bb>;
+
+        $c54 = $r23[0];
+
+        $i81 = (int) $c54;
+
+        $i55 = $i81 >> 8;
+
+        $b56 = (byte) $i55;
+
+        virtualinvoke $r18.<java.nio.ByteBuffer: java.nio.ByteBuffer put(byte)>($b56);
+
+        goto label11;
+
+     label09:
+        $r15 = $r38.<sun.awt.PlatformFont$PlatformFontCache: java.nio.ByteBuffer bb>;
+
+        $c45 = $r23[0];
+
+        $i82 = (int) $c45;
+
+        $i46 = $i82 >> 8;
+
+        $b47 = (byte) $i46;
+
+        virtualinvoke $r15.<java.nio.ByteBuffer: java.nio.ByteBuffer put(byte)>($b47);
+
+        $r16 = $r38.<sun.awt.PlatformFont$PlatformFontCache: java.nio.ByteBuffer bb>;
+
+        $c48 = $r23[0];
+
+        $c49 = $c48 & 255;
+
+        $b50 = (byte) $c49;
+
+        virtualinvoke $r16.<java.nio.ByteBuffer: java.nio.ByteBuffer put(byte)>($b50);
+
+        goto label11;
+
+     label10:
+        $r7 = r30.<sun.awt.FontDescriptor: java.nio.charset.CharsetEncoder encoder>;
+
+        $r8 = staticinvoke <java.nio.CharBuffer: java.nio.CharBuffer wrap(char[])>($r23);
+
+        $r9 = $r38.<sun.awt.PlatformFont$PlatformFontCache: java.nio.ByteBuffer bb>;
+
+        virtualinvoke $r7.<java.nio.charset.CharsetEncoder: java.nio.charset.CoderResult encode(java.nio.CharBuffer,java.nio.ByteBuffer,boolean)>($r8, $r9, 1);
+
+     label11:
+        $r38.<sun.awt.PlatformFont$PlatformFontCache: sun.awt.FontDescriptor fontDescriptor> = r30;
+
+        $c66 = r1[i60];
+
+        $r38.<sun.awt.PlatformFont$PlatformFontCache: char uniChar> = $c66;
+
+        $r31 = virtualinvoke r2.<sun.awt.PlatformFont: java.lang.Object[] getFontCache()>();
+
+        $r31[i12] = $r38;
+
+     label12:
+        goto label14;
+
+     label13:
+        $r24 := @caughtexception;
+
+        $r25 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r25.<java.io.PrintStream: void println(java.lang.Object)>($r24);
+
+        virtualinvoke $r24.<java.lang.Exception: void printStackTrace()>();
+
+        return null;
+
+     label14:
+        $r10 = r29.<sun.awt.PlatformFont$PlatformFontCache: sun.awt.FontDescriptor fontDescriptor>;
+
+        if r28 == $r10 goto label19;
+
+        if r28 == null goto label16;
+
+        i67 = i62 + 1;
+
+        r26[i62] = r28;
+
+        i62 = i67 + 1;
+
+        r26[i67] = r27;
+
+        if r27 == null goto label15;
+
+        $i84 = (int) -4;
+
+        i68 = i61 + $i84;
+
+        $i38 = i68 >> 24;
+
+        $b39 = (byte) $i38;
+
+        r27[0] = $b39;
+
+        $i40 = i68 >> 16;
+
+        $b41 = (byte) $i40;
+
+        r27[1] = $b41;
+
+        $i42 = i68 >> 8;
+
+        $b43 = (byte) $i42;
+
+        r27[2] = $b43;
+
+        $b44 = (byte) i68;
+
+        r27[3] = $b44;
+
+     label15:
+        $i34 = lengthof r26;
+
+        if i62 < $i34 goto label16;
+
+        $i35 = lengthof r26;
+
+        $i36 = $i35 * 2;
+
+        r32 = newarray (java.lang.Object)[$i36];
+
+        $i37 = lengthof r26;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r26, 0, r32, 0, $i37);
+
+        r26 = r32;
+
+     label16:
+        $r33 = r29.<sun.awt.PlatformFont$PlatformFontCache: sun.awt.FontDescriptor fontDescriptor>;
+
+        $z4 = virtualinvoke $r33.<sun.awt.FontDescriptor: boolean useUnicode()>();
+
+        if $z4 == 0 goto label17;
+
+        $i29 = i2 - i60;
+
+        $i30 = $i29 + 1;
+
+        $r13 = r29.<sun.awt.PlatformFont$PlatformFontCache: sun.awt.FontDescriptor fontDescriptor>;
+
+        $r14 = $r13.<sun.awt.FontDescriptor: java.nio.charset.CharsetEncoder unicodeEncoder>;
+
+        $f1 = virtualinvoke $r14.<java.nio.charset.CharsetEncoder: float maxBytesPerChar()>();
+
+        $i31 = (int) $f1;
+
+        $i32 = $i30 * $i31;
+
+        $i33 = $i32 + 4;
+
+        r27 = newarray (byte)[$i33];
+
+        goto label18;
+
+     label17:
+        $i24 = i2 - i60;
+
+        $i25 = $i24 + 1;
+
+        $r11 = r29.<sun.awt.PlatformFont$PlatformFontCache: sun.awt.FontDescriptor fontDescriptor>;
+
+        $r12 = $r11.<sun.awt.FontDescriptor: java.nio.charset.CharsetEncoder encoder>;
+
+        $f0 = virtualinvoke $r12.<java.nio.charset.CharsetEncoder: float maxBytesPerChar()>();
+
+        $i26 = (int) $f0;
+
+        $i27 = $i25 * $i26;
+
+        $i28 = $i27 + 4;
+
+        r27 = newarray (byte)[$i28];
+
+     label18:
+        i61 = 4;
+
+        r28 = r29.<sun.awt.PlatformFont$PlatformFontCache: sun.awt.FontDescriptor fontDescriptor>;
+
+     label19:
+        $r34 = r29.<sun.awt.PlatformFont$PlatformFontCache: java.nio.ByteBuffer bb>;
+
+        $r35 = virtualinvoke $r34.<java.nio.ByteBuffer: byte[] array()>();
+
+        $r36 = r29.<sun.awt.PlatformFont$PlatformFontCache: java.nio.ByteBuffer bb>;
+
+        $i69 = virtualinvoke $r36.<java.nio.ByteBuffer: int position()>();
+
+        if $i69 != 1 goto label20;
+
+        $i22 = i61;
+
+        i61 = i61 + 1;
+
+        $b23 = $r35[0];
+
+        r27[$i22] = $b23;
+
+        goto label23;
+
+     label20:
+        if $i69 != 2 goto label21;
+
+        i70 = i61 + 1;
+
+        $b20 = $r35[0];
+
+        r27[i61] = $b20;
+
+        i61 = i70 + 1;
+
+        $b21 = $r35[1];
+
+        r27[i70] = $b21;
+
+        goto label23;
+
+     label21:
+        if $i69 != 3 goto label22;
+
+        i71 = i61 + 1;
+
+        $b17 = $r35[0];
+
+        r27[i61] = $b17;
+
+        i72 = i71 + 1;
+
+        $b18 = $r35[1];
+
+        r27[i71] = $b18;
+
+        i61 = i72 + 1;
+
+        $b19 = $r35[2];
+
+        r27[i72] = $b19;
+
+        goto label23;
+
+     label22:
+        if $i69 != 4 goto label23;
+
+        i73 = i61 + 1;
+
+        $b13 = $r35[0];
+
+        r27[i61] = $b13;
+
+        i74 = i73 + 1;
+
+        $b14 = $r35[1];
+
+        r27[i73] = $b14;
+
+        i75 = i74 + 1;
+
+        $b15 = $r35[2];
+
+        r27[i74] = $b15;
+
+        i61 = i75 + 1;
+
+        $b16 = $r35[3];
+
+        r27[i75] = $b16;
+
+     label23:
+        i60 = i60 + 1;
+
+        goto label03;
+
+     label24:
+        i76 = i62 + 1;
+
+        r26[i62] = r28;
+
+        r26[i76] = r27;
+
+        if r27 == null goto label25;
+
+        $i86 = (int) -4;
+
+        i77 = i61 + $i86;
+
+        $i4 = i77 >> 24;
+
+        $b5 = (byte) $i4;
+
+        r27[0] = $b5;
+
+        $i6 = i77 >> 16;
+
+        $b7 = (byte) $i6;
+
+        r27[1] = $b7;
+
+        $i8 = i77 >> 8;
+
+        $b9 = (byte) $i8;
+
+        r27[2] = $b9;
+
+        $b10 = (byte) i77;
+
+        r27[3] = $b10;
+
+     label25:
+        return r26;
+
+        catch java.lang.Exception from label08 to label12 with label13;
+    }
+
+    protected final java.lang.Object[] getFontCache()
+    {
+        java.lang.Object[] $r1, $r2, $r3;
+        int $i0;
+        sun.awt.PlatformFont r0;
+
+        r0 := @this: sun.awt.PlatformFont;
+
+        $r1 = r0.<sun.awt.PlatformFont: java.lang.Object[] fontCache>;
+
+        if $r1 != null goto label1;
+
+        $i0 = <sun.awt.PlatformFont: int FONTCACHESIZE>;
+
+        $r3 = newarray (java.lang.Object)[$i0];
+
+        r0.<sun.awt.PlatformFont: java.lang.Object[] fontCache> = $r3;
+
+     label1:
+        $r2 = r0.<sun.awt.PlatformFont: java.lang.Object[] fontCache>;
+
+        return $r2;
+    }
+
+    private static native void initIDs();
+
+    static void <clinit>()
+    {
+        int $i0, $i1;
+
+        staticinvoke <sun.awt.NativeLibLoader: void loadLibraries()>();
+
+        staticinvoke <sun.awt.PlatformFont: void initIDs()>();
+
+        <sun.awt.PlatformFont: int FONTCACHESIZE> = 256;
+
+        $i0 = <sun.awt.PlatformFont: int FONTCACHESIZE>;
+
+        $i1 = $i0 - 1;
+
+        <sun.awt.PlatformFont: int FONTCACHEMASK> = $i1;
+
+        return;
+    }
+}

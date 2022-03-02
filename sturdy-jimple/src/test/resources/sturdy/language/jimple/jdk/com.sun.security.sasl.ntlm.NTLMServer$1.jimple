@@ -1,0 +1,112 @@
+class com.sun.security.sasl.ntlm.NTLMServer$1 extends com.sun.security.ntlm.Server
+{
+    final javax.security.auth.callback.CallbackHandler val$cbh;
+    final com.sun.security.sasl.ntlm.NTLMServer this$0;
+
+    void <init>(com.sun.security.sasl.ntlm.NTLMServer, java.lang.String, java.lang.String, javax.security.auth.callback.CallbackHandler)
+    {
+        javax.security.auth.callback.CallbackHandler r2;
+        java.lang.String r3, r4;
+        com.sun.security.sasl.ntlm.NTLMServer r1;
+        com.sun.security.sasl.ntlm.NTLMServer$1 r0;
+
+        r0 := @this: com.sun.security.sasl.ntlm.NTLMServer$1;
+
+        r1 := @parameter0: com.sun.security.sasl.ntlm.NTLMServer;
+
+        r3 := @parameter1: java.lang.String;
+
+        r4 := @parameter2: java.lang.String;
+
+        r2 := @parameter3: javax.security.auth.callback.CallbackHandler;
+
+        r0.<com.sun.security.sasl.ntlm.NTLMServer$1: com.sun.security.sasl.ntlm.NTLMServer this$0> = r1;
+
+        r0.<com.sun.security.sasl.ntlm.NTLMServer$1: javax.security.auth.callback.CallbackHandler val$cbh> = r2;
+
+        specialinvoke r0.<com.sun.security.ntlm.Server: void <init>(java.lang.String,java.lang.String)>(r3, r4);
+
+        return;
+    }
+
+    public char[] getPassword(java.lang.String, java.lang.String)
+    {
+        javax.security.sasl.RealmCallback $r10;
+        javax.security.auth.callback.PasswordCallback $r3;
+        javax.security.auth.callback.UnsupportedCallbackException $r8;
+        java.io.IOException $r9;
+        com.sun.security.sasl.ntlm.NTLMServer$1 r4;
+        javax.security.auth.callback.Callback[] $r5;
+        javax.security.auth.callback.NameCallback $r1;
+        javax.security.auth.callback.CallbackHandler $r6;
+        char[] $r7;
+        java.lang.String r0, r2;
+        boolean $z0;
+
+        r4 := @this: com.sun.security.sasl.ntlm.NTLMServer$1;
+
+        r0 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+     label1:
+        if r0 == null goto label2;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        $r10 = new javax.security.sasl.RealmCallback;
+
+        specialinvoke $r10.<javax.security.sasl.RealmCallback: void <init>(java.lang.String)>("Domain: ");
+
+        goto label4;
+
+     label3:
+        $r10 = new javax.security.sasl.RealmCallback;
+
+        specialinvoke $r10.<javax.security.sasl.RealmCallback: void <init>(java.lang.String,java.lang.String)>("Domain: ", r0);
+
+     label4:
+        $r1 = new javax.security.auth.callback.NameCallback;
+
+        specialinvoke $r1.<javax.security.auth.callback.NameCallback: void <init>(java.lang.String,java.lang.String)>("Name: ", r2);
+
+        $r3 = new javax.security.auth.callback.PasswordCallback;
+
+        specialinvoke $r3.<javax.security.auth.callback.PasswordCallback: void <init>(java.lang.String,boolean)>("Password: ", 0);
+
+        $r6 = r4.<com.sun.security.sasl.ntlm.NTLMServer$1: javax.security.auth.callback.CallbackHandler val$cbh>;
+
+        $r5 = newarray (javax.security.auth.callback.Callback)[3];
+
+        $r5[0] = $r10;
+
+        $r5[1] = $r1;
+
+        $r5[2] = $r3;
+
+        interfaceinvoke $r6.<javax.security.auth.callback.CallbackHandler: void handle(javax.security.auth.callback.Callback[])>($r5);
+
+        $r7 = virtualinvoke $r3.<javax.security.auth.callback.PasswordCallback: char[] getPassword()>();
+
+        virtualinvoke $r3.<javax.security.auth.callback.PasswordCallback: void clearPassword()>();
+
+     label5:
+        return $r7;
+
+     label6:
+        $r9 := @caughtexception;
+
+        return null;
+
+     label7:
+        $r8 := @caughtexception;
+
+        return null;
+
+        catch java.io.IOException from label1 to label5 with label6;
+        catch javax.security.auth.callback.UnsupportedCallbackException from label1 to label5 with label7;
+    }
+}

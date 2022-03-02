@@ -1,0 +1,1382 @@
+public class com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl extends com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl
+{
+    protected static final int SCANNER_STATE_XML_DECL;
+    protected static final int SCANNER_STATE_PROLOG;
+    protected static final int SCANNER_STATE_TRAILING_MISC;
+    protected static final int SCANNER_STATE_DTD_INTERNAL_DECLS;
+    protected static final int SCANNER_STATE_DTD_EXTERNAL;
+    protected static final int SCANNER_STATE_DTD_EXTERNAL_DECLS;
+    protected static final int SCANNER_STATE_NO_SUCH_ELEMENT_EXCEPTION;
+    protected static final java.lang.String DOCUMENT_SCANNER;
+    protected static final java.lang.String LOAD_EXTERNAL_DTD;
+    protected static final java.lang.String DISALLOW_DOCTYPE_DECL_FEATURE;
+    protected static final java.lang.String DTD_SCANNER;
+    protected static final java.lang.String VALIDATION_MANAGER;
+    protected static final java.lang.String NAMESPACE_CONTEXT;
+    private static final java.lang.String[] RECOGNIZED_FEATURES;
+    private static final java.lang.Boolean[] FEATURE_DEFAULTS;
+    private static final java.lang.String[] RECOGNIZED_PROPERTIES;
+    private static final java.lang.Object[] PROPERTY_DEFAULTS;
+    protected com.sun.org.apache.xerces.internal.xni.parser.XMLDTDScanner fDTDScanner;
+    protected com.sun.org.apache.xerces.internal.impl.validation.ValidationManager fValidationManager;
+    protected com.sun.org.apache.xerces.internal.util.XMLStringBuffer fDTDDecl;
+    protected boolean fReadingDTD;
+    protected boolean fAddedListener;
+    protected java.lang.String fDoctypeName;
+    protected java.lang.String fDoctypePublicId;
+    protected java.lang.String fDoctypeSystemId;
+    protected com.sun.org.apache.xerces.internal.xni.NamespaceContext fNamespaceContext;
+    protected boolean fLoadExternalDTD;
+    protected boolean fSeenDoctypeDecl;
+    protected boolean fScanEndElement;
+    protected com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$Driver fXMLDeclDriver;
+    protected com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$Driver fPrologDriver;
+    protected com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$Driver fDTDDriver;
+    protected com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$Driver fTrailingMiscDriver;
+    protected int fStartPos;
+    protected int fEndPos;
+    protected boolean fSeenInternalSubset;
+    private java.lang.String[] fStrings;
+    private com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource fExternalSubsetSource;
+    private final com.sun.org.apache.xerces.internal.impl.dtd.XMLDTDDescription fDTDDescription;
+    private static final char[] DOCTYPE;
+    private static final char[] COMMENTSTRING;
+
+    public void <init>()
+    {
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl r0;
+        com.sun.org.apache.xerces.internal.impl.dtd.XMLDTDDescription $r6;
+        com.sun.org.apache.xerces.internal.util.NamespaceSupport $r1;
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl$XMLDeclDriver $r2;
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl$PrologDriver $r3;
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl$TrailingMiscDriver $r4;
+        java.lang.String[] $r5;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl: void <init>()>();
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.parser.XMLDTDScanner fDTDScanner> = null;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.util.XMLStringBuffer fDTDDecl> = null;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: boolean fReadingDTD> = 0;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: boolean fAddedListener> = 0;
+
+        $r1 = new com.sun.org.apache.xerces.internal.util.NamespaceSupport;
+
+        specialinvoke $r1.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: void <init>()>();
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.NamespaceContext fNamespaceContext> = $r1;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: boolean fLoadExternalDTD> = 1;
+
+        $r2 = new com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl$XMLDeclDriver;
+
+        specialinvoke $r2.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl$XMLDeclDriver: void <init>(com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl)>(r0);
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$Driver fXMLDeclDriver> = $r2;
+
+        $r3 = new com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl$PrologDriver;
+
+        specialinvoke $r3.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl$PrologDriver: void <init>(com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl)>(r0);
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$Driver fPrologDriver> = $r3;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$Driver fDTDDriver> = null;
+
+        $r4 = new com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl$TrailingMiscDriver;
+
+        specialinvoke $r4.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl$TrailingMiscDriver: void <init>(com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl)>(r0);
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$Driver fTrailingMiscDriver> = $r4;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: int fStartPos> = 0;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: int fEndPos> = 0;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: boolean fSeenInternalSubset> = 0;
+
+        $r5 = newarray (java.lang.String)[3];
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String[] fStrings> = $r5;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource fExternalSubsetSource> = null;
+
+        $r6 = new com.sun.org.apache.xerces.internal.impl.dtd.XMLDTDDescription;
+
+        specialinvoke $r6.<com.sun.org.apache.xerces.internal.impl.dtd.XMLDTDDescription: void <init>(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)>(null, null, null, null, null);
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.dtd.XMLDTDDescription fDTDDescription> = $r6;
+
+        return;
+    }
+
+    public void setInputSource(com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource) throws java.io.IOException
+    {
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl r0;
+        com.sun.org.apache.xerces.internal.impl.XMLEntityManager $r1, $r3;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource r2;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+
+        r2 := @parameter0: com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLEntityManager fEntityManager>;
+
+        virtualinvoke $r1.<com.sun.org.apache.xerces.internal.impl.XMLEntityManager: void setEntityHandler(com.sun.org.apache.xerces.internal.impl.XMLEntityHandler)>(r0);
+
+        $r3 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLEntityManager fEntityManager>;
+
+        virtualinvoke $r3.<com.sun.org.apache.xerces.internal.impl.XMLEntityManager: void startDocumentEntity(com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource)>(r2);
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: void setScannerState(int)>(7);
+
+        return;
+    }
+
+    public int getScannetState()
+    {
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl r0;
+        int $i0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+
+        $i0 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: int fScannerState>;
+
+        return $i0;
+    }
+
+    public void reset(com.sun.org.apache.xerces.internal.impl.PropertyManager)
+    {
+        com.sun.org.apache.xerces.internal.xni.parser.XMLDTDScanner $r8, $r11;
+        java.lang.Boolean $r4, $r6;
+        boolean $z0, $z1, $z2;
+        com.sun.org.apache.xerces.internal.impl.PropertyManager r1;
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$Driver $r7;
+        com.sun.org.apache.xerces.internal.util.XMLStringBuffer $r9, $r10;
+        com.sun.org.apache.xerces.internal.impl.XMLDTDScannerImpl $r12;
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl r0;
+        com.sun.org.apache.xerces.internal.xni.NamespaceContext $r2;
+        java.lang.Object $r3, $r5;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+
+        r1 := @parameter0: com.sun.org.apache.xerces.internal.impl.PropertyManager;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl: void reset(com.sun.org.apache.xerces.internal.impl.PropertyManager)>(r1);
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String fDoctypeName> = null;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String fDoctypePublicId> = null;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String fDoctypeSystemId> = null;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: boolean fSeenDoctypeDecl> = 0;
+
+        $r2 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.NamespaceContext fNamespaceContext>;
+
+        interfaceinvoke $r2.<com.sun.org.apache.xerces.internal.xni.NamespaceContext: void reset()>();
+
+        $r3 = virtualinvoke r1.<com.sun.org.apache.xerces.internal.impl.PropertyManager: java.lang.Object getProperty(java.lang.String)>("javax.xml.stream.supportDTD");
+
+        $r4 = (java.lang.Boolean) $r3;
+
+        $z0 = virtualinvoke $r4.<java.lang.Boolean: boolean booleanValue()>();
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: boolean fSupportDTD> = $z0;
+
+        $r5 = virtualinvoke r1.<com.sun.org.apache.xerces.internal.impl.PropertyManager: java.lang.Object getProperty(java.lang.String)>("http://java.sun.com/xml/stream/properties/ignore-external-dtd");
+
+        $r6 = (java.lang.Boolean) $r5;
+
+        $z1 = virtualinvoke $r6.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z1 != 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: boolean fLoadExternalDTD> = $z2;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: void setScannerState(int)>(7);
+
+        $r7 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$Driver fXMLDeclDriver>;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: void setDriver(com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$Driver)>($r7);
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: boolean fSeenInternalSubset> = 0;
+
+        $r8 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.parser.XMLDTDScanner fDTDScanner>;
+
+        if $r8 == null goto label3;
+
+        $r11 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.parser.XMLDTDScanner fDTDScanner>;
+
+        $r12 = (com.sun.org.apache.xerces.internal.impl.XMLDTDScannerImpl) $r11;
+
+        virtualinvoke $r12.<com.sun.org.apache.xerces.internal.impl.XMLDTDScannerImpl: void reset(com.sun.org.apache.xerces.internal.impl.PropertyManager)>(r1);
+
+     label3:
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: int fEndPos> = 0;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: int fStartPos> = 0;
+
+        $r9 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.util.XMLStringBuffer fDTDDecl>;
+
+        if $r9 == null goto label4;
+
+        $r10 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.util.XMLStringBuffer fDTDDecl>;
+
+        virtualinvoke $r10.<com.sun.org.apache.xerces.internal.util.XMLStringBuffer: void clear()>();
+
+     label4:
+        return;
+    }
+
+    public void reset(com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager) throws com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException
+    {
+        com.sun.org.apache.xerces.internal.xni.parser.XMLDTDScanner $r3;
+        boolean $z0, $z1, $z2;
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$Driver $r11;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager r1;
+        com.sun.org.apache.xerces.internal.util.XMLStringBuffer $r10, $r12;
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl r0;
+        com.sun.org.apache.xerces.internal.xni.NamespaceContext $r7, $r8, $r9;
+        com.sun.org.apache.xerces.internal.util.NamespaceSupport $r13;
+        com.sun.org.apache.xerces.internal.impl.validation.ValidationManager $r5;
+        java.lang.Object $r2, $r4, $r6;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException $r14;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+
+        r1 := @parameter0: com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl: void reset(com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager)>(r1);
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String fDoctypeName> = null;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String fDoctypePublicId> = null;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String fDoctypeSystemId> = null;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: boolean fSeenDoctypeDecl> = 0;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource fExternalSubsetSource> = null;
+
+        $z0 = interfaceinvoke r1.<com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager: boolean getFeature(java.lang.String,boolean)>("http://apache.org/xml/features/nonvalidating/load-external-dtd", 1);
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: boolean fLoadExternalDTD> = $z0;
+
+        $z1 = interfaceinvoke r1.<com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager: boolean getFeature(java.lang.String,boolean)>("http://apache.org/xml/features/disallow-doctype-decl", 0);
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: boolean fDisallowDoctype> = $z1;
+
+        $z2 = interfaceinvoke r1.<com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager: boolean getFeature(java.lang.String,boolean)>("http://xml.org/sax/features/namespaces", 1);
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: boolean fNamespaces> = $z2;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: boolean fSeenInternalSubset> = 0;
+
+        $r2 = interfaceinvoke r1.<com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager: java.lang.Object getProperty(java.lang.String)>("http://apache.org/xml/properties/internal/dtd-scanner");
+
+        $r3 = (com.sun.org.apache.xerces.internal.xni.parser.XMLDTDScanner) $r2;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.parser.XMLDTDScanner fDTDScanner> = $r3;
+
+        $r4 = interfaceinvoke r1.<com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager: java.lang.Object getProperty(java.lang.String,java.lang.Object)>("http://apache.org/xml/properties/internal/validation-manager", null);
+
+        $r5 = (com.sun.org.apache.xerces.internal.impl.validation.ValidationManager) $r4;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.validation.ValidationManager fValidationManager> = $r5;
+
+     label1:
+        $r6 = interfaceinvoke r1.<com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager: java.lang.Object getProperty(java.lang.String)>("http://apache.org/xml/properties/internal/namespace-context");
+
+        $r7 = (com.sun.org.apache.xerces.internal.xni.NamespaceContext) $r6;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.NamespaceContext fNamespaceContext> = $r7;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r14 := @caughtexception;
+
+     label4:
+        $r8 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.NamespaceContext fNamespaceContext>;
+
+        if $r8 != null goto label5;
+
+        $r13 = new com.sun.org.apache.xerces.internal.util.NamespaceSupport;
+
+        specialinvoke $r13.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: void <init>()>();
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.NamespaceContext fNamespaceContext> = $r13;
+
+     label5:
+        $r9 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.NamespaceContext fNamespaceContext>;
+
+        interfaceinvoke $r9.<com.sun.org.apache.xerces.internal.xni.NamespaceContext: void reset()>();
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: int fEndPos> = 0;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: int fStartPos> = 0;
+
+        $r10 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.util.XMLStringBuffer fDTDDecl>;
+
+        if $r10 == null goto label6;
+
+        $r12 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.util.XMLStringBuffer fDTDDecl>;
+
+        virtualinvoke $r12.<com.sun.org.apache.xerces.internal.util.XMLStringBuffer: void clear()>();
+
+     label6:
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: void setScannerState(int)>(42);
+
+        $r11 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$Driver fXMLDeclDriver>;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: void setDriver(com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$Driver)>($r11);
+
+        return;
+
+        catch com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException from label1 to label2 with label3;
+    }
+
+    public java.lang.String[] getRecognizedFeatures()
+    {
+        java.lang.String[] $r1, $r2, $r3, $r4, $r5;
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl r0;
+        int i0, $i1, $i2, $i3, $i4, $i5;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+
+        $r1 = specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl: java.lang.String[] getRecognizedFeatures()>();
+
+        if $r1 == null goto label1;
+
+        $i5 = lengthof $r1;
+
+        goto label2;
+
+     label1:
+        $i5 = 0;
+
+     label2:
+        i0 = $i5;
+
+        $r2 = <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String[] RECOGNIZED_FEATURES>;
+
+        $i1 = lengthof $r2;
+
+        $i2 = $i5 + $i1;
+
+        $r5 = newarray (java.lang.String)[$i2];
+
+        if $r1 == null goto label3;
+
+        $i4 = lengthof $r1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, 0, $r5, 0, $i4);
+
+     label3:
+        $r4 = <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String[] RECOGNIZED_FEATURES>;
+
+        $r3 = <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String[] RECOGNIZED_FEATURES>;
+
+        $i3 = lengthof $r3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, $r5, i0, $i3);
+
+        return $r5;
+    }
+
+    public void setFeature(java.lang.String, boolean) throws com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException
+    {
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl r0;
+        int $i0, $i1, i2, $i3, $i4;
+        java.lang.String r1, $r2, $r3, $r4;
+        boolean z0, $z1, $z2, $z3;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        z0 := @parameter1: boolean;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl: void setFeature(java.lang.String,boolean)>(r1, z0);
+
+        $z1 = virtualinvoke r1.<java.lang.String: boolean startsWith(java.lang.String)>("http://apache.org/xml/features/");
+
+        if $z1 == 0 goto label2;
+
+        $i0 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        $r2 = "http://apache.org/xml/features/";
+
+        $i1 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        i2 = $i0 - $i1;
+
+        $r3 = "nonvalidating/load-external-dtd";
+
+        $i3 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        if i2 != $i3 goto label1;
+
+        $z3 = virtualinvoke r1.<java.lang.String: boolean endsWith(java.lang.String)>("nonvalidating/load-external-dtd");
+
+        if $z3 == 0 goto label1;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: boolean fLoadExternalDTD> = z0;
+
+        return;
+
+     label1:
+        $r4 = "disallow-doctype-decl";
+
+        $i4 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        if i2 != $i4 goto label2;
+
+        $z2 = virtualinvoke r1.<java.lang.String: boolean endsWith(java.lang.String)>("disallow-doctype-decl");
+
+        if $z2 == 0 goto label2;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: boolean fDisallowDoctype> = z0;
+
+        return;
+
+     label2:
+        return;
+    }
+
+    public java.lang.String[] getRecognizedProperties()
+    {
+        java.lang.String[] $r1, $r2, $r3, $r4, $r5;
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl r0;
+        int i0, $i1, $i2, $i3, $i4, $i5;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+
+        $r1 = specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl: java.lang.String[] getRecognizedProperties()>();
+
+        if $r1 == null goto label1;
+
+        $i5 = lengthof $r1;
+
+        goto label2;
+
+     label1:
+        $i5 = 0;
+
+     label2:
+        i0 = $i5;
+
+        $r2 = <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String[] RECOGNIZED_PROPERTIES>;
+
+        $i1 = lengthof $r2;
+
+        $i2 = $i5 + $i1;
+
+        $r5 = newarray (java.lang.String)[$i2];
+
+        if $r1 == null goto label3;
+
+        $i4 = lengthof $r1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, 0, $r5, 0, $i4);
+
+     label3:
+        $r4 = <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String[] RECOGNIZED_PROPERTIES>;
+
+        $r3 = <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String[] RECOGNIZED_PROPERTIES>;
+
+        $i3 = lengthof $r3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, $r5, i0, $i3);
+
+        return $r5;
+    }
+
+    public void setProperty(java.lang.String, java.lang.Object) throws com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException
+    {
+        com.sun.org.apache.xerces.internal.xni.parser.XMLDTDScanner $r6;
+        int $i0, $i1, i2, $i3, $i4;
+        java.lang.String r1, $r3, $r4, $r7;
+        boolean $z0, $z1, $z2;
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl r0;
+        com.sun.org.apache.xerces.internal.xni.NamespaceContext $r5;
+        java.lang.Object r2;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Object;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl: void setProperty(java.lang.String,java.lang.Object)>(r1, r2);
+
+        $z0 = virtualinvoke r1.<java.lang.String: boolean startsWith(java.lang.String)>("http://apache.org/xml/properties/");
+
+        if $z0 == 0 goto label3;
+
+        $i0 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        $r3 = "http://apache.org/xml/properties/";
+
+        $i1 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        i2 = $i0 - $i1;
+
+        $r4 = "internal/dtd-scanner";
+
+        $i3 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        if i2 != $i3 goto label1;
+
+        $z2 = virtualinvoke r1.<java.lang.String: boolean endsWith(java.lang.String)>("internal/dtd-scanner");
+
+        if $z2 == 0 goto label1;
+
+        $r6 = (com.sun.org.apache.xerces.internal.xni.parser.XMLDTDScanner) r2;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.parser.XMLDTDScanner fDTDScanner> = $r6;
+
+     label1:
+        $r7 = "internal/namespace-context";
+
+        $i4 = virtualinvoke $r7.<java.lang.String: int length()>();
+
+        if i2 != $i4 goto label2;
+
+        $z1 = virtualinvoke r1.<java.lang.String: boolean endsWith(java.lang.String)>("internal/namespace-context");
+
+        if $z1 == 0 goto label2;
+
+        if r2 == null goto label2;
+
+        $r5 = (com.sun.org.apache.xerces.internal.xni.NamespaceContext) r2;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.NamespaceContext fNamespaceContext> = $r5;
+
+     label2:
+        return;
+
+     label3:
+        return;
+    }
+
+    public java.lang.Boolean getFeatureDefault(java.lang.String)
+    {
+        java.lang.String[] $r0, $r4;
+        java.lang.Boolean[] $r6;
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl r1;
+        int $i0, i1;
+        java.lang.Boolean $r3, $r7;
+        java.lang.String r2, $r5;
+        boolean $z0;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+        i1 = 0;
+
+     label1:
+        $r0 = <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String[] RECOGNIZED_FEATURES>;
+
+        $i0 = lengthof $r0;
+
+        if i1 >= $i0 goto label3;
+
+        $r4 = <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String[] RECOGNIZED_FEATURES>;
+
+        $r5 = $r4[i1];
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>(r2);
+
+        if $z0 == 0 goto label2;
+
+        $r6 = <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.Boolean[] FEATURE_DEFAULTS>;
+
+        $r7 = $r6[i1];
+
+        return $r7;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        $r3 = specialinvoke r1.<com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl: java.lang.Boolean getFeatureDefault(java.lang.String)>(r2);
+
+        return $r3;
+    }
+
+    public java.lang.Object getPropertyDefault(java.lang.String)
+    {
+        java.lang.Object[] $r6;
+        java.lang.String[] $r0, $r4;
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl r1;
+        int $i0, i1;
+        java.lang.Object $r3, $r7;
+        java.lang.String r2, $r5;
+        boolean $z0;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+        i1 = 0;
+
+     label1:
+        $r0 = <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String[] RECOGNIZED_PROPERTIES>;
+
+        $i0 = lengthof $r0;
+
+        if i1 >= $i0 goto label3;
+
+        $r4 = <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String[] RECOGNIZED_PROPERTIES>;
+
+        $r5 = $r4[i1];
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>(r2);
+
+        if $z0 == 0 goto label2;
+
+        $r6 = <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.Object[] PROPERTY_DEFAULTS>;
+
+        $r7 = $r6[i1];
+
+        return $r7;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        $r3 = specialinvoke r1.<com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl: java.lang.Object getPropertyDefault(java.lang.String)>(r2);
+
+        return $r3;
+    }
+
+    public void startEntity(java.lang.String, com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier, java.lang.String, com.sun.org.apache.xerces.internal.xni.Augmentations) throws com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        java.lang.Boolean $r11;
+        java.lang.String r1, r3;
+        boolean $z0, $z1, $z2, $z3;
+        com.sun.org.apache.xerces.internal.impl.XMLEntityScanner $r5, $r7, $r9;
+        com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier r2;
+        com.sun.org.apache.xerces.internal.xni.XMLDocumentHandler $r8, $r12;
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl r0;
+        com.sun.org.apache.xerces.internal.xni.Augmentations r4;
+        com.sun.org.apache.xerces.internal.xni.NamespaceContext $r6;
+        java.lang.Object $r10;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier;
+
+        r3 := @parameter2: java.lang.String;
+
+        r4 := @parameter3: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl: void startEntity(java.lang.String,com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier,java.lang.String,com.sun.org.apache.xerces.internal.xni.Augmentations)>(r1, r2, r3, r4);
+
+        $r5 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLEntityScanner fEntityScanner>;
+
+        virtualinvoke $r5.<com.sun.org.apache.xerces.internal.impl.XMLEntityScanner: void registerListener(com.sun.xml.internal.stream.XMLBufferListener)>(r0);
+
+        $z0 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("[xml]");
+
+        if $z0 != 0 goto label2;
+
+        $r9 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLEntityScanner fEntityScanner>;
+
+        $z2 = virtualinvoke $r9.<com.sun.org.apache.xerces.internal.impl.XMLEntityScanner: boolean isExternal()>();
+
+        if $z2 == 0 goto label2;
+
+        if r4 == null goto label1;
+
+        $r10 = interfaceinvoke r4.<com.sun.org.apache.xerces.internal.xni.Augmentations: java.lang.Object getItem(java.lang.String)>("ENTITY_SKIPPED");
+
+        $r11 = (java.lang.Boolean) $r10;
+
+        $z3 = virtualinvoke $r11.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z3 != 0 goto label2;
+
+     label1:
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: void setScannerState(int)>(36);
+
+     label2:
+        $r12 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.XMLDocumentHandler fDocumentHandler>;
+
+        if $r12 == null goto label3;
+
+        $z1 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("[xml]");
+
+        if $z1 == 0 goto label3;
+
+        $r8 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.XMLDocumentHandler fDocumentHandler>;
+
+        $r7 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLEntityScanner fEntityScanner>;
+
+        $r6 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.NamespaceContext fNamespaceContext>;
+
+        interfaceinvoke $r8.<com.sun.org.apache.xerces.internal.xni.XMLDocumentHandler: void startDocument(com.sun.org.apache.xerces.internal.xni.XMLLocator,java.lang.String,com.sun.org.apache.xerces.internal.xni.NamespaceContext,com.sun.org.apache.xerces.internal.xni.Augmentations)>($r7, r3, $r6, null);
+
+     label3:
+        return;
+    }
+
+    public void endEntity(java.lang.String, com.sun.org.apache.xerces.internal.xni.Augmentations) throws java.io.IOException, com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$Driver $r4, $r5;
+        java.io.EOFException $r3;
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl r0;
+        com.sun.org.apache.xerces.internal.xni.Augmentations r2;
+        int $i0;
+        java.lang.String r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: com.sun.org.apache.xerces.internal.xni.Augmentations;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl: void endEntity(java.lang.String,com.sun.org.apache.xerces.internal.xni.Augmentations)>(r1, r2);
+
+        $z0 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("[xml]");
+
+        if $z0 == 0 goto label2;
+
+        $i0 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: int fMarkupDepth>;
+
+        if $i0 != 0 goto label1;
+
+        $r5 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$Driver fDriver>;
+
+        $r4 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$Driver fTrailingMiscDriver>;
+
+        if $r5 != $r4 goto label1;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: void setScannerState(int)>(34);
+
+        goto label2;
+
+     label1:
+        $r3 = new java.io.EOFException;
+
+        specialinvoke $r3.<java.io.EOFException: void <init>()>();
+
+        throw $r3;
+
+     label2:
+        return;
+    }
+
+    public com.sun.org.apache.xerces.internal.util.XMLStringBuffer getDTDDecl()
+    {
+        com.sun.org.apache.xerces.internal.impl.XMLEntityScanner $r1;
+        com.sun.org.apache.xerces.internal.util.XMLStringBuffer $r5, $r6, $r7;
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl r0;
+        com.sun.xml.internal.stream.Entity$ScannedEntity $r2, $r3;
+        int $i0, $i1, $i2, $i3;
+        char[] $r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLEntityScanner fEntityScanner>;
+
+        $r2 = virtualinvoke $r1.<com.sun.org.apache.xerces.internal.impl.XMLEntityScanner: com.sun.xml.internal.stream.Entity$ScannedEntity getCurrentEntity()>();
+
+        $r5 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.util.XMLStringBuffer fDTDDecl>;
+
+        $r3 = (com.sun.xml.internal.stream.Entity$ScannedEntity) $r2;
+
+        $r4 = $r3.<com.sun.xml.internal.stream.Entity$ScannedEntity: char[] ch>;
+
+        $i3 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: int fStartPos>;
+
+        $i1 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: int fEndPos>;
+
+        $i0 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: int fStartPos>;
+
+        $i2 = $i1 - $i0;
+
+        virtualinvoke $r5.<com.sun.org.apache.xerces.internal.util.XMLStringBuffer: void append(char[],int,int)>($r4, $i3, $i2);
+
+        $z0 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: boolean fSeenInternalSubset>;
+
+        if $z0 == 0 goto label1;
+
+        $r7 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.util.XMLStringBuffer fDTDDecl>;
+
+        virtualinvoke $r7.<com.sun.org.apache.xerces.internal.util.XMLStringBuffer: void append(java.lang.String)>("]>");
+
+     label1:
+        $r6 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.util.XMLStringBuffer fDTDDecl>;
+
+        return $r6;
+    }
+
+    public java.lang.String getCharacterEncodingScheme()
+    {
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl r0;
+        java.lang.String $r1;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String fDeclaredEncoding>;
+
+        return $r1;
+    }
+
+    public int next() throws java.io.IOException, com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl r0;
+        int $i0;
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$Driver $r1;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$Driver fDriver>;
+
+        $i0 = interfaceinvoke $r1.<com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$Driver: int next()>();
+
+        return $i0;
+    }
+
+    public com.sun.org.apache.xerces.internal.xni.NamespaceContext getNamespaceContext()
+    {
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl r0;
+        com.sun.org.apache.xerces.internal.xni.NamespaceContext $r1;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.NamespaceContext fNamespaceContext>;
+
+        return $r1;
+    }
+
+    protected com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$Driver createContentDriver()
+    {
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl$ContentDriver $r0;
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl r1;
+
+        r1 := @this: com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+
+        $r0 = new com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl$ContentDriver;
+
+        specialinvoke $r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl$ContentDriver: void <init>(com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl)>(r1);
+
+        return $r0;
+    }
+
+    protected boolean scanDoctypeDecl(boolean) throws java.io.IOException, com.sun.org.apache.xerces.internal.xni.XNIException
+    {
+        com.sun.org.apache.xerces.internal.impl.XMLScanner$NameType $r2;
+        boolean $z0, $z1, z2, $z3, $z4, $z5, $z6, z7, $z8;
+        com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier $r27;
+        java.lang.Object[] $r10;
+        java.lang.String[] $r35, $r36, $r38;
+        com.sun.org.apache.xerces.internal.impl.XMLEntityManager $r25;
+        int $i0, $i1;
+        java.lang.String $r4, $r5, $r7, $r11, $r16, $r17, $r19, $r20, $r21, $r22, $r28, $r29, $r37, $r39;
+        com.sun.org.apache.xerces.internal.impl.XMLEntityScanner $r1, $r3, $r6, $r8, $r9, $r40, $r41;
+        com.sun.org.apache.xerces.internal.impl.ExternalSubsetResolver $r24, $r32;
+        com.sun.org.apache.xerces.internal.xni.XMLDocumentHandler $r12, $r15, $r23;
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl r0;
+        com.sun.org.apache.xerces.internal.impl.dtd.XMLDTDDescription $r26, $r30, $r31;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource $r13, $r14, $r18, $r33, $r34;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+
+        z2 := @parameter0: boolean;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLEntityScanner fEntityScanner>;
+
+        $z0 = virtualinvoke $r1.<com.sun.org.apache.xerces.internal.impl.XMLEntityScanner: boolean skipSpaces()>();
+
+        if $z0 != 0 goto label01;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: void reportFatalError(java.lang.String,java.lang.Object[])>("MSG_SPACE_REQUIRED_BEFORE_ROOT_ELEMENT_TYPE_IN_DOCTYPEDECL", null);
+
+     label01:
+        $r3 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLEntityScanner fEntityScanner>;
+
+        $r2 = <com.sun.org.apache.xerces.internal.impl.XMLScanner$NameType: com.sun.org.apache.xerces.internal.impl.XMLScanner$NameType DOCTYPE>;
+
+        $r4 = virtualinvoke $r3.<com.sun.org.apache.xerces.internal.impl.XMLEntityScanner: java.lang.String scanName(com.sun.org.apache.xerces.internal.impl.XMLScanner$NameType)>($r2);
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String fDoctypeName> = $r4;
+
+        $r5 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String fDoctypeName>;
+
+        if $r5 != null goto label02;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: void reportFatalError(java.lang.String,java.lang.Object[])>("MSG_ROOT_ELEMENT_TYPE_REQUIRED", null);
+
+     label02:
+        $r6 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLEntityScanner fEntityScanner>;
+
+        $z1 = virtualinvoke $r6.<com.sun.org.apache.xerces.internal.impl.XMLEntityScanner: boolean skipSpaces()>();
+
+        if $z1 == 0 goto label03;
+
+        $r35 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String[] fStrings>;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: void scanExternalID(java.lang.String[],boolean)>($r35, 0);
+
+        $r36 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String[] fStrings>;
+
+        $r37 = $r36[0];
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String fDoctypeSystemId> = $r37;
+
+        $r38 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String[] fStrings>;
+
+        $r39 = $r38[1];
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String fDoctypePublicId> = $r39;
+
+        $r40 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLEntityScanner fEntityScanner>;
+
+        virtualinvoke $r40.<com.sun.org.apache.xerces.internal.impl.XMLEntityScanner: boolean skipSpaces()>();
+
+     label03:
+        $r7 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String fDoctypeSystemId>;
+
+        if $r7 == null goto label04;
+
+        $z5 = 1;
+
+        goto label05;
+
+     label04:
+        $z5 = 0;
+
+     label05:
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: boolean fHasExternalDTD> = $z5;
+
+        if z2 == 0 goto label08;
+
+        $z4 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: boolean fHasExternalDTD>;
+
+        if $z4 != 0 goto label08;
+
+        $r24 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.ExternalSubsetResolver fExternalSubsetResolver>;
+
+        if $r24 == null goto label08;
+
+        $r26 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.dtd.XMLDTDDescription fDTDDescription>;
+
+        $r25 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLEntityManager fEntityManager>;
+
+        $r27 = virtualinvoke $r25.<com.sun.org.apache.xerces.internal.impl.XMLEntityManager: com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier getCurrentResourceIdentifier()>();
+
+        $r28 = interfaceinvoke $r27.<com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier: java.lang.String getExpandedSystemId()>();
+
+        virtualinvoke $r26.<com.sun.org.apache.xerces.internal.impl.dtd.XMLDTDDescription: void setValues(java.lang.String,java.lang.String,java.lang.String,java.lang.String)>(null, null, $r28, null);
+
+        $r30 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.dtd.XMLDTDDescription fDTDDescription>;
+
+        $r29 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String fDoctypeName>;
+
+        virtualinvoke $r30.<com.sun.org.apache.xerces.internal.impl.dtd.XMLDTDDescription: void setRootName(java.lang.String)>($r29);
+
+        $r32 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.ExternalSubsetResolver fExternalSubsetResolver>;
+
+        $r31 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.dtd.XMLDTDDescription fDTDDescription>;
+
+        $r33 = interfaceinvoke $r32.<com.sun.org.apache.xerces.internal.impl.ExternalSubsetResolver: com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource getExternalSubset(com.sun.org.apache.xerces.internal.xni.grammars.XMLDTDDescription)>($r31);
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource fExternalSubsetSource> = $r33;
+
+        $r34 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource fExternalSubsetSource>;
+
+        if $r34 == null goto label06;
+
+        $z6 = 1;
+
+        goto label07;
+
+     label06:
+        $z6 = 0;
+
+     label07:
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: boolean fHasExternalDTD> = $z6;
+
+     label08:
+        if z2 == 0 goto label10;
+
+        $r12 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.XMLDocumentHandler fDocumentHandler>;
+
+        if $r12 == null goto label10;
+
+        $r13 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource fExternalSubsetSource>;
+
+        if $r13 != null goto label09;
+
+        $r23 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.XMLDocumentHandler fDocumentHandler>;
+
+        $r22 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String fDoctypeName>;
+
+        $r21 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String fDoctypePublicId>;
+
+        $r20 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String fDoctypeSystemId>;
+
+        interfaceinvoke $r23.<com.sun.org.apache.xerces.internal.xni.XMLDocumentHandler: void doctypeDecl(java.lang.String,java.lang.String,java.lang.String,com.sun.org.apache.xerces.internal.xni.Augmentations)>($r22, $r21, $r20, null);
+
+        goto label10;
+
+     label09:
+        $r15 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.XMLDocumentHandler fDocumentHandler>;
+
+        $r16 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String fDoctypeName>;
+
+        $r14 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource fExternalSubsetSource>;
+
+        $r17 = virtualinvoke $r14.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: java.lang.String getPublicId()>();
+
+        $r18 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource fExternalSubsetSource>;
+
+        $r19 = virtualinvoke $r18.<com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource: java.lang.String getSystemId()>();
+
+        interfaceinvoke $r15.<com.sun.org.apache.xerces.internal.xni.XMLDocumentHandler: void doctypeDecl(java.lang.String,java.lang.String,java.lang.String,com.sun.org.apache.xerces.internal.xni.Augmentations)>($r16, $r17, $r19, null);
+
+     label10:
+        z7 = 1;
+
+        $r41 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLEntityScanner fEntityScanner>;
+
+        $z8 = virtualinvoke $r41.<com.sun.org.apache.xerces.internal.impl.XMLEntityScanner: boolean skipChar(int,com.sun.org.apache.xerces.internal.impl.XMLScanner$NameType)>(91, null);
+
+        if $z8 != 0 goto label12;
+
+        z7 = 0;
+
+        $r8 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLEntityScanner fEntityScanner>;
+
+        virtualinvoke $r8.<com.sun.org.apache.xerces.internal.impl.XMLEntityScanner: boolean skipSpaces()>();
+
+        $r9 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLEntityScanner fEntityScanner>;
+
+        $z3 = virtualinvoke $r9.<com.sun.org.apache.xerces.internal.impl.XMLEntityScanner: boolean skipChar(int,com.sun.org.apache.xerces.internal.impl.XMLScanner$NameType)>(62, null);
+
+        if $z3 != 0 goto label11;
+
+        $r10 = newarray (java.lang.Object)[1];
+
+        $r11 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String fDoctypeName>;
+
+        $r10[0] = $r11;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: void reportFatalError(java.lang.String,java.lang.Object[])>("DoctypedeclUnterminated", $r10);
+
+     label11:
+        $i0 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: int fMarkupDepth>;
+
+        $i1 = $i0 - 1;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: int fMarkupDepth> = $i1;
+
+     label12:
+        return z7;
+    }
+
+    protected void setEndDTDScanState()
+    {
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl r0;
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$Driver $r1;
+        com.sun.org.apache.xerces.internal.impl.XMLEntityManager $r2;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: void setScannerState(int)>(43);
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$Driver fPrologDriver>;
+
+        virtualinvoke r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: void setDriver(com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$Driver)>($r1);
+
+        $r2 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLEntityManager fEntityManager>;
+
+        virtualinvoke $r2.<com.sun.org.apache.xerces.internal.impl.XMLEntityManager: void setEntityHandler(com.sun.org.apache.xerces.internal.impl.XMLEntityHandler)>(r0);
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: boolean fReadingDTD> = 0;
+
+        return;
+    }
+
+    protected java.lang.String getScannerStateName(int)
+    {
+        int i0;
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl r0;
+        java.lang.String $r1;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+
+        i0 := @parameter0: int;
+
+        tableswitch(i0)
+        {
+            case 42: goto label1;
+            case 43: goto label2;
+            case 44: goto label3;
+            case 45: goto label4;
+            case 46: goto label5;
+            case 47: goto label6;
+            default: goto label7;
+        };
+
+     label1:
+        return "SCANNER_STATE_XML_DECL";
+
+     label2:
+        return "SCANNER_STATE_PROLOG";
+
+     label3:
+        return "SCANNER_STATE_TRAILING_MISC";
+
+     label4:
+        return "SCANNER_STATE_DTD_INTERNAL_DECLS";
+
+     label5:
+        return "SCANNER_STATE_DTD_EXTERNAL";
+
+     label6:
+        return "SCANNER_STATE_DTD_EXTERNAL_DECLS";
+
+     label7:
+        $r1 = specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl: java.lang.String getScannerStateName(int)>(i0);
+
+        return $r1;
+    }
+
+    public void refresh(int)
+    {
+        com.sun.org.apache.xerces.internal.impl.XMLEntityScanner $r1;
+        com.sun.org.apache.xerces.internal.util.XMLStringBuffer $r5;
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl r0;
+        com.sun.xml.internal.stream.Entity$ScannedEntity $r2, $r3, $r6;
+        int i0, $i1, $i2, $i3, $i4, $i5;
+        char[] $r4;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl: void refresh(int)>(i0);
+
+        $z0 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: boolean fReadingDTD>;
+
+        if $z0 == 0 goto label2;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.XMLEntityScanner fEntityScanner>;
+
+        $r2 = virtualinvoke $r1.<com.sun.org.apache.xerces.internal.impl.XMLEntityScanner: com.sun.xml.internal.stream.Entity$ScannedEntity getCurrentEntity()>();
+
+        $z1 = $r2 instanceof com.sun.xml.internal.stream.Entity$ScannedEntity;
+
+        if $z1 == 0 goto label1;
+
+        $r6 = (com.sun.xml.internal.stream.Entity$ScannedEntity) $r2;
+
+        $i5 = $r6.<com.sun.xml.internal.stream.Entity$ScannedEntity: int position>;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: int fEndPos> = $i5;
+
+     label1:
+        $r5 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.util.XMLStringBuffer fDTDDecl>;
+
+        $r3 = (com.sun.xml.internal.stream.Entity$ScannedEntity) $r2;
+
+        $r4 = $r3.<com.sun.xml.internal.stream.Entity$ScannedEntity: char[] ch>;
+
+        $i4 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: int fStartPos>;
+
+        $i2 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: int fEndPos>;
+
+        $i1 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: int fStartPos>;
+
+        $i3 = $i2 - $i1;
+
+        virtualinvoke $r5.<com.sun.org.apache.xerces.internal.util.XMLStringBuffer: void append(char[],int,int)>($r4, $i4, $i3);
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: int fStartPos> = i0;
+
+     label2:
+        return;
+    }
+
+    static char[] access$000()
+    {
+        char[] $r0;
+
+        $r0 = <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: char[] DOCTYPE>;
+
+        return $r0;
+    }
+
+    static com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource access$100(com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl)
+    {
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl r0;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource $r1;
+
+        r0 := @parameter0: com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource fExternalSubsetSource>;
+
+        return $r1;
+    }
+
+    static com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource access$102(com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl, com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource)
+    {
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl r0;
+        com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource r1;
+
+        r0 := @parameter0: com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+
+        r1 := @parameter1: com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
+
+        r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource fExternalSubsetSource> = r1;
+
+        return r1;
+    }
+
+    static com.sun.org.apache.xerces.internal.impl.dtd.XMLDTDDescription access$200(com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl)
+    {
+        com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl r0;
+        com.sun.org.apache.xerces.internal.impl.dtd.XMLDTDDescription $r1;
+
+        r0 := @parameter0: com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: com.sun.org.apache.xerces.internal.impl.dtd.XMLDTDDescription fDTDDescription>;
+
+        return $r1;
+    }
+
+    static char[] access$300()
+    {
+        char[] $r0;
+
+        $r0 = <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: char[] COMMENTSTRING>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Object[] $r5;
+        java.lang.String[] $r0, $r4;
+        java.lang.Boolean[] $r1;
+        java.lang.Boolean $r2, $r3;
+        char[] $r6, $r7;
+
+        <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String NAMESPACE_CONTEXT> = "http://apache.org/xml/properties/internal/namespace-context";
+
+        <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String VALIDATION_MANAGER> = "http://apache.org/xml/properties/internal/validation-manager";
+
+        <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String DTD_SCANNER> = "http://apache.org/xml/properties/internal/dtd-scanner";
+
+        <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String DISALLOW_DOCTYPE_DECL_FEATURE> = "http://apache.org/xml/features/disallow-doctype-decl";
+
+        <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String LOAD_EXTERNAL_DTD> = "http://apache.org/xml/features/nonvalidating/load-external-dtd";
+
+        <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String DOCUMENT_SCANNER> = "http://apache.org/xml/properties/internal/document-scanner";
+
+        <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: int SCANNER_STATE_NO_SUCH_ELEMENT_EXCEPTION> = 48;
+
+        <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: int SCANNER_STATE_DTD_EXTERNAL_DECLS> = 47;
+
+        <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: int SCANNER_STATE_DTD_EXTERNAL> = 46;
+
+        <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: int SCANNER_STATE_DTD_INTERNAL_DECLS> = 45;
+
+        <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: int SCANNER_STATE_TRAILING_MISC> = 44;
+
+        <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: int SCANNER_STATE_PROLOG> = 43;
+
+        <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: int SCANNER_STATE_XML_DECL> = 42;
+
+        $r0 = newarray (java.lang.String)[2];
+
+        $r0[0] = "http://apache.org/xml/features/nonvalidating/load-external-dtd";
+
+        $r0[1] = "http://apache.org/xml/features/disallow-doctype-decl";
+
+        <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String[] RECOGNIZED_FEATURES> = $r0;
+
+        $r1 = newarray (java.lang.Boolean)[2];
+
+        $r2 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $r1[0] = $r2;
+
+        $r3 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        $r1[1] = $r3;
+
+        <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.Boolean[] FEATURE_DEFAULTS> = $r1;
+
+        $r4 = newarray (java.lang.String)[2];
+
+        $r4[0] = "http://apache.org/xml/properties/internal/dtd-scanner";
+
+        $r4[1] = "http://apache.org/xml/properties/internal/validation-manager";
+
+        <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.String[] RECOGNIZED_PROPERTIES> = $r4;
+
+        $r5 = newarray (java.lang.Object)[2];
+
+        $r5[0] = null;
+
+        $r5[1] = null;
+
+        <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: java.lang.Object[] PROPERTY_DEFAULTS> = $r5;
+
+        $r6 = newarray (char)[7];
+
+        $r6[0] = 68;
+
+        $r6[1] = 79;
+
+        $r6[2] = 67;
+
+        $r6[3] = 84;
+
+        $r6[4] = 89;
+
+        $r6[5] = 80;
+
+        $r6[6] = 69;
+
+        <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: char[] DOCTYPE> = $r6;
+
+        $r7 = newarray (char)[2];
+
+        $r7[0] = 45;
+
+        $r7[1] = 45;
+
+        <com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl: char[] COMMENTSTRING> = $r7;
+
+        return;
+    }
+}

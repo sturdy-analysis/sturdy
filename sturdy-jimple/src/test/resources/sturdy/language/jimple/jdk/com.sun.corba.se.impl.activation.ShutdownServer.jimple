@@ -1,0 +1,175 @@
+class com.sun.corba.se.impl.activation.ShutdownServer extends java.lang.Object implements com.sun.corba.se.impl.activation.CommandHandler
+{
+    static final int illegalServerId;
+
+    void <init>()
+    {
+        com.sun.corba.se.impl.activation.ShutdownServer r0;
+
+        r0 := @this: com.sun.corba.se.impl.activation.ShutdownServer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public java.lang.String getCommandName()
+    {
+        com.sun.corba.se.impl.activation.ShutdownServer r0;
+
+        r0 := @this: com.sun.corba.se.impl.activation.ShutdownServer;
+
+        return "shutdown";
+    }
+
+    public void printCommandHelp(java.io.PrintStream, boolean)
+    {
+        java.io.PrintStream r0;
+        com.sun.corba.se.impl.activation.ShutdownServer r3;
+        java.lang.String $r1, $r2;
+        boolean z0;
+
+        r3 := @this: com.sun.corba.se.impl.activation.ShutdownServer;
+
+        r0 := @parameter0: java.io.PrintStream;
+
+        z0 := @parameter1: boolean;
+
+        if z0 != 0 goto label1;
+
+        $r2 = staticinvoke <com.sun.corba.se.impl.orbutil.CorbaResourceUtil: java.lang.String getText(java.lang.String)>("servertool.shutdown");
+
+        virtualinvoke r0.<java.io.PrintStream: void println(java.lang.String)>($r2);
+
+        goto label2;
+
+     label1:
+        $r1 = staticinvoke <com.sun.corba.se.impl.orbutil.CorbaResourceUtil: java.lang.String getText(java.lang.String)>("servertool.shutdown1");
+
+        virtualinvoke r0.<java.io.PrintStream: void println(java.lang.String)>($r1);
+
+     label2:
+        return;
+    }
+
+    public boolean processCommand(java.lang.String[], org.omg.CORBA.ORB, java.io.PrintStream)
+    {
+        java.lang.String[] r0;
+        com.sun.corba.se.impl.activation.ShutdownServer r16;
+        com.sun.corba.se.spi.activation.Activator $r3;
+        java.lang.Integer $r10;
+        org.omg.CORBA.ORB r1;
+        com.sun.corba.se.spi.activation.ServerNotRegistered $r12;
+        com.sun.corba.se.spi.activation.ServerNotActive $r14;
+        int $i0, i1, $i3, $i5;
+        java.lang.String $r5, $r6, $r7, $r8, $r9, $r13, $r15;
+        boolean $z0, $z1;
+        java.io.PrintStream r4;
+        java.lang.Exception $r11;
+        org.omg.CORBA.Object $r2;
+
+        r16 := @this: com.sun.corba.se.impl.activation.ShutdownServer;
+
+        r0 := @parameter0: java.lang.String[];
+
+        r1 := @parameter1: org.omg.CORBA.ORB;
+
+        r4 := @parameter2: java.io.PrintStream;
+
+        $i3 = (int) -1;
+
+        i1 = $i3;
+
+     label01:
+        $i0 = lengthof r0;
+
+        if $i0 != 2 goto label03;
+
+        $r6 = r0[0];
+
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>("-serverid");
+
+        if $z0 == 0 goto label02;
+
+        $r9 = r0[1];
+
+        $r10 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(java.lang.String)>($r9);
+
+        i1 = virtualinvoke $r10.<java.lang.Integer: int intValue()>();
+
+        goto label03;
+
+     label02:
+        $r7 = r0[0];
+
+        $z1 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>("-applicationName");
+
+        if $z1 == 0 goto label03;
+
+        $r8 = r0[1];
+
+        i1 = staticinvoke <com.sun.corba.se.impl.activation.ServerTool: int getServerIdForAlias(org.omg.CORBA.ORB,java.lang.String)>(r1, $r8);
+
+     label03:
+        $i5 = (int) -1;
+
+        if i1 != $i5 goto label05;
+
+     label04:
+        return 1;
+
+     label05:
+        $r2 = virtualinvoke r1.<org.omg.CORBA.ORB: org.omg.CORBA.Object resolve_initial_references(java.lang.String)>("ServerActivator");
+
+        $r3 = staticinvoke <com.sun.corba.se.spi.activation.ActivatorHelper: com.sun.corba.se.spi.activation.Activator narrow(org.omg.CORBA.Object)>($r2);
+
+        interfaceinvoke $r3.<com.sun.corba.se.spi.activation.Activator: void shutdown(int)>(i1);
+
+        $r5 = staticinvoke <com.sun.corba.se.impl.orbutil.CorbaResourceUtil: java.lang.String getText(java.lang.String)>("servertool.shutdown2");
+
+        virtualinvoke r4.<java.io.PrintStream: void println(java.lang.String)>($r5);
+
+     label06:
+        goto label10;
+
+     label07:
+        $r14 := @caughtexception;
+
+        $r15 = staticinvoke <com.sun.corba.se.impl.orbutil.CorbaResourceUtil: java.lang.String getText(java.lang.String)>("servertool.servernotrunning");
+
+        virtualinvoke r4.<java.io.PrintStream: void println(java.lang.String)>($r15);
+
+        goto label10;
+
+     label08:
+        $r12 := @caughtexception;
+
+        $r13 = staticinvoke <com.sun.corba.se.impl.orbutil.CorbaResourceUtil: java.lang.String getText(java.lang.String)>("servertool.nosuchserver");
+
+        virtualinvoke r4.<java.io.PrintStream: void println(java.lang.String)>($r13);
+
+        goto label10;
+
+     label09:
+        $r11 := @caughtexception;
+
+        virtualinvoke $r11.<java.lang.Exception: void printStackTrace()>();
+
+     label10:
+        return 0;
+
+        catch com.sun.corba.se.spi.activation.ServerNotActive from label01 to label04 with label07;
+        catch com.sun.corba.se.spi.activation.ServerNotActive from label05 to label06 with label07;
+        catch com.sun.corba.se.spi.activation.ServerNotRegistered from label01 to label04 with label08;
+        catch com.sun.corba.se.spi.activation.ServerNotRegistered from label05 to label06 with label08;
+        catch java.lang.Exception from label01 to label04 with label09;
+        catch java.lang.Exception from label05 to label06 with label09;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.corba.se.impl.activation.ShutdownServer: int illegalServerId> = -1;
+
+        return;
+    }
+}

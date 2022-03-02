@@ -1,0 +1,1078 @@
+public class java.sql.DriverManager extends java.lang.Object
+{
+    private static final java.util.concurrent.CopyOnWriteArrayList registeredDrivers;
+    private static volatile int loginTimeout;
+    private static volatile java.io.PrintWriter logWriter;
+    private static volatile java.io.PrintStream logStream;
+    private static final java.lang.Object logSync;
+    static final java.sql.SQLPermission SET_LOG_PERMISSION;
+    static final java.sql.SQLPermission DEREGISTER_DRIVER_PERMISSION;
+
+    private void <init>()
+    {
+        java.sql.DriverManager r0;
+
+        r0 := @this: java.sql.DriverManager;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static java.io.PrintWriter getLogWriter()
+    {
+        java.io.PrintWriter $r0;
+
+        $r0 = <java.sql.DriverManager: java.io.PrintWriter logWriter>;
+
+        return $r0;
+    }
+
+    public static void setLogWriter(java.io.PrintWriter)
+    {
+        java.io.PrintWriter r1;
+        java.sql.SQLPermission $r2;
+        java.lang.SecurityManager $r0;
+
+        r1 := @parameter0: java.io.PrintWriter;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r2 = <java.sql.DriverManager: java.sql.SQLPermission SET_LOG_PERMISSION>;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r2);
+
+     label1:
+        <java.sql.DriverManager: java.io.PrintStream logStream> = null;
+
+        <java.sql.DriverManager: java.io.PrintWriter logWriter> = r1;
+
+        return;
+    }
+
+    public static java.sql.Connection getConnection(java.lang.String, java.util.Properties) throws java.sql.SQLException
+    {
+        java.util.Properties r1;
+        java.sql.Connection $r3;
+        java.lang.Class $r2;
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.util.Properties;
+
+        $r2 = staticinvoke <sun.reflect.Reflection: java.lang.Class getCallerClass()>();
+
+        $r3 = staticinvoke <java.sql.DriverManager: java.sql.Connection getConnection(java.lang.String,java.util.Properties,java.lang.Class)>(r0, r1, $r2);
+
+        return $r3;
+    }
+
+    public static java.sql.Connection getConnection(java.lang.String, java.lang.String, java.lang.String) throws java.sql.SQLException
+    {
+        java.util.Properties $r0;
+        java.sql.Connection $r5;
+        java.lang.Class $r4;
+        java.lang.String r1, r2, r3;
+
+        r3 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        $r0 = new java.util.Properties;
+
+        specialinvoke $r0.<java.util.Properties: void <init>()>();
+
+        if r1 == null goto label1;
+
+        virtualinvoke $r0.<java.util.Properties: java.lang.Object put(java.lang.Object,java.lang.Object)>("user", r1);
+
+     label1:
+        if r2 == null goto label2;
+
+        virtualinvoke $r0.<java.util.Properties: java.lang.Object put(java.lang.Object,java.lang.Object)>("password", r2);
+
+     label2:
+        $r4 = staticinvoke <sun.reflect.Reflection: java.lang.Class getCallerClass()>();
+
+        $r5 = staticinvoke <java.sql.DriverManager: java.sql.Connection getConnection(java.lang.String,java.util.Properties,java.lang.Class)>(r3, $r0, $r4);
+
+        return $r5;
+    }
+
+    public static java.sql.Connection getConnection(java.lang.String) throws java.sql.SQLException
+    {
+        java.util.Properties $r0;
+        java.sql.Connection $r3;
+        java.lang.Class $r2;
+        java.lang.String r1;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = new java.util.Properties;
+
+        specialinvoke $r0.<java.util.Properties: void <init>()>();
+
+        $r2 = staticinvoke <sun.reflect.Reflection: java.lang.Class getCallerClass()>();
+
+        $r3 = staticinvoke <java.sql.DriverManager: java.sql.Connection getConnection(java.lang.String,java.util.Properties,java.lang.Class)>(r1, $r0, $r2);
+
+        return $r3;
+    }
+
+    public static java.sql.Driver getDriver(java.lang.String) throws java.sql.SQLException
+    {
+        java.sql.DriverInfo r11;
+        boolean $z0, $z1, $z2;
+        java.lang.StringBuilder $r0, $r1, $r3, $r4, $r13, $r14, $r18, $r21, $r22, $r26;
+        java.util.concurrent.CopyOnWriteArrayList $r7;
+        java.sql.SQLException $r9, $r29;
+        java.lang.String r2, $r5, $r17, $r19, $r25, $r27;
+        java.util.Iterator $r8;
+        java.sql.Driver $r12, $r15, $r20, $r23, $r28;
+        java.lang.Class $r6, $r16, $r24;
+        java.lang.Object $r10;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DriverManager.getDriver(\"");
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\")");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <java.sql.DriverManager: void println(java.lang.String)>($r5);
+
+        $r6 = staticinvoke <sun.reflect.Reflection: java.lang.Class getCallerClass()>();
+
+        $r7 = <java.sql.DriverManager: java.util.concurrent.CopyOnWriteArrayList registeredDrivers>;
+
+        $r8 = virtualinvoke $r7.<java.util.concurrent.CopyOnWriteArrayList: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label8;
+
+        $r10 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        r11 = (java.sql.DriverInfo) $r10;
+
+        $r12 = r11.<java.sql.DriverInfo: java.sql.Driver driver>;
+
+        $z1 = staticinvoke <java.sql.DriverManager: boolean isDriverAllowed(java.sql.Driver,java.lang.Class)>($r12, $r6);
+
+        if $z1 == 0 goto label6;
+
+     label2:
+        $r20 = r11.<java.sql.DriverInfo: java.sql.Driver driver>;
+
+        $z2 = interfaceinvoke $r20.<java.sql.Driver: boolean acceptsURL(java.lang.String)>(r2);
+
+        if $z2 == 0 goto label4;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getDriver returning ");
+
+        $r23 = r11.<java.sql.DriverInfo: java.sql.Driver driver>;
+
+        $r24 = virtualinvoke $r23.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r25 = virtualinvoke $r24.<java.lang.Class: java.lang.String getName()>();
+
+        $r26 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r25);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <java.sql.DriverManager: void println(java.lang.String)>($r27);
+
+        $r28 = r11.<java.sql.DriverInfo: java.sql.Driver driver>;
+
+     label3:
+        return $r28;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r29 := @caughtexception;
+
+        goto label7;
+
+     label6:
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("    skipping: ");
+
+        $r15 = r11.<java.sql.DriverInfo: java.sql.Driver driver>;
+
+        $r16 = virtualinvoke $r15.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.Class: java.lang.String getName()>();
+
+        $r18 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <java.sql.DriverManager: void println(java.lang.String)>($r19);
+
+     label7:
+        goto label1;
+
+     label8:
+        staticinvoke <java.sql.DriverManager: void println(java.lang.String)>("getDriver: no suitable driver");
+
+        $r9 = new java.sql.SQLException;
+
+        specialinvoke $r9.<java.sql.SQLException: void <init>(java.lang.String,java.lang.String)>("No suitable driver", "08001");
+
+        throw $r9;
+
+        catch java.sql.SQLException from label2 to label3 with label5;
+    }
+
+    public static synchronized void registerDriver(java.sql.Driver) throws java.sql.SQLException
+    {
+        java.sql.Driver r0;
+
+        r0 := @parameter0: java.sql.Driver;
+
+        staticinvoke <java.sql.DriverManager: void registerDriver(java.sql.Driver,java.sql.DriverAction)>(r0, null);
+
+        return;
+    }
+
+    public static synchronized void registerDriver(java.sql.Driver, java.sql.DriverAction) throws java.sql.SQLException
+    {
+        java.sql.DriverInfo $r2;
+        java.lang.NullPointerException $r1;
+        java.sql.Driver r0;
+        java.sql.DriverAction r3;
+        java.lang.StringBuilder $r5, $r6, $r7;
+        java.lang.String $r8;
+        java.util.concurrent.CopyOnWriteArrayList $r4;
+
+        r0 := @parameter0: java.sql.Driver;
+
+        r3 := @parameter1: java.sql.DriverAction;
+
+        if r0 == null goto label1;
+
+        $r4 = <java.sql.DriverManager: java.util.concurrent.CopyOnWriteArrayList registeredDrivers>;
+
+        $r2 = new java.sql.DriverInfo;
+
+        specialinvoke $r2.<java.sql.DriverInfo: void <init>(java.sql.Driver,java.sql.DriverAction)>(r0, r3);
+
+        virtualinvoke $r4.<java.util.concurrent.CopyOnWriteArrayList: boolean addIfAbsent(java.lang.Object)>($r2);
+
+        goto label2;
+
+     label1:
+        $r1 = new java.lang.NullPointerException;
+
+        specialinvoke $r1.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r1;
+
+     label2:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("registerDriver: ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <java.sql.DriverManager: void println(java.lang.String)>($r8);
+
+        return;
+    }
+
+    public static synchronized void deregisterDriver(java.sql.Driver) throws java.sql.SQLException
+    {
+        java.sql.DriverInfo $r6, r13;
+        java.sql.DriverAction $r14, $r16;
+        int $i0;
+        java.lang.SecurityException $r9;
+        java.lang.String $r5;
+        boolean $z0, $z1;
+        java.sql.SQLPermission $r17;
+        java.lang.SecurityManager $r1;
+        java.sql.Driver r0;
+        java.lang.StringBuilder $r2, $r3, $r4;
+        java.lang.Class $r8;
+        java.lang.Object $r12;
+        java.util.concurrent.CopyOnWriteArrayList $r7, $r10, $r11, $r15;
+
+        r0 := @parameter0: java.sql.Driver;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $r1 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r1 == null goto label2;
+
+        $r17 = <java.sql.DriverManager: java.sql.SQLPermission DEREGISTER_DRIVER_PERMISSION>;
+
+        virtualinvoke $r1.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r17);
+
+     label2:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DriverManager.deregisterDriver: ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <java.sql.DriverManager: void println(java.lang.String)>($r5);
+
+        $r6 = new java.sql.DriverInfo;
+
+        specialinvoke $r6.<java.sql.DriverInfo: void <init>(java.sql.Driver,java.sql.DriverAction)>(r0, null);
+
+        $r7 = <java.sql.DriverManager: java.util.concurrent.CopyOnWriteArrayList registeredDrivers>;
+
+        $z0 = virtualinvoke $r7.<java.util.concurrent.CopyOnWriteArrayList: boolean contains(java.lang.Object)>($r6);
+
+        if $z0 == 0 goto label5;
+
+        $r8 = staticinvoke <sun.reflect.Reflection: java.lang.Class getCallerClass()>();
+
+        $z1 = staticinvoke <java.sql.DriverManager: boolean isDriverAllowed(java.sql.Driver,java.lang.Class)>(r0, $r8);
+
+        if $z1 == 0 goto label4;
+
+        $r11 = <java.sql.DriverManager: java.util.concurrent.CopyOnWriteArrayList registeredDrivers>;
+
+        $r10 = <java.sql.DriverManager: java.util.concurrent.CopyOnWriteArrayList registeredDrivers>;
+
+        $i0 = virtualinvoke $r10.<java.util.concurrent.CopyOnWriteArrayList: int indexOf(java.lang.Object)>($r6);
+
+        $r12 = virtualinvoke $r11.<java.util.concurrent.CopyOnWriteArrayList: java.lang.Object get(int)>($i0);
+
+        r13 = (java.sql.DriverInfo) $r12;
+
+        $r14 = virtualinvoke r13.<java.sql.DriverInfo: java.sql.DriverAction action()>();
+
+        if $r14 == null goto label3;
+
+        $r16 = virtualinvoke r13.<java.sql.DriverInfo: java.sql.DriverAction action()>();
+
+        interfaceinvoke $r16.<java.sql.DriverAction: void deregister()>();
+
+     label3:
+        $r15 = <java.sql.DriverManager: java.util.concurrent.CopyOnWriteArrayList registeredDrivers>;
+
+        virtualinvoke $r15.<java.util.concurrent.CopyOnWriteArrayList: boolean remove(java.lang.Object)>($r6);
+
+        goto label6;
+
+     label4:
+        $r9 = new java.lang.SecurityException;
+
+        specialinvoke $r9.<java.lang.SecurityException: void <init>()>();
+
+        throw $r9;
+
+     label5:
+        staticinvoke <java.sql.DriverManager: void println(java.lang.String)>("    couldn\'t find driver to unload");
+
+     label6:
+        return;
+    }
+
+    public static java.util.Enumeration getDrivers()
+    {
+        java.util.Enumeration $r4;
+        java.sql.DriverInfo r6;
+        java.util.Vector $r0;
+        java.lang.String $r11, $r13;
+        boolean $z0, $z1;
+        java.util.Iterator $r3;
+        java.sql.Driver $r7, $r14;
+        java.lang.Class $r1, $r10;
+        java.lang.Object $r5;
+        java.lang.StringBuilder $r8, $r9, $r12;
+        java.util.concurrent.CopyOnWriteArrayList $r2;
+
+        $r0 = new java.util.Vector;
+
+        specialinvoke $r0.<java.util.Vector: void <init>()>();
+
+        $r1 = staticinvoke <sun.reflect.Reflection: java.lang.Class getCallerClass()>();
+
+        $r2 = <java.sql.DriverManager: java.util.concurrent.CopyOnWriteArrayList registeredDrivers>;
+
+        $r3 = virtualinvoke $r2.<java.util.concurrent.CopyOnWriteArrayList: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r5 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (java.sql.DriverInfo) $r5;
+
+        $r7 = r6.<java.sql.DriverInfo: java.sql.Driver driver>;
+
+        $z1 = staticinvoke <java.sql.DriverManager: boolean isDriverAllowed(java.sql.Driver,java.lang.Class)>($r7, $r1);
+
+        if $z1 == 0 goto label2;
+
+        $r14 = r6.<java.sql.DriverInfo: java.sql.Driver driver>;
+
+        virtualinvoke $r0.<java.util.Vector: void addElement(java.lang.Object)>($r14);
+
+        goto label3;
+
+     label2:
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("    skipping: ");
+
+        $r10 = virtualinvoke r6.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.Class: java.lang.String getName()>();
+
+        $r12 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <java.sql.DriverManager: void println(java.lang.String)>($r13);
+
+     label3:
+        goto label1;
+
+     label4:
+        $r4 = virtualinvoke $r0.<java.util.Vector: java.util.Enumeration elements()>();
+
+        return $r4;
+    }
+
+    public static void setLoginTimeout(int)
+    {
+        int i0;
+
+        i0 := @parameter0: int;
+
+        <java.sql.DriverManager: int loginTimeout> = i0;
+
+        return;
+    }
+
+    public static int getLoginTimeout()
+    {
+        int $i0;
+
+        $i0 = <java.sql.DriverManager: int loginTimeout>;
+
+        return $i0;
+    }
+
+    public static void setLogStream(java.io.PrintStream)
+    {
+        java.io.PrintStream r1;
+        java.io.PrintWriter $r2;
+        java.sql.SQLPermission $r3;
+        java.lang.SecurityManager $r0;
+
+        r1 := @parameter0: java.io.PrintStream;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r3 = <java.sql.DriverManager: java.sql.SQLPermission SET_LOG_PERMISSION>;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r3);
+
+     label1:
+        <java.sql.DriverManager: java.io.PrintStream logStream> = r1;
+
+        if r1 == null goto label2;
+
+        $r2 = new java.io.PrintWriter;
+
+        specialinvoke $r2.<java.io.PrintWriter: void <init>(java.io.OutputStream)>(r1);
+
+        <java.sql.DriverManager: java.io.PrintWriter logWriter> = $r2;
+
+        goto label3;
+
+     label2:
+        <java.sql.DriverManager: java.io.PrintWriter logWriter> = null;
+
+     label3:
+        return;
+    }
+
+    public static java.io.PrintStream getLogStream()
+    {
+        java.io.PrintStream $r0;
+
+        $r0 = <java.sql.DriverManager: java.io.PrintStream logStream>;
+
+        return $r0;
+    }
+
+    public static void println(java.lang.String)
+    {
+        java.io.PrintWriter $r1, $r3, $r4;
+        java.lang.Throwable $r5;
+        java.lang.Object $r0;
+        java.lang.String r2;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r0 = <java.sql.DriverManager: java.lang.Object logSync>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = <java.sql.DriverManager: java.io.PrintWriter logWriter>;
+
+        if $r1 == null goto label2;
+
+        $r3 = <java.sql.DriverManager: java.io.PrintWriter logWriter>;
+
+        virtualinvoke $r3.<java.io.PrintWriter: void println(java.lang.String)>(r2);
+
+        $r4 = <java.sql.DriverManager: java.io.PrintWriter logWriter>;
+
+        virtualinvoke $r4.<java.io.PrintWriter: void flush()>();
+
+     label2:
+        exitmonitor $r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r5;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private static boolean isDriverAllowed(java.sql.Driver, java.lang.Class)
+    {
+        java.sql.Driver r1;
+        java.lang.Class r0;
+        java.lang.ClassLoader $r2;
+        boolean $z0;
+
+        r1 := @parameter0: java.sql.Driver;
+
+        r0 := @parameter1: java.lang.Class;
+
+        if r0 == null goto label1;
+
+        $r2 = virtualinvoke r0.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        goto label2;
+
+     label1:
+        $r2 = null;
+
+     label2:
+        $z0 = staticinvoke <java.sql.DriverManager: boolean isDriverAllowed(java.sql.Driver,java.lang.ClassLoader)>(r1, $r2);
+
+        return $z0;
+    }
+
+    private static boolean isDriverAllowed(java.sql.Driver, java.lang.ClassLoader)
+    {
+        java.lang.Exception $r5;
+        java.sql.Driver r0;
+        java.lang.Class $r1, $r4, r6;
+        java.lang.String $r2;
+        java.lang.ClassLoader r3;
+        boolean z0, $z1;
+
+        r0 := @parameter0: java.sql.Driver;
+
+        r3 := @parameter1: java.lang.ClassLoader;
+
+        z0 = 0;
+
+        if r0 == null goto label7;
+
+        r6 = null;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.String getName()>();
+
+        r6 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>($r2, 1, r3);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+     label4:
+        $r4 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        if r6 != $r4 goto label5;
+
+        $z1 = 1;
+
+        goto label6;
+
+     label5:
+        $z1 = 0;
+
+     label6:
+        z0 = $z1;
+
+     label7:
+        return z0;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    private static void loadInitialDrivers()
+    {
+        java.lang.String[] $r7;
+        int $i0, i1, i2;
+        java.sql.DriverManager$1 $r0;
+        java.sql.DriverManager$2 $r2;
+        java.lang.String $r6, $r11, r12, $r16, $r22, r24;
+        boolean $z0;
+        java.lang.Exception $r18, $r23;
+        java.lang.Object $r1;
+        java.lang.StringBuilder $r3, $r4, $r5, $r8, $r9, $r10, $r13, $r14, $r15, $r19, $r20, $r21;
+        java.lang.ClassLoader $r17;
+
+     label01:
+        $r0 = new java.sql.DriverManager$1;
+
+        specialinvoke $r0.<java.sql.DriverManager$1: void <init>()>();
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r24 = (java.lang.String) $r1;
+
+     label02:
+        goto label04;
+
+     label03:
+        $r23 := @caughtexception;
+
+        r24 = null;
+
+     label04:
+        $r2 = new java.sql.DriverManager$2;
+
+        specialinvoke $r2.<java.sql.DriverManager$2: void <init>()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DriverManager.initialize: jdbc.drivers = ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r24);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <java.sql.DriverManager: void println(java.lang.String)>($r6);
+
+        if r24 == null goto label05;
+
+        $z0 = virtualinvoke r24.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z0 == 0 goto label06;
+
+     label05:
+        return;
+
+     label06:
+        $r7 = virtualinvoke r24.<java.lang.String: java.lang.String[] split(java.lang.String)>(":");
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("number of Drivers:");
+
+        $i0 = lengthof $r7;
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <java.sql.DriverManager: void println(java.lang.String)>($r11);
+
+        i1 = lengthof $r7;
+
+        i2 = 0;
+
+     label07:
+        if i2 >= i1 goto label12;
+
+        r12 = $r7[i2];
+
+     label08:
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DriverManager.Initialize: loading ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r12);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <java.sql.DriverManager: void println(java.lang.String)>($r16);
+
+        $r17 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getSystemClassLoader()>();
+
+        staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>(r12, 1, $r17);
+
+     label09:
+        goto label11;
+
+     label10:
+        $r18 := @caughtexception;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DriverManager.Initialize: load failed: ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r18);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <java.sql.DriverManager: void println(java.lang.String)>($r22);
+
+     label11:
+        i2 = i2 + 1;
+
+        goto label07;
+
+     label12:
+        return;
+
+        catch java.lang.Exception from label01 to label02 with label03;
+        catch java.lang.Exception from label08 to label09 with label10;
+    }
+
+    private static java.sql.Connection getConnection(java.lang.String, java.util.Properties, java.lang.Class) throws java.sql.SQLException
+    {
+        java.sql.Connection $r40;
+        java.sql.DriverInfo r23;
+        java.lang.Thread $r49;
+        boolean $z0, $z1;
+        java.lang.StringBuilder $r2, $r3, $r4, $r5, $r9, $r10, $r11, $r14, $r15, $r16, $r18, $r19, $r20, $r25, $r26, $r29, $r31, $r32, $r36, $r41, $r42, $r46;
+        java.lang.ClassLoader $r52, r53;
+        java.util.concurrent.CopyOnWriteArrayList $r7;
+        java.lang.Throwable $r51;
+        java.sql.SQLException $r13, $r48, $r50, r54;
+        java.lang.String r1, $r6, $r12, $r17, $r21, $r28, $r30, $r35, $r37, $r45, $r47;
+        java.util.Properties r38;
+        java.util.Iterator $r8;
+        java.sql.Driver $r24, $r33, $r39, $r43;
+        java.lang.Class r0, $r27, $r34, $r44;
+        java.lang.Object $r22;
+
+        r1 := @parameter0: java.lang.String;
+
+        r38 := @parameter1: java.util.Properties;
+
+        r0 := @parameter2: java.lang.Class;
+
+        if r0 == null goto label01;
+
+        $r52 = virtualinvoke r0.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        goto label02;
+
+     label01:
+        $r52 = null;
+
+     label02:
+        r53 = $r52;
+
+        entermonitor class "Ljava/sql/DriverManager;";
+
+     label03:
+        if $r52 != null goto label04;
+
+        $r49 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        r53 = virtualinvoke $r49.<java.lang.Thread: java.lang.ClassLoader getContextClassLoader()>();
+
+     label04:
+        exitmonitor class "Ljava/sql/DriverManager;";
+
+     label05:
+        goto label08;
+
+     label06:
+        $r51 := @caughtexception;
+
+        exitmonitor class "Ljava/sql/DriverManager;";
+
+     label07:
+        throw $r51;
+
+     label08:
+        if r1 != null goto label09;
+
+        $r48 = new java.sql.SQLException;
+
+        specialinvoke $r48.<java.sql.SQLException: void <init>(java.lang.String,java.lang.String)>("The url cannot be null", "08001");
+
+        throw $r48;
+
+     label09:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DriverManager.getConnection(\"");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\")");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <java.sql.DriverManager: void println(java.lang.String)>($r6);
+
+        r54 = null;
+
+        $r7 = <java.sql.DriverManager: java.util.concurrent.CopyOnWriteArrayList registeredDrivers>;
+
+        $r8 = virtualinvoke $r7.<java.util.concurrent.CopyOnWriteArrayList: java.util.Iterator iterator()>();
+
+     label10:
+        $z0 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label18;
+
+        $r22 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        r23 = (java.sql.DriverInfo) $r22;
+
+        $r24 = r23.<java.sql.DriverInfo: java.sql.Driver driver>;
+
+        $z1 = staticinvoke <java.sql.DriverManager: boolean isDriverAllowed(java.sql.Driver,java.lang.ClassLoader)>($r24, r53);
+
+        if $z1 == 0 goto label16;
+
+     label11:
+        $r31 = new java.lang.StringBuilder;
+
+        specialinvoke $r31.<java.lang.StringBuilder: void <init>()>();
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("    trying ");
+
+        $r33 = r23.<java.sql.DriverInfo: java.sql.Driver driver>;
+
+        $r34 = virtualinvoke $r33.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r35 = virtualinvoke $r34.<java.lang.Class: java.lang.String getName()>();
+
+        $r36 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r35);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <java.sql.DriverManager: void println(java.lang.String)>($r37);
+
+        $r39 = r23.<java.sql.DriverInfo: java.sql.Driver driver>;
+
+        $r40 = interfaceinvoke $r39.<java.sql.Driver: java.sql.Connection connect(java.lang.String,java.util.Properties)>(r1, r38);
+
+        if $r40 == null goto label13;
+
+        $r41 = new java.lang.StringBuilder;
+
+        specialinvoke $r41.<java.lang.StringBuilder: void <init>()>();
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getConnection returning ");
+
+        $r43 = r23.<java.sql.DriverInfo: java.sql.Driver driver>;
+
+        $r44 = virtualinvoke $r43.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r45 = virtualinvoke $r44.<java.lang.Class: java.lang.String getName()>();
+
+        $r46 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r45);
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <java.sql.DriverManager: void println(java.lang.String)>($r47);
+
+     label12:
+        return $r40;
+
+     label13:
+        goto label17;
+
+     label14:
+        $r50 := @caughtexception;
+
+        if r54 != null goto label15;
+
+        r54 = $r50;
+
+     label15:
+        goto label17;
+
+     label16:
+        $r25 = new java.lang.StringBuilder;
+
+        specialinvoke $r25.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("    skipping: ");
+
+        $r27 = virtualinvoke r23.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r28 = virtualinvoke $r27.<java.lang.Class: java.lang.String getName()>();
+
+        $r29 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r28);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <java.sql.DriverManager: void println(java.lang.String)>($r30);
+
+     label17:
+        goto label10;
+
+     label18:
+        if r54 == null goto label19;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getConnection failed: ");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r54);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <java.sql.DriverManager: void println(java.lang.String)>($r21);
+
+        throw r54;
+
+     label19:
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getConnection: no suitable driver found for ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <java.sql.DriverManager: void println(java.lang.String)>($r12);
+
+        $r13 = new java.sql.SQLException;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No suitable driver found for ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<java.sql.SQLException: void <init>(java.lang.String,java.lang.String)>($r17, "08001");
+
+        throw $r13;
+
+        catch java.lang.Throwable from label03 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+        catch java.sql.SQLException from label11 to label12 with label14;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Object $r1;
+        java.sql.SQLPermission $r2, $r3;
+        java.util.concurrent.CopyOnWriteArrayList $r0;
+
+        $r0 = new java.util.concurrent.CopyOnWriteArrayList;
+
+        specialinvoke $r0.<java.util.concurrent.CopyOnWriteArrayList: void <init>()>();
+
+        <java.sql.DriverManager: java.util.concurrent.CopyOnWriteArrayList registeredDrivers> = $r0;
+
+        <java.sql.DriverManager: int loginTimeout> = 0;
+
+        <java.sql.DriverManager: java.io.PrintWriter logWriter> = null;
+
+        <java.sql.DriverManager: java.io.PrintStream logStream> = null;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        <java.sql.DriverManager: java.lang.Object logSync> = $r1;
+
+        staticinvoke <java.sql.DriverManager: void loadInitialDrivers()>();
+
+        staticinvoke <java.sql.DriverManager: void println(java.lang.String)>("JDBC DriverManager initialized");
+
+        $r2 = new java.sql.SQLPermission;
+
+        specialinvoke $r2.<java.sql.SQLPermission: void <init>(java.lang.String)>("setLog");
+
+        <java.sql.DriverManager: java.sql.SQLPermission SET_LOG_PERMISSION> = $r2;
+
+        $r3 = new java.sql.SQLPermission;
+
+        specialinvoke $r3.<java.sql.SQLPermission: void <init>(java.lang.String)>("deregisterDriver");
+
+        <java.sql.DriverManager: java.sql.SQLPermission DEREGISTER_DRIVER_PERMISSION> = $r3;
+
+        return;
+    }
+}

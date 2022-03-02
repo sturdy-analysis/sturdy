@@ -1,0 +1,1263 @@
+public class sun.java2d.d3d.D3DGraphicsDevice extends sun.awt.Win32GraphicsDevice
+{
+    private sun.java2d.d3d.D3DContext context;
+    private static boolean d3dAvailable;
+    private sun.java2d.pipe.hw.ContextCapabilities d3dCaps;
+    private boolean fsStatus;
+    private java.awt.Rectangle ownerOrigBounds;
+    private boolean ownerWasVisible;
+    private java.awt.Window realFSWindow;
+    private java.awt.event.WindowListener fsWindowListener;
+    private boolean fsWindowWasAlwaysOnTop;
+
+    private static native boolean initD3D();
+
+    public static sun.java2d.d3d.D3DGraphicsDevice createDevice(int)
+    {
+        int i0, $i1, $i2;
+        java.lang.String $r6, $r11;
+        sun.java2d.d3d.D3DGraphicsDevice $r1;
+        boolean $z0, $z1, $z2;
+        java.io.PrintStream $r3, $r8;
+        sun.java2d.pipe.hw.ContextCapabilities $r0;
+        java.lang.StringBuilder $r2, $r4, $r5, $r7, $r9, $r10;
+
+        i0 := @parameter0: int;
+
+        $z0 = <sun.java2d.d3d.D3DGraphicsDevice: boolean d3dAvailable>;
+
+        if $z0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r0 = staticinvoke <sun.java2d.d3d.D3DGraphicsDevice: sun.java2d.pipe.hw.ContextCapabilities getDeviceCaps(int)>(i0);
+
+        $i1 = virtualinvoke $r0.<sun.java2d.pipe.hw.ContextCapabilities: int getCaps()>();
+
+        $i2 = $i1 & 262144;
+
+        if $i2 != 0 goto label3;
+
+        $z2 = staticinvoke <sun.java2d.windows.WindowsFlags: boolean isD3DVerbose()>();
+
+        if $z2 == 0 goto label2;
+
+        $r8 = <java.lang.System: java.io.PrintStream out>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not enable Direct3D pipeline on screen ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r8.<java.io.PrintStream: void println(java.lang.String)>($r11);
+
+     label2:
+        return null;
+
+     label3:
+        $z1 = staticinvoke <sun.java2d.windows.WindowsFlags: boolean isD3DVerbose()>();
+
+        if $z1 == 0 goto label4;
+
+        $r3 = <java.lang.System: java.io.PrintStream out>;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Direct3D pipeline enabled on screen ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>($r6);
+
+     label4:
+        $r1 = new sun.java2d.d3d.D3DGraphicsDevice;
+
+        specialinvoke $r1.<sun.java2d.d3d.D3DGraphicsDevice: void <init>(int,sun.java2d.pipe.hw.ContextCapabilities)>(i0, $r0);
+
+        return $r1;
+    }
+
+    private static native int getDeviceCapsNative(int);
+
+    private static native java.lang.String getDeviceIdNative(int);
+
+    private static sun.java2d.pipe.hw.ContextCapabilities getDeviceCaps(int)
+    {
+        java.lang.Throwable $r5;
+        sun.java2d.d3d.D3DRenderQueue $r0;
+        sun.java2d.d3d.D3DGraphicsDevice$1 $r2;
+        sun.java2d.d3d.D3DContext$D3DContextCaps $r3, $r6;
+        sun.java2d.d3d.D3DGraphicsDevice$1Result $r1;
+        int i0, $i1;
+        java.lang.String $r4;
+
+        i0 := @parameter0: int;
+
+        $r0 = staticinvoke <sun.java2d.d3d.D3DRenderQueue: sun.java2d.d3d.D3DRenderQueue getInstance()>();
+
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void lock()>();
+
+     label1:
+        $r1 = new sun.java2d.d3d.D3DGraphicsDevice$1Result;
+
+        specialinvoke $r1.<sun.java2d.d3d.D3DGraphicsDevice$1Result: void <init>()>();
+
+        $r2 = new sun.java2d.d3d.D3DGraphicsDevice$1;
+
+        specialinvoke $r2.<sun.java2d.d3d.D3DGraphicsDevice$1: void <init>(sun.java2d.d3d.D3DGraphicsDevice$1Result,int)>($r1, i0);
+
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void flushAndInvokeNow(java.lang.Runnable)>($r2);
+
+        $r3 = new sun.java2d.d3d.D3DContext$D3DContextCaps;
+
+        $i1 = $r1.<sun.java2d.d3d.D3DGraphicsDevice$1Result: int caps>;
+
+        $r4 = $r1.<sun.java2d.d3d.D3DGraphicsDevice$1Result: java.lang.String id>;
+
+        specialinvoke $r3.<sun.java2d.d3d.D3DContext$D3DContextCaps: void <init>(int,java.lang.String)>($i1, $r4);
+
+     label2:
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        goto label5;
+
+     label3:
+        $r5 := @caughtexception;
+
+     label4:
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        throw $r5;
+
+     label5:
+        if $r3 == null goto label6;
+
+        $r6 = $r3;
+
+        goto label7;
+
+     label6:
+        $r6 = new sun.java2d.d3d.D3DContext$D3DContextCaps;
+
+        specialinvoke $r6.<sun.java2d.d3d.D3DContext$D3DContextCaps: void <init>(int,java.lang.String)>(0, null);
+
+     label7:
+        return $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public final boolean isCapPresent(int)
+    {
+        sun.java2d.pipe.hw.ContextCapabilities $r1;
+        int $i0, i1, $i2;
+        sun.java2d.d3d.D3DGraphicsDevice r0;
+        boolean $z0;
+
+        r0 := @this: sun.java2d.d3d.D3DGraphicsDevice;
+
+        i1 := @parameter0: int;
+
+        $r1 = r0.<sun.java2d.d3d.D3DGraphicsDevice: sun.java2d.pipe.hw.ContextCapabilities d3dCaps>;
+
+        $i0 = virtualinvoke $r1.<sun.java2d.pipe.hw.ContextCapabilities: int getCaps()>();
+
+        $i2 = $i0 & i1;
+
+        if $i2 == 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private void <init>(int, sun.java2d.pipe.hw.ContextCapabilities)
+    {
+        sun.java2d.d3d.D3DContext $r6;
+        sun.java2d.d3d.D3DRenderQueue $r7;
+        sun.java2d.pipe.hw.ContextCapabilities r5;
+        int i0;
+        java.lang.StringBuilder $r1, $r2, $r3;
+        java.lang.String $r4;
+        sun.java2d.d3d.D3DGraphicsDevice r0;
+
+        r0 := @this: sun.java2d.d3d.D3DGraphicsDevice;
+
+        i0 := @parameter0: int;
+
+        r5 := @parameter1: sun.java2d.pipe.hw.ContextCapabilities;
+
+        specialinvoke r0.<sun.awt.Win32GraphicsDevice: void <init>(int)>(i0);
+
+        r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Rectangle ownerOrigBounds> = null;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("D3DGraphicsDevice[screen=");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r0.<sun.java2d.d3d.D3DGraphicsDevice: java.lang.String descString> = $r4;
+
+        r0.<sun.java2d.d3d.D3DGraphicsDevice: sun.java2d.pipe.hw.ContextCapabilities d3dCaps> = r5;
+
+        $r6 = new sun.java2d.d3d.D3DContext;
+
+        $r7 = staticinvoke <sun.java2d.d3d.D3DRenderQueue: sun.java2d.d3d.D3DRenderQueue getInstance()>();
+
+        specialinvoke $r6.<sun.java2d.d3d.D3DContext: void <init>(sun.java2d.pipe.RenderQueue,sun.java2d.d3d.D3DGraphicsDevice)>($r7, r0);
+
+        r0.<sun.java2d.d3d.D3DGraphicsDevice: sun.java2d.d3d.D3DContext context> = $r6;
+
+        return;
+    }
+
+    public boolean isD3DEnabledOnDevice()
+    {
+        sun.java2d.d3d.D3DGraphicsDevice r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.java2d.d3d.D3DGraphicsDevice;
+
+        $z0 = virtualinvoke r0.<sun.java2d.d3d.D3DGraphicsDevice: boolean isValid()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = virtualinvoke r0.<sun.java2d.d3d.D3DGraphicsDevice: boolean isCapPresent(int)>(262144);
+
+        if $z1 == 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+    }
+
+    public static boolean isD3DAvailable()
+    {
+        boolean $z0;
+
+        $z0 = <sun.java2d.d3d.D3DGraphicsDevice: boolean d3dAvailable>;
+
+        return $z0;
+    }
+
+    private java.awt.Frame getToplevelOwner(java.awt.Window)
+    {
+        java.awt.Frame $r2;
+        java.awt.Window r0, $r1, r4;
+        sun.java2d.d3d.D3DGraphicsDevice r3;
+        boolean $z0;
+
+        r3 := @this: sun.java2d.d3d.D3DGraphicsDevice;
+
+        r0 := @parameter0: java.awt.Window;
+
+        r4 = r0;
+
+     label1:
+        if r4 == null goto label2;
+
+        $r1 = virtualinvoke r4.<java.awt.Window: java.awt.Window getOwner()>();
+
+        r4 = $r1;
+
+        $z0 = $r1 instanceof java.awt.Frame;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = (java.awt.Frame) $r1;
+
+        return $r2;
+
+     label2:
+        return null;
+    }
+
+    private static native boolean enterFullScreenExclusiveNative(int, long);
+
+    protected void enterFullScreenExclusive(int, java.awt.peer.WindowPeer)
+    {
+        java.lang.Throwable $r7;
+        java.awt.peer.WindowPeer r6;
+        java.awt.peer.ComponentPeer $r2;
+        sun.java2d.d3d.D3DRenderQueue $r4;
+        java.awt.Window $r1;
+        sun.java2d.d3d.D3DGraphicsDevice$2 $r5;
+        int i0;
+        sun.awt.windows.WWindowPeer r3;
+        sun.java2d.d3d.D3DGraphicsDevice r0;
+        boolean $z0;
+
+        r0 := @this: sun.java2d.d3d.D3DGraphicsDevice;
+
+        i0 := @parameter0: int;
+
+        r6 := @parameter1: java.awt.peer.WindowPeer;
+
+        $r1 = r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Window realFSWindow>;
+
+        $r2 = virtualinvoke $r1.<java.awt.Window: java.awt.peer.ComponentPeer getPeer()>();
+
+        r3 = (sun.awt.windows.WWindowPeer) $r2;
+
+        $r4 = staticinvoke <sun.java2d.d3d.D3DRenderQueue: sun.java2d.d3d.D3DRenderQueue getInstance()>();
+
+        virtualinvoke $r4.<sun.java2d.d3d.D3DRenderQueue: void lock()>();
+
+     label1:
+        $r5 = new sun.java2d.d3d.D3DGraphicsDevice$2;
+
+        specialinvoke $r5.<sun.java2d.d3d.D3DGraphicsDevice$2: void <init>(sun.java2d.d3d.D3DGraphicsDevice,sun.awt.windows.WWindowPeer,int)>(r0, r3, i0);
+
+        virtualinvoke $r4.<sun.java2d.d3d.D3DRenderQueue: void flushAndInvokeNow(java.lang.Runnable)>($r5);
+
+     label2:
+        virtualinvoke $r4.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        goto label5;
+
+     label3:
+        $r7 := @caughtexception;
+
+     label4:
+        virtualinvoke $r4.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        throw $r7;
+
+     label5:
+        $z0 = r0.<sun.java2d.d3d.D3DGraphicsDevice: boolean fsStatus>;
+
+        if $z0 != 0 goto label6;
+
+        specialinvoke r0.<sun.awt.Win32GraphicsDevice: void enterFullScreenExclusive(int,java.awt.peer.WindowPeer)>(i0, r6);
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private static native boolean exitFullScreenExclusiveNative(int);
+
+    protected void exitFullScreenExclusive(int, java.awt.peer.WindowPeer)
+    {
+        java.lang.Throwable $r4;
+        java.awt.peer.WindowPeer r1;
+        sun.java2d.d3d.D3DRenderQueue $r2;
+        int i0;
+        sun.java2d.d3d.D3DGraphicsDevice$3 $r3;
+        sun.java2d.d3d.D3DGraphicsDevice r0;
+        boolean $z0;
+
+        r0 := @this: sun.java2d.d3d.D3DGraphicsDevice;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.awt.peer.WindowPeer;
+
+        $z0 = r0.<sun.java2d.d3d.D3DGraphicsDevice: boolean fsStatus>;
+
+        if $z0 == 0 goto label6;
+
+        $r2 = staticinvoke <sun.java2d.d3d.D3DRenderQueue: sun.java2d.d3d.D3DRenderQueue getInstance()>();
+
+        virtualinvoke $r2.<sun.java2d.d3d.D3DRenderQueue: void lock()>();
+
+     label1:
+        $r3 = new sun.java2d.d3d.D3DGraphicsDevice$3;
+
+        specialinvoke $r3.<sun.java2d.d3d.D3DGraphicsDevice$3: void <init>(sun.java2d.d3d.D3DGraphicsDevice,int)>(r0, i0);
+
+        virtualinvoke $r2.<sun.java2d.d3d.D3DRenderQueue: void flushAndInvokeNow(java.lang.Runnable)>($r3);
+
+     label2:
+        virtualinvoke $r2.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+     label4:
+        virtualinvoke $r2.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        throw $r4;
+
+     label5:
+        goto label7;
+
+     label6:
+        specialinvoke r0.<sun.awt.Win32GraphicsDevice: void exitFullScreenExclusive(int,java.awt.peer.WindowPeer)>(i0, r1);
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    protected void addFSWindowListener(java.awt.Window)
+    {
+        java.awt.Rectangle $r4, $r9;
+        java.awt.event.WindowListener $r16;
+        int $i0, $i1, $i2, $i3;
+        sun.awt.windows.WWindowPeer r7, $r13;
+        sun.java2d.d3d.D3DGraphicsDevice r1;
+        boolean $z0, $z1, $z2, $z3;
+        sun.java2d.d3d.D3DGraphicsDevice$D3DFSWindowAdapter $r14;
+        java.awt.peer.ComponentPeer $r6, $r12;
+        java.awt.Frame $r2;
+        java.awt.Window r0, $r3, $r5, $r8, $r10, $r11, $r15;
+
+        r1 := @this: sun.java2d.d3d.D3DGraphicsDevice;
+
+        r0 := @parameter0: java.awt.Window;
+
+        $z0 = r0 instanceof java.awt.Frame;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = r0 instanceof java.awt.Dialog;
+
+        if $z1 != 0 goto label1;
+
+        $r2 = specialinvoke r1.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Frame getToplevelOwner(java.awt.Window)>(r0);
+
+        r1.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Window realFSWindow> = $r2;
+
+        if $r2 == null goto label1;
+
+        $r3 = r1.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Window realFSWindow>;
+
+        $r4 = virtualinvoke $r3.<java.awt.Window: java.awt.Rectangle getBounds()>();
+
+        r1.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Rectangle ownerOrigBounds> = $r4;
+
+        $r5 = r1.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Window realFSWindow>;
+
+        $r6 = virtualinvoke $r5.<java.awt.Window: java.awt.peer.ComponentPeer getPeer()>();
+
+        r7 = (sun.awt.windows.WWindowPeer) $r6;
+
+        $r8 = r1.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Window realFSWindow>;
+
+        $z2 = virtualinvoke $r8.<java.awt.Window: boolean isVisible()>();
+
+        r1.<sun.java2d.d3d.D3DGraphicsDevice: boolean ownerWasVisible> = $z2;
+
+        $r9 = virtualinvoke r0.<java.awt.Window: java.awt.Rectangle getBounds()>();
+
+        $i3 = $r9.<java.awt.Rectangle: int x>;
+
+        $i2 = $r9.<java.awt.Rectangle: int y>;
+
+        $i1 = $r9.<java.awt.Rectangle: int width>;
+
+        $i0 = $r9.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r7.<sun.awt.windows.WWindowPeer: void reshape(int,int,int,int)>($i3, $i2, $i1, $i0);
+
+        virtualinvoke r7.<sun.awt.windows.WWindowPeer: void setVisible(boolean)>(1);
+
+        goto label2;
+
+     label1:
+        r1.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Window realFSWindow> = r0;
+
+     label2:
+        $r10 = r1.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Window realFSWindow>;
+
+        $z3 = virtualinvoke $r10.<java.awt.Window: boolean isAlwaysOnTop()>();
+
+        r1.<sun.java2d.d3d.D3DGraphicsDevice: boolean fsWindowWasAlwaysOnTop> = $z3;
+
+        $r11 = r1.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Window realFSWindow>;
+
+        $r12 = virtualinvoke $r11.<java.awt.Window: java.awt.peer.ComponentPeer getPeer()>();
+
+        $r13 = (sun.awt.windows.WWindowPeer) $r12;
+
+        virtualinvoke $r13.<sun.awt.windows.WWindowPeer: void setAlwaysOnTop(boolean)>(1);
+
+        $r14 = new sun.java2d.d3d.D3DGraphicsDevice$D3DFSWindowAdapter;
+
+        specialinvoke $r14.<sun.java2d.d3d.D3DGraphicsDevice$D3DFSWindowAdapter: void <init>(sun.java2d.d3d.D3DGraphicsDevice$1)>(null);
+
+        r1.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.event.WindowListener fsWindowListener> = $r14;
+
+        $r15 = r1.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Window realFSWindow>;
+
+        $r16 = r1.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.event.WindowListener fsWindowListener>;
+
+        virtualinvoke $r15.<java.awt.Window: void addWindowListener(java.awt.event.WindowListener)>($r16);
+
+        return;
+    }
+
+    protected void removeFSWindowListener(java.awt.Window)
+    {
+        java.awt.Rectangle $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14;
+        java.awt.event.WindowListener $r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        sun.awt.windows.WWindowPeer r5;
+        sun.java2d.d3d.D3DGraphicsDevice r0;
+        boolean $z0, $z1;
+        java.awt.peer.ComponentPeer $r4;
+        java.awt.Window $r2, $r3, r15;
+
+        r0 := @this: sun.java2d.d3d.D3DGraphicsDevice;
+
+        r15 := @parameter0: java.awt.Window;
+
+        $r2 = r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Window realFSWindow>;
+
+        $r1 = r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.event.WindowListener fsWindowListener>;
+
+        virtualinvoke $r2.<java.awt.Window: void removeWindowListener(java.awt.event.WindowListener)>($r1);
+
+        r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.event.WindowListener fsWindowListener> = null;
+
+        $r3 = r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Window realFSWindow>;
+
+        $r4 = virtualinvoke $r3.<java.awt.Window: java.awt.peer.ComponentPeer getPeer()>();
+
+        r5 = (sun.awt.windows.WWindowPeer) $r4;
+
+        if r5 == null goto label5;
+
+        $r6 = r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Rectangle ownerOrigBounds>;
+
+        if $r6 == null goto label4;
+
+        $r7 = r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Rectangle ownerOrigBounds>;
+
+        $i0 = $r7.<java.awt.Rectangle: int width>;
+
+        if $i0 != 0 goto label1;
+
+        $r14 = r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Rectangle ownerOrigBounds>;
+
+        $r14.<java.awt.Rectangle: int width> = 1;
+
+     label1:
+        $r8 = r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Rectangle ownerOrigBounds>;
+
+        $i1 = $r8.<java.awt.Rectangle: int height>;
+
+        if $i1 != 0 goto label2;
+
+        $r13 = r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Rectangle ownerOrigBounds>;
+
+        $r13.<java.awt.Rectangle: int height> = 1;
+
+     label2:
+        $r9 = r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Rectangle ownerOrigBounds>;
+
+        $i5 = $r9.<java.awt.Rectangle: int x>;
+
+        $r10 = r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Rectangle ownerOrigBounds>;
+
+        $i4 = $r10.<java.awt.Rectangle: int y>;
+
+        $r11 = r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Rectangle ownerOrigBounds>;
+
+        $i3 = $r11.<java.awt.Rectangle: int width>;
+
+        $r12 = r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Rectangle ownerOrigBounds>;
+
+        $i2 = $r12.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r5.<sun.awt.windows.WWindowPeer: void reshape(int,int,int,int)>($i5, $i4, $i3, $i2);
+
+        $z0 = r0.<sun.java2d.d3d.D3DGraphicsDevice: boolean ownerWasVisible>;
+
+        if $z0 != 0 goto label3;
+
+        virtualinvoke r5.<sun.awt.windows.WWindowPeer: void setVisible(boolean)>(0);
+
+     label3:
+        r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Rectangle ownerOrigBounds> = null;
+
+     label4:
+        $z1 = r0.<sun.java2d.d3d.D3DGraphicsDevice: boolean fsWindowWasAlwaysOnTop>;
+
+        if $z1 != 0 goto label5;
+
+        virtualinvoke r5.<sun.awt.windows.WWindowPeer: void setAlwaysOnTop(boolean)>(0);
+
+     label5:
+        r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Window realFSWindow> = null;
+
+        return;
+    }
+
+    private static native java.awt.DisplayMode getCurrentDisplayModeNative(int);
+
+    protected java.awt.DisplayMode getCurrentDisplayMode(int)
+    {
+        java.lang.Throwable $r6;
+        sun.java2d.d3d.D3DRenderQueue $r0;
+        sun.java2d.d3d.D3DGraphicsDevice$4 $r3;
+        sun.java2d.d3d.D3DGraphicsDevice$2Result $r1;
+        java.awt.DisplayMode $r4, $r5, r7;
+        int i0;
+        sun.java2d.d3d.D3DGraphicsDevice r2;
+
+        r2 := @this: sun.java2d.d3d.D3DGraphicsDevice;
+
+        i0 := @parameter0: int;
+
+        $r0 = staticinvoke <sun.java2d.d3d.D3DRenderQueue: sun.java2d.d3d.D3DRenderQueue getInstance()>();
+
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void lock()>();
+
+     label1:
+        $r1 = new sun.java2d.d3d.D3DGraphicsDevice$2Result;
+
+        specialinvoke $r1.<sun.java2d.d3d.D3DGraphicsDevice$2Result: void <init>(sun.java2d.d3d.D3DGraphicsDevice)>(r2);
+
+        $r3 = new sun.java2d.d3d.D3DGraphicsDevice$4;
+
+        specialinvoke $r3.<sun.java2d.d3d.D3DGraphicsDevice$4: void <init>(sun.java2d.d3d.D3DGraphicsDevice,sun.java2d.d3d.D3DGraphicsDevice$2Result,int)>(r2, $r1, i0);
+
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void flushAndInvokeNow(java.lang.Runnable)>($r3);
+
+        $r4 = $r1.<sun.java2d.d3d.D3DGraphicsDevice$2Result: java.awt.DisplayMode dm>;
+
+        if $r4 != null goto label3;
+
+        $r5 = specialinvoke r2.<sun.awt.Win32GraphicsDevice: java.awt.DisplayMode getCurrentDisplayMode(int)>(i0);
+
+     label2:
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        return $r5;
+
+     label3:
+        r7 = $r1.<sun.java2d.d3d.D3DGraphicsDevice$2Result: java.awt.DisplayMode dm>;
+
+     label4:
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        return r7;
+
+     label5:
+        $r6 := @caughtexception;
+
+     label6:
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    private static native void configDisplayModeNative(int, long, int, int, int, int);
+
+    protected void configDisplayMode(int, java.awt.peer.WindowPeer, int, int, int, int)
+    {
+        java.lang.Throwable $r11;
+        java.awt.Rectangle $r9;
+        java.awt.peer.WindowPeer r10;
+        sun.java2d.d3d.D3DRenderQueue $r6;
+        sun.java2d.d3d.D3DGraphicsDevice$5 $r7;
+        int i0, i1, i2, i3, i4, $i5, $i6;
+        sun.awt.windows.WWindowPeer r3;
+        sun.java2d.d3d.D3DGraphicsDevice r0;
+        boolean $z0;
+        java.awt.peer.ComponentPeer $r2;
+        java.awt.GraphicsConfiguration $r8;
+        java.awt.Window $r1, $r4, $r5;
+
+        r0 := @this: sun.java2d.d3d.D3DGraphicsDevice;
+
+        i0 := @parameter0: int;
+
+        r10 := @parameter1: java.awt.peer.WindowPeer;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        i3 := @parameter4: int;
+
+        i4 := @parameter5: int;
+
+        $z0 = r0.<sun.java2d.d3d.D3DGraphicsDevice: boolean fsStatus>;
+
+        if $z0 != 0 goto label1;
+
+        specialinvoke r0.<sun.awt.Win32GraphicsDevice: void configDisplayMode(int,java.awt.peer.WindowPeer,int,int,int,int)>(i0, r10, i1, i2, i3, i4);
+
+        return;
+
+     label1:
+        $r1 = r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Window realFSWindow>;
+
+        $r2 = virtualinvoke $r1.<java.awt.Window: java.awt.peer.ComponentPeer getPeer()>();
+
+        r3 = (sun.awt.windows.WWindowPeer) $r2;
+
+        $r4 = virtualinvoke r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Window getFullScreenWindow()>();
+
+        $r5 = r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.Window realFSWindow>;
+
+        if $r4 == $r5 goto label2;
+
+        $r8 = virtualinvoke r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.GraphicsConfiguration getDefaultConfiguration()>();
+
+        $r9 = virtualinvoke $r8.<java.awt.GraphicsConfiguration: java.awt.Rectangle getBounds()>();
+
+        $i6 = $r9.<java.awt.Rectangle: int x>;
+
+        $i5 = $r9.<java.awt.Rectangle: int y>;
+
+        virtualinvoke r3.<sun.awt.windows.WWindowPeer: void reshape(int,int,int,int)>($i6, $i5, i1, i2);
+
+     label2:
+        $r6 = staticinvoke <sun.java2d.d3d.D3DRenderQueue: sun.java2d.d3d.D3DRenderQueue getInstance()>();
+
+        virtualinvoke $r6.<sun.java2d.d3d.D3DRenderQueue: void lock()>();
+
+     label3:
+        $r7 = new sun.java2d.d3d.D3DGraphicsDevice$5;
+
+        specialinvoke $r7.<sun.java2d.d3d.D3DGraphicsDevice$5: void <init>(sun.java2d.d3d.D3DGraphicsDevice,sun.awt.windows.WWindowPeer,int,int,int,int,int)>(r0, r3, i0, i1, i2, i3, i4);
+
+        virtualinvoke $r6.<sun.java2d.d3d.D3DRenderQueue: void flushAndInvokeNow(java.lang.Runnable)>($r7);
+
+     label4:
+        virtualinvoke $r6.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        goto label7;
+
+     label5:
+        $r11 := @caughtexception;
+
+     label6:
+        virtualinvoke $r6.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        throw $r11;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    private static native void enumDisplayModesNative(int, java.util.ArrayList);
+
+    protected void enumDisplayModes(int, java.util.ArrayList)
+    {
+        java.lang.Throwable $r5;
+        sun.java2d.d3d.D3DRenderQueue $r0;
+        sun.java2d.d3d.D3DGraphicsDevice$6 $r1;
+        java.util.ArrayList r3;
+        java.awt.DisplayMode $r4;
+        int i0, $i1;
+        sun.java2d.d3d.D3DGraphicsDevice r2;
+
+        r2 := @this: sun.java2d.d3d.D3DGraphicsDevice;
+
+        i0 := @parameter0: int;
+
+        r3 := @parameter1: java.util.ArrayList;
+
+        $r0 = staticinvoke <sun.java2d.d3d.D3DRenderQueue: sun.java2d.d3d.D3DRenderQueue getInstance()>();
+
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void lock()>();
+
+     label1:
+        $r1 = new sun.java2d.d3d.D3DGraphicsDevice$6;
+
+        specialinvoke $r1.<sun.java2d.d3d.D3DGraphicsDevice$6: void <init>(sun.java2d.d3d.D3DGraphicsDevice,int,java.util.ArrayList)>(r2, i0, r3);
+
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void flushAndInvokeNow(java.lang.Runnable)>($r1);
+
+        $i1 = virtualinvoke r3.<java.util.ArrayList: int size()>();
+
+        if $i1 != 0 goto label2;
+
+        $r4 = staticinvoke <sun.java2d.d3d.D3DGraphicsDevice: java.awt.DisplayMode getCurrentDisplayModeNative(int)>(i0);
+
+        virtualinvoke r3.<java.util.ArrayList: boolean add(java.lang.Object)>($r4);
+
+     label2:
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        goto label5;
+
+     label3:
+        $r5 := @caughtexception;
+
+     label4:
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        throw $r5;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private static native long getAvailableAcceleratedMemoryNative(int);
+
+    public int getAvailableAcceleratedMemory()
+    {
+        java.lang.Throwable $r4;
+        sun.java2d.d3d.D3DRenderQueue $r0;
+        sun.java2d.d3d.D3DGraphicsDevice$7 $r3;
+        sun.java2d.d3d.D3DGraphicsDevice$3Result $r1;
+        int i1;
+        long $l0;
+        sun.java2d.d3d.D3DGraphicsDevice r2;
+
+        r2 := @this: sun.java2d.d3d.D3DGraphicsDevice;
+
+        $r0 = staticinvoke <sun.java2d.d3d.D3DRenderQueue: sun.java2d.d3d.D3DRenderQueue getInstance()>();
+
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void lock()>();
+
+     label1:
+        $r1 = new sun.java2d.d3d.D3DGraphicsDevice$3Result;
+
+        specialinvoke $r1.<sun.java2d.d3d.D3DGraphicsDevice$3Result: void <init>(sun.java2d.d3d.D3DGraphicsDevice)>(r2);
+
+        $r3 = new sun.java2d.d3d.D3DGraphicsDevice$7;
+
+        specialinvoke $r3.<sun.java2d.d3d.D3DGraphicsDevice$7: void <init>(sun.java2d.d3d.D3DGraphicsDevice,sun.java2d.d3d.D3DGraphicsDevice$3Result)>(r2, $r1);
+
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void flushAndInvokeNow(java.lang.Runnable)>($r3);
+
+        $l0 = $r1.<sun.java2d.d3d.D3DGraphicsDevice$3Result: long mem>;
+
+        i1 = (int) $l0;
+
+     label2:
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        return i1;
+
+     label3:
+        $r4 := @caughtexception;
+
+     label4:
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public java.awt.GraphicsConfiguration[] getConfigurations()
+    {
+        java.awt.GraphicsConfiguration $r2, $r3, $r5;
+        java.awt.GraphicsConfiguration[] $r1, $r4, $r6, $r7, $r9, $r10;
+        java.lang.Object $r8;
+        sun.java2d.d3d.D3DGraphicsDevice r0;
+        boolean $z0;
+
+        r0 := @this: sun.java2d.d3d.D3DGraphicsDevice;
+
+        $r1 = r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.GraphicsConfiguration[] configs>;
+
+        if $r1 != null goto label1;
+
+        $z0 = virtualinvoke r0.<sun.java2d.d3d.D3DGraphicsDevice: boolean isD3DEnabledOnDevice()>();
+
+        if $z0 == 0 goto label1;
+
+        $r2 = virtualinvoke r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.GraphicsConfiguration getDefaultConfiguration()>();
+
+        r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.GraphicsConfiguration defaultConfig> = $r2;
+
+        $r3 = r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.GraphicsConfiguration defaultConfig>;
+
+        if $r3 == null goto label1;
+
+        $r4 = newarray (java.awt.GraphicsConfiguration)[1];
+
+        r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.GraphicsConfiguration[] configs> = $r4;
+
+        $r6 = r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.GraphicsConfiguration[] configs>;
+
+        $r5 = r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.GraphicsConfiguration defaultConfig>;
+
+        $r6[0] = $r5;
+
+        $r7 = r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.GraphicsConfiguration[] configs>;
+
+        $r8 = virtualinvoke $r7.<java.lang.Object: java.lang.Object clone()>();
+
+        $r9 = (java.awt.GraphicsConfiguration[]) $r8;
+
+        return $r9;
+
+     label1:
+        $r10 = specialinvoke r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration[] getConfigurations()>();
+
+        return $r10;
+    }
+
+    public java.awt.GraphicsConfiguration getDefaultConfiguration()
+    {
+        java.awt.GraphicsConfiguration $r1, $r2, $r4;
+        sun.java2d.d3d.D3DGraphicsDevice r0;
+        sun.java2d.d3d.D3DGraphicsConfig $r3;
+        boolean $z0;
+
+        r0 := @this: sun.java2d.d3d.D3DGraphicsDevice;
+
+        $r1 = r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.GraphicsConfiguration defaultConfig>;
+
+        if $r1 != null goto label2;
+
+        $z0 = virtualinvoke r0.<sun.java2d.d3d.D3DGraphicsDevice: boolean isD3DEnabledOnDevice()>();
+
+        if $z0 == 0 goto label1;
+
+        $r3 = new sun.java2d.d3d.D3DGraphicsConfig;
+
+        specialinvoke $r3.<sun.java2d.d3d.D3DGraphicsConfig: void <init>(sun.java2d.d3d.D3DGraphicsDevice)>(r0);
+
+        r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.GraphicsConfiguration defaultConfig> = $r3;
+
+        goto label2;
+
+     label1:
+        $r2 = specialinvoke r0.<sun.awt.Win32GraphicsDevice: java.awt.GraphicsConfiguration getDefaultConfiguration()>();
+
+        r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.GraphicsConfiguration defaultConfig> = $r2;
+
+     label2:
+        $r4 = r0.<sun.java2d.d3d.D3DGraphicsDevice: java.awt.GraphicsConfiguration defaultConfig>;
+
+        return $r4;
+    }
+
+    private static native boolean isD3DAvailableOnDeviceNative(int);
+
+    public static boolean isD3DAvailableOnDevice(int)
+    {
+        java.lang.Throwable $r3;
+        sun.java2d.d3d.D3DRenderQueue $r0;
+        sun.java2d.d3d.D3DGraphicsDevice$8 $r2;
+        int i0;
+        sun.java2d.d3d.D3DGraphicsDevice$4Result $r1;
+        boolean $z0, z1;
+
+        i0 := @parameter0: int;
+
+        $z0 = <sun.java2d.d3d.D3DGraphicsDevice: boolean d3dAvailable>;
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r0 = staticinvoke <sun.java2d.d3d.D3DRenderQueue: sun.java2d.d3d.D3DRenderQueue getInstance()>();
+
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void lock()>();
+
+     label2:
+        $r1 = new sun.java2d.d3d.D3DGraphicsDevice$4Result;
+
+        specialinvoke $r1.<sun.java2d.d3d.D3DGraphicsDevice$4Result: void <init>()>();
+
+        $r2 = new sun.java2d.d3d.D3DGraphicsDevice$8;
+
+        specialinvoke $r2.<sun.java2d.d3d.D3DGraphicsDevice$8: void <init>(sun.java2d.d3d.D3DGraphicsDevice$4Result,int)>($r1, i0);
+
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void flushAndInvokeNow(java.lang.Runnable)>($r2);
+
+        z1 = $r1.<sun.java2d.d3d.D3DGraphicsDevice$4Result: boolean avail>;
+
+     label3:
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        return z1;
+
+     label4:
+        $r3 := @caughtexception;
+
+     label5:
+        virtualinvoke $r0.<sun.java2d.d3d.D3DRenderQueue: void unlock()>();
+
+        throw $r3;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    sun.java2d.d3d.D3DContext getContext()
+    {
+        sun.java2d.d3d.D3DContext $r1;
+        sun.java2d.d3d.D3DGraphicsDevice r0;
+
+        r0 := @this: sun.java2d.d3d.D3DGraphicsDevice;
+
+        $r1 = r0.<sun.java2d.d3d.D3DGraphicsDevice: sun.java2d.d3d.D3DContext context>;
+
+        return $r1;
+    }
+
+    sun.java2d.pipe.hw.ContextCapabilities getContextCapabilities()
+    {
+        sun.java2d.pipe.hw.ContextCapabilities $r1;
+        sun.java2d.d3d.D3DGraphicsDevice r0;
+
+        r0 := @this: sun.java2d.d3d.D3DGraphicsDevice;
+
+        $r1 = r0.<sun.java2d.d3d.D3DGraphicsDevice: sun.java2d.pipe.hw.ContextCapabilities d3dCaps>;
+
+        return $r1;
+    }
+
+    public void displayChanged()
+    {
+        sun.java2d.pipe.hw.ContextCapabilities $r1;
+        int $i0;
+        sun.java2d.d3d.D3DGraphicsDevice r0;
+        boolean $z0;
+
+        r0 := @this: sun.java2d.d3d.D3DGraphicsDevice;
+
+        specialinvoke r0.<sun.awt.Win32GraphicsDevice: void displayChanged()>();
+
+        $z0 = <sun.java2d.d3d.D3DGraphicsDevice: boolean d3dAvailable>;
+
+        if $z0 == 0 goto label1;
+
+        $i0 = virtualinvoke r0.<sun.java2d.d3d.D3DGraphicsDevice: int getScreen()>();
+
+        $r1 = staticinvoke <sun.java2d.d3d.D3DGraphicsDevice: sun.java2d.pipe.hw.ContextCapabilities getDeviceCaps(int)>($i0);
+
+        r0.<sun.java2d.d3d.D3DGraphicsDevice: sun.java2d.pipe.hw.ContextCapabilities d3dCaps> = $r1;
+
+     label1:
+        return;
+    }
+
+    protected void invalidate(int)
+    {
+        int i0;
+        sun.java2d.d3d.D3DContext$D3DContextCaps $r1;
+        sun.java2d.d3d.D3DGraphicsDevice r0;
+
+        r0 := @this: sun.java2d.d3d.D3DGraphicsDevice;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<sun.awt.Win32GraphicsDevice: void invalidate(int)>(i0);
+
+        $r1 = new sun.java2d.d3d.D3DContext$D3DContextCaps;
+
+        specialinvoke $r1.<sun.java2d.d3d.D3DContext$D3DContextCaps: void <init>(int,java.lang.String)>(0, null);
+
+        r0.<sun.java2d.d3d.D3DGraphicsDevice: sun.java2d.pipe.hw.ContextCapabilities d3dCaps> = $r1;
+
+        return;
+    }
+
+    static int access$000(int)
+    {
+        int i0, $i1;
+
+        i0 := @parameter0: int;
+
+        $i1 = staticinvoke <sun.java2d.d3d.D3DGraphicsDevice: int getDeviceCapsNative(int)>(i0);
+
+        return $i1;
+    }
+
+    static java.lang.String access$100(int)
+    {
+        int i0;
+        java.lang.String $r0;
+
+        i0 := @parameter0: int;
+
+        $r0 = staticinvoke <sun.java2d.d3d.D3DGraphicsDevice: java.lang.String getDeviceIdNative(int)>(i0);
+
+        return $r0;
+    }
+
+    static boolean access$202(sun.java2d.d3d.D3DGraphicsDevice, boolean)
+    {
+        sun.java2d.d3d.D3DGraphicsDevice r0;
+        boolean z0;
+
+        r0 := @parameter0: sun.java2d.d3d.D3DGraphicsDevice;
+
+        z0 := @parameter1: boolean;
+
+        r0.<sun.java2d.d3d.D3DGraphicsDevice: boolean fsStatus> = z0;
+
+        return z0;
+    }
+
+    static boolean access$300(int, long)
+    {
+        int i0;
+        long l1;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        l1 := @parameter1: long;
+
+        $z0 = staticinvoke <sun.java2d.d3d.D3DGraphicsDevice: boolean enterFullScreenExclusiveNative(int,long)>(i0, l1);
+
+        return $z0;
+    }
+
+    static boolean access$400(int)
+    {
+        int i0;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        $z0 = staticinvoke <sun.java2d.d3d.D3DGraphicsDevice: boolean exitFullScreenExclusiveNative(int)>(i0);
+
+        return $z0;
+    }
+
+    static java.awt.DisplayMode access$600(int)
+    {
+        int i0;
+        java.awt.DisplayMode $r0;
+
+        i0 := @parameter0: int;
+
+        $r0 = staticinvoke <sun.java2d.d3d.D3DGraphicsDevice: java.awt.DisplayMode getCurrentDisplayModeNative(int)>(i0);
+
+        return $r0;
+    }
+
+    static void access$700(int, long, int, int, int, int)
+    {
+        int i0, i2, i3, i4, i5;
+        long l1;
+
+        i0 := @parameter0: int;
+
+        l1 := @parameter1: long;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        i4 := @parameter4: int;
+
+        i5 := @parameter5: int;
+
+        staticinvoke <sun.java2d.d3d.D3DGraphicsDevice: void configDisplayModeNative(int,long,int,int,int,int)>(i0, l1, i2, i3, i4, i5);
+
+        return;
+    }
+
+    static void access$800(int, java.util.ArrayList)
+    {
+        int i0;
+        java.util.ArrayList r0;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: java.util.ArrayList;
+
+        staticinvoke <sun.java2d.d3d.D3DGraphicsDevice: void enumDisplayModesNative(int,java.util.ArrayList)>(i0, r0);
+
+        return;
+    }
+
+    static long access$900(int)
+    {
+        int i0;
+        long $l1;
+
+        i0 := @parameter0: int;
+
+        $l1 = staticinvoke <sun.java2d.d3d.D3DGraphicsDevice: long getAvailableAcceleratedMemoryNative(int)>(i0);
+
+        return $l1;
+    }
+
+    static boolean access$1000(int)
+    {
+        int i0;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        $z0 = staticinvoke <sun.java2d.d3d.D3DGraphicsDevice: boolean isD3DAvailableOnDeviceNative(int)>(i0);
+
+        return $z0;
+    }
+
+    static void <clinit>()
+    {
+        boolean $z0, $z1;
+        sun.misc.PerfCounter $r0, $r1;
+
+        staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $z0 = staticinvoke <sun.java2d.d3d.D3DGraphicsDevice: boolean initD3D()>();
+
+        <sun.java2d.d3d.D3DGraphicsDevice: boolean d3dAvailable> = $z0;
+
+        $z1 = <sun.java2d.d3d.D3DGraphicsDevice: boolean d3dAvailable>;
+
+        if $z1 == 0 goto label1;
+
+        <sun.java2d.d3d.D3DGraphicsDevice: boolean pfDisabled> = 1;
+
+        $r1 = staticinvoke <sun.misc.PerfCounter: sun.misc.PerfCounter getD3DAvailable()>();
+
+        virtualinvoke $r1.<sun.misc.PerfCounter: void set(long)>(1L);
+
+        goto label2;
+
+     label1:
+        $r0 = staticinvoke <sun.misc.PerfCounter: sun.misc.PerfCounter getD3DAvailable()>();
+
+        virtualinvoke $r0.<sun.misc.PerfCounter: void set(long)>(0L);
+
+     label2:
+        return;
+    }
+}

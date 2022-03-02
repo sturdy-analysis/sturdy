@@ -1,0 +1,290 @@
+class java.util.concurrent.ConcurrentHashMap$Traverser extends java.lang.Object
+{
+    java.util.concurrent.ConcurrentHashMap$Node[] tab;
+    java.util.concurrent.ConcurrentHashMap$Node next;
+    java.util.concurrent.ConcurrentHashMap$TableStack stack;
+    java.util.concurrent.ConcurrentHashMap$TableStack spare;
+    int index;
+    int baseIndex;
+    int baseLimit;
+    final int baseSize;
+
+    void <init>(java.util.concurrent.ConcurrentHashMap$Node[], int, int, int)
+    {
+        java.util.concurrent.ConcurrentHashMap$Traverser r0;
+        java.util.concurrent.ConcurrentHashMap$Node[] r1;
+        int i0, i1, i2;
+
+        r0 := @this: java.util.concurrent.ConcurrentHashMap$Traverser;
+
+        r1 := @parameter0: java.util.concurrent.ConcurrentHashMap$Node[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.util.concurrent.ConcurrentHashMap$Traverser: java.util.concurrent.ConcurrentHashMap$Node[] tab> = r1;
+
+        r0.<java.util.concurrent.ConcurrentHashMap$Traverser: int baseSize> = i0;
+
+        r0.<java.util.concurrent.ConcurrentHashMap$Traverser: int index> = i1;
+
+        r0.<java.util.concurrent.ConcurrentHashMap$Traverser: int baseIndex> = i1;
+
+        r0.<java.util.concurrent.ConcurrentHashMap$Traverser: int baseLimit> = i2;
+
+        r0.<java.util.concurrent.ConcurrentHashMap$Traverser: java.util.concurrent.ConcurrentHashMap$Node next> = null;
+
+        return;
+    }
+
+    final java.util.concurrent.ConcurrentHashMap$Node advance()
+    {
+        java.util.concurrent.ConcurrentHashMap$Node $r1, $r3, r7;
+        java.util.concurrent.ConcurrentHashMap$Traverser r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        boolean $z0, $z1;
+        java.util.concurrent.ConcurrentHashMap$TableStack $r8;
+        java.util.concurrent.ConcurrentHashMap$TreeBin $r4;
+        java.util.concurrent.ConcurrentHashMap$ForwardingNode $r5;
+        java.util.concurrent.ConcurrentHashMap$Node[] $r2, $r6;
+
+        r0 := @this: java.util.concurrent.ConcurrentHashMap$Traverser;
+
+        $r1 = r0.<java.util.concurrent.ConcurrentHashMap$Traverser: java.util.concurrent.ConcurrentHashMap$Node next>;
+
+        r7 = $r1;
+
+        if $r1 == null goto label1;
+
+        r7 = $r1.<java.util.concurrent.ConcurrentHashMap$Node: java.util.concurrent.ConcurrentHashMap$Node next>;
+
+     label1:
+        if r7 == null goto label2;
+
+        r0.<java.util.concurrent.ConcurrentHashMap$Traverser: java.util.concurrent.ConcurrentHashMap$Node next> = r7;
+
+        return r7;
+
+     label2:
+        $i1 = r0.<java.util.concurrent.ConcurrentHashMap$Traverser: int baseIndex>;
+
+        $i0 = r0.<java.util.concurrent.ConcurrentHashMap$Traverser: int baseLimit>;
+
+        if $i1 >= $i0 goto label3;
+
+        $r2 = r0.<java.util.concurrent.ConcurrentHashMap$Traverser: java.util.concurrent.ConcurrentHashMap$Node[] tab>;
+
+        if $r2 == null goto label3;
+
+        $i2 = lengthof $r2;
+
+        $i3 = r0.<java.util.concurrent.ConcurrentHashMap$Traverser: int index>;
+
+        if $i2 <= $i3 goto label3;
+
+        if $i3 >= 0 goto label4;
+
+     label3:
+        r0.<java.util.concurrent.ConcurrentHashMap$Traverser: java.util.concurrent.ConcurrentHashMap$Node next> = null;
+
+        return null;
+
+     label4:
+        $r3 = staticinvoke <java.util.concurrent.ConcurrentHashMap: java.util.concurrent.ConcurrentHashMap$Node tabAt(java.util.concurrent.ConcurrentHashMap$Node[],int)>($r2, $i3);
+
+        r7 = $r3;
+
+        if $r3 == null goto label7;
+
+        $i8 = $r3.<java.util.concurrent.ConcurrentHashMap$Node: int hash>;
+
+        if $i8 >= 0 goto label7;
+
+        $z0 = $r3 instanceof java.util.concurrent.ConcurrentHashMap$ForwardingNode;
+
+        if $z0 == 0 goto label5;
+
+        $r5 = (java.util.concurrent.ConcurrentHashMap$ForwardingNode) $r3;
+
+        $r6 = $r5.<java.util.concurrent.ConcurrentHashMap$ForwardingNode: java.util.concurrent.ConcurrentHashMap$Node[] nextTable>;
+
+        r0.<java.util.concurrent.ConcurrentHashMap$Traverser: java.util.concurrent.ConcurrentHashMap$Node[] tab> = $r6;
+
+        r7 = null;
+
+        specialinvoke r0.<java.util.concurrent.ConcurrentHashMap$Traverser: void pushState(java.util.concurrent.ConcurrentHashMap$Node[],int,int)>($r2, $i3, $i2);
+
+        goto label1;
+
+     label5:
+        $z1 = $r3 instanceof java.util.concurrent.ConcurrentHashMap$TreeBin;
+
+        if $z1 == 0 goto label6;
+
+        $r4 = (java.util.concurrent.ConcurrentHashMap$TreeBin) $r3;
+
+        r7 = $r4.<java.util.concurrent.ConcurrentHashMap$TreeBin: java.util.concurrent.ConcurrentHashMap$TreeNode first>;
+
+        goto label7;
+
+     label6:
+        r7 = null;
+
+     label7:
+        $r8 = r0.<java.util.concurrent.ConcurrentHashMap$Traverser: java.util.concurrent.ConcurrentHashMap$TableStack stack>;
+
+        if $r8 == null goto label8;
+
+        specialinvoke r0.<java.util.concurrent.ConcurrentHashMap$Traverser: void recoverState(int)>($i2);
+
+        goto label9;
+
+     label8:
+        $i4 = r0.<java.util.concurrent.ConcurrentHashMap$Traverser: int baseSize>;
+
+        $i5 = $i3 + $i4;
+
+        r0.<java.util.concurrent.ConcurrentHashMap$Traverser: int index> = $i5;
+
+        if $i5 < $i2 goto label9;
+
+        $i6 = r0.<java.util.concurrent.ConcurrentHashMap$Traverser: int baseIndex>;
+
+        $i7 = $i6 + 1;
+
+        r0.<java.util.concurrent.ConcurrentHashMap$Traverser: int baseIndex> = $i7;
+
+        r0.<java.util.concurrent.ConcurrentHashMap$Traverser: int index> = $i7;
+
+     label9:
+        goto label1;
+    }
+
+    private void pushState(java.util.concurrent.ConcurrentHashMap$Node[], int, int)
+    {
+        java.util.concurrent.ConcurrentHashMap$TableStack $r1, $r3, $r4, r5;
+        java.util.concurrent.ConcurrentHashMap$Traverser r0;
+        java.util.concurrent.ConcurrentHashMap$Node[] r2;
+        int i0, i1;
+
+        r0 := @this: java.util.concurrent.ConcurrentHashMap$Traverser;
+
+        r2 := @parameter0: java.util.concurrent.ConcurrentHashMap$Node[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        r5 = r0.<java.util.concurrent.ConcurrentHashMap$Traverser: java.util.concurrent.ConcurrentHashMap$TableStack spare>;
+
+        if r5 == null goto label1;
+
+        $r4 = r5.<java.util.concurrent.ConcurrentHashMap$TableStack: java.util.concurrent.ConcurrentHashMap$TableStack next>;
+
+        r0.<java.util.concurrent.ConcurrentHashMap$Traverser: java.util.concurrent.ConcurrentHashMap$TableStack spare> = $r4;
+
+        goto label2;
+
+     label1:
+        $r1 = new java.util.concurrent.ConcurrentHashMap$TableStack;
+
+        specialinvoke $r1.<java.util.concurrent.ConcurrentHashMap$TableStack: void <init>()>();
+
+        r5 = $r1;
+
+     label2:
+        r5.<java.util.concurrent.ConcurrentHashMap$TableStack: java.util.concurrent.ConcurrentHashMap$Node[] tab> = r2;
+
+        r5.<java.util.concurrent.ConcurrentHashMap$TableStack: int length> = i0;
+
+        r5.<java.util.concurrent.ConcurrentHashMap$TableStack: int index> = i1;
+
+        $r3 = r0.<java.util.concurrent.ConcurrentHashMap$Traverser: java.util.concurrent.ConcurrentHashMap$TableStack stack>;
+
+        r5.<java.util.concurrent.ConcurrentHashMap$TableStack: java.util.concurrent.ConcurrentHashMap$TableStack next> = $r3;
+
+        r0.<java.util.concurrent.ConcurrentHashMap$Traverser: java.util.concurrent.ConcurrentHashMap$TableStack stack> = r5;
+
+        return;
+    }
+
+    private void recoverState(int)
+    {
+        java.util.concurrent.ConcurrentHashMap$TableStack $r1, r3, $r4;
+        java.util.concurrent.ConcurrentHashMap$Traverser r0;
+        java.util.concurrent.ConcurrentHashMap$Node[] $r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i9;
+
+        r0 := @this: java.util.concurrent.ConcurrentHashMap$Traverser;
+
+        i9 := @parameter0: int;
+
+     label1:
+        $r1 = r0.<java.util.concurrent.ConcurrentHashMap$Traverser: java.util.concurrent.ConcurrentHashMap$TableStack stack>;
+
+        if $r1 == null goto label2;
+
+        $i6 = r0.<java.util.concurrent.ConcurrentHashMap$Traverser: int index>;
+
+        $i5 = $r1.<java.util.concurrent.ConcurrentHashMap$TableStack: int length>;
+
+        $i7 = $i6 + $i5;
+
+        r0.<java.util.concurrent.ConcurrentHashMap$Traverser: int index> = $i7;
+
+        if $i7 < i9 goto label2;
+
+        i9 = $i5;
+
+        $i8 = $r1.<java.util.concurrent.ConcurrentHashMap$TableStack: int index>;
+
+        r0.<java.util.concurrent.ConcurrentHashMap$Traverser: int index> = $i8;
+
+        $r2 = $r1.<java.util.concurrent.ConcurrentHashMap$TableStack: java.util.concurrent.ConcurrentHashMap$Node[] tab>;
+
+        r0.<java.util.concurrent.ConcurrentHashMap$Traverser: java.util.concurrent.ConcurrentHashMap$Node[] tab> = $r2;
+
+        $r1.<java.util.concurrent.ConcurrentHashMap$TableStack: java.util.concurrent.ConcurrentHashMap$Node[] tab> = null;
+
+        r3 = $r1.<java.util.concurrent.ConcurrentHashMap$TableStack: java.util.concurrent.ConcurrentHashMap$TableStack next>;
+
+        $r4 = r0.<java.util.concurrent.ConcurrentHashMap$Traverser: java.util.concurrent.ConcurrentHashMap$TableStack spare>;
+
+        $r1.<java.util.concurrent.ConcurrentHashMap$TableStack: java.util.concurrent.ConcurrentHashMap$TableStack next> = $r4;
+
+        r0.<java.util.concurrent.ConcurrentHashMap$Traverser: java.util.concurrent.ConcurrentHashMap$TableStack stack> = r3;
+
+        r0.<java.util.concurrent.ConcurrentHashMap$Traverser: java.util.concurrent.ConcurrentHashMap$TableStack spare> = $r1;
+
+        goto label1;
+
+     label2:
+        if $r1 != null goto label3;
+
+        $i1 = r0.<java.util.concurrent.ConcurrentHashMap$Traverser: int index>;
+
+        $i0 = r0.<java.util.concurrent.ConcurrentHashMap$Traverser: int baseSize>;
+
+        $i2 = $i1 + $i0;
+
+        r0.<java.util.concurrent.ConcurrentHashMap$Traverser: int index> = $i2;
+
+        if $i2 < i9 goto label3;
+
+        $i3 = r0.<java.util.concurrent.ConcurrentHashMap$Traverser: int baseIndex>;
+
+        $i4 = $i3 + 1;
+
+        r0.<java.util.concurrent.ConcurrentHashMap$Traverser: int baseIndex> = $i4;
+
+        r0.<java.util.concurrent.ConcurrentHashMap$Traverser: int index> = $i4;
+
+     label3:
+        return;
+    }
+}

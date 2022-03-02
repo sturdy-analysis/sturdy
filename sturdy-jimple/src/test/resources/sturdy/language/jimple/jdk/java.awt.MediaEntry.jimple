@@ -1,0 +1,204 @@
+abstract class java.awt.MediaEntry extends java.lang.Object
+{
+    java.awt.MediaTracker tracker;
+    int ID;
+    java.awt.MediaEntry next;
+    int status;
+    boolean cancelled;
+    static final int LOADING;
+    static final int ABORTED;
+    static final int ERRORED;
+    static final int COMPLETE;
+    static final int LOADSTARTED;
+    static final int DONE;
+
+    void <init>(java.awt.MediaTracker, int)
+    {
+        java.awt.MediaEntry r0;
+        int i0;
+        java.awt.MediaTracker r1;
+
+        r0 := @this: java.awt.MediaEntry;
+
+        r1 := @parameter0: java.awt.MediaTracker;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.awt.MediaEntry: java.awt.MediaTracker tracker> = r1;
+
+        r0.<java.awt.MediaEntry: int ID> = i0;
+
+        return;
+    }
+
+    abstract java.lang.Object getMedia();
+
+    static java.awt.MediaEntry insert(java.awt.MediaEntry, java.awt.MediaEntry)
+    {
+        java.awt.MediaEntry r0, r1, r2, r3;
+        int $i0, $i1;
+
+        r1 := @parameter0: java.awt.MediaEntry;
+
+        r0 := @parameter1: java.awt.MediaEntry;
+
+        r2 = r1;
+
+        r3 = null;
+
+     label1:
+        if r2 == null goto label3;
+
+        $i1 = r2.<java.awt.MediaEntry: int ID>;
+
+        $i0 = r0.<java.awt.MediaEntry: int ID>;
+
+        if $i1 <= $i0 goto label2;
+
+        goto label3;
+
+     label2:
+        r3 = r2;
+
+        r2 = r2.<java.awt.MediaEntry: java.awt.MediaEntry next>;
+
+        goto label1;
+
+     label3:
+        r0.<java.awt.MediaEntry: java.awt.MediaEntry next> = r2;
+
+        if r3 != null goto label4;
+
+        r1 = r0;
+
+        goto label5;
+
+     label4:
+        r3.<java.awt.MediaEntry: java.awt.MediaEntry next> = r0;
+
+     label5:
+        return r1;
+    }
+
+    int getID()
+    {
+        java.awt.MediaEntry r0;
+        int $i0;
+
+        r0 := @this: java.awt.MediaEntry;
+
+        $i0 = r0.<java.awt.MediaEntry: int ID>;
+
+        return $i0;
+    }
+
+    abstract void startLoad();
+
+    void cancel()
+    {
+        java.awt.MediaEntry r0;
+
+        r0 := @this: java.awt.MediaEntry;
+
+        r0.<java.awt.MediaEntry: boolean cancelled> = 1;
+
+        return;
+    }
+
+    synchronized int getStatus(boolean, boolean)
+    {
+        java.awt.MediaEntry r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i7;
+        boolean z0, z1;
+
+        r0 := @this: java.awt.MediaEntry;
+
+        z0 := @parameter0: boolean;
+
+        z1 := @parameter1: boolean;
+
+        if z0 == 0 goto label1;
+
+        $i0 = r0.<java.awt.MediaEntry: int status>;
+
+        $i1 = $i0 & 13;
+
+        if $i1 != 0 goto label1;
+
+        $i2 = r0.<java.awt.MediaEntry: int status>;
+
+        $i7 = (int) -3;
+
+        $i3 = $i2 & $i7;
+
+        $i4 = $i3 | 1;
+
+        r0.<java.awt.MediaEntry: int status> = $i4;
+
+        virtualinvoke r0.<java.awt.MediaEntry: void startLoad()>();
+
+     label1:
+        $i5 = r0.<java.awt.MediaEntry: int status>;
+
+        return $i5;
+    }
+
+    void setStatus(int)
+    {
+        java.awt.MediaEntry r0;
+        java.lang.Throwable $r2;
+        java.awt.MediaTracker $r1;
+        int i0;
+
+        r0 := @this: java.awt.MediaEntry;
+
+        i0 := @parameter0: int;
+
+        entermonitor r0;
+
+     label1:
+        r0.<java.awt.MediaEntry: int status> = i0;
+
+        exitmonitor r0;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r2;
+
+     label5:
+        $r1 = r0.<java.awt.MediaEntry: java.awt.MediaTracker tracker>;
+
+        virtualinvoke $r1.<java.awt.MediaTracker: void setDone()>();
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public static void <clinit>()
+    {
+        <java.awt.MediaEntry: int DONE> = 14;
+
+        <java.awt.MediaEntry: int LOADSTARTED> = 13;
+
+        <java.awt.MediaEntry: int COMPLETE> = 8;
+
+        <java.awt.MediaEntry: int ERRORED> = 4;
+
+        <java.awt.MediaEntry: int ABORTED> = 2;
+
+        <java.awt.MediaEntry: int LOADING> = 1;
+
+        return;
+    }
+}

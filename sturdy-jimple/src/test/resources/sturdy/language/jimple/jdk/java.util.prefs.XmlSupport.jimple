@@ -1,0 +1,902 @@
+class java.util.prefs.XmlSupport extends java.lang.Object
+{
+    private static final java.lang.String PREFS_DTD_URI;
+    private static final java.lang.String PREFS_DTD;
+    private static final java.lang.String EXTERNAL_XML_VERSION;
+    private static final java.lang.String MAP_XML_VERSION;
+
+    void <init>()
+    {
+        java.util.prefs.XmlSupport r0;
+
+        r0 := @this: java.util.prefs.XmlSupport;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    static void export(java.io.OutputStream, java.util.prefs.Preferences, boolean) throws java.io.IOException, java.util.prefs.BackingStoreException
+    {
+        java.lang.IllegalStateException $r20;
+        java.util.ArrayList $r21;
+        org.w3c.dom.Document $r2;
+        org.w3c.dom.Node $r5, $r11;
+        int $i0, i1, $i3;
+        java.lang.String $r14, $r16;
+        boolean $z0, $z1, z2;
+        java.io.OutputStream r8;
+        java.util.prefs.Preferences r0, $r13, r17, r18;
+        java.util.prefs.AbstractPreferences $r1;
+        org.w3c.dom.Element $r3, $r4, r6, $r9, $r10, r19;
+        java.lang.Object $r12;
+
+        r8 := @parameter0: java.io.OutputStream;
+
+        r0 := @parameter1: java.util.prefs.Preferences;
+
+        z2 := @parameter2: boolean;
+
+        $r1 = (java.util.prefs.AbstractPreferences) r0;
+
+        $z0 = virtualinvoke $r1.<java.util.prefs.AbstractPreferences: boolean isRemoved()>();
+
+        if $z0 == 0 goto label1;
+
+        $r20 = new java.lang.IllegalStateException;
+
+        specialinvoke $r20.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Node has been removed");
+
+        throw $r20;
+
+     label1:
+        $r2 = staticinvoke <java.util.prefs.XmlSupport: org.w3c.dom.Document createPrefsDoc(java.lang.String)>("preferences");
+
+        $r3 = interfaceinvoke $r2.<org.w3c.dom.Document: org.w3c.dom.Element getDocumentElement()>();
+
+        interfaceinvoke $r3.<org.w3c.dom.Element: void setAttribute(java.lang.String,java.lang.String)>("EXTERNAL_XML_VERSION", "1.0");
+
+        $r4 = interfaceinvoke $r2.<org.w3c.dom.Document: org.w3c.dom.Element createElement(java.lang.String)>("root");
+
+        $r5 = interfaceinvoke $r3.<org.w3c.dom.Element: org.w3c.dom.Node appendChild(org.w3c.dom.Node)>($r4);
+
+        r6 = (org.w3c.dom.Element) $r5;
+
+        $z1 = virtualinvoke r0.<java.util.prefs.Preferences: boolean isUserNode()>();
+
+        if $z1 == 0 goto label2;
+
+        $r16 = "user";
+
+        goto label3;
+
+     label2:
+        $r16 = "system";
+
+     label3:
+        interfaceinvoke r6.<org.w3c.dom.Element: void setAttribute(java.lang.String,java.lang.String)>("type", $r16);
+
+        $r21 = new java.util.ArrayList;
+
+        specialinvoke $r21.<java.util.ArrayList: void <init>()>();
+
+        r17 = r0;
+
+        r18 = virtualinvoke r0.<java.util.prefs.Preferences: java.util.prefs.Preferences parent()>();
+
+     label4:
+        if r18 == null goto label5;
+
+        interfaceinvoke $r21.<java.util.List: boolean add(java.lang.Object)>(r17);
+
+        r17 = r18;
+
+        r18 = virtualinvoke r18.<java.util.prefs.Preferences: java.util.prefs.Preferences parent()>();
+
+        goto label4;
+
+     label5:
+        r19 = r6;
+
+        $i0 = interfaceinvoke $r21.<java.util.List: int size()>();
+
+        i1 = $i0 - 1;
+
+     label6:
+        if i1 < 0 goto label7;
+
+        $r9 = interfaceinvoke $r2.<org.w3c.dom.Document: org.w3c.dom.Element createElement(java.lang.String)>("map");
+
+        interfaceinvoke r19.<org.w3c.dom.Element: org.w3c.dom.Node appendChild(org.w3c.dom.Node)>($r9);
+
+        $r10 = interfaceinvoke $r2.<org.w3c.dom.Document: org.w3c.dom.Element createElement(java.lang.String)>("node");
+
+        $r11 = interfaceinvoke r19.<org.w3c.dom.Element: org.w3c.dom.Node appendChild(org.w3c.dom.Node)>($r10);
+
+        r19 = (org.w3c.dom.Element) $r11;
+
+        $r12 = interfaceinvoke $r21.<java.util.List: java.lang.Object get(int)>(i1);
+
+        $r13 = (java.util.prefs.Preferences) $r12;
+
+        $r14 = virtualinvoke $r13.<java.util.prefs.Preferences: java.lang.String name()>();
+
+        interfaceinvoke r19.<org.w3c.dom.Element: void setAttribute(java.lang.String,java.lang.String)>("name", $r14);
+
+        $i3 = (int) -1;
+
+        i1 = i1 + $i3;
+
+        goto label6;
+
+     label7:
+        staticinvoke <java.util.prefs.XmlSupport: void putPreferencesInXml(org.w3c.dom.Element,org.w3c.dom.Document,java.util.prefs.Preferences,boolean)>(r19, $r2, r0, z2);
+
+        staticinvoke <java.util.prefs.XmlSupport: void writeDoc(org.w3c.dom.Document,java.io.OutputStream)>($r2, r8);
+
+        return;
+    }
+
+    private static void putPreferencesInXml(org.w3c.dom.Element, org.w3c.dom.Document, java.util.prefs.Preferences, boolean) throws java.util.prefs.BackingStoreException
+    {
+        org.w3c.dom.Document r6;
+        boolean $z0, z1;
+        java.util.prefs.AbstractPreferences $r1, $r3;
+        java.lang.Throwable $r24;
+        java.lang.String[] $r4, $r14, r26;
+        org.w3c.dom.Node $r8, $r11, $r18, $r23;
+        int $i0, $i1, $i2, $i3, i4, i5, i6;
+        java.lang.String $r12, $r15, $r20, $r21, $r22;
+        java.util.prefs.Preferences r0, $r13, $r16;
+        org.w3c.dom.Element r5, $r7, r9, $r10, $r17, r19, r27;
+        java.util.prefs.Preferences[] r25;
+        java.lang.Object $r2;
+
+        r5 := @parameter0: org.w3c.dom.Element;
+
+        r6 := @parameter1: org.w3c.dom.Document;
+
+        r0 := @parameter2: java.util.prefs.Preferences;
+
+        z1 := @parameter3: boolean;
+
+        r25 = null;
+
+        r26 = null;
+
+        $r1 = (java.util.prefs.AbstractPreferences) r0;
+
+        $r2 = $r1.<java.util.prefs.AbstractPreferences: java.lang.Object lock>;
+
+        entermonitor $r2;
+
+     label01:
+        $r3 = (java.util.prefs.AbstractPreferences) r0;
+
+        $z0 = virtualinvoke $r3.<java.util.prefs.AbstractPreferences: boolean isRemoved()>();
+
+        if $z0 == 0 goto label03;
+
+        $r23 = interfaceinvoke r5.<org.w3c.dom.Element: org.w3c.dom.Node getParentNode()>();
+
+        interfaceinvoke $r23.<org.w3c.dom.Node: org.w3c.dom.Node removeChild(org.w3c.dom.Node)>(r5);
+
+        exitmonitor $r2;
+
+     label02:
+        return;
+
+     label03:
+        $r4 = virtualinvoke r0.<java.util.prefs.Preferences: java.lang.String[] keys()>();
+
+        $r7 = interfaceinvoke r6.<org.w3c.dom.Document: org.w3c.dom.Element createElement(java.lang.String)>("map");
+
+        $r8 = interfaceinvoke r5.<org.w3c.dom.Element: org.w3c.dom.Node appendChild(org.w3c.dom.Node)>($r7);
+
+        r9 = (org.w3c.dom.Element) $r8;
+
+        i4 = 0;
+
+     label04:
+        $i0 = lengthof $r4;
+
+        if i4 >= $i0 goto label05;
+
+        $r17 = interfaceinvoke r6.<org.w3c.dom.Document: org.w3c.dom.Element createElement(java.lang.String)>("entry");
+
+        $r18 = interfaceinvoke r9.<org.w3c.dom.Element: org.w3c.dom.Node appendChild(org.w3c.dom.Node)>($r17);
+
+        r19 = (org.w3c.dom.Element) $r18;
+
+        $r20 = $r4[i4];
+
+        interfaceinvoke r19.<org.w3c.dom.Element: void setAttribute(java.lang.String,java.lang.String)>("key", $r20);
+
+        $r21 = $r4[i4];
+
+        $r22 = virtualinvoke r0.<java.util.prefs.Preferences: java.lang.String get(java.lang.String,java.lang.String)>($r21, null);
+
+        interfaceinvoke r19.<org.w3c.dom.Element: void setAttribute(java.lang.String,java.lang.String)>("value", $r22);
+
+        i4 = i4 + 1;
+
+        goto label04;
+
+     label05:
+        if z1 == 0 goto label07;
+
+        $r14 = virtualinvoke r0.<java.util.prefs.Preferences: java.lang.String[] childrenNames()>();
+
+        r26 = $r14;
+
+        $i2 = lengthof $r14;
+
+        r25 = newarray (java.util.prefs.Preferences)[$i2];
+
+        i5 = 0;
+
+     label06:
+        $i3 = lengthof $r14;
+
+        if i5 >= $i3 goto label07;
+
+        $r15 = $r14[i5];
+
+        $r16 = virtualinvoke r0.<java.util.prefs.Preferences: java.util.prefs.Preferences node(java.lang.String)>($r15);
+
+        r25[i5] = $r16;
+
+        i5 = i5 + 1;
+
+        goto label06;
+
+     label07:
+        exitmonitor $r2;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r24 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label10:
+        throw $r24;
+
+     label11:
+        if z1 == 0 goto label13;
+
+        i6 = 0;
+
+     label12:
+        $i1 = lengthof r26;
+
+        if i6 >= $i1 goto label13;
+
+        $r10 = interfaceinvoke r6.<org.w3c.dom.Document: org.w3c.dom.Element createElement(java.lang.String)>("node");
+
+        $r11 = interfaceinvoke r5.<org.w3c.dom.Element: org.w3c.dom.Node appendChild(org.w3c.dom.Node)>($r10);
+
+        r27 = (org.w3c.dom.Element) $r11;
+
+        $r12 = r26[i6];
+
+        interfaceinvoke r27.<org.w3c.dom.Element: void setAttribute(java.lang.String,java.lang.String)>("name", $r12);
+
+        $r13 = r25[i6];
+
+        staticinvoke <java.util.prefs.XmlSupport: void putPreferencesInXml(org.w3c.dom.Element,org.w3c.dom.Document,java.util.prefs.Preferences,boolean)>(r27, r6, $r13, z1);
+
+        i6 = i6 + 1;
+
+        goto label12;
+
+     label13:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label09;
+        catch java.lang.Throwable from label03 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    static void importPreferences(java.io.InputStream) throws java.io.IOException, java.util.prefs.InvalidPreferencesFormatException
+    {
+        org.w3c.dom.Document $r1;
+        org.w3c.dom.Node $r6;
+        int $i0;
+        java.lang.String $r3, $r8, $r16;
+        boolean $z0;
+        org.w3c.dom.NodeList $r5;
+        java.util.prefs.InvalidPreferencesFormatException $r9, $r18;
+        java.util.prefs.Preferences $r19;
+        org.w3c.dom.Element $r2, $r4, r7;
+        org.xml.sax.SAXException $r17;
+        java.lang.StringBuilder $r10, $r11, $r12, $r13, $r14, $r15;
+        java.io.InputStream r0;
+
+        r0 := @parameter0: java.io.InputStream;
+
+     label1:
+        $r1 = staticinvoke <java.util.prefs.XmlSupport: org.w3c.dom.Document loadPrefsDoc(java.io.InputStream)>(r0);
+
+        $r2 = interfaceinvoke $r1.<org.w3c.dom.Document: org.w3c.dom.Element getDocumentElement()>();
+
+        $r3 = interfaceinvoke $r2.<org.w3c.dom.Element: java.lang.String getAttribute(java.lang.String)>("EXTERNAL_XML_VERSION");
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int compareTo(java.lang.String)>("1.0");
+
+        if $i0 <= 0 goto label2;
+
+        $r9 = new java.util.prefs.InvalidPreferencesFormatException;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exported preferences file format version ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is not supported. This java installation can read versions ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("1.0");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" or older. You may need to install a newer version of JDK.");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<java.util.prefs.InvalidPreferencesFormatException: void <init>(java.lang.String)>($r16);
+
+        throw $r9;
+
+     label2:
+        $r4 = interfaceinvoke $r1.<org.w3c.dom.Document: org.w3c.dom.Element getDocumentElement()>();
+
+        $r5 = interfaceinvoke $r4.<org.w3c.dom.Element: org.w3c.dom.NodeList getChildNodes()>();
+
+        $r6 = interfaceinvoke $r5.<org.w3c.dom.NodeList: org.w3c.dom.Node item(int)>(0);
+
+        r7 = (org.w3c.dom.Element) $r6;
+
+        $r8 = interfaceinvoke r7.<org.w3c.dom.Element: java.lang.String getAttribute(java.lang.String)>("type");
+
+        $z0 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>("user");
+
+        if $z0 == 0 goto label3;
+
+        $r19 = staticinvoke <java.util.prefs.Preferences: java.util.prefs.Preferences userRoot()>();
+
+        goto label4;
+
+     label3:
+        $r19 = staticinvoke <java.util.prefs.Preferences: java.util.prefs.Preferences systemRoot()>();
+
+     label4:
+        staticinvoke <java.util.prefs.XmlSupport: void ImportSubtree(java.util.prefs.Preferences,org.w3c.dom.Element)>($r19, r7);
+
+     label5:
+        goto label7;
+
+     label6:
+        $r17 := @caughtexception;
+
+        $r18 = new java.util.prefs.InvalidPreferencesFormatException;
+
+        specialinvoke $r18.<java.util.prefs.InvalidPreferencesFormatException: void <init>(java.lang.Throwable)>($r17);
+
+        throw $r18;
+
+     label7:
+        return;
+
+        catch org.xml.sax.SAXException from label1 to label5 with label6;
+    }
+
+    private static org.w3c.dom.Document createPrefsDoc(java.lang.String)
+    {
+        java.lang.AssertionError $r7;
+        org.w3c.dom.DocumentType $r4;
+        javax.xml.parsers.ParserConfigurationException $r6;
+        org.w3c.dom.Document $r5;
+        javax.xml.parsers.DocumentBuilder $r1;
+        javax.xml.parsers.DocumentBuilderFactory $r0;
+        java.lang.String r3;
+        org.w3c.dom.DOMImplementation $r2;
+
+        r3 := @parameter0: java.lang.String;
+
+     label1:
+        $r0 = staticinvoke <javax.xml.parsers.DocumentBuilderFactory: javax.xml.parsers.DocumentBuilderFactory newInstance()>();
+
+        $r1 = virtualinvoke $r0.<javax.xml.parsers.DocumentBuilderFactory: javax.xml.parsers.DocumentBuilder newDocumentBuilder()>();
+
+        $r2 = virtualinvoke $r1.<javax.xml.parsers.DocumentBuilder: org.w3c.dom.DOMImplementation getDOMImplementation()>();
+
+        $r4 = interfaceinvoke $r2.<org.w3c.dom.DOMImplementation: org.w3c.dom.DocumentType createDocumentType(java.lang.String,java.lang.String,java.lang.String)>(r3, null, "http://java.sun.com/dtd/preferences.dtd");
+
+        $r5 = interfaceinvoke $r2.<org.w3c.dom.DOMImplementation: org.w3c.dom.Document createDocument(java.lang.String,java.lang.String,org.w3c.dom.DocumentType)>(null, r3, $r4);
+
+     label2:
+        return $r5;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = new java.lang.AssertionError;
+
+        specialinvoke $r7.<java.lang.AssertionError: void <init>(java.lang.Object)>($r6);
+
+        throw $r7;
+
+        catch javax.xml.parsers.ParserConfigurationException from label1 to label2 with label3;
+    }
+
+    private static org.w3c.dom.Document loadPrefsDoc(java.io.InputStream) throws org.xml.sax.SAXException, java.io.IOException
+    {
+        java.util.prefs.XmlSupport$Resolver $r2;
+        org.xml.sax.InputSource $r4;
+        java.lang.AssertionError $r8;
+        java.util.prefs.XmlSupport$EH $r3;
+        javax.xml.parsers.ParserConfigurationException $r7;
+        org.w3c.dom.Document $r6;
+        javax.xml.parsers.DocumentBuilder $r1;
+        javax.xml.parsers.DocumentBuilderFactory $r0;
+        java.io.InputStream r5;
+
+        r5 := @parameter0: java.io.InputStream;
+
+        $r0 = staticinvoke <javax.xml.parsers.DocumentBuilderFactory: javax.xml.parsers.DocumentBuilderFactory newInstance()>();
+
+        virtualinvoke $r0.<javax.xml.parsers.DocumentBuilderFactory: void setIgnoringElementContentWhitespace(boolean)>(1);
+
+        virtualinvoke $r0.<javax.xml.parsers.DocumentBuilderFactory: void setValidating(boolean)>(1);
+
+        virtualinvoke $r0.<javax.xml.parsers.DocumentBuilderFactory: void setCoalescing(boolean)>(1);
+
+        virtualinvoke $r0.<javax.xml.parsers.DocumentBuilderFactory: void setIgnoringComments(boolean)>(1);
+
+     label1:
+        $r1 = virtualinvoke $r0.<javax.xml.parsers.DocumentBuilderFactory: javax.xml.parsers.DocumentBuilder newDocumentBuilder()>();
+
+        $r2 = new java.util.prefs.XmlSupport$Resolver;
+
+        specialinvoke $r2.<java.util.prefs.XmlSupport$Resolver: void <init>(java.util.prefs.XmlSupport$1)>(null);
+
+        virtualinvoke $r1.<javax.xml.parsers.DocumentBuilder: void setEntityResolver(org.xml.sax.EntityResolver)>($r2);
+
+        $r3 = new java.util.prefs.XmlSupport$EH;
+
+        specialinvoke $r3.<java.util.prefs.XmlSupport$EH: void <init>(java.util.prefs.XmlSupport$1)>(null);
+
+        virtualinvoke $r1.<javax.xml.parsers.DocumentBuilder: void setErrorHandler(org.xml.sax.ErrorHandler)>($r3);
+
+        $r4 = new org.xml.sax.InputSource;
+
+        specialinvoke $r4.<org.xml.sax.InputSource: void <init>(java.io.InputStream)>(r5);
+
+        $r6 = virtualinvoke $r1.<javax.xml.parsers.DocumentBuilder: org.w3c.dom.Document parse(org.xml.sax.InputSource)>($r4);
+
+     label2:
+        return $r6;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $r8 = new java.lang.AssertionError;
+
+        specialinvoke $r8.<java.lang.AssertionError: void <init>(java.lang.Object)>($r7);
+
+        throw $r8;
+
+        catch javax.xml.parsers.ParserConfigurationException from label1 to label2 with label3;
+    }
+
+    private static final void writeDoc(org.w3c.dom.Document, java.io.OutputStream) throws java.io.IOException
+    {
+        java.io.OutputStream r10;
+        javax.xml.transform.Transformer $r2;
+        javax.xml.transform.dom.DOMSource $r6;
+        javax.xml.transform.TransformerException $r11;
+        java.io.BufferedWriter $r8;
+        javax.xml.transform.stream.StreamResult $r7;
+        java.lang.AssertionError $r12;
+        java.lang.IllegalArgumentException $r13;
+        java.lang.Integer $r1;
+        org.w3c.dom.DocumentType $r4;
+        org.w3c.dom.Document r3;
+        java.io.OutputStreamWriter $r9;
+        javax.xml.transform.TransformerFactory $r0;
+        java.lang.String $r5;
+
+        r3 := @parameter0: org.w3c.dom.Document;
+
+        r10 := @parameter1: java.io.OutputStream;
+
+     label1:
+        $r0 = staticinvoke <javax.xml.transform.TransformerFactory: javax.xml.transform.TransformerFactory newInstance()>();
+
+     label2:
+        $r1 = new java.lang.Integer;
+
+        specialinvoke $r1.<java.lang.Integer: void <init>(int)>(2);
+
+        virtualinvoke $r0.<javax.xml.transform.TransformerFactory: void setAttribute(java.lang.String,java.lang.Object)>("indent-number", $r1);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r13 := @caughtexception;
+
+     label5:
+        $r2 = virtualinvoke $r0.<javax.xml.transform.TransformerFactory: javax.xml.transform.Transformer newTransformer()>();
+
+        $r4 = interfaceinvoke r3.<org.w3c.dom.Document: org.w3c.dom.DocumentType getDoctype()>();
+
+        $r5 = interfaceinvoke $r4.<org.w3c.dom.DocumentType: java.lang.String getSystemId()>();
+
+        virtualinvoke $r2.<javax.xml.transform.Transformer: void setOutputProperty(java.lang.String,java.lang.String)>("doctype-system", $r5);
+
+        virtualinvoke $r2.<javax.xml.transform.Transformer: void setOutputProperty(java.lang.String,java.lang.String)>("indent", "yes");
+
+        $r6 = new javax.xml.transform.dom.DOMSource;
+
+        specialinvoke $r6.<javax.xml.transform.dom.DOMSource: void <init>(org.w3c.dom.Node)>(r3);
+
+        $r7 = new javax.xml.transform.stream.StreamResult;
+
+        $r8 = new java.io.BufferedWriter;
+
+        $r9 = new java.io.OutputStreamWriter;
+
+        specialinvoke $r9.<java.io.OutputStreamWriter: void <init>(java.io.OutputStream,java.lang.String)>(r10, "UTF-8");
+
+        specialinvoke $r8.<java.io.BufferedWriter: void <init>(java.io.Writer)>($r9);
+
+        specialinvoke $r7.<javax.xml.transform.stream.StreamResult: void <init>(java.io.Writer)>($r8);
+
+        virtualinvoke $r2.<javax.xml.transform.Transformer: void transform(javax.xml.transform.Source,javax.xml.transform.Result)>($r6, $r7);
+
+     label6:
+        goto label8;
+
+     label7:
+        $r11 := @caughtexception;
+
+        $r12 = new java.lang.AssertionError;
+
+        specialinvoke $r12.<java.lang.AssertionError: void <init>(java.lang.Object)>($r11);
+
+        throw $r12;
+
+     label8:
+        return;
+
+        catch java.lang.IllegalArgumentException from label2 to label3 with label4;
+        catch javax.xml.transform.TransformerException from label1 to label6 with label7;
+    }
+
+    private static void ImportSubtree(java.util.prefs.Preferences, org.w3c.dom.Element)
+    {
+        java.lang.Throwable $r16;
+        org.w3c.dom.Node $r6, $r10, $r12;
+        int $i0, $i1, $i2, $i3, i4, i5;
+        java.lang.String $r14;
+        boolean $z0;
+        org.w3c.dom.NodeList $r1;
+        java.util.prefs.Preferences r2, $r9, $r15;
+        java.util.prefs.AbstractPreferences $r3, $r5;
+        org.w3c.dom.Element r0, r7, $r11, r13;
+        java.util.prefs.Preferences[] r8;
+        java.lang.Object $r4;
+
+        r2 := @parameter0: java.util.prefs.Preferences;
+
+        r0 := @parameter1: org.w3c.dom.Element;
+
+        $r1 = interfaceinvoke r0.<org.w3c.dom.Element: org.w3c.dom.NodeList getChildNodes()>();
+
+        $i0 = interfaceinvoke $r1.<org.w3c.dom.NodeList: int getLength()>();
+
+        $r3 = (java.util.prefs.AbstractPreferences) r2;
+
+        $r4 = $r3.<java.util.prefs.AbstractPreferences: java.lang.Object lock>;
+
+        entermonitor $r4;
+
+     label01:
+        $r5 = (java.util.prefs.AbstractPreferences) r2;
+
+        $z0 = virtualinvoke $r5.<java.util.prefs.AbstractPreferences: boolean isRemoved()>();
+
+        if $z0 == 0 goto label03;
+
+        exitmonitor $r4;
+
+     label02:
+        return;
+
+     label03:
+        $r6 = interfaceinvoke $r1.<org.w3c.dom.NodeList: org.w3c.dom.Node item(int)>(0);
+
+        r7 = (org.w3c.dom.Element) $r6;
+
+        staticinvoke <java.util.prefs.XmlSupport: void ImportPrefs(java.util.prefs.Preferences,org.w3c.dom.Element)>(r2, r7);
+
+        $i1 = $i0 - 1;
+
+        r8 = newarray (java.util.prefs.Preferences)[$i1];
+
+        i4 = 1;
+
+     label04:
+        if i4 >= $i0 goto label05;
+
+        $r12 = interfaceinvoke $r1.<org.w3c.dom.NodeList: org.w3c.dom.Node item(int)>(i4);
+
+        r13 = (org.w3c.dom.Element) $r12;
+
+        $i3 = i4 - 1;
+
+        $r14 = interfaceinvoke r13.<org.w3c.dom.Element: java.lang.String getAttribute(java.lang.String)>("name");
+
+        $r15 = virtualinvoke r2.<java.util.prefs.Preferences: java.util.prefs.Preferences node(java.lang.String)>($r14);
+
+        r8[$i3] = $r15;
+
+        i4 = i4 + 1;
+
+        goto label04;
+
+     label05:
+        exitmonitor $r4;
+
+     label06:
+        goto label09;
+
+     label07:
+        $r16 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label08:
+        throw $r16;
+
+     label09:
+        i5 = 1;
+
+     label10:
+        if i5 >= $i0 goto label11;
+
+        $i2 = i5 - 1;
+
+        $r9 = r8[$i2];
+
+        $r10 = interfaceinvoke $r1.<org.w3c.dom.NodeList: org.w3c.dom.Node item(int)>(i5);
+
+        $r11 = (org.w3c.dom.Element) $r10;
+
+        staticinvoke <java.util.prefs.XmlSupport: void ImportSubtree(java.util.prefs.Preferences,org.w3c.dom.Element)>($r9, $r11);
+
+        i5 = i5 + 1;
+
+        goto label10;
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label07;
+        catch java.lang.Throwable from label03 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+    }
+
+    private static void ImportPrefs(java.util.prefs.Preferences, org.w3c.dom.Element)
+    {
+        org.w3c.dom.NodeList $r1;
+        java.util.prefs.Preferences r4;
+        org.w3c.dom.Element r0, r3;
+        org.w3c.dom.Node $r2;
+        int $i0, i1;
+        java.lang.String $r5, $r6;
+
+        r4 := @parameter0: java.util.prefs.Preferences;
+
+        r0 := @parameter1: org.w3c.dom.Element;
+
+        $r1 = interfaceinvoke r0.<org.w3c.dom.Element: org.w3c.dom.NodeList getChildNodes()>();
+
+        i1 = 0;
+
+        $i0 = interfaceinvoke $r1.<org.w3c.dom.NodeList: int getLength()>();
+
+     label1:
+        if i1 >= $i0 goto label2;
+
+        $r2 = interfaceinvoke $r1.<org.w3c.dom.NodeList: org.w3c.dom.Node item(int)>(i1);
+
+        r3 = (org.w3c.dom.Element) $r2;
+
+        $r5 = interfaceinvoke r3.<org.w3c.dom.Element: java.lang.String getAttribute(java.lang.String)>("key");
+
+        $r6 = interfaceinvoke r3.<org.w3c.dom.Element: java.lang.String getAttribute(java.lang.String)>("value");
+
+        virtualinvoke r4.<java.util.prefs.Preferences: void put(java.lang.String,java.lang.String)>($r5, $r6);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    static void exportMap(java.io.OutputStream, java.util.Map) throws java.io.IOException
+    {
+        org.w3c.dom.Document $r0;
+        java.util.Map r2;
+        org.w3c.dom.Node $r9;
+        java.lang.String $r12, $r14;
+        boolean $z0;
+        java.io.OutputStream r5;
+        java.util.Map$Entry r7;
+        java.util.Iterator $r4;
+        java.util.Set $r3;
+        org.w3c.dom.Element $r1, $r8, r10;
+        java.lang.Object $r6, $r11, $r13;
+
+        r5 := @parameter0: java.io.OutputStream;
+
+        r2 := @parameter1: java.util.Map;
+
+        $r0 = staticinvoke <java.util.prefs.XmlSupport: org.w3c.dom.Document createPrefsDoc(java.lang.String)>("map");
+
+        $r1 = interfaceinvoke $r0.<org.w3c.dom.Document: org.w3c.dom.Element getDocumentElement()>();
+
+        interfaceinvoke $r1.<org.w3c.dom.Element: void setAttribute(java.lang.String,java.lang.String)>("MAP_XML_VERSION", "1.0");
+
+        $r3 = interfaceinvoke r2.<java.util.Map: java.util.Set entrySet()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r6 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (java.util.Map$Entry) $r6;
+
+        $r8 = interfaceinvoke $r0.<org.w3c.dom.Document: org.w3c.dom.Element createElement(java.lang.String)>("entry");
+
+        $r9 = interfaceinvoke $r1.<org.w3c.dom.Element: org.w3c.dom.Node appendChild(org.w3c.dom.Node)>($r8);
+
+        r10 = (org.w3c.dom.Element) $r9;
+
+        $r11 = interfaceinvoke r7.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r12 = (java.lang.String) $r11;
+
+        interfaceinvoke r10.<org.w3c.dom.Element: void setAttribute(java.lang.String,java.lang.String)>("key", $r12);
+
+        $r13 = interfaceinvoke r7.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r14 = (java.lang.String) $r13;
+
+        interfaceinvoke r10.<org.w3c.dom.Element: void setAttribute(java.lang.String,java.lang.String)>("value", $r14);
+
+        goto label1;
+
+     label2:
+        staticinvoke <java.util.prefs.XmlSupport: void writeDoc(org.w3c.dom.Document,java.io.OutputStream)>($r0, r5);
+
+        return;
+    }
+
+    static void importMap(java.io.InputStream, java.util.Map) throws java.io.IOException, java.util.prefs.InvalidPreferencesFormatException
+    {
+        org.w3c.dom.Document $r1;
+        org.w3c.dom.Node $r5;
+        java.util.Map r7;
+        int $i0, $i1, i2;
+        java.lang.String $r3, $r8, $r9, $r17;
+        org.w3c.dom.NodeList $r4;
+        java.util.prefs.InvalidPreferencesFormatException $r10, $r19;
+        org.w3c.dom.Element $r2, r6;
+        org.xml.sax.SAXException $r18;
+        java.lang.StringBuilder $r11, $r12, $r13, $r14, $r15, $r16;
+        java.io.InputStream r0;
+
+        r0 := @parameter0: java.io.InputStream;
+
+        r7 := @parameter1: java.util.Map;
+
+     label1:
+        $r1 = staticinvoke <java.util.prefs.XmlSupport: org.w3c.dom.Document loadPrefsDoc(java.io.InputStream)>(r0);
+
+        $r2 = interfaceinvoke $r1.<org.w3c.dom.Document: org.w3c.dom.Element getDocumentElement()>();
+
+        $r3 = interfaceinvoke $r2.<org.w3c.dom.Element: java.lang.String getAttribute(java.lang.String)>("MAP_XML_VERSION");
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int compareTo(java.lang.String)>("1.0");
+
+        if $i0 <= 0 goto label2;
+
+        $r10 = new java.util.prefs.InvalidPreferencesFormatException;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Preferences map file format version ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is not supported. This java installation can read versions ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("1.0");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" or older. You may need to install a newer version of JDK.");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r10.<java.util.prefs.InvalidPreferencesFormatException: void <init>(java.lang.String)>($r17);
+
+        throw $r10;
+
+     label2:
+        $r4 = interfaceinvoke $r2.<org.w3c.dom.Element: org.w3c.dom.NodeList getChildNodes()>();
+
+        i2 = 0;
+
+        $i1 = interfaceinvoke $r4.<org.w3c.dom.NodeList: int getLength()>();
+
+     label3:
+        if i2 >= $i1 goto label4;
+
+        $r5 = interfaceinvoke $r4.<org.w3c.dom.NodeList: org.w3c.dom.Node item(int)>(i2);
+
+        r6 = (org.w3c.dom.Element) $r5;
+
+        $r8 = interfaceinvoke r6.<org.w3c.dom.Element: java.lang.String getAttribute(java.lang.String)>("key");
+
+        $r9 = interfaceinvoke r6.<org.w3c.dom.Element: java.lang.String getAttribute(java.lang.String)>("value");
+
+        interfaceinvoke r7.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r8, $r9);
+
+        i2 = i2 + 1;
+
+        goto label3;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r18 := @caughtexception;
+
+        $r19 = new java.util.prefs.InvalidPreferencesFormatException;
+
+        specialinvoke $r19.<java.util.prefs.InvalidPreferencesFormatException: void <init>(java.lang.Throwable)>($r18);
+
+        throw $r19;
+
+     label6:
+        return;
+
+        catch org.xml.sax.SAXException from label1 to label4 with label5;
+    }
+
+    public static void <clinit>()
+    {
+        <java.util.prefs.XmlSupport: java.lang.String MAP_XML_VERSION> = "1.0";
+
+        <java.util.prefs.XmlSupport: java.lang.String EXTERNAL_XML_VERSION> = "1.0";
+
+        <java.util.prefs.XmlSupport: java.lang.String PREFS_DTD> = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!-- DTD for preferences --><!ELEMENT preferences (root) ><!ATTLIST preferences EXTERNAL_XML_VERSION CDATA \"0.0\"  ><!ELEMENT root (map, node*) ><!ATTLIST root          type (system|user) #REQUIRED ><!ELEMENT node (map, node*) ><!ATTLIST node          name CDATA #REQUIRED ><!ELEMENT map (entry*) ><!ATTLIST map  MAP_XML_VERSION CDATA \"0.0\"  ><!ELEMENT entry EMPTY ><!ATTLIST entry          key CDATA #REQUIRED          value CDATA #REQUIRED >";
+
+        <java.util.prefs.XmlSupport: java.lang.String PREFS_DTD_URI> = "http://java.sun.com/dtd/preferences.dtd";
+
+        return;
+    }
+}

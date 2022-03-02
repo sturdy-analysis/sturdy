@@ -1,0 +1,75 @@
+class sun.applet.AppContextCreator extends java.lang.Thread
+{
+    java.lang.Object syncObject;
+    sun.awt.AppContext appContext;
+    volatile boolean created;
+
+    void <init>(java.lang.ThreadGroup)
+    {
+        java.lang.Object $r2;
+        java.lang.ThreadGroup r1;
+        sun.applet.AppContextCreator r0;
+
+        r0 := @this: sun.applet.AppContextCreator;
+
+        r1 := @parameter0: java.lang.ThreadGroup;
+
+        specialinvoke r0.<java.lang.Thread: void <init>(java.lang.ThreadGroup,java.lang.String)>(r1, "AppContextCreator");
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        r0.<sun.applet.AppContextCreator: java.lang.Object syncObject> = $r2;
+
+        r0.<sun.applet.AppContextCreator: sun.awt.AppContext appContext> = null;
+
+        r0.<sun.applet.AppContextCreator: boolean created> = 0;
+
+        return;
+    }
+
+    public void run()
+    {
+        java.lang.Throwable $r4;
+        sun.applet.AppContextCreator r0;
+        sun.awt.AppContext $r1;
+        java.lang.Object $r2, $r3;
+
+        r0 := @this: sun.applet.AppContextCreator;
+
+        $r1 = staticinvoke <sun.awt.SunToolkit: sun.awt.AppContext createNewAppContext()>();
+
+        r0.<sun.applet.AppContextCreator: sun.awt.AppContext appContext> = $r1;
+
+        r0.<sun.applet.AppContextCreator: boolean created> = 1;
+
+        $r2 = r0.<sun.applet.AppContextCreator: java.lang.Object syncObject>;
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = r0.<sun.applet.AppContextCreator: java.lang.Object syncObject>;
+
+        virtualinvoke $r3.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor $r2;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label4:
+        throw $r4;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+}

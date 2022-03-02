@@ -1,0 +1,2825 @@
+public abstract class sun.awt.windows.WComponentPeer extends sun.awt.windows.WObjectPeer implements java.awt.peer.ComponentPeer, java.awt.dnd.peer.DropTargetPeer
+{
+    protected volatile long hwnd;
+    private static final sun.util.logging.PlatformLogger log;
+    private static final sun.util.logging.PlatformLogger shapeLog;
+    private static final sun.util.logging.PlatformLogger focusLog;
+    sun.java2d.SurfaceData surfaceData;
+    private sun.awt.RepaintArea paintArea;
+    protected sun.awt.Win32GraphicsConfig winGraphicsConfig;
+    boolean isLayouting;
+    boolean paintPending;
+    int oldWidth;
+    int oldHeight;
+    private int numBackBuffers;
+    private java.awt.image.VolatileImage backBuffer;
+    private java.awt.BufferCapabilities backBufferCaps;
+    private java.awt.Color foreground;
+    private java.awt.Color background;
+    private java.awt.Font font;
+    int nDropTargets;
+    long nativeDropTargetContext;
+    public int serialNum;
+    private static final double BANDING_DIVISOR;
+    static final java.awt.Font defaultFont;
+    private int updateX1;
+    private int updateY1;
+    private int updateX2;
+    private int updateY2;
+    private volatile boolean isAccelCapable;
+
+    public native boolean isObscured();
+
+    public boolean canDetermineObscurity()
+    {
+        sun.awt.windows.WComponentPeer r0;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        return 1;
+    }
+
+    private synchronized native void pShow();
+
+    synchronized native void hide();
+
+    synchronized native void enable();
+
+    synchronized native void disable();
+
+    public long getHWnd()
+    {
+        sun.awt.windows.WComponentPeer r0;
+        long $l0;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        $l0 = r0.<sun.awt.windows.WComponentPeer: long hwnd>;
+
+        return $l0;
+    }
+
+    public native java.awt.Point getLocationOnScreen();
+
+    public void setVisible(boolean)
+    {
+        sun.awt.windows.WComponentPeer r0;
+        boolean z0;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        z0 := @parameter0: boolean;
+
+        if z0 == 0 goto label1;
+
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void show()>();
+
+        goto label2;
+
+     label1:
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void hide()>();
+
+     label2:
+        return;
+    }
+
+    public void show()
+    {
+        java.awt.Dimension $r3;
+        sun.awt.windows.WComponentPeer r0;
+        int $i0, $i1;
+        java.lang.Object $r1;
+        java.awt.Component $r2;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        $r1 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r2 = (java.awt.Component) $r1;
+
+        $r3 = virtualinvoke $r2.<java.awt.Component: java.awt.Dimension getSize()>();
+
+        $i0 = $r3.<java.awt.Dimension: int height>;
+
+        r0.<sun.awt.windows.WComponentPeer: int oldHeight> = $i0;
+
+        $i1 = $r3.<java.awt.Dimension: int width>;
+
+        r0.<sun.awt.windows.WComponentPeer: int oldWidth> = $i1;
+
+        specialinvoke r0.<sun.awt.windows.WComponentPeer: void pShow()>();
+
+        return;
+    }
+
+    public void setEnabled(boolean)
+    {
+        sun.awt.windows.WComponentPeer r0;
+        boolean z0;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        z0 := @parameter0: boolean;
+
+        if z0 == 0 goto label1;
+
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void enable()>();
+
+        goto label2;
+
+     label1:
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void disable()>();
+
+     label2:
+        return;
+    }
+
+    private native void reshapeNoCheck(int, int, int, int);
+
+    public void setBounds(int, int, int, int, int)
+    {
+        sun.java2d.InvalidPipeException $r1;
+        sun.awt.windows.WComponentPeer r0;
+        int i0, $i1, i2, $i3, i4, i5, i6, $i7, $i8, $i9, $i10, $i11;
+        boolean $z0;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        i4 := @parameter0: int;
+
+        i5 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        i6 := @parameter3: int;
+
+        i2 := @parameter4: int;
+
+        $i1 = r0.<sun.awt.windows.WComponentPeer: int oldWidth>;
+
+        if i0 != $i1 goto label01;
+
+        $i9 = r0.<sun.awt.windows.WComponentPeer: int oldHeight>;
+
+        if i6 == $i9 goto label02;
+
+     label01:
+        $z0 = 1;
+
+        goto label03;
+
+     label02:
+        $z0 = 0;
+
+     label03:
+        r0.<sun.awt.windows.WComponentPeer: boolean paintPending> = $z0;
+
+        $i3 = i2 & 16384;
+
+        if $i3 == 0 goto label04;
+
+        specialinvoke r0.<sun.awt.windows.WComponentPeer: void reshapeNoCheck(int,int,int,int)>(i4, i5, i0, i6);
+
+        goto label05;
+
+     label04:
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void reshape(int,int,int,int)>(i4, i5, i0, i6);
+
+     label05:
+        $i7 = r0.<sun.awt.windows.WComponentPeer: int oldWidth>;
+
+        if i0 != $i7 goto label06;
+
+        $i8 = r0.<sun.awt.windows.WComponentPeer: int oldHeight>;
+
+        if i6 == $i8 goto label10;
+
+     label06:
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void replaceSurfaceData()>();
+
+     label07:
+        goto label09;
+
+     label08:
+        $r1 := @caughtexception;
+
+     label09:
+        r0.<sun.awt.windows.WComponentPeer: int oldWidth> = i0;
+
+        r0.<sun.awt.windows.WComponentPeer: int oldHeight> = i6;
+
+     label10:
+        $i10 = r0.<sun.awt.windows.WComponentPeer: int serialNum>;
+
+        $i11 = $i10 + 1;
+
+        r0.<sun.awt.windows.WComponentPeer: int serialNum> = $i11;
+
+        return;
+
+        catch sun.java2d.InvalidPipeException from label06 to label07 with label08;
+    }
+
+    void dynamicallyLayoutContainer()
+    {
+        sun.util.logging.PlatformLogger$Level $r0;
+        sun.util.logging.PlatformLogger $r1, $r6;
+        sun.awt.windows.WComponentPeer$1 $r9;
+        java.awt.Component $r4;
+        sun.awt.windows.WComponentPeer r2;
+        java.lang.Object $r3, $r7;
+        java.awt.Container $r5, $r8;
+        boolean $z0;
+
+        r2 := @this: sun.awt.windows.WComponentPeer;
+
+        $r1 = <sun.awt.windows.WComponentPeer: sun.util.logging.PlatformLogger log>;
+
+        $r0 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINE>;
+
+        $z0 = virtualinvoke $r1.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r0);
+
+        if $z0 == 0 goto label1;
+
+        $r3 = r2.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r4 = (java.awt.Component) $r3;
+
+        $r5 = staticinvoke <sun.awt.windows.WToolkit: java.awt.Container getNativeContainer(java.awt.Component)>($r4);
+
+        if $r5 == null goto label1;
+
+        $r6 = <sun.awt.windows.WComponentPeer: sun.util.logging.PlatformLogger log>;
+
+        virtualinvoke $r6.<sun.util.logging.PlatformLogger: void fine(java.lang.String)>("Assertion (parent == null) failed");
+
+     label1:
+        $r7 = r2.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r8 = (java.awt.Container) $r7;
+
+        $r9 = new sun.awt.windows.WComponentPeer$1;
+
+        specialinvoke $r9.<sun.awt.windows.WComponentPeer$1: void <init>(sun.awt.windows.WComponentPeer,java.awt.Container)>(r2, $r8);
+
+        staticinvoke <sun.awt.windows.WToolkit: void executeOnEventHandlerThread(java.lang.Object,java.lang.Runnable)>($r8, $r9);
+
+        return;
+    }
+
+    void paintDamagedAreaImmediately()
+    {
+        sun.awt.RepaintArea $r1;
+        sun.awt.windows.WComponentPeer r0;
+        java.lang.Object $r2;
+        boolean $z0;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void updateWindow()>();
+
+        staticinvoke <sun.awt.SunToolkit: void flushPendingEvents()>();
+
+        $r1 = r0.<sun.awt.windows.WComponentPeer: sun.awt.RepaintArea paintArea>;
+
+        $r2 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $z0 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: boolean shouldClearRectBeforePaint()>();
+
+        virtualinvoke $r1.<sun.awt.RepaintArea: void paint(java.lang.Object,boolean)>($r2, $z0);
+
+        return;
+    }
+
+    synchronized native void updateWindow();
+
+    public void paint(java.awt.Graphics)
+    {
+        sun.awt.windows.WComponentPeer r0;
+        java.awt.Graphics r2;
+        java.lang.Object $r1;
+        java.awt.Component $r3;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        r2 := @parameter0: java.awt.Graphics;
+
+        $r1 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r3 = (java.awt.Component) $r1;
+
+        virtualinvoke $r3.<java.awt.Component: void paint(java.awt.Graphics)>(r2);
+
+        return;
+    }
+
+    public void repaint(long, int, int, int, int)
+    {
+        sun.awt.windows.WComponentPeer r0;
+        int i1, i2, i3, i4;
+        long l0;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        l0 := @parameter0: long;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        i4 := @parameter4: int;
+
+        return;
+    }
+
+    private native int[] createPrintedPixels(int, int, int, int, int);
+
+    public void print(java.awt.Graphics)
+    {
+        java.awt.Color $r4;
+        int[] $r5;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, i7, i8, $i9;
+        double $d0, $d1;
+        java.awt.image.BufferedImage $r6;
+        java.awt.Component r2;
+        sun.awt.windows.WComponentPeer r0;
+        java.awt.Graphics r3;
+        java.lang.Object $r1;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        r3 := @parameter0: java.awt.Graphics;
+
+        $r1 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        r2 = (java.awt.Component) $r1;
+
+        $i0 = virtualinvoke r2.<java.awt.Component: int getWidth()>();
+
+        $i1 = virtualinvoke r2.<java.awt.Component: int getHeight()>();
+
+        $d0 = (double) $i1;
+
+        $d1 = $d0 / 4.0;
+
+        i6 = (int) $d1;
+
+        if i6 != 0 goto label1;
+
+        i6 = $i1;
+
+     label1:
+        i7 = 0;
+
+     label2:
+        if i7 >= $i1 goto label7;
+
+        $i2 = i7 + i6;
+
+        i8 = $i2 - 1;
+
+        if i8 < $i1 goto label3;
+
+        i8 = $i1 - 1;
+
+     label3:
+        $i3 = i8 - i7;
+
+        $i5 = $i3 + 1;
+
+        $r4 = virtualinvoke r2.<java.awt.Component: java.awt.Color getBackground()>();
+
+        $i4 = i7;
+
+        if $r4 != null goto label4;
+
+        $i9 = 255;
+
+        goto label5;
+
+     label4:
+        $i9 = virtualinvoke $r4.<java.awt.Color: int getAlpha()>();
+
+     label5:
+        $r5 = specialinvoke r0.<sun.awt.windows.WComponentPeer: int[] createPrintedPixels(int,int,int,int,int)>(0, $i4, $i0, $i5, $i9);
+
+        if $r5 == null goto label6;
+
+        $r6 = new java.awt.image.BufferedImage;
+
+        specialinvoke $r6.<java.awt.image.BufferedImage: void <init>(int,int,int)>($i0, $i5, 2);
+
+        virtualinvoke $r6.<java.awt.image.BufferedImage: void setRGB(int,int,int,int,int[],int,int)>(0, 0, $i0, $i5, $r5, 0, $i0);
+
+        virtualinvoke r3.<java.awt.Graphics: boolean drawImage(java.awt.Image,int,int,java.awt.image.ImageObserver)>($r6, 0, i7, null);
+
+        virtualinvoke $r6.<java.awt.image.BufferedImage: void flush()>();
+
+     label6:
+        i7 = i7 + i6;
+
+        goto label2;
+
+     label7:
+        virtualinvoke r2.<java.awt.Component: void print(java.awt.Graphics)>(r3);
+
+        return;
+    }
+
+    public void coalescePaintEvent(java.awt.event.PaintEvent)
+    {
+        sun.awt.RepaintArea $r27;
+        boolean $z0, $z1;
+        sun.util.logging.PlatformLogger$Level $r2;
+        sun.awt.windows.WComponentPeer r26;
+        java.lang.StringBuilder $r4, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r15, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24;
+        java.awt.Rectangle $r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9;
+        java.lang.String $r14, $r25;
+        sun.util.logging.PlatformLogger $r3, $r5, $r16;
+        java.awt.event.PaintEvent r0;
+
+        r26 := @this: sun.awt.windows.WComponentPeer;
+
+        r0 := @parameter0: java.awt.event.PaintEvent;
+
+        $r1 = virtualinvoke r0.<java.awt.event.PaintEvent: java.awt.Rectangle getUpdateRect()>();
+
+        $z0 = r0 instanceof sun.awt.event.IgnorePaintEvent;
+
+        if $z0 != 0 goto label1;
+
+        $r27 = r26.<sun.awt.windows.WComponentPeer: sun.awt.RepaintArea paintArea>;
+
+        $i9 = virtualinvoke r0.<java.awt.event.PaintEvent: int getID()>();
+
+        virtualinvoke $r27.<sun.awt.RepaintArea: void add(java.awt.Rectangle,int)>($r1, $i9);
+
+     label1:
+        $r3 = <sun.awt.windows.WComponentPeer: sun.util.logging.PlatformLogger log>;
+
+        $r2 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINEST>;
+
+        $z1 = virtualinvoke $r3.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r2);
+
+        if $z1 == 0 goto label4;
+
+        $i0 = virtualinvoke r0.<java.awt.event.PaintEvent: int getID()>();
+
+        lookupswitch($i0)
+        {
+            case 800: goto label3;
+            case 801: goto label2;
+            default: goto label4;
+        };
+
+     label2:
+        $r5 = <sun.awt.windows.WComponentPeer: sun.util.logging.PlatformLogger log>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("coalescePaintEvent: UPDATE: add: x = ");
+
+        $i1 = $r1.<java.awt.Rectangle: int x>;
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", y = ");
+
+        $i2 = $r1.<java.awt.Rectangle: int y>;
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", width = ");
+
+        $i3 = $r1.<java.awt.Rectangle: int width>;
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", height = ");
+
+        $i4 = $r1.<java.awt.Rectangle: int height>;
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<sun.util.logging.PlatformLogger: void finest(java.lang.String)>($r14);
+
+        return;
+
+     label3:
+        $r16 = <sun.awt.windows.WComponentPeer: sun.util.logging.PlatformLogger log>;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("coalescePaintEvent: PAINT: add: x = ");
+
+        $i5 = $r1.<java.awt.Rectangle: int x>;
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", y = ");
+
+        $i6 = $r1.<java.awt.Rectangle: int y>;
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i6);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", width = ");
+
+        $i7 = $r1.<java.awt.Rectangle: int width>;
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i7);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", height = ");
+
+        $i8 = $r1.<java.awt.Rectangle: int height>;
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i8);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r16.<sun.util.logging.PlatformLogger: void finest(java.lang.String)>($r25);
+
+        return;
+
+     label4:
+        return;
+    }
+
+    public synchronized native void reshape(int, int, int, int);
+
+    public boolean handleJavaKeyEvent(java.awt.event.KeyEvent)
+    {
+        sun.awt.windows.WComponentPeer r0;
+        java.awt.event.KeyEvent r1;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        r1 := @parameter0: java.awt.event.KeyEvent;
+
+        return 0;
+    }
+
+    public void handleJavaMouseEvent(java.awt.event.MouseEvent)
+    {
+        sun.awt.CausedFocusEvent$Cause $r9;
+        java.awt.Component $r5, $r7, $r10;
+        java.awt.event.MouseEvent r0;
+        int $i0;
+        sun.awt.windows.WComponentPeer r1;
+        java.lang.Object $r2, $r3, $r4, $r6, $r8;
+        boolean $z0, $z1;
+
+        r1 := @this: sun.awt.windows.WComponentPeer;
+
+        r0 := @parameter0: java.awt.event.MouseEvent;
+
+        $i0 = virtualinvoke r0.<java.awt.event.MouseEvent: int getID()>();
+
+        lookupswitch($i0)
+        {
+            case 501: goto label1;
+            default: goto label2;
+        };
+
+     label1:
+        $r2 = r1.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r3 = virtualinvoke r0.<java.awt.event.MouseEvent: java.lang.Object getSource()>();
+
+        if $r2 != $r3 goto label2;
+
+        $r4 = r1.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r5 = (java.awt.Component) $r4;
+
+        $z0 = virtualinvoke $r5.<java.awt.Component: boolean isFocusOwner()>();
+
+        if $z0 != 0 goto label2;
+
+        $r6 = r1.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r7 = (java.awt.Component) $r6;
+
+        $z1 = staticinvoke <sun.awt.windows.WKeyboardFocusManagerPeer: boolean shouldFocusOnClick(java.awt.Component)>($r7);
+
+        if $z1 == 0 goto label2;
+
+        $r8 = r1.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r10 = (java.awt.Component) $r8;
+
+        $r9 = <sun.awt.CausedFocusEvent$Cause: sun.awt.CausedFocusEvent$Cause MOUSE_EVENT>;
+
+        staticinvoke <sun.awt.windows.WKeyboardFocusManagerPeer: boolean requestFocusFor(java.awt.Component,sun.awt.CausedFocusEvent$Cause)>($r10, $r9);
+
+     label2:
+        return;
+    }
+
+    native void nativeHandleEvent(java.awt.AWTEvent);
+
+    public void handleEvent(java.awt.AWTEvent)
+    {
+        java.awt.event.InputEvent $r5;
+        java.awt.AWTEvent r0;
+        sun.awt.RepaintArea $r3;
+        int $i0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        java.awt.event.KeyEvent $r8;
+        java.awt.Component $r7;
+        java.awt.event.MouseEvent $r9;
+        java.awt.event.FocusEvent $r2;
+        sun.awt.windows.WComponentPeer r1;
+        java.lang.Object $r4, $r6;
+
+        r1 := @this: sun.awt.windows.WComponentPeer;
+
+        r0 := @parameter0: java.awt.AWTEvent;
+
+        $i0 = virtualinvoke r0.<java.awt.AWTEvent: int getID()>();
+
+        $z0 = r0 instanceof java.awt.event.InputEvent;
+
+        if $z0 == 0 goto label2;
+
+        $r5 = (java.awt.event.InputEvent) r0;
+
+        $z4 = virtualinvoke $r5.<java.awt.event.InputEvent: boolean isConsumed()>();
+
+        if $z4 != 0 goto label2;
+
+        $r6 = r1.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r7 = (java.awt.Component) $r6;
+
+        $z5 = virtualinvoke $r7.<java.awt.Component: boolean isEnabled()>();
+
+        if $z5 == 0 goto label2;
+
+        $z6 = r0 instanceof java.awt.event.MouseEvent;
+
+        if $z6 == 0 goto label1;
+
+        $z9 = r0 instanceof java.awt.event.MouseWheelEvent;
+
+        if $z9 != 0 goto label1;
+
+        $r9 = (java.awt.event.MouseEvent) r0;
+
+        virtualinvoke r1.<sun.awt.windows.WComponentPeer: void handleJavaMouseEvent(java.awt.event.MouseEvent)>($r9);
+
+        goto label2;
+
+     label1:
+        $z7 = r0 instanceof java.awt.event.KeyEvent;
+
+        if $z7 == 0 goto label2;
+
+        $r8 = (java.awt.event.KeyEvent) r0;
+
+        $z8 = virtualinvoke r1.<sun.awt.windows.WComponentPeer: boolean handleJavaKeyEvent(java.awt.event.KeyEvent)>($r8);
+
+        if $z8 == 0 goto label2;
+
+        return;
+
+     label2:
+        lookupswitch($i0)
+        {
+            case 800: goto label3;
+            case 801: goto label4;
+            case 1004: goto label6;
+            case 1005: goto label6;
+            default: goto label7;
+        };
+
+     label3:
+        r1.<sun.awt.windows.WComponentPeer: boolean paintPending> = 0;
+
+     label4:
+        $z1 = r1.<sun.awt.windows.WComponentPeer: boolean isLayouting>;
+
+        if $z1 != 0 goto label5;
+
+        $z2 = r1.<sun.awt.windows.WComponentPeer: boolean paintPending>;
+
+        if $z2 != 0 goto label5;
+
+        $r3 = r1.<sun.awt.windows.WComponentPeer: sun.awt.RepaintArea paintArea>;
+
+        $r4 = r1.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $z3 = virtualinvoke r1.<sun.awt.windows.WComponentPeer: boolean shouldClearRectBeforePaint()>();
+
+        virtualinvoke $r3.<sun.awt.RepaintArea: void paint(java.lang.Object,boolean)>($r4, $z3);
+
+     label5:
+        return;
+
+     label6:
+        $r2 = (java.awt.event.FocusEvent) r0;
+
+        virtualinvoke r1.<sun.awt.windows.WComponentPeer: void handleJavaFocusEvent(java.awt.event.FocusEvent)>($r2);
+
+     label7:
+        virtualinvoke r1.<sun.awt.windows.WComponentPeer: void nativeHandleEvent(java.awt.AWTEvent)>(r0);
+
+        return;
+    }
+
+    void handleJavaFocusEvent(java.awt.event.FocusEvent)
+    {
+        sun.util.logging.PlatformLogger$Level $r0;
+        sun.util.logging.PlatformLogger $r1, $r4;
+        java.awt.event.FocusEvent r3;
+        sun.awt.windows.WComponentPeer r2;
+        int $i0;
+        java.lang.String $r5;
+        boolean $z0, $z1;
+
+        r2 := @this: sun.awt.windows.WComponentPeer;
+
+        r3 := @parameter0: java.awt.event.FocusEvent;
+
+        $r1 = <sun.awt.windows.WComponentPeer: sun.util.logging.PlatformLogger focusLog>;
+
+        $r0 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINER>;
+
+        $z0 = virtualinvoke $r1.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r0);
+
+        if $z0 == 0 goto label1;
+
+        $r4 = <sun.awt.windows.WComponentPeer: sun.util.logging.PlatformLogger focusLog>;
+
+        $r5 = virtualinvoke r3.<java.awt.event.FocusEvent: java.lang.String toString()>();
+
+        virtualinvoke $r4.<sun.util.logging.PlatformLogger: void finer(java.lang.String)>($r5);
+
+     label1:
+        $i0 = virtualinvoke r3.<java.awt.event.FocusEvent: int getID()>();
+
+        if $i0 != 1004 goto label2;
+
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        virtualinvoke r2.<sun.awt.windows.WComponentPeer: void setFocus(boolean)>($z1);
+
+        return;
+    }
+
+    native void setFocus(boolean);
+
+    public java.awt.Dimension getMinimumSize()
+    {
+        java.awt.Dimension $r3;
+        sun.awt.windows.WComponentPeer r0;
+        java.lang.Object $r1;
+        java.awt.Component $r2;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        $r1 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r2 = (java.awt.Component) $r1;
+
+        $r3 = virtualinvoke $r2.<java.awt.Component: java.awt.Dimension getSize()>();
+
+        return $r3;
+    }
+
+    public java.awt.Dimension getPreferredSize()
+    {
+        sun.awt.windows.WComponentPeer r0;
+        java.awt.Dimension $r1;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        $r1 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: java.awt.Dimension getMinimumSize()>();
+
+        return $r1;
+    }
+
+    public void layout()
+    {
+        sun.awt.windows.WComponentPeer r0;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        return;
+    }
+
+    public java.awt.Rectangle getBounds()
+    {
+        java.awt.Rectangle $r3;
+        sun.awt.windows.WComponentPeer r0;
+        java.lang.Object $r1;
+        java.awt.Component $r2;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        $r1 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r2 = (java.awt.Component) $r1;
+
+        $r3 = virtualinvoke $r2.<java.awt.Component: java.awt.Rectangle getBounds()>();
+
+        return $r3;
+    }
+
+    public boolean isFocusable()
+    {
+        sun.awt.windows.WComponentPeer r0;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        return 0;
+    }
+
+    public java.awt.GraphicsConfiguration getGraphicsConfiguration()
+    {
+        java.awt.GraphicsConfiguration $r4;
+        sun.awt.windows.WComponentPeer r0;
+        java.lang.Object $r2;
+        java.awt.Component $r3;
+        sun.awt.Win32GraphicsConfig $r1, $r5;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        $r1 = r0.<sun.awt.windows.WComponentPeer: sun.awt.Win32GraphicsConfig winGraphicsConfig>;
+
+        if $r1 == null goto label1;
+
+        $r5 = r0.<sun.awt.windows.WComponentPeer: sun.awt.Win32GraphicsConfig winGraphicsConfig>;
+
+        return $r5;
+
+     label1:
+        $r2 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r3 = (java.awt.Component) $r2;
+
+        $r4 = virtualinvoke $r3.<java.awt.Component: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+        return $r4;
+    }
+
+    public sun.java2d.SurfaceData getSurfaceData()
+    {
+        sun.awt.windows.WComponentPeer r0;
+        sun.java2d.SurfaceData $r1;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        $r1 = r0.<sun.awt.windows.WComponentPeer: sun.java2d.SurfaceData surfaceData>;
+
+        return $r1;
+    }
+
+    public void replaceSurfaceData()
+    {
+        sun.awt.windows.WComponentPeer r0;
+        int $i0;
+        java.awt.BufferCapabilities $r1;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        $i0 = r0.<sun.awt.windows.WComponentPeer: int numBackBuffers>;
+
+        $r1 = r0.<sun.awt.windows.WComponentPeer: java.awt.BufferCapabilities backBufferCaps>;
+
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void replaceSurfaceData(int,java.awt.BufferCapabilities)>($i0, $r1);
+
+        return;
+    }
+
+    public void createScreenSurface(boolean)
+    {
+        java.awt.GraphicsConfiguration $r1;
+        sun.awt.windows.WComponentPeer r0;
+        int $i0;
+        sun.java2d.SurfaceData $r4;
+        sun.java2d.ScreenUpdateManager $r3;
+        sun.awt.Win32GraphicsConfig r2;
+        boolean z0;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+        r2 = (sun.awt.Win32GraphicsConfig) $r1;
+
+        $r3 = staticinvoke <sun.java2d.ScreenUpdateManager: sun.java2d.ScreenUpdateManager getInstance()>();
+
+        $i0 = r0.<sun.awt.windows.WComponentPeer: int numBackBuffers>;
+
+        $r4 = virtualinvoke $r3.<sun.java2d.ScreenUpdateManager: sun.java2d.SurfaceData createScreenSurface(sun.awt.Win32GraphicsConfig,sun.awt.windows.WComponentPeer,int,boolean)>(r2, r0, $i0, z0);
+
+        r0.<sun.awt.windows.WComponentPeer: sun.java2d.SurfaceData surfaceData> = $r4;
+
+        return;
+    }
+
+    public void replaceSurfaceData(int, java.awt.BufferCapabilities)
+    {
+        java.lang.Throwable $r11, $r12;
+        long $l0;
+        byte $b1;
+        int i2, $i3;
+        java.awt.BufferCapabilities r6;
+        sun.awt.Win32GraphicsConfig r8;
+        java.awt.GraphicsConfiguration $r7;
+        sun.java2d.SurfaceData r13;
+        sun.java2d.ScreenUpdateManager $r4;
+        java.awt.Component $r2;
+        java.awt.image.VolatileImage $r5, $r9, $r10;
+        sun.awt.windows.WComponentPeer r0;
+        java.lang.Object $r1, $r3;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        i2 := @parameter0: int;
+
+        r6 := @parameter1: java.awt.BufferCapabilities;
+
+        $r1 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r2 = (java.awt.Component) $r1;
+
+        $r3 = virtualinvoke $r2.<java.awt.Component: java.lang.Object getTreeLock()>();
+
+        entermonitor $r3;
+
+     label01:
+        entermonitor r0;
+
+     label02:
+        $l0 = r0.<sun.awt.windows.WComponentPeer: long pData>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label05;
+
+        exitmonitor r0;
+
+     label03:
+        exitmonitor $r3;
+
+     label04:
+        return;
+
+     label05:
+        r0.<sun.awt.windows.WComponentPeer: int numBackBuffers> = i2;
+
+        $r4 = staticinvoke <sun.java2d.ScreenUpdateManager: sun.java2d.ScreenUpdateManager getInstance()>();
+
+        r13 = r0.<sun.awt.windows.WComponentPeer: sun.java2d.SurfaceData surfaceData>;
+
+        virtualinvoke $r4.<sun.java2d.ScreenUpdateManager: void dropScreenSurface(sun.java2d.SurfaceData)>(r13);
+
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void createScreenSurface(boolean)>(1);
+
+        if r13 == null goto label06;
+
+        virtualinvoke r13.<sun.java2d.SurfaceData: void invalidate()>();
+
+     label06:
+        $r10 = r0.<sun.awt.windows.WComponentPeer: java.awt.image.VolatileImage backBuffer>;
+
+        $i3 = r0.<sun.awt.windows.WComponentPeer: int numBackBuffers>;
+
+        if $i3 <= 0 goto label07;
+
+        r0.<sun.awt.windows.WComponentPeer: java.awt.BufferCapabilities backBufferCaps> = r6;
+
+        $r7 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+        r8 = (sun.awt.Win32GraphicsConfig) $r7;
+
+        $r9 = virtualinvoke r8.<sun.awt.Win32GraphicsConfig: java.awt.image.VolatileImage createBackBuffer(sun.awt.windows.WComponentPeer)>(r0);
+
+        r0.<sun.awt.windows.WComponentPeer: java.awt.image.VolatileImage backBuffer> = $r9;
+
+        goto label08;
+
+     label07:
+        $r5 = r0.<sun.awt.windows.WComponentPeer: java.awt.image.VolatileImage backBuffer>;
+
+        if $r5 == null goto label08;
+
+        r0.<sun.awt.windows.WComponentPeer: java.awt.BufferCapabilities backBufferCaps> = null;
+
+        r0.<sun.awt.windows.WComponentPeer: java.awt.image.VolatileImage backBuffer> = null;
+
+     label08:
+        exitmonitor r0;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r12 := @caughtexception;
+
+        exitmonitor r0;
+
+     label11:
+        throw $r12;
+
+     label12:
+        exitmonitor $r3;
+
+     label13:
+        goto label16;
+
+     label14:
+        $r11 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label15:
+        throw $r11;
+
+     label16:
+        if r13 == null goto label17;
+
+        virtualinvoke r13.<sun.java2d.SurfaceData: void flush()>();
+
+     label17:
+        if $r10 == null goto label18;
+
+        virtualinvoke $r10.<java.awt.image.VolatileImage: void flush()>();
+
+     label18:
+        return;
+
+        catch java.lang.Throwable from label02 to label03 with label10;
+        catch java.lang.Throwable from label05 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+        catch java.lang.Throwable from label01 to label04 with label14;
+        catch java.lang.Throwable from label05 to label13 with label14;
+        catch java.lang.Throwable from label14 to label15 with label14;
+    }
+
+    public void replaceSurfaceDataLater()
+    {
+        java.awt.event.InvocationEvent $r5;
+        sun.awt.windows.WComponentPeer$2 $r0;
+        sun.awt.windows.WComponentPeer r1;
+        sun.awt.PaintEventDispatcher $r4;
+        java.lang.Object $r2;
+        java.awt.Component r3;
+        boolean $z0;
+
+        r1 := @this: sun.awt.windows.WComponentPeer;
+
+        $r0 = new sun.awt.windows.WComponentPeer$2;
+
+        specialinvoke $r0.<sun.awt.windows.WComponentPeer$2: void <init>(sun.awt.windows.WComponentPeer)>(r1);
+
+        $r2 = r1.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        r3 = (java.awt.Component) $r2;
+
+        $r4 = staticinvoke <sun.awt.PaintEventDispatcher: sun.awt.PaintEventDispatcher getPaintEventDispatcher()>();
+
+        $z0 = virtualinvoke $r4.<sun.awt.PaintEventDispatcher: boolean queueSurfaceDataReplacing(java.awt.Component,java.lang.Runnable)>(r3, $r0);
+
+        if $z0 != 0 goto label1;
+
+        $r5 = new java.awt.event.InvocationEvent;
+
+        specialinvoke $r5.<java.awt.event.InvocationEvent: void <init>(java.lang.Object,java.lang.Runnable)>(r3, $r0);
+
+        virtualinvoke r1.<sun.awt.windows.WComponentPeer: void postEvent(java.awt.AWTEvent)>($r5);
+
+     label1:
+        return;
+    }
+
+    public boolean updateGraphicsData(java.awt.GraphicsConfiguration)
+    {
+        java.awt.GraphicsConfiguration r1;
+        sun.java2d.InvalidPipeException $r3;
+        sun.awt.windows.WComponentPeer r0;
+        sun.awt.Win32GraphicsConfig $r2;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        r1 := @parameter0: java.awt.GraphicsConfiguration;
+
+        $r2 = (sun.awt.Win32GraphicsConfig) r1;
+
+        r0.<sun.awt.windows.WComponentPeer: sun.awt.Win32GraphicsConfig winGraphicsConfig> = $r2;
+
+     label1:
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void replaceSurfaceData()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+     label4:
+        return 0;
+
+        catch sun.java2d.InvalidPipeException from label1 to label2 with label3;
+    }
+
+    public java.awt.image.ColorModel getColorModel()
+    {
+        sun.awt.windows.WComponentPeer r0;
+        java.awt.GraphicsConfiguration $r1;
+        java.awt.image.ColorModel $r2;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        $r1 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = virtualinvoke $r1.<java.awt.GraphicsConfiguration: java.awt.image.ColorModel getColorModel()>();
+
+        return $r2;
+
+     label1:
+        return null;
+    }
+
+    public java.awt.image.ColorModel getDeviceColorModel()
+    {
+        java.awt.GraphicsConfiguration $r1;
+        java.awt.image.ColorModel $r3;
+        sun.awt.windows.WComponentPeer r0;
+        sun.awt.Win32GraphicsConfig r2;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        $r1 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+        r2 = (sun.awt.Win32GraphicsConfig) $r1;
+
+        if r2 == null goto label1;
+
+        $r3 = virtualinvoke r2.<sun.awt.Win32GraphicsConfig: java.awt.image.ColorModel getDeviceColorModel()>();
+
+        return $r3;
+
+     label1:
+        return null;
+    }
+
+    public java.awt.image.ColorModel getColorModel(int)
+    {
+        java.awt.GraphicsConfiguration $r1;
+        java.awt.image.ColorModel $r2;
+        sun.awt.windows.WComponentPeer r0;
+        int i0;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = virtualinvoke $r1.<java.awt.GraphicsConfiguration: java.awt.image.ColorModel getColorModel(int)>(i0);
+
+        return $r2;
+
+     label1:
+        return null;
+    }
+
+    public java.awt.Graphics getGraphics()
+    {
+        java.awt.Color $r7, r13, r14;
+        java.awt.Graphics2D $r5;
+        int $i0, $i1, $i2, $i3, i4, i5;
+        sun.awt.windows.WWindowPeer $r9;
+        boolean $z0;
+        java.awt.peer.ComponentPeer $r8;
+        java.awt.Font $r6, r15;
+        java.awt.Window $r3;
+        sun.java2d.SurfaceData $r11;
+        sun.java2d.ScreenUpdateManager $r4;
+        java.awt.Component r2, r12;
+        sun.awt.windows.WComponentPeer r0;
+        java.awt.Graphics $r10;
+        java.lang.Object $r1;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        $z0 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: boolean isDisposed()>();
+
+        if $z0 == 0 goto label1;
+
+        return null;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: java.lang.Object getTarget()>();
+
+        r2 = (java.awt.Component) $r1;
+
+        $r3 = staticinvoke <sun.awt.SunToolkit: java.awt.Window getContainingWindow(java.awt.Component)>(r2);
+
+        if $r3 == null goto label4;
+
+        $r8 = virtualinvoke $r3.<java.awt.Window: java.awt.peer.ComponentPeer getPeer()>();
+
+        $r9 = (sun.awt.windows.WWindowPeer) $r8;
+
+        $r10 = virtualinvoke $r9.<sun.awt.windows.WWindowPeer: java.awt.Graphics getTranslucentGraphics()>();
+
+        if $r10 == null goto label4;
+
+        i4 = 0;
+
+        i5 = 0;
+
+        r12 = r2;
+
+     label2:
+        if r12 == $r3 goto label3;
+
+        $i2 = virtualinvoke r12.<java.awt.Component: int getX()>();
+
+        i4 = i4 + $i2;
+
+        $i3 = virtualinvoke r12.<java.awt.Component: int getY()>();
+
+        i5 = i5 + $i3;
+
+        r12 = virtualinvoke r12.<java.awt.Component: java.awt.Container getParent()>();
+
+        goto label2;
+
+     label3:
+        virtualinvoke $r10.<java.awt.Graphics: void translate(int,int)>(i4, i5);
+
+        $i0 = virtualinvoke r2.<java.awt.Component: int getWidth()>();
+
+        $i1 = virtualinvoke r2.<java.awt.Component: int getHeight()>();
+
+        virtualinvoke $r10.<java.awt.Graphics: void clipRect(int,int,int,int)>(0, 0, $i0, $i1);
+
+        return $r10;
+
+     label4:
+        $r11 = r0.<sun.awt.windows.WComponentPeer: sun.java2d.SurfaceData surfaceData>;
+
+        if $r11 == null goto label8;
+
+        r13 = r0.<sun.awt.windows.WComponentPeer: java.awt.Color background>;
+
+        if r13 != null goto label5;
+
+        r13 = <java.awt.SystemColor: java.awt.SystemColor window>;
+
+     label5:
+        $r7 = r0.<sun.awt.windows.WComponentPeer: java.awt.Color foreground>;
+
+        r14 = $r7;
+
+        if $r7 != null goto label6;
+
+        r14 = <java.awt.SystemColor: java.awt.SystemColor windowText>;
+
+     label6:
+        $r6 = r0.<sun.awt.windows.WComponentPeer: java.awt.Font font>;
+
+        r15 = $r6;
+
+        if $r6 != null goto label7;
+
+        r15 = <sun.awt.windows.WComponentPeer: java.awt.Font defaultFont>;
+
+     label7:
+        $r4 = staticinvoke <sun.java2d.ScreenUpdateManager: sun.java2d.ScreenUpdateManager getInstance()>();
+
+        $r5 = virtualinvoke $r4.<sun.java2d.ScreenUpdateManager: java.awt.Graphics2D createGraphics(sun.java2d.SurfaceData,sun.awt.windows.WComponentPeer,java.awt.Color,java.awt.Color,java.awt.Font)>($r11, r0, r14, r13, r15);
+
+        return $r5;
+
+     label8:
+        return null;
+    }
+
+    public java.awt.FontMetrics getFontMetrics(java.awt.Font)
+    {
+        sun.awt.windows.WComponentPeer r2;
+        java.awt.FontMetrics $r1;
+        java.awt.Font r0;
+
+        r2 := @this: sun.awt.windows.WComponentPeer;
+
+        r0 := @parameter0: java.awt.Font;
+
+        $r1 = staticinvoke <sun.awt.windows.WFontMetrics: java.awt.FontMetrics getFontMetrics(java.awt.Font)>(r0);
+
+        return $r1;
+    }
+
+    private synchronized native void _dispose();
+
+    protected void disposeImpl()
+    {
+        sun.awt.windows.WComponentPeer r0;
+        sun.java2d.SurfaceData r1;
+        java.lang.Object $r3;
+        sun.java2d.ScreenUpdateManager $r2;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        r1 = r0.<sun.awt.windows.WComponentPeer: sun.java2d.SurfaceData surfaceData>;
+
+        r0.<sun.awt.windows.WComponentPeer: sun.java2d.SurfaceData surfaceData> = null;
+
+        $r2 = staticinvoke <sun.java2d.ScreenUpdateManager: sun.java2d.ScreenUpdateManager getInstance()>();
+
+        virtualinvoke $r2.<sun.java2d.ScreenUpdateManager: void dropScreenSurface(sun.java2d.SurfaceData)>(r1);
+
+        virtualinvoke r1.<sun.java2d.SurfaceData: void invalidate()>();
+
+        $r3 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetDisposedPeer(java.lang.Object,java.lang.Object)>($r3, r0);
+
+        specialinvoke r0.<sun.awt.windows.WComponentPeer: void _dispose()>();
+
+        return;
+    }
+
+    public void disposeLater()
+    {
+        java.awt.event.InvocationEvent $r1;
+        sun.awt.windows.WComponentPeer$3 $r2;
+        sun.awt.windows.WComponentPeer r0;
+        java.lang.Object $r3;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        $r1 = new java.awt.event.InvocationEvent;
+
+        $r3 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r2 = new sun.awt.windows.WComponentPeer$3;
+
+        specialinvoke $r2.<sun.awt.windows.WComponentPeer$3: void <init>(sun.awt.windows.WComponentPeer)>(r0);
+
+        specialinvoke $r1.<java.awt.event.InvocationEvent: void <init>(java.lang.Object,java.lang.Runnable)>($r3, $r2);
+
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void postEvent(java.awt.AWTEvent)>($r1);
+
+        return;
+    }
+
+    public synchronized void setForeground(java.awt.Color)
+    {
+        sun.awt.windows.WComponentPeer r0;
+        java.awt.Color r1;
+        int $i0;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        r1 := @parameter0: java.awt.Color;
+
+        r0.<sun.awt.windows.WComponentPeer: java.awt.Color foreground> = r1;
+
+        $i0 = virtualinvoke r1.<java.awt.Color: int getRGB()>();
+
+        specialinvoke r0.<sun.awt.windows.WComponentPeer: void _setForeground(int)>($i0);
+
+        return;
+    }
+
+    public synchronized void setBackground(java.awt.Color)
+    {
+        sun.awt.windows.WComponentPeer r0;
+        java.awt.Color r1;
+        int $i0;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        r1 := @parameter0: java.awt.Color;
+
+        r0.<sun.awt.windows.WComponentPeer: java.awt.Color background> = r1;
+
+        $i0 = virtualinvoke r1.<java.awt.Color: int getRGB()>();
+
+        specialinvoke r0.<sun.awt.windows.WComponentPeer: void _setBackground(int)>($i0);
+
+        return;
+    }
+
+    public java.awt.Color getBackgroundNoSync()
+    {
+        sun.awt.windows.WComponentPeer r0;
+        java.awt.Color $r1;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        $r1 = r0.<sun.awt.windows.WComponentPeer: java.awt.Color background>;
+
+        return $r1;
+    }
+
+    private native void _setForeground(int);
+
+    private native void _setBackground(int);
+
+    public synchronized void setFont(java.awt.Font)
+    {
+        sun.awt.windows.WComponentPeer r0;
+        java.awt.Font r1;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        r1 := @parameter0: java.awt.Font;
+
+        r0.<sun.awt.windows.WComponentPeer: java.awt.Font font> = r1;
+
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void _setFont(java.awt.Font)>(r1);
+
+        return;
+    }
+
+    synchronized native void _setFont(java.awt.Font);
+
+    public void updateCursorImmediately()
+    {
+        sun.awt.GlobalCursorManager $r0;
+        sun.awt.windows.WComponentPeer r1;
+
+        r1 := @this: sun.awt.windows.WComponentPeer;
+
+        $r0 = staticinvoke <sun.awt.windows.WGlobalCursorManager: sun.awt.GlobalCursorManager getCursorManager()>();
+
+        virtualinvoke $r0.<sun.awt.GlobalCursorManager: void updateCursorImmediately()>();
+
+        return;
+    }
+
+    public boolean requestFocus(java.awt.Component, boolean, boolean, long, sun.awt.CausedFocusEvent$Cause)
+    {
+        sun.awt.windows.WWindowPeer r13;
+        boolean z0, z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10;
+        sun.util.logging.PlatformLogger$Level $r7, $r14;
+        java.awt.peer.ComponentPeer $r12;
+        java.awt.Component r2, $r3, $r6, $r10, $r17;
+        sun.awt.windows.WComponentPeer r0;
+        java.lang.StringBuilder $r18, $r20, $r21, $r23, $r25, $r26, $r27, $r29;
+        long l0;
+        int $i1;
+        java.lang.String $r22, $r30;
+        sun.util.logging.PlatformLogger $r8, $r15, $r19, $r24;
+        java.awt.Window $r11;
+        sun.awt.CausedFocusEvent$Cause r5;
+        java.lang.Object $r1, $r4, $r9, $r16, $r28;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        r2 := @parameter0: java.awt.Component;
+
+        z0 := @parameter1: boolean;
+
+        z1 := @parameter2: boolean;
+
+        l0 := @parameter3: long;
+
+        r5 := @parameter4: sun.awt.CausedFocusEvent$Cause;
+
+        $r1 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r3 = (java.awt.Component) $r1;
+
+        $z2 = staticinvoke <sun.awt.windows.WKeyboardFocusManagerPeer: boolean processSynchronousLightweightTransfer(java.awt.Component,java.awt.Component,boolean,boolean,long)>($r3, r2, z0, z1, l0);
+
+        if $z2 == 0 goto label01;
+
+        return 1;
+
+     label01:
+        $r4 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r6 = (java.awt.Component) $r4;
+
+        $i1 = staticinvoke <sun.awt.windows.WKeyboardFocusManagerPeer: int shouldNativelyFocusHeavyweight(java.awt.Component,java.awt.Component,boolean,boolean,long,sun.awt.CausedFocusEvent$Cause)>($r6, r2, z0, z1, l0, r5);
+
+        tableswitch($i1)
+        {
+            case 0: goto label02;
+            case 1: goto label10;
+            case 2: goto label03;
+            default: goto label11;
+        };
+
+     label02:
+        return 0;
+
+     label03:
+        $r8 = <sun.awt.windows.WComponentPeer: sun.util.logging.PlatformLogger focusLog>;
+
+        $r7 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINER>;
+
+        $z3 = virtualinvoke $r8.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r7);
+
+        if $z3 == 0 goto label04;
+
+        $r24 = <sun.awt.windows.WComponentPeer: sun.util.logging.PlatformLogger focusLog>;
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Proceeding with request to ");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" in ");
+
+        $r28 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r29 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r28);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r24.<sun.util.logging.PlatformLogger: void finer(java.lang.String)>($r30);
+
+     label04:
+        $r9 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r10 = (java.awt.Component) $r9;
+
+        $r11 = staticinvoke <sun.awt.SunToolkit: java.awt.Window getContainingWindow(java.awt.Component)>($r10);
+
+        if $r11 != null goto label05;
+
+        $z10 = specialinvoke r0.<sun.awt.windows.WComponentPeer: boolean rejectFocusRequestHelper(java.lang.String)>("WARNING: Parent window is null");
+
+        return $z10;
+
+     label05:
+        $r12 = virtualinvoke $r11.<java.awt.Window: java.awt.peer.ComponentPeer getPeer()>();
+
+        r13 = (sun.awt.windows.WWindowPeer) $r12;
+
+        if r13 != null goto label06;
+
+        $z9 = specialinvoke r0.<sun.awt.windows.WComponentPeer: boolean rejectFocusRequestHelper(java.lang.String)>("WARNING: Parent window\'s peer is null");
+
+        return $z9;
+
+     label06:
+        $z4 = virtualinvoke r13.<sun.awt.windows.WWindowPeer: boolean requestWindowFocus(sun.awt.CausedFocusEvent$Cause)>(r5);
+
+        $r15 = <sun.awt.windows.WComponentPeer: sun.util.logging.PlatformLogger focusLog>;
+
+        $r14 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINER>;
+
+        $z5 = virtualinvoke $r15.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r14);
+
+        if $z5 == 0 goto label07;
+
+        $r19 = <sun.awt.windows.WComponentPeer: sun.util.logging.PlatformLogger focusLog>;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Requested window focus: ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z4);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r19.<sun.util.logging.PlatformLogger: void finer(java.lang.String)>($r22);
+
+     label07:
+        if $z4 == 0 goto label08;
+
+        $z7 = virtualinvoke $r11.<java.awt.Window: boolean isFocused()>();
+
+        if $z7 != 0 goto label09;
+
+     label08:
+        $z6 = specialinvoke r0.<sun.awt.windows.WComponentPeer: boolean rejectFocusRequestHelper(java.lang.String)>("Waiting for asynchronous processing of the request");
+
+        return $z6;
+
+     label09:
+        $r16 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r17 = (java.awt.Component) $r16;
+
+        $z8 = staticinvoke <sun.awt.windows.WKeyboardFocusManagerPeer: boolean deliverFocus(java.awt.Component,java.awt.Component,boolean,boolean,long,sun.awt.CausedFocusEvent$Cause)>(r2, $r17, z0, z1, l0, r5);
+
+        return $z8;
+
+     label10:
+        return 1;
+
+     label11:
+        return 0;
+    }
+
+    private boolean rejectFocusRequestHelper(java.lang.String)
+    {
+        sun.util.logging.PlatformLogger$Level $r0;
+        sun.util.logging.PlatformLogger $r1, $r6;
+        java.awt.Component $r4;
+        sun.awt.windows.WComponentPeer r2;
+        java.lang.Object $r3;
+        java.lang.String r5;
+        boolean $z0;
+
+        r2 := @this: sun.awt.windows.WComponentPeer;
+
+        r5 := @parameter0: java.lang.String;
+
+        $r1 = <sun.awt.windows.WComponentPeer: sun.util.logging.PlatformLogger focusLog>;
+
+        $r0 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINER>;
+
+        $z0 = virtualinvoke $r1.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r0);
+
+        if $z0 == 0 goto label1;
+
+        $r6 = <sun.awt.windows.WComponentPeer: sun.util.logging.PlatformLogger focusLog>;
+
+        virtualinvoke $r6.<sun.util.logging.PlatformLogger: void finer(java.lang.String)>(r5);
+
+     label1:
+        $r3 = r2.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r4 = (java.awt.Component) $r3;
+
+        staticinvoke <sun.awt.windows.WKeyboardFocusManagerPeer: void removeLastFocusRequest(java.awt.Component)>($r4);
+
+        return 0;
+    }
+
+    public java.awt.Image createImage(java.awt.image.ImageProducer)
+    {
+        sun.awt.windows.WComponentPeer r2;
+        sun.awt.image.ToolkitImage $r0;
+        java.awt.image.ImageProducer r1;
+
+        r2 := @this: sun.awt.windows.WComponentPeer;
+
+        r1 := @parameter0: java.awt.image.ImageProducer;
+
+        $r0 = new sun.awt.image.ToolkitImage;
+
+        specialinvoke $r0.<sun.awt.image.ToolkitImage: void <init>(java.awt.image.ImageProducer)>(r1);
+
+        return $r0;
+    }
+
+    public java.awt.Image createImage(int, int)
+    {
+        java.awt.GraphicsConfiguration $r1;
+        java.awt.Image $r5;
+        java.awt.Component $r4;
+        sun.awt.windows.WComponentPeer r0;
+        int i0, i1;
+        java.lang.Object $r3;
+        sun.awt.Win32GraphicsConfig r2;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r1 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+        r2 = (sun.awt.Win32GraphicsConfig) $r1;
+
+        $r3 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r4 = (java.awt.Component) $r3;
+
+        $r5 = virtualinvoke r2.<sun.awt.Win32GraphicsConfig: java.awt.Image createAcceleratedImage(java.awt.Component,int,int)>($r4, i0, i1);
+
+        return $r5;
+    }
+
+    public java.awt.image.VolatileImage createVolatileImage(int, int)
+    {
+        sun.awt.image.SunVolatileImage $r0;
+        sun.awt.windows.WComponentPeer r1;
+        int i0, i1;
+        java.lang.Object $r2;
+        java.awt.Component $r3;
+
+        r1 := @this: sun.awt.windows.WComponentPeer;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r0 = new sun.awt.image.SunVolatileImage;
+
+        $r2 = r1.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r3 = (java.awt.Component) $r2;
+
+        specialinvoke $r0.<sun.awt.image.SunVolatileImage: void <init>(java.awt.Component,int,int)>($r3, i0, i1);
+
+        return $r0;
+    }
+
+    public boolean prepareImage(java.awt.Image, int, int, java.awt.image.ImageObserver)
+    {
+        java.awt.Image r1;
+        int i0, i1;
+        sun.awt.windows.WComponentPeer r3;
+        java.awt.image.ImageObserver r2;
+        java.awt.Toolkit $r0;
+        boolean $z0;
+
+        r3 := @this: sun.awt.windows.WComponentPeer;
+
+        r1 := @parameter0: java.awt.Image;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r2 := @parameter3: java.awt.image.ImageObserver;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $z0 = virtualinvoke $r0.<java.awt.Toolkit: boolean prepareImage(java.awt.Image,int,int,java.awt.image.ImageObserver)>(r1, i0, i1, r2);
+
+        return $z0;
+    }
+
+    public int checkImage(java.awt.Image, int, int, java.awt.image.ImageObserver)
+    {
+        java.awt.Image r1;
+        int i0, i1, $i2;
+        sun.awt.windows.WComponentPeer r3;
+        java.awt.image.ImageObserver r2;
+        java.awt.Toolkit $r0;
+
+        r3 := @this: sun.awt.windows.WComponentPeer;
+
+        r1 := @parameter0: java.awt.Image;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        r2 := @parameter3: java.awt.image.ImageObserver;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $i2 = virtualinvoke $r0.<java.awt.Toolkit: int checkImage(java.awt.Image,int,int,java.awt.image.ImageObserver)>(r1, i0, i1, r2);
+
+        return $i2;
+    }
+
+    public java.lang.String toString()
+    {
+        sun.awt.windows.WComponentPeer r1;
+        java.lang.StringBuilder $r0, $r4, $r5, $r7, $r8;
+        java.lang.Class $r2;
+        java.lang.Object $r6;
+        java.lang.String $r3, $r9;
+
+        r1 := @this: sun.awt.windows.WComponentPeer;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        $r4 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r6 = r1.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r9;
+    }
+
+    void <init>(java.awt.Component)
+    {
+        sun.awt.RepaintArea $r4;
+        sun.awt.windows.WComponentPeer r0, $r3;
+        int $i1, $i3;
+        java.awt.Component r1;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        r1 := @parameter0: java.awt.Component;
+
+        specialinvoke r0.<sun.awt.windows.WObjectPeer: void <init>()>();
+
+        r0.<sun.awt.windows.WComponentPeer: boolean isLayouting> = 0;
+
+        r0.<sun.awt.windows.WComponentPeer: boolean paintPending> = 0;
+
+        $i1 = (int) -1;
+
+        r0.<sun.awt.windows.WComponentPeer: int oldWidth> = $i1;
+
+        $i3 = (int) -1;
+
+        r0.<sun.awt.windows.WComponentPeer: int oldHeight> = $i3;
+
+        r0.<sun.awt.windows.WComponentPeer: int numBackBuffers> = 0;
+
+        r0.<sun.awt.windows.WComponentPeer: java.awt.image.VolatileImage backBuffer> = null;
+
+        r0.<sun.awt.windows.WComponentPeer: java.awt.BufferCapabilities backBufferCaps> = null;
+
+        r0.<sun.awt.windows.WComponentPeer: int serialNum> = 0;
+
+        r0.<sun.awt.windows.WComponentPeer: boolean isAccelCapable> = 1;
+
+        r0.<sun.awt.windows.WComponentPeer: java.lang.Object target> = r1;
+
+        $r4 = new sun.awt.RepaintArea;
+
+        specialinvoke $r4.<sun.awt.RepaintArea: void <init>()>();
+
+        r0.<sun.awt.windows.WComponentPeer: sun.awt.RepaintArea paintArea> = $r4;
+
+        $r3 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: sun.awt.windows.WComponentPeer getNativeParent()>();
+
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void create(sun.awt.windows.WComponentPeer)>($r3);
+
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void checkCreation()>();
+
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void createScreenSurface(boolean)>(0);
+
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void initialize()>();
+
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void start()>();
+
+        return;
+    }
+
+    abstract void create(sun.awt.windows.WComponentPeer);
+
+    sun.awt.windows.WComponentPeer getNativeParent()
+    {
+        sun.awt.windows.WComponentPeer r0, $r5;
+        java.lang.Object $r1, $r4;
+        java.awt.Container $r3;
+        java.awt.Component $r2;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        $r1 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r2 = (java.awt.Component) $r1;
+
+        $r3 = staticinvoke <sun.awt.SunToolkit: java.awt.Container getNativeContainer(java.awt.Component)>($r2);
+
+        $r4 = staticinvoke <sun.awt.windows.WToolkit: java.lang.Object targetToPeer(java.lang.Object)>($r3);
+
+        $r5 = (sun.awt.windows.WComponentPeer) $r4;
+
+        return $r5;
+    }
+
+    protected void checkCreation()
+    {
+        java.lang.Error $r1, $r3;
+        long $l0, $l2;
+        byte $b1, $b3;
+        sun.awt.windows.WComponentPeer r0;
+        java.lang.InternalError $r2;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        $l0 = r0.<sun.awt.windows.WComponentPeer: long hwnd>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 == 0 goto label1;
+
+        $l2 = r0.<sun.awt.windows.WComponentPeer: long pData>;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 != 0 goto label3;
+
+     label1:
+        $r1 = r0.<sun.awt.windows.WComponentPeer: java.lang.Error createError>;
+
+        if $r1 == null goto label2;
+
+        $r3 = r0.<sun.awt.windows.WComponentPeer: java.lang.Error createError>;
+
+        throw $r3;
+
+     label2:
+        $r2 = new java.lang.InternalError;
+
+        specialinvoke $r2.<java.lang.InternalError: void <init>(java.lang.String)>("couldn\'t create component peer");
+
+        throw $r2;
+
+     label3:
+        return;
+    }
+
+    synchronized native void start();
+
+    void initialize()
+    {
+        java.awt.Color $r5;
+        java.awt.Rectangle $r13;
+        int $i0, $i1, $i2, $i3;
+        boolean $z0, $z1;
+        java.awt.Font $r8;
+        java.awt.Component $r2, $r4, $r7, $r10, $r12;
+        sun.awt.windows.WComponentPeer r0;
+        java.lang.Object $r1, $r3, $r6, $r9, $r11;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        $r1 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r2 = (java.awt.Component) $r1;
+
+        $z0 = virtualinvoke $r2.<java.awt.Component: boolean isVisible()>();
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void show()>();
+
+     label1:
+        $r3 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r4 = (java.awt.Component) $r3;
+
+        $r5 = virtualinvoke $r4.<java.awt.Component: java.awt.Color getForeground()>();
+
+        if $r5 == null goto label2;
+
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void setForeground(java.awt.Color)>($r5);
+
+     label2:
+        $r6 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r7 = (java.awt.Component) $r6;
+
+        $r8 = virtualinvoke $r7.<java.awt.Component: java.awt.Font getFont()>();
+
+        if $r8 == null goto label3;
+
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void setFont(java.awt.Font)>($r8);
+
+     label3:
+        $r9 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r10 = (java.awt.Component) $r9;
+
+        $z1 = virtualinvoke $r10.<java.awt.Component: boolean isEnabled()>();
+
+        if $z1 != 0 goto label4;
+
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void disable()>();
+
+     label4:
+        $r11 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r12 = (java.awt.Component) $r11;
+
+        $r13 = virtualinvoke $r12.<java.awt.Component: java.awt.Rectangle getBounds()>();
+
+        $i3 = $r13.<java.awt.Rectangle: int x>;
+
+        $i2 = $r13.<java.awt.Rectangle: int y>;
+
+        $i1 = $r13.<java.awt.Rectangle: int width>;
+
+        $i0 = $r13.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void setBounds(int,int,int,int,int)>($i3, $i2, $i1, $i0, 3);
+
+        return;
+    }
+
+    void handleRepaint(int, int, int, int)
+    {
+        sun.awt.windows.WComponentPeer r0;
+        int i0, i1, i2, i3;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        return;
+    }
+
+    void handleExpose(int, int, int, int)
+    {
+        sun.awt.windows.WComponentPeer r0;
+        int i0, i1, i2, i3;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        specialinvoke r0.<sun.awt.windows.WComponentPeer: void postPaintIfNecessary(int,int,int,int)>(i0, i1, i2, i3);
+
+        return;
+    }
+
+    public void handlePaint(int, int, int, int)
+    {
+        sun.awt.windows.WComponentPeer r0;
+        int i0, i1, i2, i3;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        specialinvoke r0.<sun.awt.windows.WComponentPeer: void postPaintIfNecessary(int,int,int,int)>(i0, i1, i2, i3);
+
+        return;
+    }
+
+    private void postPaintIfNecessary(int, int, int, int)
+    {
+        sun.awt.PaintEventDispatcher $r4;
+        java.awt.Component $r3, $r6;
+        sun.awt.AWTAccessor$ComponentAccessor $r0;
+        sun.awt.windows.WComponentPeer r1;
+        int i0, i1, i2, i3;
+        java.awt.event.PaintEvent $r7;
+        java.lang.Object $r2, $r5;
+        boolean $z0;
+
+        r1 := @this: sun.awt.windows.WComponentPeer;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        $r0 = staticinvoke <sun.awt.AWTAccessor: sun.awt.AWTAccessor$ComponentAccessor getComponentAccessor()>();
+
+        $r2 = r1.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r3 = (java.awt.Component) $r2;
+
+        $z0 = interfaceinvoke $r0.<sun.awt.AWTAccessor$ComponentAccessor: boolean getIgnoreRepaint(java.awt.Component)>($r3);
+
+        if $z0 != 0 goto label1;
+
+        $r4 = staticinvoke <sun.awt.PaintEventDispatcher: sun.awt.PaintEventDispatcher getPaintEventDispatcher()>();
+
+        $r5 = r1.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r6 = (java.awt.Component) $r5;
+
+        $r7 = virtualinvoke $r4.<sun.awt.PaintEventDispatcher: java.awt.event.PaintEvent createPaintEvent(java.awt.Component,int,int,int,int)>($r6, i0, i1, i2, i3);
+
+        if $r7 == null goto label1;
+
+        virtualinvoke r1.<sun.awt.windows.WComponentPeer: void postEvent(java.awt.AWTEvent)>($r7);
+
+     label1:
+        return;
+    }
+
+    void postEvent(java.awt.AWTEvent)
+    {
+        java.awt.AWTEvent r1;
+        sun.awt.AppContext $r3;
+        sun.awt.windows.WComponentPeer r0;
+        java.lang.Object $r2;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        r1 := @parameter0: java.awt.AWTEvent;
+
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void preprocessPostEvent(java.awt.AWTEvent)>(r1);
+
+        $r2 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r3 = staticinvoke <sun.awt.windows.WToolkit: sun.awt.AppContext targetToAppContext(java.lang.Object)>($r2);
+
+        staticinvoke <sun.awt.windows.WToolkit: void postEvent(sun.awt.AppContext,java.awt.AWTEvent)>($r3, r1);
+
+        return;
+    }
+
+    void preprocessPostEvent(java.awt.AWTEvent)
+    {
+        sun.awt.windows.WComponentPeer r0;
+        java.awt.AWTEvent r1;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        r1 := @parameter0: java.awt.AWTEvent;
+
+        return;
+    }
+
+    public void beginLayout()
+    {
+        sun.awt.windows.WComponentPeer r0;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        r0.<sun.awt.windows.WComponentPeer: boolean isLayouting> = 1;
+
+        return;
+    }
+
+    public void endLayout()
+    {
+        java.awt.Rectangle $r6;
+        java.awt.Component $r3, $r7;
+        sun.awt.RepaintArea $r1;
+        sun.awt.windows.WComponentPeer r0;
+        java.awt.event.PaintEvent $r4;
+        java.lang.Object $r2, $r5;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        $r1 = r0.<sun.awt.windows.WComponentPeer: sun.awt.RepaintArea paintArea>;
+
+        $z0 = virtualinvoke $r1.<sun.awt.RepaintArea: boolean isEmpty()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = r0.<sun.awt.windows.WComponentPeer: boolean paintPending>;
+
+        if $z1 != 0 goto label1;
+
+        $r2 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r3 = (java.awt.Component) $r2;
+
+        $z2 = virtualinvoke $r3.<java.awt.Component: boolean getIgnoreRepaint()>();
+
+        if $z2 != 0 goto label1;
+
+        $r4 = new java.awt.event.PaintEvent;
+
+        $r5 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r7 = (java.awt.Component) $r5;
+
+        $r6 = new java.awt.Rectangle;
+
+        specialinvoke $r6.<java.awt.Rectangle: void <init>()>();
+
+        specialinvoke $r4.<java.awt.event.PaintEvent: void <init>(java.awt.Component,int,java.awt.Rectangle)>($r7, 800, $r6);
+
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void postEvent(java.awt.AWTEvent)>($r4);
+
+     label1:
+        r0.<sun.awt.windows.WComponentPeer: boolean isLayouting> = 0;
+
+        return;
+    }
+
+    public native void beginValidate();
+
+    public native void endValidate();
+
+    public java.awt.Dimension preferredSize()
+    {
+        sun.awt.windows.WComponentPeer r0;
+        java.awt.Dimension $r1;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        $r1 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: java.awt.Dimension getPreferredSize()>();
+
+        return $r1;
+    }
+
+    public synchronized void addDropTarget(java.awt.dnd.DropTarget)
+    {
+        java.awt.dnd.DropTarget r1;
+        sun.awt.windows.WComponentPeer r0;
+        int $i0, $i1, $i2;
+        long $l3;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        r1 := @parameter0: java.awt.dnd.DropTarget;
+
+        $i0 = r0.<sun.awt.windows.WComponentPeer: int nDropTargets>;
+
+        if $i0 != 0 goto label1;
+
+        $l3 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: long addNativeDropTarget()>();
+
+        r0.<sun.awt.windows.WComponentPeer: long nativeDropTargetContext> = $l3;
+
+     label1:
+        $i1 = r0.<sun.awt.windows.WComponentPeer: int nDropTargets>;
+
+        $i2 = $i1 + 1;
+
+        r0.<sun.awt.windows.WComponentPeer: int nDropTargets> = $i2;
+
+        return;
+    }
+
+    public synchronized void removeDropTarget(java.awt.dnd.DropTarget)
+    {
+        java.awt.dnd.DropTarget r1;
+        sun.awt.windows.WComponentPeer r0;
+        int $i0, $i1, $i2;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        r1 := @parameter0: java.awt.dnd.DropTarget;
+
+        $i0 = r0.<sun.awt.windows.WComponentPeer: int nDropTargets>;
+
+        $i1 = $i0 - 1;
+
+        r0.<sun.awt.windows.WComponentPeer: int nDropTargets> = $i1;
+
+        $i2 = r0.<sun.awt.windows.WComponentPeer: int nDropTargets>;
+
+        if $i2 != 0 goto label1;
+
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void removeNativeDropTarget()>();
+
+        r0.<sun.awt.windows.WComponentPeer: long nativeDropTargetContext> = 0L;
+
+     label1:
+        return;
+    }
+
+    native long addNativeDropTarget();
+
+    native void removeNativeDropTarget();
+
+    native boolean nativeHandlesWheelScrolling();
+
+    public boolean handlesWheelScrolling()
+    {
+        sun.awt.windows.WComponentPeer r0;
+        boolean $z0;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        $z0 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: boolean nativeHandlesWheelScrolling()>();
+
+        return $z0;
+    }
+
+    public boolean isPaintPending()
+    {
+        sun.awt.windows.WComponentPeer r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        $z0 = r0.<sun.awt.windows.WComponentPeer: boolean paintPending>;
+
+        if $z0 == 0 goto label1;
+
+        $z1 = r0.<sun.awt.windows.WComponentPeer: boolean isLayouting>;
+
+        if $z1 == 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+    }
+
+    public void createBuffers(int, java.awt.BufferCapabilities) throws java.awt.AWTException
+    {
+        java.awt.GraphicsConfiguration $r1;
+        sun.java2d.InvalidPipeException $r6;
+        java.awt.Component $r5;
+        java.awt.AWTException $r7;
+        sun.awt.windows.WComponentPeer r0;
+        int i0, $i1;
+        java.lang.Object $r3;
+        java.awt.BufferCapabilities r4;
+        java.lang.String $r8;
+        sun.awt.Win32GraphicsConfig r2;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        i0 := @parameter0: int;
+
+        r4 := @parameter1: java.awt.BufferCapabilities;
+
+        $r1 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+        r2 = (sun.awt.Win32GraphicsConfig) $r1;
+
+        $r3 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r5 = (java.awt.Component) $r3;
+
+        virtualinvoke r2.<sun.awt.Win32GraphicsConfig: void assertOperationSupported(java.awt.Component,int,java.awt.BufferCapabilities)>($r5, i0, r4);
+
+     label1:
+        $i1 = i0 - 1;
+
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void replaceSurfaceData(int,java.awt.BufferCapabilities)>($i1, r4);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = new java.awt.AWTException;
+
+        $r8 = virtualinvoke $r6.<sun.java2d.InvalidPipeException: java.lang.String getMessage()>();
+
+        specialinvoke $r7.<java.awt.AWTException: void <init>(java.lang.String)>($r8);
+
+        throw $r7;
+
+     label4:
+        return;
+
+        catch sun.java2d.InvalidPipeException from label1 to label2 with label3;
+    }
+
+    public void destroyBuffers()
+    {
+        sun.awt.windows.WComponentPeer r0;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void replaceSurfaceData(int,java.awt.BufferCapabilities)>(0, null);
+
+        return;
+    }
+
+    public void flip(int, int, int, int, java.awt.BufferCapabilities$FlipContents)
+    {
+        java.lang.IllegalStateException $r7;
+        java.awt.GraphicsConfiguration $r2;
+        java.awt.BufferCapabilities$FlipContents r5;
+        java.awt.Component $r6;
+        java.awt.image.VolatileImage r1;
+        sun.awt.windows.WComponentPeer r0;
+        int i0, i1, i2, i3;
+        java.lang.Object $r4;
+        sun.awt.Win32GraphicsConfig r3;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        r5 := @parameter4: java.awt.BufferCapabilities$FlipContents;
+
+        r1 = r0.<sun.awt.windows.WComponentPeer: java.awt.image.VolatileImage backBuffer>;
+
+        if r1 != null goto label1;
+
+        $r7 = new java.lang.IllegalStateException;
+
+        specialinvoke $r7.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Buffers have not been created");
+
+        throw $r7;
+
+     label1:
+        $r2 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+        r3 = (sun.awt.Win32GraphicsConfig) $r2;
+
+        $r4 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r6 = (java.awt.Component) $r4;
+
+        virtualinvoke r3.<sun.awt.Win32GraphicsConfig: void flip(sun.awt.windows.WComponentPeer,java.awt.Component,java.awt.image.VolatileImage,int,int,int,int,java.awt.BufferCapabilities$FlipContents)>(r0, $r6, r1, i0, i1, i2, i3, r5);
+
+        return;
+    }
+
+    public synchronized java.awt.Image getBackBuffer()
+    {
+        sun.awt.windows.WComponentPeer r0;
+        java.awt.image.VolatileImage r1;
+        java.lang.IllegalStateException $r2;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        r1 = r0.<sun.awt.windows.WComponentPeer: java.awt.image.VolatileImage backBuffer>;
+
+        if r1 != null goto label1;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Buffers have not been created");
+
+        throw $r2;
+
+     label1:
+        return r1;
+    }
+
+    public java.awt.BufferCapabilities getBackBufferCaps()
+    {
+        sun.awt.windows.WComponentPeer r0;
+        java.awt.BufferCapabilities $r1;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        $r1 = r0.<sun.awt.windows.WComponentPeer: java.awt.BufferCapabilities backBufferCaps>;
+
+        return $r1;
+    }
+
+    public int getBackBuffersNum()
+    {
+        sun.awt.windows.WComponentPeer r0;
+        int $i0;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        $i0 = r0.<sun.awt.windows.WComponentPeer: int numBackBuffers>;
+
+        return $i0;
+    }
+
+    public boolean shouldClearRectBeforePaint()
+    {
+        sun.awt.windows.WComponentPeer r0;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        return 1;
+    }
+
+    native void pSetParent(java.awt.peer.ComponentPeer);
+
+    public void reparent(java.awt.peer.ContainerPeer)
+    {
+        sun.awt.windows.WComponentPeer r0;
+        java.awt.peer.ContainerPeer r1;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        r1 := @parameter0: java.awt.peer.ContainerPeer;
+
+        virtualinvoke r0.<sun.awt.windows.WComponentPeer: void pSetParent(java.awt.peer.ComponentPeer)>(r1);
+
+        return;
+    }
+
+    public boolean isReparentSupported()
+    {
+        sun.awt.windows.WComponentPeer r0;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        return 1;
+    }
+
+    public void setBoundsOperation(int)
+    {
+        sun.awt.windows.WComponentPeer r0;
+        int i0;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        i0 := @parameter0: int;
+
+        return;
+    }
+
+    public boolean isAccelCapable()
+    {
+        java.awt.Component $r2, $r4;
+        sun.awt.windows.WComponentPeer r0;
+        java.lang.Object $r1, $r3;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        $z0 = r0.<sun.awt.windows.WComponentPeer: boolean isAccelCapable>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r2 = (java.awt.Component) $r1;
+
+        $z1 = staticinvoke <sun.awt.windows.WComponentPeer: boolean isContainingTopLevelAccelCapable(java.awt.Component)>($r2);
+
+        if $z1 != 0 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $r3 = r0.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r4 = (java.awt.Component) $r3;
+
+        $z2 = staticinvoke <sun.awt.SunToolkit: boolean isContainingTopLevelTranslucent(java.awt.Component)>($r4);
+
+        if $z2 == 0 goto label3;
+
+        $z3 = staticinvoke <sun.awt.Win32GraphicsEnvironment: boolean isVistaOS()>();
+
+        if $z3 == 0 goto label4;
+
+     label3:
+        $z4 = 1;
+
+        goto label5;
+
+     label4:
+        $z4 = 0;
+
+     label5:
+        return $z4;
+    }
+
+    public void disableAcceleration()
+    {
+        sun.awt.windows.WComponentPeer r0;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        r0.<sun.awt.windows.WComponentPeer: boolean isAccelCapable> = 0;
+
+        return;
+    }
+
+    native void setRectangularShape(int, int, int, int, sun.java2d.pipe.Region);
+
+    private static final boolean isContainingTopLevelAccelCapable(java.awt.Component)
+    {
+        java.awt.peer.ComponentPeer $r0;
+        sun.awt.windows.WEmbeddedFramePeer $r1;
+        java.awt.Component r2;
+        boolean $z0, $z1;
+
+        r2 := @parameter0: java.awt.Component;
+
+     label1:
+        if r2 == null goto label2;
+
+        $z1 = r2 instanceof sun.awt.windows.WEmbeddedFrame;
+
+        if $z1 != 0 goto label2;
+
+        r2 = virtualinvoke r2.<java.awt.Component: java.awt.Container getParent()>();
+
+        goto label1;
+
+     label2:
+        if r2 != null goto label3;
+
+        return 1;
+
+     label3:
+        $r0 = virtualinvoke r2.<java.awt.Component: java.awt.peer.ComponentPeer getPeer()>();
+
+        $r1 = (sun.awt.windows.WEmbeddedFramePeer) $r0;
+
+        $z0 = virtualinvoke $r1.<sun.awt.windows.WEmbeddedFramePeer: boolean isAccelCapable()>();
+
+        return $z0;
+    }
+
+    public void applyShape(sun.java2d.pipe.Region)
+    {
+        int $i0, $i1, $i2, $i3;
+        java.lang.String $r13;
+        boolean $z0, $z1;
+        sun.util.logging.PlatformLogger$Level $r0;
+        sun.util.logging.PlatformLogger $r1, $r5;
+        sun.java2d.pipe.Region r2, $r14;
+        sun.awt.windows.WComponentPeer r3;
+        java.lang.StringBuilder $r4, $r6, $r7, $r8, $r10, $r11, $r12;
+        java.lang.Object $r9;
+
+        r3 := @this: sun.awt.windows.WComponentPeer;
+
+        r2 := @parameter0: sun.java2d.pipe.Region;
+
+        $r1 = <sun.awt.windows.WComponentPeer: sun.util.logging.PlatformLogger shapeLog>;
+
+        $r0 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINER>;
+
+        $z0 = virtualinvoke $r1.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r0);
+
+        if $z0 == 0 goto label1;
+
+        $r5 = <sun.awt.windows.WComponentPeer: sun.util.logging.PlatformLogger shapeLog>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("*** INFO: Setting shape: PEER: ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r3);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("; TARGET: ");
+
+        $r9 = r3.<sun.awt.windows.WComponentPeer: java.lang.Object target>;
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("; SHAPE: ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<sun.util.logging.PlatformLogger: void finer(java.lang.String)>($r13);
+
+     label1:
+        if r2 == null goto label4;
+
+        $i0 = virtualinvoke r2.<sun.java2d.pipe.Region: int getLoX()>();
+
+        $i1 = virtualinvoke r2.<sun.java2d.pipe.Region: int getLoY()>();
+
+        $i2 = virtualinvoke r2.<sun.java2d.pipe.Region: int getHiX()>();
+
+        $i3 = virtualinvoke r2.<sun.java2d.pipe.Region: int getHiY()>();
+
+        $z1 = virtualinvoke r2.<sun.java2d.pipe.Region: boolean isRectangular()>();
+
+        if $z1 == 0 goto label2;
+
+        $r14 = null;
+
+        goto label3;
+
+     label2:
+        $r14 = r2;
+
+     label3:
+        virtualinvoke r3.<sun.awt.windows.WComponentPeer: void setRectangularShape(int,int,int,int,sun.java2d.pipe.Region)>($i0, $i1, $i2, $i3, $r14);
+
+        goto label5;
+
+     label4:
+        virtualinvoke r3.<sun.awt.windows.WComponentPeer: void setRectangularShape(int,int,int,int,sun.java2d.pipe.Region)>(0, 0, 0, 0, null);
+
+     label5:
+        return;
+    }
+
+    public void setZOrder(java.awt.peer.ComponentPeer)
+    {
+        java.awt.peer.ComponentPeer r0;
+        sun.awt.windows.WComponentPeer r1, $r2;
+        long $l0;
+
+        r1 := @this: sun.awt.windows.WComponentPeer;
+
+        r0 := @parameter0: java.awt.peer.ComponentPeer;
+
+        if r0 == null goto label1;
+
+        $r2 = (sun.awt.windows.WComponentPeer) r0;
+
+        $l0 = virtualinvoke $r2.<sun.awt.windows.WComponentPeer: long getHWnd()>();
+
+        goto label2;
+
+     label1:
+        $l0 = 0L;
+
+     label2:
+        specialinvoke r1.<sun.awt.windows.WComponentPeer: void setZOrder(long)>($l0);
+
+        return;
+    }
+
+    private native void setZOrder(long);
+
+    public boolean isLightweightFramePeer()
+    {
+        sun.awt.windows.WComponentPeer r0;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        return 0;
+    }
+
+    public volatile java.lang.Object getTarget()
+    {
+        sun.awt.windows.WComponentPeer r0;
+        java.lang.Object $r1;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        $r1 = specialinvoke r0.<sun.awt.windows.WObjectPeer: java.lang.Object getTarget()>();
+
+        return $r1;
+    }
+
+    public volatile long getData()
+    {
+        sun.awt.windows.WComponentPeer r0;
+        long $l0;
+
+        r0 := @this: sun.awt.windows.WComponentPeer;
+
+        $l0 = specialinvoke r0.<sun.awt.windows.WObjectPeer: long getData()>();
+
+        return $l0;
+    }
+
+    static void <clinit>()
+    {
+        sun.util.logging.PlatformLogger $r0, $r1, $r2;
+        java.awt.Font $r3;
+
+        <sun.awt.windows.WComponentPeer: double BANDING_DIVISOR> = 4.0;
+
+        $r0 = staticinvoke <sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger getLogger(java.lang.String)>("sun.awt.windows.WComponentPeer");
+
+        <sun.awt.windows.WComponentPeer: sun.util.logging.PlatformLogger log> = $r0;
+
+        $r1 = staticinvoke <sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger getLogger(java.lang.String)>("sun.awt.windows.shape.WComponentPeer");
+
+        <sun.awt.windows.WComponentPeer: sun.util.logging.PlatformLogger shapeLog> = $r1;
+
+        $r2 = staticinvoke <sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger getLogger(java.lang.String)>("sun.awt.windows.focus.WComponentPeer");
+
+        <sun.awt.windows.WComponentPeer: sun.util.logging.PlatformLogger focusLog> = $r2;
+
+        $r3 = new java.awt.Font;
+
+        specialinvoke $r3.<java.awt.Font: void <init>(java.lang.String,int,int)>("Dialog", 0, 12);
+
+        <sun.awt.windows.WComponentPeer: java.awt.Font defaultFont> = $r3;
+
+        return;
+    }
+}

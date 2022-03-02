@@ -1,0 +1,2237 @@
+public class java.lang.invoke.MethodHandles extends java.lang.Object
+{
+    private static final java.lang.invoke.MemberName$Factory IMPL_NAMES;
+    private static final java.security.Permission ACCESS_PERMISSION;
+    private static final java.lang.invoke.MethodHandle[] IDENTITY_MHS;
+    private static final java.lang.invoke.MethodHandle[] ZERO_MHS;
+    static final boolean $assertionsDisabled;
+
+    private void <init>()
+    {
+        java.lang.invoke.MethodHandles r0;
+
+        r0 := @this: java.lang.invoke.MethodHandles;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static java.lang.invoke.MethodHandles$Lookup lookup()
+    {
+        java.lang.invoke.MethodHandles$Lookup $r0;
+        java.lang.Class $r1;
+
+        $r0 = new java.lang.invoke.MethodHandles$Lookup;
+
+        $r1 = staticinvoke <sun.reflect.Reflection: java.lang.Class getCallerClass()>();
+
+        specialinvoke $r0.<java.lang.invoke.MethodHandles$Lookup: void <init>(java.lang.Class)>($r1);
+
+        return $r0;
+    }
+
+    public static java.lang.invoke.MethodHandles$Lookup publicLookup()
+    {
+        java.lang.invoke.MethodHandles$Lookup $r0;
+
+        $r0 = <java.lang.invoke.MethodHandles$Lookup: java.lang.invoke.MethodHandles$Lookup PUBLIC_LOOKUP>;
+
+        return $r0;
+    }
+
+    public static java.lang.reflect.Member reflectAs(java.lang.Class, java.lang.invoke.MethodHandle)
+    {
+        java.lang.invoke.MethodHandle r1;
+        java.lang.invoke.MethodHandles$Lookup $r6;
+        java.security.Permission $r5;
+        java.lang.reflect.Member $r4;
+        java.lang.invoke.MethodHandleInfo $r2;
+        java.lang.Class r3;
+        java.lang.SecurityManager $r0;
+
+        r3 := @parameter0: java.lang.Class;
+
+        r1 := @parameter1: java.lang.invoke.MethodHandle;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r5 = <java.lang.invoke.MethodHandles: java.security.Permission ACCESS_PERMISSION>;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r5);
+
+     label1:
+        $r6 = <java.lang.invoke.MethodHandles$Lookup: java.lang.invoke.MethodHandles$Lookup IMPL_LOOKUP>;
+
+        $r2 = virtualinvoke $r6.<java.lang.invoke.MethodHandles$Lookup: java.lang.invoke.MethodHandleInfo revealDirect(java.lang.invoke.MethodHandle)>(r1);
+
+        $r4 = interfaceinvoke $r2.<java.lang.invoke.MethodHandleInfo: java.lang.reflect.Member reflectAs(java.lang.Class,java.lang.invoke.MethodHandles$Lookup)>(r3, $r6);
+
+        return $r4;
+    }
+
+    public static java.lang.invoke.MethodHandle arrayElementGetter(java.lang.Class) throws java.lang.IllegalArgumentException
+    {
+        java.lang.Class r0;
+        java.lang.invoke.MethodHandle $r1;
+
+        r0 := @parameter0: java.lang.Class;
+
+        $r1 = staticinvoke <java.lang.invoke.MethodHandleImpl: java.lang.invoke.MethodHandle makeArrayElementAccessor(java.lang.Class,boolean)>(r0, 0);
+
+        return $r1;
+    }
+
+    public static java.lang.invoke.MethodHandle arrayElementSetter(java.lang.Class) throws java.lang.IllegalArgumentException
+    {
+        java.lang.Class r0;
+        java.lang.invoke.MethodHandle $r1;
+
+        r0 := @parameter0: java.lang.Class;
+
+        $r1 = staticinvoke <java.lang.invoke.MethodHandleImpl: java.lang.invoke.MethodHandle makeArrayElementAccessor(java.lang.Class,boolean)>(r0, 1);
+
+        return $r1;
+    }
+
+    public static java.lang.invoke.MethodHandle spreadInvoker(java.lang.invoke.MethodType, int)
+    {
+        java.lang.invoke.MethodHandle $r4;
+        java.lang.RuntimeException $r1;
+        java.lang.Integer $r0;
+        java.lang.invoke.MethodType $r2, r5;
+        java.lang.invoke.Invokers $r3;
+        int i0, $i1, $i2, $i3;
+
+        r5 := @parameter0: java.lang.invoke.MethodType;
+
+        i0 := @parameter1: int;
+
+        if i0 < 0 goto label1;
+
+        $i1 = virtualinvoke r5.<java.lang.invoke.MethodType: int parameterCount()>();
+
+        if i0 <= $i1 goto label2;
+
+     label1:
+        $r0 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        $r1 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.RuntimeException newIllegalArgumentException(java.lang.String,java.lang.Object)>("bad argument count", $r0);
+
+        throw $r1;
+
+     label2:
+        $i2 = virtualinvoke r5.<java.lang.invoke.MethodType: int parameterCount()>();
+
+        $i3 = $i2 - i0;
+
+        $r2 = virtualinvoke r5.<java.lang.invoke.MethodType: java.lang.invoke.MethodType asSpreaderType(java.lang.Class,int)>(class "[Ljava/lang/Object;", $i3);
+
+        $r3 = virtualinvoke $r2.<java.lang.invoke.MethodType: java.lang.invoke.Invokers invokers()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.invoke.Invokers: java.lang.invoke.MethodHandle spreadInvoker(int)>(i0);
+
+        return $r4;
+    }
+
+    public static java.lang.invoke.MethodHandle exactInvoker(java.lang.invoke.MethodType)
+    {
+        java.lang.invoke.MethodHandle $r2;
+        java.lang.invoke.MethodType r0;
+        java.lang.invoke.Invokers $r1;
+
+        r0 := @parameter0: java.lang.invoke.MethodType;
+
+        $r1 = virtualinvoke r0.<java.lang.invoke.MethodType: java.lang.invoke.Invokers invokers()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.invoke.Invokers: java.lang.invoke.MethodHandle exactInvoker()>();
+
+        return $r2;
+    }
+
+    public static java.lang.invoke.MethodHandle invoker(java.lang.invoke.MethodType)
+    {
+        java.lang.invoke.MethodHandle $r2;
+        java.lang.invoke.MethodType r0;
+        java.lang.invoke.Invokers $r1;
+
+        r0 := @parameter0: java.lang.invoke.MethodType;
+
+        $r1 = virtualinvoke r0.<java.lang.invoke.MethodType: java.lang.invoke.Invokers invokers()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.invoke.Invokers: java.lang.invoke.MethodHandle genericInvoker()>();
+
+        return $r2;
+    }
+
+    static java.lang.invoke.MethodHandle basicInvoker(java.lang.invoke.MethodType)
+    {
+        java.lang.invoke.MethodHandle $r2;
+        java.lang.invoke.MethodType r0;
+        java.lang.invoke.Invokers $r1;
+
+        r0 := @parameter0: java.lang.invoke.MethodType;
+
+        $r1 = virtualinvoke r0.<java.lang.invoke.MethodType: java.lang.invoke.Invokers invokers()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.invoke.Invokers: java.lang.invoke.MethodHandle basicInvoker()>();
+
+        return $r2;
+    }
+
+    public static java.lang.invoke.MethodHandle explicitCastArguments(java.lang.invoke.MethodHandle, java.lang.invoke.MethodType)
+    {
+        java.lang.invoke.MethodHandle r0, $r3, $r4, $r5;
+        java.lang.invoke.MethodType r1, $r2;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.invoke.MethodHandle;
+
+        r1 := @parameter1: java.lang.invoke.MethodType;
+
+        staticinvoke <java.lang.invoke.MethodHandles: void explicitCastArgumentsChecks(java.lang.invoke.MethodHandle,java.lang.invoke.MethodType)>(r0, r1);
+
+        $r2 = virtualinvoke r0.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        if $r2 != r1 goto label1;
+
+        return r0;
+
+     label1:
+        $z0 = virtualinvoke $r2.<java.lang.invoke.MethodType: boolean explicitCastEquivalentToAsType(java.lang.invoke.MethodType)>(r1);
+
+        if $z0 == 0 goto label2;
+
+        $r4 = virtualinvoke r0.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodHandle asFixedArity()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodHandle asType(java.lang.invoke.MethodType)>(r1);
+
+        return $r5;
+
+     label2:
+        $r3 = staticinvoke <java.lang.invoke.MethodHandleImpl: java.lang.invoke.MethodHandle makePairwiseConvert(java.lang.invoke.MethodHandle,java.lang.invoke.MethodType,boolean)>(r0, r1, 0);
+
+        return $r3;
+    }
+
+    private static void explicitCastArgumentsChecks(java.lang.invoke.MethodHandle, java.lang.invoke.MethodType)
+    {
+        java.lang.invoke.WrongMethodTypeException $r3;
+        java.lang.invoke.MethodHandle r0;
+        java.lang.invoke.MethodType $r1, r2;
+        int $i0, $i1;
+        java.lang.StringBuilder $r4, $r5, $r6, $r7, $r8;
+        java.lang.String $r9;
+
+        r0 := @parameter0: java.lang.invoke.MethodHandle;
+
+        r2 := @parameter1: java.lang.invoke.MethodType;
+
+        $r1 = virtualinvoke r0.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.invoke.MethodType: int parameterCount()>();
+
+        $i1 = virtualinvoke r2.<java.lang.invoke.MethodType: int parameterCount()>();
+
+        if $i0 == $i1 goto label1;
+
+        $r3 = new java.lang.invoke.WrongMethodTypeException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("cannot explicitly cast ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" to ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.invoke.WrongMethodTypeException: void <init>(java.lang.String)>($r9);
+
+        throw $r3;
+
+     label1:
+        return;
+    }
+
+    public static transient java.lang.invoke.MethodHandle permuteArguments(java.lang.invoke.MethodHandle, java.lang.invoke.MethodType, int[])
+    {
+        java.lang.invoke.LambdaForm $r6, $r9, r22;
+        java.lang.invoke.LambdaFormEditor $r5, $r12, $r17;
+        int[] $r15, r19, r20;
+        java.lang.invoke.BoundMethodHandle $r4, $r8;
+        boolean $z0, $z1, $z2, z3, $z4;
+        java.lang.invoke.LambdaForm$BasicType $r13;
+        java.lang.invoke.MethodHandle r1;
+        java.lang.AssertionError $r23, $r24, $r25;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, i21, i22, i23, $i24, i25, i26, $i28, $i30;
+        java.lang.Class[] $r14;
+        java.lang.invoke.MethodType $r2, r3, $r7, r21;
+        java.lang.Object $r0;
+        java.lang.Class $r11;
+
+        r1 := @parameter0: java.lang.invoke.MethodHandle;
+
+        r3 := @parameter1: java.lang.invoke.MethodType;
+
+        r19 := @parameter2: int[];
+
+        $r0 = virtualinvoke r19.<java.lang.Object: java.lang.Object clone()>();
+
+        r20 = (int[]) $r0;
+
+        $r2 = virtualinvoke r1.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        r21 = $r2;
+
+        staticinvoke <java.lang.invoke.MethodHandles: boolean permuteArgumentChecks(int[],java.lang.invoke.MethodType,java.lang.invoke.MethodType)>(r20, r3, $r2);
+
+        $r4 = virtualinvoke r1.<java.lang.invoke.MethodHandle: java.lang.invoke.BoundMethodHandle rebind()>();
+
+        r22 = $r4.<java.lang.invoke.BoundMethodHandle: java.lang.invoke.LambdaForm form>;
+
+        $i0 = virtualinvoke r3.<java.lang.invoke.MethodType: int parameterCount()>();
+
+     label01:
+        $i20 = staticinvoke <java.lang.invoke.MethodHandles: int findFirstDupOrDrop(int[],int)>(r20, $i0);
+
+        if $i20 == 0 goto label10;
+
+        if $i20 <= 0 goto label06;
+
+        i21 = $i20;
+
+        i22 = $i20;
+
+        i23 = r20[$i20];
+
+        z3 = 0;
+
+     label02:
+        $i28 = (int) -1;
+
+        i22 = i22 + $i28;
+
+        $i24 = r20[i22];
+
+        if $i24 == i23 goto label03;
+
+        if i23 <= $i24 goto label02;
+
+        z3 = 1;
+
+        goto label02;
+
+     label03:
+        if z3 != 0 goto label04;
+
+        i21 = i22;
+
+        i22 = $i20;
+
+     label04:
+        $r17 = virtualinvoke r22.<java.lang.invoke.LambdaForm: java.lang.invoke.LambdaFormEditor editor()>();
+
+        $i11 = 1 + i21;
+
+        $i10 = 1 + i22;
+
+        r22 = virtualinvoke $r17.<java.lang.invoke.LambdaFormEditor: java.lang.invoke.LambdaForm dupArgumentForm(int,int)>($i11, $i10);
+
+        $z2 = <java.lang.invoke.MethodHandles: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label05;
+
+        $i18 = r20[i21];
+
+        $i17 = r20[i22];
+
+        if $i18 == $i17 goto label05;
+
+        $r23 = new java.lang.AssertionError;
+
+        specialinvoke $r23.<java.lang.AssertionError: void <init>()>();
+
+        throw $r23;
+
+     label05:
+        $i12 = i22 + 1;
+
+        r21 = virtualinvoke r21.<java.lang.invoke.MethodType: java.lang.invoke.MethodType dropParameterTypes(int,int)>(i22, $i12);
+
+        $i19 = i22 + 1;
+
+        $i13 = lengthof r20;
+
+        $i14 = $i13 - $i19;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r20, $i19, r20, i22, $i14);
+
+        $i15 = lengthof r20;
+
+        $i16 = $i15 - 1;
+
+        r20 = staticinvoke <java.util.Arrays: int[] copyOf(int[],int)>(r20, $i16);
+
+        goto label09;
+
+     label06:
+        $i30 = (int) -1;
+
+        i25 = $i20 ^ $i30;
+
+        i26 = 0;
+
+     label07:
+        $i2 = lengthof r20;
+
+        if i26 >= $i2 goto label08;
+
+        $i8 = r20[i26];
+
+        if $i8 >= i25 goto label08;
+
+        i26 = i26 + 1;
+
+        goto label07;
+
+     label08:
+        $r11 = virtualinvoke r3.<java.lang.invoke.MethodType: java.lang.Class parameterType(int)>(i25);
+
+        $r12 = virtualinvoke r22.<java.lang.invoke.LambdaForm: java.lang.invoke.LambdaFormEditor editor()>();
+
+        $i3 = 1 + i26;
+
+        $r13 = staticinvoke <java.lang.invoke.LambdaForm$BasicType: java.lang.invoke.LambdaForm$BasicType basicType(java.lang.Class)>($r11);
+
+        r22 = virtualinvoke $r12.<java.lang.invoke.LambdaFormEditor: java.lang.invoke.LambdaForm addArgumentForm(int,java.lang.invoke.LambdaForm$BasicType)>($i3, $r13);
+
+        $r14 = newarray (java.lang.Class)[1];
+
+        $r14[0] = $r11;
+
+        r21 = virtualinvoke r21.<java.lang.invoke.MethodType: java.lang.invoke.MethodType insertParameterTypes(int,java.lang.Class[])>(i26, $r14);
+
+        $i9 = i26 + 1;
+
+        $i4 = lengthof r20;
+
+        $i5 = $i4 + 1;
+
+        $r15 = staticinvoke <java.util.Arrays: int[] copyOf(int[],int)>(r20, $i5);
+
+        r20 = $r15;
+
+        $i6 = lengthof $r15;
+
+        $i7 = $i6 - $i9;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r15, i26, $r15, $i9, $i7);
+
+        $r15[i26] = i25;
+
+     label09:
+        $z4 = <java.lang.invoke.MethodHandles: boolean $assertionsDisabled>;
+
+        if $z4 != 0 goto label01;
+
+        $z1 = staticinvoke <java.lang.invoke.MethodHandles: boolean permuteArgumentChecks(int[],java.lang.invoke.MethodType,java.lang.invoke.MethodType)>(r20, r3, r21);
+
+        if $z1 != 0 goto label01;
+
+        $r24 = new java.lang.AssertionError;
+
+        specialinvoke $r24.<java.lang.AssertionError: void <init>()>();
+
+        throw $r24;
+
+     label10:
+        $z0 = <java.lang.invoke.MethodHandles: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label11;
+
+        $i1 = lengthof r20;
+
+        if $i1 == $i0 goto label11;
+
+        $r25 = new java.lang.AssertionError;
+
+        specialinvoke $r25.<java.lang.AssertionError: void <init>()>();
+
+        throw $r25;
+
+     label11:
+        $r5 = virtualinvoke r22.<java.lang.invoke.LambdaForm: java.lang.invoke.LambdaFormEditor editor()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.invoke.LambdaFormEditor: java.lang.invoke.LambdaForm permuteArgumentsForm(int,int[])>(1, r20);
+
+        $r7 = virtualinvoke $r4.<java.lang.invoke.BoundMethodHandle: java.lang.invoke.MethodType type()>();
+
+        if r3 != $r7 goto label12;
+
+        $r9 = virtualinvoke $r4.<java.lang.invoke.BoundMethodHandle: java.lang.invoke.LambdaForm internalForm()>();
+
+        if $r6 != $r9 goto label12;
+
+        return $r4;
+
+     label12:
+        $r8 = virtualinvoke $r4.<java.lang.invoke.BoundMethodHandle: java.lang.invoke.BoundMethodHandle copyWith(java.lang.invoke.MethodType,java.lang.invoke.LambdaForm)>(r3, $r6);
+
+        return $r8;
+    }
+
+    private static int findFirstDupOrDrop(int[], int)
+    {
+        byte $b8, $b18;
+        int[] r1;
+        boolean $z0, $z1, $z2, $z3;
+        long $l6, $l7, $l9, $l10, $l13, $l14, $l17, l20, l22;
+        java.lang.AssertionError $r5, $r6, $r8;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i11, $i12, $i15, i16, $i19, i21, i23, i24, $i26, $i28;
+        java.util.BitSet $r7;
+
+        r1 := @parameter0: int[];
+
+        i0 := @parameter1: int;
+
+        if i0 >= 63 goto label09;
+
+        l20 = 0L;
+
+        i21 = 0;
+
+     label01:
+        $i5 = lengthof r1;
+
+        if i21 >= $i5 goto label04;
+
+        i16 = r1[i21];
+
+        if i16 < i0 goto label02;
+
+        $i19 = lengthof r1;
+
+        return $i19;
+
+     label02:
+        l22 = 1L << i16;
+
+        $l17 = l20 & l22;
+
+        $b18 = $l17 cmp 0L;
+
+        if $b18 == 0 goto label03;
+
+        return i21;
+
+     label03:
+        l20 = l20 | l22;
+
+        i21 = i21 + 1;
+
+        goto label01;
+
+     label04:
+        $l6 = 1L << i0;
+
+        $l7 = $l6 - 1L;
+
+        $b8 = l20 cmp $l7;
+
+        if $b8 != 0 goto label06;
+
+        $z3 = <java.lang.invoke.MethodHandles: boolean $assertionsDisabled>;
+
+        if $z3 != 0 goto label05;
+
+        $l13 = l20 ^ -1L;
+
+        $l14 = staticinvoke <java.lang.Long: long lowestOneBit(long)>($l13);
+
+        $i15 = staticinvoke <java.lang.Long: int numberOfTrailingZeros(long)>($l14);
+
+        if $i15 == i0 goto label05;
+
+        $r5 = new java.lang.AssertionError;
+
+        specialinvoke $r5.<java.lang.AssertionError: void <init>()>();
+
+        throw $r5;
+
+     label05:
+        return 0;
+
+     label06:
+        $l9 = l20 ^ -1L;
+
+        $l10 = staticinvoke <java.lang.Long: long lowestOneBit(long)>($l9);
+
+        $i11 = staticinvoke <java.lang.Long: int numberOfTrailingZeros(long)>($l10);
+
+        $z2 = <java.lang.invoke.MethodHandles: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label07;
+
+        if $i11 <= i0 goto label07;
+
+        $r6 = new java.lang.AssertionError;
+
+        specialinvoke $r6.<java.lang.AssertionError: void <init>()>();
+
+        throw $r6;
+
+     label07:
+        if $i11 != i0 goto label08;
+
+        return 0;
+
+     label08:
+        $i26 = (int) -1;
+
+        $i12 = $i11 ^ $i26;
+
+        return $i12;
+
+     label09:
+        $r7 = new java.util.BitSet;
+
+        specialinvoke $r7.<java.util.BitSet: void <init>(int)>(i0);
+
+        i23 = 0;
+
+     label10:
+        $i1 = lengthof r1;
+
+        if i23 >= $i1 goto label13;
+
+        i24 = r1[i23];
+
+        if i24 < i0 goto label11;
+
+        $i4 = lengthof r1;
+
+        return $i4;
+
+     label11:
+        $z1 = virtualinvoke $r7.<java.util.BitSet: boolean get(int)>(i24);
+
+        if $z1 == 0 goto label12;
+
+        return i23;
+
+     label12:
+        virtualinvoke $r7.<java.util.BitSet: void set(int)>(i24);
+
+        i23 = i23 + 1;
+
+        goto label10;
+
+     label13:
+        $i2 = virtualinvoke $r7.<java.util.BitSet: int nextClearBit(int)>(0);
+
+        $z0 = <java.lang.invoke.MethodHandles: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label14;
+
+        if $i2 <= i0 goto label14;
+
+        $r8 = new java.lang.AssertionError;
+
+        specialinvoke $r8.<java.lang.AssertionError: void <init>()>();
+
+        throw $r8;
+
+     label14:
+        if $i2 != i0 goto label15;
+
+        return 0;
+
+     label15:
+        $i28 = (int) -1;
+
+        $i3 = $i2 ^ $i28;
+
+        return $i3;
+    }
+
+    private static boolean permuteArgumentChecks(int[], java.lang.invoke.MethodType, java.lang.invoke.MethodType)
+    {
+        int[] r4;
+        int $i0, $i1, $i2, $i3, i4, i5;
+        java.lang.String $r7, $r9;
+        boolean z0;
+        java.lang.RuntimeException $r10, $r13, $r14;
+        java.lang.invoke.MethodType r0, r2;
+        java.lang.Class $r1, $r3, $r11, $r12;
+        java.lang.StringBuilder $r5, $r6, $r8;
+
+        r4 := @parameter0: int[];
+
+        r0 := @parameter1: java.lang.invoke.MethodType;
+
+        r2 := @parameter2: java.lang.invoke.MethodType;
+
+        $r1 = virtualinvoke r0.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        $r3 = virtualinvoke r2.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        if $r1 == $r3 goto label1;
+
+        $r14 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.RuntimeException newIllegalArgumentException(java.lang.String,java.lang.Object,java.lang.Object)>("return types do not match", r2, r0);
+
+        throw $r14;
+
+     label1:
+        $i0 = lengthof r4;
+
+        $i1 = virtualinvoke r2.<java.lang.invoke.MethodType: int parameterCount()>();
+
+        if $i0 != $i1 goto label7;
+
+        $i2 = virtualinvoke r0.<java.lang.invoke.MethodType: int parameterCount()>();
+
+        z0 = 0;
+
+        i5 = 0;
+
+     label2:
+        $i3 = lengthof r4;
+
+        if i5 >= $i3 goto label6;
+
+        i4 = r4[i5];
+
+        if i4 < 0 goto label3;
+
+        if i4 < $i2 goto label4;
+
+     label3:
+        z0 = 1;
+
+        goto label6;
+
+     label4:
+        $r11 = virtualinvoke r0.<java.lang.invoke.MethodType: java.lang.Class parameterType(int)>(i4);
+
+        $r12 = virtualinvoke r2.<java.lang.invoke.MethodType: java.lang.Class parameterType(int)>(i5);
+
+        if $r11 == $r12 goto label5;
+
+        $r13 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.RuntimeException newIllegalArgumentException(java.lang.String,java.lang.Object,java.lang.Object)>("parameter types do not match after reorder", r2, r0);
+
+        throw $r13;
+
+     label5:
+        i5 = i5 + 1;
+
+        goto label2;
+
+     label6:
+        if z0 != 0 goto label7;
+
+        return 1;
+
+     label7:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("bad reorder array: ");
+
+        $r7 = staticinvoke <java.util.Arrays: java.lang.String toString(int[])>(r4);
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r10 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.RuntimeException newIllegalArgumentException(java.lang.String)>($r9);
+
+        throw $r10;
+    }
+
+    public static java.lang.invoke.MethodHandle constant(java.lang.Class, java.lang.Object)
+    {
+        java.lang.invoke.MethodHandle $r1, $r2, $r4, $r9, $r11, $r12;
+        java.lang.Object[] $r10;
+        boolean $z0, $z1;
+        java.lang.RuntimeException $r13;
+        sun.invoke.util.Wrapper $r3, $r6;
+        java.lang.Class r0, $r5;
+        java.lang.Object $r7, $r8, r14;
+
+        r0 := @parameter0: java.lang.Class;
+
+        r14 := @parameter1: java.lang.Object;
+
+        $z0 = virtualinvoke r0.<java.lang.Class: boolean isPrimitive()>();
+
+        if $z0 == 0 goto label3;
+
+        $r5 = <java.lang.Void: java.lang.Class TYPE>;
+
+        if r0 != $r5 goto label1;
+
+        $r13 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.RuntimeException newIllegalArgumentException(java.lang.String)>("void type");
+
+        throw $r13;
+
+     label1:
+        $r6 = staticinvoke <sun.invoke.util.Wrapper: sun.invoke.util.Wrapper forPrimitiveType(java.lang.Class)>(r0);
+
+        $r7 = virtualinvoke $r6.<sun.invoke.util.Wrapper: java.lang.Object convert(java.lang.Object,java.lang.Class)>(r14, r0);
+
+        $r8 = virtualinvoke $r6.<sun.invoke.util.Wrapper: java.lang.Object zero()>();
+
+        $z1 = virtualinvoke $r8.<java.lang.Object: boolean equals(java.lang.Object)>($r7);
+
+        if $z1 == 0 goto label2;
+
+        $r12 = staticinvoke <java.lang.invoke.MethodHandles: java.lang.invoke.MethodHandle zero(sun.invoke.util.Wrapper,java.lang.Class)>($r6, r0);
+
+        return $r12;
+
+     label2:
+        $r9 = staticinvoke <java.lang.invoke.MethodHandles: java.lang.invoke.MethodHandle identity(java.lang.Class)>(r0);
+
+        $r10 = newarray (java.lang.Object)[1];
+
+        $r10[0] = $r7;
+
+        $r11 = staticinvoke <java.lang.invoke.MethodHandles: java.lang.invoke.MethodHandle insertArguments(java.lang.invoke.MethodHandle,int,java.lang.Object[])>($r9, 0, $r10);
+
+        return $r11;
+
+     label3:
+        if r14 != null goto label4;
+
+        $r3 = <sun.invoke.util.Wrapper: sun.invoke.util.Wrapper OBJECT>;
+
+        $r4 = staticinvoke <java.lang.invoke.MethodHandles: java.lang.invoke.MethodHandle zero(sun.invoke.util.Wrapper,java.lang.Class)>($r3, r0);
+
+        return $r4;
+
+     label4:
+        $r1 = staticinvoke <java.lang.invoke.MethodHandles: java.lang.invoke.MethodHandle identity(java.lang.Class)>(r0);
+
+        $r2 = virtualinvoke $r1.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodHandle bindTo(java.lang.Object)>(r14);
+
+        return $r2;
+    }
+
+    public static java.lang.invoke.MethodHandle identity(java.lang.Class)
+    {
+        java.lang.invoke.MethodHandle $r5, $r10, $r11, r13;
+        java.lang.AssertionError $r7;
+        int $i0;
+        boolean $z0, $z1;
+        sun.invoke.util.Wrapper r1, $r6, $r12;
+        java.lang.invoke.MethodType $r3;
+        java.lang.Class r0, $r4, $r9;
+        java.lang.invoke.MethodHandle[] $r2, $r8;
+
+        r0 := @parameter0: java.lang.Class;
+
+        $z0 = virtualinvoke r0.<java.lang.Class: boolean isPrimitive()>();
+
+        if $z0 == 0 goto label1;
+
+        $r12 = staticinvoke <sun.invoke.util.Wrapper: sun.invoke.util.Wrapper forPrimitiveType(java.lang.Class)>(r0);
+
+        goto label2;
+
+     label1:
+        $r12 = <sun.invoke.util.Wrapper: sun.invoke.util.Wrapper OBJECT>;
+
+     label2:
+        r1 = $r12;
+
+        $i0 = virtualinvoke $r12.<sun.invoke.util.Wrapper: int ordinal()>();
+
+        $r2 = <java.lang.invoke.MethodHandles: java.lang.invoke.MethodHandle[] IDENTITY_MHS>;
+
+        $r11 = $r2[$i0];
+
+        r13 = $r11;
+
+        if $r11 != null goto label3;
+
+        $r8 = <java.lang.invoke.MethodHandles: java.lang.invoke.MethodHandle[] IDENTITY_MHS>;
+
+        $r9 = virtualinvoke $r12.<sun.invoke.util.Wrapper: java.lang.Class primitiveType()>();
+
+        $r10 = staticinvoke <java.lang.invoke.MethodHandles: java.lang.invoke.MethodHandle makeIdentity(java.lang.Class)>($r9);
+
+        r13 = staticinvoke <java.lang.invoke.MethodHandles: java.lang.invoke.MethodHandle setCachedMethodHandle(java.lang.invoke.MethodHandle[],int,java.lang.invoke.MethodHandle)>($r8, $i0, $r10);
+
+     label3:
+        $r3 = virtualinvoke r13.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        if $r4 != r0 goto label4;
+
+        return r13;
+
+     label4:
+        $z1 = <java.lang.invoke.MethodHandles: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label5;
+
+        $r6 = <sun.invoke.util.Wrapper: sun.invoke.util.Wrapper OBJECT>;
+
+        if r1 == $r6 goto label5;
+
+        $r7 = new java.lang.AssertionError;
+
+        specialinvoke $r7.<java.lang.AssertionError: void <init>()>();
+
+        throw $r7;
+
+     label5:
+        $r5 = staticinvoke <java.lang.invoke.MethodHandles: java.lang.invoke.MethodHandle makeIdentity(java.lang.Class)>(r0);
+
+        return $r5;
+    }
+
+    private static java.lang.invoke.MethodHandle makeIdentity(java.lang.Class)
+    {
+        java.lang.invoke.LambdaForm $r3;
+        java.lang.invoke.MethodHandle $r5;
+        java.lang.invoke.MethodType $r1;
+        java.lang.invoke.LambdaForm$BasicType $r2;
+        java.lang.invoke.MethodHandleImpl$Intrinsic $r4;
+        java.lang.Class r0;
+
+        r0 := @parameter0: java.lang.Class;
+
+        $r1 = staticinvoke <java.lang.invoke.MethodType: java.lang.invoke.MethodType methodType(java.lang.Class,java.lang.Class)>(r0, r0);
+
+        $r2 = staticinvoke <java.lang.invoke.LambdaForm$BasicType: java.lang.invoke.LambdaForm$BasicType basicType(java.lang.Class)>(r0);
+
+        $r3 = staticinvoke <java.lang.invoke.LambdaForm: java.lang.invoke.LambdaForm identityForm(java.lang.invoke.LambdaForm$BasicType)>($r2);
+
+        $r4 = <java.lang.invoke.MethodHandleImpl$Intrinsic: java.lang.invoke.MethodHandleImpl$Intrinsic IDENTITY>;
+
+        $r5 = staticinvoke <java.lang.invoke.MethodHandleImpl: java.lang.invoke.MethodHandle makeIntrinsic(java.lang.invoke.MethodType,java.lang.invoke.LambdaForm,java.lang.invoke.MethodHandleImpl$Intrinsic)>($r1, $r3, $r4);
+
+        return $r5;
+    }
+
+    private static java.lang.invoke.MethodHandle zero(sun.invoke.util.Wrapper, java.lang.Class)
+    {
+        java.lang.invoke.MethodHandle $r5, $r10, r11;
+        java.lang.AssertionError $r7;
+        sun.invoke.util.Wrapper r0, $r6;
+        java.lang.invoke.MethodType $r2;
+        int $i0;
+        java.lang.Class $r3, r4, $r9;
+        java.lang.invoke.MethodHandle[] $r1, $r8;
+        boolean $z0;
+
+        r0 := @parameter0: sun.invoke.util.Wrapper;
+
+        r4 := @parameter1: java.lang.Class;
+
+        $i0 = virtualinvoke r0.<sun.invoke.util.Wrapper: int ordinal()>();
+
+        $r1 = <java.lang.invoke.MethodHandles: java.lang.invoke.MethodHandle[] ZERO_MHS>;
+
+        r11 = $r1[$i0];
+
+        if r11 != null goto label1;
+
+        $r8 = <java.lang.invoke.MethodHandles: java.lang.invoke.MethodHandle[] ZERO_MHS>;
+
+        $r9 = virtualinvoke r0.<sun.invoke.util.Wrapper: java.lang.Class primitiveType()>();
+
+        $r10 = staticinvoke <java.lang.invoke.MethodHandles: java.lang.invoke.MethodHandle makeZero(java.lang.Class)>($r9);
+
+        r11 = staticinvoke <java.lang.invoke.MethodHandles: java.lang.invoke.MethodHandle setCachedMethodHandle(java.lang.invoke.MethodHandle[],int,java.lang.invoke.MethodHandle)>($r8, $i0, $r10);
+
+     label1:
+        $r2 = virtualinvoke r11.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        if $r3 != r4 goto label2;
+
+        return r11;
+
+     label2:
+        $z0 = <java.lang.invoke.MethodHandles: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label3;
+
+        $r6 = <sun.invoke.util.Wrapper: sun.invoke.util.Wrapper OBJECT>;
+
+        if r0 == $r6 goto label3;
+
+        $r7 = new java.lang.AssertionError;
+
+        specialinvoke $r7.<java.lang.AssertionError: void <init>()>();
+
+        throw $r7;
+
+     label3:
+        $r5 = staticinvoke <java.lang.invoke.MethodHandles: java.lang.invoke.MethodHandle makeZero(java.lang.Class)>(r4);
+
+        return $r5;
+    }
+
+    private static java.lang.invoke.MethodHandle makeZero(java.lang.Class)
+    {
+        java.lang.invoke.LambdaForm $r3;
+        java.lang.invoke.MethodHandle $r5;
+        java.lang.invoke.MethodType $r1;
+        java.lang.invoke.LambdaForm$BasicType $r2;
+        java.lang.invoke.MethodHandleImpl$Intrinsic $r4;
+        java.lang.Class r0;
+
+        r0 := @parameter0: java.lang.Class;
+
+        $r1 = staticinvoke <java.lang.invoke.MethodType: java.lang.invoke.MethodType methodType(java.lang.Class)>(r0);
+
+        $r2 = staticinvoke <java.lang.invoke.LambdaForm$BasicType: java.lang.invoke.LambdaForm$BasicType basicType(java.lang.Class)>(r0);
+
+        $r3 = staticinvoke <java.lang.invoke.LambdaForm: java.lang.invoke.LambdaForm zeroForm(java.lang.invoke.LambdaForm$BasicType)>($r2);
+
+        $r4 = <java.lang.invoke.MethodHandleImpl$Intrinsic: java.lang.invoke.MethodHandleImpl$Intrinsic ZERO>;
+
+        $r5 = staticinvoke <java.lang.invoke.MethodHandleImpl: java.lang.invoke.MethodHandle makeIntrinsic(java.lang.invoke.MethodType,java.lang.invoke.LambdaForm,java.lang.invoke.MethodHandleImpl$Intrinsic)>($r1, $r3, $r4);
+
+        return $r5;
+    }
+
+    private static synchronized java.lang.invoke.MethodHandle setCachedMethodHandle(java.lang.invoke.MethodHandle[], int, java.lang.invoke.MethodHandle)
+    {
+        java.lang.invoke.MethodHandle r1, r2;
+        int i0;
+        java.lang.invoke.MethodHandle[] r0;
+
+        r0 := @parameter0: java.lang.invoke.MethodHandle[];
+
+        i0 := @parameter1: int;
+
+        r2 := @parameter2: java.lang.invoke.MethodHandle;
+
+        r1 = r0[i0];
+
+        if r1 == null goto label1;
+
+        return r1;
+
+     label1:
+        r0[i0] = r2;
+
+        return r2;
+    }
+
+    public static transient java.lang.invoke.MethodHandle insertArguments(java.lang.invoke.MethodHandle, int, java.lang.Object[])
+    {
+        java.lang.invoke.MethodHandle r1;
+        java.lang.Object[] r0;
+        java.lang.Class[] $r2;
+        int i0, i1, $i2, i3;
+        java.lang.Class r3;
+        java.lang.Object $r4, r6;
+        boolean $z0;
+        java.lang.invoke.BoundMethodHandle r5;
+
+        r1 := @parameter0: java.lang.invoke.MethodHandle;
+
+        i1 := @parameter1: int;
+
+        r0 := @parameter2: java.lang.Object[];
+
+        i0 = lengthof r0;
+
+        $r2 = staticinvoke <java.lang.invoke.MethodHandles: java.lang.Class[] insertArgumentsChecks(java.lang.invoke.MethodHandle,int,int)>(r1, i0, i1);
+
+        if i0 != 0 goto label1;
+
+        return r1;
+
+     label1:
+        r5 = virtualinvoke r1.<java.lang.invoke.MethodHandle: java.lang.invoke.BoundMethodHandle rebind()>();
+
+        i3 = 0;
+
+     label2:
+        if i3 >= i0 goto label5;
+
+        r6 = r0[i3];
+
+        $i2 = i1 + i3;
+
+        r3 = $r2[$i2];
+
+        $z0 = virtualinvoke r3.<java.lang.Class: boolean isPrimitive()>();
+
+        if $z0 == 0 goto label3;
+
+        r5 = staticinvoke <java.lang.invoke.MethodHandles: java.lang.invoke.BoundMethodHandle insertArgumentPrimitive(java.lang.invoke.BoundMethodHandle,int,java.lang.Class,java.lang.Object)>(r5, i1, r3, r6);
+
+        goto label4;
+
+     label3:
+        $r4 = virtualinvoke r3.<java.lang.Class: java.lang.Object cast(java.lang.Object)>(r6);
+
+        r5 = virtualinvoke r5.<java.lang.invoke.BoundMethodHandle: java.lang.invoke.BoundMethodHandle bindArgumentL(int,java.lang.Object)>(i1, $r4);
+
+     label4:
+        i3 = i3 + 1;
+
+        goto label2;
+
+     label5:
+        return r5;
+    }
+
+    private static java.lang.invoke.BoundMethodHandle insertArgumentPrimitive(java.lang.invoke.BoundMethodHandle, int, java.lang.Class, java.lang.Object)
+    {
+        java.lang.Float $r7;
+        java.lang.Double $r5;
+        long $l3;
+        java.lang.Integer $r11;
+        int[] $r3;
+        java.lang.Long $r9;
+        int $i0, $i1, i2, $i4, $i5;
+        java.lang.invoke.BoundMethodHandle r4, $r6, $r8, $r10, $r12, $r13;
+        double $d0;
+        sun.invoke.util.Wrapper $r1;
+        float $f0;
+        java.lang.Class r0;
+        java.lang.Object $r2, r14;
+
+        r4 := @parameter0: java.lang.invoke.BoundMethodHandle;
+
+        i2 := @parameter1: int;
+
+        r0 := @parameter2: java.lang.Class;
+
+        r14 := @parameter3: java.lang.Object;
+
+        $r1 = staticinvoke <sun.invoke.util.Wrapper: sun.invoke.util.Wrapper forPrimitiveType(java.lang.Class)>(r0);
+
+        $r2 = virtualinvoke $r1.<sun.invoke.util.Wrapper: java.lang.Object convert(java.lang.Object,java.lang.Class)>(r14, r0);
+
+        $r3 = <java.lang.invoke.MethodHandles$1: int[] $SwitchMap$sun$invoke$util$Wrapper>;
+
+        $i0 = virtualinvoke $r1.<sun.invoke.util.Wrapper: int ordinal()>();
+
+        $i1 = $r3[$i0];
+
+        tableswitch($i1)
+        {
+            case 1: goto label1;
+            case 2: goto label2;
+            case 3: goto label3;
+            case 4: goto label4;
+            default: goto label5;
+        };
+
+     label1:
+        $r11 = (java.lang.Integer) $r2;
+
+        $i4 = virtualinvoke $r11.<java.lang.Integer: int intValue()>();
+
+        $r12 = virtualinvoke r4.<java.lang.invoke.BoundMethodHandle: java.lang.invoke.BoundMethodHandle bindArgumentI(int,int)>(i2, $i4);
+
+        return $r12;
+
+     label2:
+        $r9 = (java.lang.Long) $r2;
+
+        $l3 = virtualinvoke $r9.<java.lang.Long: long longValue()>();
+
+        $r10 = virtualinvoke r4.<java.lang.invoke.BoundMethodHandle: java.lang.invoke.BoundMethodHandle bindArgumentJ(int,long)>(i2, $l3);
+
+        return $r10;
+
+     label3:
+        $r7 = (java.lang.Float) $r2;
+
+        $f0 = virtualinvoke $r7.<java.lang.Float: float floatValue()>();
+
+        $r8 = virtualinvoke r4.<java.lang.invoke.BoundMethodHandle: java.lang.invoke.BoundMethodHandle bindArgumentF(int,float)>(i2, $f0);
+
+        return $r8;
+
+     label4:
+        $r5 = (java.lang.Double) $r2;
+
+        $d0 = virtualinvoke $r5.<java.lang.Double: double doubleValue()>();
+
+        $r6 = virtualinvoke r4.<java.lang.invoke.BoundMethodHandle: java.lang.invoke.BoundMethodHandle bindArgumentD(int,double)>(i2, $d0);
+
+        return $r6;
+
+     label5:
+        $i5 = staticinvoke <sun.invoke.util.ValueConversions: int widenSubword(java.lang.Object)>($r2);
+
+        $r13 = virtualinvoke r4.<java.lang.invoke.BoundMethodHandle: java.lang.invoke.BoundMethodHandle bindArgumentI(int,int)>(i2, $i5);
+
+        return $r13;
+    }
+
+    private static java.lang.Class[] insertArgumentsChecks(java.lang.invoke.MethodHandle, int, int) throws java.lang.RuntimeException
+    {
+        java.lang.invoke.MethodHandle r0;
+        java.lang.Class[] $r3;
+        java.lang.RuntimeException $r2, $r4;
+        java.lang.invoke.MethodType $r1;
+        int $i0, i1, i2, i3;
+
+        r0 := @parameter0: java.lang.invoke.MethodHandle;
+
+        i1 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        $r1 = virtualinvoke r0.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.invoke.MethodType: int parameterCount()>();
+
+        i2 = $i0 - i1;
+
+        if i2 >= 0 goto label1;
+
+        $r4 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.RuntimeException newIllegalArgumentException(java.lang.String)>("too many values to insert");
+
+        throw $r4;
+
+     label1:
+        if i3 < 0 goto label2;
+
+        if i3 <= i2 goto label3;
+
+     label2:
+        $r2 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.RuntimeException newIllegalArgumentException(java.lang.String)>("no argument type to append");
+
+        throw $r2;
+
+     label3:
+        $r3 = virtualinvoke $r1.<java.lang.invoke.MethodType: java.lang.Class[] ptypes()>();
+
+        return $r3;
+    }
+
+    public static java.lang.invoke.MethodHandle dropArguments(java.lang.invoke.MethodHandle, int, java.util.List)
+    {
+        java.lang.invoke.MethodHandle r1;
+        java.lang.invoke.LambdaForm r12;
+        java.lang.invoke.LambdaFormEditor $r9;
+        int i0, $i1, $i2, i3;
+        java.lang.invoke.BoundMethodHandle $r4, $r6;
+        boolean $z0;
+        java.util.Iterator $r5;
+        java.lang.invoke.LambdaForm$BasicType $r10;
+        java.util.List $r0, r11;
+        java.lang.invoke.MethodType $r2, $r3;
+        java.lang.Object $r7;
+        java.lang.Class r8;
+
+        r1 := @parameter0: java.lang.invoke.MethodHandle;
+
+        i0 := @parameter1: int;
+
+        r11 := @parameter2: java.util.List;
+
+        $r0 = staticinvoke <java.lang.invoke.MethodHandles: java.util.List copyTypes(java.util.List)>(r11);
+
+        $r2 = virtualinvoke r1.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        $i1 = staticinvoke <java.lang.invoke.MethodHandles: int dropArgumentChecks(java.lang.invoke.MethodType,int,java.util.List)>($r2, i0, $r0);
+
+        $r3 = virtualinvoke $r2.<java.lang.invoke.MethodType: java.lang.invoke.MethodType insertParameterTypes(int,java.util.List)>(i0, $r0);
+
+        if $i1 != 0 goto label1;
+
+        return r1;
+
+     label1:
+        $r4 = virtualinvoke r1.<java.lang.invoke.MethodHandle: java.lang.invoke.BoundMethodHandle rebind()>();
+
+        r12 = $r4.<java.lang.invoke.BoundMethodHandle: java.lang.invoke.LambdaForm form>;
+
+        i3 = 1 + i0;
+
+        $r5 = interfaceinvoke $r0.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r7 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r8 = (java.lang.Class) $r7;
+
+        $r9 = virtualinvoke r12.<java.lang.invoke.LambdaForm: java.lang.invoke.LambdaFormEditor editor()>();
+
+        $i2 = i3;
+
+        i3 = i3 + 1;
+
+        $r10 = staticinvoke <java.lang.invoke.LambdaForm$BasicType: java.lang.invoke.LambdaForm$BasicType basicType(java.lang.Class)>(r8);
+
+        r12 = virtualinvoke $r9.<java.lang.invoke.LambdaFormEditor: java.lang.invoke.LambdaForm addArgumentForm(int,java.lang.invoke.LambdaForm$BasicType)>($i2, $r10);
+
+        goto label2;
+
+     label3:
+        $r6 = virtualinvoke $r4.<java.lang.invoke.BoundMethodHandle: java.lang.invoke.BoundMethodHandle copyWith(java.lang.invoke.MethodType,java.lang.invoke.LambdaForm)>($r3, r12);
+
+        return $r6;
+    }
+
+    private static java.util.List copyTypes(java.util.List)
+    {
+        java.util.List r0, $r3;
+        java.lang.Object[] $r1, $r2;
+        int $i0;
+
+        r0 := @parameter0: java.util.List;
+
+        $r1 = interfaceinvoke r0.<java.util.List: java.lang.Object[] toArray()>();
+
+        $i0 = lengthof $r1;
+
+        $r2 = staticinvoke <java.util.Arrays: java.lang.Object[] copyOf(java.lang.Object[],int,java.lang.Class)>($r1, $i0, class "[Ljava/lang/Class;");
+
+        $r3 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r2);
+
+        return $r3;
+    }
+
+    private static int dropArgumentChecks(java.lang.invoke.MethodType, int, java.util.List)
+    {
+        java.lang.Object[] $r4;
+        java.lang.Integer $r5, $r6, $r7;
+        int $i0, $i1, i2, i3;
+        java.lang.String $r10;
+        java.lang.RuntimeException $r11;
+        java.util.List r0, $r8;
+        java.lang.invoke.MethodType r1;
+        java.lang.StringBuilder $r2, $r3, $r9;
+
+        r1 := @parameter0: java.lang.invoke.MethodType;
+
+        i3 := @parameter1: int;
+
+        r0 := @parameter2: java.util.List;
+
+        $i0 = interfaceinvoke r0.<java.util.List: int size()>();
+
+        staticinvoke <java.lang.invoke.MethodType: void checkSlotCount(int)>($i0);
+
+        $i1 = virtualinvoke r1.<java.lang.invoke.MethodType: int parameterCount()>();
+
+        i2 = $i1 + $i0;
+
+        if i3 < 0 goto label1;
+
+        if i3 <= $i1 goto label2;
+
+     label1:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("no argument type to remove");
+
+        $r4 = newarray (java.lang.Object)[5];
+
+        $r4[0] = r1;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i3);
+
+        $r4[1] = $r5;
+
+        $r4[2] = r0;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i2);
+
+        $r4[3] = $r6;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r4[4] = $r7;
+
+        $r8 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r4);
+
+        $r9 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r11 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.RuntimeException newIllegalArgumentException(java.lang.String)>($r10);
+
+        throw $r11;
+
+     label2:
+        return $i0;
+    }
+
+    public static transient java.lang.invoke.MethodHandle dropArguments(java.lang.invoke.MethodHandle, int, java.lang.Class[])
+    {
+        java.lang.invoke.MethodHandle r0, $r3;
+        java.util.List $r2;
+        int i0;
+        java.lang.Class[] r1;
+
+        r0 := @parameter0: java.lang.invoke.MethodHandle;
+
+        i0 := @parameter1: int;
+
+        r1 := @parameter2: java.lang.Class[];
+
+        $r2 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>(r1);
+
+        $r3 = staticinvoke <java.lang.invoke.MethodHandles: java.lang.invoke.MethodHandle dropArguments(java.lang.invoke.MethodHandle,int,java.util.List)>(r0, i0, $r2);
+
+        return $r3;
+    }
+
+    public static transient java.lang.invoke.MethodHandle filterArguments(java.lang.invoke.MethodHandle, int, java.lang.invoke.MethodHandle[])
+    {
+        java.lang.invoke.MethodHandle r0, r2, r3;
+        int i0, i1, i2, i3;
+        java.lang.invoke.MethodHandle[] r1;
+
+        r0 := @parameter0: java.lang.invoke.MethodHandle;
+
+        i0 := @parameter1: int;
+
+        r1 := @parameter2: java.lang.invoke.MethodHandle[];
+
+        staticinvoke <java.lang.invoke.MethodHandles: void filterArgumentsCheckArity(java.lang.invoke.MethodHandle,int,java.lang.invoke.MethodHandle[])>(r0, i0, r1);
+
+        r3 = r0;
+
+        i2 = i0 - 1;
+
+        i1 = lengthof r1;
+
+        i3 = 0;
+
+     label1:
+        if i3 >= i1 goto label4;
+
+        r2 = r1[i3];
+
+        i2 = i2 + 1;
+
+        if r2 != null goto label2;
+
+        goto label3;
+
+     label2:
+        r3 = staticinvoke <java.lang.invoke.MethodHandles: java.lang.invoke.MethodHandle filterArgument(java.lang.invoke.MethodHandle,int,java.lang.invoke.MethodHandle)>(r3, i2, r2);
+
+     label3:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label4:
+        return r3;
+    }
+
+    static java.lang.invoke.MethodHandle filterArgument(java.lang.invoke.MethodHandle, int, java.lang.invoke.MethodHandle)
+    {
+        java.lang.invoke.MethodHandle r0, r1;
+        java.lang.invoke.LambdaForm $r8;
+        java.lang.invoke.LambdaForm$BasicType $r7;
+        java.lang.invoke.MethodType $r2, $r3, $r9;
+        java.lang.invoke.LambdaFormEditor $r6;
+        int i0, $i1;
+        java.lang.Class $r5;
+        java.lang.invoke.BoundMethodHandle $r4, $r10;
+
+        r0 := @parameter0: java.lang.invoke.MethodHandle;
+
+        i0 := @parameter1: int;
+
+        r1 := @parameter2: java.lang.invoke.MethodHandle;
+
+        staticinvoke <java.lang.invoke.MethodHandles: void filterArgumentChecks(java.lang.invoke.MethodHandle,int,java.lang.invoke.MethodHandle)>(r0, i0, r1);
+
+        $r2 = virtualinvoke r0.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        $r3 = virtualinvoke r1.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        $r4 = virtualinvoke r0.<java.lang.invoke.MethodHandle: java.lang.invoke.BoundMethodHandle rebind()>();
+
+        $r5 = virtualinvoke $r3.<java.lang.invoke.MethodType: java.lang.Class parameterType(int)>(0);
+
+        $r6 = virtualinvoke $r4.<java.lang.invoke.BoundMethodHandle: java.lang.invoke.LambdaFormEditor editor()>();
+
+        $i1 = 1 + i0;
+
+        $r7 = staticinvoke <java.lang.invoke.LambdaForm$BasicType: java.lang.invoke.LambdaForm$BasicType basicType(java.lang.Class)>($r5);
+
+        $r8 = virtualinvoke $r6.<java.lang.invoke.LambdaFormEditor: java.lang.invoke.LambdaForm filterArgumentForm(int,java.lang.invoke.LambdaForm$BasicType)>($i1, $r7);
+
+        $r9 = virtualinvoke $r2.<java.lang.invoke.MethodType: java.lang.invoke.MethodType changeParameterType(int,java.lang.Class)>(i0, $r5);
+
+        $r10 = virtualinvoke $r4.<java.lang.invoke.BoundMethodHandle: java.lang.invoke.BoundMethodHandle copyWithExtendL(java.lang.invoke.MethodType,java.lang.invoke.LambdaForm,java.lang.Object)>($r9, $r8, r1);
+
+        return $r10;
+    }
+
+    private static void filterArgumentsCheckArity(java.lang.invoke.MethodHandle, int, java.lang.invoke.MethodHandle[])
+    {
+        java.lang.invoke.MethodHandle r0;
+        java.lang.RuntimeException $r3;
+        java.lang.invoke.MethodType $r1;
+        int $i0, i1, $i2, $i3;
+        java.lang.invoke.MethodHandle[] r2;
+
+        r0 := @parameter0: java.lang.invoke.MethodHandle;
+
+        i1 := @parameter1: int;
+
+        r2 := @parameter2: java.lang.invoke.MethodHandle[];
+
+        $r1 = virtualinvoke r0.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.invoke.MethodType: int parameterCount()>();
+
+        $i2 = lengthof r2;
+
+        $i3 = i1 + $i2;
+
+        if $i3 <= $i0 goto label1;
+
+        $r3 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.RuntimeException newIllegalArgumentException(java.lang.String)>("too many filters");
+
+        throw $r3;
+
+     label1:
+        return;
+    }
+
+    private static void filterArgumentChecks(java.lang.invoke.MethodHandle, int, java.lang.invoke.MethodHandle) throws java.lang.RuntimeException
+    {
+        java.lang.invoke.MethodHandle r0, r2;
+        java.lang.RuntimeException $r4;
+        java.lang.invoke.MethodType $r1, $r3;
+        int $i0, i1;
+        java.lang.Class $r5, $r6;
+
+        r0 := @parameter0: java.lang.invoke.MethodHandle;
+
+        i1 := @parameter1: int;
+
+        r2 := @parameter2: java.lang.invoke.MethodHandle;
+
+        $r1 = virtualinvoke r0.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        $r3 = virtualinvoke r2.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        $i0 = virtualinvoke $r3.<java.lang.invoke.MethodType: int parameterCount()>();
+
+        if $i0 != 1 goto label1;
+
+        $r5 = virtualinvoke $r3.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        $r6 = virtualinvoke $r1.<java.lang.invoke.MethodType: java.lang.Class parameterType(int)>(i1);
+
+        if $r5 == $r6 goto label2;
+
+     label1:
+        $r4 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.RuntimeException newIllegalArgumentException(java.lang.String,java.lang.Object,java.lang.Object)>("target and filter types do not match", $r1, $r3);
+
+        throw $r4;
+
+     label2:
+        return;
+    }
+
+    public static java.lang.invoke.MethodHandle collectArguments(java.lang.invoke.MethodHandle, int, java.lang.invoke.MethodHandle)
+    {
+        java.lang.invoke.MethodHandle r0, r1;
+        java.lang.invoke.LambdaForm $r9, $r13;
+        java.lang.invoke.MethodHandleImpl$Intrinsic $r6, $r7;
+        java.lang.invoke.LambdaFormEditor $r8, $r11;
+        int i0, $i1, $i2;
+        java.lang.invoke.BoundMethodHandle $r4, $r10, $r14;
+        boolean $z0;
+        java.lang.invoke.MethodType $r2, $r3, $r12;
+        java.lang.Class $r5;
+
+        r0 := @parameter0: java.lang.invoke.MethodHandle;
+
+        i0 := @parameter1: int;
+
+        r1 := @parameter2: java.lang.invoke.MethodHandle;
+
+        $r2 = staticinvoke <java.lang.invoke.MethodHandles: java.lang.invoke.MethodType collectArgumentsChecks(java.lang.invoke.MethodHandle,int,java.lang.invoke.MethodHandle)>(r0, i0, r1);
+
+        $r3 = virtualinvoke r1.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        $r4 = virtualinvoke r0.<java.lang.invoke.MethodHandle: java.lang.invoke.BoundMethodHandle rebind()>();
+
+        $r5 = virtualinvoke $r3.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        $z0 = virtualinvoke $r5.<java.lang.Class: boolean isArray()>();
+
+        if $z0 == 0 goto label1;
+
+        $r6 = virtualinvoke r1.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodHandleImpl$Intrinsic intrinsicName()>();
+
+        $r7 = <java.lang.invoke.MethodHandleImpl$Intrinsic: java.lang.invoke.MethodHandleImpl$Intrinsic NEW_ARRAY>;
+
+        if $r6 != $r7 goto label1;
+
+        $r8 = virtualinvoke $r4.<java.lang.invoke.BoundMethodHandle: java.lang.invoke.LambdaFormEditor editor()>();
+
+        $i1 = 1 + i0;
+
+        $r9 = virtualinvoke $r8.<java.lang.invoke.LambdaFormEditor: java.lang.invoke.LambdaForm collectArgumentArrayForm(int,java.lang.invoke.MethodHandle)>($i1, r1);
+
+        if $r9 == null goto label1;
+
+        $r10 = virtualinvoke $r4.<java.lang.invoke.BoundMethodHandle: java.lang.invoke.BoundMethodHandle copyWith(java.lang.invoke.MethodType,java.lang.invoke.LambdaForm)>($r2, $r9);
+
+        return $r10;
+
+     label1:
+        $r11 = virtualinvoke $r4.<java.lang.invoke.BoundMethodHandle: java.lang.invoke.LambdaFormEditor editor()>();
+
+        $i2 = 1 + i0;
+
+        $r12 = virtualinvoke $r3.<java.lang.invoke.MethodType: java.lang.invoke.MethodType basicType()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.invoke.LambdaFormEditor: java.lang.invoke.LambdaForm collectArgumentsForm(int,java.lang.invoke.MethodType)>($i2, $r12);
+
+        $r14 = virtualinvoke $r4.<java.lang.invoke.BoundMethodHandle: java.lang.invoke.BoundMethodHandle copyWithExtendL(java.lang.invoke.MethodType,java.lang.invoke.LambdaForm,java.lang.Object)>($r2, $r13, r1);
+
+        return $r14;
+    }
+
+    private static java.lang.invoke.MethodType collectArgumentsChecks(java.lang.invoke.MethodHandle, int, java.lang.invoke.MethodHandle) throws java.lang.RuntimeException
+    {
+        java.lang.invoke.MethodHandle r0, r2;
+        java.lang.RuntimeException $r10;
+        java.util.List $r5;
+        java.lang.invoke.MethodType $r1, $r3, $r8, $r9, $r11;
+        int i0, $i1;
+        java.lang.Class $r4, $r6, $r7;
+
+        r0 := @parameter0: java.lang.invoke.MethodHandle;
+
+        i0 := @parameter1: int;
+
+        r2 := @parameter2: java.lang.invoke.MethodHandle;
+
+        $r1 = virtualinvoke r0.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        $r3 = virtualinvoke r2.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        $r5 = virtualinvoke $r3.<java.lang.invoke.MethodType: java.util.List parameterList()>();
+
+        $r6 = <java.lang.Void: java.lang.Class TYPE>;
+
+        if $r4 != $r6 goto label1;
+
+        $r11 = virtualinvoke $r1.<java.lang.invoke.MethodType: java.lang.invoke.MethodType insertParameterTypes(int,java.util.List)>(i0, $r5);
+
+        return $r11;
+
+     label1:
+        $r7 = virtualinvoke $r1.<java.lang.invoke.MethodType: java.lang.Class parameterType(int)>(i0);
+
+        if $r4 == $r7 goto label2;
+
+        $r10 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.RuntimeException newIllegalArgumentException(java.lang.String,java.lang.Object,java.lang.Object)>("target and filter types do not match", $r1, $r3);
+
+        throw $r10;
+
+     label2:
+        $i1 = i0 + 1;
+
+        $r8 = virtualinvoke $r1.<java.lang.invoke.MethodType: java.lang.invoke.MethodType dropParameterTypes(int,int)>(i0, $i1);
+
+        $r9 = virtualinvoke $r8.<java.lang.invoke.MethodType: java.lang.invoke.MethodType insertParameterTypes(int,java.util.List)>(i0, $r5);
+
+        return $r9;
+    }
+
+    public static java.lang.invoke.MethodHandle filterReturnValue(java.lang.invoke.MethodHandle, java.lang.invoke.MethodHandle)
+    {
+        java.lang.invoke.MethodHandle r0, r2;
+        java.lang.invoke.LambdaForm $r8;
+        java.lang.invoke.LambdaForm$BasicType $r6;
+        java.lang.invoke.MethodType $r1, $r3, $r10;
+        java.lang.invoke.LambdaFormEditor $r7;
+        java.lang.Class $r5, $r9;
+        java.lang.invoke.BoundMethodHandle $r4, $r11;
+
+        r0 := @parameter0: java.lang.invoke.MethodHandle;
+
+        r2 := @parameter1: java.lang.invoke.MethodHandle;
+
+        $r1 = virtualinvoke r0.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        $r3 = virtualinvoke r2.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        staticinvoke <java.lang.invoke.MethodHandles: void filterReturnValueChecks(java.lang.invoke.MethodType,java.lang.invoke.MethodType)>($r1, $r3);
+
+        $r4 = virtualinvoke r0.<java.lang.invoke.MethodHandle: java.lang.invoke.BoundMethodHandle rebind()>();
+
+        $r5 = virtualinvoke $r3.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        $r6 = staticinvoke <java.lang.invoke.LambdaForm$BasicType: java.lang.invoke.LambdaForm$BasicType basicType(java.lang.Class)>($r5);
+
+        $r7 = virtualinvoke $r4.<java.lang.invoke.BoundMethodHandle: java.lang.invoke.LambdaFormEditor editor()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.invoke.LambdaFormEditor: java.lang.invoke.LambdaForm filterReturnForm(java.lang.invoke.LambdaForm$BasicType,boolean)>($r6, 0);
+
+        $r9 = virtualinvoke $r3.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        $r10 = virtualinvoke $r1.<java.lang.invoke.MethodType: java.lang.invoke.MethodType changeReturnType(java.lang.Class)>($r9);
+
+        $r11 = virtualinvoke $r4.<java.lang.invoke.BoundMethodHandle: java.lang.invoke.BoundMethodHandle copyWithExtendL(java.lang.invoke.MethodType,java.lang.invoke.LambdaForm,java.lang.Object)>($r10, $r8, r2);
+
+        return $r11;
+    }
+
+    private static void filterReturnValueChecks(java.lang.invoke.MethodType, java.lang.invoke.MethodType) throws java.lang.RuntimeException
+    {
+        java.lang.invoke.MethodType r0, r2;
+        int $i0;
+        java.lang.Class $r1, $r3, $r4;
+        java.lang.RuntimeException $r5;
+
+        r0 := @parameter0: java.lang.invoke.MethodType;
+
+        r2 := @parameter1: java.lang.invoke.MethodType;
+
+        $r1 = virtualinvoke r0.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        $i0 = virtualinvoke r2.<java.lang.invoke.MethodType: int parameterCount()>();
+
+        if $i0 != 0 goto label1;
+
+        $r4 = <java.lang.Void: java.lang.Class TYPE>;
+
+        if $r1 == $r4 goto label3;
+
+        goto label2;
+
+     label1:
+        $r3 = virtualinvoke r2.<java.lang.invoke.MethodType: java.lang.Class parameterType(int)>(0);
+
+        if $r1 != $r3 goto label2;
+
+        if $i0 == 1 goto label3;
+
+     label2:
+        $r5 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.RuntimeException newIllegalArgumentException(java.lang.String,java.lang.Object,java.lang.Object)>("target and filter types do not match", r0, r2);
+
+        throw $r5;
+
+     label3:
+        return;
+    }
+
+    public static java.lang.invoke.MethodHandle foldArguments(java.lang.invoke.MethodHandle, java.lang.invoke.MethodHandle)
+    {
+        java.lang.invoke.MethodHandle r0, r2;
+        java.lang.invoke.LambdaForm $r9;
+        java.lang.invoke.MethodType $r1, $r3, $r8, r11;
+        java.lang.invoke.LambdaFormEditor $r7;
+        java.lang.Class $r4, $r6;
+        java.lang.invoke.BoundMethodHandle $r5, $r10;
+        boolean $z1, $z2;
+
+        r0 := @parameter0: java.lang.invoke.MethodHandle;
+
+        r2 := @parameter1: java.lang.invoke.MethodHandle;
+
+        $r1 = virtualinvoke r0.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        $r3 = virtualinvoke r2.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        $r4 = staticinvoke <java.lang.invoke.MethodHandles: java.lang.Class foldArgumentChecks(int,java.lang.invoke.MethodType,java.lang.invoke.MethodType)>(0, $r1, $r3);
+
+        $r5 = virtualinvoke r0.<java.lang.invoke.MethodHandle: java.lang.invoke.BoundMethodHandle rebind()>();
+
+        $r6 = <java.lang.Void: java.lang.Class TYPE>;
+
+        if $r4 != $r6 goto label1;
+
+        $z2 = 1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+        $z1 = 0;
+
+     label2:
+        $r7 = virtualinvoke $r5.<java.lang.invoke.BoundMethodHandle: java.lang.invoke.LambdaFormEditor editor()>();
+
+        $r8 = virtualinvoke $r3.<java.lang.invoke.MethodType: java.lang.invoke.MethodType basicType()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.invoke.LambdaFormEditor: java.lang.invoke.LambdaForm foldArgumentsForm(int,boolean,java.lang.invoke.MethodType)>(1, $z2, $r8);
+
+        r11 = $r1;
+
+        if $z1 != 0 goto label3;
+
+        r11 = virtualinvoke $r1.<java.lang.invoke.MethodType: java.lang.invoke.MethodType dropParameterTypes(int,int)>(0, 1);
+
+     label3:
+        $r10 = virtualinvoke $r5.<java.lang.invoke.BoundMethodHandle: java.lang.invoke.BoundMethodHandle copyWithExtendL(java.lang.invoke.MethodType,java.lang.invoke.LambdaForm,java.lang.Object)>(r11, $r9, r2);
+
+        return $r10;
+    }
+
+    private static java.lang.Class foldArgumentChecks(int, java.lang.invoke.MethodType, java.lang.invoke.MethodType)
+    {
+        int $i0, i1, $i2, $i3, $i4, $i5;
+        boolean z0, $z1, z4, $z5, $z6, $z7, $z8;
+        java.lang.RuntimeException $r4;
+        java.util.List $r7, $r8, $r9;
+        java.lang.invoke.MethodType r0, r3;
+        java.lang.Class $r1, $r2, $r5, $r6;
+
+        i1 := @parameter0: int;
+
+        r3 := @parameter1: java.lang.invoke.MethodType;
+
+        r0 := @parameter2: java.lang.invoke.MethodType;
+
+        $i0 = virtualinvoke r0.<java.lang.invoke.MethodType: int parameterCount()>();
+
+        $r1 = virtualinvoke r0.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        $r2 = <java.lang.Void: java.lang.Class TYPE>;
+
+        if $r1 != $r2 goto label1;
+
+        $z6 = 0;
+
+        $z5 = 0;
+
+        goto label2;
+
+     label1:
+        $z6 = 1;
+
+        $z5 = 1;
+
+     label2:
+        z0 = $z6;
+
+        $i5 = i1 + $z5;
+
+        $i2 = virtualinvoke r3.<java.lang.invoke.MethodType: int parameterCount()>();
+
+        $i3 = $i5 + $i0;
+
+        if $i2 < $i3 goto label3;
+
+        $z8 = 1;
+
+        $z7 = 1;
+
+        goto label4;
+
+     label3:
+        $z8 = 0;
+
+        $z7 = 0;
+
+     label4:
+        z4 = $z8;
+
+        if $z7 == 0 goto label5;
+
+        $r7 = virtualinvoke r0.<java.lang.invoke.MethodType: java.util.List parameterList()>();
+
+        $r8 = virtualinvoke r3.<java.lang.invoke.MethodType: java.util.List parameterList()>();
+
+        $i4 = $i5 + $i0;
+
+        $r9 = interfaceinvoke $r8.<java.util.List: java.util.List subList(int,int)>($i5, $i4);
+
+        $z1 = interfaceinvoke $r7.<java.util.List: boolean equals(java.lang.Object)>($r9);
+
+        if $z1 != 0 goto label5;
+
+        z4 = 0;
+
+     label5:
+        if z4 == 0 goto label6;
+
+        if z0 == 0 goto label6;
+
+        $r5 = virtualinvoke r0.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        $r6 = virtualinvoke r3.<java.lang.invoke.MethodType: java.lang.Class parameterType(int)>(0);
+
+        if $r5 == $r6 goto label6;
+
+        z4 = 0;
+
+     label6:
+        if z4 != 0 goto label7;
+
+        $r4 = staticinvoke <java.lang.invoke.MethodHandles: java.lang.RuntimeException misMatchedTypes(java.lang.String,java.lang.invoke.MethodType,java.lang.invoke.MethodType)>("target and combiner types", r3, r0);
+
+        throw $r4;
+
+     label7:
+        return $r1;
+    }
+
+    public static java.lang.invoke.MethodHandle guardWithTest(java.lang.invoke.MethodHandle, java.lang.invoke.MethodHandle, java.lang.invoke.MethodHandle)
+    {
+        java.lang.invoke.MethodHandle r1, r3, $r9, $r13, r20;
+        int $i0, $i1;
+        java.lang.String $r17;
+        boolean $z0, $z1, $z2;
+        java.lang.RuntimeException $r10, $r18, $r19;
+        java.util.List $r7, $r8, $r11, $r12;
+        java.lang.invoke.MethodType $r0, $r2, $r4;
+        java.lang.Class $r5, $r6;
+        java.lang.StringBuilder $r14, $r15, $r16;
+
+        r20 := @parameter0: java.lang.invoke.MethodHandle;
+
+        r1 := @parameter1: java.lang.invoke.MethodHandle;
+
+        r3 := @parameter2: java.lang.invoke.MethodHandle;
+
+        $r0 = virtualinvoke r20.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        $r2 = virtualinvoke r1.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        $r4 = virtualinvoke r3.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        $z0 = virtualinvoke $r2.<java.lang.invoke.MethodType: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 != 0 goto label1;
+
+        $r19 = staticinvoke <java.lang.invoke.MethodHandles: java.lang.RuntimeException misMatchedTypes(java.lang.String,java.lang.invoke.MethodType,java.lang.invoke.MethodType)>("target and fallback types", $r2, $r4);
+
+        throw $r19;
+
+     label1:
+        $r5 = virtualinvoke $r0.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        $r6 = <java.lang.Boolean: java.lang.Class TYPE>;
+
+        if $r5 == $r6 goto label2;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("guard type is not a predicate ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r0);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r18 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.RuntimeException newIllegalArgumentException(java.lang.String)>($r17);
+
+        throw $r18;
+
+     label2:
+        $r7 = virtualinvoke $r2.<java.lang.invoke.MethodType: java.util.List parameterList()>();
+
+        $r8 = virtualinvoke $r0.<java.lang.invoke.MethodType: java.util.List parameterList()>();
+
+        $z1 = interfaceinvoke $r7.<java.util.List: boolean equals(java.lang.Object)>($r8);
+
+        if $z1 != 0 goto label5;
+
+        $i0 = interfaceinvoke $r8.<java.util.List: int size()>();
+
+        $i1 = interfaceinvoke $r7.<java.util.List: int size()>();
+
+        if $i0 >= $i1 goto label3;
+
+        $r11 = interfaceinvoke $r7.<java.util.List: java.util.List subList(int,int)>(0, $i0);
+
+        $z2 = interfaceinvoke $r11.<java.util.List: boolean equals(java.lang.Object)>($r8);
+
+        if $z2 != 0 goto label4;
+
+     label3:
+        $r10 = staticinvoke <java.lang.invoke.MethodHandles: java.lang.RuntimeException misMatchedTypes(java.lang.String,java.lang.invoke.MethodType,java.lang.invoke.MethodType)>("target and test types", $r2, $r0);
+
+        throw $r10;
+
+     label4:
+        $r12 = interfaceinvoke $r7.<java.util.List: java.util.List subList(int,int)>($i0, $i1);
+
+        $r13 = staticinvoke <java.lang.invoke.MethodHandles: java.lang.invoke.MethodHandle dropArguments(java.lang.invoke.MethodHandle,int,java.util.List)>(r20, $i0, $r12);
+
+        r20 = $r13;
+
+        virtualinvoke $r13.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+     label5:
+        $r9 = staticinvoke <java.lang.invoke.MethodHandleImpl: java.lang.invoke.MethodHandle makeGuardWithTest(java.lang.invoke.MethodHandle,java.lang.invoke.MethodHandle,java.lang.invoke.MethodHandle)>(r20, r1, r3);
+
+        return $r9;
+    }
+
+    static java.lang.RuntimeException misMatchedTypes(java.lang.String, java.lang.invoke.MethodType, java.lang.invoke.MethodType)
+    {
+        java.lang.RuntimeException $r10;
+        java.lang.invoke.MethodType r4, r7;
+        java.lang.StringBuilder $r0, $r2, $r3, $r5, $r6, $r8;
+        java.lang.String r1, $r9;
+
+        r1 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.lang.invoke.MethodType;
+
+        r7 := @parameter2: java.lang.invoke.MethodType;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" must match: ");
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" != ");
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r10 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.RuntimeException newIllegalArgumentException(java.lang.String)>($r9);
+
+        return $r10;
+    }
+
+    public static java.lang.invoke.MethodHandle catchException(java.lang.invoke.MethodHandle, java.lang.Class, java.lang.invoke.MethodHandle)
+    {
+        java.lang.invoke.MethodHandle r0, $r15, $r19, r21;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.lang.String $r7;
+        boolean $z0, $z1, $z2;
+        java.lang.RuntimeException $r8, $r16, $r20;
+        java.util.List $r12, $r13, $r14, $r17, $r18;
+        java.lang.invoke.MethodType $r1, $r2;
+        java.lang.StringBuilder $r3, $r4, $r6;
+        java.lang.Class r5, $r9, $r10, $r11;
+
+        r0 := @parameter0: java.lang.invoke.MethodHandle;
+
+        r5 := @parameter1: java.lang.Class;
+
+        r21 := @parameter2: java.lang.invoke.MethodHandle;
+
+        $r1 = virtualinvoke r0.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        $r2 = virtualinvoke r21.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+        $i0 = virtualinvoke $r2.<java.lang.invoke.MethodType: int parameterCount()>();
+
+        if $i0 < 1 goto label1;
+
+        $r9 = virtualinvoke $r2.<java.lang.invoke.MethodType: java.lang.Class parameterType(int)>(0);
+
+        $z0 = virtualinvoke $r9.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(r5);
+
+        if $z0 != 0 goto label2;
+
+     label1:
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("handler does not accept exception type ");
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r8 = staticinvoke <java.lang.invoke.MethodHandleStatics: java.lang.RuntimeException newIllegalArgumentException(java.lang.String)>($r7);
+
+        throw $r8;
+
+     label2:
+        $r10 = virtualinvoke $r2.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        $r11 = virtualinvoke $r1.<java.lang.invoke.MethodType: java.lang.Class returnType()>();
+
+        if $r10 == $r11 goto label3;
+
+        $r20 = staticinvoke <java.lang.invoke.MethodHandles: java.lang.RuntimeException misMatchedTypes(java.lang.String,java.lang.invoke.MethodType,java.lang.invoke.MethodType)>("target and handler return types", $r1, $r2);
+
+        throw $r20;
+
+     label3:
+        $r12 = virtualinvoke $r1.<java.lang.invoke.MethodType: java.util.List parameterList()>();
+
+        $r13 = virtualinvoke $r2.<java.lang.invoke.MethodType: java.util.List parameterList()>();
+
+        $i1 = interfaceinvoke $r13.<java.util.List: int size()>();
+
+        $r14 = interfaceinvoke $r13.<java.util.List: java.util.List subList(int,int)>(1, $i1);
+
+        $z1 = interfaceinvoke $r12.<java.util.List: boolean equals(java.lang.Object)>($r14);
+
+        if $z1 != 0 goto label6;
+
+        $i2 = interfaceinvoke $r14.<java.util.List: int size()>();
+
+        $i3 = interfaceinvoke $r12.<java.util.List: int size()>();
+
+        if $i2 >= $i3 goto label4;
+
+        $r17 = interfaceinvoke $r12.<java.util.List: java.util.List subList(int,int)>(0, $i2);
+
+        $z2 = interfaceinvoke $r17.<java.util.List: boolean equals(java.lang.Object)>($r14);
+
+        if $z2 != 0 goto label5;
+
+     label4:
+        $r16 = staticinvoke <java.lang.invoke.MethodHandles: java.lang.RuntimeException misMatchedTypes(java.lang.String,java.lang.invoke.MethodType,java.lang.invoke.MethodType)>("target and handler types", $r1, $r2);
+
+        throw $r16;
+
+     label5:
+        $i4 = 1 + $i2;
+
+        $r18 = interfaceinvoke $r12.<java.util.List: java.util.List subList(int,int)>($i2, $i3);
+
+        $r19 = staticinvoke <java.lang.invoke.MethodHandles: java.lang.invoke.MethodHandle dropArguments(java.lang.invoke.MethodHandle,int,java.util.List)>(r21, $i4, $r18);
+
+        r21 = $r19;
+
+        virtualinvoke $r19.<java.lang.invoke.MethodHandle: java.lang.invoke.MethodType type()>();
+
+     label6:
+        $r15 = staticinvoke <java.lang.invoke.MethodHandleImpl: java.lang.invoke.MethodHandle makeGuardWithCatch(java.lang.invoke.MethodHandle,java.lang.Class,java.lang.invoke.MethodHandle)>(r0, r5, r21);
+
+        return $r15;
+    }
+
+    public static java.lang.invoke.MethodHandle throwException(java.lang.Class, java.lang.Class)
+    {
+        java.lang.invoke.MethodHandle $r4;
+        java.lang.ClassCastException $r5;
+        java.lang.invoke.MethodType $r3;
+        java.lang.Class r0, $r1, r2;
+        java.lang.String $r6;
+        boolean $z0;
+
+        r2 := @parameter0: java.lang.Class;
+
+        r0 := @parameter1: java.lang.Class;
+
+        $r1 = class "Ljava/lang/Throwable;";
+
+        $z0 = virtualinvoke $r1.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(r0);
+
+        if $z0 != 0 goto label1;
+
+        $r5 = new java.lang.ClassCastException;
+
+        $r6 = virtualinvoke r0.<java.lang.Class: java.lang.String getName()>();
+
+        specialinvoke $r5.<java.lang.ClassCastException: void <init>(java.lang.String)>($r6);
+
+        throw $r5;
+
+     label1:
+        $r3 = staticinvoke <java.lang.invoke.MethodType: java.lang.invoke.MethodType methodType(java.lang.Class,java.lang.Class)>(r2, r0);
+
+        $r4 = staticinvoke <java.lang.invoke.MethodHandleImpl: java.lang.invoke.MethodHandle throwException(java.lang.invoke.MethodType)>($r3);
+
+        return $r4;
+    }
+
+    static java.lang.invoke.MemberName$Factory access$000()
+    {
+        java.lang.invoke.MemberName$Factory $r0;
+
+        $r0 = <java.lang.invoke.MethodHandles: java.lang.invoke.MemberName$Factory IMPL_NAMES>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.reflect.ReflectPermission $r2;
+        sun.invoke.util.Wrapper[] $r3, $r5;
+        java.lang.invoke.MemberName$Factory $r1;
+        int $i0, $i1;
+        java.lang.Class $r0;
+        java.lang.invoke.MethodHandle[] $r4, $r6;
+        boolean $z0, $z1;
+
+        $r0 = class "Ljava/lang/invoke/MethodHandles;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <java.lang.invoke.MethodHandles: boolean $assertionsDisabled> = $z1;
+
+        $r1 = staticinvoke <java.lang.invoke.MemberName: java.lang.invoke.MemberName$Factory getFactory()>();
+
+        <java.lang.invoke.MethodHandles: java.lang.invoke.MemberName$Factory IMPL_NAMES> = $r1;
+
+        staticinvoke <java.lang.invoke.MethodHandleImpl: void initStatics()>();
+
+        $r2 = new java.lang.reflect.ReflectPermission;
+
+        specialinvoke $r2.<java.lang.reflect.ReflectPermission: void <init>(java.lang.String)>("suppressAccessChecks");
+
+        <java.lang.invoke.MethodHandles: java.security.Permission ACCESS_PERMISSION> = $r2;
+
+        $r3 = staticinvoke <sun.invoke.util.Wrapper: sun.invoke.util.Wrapper[] values()>();
+
+        $i0 = lengthof $r3;
+
+        $r4 = newarray (java.lang.invoke.MethodHandle)[$i0];
+
+        <java.lang.invoke.MethodHandles: java.lang.invoke.MethodHandle[] IDENTITY_MHS> = $r4;
+
+        $r5 = staticinvoke <sun.invoke.util.Wrapper: sun.invoke.util.Wrapper[] values()>();
+
+        $i1 = lengthof $r5;
+
+        $r6 = newarray (java.lang.invoke.MethodHandle)[$i1];
+
+        <java.lang.invoke.MethodHandles: java.lang.invoke.MethodHandle[] ZERO_MHS> = $r6;
+
+        return;
+    }
+}

@@ -1,0 +1,524 @@
+public class java.io.CharArrayReader extends java.io.Reader
+{
+    protected char[] buf;
+    protected int pos;
+    protected int markedPos;
+    protected int count;
+
+    public void <init>(char[])
+    {
+        int $i0;
+        char[] r1;
+        java.io.CharArrayReader r0;
+
+        r0 := @this: java.io.CharArrayReader;
+
+        r1 := @parameter0: char[];
+
+        specialinvoke r0.<java.io.Reader: void <init>()>();
+
+        r0.<java.io.CharArrayReader: int markedPos> = 0;
+
+        r0.<java.io.CharArrayReader: char[] buf> = r1;
+
+        r0.<java.io.CharArrayReader: int pos> = 0;
+
+        $i0 = lengthof r1;
+
+        r0.<java.io.CharArrayReader: int count> = $i0;
+
+        return;
+    }
+
+    public void <init>(char[], int, int)
+    {
+        java.io.CharArrayReader r0;
+        java.lang.IllegalArgumentException $r2;
+        int i0, $i1, i2, $i3, $i4, $i5, $i6;
+        char[] r1;
+
+        r0 := @this: java.io.CharArrayReader;
+
+        r1 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        specialinvoke r0.<java.io.Reader: void <init>()>();
+
+        r0.<java.io.CharArrayReader: int markedPos> = 0;
+
+        if i0 < 0 goto label1;
+
+        $i1 = lengthof r1;
+
+        if i0 > $i1 goto label1;
+
+        if i2 < 0 goto label1;
+
+        $i3 = i0 + i2;
+
+        if $i3 >= 0 goto label2;
+
+     label1:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r2;
+
+     label2:
+        r0.<java.io.CharArrayReader: char[] buf> = r1;
+
+        r0.<java.io.CharArrayReader: int pos> = i0;
+
+        $i5 = i0 + i2;
+
+        $i4 = lengthof r1;
+
+        $i6 = staticinvoke <java.lang.Math: int min(int,int)>($i5, $i4);
+
+        r0.<java.io.CharArrayReader: int count> = $i6;
+
+        r0.<java.io.CharArrayReader: int markedPos> = i0;
+
+        return;
+    }
+
+    private void ensureOpen() throws java.io.IOException
+    {
+        char[] $r1;
+        java.io.IOException $r2;
+        java.io.CharArrayReader r0;
+
+        r0 := @this: java.io.CharArrayReader;
+
+        $r1 = r0.<java.io.CharArrayReader: char[] buf>;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.io.IOException;
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>("Stream closed");
+
+        throw $r2;
+
+     label1:
+        return;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        java.lang.Throwable $r3;
+        java.io.CharArrayReader r0;
+        char $c4;
+        int $i0, $i1, $i2, $i3, $i6, $i7;
+        char[] $r2;
+        java.lang.Object $r1;
+
+        r0 := @this: java.io.CharArrayReader;
+
+        $r1 = r0.<java.io.CharArrayReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label1:
+        specialinvoke r0.<java.io.CharArrayReader: void ensureOpen()>();
+
+        $i1 = r0.<java.io.CharArrayReader: int pos>;
+
+        $i0 = r0.<java.io.CharArrayReader: int count>;
+
+        if $i1 < $i0 goto label3;
+
+        exitmonitor $r1;
+
+     label2:
+        $i6 = (int) -1;
+
+        return $i6;
+
+     label3:
+        $r2 = r0.<java.io.CharArrayReader: char[] buf>;
+
+        $i2 = r0.<java.io.CharArrayReader: int pos>;
+
+        $i3 = $i2 + 1;
+
+        r0.<java.io.CharArrayReader: int pos> = $i3;
+
+        $c4 = $r2[$i2];
+
+        exitmonitor $r1;
+
+     label4:
+        $i7 = (int) $c4;
+
+        return $i7;
+
+     label5:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public int read(char[], int, int) throws java.io.IOException
+    {
+        java.lang.Throwable $r4;
+        java.lang.IndexOutOfBoundsException $r6;
+        java.io.CharArrayReader r0;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, $i10, $i11, $i12, i13, $i15;
+        char[] r2, $r3;
+        java.lang.Object $r1;
+
+        r0 := @this: java.io.CharArrayReader;
+
+        r2 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i13 := @parameter2: int;
+
+        $r1 = r0.<java.io.CharArrayReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label01:
+        specialinvoke r0.<java.io.CharArrayReader: void ensureOpen()>();
+
+        if i0 < 0 goto label02;
+
+        $i1 = lengthof r2;
+
+        if i0 > $i1 goto label02;
+
+        if i13 < 0 goto label02;
+
+        $i3 = i0 + i13;
+
+        $i2 = lengthof r2;
+
+        if $i3 > $i2 goto label02;
+
+        $i4 = i0 + i13;
+
+        if $i4 >= 0 goto label03;
+
+     label02:
+        $r6 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r6.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r6;
+
+     label03:
+        if i13 != 0 goto label05;
+
+        exitmonitor $r1;
+
+     label04:
+        return 0;
+
+     label05:
+        $i6 = r0.<java.io.CharArrayReader: int pos>;
+
+        $i5 = r0.<java.io.CharArrayReader: int count>;
+
+        if $i6 < $i5 goto label07;
+
+        exitmonitor $r1;
+
+     label06:
+        $i15 = (int) -1;
+
+        return $i15;
+
+     label07:
+        $i8 = r0.<java.io.CharArrayReader: int count>;
+
+        $i7 = r0.<java.io.CharArrayReader: int pos>;
+
+        i9 = $i8 - $i7;
+
+        if i13 <= i9 goto label08;
+
+        i13 = i9;
+
+     label08:
+        if i13 > 0 goto label10;
+
+        exitmonitor $r1;
+
+     label09:
+        return 0;
+
+     label10:
+        $r3 = r0.<java.io.CharArrayReader: char[] buf>;
+
+        $i10 = r0.<java.io.CharArrayReader: int pos>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, $i10, r2, i0, i13);
+
+        $i11 = r0.<java.io.CharArrayReader: int pos>;
+
+        $i12 = $i11 + i13;
+
+        r0.<java.io.CharArrayReader: int pos> = $i12;
+
+        exitmonitor $r1;
+
+     label11:
+        return i13;
+
+     label12:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label13:
+        throw $r4;
+
+        catch java.lang.Throwable from label01 to label04 with label12;
+        catch java.lang.Throwable from label05 to label06 with label12;
+        catch java.lang.Throwable from label07 to label09 with label12;
+        catch java.lang.Throwable from label10 to label11 with label12;
+        catch java.lang.Throwable from label12 to label13 with label12;
+    }
+
+    public long skip(long) throws java.io.IOException
+    {
+        java.lang.Throwable $r2;
+        java.io.CharArrayReader r0;
+        long l3, $l7, $l8, l10;
+        byte $b4, $b5;
+        int $i0, $i1, $i2, $i6, $i9, $i11, $i12;
+        java.lang.Object $r1;
+
+        r0 := @this: java.io.CharArrayReader;
+
+        l10 := @parameter0: long;
+
+        $r1 = r0.<java.io.CharArrayReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label1:
+        specialinvoke r0.<java.io.CharArrayReader: void ensureOpen()>();
+
+        $i1 = r0.<java.io.CharArrayReader: int count>;
+
+        $i0 = r0.<java.io.CharArrayReader: int pos>;
+
+        $i2 = $i1 - $i0;
+
+        l3 = (long) $i2;
+
+        $b4 = l10 cmp l3;
+
+        $i11 = (int) $b4;
+
+        if $i11 <= 0 goto label2;
+
+        l10 = l3;
+
+     label2:
+        $b5 = l10 cmp 0L;
+
+        $i12 = (int) $b5;
+
+        if $i12 >= 0 goto label4;
+
+        exitmonitor $r1;
+
+     label3:
+        return 0L;
+
+     label4:
+        $i6 = r0.<java.io.CharArrayReader: int pos>;
+
+        $l7 = (long) $i6;
+
+        $l8 = $l7 + l10;
+
+        $i9 = (int) $l8;
+
+        r0.<java.io.CharArrayReader: int pos> = $i9;
+
+        exitmonitor $r1;
+
+     label5:
+        return l10;
+
+     label6:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label7:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label3 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public boolean ready() throws java.io.IOException
+    {
+        java.lang.Throwable $r2;
+        java.io.CharArrayReader r0;
+        int $i0, $i1, $i2;
+        java.lang.Object $r1;
+        boolean $z0;
+
+        r0 := @this: java.io.CharArrayReader;
+
+        $r1 = r0.<java.io.CharArrayReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label1:
+        specialinvoke r0.<java.io.CharArrayReader: void ensureOpen()>();
+
+        $i1 = r0.<java.io.CharArrayReader: int count>;
+
+        $i0 = r0.<java.io.CharArrayReader: int pos>;
+
+        $i2 = $i1 - $i0;
+
+        if $i2 <= 0 goto label2;
+
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        exitmonitor $r1;
+
+     label4:
+        return $z0;
+
+     label5:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public boolean markSupported()
+    {
+        java.io.CharArrayReader r0;
+
+        r0 := @this: java.io.CharArrayReader;
+
+        return 1;
+    }
+
+    public void mark(int) throws java.io.IOException
+    {
+        java.lang.Throwable $r2;
+        java.io.CharArrayReader r0;
+        int $i0, i1;
+        java.lang.Object $r1;
+
+        r0 := @this: java.io.CharArrayReader;
+
+        i1 := @parameter0: int;
+
+        $r1 = r0.<java.io.CharArrayReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label1:
+        specialinvoke r0.<java.io.CharArrayReader: void ensureOpen()>();
+
+        $i0 = r0.<java.io.CharArrayReader: int pos>;
+
+        r0.<java.io.CharArrayReader: int markedPos> = $i0;
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void reset() throws java.io.IOException
+    {
+        java.lang.Throwable $r2;
+        java.io.CharArrayReader r0;
+        int $i0;
+        java.lang.Object $r1;
+
+        r0 := @this: java.io.CharArrayReader;
+
+        $r1 = r0.<java.io.CharArrayReader: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label1:
+        specialinvoke r0.<java.io.CharArrayReader: void ensureOpen()>();
+
+        $i0 = r0.<java.io.CharArrayReader: int markedPos>;
+
+        r0.<java.io.CharArrayReader: int pos> = $i0;
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void close()
+    {
+        java.io.CharArrayReader r0;
+
+        r0 := @this: java.io.CharArrayReader;
+
+        r0.<java.io.CharArrayReader: char[] buf> = null;
+
+        return;
+    }
+}

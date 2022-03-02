@@ -1,0 +1,522 @@
+public abstract class java.rmi.activation.ActivationGroup extends java.rmi.server.UnicastRemoteObject implements java.rmi.activation.ActivationInstantiator
+{
+    private java.rmi.activation.ActivationGroupID groupID;
+    private java.rmi.activation.ActivationMonitor monitor;
+    private long incarnation;
+    private static java.rmi.activation.ActivationGroup currGroup;
+    private static java.rmi.activation.ActivationGroupID currGroupID;
+    private static java.rmi.activation.ActivationSystem currSystem;
+    private static boolean canCreate;
+    private static final long serialVersionUID;
+
+    protected void <init>(java.rmi.activation.ActivationGroupID) throws java.rmi.RemoteException
+    {
+        java.rmi.activation.ActivationGroup r0;
+        java.rmi.activation.ActivationGroupID r1;
+
+        r0 := @this: java.rmi.activation.ActivationGroup;
+
+        r1 := @parameter0: java.rmi.activation.ActivationGroupID;
+
+        specialinvoke r0.<java.rmi.server.UnicastRemoteObject: void <init>()>();
+
+        r0.<java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationGroupID groupID> = r1;
+
+        return;
+    }
+
+    public boolean inactiveObject(java.rmi.activation.ActivationID) throws java.rmi.activation.ActivationException, java.rmi.activation.UnknownObjectException, java.rmi.RemoteException
+    {
+        java.rmi.activation.ActivationGroup r0;
+        java.rmi.activation.ActivationID r2;
+        java.rmi.activation.ActivationMonitor $r1;
+
+        r0 := @this: java.rmi.activation.ActivationGroup;
+
+        r2 := @parameter0: java.rmi.activation.ActivationID;
+
+        $r1 = specialinvoke r0.<java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationMonitor getMonitor()>();
+
+        interfaceinvoke $r1.<java.rmi.activation.ActivationMonitor: void inactiveObject(java.rmi.activation.ActivationID)>(r2);
+
+        return 1;
+    }
+
+    public abstract void activeObject(java.rmi.activation.ActivationID, java.rmi.Remote) throws java.rmi.activation.ActivationException, java.rmi.activation.UnknownObjectException, java.rmi.RemoteException;
+
+    public static synchronized java.rmi.activation.ActivationGroup createGroup(java.rmi.activation.ActivationGroupID, java.rmi.activation.ActivationGroupDesc, long) throws java.rmi.activation.ActivationException
+    {
+        java.rmi.activation.ActivationException $r19, $r26, $r27, $r29, $r30, $r33, $r36;
+        java.rmi.MarshalledObject $r9;
+        boolean $z0, $z1, $z2;
+        java.rmi.activation.ActivationGroupDesc r2;
+        java.rmi.activation.ActivationGroupID r8;
+        java.lang.Exception $r28, $r35;
+        java.lang.reflect.InvocationTargetException $r31;
+        java.rmi.activation.ActivationSystem $r11, $r12;
+        java.lang.StringBuilder $r20, $r21, $r23;
+        java.lang.Throwable $r32, $r34;
+        java.lang.Object[] $r7;
+        long l0;
+        java.lang.reflect.Constructor $r6;
+        java.lang.String $r3, $r15, $r16, $r22, $r24;
+        java.rmi.activation.ActivationGroup $r1, $r14, $r25;
+        java.lang.Class[] $r5;
+        java.lang.SecurityManager $r0;
+        java.rmi.activation.ActivationMonitor $r13;
+        java.lang.Class r4, $r17, $r18, r37;
+        java.lang.Object $r10;
+
+        r8 := @parameter0: java.rmi.activation.ActivationGroupID;
+
+        r2 := @parameter1: java.rmi.activation.ActivationGroupDesc;
+
+        l0 := @parameter2: long;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label01;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkSetFactory()>();
+
+     label01:
+        $r1 = <java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationGroup currGroup>;
+
+        if $r1 == null goto label02;
+
+        $r27 = new java.rmi.activation.ActivationException;
+
+        specialinvoke $r27.<java.rmi.activation.ActivationException: void <init>(java.lang.String)>("group already exists");
+
+        throw $r27;
+
+     label02:
+        $z0 = <java.rmi.activation.ActivationGroup: boolean canCreate>;
+
+        if $z0 != 0 goto label03;
+
+        $r26 = new java.rmi.activation.ActivationException;
+
+        specialinvoke $r26.<java.rmi.activation.ActivationException: void <init>(java.lang.String)>("group deactivated and cannot be recreated");
+
+        throw $r26;
+
+     label03:
+        $r3 = virtualinvoke r2.<java.rmi.activation.ActivationGroupDesc: java.lang.String getClassName()>();
+
+        r4 = class "Lsun/rmi/server/ActivationGroupImpl;";
+
+        if $r3 == null goto label04;
+
+        $r15 = virtualinvoke r4.<java.lang.Class: java.lang.String getName()>();
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r15);
+
+        if $z1 == 0 goto label05;
+
+     label04:
+        r37 = class "Lsun/rmi/server/ActivationGroupImpl;";
+
+        goto label10;
+
+     label05:
+        $r16 = virtualinvoke r2.<java.rmi.activation.ActivationGroupDesc: java.lang.String getLocation()>();
+
+        $r17 = staticinvoke <java.rmi.server.RMIClassLoader: java.lang.Class loadClass(java.lang.String,java.lang.String)>($r16, $r3);
+
+     label06:
+        goto label08;
+
+     label07:
+        $r35 := @caughtexception;
+
+        $r36 = new java.rmi.activation.ActivationException;
+
+        specialinvoke $r36.<java.rmi.activation.ActivationException: void <init>(java.lang.String,java.lang.Throwable)>("Could not load group implementation class", $r35);
+
+        throw $r36;
+
+     label08:
+        $r18 = class "Ljava/rmi/activation/ActivationGroup;";
+
+        $z2 = virtualinvoke $r18.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>($r17);
+
+        if $z2 == 0 goto label09;
+
+        r37 = virtualinvoke $r17.<java.lang.Class: java.lang.Class asSubclass(java.lang.Class)>(class "Ljava/rmi/activation/ActivationGroup;");
+
+        goto label10;
+
+     label09:
+        $r19 = new java.rmi.activation.ActivationException;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("group not correct class: ");
+
+        $r22 = virtualinvoke $r17.<java.lang.Class: java.lang.String getName()>();
+
+        $r23 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r19.<java.rmi.activation.ActivationException: void <init>(java.lang.String)>($r24);
+
+        throw $r19;
+
+     label10:
+        $r5 = newarray (java.lang.Class)[2];
+
+        $r5[0] = class "Ljava/rmi/activation/ActivationGroupID;";
+
+        $r5[1] = class "Ljava/rmi/MarshalledObject;";
+
+        $r6 = virtualinvoke r37.<java.lang.Class: java.lang.reflect.Constructor getConstructor(java.lang.Class[])>($r5);
+
+        $r7 = newarray (java.lang.Object)[2];
+
+        $r7[0] = r8;
+
+        $r9 = virtualinvoke r2.<java.rmi.activation.ActivationGroupDesc: java.rmi.MarshalledObject getData()>();
+
+        $r7[1] = $r9;
+
+        $r10 = virtualinvoke $r6.<java.lang.reflect.Constructor: java.lang.Object newInstance(java.lang.Object[])>($r7);
+
+        $r25 = (java.rmi.activation.ActivationGroup) $r10;
+
+        $r11 = virtualinvoke r8.<java.rmi.activation.ActivationGroupID: java.rmi.activation.ActivationSystem getSystem()>();
+
+        <java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationSystem currSystem> = $r11;
+
+        $r25.<java.rmi.activation.ActivationGroup: long incarnation> = l0;
+
+        $r12 = <java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationSystem currSystem>;
+
+        $r13 = interfaceinvoke $r12.<java.rmi.activation.ActivationSystem: java.rmi.activation.ActivationMonitor activeGroup(java.rmi.activation.ActivationGroupID,java.rmi.activation.ActivationInstantiator,long)>(r8, $r25, l0);
+
+        $r25.<java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationMonitor monitor> = $r13;
+
+        <java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationGroup currGroup> = $r25;
+
+        <java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationGroupID currGroupID> = r8;
+
+        <java.rmi.activation.ActivationGroup: boolean canCreate> = 0;
+
+     label11:
+        goto label15;
+
+     label12:
+        $r31 := @caughtexception;
+
+        $r32 = virtualinvoke $r31.<java.lang.reflect.InvocationTargetException: java.lang.Throwable getTargetException()>();
+
+        virtualinvoke $r32.<java.lang.Throwable: void printStackTrace()>();
+
+        $r33 = new java.rmi.activation.ActivationException;
+
+        $r34 = virtualinvoke $r31.<java.lang.reflect.InvocationTargetException: java.lang.Throwable getTargetException()>();
+
+        specialinvoke $r33.<java.rmi.activation.ActivationException: void <init>(java.lang.String,java.lang.Throwable)>("exception in group constructor", $r34);
+
+        throw $r33;
+
+     label13:
+        $r30 := @caughtexception;
+
+        throw $r30;
+
+     label14:
+        $r28 := @caughtexception;
+
+        $r29 = new java.rmi.activation.ActivationException;
+
+        specialinvoke $r29.<java.rmi.activation.ActivationException: void <init>(java.lang.String,java.lang.Throwable)>("exception creating group", $r28);
+
+        throw $r29;
+
+     label15:
+        $r14 = <java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationGroup currGroup>;
+
+        return $r14;
+
+        catch java.lang.Exception from label05 to label06 with label07;
+        catch java.lang.reflect.InvocationTargetException from label03 to label11 with label12;
+        catch java.rmi.activation.ActivationException from label03 to label11 with label13;
+        catch java.lang.Exception from label03 to label11 with label14;
+    }
+
+    public static synchronized java.rmi.activation.ActivationGroupID currentGroupID()
+    {
+        java.rmi.activation.ActivationGroupID $r0;
+
+        $r0 = <java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationGroupID currGroupID>;
+
+        return $r0;
+    }
+
+    static synchronized java.rmi.activation.ActivationGroupID internalCurrentGroupID() throws java.rmi.activation.ActivationException
+    {
+        java.rmi.activation.ActivationGroupID $r0, $r1;
+        java.rmi.activation.ActivationException $r2;
+
+        $r0 = <java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationGroupID currGroupID>;
+
+        if $r0 != null goto label1;
+
+        $r2 = new java.rmi.activation.ActivationException;
+
+        specialinvoke $r2.<java.rmi.activation.ActivationException: void <init>(java.lang.String)>("nonexistent group");
+
+        throw $r2;
+
+     label1:
+        $r1 = <java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationGroupID currGroupID>;
+
+        return $r1;
+    }
+
+    public static synchronized void setSystem(java.rmi.activation.ActivationSystem) throws java.rmi.activation.ActivationException
+    {
+        java.rmi.activation.ActivationException $r3;
+        java.rmi.activation.ActivationSystem $r1, r2;
+        java.lang.SecurityManager $r0;
+
+        r2 := @parameter0: java.rmi.activation.ActivationSystem;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkSetFactory()>();
+
+     label1:
+        $r1 = <java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationSystem currSystem>;
+
+        if $r1 == null goto label2;
+
+        $r3 = new java.rmi.activation.ActivationException;
+
+        specialinvoke $r3.<java.rmi.activation.ActivationException: void <init>(java.lang.String)>("activation system already set");
+
+        throw $r3;
+
+     label2:
+        <java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationSystem currSystem> = r2;
+
+        return;
+    }
+
+    public static synchronized java.rmi.activation.ActivationSystem getSystem() throws java.rmi.activation.ActivationException
+    {
+        sun.security.action.GetIntegerAction $r2;
+        java.rmi.Remote $r10;
+        java.rmi.activation.ActivationException $r13;
+        java.lang.Integer $r4;
+        java.lang.Exception $r12;
+        java.rmi.activation.ActivationSystem $r0, $r1, $r11;
+        int $i0;
+        java.lang.Object $r3;
+        java.lang.StringBuilder $r5, $r6, $r7, $r8;
+        java.lang.String $r9;
+
+        $r0 = <java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationSystem currSystem>;
+
+        if $r0 != null goto label4;
+
+     label1:
+        $r2 = new sun.security.action.GetIntegerAction;
+
+        specialinvoke $r2.<sun.security.action.GetIntegerAction: void <init>(java.lang.String,int)>("java.rmi.activation.port", 1098);
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        $r4 = (java.lang.Integer) $r3;
+
+        $i0 = virtualinvoke $r4.<java.lang.Integer: int intValue()>();
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("//:");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/java.rmi.activation.ActivationSystem");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r10 = staticinvoke <java.rmi.Naming: java.rmi.Remote lookup(java.lang.String)>($r9);
+
+        $r11 = (java.rmi.activation.ActivationSystem) $r10;
+
+        <java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationSystem currSystem> = $r11;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r12 := @caughtexception;
+
+        $r13 = new java.rmi.activation.ActivationException;
+
+        specialinvoke $r13.<java.rmi.activation.ActivationException: void <init>(java.lang.String,java.lang.Throwable)>("unable to obtain ActivationSystem", $r12);
+
+        throw $r13;
+
+     label4:
+        $r1 = <java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationSystem currSystem>;
+
+        return $r1;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    protected void activeObject(java.rmi.activation.ActivationID, java.rmi.MarshalledObject) throws java.rmi.activation.ActivationException, java.rmi.activation.UnknownObjectException, java.rmi.RemoteException
+    {
+        java.rmi.activation.ActivationGroup r0;
+        java.rmi.activation.ActivationMonitor $r1;
+        java.rmi.MarshalledObject r3;
+        java.rmi.activation.ActivationID r2;
+
+        r0 := @this: java.rmi.activation.ActivationGroup;
+
+        r2 := @parameter0: java.rmi.activation.ActivationID;
+
+        r3 := @parameter1: java.rmi.MarshalledObject;
+
+        $r1 = specialinvoke r0.<java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationMonitor getMonitor()>();
+
+        interfaceinvoke $r1.<java.rmi.activation.ActivationMonitor: void activeObject(java.rmi.activation.ActivationID,java.rmi.MarshalledObject)>(r2, r3);
+
+        return;
+    }
+
+    protected void inactiveGroup() throws java.rmi.activation.UnknownGroupException, java.rmi.RemoteException
+    {
+        java.lang.Throwable $r3;
+        java.rmi.activation.ActivationGroup r0;
+        java.rmi.activation.ActivationGroupID $r2;
+        java.rmi.activation.ActivationMonitor $r1;
+        long $l0;
+
+        r0 := @this: java.rmi.activation.ActivationGroup;
+
+     label1:
+        $r1 = specialinvoke r0.<java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationMonitor getMonitor()>();
+
+        $r2 = r0.<java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationGroupID groupID>;
+
+        $l0 = r0.<java.rmi.activation.ActivationGroup: long incarnation>;
+
+        interfaceinvoke $r1.<java.rmi.activation.ActivationMonitor: void inactiveGroup(java.rmi.activation.ActivationGroupID,long)>($r2, $l0);
+
+     label2:
+        staticinvoke <java.rmi.activation.ActivationGroup: void destroyGroup()>();
+
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        staticinvoke <java.rmi.activation.ActivationGroup: void destroyGroup()>();
+
+        throw $r3;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private java.rmi.activation.ActivationMonitor getMonitor() throws java.rmi.RemoteException
+    {
+        java.lang.Throwable $r4;
+        java.rmi.activation.ActivationGroup r0;
+        java.rmi.activation.ActivationMonitor $r1, $r3;
+        java.rmi.RemoteException $r2;
+
+        r0 := @this: java.rmi.activation.ActivationGroup;
+
+        entermonitor class "Ljava/rmi/activation/ActivationGroup;";
+
+     label1:
+        $r1 = r0.<java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationMonitor monitor>;
+
+        if $r1 == null goto label3;
+
+        $r3 = r0.<java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationMonitor monitor>;
+
+        exitmonitor class "Ljava/rmi/activation/ActivationGroup;";
+
+     label2:
+        return $r3;
+
+     label3:
+        exitmonitor class "Ljava/rmi/activation/ActivationGroup;";
+
+     label4:
+        goto label7;
+
+     label5:
+        $r4 := @caughtexception;
+
+        exitmonitor class "Ljava/rmi/activation/ActivationGroup;";
+
+     label6:
+        throw $r4;
+
+     label7:
+        $r2 = new java.rmi.RemoteException;
+
+        specialinvoke $r2.<java.rmi.RemoteException: void <init>(java.lang.String)>("monitor not received");
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    private static synchronized void destroyGroup()
+    {
+        <java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationGroup currGroup> = null;
+
+        <java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationGroupID currGroupID> = null;
+
+        return;
+    }
+
+    static synchronized java.rmi.activation.ActivationGroup currentGroup() throws java.rmi.activation.ActivationException
+    {
+        java.rmi.activation.ActivationGroup $r0, $r1;
+        java.rmi.activation.ActivationException $r2;
+
+        $r0 = <java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationGroup currGroup>;
+
+        if $r0 != null goto label1;
+
+        $r2 = new java.rmi.activation.ActivationException;
+
+        specialinvoke $r2.<java.rmi.activation.ActivationException: void <init>(java.lang.String)>("group is not active");
+
+        throw $r2;
+
+     label1:
+        $r1 = <java.rmi.activation.ActivationGroup: java.rmi.activation.ActivationGroup currGroup>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        <java.rmi.activation.ActivationGroup: long serialVersionUID> = -7696947875314805420L;
+
+        <java.rmi.activation.ActivationGroup: boolean canCreate> = 1;
+
+        return;
+    }
+}

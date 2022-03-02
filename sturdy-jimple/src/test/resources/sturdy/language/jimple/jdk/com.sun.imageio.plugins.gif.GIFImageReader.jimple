@@ -1,0 +1,3146 @@
+public class com.sun.imageio.plugins.gif.GIFImageReader extends javax.imageio.ImageReader
+{
+    javax.imageio.stream.ImageInputStream stream;
+    boolean gotHeader;
+    com.sun.imageio.plugins.gif.GIFStreamMetadata streamMetadata;
+    int currIndex;
+    com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata;
+    java.util.List imageStartPosition;
+    int imageMetadataLength;
+    int numImages;
+    byte[] block;
+    int blockLength;
+    int bitPos;
+    int nextByte;
+    int initCodeSize;
+    int clearCode;
+    int eofCode;
+    int next32Bits;
+    boolean lastBlockFound;
+    java.awt.image.BufferedImage theImage;
+    java.awt.image.WritableRaster theTile;
+    int width;
+    int height;
+    int streamX;
+    int streamY;
+    int rowsDone;
+    int interlacePass;
+    private byte[] fallbackColorTable;
+    static final int[] interlaceIncrement;
+    static final int[] interlaceOffset;
+    java.awt.Rectangle sourceRegion;
+    int sourceXSubsampling;
+    int sourceYSubsampling;
+    int sourceMinProgressivePass;
+    int sourceMaxProgressivePass;
+    java.awt.Point destinationOffset;
+    java.awt.Rectangle destinationRegion;
+    int updateMinY;
+    int updateYStep;
+    boolean decodeThisRow;
+    int destY;
+    byte[] rowBuf;
+    private static byte[] defaultPalette;
+
+    public void <init>(javax.imageio.spi.ImageReaderSpi)
+    {
+        byte[] $r3;
+        javax.imageio.spi.ImageReaderSpi r1;
+        java.util.ArrayList $r4;
+        com.sun.imageio.plugins.gif.GIFImageReader r0;
+        int $i1, $i3, $i5, $i7, $i9, $i11;
+
+        r0 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        r1 := @parameter0: javax.imageio.spi.ImageReaderSpi;
+
+        specialinvoke r0.<javax.imageio.ImageReader: void <init>(javax.imageio.spi.ImageReaderSpi)>(r1);
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream> = null;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: boolean gotHeader> = 0;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFStreamMetadata streamMetadata> = null;
+
+        $i1 = (int) -1;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int currIndex> = $i1;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata> = null;
+
+        $r4 = new java.util.ArrayList;
+
+        specialinvoke $r4.<java.util.ArrayList: void <init>()>();
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.util.List imageStartPosition> = $r4;
+
+        $i3 = (int) -1;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int numImages> = $i3;
+
+        $r3 = newarray (byte)[255];
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: byte[] block> = $r3;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int blockLength> = 0;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int bitPos> = 0;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int nextByte> = 0;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int next32Bits> = 0;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: boolean lastBlockFound> = 0;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.image.BufferedImage theImage> = null;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.image.WritableRaster theTile> = null;
+
+        $i5 = (int) -1;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int width> = $i5;
+
+        $i7 = (int) -1;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int height> = $i7;
+
+        $i9 = (int) -1;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int streamX> = $i9;
+
+        $i11 = (int) -1;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int streamY> = $i11;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int rowsDone> = 0;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int interlacePass> = 0;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: byte[] fallbackColorTable> = null;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: boolean decodeThisRow> = 1;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int destY> = 0;
+
+        return;
+    }
+
+    public void setInput(java.lang.Object, boolean, boolean)
+    {
+        com.sun.imageio.plugins.gif.GIFImageReader r0;
+        java.lang.Object r1;
+        java.lang.IllegalArgumentException $r3;
+        boolean z0, z1, $z2;
+        javax.imageio.stream.ImageInputStream $r2;
+
+        r0 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        r1 := @parameter0: java.lang.Object;
+
+        z0 := @parameter1: boolean;
+
+        z1 := @parameter2: boolean;
+
+        specialinvoke r0.<javax.imageio.ImageReader: void setInput(java.lang.Object,boolean,boolean)>(r1, z0, z1);
+
+        if r1 == null goto label2;
+
+        $z2 = r1 instanceof javax.imageio.stream.ImageInputStream;
+
+        if $z2 != 0 goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("input not an ImageInputStream!");
+
+        throw $r3;
+
+     label1:
+        $r2 = (javax.imageio.stream.ImageInputStream) r1;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream> = $r2;
+
+        goto label3;
+
+     label2:
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream> = null;
+
+     label3:
+        specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void resetStreamSettings()>();
+
+        return;
+    }
+
+    public int getNumImages(boolean) throws javax.imageio.IIOException
+    {
+        java.lang.IllegalStateException $r2, $r3;
+        javax.imageio.stream.ImageInputStream $r1;
+        com.sun.imageio.plugins.gif.GIFImageReader r0;
+        int $i0, $i1, $i2, $i3, $i4;
+        boolean $z0, z1;
+
+        r0 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        z1 := @parameter0: boolean;
+
+        $r1 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Input not set!");
+
+        throw $r3;
+
+     label1:
+        $z0 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: boolean seekForwardOnly>;
+
+        if $z0 == 0 goto label2;
+
+        if z1 == 0 goto label2;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("seekForwardOnly and allowSearch can\'t both be true!");
+
+        throw $r2;
+
+     label2:
+        $i0 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int numImages>;
+
+        if $i0 <= 0 goto label3;
+
+        $i4 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int numImages>;
+
+        return $i4;
+
+     label3:
+        if z1 == 0 goto label4;
+
+        $i2 = specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: int locateImage(int)>(2147483647);
+
+        $i3 = $i2 + 1;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int numImages> = $i3;
+
+     label4:
+        $i1 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int numImages>;
+
+        return $i1;
+    }
+
+    private void checkIndex(int)
+    {
+        java.lang.IndexOutOfBoundsException $r1;
+        com.sun.imageio.plugins.gif.GIFImageReader r0;
+        int i0, $i1;
+        boolean $z0;
+
+        r0 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        i0 := @parameter0: int;
+
+        $i1 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int minIndex>;
+
+        if i0 >= $i1 goto label1;
+
+        $r1 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r1.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("imageIndex < minIndex!");
+
+        throw $r1;
+
+     label1:
+        $z0 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: boolean seekForwardOnly>;
+
+        if $z0 == 0 goto label2;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int minIndex> = i0;
+
+     label2:
+        return;
+    }
+
+    public int getWidth(int) throws javax.imageio.IIOException
+    {
+        java.lang.IndexOutOfBoundsException $r2;
+        com.sun.imageio.plugins.gif.GIFImageReader r0;
+        com.sun.imageio.plugins.gif.GIFImageMetadata $r1;
+        int i0, $i1, $i2;
+
+        r0 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void checkIndex(int)>(i0);
+
+        $i1 = specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: int locateImage(int)>(i0);
+
+        if $i1 == i0 goto label1;
+
+        $r2 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r2.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void readMetadata()>();
+
+        $r1 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $i2 = $r1.<com.sun.imageio.plugins.gif.GIFImageMetadata: int imageWidth>;
+
+        return $i2;
+    }
+
+    public int getHeight(int) throws javax.imageio.IIOException
+    {
+        java.lang.IndexOutOfBoundsException $r2;
+        com.sun.imageio.plugins.gif.GIFImageReader r0;
+        com.sun.imageio.plugins.gif.GIFImageMetadata $r1;
+        int i0, $i1, $i2;
+
+        r0 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void checkIndex(int)>(i0);
+
+        $i1 = specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: int locateImage(int)>(i0);
+
+        if $i1 == i0 goto label1;
+
+        $r2 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r2.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void readMetadata()>();
+
+        $r1 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $i2 = $r1.<com.sun.imageio.plugins.gif.GIFImageMetadata: int imageHeight>;
+
+        return $i2;
+    }
+
+    private javax.imageio.ImageTypeSpecifier createIndexed(byte[], byte[], byte[], int)
+    {
+        byte[] r3, r4, r5;
+        javax.imageio.ImageTypeSpecifier $r7;
+        java.awt.image.SampleModel r13;
+        com.sun.imageio.plugins.gif.GIFImageReader r0;
+        java.awt.image.MultiPixelPackedSampleModel $r6;
+        int[] $r8;
+        java.awt.image.IndexColorModel $r2, $r11, r12;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        boolean $z0;
+        com.sun.imageio.plugins.gif.GIFImageMetadata $r1, $r10;
+        java.awt.image.PixelInterleavedSampleModel $r9;
+
+        r0 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        r3 := @parameter0: byte[];
+
+        r4 := @parameter1: byte[];
+
+        r5 := @parameter2: byte[];
+
+        i0 := @parameter3: int;
+
+        $r1 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $z0 = $r1.<com.sun.imageio.plugins.gif.GIFImageMetadata: boolean transparentColorFlag>;
+
+        if $z0 == 0 goto label1;
+
+        $r10 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $i4 = $r10.<com.sun.imageio.plugins.gif.GIFImageMetadata: int transparentColorIndex>;
+
+        $i2 = lengthof r3;
+
+        $i3 = $i2 - 1;
+
+        $i5 = staticinvoke <java.lang.Math: int min(int,int)>($i4, $i3);
+
+        $r11 = new java.awt.image.IndexColorModel;
+
+        $i6 = lengthof r3;
+
+        specialinvoke $r11.<java.awt.image.IndexColorModel: void <init>(int,int,byte[],byte[],byte[],int)>(i0, $i6, r3, r4, r5, $i5);
+
+        r12 = $r11;
+
+        goto label2;
+
+     label1:
+        $r2 = new java.awt.image.IndexColorModel;
+
+        $i1 = lengthof r3;
+
+        specialinvoke $r2.<java.awt.image.IndexColorModel: void <init>(int,int,byte[],byte[],byte[])>(i0, $i1, r3, r4, r5);
+
+        r12 = $r2;
+
+     label2:
+        if i0 != 8 goto label3;
+
+        $r8 = newarray (int)[1];
+
+        $r8[0] = 0;
+
+        $r9 = new java.awt.image.PixelInterleavedSampleModel;
+
+        specialinvoke $r9.<java.awt.image.PixelInterleavedSampleModel: void <init>(int,int,int,int,int,int[])>(0, 1, 1, 1, 1, $r8);
+
+        r13 = $r9;
+
+        goto label4;
+
+     label3:
+        $r6 = new java.awt.image.MultiPixelPackedSampleModel;
+
+        specialinvoke $r6.<java.awt.image.MultiPixelPackedSampleModel: void <init>(int,int,int,int)>(0, 1, 1, i0);
+
+        r13 = $r6;
+
+     label4:
+        $r7 = new javax.imageio.ImageTypeSpecifier;
+
+        specialinvoke $r7.<javax.imageio.ImageTypeSpecifier: void <init>(java.awt.image.ColorModel,java.awt.image.SampleModel)>(r12, r13);
+
+        return $r7;
+    }
+
+    public java.util.Iterator getImageTypes(int) throws javax.imageio.IIOException
+    {
+        byte[] $r3, $r7, $r8, $r11, r13, $r14, $r15, $r16;
+        java.lang.IndexOutOfBoundsException $r12;
+        byte $b2, $b3, $b4, b7, b13, b14;
+        com.sun.imageio.plugins.gif.GIFStreamMetadata $r4;
+        javax.imageio.ImageTypeSpecifier $r5;
+        java.util.ArrayList $r1;
+        com.sun.imageio.plugins.gif.GIFImageReader r0;
+        int i0, $i1, $i5, $i6, $i8, i9, i10, i11, i12;
+        com.sun.imageio.plugins.gif.GIFImageMetadata $r2, $r9, $r10;
+        java.util.Iterator $r6;
+
+        r0 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void checkIndex(int)>(i0);
+
+        $i1 = specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: int locateImage(int)>(i0);
+
+        if $i1 == i0 goto label01;
+
+        $r12 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r12.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r12;
+
+     label01:
+        specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void readMetadata()>();
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>(int)>(1);
+
+        $r2 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r3 = $r2.<com.sun.imageio.plugins.gif.GIFImageMetadata: byte[] localColorTable>;
+
+        if $r3 == null goto label02;
+
+        $r9 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        r13 = $r9.<com.sun.imageio.plugins.gif.GIFImageMetadata: byte[] localColorTable>;
+
+        $r10 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r11 = $r10.<com.sun.imageio.plugins.gif.GIFImageMetadata: byte[] localColorTable>;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: byte[] fallbackColorTable> = $r11;
+
+        goto label03;
+
+     label02:
+        $r4 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFStreamMetadata streamMetadata>;
+
+        r13 = $r4.<com.sun.imageio.plugins.gif.GIFStreamMetadata: byte[] globalColorTable>;
+
+     label03:
+        if r13 != null goto label05;
+
+        $r7 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: byte[] fallbackColorTable>;
+
+        if $r7 != null goto label04;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void processWarningOccurred(java.lang.String)>("Use default color table.");
+
+        $r8 = staticinvoke <com.sun.imageio.plugins.gif.GIFImageReader: byte[] getDefaultPalette()>();
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: byte[] fallbackColorTable> = $r8;
+
+     label04:
+        r13 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: byte[] fallbackColorTable>;
+
+     label05:
+        $i5 = lengthof r13;
+
+        $i6 = $i5 / 3;
+
+        if $i6 != 2 goto label06;
+
+        b7 = 1;
+
+        b14 = 1;
+
+        b13 = 1;
+
+        goto label10;
+
+     label06:
+        if $i6 != 4 goto label07;
+
+        b7 = 2;
+
+        b14 = 2;
+
+        b13 = 2;
+
+        goto label10;
+
+     label07:
+        if $i6 == 8 goto label08;
+
+        if $i6 != 16 goto label09;
+
+     label08:
+        b7 = 4;
+
+        b14 = 4;
+
+        b13 = 4;
+
+        goto label10;
+
+     label09:
+        b7 = 8;
+
+        b14 = 8;
+
+        b13 = 8;
+
+     label10:
+        $i8 = 1 << b13;
+
+        $r14 = newarray (byte)[$i8];
+
+        $r15 = newarray (byte)[$i8];
+
+        $r16 = newarray (byte)[$i8];
+
+        i9 = 0;
+
+        i10 = 0;
+
+     label11:
+        if i10 >= $i6 goto label12;
+
+        i11 = i9 + 1;
+
+        $b2 = r13[i9];
+
+        $r14[i10] = $b2;
+
+        i12 = i11 + 1;
+
+        $b3 = r13[i11];
+
+        $r15[i10] = $b3;
+
+        i9 = i12 + 1;
+
+        $b4 = r13[i12];
+
+        $r16[i10] = $b4;
+
+        i10 = i10 + 1;
+
+        goto label11;
+
+     label12:
+        $r5 = specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.ImageTypeSpecifier createIndexed(byte[],byte[],byte[],int)>($r14, $r15, $r16, b14);
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>($r5);
+
+        $r6 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+        return $r6;
+    }
+
+    public javax.imageio.ImageReadParam getDefaultReadParam()
+    {
+        javax.imageio.ImageReadParam $r0;
+        com.sun.imageio.plugins.gif.GIFImageReader r1;
+
+        r1 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        $r0 = new javax.imageio.ImageReadParam;
+
+        specialinvoke $r0.<javax.imageio.ImageReadParam: void <init>()>();
+
+        return $r0;
+    }
+
+    public javax.imageio.metadata.IIOMetadata getStreamMetadata() throws javax.imageio.IIOException
+    {
+        com.sun.imageio.plugins.gif.GIFImageReader r0;
+        com.sun.imageio.plugins.gif.GIFStreamMetadata $r1;
+
+        r0 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void readHeader()>();
+
+        $r1 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFStreamMetadata streamMetadata>;
+
+        return $r1;
+    }
+
+    public javax.imageio.metadata.IIOMetadata getImageMetadata(int) throws javax.imageio.IIOException
+    {
+        java.lang.IndexOutOfBoundsException $r2;
+        com.sun.imageio.plugins.gif.GIFImageReader r0;
+        com.sun.imageio.plugins.gif.GIFImageMetadata $r1;
+        int i0, $i1;
+
+        r0 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void checkIndex(int)>(i0);
+
+        $i1 = specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: int locateImage(int)>(i0);
+
+        if $i1 == i0 goto label1;
+
+        $r2 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r2.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("Bad image index!");
+
+        throw $r2;
+
+     label1:
+        specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void readMetadata()>();
+
+        $r1 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        return $r1;
+    }
+
+    private void initNext32Bits()
+    {
+        byte[] $r1, $r2, $r3, $r4;
+        com.sun.imageio.plugins.gif.GIFImageReader r0;
+        short $s1, $s3, $s8, $s16, $s18, $s20;
+        byte $b0, $b2, $b7, $b12;
+        int $i4, $i5, $i6, $i9, $i10, $i11, $i13, $i14, $i15, $i17, $i19, $i21, $i22;
+
+        r0 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        $r1 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: byte[] block>;
+
+        $b0 = $r1[0];
+
+        $s16 = (short) $b0;
+
+        $s1 = $s16 & 255;
+
+        $i17 = (int) $s1;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int next32Bits> = $i17;
+
+        $i5 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int next32Bits>;
+
+        $r2 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: byte[] block>;
+
+        $b2 = $r2[1];
+
+        $s18 = (short) $b2;
+
+        $s3 = $s18 & 255;
+
+        $i19 = (int) $s3;
+
+        $i4 = $i19 << 8;
+
+        $i6 = $i5 | $i4;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int next32Bits> = $i6;
+
+        $i10 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int next32Bits>;
+
+        $r3 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: byte[] block>;
+
+        $b7 = $r3[2];
+
+        $s20 = (short) $b7;
+
+        $s8 = $s20 & 255;
+
+        $i21 = (int) $s8;
+
+        $i9 = $i21 << 16;
+
+        $i11 = $i10 | $i9;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int next32Bits> = $i11;
+
+        $i14 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int next32Bits>;
+
+        $r4 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: byte[] block>;
+
+        $b12 = $r4[3];
+
+        $i22 = (int) $b12;
+
+        $i13 = $i22 << 24;
+
+        $i15 = $i14 | $i13;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int next32Bits> = $i15;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int nextByte> = 4;
+
+        return;
+    }
+
+    private int getCode(int, int) throws java.io.IOException
+    {
+        byte[] $r1, $r3;
+        byte $b20;
+        boolean $z0;
+        javax.imageio.stream.ImageInputStream $r2, $r4;
+        com.sun.imageio.plugins.gif.GIFImageReader r0;
+        int i0, $i1, $i2, $i3, $i4, i5, $i6, i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i21, $i22, $i23, $i24, $i25, $i26, i27, i28, $i29;
+
+        r0 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        i0 := @parameter0: int;
+
+        i5 := @parameter1: int;
+
+        $i1 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int bitPos>;
+
+        $i2 = $i1 + i0;
+
+        if $i2 <= 32 goto label1;
+
+        $i26 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int eofCode>;
+
+        return $i26;
+
+     label1:
+        $i4 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int next32Bits>;
+
+        $i3 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int bitPos>;
+
+        $i6 = $i4 >> $i3;
+
+        i7 = $i6 & i5;
+
+        $i8 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int bitPos>;
+
+        $i9 = $i8 + i0;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int bitPos> = $i9;
+
+     label2:
+        $i10 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int bitPos>;
+
+        if $i10 < 8 goto label7;
+
+        $z0 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: boolean lastBlockFound>;
+
+        if $z0 != 0 goto label7;
+
+        $i11 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int next32Bits>;
+
+        $i12 = $i11 >>> 8;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int next32Bits> = $i12;
+
+        $i13 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int bitPos>;
+
+        $i14 = $i13 - 8;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int bitPos> = $i14;
+
+        $i16 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int nextByte>;
+
+        $i15 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int blockLength>;
+
+        if $i16 < $i15 goto label6;
+
+        $r2 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i23 = interfaceinvoke $r2.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int blockLength> = $i23;
+
+        $i24 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int blockLength>;
+
+        if $i24 != 0 goto label3;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: boolean lastBlockFound> = 1;
+
+        return i7;
+
+     label3:
+        i27 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int blockLength>;
+
+        i28 = 0;
+
+     label4:
+        if i27 <= 0 goto label5;
+
+        $r4 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $r3 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: byte[] block>;
+
+        $i25 = interfaceinvoke $r4.<javax.imageio.stream.ImageInputStream: int read(byte[],int,int)>($r3, i28, i27);
+
+        i28 = i28 + $i25;
+
+        i27 = i27 - $i25;
+
+        goto label4;
+
+     label5:
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int nextByte> = 0;
+
+     label6:
+        $i19 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int next32Bits>;
+
+        $r1 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: byte[] block>;
+
+        $i17 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int nextByte>;
+
+        $i18 = $i17 + 1;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int nextByte> = $i18;
+
+        $b20 = $r1[$i17];
+
+        $i29 = (int) $b20;
+
+        $i21 = $i29 << 24;
+
+        $i22 = $i19 | $i21;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int next32Bits> = $i22;
+
+        goto label2;
+
+     label7:
+        return i7;
+    }
+
+    public void initializeStringTable(int[], byte[], byte[], int[])
+    {
+        byte[] r3, r4;
+        com.sun.imageio.plugins.gif.GIFImageReader r0;
+        byte $b2, $b3;
+        int[] r1, r2;
+        int $i0, i1, i4, i5, $i7, $i9;
+
+        r0 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        r1 := @parameter0: int[];
+
+        r3 := @parameter1: byte[];
+
+        r4 := @parameter2: byte[];
+
+        r2 := @parameter3: int[];
+
+        $i0 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int initCodeSize>;
+
+        i1 = 1 << $i0;
+
+        i4 = 0;
+
+     label1:
+        if i4 >= i1 goto label2;
+
+        $i7 = (int) -1;
+
+        r1[i4] = $i7;
+
+        $b2 = (byte) i4;
+
+        r3[i4] = $b2;
+
+        $b3 = (byte) i4;
+
+        r4[i4] = $b3;
+
+        r2[i4] = 1;
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label2:
+        i5 = i1;
+
+     label3:
+        if i5 >= 4096 goto label4;
+
+        $i9 = (int) -1;
+
+        r1[i5] = $i9;
+
+        r2[i5] = 1;
+
+        i5 = i5 + 1;
+
+        goto label3;
+
+     label4:
+        return;
+    }
+
+    private void outputRow()
+    {
+        java.awt.Rectangle $r1, $r2, $r3;
+        byte[] $r7, $r9;
+        com.sun.imageio.plugins.gif.GIFImageReader r0;
+        short $s9, $s15;
+        byte $b8;
+        int[] $r5;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i10, $i11, $i12, i13, i14, $i16;
+        java.awt.image.BufferedImage $r6;
+        java.util.List $r4;
+        java.awt.image.WritableRaster $r8, $r10;
+
+        r0 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        $r1 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle sourceRegion>;
+
+        $i3 = $r1.<java.awt.Rectangle: int width>;
+
+        $r2 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle destinationRegion>;
+
+        $i1 = $r2.<java.awt.Rectangle: int width>;
+
+        $i0 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int sourceXSubsampling>;
+
+        $i2 = $i1 * $i0;
+
+        $i4 = staticinvoke <java.lang.Math: int min(int,int)>($i3, $i2);
+
+        $r3 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle destinationRegion>;
+
+        i13 = $r3.<java.awt.Rectangle: int x>;
+
+        $i5 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int sourceXSubsampling>;
+
+        if $i5 != 1 goto label1;
+
+        $r10 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.image.WritableRaster theTile>;
+
+        $i12 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int destY>;
+
+        $r9 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: byte[] rowBuf>;
+
+        virtualinvoke $r10.<java.awt.image.WritableRaster: void setDataElements(int,int,int,int,java.lang.Object)>(i13, $i12, $i4, 1, $r9);
+
+        goto label3;
+
+     label1:
+        i14 = 0;
+
+     label2:
+        if i14 >= $i4 goto label3;
+
+        $r8 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.image.WritableRaster theTile>;
+
+        $i10 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int destY>;
+
+        $r7 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: byte[] rowBuf>;
+
+        $b8 = $r7[i14];
+
+        $s15 = (short) $b8;
+
+        $s9 = $s15 & 255;
+
+        $i16 = (int) $s9;
+
+        virtualinvoke $r8.<java.awt.image.WritableRaster: void setSample(int,int,int,int)>(i13, $i10, 0, $i16);
+
+        $i11 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int sourceXSubsampling>;
+
+        i14 = i14 + $i11;
+
+        i13 = i13 + 1;
+
+        goto label2;
+
+     label3:
+        $r4 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.util.List updateListeners>;
+
+        if $r4 == null goto label4;
+
+        $r5 = newarray (int)[1];
+
+        $r5[0] = 0;
+
+        $r6 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.image.BufferedImage theImage>;
+
+        $i7 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int destY>;
+
+        $i6 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int updateYStep>;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void processImageUpdate(java.awt.image.BufferedImage,int,int,int,int,int,int,int[])>($r6, i13, $i7, $i4, 1, 1, $i6, $r5);
+
+     label4:
+        return;
+    }
+
+    private void computeDecodeThisRow()
+    {
+        java.awt.Rectangle $r1, $r2, $r3, $r4, $r5, $r6;
+        com.sun.imageio.plugins.gif.GIFImageReader r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14;
+        boolean $z0;
+
+        r0 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        $i3 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int destY>;
+
+        $r1 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle destinationRegion>;
+
+        $i1 = $r1.<java.awt.Rectangle: int y>;
+
+        $r2 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle destinationRegion>;
+
+        $i0 = $r2.<java.awt.Rectangle: int height>;
+
+        $i2 = $i1 + $i0;
+
+        if $i3 >= $i2 goto label1;
+
+        $i5 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int streamY>;
+
+        $r3 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle sourceRegion>;
+
+        $i4 = $r3.<java.awt.Rectangle: int y>;
+
+        if $i5 < $i4 goto label1;
+
+        $i9 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int streamY>;
+
+        $r4 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle sourceRegion>;
+
+        $i7 = $r4.<java.awt.Rectangle: int y>;
+
+        $r5 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle sourceRegion>;
+
+        $i6 = $r5.<java.awt.Rectangle: int height>;
+
+        $i8 = $i7 + $i6;
+
+        if $i9 >= $i8 goto label1;
+
+        $i11 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int streamY>;
+
+        $r6 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle sourceRegion>;
+
+        $i10 = $r6.<java.awt.Rectangle: int y>;
+
+        $i13 = $i11 - $i10;
+
+        $i12 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int sourceYSubsampling>;
+
+        $i14 = $i13 % $i12;
+
+        if $i14 != 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: boolean decodeThisRow> = $z0;
+
+        return;
+    }
+
+    private void outputPixels(byte[], int)
+    {
+        byte[] r8, $r9;
+        byte $b32;
+        int[] $r3, $r5;
+        boolean $z0, $z1;
+        java.awt.image.BufferedImage $r6;
+        java.util.List $r4;
+        float $f0, $f1, $f2, $f3;
+        java.awt.Rectangle $r1, $r7, $r10, $r11;
+        com.sun.imageio.plugins.gif.GIFImageReader r0;
+        int $i0, $i1, $i2, $i3, i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i33, i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41;
+        com.sun.imageio.plugins.gif.GIFImageMetadata $r2;
+
+        r0 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        r8 := @parameter0: byte[];
+
+        i4 := @parameter1: int;
+
+        $i1 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int interlacePass>;
+
+        $i0 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int sourceMinProgressivePass>;
+
+        if $i1 < $i0 goto label01;
+
+        $i3 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int interlacePass>;
+
+        $i2 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int sourceMaxProgressivePass>;
+
+        if $i3 <= $i2 goto label02;
+
+     label01:
+        return;
+
+     label02:
+        i34 = 0;
+
+     label03:
+        if i34 >= i4 goto label11;
+
+        $i6 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int streamX>;
+
+        $r1 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle sourceRegion>;
+
+        $i5 = $r1.<java.awt.Rectangle: int x>;
+
+        if $i6 < $i5 goto label04;
+
+        $r9 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: byte[] rowBuf>;
+
+        $i31 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int streamX>;
+
+        $r7 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle sourceRegion>;
+
+        $i30 = $r7.<java.awt.Rectangle: int x>;
+
+        $i33 = $i31 - $i30;
+
+        $b32 = r8[i34];
+
+        $r9[$i33] = $b32;
+
+     label04:
+        $i7 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int streamX>;
+
+        $i8 = $i7 + 1;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int streamX> = $i8;
+
+        $i10 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int streamX>;
+
+        $i9 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int width>;
+
+        if $i10 != $i9 goto label10;
+
+        $i11 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int rowsDone>;
+
+        $i12 = $i11 + 1;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int rowsDone> = $i12;
+
+        $i13 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int rowsDone>;
+
+        $f0 = (float) $i13;
+
+        $f2 = 100.0F * $f0;
+
+        $i14 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int height>;
+
+        $f1 = (float) $i14;
+
+        $f3 = $f2 / $f1;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void processImageProgress(float)>($f3);
+
+        $z0 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: boolean decodeThisRow>;
+
+        if $z0 == 0 goto label05;
+
+        specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void outputRow()>();
+
+     label05:
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int streamX> = 0;
+
+        $r2 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $z1 = $r2.<com.sun.imageio.plugins.gif.GIFImageMetadata: boolean interlaceFlag>;
+
+        if $z1 == 0 goto label08;
+
+        $i19 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int streamY>;
+
+        $r3 = <com.sun.imageio.plugins.gif.GIFImageReader: int[] interlaceIncrement>;
+
+        $i17 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int interlacePass>;
+
+        $i18 = $r3[$i17];
+
+        $i20 = $i19 + $i18;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int streamY> = $i20;
+
+        $i22 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int streamY>;
+
+        $i21 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int height>;
+
+        if $i22 < $i21 goto label09;
+
+        $r4 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.util.List updateListeners>;
+
+        if $r4 == null goto label06;
+
+        $r6 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.image.BufferedImage theImage>;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void processPassComplete(java.awt.image.BufferedImage)>($r6);
+
+     label06:
+        $i23 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int interlacePass>;
+
+        $i24 = $i23 + 1;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int interlacePass> = $i24;
+
+        $i26 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int interlacePass>;
+
+        $i25 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int sourceMaxProgressivePass>;
+
+        if $i26 <= $i25 goto label07;
+
+        return;
+
+     label07:
+        $r5 = <com.sun.imageio.plugins.gif.GIFImageReader: int[] interlaceOffset>;
+
+        $i27 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int interlacePass>;
+
+        $i28 = $r5[$i27];
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int streamY> = $i28;
+
+        $i29 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int interlacePass>;
+
+        specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void startPass(int)>($i29);
+
+        goto label09;
+
+     label08:
+        $i15 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int streamY>;
+
+        $i16 = $i15 + 1;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int streamY> = $i16;
+
+     label09:
+        $r10 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle destinationRegion>;
+
+        $i35 = $r10.<java.awt.Rectangle: int y>;
+
+        $i36 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int streamY>;
+
+        $r11 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle sourceRegion>;
+
+        $i37 = $r11.<java.awt.Rectangle: int y>;
+
+        $i38 = $i36 - $i37;
+
+        $i39 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int sourceYSubsampling>;
+
+        $i40 = $i38 / $i39;
+
+        $i41 = $i35 + $i40;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int destY> = $i41;
+
+        specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void computeDecodeThisRow()>();
+
+     label10:
+        i34 = i34 + 1;
+
+        goto label03;
+
+     label11:
+        return;
+    }
+
+    private void readHeader() throws javax.imageio.IIOException
+    {
+        byte[] $r24, $r27, r32;
+        java.lang.IllegalStateException $r29;
+        byte $b0, $b2, $b4;
+        java.lang.Long $r23;
+        boolean $z0, z1, $z2, $z3;
+        javax.imageio.stream.ImageInputStream $r1, $r4, $r5, $r9, $r11, $r13, $r16, $r18, $r21, $r28;
+        java.nio.ByteOrder $r3;
+        java.util.List $r22;
+        com.sun.imageio.plugins.gif.GIFStreamMetadata $r2, $r7, $r10, $r12, $r14, $r15, $r17, $r19, $r20, $r25, $r26;
+        long $l18;
+        javax.imageio.IIOException $r31;
+        com.sun.imageio.plugins.gif.GIFImageReader r0;
+        java.lang.StringBuffer $r6;
+        int $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i19, $i20;
+        java.lang.String $r8;
+        char $c1, $c3, $c5;
+        java.io.IOException $r30;
+
+        r0 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        $z0 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: boolean gotHeader>;
+
+        if $z0 == 0 goto label01;
+
+        return;
+
+     label01:
+        $r1 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        if $r1 != null goto label02;
+
+        $r29 = new java.lang.IllegalStateException;
+
+        specialinvoke $r29.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Input not set!");
+
+        throw $r29;
+
+     label02:
+        $r2 = new com.sun.imageio.plugins.gif.GIFStreamMetadata;
+
+        specialinvoke $r2.<com.sun.imageio.plugins.gif.GIFStreamMetadata: void <init>()>();
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFStreamMetadata streamMetadata> = $r2;
+
+     label03:
+        $r4 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $r3 = <java.nio.ByteOrder: java.nio.ByteOrder LITTLE_ENDIAN>;
+
+        interfaceinvoke $r4.<javax.imageio.stream.ImageInputStream: void setByteOrder(java.nio.ByteOrder)>($r3);
+
+        r32 = newarray (byte)[6];
+
+        $r5 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r5.<javax.imageio.stream.ImageInputStream: void readFully(byte[])>(r32);
+
+        $r6 = new java.lang.StringBuffer;
+
+        specialinvoke $r6.<java.lang.StringBuffer: void <init>(int)>(3);
+
+        $b0 = r32[3];
+
+        $c1 = (char) $b0;
+
+        virtualinvoke $r6.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c1);
+
+        $b2 = r32[4];
+
+        $c3 = (char) $b2;
+
+        virtualinvoke $r6.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c3);
+
+        $b4 = r32[5];
+
+        $c5 = (char) $b4;
+
+        virtualinvoke $r6.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c5);
+
+        $r7 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFStreamMetadata streamMetadata>;
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $r7.<com.sun.imageio.plugins.gif.GIFStreamMetadata: java.lang.String version> = $r8;
+
+        $r10 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFStreamMetadata streamMetadata>;
+
+        $r9 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i6 = interfaceinvoke $r9.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r10.<com.sun.imageio.plugins.gif.GIFStreamMetadata: int logicalScreenWidth> = $i6;
+
+        $r12 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFStreamMetadata streamMetadata>;
+
+        $r11 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i7 = interfaceinvoke $r11.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r12.<com.sun.imageio.plugins.gif.GIFStreamMetadata: int logicalScreenHeight> = $i7;
+
+        $r13 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i8 = interfaceinvoke $r13.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $i9 = $i8 & 128;
+
+        if $i9 == 0 goto label04;
+
+        $z2 = 1;
+
+        goto label05;
+
+     label04:
+        $z2 = 0;
+
+     label05:
+        z1 = $z2;
+
+        $r14 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFStreamMetadata streamMetadata>;
+
+        $i10 = $i8 >> 4;
+
+        $i11 = $i10 & 7;
+
+        $i12 = $i11 + 1;
+
+        $r14.<com.sun.imageio.plugins.gif.GIFStreamMetadata: int colorResolution> = $i12;
+
+        $r15 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFStreamMetadata streamMetadata>;
+
+        $i13 = $i8 & 8;
+
+        if $i13 == 0 goto label06;
+
+        $z3 = 1;
+
+        goto label07;
+
+     label06:
+        $z3 = 0;
+
+     label07:
+        $r15.<com.sun.imageio.plugins.gif.GIFStreamMetadata: boolean sortFlag> = $z3;
+
+        $i14 = $i8 & 7;
+
+        $i15 = $i14 + 1;
+
+        $i20 = 1 << $i15;
+
+        $r17 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFStreamMetadata streamMetadata>;
+
+        $r16 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i16 = interfaceinvoke $r16.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r17.<com.sun.imageio.plugins.gif.GIFStreamMetadata: int backgroundColorIndex> = $i16;
+
+        $r19 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFStreamMetadata streamMetadata>;
+
+        $r18 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i17 = interfaceinvoke $r18.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r19.<com.sun.imageio.plugins.gif.GIFStreamMetadata: int pixelAspectRatio> = $i17;
+
+        if z1 == 0 goto label08;
+
+        $r25 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFStreamMetadata streamMetadata>;
+
+        $i19 = 3 * $i20;
+
+        $r24 = newarray (byte)[$i19];
+
+        $r25.<com.sun.imageio.plugins.gif.GIFStreamMetadata: byte[] globalColorTable> = $r24;
+
+        $r28 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $r26 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFStreamMetadata streamMetadata>;
+
+        $r27 = $r26.<com.sun.imageio.plugins.gif.GIFStreamMetadata: byte[] globalColorTable>;
+
+        interfaceinvoke $r28.<javax.imageio.stream.ImageInputStream: void readFully(byte[])>($r27);
+
+        goto label09;
+
+     label08:
+        $r20 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFStreamMetadata streamMetadata>;
+
+        $r20.<com.sun.imageio.plugins.gif.GIFStreamMetadata: byte[] globalColorTable> = null;
+
+     label09:
+        $r22 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.util.List imageStartPosition>;
+
+        $r21 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $l18 = interfaceinvoke $r21.<javax.imageio.stream.ImageInputStream: long getStreamPosition()>();
+
+        $r23 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l18);
+
+        interfaceinvoke $r22.<java.util.List: boolean add(java.lang.Object)>($r23);
+
+     label10:
+        goto label12;
+
+     label11:
+        $r30 := @caughtexception;
+
+        $r31 = new javax.imageio.IIOException;
+
+        specialinvoke $r31.<javax.imageio.IIOException: void <init>(java.lang.String,java.lang.Throwable)>("I/O error reading header!", $r30);
+
+        throw $r31;
+
+     label12:
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: boolean gotHeader> = 1;
+
+        return;
+
+        catch java.io.IOException from label03 to label10 with label11;
+    }
+
+    private boolean skipImage() throws javax.imageio.IIOException
+    {
+        javax.imageio.IIOException $r12;
+        com.sun.imageio.plugins.gif.GIFImageReader r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, i8, $i9;
+        java.io.IOException $r11;
+        java.io.EOFException $r13;
+        javax.imageio.stream.ImageInputStream $r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r14, $r15;
+
+        r0 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+     label01:
+        $r1 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i0 = interfaceinvoke $r1.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        if $i0 != 44 goto label05;
+
+        $r7 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r7.<javax.imageio.stream.ImageInputStream: int skipBytes(int)>(8);
+
+        $r8 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i3 = interfaceinvoke $r8.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $i4 = $i3 & 128;
+
+        if $i4 == 0 goto label02;
+
+        $i5 = $i3 & 7;
+
+        i8 = $i5 + 1;
+
+        $r10 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i6 = 1 << i8;
+
+        $i7 = 3 * $i6;
+
+        interfaceinvoke $r10.<javax.imageio.stream.ImageInputStream: int skipBytes(int)>($i7);
+
+     label02:
+        $r9 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r9.<javax.imageio.stream.ImageInputStream: int skipBytes(int)>(1);
+
+     label03:
+        $r14 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i9 = interfaceinvoke $r14.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r15 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r15.<javax.imageio.stream.ImageInputStream: int skipBytes(int)>($i9);
+
+        if $i9 > 0 goto label03;
+
+     label04:
+        return 1;
+
+     label05:
+        if $i0 != 59 goto label07;
+
+     label06:
+        return 0;
+
+     label07:
+        if $i0 != 33 goto label09;
+
+        $r4 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r4.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+     label08:
+        $r5 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i2 = interfaceinvoke $r5.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r6 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r6.<javax.imageio.stream.ImageInputStream: int skipBytes(int)>($i2);
+
+        if $i2 > 0 goto label08;
+
+        goto label12;
+
+     label09:
+        if $i0 != 0 goto label11;
+
+     label10:
+        return 0;
+
+     label11:
+        $r2 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i1 = interfaceinvoke $r2.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r3 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r3.<javax.imageio.stream.ImageInputStream: int skipBytes(int)>($i1);
+
+        if $i1 > 0 goto label11;
+
+     label12:
+        goto label01;
+
+     label13:
+        $r13 := @caughtexception;
+
+        return 0;
+
+     label14:
+        $r11 := @caughtexception;
+
+        $r12 = new javax.imageio.IIOException;
+
+        specialinvoke $r12.<javax.imageio.IIOException: void <init>(java.lang.String,java.lang.Throwable)>("I/O error locating image!", $r11);
+
+        throw $r12;
+
+        catch java.io.EOFException from label01 to label04 with label13;
+        catch java.io.EOFException from label05 to label06 with label13;
+        catch java.io.EOFException from label07 to label10 with label13;
+        catch java.io.EOFException from label11 to label13 with label13;
+        catch java.io.IOException from label01 to label04 with label14;
+        catch java.io.IOException from label05 to label06 with label14;
+        catch java.io.IOException from label07 to label10 with label14;
+        catch java.io.IOException from label11 to label13 with label14;
+    }
+
+    private int locateImage(int) throws javax.imageio.IIOException
+    {
+        long $l4, $l6;
+        javax.imageio.IIOException $r12;
+        com.sun.imageio.plugins.gif.GIFImageReader r0;
+        java.lang.Long r4, $r11;
+        int i0, $i1, $i2, $i3, $i5, i7, i8, $i10;
+        boolean $z0;
+        java.io.IOException $r9;
+        javax.imageio.stream.ImageInputStream $r5, $r7;
+        java.util.List $r1, $r2, $r8;
+        java.lang.Object $r3;
+
+        r0 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void readHeader()>();
+
+     label1:
+        $r1 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.util.List imageStartPosition>;
+
+        $i1 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        $i2 = $i1 - 1;
+
+        $i3 = staticinvoke <java.lang.Math: int min(int,int)>(i0, $i2);
+
+        i7 = $i3;
+
+        $r2 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.util.List imageStartPosition>;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.lang.Object get(int)>($i3);
+
+        r4 = (java.lang.Long) $r3;
+
+        $r5 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $l4 = virtualinvoke r4.<java.lang.Long: long longValue()>();
+
+        interfaceinvoke $r5.<javax.imageio.stream.ImageInputStream: void seek(long)>($l4);
+
+     label2:
+        if i7 >= i0 goto label5;
+
+        $z0 = specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: boolean skipImage()>();
+
+        if $z0 != 0 goto label4;
+
+        $i10 = (int) -1;
+
+        i8 = i7 + $i10;
+
+     label3:
+        return i8;
+
+     label4:
+        $r11 = new java.lang.Long;
+
+        $r7 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $l6 = interfaceinvoke $r7.<javax.imageio.stream.ImageInputStream: long getStreamPosition()>();
+
+        specialinvoke $r11.<java.lang.Long: void <init>(long)>($l6);
+
+        $r8 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.util.List imageStartPosition>;
+
+        interfaceinvoke $r8.<java.util.List: boolean add(java.lang.Object)>($r11);
+
+        i7 = i7 + 1;
+
+        goto label2;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r9 := @caughtexception;
+
+        $r12 = new javax.imageio.IIOException;
+
+        specialinvoke $r12.<javax.imageio.IIOException: void <init>(java.lang.String,java.lang.Throwable)>("Couldn\'t seek!", $r9);
+
+        throw $r12;
+
+     label7:
+        $i5 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int currIndex>;
+
+        if $i5 == i0 goto label8;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata> = null;
+
+     label8:
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int currIndex> = i0;
+
+        return i0;
+
+        catch java.io.IOException from label1 to label3 with label6;
+        catch java.io.IOException from label4 to label5 with label6;
+    }
+
+    private byte[] concatenateBlocks() throws java.io.IOException
+    {
+        byte[] r2, r4;
+        javax.imageio.stream.ImageInputStream $r1, $r3;
+        com.sun.imageio.plugins.gif.GIFImageReader r0;
+        int $i0, $i1, $i2, $i3, $i4;
+
+        r0 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        r4 = newarray (byte)[0];
+
+     label1:
+        $r1 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i0 = interfaceinvoke $r1.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        if $i0 != 0 goto label2;
+
+        goto label3;
+
+     label2:
+        $i1 = lengthof r4;
+
+        $i2 = $i1 + $i0;
+
+        r2 = newarray (byte)[$i2];
+
+        $i3 = lengthof r4;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r4, 0, r2, 0, $i3);
+
+        $r3 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i4 = lengthof r4;
+
+        interfaceinvoke $r3.<javax.imageio.stream.ImageInputStream: void readFully(byte[],int,int)>(r2, $i4, $i0);
+
+        r4 = r2;
+
+        goto label1;
+
+     label3:
+        return r4;
+    }
+
+    private void readMetadata() throws javax.imageio.IIOException
+    {
+        java.lang.IndexOutOfBoundsException $r11;
+        byte[] r16, $r18, r33, $r34, $r60, $r84, $r87, r93, r94, r95;
+        javax.imageio.stream.ImageInputStream $r1, $r3, $r4, $r12, $r13, $r14, $r15, $r17, $r41, $r43, $r45, $r47, $r49, $r51, $r53, $r55, $r57, $r61, $r62, $r66, $r68, $r70, $r71, $r73, $r75, $r77, $r79, $r83, $r88;
+        java.lang.StringBuilder $r6, $r7, $r8, $r9;
+        long $l0, $l36, $l37;
+        com.sun.imageio.plugins.gif.GIFImageMetadata $r2, $r19, $r21, $r23, $r25, $r28, $r30, $r32, $r35, $r37, $r40, $r42, $r44, $r46, $r48, $r50, $r52, $r54, $r56, $r58, $r59, $r63, $r64, $r65, $r67, $r69, $r72, $r74, $r76, $r78, $r80, $r81, $r82, $r85, $r86;
+        java.io.IOException $r90;
+        int $i1, $i2, $i3, $i4, $i5, $i6, i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i38, $i39, $i40;
+        javax.imageio.IIOException $r5, $r91, $r92;
+        java.util.ArrayList $r27, $r29, $r31, $r39;
+        com.sun.imageio.plugins.gif.GIFImageReader r0;
+        java.lang.String $r10;
+        java.lang.IllegalStateException $r89;
+        boolean $z0, z1, $z2, $z3, $z4, $z5;
+        java.util.List $r20, $r22, $r24, $r26, $r36, $r38;
+
+        r0 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        $r1 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        if $r1 != null goto label01;
+
+        $r89 = new java.lang.IllegalStateException;
+
+        specialinvoke $r89.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Input not set!");
+
+        throw $r89;
+
+     label01:
+        $r2 = new com.sun.imageio.plugins.gif.GIFImageMetadata;
+
+        specialinvoke $r2.<com.sun.imageio.plugins.gif.GIFImageMetadata: void <init>()>();
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata> = $r2;
+
+        $r3 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $l0 = interfaceinvoke $r3.<javax.imageio.stream.ImageInputStream: long getStreamPosition()>();
+
+     label02:
+        $r4 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i1 = interfaceinvoke $r4.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        if $i1 != 44 goto label12;
+
+        $r72 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r71 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i26 = interfaceinvoke $r71.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r72.<com.sun.imageio.plugins.gif.GIFImageMetadata: int imageLeftPosition> = $i26;
+
+        $r74 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r73 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i27 = interfaceinvoke $r73.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r74.<com.sun.imageio.plugins.gif.GIFImageMetadata: int imageTopPosition> = $i27;
+
+        $r76 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r75 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i28 = interfaceinvoke $r75.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r76.<com.sun.imageio.plugins.gif.GIFImageMetadata: int imageWidth> = $i28;
+
+        $r78 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r77 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i29 = interfaceinvoke $r77.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r78.<com.sun.imageio.plugins.gif.GIFImageMetadata: int imageHeight> = $i29;
+
+        $r79 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i30 = interfaceinvoke $r79.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $i31 = $i30 & 128;
+
+        if $i31 == 0 goto label03;
+
+        $z0 = 1;
+
+        goto label04;
+
+     label03:
+        $z0 = 0;
+
+     label04:
+        z1 = $z0;
+
+        $r80 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $i32 = $i30 & 64;
+
+        if $i32 == 0 goto label05;
+
+        $z2 = 1;
+
+        goto label06;
+
+     label05:
+        $z2 = 0;
+
+     label06:
+        $r80.<com.sun.imageio.plugins.gif.GIFImageMetadata: boolean interlaceFlag> = $z2;
+
+        $r81 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $i33 = $i30 & 32;
+
+        if $i33 == 0 goto label07;
+
+        $z3 = 1;
+
+        goto label08;
+
+     label07:
+        $z3 = 0;
+
+     label08:
+        $r81.<com.sun.imageio.plugins.gif.GIFImageMetadata: boolean sortFlag> = $z3;
+
+        $i34 = $i30 & 7;
+
+        $i35 = $i34 + 1;
+
+        $i40 = 1 << $i35;
+
+        if z1 == 0 goto label09;
+
+        $r85 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $i39 = 3 * $i40;
+
+        $r84 = newarray (byte)[$i39];
+
+        $r85.<com.sun.imageio.plugins.gif.GIFImageMetadata: byte[] localColorTable> = $r84;
+
+        $r88 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $r86 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r87 = $r86.<com.sun.imageio.plugins.gif.GIFImageMetadata: byte[] localColorTable>;
+
+        interfaceinvoke $r88.<javax.imageio.stream.ImageInputStream: void readFully(byte[])>($r87);
+
+        goto label10;
+
+     label09:
+        $r82 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r82.<com.sun.imageio.plugins.gif.GIFImageMetadata: byte[] localColorTable> = null;
+
+     label10:
+        $r83 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $l36 = interfaceinvoke $r83.<javax.imageio.stream.ImageInputStream: long getStreamPosition()>();
+
+        $l37 = $l36 - $l0;
+
+        $i38 = (int) $l37;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int imageMetadataLength> = $i38;
+
+     label11:
+        return;
+
+     label12:
+        if $i1 != 33 goto label25;
+
+        $r12 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i2 = interfaceinvoke $r12.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        if $i2 != 249 goto label17;
+
+        $r61 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r61.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r62 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i19 = interfaceinvoke $r62.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r63 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $i20 = $i19 >> 2;
+
+        $i21 = $i20 & 3;
+
+        $r63.<com.sun.imageio.plugins.gif.GIFImageMetadata: int disposalMethod> = $i21;
+
+        $r64 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $i22 = $i19 & 2;
+
+        if $i22 == 0 goto label13;
+
+        $z4 = 1;
+
+        goto label14;
+
+     label13:
+        $z4 = 0;
+
+     label14:
+        $r64.<com.sun.imageio.plugins.gif.GIFImageMetadata: boolean userInputFlag> = $z4;
+
+        $r65 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $i23 = $i19 & 1;
+
+        if $i23 == 0 goto label15;
+
+        $z5 = 1;
+
+        goto label16;
+
+     label15:
+        $z5 = 0;
+
+     label16:
+        $r65.<com.sun.imageio.plugins.gif.GIFImageMetadata: boolean transparentColorFlag> = $z5;
+
+        $r67 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r66 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i24 = interfaceinvoke $r66.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r67.<com.sun.imageio.plugins.gif.GIFImageMetadata: int delayTime> = $i24;
+
+        $r69 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r68 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i25 = interfaceinvoke $r68.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r69.<com.sun.imageio.plugins.gif.GIFImageMetadata: int transparentColorIndex> = $i25;
+
+        $r70 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r70.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        goto label24;
+
+     label17:
+        if $i2 != 1 goto label18;
+
+        $r41 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r41.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r42 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r42.<com.sun.imageio.plugins.gif.GIFImageMetadata: boolean hasPlainTextExtension> = 1;
+
+        $r44 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r43 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i11 = interfaceinvoke $r43.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r44.<com.sun.imageio.plugins.gif.GIFImageMetadata: int textGridLeft> = $i11;
+
+        $r46 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r45 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i12 = interfaceinvoke $r45.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r46.<com.sun.imageio.plugins.gif.GIFImageMetadata: int textGridTop> = $i12;
+
+        $r48 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r47 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i13 = interfaceinvoke $r47.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r48.<com.sun.imageio.plugins.gif.GIFImageMetadata: int textGridWidth> = $i13;
+
+        $r50 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r49 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i14 = interfaceinvoke $r49.<javax.imageio.stream.ImageInputStream: int readUnsignedShort()>();
+
+        $r50.<com.sun.imageio.plugins.gif.GIFImageMetadata: int textGridHeight> = $i14;
+
+        $r52 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r51 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i15 = interfaceinvoke $r51.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r52.<com.sun.imageio.plugins.gif.GIFImageMetadata: int characterCellWidth> = $i15;
+
+        $r54 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r53 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i16 = interfaceinvoke $r53.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r54.<com.sun.imageio.plugins.gif.GIFImageMetadata: int characterCellHeight> = $i16;
+
+        $r56 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r55 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i17 = interfaceinvoke $r55.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r56.<com.sun.imageio.plugins.gif.GIFImageMetadata: int textForegroundColor> = $i17;
+
+        $r58 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r57 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i18 = interfaceinvoke $r57.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r58.<com.sun.imageio.plugins.gif.GIFImageMetadata: int textBackgroundColor> = $i18;
+
+        $r59 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r60 = specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: byte[] concatenateBlocks()>();
+
+        $r59.<com.sun.imageio.plugins.gif.GIFImageMetadata: byte[] text> = $r60;
+
+        goto label24;
+
+     label18:
+        if $i2 != 254 goto label20;
+
+        $r34 = specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: byte[] concatenateBlocks()>();
+
+        $r35 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r36 = $r35.<com.sun.imageio.plugins.gif.GIFImageMetadata: java.util.List comments>;
+
+        if $r36 != null goto label19;
+
+        $r40 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r39 = new java.util.ArrayList;
+
+        specialinvoke $r39.<java.util.ArrayList: void <init>()>();
+
+        $r40.<com.sun.imageio.plugins.gif.GIFImageMetadata: java.util.List comments> = $r39;
+
+     label19:
+        $r37 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r38 = $r37.<com.sun.imageio.plugins.gif.GIFImageMetadata: java.util.List comments>;
+
+        interfaceinvoke $r38.<java.util.List: boolean add(java.lang.Object)>($r34);
+
+        goto label24;
+
+     label20:
+        if $i2 != 255 goto label23;
+
+        $r15 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i4 = interfaceinvoke $r15.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        r93 = newarray (byte)[8];
+
+        r94 = newarray (byte)[3];
+
+        r16 = newarray (byte)[$i4];
+
+        $r17 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r17.<javax.imageio.stream.ImageInputStream: void readFully(byte[])>(r16);
+
+        $i5 = specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: int copyData(byte[],int,byte[])>(r16, 0, r93);
+
+        $i6 = specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: int copyData(byte[],int,byte[])>(r16, $i5, r94);
+
+        $r18 = specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: byte[] concatenateBlocks()>();
+
+        r95 = $r18;
+
+        if $i6 >= $i4 goto label21;
+
+        i7 = $i4 - $i6;
+
+        $i8 = lengthof $r18;
+
+        $i9 = i7 + $i8;
+
+        r33 = newarray (byte)[$i9];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r16, $i6, r33, 0, i7);
+
+        $i10 = lengthof $r18;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r18, 0, r33, i7, $i10);
+
+        r95 = r33;
+
+     label21:
+        $r19 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r20 = $r19.<com.sun.imageio.plugins.gif.GIFImageMetadata: java.util.List applicationIDs>;
+
+        if $r20 != null goto label22;
+
+        $r28 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r27 = new java.util.ArrayList;
+
+        specialinvoke $r27.<java.util.ArrayList: void <init>()>();
+
+        $r28.<com.sun.imageio.plugins.gif.GIFImageMetadata: java.util.List applicationIDs> = $r27;
+
+        $r30 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r29 = new java.util.ArrayList;
+
+        specialinvoke $r29.<java.util.ArrayList: void <init>()>();
+
+        $r30.<com.sun.imageio.plugins.gif.GIFImageMetadata: java.util.List authenticationCodes> = $r29;
+
+        $r32 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r31 = new java.util.ArrayList;
+
+        specialinvoke $r31.<java.util.ArrayList: void <init>()>();
+
+        $r32.<com.sun.imageio.plugins.gif.GIFImageMetadata: java.util.List applicationData> = $r31;
+
+     label22:
+        $r21 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r22 = $r21.<com.sun.imageio.plugins.gif.GIFImageMetadata: java.util.List applicationIDs>;
+
+        interfaceinvoke $r22.<java.util.List: boolean add(java.lang.Object)>(r93);
+
+        $r23 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r24 = $r23.<com.sun.imageio.plugins.gif.GIFImageMetadata: java.util.List authenticationCodes>;
+
+        interfaceinvoke $r24.<java.util.List: boolean add(java.lang.Object)>(r94);
+
+        $r25 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $r26 = $r25.<com.sun.imageio.plugins.gif.GIFImageMetadata: java.util.List applicationData>;
+
+        interfaceinvoke $r26.<java.util.List: boolean add(java.lang.Object)>(r95);
+
+        goto label24;
+
+     label23:
+        $r13 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i3 = interfaceinvoke $r13.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        $r14 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        interfaceinvoke $r14.<javax.imageio.stream.ImageInputStream: int skipBytes(int)>($i3);
+
+        if $i3 > 0 goto label23;
+
+     label24:
+        goto label27;
+
+     label25:
+        if $i1 != 59 goto label26;
+
+        $r11 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r11.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("Attempt to read past end of image sequence!");
+
+        throw $r11;
+
+     label26:
+        $r5 = new javax.imageio.IIOException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unexpected block type ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("!");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<javax.imageio.IIOException: void <init>(java.lang.String)>($r10);
+
+        throw $r5;
+
+     label27:
+        goto label02;
+
+     label28:
+        $r92 := @caughtexception;
+
+        throw $r92;
+
+     label29:
+        $r90 := @caughtexception;
+
+        $r91 = new javax.imageio.IIOException;
+
+        specialinvoke $r91.<javax.imageio.IIOException: void <init>(java.lang.String,java.lang.Throwable)>("I/O error reading image metadata!", $r90);
+
+        throw $r91;
+
+        catch javax.imageio.IIOException from label01 to label11 with label28;
+        catch javax.imageio.IIOException from label12 to label28 with label28;
+        catch java.io.IOException from label01 to label11 with label29;
+        catch java.io.IOException from label12 to label28 with label29;
+    }
+
+    private int copyData(byte[], int, byte[])
+    {
+        byte[] r0, r1;
+        com.sun.imageio.plugins.gif.GIFImageReader r2;
+        int i0, $i1, i2, $i3, i4;
+
+        r2 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        r0 := @parameter2: byte[];
+
+        i4 = lengthof r0;
+
+        $i1 = lengthof r1;
+
+        i2 = $i1 - i0;
+
+        if i4 <= i2 goto label1;
+
+        i4 = i2;
+
+     label1:
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, i0, r0, 0, i4);
+
+        $i3 = i0 + i4;
+
+        return $i3;
+    }
+
+    private void startPass(int)
+    {
+        java.awt.Point $r13;
+        int[] $r3, $r4, $r15, $r16;
+        boolean $z0;
+        java.awt.image.BufferedImage $r17;
+        java.util.List $r1;
+        java.awt.Rectangle $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r14;
+        com.sun.imageio.plugins.gif.GIFImageReader r0;
+        int $i0, i1, $i2, i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, i28;
+        com.sun.imageio.plugins.gif.GIFImageMetadata $r2;
+
+        r0 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        i28 := @parameter0: int;
+
+        $r1 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.util.List updateListeners>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $z0 = $r2.<com.sun.imageio.plugins.gif.GIFImageMetadata: boolean interlaceFlag>;
+
+        if $z0 != 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        $r3 = <com.sun.imageio.plugins.gif.GIFImageReader: int[] interlaceOffset>;
+
+        $i0 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int interlacePass>;
+
+        i1 = $r3[$i0];
+
+        $r4 = <com.sun.imageio.plugins.gif.GIFImageReader: int[] interlaceIncrement>;
+
+        $i2 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int interlacePass>;
+
+        i3 = $r4[$i2];
+
+        $r14 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle sourceRegion>;
+
+        $r13 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Point destinationOffset>;
+
+        $r5 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle destinationRegion>;
+
+        $i20 = $r5.<java.awt.Rectangle: int x>;
+
+        $r6 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle destinationRegion>;
+
+        $i19 = $r6.<java.awt.Rectangle: int y>;
+
+        $r7 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle destinationRegion>;
+
+        $i5 = $r7.<java.awt.Rectangle: int x>;
+
+        $r8 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle destinationRegion>;
+
+        $i4 = $r8.<java.awt.Rectangle: int width>;
+
+        $i6 = $i5 + $i4;
+
+        $i18 = $i6 - 1;
+
+        $r9 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle destinationRegion>;
+
+        $i8 = $r9.<java.awt.Rectangle: int y>;
+
+        $r10 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle destinationRegion>;
+
+        $i7 = $r10.<java.awt.Rectangle: int height>;
+
+        $i9 = $i8 + $i7;
+
+        $i17 = $i9 - 1;
+
+        $i16 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int sourceXSubsampling>;
+
+        $i15 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int sourceYSubsampling>;
+
+        $r11 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle destinationRegion>;
+
+        $i14 = $r11.<java.awt.Rectangle: int width>;
+
+        $r12 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle destinationRegion>;
+
+        $i10 = $r12.<java.awt.Rectangle: int height>;
+
+        $i11 = $i10 + i3;
+
+        $i12 = $i11 - 1;
+
+        $i13 = $i12 / i3;
+
+        $r15 = staticinvoke <com.sun.imageio.plugins.common.ReaderUtil: int[] computeUpdatedPixels(java.awt.Rectangle,java.awt.Point,int,int,int,int,int,int,int,int,int,int,int,int)>($r14, $r13, $i20, $i19, $i18, $i17, $i16, $i15, 0, i1, $i14, $i13, 1, i3);
+
+        $i21 = $r15[1];
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int updateMinY> = $i21;
+
+        $i22 = $r15[5];
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int updateYStep> = $i22;
+
+        $r16 = newarray (int)[1];
+
+        $r16[0] = 0;
+
+        $r17 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.image.BufferedImage theImage>;
+
+        $i27 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int interlacePass>;
+
+        $i26 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int sourceMinProgressivePass>;
+
+        $i25 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int sourceMaxProgressivePass>;
+
+        $i24 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int updateMinY>;
+
+        $i23 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int updateYStep>;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void processPassStarted(java.awt.image.BufferedImage,int,int,int,int,int,int,int,int[])>($r17, $i27, $i26, $i25, 0, $i24, 1, $i23, $r16);
+
+        return;
+    }
+
+    public java.awt.image.BufferedImage read(int, javax.imageio.ImageReadParam) throws javax.imageio.IIOException
+    {
+        byte[] $r20, r29, r30, r32, $r36;
+        java.lang.IndexOutOfBoundsException $r44;
+        byte $b40, $b57, $b58;
+        javax.imageio.stream.ImageInputStream $r1, $r21, $r27, $r37;
+        java.lang.StringBuilder $r24, $r25, $r48;
+        javax.imageio.IIOException $r49, $r50;
+        com.sun.imageio.plugins.gif.GIFImageReader r0;
+        java.lang.String $r26;
+        com.sun.imageio.plugins.gif.GIFImageMetadata $r3, $r4, $r8, $r9;
+        java.io.IOException $r40;
+        javax.imageio.ImageReadParam r42;
+        java.lang.IllegalStateException $r43;
+        java.awt.Point $r47;
+        int[] r28, r31;
+        boolean $z0;
+        java.awt.image.BufferedImage $r5, $r6, $r14, $r33, $r34, $r35;
+        java.awt.Rectangle $r12, $r13, $r16, $r17, $r18, $r19, $r45, $r46;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, i49, i50, i51, i52, i53, i54, i55, i56, $i59, $i60, $i61, i62, $i63, i64, $i66;
+        java.util.Iterator $r2;
+        java.awt.image.WritableRaster $r7;
+
+        r0 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        i0 := @parameter0: int;
+
+        r42 := @parameter1: javax.imageio.ImageReadParam;
+
+        $r1 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        if $r1 != null goto label01;
+
+        $r43 = new java.lang.IllegalStateException;
+
+        specialinvoke $r43.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Input not set!");
+
+        throw $r43;
+
+     label01:
+        specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void checkIndex(int)>(i0);
+
+        $i1 = specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: int locateImage(int)>(i0);
+
+        if $i1 == i0 goto label02;
+
+        $r44 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r44.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>("imageIndex out of bounds!");
+
+        throw $r44;
+
+     label02:
+        virtualinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void clearAbortRequest()>();
+
+        specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void readMetadata()>();
+
+        if r42 != null goto label03;
+
+        r42 = virtualinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.ImageReadParam getDefaultReadParam()>();
+
+     label03:
+        $r2 = virtualinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.util.Iterator getImageTypes(int)>(i0);
+
+        $r3 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $i3 = $r3.<com.sun.imageio.plugins.gif.GIFImageMetadata: int imageWidth>;
+
+        $r4 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $i2 = $r4.<com.sun.imageio.plugins.gif.GIFImageMetadata: int imageHeight>;
+
+        $r5 = staticinvoke <com.sun.imageio.plugins.gif.GIFImageReader: java.awt.image.BufferedImage getDestination(javax.imageio.ImageReadParam,java.util.Iterator,int,int)>(r42, $r2, $i3, $i2);
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.image.BufferedImage theImage> = $r5;
+
+        $r6 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.image.BufferedImage theImage>;
+
+        $r7 = virtualinvoke $r6.<java.awt.image.BufferedImage: java.awt.image.WritableRaster getWritableTile(int,int)>(0, 0);
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.image.WritableRaster theTile> = $r7;
+
+        $r8 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $i4 = $r8.<com.sun.imageio.plugins.gif.GIFImageMetadata: int imageWidth>;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int width> = $i4;
+
+        $r9 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata>;
+
+        $i5 = $r9.<com.sun.imageio.plugins.gif.GIFImageMetadata: int imageHeight>;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int height> = $i5;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int streamX> = 0;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int streamY> = 0;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int rowsDone> = 0;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int interlacePass> = 0;
+
+        $r45 = new java.awt.Rectangle;
+
+        specialinvoke $r45.<java.awt.Rectangle: void <init>(int,int,int,int)>(0, 0, 0, 0);
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle sourceRegion> = $r45;
+
+        $r46 = new java.awt.Rectangle;
+
+        specialinvoke $r46.<java.awt.Rectangle: void <init>(int,int,int,int)>(0, 0, 0, 0);
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle destinationRegion> = $r46;
+
+        $i7 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int width>;
+
+        $i6 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int height>;
+
+        $r14 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.image.BufferedImage theImage>;
+
+        $r13 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle sourceRegion>;
+
+        $r12 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle destinationRegion>;
+
+        staticinvoke <com.sun.imageio.plugins.gif.GIFImageReader: void computeRegions(javax.imageio.ImageReadParam,int,int,java.awt.image.BufferedImage,java.awt.Rectangle,java.awt.Rectangle)>(r42, $i7, $i6, $r14, $r13, $r12);
+
+        $r47 = new java.awt.Point;
+
+        $r16 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle destinationRegion>;
+
+        $i9 = $r16.<java.awt.Rectangle: int x>;
+
+        $r17 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle destinationRegion>;
+
+        $i8 = $r17.<java.awt.Rectangle: int y>;
+
+        specialinvoke $r47.<java.awt.Point: void <init>(int,int)>($i9, $i8);
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Point destinationOffset> = $r47;
+
+        $i10 = virtualinvoke r42.<javax.imageio.ImageReadParam: int getSourceXSubsampling()>();
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int sourceXSubsampling> = $i10;
+
+        $i11 = virtualinvoke r42.<javax.imageio.ImageReadParam: int getSourceYSubsampling()>();
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int sourceYSubsampling> = $i11;
+
+        $i12 = virtualinvoke r42.<javax.imageio.ImageReadParam: int getSourceMinProgressivePass()>();
+
+        $i13 = staticinvoke <java.lang.Math: int max(int,int)>($i12, 0);
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int sourceMinProgressivePass> = $i13;
+
+        $i14 = virtualinvoke r42.<javax.imageio.ImageReadParam: int getSourceMaxProgressivePass()>();
+
+        $i15 = staticinvoke <java.lang.Math: int min(int,int)>($i14, 3);
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int sourceMaxProgressivePass> = $i15;
+
+        $r18 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle destinationRegion>;
+
+        $i21 = $r18.<java.awt.Rectangle: int y>;
+
+        $i17 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int streamY>;
+
+        $r19 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.Rectangle sourceRegion>;
+
+        $i16 = $r19.<java.awt.Rectangle: int y>;
+
+        $i19 = $i17 - $i16;
+
+        $i18 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int sourceYSubsampling>;
+
+        $i20 = $i19 / $i18;
+
+        $i22 = $i21 + $i20;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int destY> = $i22;
+
+        specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void computeDecodeThisRow()>();
+
+        virtualinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void processImageStarted(int)>(i0);
+
+        specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void startPass(int)>(0);
+
+        $i23 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int width>;
+
+        $r20 = newarray (byte)[$i23];
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: byte[] rowBuf> = $r20;
+
+     label04:
+        $r21 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i24 = interfaceinvoke $r21.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int initCodeSize> = $i24;
+
+        $i25 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int initCodeSize>;
+
+        if $i25 < 1 goto label05;
+
+        $i27 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int initCodeSize>;
+
+        if $i27 <= 8 goto label06;
+
+     label05:
+        $r49 = new javax.imageio.IIOException;
+
+        $r48 = new java.lang.StringBuilder;
+
+        specialinvoke $r48.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Bad code size:");
+
+        $i26 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int initCodeSize>;
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i26);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r49.<javax.imageio.IIOException: void <init>(java.lang.String)>($r26);
+
+        throw $r49;
+
+     label06:
+        $r27 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $i28 = interfaceinvoke $r27.<javax.imageio.stream.ImageInputStream: int readUnsignedByte()>();
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int blockLength> = $i28;
+
+        i49 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int blockLength>;
+
+        i50 = 0;
+
+     label07:
+        if i49 <= 0 goto label08;
+
+        $r37 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: javax.imageio.stream.ImageInputStream stream>;
+
+        $r36 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: byte[] block>;
+
+        $i48 = interfaceinvoke $r37.<javax.imageio.stream.ImageInputStream: int read(byte[],int,int)>($r36, i50, i49);
+
+        i49 = i49 - $i48;
+
+        i50 = i50 + $i48;
+
+        goto label07;
+
+     label08:
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int bitPos> = 0;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int nextByte> = 0;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: boolean lastBlockFound> = 0;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int interlacePass> = 0;
+
+        specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void initNext32Bits()>();
+
+        $i29 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int initCodeSize>;
+
+        $i30 = 1 << $i29;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int clearCode> = $i30;
+
+        $i31 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int clearCode>;
+
+        $i32 = $i31 + 1;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int eofCode> = $i32;
+
+        i51 = 0;
+
+        r28 = newarray (int)[4096];
+
+        r29 = newarray (byte)[4096];
+
+        r30 = newarray (byte)[4096];
+
+        r31 = newarray (int)[4096];
+
+        r32 = newarray (byte)[4096];
+
+        virtualinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void initializeStringTable(int[],byte[],byte[],int[])>(r28, r29, r30, r31);
+
+        $i33 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int initCodeSize>;
+
+        $i34 = 1 << $i33;
+
+        i52 = $i34 + 2;
+
+        $i35 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int initCodeSize>;
+
+        i53 = $i35 + 1;
+
+        $i36 = 1 << i53;
+
+        i54 = $i36 - 1;
+
+     label09:
+        $z0 = virtualinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: boolean abortRequested()>();
+
+        if $z0 != 0 goto label19;
+
+        $i37 = specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: int getCode(int,int)>(i53, i54);
+
+        i55 = $i37;
+
+        $i38 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int clearCode>;
+
+        if $i37 != $i38 goto label11;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void initializeStringTable(int[],byte[],byte[],int[])>(r28, r29, r30, r31);
+
+        $i42 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int initCodeSize>;
+
+        $i43 = 1 << $i42;
+
+        i52 = $i43 + 2;
+
+        $i44 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int initCodeSize>;
+
+        i53 = $i44 + 1;
+
+        $i45 = 1 << i53;
+
+        i54 = $i45 - 1;
+
+        $i46 = specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: int getCode(int,int)>(i53, i54);
+
+        i55 = $i46;
+
+        $i47 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int eofCode>;
+
+        if $i46 != $i47 goto label16;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void processImageComplete()>();
+
+        $r35 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.image.BufferedImage theImage>;
+
+     label10:
+        return $r35;
+
+     label11:
+        $i39 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: int eofCode>;
+
+        if $i37 != $i39 goto label13;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void processImageComplete()>();
+
+        $r34 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.image.BufferedImage theImage>;
+
+     label12:
+        return $r34;
+
+     label13:
+        if $i37 >= i52 goto label14;
+
+        i56 = $i37;
+
+        goto label15;
+
+     label14:
+        i56 = i51;
+
+        if $i37 == i52 goto label15;
+
+        virtualinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void processWarningOccurred(java.lang.String)>("Out-of-sequence code!");
+
+     label15:
+        r28[i52] = i51;
+
+        $b57 = r30[i56];
+
+        r29[i52] = $b57;
+
+        $b58 = r30[i51];
+
+        r30[i52] = $b58;
+
+        $i59 = r31[i51];
+
+        $i60 = $i59 + 1;
+
+        r31[i52] = $i60;
+
+        i52 = i52 + 1;
+
+        $i61 = 1 << i53;
+
+        if i52 != $i61 goto label16;
+
+        if i52 >= 4096 goto label16;
+
+        i53 = i53 + 1;
+
+        $i41 = 1 << i53;
+
+        i54 = $i41 - 1;
+
+     label16:
+        i62 = i55;
+
+        $i63 = r31[i55];
+
+        i64 = $i63 - 1;
+
+     label17:
+        if i64 < 0 goto label18;
+
+        $b40 = r29[i62];
+
+        r32[i64] = $b40;
+
+        i62 = r28[i62];
+
+        $i66 = (int) -1;
+
+        i64 = i64 + $i66;
+
+        goto label17;
+
+     label18:
+        specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void outputPixels(byte[],int)>(r32, $i63);
+
+        i51 = i55;
+
+        goto label09;
+
+     label19:
+        virtualinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void processReadAborted()>();
+
+        $r33 = r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.image.BufferedImage theImage>;
+
+     label20:
+        return $r33;
+
+     label21:
+        $r40 := @caughtexception;
+
+        $r50 = new javax.imageio.IIOException;
+
+        specialinvoke $r50.<javax.imageio.IIOException: void <init>(java.lang.String,java.lang.Throwable)>("I/O error reading image!", $r40);
+
+        throw $r50;
+
+        catch java.io.IOException from label04 to label10 with label21;
+        catch java.io.IOException from label11 to label12 with label21;
+        catch java.io.IOException from label13 to label20 with label21;
+    }
+
+    public void reset()
+    {
+        com.sun.imageio.plugins.gif.GIFImageReader r0;
+
+        r0 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        specialinvoke r0.<javax.imageio.ImageReader: void reset()>();
+
+        specialinvoke r0.<com.sun.imageio.plugins.gif.GIFImageReader: void resetStreamSettings()>();
+
+        return;
+    }
+
+    private void resetStreamSettings()
+    {
+        java.util.ArrayList $r2;
+        com.sun.imageio.plugins.gif.GIFImageReader r0;
+        int $i1, $i3, $i5, $i7, $i9, $i11;
+
+        r0 := @this: com.sun.imageio.plugins.gif.GIFImageReader;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: boolean gotHeader> = 0;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFStreamMetadata streamMetadata> = null;
+
+        $i1 = (int) -1;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int currIndex> = $i1;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: com.sun.imageio.plugins.gif.GIFImageMetadata imageMetadata> = null;
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.util.List imageStartPosition> = $r2;
+
+        $i3 = (int) -1;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int numImages> = $i3;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int blockLength> = 0;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int bitPos> = 0;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int nextByte> = 0;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int next32Bits> = 0;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: boolean lastBlockFound> = 0;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.image.BufferedImage theImage> = null;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: java.awt.image.WritableRaster theTile> = null;
+
+        $i5 = (int) -1;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int width> = $i5;
+
+        $i7 = (int) -1;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int height> = $i7;
+
+        $i9 = (int) -1;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int streamX> = $i9;
+
+        $i11 = (int) -1;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int streamY> = $i11;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int rowsDone> = 0;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: int interlacePass> = 0;
+
+        r0.<com.sun.imageio.plugins.gif.GIFImageReader: byte[] fallbackColorTable> = null;
+
+        return;
+    }
+
+    private static synchronized byte[] getDefaultPalette()
+    {
+        byte[] $r0, $r1, r5, r6, r7, $r8, $r9, $r10, $r11;
+        byte $b3, $b6, $b9;
+        java.awt.image.IndexColorModel r4;
+        int $i0, $i1, $i2, $i4, $i5, $i7, $i8, $i10, i11;
+        java.awt.image.BufferedImage $r2;
+        java.awt.image.ColorModel $r3;
+
+        $r0 = <com.sun.imageio.plugins.gif.GIFImageReader: byte[] defaultPalette>;
+
+        if $r0 != null goto label2;
+
+        $r2 = new java.awt.image.BufferedImage;
+
+        specialinvoke $r2.<java.awt.image.BufferedImage: void <init>(int,int,int)>(1, 1, 13);
+
+        $r3 = virtualinvoke $r2.<java.awt.image.BufferedImage: java.awt.image.ColorModel getColorModel()>();
+
+        r4 = (java.awt.image.IndexColorModel) $r3;
+
+        $i0 = virtualinvoke r4.<java.awt.image.IndexColorModel: int getMapSize()>();
+
+        r5 = newarray (byte)[$i0];
+
+        r6 = newarray (byte)[$i0];
+
+        r7 = newarray (byte)[$i0];
+
+        virtualinvoke r4.<java.awt.image.IndexColorModel: void getReds(byte[])>(r5);
+
+        virtualinvoke r4.<java.awt.image.IndexColorModel: void getGreens(byte[])>(r6);
+
+        virtualinvoke r4.<java.awt.image.IndexColorModel: void getBlues(byte[])>(r7);
+
+        $i1 = $i0 * 3;
+
+        $r8 = newarray (byte)[$i1];
+
+        <com.sun.imageio.plugins.gif.GIFImageReader: byte[] defaultPalette> = $r8;
+
+        i11 = 0;
+
+     label1:
+        if i11 >= $i0 goto label2;
+
+        $r9 = <com.sun.imageio.plugins.gif.GIFImageReader: byte[] defaultPalette>;
+
+        $i2 = 3 * i11;
+
+        $i4 = $i2 + 0;
+
+        $b3 = r5[i11];
+
+        $r9[$i4] = $b3;
+
+        $r10 = <com.sun.imageio.plugins.gif.GIFImageReader: byte[] defaultPalette>;
+
+        $i5 = 3 * i11;
+
+        $i7 = $i5 + 1;
+
+        $b6 = r6[i11];
+
+        $r10[$i7] = $b6;
+
+        $r11 = <com.sun.imageio.plugins.gif.GIFImageReader: byte[] defaultPalette>;
+
+        $i8 = 3 * i11;
+
+        $i10 = $i8 + 2;
+
+        $b9 = r7[i11];
+
+        $r11[$i10] = $b9;
+
+        i11 = i11 + 1;
+
+        goto label1;
+
+     label2:
+        $r1 = <com.sun.imageio.plugins.gif.GIFImageReader: byte[] defaultPalette>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        int[] $r0, $r1;
+        int $i1, $i3;
+
+        $r0 = newarray (int)[5];
+
+        $r0[0] = 8;
+
+        $r0[1] = 8;
+
+        $r0[2] = 4;
+
+        $r0[3] = 2;
+
+        $i1 = (int) -1;
+
+        $r0[4] = $i1;
+
+        <com.sun.imageio.plugins.gif.GIFImageReader: int[] interlaceIncrement> = $r0;
+
+        $r1 = newarray (int)[5];
+
+        $r1[0] = 0;
+
+        $r1[1] = 4;
+
+        $r1[2] = 2;
+
+        $r1[3] = 1;
+
+        $i3 = (int) -1;
+
+        $r1[4] = $i3;
+
+        <com.sun.imageio.plugins.gif.GIFImageReader: int[] interlaceOffset> = $r1;
+
+        <com.sun.imageio.plugins.gif.GIFImageReader: byte[] defaultPalette> = null;
+
+        return;
+    }
+}

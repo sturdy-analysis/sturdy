@@ -1,0 +1,988 @@
+final class sun.security.smartcardio.ChannelImpl extends javax.smartcardio.CardChannel
+{
+    private final sun.security.smartcardio.CardImpl card;
+    private final int channel;
+    private volatile boolean isClosed;
+    private static final boolean t0GetResponse;
+    private static final boolean t1GetResponse;
+    private static final boolean t1StripLe;
+    private static final int RESPONSE_ITERATIONS;
+    private static final byte[] B0;
+
+    void <init>(sun.security.smartcardio.CardImpl, int)
+    {
+        int i0;
+        sun.security.smartcardio.CardImpl r1;
+        sun.security.smartcardio.ChannelImpl r0;
+
+        r0 := @this: sun.security.smartcardio.ChannelImpl;
+
+        r1 := @parameter0: sun.security.smartcardio.CardImpl;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<javax.smartcardio.CardChannel: void <init>()>();
+
+        r0.<sun.security.smartcardio.ChannelImpl: sun.security.smartcardio.CardImpl card> = r1;
+
+        r0.<sun.security.smartcardio.ChannelImpl: int channel> = i0;
+
+        return;
+    }
+
+    void checkClosed()
+    {
+        java.lang.IllegalStateException $r2;
+        sun.security.smartcardio.CardImpl $r1;
+        sun.security.smartcardio.ChannelImpl r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.smartcardio.ChannelImpl;
+
+        $r1 = r0.<sun.security.smartcardio.ChannelImpl: sun.security.smartcardio.CardImpl card>;
+
+        virtualinvoke $r1.<sun.security.smartcardio.CardImpl: void checkState()>();
+
+        $z0 = r0.<sun.security.smartcardio.ChannelImpl: boolean isClosed>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Logical channel has been closed");
+
+        throw $r2;
+
+     label1:
+        return;
+    }
+
+    public javax.smartcardio.Card getCard()
+    {
+        sun.security.smartcardio.CardImpl $r1;
+        sun.security.smartcardio.ChannelImpl r0;
+
+        r0 := @this: sun.security.smartcardio.ChannelImpl;
+
+        $r1 = r0.<sun.security.smartcardio.ChannelImpl: sun.security.smartcardio.CardImpl card>;
+
+        return $r1;
+    }
+
+    public int getChannelNumber()
+    {
+        int $i0;
+        sun.security.smartcardio.ChannelImpl r0;
+
+        r0 := @this: sun.security.smartcardio.ChannelImpl;
+
+        virtualinvoke r0.<sun.security.smartcardio.ChannelImpl: void checkClosed()>();
+
+        $i0 = r0.<sun.security.smartcardio.ChannelImpl: int channel>;
+
+        return $i0;
+    }
+
+    private static void checkManageChannel(byte[])
+    {
+        byte[] r0;
+        java.lang.IllegalArgumentException $r3, $r4;
+        byte $b1, $b2;
+        int $i0, $i3, $i4;
+
+        r0 := @parameter0: byte[];
+
+        $i0 = lengthof r0;
+
+        if $i0 >= 4 goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Command APDU must be at least 4 bytes long");
+
+        throw $r3;
+
+     label1:
+        $b1 = r0[0];
+
+        $i3 = (int) $b1;
+
+        if $i3 < 0 goto label2;
+
+        $b2 = r0[1];
+
+        $i4 = (int) $b2;
+
+        if $i4 != 112 goto label2;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Manage channel command not allowed, use openLogicalChannel()");
+
+        throw $r4;
+
+     label2:
+        return;
+    }
+
+    public javax.smartcardio.ResponseAPDU transmit(javax.smartcardio.CommandAPDU) throws javax.smartcardio.CardException
+    {
+        byte[] $r3, $r4;
+        sun.security.smartcardio.CardImpl $r1;
+        javax.smartcardio.ResponseAPDU $r5;
+        sun.security.smartcardio.ChannelImpl r0;
+        javax.smartcardio.CommandAPDU r2;
+
+        r0 := @this: sun.security.smartcardio.ChannelImpl;
+
+        r2 := @parameter0: javax.smartcardio.CommandAPDU;
+
+        virtualinvoke r0.<sun.security.smartcardio.ChannelImpl: void checkClosed()>();
+
+        $r1 = r0.<sun.security.smartcardio.ChannelImpl: sun.security.smartcardio.CardImpl card>;
+
+        virtualinvoke $r1.<sun.security.smartcardio.CardImpl: void checkExclusive()>();
+
+        $r3 = virtualinvoke r2.<javax.smartcardio.CommandAPDU: byte[] getBytes()>();
+
+        $r4 = specialinvoke r0.<sun.security.smartcardio.ChannelImpl: byte[] doTransmit(byte[])>($r3);
+
+        $r5 = new javax.smartcardio.ResponseAPDU;
+
+        specialinvoke $r5.<javax.smartcardio.ResponseAPDU: void <init>(byte[])>($r4);
+
+        return $r5;
+    }
+
+    public int transmit(java.nio.ByteBuffer, java.nio.ByteBuffer) throws javax.smartcardio.CardException
+    {
+        byte[] r5, $r6;
+        sun.security.smartcardio.CardImpl $r1;
+        sun.security.smartcardio.ChannelImpl r0;
+        java.lang.IllegalArgumentException $r7, $r8;
+        java.nio.ByteBuffer r2, r4;
+        java.lang.NullPointerException $r3;
+        int $i0, $i1, $i2;
+        boolean $z0;
+        java.nio.ReadOnlyBufferException $r9;
+
+        r0 := @this: sun.security.smartcardio.ChannelImpl;
+
+        r2 := @parameter0: java.nio.ByteBuffer;
+
+        r4 := @parameter1: java.nio.ByteBuffer;
+
+        virtualinvoke r0.<sun.security.smartcardio.ChannelImpl: void checkClosed()>();
+
+        $r1 = r0.<sun.security.smartcardio.ChannelImpl: sun.security.smartcardio.CardImpl card>;
+
+        virtualinvoke $r1.<sun.security.smartcardio.CardImpl: void checkExclusive()>();
+
+        if r2 == null goto label1;
+
+        if r4 != null goto label2;
+
+     label1:
+        $r3 = new java.lang.NullPointerException;
+
+        specialinvoke $r3.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r3;
+
+     label2:
+        $z0 = virtualinvoke r4.<java.nio.ByteBuffer: boolean isReadOnly()>();
+
+        if $z0 == 0 goto label3;
+
+        $r9 = new java.nio.ReadOnlyBufferException;
+
+        specialinvoke $r9.<java.nio.ReadOnlyBufferException: void <init>()>();
+
+        throw $r9;
+
+     label3:
+        if r2 != r4 goto label4;
+
+        $r8 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("command and response must not be the same object");
+
+        throw $r8;
+
+     label4:
+        $i0 = virtualinvoke r4.<java.nio.ByteBuffer: int remaining()>();
+
+        if $i0 >= 258 goto label5;
+
+        $r7 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r7.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Insufficient space in response buffer");
+
+        throw $r7;
+
+     label5:
+        $i1 = virtualinvoke r2.<java.nio.ByteBuffer: int remaining()>();
+
+        r5 = newarray (byte)[$i1];
+
+        virtualinvoke r2.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[])>(r5);
+
+        $r6 = specialinvoke r0.<sun.security.smartcardio.ChannelImpl: byte[] doTransmit(byte[])>(r5);
+
+        virtualinvoke r4.<java.nio.ByteBuffer: java.nio.ByteBuffer put(byte[])>($r6);
+
+        $i2 = lengthof $r6;
+
+        return $i2;
+    }
+
+    private static boolean getBooleanProperty(java.lang.String, boolean)
+    {
+        java.lang.IllegalArgumentException $r4;
+        sun.security.action.GetPropertyAction $r0;
+        java.lang.Object $r2;
+        java.lang.StringBuilder $r5, $r6, $r7;
+        java.lang.String r1, r3, $r8;
+        boolean $z0, $z1, z2;
+
+        r1 := @parameter0: java.lang.String;
+
+        z2 := @parameter1: boolean;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>(r1);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r3 = (java.lang.String) $r2;
+
+        if r3 != null goto label1;
+
+        return z2;
+
+     label1:
+        $z0 = virtualinvoke r3.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("true");
+
+        if $z0 == 0 goto label2;
+
+        return 1;
+
+     label2:
+        $z1 = virtualinvoke r3.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("false");
+
+        if $z1 == 0 goto label3;
+
+        return 0;
+
+     label3:
+        $r4 = new java.lang.IllegalArgumentException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" must be either \'true\' or \'false\'");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r8);
+
+        throw $r4;
+    }
+
+    private byte[] concat(byte[], byte[], int)
+    {
+        byte[] r0, r1, $r2;
+        sun.security.smartcardio.ChannelImpl r3;
+        int i0, i1, $i2, $i3;
+
+        r3 := @this: sun.security.smartcardio.ChannelImpl;
+
+        r0 := @parameter0: byte[];
+
+        r1 := @parameter1: byte[];
+
+        i1 := @parameter2: int;
+
+        i0 = lengthof r0;
+
+        if i0 != 0 goto label1;
+
+        $i3 = lengthof r1;
+
+        if i1 != $i3 goto label1;
+
+        return r1;
+
+     label1:
+        $i2 = i0 + i1;
+
+        $r2 = newarray (byte)[$i2];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, 0, $r2, 0, i0);
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, 0, $r2, i0, i1);
+
+        return $r2;
+    }
+
+    private byte[] doTransmit(byte[]) throws javax.smartcardio.CardException
+    {
+        byte[] r0, $r6, r12, $r13;
+        sun.security.smartcardio.CardImpl $r2, $r3, $r4, $r5, $r10;
+        byte $b6, $b8, $b10, $b11, $b13, $b14, $b16, $b21;
+        boolean z0, z1, $z2, $z3, $z4, $z5, $z6, $z7, z8;
+        sun.security.smartcardio.PCSCException $r9;
+        javax.smartcardio.CardException $r14, $r15, $r16;
+        sun.security.smartcardio.ChannelImpl r1;
+        long $l3;
+        short $s15, $s17, s23, $s26, $s30, $s32;
+        int $i0, $i1, $i2, i4, $i5, $i7, $i9, $i12, $i18, $i19, $i20, i22, i24, i25, $i27, $i29, $i31, $i33, $i35, $i36, $i37;
+
+        r1 := @this: sun.security.smartcardio.ChannelImpl;
+
+        r0 := @parameter0: byte[];
+
+     label01:
+        staticinvoke <sun.security.smartcardio.ChannelImpl: void checkManageChannel(byte[])>(r0);
+
+        specialinvoke r1.<sun.security.smartcardio.ChannelImpl: void setChannel(byte[])>(r0);
+
+        i22 = lengthof r0;
+
+        $r2 = r1.<sun.security.smartcardio.ChannelImpl: sun.security.smartcardio.CardImpl card>;
+
+        $i0 = $r2.<sun.security.smartcardio.CardImpl: int protocol>;
+
+        if $i0 != 1 goto label02;
+
+        $z5 = 1;
+
+        goto label03;
+
+     label02:
+        $z5 = 0;
+
+     label03:
+        z0 = $z5;
+
+        $r3 = r1.<sun.security.smartcardio.ChannelImpl: sun.security.smartcardio.CardImpl card>;
+
+        $i1 = $r3.<sun.security.smartcardio.CardImpl: int protocol>;
+
+        if $i1 != 2 goto label04;
+
+        $z6 = 1;
+
+        goto label05;
+
+     label04:
+        $z6 = 0;
+
+     label05:
+        z1 = $z6;
+
+        if z0 == 0 goto label06;
+
+        if i22 < 7 goto label06;
+
+        $b21 = r0[4];
+
+        if $b21 != 0 goto label06;
+
+        $r14 = new javax.smartcardio.CardException;
+
+        specialinvoke $r14.<javax.smartcardio.CardException: void <init>(java.lang.String)>("Extended length forms not supported for T=0");
+
+        throw $r14;
+
+     label06:
+        if z0 != 0 goto label07;
+
+        if z1 == 0 goto label09;
+
+        $z4 = <sun.security.smartcardio.ChannelImpl: boolean t1StripLe>;
+
+        if $z4 == 0 goto label09;
+
+     label07:
+        if i22 < 7 goto label09;
+
+        $b13 = r0[4];
+
+        $s26 = (short) $b13;
+
+        s23 = $s26 & 255;
+
+        if s23 == 0 goto label08;
+
+        $i27 = (int) s23;
+
+        $i20 = $i27 + 6;
+
+        if i22 != $i20 goto label09;
+
+        $i29 = (int) -1;
+
+        i22 = i22 + $i29;
+
+        goto label09;
+
+     label08:
+        $b14 = r0[5];
+
+        $s30 = (short) $b14;
+
+        $s15 = $s30 & 255;
+
+        $i31 = (int) $s15;
+
+        $i18 = $i31 << 8;
+
+        $b16 = r0[6];
+
+        $s32 = (short) $b16;
+
+        $s17 = $s32 & 255;
+
+        $i33 = (int) $s17;
+
+        i24 = $i18 | $i33;
+
+        $i19 = i24 + 9;
+
+        if i22 != $i19 goto label09;
+
+        $i35 = (int) -2;
+
+        i22 = i22 + $i35;
+
+     label09:
+        if z0 == 0 goto label10;
+
+        $z3 = <sun.security.smartcardio.ChannelImpl: boolean t0GetResponse>;
+
+        if $z3 != 0 goto label11;
+
+     label10:
+        if z1 == 0 goto label12;
+
+        $z2 = <sun.security.smartcardio.ChannelImpl: boolean t1GetResponse>;
+
+        if $z2 == 0 goto label12;
+
+     label11:
+        $z7 = 1;
+
+        goto label13;
+
+     label12:
+        $z7 = 0;
+
+     label13:
+        z8 = $z7;
+
+        i25 = 0;
+
+        r12 = <sun.security.smartcardio.ChannelImpl: byte[] B0>;
+
+     label14:
+        i25 = i25 + 1;
+
+        if i25 <= 256 goto label15;
+
+        $r15 = new javax.smartcardio.CardException;
+
+        specialinvoke $r15.<javax.smartcardio.CardException: void <init>(java.lang.String)>("Number of response iterations exceeded maximum 256");
+
+        throw $r15;
+
+     label15:
+        $r4 = r1.<sun.security.smartcardio.ChannelImpl: sun.security.smartcardio.CardImpl card>;
+
+        $l3 = $r4.<sun.security.smartcardio.CardImpl: long cardId>;
+
+        $r5 = r1.<sun.security.smartcardio.ChannelImpl: sun.security.smartcardio.CardImpl card>;
+
+        $i2 = $r5.<sun.security.smartcardio.CardImpl: int protocol>;
+
+        $r6 = staticinvoke <sun.security.smartcardio.PCSC: byte[] SCardTransmit(long,int,byte[],int,int)>($l3, $i2, r0, 0, i22);
+
+        i4 = lengthof $r6;
+
+        if z8 == 0 goto label18;
+
+        if i4 < 2 goto label18;
+
+        if i4 != 2 goto label16;
+
+        $b10 = $r6[0];
+
+        $i36 = (int) $b10;
+
+        if $i36 != 108 goto label16;
+
+        $i12 = i22 - 1;
+
+        $b11 = $r6[1];
+
+        r0[$i12] = $b11;
+
+        goto label14;
+
+     label16:
+        $i5 = i4 - 2;
+
+        $b6 = $r6[$i5];
+
+        $i37 = (int) $b6;
+
+        if $i37 != 97 goto label18;
+
+        if i4 <= 2 goto label17;
+
+        $i9 = i4 - 2;
+
+        r12 = specialinvoke r1.<sun.security.smartcardio.ChannelImpl: byte[] concat(byte[],byte[],int)>(r12, $r6, $i9);
+
+     label17:
+        r0[1] = -64;
+
+        r0[2] = 0;
+
+        r0[3] = 0;
+
+        $i7 = i4 - 1;
+
+        $b8 = $r6[$i7];
+
+        r0[4] = $b8;
+
+        i22 = 5;
+
+        goto label14;
+
+     label18:
+        $r13 = specialinvoke r1.<sun.security.smartcardio.ChannelImpl: byte[] concat(byte[],byte[],int)>(r12, $r6, i4);
+
+        goto label19;
+
+     label19:
+        return $r13;
+
+     label20:
+        $r9 := @caughtexception;
+
+        $r10 = r1.<sun.security.smartcardio.ChannelImpl: sun.security.smartcardio.CardImpl card>;
+
+        virtualinvoke $r10.<sun.security.smartcardio.CardImpl: void handleError(sun.security.smartcardio.PCSCException)>($r9);
+
+        $r16 = new javax.smartcardio.CardException;
+
+        specialinvoke $r16.<javax.smartcardio.CardException: void <init>(java.lang.Throwable)>($r9);
+
+        throw $r16;
+
+        catch sun.security.smartcardio.PCSCException from label01 to label19 with label20;
+    }
+
+    private static int getSW(byte[]) throws javax.smartcardio.CardException
+    {
+        byte[] r0;
+        short s4, s8, $s12, $s13;
+        byte $b3, $b7;
+        int $i0, $i1, $i2, $i5, $i6, $i9, $i10, $i11, $i14, $i15;
+        java.lang.String $r5;
+        javax.smartcardio.CardException $r7;
+        java.lang.StringBuilder $r3, $r4, $r6;
+
+        r0 := @parameter0: byte[];
+
+        $i0 = lengthof r0;
+
+        if $i0 >= 2 goto label1;
+
+        $r7 = new javax.smartcardio.CardException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid response length: ");
+
+        $i11 = lengthof r0;
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i11);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<javax.smartcardio.CardException: void <init>(java.lang.String)>($r5);
+
+        throw $r7;
+
+     label1:
+        $i1 = lengthof r0;
+
+        $i2 = $i1 - 2;
+
+        $b3 = r0[$i2];
+
+        $s12 = (short) $b3;
+
+        s4 = $s12 & 255;
+
+        $i5 = lengthof r0;
+
+        $i6 = $i5 - 1;
+
+        $b7 = r0[$i6];
+
+        $s13 = (short) $b7;
+
+        s8 = $s13 & 255;
+
+        $i14 = (int) s4;
+
+        $i9 = $i14 << 8;
+
+        $i15 = (int) s8;
+
+        $i10 = $i9 | $i15;
+
+        return $i10;
+    }
+
+    private static boolean isOK(byte[]) throws javax.smartcardio.CardException
+    {
+        byte[] r0;
+        int $i0, $i1, $i3;
+        boolean $z0;
+
+        r0 := @parameter0: byte[];
+
+        $i0 = lengthof r0;
+
+        if $i0 != 2 goto label1;
+
+        $i1 = staticinvoke <sun.security.smartcardio.ChannelImpl: int getSW(byte[])>(r0);
+
+        $i3 = (int) 36864;
+
+        if $i1 != $i3 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private void setChannel(byte[])
+    {
+        byte[] r0;
+        byte b0, $b5, $b7, $b8, $b9, $b10, $b13, $b15, $b16, $b18, $b20, $b22;
+        java.lang.StringBuilder $r4, $r5, $r7;
+        sun.security.smartcardio.ChannelImpl r1;
+        short $s1, $s6, $s17, $s24, $s26, $s28;
+        int $i2, $i3, $i4, $i11, $i12, $i14, $i19, $i21, $i23, $i25, $i27, $i29;
+        java.lang.String $r6;
+        java.lang.RuntimeException $r8;
+
+        r1 := @this: sun.security.smartcardio.ChannelImpl;
+
+        r0 := @parameter0: byte[];
+
+        b0 = r0[0];
+
+        $i23 = (int) b0;
+
+        if $i23 >= 0 goto label1;
+
+        return;
+
+     label1:
+        $s24 = (short) b0;
+
+        $s1 = $s24 & 224;
+
+        $i25 = (int) $s1;
+
+        if $i25 != 32 goto label2;
+
+        return;
+
+     label2:
+        $i2 = r1.<sun.security.smartcardio.ChannelImpl: int channel>;
+
+        if $i2 > 3 goto label3;
+
+        $b16 = r0[0];
+
+        $s26 = (short) $b16;
+
+        $s17 = $s26 & 188;
+
+        $b18 = (byte) $s17;
+
+        r0[0] = $b18;
+
+        $b20 = r0[0];
+
+        $i19 = r1.<sun.security.smartcardio.ChannelImpl: int channel>;
+
+        $i27 = (int) $b20;
+
+        $i21 = $i27 | $i19;
+
+        $b22 = (byte) $i21;
+
+        r0[0] = $b22;
+
+        goto label5;
+
+     label3:
+        $i3 = r1.<sun.security.smartcardio.ChannelImpl: int channel>;
+
+        if $i3 > 19 goto label4;
+
+        $b5 = r0[0];
+
+        $s28 = (short) $b5;
+
+        $s6 = $s28 & 176;
+
+        $b7 = (byte) $s6;
+
+        r0[0] = $b7;
+
+        $b8 = r0[0];
+
+        $b9 = $b8 | 64;
+
+        $b10 = (byte) $b9;
+
+        r0[0] = $b10;
+
+        $b13 = r0[0];
+
+        $i11 = r1.<sun.security.smartcardio.ChannelImpl: int channel>;
+
+        $i12 = $i11 - 4;
+
+        $i29 = (int) $b13;
+
+        $i14 = $i29 | $i12;
+
+        $b15 = (byte) $i14;
+
+        r0[0] = $b15;
+
+        goto label5;
+
+     label4:
+        $r8 = new java.lang.RuntimeException;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported channel number: ");
+
+        $i4 = r1.<sun.security.smartcardio.ChannelImpl: int channel>;
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<java.lang.RuntimeException: void <init>(java.lang.String)>($r6);
+
+        throw $r8;
+
+     label5:
+        return;
+    }
+
+    public void close() throws javax.smartcardio.CardException
+    {
+        java.lang.Throwable $r13;
+        byte[] $r2, $r5;
+        java.lang.IllegalStateException $r12;
+        sun.security.smartcardio.CardImpl $r1, $r3, $r4, $r15;
+        sun.security.smartcardio.ChannelImpl r0;
+        long $l5;
+        byte $b2;
+        int $i0, $i1, $i3, $i4;
+        java.lang.String $r9, $r11;
+        boolean $z0, $z1;
+        sun.security.smartcardio.PCSCException $r14;
+        javax.smartcardio.CardException $r6, $r16;
+        java.lang.StringBuilder $r7, $r8, $r10;
+
+        r0 := @this: sun.security.smartcardio.ChannelImpl;
+
+        $i0 = virtualinvoke r0.<sun.security.smartcardio.ChannelImpl: int getChannelNumber()>();
+
+        if $i0 != 0 goto label1;
+
+        $r12 = new java.lang.IllegalStateException;
+
+        specialinvoke $r12.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Cannot close basic logical channel");
+
+        throw $r12;
+
+     label1:
+        $z0 = r0.<sun.security.smartcardio.ChannelImpl: boolean isClosed>;
+
+        if $z0 == 0 goto label2;
+
+        return;
+
+     label2:
+        $r1 = r0.<sun.security.smartcardio.ChannelImpl: sun.security.smartcardio.CardImpl card>;
+
+        virtualinvoke $r1.<sun.security.smartcardio.CardImpl: void checkExclusive()>();
+
+     label3:
+        $r2 = newarray (byte)[4];
+
+        $r2[0] = 0;
+
+        $r2[1] = 112;
+
+        $r2[2] = -128;
+
+        $r2[3] = 0;
+
+        $i1 = virtualinvoke r0.<sun.security.smartcardio.ChannelImpl: int getChannelNumber()>();
+
+        $b2 = (byte) $i1;
+
+        $r2[3] = $b2;
+
+        specialinvoke r0.<sun.security.smartcardio.ChannelImpl: void setChannel(byte[])>($r2);
+
+        $r3 = r0.<sun.security.smartcardio.ChannelImpl: sun.security.smartcardio.CardImpl card>;
+
+        $l5 = $r3.<sun.security.smartcardio.CardImpl: long cardId>;
+
+        $r4 = r0.<sun.security.smartcardio.ChannelImpl: sun.security.smartcardio.CardImpl card>;
+
+        $i4 = $r4.<sun.security.smartcardio.CardImpl: int protocol>;
+
+        $i3 = lengthof $r2;
+
+        $r5 = staticinvoke <sun.security.smartcardio.PCSC: byte[] SCardTransmit(long,int,byte[],int,int)>($l5, $i4, $r2, 0, $i3);
+
+        $z1 = staticinvoke <sun.security.smartcardio.ChannelImpl: boolean isOK(byte[])>($r5);
+
+        if $z1 != 0 goto label4;
+
+        $r6 = new javax.smartcardio.CardException;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("close() failed: ");
+
+        $r9 = staticinvoke <sun.security.smartcardio.PCSC: java.lang.String toString(byte[])>($r5);
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<javax.smartcardio.CardException: void <init>(java.lang.String)>($r11);
+
+        throw $r6;
+
+     label4:
+        r0.<sun.security.smartcardio.ChannelImpl: boolean isClosed> = 1;
+
+        goto label8;
+
+     label5:
+        $r14 := @caughtexception;
+
+        $r15 = r0.<sun.security.smartcardio.ChannelImpl: sun.security.smartcardio.CardImpl card>;
+
+        virtualinvoke $r15.<sun.security.smartcardio.CardImpl: void handleError(sun.security.smartcardio.PCSCException)>($r14);
+
+        $r16 = new javax.smartcardio.CardException;
+
+        specialinvoke $r16.<javax.smartcardio.CardException: void <init>(java.lang.String,java.lang.Throwable)>("Could not close channel", $r14);
+
+        throw $r16;
+
+     label6:
+        $r13 := @caughtexception;
+
+     label7:
+        r0.<sun.security.smartcardio.ChannelImpl: boolean isClosed> = 1;
+
+        throw $r13;
+
+     label8:
+        return;
+
+        catch sun.security.smartcardio.PCSCException from label3 to label4 with label5;
+        catch java.lang.Throwable from label3 to label4 with label6;
+        catch java.lang.Throwable from label5 to label7 with label6;
+    }
+
+    public java.lang.String toString()
+    {
+        sun.security.smartcardio.ChannelImpl r2;
+        int $i0;
+        java.lang.StringBuilder $r0, $r1, $r3;
+        java.lang.String $r4;
+
+        r2 := @this: sun.security.smartcardio.ChannelImpl;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PC/SC channel ");
+
+        $i0 = r2.<sun.security.smartcardio.ChannelImpl: int channel>;
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r4;
+    }
+
+    static void <clinit>()
+    {
+        byte[] $r0;
+        boolean $z0, $z1, $z2;
+
+        <sun.security.smartcardio.ChannelImpl: int RESPONSE_ITERATIONS> = 256;
+
+        $z0 = staticinvoke <sun.security.smartcardio.ChannelImpl: boolean getBooleanProperty(java.lang.String,boolean)>("sun.security.smartcardio.t0GetResponse", 1);
+
+        <sun.security.smartcardio.ChannelImpl: boolean t0GetResponse> = $z0;
+
+        $z1 = staticinvoke <sun.security.smartcardio.ChannelImpl: boolean getBooleanProperty(java.lang.String,boolean)>("sun.security.smartcardio.t1GetResponse", 1);
+
+        <sun.security.smartcardio.ChannelImpl: boolean t1GetResponse> = $z1;
+
+        $z2 = staticinvoke <sun.security.smartcardio.ChannelImpl: boolean getBooleanProperty(java.lang.String,boolean)>("sun.security.smartcardio.t1StripLe", 0);
+
+        <sun.security.smartcardio.ChannelImpl: boolean t1StripLe> = $z2;
+
+        $r0 = newarray (byte)[0];
+
+        <sun.security.smartcardio.ChannelImpl: byte[] B0> = $r0;
+
+        return;
+    }
+}

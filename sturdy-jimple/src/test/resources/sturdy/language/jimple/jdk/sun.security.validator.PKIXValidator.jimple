@@ -1,0 +1,1219 @@
+public final class sun.security.validator.PKIXValidator extends sun.security.validator.Validator
+{
+    private static final boolean checkTLSRevocation;
+    private static final boolean ALLOW_NON_CA_ANCHOR;
+    private final java.util.Set trustedCerts;
+    private final java.security.cert.PKIXBuilderParameters parameterTemplate;
+    private int certPathLength;
+    private final java.util.Map trustedSubjects;
+    private final java.security.cert.CertificateFactory factory;
+    private final boolean plugin;
+
+    private static boolean allowNonCaAnchor()
+    {
+        java.lang.String $r0;
+        boolean $z0, $z1, $z2;
+
+        $r0 = staticinvoke <sun.security.action.GetPropertyAction: java.lang.String privilegedGetProperty(java.lang.String)>("jdk.security.allowNonCaAnchor");
+
+        if $r0 == null goto label2;
+
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = virtualinvoke $r0.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("true");
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+    }
+
+    void <init>(java.lang.String, java.util.Collection)
+    {
+        java.security.cert.X509Certificate r9;
+        sun.security.validator.PKIXValidator r0;
+        java.security.cert.CertificateFactory $r6;
+        java.security.InvalidAlgorithmParameterException $r13;
+        java.util.HashSet $r21, $r22;
+        java.util.Map $r7;
+        int $i1;
+        java.lang.String r1, $r17, $r19;
+        boolean $z0, $z1, $z2;
+        java.util.Iterator $r4;
+        java.util.Collection r2;
+        java.util.Set $r20;
+        java.security.cert.CertificateException $r11;
+        java.lang.RuntimeException $r26, $r27;
+        java.security.cert.PKIXBuilderParameters $r24;
+        java.lang.Object $r8;
+        java.lang.StringBuilder $r16, $r18, $r25;
+        java.security.cert.TrustAnchor $r23;
+
+        r0 := @this: sun.security.validator.PKIXValidator;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.util.Collection;
+
+        specialinvoke r0.<sun.security.validator.Validator: void <init>(java.lang.String,java.lang.String)>("PKIX", r1);
+
+        $i1 = (int) -1;
+
+        r0.<sun.security.validator.PKIXValidator: int certPathLength> = $i1;
+
+        $z0 = r2 instanceof java.util.Set;
+
+        if $z0 == 0 goto label1;
+
+        $r20 = (java.util.Set) r2;
+
+        goto label2;
+
+     label1:
+        $r21 = new java.util.HashSet;
+
+        $r20 = $r21;
+
+        specialinvoke $r21.<java.util.HashSet: void <init>(java.util.Collection)>(r2);
+
+     label2:
+        r0.<sun.security.validator.PKIXValidator: java.util.Set trustedCerts> = $r20;
+
+        $r22 = new java.util.HashSet;
+
+        specialinvoke $r22.<java.util.HashSet: void <init>()>();
+
+        $r4 = interfaceinvoke r2.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label3:
+        $z2 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label4;
+
+        $r8 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (java.security.cert.X509Certificate) $r8;
+
+        $r23 = new java.security.cert.TrustAnchor;
+
+        specialinvoke $r23.<java.security.cert.TrustAnchor: void <init>(java.security.cert.X509Certificate,byte[])>(r9, null);
+
+        interfaceinvoke $r22.<java.util.Set: boolean add(java.lang.Object)>($r23);
+
+        goto label3;
+
+     label4:
+        $r24 = new java.security.cert.PKIXBuilderParameters;
+
+        specialinvoke $r24.<java.security.cert.PKIXBuilderParameters: void <init>(java.util.Set,java.security.cert.CertSelector)>($r22, null);
+
+        r0.<sun.security.validator.PKIXValidator: java.security.cert.PKIXBuilderParameters parameterTemplate> = $r24;
+
+        $r6 = staticinvoke <java.security.cert.CertificateFactory: java.security.cert.CertificateFactory getInstance(java.lang.String)>("X.509");
+
+        r0.<sun.security.validator.PKIXValidator: java.security.cert.CertificateFactory factory> = $r6;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r13 := @caughtexception;
+
+        $r26 = new java.lang.RuntimeException;
+
+        $r25 = new java.lang.StringBuilder;
+
+        specialinvoke $r25.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unexpected error: ");
+
+        $r17 = virtualinvoke $r13.<java.security.InvalidAlgorithmParameterException: java.lang.String toString()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r26.<java.lang.RuntimeException: void <init>(java.lang.String,java.lang.Throwable)>($r19, $r13);
+
+        throw $r26;
+
+     label7:
+        $r11 := @caughtexception;
+
+        $r27 = new java.lang.RuntimeException;
+
+        specialinvoke $r27.<java.lang.RuntimeException: void <init>(java.lang.String,java.lang.Throwable)>("Internal error", $r11);
+
+        throw $r27;
+
+     label8:
+        specialinvoke r0.<sun.security.validator.PKIXValidator: void setDefaultParameters(java.lang.String)>(r1);
+
+        $z1 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("plugin code signing");
+
+        r0.<sun.security.validator.PKIXValidator: boolean plugin> = $z1;
+
+        $r7 = specialinvoke r0.<sun.security.validator.PKIXValidator: java.util.Map setTrustedSubjects()>();
+
+        r0.<sun.security.validator.PKIXValidator: java.util.Map trustedSubjects> = $r7;
+
+        return;
+
+        catch java.security.InvalidAlgorithmParameterException from label4 to label5 with label6;
+        catch java.security.cert.CertificateException from label4 to label5 with label7;
+    }
+
+    void <init>(java.lang.String, java.security.cert.PKIXBuilderParameters)
+    {
+        java.security.cert.X509Certificate $r10;
+        sun.security.validator.PKIXValidator r0;
+        java.security.cert.CertificateFactory $r6;
+        java.util.HashSet $r14;
+        java.util.Map $r7;
+        int $i1;
+        java.lang.String r1;
+        boolean $z0, $z1;
+        java.util.Iterator $r5;
+        java.util.Set $r4, $r11;
+        java.security.cert.CertificateException $r12;
+        java.lang.RuntimeException $r15;
+        java.security.cert.PKIXBuilderParameters r3;
+        java.lang.Object $r8;
+        java.security.cert.TrustAnchor r9;
+
+        r0 := @this: sun.security.validator.PKIXValidator;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.security.cert.PKIXBuilderParameters;
+
+        specialinvoke r0.<sun.security.validator.Validator: void <init>(java.lang.String,java.lang.String)>("PKIX", r1);
+
+        $i1 = (int) -1;
+
+        r0.<sun.security.validator.PKIXValidator: int certPathLength> = $i1;
+
+        $r14 = new java.util.HashSet;
+
+        specialinvoke $r14.<java.util.HashSet: void <init>()>();
+
+        r0.<sun.security.validator.PKIXValidator: java.util.Set trustedCerts> = $r14;
+
+        $r4 = virtualinvoke r3.<java.security.cert.PKIXBuilderParameters: java.util.Set getTrustAnchors()>();
+
+        $r5 = interfaceinvoke $r4.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r8 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (java.security.cert.TrustAnchor) $r8;
+
+        $r10 = virtualinvoke r9.<java.security.cert.TrustAnchor: java.security.cert.X509Certificate getTrustedCert()>();
+
+        if $r10 == null goto label2;
+
+        $r11 = r0.<sun.security.validator.PKIXValidator: java.util.Set trustedCerts>;
+
+        interfaceinvoke $r11.<java.util.Set: boolean add(java.lang.Object)>($r10);
+
+     label2:
+        goto label1;
+
+     label3:
+        r0.<sun.security.validator.PKIXValidator: java.security.cert.PKIXBuilderParameters parameterTemplate> = r3;
+
+     label4:
+        $r6 = staticinvoke <java.security.cert.CertificateFactory: java.security.cert.CertificateFactory getInstance(java.lang.String)>("X.509");
+
+        r0.<sun.security.validator.PKIXValidator: java.security.cert.CertificateFactory factory> = $r6;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r12 := @caughtexception;
+
+        $r15 = new java.lang.RuntimeException;
+
+        specialinvoke $r15.<java.lang.RuntimeException: void <init>(java.lang.String,java.lang.Throwable)>("Internal error", $r12);
+
+        throw $r15;
+
+     label7:
+        $z1 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("plugin code signing");
+
+        r0.<sun.security.validator.PKIXValidator: boolean plugin> = $z1;
+
+        $r7 = specialinvoke r0.<sun.security.validator.PKIXValidator: java.util.Map setTrustedSubjects()>();
+
+        r0.<sun.security.validator.PKIXValidator: java.util.Map trustedSubjects> = $r7;
+
+        return;
+
+        catch java.security.cert.CertificateException from label4 to label5 with label6;
+    }
+
+    private java.util.Map setTrustedSubjects()
+    {
+        java.security.cert.X509Certificate r5;
+        javax.security.auth.x500.X500Principal $r6;
+        sun.security.validator.PKIXValidator r1;
+        java.util.Iterator $r3;
+        java.util.Set $r2;
+        java.util.HashMap $r0;
+        java.security.PublicKey $r8;
+        java.util.ArrayList $r7;
+        java.util.List r10;
+        java.lang.Object $r4, $r9;
+        boolean $z0, $z1;
+
+        r1 := @this: sun.security.validator.PKIXValidator;
+
+        $r0 = new java.util.HashMap;
+
+        specialinvoke $r0.<java.util.HashMap: void <init>()>();
+
+        $r2 = r1.<sun.security.validator.PKIXValidator: java.util.Set trustedCerts>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (java.security.cert.X509Certificate) $r4;
+
+        $r6 = virtualinvoke r5.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        $z1 = interfaceinvoke $r0.<java.util.Map: boolean containsKey(java.lang.Object)>($r6);
+
+        if $z1 == 0 goto label2;
+
+        $r9 = interfaceinvoke $r0.<java.util.Map: java.lang.Object get(java.lang.Object)>($r6);
+
+        r10 = (java.util.List) $r9;
+
+        goto label3;
+
+     label2:
+        $r7 = new java.util.ArrayList;
+
+        specialinvoke $r7.<java.util.ArrayList: void <init>()>();
+
+        r10 = $r7;
+
+        interfaceinvoke $r0.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r6, $r7);
+
+     label3:
+        $r8 = virtualinvoke r5.<java.security.cert.X509Certificate: java.security.PublicKey getPublicKey()>();
+
+        interfaceinvoke r10.<java.util.List: boolean add(java.lang.Object)>($r8);
+
+        goto label1;
+
+     label4:
+        return $r0;
+    }
+
+    public java.util.Collection getTrustedCertificates()
+    {
+        java.util.Set $r1;
+        sun.security.validator.PKIXValidator r0;
+
+        r0 := @this: sun.security.validator.PKIXValidator;
+
+        $r1 = r0.<sun.security.validator.PKIXValidator: java.util.Set trustedCerts>;
+
+        return $r1;
+    }
+
+    public int getCertPathLength()
+    {
+        int $i0;
+        sun.security.validator.PKIXValidator r0;
+
+        r0 := @this: sun.security.validator.PKIXValidator;
+
+        $i0 = r0.<sun.security.validator.PKIXValidator: int certPathLength>;
+
+        return $i0;
+    }
+
+    private void setDefaultParameters(java.lang.String)
+    {
+        java.security.cert.PKIXBuilderParameters $r2, $r3;
+        sun.security.validator.PKIXValidator r1;
+        java.lang.String r0;
+        boolean $z0;
+
+        r1 := @this: sun.security.validator.PKIXValidator;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 == "tls server" goto label1;
+
+        if r0 != "tls client" goto label2;
+
+     label1:
+        $r2 = r1.<sun.security.validator.PKIXValidator: java.security.cert.PKIXBuilderParameters parameterTemplate>;
+
+        $z0 = <sun.security.validator.PKIXValidator: boolean checkTLSRevocation>;
+
+        virtualinvoke $r2.<java.security.cert.PKIXBuilderParameters: void setRevocationEnabled(boolean)>($z0);
+
+        goto label3;
+
+     label2:
+        $r3 = r1.<sun.security.validator.PKIXValidator: java.security.cert.PKIXBuilderParameters parameterTemplate>;
+
+        virtualinvoke $r3.<java.security.cert.PKIXBuilderParameters: void setRevocationEnabled(boolean)>(0);
+
+     label3:
+        return;
+    }
+
+    public java.security.cert.PKIXBuilderParameters getParameters()
+    {
+        java.security.cert.PKIXBuilderParameters $r1;
+        sun.security.validator.PKIXValidator r0;
+
+        r0 := @this: sun.security.validator.PKIXValidator;
+
+        $r1 = r0.<sun.security.validator.PKIXValidator: java.security.cert.PKIXBuilderParameters parameterTemplate>;
+
+        return $r1;
+    }
+
+    java.security.cert.X509Certificate[] engineValidate(java.security.cert.X509Certificate[], java.util.Collection, java.util.List, java.security.AlgorithmConstraints, java.lang.Object) throws java.security.cert.CertificateException
+    {
+        java.util.Map $r12, $r20, $r27, $r28;
+        java.util.Set $r19, $r25, $r34;
+        java.security.cert.PKIXBuilderParameters $r4, $r8;
+        java.security.cert.TrustAnchor $r17;
+        sun.security.provider.certpath.AlgorithmChecker $r37;
+        sun.security.validator.PKIXValidator r3;
+        java.security.InvalidAlgorithmParameterException $r39, $r41;
+        java.lang.String $r7, $r38;
+        sun.security.provider.certpath.PKIXExtendedParameters $r2, r42;
+        java.security.AlgorithmConstraints r9;
+        java.security.cert.X509Certificate $r18, $r36, r45, r46;
+        sun.security.validator.ValidatorException $r15;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        java.util.Collection r13;
+        java.util.List r10, $r22, $r30;
+        java.security.cert.X509Certificate[] r0, $r14, $r23, $r26, $r32, $r33, $r35, r47;
+        javax.security.auth.x500.X500Principal $r11, $r24, r44;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, $i10;
+        java.security.PublicKey $r31;
+        java.security.cert.CertificateException $r1, $r40;
+        java.lang.Object $r5, r6, $r16, $r21, $r29;
+        java.security.Timestamp $r43;
+
+        r3 := @this: sun.security.validator.PKIXValidator;
+
+        r0 := @parameter0: java.security.cert.X509Certificate[];
+
+        r13 := @parameter1: java.util.Collection;
+
+        r10 := @parameter2: java.util.List;
+
+        r9 := @parameter3: java.security.AlgorithmConstraints;
+
+        r6 := @parameter4: java.lang.Object;
+
+        if r0 == null goto label01;
+
+        $i0 = lengthof r0;
+
+        if $i0 != 0 goto label02;
+
+     label01:
+        $r1 = new java.security.cert.CertificateException;
+
+        specialinvoke $r1.<java.security.cert.CertificateException: void <init>(java.lang.String)>("null or zero-length certificate chain");
+
+        throw $r1;
+
+     label02:
+        r42 = null;
+
+     label03:
+        $r2 = new sun.security.provider.certpath.PKIXExtendedParameters;
+
+        $r4 = r3.<sun.security.validator.PKIXValidator: java.security.cert.PKIXBuilderParameters parameterTemplate>;
+
+        $r5 = virtualinvoke $r4.<java.security.cert.PKIXBuilderParameters: java.lang.Object clone()>();
+
+        $r8 = (java.security.cert.PKIXBuilderParameters) $r5;
+
+        $z0 = r6 instanceof java.security.Timestamp;
+
+        if $z0 == 0 goto label04;
+
+        $r43 = (java.security.Timestamp) r6;
+
+        goto label05;
+
+     label04:
+        $r43 = null;
+
+     label05:
+        $r7 = r3.<sun.security.validator.PKIXValidator: java.lang.String variant>;
+
+        specialinvoke $r2.<sun.security.provider.certpath.PKIXExtendedParameters: void <init>(java.security.cert.PKIXBuilderParameters,java.security.Timestamp,java.lang.String)>($r8, $r43, $r7);
+
+        r42 = $r2;
+
+     label06:
+        goto label08;
+
+     label07:
+        $r41 := @caughtexception;
+
+     label08:
+        if r9 == null goto label09;
+
+        $r37 = new sun.security.provider.certpath.AlgorithmChecker;
+
+        $r38 = r3.<sun.security.validator.PKIXValidator: java.lang.String variant>;
+
+        specialinvoke $r37.<sun.security.provider.certpath.AlgorithmChecker: void <init>(java.security.AlgorithmConstraints,java.lang.String)>(r9, $r38);
+
+        virtualinvoke r42.<java.security.cert.PKIXBuilderParameters: void addCertPathChecker(java.security.cert.PKIXCertPathChecker)>($r37);
+
+     label09:
+        $z1 = interfaceinvoke r10.<java.util.List: boolean isEmpty()>();
+
+        if $z1 != 0 goto label10;
+
+        staticinvoke <sun.security.validator.PKIXValidator: void addResponses(java.security.cert.PKIXBuilderParameters,java.security.cert.X509Certificate[],java.util.List)>(r42, r0, r10);
+
+     label10:
+        r44 = null;
+
+        i9 = 0;
+
+     label11:
+        $i10 = lengthof r0;
+
+        if i9 >= $i10 goto label16;
+
+        r45 = r0[i9];
+
+        $r24 = virtualinvoke r45.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        if i9 != 0 goto label12;
+
+        $r34 = r3.<sun.security.validator.PKIXValidator: java.util.Set trustedCerts>;
+
+        $z9 = interfaceinvoke $r34.<java.util.Set: boolean contains(java.lang.Object)>(r45);
+
+        if $z9 == 0 goto label15;
+
+        $r35 = newarray (java.security.cert.X509Certificate)[1];
+
+        $r36 = r0[0];
+
+        $r35[0] = $r36;
+
+        return $r35;
+
+     label12:
+        $z5 = virtualinvoke $r24.<javax.security.auth.x500.X500Principal: boolean equals(java.lang.Object)>(r44);
+
+        if $z5 != 0 goto label13;
+
+        $r33 = specialinvoke r3.<sun.security.validator.PKIXValidator: java.security.cert.X509Certificate[] doBuild(java.security.cert.X509Certificate[],java.util.Collection,java.security.cert.PKIXBuilderParameters)>(r0, r13, r42);
+
+        return $r33;
+
+     label13:
+        $r25 = r3.<sun.security.validator.PKIXValidator: java.util.Set trustedCerts>;
+
+        $z6 = interfaceinvoke $r25.<java.util.Set: boolean contains(java.lang.Object)>(r45);
+
+        if $z6 != 0 goto label14;
+
+        $r27 = r3.<sun.security.validator.PKIXValidator: java.util.Map trustedSubjects>;
+
+        $z7 = interfaceinvoke $r27.<java.util.Map: boolean containsKey(java.lang.Object)>($r24);
+
+        if $z7 == 0 goto label15;
+
+        $r28 = r3.<sun.security.validator.PKIXValidator: java.util.Map trustedSubjects>;
+
+        $r29 = interfaceinvoke $r28.<java.util.Map: java.lang.Object get(java.lang.Object)>($r24);
+
+        $r30 = (java.util.List) $r29;
+
+        $r31 = virtualinvoke r45.<java.security.cert.X509Certificate: java.security.PublicKey getPublicKey()>();
+
+        $z8 = interfaceinvoke $r30.<java.util.List: boolean contains(java.lang.Object)>($r31);
+
+        if $z8 == 0 goto label15;
+
+     label14:
+        $r32 = newarray (java.security.cert.X509Certificate)[i9];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, 0, $r32, 0, i9);
+
+        $r26 = specialinvoke r3.<sun.security.validator.PKIXValidator: java.security.cert.X509Certificate[] doValidate(java.security.cert.X509Certificate[],java.security.cert.PKIXBuilderParameters)>($r32, r42);
+
+        return $r26;
+
+     label15:
+        r44 = virtualinvoke r45.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getIssuerX500Principal()>();
+
+        i9 = i9 + 1;
+
+        goto label11;
+
+     label16:
+        $i1 = lengthof r0;
+
+        $i2 = $i1 - 1;
+
+        r46 = r0[$i2];
+
+        $r11 = virtualinvoke r46.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getIssuerX500Principal()>();
+
+        virtualinvoke r46.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        $r12 = r3.<sun.security.validator.PKIXValidator: java.util.Map trustedSubjects>;
+
+        $z2 = interfaceinvoke $r12.<java.util.Map: boolean containsKey(java.lang.Object)>($r11);
+
+        if $z2 == 0 goto label17;
+
+        $r20 = r3.<sun.security.validator.PKIXValidator: java.util.Map trustedSubjects>;
+
+        $r21 = interfaceinvoke $r20.<java.util.Map: java.lang.Object get(java.lang.Object)>($r11);
+
+        $r22 = (java.util.List) $r21;
+
+        $z4 = specialinvoke r3.<sun.security.validator.PKIXValidator: boolean isSignatureValid(java.util.List,java.security.cert.X509Certificate)>($r22, r46);
+
+        if $z4 == 0 goto label17;
+
+        $r23 = specialinvoke r3.<sun.security.validator.PKIXValidator: java.security.cert.X509Certificate[] doValidate(java.security.cert.X509Certificate[],java.security.cert.PKIXBuilderParameters)>(r0, r42);
+
+        return $r23;
+
+     label17:
+        $z3 = r3.<sun.security.validator.PKIXValidator: boolean plugin>;
+
+        if $z3 == 0 goto label23;
+
+        $i3 = lengthof r0;
+
+        if $i3 <= 1 goto label22;
+
+        $i4 = lengthof r0;
+
+        $i5 = $i4 - 1;
+
+        r47 = newarray (java.security.cert.X509Certificate)[$i5];
+
+        $i6 = lengthof r47;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, 0, r47, 0, $i6);
+
+     label18:
+        $r17 = new java.security.cert.TrustAnchor;
+
+        $i7 = lengthof r0;
+
+        $i8 = $i7 - 1;
+
+        $r18 = r0[$i8];
+
+        specialinvoke $r17.<java.security.cert.TrustAnchor: void <init>(java.security.cert.X509Certificate,byte[])>($r18, null);
+
+        $r19 = staticinvoke <java.util.Collections: java.util.Set singleton(java.lang.Object)>($r17);
+
+        virtualinvoke r42.<java.security.cert.PKIXBuilderParameters: void setTrustAnchors(java.util.Set)>($r19);
+
+     label19:
+        goto label21;
+
+     label20:
+        $r39 := @caughtexception;
+
+        $r40 = new java.security.cert.CertificateException;
+
+        specialinvoke $r40.<java.security.cert.CertificateException: void <init>(java.lang.Throwable)>($r39);
+
+        throw $r40;
+
+     label21:
+        specialinvoke r3.<sun.security.validator.PKIXValidator: java.security.cert.X509Certificate[] doValidate(java.security.cert.X509Certificate[],java.security.cert.PKIXBuilderParameters)>(r47, r42);
+
+     label22:
+        $r15 = new sun.security.validator.ValidatorException;
+
+        $r16 = <sun.security.validator.ValidatorException: java.lang.Object T_NO_TRUST_ANCHOR>;
+
+        specialinvoke $r15.<sun.security.validator.ValidatorException: void <init>(java.lang.Object)>($r16);
+
+        throw $r15;
+
+     label23:
+        $r14 = specialinvoke r3.<sun.security.validator.PKIXValidator: java.security.cert.X509Certificate[] doBuild(java.security.cert.X509Certificate[],java.util.Collection,java.security.cert.PKIXBuilderParameters)>(r0, r13, r42);
+
+        return $r14;
+
+        catch java.security.InvalidAlgorithmParameterException from label03 to label06 with label07;
+        catch java.security.InvalidAlgorithmParameterException from label18 to label19 with label20;
+    }
+
+    private boolean isSignatureValid(java.util.List, java.security.cert.X509Certificate)
+    {
+        java.security.cert.X509Certificate r5;
+        sun.security.validator.PKIXValidator r0;
+        java.util.Iterator $r2;
+        java.security.PublicKey r4;
+        java.lang.Exception $r6;
+        java.util.List r1;
+        java.lang.Object $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.security.validator.PKIXValidator;
+
+        r1 := @parameter0: java.util.List;
+
+        r5 := @parameter1: java.security.cert.X509Certificate;
+
+        $z0 = r0.<sun.security.validator.PKIXValidator: boolean plugin>;
+
+        if $z0 == 0 goto label6;
+
+        $r2 = interfaceinvoke r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z1 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label5;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (java.security.PublicKey) $r3;
+
+     label2:
+        virtualinvoke r5.<java.security.cert.X509Certificate: void verify(java.security.PublicKey)>(r4);
+
+     label3:
+        return 1;
+
+     label4:
+        $r6 := @caughtexception;
+
+        goto label1;
+
+     label5:
+        return 0;
+
+     label6:
+        return 1;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    private static java.security.cert.X509Certificate[] toArray(java.security.cert.CertPath, java.security.cert.TrustAnchor) throws java.security.cert.CertificateException
+    {
+        java.security.cert.X509Certificate $r1;
+        java.security.cert.CertPath r2;
+        java.util.List $r3;
+        int $i0, $i1, $i2, $i3;
+        sun.security.validator.ValidatorException $r5;
+        java.security.cert.X509Certificate[] r4;
+        java.security.cert.TrustAnchor r0;
+
+        r2 := @parameter0: java.security.cert.CertPath;
+
+        r0 := @parameter1: java.security.cert.TrustAnchor;
+
+        $r1 = virtualinvoke r0.<java.security.cert.TrustAnchor: java.security.cert.X509Certificate getTrustedCert()>();
+
+        if $r1 != null goto label1;
+
+        $r5 = new sun.security.validator.ValidatorException;
+
+        specialinvoke $r5.<sun.security.validator.ValidatorException: void <init>(java.lang.String)>("TrustAnchor must be specified as certificate");
+
+        throw $r5;
+
+     label1:
+        staticinvoke <sun.security.validator.PKIXValidator: void verifyTrustAnchor(java.security.cert.X509Certificate)>($r1);
+
+        $r3 = virtualinvoke r2.<java.security.cert.CertPath: java.util.List getCertificates()>();
+
+        $i0 = interfaceinvoke $r3.<java.util.List: int size()>();
+
+        $i1 = $i0 + 1;
+
+        r4 = newarray (java.security.cert.X509Certificate)[$i1];
+
+        interfaceinvoke $r3.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>(r4);
+
+        $i2 = lengthof r4;
+
+        $i3 = $i2 - 1;
+
+        r4[$i3] = $r1;
+
+        return r4;
+    }
+
+    private void setDate(java.security.cert.PKIXBuilderParameters)
+    {
+        java.security.cert.PKIXBuilderParameters r2;
+        sun.security.validator.PKIXValidator r0;
+        java.util.Date r1;
+
+        r0 := @this: sun.security.validator.PKIXValidator;
+
+        r2 := @parameter0: java.security.cert.PKIXBuilderParameters;
+
+        r1 = r0.<sun.security.validator.PKIXValidator: java.util.Date validationDate>;
+
+        if r1 == null goto label1;
+
+        virtualinvoke r2.<java.security.cert.PKIXBuilderParameters: void setDate(java.util.Date)>(r1);
+
+     label1:
+        return;
+    }
+
+    private java.security.cert.X509Certificate[] doValidate(java.security.cert.X509Certificate[], java.security.cert.PKIXBuilderParameters) throws java.security.cert.CertificateException
+    {
+        sun.security.validator.PKIXValidator r0;
+        java.security.cert.CertificateFactory $r4;
+        java.security.cert.PKIXCertPathValidatorResult r8;
+        java.security.GeneralSecurityException $r11;
+        int $i0;
+        sun.security.validator.ValidatorException $r12;
+        java.lang.String $r15, $r17;
+        java.security.cert.CertPathValidator $r2;
+        java.security.cert.CertPath $r6;
+        java.security.cert.CertPathValidatorResult $r7;
+        java.security.cert.PKIXBuilderParameters r1;
+        java.util.List $r5;
+        java.lang.StringBuilder $r13, $r14, $r16;
+        java.security.cert.X509Certificate[] r3, $r10;
+        java.security.cert.TrustAnchor $r9;
+
+        r0 := @this: sun.security.validator.PKIXValidator;
+
+        r3 := @parameter0: java.security.cert.X509Certificate[];
+
+        r1 := @parameter1: java.security.cert.PKIXBuilderParameters;
+
+     label1:
+        specialinvoke r0.<sun.security.validator.PKIXValidator: void setDate(java.security.cert.PKIXBuilderParameters)>(r1);
+
+        $r2 = staticinvoke <java.security.cert.CertPathValidator: java.security.cert.CertPathValidator getInstance(java.lang.String)>("PKIX");
+
+        $r4 = r0.<sun.security.validator.PKIXValidator: java.security.cert.CertificateFactory factory>;
+
+        $r5 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>(r3);
+
+        $r6 = virtualinvoke $r4.<java.security.cert.CertificateFactory: java.security.cert.CertPath generateCertPath(java.util.List)>($r5);
+
+        $i0 = lengthof r3;
+
+        r0.<sun.security.validator.PKIXValidator: int certPathLength> = $i0;
+
+        $r7 = virtualinvoke $r2.<java.security.cert.CertPathValidator: java.security.cert.CertPathValidatorResult validate(java.security.cert.CertPath,java.security.cert.CertPathParameters)>($r6, r1);
+
+        r8 = (java.security.cert.PKIXCertPathValidatorResult) $r7;
+
+        $r9 = virtualinvoke r8.<java.security.cert.PKIXCertPathValidatorResult: java.security.cert.TrustAnchor getTrustAnchor()>();
+
+        $r10 = staticinvoke <sun.security.validator.PKIXValidator: java.security.cert.X509Certificate[] toArray(java.security.cert.CertPath,java.security.cert.TrustAnchor)>($r6, $r9);
+
+     label2:
+        return $r10;
+
+     label3:
+        $r11 := @caughtexception;
+
+        $r12 = new sun.security.validator.ValidatorException;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PKIX path validation failed: ");
+
+        $r15 = virtualinvoke $r11.<java.security.GeneralSecurityException: java.lang.String toString()>();
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r12.<sun.security.validator.ValidatorException: void <init>(java.lang.String,java.lang.Throwable)>($r17, $r11);
+
+        throw $r12;
+
+        catch java.security.GeneralSecurityException from label1 to label2 with label3;
+    }
+
+    private static void verifyTrustAnchor(java.security.cert.X509Certificate) throws sun.security.validator.ValidatorException
+    {
+        java.security.cert.X509Certificate r0;
+        javax.security.auth.x500.X500Principal $r5, $r12;
+        int $i0, $i1, $i3;
+        java.lang.String $r8, $r15;
+        sun.security.validator.ValidatorException $r17, $r19;
+        boolean $z0, $z1;
+        boolean[] $r1;
+        java.lang.StringBuilder $r4, $r6, $r7, $r11, $r13, $r14, $r16, $r18;
+
+        r0 := @parameter0: java.security.cert.X509Certificate;
+
+        $z0 = <sun.security.validator.PKIXValidator: boolean ALLOW_NON_CA_ANCHOR>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.security.cert.X509Certificate: int getVersion()>();
+
+        if $i0 >= 3 goto label2;
+
+        return;
+
+     label2:
+        $i1 = virtualinvoke r0.<java.security.cert.X509Certificate: int getBasicConstraints()>();
+
+        $i3 = (int) -1;
+
+        if $i1 != $i3 goto label3;
+
+        $r17 = new sun.security.validator.ValidatorException;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("TrustAnchor with subject \"");
+
+        $r12 = virtualinvoke r0.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\" is not a CA certificate");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r17.<sun.security.validator.ValidatorException: void <init>(java.lang.String)>($r15);
+
+        throw $r17;
+
+     label3:
+        $r1 = virtualinvoke r0.<java.security.cert.X509Certificate: boolean[] getKeyUsage()>();
+
+        if $r1 == null goto label4;
+
+        $z1 = $r1[5];
+
+        if $z1 != 0 goto label4;
+
+        $r19 = new sun.security.validator.ValidatorException;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("TrustAnchor with subject \"");
+
+        $r5 = virtualinvoke r0.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\" does not have keyCertSign bit set in KeyUsage extension");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r19.<sun.security.validator.ValidatorException: void <init>(java.lang.String)>($r8);
+
+        throw $r19;
+
+     label4:
+        return;
+    }
+
+    private java.security.cert.X509Certificate[] doBuild(java.security.cert.X509Certificate[], java.util.Collection, java.security.cert.PKIXBuilderParameters) throws java.security.cert.CertificateException
+    {
+        java.security.cert.X509Certificate $r4;
+        sun.security.validator.PKIXValidator r0;
+        java.util.ArrayList $r5;
+        java.security.GeneralSecurityException $r16;
+        java.security.cert.CertPathBuilder $r10;
+        sun.security.validator.ValidatorException $r17;
+        java.lang.String $r20, $r22;
+        java.security.cert.X509CertSelector $r2;
+        java.util.Collection r7;
+        java.security.cert.CertPathBuilderResult $r11;
+        java.security.cert.CertPath $r12;
+        java.security.cert.CollectionCertStoreParameters $r8;
+        java.security.cert.PKIXBuilderParameters r1;
+        java.util.List $r6;
+        java.security.cert.CertStore $r9;
+        java.security.cert.PKIXCertPathBuilderResult $r15;
+        java.lang.StringBuilder $r18, $r19, $r21;
+        java.security.cert.X509Certificate[] r3, $r14;
+        java.security.cert.TrustAnchor $r13;
+
+        r0 := @this: sun.security.validator.PKIXValidator;
+
+        r3 := @parameter0: java.security.cert.X509Certificate[];
+
+        r7 := @parameter1: java.util.Collection;
+
+        r1 := @parameter2: java.security.cert.PKIXBuilderParameters;
+
+     label1:
+        specialinvoke r0.<sun.security.validator.PKIXValidator: void setDate(java.security.cert.PKIXBuilderParameters)>(r1);
+
+        $r2 = new java.security.cert.X509CertSelector;
+
+        specialinvoke $r2.<java.security.cert.X509CertSelector: void <init>()>();
+
+        $r4 = r3[0];
+
+        virtualinvoke $r2.<java.security.cert.X509CertSelector: void setCertificate(java.security.cert.X509Certificate)>($r4);
+
+        virtualinvoke r1.<java.security.cert.PKIXBuilderParameters: void setTargetCertConstraints(java.security.cert.CertSelector)>($r2);
+
+        $r5 = new java.util.ArrayList;
+
+        specialinvoke $r5.<java.util.ArrayList: void <init>()>();
+
+        $r6 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>(r3);
+
+        interfaceinvoke $r5.<java.util.Collection: boolean addAll(java.util.Collection)>($r6);
+
+        if r7 == null goto label2;
+
+        interfaceinvoke $r5.<java.util.Collection: boolean addAll(java.util.Collection)>(r7);
+
+     label2:
+        $r8 = new java.security.cert.CollectionCertStoreParameters;
+
+        specialinvoke $r8.<java.security.cert.CollectionCertStoreParameters: void <init>(java.util.Collection)>($r5);
+
+        $r9 = staticinvoke <java.security.cert.CertStore: java.security.cert.CertStore getInstance(java.lang.String,java.security.cert.CertStoreParameters)>("Collection", $r8);
+
+        virtualinvoke r1.<java.security.cert.PKIXBuilderParameters: void addCertStore(java.security.cert.CertStore)>($r9);
+
+        $r10 = staticinvoke <java.security.cert.CertPathBuilder: java.security.cert.CertPathBuilder getInstance(java.lang.String)>("PKIX");
+
+        $r11 = virtualinvoke $r10.<java.security.cert.CertPathBuilder: java.security.cert.CertPathBuilderResult build(java.security.cert.CertPathParameters)>(r1);
+
+        $r15 = (java.security.cert.PKIXCertPathBuilderResult) $r11;
+
+        $r12 = virtualinvoke $r15.<java.security.cert.PKIXCertPathBuilderResult: java.security.cert.CertPath getCertPath()>();
+
+        $r13 = virtualinvoke $r15.<java.security.cert.PKIXCertPathBuilderResult: java.security.cert.TrustAnchor getTrustAnchor()>();
+
+        $r14 = staticinvoke <sun.security.validator.PKIXValidator: java.security.cert.X509Certificate[] toArray(java.security.cert.CertPath,java.security.cert.TrustAnchor)>($r12, $r13);
+
+     label3:
+        return $r14;
+
+     label4:
+        $r16 := @caughtexception;
+
+        $r17 = new sun.security.validator.ValidatorException;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PKIX path building failed: ");
+
+        $r20 = virtualinvoke $r16.<java.security.GeneralSecurityException: java.lang.String toString()>();
+
+        $r21 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r17.<sun.security.validator.ValidatorException: void <init>(java.lang.String,java.lang.Throwable)>($r22, $r16);
+
+        throw $r17;
+
+        catch java.security.GeneralSecurityException from label1 to label3 with label4;
+    }
+
+    private static void addResponses(java.security.cert.PKIXBuilderParameters, java.security.cert.X509Certificate[], java.util.List)
+    {
+        java.security.cert.X509Certificate $r9, $r10;
+        byte[] r8;
+        java.util.ArrayList $r1;
+        java.security.cert.PKIXCertPathChecker r16;
+        java.util.Map $r4;
+        int $i0, $i1, $i2, $i3, i4;
+        boolean $z0, $z1, $z2, $z3;
+        java.security.cert.PKIXRevocationChecker r15;
+        java.util.Iterator $r3;
+        java.security.cert.CertPathValidator $r11;
+        java.security.cert.CertPathChecker $r12;
+        java.security.cert.PKIXBuilderParameters r0;
+        java.util.List $r2, r6;
+        java.security.NoSuchAlgorithmException $r14;
+        java.lang.Object $r7, $r13;
+        java.security.cert.X509Certificate[] r5;
+
+        r0 := @parameter0: java.security.cert.PKIXBuilderParameters;
+
+        r5 := @parameter1: java.security.cert.X509Certificate[];
+
+        r6 := @parameter2: java.util.List;
+
+        $z0 = virtualinvoke r0.<java.security.cert.PKIXBuilderParameters: boolean isRevocationEnabled()>();
+
+        if $z0 == 0 goto label11;
+
+     label01:
+        r15 = null;
+
+        $r1 = new java.util.ArrayList;
+
+        $r2 = virtualinvoke r0.<java.security.cert.PKIXBuilderParameters: java.util.List getCertPathCheckers()>();
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>(java.util.Collection)>($r2);
+
+        $r3 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label02:
+        $z1 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label04;
+
+        $r13 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r16 = (java.security.cert.PKIXCertPathChecker) $r13;
+
+        $z3 = r16 instanceof java.security.cert.PKIXRevocationChecker;
+
+        if $z3 == 0 goto label03;
+
+        r15 = (java.security.cert.PKIXRevocationChecker) r16;
+
+        goto label04;
+
+     label03:
+        goto label02;
+
+     label04:
+        if r15 != null goto label05;
+
+        $r11 = staticinvoke <java.security.cert.CertPathValidator: java.security.cert.CertPathValidator getInstance(java.lang.String)>("PKIX");
+
+        $r12 = virtualinvoke $r11.<java.security.cert.CertPathValidator: java.security.cert.CertPathChecker getRevocationChecker()>();
+
+        r15 = (java.security.cert.PKIXRevocationChecker) $r12;
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>(r15);
+
+     label05:
+        $r4 = virtualinvoke r15.<java.security.cert.PKIXRevocationChecker: java.util.Map getOcspResponses()>();
+
+        $i0 = lengthof r5;
+
+        $i1 = interfaceinvoke r6.<java.util.List: int size()>();
+
+        $i2 = staticinvoke <java.lang.Integer: int min(int,int)>($i0, $i1);
+
+        i4 = 0;
+
+     label06:
+        if i4 >= $i2 goto label08;
+
+        $r7 = interfaceinvoke r6.<java.util.List: java.lang.Object get(int)>(i4);
+
+        r8 = (byte[]) $r7;
+
+        if r8 == null goto label07;
+
+        $i3 = lengthof r8;
+
+        if $i3 <= 0 goto label07;
+
+        $r9 = r5[i4];
+
+        $z2 = interfaceinvoke $r4.<java.util.Map: boolean containsKey(java.lang.Object)>($r9);
+
+        if $z2 != 0 goto label07;
+
+        $r10 = r5[i4];
+
+        interfaceinvoke $r4.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r10, r8);
+
+     label07:
+        i4 = i4 + 1;
+
+        goto label06;
+
+     label08:
+        virtualinvoke r15.<java.security.cert.PKIXRevocationChecker: void setOcspResponses(java.util.Map)>($r4);
+
+        virtualinvoke r0.<java.security.cert.PKIXBuilderParameters: void setCertPathCheckers(java.util.List)>($r1);
+
+     label09:
+        goto label11;
+
+     label10:
+        $r14 := @caughtexception;
+
+     label11:
+        return;
+
+        catch java.security.NoSuchAlgorithmException from label01 to label09 with label10;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.action.GetBooleanAction $r0;
+        java.lang.Boolean $r2;
+        java.lang.Object $r1;
+        boolean $z0, $z1;
+
+        $r0 = new sun.security.action.GetBooleanAction;
+
+        specialinvoke $r0.<sun.security.action.GetBooleanAction: void <init>(java.lang.String)>("com.sun.net.ssl.checkRevocation");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r2 = (java.lang.Boolean) $r1;
+
+        $z0 = virtualinvoke $r2.<java.lang.Boolean: boolean booleanValue()>();
+
+        <sun.security.validator.PKIXValidator: boolean checkTLSRevocation> = $z0;
+
+        $z1 = staticinvoke <sun.security.validator.PKIXValidator: boolean allowNonCaAnchor()>();
+
+        <sun.security.validator.PKIXValidator: boolean ALLOW_NON_CA_ANCHOR> = $z1;
+
+        return;
+    }
+}

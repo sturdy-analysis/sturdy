@@ -1,0 +1,1509 @@
+public class sun.nio.cs.CharsetMapping extends java.lang.Object
+{
+    public static final char UNMAPPABLE_DECODING;
+    public static final int UNMAPPABLE_ENCODING;
+    char[] b2cSB;
+    char[] b2cDB1;
+    char[] b2cDB2;
+    int b2Min;
+    int b2Max;
+    int b1MinDB1;
+    int b1MaxDB1;
+    int b1MinDB2;
+    int b1MaxDB2;
+    int dbSegSize;
+    char[] c2b;
+    char[] c2bIndex;
+    char[] b2cSupp;
+    char[] c2bSupp;
+    sun.nio.cs.CharsetMapping$Entry[] b2cComp;
+    sun.nio.cs.CharsetMapping$Entry[] c2bComp;
+    static java.util.Comparator comparatorBytes;
+    static java.util.Comparator comparatorCP;
+    static java.util.Comparator comparatorComp;
+    private static final int MAP_SINGLEBYTE;
+    private static final int MAP_DOUBLEBYTE1;
+    private static final int MAP_DOUBLEBYTE2;
+    private static final int MAP_SUPPLEMENT;
+    private static final int MAP_SUPPLEMENT_C2B;
+    private static final int MAP_COMPOSITE;
+    private static final int MAP_INDEXC2B;
+    int off;
+    byte[] bb;
+
+    public void <init>()
+    {
+        sun.nio.cs.CharsetMapping r0;
+
+        r0 := @this: sun.nio.cs.CharsetMapping;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.nio.cs.CharsetMapping: int off> = 0;
+
+        return;
+    }
+
+    public char decodeSingle(int)
+    {
+        int i0;
+        char[] $r1;
+        sun.nio.cs.CharsetMapping r0;
+        char $c1;
+
+        r0 := @this: sun.nio.cs.CharsetMapping;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.nio.cs.CharsetMapping: char[] b2cSB>;
+
+        $c1 = $r1[i0];
+
+        return $c1;
+    }
+
+    public char decodeDouble(int, int)
+    {
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i11, $i12, $i13, $i14, $i15, i17, i18, i19, i20, i21;
+        sun.nio.cs.CharsetMapping r0;
+        char $c10, $c16;
+        char[] $r1, $r2;
+
+        r0 := @this: sun.nio.cs.CharsetMapping;
+
+        i17 := @parameter0: int;
+
+        i18 := @parameter1: int;
+
+        $i0 = r0.<sun.nio.cs.CharsetMapping: int b2Min>;
+
+        if i18 < $i0 goto label2;
+
+        $i1 = r0.<sun.nio.cs.CharsetMapping: int b2Max>;
+
+        if i18 >= $i1 goto label2;
+
+        $i2 = r0.<sun.nio.cs.CharsetMapping: int b2Min>;
+
+        i19 = i18 - $i2;
+
+        $i3 = r0.<sun.nio.cs.CharsetMapping: int b1MinDB1>;
+
+        if i17 < $i3 goto label1;
+
+        $i11 = r0.<sun.nio.cs.CharsetMapping: int b1MaxDB1>;
+
+        if i17 > $i11 goto label1;
+
+        $i12 = r0.<sun.nio.cs.CharsetMapping: int b1MinDB1>;
+
+        i20 = i17 - $i12;
+
+        $r2 = r0.<sun.nio.cs.CharsetMapping: char[] b2cDB1>;
+
+        $i13 = r0.<sun.nio.cs.CharsetMapping: int dbSegSize>;
+
+        $i14 = i20 * $i13;
+
+        $i15 = $i14 + i19;
+
+        $c16 = $r2[$i15];
+
+        return $c16;
+
+     label1:
+        $i4 = r0.<sun.nio.cs.CharsetMapping: int b1MinDB2>;
+
+        if i17 < $i4 goto label2;
+
+        $i5 = r0.<sun.nio.cs.CharsetMapping: int b1MaxDB2>;
+
+        if i17 > $i5 goto label2;
+
+        $i6 = r0.<sun.nio.cs.CharsetMapping: int b1MinDB2>;
+
+        i21 = i17 - $i6;
+
+        $r1 = r0.<sun.nio.cs.CharsetMapping: char[] b2cDB2>;
+
+        $i7 = r0.<sun.nio.cs.CharsetMapping: int dbSegSize>;
+
+        $i8 = i21 * $i7;
+
+        $i9 = $i8 + i19;
+
+        $c10 = $r1[$i9];
+
+        return $c10;
+
+     label2:
+        return 65533;
+    }
+
+    public char[] decodeSurrogate(int, char[])
+    {
+        sun.nio.cs.CharsetMapping r0;
+        char $c3, $c6;
+        int $i0, i1, i2, $i4, $i5, $i7, $i8;
+        char[] $r1, $r2, $r3, r4;
+
+        r0 := @this: sun.nio.cs.CharsetMapping;
+
+        i2 := @parameter0: int;
+
+        r4 := @parameter1: char[];
+
+        $r1 = r0.<sun.nio.cs.CharsetMapping: char[] b2cSupp>;
+
+        $i0 = lengthof $r1;
+
+        i1 = $i0 / 2;
+
+        $r2 = r0.<sun.nio.cs.CharsetMapping: char[] b2cSupp>;
+
+        $c3 = (char) i2;
+
+        $i4 = staticinvoke <java.util.Arrays: int binarySearch(char[],int,int,char)>($r2, 0, i1, $c3);
+
+        if $i4 < 0 goto label1;
+
+        $r3 = r0.<sun.nio.cs.CharsetMapping: char[] b2cSupp>;
+
+        $i5 = i1 + $i4;
+
+        $c6 = $r3[$i5];
+
+        $i8 = (int) $c6;
+
+        $i7 = $i8 + 131072;
+
+        staticinvoke <java.lang.Character: int toChars(int,char[],int)>($i7, r4, 0);
+
+        return r4;
+
+     label1:
+        return null;
+    }
+
+    public char[] decodeComposite(sun.nio.cs.CharsetMapping$Entry, char[])
+    {
+        sun.nio.cs.CharsetMapping r0;
+        char $c2, $c4;
+        sun.nio.cs.CharsetMapping$Entry[] $r2, $r4, $r6;
+        int $i0, $i1, $i3;
+        char[] r3;
+        sun.nio.cs.CharsetMapping$Entry r1, $r5, $r7;
+
+        r0 := @this: sun.nio.cs.CharsetMapping;
+
+        r1 := @parameter0: sun.nio.cs.CharsetMapping$Entry;
+
+        r3 := @parameter1: char[];
+
+        $r2 = r0.<sun.nio.cs.CharsetMapping: sun.nio.cs.CharsetMapping$Entry[] b2cComp>;
+
+        $i0 = staticinvoke <sun.nio.cs.CharsetMapping: int findBytes(sun.nio.cs.CharsetMapping$Entry[],sun.nio.cs.CharsetMapping$Entry)>($r2, r1);
+
+        if $i0 < 0 goto label1;
+
+        $r4 = r0.<sun.nio.cs.CharsetMapping: sun.nio.cs.CharsetMapping$Entry[] b2cComp>;
+
+        $r5 = $r4[$i0];
+
+        $i1 = $r5.<sun.nio.cs.CharsetMapping$Entry: int cp>;
+
+        $c2 = (char) $i1;
+
+        r3[0] = $c2;
+
+        $r6 = r0.<sun.nio.cs.CharsetMapping: sun.nio.cs.CharsetMapping$Entry[] b2cComp>;
+
+        $r7 = $r6[$i0];
+
+        $i3 = $r7.<sun.nio.cs.CharsetMapping$Entry: int cp2>;
+
+        $c4 = (char) $i3;
+
+        r3[1] = $c4;
+
+        return r3;
+
+     label1:
+        return null;
+    }
+
+    public int encodeChar(char)
+    {
+        int $i1, $i4, $i6, $i7, $i9, $i11, $i12, $i13, $i14;
+        sun.nio.cs.CharsetMapping r0;
+        char c0, c2, $c3, $c5;
+        char[] $r1, $r2;
+
+        r0 := @this: sun.nio.cs.CharsetMapping;
+
+        c0 := @parameter0: char;
+
+        $r1 = r0.<sun.nio.cs.CharsetMapping: char[] c2bIndex>;
+
+        $i6 = (int) c0;
+
+        $i1 = $i6 >> 8;
+
+        c2 = $r1[$i1];
+
+        $i7 = (int) c2;
+
+        $i9 = (int) 65535;
+
+        if $i7 != $i9 goto label1;
+
+        $i11 = (int) 65533;
+
+        return $i11;
+
+     label1:
+        $r2 = r0.<sun.nio.cs.CharsetMapping: char[] c2b>;
+
+        $c3 = c0 & 255;
+
+        $i12 = (int) c2;
+
+        $i13 = (int) $c3;
+
+        $i4 = $i12 + $i13;
+
+        $c5 = $r2[$i4];
+
+        $i14 = (int) $c5;
+
+        return $i14;
+    }
+
+    public int encodeSurrogate(char, char)
+    {
+        int $i2, $i3, i4, $i6, $i7, $i10, $i11, $i13;
+        char c0, c1, $c5, $c8;
+        sun.nio.cs.CharsetMapping r0;
+        char[] $r1, $r2, $r3;
+
+        r0 := @this: sun.nio.cs.CharsetMapping;
+
+        c0 := @parameter0: char;
+
+        c1 := @parameter1: char;
+
+        $i2 = staticinvoke <java.lang.Character: int toCodePoint(char,char)>(c0, c1);
+
+        if $i2 < 131072 goto label1;
+
+        if $i2 < 196608 goto label2;
+
+     label1:
+        $i10 = (int) 65533;
+
+        return $i10;
+
+     label2:
+        $r1 = r0.<sun.nio.cs.CharsetMapping: char[] c2bSupp>;
+
+        $i3 = lengthof $r1;
+
+        i4 = $i3 / 2;
+
+        $r2 = r0.<sun.nio.cs.CharsetMapping: char[] c2bSupp>;
+
+        $c5 = (char) $i2;
+
+        $i6 = staticinvoke <java.util.Arrays: int binarySearch(char[],int,int,char)>($r2, 0, i4, $c5);
+
+        if $i6 < 0 goto label3;
+
+        $r3 = r0.<sun.nio.cs.CharsetMapping: char[] c2bSupp>;
+
+        $i7 = i4 + $i6;
+
+        $c8 = $r3[$i7];
+
+        $i11 = (int) $c8;
+
+        return $i11;
+
+     label3:
+        $i13 = (int) 65533;
+
+        return $i13;
+    }
+
+    public boolean isCompositeBase(sun.nio.cs.CharsetMapping$Entry)
+    {
+        int $i0, $i1, $i2;
+        sun.nio.cs.CharsetMapping r1;
+        sun.nio.cs.CharsetMapping$Entry r0;
+        sun.nio.cs.CharsetMapping$Entry[] $r2;
+        boolean $z0;
+
+        r1 := @this: sun.nio.cs.CharsetMapping;
+
+        r0 := @parameter0: sun.nio.cs.CharsetMapping$Entry;
+
+        $i0 = r0.<sun.nio.cs.CharsetMapping$Entry: int cp>;
+
+        if $i0 > 12791 goto label3;
+
+        $i1 = r0.<sun.nio.cs.CharsetMapping$Entry: int cp>;
+
+        if $i1 < 230 goto label3;
+
+        $r2 = r1.<sun.nio.cs.CharsetMapping: sun.nio.cs.CharsetMapping$Entry[] c2bComp>;
+
+        $i2 = staticinvoke <sun.nio.cs.CharsetMapping: int findCP(sun.nio.cs.CharsetMapping$Entry[],sun.nio.cs.CharsetMapping$Entry)>($r2, r0);
+
+        if $i2 < 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+
+     label3:
+        return 0;
+    }
+
+    public int encodeComposite(sun.nio.cs.CharsetMapping$Entry)
+    {
+        sun.nio.cs.CharsetMapping r0;
+        sun.nio.cs.CharsetMapping$Entry[] $r2, $r3;
+        int $i0, $i1, $i3;
+        sun.nio.cs.CharsetMapping$Entry r1, $r4;
+
+        r0 := @this: sun.nio.cs.CharsetMapping;
+
+        r1 := @parameter0: sun.nio.cs.CharsetMapping$Entry;
+
+        $r2 = r0.<sun.nio.cs.CharsetMapping: sun.nio.cs.CharsetMapping$Entry[] c2bComp>;
+
+        $i0 = staticinvoke <sun.nio.cs.CharsetMapping: int findComp(sun.nio.cs.CharsetMapping$Entry[],sun.nio.cs.CharsetMapping$Entry)>($r2, r1);
+
+        if $i0 < 0 goto label1;
+
+        $r3 = r0.<sun.nio.cs.CharsetMapping: sun.nio.cs.CharsetMapping$Entry[] c2bComp>;
+
+        $r4 = $r3[$i0];
+
+        $i1 = $r4.<sun.nio.cs.CharsetMapping$Entry: int bs>;
+
+        return $i1;
+
+     label1:
+        $i3 = (int) 65533;
+
+        return $i3;
+    }
+
+    public static sun.nio.cs.CharsetMapping get(java.io.InputStream)
+    {
+        sun.nio.cs.CharsetMapping$1 $r0;
+        java.lang.Object $r2;
+        sun.nio.cs.CharsetMapping $r3;
+        java.io.InputStream r1;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        $r0 = new sun.nio.cs.CharsetMapping$1;
+
+        specialinvoke $r0.<sun.nio.cs.CharsetMapping$1: void <init>(java.io.InputStream)>(r1);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r3 = (sun.nio.cs.CharsetMapping) $r2;
+
+        return $r3;
+    }
+
+    static int findBytes(sun.nio.cs.CharsetMapping$Entry[], sun.nio.cs.CharsetMapping$Entry)
+    {
+        int $i0, $i1;
+        java.util.Comparator $r2;
+        sun.nio.cs.CharsetMapping$Entry r1;
+        sun.nio.cs.CharsetMapping$Entry[] r0;
+
+        r0 := @parameter0: sun.nio.cs.CharsetMapping$Entry[];
+
+        r1 := @parameter1: sun.nio.cs.CharsetMapping$Entry;
+
+        $i0 = lengthof r0;
+
+        $r2 = <sun.nio.cs.CharsetMapping: java.util.Comparator comparatorBytes>;
+
+        $i1 = staticinvoke <java.util.Arrays: int binarySearch(java.lang.Object[],int,int,java.lang.Object,java.util.Comparator)>(r0, 0, $i0, r1, $r2);
+
+        return $i1;
+    }
+
+    static int findCP(sun.nio.cs.CharsetMapping$Entry[], sun.nio.cs.CharsetMapping$Entry)
+    {
+        int $i0, $i1;
+        java.util.Comparator $r2;
+        sun.nio.cs.CharsetMapping$Entry r1;
+        sun.nio.cs.CharsetMapping$Entry[] r0;
+
+        r0 := @parameter0: sun.nio.cs.CharsetMapping$Entry[];
+
+        r1 := @parameter1: sun.nio.cs.CharsetMapping$Entry;
+
+        $i0 = lengthof r0;
+
+        $r2 = <sun.nio.cs.CharsetMapping: java.util.Comparator comparatorCP>;
+
+        $i1 = staticinvoke <java.util.Arrays: int binarySearch(java.lang.Object[],int,int,java.lang.Object,java.util.Comparator)>(r0, 0, $i0, r1, $r2);
+
+        return $i1;
+    }
+
+    static int findComp(sun.nio.cs.CharsetMapping$Entry[], sun.nio.cs.CharsetMapping$Entry)
+    {
+        int $i0, $i1;
+        java.util.Comparator $r2;
+        sun.nio.cs.CharsetMapping$Entry r1;
+        sun.nio.cs.CharsetMapping$Entry[] r0;
+
+        r0 := @parameter0: sun.nio.cs.CharsetMapping$Entry[];
+
+        r1 := @parameter1: sun.nio.cs.CharsetMapping$Entry;
+
+        $i0 = lengthof r0;
+
+        $r2 = <sun.nio.cs.CharsetMapping: java.util.Comparator comparatorComp>;
+
+        $i1 = staticinvoke <java.util.Arrays: int binarySearch(java.lang.Object[],int,int,java.lang.Object,java.util.Comparator)>(r0, 0, $i0, r1, $r2);
+
+        return $i1;
+    }
+
+    private static final boolean readNBytes(java.io.InputStream, byte[], int) throws java.io.IOException
+    {
+        byte[] r1;
+        int $i0, i1, i2, $i4;
+        java.io.InputStream r0;
+
+        r0 := @parameter0: java.io.InputStream;
+
+        r1 := @parameter1: byte[];
+
+        i1 := @parameter2: int;
+
+        i2 = 0;
+
+     label1:
+        if i1 <= 0 goto label3;
+
+        $i0 = virtualinvoke r0.<java.io.InputStream: int read(byte[],int,int)>(r1, i2, i1);
+
+        $i4 = (int) -1;
+
+        if $i0 != $i4 goto label2;
+
+        return 0;
+
+     label2:
+        i1 = i1 - $i0;
+
+        i2 = i2 + $i0;
+
+        goto label1;
+
+     label3:
+        return 1;
+    }
+
+    private char[] readCharArray()
+    {
+        byte[] $r1, $r2, $r4, $r5;
+        byte $b2, $b7, $b12, $b17;
+        short $s3, $s8, $s13, $s18, $s22, $s24, $s26, $s28;
+        int $i0, $i1, $i4, $i5, $i6, i9, $i10, $i11, $i14, $i15, $i16, $i19, i21, $i23, $i25, $i27, $i29;
+        sun.nio.cs.CharsetMapping r0;
+        char $c20;
+        char[] r3;
+
+        r0 := @this: sun.nio.cs.CharsetMapping;
+
+        $r1 = r0.<sun.nio.cs.CharsetMapping: byte[] bb>;
+
+        $i0 = r0.<sun.nio.cs.CharsetMapping: int off>;
+
+        $i1 = $i0 + 1;
+
+        r0.<sun.nio.cs.CharsetMapping: int off> = $i1;
+
+        $b2 = $r1[$i0];
+
+        $s22 = (short) $b2;
+
+        $s3 = $s22 & 255;
+
+        $i23 = (int) $s3;
+
+        $i6 = $i23 << 8;
+
+        $r2 = r0.<sun.nio.cs.CharsetMapping: byte[] bb>;
+
+        $i4 = r0.<sun.nio.cs.CharsetMapping: int off>;
+
+        $i5 = $i4 + 1;
+
+        r0.<sun.nio.cs.CharsetMapping: int off> = $i5;
+
+        $b7 = $r2[$i4];
+
+        $s24 = (short) $b7;
+
+        $s8 = $s24 & 255;
+
+        $i25 = (int) $s8;
+
+        i9 = $i6 | $i25;
+
+        r3 = newarray (char)[i9];
+
+        i21 = 0;
+
+     label1:
+        if i21 >= i9 goto label2;
+
+        $r4 = r0.<sun.nio.cs.CharsetMapping: byte[] bb>;
+
+        $i10 = r0.<sun.nio.cs.CharsetMapping: int off>;
+
+        $i11 = $i10 + 1;
+
+        r0.<sun.nio.cs.CharsetMapping: int off> = $i11;
+
+        $b12 = $r4[$i10];
+
+        $s26 = (short) $b12;
+
+        $s13 = $s26 & 255;
+
+        $i27 = (int) $s13;
+
+        $i16 = $i27 << 8;
+
+        $r5 = r0.<sun.nio.cs.CharsetMapping: byte[] bb>;
+
+        $i14 = r0.<sun.nio.cs.CharsetMapping: int off>;
+
+        $i15 = $i14 + 1;
+
+        r0.<sun.nio.cs.CharsetMapping: int off> = $i15;
+
+        $b17 = $r5[$i14];
+
+        $s28 = (short) $b17;
+
+        $s18 = $s28 & 255;
+
+        $i29 = (int) $s18;
+
+        $i19 = $i16 | $i29;
+
+        $c20 = (char) $i19;
+
+        r3[i21] = $c20;
+
+        i21 = i21 + 1;
+
+        goto label1;
+
+     label2:
+        return r3;
+    }
+
+    void readSINGLEBYTE()
+    {
+        int $i0, $i2, $i6, i7, $i8, $i10, $i11, $i12, $i13;
+        sun.nio.cs.CharsetMapping r0;
+        char c1, $c3, $c4, $c5;
+        char[] $r1, $r2, $r3;
+
+        r0 := @this: sun.nio.cs.CharsetMapping;
+
+        $r1 = specialinvoke r0.<sun.nio.cs.CharsetMapping: char[] readCharArray()>();
+
+        i7 = 0;
+
+     label1:
+        $i0 = lengthof $r1;
+
+        if i7 >= $i0 goto label3;
+
+        c1 = $r1[i7];
+
+        $i8 = (int) c1;
+
+        $i10 = (int) 65533;
+
+        if $i8 == $i10 goto label2;
+
+        $r3 = r0.<sun.nio.cs.CharsetMapping: char[] c2b>;
+
+        $r2 = r0.<sun.nio.cs.CharsetMapping: char[] c2bIndex>;
+
+        $i11 = (int) c1;
+
+        $i2 = $i11 >> 8;
+
+        $c4 = $r2[$i2];
+
+        $c3 = c1 & 255;
+
+        $i12 = (int) $c4;
+
+        $i13 = (int) $c3;
+
+        $i6 = $i12 + $i13;
+
+        $c5 = (char) i7;
+
+        $r3[$i6] = $c5;
+
+     label2:
+        i7 = i7 + 1;
+
+        goto label1;
+
+     label3:
+        r0.<sun.nio.cs.CharsetMapping: char[] b2cSB> = $r1;
+
+        return;
+    }
+
+    void readINDEXC2B()
+    {
+        sun.nio.cs.CharsetMapping r0;
+        char $c1, $c2;
+        int $i0, $i3, i4, $i5, $i7, $i8, $i10;
+        char[] $r1, $r2, $r3, $r4;
+
+        r0 := @this: sun.nio.cs.CharsetMapping;
+
+        $r1 = specialinvoke r0.<sun.nio.cs.CharsetMapping: char[] readCharArray()>();
+
+        $i0 = lengthof $r1;
+
+        i4 = $i0 - 1;
+
+     label1:
+        if i4 < 0 goto label3;
+
+        $r2 = r0.<sun.nio.cs.CharsetMapping: char[] c2b>;
+
+        if $r2 != null goto label2;
+
+        $c1 = $r1[i4];
+
+        $i5 = (int) $c1;
+
+        $i7 = (int) -1;
+
+        if $i5 == $i7 goto label2;
+
+        $c2 = $r1[i4];
+
+        $i8 = (int) $c2;
+
+        $i3 = $i8 + 256;
+
+        $r3 = newarray (char)[$i3];
+
+        r0.<sun.nio.cs.CharsetMapping: char[] c2b> = $r3;
+
+        $r4 = r0.<sun.nio.cs.CharsetMapping: char[] c2b>;
+
+        staticinvoke <java.util.Arrays: void fill(char[],char)>($r4, 65533);
+
+        goto label3;
+
+     label2:
+        $i10 = (int) -1;
+
+        i4 = i4 + $i10;
+
+        goto label1;
+
+     label3:
+        r0.<sun.nio.cs.CharsetMapping: char[] c2bIndex> = $r1;
+
+        return;
+    }
+
+    char[] readDB(int, int, int)
+    {
+        int $i0, i2, i3, i4, i5, $i6, i7, $i8, $i9, i10, $i11, $i15, i16, $i17, $i19, $i20, $i21, $i22;
+        sun.nio.cs.CharsetMapping r0;
+        char c1, $c12, $c13, $c14;
+        char[] $r1, $r2, $r3;
+
+        r0 := @this: sun.nio.cs.CharsetMapping;
+
+        i5 := @parameter0: int;
+
+        i7 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $r1 = specialinvoke r0.<sun.nio.cs.CharsetMapping: char[] readCharArray()>();
+
+        i16 = 0;
+
+     label1:
+        $i0 = lengthof $r1;
+
+        if i16 >= $i0 goto label3;
+
+        c1 = $r1[i16];
+
+        $i17 = (int) c1;
+
+        $i19 = (int) 65533;
+
+        if $i17 == $i19 goto label2;
+
+        i3 = i16 / i2;
+
+        i4 = i16 % i2;
+
+        $i6 = i3 + i5;
+
+        $i9 = $i6 * 256;
+
+        $i8 = i4 + i7;
+
+        i10 = $i9 + $i8;
+
+        $r3 = r0.<sun.nio.cs.CharsetMapping: char[] c2b>;
+
+        $r2 = r0.<sun.nio.cs.CharsetMapping: char[] c2bIndex>;
+
+        $i20 = (int) c1;
+
+        $i11 = $i20 >> 8;
+
+        $c13 = $r2[$i11];
+
+        $c12 = c1 & 255;
+
+        $i21 = (int) $c13;
+
+        $i22 = (int) $c12;
+
+        $i15 = $i21 + $i22;
+
+        $c14 = (char) i10;
+
+        $r3[$i15] = $c14;
+
+     label2:
+        i16 = i16 + 1;
+
+        goto label1;
+
+     label3:
+        return $r1;
+    }
+
+    void readDOUBLEBYTE1()
+    {
+        byte[] $r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8;
+        byte $b2, $b7, $b12, $b17, $b22, $b27, $b32, $b37;
+        short $s3, $s8, $s13, $s18, $s23, $s28, $s33, $s38, $s47, $s49, $s51, $s53, $s55, $s57, $s59, $s61;
+        char[] $r9;
+        int $i0, $i1, $i4, $i5, $i6, $i9, $i10, $i11, $i14, $i15, $i16, $i19, $i20, $i21, $i24, $i25, $i26, $i29, $i30, $i31, $i34, $i35, $i36, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i48, $i50, $i52, $i54, $i56, $i58, $i60, $i62;
+        sun.nio.cs.CharsetMapping r0;
+
+        r0 := @this: sun.nio.cs.CharsetMapping;
+
+        $r1 = r0.<sun.nio.cs.CharsetMapping: byte[] bb>;
+
+        $i0 = r0.<sun.nio.cs.CharsetMapping: int off>;
+
+        $i1 = $i0 + 1;
+
+        r0.<sun.nio.cs.CharsetMapping: int off> = $i1;
+
+        $b2 = $r1[$i0];
+
+        $s47 = (short) $b2;
+
+        $s3 = $s47 & 255;
+
+        $i48 = (int) $s3;
+
+        $i6 = $i48 << 8;
+
+        $r2 = r0.<sun.nio.cs.CharsetMapping: byte[] bb>;
+
+        $i4 = r0.<sun.nio.cs.CharsetMapping: int off>;
+
+        $i5 = $i4 + 1;
+
+        r0.<sun.nio.cs.CharsetMapping: int off> = $i5;
+
+        $b7 = $r2[$i4];
+
+        $s49 = (short) $b7;
+
+        $s8 = $s49 & 255;
+
+        $i50 = (int) $s8;
+
+        $i9 = $i6 | $i50;
+
+        r0.<sun.nio.cs.CharsetMapping: int b1MinDB1> = $i9;
+
+        $r3 = r0.<sun.nio.cs.CharsetMapping: byte[] bb>;
+
+        $i10 = r0.<sun.nio.cs.CharsetMapping: int off>;
+
+        $i11 = $i10 + 1;
+
+        r0.<sun.nio.cs.CharsetMapping: int off> = $i11;
+
+        $b12 = $r3[$i10];
+
+        $s51 = (short) $b12;
+
+        $s13 = $s51 & 255;
+
+        $i52 = (int) $s13;
+
+        $i16 = $i52 << 8;
+
+        $r4 = r0.<sun.nio.cs.CharsetMapping: byte[] bb>;
+
+        $i14 = r0.<sun.nio.cs.CharsetMapping: int off>;
+
+        $i15 = $i14 + 1;
+
+        r0.<sun.nio.cs.CharsetMapping: int off> = $i15;
+
+        $b17 = $r4[$i14];
+
+        $s53 = (short) $b17;
+
+        $s18 = $s53 & 255;
+
+        $i54 = (int) $s18;
+
+        $i19 = $i16 | $i54;
+
+        r0.<sun.nio.cs.CharsetMapping: int b1MaxDB1> = $i19;
+
+        $r5 = r0.<sun.nio.cs.CharsetMapping: byte[] bb>;
+
+        $i20 = r0.<sun.nio.cs.CharsetMapping: int off>;
+
+        $i21 = $i20 + 1;
+
+        r0.<sun.nio.cs.CharsetMapping: int off> = $i21;
+
+        $b22 = $r5[$i20];
+
+        $s55 = (short) $b22;
+
+        $s23 = $s55 & 255;
+
+        $i56 = (int) $s23;
+
+        $i26 = $i56 << 8;
+
+        $r6 = r0.<sun.nio.cs.CharsetMapping: byte[] bb>;
+
+        $i24 = r0.<sun.nio.cs.CharsetMapping: int off>;
+
+        $i25 = $i24 + 1;
+
+        r0.<sun.nio.cs.CharsetMapping: int off> = $i25;
+
+        $b27 = $r6[$i24];
+
+        $s57 = (short) $b27;
+
+        $s28 = $s57 & 255;
+
+        $i58 = (int) $s28;
+
+        $i29 = $i26 | $i58;
+
+        r0.<sun.nio.cs.CharsetMapping: int b2Min> = $i29;
+
+        $r7 = r0.<sun.nio.cs.CharsetMapping: byte[] bb>;
+
+        $i30 = r0.<sun.nio.cs.CharsetMapping: int off>;
+
+        $i31 = $i30 + 1;
+
+        r0.<sun.nio.cs.CharsetMapping: int off> = $i31;
+
+        $b32 = $r7[$i30];
+
+        $s59 = (short) $b32;
+
+        $s33 = $s59 & 255;
+
+        $i60 = (int) $s33;
+
+        $i36 = $i60 << 8;
+
+        $r8 = r0.<sun.nio.cs.CharsetMapping: byte[] bb>;
+
+        $i34 = r0.<sun.nio.cs.CharsetMapping: int off>;
+
+        $i35 = $i34 + 1;
+
+        r0.<sun.nio.cs.CharsetMapping: int off> = $i35;
+
+        $b37 = $r8[$i34];
+
+        $s61 = (short) $b37;
+
+        $s38 = $s61 & 255;
+
+        $i62 = (int) $s38;
+
+        $i39 = $i36 | $i62;
+
+        r0.<sun.nio.cs.CharsetMapping: int b2Max> = $i39;
+
+        $i41 = r0.<sun.nio.cs.CharsetMapping: int b2Max>;
+
+        $i40 = r0.<sun.nio.cs.CharsetMapping: int b2Min>;
+
+        $i42 = $i41 - $i40;
+
+        $i43 = $i42 + 1;
+
+        r0.<sun.nio.cs.CharsetMapping: int dbSegSize> = $i43;
+
+        $i46 = r0.<sun.nio.cs.CharsetMapping: int b1MinDB1>;
+
+        $i45 = r0.<sun.nio.cs.CharsetMapping: int b2Min>;
+
+        $i44 = r0.<sun.nio.cs.CharsetMapping: int dbSegSize>;
+
+        $r9 = virtualinvoke r0.<sun.nio.cs.CharsetMapping: char[] readDB(int,int,int)>($i46, $i45, $i44);
+
+        r0.<sun.nio.cs.CharsetMapping: char[] b2cDB1> = $r9;
+
+        return;
+    }
+
+    void readDOUBLEBYTE2()
+    {
+        byte[] $r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8;
+        byte $b2, $b7, $b12, $b17, $b22, $b27, $b32, $b37;
+        short $s3, $s8, $s13, $s18, $s23, $s28, $s33, $s38, $s47, $s49, $s51, $s53, $s55, $s57, $s59, $s61;
+        char[] $r9;
+        int $i0, $i1, $i4, $i5, $i6, $i9, $i10, $i11, $i14, $i15, $i16, $i19, $i20, $i21, $i24, $i25, $i26, $i29, $i30, $i31, $i34, $i35, $i36, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i48, $i50, $i52, $i54, $i56, $i58, $i60, $i62;
+        sun.nio.cs.CharsetMapping r0;
+
+        r0 := @this: sun.nio.cs.CharsetMapping;
+
+        $r1 = r0.<sun.nio.cs.CharsetMapping: byte[] bb>;
+
+        $i0 = r0.<sun.nio.cs.CharsetMapping: int off>;
+
+        $i1 = $i0 + 1;
+
+        r0.<sun.nio.cs.CharsetMapping: int off> = $i1;
+
+        $b2 = $r1[$i0];
+
+        $s47 = (short) $b2;
+
+        $s3 = $s47 & 255;
+
+        $i48 = (int) $s3;
+
+        $i6 = $i48 << 8;
+
+        $r2 = r0.<sun.nio.cs.CharsetMapping: byte[] bb>;
+
+        $i4 = r0.<sun.nio.cs.CharsetMapping: int off>;
+
+        $i5 = $i4 + 1;
+
+        r0.<sun.nio.cs.CharsetMapping: int off> = $i5;
+
+        $b7 = $r2[$i4];
+
+        $s49 = (short) $b7;
+
+        $s8 = $s49 & 255;
+
+        $i50 = (int) $s8;
+
+        $i9 = $i6 | $i50;
+
+        r0.<sun.nio.cs.CharsetMapping: int b1MinDB2> = $i9;
+
+        $r3 = r0.<sun.nio.cs.CharsetMapping: byte[] bb>;
+
+        $i10 = r0.<sun.nio.cs.CharsetMapping: int off>;
+
+        $i11 = $i10 + 1;
+
+        r0.<sun.nio.cs.CharsetMapping: int off> = $i11;
+
+        $b12 = $r3[$i10];
+
+        $s51 = (short) $b12;
+
+        $s13 = $s51 & 255;
+
+        $i52 = (int) $s13;
+
+        $i16 = $i52 << 8;
+
+        $r4 = r0.<sun.nio.cs.CharsetMapping: byte[] bb>;
+
+        $i14 = r0.<sun.nio.cs.CharsetMapping: int off>;
+
+        $i15 = $i14 + 1;
+
+        r0.<sun.nio.cs.CharsetMapping: int off> = $i15;
+
+        $b17 = $r4[$i14];
+
+        $s53 = (short) $b17;
+
+        $s18 = $s53 & 255;
+
+        $i54 = (int) $s18;
+
+        $i19 = $i16 | $i54;
+
+        r0.<sun.nio.cs.CharsetMapping: int b1MaxDB2> = $i19;
+
+        $r5 = r0.<sun.nio.cs.CharsetMapping: byte[] bb>;
+
+        $i20 = r0.<sun.nio.cs.CharsetMapping: int off>;
+
+        $i21 = $i20 + 1;
+
+        r0.<sun.nio.cs.CharsetMapping: int off> = $i21;
+
+        $b22 = $r5[$i20];
+
+        $s55 = (short) $b22;
+
+        $s23 = $s55 & 255;
+
+        $i56 = (int) $s23;
+
+        $i26 = $i56 << 8;
+
+        $r6 = r0.<sun.nio.cs.CharsetMapping: byte[] bb>;
+
+        $i24 = r0.<sun.nio.cs.CharsetMapping: int off>;
+
+        $i25 = $i24 + 1;
+
+        r0.<sun.nio.cs.CharsetMapping: int off> = $i25;
+
+        $b27 = $r6[$i24];
+
+        $s57 = (short) $b27;
+
+        $s28 = $s57 & 255;
+
+        $i58 = (int) $s28;
+
+        $i29 = $i26 | $i58;
+
+        r0.<sun.nio.cs.CharsetMapping: int b2Min> = $i29;
+
+        $r7 = r0.<sun.nio.cs.CharsetMapping: byte[] bb>;
+
+        $i30 = r0.<sun.nio.cs.CharsetMapping: int off>;
+
+        $i31 = $i30 + 1;
+
+        r0.<sun.nio.cs.CharsetMapping: int off> = $i31;
+
+        $b32 = $r7[$i30];
+
+        $s59 = (short) $b32;
+
+        $s33 = $s59 & 255;
+
+        $i60 = (int) $s33;
+
+        $i36 = $i60 << 8;
+
+        $r8 = r0.<sun.nio.cs.CharsetMapping: byte[] bb>;
+
+        $i34 = r0.<sun.nio.cs.CharsetMapping: int off>;
+
+        $i35 = $i34 + 1;
+
+        r0.<sun.nio.cs.CharsetMapping: int off> = $i35;
+
+        $b37 = $r8[$i34];
+
+        $s61 = (short) $b37;
+
+        $s38 = $s61 & 255;
+
+        $i62 = (int) $s38;
+
+        $i39 = $i36 | $i62;
+
+        r0.<sun.nio.cs.CharsetMapping: int b2Max> = $i39;
+
+        $i41 = r0.<sun.nio.cs.CharsetMapping: int b2Max>;
+
+        $i40 = r0.<sun.nio.cs.CharsetMapping: int b2Min>;
+
+        $i42 = $i41 - $i40;
+
+        $i43 = $i42 + 1;
+
+        r0.<sun.nio.cs.CharsetMapping: int dbSegSize> = $i43;
+
+        $i46 = r0.<sun.nio.cs.CharsetMapping: int b1MinDB2>;
+
+        $i45 = r0.<sun.nio.cs.CharsetMapping: int b2Min>;
+
+        $i44 = r0.<sun.nio.cs.CharsetMapping: int dbSegSize>;
+
+        $r9 = virtualinvoke r0.<sun.nio.cs.CharsetMapping: char[] readDB(int,int,int)>($i46, $i45, $i44);
+
+        r0.<sun.nio.cs.CharsetMapping: char[] b2cDB2> = $r9;
+
+        return;
+    }
+
+    void readCOMPOSITE()
+    {
+        int $i0, i1, $i2, i6, i7, i8, i9, $i10, $i11, $i12;
+        sun.nio.cs.CharsetMapping$Entry $r10;
+        sun.nio.cs.CharsetMapping r0;
+        char $c3, $c4, $c5;
+        sun.nio.cs.CharsetMapping$Entry[] $r2, $r3, $r4, $r6, $r8, $r9;
+        char[] $r1;
+        java.util.Comparator $r5;
+
+        r0 := @this: sun.nio.cs.CharsetMapping;
+
+        $r1 = specialinvoke r0.<sun.nio.cs.CharsetMapping: char[] readCharArray()>();
+
+        $i0 = lengthof $r1;
+
+        i1 = $i0 / 3;
+
+        $r2 = newarray (sun.nio.cs.CharsetMapping$Entry)[i1];
+
+        r0.<sun.nio.cs.CharsetMapping: sun.nio.cs.CharsetMapping$Entry[] b2cComp> = $r2;
+
+        $r3 = newarray (sun.nio.cs.CharsetMapping$Entry)[i1];
+
+        r0.<sun.nio.cs.CharsetMapping: sun.nio.cs.CharsetMapping$Entry[] c2bComp> = $r3;
+
+        i6 = 0;
+
+        i7 = 0;
+
+     label1:
+        if i6 >= i1 goto label2;
+
+        $r10 = new sun.nio.cs.CharsetMapping$Entry;
+
+        specialinvoke $r10.<sun.nio.cs.CharsetMapping$Entry: void <init>()>();
+
+        i8 = i7 + 1;
+
+        $c3 = $r1[i7];
+
+        $i10 = (int) $c3;
+
+        $r10.<sun.nio.cs.CharsetMapping$Entry: int bs> = $i10;
+
+        i9 = i8 + 1;
+
+        $c4 = $r1[i8];
+
+        $i11 = (int) $c4;
+
+        $r10.<sun.nio.cs.CharsetMapping$Entry: int cp> = $i11;
+
+        i7 = i9 + 1;
+
+        $c5 = $r1[i9];
+
+        $i12 = (int) $c5;
+
+        $r10.<sun.nio.cs.CharsetMapping$Entry: int cp2> = $i12;
+
+        $r8 = r0.<sun.nio.cs.CharsetMapping: sun.nio.cs.CharsetMapping$Entry[] b2cComp>;
+
+        $r8[i6] = $r10;
+
+        $r9 = r0.<sun.nio.cs.CharsetMapping: sun.nio.cs.CharsetMapping$Entry[] c2bComp>;
+
+        $r9[i6] = $r10;
+
+        i6 = i6 + 1;
+
+        goto label1;
+
+     label2:
+        $r6 = r0.<sun.nio.cs.CharsetMapping: sun.nio.cs.CharsetMapping$Entry[] c2bComp>;
+
+        $r4 = r0.<sun.nio.cs.CharsetMapping: sun.nio.cs.CharsetMapping$Entry[] c2bComp>;
+
+        $i2 = lengthof $r4;
+
+        $r5 = <sun.nio.cs.CharsetMapping: java.util.Comparator comparatorComp>;
+
+        staticinvoke <java.util.Arrays: void sort(java.lang.Object[],int,int,java.util.Comparator)>($r6, 0, $i2, $r5);
+
+        return;
+    }
+
+    sun.nio.cs.CharsetMapping load(java.io.InputStream)
+    {
+        byte[] $r2, $r3, $r4, $r5;
+        byte $b16, $b21;
+        boolean $z0;
+        short $s17, $s22, $s25, $s27;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i18, $i19, $i20, i23, i24, $i26, $i28;
+        sun.nio.cs.CharsetMapping r1;
+        java.io.IOException $r10;
+        java.lang.RuntimeException $r11, $r12;
+        char[] $r6, $r7;
+        java.io.InputStream r0;
+
+        r1 := @this: sun.nio.cs.CharsetMapping;
+
+        r0 := @parameter0: java.io.InputStream;
+
+     label01:
+        $i0 = virtualinvoke r0.<java.io.InputStream: int read()>();
+
+        $i1 = $i0 & 255;
+
+        $i2 = $i1 << 24;
+
+        $i3 = virtualinvoke r0.<java.io.InputStream: int read()>();
+
+        $i4 = $i3 & 255;
+
+        $i5 = $i4 << 16;
+
+        $i6 = $i2 | $i5;
+
+        $i7 = virtualinvoke r0.<java.io.InputStream: int read()>();
+
+        $i8 = $i7 & 255;
+
+        $i9 = $i8 << 8;
+
+        $i10 = $i6 | $i9;
+
+        $i11 = virtualinvoke r0.<java.io.InputStream: int read()>();
+
+        $i12 = $i11 & 255;
+
+        i24 = $i10 | $i12;
+
+        $r2 = newarray (byte)[i24];
+
+        r1.<sun.nio.cs.CharsetMapping: byte[] bb> = $r2;
+
+        r1.<sun.nio.cs.CharsetMapping: int off> = 0;
+
+        $r3 = r1.<sun.nio.cs.CharsetMapping: byte[] bb>;
+
+        $z0 = staticinvoke <sun.nio.cs.CharsetMapping: boolean readNBytes(java.io.InputStream,byte[],int)>(r0, $r3, i24);
+
+        if $z0 != 0 goto label02;
+
+        $r11 = new java.lang.RuntimeException;
+
+        specialinvoke $r11.<java.lang.RuntimeException: void <init>(java.lang.String)>("Corrupted data file");
+
+        throw $r11;
+
+     label02:
+        virtualinvoke r0.<java.io.InputStream: void close()>();
+
+     label03:
+        $i13 = r1.<sun.nio.cs.CharsetMapping: int off>;
+
+        if $i13 >= i24 goto label13;
+
+        $r4 = r1.<sun.nio.cs.CharsetMapping: byte[] bb>;
+
+        $i14 = r1.<sun.nio.cs.CharsetMapping: int off>;
+
+        $i15 = $i14 + 1;
+
+        r1.<sun.nio.cs.CharsetMapping: int off> = $i15;
+
+        $b16 = $r4[$i14];
+
+        $s25 = (short) $b16;
+
+        $s17 = $s25 & 255;
+
+        $i26 = (int) $s17;
+
+        $i20 = $i26 << 8;
+
+        $r5 = r1.<sun.nio.cs.CharsetMapping: byte[] bb>;
+
+        $i18 = r1.<sun.nio.cs.CharsetMapping: int off>;
+
+        $i19 = $i18 + 1;
+
+        r1.<sun.nio.cs.CharsetMapping: int off> = $i19;
+
+        $b21 = $r5[$i18];
+
+        $s27 = (short) $b21;
+
+        $s22 = $s27 & 255;
+
+        $i28 = (int) $s22;
+
+        i23 = $i20 | $i28;
+
+        tableswitch(i23)
+        {
+            case 1: goto label05;
+            case 2: goto label06;
+            case 3: goto label07;
+            case 4: goto label11;
+            case 5: goto label08;
+            case 6: goto label09;
+            case 7: goto label10;
+            case 8: goto label04;
+            default: goto label11;
+        };
+
+     label04:
+        virtualinvoke r1.<sun.nio.cs.CharsetMapping: void readINDEXC2B()>();
+
+        goto label12;
+
+     label05:
+        virtualinvoke r1.<sun.nio.cs.CharsetMapping: void readSINGLEBYTE()>();
+
+        goto label12;
+
+     label06:
+        virtualinvoke r1.<sun.nio.cs.CharsetMapping: void readDOUBLEBYTE1()>();
+
+        goto label12;
+
+     label07:
+        virtualinvoke r1.<sun.nio.cs.CharsetMapping: void readDOUBLEBYTE2()>();
+
+        goto label12;
+
+     label08:
+        $r7 = specialinvoke r1.<sun.nio.cs.CharsetMapping: char[] readCharArray()>();
+
+        r1.<sun.nio.cs.CharsetMapping: char[] b2cSupp> = $r7;
+
+        goto label12;
+
+     label09:
+        $r6 = specialinvoke r1.<sun.nio.cs.CharsetMapping: char[] readCharArray()>();
+
+        r1.<sun.nio.cs.CharsetMapping: char[] c2bSupp> = $r6;
+
+        goto label12;
+
+     label10:
+        virtualinvoke r1.<sun.nio.cs.CharsetMapping: void readCOMPOSITE()>();
+
+        goto label12;
+
+     label11:
+        $r12 = new java.lang.RuntimeException;
+
+        specialinvoke $r12.<java.lang.RuntimeException: void <init>(java.lang.String)>("Corrupted data file");
+
+        throw $r12;
+
+     label12:
+        goto label03;
+
+     label13:
+        r1.<sun.nio.cs.CharsetMapping: byte[] bb> = null;
+
+     label14:
+        return r1;
+
+     label15:
+        $r10 := @caughtexception;
+
+        virtualinvoke $r10.<java.io.IOException: void printStackTrace()>();
+
+        return null;
+
+        catch java.io.IOException from label01 to label14 with label15;
+    }
+
+    static void <clinit>()
+    {
+        sun.nio.cs.CharsetMapping$4 $r2;
+        sun.nio.cs.CharsetMapping$3 $r1;
+        sun.nio.cs.CharsetMapping$2 $r0;
+
+        <sun.nio.cs.CharsetMapping: int MAP_INDEXC2B> = 8;
+
+        <sun.nio.cs.CharsetMapping: int MAP_COMPOSITE> = 7;
+
+        <sun.nio.cs.CharsetMapping: int MAP_SUPPLEMENT_C2B> = 6;
+
+        <sun.nio.cs.CharsetMapping: int MAP_SUPPLEMENT> = 5;
+
+        <sun.nio.cs.CharsetMapping: int MAP_DOUBLEBYTE2> = 3;
+
+        <sun.nio.cs.CharsetMapping: int MAP_DOUBLEBYTE1> = 2;
+
+        <sun.nio.cs.CharsetMapping: int MAP_SINGLEBYTE> = 1;
+
+        <sun.nio.cs.CharsetMapping: int UNMAPPABLE_ENCODING> = 65533;
+
+        <sun.nio.cs.CharsetMapping: char UNMAPPABLE_DECODING> = 65533;
+
+        $r0 = new sun.nio.cs.CharsetMapping$2;
+
+        specialinvoke $r0.<sun.nio.cs.CharsetMapping$2: void <init>()>();
+
+        <sun.nio.cs.CharsetMapping: java.util.Comparator comparatorBytes> = $r0;
+
+        $r1 = new sun.nio.cs.CharsetMapping$3;
+
+        specialinvoke $r1.<sun.nio.cs.CharsetMapping$3: void <init>()>();
+
+        <sun.nio.cs.CharsetMapping: java.util.Comparator comparatorCP> = $r1;
+
+        $r2 = new sun.nio.cs.CharsetMapping$4;
+
+        specialinvoke $r2.<sun.nio.cs.CharsetMapping$4: void <init>()>();
+
+        <sun.nio.cs.CharsetMapping: java.util.Comparator comparatorComp> = $r2;
+
+        return;
+    }
+}

@@ -1,0 +1,304 @@
+final class com.sun.jmx.snmp.daemon.SnmpQManager extends java.lang.Object implements java.io.Serializable
+{
+    private static final long serialVersionUID;
+    private com.sun.jmx.snmp.daemon.SendQ newq;
+    private com.sun.jmx.snmp.daemon.WaitQ waitq;
+    private java.lang.ThreadGroup queueThreadGroup;
+    private java.lang.Thread requestQThread;
+    private java.lang.Thread timerQThread;
+
+    void <init>()
+    {
+        com.sun.jmx.snmp.daemon.SnmpQManager r0;
+        com.sun.jmx.snmp.daemon.SendQ $r1;
+        java.lang.ThreadGroup $r3;
+        com.sun.jmx.snmp.daemon.WaitQ $r2;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpQManager;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpQManager: java.lang.ThreadGroup queueThreadGroup> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpQManager: java.lang.Thread requestQThread> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpQManager: java.lang.Thread timerQThread> = null;
+
+        $r1 = new com.sun.jmx.snmp.daemon.SendQ;
+
+        specialinvoke $r1.<com.sun.jmx.snmp.daemon.SendQ: void <init>(int,int)>(20, 5);
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpQManager: com.sun.jmx.snmp.daemon.SendQ newq> = $r1;
+
+        $r2 = new com.sun.jmx.snmp.daemon.WaitQ;
+
+        specialinvoke $r2.<com.sun.jmx.snmp.daemon.WaitQ: void <init>(int,int)>(20, 5);
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpQManager: com.sun.jmx.snmp.daemon.WaitQ waitq> = $r2;
+
+        $r3 = new java.lang.ThreadGroup;
+
+        specialinvoke $r3.<java.lang.ThreadGroup: void <init>(java.lang.String)>("Qmanager Thread Group");
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpQManager: java.lang.ThreadGroup queueThreadGroup> = $r3;
+
+        virtualinvoke r0.<com.sun.jmx.snmp.daemon.SnmpQManager: void startQThreads()>();
+
+        return;
+    }
+
+    public void startQThreads()
+    {
+        com.sun.jmx.snmp.daemon.SnmpSendServer $r4;
+        java.lang.ThreadGroup $r3, $r5;
+        com.sun.jmx.snmp.daemon.SnmpQManager r0;
+        java.lang.Thread $r1, $r6, $r7, $r8;
+        com.sun.jmx.snmp.daemon.SnmpTimerServer $r2;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpQManager;
+
+        $r1 = r0.<com.sun.jmx.snmp.daemon.SnmpQManager: java.lang.Thread timerQThread>;
+
+        if $r1 == null goto label1;
+
+        $r7 = r0.<com.sun.jmx.snmp.daemon.SnmpQManager: java.lang.Thread timerQThread>;
+
+        $z1 = virtualinvoke $r7.<java.lang.Thread: boolean isAlive()>();
+
+        if $z1 != 0 goto label2;
+
+     label1:
+        $r2 = new com.sun.jmx.snmp.daemon.SnmpTimerServer;
+
+        $r3 = r0.<com.sun.jmx.snmp.daemon.SnmpQManager: java.lang.ThreadGroup queueThreadGroup>;
+
+        specialinvoke $r2.<com.sun.jmx.snmp.daemon.SnmpTimerServer: void <init>(java.lang.ThreadGroup,com.sun.jmx.snmp.daemon.SnmpQManager)>($r3, r0);
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpQManager: java.lang.Thread timerQThread> = $r2;
+
+     label2:
+        $r8 = r0.<com.sun.jmx.snmp.daemon.SnmpQManager: java.lang.Thread requestQThread>;
+
+        if $r8 == null goto label3;
+
+        $r6 = r0.<com.sun.jmx.snmp.daemon.SnmpQManager: java.lang.Thread requestQThread>;
+
+        $z0 = virtualinvoke $r6.<java.lang.Thread: boolean isAlive()>();
+
+        if $z0 != 0 goto label4;
+
+     label3:
+        $r4 = new com.sun.jmx.snmp.daemon.SnmpSendServer;
+
+        $r5 = r0.<com.sun.jmx.snmp.daemon.SnmpQManager: java.lang.ThreadGroup queueThreadGroup>;
+
+        specialinvoke $r4.<com.sun.jmx.snmp.daemon.SnmpSendServer: void <init>(java.lang.ThreadGroup,com.sun.jmx.snmp.daemon.SnmpQManager)>($r5, r0);
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpQManager: java.lang.Thread requestQThread> = $r4;
+
+     label4:
+        return;
+    }
+
+    public void stopQThreads()
+    {
+        com.sun.jmx.snmp.daemon.SnmpSendServer $r5, $r10;
+        java.lang.Thread $r1, $r4, $r7, $r8, $r9, $r11, $r12, $r14;
+        boolean $z0, $z1;
+        com.sun.jmx.snmp.daemon.SendQ $r6;
+        com.sun.jmx.snmp.daemon.WaitQ $r3;
+        com.sun.jmx.snmp.daemon.SnmpQManager r0;
+        com.sun.jmx.snmp.daemon.SnmpTimerServer $r2, $r13;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpQManager;
+
+        $r1 = r0.<com.sun.jmx.snmp.daemon.SnmpQManager: java.lang.Thread timerQThread>;
+
+        $r2 = (com.sun.jmx.snmp.daemon.SnmpTimerServer) $r1;
+
+        $r2.<com.sun.jmx.snmp.daemon.SnmpTimerServer: boolean isBeingDestroyed> = 1;
+
+        $r3 = r0.<com.sun.jmx.snmp.daemon.SnmpQManager: com.sun.jmx.snmp.daemon.WaitQ waitq>;
+
+        $r3.<com.sun.jmx.snmp.daemon.WaitQ: boolean isBeingDestroyed> = 1;
+
+        $r4 = r0.<com.sun.jmx.snmp.daemon.SnmpQManager: java.lang.Thread requestQThread>;
+
+        $r5 = (com.sun.jmx.snmp.daemon.SnmpSendServer) $r4;
+
+        $r5.<com.sun.jmx.snmp.daemon.SnmpSendServer: boolean isBeingDestroyed> = 1;
+
+        $r6 = r0.<com.sun.jmx.snmp.daemon.SnmpQManager: com.sun.jmx.snmp.daemon.SendQ newq>;
+
+        $r6.<com.sun.jmx.snmp.daemon.SendQ: boolean isBeingDestroyed> = 1;
+
+        $r7 = r0.<com.sun.jmx.snmp.daemon.SnmpQManager: java.lang.Thread timerQThread>;
+
+        if $r7 == null goto label1;
+
+        $r11 = r0.<com.sun.jmx.snmp.daemon.SnmpQManager: java.lang.Thread timerQThread>;
+
+        $z1 = virtualinvoke $r11.<java.lang.Thread: boolean isAlive()>();
+
+        if $z1 != 1 goto label1;
+
+        $r12 = r0.<com.sun.jmx.snmp.daemon.SnmpQManager: java.lang.Thread timerQThread>;
+
+        $r13 = (com.sun.jmx.snmp.daemon.SnmpTimerServer) $r12;
+
+        virtualinvoke $r13.<com.sun.jmx.snmp.daemon.SnmpTimerServer: void stopTimerServer()>();
+
+     label1:
+        r0.<com.sun.jmx.snmp.daemon.SnmpQManager: com.sun.jmx.snmp.daemon.WaitQ waitq> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpQManager: java.lang.Thread timerQThread> = null;
+
+        $r14 = r0.<com.sun.jmx.snmp.daemon.SnmpQManager: java.lang.Thread requestQThread>;
+
+        if $r14 == null goto label2;
+
+        $r8 = r0.<com.sun.jmx.snmp.daemon.SnmpQManager: java.lang.Thread requestQThread>;
+
+        $z0 = virtualinvoke $r8.<java.lang.Thread: boolean isAlive()>();
+
+        if $z0 != 1 goto label2;
+
+        $r9 = r0.<com.sun.jmx.snmp.daemon.SnmpQManager: java.lang.Thread requestQThread>;
+
+        $r10 = (com.sun.jmx.snmp.daemon.SnmpSendServer) $r9;
+
+        virtualinvoke $r10.<com.sun.jmx.snmp.daemon.SnmpSendServer: void stopSendServer()>();
+
+     label2:
+        r0.<com.sun.jmx.snmp.daemon.SnmpQManager: com.sun.jmx.snmp.daemon.SendQ newq> = null;
+
+        r0.<com.sun.jmx.snmp.daemon.SnmpQManager: java.lang.Thread requestQThread> = null;
+
+        return;
+    }
+
+    public void addRequest(com.sun.jmx.snmp.daemon.SnmpInformRequest)
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r1;
+        com.sun.jmx.snmp.daemon.SnmpQManager r0;
+        com.sun.jmx.snmp.daemon.SendQ $r2;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpQManager;
+
+        r1 := @parameter0: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        $r2 = r0.<com.sun.jmx.snmp.daemon.SnmpQManager: com.sun.jmx.snmp.daemon.SendQ newq>;
+
+        virtualinvoke $r2.<com.sun.jmx.snmp.daemon.SendQ: void addRequest(com.sun.jmx.snmp.daemon.SnmpInformRequest)>(r1);
+
+        return;
+    }
+
+    public void addWaiting(com.sun.jmx.snmp.daemon.SnmpInformRequest)
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r1;
+        com.sun.jmx.snmp.daemon.WaitQ $r2;
+        com.sun.jmx.snmp.daemon.SnmpQManager r0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpQManager;
+
+        r1 := @parameter0: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        $r2 = r0.<com.sun.jmx.snmp.daemon.SnmpQManager: com.sun.jmx.snmp.daemon.WaitQ waitq>;
+
+        virtualinvoke $r2.<com.sun.jmx.snmp.daemon.WaitQ: void addWaiting(com.sun.jmx.snmp.daemon.SnmpInformRequest)>(r1);
+
+        return;
+    }
+
+    public java.util.Vector getAllOutstandingRequest(long)
+    {
+        java.util.Vector $r2;
+        com.sun.jmx.snmp.daemon.SnmpQManager r0;
+        com.sun.jmx.snmp.daemon.SendQ $r1;
+        long l0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpQManager;
+
+        l0 := @parameter0: long;
+
+        $r1 = r0.<com.sun.jmx.snmp.daemon.SnmpQManager: com.sun.jmx.snmp.daemon.SendQ newq>;
+
+        $r2 = virtualinvoke $r1.<com.sun.jmx.snmp.daemon.SendQ: java.util.Vector getAllOutstandingRequest(long)>(l0);
+
+        return $r2;
+    }
+
+    public com.sun.jmx.snmp.daemon.SnmpInformRequest getTimeoutRequests()
+    {
+        com.sun.jmx.snmp.daemon.SnmpInformRequest $r2;
+        com.sun.jmx.snmp.daemon.WaitQ $r1;
+        com.sun.jmx.snmp.daemon.SnmpQManager r0;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpQManager;
+
+        $r1 = r0.<com.sun.jmx.snmp.daemon.SnmpQManager: com.sun.jmx.snmp.daemon.WaitQ waitq>;
+
+        $r2 = virtualinvoke $r1.<com.sun.jmx.snmp.daemon.WaitQ: com.sun.jmx.snmp.daemon.SnmpInformRequest getTimeoutRequests()>();
+
+        return $r2;
+    }
+
+    public void removeRequest(com.sun.jmx.snmp.daemon.SnmpInformRequest)
+    {
+        com.sun.jmx.snmp.daemon.SnmpQManager r0;
+        com.sun.jmx.snmp.daemon.SendQ $r2;
+        com.sun.jmx.snmp.daemon.SnmpInformRequest r1;
+        com.sun.jmx.snmp.daemon.WaitQ $r3;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpQManager;
+
+        r1 := @parameter0: com.sun.jmx.snmp.daemon.SnmpInformRequest;
+
+        $r2 = r0.<com.sun.jmx.snmp.daemon.SnmpQManager: com.sun.jmx.snmp.daemon.SendQ newq>;
+
+        virtualinvoke $r2.<com.sun.jmx.snmp.daemon.SendQ: boolean removeElement(java.lang.Object)>(r1);
+
+        $r3 = r0.<com.sun.jmx.snmp.daemon.SnmpQManager: com.sun.jmx.snmp.daemon.WaitQ waitq>;
+
+        virtualinvoke $r3.<com.sun.jmx.snmp.daemon.WaitQ: boolean removeElement(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    public com.sun.jmx.snmp.daemon.SnmpInformRequest removeRequest(long)
+    {
+        com.sun.jmx.snmp.daemon.SnmpQManager r0;
+        com.sun.jmx.snmp.daemon.SendQ $r1;
+        com.sun.jmx.snmp.daemon.SnmpInformRequest $r2, r4;
+        long l0;
+        com.sun.jmx.snmp.daemon.WaitQ $r3;
+
+        r0 := @this: com.sun.jmx.snmp.daemon.SnmpQManager;
+
+        l0 := @parameter0: long;
+
+        $r1 = r0.<com.sun.jmx.snmp.daemon.SnmpQManager: com.sun.jmx.snmp.daemon.SendQ newq>;
+
+        $r2 = virtualinvoke $r1.<com.sun.jmx.snmp.daemon.SendQ: com.sun.jmx.snmp.daemon.SnmpInformRequest removeRequest(long)>(l0);
+
+        r4 = $r2;
+
+        if $r2 != null goto label1;
+
+        $r3 = r0.<com.sun.jmx.snmp.daemon.SnmpQManager: com.sun.jmx.snmp.daemon.WaitQ waitq>;
+
+        r4 = virtualinvoke $r3.<com.sun.jmx.snmp.daemon.WaitQ: com.sun.jmx.snmp.daemon.SnmpInformRequest removeRequest(long)>(l0);
+
+     label1:
+        return r4;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.jmx.snmp.daemon.SnmpQManager: long serialVersionUID> = 2163709017015248264L;
+
+        return;
+    }
+}

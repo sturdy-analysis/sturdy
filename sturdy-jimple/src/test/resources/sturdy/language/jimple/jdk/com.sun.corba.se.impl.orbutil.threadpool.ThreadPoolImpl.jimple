@@ -1,0 +1,1147 @@
+public class com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl extends java.lang.Object implements com.sun.corba.se.spi.orbutil.threadpool.ThreadPool
+{
+    private static java.util.concurrent.atomic.AtomicInteger threadCounter;
+    private static final com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper;
+    private com.sun.corba.se.spi.orbutil.threadpool.WorkQueue workQueue;
+    private int availableWorkerThreads;
+    private int currentThreadCount;
+    private int minWorkerThreads;
+    private int maxWorkerThreads;
+    private long inactivityTimeout;
+    private boolean boundedThreadPool;
+    private java.util.concurrent.atomic.AtomicLong processedCount;
+    private java.util.concurrent.atomic.AtomicLong totalTimeTaken;
+    private java.lang.String name;
+    private com.sun.corba.se.spi.monitoring.MonitoredObject threadpoolMonitoredObject;
+    private java.lang.ThreadGroup threadGroup;
+    java.lang.Object workersLock;
+    java.util.List workers;
+
+    public void <init>(java.lang.ThreadGroup, java.lang.String)
+    {
+        java.lang.ThreadGroup r6;
+        java.util.ArrayList $r4;
+        java.util.concurrent.atomic.AtomicLong $r1, $r2;
+        com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl $r5;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+        java.lang.Object $r3;
+        java.lang.String r7;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        r6 := @parameter0: java.lang.ThreadGroup;
+
+        r7 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int availableWorkerThreads> = 0;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int currentThreadCount> = 0;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int minWorkerThreads> = 0;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int maxWorkerThreads> = 0;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: boolean boundedThreadPool> = 0;
+
+        $r1 = new java.util.concurrent.atomic.AtomicLong;
+
+        specialinvoke $r1.<java.util.concurrent.atomic.AtomicLong: void <init>(long)>(1L);
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.util.concurrent.atomic.AtomicLong processedCount> = $r1;
+
+        $r2 = new java.util.concurrent.atomic.AtomicLong;
+
+        specialinvoke $r2.<java.util.concurrent.atomic.AtomicLong: void <init>(long)>(0L);
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.util.concurrent.atomic.AtomicLong totalTimeTaken> = $r2;
+
+        $r3 = new java.lang.Object;
+
+        specialinvoke $r3.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.lang.Object workersLock> = $r3;
+
+        $r4 = new java.util.ArrayList;
+
+        specialinvoke $r4.<java.util.ArrayList: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.util.List workers> = $r4;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: long inactivityTimeout> = 120000L;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int maxWorkerThreads> = 2147483647;
+
+        $r5 = new com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl;
+
+        specialinvoke $r5.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: void <init>(com.sun.corba.se.spi.orbutil.threadpool.ThreadPool)>(r0);
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.spi.orbutil.threadpool.WorkQueue workQueue> = $r5;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.lang.ThreadGroup threadGroup> = r6;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.lang.String name> = r7;
+
+        specialinvoke r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: void initializeMonitoring()>();
+
+        return;
+    }
+
+    public void <init>(java.lang.String)
+    {
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+        java.lang.Thread $r1;
+        java.lang.ThreadGroup $r2;
+        java.lang.String r3;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        r3 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.Thread: java.lang.ThreadGroup getThreadGroup()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: void <init>(java.lang.ThreadGroup,java.lang.String)>($r2, r3);
+
+        return;
+    }
+
+    public void <init>(int, int, long, java.lang.String)
+    {
+        long l2;
+        java.util.ArrayList $r4;
+        java.util.concurrent.atomic.AtomicLong $r1, $r2;
+        com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl $r5;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+        int i0, i1, $i3, i4;
+        java.lang.Object $r3;
+        java.lang.String r6;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        l2 := @parameter2: long;
+
+        r6 := @parameter3: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int availableWorkerThreads> = 0;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int currentThreadCount> = 0;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int minWorkerThreads> = 0;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int maxWorkerThreads> = 0;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: boolean boundedThreadPool> = 0;
+
+        $r1 = new java.util.concurrent.atomic.AtomicLong;
+
+        specialinvoke $r1.<java.util.concurrent.atomic.AtomicLong: void <init>(long)>(1L);
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.util.concurrent.atomic.AtomicLong processedCount> = $r1;
+
+        $r2 = new java.util.concurrent.atomic.AtomicLong;
+
+        specialinvoke $r2.<java.util.concurrent.atomic.AtomicLong: void <init>(long)>(0L);
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.util.concurrent.atomic.AtomicLong totalTimeTaken> = $r2;
+
+        $r3 = new java.lang.Object;
+
+        specialinvoke $r3.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.lang.Object workersLock> = $r3;
+
+        $r4 = new java.util.ArrayList;
+
+        specialinvoke $r4.<java.util.ArrayList: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.util.List workers> = $r4;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int minWorkerThreads> = i0;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int maxWorkerThreads> = i1;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: long inactivityTimeout> = l2;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: boolean boundedThreadPool> = 1;
+
+        $r5 = new com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl;
+
+        specialinvoke $r5.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: void <init>(com.sun.corba.se.spi.orbutil.threadpool.ThreadPool)>(r0);
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.spi.orbutil.threadpool.WorkQueue workQueue> = $r5;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.lang.String name> = r6;
+
+        i4 = 0;
+
+     label1:
+        $i3 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int minWorkerThreads>;
+
+        if i4 >= $i3 goto label2;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: void createWorkerThread()>();
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label2:
+        specialinvoke r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: void initializeMonitoring()>();
+
+        return;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        java.lang.Throwable $r8;
+        java.util.Iterator $r4;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r7;
+        java.lang.Thread$State $r10, $r11;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$WorkerThread r9;
+        java.util.ArrayList $r2;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+        java.util.List $r3;
+        java.lang.InterruptedException $r6;
+        java.lang.Object $r1, $r5;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.lang.Object workersLock>;
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = new java.util.ArrayList;
+
+        $r3 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.util.List workers>;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>(java.util.Collection)>($r3);
+
+        exitmonitor $r1;
+
+     label02:
+        goto label05;
+
+     label03:
+        $r8 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label04:
+        throw $r8;
+
+     label05:
+        $r4 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label06:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label12;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$WorkerThread) $r5;
+
+        virtualinvoke r9.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$WorkerThread: void close()>();
+
+     label07:
+        $r10 = virtualinvoke r9.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$WorkerThread: java.lang.Thread$State getState()>();
+
+        $r11 = <java.lang.Thread$State: java.lang.Thread$State TERMINATED>;
+
+        if $r10 == $r11 goto label11;
+
+     label08:
+        virtualinvoke r9.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$WorkerThread: void join()>();
+
+     label09:
+        goto label07;
+
+     label10:
+        $r6 := @caughtexception;
+
+        $r7 = <com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        virtualinvoke $r7.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL interruptedJoinCallWhileClosingThreadPool(java.lang.Throwable,java.lang.Object,java.lang.Object)>($r6, r9, r0);
+
+        goto label07;
+
+     label11:
+        goto label06;
+
+     label12:
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.lang.ThreadGroup threadGroup> = null;
+
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label03;
+        catch java.lang.Throwable from label03 to label04 with label03;
+        catch java.lang.InterruptedException from label08 to label09 with label10;
+    }
+
+    private void initializeMonitoring()
+    {
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$5 $r17;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$2 $r11;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$1 $r9;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$4 $r15;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$3 $r13;
+        com.sun.corba.se.spi.monitoring.MonitoredObject $r2, $r3, $r7, $r8, $r10, $r12, $r14, $r16, $r18, $r21, $r22, $r24, r25;
+        java.lang.String $r6;
+        com.sun.corba.se.spi.monitoring.MonitoringManager $r1;
+        com.sun.corba.se.spi.monitoring.MonitoringManagerFactory $r0;
+        com.sun.corba.se.spi.monitoring.MonitoredObjectFactory $r5, $r23;
+        com.sun.corba.se.spi.orbutil.threadpool.WorkQueue $r19;
+        com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl $r20;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r4;
+
+        r4 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        $r0 = staticinvoke <com.sun.corba.se.spi.monitoring.MonitoringFactories: com.sun.corba.se.spi.monitoring.MonitoringManagerFactory getMonitoringManagerFactory()>();
+
+        $r1 = interfaceinvoke $r0.<com.sun.corba.se.spi.monitoring.MonitoringManagerFactory: com.sun.corba.se.spi.monitoring.MonitoringManager createMonitoringManager(java.lang.String,java.lang.String)>("orb", null);
+
+        $r2 = interfaceinvoke $r1.<com.sun.corba.se.spi.monitoring.MonitoringManager: com.sun.corba.se.spi.monitoring.MonitoredObject getRootMonitoredObject()>();
+
+        $r3 = interfaceinvoke $r2.<com.sun.corba.se.spi.monitoring.MonitoredObject: com.sun.corba.se.spi.monitoring.MonitoredObject getChild(java.lang.String)>("threadpool");
+
+        r25 = $r3;
+
+        if $r3 != null goto label1;
+
+        $r23 = staticinvoke <com.sun.corba.se.spi.monitoring.MonitoringFactories: com.sun.corba.se.spi.monitoring.MonitoredObjectFactory getMonitoredObjectFactory()>();
+
+        $r24 = interfaceinvoke $r23.<com.sun.corba.se.spi.monitoring.MonitoredObjectFactory: com.sun.corba.se.spi.monitoring.MonitoredObject createMonitoredObject(java.lang.String,java.lang.String)>("threadpool", "Monitoring for all ThreadPool instances");
+
+        r25 = $r24;
+
+        interfaceinvoke $r2.<com.sun.corba.se.spi.monitoring.MonitoredObject: void addChild(com.sun.corba.se.spi.monitoring.MonitoredObject)>($r24);
+
+     label1:
+        $r5 = staticinvoke <com.sun.corba.se.spi.monitoring.MonitoringFactories: com.sun.corba.se.spi.monitoring.MonitoredObjectFactory getMonitoredObjectFactory()>();
+
+        $r6 = r4.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.lang.String name>;
+
+        $r7 = interfaceinvoke $r5.<com.sun.corba.se.spi.monitoring.MonitoredObjectFactory: com.sun.corba.se.spi.monitoring.MonitoredObject createMonitoredObject(java.lang.String,java.lang.String)>($r6, "Monitoring for a ThreadPool");
+
+        r4.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.spi.monitoring.MonitoredObject threadpoolMonitoredObject> = $r7;
+
+        $r8 = r4.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.spi.monitoring.MonitoredObject threadpoolMonitoredObject>;
+
+        interfaceinvoke r25.<com.sun.corba.se.spi.monitoring.MonitoredObject: void addChild(com.sun.corba.se.spi.monitoring.MonitoredObject)>($r8);
+
+        $r9 = new com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$1;
+
+        specialinvoke $r9.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$1: void <init>(com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl,java.lang.String,java.lang.String)>(r4, "currentNumberOfThreads", "Current number of total threads in the ThreadPool");
+
+        $r10 = r4.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.spi.monitoring.MonitoredObject threadpoolMonitoredObject>;
+
+        interfaceinvoke $r10.<com.sun.corba.se.spi.monitoring.MonitoredObject: void addAttribute(com.sun.corba.se.spi.monitoring.MonitoredAttribute)>($r9);
+
+        $r11 = new com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$2;
+
+        specialinvoke $r11.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$2: void <init>(com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl,java.lang.String,java.lang.String)>(r4, "numberOfAvailableThreads", "Current number of total threads in the ThreadPool");
+
+        $r12 = r4.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.spi.monitoring.MonitoredObject threadpoolMonitoredObject>;
+
+        interfaceinvoke $r12.<com.sun.corba.se.spi.monitoring.MonitoredObject: void addAttribute(com.sun.corba.se.spi.monitoring.MonitoredAttribute)>($r11);
+
+        $r13 = new com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$3;
+
+        specialinvoke $r13.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$3: void <init>(com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl,java.lang.String,java.lang.String)>(r4, "numberOfBusyThreads", "Number of busy threads in the ThreadPool");
+
+        $r14 = r4.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.spi.monitoring.MonitoredObject threadpoolMonitoredObject>;
+
+        interfaceinvoke $r14.<com.sun.corba.se.spi.monitoring.MonitoredObject: void addAttribute(com.sun.corba.se.spi.monitoring.MonitoredAttribute)>($r13);
+
+        $r15 = new com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$4;
+
+        specialinvoke $r15.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$4: void <init>(com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl,java.lang.String,java.lang.String)>(r4, "averageWorkCompletionTime", "Average elapsed time taken to complete a work item by the ThreadPool");
+
+        $r16 = r4.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.spi.monitoring.MonitoredObject threadpoolMonitoredObject>;
+
+        interfaceinvoke $r16.<com.sun.corba.se.spi.monitoring.MonitoredObject: void addAttribute(com.sun.corba.se.spi.monitoring.MonitoredAttribute)>($r15);
+
+        $r17 = new com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$5;
+
+        specialinvoke $r17.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$5: void <init>(com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl,java.lang.String,java.lang.String)>(r4, "currentProcessedCount", "Number of Work items processed by the ThreadPool");
+
+        $r18 = r4.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.spi.monitoring.MonitoredObject threadpoolMonitoredObject>;
+
+        interfaceinvoke $r18.<com.sun.corba.se.spi.monitoring.MonitoredObject: void addAttribute(com.sun.corba.se.spi.monitoring.MonitoredAttribute)>($r17);
+
+        $r21 = r4.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.spi.monitoring.MonitoredObject threadpoolMonitoredObject>;
+
+        $r19 = r4.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.spi.orbutil.threadpool.WorkQueue workQueue>;
+
+        $r20 = (com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl) $r19;
+
+        $r22 = virtualinvoke $r20.<com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl: com.sun.corba.se.spi.monitoring.MonitoredObject getMonitoredObject()>();
+
+        interfaceinvoke $r21.<com.sun.corba.se.spi.monitoring.MonitoredObject: void addChild(com.sun.corba.se.spi.monitoring.MonitoredObject)>($r22);
+
+        return;
+    }
+
+    com.sun.corba.se.spi.monitoring.MonitoredObject getMonitoredObject()
+    {
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+        com.sun.corba.se.spi.monitoring.MonitoredObject $r1;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.spi.monitoring.MonitoredObject threadpoolMonitoredObject>;
+
+        return $r1;
+    }
+
+    public com.sun.corba.se.spi.orbutil.threadpool.WorkQueue getAnyWorkQueue()
+    {
+        com.sun.corba.se.spi.orbutil.threadpool.WorkQueue $r1;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.spi.orbutil.threadpool.WorkQueue workQueue>;
+
+        return $r1;
+    }
+
+    public com.sun.corba.se.spi.orbutil.threadpool.WorkQueue getWorkQueue(int) throws com.sun.corba.se.spi.orbutil.threadpool.NoSuchWorkQueueException
+    {
+        com.sun.corba.se.spi.orbutil.threadpool.WorkQueue $r1;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+        int i0;
+        com.sun.corba.se.spi.orbutil.threadpool.NoSuchWorkQueueException $r2;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        i0 := @parameter0: int;
+
+        if i0 == 0 goto label1;
+
+        $r2 = new com.sun.corba.se.spi.orbutil.threadpool.NoSuchWorkQueueException;
+
+        specialinvoke $r2.<com.sun.corba.se.spi.orbutil.threadpool.NoSuchWorkQueueException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.spi.orbutil.threadpool.WorkQueue workQueue>;
+
+        return $r1;
+    }
+
+    void notifyForAvailableWork(com.sun.corba.se.spi.orbutil.threadpool.WorkQueue)
+    {
+        com.sun.corba.se.spi.orbutil.threadpool.WorkQueue r0;
+        java.lang.Throwable $r2;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r1;
+        int $i0, $i1;
+
+        r1 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        r0 := @parameter0: com.sun.corba.se.spi.orbutil.threadpool.WorkQueue;
+
+        entermonitor r0;
+
+     label1:
+        $i0 = r1.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int availableWorkerThreads>;
+
+        $i1 = interfaceinvoke r0.<com.sun.corba.se.spi.orbutil.threadpool.WorkQueue: int workItemsInQueue()>();
+
+        if $i0 >= $i1 goto label2;
+
+        virtualinvoke r1.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: void createWorkerThread()>();
+
+        goto label3;
+
+     label2:
+        virtualinvoke r0.<java.lang.Object: void notify()>();
+
+     label3:
+        exitmonitor r0;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+     label6:
+        throw $r2;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    private java.lang.Thread createWorkerThreadHelper(java.lang.String)
+    {
+        java.lang.Throwable $r8;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r6;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$WorkerThread $r0;
+        java.lang.ThreadGroup $r3;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r1;
+        java.util.List $r5;
+        java.lang.Object $r4;
+        java.lang.String r2;
+        java.lang.ClassLoader $r7;
+
+        r1 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r0 = new com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$WorkerThread;
+
+        $r3 = r1.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.lang.ThreadGroup threadGroup>;
+
+        specialinvoke $r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$WorkerThread: void <init>(com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl,java.lang.ThreadGroup,java.lang.String)>(r1, $r3, r2);
+
+        $r4 = r1.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.lang.Object workersLock>;
+
+        entermonitor $r4;
+
+     label1:
+        $r5 = r1.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.util.List workers>;
+
+        interfaceinvoke $r5.<java.util.List: boolean add(java.lang.Object)>($r0);
+
+        exitmonitor $r4;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r8 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label4:
+        throw $r8;
+
+     label5:
+        virtualinvoke $r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$WorkerThread: void setDaemon(boolean)>(1);
+
+        $r6 = <com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r7 = virtualinvoke $r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$WorkerThread: java.lang.ClassLoader getContextClassLoader()>();
+
+        virtualinvoke $r6.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL workerThreadCreated(java.lang.Object,java.lang.Object)>($r0, $r7);
+
+        virtualinvoke $r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$WorkerThread: void start()>();
+
+        return null;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    void createWorkerThread()
+    {
+        java.lang.Throwable $r5, $r6, $r7;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$6 $r4;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r8;
+        java.lang.SecurityManager $r3;
+        com.sun.corba.se.spi.orbutil.threadpool.WorkQueue $r2;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+        java.lang.String $r1;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.lang.String getName()>();
+
+        $r2 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.spi.orbutil.threadpool.WorkQueue workQueue>;
+
+        entermonitor $r2;
+
+     label01:
+        $r3 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r3 != null goto label02;
+
+        specialinvoke r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.lang.Thread createWorkerThreadHelper(java.lang.String)>($r1);
+
+        goto label03;
+
+     label02:
+        $r4 = new com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$6;
+
+        specialinvoke $r4.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl$6: void <init>(com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl,java.lang.String)>(r0, $r1);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r4);
+
+     label03:
+        virtualinvoke r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: void incrementCurrentNumberOfThreads()>();
+
+        goto label08;
+
+     label04:
+        $r7 := @caughtexception;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: void decrementCurrentNumberOfThreads()>();
+
+        $r8 = <com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        virtualinvoke $r8.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL workerThreadCreationFailure(java.lang.Object)>($r7);
+
+     label05:
+        virtualinvoke r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: void incrementCurrentNumberOfThreads()>();
+
+        goto label08;
+
+     label06:
+        $r6 := @caughtexception;
+
+     label07:
+        virtualinvoke r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: void incrementCurrentNumberOfThreads()>();
+
+        throw $r6;
+
+     label08:
+        exitmonitor $r2;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r5 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label11:
+        throw $r5;
+
+     label12:
+        return;
+
+        catch java.lang.Throwable from label01 to label03 with label04;
+        catch java.lang.Throwable from label04 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+        catch java.lang.Throwable from label01 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    public int minimumNumberOfThreads()
+    {
+        int $i0;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        $i0 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int minWorkerThreads>;
+
+        return $i0;
+    }
+
+    public int maximumNumberOfThreads()
+    {
+        int $i0;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        $i0 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int maxWorkerThreads>;
+
+        return $i0;
+    }
+
+    public long idleTimeoutForThreads()
+    {
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+        long $l0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        $l0 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: long inactivityTimeout>;
+
+        return $l0;
+    }
+
+    public int currentNumberOfThreads()
+    {
+        com.sun.corba.se.spi.orbutil.threadpool.WorkQueue $r1;
+        java.lang.Throwable $r2;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+        int $i0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.spi.orbutil.threadpool.WorkQueue workQueue>;
+
+        entermonitor $r1;
+
+     label1:
+        $i0 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int currentThreadCount>;
+
+        exitmonitor $r1;
+
+     label2:
+        return $i0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    void decrementCurrentNumberOfThreads()
+    {
+        com.sun.corba.se.spi.orbutil.threadpool.WorkQueue $r1;
+        java.lang.Throwable $r2;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+        int $i0, $i1;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.spi.orbutil.threadpool.WorkQueue workQueue>;
+
+        entermonitor $r1;
+
+     label1:
+        $i0 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int currentThreadCount>;
+
+        $i1 = $i0 - 1;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int currentThreadCount> = $i1;
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    void incrementCurrentNumberOfThreads()
+    {
+        com.sun.corba.se.spi.orbutil.threadpool.WorkQueue $r1;
+        java.lang.Throwable $r2;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+        int $i0, $i1;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.spi.orbutil.threadpool.WorkQueue workQueue>;
+
+        entermonitor $r1;
+
+     label1:
+        $i0 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int currentThreadCount>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int currentThreadCount> = $i1;
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public int numberOfAvailableThreads()
+    {
+        com.sun.corba.se.spi.orbutil.threadpool.WorkQueue $r1;
+        java.lang.Throwable $r2;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+        int $i0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.spi.orbutil.threadpool.WorkQueue workQueue>;
+
+        entermonitor $r1;
+
+     label1:
+        $i0 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int availableWorkerThreads>;
+
+        exitmonitor $r1;
+
+     label2:
+        return $i0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public int numberOfBusyThreads()
+    {
+        com.sun.corba.se.spi.orbutil.threadpool.WorkQueue $r1;
+        java.lang.Throwable $r2;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+        int $i0, $i1, $i2;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.spi.orbutil.threadpool.WorkQueue workQueue>;
+
+        entermonitor $r1;
+
+     label1:
+        $i1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int currentThreadCount>;
+
+        $i0 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int availableWorkerThreads>;
+
+        $i2 = $i1 - $i0;
+
+        exitmonitor $r1;
+
+     label2:
+        return $i2;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public long averageWorkCompletionTime()
+    {
+        java.lang.Throwable $r4;
+        long $l0, $l1, $l2;
+        com.sun.corba.se.spi.orbutil.threadpool.WorkQueue $r1;
+        java.util.concurrent.atomic.AtomicLong $r2, $r3;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.spi.orbutil.threadpool.WorkQueue workQueue>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.util.concurrent.atomic.AtomicLong totalTimeTaken>;
+
+        $l0 = virtualinvoke $r2.<java.util.concurrent.atomic.AtomicLong: long get()>();
+
+        $r3 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.util.concurrent.atomic.AtomicLong processedCount>;
+
+        $l1 = virtualinvoke $r3.<java.util.concurrent.atomic.AtomicLong: long get()>();
+
+        $l2 = $l0 / $l1;
+
+        exitmonitor $r1;
+
+     label2:
+        return $l2;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public long currentProcessedCount()
+    {
+        com.sun.corba.se.spi.orbutil.threadpool.WorkQueue $r1;
+        java.lang.Throwable $r3;
+        java.util.concurrent.atomic.AtomicLong $r2;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+        long $l0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.spi.orbutil.threadpool.WorkQueue workQueue>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.util.concurrent.atomic.AtomicLong processedCount>;
+
+        $l0 = virtualinvoke $r2.<java.util.concurrent.atomic.AtomicLong: long get()>();
+
+        exitmonitor $r1;
+
+     label2:
+        return $l0;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public java.lang.String getName()
+    {
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+        java.lang.String $r1;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.lang.String name>;
+
+        return $r1;
+    }
+
+    public int numberOfWorkQueues()
+    {
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        return 1;
+    }
+
+    private static synchronized int getUniqueThreadId()
+    {
+        int $i0;
+        java.util.concurrent.atomic.AtomicInteger $r0;
+
+        $r0 = <com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.util.concurrent.atomic.AtomicInteger threadCounter>;
+
+        $i0 = virtualinvoke $r0.<java.util.concurrent.atomic.AtomicInteger: int incrementAndGet()>();
+
+        return $i0;
+    }
+
+    void decrementNumberOfAvailableThreads()
+    {
+        com.sun.corba.se.spi.orbutil.threadpool.WorkQueue $r1;
+        java.lang.Throwable $r2;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+        int $i0, $i1;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.spi.orbutil.threadpool.WorkQueue workQueue>;
+
+        entermonitor $r1;
+
+     label1:
+        $i0 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int availableWorkerThreads>;
+
+        $i1 = $i0 - 1;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int availableWorkerThreads> = $i1;
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    void incrementNumberOfAvailableThreads()
+    {
+        com.sun.corba.se.spi.orbutil.threadpool.WorkQueue $r1;
+        java.lang.Throwable $r2;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+        int $i0, $i1;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.spi.orbutil.threadpool.WorkQueue workQueue>;
+
+        entermonitor $r1;
+
+     label1:
+        $i0 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int availableWorkerThreads>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int availableWorkerThreads> = $i1;
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    static java.lang.Thread access$000(com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl, java.lang.String)
+    {
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+        java.lang.String r1;
+        java.lang.Thread $r2;
+
+        r0 := @parameter0: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        r1 := @parameter1: java.lang.String;
+
+        $r2 = specialinvoke r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.lang.Thread createWorkerThreadHelper(java.lang.String)>(r1);
+
+        return $r2;
+    }
+
+    static int access$100()
+    {
+        int $i0;
+
+        $i0 = staticinvoke <com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: int getUniqueThreadId()>();
+
+        return $i0;
+    }
+
+    static com.sun.corba.se.impl.logging.ORBUtilSystemException access$200()
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r0;
+
+        $r0 = <com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        return $r0;
+    }
+
+    static java.util.concurrent.atomic.AtomicLong access$300(com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl)
+    {
+        java.util.concurrent.atomic.AtomicLong $r1;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+
+        r0 := @parameter0: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.util.concurrent.atomic.AtomicLong totalTimeTaken>;
+
+        return $r1;
+    }
+
+    static java.util.concurrent.atomic.AtomicLong access$400(com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl)
+    {
+        java.util.concurrent.atomic.AtomicLong $r1;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+
+        r0 := @parameter0: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.util.concurrent.atomic.AtomicLong processedCount>;
+
+        return $r1;
+    }
+
+    static long access$500(com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl)
+    {
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+        long $l0;
+
+        r0 := @parameter0: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        $l0 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: long inactivityTimeout>;
+
+        return $l0;
+    }
+
+    static com.sun.corba.se.spi.orbutil.threadpool.WorkQueue access$600(com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl)
+    {
+        com.sun.corba.se.spi.orbutil.threadpool.WorkQueue $r1;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl r0;
+
+        r0 := @parameter0: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.spi.orbutil.threadpool.WorkQueue workQueue>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r1;
+        java.util.concurrent.atomic.AtomicInteger $r0;
+
+        $r0 = new java.util.concurrent.atomic.AtomicInteger;
+
+        specialinvoke $r0.<java.util.concurrent.atomic.AtomicInteger: void <init>(int)>(0);
+
+        <com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: java.util.concurrent.atomic.AtomicInteger threadCounter> = $r0;
+
+        $r1 = staticinvoke <com.sun.corba.se.impl.logging.ORBUtilSystemException: com.sun.corba.se.impl.logging.ORBUtilSystemException get(java.lang.String)>("rpc.transport");
+
+        <com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper> = $r1;
+
+        return;
+    }
+}

@@ -1,0 +1,301 @@
+public class sun.security.krb5.KrbTgsRep extends sun.security.krb5.KrbKdcRep
+{
+    private sun.security.krb5.internal.TGSRep rep;
+    private sun.security.krb5.Credentials creds;
+    private sun.security.krb5.internal.Ticket secondTicket;
+    private static final boolean DEBUG;
+
+    void <init>(byte[], sun.security.krb5.KrbTgsReq) throws sun.security.krb5.KrbException, java.io.IOException
+    {
+        byte[] r2, $r8, $r10;
+        sun.security.krb5.KrbTgsReq r3;
+        sun.security.krb5.KrbTgsRep r0;
+        byte $b8;
+        sun.security.krb5.internal.TicketFlags $r21;
+        sun.security.krb5.internal.EncTGSRepPart $r12;
+        boolean $z0, $z1, $z2, $z3;
+        sun.security.util.DerValue $r1, $r11;
+        sun.security.krb5.internal.KDCReqBody $r38;
+        sun.security.krb5.EncryptionKey $r7, $r13, $r22;
+        sun.security.krb5.Credentials $r15;
+        sun.security.krb5.Asn1Exception $r27;
+        sun.security.krb5.PrincipalName $r14, $r23, $r24, r34, r35, r36, $r37, $r39;
+        sun.security.krb5.internal.Ticket $r25, $r26;
+        sun.security.krb5.internal.HostAddresses $r16;
+        sun.security.krb5.internal.KerberosTime $r17, $r18, $r19, $r20;
+        sun.security.krb5.KrbException $r30, $r31, r33;
+        sun.security.krb5.internal.TGSRep $r5;
+        sun.security.krb5.internal.TGSReq $r4;
+        int $i0, $i1, $i2, $i3, $i4, $i6, $i7;
+        java.lang.String $r29, r32;
+        sun.security.krb5.internal.KRBError $r28;
+        char $c5;
+        sun.security.krb5.EncryptedData $r6, $r9;
+
+        r0 := @this: sun.security.krb5.KrbTgsRep;
+
+        r2 := @parameter0: byte[];
+
+        r3 := @parameter1: sun.security.krb5.KrbTgsReq;
+
+        specialinvoke r0.<sun.security.krb5.KrbKdcRep: void <init>()>();
+
+        $r1 = new sun.security.util.DerValue;
+
+        specialinvoke $r1.<sun.security.util.DerValue: void <init>(byte[])>(r2);
+
+        $r4 = virtualinvoke r3.<sun.security.krb5.KrbTgsReq: sun.security.krb5.internal.TGSReq getMessage()>();
+
+     label01:
+        $r5 = new sun.security.krb5.internal.TGSRep;
+
+        specialinvoke $r5.<sun.security.krb5.internal.TGSRep: void <init>(sun.security.util.DerValue)>($r1);
+
+     label02:
+        goto label08;
+
+     label03:
+        $r27 := @caughtexception;
+
+        $r28 = new sun.security.krb5.internal.KRBError;
+
+        specialinvoke $r28.<sun.security.krb5.internal.KRBError: void <init>(sun.security.util.DerValue)>($r1);
+
+        $r29 = virtualinvoke $r28.<sun.security.krb5.internal.KRBError: java.lang.String getErrorString()>();
+
+        r32 = null;
+
+        if $r29 == null goto label05;
+
+        $i2 = virtualinvoke $r29.<java.lang.String: int length()>();
+
+        if $i2 <= 0 goto label05;
+
+        $i3 = virtualinvoke $r29.<java.lang.String: int length()>();
+
+        $i4 = $i3 - 1;
+
+        $c5 = virtualinvoke $r29.<java.lang.String: char charAt(int)>($i4);
+
+        if $c5 != 0 goto label04;
+
+        $i6 = virtualinvoke $r29.<java.lang.String: int length()>();
+
+        $i7 = $i6 - 1;
+
+        r32 = virtualinvoke $r29.<java.lang.String: java.lang.String substring(int,int)>(0, $i7);
+
+        goto label05;
+
+     label04:
+        r32 = $r29;
+
+     label05:
+        if r32 != null goto label06;
+
+        $r31 = new sun.security.krb5.KrbException;
+
+        $i1 = virtualinvoke $r28.<sun.security.krb5.internal.KRBError: int getErrorCode()>();
+
+        specialinvoke $r31.<sun.security.krb5.KrbException: void <init>(int)>($i1);
+
+        r33 = $r31;
+
+        goto label07;
+
+     label06:
+        $r30 = new sun.security.krb5.KrbException;
+
+        $i0 = virtualinvoke $r28.<sun.security.krb5.internal.KRBError: int getErrorCode()>();
+
+        specialinvoke $r30.<sun.security.krb5.KrbException: void <init>(int,java.lang.String)>($i0, r32);
+
+        r33 = $r30;
+
+     label07:
+        virtualinvoke r33.<sun.security.krb5.KrbException: java.lang.Throwable initCause(java.lang.Throwable)>($r27);
+
+        throw r33;
+
+     label08:
+        $r6 = $r5.<sun.security.krb5.internal.TGSRep: sun.security.krb5.EncryptedData encPart>;
+
+        $r7 = r3.<sun.security.krb5.KrbTgsReq: sun.security.krb5.EncryptionKey tgsReqKey>;
+
+        $z0 = virtualinvoke r3.<sun.security.krb5.KrbTgsReq: boolean usedSubkey()>();
+
+        if $z0 == 0 goto label09;
+
+        $b8 = 9;
+
+        goto label10;
+
+     label09:
+        $b8 = 8;
+
+     label10:
+        $r8 = virtualinvoke $r6.<sun.security.krb5.EncryptedData: byte[] decrypt(sun.security.krb5.EncryptionKey,int)>($r7, $b8);
+
+        $r9 = $r5.<sun.security.krb5.internal.TGSRep: sun.security.krb5.EncryptedData encPart>;
+
+        $r10 = virtualinvoke $r9.<sun.security.krb5.EncryptedData: byte[] reset(byte[])>($r8);
+
+        $r11 = new sun.security.util.DerValue;
+
+        specialinvoke $r11.<sun.security.util.DerValue: void <init>(byte[])>($r10);
+
+        $r12 = new sun.security.krb5.internal.EncTGSRepPart;
+
+        specialinvoke $r12.<sun.security.krb5.internal.EncTGSRepPart: void <init>(sun.security.util.DerValue)>($r11);
+
+        $r5.<sun.security.krb5.internal.TGSRep: sun.security.krb5.internal.EncKDCRepPart encKDCRepPart> = $r12;
+
+        $r13 = r3.<sun.security.krb5.KrbTgsReq: sun.security.krb5.EncryptionKey tgsReqKey>;
+
+        staticinvoke <sun.security.krb5.KrbTgsRep: void check(boolean,sun.security.krb5.internal.KDCReq,sun.security.krb5.internal.KDCRep,sun.security.krb5.EncryptionKey)>(0, $r4, $r5, $r13);
+
+        $r14 = virtualinvoke r3.<sun.security.krb5.KrbTgsReq: sun.security.krb5.PrincipalName getServerAlias()>();
+
+        r34 = $r14;
+
+        if $r14 == null goto label12;
+
+        r35 = $r12.<sun.security.krb5.internal.EncTGSRepPart: sun.security.krb5.PrincipalName sname>;
+
+        $z1 = virtualinvoke $r14.<sun.security.krb5.PrincipalName: boolean equals(java.lang.Object)>(r35);
+
+        if $z1 != 0 goto label11;
+
+        $z2 = staticinvoke <sun.security.krb5.KrbTgsRep: boolean isReferralSname(sun.security.krb5.PrincipalName)>(r35);
+
+        if $z2 == 0 goto label12;
+
+     label11:
+        r34 = null;
+
+     label12:
+        r36 = null;
+
+        $r37 = $r5.<sun.security.krb5.internal.TGSRep: sun.security.krb5.PrincipalName cname>;
+
+        $r38 = $r4.<sun.security.krb5.internal.TGSReq: sun.security.krb5.internal.KDCReqBody reqBody>;
+
+        $r39 = $r38.<sun.security.krb5.internal.KDCReqBody: sun.security.krb5.PrincipalName cname>;
+
+        $z3 = virtualinvoke $r37.<sun.security.krb5.PrincipalName: boolean equals(java.lang.Object)>($r39);
+
+        if $z3 == 0 goto label13;
+
+        r36 = virtualinvoke r3.<sun.security.krb5.KrbTgsReq: sun.security.krb5.PrincipalName getClientAlias()>();
+
+     label13:
+        $r15 = new sun.security.krb5.Credentials;
+
+        $r25 = $r5.<sun.security.krb5.internal.TGSRep: sun.security.krb5.internal.Ticket ticket>;
+
+        $r24 = $r5.<sun.security.krb5.internal.TGSRep: sun.security.krb5.PrincipalName cname>;
+
+        $r23 = $r12.<sun.security.krb5.internal.EncTGSRepPart: sun.security.krb5.PrincipalName sname>;
+
+        $r22 = $r12.<sun.security.krb5.internal.EncTGSRepPart: sun.security.krb5.EncryptionKey key>;
+
+        $r21 = $r12.<sun.security.krb5.internal.EncTGSRepPart: sun.security.krb5.internal.TicketFlags flags>;
+
+        $r20 = $r12.<sun.security.krb5.internal.EncTGSRepPart: sun.security.krb5.internal.KerberosTime authtime>;
+
+        $r19 = $r12.<sun.security.krb5.internal.EncTGSRepPart: sun.security.krb5.internal.KerberosTime starttime>;
+
+        $r18 = $r12.<sun.security.krb5.internal.EncTGSRepPart: sun.security.krb5.internal.KerberosTime endtime>;
+
+        $r17 = $r12.<sun.security.krb5.internal.EncTGSRepPart: sun.security.krb5.internal.KerberosTime renewTill>;
+
+        $r16 = $r12.<sun.security.krb5.internal.EncTGSRepPart: sun.security.krb5.internal.HostAddresses caddr>;
+
+        specialinvoke $r15.<sun.security.krb5.Credentials: void <init>(sun.security.krb5.internal.Ticket,sun.security.krb5.PrincipalName,sun.security.krb5.PrincipalName,sun.security.krb5.PrincipalName,sun.security.krb5.PrincipalName,sun.security.krb5.EncryptionKey,sun.security.krb5.internal.TicketFlags,sun.security.krb5.internal.KerberosTime,sun.security.krb5.internal.KerberosTime,sun.security.krb5.internal.KerberosTime,sun.security.krb5.internal.KerberosTime,sun.security.krb5.internal.HostAddresses)>($r25, $r24, r36, $r23, r34, $r22, $r21, $r20, $r19, $r18, $r17, $r16);
+
+        r0.<sun.security.krb5.KrbTgsRep: sun.security.krb5.Credentials creds> = $r15;
+
+        r0.<sun.security.krb5.KrbTgsRep: sun.security.krb5.internal.TGSRep rep> = $r5;
+
+        $r26 = virtualinvoke r3.<sun.security.krb5.KrbTgsReq: sun.security.krb5.internal.Ticket getSecondTicket()>();
+
+        r0.<sun.security.krb5.KrbTgsRep: sun.security.krb5.internal.Ticket secondTicket> = $r26;
+
+        return;
+
+        catch sun.security.krb5.Asn1Exception from label01 to label02 with label03;
+    }
+
+    public sun.security.krb5.Credentials getCreds()
+    {
+        sun.security.krb5.KrbTgsRep r0;
+        sun.security.krb5.Credentials $r1;
+
+        r0 := @this: sun.security.krb5.KrbTgsRep;
+
+        $r1 = r0.<sun.security.krb5.KrbTgsRep: sun.security.krb5.Credentials creds>;
+
+        return $r1;
+    }
+
+    sun.security.krb5.internal.ccache.Credentials setCredentials()
+    {
+        sun.security.krb5.KrbTgsRep r1;
+        sun.security.krb5.internal.TGSRep $r3;
+        sun.security.krb5.internal.ccache.Credentials $r0;
+        sun.security.krb5.internal.Ticket $r2;
+
+        r1 := @this: sun.security.krb5.KrbTgsRep;
+
+        $r0 = new sun.security.krb5.internal.ccache.Credentials;
+
+        $r3 = r1.<sun.security.krb5.KrbTgsRep: sun.security.krb5.internal.TGSRep rep>;
+
+        $r2 = r1.<sun.security.krb5.KrbTgsRep: sun.security.krb5.internal.Ticket secondTicket>;
+
+        specialinvoke $r0.<sun.security.krb5.internal.ccache.Credentials: void <init>(sun.security.krb5.internal.KDCRep,sun.security.krb5.internal.Ticket)>($r3, $r2);
+
+        return $r0;
+    }
+
+    private static boolean isReferralSname(sun.security.krb5.PrincipalName)
+    {
+        sun.security.krb5.PrincipalName r0;
+        int $i0;
+        java.lang.String[] $r1;
+        java.lang.String $r2;
+        boolean $z0;
+
+        r0 := @parameter0: sun.security.krb5.PrincipalName;
+
+        if r0 == null goto label1;
+
+        $r1 = virtualinvoke r0.<sun.security.krb5.PrincipalName: java.lang.String[] getNameStrings()>();
+
+        $i0 = lengthof $r1;
+
+        if $i0 != 2 goto label1;
+
+        $r2 = $r1[0];
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("krbtgt");
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    static void <clinit>()
+    {
+        boolean $z0;
+
+        $z0 = <sun.security.krb5.internal.Krb5: boolean DEBUG>;
+
+        <sun.security.krb5.KrbTgsRep: boolean DEBUG> = $z0;
+
+        return;
+    }
+}

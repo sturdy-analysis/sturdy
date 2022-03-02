@@ -1,0 +1,305 @@
+class sun.nio.fs.NativeBuffers extends java.lang.Object
+{
+    private static final sun.misc.Unsafe unsafe;
+    private static final int TEMP_BUF_POOL_SIZE;
+    private static java.lang.ThreadLocal threadLocal;
+    static final boolean $assertionsDisabled;
+
+    private void <init>()
+    {
+        sun.nio.fs.NativeBuffers r0;
+
+        r0 := @this: sun.nio.fs.NativeBuffers;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    static sun.nio.fs.NativeBuffer allocNativeBuffer(int)
+    {
+        int i0;
+        sun.nio.fs.NativeBuffer $r0;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 2048 goto label1;
+
+        i0 = 2048;
+
+     label1:
+        $r0 = new sun.nio.fs.NativeBuffer;
+
+        specialinvoke $r0.<sun.nio.fs.NativeBuffer: void <init>(int)>(i0);
+
+        return $r0;
+    }
+
+    static sun.nio.fs.NativeBuffer getNativeBufferFromCache(int)
+    {
+        java.lang.ThreadLocal $r0;
+        sun.nio.fs.NativeBuffer[] r2;
+        int $i0, i1, i2;
+        java.lang.Object $r1;
+        sun.nio.fs.NativeBuffer r3;
+
+        i1 := @parameter0: int;
+
+        $r0 = <sun.nio.fs.NativeBuffers: java.lang.ThreadLocal threadLocal>;
+
+        $r1 = virtualinvoke $r0.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        r2 = (sun.nio.fs.NativeBuffer[]) $r1;
+
+        if r2 == null goto label3;
+
+        i2 = 0;
+
+     label1:
+        if i2 >= 3 goto label3;
+
+        r3 = r2[i2];
+
+        if r3 == null goto label2;
+
+        $i0 = virtualinvoke r3.<sun.nio.fs.NativeBuffer: int size()>();
+
+        if $i0 < i1 goto label2;
+
+        r2[i2] = null;
+
+        return r3;
+
+     label2:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    static sun.nio.fs.NativeBuffer getNativeBuffer(int)
+    {
+        int i0;
+        sun.nio.fs.NativeBuffer $r0, $r1;
+
+        i0 := @parameter0: int;
+
+        $r0 = staticinvoke <sun.nio.fs.NativeBuffers: sun.nio.fs.NativeBuffer getNativeBufferFromCache(int)>(i0);
+
+        if $r0 == null goto label1;
+
+        virtualinvoke $r0.<sun.nio.fs.NativeBuffer: void setOwner(java.lang.Object)>(null);
+
+        return $r0;
+
+     label1:
+        $r1 = staticinvoke <sun.nio.fs.NativeBuffers: sun.nio.fs.NativeBuffer allocNativeBuffer(int)>(i0);
+
+        return $r1;
+    }
+
+    static void releaseNativeBuffer(sun.nio.fs.NativeBuffer)
+    {
+        java.lang.ThreadLocal $r0, $r7;
+        sun.nio.fs.NativeBuffer r2, r4, $r6;
+        int $i0, $i1, i2, i3;
+        sun.nio.fs.NativeBuffer[] r8, r9;
+        java.lang.Object $r1;
+        sun.misc.Cleaner $r3, $r5;
+
+        r2 := @parameter0: sun.nio.fs.NativeBuffer;
+
+        $r0 = <sun.nio.fs.NativeBuffers: java.lang.ThreadLocal threadLocal>;
+
+        $r1 = virtualinvoke $r0.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        r8 = (sun.nio.fs.NativeBuffer[]) $r1;
+
+        if r8 != null goto label1;
+
+        r9 = newarray (sun.nio.fs.NativeBuffer)[3];
+
+        r9[0] = r2;
+
+        $r7 = <sun.nio.fs.NativeBuffers: java.lang.ThreadLocal threadLocal>;
+
+        virtualinvoke $r7.<java.lang.ThreadLocal: void set(java.lang.Object)>(r9);
+
+        return;
+
+     label1:
+        i2 = 0;
+
+     label2:
+        if i2 >= 3 goto label4;
+
+        $r6 = r8[i2];
+
+        if $r6 != null goto label3;
+
+        r8[i2] = r2;
+
+        return;
+
+     label3:
+        i2 = i2 + 1;
+
+        goto label2;
+
+     label4:
+        i3 = 0;
+
+     label5:
+        if i3 >= 3 goto label7;
+
+        r4 = r8[i3];
+
+        $i0 = virtualinvoke r4.<sun.nio.fs.NativeBuffer: int size()>();
+
+        $i1 = virtualinvoke r2.<sun.nio.fs.NativeBuffer: int size()>();
+
+        if $i0 >= $i1 goto label6;
+
+        $r5 = virtualinvoke r4.<sun.nio.fs.NativeBuffer: sun.misc.Cleaner cleaner()>();
+
+        virtualinvoke $r5.<sun.misc.Cleaner: void clean()>();
+
+        r8[i3] = r2;
+
+        return;
+
+     label6:
+        i3 = i3 + 1;
+
+        goto label5;
+
+     label7:
+        $r3 = virtualinvoke r2.<sun.nio.fs.NativeBuffer: sun.misc.Cleaner cleaner()>();
+
+        virtualinvoke $r3.<sun.misc.Cleaner: void clean()>();
+
+        return;
+    }
+
+    static void copyCStringToNativeBuffer(byte[], sun.nio.fs.NativeBuffer)
+    {
+        sun.misc.Unsafe $r2, $r3;
+        byte[] r0;
+        long l1, l3, $l4, $l5, $l6, $l8, $l9;
+        java.lang.AssertionError $r5;
+        byte $b10;
+        int $i0, $i2, $i7, $i11;
+        boolean $z0;
+        sun.nio.fs.NativeBuffer r1;
+
+        r0 := @parameter0: byte[];
+
+        r1 := @parameter1: sun.nio.fs.NativeBuffer;
+
+        $i0 = <sun.misc.Unsafe: int ARRAY_BYTE_BASE_OFFSET>;
+
+        l1 = (long) $i0;
+
+        $i2 = lengthof r0;
+
+        l3 = (long) $i2;
+
+        $z0 = <sun.nio.fs.NativeBuffers: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $i7 = virtualinvoke r1.<sun.nio.fs.NativeBuffer: int size()>();
+
+        $l9 = (long) $i7;
+
+        $l8 = l3 + 1L;
+
+        $b10 = $l9 cmp $l8;
+
+        $i11 = (int) $b10;
+
+        if $i11 >= 0 goto label1;
+
+        $r5 = new java.lang.AssertionError;
+
+        specialinvoke $r5.<java.lang.AssertionError: void <init>()>();
+
+        throw $r5;
+
+     label1:
+        $r2 = <sun.nio.fs.NativeBuffers: sun.misc.Unsafe unsafe>;
+
+        $l4 = virtualinvoke r1.<sun.nio.fs.NativeBuffer: long address()>();
+
+        virtualinvoke $r2.<sun.misc.Unsafe: void copyMemory(java.lang.Object,long,java.lang.Object,long,long)>(r0, l1, null, $l4, l3);
+
+        $r3 = <sun.nio.fs.NativeBuffers: sun.misc.Unsafe unsafe>;
+
+        $l5 = virtualinvoke r1.<sun.nio.fs.NativeBuffer: long address()>();
+
+        $l6 = $l5 + l3;
+
+        virtualinvoke $r3.<sun.misc.Unsafe: void putByte(long,byte)>($l6, 0);
+
+        return;
+    }
+
+    static sun.nio.fs.NativeBuffer asNativeBuffer(byte[])
+    {
+        byte[] r0;
+        int $i0, $i1;
+        sun.nio.fs.NativeBuffer $r1;
+
+        r0 := @parameter0: byte[];
+
+        $i0 = lengthof r0;
+
+        $i1 = $i0 + 1;
+
+        $r1 = staticinvoke <sun.nio.fs.NativeBuffers: sun.nio.fs.NativeBuffer getNativeBuffer(int)>($i1);
+
+        staticinvoke <sun.nio.fs.NativeBuffers: void copyCStringToNativeBuffer(byte[],sun.nio.fs.NativeBuffer)>(r0, $r1);
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        sun.misc.Unsafe $r1;
+        java.lang.ThreadLocal $r2;
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        <sun.nio.fs.NativeBuffers: int TEMP_BUF_POOL_SIZE> = 3;
+
+        $r0 = class "Lsun/nio/fs/NativeBuffers;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.nio.fs.NativeBuffers: boolean $assertionsDisabled> = $z1;
+
+        $r1 = staticinvoke <sun.misc.Unsafe: sun.misc.Unsafe getUnsafe()>();
+
+        <sun.nio.fs.NativeBuffers: sun.misc.Unsafe unsafe> = $r1;
+
+        $r2 = new java.lang.ThreadLocal;
+
+        specialinvoke $r2.<java.lang.ThreadLocal: void <init>()>();
+
+        <sun.nio.fs.NativeBuffers: java.lang.ThreadLocal threadLocal> = $r2;
+
+        return;
+    }
+}

@@ -1,0 +1,128 @@
+class java.io.DeleteOnExitHook extends java.lang.Object
+{
+    private static java.util.LinkedHashSet files;
+
+    private void <init>()
+    {
+        java.io.DeleteOnExitHook r0;
+
+        r0 := @this: java.io.DeleteOnExitHook;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    static synchronized void add(java.lang.String)
+    {
+        java.lang.IllegalStateException $r3;
+        java.lang.String r1;
+        java.util.LinkedHashSet $r0, $r2;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = <java.io.DeleteOnExitHook: java.util.LinkedHashSet files>;
+
+        if $r0 != null goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Shutdown in progress");
+
+        throw $r3;
+
+     label1:
+        $r2 = <java.io.DeleteOnExitHook: java.util.LinkedHashSet files>;
+
+        virtualinvoke $r2.<java.util.LinkedHashSet: boolean add(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    static void runHooks()
+    {
+        java.lang.Throwable $r6;
+        java.util.Iterator $r2;
+        java.io.File $r5;
+        java.util.ArrayList $r1;
+        java.lang.Object $r3;
+        java.lang.String r4;
+        java.util.LinkedHashSet r0;
+        boolean $z0;
+
+        entermonitor class "Ljava/io/DeleteOnExitHook;";
+
+     label1:
+        r0 = <java.io.DeleteOnExitHook: java.util.LinkedHashSet files>;
+
+        <java.io.DeleteOnExitHook: java.util.LinkedHashSet files> = null;
+
+        exitmonitor class "Ljava/io/DeleteOnExitHook;";
+
+     label2:
+        goto label5;
+
+     label3:
+        $r6 := @caughtexception;
+
+        exitmonitor class "Ljava/io/DeleteOnExitHook;";
+
+     label4:
+        throw $r6;
+
+     label5:
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>(java.util.Collection)>(r0);
+
+        staticinvoke <java.util.Collections: void reverse(java.util.List)>($r1);
+
+        $r2 = virtualinvoke $r1.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label6:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label7;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (java.lang.String) $r3;
+
+        $r5 = new java.io.File;
+
+        specialinvoke $r5.<java.io.File: void <init>(java.lang.String)>(r4);
+
+        virtualinvoke $r5.<java.io.File: boolean delete()>();
+
+        goto label6;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    static void <clinit>()
+    {
+        java.io.DeleteOnExitHook$1 $r2;
+        sun.misc.JavaLangAccess $r1;
+        java.util.LinkedHashSet $r0;
+
+        $r0 = new java.util.LinkedHashSet;
+
+        specialinvoke $r0.<java.util.LinkedHashSet: void <init>()>();
+
+        <java.io.DeleteOnExitHook: java.util.LinkedHashSet files> = $r0;
+
+        $r1 = staticinvoke <sun.misc.SharedSecrets: sun.misc.JavaLangAccess getJavaLangAccess()>();
+
+        $r2 = new java.io.DeleteOnExitHook$1;
+
+        specialinvoke $r2.<java.io.DeleteOnExitHook$1: void <init>()>();
+
+        interfaceinvoke $r1.<sun.misc.JavaLangAccess: void registerShutdownHook(int,boolean,java.lang.Runnable)>(2, 1, $r2);
+
+        return;
+    }
+}

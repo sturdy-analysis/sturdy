@@ -1,0 +1,582 @@
+class com.sun.xml.internal.ws.model.ExternalMetadataReader$Util extends java.lang.Object
+{
+    private static final java.lang.String DATABINDING_XSD;
+    private static final java.lang.String TRANSLATE_NAMESPACES_XSL;
+    static javax.xml.validation.Schema schema;
+    static javax.xml.bind.JAXBContext jaxbContext;
+
+    void <init>()
+    {
+        com.sun.xml.internal.ws.model.ExternalMetadataReader$Util r0;
+
+        r0 := @this: com.sun.xml.internal.ws.model.ExternalMetadataReader$Util;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static java.net.URL getResource()
+    {
+        java.lang.Class $r0;
+        java.lang.ClassLoader $r1;
+        java.net.URL $r2;
+
+        $r0 = class "Lcom/sun/xml/internal/ws/model/ExternalMetadataReader$Util;";
+
+        $r1 = virtualinvoke $r0.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = virtualinvoke $r1.<java.lang.ClassLoader: java.net.URL getResource(java.lang.String)>("jaxws-databinding.xsd");
+
+        goto label2;
+
+     label1:
+        $r2 = staticinvoke <java.lang.ClassLoader: java.net.URL getSystemResource(java.lang.String)>("jaxws-databinding.xsd");
+
+     label2:
+        return $r2;
+    }
+
+    private static javax.xml.bind.JAXBContext createJaxbContext(boolean)
+    {
+        java.lang.Class[] $r0;
+        java.lang.Boolean $r3;
+        java.util.HashMap $r2;
+        javax.xml.bind.JAXBException $r5;
+        javax.xml.bind.JAXBContext $r1, $r4;
+        boolean z0;
+
+        z0 := @parameter0: boolean;
+
+        $r0 = newarray (java.lang.Class)[1];
+
+        $r0[0] = class "Lcom/oracle/xmlns/internal/webservices/jaxws_databinding/ObjectFactory;";
+
+     label1:
+        if z0 == 0 goto label3;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        $r3 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(z0);
+
+        interfaceinvoke $r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("com.sun.xml.internal.bind.disableXmlSecurity", $r3);
+
+        $r4 = staticinvoke <javax.xml.bind.JAXBContext: javax.xml.bind.JAXBContext newInstance(java.lang.Class[],java.util.Map)>($r0, $r2);
+
+     label2:
+        return $r4;
+
+     label3:
+        $r1 = staticinvoke <javax.xml.bind.JAXBContext: javax.xml.bind.JAXBContext newInstance(java.lang.Class[])>($r0);
+
+     label4:
+        return $r1;
+
+     label5:
+        $r5 := @caughtexception;
+
+        virtualinvoke $r5.<javax.xml.bind.JAXBException: void printStackTrace()>();
+
+        return null;
+
+        catch javax.xml.bind.JAXBException from label1 to label2 with label5;
+        catch javax.xml.bind.JAXBException from label3 to label4 with label5;
+    }
+
+    public static com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaWsdlMappingType read(javax.xml.transform.Source, boolean, boolean) throws java.io.IOException, javax.xml.bind.JAXBException
+    {
+        java.net.URL $r8;
+        javax.xml.transform.stream.StreamSource $r10;
+        javax.xml.transform.Source r2;
+        javax.xml.validation.Schema $r5, $r6, $r15, $r16;
+        java.lang.String $r9;
+        com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaWsdlMappingType $r4, $r14;
+        javax.xml.bind.JAXBContext $r0;
+        boolean z0, z1;
+        javax.xml.bind.Unmarshaller $r1, $r12;
+        javax.xml.bind.JAXBException $r7;
+        java.lang.Object $r3, $r13;
+        java.io.InputStream $r11;
+
+        r2 := @parameter0: javax.xml.transform.Source;
+
+        z1 := @parameter1: boolean;
+
+        z0 := @parameter2: boolean;
+
+        $r0 = staticinvoke <com.sun.xml.internal.ws.model.ExternalMetadataReader$Util: javax.xml.bind.JAXBContext jaxbContext(boolean)>(z0);
+
+     label1:
+        $r1 = virtualinvoke $r0.<javax.xml.bind.JAXBContext: javax.xml.bind.Unmarshaller createUnmarshaller()>();
+
+        if z1 == 0 goto label3;
+
+        $r5 = <com.sun.xml.internal.ws.model.ExternalMetadataReader$Util: javax.xml.validation.Schema schema>;
+
+        if $r5 != null goto label2;
+
+     label2:
+        $r6 = <com.sun.xml.internal.ws.model.ExternalMetadataReader$Util: javax.xml.validation.Schema schema>;
+
+        interfaceinvoke $r1.<javax.xml.bind.Unmarshaller: void setSchema(javax.xml.validation.Schema)>($r6);
+
+     label3:
+        $r3 = interfaceinvoke $r1.<javax.xml.bind.Unmarshaller: java.lang.Object unmarshal(javax.xml.transform.Source)>(r2);
+
+        $r4 = staticinvoke <com.sun.xml.internal.ws.model.ExternalMetadataReader$Util: com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaWsdlMappingType getJavaWsdlMapping(java.lang.Object)>($r3);
+
+     label4:
+        return $r4;
+
+     label5:
+        $r7 := @caughtexception;
+
+        $r8 = new java.net.URL;
+
+        $r9 = interfaceinvoke r2.<javax.xml.transform.Source: java.lang.String getSystemId()>();
+
+        specialinvoke $r8.<java.net.URL: void <init>(java.lang.String)>($r9);
+
+        $r10 = new javax.xml.transform.stream.StreamSource;
+
+        $r11 = virtualinvoke $r8.<java.net.URL: java.io.InputStream openStream()>();
+
+        specialinvoke $r10.<javax.xml.transform.stream.StreamSource: void <init>(java.io.InputStream)>($r11);
+
+        $r12 = virtualinvoke $r0.<javax.xml.bind.JAXBContext: javax.xml.bind.Unmarshaller createUnmarshaller()>();
+
+        if z1 == 0 goto label7;
+
+        $r15 = <com.sun.xml.internal.ws.model.ExternalMetadataReader$Util: javax.xml.validation.Schema schema>;
+
+        if $r15 != null goto label6;
+
+     label6:
+        $r16 = <com.sun.xml.internal.ws.model.ExternalMetadataReader$Util: javax.xml.validation.Schema schema>;
+
+        interfaceinvoke $r12.<javax.xml.bind.Unmarshaller: void setSchema(javax.xml.validation.Schema)>($r16);
+
+     label7:
+        $r13 = interfaceinvoke $r12.<javax.xml.bind.Unmarshaller: java.lang.Object unmarshal(javax.xml.transform.Source)>($r10);
+
+        $r14 = staticinvoke <com.sun.xml.internal.ws.model.ExternalMetadataReader$Util: com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaWsdlMappingType getJavaWsdlMapping(java.lang.Object)>($r13);
+
+        return $r14;
+
+        catch javax.xml.bind.JAXBException from label1 to label4 with label5;
+    }
+
+    private static javax.xml.bind.JAXBContext jaxbContext(boolean)
+    {
+        javax.xml.bind.JAXBContext $r0;
+        boolean z0;
+
+        z0 := @parameter0: boolean;
+
+        if z0 == 0 goto label1;
+
+        $r0 = staticinvoke <com.sun.xml.internal.ws.model.ExternalMetadataReader$Util: javax.xml.bind.JAXBContext createJaxbContext(boolean)>(1);
+
+        goto label2;
+
+     label1:
+        $r0 = <com.sun.xml.internal.ws.model.ExternalMetadataReader$Util: javax.xml.bind.JAXBContext jaxbContext>;
+
+     label2:
+        return $r0;
+    }
+
+    public static com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaWsdlMappingType transformAndRead(javax.xml.transform.Source, boolean) throws javax.xml.transform.TransformerException, javax.xml.bind.JAXBException
+    {
+        javax.xml.transform.Transformer $r7;
+        javax.xml.transform.Templates $r6;
+        javax.xml.transform.stream.StreamSource $r0;
+        javax.xml.transform.Source r8;
+        java.lang.Class $r1;
+        java.lang.Object $r9;
+        javax.xml.transform.TransformerFactory $r5;
+        com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaWsdlMappingType $r10;
+        javax.xml.bind.util.JAXBResult $r3;
+        javax.xml.bind.JAXBContext $r4;
+        java.io.InputStream $r2;
+        boolean z0, $z1;
+
+        r8 := @parameter0: javax.xml.transform.Source;
+
+        z0 := @parameter1: boolean;
+
+        $r0 = new javax.xml.transform.stream.StreamSource;
+
+        $r1 = class "Lcom/sun/xml/internal/ws/model/ExternalMetadataReader$Util;";
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.io.InputStream getResourceAsStream(java.lang.String)>("jaxws-databinding-translate-namespaces.xml");
+
+        specialinvoke $r0.<javax.xml.transform.stream.StreamSource: void <init>(java.io.InputStream)>($r2);
+
+        $r3 = new javax.xml.bind.util.JAXBResult;
+
+        $r4 = staticinvoke <com.sun.xml.internal.ws.model.ExternalMetadataReader$Util: javax.xml.bind.JAXBContext jaxbContext(boolean)>(z0);
+
+        specialinvoke $r3.<javax.xml.bind.util.JAXBResult: void <init>(javax.xml.bind.JAXBContext)>($r4);
+
+        if z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        $r5 = staticinvoke <com.sun.xml.internal.ws.util.xml.XmlUtil: javax.xml.transform.TransformerFactory newTransformerFactory(boolean)>($z1);
+
+        $r6 = virtualinvoke $r5.<javax.xml.transform.TransformerFactory: javax.xml.transform.Templates newTemplates(javax.xml.transform.Source)>($r0);
+
+        $r7 = interfaceinvoke $r6.<javax.xml.transform.Templates: javax.xml.transform.Transformer newTransformer()>();
+
+        virtualinvoke $r7.<javax.xml.transform.Transformer: void transform(javax.xml.transform.Source,javax.xml.transform.Result)>(r8, $r3);
+
+        $r9 = virtualinvoke $r3.<javax.xml.bind.util.JAXBResult: java.lang.Object getResult()>();
+
+        $r10 = staticinvoke <com.sun.xml.internal.ws.model.ExternalMetadataReader$Util: com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaWsdlMappingType getJavaWsdlMapping(java.lang.Object)>($r9);
+
+        return $r10;
+    }
+
+    static com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaWsdlMappingType getJavaWsdlMapping(java.lang.Object)
+    {
+        javax.xml.bind.JAXBElement $r2;
+        java.lang.Object r0, $r3;
+        com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaWsdlMappingType $r1;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $z0 = r0 instanceof javax.xml.bind.JAXBElement;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = (javax.xml.bind.JAXBElement) r0;
+
+        $r3 = virtualinvoke $r2.<javax.xml.bind.JAXBElement: java.lang.Object getValue()>();
+
+        goto label2;
+
+     label1:
+        $r3 = r0;
+
+     label2:
+        $z1 = $r3 instanceof com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaWsdlMappingType;
+
+        if $z1 == 0 goto label3;
+
+        $r1 = (com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaWsdlMappingType) $r3;
+
+        return $r1;
+
+     label3:
+        return null;
+    }
+
+    static java.lang.Object findInstanceOf(java.lang.Class, java.util.List)
+    {
+        java.util.List r0;
+        java.util.Iterator $r1;
+        java.lang.Object $r2, $r4;
+        java.lang.Class r3;
+        boolean $z0, $z1;
+
+        r3 := @parameter0: java.lang.Class;
+
+        r0 := @parameter1: java.util.List;
+
+        $r1 = interfaceinvoke r0.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r2 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        $z1 = virtualinvoke r3.<java.lang.Class: boolean isInstance(java.lang.Object)>($r2);
+
+        if $z1 == 0 goto label2;
+
+        $r4 = virtualinvoke r3.<java.lang.Class: java.lang.Object cast(java.lang.Object)>($r2);
+
+        return $r4;
+
+     label2:
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    public static java.lang.Object 'annotation'(com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaWsdlMappingType, java.lang.Class)
+    {
+        java.util.List $r1, $r3;
+        java.lang.Class r2;
+        java.lang.Object $r4;
+        com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaWsdlMappingType r0;
+
+        r0 := @parameter0: com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaWsdlMappingType;
+
+        r2 := @parameter1: java.lang.Class;
+
+        if r0 == null goto label1;
+
+        $r1 = virtualinvoke r0.<com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaWsdlMappingType: java.util.List getClassAnnotation()>();
+
+        if $r1 != null goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r3 = virtualinvoke r0.<com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaWsdlMappingType: java.util.List getClassAnnotation()>();
+
+        $r4 = staticinvoke <com.sun.xml.internal.ws.model.ExternalMetadataReader$Util: java.lang.Object findInstanceOf(java.lang.Class,java.util.List)>(r2, $r3);
+
+        return $r4;
+    }
+
+    public static java.lang.Object 'annotation'(com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaMethod, java.lang.Class)
+    {
+        java.util.List $r1, $r3;
+        com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaMethod r0;
+        java.lang.Class r2;
+        java.lang.Object $r4;
+
+        r0 := @parameter0: com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaMethod;
+
+        r2 := @parameter1: java.lang.Class;
+
+        if r0 == null goto label1;
+
+        $r1 = virtualinvoke r0.<com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaMethod: java.util.List getMethodAnnotation()>();
+
+        if $r1 != null goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r3 = virtualinvoke r0.<com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaMethod: java.util.List getMethodAnnotation()>();
+
+        $r4 = staticinvoke <com.sun.xml.internal.ws.model.ExternalMetadataReader$Util: java.lang.Object findInstanceOf(java.lang.Class,java.util.List)>(r2, $r3);
+
+        return $r4;
+    }
+
+    public static java.lang.Object 'annotation'(com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaParam, java.lang.Class)
+    {
+        java.util.List $r1, $r3;
+        java.lang.Class r2;
+        java.lang.Object $r4;
+        com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaParam r0;
+
+        r0 := @parameter0: com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaParam;
+
+        r2 := @parameter1: java.lang.Class;
+
+        if r0 == null goto label1;
+
+        $r1 = virtualinvoke r0.<com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaParam: java.util.List getParamAnnotation()>();
+
+        if $r1 != null goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r3 = virtualinvoke r0.<com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaParam: java.util.List getParamAnnotation()>();
+
+        $r4 = staticinvoke <com.sun.xml.internal.ws.model.ExternalMetadataReader$Util: java.lang.Object findInstanceOf(java.lang.Class,java.util.List)>(r2, $r3);
+
+        return $r4;
+    }
+
+    public static org.w3c.dom.Element[] 'annotation'(com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaMethod)
+    {
+        java.util.List $r1, $r2;
+        com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaMethod r0;
+        org.w3c.dom.Element[] $r3;
+
+        r0 := @parameter0: com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaMethod;
+
+        if r0 == null goto label1;
+
+        $r1 = virtualinvoke r0.<com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaMethod: java.util.List getMethodAnnotation()>();
+
+        if $r1 != null goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r2 = virtualinvoke r0.<com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaMethod: java.util.List getMethodAnnotation()>();
+
+        $r3 = staticinvoke <com.sun.xml.internal.ws.model.ExternalMetadataReader$Util: org.w3c.dom.Element[] findElements(java.util.List)>($r2);
+
+        return $r3;
+    }
+
+    public static org.w3c.dom.Element[] 'annotation'(com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaParam)
+    {
+        java.util.List $r1, $r2;
+        org.w3c.dom.Element[] $r3;
+        com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaParam r0;
+
+        r0 := @parameter0: com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaParam;
+
+        if r0 == null goto label1;
+
+        $r1 = virtualinvoke r0.<com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaParam: java.util.List getParamAnnotation()>();
+
+        if $r1 != null goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r2 = virtualinvoke r0.<com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaParam: java.util.List getParamAnnotation()>();
+
+        $r3 = staticinvoke <com.sun.xml.internal.ws.model.ExternalMetadataReader$Util: org.w3c.dom.Element[] findElements(java.util.List)>($r2);
+
+        return $r3;
+    }
+
+    private static org.w3c.dom.Element[] findElements(java.util.List)
+    {
+        java.lang.Object[] $r4;
+        java.util.Iterator $r2;
+        java.util.ArrayList $r0;
+        java.util.List r1;
+        org.w3c.dom.Element $r7;
+        int $i0;
+        org.w3c.dom.Element[] $r3, $r5;
+        java.lang.Object $r6;
+        boolean $z0, $z1;
+
+        r1 := @parameter0: java.util.List;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+        $r2 = interfaceinvoke r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r6 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        $z1 = $r6 instanceof org.w3c.dom.Element;
+
+        if $z1 == 0 goto label2;
+
+        $r7 = (org.w3c.dom.Element) $r6;
+
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>($r7);
+
+     label2:
+        goto label1;
+
+     label3:
+        $i0 = interfaceinvoke $r0.<java.util.List: int size()>();
+
+        $r3 = newarray (org.w3c.dom.Element)[$i0];
+
+        $r4 = interfaceinvoke $r0.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r3);
+
+        $r5 = (org.w3c.dom.Element[]) $r4;
+
+        return $r5;
+    }
+
+    static java.lang.String documentRootNamespace(javax.xml.transform.Source, boolean) throws javax.xml.stream.XMLStreamException
+    {
+        javax.xml.stream.XMLStreamReader $r2;
+        javax.xml.stream.XMLInputFactory $r0;
+        javax.xml.transform.Source r1;
+        javax.xml.namespace.QName $r3;
+        java.lang.String $r4;
+        boolean z0, $z1;
+
+        r1 := @parameter0: javax.xml.transform.Source;
+
+        z0 := @parameter1: boolean;
+
+        if z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        $r0 = staticinvoke <com.sun.xml.internal.ws.util.xml.XmlUtil: javax.xml.stream.XMLInputFactory newXMLInputFactory(boolean)>($z1);
+
+        $r2 = virtualinvoke $r0.<javax.xml.stream.XMLInputFactory: javax.xml.stream.XMLStreamReader createXMLStreamReader(javax.xml.transform.Source)>(r1);
+
+        staticinvoke <com.sun.xml.internal.ws.streaming.XMLStreamReaderUtil: int nextElementContent(javax.xml.stream.XMLStreamReader)>($r2);
+
+        $r3 = interfaceinvoke $r2.<javax.xml.stream.XMLStreamReader: javax.xml.namespace.QName getName()>();
+
+        $r4 = virtualinvoke $r3.<javax.xml.namespace.QName: java.lang.String getNamespaceURI()>();
+
+        staticinvoke <com.sun.xml.internal.ws.streaming.XMLStreamReaderUtil: void close(javax.xml.stream.XMLStreamReader)>($r2);
+
+        return $r4;
+    }
+
+    static void <clinit>()
+    {
+        javax.xml.validation.SchemaFactory $r0;
+        java.net.URL $r1;
+        org.xml.sax.SAXException $r4;
+        javax.xml.bind.JAXBContext $r2;
+        javax.xml.validation.Schema $r3;
+
+        <com.sun.xml.internal.ws.model.ExternalMetadataReader$Util: java.lang.String TRANSLATE_NAMESPACES_XSL> = "jaxws-databinding-translate-namespaces.xml";
+
+        <com.sun.xml.internal.ws.model.ExternalMetadataReader$Util: java.lang.String DATABINDING_XSD> = "jaxws-databinding.xsd";
+
+        $r0 = staticinvoke <javax.xml.validation.SchemaFactory: javax.xml.validation.SchemaFactory newInstance(java.lang.String)>("http://www.w3.org/2001/XMLSchema");
+
+     label1:
+        $r1 = staticinvoke <com.sun.xml.internal.ws.model.ExternalMetadataReader$Util: java.net.URL getResource()>();
+
+        if $r1 == null goto label2;
+
+        $r3 = virtualinvoke $r0.<javax.xml.validation.SchemaFactory: javax.xml.validation.Schema newSchema(java.net.URL)>($r1);
+
+        <com.sun.xml.internal.ws.model.ExternalMetadataReader$Util: javax.xml.validation.Schema schema> = $r3;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+     label4:
+        $r2 = staticinvoke <com.sun.xml.internal.ws.model.ExternalMetadataReader$Util: javax.xml.bind.JAXBContext createJaxbContext(boolean)>(0);
+
+        <com.sun.xml.internal.ws.model.ExternalMetadataReader$Util: javax.xml.bind.JAXBContext jaxbContext> = $r2;
+
+        return;
+
+        catch org.xml.sax.SAXException from label1 to label2 with label3;
+    }
+}

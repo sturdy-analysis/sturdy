@@ -1,0 +1,215 @@
+final class sun.security.ssl.SSLMasterKeyDerivation$LegacyMasterKeyDerivation extends java.lang.Object implements sun.security.ssl.SSLKeyDerivation
+{
+    final sun.security.ssl.HandshakeContext context;
+    final javax.crypto.SecretKey preMasterSecret;
+
+    void <init>(sun.security.ssl.HandshakeContext, javax.crypto.SecretKey)
+    {
+        sun.security.ssl.SSLMasterKeyDerivation$LegacyMasterKeyDerivation r0;
+        javax.crypto.SecretKey r2;
+        sun.security.ssl.HandshakeContext r1;
+
+        r0 := @this: sun.security.ssl.SSLMasterKeyDerivation$LegacyMasterKeyDerivation;
+
+        r1 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        r2 := @parameter1: javax.crypto.SecretKey;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.ssl.SSLMasterKeyDerivation$LegacyMasterKeyDerivation: sun.security.ssl.HandshakeContext context> = r1;
+
+        r0.<sun.security.ssl.SSLMasterKeyDerivation$LegacyMasterKeyDerivation: javax.crypto.SecretKey preMasterSecret> = r2;
+
+        return;
+    }
+
+    public javax.crypto.SecretKey deriveKey(java.lang.String, java.security.spec.AlgorithmParameterSpec) throws java.io.IOException
+    {
+        byte[] $r14, $r15, $r23;
+        javax.crypto.KeyGenerator $r17;
+        java.security.GeneralSecurityException $r27;
+        byte b0, b1;
+        java.security.spec.AlgorithmParameterSpec r30;
+        boolean $z0, $z1, $z2;
+        java.security.ProviderException $r37;
+        sun.security.ssl.HandshakeHash $r20, $r22;
+        sun.security.ssl.CipherSuite r2;
+        javax.crypto.SecretKey $r16, $r18, $r26;
+        sun.security.internal.spec.TlsMasterSecretParameterSpec r33, $r35, $r36;
+        java.lang.Object[] $r28;
+        sun.security.ssl.ProtocolVersion r4, $r5;
+        short $s6, $s7, $s10, $s11, $s12, $s13, $s16, $s17;
+        sun.security.ssl.CipherSuite$HashAlg r32;
+        int $i2, $i3, $i4, $i5, $i8, $i9, $i14, $i15, $i18, $i19;
+        java.lang.String $r13, $r25, r29, r31;
+        sun.security.ssl.RandomCookie $r10, $r12;
+        sun.security.ssl.SSLMasterKeyDerivation$LegacyMasterKeyDerivation r0;
+        sun.security.ssl.SSLSessionImpl $r7;
+        sun.security.ssl.HandshakeContext $r1, $r3, $r6, $r9, $r11, $r19, $r21;
+
+        r0 := @this: sun.security.ssl.SSLMasterKeyDerivation$LegacyMasterKeyDerivation;
+
+        r29 := @parameter0: java.lang.String;
+
+        r30 := @parameter1: java.security.spec.AlgorithmParameterSpec;
+
+        $r1 = r0.<sun.security.ssl.SSLMasterKeyDerivation$LegacyMasterKeyDerivation: sun.security.ssl.HandshakeContext context>;
+
+        r2 = $r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.CipherSuite negotiatedCipherSuite>;
+
+        $r3 = r0.<sun.security.ssl.SSLMasterKeyDerivation$LegacyMasterKeyDerivation: sun.security.ssl.HandshakeContext context>;
+
+        r4 = $r3.<sun.security.ssl.HandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        b0 = r4.<sun.security.ssl.ProtocolVersion: byte major>;
+
+        b1 = r4.<sun.security.ssl.ProtocolVersion: byte minor>;
+
+        $i3 = r4.<sun.security.ssl.ProtocolVersion: int id>;
+
+        $r5 = <sun.security.ssl.ProtocolVersion: sun.security.ssl.ProtocolVersion TLS12>;
+
+        $i2 = $r5.<sun.security.ssl.ProtocolVersion: int id>;
+
+        if $i3 < $i2 goto label1;
+
+        r31 = "SunTls12MasterSecret";
+
+        r32 = r2.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$HashAlg hashAlg>;
+
+        goto label2;
+
+     label1:
+        r31 = "SunTlsMasterSecret";
+
+        r32 = <sun.security.ssl.CipherSuite$HashAlg: sun.security.ssl.CipherSuite$HashAlg H_NONE>;
+
+     label2:
+        $r6 = r0.<sun.security.ssl.SSLMasterKeyDerivation$LegacyMasterKeyDerivation: sun.security.ssl.HandshakeContext context>;
+
+        $r7 = $r6.<sun.security.ssl.HandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        $z0 = $r7.<sun.security.ssl.SSLSessionImpl: boolean useExtendedMasterSecret>;
+
+        if $z0 == 0 goto label3;
+
+        r31 = "SunTlsExtendedMasterSecret";
+
+        $r19 = r0.<sun.security.ssl.SSLMasterKeyDerivation$LegacyMasterKeyDerivation: sun.security.ssl.HandshakeContext context>;
+
+        $r20 = $r19.<sun.security.ssl.HandshakeContext: sun.security.ssl.HandshakeHash handshakeHash>;
+
+        virtualinvoke $r20.<sun.security.ssl.HandshakeHash: void utilize()>();
+
+        $r21 = r0.<sun.security.ssl.SSLMasterKeyDerivation$LegacyMasterKeyDerivation: sun.security.ssl.HandshakeContext context>;
+
+        $r22 = $r21.<sun.security.ssl.HandshakeContext: sun.security.ssl.HandshakeHash handshakeHash>;
+
+        $r23 = virtualinvoke $r22.<sun.security.ssl.HandshakeHash: byte[] digest()>();
+
+        $r35 = new sun.security.internal.spec.TlsMasterSecretParameterSpec;
+
+        $r26 = r0.<sun.security.ssl.SSLMasterKeyDerivation$LegacyMasterKeyDerivation: javax.crypto.SecretKey preMasterSecret>;
+
+        $s12 = (short) b0;
+
+        $s11 = $s12 & 255;
+
+        $s13 = (short) b1;
+
+        $s10 = $s13 & 255;
+
+        $r25 = r32.<sun.security.ssl.CipherSuite$HashAlg: java.lang.String name>;
+
+        $i9 = r32.<sun.security.ssl.CipherSuite$HashAlg: int hashLength>;
+
+        $i8 = r32.<sun.security.ssl.CipherSuite$HashAlg: int blockSize>;
+
+        $i14 = (int) $s11;
+
+        $i15 = (int) $s10;
+
+        specialinvoke $r35.<sun.security.internal.spec.TlsMasterSecretParameterSpec: void <init>(javax.crypto.SecretKey,int,int,byte[],java.lang.String,int,int)>($r26, $i14, $i15, $r23, $r25, $i9, $i8);
+
+        r33 = $r35;
+
+        goto label4;
+
+     label3:
+        $r36 = new sun.security.internal.spec.TlsMasterSecretParameterSpec;
+
+        $r16 = r0.<sun.security.ssl.SSLMasterKeyDerivation$LegacyMasterKeyDerivation: javax.crypto.SecretKey preMasterSecret>;
+
+        $s16 = (short) b0;
+
+        $s7 = $s16 & 255;
+
+        $s17 = (short) b1;
+
+        $s6 = $s17 & 255;
+
+        $r9 = r0.<sun.security.ssl.SSLMasterKeyDerivation$LegacyMasterKeyDerivation: sun.security.ssl.HandshakeContext context>;
+
+        $r10 = $r9.<sun.security.ssl.HandshakeContext: sun.security.ssl.RandomCookie clientHelloRandom>;
+
+        $r15 = $r10.<sun.security.ssl.RandomCookie: byte[] randomBytes>;
+
+        $r11 = r0.<sun.security.ssl.SSLMasterKeyDerivation$LegacyMasterKeyDerivation: sun.security.ssl.HandshakeContext context>;
+
+        $r12 = $r11.<sun.security.ssl.HandshakeContext: sun.security.ssl.RandomCookie serverHelloRandom>;
+
+        $r14 = $r12.<sun.security.ssl.RandomCookie: byte[] randomBytes>;
+
+        $r13 = r32.<sun.security.ssl.CipherSuite$HashAlg: java.lang.String name>;
+
+        $i5 = r32.<sun.security.ssl.CipherSuite$HashAlg: int hashLength>;
+
+        $i4 = r32.<sun.security.ssl.CipherSuite$HashAlg: int blockSize>;
+
+        $i18 = (int) $s7;
+
+        $i19 = (int) $s6;
+
+        specialinvoke $r36.<sun.security.internal.spec.TlsMasterSecretParameterSpec: void <init>(javax.crypto.SecretKey,int,int,byte[],byte[],java.lang.String,int,int)>($r16, $i18, $i19, $r15, $r14, $r13, $i5, $i4);
+
+        r33 = $r36;
+
+     label4:
+        $r17 = staticinvoke <sun.security.ssl.JsseJce: javax.crypto.KeyGenerator getKeyGenerator(java.lang.String)>(r31);
+
+        virtualinvoke $r17.<javax.crypto.KeyGenerator: void init(java.security.spec.AlgorithmParameterSpec)>(r33);
+
+        $r18 = virtualinvoke $r17.<javax.crypto.KeyGenerator: javax.crypto.SecretKey generateKey()>();
+
+     label5:
+        return $r18;
+
+     label6:
+        $r27 := @caughtexception;
+
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label7;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("handshake");
+
+        if $z2 == 0 goto label7;
+
+        $r28 = newarray (java.lang.Object)[1];
+
+        $r28[0] = $r27;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("RSA master secret generation error.", $r28);
+
+     label7:
+        $r37 = new java.security.ProviderException;
+
+        specialinvoke $r37.<java.security.ProviderException: void <init>(java.lang.Throwable)>($r27);
+
+        throw $r37;
+
+        catch java.security.InvalidAlgorithmParameterException from label4 to label5 with label6;
+        catch java.security.NoSuchAlgorithmException from label4 to label5 with label6;
+    }
+}

@@ -1,0 +1,953 @@
+public class java.util.concurrent.ScheduledThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor implements java.util.concurrent.ScheduledExecutorService
+{
+    private volatile boolean continueExistingPeriodicTasksAfterShutdown;
+    private volatile boolean executeExistingDelayedTasksAfterShutdown;
+    private volatile boolean removeOnCancel;
+    private static final java.util.concurrent.atomic.AtomicLong sequencer;
+
+    final long now()
+    {
+        long $l0;
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+
+        r0 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        $l0 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        return $l0;
+    }
+
+    boolean canRunInCurrentRunState(boolean)
+    {
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+        boolean z0, $z1, $z2;
+
+        r0 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        z0 := @parameter0: boolean;
+
+        if z0 == 0 goto label1;
+
+        $z2 = r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean continueExistingPeriodicTasksAfterShutdown>;
+
+        goto label2;
+
+     label1:
+        $z2 = r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean executeExistingDelayedTasksAfterShutdown>;
+
+     label2:
+        $z1 = virtualinvoke r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean isRunningOrShutdown(boolean)>($z2);
+
+        return $z1;
+    }
+
+    private void delayedExecute(java.util.concurrent.RunnableScheduledFuture)
+    {
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+        java.util.concurrent.BlockingQueue $r1;
+        java.util.concurrent.RunnableScheduledFuture r2;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        r0 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        r2 := @parameter0: java.util.concurrent.RunnableScheduledFuture;
+
+        $z0 = virtualinvoke r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean isShutdown()>();
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r0.<java.util.concurrent.ScheduledThreadPoolExecutor: void reject(java.lang.Runnable)>(r2);
+
+        goto label3;
+
+     label1:
+        $r1 = specialinvoke r0.<java.util.concurrent.ThreadPoolExecutor: java.util.concurrent.BlockingQueue getQueue()>();
+
+        interfaceinvoke $r1.<java.util.concurrent.BlockingQueue: boolean add(java.lang.Object)>(r2);
+
+        $z1 = virtualinvoke r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean isShutdown()>();
+
+        if $z1 == 0 goto label2;
+
+        $z2 = interfaceinvoke r2.<java.util.concurrent.RunnableScheduledFuture: boolean isPeriodic()>();
+
+        $z3 = virtualinvoke r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean canRunInCurrentRunState(boolean)>($z2);
+
+        if $z3 != 0 goto label2;
+
+        $z4 = virtualinvoke r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean remove(java.lang.Runnable)>(r2);
+
+        if $z4 == 0 goto label2;
+
+        interfaceinvoke r2.<java.util.concurrent.RunnableScheduledFuture: boolean cancel(boolean)>(0);
+
+        goto label3;
+
+     label2:
+        virtualinvoke r0.<java.util.concurrent.ScheduledThreadPoolExecutor: void ensurePrestart()>();
+
+     label3:
+        return;
+    }
+
+    void reExecutePeriodic(java.util.concurrent.RunnableScheduledFuture)
+    {
+        java.util.concurrent.RunnableScheduledFuture r2;
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+        java.util.concurrent.BlockingQueue $r1;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        r2 := @parameter0: java.util.concurrent.RunnableScheduledFuture;
+
+        $z0 = virtualinvoke r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean canRunInCurrentRunState(boolean)>(1);
+
+        if $z0 == 0 goto label2;
+
+        $r1 = specialinvoke r0.<java.util.concurrent.ThreadPoolExecutor: java.util.concurrent.BlockingQueue getQueue()>();
+
+        interfaceinvoke $r1.<java.util.concurrent.BlockingQueue: boolean add(java.lang.Object)>(r2);
+
+        $z1 = virtualinvoke r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean canRunInCurrentRunState(boolean)>(1);
+
+        if $z1 != 0 goto label1;
+
+        $z2 = virtualinvoke r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean remove(java.lang.Runnable)>(r2);
+
+        if $z2 == 0 goto label1;
+
+        interfaceinvoke r2.<java.util.concurrent.RunnableScheduledFuture: boolean cancel(boolean)>(0);
+
+        goto label2;
+
+     label1:
+        virtualinvoke r0.<java.util.concurrent.ScheduledThreadPoolExecutor: void ensurePrestart()>();
+
+     label2:
+        return;
+    }
+
+    void onShutdown()
+    {
+        java.lang.Object[] $r2, $r4;
+        java.util.concurrent.RunnableScheduledFuture r3, $r5;
+        int $i0, i1, i2, i3;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+        java.util.concurrent.BlockingQueue $r1;
+        java.lang.Object r6, r7;
+
+        r0 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        $r1 = specialinvoke r0.<java.util.concurrent.ThreadPoolExecutor: java.util.concurrent.BlockingQueue getQueue()>();
+
+        $z0 = virtualinvoke r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean getExecuteExistingDelayedTasksAfterShutdownPolicy()>();
+
+        $z1 = virtualinvoke r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean getContinueExistingPeriodicTasksAfterShutdownPolicy()>();
+
+        if $z0 != 0 goto label04;
+
+        if $z1 != 0 goto label04;
+
+        $r4 = interfaceinvoke $r1.<java.util.concurrent.BlockingQueue: java.lang.Object[] toArray()>();
+
+        i1 = lengthof $r4;
+
+        i2 = 0;
+
+     label01:
+        if i2 >= i1 goto label03;
+
+        r6 = $r4[i2];
+
+        $z5 = r6 instanceof java.util.concurrent.RunnableScheduledFuture;
+
+        if $z5 == 0 goto label02;
+
+        $r5 = (java.util.concurrent.RunnableScheduledFuture) r6;
+
+        interfaceinvoke $r5.<java.util.concurrent.RunnableScheduledFuture: boolean cancel(boolean)>(0);
+
+     label02:
+        i2 = i2 + 1;
+
+        goto label01;
+
+     label03:
+        interfaceinvoke $r1.<java.util.concurrent.BlockingQueue: void clear()>();
+
+        goto label10;
+
+     label04:
+        $r2 = interfaceinvoke $r1.<java.util.concurrent.BlockingQueue: java.lang.Object[] toArray()>();
+
+        $i0 = lengthof $r2;
+
+        i3 = 0;
+
+     label05:
+        if i3 >= $i0 goto label10;
+
+        r7 = $r2[i3];
+
+        $z2 = r7 instanceof java.util.concurrent.RunnableScheduledFuture;
+
+        if $z2 == 0 goto label09;
+
+        r3 = (java.util.concurrent.RunnableScheduledFuture) r7;
+
+        $z3 = interfaceinvoke r3.<java.util.concurrent.RunnableScheduledFuture: boolean isPeriodic()>();
+
+        if $z3 == 0 goto label06;
+
+        if $z1 != 0 goto label07;
+
+        goto label08;
+
+     label06:
+        if $z0 == 0 goto label08;
+
+     label07:
+        $z4 = interfaceinvoke r3.<java.util.concurrent.RunnableScheduledFuture: boolean isCancelled()>();
+
+        if $z4 == 0 goto label09;
+
+     label08:
+        $z6 = interfaceinvoke $r1.<java.util.concurrent.BlockingQueue: boolean remove(java.lang.Object)>(r3);
+
+        if $z6 == 0 goto label09;
+
+        interfaceinvoke r3.<java.util.concurrent.RunnableScheduledFuture: boolean cancel(boolean)>(0);
+
+     label09:
+        i3 = i3 + 1;
+
+        goto label05;
+
+     label10:
+        virtualinvoke r0.<java.util.concurrent.ScheduledThreadPoolExecutor: void tryTerminate()>();
+
+        return;
+    }
+
+    protected java.util.concurrent.RunnableScheduledFuture decorateTask(java.lang.Runnable, java.util.concurrent.RunnableScheduledFuture)
+    {
+        java.util.concurrent.ScheduledThreadPoolExecutor r1;
+        java.lang.Runnable r2;
+        java.util.concurrent.RunnableScheduledFuture r0;
+
+        r1 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        r2 := @parameter0: java.lang.Runnable;
+
+        r0 := @parameter1: java.util.concurrent.RunnableScheduledFuture;
+
+        return r0;
+    }
+
+    protected java.util.concurrent.RunnableScheduledFuture decorateTask(java.util.concurrent.Callable, java.util.concurrent.RunnableScheduledFuture)
+    {
+        java.util.concurrent.ScheduledThreadPoolExecutor r1;
+        java.util.concurrent.Callable r2;
+        java.util.concurrent.RunnableScheduledFuture r0;
+
+        r1 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        r2 := @parameter0: java.util.concurrent.Callable;
+
+        r0 := @parameter1: java.util.concurrent.RunnableScheduledFuture;
+
+        return r0;
+    }
+
+    public void <init>(int)
+    {
+        java.util.concurrent.TimeUnit $r2;
+        int i0;
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+        java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue $r1;
+
+        r0 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        i0 := @parameter0: int;
+
+        $r2 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit NANOSECONDS>;
+
+        $r1 = new java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue;
+
+        specialinvoke $r1.<java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue: void <init>()>();
+
+        specialinvoke r0.<java.util.concurrent.ThreadPoolExecutor: void <init>(int,int,long,java.util.concurrent.TimeUnit,java.util.concurrent.BlockingQueue)>(i0, 2147483647, 0L, $r2, $r1);
+
+        r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean executeExistingDelayedTasksAfterShutdown> = 1;
+
+        r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean removeOnCancel> = 0;
+
+        return;
+    }
+
+    public void <init>(int, java.util.concurrent.ThreadFactory)
+    {
+        java.util.concurrent.TimeUnit $r2;
+        int i0;
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+        java.util.concurrent.ThreadFactory r3;
+        java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue $r1;
+
+        r0 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        i0 := @parameter0: int;
+
+        r3 := @parameter1: java.util.concurrent.ThreadFactory;
+
+        $r2 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit NANOSECONDS>;
+
+        $r1 = new java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue;
+
+        specialinvoke $r1.<java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue: void <init>()>();
+
+        specialinvoke r0.<java.util.concurrent.ThreadPoolExecutor: void <init>(int,int,long,java.util.concurrent.TimeUnit,java.util.concurrent.BlockingQueue,java.util.concurrent.ThreadFactory)>(i0, 2147483647, 0L, $r2, $r1, r3);
+
+        r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean executeExistingDelayedTasksAfterShutdown> = 1;
+
+        r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean removeOnCancel> = 0;
+
+        return;
+    }
+
+    public void <init>(int, java.util.concurrent.RejectedExecutionHandler)
+    {
+        java.util.concurrent.TimeUnit $r2;
+        java.util.concurrent.RejectedExecutionHandler r3;
+        int i0;
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+        java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue $r1;
+
+        r0 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        i0 := @parameter0: int;
+
+        r3 := @parameter1: java.util.concurrent.RejectedExecutionHandler;
+
+        $r2 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit NANOSECONDS>;
+
+        $r1 = new java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue;
+
+        specialinvoke $r1.<java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue: void <init>()>();
+
+        specialinvoke r0.<java.util.concurrent.ThreadPoolExecutor: void <init>(int,int,long,java.util.concurrent.TimeUnit,java.util.concurrent.BlockingQueue,java.util.concurrent.RejectedExecutionHandler)>(i0, 2147483647, 0L, $r2, $r1, r3);
+
+        r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean executeExistingDelayedTasksAfterShutdown> = 1;
+
+        r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean removeOnCancel> = 0;
+
+        return;
+    }
+
+    public void <init>(int, java.util.concurrent.ThreadFactory, java.util.concurrent.RejectedExecutionHandler)
+    {
+        java.util.concurrent.TimeUnit $r2;
+        java.util.concurrent.RejectedExecutionHandler r4;
+        int i0;
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+        java.util.concurrent.ThreadFactory r3;
+        java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue $r1;
+
+        r0 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        i0 := @parameter0: int;
+
+        r3 := @parameter1: java.util.concurrent.ThreadFactory;
+
+        r4 := @parameter2: java.util.concurrent.RejectedExecutionHandler;
+
+        $r2 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit NANOSECONDS>;
+
+        $r1 = new java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue;
+
+        specialinvoke $r1.<java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue: void <init>()>();
+
+        specialinvoke r0.<java.util.concurrent.ThreadPoolExecutor: void <init>(int,int,long,java.util.concurrent.TimeUnit,java.util.concurrent.BlockingQueue,java.util.concurrent.ThreadFactory,java.util.concurrent.RejectedExecutionHandler)>(i0, 2147483647, 0L, $r2, $r1, r3, r4);
+
+        r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean executeExistingDelayedTasksAfterShutdown> = 1;
+
+        r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean removeOnCancel> = 0;
+
+        return;
+    }
+
+    private long triggerTime(long, java.util.concurrent.TimeUnit)
+    {
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+        long l0, $l2, $l3, $l4;
+        java.util.concurrent.TimeUnit r1;
+        byte $b1;
+        int $i5;
+
+        r0 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: java.util.concurrent.TimeUnit;
+
+        $b1 = l0 cmp 0L;
+
+        $i5 = (int) $b1;
+
+        if $i5 >= 0 goto label1;
+
+        $l4 = 0L;
+
+        goto label2;
+
+     label1:
+        $l4 = l0;
+
+     label2:
+        $l2 = virtualinvoke r1.<java.util.concurrent.TimeUnit: long toNanos(long)>($l4);
+
+        $l3 = virtualinvoke r0.<java.util.concurrent.ScheduledThreadPoolExecutor: long triggerTime(long)>($l2);
+
+        return $l3;
+    }
+
+    long triggerTime(long)
+    {
+        byte $b2;
+        int $i5;
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+        long $l0, l1, $l3, $l4;
+
+        r0 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        l1 := @parameter0: long;
+
+        $l0 = virtualinvoke r0.<java.util.concurrent.ScheduledThreadPoolExecutor: long now()>();
+
+        $b2 = l1 cmp 4611686018427387903L;
+
+        $i5 = (int) $b2;
+
+        if $i5 >= 0 goto label1;
+
+        $l4 = l1;
+
+        goto label2;
+
+     label1:
+        $l4 = specialinvoke r0.<java.util.concurrent.ScheduledThreadPoolExecutor: long overflowFree(long)>(l1);
+
+     label2:
+        $l3 = $l0 + $l4;
+
+        return $l3;
+    }
+
+    private long overflowFree(long)
+    {
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+        java.util.concurrent.BlockingQueue $r1;
+        long $l0, $l2, l4;
+        java.util.concurrent.TimeUnit $r4;
+        byte $b1, $b3;
+        int $i5, $i6;
+        java.lang.Object $r2;
+        java.util.concurrent.Delayed r3;
+
+        r0 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        l4 := @parameter0: long;
+
+        $r1 = specialinvoke r0.<java.util.concurrent.ThreadPoolExecutor: java.util.concurrent.BlockingQueue getQueue()>();
+
+        $r2 = interfaceinvoke $r1.<java.util.concurrent.BlockingQueue: java.lang.Object peek()>();
+
+        r3 = (java.util.concurrent.Delayed) $r2;
+
+        if r3 == null goto label1;
+
+        $r4 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit NANOSECONDS>;
+
+        $l0 = interfaceinvoke r3.<java.util.concurrent.Delayed: long getDelay(java.util.concurrent.TimeUnit)>($r4);
+
+        $b1 = $l0 cmp 0L;
+
+        $i5 = (int) $b1;
+
+        if $i5 >= 0 goto label1;
+
+        $l2 = l4 - $l0;
+
+        $b3 = $l2 cmp 0L;
+
+        $i6 = (int) $b3;
+
+        if $i6 >= 0 goto label1;
+
+        l4 = 9223372036854775807L + $l0;
+
+     label1:
+        return l4;
+    }
+
+    public java.util.concurrent.ScheduledFuture schedule(java.lang.Runnable, long, java.util.concurrent.TimeUnit)
+    {
+        java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask $r4;
+        java.util.concurrent.ScheduledThreadPoolExecutor r3;
+        long l0, $l1;
+        java.lang.Runnable r0;
+        java.lang.NullPointerException $r1;
+        java.util.concurrent.TimeUnit r2;
+        java.util.concurrent.RunnableScheduledFuture $r5;
+
+        r3 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        r0 := @parameter0: java.lang.Runnable;
+
+        l0 := @parameter1: long;
+
+        r2 := @parameter2: java.util.concurrent.TimeUnit;
+
+        if r0 == null goto label1;
+
+        if r2 != null goto label2;
+
+     label1:
+        $r1 = new java.lang.NullPointerException;
+
+        specialinvoke $r1.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r1;
+
+     label2:
+        $r4 = new java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask;
+
+        $l1 = specialinvoke r3.<java.util.concurrent.ScheduledThreadPoolExecutor: long triggerTime(long,java.util.concurrent.TimeUnit)>(l0, r2);
+
+        specialinvoke $r4.<java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask: void <init>(java.util.concurrent.ScheduledThreadPoolExecutor,java.lang.Runnable,java.lang.Object,long)>(r3, r0, null, $l1);
+
+        $r5 = virtualinvoke r3.<java.util.concurrent.ScheduledThreadPoolExecutor: java.util.concurrent.RunnableScheduledFuture decorateTask(java.lang.Runnable,java.util.concurrent.RunnableScheduledFuture)>(r0, $r4);
+
+        specialinvoke r3.<java.util.concurrent.ScheduledThreadPoolExecutor: void delayedExecute(java.util.concurrent.RunnableScheduledFuture)>($r5);
+
+        return $r5;
+    }
+
+    public java.util.concurrent.ScheduledFuture schedule(java.util.concurrent.Callable, long, java.util.concurrent.TimeUnit)
+    {
+        java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask $r4;
+        java.util.concurrent.Callable r0;
+        java.util.concurrent.ScheduledThreadPoolExecutor r3;
+        long l0, $l1;
+        java.lang.NullPointerException $r1;
+        java.util.concurrent.TimeUnit r2;
+        java.util.concurrent.RunnableScheduledFuture $r5;
+
+        r3 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        r0 := @parameter0: java.util.concurrent.Callable;
+
+        l0 := @parameter1: long;
+
+        r2 := @parameter2: java.util.concurrent.TimeUnit;
+
+        if r0 == null goto label1;
+
+        if r2 != null goto label2;
+
+     label1:
+        $r1 = new java.lang.NullPointerException;
+
+        specialinvoke $r1.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r1;
+
+     label2:
+        $r4 = new java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask;
+
+        $l1 = specialinvoke r3.<java.util.concurrent.ScheduledThreadPoolExecutor: long triggerTime(long,java.util.concurrent.TimeUnit)>(l0, r2);
+
+        specialinvoke $r4.<java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask: void <init>(java.util.concurrent.ScheduledThreadPoolExecutor,java.util.concurrent.Callable,long)>(r3, r0, $l1);
+
+        $r5 = virtualinvoke r3.<java.util.concurrent.ScheduledThreadPoolExecutor: java.util.concurrent.RunnableScheduledFuture decorateTask(java.util.concurrent.Callable,java.util.concurrent.RunnableScheduledFuture)>(r0, $r4);
+
+        specialinvoke r3.<java.util.concurrent.ScheduledThreadPoolExecutor: void delayedExecute(java.util.concurrent.RunnableScheduledFuture)>($r5);
+
+        return $r5;
+    }
+
+    public java.util.concurrent.ScheduledFuture scheduleAtFixedRate(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit)
+    {
+        java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask $r9;
+        long l0, l2, $l3, $l4;
+        java.util.concurrent.ScheduledThreadPoolExecutor r4;
+        java.lang.IllegalArgumentException $r8;
+        java.lang.Runnable r0;
+        java.lang.NullPointerException $r7;
+        java.util.concurrent.TimeUnit r2;
+        byte $b1;
+        java.util.concurrent.RunnableScheduledFuture $r5;
+        int $i5;
+
+        r4 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        r0 := @parameter0: java.lang.Runnable;
+
+        l2 := @parameter1: long;
+
+        l0 := @parameter2: long;
+
+        r2 := @parameter3: java.util.concurrent.TimeUnit;
+
+        if r0 == null goto label1;
+
+        if r2 != null goto label2;
+
+     label1:
+        $r7 = new java.lang.NullPointerException;
+
+        specialinvoke $r7.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r7;
+
+     label2:
+        $b1 = l0 cmp 0L;
+
+        $i5 = (int) $b1;
+
+        if $i5 > 0 goto label3;
+
+        $r8 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r8;
+
+     label3:
+        $r9 = new java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask;
+
+        $l3 = specialinvoke r4.<java.util.concurrent.ScheduledThreadPoolExecutor: long triggerTime(long,java.util.concurrent.TimeUnit)>(l2, r2);
+
+        $l4 = virtualinvoke r2.<java.util.concurrent.TimeUnit: long toNanos(long)>(l0);
+
+        specialinvoke $r9.<java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask: void <init>(java.util.concurrent.ScheduledThreadPoolExecutor,java.lang.Runnable,java.lang.Object,long,long)>(r4, r0, null, $l3, $l4);
+
+        $r5 = virtualinvoke r4.<java.util.concurrent.ScheduledThreadPoolExecutor: java.util.concurrent.RunnableScheduledFuture decorateTask(java.lang.Runnable,java.util.concurrent.RunnableScheduledFuture)>(r0, $r9);
+
+        $r9.<java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask: java.util.concurrent.RunnableScheduledFuture outerTask> = $r5;
+
+        specialinvoke r4.<java.util.concurrent.ScheduledThreadPoolExecutor: void delayedExecute(java.util.concurrent.RunnableScheduledFuture)>($r5);
+
+        return $r5;
+    }
+
+    public java.util.concurrent.ScheduledFuture scheduleWithFixedDelay(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit)
+    {
+        java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask $r9;
+        long l0, l2, $l3, $l4, $l5;
+        java.util.concurrent.ScheduledThreadPoolExecutor r4;
+        java.lang.IllegalArgumentException $r8;
+        java.lang.Runnable r0;
+        java.lang.NullPointerException $r7;
+        java.util.concurrent.TimeUnit r2;
+        byte $b1;
+        java.util.concurrent.RunnableScheduledFuture $r5;
+        int $i6;
+
+        r4 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        r0 := @parameter0: java.lang.Runnable;
+
+        l2 := @parameter1: long;
+
+        l0 := @parameter2: long;
+
+        r2 := @parameter3: java.util.concurrent.TimeUnit;
+
+        if r0 == null goto label1;
+
+        if r2 != null goto label2;
+
+     label1:
+        $r7 = new java.lang.NullPointerException;
+
+        specialinvoke $r7.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r7;
+
+     label2:
+        $b1 = l0 cmp 0L;
+
+        $i6 = (int) $b1;
+
+        if $i6 > 0 goto label3;
+
+        $r8 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r8;
+
+     label3:
+        $r9 = new java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask;
+
+        $l3 = specialinvoke r4.<java.util.concurrent.ScheduledThreadPoolExecutor: long triggerTime(long,java.util.concurrent.TimeUnit)>(l2, r2);
+
+        $l4 = neg l0;
+
+        $l5 = virtualinvoke r2.<java.util.concurrent.TimeUnit: long toNanos(long)>($l4);
+
+        specialinvoke $r9.<java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask: void <init>(java.util.concurrent.ScheduledThreadPoolExecutor,java.lang.Runnable,java.lang.Object,long,long)>(r4, r0, null, $l3, $l5);
+
+        $r5 = virtualinvoke r4.<java.util.concurrent.ScheduledThreadPoolExecutor: java.util.concurrent.RunnableScheduledFuture decorateTask(java.lang.Runnable,java.util.concurrent.RunnableScheduledFuture)>(r0, $r9);
+
+        $r9.<java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask: java.util.concurrent.RunnableScheduledFuture outerTask> = $r5;
+
+        specialinvoke r4.<java.util.concurrent.ScheduledThreadPoolExecutor: void delayedExecute(java.util.concurrent.RunnableScheduledFuture)>($r5);
+
+        return $r5;
+    }
+
+    public void execute(java.lang.Runnable)
+    {
+        java.util.concurrent.TimeUnit $r2;
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+        java.lang.Runnable r1;
+
+        r0 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        r1 := @parameter0: java.lang.Runnable;
+
+        $r2 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit NANOSECONDS>;
+
+        virtualinvoke r0.<java.util.concurrent.ScheduledThreadPoolExecutor: java.util.concurrent.ScheduledFuture schedule(java.lang.Runnable,long,java.util.concurrent.TimeUnit)>(r1, 0L, $r2);
+
+        return;
+    }
+
+    public java.util.concurrent.Future submit(java.lang.Runnable)
+    {
+        java.util.concurrent.TimeUnit $r2;
+        java.util.concurrent.ScheduledFuture $r3;
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+        java.lang.Runnable r1;
+
+        r0 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        r1 := @parameter0: java.lang.Runnable;
+
+        $r2 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit NANOSECONDS>;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.ScheduledThreadPoolExecutor: java.util.concurrent.ScheduledFuture schedule(java.lang.Runnable,long,java.util.concurrent.TimeUnit)>(r1, 0L, $r2);
+
+        return $r3;
+    }
+
+    public java.util.concurrent.Future submit(java.lang.Runnable, java.lang.Object)
+    {
+        java.util.concurrent.TimeUnit $r4;
+        java.util.concurrent.ScheduledFuture $r5;
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+        java.lang.Object r2;
+        java.util.concurrent.Callable $r3;
+        java.lang.Runnable r1;
+
+        r0 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        r1 := @parameter0: java.lang.Runnable;
+
+        r2 := @parameter1: java.lang.Object;
+
+        $r3 = staticinvoke <java.util.concurrent.Executors: java.util.concurrent.Callable callable(java.lang.Runnable,java.lang.Object)>(r1, r2);
+
+        $r4 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit NANOSECONDS>;
+
+        $r5 = virtualinvoke r0.<java.util.concurrent.ScheduledThreadPoolExecutor: java.util.concurrent.ScheduledFuture schedule(java.util.concurrent.Callable,long,java.util.concurrent.TimeUnit)>($r3, 0L, $r4);
+
+        return $r5;
+    }
+
+    public java.util.concurrent.Future submit(java.util.concurrent.Callable)
+    {
+        java.util.concurrent.TimeUnit $r2;
+        java.util.concurrent.ScheduledFuture $r3;
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+        java.util.concurrent.Callable r1;
+
+        r0 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        r1 := @parameter0: java.util.concurrent.Callable;
+
+        $r2 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit NANOSECONDS>;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.ScheduledThreadPoolExecutor: java.util.concurrent.ScheduledFuture schedule(java.util.concurrent.Callable,long,java.util.concurrent.TimeUnit)>(r1, 0L, $r2);
+
+        return $r3;
+    }
+
+    public void setContinueExistingPeriodicTasksAfterShutdownPolicy(boolean)
+    {
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+        boolean z0, $z1;
+
+        r0 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        z0 := @parameter0: boolean;
+
+        r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean continueExistingPeriodicTasksAfterShutdown> = z0;
+
+        if z0 != 0 goto label1;
+
+        $z1 = virtualinvoke r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean isShutdown()>();
+
+        if $z1 == 0 goto label1;
+
+        virtualinvoke r0.<java.util.concurrent.ScheduledThreadPoolExecutor: void onShutdown()>();
+
+     label1:
+        return;
+    }
+
+    public boolean getContinueExistingPeriodicTasksAfterShutdownPolicy()
+    {
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        $z0 = r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean continueExistingPeriodicTasksAfterShutdown>;
+
+        return $z0;
+    }
+
+    public void setExecuteExistingDelayedTasksAfterShutdownPolicy(boolean)
+    {
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+        boolean z0, $z1;
+
+        r0 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        z0 := @parameter0: boolean;
+
+        r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean executeExistingDelayedTasksAfterShutdown> = z0;
+
+        if z0 != 0 goto label1;
+
+        $z1 = virtualinvoke r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean isShutdown()>();
+
+        if $z1 == 0 goto label1;
+
+        virtualinvoke r0.<java.util.concurrent.ScheduledThreadPoolExecutor: void onShutdown()>();
+
+     label1:
+        return;
+    }
+
+    public boolean getExecuteExistingDelayedTasksAfterShutdownPolicy()
+    {
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        $z0 = r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean executeExistingDelayedTasksAfterShutdown>;
+
+        return $z0;
+    }
+
+    public void setRemoveOnCancelPolicy(boolean)
+    {
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+        boolean z0;
+
+        r0 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        z0 := @parameter0: boolean;
+
+        r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean removeOnCancel> = z0;
+
+        return;
+    }
+
+    public boolean getRemoveOnCancelPolicy()
+    {
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        $z0 = r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean removeOnCancel>;
+
+        return $z0;
+    }
+
+    public void shutdown()
+    {
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+
+        r0 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        specialinvoke r0.<java.util.concurrent.ThreadPoolExecutor: void shutdown()>();
+
+        return;
+    }
+
+    public java.util.List shutdownNow()
+    {
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+        java.util.List $r1;
+
+        r0 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        $r1 = specialinvoke r0.<java.util.concurrent.ThreadPoolExecutor: java.util.List shutdownNow()>();
+
+        return $r1;
+    }
+
+    public java.util.concurrent.BlockingQueue getQueue()
+    {
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+        java.util.concurrent.BlockingQueue $r1;
+
+        r0 := @this: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        $r1 = specialinvoke r0.<java.util.concurrent.ThreadPoolExecutor: java.util.concurrent.BlockingQueue getQueue()>();
+
+        return $r1;
+    }
+
+    static java.util.concurrent.atomic.AtomicLong access$000()
+    {
+        java.util.concurrent.atomic.AtomicLong $r0;
+
+        $r0 = <java.util.concurrent.ScheduledThreadPoolExecutor: java.util.concurrent.atomic.AtomicLong sequencer>;
+
+        return $r0;
+    }
+
+    static boolean access$100(java.util.concurrent.ScheduledThreadPoolExecutor)
+    {
+        java.util.concurrent.ScheduledThreadPoolExecutor r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        $z0 = r0.<java.util.concurrent.ScheduledThreadPoolExecutor: boolean removeOnCancel>;
+
+        return $z0;
+    }
+
+    static void <clinit>()
+    {
+        java.util.concurrent.atomic.AtomicLong $r0;
+
+        $r0 = new java.util.concurrent.atomic.AtomicLong;
+
+        specialinvoke $r0.<java.util.concurrent.atomic.AtomicLong: void <init>()>();
+
+        <java.util.concurrent.ScheduledThreadPoolExecutor: java.util.concurrent.atomic.AtomicLong sequencer> = $r0;
+
+        return;
+    }
+}

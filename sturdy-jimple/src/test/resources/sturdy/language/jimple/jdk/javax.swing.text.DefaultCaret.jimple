@@ -1,0 +1,3073 @@
+public class javax.swing.text.DefaultCaret extends java.awt.Rectangle implements javax.swing.text.Caret, java.awt.event.FocusListener, java.awt.event.MouseListener, java.awt.event.MouseMotionListener
+{
+    public static final int UPDATE_WHEN_ON_EDT;
+    public static final int NEVER_UPDATE;
+    public static final int ALWAYS_UPDATE;
+    protected javax.swing.event.EventListenerList listenerList;
+    protected transient javax.swing.event.ChangeEvent changeEvent;
+    javax.swing.text.JTextComponent component;
+    int updatePolicy;
+    boolean visible;
+    boolean active;
+    int dot;
+    int mark;
+    java.lang.Object selectionTag;
+    boolean selectionVisible;
+    javax.swing.Timer flasher;
+    java.awt.Point magicCaretPosition;
+    transient javax.swing.text.Position$Bias dotBias;
+    transient javax.swing.text.Position$Bias markBias;
+    boolean dotLTR;
+    boolean markLTR;
+    transient javax.swing.text.DefaultCaret$Handler handler;
+    private transient int[] flagXPoints;
+    private transient int[] flagYPoints;
+    private transient javax.swing.text.NavigationFilter$FilterBypass filterBypass;
+    private static transient javax.swing.Action selectWord;
+    private static transient javax.swing.Action selectLine;
+    private boolean ownsSelection;
+    private boolean forceCaretPositionChange;
+    private transient boolean shouldHandleRelease;
+    private transient java.awt.event.MouseEvent selectedWordEvent;
+    private int caretWidth;
+    private float aspectRatio;
+
+    public void <init>()
+    {
+        javax.swing.text.DefaultCaret$Handler $r6;
+        javax.swing.event.EventListenerList $r5;
+        int[] $r3, $r4;
+        int $i1;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        specialinvoke r0.<java.awt.Rectangle: void <init>()>();
+
+        $r5 = new javax.swing.event.EventListenerList;
+
+        specialinvoke $r5.<javax.swing.event.EventListenerList: void <init>()>();
+
+        r0.<javax.swing.text.DefaultCaret: javax.swing.event.EventListenerList listenerList> = $r5;
+
+        r0.<javax.swing.text.DefaultCaret: javax.swing.event.ChangeEvent changeEvent> = null;
+
+        r0.<javax.swing.text.DefaultCaret: int updatePolicy> = 0;
+
+        $r6 = new javax.swing.text.DefaultCaret$Handler;
+
+        specialinvoke $r6.<javax.swing.text.DefaultCaret$Handler: void <init>(javax.swing.text.DefaultCaret)>(r0);
+
+        r0.<javax.swing.text.DefaultCaret: javax.swing.text.DefaultCaret$Handler handler> = $r6;
+
+        $r3 = newarray (int)[3];
+
+        r0.<javax.swing.text.DefaultCaret: int[] flagXPoints> = $r3;
+
+        $r4 = newarray (int)[3];
+
+        r0.<javax.swing.text.DefaultCaret: int[] flagYPoints> = $r4;
+
+        r0.<javax.swing.text.DefaultCaret: java.awt.event.MouseEvent selectedWordEvent> = null;
+
+        $i1 = (int) -1;
+
+        r0.<javax.swing.text.DefaultCaret: int caretWidth> = $i1;
+
+        r0.<javax.swing.text.DefaultCaret: float aspectRatio> = -1.0F;
+
+        return;
+    }
+
+    public void setUpdatePolicy(int)
+    {
+        int i0;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        i0 := @parameter0: int;
+
+        r0.<javax.swing.text.DefaultCaret: int updatePolicy> = i0;
+
+        return;
+    }
+
+    public int getUpdatePolicy()
+    {
+        int $i0;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        $i0 = r0.<javax.swing.text.DefaultCaret: int updatePolicy>;
+
+        return $i0;
+    }
+
+    protected final javax.swing.text.JTextComponent getComponent()
+    {
+        javax.swing.text.DefaultCaret r0;
+        javax.swing.text.JTextComponent $r1;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        $r1 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        return $r1;
+    }
+
+    protected final synchronized void repaint()
+    {
+        int $i0, $i1, $i2, $i3;
+        javax.swing.text.DefaultCaret r0;
+        javax.swing.text.JTextComponent $r1, $r2;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        $r1 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $i3 = r0.<javax.swing.text.DefaultCaret: int x>;
+
+        $i2 = r0.<javax.swing.text.DefaultCaret: int y>;
+
+        $i1 = r0.<javax.swing.text.DefaultCaret: int width>;
+
+        $i0 = r0.<javax.swing.text.DefaultCaret: int height>;
+
+        virtualinvoke $r2.<javax.swing.text.JTextComponent: void repaint(int,int,int,int)>($i3, $i2, $i1, $i0);
+
+     label1:
+        return;
+    }
+
+    protected synchronized void damage(java.awt.Rectangle)
+    {
+        java.awt.Rectangle r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        javax.swing.text.DefaultCaret r1;
+
+        r1 := @this: javax.swing.text.DefaultCaret;
+
+        r0 := @parameter0: java.awt.Rectangle;
+
+        if r0 == null goto label1;
+
+        $i0 = r0.<java.awt.Rectangle: int height>;
+
+        $i1 = virtualinvoke r1.<javax.swing.text.DefaultCaret: int getCaretWidth(int)>($i0);
+
+        $i2 = r0.<java.awt.Rectangle: int x>;
+
+        $i4 = $i2 - 4;
+
+        $i3 = $i1 >> 1;
+
+        $i5 = $i4 - $i3;
+
+        r1.<javax.swing.text.DefaultCaret: int x> = $i5;
+
+        $i6 = r0.<java.awt.Rectangle: int y>;
+
+        r1.<javax.swing.text.DefaultCaret: int y> = $i6;
+
+        $i7 = 9 + $i1;
+
+        r1.<javax.swing.text.DefaultCaret: int width> = $i7;
+
+        $i8 = r0.<java.awt.Rectangle: int height>;
+
+        r1.<javax.swing.text.DefaultCaret: int height> = $i8;
+
+        virtualinvoke r1.<javax.swing.text.DefaultCaret: void repaint()>();
+
+     label1:
+        return;
+    }
+
+    protected void adjustVisibility(java.awt.Rectangle)
+    {
+        javax.swing.text.DefaultCaret$SafeScroller $r2;
+        java.awt.Rectangle r3;
+        javax.swing.text.DefaultCaret r0;
+        javax.swing.text.JTextComponent $r1, $r4;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        r3 := @parameter0: java.awt.Rectangle;
+
+        $r1 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        $z0 = staticinvoke <javax.swing.SwingUtilities: boolean isEventDispatchThread()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        virtualinvoke $r4.<javax.swing.text.JTextComponent: void scrollRectToVisible(java.awt.Rectangle)>(r3);
+
+        goto label3;
+
+     label2:
+        $r2 = new javax.swing.text.DefaultCaret$SafeScroller;
+
+        specialinvoke $r2.<javax.swing.text.DefaultCaret$SafeScroller: void <init>(javax.swing.text.DefaultCaret,java.awt.Rectangle)>(r0, r3);
+
+        staticinvoke <javax.swing.SwingUtilities: void invokeLater(java.lang.Runnable)>($r2);
+
+     label3:
+        return;
+    }
+
+    protected javax.swing.text.Highlighter$HighlightPainter getSelectionPainter()
+    {
+        javax.swing.text.LayeredHighlighter$LayerPainter $r0;
+        javax.swing.text.DefaultCaret r1;
+
+        r1 := @this: javax.swing.text.DefaultCaret;
+
+        $r0 = <javax.swing.text.DefaultHighlighter: javax.swing.text.LayeredHighlighter$LayerPainter DefaultPainter>;
+
+        return $r0;
+    }
+
+    protected void positionCaret(java.awt.event.MouseEvent)
+    {
+        javax.swing.text.Position$Bias[] r2;
+        java.awt.Point $r0;
+        javax.swing.text.JTextComponent $r4, $r6;
+        java.awt.event.MouseEvent r1;
+        javax.swing.plaf.TextUI $r5;
+        javax.swing.text.Position$Bias $r7, $r8, $r9;
+        int $i0, $i1, $i2;
+        javax.swing.text.DefaultCaret r3;
+
+        r3 := @this: javax.swing.text.DefaultCaret;
+
+        r1 := @parameter0: java.awt.event.MouseEvent;
+
+        $r0 = new java.awt.Point;
+
+        $i0 = virtualinvoke r1.<java.awt.event.MouseEvent: int getX()>();
+
+        $i1 = virtualinvoke r1.<java.awt.event.MouseEvent: int getY()>();
+
+        specialinvoke $r0.<java.awt.Point: void <init>(int,int)>($i0, $i1);
+
+        r2 = newarray (javax.swing.text.Position$Bias)[1];
+
+        $r4 = r3.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $r5 = virtualinvoke $r4.<javax.swing.text.JTextComponent: javax.swing.plaf.TextUI getUI()>();
+
+        $r6 = r3.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $i2 = virtualinvoke $r5.<javax.swing.plaf.TextUI: int viewToModel(javax.swing.text.JTextComponent,java.awt.Point,javax.swing.text.Position$Bias[])>($r6, $r0, r2);
+
+        $r7 = r2[0];
+
+        if $r7 != null goto label1;
+
+        $r9 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Forward>;
+
+        r2[0] = $r9;
+
+     label1:
+        if $i2 < 0 goto label2;
+
+        $r8 = r2[0];
+
+        virtualinvoke r3.<javax.swing.text.DefaultCaret: void setDot(int,javax.swing.text.Position$Bias)>($i2, $r8);
+
+     label2:
+        return;
+    }
+
+    protected void moveCaret(java.awt.event.MouseEvent)
+    {
+        javax.swing.text.Position$Bias[] r2;
+        java.awt.Point $r0;
+        javax.swing.text.JTextComponent $r4, $r6;
+        java.awt.event.MouseEvent r1;
+        javax.swing.plaf.TextUI $r5;
+        javax.swing.text.Position$Bias $r7, $r8, $r9;
+        int $i0, $i1, $i2;
+        javax.swing.text.DefaultCaret r3;
+
+        r3 := @this: javax.swing.text.DefaultCaret;
+
+        r1 := @parameter0: java.awt.event.MouseEvent;
+
+        $r0 = new java.awt.Point;
+
+        $i0 = virtualinvoke r1.<java.awt.event.MouseEvent: int getX()>();
+
+        $i1 = virtualinvoke r1.<java.awt.event.MouseEvent: int getY()>();
+
+        specialinvoke $r0.<java.awt.Point: void <init>(int,int)>($i0, $i1);
+
+        r2 = newarray (javax.swing.text.Position$Bias)[1];
+
+        $r4 = r3.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $r5 = virtualinvoke $r4.<javax.swing.text.JTextComponent: javax.swing.plaf.TextUI getUI()>();
+
+        $r6 = r3.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $i2 = virtualinvoke $r5.<javax.swing.plaf.TextUI: int viewToModel(javax.swing.text.JTextComponent,java.awt.Point,javax.swing.text.Position$Bias[])>($r6, $r0, r2);
+
+        $r7 = r2[0];
+
+        if $r7 != null goto label1;
+
+        $r9 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Forward>;
+
+        r2[0] = $r9;
+
+     label1:
+        if $i2 < 0 goto label2;
+
+        $r8 = r2[0];
+
+        virtualinvoke r3.<javax.swing.text.DefaultCaret: void moveDot(int,javax.swing.text.Position$Bias)>($i2, $r8);
+
+     label2:
+        return;
+    }
+
+    public void focusGained(java.awt.event.FocusEvent)
+    {
+        java.awt.event.FocusEvent r3;
+        javax.swing.text.DefaultCaret r0;
+        javax.swing.text.JTextComponent $r1, $r2;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        r3 := @parameter0: java.awt.event.FocusEvent;
+
+        $r1 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $z0 = virtualinvoke $r1.<javax.swing.text.JTextComponent: boolean isEnabled()>();
+
+        if $z0 == 0 goto label2;
+
+        $r2 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $z1 = virtualinvoke $r2.<javax.swing.text.JTextComponent: boolean isEditable()>();
+
+        if $z1 == 0 goto label1;
+
+        virtualinvoke r0.<javax.swing.text.DefaultCaret: void setVisible(boolean)>(1);
+
+     label1:
+        virtualinvoke r0.<javax.swing.text.DefaultCaret: void setSelectionVisible(boolean)>(1);
+
+     label2:
+        return;
+    }
+
+    public void focusLost(java.awt.event.FocusEvent)
+    {
+        java.awt.event.FocusEvent r1;
+        javax.swing.text.DefaultCaret r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        r1 := @parameter0: java.awt.event.FocusEvent;
+
+        virtualinvoke r0.<javax.swing.text.DefaultCaret: void setVisible(boolean)>(0);
+
+        $z0 = r0.<javax.swing.text.DefaultCaret: boolean ownsSelection>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = virtualinvoke r1.<java.awt.event.FocusEvent: boolean isTemporary()>();
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        virtualinvoke r0.<javax.swing.text.DefaultCaret: void setSelectionVisible(boolean)>($z2);
+
+        return;
+    }
+
+    private void selectWord(java.awt.event.MouseEvent)
+    {
+        long $l4;
+        javax.swing.Action $r3, r7;
+        int $i0, $i1, $i2, $i3, $i5;
+        javax.swing.ActionMap $r9;
+        javax.swing.text.DefaultEditorKit$SelectWordAction $r4;
+        javax.swing.text.JTextComponent $r8, $r11;
+        java.awt.event.ActionEvent $r10;
+        java.awt.event.MouseEvent $r1, r2, $r5, $r6;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        r2 := @parameter0: java.awt.event.MouseEvent;
+
+        $r1 = r0.<javax.swing.text.DefaultCaret: java.awt.event.MouseEvent selectedWordEvent>;
+
+        if $r1 == null goto label1;
+
+        $r5 = r0.<javax.swing.text.DefaultCaret: java.awt.event.MouseEvent selectedWordEvent>;
+
+        $i0 = virtualinvoke $r5.<java.awt.event.MouseEvent: int getX()>();
+
+        $i1 = virtualinvoke r2.<java.awt.event.MouseEvent: int getX()>();
+
+        if $i0 != $i1 goto label1;
+
+        $r6 = r0.<javax.swing.text.DefaultCaret: java.awt.event.MouseEvent selectedWordEvent>;
+
+        $i2 = virtualinvoke $r6.<java.awt.event.MouseEvent: int getY()>();
+
+        $i3 = virtualinvoke r2.<java.awt.event.MouseEvent: int getY()>();
+
+        if $i2 != $i3 goto label1;
+
+        return;
+
+     label1:
+        r7 = null;
+
+        $r8 = virtualinvoke r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent getComponent()>();
+
+        $r9 = virtualinvoke $r8.<javax.swing.text.JTextComponent: javax.swing.ActionMap getActionMap()>();
+
+        if $r9 == null goto label2;
+
+        r7 = virtualinvoke $r9.<javax.swing.ActionMap: javax.swing.Action get(java.lang.Object)>("select-word");
+
+     label2:
+        if r7 != null goto label4;
+
+        $r3 = <javax.swing.text.DefaultCaret: javax.swing.Action selectWord>;
+
+        if $r3 != null goto label3;
+
+        $r4 = new javax.swing.text.DefaultEditorKit$SelectWordAction;
+
+        specialinvoke $r4.<javax.swing.text.DefaultEditorKit$SelectWordAction: void <init>()>();
+
+        <javax.swing.text.DefaultCaret: javax.swing.Action selectWord> = $r4;
+
+     label3:
+        r7 = <javax.swing.text.DefaultCaret: javax.swing.Action selectWord>;
+
+     label4:
+        $r10 = new java.awt.event.ActionEvent;
+
+        $r11 = virtualinvoke r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent getComponent()>();
+
+        $l4 = virtualinvoke r2.<java.awt.event.MouseEvent: long getWhen()>();
+
+        $i5 = virtualinvoke r2.<java.awt.event.MouseEvent: int getModifiers()>();
+
+        specialinvoke $r10.<java.awt.event.ActionEvent: void <init>(java.lang.Object,int,java.lang.String,long,int)>($r11, 1001, null, $l4, $i5);
+
+        interfaceinvoke r7.<javax.swing.Action: void actionPerformed(java.awt.event.ActionEvent)>($r10);
+
+        r0.<javax.swing.text.DefaultCaret: java.awt.event.MouseEvent selectedWordEvent> = r2;
+
+        return;
+    }
+
+    public void mouseClicked(java.awt.event.MouseEvent)
+    {
+        java.lang.IllegalStateException $r15;
+        java.awt.HeadlessException $r14;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        java.awt.datatransfer.Clipboard $r8;
+        java.awt.Toolkit $r7;
+        java.awt.datatransfer.Transferable r21;
+        long $l1;
+        javax.swing.Action $r12, r17;
+        javax.swing.TransferHandler $r9;
+        javax.swing.text.DefaultEditorKit$SelectLineAction $r13;
+        int $i0, $i2;
+        javax.swing.ActionMap $r11;
+        javax.swing.LookAndFeel $r16;
+        javax.swing.text.JTextComponent $r1, $r2, $r4, $r5, $r10, $r19, r20;
+        java.awt.event.ActionEvent $r18;
+        java.awt.event.MouseEvent r3;
+        java.lang.Object $r6;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        r3 := @parameter0: java.awt.event.MouseEvent;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent getComponent()>();
+
+        if $r1 != null goto label01;
+
+        return;
+
+     label01:
+        $r2 = virtualinvoke r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent getComponent()>();
+
+        $i0 = staticinvoke <sun.swing.SwingUtilities2: int getAdjustedClickCount(javax.swing.text.JTextComponent,java.awt.event.MouseEvent)>($r2, r3);
+
+        $z0 = virtualinvoke r3.<java.awt.event.MouseEvent: boolean isConsumed()>();
+
+        if $z0 != 0 goto label16;
+
+        $z1 = staticinvoke <javax.swing.SwingUtilities: boolean isLeftMouseButton(java.awt.event.MouseEvent)>(r3);
+
+        if $z1 == 0 goto label07;
+
+        if $i0 != 1 goto label02;
+
+        r0.<javax.swing.text.DefaultCaret: java.awt.event.MouseEvent selectedWordEvent> = null;
+
+        goto label16;
+
+     label02:
+        if $i0 != 2 goto label03;
+
+        $z7 = staticinvoke <sun.swing.SwingUtilities2: boolean canEventAccessSystemClipboard(java.awt.AWTEvent)>(r3);
+
+        if $z7 == 0 goto label03;
+
+        specialinvoke r0.<javax.swing.text.DefaultCaret: void selectWord(java.awt.event.MouseEvent)>(r3);
+
+        r0.<javax.swing.text.DefaultCaret: java.awt.event.MouseEvent selectedWordEvent> = null;
+
+        goto label16;
+
+     label03:
+        if $i0 != 3 goto label16;
+
+        $z6 = staticinvoke <sun.swing.SwingUtilities2: boolean canEventAccessSystemClipboard(java.awt.AWTEvent)>(r3);
+
+        if $z6 == 0 goto label16;
+
+        r17 = null;
+
+        $r10 = virtualinvoke r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent getComponent()>();
+
+        $r11 = virtualinvoke $r10.<javax.swing.text.JTextComponent: javax.swing.ActionMap getActionMap()>();
+
+        if $r11 == null goto label04;
+
+        r17 = virtualinvoke $r11.<javax.swing.ActionMap: javax.swing.Action get(java.lang.Object)>("select-line");
+
+     label04:
+        if r17 != null goto label06;
+
+        $r12 = <javax.swing.text.DefaultCaret: javax.swing.Action selectLine>;
+
+        if $r12 != null goto label05;
+
+        $r13 = new javax.swing.text.DefaultEditorKit$SelectLineAction;
+
+        specialinvoke $r13.<javax.swing.text.DefaultEditorKit$SelectLineAction: void <init>()>();
+
+        <javax.swing.text.DefaultCaret: javax.swing.Action selectLine> = $r13;
+
+     label05:
+        r17 = <javax.swing.text.DefaultCaret: javax.swing.Action selectLine>;
+
+     label06:
+        $r18 = new java.awt.event.ActionEvent;
+
+        $r19 = virtualinvoke r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent getComponent()>();
+
+        $l1 = virtualinvoke r3.<java.awt.event.MouseEvent: long getWhen()>();
+
+        $i2 = virtualinvoke r3.<java.awt.event.MouseEvent: int getModifiers()>();
+
+        specialinvoke $r18.<java.awt.event.ActionEvent: void <init>(java.lang.Object,int,java.lang.String,long,int)>($r19, 1001, null, $l1, $i2);
+
+        interfaceinvoke r17.<javax.swing.Action: void actionPerformed(java.awt.event.ActionEvent)>($r18);
+
+        goto label16;
+
+     label07:
+        $z2 = staticinvoke <javax.swing.SwingUtilities: boolean isMiddleMouseButton(java.awt.event.MouseEvent)>(r3);
+
+        if $z2 == 0 goto label16;
+
+        if $i0 != 1 goto label16;
+
+        $r4 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $z3 = virtualinvoke $r4.<javax.swing.text.JTextComponent: boolean isEditable()>();
+
+        if $z3 == 0 goto label16;
+
+        $r5 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $z4 = virtualinvoke $r5.<javax.swing.text.JTextComponent: boolean isEnabled()>();
+
+        if $z4 == 0 goto label16;
+
+        $z5 = staticinvoke <sun.swing.SwingUtilities2: boolean canEventAccessSystemClipboard(java.awt.AWTEvent)>(r3);
+
+        if $z5 == 0 goto label16;
+
+        $r6 = virtualinvoke r3.<java.awt.event.MouseEvent: java.lang.Object getSource()>();
+
+        r20 = (javax.swing.text.JTextComponent) $r6;
+
+        if r20 == null goto label16;
+
+     label08:
+        $r7 = virtualinvoke r20.<javax.swing.text.JTextComponent: java.awt.Toolkit getToolkit()>();
+
+        $r8 = virtualinvoke $r7.<java.awt.Toolkit: java.awt.datatransfer.Clipboard getSystemSelection()>();
+
+        if $r8 == null goto label14;
+
+        specialinvoke r0.<javax.swing.text.DefaultCaret: void adjustCaret(java.awt.event.MouseEvent)>(r3);
+
+        $r9 = virtualinvoke r20.<javax.swing.text.JTextComponent: javax.swing.TransferHandler getTransferHandler()>();
+
+        if $r9 == null goto label13;
+
+        r21 = null;
+
+     label09:
+        r21 = virtualinvoke $r8.<java.awt.datatransfer.Clipboard: java.awt.datatransfer.Transferable getContents(java.lang.Object)>(null);
+
+     label10:
+        goto label12;
+
+     label11:
+        $r15 := @caughtexception;
+
+        $r16 = staticinvoke <javax.swing.UIManager: javax.swing.LookAndFeel getLookAndFeel()>();
+
+        virtualinvoke $r16.<javax.swing.LookAndFeel: void provideErrorFeedback(java.awt.Component)>(r20);
+
+     label12:
+        if r21 == null goto label13;
+
+        virtualinvoke $r9.<javax.swing.TransferHandler: boolean importData(javax.swing.JComponent,java.awt.datatransfer.Transferable)>(r20, r21);
+
+     label13:
+        specialinvoke r0.<javax.swing.text.DefaultCaret: void adjustFocus(boolean)>(1);
+
+     label14:
+        goto label16;
+
+     label15:
+        $r14 := @caughtexception;
+
+     label16:
+        return;
+
+        catch java.lang.IllegalStateException from label09 to label10 with label11;
+        catch java.awt.HeadlessException from label08 to label14 with label15;
+    }
+
+    public void mousePressed(java.awt.event.MouseEvent)
+    {
+        int $i0;
+        javax.swing.text.DefaultCaret r0;
+        javax.swing.text.JTextComponent $r1;
+        java.awt.event.MouseEvent r2;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        r2 := @parameter0: java.awt.event.MouseEvent;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent getComponent()>();
+
+        $i0 = staticinvoke <sun.swing.SwingUtilities2: int getAdjustedClickCount(javax.swing.text.JTextComponent,java.awt.event.MouseEvent)>($r1, r2);
+
+        $z0 = staticinvoke <javax.swing.SwingUtilities: boolean isLeftMouseButton(java.awt.event.MouseEvent)>(r2);
+
+        if $z0 == 0 goto label2;
+
+        $z1 = virtualinvoke r2.<java.awt.event.MouseEvent: boolean isConsumed()>();
+
+        if $z1 == 0 goto label1;
+
+        r0.<javax.swing.text.DefaultCaret: boolean shouldHandleRelease> = 1;
+
+        goto label2;
+
+     label1:
+        r0.<javax.swing.text.DefaultCaret: boolean shouldHandleRelease> = 0;
+
+        virtualinvoke r0.<javax.swing.text.DefaultCaret: void adjustCaretAndFocus(java.awt.event.MouseEvent)>(r2);
+
+        if $i0 != 2 goto label2;
+
+        $z2 = staticinvoke <sun.swing.SwingUtilities2: boolean canEventAccessSystemClipboard(java.awt.AWTEvent)>(r2);
+
+        if $z2 == 0 goto label2;
+
+        specialinvoke r0.<javax.swing.text.DefaultCaret: void selectWord(java.awt.event.MouseEvent)>(r2);
+
+     label2:
+        return;
+    }
+
+    void adjustCaretAndFocus(java.awt.event.MouseEvent)
+    {
+        javax.swing.text.DefaultCaret r0;
+        java.awt.event.MouseEvent r1;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        r1 := @parameter0: java.awt.event.MouseEvent;
+
+        specialinvoke r0.<javax.swing.text.DefaultCaret: void adjustCaret(java.awt.event.MouseEvent)>(r1);
+
+        specialinvoke r0.<javax.swing.text.DefaultCaret: void adjustFocus(boolean)>(0);
+
+        return;
+    }
+
+    private void adjustCaret(java.awt.event.MouseEvent)
+    {
+        int $i0, $i1, $i2, $i4;
+        javax.swing.text.DefaultCaret r1;
+        java.awt.event.MouseEvent r0;
+        boolean $z0;
+
+        r1 := @this: javax.swing.text.DefaultCaret;
+
+        r0 := @parameter0: java.awt.event.MouseEvent;
+
+        $i0 = virtualinvoke r0.<java.awt.event.MouseEvent: int getModifiers()>();
+
+        $i1 = $i0 & 1;
+
+        if $i1 == 0 goto label1;
+
+        $i2 = virtualinvoke r1.<javax.swing.text.DefaultCaret: int getDot()>();
+
+        $i4 = (int) -1;
+
+        if $i2 == $i4 goto label1;
+
+        virtualinvoke r1.<javax.swing.text.DefaultCaret: void moveCaret(java.awt.event.MouseEvent)>(r0);
+
+        goto label2;
+
+     label1:
+        $z0 = virtualinvoke r0.<java.awt.event.MouseEvent: boolean isPopupTrigger()>();
+
+        if $z0 != 0 goto label2;
+
+        virtualinvoke r1.<javax.swing.text.DefaultCaret: void positionCaret(java.awt.event.MouseEvent)>(r0);
+
+     label2:
+        return;
+    }
+
+    private void adjustFocus(boolean)
+    {
+        javax.swing.text.JTextComponent $r1, $r2, $r3, $r4, $r5;
+        javax.swing.text.DefaultCaret r0;
+        boolean $z0, $z1, z2;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        z2 := @parameter0: boolean;
+
+        $r1 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        if $r1 == null goto label2;
+
+        $r2 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $z0 = virtualinvoke $r2.<javax.swing.text.JTextComponent: boolean isEnabled()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $z1 = virtualinvoke $r3.<javax.swing.text.JTextComponent: boolean isRequestFocusEnabled()>();
+
+        if $z1 == 0 goto label2;
+
+        if z2 == 0 goto label1;
+
+        $r5 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        virtualinvoke $r5.<javax.swing.text.JTextComponent: boolean requestFocusInWindow()>();
+
+        goto label2;
+
+     label1:
+        $r4 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        virtualinvoke $r4.<javax.swing.text.JTextComponent: void requestFocus()>();
+
+     label2:
+        return;
+    }
+
+    public void mouseReleased(java.awt.event.MouseEvent)
+    {
+        javax.swing.text.DefaultCaret r1;
+        java.awt.event.MouseEvent r0;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: javax.swing.text.DefaultCaret;
+
+        r0 := @parameter0: java.awt.event.MouseEvent;
+
+        $z0 = virtualinvoke r0.<java.awt.event.MouseEvent: boolean isConsumed()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = r1.<javax.swing.text.DefaultCaret: boolean shouldHandleRelease>;
+
+        if $z1 == 0 goto label1;
+
+        $z2 = staticinvoke <javax.swing.SwingUtilities: boolean isLeftMouseButton(java.awt.event.MouseEvent)>(r0);
+
+        if $z2 == 0 goto label1;
+
+        virtualinvoke r1.<javax.swing.text.DefaultCaret: void adjustCaretAndFocus(java.awt.event.MouseEvent)>(r0);
+
+     label1:
+        return;
+    }
+
+    public void mouseEntered(java.awt.event.MouseEvent)
+    {
+        javax.swing.text.DefaultCaret r0;
+        java.awt.event.MouseEvent r1;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        r1 := @parameter0: java.awt.event.MouseEvent;
+
+        return;
+    }
+
+    public void mouseExited(java.awt.event.MouseEvent)
+    {
+        javax.swing.text.DefaultCaret r0;
+        java.awt.event.MouseEvent r1;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        r1 := @parameter0: java.awt.event.MouseEvent;
+
+        return;
+    }
+
+    public void mouseDragged(java.awt.event.MouseEvent)
+    {
+        javax.swing.text.DefaultCaret r1;
+        java.awt.event.MouseEvent r0;
+        boolean $z0, $z1;
+
+        r1 := @this: javax.swing.text.DefaultCaret;
+
+        r0 := @parameter0: java.awt.event.MouseEvent;
+
+        $z0 = virtualinvoke r0.<java.awt.event.MouseEvent: boolean isConsumed()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = staticinvoke <javax.swing.SwingUtilities: boolean isLeftMouseButton(java.awt.event.MouseEvent)>(r0);
+
+        if $z1 == 0 goto label1;
+
+        virtualinvoke r1.<javax.swing.text.DefaultCaret: void moveCaret(java.awt.event.MouseEvent)>(r0);
+
+     label1:
+        return;
+    }
+
+    public void mouseMoved(java.awt.event.MouseEvent)
+    {
+        javax.swing.text.DefaultCaret r0;
+        java.awt.event.MouseEvent r1;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        r1 := @parameter0: java.awt.event.MouseEvent;
+
+        return;
+    }
+
+    public void paint(java.awt.Graphics)
+    {
+        java.awt.Color $r24;
+        javax.swing.text.AbstractDocument $r7;
+        javax.swing.plaf.TextUI $r2;
+        byte $b28;
+        int[] $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20;
+        javax.swing.text.Position$Bias $r3;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        javax.swing.text.BadLocationException $r22;
+        java.awt.Graphics r6;
+        javax.swing.text.Document $r26;
+        java.awt.Rectangle $r5, $r21;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27;
+        javax.swing.text.JTextComponent $r1, $r4, $r23, $r25;
+        javax.swing.text.Element $r8;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        r6 := @parameter0: java.awt.Graphics;
+
+        $z0 = virtualinvoke r0.<javax.swing.text.DefaultCaret: boolean isVisible()>();
+
+        if $z0 == 0 goto label12;
+
+     label01:
+        $r1 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.text.JTextComponent: javax.swing.plaf.TextUI getUI()>();
+
+        $r4 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $i0 = r0.<javax.swing.text.DefaultCaret: int dot>;
+
+        $r3 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.Position$Bias dotBias>;
+
+        $r5 = virtualinvoke $r2.<javax.swing.plaf.TextUI: java.awt.Rectangle modelToView(javax.swing.text.JTextComponent,int,javax.swing.text.Position$Bias)>($r4, $i0, $r3);
+
+        if $r5 == null goto label02;
+
+        $i1 = $r5.<java.awt.Rectangle: int width>;
+
+        if $i1 != 0 goto label03;
+
+        $i18 = $r5.<java.awt.Rectangle: int height>;
+
+        if $i18 != 0 goto label03;
+
+     label02:
+        return;
+
+     label03:
+        $i2 = r0.<javax.swing.text.DefaultCaret: int width>;
+
+        if $i2 <= 0 goto label05;
+
+        $i13 = r0.<javax.swing.text.DefaultCaret: int height>;
+
+        if $i13 <= 0 goto label05;
+
+        $i17 = $r5.<java.awt.Rectangle: int x>;
+
+        $i16 = $r5.<java.awt.Rectangle: int y>;
+
+        $i15 = $r5.<java.awt.Rectangle: int width>;
+
+        $i14 = $r5.<java.awt.Rectangle: int height>;
+
+        $z3 = specialinvoke r0.<javax.swing.text.DefaultCaret: boolean _contains(int,int,int,int)>($i17, $i16, $i15, $i14);
+
+        if $z3 != 0 goto label05;
+
+        $r21 = virtualinvoke r6.<java.awt.Graphics: java.awt.Rectangle getClipBounds()>();
+
+        if $r21 == null goto label04;
+
+        $z4 = virtualinvoke $r21.<java.awt.Rectangle: boolean contains(java.awt.Rectangle)>(r0);
+
+        if $z4 != 0 goto label04;
+
+        virtualinvoke r0.<javax.swing.text.DefaultCaret: void repaint()>();
+
+     label04:
+        virtualinvoke r0.<javax.swing.text.DefaultCaret: void damage(java.awt.Rectangle)>($r5);
+
+     label05:
+        $r23 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $r24 = virtualinvoke $r23.<javax.swing.text.JTextComponent: java.awt.Color getCaretColor()>();
+
+        virtualinvoke r6.<java.awt.Graphics: void setColor(java.awt.Color)>($r24);
+
+        $i19 = $r5.<java.awt.Rectangle: int height>;
+
+        $i20 = virtualinvoke r0.<javax.swing.text.DefaultCaret: int getCaretWidth(int)>($i19);
+
+        $i21 = $r5.<java.awt.Rectangle: int x>;
+
+        $i22 = $i20 >> 1;
+
+        $i23 = $i21 - $i22;
+
+        $r5.<java.awt.Rectangle: int x> = $i23;
+
+        $i24 = $r5.<java.awt.Rectangle: int x>;
+
+        $i25 = $r5.<java.awt.Rectangle: int y>;
+
+        $i26 = $r5.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r6.<java.awt.Graphics: void fillRect(int,int,int,int)>($i24, $i25, $i20, $i26);
+
+        $r25 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $r26 = virtualinvoke $r25.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        $z5 = $r26 instanceof javax.swing.text.AbstractDocument;
+
+        if $z5 == 0 goto label10;
+
+        $r7 = (javax.swing.text.AbstractDocument) $r26;
+
+        $r8 = virtualinvoke $r7.<javax.swing.text.AbstractDocument: javax.swing.text.Element getBidiRootElement()>();
+
+        if $r8 == null goto label10;
+
+        $i3 = interfaceinvoke $r8.<javax.swing.text.Element: int getElementCount()>();
+
+        if $i3 <= 1 goto label10;
+
+        $r9 = r0.<javax.swing.text.DefaultCaret: int[] flagXPoints>;
+
+        $i4 = $r5.<java.awt.Rectangle: int x>;
+
+        $z1 = r0.<javax.swing.text.DefaultCaret: boolean dotLTR>;
+
+        if $z1 == 0 goto label06;
+
+        $i27 = $i20;
+
+        goto label07;
+
+     label06:
+        $i27 = 0;
+
+     label07:
+        $i5 = $i4 + $i27;
+
+        $r9[0] = $i5;
+
+        $r10 = r0.<javax.swing.text.DefaultCaret: int[] flagYPoints>;
+
+        $i6 = $r5.<java.awt.Rectangle: int y>;
+
+        $r10[0] = $i6;
+
+        $r12 = r0.<javax.swing.text.DefaultCaret: int[] flagXPoints>;
+
+        $r11 = r0.<javax.swing.text.DefaultCaret: int[] flagXPoints>;
+
+        $i7 = $r11[0];
+
+        $r12[1] = $i7;
+
+        $r14 = r0.<javax.swing.text.DefaultCaret: int[] flagYPoints>;
+
+        $r13 = r0.<javax.swing.text.DefaultCaret: int[] flagYPoints>;
+
+        $i8 = $r13[0];
+
+        $i9 = $i8 + 4;
+
+        $r14[1] = $i9;
+
+        $r16 = r0.<javax.swing.text.DefaultCaret: int[] flagXPoints>;
+
+        $r15 = r0.<javax.swing.text.DefaultCaret: int[] flagXPoints>;
+
+        $i10 = $r15[0];
+
+        $z2 = r0.<javax.swing.text.DefaultCaret: boolean dotLTR>;
+
+        if $z2 == 0 goto label08;
+
+        $b28 = 4;
+
+        goto label09;
+
+     label08:
+        $b28 = -4;
+
+     label09:
+        $i11 = $i10 + $b28;
+
+        $r16[2] = $i11;
+
+        $r18 = r0.<javax.swing.text.DefaultCaret: int[] flagYPoints>;
+
+        $r17 = r0.<javax.swing.text.DefaultCaret: int[] flagYPoints>;
+
+        $i12 = $r17[0];
+
+        $r18[2] = $i12;
+
+        $r20 = r0.<javax.swing.text.DefaultCaret: int[] flagXPoints>;
+
+        $r19 = r0.<javax.swing.text.DefaultCaret: int[] flagYPoints>;
+
+        virtualinvoke r6.<java.awt.Graphics: void fillPolygon(int[],int[],int)>($r20, $r19, 3);
+
+     label10:
+        goto label12;
+
+     label11:
+        $r22 := @caughtexception;
+
+     label12:
+        return;
+
+        catch javax.swing.text.BadLocationException from label01 to label02 with label11;
+        catch javax.swing.text.BadLocationException from label03 to label10 with label11;
+    }
+
+    public void install(javax.swing.text.JTextComponent)
+    {
+        javax.swing.text.DefaultCaret$Handler $r4, $r10;
+        javax.swing.text.JTextComponent r1, $r5;
+        java.lang.Integer $r8;
+        javax.swing.text.Position$Bias $r3;
+        int $i0, $i2;
+        float $f0;
+        java.lang.Object $r6, $r7;
+        javax.swing.text.Document $r2;
+        java.lang.Number $r9;
+        javax.swing.text.DefaultCaret r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        r1 := @parameter0: javax.swing.text.JTextComponent;
+
+        r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component> = r1;
+
+        $r2 = virtualinvoke r1.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        r0.<javax.swing.text.DefaultCaret: int mark> = 0;
+
+        r0.<javax.swing.text.DefaultCaret: int dot> = 0;
+
+        r0.<javax.swing.text.DefaultCaret: boolean markLTR> = 1;
+
+        r0.<javax.swing.text.DefaultCaret: boolean dotLTR> = 1;
+
+        $r3 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Forward>;
+
+        r0.<javax.swing.text.DefaultCaret: javax.swing.text.Position$Bias markBias> = $r3;
+
+        r0.<javax.swing.text.DefaultCaret: javax.swing.text.Position$Bias dotBias> = $r3;
+
+        if $r2 == null goto label1;
+
+        $r10 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.DefaultCaret$Handler handler>;
+
+        interfaceinvoke $r2.<javax.swing.text.Document: void addDocumentListener(javax.swing.event.DocumentListener)>($r10);
+
+     label1:
+        $r4 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.DefaultCaret$Handler handler>;
+
+        virtualinvoke r1.<javax.swing.text.JTextComponent: void addPropertyChangeListener(java.beans.PropertyChangeListener)>($r4);
+
+        virtualinvoke r1.<javax.swing.text.JTextComponent: void addFocusListener(java.awt.event.FocusListener)>(r0);
+
+        virtualinvoke r1.<javax.swing.text.JTextComponent: void addMouseListener(java.awt.event.MouseListener)>(r0);
+
+        virtualinvoke r1.<javax.swing.text.JTextComponent: void addMouseMotionListener(java.awt.event.MouseMotionListener)>(r0);
+
+        $r5 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $z0 = virtualinvoke $r5.<javax.swing.text.JTextComponent: boolean hasFocus()>();
+
+        if $z0 == 0 goto label2;
+
+        virtualinvoke r0.<javax.swing.text.DefaultCaret: void focusGained(java.awt.event.FocusEvent)>(null);
+
+     label2:
+        $r6 = virtualinvoke r1.<javax.swing.text.JTextComponent: java.lang.Object getClientProperty(java.lang.Object)>("caretAspectRatio");
+
+        $r9 = (java.lang.Number) $r6;
+
+        if $r9 == null goto label3;
+
+        $f0 = virtualinvoke $r9.<java.lang.Number: float floatValue()>();
+
+        r0.<javax.swing.text.DefaultCaret: float aspectRatio> = $f0;
+
+        goto label4;
+
+     label3:
+        r0.<javax.swing.text.DefaultCaret: float aspectRatio> = -1.0F;
+
+     label4:
+        $r7 = virtualinvoke r1.<javax.swing.text.JTextComponent: java.lang.Object getClientProperty(java.lang.Object)>("caretWidth");
+
+        $r8 = (java.lang.Integer) $r7;
+
+        if $r8 == null goto label5;
+
+        $i0 = virtualinvoke $r8.<java.lang.Integer: int intValue()>();
+
+        r0.<javax.swing.text.DefaultCaret: int caretWidth> = $i0;
+
+        goto label6;
+
+     label5:
+        $i2 = (int) -1;
+
+        r0.<javax.swing.text.DefaultCaret: int caretWidth> = $i2;
+
+     label6:
+        return;
+    }
+
+    public void deinstall(javax.swing.text.JTextComponent)
+    {
+        java.lang.Throwable $r7;
+        javax.swing.text.DefaultCaret$Handler $r2, $r6;
+        javax.swing.text.JTextComponent r0;
+        javax.swing.text.Document $r3;
+        javax.swing.text.DefaultCaret r1;
+        javax.swing.Timer $r4, $r5;
+
+        r1 := @this: javax.swing.text.DefaultCaret;
+
+        r0 := @parameter0: javax.swing.text.JTextComponent;
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void removeMouseListener(java.awt.event.MouseListener)>(r1);
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void removeMouseMotionListener(java.awt.event.MouseMotionListener)>(r1);
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void removeFocusListener(java.awt.event.FocusListener)>(r1);
+
+        $r2 = r1.<javax.swing.text.DefaultCaret: javax.swing.text.DefaultCaret$Handler handler>;
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void removePropertyChangeListener(java.beans.PropertyChangeListener)>($r2);
+
+        $r3 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        if $r3 == null goto label1;
+
+        $r6 = r1.<javax.swing.text.DefaultCaret: javax.swing.text.DefaultCaret$Handler handler>;
+
+        interfaceinvoke $r3.<javax.swing.text.Document: void removeDocumentListener(javax.swing.event.DocumentListener)>($r6);
+
+     label1:
+        entermonitor r1;
+
+     label2:
+        r1.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component> = null;
+
+        exitmonitor r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r7 := @caughtexception;
+
+        exitmonitor r1;
+
+     label5:
+        throw $r7;
+
+     label6:
+        $r4 = r1.<javax.swing.text.DefaultCaret: javax.swing.Timer flasher>;
+
+        if $r4 == null goto label7;
+
+        $r5 = r1.<javax.swing.text.DefaultCaret: javax.swing.Timer flasher>;
+
+        virtualinvoke $r5.<javax.swing.Timer: void stop()>();
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void addChangeListener(javax.swing.event.ChangeListener)
+    {
+        javax.swing.event.ChangeListener r1;
+        javax.swing.event.EventListenerList $r2;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        r1 := @parameter0: javax.swing.event.ChangeListener;
+
+        $r2 = r0.<javax.swing.text.DefaultCaret: javax.swing.event.EventListenerList listenerList>;
+
+        virtualinvoke $r2.<javax.swing.event.EventListenerList: void add(java.lang.Class,java.util.EventListener)>(class "Ljavax/swing/event/ChangeListener;", r1);
+
+        return;
+    }
+
+    public void removeChangeListener(javax.swing.event.ChangeListener)
+    {
+        javax.swing.event.ChangeListener r1;
+        javax.swing.event.EventListenerList $r2;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        r1 := @parameter0: javax.swing.event.ChangeListener;
+
+        $r2 = r0.<javax.swing.text.DefaultCaret: javax.swing.event.EventListenerList listenerList>;
+
+        virtualinvoke $r2.<javax.swing.event.EventListenerList: void remove(java.lang.Class,java.util.EventListener)>(class "Ljavax/swing/event/ChangeListener;", r1);
+
+        return;
+    }
+
+    public javax.swing.event.ChangeListener[] getChangeListeners()
+    {
+        java.util.EventListener[] $r2;
+        javax.swing.event.EventListenerList $r1;
+        javax.swing.event.ChangeListener[] $r3;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        $r1 = r0.<javax.swing.text.DefaultCaret: javax.swing.event.EventListenerList listenerList>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.event.EventListenerList: java.util.EventListener[] getListeners(java.lang.Class)>(class "Ljavax/swing/event/ChangeListener;");
+
+        $r3 = (javax.swing.event.ChangeListener[]) $r2;
+
+        return $r3;
+    }
+
+    protected void fireStateChanged()
+    {
+        javax.swing.event.ChangeEvent $r4, $r6, $r9;
+        java.lang.Object[] $r2;
+        javax.swing.event.EventListenerList $r1;
+        int $i0, $i1, i2, $i4;
+        java.lang.Object $r3, $r5;
+        javax.swing.event.ChangeListener $r7;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        $r1 = r0.<javax.swing.text.DefaultCaret: javax.swing.event.EventListenerList listenerList>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.event.EventListenerList: java.lang.Object[] getListenerList()>();
+
+        $i0 = lengthof $r2;
+
+        i2 = $i0 - 2;
+
+     label1:
+        if i2 < 0 goto label4;
+
+        $r3 = $r2[i2];
+
+        if $r3 != class "Ljavax/swing/event/ChangeListener;" goto label3;
+
+        $r4 = r0.<javax.swing.text.DefaultCaret: javax.swing.event.ChangeEvent changeEvent>;
+
+        if $r4 != null goto label2;
+
+        $r9 = new javax.swing.event.ChangeEvent;
+
+        specialinvoke $r9.<javax.swing.event.ChangeEvent: void <init>(java.lang.Object)>(r0);
+
+        r0.<javax.swing.text.DefaultCaret: javax.swing.event.ChangeEvent changeEvent> = $r9;
+
+     label2:
+        $i1 = i2 + 1;
+
+        $r5 = $r2[$i1];
+
+        $r7 = (javax.swing.event.ChangeListener) $r5;
+
+        $r6 = r0.<javax.swing.text.DefaultCaret: javax.swing.event.ChangeEvent changeEvent>;
+
+        interfaceinvoke $r7.<javax.swing.event.ChangeListener: void stateChanged(javax.swing.event.ChangeEvent)>($r6);
+
+     label3:
+        $i4 = (int) -2;
+
+        i2 = i2 + $i4;
+
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    public java.util.EventListener[] getListeners(java.lang.Class)
+    {
+        java.util.EventListener[] $r3;
+        javax.swing.event.EventListenerList $r2;
+        java.lang.Class r1;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        r1 := @parameter0: java.lang.Class;
+
+        $r2 = r0.<javax.swing.text.DefaultCaret: javax.swing.event.EventListenerList listenerList>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.event.EventListenerList: java.util.EventListener[] getListeners(java.lang.Class)>(r1);
+
+        return $r3;
+    }
+
+    public void setSelectionVisible(boolean)
+    {
+        javax.swing.text.Highlighter$HighlightPainter $r8;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7;
+        boolean z0, $z1, $z2;
+        javax.swing.text.BadLocationException $r10;
+        javax.swing.text.JTextComponent $r2, $r5;
+        javax.swing.text.Highlighter $r3, $r6;
+        java.lang.Object $r1, $r4, $r7, $r9;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        z0 := @parameter0: boolean;
+
+        $z1 = r0.<javax.swing.text.DefaultCaret: boolean selectionVisible>;
+
+        if z0 == $z1 goto label6;
+
+        r0.<javax.swing.text.DefaultCaret: boolean selectionVisible> = z0;
+
+        $z2 = r0.<javax.swing.text.DefaultCaret: boolean selectionVisible>;
+
+        if $z2 == 0 goto label5;
+
+        $r5 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $r6 = virtualinvoke $r5.<javax.swing.text.JTextComponent: javax.swing.text.Highlighter getHighlighter()>();
+
+        $i1 = r0.<javax.swing.text.DefaultCaret: int dot>;
+
+        $i0 = r0.<javax.swing.text.DefaultCaret: int mark>;
+
+        if $i1 == $i0 goto label4;
+
+        if $r6 == null goto label4;
+
+        $r7 = r0.<javax.swing.text.DefaultCaret: java.lang.Object selectionTag>;
+
+        if $r7 != null goto label4;
+
+        $i3 = r0.<javax.swing.text.DefaultCaret: int dot>;
+
+        $i2 = r0.<javax.swing.text.DefaultCaret: int mark>;
+
+        $i4 = staticinvoke <java.lang.Math: int min(int,int)>($i3, $i2);
+
+        $i6 = r0.<javax.swing.text.DefaultCaret: int dot>;
+
+        $i5 = r0.<javax.swing.text.DefaultCaret: int mark>;
+
+        $i7 = staticinvoke <java.lang.Math: int max(int,int)>($i6, $i5);
+
+        $r8 = virtualinvoke r0.<javax.swing.text.DefaultCaret: javax.swing.text.Highlighter$HighlightPainter getSelectionPainter()>();
+
+     label1:
+        $r9 = interfaceinvoke $r6.<javax.swing.text.Highlighter: java.lang.Object addHighlight(int,int,javax.swing.text.Highlighter$HighlightPainter)>($i4, $i7, $r8);
+
+        r0.<javax.swing.text.DefaultCaret: java.lang.Object selectionTag> = $r9;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r10 := @caughtexception;
+
+        r0.<javax.swing.text.DefaultCaret: java.lang.Object selectionTag> = null;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r1 = r0.<javax.swing.text.DefaultCaret: java.lang.Object selectionTag>;
+
+        if $r1 == null goto label6;
+
+        $r2 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.text.JTextComponent: javax.swing.text.Highlighter getHighlighter()>();
+
+        $r4 = r0.<javax.swing.text.DefaultCaret: java.lang.Object selectionTag>;
+
+        interfaceinvoke $r3.<javax.swing.text.Highlighter: void removeHighlight(java.lang.Object)>($r4);
+
+        r0.<javax.swing.text.DefaultCaret: java.lang.Object selectionTag> = null;
+
+     label6:
+        return;
+
+        catch javax.swing.text.BadLocationException from label1 to label2 with label3;
+    }
+
+    public boolean isSelectionVisible()
+    {
+        javax.swing.text.DefaultCaret r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        $z0 = r0.<javax.swing.text.DefaultCaret: boolean selectionVisible>;
+
+        return $z0;
+    }
+
+    public boolean isActive()
+    {
+        javax.swing.text.DefaultCaret r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        $z0 = r0.<javax.swing.text.DefaultCaret: boolean active>;
+
+        return $z0;
+    }
+
+    public boolean isVisible()
+    {
+        javax.swing.text.DefaultCaret r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        $z0 = r0.<javax.swing.text.DefaultCaret: boolean visible>;
+
+        return $z0;
+    }
+
+    public void setVisible(boolean)
+    {
+        java.awt.Rectangle $r8;
+        javax.swing.text.BadLocationException $r9;
+        javax.swing.text.JTextComponent $r1, $r4, $r7;
+        javax.swing.plaf.TextUI $r5;
+        javax.swing.text.Position$Bias $r6;
+        int $i0;
+        javax.swing.text.DefaultCaret r0;
+        boolean z0, $z1, $z2;
+        javax.swing.Timer $r2, $r3, $r10;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        z0 := @parameter0: boolean;
+
+        r0.<javax.swing.text.DefaultCaret: boolean active> = z0;
+
+        $r1 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        if $r1 == null goto label4;
+
+        $r4 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $r5 = virtualinvoke $r4.<javax.swing.text.JTextComponent: javax.swing.plaf.TextUI getUI()>();
+
+        $z2 = r0.<javax.swing.text.DefaultCaret: boolean visible>;
+
+        if $z2 == z0 goto label4;
+
+        r0.<javax.swing.text.DefaultCaret: boolean visible> = z0;
+
+     label1:
+        $r7 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $i0 = r0.<javax.swing.text.DefaultCaret: int dot>;
+
+        $r6 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.Position$Bias dotBias>;
+
+        $r8 = virtualinvoke $r5.<javax.swing.plaf.TextUI: java.awt.Rectangle modelToView(javax.swing.text.JTextComponent,int,javax.swing.text.Position$Bias)>($r7, $i0, $r6);
+
+        virtualinvoke r0.<javax.swing.text.DefaultCaret: void damage(java.awt.Rectangle)>($r8);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r9 := @caughtexception;
+
+     label4:
+        $r10 = r0.<javax.swing.text.DefaultCaret: javax.swing.Timer flasher>;
+
+        if $r10 == null goto label6;
+
+        $z1 = r0.<javax.swing.text.DefaultCaret: boolean visible>;
+
+        if $z1 == 0 goto label5;
+
+        $r3 = r0.<javax.swing.text.DefaultCaret: javax.swing.Timer flasher>;
+
+        virtualinvoke $r3.<javax.swing.Timer: void start()>();
+
+        goto label6;
+
+     label5:
+        $r2 = r0.<javax.swing.text.DefaultCaret: javax.swing.Timer flasher>;
+
+        virtualinvoke $r2.<javax.swing.Timer: void stop()>();
+
+     label6:
+        return;
+
+        catch javax.swing.text.BadLocationException from label1 to label2 with label3;
+    }
+
+    public void setBlinkRate(int)
+    {
+        javax.swing.text.DefaultCaret$Handler $r3, $r8;
+        int i0;
+        javax.swing.text.DefaultCaret r0;
+        javax.swing.Timer $r1, $r2, $r4, $r5, $r6, $r7;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        i0 := @parameter0: int;
+
+        if i0 == 0 goto label2;
+
+        $r5 = r0.<javax.swing.text.DefaultCaret: javax.swing.Timer flasher>;
+
+        if $r5 != null goto label1;
+
+        $r7 = new javax.swing.Timer;
+
+        $r8 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.DefaultCaret$Handler handler>;
+
+        specialinvoke $r7.<javax.swing.Timer: void <init>(int,java.awt.event.ActionListener)>(i0, $r8);
+
+        r0.<javax.swing.text.DefaultCaret: javax.swing.Timer flasher> = $r7;
+
+     label1:
+        $r6 = r0.<javax.swing.text.DefaultCaret: javax.swing.Timer flasher>;
+
+        virtualinvoke $r6.<javax.swing.Timer: void setDelay(int)>(i0);
+
+        goto label3;
+
+     label2:
+        $r1 = r0.<javax.swing.text.DefaultCaret: javax.swing.Timer flasher>;
+
+        if $r1 == null goto label3;
+
+        $r2 = r0.<javax.swing.text.DefaultCaret: javax.swing.Timer flasher>;
+
+        virtualinvoke $r2.<javax.swing.Timer: void stop()>();
+
+        $r4 = r0.<javax.swing.text.DefaultCaret: javax.swing.Timer flasher>;
+
+        $r3 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.DefaultCaret$Handler handler>;
+
+        virtualinvoke $r4.<javax.swing.Timer: void removeActionListener(java.awt.event.ActionListener)>($r3);
+
+        r0.<javax.swing.text.DefaultCaret: javax.swing.Timer flasher> = null;
+
+     label3:
+        return;
+    }
+
+    public int getBlinkRate()
+    {
+        int $i0;
+        javax.swing.text.DefaultCaret r0;
+        javax.swing.Timer $r1, $r2;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        $r1 = r0.<javax.swing.text.DefaultCaret: javax.swing.Timer flasher>;
+
+        if $r1 != null goto label1;
+
+        $i0 = 0;
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<javax.swing.text.DefaultCaret: javax.swing.Timer flasher>;
+
+        $i0 = virtualinvoke $r2.<javax.swing.Timer: int getDelay()>();
+
+     label2:
+        return $i0;
+    }
+
+    public int getDot()
+    {
+        int $i0;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        $i0 = r0.<javax.swing.text.DefaultCaret: int dot>;
+
+        return $i0;
+    }
+
+    public int getMark()
+    {
+        int $i0;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        $i0 = r0.<javax.swing.text.DefaultCaret: int mark>;
+
+        return $i0;
+    }
+
+    public void setDot(int)
+    {
+        int i0;
+        javax.swing.text.DefaultCaret r0;
+        javax.swing.text.Position$Bias $r1;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        i0 := @parameter0: int;
+
+        $r1 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Forward>;
+
+        virtualinvoke r0.<javax.swing.text.DefaultCaret: void setDot(int,javax.swing.text.Position$Bias)>(i0, $r1);
+
+        return;
+    }
+
+    public void moveDot(int)
+    {
+        int i0;
+        javax.swing.text.DefaultCaret r0;
+        javax.swing.text.Position$Bias $r1;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        i0 := @parameter0: int;
+
+        $r1 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Forward>;
+
+        virtualinvoke r0.<javax.swing.text.DefaultCaret: void moveDot(int,javax.swing.text.Position$Bias)>(i0, $r1);
+
+        return;
+    }
+
+    public void moveDot(int, javax.swing.text.Position$Bias)
+    {
+        javax.swing.text.NavigationFilter$FilterBypass $r5;
+        java.lang.IllegalArgumentException $r6;
+        javax.swing.text.JTextComponent $r2, $r3;
+        javax.swing.text.NavigationFilter $r4;
+        javax.swing.text.Position$Bias r0;
+        int i0, $i1;
+        javax.swing.text.DefaultCaret r1;
+        boolean $z0;
+
+        r1 := @this: javax.swing.text.DefaultCaret;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: javax.swing.text.Position$Bias;
+
+        if r0 != null goto label1;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("null bias");
+
+        throw $r6;
+
+     label1:
+        $r2 = r1.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $z0 = virtualinvoke $r2.<javax.swing.text.JTextComponent: boolean isEnabled()>();
+
+        if $z0 != 0 goto label2;
+
+        virtualinvoke r1.<javax.swing.text.DefaultCaret: void setDot(int,javax.swing.text.Position$Bias)>(i0, r0);
+
+        return;
+
+     label2:
+        $i1 = r1.<javax.swing.text.DefaultCaret: int dot>;
+
+        if i0 == $i1 goto label4;
+
+        $r3 = r1.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $r4 = virtualinvoke $r3.<javax.swing.text.JTextComponent: javax.swing.text.NavigationFilter getNavigationFilter()>();
+
+        if $r4 == null goto label3;
+
+        $r5 = specialinvoke r1.<javax.swing.text.DefaultCaret: javax.swing.text.NavigationFilter$FilterBypass getFilterBypass()>();
+
+        virtualinvoke $r4.<javax.swing.text.NavigationFilter: void moveDot(javax.swing.text.NavigationFilter$FilterBypass,int,javax.swing.text.Position$Bias)>($r5, i0, r0);
+
+        goto label4;
+
+     label3:
+        virtualinvoke r1.<javax.swing.text.DefaultCaret: void handleMoveDot(int,javax.swing.text.Position$Bias)>(i0, r0);
+
+     label4:
+        return;
+    }
+
+    void handleMoveDot(int, javax.swing.text.Position$Bias)
+    {
+        javax.swing.text.StateInvariantError $r11;
+        javax.swing.text.Highlighter$HighlightPainter $r5;
+        javax.swing.text.Position$Bias r1;
+        int i0, $i1, $i2, $i3, $i4;
+        boolean $z0;
+        javax.swing.text.BadLocationException $r10;
+        javax.swing.text.JTextComponent $r2;
+        javax.swing.text.Highlighter $r3;
+        java.lang.Object $r4, $r6, $r7, $r8, $r9;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: javax.swing.text.Position$Bias;
+
+        virtualinvoke r0.<javax.swing.text.DefaultCaret: void changeCaretPosition(int,javax.swing.text.Position$Bias)>(i0, r1);
+
+        $z0 = r0.<javax.swing.text.DefaultCaret: boolean selectionVisible>;
+
+        if $z0 == 0 goto label5;
+
+        $r2 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.text.JTextComponent: javax.swing.text.Highlighter getHighlighter()>();
+
+        if $r3 == null goto label5;
+
+        $i1 = r0.<javax.swing.text.DefaultCaret: int mark>;
+
+        $i2 = staticinvoke <java.lang.Math: int min(int,int)>(i0, $i1);
+
+        $i3 = r0.<javax.swing.text.DefaultCaret: int mark>;
+
+        $i4 = staticinvoke <java.lang.Math: int max(int,int)>(i0, $i3);
+
+        if $i2 != $i4 goto label1;
+
+        $r8 = r0.<javax.swing.text.DefaultCaret: java.lang.Object selectionTag>;
+
+        if $r8 == null goto label5;
+
+        $r9 = r0.<javax.swing.text.DefaultCaret: java.lang.Object selectionTag>;
+
+        interfaceinvoke $r3.<javax.swing.text.Highlighter: void removeHighlight(java.lang.Object)>($r9);
+
+        r0.<javax.swing.text.DefaultCaret: java.lang.Object selectionTag> = null;
+
+        goto label5;
+
+     label1:
+        $r4 = r0.<javax.swing.text.DefaultCaret: java.lang.Object selectionTag>;
+
+        if $r4 == null goto label2;
+
+        $r7 = r0.<javax.swing.text.DefaultCaret: java.lang.Object selectionTag>;
+
+        interfaceinvoke $r3.<javax.swing.text.Highlighter: void changeHighlight(java.lang.Object,int,int)>($r7, $i2, $i4);
+
+        goto label3;
+
+     label2:
+        $r5 = virtualinvoke r0.<javax.swing.text.DefaultCaret: javax.swing.text.Highlighter$HighlightPainter getSelectionPainter()>();
+
+        $r6 = interfaceinvoke $r3.<javax.swing.text.Highlighter: java.lang.Object addHighlight(int,int,javax.swing.text.Highlighter$HighlightPainter)>($i2, $i4, $r5);
+
+        r0.<javax.swing.text.DefaultCaret: java.lang.Object selectionTag> = $r6;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r10 := @caughtexception;
+
+        $r11 = new javax.swing.text.StateInvariantError;
+
+        specialinvoke $r11.<javax.swing.text.StateInvariantError: void <init>(java.lang.String)>("Bad caret position");
+
+        throw $r11;
+
+     label5:
+        return;
+
+        catch javax.swing.text.BadLocationException from label1 to label3 with label4;
+    }
+
+    public void setDot(int, javax.swing.text.Position$Bias)
+    {
+        javax.swing.text.NavigationFilter$FilterBypass $r4;
+        javax.swing.text.Position$Bias r0;
+        int i0;
+        java.lang.IllegalArgumentException $r5;
+        javax.swing.text.DefaultCaret r1;
+        javax.swing.text.JTextComponent $r2;
+        javax.swing.text.NavigationFilter $r3;
+
+        r1 := @this: javax.swing.text.DefaultCaret;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: javax.swing.text.Position$Bias;
+
+        if r0 != null goto label1;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("null bias");
+
+        throw $r5;
+
+     label1:
+        $r2 = r1.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.text.JTextComponent: javax.swing.text.NavigationFilter getNavigationFilter()>();
+
+        if $r3 == null goto label2;
+
+        $r4 = specialinvoke r1.<javax.swing.text.DefaultCaret: javax.swing.text.NavigationFilter$FilterBypass getFilterBypass()>();
+
+        virtualinvoke $r3.<javax.swing.text.NavigationFilter: void setDot(javax.swing.text.NavigationFilter$FilterBypass,int,javax.swing.text.Position$Bias)>($r4, i0, r0);
+
+        goto label3;
+
+     label2:
+        virtualinvoke r1.<javax.swing.text.DefaultCaret: void handleSetDot(int,javax.swing.text.Position$Bias)>(i0, r0);
+
+     label3:
+        return;
+    }
+
+    void handleSetDot(int, javax.swing.text.Position$Bias)
+    {
+        javax.swing.text.Position$Bias $r5, r7, $r8;
+        int $i0, $i1, $i2, i3;
+        boolean $z0, $z1;
+        javax.swing.text.JTextComponent $r1, $r9;
+        javax.swing.text.Highlighter $r10;
+        java.lang.Object $r3, $r4, $r6;
+        javax.swing.text.Document $r2;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        i3 := @parameter0: int;
+
+        r7 := @parameter1: javax.swing.text.Position$Bias;
+
+        $r1 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        if $r2 == null goto label1;
+
+        $i2 = interfaceinvoke $r2.<javax.swing.text.Document: int getLength()>();
+
+        i3 = staticinvoke <java.lang.Math: int min(int,int)>(i3, $i2);
+
+     label1:
+        $i0 = staticinvoke <java.lang.Math: int max(int,int)>(i3, 0);
+
+        if $i0 != 0 goto label2;
+
+        r7 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Forward>;
+
+     label2:
+        r0.<javax.swing.text.DefaultCaret: int mark> = $i0;
+
+        $i1 = r0.<javax.swing.text.DefaultCaret: int dot>;
+
+        if $i1 != $i0 goto label3;
+
+        $r5 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.Position$Bias dotBias>;
+
+        if $r5 != r7 goto label3;
+
+        $r6 = r0.<javax.swing.text.DefaultCaret: java.lang.Object selectionTag>;
+
+        if $r6 != null goto label3;
+
+        $z0 = r0.<javax.swing.text.DefaultCaret: boolean forceCaretPositionChange>;
+
+        if $z0 == 0 goto label4;
+
+     label3:
+        virtualinvoke r0.<javax.swing.text.DefaultCaret: void changeCaretPosition(int,javax.swing.text.Position$Bias)>($i0, r7);
+
+     label4:
+        $r8 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.Position$Bias dotBias>;
+
+        r0.<javax.swing.text.DefaultCaret: javax.swing.text.Position$Bias markBias> = $r8;
+
+        $z1 = r0.<javax.swing.text.DefaultCaret: boolean dotLTR>;
+
+        r0.<javax.swing.text.DefaultCaret: boolean markLTR> = $z1;
+
+        $r9 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $r10 = virtualinvoke $r9.<javax.swing.text.JTextComponent: javax.swing.text.Highlighter getHighlighter()>();
+
+        if $r10 == null goto label5;
+
+        $r3 = r0.<javax.swing.text.DefaultCaret: java.lang.Object selectionTag>;
+
+        if $r3 == null goto label5;
+
+        $r4 = r0.<javax.swing.text.DefaultCaret: java.lang.Object selectionTag>;
+
+        interfaceinvoke $r10.<javax.swing.text.Highlighter: void removeHighlight(java.lang.Object)>($r4);
+
+        r0.<javax.swing.text.DefaultCaret: java.lang.Object selectionTag> = null;
+
+     label5:
+        return;
+    }
+
+    public javax.swing.text.Position$Bias getDotBias()
+    {
+        javax.swing.text.DefaultCaret r0;
+        javax.swing.text.Position$Bias $r1;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        $r1 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.Position$Bias dotBias>;
+
+        return $r1;
+    }
+
+    public javax.swing.text.Position$Bias getMarkBias()
+    {
+        javax.swing.text.DefaultCaret r0;
+        javax.swing.text.Position$Bias $r1;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        $r1 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.Position$Bias markBias>;
+
+        return $r1;
+    }
+
+    boolean isDotLeftToRight()
+    {
+        javax.swing.text.DefaultCaret r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        $z0 = r0.<javax.swing.text.DefaultCaret: boolean dotLTR>;
+
+        return $z0;
+    }
+
+    boolean isMarkLeftToRight()
+    {
+        javax.swing.text.DefaultCaret r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        $z0 = r0.<javax.swing.text.DefaultCaret: boolean markLTR>;
+
+        return $z0;
+    }
+
+    boolean isPositionLTR(int, javax.swing.text.Position$Bias)
+    {
+        javax.swing.text.JTextComponent $r1;
+        javax.swing.text.Position$Bias r3, $r4;
+        int i0, $i2;
+        javax.swing.text.Document $r2;
+        javax.swing.text.DefaultCaret r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        i0 := @parameter0: int;
+
+        r3 := @parameter1: javax.swing.text.Position$Bias;
+
+        $r1 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        $r4 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Backward>;
+
+        if r3 != $r4 goto label1;
+
+        $i2 = (int) -1;
+
+        i0 = i0 + $i2;
+
+        if i0 >= 0 goto label1;
+
+        i0 = 0;
+
+     label1:
+        $z0 = staticinvoke <javax.swing.text.AbstractDocument: boolean isLeftToRight(javax.swing.text.Document,int,int)>($r2, i0, i0);
+
+        return $z0;
+    }
+
+    javax.swing.text.Position$Bias guessBiasForOffset(int, javax.swing.text.Position$Bias, boolean)
+    {
+        javax.swing.text.Position$Bias $r1, $r6, r8, $r9;
+        int i0, $i1, $i2, $i3, $i5;
+        boolean z0, $z1, $z2;
+        char $c4;
+        javax.swing.text.BadLocationException $r7;
+        javax.swing.text.JTextComponent $r3;
+        char[] $r5;
+        javax.swing.text.Document $r4;
+        javax.swing.text.Segment $r10;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        i0 := @parameter0: int;
+
+        r8 := @parameter1: javax.swing.text.Position$Bias;
+
+        z0 := @parameter2: boolean;
+
+        $z1 = virtualinvoke r0.<javax.swing.text.DefaultCaret: boolean isPositionLTR(int,javax.swing.text.Position$Bias)>(i0, r8);
+
+        if z0 == $z1 goto label1;
+
+        r8 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Backward>;
+
+        goto label2;
+
+     label1:
+        $r1 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Backward>;
+
+        if r8 == $r1 goto label2;
+
+        $r6 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Backward>;
+
+        $z2 = virtualinvoke r0.<javax.swing.text.DefaultCaret: boolean isPositionLTR(int,javax.swing.text.Position$Bias)>(i0, $r6);
+
+        if z0 == $z2 goto label2;
+
+        r8 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Backward>;
+
+     label2:
+        $r9 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Backward>;
+
+        if r8 != $r9 goto label6;
+
+        if i0 <= 0 goto label6;
+
+     label3:
+        $r10 = new javax.swing.text.Segment;
+
+        specialinvoke $r10.<javax.swing.text.Segment: void <init>()>();
+
+        $r3 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $r4 = virtualinvoke $r3.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        $i1 = i0 - 1;
+
+        interfaceinvoke $r4.<javax.swing.text.Document: void getText(int,int,javax.swing.text.Segment)>($i1, 1, $r10);
+
+        $i2 = $r10.<javax.swing.text.Segment: int count>;
+
+        if $i2 <= 0 goto label4;
+
+        $r5 = $r10.<javax.swing.text.Segment: char[] array>;
+
+        $i3 = $r10.<javax.swing.text.Segment: int offset>;
+
+        $c4 = $r5[$i3];
+
+        $i5 = (int) $c4;
+
+        if $i5 != 10 goto label4;
+
+        r8 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Forward>;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r7 := @caughtexception;
+
+     label6:
+        return r8;
+
+        catch javax.swing.text.BadLocationException from label3 to label4 with label5;
+    }
+
+    void changeCaretPosition(int, javax.swing.text.Position$Bias)
+    {
+        javax.swing.text.DefaultCaret$1 $r5;
+        javax.swing.text.Position$Bias r2;
+        int i0;
+        javax.swing.text.DefaultCaret r0;
+        javax.swing.Timer $r1, $r3, $r4;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: javax.swing.text.Position$Bias;
+
+        virtualinvoke r0.<javax.swing.text.DefaultCaret: void repaint()>();
+
+        $r1 = r0.<javax.swing.text.DefaultCaret: javax.swing.Timer flasher>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<javax.swing.text.DefaultCaret: javax.swing.Timer flasher>;
+
+        $z0 = virtualinvoke $r3.<javax.swing.Timer: boolean isRunning()>();
+
+        if $z0 == 0 goto label1;
+
+        r0.<javax.swing.text.DefaultCaret: boolean visible> = 1;
+
+        $r4 = r0.<javax.swing.text.DefaultCaret: javax.swing.Timer flasher>;
+
+        virtualinvoke $r4.<javax.swing.Timer: void restart()>();
+
+     label1:
+        r0.<javax.swing.text.DefaultCaret: int dot> = i0;
+
+        r0.<javax.swing.text.DefaultCaret: javax.swing.text.Position$Bias dotBias> = r2;
+
+        $z1 = virtualinvoke r0.<javax.swing.text.DefaultCaret: boolean isPositionLTR(int,javax.swing.text.Position$Bias)>(i0, r2);
+
+        r0.<javax.swing.text.DefaultCaret: boolean dotLTR> = $z1;
+
+        virtualinvoke r0.<javax.swing.text.DefaultCaret: void fireStateChanged()>();
+
+        specialinvoke r0.<javax.swing.text.DefaultCaret: void updateSystemSelection()>();
+
+        virtualinvoke r0.<javax.swing.text.DefaultCaret: void setMagicCaretPosition(java.awt.Point)>(null);
+
+        $r5 = new javax.swing.text.DefaultCaret$1;
+
+        specialinvoke $r5.<javax.swing.text.DefaultCaret$1: void <init>(javax.swing.text.DefaultCaret)>(r0);
+
+        staticinvoke <javax.swing.SwingUtilities: void invokeLater(java.lang.Runnable)>($r5);
+
+        return;
+    }
+
+    void repaintNewCaret()
+    {
+        java.awt.Rectangle r11;
+        java.awt.Point $r8, $r9;
+        javax.swing.text.BadLocationException $r10;
+        javax.swing.text.JTextComponent $r1, $r2, $r4, $r7;
+        javax.swing.plaf.TextUI $r3;
+        javax.swing.text.Position$Bias $r6;
+        int $i0, $i1, $i2;
+        javax.swing.text.Document $r5;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        $r1 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        if $r1 == null goto label6;
+
+        $r2 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.text.JTextComponent: javax.swing.plaf.TextUI getUI()>();
+
+        $r4 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $r5 = virtualinvoke $r4.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        if $r3 == null goto label6;
+
+        if $r5 == null goto label6;
+
+     label1:
+        $r7 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $i0 = r0.<javax.swing.text.DefaultCaret: int dot>;
+
+        $r6 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.Position$Bias dotBias>;
+
+        r11 = virtualinvoke $r3.<javax.swing.plaf.TextUI: java.awt.Rectangle modelToView(javax.swing.text.JTextComponent,int,javax.swing.text.Position$Bias)>($r7, $i0, $r6);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r10 := @caughtexception;
+
+        r11 = null;
+
+     label4:
+        if r11 == null goto label5;
+
+        virtualinvoke r0.<javax.swing.text.DefaultCaret: void adjustVisibility(java.awt.Rectangle)>(r11);
+
+        $r8 = virtualinvoke r0.<javax.swing.text.DefaultCaret: java.awt.Point getMagicCaretPosition()>();
+
+        if $r8 != null goto label5;
+
+        $r9 = new java.awt.Point;
+
+        $i2 = r11.<java.awt.Rectangle: int x>;
+
+        $i1 = r11.<java.awt.Rectangle: int y>;
+
+        specialinvoke $r9.<java.awt.Point: void <init>(int,int)>($i2, $i1);
+
+        virtualinvoke r0.<javax.swing.text.DefaultCaret: void setMagicCaretPosition(java.awt.Point)>($r9);
+
+     label5:
+        virtualinvoke r0.<javax.swing.text.DefaultCaret: void damage(java.awt.Rectangle)>(r11);
+
+     label6:
+        return;
+
+        catch javax.swing.text.BadLocationException from label1 to label2 with label3;
+    }
+
+    private void updateSystemSelection()
+    {
+        java.lang.IllegalStateException $r12;
+        int $i0, $i1, $i3, $i4, $i5, $i6, $i7, $i8, i9;
+        java.awt.datatransfer.StringSelection $r16;
+        java.lang.Boolean $r8;
+        java.lang.String $r14, r15;
+        boolean $z0, $z1, $z2;
+        java.awt.datatransfer.Clipboard $r3;
+        java.awt.datatransfer.ClipboardOwner $r17;
+        char $c2;
+        javax.swing.text.JTextComponent $r1, $r2, $r4, $r5, $r6, $r9;
+        javax.swing.JPasswordField $r10;
+        java.lang.Object $r7;
+        java.lang.StringBuilder $r11, r13;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        $z0 = staticinvoke <sun.swing.SwingUtilities2: boolean canCurrentEventAccessSystemClipboard()>();
+
+        if $z0 != 0 goto label01;
+
+        return;
+
+     label01:
+        $i1 = r0.<javax.swing.text.DefaultCaret: int dot>;
+
+        $i0 = r0.<javax.swing.text.DefaultCaret: int mark>;
+
+        if $i1 == $i0 goto label11;
+
+        $r1 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        if $r1 == null goto label11;
+
+        $r2 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $z1 = virtualinvoke $r2.<javax.swing.text.JTextComponent: boolean hasFocus()>();
+
+        if $z1 == 0 goto label11;
+
+        $r3 = specialinvoke r0.<javax.swing.text.DefaultCaret: java.awt.datatransfer.Clipboard getSystemSelection()>();
+
+        if $r3 == null goto label11;
+
+        $r4 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $z2 = $r4 instanceof javax.swing.JPasswordField;
+
+        if $z2 == 0 goto label07;
+
+        $r6 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $r7 = virtualinvoke $r6.<javax.swing.text.JTextComponent: java.lang.Object getClientProperty(java.lang.Object)>("JPasswordField.cutCopyAllowed");
+
+        $r8 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        if $r7 == $r8 goto label07;
+
+        r13 = null;
+
+        $r9 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $r10 = (javax.swing.JPasswordField) $r9;
+
+        $c2 = virtualinvoke $r10.<javax.swing.JPasswordField: char getEchoChar()>();
+
+        $i3 = virtualinvoke r0.<javax.swing.text.DefaultCaret: int getDot()>();
+
+        $i4 = virtualinvoke r0.<javax.swing.text.DefaultCaret: int getMark()>();
+
+        $i5 = staticinvoke <java.lang.Math: int min(int,int)>($i3, $i4);
+
+        $i6 = virtualinvoke r0.<javax.swing.text.DefaultCaret: int getDot()>();
+
+        $i7 = virtualinvoke r0.<javax.swing.text.DefaultCaret: int getMark()>();
+
+        $i8 = staticinvoke <java.lang.Math: int max(int,int)>($i6, $i7);
+
+        i9 = $i5;
+
+     label02:
+        if i9 >= $i8 goto label04;
+
+        if r13 != null goto label03;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        r13 = $r11;
+
+     label03:
+        virtualinvoke r13.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c2);
+
+        i9 = i9 + 1;
+
+        goto label02;
+
+     label04:
+        if r13 == null goto label05;
+
+        $r14 = virtualinvoke r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label06;
+
+     label05:
+        $r14 = null;
+
+     label06:
+        r15 = $r14;
+
+        goto label08;
+
+     label07:
+        $r5 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        r15 = virtualinvoke $r5.<javax.swing.text.JTextComponent: java.lang.String getSelectedText()>();
+
+     label08:
+        $r16 = new java.awt.datatransfer.StringSelection;
+
+        specialinvoke $r16.<java.awt.datatransfer.StringSelection: void <init>(java.lang.String)>(r15);
+
+        $r17 = specialinvoke r0.<javax.swing.text.DefaultCaret: java.awt.datatransfer.ClipboardOwner getClipboardOwner()>();
+
+        virtualinvoke $r3.<java.awt.datatransfer.Clipboard: void setContents(java.awt.datatransfer.Transferable,java.awt.datatransfer.ClipboardOwner)>($r16, $r17);
+
+        r0.<javax.swing.text.DefaultCaret: boolean ownsSelection> = 1;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r12 := @caughtexception;
+
+     label11:
+        return;
+
+        catch java.lang.IllegalStateException from label08 to label09 with label10;
+    }
+
+    private java.awt.datatransfer.Clipboard getSystemSelection()
+    {
+        java.awt.datatransfer.Clipboard $r3;
+        java.lang.SecurityException $r4;
+        java.awt.HeadlessException $r5;
+        javax.swing.text.DefaultCaret r0;
+        javax.swing.text.JTextComponent $r1;
+        java.awt.Toolkit $r2;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+     label1:
+        $r1 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.text.JTextComponent: java.awt.Toolkit getToolkit()>();
+
+        $r3 = virtualinvoke $r2.<java.awt.Toolkit: java.awt.datatransfer.Clipboard getSystemSelection()>();
+
+     label2:
+        return $r3;
+
+     label3:
+        $r5 := @caughtexception;
+
+        goto label5;
+
+     label4:
+        $r4 := @caughtexception;
+
+     label5:
+        return null;
+
+        catch java.awt.HeadlessException from label1 to label2 with label3;
+        catch java.lang.SecurityException from label1 to label2 with label4;
+    }
+
+    private java.awt.datatransfer.ClipboardOwner getClipboardOwner()
+    {
+        javax.swing.text.DefaultCaret$Handler $r1;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        $r1 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.DefaultCaret$Handler handler>;
+
+        return $r1;
+    }
+
+    private void ensureValidPosition()
+    {
+        javax.swing.text.Position$Bias $r3;
+        int $i0, $i1, $i2;
+        javax.swing.text.Document $r2;
+        javax.swing.text.DefaultCaret r0;
+        javax.swing.text.JTextComponent $r1;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        $r1 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.JTextComponent component>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        $i0 = interfaceinvoke $r2.<javax.swing.text.Document: int getLength()>();
+
+        $i1 = r0.<javax.swing.text.DefaultCaret: int dot>;
+
+        if $i1 > $i0 goto label1;
+
+        $i2 = r0.<javax.swing.text.DefaultCaret: int mark>;
+
+        if $i2 <= $i0 goto label2;
+
+     label1:
+        $r3 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Forward>;
+
+        virtualinvoke r0.<javax.swing.text.DefaultCaret: void handleSetDot(int,javax.swing.text.Position$Bias)>($i0, $r3);
+
+     label2:
+        return;
+    }
+
+    public void setMagicCaretPosition(java.awt.Point)
+    {
+        java.awt.Point r1;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        r1 := @parameter0: java.awt.Point;
+
+        r0.<javax.swing.text.DefaultCaret: java.awt.Point magicCaretPosition> = r1;
+
+        return;
+    }
+
+    public java.awt.Point getMagicCaretPosition()
+    {
+        java.awt.Point $r1;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        $r1 = r0.<javax.swing.text.DefaultCaret: java.awt.Point magicCaretPosition>;
+
+        return $r1;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        java.lang.Object r1;
+        javax.swing.text.DefaultCaret r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        r1 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public java.lang.String toString()
+    {
+        javax.swing.text.Position$Bias $r5, $r14;
+        int $i0, $i1;
+        java.lang.String $r8, $r17;
+        java.lang.StringBuilder $r0, $r1, $r3, $r4, $r6, $r7, $r9, $r10, $r11, $r12, $r13, $r15, $r16;
+        javax.swing.text.DefaultCaret r2;
+
+        r2 := @this: javax.swing.text.DefaultCaret;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Dot=(");
+
+        $i0 = r2.<javax.swing.text.DefaultCaret: int dot>;
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $r5 = r2.<javax.swing.text.DefaultCaret: javax.swing.text.Position$Bias dotBias>;
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" Mark=(");
+
+        $i1 = r2.<javax.swing.text.DefaultCaret: int mark>;
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $r14 = r2.<javax.swing.text.DefaultCaret: javax.swing.text.Position$Bias markBias>;
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r17;
+    }
+
+    private javax.swing.text.NavigationFilter$FilterBypass getFilterBypass()
+    {
+        javax.swing.text.NavigationFilter$FilterBypass $r1, $r2;
+        javax.swing.text.DefaultCaret r0;
+        javax.swing.text.DefaultCaret$DefaultFilterBypass $r3;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        $r1 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.NavigationFilter$FilterBypass filterBypass>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new javax.swing.text.DefaultCaret$DefaultFilterBypass;
+
+        specialinvoke $r3.<javax.swing.text.DefaultCaret$DefaultFilterBypass: void <init>(javax.swing.text.DefaultCaret,javax.swing.text.DefaultCaret$1)>(r0, null);
+
+        r0.<javax.swing.text.DefaultCaret: javax.swing.text.NavigationFilter$FilterBypass filterBypass> = $r3;
+
+     label1:
+        $r2 = r0.<javax.swing.text.DefaultCaret: javax.swing.text.NavigationFilter$FilterBypass filterBypass>;
+
+        return $r2;
+    }
+
+    private boolean _contains(int, int, int, int)
+    {
+        int $i0, $i1, $i2, i3, i4, i5, i6, $i7, $i8, i9, i10, i11, i12, i13, i14, i15, i16;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        i5 := @parameter0: int;
+
+        i6 := @parameter1: int;
+
+        i9 := @parameter2: int;
+
+        i10 := @parameter3: int;
+
+        i11 = r0.<javax.swing.text.DefaultCaret: int width>;
+
+        i12 = r0.<javax.swing.text.DefaultCaret: int height>;
+
+        $i0 = i11 | i12;
+
+        $i1 = $i0 | i9;
+
+        $i2 = $i1 | i10;
+
+        if $i2 >= 0 goto label01;
+
+        return 0;
+
+     label01:
+        i3 = r0.<javax.swing.text.DefaultCaret: int x>;
+
+        i4 = r0.<javax.swing.text.DefaultCaret: int y>;
+
+        if i5 < i3 goto label02;
+
+        if i6 >= i4 goto label03;
+
+     label02:
+        return 0;
+
+     label03:
+        if i9 <= 0 goto label06;
+
+        i13 = i11 + i3;
+
+        i14 = i9 + i5;
+
+        if i14 > i5 goto label05;
+
+        if i13 >= i3 goto label04;
+
+        if i14 <= i13 goto label07;
+
+     label04:
+        return 0;
+
+     label05:
+        if i13 < i3 goto label07;
+
+        if i14 <= i13 goto label07;
+
+        return 0;
+
+     label06:
+        $i7 = i3 + i11;
+
+        if $i7 >= i5 goto label07;
+
+        return 0;
+
+     label07:
+        if i10 <= 0 goto label10;
+
+        i15 = i12 + i4;
+
+        i16 = i10 + i6;
+
+        if i16 > i6 goto label09;
+
+        if i15 >= i4 goto label08;
+
+        if i16 <= i15 goto label11;
+
+     label08:
+        return 0;
+
+     label09:
+        if i15 < i4 goto label11;
+
+        if i16 <= i15 goto label11;
+
+        return 0;
+
+     label10:
+        $i8 = i4 + i12;
+
+        if $i8 >= i6 goto label11;
+
+        return 0;
+
+     label11:
+        return 1;
+    }
+
+    int getCaretWidth(int)
+    {
+        java.lang.Integer $r2;
+        byte $b0;
+        int $i1, $i2, $i3, i4, $i5, $i6, $i7, $i9;
+        boolean $z0;
+        float $f0, $f1, $f2, $f3;
+        java.lang.Object $r1;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @this: javax.swing.text.DefaultCaret;
+
+        i4 := @parameter0: int;
+
+        $f0 = r0.<javax.swing.text.DefaultCaret: float aspectRatio>;
+
+        $b0 = $f0 cmpl -1.0F;
+
+        $i7 = (int) $b0;
+
+        if $i7 <= 0 goto label1;
+
+        $f2 = r0.<javax.swing.text.DefaultCaret: float aspectRatio>;
+
+        $f1 = (float) i4;
+
+        $f3 = $f2 * $f1;
+
+        $i5 = (int) $f3;
+
+        $i6 = $i5 + 1;
+
+        return $i6;
+
+     label1:
+        $i1 = r0.<javax.swing.text.DefaultCaret: int caretWidth>;
+
+        $i9 = (int) -1;
+
+        if $i1 <= $i9 goto label2;
+
+        $i3 = r0.<javax.swing.text.DefaultCaret: int caretWidth>;
+
+        return $i3;
+
+     label2:
+        $r1 = staticinvoke <javax.swing.UIManager: java.lang.Object get(java.lang.Object)>("Caret.width");
+
+        $z0 = $r1 instanceof java.lang.Integer;
+
+        if $z0 == 0 goto label3;
+
+        $r2 = (java.lang.Integer) $r1;
+
+        $i2 = virtualinvoke $r2.<java.lang.Integer: int intValue()>();
+
+        return $i2;
+
+     label3:
+        return 1;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.lang.ClassNotFoundException, java.io.IOException
+    {
+        javax.swing.text.DefaultCaret$Handler $r2;
+        java.io.ObjectInputStream r0;
+        javax.swing.text.Position$Bias $r3, $r4, $r5, $r6;
+        javax.swing.text.DefaultCaret r1;
+        boolean $z0, $z1;
+
+        r1 := @this: javax.swing.text.DefaultCaret;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        $r2 = new javax.swing.text.DefaultCaret$Handler;
+
+        specialinvoke $r2.<javax.swing.text.DefaultCaret$Handler: void <init>(javax.swing.text.DefaultCaret)>(r1);
+
+        r1.<javax.swing.text.DefaultCaret: javax.swing.text.DefaultCaret$Handler handler> = $r2;
+
+        $z0 = virtualinvoke r0.<java.io.ObjectInputStream: boolean readBoolean()>();
+
+        if $z0 != 0 goto label1;
+
+        $r6 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Forward>;
+
+        r1.<javax.swing.text.DefaultCaret: javax.swing.text.Position$Bias dotBias> = $r6;
+
+        goto label2;
+
+     label1:
+        $r3 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Backward>;
+
+        r1.<javax.swing.text.DefaultCaret: javax.swing.text.Position$Bias dotBias> = $r3;
+
+     label2:
+        $z1 = virtualinvoke r0.<java.io.ObjectInputStream: boolean readBoolean()>();
+
+        if $z1 != 0 goto label3;
+
+        $r5 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Forward>;
+
+        r1.<javax.swing.text.DefaultCaret: javax.swing.text.Position$Bias markBias> = $r5;
+
+        goto label4;
+
+     label3:
+        $r4 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Backward>;
+
+        r1.<javax.swing.text.DefaultCaret: javax.swing.text.Position$Bias markBias> = $r4;
+
+     label4:
+        return;
+    }
+
+    private void writeObject(java.io.ObjectOutputStream) throws java.io.IOException
+    {
+        javax.swing.text.Position$Bias $r2, $r3, $r4, $r5;
+        java.io.ObjectOutputStream r0;
+        javax.swing.text.DefaultCaret r1;
+        boolean $z0, $z1;
+
+        r1 := @this: javax.swing.text.DefaultCaret;
+
+        r0 := @parameter0: java.io.ObjectOutputStream;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void defaultWriteObject()>();
+
+        $r3 = r1.<javax.swing.text.DefaultCaret: javax.swing.text.Position$Bias dotBias>;
+
+        $r2 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Backward>;
+
+        if $r3 != $r2 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeBoolean(boolean)>($z0);
+
+        $r5 = r1.<javax.swing.text.DefaultCaret: javax.swing.text.Position$Bias markBias>;
+
+        $r4 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Backward>;
+
+        if $r5 != $r4 goto label3;
+
+        $z1 = 1;
+
+        goto label4;
+
+     label3:
+        $z1 = 0;
+
+     label4:
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeBoolean(boolean)>($z1);
+
+        return;
+    }
+
+    static void access$100(javax.swing.text.DefaultCaret)
+    {
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @parameter0: javax.swing.text.DefaultCaret;
+
+        specialinvoke r0.<javax.swing.text.DefaultCaret: void ensureValidPosition()>();
+
+        return;
+    }
+
+    static boolean access$202(javax.swing.text.DefaultCaret, boolean)
+    {
+        javax.swing.text.DefaultCaret r0;
+        boolean z0;
+
+        r0 := @parameter0: javax.swing.text.DefaultCaret;
+
+        z0 := @parameter1: boolean;
+
+        r0.<javax.swing.text.DefaultCaret: boolean forceCaretPositionChange> = z0;
+
+        return z0;
+    }
+
+    static int access$302(javax.swing.text.DefaultCaret, int)
+    {
+        int i0;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @parameter0: javax.swing.text.DefaultCaret;
+
+        i0 := @parameter1: int;
+
+        r0.<javax.swing.text.DefaultCaret: int caretWidth> = i0;
+
+        return i0;
+    }
+
+    static float access$402(javax.swing.text.DefaultCaret, float)
+    {
+        float f0;
+        javax.swing.text.DefaultCaret r0;
+
+        r0 := @parameter0: javax.swing.text.DefaultCaret;
+
+        f0 := @parameter1: float;
+
+        r0.<javax.swing.text.DefaultCaret: float aspectRatio> = f0;
+
+        return f0;
+    }
+
+    static boolean access$500(javax.swing.text.DefaultCaret)
+    {
+        javax.swing.text.DefaultCaret r0;
+        boolean $z0;
+
+        r0 := @parameter0: javax.swing.text.DefaultCaret;
+
+        $z0 = r0.<javax.swing.text.DefaultCaret: boolean ownsSelection>;
+
+        return $z0;
+    }
+
+    static boolean access$502(javax.swing.text.DefaultCaret, boolean)
+    {
+        javax.swing.text.DefaultCaret r0;
+        boolean z0;
+
+        r0 := @parameter0: javax.swing.text.DefaultCaret;
+
+        z0 := @parameter1: boolean;
+
+        r0.<javax.swing.text.DefaultCaret: boolean ownsSelection> = z0;
+
+        return z0;
+    }
+
+    static void <clinit>()
+    {
+        <javax.swing.text.DefaultCaret: int ALWAYS_UPDATE> = 2;
+
+        <javax.swing.text.DefaultCaret: int NEVER_UPDATE> = 1;
+
+        <javax.swing.text.DefaultCaret: int UPDATE_WHEN_ON_EDT> = 0;
+
+        <javax.swing.text.DefaultCaret: javax.swing.Action selectWord> = null;
+
+        <javax.swing.text.DefaultCaret: javax.swing.Action selectLine> = null;
+
+        return;
+    }
+}

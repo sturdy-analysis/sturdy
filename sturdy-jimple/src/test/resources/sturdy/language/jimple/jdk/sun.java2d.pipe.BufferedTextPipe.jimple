@@ -1,0 +1,290 @@
+public abstract class sun.java2d.pipe.BufferedTextPipe extends sun.java2d.pipe.GlyphListPipe
+{
+    private static final int BYTES_PER_GLYPH_IMAGE;
+    private static final int BYTES_PER_GLYPH_POSITION;
+    private static final int OFFSET_CONTRAST;
+    private static final int OFFSET_RGBORDER;
+    private static final int OFFSET_SUBPIXPOS;
+    private static final int OFFSET_POSITIONS;
+    protected final sun.java2d.pipe.RenderQueue rq;
+
+    private static int createPackedParams(sun.java2d.SunGraphics2D, sun.font.GlyphList)
+    {
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        sun.font.GlyphList r0;
+        sun.java2d.SunGraphics2D r1;
+
+        r1 := @parameter0: sun.java2d.SunGraphics2D;
+
+        r0 := @parameter1: sun.font.GlyphList;
+
+        $z0 = virtualinvoke r0.<sun.font.GlyphList: boolean usePositions()>();
+
+        if $z0 == 0 goto label1;
+
+        $z3 = 1;
+
+        goto label2;
+
+     label1:
+        $z3 = 0;
+
+     label2:
+        $i0 = $z3 << 0;
+
+        $z1 = virtualinvoke r0.<sun.font.GlyphList: boolean isSubPixPos()>();
+
+        if $z1 == 0 goto label3;
+
+        $z4 = 1;
+
+        goto label4;
+
+     label3:
+        $z4 = 0;
+
+     label4:
+        $i1 = $z4 << 1;
+
+        $i2 = $i0 | $i1;
+
+        $z2 = virtualinvoke r0.<sun.font.GlyphList: boolean isRGBOrder()>();
+
+        if $z2 == 0 goto label5;
+
+        $z5 = 1;
+
+        goto label6;
+
+     label5:
+        $z5 = 0;
+
+     label6:
+        $i3 = $z5 << 2;
+
+        $i7 = $i2 | $i3;
+
+        $i4 = r1.<sun.java2d.SunGraphics2D: int lcdTextContrast>;
+
+        $i5 = $i4 & 255;
+
+        $i6 = $i5 << 8;
+
+        $i8 = $i7 | $i6;
+
+        return $i8;
+    }
+
+    protected void <init>(sun.java2d.pipe.RenderQueue)
+    {
+        sun.java2d.pipe.BufferedTextPipe r0;
+        sun.java2d.pipe.RenderQueue r1;
+
+        r0 := @this: sun.java2d.pipe.BufferedTextPipe;
+
+        r1 := @parameter0: sun.java2d.pipe.RenderQueue;
+
+        specialinvoke r0.<sun.java2d.pipe.GlyphListPipe: void <init>()>();
+
+        r0.<sun.java2d.pipe.BufferedTextPipe: sun.java2d.pipe.RenderQueue rq> = r1;
+
+        return;
+    }
+
+    protected void drawGlyphList(sun.java2d.SunGraphics2D, sun.font.GlyphList)
+    {
+        java.lang.Throwable $r6;
+        java.awt.Composite r8;
+        sun.font.GlyphList r4;
+        java.awt.AlphaComposite $r1;
+        sun.java2d.pipe.BufferedTextPipe r2;
+        sun.java2d.SunGraphics2D r0;
+        sun.java2d.pipe.RenderQueue $r3, $r5, $r7;
+
+        r2 := @this: sun.java2d.pipe.BufferedTextPipe;
+
+        r0 := @parameter0: sun.java2d.SunGraphics2D;
+
+        r4 := @parameter1: sun.font.GlyphList;
+
+        r8 = r0.<sun.java2d.SunGraphics2D: java.awt.Composite composite>;
+
+        $r1 = <java.awt.AlphaComposite: java.awt.AlphaComposite Src>;
+
+        if r8 != $r1 goto label1;
+
+        r8 = <java.awt.AlphaComposite: java.awt.AlphaComposite SrcOver>;
+
+     label1:
+        $r3 = r2.<sun.java2d.pipe.BufferedTextPipe: sun.java2d.pipe.RenderQueue rq>;
+
+        virtualinvoke $r3.<sun.java2d.pipe.RenderQueue: void lock()>();
+
+     label2:
+        virtualinvoke r2.<sun.java2d.pipe.BufferedTextPipe: void validateContext(sun.java2d.SunGraphics2D,java.awt.Composite)>(r0, r8);
+
+        specialinvoke r2.<sun.java2d.pipe.BufferedTextPipe: void enqueueGlyphList(sun.java2d.SunGraphics2D,sun.font.GlyphList)>(r0, r4);
+
+     label3:
+        $r5 = r2.<sun.java2d.pipe.BufferedTextPipe: sun.java2d.pipe.RenderQueue rq>;
+
+        virtualinvoke $r5.<sun.java2d.pipe.RenderQueue: void unlock()>();
+
+        goto label6;
+
+     label4:
+        $r6 := @caughtexception;
+
+     label5:
+        $r7 = r2.<sun.java2d.pipe.BufferedTextPipe: sun.java2d.pipe.RenderQueue rq>;
+
+        virtualinvoke $r7.<sun.java2d.pipe.RenderQueue: void unlock()>();
+
+        throw $r6;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private void enqueueGlyphList(sun.java2d.SunGraphics2D, sun.font.GlyphList)
+    {
+        float[] $r11;
+        long[] $r4;
+        int $i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        sun.java2d.pipe.RenderQueue $r1, $r5, $r9, $r10, $r12;
+        boolean $z0, $z1;
+        sun.font.GlyphList r3;
+        sun.java2d.pipe.BufferedTextPipe r0;
+        float $f0, $f1, $f2, $f3;
+        sun.java2d.pipe.RenderBuffer $r2;
+        java.lang.Object $r6;
+        sun.java2d.SunGraphics2D r8;
+        sun.java2d.pipe.BufferedTextPipe$1 $r7;
+
+        r0 := @this: sun.java2d.pipe.BufferedTextPipe;
+
+        r8 := @parameter0: sun.java2d.SunGraphics2D;
+
+        r3 := @parameter1: sun.font.GlyphList;
+
+        $r1 = r0.<sun.java2d.pipe.BufferedTextPipe: sun.java2d.pipe.RenderQueue rq>;
+
+        $r2 = virtualinvoke $r1.<sun.java2d.pipe.RenderQueue: sun.java2d.pipe.RenderBuffer getBuffer()>();
+
+        $i0 = virtualinvoke r3.<sun.font.GlyphList: int getNumGlyphs()>();
+
+        i1 = $i0 * 8;
+
+        $z0 = virtualinvoke r3.<sun.font.GlyphList: boolean usePositions()>();
+
+        if $z0 == 0 goto label1;
+
+        $i8 = $i0 * 8;
+
+        goto label2;
+
+     label1:
+        $i8 = 0;
+
+     label2:
+        $i2 = 24 + i1;
+
+        $i7 = $i2 + $i8;
+
+        $r4 = virtualinvoke r3.<sun.font.GlyphList: long[] getImages()>();
+
+        $f0 = virtualinvoke r3.<sun.font.GlyphList: float getX()>();
+
+        $f2 = $f0 + 0.5F;
+
+        $f1 = virtualinvoke r3.<sun.font.GlyphList: float getY()>();
+
+        $f3 = $f1 + 0.5F;
+
+        $r5 = r0.<sun.java2d.pipe.BufferedTextPipe: sun.java2d.pipe.RenderQueue rq>;
+
+        $r6 = virtualinvoke r3.<sun.font.GlyphList: java.lang.Object getStrike()>();
+
+        virtualinvoke $r5.<sun.java2d.pipe.RenderQueue: void addReference(java.lang.Object)>($r6);
+
+        $i3 = virtualinvoke $r2.<sun.java2d.pipe.RenderBuffer: int capacity()>();
+
+        if $i7 > $i3 goto label4;
+
+        $i4 = virtualinvoke $r2.<sun.java2d.pipe.RenderBuffer: int remaining()>();
+
+        if $i7 <= $i4 goto label3;
+
+        $r12 = r0.<sun.java2d.pipe.BufferedTextPipe: sun.java2d.pipe.RenderQueue rq>;
+
+        virtualinvoke $r12.<sun.java2d.pipe.RenderQueue: void flushNow()>();
+
+     label3:
+        $r10 = r0.<sun.java2d.pipe.BufferedTextPipe: sun.java2d.pipe.RenderQueue rq>;
+
+        virtualinvoke $r10.<sun.java2d.pipe.RenderQueue: void ensureAlignment(int)>(20);
+
+        virtualinvoke $r2.<sun.java2d.pipe.RenderBuffer: sun.java2d.pipe.RenderBuffer putInt(int)>(40);
+
+        virtualinvoke $r2.<sun.java2d.pipe.RenderBuffer: sun.java2d.pipe.RenderBuffer putInt(int)>($i0);
+
+        $i5 = staticinvoke <sun.java2d.pipe.BufferedTextPipe: int createPackedParams(sun.java2d.SunGraphics2D,sun.font.GlyphList)>(r8, r3);
+
+        virtualinvoke $r2.<sun.java2d.pipe.RenderBuffer: sun.java2d.pipe.RenderBuffer putInt(int)>($i5);
+
+        virtualinvoke $r2.<sun.java2d.pipe.RenderBuffer: sun.java2d.pipe.RenderBuffer putFloat(float)>($f2);
+
+        virtualinvoke $r2.<sun.java2d.pipe.RenderBuffer: sun.java2d.pipe.RenderBuffer putFloat(float)>($f3);
+
+        virtualinvoke $r2.<sun.java2d.pipe.RenderBuffer: sun.java2d.pipe.RenderBuffer put(long[],int,int)>($r4, 0, $i0);
+
+        $z1 = virtualinvoke r3.<sun.font.GlyphList: boolean usePositions()>();
+
+        if $z1 == 0 goto label5;
+
+        $r11 = virtualinvoke r3.<sun.font.GlyphList: float[] getPositions()>();
+
+        $i6 = 2 * $i0;
+
+        virtualinvoke $r2.<sun.java2d.pipe.RenderBuffer: sun.java2d.pipe.RenderBuffer put(float[],int,int)>($r11, 0, $i6);
+
+        goto label5;
+
+     label4:
+        $r9 = r0.<sun.java2d.pipe.BufferedTextPipe: sun.java2d.pipe.RenderQueue rq>;
+
+        $r7 = new sun.java2d.pipe.BufferedTextPipe$1;
+
+        specialinvoke $r7.<sun.java2d.pipe.BufferedTextPipe$1: void <init>(sun.java2d.pipe.BufferedTextPipe,int,sun.font.GlyphList,sun.java2d.SunGraphics2D,float,float,long[])>(r0, $i0, r3, r8, $f2, $f3, $r4);
+
+        virtualinvoke $r9.<sun.java2d.pipe.RenderQueue: void flushAndInvokeNow(java.lang.Runnable)>($r7);
+
+     label5:
+        return;
+    }
+
+    protected abstract void drawGlyphList(int, boolean, boolean, boolean, int, float, float, long[], float[]);
+
+    protected abstract void validateContext(sun.java2d.SunGraphics2D, java.awt.Composite);
+
+    public static void <clinit>()
+    {
+        <sun.java2d.pipe.BufferedTextPipe: int OFFSET_POSITIONS> = 0;
+
+        <sun.java2d.pipe.BufferedTextPipe: int OFFSET_SUBPIXPOS> = 1;
+
+        <sun.java2d.pipe.BufferedTextPipe: int OFFSET_RGBORDER> = 2;
+
+        <sun.java2d.pipe.BufferedTextPipe: int OFFSET_CONTRAST> = 8;
+
+        <sun.java2d.pipe.BufferedTextPipe: int BYTES_PER_GLYPH_POSITION> = 8;
+
+        <sun.java2d.pipe.BufferedTextPipe: int BYTES_PER_GLYPH_IMAGE> = 8;
+
+        return;
+    }
+}

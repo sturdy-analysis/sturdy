@@ -1,0 +1,991 @@
+class com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher extends java.lang.Object implements java.lang.Runnable
+{
+    private volatile boolean alreadyLogged;
+    final com.sun.jmx.remote.internal.ClientNotifForwarder this$0;
+
+    private void <init>(com.sun.jmx.remote.internal.ClientNotifForwarder)
+    {
+        com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher r0;
+        com.sun.jmx.remote.internal.ClientNotifForwarder r1;
+
+        r0 := @this: com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher;
+
+        r1 := @parameter0: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+        r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0> = r1;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: boolean alreadyLogged> = 0;
+
+        return;
+    }
+
+    private void logOnce(java.lang.String, java.lang.SecurityException)
+    {
+        java.lang.SecurityException r3;
+        com.sun.jmx.remote.util.ClassLogger $r1, $r4;
+        java.lang.String r2;
+        com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.SecurityException;
+
+        $z0 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: boolean alreadyLogged>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger access$400()>();
+
+        virtualinvoke $r1.<com.sun.jmx.remote.util.ClassLogger: void config(java.lang.String,java.lang.String)>("setContextClassLoader", r2);
+
+        if r3 == null goto label2;
+
+        $r4 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger access$400()>();
+
+        virtualinvoke $r4.<com.sun.jmx.remote.util.ClassLogger: void fine(java.lang.String,java.lang.Throwable)>("setContextClassLoader", r3);
+
+     label2:
+        r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: boolean alreadyLogged> = 1;
+
+        return;
+    }
+
+    private final java.lang.ClassLoader setContextClassLoader(java.lang.ClassLoader)
+    {
+        java.security.AccessControlContext $r2;
+        com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher$1 $r3;
+        com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher r0;
+        com.sun.jmx.remote.internal.ClientNotifForwarder $r1;
+        java.lang.Object $r5;
+        java.lang.SecurityException $r7;
+        java.lang.ClassLoader r4, $r6;
+
+        r0 := @this: com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher;
+
+        r4 := @parameter0: java.lang.ClassLoader;
+
+        $r1 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        $r2 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: java.security.AccessControlContext access$500(com.sun.jmx.remote.internal.ClientNotifForwarder)>($r1);
+
+        if $r2 != null goto label1;
+
+        specialinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: void logOnce(java.lang.String,java.lang.SecurityException)>("AccessControlContext must not be null.", null);
+
+        $r7 = new java.lang.SecurityException;
+
+        specialinvoke $r7.<java.lang.SecurityException: void <init>(java.lang.String)>("AccessControlContext must not be null");
+
+        throw $r7;
+
+     label1:
+        $r3 = new com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher$1;
+
+        specialinvoke $r3.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher$1: void <init>(com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher,java.lang.ClassLoader)>(r0, r4);
+
+        $r5 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction,java.security.AccessControlContext)>($r3, $r2);
+
+        $r6 = (java.lang.ClassLoader) $r5;
+
+        return $r6;
+    }
+
+    public void run()
+    {
+        java.lang.Throwable $r7;
+        com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher r0;
+        com.sun.jmx.remote.internal.ClientNotifForwarder $r1, $r3, $r5, $r8;
+        java.lang.ClassLoader $r2, $r4, $r6, $r9, r10;
+
+        r0 := @this: com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher;
+
+        $r1 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        $r2 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: java.lang.ClassLoader access$700(com.sun.jmx.remote.internal.ClientNotifForwarder)>($r1);
+
+        if $r2 == null goto label1;
+
+        $r5 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        $r6 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: java.lang.ClassLoader access$700(com.sun.jmx.remote.internal.ClientNotifForwarder)>($r5);
+
+        r10 = specialinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: java.lang.ClassLoader setContextClassLoader(java.lang.ClassLoader)>($r6);
+
+        goto label2;
+
+     label1:
+        r10 = null;
+
+     label2:
+        specialinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: void doRun()>();
+
+     label3:
+        $r3 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        $r4 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: java.lang.ClassLoader access$700(com.sun.jmx.remote.internal.ClientNotifForwarder)>($r3);
+
+        if $r4 == null goto label6;
+
+        specialinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: java.lang.ClassLoader setContextClassLoader(java.lang.ClassLoader)>(r10);
+
+        goto label6;
+
+     label4:
+        $r7 := @caughtexception;
+
+        $r8 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        $r9 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: java.lang.ClassLoader access$700(com.sun.jmx.remote.internal.ClientNotifForwarder)>($r8);
+
+        if $r9 == null goto label5;
+
+        specialinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: java.lang.ClassLoader setContextClassLoader(java.lang.ClassLoader)>(r10);
+
+     label5:
+        throw $r7;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+    }
+
+    private void doRun()
+    {
+        java.lang.Integer $r8, $r20, $r30, $r32;
+        byte $b3, $b5, $b6;
+        java.lang.Thread $r3;
+        java.util.Map $r39;
+        javax.management.remote.NotificationResult $r13, r49;
+        javax.management.Notification $r33;
+        java.lang.Exception $r43;
+        java.lang.StringBuilder $r22, $r23, $r24, $r25, $r56;
+        java.lang.Throwable $r46, $r47, $r48;
+        com.sun.jmx.remote.internal.ClientListenerInfo r50;
+        long $l2, $l4, $l7, $l8, l9;
+        com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher r0;
+        javax.management.remote.TargetedNotification[] $r14;
+        java.lang.String $r26, $r34, $r51;
+        java.util.concurrent.Executor $r10;
+        javax.management.MBeanServerNotification r35;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        javax.management.ObjectName $r36;
+        javax.management.remote.TargetedNotification r29, r52;
+        java.util.HashMap $r55;
+        com.sun.jmx.remote.internal.ClientNotifForwarder $r1, $r2, $r4, $r5, $r6, $r7, $r9, $r15, $r16, $r17, $r19, $r27, $r31, $r37, $r38, $r41, $r42, $r53, $r54;
+        int $i0, i1, i10, i11, $i12, $i13;
+        com.sun.jmx.remote.util.ClassLogger $r11, $r12, $r28, $r44, $r45;
+        java.lang.Object $r40;
+
+        r0 := @this: com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher;
+
+        $r1 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        $r3 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: java.lang.Thread access$802(com.sun.jmx.remote.internal.ClientNotifForwarder,java.lang.Thread)>($r2, $r3);
+
+        $r4 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        $i0 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: int access$900(com.sun.jmx.remote.internal.ClientNotifForwarder)>($r4);
+
+        if $i0 != 0 goto label02;
+
+        $r42 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: void access$1000(com.sun.jmx.remote.internal.ClientNotifForwarder,int)>($r42, 1);
+
+     label02:
+        exitmonitor $r1;
+
+     label03:
+        goto label06;
+
+     label04:
+        $r48 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label05:
+        throw $r48;
+
+     label06:
+        r49 = null;
+
+        $z0 = specialinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: boolean shouldStop()>();
+
+        if $z0 != 0 goto label21;
+
+        $r13 = specialinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: javax.management.remote.NotificationResult fetchNotifs()>();
+
+        r49 = $r13;
+
+        if $r13 == null goto label21;
+
+        $r14 = virtualinvoke $r13.<javax.management.remote.NotificationResult: javax.management.remote.TargetedNotification[] getTargetedNotifications()>();
+
+        i1 = lengthof $r14;
+
+        l9 = 0L;
+
+        $r15 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        entermonitor $r15;
+
+     label07:
+        $r16 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        $l2 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: long access$1100(com.sun.jmx.remote.internal.ClientNotifForwarder)>($r16);
+
+        $b3 = $l2 cmp 0L;
+
+        $i12 = (int) $b3;
+
+        if $i12 < 0 goto label08;
+
+        $l7 = virtualinvoke $r13.<javax.management.remote.NotificationResult: long getEarliestSequenceNumber()>();
+
+        $r41 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        $l8 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: long access$1100(com.sun.jmx.remote.internal.ClientNotifForwarder)>($r41);
+
+        l9 = $l7 - $l8;
+
+     label08:
+        $r17 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        $l4 = virtualinvoke $r13.<javax.management.remote.NotificationResult: long getNextSequenceNumber()>();
+
+        staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: long access$1102(com.sun.jmx.remote.internal.ClientNotifForwarder,long)>($r17, $l4);
+
+        $r55 = new java.util.HashMap;
+
+        specialinvoke $r55.<java.util.HashMap: void <init>()>();
+
+        i10 = 0;
+
+     label09:
+        if i10 >= i1 goto label12;
+
+        r29 = $r14[i10];
+
+        $r30 = virtualinvoke r29.<javax.management.remote.TargetedNotification: java.lang.Integer getListenerID()>();
+
+        $r31 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        $r32 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: java.lang.Integer access$1200(com.sun.jmx.remote.internal.ClientNotifForwarder)>($r31);
+
+        $z3 = virtualinvoke $r30.<java.lang.Integer: boolean equals(java.lang.Object)>($r32);
+
+        if $z3 != 0 goto label10;
+
+        $r38 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        $r39 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: java.util.Map access$1300(com.sun.jmx.remote.internal.ClientNotifForwarder)>($r38);
+
+        $r40 = interfaceinvoke $r39.<java.util.Map: java.lang.Object get(java.lang.Object)>($r30);
+
+        r50 = (com.sun.jmx.remote.internal.ClientListenerInfo) $r40;
+
+        if r50 == null goto label11;
+
+        interfaceinvoke $r55.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r30, r50);
+
+        goto label11;
+
+     label10:
+        $r33 = virtualinvoke r29.<javax.management.remote.TargetedNotification: javax.management.Notification getNotification()>();
+
+        $z4 = $r33 instanceof javax.management.MBeanServerNotification;
+
+        if $z4 == 0 goto label11;
+
+        $r34 = virtualinvoke $r33.<javax.management.Notification: java.lang.String getType()>();
+
+        $z5 = virtualinvoke $r34.<java.lang.String: boolean equals(java.lang.Object)>("JMX.mbean.unregistered");
+
+        if $z5 == 0 goto label11;
+
+        r35 = (javax.management.MBeanServerNotification) $r33;
+
+        $r36 = virtualinvoke r35.<javax.management.MBeanServerNotification: javax.management.ObjectName getMBeanName()>();
+
+        $r37 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        virtualinvoke $r37.<com.sun.jmx.remote.internal.ClientNotifForwarder: java.lang.Integer[] removeNotificationListener(javax.management.ObjectName)>($r36);
+
+     label11:
+        i10 = i10 + 1;
+
+        goto label09;
+
+     label12:
+        $r19 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        $r20 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: java.lang.Integer access$1200(com.sun.jmx.remote.internal.ClientNotifForwarder)>($r19);
+
+        exitmonitor $r15;
+
+     label13:
+        goto label16;
+
+     label14:
+        $r47 := @caughtexception;
+
+        exitmonitor $r15;
+
+     label15:
+        throw $r47;
+
+     label16:
+        $b5 = l9 cmp 0L;
+
+        $i13 = (int) $b5;
+
+        if $i13 <= 0 goto label19;
+
+        $r56 = new java.lang.StringBuilder;
+
+        specialinvoke $r56.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("May have lost up to ");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>(l9);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" notification");
+
+        $b6 = l9 cmp 1L;
+
+        if $b6 != 0 goto label17;
+
+        $r51 = "";
+
+        goto label18;
+
+     label17:
+        $r51 = "s";
+
+     label18:
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r51);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r27 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        virtualinvoke $r27.<com.sun.jmx.remote.internal.ClientNotifForwarder: void lostNotifs(java.lang.String,long)>($r26, l9);
+
+        $r28 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger access$400()>();
+
+        virtualinvoke $r28.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("NotifFetcher.run", $r26);
+
+     label19:
+        i11 = 0;
+
+     label20:
+        if i11 >= i1 goto label21;
+
+        r52 = $r14[i11];
+
+        virtualinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: void dispatchNotification(javax.management.remote.TargetedNotification,java.lang.Integer,java.util.Map)>(r52, $r20, $r55);
+
+        i11 = i11 + 1;
+
+        goto label20;
+
+     label21:
+        $r53 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        entermonitor $r53;
+
+     label22:
+        $r54 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: java.lang.Thread access$802(com.sun.jmx.remote.internal.ClientNotifForwarder,java.lang.Thread)>($r54, null);
+
+        exitmonitor $r53;
+
+     label23:
+        goto label26;
+
+     label24:
+        $r46 := @caughtexception;
+
+        exitmonitor $r53;
+
+     label25:
+        throw $r46;
+
+     label26:
+        if r49 != null goto label27;
+
+        $r11 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger access$400()>();
+
+        $z2 = virtualinvoke $r11.<com.sun.jmx.remote.util.ClassLogger: boolean traceOn()>();
+
+        if $z2 == 0 goto label27;
+
+        $r12 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger access$400()>();
+
+        virtualinvoke $r12.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("NotifFetcher-run", "Recieved null object as notifs, stops fetching because the notification server is terminated.");
+
+     label27:
+        if r49 == null goto label28;
+
+        $z1 = specialinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: boolean shouldStop()>();
+
+        if $z1 == 0 goto label33;
+
+     label28:
+        $r5 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: void access$1000(com.sun.jmx.remote.internal.ClientNotifForwarder,int)>($r5, 3);
+
+     label29:
+        $r7 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        $r6 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        $r8 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: java.lang.Integer access$1200(com.sun.jmx.remote.internal.ClientNotifForwarder)>($r6);
+
+        virtualinvoke $r7.<com.sun.jmx.remote.internal.ClientNotifForwarder: void removeListenerForMBeanRemovedNotif(java.lang.Integer)>($r8);
+
+     label30:
+        goto label34;
+
+     label31:
+        $r43 := @caughtexception;
+
+        $r44 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger access$400()>();
+
+        $z6 = virtualinvoke $r44.<com.sun.jmx.remote.util.ClassLogger: boolean traceOn()>();
+
+        if $z6 == 0 goto label32;
+
+        $r45 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger access$400()>();
+
+        virtualinvoke $r45.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String,java.lang.Throwable)>("NotifFetcher-run", "removeListenerForMBeanRemovedNotif", $r43);
+
+     label32:
+        goto label34;
+
+     label33:
+        $r9 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        $r10 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: java.util.concurrent.Executor access$1400(com.sun.jmx.remote.internal.ClientNotifForwarder)>($r9);
+
+        interfaceinvoke $r10.<java.util.concurrent.Executor: void execute(java.lang.Runnable)>(r0);
+
+     label34:
+        return;
+
+        catch java.lang.Throwable from label01 to label03 with label04;
+        catch java.lang.Throwable from label04 to label05 with label04;
+        catch java.lang.Throwable from label07 to label13 with label14;
+        catch java.lang.Throwable from label14 to label15 with label14;
+        catch java.lang.Throwable from label22 to label23 with label24;
+        catch java.lang.Throwable from label24 to label25 with label24;
+        catch java.lang.Exception from label29 to label30 with label31;
+    }
+
+    void dispatchNotification(javax.management.remote.TargetedNotification, java.lang.Integer, java.util.Map)
+    {
+        javax.management.NotificationListener $r7;
+        com.sun.jmx.remote.internal.ClientListenerInfo r6;
+        javax.management.remote.TargetedNotification r0;
+        java.lang.RuntimeException $r10;
+        javax.management.Notification $r1;
+        java.lang.Integer $r2, r3;
+        com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher r12;
+        java.util.Map r4;
+        java.lang.Object $r5, $r8;
+        com.sun.jmx.remote.util.ClassLogger $r9, $r11;
+        boolean $z0;
+
+        r12 := @this: com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher;
+
+        r0 := @parameter0: javax.management.remote.TargetedNotification;
+
+        r3 := @parameter1: java.lang.Integer;
+
+        r4 := @parameter2: java.util.Map;
+
+        $r1 = virtualinvoke r0.<javax.management.remote.TargetedNotification: javax.management.Notification getNotification()>();
+
+        $r2 = virtualinvoke r0.<javax.management.remote.TargetedNotification: java.lang.Integer getListenerID()>();
+
+        $z0 = virtualinvoke $r2.<java.lang.Integer: boolean equals(java.lang.Object)>(r3);
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r5 = interfaceinvoke r4.<java.util.Map: java.lang.Object get(java.lang.Object)>($r2);
+
+        r6 = (com.sun.jmx.remote.internal.ClientListenerInfo) $r5;
+
+        if r6 != null goto label2;
+
+        $r9 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger access$400()>();
+
+        virtualinvoke $r9.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("NotifFetcher.dispatch", "Listener ID not in map");
+
+        return;
+
+     label2:
+        $r7 = virtualinvoke r6.<com.sun.jmx.remote.internal.ClientListenerInfo: javax.management.NotificationListener getListener()>();
+
+        $r8 = virtualinvoke r6.<com.sun.jmx.remote.internal.ClientListenerInfo: java.lang.Object getHandback()>();
+
+     label3:
+        interfaceinvoke $r7.<javax.management.NotificationListener: void handleNotification(javax.management.Notification,java.lang.Object)>($r1, $r8);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r10 := @caughtexception;
+
+        $r11 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger access$400()>();
+
+        virtualinvoke $r11.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String,java.lang.Throwable)>("NotifFetcher-run", "Failed to forward a notification to a listener", $r10);
+
+     label6:
+        return;
+
+        catch java.lang.RuntimeException from label3 to label4 with label5;
+    }
+
+    private javax.management.remote.NotificationResult fetchNotifs()
+    {
+        long $l0, $l2;
+        com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher r0;
+        com.sun.jmx.remote.internal.ClientNotifForwarder $r1, $r2, $r3, $r4;
+        int $i1;
+        com.sun.jmx.remote.util.ClassLogger $r6, $r7, $r13, $r18, $r20;
+        java.lang.String $r11, $r17;
+        boolean $z0, $z1;
+        javax.management.remote.NotificationResult $r5, $r21;
+        java.io.IOException $r12;
+        java.lang.Exception $r19;
+        java.lang.StringBuilder $r8, $r9, $r10, $r14, $r15, $r16;
+
+        r0 := @this: com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher;
+
+     label1:
+        $r2 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        $r1 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        $l0 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: long access$1100(com.sun.jmx.remote.internal.ClientNotifForwarder)>($r1);
+
+        $r3 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        $i1 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: int access$1500(com.sun.jmx.remote.internal.ClientNotifForwarder)>($r3);
+
+        $r4 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        $l2 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: long access$1600(com.sun.jmx.remote.internal.ClientNotifForwarder)>($r4);
+
+        $r5 = virtualinvoke $r2.<com.sun.jmx.remote.internal.ClientNotifForwarder: javax.management.remote.NotificationResult fetchNotifs(long,int,long)>($l0, $i1, $l2);
+
+        $r6 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger access$400()>();
+
+        $z0 = virtualinvoke $r6.<com.sun.jmx.remote.util.ClassLogger: boolean traceOn()>();
+
+        if $z0 == 0 goto label2;
+
+        $r7 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger access$400()>();
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Got notifications from the server: ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r5);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String)>("NotifFetcher-run", $r11);
+
+     label2:
+        return $r5;
+
+     label3:
+        $r19 := @caughtexception;
+
+        $r20 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger access$400()>();
+
+        virtualinvoke $r20.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.Throwable)>("NotifFetcher.fetchNotifs", $r19);
+
+        $r21 = specialinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: javax.management.remote.NotificationResult fetchOneNotif()>();
+
+        return $r21;
+
+     label4:
+        $r12 := @caughtexception;
+
+        $z1 = specialinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: boolean shouldStop()>();
+
+        if $z1 != 0 goto label5;
+
+        $r13 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger access$400()>();
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to fetch notification, stopping thread. Error is: ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r12);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r13.<com.sun.jmx.remote.util.ClassLogger: void error(java.lang.String,java.lang.String,java.lang.Throwable)>("NotifFetcher-run", $r17, $r12);
+
+        $r18 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger access$400()>();
+
+        virtualinvoke $r18.<com.sun.jmx.remote.util.ClassLogger: void debug(java.lang.String,java.lang.Throwable)>("NotifFetcher-run", $r12);
+
+     label5:
+        return null;
+
+        catch java.lang.ClassNotFoundException from label1 to label2 with label3;
+        catch java.io.NotSerializableException from label1 to label2 with label3;
+        catch java.rmi.UnmarshalException from label1 to label2 with label3;
+        catch java.io.IOException from label1 to label2 with label4;
+    }
+
+    private javax.management.remote.NotificationResult fetchOneNotif()
+    {
+        byte $b3;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        javax.management.remote.NotificationResult $r13, r34, $r39;
+        java.lang.Exception $r14, $r16;
+        java.lang.StringBuilder $r4, $r5, $r6, $r7, $r8, $r19, $r21, $r30, $r31, $r36, $r37, $r38;
+        long $l0, $l1, $l2, l4, l6;
+        com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher r0;
+        com.sun.jmx.remote.internal.ClientNotifForwarder r1, $r2, $r10;
+        javax.management.remote.TargetedNotification[] $r12;
+        int i5, $i7;
+        java.lang.String $r9, $r20, $r22, $r32, $r35;
+        com.sun.jmx.remote.util.ClassLogger $r15, $r17, $r23, $r24, $r26, $r28, $r33;
+        java.io.IOException $r25;
+        java.lang.ClassNotFoundException $r27;
+
+        r0 := @this: com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher;
+
+        r1 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        $r2 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        l4 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: long access$1100(com.sun.jmx.remote.internal.ClientNotifForwarder)>($r2);
+
+        i5 = 0;
+
+        r34 = null;
+
+        l6 = -1L;
+
+     label01:
+        if r34 != null goto label17;
+
+        $z0 = specialinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: boolean shouldStop()>();
+
+        if $z0 != 0 goto label17;
+
+     label02:
+        $r13 = virtualinvoke r1.<com.sun.jmx.remote.internal.ClientNotifForwarder: javax.management.remote.NotificationResult fetchNotifs(long,int,long)>(l4, 0, 0L);
+
+     label03:
+        goto label07;
+
+     label04:
+        $r27 := @caughtexception;
+
+        $r28 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger access$400()>();
+
+        $r36 = new java.lang.StringBuilder;
+
+        specialinvoke $r36.<java.lang.StringBuilder: void <init>()>();
+
+        $r30 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Impossible exception: ");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r27);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r28.<com.sun.jmx.remote.util.ClassLogger: void warning(java.lang.String,java.lang.String)>("NotifFetcher.fetchOneNotif", $r32);
+
+        $r33 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger access$400()>();
+
+        virtualinvoke $r33.<com.sun.jmx.remote.util.ClassLogger: void debug(java.lang.String,java.lang.Throwable)>("NotifFetcher.fetchOneNotif", $r27);
+
+        return null;
+
+     label05:
+        $r25 := @caughtexception;
+
+        $z4 = specialinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: boolean shouldStop()>();
+
+        if $z4 != 0 goto label06;
+
+        $r26 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger access$400()>();
+
+        virtualinvoke $r26.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.Throwable)>("NotifFetcher.fetchOneNotif", $r25);
+
+     label06:
+        return null;
+
+     label07:
+        $z1 = specialinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: boolean shouldStop()>();
+
+        if $z1 != 0 goto label08;
+
+        if $r13 != null goto label09;
+
+     label08:
+        return null;
+
+     label09:
+        $l2 = virtualinvoke $r13.<javax.management.remote.NotificationResult: long getNextSequenceNumber()>();
+
+        l4 = $l2;
+
+        $b3 = l6 cmp 0L;
+
+        $i7 = (int) $b3;
+
+        if $i7 >= 0 goto label10;
+
+        l6 = virtualinvoke $r13.<javax.management.remote.NotificationResult: long getEarliestSequenceNumber()>();
+
+     label10:
+        r34 = virtualinvoke r1.<com.sun.jmx.remote.internal.ClientNotifForwarder: javax.management.remote.NotificationResult fetchNotifs(long,int,long)>($l2, 1, 0L);
+
+     label11:
+        goto label16;
+
+     label12:
+        $r16 := @caughtexception;
+
+        $r17 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger access$400()>();
+
+        $r37 = new java.lang.StringBuilder;
+
+        specialinvoke $r37.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to deserialize a notification: ");
+
+        $r20 = virtualinvoke $r16.<java.lang.Exception: java.lang.String toString()>();
+
+        $r21 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r17.<com.sun.jmx.remote.util.ClassLogger: void warning(java.lang.String,java.lang.String)>("NotifFetcher.fetchOneNotif", $r22);
+
+        $r23 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger access$400()>();
+
+        $z3 = virtualinvoke $r23.<com.sun.jmx.remote.util.ClassLogger: boolean traceOn()>();
+
+        if $z3 == 0 goto label13;
+
+        $r24 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger access$400()>();
+
+        virtualinvoke $r24.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.String,java.lang.Throwable)>("NotifFetcher.fetchOneNotif", "Failed to deserialize a notification.", $r16);
+
+     label13:
+        i5 = i5 + 1;
+
+        l4 = $l2 + 1L;
+
+        goto label16;
+
+     label14:
+        $r14 := @caughtexception;
+
+        $z2 = specialinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: boolean shouldStop()>();
+
+        if $z2 != 0 goto label15;
+
+        $r15 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: com.sun.jmx.remote.util.ClassLogger access$400()>();
+
+        virtualinvoke $r15.<com.sun.jmx.remote.util.ClassLogger: void trace(java.lang.String,java.lang.Throwable)>("NotifFetcher.fetchOneNotif", $r14);
+
+     label15:
+        return null;
+
+     label16:
+        goto label01;
+
+     label17:
+        if i5 <= 0 goto label20;
+
+        $r38 = new java.lang.StringBuilder;
+
+        specialinvoke $r38.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Dropped ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i5);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" notification");
+
+        if i5 != 1 goto label18;
+
+        $r35 = "";
+
+        goto label19;
+
+     label18:
+        $r35 = "s";
+
+     label19:
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r35);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" because classes were missing locally or incompatible");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r10 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        $l0 = (long) i5;
+
+        virtualinvoke $r10.<com.sun.jmx.remote.internal.ClientNotifForwarder: void lostNotifs(java.lang.String,long)>($r9, $l0);
+
+        if r34 == null goto label20;
+
+        $r39 = new javax.management.remote.NotificationResult;
+
+        $l1 = virtualinvoke r34.<javax.management.remote.NotificationResult: long getNextSequenceNumber()>();
+
+        $r12 = virtualinvoke r34.<javax.management.remote.NotificationResult: javax.management.remote.TargetedNotification[] getTargetedNotifications()>();
+
+        specialinvoke $r39.<javax.management.remote.NotificationResult: void <init>(long,long,javax.management.remote.TargetedNotification[])>(l6, $l1, $r12);
+
+        r34 = $r39;
+
+     label20:
+        return r34;
+
+        catch java.lang.ClassNotFoundException from label02 to label03 with label04;
+        catch java.io.IOException from label02 to label03 with label05;
+        catch java.lang.ClassNotFoundException from label10 to label11 with label12;
+        catch java.io.NotSerializableException from label10 to label11 with label12;
+        catch java.rmi.UnmarshalException from label10 to label11 with label12;
+        catch java.lang.Exception from label10 to label11 with label14;
+    }
+
+    private boolean shouldStop()
+    {
+        java.lang.Throwable $r6;
+        com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher r0;
+        com.sun.jmx.remote.internal.ClientNotifForwarder $r1, $r2, $r3, $r5;
+        java.util.Map $r4;
+        int $i0, $i1;
+
+        r0 := @this: com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher;
+
+        $r1 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        $i0 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: int access$900(com.sun.jmx.remote.internal.ClientNotifForwarder)>($r2);
+
+        if $i0 == 1 goto label3;
+
+        exitmonitor $r1;
+
+     label2:
+        return 1;
+
+     label3:
+        $r3 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        $r4 = staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: java.util.Map access$1300(com.sun.jmx.remote.internal.ClientNotifForwarder)>($r3);
+
+        $i1 = interfaceinvoke $r4.<java.util.Map: int size()>();
+
+        if $i1 != 0 goto label5;
+
+        $r5 = r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: com.sun.jmx.remote.internal.ClientNotifForwarder this$0>;
+
+        staticinvoke <com.sun.jmx.remote.internal.ClientNotifForwarder: void access$1000(com.sun.jmx.remote.internal.ClientNotifForwarder,int)>($r5, 2);
+
+        exitmonitor $r1;
+
+     label4:
+        return 1;
+
+     label5:
+        exitmonitor $r1;
+
+     label6:
+        return 0;
+
+     label7:
+        $r6 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label8:
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label3 to label4 with label7;
+        catch java.lang.Throwable from label5 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    static void access$600(com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher, java.lang.String, java.lang.SecurityException)
+    {
+        java.lang.SecurityException r2;
+        java.lang.String r1;
+        com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher r0;
+
+        r0 := @parameter0: com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.SecurityException;
+
+        specialinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: void logOnce(java.lang.String,java.lang.SecurityException)>(r1, r2);
+
+        return;
+    }
+
+    void <init>(com.sun.jmx.remote.internal.ClientNotifForwarder, com.sun.jmx.remote.internal.ClientNotifForwarder$1)
+    {
+        com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher r0;
+        com.sun.jmx.remote.internal.ClientNotifForwarder$1 r2;
+        com.sun.jmx.remote.internal.ClientNotifForwarder r1;
+
+        r0 := @this: com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher;
+
+        r1 := @parameter0: com.sun.jmx.remote.internal.ClientNotifForwarder;
+
+        r2 := @parameter1: com.sun.jmx.remote.internal.ClientNotifForwarder$1;
+
+        specialinvoke r0.<com.sun.jmx.remote.internal.ClientNotifForwarder$NotifFetcher: void <init>(com.sun.jmx.remote.internal.ClientNotifForwarder)>(r1);
+
+        return;
+    }
+}

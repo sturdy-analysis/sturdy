@@ -1,0 +1,1594 @@
+class com.sun.xml.internal.org.jvnet.mimepull.MIMEParser extends java.lang.Object implements java.lang.Iterable
+{
+    private static final java.util.logging.Logger LOGGER;
+    private static final java.lang.String HEADER_ENCODING;
+    private static final int NO_LWSP;
+    private com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$STATE state;
+    private final java.io.InputStream in;
+    private final byte[] bndbytes;
+    private final int bl;
+    private final com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig config;
+    private final int[] bcs;
+    private final int[] gss;
+    private boolean parsed;
+    private boolean done;
+    private boolean eof;
+    private final int capacity;
+    private byte[] buf;
+    private int len;
+    private boolean bol;
+    static final boolean $assertionsDisabled;
+
+    void <init>(java.io.InputStream, java.lang.String, com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig)
+    {
+        byte[] $r9, $r10;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$STATE $r1;
+        int[] $r2, $r12;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        java.lang.String r6, $r8;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig r11;
+        java.lang.StringBuilder $r4, $r5, $r7;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser r0;
+        java.io.InputStream r3;
+
+        r0 := @this: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+        r3 := @parameter0: java.io.InputStream;
+
+        r6 := @parameter1: java.lang.String;
+
+        r11 := @parameter2: com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$STATE: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$STATE START_MESSAGE>;
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$STATE state> = $r1;
+
+        $r2 = newarray (int)[128];
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int[] bcs> = $r2;
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean done> = 0;
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.io.InputStream in> = r3;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("--");
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r9 = staticinvoke <com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] getBytes(java.lang.String)>($r8);
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] bndbytes> = $r9;
+
+        $r10 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] bndbytes>;
+
+        $i0 = lengthof $r10;
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl> = $i0;
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig config> = r11;
+
+        $i1 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        $r12 = newarray (int)[$i1];
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int[] gss> = $r12;
+
+        specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: void compileBoundaryPattern()>();
+
+        $i2 = r11.<com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig: int chunkSize>;
+
+        $i4 = $i2 + 2;
+
+        $i3 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        $i5 = $i4 + $i3;
+
+        $i6 = $i5 + 4;
+
+        $i7 = $i6 + 1000;
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int capacity> = $i7;
+
+        $i8 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int capacity>;
+
+        specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: void createBuf(int)>($i8);
+
+        return;
+    }
+
+    public java.util.Iterator iterator()
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$MIMEEventIterator $r0;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser r1;
+
+        r1 := @this: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+        $r0 = new com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$MIMEEventIterator;
+
+        specialinvoke $r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$MIMEEventIterator: void <init>(com.sun.xml.internal.org.jvnet.mimepull.MIMEParser)>(r1);
+
+        return $r0;
+    }
+
+    private com.sun.xml.internal.org.jvnet.mimepull.InternetHeaders readHeaders()
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.InternetHeaders $r1;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$LineInputStream $r2;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+        $z0 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean eof>;
+
+        if $z0 != 0 goto label1;
+
+        specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: void fillBuf()>();
+
+     label1:
+        $r1 = new com.sun.xml.internal.org.jvnet.mimepull.InternetHeaders;
+
+        $r2 = new com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$LineInputStream;
+
+        specialinvoke $r2.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$LineInputStream: void <init>(com.sun.xml.internal.org.jvnet.mimepull.MIMEParser)>(r0);
+
+        specialinvoke $r1.<com.sun.xml.internal.org.jvnet.mimepull.InternetHeaders: void <init>(com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$LineInputStream)>($r2);
+
+        return $r1;
+    }
+
+    private java.nio.ByteBuffer readBody()
+    {
+        byte[] $r1, $r3, $r4, $r8, $r9, $r12, $r15, $r16, $r17, $r18, $r21, $r22;
+        byte $b7, $b9, $b28, $b33, $b43, $b50, $b51, $b54, $b58, $b60, $b62;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig $r23, $r26;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i8, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i29, $i30, $i31, $i32, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i44, $i45, $i46, $i47, $i48, $i49, $i52, $i53, $i55, $i56, $i57, $i59, $i61, $i63, $i64, $i65, $i66, $i67, i68, $i69, $i70, $i71, $i72, i73, $i74, i75, $i76, $i77, $i78, $i79, $i80, $i81, $i83, $i84, $i85, $i87, $i88, $i89, $i91, $i92, $i93, $i94, $i95, $i96, $i97, $i98;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser r0;
+        java.lang.AssertionError $r28;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException $r29, $r30;
+        java.nio.ByteBuffer $r2, $r5, $r7, $r11, $r14, $r20, $r24;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$STATE $r10, $r13, $r19;
+
+        r0 := @this: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+        $z0 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean eof>;
+
+        if $z0 != 0 goto label01;
+
+        specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: void fillBuf()>();
+
+     label01:
+        $r1 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        $i0 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        $i1 = specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int match(byte[],int,int)>($r1, 0, $i0);
+
+        $i83 = (int) -1;
+
+        if $i1 != $i83 goto label06;
+
+        $z3 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean $assertionsDisabled>;
+
+        if $z3 != 0 goto label02;
+
+        $z5 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean eof>;
+
+        if $z5 != 0 goto label02;
+
+        $i66 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        $r26 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig config>;
+
+        $i65 = $r26.<com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig: int chunkSize>;
+
+        if $i66 >= $i65 goto label02;
+
+        $r28 = new java.lang.AssertionError;
+
+        specialinvoke $r28.<java.lang.AssertionError: void <init>()>();
+
+        throw $r28;
+
+     label02:
+        $z6 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean eof>;
+
+        if $z6 == 0 goto label03;
+
+        $i67 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        goto label04;
+
+     label03:
+        $r23 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig config>;
+
+        $i67 = $r23.<com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig: int chunkSize>;
+
+     label04:
+        $z4 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean eof>;
+
+        if $z4 == 0 goto label05;
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean done> = 1;
+
+        $r29 = new com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException;
+
+        specialinvoke $r29.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException: void <init>(java.lang.String)>("Reached EOF, but there is no closing MIME boundary.");
+
+        throw $r29;
+
+     label05:
+        $i63 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        $i64 = $i63 - $i67;
+
+        $r24 = specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.nio.ByteBuffer adjustBuf(int,int)>($i67, $i64);
+
+        return $r24;
+
+     label06:
+        i68 = $i1;
+
+        $z1 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean bol>;
+
+        if $z1 == 0 goto label07;
+
+        if $i1 != 0 goto label07;
+
+        goto label10;
+
+     label07:
+        if $i1 <= 0 goto label09;
+
+        $r3 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        $i6 = $i1 - 1;
+
+        $b7 = $r3[$i6];
+
+        $i84 = (int) $b7;
+
+        if $i84 == 10 goto label08;
+
+        $r22 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        $i61 = $i1 - 1;
+
+        $b62 = $r22[$i61];
+
+        $i85 = (int) $b62;
+
+        if $i85 != 13 goto label09;
+
+     label08:
+        $i87 = (int) -1;
+
+        i68 = $i1 + $i87;
+
+        $r4 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        $i8 = $i1 - 1;
+
+        $b9 = $r4[$i8];
+
+        $i88 = (int) $b9;
+
+        if $i88 != 10 goto label10;
+
+        if $i1 <= 1 goto label10;
+
+        $r21 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        $i59 = $i1 - 2;
+
+        $b60 = $r21[$i59];
+
+        $i89 = (int) $b60;
+
+        if $i89 != 13 goto label10;
+
+        $i91 = (int) -1;
+
+        i68 = i68 + $i91;
+
+        goto label10;
+
+     label09:
+        $i5 = $i1 + 1;
+
+        $i2 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        $i3 = $i2 - $i1;
+
+        $i4 = $i3 - 1;
+
+        $r2 = specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.nio.ByteBuffer adjustBuf(int,int)>($i5, $i4);
+
+        return $r2;
+
+     label10:
+        $i69 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        $i70 = $i1 + $i69;
+
+        $i71 = $i70 + 1;
+
+        $i72 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        if $i71 >= $i72 goto label11;
+
+        $r17 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        $i52 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        $i53 = $i1 + $i52;
+
+        $b54 = $r17[$i53];
+
+        $i92 = (int) $b54;
+
+        if $i92 != 45 goto label11;
+
+        $r18 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        $i55 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        $i56 = $i1 + $i55;
+
+        $i57 = $i56 + 1;
+
+        $b58 = $r18[$i57];
+
+        $i93 = (int) $b58;
+
+        if $i93 != 45 goto label11;
+
+        $r19 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$STATE: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$STATE END_PART>;
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$STATE state> = $r19;
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean done> = 1;
+
+        $r20 = specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.nio.ByteBuffer adjustBuf(int,int)>(i68, 0);
+
+        return $r20;
+
+     label11:
+        i73 = 0;
+
+        $i74 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        i75 = $i1 + $i74;
+
+     label12:
+        $i76 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        if i75 >= $i76 goto label14;
+
+        $r15 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        $b50 = $r15[i75];
+
+        $i94 = (int) $b50;
+
+        if $i94 == 32 goto label13;
+
+        $r16 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        $b51 = $r16[i75];
+
+        $i95 = (int) $b51;
+
+        if $i95 != 9 goto label14;
+
+     label13:
+        i73 = i73 + 1;
+
+        i75 = i75 + 1;
+
+        goto label12;
+
+     label14:
+        $i10 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        $i11 = $i1 + $i10;
+
+        $i13 = $i11 + i73;
+
+        $i12 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        if $i13 >= $i12 goto label15;
+
+        $r12 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        $i40 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        $i41 = $i1 + $i40;
+
+        $i42 = $i41 + i73;
+
+        $b43 = $r12[$i42];
+
+        $i96 = (int) $b43;
+
+        if $i96 != 10 goto label15;
+
+        $r13 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$STATE: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$STATE END_PART>;
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$STATE state> = $r13;
+
+        $i44 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        $i46 = $i44 - $i1;
+
+        $i45 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        $i47 = $i46 - $i45;
+
+        $i48 = $i47 - i73;
+
+        $i49 = $i48 - 1;
+
+        $r14 = specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.nio.ByteBuffer adjustBuf(int,int)>(i68, $i49);
+
+        return $r14;
+
+     label15:
+        $i14 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        $i15 = $i1 + $i14;
+
+        $i16 = $i15 + i73;
+
+        $i18 = $i16 + 1;
+
+        $i17 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        if $i18 >= $i17 goto label16;
+
+        $r8 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        $i25 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        $i26 = $i1 + $i25;
+
+        $i27 = $i26 + i73;
+
+        $b28 = $r8[$i27];
+
+        $i97 = (int) $b28;
+
+        if $i97 != 13 goto label16;
+
+        $r9 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        $i29 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        $i30 = $i1 + $i29;
+
+        $i31 = $i30 + i73;
+
+        $i32 = $i31 + 1;
+
+        $b33 = $r9[$i32];
+
+        $i98 = (int) $b33;
+
+        if $i98 != 10 goto label16;
+
+        $r10 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$STATE: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$STATE END_PART>;
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$STATE state> = $r10;
+
+        $i34 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        $i36 = $i34 - $i1;
+
+        $i35 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        $i37 = $i36 - $i35;
+
+        $i38 = $i37 - i73;
+
+        $i39 = $i38 - 2;
+
+        $r11 = specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.nio.ByteBuffer adjustBuf(int,int)>(i68, $i39);
+
+        return $r11;
+
+     label16:
+        $i77 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        $i78 = $i1 + $i77;
+
+        $i79 = $i78 + i73;
+
+        $i80 = $i79 + 1;
+
+        $i81 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        if $i80 >= $i81 goto label17;
+
+        $i24 = i68 + 1;
+
+        $i21 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        $i22 = $i21 - i68;
+
+        $i23 = $i22 - 1;
+
+        $r7 = specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.nio.ByteBuffer adjustBuf(int,int)>($i24, $i23);
+
+        return $r7;
+
+     label17:
+        $z2 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean eof>;
+
+        if $z2 == 0 goto label18;
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean done> = 1;
+
+        $r30 = new com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException;
+
+        specialinvoke $r30.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException: void <init>(java.lang.String)>("Reached EOF, but there is no closing MIME boundary.");
+
+        throw $r30;
+
+     label18:
+        $i19 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        $i20 = $i19 - i68;
+
+        $r5 = specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.nio.ByteBuffer adjustBuf(int,int)>(i68, $i20);
+
+        return $r5;
+    }
+
+    private java.nio.ByteBuffer adjustBuf(int, int)
+    {
+        byte[] $r1, $r3, $r6;
+        java.lang.AssertionError $r4, $r5, $r7;
+        java.nio.ByteBuffer $r2;
+        int i0, $i1, $i2, i3;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+        i3 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        $z0 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $r6 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        if $r6 != null goto label1;
+
+        $r7 = new java.lang.AssertionError;
+
+        specialinvoke $r7.<java.lang.AssertionError: void <init>()>();
+
+        throw $r7;
+
+     label1:
+        $z1 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label2;
+
+        if i3 >= 0 goto label2;
+
+        $r5 = new java.lang.AssertionError;
+
+        specialinvoke $r5.<java.lang.AssertionError: void <init>()>();
+
+        throw $r5;
+
+     label2:
+        $z2 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label3;
+
+        if i0 >= 0 goto label3;
+
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>()>();
+
+        throw $r4;
+
+     label3:
+        $r3 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: void createBuf(int)>(i0);
+
+        $i1 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        $i2 = $i1 - i0;
+
+        $r1 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, $i2, $r1, 0, i0);
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len> = i0;
+
+        $r2 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[],int,int)>($r3, 0, i3);
+
+        return $r2;
+    }
+
+    private void createBuf(int)
+    {
+        byte[] $r1;
+        int i0, $i1, $i2;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser r0;
+
+        r0 := @this: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+        i0 := @parameter0: int;
+
+        $i1 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int capacity>;
+
+        if i0 >= $i1 goto label1;
+
+        $i2 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int capacity>;
+
+        goto label2;
+
+     label1:
+        $i2 = i0;
+
+     label2:
+        $r1 = newarray (byte)[$i2];
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf> = $r1;
+
+        return;
+    }
+
+    private void skipPreamble()
+    {
+        byte[] $r1, $r3, $r4, $r5, $r11, $r12, $r13;
+        java.lang.Integer $r10;
+        byte $b12, $b16, $b26, $b51, $b52, $b53;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException $r15;
+        boolean $z0, $z1, $z2;
+        java.util.logging.Logger $r7, $r8;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig $r2;
+        java.util.logging.Level $r6, $r9;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i13, $i14, $i15, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i54, $i55, $i56, $i57, $i58, $i59, $i60, $i61, i62, i63, $i64, $i65, $i66, $i67, $i69, $i70, $i71, $i72, $i73, $i74, $i75;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser r0;
+
+        r0 := @this: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+     label01:
+        $z2 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean eof>;
+
+        if $z2 != 0 goto label02;
+
+        specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: void fillBuf()>();
+
+     label02:
+        $r1 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        $i0 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        $i1 = specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int match(byte[],int,int)>($r1, 0, $i0);
+
+        $i69 = (int) -1;
+
+        if $i1 != $i69 goto label04;
+
+        $z1 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean eof>;
+
+        if $z1 == 0 goto label03;
+
+        $r15 = new com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException;
+
+        specialinvoke $r15.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException: void <init>(java.lang.String)>("Missing start boundary");
+
+        throw $r15;
+
+     label03:
+        $i57 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        $i56 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        $i58 = $i57 - $i56;
+
+        $i61 = $i58 + 1;
+
+        $i59 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        $i60 = $i59 - 1;
+
+        specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.nio.ByteBuffer adjustBuf(int,int)>($i61, $i60);
+
+        goto label01;
+
+     label04:
+        $r2 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig config>;
+
+        $i2 = $r2.<com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig: int chunkSize>;
+
+        if $i1 <= $i2 goto label05;
+
+        $i54 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        $i55 = $i54 - $i1;
+
+        specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.nio.ByteBuffer adjustBuf(int,int)>($i1, $i55);
+
+        goto label01;
+
+     label05:
+        i62 = 0;
+
+        $i3 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        i63 = $i1 + $i3;
+
+     label06:
+        $i4 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        if i63 >= $i4 goto label08;
+
+        $r12 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        $b52 = $r12[i63];
+
+        $i70 = (int) $b52;
+
+        if $i70 == 32 goto label07;
+
+        $r13 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        $b53 = $r13[i63];
+
+        $i71 = (int) $b53;
+
+        if $i71 != 9 goto label08;
+
+     label07:
+        i62 = i62 + 1;
+
+        i63 = i63 + 1;
+
+        goto label06;
+
+     label08:
+        $i5 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        $i6 = $i1 + $i5;
+
+        $i8 = $i6 + i62;
+
+        $i7 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        if $i8 >= $i7 goto label11;
+
+        $r3 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        $i9 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        $i10 = $i1 + $i9;
+
+        $i11 = $i10 + i62;
+
+        $b12 = $r3[$i11];
+
+        $i72 = (int) $b12;
+
+        if $i72 == 10 goto label09;
+
+        $r11 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        $i48 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        $i49 = $i1 + $i48;
+
+        $i50 = $i49 + i62;
+
+        $b51 = $r11[$i50];
+
+        $i73 = (int) $b51;
+
+        if $i73 != 13 goto label11;
+
+     label09:
+        $r4 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        $i13 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        $i14 = $i1 + $i13;
+
+        $i15 = $i14 + i62;
+
+        $b16 = $r4[$i15];
+
+        $i74 = (int) $b16;
+
+        if $i74 != 10 goto label10;
+
+        $i38 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        $i39 = $i1 + $i38;
+
+        $i40 = $i39 + i62;
+
+        $i47 = $i40 + 1;
+
+        $i41 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        $i43 = $i41 - $i1;
+
+        $i42 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        $i44 = $i43 - $i42;
+
+        $i45 = $i44 - i62;
+
+        $i46 = $i45 - 1;
+
+        specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.nio.ByteBuffer adjustBuf(int,int)>($i47, $i46);
+
+        goto label12;
+
+     label10:
+        $i17 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        $i18 = $i1 + $i17;
+
+        $i19 = $i18 + i62;
+
+        $i21 = $i19 + 1;
+
+        $i20 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        if $i21 >= $i20 goto label11;
+
+        $r5 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        $i22 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        $i23 = $i1 + $i22;
+
+        $i24 = $i23 + i62;
+
+        $i25 = $i24 + 1;
+
+        $b26 = $r5[$i25];
+
+        $i75 = (int) $b26;
+
+        if $i75 != 10 goto label11;
+
+        $i27 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        $i28 = $i1 + $i27;
+
+        $i29 = $i28 + i62;
+
+        $i36 = $i29 + 2;
+
+        $i30 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        $i32 = $i30 - $i1;
+
+        $i31 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int bl>;
+
+        $i33 = $i32 - $i31;
+
+        $i34 = $i33 - i62;
+
+        $i35 = $i34 - 2;
+
+        specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.nio.ByteBuffer adjustBuf(int,int)>($i36, $i35);
+
+        goto label12;
+
+     label11:
+        $i64 = $i1 + 1;
+
+        $i65 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        $i66 = $i65 - $i1;
+
+        $i67 = $i66 - 1;
+
+        specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.nio.ByteBuffer adjustBuf(int,int)>($i64, $i67);
+
+        goto label01;
+
+     label12:
+        $r7 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.util.logging.Logger LOGGER>;
+
+        $r6 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $z0 = virtualinvoke $r7.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r6);
+
+        if $z0 == 0 goto label13;
+
+        $r8 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.util.logging.Logger LOGGER>;
+
+        $r9 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $i37 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        $r10 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i37);
+
+        virtualinvoke $r8.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r9, "Skipped the preamble. buffer len={0}", $r10);
+
+     label13:
+        return;
+    }
+
+    private static byte[] getBytes(java.lang.String)
+    {
+        byte[] r2;
+        char $c3;
+        byte $b4;
+        int i0, $i1, $i2, i5;
+        char[] $r1;
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = virtualinvoke r0.<java.lang.String: char[] toCharArray()>();
+
+        i0 = lengthof $r1;
+
+        r2 = newarray (byte)[i0];
+
+        i5 = 0;
+
+     label1:
+        if i5 >= i0 goto label2;
+
+        $i1 = i5;
+
+        $i2 = i5;
+
+        i5 = i5 + 1;
+
+        $c3 = $r1[$i2];
+
+        $b4 = (byte) $c3;
+
+        r2[$i1] = $b4;
+
+        goto label1;
+
+     label2:
+        return r2;
+    }
+
+    private void compileBoundaryPattern()
+    {
+        byte[] $r1, $r2, $r3, $r5, $r7, $r8, $r10;
+        byte $b5, $b6, $b8, $b10;
+        int[] $r4, $r6, $r9, $r11;
+        int $i0, $i1, $i2, $i3, $i4, $i7, $i9, i11, i12, i13, $i14, $i15, $i16, $i18, $i20, $i22;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser r0;
+
+        r0 := @this: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+        i11 = 0;
+
+     label1:
+        $r1 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] bndbytes>;
+
+        $i0 = lengthof $r1;
+
+        if i11 >= $i0 goto label2;
+
+        $r11 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int[] bcs>;
+
+        $r10 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] bndbytes>;
+
+        $b8 = $r10[i11];
+
+        $b10 = $b8 & 127;
+
+        $i9 = i11 + 1;
+
+        $i14 = (int) $b10;
+
+        $r11[$i14] = $i9;
+
+        i11 = i11 + 1;
+
+        goto label1;
+
+     label2:
+        $r2 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] bndbytes>;
+
+        i12 = lengthof $r2;
+
+     label3:
+        if i12 <= 0 goto label7;
+
+        $r5 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] bndbytes>;
+
+        $i3 = lengthof $r5;
+
+        i13 = $i3 - 1;
+
+     label4:
+        if i13 < i12 goto label5;
+
+        $r7 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] bndbytes>;
+
+        $b6 = $r7[i13];
+
+        $r8 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] bndbytes>;
+
+        $i4 = i13 - i12;
+
+        $b5 = $r8[$i4];
+
+        $i15 = (int) $b6;
+
+        $i16 = (int) $b5;
+
+        if $i15 != $i16 goto label6;
+
+        $r9 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int[] gss>;
+
+        $i7 = i13 - 1;
+
+        $r9[$i7] = i12;
+
+        $i18 = (int) -1;
+
+        i13 = i13 + $i18;
+
+        goto label4;
+
+     label5:
+        if i13 <= 0 goto label6;
+
+        $r6 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int[] gss>;
+
+        $i20 = (int) -1;
+
+        i13 = i13 + $i20;
+
+        $r6[i13] = i12;
+
+        goto label5;
+
+     label6:
+        $i22 = (int) -1;
+
+        i12 = i12 + $i22;
+
+        goto label3;
+
+     label7:
+        $r4 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int[] gss>;
+
+        $r3 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] bndbytes>;
+
+        $i1 = lengthof $r3;
+
+        $i2 = $i1 - 1;
+
+        $r4[$i2] = 1;
+
+        return;
+    }
+
+    private int match(byte[], int, int)
+    {
+        byte[] $r1, $r2, r3, $r4;
+        byte b5, $b6, $b7;
+        int[] $r5, $r6;
+        int i0, $i1, i2, $i3, $i4, $i8, $i9, $i10, $i11, $i12, i13, i14, $i15, $i16, $i17, $i19, $i21;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser r0;
+
+        r0 := @this: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+        r3 := @parameter0: byte[];
+
+        i13 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        $r1 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] bndbytes>;
+
+        $i1 = lengthof $r1;
+
+        i2 = i0 - $i1;
+
+     label1:
+        if i13 > i2 goto label5;
+
+        $r2 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] bndbytes>;
+
+        $i3 = lengthof $r2;
+
+        i14 = $i3 - 1;
+
+     label2:
+        if i14 < 0 goto label4;
+
+        $i4 = i13 + i14;
+
+        b5 = r3[$i4];
+
+        $r4 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] bndbytes>;
+
+        $b6 = $r4[i14];
+
+        $i15 = (int) b5;
+
+        $i16 = (int) $b6;
+
+        if $i15 == $i16 goto label3;
+
+        $i9 = i14 + 1;
+
+        $r5 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int[] bcs>;
+
+        $b7 = b5 & 127;
+
+        $i17 = (int) $b7;
+
+        $i8 = $r5[$i17];
+
+        $i11 = $i9 - $i8;
+
+        $r6 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int[] gss>;
+
+        $i10 = $r6[i14];
+
+        $i12 = staticinvoke <java.lang.Math: int max(int,int)>($i11, $i10);
+
+        i13 = i13 + $i12;
+
+        goto label1;
+
+     label3:
+        $i19 = (int) -1;
+
+        i14 = i14 + $i19;
+
+        goto label2;
+
+     label4:
+        return i13;
+
+     label5:
+        $i21 = (int) -1;
+
+        return $i21;
+    }
+
+    private void fillBuf()
+    {
+        byte[] $r8, $r9, $r23;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException $r25, $r26;
+        java.lang.Integer $r7, $r18;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.util.logging.Logger $r1, $r4, $r5, $r12, $r14, $r16;
+        java.lang.AssertionError $r24;
+        java.util.logging.Level $r0, $r3, $r6, $r11, $r17;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i12;
+        java.io.IOException $r19, $r21;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser r2;
+        java.io.InputStream $r10, $r13;
+
+        r2 := @this: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+        $r1 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.util.logging.Logger LOGGER>;
+
+        $r0 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z0 = virtualinvoke $r1.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r0);
+
+        if $z0 == 0 goto label01;
+
+        $r16 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.util.logging.Logger LOGGER>;
+
+        $r17 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $i8 = r2.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        $r18 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i8);
+
+        virtualinvoke $r16.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r17, "Before fillBuf() buffer len={0}", $r18);
+
+     label01:
+        $z1 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label02;
+
+        $z4 = r2.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean eof>;
+
+        if $z4 == 0 goto label02;
+
+        $r24 = new java.lang.AssertionError;
+
+        specialinvoke $r24.<java.lang.AssertionError: void <init>()>();
+
+        throw $r24;
+
+     label02:
+        $i9 = r2.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        $r23 = r2.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        $i10 = lengthof $r23;
+
+        if $i9 >= $i10 goto label12;
+
+     label03:
+        $r10 = r2.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.io.InputStream in>;
+
+        $r9 = r2.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        $i4 = r2.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        $r8 = r2.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        $i2 = lengthof $r8;
+
+        $i1 = r2.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        $i3 = $i2 - $i1;
+
+        $i5 = virtualinvoke $r10.<java.io.InputStream: int read(byte[],int,int)>($r9, $i4, $i3);
+
+     label04:
+        goto label06;
+
+     label05:
+        $r21 := @caughtexception;
+
+        $r25 = new com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException;
+
+        specialinvoke $r25.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException: void <init>(java.lang.Throwable)>($r21);
+
+        throw $r25;
+
+     label06:
+        $i12 = (int) -1;
+
+        if $i5 != $i12 goto label11;
+
+        r2.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean eof> = 1;
+
+     label07:
+        $r12 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.util.logging.Logger LOGGER>;
+
+        $r11 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $z3 = virtualinvoke $r12.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r11);
+
+        if $z3 == 0 goto label08;
+
+        $r14 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.util.logging.Logger LOGGER>;
+
+        virtualinvoke $r14.<java.util.logging.Logger: void fine(java.lang.String)>("Closing the input stream.");
+
+     label08:
+        $r13 = r2.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.io.InputStream in>;
+
+        virtualinvoke $r13.<java.io.InputStream: void close()>();
+
+     label09:
+        goto label12;
+
+     label10:
+        $r19 := @caughtexception;
+
+        $r26 = new com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException;
+
+        specialinvoke $r26.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException: void <init>(java.lang.Throwable)>($r19);
+
+        throw $r26;
+
+     label11:
+        $i6 = r2.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        $i7 = $i6 + $i5;
+
+        r2.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len> = $i7;
+
+        goto label02;
+
+     label12:
+        $r4 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.util.logging.Logger LOGGER>;
+
+        $r3 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z2 = virtualinvoke $r4.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r3);
+
+        if $z2 == 0 goto label13;
+
+        $r5 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.util.logging.Logger LOGGER>;
+
+        $r6 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $i0 = r2.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        virtualinvoke $r5.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r6, "After fillBuf() buffer len={0}", $r7);
+
+     label13:
+        return;
+
+        catch java.io.IOException from label03 to label04 with label05;
+        catch java.io.IOException from label07 to label09 with label10;
+    }
+
+    private void doubleBuf()
+    {
+        byte[] r1, $r2;
+        int $i0, $i1, $i2;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+        $i0 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        $i1 = 2 * $i0;
+
+        r1 = newarray (byte)[$i1];
+
+        $r2 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        $i2 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, 0, r1, 0, $i2);
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf> = r1;
+
+        $z0 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean eof>;
+
+        if $z0 != 0 goto label1;
+
+        specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: void fillBuf()>();
+
+     label1:
+        return;
+    }
+
+    static boolean access$000(com.sun.xml.internal.org.jvnet.mimepull.MIMEParser)
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser r0;
+        boolean $z0;
+
+        r0 := @parameter0: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+        $z0 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean parsed>;
+
+        return $z0;
+    }
+
+    static com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$STATE access$100(com.sun.xml.internal.org.jvnet.mimepull.MIMEParser)
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$STATE $r1;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser r0;
+
+        r0 := @parameter0: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+        $r1 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$STATE state>;
+
+        return $r1;
+    }
+
+    static java.util.logging.Logger access$200()
+    {
+        java.util.logging.Logger $r0;
+
+        $r0 = <com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.util.logging.Logger LOGGER>;
+
+        return $r0;
+    }
+
+    static com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$STATE access$102(com.sun.xml.internal.org.jvnet.mimepull.MIMEParser, com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$STATE)
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$STATE r1;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser r0;
+
+        r0 := @parameter0: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+        r1 := @parameter1: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$STATE;
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser$STATE state> = r1;
+
+        return r1;
+    }
+
+    static void access$300(com.sun.xml.internal.org.jvnet.mimepull.MIMEParser)
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser r0;
+
+        r0 := @parameter0: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+        specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: void skipPreamble()>();
+
+        return;
+    }
+
+    static com.sun.xml.internal.org.jvnet.mimepull.InternetHeaders access$400(com.sun.xml.internal.org.jvnet.mimepull.MIMEParser)
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.InternetHeaders $r1;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser r0;
+
+        r0 := @parameter0: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+        $r1 = specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: com.sun.xml.internal.org.jvnet.mimepull.InternetHeaders readHeaders()>();
+
+        return $r1;
+    }
+
+    static boolean access$502(com.sun.xml.internal.org.jvnet.mimepull.MIMEParser, boolean)
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser r0;
+        boolean z0;
+
+        r0 := @parameter0: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+        z0 := @parameter1: boolean;
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean bol> = z0;
+
+        return z0;
+    }
+
+    static java.nio.ByteBuffer access$600(com.sun.xml.internal.org.jvnet.mimepull.MIMEParser)
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser r0;
+        java.nio.ByteBuffer $r1;
+
+        r0 := @parameter0: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+        $r1 = specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.nio.ByteBuffer readBody()>();
+
+        return $r1;
+    }
+
+    static boolean access$700(com.sun.xml.internal.org.jvnet.mimepull.MIMEParser)
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser r0;
+        boolean $z0;
+
+        r0 := @parameter0: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+        $z0 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean done>;
+
+        return $z0;
+    }
+
+    static boolean access$002(com.sun.xml.internal.org.jvnet.mimepull.MIMEParser, boolean)
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser r0;
+        boolean z0;
+
+        r0 := @parameter0: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+        z0 := @parameter1: boolean;
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean parsed> = z0;
+
+        return z0;
+    }
+
+    static int access$800(com.sun.xml.internal.org.jvnet.mimepull.MIMEParser)
+    {
+        int $i0;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser r0;
+
+        r0 := @parameter0: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+        $i0 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int len>;
+
+        return $i0;
+    }
+
+    static byte[] access$900(com.sun.xml.internal.org.jvnet.mimepull.MIMEParser)
+    {
+        byte[] $r1;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser r0;
+
+        r0 := @parameter0: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+        $r1 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: byte[] buf>;
+
+        return $r1;
+    }
+
+    static void access$1000(com.sun.xml.internal.org.jvnet.mimepull.MIMEParser)
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser r0;
+
+        r0 := @parameter0: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+        specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: void doubleBuf()>();
+
+        return;
+    }
+
+    static boolean access$1100(com.sun.xml.internal.org.jvnet.mimepull.MIMEParser)
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser r0;
+        boolean $z0;
+
+        r0 := @parameter0: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+        $z0 = r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean eof>;
+
+        return $z0;
+    }
+
+    static java.nio.ByteBuffer access$1200(com.sun.xml.internal.org.jvnet.mimepull.MIMEParser, int, int)
+    {
+        int i0, i1;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParser r0;
+        java.nio.ByteBuffer $r1;
+
+        r0 := @parameter0: com.sun.xml.internal.org.jvnet.mimepull.MIMEParser;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r1 = specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.nio.ByteBuffer adjustBuf(int,int)>(i0, i1);
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0, $r1;
+        java.lang.String $r2;
+        java.util.logging.Logger $r3;
+        boolean $z0, $z1;
+
+        <com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: int NO_LWSP> = 1000;
+
+        <com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.lang.String HEADER_ENCODING> = "ISO8859-1";
+
+        $r0 = class "Lcom/sun/xml/internal/org/jvnet/mimepull/MIMEParser;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: boolean $assertionsDisabled> = $z1;
+
+        $r1 = class "Lcom/sun/xml/internal/org/jvnet/mimepull/MIMEParser;";
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.String getName()>();
+
+        $r3 = staticinvoke <java.util.logging.Logger: java.util.logging.Logger getLogger(java.lang.String)>($r2);
+
+        <com.sun.xml.internal.org.jvnet.mimepull.MIMEParser: java.util.logging.Logger LOGGER> = $r3;
+
+        return;
+    }
+}

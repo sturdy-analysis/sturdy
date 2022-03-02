@@ -1,0 +1,1029 @@
+public abstract class com.sun.security.sasl.util.AbstractSaslImpl extends java.lang.Object
+{
+    protected boolean completed;
+    protected boolean privacy;
+    protected boolean integrity;
+    protected byte[] qop;
+    protected byte allQop;
+    protected byte[] strength;
+    protected int sendMaxBufSize;
+    protected int recvMaxBufSize;
+    protected int rawSendSize;
+    protected java.lang.String myClassName;
+    private static final java.lang.String SASL_LOGGER_NAME;
+    protected static final java.lang.String MAX_SEND_BUF;
+    protected static final java.util.logging.Logger logger;
+    protected static final byte NO_PROTECTION;
+    protected static final byte INTEGRITY_ONLY_PROTECTION;
+    protected static final byte PRIVACY_PROTECTION;
+    protected static final byte LOW_STRENGTH;
+    protected static final byte MEDIUM_STRENGTH;
+    protected static final byte HIGH_STRENGTH;
+    private static final byte[] DEFAULT_QOP;
+    private static final java.lang.String[] QOP_TOKENS;
+    private static final byte[] QOP_MASKS;
+    private static final byte[] DEFAULT_STRENGTH;
+    private static final java.lang.String[] STRENGTH_TOKENS;
+    private static final byte[] STRENGTH_MASKS;
+
+    protected void <init>(java.util.Map, java.lang.String) throws javax.security.sasl.SaslException
+    {
+        byte[] $r3, $r4, $r7, $r11, $r22, $r24, $r29, $r35, $r37, $r42, $r50;
+        javax.security.sasl.SaslException $r45, $r47;
+        byte $b0, $b5, $b6, $b9;
+        java.util.Map r2;
+        java.lang.StringBuffer $r23, $r36;
+        java.lang.String r1, $r6, $r8, $r15, $r18, $r21, $r27, $r28, $r30, $r34, $r40, $r41, $r43, $r49, $r53, $r57;
+        java.lang.NumberFormatException $r44, $r46;
+        java.lang.Byte $r31;
+        boolean $z0, $z1;
+        java.util.logging.Logger $r10, $r13, $r17, $r20, $r25, $r32, $r38, $r51, $r54;
+        java.util.logging.Level $r9, $r12, $r16, $r19, $r26, $r33, $r39, $r52, $r55;
+        int $i1, $i2, $i3, $i4, $i7, $i8, i10, i11;
+        com.sun.security.sasl.util.AbstractSaslImpl r0;
+        java.lang.Object $r5, $r14, $r48, $r56;
+
+        r0 := @this: com.sun.security.sasl.util.AbstractSaslImpl;
+
+        r2 := @parameter0: java.util.Map;
+
+        r1 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.security.sasl.util.AbstractSaslImpl: boolean completed> = 0;
+
+        r0.<com.sun.security.sasl.util.AbstractSaslImpl: boolean privacy> = 0;
+
+        r0.<com.sun.security.sasl.util.AbstractSaslImpl: boolean integrity> = 0;
+
+        r0.<com.sun.security.sasl.util.AbstractSaslImpl: int sendMaxBufSize> = 0;
+
+        r0.<com.sun.security.sasl.util.AbstractSaslImpl: int recvMaxBufSize> = 65536;
+
+        r0.<com.sun.security.sasl.util.AbstractSaslImpl: java.lang.String myClassName> = r1;
+
+        if r2 == null goto label15;
+
+        $r5 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>("javax.security.sasl.qop");
+
+        $r6 = (java.lang.String) $r5;
+
+        $r7 = staticinvoke <com.sun.security.sasl.util.AbstractSaslImpl: byte[] parseQop(java.lang.String)>($r6);
+
+        r0.<com.sun.security.sasl.util.AbstractSaslImpl: byte[] qop> = $r7;
+
+        $r10 = <com.sun.security.sasl.util.AbstractSaslImpl: java.util.logging.Logger logger>;
+
+        $r9 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r8 = r0.<com.sun.security.sasl.util.AbstractSaslImpl: java.lang.String myClassName>;
+
+        virtualinvoke $r10.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Object)>($r9, $r8, "constructor", "SASLIMPL01:Preferred qop property: {0}", $r6);
+
+        $r11 = r0.<com.sun.security.sasl.util.AbstractSaslImpl: byte[] qop>;
+
+        $b0 = staticinvoke <com.sun.security.sasl.util.AbstractSaslImpl: byte combineMasks(byte[])>($r11);
+
+        r0.<com.sun.security.sasl.util.AbstractSaslImpl: byte allQop> = $b0;
+
+        $r13 = <com.sun.security.sasl.util.AbstractSaslImpl: java.util.logging.Logger logger>;
+
+        $r12 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $z0 = virtualinvoke $r13.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r12);
+
+        if $z0 == 0 goto label03;
+
+        $r32 = <com.sun.security.sasl.util.AbstractSaslImpl: java.util.logging.Logger logger>;
+
+        $r33 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r34 = r0.<com.sun.security.sasl.util.AbstractSaslImpl: java.lang.String myClassName>;
+
+        $r31 = new java.lang.Byte;
+
+        $b6 = r0.<com.sun.security.sasl.util.AbstractSaslImpl: byte allQop>;
+
+        specialinvoke $r31.<java.lang.Byte: void <init>(byte)>($b6);
+
+        virtualinvoke $r32.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Object)>($r33, $r34, "constructor", "SASLIMPL02:Preferred qop mask: {0}", $r31);
+
+        $r35 = r0.<com.sun.security.sasl.util.AbstractSaslImpl: byte[] qop>;
+
+        $i7 = lengthof $r35;
+
+        if $i7 <= 0 goto label03;
+
+        $r36 = new java.lang.StringBuffer;
+
+        specialinvoke $r36.<java.lang.StringBuffer: void <init>()>();
+
+        i10 = 0;
+
+     label01:
+        $r37 = r0.<com.sun.security.sasl.util.AbstractSaslImpl: byte[] qop>;
+
+        $i8 = lengthof $r37;
+
+        if i10 >= $i8 goto label02;
+
+        $r42 = r0.<com.sun.security.sasl.util.AbstractSaslImpl: byte[] qop>;
+
+        $b9 = $r42[i10];
+
+        $r43 = staticinvoke <java.lang.Byte: java.lang.String toString(byte)>($b9);
+
+        virtualinvoke $r36.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r43);
+
+        virtualinvoke $r36.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(32);
+
+        i10 = i10 + 1;
+
+        goto label01;
+
+     label02:
+        $r38 = <com.sun.security.sasl.util.AbstractSaslImpl: java.util.logging.Logger logger>;
+
+        $r39 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r40 = r0.<com.sun.security.sasl.util.AbstractSaslImpl: java.lang.String myClassName>;
+
+        $r41 = virtualinvoke $r36.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        virtualinvoke $r38.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Object)>($r39, $r40, "constructor", "SASLIMPL03:Preferred qops : {0}", $r41);
+
+     label03:
+        $r48 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>("javax.security.sasl.strength");
+
+        $r49 = (java.lang.String) $r48;
+
+        $r50 = staticinvoke <com.sun.security.sasl.util.AbstractSaslImpl: byte[] parseStrength(java.lang.String)>($r49);
+
+        r0.<com.sun.security.sasl.util.AbstractSaslImpl: byte[] strength> = $r50;
+
+        $r51 = <com.sun.security.sasl.util.AbstractSaslImpl: java.util.logging.Logger logger>;
+
+        $r52 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r53 = r0.<com.sun.security.sasl.util.AbstractSaslImpl: java.lang.String myClassName>;
+
+        virtualinvoke $r51.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Object)>($r52, $r53, "constructor", "SASLIMPL04:Preferred strength property: {0}", $r49);
+
+        $r54 = <com.sun.security.sasl.util.AbstractSaslImpl: java.util.logging.Logger logger>;
+
+        $r55 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $z1 = virtualinvoke $r54.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r55);
+
+        if $z1 == 0 goto label06;
+
+        $r22 = r0.<com.sun.security.sasl.util.AbstractSaslImpl: byte[] strength>;
+
+        $i3 = lengthof $r22;
+
+        if $i3 <= 0 goto label06;
+
+        $r23 = new java.lang.StringBuffer;
+
+        specialinvoke $r23.<java.lang.StringBuffer: void <init>()>();
+
+        i11 = 0;
+
+     label04:
+        $r24 = r0.<com.sun.security.sasl.util.AbstractSaslImpl: byte[] strength>;
+
+        $i4 = lengthof $r24;
+
+        if i11 >= $i4 goto label05;
+
+        $r29 = r0.<com.sun.security.sasl.util.AbstractSaslImpl: byte[] strength>;
+
+        $b5 = $r29[i11];
+
+        $r30 = staticinvoke <java.lang.Byte: java.lang.String toString(byte)>($b5);
+
+        virtualinvoke $r23.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r30);
+
+        virtualinvoke $r23.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(32);
+
+        i11 = i11 + 1;
+
+        goto label04;
+
+     label05:
+        $r25 = <com.sun.security.sasl.util.AbstractSaslImpl: java.util.logging.Logger logger>;
+
+        $r26 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r27 = r0.<com.sun.security.sasl.util.AbstractSaslImpl: java.lang.String myClassName>;
+
+        $r28 = virtualinvoke $r23.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        virtualinvoke $r25.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Object)>($r26, $r27, "constructor", "SASLIMPL05:Cipher strengths: {0}", $r28);
+
+     label06:
+        $r56 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>("javax.security.sasl.maxbuffer");
+
+        $r57 = (java.lang.String) $r56;
+
+        if $r57 == null goto label10;
+
+     label07:
+        $r20 = <com.sun.security.sasl.util.AbstractSaslImpl: java.util.logging.Logger logger>;
+
+        $r19 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r18 = r0.<com.sun.security.sasl.util.AbstractSaslImpl: java.lang.String myClassName>;
+
+        virtualinvoke $r20.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Object)>($r19, $r18, "constructor", "SASLIMPL06:Max receive buffer size: {0}", $r57);
+
+        $i2 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r57);
+
+        r0.<com.sun.security.sasl.util.AbstractSaslImpl: int recvMaxBufSize> = $i2;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r46 := @caughtexception;
+
+        $r47 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r47.<javax.security.sasl.SaslException: void <init>(java.lang.String)>("Property must be string representation of integer: javax.security.sasl.maxbuffer");
+
+        throw $r47;
+
+     label10:
+        $r14 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>("javax.security.sasl.sendmaxbuffer");
+
+        $r21 = (java.lang.String) $r14;
+
+        if $r21 == null goto label14;
+
+     label11:
+        $r17 = <com.sun.security.sasl.util.AbstractSaslImpl: java.util.logging.Logger logger>;
+
+        $r16 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r15 = r0.<com.sun.security.sasl.util.AbstractSaslImpl: java.lang.String myClassName>;
+
+        virtualinvoke $r17.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Object)>($r16, $r15, "constructor", "SASLIMPL07:Max send buffer size: {0}", $r21);
+
+        $i1 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r21);
+
+        r0.<com.sun.security.sasl.util.AbstractSaslImpl: int sendMaxBufSize> = $i1;
+
+     label12:
+        goto label14;
+
+     label13:
+        $r44 := @caughtexception;
+
+        $r45 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r45.<javax.security.sasl.SaslException: void <init>(java.lang.String)>("Property must be string representation of integer: javax.security.sasl.sendmaxbuffer");
+
+        throw $r45;
+
+     label14:
+        goto label16;
+
+     label15:
+        $r3 = <com.sun.security.sasl.util.AbstractSaslImpl: byte[] DEFAULT_QOP>;
+
+        r0.<com.sun.security.sasl.util.AbstractSaslImpl: byte[] qop> = $r3;
+
+        r0.<com.sun.security.sasl.util.AbstractSaslImpl: byte allQop> = 1;
+
+        $r4 = <com.sun.security.sasl.util.AbstractSaslImpl: byte[] STRENGTH_MASKS>;
+
+        r0.<com.sun.security.sasl.util.AbstractSaslImpl: byte[] strength> = $r4;
+
+     label16:
+        return;
+
+        catch java.lang.NumberFormatException from label07 to label08 with label09;
+        catch java.lang.NumberFormatException from label11 to label12 with label13;
+    }
+
+    public boolean isComplete()
+    {
+        com.sun.security.sasl.util.AbstractSaslImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.security.sasl.util.AbstractSaslImpl;
+
+        $z0 = r0.<com.sun.security.sasl.util.AbstractSaslImpl: boolean completed>;
+
+        return $z0;
+    }
+
+    public java.lang.Object getNegotiatedProperty(java.lang.String)
+    {
+        java.lang.IllegalStateException $r5;
+        byte b4;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String r1, $r2, $r3, $r4;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        com.sun.security.sasl.util.AbstractSaslImpl r0;
+
+        r0 := @this: com.sun.security.sasl.util.AbstractSaslImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $z0 = r0.<com.sun.security.sasl.util.AbstractSaslImpl: boolean completed>;
+
+        if $z0 != 0 goto label01;
+
+        $r5 = new java.lang.IllegalStateException;
+
+        specialinvoke $r5.<java.lang.IllegalStateException: void <init>(java.lang.String)>("SASL authentication not completed");
+
+        throw $r5;
+
+     label01:
+        b4 = -1;
+
+        $i0 = virtualinvoke r1.<java.lang.String: int hashCode()>();
+
+        lookupswitch($i0)
+        {
+            case -2079432448: goto label04;
+            case -1673898581: goto label05;
+            case -1548608927: goto label02;
+            case 1495157683: goto label03;
+            default: goto label06;
+        };
+
+     label02:
+        $z4 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("javax.security.sasl.qop");
+
+        if $z4 == 0 goto label06;
+
+        b4 = 0;
+
+        goto label06;
+
+     label03:
+        $z1 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("javax.security.sasl.maxbuffer");
+
+        if $z1 == 0 goto label06;
+
+        b4 = 1;
+
+        goto label06;
+
+     label04:
+        $z6 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("javax.security.sasl.rawsendsize");
+
+        if $z6 == 0 goto label06;
+
+        b4 = 2;
+
+        goto label06;
+
+     label05:
+        $z5 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("javax.security.sasl.sendmaxbuffer");
+
+        if $z5 == 0 goto label06;
+
+        b4 = 3;
+
+     label06:
+        tableswitch(b4)
+        {
+            case 0: goto label07;
+            case 1: goto label10;
+            case 2: goto label11;
+            case 3: goto label12;
+            default: goto label13;
+        };
+
+     label07:
+        $z2 = r0.<com.sun.security.sasl.util.AbstractSaslImpl: boolean privacy>;
+
+        if $z2 == 0 goto label08;
+
+        return "auth-conf";
+
+     label08:
+        $z3 = r0.<com.sun.security.sasl.util.AbstractSaslImpl: boolean integrity>;
+
+        if $z3 == 0 goto label09;
+
+        return "auth-int";
+
+     label09:
+        return "auth";
+
+     label10:
+        $i3 = r0.<com.sun.security.sasl.util.AbstractSaslImpl: int recvMaxBufSize>;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i3);
+
+        return $r4;
+
+     label11:
+        $i2 = r0.<com.sun.security.sasl.util.AbstractSaslImpl: int rawSendSize>;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i2);
+
+        return $r3;
+
+     label12:
+        $i1 = r0.<com.sun.security.sasl.util.AbstractSaslImpl: int sendMaxBufSize>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i1);
+
+        return $r2;
+
+     label13:
+        return null;
+    }
+
+    protected static final byte combineMasks(byte[])
+    {
+        byte[] r0;
+        byte $b1, $b2, b3;
+        int $i0, i4;
+
+        r0 := @parameter0: byte[];
+
+        b3 = 0;
+
+        i4 = 0;
+
+     label1:
+        $i0 = lengthof r0;
+
+        if i4 >= $i0 goto label2;
+
+        $b1 = r0[i4];
+
+        $b2 = b3 | $b1;
+
+        b3 = (byte) $b2;
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label2:
+        return b3;
+    }
+
+    protected static final byte findPreferredMask(byte, byte[])
+    {
+        byte[] r0;
+        byte b1, $b2, $b3, $b4;
+        int $i0, i5;
+
+        b1 := @parameter0: byte;
+
+        r0 := @parameter1: byte[];
+
+        i5 = 0;
+
+     label1:
+        $i0 = lengthof r0;
+
+        if i5 >= $i0 goto label3;
+
+        $b2 = r0[i5];
+
+        $b3 = $b2 & b1;
+
+        if $b3 == 0 goto label2;
+
+        $b4 = r0[i5];
+
+        return $b4;
+
+     label2:
+        i5 = i5 + 1;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    private static final byte[] parseQop(java.lang.String) throws javax.security.sasl.SaslException
+    {
+        byte[] $r1;
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <com.sun.security.sasl.util.AbstractSaslImpl: byte[] parseQop(java.lang.String,java.lang.String[],boolean)>(r0, null, 0);
+
+        return $r1;
+    }
+
+    protected static final byte[] parseQop(java.lang.String, java.lang.String[], boolean) throws javax.security.sasl.SaslException
+    {
+        byte[] $r2, $r4, $r5;
+        java.lang.String[] r1, $r3;
+        java.lang.String r0;
+        boolean z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String[];
+
+        z0 := @parameter2: boolean;
+
+        if r0 != null goto label1;
+
+        $r5 = <com.sun.security.sasl.util.AbstractSaslImpl: byte[] DEFAULT_QOP>;
+
+        return $r5;
+
+     label1:
+        $r3 = <com.sun.security.sasl.util.AbstractSaslImpl: java.lang.String[] QOP_TOKENS>;
+
+        $r2 = <com.sun.security.sasl.util.AbstractSaslImpl: byte[] QOP_MASKS>;
+
+        $r4 = staticinvoke <com.sun.security.sasl.util.AbstractSaslImpl: byte[] parseProp(java.lang.String,java.lang.String,java.lang.String[],byte[],java.lang.String[],boolean)>("javax.security.sasl.qop", r0, $r3, $r2, r1, z0);
+
+        return $r4;
+    }
+
+    private static final byte[] parseStrength(java.lang.String) throws javax.security.sasl.SaslException
+    {
+        byte[] $r1, $r3, $r4;
+        java.lang.String[] $r2;
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        $r4 = <com.sun.security.sasl.util.AbstractSaslImpl: byte[] DEFAULT_STRENGTH>;
+
+        return $r4;
+
+     label1:
+        $r2 = <com.sun.security.sasl.util.AbstractSaslImpl: java.lang.String[] STRENGTH_TOKENS>;
+
+        $r1 = <com.sun.security.sasl.util.AbstractSaslImpl: byte[] STRENGTH_MASKS>;
+
+        $r3 = staticinvoke <com.sun.security.sasl.util.AbstractSaslImpl: byte[] parseProp(java.lang.String,java.lang.String,java.lang.String[],byte[],java.lang.String[],boolean)>("javax.security.sasl.strength", r0, $r2, $r1, null, 0);
+
+        return $r3;
+    }
+
+    private static final byte[] parseProp(java.lang.String, java.lang.String, java.lang.String[], byte[], java.lang.String[], boolean) throws javax.security.sasl.SaslException
+    {
+        byte[] r3, r14;
+        java.lang.String[] r2, r15;
+        javax.security.sasl.SaslException $r5;
+        byte $b4;
+        java.util.StringTokenizer $r0;
+        int $i0, $i1, $i2, $i3, i5, i6, i7, $i8;
+        java.lang.String r1, $r4, r8, $r12, $r13;
+        boolean z0, $z1, $z2, z3, z4, z5;
+        java.lang.StringBuilder $r6, $r7, $r9, $r10, $r11;
+
+        r8 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String[];
+
+        r14 := @parameter3: byte[];
+
+        r15 := @parameter4: java.lang.String[];
+
+        z0 := @parameter5: boolean;
+
+        $r0 = new java.util.StringTokenizer;
+
+        specialinvoke $r0.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>(r1, ", \t\n");
+
+        $i0 = lengthof r2;
+
+        r3 = newarray (byte)[$i0];
+
+        i5 = 0;
+
+     label1:
+        $z2 = virtualinvoke $r0.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z2 == 0 goto label5;
+
+        $i1 = lengthof r3;
+
+        if i5 >= $i1 goto label5;
+
+        $r4 = virtualinvoke $r0.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        z3 = 0;
+
+        z5 = 0;
+
+        z4 = 0;
+
+        i6 = 0;
+
+     label2:
+        if z4 != 0 goto label4;
+
+        $i2 = lengthof r2;
+
+        if i6 >= $i2 goto label4;
+
+        $r13 = r2[i6];
+
+        $z1 = virtualinvoke $r4.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r13);
+
+        if $z1 == 0 goto label3;
+
+        z3 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+        $i3 = i5;
+
+        i5 = i5 + 1;
+
+        $b4 = r14[i6];
+
+        r3[$i3] = $b4;
+
+        if r15 == null goto label3;
+
+        r15[i6] = $r4;
+
+     label3:
+        i6 = i6 + 1;
+
+        goto label2;
+
+     label4:
+        if z5 != 0 goto label1;
+
+        if z0 != 0 goto label1;
+
+        $r5 = new javax.security.sasl.SaslException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid token in ");
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<javax.security.sasl.SaslException: void <init>(java.lang.String)>($r12);
+
+        throw $r5;
+
+     label5:
+        i7 = i5;
+
+     label6:
+        $i8 = lengthof r3;
+
+        if i7 >= $i8 goto label7;
+
+        r3[i7] = 0;
+
+        i7 = i7 + 1;
+
+        goto label6;
+
+     label7:
+        return r3;
+    }
+
+    protected static final void traceOutput(java.lang.String, java.lang.String, java.lang.String, byte[])
+    {
+        byte[] r3;
+        int $i0;
+        java.lang.String r0, r1, r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: byte[];
+
+        if r3 != null goto label1;
+
+        $i0 = 0;
+
+        goto label2;
+
+     label1:
+        $i0 = lengthof r3;
+
+     label2:
+        staticinvoke <com.sun.security.sasl.util.AbstractSaslImpl: void traceOutput(java.lang.String,java.lang.String,java.lang.String,byte[],int,int)>(r0, r1, r2, r3, 0, $i0);
+
+        return;
+    }
+
+    protected static final void traceOutput(java.lang.String, java.lang.String, java.lang.String, byte[], int, int)
+    {
+        byte[] r2;
+        java.lang.Object[] $r5;
+        java.io.ByteArrayOutputStream $r9;
+        java.lang.Integer $r7;
+        java.util.logging.Level $r0, $r13, r15;
+        java.io.ByteArrayInputStream $r11;
+        int i0, i1, i2;
+        java.lang.String r3, r4, r6, r16;
+        sun.misc.HexDumpEncoder $r10;
+        boolean $z0;
+        java.util.logging.Logger $r1, $r8, $r14;
+        java.lang.Exception $r12;
+
+        r3 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.lang.String;
+
+        r6 := @parameter2: java.lang.String;
+
+        r2 := @parameter3: byte[];
+
+        i0 := @parameter4: int;
+
+        i1 := @parameter5: int;
+
+     label1:
+        i2 = i1;
+
+        $r1 = <com.sun.security.sasl.util.AbstractSaslImpl: java.util.logging.Logger logger>;
+
+        $r0 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z0 = virtualinvoke $r1.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r0);
+
+        if $z0 != 0 goto label2;
+
+        i1 = staticinvoke <java.lang.Math: int min(int,int)>(16, i1);
+
+        r15 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        goto label3;
+
+     label2:
+        r15 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+     label3:
+        if r2 == null goto label4;
+
+        $r9 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r9.<java.io.ByteArrayOutputStream: void <init>(int)>(i1);
+
+        $r10 = new sun.misc.HexDumpEncoder;
+
+        specialinvoke $r10.<sun.misc.HexDumpEncoder: void <init>()>();
+
+        $r11 = new java.io.ByteArrayInputStream;
+
+        specialinvoke $r11.<java.io.ByteArrayInputStream: void <init>(byte[],int,int)>(r2, i0, i1);
+
+        virtualinvoke $r10.<sun.misc.HexDumpEncoder: void encodeBuffer(java.io.InputStream,java.io.OutputStream)>($r11, $r9);
+
+        r16 = virtualinvoke $r9.<java.io.ByteArrayOutputStream: java.lang.String toString()>();
+
+        goto label5;
+
+     label4:
+        r16 = "NULL";
+
+     label5:
+        $r8 = <com.sun.security.sasl.util.AbstractSaslImpl: java.util.logging.Logger logger>;
+
+        $r5 = newarray (java.lang.Object)[3];
+
+        $r5[0] = r6;
+
+        $r7 = new java.lang.Integer;
+
+        specialinvoke $r7.<java.lang.Integer: void <init>(int)>(i2);
+
+        $r5[1] = $r7;
+
+        $r5[2] = r16;
+
+        virtualinvoke $r8.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Object[])>(r15, r3, r4, "{0} ( {1} ): {2}", $r5);
+
+     label6:
+        goto label8;
+
+     label7:
+        $r12 := @caughtexception;
+
+        $r14 = <com.sun.security.sasl.util.AbstractSaslImpl: java.util.logging.Logger logger>;
+
+        $r13 = <java.util.logging.Level: java.util.logging.Level WARNING>;
+
+        virtualinvoke $r14.<java.util.logging.Logger: void logp(java.util.logging.Level,java.lang.String,java.lang.String,java.lang.String,java.lang.Throwable)>($r13, r3, r4, "SASLIMPL09:Error generating trace output: {0}", $r12);
+
+     label8:
+        return;
+
+        catch java.lang.Exception from label1 to label6 with label7;
+    }
+
+    protected static final int networkByteOrderToInt(byte[], int, int)
+    {
+        byte[] r0;
+        java.lang.IllegalArgumentException $r2;
+        short $s4, $s8;
+        byte $b3;
+        int i0, i1, $i2, i5, i6, i7, $i9;
+
+        r0 := @parameter0: byte[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        if i0 <= 4 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Cannot handle more than 4 bytes");
+
+        throw $r2;
+
+     label1:
+        i5 = 0;
+
+        i6 = 0;
+
+     label2:
+        if i6 >= i0 goto label3;
+
+        i7 = i5 << 8;
+
+        $i2 = i1 + i6;
+
+        $b3 = r0[$i2];
+
+        $s8 = (short) $b3;
+
+        $s4 = $s8 & 255;
+
+        $i9 = (int) $s4;
+
+        i5 = i7 | $i9;
+
+        i6 = i6 + 1;
+
+        goto label2;
+
+     label3:
+        return i5;
+    }
+
+    protected static final void intToNetworkByteOrder(int, byte[], int, int)
+    {
+        byte[] r0;
+        java.lang.IllegalArgumentException $r2;
+        byte $b3;
+        int i0, i1, $i2, $i4, i5, i6, $i8;
+
+        i5 := @parameter0: int;
+
+        r0 := @parameter1: byte[];
+
+        i1 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        if i0 <= 4 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Cannot handle more than 4 bytes");
+
+        throw $r2;
+
+     label1:
+        i6 = i0 - 1;
+
+     label2:
+        if i6 < 0 goto label3;
+
+        $i4 = i1 + i6;
+
+        $i2 = i5 & 255;
+
+        $b3 = (byte) $i2;
+
+        r0[$i4] = $b3;
+
+        i5 = i5 >>> 8;
+
+        $i8 = (int) -1;
+
+        i6 = i6 + $i8;
+
+        goto label2;
+
+     label3:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        byte[] $r1, $r3, $r4, $r6;
+        java.lang.String[] $r2, $r5;
+        java.util.logging.Logger $r0;
+
+        <com.sun.security.sasl.util.AbstractSaslImpl: byte HIGH_STRENGTH> = 4;
+
+        <com.sun.security.sasl.util.AbstractSaslImpl: byte MEDIUM_STRENGTH> = 2;
+
+        <com.sun.security.sasl.util.AbstractSaslImpl: byte LOW_STRENGTH> = 1;
+
+        <com.sun.security.sasl.util.AbstractSaslImpl: byte PRIVACY_PROTECTION> = 4;
+
+        <com.sun.security.sasl.util.AbstractSaslImpl: byte INTEGRITY_ONLY_PROTECTION> = 2;
+
+        <com.sun.security.sasl.util.AbstractSaslImpl: byte NO_PROTECTION> = 1;
+
+        <com.sun.security.sasl.util.AbstractSaslImpl: java.lang.String MAX_SEND_BUF> = "javax.security.sasl.sendmaxbuffer";
+
+        <com.sun.security.sasl.util.AbstractSaslImpl: java.lang.String SASL_LOGGER_NAME> = "javax.security.sasl";
+
+        $r0 = staticinvoke <java.util.logging.Logger: java.util.logging.Logger getLogger(java.lang.String)>("javax.security.sasl");
+
+        <com.sun.security.sasl.util.AbstractSaslImpl: java.util.logging.Logger logger> = $r0;
+
+        $r1 = newarray (byte)[1];
+
+        $r1[0] = 1;
+
+        <com.sun.security.sasl.util.AbstractSaslImpl: byte[] DEFAULT_QOP> = $r1;
+
+        $r2 = newarray (java.lang.String)[3];
+
+        $r2[0] = "auth-conf";
+
+        $r2[1] = "auth-int";
+
+        $r2[2] = "auth";
+
+        <com.sun.security.sasl.util.AbstractSaslImpl: java.lang.String[] QOP_TOKENS> = $r2;
+
+        $r3 = newarray (byte)[3];
+
+        $r3[0] = 4;
+
+        $r3[1] = 2;
+
+        $r3[2] = 1;
+
+        <com.sun.security.sasl.util.AbstractSaslImpl: byte[] QOP_MASKS> = $r3;
+
+        $r4 = newarray (byte)[3];
+
+        $r4[0] = 4;
+
+        $r4[1] = 2;
+
+        $r4[2] = 1;
+
+        <com.sun.security.sasl.util.AbstractSaslImpl: byte[] DEFAULT_STRENGTH> = $r4;
+
+        $r5 = newarray (java.lang.String)[3];
+
+        $r5[0] = "low";
+
+        $r5[1] = "medium";
+
+        $r5[2] = "high";
+
+        <com.sun.security.sasl.util.AbstractSaslImpl: java.lang.String[] STRENGTH_TOKENS> = $r5;
+
+        $r6 = newarray (byte)[3];
+
+        $r6[0] = 1;
+
+        $r6[1] = 2;
+
+        $r6[2] = 4;
+
+        <com.sun.security.sasl.util.AbstractSaslImpl: byte[] STRENGTH_MASKS> = $r6;
+
+        return;
+    }
+}

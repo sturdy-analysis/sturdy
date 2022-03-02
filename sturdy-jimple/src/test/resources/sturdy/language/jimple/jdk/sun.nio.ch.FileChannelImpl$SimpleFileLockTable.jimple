@@ -1,0 +1,286 @@
+class sun.nio.ch.FileChannelImpl$SimpleFileLockTable extends sun.nio.ch.FileLockTable
+{
+    private final java.util.List lockList;
+    static final boolean $assertionsDisabled;
+
+    public void <init>()
+    {
+        sun.nio.ch.FileChannelImpl$SimpleFileLockTable r0;
+        java.util.ArrayList $r1;
+
+        r0 := @this: sun.nio.ch.FileChannelImpl$SimpleFileLockTable;
+
+        specialinvoke r0.<sun.nio.ch.FileLockTable: void <init>()>();
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>(int)>(2);
+
+        r0.<sun.nio.ch.FileChannelImpl$SimpleFileLockTable: java.util.List lockList> = $r1;
+
+        return;
+    }
+
+    private void checkList(long, long) throws java.nio.channels.OverlappingFileLockException
+    {
+        java.nio.channels.OverlappingFileLockException $r5;
+        java.util.Iterator $r2;
+        long l0, l1;
+        java.lang.AssertionError $r7;
+        java.nio.channels.FileLock r4;
+        java.util.List $r1, $r6;
+        java.lang.Object $r3;
+        sun.nio.ch.FileChannelImpl$SimpleFileLockTable r0;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: sun.nio.ch.FileChannelImpl$SimpleFileLockTable;
+
+        l0 := @parameter0: long;
+
+        l1 := @parameter1: long;
+
+        $z0 = <sun.nio.ch.FileChannelImpl$SimpleFileLockTable: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $r6 = r0.<sun.nio.ch.FileChannelImpl$SimpleFileLockTable: java.util.List lockList>;
+
+        $z2 = staticinvoke <java.lang.Thread: boolean holdsLock(java.lang.Object)>($r6);
+
+        if $z2 != 0 goto label1;
+
+        $r7 = new java.lang.AssertionError;
+
+        specialinvoke $r7.<java.lang.AssertionError: void <init>()>();
+
+        throw $r7;
+
+     label1:
+        $r1 = r0.<sun.nio.ch.FileChannelImpl$SimpleFileLockTable: java.util.List lockList>;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z3 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label4;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (java.nio.channels.FileLock) $r3;
+
+        $z1 = virtualinvoke r4.<java.nio.channels.FileLock: boolean overlaps(long,long)>(l0, l1);
+
+        if $z1 == 0 goto label3;
+
+        $r5 = new java.nio.channels.OverlappingFileLockException;
+
+        specialinvoke $r5.<java.nio.channels.OverlappingFileLockException: void <init>()>();
+
+        throw $r5;
+
+     label3:
+        goto label2;
+
+     label4:
+        return;
+    }
+
+    public void add(java.nio.channels.FileLock) throws java.nio.channels.OverlappingFileLockException
+    {
+        java.lang.Throwable $r4;
+        java.util.List $r1, $r3;
+        long $l0, $l1;
+        sun.nio.ch.FileChannelImpl$SimpleFileLockTable r0;
+        java.nio.channels.FileLock r2;
+
+        r0 := @this: sun.nio.ch.FileChannelImpl$SimpleFileLockTable;
+
+        r2 := @parameter0: java.nio.channels.FileLock;
+
+        $r1 = r0.<sun.nio.ch.FileChannelImpl$SimpleFileLockTable: java.util.List lockList>;
+
+        entermonitor $r1;
+
+     label1:
+        $l0 = virtualinvoke r2.<java.nio.channels.FileLock: long position()>();
+
+        $l1 = virtualinvoke r2.<java.nio.channels.FileLock: long size()>();
+
+        specialinvoke r0.<sun.nio.ch.FileChannelImpl$SimpleFileLockTable: void checkList(long,long)>($l0, $l1);
+
+        $r3 = r0.<sun.nio.ch.FileChannelImpl$SimpleFileLockTable: java.util.List lockList>;
+
+        interfaceinvoke $r3.<java.util.List: boolean add(java.lang.Object)>(r2);
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r4;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void remove(java.nio.channels.FileLock)
+    {
+        java.lang.Throwable $r4;
+        java.util.List $r1, $r3;
+        sun.nio.ch.FileChannelImpl$SimpleFileLockTable r0;
+        java.nio.channels.FileLock r2;
+
+        r0 := @this: sun.nio.ch.FileChannelImpl$SimpleFileLockTable;
+
+        r2 := @parameter0: java.nio.channels.FileLock;
+
+        $r1 = r0.<sun.nio.ch.FileChannelImpl$SimpleFileLockTable: java.util.List lockList>;
+
+        entermonitor $r1;
+
+     label1:
+        $r3 = r0.<sun.nio.ch.FileChannelImpl$SimpleFileLockTable: java.util.List lockList>;
+
+        interfaceinvoke $r3.<java.util.List: boolean remove(java.lang.Object)>(r2);
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r4;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public java.util.List removeAll()
+    {
+        java.lang.Throwable $r5;
+        java.util.List $r1, $r3, $r4;
+        sun.nio.ch.FileChannelImpl$SimpleFileLockTable r0;
+        java.util.ArrayList $r2;
+
+        r0 := @this: sun.nio.ch.FileChannelImpl$SimpleFileLockTable;
+
+        $r1 = r0.<sun.nio.ch.FileChannelImpl$SimpleFileLockTable: java.util.List lockList>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = new java.util.ArrayList;
+
+        $r3 = r0.<sun.nio.ch.FileChannelImpl$SimpleFileLockTable: java.util.List lockList>;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>(java.util.Collection)>($r3);
+
+        $r4 = r0.<sun.nio.ch.FileChannelImpl$SimpleFileLockTable: java.util.List lockList>;
+
+        interfaceinvoke $r4.<java.util.List: void clear()>();
+
+        exitmonitor $r1;
+
+     label2:
+        return $r2;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void replace(java.nio.channels.FileLock, java.nio.channels.FileLock)
+    {
+        java.lang.Throwable $r6;
+        java.util.List $r1, $r3, $r5;
+        sun.nio.ch.FileChannelImpl$SimpleFileLockTable r0;
+        java.nio.channels.FileLock r2, r4;
+
+        r0 := @this: sun.nio.ch.FileChannelImpl$SimpleFileLockTable;
+
+        r2 := @parameter0: java.nio.channels.FileLock;
+
+        r4 := @parameter1: java.nio.channels.FileLock;
+
+        $r1 = r0.<sun.nio.ch.FileChannelImpl$SimpleFileLockTable: java.util.List lockList>;
+
+        entermonitor $r1;
+
+     label1:
+        $r3 = r0.<sun.nio.ch.FileChannelImpl$SimpleFileLockTable: java.util.List lockList>;
+
+        interfaceinvoke $r3.<java.util.List: boolean remove(java.lang.Object)>(r2);
+
+        $r5 = r0.<sun.nio.ch.FileChannelImpl$SimpleFileLockTable: java.util.List lockList>;
+
+        interfaceinvoke $r5.<java.util.List: boolean add(java.lang.Object)>(r4);
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r6 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r6;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        $r0 = class "Lsun/nio/ch/FileChannelImpl;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.nio.ch.FileChannelImpl$SimpleFileLockTable: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

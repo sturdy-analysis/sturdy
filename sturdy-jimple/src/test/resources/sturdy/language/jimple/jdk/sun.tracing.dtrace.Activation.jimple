@@ -1,0 +1,94 @@
+class sun.tracing.dtrace.Activation extends java.lang.Object
+{
+    private sun.tracing.dtrace.SystemResource resource;
+    private int referenceCount;
+
+    void <init>(java.lang.String, sun.tracing.dtrace.DTraceProvider[])
+    {
+        sun.tracing.dtrace.Activation r0;
+        long $l1;
+        sun.tracing.dtrace.DTraceProvider r5;
+        java.lang.SecurityManager $r1;
+        sun.tracing.dtrace.SystemResource $r3;
+        int $i0, $i2, i3;
+        java.lang.RuntimePermission $r6;
+        sun.tracing.dtrace.DTraceProvider[] r2;
+        java.lang.String r4;
+
+        r0 := @this: sun.tracing.dtrace.Activation;
+
+        r4 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: sun.tracing.dtrace.DTraceProvider[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r1 == null goto label1;
+
+        $r6 = new java.lang.RuntimePermission;
+
+        specialinvoke $r6.<java.lang.RuntimePermission: void <init>(java.lang.String)>("com.sun.tracing.dtrace.createProvider");
+
+        virtualinvoke $r1.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r6);
+
+     label1:
+        $i0 = lengthof r2;
+
+        r0.<sun.tracing.dtrace.Activation: int referenceCount> = $i0;
+
+        $i2 = lengthof r2;
+
+        i3 = 0;
+
+     label2:
+        if i3 >= $i2 goto label3;
+
+        r5 = r2[i3];
+
+        virtualinvoke r5.<sun.tracing.dtrace.DTraceProvider: void setActivation(sun.tracing.dtrace.Activation)>(r0);
+
+        i3 = i3 + 1;
+
+        goto label2;
+
+     label3:
+        $r3 = new sun.tracing.dtrace.SystemResource;
+
+        $l1 = staticinvoke <sun.tracing.dtrace.JVM: long activate(java.lang.String,sun.tracing.dtrace.DTraceProvider[])>(r4, r2);
+
+        specialinvoke $r3.<sun.tracing.dtrace.SystemResource: void <init>(sun.tracing.dtrace.Activation,long)>(r0, $l1);
+
+        r0.<sun.tracing.dtrace.Activation: sun.tracing.dtrace.SystemResource resource> = $r3;
+
+        return;
+    }
+
+    void disposeProvider(sun.tracing.dtrace.DTraceProvider)
+    {
+        sun.tracing.dtrace.Activation r0;
+        int $i0, $i1;
+        sun.tracing.dtrace.DTraceProvider r2;
+        sun.tracing.dtrace.SystemResource $r1;
+
+        r0 := @this: sun.tracing.dtrace.Activation;
+
+        r2 := @parameter0: sun.tracing.dtrace.DTraceProvider;
+
+        $i0 = r0.<sun.tracing.dtrace.Activation: int referenceCount>;
+
+        $i1 = $i0 - 1;
+
+        r0.<sun.tracing.dtrace.Activation: int referenceCount> = $i1;
+
+        if $i1 != 0 goto label1;
+
+        $r1 = r0.<sun.tracing.dtrace.Activation: sun.tracing.dtrace.SystemResource resource>;
+
+        virtualinvoke $r1.<sun.tracing.dtrace.SystemResource: void dispose()>();
+
+     label1:
+        return;
+    }
+}

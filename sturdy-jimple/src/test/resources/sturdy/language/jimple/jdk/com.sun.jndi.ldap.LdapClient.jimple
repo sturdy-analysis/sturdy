@@ -1,0 +1,3932 @@
+public final class com.sun.jndi.ldap.LdapClient extends java.lang.Object implements com.sun.jndi.ldap.pool.PooledConnection
+{
+    private static final int debug;
+    static final boolean caseIgnore;
+    private static final java.util.Hashtable defaultBinaryAttrs;
+    private static final java.lang.String DISCONNECT_OID;
+    boolean isLdapv3;
+    int referenceCount;
+    final com.sun.jndi.ldap.Connection conn;
+    private final com.sun.jndi.ldap.pool.PoolCallback pcb;
+    private final boolean pooled;
+    private boolean authenticateCalled;
+    static final int SCOPE_BASE_OBJECT;
+    static final int SCOPE_ONE_LEVEL;
+    static final int SCOPE_SUBTREE;
+    static final int ADD;
+    static final int DELETE;
+    static final int REPLACE;
+    static final int LDAP_VERSION3_VERSION2;
+    static final int LDAP_VERSION2;
+    static final int LDAP_VERSION3;
+    static final int LDAP_VERSION;
+    static final int LDAP_REF_FOLLOW;
+    static final int LDAP_REF_THROW;
+    static final int LDAP_REF_IGNORE;
+    static final int LDAP_REF_FOLLOW_SCHEME;
+    static final java.lang.String LDAP_URL;
+    static final java.lang.String LDAPS_URL;
+    static final int LBER_BOOLEAN;
+    static final int LBER_INTEGER;
+    static final int LBER_BITSTRING;
+    static final int LBER_OCTETSTRING;
+    static final int LBER_NULL;
+    static final int LBER_ENUMERATED;
+    static final int LBER_SEQUENCE;
+    static final int LBER_SET;
+    static final int LDAP_SUPERIOR_DN;
+    static final int LDAP_REQ_BIND;
+    static final int LDAP_REQ_UNBIND;
+    static final int LDAP_REQ_SEARCH;
+    static final int LDAP_REQ_MODIFY;
+    static final int LDAP_REQ_ADD;
+    static final int LDAP_REQ_DELETE;
+    static final int LDAP_REQ_MODRDN;
+    static final int LDAP_REQ_COMPARE;
+    static final int LDAP_REQ_ABANDON;
+    static final int LDAP_REQ_EXTENSION;
+    static final int LDAP_REP_BIND;
+    static final int LDAP_REP_SEARCH;
+    static final int LDAP_REP_SEARCH_REF;
+    static final int LDAP_REP_RESULT;
+    static final int LDAP_REP_MODIFY;
+    static final int LDAP_REP_ADD;
+    static final int LDAP_REP_DELETE;
+    static final int LDAP_REP_MODRDN;
+    static final int LDAP_REP_COMPARE;
+    static final int LDAP_REP_EXTENSION;
+    static final int LDAP_REP_REFERRAL;
+    static final int LDAP_REP_EXT_OID;
+    static final int LDAP_REP_EXT_VAL;
+    static final int LDAP_CONTROLS;
+    static final java.lang.String LDAP_CONTROL_MANAGE_DSA_IT;
+    static final java.lang.String LDAP_CONTROL_PREFERRED_LANG;
+    static final java.lang.String LDAP_CONTROL_PAGED_RESULTS;
+    static final java.lang.String LDAP_CONTROL_SERVER_SORT_REQ;
+    static final java.lang.String LDAP_CONTROL_SERVER_SORT_RES;
+    static final int LDAP_SUCCESS;
+    static final int LDAP_OPERATIONS_ERROR;
+    static final int LDAP_PROTOCOL_ERROR;
+    static final int LDAP_TIME_LIMIT_EXCEEDED;
+    static final int LDAP_SIZE_LIMIT_EXCEEDED;
+    static final int LDAP_COMPARE_FALSE;
+    static final int LDAP_COMPARE_TRUE;
+    static final int LDAP_AUTH_METHOD_NOT_SUPPORTED;
+    static final int LDAP_STRONG_AUTH_REQUIRED;
+    static final int LDAP_PARTIAL_RESULTS;
+    static final int LDAP_REFERRAL;
+    static final int LDAP_ADMIN_LIMIT_EXCEEDED;
+    static final int LDAP_UNAVAILABLE_CRITICAL_EXTENSION;
+    static final int LDAP_CONFIDENTIALITY_REQUIRED;
+    static final int LDAP_SASL_BIND_IN_PROGRESS;
+    static final int LDAP_NO_SUCH_ATTRIBUTE;
+    static final int LDAP_UNDEFINED_ATTRIBUTE_TYPE;
+    static final int LDAP_INAPPROPRIATE_MATCHING;
+    static final int LDAP_CONSTRAINT_VIOLATION;
+    static final int LDAP_ATTRIBUTE_OR_VALUE_EXISTS;
+    static final int LDAP_INVALID_ATTRIBUTE_SYNTAX;
+    static final int LDAP_NO_SUCH_OBJECT;
+    static final int LDAP_ALIAS_PROBLEM;
+    static final int LDAP_INVALID_DN_SYNTAX;
+    static final int LDAP_IS_LEAF;
+    static final int LDAP_ALIAS_DEREFERENCING_PROBLEM;
+    static final int LDAP_INAPPROPRIATE_AUTHENTICATION;
+    static final int LDAP_INVALID_CREDENTIALS;
+    static final int LDAP_INSUFFICIENT_ACCESS_RIGHTS;
+    static final int LDAP_BUSY;
+    static final int LDAP_UNAVAILABLE;
+    static final int LDAP_UNWILLING_TO_PERFORM;
+    static final int LDAP_LOOP_DETECT;
+    static final int LDAP_NAMING_VIOLATION;
+    static final int LDAP_OBJECT_CLASS_VIOLATION;
+    static final int LDAP_NOT_ALLOWED_ON_NON_LEAF;
+    static final int LDAP_NOT_ALLOWED_ON_RDN;
+    static final int LDAP_ENTRY_ALREADY_EXISTS;
+    static final int LDAP_OBJECT_CLASS_MODS_PROHIBITED;
+    static final int LDAP_AFFECTS_MULTIPLE_DSAS;
+    static final int LDAP_OTHER;
+    static final java.lang.String[] ldap_error_message;
+    private java.util.Vector unsolicited;
+
+    void <init>(java.lang.String, int, java.lang.String, int, int, java.io.OutputStream, com.sun.jndi.ldap.pool.PoolCallback) throws javax.naming.NamingException
+    {
+        java.io.OutputStream r5;
+        com.sun.jndi.ldap.pool.PoolCallback r6;
+        com.sun.jndi.ldap.LdapClient r0;
+        java.util.Vector $r1;
+        com.sun.jndi.ldap.Connection $r2;
+        int i0, i1, i2;
+        java.lang.String r3, r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapClient;
+
+        r3 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        r4 := @parameter2: java.lang.String;
+
+        i1 := @parameter3: int;
+
+        i2 := @parameter4: int;
+
+        r5 := @parameter5: java.io.OutputStream;
+
+        r6 := @parameter6: com.sun.jndi.ldap.pool.PoolCallback;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.jndi.ldap.LdapClient: int referenceCount> = 1;
+
+        r0.<com.sun.jndi.ldap.LdapClient: boolean authenticateCalled> = 0;
+
+        $r1 = new java.util.Vector;
+
+        specialinvoke $r1.<java.util.Vector: void <init>(int)>(3);
+
+        r0.<com.sun.jndi.ldap.LdapClient: java.util.Vector unsolicited> = $r1;
+
+        $r2 = new com.sun.jndi.ldap.Connection;
+
+        specialinvoke $r2.<com.sun.jndi.ldap.Connection: void <init>(com.sun.jndi.ldap.LdapClient,java.lang.String,int,java.lang.String,int,int,java.io.OutputStream)>(r0, r3, i0, r4, i1, i2, r5);
+
+        r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn> = $r2;
+
+        r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.pool.PoolCallback pcb> = r6;
+
+        if r6 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        r0.<com.sun.jndi.ldap.LdapClient: boolean pooled> = $z0;
+
+        return;
+    }
+
+    synchronized boolean authenticateCalled()
+    {
+        com.sun.jndi.ldap.LdapClient r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapClient;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapClient: boolean authenticateCalled>;
+
+        return $z0;
+    }
+
+    synchronized com.sun.jndi.ldap.LdapResult authenticate(boolean, java.lang.String, java.lang.Object, int, java.lang.String, javax.naming.ldap.Control[], java.util.Hashtable) throws javax.naming.NamingException
+    {
+        byte[] $r21, $r83, $r84, r87, r88, $r89;
+        java.lang.StringBuilder $r25, $r26, $r27, $r28, $r35, $r36, $r37, $r40, $r41, $r43, $r47, $r48, $r51, $r52, $r54, $r59, $r60, $r63, $r64, $r66, $r70, $r71, $r74, $r75, $r77;
+        java.lang.Throwable $r30, $r32, $r56;
+        javax.naming.AuthenticationNotSupportedException $r14;
+        java.lang.String r4, $r9, $r10, $r17, $r29, $r39, $r44, $r50, $r55, $r62, $r67, $r73, $r78, r81;
+        java.io.IOException $r33, $r45, $r57, $r68, $r79;
+        com.sun.jndi.ldap.LdapClient r0;
+        com.sun.jndi.ldap.Connection $r1, $r2, $r3, $r6, $r7, $r11, $r12, $r15, $r18, $r20, $r23, $r31, $r38, $r42, $r49, $r53, $r61, $r65, $r72, $r76;
+        javax.naming.AuthenticationException $r8;
+        boolean $z0, z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        javax.naming.ldap.Control[] r5;
+        int i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, i17, i18, $i19, i20, i21, $i22;
+        java.util.Hashtable r16;
+        javax.naming.CommunicationException $r24, $r34, $r46, $r58, $r69, $r80;
+        java.lang.Object r82;
+        com.sun.jndi.ldap.LdapResult $r13, $r19, $r22, $r85, r86, $r90;
+
+        r0 := @this: com.sun.jndi.ldap.LdapClient;
+
+        z1 := @parameter0: boolean;
+
+        r81 := @parameter1: java.lang.String;
+
+        r82 := @parameter2: java.lang.Object;
+
+        i2 := @parameter3: int;
+
+        r4 := @parameter4: java.lang.String;
+
+        r5 := @parameter5: javax.naming.ldap.Control[];
+
+        r16 := @parameter6: java.util.Hashtable;
+
+        $r1 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        i0 = $r1.<com.sun.jndi.ldap.Connection: int readTimeout>;
+
+        $r3 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $r2 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $i1 = $r2.<com.sun.jndi.ldap.Connection: int connectTimeout>;
+
+        $r3.<com.sun.jndi.ldap.Connection: int readTimeout> = $i1;
+
+     label01:
+        r0.<com.sun.jndi.ldap.LdapClient: boolean authenticateCalled> = 1;
+
+     label02:
+        specialinvoke r0.<com.sun.jndi.ldap.LdapClient: void ensureOpen()>();
+
+     label03:
+        goto label05;
+
+     label04:
+        $r79 := @caughtexception;
+
+        $r80 = new javax.naming.CommunicationException;
+
+        specialinvoke $r80.<javax.naming.CommunicationException: void <init>()>();
+
+        virtualinvoke $r80.<javax.naming.NamingException: void setRootCause(java.lang.Throwable)>($r79);
+
+        throw $r80;
+
+     label05:
+        lookupswitch(i2)
+        {
+            case 2: goto label07;
+            case 3: goto label06;
+            case 32: goto label06;
+            default: goto label08;
+        };
+
+     label06:
+        r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3> = 1;
+
+        goto label09;
+
+     label07:
+        r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3> = 0;
+
+        goto label09;
+
+     label08:
+        $r24 = new javax.naming.CommunicationException;
+
+        $r25 = new java.lang.StringBuilder;
+
+        specialinvoke $r25.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Protocol version ");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i2);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" not supported");
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r24.<javax.naming.CommunicationException: void <init>(java.lang.String)>($r29);
+
+        throw $r24;
+
+     label09:
+        $z0 = virtualinvoke r4.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("none");
+
+        if $z0 != 0 goto label10;
+
+        $z6 = virtualinvoke r4.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("anonymous");
+
+        if $z6 == 0 goto label15;
+
+     label10:
+        if z1 == 0 goto label11;
+
+        if i2 == 2 goto label11;
+
+        if i2 == 32 goto label11;
+
+        if r5 == null goto label14;
+
+        $i6 = lengthof r5;
+
+        if $i6 <= 0 goto label14;
+
+     label11:
+        r81 = null;
+
+        r82 = null;
+
+        $r83 = (byte[]) null;
+
+        $r84 = (byte[]) $r83;
+
+        $r85 = virtualinvoke r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.LdapResult ldapBind(java.lang.String,byte[],javax.naming.ldap.Control[],java.lang.String,boolean)>(null, $r84, r5, null, 0);
+
+        r86 = $r85;
+
+        $i16 = $r85.<com.sun.jndi.ldap.LdapResult: int status>;
+
+        if $i16 != 0 goto label12;
+
+        $r12 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        virtualinvoke $r12.<com.sun.jndi.ldap.Connection: void setBound()>();
+
+     label12:
+        goto label31;
+
+     label13:
+        $r68 := @caughtexception;
+
+        $r69 = new javax.naming.CommunicationException;
+
+        $r70 = new java.lang.StringBuilder;
+
+        specialinvoke $r70.<java.lang.StringBuilder: void <init>()>();
+
+        $r71 = virtualinvoke $r70.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("anonymous bind failed: ");
+
+        $r72 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $r73 = $r72.<com.sun.jndi.ldap.Connection: java.lang.String host>;
+
+        $r74 = virtualinvoke $r71.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r73);
+
+        $r75 = virtualinvoke $r74.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r76 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $i15 = $r76.<com.sun.jndi.ldap.Connection: int port>;
+
+        $r77 = virtualinvoke $r75.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i15);
+
+        $r78 = virtualinvoke $r77.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r69.<javax.naming.CommunicationException: void <init>(java.lang.String)>($r78);
+
+        virtualinvoke $r69.<javax.naming.NamingException: void setRootCause(java.lang.Throwable)>($r68);
+
+        throw $r69;
+
+     label14:
+        $r13 = new com.sun.jndi.ldap.LdapResult;
+
+        specialinvoke $r13.<com.sun.jndi.ldap.LdapResult: void <init>()>();
+
+        r86 = $r13;
+
+        $r13.<com.sun.jndi.ldap.LdapResult: int status> = 0;
+
+        goto label31;
+
+     label15:
+        $z7 = virtualinvoke r4.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("simple");
+
+        if $z7 == 0 goto label26;
+
+        r87 = null;
+
+     label16:
+        $z9 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        $r21 = staticinvoke <com.sun.jndi.ldap.LdapClient: byte[] encodePassword(java.lang.Object,boolean)>(r82, $z9);
+
+        r87 = $r21;
+
+        $r22 = virtualinvoke r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.LdapResult ldapBind(java.lang.String,byte[],javax.naming.ldap.Control[],java.lang.String,boolean)>(r81, $r21, r5, null, 0);
+
+        r86 = $r22;
+
+        $i8 = $r22.<com.sun.jndi.ldap.LdapResult: int status>;
+
+        if $i8 != 0 goto label17;
+
+        $r23 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        virtualinvoke $r23.<com.sun.jndi.ldap.Connection: void setBound()>();
+
+     label17:
+        if $r21 == r82 goto label25;
+
+        if $r21 == null goto label25;
+
+        i17 = 0;
+
+     label18:
+        $i9 = lengthof $r21;
+
+        if i17 >= $i9 goto label19;
+
+        $r21[i17] = 0;
+
+        i17 = i17 + 1;
+
+        goto label18;
+
+     label19:
+        goto label25;
+
+     label20:
+        $r57 := @caughtexception;
+
+        $r58 = new javax.naming.CommunicationException;
+
+        $r59 = new java.lang.StringBuilder;
+
+        specialinvoke $r59.<java.lang.StringBuilder: void <init>()>();
+
+        $r60 = virtualinvoke $r59.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("simple bind failed: ");
+
+        $r61 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $r62 = $r61.<com.sun.jndi.ldap.Connection: java.lang.String host>;
+
+        $r63 = virtualinvoke $r60.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r62);
+
+        $r64 = virtualinvoke $r63.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r65 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $i14 = $r65.<com.sun.jndi.ldap.Connection: int port>;
+
+        $r66 = virtualinvoke $r64.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i14);
+
+        $r67 = virtualinvoke $r66.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r58.<javax.naming.CommunicationException: void <init>(java.lang.String)>($r67);
+
+        virtualinvoke $r58.<javax.naming.NamingException: void setRootCause(java.lang.Throwable)>($r57);
+
+        throw $r58;
+
+     label21:
+        $r56 := @caughtexception;
+
+     label22:
+        if r87 == r82 goto label24;
+
+        if r87 == null goto label24;
+
+        i18 = 0;
+
+     label23:
+        $i13 = lengthof r87;
+
+        if i18 >= $i13 goto label24;
+
+        r87[i18] = 0;
+
+        i18 = i18 + 1;
+
+        goto label23;
+
+     label24:
+        throw $r56;
+
+     label25:
+        goto label31;
+
+     label26:
+        $z8 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        if $z8 == 0 goto label30;
+
+     label27:
+        $r18 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $r15 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $r17 = $r15.<com.sun.jndi.ldap.Connection: java.lang.String host>;
+
+        $r19 = staticinvoke <com.sun.jndi.ldap.sasl.LdapSasl: com.sun.jndi.ldap.LdapResult saslBind(com.sun.jndi.ldap.LdapClient,com.sun.jndi.ldap.Connection,java.lang.String,java.lang.String,java.lang.Object,java.lang.String,java.util.Hashtable,javax.naming.ldap.Control[])>(r0, $r18, $r17, r81, r82, r4, r16, r5);
+
+        r86 = $r19;
+
+        $i7 = $r19.<com.sun.jndi.ldap.LdapResult: int status>;
+
+        if $i7 != 0 goto label28;
+
+        $r20 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        virtualinvoke $r20.<com.sun.jndi.ldap.Connection: void setBound()>();
+
+     label28:
+        goto label31;
+
+     label29:
+        $r45 := @caughtexception;
+
+        $r46 = new javax.naming.CommunicationException;
+
+        $r47 = new java.lang.StringBuilder;
+
+        specialinvoke $r47.<java.lang.StringBuilder: void <init>()>();
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SASL bind failed: ");
+
+        $r49 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $r50 = $r49.<com.sun.jndi.ldap.Connection: java.lang.String host>;
+
+        $r51 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r50);
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r53 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $i12 = $r53.<com.sun.jndi.ldap.Connection: int port>;
+
+        $r54 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i12);
+
+        $r55 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r46.<javax.naming.CommunicationException: void <init>(java.lang.String)>($r55);
+
+        virtualinvoke $r46.<javax.naming.NamingException: void setRootCause(java.lang.Throwable)>($r45);
+
+        throw $r46;
+
+     label30:
+        $r14 = new javax.naming.AuthenticationNotSupportedException;
+
+        specialinvoke $r14.<javax.naming.AuthenticationNotSupportedException: void <init>(java.lang.String)>(r4);
+
+        throw $r14;
+
+     label31:
+        if z1 == 0 goto label42;
+
+        $i4 = r86.<com.sun.jndi.ldap.LdapResult: int status>;
+
+        if $i4 != 2 goto label42;
+
+        if i2 != 32 goto label42;
+
+        $z3 = virtualinvoke r4.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("none");
+
+        if $z3 != 0 goto label32;
+
+        $z4 = virtualinvoke r4.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("anonymous");
+
+        if $z4 != 0 goto label32;
+
+        $z5 = virtualinvoke r4.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("simple");
+
+        if $z5 == 0 goto label42;
+
+     label32:
+        r88 = null;
+
+     label33:
+        r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3> = 0;
+
+        $r89 = staticinvoke <com.sun.jndi.ldap.LdapClient: byte[] encodePassword(java.lang.Object,boolean)>(r82, 0);
+
+        r88 = $r89;
+
+        $r90 = virtualinvoke r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.LdapResult ldapBind(java.lang.String,byte[],javax.naming.ldap.Control[],java.lang.String,boolean)>(r81, $r89, r5, null, 0);
+
+        r86 = $r90;
+
+        $i19 = $r90.<com.sun.jndi.ldap.LdapResult: int status>;
+
+        if $i19 != 0 goto label34;
+
+        $r11 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        virtualinvoke $r11.<com.sun.jndi.ldap.Connection: void setBound()>();
+
+     label34:
+        if $r89 == r82 goto label42;
+
+        if $r89 == null goto label42;
+
+        i20 = 0;
+
+     label35:
+        $i5 = lengthof $r89;
+
+        if i20 >= $i5 goto label36;
+
+        $r89[i20] = 0;
+
+        i20 = i20 + 1;
+
+        goto label35;
+
+     label36:
+        goto label42;
+
+     label37:
+        $r33 := @caughtexception;
+
+        $r34 = new javax.naming.CommunicationException;
+
+        $r35 = new java.lang.StringBuilder;
+
+        specialinvoke $r35.<java.lang.StringBuilder: void <init>()>();
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r38 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $r39 = $r38.<com.sun.jndi.ldap.Connection: java.lang.String host>;
+
+        $r40 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r39);
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r42 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $i11 = $r42.<com.sun.jndi.ldap.Connection: int port>;
+
+        $r43 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i11);
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r34.<javax.naming.CommunicationException: void <init>(java.lang.String)>($r44);
+
+        virtualinvoke $r34.<javax.naming.NamingException: void setRootCause(java.lang.Throwable)>($r33);
+
+        throw $r34;
+
+     label38:
+        $r32 := @caughtexception;
+
+     label39:
+        if r88 == r82 goto label41;
+
+        if r88 == null goto label41;
+
+        i21 = 0;
+
+     label40:
+        $i10 = lengthof r88;
+
+        if i21 >= $i10 goto label41;
+
+        r88[i21] = 0;
+
+        i21 = i21 + 1;
+
+        goto label40;
+
+     label41:
+        throw $r32;
+
+     label42:
+        $i22 = r86.<com.sun.jndi.ldap.LdapResult: int status>;
+
+        if $i22 != 32 goto label43;
+
+        $r8 = new javax.naming.AuthenticationException;
+
+        $i3 = r86.<com.sun.jndi.ldap.LdapResult: int status>;
+
+        $r9 = r86.<com.sun.jndi.ldap.LdapResult: java.lang.String errorMessage>;
+
+        $r10 = staticinvoke <com.sun.jndi.ldap.LdapClient: java.lang.String getErrorMessage(int,java.lang.String)>($i3, $r9);
+
+        specialinvoke $r8.<javax.naming.AuthenticationException: void <init>(java.lang.String)>($r10);
+
+        throw $r8;
+
+     label43:
+        $r6 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $z2 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        virtualinvoke $r6.<com.sun.jndi.ldap.Connection: void setV3(boolean)>($z2);
+
+     label44:
+        $r7 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $r7.<com.sun.jndi.ldap.Connection: int readTimeout> = i0;
+
+        return r86;
+
+     label45:
+        $r30 := @caughtexception;
+
+     label46:
+        $r31 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $r31.<com.sun.jndi.ldap.Connection: int readTimeout> = i0;
+
+        throw $r30;
+
+        catch java.io.IOException from label02 to label03 with label04;
+        catch java.io.IOException from label11 to label12 with label13;
+        catch java.io.IOException from label16 to label17 with label20;
+        catch java.lang.Throwable from label16 to label17 with label21;
+        catch java.lang.Throwable from label20 to label22 with label21;
+        catch java.io.IOException from label27 to label28 with label29;
+        catch java.io.IOException from label33 to label34 with label37;
+        catch java.lang.Throwable from label33 to label34 with label38;
+        catch java.lang.Throwable from label37 to label39 with label38;
+        catch java.lang.Throwable from label01 to label44 with label45;
+        catch java.lang.Throwable from label45 to label46 with label45;
+    }
+
+    public synchronized com.sun.jndi.ldap.LdapResult ldapBind(java.lang.String, byte[], javax.naming.ldap.Control[], java.lang.String, boolean) throws java.io.IOException, javax.naming.NamingException
+    {
+        byte[] r7, $r13;
+        com.sun.jndi.ldap.LdapRequest $r9;
+        java.util.Vector $r15;
+        byte $b4;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String r5, r6;
+        boolean $z0, $z1, z2, $z3, $z4, $z5, $z6, $z7;
+        com.sun.jndi.ldap.BerDecoder $r11;
+        com.sun.jndi.ldap.LdapClient r0;
+        com.sun.jndi.ldap.Connection $r1, $r3, $r8, $r10, $r12;
+        com.sun.jndi.ldap.BerEncoder $r2;
+        com.sun.jndi.ldap.LdapResult $r4;
+        javax.naming.ldap.Control[] r14;
+
+        r0 := @this: com.sun.jndi.ldap.LdapClient;
+
+        r5 := @parameter0: java.lang.String;
+
+        r7 := @parameter1: byte[];
+
+        r14 := @parameter2: javax.naming.ldap.Control[];
+
+        r6 := @parameter3: java.lang.String;
+
+        z2 := @parameter4: boolean;
+
+        specialinvoke r0.<com.sun.jndi.ldap.LdapClient: void ensureOpen()>();
+
+        $r1 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        virtualinvoke $r1.<com.sun.jndi.ldap.Connection: void abandonOutstandingReqs(javax.naming.ldap.Control[])>(null);
+
+        $r2 = new com.sun.jndi.ldap.BerEncoder;
+
+        specialinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void <init>()>();
+
+        $r3 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $i0 = virtualinvoke $r3.<com.sun.jndi.ldap.Connection: int getMsgId()>();
+
+        $r4 = new com.sun.jndi.ldap.LdapResult;
+
+        specialinvoke $r4.<com.sun.jndi.ldap.LdapResult: void <init>()>();
+
+        $r4.<com.sun.jndi.ldap.LdapResult: int status> = 1;
+
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(48);
+
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void encodeInt(int)>($i0);
+
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(96);
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        if $z0 == 0 goto label01;
+
+        $b4 = 3;
+
+        goto label02;
+
+     label01:
+        $b4 = 2;
+
+     label02:
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void encodeInt(int)>($b4);
+
+        $z1 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void encodeString(java.lang.String,boolean)>(r5, $z1);
+
+        if r6 == null goto label04;
+
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(163);
+
+        $z5 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void encodeString(java.lang.String,boolean)>(r6, $z5);
+
+        if r7 == null goto label03;
+
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void encodeOctetString(byte[],int)>(r7, 4);
+
+     label03:
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        goto label06;
+
+     label04:
+        if r7 == null goto label05;
+
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void encodeOctetString(byte[],int)>(r7, 128);
+
+        goto label06;
+
+     label05:
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void encodeOctetString(byte[],int,int,int)>(null, 128, 0, 0);
+
+     label06:
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        $z6 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        if $z6 == 0 goto label07;
+
+        staticinvoke <com.sun.jndi.ldap.LdapClient: void encodeControls(com.sun.jndi.ldap.BerEncoder,javax.naming.ldap.Control[])>($r2, r14);
+
+     label07:
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        $r8 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $r9 = virtualinvoke $r8.<com.sun.jndi.ldap.Connection: com.sun.jndi.ldap.LdapRequest writeRequest(com.sun.jndi.ldap.BerEncoder,int,boolean)>($r2, $i0, z2);
+
+        if r7 == null goto label08;
+
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void reset()>();
+
+     label08:
+        $r10 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $r11 = virtualinvoke $r10.<com.sun.jndi.ldap.Connection: com.sun.jndi.ldap.BerDecoder readReply(com.sun.jndi.ldap.LdapRequest)>($r9);
+
+        virtualinvoke $r11.<com.sun.jndi.ldap.BerDecoder: int parseSeq(int[])>(null);
+
+        virtualinvoke $r11.<com.sun.jndi.ldap.BerDecoder: int parseInt()>();
+
+        $i1 = virtualinvoke $r11.<com.sun.jndi.ldap.BerDecoder: int parseByte()>();
+
+        if $i1 == 97 goto label09;
+
+        return $r4;
+
+     label09:
+        virtualinvoke $r11.<com.sun.jndi.ldap.BerDecoder: int parseLength()>();
+
+        $z3 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        staticinvoke <com.sun.jndi.ldap.LdapClient: void parseResult(com.sun.jndi.ldap.BerDecoder,com.sun.jndi.ldap.LdapResult,boolean)>($r11, $r4, $z3);
+
+        $z4 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        if $z4 == 0 goto label10;
+
+        $i2 = virtualinvoke $r11.<com.sun.jndi.ldap.BerDecoder: int bytesLeft()>();
+
+        if $i2 <= 0 goto label10;
+
+        $i3 = virtualinvoke $r11.<com.sun.jndi.ldap.BerDecoder: int peekByte()>();
+
+        if $i3 != 135 goto label10;
+
+        $r13 = virtualinvoke $r11.<com.sun.jndi.ldap.BerDecoder: byte[] parseOctetString(int,int[])>(135, null);
+
+        $r4.<com.sun.jndi.ldap.LdapResult: byte[] serverCreds> = $r13;
+
+     label10:
+        $z7 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        if $z7 == 0 goto label11;
+
+        $r15 = staticinvoke <com.sun.jndi.ldap.LdapClient: java.util.Vector parseControls(com.sun.jndi.ldap.BerDecoder)>($r11);
+
+        goto label12;
+
+     label11:
+        $r15 = null;
+
+     label12:
+        $r4.<com.sun.jndi.ldap.LdapResult: java.util.Vector resControls> = $r15;
+
+        $r12 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        virtualinvoke $r12.<com.sun.jndi.ldap.Connection: void removeRequest(com.sun.jndi.ldap.LdapRequest)>($r9);
+
+        return $r4;
+    }
+
+    boolean usingSaslStreams()
+    {
+        com.sun.jndi.ldap.LdapClient r0;
+        com.sun.jndi.ldap.Connection $r1;
+        java.io.InputStream $r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapClient;
+
+        $r1 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $r2 = $r1.<com.sun.jndi.ldap.Connection: java.io.InputStream inStream>;
+
+        $z0 = $r2 instanceof com.sun.jndi.ldap.sasl.SaslInputStream;
+
+        return $z0;
+    }
+
+    boolean isUpgradedToStartTls()
+    {
+        com.sun.jndi.ldap.LdapClient r0;
+        com.sun.jndi.ldap.Connection $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapClient;
+
+        $r1 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $z0 = virtualinvoke $r1.<com.sun.jndi.ldap.Connection: boolean isUpgradedToStartTls()>();
+
+        return $z0;
+    }
+
+    synchronized void incRefCount()
+    {
+        int $i0, $i1;
+        com.sun.jndi.ldap.LdapClient r0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapClient;
+
+        $i0 = r0.<com.sun.jndi.ldap.LdapClient: int referenceCount>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.jndi.ldap.LdapClient: int referenceCount> = $i1;
+
+        return;
+    }
+
+    private static byte[] encodePassword(java.lang.Object, boolean) throws java.io.IOException
+    {
+        byte[] $r0, $r1, $r3, $r5;
+        char[] $r7, $r8;
+        java.lang.Object r9;
+        java.lang.String $r2, $r4, $r6;
+        boolean $z0, $z1, z2;
+
+        r9 := @parameter0: java.lang.Object;
+
+        z2 := @parameter1: boolean;
+
+        $z0 = r9 instanceof char[];
+
+        if $z0 == 0 goto label1;
+
+        $r6 = new java.lang.String;
+
+        $r7 = (char[]) r9;
+
+        $r8 = (char[]) $r7;
+
+        specialinvoke $r6.<java.lang.String: void <init>(char[])>($r8);
+
+        r9 = $r6;
+
+     label1:
+        $z1 = r9 instanceof java.lang.String;
+
+        if $z1 == 0 goto label3;
+
+        if z2 == 0 goto label2;
+
+        $r4 = (java.lang.String) r9;
+
+        $r5 = virtualinvoke $r4.<java.lang.String: byte[] getBytes(java.lang.String)>("UTF8");
+
+        return $r5;
+
+     label2:
+        $r2 = (java.lang.String) r9;
+
+        $r3 = virtualinvoke $r2.<java.lang.String: byte[] getBytes(java.lang.String)>("8859_1");
+
+        return $r3;
+
+     label3:
+        $r0 = (byte[]) r9;
+
+        $r1 = (byte[]) $r0;
+
+        return $r1;
+    }
+
+    synchronized void close(javax.naming.ldap.Control[], boolean)
+    {
+        com.sun.jndi.ldap.pool.PoolCallback $r1, $r4;
+        com.sun.jndi.ldap.LdapClient r0;
+        com.sun.jndi.ldap.Connection $r3, $r5;
+        int $i0, $i1, $i2;
+        boolean $z0, z1;
+        javax.naming.ldap.Control[] r2;
+
+        r0 := @this: com.sun.jndi.ldap.LdapClient;
+
+        r2 := @parameter0: javax.naming.ldap.Control[];
+
+        z1 := @parameter1: boolean;
+
+        $i0 = r0.<com.sun.jndi.ldap.LdapClient: int referenceCount>;
+
+        $i1 = $i0 - 1;
+
+        r0.<com.sun.jndi.ldap.LdapClient: int referenceCount> = $i1;
+
+        $i2 = r0.<com.sun.jndi.ldap.LdapClient: int referenceCount>;
+
+        if $i2 > 0 goto label3;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapClient: boolean pooled>;
+
+        if $z0 != 0 goto label1;
+
+        $r5 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        virtualinvoke $r5.<com.sun.jndi.ldap.Connection: void cleanup(javax.naming.ldap.Control[],boolean)>(r2, 0);
+
+        goto label3;
+
+     label1:
+        if z1 == 0 goto label2;
+
+        $r3 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        virtualinvoke $r3.<com.sun.jndi.ldap.Connection: void cleanup(javax.naming.ldap.Control[],boolean)>(r2, 0);
+
+        $r4 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.pool.PoolCallback pcb>;
+
+        interfaceinvoke $r4.<com.sun.jndi.ldap.pool.PoolCallback: boolean removePooledConnection(com.sun.jndi.ldap.pool.PooledConnection)>(r0);
+
+        goto label3;
+
+     label2:
+        $r1 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.pool.PoolCallback pcb>;
+
+        interfaceinvoke $r1.<com.sun.jndi.ldap.pool.PoolCallback: boolean releasePooledConnection(com.sun.jndi.ldap.pool.PooledConnection)>(r0);
+
+     label3:
+        return;
+    }
+
+    private void forceClose(boolean)
+    {
+        com.sun.jndi.ldap.LdapClient r0;
+        com.sun.jndi.ldap.Connection $r1;
+        com.sun.jndi.ldap.pool.PoolCallback $r2;
+        boolean z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapClient;
+
+        z0 := @parameter0: boolean;
+
+        r0.<com.sun.jndi.ldap.LdapClient: int referenceCount> = 0;
+
+        $r1 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        virtualinvoke $r1.<com.sun.jndi.ldap.Connection: void cleanup(javax.naming.ldap.Control[],boolean)>(null, 0);
+
+        if z0 == 0 goto label1;
+
+        $r2 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.pool.PoolCallback pcb>;
+
+        interfaceinvoke $r2.<com.sun.jndi.ldap.pool.PoolCallback: boolean removePooledConnection(com.sun.jndi.ldap.pool.PooledConnection)>(r0);
+
+     label1:
+        return;
+    }
+
+    protected void finalize()
+    {
+        com.sun.jndi.ldap.LdapClient r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapClient;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapClient: boolean pooled>;
+
+        specialinvoke r0.<com.sun.jndi.ldap.LdapClient: void forceClose(boolean)>($z0);
+
+        return;
+    }
+
+    public synchronized void closeConnection()
+    {
+        com.sun.jndi.ldap.LdapClient r0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapClient;
+
+        specialinvoke r0.<com.sun.jndi.ldap.LdapClient: void forceClose(boolean)>(0);
+
+        return;
+    }
+
+    void processConnectionClosure()
+    {
+        com.sun.jndi.ldap.pool.PoolCallback $r2;
+        java.util.Vector $r1;
+        int $i0, $i1;
+        java.lang.String $r7, r13;
+        boolean $z0;
+        com.sun.jndi.ldap.LdapClient r0;
+        com.sun.jndi.ldap.Connection $r3, $r6, $r10;
+        javax.naming.CommunicationException $r4;
+        java.lang.StringBuilder $r5, $r8, $r9, $r11, $r12;
+
+        r0 := @this: com.sun.jndi.ldap.LdapClient;
+
+        $r1 = r0.<com.sun.jndi.ldap.LdapClient: java.util.Vector unsolicited>;
+
+        $i0 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        if $i0 <= 0 goto label3;
+
+        $r3 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        if $r3 == null goto label1;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $r7 = $r6.<com.sun.jndi.ldap.Connection: java.lang.String host>;
+
+        $r8 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r10 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $i1 = $r10.<com.sun.jndi.ldap.Connection: int port>;
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" connection closed");
+
+        r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label2;
+
+     label1:
+        r13 = "Connection closed";
+
+     label2:
+        $r4 = new javax.naming.CommunicationException;
+
+        specialinvoke $r4.<javax.naming.CommunicationException: void <init>(java.lang.String)>(r13);
+
+        specialinvoke r0.<com.sun.jndi.ldap.LdapClient: void notifyUnsolicited(java.lang.Object)>($r4);
+
+     label3:
+        $z0 = r0.<com.sun.jndi.ldap.LdapClient: boolean pooled>;
+
+        if $z0 == 0 goto label4;
+
+        $r2 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.pool.PoolCallback pcb>;
+
+        interfaceinvoke $r2.<com.sun.jndi.ldap.pool.PoolCallback: boolean removePooledConnection(com.sun.jndi.ldap.pool.PooledConnection)>(r0);
+
+     label4:
+        return;
+    }
+
+    com.sun.jndi.ldap.LdapResult search(java.lang.String, int, int, int, int, boolean, java.lang.String[], java.lang.String, int, javax.naming.ldap.Control[], java.util.Hashtable, boolean, int) throws java.io.IOException, javax.naming.NamingException
+    {
+        java.lang.String[] r6;
+        com.sun.jndi.ldap.LdapRequest $r8;
+        int $i0, i1, i2, i3, i4, i5, i6;
+        java.lang.String r4, r5, $r12;
+        java.util.Hashtable r9;
+        boolean $z0, z1, $z2, $z3, $z4, z5;
+        com.sun.jndi.ldap.LdapClient r0;
+        com.sun.jndi.ldap.Connection $r3, $r7;
+        com.sun.jndi.ldap.BerEncoder $r2;
+        com.sun.jndi.ldap.LdapResult $r1, r11;
+        javax.naming.ldap.Control[] r10;
+
+        r0 := @this: com.sun.jndi.ldap.LdapClient;
+
+        r4 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        i4 := @parameter4: int;
+
+        z1 := @parameter5: boolean;
+
+        r6 := @parameter6: java.lang.String[];
+
+        r5 := @parameter7: java.lang.String;
+
+        i6 := @parameter8: int;
+
+        r10 := @parameter9: javax.naming.ldap.Control[];
+
+        r9 := @parameter10: java.util.Hashtable;
+
+        z5 := @parameter11: boolean;
+
+        i5 := @parameter12: int;
+
+        specialinvoke r0.<com.sun.jndi.ldap.LdapClient: void ensureOpen()>();
+
+        $r1 = new com.sun.jndi.ldap.LdapResult;
+
+        specialinvoke $r1.<com.sun.jndi.ldap.LdapResult: void <init>()>();
+
+        r11 = $r1;
+
+        $r2 = new com.sun.jndi.ldap.BerEncoder;
+
+        specialinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void <init>()>();
+
+        $r3 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $i0 = virtualinvoke $r3.<com.sun.jndi.ldap.Connection: int getMsgId()>();
+
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(48);
+
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void encodeInt(int)>($i0);
+
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(99);
+
+        if r4 != null goto label1;
+
+        $r12 = "";
+
+        goto label2;
+
+     label1:
+        $r12 = r4;
+
+     label2:
+        $z0 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void encodeString(java.lang.String,boolean)>($r12, $z0);
+
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void encodeInt(int,int)>(i1, 10);
+
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void encodeInt(int,int)>(i2, 10);
+
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void encodeInt(int)>(i3);
+
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void encodeInt(int)>(i4);
+
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void encodeBoolean(boolean)>(z1);
+
+        $z2 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        staticinvoke <com.sun.jndi.ldap.Filter: void encodeFilterString(com.sun.jndi.ldap.BerEncoder,java.lang.String,boolean)>($r2, r5, $z2);
+
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(48);
+
+        $z3 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void encodeStringArray(java.lang.String[],boolean)>(r6, $z3);
+
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        $z4 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        if $z4 == 0 goto label3;
+
+        staticinvoke <com.sun.jndi.ldap.LdapClient: void encodeControls(com.sun.jndi.ldap.BerEncoder,javax.naming.ldap.Control[])>($r2, r10);
+
+     label3:
+        virtualinvoke $r2.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        $r7 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $r8 = virtualinvoke $r7.<com.sun.jndi.ldap.Connection: com.sun.jndi.ldap.LdapRequest writeRequest(com.sun.jndi.ldap.BerEncoder,int,boolean,int)>($r2, $i0, 0, i5);
+
+        $r1.<com.sun.jndi.ldap.LdapResult: int msgId> = $i0;
+
+        $r1.<com.sun.jndi.ldap.LdapResult: int status> = 0;
+
+        if z5 == 0 goto label4;
+
+        r11 = specialinvoke r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.LdapResult getSearchReply(com.sun.jndi.ldap.LdapRequest,int,com.sun.jndi.ldap.LdapResult,java.util.Hashtable)>($r8, i6, $r1, r9);
+
+     label4:
+        return r11;
+    }
+
+    void clearSearchReply(com.sun.jndi.ldap.LdapResult, javax.naming.ldap.Control[])
+    {
+        com.sun.jndi.ldap.LdapRequest $r3;
+        com.sun.jndi.ldap.LdapClient r1;
+        com.sun.jndi.ldap.Connection $r2, $r5, $r6;
+        int $i0;
+        com.sun.jndi.ldap.LdapResult r0;
+        boolean $z0;
+        javax.naming.ldap.Control[] r4;
+
+        r1 := @this: com.sun.jndi.ldap.LdapClient;
+
+        r0 := @parameter0: com.sun.jndi.ldap.LdapResult;
+
+        r4 := @parameter1: javax.naming.ldap.Control[];
+
+        if r0 == null goto label3;
+
+        $r2 = r1.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $i0 = r0.<com.sun.jndi.ldap.LdapResult: int msgId>;
+
+        $r3 = virtualinvoke $r2.<com.sun.jndi.ldap.Connection: com.sun.jndi.ldap.LdapRequest findRequest(int)>($i0);
+
+        if $r3 != null goto label1;
+
+        return;
+
+     label1:
+        $z0 = virtualinvoke $r3.<com.sun.jndi.ldap.LdapRequest: boolean hasSearchCompleted()>();
+
+        if $z0 == 0 goto label2;
+
+        $r6 = r1.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        virtualinvoke $r6.<com.sun.jndi.ldap.Connection: void removeRequest(com.sun.jndi.ldap.LdapRequest)>($r3);
+
+        goto label3;
+
+     label2:
+        $r5 = r1.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        virtualinvoke $r5.<com.sun.jndi.ldap.Connection: void abandonRequest(com.sun.jndi.ldap.LdapRequest,javax.naming.ldap.Control[])>($r3, r4);
+
+     label3:
+        return;
+    }
+
+    com.sun.jndi.ldap.LdapResult getSearchReply(int, com.sun.jndi.ldap.LdapResult, java.util.Hashtable) throws java.io.IOException, javax.naming.NamingException
+    {
+        com.sun.jndi.ldap.LdapRequest $r3;
+        com.sun.jndi.ldap.LdapClient r0;
+        com.sun.jndi.ldap.Connection $r2;
+        int $i0, i1;
+        java.util.Hashtable r4;
+        com.sun.jndi.ldap.LdapResult r1, $r5;
+
+        r0 := @this: com.sun.jndi.ldap.LdapClient;
+
+        i1 := @parameter0: int;
+
+        r1 := @parameter1: com.sun.jndi.ldap.LdapResult;
+
+        r4 := @parameter2: java.util.Hashtable;
+
+        specialinvoke r0.<com.sun.jndi.ldap.LdapClient: void ensureOpen()>();
+
+        $r2 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $i0 = r1.<com.sun.jndi.ldap.LdapResult: int msgId>;
+
+        $r3 = virtualinvoke $r2.<com.sun.jndi.ldap.Connection: com.sun.jndi.ldap.LdapRequest findRequest(int)>($i0);
+
+        if $r3 != null goto label1;
+
+        return null;
+
+     label1:
+        $r5 = specialinvoke r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.LdapResult getSearchReply(com.sun.jndi.ldap.LdapRequest,int,com.sun.jndi.ldap.LdapResult,java.util.Hashtable)>($r3, i1, r1, r4);
+
+        return $r5;
+    }
+
+    private com.sun.jndi.ldap.LdapResult getSearchReply(com.sun.jndi.ldap.LdapRequest, int, com.sun.jndi.ldap.LdapResult, java.util.Hashtable) throws java.io.IOException, javax.naming.NamingException
+    {
+        com.sun.jndi.ldap.LdapRequest r4;
+        javax.naming.directory.Attribute $r19;
+        java.util.Vector $r1, $r2, $r8, $r9, $r10, $r11, $r17, $r20, $r21, $r22, $r23, $r24, $r25;
+        int[] r16;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        com.sun.jndi.ldap.BerDecoder $r6;
+        javax.naming.directory.BasicAttributes $r13;
+        int $i0, $i1, $i2, $i3, $i4, i5, $i6, $i7, i8, $i9, i10, $i11;
+        java.lang.String $r12, $r14;
+        java.util.Hashtable r18;
+        com.sun.jndi.ldap.LdapEntry $r15;
+        com.sun.jndi.ldap.LdapClient r3;
+        com.sun.jndi.ldap.Connection $r5, $r7;
+        com.sun.jndi.ldap.LdapResult r0;
+
+        r3 := @this: com.sun.jndi.ldap.LdapClient;
+
+        r4 := @parameter0: com.sun.jndi.ldap.LdapRequest;
+
+        i8 := @parameter1: int;
+
+        r0 := @parameter2: com.sun.jndi.ldap.LdapResult;
+
+        r18 := @parameter3: java.util.Hashtable;
+
+        if i8 != 0 goto label01;
+
+        i8 = 2147483647;
+
+     label01:
+        $r1 = r0.<com.sun.jndi.ldap.LdapResult: java.util.Vector entries>;
+
+        if $r1 == null goto label02;
+
+        $r21 = r0.<com.sun.jndi.ldap.LdapResult: java.util.Vector entries>;
+
+        virtualinvoke $r21.<java.util.Vector: void setSize(int)>(0);
+
+        goto label05;
+
+     label02:
+        $r2 = new java.util.Vector;
+
+        if i8 != 2147483647 goto label03;
+
+        $i9 = 32;
+
+        goto label04;
+
+     label03:
+        $i9 = i8;
+
+     label04:
+        specialinvoke $r2.<java.util.Vector: void <init>(int)>($i9);
+
+        r0.<com.sun.jndi.ldap.LdapResult: java.util.Vector entries> = $r2;
+
+     label05:
+        $r22 = r0.<com.sun.jndi.ldap.LdapResult: java.util.Vector referrals>;
+
+        if $r22 == null goto label06;
+
+        $r20 = r0.<com.sun.jndi.ldap.LdapResult: java.util.Vector referrals>;
+
+        virtualinvoke $r20.<java.util.Vector: void setSize(int)>(0);
+
+     label06:
+        i10 = 0;
+
+     label07:
+        if i10 >= i8 goto label22;
+
+        $r5 = r3.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $r6 = virtualinvoke $r5.<com.sun.jndi.ldap.Connection: com.sun.jndi.ldap.BerDecoder readReply(com.sun.jndi.ldap.LdapRequest)>(r4);
+
+        virtualinvoke $r6.<com.sun.jndi.ldap.BerDecoder: int parseSeq(int[])>(null);
+
+        virtualinvoke $r6.<com.sun.jndi.ldap.BerDecoder: int parseInt()>();
+
+        $i0 = virtualinvoke $r6.<com.sun.jndi.ldap.BerDecoder: int parseSeq(int[])>(null);
+
+        if $i0 != 100 goto label12;
+
+        $r13 = new javax.naming.directory.BasicAttributes;
+
+        specialinvoke $r13.<javax.naming.directory.BasicAttributes: void <init>(boolean)>(1);
+
+        $z5 = r3.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        $r14 = virtualinvoke $r6.<com.sun.jndi.ldap.BerDecoder: java.lang.String parseString(boolean)>($z5);
+
+        $r15 = new com.sun.jndi.ldap.LdapEntry;
+
+        specialinvoke $r15.<com.sun.jndi.ldap.LdapEntry: void <init>(java.lang.String,javax.naming.directory.Attributes)>($r14, $r13);
+
+        r16 = newarray (int)[1];
+
+        virtualinvoke $r6.<com.sun.jndi.ldap.BerDecoder: int parseSeq(int[])>(r16);
+
+        $i3 = virtualinvoke $r6.<com.sun.jndi.ldap.BerDecoder: int getParsePosition()>();
+
+        $i4 = r16[0];
+
+        i5 = $i3 + $i4;
+
+     label08:
+        $i6 = virtualinvoke $r6.<com.sun.jndi.ldap.BerDecoder: int getParsePosition()>();
+
+        if $i6 >= i5 goto label09;
+
+        $i7 = virtualinvoke $r6.<com.sun.jndi.ldap.BerDecoder: int bytesLeft()>();
+
+        if $i7 <= 0 goto label09;
+
+        $r19 = specialinvoke r3.<com.sun.jndi.ldap.LdapClient: javax.naming.directory.Attribute parseAttribute(com.sun.jndi.ldap.BerDecoder,java.util.Hashtable)>($r6, r18);
+
+        interfaceinvoke $r13.<javax.naming.directory.Attributes: javax.naming.directory.Attribute put(javax.naming.directory.Attribute)>($r19);
+
+        goto label08;
+
+     label09:
+        $z6 = r3.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        if $z6 == 0 goto label10;
+
+        $r23 = staticinvoke <com.sun.jndi.ldap.LdapClient: java.util.Vector parseControls(com.sun.jndi.ldap.BerDecoder)>($r6);
+
+        goto label11;
+
+     label10:
+        $r23 = null;
+
+     label11:
+        $r15.<com.sun.jndi.ldap.LdapEntry: java.util.Vector respCtls> = $r23;
+
+        $r17 = r0.<com.sun.jndi.ldap.LdapResult: java.util.Vector entries>;
+
+        virtualinvoke $r17.<java.util.Vector: void addElement(java.lang.Object)>($r15);
+
+        i10 = i10 + 1;
+
+        goto label07;
+
+     label12:
+        if $i0 != 115 goto label18;
+
+        $z2 = r3.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        if $z2 == 0 goto label18;
+
+        $r8 = new java.util.Vector;
+
+        specialinvoke $r8.<java.util.Vector: void <init>(int)>(4);
+
+        $i1 = virtualinvoke $r6.<com.sun.jndi.ldap.BerDecoder: int peekByte()>();
+
+        if $i1 != 48 goto label13;
+
+        virtualinvoke $r6.<com.sun.jndi.ldap.BerDecoder: int parseSeq(int[])>(null);
+
+     label13:
+        $i11 = virtualinvoke $r6.<com.sun.jndi.ldap.BerDecoder: int bytesLeft()>();
+
+        if $i11 <= 0 goto label14;
+
+        $i2 = virtualinvoke $r6.<com.sun.jndi.ldap.BerDecoder: int peekByte()>();
+
+        if $i2 != 4 goto label14;
+
+        $z4 = r3.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        $r12 = virtualinvoke $r6.<com.sun.jndi.ldap.BerDecoder: java.lang.String parseString(boolean)>($z4);
+
+        virtualinvoke $r8.<java.util.Vector: void addElement(java.lang.Object)>($r12);
+
+        goto label13;
+
+     label14:
+        $r9 = r0.<com.sun.jndi.ldap.LdapResult: java.util.Vector referrals>;
+
+        if $r9 != null goto label15;
+
+        $r11 = new java.util.Vector;
+
+        specialinvoke $r11.<java.util.Vector: void <init>(int)>(4);
+
+        r0.<com.sun.jndi.ldap.LdapResult: java.util.Vector referrals> = $r11;
+
+     label15:
+        $r10 = r0.<com.sun.jndi.ldap.LdapResult: java.util.Vector referrals>;
+
+        virtualinvoke $r10.<java.util.Vector: void addElement(java.lang.Object)>($r8);
+
+        $z3 = r3.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        if $z3 == 0 goto label16;
+
+        $r24 = staticinvoke <com.sun.jndi.ldap.LdapClient: java.util.Vector parseControls(com.sun.jndi.ldap.BerDecoder)>($r6);
+
+        goto label17;
+
+     label16:
+        $r24 = null;
+
+     label17:
+        r0.<com.sun.jndi.ldap.LdapResult: java.util.Vector resControls> = $r24;
+
+        goto label07;
+
+     label18:
+        if $i0 != 120 goto label19;
+
+        specialinvoke r3.<com.sun.jndi.ldap.LdapClient: void parseExtResponse(com.sun.jndi.ldap.BerDecoder,com.sun.jndi.ldap.LdapResult)>($r6, r0);
+
+        goto label07;
+
+     label19:
+        if $i0 != 101 goto label07;
+
+        $z0 = r3.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        staticinvoke <com.sun.jndi.ldap.LdapClient: void parseResult(com.sun.jndi.ldap.BerDecoder,com.sun.jndi.ldap.LdapResult,boolean)>($r6, r0, $z0);
+
+        $z1 = r3.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        if $z1 == 0 goto label20;
+
+        $r25 = staticinvoke <com.sun.jndi.ldap.LdapClient: java.util.Vector parseControls(com.sun.jndi.ldap.BerDecoder)>($r6);
+
+        goto label21;
+
+     label20:
+        $r25 = null;
+
+     label21:
+        r0.<com.sun.jndi.ldap.LdapResult: java.util.Vector resControls> = $r25;
+
+        $r7 = r3.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        virtualinvoke $r7.<com.sun.jndi.ldap.Connection: void removeRequest(com.sun.jndi.ldap.LdapRequest)>(r4);
+
+        return r0;
+
+     label22:
+        return r0;
+    }
+
+    private javax.naming.directory.Attribute parseAttribute(com.sun.jndi.ldap.BerDecoder, java.util.Hashtable) throws java.io.IOException
+    {
+        com.sun.jndi.ldap.BerDecoder r1;
+        com.sun.jndi.ldap.LdapAttribute $r5;
+        java.io.IOException $r6;
+        com.sun.jndi.ldap.LdapClient r2;
+        int[] r0;
+        int $i0, $i1, $i2, $i3, i4;
+        java.lang.String $r3;
+        java.util.Hashtable r4;
+        boolean $z0, $z1;
+
+        r2 := @this: com.sun.jndi.ldap.LdapClient;
+
+        r1 := @parameter0: com.sun.jndi.ldap.BerDecoder;
+
+        r4 := @parameter1: java.util.Hashtable;
+
+        r0 = newarray (int)[1];
+
+        virtualinvoke r1.<com.sun.jndi.ldap.BerDecoder: int parseSeq(int[])>(null);
+
+        $z0 = r2.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        $r3 = virtualinvoke r1.<com.sun.jndi.ldap.BerDecoder: java.lang.String parseString(boolean)>($z0);
+
+        $z1 = specialinvoke r2.<com.sun.jndi.ldap.LdapClient: boolean isBinaryValued(java.lang.String,java.util.Hashtable)>($r3, r4);
+
+        $r5 = new com.sun.jndi.ldap.LdapAttribute;
+
+        specialinvoke $r5.<com.sun.jndi.ldap.LdapAttribute: void <init>(java.lang.String)>($r3);
+
+        $i0 = virtualinvoke r1.<com.sun.jndi.ldap.BerDecoder: int parseSeq(int[])>(r0);
+
+        if $i0 != 49 goto label6;
+
+        i4 = r0[0];
+
+     label1:
+        $i2 = virtualinvoke r1.<com.sun.jndi.ldap.BerDecoder: int bytesLeft()>();
+
+        if $i2 <= 0 goto label5;
+
+        if i4 <= 0 goto label5;
+
+     label2:
+        $i3 = specialinvoke r2.<com.sun.jndi.ldap.LdapClient: int parseAttributeValue(com.sun.jndi.ldap.BerDecoder,javax.naming.directory.Attribute,boolean)>(r1, $r5, $z1);
+
+        i4 = i4 - $i3;
+
+     label3:
+        goto label1;
+
+     label4:
+        $r6 := @caughtexception;
+
+        virtualinvoke r1.<com.sun.jndi.ldap.BerDecoder: void seek(int)>(i4);
+
+        goto label5;
+
+     label5:
+        goto label7;
+
+     label6:
+        $i1 = r0[0];
+
+        virtualinvoke r1.<com.sun.jndi.ldap.BerDecoder: void seek(int)>($i1);
+
+     label7:
+        return $r5;
+
+        catch java.io.IOException from label2 to label3 with label4;
+    }
+
+    private int parseAttributeValue(com.sun.jndi.ldap.BerDecoder, javax.naming.directory.Attribute, boolean) throws java.io.IOException
+    {
+        byte[] $r5;
+        com.sun.jndi.ldap.BerDecoder r2;
+        javax.naming.directory.Attribute r1;
+        com.sun.jndi.ldap.LdapClient r3;
+        int[] r0;
+        int $i0, $i1;
+        java.lang.String $r4;
+        boolean z0, $z1;
+
+        r3 := @this: com.sun.jndi.ldap.LdapClient;
+
+        r2 := @parameter0: com.sun.jndi.ldap.BerDecoder;
+
+        r1 := @parameter1: javax.naming.directory.Attribute;
+
+        z0 := @parameter2: boolean;
+
+        r0 = newarray (int)[1];
+
+        if z0 == 0 goto label1;
+
+        $i1 = virtualinvoke r2.<com.sun.jndi.ldap.BerDecoder: int peekByte()>();
+
+        $r5 = virtualinvoke r2.<com.sun.jndi.ldap.BerDecoder: byte[] parseOctetString(int,int[])>($i1, r0);
+
+        interfaceinvoke r1.<javax.naming.directory.Attribute: boolean add(java.lang.Object)>($r5);
+
+        goto label2;
+
+     label1:
+        $z1 = r3.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        $r4 = virtualinvoke r2.<com.sun.jndi.ldap.BerDecoder: java.lang.String parseStringWithTag(int,boolean,int[])>(4, $z1, r0);
+
+        interfaceinvoke r1.<javax.naming.directory.Attribute: boolean add(java.lang.Object)>($r4);
+
+     label2:
+        $i0 = r0[0];
+
+        return $i0;
+    }
+
+    private boolean isBinaryValued(java.lang.String, java.util.Hashtable)
+    {
+        com.sun.jndi.ldap.LdapClient r5;
+        java.util.Locale $r1;
+        int $i0, $i2;
+        java.lang.String r0, $r2;
+        java.util.Hashtable $r3, r4;
+        boolean $z0, $z1, $z2;
+
+        r5 := @this: com.sun.jndi.ldap.LdapClient;
+
+        r0 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.util.Hashtable;
+
+        $r1 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r2 = virtualinvoke r0.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r1);
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int indexOf(java.lang.String)>(";binary");
+
+        $i2 = (int) -1;
+
+        if $i0 != $i2 goto label1;
+
+        $r3 = <com.sun.jndi.ldap.LdapClient: java.util.Hashtable defaultBinaryAttrs>;
+
+        $z0 = virtualinvoke $r3.<java.util.Hashtable: boolean containsKey(java.lang.Object)>($r2);
+
+        if $z0 != 0 goto label1;
+
+        if r4 == null goto label2;
+
+        $z1 = virtualinvoke r4.<java.util.Hashtable: boolean containsKey(java.lang.Object)>($r2);
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+    }
+
+    static void parseResult(com.sun.jndi.ldap.BerDecoder, com.sun.jndi.ldap.LdapResult, boolean) throws java.io.IOException
+    {
+        java.util.Vector $r4, $r6, $r7, $r8;
+        int[] r5;
+        int $i0, $i1, $i2, $i3, $i4, i5, $i6, $i7;
+        java.lang.String $r2, $r3, $r9;
+        boolean z0;
+        com.sun.jndi.ldap.BerDecoder r1;
+        com.sun.jndi.ldap.LdapResult r0;
+
+        r1 := @parameter0: com.sun.jndi.ldap.BerDecoder;
+
+        r0 := @parameter1: com.sun.jndi.ldap.LdapResult;
+
+        z0 := @parameter2: boolean;
+
+        $i0 = virtualinvoke r1.<com.sun.jndi.ldap.BerDecoder: int parseEnumeration()>();
+
+        r0.<com.sun.jndi.ldap.LdapResult: int status> = $i0;
+
+        $r2 = virtualinvoke r1.<com.sun.jndi.ldap.BerDecoder: java.lang.String parseString(boolean)>(z0);
+
+        r0.<com.sun.jndi.ldap.LdapResult: java.lang.String matchedDN> = $r2;
+
+        $r3 = virtualinvoke r1.<com.sun.jndi.ldap.BerDecoder: java.lang.String parseString(boolean)>(z0);
+
+        r0.<com.sun.jndi.ldap.LdapResult: java.lang.String errorMessage> = $r3;
+
+        if z0 == 0 goto label4;
+
+        $i1 = virtualinvoke r1.<com.sun.jndi.ldap.BerDecoder: int bytesLeft()>();
+
+        if $i1 <= 0 goto label4;
+
+        $i2 = virtualinvoke r1.<com.sun.jndi.ldap.BerDecoder: int peekByte()>();
+
+        if $i2 != 163 goto label4;
+
+        $r4 = new java.util.Vector;
+
+        specialinvoke $r4.<java.util.Vector: void <init>(int)>(4);
+
+        r5 = newarray (int)[1];
+
+        virtualinvoke r1.<com.sun.jndi.ldap.BerDecoder: int parseSeq(int[])>(r5);
+
+        $i3 = virtualinvoke r1.<com.sun.jndi.ldap.BerDecoder: int getParsePosition()>();
+
+        $i4 = r5[0];
+
+        i5 = $i3 + $i4;
+
+     label1:
+        $i6 = virtualinvoke r1.<com.sun.jndi.ldap.BerDecoder: int getParsePosition()>();
+
+        if $i6 >= i5 goto label2;
+
+        $i7 = virtualinvoke r1.<com.sun.jndi.ldap.BerDecoder: int bytesLeft()>();
+
+        if $i7 <= 0 goto label2;
+
+        $r9 = virtualinvoke r1.<com.sun.jndi.ldap.BerDecoder: java.lang.String parseString(boolean)>(z0);
+
+        virtualinvoke $r4.<java.util.Vector: void addElement(java.lang.Object)>($r9);
+
+        goto label1;
+
+     label2:
+        $r6 = r0.<com.sun.jndi.ldap.LdapResult: java.util.Vector referrals>;
+
+        if $r6 != null goto label3;
+
+        $r8 = new java.util.Vector;
+
+        specialinvoke $r8.<java.util.Vector: void <init>(int)>(4);
+
+        r0.<com.sun.jndi.ldap.LdapResult: java.util.Vector referrals> = $r8;
+
+     label3:
+        $r7 = r0.<com.sun.jndi.ldap.LdapResult: java.util.Vector referrals>;
+
+        virtualinvoke $r7.<java.util.Vector: void addElement(java.lang.Object)>($r4);
+
+     label4:
+        return;
+    }
+
+    static java.util.Vector parseControls(com.sun.jndi.ldap.BerDecoder) throws java.io.IOException
+    {
+        byte[] r5;
+        java.util.Vector $r1;
+        int[] r2;
+        int $i0, $i1, $i2, $i3, i4, $i5, $i6, $i7, $i8, $i9, $i10;
+        java.lang.String $r3;
+        boolean z0;
+        com.sun.jndi.ldap.BerDecoder r0;
+        com.sun.jndi.ldap.BasicControl $r4;
+
+        r0 := @parameter0: com.sun.jndi.ldap.BerDecoder;
+
+        $i0 = virtualinvoke r0.<com.sun.jndi.ldap.BerDecoder: int bytesLeft()>();
+
+        if $i0 <= 0 goto label5;
+
+        $i1 = virtualinvoke r0.<com.sun.jndi.ldap.BerDecoder: int peekByte()>();
+
+        if $i1 != 160 goto label5;
+
+        $r1 = new java.util.Vector;
+
+        specialinvoke $r1.<java.util.Vector: void <init>(int)>(4);
+
+        z0 = 0;
+
+        r5 = null;
+
+        r2 = newarray (int)[1];
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerDecoder: int parseSeq(int[])>(r2);
+
+        $i2 = virtualinvoke r0.<com.sun.jndi.ldap.BerDecoder: int getParsePosition()>();
+
+        $i3 = r2[0];
+
+        i4 = $i2 + $i3;
+
+     label1:
+        $i9 = virtualinvoke r0.<com.sun.jndi.ldap.BerDecoder: int getParsePosition()>();
+
+        if $i9 >= i4 goto label4;
+
+        $i5 = virtualinvoke r0.<com.sun.jndi.ldap.BerDecoder: int bytesLeft()>();
+
+        if $i5 <= 0 goto label4;
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerDecoder: int parseSeq(int[])>(null);
+
+        $r3 = virtualinvoke r0.<com.sun.jndi.ldap.BerDecoder: java.lang.String parseString(boolean)>(1);
+
+        $i6 = virtualinvoke r0.<com.sun.jndi.ldap.BerDecoder: int bytesLeft()>();
+
+        if $i6 <= 0 goto label2;
+
+        $i8 = virtualinvoke r0.<com.sun.jndi.ldap.BerDecoder: int peekByte()>();
+
+        if $i8 != 1 goto label2;
+
+        z0 = virtualinvoke r0.<com.sun.jndi.ldap.BerDecoder: boolean parseBoolean()>();
+
+     label2:
+        $i10 = virtualinvoke r0.<com.sun.jndi.ldap.BerDecoder: int bytesLeft()>();
+
+        if $i10 <= 0 goto label3;
+
+        $i7 = virtualinvoke r0.<com.sun.jndi.ldap.BerDecoder: int peekByte()>();
+
+        if $i7 != 4 goto label3;
+
+        r5 = virtualinvoke r0.<com.sun.jndi.ldap.BerDecoder: byte[] parseOctetString(int,int[])>(4, null);
+
+     label3:
+        if $r3 == null goto label1;
+
+        $r4 = new com.sun.jndi.ldap.BasicControl;
+
+        specialinvoke $r4.<com.sun.jndi.ldap.BasicControl: void <init>(java.lang.String,boolean,byte[])>($r3, z0, r5);
+
+        virtualinvoke $r1.<java.util.Vector: void addElement(java.lang.Object)>($r4);
+
+        goto label1;
+
+     label4:
+        return $r1;
+
+     label5:
+        return null;
+    }
+
+    private void parseExtResponse(com.sun.jndi.ldap.BerDecoder, com.sun.jndi.ldap.LdapResult) throws java.io.IOException
+    {
+        byte[] $r3;
+        com.sun.jndi.ldap.BerDecoder r0;
+        com.sun.jndi.ldap.LdapClient r2;
+        java.util.Vector $r5;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String $r4;
+        com.sun.jndi.ldap.LdapResult r1;
+        boolean $z0, $z1;
+
+        r2 := @this: com.sun.jndi.ldap.LdapClient;
+
+        r0 := @parameter0: com.sun.jndi.ldap.BerDecoder;
+
+        r1 := @parameter1: com.sun.jndi.ldap.LdapResult;
+
+        $z0 = r2.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        staticinvoke <com.sun.jndi.ldap.LdapClient: void parseResult(com.sun.jndi.ldap.BerDecoder,com.sun.jndi.ldap.LdapResult,boolean)>(r0, r1, $z0);
+
+        $i0 = virtualinvoke r0.<com.sun.jndi.ldap.BerDecoder: int bytesLeft()>();
+
+        if $i0 <= 0 goto label1;
+
+        $i2 = virtualinvoke r0.<com.sun.jndi.ldap.BerDecoder: int peekByte()>();
+
+        if $i2 != 138 goto label1;
+
+        $z1 = r2.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        $r4 = virtualinvoke r0.<com.sun.jndi.ldap.BerDecoder: java.lang.String parseStringWithTag(int,boolean,int[])>(138, $z1, null);
+
+        r1.<com.sun.jndi.ldap.LdapResult: java.lang.String extensionId> = $r4;
+
+     label1:
+        $i3 = virtualinvoke r0.<com.sun.jndi.ldap.BerDecoder: int bytesLeft()>();
+
+        if $i3 <= 0 goto label2;
+
+        $i1 = virtualinvoke r0.<com.sun.jndi.ldap.BerDecoder: int peekByte()>();
+
+        if $i1 != 139 goto label2;
+
+        $r3 = virtualinvoke r0.<com.sun.jndi.ldap.BerDecoder: byte[] parseOctetString(int,int[])>(139, null);
+
+        r1.<com.sun.jndi.ldap.LdapResult: byte[] extensionValue> = $r3;
+
+     label2:
+        $r5 = staticinvoke <com.sun.jndi.ldap.LdapClient: java.util.Vector parseControls(com.sun.jndi.ldap.BerDecoder)>(r0);
+
+        r1.<com.sun.jndi.ldap.LdapResult: java.util.Vector resControls> = $r5;
+
+        return;
+    }
+
+    static void encodeControls(com.sun.jndi.ldap.BerEncoder, javax.naming.ldap.Control[]) throws java.io.IOException
+    {
+        byte[] $r6;
+        javax.naming.ldap.Control $r2, $r4, $r5;
+        int $i0, $i1, i2;
+        java.lang.String $r3;
+        com.sun.jndi.ldap.BerEncoder r1;
+        javax.naming.ldap.Control[] r0;
+        boolean $z0;
+
+        r1 := @parameter0: com.sun.jndi.ldap.BerEncoder;
+
+        r0 := @parameter1: javax.naming.ldap.Control[];
+
+        if r0 == null goto label1;
+
+        $i0 = lengthof r0;
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        virtualinvoke r1.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(160);
+
+        i2 = 0;
+
+     label3:
+        $i1 = lengthof r0;
+
+        if i2 >= $i1 goto label6;
+
+        virtualinvoke r1.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(48);
+
+        $r2 = r0[i2];
+
+        $r3 = interfaceinvoke $r2.<javax.naming.ldap.Control: java.lang.String getID()>();
+
+        virtualinvoke r1.<com.sun.jndi.ldap.BerEncoder: void encodeString(java.lang.String,boolean)>($r3, 1);
+
+        $r4 = r0[i2];
+
+        $z0 = interfaceinvoke $r4.<javax.naming.ldap.Control: boolean isCritical()>();
+
+        if $z0 == 0 goto label4;
+
+        virtualinvoke r1.<com.sun.jndi.ldap.BerEncoder: void encodeBoolean(boolean)>(1);
+
+     label4:
+        $r5 = r0[i2];
+
+        $r6 = interfaceinvoke $r5.<javax.naming.ldap.Control: byte[] getEncodedValue()>();
+
+        if $r6 == null goto label5;
+
+        virtualinvoke r1.<com.sun.jndi.ldap.BerEncoder: void encodeOctetString(byte[],int)>($r6, 4);
+
+     label5:
+        virtualinvoke r1.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        i2 = i2 + 1;
+
+        goto label3;
+
+     label6:
+        virtualinvoke r1.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        return;
+    }
+
+    private com.sun.jndi.ldap.LdapResult processReply(com.sun.jndi.ldap.LdapRequest, com.sun.jndi.ldap.LdapResult, int) throws java.io.IOException, javax.naming.NamingException
+    {
+        com.sun.jndi.ldap.BerDecoder $r3;
+        com.sun.jndi.ldap.LdapRequest r1;
+        com.sun.jndi.ldap.LdapClient r0;
+        java.util.Vector $r6;
+        com.sun.jndi.ldap.Connection $r2, $r5;
+        int $i0, i1;
+        com.sun.jndi.ldap.LdapResult r4;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.jndi.ldap.LdapClient;
+
+        r1 := @parameter0: com.sun.jndi.ldap.LdapRequest;
+
+        r4 := @parameter1: com.sun.jndi.ldap.LdapResult;
+
+        i1 := @parameter2: int;
+
+        $r2 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $r3 = virtualinvoke $r2.<com.sun.jndi.ldap.Connection: com.sun.jndi.ldap.BerDecoder readReply(com.sun.jndi.ldap.LdapRequest)>(r1);
+
+        virtualinvoke $r3.<com.sun.jndi.ldap.BerDecoder: int parseSeq(int[])>(null);
+
+        virtualinvoke $r3.<com.sun.jndi.ldap.BerDecoder: int parseInt()>();
+
+        $i0 = virtualinvoke $r3.<com.sun.jndi.ldap.BerDecoder: int parseByte()>();
+
+        if $i0 == i1 goto label1;
+
+        return r4;
+
+     label1:
+        virtualinvoke $r3.<com.sun.jndi.ldap.BerDecoder: int parseLength()>();
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        staticinvoke <com.sun.jndi.ldap.LdapClient: void parseResult(com.sun.jndi.ldap.BerDecoder,com.sun.jndi.ldap.LdapResult,boolean)>($r3, r4, $z0);
+
+        $z1 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        if $z1 == 0 goto label2;
+
+        $r6 = staticinvoke <com.sun.jndi.ldap.LdapClient: java.util.Vector parseControls(com.sun.jndi.ldap.BerDecoder)>($r3);
+
+        goto label3;
+
+     label2:
+        $r6 = null;
+
+     label3:
+        r4.<com.sun.jndi.ldap.LdapResult: java.util.Vector resControls> = $r6;
+
+        $r5 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        virtualinvoke $r5.<com.sun.jndi.ldap.Connection: void removeRequest(com.sun.jndi.ldap.LdapRequest)>(r1);
+
+        return r4;
+    }
+
+    com.sun.jndi.ldap.LdapResult modify(java.lang.String, int[], javax.naming.directory.Attribute[], javax.naming.ldap.Control[]) throws java.io.IOException, javax.naming.NamingException
+    {
+        javax.naming.directory.Attribute[] r4;
+        com.sun.jndi.ldap.LdapRequest $r8;
+        javax.naming.directory.Attribute $r11, $r12, $r16;
+        int[] r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6;
+        javax.naming.directory.InvalidAttributeValueException $r13;
+        java.lang.String r2, $r17, $r20;
+        boolean $z0, $z1, $z2;
+        com.sun.jndi.ldap.LdapClient r0;
+        com.sun.jndi.ldap.Connection $r6, $r7;
+        java.lang.StringBuilder $r14, $r15, $r18, $r19;
+        com.sun.jndi.ldap.BerEncoder $r5;
+        com.sun.jndi.ldap.LdapResult $r1, $r9;
+        javax.naming.ldap.Control[] r10;
+
+        r0 := @this: com.sun.jndi.ldap.LdapClient;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: int[];
+
+        r4 := @parameter2: javax.naming.directory.Attribute[];
+
+        r10 := @parameter3: javax.naming.ldap.Control[];
+
+        specialinvoke r0.<com.sun.jndi.ldap.LdapClient: void ensureOpen()>();
+
+        $r1 = new com.sun.jndi.ldap.LdapResult;
+
+        specialinvoke $r1.<com.sun.jndi.ldap.LdapResult: void <init>()>();
+
+        $r1.<com.sun.jndi.ldap.LdapResult: int status> = 1;
+
+        if r2 == null goto label1;
+
+        $i1 = lengthof r3;
+
+        $i0 = lengthof r4;
+
+        if $i1 == $i0 goto label2;
+
+     label1:
+        return $r1;
+
+     label2:
+        $r5 = new com.sun.jndi.ldap.BerEncoder;
+
+        specialinvoke $r5.<com.sun.jndi.ldap.BerEncoder: void <init>()>();
+
+        $r6 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $i2 = virtualinvoke $r6.<com.sun.jndi.ldap.Connection: int getMsgId()>();
+
+        virtualinvoke $r5.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(48);
+
+        virtualinvoke $r5.<com.sun.jndi.ldap.BerEncoder: void encodeInt(int)>($i2);
+
+        virtualinvoke $r5.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(102);
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        virtualinvoke $r5.<com.sun.jndi.ldap.BerEncoder: void encodeString(java.lang.String,boolean)>(r2, $z0);
+
+        virtualinvoke $r5.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(48);
+
+        i6 = 0;
+
+     label3:
+        $i3 = lengthof r3;
+
+        if i6 >= $i3 goto label5;
+
+        virtualinvoke $r5.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(48);
+
+        $i4 = r3[i6];
+
+        virtualinvoke $r5.<com.sun.jndi.ldap.BerEncoder: void encodeInt(int,int)>($i4, 10);
+
+        $i5 = r3[i6];
+
+        if $i5 != 0 goto label4;
+
+        $r12 = r4[i6];
+
+        $z2 = staticinvoke <com.sun.jndi.ldap.LdapClient: boolean hasNoValue(javax.naming.directory.Attribute)>($r12);
+
+        if $z2 == 0 goto label4;
+
+        $r13 = new javax.naming.directory.InvalidAttributeValueException;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r16 = r4[i6];
+
+        $r17 = interfaceinvoke $r16.<javax.naming.directory.Attribute: java.lang.String getID()>();
+
+        $r18 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' has no values.");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<javax.naming.directory.InvalidAttributeValueException: void <init>(java.lang.String)>($r20);
+
+        throw $r13;
+
+     label4:
+        $r11 = r4[i6];
+
+        specialinvoke r0.<com.sun.jndi.ldap.LdapClient: void encodeAttribute(com.sun.jndi.ldap.BerEncoder,javax.naming.directory.Attribute)>($r5, $r11);
+
+        virtualinvoke $r5.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        i6 = i6 + 1;
+
+        goto label3;
+
+     label5:
+        virtualinvoke $r5.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        virtualinvoke $r5.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        $z1 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        if $z1 == 0 goto label6;
+
+        staticinvoke <com.sun.jndi.ldap.LdapClient: void encodeControls(com.sun.jndi.ldap.BerEncoder,javax.naming.ldap.Control[])>($r5, r10);
+
+     label6:
+        virtualinvoke $r5.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        $r7 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $r8 = virtualinvoke $r7.<com.sun.jndi.ldap.Connection: com.sun.jndi.ldap.LdapRequest writeRequest(com.sun.jndi.ldap.BerEncoder,int)>($r5, $i2);
+
+        $r9 = specialinvoke r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.LdapResult processReply(com.sun.jndi.ldap.LdapRequest,com.sun.jndi.ldap.LdapResult,int)>($r8, $r1, 103);
+
+        return $r9;
+    }
+
+    private void encodeAttribute(com.sun.jndi.ldap.BerEncoder, javax.naming.directory.Attribute) throws java.io.IOException, javax.naming.NamingException
+    {
+        byte[] $r13, $r14;
+        javax.naming.directory.Attribute r1;
+        javax.naming.directory.InvalidAttributeValueException $r6;
+        java.lang.String $r2, $r9, $r12, $r15;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        com.sun.jndi.ldap.LdapClient r3;
+        javax.naming.NamingEnumeration $r4;
+        java.lang.Object $r5;
+        java.lang.StringBuilder $r7, $r8, $r10, $r11;
+        com.sun.jndi.ldap.BerEncoder r0;
+
+        r3 := @this: com.sun.jndi.ldap.LdapClient;
+
+        r0 := @parameter0: com.sun.jndi.ldap.BerEncoder;
+
+        r1 := @parameter1: javax.naming.directory.Attribute;
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(48);
+
+        $r2 = interfaceinvoke r1.<javax.naming.directory.Attribute: java.lang.String getID()>();
+
+        $z0 = r3.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void encodeString(java.lang.String,boolean)>($r2, $z0);
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(49);
+
+        $r4 = interfaceinvoke r1.<javax.naming.directory.Attribute: javax.naming.NamingEnumeration getAll()>();
+
+     label1:
+        $z4 = interfaceinvoke $r4.<javax.naming.NamingEnumeration: boolean hasMore()>();
+
+        if $z4 == 0 goto label5;
+
+        $r5 = interfaceinvoke $r4.<javax.naming.NamingEnumeration: java.lang.Object next()>();
+
+        $z1 = $r5 instanceof java.lang.String;
+
+        if $z1 == 0 goto label2;
+
+        $r15 = (java.lang.String) $r5;
+
+        $z3 = r3.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void encodeString(java.lang.String,boolean)>($r15, $z3);
+
+        goto label1;
+
+     label2:
+        $z2 = $r5 instanceof byte[];
+
+        if $z2 == 0 goto label3;
+
+        $r13 = (byte[]) $r5;
+
+        $r14 = (byte[]) $r13;
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void encodeOctetString(byte[],int)>($r14, 4);
+
+        goto label1;
+
+     label3:
+        if $r5 != null goto label4;
+
+        goto label1;
+
+     label4:
+        $r6 = new javax.naming.directory.InvalidAttributeValueException;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Malformed \'");
+
+        $r9 = interfaceinvoke r1.<javax.naming.directory.Attribute: java.lang.String getID()>();
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' attribute value");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<javax.naming.directory.InvalidAttributeValueException: void <init>(java.lang.String)>($r12);
+
+        throw $r6;
+
+     label5:
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        return;
+    }
+
+    private static boolean hasNoValue(javax.naming.directory.Attribute) throws javax.naming.NamingException
+    {
+        javax.naming.directory.Attribute r0;
+        int $i0, $i1;
+        java.lang.Object $r1;
+        boolean $z0;
+
+        r0 := @parameter0: javax.naming.directory.Attribute;
+
+        $i0 = interfaceinvoke r0.<javax.naming.directory.Attribute: int size()>();
+
+        if $i0 == 0 goto label1;
+
+        $i1 = interfaceinvoke r0.<javax.naming.directory.Attribute: int size()>();
+
+        if $i1 != 1 goto label2;
+
+        $r1 = interfaceinvoke r0.<javax.naming.directory.Attribute: java.lang.Object get()>();
+
+        if $r1 != null goto label2;
+
+     label1:
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+    }
+
+    com.sun.jndi.ldap.LdapResult add(com.sun.jndi.ldap.LdapEntry, javax.naming.ldap.Control[]) throws java.io.IOException, javax.naming.NamingException
+    {
+        com.sun.jndi.ldap.LdapRequest $r10;
+        javax.naming.directory.Attribute r14;
+        int $i0;
+        javax.naming.directory.InvalidAttributeValueException $r15;
+        java.lang.String $r3, $r6, $r18, $r21;
+        boolean $z0, $z1, $z2, $z3;
+        com.sun.jndi.ldap.LdapEntry r2;
+        com.sun.jndi.ldap.LdapClient r0;
+        com.sun.jndi.ldap.Connection $r5, $r9;
+        javax.naming.directory.Attributes $r7;
+        javax.naming.NamingEnumeration $r8;
+        java.lang.Object $r13;
+        java.lang.StringBuilder $r16, $r17, $r19, $r20;
+        com.sun.jndi.ldap.BerEncoder $r4;
+        com.sun.jndi.ldap.LdapResult $r1, $r11;
+        javax.naming.ldap.Control[] r12;
+
+        r0 := @this: com.sun.jndi.ldap.LdapClient;
+
+        r2 := @parameter0: com.sun.jndi.ldap.LdapEntry;
+
+        r12 := @parameter1: javax.naming.ldap.Control[];
+
+        specialinvoke r0.<com.sun.jndi.ldap.LdapClient: void ensureOpen()>();
+
+        $r1 = new com.sun.jndi.ldap.LdapResult;
+
+        specialinvoke $r1.<com.sun.jndi.ldap.LdapResult: void <init>()>();
+
+        $r1.<com.sun.jndi.ldap.LdapResult: int status> = 1;
+
+        if r2 == null goto label1;
+
+        $r3 = r2.<com.sun.jndi.ldap.LdapEntry: java.lang.String DN>;
+
+        if $r3 != null goto label2;
+
+     label1:
+        return $r1;
+
+     label2:
+        $r4 = new com.sun.jndi.ldap.BerEncoder;
+
+        specialinvoke $r4.<com.sun.jndi.ldap.BerEncoder: void <init>()>();
+
+        $r5 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $i0 = virtualinvoke $r5.<com.sun.jndi.ldap.Connection: int getMsgId()>();
+
+        virtualinvoke $r4.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(48);
+
+        virtualinvoke $r4.<com.sun.jndi.ldap.BerEncoder: void encodeInt(int)>($i0);
+
+        virtualinvoke $r4.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(104);
+
+        $r6 = r2.<com.sun.jndi.ldap.LdapEntry: java.lang.String DN>;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        virtualinvoke $r4.<com.sun.jndi.ldap.BerEncoder: void encodeString(java.lang.String,boolean)>($r6, $z0);
+
+        virtualinvoke $r4.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(48);
+
+        $r7 = r2.<com.sun.jndi.ldap.LdapEntry: javax.naming.directory.Attributes attributes>;
+
+        $r8 = interfaceinvoke $r7.<javax.naming.directory.Attributes: javax.naming.NamingEnumeration getAll()>();
+
+     label3:
+        $z1 = interfaceinvoke $r8.<javax.naming.NamingEnumeration: boolean hasMore()>();
+
+        if $z1 == 0 goto label5;
+
+        $r13 = interfaceinvoke $r8.<javax.naming.NamingEnumeration: java.lang.Object next()>();
+
+        r14 = (javax.naming.directory.Attribute) $r13;
+
+        $z3 = staticinvoke <com.sun.jndi.ldap.LdapClient: boolean hasNoValue(javax.naming.directory.Attribute)>(r14);
+
+        if $z3 == 0 goto label4;
+
+        $r15 = new javax.naming.directory.InvalidAttributeValueException;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r18 = interfaceinvoke r14.<javax.naming.directory.Attribute: java.lang.String getID()>();
+
+        $r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' has no values.");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r15.<javax.naming.directory.InvalidAttributeValueException: void <init>(java.lang.String)>($r21);
+
+        throw $r15;
+
+     label4:
+        specialinvoke r0.<com.sun.jndi.ldap.LdapClient: void encodeAttribute(com.sun.jndi.ldap.BerEncoder,javax.naming.directory.Attribute)>($r4, r14);
+
+        goto label3;
+
+     label5:
+        virtualinvoke $r4.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        virtualinvoke $r4.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        $z2 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        if $z2 == 0 goto label6;
+
+        staticinvoke <com.sun.jndi.ldap.LdapClient: void encodeControls(com.sun.jndi.ldap.BerEncoder,javax.naming.ldap.Control[])>($r4, r12);
+
+     label6:
+        virtualinvoke $r4.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        $r9 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $r10 = virtualinvoke $r9.<com.sun.jndi.ldap.Connection: com.sun.jndi.ldap.LdapRequest writeRequest(com.sun.jndi.ldap.BerEncoder,int)>($r4, $i0);
+
+        $r11 = specialinvoke r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.LdapResult processReply(com.sun.jndi.ldap.LdapRequest,com.sun.jndi.ldap.LdapResult,int)>($r10, $r1, 105);
+
+        return $r11;
+    }
+
+    com.sun.jndi.ldap.LdapResult delete(java.lang.String, javax.naming.ldap.Control[]) throws java.io.IOException, javax.naming.NamingException
+    {
+        com.sun.jndi.ldap.LdapRequest $r6;
+        com.sun.jndi.ldap.LdapClient r0;
+        com.sun.jndi.ldap.Connection $r4, $r5;
+        int $i0;
+        java.lang.String r2;
+        com.sun.jndi.ldap.BerEncoder $r3;
+        com.sun.jndi.ldap.LdapResult $r1, $r7;
+        boolean $z0, $z1;
+        javax.naming.ldap.Control[] r8;
+
+        r0 := @this: com.sun.jndi.ldap.LdapClient;
+
+        r2 := @parameter0: java.lang.String;
+
+        r8 := @parameter1: javax.naming.ldap.Control[];
+
+        specialinvoke r0.<com.sun.jndi.ldap.LdapClient: void ensureOpen()>();
+
+        $r1 = new com.sun.jndi.ldap.LdapResult;
+
+        specialinvoke $r1.<com.sun.jndi.ldap.LdapResult: void <init>()>();
+
+        $r1.<com.sun.jndi.ldap.LdapResult: int status> = 1;
+
+        if r2 != null goto label1;
+
+        return $r1;
+
+     label1:
+        $r3 = new com.sun.jndi.ldap.BerEncoder;
+
+        specialinvoke $r3.<com.sun.jndi.ldap.BerEncoder: void <init>()>();
+
+        $r4 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $i0 = virtualinvoke $r4.<com.sun.jndi.ldap.Connection: int getMsgId()>();
+
+        virtualinvoke $r3.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(48);
+
+        virtualinvoke $r3.<com.sun.jndi.ldap.BerEncoder: void encodeInt(int)>($i0);
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        virtualinvoke $r3.<com.sun.jndi.ldap.BerEncoder: void encodeString(java.lang.String,int,boolean)>(r2, 74, $z0);
+
+        $z1 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        if $z1 == 0 goto label2;
+
+        staticinvoke <com.sun.jndi.ldap.LdapClient: void encodeControls(com.sun.jndi.ldap.BerEncoder,javax.naming.ldap.Control[])>($r3, r8);
+
+     label2:
+        virtualinvoke $r3.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        $r5 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $r6 = virtualinvoke $r5.<com.sun.jndi.ldap.Connection: com.sun.jndi.ldap.LdapRequest writeRequest(com.sun.jndi.ldap.BerEncoder,int)>($r3, $i0);
+
+        $r7 = specialinvoke r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.LdapResult processReply(com.sun.jndi.ldap.LdapRequest,com.sun.jndi.ldap.LdapResult,int)>($r6, $r1, 107);
+
+        return $r7;
+    }
+
+    com.sun.jndi.ldap.LdapResult moddn(java.lang.String, java.lang.String, boolean, java.lang.String, javax.naming.ldap.Control[]) throws java.io.IOException, javax.naming.NamingException
+    {
+        com.sun.jndi.ldap.LdapRequest $r7;
+        int $i0, $i1;
+        java.lang.String r1, r2, r3;
+        boolean $z0, $z1, z2, $z3, $z4, $z5, $z6;
+        com.sun.jndi.ldap.LdapClient r0;
+        com.sun.jndi.ldap.Connection $r5, $r6;
+        com.sun.jndi.ldap.BerEncoder $r4;
+        com.sun.jndi.ldap.LdapResult $r8, $r10;
+        javax.naming.ldap.Control[] r9;
+
+        r0 := @this: com.sun.jndi.ldap.LdapClient;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        z2 := @parameter2: boolean;
+
+        r1 := @parameter3: java.lang.String;
+
+        r9 := @parameter4: javax.naming.ldap.Control[];
+
+        specialinvoke r0.<com.sun.jndi.ldap.LdapClient: void ensureOpen()>();
+
+        if r1 == null goto label1;
+
+        $i1 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        if $i1 <= 0 goto label1;
+
+        $z5 = 1;
+
+        goto label2;
+
+     label1:
+        $z5 = 0;
+
+     label2:
+        $r10 = new com.sun.jndi.ldap.LdapResult;
+
+        specialinvoke $r10.<com.sun.jndi.ldap.LdapResult: void <init>()>();
+
+        $r10.<com.sun.jndi.ldap.LdapResult: int status> = 1;
+
+        if r2 == null goto label3;
+
+        if r3 != null goto label4;
+
+     label3:
+        return $r10;
+
+     label4:
+        $r4 = new com.sun.jndi.ldap.BerEncoder;
+
+        specialinvoke $r4.<com.sun.jndi.ldap.BerEncoder: void <init>()>();
+
+        $r5 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $i0 = virtualinvoke $r5.<com.sun.jndi.ldap.Connection: int getMsgId()>();
+
+        virtualinvoke $r4.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(48);
+
+        virtualinvoke $r4.<com.sun.jndi.ldap.BerEncoder: void encodeInt(int)>($i0);
+
+        virtualinvoke $r4.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(108);
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        virtualinvoke $r4.<com.sun.jndi.ldap.BerEncoder: void encodeString(java.lang.String,boolean)>(r2, $z0);
+
+        $z1 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        virtualinvoke $r4.<com.sun.jndi.ldap.BerEncoder: void encodeString(java.lang.String,boolean)>(r3, $z1);
+
+        virtualinvoke $r4.<com.sun.jndi.ldap.BerEncoder: void encodeBoolean(boolean)>(z2);
+
+        $z3 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        if $z3 == 0 goto label5;
+
+        if $z5 == 0 goto label5;
+
+        $z4 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        virtualinvoke $r4.<com.sun.jndi.ldap.BerEncoder: void encodeString(java.lang.String,int,boolean)>(r1, 128, $z4);
+
+     label5:
+        virtualinvoke $r4.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        $z6 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        if $z6 == 0 goto label6;
+
+        staticinvoke <com.sun.jndi.ldap.LdapClient: void encodeControls(com.sun.jndi.ldap.BerEncoder,javax.naming.ldap.Control[])>($r4, r9);
+
+     label6:
+        virtualinvoke $r4.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        $r6 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $r7 = virtualinvoke $r6.<com.sun.jndi.ldap.Connection: com.sun.jndi.ldap.LdapRequest writeRequest(com.sun.jndi.ldap.BerEncoder,int)>($r4, $i0);
+
+        $r8 = specialinvoke r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.LdapResult processReply(com.sun.jndi.ldap.LdapRequest,com.sun.jndi.ldap.LdapResult,int)>($r7, $r10, 109);
+
+        return $r8;
+    }
+
+    com.sun.jndi.ldap.LdapResult compare(java.lang.String, java.lang.String, java.lang.String, javax.naming.ldap.Control[]) throws java.io.IOException, javax.naming.NamingException
+    {
+        byte[] $r7, $r12;
+        com.sun.jndi.ldap.LdapRequest $r9;
+        int $i0, $i1;
+        java.lang.String r2, r3, r4;
+        boolean $z0, $z1, $z2, $z3;
+        com.sun.jndi.ldap.LdapClient r0;
+        com.sun.jndi.ldap.Connection $r6, $r8;
+        com.sun.jndi.ldap.BerEncoder $r5;
+        com.sun.jndi.ldap.LdapResult $r1, $r10;
+        javax.naming.ldap.Control[] r11;
+
+        r0 := @this: com.sun.jndi.ldap.LdapClient;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        r4 := @parameter2: java.lang.String;
+
+        r11 := @parameter3: javax.naming.ldap.Control[];
+
+        specialinvoke r0.<com.sun.jndi.ldap.LdapClient: void ensureOpen()>();
+
+        $r1 = new com.sun.jndi.ldap.LdapResult;
+
+        specialinvoke $r1.<com.sun.jndi.ldap.LdapResult: void <init>()>();
+
+        $r1.<com.sun.jndi.ldap.LdapResult: int status> = 1;
+
+        if r2 == null goto label1;
+
+        if r3 == null goto label1;
+
+        if r4 != null goto label2;
+
+     label1:
+        return $r1;
+
+     label2:
+        $r5 = new com.sun.jndi.ldap.BerEncoder;
+
+        specialinvoke $r5.<com.sun.jndi.ldap.BerEncoder: void <init>()>();
+
+        $r6 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $i0 = virtualinvoke $r6.<com.sun.jndi.ldap.Connection: int getMsgId()>();
+
+        virtualinvoke $r5.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(48);
+
+        virtualinvoke $r5.<com.sun.jndi.ldap.BerEncoder: void encodeInt(int)>($i0);
+
+        virtualinvoke $r5.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(110);
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        virtualinvoke $r5.<com.sun.jndi.ldap.BerEncoder: void encodeString(java.lang.String,boolean)>(r2, $z0);
+
+        virtualinvoke $r5.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(48);
+
+        $z1 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        virtualinvoke $r5.<com.sun.jndi.ldap.BerEncoder: void encodeString(java.lang.String,boolean)>(r3, $z1);
+
+        $z2 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        if $z2 == 0 goto label3;
+
+        $r12 = virtualinvoke r4.<java.lang.String: byte[] getBytes(java.lang.String)>("UTF8");
+
+        goto label4;
+
+     label3:
+        $r12 = virtualinvoke r4.<java.lang.String: byte[] getBytes(java.lang.String)>("8859_1");
+
+     label4:
+        $i1 = lengthof $r12;
+
+        $r7 = staticinvoke <com.sun.jndi.ldap.Filter: byte[] unescapeFilterValue(byte[],int,int)>($r12, 0, $i1);
+
+        virtualinvoke $r5.<com.sun.jndi.ldap.BerEncoder: void encodeOctetString(byte[],int)>($r7, 4);
+
+        virtualinvoke $r5.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        virtualinvoke $r5.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        $z3 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        if $z3 == 0 goto label5;
+
+        staticinvoke <com.sun.jndi.ldap.LdapClient: void encodeControls(com.sun.jndi.ldap.BerEncoder,javax.naming.ldap.Control[])>($r5, r11);
+
+     label5:
+        virtualinvoke $r5.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        $r8 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $r9 = virtualinvoke $r8.<com.sun.jndi.ldap.Connection: com.sun.jndi.ldap.LdapRequest writeRequest(com.sun.jndi.ldap.BerEncoder,int)>($r5, $i0);
+
+        $r10 = specialinvoke r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.LdapResult processReply(com.sun.jndi.ldap.LdapRequest,com.sun.jndi.ldap.LdapResult,int)>($r9, $r1, 111);
+
+        return $r10;
+    }
+
+    com.sun.jndi.ldap.LdapResult extendedOp(java.lang.String, byte[], javax.naming.ldap.Control[], boolean) throws java.io.IOException, javax.naming.NamingException
+    {
+        byte[] r5;
+        com.sun.jndi.ldap.LdapRequest $r8;
+        int $i0, $i1;
+        java.lang.String r2;
+        boolean $z0, z1;
+        com.sun.jndi.ldap.BerDecoder $r10;
+        com.sun.jndi.ldap.LdapClient r0;
+        com.sun.jndi.ldap.Connection $r4, $r7, $r9, $r11;
+        com.sun.jndi.ldap.BerEncoder $r3;
+        com.sun.jndi.ldap.LdapResult $r1;
+        javax.naming.ldap.Control[] r6;
+
+        r0 := @this: com.sun.jndi.ldap.LdapClient;
+
+        r2 := @parameter0: java.lang.String;
+
+        r5 := @parameter1: byte[];
+
+        r6 := @parameter2: javax.naming.ldap.Control[];
+
+        z1 := @parameter3: boolean;
+
+        specialinvoke r0.<com.sun.jndi.ldap.LdapClient: void ensureOpen()>();
+
+        $r1 = new com.sun.jndi.ldap.LdapResult;
+
+        specialinvoke $r1.<com.sun.jndi.ldap.LdapResult: void <init>()>();
+
+        $r1.<com.sun.jndi.ldap.LdapResult: int status> = 1;
+
+        if r2 != null goto label1;
+
+        return $r1;
+
+     label1:
+        $r3 = new com.sun.jndi.ldap.BerEncoder;
+
+        specialinvoke $r3.<com.sun.jndi.ldap.BerEncoder: void <init>()>();
+
+        $r4 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $i0 = virtualinvoke $r4.<com.sun.jndi.ldap.Connection: int getMsgId()>();
+
+        virtualinvoke $r3.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(48);
+
+        virtualinvoke $r3.<com.sun.jndi.ldap.BerEncoder: void encodeInt(int)>($i0);
+
+        virtualinvoke $r3.<com.sun.jndi.ldap.BerEncoder: void beginSeq(int)>(119);
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapClient: boolean isLdapv3>;
+
+        virtualinvoke $r3.<com.sun.jndi.ldap.BerEncoder: void encodeString(java.lang.String,int,boolean)>(r2, 128, $z0);
+
+        if r5 == null goto label2;
+
+        virtualinvoke $r3.<com.sun.jndi.ldap.BerEncoder: void encodeOctetString(byte[],int)>(r5, 129);
+
+     label2:
+        virtualinvoke $r3.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        staticinvoke <com.sun.jndi.ldap.LdapClient: void encodeControls(com.sun.jndi.ldap.BerEncoder,javax.naming.ldap.Control[])>($r3, r6);
+
+        virtualinvoke $r3.<com.sun.jndi.ldap.BerEncoder: void endSeq()>();
+
+        $r7 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $r8 = virtualinvoke $r7.<com.sun.jndi.ldap.Connection: com.sun.jndi.ldap.LdapRequest writeRequest(com.sun.jndi.ldap.BerEncoder,int,boolean)>($r3, $i0, z1);
+
+        $r9 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $r10 = virtualinvoke $r9.<com.sun.jndi.ldap.Connection: com.sun.jndi.ldap.BerDecoder readReply(com.sun.jndi.ldap.LdapRequest)>($r8);
+
+        virtualinvoke $r10.<com.sun.jndi.ldap.BerDecoder: int parseSeq(int[])>(null);
+
+        virtualinvoke $r10.<com.sun.jndi.ldap.BerDecoder: int parseInt()>();
+
+        $i1 = virtualinvoke $r10.<com.sun.jndi.ldap.BerDecoder: int parseByte()>();
+
+        if $i1 == 120 goto label3;
+
+        return $r1;
+
+     label3:
+        virtualinvoke $r10.<com.sun.jndi.ldap.BerDecoder: int parseLength()>();
+
+        specialinvoke r0.<com.sun.jndi.ldap.LdapClient: void parseExtResponse(com.sun.jndi.ldap.BerDecoder,com.sun.jndi.ldap.LdapResult)>($r10, $r1);
+
+        $r11 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        virtualinvoke $r11.<com.sun.jndi.ldap.Connection: void removeRequest(com.sun.jndi.ldap.LdapRequest)>($r8);
+
+        return $r1;
+    }
+
+    static java.lang.String getErrorMessage(int, java.lang.String)
+    {
+        java.lang.String[] $r5, $r10;
+        int i0, $i1;
+        java.lang.String $r3, r4, $r6, $r11, r23;
+        java.lang.ArrayIndexOutOfBoundsException $r19;
+        java.lang.StringBuilder $r0, $r1, $r2, $r7, $r8, $r9, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r20, $r21, $r22;
+
+        i0 := @parameter0: int;
+
+        r4 := @parameter1: java.lang.String;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[LDAP: error code ");
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r23 = $r3;
+
+        if r4 == null goto label1;
+
+        $i1 = virtualinvoke r4.<java.lang.String: int length()>();
+
+        if $i1 == 0 goto label1;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" - ");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        r23 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label4;
+
+     label1:
+        $r5 = <com.sun.jndi.ldap.LdapClient: java.lang.String[] ldap_error_message>;
+
+        $r6 = $r5[i0];
+
+        if $r6 == null goto label2;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" - ");
+
+        $r10 = <com.sun.jndi.ldap.LdapClient: java.lang.String[] ldap_error_message>;
+
+        $r11 = $r10[i0];
+
+        $r12 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        r23 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r19 := @caughtexception;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label4:
+        return r23;
+
+        catch java.lang.ArrayIndexOutOfBoundsException from label1 to label2 with label3;
+    }
+
+    void addUnsolicited(com.sun.jndi.ldap.LdapCtx)
+    {
+        com.sun.jndi.ldap.LdapClient r0;
+        java.util.Vector $r2;
+        com.sun.jndi.ldap.LdapCtx r1;
+
+        r0 := @this: com.sun.jndi.ldap.LdapClient;
+
+        r1 := @parameter0: com.sun.jndi.ldap.LdapCtx;
+
+        $r2 = r0.<com.sun.jndi.ldap.LdapClient: java.util.Vector unsolicited>;
+
+        virtualinvoke $r2.<java.util.Vector: void addElement(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    void removeUnsolicited(com.sun.jndi.ldap.LdapCtx)
+    {
+        com.sun.jndi.ldap.LdapClient r0;
+        java.util.Vector $r2;
+        com.sun.jndi.ldap.LdapCtx r1;
+
+        r0 := @this: com.sun.jndi.ldap.LdapClient;
+
+        r1 := @parameter0: com.sun.jndi.ldap.LdapCtx;
+
+        $r2 = r0.<com.sun.jndi.ldap.LdapClient: java.util.Vector unsolicited>;
+
+        virtualinvoke $r2.<java.util.Vector: boolean removeElement(java.lang.Object)>(r1);
+
+        return;
+    }
+
+    void processUnsolicited(com.sun.jndi.ldap.BerDecoder)
+    {
+        byte[] $r17;
+        javax.naming.NamingException $r21;
+        java.util.Vector $r5, $r6, $r10, $r13, $r16, $r19;
+        boolean $z0, $z1, $z2;
+        com.sun.jndi.ldap.BerDecoder r1;
+        com.sun.jndi.ldap.LdapCtx r26;
+        javax.naming.ldap.Control[] $r27;
+        java.lang.Throwable $r24;
+        int $i0, $i1, $i2;
+        java.lang.String $r3, $r4, $r7, $r8, $r14, $r15, $r18;
+        com.sun.jndi.ldap.UnsolicitedResponseImpl $r12, r25;
+        java.io.IOException $r20, $r22;
+        com.sun.jndi.ldap.LdapClient r2;
+        javax.naming.CommunicationException $r9, $r23;
+        java.lang.Object $r11;
+        com.sun.jndi.ldap.LdapResult $r0;
+
+        r2 := @this: com.sun.jndi.ldap.LdapClient;
+
+        r1 := @parameter0: com.sun.jndi.ldap.BerDecoder;
+
+     label01:
+        $r0 = new com.sun.jndi.ldap.LdapResult;
+
+        specialinvoke $r0.<com.sun.jndi.ldap.LdapResult: void <init>()>();
+
+        virtualinvoke r1.<com.sun.jndi.ldap.BerDecoder: int parseSeq(int[])>(null);
+
+        virtualinvoke r1.<com.sun.jndi.ldap.BerDecoder: int parseInt()>();
+
+        $i0 = virtualinvoke r1.<com.sun.jndi.ldap.BerDecoder: int parseByte()>();
+
+        if $i0 == 120 goto label02;
+
+        $r20 = new java.io.IOException;
+
+        specialinvoke $r20.<java.io.IOException: void <init>(java.lang.String)>("Unsolicited Notification must be an Extended Response");
+
+        throw $r20;
+
+     label02:
+        virtualinvoke r1.<com.sun.jndi.ldap.BerDecoder: int parseLength()>();
+
+        specialinvoke r2.<com.sun.jndi.ldap.LdapClient: void parseExtResponse(com.sun.jndi.ldap.BerDecoder,com.sun.jndi.ldap.LdapResult)>(r1, $r0);
+
+        $r4 = "1.3.6.1.4.1.1466.20036";
+
+        $r3 = $r0.<com.sun.jndi.ldap.LdapResult: java.lang.String extensionId>;
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label03;
+
+        $z2 = r2.<com.sun.jndi.ldap.LdapClient: boolean pooled>;
+
+        specialinvoke r2.<com.sun.jndi.ldap.LdapClient: void forceClose(boolean)>($z2);
+
+     label03:
+        r25 = null;
+
+        $r5 = r2.<com.sun.jndi.ldap.LdapClient: java.util.Vector unsolicited>;
+
+        entermonitor $r5;
+
+     label04:
+        $r6 = r2.<com.sun.jndi.ldap.LdapClient: java.util.Vector unsolicited>;
+
+        $i1 = virtualinvoke $r6.<java.util.Vector: int size()>();
+
+        if $i1 <= 0 goto label07;
+
+        $r10 = r2.<com.sun.jndi.ldap.LdapClient: java.util.Vector unsolicited>;
+
+        $r11 = virtualinvoke $r10.<java.util.Vector: java.lang.Object elementAt(int)>(0);
+
+        r26 = (com.sun.jndi.ldap.LdapCtx) $r11;
+
+        $r12 = new com.sun.jndi.ldap.UnsolicitedResponseImpl;
+
+        $r18 = $r0.<com.sun.jndi.ldap.LdapResult: java.lang.String extensionId>;
+
+        $r17 = $r0.<com.sun.jndi.ldap.LdapResult: byte[] extensionValue>;
+
+        $r16 = $r0.<com.sun.jndi.ldap.LdapResult: java.util.Vector referrals>;
+
+        $i2 = $r0.<com.sun.jndi.ldap.LdapResult: int status>;
+
+        $r15 = $r0.<com.sun.jndi.ldap.LdapResult: java.lang.String errorMessage>;
+
+        $r14 = $r0.<com.sun.jndi.ldap.LdapResult: java.lang.String matchedDN>;
+
+        $r13 = $r0.<com.sun.jndi.ldap.LdapResult: java.util.Vector resControls>;
+
+        if $r13 == null goto label05;
+
+        $r19 = $r0.<com.sun.jndi.ldap.LdapResult: java.util.Vector resControls>;
+
+        $r27 = virtualinvoke r26.<com.sun.jndi.ldap.LdapCtx: javax.naming.ldap.Control[] convertControls(java.util.Vector)>($r19);
+
+        goto label06;
+
+     label05:
+        $r27 = null;
+
+     label06:
+        specialinvoke $r12.<com.sun.jndi.ldap.UnsolicitedResponseImpl: void <init>(java.lang.String,byte[],java.util.Vector,int,java.lang.String,java.lang.String,javax.naming.ldap.Control[])>($r18, $r17, $r16, $i2, $r15, $r14, $r27);
+
+        r25 = $r12;
+
+     label07:
+        exitmonitor $r5;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r24 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label10:
+        throw $r24;
+
+     label11:
+        if r25 == null goto label12;
+
+        specialinvoke r2.<com.sun.jndi.ldap.LdapClient: void notifyUnsolicited(java.lang.Object)>(r25);
+
+        $r8 = "1.3.6.1.4.1.1466.20036";
+
+        $r7 = $r0.<com.sun.jndi.ldap.LdapResult: java.lang.String extensionId>;
+
+        $z1 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>($r7);
+
+        if $z1 == 0 goto label12;
+
+        $r9 = new javax.naming.CommunicationException;
+
+        specialinvoke $r9.<javax.naming.CommunicationException: void <init>(java.lang.String)>("Connection closed");
+
+        specialinvoke r2.<com.sun.jndi.ldap.LdapClient: void notifyUnsolicited(java.lang.Object)>($r9);
+
+     label12:
+        goto label15;
+
+     label13:
+        $r22 := @caughtexception;
+
+        $r23 = new javax.naming.CommunicationException;
+
+        specialinvoke $r23.<javax.naming.CommunicationException: void <init>(java.lang.String)>("Problem parsing unsolicited notification");
+
+        virtualinvoke $r23.<javax.naming.NamingException: void setRootCause(java.lang.Throwable)>($r22);
+
+        specialinvoke r2.<com.sun.jndi.ldap.LdapClient: void notifyUnsolicited(java.lang.Object)>($r23);
+
+        goto label15;
+
+     label14:
+        $r21 := @caughtexception;
+
+        specialinvoke r2.<com.sun.jndi.ldap.LdapClient: void notifyUnsolicited(java.lang.Object)>($r21);
+
+     label15:
+        return;
+
+        catch java.lang.Throwable from label04 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+        catch java.io.IOException from label01 to label12 with label13;
+        catch javax.naming.NamingException from label01 to label12 with label14;
+    }
+
+    private void notifyUnsolicited(java.lang.Object)
+    {
+        java.lang.Throwable $r8;
+        com.sun.jndi.ldap.LdapCtx $r6;
+        com.sun.jndi.ldap.LdapClient r0;
+        java.util.Vector $r1, $r2, $r3, $r7;
+        int $i0, i1;
+        java.lang.Object r4, $r5;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapClient;
+
+        r4 := @parameter0: java.lang.Object;
+
+        $r1 = r0.<com.sun.jndi.ldap.LdapClient: java.util.Vector unsolicited>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = new java.util.Vector;
+
+        $r3 = r0.<com.sun.jndi.ldap.LdapClient: java.util.Vector unsolicited>;
+
+        specialinvoke $r2.<java.util.Vector: void <init>(java.util.Collection)>($r3);
+
+        $z0 = r4 instanceof javax.naming.NamingException;
+
+        if $z0 == 0 goto label2;
+
+        $r7 = r0.<com.sun.jndi.ldap.LdapClient: java.util.Vector unsolicited>;
+
+        virtualinvoke $r7.<java.util.Vector: void setSize(int)>(0);
+
+     label2:
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r8 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r8;
+
+     label6:
+        i1 = 0;
+
+     label7:
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        if i1 >= $i0 goto label8;
+
+        $r5 = virtualinvoke $r2.<java.util.Vector: java.lang.Object elementAt(int)>(i1);
+
+        $r6 = (com.sun.jndi.ldap.LdapCtx) $r5;
+
+        virtualinvoke $r6.<com.sun.jndi.ldap.LdapCtx: void fireUnsolicited(java.lang.Object)>(r4);
+
+        i1 = i1 + 1;
+
+        goto label7;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private void ensureOpen() throws java.io.IOException
+    {
+        java.io.IOException $r3, $r5, $r7;
+        com.sun.jndi.ldap.LdapClient r0;
+        com.sun.jndi.ldap.Connection $r1, $r2, $r4, $r6, $r8;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapClient;
+
+        $r1 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        if $r1 == null goto label1;
+
+        $r8 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $z0 = $r8.<com.sun.jndi.ldap.Connection: boolean useable>;
+
+        if $z0 != 0 goto label3;
+
+     label1:
+        $r2 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        if $r2 == null goto label2;
+
+        $r4 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $r5 = $r4.<com.sun.jndi.ldap.Connection: java.io.IOException closureReason>;
+
+        if $r5 == null goto label2;
+
+        $r6 = r0.<com.sun.jndi.ldap.LdapClient: com.sun.jndi.ldap.Connection conn>;
+
+        $r7 = $r6.<com.sun.jndi.ldap.Connection: java.io.IOException closureReason>;
+
+        throw $r7;
+
+     label2:
+        $r3 = new java.io.IOException;
+
+        specialinvoke $r3.<java.io.IOException: void <init>(java.lang.String)>("connection closed");
+
+        throw $r3;
+
+     label3:
+        return;
+    }
+
+    static com.sun.jndi.ldap.LdapClient getInstance(boolean, java.lang.String, int, java.lang.String, int, int, java.io.OutputStream, int, java.lang.String, javax.naming.ldap.Control[], java.lang.String, java.lang.String, java.lang.Object, java.util.Hashtable) throws javax.naming.NamingException
+    {
+        int i0, i1, i2, i3;
+        java.lang.String r1, r2, r4, r5, r8;
+        java.util.Hashtable r6;
+        boolean z0, $z1;
+        java.io.OutputStream r3;
+        com.sun.jndi.ldap.LdapClient $r0, $r10;
+        java.lang.Object r9;
+        javax.naming.ldap.Control[] r7;
+
+        z0 := @parameter0: boolean;
+
+        r1 := @parameter1: java.lang.String;
+
+        i0 := @parameter2: int;
+
+        r2 := @parameter3: java.lang.String;
+
+        i1 := @parameter4: int;
+
+        i2 := @parameter5: int;
+
+        r3 := @parameter6: java.io.OutputStream;
+
+        i3 := @parameter7: int;
+
+        r4 := @parameter8: java.lang.String;
+
+        r7 := @parameter9: javax.naming.ldap.Control[];
+
+        r5 := @parameter10: java.lang.String;
+
+        r8 := @parameter11: java.lang.String;
+
+        r9 := @parameter12: java.lang.Object;
+
+        r6 := @parameter13: java.util.Hashtable;
+
+        if z0 == 0 goto label1;
+
+        $z1 = staticinvoke <com.sun.jndi.ldap.LdapPoolManager: boolean isPoolingAllowed(java.lang.String,java.io.OutputStream,java.lang.String,java.lang.String,java.util.Hashtable)>(r2, r3, r4, r5, r6);
+
+        if $z1 == 0 goto label1;
+
+        $r10 = staticinvoke <com.sun.jndi.ldap.LdapPoolManager: com.sun.jndi.ldap.LdapClient getLdapClient(java.lang.String,int,java.lang.String,int,int,java.io.OutputStream,int,java.lang.String,javax.naming.ldap.Control[],java.lang.String,java.lang.String,java.lang.Object,java.util.Hashtable)>(r1, i0, r2, i1, i2, r3, i3, r4, r7, r5, r8, r9, r6);
+
+        $r10.<com.sun.jndi.ldap.LdapClient: int referenceCount> = 1;
+
+        return $r10;
+
+     label1:
+        $r0 = new com.sun.jndi.ldap.LdapClient;
+
+        specialinvoke $r0.<com.sun.jndi.ldap.LdapClient: void <init>(java.lang.String,int,java.lang.String,int,int,java.io.OutputStream,com.sun.jndi.ldap.pool.PoolCallback)>(r1, i0, r2, i1, i2, r3, null);
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.String[] $r31;
+        java.lang.Boolean $r1, $r3, $r5, $r7, $r9, $r11, $r13, $r15, $r17, $r19, $r21, $r23, $r25, $r27, $r29;
+        java.util.Hashtable $r0, $r2, $r4, $r6, $r8, $r10, $r12, $r14, $r16, $r18, $r20, $r22, $r24, $r26, $r28, $r30;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_OTHER> = 80;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_AFFECTS_MULTIPLE_DSAS> = 71;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_OBJECT_CLASS_MODS_PROHIBITED> = 69;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_ENTRY_ALREADY_EXISTS> = 68;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_NOT_ALLOWED_ON_RDN> = 67;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_NOT_ALLOWED_ON_NON_LEAF> = 66;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_OBJECT_CLASS_VIOLATION> = 65;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_NAMING_VIOLATION> = 64;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_LOOP_DETECT> = 54;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_UNWILLING_TO_PERFORM> = 53;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_UNAVAILABLE> = 52;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_BUSY> = 51;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_INSUFFICIENT_ACCESS_RIGHTS> = 50;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_INVALID_CREDENTIALS> = 49;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_INAPPROPRIATE_AUTHENTICATION> = 48;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_ALIAS_DEREFERENCING_PROBLEM> = 36;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_IS_LEAF> = 35;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_INVALID_DN_SYNTAX> = 34;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_ALIAS_PROBLEM> = 33;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_NO_SUCH_OBJECT> = 32;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_INVALID_ATTRIBUTE_SYNTAX> = 21;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_ATTRIBUTE_OR_VALUE_EXISTS> = 20;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_CONSTRAINT_VIOLATION> = 19;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_INAPPROPRIATE_MATCHING> = 18;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_UNDEFINED_ATTRIBUTE_TYPE> = 17;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_NO_SUCH_ATTRIBUTE> = 16;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_SASL_BIND_IN_PROGRESS> = 14;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_CONFIDENTIALITY_REQUIRED> = 13;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_UNAVAILABLE_CRITICAL_EXTENSION> = 12;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_ADMIN_LIMIT_EXCEEDED> = 11;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REFERRAL> = 10;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_PARTIAL_RESULTS> = 9;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_STRONG_AUTH_REQUIRED> = 8;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_AUTH_METHOD_NOT_SUPPORTED> = 7;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_COMPARE_TRUE> = 6;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_COMPARE_FALSE> = 5;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_SIZE_LIMIT_EXCEEDED> = 4;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_TIME_LIMIT_EXCEEDED> = 3;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_PROTOCOL_ERROR> = 2;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_OPERATIONS_ERROR> = 1;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_SUCCESS> = 0;
+
+        <com.sun.jndi.ldap.LdapClient: java.lang.String LDAP_CONTROL_SERVER_SORT_RES> = "1.2.840.113556.1.4.474";
+
+        <com.sun.jndi.ldap.LdapClient: java.lang.String LDAP_CONTROL_SERVER_SORT_REQ> = "1.2.840.113556.1.4.473";
+
+        <com.sun.jndi.ldap.LdapClient: java.lang.String LDAP_CONTROL_PAGED_RESULTS> = "1.2.840.113556.1.4.319";
+
+        <com.sun.jndi.ldap.LdapClient: java.lang.String LDAP_CONTROL_PREFERRED_LANG> = "1.3.6.1.4.1.1466.20035";
+
+        <com.sun.jndi.ldap.LdapClient: java.lang.String LDAP_CONTROL_MANAGE_DSA_IT> = "2.16.840.1.113730.3.4.2";
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_CONTROLS> = 160;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REP_EXT_VAL> = 139;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REP_EXT_OID> = 138;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REP_REFERRAL> = 163;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REP_EXTENSION> = 120;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REP_COMPARE> = 111;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REP_MODRDN> = 109;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REP_DELETE> = 107;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REP_ADD> = 105;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REP_MODIFY> = 103;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REP_RESULT> = 101;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REP_SEARCH_REF> = 115;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REP_SEARCH> = 100;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REP_BIND> = 97;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REQ_EXTENSION> = 119;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REQ_ABANDON> = 80;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REQ_COMPARE> = 110;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REQ_MODRDN> = 108;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REQ_DELETE> = 74;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REQ_ADD> = 104;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REQ_MODIFY> = 102;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REQ_SEARCH> = 99;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REQ_UNBIND> = 66;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REQ_BIND> = 96;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_SUPERIOR_DN> = 128;
+
+        <com.sun.jndi.ldap.LdapClient: int LBER_SET> = 49;
+
+        <com.sun.jndi.ldap.LdapClient: int LBER_SEQUENCE> = 48;
+
+        <com.sun.jndi.ldap.LdapClient: int LBER_ENUMERATED> = 10;
+
+        <com.sun.jndi.ldap.LdapClient: int LBER_NULL> = 5;
+
+        <com.sun.jndi.ldap.LdapClient: int LBER_OCTETSTRING> = 4;
+
+        <com.sun.jndi.ldap.LdapClient: int LBER_BITSTRING> = 3;
+
+        <com.sun.jndi.ldap.LdapClient: int LBER_INTEGER> = 2;
+
+        <com.sun.jndi.ldap.LdapClient: int LBER_BOOLEAN> = 1;
+
+        <com.sun.jndi.ldap.LdapClient: java.lang.String LDAPS_URL> = "ldaps://";
+
+        <com.sun.jndi.ldap.LdapClient: java.lang.String LDAP_URL> = "ldap://";
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REF_FOLLOW_SCHEME> = 4;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REF_IGNORE> = 3;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REF_THROW> = 2;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_REF_FOLLOW> = 1;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_VERSION> = 3;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_VERSION3> = 3;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_VERSION2> = 2;
+
+        <com.sun.jndi.ldap.LdapClient: int LDAP_VERSION3_VERSION2> = 32;
+
+        <com.sun.jndi.ldap.LdapClient: int REPLACE> = 2;
+
+        <com.sun.jndi.ldap.LdapClient: int DELETE> = 1;
+
+        <com.sun.jndi.ldap.LdapClient: int ADD> = 0;
+
+        <com.sun.jndi.ldap.LdapClient: int SCOPE_SUBTREE> = 2;
+
+        <com.sun.jndi.ldap.LdapClient: int SCOPE_ONE_LEVEL> = 1;
+
+        <com.sun.jndi.ldap.LdapClient: int SCOPE_BASE_OBJECT> = 0;
+
+        <com.sun.jndi.ldap.LdapClient: java.lang.String DISCONNECT_OID> = "1.3.6.1.4.1.1466.20036";
+
+        <com.sun.jndi.ldap.LdapClient: boolean caseIgnore> = 1;
+
+        <com.sun.jndi.ldap.LdapClient: int debug> = 0;
+
+        $r0 = new java.util.Hashtable;
+
+        specialinvoke $r0.<java.util.Hashtable: void <init>(int,float)>(23, 0.75F);
+
+        <com.sun.jndi.ldap.LdapClient: java.util.Hashtable defaultBinaryAttrs> = $r0;
+
+        $r2 = <com.sun.jndi.ldap.LdapClient: java.util.Hashtable defaultBinaryAttrs>;
+
+        $r1 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>("userpassword", $r1);
+
+        $r4 = <com.sun.jndi.ldap.LdapClient: java.util.Hashtable defaultBinaryAttrs>;
+
+        $r3 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke $r4.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>("javaserializeddata", $r3);
+
+        $r6 = <com.sun.jndi.ldap.LdapClient: java.util.Hashtable defaultBinaryAttrs>;
+
+        $r5 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke $r6.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>("javaserializedobject", $r5);
+
+        $r8 = <com.sun.jndi.ldap.LdapClient: java.util.Hashtable defaultBinaryAttrs>;
+
+        $r7 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke $r8.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>("jpegphoto", $r7);
+
+        $r10 = <com.sun.jndi.ldap.LdapClient: java.util.Hashtable defaultBinaryAttrs>;
+
+        $r9 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke $r10.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>("audio", $r9);
+
+        $r12 = <com.sun.jndi.ldap.LdapClient: java.util.Hashtable defaultBinaryAttrs>;
+
+        $r11 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke $r12.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>("thumbnailphoto", $r11);
+
+        $r14 = <com.sun.jndi.ldap.LdapClient: java.util.Hashtable defaultBinaryAttrs>;
+
+        $r13 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke $r14.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>("thumbnaillogo", $r13);
+
+        $r16 = <com.sun.jndi.ldap.LdapClient: java.util.Hashtable defaultBinaryAttrs>;
+
+        $r15 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke $r16.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>("usercertificate", $r15);
+
+        $r18 = <com.sun.jndi.ldap.LdapClient: java.util.Hashtable defaultBinaryAttrs>;
+
+        $r17 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke $r18.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>("cacertificate", $r17);
+
+        $r20 = <com.sun.jndi.ldap.LdapClient: java.util.Hashtable defaultBinaryAttrs>;
+
+        $r19 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke $r20.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>("certificaterevocationlist", $r19);
+
+        $r22 = <com.sun.jndi.ldap.LdapClient: java.util.Hashtable defaultBinaryAttrs>;
+
+        $r21 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke $r22.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>("authorityrevocationlist", $r21);
+
+        $r24 = <com.sun.jndi.ldap.LdapClient: java.util.Hashtable defaultBinaryAttrs>;
+
+        $r23 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke $r24.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>("crosscertificatepair", $r23);
+
+        $r26 = <com.sun.jndi.ldap.LdapClient: java.util.Hashtable defaultBinaryAttrs>;
+
+        $r25 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke $r26.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>("photo", $r25);
+
+        $r28 = <com.sun.jndi.ldap.LdapClient: java.util.Hashtable defaultBinaryAttrs>;
+
+        $r27 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke $r28.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>("personalsignature", $r27);
+
+        $r30 = <com.sun.jndi.ldap.LdapClient: java.util.Hashtable defaultBinaryAttrs>;
+
+        $r29 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        virtualinvoke $r30.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>("x500uniqueidentifier", $r29);
+
+        $r31 = newarray (java.lang.String)[91];
+
+        $r31[0] = "Success";
+
+        $r31[1] = "Operations Error";
+
+        $r31[2] = "Protocol Error";
+
+        $r31[3] = "Timelimit Exceeded";
+
+        $r31[4] = "Sizelimit Exceeded";
+
+        $r31[5] = "Compare False";
+
+        $r31[6] = "Compare True";
+
+        $r31[7] = "Authentication Method Not Supported";
+
+        $r31[8] = "Strong Authentication Required";
+
+        $r31[9] = null;
+
+        $r31[10] = "Referral";
+
+        $r31[11] = "Administrative Limit Exceeded";
+
+        $r31[12] = "Unavailable Critical Extension";
+
+        $r31[13] = "Confidentiality Required";
+
+        $r31[14] = "SASL Bind In Progress";
+
+        $r31[15] = null;
+
+        $r31[16] = "No Such Attribute";
+
+        $r31[17] = "Undefined Attribute Type";
+
+        $r31[18] = "Inappropriate Matching";
+
+        $r31[19] = "Constraint Violation";
+
+        $r31[20] = "Attribute Or Value Exists";
+
+        $r31[21] = "Invalid Attribute Syntax";
+
+        $r31[22] = null;
+
+        $r31[23] = null;
+
+        $r31[24] = null;
+
+        $r31[25] = null;
+
+        $r31[26] = null;
+
+        $r31[27] = null;
+
+        $r31[28] = null;
+
+        $r31[29] = null;
+
+        $r31[30] = null;
+
+        $r31[31] = null;
+
+        $r31[32] = "No Such Object";
+
+        $r31[33] = "Alias Problem";
+
+        $r31[34] = "Invalid DN Syntax";
+
+        $r31[35] = null;
+
+        $r31[36] = "Alias Dereferencing Problem";
+
+        $r31[37] = null;
+
+        $r31[38] = null;
+
+        $r31[39] = null;
+
+        $r31[40] = null;
+
+        $r31[41] = null;
+
+        $r31[42] = null;
+
+        $r31[43] = null;
+
+        $r31[44] = null;
+
+        $r31[45] = null;
+
+        $r31[46] = null;
+
+        $r31[47] = null;
+
+        $r31[48] = "Inappropriate Authentication";
+
+        $r31[49] = "Invalid Credentials";
+
+        $r31[50] = "Insufficient Access Rights";
+
+        $r31[51] = "Busy";
+
+        $r31[52] = "Unavailable";
+
+        $r31[53] = "Unwilling To Perform";
+
+        $r31[54] = "Loop Detect";
+
+        $r31[55] = null;
+
+        $r31[56] = null;
+
+        $r31[57] = null;
+
+        $r31[58] = null;
+
+        $r31[59] = null;
+
+        $r31[60] = null;
+
+        $r31[61] = null;
+
+        $r31[62] = null;
+
+        $r31[63] = null;
+
+        $r31[64] = "Naming Violation";
+
+        $r31[65] = "Object Class Violation";
+
+        $r31[66] = "Not Allowed On Non-leaf";
+
+        $r31[67] = "Not Allowed On RDN";
+
+        $r31[68] = "Entry Already Exists";
+
+        $r31[69] = "Object Class Modifications Prohibited";
+
+        $r31[70] = null;
+
+        $r31[71] = "Affects Multiple DSAs";
+
+        $r31[72] = null;
+
+        $r31[73] = null;
+
+        $r31[74] = null;
+
+        $r31[75] = null;
+
+        $r31[76] = null;
+
+        $r31[77] = null;
+
+        $r31[78] = null;
+
+        $r31[79] = null;
+
+        $r31[80] = "Other";
+
+        $r31[81] = null;
+
+        $r31[82] = null;
+
+        $r31[83] = null;
+
+        $r31[84] = null;
+
+        $r31[85] = null;
+
+        $r31[86] = null;
+
+        $r31[87] = null;
+
+        $r31[88] = null;
+
+        $r31[89] = null;
+
+        $r31[90] = null;
+
+        <com.sun.jndi.ldap.LdapClient: java.lang.String[] ldap_error_message> = $r31;
+
+        return;
+    }
+}

@@ -1,0 +1,227 @@
+class javax.swing.plaf.basic.BasicLookAndFeel$AudioAction extends javax.swing.AbstractAction implements javax.sound.sampled.LineListener
+{
+    private java.lang.String audioResource;
+    private byte[] audioBuffer;
+    final javax.swing.plaf.basic.BasicLookAndFeel this$0;
+
+    public void <init>(javax.swing.plaf.basic.BasicLookAndFeel, java.lang.String, java.lang.String)
+    {
+        javax.swing.plaf.basic.BasicLookAndFeel r1;
+        javax.swing.plaf.basic.BasicLookAndFeel$AudioAction r0;
+        java.lang.String r2, r3;
+
+        r0 := @this: javax.swing.plaf.basic.BasicLookAndFeel$AudioAction;
+
+        r1 := @parameter0: javax.swing.plaf.basic.BasicLookAndFeel;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.String;
+
+        r0.<javax.swing.plaf.basic.BasicLookAndFeel$AudioAction: javax.swing.plaf.basic.BasicLookAndFeel this$0> = r1;
+
+        specialinvoke r0.<javax.swing.AbstractAction: void <init>(java.lang.String)>(r2);
+
+        r0.<javax.swing.plaf.basic.BasicLookAndFeel$AudioAction: java.lang.String audioResource> = r3;
+
+        return;
+    }
+
+    public void actionPerformed(java.awt.event.ActionEvent)
+    {
+        java.lang.Throwable $r17;
+        byte[] $r1, $r2, $r4, $r15;
+        javax.sound.sampled.AudioFormat $r7;
+        java.io.ByteArrayInputStream $r3;
+        javax.sound.sampled.AudioInputStream $r5;
+        java.lang.String $r13;
+        javax.sound.sampled.DataLine$Info $r6;
+        javax.swing.plaf.basic.BasicLookAndFeel $r10, $r12, $r14;
+        javax.sound.sampled.Clip r9;
+        javax.swing.plaf.basic.BasicLookAndFeel$AudioAction r0;
+        java.awt.event.ActionEvent r18;
+        java.lang.Exception $r16;
+        java.lang.Object $r11;
+        javax.sound.sampled.Line $r8;
+
+        r0 := @this: javax.swing.plaf.basic.BasicLookAndFeel$AudioAction;
+
+        r18 := @parameter0: java.awt.event.ActionEvent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicLookAndFeel$AudioAction: byte[] audioBuffer>;
+
+        if $r1 != null goto label01;
+
+        $r14 = r0.<javax.swing.plaf.basic.BasicLookAndFeel$AudioAction: javax.swing.plaf.basic.BasicLookAndFeel this$0>;
+
+        $r13 = r0.<javax.swing.plaf.basic.BasicLookAndFeel$AudioAction: java.lang.String audioResource>;
+
+        $r15 = staticinvoke <javax.swing.plaf.basic.BasicLookAndFeel: byte[] access$000(javax.swing.plaf.basic.BasicLookAndFeel,java.lang.String)>($r14, $r13);
+
+        r0.<javax.swing.plaf.basic.BasicLookAndFeel$AudioAction: byte[] audioBuffer> = $r15;
+
+     label01:
+        $r2 = r0.<javax.swing.plaf.basic.BasicLookAndFeel$AudioAction: byte[] audioBuffer>;
+
+        if $r2 == null goto label10;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicLookAndFeel$AudioAction: void cancelCurrentSound(javax.sound.sampled.Clip)>(null);
+
+     label02:
+        $r3 = new java.io.ByteArrayInputStream;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicLookAndFeel$AudioAction: byte[] audioBuffer>;
+
+        specialinvoke $r3.<java.io.ByteArrayInputStream: void <init>(byte[])>($r4);
+
+        $r5 = staticinvoke <javax.sound.sampled.AudioSystem: javax.sound.sampled.AudioInputStream getAudioInputStream(java.io.InputStream)>($r3);
+
+        $r6 = new javax.sound.sampled.DataLine$Info;
+
+        $r7 = virtualinvoke $r5.<javax.sound.sampled.AudioInputStream: javax.sound.sampled.AudioFormat getFormat()>();
+
+        specialinvoke $r6.<javax.sound.sampled.DataLine$Info: void <init>(java.lang.Class,javax.sound.sampled.AudioFormat)>(class "Ljavax/sound/sampled/Clip;", $r7);
+
+        $r8 = staticinvoke <javax.sound.sampled.AudioSystem: javax.sound.sampled.Line getLine(javax.sound.sampled.Line$Info)>($r6);
+
+        r9 = (javax.sound.sampled.Clip) $r8;
+
+        interfaceinvoke r9.<javax.sound.sampled.Clip: void open(javax.sound.sampled.AudioInputStream)>($r5);
+
+        interfaceinvoke r9.<javax.sound.sampled.Clip: void addLineListener(javax.sound.sampled.LineListener)>(r0);
+
+        $r10 = r0.<javax.swing.plaf.basic.BasicLookAndFeel$AudioAction: javax.swing.plaf.basic.BasicLookAndFeel this$0>;
+
+        $r11 = staticinvoke <javax.swing.plaf.basic.BasicLookAndFeel: java.lang.Object access$100(javax.swing.plaf.basic.BasicLookAndFeel)>($r10);
+
+        entermonitor $r11;
+
+     label03:
+        $r12 = r0.<javax.swing.plaf.basic.BasicLookAndFeel$AudioAction: javax.swing.plaf.basic.BasicLookAndFeel this$0>;
+
+        staticinvoke <javax.swing.plaf.basic.BasicLookAndFeel: javax.sound.sampled.Clip access$202(javax.swing.plaf.basic.BasicLookAndFeel,javax.sound.sampled.Clip)>($r12, r9);
+
+        exitmonitor $r11;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r17 := @caughtexception;
+
+        exitmonitor $r11;
+
+     label06:
+        throw $r17;
+
+     label07:
+        interfaceinvoke r9.<javax.sound.sampled.Clip: void start()>();
+
+     label08:
+        goto label10;
+
+     label09:
+        $r16 := @caughtexception;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label03 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.lang.Exception from label02 to label08 with label09;
+    }
+
+    public void update(javax.sound.sampled.LineEvent)
+    {
+        javax.sound.sampled.LineEvent r0;
+        javax.sound.sampled.LineEvent$Type $r1, $r2;
+        javax.sound.sampled.Clip $r5;
+        javax.swing.plaf.basic.BasicLookAndFeel$AudioAction r3;
+        javax.sound.sampled.Line $r4;
+
+        r3 := @this: javax.swing.plaf.basic.BasicLookAndFeel$AudioAction;
+
+        r0 := @parameter0: javax.sound.sampled.LineEvent;
+
+        $r1 = virtualinvoke r0.<javax.sound.sampled.LineEvent: javax.sound.sampled.LineEvent$Type getType()>();
+
+        $r2 = <javax.sound.sampled.LineEvent$Type: javax.sound.sampled.LineEvent$Type STOP>;
+
+        if $r1 != $r2 goto label1;
+
+        $r4 = virtualinvoke r0.<javax.sound.sampled.LineEvent: javax.sound.sampled.Line getLine()>();
+
+        $r5 = (javax.sound.sampled.Clip) $r4;
+
+        specialinvoke r3.<javax.swing.plaf.basic.BasicLookAndFeel$AudioAction: void cancelCurrentSound(javax.sound.sampled.Clip)>($r5);
+
+     label1:
+        return;
+    }
+
+    private void cancelCurrentSound(javax.sound.sampled.Clip)
+    {
+        java.lang.Throwable $r8;
+        javax.swing.plaf.basic.BasicLookAndFeel $r1, $r4, $r5, $r6;
+        javax.sound.sampled.Clip r3, $r7, r9;
+        javax.swing.plaf.basic.BasicLookAndFeel$AudioAction r0;
+        java.lang.Object $r2;
+
+        r0 := @this: javax.swing.plaf.basic.BasicLookAndFeel$AudioAction;
+
+        r3 := @parameter0: javax.sound.sampled.Clip;
+
+        r9 = null;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicLookAndFeel$AudioAction: javax.swing.plaf.basic.BasicLookAndFeel this$0>;
+
+        $r2 = staticinvoke <javax.swing.plaf.basic.BasicLookAndFeel: java.lang.Object access$100(javax.swing.plaf.basic.BasicLookAndFeel)>($r1);
+
+        entermonitor $r2;
+
+     label1:
+        if r3 == null goto label2;
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicLookAndFeel$AudioAction: javax.swing.plaf.basic.BasicLookAndFeel this$0>;
+
+        $r7 = staticinvoke <javax.swing.plaf.basic.BasicLookAndFeel: javax.sound.sampled.Clip access$200(javax.swing.plaf.basic.BasicLookAndFeel)>($r6);
+
+        if r3 != $r7 goto label3;
+
+     label2:
+        $r4 = r0.<javax.swing.plaf.basic.BasicLookAndFeel$AudioAction: javax.swing.plaf.basic.BasicLookAndFeel this$0>;
+
+        r9 = staticinvoke <javax.swing.plaf.basic.BasicLookAndFeel: javax.sound.sampled.Clip access$200(javax.swing.plaf.basic.BasicLookAndFeel)>($r4);
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicLookAndFeel$AudioAction: javax.swing.plaf.basic.BasicLookAndFeel this$0>;
+
+        staticinvoke <javax.swing.plaf.basic.BasicLookAndFeel: javax.sound.sampled.Clip access$202(javax.swing.plaf.basic.BasicLookAndFeel,javax.sound.sampled.Clip)>($r5, null);
+
+     label3:
+        exitmonitor $r2;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r8 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label6:
+        throw $r8;
+
+     label7:
+        if r9 == null goto label8;
+
+        interfaceinvoke r9.<javax.sound.sampled.Clip: void removeLineListener(javax.sound.sampled.LineListener)>(r0);
+
+        interfaceinvoke r9.<javax.sound.sampled.Clip: void close()>();
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+}

@@ -1,0 +1,750 @@
+public class com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver extends com.sun.org.apache.xml.internal.security.keys.keyresolver.KeyResolverSpi
+{
+    private static final com.sun.org.slf4j.internal.Logger LOG;
+
+    public void <init>()
+    {
+        com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.security.keys.keyresolver.KeyResolverSpi: void <init>()>();
+
+        return;
+    }
+
+    protected boolean engineCanResolve(org.w3c.dom.Element, java.lang.String, com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver)
+    {
+        org.w3c.dom.Element r0;
+        com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver r1;
+        java.lang.String r2;
+        com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver r3;
+        boolean $z0;
+
+        r1 := @this: com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver;
+
+        r0 := @parameter0: org.w3c.dom.Element;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver;
+
+        $z0 = staticinvoke <com.sun.org.apache.xml.internal.security.utils.XMLUtils: boolean elementIsInSignatureSpace(org.w3c.dom.Element,java.lang.String)>(r0, "RetrievalMethod");
+
+        return $z0;
+    }
+
+    protected java.security.PublicKey engineResolvePublicKey(org.w3c.dom.Element, java.lang.String, com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver, boolean)
+    {
+        java.security.cert.X509Certificate $r15;
+        com.sun.org.apache.xml.internal.security.keys.content.RetrievalMethod $r0, $r9;
+        com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput $r4, $r10;
+        java.lang.String r2, $r3, $r5;
+        boolean z0, $z1, $z2, $z3;
+        com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver r23;
+        java.security.PublicKey $r8, $r16;
+        java.io.IOException $r17;
+        java.security.cert.CertificateException $r19;
+        org.w3c.dom.Element r1, $r6, $r11;
+        com.sun.org.slf4j.internal.Logger $r12, $r13, $r14, $r18, $r20, $r22;
+        com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException $r21;
+        com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver r7;
+
+        r23 := @this: com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver;
+
+        r1 := @parameter0: org.w3c.dom.Element;
+
+        r2 := @parameter1: java.lang.String;
+
+        r7 := @parameter2: com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver;
+
+        z0 := @parameter3: boolean;
+
+     label01:
+        $r0 = new com.sun.org.apache.xml.internal.security.keys.content.RetrievalMethod;
+
+        specialinvoke $r0.<com.sun.org.apache.xml.internal.security.keys.content.RetrievalMethod: void <init>(org.w3c.dom.Element,java.lang.String)>(r1, r2);
+
+        $r3 = virtualinvoke $r0.<com.sun.org.apache.xml.internal.security.keys.content.RetrievalMethod: java.lang.String getType()>();
+
+        $r4 = staticinvoke <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput resolveInput(com.sun.org.apache.xml.internal.security.keys.content.RetrievalMethod,java.lang.String,boolean)>($r0, r2, z0);
+
+        $r5 = "http://www.w3.org/2000/09/xmldsig#rawX509Certificate";
+
+        $z1 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z1 == 0 goto label04;
+
+        $r15 = staticinvoke <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: java.security.cert.X509Certificate getRawCertificate(com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput)>($r4);
+
+        if $r15 == null goto label03;
+
+        $r16 = virtualinvoke $r15.<java.security.cert.X509Certificate: java.security.PublicKey getPublicKey()>();
+
+     label02:
+        return $r16;
+
+     label03:
+        return null;
+
+     label04:
+        $r6 = staticinvoke <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: org.w3c.dom.Element obtainReferenceElement(com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput,boolean)>($r4, z0);
+
+        $z2 = staticinvoke <com.sun.org.apache.xml.internal.security.utils.XMLUtils: boolean elementIsInSignatureSpace(org.w3c.dom.Element,java.lang.String)>($r6, "RetrievalMethod");
+
+        if $z2 == 0 goto label08;
+
+        if z0 == 0 goto label06;
+
+        $r13 = <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: com.sun.org.slf4j.internal.Logger LOG>;
+
+        $z3 = virtualinvoke $r13.<com.sun.org.slf4j.internal.Logger: boolean isDebugEnabled()>();
+
+        if $z3 == 0 goto label05;
+
+        $r14 = <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: com.sun.org.slf4j.internal.Logger LOG>;
+
+        virtualinvoke $r14.<com.sun.org.slf4j.internal.Logger: void debug(java.lang.String)>("Error: It is forbidden to have one RetrievalMethod point to another with secure validation");
+
+     label05:
+        return null;
+
+     label06:
+        $r9 = new com.sun.org.apache.xml.internal.security.keys.content.RetrievalMethod;
+
+        specialinvoke $r9.<com.sun.org.apache.xml.internal.security.keys.content.RetrievalMethod: void <init>(org.w3c.dom.Element,java.lang.String)>($r6, r2);
+
+        $r10 = staticinvoke <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput resolveInput(com.sun.org.apache.xml.internal.security.keys.content.RetrievalMethod,java.lang.String,boolean)>($r9, r2, z0);
+
+        $r11 = staticinvoke <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: org.w3c.dom.Element obtainReferenceElement(com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput,boolean)>($r10, z0);
+
+        if $r11 != r1 goto label08;
+
+        $r12 = <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: com.sun.org.slf4j.internal.Logger LOG>;
+
+        virtualinvoke $r12.<com.sun.org.slf4j.internal.Logger: void debug(java.lang.String)>("Error: Can\'t have RetrievalMethods pointing to each other");
+
+     label07:
+        return null;
+
+     label08:
+        $r8 = staticinvoke <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: java.security.PublicKey resolveKey(org.w3c.dom.Element,java.lang.String,com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver,boolean)>($r6, r2, r7, z0);
+
+     label09:
+        return $r8;
+
+     label10:
+        $r21 := @caughtexception;
+
+        $r22 = <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: com.sun.org.slf4j.internal.Logger LOG>;
+
+        virtualinvoke $r22.<com.sun.org.slf4j.internal.Logger: void debug(java.lang.String,java.lang.Throwable)>("XMLSecurityException", $r21);
+
+        goto label13;
+
+     label11:
+        $r19 := @caughtexception;
+
+        $r20 = <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: com.sun.org.slf4j.internal.Logger LOG>;
+
+        virtualinvoke $r20.<com.sun.org.slf4j.internal.Logger: void debug(java.lang.String,java.lang.Throwable)>("CertificateException", $r19);
+
+        goto label13;
+
+     label12:
+        $r17 := @caughtexception;
+
+        $r18 = <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: com.sun.org.slf4j.internal.Logger LOG>;
+
+        virtualinvoke $r18.<com.sun.org.slf4j.internal.Logger: void debug(java.lang.String,java.lang.Throwable)>("IOException", $r17);
+
+     label13:
+        return null;
+
+        catch com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException from label01 to label02 with label10;
+        catch com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException from label04 to label05 with label10;
+        catch com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException from label06 to label07 with label10;
+        catch com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException from label08 to label09 with label10;
+        catch java.security.cert.CertificateException from label01 to label02 with label11;
+        catch java.security.cert.CertificateException from label04 to label05 with label11;
+        catch java.security.cert.CertificateException from label06 to label07 with label11;
+        catch java.security.cert.CertificateException from label08 to label09 with label11;
+        catch java.io.IOException from label01 to label02 with label12;
+        catch java.io.IOException from label04 to label05 with label12;
+        catch java.io.IOException from label06 to label07 with label12;
+        catch java.io.IOException from label08 to label09 with label12;
+    }
+
+    protected java.security.cert.X509Certificate engineResolveX509Certificate(org.w3c.dom.Element, java.lang.String, com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver, boolean)
+    {
+        java.security.cert.X509Certificate $r8, $r15;
+        com.sun.org.apache.xml.internal.security.keys.content.RetrievalMethod $r0, $r9;
+        com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput $r4, $r10;
+        java.lang.String r2, $r3, $r5;
+        boolean z0, $z1, $z2, $z3;
+        com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver r22;
+        java.io.IOException $r16;
+        java.security.cert.CertificateException $r18;
+        org.w3c.dom.Element r1, $r6, $r11;
+        com.sun.org.slf4j.internal.Logger $r12, $r13, $r14, $r17, $r19, $r21;
+        com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException $r20;
+        com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver r7;
+
+        r22 := @this: com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver;
+
+        r1 := @parameter0: org.w3c.dom.Element;
+
+        r2 := @parameter1: java.lang.String;
+
+        r7 := @parameter2: com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver;
+
+        z0 := @parameter3: boolean;
+
+     label01:
+        $r0 = new com.sun.org.apache.xml.internal.security.keys.content.RetrievalMethod;
+
+        specialinvoke $r0.<com.sun.org.apache.xml.internal.security.keys.content.RetrievalMethod: void <init>(org.w3c.dom.Element,java.lang.String)>(r1, r2);
+
+        $r3 = virtualinvoke $r0.<com.sun.org.apache.xml.internal.security.keys.content.RetrievalMethod: java.lang.String getType()>();
+
+        $r4 = staticinvoke <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput resolveInput(com.sun.org.apache.xml.internal.security.keys.content.RetrievalMethod,java.lang.String,boolean)>($r0, r2, z0);
+
+        $r5 = "http://www.w3.org/2000/09/xmldsig#rawX509Certificate";
+
+        $z1 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z1 == 0 goto label03;
+
+        $r15 = staticinvoke <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: java.security.cert.X509Certificate getRawCertificate(com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput)>($r4);
+
+     label02:
+        return $r15;
+
+     label03:
+        $r6 = staticinvoke <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: org.w3c.dom.Element obtainReferenceElement(com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput,boolean)>($r4, z0);
+
+        $z2 = staticinvoke <com.sun.org.apache.xml.internal.security.utils.XMLUtils: boolean elementIsInSignatureSpace(org.w3c.dom.Element,java.lang.String)>($r6, "RetrievalMethod");
+
+        if $z2 == 0 goto label07;
+
+        if z0 == 0 goto label05;
+
+        $r13 = <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: com.sun.org.slf4j.internal.Logger LOG>;
+
+        $z3 = virtualinvoke $r13.<com.sun.org.slf4j.internal.Logger: boolean isDebugEnabled()>();
+
+        if $z3 == 0 goto label04;
+
+        $r14 = <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: com.sun.org.slf4j.internal.Logger LOG>;
+
+        virtualinvoke $r14.<com.sun.org.slf4j.internal.Logger: void debug(java.lang.String)>("Error: It is forbidden to have one RetrievalMethod point to another with secure validation");
+
+     label04:
+        return null;
+
+     label05:
+        $r9 = new com.sun.org.apache.xml.internal.security.keys.content.RetrievalMethod;
+
+        specialinvoke $r9.<com.sun.org.apache.xml.internal.security.keys.content.RetrievalMethod: void <init>(org.w3c.dom.Element,java.lang.String)>($r6, r2);
+
+        $r10 = staticinvoke <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput resolveInput(com.sun.org.apache.xml.internal.security.keys.content.RetrievalMethod,java.lang.String,boolean)>($r9, r2, z0);
+
+        $r11 = staticinvoke <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: org.w3c.dom.Element obtainReferenceElement(com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput,boolean)>($r10, z0);
+
+        if $r11 != r1 goto label07;
+
+        $r12 = <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: com.sun.org.slf4j.internal.Logger LOG>;
+
+        virtualinvoke $r12.<com.sun.org.slf4j.internal.Logger: void debug(java.lang.String)>("Error: Can\'t have RetrievalMethods pointing to each other");
+
+     label06:
+        return null;
+
+     label07:
+        $r8 = staticinvoke <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: java.security.cert.X509Certificate resolveCertificate(org.w3c.dom.Element,java.lang.String,com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver,boolean)>($r6, r2, r7, z0);
+
+     label08:
+        return $r8;
+
+     label09:
+        $r20 := @caughtexception;
+
+        $r21 = <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: com.sun.org.slf4j.internal.Logger LOG>;
+
+        virtualinvoke $r21.<com.sun.org.slf4j.internal.Logger: void debug(java.lang.String,java.lang.Throwable)>("XMLSecurityException", $r20);
+
+        goto label12;
+
+     label10:
+        $r18 := @caughtexception;
+
+        $r19 = <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: com.sun.org.slf4j.internal.Logger LOG>;
+
+        virtualinvoke $r19.<com.sun.org.slf4j.internal.Logger: void debug(java.lang.String,java.lang.Throwable)>("CertificateException", $r18);
+
+        goto label12;
+
+     label11:
+        $r16 := @caughtexception;
+
+        $r17 = <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: com.sun.org.slf4j.internal.Logger LOG>;
+
+        virtualinvoke $r17.<com.sun.org.slf4j.internal.Logger: void debug(java.lang.String,java.lang.Throwable)>("IOException", $r16);
+
+     label12:
+        return null;
+
+        catch com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException from label01 to label02 with label09;
+        catch com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException from label03 to label04 with label09;
+        catch com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException from label05 to label06 with label09;
+        catch com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException from label07 to label08 with label09;
+        catch java.security.cert.CertificateException from label01 to label02 with label10;
+        catch java.security.cert.CertificateException from label03 to label04 with label10;
+        catch java.security.cert.CertificateException from label05 to label06 with label10;
+        catch java.security.cert.CertificateException from label07 to label08 with label10;
+        catch java.io.IOException from label01 to label02 with label11;
+        catch java.io.IOException from label03 to label04 with label11;
+        catch java.io.IOException from label05 to label06 with label11;
+        catch java.io.IOException from label07 to label08 with label11;
+    }
+
+    private static java.security.cert.X509Certificate resolveCertificate(org.w3c.dom.Element, java.lang.String, com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver, boolean) throws com.sun.org.apache.xml.internal.security.keys.keyresolver.KeyResolverException
+    {
+        java.security.cert.X509Certificate $r4;
+        java.lang.String r2, $r8, $r11, $r14;
+        boolean $z0, z1;
+        org.w3c.dom.Element r0;
+        com.sun.org.slf4j.internal.Logger $r1, $r6;
+        java.lang.StringBuilder $r5, $r7, $r9, $r10, $r12, $r13;
+        com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver r3;
+
+        r0 := @parameter0: org.w3c.dom.Element;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver;
+
+        z1 := @parameter3: boolean;
+
+        if r0 == null goto label2;
+
+        $r1 = <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: com.sun.org.slf4j.internal.Logger LOG>;
+
+        $z0 = virtualinvoke $r1.<com.sun.org.slf4j.internal.Logger: boolean isDebugEnabled()>();
+
+        if $z0 == 0 goto label1;
+
+        $r6 = <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: com.sun.org.slf4j.internal.Logger LOG>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Now we have a {");
+
+        $r8 = interfaceinvoke r0.<org.w3c.dom.Element: java.lang.String getNamespaceURI()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("}");
+
+        $r11 = interfaceinvoke r0.<org.w3c.dom.Element: java.lang.String getLocalName()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" Element");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<com.sun.org.slf4j.internal.Logger: void debug(java.lang.String)>($r14);
+
+     label1:
+        $r4 = staticinvoke <com.sun.org.apache.xml.internal.security.keys.keyresolver.KeyResolver: java.security.cert.X509Certificate getX509Certificate(org.w3c.dom.Element,java.lang.String,com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver,boolean)>(r0, r2, r3, z1);
+
+        return $r4;
+
+     label2:
+        return null;
+    }
+
+    private static java.security.PublicKey resolveKey(org.w3c.dom.Element, java.lang.String, com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver, boolean) throws com.sun.org.apache.xml.internal.security.keys.keyresolver.KeyResolverException
+    {
+        java.lang.String r2, $r8, $r11, $r14;
+        boolean $z0, z1;
+        java.security.PublicKey $r4;
+        org.w3c.dom.Element r0;
+        com.sun.org.slf4j.internal.Logger $r1, $r6;
+        java.lang.StringBuilder $r5, $r7, $r9, $r10, $r12, $r13;
+        com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver r3;
+
+        r0 := @parameter0: org.w3c.dom.Element;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver;
+
+        z1 := @parameter3: boolean;
+
+        if r0 == null goto label2;
+
+        $r1 = <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: com.sun.org.slf4j.internal.Logger LOG>;
+
+        $z0 = virtualinvoke $r1.<com.sun.org.slf4j.internal.Logger: boolean isDebugEnabled()>();
+
+        if $z0 == 0 goto label1;
+
+        $r6 = <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: com.sun.org.slf4j.internal.Logger LOG>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Now we have a {");
+
+        $r8 = interfaceinvoke r0.<org.w3c.dom.Element: java.lang.String getNamespaceURI()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("}");
+
+        $r11 = interfaceinvoke r0.<org.w3c.dom.Element: java.lang.String getLocalName()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" Element");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<com.sun.org.slf4j.internal.Logger: void debug(java.lang.String)>($r14);
+
+     label1:
+        $r4 = staticinvoke <com.sun.org.apache.xml.internal.security.keys.keyresolver.KeyResolver: java.security.PublicKey getPublicKey(org.w3c.dom.Element,java.lang.String,com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver,boolean)>(r0, r2, r3, z1);
+
+        return $r4;
+
+     label2:
+        return null;
+    }
+
+    private static org.w3c.dom.Element obtainReferenceElement(com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput, boolean) throws com.sun.org.apache.xml.internal.security.c14n.CanonicalizationException, com.sun.org.apache.xml.internal.security.parser.XMLParserException, java.io.IOException, com.sun.org.apache.xml.internal.security.keys.keyresolver.KeyResolverException
+    {
+        byte[] $r1;
+        java.lang.Object[] $r2;
+        java.util.Set $r5;
+        java.lang.Integer $r4;
+        org.w3c.dom.Element r7;
+        org.w3c.dom.Node $r6;
+        int $i0;
+        com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput r0;
+        com.sun.org.slf4j.internal.Logger $r3;
+        boolean $z0, $z1, z2;
+
+        r0 := @parameter0: com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput;
+
+        z2 := @parameter1: boolean;
+
+        $z0 = virtualinvoke r0.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput: boolean isElement()>();
+
+        if $z0 == 0 goto label1;
+
+        $r6 = virtualinvoke r0.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput: org.w3c.dom.Node getSubNode()>();
+
+        r7 = (org.w3c.dom.Element) $r6;
+
+        goto label3;
+
+     label1:
+        $z1 = virtualinvoke r0.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput: boolean isNodeSet()>();
+
+        if $z1 == 0 goto label2;
+
+        $r5 = virtualinvoke r0.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput: java.util.Set getNodeSet()>();
+
+        r7 = staticinvoke <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: org.w3c.dom.Element getDocumentElement(java.util.Set)>($r5);
+
+        goto label3;
+
+     label2:
+        $r1 = virtualinvoke r0.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput: byte[] getBytes()>();
+
+        r7 = staticinvoke <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: org.w3c.dom.Element getDocFromBytes(byte[],boolean)>($r1, z2);
+
+        $r3 = <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: com.sun.org.slf4j.internal.Logger LOG>;
+
+        $r2 = newarray (java.lang.Object)[1];
+
+        $i0 = lengthof $r1;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r2[0] = $r4;
+
+        virtualinvoke $r3.<com.sun.org.slf4j.internal.Logger: void debug(java.lang.String,java.lang.Object[])>("we have to parse {} bytes", $r2);
+
+     label3:
+        return r7;
+    }
+
+    private static java.security.cert.X509Certificate getRawCertificate(com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput) throws com.sun.org.apache.xml.internal.security.c14n.CanonicalizationException, java.io.IOException, java.security.cert.CertificateException
+    {
+        java.lang.Throwable $r5, $r6, $r7, r9;
+        java.security.cert.X509Certificate r10;
+        byte[] $r1;
+        java.security.cert.CertificateFactory $r2;
+        java.security.cert.Certificate $r4;
+        java.io.ByteArrayInputStream $r3;
+        com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput r0;
+
+        r0 := @parameter0: com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput;
+
+        $r1 = virtualinvoke r0.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput: byte[] getBytes()>();
+
+        $r2 = staticinvoke <java.security.cert.CertificateFactory: java.security.cert.CertificateFactory getInstance(java.lang.String)>("X.509");
+
+        $r3 = new java.io.ByteArrayInputStream;
+
+        specialinvoke $r3.<java.io.ByteArrayInputStream: void <init>(byte[])>($r1);
+
+        r9 = null;
+
+     label01:
+        $r4 = virtualinvoke $r2.<java.security.cert.CertificateFactory: java.security.cert.Certificate generateCertificate(java.io.InputStream)>($r3);
+
+        r10 = (java.security.cert.X509Certificate) $r4;
+
+     label02:
+        if $r3 == null goto label04;
+
+        goto label03;
+
+     label03:
+        virtualinvoke $r3.<java.io.InputStream: void close()>();
+
+     label04:
+        return r10;
+
+     label05:
+        $r7 := @caughtexception;
+
+        r9 = $r7;
+
+        throw $r7;
+
+     label06:
+        $r6 := @caughtexception;
+
+     label07:
+        if $r3 == null goto label12;
+
+        if r9 == null goto label11;
+
+     label08:
+        virtualinvoke $r3.<java.io.InputStream: void close()>();
+
+     label09:
+        goto label12;
+
+     label10:
+        $r5 := @caughtexception;
+
+        virtualinvoke r9.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r5);
+
+        goto label12;
+
+     label11:
+        virtualinvoke $r3.<java.io.InputStream: void close()>();
+
+     label12:
+        throw $r6;
+
+        catch java.lang.Throwable from label01 to label02 with label05;
+        catch java.lang.Throwable from label08 to label09 with label10;
+        catch java.lang.Throwable from label05 to label07 with label06;
+    }
+
+    private static com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput resolveInput(com.sun.org.apache.xml.internal.security.keys.content.RetrievalMethod, java.lang.String, boolean) throws com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException
+    {
+        com.sun.org.apache.xml.internal.security.transforms.Transforms $r2;
+        com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolverContext $r3;
+        org.w3c.dom.Attr $r1;
+        com.sun.org.apache.xml.internal.security.keys.content.RetrievalMethod r0;
+        com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput $r5, r7;
+        com.sun.org.slf4j.internal.Logger $r6;
+        java.lang.String r4;
+        boolean z0;
+
+        r0 := @parameter0: com.sun.org.apache.xml.internal.security.keys.content.RetrievalMethod;
+
+        r4 := @parameter1: java.lang.String;
+
+        z0 := @parameter2: boolean;
+
+        $r1 = virtualinvoke r0.<com.sun.org.apache.xml.internal.security.keys.content.RetrievalMethod: org.w3c.dom.Attr getURIAttr()>();
+
+        $r2 = virtualinvoke r0.<com.sun.org.apache.xml.internal.security.keys.content.RetrievalMethod: com.sun.org.apache.xml.internal.security.transforms.Transforms getTransforms()>();
+
+        $r3 = new com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolverContext;
+
+        specialinvoke $r3.<com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolverContext: void <init>(org.w3c.dom.Attr,java.lang.String,boolean)>($r1, r4, z0);
+
+        $r5 = staticinvoke <com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolver: com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput resolve(com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolverContext)>($r3);
+
+        r7 = $r5;
+
+        if $r2 == null goto label1;
+
+        $r6 = <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: com.sun.org.slf4j.internal.Logger LOG>;
+
+        virtualinvoke $r6.<com.sun.org.slf4j.internal.Logger: void debug(java.lang.String)>("We have Transforms");
+
+        r7 = virtualinvoke $r2.<com.sun.org.apache.xml.internal.security.transforms.Transforms: com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput performTransforms(com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput)>($r5);
+
+     label1:
+        return r7;
+    }
+
+    public javax.crypto.SecretKey engineResolveSecretKey(org.w3c.dom.Element, java.lang.String, com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver, boolean)
+    {
+        org.w3c.dom.Element r1;
+        com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver r0;
+        java.lang.String r2;
+        com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver r3;
+        boolean z0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver;
+
+        r1 := @parameter0: org.w3c.dom.Element;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver;
+
+        z0 := @parameter3: boolean;
+
+        return null;
+    }
+
+    protected java.security.PrivateKey engineResolvePrivateKey(org.w3c.dom.Element, java.lang.String, com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver, boolean)
+    {
+        org.w3c.dom.Element r1;
+        com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver r0;
+        java.lang.String r2;
+        com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver r3;
+        boolean z0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver;
+
+        r1 := @parameter0: org.w3c.dom.Element;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver;
+
+        z0 := @parameter3: boolean;
+
+        return null;
+    }
+
+    private static org.w3c.dom.Element getDocumentElement(java.util.Set)
+    {
+        java.util.ListIterator $r8;
+        java.util.ArrayList $r2;
+        short $s0, $s1;
+        org.w3c.dom.Node $r4, r7;
+        int $i2, $i3;
+        boolean $z0, $z1, $z2;
+        java.util.Iterator $r1;
+        java.util.Set r0;
+        org.w3c.dom.Element r6, r9;
+        java.lang.Object $r3, $r5;
+
+        r0 := @parameter0: java.util.Set;
+
+        $r1 = interfaceinvoke r0.<java.util.Set: java.util.Iterator iterator()>();
+
+        r6 = null;
+
+     label1:
+        $z0 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r5 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (org.w3c.dom.Node) $r5;
+
+        if r7 == null goto label2;
+
+        $s1 = interfaceinvoke r7.<org.w3c.dom.Node: short getNodeType()>();
+
+        if 1 != $s1 goto label2;
+
+        r6 = (org.w3c.dom.Element) r7;
+
+        goto label3;
+
+     label2:
+        goto label1;
+
+     label3:
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+     label4:
+        if r6 == null goto label6;
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>(r6);
+
+        $r4 = interfaceinvoke r6.<org.w3c.dom.Element: org.w3c.dom.Node getParentNode()>();
+
+        if $r4 == null goto label6;
+
+        $s0 = interfaceinvoke $r4.<org.w3c.dom.Node: short getNodeType()>();
+
+        if 1 == $s0 goto label5;
+
+        goto label6;
+
+     label5:
+        r6 = (org.w3c.dom.Element) $r4;
+
+        goto label4;
+
+     label6:
+        $i2 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        $i3 = $i2 - 1;
+
+        $r8 = interfaceinvoke $r2.<java.util.List: java.util.ListIterator listIterator(int)>($i3);
+
+     label7:
+        $z2 = interfaceinvoke $r8.<java.util.ListIterator: boolean hasPrevious()>();
+
+        if $z2 == 0 goto label8;
+
+        $r3 = interfaceinvoke $r8.<java.util.ListIterator: java.lang.Object previous()>();
+
+        r9 = (org.w3c.dom.Element) $r3;
+
+        $z1 = interfaceinvoke r0.<java.util.Set: boolean contains(java.lang.Object)>(r9);
+
+        if $z1 == 0 goto label7;
+
+        return r9;
+
+     label8:
+        return null;
+    }
+
+    static void <clinit>()
+    {
+        com.sun.org.slf4j.internal.Logger $r0;
+
+        $r0 = staticinvoke <com.sun.org.slf4j.internal.LoggerFactory: com.sun.org.slf4j.internal.Logger getLogger(java.lang.Class)>(class "Lcom/sun/org/apache/xml/internal/security/keys/keyresolver/implementations/RetrievalMethodResolver;");
+
+        <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.RetrievalMethodResolver: com.sun.org.slf4j.internal.Logger LOG> = $r0;
+
+        return;
+    }
+}

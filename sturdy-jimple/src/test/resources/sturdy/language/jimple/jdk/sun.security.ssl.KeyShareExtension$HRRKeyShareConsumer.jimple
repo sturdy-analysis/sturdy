@@ -1,0 +1,185 @@
+final class sun.security.ssl.KeyShareExtension$HRRKeyShareConsumer extends java.lang.Object implements sun.security.ssl.SSLExtension$ExtensionConsumer
+{
+
+    private void <init>()
+    {
+        sun.security.ssl.KeyShareExtension$HRRKeyShareConsumer r0;
+
+        r0 := @this: sun.security.ssl.KeyShareExtension$HRRKeyShareConsumer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void consume(sun.security.ssl.ConnectionContext, sun.security.ssl.SSLHandshake$HandshakeMessage, java.nio.ByteBuffer) throws java.io.IOException
+    {
+        sun.security.ssl.SSLHandshake$HandshakeMessage r39;
+        java.nio.ByteBuffer r10;
+        java.util.Map $r14;
+        sun.security.ssl.SSLConfiguration $r3;
+        boolean $z0, $z1, $z2;
+        java.util.List $r4, $r8, $r12;
+        javax.net.ssl.SSLException $r7, $r22, $r30, $r33, $r37;
+        java.lang.StringBuilder $r15, $r18, $r20, $r23, $r26, $r28;
+        sun.security.ssl.SupportedGroupsExtension$NamedGroup $r11;
+        sun.security.ssl.ConnectionContext r0;
+        int $i0, $i1;
+        java.lang.String $r19, $r21, $r27, $r29;
+        sun.security.ssl.ClientHandshakeContext r1;
+        sun.security.ssl.SSLExtension $r2, $r13;
+        java.io.IOException $r34;
+        sun.security.ssl.TransportContext $r6, $r16, $r24, $r32, $r36;
+        sun.security.ssl.KeyShareExtension$HRRKeyShareConsumer r38;
+        sun.security.ssl.Alert $r5, $r17, $r25, $r31, $r35;
+        sun.security.ssl.KeyShareExtension$HRRKeyShareSpec $r9;
+
+        r38 := @this: sun.security.ssl.KeyShareExtension$HRRKeyShareConsumer;
+
+        r0 := @parameter0: sun.security.ssl.ConnectionContext;
+
+        r39 := @parameter1: sun.security.ssl.SSLHandshake$HandshakeMessage;
+
+        r10 := @parameter2: java.nio.ByteBuffer;
+
+        r1 = (sun.security.ssl.ClientHandshakeContext) r0;
+
+        $r3 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $r2 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension HRR_KEY_SHARE>;
+
+        $z0 = virtualinvoke $r3.<sun.security.ssl.SSLConfiguration: boolean isAvailable(sun.security.ssl.SSLExtension)>($r2);
+
+        if $z0 != 0 goto label1;
+
+        $r32 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r31 = <sun.security.ssl.Alert: sun.security.ssl.Alert UNEXPECTED_MESSAGE>;
+
+        $r33 = virtualinvoke $r32.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r31, "Unsupported key_share extension in HelloRetryRequest");
+
+        throw $r33;
+
+     label1:
+        $r4 = r1.<sun.security.ssl.ClientHandshakeContext: java.util.List clientRequestedNamedGroups>;
+
+        if $r4 == null goto label2;
+
+        $r8 = r1.<sun.security.ssl.ClientHandshakeContext: java.util.List clientRequestedNamedGroups>;
+
+        $z1 = interfaceinvoke $r8.<java.util.List: boolean isEmpty()>();
+
+        if $z1 == 0 goto label3;
+
+     label2:
+        $r6 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r5 = <sun.security.ssl.Alert: sun.security.ssl.Alert UNEXPECTED_MESSAGE>;
+
+        $r7 = virtualinvoke $r6.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r5, "Unexpected key_share extension in HelloRetryRequest");
+
+        throw $r7;
+
+     label3:
+        $r9 = new sun.security.ssl.KeyShareExtension$HRRKeyShareSpec;
+
+        specialinvoke $r9.<sun.security.ssl.KeyShareExtension$HRRKeyShareSpec: void <init>(java.nio.ByteBuffer,sun.security.ssl.KeyShareExtension$1)>(r10, null);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r34 := @caughtexception;
+
+        $r36 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r35 = <sun.security.ssl.Alert: sun.security.ssl.Alert UNEXPECTED_MESSAGE>;
+
+        $r37 = virtualinvoke $r36.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.Throwable)>($r35, $r34);
+
+        throw $r37;
+
+     label6:
+        $i0 = $r9.<sun.security.ssl.KeyShareExtension$HRRKeyShareSpec: int selectedGroup>;
+
+        $r11 = staticinvoke <sun.security.ssl.SupportedGroupsExtension$NamedGroup: sun.security.ssl.SupportedGroupsExtension$NamedGroup valueOf(int)>($i0);
+
+        if $r11 != null goto label7;
+
+        $r24 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r25 = <sun.security.ssl.Alert: sun.security.ssl.Alert UNEXPECTED_MESSAGE>;
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported HelloRetryRequest selected group: ");
+
+        $i1 = $r9.<sun.security.ssl.KeyShareExtension$HRRKeyShareSpec: int selectedGroup>;
+
+        $r27 = staticinvoke <sun.security.ssl.SupportedGroupsExtension$NamedGroup: java.lang.String nameOf(int)>($i1);
+
+        $r28 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r27);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r30 = virtualinvoke $r24.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r25, $r29);
+
+        throw $r30;
+
+     label7:
+        $r12 = r1.<sun.security.ssl.ClientHandshakeContext: java.util.List clientRequestedNamedGroups>;
+
+        $z2 = interfaceinvoke $r12.<java.util.List: boolean contains(java.lang.Object)>($r11);
+
+        if $z2 != 0 goto label8;
+
+        $r16 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r17 = <sun.security.ssl.Alert: sun.security.ssl.Alert UNEXPECTED_MESSAGE>;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unexpected HelloRetryRequest selected group: ");
+
+        $r19 = $r11.<sun.security.ssl.SupportedGroupsExtension$NamedGroup: java.lang.String name>;
+
+        $r20 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r22 = virtualinvoke $r16.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r17, $r21);
+
+        throw $r22;
+
+     label8:
+        r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SupportedGroupsExtension$NamedGroup serverSelectedNamedGroup> = $r11;
+
+        $r14 = r1.<sun.security.ssl.ClientHandshakeContext: java.util.Map handshakeExtensions>;
+
+        $r13 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension HRR_KEY_SHARE>;
+
+        interfaceinvoke $r14.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r13, $r9);
+
+        return;
+
+        catch java.io.IOException from label3 to label4 with label5;
+    }
+
+    void <init>(sun.security.ssl.KeyShareExtension$1)
+    {
+        sun.security.ssl.KeyShareExtension$HRRKeyShareConsumer r0;
+        sun.security.ssl.KeyShareExtension$1 r1;
+
+        r0 := @this: sun.security.ssl.KeyShareExtension$HRRKeyShareConsumer;
+
+        r1 := @parameter0: sun.security.ssl.KeyShareExtension$1;
+
+        specialinvoke r0.<sun.security.ssl.KeyShareExtension$HRRKeyShareConsumer: void <init>()>();
+
+        return;
+    }
+}

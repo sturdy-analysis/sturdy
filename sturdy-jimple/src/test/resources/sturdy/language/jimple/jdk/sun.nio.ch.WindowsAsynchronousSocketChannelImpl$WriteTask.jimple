@@ -1,0 +1,809 @@
+class sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask extends java.lang.Object implements java.lang.Runnable, sun.nio.ch.Iocp$ResultHandler
+{
+    private final java.nio.ByteBuffer[] bufs;
+    private final int numBufs;
+    private final boolean gatheringWrite;
+    private final sun.nio.ch.PendingFuture result;
+    private java.nio.ByteBuffer[] shadow;
+    static final boolean $assertionsDisabled;
+    final sun.nio.ch.WindowsAsynchronousSocketChannelImpl this$0;
+
+    void <init>(sun.nio.ch.WindowsAsynchronousSocketChannelImpl, java.nio.ByteBuffer[], boolean, sun.nio.ch.PendingFuture)
+    {
+        java.nio.ByteBuffer[] r2;
+        sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask r0;
+        int $i0, $i1;
+        sun.nio.ch.WindowsAsynchronousSocketChannelImpl r1;
+        sun.nio.ch.PendingFuture r3;
+        boolean z0;
+
+        r0 := @this: sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask;
+
+        r1 := @parameter0: sun.nio.ch.WindowsAsynchronousSocketChannelImpl;
+
+        r2 := @parameter1: java.nio.ByteBuffer[];
+
+        z0 := @parameter2: boolean;
+
+        r3 := @parameter3: sun.nio.ch.PendingFuture;
+
+        r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.WindowsAsynchronousSocketChannelImpl this$0> = r1;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: java.nio.ByteBuffer[] bufs> = r2;
+
+        $i0 = lengthof r2;
+
+        if $i0 <= 16 goto label1;
+
+        $i1 = 16;
+
+        goto label2;
+
+     label1:
+        $i1 = lengthof r2;
+
+     label2:
+        r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: int numBufs> = $i1;
+
+        r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: boolean gatheringWrite> = z0;
+
+        r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.PendingFuture result> = r3;
+
+        return;
+    }
+
+    void prepareBuffers()
+    {
+        java.nio.ByteBuffer r4, $r9;
+        boolean $z0, $z1;
+        java.nio.ByteBuffer[] $r1, $r3, $r5, $r10;
+        sun.misc.Unsafe $r7, $r8;
+        long $l5, $l6, $l8, $l9, $l10, $l12, l13, l16;
+        sun.nio.ch.WindowsAsynchronousSocketChannelImpl $r2;
+        java.lang.AssertionError $r12;
+        int $i0, $i1, $i2, $i3, i4, $i7, $i11, i14, $i15;
+        sun.nio.ch.DirectBuffer $r6, $r11;
+        sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask r0;
+
+        r0 := @this: sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask;
+
+        $i0 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: int numBufs>;
+
+        $r1 = newarray (java.nio.ByteBuffer)[$i0];
+
+        r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: java.nio.ByteBuffer[] shadow> = $r1;
+
+        $r2 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.WindowsAsynchronousSocketChannelImpl this$0>;
+
+        l13 = staticinvoke <sun.nio.ch.WindowsAsynchronousSocketChannelImpl: long access$800(sun.nio.ch.WindowsAsynchronousSocketChannelImpl)>($r2);
+
+        i14 = 0;
+
+     label1:
+        $i1 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: int numBufs>;
+
+        if i14 >= $i1 goto label7;
+
+        $r3 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: java.nio.ByteBuffer[] bufs>;
+
+        r4 = $r3[i14];
+
+        $i2 = virtualinvoke r4.<java.nio.ByteBuffer: int position()>();
+
+        $i3 = virtualinvoke r4.<java.nio.ByteBuffer: int limit()>();
+
+        $z0 = <sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label2;
+
+        if $i2 <= $i3 goto label2;
+
+        $r12 = new java.lang.AssertionError;
+
+        specialinvoke $r12.<java.lang.AssertionError: void <init>()>();
+
+        throw $r12;
+
+     label2:
+        if $i2 > $i3 goto label3;
+
+        $i15 = $i3 - $i2;
+
+        goto label4;
+
+     label3:
+        $i15 = 0;
+
+     label4:
+        i4 = $i15;
+
+        $z1 = r4 instanceof sun.nio.ch.DirectBuffer;
+
+        if $z1 != 0 goto label5;
+
+        $r9 = staticinvoke <sun.nio.ch.Util: java.nio.ByteBuffer getTemporaryDirectBuffer(int)>($i15);
+
+        virtualinvoke $r9.<java.nio.ByteBuffer: java.nio.ByteBuffer put(java.nio.ByteBuffer)>(r4);
+
+        virtualinvoke $r9.<java.nio.ByteBuffer: java.nio.Buffer flip()>();
+
+        virtualinvoke r4.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i2);
+
+        $r10 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: java.nio.ByteBuffer[] shadow>;
+
+        $r10[i14] = $r9;
+
+        $r11 = (sun.nio.ch.DirectBuffer) $r9;
+
+        l16 = interfaceinvoke $r11.<sun.nio.ch.DirectBuffer: long address()>();
+
+        goto label6;
+
+     label5:
+        $r5 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: java.nio.ByteBuffer[] shadow>;
+
+        $r5[i14] = r4;
+
+        $r6 = (sun.nio.ch.DirectBuffer) r4;
+
+        $l5 = interfaceinvoke $r6.<sun.nio.ch.DirectBuffer: long address()>();
+
+        $l6 = (long) $i2;
+
+        l16 = $l5 + $l6;
+
+     label6:
+        $r7 = staticinvoke <sun.nio.ch.WindowsAsynchronousSocketChannelImpl: sun.misc.Unsafe access$500()>();
+
+        $i7 = staticinvoke <sun.nio.ch.WindowsAsynchronousSocketChannelImpl: int access$400()>();
+
+        $l8 = (long) $i7;
+
+        $l9 = l13 + $l8;
+
+        virtualinvoke $r7.<sun.misc.Unsafe: void putAddress(long,long)>($l9, l16);
+
+        $r8 = staticinvoke <sun.nio.ch.WindowsAsynchronousSocketChannelImpl: sun.misc.Unsafe access$500()>();
+
+        $l10 = l13 + 0L;
+
+        virtualinvoke $r8.<sun.misc.Unsafe: void putInt(long,int)>($l10, i4);
+
+        $i11 = staticinvoke <sun.nio.ch.WindowsAsynchronousSocketChannelImpl: int access$600()>();
+
+        $l12 = (long) $i11;
+
+        l13 = l13 + $l12;
+
+        i14 = i14 + 1;
+
+        goto label1;
+
+     label7:
+        return;
+    }
+
+    void updateBuffers(int)
+    {
+        long $l4;
+        java.lang.AssertionError $r6;
+        java.nio.ByteBuffer r2;
+        byte $b5;
+        int $i0, $i1, $i2, $i3, $i6, i7, i8, $i9, i10, $i11;
+        boolean $z0;
+        java.nio.ByteBuffer[] $r1;
+        java.lang.IllegalArgumentException $r4, $r5;
+        sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask r0;
+
+        r0 := @this: sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask;
+
+        i7 := @parameter0: int;
+
+        i8 = 0;
+
+     label01:
+        $i0 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: int numBufs>;
+
+        if i8 >= $i0 goto label15;
+
+        $r1 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: java.nio.ByteBuffer[] bufs>;
+
+        r2 = $r1[i8];
+
+        $i1 = virtualinvoke r2.<java.nio.ByteBuffer: int position()>();
+
+        $i2 = virtualinvoke r2.<java.nio.ByteBuffer: int limit()>();
+
+        if $i1 > $i2 goto label02;
+
+        $i9 = $i2 - $i1;
+
+        goto label03;
+
+     label02:
+        $i9 = $i2;
+
+     label03:
+        if i7 < $i9 goto label08;
+
+        i7 = i7 - $i9;
+
+        i10 = $i1 + $i9;
+
+     label04:
+        virtualinvoke r2.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i10);
+
+     label05:
+        goto label07;
+
+     label06:
+        $r5 := @caughtexception;
+
+     label07:
+        goto label14;
+
+     label08:
+        if i7 <= 0 goto label15;
+
+        $z0 = <sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label09;
+
+        $i3 = $i1 + i7;
+
+        $l4 = (long) $i3;
+
+        $b5 = $l4 cmp 2147483647L;
+
+        $i11 = (int) $b5;
+
+        if $i11 < 0 goto label09;
+
+        $r6 = new java.lang.AssertionError;
+
+        specialinvoke $r6.<java.lang.AssertionError: void <init>()>();
+
+        throw $r6;
+
+     label09:
+        $i6 = $i1 + i7;
+
+     label10:
+        virtualinvoke r2.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i6);
+
+     label11:
+        goto label13;
+
+     label12:
+        $r4 := @caughtexception;
+
+     label13:
+        goto label15;
+
+     label14:
+        i8 = i8 + 1;
+
+        goto label01;
+
+     label15:
+        return;
+
+        catch java.lang.IllegalArgumentException from label04 to label05 with label06;
+        catch java.lang.IllegalArgumentException from label10 to label11 with label12;
+    }
+
+    void releaseBuffers()
+    {
+        java.nio.ByteBuffer[] $r1, $r3;
+        java.nio.ByteBuffer $r2, $r4;
+        sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask r0;
+        int $i0, i1;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask;
+
+        i1 = 0;
+
+     label1:
+        $i0 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: int numBufs>;
+
+        if i1 >= $i0 goto label3;
+
+        $r1 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: java.nio.ByteBuffer[] bufs>;
+
+        $r2 = $r1[i1];
+
+        $z0 = $r2 instanceof sun.nio.ch.DirectBuffer;
+
+        if $z0 != 0 goto label2;
+
+        $r3 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: java.nio.ByteBuffer[] shadow>;
+
+        $r4 = $r3[i1];
+
+        staticinvoke <sun.nio.ch.Util: void releaseTemporaryDirectBuffer(java.nio.ByteBuffer)>($r4);
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    public void run()
+    {
+        java.nio.channels.AsynchronousCloseException $r28;
+        byte $b6, $b7;
+        java.lang.InternalError $r27;
+        boolean $z0, z1, z2, z3, $z4, z5, z6;
+        sun.nio.ch.PendingIoCache $r3, $r13, $r19;
+        sun.nio.ch.PendingFuture $r4, $r16, $r17;
+        java.lang.Throwable $r11, $r14, r23;
+        long $l0, $l1, $l3, l8;
+        sun.nio.ch.WindowsAsynchronousSocketChannelImpl $r1, $r2, $r5, $r6, $r12, $r15, $r18, $r22, $r24, $r25;
+        int $i2, $i4, $i10, $i12;
+        java.nio.channels.ClosedChannelException $r26;
+        java.io.IOException $r29;
+        sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask r0;
+
+        r0 := @this: sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask;
+
+        l8 = 0L;
+
+        z1 = 0;
+
+        z6 = 0;
+
+        z5 = 0;
+
+        z2 = 0;
+
+        z3 = 0;
+
+     label01:
+        $r1 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.WindowsAsynchronousSocketChannelImpl this$0>;
+
+        virtualinvoke $r1.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl: void begin()>();
+
+        virtualinvoke r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: void prepareBuffers()>();
+
+        z1 = 1;
+
+        z6 = 1;
+
+        z5 = 1;
+
+        $r2 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.WindowsAsynchronousSocketChannelImpl this$0>;
+
+        $r3 = staticinvoke <sun.nio.ch.WindowsAsynchronousSocketChannelImpl: sun.nio.ch.PendingIoCache access$100(sun.nio.ch.WindowsAsynchronousSocketChannelImpl)>($r2);
+
+        $r4 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.PendingFuture result>;
+
+        $l0 = virtualinvoke $r3.<sun.nio.ch.PendingIoCache: long add(sun.nio.ch.PendingFuture)>($r4);
+
+        l8 = $l0;
+
+        $r5 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.WindowsAsynchronousSocketChannelImpl this$0>;
+
+        $l1 = $r5.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl: long handle>;
+
+        $i2 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: int numBufs>;
+
+        $r6 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.WindowsAsynchronousSocketChannelImpl this$0>;
+
+        $l3 = staticinvoke <sun.nio.ch.WindowsAsynchronousSocketChannelImpl: long access$800(sun.nio.ch.WindowsAsynchronousSocketChannelImpl)>($r6);
+
+        $i4 = staticinvoke <sun.nio.ch.WindowsAsynchronousSocketChannelImpl: int access$900(long,int,long,long)>($l1, $i2, $l3, $l0);
+
+        $i10 = (int) -2;
+
+        if $i4 != $i10 goto label04;
+
+        z2 = 1;
+
+     label02:
+        goto label03;
+
+     label03:
+        $r22 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.WindowsAsynchronousSocketChannelImpl this$0>;
+
+        virtualinvoke $r22.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl: void end()>();
+
+        return;
+
+     label04:
+        $i12 = (int) -1;
+
+        if $i4 != $i12 goto label05;
+
+        z3 = 1;
+
+        $r26 = new java.nio.channels.ClosedChannelException;
+
+        specialinvoke $r26.<java.nio.channels.ClosedChannelException: void <init>()>();
+
+        throw $r26;
+
+     label05:
+        $r27 = new java.lang.InternalError;
+
+        specialinvoke $r27.<java.lang.InternalError: void <init>(java.lang.String)>("Write completed immediately");
+
+        throw $r27;
+
+     label06:
+        $r14 := @caughtexception;
+
+        r23 = $r14;
+
+        $r15 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.WindowsAsynchronousSocketChannelImpl this$0>;
+
+        virtualinvoke $r15.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl: void enableWriting()>();
+
+        if z3 != 0 goto label07;
+
+        $z0 = $r14 instanceof java.nio.channels.ClosedChannelException;
+
+        if $z0 == 0 goto label07;
+
+        $r28 = new java.nio.channels.AsynchronousCloseException;
+
+        specialinvoke $r28.<java.nio.channels.AsynchronousCloseException: void <init>()>();
+
+        r23 = $r28;
+
+     label07:
+        $z4 = r23 instanceof java.io.IOException;
+
+        if $z4 != 0 goto label08;
+
+        $r29 = new java.io.IOException;
+
+        specialinvoke $r29.<java.io.IOException: void <init>(java.lang.Throwable)>(r23);
+
+        r23 = $r29;
+
+     label08:
+        $r16 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.PendingFuture result>;
+
+        virtualinvoke $r16.<sun.nio.ch.PendingFuture: void setFailure(java.lang.Throwable)>(r23);
+
+     label09:
+        $b7 = l8 cmp 0L;
+
+        if $b7 == 0 goto label10;
+
+        $r18 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.WindowsAsynchronousSocketChannelImpl this$0>;
+
+        $r19 = staticinvoke <sun.nio.ch.WindowsAsynchronousSocketChannelImpl: sun.nio.ch.PendingIoCache access$100(sun.nio.ch.WindowsAsynchronousSocketChannelImpl)>($r18);
+
+        virtualinvoke $r19.<sun.nio.ch.PendingIoCache: sun.nio.ch.PendingFuture remove(long)>(l8);
+
+     label10:
+        if z5 == 0 goto label11;
+
+        virtualinvoke r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: void releaseBuffers()>();
+
+     label11:
+        $r24 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.WindowsAsynchronousSocketChannelImpl this$0>;
+
+        virtualinvoke $r24.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl: void end()>();
+
+        goto label16;
+
+     label12:
+        $r11 := @caughtexception;
+
+     label13:
+        if z2 != 0 goto label15;
+
+        $b6 = l8 cmp 0L;
+
+        if $b6 == 0 goto label14;
+
+        $r12 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.WindowsAsynchronousSocketChannelImpl this$0>;
+
+        $r13 = staticinvoke <sun.nio.ch.WindowsAsynchronousSocketChannelImpl: sun.nio.ch.PendingIoCache access$100(sun.nio.ch.WindowsAsynchronousSocketChannelImpl)>($r12);
+
+        virtualinvoke $r13.<sun.nio.ch.PendingIoCache: sun.nio.ch.PendingFuture remove(long)>(l8);
+
+     label14:
+        if z6 == 0 goto label15;
+
+        virtualinvoke r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: void releaseBuffers()>();
+
+     label15:
+        $r25 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.WindowsAsynchronousSocketChannelImpl this$0>;
+
+        virtualinvoke $r25.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl: void end()>();
+
+        throw $r11;
+
+     label16:
+        $r17 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.PendingFuture result>;
+
+        staticinvoke <sun.nio.ch.Invoker: void invoke(sun.nio.ch.PendingFuture)>($r17);
+
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label06;
+        catch java.lang.Throwable from label04 to label06 with label06;
+        catch java.lang.Throwable from label04 to label09 with label12;
+        catch java.lang.Throwable from label12 to label13 with label12;
+    }
+
+    public void completed(int, boolean)
+    {
+        java.lang.Throwable $r10;
+        long $l1;
+        sun.nio.ch.WindowsAsynchronousSocketChannelImpl $r3;
+        java.lang.Integer $r5;
+        java.lang.Long $r9;
+        int i0;
+        boolean $z0, $z1, z2;
+        sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask r0;
+        sun.nio.ch.PendingFuture $r1, $r2, $r4, $r6, $r7, $r8;
+
+        r0 := @this: sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask;
+
+        i0 := @parameter0: int;
+
+        z2 := @parameter1: boolean;
+
+        virtualinvoke r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: void updateBuffers(int)>(i0);
+
+        virtualinvoke r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: void releaseBuffers()>();
+
+        $r1 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.PendingFuture result>;
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.PendingFuture result>;
+
+        $z0 = virtualinvoke $r2.<sun.nio.ch.PendingFuture: boolean isDone()>();
+
+        if $z0 == 0 goto label03;
+
+        exitmonitor $r1;
+
+     label02:
+        return;
+
+     label03:
+        $r3 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.WindowsAsynchronousSocketChannelImpl this$0>;
+
+        virtualinvoke $r3.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl: void enableWriting()>();
+
+        $z1 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: boolean gatheringWrite>;
+
+        if $z1 == 0 goto label04;
+
+        $r8 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.PendingFuture result>;
+
+        $l1 = (long) i0;
+
+        $r9 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l1);
+
+        virtualinvoke $r8.<sun.nio.ch.PendingFuture: void setResult(java.lang.Object)>($r9);
+
+        goto label05;
+
+     label04:
+        $r4 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.PendingFuture result>;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        virtualinvoke $r4.<sun.nio.ch.PendingFuture: void setResult(java.lang.Object)>($r5);
+
+     label05:
+        exitmonitor $r1;
+
+     label06:
+        goto label09;
+
+     label07:
+        $r10 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label08:
+        throw $r10;
+
+     label09:
+        if z2 == 0 goto label10;
+
+        $r7 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.PendingFuture result>;
+
+        staticinvoke <sun.nio.ch.Invoker: void invokeUnchecked(sun.nio.ch.PendingFuture)>($r7);
+
+        goto label11;
+
+     label10:
+        $r6 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.PendingFuture result>;
+
+        staticinvoke <sun.nio.ch.Invoker: void invoke(sun.nio.ch.PendingFuture)>($r6);
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label07;
+        catch java.lang.Throwable from label03 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+    }
+
+    public void failed(int, java.io.IOException)
+    {
+        java.lang.Throwable $r8;
+        java.nio.channels.AsynchronousCloseException $r7;
+        java.io.IOException r9;
+        sun.nio.ch.WindowsAsynchronousSocketChannelImpl $r1, $r4;
+        sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask r0;
+        int i0;
+        sun.nio.ch.PendingFuture $r2, $r3, $r5, $r6;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask;
+
+        i0 := @parameter0: int;
+
+        r9 := @parameter1: java.io.IOException;
+
+        virtualinvoke r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: void releaseBuffers()>();
+
+        $r1 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.WindowsAsynchronousSocketChannelImpl this$0>;
+
+        $z0 = virtualinvoke $r1.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl: boolean isOpen()>();
+
+        if $z0 != 0 goto label1;
+
+        $r7 = new java.nio.channels.AsynchronousCloseException;
+
+        specialinvoke $r7.<java.nio.channels.AsynchronousCloseException: void <init>()>();
+
+        r9 = $r7;
+
+     label1:
+        $r2 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.PendingFuture result>;
+
+        entermonitor $r2;
+
+     label2:
+        $r3 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.PendingFuture result>;
+
+        $z1 = virtualinvoke $r3.<sun.nio.ch.PendingFuture: boolean isDone()>();
+
+        if $z1 == 0 goto label4;
+
+        exitmonitor $r2;
+
+     label3:
+        return;
+
+     label4:
+        $r4 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.WindowsAsynchronousSocketChannelImpl this$0>;
+
+        virtualinvoke $r4.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl: void enableWriting()>();
+
+        $r5 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.PendingFuture result>;
+
+        virtualinvoke $r5.<sun.nio.ch.PendingFuture: void setFailure(java.lang.Throwable)>(r9);
+
+        exitmonitor $r2;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r8 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label7:
+        throw $r8;
+
+     label8:
+        $r6 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.PendingFuture result>;
+
+        staticinvoke <sun.nio.ch.Invoker: void invoke(sun.nio.ch.PendingFuture)>($r6);
+
+        return;
+
+        catch java.lang.Throwable from label2 to label3 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    void timeout()
+    {
+        java.lang.Throwable $r7;
+        sun.nio.ch.WindowsAsynchronousSocketChannelImpl $r3;
+        sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask r0;
+        java.nio.channels.InterruptedByTimeoutException $r4;
+        sun.nio.ch.PendingFuture $r1, $r2, $r5, $r6;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask;
+
+        $r1 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.PendingFuture result>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.PendingFuture result>;
+
+        $z0 = virtualinvoke $r2.<sun.nio.ch.PendingFuture: boolean isDone()>();
+
+        if $z0 == 0 goto label3;
+
+        exitmonitor $r1;
+
+     label2:
+        return;
+
+     label3:
+        $r3 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.WindowsAsynchronousSocketChannelImpl this$0>;
+
+        virtualinvoke $r3.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl: void enableWriting(boolean)>(1);
+
+        $r5 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.PendingFuture result>;
+
+        $r4 = new java.nio.channels.InterruptedByTimeoutException;
+
+        specialinvoke $r4.<java.nio.channels.InterruptedByTimeoutException: void <init>()>();
+
+        virtualinvoke $r5.<sun.nio.ch.PendingFuture: void setFailure(java.lang.Throwable)>($r4);
+
+        exitmonitor $r1;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r7 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r7;
+
+     label7:
+        $r6 = r0.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: sun.nio.ch.PendingFuture result>;
+
+        staticinvoke <sun.nio.ch.Invoker: void invoke(sun.nio.ch.PendingFuture)>($r6);
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        $r0 = class "Lsun/nio/ch/WindowsAsynchronousSocketChannelImpl;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.nio.ch.WindowsAsynchronousSocketChannelImpl$WriteTask: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

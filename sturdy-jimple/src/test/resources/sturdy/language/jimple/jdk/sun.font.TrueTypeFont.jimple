@@ -1,0 +1,4448 @@
+public class sun.font.TrueTypeFont extends sun.font.FileFont
+{
+    public static final int cmapTag;
+    public static final int glyfTag;
+    public static final int headTag;
+    public static final int hheaTag;
+    public static final int hmtxTag;
+    public static final int locaTag;
+    public static final int maxpTag;
+    public static final int nameTag;
+    public static final int postTag;
+    public static final int os_2Tag;
+    public static final int GDEFTag;
+    public static final int GPOSTag;
+    public static final int GSUBTag;
+    public static final int mortTag;
+    public static final int morxTag;
+    public static final int fdscTag;
+    public static final int fvarTag;
+    public static final int featTag;
+    public static final int EBLCTag;
+    public static final int gaspTag;
+    public static final int ttcfTag;
+    public static final int v1ttTag;
+    public static final int trueTag;
+    public static final int ottoTag;
+    public static final int MS_PLATFORM_ID;
+    public static final short ENGLISH_LOCALE_ID;
+    public static final int FAMILY_NAME_ID;
+    public static final int FULL_NAME_ID;
+    public static final int POSTSCRIPT_NAME_ID;
+    private static final short US_LCID;
+    private static java.util.Map lcidMap;
+    sun.font.TrueTypeFont$TTDisposerRecord disposerRecord;
+    int fontIndex;
+    int directoryCount;
+    int directoryOffset;
+    int numTables;
+    sun.font.TrueTypeFont$DirectoryEntry[] tableDirectory;
+    private boolean supportsJA;
+    private boolean supportsCJK;
+    private java.util.Locale nameLocale;
+    private java.lang.String localeFamilyName;
+    private java.lang.String localeFullName;
+    int fontDataSize;
+    private static final int TTCHEADERSIZE;
+    private static final int DIRECTORYHEADERSIZE;
+    private static final int DIRECTORYENTRYSIZE;
+    static final java.lang.String[] encoding_mapping;
+    private static final java.lang.String[][] languages;
+    private static final java.lang.String[] codePages;
+    private static java.lang.String defaultCodePage;
+    public static final int reserved_bits1;
+    public static final int reserved_bits2;
+    private int fontWidth;
+    private int fontWeight;
+    private static final int fsSelectionItalicBit;
+    private static final int fsSelectionBoldBit;
+    private static final int fsSelectionRegularBit;
+    private float stSize;
+    private float stPos;
+    private float ulSize;
+    private float ulPos;
+    private char[] gaspTable;
+
+    public void <init>(java.lang.String, java.lang.Object, int, boolean) throws java.awt.FontFormatException
+    {
+        sun.font.TrueTypeFont r0;
+        int i0;
+        java.lang.Object r2;
+        java.lang.String r1;
+        boolean z0;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Object;
+
+        i0 := @parameter2: int;
+
+        z0 := @parameter3: boolean;
+
+        specialinvoke r0.<sun.font.TrueTypeFont: void <init>(java.lang.String,java.lang.Object,int,boolean,boolean)>(r1, r2, i0, z0, 1);
+
+        return;
+    }
+
+    public void <init>(java.lang.String, java.lang.Object, int, boolean, boolean) throws java.awt.FontFormatException
+    {
+        java.lang.Throwable $r5;
+        sun.font.TrueTypeFont r0;
+        java.awt.FontFormatException $r6, $r7;
+        int i0;
+        java.lang.Object r2;
+        sun.font.TrueTypeFont$TTDisposerRecord $r3, $r4;
+        java.lang.String r1;
+        boolean z0, z1, $z2;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Object;
+
+        i0 := @parameter2: int;
+
+        z0 := @parameter3: boolean;
+
+        z1 := @parameter4: boolean;
+
+        specialinvoke r0.<sun.font.FileFont: void <init>(java.lang.String,java.lang.Object)>(r1, r2);
+
+        $r3 = new sun.font.TrueTypeFont$TTDisposerRecord;
+
+        specialinvoke $r3.<sun.font.TrueTypeFont$TTDisposerRecord: void <init>(sun.font.TrueTypeFont$1)>(null);
+
+        r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$TTDisposerRecord disposerRecord> = $r3;
+
+        r0.<sun.font.TrueTypeFont: int fontIndex> = 0;
+
+        r0.<sun.font.TrueTypeFont: int directoryCount> = 1;
+
+        r0.<sun.font.TrueTypeFont: int fontWidth> = 0;
+
+        r0.<sun.font.TrueTypeFont: int fontWeight> = 0;
+
+        r0.<sun.font.TrueTypeFont: boolean useJavaRasterizer> = z0;
+
+        r0.<sun.font.TrueTypeFont: int fontRank> = 3;
+
+     label1:
+        specialinvoke r0.<sun.font.TrueTypeFont: void verify(boolean)>(z1);
+
+        virtualinvoke r0.<sun.font.TrueTypeFont: void init(int)>(i0);
+
+        if z1 != 0 goto label2;
+
+        virtualinvoke r0.<sun.font.TrueTypeFont: void close()>();
+
+     label2:
+        goto label5;
+
+     label3:
+        $r5 := @caughtexception;
+
+        virtualinvoke r0.<sun.font.TrueTypeFont: void close()>();
+
+        $z2 = $r5 instanceof java.awt.FontFormatException;
+
+        if $z2 == 0 goto label4;
+
+        $r7 = (java.awt.FontFormatException) $r5;
+
+        throw $r7;
+
+     label4:
+        $r6 = new java.awt.FontFormatException;
+
+        specialinvoke $r6.<java.awt.FontFormatException: void <init>(java.lang.String)>("Unexpected runtime exception.");
+
+        throw $r6;
+
+     label5:
+        $r4 = r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$TTDisposerRecord disposerRecord>;
+
+        staticinvoke <sun.java2d.Disposer: void addObjectRecord(java.lang.Object,sun.java2d.DisposerRecord)>(r0, $r4);
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    protected boolean checkUseNatives()
+    {
+        sun.font.TrueTypeFont r0;
+        sun.font.CharToGlyphMapper $r5;
+        sun.font.TrueTypeFont$DirectoryEntry $r2;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, z11, $z12;
+        sun.font.NativeFont[] $r9, $r12, $r16, $r18;
+        sun.font.NativeFont $r10, $r17;
+        java.lang.String[] $r8, r22;
+        java.awt.FontFormatException $r19, $r20;
+        int $i0, $i1, $i2, i3, i4, i5;
+        java.lang.String $r11, $r13, $r14, r21;
+        char[] $r6;
+        java.lang.Object $r1, $r3, $r4, $r7, $r15;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        $z0 = r0.<sun.font.TrueTypeFont: boolean checkedNatives>;
+
+        if $z0 == 0 goto label01;
+
+        $z10 = r0.<sun.font.TrueTypeFont: boolean useNatives>;
+
+        return $z10;
+
+     label01:
+        $z1 = <sun.font.FontUtilities: boolean isSolaris>;
+
+        if $z1 == 0 goto label02;
+
+        $z2 = r0.<sun.font.TrueTypeFont: boolean useJavaRasterizer>;
+
+        if $z2 != 0 goto label02;
+
+        $z3 = <sun.font.FontUtilities: boolean useT2K>;
+
+        if $z3 != 0 goto label02;
+
+        $r1 = r0.<sun.font.TrueTypeFont: java.lang.Object nativeNames>;
+
+        if $r1 == null goto label02;
+
+        $r2 = virtualinvoke r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$DirectoryEntry getDirectoryEntry(int)>(1161972803);
+
+        if $r2 != null goto label02;
+
+        $z4 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        if $z4 == 0 goto label03;
+
+     label02:
+        r0.<sun.font.TrueTypeFont: boolean checkedNatives> = 1;
+
+        return 0;
+
+     label03:
+        $r3 = r0.<sun.font.TrueTypeFont: java.lang.Object nativeNames>;
+
+        $z5 = $r3 instanceof java.lang.String;
+
+        if $z5 == 0 goto label09;
+
+        $r15 = r0.<sun.font.TrueTypeFont: java.lang.Object nativeNames>;
+
+        r21 = (java.lang.String) $r15;
+
+        $i2 = virtualinvoke r21.<java.lang.String: int indexOf(java.lang.String)>("8859");
+
+        if $i2 <= 0 goto label04;
+
+        r0.<sun.font.TrueTypeFont: boolean checkedNatives> = 1;
+
+        return 0;
+
+     label04:
+        $z9 = staticinvoke <sun.font.NativeFont: boolean hasExternalBitmaps(java.lang.String)>(r21);
+
+        if $z9 == 0 goto label08;
+
+        $r16 = newarray (sun.font.NativeFont)[1];
+
+        r0.<sun.font.TrueTypeFont: sun.font.NativeFont[] nativeFonts> = $r16;
+
+     label05:
+        $r18 = r0.<sun.font.TrueTypeFont: sun.font.NativeFont[] nativeFonts>;
+
+        $r17 = new sun.font.NativeFont;
+
+        specialinvoke $r17.<sun.font.NativeFont: void <init>(java.lang.String,boolean)>(r21, 1);
+
+        $r18[0] = $r17;
+
+        r0.<sun.font.TrueTypeFont: boolean useNatives> = 1;
+
+     label06:
+        goto label08;
+
+     label07:
+        $r20 := @caughtexception;
+
+        r0.<sun.font.TrueTypeFont: sun.font.NativeFont[] nativeFonts> = null;
+
+     label08:
+        goto label20;
+
+     label09:
+        $r4 = r0.<sun.font.TrueTypeFont: java.lang.Object nativeNames>;
+
+        $z6 = $r4 instanceof java.lang.String[];
+
+        if $z6 == 0 goto label20;
+
+        $r7 = r0.<sun.font.TrueTypeFont: java.lang.Object nativeNames>;
+
+        $r8 = (java.lang.String[]) $r7;
+
+        r22 = (java.lang.String[]) $r8;
+
+        i3 = lengthof r22;
+
+        z11 = 0;
+
+        i4 = 0;
+
+     label10:
+        if i4 >= i3 goto label13;
+
+        $r13 = r22[i4];
+
+        $i1 = virtualinvoke $r13.<java.lang.String: int indexOf(java.lang.String)>("8859");
+
+        if $i1 <= 0 goto label11;
+
+        r0.<sun.font.TrueTypeFont: boolean checkedNatives> = 1;
+
+        return 0;
+
+     label11:
+        $r14 = r22[i4];
+
+        $z8 = staticinvoke <sun.font.NativeFont: boolean hasExternalBitmaps(java.lang.String)>($r14);
+
+        if $z8 == 0 goto label12;
+
+        z11 = 1;
+
+     label12:
+        i4 = i4 + 1;
+
+        goto label10;
+
+     label13:
+        if z11 != 0 goto label14;
+
+        r0.<sun.font.TrueTypeFont: boolean checkedNatives> = 1;
+
+        return 0;
+
+     label14:
+        r0.<sun.font.TrueTypeFont: boolean useNatives> = 1;
+
+        $r9 = newarray (sun.font.NativeFont)[i3];
+
+        r0.<sun.font.TrueTypeFont: sun.font.NativeFont[] nativeFonts> = $r9;
+
+        i5 = 0;
+
+     label15:
+        if i5 >= i3 goto label20;
+
+     label16:
+        $r12 = r0.<sun.font.TrueTypeFont: sun.font.NativeFont[] nativeFonts>;
+
+        $r10 = new sun.font.NativeFont;
+
+        $r11 = r22[i5];
+
+        specialinvoke $r10.<sun.font.NativeFont: void <init>(java.lang.String,boolean)>($r11, 1);
+
+        $r12[i5] = $r10;
+
+     label17:
+        goto label19;
+
+     label18:
+        $r19 := @caughtexception;
+
+        r0.<sun.font.TrueTypeFont: boolean useNatives> = 0;
+
+        r0.<sun.font.TrueTypeFont: sun.font.NativeFont[] nativeFonts> = null;
+
+     label19:
+        i5 = i5 + 1;
+
+        goto label15;
+
+     label20:
+        $z12 = r0.<sun.font.TrueTypeFont: boolean useNatives>;
+
+        if $z12 == 0 goto label21;
+
+        $r5 = virtualinvoke r0.<sun.font.TrueTypeFont: sun.font.CharToGlyphMapper getMapper()>();
+
+        $i0 = virtualinvoke $r5.<sun.font.CharToGlyphMapper: int getNumGlyphs()>();
+
+        $r6 = newarray (char)[$i0];
+
+        r0.<sun.font.TrueTypeFont: char[] glyphToCharMap> = $r6;
+
+     label21:
+        r0.<sun.font.TrueTypeFont: boolean checkedNatives> = 1;
+
+        $z7 = r0.<sun.font.TrueTypeFont: boolean useNatives>;
+
+        return $z7;
+
+        catch java.awt.FontFormatException from label05 to label06 with label07;
+        catch java.awt.FontFormatException from label16 to label17 with label18;
+    }
+
+    private synchronized java.nio.channels.FileChannel open() throws java.awt.FontFormatException
+    {
+        sun.font.TrueTypeFont r0;
+        java.nio.channels.FileChannel $r1;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        $r1 = specialinvoke r0.<sun.font.TrueTypeFont: java.nio.channels.FileChannel open(boolean)>(1);
+
+        return $r1;
+    }
+
+    private synchronized java.nio.channels.FileChannel open(boolean) throws java.awt.FontFormatException
+    {
+        java.io.RandomAccessFile $r17;
+        sun.font.TrueTypeFont r0;
+        java.lang.NullPointerException $r22;
+        boolean $z0, z1, $z2;
+        sun.font.SunFontManager $r10;
+        sun.font.TrueTypeFont$TTDisposerRecord $r1, $r5, $r7, $r25;
+        java.lang.StringBuilder $r12, $r13, $r15;
+        long $l0;
+        java.awt.FontFormatException $r19, $r23;
+        sun.font.TrueTypeFont$1 $r3;
+        int $i1;
+        java.lang.String $r14, $r16, $r20, $r24;
+        sun.util.logging.PlatformLogger $r11;
+        java.nio.channels.ClosedChannelException $r21;
+        java.io.IOException $r18;
+        sun.font.FontManager $r9;
+        java.lang.Object $r4;
+        java.nio.channels.FileChannel $r2, $r6, $r8, $r26;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        z1 := @parameter0: boolean;
+
+        $r1 = r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$TTDisposerRecord disposerRecord>;
+
+        $r2 = $r1.<sun.font.TrueTypeFont$TTDisposerRecord: java.nio.channels.FileChannel channel>;
+
+        if $r2 != null goto label6;
+
+        $z0 = staticinvoke <sun.font.FontUtilities: boolean isLogging()>();
+
+        if $z0 == 0 goto label1;
+
+        $r11 = staticinvoke <sun.font.FontUtilities: sun.util.logging.PlatformLogger getLogger()>();
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("open TTF: ");
+
+        $r14 = r0.<sun.font.TrueTypeFont: java.lang.String platName>;
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r11.<sun.util.logging.PlatformLogger: void info(java.lang.String)>($r16);
+
+     label1:
+        $r3 = new sun.font.TrueTypeFont$1;
+
+        specialinvoke $r3.<sun.font.TrueTypeFont$1: void <init>(sun.font.TrueTypeFont)>(r0);
+
+        $r4 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r3);
+
+        $r17 = (java.io.RandomAccessFile) $r4;
+
+        $r5 = r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$TTDisposerRecord disposerRecord>;
+
+        $r6 = virtualinvoke $r17.<java.io.RandomAccessFile: java.nio.channels.FileChannel getChannel()>();
+
+        $r5.<sun.font.TrueTypeFont$TTDisposerRecord: java.nio.channels.FileChannel channel> = $r6;
+
+        $r7 = r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$TTDisposerRecord disposerRecord>;
+
+        $r8 = $r7.<sun.font.TrueTypeFont$TTDisposerRecord: java.nio.channels.FileChannel channel>;
+
+        $l0 = virtualinvoke $r8.<java.nio.channels.FileChannel: long size()>();
+
+        $i1 = (int) $l0;
+
+        r0.<sun.font.TrueTypeFont: int fileSize> = $i1;
+
+        if z1 == 0 goto label2;
+
+        $r9 = staticinvoke <sun.font.FontManagerFactory: sun.font.FontManager getInstance()>();
+
+        $z2 = $r9 instanceof sun.font.SunFontManager;
+
+        if $z2 == 0 goto label2;
+
+        $r10 = (sun.font.SunFontManager) $r9;
+
+        virtualinvoke $r10.<sun.font.SunFontManager: void addToPool(sun.font.FileFont)>(r0);
+
+     label2:
+        goto label6;
+
+     label3:
+        $r22 := @caughtexception;
+
+        virtualinvoke r0.<sun.font.TrueTypeFont: void close()>();
+
+        $r23 = new java.awt.FontFormatException;
+
+        $r24 = virtualinvoke $r22.<java.lang.NullPointerException: java.lang.String toString()>();
+
+        specialinvoke $r23.<java.awt.FontFormatException: void <init>(java.lang.String)>($r24);
+
+        throw $r23;
+
+     label4:
+        $r21 := @caughtexception;
+
+        staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        virtualinvoke r0.<sun.font.TrueTypeFont: void close()>();
+
+        specialinvoke r0.<sun.font.TrueTypeFont: java.nio.channels.FileChannel open()>();
+
+        goto label6;
+
+     label5:
+        $r18 := @caughtexception;
+
+        virtualinvoke r0.<sun.font.TrueTypeFont: void close()>();
+
+        $r19 = new java.awt.FontFormatException;
+
+        $r20 = virtualinvoke $r18.<java.io.IOException: java.lang.String toString()>();
+
+        specialinvoke $r19.<java.awt.FontFormatException: void <init>(java.lang.String)>($r20);
+
+        throw $r19;
+
+     label6:
+        $r25 = r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$TTDisposerRecord disposerRecord>;
+
+        $r26 = $r25.<sun.font.TrueTypeFont$TTDisposerRecord: java.nio.channels.FileChannel channel>;
+
+        return $r26;
+
+        catch java.lang.NullPointerException from label1 to label2 with label3;
+        catch java.nio.channels.ClosedChannelException from label1 to label2 with label4;
+        catch java.io.IOException from label1 to label2 with label5;
+    }
+
+    protected synchronized void close()
+    {
+        sun.font.TrueTypeFont$TTDisposerRecord $r1;
+        sun.font.TrueTypeFont r0;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        $r1 = r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$TTDisposerRecord disposerRecord>;
+
+        virtualinvoke $r1.<sun.font.TrueTypeFont$TTDisposerRecord: void dispose()>();
+
+        return;
+    }
+
+    int readBlock(java.nio.ByteBuffer, int, int)
+    {
+        sun.font.TrueTypeFont r0;
+        java.lang.StringBuilder $r9, $r10, $r15, $r16, $r17, $r18, $r23, $r24, $r25, $r26, $r27, $r29, $r30, $r31, $r32, $r33, $r35, $r41, $r43, $r49, $r51, $r56, $r57, $r58, $r59, $r61, $r62;
+        java.lang.Throwable $r53;
+        long $l3, $l5;
+        java.lang.String $r11, $r19, $r34, $r36, $r42, $r44, $r50, $r52, r54;
+        sun.util.logging.PlatformLogger $r20, $r21, $r37, $r39, $r47;
+        java.nio.channels.ClosedChannelException $r45;
+        java.io.IOException $r38, $r60;
+        java.nio.ByteBuffer r3;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        sun.font.TrueTypeFont$TTDisposerRecord $r1, $r4, $r6, $r12;
+        java.awt.FontFormatException $r46;
+        int i0, $i1, $i2, $i4, i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, i14, i15, $i17, $i19, $i21, $i23, $i25;
+        java.nio.channels.FileChannel $r2, $r5, $r7, $r13;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        r3 := @parameter0: java.nio.ByteBuffer;
+
+        i0 := @parameter1: int;
+
+        i14 := @parameter2: int;
+
+        i15 = 0;
+
+     label01:
+        entermonitor r0;
+
+     label02:
+        $r1 = r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$TTDisposerRecord disposerRecord>;
+
+        $r2 = $r1.<sun.font.TrueTypeFont$TTDisposerRecord: java.nio.channels.FileChannel channel>;
+
+        if $r2 != null goto label03;
+
+        specialinvoke r0.<sun.font.TrueTypeFont: java.nio.channels.FileChannel open()>();
+
+     label03:
+        $i2 = i0 + i14;
+
+        $i1 = r0.<sun.font.TrueTypeFont: int fileSize>;
+
+        if $i2 <= $i1 goto label07;
+
+        $i10 = r0.<sun.font.TrueTypeFont: int fileSize>;
+
+        if i0 < $i10 goto label06;
+
+        $z2 = staticinvoke <sun.font.FontUtilities: boolean isLogging()>();
+
+        if $z2 == 0 goto label04;
+
+        $r56 = new java.lang.StringBuilder;
+
+        specialinvoke $r56.<java.lang.StringBuilder: void <init>()>();
+
+        $r29 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Read offset is ");
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" file size is ");
+
+        $i12 = r0.<sun.font.TrueTypeFont: int fileSize>;
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i12);
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" file is ");
+
+        $r34 = r0.<sun.font.TrueTypeFont: java.lang.String platName>;
+
+        $r35 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r34);
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r37 = staticinvoke <sun.font.FontUtilities: sun.util.logging.PlatformLogger getLogger()>();
+
+        virtualinvoke $r37.<sun.util.logging.PlatformLogger: void severe(java.lang.String)>($r36);
+
+     label04:
+        exitmonitor r0;
+
+     label05:
+        $i17 = (int) -1;
+
+        return $i17;
+
+     label06:
+        $i11 = r0.<sun.font.TrueTypeFont: int fileSize>;
+
+        i14 = $i11 - i0;
+
+     label07:
+        virtualinvoke r3.<java.nio.ByteBuffer: java.nio.Buffer clear()>();
+
+        $r4 = r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$TTDisposerRecord disposerRecord>;
+
+        $r5 = $r4.<sun.font.TrueTypeFont$TTDisposerRecord: java.nio.channels.FileChannel channel>;
+
+        $l3 = (long) i0;
+
+        virtualinvoke $r5.<java.nio.channels.FileChannel: java.nio.channels.FileChannel position(long)>($l3);
+
+     label08:
+        if i15 >= i14 goto label15;
+
+        $r6 = r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$TTDisposerRecord disposerRecord>;
+
+        $r7 = $r6.<sun.font.TrueTypeFont$TTDisposerRecord: java.nio.channels.FileChannel channel>;
+
+        $i4 = virtualinvoke $r7.<java.nio.channels.FileChannel: int read(java.nio.ByteBuffer)>(r3);
+
+        $i19 = (int) -1;
+
+        if $i4 != $i19 goto label14;
+
+        $r57 = new java.lang.StringBuilder;
+
+        specialinvoke $r57.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unexpected EOF ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r54 = $r11;
+
+        $r12 = r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$TTDisposerRecord disposerRecord>;
+
+        $r13 = $r12.<sun.font.TrueTypeFont$TTDisposerRecord: java.nio.channels.FileChannel channel>;
+
+        $l5 = virtualinvoke $r13.<java.nio.channels.FileChannel: long size()>();
+
+        i6 = (int) $l5;
+
+        $i7 = r0.<sun.font.TrueTypeFont: int fileSize>;
+
+        if i6 == $i7 goto label09;
+
+        $r58 = new java.lang.StringBuilder;
+
+        specialinvoke $r58.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" File size was ");
+
+        $i9 = r0.<sun.font.TrueTypeFont: int fileSize>;
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i9);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" and now is ");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i6);
+
+        r54 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label09:
+        $z0 = staticinvoke <sun.font.FontUtilities: boolean isLogging()>();
+
+        if $z0 == 0 goto label10;
+
+        $r21 = staticinvoke <sun.font.FontUtilities: sun.util.logging.PlatformLogger getLogger()>();
+
+        virtualinvoke $r21.<sun.util.logging.PlatformLogger: void severe(java.lang.String)>(r54);
+
+     label10:
+        $i8 = i14 / 2;
+
+        if i15 > $i8 goto label11;
+
+        if i15 <= 16384 goto label12;
+
+     label11:
+        virtualinvoke r3.<java.nio.ByteBuffer: java.nio.Buffer flip()>();
+
+        $z1 = staticinvoke <sun.font.FontUtilities: boolean isLogging()>();
+
+        if $z1 == 0 goto label13;
+
+        $r59 = new java.lang.StringBuilder;
+
+        specialinvoke $r59.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r59.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Returning ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" bytes instead of ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i14);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r54 = $r19;
+
+        $r20 = staticinvoke <sun.font.FontUtilities: sun.util.logging.PlatformLogger getLogger()>();
+
+        virtualinvoke $r20.<sun.util.logging.PlatformLogger: void severe(java.lang.String)>($r19);
+
+        goto label13;
+
+     label12:
+        $i21 = (int) -1;
+
+        i15 = $i21;
+
+     label13:
+        $r60 = new java.io.IOException;
+
+        specialinvoke $r60.<java.io.IOException: void <init>(java.lang.String)>(r54);
+
+        throw $r60;
+
+     label14:
+        i15 = i15 + $i4;
+
+        goto label08;
+
+     label15:
+        virtualinvoke r3.<java.nio.ByteBuffer: java.nio.Buffer flip()>();
+
+        if i15 <= i14 goto label16;
+
+        i15 = i14;
+
+     label16:
+        exitmonitor r0;
+
+     label17:
+        goto label20;
+
+     label18:
+        $r53 := @caughtexception;
+
+        exitmonitor r0;
+
+     label19:
+        throw $r53;
+
+     label20:
+        goto label26;
+
+     label21:
+        $r46 := @caughtexception;
+
+        $z4 = staticinvoke <sun.font.FontUtilities: boolean isLogging()>();
+
+        if $z4 == 0 goto label22;
+
+        $r47 = staticinvoke <sun.font.FontUtilities: sun.util.logging.PlatformLogger getLogger()>();
+
+        $r61 = new java.lang.StringBuilder;
+
+        specialinvoke $r61.<java.lang.StringBuilder: void <init>()>();
+
+        $r49 = virtualinvoke $r61.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("While reading ");
+
+        $r50 = r0.<sun.font.TrueTypeFont: java.lang.String platName>;
+
+        $r51 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r50);
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r47.<sun.util.logging.PlatformLogger: void severe(java.lang.String,java.lang.Throwable)>($r52, $r46);
+
+     label22:
+        $i23 = (int) -1;
+
+        i15 = $i23;
+
+        virtualinvoke r0.<sun.font.TrueTypeFont: void deregisterFontAndClearStrikeCache()>();
+
+        goto label26;
+
+     label23:
+        $r45 := @caughtexception;
+
+        staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        virtualinvoke r0.<sun.font.TrueTypeFont: void close()>();
+
+        $i13 = virtualinvoke r0.<sun.font.TrueTypeFont: int readBlock(java.nio.ByteBuffer,int,int)>(r3, i0, i14);
+
+        return $i13;
+
+     label24:
+        $r38 := @caughtexception;
+
+        $z3 = staticinvoke <sun.font.FontUtilities: boolean isLogging()>();
+
+        if $z3 == 0 goto label25;
+
+        $r39 = staticinvoke <sun.font.FontUtilities: sun.util.logging.PlatformLogger getLogger()>();
+
+        $r62 = new java.lang.StringBuilder;
+
+        specialinvoke $r62.<java.lang.StringBuilder: void <init>()>();
+
+        $r41 = virtualinvoke $r62.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("While reading ");
+
+        $r42 = r0.<sun.font.TrueTypeFont: java.lang.String platName>;
+
+        $r43 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r42);
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r39.<sun.util.logging.PlatformLogger: void severe(java.lang.String,java.lang.Throwable)>($r44, $r38);
+
+     label25:
+        if i15 != 0 goto label26;
+
+        $i25 = (int) -1;
+
+        i15 = $i25;
+
+        virtualinvoke r0.<sun.font.TrueTypeFont: void deregisterFontAndClearStrikeCache()>();
+
+     label26:
+        return i15;
+
+        catch java.lang.Throwable from label02 to label05 with label18;
+        catch java.lang.Throwable from label06 to label17 with label18;
+        catch java.lang.Throwable from label18 to label19 with label18;
+        catch java.awt.FontFormatException from label01 to label05 with label21;
+        catch java.awt.FontFormatException from label06 to label20 with label21;
+        catch java.nio.channels.ClosedChannelException from label01 to label05 with label23;
+        catch java.nio.channels.ClosedChannelException from label06 to label20 with label23;
+        catch java.io.IOException from label01 to label05 with label24;
+        catch java.io.IOException from label06 to label20 with label24;
+    }
+
+    java.nio.ByteBuffer readBlock(int, int)
+    {
+        java.lang.Throwable $r10;
+        sun.font.TrueTypeFont r0;
+        long $l4;
+        java.nio.ByteBuffer r11;
+        java.awt.FontFormatException $r9;
+        int i0, i1, $i2, $i3, $i5, $i6, $i7;
+        java.nio.channels.ClosedChannelException $r8;
+        java.io.IOException $r7;
+        sun.font.TrueTypeFont$TTDisposerRecord $r1, $r3, $r5;
+        java.nio.channels.FileChannel $r2, $r4, $r6;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        r11 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer allocate(int)>(i0);
+
+     label01:
+        entermonitor r0;
+
+     label02:
+        $r1 = r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$TTDisposerRecord disposerRecord>;
+
+        $r2 = $r1.<sun.font.TrueTypeFont$TTDisposerRecord: java.nio.channels.FileChannel channel>;
+
+        if $r2 != null goto label03;
+
+        specialinvoke r0.<sun.font.TrueTypeFont: java.nio.channels.FileChannel open()>();
+
+     label03:
+        $i3 = i1 + i0;
+
+        $i2 = r0.<sun.font.TrueTypeFont: int fileSize>;
+
+        if $i3 <= $i2 goto label06;
+
+        $i5 = r0.<sun.font.TrueTypeFont: int fileSize>;
+
+        if i1 <= $i5 goto label05;
+
+        exitmonitor r0;
+
+     label04:
+        return null;
+
+     label05:
+        $i6 = r0.<sun.font.TrueTypeFont: int fileSize>;
+
+        $i7 = $i6 - i1;
+
+        r11 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer allocate(int)>($i7);
+
+     label06:
+        $r3 = r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$TTDisposerRecord disposerRecord>;
+
+        $r4 = $r3.<sun.font.TrueTypeFont$TTDisposerRecord: java.nio.channels.FileChannel channel>;
+
+        $l4 = (long) i1;
+
+        virtualinvoke $r4.<java.nio.channels.FileChannel: java.nio.channels.FileChannel position(long)>($l4);
+
+        $r5 = r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$TTDisposerRecord disposerRecord>;
+
+        $r6 = $r5.<sun.font.TrueTypeFont$TTDisposerRecord: java.nio.channels.FileChannel channel>;
+
+        virtualinvoke $r6.<java.nio.channels.FileChannel: int read(java.nio.ByteBuffer)>(r11);
+
+        virtualinvoke r11.<java.nio.ByteBuffer: java.nio.Buffer flip()>();
+
+        exitmonitor r0;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r10 := @caughtexception;
+
+        exitmonitor r0;
+
+     label09:
+        throw $r10;
+
+     label10:
+        goto label14;
+
+     label11:
+        $r9 := @caughtexception;
+
+        return null;
+
+     label12:
+        $r8 := @caughtexception;
+
+        staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        virtualinvoke r0.<sun.font.TrueTypeFont: void close()>();
+
+        virtualinvoke r0.<sun.font.TrueTypeFont: int readBlock(java.nio.ByteBuffer,int,int)>(r11, i1, i0);
+
+        goto label14;
+
+     label13:
+        $r7 := @caughtexception;
+
+        return null;
+
+     label14:
+        return r11;
+
+        catch java.lang.Throwable from label02 to label04 with label08;
+        catch java.lang.Throwable from label05 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+        catch java.awt.FontFormatException from label01 to label04 with label11;
+        catch java.awt.FontFormatException from label05 to label10 with label11;
+        catch java.nio.channels.ClosedChannelException from label01 to label04 with label12;
+        catch java.nio.channels.ClosedChannelException from label05 to label10 with label12;
+        catch java.io.IOException from label01 to label04 with label13;
+        catch java.io.IOException from label05 to label10 with label13;
+    }
+
+    byte[] readBytes(int, int)
+    {
+        byte[] r2, $r3;
+        sun.font.TrueTypeFont r0;
+        java.nio.ByteBuffer $r1;
+        int i0, i1, $i2;
+        boolean $z0;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r1 = virtualinvoke r0.<sun.font.TrueTypeFont: java.nio.ByteBuffer readBlock(int,int)>(i0, i1);
+
+        $z0 = virtualinvoke $r1.<java.nio.ByteBuffer: boolean hasArray()>();
+
+        if $z0 == 0 goto label1;
+
+        $r3 = virtualinvoke $r1.<java.nio.ByteBuffer: byte[] array()>();
+
+        return $r3;
+
+     label1:
+        $i2 = virtualinvoke $r1.<java.nio.ByteBuffer: int limit()>();
+
+        r2 = newarray (byte)[$i2];
+
+        virtualinvoke $r1.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[])>(r2);
+
+        return r2;
+    }
+
+    private void verify(boolean) throws java.awt.FontFormatException
+    {
+        sun.font.TrueTypeFont r0;
+        boolean z0;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        z0 := @parameter0: boolean;
+
+        specialinvoke r0.<sun.font.TrueTypeFont: java.nio.channels.FileChannel open(boolean)>(z0);
+
+        return;
+    }
+
+    protected void init(int) throws java.awt.FontFormatException
+    {
+        sun.font.TrueTypeFont r0;
+        sun.font.TrueTypeFont$DirectoryEntry $r7, $r8, $r9, $r16, $r43;
+        java.lang.Exception $r34;
+        sun.font.TrueTypeFont$DirectoryEntry[] $r6, $r21;
+        java.lang.StringBuilder $r24, $r25, $r30, $r32, $r41, $r44;
+        short $s11;
+        java.lang.String $r11, $r13, $r26, $r31, $r33, $r36, $r39;
+        sun.util.logging.PlatformLogger $r38;
+        java.nio.ByteBuffer $r1, $r2, $r3, $r4, $r10, $r14;
+        java.nio.IntBuffer $r5;
+        boolean $z0, $z1;
+        java.awt.FontFormatException $r37, $r40, $r42, $r45, $r46, $r47, $r48, $r49, $r50, $r51;
+        int $i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i12, $i13, $i14, $i15, $i16, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, i29, i30, $i31, $i32;
+        char $c17;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        i2 := @parameter0: int;
+
+        i29 = 0;
+
+        $r1 = virtualinvoke r0.<sun.font.TrueTypeFont: java.nio.ByteBuffer readBlock(int,int)>(0, 12);
+
+     label01:
+        $i0 = virtualinvoke $r1.<java.nio.ByteBuffer: int getInt()>();
+
+        lookupswitch($i0)
+        {
+            case 65536: goto label04;
+            case 1330926671: goto label04;
+            case 1953658213: goto label04;
+            case 1953784678: goto label02;
+            default: goto label05;
+        };
+
+     label02:
+        virtualinvoke $r1.<java.nio.ByteBuffer: int getInt()>();
+
+        $i1 = virtualinvoke $r1.<java.nio.ByteBuffer: int getInt()>();
+
+        r0.<sun.font.TrueTypeFont: int directoryCount> = $i1;
+
+        $i3 = r0.<sun.font.TrueTypeFont: int directoryCount>;
+
+        if i2 < $i3 goto label03;
+
+        $r40 = new java.awt.FontFormatException;
+
+        specialinvoke $r40.<java.awt.FontFormatException: void <init>(java.lang.String)>("Bad collection index");
+
+        throw $r40;
+
+     label03:
+        r0.<sun.font.TrueTypeFont: int fontIndex> = i2;
+
+        $i4 = 4 * i2;
+
+        $i5 = 12 + $i4;
+
+        $r2 = virtualinvoke r0.<sun.font.TrueTypeFont: java.nio.ByteBuffer readBlock(int,int)>($i5, 4);
+
+        $i6 = virtualinvoke $r2.<java.nio.ByteBuffer: int getInt()>();
+
+        i29 = $i6;
+
+        $i7 = r0.<sun.font.TrueTypeFont: int fileSize>;
+
+        $i8 = $i7 - $i6;
+
+        $i9 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i8);
+
+        r0.<sun.font.TrueTypeFont: int fontDataSize> = $i9;
+
+        goto label06;
+
+     label04:
+        $i28 = r0.<sun.font.TrueTypeFont: int fileSize>;
+
+        r0.<sun.font.TrueTypeFont: int fontDataSize> = $i28;
+
+        goto label06;
+
+     label05:
+        $r42 = new java.awt.FontFormatException;
+
+        $r41 = new java.lang.StringBuilder;
+
+        specialinvoke $r41.<java.lang.StringBuilder: void <init>()>();
+
+        $r30 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported sfnt ");
+
+        $r31 = virtualinvoke r0.<sun.font.TrueTypeFont: java.lang.String getPublicFileName()>();
+
+        $r32 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r31);
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r42.<java.awt.FontFormatException: void <init>(java.lang.String)>($r33);
+
+        throw $r42;
+
+     label06:
+        $i10 = i29 + 4;
+
+        $r3 = virtualinvoke r0.<sun.font.TrueTypeFont: java.nio.ByteBuffer readBlock(int,int)>($i10, 2);
+
+        $s11 = virtualinvoke $r3.<java.nio.ByteBuffer: short getShort()>();
+
+        $i32 = (int) $s11;
+
+        r0.<sun.font.TrueTypeFont: int numTables> = $i32;
+
+        $i12 = i29 + 12;
+
+        r0.<sun.font.TrueTypeFont: int directoryOffset> = $i12;
+
+        $i15 = r0.<sun.font.TrueTypeFont: int directoryOffset>;
+
+        $i13 = r0.<sun.font.TrueTypeFont: int numTables>;
+
+        $i14 = $i13 * 16;
+
+        $r4 = virtualinvoke r0.<sun.font.TrueTypeFont: java.nio.ByteBuffer readBlock(int,int)>($i15, $i14);
+
+        $r5 = virtualinvoke $r4.<java.nio.ByteBuffer: java.nio.IntBuffer asIntBuffer()>();
+
+        $i16 = r0.<sun.font.TrueTypeFont: int numTables>;
+
+        $r6 = newarray (sun.font.TrueTypeFont$DirectoryEntry)[$i16];
+
+        r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$DirectoryEntry[] tableDirectory> = $r6;
+
+        i30 = 0;
+
+     label07:
+        $i31 = r0.<sun.font.TrueTypeFont: int numTables>;
+
+        if i30 >= $i31 goto label09;
+
+        $r21 = r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$DirectoryEntry[] tableDirectory>;
+
+        $r43 = new sun.font.TrueTypeFont$DirectoryEntry;
+
+        specialinvoke $r43.<sun.font.TrueTypeFont$DirectoryEntry: void <init>()>();
+
+        $r21[i30] = $r43;
+
+        $i18 = virtualinvoke $r5.<java.nio.IntBuffer: int get()>();
+
+        $r43.<sun.font.TrueTypeFont$DirectoryEntry: int tag> = $i18;
+
+        virtualinvoke $r5.<java.nio.IntBuffer: int get()>();
+
+        $i19 = virtualinvoke $r5.<java.nio.IntBuffer: int get()>();
+
+        $i20 = $i19 & 2147483647;
+
+        $r43.<sun.font.TrueTypeFont$DirectoryEntry: int offset> = $i20;
+
+        $i21 = virtualinvoke $r5.<java.nio.IntBuffer: int get()>();
+
+        $i22 = $i21 & 2147483647;
+
+        $r43.<sun.font.TrueTypeFont$DirectoryEntry: int length> = $i22;
+
+        $i24 = $r43.<sun.font.TrueTypeFont$DirectoryEntry: int offset>;
+
+        $i23 = $r43.<sun.font.TrueTypeFont$DirectoryEntry: int length>;
+
+        $i26 = $i24 + $i23;
+
+        $i25 = r0.<sun.font.TrueTypeFont: int fileSize>;
+
+        if $i26 <= $i25 goto label08;
+
+        $r45 = new java.awt.FontFormatException;
+
+        $r44 = new java.lang.StringBuilder;
+
+        specialinvoke $r44.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("bad table, tag=");
+
+        $i27 = $r43.<sun.font.TrueTypeFont$DirectoryEntry: int tag>;
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i27);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r45.<java.awt.FontFormatException: void <init>(java.lang.String)>($r26);
+
+        throw $r45;
+
+     label08:
+        i30 = i30 + 1;
+
+        goto label07;
+
+     label09:
+        $r7 = virtualinvoke r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$DirectoryEntry getDirectoryEntry(int)>(1751474532);
+
+        if $r7 != null goto label10;
+
+        $r46 = new java.awt.FontFormatException;
+
+        specialinvoke $r46.<java.awt.FontFormatException: void <init>(java.lang.String)>("missing head table");
+
+        throw $r46;
+
+     label10:
+        $r8 = virtualinvoke r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$DirectoryEntry getDirectoryEntry(int)>(1835104368);
+
+        if $r8 != null goto label11;
+
+        $r47 = new java.awt.FontFormatException;
+
+        specialinvoke $r47.<java.awt.FontFormatException: void <init>(java.lang.String)>("missing maxp table");
+
+        throw $r47;
+
+     label11:
+        $r9 = virtualinvoke r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$DirectoryEntry getDirectoryEntry(int)>(1752003704);
+
+        if $r9 == null goto label12;
+
+        $r16 = virtualinvoke r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$DirectoryEntry getDirectoryEntry(int)>(1751672161);
+
+        if $r16 != null goto label12;
+
+        $r48 = new java.awt.FontFormatException;
+
+        specialinvoke $r48.<java.awt.FontFormatException: void <init>(java.lang.String)>("missing hhea table");
+
+        throw $r48;
+
+     label12:
+        $r10 = virtualinvoke r0.<sun.font.TrueTypeFont: java.nio.ByteBuffer getTableBuffer(int)>(1835104368);
+
+        $c17 = virtualinvoke $r10.<java.nio.ByteBuffer: char getChar(int)>(4);
+
+        if $c17 != 0 goto label13;
+
+        $r49 = new java.awt.FontFormatException;
+
+        specialinvoke $r49.<java.awt.FontFormatException: void <init>(java.lang.String)>("zero glyphs");
+
+        throw $r49;
+
+     label13:
+        virtualinvoke r0.<sun.font.TrueTypeFont: void initNames()>();
+
+     label14:
+        goto label18;
+
+     label15:
+        $r34 := @caughtexception;
+
+        $z0 = staticinvoke <sun.font.FontUtilities: boolean isLogging()>();
+
+        if $z0 == 0 goto label16;
+
+        $r38 = staticinvoke <sun.font.FontUtilities: sun.util.logging.PlatformLogger getLogger()>();
+
+        $r39 = virtualinvoke $r34.<java.lang.Exception: java.lang.String toString()>();
+
+        virtualinvoke $r38.<sun.util.logging.PlatformLogger: void severe(java.lang.String)>($r39);
+
+     label16:
+        $z1 = $r34 instanceof java.awt.FontFormatException;
+
+        if $z1 == 0 goto label17;
+
+        $r37 = (java.awt.FontFormatException) $r34;
+
+        throw $r37;
+
+     label17:
+        $r50 = new java.awt.FontFormatException;
+
+        $r36 = virtualinvoke $r34.<java.lang.Exception: java.lang.String toString()>();
+
+        specialinvoke $r50.<java.awt.FontFormatException: void <init>(java.lang.String)>($r36);
+
+        throw $r50;
+
+     label18:
+        $r11 = r0.<sun.font.TrueTypeFont: java.lang.String familyName>;
+
+        if $r11 == null goto label19;
+
+        $r13 = r0.<sun.font.TrueTypeFont: java.lang.String fullName>;
+
+        if $r13 != null goto label20;
+
+     label19:
+        $r51 = new java.awt.FontFormatException;
+
+        specialinvoke $r51.<java.awt.FontFormatException: void <init>(java.lang.String)>("Font name not found");
+
+        throw $r51;
+
+     label20:
+        $r14 = virtualinvoke r0.<sun.font.TrueTypeFont: java.nio.ByteBuffer getTableBuffer(int)>(1330851634);
+
+        specialinvoke r0.<sun.font.TrueTypeFont: void setStyle(java.nio.ByteBuffer)>($r14);
+
+        specialinvoke r0.<sun.font.TrueTypeFont: void setCJKSupport(java.nio.ByteBuffer)>($r14);
+
+        return;
+
+        catch java.lang.Exception from label01 to label14 with label15;
+    }
+
+    static java.lang.String getCodePage()
+    {
+        sun.security.action.GetPropertyAction $r20;
+        java.util.Locale $r3;
+        java.lang.InternalError $r19;
+        boolean $z0, $z1, $z2;
+        java.lang.StringBuilder $r15, $r16, $r17, $r18;
+        java.lang.String[] $r2, $r7, $r9, $r11;
+        int $i0, $i1, $i2, i3, $i4, i5;
+        java.lang.String $r0, $r4, $r5, $r10, $r12, $r13, $r14, $r22, $r23, r24, $r26;
+        java.lang.Object $r21;
+        java.lang.String[][] $r1, $r6, $r8, $r25;
+
+        $r0 = <sun.font.TrueTypeFont: java.lang.String defaultCodePage>;
+
+        if $r0 == null goto label01;
+
+        $r23 = <sun.font.TrueTypeFont: java.lang.String defaultCodePage>;
+
+        return $r23;
+
+     label01:
+        $z0 = <sun.font.FontUtilities: boolean isWindows>;
+
+        if $z0 == 0 goto label02;
+
+        $r20 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r20.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("file.encoding");
+
+        $r21 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r20);
+
+        $r22 = (java.lang.String) $r21;
+
+        <sun.font.TrueTypeFont: java.lang.String defaultCodePage> = $r22;
+
+        goto label09;
+
+     label02:
+        $r1 = <sun.font.TrueTypeFont: java.lang.String[][] languages>;
+
+        $i1 = lengthof $r1;
+
+        $r2 = <sun.font.TrueTypeFont: java.lang.String[] codePages>;
+
+        $i0 = lengthof $r2;
+
+        if $i1 == $i0 goto label03;
+
+        $r19 = new java.lang.InternalError;
+
+        specialinvoke $r19.<java.lang.InternalError: void <init>(java.lang.String)>("wrong code pages array length");
+
+        throw $r19;
+
+     label03:
+        $r3 = staticinvoke <sun.awt.SunToolkit: java.util.Locale getStartupLocale()>();
+
+        $r4 = virtualinvoke $r3.<java.util.Locale: java.lang.String getLanguage()>();
+
+        r24 = $r4;
+
+        if $r4 == null goto label09;
+
+        $z1 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("zh");
+
+        if $z1 == 0 goto label04;
+
+        $r14 = virtualinvoke $r3.<java.util.Locale: java.lang.String getCountry()>();
+
+        if $r14 == null goto label04;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("_");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        r24 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label04:
+        i3 = 0;
+
+     label05:
+        $r25 = <sun.font.TrueTypeFont: java.lang.String[][] languages>;
+
+        $i4 = lengthof $r25;
+
+        if i3 >= $i4 goto label09;
+
+        i5 = 0;
+
+     label06:
+        $r6 = <sun.font.TrueTypeFont: java.lang.String[][] languages>;
+
+        $r7 = $r6[i3];
+
+        $i2 = lengthof $r7;
+
+        if i5 >= $i2 goto label08;
+
+        $r8 = <sun.font.TrueTypeFont: java.lang.String[][] languages>;
+
+        $r9 = $r8[i3];
+
+        $r10 = $r9[i5];
+
+        $z2 = virtualinvoke r24.<java.lang.String: boolean equals(java.lang.Object)>($r10);
+
+        if $z2 == 0 goto label07;
+
+        $r11 = <sun.font.TrueTypeFont: java.lang.String[] codePages>;
+
+        $r12 = $r11[i3];
+
+        <sun.font.TrueTypeFont: java.lang.String defaultCodePage> = $r12;
+
+        $r13 = <sun.font.TrueTypeFont: java.lang.String defaultCodePage>;
+
+        return $r13;
+
+     label07:
+        i5 = i5 + 1;
+
+        goto label06;
+
+     label08:
+        i3 = i3 + 1;
+
+        goto label05;
+
+     label09:
+        $r26 = <sun.font.TrueTypeFont: java.lang.String defaultCodePage>;
+
+        if $r26 != null goto label10;
+
+        <sun.font.TrueTypeFont: java.lang.String defaultCodePage> = "";
+
+     label10:
+        $r5 = <sun.font.TrueTypeFont: java.lang.String defaultCodePage>;
+
+        return $r5;
+    }
+
+    boolean supportsEncoding(java.lang.String)
+    {
+        sun.font.TrueTypeFont r2;
+        java.lang.String[] $r3, $r4;
+        java.nio.ByteBuffer $r8;
+        int $i0, $i1, $i2, $i3, $i4, i5;
+        java.lang.String $r0, $r1, $r5, r6, r7;
+        boolean $z0, $z1, $z2, $z3;
+
+        r2 := @this: sun.font.TrueTypeFont;
+
+        r6 := @parameter0: java.lang.String;
+
+        if r6 != null goto label1;
+
+        r6 = staticinvoke <sun.font.TrueTypeFont: java.lang.String getCodePage()>();
+
+     label1:
+        $r0 = "";
+
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean equals(java.lang.Object)>(r6);
+
+        if $z0 == 0 goto label2;
+
+        return 0;
+
+     label2:
+        $r1 = virtualinvoke r6.<java.lang.String: java.lang.String toLowerCase()>();
+
+        r7 = $r1;
+
+        $z1 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("gb18030");
+
+        if $z1 == 0 goto label3;
+
+        r7 = "gbk";
+
+        goto label4;
+
+     label3:
+        $z2 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("ms950_hkscs");
+
+        if $z2 == 0 goto label4;
+
+        r7 = "ms950";
+
+     label4:
+        $r8 = virtualinvoke r2.<sun.font.TrueTypeFont: java.nio.ByteBuffer getTableBuffer(int)>(1330851634);
+
+        if $r8 == null goto label5;
+
+        $i0 = virtualinvoke $r8.<java.nio.ByteBuffer: int capacity()>();
+
+        if $i0 >= 86 goto label6;
+
+     label5:
+        return 0;
+
+     label6:
+        $i1 = virtualinvoke $r8.<java.nio.ByteBuffer: int getInt(int)>(78);
+
+        virtualinvoke $r8.<java.nio.ByteBuffer: int getInt(int)>(82);
+
+        i5 = 0;
+
+     label7:
+        $r3 = <sun.font.TrueTypeFont: java.lang.String[] encoding_mapping>;
+
+        $i2 = lengthof $r3;
+
+        if i5 >= $i2 goto label9;
+
+        $r4 = <sun.font.TrueTypeFont: java.lang.String[] encoding_mapping>;
+
+        $r5 = $r4[i5];
+
+        $z3 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>(r7);
+
+        if $z3 == 0 goto label8;
+
+        $i3 = 1 << i5;
+
+        $i4 = $i3 & $i1;
+
+        if $i4 == 0 goto label8;
+
+        return 1;
+
+     label8:
+        i5 = i5 + 1;
+
+        goto label7;
+
+     label9:
+        return 0;
+    }
+
+    private void setCJKSupport(java.nio.ByteBuffer)
+    {
+        sun.font.TrueTypeFont r1;
+        java.nio.ByteBuffer r0;
+        int $i0, $i1, $i2, $i3;
+        boolean $z0, $z1;
+
+        r1 := @this: sun.font.TrueTypeFont;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        if r0 == null goto label1;
+
+        $i0 = virtualinvoke r0.<java.nio.ByteBuffer: int capacity()>();
+
+        if $i0 >= 50 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        $i1 = virtualinvoke r0.<java.nio.ByteBuffer: int getInt(int)>(46);
+
+        $i2 = $i1 & 700383232;
+
+        if $i2 == 0 goto label3;
+
+        $z0 = 1;
+
+        goto label4;
+
+     label3:
+        $z0 = 0;
+
+     label4:
+        r1.<sun.font.TrueTypeFont: boolean supportsCJK> = $z0;
+
+        $i3 = $i1 & 393216;
+
+        if $i3 == 0 goto label5;
+
+        $z1 = 1;
+
+        goto label6;
+
+     label5:
+        $z1 = 0;
+
+     label6:
+        r1.<sun.font.TrueTypeFont: boolean supportsJA> = $z1;
+
+        return;
+    }
+
+    boolean supportsJA()
+    {
+        sun.font.TrueTypeFont r0;
+        boolean $z0;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        $z0 = r0.<sun.font.TrueTypeFont: boolean supportsJA>;
+
+        return $z0;
+    }
+
+    java.nio.ByteBuffer getTableBuffer(int)
+    {
+        java.lang.Throwable $r11;
+        sun.font.TrueTypeFont r0;
+        long $l8;
+        java.nio.ByteBuffer $r1, $r15;
+        java.awt.FontFormatException $r12;
+        sun.font.TrueTypeFont$DirectoryEntry $r9, r16;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i9, $i10, i11, $i12, i13;
+        java.nio.channels.ClosedChannelException $r14;
+        java.io.IOException $r13;
+        sun.font.TrueTypeFont$DirectoryEntry[] $r8, $r10;
+        sun.font.TrueTypeFont$TTDisposerRecord $r2, $r4, $r6;
+        java.nio.channels.FileChannel $r3, $r5, $r7;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        i11 := @parameter0: int;
+
+        r16 = null;
+
+        i13 = 0;
+
+     label01:
+        $i0 = r0.<sun.font.TrueTypeFont: int numTables>;
+
+        if i13 >= $i0 goto label03;
+
+        $r8 = r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$DirectoryEntry[] tableDirectory>;
+
+        $r9 = $r8[i13];
+
+        $i12 = $r9.<sun.font.TrueTypeFont$DirectoryEntry: int tag>;
+
+        if $i12 != i11 goto label02;
+
+        $r10 = r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$DirectoryEntry[] tableDirectory>;
+
+        r16 = $r10[i13];
+
+        goto label03;
+
+     label02:
+        i13 = i13 + 1;
+
+        goto label01;
+
+     label03:
+        if r16 == null goto label04;
+
+        $i1 = r16.<sun.font.TrueTypeFont$DirectoryEntry: int length>;
+
+        if $i1 == 0 goto label04;
+
+        $i3 = r16.<sun.font.TrueTypeFont$DirectoryEntry: int offset>;
+
+        $i2 = r16.<sun.font.TrueTypeFont$DirectoryEntry: int length>;
+
+        $i5 = $i3 + $i2;
+
+        $i4 = r0.<sun.font.TrueTypeFont: int fileSize>;
+
+        if $i5 <= $i4 goto label05;
+
+     label04:
+        return null;
+
+     label05:
+        $i6 = r16.<sun.font.TrueTypeFont$DirectoryEntry: int length>;
+
+        $r1 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer allocate(int)>($i6);
+
+        entermonitor r0;
+
+     label06:
+        $r2 = r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$TTDisposerRecord disposerRecord>;
+
+        $r3 = $r2.<sun.font.TrueTypeFont$TTDisposerRecord: java.nio.channels.FileChannel channel>;
+
+        if $r3 != null goto label07;
+
+        specialinvoke r0.<sun.font.TrueTypeFont: java.nio.channels.FileChannel open()>();
+
+     label07:
+        $r4 = r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$TTDisposerRecord disposerRecord>;
+
+        $r5 = $r4.<sun.font.TrueTypeFont$TTDisposerRecord: java.nio.channels.FileChannel channel>;
+
+        $i7 = r16.<sun.font.TrueTypeFont$DirectoryEntry: int offset>;
+
+        $l8 = (long) $i7;
+
+        virtualinvoke $r5.<java.nio.channels.FileChannel: java.nio.channels.FileChannel position(long)>($l8);
+
+        $r6 = r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$TTDisposerRecord disposerRecord>;
+
+        $r7 = $r6.<sun.font.TrueTypeFont$TTDisposerRecord: java.nio.channels.FileChannel channel>;
+
+        $i9 = virtualinvoke $r7.<java.nio.channels.FileChannel: int read(java.nio.ByteBuffer)>($r1);
+
+        virtualinvoke $r1.<java.nio.ByteBuffer: java.nio.Buffer flip()>();
+
+     label08:
+        goto label15;
+
+     label09:
+        $r14 := @caughtexception;
+
+        staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        virtualinvoke r0.<sun.font.TrueTypeFont: void close()>();
+
+        $r15 = virtualinvoke r0.<sun.font.TrueTypeFont: java.nio.ByteBuffer getTableBuffer(int)>(i11);
+
+        exitmonitor r0;
+
+     label10:
+        return $r15;
+
+     label11:
+        $r13 := @caughtexception;
+
+        exitmonitor r0;
+
+     label12:
+        return null;
+
+     label13:
+        $r12 := @caughtexception;
+
+        exitmonitor r0;
+
+     label14:
+        return null;
+
+     label15:
+        $i10 = r16.<sun.font.TrueTypeFont$DirectoryEntry: int length>;
+
+        if $i9 >= $i10 goto label17;
+
+        exitmonitor r0;
+
+     label16:
+        return null;
+
+     label17:
+        exitmonitor r0;
+
+     label18:
+        return $r1;
+
+     label19:
+        $r11 := @caughtexception;
+
+        exitmonitor r0;
+
+     label20:
+        throw $r11;
+
+        catch java.nio.channels.ClosedChannelException from label06 to label08 with label09;
+        catch java.io.IOException from label06 to label08 with label11;
+        catch java.awt.FontFormatException from label06 to label08 with label13;
+        catch java.lang.Throwable from label06 to label10 with label19;
+        catch java.lang.Throwable from label11 to label12 with label19;
+        catch java.lang.Throwable from label13 to label14 with label19;
+        catch java.lang.Throwable from label15 to label16 with label19;
+        catch java.lang.Throwable from label17 to label18 with label19;
+        catch java.lang.Throwable from label19 to label20 with label19;
+    }
+
+    protected long getLayoutTableCache()
+    {
+        sun.font.FontScalerException $r2;
+        sun.font.TrueTypeFont r0;
+        sun.font.FontScaler $r1;
+        long $l0;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.font.TrueTypeFont: sun.font.FontScaler getScaler()>();
+
+        $l0 = virtualinvoke $r1.<sun.font.FontScaler: long getLayoutTableCache()>();
+
+     label2:
+        return $l0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        return 0L;
+
+        catch sun.font.FontScalerException from label1 to label2 with label3;
+    }
+
+    protected byte[] getTableBytes(int)
+    {
+        byte[] $r2, $r4;
+        sun.font.TrueTypeFont r0;
+        java.nio.ByteBuffer $r1;
+        java.lang.Exception $r3;
+        int i0, $i1;
+        boolean $z0;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<sun.font.TrueTypeFont: java.nio.ByteBuffer getTableBuffer(int)>(i0);
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $z0 = virtualinvoke $r1.<java.nio.ByteBuffer: boolean hasArray()>();
+
+        if $z0 == 0 goto label5;
+
+     label2:
+        $r2 = virtualinvoke $r1.<java.nio.ByteBuffer: byte[] array()>();
+
+     label3:
+        return $r2;
+
+     label4:
+        $r3 := @caughtexception;
+
+     label5:
+        $i1 = virtualinvoke r0.<sun.font.TrueTypeFont: int getTableSize(int)>(i0);
+
+        $r4 = newarray (byte)[$i1];
+
+        virtualinvoke $r1.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[])>($r4);
+
+        return $r4;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    int getTableSize(int)
+    {
+        sun.font.TrueTypeFont r0;
+        sun.font.TrueTypeFont$DirectoryEntry $r2, $r4;
+        int $i0, i1, $i2, $i3, i4;
+        sun.font.TrueTypeFont$DirectoryEntry[] $r1, $r3;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        i1 := @parameter0: int;
+
+        i4 = 0;
+
+     label1:
+        $i0 = r0.<sun.font.TrueTypeFont: int numTables>;
+
+        if i4 >= $i0 goto label3;
+
+        $r1 = r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$DirectoryEntry[] tableDirectory>;
+
+        $r2 = $r1[i4];
+
+        $i2 = $r2.<sun.font.TrueTypeFont$DirectoryEntry: int tag>;
+
+        if $i2 != i1 goto label2;
+
+        $r3 = r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$DirectoryEntry[] tableDirectory>;
+
+        $r4 = $r3[i4];
+
+        $i3 = $r4.<sun.font.TrueTypeFont$DirectoryEntry: int length>;
+
+        return $i3;
+
+     label2:
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    int getTableOffset(int)
+    {
+        sun.font.TrueTypeFont r0;
+        sun.font.TrueTypeFont$DirectoryEntry $r2, $r4;
+        int $i0, i1, $i2, $i3, i4;
+        sun.font.TrueTypeFont$DirectoryEntry[] $r1, $r3;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        i1 := @parameter0: int;
+
+        i4 = 0;
+
+     label1:
+        $i0 = r0.<sun.font.TrueTypeFont: int numTables>;
+
+        if i4 >= $i0 goto label3;
+
+        $r1 = r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$DirectoryEntry[] tableDirectory>;
+
+        $r2 = $r1[i4];
+
+        $i2 = $r2.<sun.font.TrueTypeFont$DirectoryEntry: int tag>;
+
+        if $i2 != i1 goto label2;
+
+        $r3 = r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$DirectoryEntry[] tableDirectory>;
+
+        $r4 = $r3[i4];
+
+        $i3 = $r4.<sun.font.TrueTypeFont$DirectoryEntry: int offset>;
+
+        return $i3;
+
+     label2:
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    sun.font.TrueTypeFont$DirectoryEntry getDirectoryEntry(int)
+    {
+        sun.font.TrueTypeFont r0;
+        sun.font.TrueTypeFont$DirectoryEntry $r2, $r4;
+        int $i0, i1, $i2, i3;
+        sun.font.TrueTypeFont$DirectoryEntry[] $r1, $r3;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        i1 := @parameter0: int;
+
+        i3 = 0;
+
+     label1:
+        $i0 = r0.<sun.font.TrueTypeFont: int numTables>;
+
+        if i3 >= $i0 goto label3;
+
+        $r1 = r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$DirectoryEntry[] tableDirectory>;
+
+        $r2 = $r1[i3];
+
+        $i2 = $r2.<sun.font.TrueTypeFont$DirectoryEntry: int tag>;
+
+        if $i2 != i1 goto label2;
+
+        $r3 = r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$DirectoryEntry[] tableDirectory>;
+
+        $r4 = $r3[i3];
+
+        return $r4;
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    boolean useEmbeddedBitmapsForSize(int)
+    {
+        sun.font.TrueTypeFont r0;
+        java.nio.ByteBuffer $r2;
+        short s5, $s8;
+        byte $b4;
+        sun.font.TrueTypeFont$DirectoryEntry $r1;
+        int $i0, $i1, $i2, $i3, i6, i7, $i9;
+        boolean $z0;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        i6 := @parameter0: int;
+
+        $z0 = r0.<sun.font.TrueTypeFont: boolean supportsCJK>;
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.font.TrueTypeFont: sun.font.TrueTypeFont$DirectoryEntry getDirectoryEntry(int)>(1161972803);
+
+        if $r1 != null goto label2;
+
+        return 0;
+
+     label2:
+        $r2 = virtualinvoke r0.<sun.font.TrueTypeFont: java.nio.ByteBuffer getTableBuffer(int)>(1161972803);
+
+        $i0 = virtualinvoke $r2.<java.nio.ByteBuffer: int getInt(int)>(4);
+
+        i7 = 0;
+
+     label3:
+        if i7 >= $i0 goto label5;
+
+        $i1 = i7 * 48;
+
+        $i2 = 8 + $i1;
+
+        $i3 = $i2 + 45;
+
+        $b4 = virtualinvoke $r2.<java.nio.ByteBuffer: byte get(int)>($i3);
+
+        $s8 = (short) $b4;
+
+        s5 = $s8 & 255;
+
+        $i9 = (int) s5;
+
+        if $i9 != i6 goto label4;
+
+        return 1;
+
+     label4:
+        i7 = i7 + 1;
+
+        goto label3;
+
+     label5:
+        return 0;
+    }
+
+    public java.lang.String getFullName()
+    {
+        java.lang.String $r1;
+        sun.font.TrueTypeFont r0;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        $r1 = r0.<sun.font.TrueTypeFont: java.lang.String fullName>;
+
+        return $r1;
+    }
+
+    protected void setStyle()
+    {
+        sun.font.TrueTypeFont r0;
+        java.nio.ByteBuffer $r1;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        $r1 = virtualinvoke r0.<sun.font.TrueTypeFont: java.nio.ByteBuffer getTableBuffer(int)>(1330851634);
+
+        specialinvoke r0.<sun.font.TrueTypeFont: void setStyle(java.nio.ByteBuffer)>($r1);
+
+        return;
+    }
+
+    public int getWidth()
+    {
+        int $i0, $i1;
+        sun.font.TrueTypeFont r0;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        $i0 = r0.<sun.font.TrueTypeFont: int fontWidth>;
+
+        if $i0 <= 0 goto label1;
+
+        $i1 = r0.<sun.font.TrueTypeFont: int fontWidth>;
+
+        goto label2;
+
+     label1:
+        $i1 = specialinvoke r0.<sun.font.FileFont: int getWidth()>();
+
+     label2:
+        return $i1;
+    }
+
+    public int getWeight()
+    {
+        int $i0, $i1;
+        sun.font.TrueTypeFont r0;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        $i0 = r0.<sun.font.TrueTypeFont: int fontWeight>;
+
+        if $i0 <= 0 goto label1;
+
+        $i1 = r0.<sun.font.TrueTypeFont: int fontWeight>;
+
+        goto label2;
+
+     label1:
+        $i1 = specialinvoke r0.<sun.font.FileFont: int getWeight()>();
+
+     label2:
+        return $i1;
+    }
+
+    private void setStyle(java.nio.ByteBuffer)
+    {
+        sun.font.TrueTypeFont r1;
+        java.nio.ByteBuffer r0;
+        int $i0, $i1, $i15, $i16, $i17;
+        java.lang.String $r2;
+        boolean $z0, $z1;
+        char $c2, c3, c4, c5, c6, $c7, $c8, $c9, $c10, $c11, $c12, $c13, $c14;
+
+        r1 := @this: sun.font.TrueTypeFont;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        if r0 != null goto label01;
+
+        return;
+
+     label01:
+        $i0 = virtualinvoke r0.<java.nio.ByteBuffer: int capacity()>();
+
+        if $i0 < 8 goto label02;
+
+        $c11 = virtualinvoke r0.<java.nio.ByteBuffer: char getChar(int)>(4);
+
+        $c12 = $c11 & 65535;
+
+        $i15 = (int) $c12;
+
+        r1.<sun.font.TrueTypeFont: int fontWeight> = $i15;
+
+        $c13 = virtualinvoke r0.<java.nio.ByteBuffer: char getChar(int)>(6);
+
+        $c14 = $c13 & 65535;
+
+        $i16 = (int) $c14;
+
+        r1.<sun.font.TrueTypeFont: int fontWidth> = $i16;
+
+     label02:
+        $i1 = virtualinvoke r0.<java.nio.ByteBuffer: int capacity()>();
+
+        if $i1 >= 64 goto label03;
+
+        specialinvoke r1.<sun.font.FileFont: void setStyle()>();
+
+        return;
+
+     label03:
+        $c2 = virtualinvoke r0.<java.nio.ByteBuffer: char getChar(int)>(62);
+
+        c3 = $c2 & 65535;
+
+        c4 = c3 & 1;
+
+        c5 = c3 & 32;
+
+        c6 = c3 & 64;
+
+        if c6 == 0 goto label04;
+
+        $c10 = c4 | c5;
+
+        if $c10 == 0 goto label04;
+
+        specialinvoke r1.<sun.font.FileFont: void setStyle()>();
+
+        return;
+
+     label04:
+        $c7 = c6 | c4;
+
+        $c8 = $c7 | c5;
+
+        if $c8 != 0 goto label05;
+
+        specialinvoke r1.<sun.font.FileFont: void setStyle()>();
+
+        return;
+
+     label05:
+        $c9 = c5 | c4;
+
+        $i17 = (int) $c9;
+
+        lookupswitch($i17)
+        {
+            case 1: goto label06;
+            case 32: goto label07;
+            case 33: goto label09;
+            default: goto label10;
+        };
+
+     label06:
+        r1.<sun.font.TrueTypeFont: int style> = 2;
+
+        goto label10;
+
+     label07:
+        $z0 = <sun.font.FontUtilities: boolean isSolaris>;
+
+        if $z0 == 0 goto label08;
+
+        $r2 = r1.<sun.font.TrueTypeFont: java.lang.String platName>;
+
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean endsWith(java.lang.String)>("HG-GothicB.ttf");
+
+        if $z1 == 0 goto label08;
+
+        r1.<sun.font.TrueTypeFont: int style> = 0;
+
+        goto label10;
+
+     label08:
+        r1.<sun.font.TrueTypeFont: int style> = 1;
+
+        goto label10;
+
+     label09:
+        r1.<sun.font.TrueTypeFont: int style> = 3;
+
+     label10:
+        return;
+    }
+
+    private void setStrikethroughMetrics(java.nio.ByteBuffer, int)
+    {
+        sun.font.TrueTypeFont r1;
+        java.nio.ShortBuffer $r2;
+        java.nio.ByteBuffer r0;
+        short $s2, $s3;
+        byte $b5, $b6;
+        int $i0, i1, $i4, $i7, $i8, $i9;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8;
+
+        r1 := @this: sun.font.TrueTypeFont;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        i1 := @parameter1: int;
+
+        if r0 == null goto label1;
+
+        $i0 = virtualinvoke r0.<java.nio.ByteBuffer: int capacity()>();
+
+        if $i0 < 30 goto label1;
+
+        if i1 >= 0 goto label2;
+
+     label1:
+        r1.<sun.font.TrueTypeFont: float stSize> = 0.05F;
+
+        r1.<sun.font.TrueTypeFont: float stPos> = -0.4F;
+
+        return;
+
+     label2:
+        $r2 = virtualinvoke r0.<java.nio.ByteBuffer: java.nio.ShortBuffer asShortBuffer()>();
+
+        $s2 = virtualinvoke $r2.<java.nio.ShortBuffer: short get(int)>(13);
+
+        $f1 = (float) $s2;
+
+        $f0 = (float) i1;
+
+        $f2 = $f1 / $f0;
+
+        r1.<sun.font.TrueTypeFont: float stSize> = $f2;
+
+        $s3 = virtualinvoke $r2.<java.nio.ShortBuffer: short get(int)>(14);
+
+        $i7 = (int) $s3;
+
+        $i4 = neg $i7;
+
+        $f4 = (float) $i4;
+
+        $f3 = (float) i1;
+
+        $f5 = $f4 / $f3;
+
+        r1.<sun.font.TrueTypeFont: float stPos> = $f5;
+
+        $f6 = r1.<sun.font.TrueTypeFont: float stSize>;
+
+        $b5 = $f6 cmpg 0.0F;
+
+        $i8 = (int) $b5;
+
+        if $i8 >= 0 goto label3;
+
+        r1.<sun.font.TrueTypeFont: float stSize> = 0.05F;
+
+     label3:
+        $f7 = r1.<sun.font.TrueTypeFont: float stPos>;
+
+        $f8 = staticinvoke <java.lang.Math: float abs(float)>($f7);
+
+        $b6 = $f8 cmpl 2.0F;
+
+        $i9 = (int) $b6;
+
+        if $i9 <= 0 goto label4;
+
+        r1.<sun.font.TrueTypeFont: float stPos> = -0.4F;
+
+     label4:
+        return;
+    }
+
+    private void setUnderlineMetrics(java.nio.ByteBuffer, int)
+    {
+        sun.font.TrueTypeFont r1;
+        java.nio.ShortBuffer $r2;
+        java.nio.ByteBuffer r0;
+        short $s2, $s3;
+        byte $b5, $b6;
+        int $i0, i1, $i4, $i7, $i8, $i9;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8;
+
+        r1 := @this: sun.font.TrueTypeFont;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        i1 := @parameter1: int;
+
+        if r0 == null goto label1;
+
+        $i0 = virtualinvoke r0.<java.nio.ByteBuffer: int capacity()>();
+
+        if $i0 < 12 goto label1;
+
+        if i1 >= 0 goto label2;
+
+     label1:
+        r1.<sun.font.TrueTypeFont: float ulSize> = 0.05F;
+
+        r1.<sun.font.TrueTypeFont: float ulPos> = 0.1F;
+
+        return;
+
+     label2:
+        $r2 = virtualinvoke r0.<java.nio.ByteBuffer: java.nio.ShortBuffer asShortBuffer()>();
+
+        $s2 = virtualinvoke $r2.<java.nio.ShortBuffer: short get(int)>(5);
+
+        $f1 = (float) $s2;
+
+        $f0 = (float) i1;
+
+        $f2 = $f1 / $f0;
+
+        r1.<sun.font.TrueTypeFont: float ulSize> = $f2;
+
+        $s3 = virtualinvoke $r2.<java.nio.ShortBuffer: short get(int)>(4);
+
+        $i7 = (int) $s3;
+
+        $i4 = neg $i7;
+
+        $f4 = (float) $i4;
+
+        $f3 = (float) i1;
+
+        $f5 = $f4 / $f3;
+
+        r1.<sun.font.TrueTypeFont: float ulPos> = $f5;
+
+        $f6 = r1.<sun.font.TrueTypeFont: float ulSize>;
+
+        $b5 = $f6 cmpg 0.0F;
+
+        $i8 = (int) $b5;
+
+        if $i8 >= 0 goto label3;
+
+        r1.<sun.font.TrueTypeFont: float ulSize> = 0.05F;
+
+     label3:
+        $f7 = r1.<sun.font.TrueTypeFont: float ulPos>;
+
+        $f8 = staticinvoke <java.lang.Math: float abs(float)>($f7);
+
+        $b6 = $f8 cmpl 2.0F;
+
+        $i9 = (int) $b6;
+
+        if $i9 <= 0 goto label4;
+
+        r1.<sun.font.TrueTypeFont: float ulPos> = 0.1F;
+
+     label4:
+        return;
+    }
+
+    public void getStyleMetrics(float, float[], int)
+    {
+        sun.font.TrueTypeFont r0;
+        java.nio.ShortBuffer $r3;
+        float[] r1;
+        java.nio.ByteBuffer $r2, $r4, $r5;
+        short $s4;
+        byte $b0, $b2;
+        int i1, $i3, i5, $i6, $i7, $i8, $i10, $i11, $i13;
+        float $f0, f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $f10;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        f1 := @parameter0: float;
+
+        r1 := @parameter1: float[];
+
+        i1 := @parameter2: int;
+
+        $f0 = r0.<sun.font.TrueTypeFont: float ulSize>;
+
+        $b0 = $f0 cmpl 0.0F;
+
+        if $b0 != 0 goto label3;
+
+        $f2 = r0.<sun.font.TrueTypeFont: float ulPos>;
+
+        $b2 = $f2 cmpl 0.0F;
+
+        if $b2 != 0 goto label3;
+
+        $r2 = virtualinvoke r0.<sun.font.TrueTypeFont: java.nio.ByteBuffer getTableBuffer(int)>(1751474532);
+
+        $i10 = (int) -1;
+
+        i5 = $i10;
+
+        if $r2 == null goto label2;
+
+        $i3 = virtualinvoke $r2.<java.nio.ByteBuffer: int capacity()>();
+
+        if $i3 < 18 goto label2;
+
+        $r3 = virtualinvoke $r2.<java.nio.ByteBuffer: java.nio.ShortBuffer asShortBuffer()>();
+
+        $s4 = virtualinvoke $r3.<java.nio.ShortBuffer: short get(int)>(9);
+
+        $i11 = (int) $s4;
+
+        $i13 = (int) 65535;
+
+        i5 = $i11 & $i13;
+
+        if i5 < 16 goto label1;
+
+        if i5 <= 16384 goto label2;
+
+     label1:
+        i5 = 2048;
+
+     label2:
+        $r4 = virtualinvoke r0.<sun.font.TrueTypeFont: java.nio.ByteBuffer getTableBuffer(int)>(1330851634);
+
+        specialinvoke r0.<sun.font.TrueTypeFont: void setStrikethroughMetrics(java.nio.ByteBuffer,int)>($r4, i5);
+
+        $r5 = virtualinvoke r0.<sun.font.TrueTypeFont: java.nio.ByteBuffer getTableBuffer(int)>(1886352244);
+
+        specialinvoke r0.<sun.font.TrueTypeFont: void setUnderlineMetrics(java.nio.ByteBuffer,int)>($r5, i5);
+
+     label3:
+        $f3 = r0.<sun.font.TrueTypeFont: float stPos>;
+
+        $f4 = $f3 * f1;
+
+        r1[i1] = $f4;
+
+        $i6 = i1 + 1;
+
+        $f5 = r0.<sun.font.TrueTypeFont: float stSize>;
+
+        $f6 = $f5 * f1;
+
+        r1[$i6] = $f6;
+
+        $i7 = i1 + 2;
+
+        $f7 = r0.<sun.font.TrueTypeFont: float ulPos>;
+
+        $f8 = $f7 * f1;
+
+        r1[$i7] = $f8;
+
+        $i8 = i1 + 3;
+
+        $f9 = r0.<sun.font.TrueTypeFont: float ulSize>;
+
+        $f10 = $f9 * f1;
+
+        r1[$i8] = $f10;
+
+        return;
+    }
+
+    private java.lang.String makeString(byte[], int, short)
+    {
+        java.lang.Throwable $r0;
+        byte[] r10, r11;
+        sun.font.TrueTypeFont r9;
+        short s0;
+        byte $b1, $b3;
+        int $i2, i4, i5, i6, $i7, $i8, $i9, $i10;
+        java.lang.String $r8, r12, $r14, $r16;
+        boolean $z0;
+        sun.util.logging.PlatformLogger $r3;
+        java.lang.StringBuilder $r5, $r6, $r7, $r15;
+        java.io.UnsupportedEncodingException $r1;
+
+        r9 := @this: sun.font.TrueTypeFont;
+
+        r10 := @parameter0: byte[];
+
+        i4 := @parameter1: int;
+
+        s0 := @parameter2: short;
+
+        $i7 = (int) s0;
+
+        if $i7 < 2 goto label03;
+
+        $i8 = (int) s0;
+
+        if $i8 > 6 goto label03;
+
+        r11 = r10;
+
+        i5 = i4;
+
+        r10 = newarray (byte)[i4];
+
+        i4 = 0;
+
+        i6 = 0;
+
+     label01:
+        if i6 >= i5 goto label03;
+
+        $b1 = r11[i6];
+
+        if $b1 == 0 goto label02;
+
+        $i2 = i4;
+
+        i4 = i4 + 1;
+
+        $b3 = r11[i6];
+
+        r10[$i2] = $b3;
+
+     label02:
+        i6 = i6 + 1;
+
+        goto label01;
+
+     label03:
+        $i9 = (int) s0;
+
+        tableswitch($i9)
+        {
+            case 0: goto label05;
+            case 1: goto label04;
+            case 2: goto label06;
+            case 3: goto label07;
+            case 4: goto label08;
+            case 5: goto label09;
+            case 6: goto label10;
+            default: goto label11;
+        };
+
+     label04:
+        r12 = "UTF-16";
+
+        goto label12;
+
+     label05:
+        r12 = "UTF-16";
+
+        goto label12;
+
+     label06:
+        r12 = "SJIS";
+
+        goto label12;
+
+     label07:
+        r12 = "GBK";
+
+        goto label12;
+
+     label08:
+        r12 = "MS950";
+
+        goto label12;
+
+     label09:
+        r12 = "EUC_KR";
+
+        goto label12;
+
+     label10:
+        r12 = "Johab";
+
+        goto label12;
+
+     label11:
+        r12 = "UTF-16";
+
+     label12:
+        $r14 = new java.lang.String;
+
+        specialinvoke $r14.<java.lang.String: void <init>(byte[],int,int,java.lang.String)>(r10, 0, i4, r12);
+
+     label13:
+        return $r14;
+
+     label14:
+        $r1 := @caughtexception;
+
+        $z0 = staticinvoke <sun.font.FontUtilities: boolean isLogging()>();
+
+        if $z0 == 0 goto label15;
+
+        $r3 = staticinvoke <sun.font.FontUtilities: sun.util.logging.PlatformLogger getLogger()>();
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" EncodingID=");
+
+        $i10 = (int) s0;
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i10);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r3.<sun.util.logging.PlatformLogger: void warning(java.lang.String)>($r8);
+
+     label15:
+        $r16 = new java.lang.String;
+
+        specialinvoke $r16.<java.lang.String: void <init>(byte[],int,int)>(r10, 0, i4);
+
+        return $r16;
+
+     label16:
+        $r0 := @caughtexception;
+
+        return null;
+
+        catch java.io.UnsupportedEncodingException from label12 to label13 with label14;
+        catch java.lang.Throwable from label12 to label13 with label16;
+    }
+
+    protected void initNames()
+    {
+        byte[] r0;
+        sun.font.TrueTypeFont r1;
+        java.nio.ByteBuffer $r2;
+        java.util.Locale $r4, $r5;
+        java.nio.ShortBuffer $r3;
+        short $s0, $s1, $s3, $s4, $s5, $s6, $s7, $s8, $s10;
+        int i2, i9, $i11, i12, $i13, $i14, i15, $i16, $i18, $i19, $i20, $i21, $i23, $i24, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39;
+        java.lang.String $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15;
+
+        r1 := @this: sun.font.TrueTypeFont;
+
+        r0 = newarray (byte)[256];
+
+        $r2 = virtualinvoke r1.<sun.font.TrueTypeFont: java.nio.ByteBuffer getTableBuffer(int)>(1851878757);
+
+        if $r2 == null goto label14;
+
+        $r3 = virtualinvoke $r2.<java.nio.ByteBuffer: java.nio.ShortBuffer asShortBuffer()>();
+
+        virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $s0 = virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $s1 = virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $i16 = (int) $s1;
+
+        $i18 = (int) 65535;
+
+        i2 = $i16 & $i18;
+
+        $r4 = staticinvoke <sun.awt.SunToolkit: java.util.Locale getStartupLocale()>();
+
+        r1.<sun.font.TrueTypeFont: java.util.Locale nameLocale> = $r4;
+
+        $r5 = r1.<sun.font.TrueTypeFont: java.util.Locale nameLocale>;
+
+        $s3 = staticinvoke <sun.font.TrueTypeFont: short getLCIDFromLocale(java.util.Locale)>($r5);
+
+        i15 = 0;
+
+     label01:
+        $i19 = (int) $s0;
+
+        if i15 >= $i19 goto label12;
+
+        $s4 = virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $i20 = (int) $s4;
+
+        if $i20 == 3 goto label02;
+
+        $i13 = virtualinvoke $r3.<java.nio.ShortBuffer: int position()>();
+
+        $i14 = $i13 + 5;
+
+        virtualinvoke $r3.<java.nio.ShortBuffer: java.nio.Buffer position(int)>($i14);
+
+        goto label11;
+
+     label02:
+        $s5 = virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $s6 = virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $s7 = virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $s8 = virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $i21 = (int) $s8;
+
+        $i23 = (int) 65535;
+
+        i9 = $i21 & $i23;
+
+        $s10 = virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $i24 = (int) $s10;
+
+        $i26 = (int) 65535;
+
+        $i11 = $i24 & $i26;
+
+        i12 = $i11 + i2;
+
+        $i27 = (int) $s7;
+
+        lookupswitch($i27)
+        {
+            case 1: goto label03;
+            case 4: goto label07;
+            default: goto label11;
+        };
+
+     label03:
+        $r11 = r1.<sun.font.TrueTypeFont: java.lang.String familyName>;
+
+        if $r11 == null goto label04;
+
+        $i28 = (int) $s6;
+
+        if $i28 == 1033 goto label04;
+
+        $i29 = (int) $s6;
+
+        $i30 = (int) $s3;
+
+        if $i29 != $i30 goto label11;
+
+     label04:
+        virtualinvoke $r2.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i12);
+
+        virtualinvoke $r2.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[],int,int)>(r0, 0, i9);
+
+        $r12 = specialinvoke r1.<sun.font.TrueTypeFont: java.lang.String makeString(byte[],int,short)>(r0, i9, $s5);
+
+        $r13 = r1.<sun.font.TrueTypeFont: java.lang.String familyName>;
+
+        if $r13 == null goto label05;
+
+        $i31 = (int) $s6;
+
+        if $i31 != 1033 goto label06;
+
+     label05:
+        r1.<sun.font.TrueTypeFont: java.lang.String familyName> = $r12;
+
+     label06:
+        $i32 = (int) $s6;
+
+        $i33 = (int) $s3;
+
+        if $i32 != $i33 goto label11;
+
+        r1.<sun.font.TrueTypeFont: java.lang.String localeFamilyName> = $r12;
+
+        goto label11;
+
+     label07:
+        $r10 = r1.<sun.font.TrueTypeFont: java.lang.String fullName>;
+
+        if $r10 == null goto label08;
+
+        $i34 = (int) $s6;
+
+        if $i34 == 1033 goto label08;
+
+        $i35 = (int) $s6;
+
+        $i36 = (int) $s3;
+
+        if $i35 != $i36 goto label11;
+
+     label08:
+        virtualinvoke $r2.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i12);
+
+        virtualinvoke $r2.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[],int,int)>(r0, 0, i9);
+
+        $r14 = specialinvoke r1.<sun.font.TrueTypeFont: java.lang.String makeString(byte[],int,short)>(r0, i9, $s5);
+
+        $r15 = r1.<sun.font.TrueTypeFont: java.lang.String fullName>;
+
+        if $r15 == null goto label09;
+
+        $i37 = (int) $s6;
+
+        if $i37 != 1033 goto label10;
+
+     label09:
+        r1.<sun.font.TrueTypeFont: java.lang.String fullName> = $r14;
+
+     label10:
+        $i38 = (int) $s6;
+
+        $i39 = (int) $s3;
+
+        if $i38 != $i39 goto label11;
+
+        r1.<sun.font.TrueTypeFont: java.lang.String localeFullName> = $r14;
+
+     label11:
+        i15 = i15 + 1;
+
+        goto label01;
+
+     label12:
+        $r6 = r1.<sun.font.TrueTypeFont: java.lang.String localeFamilyName>;
+
+        if $r6 != null goto label13;
+
+        $r9 = r1.<sun.font.TrueTypeFont: java.lang.String familyName>;
+
+        r1.<sun.font.TrueTypeFont: java.lang.String localeFamilyName> = $r9;
+
+     label13:
+        $r7 = r1.<sun.font.TrueTypeFont: java.lang.String localeFullName>;
+
+        if $r7 != null goto label14;
+
+        $r8 = r1.<sun.font.TrueTypeFont: java.lang.String fullName>;
+
+        r1.<sun.font.TrueTypeFont: java.lang.String localeFullName> = $r8;
+
+     label14:
+        return;
+    }
+
+    protected java.lang.String lookupName(short, int)
+    {
+        byte[] r0;
+        sun.font.TrueTypeFont r1;
+        java.nio.ByteBuffer $r2;
+        java.nio.ShortBuffer $r3;
+        short $s0, $s1, $s3, $s4, $s5, $s6, $s7, $s9, s13;
+        int i2, i8, $i10, i11, i12, $i14, $i15, i16, $i17, $i19, $i20, $i21, $i22, $i24, $i25, $i27, $i28, $i29, $i30, $i31, $i32, $i33;
+        java.lang.String $r4, r5;
+
+        r1 := @this: sun.font.TrueTypeFont;
+
+        s13 := @parameter0: short;
+
+        i12 := @parameter1: int;
+
+        r5 = null;
+
+        r0 = newarray (byte)[1024];
+
+        $r2 = virtualinvoke r1.<sun.font.TrueTypeFont: java.nio.ByteBuffer getTableBuffer(int)>(1851878757);
+
+        if $r2 == null goto label6;
+
+        $r3 = virtualinvoke $r2.<java.nio.ByteBuffer: java.nio.ShortBuffer asShortBuffer()>();
+
+        virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $s0 = virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $s1 = virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $i17 = (int) $s1;
+
+        $i19 = (int) 65535;
+
+        i2 = $i17 & $i19;
+
+        i16 = 0;
+
+     label1:
+        $i20 = (int) $s0;
+
+        if i16 >= $i20 goto label6;
+
+        $s3 = virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $i21 = (int) $s3;
+
+        if $i21 == 3 goto label2;
+
+        $i14 = virtualinvoke $r3.<java.nio.ShortBuffer: int position()>();
+
+        $i15 = $i14 + 5;
+
+        virtualinvoke $r3.<java.nio.ShortBuffer: java.nio.Buffer position(int)>($i15);
+
+        goto label5;
+
+     label2:
+        $s4 = virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $s5 = virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $s6 = virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $s7 = virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $i22 = (int) $s7;
+
+        $i24 = (int) 65535;
+
+        i8 = $i22 & $i24;
+
+        $s9 = virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $i25 = (int) $s9;
+
+        $i27 = (int) 65535;
+
+        $i10 = $i25 & $i27;
+
+        i11 = $i10 + i2;
+
+        $i28 = (int) $s6;
+
+        if $i28 != i12 goto label5;
+
+        if r5 != null goto label3;
+
+        $i29 = (int) $s5;
+
+        if $i29 == 1033 goto label4;
+
+     label3:
+        $i30 = (int) $s5;
+
+        $i31 = (int) s13;
+
+        if $i30 != $i31 goto label5;
+
+     label4:
+        virtualinvoke $r2.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i11);
+
+        virtualinvoke $r2.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[],int,int)>(r0, 0, i8);
+
+        $r4 = specialinvoke r1.<sun.font.TrueTypeFont: java.lang.String makeString(byte[],int,short)>(r0, i8, $s4);
+
+        r5 = $r4;
+
+        $i32 = (int) $s5;
+
+        $i33 = (int) s13;
+
+        if $i32 != $i33 goto label5;
+
+        return $r4;
+
+     label5:
+        i16 = i16 + 1;
+
+        goto label1;
+
+     label6:
+        return r5;
+    }
+
+    public int getFontCount()
+    {
+        int $i0;
+        sun.font.TrueTypeFont r0;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        $i0 = r0.<sun.font.TrueTypeFont: int directoryCount>;
+
+        return $i0;
+    }
+
+    protected synchronized sun.font.FontScaler getScaler()
+    {
+        sun.font.TrueTypeFont r0;
+        sun.font.FontScaler $r1, $r2, $r3;
+        int $i0, $i1;
+        boolean $z0;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        $r1 = r0.<sun.font.TrueTypeFont: sun.font.FontScaler scaler>;
+
+        if $r1 != null goto label1;
+
+        $i1 = r0.<sun.font.TrueTypeFont: int fontIndex>;
+
+        $z0 = r0.<sun.font.TrueTypeFont: boolean supportsCJK>;
+
+        $i0 = r0.<sun.font.TrueTypeFont: int fileSize>;
+
+        $r3 = staticinvoke <sun.font.FontScaler: sun.font.FontScaler getScaler(sun.font.Font2D,int,boolean,int)>(r0, $i1, $z0, $i0);
+
+        r0.<sun.font.TrueTypeFont: sun.font.FontScaler scaler> = $r3;
+
+     label1:
+        $r2 = r0.<sun.font.TrueTypeFont: sun.font.FontScaler scaler>;
+
+        return $r2;
+    }
+
+    public java.lang.String getPostscriptName()
+    {
+        java.lang.String $r1, $r2;
+        sun.font.TrueTypeFont r0;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        $r1 = virtualinvoke r0.<sun.font.TrueTypeFont: java.lang.String lookupName(short,int)>(1033, 6);
+
+        if $r1 != null goto label1;
+
+        $r2 = r0.<sun.font.TrueTypeFont: java.lang.String fullName>;
+
+        return $r2;
+
+     label1:
+        return $r1;
+    }
+
+    public java.lang.String getFontName(java.util.Locale)
+    {
+        sun.font.TrueTypeFont r1;
+        short $s0;
+        java.util.Locale r0, $r2;
+        java.lang.String $r3, $r4, $r5, $r6, $r7;
+        boolean $z0;
+
+        r1 := @this: sun.font.TrueTypeFont;
+
+        r0 := @parameter0: java.util.Locale;
+
+        if r0 != null goto label1;
+
+        $r7 = r1.<sun.font.TrueTypeFont: java.lang.String fullName>;
+
+        return $r7;
+
+     label1:
+        $r2 = r1.<sun.font.TrueTypeFont: java.util.Locale nameLocale>;
+
+        $z0 = virtualinvoke r0.<java.util.Locale: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label2;
+
+        $r5 = r1.<sun.font.TrueTypeFont: java.lang.String localeFullName>;
+
+        if $r5 == null goto label2;
+
+        $r6 = r1.<sun.font.TrueTypeFont: java.lang.String localeFullName>;
+
+        return $r6;
+
+     label2:
+        $s0 = staticinvoke <sun.font.TrueTypeFont: short getLCIDFromLocale(java.util.Locale)>(r0);
+
+        $r3 = virtualinvoke r1.<sun.font.TrueTypeFont: java.lang.String lookupName(short,int)>($s0, 4);
+
+        if $r3 != null goto label3;
+
+        $r4 = r1.<sun.font.TrueTypeFont: java.lang.String fullName>;
+
+        return $r4;
+
+     label3:
+        return $r3;
+    }
+
+    private static void addLCIDMapEntry(java.util.Map, java.lang.String, short)
+    {
+        short s0;
+        java.lang.Short $r2;
+        java.util.Map r0;
+        java.lang.String r1;
+
+        r0 := @parameter0: java.util.Map;
+
+        r1 := @parameter1: java.lang.String;
+
+        s0 := @parameter2: short;
+
+        $r2 = staticinvoke <java.lang.Short: java.lang.Short valueOf(short)>(s0);
+
+        interfaceinvoke r0.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r2);
+
+        return;
+    }
+
+    private static synchronized void createLCIDMap()
+    {
+        java.util.HashMap $r1;
+        java.util.Map $r0;
+
+        $r0 = <sun.font.TrueTypeFont: java.util.Map lcidMap>;
+
+        if $r0 == null goto label1;
+
+        return;
+
+     label1:
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>(int)>(200);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ar", 1025);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "bg", 1026);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ca", 1027);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "zh", 1028);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "cs", 1029);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "da", 1030);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "de", 1031);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "el", 1032);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "es", 1034);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "fi", 1035);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "fr", 1036);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "iw", 1037);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "hu", 1038);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "is", 1039);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "it", 1040);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ja", 1041);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ko", 1042);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "nl", 1043);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "no", 1044);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "pl", 1045);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "pt", 1046);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "rm", 1047);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ro", 1048);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ru", 1049);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "hr", 1050);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "sk", 1051);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "sq", 1052);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "sv", 1053);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "th", 1054);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "tr", 1055);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ur", 1056);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "in", 1057);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "uk", 1058);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "be", 1059);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "sl", 1060);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "et", 1061);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "lv", 1062);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "lt", 1063);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "fa", 1065);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "vi", 1066);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "hy", 1067);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "eu", 1069);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "mk", 1071);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "tn", 1074);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "xh", 1076);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "zu", 1077);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "af", 1078);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ka", 1079);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "fo", 1080);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "hi", 1081);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "mt", 1082);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "se", 1083);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "gd", 1084);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ms", 1086);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "kk", 1087);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ky", 1088);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "sw", 1089);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "tt", 1092);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "bn", 1093);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "pa", 1094);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "gu", 1095);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ta", 1097);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "te", 1098);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "kn", 1099);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ml", 1100);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "mr", 1102);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "sa", 1103);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "mn", 1104);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "cy", 1106);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "gl", 1110);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "dv", 1125);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "qu", 1131);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "mi", 1153);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ar_IQ", 2049);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "zh_CN", 2052);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "de_CH", 2055);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "en_GB", 2057);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "es_MX", 2058);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "fr_BE", 2060);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "it_CH", 2064);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "nl_BE", 2067);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "no_NO_NY", 2068);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "pt_PT", 2070);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ro_MD", 2072);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ru_MD", 2073);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "sr_CS", 2074);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "sv_FI", 2077);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "az_AZ", 2092);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "se_SE", 2107);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ga_IE", 2108);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ms_BN", 2110);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "uz_UZ", 2115);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "qu_EC", 2155);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ar_EG", 3073);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "zh_HK", 3076);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "de_AT", 3079);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "en_AU", 3081);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "fr_CA", 3084);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "sr_CS", 3098);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "se_FI", 3131);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "qu_PE", 3179);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ar_LY", 4097);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "zh_SG", 4100);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "de_LU", 4103);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "en_CA", 4105);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "es_GT", 4106);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "fr_CH", 4108);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "hr_BA", 4122);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ar_DZ", 5121);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "zh_MO", 5124);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "de_LI", 5127);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "en_NZ", 5129);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "es_CR", 5130);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "fr_LU", 5132);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "bs_BA", 5146);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ar_MA", 6145);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "en_IE", 6153);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "es_PA", 6154);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "fr_MC", 6156);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "sr_BA", 6170);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ar_TN", 7169);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "en_ZA", 7177);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "es_DO", 7178);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "sr_BA", 7194);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ar_OM", 8193);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "en_JM", 8201);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "es_VE", 8202);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ar_YE", 9217);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "es_CO", 9226);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ar_SY", 10241);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "en_BZ", 10249);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "es_PE", 10250);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ar_JO", 11265);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "en_TT", 11273);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "es_AR", 11274);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ar_LB", 12289);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "en_ZW", 12297);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "es_EC", 12298);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ar_KW", 13313);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "en_PH", 13321);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "es_CL", 13322);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ar_AE", 14337);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "es_UY", 14346);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ar_BH", 15361);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "es_PY", 15370);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "ar_QA", 16385);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "es_BO", 16394);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "es_SV", 17418);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "es_HN", 18442);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "es_NI", 19466);
+
+        staticinvoke <sun.font.TrueTypeFont: void addLCIDMapEntry(java.util.Map,java.lang.String,short)>($r1, "es_PR", 20490);
+
+        <sun.font.TrueTypeFont: java.util.Map lcidMap> = $r1;
+
+        return;
+    }
+
+    private static short getLCIDFromLocale(java.util.Locale)
+    {
+        short $s1;
+        java.util.Locale r0, $r1;
+        java.lang.Short r5;
+        java.util.Map $r2, $r3;
+        int $i0;
+        java.lang.Object $r4;
+        java.lang.String r6, $r7;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.util.Locale;
+
+        $r1 = <java.util.Locale: java.util.Locale US>;
+
+        $z0 = virtualinvoke r0.<java.util.Locale: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        return 1033;
+
+     label1:
+        $r2 = <sun.font.TrueTypeFont: java.util.Map lcidMap>;
+
+        if $r2 != null goto label2;
+
+        staticinvoke <sun.font.TrueTypeFont: void createLCIDMap()>();
+
+     label2:
+        r6 = virtualinvoke r0.<java.util.Locale: java.lang.String toString()>();
+
+     label3:
+        $r7 = "";
+
+        $z1 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>(r6);
+
+        if $z1 != 0 goto label6;
+
+        $r3 = <sun.font.TrueTypeFont: java.util.Map lcidMap>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>(r6);
+
+        r5 = (java.lang.Short) $r4;
+
+        if r5 == null goto label4;
+
+        $s1 = virtualinvoke r5.<java.lang.Short: short shortValue()>();
+
+        return $s1;
+
+     label4:
+        $i0 = virtualinvoke r6.<java.lang.String: int lastIndexOf(int)>(95);
+
+        if $i0 >= 1 goto label5;
+
+        return 1033;
+
+     label5:
+        r6 = virtualinvoke r6.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        goto label3;
+
+     label6:
+        return 1033;
+    }
+
+    public java.lang.String getFamilyName(java.util.Locale)
+    {
+        sun.font.TrueTypeFont r1;
+        short $s0;
+        java.util.Locale r0, $r2;
+        java.lang.String $r3, $r4, $r5, $r6, $r7;
+        boolean $z0;
+
+        r1 := @this: sun.font.TrueTypeFont;
+
+        r0 := @parameter0: java.util.Locale;
+
+        if r0 != null goto label1;
+
+        $r7 = r1.<sun.font.TrueTypeFont: java.lang.String familyName>;
+
+        return $r7;
+
+     label1:
+        $r2 = r1.<sun.font.TrueTypeFont: java.util.Locale nameLocale>;
+
+        $z0 = virtualinvoke r0.<java.util.Locale: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label2;
+
+        $r5 = r1.<sun.font.TrueTypeFont: java.lang.String localeFamilyName>;
+
+        if $r5 == null goto label2;
+
+        $r6 = r1.<sun.font.TrueTypeFont: java.lang.String localeFamilyName>;
+
+        return $r6;
+
+     label2:
+        $s0 = staticinvoke <sun.font.TrueTypeFont: short getLCIDFromLocale(java.util.Locale)>(r0);
+
+        $r3 = virtualinvoke r1.<sun.font.TrueTypeFont: java.lang.String lookupName(short,int)>($s0, 1);
+
+        if $r3 != null goto label3;
+
+        $r4 = r1.<sun.font.TrueTypeFont: java.lang.String familyName>;
+
+        return $r4;
+
+     label3:
+        return $r3;
+    }
+
+    public sun.font.CharToGlyphMapper getMapper()
+    {
+        sun.font.TrueTypeFont r0;
+        sun.font.CharToGlyphMapper $r1, $r2;
+        sun.font.TrueTypeGlyphMapper $r3;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        $r1 = r0.<sun.font.TrueTypeFont: sun.font.CharToGlyphMapper mapper>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new sun.font.TrueTypeGlyphMapper;
+
+        specialinvoke $r3.<sun.font.TrueTypeGlyphMapper: void <init>(sun.font.TrueTypeFont)>(r0);
+
+        r0.<sun.font.TrueTypeFont: sun.font.CharToGlyphMapper mapper> = $r3;
+
+     label1:
+        $r2 = r0.<sun.font.TrueTypeFont: sun.font.CharToGlyphMapper mapper>;
+
+        return $r2;
+    }
+
+    protected void initAllNames(int, java.util.HashSet)
+    {
+        byte[] r0;
+        sun.font.TrueTypeFont r1;
+        java.nio.ShortBuffer $r3;
+        java.nio.ByteBuffer $r2;
+        java.util.HashSet r4;
+        short $s0, $s1, $s3, $s4, $s5, $s6, $s8;
+        int i2, i7, $i9, i10, i11, $i12, $i13, i14, $i15, $i17, $i18, $i19, $i20, $i22, $i23, $i25, $i26;
+        java.lang.String $r5;
+
+        r1 := @this: sun.font.TrueTypeFont;
+
+        i11 := @parameter0: int;
+
+        r4 := @parameter1: java.util.HashSet;
+
+        r0 = newarray (byte)[256];
+
+        $r2 = virtualinvoke r1.<sun.font.TrueTypeFont: java.nio.ByteBuffer getTableBuffer(int)>(1851878757);
+
+        if $r2 == null goto label4;
+
+        $r3 = virtualinvoke $r2.<java.nio.ByteBuffer: java.nio.ShortBuffer asShortBuffer()>();
+
+        virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $s0 = virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $s1 = virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $i15 = (int) $s1;
+
+        $i17 = (int) 65535;
+
+        i2 = $i15 & $i17;
+
+        i14 = 0;
+
+     label1:
+        $i18 = (int) $s0;
+
+        if i14 >= $i18 goto label4;
+
+        $s3 = virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $i19 = (int) $s3;
+
+        if $i19 == 3 goto label2;
+
+        $i12 = virtualinvoke $r3.<java.nio.ShortBuffer: int position()>();
+
+        $i13 = $i12 + 5;
+
+        virtualinvoke $r3.<java.nio.ShortBuffer: java.nio.Buffer position(int)>($i13);
+
+        goto label3;
+
+     label2:
+        $s4 = virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $s5 = virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $s6 = virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $i20 = (int) $s6;
+
+        $i22 = (int) 65535;
+
+        i7 = $i20 & $i22;
+
+        $s8 = virtualinvoke $r3.<java.nio.ShortBuffer: short get()>();
+
+        $i23 = (int) $s8;
+
+        $i25 = (int) 65535;
+
+        $i9 = $i23 & $i25;
+
+        i10 = $i9 + i2;
+
+        $i26 = (int) $s5;
+
+        if $i26 != i11 goto label3;
+
+        virtualinvoke $r2.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i10);
+
+        virtualinvoke $r2.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[],int,int)>(r0, 0, i7);
+
+        $r5 = specialinvoke r1.<sun.font.TrueTypeFont: java.lang.String makeString(byte[],int,short)>(r0, i7, $s4);
+
+        virtualinvoke r4.<java.util.HashSet: boolean add(java.lang.Object)>($r5);
+
+     label3:
+        i14 = i14 + 1;
+
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    java.lang.String[] getAllFamilyNames()
+    {
+        java.util.HashSet $r0;
+        java.lang.Object[] $r3;
+        sun.font.TrueTypeFont r1;
+        java.lang.String[] $r2, $r4, $r5;
+        java.lang.Exception $r6;
+
+        r1 := @this: sun.font.TrueTypeFont;
+
+        $r0 = new java.util.HashSet;
+
+        specialinvoke $r0.<java.util.HashSet: void <init>()>();
+
+     label1:
+        virtualinvoke r1.<sun.font.TrueTypeFont: void initAllNames(int,java.util.HashSet)>(1, $r0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+     label4:
+        $r2 = newarray (java.lang.String)[0];
+
+        $r3 = virtualinvoke $r0.<java.util.HashSet: java.lang.Object[] toArray(java.lang.Object[])>($r2);
+
+        $r4 = (java.lang.String[]) $r3;
+
+        $r5 = (java.lang.String[]) $r4;
+
+        return $r5;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    java.lang.String[] getAllFullNames()
+    {
+        java.util.HashSet $r0;
+        java.lang.Object[] $r3;
+        sun.font.TrueTypeFont r1;
+        java.lang.String[] $r2, $r4, $r5;
+        java.lang.Exception $r6;
+
+        r1 := @this: sun.font.TrueTypeFont;
+
+        $r0 = new java.util.HashSet;
+
+        specialinvoke $r0.<java.util.HashSet: void <init>()>();
+
+     label1:
+        virtualinvoke r1.<sun.font.TrueTypeFont: void initAllNames(int,java.util.HashSet)>(4, $r0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+     label4:
+        $r2 = newarray (java.lang.String)[0];
+
+        $r3 = virtualinvoke $r0.<java.util.HashSet: java.lang.Object[] toArray(java.lang.Object[])>($r2);
+
+        $r4 = (java.lang.String[]) $r3;
+
+        $r5 = (java.lang.String[]) $r4;
+
+        return $r5;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    java.awt.geom.Point2D$Float getGlyphPoint(long, int, int)
+    {
+        sun.font.FontScalerException $r3;
+        java.awt.geom.Point2D$Float $r2;
+        sun.font.TrueTypeFont r0;
+        sun.font.FontScaler $r1;
+        int i1, i2;
+        long l0;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        l0 := @parameter0: long;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.font.TrueTypeFont: sun.font.FontScaler getScaler()>();
+
+        $r2 = virtualinvoke $r1.<sun.font.FontScaler: java.awt.geom.Point2D$Float getGlyphPoint(long,int,int)>(l0, i1, i2);
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        return null;
+
+        catch sun.font.FontScalerException from label1 to label2 with label3;
+    }
+
+    private char[] getGaspTable()
+    {
+        sun.font.TrueTypeFont r0;
+        java.nio.ByteBuffer $r2;
+        int $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        java.nio.CharBuffer $r3;
+        char $c0, $c1;
+        char[] $r1, $r4, $r5, $r6, $r7, $r8, $r9, $r10;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        $r1 = r0.<sun.font.TrueTypeFont: char[] gaspTable>;
+
+        if $r1 == null goto label1;
+
+        $r10 = r0.<sun.font.TrueTypeFont: char[] gaspTable>;
+
+        return $r10;
+
+     label1:
+        $r2 = virtualinvoke r0.<sun.font.TrueTypeFont: java.nio.ByteBuffer getTableBuffer(int)>(1734439792);
+
+        if $r2 != null goto label2;
+
+        $r9 = newarray (char)[0];
+
+        r0.<sun.font.TrueTypeFont: char[] gaspTable> = $r9;
+
+        return $r9;
+
+     label2:
+        $r3 = virtualinvoke $r2.<java.nio.ByteBuffer: java.nio.CharBuffer asCharBuffer()>();
+
+        $c0 = virtualinvoke $r3.<java.nio.CharBuffer: char get()>();
+
+        $i6 = (int) $c0;
+
+        if $i6 <= 1 goto label3;
+
+        $r8 = newarray (char)[0];
+
+        r0.<sun.font.TrueTypeFont: char[] gaspTable> = $r8;
+
+        return $r8;
+
+     label3:
+        $c1 = virtualinvoke $r3.<java.nio.CharBuffer: char get()>();
+
+        $i7 = (int) $c1;
+
+        $i2 = $i7 * 4;
+
+        $i3 = 4 + $i2;
+
+        $i4 = virtualinvoke r0.<sun.font.TrueTypeFont: int getTableSize(int)>(1734439792);
+
+        if $i3 <= $i4 goto label4;
+
+        $r7 = newarray (char)[0];
+
+        r0.<sun.font.TrueTypeFont: char[] gaspTable> = $r7;
+
+        return $r7;
+
+     label4:
+        $i8 = (int) $c1;
+
+        $i5 = 2 * $i8;
+
+        $r4 = newarray (char)[$i5];
+
+        r0.<sun.font.TrueTypeFont: char[] gaspTable> = $r4;
+
+        $r5 = r0.<sun.font.TrueTypeFont: char[] gaspTable>;
+
+        virtualinvoke $r3.<java.nio.CharBuffer: java.nio.CharBuffer get(char[])>($r5);
+
+        $r6 = r0.<sun.font.TrueTypeFont: char[] gaspTable>;
+
+        return $r6;
+    }
+
+    public boolean useAAForPtSize(int)
+    {
+        sun.font.TrueTypeFont r0;
+        char $c4, $c6, $c7;
+        int $i0, $i1, i2, $i3, $i5, i8, $i9;
+        char[] $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        i2 := @parameter0: int;
+
+        $r1 = specialinvoke r0.<sun.font.TrueTypeFont: char[] getGaspTable()>();
+
+        $i0 = lengthof $r1;
+
+        if $i0 <= 0 goto label06;
+
+        i8 = 0;
+
+     label01:
+        $i3 = lengthof $r1;
+
+        if i8 >= $i3 goto label05;
+
+        $c4 = $r1[i8];
+
+        $i9 = (int) $c4;
+
+        if i2 > $i9 goto label04;
+
+        $i5 = i8 + 1;
+
+        $c6 = $r1[$i5];
+
+        $c7 = $c6 & 2;
+
+        if $c7 == 0 goto label02;
+
+        $z0 = 1;
+
+        goto label03;
+
+     label02:
+        $z0 = 0;
+
+     label03:
+        return $z0;
+
+     label04:
+        i8 = i8 + 2;
+
+        goto label01;
+
+     label05:
+        return 1;
+
+     label06:
+        $i1 = r0.<sun.font.TrueTypeFont: int style>;
+
+        if $i1 != 1 goto label07;
+
+        return 1;
+
+     label07:
+        if i2 <= 8 goto label08;
+
+        if i2 < 18 goto label09;
+
+     label08:
+        $z1 = 1;
+
+        goto label10;
+
+     label09:
+        $z1 = 0;
+
+     label10:
+        return $z1;
+    }
+
+    public boolean hasSupplementaryChars()
+    {
+        sun.font.TrueTypeFont r0;
+        sun.font.CharToGlyphMapper $r1;
+        sun.font.TrueTypeGlyphMapper $r2;
+        boolean $z0;
+
+        r0 := @this: sun.font.TrueTypeFont;
+
+        $r1 = virtualinvoke r0.<sun.font.TrueTypeFont: sun.font.CharToGlyphMapper getMapper()>();
+
+        $r2 = (sun.font.TrueTypeGlyphMapper) $r1;
+
+        $z0 = virtualinvoke $r2.<sun.font.TrueTypeGlyphMapper: boolean hasSupplementaryChars()>();
+
+        return $z0;
+    }
+
+    public java.lang.String toString()
+    {
+        sun.font.TrueTypeFont r2;
+        int $i0;
+        java.lang.StringBuilder $r0, $r1, $r4, $r5, $r7, $r8, $r9, $r10, $r12;
+        java.lang.String $r3, $r6, $r11, $r13;
+
+        r2 := @this: sun.font.TrueTypeFont;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("** TrueType Font: Family=");
+
+        $r3 = r2.<sun.font.TrueTypeFont: java.lang.String familyName>;
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" Name=");
+
+        $r6 = r2.<sun.font.TrueTypeFont: java.lang.String fullName>;
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" style=");
+
+        $i0 = r2.<sun.font.TrueTypeFont: int style>;
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" fileName=");
+
+        $r11 = virtualinvoke r2.<sun.font.TrueTypeFont: java.lang.String getPublicFileName()>();
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r13;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.String[] $r0, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16;
+        java.lang.String[][] $r1;
+
+        <sun.font.TrueTypeFont: int fsSelectionRegularBit> = 64;
+
+        <sun.font.TrueTypeFont: int fsSelectionBoldBit> = 32;
+
+        <sun.font.TrueTypeFont: int fsSelectionItalicBit> = 1;
+
+        <sun.font.TrueTypeFont: int reserved_bits2> = 65535;
+
+        <sun.font.TrueTypeFont: int reserved_bits1> = -2147483648;
+
+        <sun.font.TrueTypeFont: int DIRECTORYENTRYSIZE> = 16;
+
+        <sun.font.TrueTypeFont: int DIRECTORYHEADERSIZE> = 12;
+
+        <sun.font.TrueTypeFont: int TTCHEADERSIZE> = 12;
+
+        <sun.font.TrueTypeFont: short US_LCID> = 1033;
+
+        <sun.font.TrueTypeFont: int POSTSCRIPT_NAME_ID> = 6;
+
+        <sun.font.TrueTypeFont: int FULL_NAME_ID> = 4;
+
+        <sun.font.TrueTypeFont: int FAMILY_NAME_ID> = 1;
+
+        <sun.font.TrueTypeFont: short ENGLISH_LOCALE_ID> = 1033;
+
+        <sun.font.TrueTypeFont: int MS_PLATFORM_ID> = 3;
+
+        <sun.font.TrueTypeFont: int ottoTag> = 1330926671;
+
+        <sun.font.TrueTypeFont: int trueTag> = 1953658213;
+
+        <sun.font.TrueTypeFont: int v1ttTag> = 65536;
+
+        <sun.font.TrueTypeFont: int ttcfTag> = 1953784678;
+
+        <sun.font.TrueTypeFont: int gaspTag> = 1734439792;
+
+        <sun.font.TrueTypeFont: int EBLCTag> = 1161972803;
+
+        <sun.font.TrueTypeFont: int featTag> = 1717920116;
+
+        <sun.font.TrueTypeFont: int fvarTag> = 1719034226;
+
+        <sun.font.TrueTypeFont: int fdscTag> = 1717859171;
+
+        <sun.font.TrueTypeFont: int morxTag> = 1836020344;
+
+        <sun.font.TrueTypeFont: int mortTag> = 1836020340;
+
+        <sun.font.TrueTypeFont: int GSUBTag> = 1196643650;
+
+        <sun.font.TrueTypeFont: int GPOSTag> = 1196445523;
+
+        <sun.font.TrueTypeFont: int GDEFTag> = 1195656518;
+
+        <sun.font.TrueTypeFont: int os_2Tag> = 1330851634;
+
+        <sun.font.TrueTypeFont: int postTag> = 1886352244;
+
+        <sun.font.TrueTypeFont: int nameTag> = 1851878757;
+
+        <sun.font.TrueTypeFont: int maxpTag> = 1835104368;
+
+        <sun.font.TrueTypeFont: int locaTag> = 1819239265;
+
+        <sun.font.TrueTypeFont: int hmtxTag> = 1752003704;
+
+        <sun.font.TrueTypeFont: int hheaTag> = 1751672161;
+
+        <sun.font.TrueTypeFont: int headTag> = 1751474532;
+
+        <sun.font.TrueTypeFont: int glyfTag> = 1735162214;
+
+        <sun.font.TrueTypeFont: int cmapTag> = 1668112752;
+
+        $r0 = newarray (java.lang.String)[32];
+
+        $r0[0] = "cp1252";
+
+        $r0[1] = "cp1250";
+
+        $r0[2] = "cp1251";
+
+        $r0[3] = "cp1253";
+
+        $r0[4] = "cp1254";
+
+        $r0[5] = "cp1255";
+
+        $r0[6] = "cp1256";
+
+        $r0[7] = "cp1257";
+
+        $r0[8] = "";
+
+        $r0[9] = "";
+
+        $r0[10] = "";
+
+        $r0[11] = "";
+
+        $r0[12] = "";
+
+        $r0[13] = "";
+
+        $r0[14] = "";
+
+        $r0[15] = "";
+
+        $r0[16] = "ms874";
+
+        $r0[17] = "ms932";
+
+        $r0[18] = "gbk";
+
+        $r0[19] = "ms949";
+
+        $r0[20] = "ms950";
+
+        $r0[21] = "ms1361";
+
+        $r0[22] = "";
+
+        $r0[23] = "";
+
+        $r0[24] = "";
+
+        $r0[25] = "";
+
+        $r0[26] = "";
+
+        $r0[27] = "";
+
+        $r0[28] = "";
+
+        $r0[29] = "";
+
+        $r0[30] = "";
+
+        $r0[31] = "";
+
+        <sun.font.TrueTypeFont: java.lang.String[] encoding_mapping> = $r0;
+
+        $r1 = newarray (java.lang.String[])[14];
+
+        $r2 = newarray (java.lang.String)[14];
+
+        $r2[0] = "en";
+
+        $r2[1] = "ca";
+
+        $r2[2] = "da";
+
+        $r2[3] = "de";
+
+        $r2[4] = "es";
+
+        $r2[5] = "fi";
+
+        $r2[6] = "fr";
+
+        $r2[7] = "is";
+
+        $r2[8] = "it";
+
+        $r2[9] = "nl";
+
+        $r2[10] = "no";
+
+        $r2[11] = "pt";
+
+        $r2[12] = "sq";
+
+        $r2[13] = "sv";
+
+        $r1[0] = $r2;
+
+        $r3 = newarray (java.lang.String)[12];
+
+        $r3[0] = "cs";
+
+        $r3[1] = "cz";
+
+        $r3[2] = "et";
+
+        $r3[3] = "hr";
+
+        $r3[4] = "hu";
+
+        $r3[5] = "nr";
+
+        $r3[6] = "pl";
+
+        $r3[7] = "ro";
+
+        $r3[8] = "sk";
+
+        $r3[9] = "sl";
+
+        $r3[10] = "sq";
+
+        $r3[11] = "sr";
+
+        $r1[1] = $r3;
+
+        $r4 = newarray (java.lang.String)[5];
+
+        $r4[0] = "bg";
+
+        $r4[1] = "mk";
+
+        $r4[2] = "ru";
+
+        $r4[3] = "sh";
+
+        $r4[4] = "uk";
+
+        $r1[2] = $r4;
+
+        $r5 = newarray (java.lang.String)[1];
+
+        $r5[0] = "el";
+
+        $r1[3] = $r5;
+
+        $r6 = newarray (java.lang.String)[1];
+
+        $r6[0] = "tr";
+
+        $r1[4] = $r6;
+
+        $r7 = newarray (java.lang.String)[1];
+
+        $r7[0] = "he";
+
+        $r1[5] = $r7;
+
+        $r8 = newarray (java.lang.String)[1];
+
+        $r8[0] = "ar";
+
+        $r1[6] = $r8;
+
+        $r9 = newarray (java.lang.String)[3];
+
+        $r9[0] = "et";
+
+        $r9[1] = "lt";
+
+        $r9[2] = "lv";
+
+        $r1[7] = $r9;
+
+        $r10 = newarray (java.lang.String)[1];
+
+        $r10[0] = "th";
+
+        $r1[8] = $r10;
+
+        $r11 = newarray (java.lang.String)[1];
+
+        $r11[0] = "ja";
+
+        $r1[9] = $r11;
+
+        $r12 = newarray (java.lang.String)[2];
+
+        $r12[0] = "zh";
+
+        $r12[1] = "zh_CN";
+
+        $r1[10] = $r12;
+
+        $r13 = newarray (java.lang.String)[1];
+
+        $r13[0] = "ko";
+
+        $r1[11] = $r13;
+
+        $r14 = newarray (java.lang.String)[2];
+
+        $r14[0] = "zh_HK";
+
+        $r14[1] = "zh_TW";
+
+        $r1[12] = $r14;
+
+        $r15 = newarray (java.lang.String)[1];
+
+        $r15[0] = "ko";
+
+        $r1[13] = $r15;
+
+        <sun.font.TrueTypeFont: java.lang.String[][] languages> = $r1;
+
+        $r16 = newarray (java.lang.String)[14];
+
+        $r16[0] = "cp1252";
+
+        $r16[1] = "cp1250";
+
+        $r16[2] = "cp1251";
+
+        $r16[3] = "cp1253";
+
+        $r16[4] = "cp1254";
+
+        $r16[5] = "cp1255";
+
+        $r16[6] = "cp1256";
+
+        $r16[7] = "cp1257";
+
+        $r16[8] = "ms874";
+
+        $r16[9] = "ms932";
+
+        $r16[10] = "gbk";
+
+        $r16[11] = "ms949";
+
+        $r16[12] = "ms950";
+
+        $r16[13] = "ms1361";
+
+        <sun.font.TrueTypeFont: java.lang.String[] codePages> = $r16;
+
+        <sun.font.TrueTypeFont: java.lang.String defaultCodePage> = null;
+
+        return;
+    }
+}

@@ -1,0 +1,420 @@
+class sun.security.provider.DSAKeyPairGenerator extends java.security.KeyPairGenerator
+{
+    private int plen;
+    private int qlen;
+    boolean forceNewParameters;
+    private java.security.spec.DSAParameterSpec params;
+    private java.security.SecureRandom random;
+
+    void <init>(int)
+    {
+        sun.security.provider.DSAKeyPairGenerator r0;
+        int i0;
+
+        r0 := @this: sun.security.provider.DSAKeyPairGenerator;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.security.KeyPairGenerator: void <init>(java.lang.String)>("DSA");
+
+        virtualinvoke r0.<sun.security.provider.DSAKeyPairGenerator: void initialize(int,java.security.SecureRandom)>(i0, null);
+
+        return;
+    }
+
+    private static void checkStrength(int, int)
+    {
+        java.security.InvalidParameterException $r0;
+        int i0, i1, $i2;
+        java.lang.StringBuilder $r1, $r2, $r3, $r4, $r5;
+        java.lang.String $r6;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        if i0 < 512 goto label1;
+
+        if i0 > 1024 goto label1;
+
+        $i2 = i0 % 64;
+
+        if $i2 != 0 goto label1;
+
+        if i1 != 160 goto label1;
+
+        goto label4;
+
+     label1:
+        if i0 != 2048 goto label2;
+
+        if i1 == 224 goto label4;
+
+        if i1 != 256 goto label2;
+
+        goto label4;
+
+     label2:
+        if i0 != 3072 goto label3;
+
+        if i1 != 256 goto label3;
+
+        goto label4;
+
+     label3:
+        $r0 = new java.security.InvalidParameterException;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported prime and subprime size combination: ");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<java.security.InvalidParameterException: void <init>(java.lang.String)>($r6);
+
+        throw $r0;
+
+     label4:
+        return;
+    }
+
+    public void initialize(int, java.security.SecureRandom)
+    {
+        sun.security.provider.DSAKeyPairGenerator r0;
+        int i0;
+        java.security.SecureRandom r1;
+
+        r0 := @this: sun.security.provider.DSAKeyPairGenerator;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.security.SecureRandom;
+
+        virtualinvoke r0.<sun.security.provider.DSAKeyPairGenerator: void init(int,java.security.SecureRandom,boolean)>(i0, r1, 0);
+
+        return;
+    }
+
+    public void initialize(java.security.spec.AlgorithmParameterSpec, java.security.SecureRandom) throws java.security.InvalidAlgorithmParameterException
+    {
+        java.security.SecureRandom r2;
+        java.security.spec.DSAParameterSpec $r3;
+        sun.security.provider.DSAKeyPairGenerator r1;
+        java.security.spec.AlgorithmParameterSpec r0;
+        boolean $z0;
+        java.security.InvalidAlgorithmParameterException $r4;
+
+        r1 := @this: sun.security.provider.DSAKeyPairGenerator;
+
+        r0 := @parameter0: java.security.spec.AlgorithmParameterSpec;
+
+        r2 := @parameter1: java.security.SecureRandom;
+
+        $z0 = r0 instanceof java.security.spec.DSAParameterSpec;
+
+        if $z0 != 0 goto label1;
+
+        $r4 = new java.security.InvalidAlgorithmParameterException;
+
+        specialinvoke $r4.<java.security.InvalidAlgorithmParameterException: void <init>(java.lang.String)>("Inappropriate parameter");
+
+        throw $r4;
+
+     label1:
+        $r3 = (java.security.spec.DSAParameterSpec) r0;
+
+        virtualinvoke r1.<sun.security.provider.DSAKeyPairGenerator: void init(java.security.spec.DSAParameterSpec,java.security.SecureRandom,boolean)>($r3, r2, 0);
+
+        return;
+    }
+
+    void init(int, java.security.SecureRandom, boolean)
+    {
+        java.security.SecureRandom r1;
+        int i0, $i1;
+        sun.security.provider.DSAKeyPairGenerator r0;
+        boolean z0;
+
+        r0 := @this: sun.security.provider.DSAKeyPairGenerator;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.security.SecureRandom;
+
+        z0 := @parameter2: boolean;
+
+        $i1 = staticinvoke <sun.security.util.SecurityProviderConstants: int getDefDSASubprimeSize(int)>(i0);
+
+        staticinvoke <sun.security.provider.DSAKeyPairGenerator: void checkStrength(int,int)>(i0, $i1);
+
+        r0.<sun.security.provider.DSAKeyPairGenerator: int plen> = i0;
+
+        r0.<sun.security.provider.DSAKeyPairGenerator: int qlen> = $i1;
+
+        r0.<sun.security.provider.DSAKeyPairGenerator: java.security.spec.DSAParameterSpec params> = null;
+
+        r0.<sun.security.provider.DSAKeyPairGenerator: java.security.SecureRandom random> = r1;
+
+        r0.<sun.security.provider.DSAKeyPairGenerator: boolean forceNewParameters> = z0;
+
+        return;
+    }
+
+    void init(java.security.spec.DSAParameterSpec, java.security.SecureRandom, boolean)
+    {
+        java.security.spec.DSAParameterSpec r0;
+        java.security.SecureRandom r4;
+        int $i0, $i1;
+        sun.security.provider.DSAKeyPairGenerator r3;
+        java.math.BigInteger $r1, $r2;
+        boolean z0;
+
+        r3 := @this: sun.security.provider.DSAKeyPairGenerator;
+
+        r0 := @parameter0: java.security.spec.DSAParameterSpec;
+
+        r4 := @parameter1: java.security.SecureRandom;
+
+        z0 := @parameter2: boolean;
+
+        $r1 = virtualinvoke r0.<java.security.spec.DSAParameterSpec: java.math.BigInteger getP()>();
+
+        $i0 = virtualinvoke $r1.<java.math.BigInteger: int bitLength()>();
+
+        $r2 = virtualinvoke r0.<java.security.spec.DSAParameterSpec: java.math.BigInteger getQ()>();
+
+        $i1 = virtualinvoke $r2.<java.math.BigInteger: int bitLength()>();
+
+        staticinvoke <sun.security.provider.DSAKeyPairGenerator: void checkStrength(int,int)>($i0, $i1);
+
+        r3.<sun.security.provider.DSAKeyPairGenerator: int plen> = $i0;
+
+        r3.<sun.security.provider.DSAKeyPairGenerator: int qlen> = $i1;
+
+        r3.<sun.security.provider.DSAKeyPairGenerator: java.security.spec.DSAParameterSpec params> = r0;
+
+        r3.<sun.security.provider.DSAKeyPairGenerator: java.security.SecureRandom random> = r4;
+
+        r3.<sun.security.provider.DSAKeyPairGenerator: boolean forceNewParameters> = z0;
+
+        return;
+    }
+
+    public java.security.KeyPair generateKeyPair()
+    {
+        java.security.KeyPair $r7;
+        java.security.SecureRandom $r1, $r6, $r8, $r10, $r11;
+        java.security.GeneralSecurityException $r12;
+        int $i0, $i1, $i2, $i3;
+        java.math.BigInteger $r3, $r4, $r5;
+        boolean $z0;
+        java.security.ProviderException $r13;
+        java.security.spec.DSAParameterSpec $r2, $r9, r14;
+        sun.security.provider.DSAKeyPairGenerator r0;
+
+        r0 := @this: sun.security.provider.DSAKeyPairGenerator;
+
+        $r1 = r0.<sun.security.provider.DSAKeyPairGenerator: java.security.SecureRandom random>;
+
+        if $r1 != null goto label1;
+
+        $r11 = staticinvoke <sun.security.jca.JCAUtil: java.security.SecureRandom getSecureRandom()>();
+
+        r0.<sun.security.provider.DSAKeyPairGenerator: java.security.SecureRandom random> = $r11;
+
+     label1:
+        $z0 = r0.<sun.security.provider.DSAKeyPairGenerator: boolean forceNewParameters>;
+
+        if $z0 == 0 goto label2;
+
+        $i3 = r0.<sun.security.provider.DSAKeyPairGenerator: int plen>;
+
+        $i2 = r0.<sun.security.provider.DSAKeyPairGenerator: int qlen>;
+
+        $r10 = r0.<sun.security.provider.DSAKeyPairGenerator: java.security.SecureRandom random>;
+
+        r14 = staticinvoke <sun.security.provider.ParameterCache: java.security.spec.DSAParameterSpec getNewDSAParameterSpec(int,int,java.security.SecureRandom)>($i3, $i2, $r10);
+
+        goto label4;
+
+     label2:
+        $r2 = r0.<sun.security.provider.DSAKeyPairGenerator: java.security.spec.DSAParameterSpec params>;
+
+        if $r2 != null goto label3;
+
+        $i1 = r0.<sun.security.provider.DSAKeyPairGenerator: int plen>;
+
+        $i0 = r0.<sun.security.provider.DSAKeyPairGenerator: int qlen>;
+
+        $r8 = r0.<sun.security.provider.DSAKeyPairGenerator: java.security.SecureRandom random>;
+
+        $r9 = staticinvoke <sun.security.provider.ParameterCache: java.security.spec.DSAParameterSpec getDSAParameterSpec(int,int,java.security.SecureRandom)>($i1, $i0, $r8);
+
+        r0.<sun.security.provider.DSAKeyPairGenerator: java.security.spec.DSAParameterSpec params> = $r9;
+
+     label3:
+        r14 = r0.<sun.security.provider.DSAKeyPairGenerator: java.security.spec.DSAParameterSpec params>;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r12 := @caughtexception;
+
+        $r13 = new java.security.ProviderException;
+
+        specialinvoke $r13.<java.security.ProviderException: void <init>(java.lang.Throwable)>($r12);
+
+        throw $r13;
+
+     label6:
+        $r3 = virtualinvoke r14.<java.security.spec.DSAParameterSpec: java.math.BigInteger getP()>();
+
+        $r4 = virtualinvoke r14.<java.security.spec.DSAParameterSpec: java.math.BigInteger getQ()>();
+
+        $r5 = virtualinvoke r14.<java.security.spec.DSAParameterSpec: java.math.BigInteger getG()>();
+
+        $r6 = r0.<sun.security.provider.DSAKeyPairGenerator: java.security.SecureRandom random>;
+
+        $r7 = specialinvoke r0.<sun.security.provider.DSAKeyPairGenerator: java.security.KeyPair generateKeyPair(java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.security.SecureRandom)>($r3, $r4, $r5, $r6);
+
+        return $r7;
+
+        catch java.security.GeneralSecurityException from label1 to label4 with label5;
+    }
+
+    private java.security.KeyPair generateKeyPair(java.math.BigInteger, java.math.BigInteger, java.math.BigInteger, java.security.SecureRandom)
+    {
+        sun.security.provider.DSAPrivateKey $r8;
+        java.security.KeyPair $r9;
+        sun.security.provider.DSAPublicKeyImpl $r7;
+        java.security.ProviderException $r12;
+        sun.security.provider.DSAPublicKey $r10, r13;
+        java.security.SecureRandom r1;
+        sun.security.provider.DSAKeyPairGenerator r0;
+        java.math.BigInteger r2, $r3, r4, r5, $r6;
+        java.security.InvalidKeyException $r11;
+        boolean $z0;
+
+        r0 := @this: sun.security.provider.DSAKeyPairGenerator;
+
+        r4 := @parameter0: java.math.BigInteger;
+
+        r2 := @parameter1: java.math.BigInteger;
+
+        r5 := @parameter2: java.math.BigInteger;
+
+        r1 := @parameter3: java.security.SecureRandom;
+
+        $r3 = specialinvoke r0.<sun.security.provider.DSAKeyPairGenerator: java.math.BigInteger generateX(java.security.SecureRandom,java.math.BigInteger)>(r1, r2);
+
+        $r6 = virtualinvoke r0.<sun.security.provider.DSAKeyPairGenerator: java.math.BigInteger generateY(java.math.BigInteger,java.math.BigInteger,java.math.BigInteger)>($r3, r4, r5);
+
+     label1:
+        $z0 = <sun.security.provider.DSAKeyFactory: boolean SERIAL_INTEROP>;
+
+        if $z0 == 0 goto label2;
+
+        $r10 = new sun.security.provider.DSAPublicKey;
+
+        specialinvoke $r10.<sun.security.provider.DSAPublicKey: void <init>(java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger)>($r6, r4, r2, r5);
+
+        r13 = $r10;
+
+        goto label3;
+
+     label2:
+        $r7 = new sun.security.provider.DSAPublicKeyImpl;
+
+        specialinvoke $r7.<sun.security.provider.DSAPublicKeyImpl: void <init>(java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger)>($r6, r4, r2, r5);
+
+        r13 = $r7;
+
+     label3:
+        $r8 = new sun.security.provider.DSAPrivateKey;
+
+        specialinvoke $r8.<sun.security.provider.DSAPrivateKey: void <init>(java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger)>($r3, r4, r2, r5);
+
+        $r9 = new java.security.KeyPair;
+
+        specialinvoke $r9.<java.security.KeyPair: void <init>(java.security.PublicKey,java.security.PrivateKey)>(r13, $r8);
+
+     label4:
+        return $r9;
+
+     label5:
+        $r11 := @caughtexception;
+
+        $r12 = new java.security.ProviderException;
+
+        specialinvoke $r12.<java.security.ProviderException: void <init>(java.lang.Throwable)>($r11);
+
+        throw $r12;
+
+        catch java.security.InvalidKeyException from label1 to label4 with label5;
+    }
+
+    private java.math.BigInteger generateX(java.security.SecureRandom, java.math.BigInteger)
+    {
+        byte[] r1;
+        java.security.SecureRandom r2;
+        sun.security.provider.DSAKeyPairGenerator r0;
+        int $i0, $i1, $i2;
+        java.math.BigInteger r3, $r4, $r5;
+
+        r0 := @this: sun.security.provider.DSAKeyPairGenerator;
+
+        r2 := @parameter0: java.security.SecureRandom;
+
+        r3 := @parameter1: java.math.BigInteger;
+
+        $i0 = r0.<sun.security.provider.DSAKeyPairGenerator: int qlen>;
+
+        r1 = newarray (byte)[$i0];
+
+     label1:
+        virtualinvoke r2.<java.security.SecureRandom: void nextBytes(byte[])>(r1);
+
+        $r4 = new java.math.BigInteger;
+
+        specialinvoke $r4.<java.math.BigInteger: void <init>(int,byte[])>(1, r1);
+
+        $r5 = virtualinvoke $r4.<java.math.BigInteger: java.math.BigInteger mod(java.math.BigInteger)>(r3);
+
+        $i2 = virtualinvoke $r5.<java.math.BigInteger: int signum()>();
+
+        if $i2 <= 0 goto label1;
+
+        $i1 = virtualinvoke $r5.<java.math.BigInteger: int compareTo(java.math.BigInteger)>(r3);
+
+        if $i1 >= 0 goto label1;
+
+        return $r5;
+    }
+
+    java.math.BigInteger generateY(java.math.BigInteger, java.math.BigInteger, java.math.BigInteger)
+    {
+        sun.security.provider.DSAKeyPairGenerator r4;
+        java.math.BigInteger r0, r1, r2, $r3;
+
+        r4 := @this: sun.security.provider.DSAKeyPairGenerator;
+
+        r1 := @parameter0: java.math.BigInteger;
+
+        r2 := @parameter1: java.math.BigInteger;
+
+        r0 := @parameter2: java.math.BigInteger;
+
+        $r3 = virtualinvoke r0.<java.math.BigInteger: java.math.BigInteger modPow(java.math.BigInteger,java.math.BigInteger)>(r1, r2);
+
+        return $r3;
+    }
+}

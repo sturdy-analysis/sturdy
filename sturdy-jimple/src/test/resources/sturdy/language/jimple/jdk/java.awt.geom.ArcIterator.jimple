@@ -1,0 +1,749 @@
+class java.awt.geom.ArcIterator extends java.lang.Object implements java.awt.geom.PathIterator
+{
+    double x;
+    double y;
+    double w;
+    double h;
+    double angStRad;
+    double increment;
+    double cv;
+    java.awt.geom.AffineTransform affine;
+    int index;
+    int arcSegs;
+    int lineSegs;
+
+    void <init>(java.awt.geom.Arc2D, java.awt.geom.AffineTransform)
+    {
+        byte $b0, $b1, $b2, $b3, $b6, $b8;
+        java.awt.geom.AffineTransform r2;
+        java.awt.geom.ArcIterator r0;
+        java.awt.geom.Arc2D r1;
+        int $i4, $i5, $i7, $i9, $i10, $i11, $i12, $i13, $i15, $i17;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11, $d12, $d13, d14, $d15, $d16, $d17, $d18, $d19, $d20, $d21, $d22, $d23, $d24, $d25, $d26, $d27, $d28, $d29;
+
+        r0 := @this: java.awt.geom.ArcIterator;
+
+        r1 := @parameter0: java.awt.geom.Arc2D;
+
+        r2 := @parameter1: java.awt.geom.AffineTransform;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $d0 = virtualinvoke r1.<java.awt.geom.Arc2D: double getWidth()>();
+
+        $d1 = $d0 / 2.0;
+
+        r0.<java.awt.geom.ArcIterator: double w> = $d1;
+
+        $d2 = virtualinvoke r1.<java.awt.geom.Arc2D: double getHeight()>();
+
+        $d3 = $d2 / 2.0;
+
+        r0.<java.awt.geom.ArcIterator: double h> = $d3;
+
+        $d4 = virtualinvoke r1.<java.awt.geom.Arc2D: double getX()>();
+
+        $d5 = r0.<java.awt.geom.ArcIterator: double w>;
+
+        $d6 = $d4 + $d5;
+
+        r0.<java.awt.geom.ArcIterator: double x> = $d6;
+
+        $d7 = virtualinvoke r1.<java.awt.geom.Arc2D: double getY()>();
+
+        $d8 = r0.<java.awt.geom.ArcIterator: double h>;
+
+        $d9 = $d7 + $d8;
+
+        r0.<java.awt.geom.ArcIterator: double y> = $d9;
+
+        $d10 = virtualinvoke r1.<java.awt.geom.Arc2D: double getAngleStart()>();
+
+        $d11 = staticinvoke <java.lang.Math: double toRadians(double)>($d10);
+
+        $d12 = neg $d11;
+
+        r0.<java.awt.geom.ArcIterator: double angStRad> = $d12;
+
+        r0.<java.awt.geom.ArcIterator: java.awt.geom.AffineTransform affine> = r2;
+
+        $d13 = virtualinvoke r1.<java.awt.geom.Arc2D: double getAngleExtent()>();
+
+        d14 = neg $d13;
+
+        $b0 = d14 cmpl 360.0;
+
+        $i9 = (int) $b0;
+
+        if $i9 >= 0 goto label1;
+
+        $b3 = d14 cmpg -360.0;
+
+        $i10 = (int) $b3;
+
+        if $i10 > 0 goto label2;
+
+     label1:
+        r0.<java.awt.geom.ArcIterator: int arcSegs> = 4;
+
+        r0.<java.awt.geom.ArcIterator: double increment> = 1.5707963267948966;
+
+        r0.<java.awt.geom.ArcIterator: double cv> = 0.5522847498307933;
+
+        $b1 = d14 cmpg 0.0;
+
+        $i11 = (int) $b1;
+
+        if $i11 >= 0 goto label3;
+
+        $d16 = r0.<java.awt.geom.ArcIterator: double increment>;
+
+        $d17 = neg $d16;
+
+        r0.<java.awt.geom.ArcIterator: double increment> = $d17;
+
+        $d18 = r0.<java.awt.geom.ArcIterator: double cv>;
+
+        $d19 = neg $d18;
+
+        r0.<java.awt.geom.ArcIterator: double cv> = $d19;
+
+        goto label3;
+
+     label2:
+        $d20 = staticinvoke <java.lang.Math: double abs(double)>(d14);
+
+        $d21 = $d20 / 90.0;
+
+        $d22 = staticinvoke <java.lang.Math: double ceil(double)>($d21);
+
+        $i4 = (int) $d22;
+
+        r0.<java.awt.geom.ArcIterator: int arcSegs> = $i4;
+
+        $i5 = r0.<java.awt.geom.ArcIterator: int arcSegs>;
+
+        $d23 = (double) $i5;
+
+        $d24 = d14 / $d23;
+
+        $d25 = staticinvoke <java.lang.Math: double toRadians(double)>($d24);
+
+        r0.<java.awt.geom.ArcIterator: double increment> = $d25;
+
+        $d26 = r0.<java.awt.geom.ArcIterator: double increment>;
+
+        $d27 = staticinvoke <java.awt.geom.ArcIterator: double btan(double)>($d26);
+
+        r0.<java.awt.geom.ArcIterator: double cv> = $d27;
+
+        $d28 = r0.<java.awt.geom.ArcIterator: double cv>;
+
+        $b6 = $d28 cmpl 0.0;
+
+        if $b6 != 0 goto label3;
+
+        r0.<java.awt.geom.ArcIterator: int arcSegs> = 0;
+
+     label3:
+        $i7 = virtualinvoke r1.<java.awt.geom.Arc2D: int getArcType()>();
+
+        tableswitch($i7)
+        {
+            case 0: goto label4;
+            case 1: goto label5;
+            case 2: goto label6;
+            default: goto label7;
+        };
+
+     label4:
+        r0.<java.awt.geom.ArcIterator: int lineSegs> = 0;
+
+        goto label7;
+
+     label5:
+        r0.<java.awt.geom.ArcIterator: int lineSegs> = 1;
+
+        goto label7;
+
+     label6:
+        r0.<java.awt.geom.ArcIterator: int lineSegs> = 2;
+
+     label7:
+        $d29 = r0.<java.awt.geom.ArcIterator: double w>;
+
+        $b8 = $d29 cmpg 0.0;
+
+        $i12 = (int) $b8;
+
+        if $i12 < 0 goto label8;
+
+        $d15 = r0.<java.awt.geom.ArcIterator: double h>;
+
+        $b2 = $d15 cmpg 0.0;
+
+        $i13 = (int) $b2;
+
+        if $i13 >= 0 goto label9;
+
+     label8:
+        $i15 = (int) -1;
+
+        r0.<java.awt.geom.ArcIterator: int lineSegs> = $i15;
+
+        $i17 = (int) -1;
+
+        r0.<java.awt.geom.ArcIterator: int arcSegs> = $i17;
+
+     label9:
+        return;
+    }
+
+    public int getWindingRule()
+    {
+        java.awt.geom.ArcIterator r0;
+
+        r0 := @this: java.awt.geom.ArcIterator;
+
+        return 1;
+    }
+
+    public boolean isDone()
+    {
+        int $i0, $i1, $i2, $i3;
+        java.awt.geom.ArcIterator r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.geom.ArcIterator;
+
+        $i3 = r0.<java.awt.geom.ArcIterator: int index>;
+
+        $i1 = r0.<java.awt.geom.ArcIterator: int arcSegs>;
+
+        $i0 = r0.<java.awt.geom.ArcIterator: int lineSegs>;
+
+        $i2 = $i1 + $i0;
+
+        if $i3 <= $i2 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public void next()
+    {
+        int $i0, $i1;
+        java.awt.geom.ArcIterator r0;
+
+        r0 := @this: java.awt.geom.ArcIterator;
+
+        $i0 = r0.<java.awt.geom.ArcIterator: int index>;
+
+        $i1 = $i0 + 1;
+
+        r0.<java.awt.geom.ArcIterator: int index> = $i1;
+
+        return;
+    }
+
+    private static double btan(double)
+    {
+        double $d0, $d1, $d2, $d3, $d4, d5, d6;
+
+        d5 := @parameter0: double;
+
+        d6 = d5 / 2.0;
+
+        $d0 = staticinvoke <java.lang.Math: double sin(double)>(d6);
+
+        $d1 = 1.3333333333333333 * $d0;
+
+        $d2 = staticinvoke <java.lang.Math: double cos(double)>(d6);
+
+        $d3 = 1.0 + $d2;
+
+        $d4 = $d1 / $d3;
+
+        return $d4;
+    }
+
+    public int currentSegment(float[])
+    {
+        java.awt.geom.AffineTransform $r2, $r3, $r4, $r5, $r6, $r7;
+        java.awt.geom.ArcIterator r0;
+        float[] r1;
+        boolean $z0;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        java.util.NoSuchElementException $r8;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15, $d16, $d17, $d18, $d19, $d20, $d21, $d22, $d23, $d24, $d25, $d26, $d27, $d28, $d29, $d30, $d31, $d32, $d33, $d34, $d35, $d36, $d37, $d38, $d39, $d40, $d41, $d42, $d43, $d44, $d45, $d46, $d47, $d48, $d49, $d50, $d51, $d52, $d53, $d54, $d55, d56, d57, d58;
+
+        r0 := @this: java.awt.geom.ArcIterator;
+
+        r1 := @parameter0: float[];
+
+        $z0 = virtualinvoke r0.<java.awt.geom.ArcIterator: boolean isDone()>();
+
+        if $z0 == 0 goto label1;
+
+        $r8 = new java.util.NoSuchElementException;
+
+        specialinvoke $r8.<java.util.NoSuchElementException: void <init>(java.lang.String)>("arc iterator out of bounds");
+
+        throw $r8;
+
+     label1:
+        d56 = r0.<java.awt.geom.ArcIterator: double angStRad>;
+
+        $i0 = r0.<java.awt.geom.ArcIterator: int index>;
+
+        if $i0 != 0 goto label3;
+
+        $d46 = r0.<java.awt.geom.ArcIterator: double x>;
+
+        $d47 = staticinvoke <java.lang.Math: double cos(double)>(d56);
+
+        $d48 = r0.<java.awt.geom.ArcIterator: double w>;
+
+        $d49 = $d47 * $d48;
+
+        $d50 = $d46 + $d49;
+
+        $f8 = (float) $d50;
+
+        r1[0] = $f8;
+
+        $d51 = r0.<java.awt.geom.ArcIterator: double y>;
+
+        $d52 = staticinvoke <java.lang.Math: double sin(double)>(d56);
+
+        $d53 = r0.<java.awt.geom.ArcIterator: double h>;
+
+        $d54 = $d52 * $d53;
+
+        $d55 = $d51 + $d54;
+
+        $f9 = (float) $d55;
+
+        r1[1] = $f9;
+
+        $r6 = r0.<java.awt.geom.ArcIterator: java.awt.geom.AffineTransform affine>;
+
+        if $r6 == null goto label2;
+
+        $r7 = r0.<java.awt.geom.ArcIterator: java.awt.geom.AffineTransform affine>;
+
+        virtualinvoke $r7.<java.awt.geom.AffineTransform: void transform(float[],int,float[],int,int)>(r1, 0, r1, 0, 1);
+
+     label2:
+        return 0;
+
+     label3:
+        $i2 = r0.<java.awt.geom.ArcIterator: int index>;
+
+        $i1 = r0.<java.awt.geom.ArcIterator: int arcSegs>;
+
+        if $i2 <= $i1 goto label6;
+
+        $i8 = r0.<java.awt.geom.ArcIterator: int index>;
+
+        $i6 = r0.<java.awt.geom.ArcIterator: int arcSegs>;
+
+        $i5 = r0.<java.awt.geom.ArcIterator: int lineSegs>;
+
+        $i7 = $i6 + $i5;
+
+        if $i8 != $i7 goto label4;
+
+        return 4;
+
+     label4:
+        $d44 = r0.<java.awt.geom.ArcIterator: double x>;
+
+        $f6 = (float) $d44;
+
+        r1[0] = $f6;
+
+        $d45 = r0.<java.awt.geom.ArcIterator: double y>;
+
+        $f7 = (float) $d45;
+
+        r1[1] = $f7;
+
+        $r4 = r0.<java.awt.geom.ArcIterator: java.awt.geom.AffineTransform affine>;
+
+        if $r4 == null goto label5;
+
+        $r5 = r0.<java.awt.geom.ArcIterator: java.awt.geom.AffineTransform affine>;
+
+        virtualinvoke $r5.<java.awt.geom.AffineTransform: void transform(float[],int,float[],int,int)>(r1, 0, r1, 0, 1);
+
+     label5:
+        return 1;
+
+     label6:
+        $d1 = r0.<java.awt.geom.ArcIterator: double increment>;
+
+        $i3 = r0.<java.awt.geom.ArcIterator: int index>;
+
+        $i4 = $i3 - 1;
+
+        $d0 = (double) $i4;
+
+        $d2 = $d1 * $d0;
+
+        d57 = d56 + $d2;
+
+        $d3 = staticinvoke <java.lang.Math: double cos(double)>(d57);
+
+        $d4 = staticinvoke <java.lang.Math: double sin(double)>(d57);
+
+        $d10 = r0.<java.awt.geom.ArcIterator: double x>;
+
+        $d5 = r0.<java.awt.geom.ArcIterator: double cv>;
+
+        $d6 = $d5 * $d4;
+
+        $d8 = $d3 - $d6;
+
+        $d7 = r0.<java.awt.geom.ArcIterator: double w>;
+
+        $d9 = $d8 * $d7;
+
+        $d11 = $d10 + $d9;
+
+        $f0 = (float) $d11;
+
+        r1[0] = $f0;
+
+        $d17 = r0.<java.awt.geom.ArcIterator: double y>;
+
+        $d12 = r0.<java.awt.geom.ArcIterator: double cv>;
+
+        $d13 = $d12 * $d3;
+
+        $d15 = $d4 + $d13;
+
+        $d14 = r0.<java.awt.geom.ArcIterator: double h>;
+
+        $d16 = $d15 * $d14;
+
+        $d18 = $d17 + $d16;
+
+        $f1 = (float) $d18;
+
+        r1[1] = $f1;
+
+        $d19 = r0.<java.awt.geom.ArcIterator: double increment>;
+
+        d58 = d57 + $d19;
+
+        $d20 = staticinvoke <java.lang.Math: double cos(double)>(d58);
+
+        $d21 = staticinvoke <java.lang.Math: double sin(double)>(d58);
+
+        $d27 = r0.<java.awt.geom.ArcIterator: double x>;
+
+        $d22 = r0.<java.awt.geom.ArcIterator: double cv>;
+
+        $d23 = $d22 * $d21;
+
+        $d25 = $d20 + $d23;
+
+        $d24 = r0.<java.awt.geom.ArcIterator: double w>;
+
+        $d26 = $d25 * $d24;
+
+        $d28 = $d27 + $d26;
+
+        $f2 = (float) $d28;
+
+        r1[2] = $f2;
+
+        $d34 = r0.<java.awt.geom.ArcIterator: double y>;
+
+        $d29 = r0.<java.awt.geom.ArcIterator: double cv>;
+
+        $d30 = $d29 * $d20;
+
+        $d32 = $d21 - $d30;
+
+        $d31 = r0.<java.awt.geom.ArcIterator: double h>;
+
+        $d33 = $d32 * $d31;
+
+        $d35 = $d34 + $d33;
+
+        $f3 = (float) $d35;
+
+        r1[3] = $f3;
+
+        $d38 = r0.<java.awt.geom.ArcIterator: double x>;
+
+        $d36 = r0.<java.awt.geom.ArcIterator: double w>;
+
+        $d37 = $d20 * $d36;
+
+        $d39 = $d38 + $d37;
+
+        $f4 = (float) $d39;
+
+        r1[4] = $f4;
+
+        $d42 = r0.<java.awt.geom.ArcIterator: double y>;
+
+        $d40 = r0.<java.awt.geom.ArcIterator: double h>;
+
+        $d41 = $d21 * $d40;
+
+        $d43 = $d42 + $d41;
+
+        $f5 = (float) $d43;
+
+        r1[5] = $f5;
+
+        $r2 = r0.<java.awt.geom.ArcIterator: java.awt.geom.AffineTransform affine>;
+
+        if $r2 == null goto label7;
+
+        $r3 = r0.<java.awt.geom.ArcIterator: java.awt.geom.AffineTransform affine>;
+
+        virtualinvoke $r3.<java.awt.geom.AffineTransform: void transform(float[],int,float[],int,int)>(r1, 0, r1, 0, 3);
+
+     label7:
+        return 3;
+    }
+
+    public int currentSegment(double[])
+    {
+        java.awt.geom.AffineTransform $r2, $r3, $r4, $r5, $r6, $r7;
+        java.awt.geom.ArcIterator r0;
+        double[] r1;
+        boolean $z0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        java.util.NoSuchElementException $r8;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15, $d16, $d17, $d18, $d19, $d20, $d21, $d22, $d23, $d24, $d25, $d26, $d27, $d28, $d29, $d30, $d31, $d32, $d33, $d34, $d35, $d36, $d37, $d38, $d39, $d40, $d41, $d42, $d43, $d44, $d45, $d46, $d47, $d48, $d49, $d50, $d51, $d52, $d53, $d54, $d55, d56, d57, d58;
+
+        r0 := @this: java.awt.geom.ArcIterator;
+
+        r1 := @parameter0: double[];
+
+        $z0 = virtualinvoke r0.<java.awt.geom.ArcIterator: boolean isDone()>();
+
+        if $z0 == 0 goto label1;
+
+        $r8 = new java.util.NoSuchElementException;
+
+        specialinvoke $r8.<java.util.NoSuchElementException: void <init>(java.lang.String)>("arc iterator out of bounds");
+
+        throw $r8;
+
+     label1:
+        d56 = r0.<java.awt.geom.ArcIterator: double angStRad>;
+
+        $i0 = r0.<java.awt.geom.ArcIterator: int index>;
+
+        if $i0 != 0 goto label3;
+
+        $d46 = r0.<java.awt.geom.ArcIterator: double x>;
+
+        $d47 = staticinvoke <java.lang.Math: double cos(double)>(d56);
+
+        $d48 = r0.<java.awt.geom.ArcIterator: double w>;
+
+        $d49 = $d47 * $d48;
+
+        $d50 = $d46 + $d49;
+
+        r1[0] = $d50;
+
+        $d51 = r0.<java.awt.geom.ArcIterator: double y>;
+
+        $d52 = staticinvoke <java.lang.Math: double sin(double)>(d56);
+
+        $d53 = r0.<java.awt.geom.ArcIterator: double h>;
+
+        $d54 = $d52 * $d53;
+
+        $d55 = $d51 + $d54;
+
+        r1[1] = $d55;
+
+        $r6 = r0.<java.awt.geom.ArcIterator: java.awt.geom.AffineTransform affine>;
+
+        if $r6 == null goto label2;
+
+        $r7 = r0.<java.awt.geom.ArcIterator: java.awt.geom.AffineTransform affine>;
+
+        virtualinvoke $r7.<java.awt.geom.AffineTransform: void transform(double[],int,double[],int,int)>(r1, 0, r1, 0, 1);
+
+     label2:
+        return 0;
+
+     label3:
+        $i2 = r0.<java.awt.geom.ArcIterator: int index>;
+
+        $i1 = r0.<java.awt.geom.ArcIterator: int arcSegs>;
+
+        if $i2 <= $i1 goto label6;
+
+        $i8 = r0.<java.awt.geom.ArcIterator: int index>;
+
+        $i6 = r0.<java.awt.geom.ArcIterator: int arcSegs>;
+
+        $i5 = r0.<java.awt.geom.ArcIterator: int lineSegs>;
+
+        $i7 = $i6 + $i5;
+
+        if $i8 != $i7 goto label4;
+
+        return 4;
+
+     label4:
+        $d44 = r0.<java.awt.geom.ArcIterator: double x>;
+
+        r1[0] = $d44;
+
+        $d45 = r0.<java.awt.geom.ArcIterator: double y>;
+
+        r1[1] = $d45;
+
+        $r4 = r0.<java.awt.geom.ArcIterator: java.awt.geom.AffineTransform affine>;
+
+        if $r4 == null goto label5;
+
+        $r5 = r0.<java.awt.geom.ArcIterator: java.awt.geom.AffineTransform affine>;
+
+        virtualinvoke $r5.<java.awt.geom.AffineTransform: void transform(double[],int,double[],int,int)>(r1, 0, r1, 0, 1);
+
+     label5:
+        return 1;
+
+     label6:
+        $d1 = r0.<java.awt.geom.ArcIterator: double increment>;
+
+        $i3 = r0.<java.awt.geom.ArcIterator: int index>;
+
+        $i4 = $i3 - 1;
+
+        $d0 = (double) $i4;
+
+        $d2 = $d1 * $d0;
+
+        d57 = d56 + $d2;
+
+        $d3 = staticinvoke <java.lang.Math: double cos(double)>(d57);
+
+        $d4 = staticinvoke <java.lang.Math: double sin(double)>(d57);
+
+        $d10 = r0.<java.awt.geom.ArcIterator: double x>;
+
+        $d5 = r0.<java.awt.geom.ArcIterator: double cv>;
+
+        $d6 = $d5 * $d4;
+
+        $d8 = $d3 - $d6;
+
+        $d7 = r0.<java.awt.geom.ArcIterator: double w>;
+
+        $d9 = $d8 * $d7;
+
+        $d11 = $d10 + $d9;
+
+        r1[0] = $d11;
+
+        $d17 = r0.<java.awt.geom.ArcIterator: double y>;
+
+        $d12 = r0.<java.awt.geom.ArcIterator: double cv>;
+
+        $d13 = $d12 * $d3;
+
+        $d15 = $d4 + $d13;
+
+        $d14 = r0.<java.awt.geom.ArcIterator: double h>;
+
+        $d16 = $d15 * $d14;
+
+        $d18 = $d17 + $d16;
+
+        r1[1] = $d18;
+
+        $d19 = r0.<java.awt.geom.ArcIterator: double increment>;
+
+        d58 = d57 + $d19;
+
+        $d20 = staticinvoke <java.lang.Math: double cos(double)>(d58);
+
+        $d21 = staticinvoke <java.lang.Math: double sin(double)>(d58);
+
+        $d27 = r0.<java.awt.geom.ArcIterator: double x>;
+
+        $d22 = r0.<java.awt.geom.ArcIterator: double cv>;
+
+        $d23 = $d22 * $d21;
+
+        $d25 = $d20 + $d23;
+
+        $d24 = r0.<java.awt.geom.ArcIterator: double w>;
+
+        $d26 = $d25 * $d24;
+
+        $d28 = $d27 + $d26;
+
+        r1[2] = $d28;
+
+        $d34 = r0.<java.awt.geom.ArcIterator: double y>;
+
+        $d29 = r0.<java.awt.geom.ArcIterator: double cv>;
+
+        $d30 = $d29 * $d20;
+
+        $d32 = $d21 - $d30;
+
+        $d31 = r0.<java.awt.geom.ArcIterator: double h>;
+
+        $d33 = $d32 * $d31;
+
+        $d35 = $d34 + $d33;
+
+        r1[3] = $d35;
+
+        $d38 = r0.<java.awt.geom.ArcIterator: double x>;
+
+        $d36 = r0.<java.awt.geom.ArcIterator: double w>;
+
+        $d37 = $d20 * $d36;
+
+        $d39 = $d38 + $d37;
+
+        r1[4] = $d39;
+
+        $d42 = r0.<java.awt.geom.ArcIterator: double y>;
+
+        $d40 = r0.<java.awt.geom.ArcIterator: double h>;
+
+        $d41 = $d21 * $d40;
+
+        $d43 = $d42 + $d41;
+
+        r1[5] = $d43;
+
+        $r2 = r0.<java.awt.geom.ArcIterator: java.awt.geom.AffineTransform affine>;
+
+        if $r2 == null goto label7;
+
+        $r3 = r0.<java.awt.geom.ArcIterator: java.awt.geom.AffineTransform affine>;
+
+        virtualinvoke $r3.<java.awt.geom.AffineTransform: void transform(double[],int,double[],int,int)>(r1, 0, r1, 0, 3);
+
+     label7:
+        return 3;
+    }
+}

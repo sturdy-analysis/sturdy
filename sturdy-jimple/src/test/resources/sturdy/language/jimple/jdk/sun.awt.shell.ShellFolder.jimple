@@ -1,0 +1,1327 @@
+public abstract class sun.awt.shell.ShellFolder extends java.io.File
+{
+    private static final java.lang.String COLUMN_NAME;
+    private static final java.lang.String COLUMN_SIZE;
+    private static final java.lang.String COLUMN_DATE;
+    protected sun.awt.shell.ShellFolder parent;
+    private static final sun.awt.shell.ShellFolderManager shellFolderManager;
+    private static final sun.awt.shell.ShellFolder$Invoker invoker;
+    private static final java.util.Comparator DEFAULT_COMPARATOR;
+    private static final java.util.Comparator FILE_COMPARATOR;
+
+    void <init>(sun.awt.shell.ShellFolder, java.lang.String)
+    {
+        sun.awt.shell.ShellFolder r0, r2;
+        java.lang.String r1, $r3;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        r2 := @parameter0: sun.awt.shell.ShellFolder;
+
+        r1 := @parameter1: java.lang.String;
+
+        if r1 == null goto label1;
+
+        $r3 = r1;
+
+        goto label2;
+
+     label1:
+        $r3 = "ShellFolder";
+
+     label2:
+        specialinvoke r0.<java.io.File: void <init>(java.lang.String)>($r3);
+
+        r0.<sun.awt.shell.ShellFolder: sun.awt.shell.ShellFolder parent> = r2;
+
+        return;
+    }
+
+    public boolean isFileSystem()
+    {
+        sun.awt.shell.ShellFolder r0;
+        java.lang.String $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        $r1 = virtualinvoke r0.<sun.awt.shell.ShellFolder: java.lang.String getPath()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("ShellFolder");
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    protected abstract java.lang.Object writeReplace() throws java.io.ObjectStreamException;
+
+    public java.lang.String getParent()
+    {
+        sun.awt.shell.ShellFolder r0, $r1, $r2, $r3;
+        java.lang.String $r4, $r5;
+        boolean $z0;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        $r1 = r0.<sun.awt.shell.ShellFolder: sun.awt.shell.ShellFolder parent>;
+
+        if $r1 != null goto label1;
+
+        $z0 = virtualinvoke r0.<sun.awt.shell.ShellFolder: boolean isFileSystem()>();
+
+        if $z0 == 0 goto label1;
+
+        $r5 = specialinvoke r0.<java.io.File: java.lang.String getParent()>();
+
+        return $r5;
+
+     label1:
+        $r2 = r0.<sun.awt.shell.ShellFolder: sun.awt.shell.ShellFolder parent>;
+
+        if $r2 == null goto label2;
+
+        $r3 = r0.<sun.awt.shell.ShellFolder: sun.awt.shell.ShellFolder parent>;
+
+        $r4 = virtualinvoke $r3.<sun.awt.shell.ShellFolder: java.lang.String getPath()>();
+
+        return $r4;
+
+     label2:
+        return null;
+    }
+
+    public java.io.File getParentFile()
+    {
+        sun.awt.shell.ShellFolder r0, $r1, $r3;
+        java.io.File $r2;
+        boolean $z0;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        $r1 = r0.<sun.awt.shell.ShellFolder: sun.awt.shell.ShellFolder parent>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<sun.awt.shell.ShellFolder: sun.awt.shell.ShellFolder parent>;
+
+        return $r3;
+
+     label1:
+        $z0 = virtualinvoke r0.<sun.awt.shell.ShellFolder: boolean isFileSystem()>();
+
+        if $z0 == 0 goto label2;
+
+        $r2 = specialinvoke r0.<java.io.File: java.io.File getParentFile()>();
+
+        return $r2;
+
+     label2:
+        return null;
+    }
+
+    public java.io.File[] listFiles()
+    {
+        sun.awt.shell.ShellFolder r0;
+        java.io.File[] $r1;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        $r1 = virtualinvoke r0.<sun.awt.shell.ShellFolder: java.io.File[] listFiles(boolean)>(1);
+
+        return $r1;
+    }
+
+    public java.io.File[] listFiles(boolean)
+    {
+        java.lang.Object[] $r4;
+        java.io.File $r6, $r7;
+        sun.awt.shell.ShellFolder r0;
+        java.util.Vector $r2;
+        int i0, $i1, $i2, i3;
+        java.io.File[] $r1, $r3, $r5, r8;
+        boolean z0, $z1;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = specialinvoke r0.<java.io.File: java.io.File[] listFiles()>();
+
+        r8 = $r1;
+
+        if z0 != 0 goto label6;
+
+        $r2 = new java.util.Vector;
+
+        specialinvoke $r2.<java.util.Vector: void <init>()>();
+
+        if $r1 != null goto label1;
+
+        $i2 = 0;
+
+        goto label2;
+
+     label1:
+        $i2 = lengthof $r1;
+
+     label2:
+        i0 = $i2;
+
+        i3 = 0;
+
+     label3:
+        if i3 >= i0 goto label5;
+
+        $r6 = $r1[i3];
+
+        $z1 = virtualinvoke $r6.<java.io.File: boolean isHidden()>();
+
+        if $z1 != 0 goto label4;
+
+        $r7 = $r1[i3];
+
+        virtualinvoke $r2.<java.util.Vector: void addElement(java.lang.Object)>($r7);
+
+     label4:
+        i3 = i3 + 1;
+
+        goto label3;
+
+     label5:
+        $i1 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        $r3 = newarray (java.io.File)[$i1];
+
+        $r4 = virtualinvoke $r2.<java.util.Vector: java.lang.Object[] toArray(java.lang.Object[])>($r3);
+
+        $r5 = (java.io.File[]) $r4;
+
+        r8 = (java.io.File[]) $r5;
+
+     label6:
+        return r8;
+    }
+
+    public abstract boolean isLink();
+
+    public abstract sun.awt.shell.ShellFolder getLinkLocation() throws java.io.FileNotFoundException;
+
+    public abstract java.lang.String getDisplayName();
+
+    public abstract java.lang.String getFolderType();
+
+    public abstract java.lang.String getExecutableType();
+
+    public int compareTo(java.io.File)
+    {
+        java.io.File r0;
+        sun.awt.shell.ShellFolder r1, $r4;
+        int $i0, $i1, $i3;
+        java.lang.String $r2, $r3;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        r1 := @this: sun.awt.shell.ShellFolder;
+
+        r0 := @parameter0: java.io.File;
+
+        if r0 == null goto label1;
+
+        $z0 = r0 instanceof sun.awt.shell.ShellFolder;
+
+        if $z0 == 0 goto label1;
+
+        $z1 = r0 instanceof sun.awt.shell.ShellFolder;
+
+        if $z1 == 0 goto label3;
+
+        $r4 = (sun.awt.shell.ShellFolder) r0;
+
+        $z3 = virtualinvoke $r4.<sun.awt.shell.ShellFolder: boolean isFileSystem()>();
+
+        if $z3 == 0 goto label3;
+
+     label1:
+        $z4 = virtualinvoke r1.<sun.awt.shell.ShellFolder: boolean isFileSystem()>();
+
+        if $z4 == 0 goto label2;
+
+        $i0 = specialinvoke r1.<java.io.File: int compareTo(java.io.File)>(r0);
+
+        return $i0;
+
+     label2:
+        $i3 = (int) -1;
+
+        return $i3;
+
+     label3:
+        $z2 = virtualinvoke r1.<sun.awt.shell.ShellFolder: boolean isFileSystem()>();
+
+        if $z2 == 0 goto label4;
+
+        return 1;
+
+     label4:
+        $r2 = virtualinvoke r1.<sun.awt.shell.ShellFolder: java.lang.String getName()>();
+
+        $r3 = virtualinvoke r0.<java.io.File: java.lang.String getName()>();
+
+        $i1 = virtualinvoke $r2.<java.lang.String: int compareTo(java.lang.String)>($r3);
+
+        return $i1;
+    }
+
+    public java.awt.Image getIcon(boolean)
+    {
+        sun.awt.shell.ShellFolder r0;
+        boolean z0;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        z0 := @parameter0: boolean;
+
+        return null;
+    }
+
+    public static sun.awt.shell.ShellFolder getShellFolder(java.io.File) throws java.io.FileNotFoundException
+    {
+        sun.awt.shell.ShellFolder $r2, $r4;
+        sun.awt.shell.ShellFolderManager $r1;
+        java.io.File r0;
+        java.io.FileNotFoundException $r3;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.io.File;
+
+        $z0 = r0 instanceof sun.awt.shell.ShellFolder;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = (sun.awt.shell.ShellFolder) r0;
+
+        return $r4;
+
+     label1:
+        $z1 = virtualinvoke r0.<java.io.File: boolean exists()>();
+
+        if $z1 != 0 goto label2;
+
+        $r3 = new java.io.FileNotFoundException;
+
+        specialinvoke $r3.<java.io.FileNotFoundException: void <init>()>();
+
+        throw $r3;
+
+     label2:
+        $r1 = <sun.awt.shell.ShellFolder: sun.awt.shell.ShellFolderManager shellFolderManager>;
+
+        $r2 = virtualinvoke $r1.<sun.awt.shell.ShellFolderManager: sun.awt.shell.ShellFolder createShellFolder(java.io.File)>(r0);
+
+        return $r2;
+    }
+
+    public static java.lang.Object get(java.lang.String)
+    {
+        java.lang.Object $r2;
+        java.lang.String r0;
+        sun.awt.shell.ShellFolderManager $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = <sun.awt.shell.ShellFolder: sun.awt.shell.ShellFolderManager shellFolderManager>;
+
+        $r2 = virtualinvoke $r1.<sun.awt.shell.ShellFolderManager: java.lang.Object get(java.lang.String)>(r0);
+
+        return $r2;
+    }
+
+    public static boolean isComputerNode(java.io.File)
+    {
+        java.io.File r0;
+        sun.awt.shell.ShellFolderManager $r1;
+        boolean $z0;
+
+        r0 := @parameter0: java.io.File;
+
+        $r1 = <sun.awt.shell.ShellFolder: sun.awt.shell.ShellFolderManager shellFolderManager>;
+
+        $z0 = virtualinvoke $r1.<sun.awt.shell.ShellFolderManager: boolean isComputerNode(java.io.File)>(r0);
+
+        return $z0;
+    }
+
+    public static boolean isFileSystemRoot(java.io.File)
+    {
+        java.io.File r0;
+        sun.awt.shell.ShellFolderManager $r1;
+        boolean $z0;
+
+        r0 := @parameter0: java.io.File;
+
+        $r1 = <sun.awt.shell.ShellFolder: sun.awt.shell.ShellFolderManager shellFolderManager>;
+
+        $z0 = virtualinvoke $r1.<sun.awt.shell.ShellFolderManager: boolean isFileSystemRoot(java.io.File)>(r0);
+
+        return $z0;
+    }
+
+    public static java.io.File getNormalizedFile(java.io.File) throws java.io.IOException
+    {
+        java.net.URI $r3, $r4;
+        java.io.File r0, $r1, $r2;
+        boolean $z0;
+
+        r0 := @parameter0: java.io.File;
+
+        $r1 = virtualinvoke r0.<java.io.File: java.io.File getCanonicalFile()>();
+
+        $z0 = virtualinvoke r0.<java.io.File: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        return $r1;
+
+     label1:
+        $r2 = new java.io.File;
+
+        $r3 = virtualinvoke r0.<java.io.File: java.net.URI toURI()>();
+
+        $r4 = virtualinvoke $r3.<java.net.URI: java.net.URI normalize()>();
+
+        specialinvoke $r2.<java.io.File: void <init>(java.net.URI)>($r4);
+
+        return $r2;
+    }
+
+    public static void sort(java.util.List)
+    {
+        int $i0;
+        sun.awt.shell.ShellFolder$1 $r1;
+        java.util.List r0;
+
+        r0 := @parameter0: java.util.List;
+
+        if r0 == null goto label1;
+
+        $i0 = interfaceinvoke r0.<java.util.List: int size()>();
+
+        if $i0 > 1 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        $r1 = new sun.awt.shell.ShellFolder$1;
+
+        specialinvoke $r1.<sun.awt.shell.ShellFolder$1: void <init>(java.util.List)>(r0);
+
+        staticinvoke <sun.awt.shell.ShellFolder: java.lang.Object invoke(java.util.concurrent.Callable)>($r1);
+
+        return;
+    }
+
+    public void sortChildren(java.util.List)
+    {
+        java.util.List r2;
+        sun.awt.shell.ShellFolder r1;
+        sun.awt.shell.ShellFolder$2 $r0;
+
+        r1 := @this: sun.awt.shell.ShellFolder;
+
+        r2 := @parameter0: java.util.List;
+
+        $r0 = new sun.awt.shell.ShellFolder$2;
+
+        specialinvoke $r0.<sun.awt.shell.ShellFolder$2: void <init>(sun.awt.shell.ShellFolder,java.util.List)>(r1, r2);
+
+        staticinvoke <sun.awt.shell.ShellFolder: java.lang.Object invoke(java.util.concurrent.Callable)>($r0);
+
+        return;
+    }
+
+    public boolean isAbsolute()
+    {
+        sun.awt.shell.ShellFolder r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        $z0 = virtualinvoke r0.<sun.awt.shell.ShellFolder: boolean isFileSystem()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = specialinvoke r0.<java.io.File: boolean isAbsolute()>();
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+    }
+
+    public java.io.File getAbsoluteFile()
+    {
+        sun.awt.shell.ShellFolder r0;
+        java.io.File $r1;
+        boolean $z0;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        $z0 = virtualinvoke r0.<sun.awt.shell.ShellFolder: boolean isFileSystem()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = specialinvoke r0.<java.io.File: java.io.File getAbsoluteFile()>();
+
+        goto label2;
+
+     label1:
+        $r1 = r0;
+
+     label2:
+        return $r1;
+    }
+
+    public boolean canRead()
+    {
+        sun.awt.shell.ShellFolder r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        $z0 = virtualinvoke r0.<sun.awt.shell.ShellFolder: boolean isFileSystem()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = specialinvoke r0.<java.io.File: boolean canRead()>();
+
+        goto label2;
+
+     label1:
+        $z1 = 1;
+
+     label2:
+        return $z1;
+    }
+
+    public boolean canWrite()
+    {
+        sun.awt.shell.ShellFolder r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        $z0 = virtualinvoke r0.<sun.awt.shell.ShellFolder: boolean isFileSystem()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = specialinvoke r0.<java.io.File: boolean canWrite()>();
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public boolean exists()
+    {
+        sun.awt.shell.ShellFolder r0;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        $z0 = virtualinvoke r0.<sun.awt.shell.ShellFolder: boolean isFileSystem()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = staticinvoke <sun.awt.shell.ShellFolder: boolean isFileSystemRoot(java.io.File)>(r0);
+
+        if $z1 != 0 goto label1;
+
+        $z2 = specialinvoke r0.<java.io.File: boolean exists()>();
+
+        if $z2 == 0 goto label2;
+
+     label1:
+        $z3 = 1;
+
+        goto label3;
+
+     label2:
+        $z3 = 0;
+
+     label3:
+        return $z3;
+    }
+
+    public boolean isDirectory()
+    {
+        sun.awt.shell.ShellFolder r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        $z0 = virtualinvoke r0.<sun.awt.shell.ShellFolder: boolean isFileSystem()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = specialinvoke r0.<java.io.File: boolean isDirectory()>();
+
+        goto label2;
+
+     label1:
+        $z1 = 1;
+
+     label2:
+        return $z1;
+    }
+
+    public boolean isFile()
+    {
+        sun.awt.shell.ShellFolder r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        $z0 = virtualinvoke r0.<sun.awt.shell.ShellFolder: boolean isFileSystem()>();
+
+        if $z0 == 0 goto label1;
+
+        $z2 = specialinvoke r0.<java.io.File: boolean isFile()>();
+
+        goto label3;
+
+     label1:
+        $z1 = virtualinvoke r0.<sun.awt.shell.ShellFolder: boolean isDirectory()>();
+
+        if $z1 != 0 goto label2;
+
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+    }
+
+    public long lastModified()
+    {
+        long $l0;
+        sun.awt.shell.ShellFolder r0;
+        boolean $z0;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        $z0 = virtualinvoke r0.<sun.awt.shell.ShellFolder: boolean isFileSystem()>();
+
+        if $z0 == 0 goto label1;
+
+        $l0 = specialinvoke r0.<java.io.File: long lastModified()>();
+
+        goto label2;
+
+     label1:
+        $l0 = 0L;
+
+     label2:
+        return $l0;
+    }
+
+    public long length()
+    {
+        long $l0;
+        sun.awt.shell.ShellFolder r0;
+        boolean $z0;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        $z0 = virtualinvoke r0.<sun.awt.shell.ShellFolder: boolean isFileSystem()>();
+
+        if $z0 == 0 goto label1;
+
+        $l0 = specialinvoke r0.<java.io.File: long length()>();
+
+        goto label2;
+
+     label1:
+        $l0 = 0L;
+
+     label2:
+        return $l0;
+    }
+
+    public boolean createNewFile() throws java.io.IOException
+    {
+        sun.awt.shell.ShellFolder r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        $z0 = virtualinvoke r0.<sun.awt.shell.ShellFolder: boolean isFileSystem()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = specialinvoke r0.<java.io.File: boolean createNewFile()>();
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public boolean delete()
+    {
+        sun.awt.shell.ShellFolder r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        $z0 = virtualinvoke r0.<sun.awt.shell.ShellFolder: boolean isFileSystem()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = specialinvoke r0.<java.io.File: boolean delete()>();
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public void deleteOnExit()
+    {
+        sun.awt.shell.ShellFolder r0;
+        boolean $z0;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        $z0 = virtualinvoke r0.<sun.awt.shell.ShellFolder: boolean isFileSystem()>();
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<java.io.File: void deleteOnExit()>();
+
+     label1:
+        return;
+    }
+
+    public boolean mkdir()
+    {
+        sun.awt.shell.ShellFolder r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        $z0 = virtualinvoke r0.<sun.awt.shell.ShellFolder: boolean isFileSystem()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = specialinvoke r0.<java.io.File: boolean mkdir()>();
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public boolean mkdirs()
+    {
+        sun.awt.shell.ShellFolder r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        $z0 = virtualinvoke r0.<sun.awt.shell.ShellFolder: boolean isFileSystem()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = specialinvoke r0.<java.io.File: boolean mkdirs()>();
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public boolean renameTo(java.io.File)
+    {
+        sun.awt.shell.ShellFolder r0;
+        java.io.File r1;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        r1 := @parameter0: java.io.File;
+
+        $z0 = virtualinvoke r0.<sun.awt.shell.ShellFolder: boolean isFileSystem()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = specialinvoke r0.<java.io.File: boolean renameTo(java.io.File)>(r1);
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public boolean setLastModified(long)
+    {
+        sun.awt.shell.ShellFolder r0;
+        long l0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        l0 := @parameter0: long;
+
+        $z0 = virtualinvoke r0.<sun.awt.shell.ShellFolder: boolean isFileSystem()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = specialinvoke r0.<java.io.File: boolean setLastModified(long)>(l0);
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public boolean setReadOnly()
+    {
+        sun.awt.shell.ShellFolder r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        $z0 = virtualinvoke r0.<sun.awt.shell.ShellFolder: boolean isFileSystem()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = specialinvoke r0.<java.io.File: boolean setReadOnly()>();
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public java.lang.String toString()
+    {
+        sun.awt.shell.ShellFolder r0;
+        java.lang.String $r1;
+        boolean $z0;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        $z0 = virtualinvoke r0.<sun.awt.shell.ShellFolder: boolean isFileSystem()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = specialinvoke r0.<java.io.File: java.lang.String toString()>();
+
+        goto label2;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.awt.shell.ShellFolder: java.lang.String getDisplayName()>();
+
+     label2:
+        return $r1;
+    }
+
+    public static sun.awt.shell.ShellFolderColumnInfo[] getFolderColumns(java.io.File)
+    {
+        java.lang.Integer $r3, $r4, $r7, $r8, $r11, $r12;
+        sun.awt.shell.ShellFolder $r14;
+        sun.awt.shell.ShellFolderColumnInfo[] $r1, r15;
+        boolean $z0;
+        java.io.File r0;
+        sun.awt.shell.ShellFolderColumnInfo $r2, $r6, $r10;
+        java.util.Comparator $r5, $r9, $r13;
+
+        r0 := @parameter0: java.io.File;
+
+        r15 = null;
+
+        $z0 = r0 instanceof sun.awt.shell.ShellFolder;
+
+        if $z0 == 0 goto label1;
+
+        $r14 = (sun.awt.shell.ShellFolder) r0;
+
+        r15 = virtualinvoke $r14.<sun.awt.shell.ShellFolder: sun.awt.shell.ShellFolderColumnInfo[] getFolderColumns()>();
+
+     label1:
+        if r15 != null goto label2;
+
+        $r1 = newarray (sun.awt.shell.ShellFolderColumnInfo)[3];
+
+        $r2 = new sun.awt.shell.ShellFolderColumnInfo;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(150);
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(10);
+
+        $r5 = <sun.awt.shell.ShellFolder: java.util.Comparator FILE_COMPARATOR>;
+
+        specialinvoke $r2.<sun.awt.shell.ShellFolderColumnInfo: void <init>(java.lang.String,java.lang.Integer,java.lang.Integer,boolean,javax.swing.SortOrder,java.util.Comparator)>("FileChooser.fileNameHeaderText", $r3, $r4, 1, null, $r5);
+
+        $r1[0] = $r2;
+
+        $r6 = new sun.awt.shell.ShellFolderColumnInfo;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(75);
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(4);
+
+        $r9 = <sun.awt.shell.ShellFolder: java.util.Comparator DEFAULT_COMPARATOR>;
+
+        specialinvoke $r6.<sun.awt.shell.ShellFolderColumnInfo: void <init>(java.lang.String,java.lang.Integer,java.lang.Integer,boolean,javax.swing.SortOrder,java.util.Comparator,boolean)>("FileChooser.fileSizeHeaderText", $r7, $r8, 1, null, $r9, 1);
+
+        $r1[1] = $r6;
+
+        $r10 = new sun.awt.shell.ShellFolderColumnInfo;
+
+        $r11 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(130);
+
+        $r12 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(10);
+
+        $r13 = <sun.awt.shell.ShellFolder: java.util.Comparator DEFAULT_COMPARATOR>;
+
+        specialinvoke $r10.<sun.awt.shell.ShellFolderColumnInfo: void <init>(java.lang.String,java.lang.Integer,java.lang.Integer,boolean,javax.swing.SortOrder,java.util.Comparator,boolean)>("FileChooser.fileDateHeaderText", $r11, $r12, 1, null, $r13, 1);
+
+        $r1[2] = $r10;
+
+        r15 = $r1;
+
+     label2:
+        return r15;
+    }
+
+    public sun.awt.shell.ShellFolderColumnInfo[] getFolderColumns()
+    {
+        sun.awt.shell.ShellFolder r0;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        return null;
+    }
+
+    public static java.lang.Object getFolderColumnValue(java.io.File, int)
+    {
+        java.util.Date $r4;
+        long $l1, $l3;
+        java.io.File r0;
+        sun.awt.shell.ShellFolder $r1;
+        byte $b2;
+        java.lang.Long $r3;
+        int i0;
+        java.lang.Object $r2;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @parameter0: java.io.File;
+
+        i0 := @parameter1: int;
+
+        $z0 = r0 instanceof sun.awt.shell.ShellFolder;
+
+        if $z0 == 0 goto label01;
+
+        $r1 = (sun.awt.shell.ShellFolder) r0;
+
+        $r2 = virtualinvoke $r1.<sun.awt.shell.ShellFolder: java.lang.Object getFolderColumnValue(int)>(i0);
+
+        if $r2 == null goto label01;
+
+        return $r2;
+
+     label01:
+        if r0 == null goto label02;
+
+        $z1 = virtualinvoke r0.<java.io.File: boolean exists()>();
+
+        if $z1 != 0 goto label03;
+
+     label02:
+        return null;
+
+     label03:
+        tableswitch(i0)
+        {
+            case 0: goto label04;
+            case 1: goto label05;
+            case 2: goto label08;
+            default: goto label12;
+        };
+
+     label04:
+        return r0;
+
+     label05:
+        $z3 = virtualinvoke r0.<java.io.File: boolean isDirectory()>();
+
+        if $z3 == 0 goto label06;
+
+        $r3 = null;
+
+        goto label07;
+
+     label06:
+        $l3 = virtualinvoke r0.<java.io.File: long length()>();
+
+        $r3 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l3);
+
+     label07:
+        return $r3;
+
+     label08:
+        $z2 = staticinvoke <sun.awt.shell.ShellFolder: boolean isFileSystemRoot(java.io.File)>(r0);
+
+        if $z2 == 0 goto label09;
+
+        return null;
+
+     label09:
+        $l1 = virtualinvoke r0.<java.io.File: long lastModified()>();
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 != 0 goto label10;
+
+        $r4 = null;
+
+        goto label11;
+
+     label10:
+        $r4 = new java.util.Date;
+
+        specialinvoke $r4.<java.util.Date: void <init>(long)>($l1);
+
+     label11:
+        return $r4;
+
+     label12:
+        return null;
+    }
+
+    public java.lang.Object getFolderColumnValue(int)
+    {
+        int i0;
+        sun.awt.shell.ShellFolder r0;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        i0 := @parameter0: int;
+
+        return null;
+    }
+
+    public static java.lang.Object invoke(java.util.concurrent.Callable)
+    {
+        java.util.concurrent.Callable r0;
+        java.lang.Object $r1;
+        java.lang.InterruptedException $r2;
+
+        r0 := @parameter0: java.util.concurrent.Callable;
+
+     label1:
+        $r1 = staticinvoke <sun.awt.shell.ShellFolder: java.lang.Object invoke(java.util.concurrent.Callable,java.lang.Class)>(r0, class "Ljava/lang/RuntimeException;");
+
+     label2:
+        return $r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        return null;
+
+        catch java.lang.InterruptedException from label1 to label2 with label3;
+    }
+
+    public static java.lang.Object invoke(java.util.concurrent.Callable, java.lang.Class) throws java.lang.InterruptedException, java.lang.Throwable
+    {
+        java.lang.Throwable $r7;
+        java.util.concurrent.Callable r0;
+        java.lang.RuntimeException $r5, $r10;
+        java.lang.Exception $r3;
+        java.lang.InterruptedException $r9;
+        sun.awt.shell.ShellFolder$Invoker $r1;
+        java.lang.Thread $r8;
+        java.lang.Object $r2, $r6;
+        java.lang.Class r4;
+        boolean $z0, $z1, $z2;
+
+        r0 := @parameter0: java.util.concurrent.Callable;
+
+        r4 := @parameter1: java.lang.Class;
+
+     label1:
+        $r1 = <sun.awt.shell.ShellFolder: sun.awt.shell.ShellFolder$Invoker invoker>;
+
+        $r2 = interfaceinvoke $r1.<sun.awt.shell.ShellFolder$Invoker: java.lang.Object invoke(java.util.concurrent.Callable)>(r0);
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $z0 = $r3 instanceof java.lang.RuntimeException;
+
+        if $z0 == 0 goto label4;
+
+        $r10 = (java.lang.RuntimeException) $r3;
+
+        throw $r10;
+
+     label4:
+        $z1 = $r3 instanceof java.lang.InterruptedException;
+
+        if $z1 == 0 goto label5;
+
+        $r8 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r8.<java.lang.Thread: void interrupt()>();
+
+        $r9 = (java.lang.InterruptedException) $r3;
+
+        throw $r9;
+
+     label5:
+        $z2 = virtualinvoke r4.<java.lang.Class: boolean isInstance(java.lang.Object)>($r3);
+
+        if $z2 == 0 goto label6;
+
+        $r6 = virtualinvoke r4.<java.lang.Class: java.lang.Object cast(java.lang.Object)>($r3);
+
+        $r7 = (java.lang.Throwable) $r6;
+
+        throw $r7;
+
+     label6:
+        $r5 = new java.lang.RuntimeException;
+
+        specialinvoke $r5.<java.lang.RuntimeException: void <init>(java.lang.String,java.lang.Throwable)>("Unexpected error", $r3);
+
+        throw $r5;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public volatile int compareTo(java.lang.Object)
+    {
+        sun.awt.shell.ShellFolder r0;
+        int $i0;
+        java.lang.Object r1;
+        java.io.File $r2;
+
+        r0 := @this: sun.awt.shell.ShellFolder;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = (java.io.File) r1;
+
+        $i0 = virtualinvoke r0.<sun.awt.shell.ShellFolder: int compareTo(java.io.File)>($r2);
+
+        return $i0;
+    }
+
+    static java.util.Comparator access$000()
+    {
+        java.util.Comparator $r0;
+
+        $r0 = <sun.awt.shell.ShellFolder: java.util.Comparator FILE_COMPARATOR>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        sun.awt.shell.ShellFolderManager $r6, $r7;
+        java.lang.Error $r12, $r19;
+        java.lang.NullPointerException $r26;
+        java.lang.InstantiationException $r18;
+        java.lang.SecurityException $r25;
+        java.lang.String r2, $r15, $r17, $r22, $r24;
+        sun.awt.shell.ShellFolder$4 $r10;
+        sun.awt.shell.ShellFolder$3 $r9;
+        boolean $z0;
+        java.lang.IllegalAccessException $r11;
+        sun.awt.shell.ShellFolder$Invoker $r8;
+        java.lang.Object $r1, $r5;
+        java.lang.Class $r3, $r4, r28;
+        java.lang.StringBuilder $r13, $r14, $r16, $r20, $r21, $r23;
+        java.lang.ClassNotFoundException $r27;
+        java.awt.Toolkit $r0;
+
+        <sun.awt.shell.ShellFolder: java.lang.String COLUMN_DATE> = "FileChooser.fileDateHeaderText";
+
+        <sun.awt.shell.ShellFolder: java.lang.String COLUMN_SIZE> = "FileChooser.fileSizeHeaderText";
+
+        <sun.awt.shell.ShellFolder: java.lang.String COLUMN_NAME> = "FileChooser.fileNameHeaderText";
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r1 = virtualinvoke $r0.<java.awt.Toolkit: java.lang.Object getDesktopProperty(java.lang.String)>("Shell.shellFolderManager");
+
+        r2 = (java.lang.String) $r1;
+
+        r28 = null;
+
+     label01:
+        $r3 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>(r2, 0, null);
+
+        r28 = $r3;
+
+        $r4 = class "Lsun/awt/shell/ShellFolderManager;";
+
+        $z0 = virtualinvoke $r4.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>($r3);
+
+        if $z0 != 0 goto label02;
+
+        r28 = null;
+
+     label02:
+        goto label06;
+
+     label03:
+        $r27 := @caughtexception;
+
+        goto label06;
+
+     label04:
+        $r26 := @caughtexception;
+
+        goto label06;
+
+     label05:
+        $r25 := @caughtexception;
+
+     label06:
+        if r28 != null goto label07;
+
+        r28 = class "Lsun/awt/shell/ShellFolderManager;";
+
+     label07:
+        $r5 = virtualinvoke r28.<java.lang.Class: java.lang.Object newInstance()>();
+
+        $r6 = (sun.awt.shell.ShellFolderManager) $r5;
+
+        <sun.awt.shell.ShellFolder: sun.awt.shell.ShellFolderManager shellFolderManager> = $r6;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r18 := @caughtexception;
+
+        $r19 = new java.lang.Error;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not instantiate Shell Folder Manager: ");
+
+        $r22 = virtualinvoke r28.<java.lang.Class: java.lang.String getName()>();
+
+        $r23 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r19.<java.lang.Error: void <init>(java.lang.String)>($r24);
+
+        throw $r19;
+
+     label10:
+        $r11 := @caughtexception;
+
+        $r12 = new java.lang.Error;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not access Shell Folder Manager: ");
+
+        $r15 = virtualinvoke r28.<java.lang.Class: java.lang.String getName()>();
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r12.<java.lang.Error: void <init>(java.lang.String)>($r17);
+
+        throw $r12;
+
+     label11:
+        $r7 = <sun.awt.shell.ShellFolder: sun.awt.shell.ShellFolderManager shellFolderManager>;
+
+        $r8 = virtualinvoke $r7.<sun.awt.shell.ShellFolderManager: sun.awt.shell.ShellFolder$Invoker createInvoker()>();
+
+        <sun.awt.shell.ShellFolder: sun.awt.shell.ShellFolder$Invoker invoker> = $r8;
+
+        $r9 = new sun.awt.shell.ShellFolder$3;
+
+        specialinvoke $r9.<sun.awt.shell.ShellFolder$3: void <init>()>();
+
+        <sun.awt.shell.ShellFolder: java.util.Comparator DEFAULT_COMPARATOR> = $r9;
+
+        $r10 = new sun.awt.shell.ShellFolder$4;
+
+        specialinvoke $r10.<sun.awt.shell.ShellFolder$4: void <init>()>();
+
+        <sun.awt.shell.ShellFolder: java.util.Comparator FILE_COMPARATOR> = $r10;
+
+        return;
+
+        catch java.lang.ClassNotFoundException from label01 to label02 with label03;
+        catch java.lang.NullPointerException from label01 to label02 with label04;
+        catch java.lang.SecurityException from label01 to label02 with label05;
+        catch java.lang.InstantiationException from label07 to label08 with label09;
+        catch java.lang.IllegalAccessException from label07 to label08 with label10;
+    }
+}

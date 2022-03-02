@@ -1,0 +1,1192 @@
+public class javax.swing.JLayeredPane extends javax.swing.JComponent implements javax.accessibility.Accessible
+{
+    public static final java.lang.Integer DEFAULT_LAYER;
+    public static final java.lang.Integer PALETTE_LAYER;
+    public static final java.lang.Integer MODAL_LAYER;
+    public static final java.lang.Integer POPUP_LAYER;
+    public static final java.lang.Integer DRAG_LAYER;
+    public static final java.lang.Integer FRAME_CONTENT_LAYER;
+    public static final java.lang.String LAYER_PROPERTY;
+    private java.util.Hashtable componentToLayer;
+    private boolean optimizedDrawingPossible;
+
+    public void <init>()
+    {
+        javax.swing.JLayeredPane r0;
+
+        r0 := @this: javax.swing.JLayeredPane;
+
+        specialinvoke r0.<javax.swing.JComponent: void <init>()>();
+
+        r0.<javax.swing.JLayeredPane: boolean optimizedDrawingPossible> = 1;
+
+        virtualinvoke r0.<javax.swing.JLayeredPane: void setLayout(java.awt.LayoutManager)>(null);
+
+        return;
+    }
+
+    private void validateOptimizedDrawing()
+    {
+        java.lang.Throwable $r8;
+        java.lang.Integer $r4, $r7, r9;
+        java.awt.Component[] $r2;
+        int i0, i1;
+        boolean $z0, $z1, $z2, z3;
+        javax.swing.JComponent $r5;
+        java.awt.Component r3;
+        java.lang.Object $r1, $r6;
+        javax.swing.JLayeredPane r0;
+
+        r0 := @this: javax.swing.JLayeredPane;
+
+        z3 = 0;
+
+        $r1 = virtualinvoke r0.<javax.swing.JLayeredPane: java.lang.Object getTreeLock()>();
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = virtualinvoke r0.<javax.swing.JLayeredPane: java.awt.Component[] getComponents()>();
+
+        i0 = lengthof $r2;
+
+        i1 = 0;
+
+     label02:
+        if i1 >= i0 goto label06;
+
+        r3 = $r2[i1];
+
+        r9 = null;
+
+        $z0 = staticinvoke <sun.awt.SunToolkit: boolean isInstanceOf(java.lang.Object,java.lang.String)>(r3, "javax.swing.JInternalFrame");
+
+        if $z0 != 0 goto label03;
+
+        $z2 = r3 instanceof javax.swing.JComponent;
+
+        if $z2 == 0 goto label05;
+
+        $r5 = (javax.swing.JComponent) r3;
+
+        $r6 = virtualinvoke $r5.<javax.swing.JComponent: java.lang.Object getClientProperty(java.lang.Object)>("layeredContainerLayer");
+
+        $r7 = (java.lang.Integer) $r6;
+
+        r9 = $r7;
+
+        if $r7 == null goto label05;
+
+     label03:
+        if r9 == null goto label04;
+
+        $r4 = <javax.swing.JLayeredPane: java.lang.Integer FRAME_CONTENT_LAYER>;
+
+        $z1 = virtualinvoke r9.<java.lang.Integer: boolean equals(java.lang.Object)>($r4);
+
+        if $z1 == 0 goto label04;
+
+        goto label05;
+
+     label04:
+        z3 = 1;
+
+        goto label06;
+
+     label05:
+        i1 = i1 + 1;
+
+        goto label02;
+
+     label06:
+        exitmonitor $r1;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r8 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label09:
+        throw $r8;
+
+     label10:
+        if z3 == 0 goto label11;
+
+        r0.<javax.swing.JLayeredPane: boolean optimizedDrawingPossible> = 0;
+
+        goto label12;
+
+     label11:
+        r0.<javax.swing.JLayeredPane: boolean optimizedDrawingPossible> = 1;
+
+     label12:
+        return;
+
+        catch java.lang.Throwable from label01 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    protected void addImpl(java.awt.Component, java.lang.Object, int)
+    {
+        java.awt.Component r2;
+        java.lang.Integer $r3;
+        int i0, $i1, $i2, i3;
+        java.lang.Object r0;
+        javax.swing.JLayeredPane r1;
+        boolean $z0;
+
+        r1 := @this: javax.swing.JLayeredPane;
+
+        r2 := @parameter0: java.awt.Component;
+
+        r0 := @parameter1: java.lang.Object;
+
+        i0 := @parameter2: int;
+
+        $z0 = r0 instanceof java.lang.Integer;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = (java.lang.Integer) r0;
+
+        $i2 = virtualinvoke $r3.<java.lang.Integer: int intValue()>();
+
+        i3 = $i2;
+
+        virtualinvoke r1.<javax.swing.JLayeredPane: void setLayer(java.awt.Component,int)>(r2, $i2);
+
+        goto label2;
+
+     label1:
+        i3 = virtualinvoke r1.<javax.swing.JLayeredPane: int getLayer(java.awt.Component)>(r2);
+
+     label2:
+        $i1 = virtualinvoke r1.<javax.swing.JLayeredPane: int insertIndexForLayer(int,int)>(i3, i0);
+
+        specialinvoke r1.<javax.swing.JComponent: void addImpl(java.awt.Component,java.lang.Object,int)>(r2, r0, $i1);
+
+        virtualinvoke r2.<java.awt.Component: void validate()>();
+
+        virtualinvoke r2.<java.awt.Component: void repaint()>();
+
+        specialinvoke r1.<javax.swing.JLayeredPane: void validateOptimizedDrawing()>();
+
+        return;
+    }
+
+    public void remove(int)
+    {
+        int i0;
+        javax.swing.JLayeredPane r0;
+        java.awt.Component $r1;
+        java.util.Hashtable $r2;
+        boolean $z0;
+
+        r0 := @this: javax.swing.JLayeredPane;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<javax.swing.JLayeredPane: java.awt.Component getComponent(int)>(i0);
+
+        specialinvoke r0.<javax.swing.JComponent: void remove(int)>(i0);
+
+        if $r1 == null goto label1;
+
+        $z0 = $r1 instanceof javax.swing.JComponent;
+
+        if $z0 != 0 goto label1;
+
+        $r2 = virtualinvoke r0.<javax.swing.JLayeredPane: java.util.Hashtable getComponentToLayer()>();
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>($r1);
+
+     label1:
+        specialinvoke r0.<javax.swing.JLayeredPane: void validateOptimizedDrawing()>();
+
+        return;
+    }
+
+    public void removeAll()
+    {
+        java.awt.Component r3;
+        java.awt.Component[] $r1;
+        int $i0, i1, $i3;
+        javax.swing.JLayeredPane r0;
+        java.util.Hashtable $r2;
+        boolean $z0;
+
+        r0 := @this: javax.swing.JLayeredPane;
+
+        $r1 = virtualinvoke r0.<javax.swing.JLayeredPane: java.awt.Component[] getComponents()>();
+
+        $r2 = virtualinvoke r0.<javax.swing.JLayeredPane: java.util.Hashtable getComponentToLayer()>();
+
+        $i0 = lengthof $r1;
+
+        i1 = $i0 - 1;
+
+     label1:
+        if i1 < 0 goto label3;
+
+        r3 = $r1[i1];
+
+        if r3 == null goto label2;
+
+        $z0 = r3 instanceof javax.swing.JComponent;
+
+        if $z0 != 0 goto label2;
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>(r3);
+
+     label2:
+        $i3 = (int) -1;
+
+        i1 = i1 + $i3;
+
+        goto label1;
+
+     label3:
+        specialinvoke r0.<javax.swing.JComponent: void removeAll()>();
+
+        return;
+    }
+
+    public boolean isOptimizedDrawingEnabled()
+    {
+        javax.swing.JLayeredPane r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.JLayeredPane;
+
+        $z0 = r0.<javax.swing.JLayeredPane: boolean optimizedDrawingPossible>;
+
+        return $z0;
+    }
+
+    public static void putLayer(javax.swing.JComponent, int)
+    {
+        int i0;
+        javax.swing.JComponent r1;
+        java.lang.Integer $r0;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        i0 := @parameter1: int;
+
+        $r0 = new java.lang.Integer;
+
+        specialinvoke $r0.<java.lang.Integer: void <init>(int)>(i0);
+
+        virtualinvoke r1.<javax.swing.JComponent: void putClientProperty(java.lang.Object,java.lang.Object)>("layeredContainerLayer", $r0);
+
+        return;
+    }
+
+    public static int getLayer(javax.swing.JComponent)
+    {
+        javax.swing.JComponent r0;
+        int $i0, $i1;
+        java.lang.Object $r1;
+        java.lang.Integer $r2, $r3;
+
+        r0 := @parameter0: javax.swing.JComponent;
+
+        $r1 = virtualinvoke r0.<javax.swing.JComponent: java.lang.Object getClientProperty(java.lang.Object)>("layeredContainerLayer");
+
+        $r2 = (java.lang.Integer) $r1;
+
+        if $r2 == null goto label1;
+
+        $i1 = virtualinvoke $r2.<java.lang.Integer: int intValue()>();
+
+        return $i1;
+
+     label1:
+        $r3 = <javax.swing.JLayeredPane: java.lang.Integer DEFAULT_LAYER>;
+
+        $i0 = virtualinvoke $r3.<java.lang.Integer: int intValue()>();
+
+        return $i0;
+    }
+
+    public static javax.swing.JLayeredPane getLayeredPaneAbove(java.awt.Component)
+    {
+        javax.swing.JLayeredPane $r1;
+        java.awt.Container r2;
+        java.awt.Component r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.Component;
+
+        if r0 != null goto label1;
+
+        return null;
+
+     label1:
+        r2 = virtualinvoke r0.<java.awt.Component: java.awt.Container getParent()>();
+
+     label2:
+        if r2 == null goto label3;
+
+        $z0 = r2 instanceof javax.swing.JLayeredPane;
+
+        if $z0 != 0 goto label3;
+
+        r2 = virtualinvoke r2.<java.awt.Component: java.awt.Container getParent()>();
+
+        goto label2;
+
+     label3:
+        $r1 = (javax.swing.JLayeredPane) r2;
+
+        return $r1;
+    }
+
+    public void setLayer(java.awt.Component, int)
+    {
+        int i0, $i2;
+        javax.swing.JLayeredPane r0;
+        java.awt.Component r1;
+
+        r0 := @this: javax.swing.JLayeredPane;
+
+        r1 := @parameter0: java.awt.Component;
+
+        i0 := @parameter1: int;
+
+        $i2 = (int) -1;
+
+        virtualinvoke r0.<javax.swing.JLayeredPane: void setLayer(java.awt.Component,int,int)>(r1, i0, $i2);
+
+        return;
+    }
+
+    public void setLayer(java.awt.Component, int, int)
+    {
+        java.awt.Rectangle $r5, $r7, $r9;
+        java.lang.Integer $r1;
+        int i0, $i1, i2, $i3, $i4;
+        java.awt.Container $r4, $r6;
+        java.util.Hashtable $r3;
+        boolean $z0;
+        javax.swing.JComponent $r8;
+        java.awt.Component r2;
+        javax.swing.JLayeredPane r0;
+
+        r0 := @this: javax.swing.JLayeredPane;
+
+        r2 := @parameter0: java.awt.Component;
+
+        i0 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $r1 = virtualinvoke r0.<javax.swing.JLayeredPane: java.lang.Integer getObjectForLayer(int)>(i0);
+
+        $i1 = virtualinvoke r0.<javax.swing.JLayeredPane: int getLayer(java.awt.Component)>(r2);
+
+        if i0 != $i1 goto label1;
+
+        $i4 = virtualinvoke r0.<javax.swing.JLayeredPane: int getPosition(java.awt.Component)>(r2);
+
+        if i2 != $i4 goto label1;
+
+        $r9 = virtualinvoke r2.<java.awt.Component: java.awt.Rectangle getBounds()>();
+
+        virtualinvoke r0.<javax.swing.JLayeredPane: void repaint(java.awt.Rectangle)>($r9);
+
+        return;
+
+     label1:
+        $z0 = r2 instanceof javax.swing.JComponent;
+
+        if $z0 == 0 goto label2;
+
+        $r8 = (javax.swing.JComponent) r2;
+
+        virtualinvoke $r8.<javax.swing.JComponent: void putClientProperty(java.lang.Object,java.lang.Object)>("layeredContainerLayer", $r1);
+
+        goto label3;
+
+     label2:
+        $r3 = virtualinvoke r0.<javax.swing.JLayeredPane: java.util.Hashtable getComponentToLayer()>();
+
+        virtualinvoke $r3.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>(r2, $r1);
+
+     label3:
+        $r4 = virtualinvoke r2.<java.awt.Component: java.awt.Container getParent()>();
+
+        if $r4 == null goto label4;
+
+        $r6 = virtualinvoke r2.<java.awt.Component: java.awt.Container getParent()>();
+
+        if $r6 == r0 goto label5;
+
+     label4:
+        $r5 = virtualinvoke r2.<java.awt.Component: java.awt.Rectangle getBounds()>();
+
+        virtualinvoke r0.<javax.swing.JLayeredPane: void repaint(java.awt.Rectangle)>($r5);
+
+        return;
+
+     label5:
+        $i3 = specialinvoke r0.<javax.swing.JLayeredPane: int insertIndexForLayer(java.awt.Component,int,int)>(r2, i0, i2);
+
+        virtualinvoke r0.<javax.swing.JLayeredPane: void setComponentZOrder(java.awt.Component,int)>(r2, $i3);
+
+        $r7 = virtualinvoke r2.<java.awt.Component: java.awt.Rectangle getBounds()>();
+
+        virtualinvoke r0.<javax.swing.JLayeredPane: void repaint(java.awt.Rectangle)>($r7);
+
+        return;
+    }
+
+    public int getLayer(java.awt.Component)
+    {
+        javax.swing.JComponent $r5;
+        java.awt.Component r0;
+        java.lang.Integer $r4, r7;
+        int $i0, $i1;
+        java.lang.Object $r3, $r6;
+        javax.swing.JLayeredPane r1;
+        java.util.Hashtable $r2;
+        boolean $z0;
+
+        r1 := @this: javax.swing.JLayeredPane;
+
+        r0 := @parameter0: java.awt.Component;
+
+        $z0 = r0 instanceof javax.swing.JComponent;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = (javax.swing.JComponent) r0;
+
+        $r6 = virtualinvoke $r5.<javax.swing.JComponent: java.lang.Object getClientProperty(java.lang.Object)>("layeredContainerLayer");
+
+        r7 = (java.lang.Integer) $r6;
+
+        goto label2;
+
+     label1:
+        $r2 = virtualinvoke r1.<javax.swing.JLayeredPane: java.util.Hashtable getComponentToLayer()>();
+
+        $r3 = virtualinvoke $r2.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r0);
+
+        r7 = (java.lang.Integer) $r3;
+
+     label2:
+        if r7 != null goto label3;
+
+        $r4 = <javax.swing.JLayeredPane: java.lang.Integer DEFAULT_LAYER>;
+
+        $i1 = virtualinvoke $r4.<java.lang.Integer: int intValue()>();
+
+        return $i1;
+
+     label3:
+        $i0 = virtualinvoke r7.<java.lang.Integer: int intValue()>();
+
+        return $i0;
+    }
+
+    public int getIndexOf(java.awt.Component)
+    {
+        int $i0, i1, $i3;
+        javax.swing.JLayeredPane r0;
+        java.awt.Component r1, $r2;
+
+        r0 := @this: javax.swing.JLayeredPane;
+
+        r1 := @parameter0: java.awt.Component;
+
+        $i0 = virtualinvoke r0.<javax.swing.JLayeredPane: int getComponentCount()>();
+
+        i1 = 0;
+
+     label1:
+        if i1 >= $i0 goto label3;
+
+        $r2 = virtualinvoke r0.<javax.swing.JLayeredPane: java.awt.Component getComponent(int)>(i1);
+
+        if r1 != $r2 goto label2;
+
+        return i1;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        $i3 = (int) -1;
+
+        return $i3;
+    }
+
+    public void moveToFront(java.awt.Component)
+    {
+        javax.swing.JLayeredPane r0;
+        java.awt.Component r1;
+
+        r0 := @this: javax.swing.JLayeredPane;
+
+        r1 := @parameter0: java.awt.Component;
+
+        virtualinvoke r0.<javax.swing.JLayeredPane: void setPosition(java.awt.Component,int)>(r1, 0);
+
+        return;
+    }
+
+    public void moveToBack(java.awt.Component)
+    {
+        int $i1;
+        javax.swing.JLayeredPane r0;
+        java.awt.Component r1;
+
+        r0 := @this: javax.swing.JLayeredPane;
+
+        r1 := @parameter0: java.awt.Component;
+
+        $i1 = (int) -1;
+
+        virtualinvoke r0.<javax.swing.JLayeredPane: void setPosition(java.awt.Component,int)>(r1, $i1);
+
+        return;
+    }
+
+    public void setPosition(java.awt.Component, int)
+    {
+        int $i0, i1;
+        javax.swing.JLayeredPane r0;
+        java.awt.Component r1;
+
+        r0 := @this: javax.swing.JLayeredPane;
+
+        r1 := @parameter0: java.awt.Component;
+
+        i1 := @parameter1: int;
+
+        $i0 = virtualinvoke r0.<javax.swing.JLayeredPane: int getLayer(java.awt.Component)>(r1);
+
+        virtualinvoke r0.<javax.swing.JLayeredPane: void setLayer(java.awt.Component,int,int)>(r1, $i0, i1);
+
+        return;
+    }
+
+    public int getPosition(java.awt.Component)
+    {
+        java.awt.Component r1, $r2;
+        int $i0, $i1, $i2, i3, i4, $i6, $i8, $i10;
+        javax.swing.JLayeredPane r0;
+
+        r0 := @this: javax.swing.JLayeredPane;
+
+        r1 := @parameter0: java.awt.Component;
+
+        i3 = 0;
+
+        virtualinvoke r0.<javax.swing.JLayeredPane: int getComponentCount()>();
+
+        $i0 = virtualinvoke r0.<javax.swing.JLayeredPane: int getIndexOf(java.awt.Component)>(r1);
+
+        $i6 = (int) -1;
+
+        if $i0 != $i6 goto label1;
+
+        $i8 = (int) -1;
+
+        return $i8;
+
+     label1:
+        $i1 = virtualinvoke r0.<javax.swing.JLayeredPane: int getLayer(java.awt.Component)>(r1);
+
+        i4 = $i0 - 1;
+
+     label2:
+        if i4 < 0 goto label5;
+
+        $r2 = virtualinvoke r0.<javax.swing.JLayeredPane: java.awt.Component getComponent(int)>(i4);
+
+        $i2 = virtualinvoke r0.<javax.swing.JLayeredPane: int getLayer(java.awt.Component)>($r2);
+
+        if $i2 != $i1 goto label3;
+
+        i3 = i3 + 1;
+
+        goto label4;
+
+     label3:
+        return i3;
+
+     label4:
+        $i10 = (int) -1;
+
+        i4 = i4 + $i10;
+
+        goto label2;
+
+     label5:
+        return i3;
+    }
+
+    public int highestLayer()
+    {
+        int $i0, $i1;
+        javax.swing.JLayeredPane r0;
+        java.awt.Component $r1;
+
+        r0 := @this: javax.swing.JLayeredPane;
+
+        $i0 = virtualinvoke r0.<javax.swing.JLayeredPane: int getComponentCount()>();
+
+        if $i0 <= 0 goto label1;
+
+        $r1 = virtualinvoke r0.<javax.swing.JLayeredPane: java.awt.Component getComponent(int)>(0);
+
+        $i1 = virtualinvoke r0.<javax.swing.JLayeredPane: int getLayer(java.awt.Component)>($r1);
+
+        return $i1;
+
+     label1:
+        return 0;
+    }
+
+    public int lowestLayer()
+    {
+        int $i0, $i1, $i2;
+        javax.swing.JLayeredPane r0;
+        java.awt.Component $r1;
+
+        r0 := @this: javax.swing.JLayeredPane;
+
+        $i0 = virtualinvoke r0.<javax.swing.JLayeredPane: int getComponentCount()>();
+
+        if $i0 <= 0 goto label1;
+
+        $i1 = $i0 - 1;
+
+        $r1 = virtualinvoke r0.<javax.swing.JLayeredPane: java.awt.Component getComponent(int)>($i1);
+
+        $i2 = virtualinvoke r0.<javax.swing.JLayeredPane: int getLayer(java.awt.Component)>($r1);
+
+        return $i2;
+
+     label1:
+        return 0;
+    }
+
+    public int getComponentCountInLayer(int)
+    {
+        int $i0, $i1, i2, i3, i4;
+        javax.swing.JLayeredPane r0;
+        java.awt.Component $r1;
+
+        r0 := @this: javax.swing.JLayeredPane;
+
+        i2 := @parameter0: int;
+
+        i3 = 0;
+
+        $i0 = virtualinvoke r0.<javax.swing.JLayeredPane: int getComponentCount()>();
+
+        i4 = 0;
+
+     label1:
+        if i4 >= $i0 goto label4;
+
+        $r1 = virtualinvoke r0.<javax.swing.JLayeredPane: java.awt.Component getComponent(int)>(i4);
+
+        $i1 = virtualinvoke r0.<javax.swing.JLayeredPane: int getLayer(java.awt.Component)>($r1);
+
+        if $i1 != i2 goto label2;
+
+        i3 = i3 + 1;
+
+        goto label3;
+
+     label2:
+        if i3 > 0 goto label4;
+
+        if $i1 >= i2 goto label3;
+
+        goto label4;
+
+     label3:
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label4:
+        return i3;
+    }
+
+    public java.awt.Component[] getComponentsInLayer(int)
+    {
+        java.awt.Component $r2, $r3;
+        int i0, $i1, $i2, $i3, $i4, i5, i6;
+        java.awt.Component[] r1;
+        javax.swing.JLayeredPane r0;
+
+        r0 := @this: javax.swing.JLayeredPane;
+
+        i0 := @parameter0: int;
+
+        i5 = 0;
+
+        $i1 = virtualinvoke r0.<javax.swing.JLayeredPane: int getComponentCountInLayer(int)>(i0);
+
+        r1 = newarray (java.awt.Component)[$i1];
+
+        $i2 = virtualinvoke r0.<javax.swing.JLayeredPane: int getComponentCount()>();
+
+        i6 = 0;
+
+     label1:
+        if i6 >= $i2 goto label4;
+
+        $r2 = virtualinvoke r0.<javax.swing.JLayeredPane: java.awt.Component getComponent(int)>(i6);
+
+        $i3 = virtualinvoke r0.<javax.swing.JLayeredPane: int getLayer(java.awt.Component)>($r2);
+
+        if $i3 != i0 goto label2;
+
+        $i4 = i5;
+
+        i5 = i5 + 1;
+
+        $r3 = virtualinvoke r0.<javax.swing.JLayeredPane: java.awt.Component getComponent(int)>(i6);
+
+        r1[$i4] = $r3;
+
+        goto label3;
+
+     label2:
+        if i5 > 0 goto label4;
+
+        if $i3 >= i0 goto label3;
+
+        goto label4;
+
+     label3:
+        i6 = i6 + 1;
+
+        goto label1;
+
+     label4:
+        return r1;
+    }
+
+    public void paint(java.awt.Graphics)
+    {
+        java.awt.Color $r3, r4;
+        java.awt.Rectangle $r2;
+        java.awt.Graphics r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        javax.swing.JLayeredPane r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.JLayeredPane;
+
+        r1 := @parameter0: java.awt.Graphics;
+
+        $z0 = virtualinvoke r0.<javax.swing.JLayeredPane: boolean isOpaque()>();
+
+        if $z0 == 0 goto label3;
+
+        $r2 = virtualinvoke r1.<java.awt.Graphics: java.awt.Rectangle getClipBounds()>();
+
+        $r3 = virtualinvoke r0.<javax.swing.JLayeredPane: java.awt.Color getBackground()>();
+
+        r4 = $r3;
+
+        if $r3 != null goto label1;
+
+        r4 = <java.awt.Color: java.awt.Color lightGray>;
+
+     label1:
+        virtualinvoke r1.<java.awt.Graphics: void setColor(java.awt.Color)>(r4);
+
+        if $r2 == null goto label2;
+
+        $i5 = $r2.<java.awt.Rectangle: int x>;
+
+        $i4 = $r2.<java.awt.Rectangle: int y>;
+
+        $i3 = $r2.<java.awt.Rectangle: int width>;
+
+        $i2 = $r2.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r1.<java.awt.Graphics: void fillRect(int,int,int,int)>($i5, $i4, $i3, $i2);
+
+        goto label3;
+
+     label2:
+        $i0 = virtualinvoke r0.<javax.swing.JLayeredPane: int getWidth()>();
+
+        $i1 = virtualinvoke r0.<javax.swing.JLayeredPane: int getHeight()>();
+
+        virtualinvoke r1.<java.awt.Graphics: void fillRect(int,int,int,int)>(0, 0, $i0, $i1);
+
+     label3:
+        specialinvoke r0.<javax.swing.JComponent: void paint(java.awt.Graphics)>(r1);
+
+        return;
+    }
+
+    protected java.util.Hashtable getComponentToLayer()
+    {
+        javax.swing.JLayeredPane r0;
+        java.util.Hashtable $r1, $r2, $r3;
+
+        r0 := @this: javax.swing.JLayeredPane;
+
+        $r1 = r0.<javax.swing.JLayeredPane: java.util.Hashtable componentToLayer>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.util.Hashtable;
+
+        specialinvoke $r3.<java.util.Hashtable: void <init>(int)>(4);
+
+        r0.<javax.swing.JLayeredPane: java.util.Hashtable componentToLayer> = $r3;
+
+     label1:
+        $r2 = r0.<javax.swing.JLayeredPane: java.util.Hashtable componentToLayer>;
+
+        return $r2;
+    }
+
+    protected java.lang.Integer getObjectForLayer(int)
+    {
+        int i0;
+        javax.swing.JLayeredPane r1;
+        java.lang.Integer $r0, r2;
+
+        r1 := @this: javax.swing.JLayeredPane;
+
+        i0 := @parameter0: int;
+
+        lookupswitch(i0)
+        {
+            case 0: goto label1;
+            case 100: goto label2;
+            case 200: goto label3;
+            case 300: goto label4;
+            case 400: goto label5;
+            default: goto label6;
+        };
+
+     label1:
+        r2 = <javax.swing.JLayeredPane: java.lang.Integer DEFAULT_LAYER>;
+
+        goto label7;
+
+     label2:
+        r2 = <javax.swing.JLayeredPane: java.lang.Integer PALETTE_LAYER>;
+
+        goto label7;
+
+     label3:
+        r2 = <javax.swing.JLayeredPane: java.lang.Integer MODAL_LAYER>;
+
+        goto label7;
+
+     label4:
+        r2 = <javax.swing.JLayeredPane: java.lang.Integer POPUP_LAYER>;
+
+        goto label7;
+
+     label5:
+        r2 = <javax.swing.JLayeredPane: java.lang.Integer DRAG_LAYER>;
+
+        goto label7;
+
+     label6:
+        $r0 = new java.lang.Integer;
+
+        specialinvoke $r0.<java.lang.Integer: void <init>(int)>(i0);
+
+        r2 = $r0;
+
+     label7:
+        return r2;
+    }
+
+    protected int insertIndexForLayer(int, int)
+    {
+        int i0, i1, $i2;
+        javax.swing.JLayeredPane r0;
+
+        r0 := @this: javax.swing.JLayeredPane;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $i2 = specialinvoke r0.<javax.swing.JLayeredPane: int insertIndexForLayer(java.awt.Component,int,int)>(null, i0, i1);
+
+        return $i2;
+    }
+
+    private int insertIndexForLayer(java.awt.Component, int, int)
+    {
+        java.util.ArrayList $r7;
+        int $i0, $i1, i2, $i3, $i4, $i5, i6, i7, i8, i9, i10, $i12, $i14, $i16, $i18, $i20, $i22, $i24, $i26, $i28, $i30, $i32;
+        java.awt.Component $r3, $r4, r5, $r6;
+        java.lang.Object $r2;
+        javax.swing.JLayeredPane r0;
+
+        r0 := @this: javax.swing.JLayeredPane;
+
+        r5 := @parameter0: java.awt.Component;
+
+        i6 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $i12 = (int) -1;
+
+        i7 = $i12;
+
+        $i14 = (int) -1;
+
+        i8 = $i14;
+
+        $i0 = virtualinvoke r0.<javax.swing.JLayeredPane: int getComponentCount()>();
+
+        $r7 = new java.util.ArrayList;
+
+        specialinvoke $r7.<java.util.ArrayList: void <init>(int)>($i0);
+
+        i9 = 0;
+
+     label01:
+        if i9 >= $i0 goto label03;
+
+        $r4 = virtualinvoke r0.<javax.swing.JLayeredPane: java.awt.Component getComponent(int)>(i9);
+
+        if $r4 == r5 goto label02;
+
+        $r6 = virtualinvoke r0.<javax.swing.JLayeredPane: java.awt.Component getComponent(int)>(i9);
+
+        virtualinvoke $r7.<java.util.ArrayList: boolean add(java.lang.Object)>($r6);
+
+     label02:
+        i9 = i9 + 1;
+
+        goto label01;
+
+     label03:
+        $i1 = virtualinvoke $r7.<java.util.ArrayList: int size()>();
+
+        i10 = 0;
+
+     label04:
+        if i10 >= $i1 goto label08;
+
+        $r2 = virtualinvoke $r7.<java.util.ArrayList: java.lang.Object get(int)>(i10);
+
+        $r3 = (java.awt.Component) $r2;
+
+        $i5 = virtualinvoke r0.<javax.swing.JLayeredPane: int getLayer(java.awt.Component)>($r3);
+
+        $i16 = (int) -1;
+
+        if i7 != $i16 goto label05;
+
+        if $i5 != i6 goto label05;
+
+        i7 = i10;
+
+     label05:
+        if $i5 >= i6 goto label07;
+
+        if i10 != 0 goto label06;
+
+        i7 = 0;
+
+        i8 = 0;
+
+        goto label08;
+
+     label06:
+        i8 = i10;
+
+        goto label08;
+
+     label07:
+        i10 = i10 + 1;
+
+        goto label04;
+
+     label08:
+        $i18 = (int) -1;
+
+        if i7 != $i18 goto label09;
+
+        $i20 = (int) -1;
+
+        if i8 != $i20 goto label09;
+
+        return $i1;
+
+     label09:
+        $i22 = (int) -1;
+
+        if i7 == $i22 goto label10;
+
+        $i24 = (int) -1;
+
+        if i8 != $i24 goto label10;
+
+        i8 = $i1;
+
+     label10:
+        $i26 = (int) -1;
+
+        if i8 == $i26 goto label11;
+
+        $i28 = (int) -1;
+
+        if i7 != $i28 goto label11;
+
+        i7 = i8;
+
+     label11:
+        $i30 = (int) -1;
+
+        if i2 != $i30 goto label12;
+
+        return i8;
+
+     label12:
+        $i32 = (int) -1;
+
+        if i2 <= $i32 goto label13;
+
+        $i3 = i7 + i2;
+
+        if $i3 > i8 goto label13;
+
+        $i4 = i7 + i2;
+
+        return $i4;
+
+     label13:
+        return i8;
+    }
+
+    protected java.lang.String paramString()
+    {
+        java.lang.StringBuilder $r1, $r3, $r4, $r5;
+        javax.swing.JLayeredPane r0;
+        java.lang.String $r2, $r6, $r7;
+        boolean $z0;
+
+        r0 := @this: javax.swing.JLayeredPane;
+
+        $z0 = r0.<javax.swing.JLayeredPane: boolean optimizedDrawingPossible>;
+
+        if $z0 == 0 goto label1;
+
+        $r7 = "true";
+
+        goto label2;
+
+     label1:
+        $r7 = "false";
+
+     label2:
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = specialinvoke r0.<javax.swing.JComponent: java.lang.String paramString()>();
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",optimizedDrawingPossible=");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r6;
+    }
+
+    public javax.accessibility.AccessibleContext getAccessibleContext()
+    {
+        javax.accessibility.AccessibleContext $r1, $r2;
+        javax.swing.JLayeredPane r0;
+        javax.swing.JLayeredPane$AccessibleJLayeredPane $r3;
+
+        r0 := @this: javax.swing.JLayeredPane;
+
+        $r1 = r0.<javax.swing.JLayeredPane: javax.accessibility.AccessibleContext accessibleContext>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new javax.swing.JLayeredPane$AccessibleJLayeredPane;
+
+        specialinvoke $r3.<javax.swing.JLayeredPane$AccessibleJLayeredPane: void <init>(javax.swing.JLayeredPane)>(r0);
+
+        r0.<javax.swing.JLayeredPane: javax.accessibility.AccessibleContext accessibleContext> = $r3;
+
+     label1:
+        $r2 = r0.<javax.swing.JLayeredPane: javax.accessibility.AccessibleContext accessibleContext>;
+
+        return $r2;
+    }
+
+    static void <clinit>()
+    {
+        int $i1;
+        java.lang.Integer $r6, $r7, $r8, $r9, $r10, $r11;
+
+        <javax.swing.JLayeredPane: java.lang.String LAYER_PROPERTY> = "layeredContainerLayer";
+
+        $r6 = new java.lang.Integer;
+
+        specialinvoke $r6.<java.lang.Integer: void <init>(int)>(0);
+
+        <javax.swing.JLayeredPane: java.lang.Integer DEFAULT_LAYER> = $r6;
+
+        $r7 = new java.lang.Integer;
+
+        specialinvoke $r7.<java.lang.Integer: void <init>(int)>(100);
+
+        <javax.swing.JLayeredPane: java.lang.Integer PALETTE_LAYER> = $r7;
+
+        $r8 = new java.lang.Integer;
+
+        specialinvoke $r8.<java.lang.Integer: void <init>(int)>(200);
+
+        <javax.swing.JLayeredPane: java.lang.Integer MODAL_LAYER> = $r8;
+
+        $r9 = new java.lang.Integer;
+
+        specialinvoke $r9.<java.lang.Integer: void <init>(int)>(300);
+
+        <javax.swing.JLayeredPane: java.lang.Integer POPUP_LAYER> = $r9;
+
+        $r10 = new java.lang.Integer;
+
+        specialinvoke $r10.<java.lang.Integer: void <init>(int)>(400);
+
+        <javax.swing.JLayeredPane: java.lang.Integer DRAG_LAYER> = $r10;
+
+        $r11 = new java.lang.Integer;
+
+        $i1 = (int) -30000;
+
+        specialinvoke $r11.<java.lang.Integer: void <init>(int)>($i1);
+
+        <javax.swing.JLayeredPane: java.lang.Integer FRAME_CONTENT_LAYER> = $r11;
+
+        return;
+    }
+}

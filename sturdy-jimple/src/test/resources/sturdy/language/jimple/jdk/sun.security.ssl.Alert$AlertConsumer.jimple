@@ -1,0 +1,257 @@
+final class sun.security.ssl.Alert$AlertConsumer extends java.lang.Object implements sun.security.ssl.SSLConsumer
+{
+
+    private void <init>()
+    {
+        sun.security.ssl.Alert$AlertConsumer r0;
+
+        r0 := @this: sun.security.ssl.Alert$AlertConsumer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void consume(sun.security.ssl.ConnectionContext, java.nio.ByteBuffer) throws java.io.IOException
+    {
+        sun.security.ssl.Alert$Level $r5, $r29, $r36;
+        java.nio.ByteBuffer r3;
+        byte $b0, $b1, $b2, $b3, $b4;
+        sun.security.ssl.SSLConfiguration $r16, $r18;
+        java.lang.Byte $r24, $r28;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        sun.security.ssl.Alert$AlertConsumer r35;
+        sun.security.ssl.SSLHandshake $r22, $r26;
+        javax.net.ssl.SSLException $r10, $r30, $r33, $r46;
+        sun.security.ssl.ClientAuthType $r19, $r20;
+        java.lang.StringBuilder $r7, $r9, $r12, $r13, $r14, $r42, $r44, $r49, $r50, $r51;
+        java.lang.Object[] $r34;
+        java.util.LinkedHashMap $r23, $r27;
+        sun.security.ssl.ConnectionContext r0;
+        int $i5;
+        java.lang.String $r8, $r43, $r45, r47;
+        sun.security.ssl.Alert$AlertMessage $r48;
+        sun.security.ssl.TransportContext r1;
+        sun.security.ssl.Alert $r4, $r17, $r32, $r37, r38, $r39, $r40;
+        sun.security.ssl.HandshakeContext $r15, $r21, $r25, $r31;
+
+        r35 := @this: sun.security.ssl.Alert$AlertConsumer;
+
+        r0 := @parameter0: sun.security.ssl.ConnectionContext;
+
+        r3 := @parameter1: java.nio.ByteBuffer;
+
+        r1 = (sun.security.ssl.TransportContext) r0;
+
+        $r48 = new sun.security.ssl.Alert$AlertMessage;
+
+        specialinvoke $r48.<sun.security.ssl.Alert$AlertMessage: void <init>(sun.security.ssl.TransportContext,java.nio.ByteBuffer)>(r1, r3);
+
+        $z0 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z0 == 0 goto label01;
+
+        $z4 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl");
+
+        if $z4 == 0 goto label01;
+
+        $r34 = newarray (java.lang.Object)[1];
+
+        $r34[0] = $r48;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Received alert message", $r34);
+
+     label01:
+        $b3 = staticinvoke <sun.security.ssl.Alert$AlertMessage: byte access$100(sun.security.ssl.Alert$AlertMessage)>($r48);
+
+        $r36 = staticinvoke <sun.security.ssl.Alert$Level: sun.security.ssl.Alert$Level valueOf(byte)>($b3);
+
+        $b4 = staticinvoke <sun.security.ssl.Alert$AlertMessage: byte access$200(sun.security.ssl.Alert$AlertMessage)>($r48);
+
+        $r37 = staticinvoke <sun.security.ssl.Alert: sun.security.ssl.Alert valueOf(byte)>($b4);
+
+        r38 = $r37;
+
+        $r39 = <sun.security.ssl.Alert: sun.security.ssl.Alert CLOSE_NOTIFY>;
+
+        if $r37 != $r39 goto label03;
+
+        r1.<sun.security.ssl.TransportContext: boolean isInputCloseNotified> = 1;
+
+        virtualinvoke r1.<sun.security.ssl.TransportContext: void closeInbound()>();
+
+        $z3 = r1.<sun.security.ssl.TransportContext: boolean peerUserCanceled>;
+
+        if $z3 == 0 goto label02;
+
+        virtualinvoke r1.<sun.security.ssl.TransportContext: void closeOutbound()>();
+
+        goto label11;
+
+     label02:
+        $r31 = r1.<sun.security.ssl.TransportContext: sun.security.ssl.HandshakeContext handshakeContext>;
+
+        if $r31 == null goto label11;
+
+        $r32 = <sun.security.ssl.Alert: sun.security.ssl.Alert UNEXPECTED_MESSAGE>;
+
+        $r33 = virtualinvoke r1.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r32, "Received close_notify during handshake");
+
+        throw $r33;
+
+     label03:
+        $r4 = <sun.security.ssl.Alert: sun.security.ssl.Alert USER_CANCELED>;
+
+        if $r37 != $r4 goto label05;
+
+        $r29 = <sun.security.ssl.Alert$Level: sun.security.ssl.Alert$Level WARNING>;
+
+        if $r36 != $r29 goto label04;
+
+        r1.<sun.security.ssl.TransportContext: boolean peerUserCanceled> = 1;
+
+        goto label11;
+
+     label04:
+        $r30 = virtualinvoke r1.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String,boolean,java.lang.Throwable)>($r37, "Received fatal close_notify alert", 1, null);
+
+        throw $r30;
+
+     label05:
+        $r5 = <sun.security.ssl.Alert$Level: sun.security.ssl.Alert$Level WARNING>;
+
+        if $r36 != $r5 goto label08;
+
+        if $r37 == null goto label08;
+
+        $z1 = $r37.<sun.security.ssl.Alert: boolean handshakeOnly>;
+
+        if $z1 == 0 goto label11;
+
+        $r15 = r1.<sun.security.ssl.TransportContext: sun.security.ssl.HandshakeContext handshakeContext>;
+
+        if $r15 == null goto label11;
+
+        $r16 = r1.<sun.security.ssl.TransportContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $z2 = $r16.<sun.security.ssl.SSLConfiguration: boolean isClientMode>;
+
+        if $z2 != 0 goto label06;
+
+        $r17 = <sun.security.ssl.Alert: sun.security.ssl.Alert NO_CERTIFICATE>;
+
+        if $r37 != $r17 goto label06;
+
+        $r18 = r1.<sun.security.ssl.TransportContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $r20 = $r18.<sun.security.ssl.SSLConfiguration: sun.security.ssl.ClientAuthType clientAuthType>;
+
+        $r19 = <sun.security.ssl.ClientAuthType: sun.security.ssl.ClientAuthType CLIENT_AUTH_REQUESTED>;
+
+        if $r20 == $r19 goto label07;
+
+     label06:
+        $r40 = <sun.security.ssl.Alert: sun.security.ssl.Alert HANDSHAKE_FAILURE>;
+
+        $r49 = new java.lang.StringBuilder;
+
+        specialinvoke $r49.<java.lang.StringBuilder: void <init>()>();
+
+        $r42 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("received handshake warning: ");
+
+        $r43 = $r37.<sun.security.ssl.Alert: java.lang.String description>;
+
+        $r44 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r43);
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r46 = virtualinvoke r1.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r40, $r45);
+
+        throw $r46;
+
+     label07:
+        $r21 = r1.<sun.security.ssl.TransportContext: sun.security.ssl.HandshakeContext handshakeContext>;
+
+        $r23 = $r21.<sun.security.ssl.HandshakeContext: java.util.LinkedHashMap handshakeConsumers>;
+
+        $r22 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake CERTIFICATE>;
+
+        $b1 = $r22.<sun.security.ssl.SSLHandshake: byte id>;
+
+        $r24 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b1);
+
+        virtualinvoke $r23.<java.util.LinkedHashMap: java.lang.Object remove(java.lang.Object)>($r24);
+
+        $r25 = r1.<sun.security.ssl.TransportContext: sun.security.ssl.HandshakeContext handshakeContext>;
+
+        $r27 = $r25.<sun.security.ssl.HandshakeContext: java.util.LinkedHashMap handshakeConsumers>;
+
+        $r26 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake CERTIFICATE_VERIFY>;
+
+        $b2 = $r26.<sun.security.ssl.SSLHandshake: byte id>;
+
+        $r28 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b2);
+
+        virtualinvoke $r27.<java.util.LinkedHashMap: java.lang.Object remove(java.lang.Object)>($r28);
+
+        goto label11;
+
+     label08:
+        if $r37 != null goto label09;
+
+        r38 = <sun.security.ssl.Alert: sun.security.ssl.Alert UNEXPECTED_MESSAGE>;
+
+        $r50 = new java.lang.StringBuilder;
+
+        specialinvoke $r50.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown alert description (");
+
+        $b0 = staticinvoke <sun.security.ssl.Alert$AlertMessage: byte access$200(sun.security.ssl.Alert$AlertMessage)>($r48);
+
+        $i5 = (int) $b0;
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        r47 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label10;
+
+     label09:
+        $r51 = new java.lang.StringBuilder;
+
+        specialinvoke $r51.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Received fatal alert: ");
+
+        $r8 = $r37.<sun.security.ssl.Alert: java.lang.String description>;
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        r47 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label10:
+        $r10 = virtualinvoke r1.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String,boolean,java.lang.Throwable)>(r38, r47, 1, null);
+
+        throw $r10;
+
+     label11:
+        return;
+    }
+
+    void <init>(sun.security.ssl.Alert$1)
+    {
+        sun.security.ssl.Alert$AlertConsumer r0;
+        sun.security.ssl.Alert$1 r1;
+
+        r0 := @this: sun.security.ssl.Alert$AlertConsumer;
+
+        r1 := @parameter0: sun.security.ssl.Alert$1;
+
+        specialinvoke r0.<sun.security.ssl.Alert$AlertConsumer: void <init>()>();
+
+        return;
+    }
+}

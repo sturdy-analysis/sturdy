@@ -1,0 +1,312 @@
+final class sun.security.ssl.DHKeyExchange$DHEPossessionGenerator extends java.lang.Object implements sun.security.ssl.SSLPossessionGenerator
+{
+    private static final boolean useSmartEphemeralDHKeys;
+    private static final boolean useLegacyEphemeralDHKeys;
+    private static final int customizedDHKeySize;
+    private final boolean exportable;
+
+    private void <init>(boolean)
+    {
+        sun.security.ssl.DHKeyExchange$DHEPossessionGenerator r0;
+        boolean z0;
+
+        r0 := @this: sun.security.ssl.DHKeyExchange$DHEPossessionGenerator;
+
+        z0 := @parameter0: boolean;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.ssl.DHKeyExchange$DHEPossessionGenerator: boolean exportable> = z0;
+
+        return;
+    }
+
+    public sun.security.ssl.SSLPossession createPossession(sun.security.ssl.HandshakeContext)
+    {
+        sun.security.ssl.SupportedGroupsExtension$NamedGroupType $r9;
+        java.security.SecureRandom $r15, $r19;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        sun.security.ssl.ServerHandshakeContext r2;
+        sun.security.ssl.X509Authentication$X509Possession $r5;
+        sun.security.ssl.SSLContextImpl $r14, $r18;
+        java.util.List $r6, $r7, $r8;
+        java.security.PrivateKey r16;
+        sun.security.ssl.SSLPossession $r3, $r4;
+        sun.security.ssl.DHKeyExchange$DHEPossessionGenerator r0;
+        sun.security.ssl.SupportedGroupsExtension$NamedGroup $r12;
+        sun.security.ssl.ProtocolVersion $r11;
+        short $s2, $s4;
+        int $i0, $i1, i3;
+        java.security.AlgorithmConstraints $r10;
+        sun.security.ssl.DHKeyExchange$DHEPossession $r13, $r17;
+        sun.security.ssl.HandshakeContext r1;
+
+        r0 := @this: sun.security.ssl.DHKeyExchange$DHEPossessionGenerator;
+
+        r1 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        $z0 = <sun.security.ssl.DHKeyExchange$DHEPossessionGenerator: boolean useLegacyEphemeralDHKeys>;
+
+        if $z0 != 0 goto label01;
+
+        $r6 = r1.<sun.security.ssl.HandshakeContext: java.util.List clientRequestedNamedGroups>;
+
+        if $r6 == null goto label01;
+
+        $r7 = r1.<sun.security.ssl.HandshakeContext: java.util.List clientRequestedNamedGroups>;
+
+        $z5 = interfaceinvoke $r7.<java.util.List: boolean isEmpty()>();
+
+        if $z5 != 0 goto label01;
+
+        $r11 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r10 = r1.<sun.security.ssl.HandshakeContext: java.security.AlgorithmConstraints algorithmConstraints>;
+
+        $r9 = <sun.security.ssl.SupportedGroupsExtension$NamedGroupType: sun.security.ssl.SupportedGroupsExtension$NamedGroupType NAMED_GROUP_FFDHE>;
+
+        $r8 = r1.<sun.security.ssl.HandshakeContext: java.util.List clientRequestedNamedGroups>;
+
+        $r12 = staticinvoke <sun.security.ssl.SupportedGroupsExtension$SupportedGroups: sun.security.ssl.SupportedGroupsExtension$NamedGroup getPreferredGroup(sun.security.ssl.ProtocolVersion,java.security.AlgorithmConstraints,sun.security.ssl.SupportedGroupsExtension$NamedGroupType,java.util.List)>($r11, $r10, $r9, $r8);
+
+        if $r12 == null goto label01;
+
+        $r13 = new sun.security.ssl.DHKeyExchange$DHEPossession;
+
+        $r14 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.SSLContextImpl sslContext>;
+
+        $r15 = virtualinvoke $r14.<sun.security.ssl.SSLContextImpl: java.security.SecureRandom getSecureRandom()>();
+
+        specialinvoke $r13.<sun.security.ssl.DHKeyExchange$DHEPossession: void <init>(sun.security.ssl.SupportedGroupsExtension$NamedGroup,java.security.SecureRandom)>($r12, $r15);
+
+        return $r13;
+
+     label01:
+        $z6 = r0.<sun.security.ssl.DHKeyExchange$DHEPossessionGenerator: boolean exportable>;
+
+        if $z6 == 0 goto label02;
+
+        $s2 = 512;
+
+        goto label03;
+
+     label02:
+        $s2 = 1024;
+
+     label03:
+        i3 = $s2;
+
+        $z1 = r0.<sun.security.ssl.DHKeyExchange$DHEPossessionGenerator: boolean exportable>;
+
+        if $z1 != 0 goto label10;
+
+        $z2 = <sun.security.ssl.DHKeyExchange$DHEPossessionGenerator: boolean useLegacyEphemeralDHKeys>;
+
+        if $z2 == 0 goto label04;
+
+        i3 = 768;
+
+        goto label10;
+
+     label04:
+        $z3 = <sun.security.ssl.DHKeyExchange$DHEPossessionGenerator: boolean useSmartEphemeralDHKeys>;
+
+        if $z3 == 0 goto label09;
+
+        r16 = null;
+
+        r2 = (sun.security.ssl.ServerHandshakeContext) r1;
+
+        $r3 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLPossession interimAuthn>;
+
+        $z4 = $r3 instanceof sun.security.ssl.X509Authentication$X509Possession;
+
+        if $z4 == 0 goto label05;
+
+        $r4 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLPossession interimAuthn>;
+
+        $r5 = (sun.security.ssl.X509Authentication$X509Possession) $r4;
+
+        r16 = $r5.<sun.security.ssl.X509Authentication$X509Possession: java.security.PrivateKey popPrivateKey>;
+
+     label05:
+        if r16 == null goto label08;
+
+        $i1 = staticinvoke <sun.security.util.KeyUtil: int getKeySize(java.security.Key)>(r16);
+
+        if $i1 > 1024 goto label06;
+
+        $s4 = 1024;
+
+        goto label07;
+
+     label06:
+        $s4 = 2048;
+
+     label07:
+        i3 = $s4;
+
+     label08:
+        goto label10;
+
+     label09:
+        $i0 = <sun.security.ssl.DHKeyExchange$DHEPossessionGenerator: int customizedDHKeySize>;
+
+        if $i0 <= 0 goto label10;
+
+        i3 = <sun.security.ssl.DHKeyExchange$DHEPossessionGenerator: int customizedDHKeySize>;
+
+     label10:
+        $r17 = new sun.security.ssl.DHKeyExchange$DHEPossession;
+
+        $r18 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.SSLContextImpl sslContext>;
+
+        $r19 = virtualinvoke $r18.<sun.security.ssl.SSLContextImpl: java.security.SecureRandom getSecureRandom()>();
+
+        specialinvoke $r17.<sun.security.ssl.DHKeyExchange$DHEPossession: void <init>(int,java.security.SecureRandom)>(i3, $r19);
+
+        return $r17;
+    }
+
+    void <init>(boolean, sun.security.ssl.DHKeyExchange$1)
+    {
+        sun.security.ssl.DHKeyExchange$1 r1;
+        sun.security.ssl.DHKeyExchange$DHEPossessionGenerator r0;
+        boolean z0;
+
+        r0 := @this: sun.security.ssl.DHKeyExchange$DHEPossessionGenerator;
+
+        z0 := @parameter0: boolean;
+
+        r1 := @parameter1: sun.security.ssl.DHKeyExchange$1;
+
+        specialinvoke r0.<sun.security.ssl.DHKeyExchange$DHEPossessionGenerator: void <init>(boolean)>(z0);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i7, $i9, $i11;
+        java.lang.String $r0, $r1, $r2, $r10;
+        boolean $z0, $z1, $z2;
+        java.lang.NumberFormatException $r3;
+        java.lang.IllegalArgumentException $r12, $r13;
+        java.lang.StringBuilder $r7, $r8, $r9, $r11;
+
+        $r0 = staticinvoke <sun.security.action.GetPropertyAction: java.lang.String privilegedGetProperty(java.lang.String)>("jdk.tls.ephemeralDHKeySize");
+
+        if $r0 == null goto label1;
+
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        <sun.security.ssl.DHKeyExchange$DHEPossessionGenerator: boolean useLegacyEphemeralDHKeys> = 0;
+
+        <sun.security.ssl.DHKeyExchange$DHEPossessionGenerator: boolean useSmartEphemeralDHKeys> = 0;
+
+        $i7 = (int) -1;
+
+        <sun.security.ssl.DHKeyExchange$DHEPossessionGenerator: int customizedDHKeySize> = $i7;
+
+        goto label9;
+
+     label2:
+        $r1 = "matched";
+
+        $z1 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>($r0);
+
+        if $z1 == 0 goto label3;
+
+        <sun.security.ssl.DHKeyExchange$DHEPossessionGenerator: boolean useLegacyEphemeralDHKeys> = 0;
+
+        <sun.security.ssl.DHKeyExchange$DHEPossessionGenerator: boolean useSmartEphemeralDHKeys> = 1;
+
+        $i9 = (int) -1;
+
+        <sun.security.ssl.DHKeyExchange$DHEPossessionGenerator: int customizedDHKeySize> = $i9;
+
+        goto label9;
+
+     label3:
+        $r2 = "legacy";
+
+        $z2 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r0);
+
+        if $z2 == 0 goto label4;
+
+        <sun.security.ssl.DHKeyExchange$DHEPossessionGenerator: boolean useLegacyEphemeralDHKeys> = 1;
+
+        <sun.security.ssl.DHKeyExchange$DHEPossessionGenerator: boolean useSmartEphemeralDHKeys> = 0;
+
+        $i11 = (int) -1;
+
+        <sun.security.ssl.DHKeyExchange$DHEPossessionGenerator: int customizedDHKeySize> = $i11;
+
+        goto label9;
+
+     label4:
+        <sun.security.ssl.DHKeyExchange$DHEPossessionGenerator: boolean useLegacyEphemeralDHKeys> = 0;
+
+        <sun.security.ssl.DHKeyExchange$DHEPossessionGenerator: boolean useSmartEphemeralDHKeys> = 0;
+
+     label5:
+        $i0 = staticinvoke <java.lang.Integer: int parseUnsignedInt(java.lang.String)>($r0);
+
+        <sun.security.ssl.DHKeyExchange$DHEPossessionGenerator: int customizedDHKeySize> = $i0;
+
+        $i1 = <sun.security.ssl.DHKeyExchange$DHEPossessionGenerator: int customizedDHKeySize>;
+
+        if $i1 < 1024 goto label6;
+
+        $i2 = <sun.security.ssl.DHKeyExchange$DHEPossessionGenerator: int customizedDHKeySize>;
+
+        if $i2 > 8192 goto label6;
+
+        $i3 = <sun.security.ssl.DHKeyExchange$DHEPossessionGenerator: int customizedDHKeySize>;
+
+        $i4 = $i3 & 63;
+
+        if $i4 == 0 goto label7;
+
+     label6:
+        $r12 = new java.lang.IllegalArgumentException;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported customized DH key size: ");
+
+        $i5 = <sun.security.ssl.DHKeyExchange$DHEPossessionGenerator: int customizedDHKeySize>;
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(". The key size must be multiple of 64, and range from 1024 to 8192 (inclusive)");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r12.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r10);
+
+        throw $r12;
+
+     label7:
+        goto label9;
+
+     label8:
+        $r3 := @caughtexception;
+
+        $r13 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r13.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid system property jdk.tls.ephemeralDHKeySize");
+
+        throw $r13;
+
+     label9:
+        return;
+
+        catch java.lang.NumberFormatException from label5 to label7 with label8;
+    }
+}

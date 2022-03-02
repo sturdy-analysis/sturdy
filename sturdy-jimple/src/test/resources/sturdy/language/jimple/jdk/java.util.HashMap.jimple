@@ -1,0 +1,2889 @@
+public class java.util.HashMap extends java.util.AbstractMap implements java.util.Map, java.lang.Cloneable, java.io.Serializable
+{
+    private static final long serialVersionUID;
+    static final int DEFAULT_INITIAL_CAPACITY;
+    static final int MAXIMUM_CAPACITY;
+    static final float DEFAULT_LOAD_FACTOR;
+    static final int TREEIFY_THRESHOLD;
+    static final int UNTREEIFY_THRESHOLD;
+    static final int MIN_TREEIFY_CAPACITY;
+    transient java.util.HashMap$Node[] table;
+    transient java.util.Set entrySet;
+    transient int size;
+    transient int modCount;
+    int threshold;
+    final float loadFactor;
+
+    static final int hash(java.lang.Object)
+    {
+        int $i0, $i1, $i2;
+        java.lang.Object r0;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        $i2 = 0;
+
+        goto label2;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.lang.Object: int hashCode()>();
+
+        $i1 = $i0 >>> 16;
+
+        $i2 = $i0 ^ $i1;
+
+     label2:
+        return $i2;
+    }
+
+    static java.lang.Class comparableClassFor(java.lang.Object)
+    {
+        java.lang.reflect.ParameterizedType $r4;
+        java.lang.reflect.Type $r3, $r5, $r7;
+        java.lang.reflect.Type[] $r2, $r6;
+        int $i0, $i1, i2;
+        java.lang.Object r0;
+        java.lang.Class $r1;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $z0 = r0 instanceof java.lang.Comparable;
+
+        if $z0 == 0 goto label4;
+
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        if $r1 != class "Ljava/lang/String;" goto label1;
+
+        return $r1;
+
+     label1:
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.reflect.Type[] getGenericInterfaces()>();
+
+        if $r2 == null goto label4;
+
+        i2 = 0;
+
+     label2:
+        $i0 = lengthof $r2;
+
+        if i2 >= $i0 goto label4;
+
+        $r3 = $r2[i2];
+
+        $z1 = $r3 instanceof java.lang.reflect.ParameterizedType;
+
+        if $z1 == 0 goto label3;
+
+        $r4 = (java.lang.reflect.ParameterizedType) $r3;
+
+        $r5 = interfaceinvoke $r4.<java.lang.reflect.ParameterizedType: java.lang.reflect.Type getRawType()>();
+
+        if $r5 != class "Ljava/lang/Comparable;" goto label3;
+
+        $r6 = interfaceinvoke $r4.<java.lang.reflect.ParameterizedType: java.lang.reflect.Type[] getActualTypeArguments()>();
+
+        if $r6 == null goto label3;
+
+        $i1 = lengthof $r6;
+
+        if $i1 != 1 goto label3;
+
+        $r7 = $r6[0];
+
+        if $r7 != $r1 goto label3;
+
+        return $r1;
+
+     label3:
+        i2 = i2 + 1;
+
+        goto label2;
+
+     label4:
+        return null;
+    }
+
+    static int compareComparables(java.lang.Class, java.lang.Object, java.lang.Object)
+    {
+        int $i0;
+        java.lang.Object r0, r3;
+        java.lang.Class $r1, r2;
+        java.lang.Comparable $r4;
+
+        r2 := @parameter0: java.lang.Class;
+
+        r3 := @parameter1: java.lang.Object;
+
+        r0 := @parameter2: java.lang.Object;
+
+        if r0 == null goto label1;
+
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        if $r1 == r2 goto label2;
+
+     label1:
+        $i0 = 0;
+
+        goto label3;
+
+     label2:
+        $r4 = (java.lang.Comparable) r3;
+
+        $i0 = interfaceinvoke $r4.<java.lang.Comparable: int compareTo(java.lang.Object)>(r0);
+
+     label3:
+        return $i0;
+    }
+
+    static final int tableSizeFor(int)
+    {
+        int i0, $i1, $i2, $i3, $i4, $i5, i6, i7, i8, i9, i10, i11, $i12;
+
+        i0 := @parameter0: int;
+
+        i6 = i0 - 1;
+
+        $i1 = i6 >>> 1;
+
+        i7 = i6 | $i1;
+
+        $i2 = i7 >>> 2;
+
+        i8 = i7 | $i2;
+
+        $i3 = i8 >>> 4;
+
+        i9 = i8 | $i3;
+
+        $i4 = i9 >>> 8;
+
+        i10 = i9 | $i4;
+
+        $i5 = i10 >>> 16;
+
+        i11 = i10 | $i5;
+
+        if i11 >= 0 goto label1;
+
+        $i12 = 1;
+
+        goto label3;
+
+     label1:
+        if i11 < 1073741824 goto label2;
+
+        $i12 = 1073741824;
+
+        goto label3;
+
+     label2:
+        $i12 = i11 + 1;
+
+     label3:
+        return $i12;
+    }
+
+    public void <init>(int, float)
+    {
+        java.util.HashMap r0;
+        byte $b0;
+        int $i1, i2, $i3;
+        java.lang.String $r5, $r10;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r12, $r14;
+        float f0;
+        java.lang.StringBuilder $r3, $r4, $r8, $r9, $r11, $r13;
+
+        r0 := @this: java.util.HashMap;
+
+        i2 := @parameter0: int;
+
+        f0 := @parameter1: float;
+
+        specialinvoke r0.<java.util.AbstractMap: void <init>()>();
+
+        if i2 >= 0 goto label1;
+
+        $r12 = new java.lang.IllegalArgumentException;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Illegal initial capacity: ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i2);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r12.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r10);
+
+        throw $r12;
+
+     label1:
+        if i2 <= 1073741824 goto label2;
+
+        i2 = 1073741824;
+
+     label2:
+        $b0 = f0 cmpg 0.0F;
+
+        $i3 = (int) $b0;
+
+        if $i3 <= 0 goto label3;
+
+        $z0 = staticinvoke <java.lang.Float: boolean isNaN(float)>(f0);
+
+        if $z0 == 0 goto label4;
+
+     label3:
+        $r14 = new java.lang.IllegalArgumentException;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Illegal load factor: ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(float)>(f0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r14.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r5);
+
+        throw $r14;
+
+     label4:
+        r0.<java.util.HashMap: float loadFactor> = f0;
+
+        $i1 = staticinvoke <java.util.HashMap: int tableSizeFor(int)>(i2);
+
+        r0.<java.util.HashMap: int threshold> = $i1;
+
+        return;
+    }
+
+    public void <init>(int)
+    {
+        int i0;
+        java.util.HashMap r0;
+
+        r0 := @this: java.util.HashMap;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.util.HashMap: void <init>(int,float)>(i0, 0.75F);
+
+        return;
+    }
+
+    public void <init>()
+    {
+        java.util.HashMap r0;
+
+        r0 := @this: java.util.HashMap;
+
+        specialinvoke r0.<java.util.AbstractMap: void <init>()>();
+
+        r0.<java.util.HashMap: float loadFactor> = 0.75F;
+
+        return;
+    }
+
+    public void <init>(java.util.Map)
+    {
+        java.util.HashMap r0;
+        java.util.Map r1;
+
+        r0 := @this: java.util.HashMap;
+
+        r1 := @parameter0: java.util.Map;
+
+        specialinvoke r0.<java.util.AbstractMap: void <init>()>();
+
+        r0.<java.util.HashMap: float loadFactor> = 0.75F;
+
+        virtualinvoke r0.<java.util.HashMap: void putMapEntries(java.util.Map,boolean)>(r1, 0);
+
+        return;
+    }
+
+    final void putMapEntries(java.util.Map, boolean)
+    {
+        java.util.HashMap r1;
+        java.util.HashMap$Node[] $r2;
+        byte $b3;
+        java.util.Map r0;
+        int $i0, $i1, $i2, $i4, $i5, $i6, $i7;
+        boolean z0, $z1;
+        java.util.Map$Entry r8;
+        java.util.Iterator $r7;
+        java.util.Set $r6;
+        float $f0, $f1, $f2, f3;
+        java.lang.Object $r3, $r4, $r5;
+
+        r1 := @this: java.util.HashMap;
+
+        r0 := @parameter0: java.util.Map;
+
+        z0 := @parameter1: boolean;
+
+        $i0 = interfaceinvoke r0.<java.util.Map: int size()>();
+
+        if $i0 <= 0 goto label7;
+
+        $r2 = r1.<java.util.HashMap: java.util.HashMap$Node[] table>;
+
+        if $r2 != null goto label4;
+
+        $f1 = (float) $i0;
+
+        $f0 = r1.<java.util.HashMap: float loadFactor>;
+
+        $f2 = $f1 / $f0;
+
+        f3 = $f2 + 1.0F;
+
+        $b3 = f3 cmpg 1.07374182E9F;
+
+        $i7 = (int) $b3;
+
+        if $i7 >= 0 goto label1;
+
+        $i6 = (int) f3;
+
+        goto label2;
+
+     label1:
+        $i6 = 1073741824;
+
+     label2:
+        $i4 = r1.<java.util.HashMap: int threshold>;
+
+        if $i6 <= $i4 goto label3;
+
+        $i5 = staticinvoke <java.util.HashMap: int tableSizeFor(int)>($i6);
+
+        r1.<java.util.HashMap: int threshold> = $i5;
+
+     label3:
+        goto label5;
+
+     label4:
+        $i1 = r1.<java.util.HashMap: int threshold>;
+
+        if $i0 <= $i1 goto label5;
+
+        virtualinvoke r1.<java.util.HashMap: java.util.HashMap$Node[] resize()>();
+
+     label5:
+        $r6 = interfaceinvoke r0.<java.util.Map: java.util.Set entrySet()>();
+
+        $r7 = interfaceinvoke $r6.<java.util.Set: java.util.Iterator iterator()>();
+
+     label6:
+        $z1 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label7;
+
+        $r3 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r8 = (java.util.Map$Entry) $r3;
+
+        $r4 = interfaceinvoke r8.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r5 = interfaceinvoke r8.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $i2 = staticinvoke <java.util.HashMap: int hash(java.lang.Object)>($r4);
+
+        virtualinvoke r1.<java.util.HashMap: java.lang.Object putVal(int,java.lang.Object,java.lang.Object,boolean,boolean)>($i2, $r4, $r5, 0, z0);
+
+        goto label6;
+
+     label7:
+        return;
+    }
+
+    public int size()
+    {
+        int $i0;
+        java.util.HashMap r0;
+
+        r0 := @this: java.util.HashMap;
+
+        $i0 = r0.<java.util.HashMap: int size>;
+
+        return $i0;
+    }
+
+    public boolean isEmpty()
+    {
+        int $i0;
+        java.util.HashMap r0;
+        boolean $z0;
+
+        r0 := @this: java.util.HashMap;
+
+        $i0 = r0.<java.util.HashMap: int size>;
+
+        if $i0 != 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public java.lang.Object get(java.lang.Object)
+    {
+        int $i0;
+        java.util.HashMap r0;
+        java.lang.Object r1, $r3;
+        java.util.HashMap$Node $r2;
+
+        r0 := @this: java.util.HashMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $i0 = staticinvoke <java.util.HashMap: int hash(java.lang.Object)>(r1);
+
+        $r2 = virtualinvoke r0.<java.util.HashMap: java.util.HashMap$Node getNode(int,java.lang.Object)>($i0, r1);
+
+        if $r2 != null goto label1;
+
+        $r3 = null;
+
+        goto label2;
+
+     label1:
+        $r3 = $r2.<java.util.HashMap$Node: java.lang.Object value>;
+
+     label2:
+        return $r3;
+    }
+
+    final java.util.HashMap$Node getNode(int, java.lang.Object)
+    {
+        java.util.HashMap r0;
+        java.util.HashMap$Node[] $r1;
+        java.util.HashMap$TreeNode $r5, $r6;
+        int $i0, i1, $i2, $i3, $i4, $i5;
+        boolean $z0, $z1, $z2;
+        java.lang.Object $r3, r4, $r7;
+        java.util.HashMap$Node $r2, $r8, r9, $r10;
+
+        r0 := @this: java.util.HashMap;
+
+        i1 := @parameter0: int;
+
+        r4 := @parameter1: java.lang.Object;
+
+        $r1 = r0.<java.util.HashMap: java.util.HashMap$Node[] table>;
+
+        if $r1 == null goto label6;
+
+        $i0 = lengthof $r1;
+
+        if $i0 <= 0 goto label6;
+
+        $i2 = $i0 - 1;
+
+        $i3 = $i2 & i1;
+
+        $r2 = $r1[$i3];
+
+        if $r2 == null goto label6;
+
+        $i4 = $r2.<java.util.HashMap$Node: int hash>;
+
+        if $i4 != i1 goto label2;
+
+        $r7 = $r2.<java.util.HashMap$Node: java.lang.Object key>;
+
+        if $r7 == r4 goto label1;
+
+        if r4 == null goto label2;
+
+        $z2 = virtualinvoke r4.<java.lang.Object: boolean equals(java.lang.Object)>($r7);
+
+        if $z2 == 0 goto label2;
+
+     label1:
+        return $r2;
+
+     label2:
+        $r8 = $r2.<java.util.HashMap$Node: java.util.HashMap$Node next>;
+
+        r9 = $r8;
+
+        if $r8 == null goto label6;
+
+        $z0 = $r2 instanceof java.util.HashMap$TreeNode;
+
+        if $z0 == 0 goto label3;
+
+        $r5 = (java.util.HashMap$TreeNode) $r2;
+
+        $r6 = virtualinvoke $r5.<java.util.HashMap$TreeNode: java.util.HashMap$TreeNode getTreeNode(int,java.lang.Object)>(i1, r4);
+
+        return $r6;
+
+     label3:
+        $i5 = r9.<java.util.HashMap$Node: int hash>;
+
+        if $i5 != i1 goto label5;
+
+        $r3 = r9.<java.util.HashMap$Node: java.lang.Object key>;
+
+        if $r3 == r4 goto label4;
+
+        if r4 == null goto label5;
+
+        $z1 = virtualinvoke r4.<java.lang.Object: boolean equals(java.lang.Object)>($r3);
+
+        if $z1 == 0 goto label5;
+
+     label4:
+        return r9;
+
+     label5:
+        $r10 = r9.<java.util.HashMap$Node: java.util.HashMap$Node next>;
+
+        r9 = $r10;
+
+        if $r10 != null goto label3;
+
+     label6:
+        return null;
+    }
+
+    public boolean containsKey(java.lang.Object)
+    {
+        int $i0;
+        java.util.HashMap r0;
+        java.lang.Object r1;
+        java.util.HashMap$Node $r2;
+        boolean $z0;
+
+        r0 := @this: java.util.HashMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $i0 = staticinvoke <java.util.HashMap: int hash(java.lang.Object)>(r1);
+
+        $r2 = virtualinvoke r0.<java.util.HashMap: java.util.HashMap$Node getNode(int,java.lang.Object)>($i0, r1);
+
+        if $r2 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public java.lang.Object put(java.lang.Object, java.lang.Object)
+    {
+        int $i0;
+        java.util.HashMap r0;
+        java.lang.Object r1, r2, $r3;
+
+        r0 := @this: java.util.HashMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.lang.Object;
+
+        $i0 = staticinvoke <java.util.HashMap: int hash(java.lang.Object)>(r1);
+
+        $r3 = virtualinvoke r0.<java.util.HashMap: java.lang.Object putVal(int,java.lang.Object,java.lang.Object,boolean,boolean)>($i0, r1, r2, 0, 1);
+
+        return $r3;
+    }
+
+    final java.lang.Object putVal(int, java.lang.Object, java.lang.Object, boolean, boolean)
+    {
+        boolean z0, z1, $z2, $z3, $z4;
+        java.util.HashMap r0;
+        java.util.HashMap$Node[] $r1, $r2, r11;
+        java.util.HashMap$TreeNode $r8;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, $i10, $i11, i12;
+        java.lang.Object $r4, r5, r6, $r9, r15;
+        java.util.HashMap$Node $r3, $r7, $r10, $r12, r13, r14;
+
+        r0 := @this: java.util.HashMap;
+
+        i0 := @parameter0: int;
+
+        r5 := @parameter1: java.lang.Object;
+
+        r6 := @parameter2: java.lang.Object;
+
+        z1 := @parameter3: boolean;
+
+        z0 := @parameter4: boolean;
+
+        $r1 = r0.<java.util.HashMap: java.util.HashMap$Node[] table>;
+
+        r11 = $r1;
+
+        if $r1 == null goto label01;
+
+        $i8 = lengthof $r1;
+
+        i9 = $i8;
+
+        if $i8 != 0 goto label02;
+
+     label01:
+        $r2 = virtualinvoke r0.<java.util.HashMap: java.util.HashMap$Node[] resize()>();
+
+        r11 = $r2;
+
+        i9 = lengthof $r2;
+
+     label02:
+        $i10 = i9 - 1;
+
+        $i11 = $i10 & i0;
+
+        $r12 = r11[$i11];
+
+        r13 = $r12;
+
+        if $r12 != null goto label03;
+
+        $r10 = virtualinvoke r0.<java.util.HashMap: java.util.HashMap$Node newNode(int,java.lang.Object,java.lang.Object,java.util.HashMap$Node)>(i0, r5, r6, null);
+
+        r11[$i11] = $r10;
+
+        goto label13;
+
+     label03:
+        $i1 = $r12.<java.util.HashMap$Node: int hash>;
+
+        if $i1 != i0 goto label05;
+
+        $r9 = $r12.<java.util.HashMap$Node: java.lang.Object key>;
+
+        if $r9 == r5 goto label04;
+
+        if r5 == null goto label05;
+
+        $z3 = virtualinvoke r5.<java.lang.Object: boolean equals(java.lang.Object)>($r9);
+
+        if $z3 == 0 goto label05;
+
+     label04:
+        r14 = $r12;
+
+        goto label10;
+
+     label05:
+        $z4 = $r12 instanceof java.util.HashMap$TreeNode;
+
+        if $z4 == 0 goto label06;
+
+        $r8 = (java.util.HashMap$TreeNode) $r12;
+
+        r14 = virtualinvoke $r8.<java.util.HashMap$TreeNode: java.util.HashMap$TreeNode putTreeVal(java.util.HashMap,java.util.HashMap$Node[],int,java.lang.Object,java.lang.Object)>(r0, r11, i0, r5, r6);
+
+        goto label10;
+
+     label06:
+        i12 = 0;
+
+     label07:
+        $r3 = r13.<java.util.HashMap$Node: java.util.HashMap$Node next>;
+
+        r14 = $r3;
+
+        if $r3 != null goto label08;
+
+        $r7 = virtualinvoke r0.<java.util.HashMap: java.util.HashMap$Node newNode(int,java.lang.Object,java.lang.Object,java.util.HashMap$Node)>(i0, r5, r6, null);
+
+        r13.<java.util.HashMap$Node: java.util.HashMap$Node next> = $r7;
+
+        if i12 < 7 goto label10;
+
+        virtualinvoke r0.<java.util.HashMap: void treeifyBin(java.util.HashMap$Node[],int)>(r11, i0);
+
+        goto label10;
+
+     label08:
+        $i2 = $r3.<java.util.HashMap$Node: int hash>;
+
+        if $i2 != i0 goto label09;
+
+        $r4 = $r3.<java.util.HashMap$Node: java.lang.Object key>;
+
+        if $r4 == r5 goto label10;
+
+        if r5 == null goto label09;
+
+        $z2 = virtualinvoke r5.<java.lang.Object: boolean equals(java.lang.Object)>($r4);
+
+        if $z2 == 0 goto label09;
+
+        goto label10;
+
+     label09:
+        r13 = $r3;
+
+        i12 = i12 + 1;
+
+        goto label07;
+
+     label10:
+        if r14 == null goto label13;
+
+        r15 = r14.<java.util.HashMap$Node: java.lang.Object value>;
+
+        if z1 == 0 goto label11;
+
+        if r15 != null goto label12;
+
+     label11:
+        r14.<java.util.HashMap$Node: java.lang.Object value> = r6;
+
+     label12:
+        virtualinvoke r0.<java.util.HashMap: void afterNodeAccess(java.util.HashMap$Node)>(r14);
+
+        return r15;
+
+     label13:
+        $i3 = r0.<java.util.HashMap: int modCount>;
+
+        $i4 = $i3 + 1;
+
+        r0.<java.util.HashMap: int modCount> = $i4;
+
+        $i5 = r0.<java.util.HashMap: int size>;
+
+        $i6 = $i5 + 1;
+
+        r0.<java.util.HashMap: int size> = $i6;
+
+        $i7 = r0.<java.util.HashMap: int threshold>;
+
+        if $i6 <= $i7 goto label14;
+
+        virtualinvoke r0.<java.util.HashMap: java.util.HashMap$Node[] resize()>();
+
+     label14:
+        virtualinvoke r0.<java.util.HashMap: void afterNodeInsertion(boolean)>(z0);
+
+        return null;
+    }
+
+    final java.util.HashMap$Node[] resize()
+    {
+        byte $b7;
+        boolean $z0;
+        float $f0, $f1, f2;
+        java.util.HashMap r0;
+        java.util.HashMap$Node[] r1, $r6, $r7;
+        java.util.HashMap$TreeNode $r5;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i8, $i9, $i10, i11, i12, $i13, i14, $i15;
+        java.util.HashMap$Node $r2, $r3, $r4, r8, r9, r10, r11, r12;
+
+        r0 := @this: java.util.HashMap;
+
+        r1 = r0.<java.util.HashMap: java.util.HashMap$Node[] table>;
+
+        if r1 != null goto label01;
+
+        $i10 = 0;
+
+        goto label02;
+
+     label01:
+        $i10 = lengthof r1;
+
+     label02:
+        i0 = $i10;
+
+        $i9 = r0.<java.util.HashMap: int threshold>;
+
+        i11 = 0;
+
+        if $i10 <= 0 goto label04;
+
+        if $i10 < 1073741824 goto label03;
+
+        r0.<java.util.HashMap: int threshold> = 2147483647;
+
+        return r1;
+
+     label03:
+        $i8 = $i10 << 1;
+
+        i12 = $i8;
+
+        if $i8 >= 1073741824 goto label06;
+
+        if $i10 < 16 goto label06;
+
+        i11 = $i9 << 1;
+
+        goto label06;
+
+     label04:
+        if $i9 <= 0 goto label05;
+
+        i12 = $i9;
+
+        goto label06;
+
+     label05:
+        i12 = 16;
+
+        i11 = 12;
+
+     label06:
+        if i11 != 0 goto label09;
+
+        $f1 = (float) i12;
+
+        $f0 = r0.<java.util.HashMap: float loadFactor>;
+
+        f2 = $f1 * $f0;
+
+        if i12 >= 1073741824 goto label07;
+
+        $b7 = f2 cmpg 1.07374182E9F;
+
+        $i15 = (int) $b7;
+
+        if $i15 >= 0 goto label07;
+
+        $i13 = (int) f2;
+
+        goto label08;
+
+     label07:
+        $i13 = 2147483647;
+
+     label08:
+        i11 = $i13;
+
+     label09:
+        r0.<java.util.HashMap: int threshold> = i11;
+
+        $r6 = newarray (java.util.HashMap$Node)[i12];
+
+        $r7 = (java.util.HashMap$Node[]) $r6;
+
+        r0.<java.util.HashMap: java.util.HashMap$Node[] table> = $r7;
+
+        if r1 == null goto label22;
+
+        i14 = 0;
+
+     label10:
+        if i14 >= i0 goto label22;
+
+        $r2 = r1[i14];
+
+        r8 = $r2;
+
+        if $r2 == null goto label21;
+
+        r1[i14] = null;
+
+        $r3 = $r2.<java.util.HashMap$Node: java.util.HashMap$Node next>;
+
+        if $r3 != null goto label11;
+
+        $i5 = $r2.<java.util.HashMap$Node: int hash>;
+
+        $i4 = i12 - 1;
+
+        $i6 = $i5 & $i4;
+
+        $r7[$i6] = $r2;
+
+        goto label21;
+
+     label11:
+        $z0 = $r2 instanceof java.util.HashMap$TreeNode;
+
+        if $z0 == 0 goto label12;
+
+        $r5 = (java.util.HashMap$TreeNode) $r2;
+
+        virtualinvoke $r5.<java.util.HashMap$TreeNode: void split(java.util.HashMap,java.util.HashMap$Node[],int,int)>(r0, $r7, i14, i0);
+
+        goto label21;
+
+     label12:
+        r9 = null;
+
+        r10 = null;
+
+        r11 = null;
+
+        r12 = null;
+
+     label13:
+        $r4 = r8.<java.util.HashMap$Node: java.util.HashMap$Node next>;
+
+        $i1 = r8.<java.util.HashMap$Node: int hash>;
+
+        $i2 = $i1 & i0;
+
+        if $i2 != 0 goto label16;
+
+        if r10 != null goto label14;
+
+        r9 = r8;
+
+        goto label15;
+
+     label14:
+        r10.<java.util.HashMap$Node: java.util.HashMap$Node next> = r8;
+
+     label15:
+        r10 = r8;
+
+        goto label19;
+
+     label16:
+        if r12 != null goto label17;
+
+        r11 = r8;
+
+        goto label18;
+
+     label17:
+        r12.<java.util.HashMap$Node: java.util.HashMap$Node next> = r8;
+
+     label18:
+        r12 = r8;
+
+     label19:
+        r8 = $r4;
+
+        if $r4 != null goto label13;
+
+        if r10 == null goto label20;
+
+        r10.<java.util.HashMap$Node: java.util.HashMap$Node next> = null;
+
+        $r7[i14] = r9;
+
+     label20:
+        if r12 == null goto label21;
+
+        r12.<java.util.HashMap$Node: java.util.HashMap$Node next> = null;
+
+        $i3 = i14 + i0;
+
+        $r7[$i3] = r11;
+
+     label21:
+        i14 = i14 + 1;
+
+        goto label10;
+
+     label22:
+        return $r7;
+    }
+
+    final void treeifyBin(java.util.HashMap$Node[], int)
+    {
+        java.util.HashMap r1;
+        java.util.HashMap$Node[] r0;
+        java.util.HashMap$TreeNode $r3, r6, r7;
+        int $i0, i1, $i2, $i3;
+        java.util.HashMap$Node $r2, $r4, r5;
+
+        r1 := @this: java.util.HashMap;
+
+        r0 := @parameter0: java.util.HashMap$Node[];
+
+        i1 := @parameter1: int;
+
+        if r0 == null goto label1;
+
+        $i0 = lengthof r0;
+
+        if $i0 >= 64 goto label2;
+
+     label1:
+        virtualinvoke r1.<java.util.HashMap: java.util.HashMap$Node[] resize()>();
+
+        goto label6;
+
+     label2:
+        $i2 = $i0 - 1;
+
+        $i3 = $i2 & i1;
+
+        $r2 = r0[$i3];
+
+        r5 = $r2;
+
+        if $r2 == null goto label6;
+
+        r6 = null;
+
+        r7 = null;
+
+     label3:
+        $r3 = virtualinvoke r1.<java.util.HashMap: java.util.HashMap$TreeNode replacementTreeNode(java.util.HashMap$Node,java.util.HashMap$Node)>(r5, null);
+
+        if r7 != null goto label4;
+
+        r6 = $r3;
+
+        goto label5;
+
+     label4:
+        $r3.<java.util.HashMap$TreeNode: java.util.HashMap$TreeNode prev> = r7;
+
+        r7.<java.util.HashMap$TreeNode: java.util.HashMap$Node next> = $r3;
+
+     label5:
+        r7 = $r3;
+
+        $r4 = r5.<java.util.HashMap$Node: java.util.HashMap$Node next>;
+
+        r5 = $r4;
+
+        if $r4 != null goto label3;
+
+        r0[$i3] = r6;
+
+        if r6 == null goto label6;
+
+        virtualinvoke r6.<java.util.HashMap$TreeNode: void treeify(java.util.HashMap$Node[])>(r0);
+
+     label6:
+        return;
+    }
+
+    public void putAll(java.util.Map)
+    {
+        java.util.HashMap r0;
+        java.util.Map r1;
+
+        r0 := @this: java.util.HashMap;
+
+        r1 := @parameter0: java.util.Map;
+
+        virtualinvoke r0.<java.util.HashMap: void putMapEntries(java.util.Map,boolean)>(r1, 1);
+
+        return;
+    }
+
+    public java.lang.Object remove(java.lang.Object)
+    {
+        int $i0;
+        java.util.HashMap r0;
+        java.lang.Object r1, $r3;
+        java.util.HashMap$Node $r2;
+
+        r0 := @this: java.util.HashMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $i0 = staticinvoke <java.util.HashMap: int hash(java.lang.Object)>(r1);
+
+        $r2 = virtualinvoke r0.<java.util.HashMap: java.util.HashMap$Node removeNode(int,java.lang.Object,java.lang.Object,boolean,boolean)>($i0, r1, null, 0, 1);
+
+        if $r2 != null goto label1;
+
+        $r3 = null;
+
+        goto label2;
+
+     label1:
+        $r3 = $r2.<java.util.HashMap$Node: java.lang.Object value>;
+
+     label2:
+        return $r3;
+    }
+
+    final java.util.HashMap$Node removeNode(int, java.lang.Object, java.lang.Object, boolean, boolean)
+    {
+        boolean z0, z1, $z2, $z3, $z4, $z5, $z6;
+        java.util.HashMap r0;
+        java.util.HashMap$Node[] $r1;
+        java.util.HashMap$TreeNode $r5, $r10;
+        int $i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9;
+        java.lang.Object $r6, r7, $r8, r9, $r11;
+        java.util.HashMap$Node $r2, $r3, $r4, r12, r13, $r14, r15, $r16;
+
+        r0 := @this: java.util.HashMap;
+
+        i1 := @parameter0: int;
+
+        r9 := @parameter1: java.lang.Object;
+
+        r7 := @parameter2: java.lang.Object;
+
+        z0 := @parameter3: boolean;
+
+        z1 := @parameter4: boolean;
+
+        $r1 = r0.<java.util.HashMap: java.util.HashMap$Node[] table>;
+
+        if $r1 == null goto label11;
+
+        $i0 = lengthof $r1;
+
+        if $i0 <= 0 goto label11;
+
+        $i2 = $i0 - 1;
+
+        $i3 = $i2 & i1;
+
+        $r2 = $r1[$i3];
+
+        r12 = $r2;
+
+        if $r2 == null goto label11;
+
+        r13 = null;
+
+        $i4 = $r2.<java.util.HashMap$Node: int hash>;
+
+        if $i4 != i1 goto label02;
+
+        $r11 = $r2.<java.util.HashMap$Node: java.lang.Object key>;
+
+        if $r11 == r9 goto label01;
+
+        if r9 == null goto label02;
+
+        $z5 = virtualinvoke r9.<java.lang.Object: boolean equals(java.lang.Object)>($r11);
+
+        if $z5 == 0 goto label02;
+
+     label01:
+        r13 = $r2;
+
+        goto label06;
+
+     label02:
+        $r14 = $r2.<java.util.HashMap$Node: java.util.HashMap$Node next>;
+
+        r15 = $r14;
+
+        if $r14 == null goto label06;
+
+        $z3 = $r2 instanceof java.util.HashMap$TreeNode;
+
+        if $z3 == 0 goto label03;
+
+        $r10 = (java.util.HashMap$TreeNode) $r2;
+
+        r13 = virtualinvoke $r10.<java.util.HashMap$TreeNode: java.util.HashMap$TreeNode getTreeNode(int,java.lang.Object)>(i1, r9);
+
+        goto label06;
+
+     label03:
+        $i5 = r15.<java.util.HashMap$Node: int hash>;
+
+        if $i5 != i1 goto label05;
+
+        $r8 = r15.<java.util.HashMap$Node: java.lang.Object key>;
+
+        if $r8 == r9 goto label04;
+
+        if r9 == null goto label05;
+
+        $z4 = virtualinvoke r9.<java.lang.Object: boolean equals(java.lang.Object)>($r8);
+
+        if $z4 == 0 goto label05;
+
+     label04:
+        r13 = r15;
+
+        goto label06;
+
+     label05:
+        r12 = r15;
+
+        $r16 = r15.<java.util.HashMap$Node: java.util.HashMap$Node next>;
+
+        r15 = $r16;
+
+        if $r16 != null goto label03;
+
+     label06:
+        if r13 == null goto label11;
+
+        if z0 == 0 goto label07;
+
+        $r6 = r13.<java.util.HashMap$Node: java.lang.Object value>;
+
+        if $r6 == r7 goto label07;
+
+        if r7 == null goto label11;
+
+        $z2 = virtualinvoke r7.<java.lang.Object: boolean equals(java.lang.Object)>($r6);
+
+        if $z2 == 0 goto label11;
+
+     label07:
+        $z6 = r13 instanceof java.util.HashMap$TreeNode;
+
+        if $z6 == 0 goto label08;
+
+        $r5 = (java.util.HashMap$TreeNode) r13;
+
+        virtualinvoke $r5.<java.util.HashMap$TreeNode: void removeTreeNode(java.util.HashMap,java.util.HashMap$Node[],boolean)>(r0, $r1, z1);
+
+        goto label10;
+
+     label08:
+        if r13 != r12 goto label09;
+
+        $r4 = r13.<java.util.HashMap$Node: java.util.HashMap$Node next>;
+
+        $r1[$i3] = $r4;
+
+        goto label10;
+
+     label09:
+        $r3 = r13.<java.util.HashMap$Node: java.util.HashMap$Node next>;
+
+        r12.<java.util.HashMap$Node: java.util.HashMap$Node next> = $r3;
+
+     label10:
+        $i6 = r0.<java.util.HashMap: int modCount>;
+
+        $i7 = $i6 + 1;
+
+        r0.<java.util.HashMap: int modCount> = $i7;
+
+        $i8 = r0.<java.util.HashMap: int size>;
+
+        $i9 = $i8 - 1;
+
+        r0.<java.util.HashMap: int size> = $i9;
+
+        virtualinvoke r0.<java.util.HashMap: void afterNodeRemoval(java.util.HashMap$Node)>(r13);
+
+        return r13;
+
+     label11:
+        return null;
+    }
+
+    public void clear()
+    {
+        int $i0, $i1, $i2, $i3, i4;
+        java.util.HashMap r0;
+        java.util.HashMap$Node[] $r1;
+
+        r0 := @this: java.util.HashMap;
+
+        $i0 = r0.<java.util.HashMap: int modCount>;
+
+        $i1 = $i0 + 1;
+
+        r0.<java.util.HashMap: int modCount> = $i1;
+
+        $r1 = r0.<java.util.HashMap: java.util.HashMap$Node[] table>;
+
+        if $r1 == null goto label2;
+
+        $i2 = r0.<java.util.HashMap: int size>;
+
+        if $i2 <= 0 goto label2;
+
+        r0.<java.util.HashMap: int size> = 0;
+
+        i4 = 0;
+
+     label1:
+        $i3 = lengthof $r1;
+
+        if i4 >= $i3 goto label2;
+
+        $r1[i4] = null;
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public boolean containsValue(java.lang.Object)
+    {
+        java.util.HashMap r0;
+        java.util.HashMap$Node[] $r1;
+        int $i0, $i1, i2;
+        java.lang.Object $r2, r3;
+        boolean $z0;
+        java.util.HashMap$Node r4;
+
+        r0 := @this: java.util.HashMap;
+
+        r3 := @parameter0: java.lang.Object;
+
+        $r1 = r0.<java.util.HashMap: java.util.HashMap$Node[] table>;
+
+        if $r1 == null goto label6;
+
+        $i0 = r0.<java.util.HashMap: int size>;
+
+        if $i0 <= 0 goto label6;
+
+        i2 = 0;
+
+     label1:
+        $i1 = lengthof $r1;
+
+        if i2 >= $i1 goto label6;
+
+        r4 = $r1[i2];
+
+     label2:
+        if r4 == null goto label5;
+
+        $r2 = r4.<java.util.HashMap$Node: java.lang.Object value>;
+
+        if $r2 == r3 goto label3;
+
+        if r3 == null goto label4;
+
+        $z0 = virtualinvoke r3.<java.lang.Object: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label4;
+
+     label3:
+        return 1;
+
+     label4:
+        r4 = r4.<java.util.HashMap$Node: java.util.HashMap$Node next>;
+
+        goto label2;
+
+     label5:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label6:
+        return 0;
+    }
+
+    public java.util.Set keySet()
+    {
+        java.util.HashMap$KeySet $r1;
+        java.util.Set r2;
+        java.util.HashMap r0;
+
+        r0 := @this: java.util.HashMap;
+
+        r2 = r0.<java.util.HashMap: java.util.Set keySet>;
+
+        if r2 != null goto label1;
+
+        $r1 = new java.util.HashMap$KeySet;
+
+        specialinvoke $r1.<java.util.HashMap$KeySet: void <init>(java.util.HashMap)>(r0);
+
+        r2 = $r1;
+
+        r0.<java.util.HashMap: java.util.Set keySet> = $r1;
+
+     label1:
+        return r2;
+    }
+
+    public java.util.Collection values()
+    {
+        java.util.HashMap$Values $r1;
+        java.util.HashMap r0;
+        java.util.Collection r2;
+
+        r0 := @this: java.util.HashMap;
+
+        r2 = r0.<java.util.HashMap: java.util.Collection values>;
+
+        if r2 != null goto label1;
+
+        $r1 = new java.util.HashMap$Values;
+
+        specialinvoke $r1.<java.util.HashMap$Values: void <init>(java.util.HashMap)>(r0);
+
+        r2 = $r1;
+
+        r0.<java.util.HashMap: java.util.Collection values> = $r1;
+
+     label1:
+        return r2;
+    }
+
+    public java.util.Set entrySet()
+    {
+        java.util.HashMap$EntrySet $r3;
+        java.util.Set $r1, $r2;
+        java.util.HashMap r0;
+
+        r0 := @this: java.util.HashMap;
+
+        $r1 = r0.<java.util.HashMap: java.util.Set entrySet>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.util.HashMap$EntrySet;
+
+        $r2 = $r3;
+
+        specialinvoke $r3.<java.util.HashMap$EntrySet: void <init>(java.util.HashMap)>(r0);
+
+        r0.<java.util.HashMap: java.util.Set entrySet> = $r3;
+
+        goto label2;
+
+     label1:
+        $r2 = $r1;
+
+     label2:
+        return $r2;
+    }
+
+    public java.lang.Object getOrDefault(java.lang.Object, java.lang.Object)
+    {
+        int $i0;
+        java.util.HashMap r0;
+        java.lang.Object r1, r3, $r4;
+        java.util.HashMap$Node $r2;
+
+        r0 := @this: java.util.HashMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r3 := @parameter1: java.lang.Object;
+
+        $i0 = staticinvoke <java.util.HashMap: int hash(java.lang.Object)>(r1);
+
+        $r2 = virtualinvoke r0.<java.util.HashMap: java.util.HashMap$Node getNode(int,java.lang.Object)>($i0, r1);
+
+        if $r2 != null goto label1;
+
+        $r4 = r3;
+
+        goto label2;
+
+     label1:
+        $r4 = $r2.<java.util.HashMap$Node: java.lang.Object value>;
+
+     label2:
+        return $r4;
+    }
+
+    public java.lang.Object putIfAbsent(java.lang.Object, java.lang.Object)
+    {
+        int $i0;
+        java.util.HashMap r0;
+        java.lang.Object r1, r2, $r3;
+
+        r0 := @this: java.util.HashMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.lang.Object;
+
+        $i0 = staticinvoke <java.util.HashMap: int hash(java.lang.Object)>(r1);
+
+        $r3 = virtualinvoke r0.<java.util.HashMap: java.lang.Object putVal(int,java.lang.Object,java.lang.Object,boolean,boolean)>($i0, r1, r2, 1, 1);
+
+        return $r3;
+    }
+
+    public boolean remove(java.lang.Object, java.lang.Object)
+    {
+        int $i0;
+        java.util.HashMap r0;
+        java.lang.Object r1, r2;
+        java.util.HashMap$Node $r3;
+        boolean $z0;
+
+        r0 := @this: java.util.HashMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r2 := @parameter1: java.lang.Object;
+
+        $i0 = staticinvoke <java.util.HashMap: int hash(java.lang.Object)>(r1);
+
+        $r3 = virtualinvoke r0.<java.util.HashMap: java.util.HashMap$Node removeNode(int,java.lang.Object,java.lang.Object,boolean,boolean)>($i0, r1, r2, 1, 1);
+
+        if $r3 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean replace(java.lang.Object, java.lang.Object, java.lang.Object)
+    {
+        java.util.HashMap r0;
+        int $i0;
+        java.lang.Object r1, $r3, r4, r5;
+        java.util.HashMap$Node $r2;
+        boolean $z0;
+
+        r0 := @this: java.util.HashMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r4 := @parameter1: java.lang.Object;
+
+        r5 := @parameter2: java.lang.Object;
+
+        $i0 = staticinvoke <java.util.HashMap: int hash(java.lang.Object)>(r1);
+
+        $r2 = virtualinvoke r0.<java.util.HashMap: java.util.HashMap$Node getNode(int,java.lang.Object)>($i0, r1);
+
+        if $r2 == null goto label2;
+
+        $r3 = $r2.<java.util.HashMap$Node: java.lang.Object value>;
+
+        if $r3 == r4 goto label1;
+
+        if $r3 == null goto label2;
+
+        $z0 = virtualinvoke $r3.<java.lang.Object: boolean equals(java.lang.Object)>(r4);
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        $r2.<java.util.HashMap$Node: java.lang.Object value> = r5;
+
+        virtualinvoke r0.<java.util.HashMap: void afterNodeAccess(java.util.HashMap$Node)>($r2);
+
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    public java.lang.Object replace(java.lang.Object, java.lang.Object)
+    {
+        int $i0;
+        java.util.HashMap r0;
+        java.lang.Object r1, r3, r4;
+        java.util.HashMap$Node $r2;
+
+        r0 := @this: java.util.HashMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r4 := @parameter1: java.lang.Object;
+
+        $i0 = staticinvoke <java.util.HashMap: int hash(java.lang.Object)>(r1);
+
+        $r2 = virtualinvoke r0.<java.util.HashMap: java.util.HashMap$Node getNode(int,java.lang.Object)>($i0, r1);
+
+        if $r2 == null goto label1;
+
+        r3 = $r2.<java.util.HashMap$Node: java.lang.Object value>;
+
+        $r2.<java.util.HashMap$Node: java.lang.Object value> = r4;
+
+        virtualinvoke r0.<java.util.HashMap: void afterNodeAccess(java.util.HashMap$Node)>($r2);
+
+        return r3;
+
+     label1:
+        return null;
+    }
+
+    public java.lang.Object computeIfAbsent(java.lang.Object, java.util.function.Function)
+    {
+        java.lang.NullPointerException $r8;
+        boolean $z0, $z1;
+        java.util.HashMap r2;
+        java.util.HashMap$Node[] $r7, r11, $r12;
+        java.util.function.Function r0;
+        java.util.HashMap$TreeNode $r6, r9;
+        int $i0, $i1, $i2, $i3, $i4, i5, i6, $i7, $i8, $i9, $i10, $i11, $i12;
+        java.lang.Object r1, $r4, $r5, $r16;
+        java.util.HashMap$Node $r3, r10, $r13, r14, $r15;
+
+        r2 := @this: java.util.HashMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r0 := @parameter1: java.util.function.Function;
+
+        if r0 != null goto label01;
+
+        $r8 = new java.lang.NullPointerException;
+
+        specialinvoke $r8.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r8;
+
+     label01:
+        $i0 = staticinvoke <java.util.HashMap: int hash(java.lang.Object)>(r1);
+
+        i5 = 0;
+
+        r9 = null;
+
+        r10 = null;
+
+        $i2 = r2.<java.util.HashMap: int size>;
+
+        $i1 = r2.<java.util.HashMap: int threshold>;
+
+        if $i2 > $i1 goto label02;
+
+        $r7 = r2.<java.util.HashMap: java.util.HashMap$Node[] table>;
+
+        r11 = $r7;
+
+        if $r7 == null goto label02;
+
+        $i4 = lengthof $r7;
+
+        i6 = $i4;
+
+        if $i4 != 0 goto label03;
+
+     label02:
+        $r12 = virtualinvoke r2.<java.util.HashMap: java.util.HashMap$Node[] resize()>();
+
+        r11 = $r12;
+
+        i6 = lengthof $r12;
+
+     label03:
+        $i7 = i6 - 1;
+
+        $i8 = $i7 & $i0;
+
+        $r13 = r11[$i8];
+
+        if $r13 == null goto label09;
+
+        $z0 = $r13 instanceof java.util.HashMap$TreeNode;
+
+        if $z0 == 0 goto label04;
+
+        $r6 = (java.util.HashMap$TreeNode) $r13;
+
+        r9 = $r6;
+
+        r10 = virtualinvoke $r6.<java.util.HashMap$TreeNode: java.util.HashMap$TreeNode getTreeNode(int,java.lang.Object)>($i0, r1);
+
+        goto label08;
+
+     label04:
+        r14 = $r13;
+
+     label05:
+        $i3 = r14.<java.util.HashMap$Node: int hash>;
+
+        if $i3 != $i0 goto label07;
+
+        $r5 = r14.<java.util.HashMap$Node: java.lang.Object key>;
+
+        if $r5 == r1 goto label06;
+
+        if r1 == null goto label07;
+
+        $z1 = virtualinvoke r1.<java.lang.Object: boolean equals(java.lang.Object)>($r5);
+
+        if $z1 == 0 goto label07;
+
+     label06:
+        r10 = r14;
+
+        goto label08;
+
+     label07:
+        i5 = i5 + 1;
+
+        $r15 = r14.<java.util.HashMap$Node: java.util.HashMap$Node next>;
+
+        r14 = $r15;
+
+        if $r15 != null goto label05;
+
+     label08:
+        if r10 == null goto label09;
+
+        $r4 = r10.<java.util.HashMap$Node: java.lang.Object value>;
+
+        if $r4 == null goto label09;
+
+        virtualinvoke r2.<java.util.HashMap: void afterNodeAccess(java.util.HashMap$Node)>(r10);
+
+        return $r4;
+
+     label09:
+        $r16 = interfaceinvoke r0.<java.util.function.Function: java.lang.Object apply(java.lang.Object)>(r1);
+
+        if $r16 != null goto label10;
+
+        return null;
+
+     label10:
+        if r10 == null goto label11;
+
+        r10.<java.util.HashMap$Node: java.lang.Object value> = $r16;
+
+        virtualinvoke r2.<java.util.HashMap: void afterNodeAccess(java.util.HashMap$Node)>(r10);
+
+        return $r16;
+
+     label11:
+        if r9 == null goto label12;
+
+        virtualinvoke r9.<java.util.HashMap$TreeNode: java.util.HashMap$TreeNode putTreeVal(java.util.HashMap,java.util.HashMap$Node[],int,java.lang.Object,java.lang.Object)>(r2, r11, $i0, r1, $r16);
+
+        goto label13;
+
+     label12:
+        $r3 = virtualinvoke r2.<java.util.HashMap: java.util.HashMap$Node newNode(int,java.lang.Object,java.lang.Object,java.util.HashMap$Node)>($i0, r1, $r16, $r13);
+
+        r11[$i8] = $r3;
+
+        if i5 < 7 goto label13;
+
+        virtualinvoke r2.<java.util.HashMap: void treeifyBin(java.util.HashMap$Node[],int)>(r11, $i0);
+
+     label13:
+        $i9 = r2.<java.util.HashMap: int modCount>;
+
+        $i10 = $i9 + 1;
+
+        r2.<java.util.HashMap: int modCount> = $i10;
+
+        $i11 = r2.<java.util.HashMap: int size>;
+
+        $i12 = $i11 + 1;
+
+        r2.<java.util.HashMap: int size> = $i12;
+
+        virtualinvoke r2.<java.util.HashMap: void afterNodeInsertion(boolean)>(1);
+
+        return $r16;
+    }
+
+    public java.lang.Object computeIfPresent(java.lang.Object, java.util.function.BiFunction)
+    {
+        java.util.function.BiFunction r0;
+        java.util.HashMap r2;
+        java.lang.NullPointerException $r6;
+        int $i0;
+        java.lang.Object r1, $r4, $r5;
+        java.util.HashMap$Node $r3;
+
+        r2 := @this: java.util.HashMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r0 := @parameter1: java.util.function.BiFunction;
+
+        if r0 != null goto label1;
+
+        $r6 = new java.lang.NullPointerException;
+
+        specialinvoke $r6.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r6;
+
+     label1:
+        $i0 = staticinvoke <java.util.HashMap: int hash(java.lang.Object)>(r1);
+
+        $r3 = virtualinvoke r2.<java.util.HashMap: java.util.HashMap$Node getNode(int,java.lang.Object)>($i0, r1);
+
+        if $r3 == null goto label3;
+
+        $r4 = $r3.<java.util.HashMap$Node: java.lang.Object value>;
+
+        if $r4 == null goto label3;
+
+        $r5 = interfaceinvoke r0.<java.util.function.BiFunction: java.lang.Object apply(java.lang.Object,java.lang.Object)>(r1, $r4);
+
+        if $r5 == null goto label2;
+
+        $r3.<java.util.HashMap$Node: java.lang.Object value> = $r5;
+
+        virtualinvoke r2.<java.util.HashMap: void afterNodeAccess(java.util.HashMap$Node)>($r3);
+
+        return $r5;
+
+     label2:
+        virtualinvoke r2.<java.util.HashMap: java.util.HashMap$Node removeNode(int,java.lang.Object,java.lang.Object,boolean,boolean)>($i0, r1, null, 0, 1);
+
+     label3:
+        return null;
+    }
+
+    public java.lang.Object compute(java.lang.Object, java.util.function.BiFunction)
+    {
+        java.util.function.BiFunction r0;
+        java.lang.NullPointerException $r8;
+        boolean $z0, $z1;
+        java.util.HashMap r2;
+        java.util.HashMap$Node[] $r7, r11, $r12;
+        java.util.HashMap$TreeNode $r6, r9;
+        int $i0, $i1, $i2, $i3, $i4, i5, i6, $i7, $i8, $i9, $i10, $i11, $i12;
+        java.lang.Object r1, $r3, $r5, $r16;
+        java.util.HashMap$Node $r4, r10, $r13, r14, $r15;
+
+        r2 := @this: java.util.HashMap;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r0 := @parameter1: java.util.function.BiFunction;
+
+        if r0 != null goto label01;
+
+        $r8 = new java.lang.NullPointerException;
+
+        specialinvoke $r8.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r8;
+
+     label01:
+        $i0 = staticinvoke <java.util.HashMap: int hash(java.lang.Object)>(r1);
+
+        i5 = 0;
+
+        r9 = null;
+
+        r10 = null;
+
+        $i2 = r2.<java.util.HashMap: int size>;
+
+        $i1 = r2.<java.util.HashMap: int threshold>;
+
+        if $i2 > $i1 goto label02;
+
+        $r7 = r2.<java.util.HashMap: java.util.HashMap$Node[] table>;
+
+        r11 = $r7;
+
+        if $r7 == null goto label02;
+
+        $i4 = lengthof $r7;
+
+        i6 = $i4;
+
+        if $i4 != 0 goto label03;
+
+     label02:
+        $r12 = virtualinvoke r2.<java.util.HashMap: java.util.HashMap$Node[] resize()>();
+
+        r11 = $r12;
+
+        i6 = lengthof $r12;
+
+     label03:
+        $i7 = i6 - 1;
+
+        $i8 = $i7 & $i0;
+
+        $r13 = r11[$i8];
+
+        if $r13 == null goto label08;
+
+        $z0 = $r13 instanceof java.util.HashMap$TreeNode;
+
+        if $z0 == 0 goto label04;
+
+        $r6 = (java.util.HashMap$TreeNode) $r13;
+
+        r9 = $r6;
+
+        r10 = virtualinvoke $r6.<java.util.HashMap$TreeNode: java.util.HashMap$TreeNode getTreeNode(int,java.lang.Object)>($i0, r1);
+
+        goto label08;
+
+     label04:
+        r14 = $r13;
+
+     label05:
+        $i3 = r14.<java.util.HashMap$Node: int hash>;
+
+        if $i3 != $i0 goto label07;
+
+        $r5 = r14.<java.util.HashMap$Node: java.lang.Object key>;
+
+        if $r5 == r1 goto label06;
+
+        if r1 == null goto label07;
+
+        $z1 = virtualinvoke r1.<java.lang.Object: boolean equals(java.lang.Object)>($r5);
+
+        if $z1 == 0 goto label07;
+
+     label06:
+        r10 = r14;
+
+        goto label08;
+
+     label07:
+        i5 = i5 + 1;
+
+        $r15 = r14.<java.util.HashMap$Node: java.util.HashMap$Node next>;
+
+        r14 = $r15;
+
+        if $r15 != null goto label05;
+
+     label08:
+        if r10 != null goto label09;
+
+        $r16 = null;
+
+        goto label10;
+
+     label09:
+        $r16 = r10.<java.util.HashMap$Node: java.lang.Object value>;
+
+     label10:
+        $r3 = interfaceinvoke r0.<java.util.function.BiFunction: java.lang.Object apply(java.lang.Object,java.lang.Object)>(r1, $r16);
+
+        if r10 == null goto label12;
+
+        if $r3 == null goto label11;
+
+        r10.<java.util.HashMap$Node: java.lang.Object value> = $r3;
+
+        virtualinvoke r2.<java.util.HashMap: void afterNodeAccess(java.util.HashMap$Node)>(r10);
+
+        goto label15;
+
+     label11:
+        virtualinvoke r2.<java.util.HashMap: java.util.HashMap$Node removeNode(int,java.lang.Object,java.lang.Object,boolean,boolean)>($i0, r1, null, 0, 1);
+
+        goto label15;
+
+     label12:
+        if $r3 == null goto label15;
+
+        if r9 == null goto label13;
+
+        virtualinvoke r9.<java.util.HashMap$TreeNode: java.util.HashMap$TreeNode putTreeVal(java.util.HashMap,java.util.HashMap$Node[],int,java.lang.Object,java.lang.Object)>(r2, r11, $i0, r1, $r3);
+
+        goto label14;
+
+     label13:
+        $r4 = virtualinvoke r2.<java.util.HashMap: java.util.HashMap$Node newNode(int,java.lang.Object,java.lang.Object,java.util.HashMap$Node)>($i0, r1, $r3, $r13);
+
+        r11[$i8] = $r4;
+
+        if i5 < 7 goto label14;
+
+        virtualinvoke r2.<java.util.HashMap: void treeifyBin(java.util.HashMap$Node[],int)>(r11, $i0);
+
+     label14:
+        $i9 = r2.<java.util.HashMap: int modCount>;
+
+        $i10 = $i9 + 1;
+
+        r2.<java.util.HashMap: int modCount> = $i10;
+
+        $i11 = r2.<java.util.HashMap: int size>;
+
+        $i12 = $i11 + 1;
+
+        r2.<java.util.HashMap: int size> = $i12;
+
+        virtualinvoke r2.<java.util.HashMap: void afterNodeInsertion(boolean)>(1);
+
+     label15:
+        return $r3;
+    }
+
+    public java.lang.Object merge(java.lang.Object, java.lang.Object, java.util.function.BiFunction)
+    {
+        java.util.function.BiFunction r1;
+        java.lang.NullPointerException $r10, $r11;
+        boolean $z0, $z1;
+        java.util.HashMap r3;
+        java.util.HashMap$Node[] $r9, r14, $r15;
+        java.util.HashMap$TreeNode $r8, r12;
+        int $i0, $i1, $i2, $i3, $i4, i5, i6, $i7, $i8, $i9, $i10, $i11, $i12;
+        java.lang.Object r0, r2, $r5, $r6, $r7, r19;
+        java.util.HashMap$Node $r4, r13, $r16, r17, $r18;
+
+        r3 := @this: java.util.HashMap;
+
+        r2 := @parameter0: java.lang.Object;
+
+        r0 := @parameter1: java.lang.Object;
+
+        r1 := @parameter2: java.util.function.BiFunction;
+
+        if r0 != null goto label01;
+
+        $r11 = new java.lang.NullPointerException;
+
+        specialinvoke $r11.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r11;
+
+     label01:
+        if r1 != null goto label02;
+
+        $r10 = new java.lang.NullPointerException;
+
+        specialinvoke $r10.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r10;
+
+     label02:
+        $i0 = staticinvoke <java.util.HashMap: int hash(java.lang.Object)>(r2);
+
+        i5 = 0;
+
+        r12 = null;
+
+        r13 = null;
+
+        $i2 = r3.<java.util.HashMap: int size>;
+
+        $i1 = r3.<java.util.HashMap: int threshold>;
+
+        if $i2 > $i1 goto label03;
+
+        $r9 = r3.<java.util.HashMap: java.util.HashMap$Node[] table>;
+
+        r14 = $r9;
+
+        if $r9 == null goto label03;
+
+        $i4 = lengthof $r9;
+
+        i6 = $i4;
+
+        if $i4 != 0 goto label04;
+
+     label03:
+        $r15 = virtualinvoke r3.<java.util.HashMap: java.util.HashMap$Node[] resize()>();
+
+        r14 = $r15;
+
+        i6 = lengthof $r15;
+
+     label04:
+        $i7 = i6 - 1;
+
+        $i8 = $i7 & $i0;
+
+        $r16 = r14[$i8];
+
+        if $r16 == null goto label09;
+
+        $z0 = $r16 instanceof java.util.HashMap$TreeNode;
+
+        if $z0 == 0 goto label05;
+
+        $r8 = (java.util.HashMap$TreeNode) $r16;
+
+        r12 = $r8;
+
+        r13 = virtualinvoke $r8.<java.util.HashMap$TreeNode: java.util.HashMap$TreeNode getTreeNode(int,java.lang.Object)>($i0, r2);
+
+        goto label09;
+
+     label05:
+        r17 = $r16;
+
+     label06:
+        $i3 = r17.<java.util.HashMap$Node: int hash>;
+
+        if $i3 != $i0 goto label08;
+
+        $r7 = r17.<java.util.HashMap$Node: java.lang.Object key>;
+
+        if $r7 == r2 goto label07;
+
+        if r2 == null goto label08;
+
+        $z1 = virtualinvoke r2.<java.lang.Object: boolean equals(java.lang.Object)>($r7);
+
+        if $z1 == 0 goto label08;
+
+     label07:
+        r13 = r17;
+
+        goto label09;
+
+     label08:
+        i5 = i5 + 1;
+
+        $r18 = r17.<java.util.HashMap$Node: java.util.HashMap$Node next>;
+
+        r17 = $r18;
+
+        if $r18 != null goto label06;
+
+     label09:
+        if r13 == null goto label14;
+
+        $r5 = r13.<java.util.HashMap$Node: java.lang.Object value>;
+
+        if $r5 == null goto label10;
+
+        $r6 = r13.<java.util.HashMap$Node: java.lang.Object value>;
+
+        r19 = interfaceinvoke r1.<java.util.function.BiFunction: java.lang.Object apply(java.lang.Object,java.lang.Object)>($r6, r0);
+
+        goto label11;
+
+     label10:
+        r19 = r0;
+
+     label11:
+        if r19 == null goto label12;
+
+        r13.<java.util.HashMap$Node: java.lang.Object value> = r19;
+
+        virtualinvoke r3.<java.util.HashMap: void afterNodeAccess(java.util.HashMap$Node)>(r13);
+
+        goto label13;
+
+     label12:
+        virtualinvoke r3.<java.util.HashMap: java.util.HashMap$Node removeNode(int,java.lang.Object,java.lang.Object,boolean,boolean)>($i0, r2, null, 0, 1);
+
+     label13:
+        return r19;
+
+     label14:
+        if r0 == null goto label17;
+
+        if r12 == null goto label15;
+
+        virtualinvoke r12.<java.util.HashMap$TreeNode: java.util.HashMap$TreeNode putTreeVal(java.util.HashMap,java.util.HashMap$Node[],int,java.lang.Object,java.lang.Object)>(r3, r14, $i0, r2, r0);
+
+        goto label16;
+
+     label15:
+        $r4 = virtualinvoke r3.<java.util.HashMap: java.util.HashMap$Node newNode(int,java.lang.Object,java.lang.Object,java.util.HashMap$Node)>($i0, r2, r0, $r16);
+
+        r14[$i8] = $r4;
+
+        if i5 < 7 goto label16;
+
+        virtualinvoke r3.<java.util.HashMap: void treeifyBin(java.util.HashMap$Node[],int)>(r14, $i0);
+
+     label16:
+        $i9 = r3.<java.util.HashMap: int modCount>;
+
+        $i10 = $i9 + 1;
+
+        r3.<java.util.HashMap: int modCount> = $i10;
+
+        $i11 = r3.<java.util.HashMap: int size>;
+
+        $i12 = $i11 + 1;
+
+        r3.<java.util.HashMap: int size> = $i12;
+
+        virtualinvoke r3.<java.util.HashMap: void afterNodeInsertion(boolean)>(1);
+
+     label17:
+        return r0;
+    }
+
+    public void forEach(java.util.function.BiConsumer)
+    {
+        java.util.HashMap r1;
+        java.util.HashMap$Node[] $r2;
+        java.lang.NullPointerException $r6;
+        java.util.function.BiConsumer r0;
+        int $i0, i1, $i2, $i3, i4;
+        java.lang.Object $r4, $r5;
+        java.util.ConcurrentModificationException $r3;
+        java.util.HashMap$Node r7;
+
+        r1 := @this: java.util.HashMap;
+
+        r0 := @parameter0: java.util.function.BiConsumer;
+
+        if r0 != null goto label1;
+
+        $r6 = new java.lang.NullPointerException;
+
+        specialinvoke $r6.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r6;
+
+     label1:
+        $i0 = r1.<java.util.HashMap: int size>;
+
+        if $i0 <= 0 goto label6;
+
+        $r2 = r1.<java.util.HashMap: java.util.HashMap$Node[] table>;
+
+        if $r2 == null goto label6;
+
+        i1 = r1.<java.util.HashMap: int modCount>;
+
+        i4 = 0;
+
+     label2:
+        $i2 = lengthof $r2;
+
+        if i4 >= $i2 goto label5;
+
+        r7 = $r2[i4];
+
+     label3:
+        if r7 == null goto label4;
+
+        $r5 = r7.<java.util.HashMap$Node: java.lang.Object key>;
+
+        $r4 = r7.<java.util.HashMap$Node: java.lang.Object value>;
+
+        interfaceinvoke r0.<java.util.function.BiConsumer: void accept(java.lang.Object,java.lang.Object)>($r5, $r4);
+
+        r7 = r7.<java.util.HashMap$Node: java.util.HashMap$Node next>;
+
+        goto label3;
+
+     label4:
+        i4 = i4 + 1;
+
+        goto label2;
+
+     label5:
+        $i3 = r1.<java.util.HashMap: int modCount>;
+
+        if $i3 == i1 goto label6;
+
+        $r3 = new java.util.ConcurrentModificationException;
+
+        specialinvoke $r3.<java.util.ConcurrentModificationException: void <init>()>();
+
+        throw $r3;
+
+     label6:
+        return;
+    }
+
+    public void replaceAll(java.util.function.BiFunction)
+    {
+        java.util.function.BiFunction r0;
+        java.util.HashMap r1;
+        java.util.HashMap$Node[] $r2;
+        java.lang.NullPointerException $r7;
+        int $i0, i1, $i2, $i3, i4;
+        java.lang.Object $r4, $r5, $r6;
+        java.util.ConcurrentModificationException $r3;
+        java.util.HashMap$Node r8;
+
+        r1 := @this: java.util.HashMap;
+
+        r0 := @parameter0: java.util.function.BiFunction;
+
+        if r0 != null goto label1;
+
+        $r7 = new java.lang.NullPointerException;
+
+        specialinvoke $r7.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r7;
+
+     label1:
+        $i0 = r1.<java.util.HashMap: int size>;
+
+        if $i0 <= 0 goto label6;
+
+        $r2 = r1.<java.util.HashMap: java.util.HashMap$Node[] table>;
+
+        if $r2 == null goto label6;
+
+        i1 = r1.<java.util.HashMap: int modCount>;
+
+        i4 = 0;
+
+     label2:
+        $i2 = lengthof $r2;
+
+        if i4 >= $i2 goto label5;
+
+        r8 = $r2[i4];
+
+     label3:
+        if r8 == null goto label4;
+
+        $r5 = r8.<java.util.HashMap$Node: java.lang.Object key>;
+
+        $r4 = r8.<java.util.HashMap$Node: java.lang.Object value>;
+
+        $r6 = interfaceinvoke r0.<java.util.function.BiFunction: java.lang.Object apply(java.lang.Object,java.lang.Object)>($r5, $r4);
+
+        r8.<java.util.HashMap$Node: java.lang.Object value> = $r6;
+
+        r8 = r8.<java.util.HashMap$Node: java.util.HashMap$Node next>;
+
+        goto label3;
+
+     label4:
+        i4 = i4 + 1;
+
+        goto label2;
+
+     label5:
+        $i3 = r1.<java.util.HashMap: int modCount>;
+
+        if $i3 == i1 goto label6;
+
+        $r3 = new java.util.ConcurrentModificationException;
+
+        specialinvoke $r3.<java.util.ConcurrentModificationException: void <init>()>();
+
+        throw $r3;
+
+     label6:
+        return;
+    }
+
+    public java.lang.Object clone()
+    {
+        java.lang.InternalError $r4;
+        java.util.HashMap r0, r2;
+        java.lang.Object $r1;
+        java.lang.CloneNotSupportedException $r3;
+
+        r0 := @this: java.util.HashMap;
+
+     label1:
+        $r1 = specialinvoke r0.<java.util.AbstractMap: java.lang.Object clone()>();
+
+        r2 = (java.util.HashMap) $r1;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.lang.InternalError;
+
+        specialinvoke $r4.<java.lang.InternalError: void <init>(java.lang.Throwable)>($r3);
+
+        throw $r4;
+
+     label4:
+        virtualinvoke r2.<java.util.HashMap: void reinitialize()>();
+
+        virtualinvoke r2.<java.util.HashMap: void putMapEntries(java.util.Map,boolean)>(r0, 0);
+
+        return r2;
+
+        catch java.lang.CloneNotSupportedException from label1 to label2 with label3;
+    }
+
+    final float loadFactor()
+    {
+        float $f0;
+        java.util.HashMap r0;
+
+        r0 := @this: java.util.HashMap;
+
+        $f0 = r0.<java.util.HashMap: float loadFactor>;
+
+        return $f0;
+    }
+
+    final int capacity()
+    {
+        int $i0, $i1;
+        java.util.HashMap r0;
+        java.util.HashMap$Node[] $r1, $r2;
+
+        r0 := @this: java.util.HashMap;
+
+        $r1 = r0.<java.util.HashMap: java.util.HashMap$Node[] table>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<java.util.HashMap: java.util.HashMap$Node[] table>;
+
+        $i1 = lengthof $r2;
+
+        goto label3;
+
+     label1:
+        $i0 = r0.<java.util.HashMap: int threshold>;
+
+        if $i0 <= 0 goto label2;
+
+        $i1 = r0.<java.util.HashMap: int threshold>;
+
+        goto label3;
+
+     label2:
+        $i1 = 16;
+
+     label3:
+        return $i1;
+    }
+
+    private void writeObject(java.io.ObjectOutputStream) throws java.io.IOException
+    {
+        int $i0, $i1;
+        java.util.HashMap r0;
+        java.io.ObjectOutputStream r1;
+
+        r0 := @this: java.util.HashMap;
+
+        r1 := @parameter0: java.io.ObjectOutputStream;
+
+        $i0 = virtualinvoke r0.<java.util.HashMap: int capacity()>();
+
+        virtualinvoke r1.<java.io.ObjectOutputStream: void defaultWriteObject()>();
+
+        virtualinvoke r1.<java.io.ObjectOutputStream: void writeInt(int)>($i0);
+
+        $i1 = r0.<java.util.HashMap: int size>;
+
+        virtualinvoke r1.<java.io.ObjectOutputStream: void writeInt(int)>($i1);
+
+        virtualinvoke r0.<java.util.HashMap: void internalWriteEntries(java.io.ObjectOutputStream)>(r1);
+
+        return;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.ObjectInputStream r0;
+        byte $b0, $b2, $b3, $b7;
+        java.io.InvalidObjectException $r19, $r21;
+        boolean $z0;
+        java.io.ObjectInputStream$GetField $r1;
+        float $f0, $f1, $f2, $f3, $f4, f5, $f6, $f7;
+        java.lang.StringBuilder $r4, $r5, $r12, $r13, $r18, $r20;
+        sun.misc.JavaOISAccess $r15;
+        java.util.HashMap r7;
+        java.util.HashMap$Node[] $r16, $r17;
+        int $i1, $i4, i5, $i6, $i8, $i9, i10, $i11, $i12, $i13, $i14;
+        java.lang.String $r6, $r14;
+        java.lang.Object $r8, $r9;
+
+        r7 := @this: java.util.HashMap;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        $r1 = virtualinvoke r0.<java.io.ObjectInputStream: java.io.ObjectInputStream$GetField readFields()>();
+
+        $f0 = virtualinvoke $r1.<java.io.ObjectInputStream$GetField: float get(java.lang.String,float)>("loadFactor", 0.75F);
+
+        $b0 = $f0 cmpg 0.0F;
+
+        $i11 = (int) $b0;
+
+        if $i11 <= 0 goto label01;
+
+        $z0 = staticinvoke <java.lang.Float: boolean isNaN(float)>($f0);
+
+        if $z0 == 0 goto label02;
+
+     label01:
+        $r19 = new java.io.InvalidObjectException;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Illegal load factor: ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(float)>($f0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r19.<java.io.InvalidObjectException: void <init>(java.lang.String)>($r6);
+
+        throw $r19;
+
+     label02:
+        $f1 = staticinvoke <java.lang.Math: float max(float,float)>(0.25F, $f0);
+
+        $f2 = staticinvoke <java.lang.Math: float min(float,float)>($f1, 4.0F);
+
+        staticinvoke <java.util.HashMap$UnsafeHolder: void putLoadFactor(java.util.HashMap,float)>(r7, $f2);
+
+        virtualinvoke r7.<java.util.HashMap: void reinitialize()>();
+
+        virtualinvoke r0.<java.io.ObjectInputStream: int readInt()>();
+
+        $i1 = virtualinvoke r0.<java.io.ObjectInputStream: int readInt()>();
+
+        if $i1 >= 0 goto label03;
+
+        $r21 = new java.io.InvalidObjectException;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Illegal mappings count: ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r21.<java.io.InvalidObjectException: void <init>(java.lang.String)>($r14);
+
+        throw $r21;
+
+     label03:
+        if $i1 != 0 goto label04;
+
+        goto label11;
+
+     label04:
+        if $i1 <= 0 goto label11;
+
+        $f3 = (float) $i1;
+
+        $f4 = $f3 / $f2;
+
+        f5 = $f4 + 1.0F;
+
+        $b2 = f5 cmpg 16.0F;
+
+        $i12 = (int) $b2;
+
+        if $i12 >= 0 goto label05;
+
+        $i8 = 16;
+
+        goto label07;
+
+     label05:
+        $b3 = f5 cmpl 1.07374182E9F;
+
+        $i13 = (int) $b3;
+
+        if $i13 < 0 goto label06;
+
+        $i8 = 1073741824;
+
+        goto label07;
+
+     label06:
+        $i4 = (int) f5;
+
+        $i8 = staticinvoke <java.util.HashMap: int tableSizeFor(int)>($i4);
+
+     label07:
+        i5 = $i8;
+
+        $f6 = (float) $i8;
+
+        $f7 = $f6 * $f2;
+
+        if $i8 >= 1073741824 goto label08;
+
+        $b7 = $f7 cmpg 1.07374182E9F;
+
+        $i14 = (int) $b7;
+
+        if $i14 >= 0 goto label08;
+
+        $i9 = (int) $f7;
+
+        goto label09;
+
+     label08:
+        $i9 = 2147483647;
+
+     label09:
+        r7.<java.util.HashMap: int threshold> = $i9;
+
+        $r15 = staticinvoke <sun.misc.SharedSecrets: sun.misc.JavaOISAccess getJavaOISAccess()>();
+
+        interfaceinvoke $r15.<sun.misc.JavaOISAccess: void checkArray(java.io.ObjectInputStream,java.lang.Class,int)>(r0, class "[Ljava/util/Map$Entry;", i5);
+
+        $r16 = newarray (java.util.HashMap$Node)[i5];
+
+        $r17 = (java.util.HashMap$Node[]) $r16;
+
+        r7.<java.util.HashMap: java.util.HashMap$Node[] table> = $r17;
+
+        i10 = 0;
+
+     label10:
+        if i10 >= $i1 goto label11;
+
+        $r8 = virtualinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        $r9 = virtualinvoke r0.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        $i6 = staticinvoke <java.util.HashMap: int hash(java.lang.Object)>($r8);
+
+        virtualinvoke r7.<java.util.HashMap: java.lang.Object putVal(int,java.lang.Object,java.lang.Object,boolean,boolean)>($i6, $r8, $r9, 0, 0);
+
+        i10 = i10 + 1;
+
+        goto label10;
+
+     label11:
+        return;
+    }
+
+    java.util.HashMap$Node newNode(int, java.lang.Object, java.lang.Object, java.util.HashMap$Node)
+    {
+        int i0;
+        java.lang.Object r1, r2;
+        java.util.HashMap r4;
+        java.util.HashMap$Node $r0, r3;
+
+        r4 := @this: java.util.HashMap;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.lang.Object;
+
+        r2 := @parameter2: java.lang.Object;
+
+        r3 := @parameter3: java.util.HashMap$Node;
+
+        $r0 = new java.util.HashMap$Node;
+
+        specialinvoke $r0.<java.util.HashMap$Node: void <init>(int,java.lang.Object,java.lang.Object,java.util.HashMap$Node)>(i0, r1, r2, r3);
+
+        return $r0;
+    }
+
+    java.util.HashMap$Node replacementNode(java.util.HashMap$Node, java.util.HashMap$Node)
+    {
+        int $i0;
+        java.lang.Object $r3, $r4;
+        java.util.HashMap r5;
+        java.util.HashMap$Node $r0, r1, r2;
+
+        r5 := @this: java.util.HashMap;
+
+        r1 := @parameter0: java.util.HashMap$Node;
+
+        r2 := @parameter1: java.util.HashMap$Node;
+
+        $r0 = new java.util.HashMap$Node;
+
+        $i0 = r1.<java.util.HashMap$Node: int hash>;
+
+        $r4 = r1.<java.util.HashMap$Node: java.lang.Object key>;
+
+        $r3 = r1.<java.util.HashMap$Node: java.lang.Object value>;
+
+        specialinvoke $r0.<java.util.HashMap$Node: void <init>(int,java.lang.Object,java.lang.Object,java.util.HashMap$Node)>($i0, $r4, $r3, r2);
+
+        return $r0;
+    }
+
+    java.util.HashMap$TreeNode newTreeNode(int, java.lang.Object, java.lang.Object, java.util.HashMap$Node)
+    {
+        int i0;
+        java.lang.Object r1, r2;
+        java.util.HashMap r4;
+        java.util.HashMap$TreeNode $r0;
+        java.util.HashMap$Node r3;
+
+        r4 := @this: java.util.HashMap;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.lang.Object;
+
+        r2 := @parameter2: java.lang.Object;
+
+        r3 := @parameter3: java.util.HashMap$Node;
+
+        $r0 = new java.util.HashMap$TreeNode;
+
+        specialinvoke $r0.<java.util.HashMap$TreeNode: void <init>(int,java.lang.Object,java.lang.Object,java.util.HashMap$Node)>(i0, r1, r2, r3);
+
+        return $r0;
+    }
+
+    java.util.HashMap$TreeNode replacementTreeNode(java.util.HashMap$Node, java.util.HashMap$Node)
+    {
+        int $i0;
+        java.lang.Object $r3, $r4;
+        java.util.HashMap r5;
+        java.util.HashMap$TreeNode $r0;
+        java.util.HashMap$Node r1, r2;
+
+        r5 := @this: java.util.HashMap;
+
+        r1 := @parameter0: java.util.HashMap$Node;
+
+        r2 := @parameter1: java.util.HashMap$Node;
+
+        $r0 = new java.util.HashMap$TreeNode;
+
+        $i0 = r1.<java.util.HashMap$Node: int hash>;
+
+        $r4 = r1.<java.util.HashMap$Node: java.lang.Object key>;
+
+        $r3 = r1.<java.util.HashMap$Node: java.lang.Object value>;
+
+        specialinvoke $r0.<java.util.HashMap$TreeNode: void <init>(int,java.lang.Object,java.lang.Object,java.util.HashMap$Node)>($i0, $r4, $r3, r2);
+
+        return $r0;
+    }
+
+    void reinitialize()
+    {
+        java.util.HashMap r0;
+
+        r0 := @this: java.util.HashMap;
+
+        r0.<java.util.HashMap: java.util.HashMap$Node[] table> = null;
+
+        r0.<java.util.HashMap: java.util.Set entrySet> = null;
+
+        r0.<java.util.HashMap: java.util.Set keySet> = null;
+
+        r0.<java.util.HashMap: java.util.Collection values> = null;
+
+        r0.<java.util.HashMap: int modCount> = 0;
+
+        r0.<java.util.HashMap: int threshold> = 0;
+
+        r0.<java.util.HashMap: int size> = 0;
+
+        return;
+    }
+
+    void afterNodeAccess(java.util.HashMap$Node)
+    {
+        java.util.HashMap r0;
+        java.util.HashMap$Node r1;
+
+        r0 := @this: java.util.HashMap;
+
+        r1 := @parameter0: java.util.HashMap$Node;
+
+        return;
+    }
+
+    void afterNodeInsertion(boolean)
+    {
+        java.util.HashMap r0;
+        boolean z0;
+
+        r0 := @this: java.util.HashMap;
+
+        z0 := @parameter0: boolean;
+
+        return;
+    }
+
+    void afterNodeRemoval(java.util.HashMap$Node)
+    {
+        java.util.HashMap r0;
+        java.util.HashMap$Node r1;
+
+        r0 := @this: java.util.HashMap;
+
+        r1 := @parameter0: java.util.HashMap$Node;
+
+        return;
+    }
+
+    void internalWriteEntries(java.io.ObjectOutputStream) throws java.io.IOException
+    {
+        java.util.HashMap r0;
+        java.util.HashMap$Node[] $r1;
+        int $i0, $i1, i2;
+        java.io.ObjectOutputStream r2;
+        java.lang.Object $r3, $r4;
+        java.util.HashMap$Node r5;
+
+        r0 := @this: java.util.HashMap;
+
+        r2 := @parameter0: java.io.ObjectOutputStream;
+
+        $i0 = r0.<java.util.HashMap: int size>;
+
+        if $i0 <= 0 goto label4;
+
+        $r1 = r0.<java.util.HashMap: java.util.HashMap$Node[] table>;
+
+        if $r1 == null goto label4;
+
+        i2 = 0;
+
+     label1:
+        $i1 = lengthof $r1;
+
+        if i2 >= $i1 goto label4;
+
+        r5 = $r1[i2];
+
+     label2:
+        if r5 == null goto label3;
+
+        $r3 = r5.<java.util.HashMap$Node: java.lang.Object key>;
+
+        virtualinvoke r2.<java.io.ObjectOutputStream: void writeObject(java.lang.Object)>($r3);
+
+        $r4 = r5.<java.util.HashMap$Node: java.lang.Object value>;
+
+        virtualinvoke r2.<java.io.ObjectOutputStream: void writeObject(java.lang.Object)>($r4);
+
+        r5 = r5.<java.util.HashMap$Node: java.util.HashMap$Node next>;
+
+        goto label2;
+
+     label3:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <java.util.HashMap: int MIN_TREEIFY_CAPACITY> = 64;
+
+        <java.util.HashMap: int UNTREEIFY_THRESHOLD> = 6;
+
+        <java.util.HashMap: int TREEIFY_THRESHOLD> = 8;
+
+        <java.util.HashMap: float DEFAULT_LOAD_FACTOR> = 0.75F;
+
+        <java.util.HashMap: int MAXIMUM_CAPACITY> = 1073741824;
+
+        <java.util.HashMap: int DEFAULT_INITIAL_CAPACITY> = 16;
+
+        <java.util.HashMap: long serialVersionUID> = 362498820763181265L;
+
+        return;
+    }
+}

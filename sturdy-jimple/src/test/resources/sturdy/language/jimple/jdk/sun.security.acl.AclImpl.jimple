@@ -1,0 +1,694 @@
+public class sun.security.acl.AclImpl extends sun.security.acl.OwnerImpl implements java.security.acl.Acl
+{
+    private java.util.Hashtable allowedUsersTable;
+    private java.util.Hashtable allowedGroupsTable;
+    private java.util.Hashtable deniedUsersTable;
+    private java.util.Hashtable deniedGroupsTable;
+    private java.lang.String aclName;
+    private java.util.Vector zeroSet;
+
+    public void <init>(java.security.Principal, java.lang.String)
+    {
+        sun.security.acl.AclImpl r0;
+        java.lang.Exception $r8;
+        java.security.Principal r1;
+        java.util.Vector $r6;
+        java.lang.String r7;
+        java.util.Hashtable $r2, $r3, $r4, $r5;
+
+        r0 := @this: sun.security.acl.AclImpl;
+
+        r1 := @parameter0: java.security.Principal;
+
+        r7 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<sun.security.acl.OwnerImpl: void <init>(java.security.Principal)>(r1);
+
+        $r2 = new java.util.Hashtable;
+
+        specialinvoke $r2.<java.util.Hashtable: void <init>(int)>(23);
+
+        r0.<sun.security.acl.AclImpl: java.util.Hashtable allowedUsersTable> = $r2;
+
+        $r3 = new java.util.Hashtable;
+
+        specialinvoke $r3.<java.util.Hashtable: void <init>(int)>(23);
+
+        r0.<sun.security.acl.AclImpl: java.util.Hashtable allowedGroupsTable> = $r3;
+
+        $r4 = new java.util.Hashtable;
+
+        specialinvoke $r4.<java.util.Hashtable: void <init>(int)>(23);
+
+        r0.<sun.security.acl.AclImpl: java.util.Hashtable deniedUsersTable> = $r4;
+
+        $r5 = new java.util.Hashtable;
+
+        specialinvoke $r5.<java.util.Hashtable: void <init>(int)>(23);
+
+        r0.<sun.security.acl.AclImpl: java.util.Hashtable deniedGroupsTable> = $r5;
+
+        r0.<sun.security.acl.AclImpl: java.lang.String aclName> = null;
+
+        $r6 = new java.util.Vector;
+
+        specialinvoke $r6.<java.util.Vector: void <init>(int,int)>(1, 1);
+
+        r0.<sun.security.acl.AclImpl: java.util.Vector zeroSet> = $r6;
+
+     label1:
+        virtualinvoke r0.<sun.security.acl.AclImpl: void setName(java.security.Principal,java.lang.String)>(r1, r7);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r8 := @caughtexception;
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public void setName(java.security.Principal, java.lang.String) throws java.security.acl.NotOwnerException
+    {
+        java.security.Principal r1;
+        sun.security.acl.AclImpl r0;
+        java.security.acl.NotOwnerException $r3;
+        java.lang.String r2;
+        boolean $z0;
+
+        r0 := @this: sun.security.acl.AclImpl;
+
+        r1 := @parameter0: java.security.Principal;
+
+        r2 := @parameter1: java.lang.String;
+
+        $z0 = virtualinvoke r0.<sun.security.acl.AclImpl: boolean isOwner(java.security.Principal)>(r1);
+
+        if $z0 != 0 goto label1;
+
+        $r3 = new java.security.acl.NotOwnerException;
+
+        specialinvoke $r3.<java.security.acl.NotOwnerException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        r0.<sun.security.acl.AclImpl: java.lang.String aclName> = r2;
+
+        return;
+    }
+
+    public java.lang.String getName()
+    {
+        sun.security.acl.AclImpl r0;
+        java.lang.String $r1;
+
+        r0 := @this: sun.security.acl.AclImpl;
+
+        $r1 = r0.<sun.security.acl.AclImpl: java.lang.String aclName>;
+
+        return $r1;
+    }
+
+    public synchronized boolean addEntry(java.security.Principal, java.security.acl.AclEntry) throws java.security.acl.NotOwnerException
+    {
+        sun.security.acl.AclImpl r0;
+        java.security.acl.NotOwnerException $r6;
+        java.security.acl.AclEntry r2;
+        java.security.Principal r1, $r4;
+        java.lang.Object $r5;
+        java.util.Hashtable $r3;
+        boolean $z0;
+
+        r0 := @this: sun.security.acl.AclImpl;
+
+        r1 := @parameter0: java.security.Principal;
+
+        r2 := @parameter1: java.security.acl.AclEntry;
+
+        $z0 = virtualinvoke r0.<sun.security.acl.AclImpl: boolean isOwner(java.security.Principal)>(r1);
+
+        if $z0 != 0 goto label1;
+
+        $r6 = new java.security.acl.NotOwnerException;
+
+        specialinvoke $r6.<java.security.acl.NotOwnerException: void <init>()>();
+
+        throw $r6;
+
+     label1:
+        $r3 = specialinvoke r0.<sun.security.acl.AclImpl: java.util.Hashtable findTable(java.security.acl.AclEntry)>(r2);
+
+        $r4 = interfaceinvoke r2.<java.security.acl.AclEntry: java.security.Principal getPrincipal()>();
+
+        $r5 = virtualinvoke $r3.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r4);
+
+        if $r5 == null goto label2;
+
+        return 0;
+
+     label2:
+        virtualinvoke $r3.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r4, r2);
+
+        return 1;
+    }
+
+    public synchronized boolean removeEntry(java.security.Principal, java.security.acl.AclEntry) throws java.security.acl.NotOwnerException
+    {
+        sun.security.acl.AclImpl r0;
+        java.security.acl.NotOwnerException $r7;
+        java.security.acl.AclEntry r2, r6;
+        java.security.Principal r1, $r4;
+        java.lang.Object $r5;
+        java.util.Hashtable $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.security.acl.AclImpl;
+
+        r1 := @parameter0: java.security.Principal;
+
+        r2 := @parameter1: java.security.acl.AclEntry;
+
+        $z0 = virtualinvoke r0.<sun.security.acl.AclImpl: boolean isOwner(java.security.Principal)>(r1);
+
+        if $z0 != 0 goto label1;
+
+        $r7 = new java.security.acl.NotOwnerException;
+
+        specialinvoke $r7.<java.security.acl.NotOwnerException: void <init>()>();
+
+        throw $r7;
+
+     label1:
+        $r3 = specialinvoke r0.<sun.security.acl.AclImpl: java.util.Hashtable findTable(java.security.acl.AclEntry)>(r2);
+
+        $r4 = interfaceinvoke r2.<java.security.acl.AclEntry: java.security.Principal getPrincipal()>();
+
+        $r5 = virtualinvoke $r3.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>($r4);
+
+        r6 = (java.security.acl.AclEntry) $r5;
+
+        if r6 == null goto label2;
+
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        return $z1;
+    }
+
+    public synchronized java.util.Enumeration getPermissions(java.security.Principal)
+    {
+        java.util.Enumeration $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24;
+        sun.security.acl.AclImpl r0;
+        java.security.Principal r1;
+
+        r0 := @this: sun.security.acl.AclImpl;
+
+        r1 := @parameter0: java.security.Principal;
+
+        $r2 = specialinvoke r0.<sun.security.acl.AclImpl: java.util.Enumeration getGroupPositive(java.security.Principal)>(r1);
+
+        $r3 = specialinvoke r0.<sun.security.acl.AclImpl: java.util.Enumeration getGroupNegative(java.security.Principal)>(r1);
+
+        $r4 = specialinvoke r0.<sun.security.acl.AclImpl: java.util.Enumeration subtract(java.util.Enumeration,java.util.Enumeration)>($r2, $r3);
+
+        $r5 = specialinvoke r0.<sun.security.acl.AclImpl: java.util.Enumeration getGroupNegative(java.security.Principal)>(r1);
+
+        $r6 = specialinvoke r0.<sun.security.acl.AclImpl: java.util.Enumeration getGroupPositive(java.security.Principal)>(r1);
+
+        $r7 = specialinvoke r0.<sun.security.acl.AclImpl: java.util.Enumeration subtract(java.util.Enumeration,java.util.Enumeration)>($r5, $r6);
+
+        $r8 = specialinvoke r0.<sun.security.acl.AclImpl: java.util.Enumeration getIndividualPositive(java.security.Principal)>(r1);
+
+        $r9 = specialinvoke r0.<sun.security.acl.AclImpl: java.util.Enumeration getIndividualNegative(java.security.Principal)>(r1);
+
+        $r10 = specialinvoke r0.<sun.security.acl.AclImpl: java.util.Enumeration subtract(java.util.Enumeration,java.util.Enumeration)>($r8, $r9);
+
+        $r11 = specialinvoke r0.<sun.security.acl.AclImpl: java.util.Enumeration getIndividualNegative(java.security.Principal)>(r1);
+
+        $r12 = specialinvoke r0.<sun.security.acl.AclImpl: java.util.Enumeration getIndividualPositive(java.security.Principal)>(r1);
+
+        $r13 = specialinvoke r0.<sun.security.acl.AclImpl: java.util.Enumeration subtract(java.util.Enumeration,java.util.Enumeration)>($r11, $r12);
+
+        $r14 = specialinvoke r0.<sun.security.acl.AclImpl: java.util.Enumeration subtract(java.util.Enumeration,java.util.Enumeration)>($r4, $r13);
+
+        $r15 = staticinvoke <sun.security.acl.AclImpl: java.util.Enumeration union(java.util.Enumeration,java.util.Enumeration)>($r10, $r14);
+
+        $r16 = specialinvoke r0.<sun.security.acl.AclImpl: java.util.Enumeration getIndividualPositive(java.security.Principal)>(r1);
+
+        $r17 = specialinvoke r0.<sun.security.acl.AclImpl: java.util.Enumeration getIndividualNegative(java.security.Principal)>(r1);
+
+        $r18 = specialinvoke r0.<sun.security.acl.AclImpl: java.util.Enumeration subtract(java.util.Enumeration,java.util.Enumeration)>($r16, $r17);
+
+        $r19 = specialinvoke r0.<sun.security.acl.AclImpl: java.util.Enumeration getIndividualNegative(java.security.Principal)>(r1);
+
+        $r20 = specialinvoke r0.<sun.security.acl.AclImpl: java.util.Enumeration getIndividualPositive(java.security.Principal)>(r1);
+
+        $r21 = specialinvoke r0.<sun.security.acl.AclImpl: java.util.Enumeration subtract(java.util.Enumeration,java.util.Enumeration)>($r19, $r20);
+
+        $r22 = specialinvoke r0.<sun.security.acl.AclImpl: java.util.Enumeration subtract(java.util.Enumeration,java.util.Enumeration)>($r7, $r18);
+
+        $r23 = staticinvoke <sun.security.acl.AclImpl: java.util.Enumeration union(java.util.Enumeration,java.util.Enumeration)>($r21, $r22);
+
+        $r24 = specialinvoke r0.<sun.security.acl.AclImpl: java.util.Enumeration subtract(java.util.Enumeration,java.util.Enumeration)>($r15, $r23);
+
+        return $r24;
+    }
+
+    public boolean checkPermission(java.security.Principal, java.security.acl.Permission)
+    {
+        java.security.acl.Permission r4, r5;
+        java.util.Enumeration $r2;
+        sun.security.acl.AclImpl r0;
+        java.security.Principal r1;
+        java.lang.Object $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.security.acl.AclImpl;
+
+        r1 := @parameter0: java.security.Principal;
+
+        r5 := @parameter1: java.security.acl.Permission;
+
+        $r2 = virtualinvoke r0.<sun.security.acl.AclImpl: java.util.Enumeration getPermissions(java.security.Principal)>(r1);
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label3;
+
+        $r3 = interfaceinvoke $r2.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r4 = (java.security.acl.Permission) $r3;
+
+        $z1 = interfaceinvoke r4.<java.security.acl.Permission: boolean equals(java.lang.Object)>(r5);
+
+        if $z1 == 0 goto label2;
+
+        return 1;
+
+     label2:
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    public synchronized java.util.Enumeration entries()
+    {
+        sun.security.acl.AclEnumerator $r0;
+        sun.security.acl.AclImpl r1;
+        java.util.Hashtable $r2, $r3, $r4, $r5;
+
+        r1 := @this: sun.security.acl.AclImpl;
+
+        $r0 = new sun.security.acl.AclEnumerator;
+
+        $r5 = r1.<sun.security.acl.AclImpl: java.util.Hashtable allowedUsersTable>;
+
+        $r4 = r1.<sun.security.acl.AclImpl: java.util.Hashtable allowedGroupsTable>;
+
+        $r3 = r1.<sun.security.acl.AclImpl: java.util.Hashtable deniedUsersTable>;
+
+        $r2 = r1.<sun.security.acl.AclImpl: java.util.Hashtable deniedGroupsTable>;
+
+        specialinvoke $r0.<sun.security.acl.AclEnumerator: void <init>(java.security.acl.Acl,java.util.Hashtable,java.util.Hashtable,java.util.Hashtable,java.util.Hashtable)>(r1, $r5, $r4, $r3, $r2);
+
+        return $r0;
+    }
+
+    public java.lang.String toString()
+    {
+        java.util.Enumeration $r2;
+        sun.security.acl.AclImpl r1;
+        java.security.acl.AclEntry r5;
+        java.lang.StringBuffer $r0;
+        java.lang.Object $r4;
+        java.lang.String $r3, $r6, $r7;
+        boolean $z0;
+
+        r1 := @this: sun.security.acl.AclImpl;
+
+        $r0 = new java.lang.StringBuffer;
+
+        specialinvoke $r0.<java.lang.StringBuffer: void <init>()>();
+
+        $r2 = virtualinvoke r1.<sun.security.acl.AclImpl: java.util.Enumeration entries()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = interfaceinvoke $r2.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r5 = (java.security.acl.AclEntry) $r4;
+
+        $r6 = interfaceinvoke r5.<java.security.acl.AclEntry: java.lang.String toString()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.String: java.lang.String trim()>();
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r7);
+
+        virtualinvoke $r0.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("\n");
+
+        goto label1;
+
+     label2:
+        $r3 = virtualinvoke $r0.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r3;
+    }
+
+    private java.util.Hashtable findTable(java.security.acl.AclEntry)
+    {
+        java.security.Principal $r1;
+        sun.security.acl.AclImpl r2;
+        java.util.Hashtable r3;
+        java.security.acl.AclEntry r0;
+        boolean $z0, $z1, $z2;
+
+        r2 := @this: sun.security.acl.AclImpl;
+
+        r0 := @parameter0: java.security.acl.AclEntry;
+
+        $r1 = interfaceinvoke r0.<java.security.acl.AclEntry: java.security.Principal getPrincipal()>();
+
+        $z0 = $r1 instanceof java.security.acl.Group;
+
+        if $z0 == 0 goto label2;
+
+        $z2 = interfaceinvoke r0.<java.security.acl.AclEntry: boolean isNegative()>();
+
+        if $z2 == 0 goto label1;
+
+        r3 = r2.<sun.security.acl.AclImpl: java.util.Hashtable deniedGroupsTable>;
+
+        goto label4;
+
+     label1:
+        r3 = r2.<sun.security.acl.AclImpl: java.util.Hashtable allowedGroupsTable>;
+
+        goto label4;
+
+     label2:
+        $z1 = interfaceinvoke r0.<java.security.acl.AclEntry: boolean isNegative()>();
+
+        if $z1 == 0 goto label3;
+
+        r3 = r2.<sun.security.acl.AclImpl: java.util.Hashtable deniedUsersTable>;
+
+        goto label4;
+
+     label3:
+        r3 = r2.<sun.security.acl.AclImpl: java.util.Hashtable allowedUsersTable>;
+
+     label4:
+        return r3;
+    }
+
+    private static java.util.Enumeration union(java.util.Enumeration, java.util.Enumeration)
+    {
+        java.security.acl.Permission r5;
+        java.util.Enumeration r1, r2, $r3;
+        java.util.Vector $r0;
+        java.lang.Object $r4, $r6;
+        boolean $z0, $z1, $z2;
+
+        r1 := @parameter0: java.util.Enumeration;
+
+        r2 := @parameter1: java.util.Enumeration;
+
+        $r0 = new java.util.Vector;
+
+        specialinvoke $r0.<java.util.Vector: void <init>(int,int)>(20, 20);
+
+     label1:
+        $z0 = interfaceinvoke r1.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label2;
+
+        $r6 = interfaceinvoke r1.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        virtualinvoke $r0.<java.util.Vector: void addElement(java.lang.Object)>($r6);
+
+        goto label1;
+
+     label2:
+        $z1 = interfaceinvoke r2.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z1 == 0 goto label4;
+
+        $r4 = interfaceinvoke r2.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r5 = (java.security.acl.Permission) $r4;
+
+        $z2 = virtualinvoke $r0.<java.util.Vector: boolean contains(java.lang.Object)>(r5);
+
+        if $z2 != 0 goto label3;
+
+        virtualinvoke $r0.<java.util.Vector: void addElement(java.lang.Object)>(r5);
+
+     label3:
+        goto label2;
+
+     label4:
+        $r3 = virtualinvoke $r0.<java.util.Vector: java.util.Enumeration elements()>();
+
+        return $r3;
+    }
+
+    private java.util.Enumeration subtract(java.util.Enumeration, java.util.Enumeration)
+    {
+        java.security.acl.Permission r5;
+        java.util.Enumeration r1, r2, $r3;
+        sun.security.acl.AclImpl r7;
+        java.util.Vector $r0;
+        java.lang.Object $r4, $r6;
+        boolean $z0, $z1, $z2;
+
+        r7 := @this: sun.security.acl.AclImpl;
+
+        r1 := @parameter0: java.util.Enumeration;
+
+        r2 := @parameter1: java.util.Enumeration;
+
+        $r0 = new java.util.Vector;
+
+        specialinvoke $r0.<java.util.Vector: void <init>(int,int)>(20, 20);
+
+     label1:
+        $z0 = interfaceinvoke r1.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label2;
+
+        $r6 = interfaceinvoke r1.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        virtualinvoke $r0.<java.util.Vector: void addElement(java.lang.Object)>($r6);
+
+        goto label1;
+
+     label2:
+        $z1 = interfaceinvoke r2.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z1 == 0 goto label4;
+
+        $r4 = interfaceinvoke r2.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r5 = (java.security.acl.Permission) $r4;
+
+        $z2 = virtualinvoke $r0.<java.util.Vector: boolean contains(java.lang.Object)>(r5);
+
+        if $z2 == 0 goto label3;
+
+        virtualinvoke $r0.<java.util.Vector: boolean removeElement(java.lang.Object)>(r5);
+
+     label3:
+        goto label2;
+
+     label4:
+        $r3 = virtualinvoke $r0.<java.util.Vector: java.util.Enumeration elements()>();
+
+        return $r3;
+    }
+
+    private java.util.Enumeration getGroupPositive(java.security.Principal)
+    {
+        java.util.Enumeration $r3, $r10, r11;
+        sun.security.acl.AclImpl r0;
+        java.security.acl.AclEntry r9;
+        java.util.Vector $r1;
+        java.security.Principal r6;
+        java.security.acl.Group r5;
+        java.lang.Object $r4, $r8;
+        java.util.Hashtable $r2, $r7;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.security.acl.AclImpl;
+
+        r6 := @parameter0: java.security.Principal;
+
+        $r1 = r0.<sun.security.acl.AclImpl: java.util.Vector zeroSet>;
+
+        r11 = virtualinvoke $r1.<java.util.Vector: java.util.Enumeration elements()>();
+
+        $r2 = r0.<sun.security.acl.AclImpl: java.util.Hashtable allowedGroupsTable>;
+
+        $r3 = virtualinvoke $r2.<java.util.Hashtable: java.util.Enumeration keys()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label3;
+
+        $r4 = interfaceinvoke $r3.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r5 = (java.security.acl.Group) $r4;
+
+        $z1 = interfaceinvoke r5.<java.security.acl.Group: boolean isMember(java.security.Principal)>(r6);
+
+        if $z1 == 0 goto label2;
+
+        $r7 = r0.<sun.security.acl.AclImpl: java.util.Hashtable allowedGroupsTable>;
+
+        $r8 = virtualinvoke $r7.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r5);
+
+        r9 = (java.security.acl.AclEntry) $r8;
+
+        $r10 = interfaceinvoke r9.<java.security.acl.AclEntry: java.util.Enumeration permissions()>();
+
+        r11 = staticinvoke <sun.security.acl.AclImpl: java.util.Enumeration union(java.util.Enumeration,java.util.Enumeration)>($r10, r11);
+
+     label2:
+        goto label1;
+
+     label3:
+        return r11;
+    }
+
+    private java.util.Enumeration getGroupNegative(java.security.Principal)
+    {
+        java.util.Enumeration $r3, $r10, r11;
+        sun.security.acl.AclImpl r0;
+        java.security.acl.AclEntry r9;
+        java.util.Vector $r1;
+        java.security.Principal r6;
+        java.security.acl.Group r5;
+        java.lang.Object $r4, $r8;
+        java.util.Hashtable $r2, $r7;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.security.acl.AclImpl;
+
+        r6 := @parameter0: java.security.Principal;
+
+        $r1 = r0.<sun.security.acl.AclImpl: java.util.Vector zeroSet>;
+
+        r11 = virtualinvoke $r1.<java.util.Vector: java.util.Enumeration elements()>();
+
+        $r2 = r0.<sun.security.acl.AclImpl: java.util.Hashtable deniedGroupsTable>;
+
+        $r3 = virtualinvoke $r2.<java.util.Hashtable: java.util.Enumeration keys()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label3;
+
+        $r4 = interfaceinvoke $r3.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r5 = (java.security.acl.Group) $r4;
+
+        $z1 = interfaceinvoke r5.<java.security.acl.Group: boolean isMember(java.security.Principal)>(r6);
+
+        if $z1 == 0 goto label2;
+
+        $r7 = r0.<sun.security.acl.AclImpl: java.util.Hashtable deniedGroupsTable>;
+
+        $r8 = virtualinvoke $r7.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r5);
+
+        r9 = (java.security.acl.AclEntry) $r8;
+
+        $r10 = interfaceinvoke r9.<java.security.acl.AclEntry: java.util.Enumeration permissions()>();
+
+        r11 = staticinvoke <sun.security.acl.AclImpl: java.util.Enumeration union(java.util.Enumeration,java.util.Enumeration)>($r10, r11);
+
+     label2:
+        goto label1;
+
+     label3:
+        return r11;
+    }
+
+    private java.util.Enumeration getIndividualPositive(java.security.Principal)
+    {
+        java.util.Vector $r1;
+        java.security.Principal r2;
+        java.util.Enumeration r6;
+        sun.security.acl.AclImpl r0;
+        java.lang.Object $r4;
+        java.util.Hashtable $r3;
+        java.security.acl.AclEntry r5;
+
+        r0 := @this: sun.security.acl.AclImpl;
+
+        r2 := @parameter0: java.security.Principal;
+
+        $r1 = r0.<sun.security.acl.AclImpl: java.util.Vector zeroSet>;
+
+        r6 = virtualinvoke $r1.<java.util.Vector: java.util.Enumeration elements()>();
+
+        $r3 = r0.<sun.security.acl.AclImpl: java.util.Hashtable allowedUsersTable>;
+
+        $r4 = virtualinvoke $r3.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r2);
+
+        r5 = (java.security.acl.AclEntry) $r4;
+
+        if r5 == null goto label1;
+
+        r6 = interfaceinvoke r5.<java.security.acl.AclEntry: java.util.Enumeration permissions()>();
+
+     label1:
+        return r6;
+    }
+
+    private java.util.Enumeration getIndividualNegative(java.security.Principal)
+    {
+        java.util.Vector $r1;
+        java.security.Principal r2;
+        java.util.Enumeration r6;
+        sun.security.acl.AclImpl r0;
+        java.lang.Object $r4;
+        java.util.Hashtable $r3;
+        java.security.acl.AclEntry r5;
+
+        r0 := @this: sun.security.acl.AclImpl;
+
+        r2 := @parameter0: java.security.Principal;
+
+        $r1 = r0.<sun.security.acl.AclImpl: java.util.Vector zeroSet>;
+
+        r6 = virtualinvoke $r1.<java.util.Vector: java.util.Enumeration elements()>();
+
+        $r3 = r0.<sun.security.acl.AclImpl: java.util.Hashtable deniedUsersTable>;
+
+        $r4 = virtualinvoke $r3.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r2);
+
+        r5 = (java.security.acl.AclEntry) $r4;
+
+        if r5 == null goto label1;
+
+        r6 = interfaceinvoke r5.<java.security.acl.AclEntry: java.util.Enumeration permissions()>();
+
+     label1:
+        return r6;
+    }
+}

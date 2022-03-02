@@ -1,0 +1,510 @@
+public class sun.net.www.MeteredStream extends java.io.FilterInputStream
+{
+    protected boolean closed;
+    protected long expected;
+    protected long count;
+    protected long markedCount;
+    protected int markLimit;
+    protected sun.net.ProgressSource pi;
+
+    public void <init>(java.io.InputStream, sun.net.ProgressSource, long)
+    {
+        sun.net.www.MeteredStream r0;
+        sun.net.ProgressSource r2;
+        int $i2;
+        long l0;
+        java.io.InputStream r1;
+
+        r0 := @this: sun.net.www.MeteredStream;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        r2 := @parameter1: sun.net.ProgressSource;
+
+        l0 := @parameter2: long;
+
+        specialinvoke r0.<java.io.FilterInputStream: void <init>(java.io.InputStream)>(r1);
+
+        r0.<sun.net.www.MeteredStream: boolean closed> = 0;
+
+        r0.<sun.net.www.MeteredStream: long count> = 0L;
+
+        r0.<sun.net.www.MeteredStream: long markedCount> = 0L;
+
+        $i2 = (int) -1;
+
+        r0.<sun.net.www.MeteredStream: int markLimit> = $i2;
+
+        r0.<sun.net.www.MeteredStream: sun.net.ProgressSource pi> = r2;
+
+        r0.<sun.net.www.MeteredStream: long expected> = l0;
+
+        if r2 == null goto label1;
+
+        virtualinvoke r2.<sun.net.ProgressSource: void updateProgress(long,long)>(0L, l0);
+
+     label1:
+        return;
+    }
+
+    private final void justRead(long) throws java.io.IOException
+    {
+        long l0, $l2, $l3, $l4, $l5, $l7, $l8, $l10, $l12, $l13, $l15, $l16;
+        sun.net.ProgressSource $r1, $r2;
+        byte $b1, $b9, $b11, $b14;
+        int $i6, $i17, $i19, $i20, $i21;
+        boolean $z0, $z1;
+        sun.net.www.MeteredStream r0;
+
+        r0 := @this: sun.net.www.MeteredStream;
+
+        l0 := @parameter0: long;
+
+        $b1 = l0 cmp -1L;
+
+        if $b1 != 0 goto label2;
+
+        $z1 = specialinvoke r0.<sun.net.www.MeteredStream: boolean isMarked()>();
+
+        if $z1 != 0 goto label1;
+
+        virtualinvoke r0.<sun.net.www.MeteredStream: void close()>();
+
+     label1:
+        return;
+
+     label2:
+        $l2 = r0.<sun.net.www.MeteredStream: long count>;
+
+        $l3 = $l2 + l0;
+
+        r0.<sun.net.www.MeteredStream: long count> = $l3;
+
+        $l5 = r0.<sun.net.www.MeteredStream: long count>;
+
+        $l4 = r0.<sun.net.www.MeteredStream: long markedCount>;
+
+        $l8 = $l5 - $l4;
+
+        $i6 = r0.<sun.net.www.MeteredStream: int markLimit>;
+
+        $l7 = (long) $i6;
+
+        $b9 = $l8 cmp $l7;
+
+        $i17 = (int) $b9;
+
+        if $i17 <= 0 goto label3;
+
+        $i19 = (int) -1;
+
+        r0.<sun.net.www.MeteredStream: int markLimit> = $i19;
+
+     label3:
+        $r1 = r0.<sun.net.www.MeteredStream: sun.net.ProgressSource pi>;
+
+        if $r1 == null goto label4;
+
+        $r2 = r0.<sun.net.www.MeteredStream: sun.net.ProgressSource pi>;
+
+        $l16 = r0.<sun.net.www.MeteredStream: long count>;
+
+        $l15 = r0.<sun.net.www.MeteredStream: long expected>;
+
+        virtualinvoke $r2.<sun.net.ProgressSource: void updateProgress(long,long)>($l16, $l15);
+
+     label4:
+        $z0 = specialinvoke r0.<sun.net.www.MeteredStream: boolean isMarked()>();
+
+        if $z0 == 0 goto label5;
+
+        return;
+
+     label5:
+        $l10 = r0.<sun.net.www.MeteredStream: long expected>;
+
+        $b11 = $l10 cmp 0L;
+
+        $i20 = (int) $b11;
+
+        if $i20 <= 0 goto label6;
+
+        $l13 = r0.<sun.net.www.MeteredStream: long count>;
+
+        $l12 = r0.<sun.net.www.MeteredStream: long expected>;
+
+        $b14 = $l13 cmp $l12;
+
+        $i21 = (int) $b14;
+
+        if $i21 < 0 goto label6;
+
+        virtualinvoke r0.<sun.net.www.MeteredStream: void close()>();
+
+     label6:
+        return;
+    }
+
+    private boolean isMarked()
+    {
+        long $l1, $l2, $l4, $l5;
+        sun.net.www.MeteredStream r0;
+        byte $b6;
+        int $i0, $i3, $i7;
+
+        r0 := @this: sun.net.www.MeteredStream;
+
+        $i0 = r0.<sun.net.www.MeteredStream: int markLimit>;
+
+        if $i0 >= 0 goto label1;
+
+        return 0;
+
+     label1:
+        $l2 = r0.<sun.net.www.MeteredStream: long count>;
+
+        $l1 = r0.<sun.net.www.MeteredStream: long markedCount>;
+
+        $l5 = $l2 - $l1;
+
+        $i3 = r0.<sun.net.www.MeteredStream: int markLimit>;
+
+        $l4 = (long) $i3;
+
+        $b6 = $l5 cmp $l4;
+
+        $i7 = (int) $b6;
+
+        if $i7 <= 0 goto label2;
+
+        return 0;
+
+     label2:
+        return 1;
+    }
+
+    public synchronized int read() throws java.io.IOException
+    {
+        sun.net.www.MeteredStream r0;
+        int $i0, $i3, $i5;
+        long $l1;
+        boolean $z0;
+        java.io.InputStream $r1;
+
+        r0 := @this: sun.net.www.MeteredStream;
+
+        $z0 = r0.<sun.net.www.MeteredStream: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        $i3 = (int) -1;
+
+        return $i3;
+
+     label1:
+        $r1 = r0.<sun.net.www.MeteredStream: java.io.InputStream in>;
+
+        $i0 = virtualinvoke $r1.<java.io.InputStream: int read()>();
+
+        $i5 = (int) -1;
+
+        if $i0 == $i5 goto label2;
+
+        specialinvoke r0.<sun.net.www.MeteredStream: void justRead(long)>(1L);
+
+        goto label3;
+
+     label2:
+        $l1 = (long) $i0;
+
+        specialinvoke r0.<sun.net.www.MeteredStream: void justRead(long)>($l1);
+
+     label3:
+        return $i0;
+    }
+
+    public synchronized int read(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r1;
+        long $l3;
+        sun.net.www.MeteredStream r0;
+        int i0, i1, $i2, $i5;
+        boolean $z0;
+        java.io.InputStream $r2;
+
+        r0 := @this: sun.net.www.MeteredStream;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $z0 = r0.<sun.net.www.MeteredStream: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        $i5 = (int) -1;
+
+        return $i5;
+
+     label1:
+        $r2 = r0.<sun.net.www.MeteredStream: java.io.InputStream in>;
+
+        $i2 = virtualinvoke $r2.<java.io.InputStream: int read(byte[],int,int)>(r1, i0, i1);
+
+        $l3 = (long) $i2;
+
+        specialinvoke r0.<sun.net.www.MeteredStream: void justRead(long)>($l3);
+
+        return $i2;
+    }
+
+    public synchronized long skip(long) throws java.io.IOException
+    {
+        long $l0, $l1, $l2, $l4, $l5, l6, l7, $l8;
+        byte $b3;
+        int $i9;
+        boolean $z0, $z1;
+        sun.net.www.MeteredStream r0;
+        java.io.InputStream $r1, $r2, $r3;
+
+        r0 := @this: sun.net.www.MeteredStream;
+
+        l6 := @parameter0: long;
+
+        $z0 = r0.<sun.net.www.MeteredStream: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        return 0L;
+
+     label1:
+        $r1 = r0.<sun.net.www.MeteredStream: java.io.InputStream in>;
+
+        $z1 = $r1 instanceof sun.net.www.http.ChunkedInputStream;
+
+        if $z1 == 0 goto label2;
+
+        $r3 = r0.<sun.net.www.MeteredStream: java.io.InputStream in>;
+
+        l7 = virtualinvoke $r3.<java.io.InputStream: long skip(long)>(l6);
+
+        goto label5;
+
+     label2:
+        $l1 = r0.<sun.net.www.MeteredStream: long expected>;
+
+        $l0 = r0.<sun.net.www.MeteredStream: long count>;
+
+        $l2 = $l1 - $l0;
+
+        $b3 = l6 cmp $l2;
+
+        $i9 = (int) $b3;
+
+        if $i9 <= 0 goto label3;
+
+        $l5 = r0.<sun.net.www.MeteredStream: long expected>;
+
+        $l4 = r0.<sun.net.www.MeteredStream: long count>;
+
+        $l8 = $l5 - $l4;
+
+        goto label4;
+
+     label3:
+        $l8 = l6;
+
+     label4:
+        $r2 = r0.<sun.net.www.MeteredStream: java.io.InputStream in>;
+
+        l7 = virtualinvoke $r2.<java.io.InputStream: long skip(long)>($l8);
+
+     label5:
+        specialinvoke r0.<sun.net.www.MeteredStream: void justRead(long)>(l7);
+
+        return l7;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        sun.net.www.MeteredStream r0;
+        sun.net.ProgressSource $r1, $r3;
+        boolean $z0;
+        java.io.InputStream $r2;
+
+        r0 := @this: sun.net.www.MeteredStream;
+
+        $z0 = r0.<sun.net.www.MeteredStream: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = r0.<sun.net.www.MeteredStream: sun.net.ProgressSource pi>;
+
+        if $r1 == null goto label2;
+
+        $r3 = r0.<sun.net.www.MeteredStream: sun.net.ProgressSource pi>;
+
+        virtualinvoke $r3.<sun.net.ProgressSource: void finishTracking()>();
+
+     label2:
+        r0.<sun.net.www.MeteredStream: boolean closed> = 1;
+
+        $r2 = r0.<sun.net.www.MeteredStream: java.io.InputStream in>;
+
+        virtualinvoke $r2.<java.io.InputStream: void close()>();
+
+        return;
+    }
+
+    public synchronized int available() throws java.io.IOException
+    {
+        sun.net.www.MeteredStream r0;
+        int $i0;
+        boolean $z0;
+        java.io.InputStream $r1;
+
+        r0 := @this: sun.net.www.MeteredStream;
+
+        $z0 = r0.<sun.net.www.MeteredStream: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        $i0 = 0;
+
+        goto label2;
+
+     label1:
+        $r1 = r0.<sun.net.www.MeteredStream: java.io.InputStream in>;
+
+        $i0 = virtualinvoke $r1.<java.io.InputStream: int available()>();
+
+     label2:
+        return $i0;
+    }
+
+    public synchronized void mark(int)
+    {
+        sun.net.www.MeteredStream r0;
+        int i0;
+        long $l1;
+        boolean $z0;
+
+        r0 := @this: sun.net.www.MeteredStream;
+
+        i0 := @parameter0: int;
+
+        $z0 = r0.<sun.net.www.MeteredStream: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        specialinvoke r0.<java.io.FilterInputStream: void mark(int)>(i0);
+
+        $l1 = r0.<sun.net.www.MeteredStream: long count>;
+
+        r0.<sun.net.www.MeteredStream: long markedCount> = $l1;
+
+        r0.<sun.net.www.MeteredStream: int markLimit> = i0;
+
+        return;
+    }
+
+    public synchronized void reset() throws java.io.IOException
+    {
+        sun.net.www.MeteredStream r0;
+        long $l0;
+        java.io.IOException $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.net.www.MeteredStream;
+
+        $z0 = r0.<sun.net.www.MeteredStream: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $z1 = specialinvoke r0.<sun.net.www.MeteredStream: boolean isMarked()>();
+
+        if $z1 != 0 goto label2;
+
+        $r1 = new java.io.IOException;
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>("Resetting to an invalid mark");
+
+        throw $r1;
+
+     label2:
+        $l0 = r0.<sun.net.www.MeteredStream: long markedCount>;
+
+        r0.<sun.net.www.MeteredStream: long count> = $l0;
+
+        specialinvoke r0.<java.io.FilterInputStream: void reset()>();
+
+        return;
+    }
+
+    public boolean markSupported()
+    {
+        sun.net.www.MeteredStream r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.net.www.MeteredStream;
+
+        $z0 = r0.<sun.net.www.MeteredStream: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        return 0;
+
+     label1:
+        $z1 = specialinvoke r0.<java.io.FilterInputStream: boolean markSupported()>();
+
+        return $z1;
+    }
+
+    protected void finalize() throws java.lang.Throwable
+    {
+        sun.net.www.MeteredStream r0;
+        sun.net.ProgressSource $r1, $r2;
+        java.lang.Throwable $r3;
+
+        r0 := @this: sun.net.www.MeteredStream;
+
+     label1:
+        virtualinvoke r0.<sun.net.www.MeteredStream: void close()>();
+
+        $r1 = r0.<sun.net.www.MeteredStream: sun.net.ProgressSource pi>;
+
+        if $r1 == null goto label2;
+
+        $r2 = r0.<sun.net.www.MeteredStream: sun.net.ProgressSource pi>;
+
+        virtualinvoke $r2.<sun.net.ProgressSource: void close()>();
+
+     label2:
+        specialinvoke r0.<java.lang.Object: void finalize()>();
+
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        specialinvoke r0.<java.lang.Object: void finalize()>();
+
+        throw $r3;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+}

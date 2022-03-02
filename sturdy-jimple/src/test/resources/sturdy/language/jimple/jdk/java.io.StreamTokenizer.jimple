@@ -1,0 +1,1478 @@
+public class java.io.StreamTokenizer extends java.lang.Object
+{
+    private java.io.Reader reader;
+    private java.io.InputStream input;
+    private char[] buf;
+    private int peekc;
+    private static final int NEED_CHAR;
+    private static final int SKIP_LF;
+    private boolean pushedBack;
+    private boolean forceLower;
+    private int LINENO;
+    private boolean eolIsSignificantP;
+    private boolean slashSlashCommentsP;
+    private boolean slashStarCommentsP;
+    private byte[] ctype;
+    private static final byte CT_WHITESPACE;
+    private static final byte CT_DIGIT;
+    private static final byte CT_ALPHA;
+    private static final byte CT_QUOTE;
+    private static final byte CT_COMMENT;
+    public int ttype;
+    public static final int TT_EOF;
+    public static final int TT_EOL;
+    public static final int TT_NUMBER;
+    public static final int TT_WORD;
+    private static final int TT_NOTHING;
+    public java.lang.String sval;
+    public double nval;
+
+    private void <init>()
+    {
+        byte[] $r2;
+        int $i1;
+        java.io.StreamTokenizer r0;
+        char[] $r1;
+
+        r0 := @this: java.io.StreamTokenizer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.io.StreamTokenizer: java.io.Reader reader> = null;
+
+        r0.<java.io.StreamTokenizer: java.io.InputStream input> = null;
+
+        $r1 = newarray (char)[20];
+
+        r0.<java.io.StreamTokenizer: char[] buf> = $r1;
+
+        r0.<java.io.StreamTokenizer: int peekc> = 2147483647;
+
+        r0.<java.io.StreamTokenizer: int LINENO> = 1;
+
+        r0.<java.io.StreamTokenizer: boolean eolIsSignificantP> = 0;
+
+        r0.<java.io.StreamTokenizer: boolean slashSlashCommentsP> = 0;
+
+        r0.<java.io.StreamTokenizer: boolean slashStarCommentsP> = 0;
+
+        $r2 = newarray (byte)[256];
+
+        r0.<java.io.StreamTokenizer: byte[] ctype> = $r2;
+
+        $i1 = (int) -4;
+
+        r0.<java.io.StreamTokenizer: int ttype> = $i1;
+
+        virtualinvoke r0.<java.io.StreamTokenizer: void wordChars(int,int)>(97, 122);
+
+        virtualinvoke r0.<java.io.StreamTokenizer: void wordChars(int,int)>(65, 90);
+
+        virtualinvoke r0.<java.io.StreamTokenizer: void wordChars(int,int)>(160, 255);
+
+        virtualinvoke r0.<java.io.StreamTokenizer: void whitespaceChars(int,int)>(0, 32);
+
+        virtualinvoke r0.<java.io.StreamTokenizer: void commentChar(int)>(47);
+
+        virtualinvoke r0.<java.io.StreamTokenizer: void quoteChar(int)>(34);
+
+        virtualinvoke r0.<java.io.StreamTokenizer: void quoteChar(int)>(39);
+
+        virtualinvoke r0.<java.io.StreamTokenizer: void parseNumbers()>();
+
+        return;
+    }
+
+    public void <init>(java.io.InputStream)
+    {
+        java.io.StreamTokenizer r0;
+        java.lang.NullPointerException $r2;
+        java.io.InputStream r1;
+
+        r0 := @this: java.io.StreamTokenizer;
+
+        r1 := @parameter0: java.io.InputStream;
+
+        specialinvoke r0.<java.io.StreamTokenizer: void <init>()>();
+
+        if r1 != null goto label1;
+
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        r0.<java.io.StreamTokenizer: java.io.InputStream input> = r1;
+
+        return;
+    }
+
+    public void <init>(java.io.Reader)
+    {
+        java.io.StreamTokenizer r0;
+        java.io.Reader r1;
+        java.lang.NullPointerException $r2;
+
+        r0 := @this: java.io.StreamTokenizer;
+
+        r1 := @parameter0: java.io.Reader;
+
+        specialinvoke r0.<java.io.StreamTokenizer: void <init>()>();
+
+        if r1 != null goto label1;
+
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        r0.<java.io.StreamTokenizer: java.io.Reader reader> = r1;
+
+        return;
+    }
+
+    public void resetSyntax()
+    {
+        byte[] $r1, $r2;
+        int i0, $i2;
+        java.io.StreamTokenizer r0;
+
+        r0 := @this: java.io.StreamTokenizer;
+
+        $r1 = r0.<java.io.StreamTokenizer: byte[] ctype>;
+
+        i0 = lengthof $r1;
+
+     label1:
+        $i2 = (int) -1;
+
+        i0 = i0 + $i2;
+
+        if i0 < 0 goto label2;
+
+        $r2 = r0.<java.io.StreamTokenizer: byte[] ctype>;
+
+        $r2[i0] = 0;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void wordChars(int, int)
+    {
+        byte[] $r1, $r2, $r3;
+        byte $b2, $b3, $b4;
+        int $i0, $i1, $i5, i6, i7;
+        java.io.StreamTokenizer r0;
+
+        r0 := @this: java.io.StreamTokenizer;
+
+        i6 := @parameter0: int;
+
+        i7 := @parameter1: int;
+
+        if i6 >= 0 goto label1;
+
+        i6 = 0;
+
+     label1:
+        $r1 = r0.<java.io.StreamTokenizer: byte[] ctype>;
+
+        $i0 = lengthof $r1;
+
+        if i7 < $i0 goto label2;
+
+        $r3 = r0.<java.io.StreamTokenizer: byte[] ctype>;
+
+        $i5 = lengthof $r3;
+
+        i7 = $i5 - 1;
+
+     label2:
+        if i6 > i7 goto label3;
+
+        $r2 = r0.<java.io.StreamTokenizer: byte[] ctype>;
+
+        $i1 = i6;
+
+        i6 = i6 + 1;
+
+        $b2 = $r2[$i1];
+
+        $b3 = $b2 | 4;
+
+        $b4 = (byte) $b3;
+
+        $r2[$i1] = $b4;
+
+        goto label2;
+
+     label3:
+        return;
+    }
+
+    public void whitespaceChars(int, int)
+    {
+        byte[] $r1, $r2, $r3;
+        int $i0, $i1, $i2, i3, i4;
+        java.io.StreamTokenizer r0;
+
+        r0 := @this: java.io.StreamTokenizer;
+
+        i3 := @parameter0: int;
+
+        i4 := @parameter1: int;
+
+        if i3 >= 0 goto label1;
+
+        i3 = 0;
+
+     label1:
+        $r1 = r0.<java.io.StreamTokenizer: byte[] ctype>;
+
+        $i0 = lengthof $r1;
+
+        if i4 < $i0 goto label2;
+
+        $r3 = r0.<java.io.StreamTokenizer: byte[] ctype>;
+
+        $i2 = lengthof $r3;
+
+        i4 = $i2 - 1;
+
+     label2:
+        if i3 > i4 goto label3;
+
+        $r2 = r0.<java.io.StreamTokenizer: byte[] ctype>;
+
+        $i1 = i3;
+
+        i3 = i3 + 1;
+
+        $r2[$i1] = 1;
+
+        goto label2;
+
+     label3:
+        return;
+    }
+
+    public void ordinaryChars(int, int)
+    {
+        byte[] $r1, $r2, $r3;
+        int $i0, $i1, $i2, i3, i4;
+        java.io.StreamTokenizer r0;
+
+        r0 := @this: java.io.StreamTokenizer;
+
+        i3 := @parameter0: int;
+
+        i4 := @parameter1: int;
+
+        if i3 >= 0 goto label1;
+
+        i3 = 0;
+
+     label1:
+        $r1 = r0.<java.io.StreamTokenizer: byte[] ctype>;
+
+        $i0 = lengthof $r1;
+
+        if i4 < $i0 goto label2;
+
+        $r3 = r0.<java.io.StreamTokenizer: byte[] ctype>;
+
+        $i2 = lengthof $r3;
+
+        i4 = $i2 - 1;
+
+     label2:
+        if i3 > i4 goto label3;
+
+        $r2 = r0.<java.io.StreamTokenizer: byte[] ctype>;
+
+        $i1 = i3;
+
+        i3 = i3 + 1;
+
+        $r2[$i1] = 0;
+
+        goto label2;
+
+     label3:
+        return;
+    }
+
+    public void ordinaryChar(int)
+    {
+        byte[] $r1, $r2;
+        int i0, $i1;
+        java.io.StreamTokenizer r0;
+
+        r0 := @this: java.io.StreamTokenizer;
+
+        i0 := @parameter0: int;
+
+        if i0 < 0 goto label1;
+
+        $r1 = r0.<java.io.StreamTokenizer: byte[] ctype>;
+
+        $i1 = lengthof $r1;
+
+        if i0 >= $i1 goto label1;
+
+        $r2 = r0.<java.io.StreamTokenizer: byte[] ctype>;
+
+        $r2[i0] = 0;
+
+     label1:
+        return;
+    }
+
+    public void commentChar(int)
+    {
+        byte[] $r1, $r2;
+        int i0, $i1;
+        java.io.StreamTokenizer r0;
+
+        r0 := @this: java.io.StreamTokenizer;
+
+        i0 := @parameter0: int;
+
+        if i0 < 0 goto label1;
+
+        $r1 = r0.<java.io.StreamTokenizer: byte[] ctype>;
+
+        $i1 = lengthof $r1;
+
+        if i0 >= $i1 goto label1;
+
+        $r2 = r0.<java.io.StreamTokenizer: byte[] ctype>;
+
+        $r2[i0] = 16;
+
+     label1:
+        return;
+    }
+
+    public void quoteChar(int)
+    {
+        byte[] $r1, $r2;
+        int i0, $i1;
+        java.io.StreamTokenizer r0;
+
+        r0 := @this: java.io.StreamTokenizer;
+
+        i0 := @parameter0: int;
+
+        if i0 < 0 goto label1;
+
+        $r1 = r0.<java.io.StreamTokenizer: byte[] ctype>;
+
+        $i1 = lengthof $r1;
+
+        if i0 >= $i1 goto label1;
+
+        $r2 = r0.<java.io.StreamTokenizer: byte[] ctype>;
+
+        $r2[i0] = 8;
+
+     label1:
+        return;
+    }
+
+    public void parseNumbers()
+    {
+        byte[] $r1, $r2, $r3;
+        byte $b0, $b1, $b2, $b3, $b4, $b5, $b6, $b7, $b8;
+        int i9;
+        java.io.StreamTokenizer r0;
+
+        r0 := @this: java.io.StreamTokenizer;
+
+        i9 = 48;
+
+     label1:
+        if i9 > 57 goto label2;
+
+        $r3 = r0.<java.io.StreamTokenizer: byte[] ctype>;
+
+        $b6 = $r3[i9];
+
+        $b7 = $b6 | 2;
+
+        $b8 = (byte) $b7;
+
+        $r3[i9] = $b8;
+
+        i9 = i9 + 1;
+
+        goto label1;
+
+     label2:
+        $r1 = r0.<java.io.StreamTokenizer: byte[] ctype>;
+
+        $b0 = $r1[46];
+
+        $b1 = $b0 | 2;
+
+        $b2 = (byte) $b1;
+
+        $r1[46] = $b2;
+
+        $r2 = r0.<java.io.StreamTokenizer: byte[] ctype>;
+
+        $b3 = $r2[45];
+
+        $b4 = $b3 | 2;
+
+        $b5 = (byte) $b4;
+
+        $r2[45] = $b5;
+
+        return;
+    }
+
+    public void eolIsSignificant(boolean)
+    {
+        java.io.StreamTokenizer r0;
+        boolean z0;
+
+        r0 := @this: java.io.StreamTokenizer;
+
+        z0 := @parameter0: boolean;
+
+        r0.<java.io.StreamTokenizer: boolean eolIsSignificantP> = z0;
+
+        return;
+    }
+
+    public void slashStarComments(boolean)
+    {
+        java.io.StreamTokenizer r0;
+        boolean z0;
+
+        r0 := @this: java.io.StreamTokenizer;
+
+        z0 := @parameter0: boolean;
+
+        r0.<java.io.StreamTokenizer: boolean slashStarCommentsP> = z0;
+
+        return;
+    }
+
+    public void slashSlashComments(boolean)
+    {
+        java.io.StreamTokenizer r0;
+        boolean z0;
+
+        r0 := @this: java.io.StreamTokenizer;
+
+        z0 := @parameter0: boolean;
+
+        r0.<java.io.StreamTokenizer: boolean slashSlashCommentsP> = z0;
+
+        return;
+    }
+
+    public void lowerCaseMode(boolean)
+    {
+        java.io.StreamTokenizer r0;
+        boolean z0;
+
+        r0 := @this: java.io.StreamTokenizer;
+
+        z0 := @parameter0: boolean;
+
+        r0.<java.io.StreamTokenizer: boolean forceLower> = z0;
+
+        return;
+    }
+
+    private int read() throws java.io.IOException
+    {
+        java.lang.IllegalStateException $r3;
+        java.io.Reader $r1, $r5;
+        int $i0, $i1;
+        java.io.StreamTokenizer r0;
+        java.io.InputStream $r2, $r4;
+
+        r0 := @this: java.io.StreamTokenizer;
+
+        $r1 = r0.<java.io.StreamTokenizer: java.io.Reader reader>;
+
+        if $r1 == null goto label1;
+
+        $r5 = r0.<java.io.StreamTokenizer: java.io.Reader reader>;
+
+        $i1 = virtualinvoke $r5.<java.io.Reader: int read()>();
+
+        return $i1;
+
+     label1:
+        $r2 = r0.<java.io.StreamTokenizer: java.io.InputStream input>;
+
+        if $r2 == null goto label2;
+
+        $r4 = r0.<java.io.StreamTokenizer: java.io.InputStream input>;
+
+        $i0 = virtualinvoke $r4.<java.io.InputStream: int read()>();
+
+        return $i0;
+
+     label2:
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>()>();
+
+        throw $r3;
+    }
+
+    public int nextToken() throws java.io.IOException
+    {
+        byte[] r1;
+        byte $b0, $b1, $b2, $b3, $b6, $b7, $b48, b49, $b50, $b51, $b55, $b56;
+        java.lang.String $r3, $r12, $r13, $r14;
+        char[] $r2, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r15, $r16, $r17;
+        java.io.StreamTokenizer r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, z8, z9, z10, z11;
+        int $i4, $i5, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46, i47, i52, i53, i54, i57, i58, i59, $i60, $i61, i62, i63, $i64, $i65, $i66, $i68, $i70, $i72, $i74, $i76, $i78, $i80, $i82, $i84, $i86, $i88, $i90, $i92, $i94;
+        double $d0, $d1, d2, d3, $d4;
+        char $c21, $c33;
+
+        r0 := @this: java.io.StreamTokenizer;
+
+        $z0 = r0.<java.io.StreamTokenizer: boolean pushedBack>;
+
+        if $z0 == 0 goto label01;
+
+        r0.<java.io.StreamTokenizer: boolean pushedBack> = 0;
+
+        $i46 = r0.<java.io.StreamTokenizer: int ttype>;
+
+        return $i46;
+
+     label01:
+        r1 = r0.<java.io.StreamTokenizer: byte[] ctype>;
+
+        r0.<java.io.StreamTokenizer: java.lang.String sval> = null;
+
+        i47 = r0.<java.io.StreamTokenizer: int peekc>;
+
+        if i47 >= 0 goto label02;
+
+        i47 = 2147483647;
+
+     label02:
+        if i47 != 2147483646 goto label04;
+
+        $i45 = specialinvoke r0.<java.io.StreamTokenizer: int read()>();
+
+        i47 = $i45;
+
+        if $i45 >= 0 goto label03;
+
+        $i68 = (int) -1;
+
+        r0.<java.io.StreamTokenizer: int ttype> = $i68;
+
+        $i70 = (int) -1;
+
+        return $i70;
+
+     label03:
+        if $i45 != 10 goto label04;
+
+        i47 = 2147483647;
+
+     label04:
+        if i47 != 2147483647 goto label05;
+
+        $i44 = specialinvoke r0.<java.io.StreamTokenizer: int read()>();
+
+        i47 = $i44;
+
+        if $i44 >= 0 goto label05;
+
+        $i72 = (int) -1;
+
+        r0.<java.io.StreamTokenizer: int ttype> = $i72;
+
+        $i74 = (int) -1;
+
+        return $i74;
+
+     label05:
+        r0.<java.io.StreamTokenizer: int ttype> = i47;
+
+        r0.<java.io.StreamTokenizer: int peekc> = 2147483647;
+
+        if i47 >= 256 goto label06;
+
+        $b48 = r1[i47];
+
+        goto label07;
+
+     label06:
+        $b48 = 4;
+
+     label07:
+        b49 = $b48;
+
+     label08:
+        $b50 = b49 & 1;
+
+        if $b50 == 0 goto label16;
+
+        if i47 != 13 goto label10;
+
+        $i41 = r0.<java.io.StreamTokenizer: int LINENO>;
+
+        $i42 = $i41 + 1;
+
+        r0.<java.io.StreamTokenizer: int LINENO> = $i42;
+
+        $z7 = r0.<java.io.StreamTokenizer: boolean eolIsSignificantP>;
+
+        if $z7 == 0 goto label09;
+
+        r0.<java.io.StreamTokenizer: int peekc> = 2147483646;
+
+        r0.<java.io.StreamTokenizer: int ttype> = 10;
+
+        return 10;
+
+     label09:
+        $i43 = specialinvoke r0.<java.io.StreamTokenizer: int read()>();
+
+        i47 = $i43;
+
+        if $i43 != 10 goto label12;
+
+        i47 = specialinvoke r0.<java.io.StreamTokenizer: int read()>();
+
+        goto label12;
+
+     label10:
+        if i47 != 10 goto label11;
+
+        $i39 = r0.<java.io.StreamTokenizer: int LINENO>;
+
+        $i40 = $i39 + 1;
+
+        r0.<java.io.StreamTokenizer: int LINENO> = $i40;
+
+        $z6 = r0.<java.io.StreamTokenizer: boolean eolIsSignificantP>;
+
+        if $z6 == 0 goto label11;
+
+        r0.<java.io.StreamTokenizer: int ttype> = 10;
+
+        return 10;
+
+     label11:
+        i47 = specialinvoke r0.<java.io.StreamTokenizer: int read()>();
+
+     label12:
+        if i47 >= 0 goto label13;
+
+        $i76 = (int) -1;
+
+        r0.<java.io.StreamTokenizer: int ttype> = $i76;
+
+        $i78 = (int) -1;
+
+        return $i78;
+
+     label13:
+        if i47 >= 256 goto label14;
+
+        $b51 = r1[i47];
+
+        goto label15;
+
+     label14:
+        $b51 = 4;
+
+     label15:
+        b49 = $b51;
+
+        goto label08;
+
+     label16:
+        $b0 = b49 & 2;
+
+        if $b0 == 0 goto label29;
+
+        z8 = 0;
+
+        if i47 != 45 goto label19;
+
+        $i38 = specialinvoke r0.<java.io.StreamTokenizer: int read()>();
+
+        i47 = $i38;
+
+        if $i38 == 46 goto label18;
+
+        if $i38 < 48 goto label17;
+
+        if $i38 <= 57 goto label18;
+
+     label17:
+        r0.<java.io.StreamTokenizer: int peekc> = $i38;
+
+        r0.<java.io.StreamTokenizer: int ttype> = 45;
+
+        return 45;
+
+     label18:
+        z8 = 1;
+
+     label19:
+        d2 = 0.0;
+
+        i52 = 0;
+
+        z9 = 0;
+
+        z11 = 0;
+
+        z10 = 0;
+
+     label20:
+        if i47 != 46 goto label21;
+
+        if z10 != 0 goto label21;
+
+        z9 = 1;
+
+        z11 = 1;
+
+        z10 = 1;
+
+        goto label22;
+
+     label21:
+        if 48 > i47 goto label23;
+
+        if i47 > 57 goto label23;
+
+        $d1 = d2 * 10.0;
+
+        $i37 = i47 - 48;
+
+        $d0 = (double) $i37;
+
+        d2 = $d1 + $d0;
+
+        i52 = i52 + z11;
+
+     label22:
+        i47 = specialinvoke r0.<java.io.StreamTokenizer: int read()>();
+
+        goto label20;
+
+     label23:
+        r0.<java.io.StreamTokenizer: int peekc> = i47;
+
+        if i52 == 0 goto label26;
+
+        d3 = 10.0;
+
+        $i80 = (int) -1;
+
+        i53 = i52 + $i80;
+
+     label24:
+        if i53 <= 0 goto label25;
+
+        d3 = d3 * 10.0;
+
+        $i82 = (int) -1;
+
+        i53 = i53 + $i82;
+
+        goto label24;
+
+     label25:
+        d2 = d2 / d3;
+
+     label26:
+        if z8 == 0 goto label27;
+
+        $d4 = neg d2;
+
+        goto label28;
+
+     label27:
+        $d4 = d2;
+
+     label28:
+        r0.<java.io.StreamTokenizer: double nval> = $d4;
+
+        $i84 = (int) -2;
+
+        r0.<java.io.StreamTokenizer: int ttype> = $i84;
+
+        $i86 = (int) -2;
+
+        return $i86;
+
+     label29:
+        $b1 = b49 & 4;
+
+        if $b1 == 0 goto label36;
+
+        i54 = 0;
+
+     label30:
+        $r9 = r0.<java.io.StreamTokenizer: char[] buf>;
+
+        $i31 = lengthof $r9;
+
+        if i54 < $i31 goto label31;
+
+        $r16 = r0.<java.io.StreamTokenizer: char[] buf>;
+
+        $r15 = r0.<java.io.StreamTokenizer: char[] buf>;
+
+        $i35 = lengthof $r15;
+
+        $i36 = $i35 * 2;
+
+        $r17 = staticinvoke <java.util.Arrays: char[] copyOf(char[],int)>($r16, $i36);
+
+        r0.<java.io.StreamTokenizer: char[] buf> = $r17;
+
+     label31:
+        $r10 = r0.<java.io.StreamTokenizer: char[] buf>;
+
+        $i32 = i54;
+
+        i54 = i54 + 1;
+
+        $c33 = (char) i47;
+
+        $r10[$i32] = $c33;
+
+        $i34 = specialinvoke r0.<java.io.StreamTokenizer: int read()>();
+
+        i47 = $i34;
+
+        if $i34 >= 0 goto label32;
+
+        $b55 = 1;
+
+        goto label34;
+
+     label32:
+        if $i34 >= 256 goto label33;
+
+        $b55 = r1[$i34];
+
+        goto label34;
+
+     label33:
+        $b55 = 4;
+
+     label34:
+        $b56 = $b55 & 6;
+
+        if $b56 != 0 goto label30;
+
+        r0.<java.io.StreamTokenizer: int peekc> = $i34;
+
+        $r11 = r0.<java.io.StreamTokenizer: char[] buf>;
+
+        $r12 = staticinvoke <java.lang.String: java.lang.String copyValueOf(char[],int,int)>($r11, 0, i54);
+
+        r0.<java.io.StreamTokenizer: java.lang.String sval> = $r12;
+
+        $z5 = r0.<java.io.StreamTokenizer: boolean forceLower>;
+
+        if $z5 == 0 goto label35;
+
+        $r13 = r0.<java.io.StreamTokenizer: java.lang.String sval>;
+
+        $r14 = virtualinvoke $r13.<java.lang.String: java.lang.String toLowerCase()>();
+
+        r0.<java.io.StreamTokenizer: java.lang.String sval> = $r14;
+
+     label35:
+        $i88 = (int) -3;
+
+        r0.<java.io.StreamTokenizer: int ttype> = $i88;
+
+        $i90 = (int) -3;
+
+        return $i90;
+
+     label36:
+        $b2 = b49 & 8;
+
+        if $b2 == 0 goto label57;
+
+        r0.<java.io.StreamTokenizer: int ttype> = i47;
+
+        i57 = 0;
+
+        i58 = specialinvoke r0.<java.io.StreamTokenizer: int read()>();
+
+     label37:
+        if i58 < 0 goto label54;
+
+        $i18 = r0.<java.io.StreamTokenizer: int ttype>;
+
+        if i58 == $i18 goto label54;
+
+        if i58 == 10 goto label54;
+
+        if i58 == 13 goto label54;
+
+        if i58 != 92 goto label51;
+
+        $i24 = specialinvoke r0.<java.io.StreamTokenizer: int read()>();
+
+        i59 = $i24;
+
+        if $i24 < 48 goto label41;
+
+        if $i24 > 55 goto label41;
+
+        i59 = $i24 - 48;
+
+        $i25 = specialinvoke r0.<java.io.StreamTokenizer: int read()>();
+
+        if 48 > $i25 goto label39;
+
+        if $i25 > 55 goto label39;
+
+        $i27 = i59 << 3;
+
+        $i26 = $i25 - 48;
+
+        i59 = $i27 + $i26;
+
+        $i28 = specialinvoke r0.<java.io.StreamTokenizer: int read()>();
+
+        if 48 > $i28 goto label38;
+
+        if $i28 > 55 goto label38;
+
+        if $i24 > 51 goto label38;
+
+        $i30 = i59 << 3;
+
+        $i29 = $i28 - 48;
+
+        i59 = $i30 + $i29;
+
+        i58 = specialinvoke r0.<java.io.StreamTokenizer: int read()>();
+
+        goto label40;
+
+     label38:
+        i58 = $i28;
+
+        goto label40;
+
+     label39:
+        i58 = $i25;
+
+     label40:
+        goto label50;
+
+     label41:
+        tableswitch($i24)
+        {
+            case 97: goto label42;
+            case 98: goto label43;
+            case 99: goto label49;
+            case 100: goto label49;
+            case 101: goto label49;
+            case 102: goto label44;
+            case 103: goto label49;
+            case 104: goto label49;
+            case 105: goto label49;
+            case 106: goto label49;
+            case 107: goto label49;
+            case 108: goto label49;
+            case 109: goto label49;
+            case 110: goto label45;
+            case 111: goto label49;
+            case 112: goto label49;
+            case 113: goto label49;
+            case 114: goto label46;
+            case 115: goto label49;
+            case 116: goto label47;
+            case 117: goto label49;
+            case 118: goto label48;
+            default: goto label49;
+        };
+
+     label42:
+        i59 = 7;
+
+        goto label49;
+
+     label43:
+        i59 = 8;
+
+        goto label49;
+
+     label44:
+        i59 = 12;
+
+        goto label49;
+
+     label45:
+        i59 = 10;
+
+        goto label49;
+
+     label46:
+        i59 = 13;
+
+        goto label49;
+
+     label47:
+        i59 = 9;
+
+        goto label49;
+
+     label48:
+        i59 = 11;
+
+     label49:
+        i58 = specialinvoke r0.<java.io.StreamTokenizer: int read()>();
+
+     label50:
+        goto label52;
+
+     label51:
+        i59 = i58;
+
+        i58 = specialinvoke r0.<java.io.StreamTokenizer: int read()>();
+
+     label52:
+        $r4 = r0.<java.io.StreamTokenizer: char[] buf>;
+
+        $i19 = lengthof $r4;
+
+        if i57 < $i19 goto label53;
+
+        $r7 = r0.<java.io.StreamTokenizer: char[] buf>;
+
+        $r6 = r0.<java.io.StreamTokenizer: char[] buf>;
+
+        $i22 = lengthof $r6;
+
+        $i23 = $i22 * 2;
+
+        $r8 = staticinvoke <java.util.Arrays: char[] copyOf(char[],int)>($r7, $i23);
+
+        r0.<java.io.StreamTokenizer: char[] buf> = $r8;
+
+     label53:
+        $r5 = r0.<java.io.StreamTokenizer: char[] buf>;
+
+        $i20 = i57;
+
+        i57 = i57 + 1;
+
+        $c21 = (char) i59;
+
+        $r5[$i20] = $c21;
+
+        goto label37;
+
+     label54:
+        $i60 = r0.<java.io.StreamTokenizer: int ttype>;
+
+        if i58 != $i60 goto label55;
+
+        $i61 = 2147483647;
+
+        goto label56;
+
+     label55:
+        $i61 = i58;
+
+     label56:
+        r0.<java.io.StreamTokenizer: int peekc> = $i61;
+
+        $r2 = r0.<java.io.StreamTokenizer: char[] buf>;
+
+        $r3 = staticinvoke <java.lang.String: java.lang.String copyValueOf(char[],int,int)>($r2, 0, i57);
+
+        r0.<java.io.StreamTokenizer: java.lang.String sval> = $r3;
+
+        $i17 = r0.<java.io.StreamTokenizer: int ttype>;
+
+        return $i17;
+
+     label57:
+        if i47 != 47 goto label72;
+
+        $z1 = r0.<java.io.StreamTokenizer: boolean slashSlashCommentsP>;
+
+        if $z1 != 0 goto label58;
+
+        $z4 = r0.<java.io.StreamTokenizer: boolean slashStarCommentsP>;
+
+        if $z4 == 0 goto label72;
+
+     label58:
+        $i5 = specialinvoke r0.<java.io.StreamTokenizer: int read()>();
+
+        if $i5 != 42 goto label65;
+
+        $z3 = r0.<java.io.StreamTokenizer: boolean slashStarCommentsP>;
+
+        if $z3 == 0 goto label65;
+
+        i62 = 0;
+
+     label59:
+        $i10 = specialinvoke r0.<java.io.StreamTokenizer: int read()>();
+
+        i63 = $i10;
+
+        if $i10 != 47 goto label60;
+
+        if i62 == 42 goto label64;
+
+     label60:
+        if $i10 != 13 goto label61;
+
+        $i13 = r0.<java.io.StreamTokenizer: int LINENO>;
+
+        $i14 = $i13 + 1;
+
+        r0.<java.io.StreamTokenizer: int LINENO> = $i14;
+
+        $i15 = specialinvoke r0.<java.io.StreamTokenizer: int read()>();
+
+        i63 = $i15;
+
+        if $i15 != 10 goto label62;
+
+        i63 = specialinvoke r0.<java.io.StreamTokenizer: int read()>();
+
+        goto label62;
+
+     label61:
+        if $i10 != 10 goto label62;
+
+        $i11 = r0.<java.io.StreamTokenizer: int LINENO>;
+
+        $i12 = $i11 + 1;
+
+        r0.<java.io.StreamTokenizer: int LINENO> = $i12;
+
+        i63 = specialinvoke r0.<java.io.StreamTokenizer: int read()>();
+
+     label62:
+        if i63 >= 0 goto label63;
+
+        $i92 = (int) -1;
+
+        r0.<java.io.StreamTokenizer: int ttype> = $i92;
+
+        $i94 = (int) -1;
+
+        return $i94;
+
+     label63:
+        i62 = i63;
+
+        goto label59;
+
+     label64:
+        $i16 = virtualinvoke r0.<java.io.StreamTokenizer: int nextToken()>();
+
+        return $i16;
+
+     label65:
+        if $i5 != 47 goto label68;
+
+        $z2 = r0.<java.io.StreamTokenizer: boolean slashSlashCommentsP>;
+
+        if $z2 == 0 goto label68;
+
+     label66:
+        $i9 = specialinvoke r0.<java.io.StreamTokenizer: int read()>();
+
+        if $i9 == 10 goto label67;
+
+        if $i9 == 13 goto label67;
+
+        if $i9 < 0 goto label67;
+
+        goto label66;
+
+     label67:
+        r0.<java.io.StreamTokenizer: int peekc> = $i9;
+
+        $i64 = virtualinvoke r0.<java.io.StreamTokenizer: int nextToken()>();
+
+        return $i64;
+
+     label68:
+        $b6 = r1[47];
+
+        $b7 = $b6 & 16;
+
+        if $b7 == 0 goto label71;
+
+     label69:
+        $i8 = specialinvoke r0.<java.io.StreamTokenizer: int read()>();
+
+        if $i8 == 10 goto label70;
+
+        if $i8 == 13 goto label70;
+
+        if $i8 < 0 goto label70;
+
+        goto label69;
+
+     label70:
+        r0.<java.io.StreamTokenizer: int peekc> = $i8;
+
+        $i65 = virtualinvoke r0.<java.io.StreamTokenizer: int nextToken()>();
+
+        return $i65;
+
+     label71:
+        r0.<java.io.StreamTokenizer: int peekc> = $i5;
+
+        r0.<java.io.StreamTokenizer: int ttype> = 47;
+
+        return 47;
+
+     label72:
+        $b3 = b49 & 16;
+
+        if $b3 == 0 goto label75;
+
+     label73:
+        $i4 = specialinvoke r0.<java.io.StreamTokenizer: int read()>();
+
+        if $i4 == 10 goto label74;
+
+        if $i4 == 13 goto label74;
+
+        if $i4 < 0 goto label74;
+
+        goto label73;
+
+     label74:
+        r0.<java.io.StreamTokenizer: int peekc> = $i4;
+
+        $i66 = virtualinvoke r0.<java.io.StreamTokenizer: int nextToken()>();
+
+        return $i66;
+
+     label75:
+        r0.<java.io.StreamTokenizer: int ttype> = i47;
+
+        return i47;
+    }
+
+    public void pushBack()
+    {
+        int $i0, $i2;
+        java.io.StreamTokenizer r0;
+
+        r0 := @this: java.io.StreamTokenizer;
+
+        $i0 = r0.<java.io.StreamTokenizer: int ttype>;
+
+        $i2 = (int) -4;
+
+        if $i0 == $i2 goto label1;
+
+        r0.<java.io.StreamTokenizer: boolean pushedBack> = 1;
+
+     label1:
+        return;
+    }
+
+    public int lineno()
+    {
+        int $i0;
+        java.io.StreamTokenizer r0;
+
+        r0 := @this: java.io.StreamTokenizer;
+
+        $i0 = r0.<java.io.StreamTokenizer: int LINENO>;
+
+        return $i0;
+    }
+
+    public java.lang.String toString()
+    {
+        byte[] $r5;
+        byte $b5, $b6;
+        int $i0, $i1, $i2, $i4, $i7;
+        java.io.StreamTokenizer r0;
+        java.lang.String $r4, r7, $r13;
+        double $d0;
+        char $c3;
+        char[] $r6;
+        java.lang.StringBuilder $r1, $r2, $r3, $r8, $r9, $r10, $r11, $r12;
+
+        r0 := @this: java.io.StreamTokenizer;
+
+        $i0 = r0.<java.io.StreamTokenizer: int ttype>;
+
+        tableswitch($i0)
+        {
+            case -4: goto label5;
+            case -3: goto label3;
+            case -2: goto label4;
+            case -1: goto label1;
+            case 0: goto label6;
+            case 1: goto label6;
+            case 2: goto label6;
+            case 3: goto label6;
+            case 4: goto label6;
+            case 5: goto label6;
+            case 6: goto label6;
+            case 7: goto label6;
+            case 8: goto label6;
+            case 9: goto label6;
+            case 10: goto label2;
+            default: goto label6;
+        };
+
+     label1:
+        r7 = "EOF";
+
+        goto label8;
+
+     label2:
+        r7 = "EOL";
+
+        goto label8;
+
+     label3:
+        r7 = r0.<java.io.StreamTokenizer: java.lang.String sval>;
+
+        goto label8;
+
+     label4:
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("n=");
+
+        $d0 = r0.<java.io.StreamTokenizer: double nval>;
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d0);
+
+        r7 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label8;
+
+     label5:
+        r7 = "NOTHING";
+
+        goto label8;
+
+     label6:
+        $i1 = r0.<java.io.StreamTokenizer: int ttype>;
+
+        if $i1 >= 256 goto label7;
+
+        $r5 = r0.<java.io.StreamTokenizer: byte[] ctype>;
+
+        $i4 = r0.<java.io.StreamTokenizer: int ttype>;
+
+        $b5 = $r5[$i4];
+
+        $b6 = $b5 & 8;
+
+        if $b6 == 0 goto label7;
+
+        r7 = r0.<java.io.StreamTokenizer: java.lang.String sval>;
+
+        goto label8;
+
+     label7:
+        $r6 = newarray (char)[3];
+
+        $r6[2] = 39;
+
+        $r6[0] = 39;
+
+        $i2 = r0.<java.io.StreamTokenizer: int ttype>;
+
+        $c3 = (char) $i2;
+
+        $r6[1] = $c3;
+
+        $r4 = new java.lang.String;
+
+        specialinvoke $r4.<java.lang.String: void <init>(char[])>($r6);
+
+        r7 = $r4;
+
+        goto label8;
+
+     label8:
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Token[");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r7);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("], line ");
+
+        $i7 = r0.<java.io.StreamTokenizer: int LINENO>;
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i7);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r13;
+    }
+
+    public static void <clinit>()
+    {
+        <java.io.StreamTokenizer: int TT_NOTHING> = -4;
+
+        <java.io.StreamTokenizer: int TT_WORD> = -3;
+
+        <java.io.StreamTokenizer: int TT_NUMBER> = -2;
+
+        <java.io.StreamTokenizer: int TT_EOL> = 10;
+
+        <java.io.StreamTokenizer: int TT_EOF> = -1;
+
+        <java.io.StreamTokenizer: byte CT_COMMENT> = 16;
+
+        <java.io.StreamTokenizer: byte CT_QUOTE> = 8;
+
+        <java.io.StreamTokenizer: byte CT_ALPHA> = 4;
+
+        <java.io.StreamTokenizer: byte CT_DIGIT> = 2;
+
+        <java.io.StreamTokenizer: byte CT_WHITESPACE> = 1;
+
+        <java.io.StreamTokenizer: int SKIP_LF> = 2147483646;
+
+        <java.io.StreamTokenizer: int NEED_CHAR> = 2147483647;
+
+        return;
+    }
+}

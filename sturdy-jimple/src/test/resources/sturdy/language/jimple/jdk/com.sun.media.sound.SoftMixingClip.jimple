@@ -1,0 +1,1873 @@
+public final class com.sun.media.sound.SoftMixingClip extends com.sun.media.sound.SoftMixingDataLine implements javax.sound.sampled.Clip
+{
+    private javax.sound.sampled.AudioFormat format;
+    private int framesize;
+    private byte[] data;
+    private final java.io.InputStream datastream;
+    private int offset;
+    private int bufferSize;
+    private float[] readbuffer;
+    private boolean open;
+    private javax.sound.sampled.AudioFormat outputformat;
+    private int out_nrofchannels;
+    private int in_nrofchannels;
+    private int frameposition;
+    private boolean frameposition_sg;
+    private boolean active_sg;
+    private int loopstart;
+    private int loopend;
+    private boolean active;
+    private int loopcount;
+    private boolean _active;
+    private int _frameposition;
+    private boolean loop_sg;
+    private int _loopcount;
+    private int _loopstart;
+    private int _loopend;
+    private float _rightgain;
+    private float _leftgain;
+    private float _eff1gain;
+    private float _eff2gain;
+    private com.sun.media.sound.AudioFloatInputStream afis;
+
+    void <init>(com.sun.media.sound.SoftMixingMixer, javax.sound.sampled.DataLine$Info)
+    {
+        int $i1, $i3;
+        javax.sound.sampled.DataLine$Info r2;
+        com.sun.media.sound.SoftMixingClip r0;
+        com.sun.media.sound.SoftMixingClip$1 $r4;
+        com.sun.media.sound.SoftMixingMixer r1;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        r1 := @parameter0: com.sun.media.sound.SoftMixingMixer;
+
+        r2 := @parameter1: javax.sound.sampled.DataLine$Info;
+
+        specialinvoke r0.<com.sun.media.sound.SoftMixingDataLine: void <init>(com.sun.media.sound.SoftMixingMixer,javax.sound.sampled.DataLine$Info)>(r1, r2);
+
+        $r4 = new com.sun.media.sound.SoftMixingClip$1;
+
+        specialinvoke $r4.<com.sun.media.sound.SoftMixingClip$1: void <init>(com.sun.media.sound.SoftMixingClip)>(r0);
+
+        r0.<com.sun.media.sound.SoftMixingClip: java.io.InputStream datastream> = $r4;
+
+        r0.<com.sun.media.sound.SoftMixingClip: boolean open> = 0;
+
+        r0.<com.sun.media.sound.SoftMixingClip: int frameposition> = 0;
+
+        r0.<com.sun.media.sound.SoftMixingClip: boolean frameposition_sg> = 0;
+
+        r0.<com.sun.media.sound.SoftMixingClip: boolean active_sg> = 0;
+
+        r0.<com.sun.media.sound.SoftMixingClip: int loopstart> = 0;
+
+        $i1 = (int) -1;
+
+        r0.<com.sun.media.sound.SoftMixingClip: int loopend> = $i1;
+
+        r0.<com.sun.media.sound.SoftMixingClip: boolean active> = 0;
+
+        r0.<com.sun.media.sound.SoftMixingClip: int loopcount> = 0;
+
+        r0.<com.sun.media.sound.SoftMixingClip: boolean _active> = 0;
+
+        r0.<com.sun.media.sound.SoftMixingClip: int _frameposition> = 0;
+
+        r0.<com.sun.media.sound.SoftMixingClip: boolean loop_sg> = 0;
+
+        r0.<com.sun.media.sound.SoftMixingClip: int _loopcount> = 0;
+
+        r0.<com.sun.media.sound.SoftMixingClip: int _loopstart> = 0;
+
+        $i3 = (int) -1;
+
+        r0.<com.sun.media.sound.SoftMixingClip: int _loopend> = $i3;
+
+        return;
+    }
+
+    protected void processControlLogic()
+    {
+        javax.sound.sampled.AudioFormat $r3, $r6, $r7, $r9;
+        byte $b1;
+        com.sun.media.sound.AudioFloatInputStream $r1, $r5, $r10;
+        javax.sound.sampled.AudioInputStream $r11;
+        com.sun.media.sound.SoftMixingClip r0;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7;
+        int $i0, $i2, $i3, $i4, $i5, $i6;
+        double $d0;
+        com.sun.media.sound.SoftMixingDataLine$AudioFloatInputStreamResampler $r12;
+        java.io.InputStream $r4;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        $f0 = r0.<com.sun.media.sound.SoftMixingClip: float rightgain>;
+
+        r0.<com.sun.media.sound.SoftMixingClip: float _rightgain> = $f0;
+
+        $f1 = r0.<com.sun.media.sound.SoftMixingClip: float leftgain>;
+
+        r0.<com.sun.media.sound.SoftMixingClip: float _leftgain> = $f1;
+
+        $f2 = r0.<com.sun.media.sound.SoftMixingClip: float eff1gain>;
+
+        r0.<com.sun.media.sound.SoftMixingClip: float _eff1gain> = $f2;
+
+        $f3 = r0.<com.sun.media.sound.SoftMixingClip: float eff2gain>;
+
+        r0.<com.sun.media.sound.SoftMixingClip: float _eff2gain> = $f3;
+
+        $z0 = r0.<com.sun.media.sound.SoftMixingClip: boolean active_sg>;
+
+        if $z0 == 0 goto label1;
+
+        $z4 = r0.<com.sun.media.sound.SoftMixingClip: boolean active>;
+
+        r0.<com.sun.media.sound.SoftMixingClip: boolean _active> = $z4;
+
+        r0.<com.sun.media.sound.SoftMixingClip: boolean active_sg> = 0;
+
+        goto label2;
+
+     label1:
+        $z1 = r0.<com.sun.media.sound.SoftMixingClip: boolean _active>;
+
+        r0.<com.sun.media.sound.SoftMixingClip: boolean active> = $z1;
+
+     label2:
+        $z2 = r0.<com.sun.media.sound.SoftMixingClip: boolean frameposition_sg>;
+
+        if $z2 == 0 goto label3;
+
+        $i5 = r0.<com.sun.media.sound.SoftMixingClip: int frameposition>;
+
+        r0.<com.sun.media.sound.SoftMixingClip: int _frameposition> = $i5;
+
+        r0.<com.sun.media.sound.SoftMixingClip: boolean frameposition_sg> = 0;
+
+        r0.<com.sun.media.sound.SoftMixingClip: com.sun.media.sound.AudioFloatInputStream afis> = null;
+
+        goto label4;
+
+     label3:
+        $i0 = r0.<com.sun.media.sound.SoftMixingClip: int _frameposition>;
+
+        r0.<com.sun.media.sound.SoftMixingClip: int frameposition> = $i0;
+
+     label4:
+        $z3 = r0.<com.sun.media.sound.SoftMixingClip: boolean loop_sg>;
+
+        if $z3 == 0 goto label5;
+
+        $i2 = r0.<com.sun.media.sound.SoftMixingClip: int loopcount>;
+
+        r0.<com.sun.media.sound.SoftMixingClip: int _loopcount> = $i2;
+
+        $i3 = r0.<com.sun.media.sound.SoftMixingClip: int loopstart>;
+
+        r0.<com.sun.media.sound.SoftMixingClip: int _loopstart> = $i3;
+
+        $i4 = r0.<com.sun.media.sound.SoftMixingClip: int loopend>;
+
+        r0.<com.sun.media.sound.SoftMixingClip: int _loopend> = $i4;
+
+     label5:
+        $r1 = r0.<com.sun.media.sound.SoftMixingClip: com.sun.media.sound.AudioFloatInputStream afis>;
+
+        if $r1 != null goto label6;
+
+        $r11 = new javax.sound.sampled.AudioInputStream;
+
+        $r4 = r0.<com.sun.media.sound.SoftMixingClip: java.io.InputStream datastream>;
+
+        $r3 = r0.<com.sun.media.sound.SoftMixingClip: javax.sound.sampled.AudioFormat format>;
+
+        specialinvoke $r11.<javax.sound.sampled.AudioInputStream: void <init>(java.io.InputStream,javax.sound.sampled.AudioFormat,long)>($r4, $r3, -1L);
+
+        $r5 = staticinvoke <com.sun.media.sound.AudioFloatInputStream: com.sun.media.sound.AudioFloatInputStream getInputStream(javax.sound.sampled.AudioInputStream)>($r11);
+
+        r0.<com.sun.media.sound.SoftMixingClip: com.sun.media.sound.AudioFloatInputStream afis> = $r5;
+
+        $r6 = r0.<com.sun.media.sound.SoftMixingClip: javax.sound.sampled.AudioFormat format>;
+
+        $f4 = virtualinvoke $r6.<javax.sound.sampled.AudioFormat: float getSampleRate()>();
+
+        $r7 = r0.<com.sun.media.sound.SoftMixingClip: javax.sound.sampled.AudioFormat outputformat>;
+
+        $f5 = virtualinvoke $r7.<javax.sound.sampled.AudioFormat: float getSampleRate()>();
+
+        $f6 = $f4 - $f5;
+
+        $f7 = staticinvoke <java.lang.Math: float abs(float)>($f6);
+
+        $d0 = (double) $f7;
+
+        $b1 = $d0 cmpl 1.0E-6;
+
+        $i6 = (int) $b1;
+
+        if $i6 <= 0 goto label6;
+
+        $r12 = new com.sun.media.sound.SoftMixingDataLine$AudioFloatInputStreamResampler;
+
+        $r10 = r0.<com.sun.media.sound.SoftMixingClip: com.sun.media.sound.AudioFloatInputStream afis>;
+
+        $r9 = r0.<com.sun.media.sound.SoftMixingClip: javax.sound.sampled.AudioFormat outputformat>;
+
+        specialinvoke $r12.<com.sun.media.sound.SoftMixingDataLine$AudioFloatInputStreamResampler: void <init>(com.sun.media.sound.AudioFloatInputStream,javax.sound.sampled.AudioFormat)>($r10, $r9);
+
+        r0.<com.sun.media.sound.SoftMixingClip: com.sun.media.sound.AudioFloatInputStream afis> = $r12;
+
+     label6:
+        return;
+    }
+
+    protected void processAudioLogic(com.sun.media.sound.SoftAudioBuffer[])
+    {
+        byte $b17, $b22;
+        com.sun.media.sound.AudioFloatInputStream $r23;
+        com.sun.media.sound.SoftMixingClip r0;
+        float[] $r3, $r5, $r7, $r8, $r10, $r11, $r12, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r24;
+        java.io.IOException $r22;
+        com.sun.media.sound.SoftAudioBuffer $r2, $r4, $r6, $r9, $r13;
+        boolean $z0;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $f10, $f11, $f12, $f13, $f14, $f15, $f16, $f17, $f18, $f19, $f20, $f21, $f22, $f23, $f24, $f25, $f26, $f27, $f28, $f29, $f30, $f31, $f32, $f33, $f34, $f35, $f36;
+        com.sun.media.sound.SoftAudioBuffer[] r1;
+        int $i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, i11, i12, i13, i14, i15, i16, i18, i19, i20, i21, i23, i24, i25, i26, $i28, $i29, $i30;
+        double $d0, $d1;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        r1 := @parameter0: com.sun.media.sound.SoftAudioBuffer[];
+
+        $z0 = r0.<com.sun.media.sound.SoftMixingClip: boolean _active>;
+
+        if $z0 == 0 goto label22;
+
+        $r2 = r1[0];
+
+        $r3 = virtualinvoke $r2.<com.sun.media.sound.SoftAudioBuffer: float[] array()>();
+
+        $r4 = r1[1];
+
+        $r5 = virtualinvoke $r4.<com.sun.media.sound.SoftAudioBuffer: float[] array()>();
+
+        $r6 = r1[0];
+
+        $i0 = virtualinvoke $r6.<com.sun.media.sound.SoftAudioBuffer: int getSize()>();
+
+        $i1 = r0.<com.sun.media.sound.SoftMixingClip: int in_nrofchannels>;
+
+        i2 = $i0 * $i1;
+
+        $r7 = r0.<com.sun.media.sound.SoftMixingClip: float[] readbuffer>;
+
+        if $r7 == null goto label01;
+
+        $r21 = r0.<com.sun.media.sound.SoftMixingClip: float[] readbuffer>;
+
+        $i8 = lengthof $r21;
+
+        if $i8 >= i2 goto label02;
+
+     label01:
+        $r8 = newarray (float)[i2];
+
+        r0.<com.sun.media.sound.SoftMixingClip: float[] readbuffer> = $r8;
+
+     label02:
+        $r23 = r0.<com.sun.media.sound.SoftMixingClip: com.sun.media.sound.AudioFloatInputStream afis>;
+
+        $r24 = r0.<com.sun.media.sound.SoftMixingClip: float[] readbuffer>;
+
+        $i10 = virtualinvoke $r23.<com.sun.media.sound.AudioFloatInputStream: int read(float[])>($r24);
+
+        $i28 = (int) -1;
+
+        if $i10 != $i28 goto label04;
+
+        r0.<com.sun.media.sound.SoftMixingClip: boolean _active> = 0;
+
+     label03:
+        return;
+
+     label04:
+        $i3 = r0.<com.sun.media.sound.SoftMixingClip: int in_nrofchannels>;
+
+        if $i10 == $i3 goto label05;
+
+        $r20 = r0.<com.sun.media.sound.SoftMixingClip: float[] readbuffer>;
+
+        staticinvoke <java.util.Arrays: void fill(float[],int,int,float)>($r20, $i10, i2, 0.0F);
+
+     label05:
+        goto label07;
+
+     label06:
+        $r22 := @caughtexception;
+
+     label07:
+        $i9 = r0.<com.sun.media.sound.SoftMixingClip: int in_nrofchannels>;
+
+        i11 = 0;
+
+        i12 = 0;
+
+     label08:
+        if i11 >= $i0 goto label09;
+
+        $f33 = $r3[i11];
+
+        $r19 = r0.<com.sun.media.sound.SoftMixingClip: float[] readbuffer>;
+
+        $f31 = $r19[i12];
+
+        $f30 = r0.<com.sun.media.sound.SoftMixingClip: float _leftgain>;
+
+        $f32 = $f31 * $f30;
+
+        $f34 = $f33 + $f32;
+
+        $r3[i11] = $f34;
+
+        i11 = i11 + 1;
+
+        i12 = i12 + $i9;
+
+        goto label08;
+
+     label09:
+        $i4 = r0.<com.sun.media.sound.SoftMixingClip: int out_nrofchannels>;
+
+        if $i4 == 1 goto label14;
+
+        $i7 = r0.<com.sun.media.sound.SoftMixingClip: int in_nrofchannels>;
+
+        if $i7 != 1 goto label12;
+
+        i13 = 0;
+
+        i14 = 0;
+
+     label10:
+        if i13 >= $i0 goto label11;
+
+        $f28 = $r5[i13];
+
+        $r18 = r0.<com.sun.media.sound.SoftMixingClip: float[] readbuffer>;
+
+        $f26 = $r18[i14];
+
+        $f25 = r0.<com.sun.media.sound.SoftMixingClip: float _rightgain>;
+
+        $f27 = $f26 * $f25;
+
+        $f29 = $f28 + $f27;
+
+        $r5[i13] = $f29;
+
+        i13 = i13 + 1;
+
+        i14 = i14 + $i9;
+
+        goto label10;
+
+     label11:
+        goto label14;
+
+     label12:
+        i15 = 0;
+
+        i16 = 1;
+
+     label13:
+        if i15 >= $i0 goto label14;
+
+        $f23 = $r5[i15];
+
+        $r17 = r0.<com.sun.media.sound.SoftMixingClip: float[] readbuffer>;
+
+        $f21 = $r17[i16];
+
+        $f20 = r0.<com.sun.media.sound.SoftMixingClip: float _rightgain>;
+
+        $f22 = $f21 * $f20;
+
+        $f24 = $f23 + $f22;
+
+        $r5[i15] = $f24;
+
+        i15 = i15 + 1;
+
+        i16 = i16 + $i9;
+
+        goto label13;
+
+     label14:
+        $f35 = r0.<com.sun.media.sound.SoftMixingClip: float _eff1gain>;
+
+        $d0 = (double) $f35;
+
+        $b17 = $d0 cmpl 2.0E-4;
+
+        $i29 = (int) $b17;
+
+        if $i29 <= 0 goto label18;
+
+        $r13 = r1[2];
+
+        $r14 = virtualinvoke $r13.<com.sun.media.sound.SoftAudioBuffer: float[] array()>();
+
+        i18 = 0;
+
+        i19 = 0;
+
+     label15:
+        if i18 >= $i0 goto label16;
+
+        $f18 = $r14[i18];
+
+        $r16 = r0.<com.sun.media.sound.SoftMixingClip: float[] readbuffer>;
+
+        $f16 = $r16[i19];
+
+        $f15 = r0.<com.sun.media.sound.SoftMixingClip: float _eff1gain>;
+
+        $f17 = $f16 * $f15;
+
+        $f19 = $f18 + $f17;
+
+        $r14[i18] = $f19;
+
+        i18 = i18 + 1;
+
+        i19 = i19 + $i9;
+
+        goto label15;
+
+     label16:
+        $i6 = r0.<com.sun.media.sound.SoftMixingClip: int in_nrofchannels>;
+
+        if $i6 != 2 goto label18;
+
+        i20 = 0;
+
+        i21 = 1;
+
+     label17:
+        if i20 >= $i0 goto label18;
+
+        $f13 = $r14[i20];
+
+        $r15 = r0.<com.sun.media.sound.SoftMixingClip: float[] readbuffer>;
+
+        $f11 = $r15[i21];
+
+        $f10 = r0.<com.sun.media.sound.SoftMixingClip: float _eff1gain>;
+
+        $f12 = $f11 * $f10;
+
+        $f14 = $f13 + $f12;
+
+        $r14[i20] = $f14;
+
+        i20 = i20 + 1;
+
+        i21 = i21 + $i9;
+
+        goto label17;
+
+     label18:
+        $f36 = r0.<com.sun.media.sound.SoftMixingClip: float _eff2gain>;
+
+        $d1 = (double) $f36;
+
+        $b22 = $d1 cmpl 2.0E-4;
+
+        $i30 = (int) $b22;
+
+        if $i30 <= 0 goto label22;
+
+        $r9 = r1[3];
+
+        $r10 = virtualinvoke $r9.<com.sun.media.sound.SoftAudioBuffer: float[] array()>();
+
+        i23 = 0;
+
+        i24 = 0;
+
+     label19:
+        if i23 >= $i0 goto label20;
+
+        $f8 = $r10[i23];
+
+        $r12 = r0.<com.sun.media.sound.SoftMixingClip: float[] readbuffer>;
+
+        $f6 = $r12[i24];
+
+        $f5 = r0.<com.sun.media.sound.SoftMixingClip: float _eff2gain>;
+
+        $f7 = $f6 * $f5;
+
+        $f9 = $f8 + $f7;
+
+        $r10[i23] = $f9;
+
+        i23 = i23 + 1;
+
+        i24 = i24 + $i9;
+
+        goto label19;
+
+     label20:
+        $i5 = r0.<com.sun.media.sound.SoftMixingClip: int in_nrofchannels>;
+
+        if $i5 != 2 goto label22;
+
+        i25 = 0;
+
+        i26 = 1;
+
+     label21:
+        if i25 >= $i0 goto label22;
+
+        $f3 = $r10[i25];
+
+        $r11 = r0.<com.sun.media.sound.SoftMixingClip: float[] readbuffer>;
+
+        $f1 = $r11[i26];
+
+        $f0 = r0.<com.sun.media.sound.SoftMixingClip: float _eff2gain>;
+
+        $f2 = $f1 * $f0;
+
+        $f4 = $f3 + $f2;
+
+        $r10[i25] = $f4;
+
+        i25 = i25 + 1;
+
+        i26 = i26 + $i9;
+
+        goto label21;
+
+     label22:
+        return;
+
+        catch java.io.IOException from label02 to label03 with label06;
+        catch java.io.IOException from label04 to label05 with label06;
+    }
+
+    public int getFrameLength()
+    {
+        int $i0, $i1, $i2;
+        javax.sound.sampled.AudioFormat $r1;
+        com.sun.media.sound.SoftMixingClip r0;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        $i0 = r0.<com.sun.media.sound.SoftMixingClip: int bufferSize>;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingClip: javax.sound.sampled.AudioFormat format>;
+
+        $i1 = virtualinvoke $r1.<javax.sound.sampled.AudioFormat: int getFrameSize()>();
+
+        $i2 = $i0 / $i1;
+
+        return $i2;
+    }
+
+    public long getMicrosecondLength()
+    {
+        javax.sound.sampled.AudioFormat $r1;
+        long $l1;
+        int $i0;
+        float $f0;
+        com.sun.media.sound.SoftMixingClip r0;
+        double $d0, $d1, $d2, $d3;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        $i0 = virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: int getFrameLength()>();
+
+        $d0 = (double) $i0;
+
+        $r1 = virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $f0 = virtualinvoke $r1.<javax.sound.sampled.AudioFormat: float getSampleRate()>();
+
+        $d1 = (double) $f0;
+
+        $d2 = 1000000.0 / $d1;
+
+        $d3 = $d0 * $d2;
+
+        $l1 = (long) $d3;
+
+        return $l1;
+    }
+
+    public void loop(int)
+    {
+        java.lang.Throwable $r4;
+        long $l1;
+        javax.sound.sampled.LineEvent $r2, r5;
+        javax.sound.sampled.LineEvent$Type $r3;
+        int i0;
+        java.lang.Object $r1;
+        com.sun.media.sound.SoftMixingClip r0;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        i0 := @parameter0: int;
+
+        r5 = null;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingClip: java.lang.Object control_mutex>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: boolean isOpen()>();
+
+        if $z0 == 0 goto label4;
+
+        $z1 = r0.<com.sun.media.sound.SoftMixingClip: boolean active>;
+
+        if $z1 == 0 goto label3;
+
+        exitmonitor $r1;
+
+     label2:
+        return;
+
+     label3:
+        r0.<com.sun.media.sound.SoftMixingClip: boolean active> = 1;
+
+        r0.<com.sun.media.sound.SoftMixingClip: boolean active_sg> = 1;
+
+        r0.<com.sun.media.sound.SoftMixingClip: int loopcount> = i0;
+
+        $r2 = new javax.sound.sampled.LineEvent;
+
+        $r3 = <javax.sound.sampled.LineEvent$Type: javax.sound.sampled.LineEvent$Type START>;
+
+        $l1 = virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: long getLongFramePosition()>();
+
+        specialinvoke $r2.<javax.sound.sampled.LineEvent: void <init>(javax.sound.sampled.Line,javax.sound.sampled.LineEvent$Type,long)>(r0, $r3, $l1);
+
+        r5 = $r2;
+
+     label4:
+        exitmonitor $r1;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label7:
+        throw $r4;
+
+     label8:
+        if r5 == null goto label9;
+
+        virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: void sendEvent(javax.sound.sampled.LineEvent)>(r5);
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label3 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public void open(javax.sound.sampled.AudioInputStream) throws javax.sound.sampled.LineUnavailableException, java.io.IOException
+    {
+        byte[] $r7, r26, r27;
+        java.lang.IllegalStateException $r29;
+        javax.sound.sampled.AudioFormat $r2, $r5, $r6, $r8, $r9, $r10, $r14, $r21;
+        byte $b1;
+        javax.sound.sampled.AudioInputStream r1;
+        com.sun.media.sound.SoftMixingClip r0;
+        boolean $z0;
+        java.lang.StringBuilder $r13, $r16, $r20, $r22, $r23, $r24, $r28, $r30;
+        java.io.ByteArrayOutputStream $r32;
+        com.sun.media.sound.AudioFloatConverter $r3;
+        long $l0, $l6;
+        int $i2, $i3, $i4, $i5, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, i17, i18, $i20, $i22;
+        java.lang.String $r15, $r17, $r25;
+        java.lang.IllegalArgumentException $r31;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        r1 := @parameter0: javax.sound.sampled.AudioInputStream;
+
+        $z0 = virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: boolean isOpen()>();
+
+        if $z0 == 0 goto label01;
+
+        $r29 = new java.lang.IllegalStateException;
+
+        $r28 = new java.lang.StringBuilder;
+
+        specialinvoke $r28.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Clip is already open with format ");
+
+        $r21 = virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $r22 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r21);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" and frame lengh of ");
+
+        $i16 = virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: int getFrameLength()>();
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i16);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r29.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r25);
+
+        throw $r29;
+
+     label01:
+        $r2 = virtualinvoke r1.<javax.sound.sampled.AudioInputStream: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $r3 = staticinvoke <com.sun.media.sound.AudioFloatConverter: com.sun.media.sound.AudioFloatConverter getConverter(javax.sound.sampled.AudioFormat)>($r2);
+
+        if $r3 != null goto label02;
+
+        $r31 = new java.lang.IllegalArgumentException;
+
+        $r30 = new java.lang.StringBuilder;
+
+        specialinvoke $r30.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid format : ");
+
+        $r14 = virtualinvoke r1.<javax.sound.sampled.AudioInputStream: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $r15 = virtualinvoke $r14.<javax.sound.sampled.AudioFormat: java.lang.String toString()>();
+
+        $r16 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r31.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r17);
+
+        throw $r31;
+
+     label02:
+        $l0 = virtualinvoke r1.<javax.sound.sampled.AudioInputStream: long getFrameLength()>();
+
+        $b1 = $l0 cmp -1L;
+
+        if $b1 == 0 goto label08;
+
+        $l6 = virtualinvoke r1.<javax.sound.sampled.AudioInputStream: long getFrameLength()>();
+
+        $i7 = (int) $l6;
+
+        $r8 = virtualinvoke r1.<javax.sound.sampled.AudioInputStream: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $i8 = virtualinvoke $r8.<javax.sound.sampled.AudioFormat: int getFrameSize()>();
+
+        $i9 = $i7 * $i8;
+
+        r26 = newarray (byte)[$i9];
+
+        $r9 = virtualinvoke r1.<javax.sound.sampled.AudioInputStream: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $i10 = virtualinvoke $r9.<javax.sound.sampled.AudioFormat: int getFrameSize()>();
+
+        i17 = 512 * $i10;
+
+        i18 = 0;
+
+     label03:
+        $i11 = lengthof r26;
+
+        if i18 == $i11 goto label07;
+
+        $i12 = lengthof r26;
+
+        $i13 = $i12 - i18;
+
+        if i17 <= $i13 goto label04;
+
+        $i15 = lengthof r26;
+
+        i17 = $i15 - i18;
+
+     label04:
+        $i14 = virtualinvoke r1.<javax.sound.sampled.AudioInputStream: int read(byte[],int,int)>(r26, i18, i17);
+
+        $i20 = (int) -1;
+
+        if $i14 != $i20 goto label05;
+
+        goto label07;
+
+     label05:
+        if $i14 != 0 goto label06;
+
+        staticinvoke <java.lang.Thread: void yield()>();
+
+     label06:
+        i18 = i18 + $i14;
+
+        goto label03;
+
+     label07:
+        $r10 = virtualinvoke r1.<javax.sound.sampled.AudioInputStream: javax.sound.sampled.AudioFormat getFormat()>();
+
+        virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: void open(javax.sound.sampled.AudioFormat,byte[],int,int)>($r10, r26, 0, i18);
+
+        goto label12;
+
+     label08:
+        $r32 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r32.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $r5 = virtualinvoke r1.<javax.sound.sampled.AudioInputStream: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $i2 = virtualinvoke $r5.<javax.sound.sampled.AudioFormat: int getFrameSize()>();
+
+        $i3 = 512 * $i2;
+
+        r27 = newarray (byte)[$i3];
+
+     label09:
+        $i4 = virtualinvoke r1.<javax.sound.sampled.AudioInputStream: int read(byte[])>(r27);
+
+        $i22 = (int) -1;
+
+        if $i4 == $i22 goto label11;
+
+        if $i4 != 0 goto label10;
+
+        staticinvoke <java.lang.Thread: void yield()>();
+
+     label10:
+        virtualinvoke $r32.<java.io.ByteArrayOutputStream: void write(byte[],int,int)>(r27, 0, $i4);
+
+        goto label09;
+
+     label11:
+        $r6 = virtualinvoke r1.<javax.sound.sampled.AudioInputStream: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $r7 = virtualinvoke $r32.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        $i5 = virtualinvoke $r32.<java.io.ByteArrayOutputStream: int size()>();
+
+        virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: void open(javax.sound.sampled.AudioFormat,byte[],int,int)>($r6, $r7, 0, $i5);
+
+     label12:
+        return;
+    }
+
+    public void open(javax.sound.sampled.AudioFormat, byte[], int, int) throws javax.sound.sampled.LineUnavailableException
+    {
+        byte[] r4, $r13;
+        java.lang.IllegalStateException $r31;
+        javax.sound.sampled.AudioFormat r2, $r7, $r8, $r24;
+        com.sun.media.sound.SoftMixingMixer $r5, $r6, $r9, $r11, $r12;
+        com.sun.media.sound.SoftMixingMainMixer $r10;
+        com.sun.media.sound.SoftMixingClip r0;
+        boolean $z0, $z1;
+        java.lang.StringBuilder $r17, $r19, $r23, $r25, $r26, $r27, $r30, $r32;
+        java.lang.Throwable $r29;
+        com.sun.media.sound.AudioFloatConverter $r3;
+        int i0, $i1, $i2, i3, $i4, $i5, $i6, $i7, $i8, $i10;
+        java.lang.String $r18, $r20, $r28;
+        java.lang.IllegalArgumentException $r33, $r34;
+        java.lang.Object $r1;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        r2 := @parameter0: javax.sound.sampled.AudioFormat;
+
+        r4 := @parameter1: byte[];
+
+        i3 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingClip: java.lang.Object control_mutex>;
+
+        entermonitor $r1;
+
+     label01:
+        $z0 = virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: boolean isOpen()>();
+
+        if $z0 == 0 goto label02;
+
+        $r31 = new java.lang.IllegalStateException;
+
+        $r30 = new java.lang.StringBuilder;
+
+        specialinvoke $r30.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Clip is already open with format ");
+
+        $r24 = virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $r25 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r24);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" and frame lengh of ");
+
+        $i8 = virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: int getFrameLength()>();
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i8);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r31.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r28);
+
+        throw $r31;
+
+     label02:
+        $r3 = staticinvoke <com.sun.media.sound.AudioFloatConverter: com.sun.media.sound.AudioFloatConverter getConverter(javax.sound.sampled.AudioFormat)>(r2);
+
+        if $r3 != null goto label03;
+
+        $r33 = new java.lang.IllegalArgumentException;
+
+        $r32 = new java.lang.StringBuilder;
+
+        specialinvoke $r32.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid format : ");
+
+        $r18 = virtualinvoke r2.<javax.sound.sampled.AudioFormat: java.lang.String toString()>();
+
+        $r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r33.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r20);
+
+        throw $r33;
+
+     label03:
+        $i1 = virtualinvoke r2.<javax.sound.sampled.AudioFormat: int getFrameSize()>();
+
+        $i2 = i0 % $i1;
+
+        if $i2 == 0 goto label04;
+
+        $r34 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r34.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Buffer size does not represent an integral number of sample frames!");
+
+        throw $r34;
+
+     label04:
+        if r4 == null goto label05;
+
+        $i7 = lengthof r4;
+
+        $r13 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>(r4, $i7);
+
+        r0.<com.sun.media.sound.SoftMixingClip: byte[] data> = $r13;
+
+     label05:
+        r0.<com.sun.media.sound.SoftMixingClip: int offset> = i3;
+
+        r0.<com.sun.media.sound.SoftMixingClip: int bufferSize> = i0;
+
+        r0.<com.sun.media.sound.SoftMixingClip: javax.sound.sampled.AudioFormat format> = r2;
+
+        $i4 = virtualinvoke r2.<javax.sound.sampled.AudioFormat: int getFrameSize()>();
+
+        r0.<com.sun.media.sound.SoftMixingClip: int framesize> = $i4;
+
+        r0.<com.sun.media.sound.SoftMixingClip: int loopstart> = 0;
+
+        $i10 = (int) -1;
+
+        r0.<com.sun.media.sound.SoftMixingClip: int loopend> = $i10;
+
+        r0.<com.sun.media.sound.SoftMixingClip: boolean loop_sg> = 1;
+
+        $r5 = r0.<com.sun.media.sound.SoftMixingClip: com.sun.media.sound.SoftMixingMixer mixer>;
+
+        $z1 = virtualinvoke $r5.<com.sun.media.sound.SoftMixingMixer: boolean isOpen()>();
+
+        if $z1 != 0 goto label06;
+
+        $r11 = r0.<com.sun.media.sound.SoftMixingClip: com.sun.media.sound.SoftMixingMixer mixer>;
+
+        virtualinvoke $r11.<com.sun.media.sound.SoftMixingMixer: void open()>();
+
+        $r12 = r0.<com.sun.media.sound.SoftMixingClip: com.sun.media.sound.SoftMixingMixer mixer>;
+
+        $r12.<com.sun.media.sound.SoftMixingMixer: boolean implicitOpen> = 1;
+
+     label06:
+        $r6 = r0.<com.sun.media.sound.SoftMixingClip: com.sun.media.sound.SoftMixingMixer mixer>;
+
+        $r7 = virtualinvoke $r6.<com.sun.media.sound.SoftMixingMixer: javax.sound.sampled.AudioFormat getFormat()>();
+
+        r0.<com.sun.media.sound.SoftMixingClip: javax.sound.sampled.AudioFormat outputformat> = $r7;
+
+        $r8 = r0.<com.sun.media.sound.SoftMixingClip: javax.sound.sampled.AudioFormat outputformat>;
+
+        $i5 = virtualinvoke $r8.<javax.sound.sampled.AudioFormat: int getChannels()>();
+
+        r0.<com.sun.media.sound.SoftMixingClip: int out_nrofchannels> = $i5;
+
+        $i6 = virtualinvoke r2.<javax.sound.sampled.AudioFormat: int getChannels()>();
+
+        r0.<com.sun.media.sound.SoftMixingClip: int in_nrofchannels> = $i6;
+
+        r0.<com.sun.media.sound.SoftMixingClip: boolean open> = 1;
+
+        $r9 = r0.<com.sun.media.sound.SoftMixingClip: com.sun.media.sound.SoftMixingMixer mixer>;
+
+        $r10 = virtualinvoke $r9.<com.sun.media.sound.SoftMixingMixer: com.sun.media.sound.SoftMixingMainMixer getMainMixer()>();
+
+        virtualinvoke $r10.<com.sun.media.sound.SoftMixingMainMixer: void openLine(com.sun.media.sound.SoftMixingDataLine)>(r0);
+
+        exitmonitor $r1;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r29 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label09:
+        throw $r29;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label01 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    public void setFramePosition(int)
+    {
+        java.lang.Throwable $r2;
+        int i0;
+        java.lang.Object $r1;
+        com.sun.media.sound.SoftMixingClip r0;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingClip: java.lang.Object control_mutex>;
+
+        entermonitor $r1;
+
+     label1:
+        r0.<com.sun.media.sound.SoftMixingClip: boolean frameposition_sg> = 1;
+
+        r0.<com.sun.media.sound.SoftMixingClip: int frameposition> = i0;
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void setLoopPoints(int, int)
+    {
+        com.sun.media.sound.SoftMixingClip r0;
+        java.lang.StringBuilder $r4, $r5, $r6, $r7, $r11, $r12, $r13, $r14, $r18, $r19, $r20, $r21, $r25, $r26, $r27, $r28, $r31, $r33, $r35, $r37;
+        java.lang.Throwable $r30;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i9;
+        java.lang.String $r8, $r15, $r22, $r29;
+        java.lang.IllegalArgumentException $r32, $r34, $r36, $r38;
+        java.lang.Object $r1;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingClip: java.lang.Object control_mutex>;
+
+        entermonitor $r1;
+
+     label1:
+        $i9 = (int) -1;
+
+        if i0 == $i9 goto label3;
+
+        if i0 >= i1 goto label2;
+
+        $r32 = new java.lang.IllegalArgumentException;
+
+        $r31 = new java.lang.StringBuilder;
+
+        specialinvoke $r31.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid loop points : ");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" - ");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r32.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r29);
+
+        throw $r32;
+
+     label2:
+        $i5 = r0.<com.sun.media.sound.SoftMixingClip: int framesize>;
+
+        $i7 = i0 * $i5;
+
+        $i6 = r0.<com.sun.media.sound.SoftMixingClip: int bufferSize>;
+
+        if $i7 <= $i6 goto label3;
+
+        $r34 = new java.lang.IllegalArgumentException;
+
+        $r33 = new java.lang.StringBuilder;
+
+        specialinvoke $r33.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid loop points : ");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" - ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r34.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r22);
+
+        throw $r34;
+
+     label3:
+        $i2 = r0.<com.sun.media.sound.SoftMixingClip: int framesize>;
+
+        $i4 = i1 * $i2;
+
+        $i3 = r0.<com.sun.media.sound.SoftMixingClip: int bufferSize>;
+
+        if $i4 <= $i3 goto label4;
+
+        $r36 = new java.lang.IllegalArgumentException;
+
+        $r35 = new java.lang.StringBuilder;
+
+        specialinvoke $r35.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid loop points : ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" - ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r36.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r15);
+
+        throw $r36;
+
+     label4:
+        if 0 >= i1 goto label5;
+
+        $r38 = new java.lang.IllegalArgumentException;
+
+        $r37 = new java.lang.StringBuilder;
+
+        specialinvoke $r37.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid loop points : ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" - ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r38.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r8);
+
+        throw $r38;
+
+     label5:
+        r0.<com.sun.media.sound.SoftMixingClip: int loopstart> = i1;
+
+        r0.<com.sun.media.sound.SoftMixingClip: int loopend> = i0;
+
+        r0.<com.sun.media.sound.SoftMixingClip: boolean loop_sg> = 1;
+
+        exitmonitor $r1;
+
+     label6:
+        goto label9;
+
+     label7:
+        $r30 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label8:
+        throw $r30;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public void setMicrosecondPosition(long)
+    {
+        javax.sound.sampled.AudioFormat $r1;
+        long l0;
+        int $i1;
+        float $f0;
+        com.sun.media.sound.SoftMixingClip r0;
+        double $d0, $d1, $d2, $d3;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        l0 := @parameter0: long;
+
+        $d0 = (double) l0;
+
+        $r1 = virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $f0 = virtualinvoke $r1.<javax.sound.sampled.AudioFormat: float getSampleRate()>();
+
+        $d1 = (double) $f0;
+
+        $d2 = $d1 / 1000000.0;
+
+        $d3 = $d0 * $d2;
+
+        $i1 = (int) $d3;
+
+        virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: void setFramePosition(int)>($i1);
+
+        return;
+    }
+
+    public int available()
+    {
+        com.sun.media.sound.SoftMixingClip r0;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        return 0;
+    }
+
+    public void drain()
+    {
+        com.sun.media.sound.SoftMixingClip r0;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        return;
+    }
+
+    public void flush()
+    {
+        com.sun.media.sound.SoftMixingClip r0;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        return;
+    }
+
+    public int getBufferSize()
+    {
+        int $i0;
+        com.sun.media.sound.SoftMixingClip r0;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        $i0 = r0.<com.sun.media.sound.SoftMixingClip: int bufferSize>;
+
+        return $i0;
+    }
+
+    public javax.sound.sampled.AudioFormat getFormat()
+    {
+        javax.sound.sampled.AudioFormat $r1;
+        com.sun.media.sound.SoftMixingClip r0;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingClip: javax.sound.sampled.AudioFormat format>;
+
+        return $r1;
+    }
+
+    public int getFramePosition()
+    {
+        java.lang.Throwable $r2;
+        int $i0;
+        java.lang.Object $r1;
+        com.sun.media.sound.SoftMixingClip r0;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingClip: java.lang.Object control_mutex>;
+
+        entermonitor $r1;
+
+     label1:
+        $i0 = r0.<com.sun.media.sound.SoftMixingClip: int frameposition>;
+
+        exitmonitor $r1;
+
+     label2:
+        return $i0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public float getLevel()
+    {
+        com.sun.media.sound.SoftMixingClip r0;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        return -1.0F;
+    }
+
+    public long getLongFramePosition()
+    {
+        int $i0;
+        long $l1;
+        com.sun.media.sound.SoftMixingClip r0;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        $i0 = virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: int getFramePosition()>();
+
+        $l1 = (long) $i0;
+
+        return $l1;
+    }
+
+    public long getMicrosecondPosition()
+    {
+        javax.sound.sampled.AudioFormat $r1;
+        long $l1;
+        int $i0;
+        float $f0;
+        com.sun.media.sound.SoftMixingClip r0;
+        double $d0, $d1, $d2, $d3;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        $i0 = virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: int getFramePosition()>();
+
+        $d0 = (double) $i0;
+
+        $r1 = virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $f0 = virtualinvoke $r1.<javax.sound.sampled.AudioFormat: float getSampleRate()>();
+
+        $d1 = (double) $f0;
+
+        $d2 = 1000000.0 / $d1;
+
+        $d3 = $d0 * $d2;
+
+        $l1 = (long) $d3;
+
+        return $l1;
+    }
+
+    public boolean isActive()
+    {
+        java.lang.Throwable $r2;
+        java.lang.Object $r1;
+        com.sun.media.sound.SoftMixingClip r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingClip: java.lang.Object control_mutex>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = r0.<com.sun.media.sound.SoftMixingClip: boolean active>;
+
+        exitmonitor $r1;
+
+     label2:
+        return $z0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public boolean isRunning()
+    {
+        java.lang.Throwable $r2;
+        java.lang.Object $r1;
+        com.sun.media.sound.SoftMixingClip r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingClip: java.lang.Object control_mutex>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = r0.<com.sun.media.sound.SoftMixingClip: boolean active>;
+
+        exitmonitor $r1;
+
+     label2:
+        return $z0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void start()
+    {
+        java.lang.Throwable $r4;
+        long $l0;
+        javax.sound.sampled.LineEvent $r2, r5;
+        javax.sound.sampled.LineEvent$Type $r3;
+        java.lang.Object $r1;
+        com.sun.media.sound.SoftMixingClip r0;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        r5 = null;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingClip: java.lang.Object control_mutex>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: boolean isOpen()>();
+
+        if $z0 == 0 goto label4;
+
+        $z1 = r0.<com.sun.media.sound.SoftMixingClip: boolean active>;
+
+        if $z1 == 0 goto label3;
+
+        exitmonitor $r1;
+
+     label2:
+        return;
+
+     label3:
+        r0.<com.sun.media.sound.SoftMixingClip: boolean active> = 1;
+
+        r0.<com.sun.media.sound.SoftMixingClip: boolean active_sg> = 1;
+
+        r0.<com.sun.media.sound.SoftMixingClip: int loopcount> = 0;
+
+        $r2 = new javax.sound.sampled.LineEvent;
+
+        $r3 = <javax.sound.sampled.LineEvent$Type: javax.sound.sampled.LineEvent$Type START>;
+
+        $l0 = virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: long getLongFramePosition()>();
+
+        specialinvoke $r2.<javax.sound.sampled.LineEvent: void <init>(javax.sound.sampled.Line,javax.sound.sampled.LineEvent$Type,long)>(r0, $r3, $l0);
+
+        r5 = $r2;
+
+     label4:
+        exitmonitor $r1;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label7:
+        throw $r4;
+
+     label8:
+        if r5 == null goto label9;
+
+        virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: void sendEvent(javax.sound.sampled.LineEvent)>(r5);
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label3 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public void stop()
+    {
+        java.lang.Throwable $r4;
+        long $l0;
+        javax.sound.sampled.LineEvent $r2, r5;
+        javax.sound.sampled.LineEvent$Type $r3;
+        java.lang.Object $r1;
+        com.sun.media.sound.SoftMixingClip r0;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        r5 = null;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingClip: java.lang.Object control_mutex>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: boolean isOpen()>();
+
+        if $z0 == 0 goto label4;
+
+        $z1 = r0.<com.sun.media.sound.SoftMixingClip: boolean active>;
+
+        if $z1 != 0 goto label3;
+
+        exitmonitor $r1;
+
+     label2:
+        return;
+
+     label3:
+        r0.<com.sun.media.sound.SoftMixingClip: boolean active> = 0;
+
+        r0.<com.sun.media.sound.SoftMixingClip: boolean active_sg> = 1;
+
+        $r2 = new javax.sound.sampled.LineEvent;
+
+        $r3 = <javax.sound.sampled.LineEvent$Type: javax.sound.sampled.LineEvent$Type STOP>;
+
+        $l0 = virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: long getLongFramePosition()>();
+
+        specialinvoke $r2.<javax.sound.sampled.LineEvent: void <init>(javax.sound.sampled.Line,javax.sound.sampled.LineEvent$Type,long)>(r0, $r3, $l0);
+
+        r5 = $r2;
+
+     label4:
+        exitmonitor $r1;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label7:
+        throw $r4;
+
+     label8:
+        if r5 == null goto label9;
+
+        virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: void sendEvent(javax.sound.sampled.LineEvent)>(r5);
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label3 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public void close()
+    {
+        java.lang.Throwable $r6;
+        long $l0;
+        com.sun.media.sound.SoftMixingMixer $r4;
+        javax.sound.sampled.LineEvent $r2;
+        com.sun.media.sound.SoftMixingMainMixer $r5;
+        javax.sound.sampled.LineEvent$Type $r3;
+        java.lang.Object $r1;
+        com.sun.media.sound.SoftMixingClip r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingClip: java.lang.Object control_mutex>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: boolean isOpen()>();
+
+        if $z0 != 0 goto label3;
+
+        exitmonitor $r1;
+
+     label2:
+        return;
+
+     label3:
+        virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: void stop()>();
+
+        $r2 = new javax.sound.sampled.LineEvent;
+
+        $r3 = <javax.sound.sampled.LineEvent$Type: javax.sound.sampled.LineEvent$Type CLOSE>;
+
+        $l0 = virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: long getLongFramePosition()>();
+
+        specialinvoke $r2.<javax.sound.sampled.LineEvent: void <init>(javax.sound.sampled.Line,javax.sound.sampled.LineEvent$Type,long)>(r0, $r3, $l0);
+
+        r0.<com.sun.media.sound.SoftMixingClip: boolean open> = 0;
+
+        $r4 = r0.<com.sun.media.sound.SoftMixingClip: com.sun.media.sound.SoftMixingMixer mixer>;
+
+        $r5 = virtualinvoke $r4.<com.sun.media.sound.SoftMixingMixer: com.sun.media.sound.SoftMixingMainMixer getMainMixer()>();
+
+        virtualinvoke $r5.<com.sun.media.sound.SoftMixingMainMixer: void closeLine(com.sun.media.sound.SoftMixingDataLine)>(r0);
+
+        exitmonitor $r1;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r6 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r6;
+
+     label7:
+        if $r2 == null goto label8;
+
+        virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: void sendEvent(javax.sound.sampled.LineEvent)>($r2);
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public boolean isOpen()
+    {
+        com.sun.media.sound.SoftMixingClip r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        $z0 = r0.<com.sun.media.sound.SoftMixingClip: boolean open>;
+
+        return $z0;
+    }
+
+    public void open() throws javax.sound.sampled.LineUnavailableException
+    {
+        byte[] $r1, $r2;
+        int $i0, $i1;
+        javax.sound.sampled.AudioFormat $r3;
+        java.lang.IllegalArgumentException $r4;
+        com.sun.media.sound.SoftMixingClip r0;
+
+        r0 := @this: com.sun.media.sound.SoftMixingClip;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingClip: byte[] data>;
+
+        if $r1 != null goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Illegal call to open() in interface Clip");
+
+        throw $r4;
+
+     label1:
+        $r3 = r0.<com.sun.media.sound.SoftMixingClip: javax.sound.sampled.AudioFormat format>;
+
+        $r2 = r0.<com.sun.media.sound.SoftMixingClip: byte[] data>;
+
+        $i1 = r0.<com.sun.media.sound.SoftMixingClip: int offset>;
+
+        $i0 = r0.<com.sun.media.sound.SoftMixingClip: int bufferSize>;
+
+        virtualinvoke r0.<com.sun.media.sound.SoftMixingClip: void open(javax.sound.sampled.AudioFormat,byte[],int,int)>($r3, $r2, $i1, $i0);
+
+        return;
+    }
+
+    static int access$000(com.sun.media.sound.SoftMixingClip)
+    {
+        int $i0;
+        com.sun.media.sound.SoftMixingClip r0;
+
+        r0 := @parameter0: com.sun.media.sound.SoftMixingClip;
+
+        $i0 = r0.<com.sun.media.sound.SoftMixingClip: int _loopcount>;
+
+        return $i0;
+    }
+
+    static int access$100(com.sun.media.sound.SoftMixingClip)
+    {
+        int $i0;
+        com.sun.media.sound.SoftMixingClip r0;
+
+        r0 := @parameter0: com.sun.media.sound.SoftMixingClip;
+
+        $i0 = r0.<com.sun.media.sound.SoftMixingClip: int _loopend>;
+
+        return $i0;
+    }
+
+    static int access$200(com.sun.media.sound.SoftMixingClip)
+    {
+        int $i0;
+        com.sun.media.sound.SoftMixingClip r0;
+
+        r0 := @parameter0: com.sun.media.sound.SoftMixingClip;
+
+        $i0 = r0.<com.sun.media.sound.SoftMixingClip: int framesize>;
+
+        return $i0;
+    }
+
+    static int access$300(com.sun.media.sound.SoftMixingClip)
+    {
+        int $i0;
+        com.sun.media.sound.SoftMixingClip r0;
+
+        r0 := @parameter0: com.sun.media.sound.SoftMixingClip;
+
+        $i0 = r0.<com.sun.media.sound.SoftMixingClip: int _loopstart>;
+
+        return $i0;
+    }
+
+    static int access$400(com.sun.media.sound.SoftMixingClip)
+    {
+        int $i0;
+        com.sun.media.sound.SoftMixingClip r0;
+
+        r0 := @parameter0: com.sun.media.sound.SoftMixingClip;
+
+        $i0 = r0.<com.sun.media.sound.SoftMixingClip: int _frameposition>;
+
+        return $i0;
+    }
+
+    static int access$010(com.sun.media.sound.SoftMixingClip)
+    {
+        int $i0, $i1;
+        com.sun.media.sound.SoftMixingClip r0;
+
+        r0 := @parameter0: com.sun.media.sound.SoftMixingClip;
+
+        $i0 = r0.<com.sun.media.sound.SoftMixingClip: int _loopcount>;
+
+        $i1 = $i0 - 1;
+
+        r0.<com.sun.media.sound.SoftMixingClip: int _loopcount> = $i1;
+
+        return $i0;
+    }
+
+    static byte[] access$500(com.sun.media.sound.SoftMixingClip)
+    {
+        byte[] $r1;
+        com.sun.media.sound.SoftMixingClip r0;
+
+        r0 := @parameter0: com.sun.media.sound.SoftMixingClip;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingClip: byte[] data>;
+
+        return $r1;
+    }
+
+    static int access$402(com.sun.media.sound.SoftMixingClip, int)
+    {
+        int i0;
+        com.sun.media.sound.SoftMixingClip r0;
+
+        r0 := @parameter0: com.sun.media.sound.SoftMixingClip;
+
+        i0 := @parameter1: int;
+
+        r0.<com.sun.media.sound.SoftMixingClip: int _frameposition> = i0;
+
+        return i0;
+    }
+
+    static int access$600(com.sun.media.sound.SoftMixingClip)
+    {
+        int $i0;
+        com.sun.media.sound.SoftMixingClip r0;
+
+        r0 := @parameter0: com.sun.media.sound.SoftMixingClip;
+
+        $i0 = r0.<com.sun.media.sound.SoftMixingClip: int bufferSize>;
+
+        return $i0;
+    }
+}

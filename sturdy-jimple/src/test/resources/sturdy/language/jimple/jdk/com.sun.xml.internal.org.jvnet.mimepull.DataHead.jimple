@@ -1,0 +1,460 @@
+final class com.sun.xml.internal.org.jvnet.mimepull.DataHead extends java.lang.Object
+{
+    volatile com.sun.xml.internal.org.jvnet.mimepull.Chunk head;
+    volatile com.sun.xml.internal.org.jvnet.mimepull.Chunk tail;
+    com.sun.xml.internal.org.jvnet.mimepull.DataFile dataFile;
+    private final com.sun.xml.internal.org.jvnet.mimepull.MIMEPart part;
+    boolean readOnce;
+    volatile long inMemory;
+    private java.lang.Throwable consumedAt;
+    static final boolean $assertionsDisabled;
+
+    void <init>(com.sun.xml.internal.org.jvnet.mimepull.MIMEPart)
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEPart r1;
+        com.sun.xml.internal.org.jvnet.mimepull.DataHead r0;
+
+        r0 := @this: com.sun.xml.internal.org.jvnet.mimepull.DataHead;
+
+        r1 := @parameter0: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart part> = r1;
+
+        return;
+    }
+
+    void addBody(java.nio.ByteBuffer)
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.Chunk $r2, $r3, $r8, $r9;
+        java.lang.Throwable $r10;
+        long $l0, $l2, $l3;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage $r6;
+        java.nio.ByteBuffer r1;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEPart $r5;
+        com.sun.xml.internal.org.jvnet.mimepull.DataHead r0;
+        int $i1;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig $r7;
+        com.sun.xml.internal.org.jvnet.mimepull.MemoryData $r4;
+
+        r0 := @this: com.sun.xml.internal.org.jvnet.mimepull.DataHead;
+
+        r1 := @parameter0: java.nio.ByteBuffer;
+
+        entermonitor r0;
+
+     label1:
+        $l0 = r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: long inMemory>;
+
+        $i1 = virtualinvoke r1.<java.nio.ByteBuffer: int limit()>();
+
+        $l2 = (long) $i1;
+
+        $l3 = $l0 + $l2;
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: long inMemory> = $l3;
+
+        exitmonitor r0;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r10 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r10;
+
+     label5:
+        $r2 = r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: com.sun.xml.internal.org.jvnet.mimepull.Chunk tail>;
+
+        if $r2 == null goto label6;
+
+        $r8 = r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: com.sun.xml.internal.org.jvnet.mimepull.Chunk tail>;
+
+        $r9 = virtualinvoke $r8.<com.sun.xml.internal.org.jvnet.mimepull.Chunk: com.sun.xml.internal.org.jvnet.mimepull.Chunk createNext(com.sun.xml.internal.org.jvnet.mimepull.DataHead,java.nio.ByteBuffer)>(r0, r1);
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: com.sun.xml.internal.org.jvnet.mimepull.Chunk tail> = $r9;
+
+        goto label7;
+
+     label6:
+        $r3 = new com.sun.xml.internal.org.jvnet.mimepull.Chunk;
+
+        $r4 = new com.sun.xml.internal.org.jvnet.mimepull.MemoryData;
+
+        $r5 = r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart part>;
+
+        $r6 = $r5.<com.sun.xml.internal.org.jvnet.mimepull.MIMEPart: com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage msg>;
+
+        $r7 = $r6.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig config>;
+
+        specialinvoke $r4.<com.sun.xml.internal.org.jvnet.mimepull.MemoryData: void <init>(java.nio.ByteBuffer,com.sun.xml.internal.org.jvnet.mimepull.MIMEConfig)>(r1, $r7);
+
+        specialinvoke $r3.<com.sun.xml.internal.org.jvnet.mimepull.Chunk: void <init>(com.sun.xml.internal.org.jvnet.mimepull.Data)>($r4);
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: com.sun.xml.internal.org.jvnet.mimepull.Chunk tail> = $r3;
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: com.sun.xml.internal.org.jvnet.mimepull.Chunk head> = $r3;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    void doneParsing()
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.DataHead r0;
+
+        r0 := @this: com.sun.xml.internal.org.jvnet.mimepull.DataHead;
+
+        return;
+    }
+
+    void moveTo(java.io.File)
+    {
+        java.lang.Throwable $r9;
+        byte[] r5;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException $r11;
+        java.io.FileOutputStream $r10;
+        java.io.IOException $r7;
+        java.io.File r3;
+        com.sun.xml.internal.org.jvnet.mimepull.DataFile $r1, $r6;
+        com.sun.xml.internal.org.jvnet.mimepull.DataHead r0;
+        int $i0, $i2;
+        java.io.InputStream $r4;
+
+        r0 := @this: com.sun.xml.internal.org.jvnet.mimepull.DataHead;
+
+        r3 := @parameter0: java.io.File;
+
+        $r1 = r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: com.sun.xml.internal.org.jvnet.mimepull.DataFile dataFile>;
+
+        if $r1 == null goto label01;
+
+        $r6 = r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: com.sun.xml.internal.org.jvnet.mimepull.DataFile dataFile>;
+
+        virtualinvoke $r6.<com.sun.xml.internal.org.jvnet.mimepull.DataFile: void renameTo(java.io.File)>(r3);
+
+        goto label10;
+
+     label01:
+        $r10 = new java.io.FileOutputStream;
+
+        specialinvoke $r10.<java.io.FileOutputStream: void <init>(java.io.File)>(r3);
+
+     label02:
+        $r4 = virtualinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: java.io.InputStream readOnce()>();
+
+        r5 = newarray (byte)[8192];
+
+     label03:
+        $i0 = virtualinvoke $r4.<java.io.InputStream: int read(byte[])>(r5);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label04;
+
+        virtualinvoke $r10.<java.io.OutputStream: void write(byte[],int,int)>(r5, 0, $i0);
+
+        goto label03;
+
+     label04:
+        if $r10 == null goto label08;
+
+        virtualinvoke $r10.<java.io.OutputStream: void close()>();
+
+        goto label08;
+
+     label05:
+        $r9 := @caughtexception;
+
+     label06:
+        if $r10 == null goto label07;
+
+        virtualinvoke $r10.<java.io.OutputStream: void close()>();
+
+     label07:
+        throw $r9;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r7 := @caughtexception;
+
+        $r11 = new com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException;
+
+        specialinvoke $r11.<com.sun.xml.internal.org.jvnet.mimepull.MIMEParsingException: void <init>(java.lang.Throwable)>($r7);
+
+        throw $r11;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label02 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.io.IOException from label01 to label08 with label09;
+    }
+
+    void close()
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.DataFile $r1, $r2;
+        com.sun.xml.internal.org.jvnet.mimepull.DataHead r0;
+
+        r0 := @this: com.sun.xml.internal.org.jvnet.mimepull.DataHead;
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: com.sun.xml.internal.org.jvnet.mimepull.Chunk tail> = null;
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: com.sun.xml.internal.org.jvnet.mimepull.Chunk head> = null;
+
+        $r1 = r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: com.sun.xml.internal.org.jvnet.mimepull.DataFile dataFile>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: com.sun.xml.internal.org.jvnet.mimepull.DataFile dataFile>;
+
+        virtualinvoke $r2.<com.sun.xml.internal.org.jvnet.mimepull.DataFile: void close()>();
+
+     label1:
+        return;
+    }
+
+    public java.io.InputStream read()
+    {
+        java.lang.IllegalStateException $r4, $r7, $r13;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage $r6;
+        java.lang.String $r12;
+        boolean $z0, $z1;
+        com.sun.xml.internal.org.jvnet.mimepull.Chunk $r1, $r2;
+        com.sun.xml.internal.org.jvnet.mimepull.DataHead$ReadMultiStream $r3;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEPart $r5, $r10;
+        com.sun.xml.internal.org.jvnet.mimepull.DataHead r0;
+        java.lang.StringBuilder $r8, $r9, $r11;
+
+        r0 := @this: com.sun.xml.internal.org.jvnet.mimepull.DataHead;
+
+        $z0 = r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: boolean readOnce>;
+
+        if $z0 == 0 goto label1;
+
+        $r13 = new java.lang.IllegalStateException;
+
+        specialinvoke $r13.<java.lang.IllegalStateException: void <init>(java.lang.String)>("readOnce() is called before, read() cannot be called later.");
+
+        throw $r13;
+
+     label1:
+        $r1 = r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: com.sun.xml.internal.org.jvnet.mimepull.Chunk tail>;
+
+        if $r1 != null goto label2;
+
+        $r5 = r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart part>;
+
+        $r6 = $r5.<com.sun.xml.internal.org.jvnet.mimepull.MIMEPart: com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage msg>;
+
+        $z1 = virtualinvoke $r6.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: boolean makeProgress()>();
+
+        if $z1 != 0 goto label1;
+
+        $r7 = new java.lang.IllegalStateException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No such MIME Part: ");
+
+        $r10 = r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart part>;
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r12);
+
+        throw $r7;
+
+     label2:
+        $r2 = r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: com.sun.xml.internal.org.jvnet.mimepull.Chunk head>;
+
+        if $r2 != null goto label3;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Already read. Probably readOnce() is called before.");
+
+        throw $r4;
+
+     label3:
+        $r3 = new com.sun.xml.internal.org.jvnet.mimepull.DataHead$ReadMultiStream;
+
+        specialinvoke $r3.<com.sun.xml.internal.org.jvnet.mimepull.DataHead$ReadMultiStream: void <init>(com.sun.xml.internal.org.jvnet.mimepull.DataHead)>(r0);
+
+        return $r3;
+    }
+
+    private boolean unconsumed()
+    {
+        java.lang.Throwable $r1, $r3, $r5;
+        com.sun.xml.internal.org.jvnet.mimepull.DataHead r0;
+        java.lang.AssertionError $r4;
+        java.lang.Exception $r2;
+
+        r0 := @this: com.sun.xml.internal.org.jvnet.mimepull.DataHead;
+
+        $r1 = r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: java.lang.Throwable consumedAt>;
+
+        if $r1 == null goto label1;
+
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>(java.lang.Object)>("readOnce() is already called before. See the nested exception from where it\'s called.");
+
+        $r5 = r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: java.lang.Throwable consumedAt>;
+
+        virtualinvoke $r4.<java.lang.AssertionError: java.lang.Throwable initCause(java.lang.Throwable)>($r5);
+
+        throw $r4;
+
+     label1:
+        $r2 = new java.lang.Exception;
+
+        specialinvoke $r2.<java.lang.Exception: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Exception: java.lang.Throwable fillInStackTrace()>();
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: java.lang.Throwable consumedAt> = $r3;
+
+        return 1;
+    }
+
+    public java.io.InputStream readOnce()
+    {
+        java.lang.IllegalStateException $r5, $r11;
+        com.sun.xml.internal.org.jvnet.mimepull.DataHead$ReadOnceStream $r1;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage $r3;
+        java.lang.AssertionError $r12;
+        java.lang.String $r10;
+        boolean $z0, $z1, $z2, $z3;
+        com.sun.xml.internal.org.jvnet.mimepull.Chunk $r4, $r13;
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEPart $r2, $r8;
+        com.sun.xml.internal.org.jvnet.mimepull.DataHead r0;
+        java.lang.StringBuilder $r6, $r7, $r9;
+
+        r0 := @this: com.sun.xml.internal.org.jvnet.mimepull.DataHead;
+
+        $z0 = <com.sun.xml.internal.org.jvnet.mimepull.DataHead: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $z3 = specialinvoke r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: boolean unconsumed()>();
+
+        if $z3 != 0 goto label1;
+
+        $r12 = new java.lang.AssertionError;
+
+        specialinvoke $r12.<java.lang.AssertionError: void <init>()>();
+
+        throw $r12;
+
+     label1:
+        $z1 = r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: boolean readOnce>;
+
+        if $z1 == 0 goto label2;
+
+        $r11 = new java.lang.IllegalStateException;
+
+        specialinvoke $r11.<java.lang.IllegalStateException: void <init>(java.lang.String)>("readOnce() is called before. It can only be called once.");
+
+        throw $r11;
+
+     label2:
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: boolean readOnce> = 1;
+
+     label3:
+        $r13 = r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: com.sun.xml.internal.org.jvnet.mimepull.Chunk tail>;
+
+        if $r13 != null goto label4;
+
+        $r2 = r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart part>;
+
+        $r3 = $r2.<com.sun.xml.internal.org.jvnet.mimepull.MIMEPart: com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage msg>;
+
+        $z2 = virtualinvoke $r3.<com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage: boolean makeProgress()>();
+
+        if $z2 != 0 goto label3;
+
+        $r4 = r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: com.sun.xml.internal.org.jvnet.mimepull.Chunk tail>;
+
+        if $r4 != null goto label3;
+
+        $r5 = new java.lang.IllegalStateException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No such Part: ");
+
+        $r8 = r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart part>;
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r10);
+
+        throw $r5;
+
+     label4:
+        $r1 = new com.sun.xml.internal.org.jvnet.mimepull.DataHead$ReadOnceStream;
+
+        specialinvoke $r1.<com.sun.xml.internal.org.jvnet.mimepull.DataHead$ReadOnceStream: void <init>(com.sun.xml.internal.org.jvnet.mimepull.DataHead)>(r0);
+
+        r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: com.sun.xml.internal.org.jvnet.mimepull.Chunk head> = null;
+
+        return $r1;
+    }
+
+    static com.sun.xml.internal.org.jvnet.mimepull.MIMEPart access$000(com.sun.xml.internal.org.jvnet.mimepull.DataHead)
+    {
+        com.sun.xml.internal.org.jvnet.mimepull.MIMEPart $r1;
+        com.sun.xml.internal.org.jvnet.mimepull.DataHead r0;
+
+        r0 := @parameter0: com.sun.xml.internal.org.jvnet.mimepull.DataHead;
+
+        $r1 = r0.<com.sun.xml.internal.org.jvnet.mimepull.DataHead: com.sun.xml.internal.org.jvnet.mimepull.MIMEPart part>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        $r0 = class "Lcom/sun/xml/internal/org/jvnet/mimepull/DataHead;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <com.sun.xml.internal.org.jvnet.mimepull.DataHead: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

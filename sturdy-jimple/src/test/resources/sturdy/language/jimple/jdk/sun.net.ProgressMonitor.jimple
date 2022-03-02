@@ -1,0 +1,702 @@
+public class sun.net.ProgressMonitor extends java.lang.Object
+{
+    private static sun.net.ProgressMeteringPolicy meteringPolicy;
+    private static sun.net.ProgressMonitor pm;
+    private java.util.ArrayList progressSourceList;
+    private java.util.ArrayList progressListenerList;
+
+    public void <init>()
+    {
+        sun.net.ProgressMonitor r0;
+        java.util.ArrayList $r1, $r2;
+
+        r0 := @this: sun.net.ProgressMonitor;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        r0.<sun.net.ProgressMonitor: java.util.ArrayList progressSourceList> = $r1;
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        r0.<sun.net.ProgressMonitor: java.util.ArrayList progressListenerList> = $r2;
+
+        return;
+    }
+
+    public static synchronized sun.net.ProgressMonitor getDefault()
+    {
+        sun.net.ProgressMonitor $r0;
+
+        $r0 = <sun.net.ProgressMonitor: sun.net.ProgressMonitor pm>;
+
+        return $r0;
+    }
+
+    public static synchronized void setDefault(sun.net.ProgressMonitor)
+    {
+        sun.net.ProgressMonitor r0;
+
+        r0 := @parameter0: sun.net.ProgressMonitor;
+
+        if r0 == null goto label1;
+
+        <sun.net.ProgressMonitor: sun.net.ProgressMonitor pm> = r0;
+
+     label1:
+        return;
+    }
+
+    public static synchronized void setMeteringPolicy(sun.net.ProgressMeteringPolicy)
+    {
+        sun.net.ProgressMeteringPolicy r0;
+
+        r0 := @parameter0: sun.net.ProgressMeteringPolicy;
+
+        if r0 == null goto label1;
+
+        <sun.net.ProgressMonitor: sun.net.ProgressMeteringPolicy meteringPolicy> = r0;
+
+     label1:
+        return;
+    }
+
+    public java.util.ArrayList getProgressSources()
+    {
+        java.lang.Throwable $r10;
+        java.util.Iterator $r4;
+        java.lang.CloneNotSupportedException $r9;
+        java.util.ArrayList $r0, $r2, $r3;
+        sun.net.ProgressSource r6, $r8;
+        java.lang.Object $r5, $r7;
+        sun.net.ProgressMonitor r1;
+        boolean $z0;
+
+        r1 := @this: sun.net.ProgressMonitor;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+     label01:
+        $r2 = r1.<sun.net.ProgressMonitor: java.util.ArrayList progressSourceList>;
+
+        entermonitor $r2;
+
+     label02:
+        $r3 = r1.<sun.net.ProgressMonitor: java.util.ArrayList progressSourceList>;
+
+        $r4 = virtualinvoke $r3.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label03:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label04;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (sun.net.ProgressSource) $r5;
+
+        $r7 = virtualinvoke r6.<sun.net.ProgressSource: java.lang.Object clone()>();
+
+        $r8 = (sun.net.ProgressSource) $r7;
+
+        virtualinvoke $r0.<java.util.ArrayList: boolean add(java.lang.Object)>($r8);
+
+        goto label03;
+
+     label04:
+        exitmonitor $r2;
+
+     label05:
+        goto label08;
+
+     label06:
+        $r10 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label07:
+        throw $r10;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r9 := @caughtexception;
+
+        virtualinvoke $r9.<java.lang.CloneNotSupportedException: void printStackTrace()>();
+
+     label10:
+        return $r0;
+
+        catch java.lang.Throwable from label02 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+        catch java.lang.CloneNotSupportedException from label01 to label08 with label09;
+    }
+
+    public synchronized int getProgressUpdateThreshold()
+    {
+        int $i0;
+        sun.net.ProgressMonitor r1;
+        sun.net.ProgressMeteringPolicy $r0;
+
+        r1 := @this: sun.net.ProgressMonitor;
+
+        $r0 = <sun.net.ProgressMonitor: sun.net.ProgressMeteringPolicy meteringPolicy>;
+
+        $i0 = interfaceinvoke $r0.<sun.net.ProgressMeteringPolicy: int getProgressUpdateThreshold()>();
+
+        return $i0;
+    }
+
+    public boolean shouldMeterInput(java.net.URL, java.lang.String)
+    {
+        java.net.URL r0;
+        java.lang.String r1;
+        sun.net.ProgressMonitor r3;
+        sun.net.ProgressMeteringPolicy $r2;
+        boolean $z0;
+
+        r3 := @this: sun.net.ProgressMonitor;
+
+        r0 := @parameter0: java.net.URL;
+
+        r1 := @parameter1: java.lang.String;
+
+        $r2 = <sun.net.ProgressMonitor: sun.net.ProgressMeteringPolicy meteringPolicy>;
+
+        $z0 = interfaceinvoke $r2.<sun.net.ProgressMeteringPolicy: boolean shouldMeterInput(java.net.URL,java.lang.String)>(r0, r1);
+
+        return $z0;
+    }
+
+    public void registerSource(sun.net.ProgressSource)
+    {
+        java.lang.Throwable $r18, $r19;
+        java.net.URL $r13;
+        long $l1, $l2;
+        java.util.ArrayList $r1, $r3, $r4, $r5, $r6, $r7, $r8;
+        sun.net.ProgressSource r2;
+        int $i0;
+        java.lang.String $r14, $r15;
+        boolean $z0, $z1, $z2;
+        java.util.Iterator $r9, $r10;
+        sun.net.ProgressSource$State $r16;
+        sun.net.ProgressEvent $r12;
+        java.lang.Object $r11, $r17;
+        sun.net.ProgressListener r20;
+        sun.net.ProgressMonitor r0;
+
+        r0 := @this: sun.net.ProgressMonitor;
+
+        r2 := @parameter0: sun.net.ProgressSource;
+
+        $r1 = r0.<sun.net.ProgressMonitor: java.util.ArrayList progressSourceList>;
+
+        entermonitor $r1;
+
+     label01:
+        $r3 = r0.<sun.net.ProgressMonitor: java.util.ArrayList progressSourceList>;
+
+        $z0 = virtualinvoke $r3.<java.util.ArrayList: boolean contains(java.lang.Object)>(r2);
+
+        if $z0 == 0 goto label03;
+
+        exitmonitor $r1;
+
+     label02:
+        return;
+
+     label03:
+        $r4 = r0.<sun.net.ProgressMonitor: java.util.ArrayList progressSourceList>;
+
+        virtualinvoke $r4.<java.util.ArrayList: boolean add(java.lang.Object)>(r2);
+
+        exitmonitor $r1;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r19 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label06:
+        throw $r19;
+
+     label07:
+        $r5 = r0.<sun.net.ProgressMonitor: java.util.ArrayList progressListenerList>;
+
+        $i0 = virtualinvoke $r5.<java.util.ArrayList: int size()>();
+
+        if $i0 <= 0 goto label16;
+
+        $r6 = new java.util.ArrayList;
+
+        specialinvoke $r6.<java.util.ArrayList: void <init>()>();
+
+        $r7 = r0.<sun.net.ProgressMonitor: java.util.ArrayList progressListenerList>;
+
+        entermonitor $r7;
+
+     label08:
+        $r8 = r0.<sun.net.ProgressMonitor: java.util.ArrayList progressListenerList>;
+
+        $r9 = virtualinvoke $r8.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label09:
+        $z1 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label10;
+
+        $r17 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        virtualinvoke $r6.<java.util.ArrayList: boolean add(java.lang.Object)>($r17);
+
+        goto label09;
+
+     label10:
+        exitmonitor $r7;
+
+     label11:
+        goto label14;
+
+     label12:
+        $r18 := @caughtexception;
+
+        exitmonitor $r7;
+
+     label13:
+        throw $r18;
+
+     label14:
+        $r10 = virtualinvoke $r6.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label15:
+        $z2 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label16;
+
+        $r11 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        r20 = (sun.net.ProgressListener) $r11;
+
+        $r12 = new sun.net.ProgressEvent;
+
+        $r13 = virtualinvoke r2.<sun.net.ProgressSource: java.net.URL getURL()>();
+
+        $r14 = virtualinvoke r2.<sun.net.ProgressSource: java.lang.String getMethod()>();
+
+        $r15 = virtualinvoke r2.<sun.net.ProgressSource: java.lang.String getContentType()>();
+
+        $r16 = virtualinvoke r2.<sun.net.ProgressSource: sun.net.ProgressSource$State getState()>();
+
+        $l1 = virtualinvoke r2.<sun.net.ProgressSource: long getProgress()>();
+
+        $l2 = virtualinvoke r2.<sun.net.ProgressSource: long getExpected()>();
+
+        specialinvoke $r12.<sun.net.ProgressEvent: void <init>(sun.net.ProgressSource,java.net.URL,java.lang.String,java.lang.String,sun.net.ProgressSource$State,long,long)>(r2, $r13, $r14, $r15, $r16, $l1, $l2);
+
+        interfaceinvoke r20.<sun.net.ProgressListener: void progressStart(sun.net.ProgressEvent)>($r12);
+
+        goto label15;
+
+     label16:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label05;
+        catch java.lang.Throwable from label03 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.lang.Throwable from label08 to label11 with label12;
+        catch java.lang.Throwable from label12 to label13 with label12;
+    }
+
+    public void unregisterSource(sun.net.ProgressSource)
+    {
+        java.lang.Throwable $r18, $r19;
+        java.net.URL $r13;
+        long $l1, $l2;
+        java.util.ArrayList $r1, $r3, $r4, $r5, $r6, $r7, $r8;
+        sun.net.ProgressSource r2;
+        int $i0;
+        java.lang.String $r14, $r15;
+        boolean $z0, $z1, $z2;
+        java.util.Iterator $r9, $r10;
+        sun.net.ProgressSource$State $r16;
+        sun.net.ProgressEvent $r12;
+        java.lang.Object $r11, $r17;
+        sun.net.ProgressListener r20;
+        sun.net.ProgressMonitor r0;
+
+        r0 := @this: sun.net.ProgressMonitor;
+
+        r2 := @parameter0: sun.net.ProgressSource;
+
+        $r1 = r0.<sun.net.ProgressMonitor: java.util.ArrayList progressSourceList>;
+
+        entermonitor $r1;
+
+     label01:
+        $r3 = r0.<sun.net.ProgressMonitor: java.util.ArrayList progressSourceList>;
+
+        $z0 = virtualinvoke $r3.<java.util.ArrayList: boolean contains(java.lang.Object)>(r2);
+
+        if $z0 != 0 goto label03;
+
+        exitmonitor $r1;
+
+     label02:
+        return;
+
+     label03:
+        virtualinvoke r2.<sun.net.ProgressSource: void close()>();
+
+        $r4 = r0.<sun.net.ProgressMonitor: java.util.ArrayList progressSourceList>;
+
+        virtualinvoke $r4.<java.util.ArrayList: boolean remove(java.lang.Object)>(r2);
+
+        exitmonitor $r1;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r19 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label06:
+        throw $r19;
+
+     label07:
+        $r5 = r0.<sun.net.ProgressMonitor: java.util.ArrayList progressListenerList>;
+
+        $i0 = virtualinvoke $r5.<java.util.ArrayList: int size()>();
+
+        if $i0 <= 0 goto label16;
+
+        $r6 = new java.util.ArrayList;
+
+        specialinvoke $r6.<java.util.ArrayList: void <init>()>();
+
+        $r7 = r0.<sun.net.ProgressMonitor: java.util.ArrayList progressListenerList>;
+
+        entermonitor $r7;
+
+     label08:
+        $r8 = r0.<sun.net.ProgressMonitor: java.util.ArrayList progressListenerList>;
+
+        $r9 = virtualinvoke $r8.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label09:
+        $z1 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label10;
+
+        $r17 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        virtualinvoke $r6.<java.util.ArrayList: boolean add(java.lang.Object)>($r17);
+
+        goto label09;
+
+     label10:
+        exitmonitor $r7;
+
+     label11:
+        goto label14;
+
+     label12:
+        $r18 := @caughtexception;
+
+        exitmonitor $r7;
+
+     label13:
+        throw $r18;
+
+     label14:
+        $r10 = virtualinvoke $r6.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label15:
+        $z2 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label16;
+
+        $r11 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        r20 = (sun.net.ProgressListener) $r11;
+
+        $r12 = new sun.net.ProgressEvent;
+
+        $r13 = virtualinvoke r2.<sun.net.ProgressSource: java.net.URL getURL()>();
+
+        $r14 = virtualinvoke r2.<sun.net.ProgressSource: java.lang.String getMethod()>();
+
+        $r15 = virtualinvoke r2.<sun.net.ProgressSource: java.lang.String getContentType()>();
+
+        $r16 = virtualinvoke r2.<sun.net.ProgressSource: sun.net.ProgressSource$State getState()>();
+
+        $l1 = virtualinvoke r2.<sun.net.ProgressSource: long getProgress()>();
+
+        $l2 = virtualinvoke r2.<sun.net.ProgressSource: long getExpected()>();
+
+        specialinvoke $r12.<sun.net.ProgressEvent: void <init>(sun.net.ProgressSource,java.net.URL,java.lang.String,java.lang.String,sun.net.ProgressSource$State,long,long)>(r2, $r13, $r14, $r15, $r16, $l1, $l2);
+
+        interfaceinvoke r20.<sun.net.ProgressListener: void progressFinish(sun.net.ProgressEvent)>($r12);
+
+        goto label15;
+
+     label16:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label05;
+        catch java.lang.Throwable from label03 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.lang.Throwable from label08 to label11 with label12;
+        catch java.lang.Throwable from label12 to label13 with label12;
+    }
+
+    public void updateProgress(sun.net.ProgressSource)
+    {
+        java.lang.Throwable $r17, $r18;
+        java.net.URL $r12;
+        long $l1, $l2;
+        java.util.ArrayList $r1, $r3, $r4, $r5, $r6, $r7;
+        sun.net.ProgressSource r2;
+        int $i0;
+        java.lang.String $r13, $r14;
+        boolean $z0, $z1, $z2;
+        java.util.Iterator $r8, $r9;
+        sun.net.ProgressSource$State $r15;
+        sun.net.ProgressEvent $r11;
+        java.lang.Object $r10, $r16;
+        sun.net.ProgressListener r19;
+        sun.net.ProgressMonitor r0;
+
+        r0 := @this: sun.net.ProgressMonitor;
+
+        r2 := @parameter0: sun.net.ProgressSource;
+
+        $r1 = r0.<sun.net.ProgressMonitor: java.util.ArrayList progressSourceList>;
+
+        entermonitor $r1;
+
+     label01:
+        $r3 = r0.<sun.net.ProgressMonitor: java.util.ArrayList progressSourceList>;
+
+        $z0 = virtualinvoke $r3.<java.util.ArrayList: boolean contains(java.lang.Object)>(r2);
+
+        if $z0 != 0 goto label03;
+
+        exitmonitor $r1;
+
+     label02:
+        return;
+
+     label03:
+        exitmonitor $r1;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r18 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label06:
+        throw $r18;
+
+     label07:
+        $r4 = r0.<sun.net.ProgressMonitor: java.util.ArrayList progressListenerList>;
+
+        $i0 = virtualinvoke $r4.<java.util.ArrayList: int size()>();
+
+        if $i0 <= 0 goto label16;
+
+        $r5 = new java.util.ArrayList;
+
+        specialinvoke $r5.<java.util.ArrayList: void <init>()>();
+
+        $r6 = r0.<sun.net.ProgressMonitor: java.util.ArrayList progressListenerList>;
+
+        entermonitor $r6;
+
+     label08:
+        $r7 = r0.<sun.net.ProgressMonitor: java.util.ArrayList progressListenerList>;
+
+        $r8 = virtualinvoke $r7.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label09:
+        $z1 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label10;
+
+        $r16 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        virtualinvoke $r5.<java.util.ArrayList: boolean add(java.lang.Object)>($r16);
+
+        goto label09;
+
+     label10:
+        exitmonitor $r6;
+
+     label11:
+        goto label14;
+
+     label12:
+        $r17 := @caughtexception;
+
+        exitmonitor $r6;
+
+     label13:
+        throw $r17;
+
+     label14:
+        $r9 = virtualinvoke $r5.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label15:
+        $z2 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label16;
+
+        $r10 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        r19 = (sun.net.ProgressListener) $r10;
+
+        $r11 = new sun.net.ProgressEvent;
+
+        $r12 = virtualinvoke r2.<sun.net.ProgressSource: java.net.URL getURL()>();
+
+        $r13 = virtualinvoke r2.<sun.net.ProgressSource: java.lang.String getMethod()>();
+
+        $r14 = virtualinvoke r2.<sun.net.ProgressSource: java.lang.String getContentType()>();
+
+        $r15 = virtualinvoke r2.<sun.net.ProgressSource: sun.net.ProgressSource$State getState()>();
+
+        $l1 = virtualinvoke r2.<sun.net.ProgressSource: long getProgress()>();
+
+        $l2 = virtualinvoke r2.<sun.net.ProgressSource: long getExpected()>();
+
+        specialinvoke $r11.<sun.net.ProgressEvent: void <init>(sun.net.ProgressSource,java.net.URL,java.lang.String,java.lang.String,sun.net.ProgressSource$State,long,long)>(r2, $r12, $r13, $r14, $r15, $l1, $l2);
+
+        interfaceinvoke r19.<sun.net.ProgressListener: void progressUpdate(sun.net.ProgressEvent)>($r11);
+
+        goto label15;
+
+     label16:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label05;
+        catch java.lang.Throwable from label03 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.lang.Throwable from label08 to label11 with label12;
+        catch java.lang.Throwable from label12 to label13 with label12;
+    }
+
+    public void addProgressListener(sun.net.ProgressListener)
+    {
+        java.lang.Throwable $r4;
+        sun.net.ProgressListener r2;
+        sun.net.ProgressMonitor r0;
+        java.util.ArrayList $r1, $r3;
+
+        r0 := @this: sun.net.ProgressMonitor;
+
+        r2 := @parameter0: sun.net.ProgressListener;
+
+        $r1 = r0.<sun.net.ProgressMonitor: java.util.ArrayList progressListenerList>;
+
+        entermonitor $r1;
+
+     label1:
+        $r3 = r0.<sun.net.ProgressMonitor: java.util.ArrayList progressListenerList>;
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>(r2);
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r4;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void removeProgressListener(sun.net.ProgressListener)
+    {
+        java.lang.Throwable $r4;
+        sun.net.ProgressListener r2;
+        sun.net.ProgressMonitor r0;
+        java.util.ArrayList $r1, $r3;
+
+        r0 := @this: sun.net.ProgressMonitor;
+
+        r2 := @parameter0: sun.net.ProgressListener;
+
+        $r1 = r0.<sun.net.ProgressMonitor: java.util.ArrayList progressListenerList>;
+
+        entermonitor $r1;
+
+     label1:
+        $r3 = r0.<sun.net.ProgressMonitor: java.util.ArrayList progressListenerList>;
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean remove(java.lang.Object)>(r2);
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r4;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    static void <clinit>()
+    {
+        sun.net.DefaultProgressMeteringPolicy $r0;
+        sun.net.ProgressMonitor $r1;
+
+        $r0 = new sun.net.DefaultProgressMeteringPolicy;
+
+        specialinvoke $r0.<sun.net.DefaultProgressMeteringPolicy: void <init>()>();
+
+        <sun.net.ProgressMonitor: sun.net.ProgressMeteringPolicy meteringPolicy> = $r0;
+
+        $r1 = new sun.net.ProgressMonitor;
+
+        specialinvoke $r1.<sun.net.ProgressMonitor: void <init>()>();
+
+        <sun.net.ProgressMonitor: sun.net.ProgressMonitor pm> = $r1;
+
+        return;
+    }
+}

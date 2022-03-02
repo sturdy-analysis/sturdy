@@ -1,0 +1,183 @@
+public abstract class sun.net.ftp.FtpClientProvider extends java.lang.Object
+{
+    private static final java.lang.Object lock;
+    private static sun.net.ftp.FtpClientProvider provider;
+
+    public abstract sun.net.ftp.FtpClient createFtpClient();
+
+    protected void <init>()
+    {
+        java.lang.RuntimePermission $r2;
+        java.lang.SecurityManager $r1;
+        sun.net.ftp.FtpClientProvider r0;
+
+        r0 := @this: sun.net.ftp.FtpClientProvider;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = new java.lang.RuntimePermission;
+
+        specialinvoke $r2.<java.lang.RuntimePermission: void <init>(java.lang.String)>("ftpClientProvider");
+
+        virtualinvoke $r1.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r2);
+
+     label1:
+        return;
+    }
+
+    private static boolean loadProviderFromProperty()
+    {
+        sun.net.ftp.FtpClientProvider $r3;
+        java.util.ServiceConfigurationError $r5;
+        java.lang.Class $r1;
+        java.lang.Object $r2;
+        java.lang.String $r0, $r6;
+        java.lang.Exception $r4;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("sun.net.ftpClientProvider");
+
+        if $r0 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r1 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>($r0, 1, null);
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.Object newInstance()>();
+
+        $r3 = (sun.net.ftp.FtpClientProvider) $r2;
+
+        <sun.net.ftp.FtpClientProvider: sun.net.ftp.FtpClientProvider provider> = $r3;
+
+     label2:
+        return 1;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = new java.util.ServiceConfigurationError;
+
+        $r6 = virtualinvoke $r4.<java.lang.Exception: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.util.ServiceConfigurationError: void <init>(java.lang.String)>($r6);
+
+        throw $r5;
+
+        catch java.lang.ClassNotFoundException from label1 to label2 with label3;
+        catch java.lang.IllegalAccessException from label1 to label2 with label3;
+        catch java.lang.InstantiationException from label1 to label2 with label3;
+        catch java.lang.SecurityException from label1 to label2 with label3;
+    }
+
+    private static boolean loadProviderAsService()
+    {
+        return 0;
+    }
+
+    public static sun.net.ftp.FtpClientProvider provider()
+    {
+        java.lang.Throwable $r6;
+        sun.net.ftp.FtpClientProvider $r1, $r4, $r5;
+        sun.net.ftp.FtpClientProvider$1 $r2;
+        java.lang.Object $r0, $r3;
+
+        $r0 = <sun.net.ftp.FtpClientProvider: java.lang.Object lock>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = <sun.net.ftp.FtpClientProvider: sun.net.ftp.FtpClientProvider provider>;
+
+        if $r1 == null goto label3;
+
+        $r5 = <sun.net.ftp.FtpClientProvider: sun.net.ftp.FtpClientProvider provider>;
+
+        exitmonitor $r0;
+
+     label2:
+        return $r5;
+
+     label3:
+        $r2 = new sun.net.ftp.FtpClientProvider$1;
+
+        specialinvoke $r2.<sun.net.ftp.FtpClientProvider$1: void <init>()>();
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        $r4 = (sun.net.ftp.FtpClientProvider) $r3;
+
+        exitmonitor $r0;
+
+     label4:
+        return $r4;
+
+     label5:
+        $r6 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label6:
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    static boolean access$000()
+    {
+        boolean $z0;
+
+        $z0 = staticinvoke <sun.net.ftp.FtpClientProvider: boolean loadProviderFromProperty()>();
+
+        return $z0;
+    }
+
+    static sun.net.ftp.FtpClientProvider access$100()
+    {
+        sun.net.ftp.FtpClientProvider $r0;
+
+        $r0 = <sun.net.ftp.FtpClientProvider: sun.net.ftp.FtpClientProvider provider>;
+
+        return $r0;
+    }
+
+    static boolean access$200()
+    {
+        boolean $z0;
+
+        $z0 = staticinvoke <sun.net.ftp.FtpClientProvider: boolean loadProviderAsService()>();
+
+        return $z0;
+    }
+
+    static sun.net.ftp.FtpClientProvider access$102(sun.net.ftp.FtpClientProvider)
+    {
+        sun.net.ftp.FtpClientProvider r0;
+
+        r0 := @parameter0: sun.net.ftp.FtpClientProvider;
+
+        <sun.net.ftp.FtpClientProvider: sun.net.ftp.FtpClientProvider provider> = r0;
+
+        return r0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Object $r0;
+
+        $r0 = new java.lang.Object;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        <sun.net.ftp.FtpClientProvider: java.lang.Object lock> = $r0;
+
+        <sun.net.ftp.FtpClientProvider: sun.net.ftp.FtpClientProvider provider> = null;
+
+        return;
+    }
+}

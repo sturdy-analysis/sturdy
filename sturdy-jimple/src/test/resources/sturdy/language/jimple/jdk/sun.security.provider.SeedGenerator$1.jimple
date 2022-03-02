@@ -1,0 +1,239 @@
+final class sun.security.provider.SeedGenerator$1 extends java.lang.Object implements java.security.PrivilegedAction
+{
+    final java.security.MessageDigest val$md;
+
+    void <init>(java.security.MessageDigest)
+    {
+        java.security.MessageDigest r1;
+        sun.security.provider.SeedGenerator$1 r0;
+
+        r0 := @this: sun.security.provider.SeedGenerator$1;
+
+        r1 := @parameter0: java.security.MessageDigest;
+
+        r0.<sun.security.provider.SeedGenerator$1: java.security.MessageDigest val$md> = r1;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public java.lang.Void run()
+    {
+        byte[] $r11, $r13, $r20, $r23, $r26;
+        java.util.Enumeration $r1;
+        java.util.Random $r8;
+        sun.security.provider.SeedGenerator$1 r2;
+        java.nio.file.DirectoryStream $r7;
+        byte $b5;
+        java.nio.file.Path $r6, r16, $r18;
+        boolean $z0, $z1, $z2;
+        java.lang.Runtime $r10;
+        java.lang.Exception $r27;
+        java.lang.Throwable $r29, $r30, $r31, r34;
+        java.security.MessageDigest $r3, $r12, $r14, $r17, $r22, $r24, $r28;
+        long $l0, $l2;
+        int $i1, $i3, $i4, i6, $i7;
+        java.lang.String $r5, $r19, $r25, r33;
+        java.util.Properties $r0;
+        java.util.Iterator $r9;
+        java.io.File $r4;
+        java.lang.Object $r15, $r21;
+
+        r2 := @this: sun.security.provider.SeedGenerator$1;
+
+     label01:
+        $r0 = staticinvoke <java.lang.System: java.util.Properties getProperties()>();
+
+        $r1 = virtualinvoke $r0.<java.util.Properties: java.util.Enumeration propertyNames()>();
+
+     label02:
+        $z0 = interfaceinvoke $r1.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label03;
+
+        $r21 = interfaceinvoke $r1.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r33 = (java.lang.String) $r21;
+
+        $r22 = r2.<sun.security.provider.SeedGenerator$1: java.security.MessageDigest val$md>;
+
+        $r23 = virtualinvoke r33.<java.lang.String: byte[] getBytes()>();
+
+        virtualinvoke $r22.<java.security.MessageDigest: void update(byte[])>($r23);
+
+        $r24 = r2.<sun.security.provider.SeedGenerator$1: java.security.MessageDigest val$md>;
+
+        $r25 = virtualinvoke $r0.<java.util.Properties: java.lang.String getProperty(java.lang.String)>(r33);
+
+        $r26 = virtualinvoke $r25.<java.lang.String: byte[] getBytes()>();
+
+        virtualinvoke $r24.<java.security.MessageDigest: void update(byte[])>($r26);
+
+        goto label02;
+
+     label03:
+        $r3 = r2.<sun.security.provider.SeedGenerator$1: java.security.MessageDigest val$md>;
+
+        staticinvoke <sun.security.provider.SeedGenerator: void access$000(java.security.MessageDigest)>($r3);
+
+        $r4 = new java.io.File;
+
+        $r5 = virtualinvoke $r0.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("java.io.tmpdir");
+
+        specialinvoke $r4.<java.io.File: void <init>(java.lang.String)>($r5);
+
+        i6 = 0;
+
+        $r6 = virtualinvoke $r4.<java.io.File: java.nio.file.Path toPath()>();
+
+        $r7 = staticinvoke <java.nio.file.Files: java.nio.file.DirectoryStream newDirectoryStream(java.nio.file.Path)>($r6);
+
+        r34 = null;
+
+     label04:
+        $r8 = new java.util.Random;
+
+        specialinvoke $r8.<java.util.Random: void <init>()>();
+
+        $r9 = interfaceinvoke $r7.<java.nio.file.DirectoryStream: java.util.Iterator iterator()>();
+
+     label05:
+        $z1 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label09;
+
+        $r15 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        r16 = (java.nio.file.Path) $r15;
+
+        if i6 < 512 goto label06;
+
+        $z2 = virtualinvoke $r8.<java.util.Random: boolean nextBoolean()>();
+
+        if $z2 == 0 goto label07;
+
+     label06:
+        $r17 = r2.<sun.security.provider.SeedGenerator$1: java.security.MessageDigest val$md>;
+
+        $r18 = interfaceinvoke r16.<java.nio.file.Path: java.nio.file.Path getFileName()>();
+
+        $r19 = interfaceinvoke $r18.<java.nio.file.Path: java.lang.String toString()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.String: byte[] getBytes()>();
+
+        virtualinvoke $r17.<java.security.MessageDigest: void update(byte[])>($r20);
+
+     label07:
+        $i7 = i6;
+
+        i6 = i6 + 1;
+
+        if $i7 <= 1024 goto label08;
+
+        goto label09;
+
+     label08:
+        goto label05;
+
+     label09:
+        if $r7 == null goto label19;
+
+        goto label10;
+
+     label10:
+        interfaceinvoke $r7.<java.nio.file.DirectoryStream: void close()>();
+
+        goto label19;
+
+     label11:
+        $r31 := @caughtexception;
+
+        r34 = $r31;
+
+        throw $r31;
+
+     label12:
+        $r30 := @caughtexception;
+
+     label13:
+        if $r7 == null goto label18;
+
+        if r34 == null goto label17;
+
+     label14:
+        interfaceinvoke $r7.<java.nio.file.DirectoryStream: void close()>();
+
+     label15:
+        goto label18;
+
+     label16:
+        $r29 := @caughtexception;
+
+        virtualinvoke r34.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r29);
+
+        goto label18;
+
+     label17:
+        interfaceinvoke $r7.<java.nio.file.DirectoryStream: void close()>();
+
+     label18:
+        throw $r30;
+
+     label19:
+        goto label21;
+
+     label20:
+        $r27 := @caughtexception;
+
+        $r28 = r2.<sun.security.provider.SeedGenerator$1: java.security.MessageDigest val$md>;
+
+        $i4 = virtualinvoke $r27.<java.lang.Object: int hashCode()>();
+
+        $b5 = (byte) $i4;
+
+        virtualinvoke $r28.<java.security.MessageDigest: void update(byte)>($b5);
+
+     label21:
+        $r10 = staticinvoke <java.lang.Runtime: java.lang.Runtime getRuntime()>();
+
+        $l0 = virtualinvoke $r10.<java.lang.Runtime: long totalMemory()>();
+
+        $r11 = staticinvoke <sun.security.provider.SeedGenerator: byte[] access$100(long)>($l0);
+
+        $r12 = r2.<sun.security.provider.SeedGenerator$1: java.security.MessageDigest val$md>;
+
+        $i1 = lengthof $r11;
+
+        virtualinvoke $r12.<java.security.MessageDigest: void update(byte[],int,int)>($r11, 0, $i1);
+
+        $l2 = virtualinvoke $r10.<java.lang.Runtime: long freeMemory()>();
+
+        $r13 = staticinvoke <sun.security.provider.SeedGenerator: byte[] access$100(long)>($l2);
+
+        $r14 = r2.<sun.security.provider.SeedGenerator$1: java.security.MessageDigest val$md>;
+
+        $i3 = lengthof $r13;
+
+        virtualinvoke $r14.<java.security.MessageDigest: void update(byte[],int,int)>($r13, 0, $i3);
+
+        return null;
+
+        catch java.lang.Throwable from label04 to label09 with label11;
+        catch java.lang.Throwable from label14 to label15 with label16;
+        catch java.lang.Throwable from label11 to label13 with label12;
+        catch java.lang.Exception from label01 to label19 with label20;
+    }
+
+    public volatile java.lang.Object run()
+    {
+        java.lang.Void $r1;
+        sun.security.provider.SeedGenerator$1 r0;
+
+        r0 := @this: sun.security.provider.SeedGenerator$1;
+
+        $r1 = virtualinvoke r0.<sun.security.provider.SeedGenerator$1: java.lang.Void run()>();
+
+        return $r1;
+    }
+}

@@ -1,0 +1,313 @@
+final class sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher extends sun.security.ssl.SSLCipher$SSLWriteCipher
+{
+    private final javax.crypto.Cipher cipher;
+
+    void <init>(sun.security.ssl.Authenticator, sun.security.ssl.ProtocolVersion, java.lang.String, java.security.Key, java.security.spec.AlgorithmParameterSpec, java.security.SecureRandom) throws java.security.GeneralSecurityException
+    {
+        sun.security.ssl.ProtocolVersion r2;
+        javax.crypto.Cipher $r4, $r8;
+        java.security.Key r5;
+        java.security.SecureRandom r7;
+        sun.security.ssl.Authenticator r1;
+        java.lang.String r3;
+        java.security.spec.AlgorithmParameterSpec r6;
+        sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher r0;
+
+        r0 := @this: sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher;
+
+        r1 := @parameter0: sun.security.ssl.Authenticator;
+
+        r2 := @parameter1: sun.security.ssl.ProtocolVersion;
+
+        r3 := @parameter2: java.lang.String;
+
+        r5 := @parameter3: java.security.Key;
+
+        r6 := @parameter4: java.security.spec.AlgorithmParameterSpec;
+
+        r7 := @parameter5: java.security.SecureRandom;
+
+        specialinvoke r0.<sun.security.ssl.SSLCipher$SSLWriteCipher: void <init>(sun.security.ssl.Authenticator,sun.security.ssl.ProtocolVersion)>(r1, r2);
+
+        $r4 = staticinvoke <sun.security.ssl.JsseJce: javax.crypto.Cipher getCipher(java.lang.String)>(r3);
+
+        r0.<sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher: javax.crypto.Cipher cipher> = $r4;
+
+        $r8 = r0.<sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher: javax.crypto.Cipher cipher>;
+
+        virtualinvoke $r8.<javax.crypto.Cipher: void init(int,java.security.Key,java.security.spec.AlgorithmParameterSpec,java.security.SecureRandom)>(1, r5, r6, r7);
+
+        return;
+    }
+
+    public int encrypt(byte, java.nio.ByteBuffer)
+    {
+        java.nio.ByteBuffer r0, $r10, $r20;
+        sun.security.ssl.CipherSuite$MacAlg $r4;
+        sun.security.ssl.Authenticator$MAC r3;
+        byte b6;
+        sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher r1;
+        boolean $z0, $z1;
+        javax.crypto.ShortBufferException $r11;
+        java.security.Provider $r16;
+        java.lang.StringBuilder $r13, $r14, $r18;
+        java.lang.Object[] $r9;
+        javax.crypto.Cipher $r6, $r15, $r21;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i7;
+        java.lang.String $r17, $r19;
+        java.lang.RuntimeException $r7, $r8, $r12;
+        sun.security.ssl.Authenticator $r2, $r5;
+
+        r1 := @this: sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher;
+
+        b6 := @parameter0: byte;
+
+        r0 := @parameter1: java.nio.ByteBuffer;
+
+        $i0 = virtualinvoke r0.<java.nio.ByteBuffer: int position()>();
+
+        $r2 = r1.<sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher: sun.security.ssl.Authenticator authenticator>;
+
+        r3 = (sun.security.ssl.Authenticator$MAC) $r2;
+
+        $r4 = interfaceinvoke r3.<sun.security.ssl.Authenticator$MAC: sun.security.ssl.CipherSuite$MacAlg macAlg()>();
+
+        $i1 = $r4.<sun.security.ssl.CipherSuite$MacAlg: int size>;
+
+        if $i1 == 0 goto label1;
+
+        staticinvoke <sun.security.ssl.SSLCipher: void access$1300(sun.security.ssl.Authenticator$MAC,java.nio.ByteBuffer,byte)>(r3, r0, b6);
+
+        goto label2;
+
+     label1:
+        $r5 = r1.<sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher: sun.security.ssl.Authenticator authenticator>;
+
+        virtualinvoke $r5.<sun.security.ssl.Authenticator: void increaseSequenceNumber()>();
+
+     label2:
+        $r6 = r1.<sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher: javax.crypto.Cipher cipher>;
+
+        $i2 = virtualinvoke $r6.<javax.crypto.Cipher: int getBlockSize()>();
+
+        $i3 = staticinvoke <sun.security.ssl.SSLCipher: int access$1600(java.nio.ByteBuffer,int)>(r0, $i2);
+
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i0);
+
+        $z0 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z0 == 0 goto label3;
+
+        $z1 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("plaintext");
+
+        if $z1 == 0 goto label3;
+
+        $r9 = newarray (java.lang.Object)[1];
+
+        $r10 = virtualinvoke r0.<java.nio.ByteBuffer: java.nio.ByteBuffer duplicate()>();
+
+        $r9[0] = $r10;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Padded plaintext before ENCRYPTION", $r9);
+
+     label3:
+        $r20 = virtualinvoke r0.<java.nio.ByteBuffer: java.nio.ByteBuffer duplicate()>();
+
+     label4:
+        $r21 = r1.<sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher: javax.crypto.Cipher cipher>;
+
+        $i7 = virtualinvoke $r21.<javax.crypto.Cipher: int update(java.nio.ByteBuffer,java.nio.ByteBuffer)>($r20, r0);
+
+        if $i3 == $i7 goto label5;
+
+        $r8 = new java.lang.RuntimeException;
+
+        specialinvoke $r8.<java.lang.RuntimeException: void <init>(java.lang.String)>("Unexpected number of plaintext bytes");
+
+        throw $r8;
+
+     label5:
+        $i4 = virtualinvoke r0.<java.nio.ByteBuffer: int position()>();
+
+        $i5 = virtualinvoke $r20.<java.nio.ByteBuffer: int position()>();
+
+        if $i4 == $i5 goto label6;
+
+        $r7 = new java.lang.RuntimeException;
+
+        specialinvoke $r7.<java.lang.RuntimeException: void <init>(java.lang.String)>("Unexpected ByteBuffer position");
+
+        throw $r7;
+
+     label6:
+        goto label8;
+
+     label7:
+        $r11 := @caughtexception;
+
+        $r12 = new java.lang.RuntimeException;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cipher buffering error in JCE provider ");
+
+        $r15 = r1.<sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher: javax.crypto.Cipher cipher>;
+
+        $r16 = virtualinvoke $r15.<javax.crypto.Cipher: java.security.Provider getProvider()>();
+
+        $r17 = virtualinvoke $r16.<java.security.Provider: java.lang.String getName()>();
+
+        $r18 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r12.<java.lang.RuntimeException: void <init>(java.lang.String,java.lang.Throwable)>($r19, $r11);
+
+        throw $r12;
+
+     label8:
+        return $i3;
+
+        catch javax.crypto.ShortBufferException from label4 to label6 with label7;
+    }
+
+    void dispose()
+    {
+        javax.crypto.Cipher $r1, $r2;
+        sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher r0;
+        java.lang.Exception $r3;
+
+        r0 := @this: sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher;
+
+        $r1 = r0.<sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher: javax.crypto.Cipher cipher>;
+
+        if $r1 == null goto label4;
+
+     label1:
+        $r2 = r0.<sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher: javax.crypto.Cipher cipher>;
+
+        virtualinvoke $r2.<javax.crypto.Cipher: byte[] doFinal()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    int getExplicitNonceSize()
+    {
+        sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher r0;
+
+        r0 := @this: sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher;
+
+        return 0;
+    }
+
+    int calculateFragmentSize(int, int)
+    {
+        javax.crypto.Cipher $r4;
+        sun.security.ssl.CipherSuite$MacAlg $r3;
+        sun.security.ssl.Authenticator$MAC $r2;
+        sun.security.ssl.Authenticator $r1;
+        int i0, $i1, i2, i3, $i4, i5, i6, i7, i8, $i10;
+        sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher r0;
+
+        r0 := @this: sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher;
+
+        i2 := @parameter0: int;
+
+        i3 := @parameter1: int;
+
+        $r1 = r0.<sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher: sun.security.ssl.Authenticator authenticator>;
+
+        $r2 = (sun.security.ssl.Authenticator$MAC) $r1;
+
+        $r3 = interfaceinvoke $r2.<sun.security.ssl.Authenticator$MAC: sun.security.ssl.CipherSuite$MacAlg macAlg()>();
+
+        i0 = $r3.<sun.security.ssl.CipherSuite$MacAlg: int size>;
+
+        $r4 = r0.<sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher: javax.crypto.Cipher cipher>;
+
+        $i1 = virtualinvoke $r4.<javax.crypto.Cipher: int getBlockSize()>();
+
+        i5 = i2 - i3;
+
+        $i4 = i5 % $i1;
+
+        i6 = i5 - $i4;
+
+        $i10 = (int) -1;
+
+        i7 = i6 + $i10;
+
+        i8 = i7 - i0;
+
+        return i8;
+    }
+
+    int calculatePacketSize(int, int)
+    {
+        javax.crypto.Cipher $r4;
+        sun.security.ssl.CipherSuite$MacAlg $r3;
+        sun.security.ssl.Authenticator$MAC $r2;
+        int i0, $i1, i2, $i3, $i4, i5, $i6, $i7, $i8, i9, i10;
+        sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher r0;
+        sun.security.ssl.Authenticator $r1;
+
+        r0 := @this: sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher;
+
+        i2 := @parameter0: int;
+
+        i5 := @parameter1: int;
+
+        $r1 = r0.<sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher: sun.security.ssl.Authenticator authenticator>;
+
+        $r2 = (sun.security.ssl.Authenticator$MAC) $r1;
+
+        $r3 = interfaceinvoke $r2.<sun.security.ssl.Authenticator$MAC: sun.security.ssl.CipherSuite$MacAlg macAlg()>();
+
+        i0 = $r3.<sun.security.ssl.CipherSuite$MacAlg: int size>;
+
+        $r4 = r0.<sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher: javax.crypto.Cipher cipher>;
+
+        $i1 = virtualinvoke $r4.<javax.crypto.Cipher: int getBlockSize()>();
+
+        $i3 = i2 + i0;
+
+        i9 = $i3 + 1;
+
+        $i4 = i9 % $i1;
+
+        if $i4 == 0 goto label1;
+
+        $i7 = $i1 - 1;
+
+        i10 = i9 + $i7;
+
+        $i8 = i10 % $i1;
+
+        i9 = i10 - $i8;
+
+     label1:
+        $i6 = i5 + i9;
+
+        return $i6;
+    }
+
+    boolean isCBCMode()
+    {
+        sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher r0;
+
+        r0 := @this: sun.security.ssl.SSLCipher$T10BlockWriteCipherGenerator$BlockWriteCipher;
+
+        return 1;
+    }
+}

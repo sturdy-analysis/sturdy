@@ -1,0 +1,761 @@
+public class java.net.CookieManager extends java.net.CookieHandler
+{
+    private java.net.CookiePolicy policyCallback;
+    private java.net.CookieStore cookieJar;
+
+    public void <init>()
+    {
+        java.net.CookieManager r0;
+
+        r0 := @this: java.net.CookieManager;
+
+        specialinvoke r0.<java.net.CookieManager: void <init>(java.net.CookieStore,java.net.CookiePolicy)>(null, null);
+
+        return;
+    }
+
+    public void <init>(java.net.CookieStore, java.net.CookiePolicy)
+    {
+        java.net.CookiePolicy r1, $r4;
+        java.net.CookieStore r2;
+        java.net.InMemoryCookieStore $r3;
+        java.net.CookieManager r0;
+
+        r0 := @this: java.net.CookieManager;
+
+        r2 := @parameter0: java.net.CookieStore;
+
+        r1 := @parameter1: java.net.CookiePolicy;
+
+        specialinvoke r0.<java.net.CookieHandler: void <init>()>();
+
+        r0.<java.net.CookieManager: java.net.CookieStore cookieJar> = null;
+
+        if r1 != null goto label1;
+
+        $r4 = <java.net.CookiePolicy: java.net.CookiePolicy ACCEPT_ORIGINAL_SERVER>;
+
+        goto label2;
+
+     label1:
+        $r4 = r1;
+
+     label2:
+        r0.<java.net.CookieManager: java.net.CookiePolicy policyCallback> = $r4;
+
+        if r2 != null goto label3;
+
+        $r3 = new java.net.InMemoryCookieStore;
+
+        specialinvoke $r3.<java.net.InMemoryCookieStore: void <init>()>();
+
+        r0.<java.net.CookieManager: java.net.CookieStore cookieJar> = $r3;
+
+        goto label4;
+
+     label3:
+        r0.<java.net.CookieManager: java.net.CookieStore cookieJar> = r2;
+
+     label4:
+        return;
+    }
+
+    public void setCookiePolicy(java.net.CookiePolicy)
+    {
+        java.net.CookiePolicy r0;
+        java.net.CookieManager r1;
+
+        r1 := @this: java.net.CookieManager;
+
+        r0 := @parameter0: java.net.CookiePolicy;
+
+        if r0 == null goto label1;
+
+        r1.<java.net.CookieManager: java.net.CookiePolicy policyCallback> = r0;
+
+     label1:
+        return;
+    }
+
+    public java.net.CookieStore getCookieStore()
+    {
+        java.net.CookieStore $r1;
+        java.net.CookieManager r0;
+
+        r0 := @this: java.net.CookieManager;
+
+        $r1 = r0.<java.net.CookieManager: java.net.CookieStore cookieJar>;
+
+        return $r1;
+    }
+
+    public java.util.Map get(java.net.URI, java.util.Map) throws java.io.IOException
+    {
+        java.net.HttpCookie r13;
+        java.util.Map r2, $r11, $r20;
+        java.net.URI r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10;
+        java.net.CookieStore $r5, $r22;
+        java.util.List $r10, $r23;
+        java.net.CookieManager r4;
+        java.util.HashMap $r27;
+        java.util.ArrayList $r28;
+        short $s2;
+        int $i0, i1, $i4;
+        java.lang.String $r6, $r7, $r9, $r14, $r15, $r16, $r17, $r18, $r19, r21, $r25;
+        java.util.Iterator $r24;
+        java.lang.IllegalArgumentException $r26;
+        java.lang.Object $r12;
+
+        r4 := @this: java.net.CookieManager;
+
+        r0 := @parameter0: java.net.URI;
+
+        r2 := @parameter1: java.util.Map;
+
+        if r0 == null goto label01;
+
+        if r2 != null goto label02;
+
+     label01:
+        $r26 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r26.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Argument is null");
+
+        throw $r26;
+
+     label02:
+        $r27 = new java.util.HashMap;
+
+        specialinvoke $r27.<java.util.HashMap: void <init>()>();
+
+        $r5 = r4.<java.net.CookieManager: java.net.CookieStore cookieJar>;
+
+        if $r5 != null goto label03;
+
+        $r20 = staticinvoke <java.util.Collections: java.util.Map unmodifiableMap(java.util.Map)>($r27);
+
+        return $r20;
+
+     label03:
+        $r6 = "https";
+
+        $r7 = virtualinvoke r0.<java.net.URI: java.lang.String getScheme()>();
+
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r7);
+
+        $r28 = new java.util.ArrayList;
+
+        specialinvoke $r28.<java.util.ArrayList: void <init>()>();
+
+        $r9 = virtualinvoke r0.<java.net.URI: java.lang.String getPath()>();
+
+        r21 = $r9;
+
+        if $r9 == null goto label04;
+
+        $z8 = virtualinvoke $r9.<java.lang.String: boolean isEmpty()>();
+
+        if $z8 == 0 goto label05;
+
+     label04:
+        r21 = "/";
+
+     label05:
+        $r22 = r4.<java.net.CookieManager: java.net.CookieStore cookieJar>;
+
+        $r23 = interfaceinvoke $r22.<java.net.CookieStore: java.util.List get(java.net.URI)>(r0);
+
+        $r24 = interfaceinvoke $r23.<java.util.List: java.util.Iterator iterator()>();
+
+     label06:
+        $z9 = interfaceinvoke $r24.<java.util.Iterator: boolean hasNext()>();
+
+        if $z9 == 0 goto label15;
+
+        $r12 = interfaceinvoke $r24.<java.util.Iterator: java.lang.Object next()>();
+
+        r13 = (java.net.HttpCookie) $r12;
+
+        $r14 = virtualinvoke r13.<java.net.HttpCookie: java.lang.String getPath()>();
+
+        $z1 = specialinvoke r4.<java.net.CookieManager: boolean pathMatches(java.lang.String,java.lang.String)>(r21, $r14);
+
+        if $z1 == 0 goto label14;
+
+        if $z0 != 0 goto label07;
+
+        $z7 = virtualinvoke r13.<java.net.HttpCookie: boolean getSecure()>();
+
+        if $z7 != 0 goto label14;
+
+     label07:
+        $z2 = virtualinvoke r13.<java.net.HttpCookie: boolean isHttpOnly()>();
+
+        if $z2 == 0 goto label08;
+
+        $r17 = virtualinvoke r0.<java.net.URI: java.lang.String getScheme()>();
+
+        $r18 = "http";
+
+        $z5 = virtualinvoke $r18.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r17);
+
+        if $z5 != 0 goto label08;
+
+        $r19 = "https";
+
+        $z6 = virtualinvoke $r19.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r17);
+
+        if $z6 != 0 goto label08;
+
+        goto label06;
+
+     label08:
+        $r25 = virtualinvoke r13.<java.net.HttpCookie: java.lang.String getPortlist()>();
+
+        if $r25 == null goto label13;
+
+        $z3 = virtualinvoke $r25.<java.lang.String: boolean isEmpty()>();
+
+        if $z3 != 0 goto label13;
+
+        $i0 = virtualinvoke r0.<java.net.URI: int getPort()>();
+
+        i1 = $i0;
+
+        $i4 = (int) -1;
+
+        if $i0 != $i4 goto label11;
+
+        $r15 = "https";
+
+        $r16 = virtualinvoke r0.<java.net.URI: java.lang.String getScheme()>();
+
+        $z4 = virtualinvoke $r15.<java.lang.String: boolean equals(java.lang.Object)>($r16);
+
+        if $z4 == 0 goto label09;
+
+        $s2 = 443;
+
+        goto label10;
+
+     label09:
+        $s2 = 80;
+
+     label10:
+        i1 = $s2;
+
+     label11:
+        $z10 = staticinvoke <java.net.CookieManager: boolean isInPortList(java.lang.String,int)>($r25, i1);
+
+        if $z10 == 0 goto label12;
+
+        interfaceinvoke $r28.<java.util.List: boolean add(java.lang.Object)>(r13);
+
+     label12:
+        goto label14;
+
+     label13:
+        interfaceinvoke $r28.<java.util.List: boolean add(java.lang.Object)>(r13);
+
+     label14:
+        goto label06;
+
+     label15:
+        $r10 = specialinvoke r4.<java.net.CookieManager: java.util.List sortByPath(java.util.List)>($r28);
+
+        interfaceinvoke $r27.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("Cookie", $r10);
+
+        $r11 = staticinvoke <java.util.Collections: java.util.Map unmodifiableMap(java.util.Map)>($r27);
+
+        return $r11;
+    }
+
+    public void put(java.net.URI, java.util.Map) throws java.io.IOException
+    {
+        java.net.HttpCookie r16;
+        java.util.Map r2;
+        java.util.Set $r6;
+        java.lang.StringBuilder $r21, $r22, $r29, $r30, $r36, $r37, $r38, $r39, $r48, $r49, $r50;
+        short $s4;
+        java.lang.String r9, r14, $r17, $r23, $r25, $r26, $r27, $r31, $r40, r43, $r44, r45, $r46;
+        sun.util.logging.PlatformLogger $r5;
+        java.net.URI r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13;
+        java.net.CookieStore $r4, $r18, $r19, $r24;
+        sun.util.logging.PlatformLogger$Level $r34;
+        java.util.List $r11, r41;
+        java.net.CookieManager r3;
+        int $i0, $i1, $i2, i3, $i6;
+        java.util.Iterator $r7, $r12, $r42;
+        java.lang.IllegalArgumentException $r32, $r33, $r47;
+        java.lang.Object $r8, $r10, $r13, $r15;
+
+        r3 := @this: java.net.CookieManager;
+
+        r0 := @parameter0: java.net.URI;
+
+        r2 := @parameter1: java.util.Map;
+
+        if r0 == null goto label01;
+
+        if r2 != null goto label02;
+
+     label01:
+        $r47 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r47.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Argument is null");
+
+        throw $r47;
+
+     label02:
+        $r4 = r3.<java.net.CookieManager: java.net.CookieStore cookieJar>;
+
+        if $r4 != null goto label03;
+
+        return;
+
+     label03:
+        $r5 = staticinvoke <sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger getLogger(java.lang.String)>("java.net.CookieManager");
+
+        $r6 = interfaceinvoke r2.<java.util.Map: java.util.Set keySet()>();
+
+        $r7 = interfaceinvoke $r6.<java.util.Set: java.util.Iterator iterator()>();
+
+     label04:
+        $z10 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z10 == 0 goto label28;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (java.lang.String) $r8;
+
+        if r9 == null goto label04;
+
+        $z0 = virtualinvoke r9.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("Set-Cookie2");
+
+        if $z0 != 0 goto label05;
+
+        $z8 = virtualinvoke r9.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("Set-Cookie");
+
+        if $z8 != 0 goto label05;
+
+        goto label04;
+
+     label05:
+        $r10 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r9);
+
+        $r11 = (java.util.List) $r10;
+
+        $r12 = interfaceinvoke $r11.<java.util.List: java.util.Iterator iterator()>();
+
+     label06:
+        $z11 = interfaceinvoke $r12.<java.util.Iterator: boolean hasNext()>();
+
+        if $z11 == 0 goto label27;
+
+        $r13 = interfaceinvoke $r12.<java.util.Iterator: java.lang.Object next()>();
+
+        r14 = (java.lang.String) $r13;
+
+     label07:
+        r41 = staticinvoke <java.net.HttpCookie: java.util.List parse(java.lang.String)>(r14);
+
+     label08:
+        goto label10;
+
+     label09:
+        $r33 := @caughtexception;
+
+        r41 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+        $r34 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level SEVERE>;
+
+        $z9 = virtualinvoke $r5.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r34);
+
+        if $z9 == 0 goto label10;
+
+        $r48 = new java.lang.StringBuilder;
+
+        specialinvoke $r48.<java.lang.StringBuilder: void <init>()>();
+
+        $r36 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid cookie for ");
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r14);
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<sun.util.logging.PlatformLogger: void severe(java.lang.String)>($r40);
+
+     label10:
+        $r42 = interfaceinvoke r41.<java.util.List: java.util.Iterator iterator()>();
+
+     label11:
+        $z12 = interfaceinvoke $r42.<java.util.Iterator: boolean hasNext()>();
+
+        if $z12 == 0 goto label24;
+
+        $r15 = interfaceinvoke $r42.<java.util.Iterator: java.lang.Object next()>();
+
+        r16 = (java.net.HttpCookie) $r15;
+
+        $r17 = virtualinvoke r16.<java.net.HttpCookie: java.lang.String getPath()>();
+
+        if $r17 != null goto label14;
+
+        $r31 = virtualinvoke r0.<java.net.URI: java.lang.String getPath()>();
+
+        r43 = $r31;
+
+        $z7 = virtualinvoke $r31.<java.lang.String: boolean endsWith(java.lang.String)>("/");
+
+        if $z7 != 0 goto label13;
+
+        $i1 = virtualinvoke $r31.<java.lang.String: int lastIndexOf(java.lang.String)>("/");
+
+        if $i1 <= 0 goto label12;
+
+        $i2 = $i1 + 1;
+
+        r43 = virtualinvoke $r31.<java.lang.String: java.lang.String substring(int,int)>(0, $i2);
+
+        goto label13;
+
+     label12:
+        r43 = "/";
+
+     label13:
+        virtualinvoke r16.<java.net.HttpCookie: void setPath(java.lang.String)>(r43);
+
+     label14:
+        $r44 = virtualinvoke r16.<java.net.HttpCookie: java.lang.String getDomain()>();
+
+        if $r44 != null goto label16;
+
+        $r27 = virtualinvoke r0.<java.net.URI: java.lang.String getHost()>();
+
+        r45 = $r27;
+
+        if $r27 == null goto label15;
+
+        $z6 = virtualinvoke $r27.<java.lang.String: boolean contains(java.lang.CharSequence)>(".");
+
+        if $z6 != 0 goto label15;
+
+        $r49 = new java.lang.StringBuilder;
+
+        specialinvoke $r49.<java.lang.StringBuilder: void <init>()>();
+
+        $r29 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r27);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".local");
+
+        r45 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label15:
+        virtualinvoke r16.<java.net.HttpCookie: void setDomain(java.lang.String)>(r45);
+
+     label16:
+        $r46 = virtualinvoke r16.<java.net.HttpCookie: java.lang.String getPortlist()>();
+
+        if $r46 == null goto label22;
+
+        $i0 = virtualinvoke r0.<java.net.URI: int getPort()>();
+
+        i3 = $i0;
+
+        $i6 = (int) -1;
+
+        if $i0 != $i6 goto label19;
+
+        $r25 = "https";
+
+        $r26 = virtualinvoke r0.<java.net.URI: java.lang.String getScheme()>();
+
+        $z5 = virtualinvoke $r25.<java.lang.String: boolean equals(java.lang.Object)>($r26);
+
+        if $z5 == 0 goto label17;
+
+        $s4 = 443;
+
+        goto label18;
+
+     label17:
+        $s4 = 80;
+
+     label18:
+        i3 = $s4;
+
+     label19:
+        $z13 = virtualinvoke $r46.<java.lang.String: boolean isEmpty()>();
+
+        if $z13 == 0 goto label20;
+
+        $r50 = new java.lang.StringBuilder;
+
+        specialinvoke $r50.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i3);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r16.<java.net.HttpCookie: void setPortlist(java.lang.String)>($r23);
+
+        $z4 = specialinvoke r3.<java.net.CookieManager: boolean shouldAcceptInternal(java.net.URI,java.net.HttpCookie)>(r0, r16);
+
+        if $z4 == 0 goto label21;
+
+        $r24 = r3.<java.net.CookieManager: java.net.CookieStore cookieJar>;
+
+        interfaceinvoke $r24.<java.net.CookieStore: void add(java.net.URI,java.net.HttpCookie)>(r0, r16);
+
+        goto label21;
+
+     label20:
+        $z2 = staticinvoke <java.net.CookieManager: boolean isInPortList(java.lang.String,int)>($r46, i3);
+
+        if $z2 == 0 goto label21;
+
+        $z3 = specialinvoke r3.<java.net.CookieManager: boolean shouldAcceptInternal(java.net.URI,java.net.HttpCookie)>(r0, r16);
+
+        if $z3 == 0 goto label21;
+
+        $r19 = r3.<java.net.CookieManager: java.net.CookieStore cookieJar>;
+
+        interfaceinvoke $r19.<java.net.CookieStore: void add(java.net.URI,java.net.HttpCookie)>(r0, r16);
+
+     label21:
+        goto label23;
+
+     label22:
+        $z1 = specialinvoke r3.<java.net.CookieManager: boolean shouldAcceptInternal(java.net.URI,java.net.HttpCookie)>(r0, r16);
+
+        if $z1 == 0 goto label23;
+
+        $r18 = r3.<java.net.CookieManager: java.net.CookieStore cookieJar>;
+
+        interfaceinvoke $r18.<java.net.CookieStore: void add(java.net.URI,java.net.HttpCookie)>(r0, r16);
+
+     label23:
+        goto label11;
+
+     label24:
+        goto label26;
+
+     label25:
+        $r32 := @caughtexception;
+
+     label26:
+        goto label06;
+
+     label27:
+        goto label04;
+
+     label28:
+        return;
+
+        catch java.lang.IllegalArgumentException from label07 to label08 with label09;
+        catch java.lang.IllegalArgumentException from label07 to label24 with label25;
+    }
+
+    private boolean shouldAcceptInternal(java.net.URI, java.net.HttpCookie)
+    {
+        java.net.CookiePolicy $r3;
+        java.net.HttpCookie r2;
+        java.net.CookieManager r0;
+        java.net.URI r1;
+        java.lang.Exception $r4;
+        boolean $z0;
+
+        r0 := @this: java.net.CookieManager;
+
+        r1 := @parameter0: java.net.URI;
+
+        r2 := @parameter1: java.net.HttpCookie;
+
+     label1:
+        $r3 = r0.<java.net.CookieManager: java.net.CookiePolicy policyCallback>;
+
+        $z0 = interfaceinvoke $r3.<java.net.CookiePolicy: boolean shouldAccept(java.net.URI,java.net.HttpCookie)>(r1, r2);
+
+     label2:
+        return $z0;
+
+     label3:
+        $r4 := @caughtexception;
+
+        return 0;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    private static boolean isInPortList(java.lang.String, int)
+    {
+        java.lang.NumberFormatException $r2, $r3;
+        int $i0, i1, $i2, $i3, i4;
+        java.lang.String $r0, $r1, r4;
+        boolean $z0;
+
+        r4 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        i4 = virtualinvoke r4.<java.lang.String: int indexOf(java.lang.String)>(",");
+
+     label01:
+        if i4 <= 0 goto label07;
+
+     label02:
+        $r0 = virtualinvoke r4.<java.lang.String: java.lang.String substring(int,int)>(0, i4);
+
+        $i2 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r0);
+
+        if $i2 != i1 goto label04;
+
+     label03:
+        return 1;
+
+     label04:
+        goto label06;
+
+     label05:
+        $r3 := @caughtexception;
+
+     label06:
+        $i3 = i4 + 1;
+
+        $r1 = virtualinvoke r4.<java.lang.String: java.lang.String substring(int)>($i3);
+
+        r4 = $r1;
+
+        i4 = virtualinvoke $r1.<java.lang.String: int indexOf(java.lang.String)>(",");
+
+        goto label01;
+
+     label07:
+        $z0 = virtualinvoke r4.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 != 0 goto label12;
+
+     label08:
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>(r4);
+
+        if $i0 != i1 goto label10;
+
+     label09:
+        return 1;
+
+     label10:
+        goto label12;
+
+     label11:
+        $r2 := @caughtexception;
+
+     label12:
+        return 0;
+
+        catch java.lang.NumberFormatException from label02 to label03 with label05;
+        catch java.lang.NumberFormatException from label08 to label09 with label11;
+    }
+
+    private boolean pathMatches(java.lang.String, java.lang.String)
+    {
+        java.net.CookieManager r2;
+        java.lang.String r0, r1;
+        boolean $z0;
+
+        r2 := @this: java.net.CookieManager;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        if r0 == null goto label2;
+
+        if r1 != null goto label3;
+
+     label2:
+        return 0;
+
+     label3:
+        $z0 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>(r1);
+
+        if $z0 == 0 goto label4;
+
+        return 1;
+
+     label4:
+        return 0;
+    }
+
+    private java.util.List sortByPath(java.util.List)
+    {
+        java.util.Iterator $r3;
+        java.net.CookieManager$CookiePathComparator $r1;
+        java.util.ArrayList $r2;
+        java.net.HttpCookie r5;
+        java.util.List r0;
+        java.net.CookieManager r6;
+        int $i0, $i1;
+        java.lang.Object $r4;
+        java.lang.String $r7;
+        boolean $z0;
+
+        r6 := @this: java.net.CookieManager;
+
+        r0 := @parameter0: java.util.List;
+
+        $r1 = new java.net.CookieManager$CookiePathComparator;
+
+        specialinvoke $r1.<java.net.CookieManager$CookiePathComparator: void <init>()>();
+
+        staticinvoke <java.util.Collections: void sort(java.util.List,java.util.Comparator)>(r0, $r1);
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        $r3 = interfaceinvoke r0.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (java.net.HttpCookie) $r4;
+
+        $i0 = interfaceinvoke r0.<java.util.List: int indexOf(java.lang.Object)>(r5);
+
+        if $i0 != 0 goto label2;
+
+        $i1 = virtualinvoke r5.<java.net.HttpCookie: int getVersion()>();
+
+        if $i1 <= 0 goto label2;
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>("$Version=\"1\"");
+
+     label2:
+        $r7 = virtualinvoke r5.<java.net.HttpCookie: java.lang.String toString()>();
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>($r7);
+
+        goto label1;
+
+     label3:
+        return $r2;
+    }
+}

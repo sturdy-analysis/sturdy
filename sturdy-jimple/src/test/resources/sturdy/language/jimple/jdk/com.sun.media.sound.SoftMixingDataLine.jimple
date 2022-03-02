@@ -1,0 +1,607 @@
+public abstract class com.sun.media.sound.SoftMixingDataLine extends java.lang.Object implements javax.sound.sampled.DataLine
+{
+    public static final javax.sound.sampled.FloatControl$Type CHORUS_SEND;
+    private final com.sun.media.sound.SoftMixingDataLine$Gain gain_control;
+    private final com.sun.media.sound.SoftMixingDataLine$Mute mute_control;
+    private final com.sun.media.sound.SoftMixingDataLine$Balance balance_control;
+    private final com.sun.media.sound.SoftMixingDataLine$Pan pan_control;
+    private final com.sun.media.sound.SoftMixingDataLine$ReverbSend reverbsend_control;
+    private final com.sun.media.sound.SoftMixingDataLine$ChorusSend chorussend_control;
+    private final com.sun.media.sound.SoftMixingDataLine$ApplyReverb apply_reverb;
+    private final javax.sound.sampled.Control[] controls;
+    float leftgain;
+    float rightgain;
+    float eff1gain;
+    float eff2gain;
+    java.util.List listeners;
+    final java.lang.Object control_mutex;
+    com.sun.media.sound.SoftMixingMixer mixer;
+    javax.sound.sampled.DataLine$Info info;
+
+    protected abstract void processControlLogic();
+
+    protected abstract void processAudioLogic(com.sun.media.sound.SoftAudioBuffer[]);
+
+    void <init>(com.sun.media.sound.SoftMixingMixer, javax.sound.sampled.DataLine$Info)
+    {
+        java.util.ArrayList $r8;
+        com.sun.media.sound.SoftMixingMixer r9;
+        com.sun.media.sound.SoftMixingDataLine$Pan $r4, $r16;
+        com.sun.media.sound.SoftMixingDataLine$ApplyReverb $r7, $r19;
+        com.sun.media.sound.SoftMixingDataLine$Gain $r1, $r13;
+        javax.sound.sampled.DataLine$Info r10;
+        com.sun.media.sound.SoftMixingDataLine$ReverbSend $r5, $r17;
+        com.sun.media.sound.SoftMixingDataLine$Balance $r3, $r15;
+        com.sun.media.sound.SoftMixingDataLine r0;
+        com.sun.media.sound.SoftMixingDataLine$Mute $r2, $r14;
+        java.lang.Object $r11;
+        com.sun.media.sound.SoftMixingDataLine$ChorusSend $r6, $r18;
+        javax.sound.sampled.Control[] $r12;
+
+        r0 := @this: com.sun.media.sound.SoftMixingDataLine;
+
+        r9 := @parameter0: com.sun.media.sound.SoftMixingMixer;
+
+        r10 := @parameter1: javax.sound.sampled.DataLine$Info;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new com.sun.media.sound.SoftMixingDataLine$Gain;
+
+        specialinvoke $r1.<com.sun.media.sound.SoftMixingDataLine$Gain: void <init>(com.sun.media.sound.SoftMixingDataLine,com.sun.media.sound.SoftMixingDataLine$1)>(r0, null);
+
+        r0.<com.sun.media.sound.SoftMixingDataLine: com.sun.media.sound.SoftMixingDataLine$Gain gain_control> = $r1;
+
+        $r2 = new com.sun.media.sound.SoftMixingDataLine$Mute;
+
+        specialinvoke $r2.<com.sun.media.sound.SoftMixingDataLine$Mute: void <init>(com.sun.media.sound.SoftMixingDataLine,com.sun.media.sound.SoftMixingDataLine$1)>(r0, null);
+
+        r0.<com.sun.media.sound.SoftMixingDataLine: com.sun.media.sound.SoftMixingDataLine$Mute mute_control> = $r2;
+
+        $r3 = new com.sun.media.sound.SoftMixingDataLine$Balance;
+
+        specialinvoke $r3.<com.sun.media.sound.SoftMixingDataLine$Balance: void <init>(com.sun.media.sound.SoftMixingDataLine,com.sun.media.sound.SoftMixingDataLine$1)>(r0, null);
+
+        r0.<com.sun.media.sound.SoftMixingDataLine: com.sun.media.sound.SoftMixingDataLine$Balance balance_control> = $r3;
+
+        $r4 = new com.sun.media.sound.SoftMixingDataLine$Pan;
+
+        specialinvoke $r4.<com.sun.media.sound.SoftMixingDataLine$Pan: void <init>(com.sun.media.sound.SoftMixingDataLine,com.sun.media.sound.SoftMixingDataLine$1)>(r0, null);
+
+        r0.<com.sun.media.sound.SoftMixingDataLine: com.sun.media.sound.SoftMixingDataLine$Pan pan_control> = $r4;
+
+        $r5 = new com.sun.media.sound.SoftMixingDataLine$ReverbSend;
+
+        specialinvoke $r5.<com.sun.media.sound.SoftMixingDataLine$ReverbSend: void <init>(com.sun.media.sound.SoftMixingDataLine,com.sun.media.sound.SoftMixingDataLine$1)>(r0, null);
+
+        r0.<com.sun.media.sound.SoftMixingDataLine: com.sun.media.sound.SoftMixingDataLine$ReverbSend reverbsend_control> = $r5;
+
+        $r6 = new com.sun.media.sound.SoftMixingDataLine$ChorusSend;
+
+        specialinvoke $r6.<com.sun.media.sound.SoftMixingDataLine$ChorusSend: void <init>(com.sun.media.sound.SoftMixingDataLine,com.sun.media.sound.SoftMixingDataLine$1)>(r0, null);
+
+        r0.<com.sun.media.sound.SoftMixingDataLine: com.sun.media.sound.SoftMixingDataLine$ChorusSend chorussend_control> = $r6;
+
+        $r7 = new com.sun.media.sound.SoftMixingDataLine$ApplyReverb;
+
+        specialinvoke $r7.<com.sun.media.sound.SoftMixingDataLine$ApplyReverb: void <init>(com.sun.media.sound.SoftMixingDataLine,com.sun.media.sound.SoftMixingDataLine$1)>(r0, null);
+
+        r0.<com.sun.media.sound.SoftMixingDataLine: com.sun.media.sound.SoftMixingDataLine$ApplyReverb apply_reverb> = $r7;
+
+        r0.<com.sun.media.sound.SoftMixingDataLine: float leftgain> = 1.0F;
+
+        r0.<com.sun.media.sound.SoftMixingDataLine: float rightgain> = 1.0F;
+
+        r0.<com.sun.media.sound.SoftMixingDataLine: float eff1gain> = 0.0F;
+
+        r0.<com.sun.media.sound.SoftMixingDataLine: float eff2gain> = 0.0F;
+
+        $r8 = new java.util.ArrayList;
+
+        specialinvoke $r8.<java.util.ArrayList: void <init>()>();
+
+        r0.<com.sun.media.sound.SoftMixingDataLine: java.util.List listeners> = $r8;
+
+        r0.<com.sun.media.sound.SoftMixingDataLine: com.sun.media.sound.SoftMixingMixer mixer> = r9;
+
+        r0.<com.sun.media.sound.SoftMixingDataLine: javax.sound.sampled.DataLine$Info info> = r10;
+
+        $r11 = r9.<com.sun.media.sound.SoftMixingMixer: java.lang.Object control_mutex>;
+
+        r0.<com.sun.media.sound.SoftMixingDataLine: java.lang.Object control_mutex> = $r11;
+
+        $r12 = newarray (javax.sound.sampled.Control)[7];
+
+        $r13 = r0.<com.sun.media.sound.SoftMixingDataLine: com.sun.media.sound.SoftMixingDataLine$Gain gain_control>;
+
+        $r12[0] = $r13;
+
+        $r14 = r0.<com.sun.media.sound.SoftMixingDataLine: com.sun.media.sound.SoftMixingDataLine$Mute mute_control>;
+
+        $r12[1] = $r14;
+
+        $r15 = r0.<com.sun.media.sound.SoftMixingDataLine: com.sun.media.sound.SoftMixingDataLine$Balance balance_control>;
+
+        $r12[2] = $r15;
+
+        $r16 = r0.<com.sun.media.sound.SoftMixingDataLine: com.sun.media.sound.SoftMixingDataLine$Pan pan_control>;
+
+        $r12[3] = $r16;
+
+        $r17 = r0.<com.sun.media.sound.SoftMixingDataLine: com.sun.media.sound.SoftMixingDataLine$ReverbSend reverbsend_control>;
+
+        $r12[4] = $r17;
+
+        $r18 = r0.<com.sun.media.sound.SoftMixingDataLine: com.sun.media.sound.SoftMixingDataLine$ChorusSend chorussend_control>;
+
+        $r12[5] = $r18;
+
+        $r19 = r0.<com.sun.media.sound.SoftMixingDataLine: com.sun.media.sound.SoftMixingDataLine$ApplyReverb apply_reverb>;
+
+        $r12[6] = $r19;
+
+        r0.<com.sun.media.sound.SoftMixingDataLine: javax.sound.sampled.Control[] controls> = $r12;
+
+        virtualinvoke r0.<com.sun.media.sound.SoftMixingDataLine: void calcVolume()>();
+
+        return;
+    }
+
+    final void calcVolume()
+    {
+        javax.sound.sampled.AudioFormat $r5;
+        com.sun.media.sound.SoftMixingMixer $r4;
+        com.sun.media.sound.SoftMixingDataLine$ApplyReverb $r8;
+        byte $b1;
+        com.sun.media.sound.SoftMixingDataLine$Gain $r2;
+        boolean $z0, $z1;
+        com.sun.media.sound.SoftMixingDataLine$Balance $r9;
+        com.sun.media.sound.SoftMixingDataLine r0;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $f10, $f11;
+        java.lang.Throwable $r10;
+        int $i0, $i2;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, d8, $d9, $d10, $d11, $d12, $d13, $d14, d15;
+        com.sun.media.sound.SoftMixingDataLine$ReverbSend $r6;
+        java.lang.Object $r1;
+        com.sun.media.sound.SoftMixingDataLine$Mute $r3;
+        com.sun.media.sound.SoftMixingDataLine$ChorusSend $r7;
+
+        r0 := @this: com.sun.media.sound.SoftMixingDataLine;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingDataLine: java.lang.Object control_mutex>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<com.sun.media.sound.SoftMixingDataLine: com.sun.media.sound.SoftMixingDataLine$Gain gain_control>;
+
+        $f0 = virtualinvoke $r2.<com.sun.media.sound.SoftMixingDataLine$Gain: float getValue()>();
+
+        $d0 = (double) $f0;
+
+        $d1 = $d0 / 20.0;
+
+        d15 = staticinvoke <java.lang.Math: double pow(double,double)>(10.0, $d1);
+
+        $r3 = r0.<com.sun.media.sound.SoftMixingDataLine: com.sun.media.sound.SoftMixingDataLine$Mute mute_control>;
+
+        $z0 = virtualinvoke $r3.<com.sun.media.sound.SoftMixingDataLine$Mute: boolean getValue()>();
+
+        if $z0 == 0 goto label2;
+
+        d15 = 0.0;
+
+     label2:
+        $f1 = (float) d15;
+
+        r0.<com.sun.media.sound.SoftMixingDataLine: float leftgain> = $f1;
+
+        $f2 = (float) d15;
+
+        r0.<com.sun.media.sound.SoftMixingDataLine: float rightgain> = $f2;
+
+        $r4 = r0.<com.sun.media.sound.SoftMixingDataLine: com.sun.media.sound.SoftMixingMixer mixer>;
+
+        $r5 = virtualinvoke $r4.<com.sun.media.sound.SoftMixingMixer: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $i0 = virtualinvoke $r5.<javax.sound.sampled.AudioFormat: int getChannels()>();
+
+        if $i0 <= 1 goto label4;
+
+        $r9 = r0.<com.sun.media.sound.SoftMixingDataLine: com.sun.media.sound.SoftMixingDataLine$Balance balance_control>;
+
+        $f7 = virtualinvoke $r9.<com.sun.media.sound.SoftMixingDataLine$Balance: float getValue()>();
+
+        d8 = (double) $f7;
+
+        $b1 = d8 cmpl 0.0;
+
+        $i2 = (int) $b1;
+
+        if $i2 <= 0 goto label3;
+
+        $f10 = r0.<com.sun.media.sound.SoftMixingDataLine: float leftgain>;
+
+        $d13 = (double) $f10;
+
+        $d12 = 1.0 - d8;
+
+        $d14 = $d13 * $d12;
+
+        $f11 = (float) $d14;
+
+        r0.<com.sun.media.sound.SoftMixingDataLine: float leftgain> = $f11;
+
+        goto label4;
+
+     label3:
+        $f8 = r0.<com.sun.media.sound.SoftMixingDataLine: float rightgain>;
+
+        $d10 = (double) $f8;
+
+        $d9 = 1.0 + d8;
+
+        $d11 = $d10 * $d9;
+
+        $f9 = (float) $d11;
+
+        r0.<com.sun.media.sound.SoftMixingDataLine: float rightgain> = $f9;
+
+     label4:
+        exitmonitor $r1;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r10 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label7:
+        throw $r10;
+
+     label8:
+        $r6 = r0.<com.sun.media.sound.SoftMixingDataLine: com.sun.media.sound.SoftMixingDataLine$ReverbSend reverbsend_control>;
+
+        $f3 = virtualinvoke $r6.<com.sun.media.sound.SoftMixingDataLine$ReverbSend: float getValue()>();
+
+        $d2 = (double) $f3;
+
+        $d3 = $d2 / 20.0;
+
+        $d4 = staticinvoke <java.lang.Math: double pow(double,double)>(10.0, $d3);
+
+        $f4 = (float) $d4;
+
+        r0.<com.sun.media.sound.SoftMixingDataLine: float eff1gain> = $f4;
+
+        $r7 = r0.<com.sun.media.sound.SoftMixingDataLine: com.sun.media.sound.SoftMixingDataLine$ChorusSend chorussend_control>;
+
+        $f5 = virtualinvoke $r7.<com.sun.media.sound.SoftMixingDataLine$ChorusSend: float getValue()>();
+
+        $d5 = (double) $f5;
+
+        $d6 = $d5 / 20.0;
+
+        $d7 = staticinvoke <java.lang.Math: double pow(double,double)>(10.0, $d6);
+
+        $f6 = (float) $d7;
+
+        r0.<com.sun.media.sound.SoftMixingDataLine: float eff2gain> = $f6;
+
+        $r8 = r0.<com.sun.media.sound.SoftMixingDataLine: com.sun.media.sound.SoftMixingDataLine$ApplyReverb apply_reverb>;
+
+        $z1 = virtualinvoke $r8.<com.sun.media.sound.SoftMixingDataLine$ApplyReverb: boolean getValue()>();
+
+        if $z1 != 0 goto label9;
+
+        r0.<com.sun.media.sound.SoftMixingDataLine: float eff1gain> = 0.0F;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    final void sendEvent(javax.sound.sampled.LineEvent)
+    {
+        javax.sound.sampled.LineListener r7;
+        java.lang.Object[] $r5;
+        javax.sound.sampled.LineListener[] $r4, r6;
+        java.util.List $r1, $r2, $r3;
+        javax.sound.sampled.LineEvent r8;
+        com.sun.media.sound.SoftMixingDataLine r0;
+        int $i0, $i1, i2, i3;
+
+        r0 := @this: com.sun.media.sound.SoftMixingDataLine;
+
+        r8 := @parameter0: javax.sound.sampled.LineEvent;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingDataLine: java.util.List listeners>;
+
+        $i0 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        if $i0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r3 = r0.<com.sun.media.sound.SoftMixingDataLine: java.util.List listeners>;
+
+        $r2 = r0.<com.sun.media.sound.SoftMixingDataLine: java.util.List listeners>;
+
+        $i1 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        $r4 = newarray (javax.sound.sampled.LineListener)[$i1];
+
+        $r5 = interfaceinvoke $r3.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r4);
+
+        r6 = (javax.sound.sampled.LineListener[]) $r5;
+
+        i2 = lengthof r6;
+
+        i3 = 0;
+
+     label2:
+        if i3 >= i2 goto label3;
+
+        r7 = r6[i3];
+
+        interfaceinvoke r7.<javax.sound.sampled.LineListener: void update(javax.sound.sampled.LineEvent)>(r8);
+
+        i3 = i3 + 1;
+
+        goto label2;
+
+     label3:
+        return;
+    }
+
+    public final void addLineListener(javax.sound.sampled.LineListener)
+    {
+        java.lang.Throwable $r4;
+        javax.sound.sampled.LineListener r2;
+        java.util.List $r3;
+        com.sun.media.sound.SoftMixingDataLine r0;
+        java.lang.Object $r1;
+
+        r0 := @this: com.sun.media.sound.SoftMixingDataLine;
+
+        r2 := @parameter0: javax.sound.sampled.LineListener;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingDataLine: java.lang.Object control_mutex>;
+
+        entermonitor $r1;
+
+     label1:
+        $r3 = r0.<com.sun.media.sound.SoftMixingDataLine: java.util.List listeners>;
+
+        interfaceinvoke $r3.<java.util.List: boolean add(java.lang.Object)>(r2);
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r4;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public final void removeLineListener(javax.sound.sampled.LineListener)
+    {
+        java.lang.Throwable $r4;
+        javax.sound.sampled.LineListener r2;
+        java.util.List $r3;
+        com.sun.media.sound.SoftMixingDataLine r0;
+        java.lang.Object $r1;
+
+        r0 := @this: com.sun.media.sound.SoftMixingDataLine;
+
+        r2 := @parameter0: javax.sound.sampled.LineListener;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingDataLine: java.lang.Object control_mutex>;
+
+        entermonitor $r1;
+
+     label1:
+        $r3 = r0.<com.sun.media.sound.SoftMixingDataLine: java.util.List listeners>;
+
+        interfaceinvoke $r3.<java.util.List: boolean add(java.lang.Object)>(r2);
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r4;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public final javax.sound.sampled.Line$Info getLineInfo()
+    {
+        javax.sound.sampled.DataLine$Info $r1;
+        com.sun.media.sound.SoftMixingDataLine r0;
+
+        r0 := @this: com.sun.media.sound.SoftMixingDataLine;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingDataLine: javax.sound.sampled.DataLine$Info info>;
+
+        return $r1;
+    }
+
+    public final javax.sound.sampled.Control getControl(javax.sound.sampled.Control$Type)
+    {
+        java.lang.IllegalArgumentException $r1;
+        javax.sound.sampled.Control $r9, $r12;
+        javax.sound.sampled.Control$Type r0, $r10;
+        com.sun.media.sound.SoftMixingDataLine r6;
+        int $i0, i1;
+        java.lang.StringBuilder $r2, $r3, $r4;
+        java.lang.String $r5;
+        javax.sound.sampled.Control[] $r7, $r8, $r11;
+
+        r6 := @this: com.sun.media.sound.SoftMixingDataLine;
+
+        r0 := @parameter0: javax.sound.sampled.Control$Type;
+
+        if r0 == null goto label3;
+
+        i1 = 0;
+
+     label1:
+        $r7 = r6.<com.sun.media.sound.SoftMixingDataLine: javax.sound.sampled.Control[] controls>;
+
+        $i0 = lengthof $r7;
+
+        if i1 >= $i0 goto label3;
+
+        $r8 = r6.<com.sun.media.sound.SoftMixingDataLine: javax.sound.sampled.Control[] controls>;
+
+        $r9 = $r8[i1];
+
+        $r10 = virtualinvoke $r9.<javax.sound.sampled.Control: javax.sound.sampled.Control$Type getType()>();
+
+        if $r10 != r0 goto label2;
+
+        $r11 = r6.<com.sun.media.sound.SoftMixingDataLine: javax.sound.sampled.Control[] controls>;
+
+        $r12 = $r11[i1];
+
+        return $r12;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        $r1 = new java.lang.IllegalArgumentException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported control type : ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r5);
+
+        throw $r1;
+    }
+
+    public final javax.sound.sampled.Control[] getControls()
+    {
+        java.lang.Object[] $r3;
+        com.sun.media.sound.SoftMixingDataLine r0;
+        int $i0;
+        javax.sound.sampled.Control[] $r1, $r2, $r4;
+
+        r0 := @this: com.sun.media.sound.SoftMixingDataLine;
+
+        $r2 = r0.<com.sun.media.sound.SoftMixingDataLine: javax.sound.sampled.Control[] controls>;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingDataLine: javax.sound.sampled.Control[] controls>;
+
+        $i0 = lengthof $r1;
+
+        $r3 = staticinvoke <java.util.Arrays: java.lang.Object[] copyOf(java.lang.Object[],int)>($r2, $i0);
+
+        $r4 = (javax.sound.sampled.Control[]) $r3;
+
+        return $r4;
+    }
+
+    public final boolean isControlSupported(javax.sound.sampled.Control$Type)
+    {
+        javax.sound.sampled.Control $r4;
+        javax.sound.sampled.Control$Type r0, $r5;
+        com.sun.media.sound.SoftMixingDataLine r1;
+        int $i0, i1;
+        javax.sound.sampled.Control[] $r2, $r3;
+
+        r1 := @this: com.sun.media.sound.SoftMixingDataLine;
+
+        r0 := @parameter0: javax.sound.sampled.Control$Type;
+
+        if r0 == null goto label3;
+
+        i1 = 0;
+
+     label1:
+        $r2 = r1.<com.sun.media.sound.SoftMixingDataLine: javax.sound.sampled.Control[] controls>;
+
+        $i0 = lengthof $r2;
+
+        if i1 >= $i0 goto label3;
+
+        $r3 = r1.<com.sun.media.sound.SoftMixingDataLine: javax.sound.sampled.Control[] controls>;
+
+        $r4 = $r3[i1];
+
+        $r5 = virtualinvoke $r4.<javax.sound.sampled.Control: javax.sound.sampled.Control$Type getType()>();
+
+        if $r5 != r0 goto label2;
+
+        return 1;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    static com.sun.media.sound.SoftMixingDataLine$Balance access$000(com.sun.media.sound.SoftMixingDataLine)
+    {
+        com.sun.media.sound.SoftMixingDataLine r0;
+        com.sun.media.sound.SoftMixingDataLine$Balance $r1;
+
+        r0 := @parameter0: com.sun.media.sound.SoftMixingDataLine;
+
+        $r1 = r0.<com.sun.media.sound.SoftMixingDataLine: com.sun.media.sound.SoftMixingDataLine$Balance balance_control>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        com.sun.media.sound.SoftMixingDataLine$1 $r0;
+
+        $r0 = new com.sun.media.sound.SoftMixingDataLine$1;
+
+        specialinvoke $r0.<com.sun.media.sound.SoftMixingDataLine$1: void <init>(java.lang.String)>("Chorus Send");
+
+        <com.sun.media.sound.SoftMixingDataLine: javax.sound.sampled.FloatControl$Type CHORUS_SEND> = $r0;
+
+        return;
+    }
+}

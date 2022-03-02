@@ -1,0 +1,2433 @@
+public class com.sun.xml.internal.ws.transport.http.HttpAdapter extends com.sun.xml.internal.ws.api.server.Adapter
+{
+    private static final java.util.logging.Logger LOGGER;
+    protected java.util.Map wsdls;
+    private java.util.Map revWsdls;
+    private com.sun.xml.internal.ws.api.server.ServiceDefinition serviceDefinition;
+    public final com.sun.xml.internal.ws.transport.http.HttpAdapterList owner;
+    public final java.lang.String urlPattern;
+    protected boolean stickyCookie;
+    protected boolean disableJreplicaCookie;
+    public static final com.sun.xml.internal.ws.transport.http.HttpAdapter$CompletionCallback NO_OP_COMPLETION_CALLBACK;
+    public static volatile boolean dump;
+    public static volatile int dump_threshold;
+    public static volatile boolean publishStatusPage;
+    static final boolean $assertionsDisabled;
+
+    public static com.sun.xml.internal.ws.transport.http.HttpAdapter createAlone(com.sun.xml.internal.ws.api.server.WSEndpoint)
+    {
+        com.sun.xml.internal.ws.transport.http.HttpAdapter$DummyList $r0;
+        com.sun.xml.internal.ws.api.server.WSEndpoint r1;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter $r2;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.api.server.WSEndpoint;
+
+        $r0 = new com.sun.xml.internal.ws.transport.http.HttpAdapter$DummyList;
+
+        specialinvoke $r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter$DummyList: void <init>(com.sun.xml.internal.ws.transport.http.HttpAdapter$1)>(null);
+
+        $r2 = virtualinvoke $r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter$DummyList: com.sun.xml.internal.ws.transport.http.HttpAdapter createAdapter(java.lang.String,java.lang.String,com.sun.xml.internal.ws.api.server.WSEndpoint)>("", "", r1);
+
+        return $r2;
+    }
+
+    protected void <init>(com.sun.xml.internal.ws.api.server.WSEndpoint, com.sun.xml.internal.ws.transport.http.HttpAdapterList)
+    {
+        com.sun.xml.internal.ws.api.server.WSEndpoint r1;
+        com.sun.xml.internal.ws.transport.http.HttpAdapterList r2;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.api.server.WSEndpoint;
+
+        r2 := @parameter1: com.sun.xml.internal.ws.transport.http.HttpAdapterList;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: void <init>(com.sun.xml.internal.ws.api.server.WSEndpoint,com.sun.xml.internal.ws.transport.http.HttpAdapterList,java.lang.String)>(r1, r2, null);
+
+        return;
+    }
+
+    protected void <init>(com.sun.xml.internal.ws.api.server.WSEndpoint, com.sun.xml.internal.ws.transport.http.HttpAdapterList, java.lang.String)
+    {
+        com.sun.xml.internal.ws.api.server.WSEndpoint r1;
+        com.sun.xml.internal.ws.transport.http.HttpAdapterList r2;
+        com.sun.xml.internal.ws.api.server.ServiceDefinition $r4;
+        java.lang.String r3;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.api.server.WSEndpoint;
+
+        r2 := @parameter1: com.sun.xml.internal.ws.transport.http.HttpAdapterList;
+
+        r3 := @parameter2: java.lang.String;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.api.server.Adapter: void <init>(com.sun.xml.internal.ws.api.server.WSEndpoint)>(r1);
+
+        r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.api.server.ServiceDefinition serviceDefinition> = null;
+
+        r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: boolean disableJreplicaCookie> = 0;
+
+        r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.transport.http.HttpAdapterList owner> = r2;
+
+        r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: java.lang.String urlPattern> = r3;
+
+        $r4 = virtualinvoke r1.<com.sun.xml.internal.ws.api.server.WSEndpoint: com.sun.xml.internal.ws.api.server.ServiceDefinition getServiceDefinition()>();
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: void initWSDLMap(com.sun.xml.internal.ws.api.server.ServiceDefinition)>($r4);
+
+        return;
+    }
+
+    public com.sun.xml.internal.ws.api.server.ServiceDefinition getServiceDefinition()
+    {
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r0;
+        com.sun.xml.internal.ws.api.server.ServiceDefinition $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.api.server.ServiceDefinition serviceDefinition>;
+
+        return $r1;
+    }
+
+    public final void initWSDLMap(com.sun.xml.internal.ws.api.server.ServiceDefinition)
+    {
+        java.net.URL $r32;
+        java.util.Map $r8, $r14, $r21, $r26, $r34, $r35, $r36, $r37;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.util.Set $r5, $r9;
+        com.sun.xml.internal.ws.api.server.SDDocument r19, $r31, r38;
+        java.lang.StringBuilder $r20, $r22, $r23, $r25, $r27, $r28;
+        java.util.HashMap $r2, $r7;
+        int $i0, $i1, i2, i3;
+        java.lang.String $r13, $r24, $r29, $r33;
+        java.util.Map$Entry r39, r40;
+        java.util.Iterator $r4, $r6, $r10;
+        com.sun.xml.internal.ws.api.server.ServiceDefinition r1;
+        java.util.TreeMap $r3;
+        java.lang.Object $r11, $r12, $r15, $r16, $r17, $r18, $r30;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.api.server.ServiceDefinition;
+
+        r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.api.server.ServiceDefinition serviceDefinition> = r1;
+
+        if r1 != null goto label01;
+
+        $r36 = staticinvoke <java.util.Collections: java.util.Map emptyMap()>();
+
+        r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.Map wsdls> = $r36;
+
+        $r37 = staticinvoke <java.util.Collections: java.util.Map emptyMap()>();
+
+        r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.Map revWsdls> = $r37;
+
+        goto label12;
+
+     label01:
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.Map wsdls> = $r2;
+
+        $r3 = new java.util.TreeMap;
+
+        specialinvoke $r3.<java.util.TreeMap: void <init>()>();
+
+        $r4 = interfaceinvoke r1.<com.sun.xml.internal.ws.api.server.ServiceDefinition: java.util.Iterator iterator()>();
+
+     label02:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label05;
+
+        $r30 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r38 = (com.sun.xml.internal.ws.api.server.SDDocument) $r30;
+
+        $r31 = interfaceinvoke r1.<com.sun.xml.internal.ws.api.server.ServiceDefinition: com.sun.xml.internal.ws.api.server.SDDocument getPrimary()>();
+
+        if r38 != $r31 goto label03;
+
+        $r34 = r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.Map wsdls>;
+
+        interfaceinvoke $r34.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("wsdl", r38);
+
+        $r35 = r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.Map wsdls>;
+
+        interfaceinvoke $r35.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("WSDL", r38);
+
+        goto label04;
+
+     label03:
+        $r32 = interfaceinvoke r38.<com.sun.xml.internal.ws.api.server.SDDocument: java.net.URL getURL()>();
+
+        $r33 = virtualinvoke $r32.<java.net.URL: java.lang.String toString()>();
+
+        interfaceinvoke $r3.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r33, r38);
+
+     label04:
+        goto label02;
+
+     label05:
+        i2 = 1;
+
+        i3 = 1;
+
+        $r5 = interfaceinvoke $r3.<java.util.Map: java.util.Set entrySet()>();
+
+        $r6 = interfaceinvoke $r5.<java.util.Set: java.util.Iterator iterator()>();
+
+     label06:
+        $z1 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label09;
+
+        $r17 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r39 = (java.util.Map$Entry) $r17;
+
+        $r18 = interfaceinvoke r39.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        r19 = (com.sun.xml.internal.ws.api.server.SDDocument) $r18;
+
+        $z4 = interfaceinvoke r19.<com.sun.xml.internal.ws.api.server.SDDocument: boolean isWSDL()>();
+
+        if $z4 == 0 goto label07;
+
+        $r26 = r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.Map wsdls>;
+
+        $r25 = new java.lang.StringBuilder;
+
+        specialinvoke $r25.<java.lang.StringBuilder: void <init>()>();
+
+        $r27 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("wsdl=");
+
+        $i1 = i2;
+
+        i2 = i2 + 1;
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r26.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r29, r19);
+
+     label07:
+        $z5 = interfaceinvoke r19.<com.sun.xml.internal.ws.api.server.SDDocument: boolean isSchema()>();
+
+        if $z5 == 0 goto label08;
+
+        $r21 = r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.Map wsdls>;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("xsd=");
+
+        $i0 = i3;
+
+        i3 = i3 + 1;
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r21.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r24, r19);
+
+     label08:
+        goto label06;
+
+     label09:
+        $r7 = new java.util.HashMap;
+
+        specialinvoke $r7.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.Map revWsdls> = $r7;
+
+        $r8 = r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.Map wsdls>;
+
+        $r9 = interfaceinvoke $r8.<java.util.Map: java.util.Set entrySet()>();
+
+        $r10 = interfaceinvoke $r9.<java.util.Set: java.util.Iterator iterator()>();
+
+     label10:
+        $z2 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label12;
+
+        $r11 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        r40 = (java.util.Map$Entry) $r11;
+
+        $r12 = interfaceinvoke r40.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r13 = (java.lang.String) $r12;
+
+        $z3 = virtualinvoke $r13.<java.lang.String: boolean equals(java.lang.Object)>("WSDL");
+
+        if $z3 != 0 goto label11;
+
+        $r14 = r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.Map revWsdls>;
+
+        $r15 = interfaceinvoke r40.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r16 = interfaceinvoke r40.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        interfaceinvoke $r14.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r15, $r16);
+
+     label11:
+        goto label10;
+
+     label12:
+        return;
+    }
+
+    public java.lang.String getValidPath()
+    {
+        int $i0, $i1;
+        java.lang.String $r1, $r2, $r3, $r4, $r5;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: java.lang.String urlPattern>;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean endsWith(java.lang.String)>("/*");
+
+        if $z0 == 0 goto label1;
+
+        $r4 = r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: java.lang.String urlPattern>;
+
+        $r3 = r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: java.lang.String urlPattern>;
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        $i1 = $i0 - 2;
+
+        $r5 = virtualinvoke $r4.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+        return $r5;
+
+     label1:
+        $r2 = r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: java.lang.String urlPattern>;
+
+        return $r2;
+    }
+
+    protected com.sun.xml.internal.ws.transport.http.HttpAdapter$HttpToolkit createToolkit()
+    {
+        com.sun.xml.internal.ws.transport.http.HttpAdapter$HttpToolkit $r0;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r1;
+
+        r1 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        $r0 = new com.sun.xml.internal.ws.transport.http.HttpAdapter$HttpToolkit;
+
+        specialinvoke $r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter$HttpToolkit: void <init>(com.sun.xml.internal.ws.transport.http.HttpAdapter)>(r1);
+
+        return $r0;
+    }
+
+    public void handle(com.sun.xml.internal.ws.transport.http.WSHTTPConnection) throws java.io.IOException
+    {
+        java.lang.Throwable $r5;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter$HttpToolkit r4;
+        com.sun.xml.internal.ws.util.Pool $r2;
+        java.lang.Object $r3;
+        com.sun.xml.internal.ws.transport.http.WSHTTPConnection r1;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.transport.http.WSHTTPConnection;
+
+        $z0 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: boolean handleGet(com.sun.xml.internal.ws.transport.http.WSHTTPConnection)>(r1);
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r2 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.util.Pool getPool()>();
+
+        $r3 = virtualinvoke $r2.<com.sun.xml.internal.ws.util.Pool: java.lang.Object take()>();
+
+        r4 = (com.sun.xml.internal.ws.transport.http.HttpAdapter$HttpToolkit) $r3;
+
+     label2:
+        virtualinvoke r4.<com.sun.xml.internal.ws.transport.http.HttpAdapter$HttpToolkit: void handle(com.sun.xml.internal.ws.transport.http.WSHTTPConnection)>(r1);
+
+     label3:
+        virtualinvoke $r2.<com.sun.xml.internal.ws.util.Pool: void recycle(java.lang.Object)>(r4);
+
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+     label5:
+        virtualinvoke $r2.<com.sun.xml.internal.ws.util.Pool: void recycle(java.lang.Object)>(r4);
+
+        throw $r5;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public boolean handleGet(com.sun.xml.internal.ws.transport.http.WSHTTPConnection) throws java.io.IOException
+    {
+        java.util.Map $r9;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r4;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        java.util.Set $r14;
+        com.sun.xml.internal.ws.api.server.SDDocument r23;
+        com.sun.xml.internal.ws.transport.http.HttpMetadataPublisher r21;
+        com.sun.xml.internal.ws.api.Component r22;
+        short $s0;
+        java.lang.String $r1, $r2, $r7, $r10, $r16;
+        java.io.OutputStream $r8, $r12;
+        com.sun.xml.internal.ws.api.server.WSEndpoint $r5, $r13, $r17;
+        java.util.Iterator $r15;
+        com.sun.xml.internal.ws.transport.http.WSHTTPConnection r0;
+        com.sun.xml.internal.ws.api.WSBinding $r6, $r18;
+        java.lang.Object $r11, $r19, $r20;
+        java.io.InputStream $r3;
+
+        r4 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.transport.http.WSHTTPConnection;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.lang.String getRequestMethod()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("GET");
+
+        if $z0 == 0 goto label06;
+
+        $r13 = r4.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.api.server.WSEndpoint endpoint>;
+
+        $r14 = virtualinvoke $r13.<com.sun.xml.internal.ws.api.server.WSEndpoint: java.util.Set getComponents()>();
+
+        $r15 = interfaceinvoke $r14.<java.util.Set: java.util.Iterator iterator()>();
+
+     label01:
+        $z4 = interfaceinvoke $r15.<java.util.Iterator: boolean hasNext()>();
+
+        if $z4 == 0 goto label03;
+
+        $r19 = interfaceinvoke $r15.<java.util.Iterator: java.lang.Object next()>();
+
+        r22 = (com.sun.xml.internal.ws.api.Component) $r19;
+
+        $r20 = interfaceinvoke r22.<com.sun.xml.internal.ws.api.Component: java.lang.Object getSPI(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/transport/http/HttpMetadataPublisher;");
+
+        r21 = (com.sun.xml.internal.ws.transport.http.HttpMetadataPublisher) $r20;
+
+        if r21 == null goto label02;
+
+        $z7 = virtualinvoke r21.<com.sun.xml.internal.ws.transport.http.HttpMetadataPublisher: boolean handleMetadataRequest(com.sun.xml.internal.ws.transport.http.HttpAdapter,com.sun.xml.internal.ws.transport.http.WSHTTPConnection)>(r4, r0);
+
+        if $z7 == 0 goto label02;
+
+        return 1;
+
+     label02:
+        goto label01;
+
+     label03:
+        $r16 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.lang.String getQueryString()>();
+
+        $z5 = specialinvoke r4.<com.sun.xml.internal.ws.transport.http.HttpAdapter: boolean isMetadataQuery(java.lang.String)>($r16);
+
+        if $z5 == 0 goto label04;
+
+        virtualinvoke r4.<com.sun.xml.internal.ws.transport.http.HttpAdapter: void publishWSDL(com.sun.xml.internal.ws.transport.http.WSHTTPConnection)>(r0);
+
+        return 1;
+
+     label04:
+        $r17 = virtualinvoke r4.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.api.server.WSEndpoint getEndpoint()>();
+
+        $r18 = virtualinvoke $r17.<com.sun.xml.internal.ws.api.server.WSEndpoint: com.sun.xml.internal.ws.api.WSBinding getBinding()>();
+
+        $z6 = $r18 instanceof javax.xml.ws.http.HTTPBinding;
+
+        if $z6 != 0 goto label05;
+
+        specialinvoke r4.<com.sun.xml.internal.ws.transport.http.HttpAdapter: void writeWebServicesHtmlPage(com.sun.xml.internal.ws.transport.http.WSHTTPConnection)>(r0);
+
+        return 1;
+
+     label05:
+        goto label10;
+
+     label06:
+        $r2 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.lang.String getRequestMethod()>();
+
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("HEAD");
+
+        if $z1 == 0 goto label10;
+
+        $r3 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.io.InputStream getInput()>();
+
+        virtualinvoke $r3.<java.io.InputStream: void close()>();
+
+        $r5 = virtualinvoke r4.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.api.server.WSEndpoint getEndpoint()>();
+
+        $r6 = virtualinvoke $r5.<com.sun.xml.internal.ws.api.server.WSEndpoint: com.sun.xml.internal.ws.api.WSBinding getBinding()>();
+
+        $r7 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.lang.String getQueryString()>();
+
+        $z2 = specialinvoke r4.<com.sun.xml.internal.ws.transport.http.HttpAdapter: boolean isMetadataQuery(java.lang.String)>($r7);
+
+        if $z2 == 0 goto label09;
+
+        $r9 = r4.<com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.Map wsdls>;
+
+        $r10 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.lang.String getQueryString()>();
+
+        $r11 = interfaceinvoke $r9.<java.util.Map: java.lang.Object get(java.lang.Object)>($r10);
+
+        r23 = (com.sun.xml.internal.ws.api.server.SDDocument) $r11;
+
+        if r23 == null goto label07;
+
+        $s0 = 200;
+
+        goto label08;
+
+     label07:
+        $s0 = 404;
+
+     label08:
+        virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: void setStatus(int)>($s0);
+
+        $r12 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.io.OutputStream getOutput()>();
+
+        virtualinvoke $r12.<java.io.OutputStream: void close()>();
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: void close()>();
+
+        return 1;
+
+     label09:
+        $z3 = $r6 instanceof javax.xml.ws.http.HTTPBinding;
+
+        if $z3 != 0 goto label10;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: void setStatus(int)>(404);
+
+        $r8 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.io.OutputStream getOutput()>();
+
+        virtualinvoke $r8.<java.io.OutputStream: void close()>();
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: void close()>();
+
+        return 1;
+
+     label10:
+        return 0;
+    }
+
+    private com.sun.xml.internal.ws.api.message.Packet decodePacket(com.sun.xml.internal.ws.transport.http.WSHTTPConnection, com.sun.xml.internal.ws.api.pipe.Codec) throws java.io.IOException
+    {
+        com.sun.xml.internal.ws.api.server.WebServiceContextDelegate $r9;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter$Oneway $r8;
+        com.sun.xml.internal.ws.util.ByteArrayBuffer $r11;
+        java.util.logging.Level $r14;
+        java.util.Map $r12;
+        com.sun.xml.internal.ws.api.message.Packet $r3;
+        java.lang.String $r1, $r4, $r5, $r6;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r7;
+        boolean $z0, $z1, $z2;
+        com.sun.xml.internal.ws.api.message.Packet$State $r10;
+        com.sun.xml.internal.ws.transport.http.WSHTTPConnection r0;
+        java.util.logging.Logger $r15;
+        com.sun.xml.internal.ws.api.pipe.Codec r13;
+        java.io.InputStream $r2, r16;
+
+        r7 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.transport.http.WSHTTPConnection;
+
+        r13 := @parameter1: com.sun.xml.internal.ws.api.pipe.Codec;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.lang.String getRequestHeader(java.lang.String)>("Content-Type");
+
+        $r2 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.io.InputStream getInput()>();
+
+        r16 = $r2;
+
+        $r3 = new com.sun.xml.internal.ws.api.message.Packet;
+
+        specialinvoke $r3.<com.sun.xml.internal.ws.api.message.Packet: void <init>()>();
+
+        $r4 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.lang.String getRequestHeader(java.lang.String)>("SOAPAction");
+
+        $r5 = staticinvoke <com.sun.xml.internal.ws.transport.http.HttpAdapter: java.lang.String fixQuotesAroundSoapAction(java.lang.String)>($r4);
+
+        $r3.<com.sun.xml.internal.ws.api.message.Packet: java.lang.String soapAction> = $r5;
+
+        $z0 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: boolean isSecure()>();
+
+        $r3.<com.sun.xml.internal.ws.api.message.Packet: boolean wasTransportSecure> = $z0;
+
+        $r6 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.lang.String getRequestHeader(java.lang.String)>("Accept");
+
+        $r3.<com.sun.xml.internal.ws.api.message.Packet: java.lang.String acceptableMimeTypes> = $r6;
+
+        virtualinvoke $r3.<com.sun.xml.internal.ws.api.message.Packet: void addSatellite(com.oracle.webservices.internal.api.message.PropertySet)>(r0);
+
+        virtualinvoke r7.<com.sun.xml.internal.ws.transport.http.HttpAdapter: void addSatellites(com.sun.xml.internal.ws.api.message.Packet)>($r3);
+
+        $r3.<com.sun.xml.internal.ws.api.message.Packet: boolean isAdapterDeliversNonAnonymousResponse> = 1;
+
+        $r3.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.api.Component component> = r7;
+
+        $r8 = new com.sun.xml.internal.ws.transport.http.HttpAdapter$Oneway;
+
+        specialinvoke $r8.<com.sun.xml.internal.ws.transport.http.HttpAdapter$Oneway: void <init>(com.sun.xml.internal.ws.transport.http.WSHTTPConnection)>(r0);
+
+        $r3.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.api.server.TransportBackChannel transportBackChannel> = $r8;
+
+        $r9 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: com.sun.xml.internal.ws.api.server.WebServiceContextDelegate getWebServiceContextDelegate()>();
+
+        $r3.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.api.server.WebServiceContextDelegate webServiceContextDelegate> = $r9;
+
+        $r10 = <com.sun.xml.internal.ws.api.message.Packet$State: com.sun.xml.internal.ws.api.message.Packet$State ServerRequest>;
+
+        virtualinvoke $r3.<com.sun.xml.internal.ws.api.message.Packet: void setState(com.sun.xml.internal.ws.api.message.Packet$State)>($r10);
+
+        $z1 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: boolean dump>;
+
+        if $z1 != 0 goto label1;
+
+        $r15 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.logging.Logger LOGGER>;
+
+        $r14 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z2 = virtualinvoke $r15.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r14);
+
+        if $z2 == 0 goto label2;
+
+     label1:
+        $r11 = new com.sun.xml.internal.ws.util.ByteArrayBuffer;
+
+        specialinvoke $r11.<com.sun.xml.internal.ws.util.ByteArrayBuffer: void <init>()>();
+
+        virtualinvoke $r11.<com.sun.xml.internal.ws.util.ByteArrayBuffer: void write(java.io.InputStream)>($r2);
+
+        virtualinvoke $r2.<java.io.InputStream: void close()>();
+
+        $r12 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.util.Map getRequestHeaders()>();
+
+        staticinvoke <com.sun.xml.internal.ws.transport.http.HttpAdapter: void dump(com.sun.xml.internal.ws.util.ByteArrayBuffer,java.lang.String,java.util.Map)>($r11, "HTTP request", $r12);
+
+        r16 = virtualinvoke $r11.<com.sun.xml.internal.ws.util.ByteArrayBuffer: java.io.InputStream newInputStream()>();
+
+     label2:
+        interfaceinvoke r13.<com.sun.xml.internal.ws.api.pipe.Codec: void decode(java.io.InputStream,java.lang.String,com.sun.xml.internal.ws.api.message.Packet)>(r16, $r1, $r3);
+
+        return $r3;
+    }
+
+    protected void addSatellites(com.sun.xml.internal.ws.api.message.Packet)
+    {
+        com.sun.xml.internal.ws.api.message.Packet r1;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.api.message.Packet;
+
+        return;
+    }
+
+    public static java.lang.String fixQuotesAroundSoapAction(java.lang.String)
+    {
+        java.util.logging.Level $r1, $r9;
+        java.lang.String r0, r11;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.util.logging.Logger $r2, $r10;
+        java.lang.StringBuilder $r3, $r4, $r5, $r6, $r7, $r8;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 == null goto label5;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("\"");
+
+        if $z0 == 0 goto label1;
+
+        $z4 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("\"");
+
+        if $z4 != 0 goto label5;
+
+     label1:
+        $r2 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.logging.Logger LOGGER>;
+
+        $r1 = <java.util.logging.Level: java.util.logging.Level INFO>;
+
+        $z1 = virtualinvoke $r2.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r1);
+
+        if $z1 == 0 goto label2;
+
+        $r10 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.logging.Logger LOGGER>;
+
+        $r9 = <java.util.logging.Level: java.util.logging.Level INFO>;
+
+        virtualinvoke $r10.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object)>($r9, "Received WS-I BP non-conformant Unquoted SoapAction HTTP header: {0}", r0);
+
+     label2:
+        r11 = r0;
+
+        $z2 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("\"");
+
+        if $z2 != 0 goto label3;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        r11 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label3:
+        $z3 = virtualinvoke r0.<java.lang.String: boolean endsWith(java.lang.String)>("\"");
+
+        if $z3 != 0 goto label4;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r11);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        r11 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label4:
+        return r11;
+
+     label5:
+        return r0;
+    }
+
+    protected com.sun.xml.internal.ws.api.addressing.NonAnonymousResponseProcessor getNonAnonymousResponseProcessor()
+    {
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r1;
+        com.sun.xml.internal.ws.api.addressing.NonAnonymousResponseProcessor $r0;
+
+        r1 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        $r0 = staticinvoke <com.sun.xml.internal.ws.api.addressing.NonAnonymousResponseProcessor: com.sun.xml.internal.ws.api.addressing.NonAnonymousResponseProcessor getDefault()>();
+
+        return $r0;
+    }
+
+    protected void writeClientError(int, java.io.OutputStream, com.sun.xml.internal.ws.api.message.Packet) throws java.io.IOException
+    {
+        java.io.OutputStream r1;
+        int i0;
+        com.sun.xml.internal.ws.api.message.Packet r2;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: java.io.OutputStream;
+
+        r2 := @parameter2: com.sun.xml.internal.ws.api.message.Packet;
+
+        return;
+    }
+
+    private boolean isClientErrorStatus(int)
+    {
+        int i0;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        i0 := @parameter0: int;
+
+        if i0 != 403 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private boolean isNonAnonymousUri(com.sun.xml.internal.ws.api.EndpointAddress)
+    {
+        com.sun.xml.internal.ws.api.EndpointAddress r0;
+        java.lang.String $r1, $r3, $r4, $r6;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r7;
+        com.sun.xml.internal.ws.api.addressing.AddressingVersion $r2, $r5;
+        boolean $z0, $z1, $z2;
+
+        r7 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.api.EndpointAddress;
+
+        if r0 == null goto label1;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.api.EndpointAddress: java.lang.String toString()>();
+
+        $r2 = <com.sun.xml.internal.ws.api.addressing.AddressingVersion: com.sun.xml.internal.ws.api.addressing.AddressingVersion W3C>;
+
+        $r3 = $r2.<com.sun.xml.internal.ws.api.addressing.AddressingVersion: java.lang.String anonymousUri>;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 != 0 goto label1;
+
+        $r4 = virtualinvoke r0.<com.sun.xml.internal.ws.api.EndpointAddress: java.lang.String toString()>();
+
+        $r5 = <com.sun.xml.internal.ws.api.addressing.AddressingVersion: com.sun.xml.internal.ws.api.addressing.AddressingVersion MEMBER>;
+
+        $r6 = $r5.<com.sun.xml.internal.ws.api.addressing.AddressingVersion: java.lang.String anonymousUri>;
+
+        $z1 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+        if $z1 != 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+    }
+
+    private void encodePacket(com.sun.xml.internal.ws.api.message.Packet, com.sun.xml.internal.ws.transport.http.WSHTTPConnection, com.sun.xml.internal.ws.api.pipe.Codec) throws java.io.IOException
+    {
+        com.sun.xml.internal.ws.api.EndpointAddress $r1;
+        com.sun.xml.internal.ws.api.message.Message $r3, $r44, $r51;
+        java.util.Map $r13, $r23, $r32, $r41;
+        java.lang.StringBuilder $r10, $r11, $r20, $r21, $r29, $r30, $r38, $r39, $r64, $r67, $r70, $r72;
+        com.sun.xml.internal.ws.api.pipe.ContentType $r5, $r7;
+        com.sun.xml.internal.ws.api.SOAPVersion $r50;
+        com.sun.xml.internal.ws.util.ByteArrayBuffer $r63, $r66, $r69, $r71;
+        short $s8;
+        java.lang.String $r8, $r12, $r16, $r17, $r22, $r31, $r35, $r40;
+        com.sun.xml.internal.ws.api.server.WSEndpoint $r52, $r54;
+        java.io.IOException $r46;
+        java.lang.RuntimeException $r48;
+        javax.xml.ws.WebServiceException $r65;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter$Http10OutputStream $r62, $r68;
+        com.sun.xml.internal.ws.api.message.Packet r56;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14;
+        java.util.logging.Logger $r15, $r25, $r34, $r43;
+        com.sun.xml.internal.ws.api.pipe.Codec r4;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLPort $r53;
+        java.util.logging.Level $r14, $r24, $r33, $r42;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i9;
+        java.io.OutputStream $r26, $r57, r58, $r59, r60, $r61;
+        com.sun.xml.internal.ws.transport.http.WSHTTPConnection r2;
+        com.sun.xml.internal.ws.api.WSBinding $r49, $r55;
+        com.sun.xml.internal.ws.api.addressing.NonAnonymousResponseProcessor $r45;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        r56 := @parameter0: com.sun.xml.internal.ws.api.message.Packet;
+
+        r2 := @parameter1: com.sun.xml.internal.ws.transport.http.WSHTTPConnection;
+
+        r4 := @parameter2: com.sun.xml.internal.ws.api.pipe.Codec;
+
+        $r1 = r56.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.api.EndpointAddress endpointAddress>;
+
+        $z0 = specialinvoke r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: boolean isNonAnonymousUri(com.sun.xml.internal.ws.api.EndpointAddress)>($r1);
+
+        if $z0 == 0 goto label04;
+
+        $r44 = virtualinvoke r56.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.api.message.Message getMessage()>();
+
+        if $r44 == null goto label04;
+
+     label01:
+        $r45 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.api.addressing.NonAnonymousResponseProcessor getNonAnonymousResponseProcessor()>();
+
+        r56 = virtualinvoke $r45.<com.sun.xml.internal.ws.api.addressing.NonAnonymousResponseProcessor: com.sun.xml.internal.ws.api.message.Packet process(com.sun.xml.internal.ws.api.message.Packet)>(r56);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r48 := @caughtexception;
+
+        $r49 = virtualinvoke r56.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.api.WSBinding getBinding()>();
+
+        $r50 = interfaceinvoke $r49.<com.sun.xml.internal.ws.api.WSBinding: com.sun.xml.internal.ws.api.SOAPVersion getSOAPVersion()>();
+
+        $r51 = staticinvoke <com.sun.xml.internal.ws.fault.SOAPFaultBuilder: com.sun.xml.internal.ws.api.message.Message createSOAPFaultMessage(com.sun.xml.internal.ws.api.SOAPVersion,com.sun.xml.internal.ws.model.CheckedExceptionImpl,java.lang.Throwable)>($r50, null, $r48);
+
+        $r52 = r56.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.api.server.WSEndpoint endpoint>;
+
+        $r53 = virtualinvoke $r52.<com.sun.xml.internal.ws.api.server.WSEndpoint: com.sun.xml.internal.ws.api.model.wsdl.WSDLPort getPort()>();
+
+        $r54 = r56.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.api.server.WSEndpoint endpoint>;
+
+        $r55 = virtualinvoke $r54.<com.sun.xml.internal.ws.api.server.WSEndpoint: com.sun.xml.internal.ws.api.WSBinding getBinding()>();
+
+        r56 = virtualinvoke r56.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.api.message.Packet createServerResponse(com.sun.xml.internal.ws.api.message.Message,com.sun.xml.internal.ws.api.model.wsdl.WSDLPort,com.sun.xml.internal.ws.api.model.SEIModel,com.sun.xml.internal.ws.api.WSBinding)>($r51, $r53, null, $r55);
+
+     label04:
+        $z13 = virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: boolean isClosed()>();
+
+        if $z13 == 0 goto label05;
+
+        return;
+
+     label05:
+        $r3 = virtualinvoke r56.<com.sun.xml.internal.ws.api.message.Packet: com.sun.xml.internal.ws.api.message.Message getMessage()>();
+
+        specialinvoke r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: void addStickyCookie(com.sun.xml.internal.ws.transport.http.WSHTTPConnection)>(r2);
+
+        specialinvoke r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: void addReplicaCookie(com.sun.xml.internal.ws.transport.http.WSHTTPConnection,com.sun.xml.internal.ws.api.message.Packet)>(r2, r56);
+
+        if $r3 != null goto label15;
+
+        $z9 = virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: boolean isClosed()>();
+
+        if $z9 != 0 goto label31;
+
+        $i6 = virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: int getStatus()>();
+
+        if $i6 != 0 goto label06;
+
+        virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: void setStatus(int)>(202);
+
+     label06:
+        $r35 = virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.lang.String getProtocol()>();
+
+        $z10 = virtualinvoke $r35.<java.lang.String: boolean contains(java.lang.CharSequence)>("1.1");
+
+        if $z10 == 0 goto label07;
+
+        $r57 = virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.io.OutputStream getOutput()>();
+
+        goto label08;
+
+     label07:
+        $r62 = new com.sun.xml.internal.ws.transport.http.HttpAdapter$Http10OutputStream;
+
+        $r57 = $r62;
+
+        specialinvoke $r62.<com.sun.xml.internal.ws.transport.http.HttpAdapter$Http10OutputStream: void <init>(com.sun.xml.internal.ws.transport.http.WSHTTPConnection)>(r2);
+
+     label08:
+        r58 = $r57;
+
+        $z11 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: boolean dump>;
+
+        if $z11 != 0 goto label09;
+
+        $r43 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.logging.Logger LOGGER>;
+
+        $r42 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z12 = virtualinvoke $r43.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r42);
+
+        if $z12 == 0 goto label10;
+
+     label09:
+        $r63 = new com.sun.xml.internal.ws.util.ByteArrayBuffer;
+
+        specialinvoke $r63.<com.sun.xml.internal.ws.util.ByteArrayBuffer: void <init>()>();
+
+        interfaceinvoke r4.<com.sun.xml.internal.ws.api.pipe.Codec: com.sun.xml.internal.ws.api.pipe.ContentType encode(com.sun.xml.internal.ws.api.message.Packet,java.io.OutputStream)>(r56, $r63);
+
+        $r64 = new java.lang.StringBuilder;
+
+        specialinvoke $r64.<java.lang.StringBuilder: void <init>()>();
+
+        $r38 = virtualinvoke $r64.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("HTTP response ");
+
+        $i7 = virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: int getStatus()>();
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i7);
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r41 = virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.util.Map getResponseHeaders()>();
+
+        staticinvoke <com.sun.xml.internal.ws.transport.http.HttpAdapter: void dump(com.sun.xml.internal.ws.util.ByteArrayBuffer,java.lang.String,java.util.Map)>($r63, $r40, $r41);
+
+        virtualinvoke $r63.<com.sun.xml.internal.ws.util.ByteArrayBuffer: void writeTo(java.io.OutputStream)>(r58);
+
+        goto label11;
+
+     label10:
+        interfaceinvoke r4.<com.sun.xml.internal.ws.api.pipe.Codec: com.sun.xml.internal.ws.api.pipe.ContentType encode(com.sun.xml.internal.ws.api.message.Packet,java.io.OutputStream)>(r56, $r57);
+
+     label11:
+        virtualinvoke r58.<java.io.OutputStream: void close()>();
+
+     label12:
+        goto label14;
+
+     label13:
+        $r46 := @caughtexception;
+
+        $r65 = new javax.xml.ws.WebServiceException;
+
+        specialinvoke $r65.<javax.xml.ws.WebServiceException: void <init>(java.lang.Throwable)>($r46);
+
+        throw $r65;
+
+     label14:
+        goto label31;
+
+     label15:
+        $i0 = virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: int getStatus()>();
+
+        if $i0 != 0 goto label18;
+
+        $z8 = virtualinvoke $r3.<com.sun.xml.internal.ws.api.message.Message: boolean isFault()>();
+
+        if $z8 == 0 goto label16;
+
+        $s8 = 500;
+
+        goto label17;
+
+     label16:
+        $s8 = 200;
+
+     label17:
+        virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: void setStatus(int)>($s8);
+
+     label18:
+        $i9 = virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: int getStatus()>();
+
+        $z14 = specialinvoke r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: boolean isClientErrorStatus(int)>($i9);
+
+        if $z14 == 0 goto label22;
+
+        $r26 = virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.io.OutputStream getOutput()>();
+
+        $z6 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: boolean dump>;
+
+        if $z6 != 0 goto label19;
+
+        $r34 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.logging.Logger LOGGER>;
+
+        $r33 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z7 = virtualinvoke $r34.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r33);
+
+        if $z7 == 0 goto label20;
+
+     label19:
+        $r66 = new com.sun.xml.internal.ws.util.ByteArrayBuffer;
+
+        specialinvoke $r66.<com.sun.xml.internal.ws.util.ByteArrayBuffer: void <init>()>();
+
+        $i3 = virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: int getStatus()>();
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: void writeClientError(int,java.io.OutputStream,com.sun.xml.internal.ws.api.message.Packet)>($i3, $r66, r56);
+
+        $r67 = new java.lang.StringBuilder;
+
+        specialinvoke $r67.<java.lang.StringBuilder: void <init>()>();
+
+        $r29 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("HTTP response ");
+
+        $i4 = virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: int getStatus()>();
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r32 = virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.util.Map getResponseHeaders()>();
+
+        staticinvoke <com.sun.xml.internal.ws.transport.http.HttpAdapter: void dump(com.sun.xml.internal.ws.util.ByteArrayBuffer,java.lang.String,java.util.Map)>($r66, $r31, $r32);
+
+        virtualinvoke $r66.<com.sun.xml.internal.ws.util.ByteArrayBuffer: void writeTo(java.io.OutputStream)>($r26);
+
+        goto label21;
+
+     label20:
+        $i5 = virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: int getStatus()>();
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: void writeClientError(int,java.io.OutputStream,com.sun.xml.internal.ws.api.message.Packet)>($i5, $r26, r56);
+
+     label21:
+        virtualinvoke $r26.<java.io.OutputStream: void close()>();
+
+        return;
+
+     label22:
+        $r5 = interfaceinvoke r4.<com.sun.xml.internal.ws.api.pipe.Codec: com.sun.xml.internal.ws.api.pipe.ContentType getStaticContentType(com.sun.xml.internal.ws.api.message.Packet)>(r56);
+
+        if $r5 == null goto label28;
+
+        $r16 = interfaceinvoke $r5.<com.sun.xml.internal.ws.api.pipe.ContentType: java.lang.String getContentType()>();
+
+        virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: void setContentTypeResponseHeader(java.lang.String)>($r16);
+
+        $r17 = virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.lang.String getProtocol()>();
+
+        $z3 = virtualinvoke $r17.<java.lang.String: boolean contains(java.lang.CharSequence)>("1.1");
+
+        if $z3 == 0 goto label23;
+
+        $r59 = virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.io.OutputStream getOutput()>();
+
+        goto label24;
+
+     label23:
+        $r68 = new com.sun.xml.internal.ws.transport.http.HttpAdapter$Http10OutputStream;
+
+        $r59 = $r68;
+
+        specialinvoke $r68.<com.sun.xml.internal.ws.transport.http.HttpAdapter$Http10OutputStream: void <init>(com.sun.xml.internal.ws.transport.http.WSHTTPConnection)>(r2);
+
+     label24:
+        r60 = $r59;
+
+        $z4 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: boolean dump>;
+
+        if $z4 != 0 goto label25;
+
+        $r25 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.logging.Logger LOGGER>;
+
+        $r24 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z5 = virtualinvoke $r25.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r24);
+
+        if $z5 == 0 goto label26;
+
+     label25:
+        $r69 = new com.sun.xml.internal.ws.util.ByteArrayBuffer;
+
+        specialinvoke $r69.<com.sun.xml.internal.ws.util.ByteArrayBuffer: void <init>()>();
+
+        interfaceinvoke r4.<com.sun.xml.internal.ws.api.pipe.Codec: com.sun.xml.internal.ws.api.pipe.ContentType encode(com.sun.xml.internal.ws.api.message.Packet,java.io.OutputStream)>(r56, $r69);
+
+        $r70 = new java.lang.StringBuilder;
+
+        specialinvoke $r70.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r70.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("HTTP response ");
+
+        $i2 = virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: int getStatus()>();
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r23 = virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.util.Map getResponseHeaders()>();
+
+        staticinvoke <com.sun.xml.internal.ws.transport.http.HttpAdapter: void dump(com.sun.xml.internal.ws.util.ByteArrayBuffer,java.lang.String,java.util.Map)>($r69, $r22, $r23);
+
+        virtualinvoke $r69.<com.sun.xml.internal.ws.util.ByteArrayBuffer: void writeTo(java.io.OutputStream)>(r60);
+
+        goto label27;
+
+     label26:
+        interfaceinvoke r4.<com.sun.xml.internal.ws.api.pipe.Codec: com.sun.xml.internal.ws.api.pipe.ContentType encode(com.sun.xml.internal.ws.api.message.Packet,java.io.OutputStream)>(r56, $r59);
+
+     label27:
+        virtualinvoke r60.<java.io.OutputStream: void close()>();
+
+        goto label31;
+
+     label28:
+        $r71 = new com.sun.xml.internal.ws.util.ByteArrayBuffer;
+
+        specialinvoke $r71.<com.sun.xml.internal.ws.util.ByteArrayBuffer: void <init>()>();
+
+        $r7 = interfaceinvoke r4.<com.sun.xml.internal.ws.api.pipe.Codec: com.sun.xml.internal.ws.api.pipe.ContentType encode(com.sun.xml.internal.ws.api.message.Packet,java.io.OutputStream)>(r56, $r71);
+
+        $r8 = interfaceinvoke $r7.<com.sun.xml.internal.ws.api.pipe.ContentType: java.lang.String getContentType()>();
+
+        virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: void setContentTypeResponseHeader(java.lang.String)>($r8);
+
+        $z1 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: boolean dump>;
+
+        if $z1 != 0 goto label29;
+
+        $r15 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.logging.Logger LOGGER>;
+
+        $r14 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z2 = virtualinvoke $r15.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r14);
+
+        if $z2 == 0 goto label30;
+
+     label29:
+        $r72 = new java.lang.StringBuilder;
+
+        specialinvoke $r72.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r72.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("HTTP response ");
+
+        $i1 = virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: int getStatus()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r13 = virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.util.Map getResponseHeaders()>();
+
+        staticinvoke <com.sun.xml.internal.ws.transport.http.HttpAdapter: void dump(com.sun.xml.internal.ws.util.ByteArrayBuffer,java.lang.String,java.util.Map)>($r71, $r12, $r13);
+
+     label30:
+        $r61 = virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.io.OutputStream getOutput()>();
+
+        virtualinvoke $r71.<com.sun.xml.internal.ws.util.ByteArrayBuffer: void writeTo(java.io.OutputStream)>($r61);
+
+        virtualinvoke $r61.<java.io.OutputStream: void close()>();
+
+     label31:
+        return;
+
+        catch java.lang.RuntimeException from label01 to label02 with label03;
+        catch java.io.IOException from label11 to label12 with label13;
+    }
+
+    private void addStickyCookie(com.sun.xml.internal.ws.transport.http.WSHTTPConnection)
+    {
+        com.sun.xml.internal.ws.transport.http.WSHTTPConnection r1;
+        java.lang.String $r2, $r3;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r0;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.transport.http.WSHTTPConnection;
+
+        $z0 = r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: boolean stickyCookie>;
+
+        if $z0 == 0 goto label3;
+
+        $r2 = virtualinvoke r1.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.lang.String getRequestHeader(java.lang.String)>("proxy-jroute");
+
+        if $r2 != null goto label1;
+
+        return;
+
+     label1:
+        $r3 = virtualinvoke r1.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.lang.String getCookie(java.lang.String)>("JROUTE");
+
+        if $r3 == null goto label2;
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z1 != 0 goto label3;
+
+     label2:
+        virtualinvoke r1.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: void setCookie(java.lang.String,java.lang.String)>("JROUTE", $r2);
+
+     label3:
+        return;
+    }
+
+    private void addReplicaCookie(com.sun.xml.internal.ws.transport.http.WSHTTPConnection, com.sun.xml.internal.ws.api.message.Packet)
+    {
+        com.sun.xml.internal.ws.transport.http.WSHTTPConnection r2;
+        com.sun.xml.internal.ws.api.ha.HaInfo r6;
+        com.sun.xml.internal.ws.api.message.Packet r1;
+        java.lang.Object $r5;
+        java.lang.String $r3, $r4;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        r2 := @parameter0: com.sun.xml.internal.ws.transport.http.WSHTTPConnection;
+
+        r1 := @parameter1: com.sun.xml.internal.ws.api.message.Packet;
+
+        $z0 = r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: boolean stickyCookie>;
+
+        if $z0 == 0 goto label2;
+
+        r6 = null;
+
+        $z1 = virtualinvoke r1.<com.sun.xml.internal.ws.api.message.Packet: boolean supports(java.lang.Object)>("com.sun.xml.internal.ws.api.message.packet.hainfo");
+
+        if $z1 == 0 goto label1;
+
+        $r5 = virtualinvoke r1.<com.sun.xml.internal.ws.api.message.Packet: java.lang.Object get(java.lang.Object)>("com.sun.xml.internal.ws.api.message.packet.hainfo");
+
+        r6 = (com.sun.xml.internal.ws.api.ha.HaInfo) $r5;
+
+     label1:
+        if r6 == null goto label2;
+
+        $r3 = virtualinvoke r6.<com.sun.xml.internal.ws.api.ha.HaInfo: java.lang.String getKey()>();
+
+        virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: void setCookie(java.lang.String,java.lang.String)>("METRO_KEY", $r3);
+
+        $z2 = r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: boolean disableJreplicaCookie>;
+
+        if $z2 != 0 goto label2;
+
+        $r4 = virtualinvoke r6.<com.sun.xml.internal.ws.api.ha.HaInfo: java.lang.String getReplicaInstance()>();
+
+        virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: void setCookie(java.lang.String,java.lang.String)>("JREPLICA", $r4);
+
+     label2:
+        return;
+    }
+
+    public void invokeAsync(com.sun.xml.internal.ws.transport.http.WSHTTPConnection) throws java.io.IOException
+    {
+        com.sun.xml.internal.ws.transport.http.WSHTTPConnection r1;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r0;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter$CompletionCallback $r2;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.transport.http.WSHTTPConnection;
+
+        $r2 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.transport.http.HttpAdapter$CompletionCallback NO_OP_COMPLETION_CALLBACK>;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: void invokeAsync(com.sun.xml.internal.ws.transport.http.WSHTTPConnection,com.sun.xml.internal.ws.transport.http.HttpAdapter$CompletionCallback)>(r1, $r2);
+
+        return;
+    }
+
+    public void invokeAsync(com.sun.xml.internal.ws.transport.http.WSHTTPConnection, com.sun.xml.internal.ws.transport.http.HttpAdapter$CompletionCallback) throws java.io.IOException
+    {
+        com.sun.xml.internal.ws.transport.http.HttpAdapter$CompletionCallback r8;
+        com.sun.xml.internal.ws.api.message.Message $r21;
+        java.util.logging.Level $r12, $r18;
+        com.sun.xml.internal.ws.api.message.Packet $r6, $r14, $r20;
+        com.sun.xml.internal.ws.api.message.ExceptionHasMessage $r16;
+        java.lang.String $r13, $r19;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r0;
+        boolean $z0;
+        com.sun.xml.internal.ws.api.server.WSEndpoint $r9;
+        com.sun.xml.internal.ws.util.Pool $r2;
+        com.sun.xml.internal.ws.server.UnsupportedMediaException $r10;
+        com.sun.xml.internal.ws.transport.http.WSHTTPConnection r1;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter$1 $r7;
+        java.util.logging.Logger $r11, $r17;
+        com.sun.xml.internal.ws.api.pipe.Codec $r5, $r15, $r22;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter$HttpToolkit r4;
+        java.lang.Object $r3;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        r1 := @parameter0: com.sun.xml.internal.ws.transport.http.WSHTTPConnection;
+
+        r8 := @parameter1: com.sun.xml.internal.ws.transport.http.HttpAdapter$CompletionCallback;
+
+        $z0 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: boolean handleGet(com.sun.xml.internal.ws.transport.http.WSHTTPConnection)>(r1);
+
+        if $z0 == 0 goto label1;
+
+        interfaceinvoke r8.<com.sun.xml.internal.ws.transport.http.HttpAdapter$CompletionCallback: void onCompletion()>();
+
+        return;
+
+     label1:
+        $r2 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.util.Pool getPool()>();
+
+        $r3 = virtualinvoke $r2.<com.sun.xml.internal.ws.util.Pool: java.lang.Object take()>();
+
+        r4 = (com.sun.xml.internal.ws.transport.http.HttpAdapter$HttpToolkit) $r3;
+
+     label2:
+        $r5 = r4.<com.sun.xml.internal.ws.transport.http.HttpAdapter$HttpToolkit: com.sun.xml.internal.ws.api.pipe.Codec codec>;
+
+        $r6 = specialinvoke r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.api.message.Packet decodePacket(com.sun.xml.internal.ws.transport.http.WSHTTPConnection,com.sun.xml.internal.ws.api.pipe.Codec)>(r1, $r5);
+
+     label3:
+        goto label6;
+
+     label4:
+        $r16 := @caughtexception;
+
+        $r17 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.logging.Logger LOGGER>;
+
+        $r18 = <java.util.logging.Level: java.util.logging.Level SEVERE>;
+
+        $r19 = virtualinvoke $r16.<com.sun.xml.internal.ws.api.message.ExceptionHasMessage: java.lang.String getMessage()>();
+
+        virtualinvoke $r17.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r18, $r19, $r16);
+
+        $r20 = new com.sun.xml.internal.ws.api.message.Packet;
+
+        specialinvoke $r20.<com.sun.xml.internal.ws.api.message.Packet: void <init>()>();
+
+        $r21 = virtualinvoke $r16.<com.sun.xml.internal.ws.api.message.ExceptionHasMessage: com.sun.xml.internal.ws.api.message.Message getFaultMessage()>();
+
+        virtualinvoke $r20.<com.sun.xml.internal.ws.api.message.Packet: void setMessage(com.sun.xml.internal.ws.api.message.Message)>($r21);
+
+        $r22 = r4.<com.sun.xml.internal.ws.transport.http.HttpAdapter$HttpToolkit: com.sun.xml.internal.ws.api.pipe.Codec codec>;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: void encodePacket(com.sun.xml.internal.ws.api.message.Packet,com.sun.xml.internal.ws.transport.http.WSHTTPConnection,com.sun.xml.internal.ws.api.pipe.Codec)>($r20, r1, $r22);
+
+        virtualinvoke $r2.<com.sun.xml.internal.ws.util.Pool: void recycle(java.lang.Object)>(r4);
+
+        virtualinvoke r1.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: void close()>();
+
+        interfaceinvoke r8.<com.sun.xml.internal.ws.transport.http.HttpAdapter$CompletionCallback: void onCompletion()>();
+
+        return;
+
+     label5:
+        $r10 := @caughtexception;
+
+        $r11 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.logging.Logger LOGGER>;
+
+        $r12 = <java.util.logging.Level: java.util.logging.Level SEVERE>;
+
+        $r13 = virtualinvoke $r10.<com.sun.xml.internal.ws.server.UnsupportedMediaException: java.lang.String getMessage()>();
+
+        virtualinvoke $r11.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r12, $r13, $r10);
+
+        $r14 = new com.sun.xml.internal.ws.api.message.Packet;
+
+        specialinvoke $r14.<com.sun.xml.internal.ws.api.message.Packet: void <init>()>();
+
+        virtualinvoke r1.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: void setStatus(int)>(415);
+
+        $r15 = r4.<com.sun.xml.internal.ws.transport.http.HttpAdapter$HttpToolkit: com.sun.xml.internal.ws.api.pipe.Codec codec>;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: void encodePacket(com.sun.xml.internal.ws.api.message.Packet,com.sun.xml.internal.ws.transport.http.WSHTTPConnection,com.sun.xml.internal.ws.api.pipe.Codec)>($r14, r1, $r15);
+
+        virtualinvoke $r2.<com.sun.xml.internal.ws.util.Pool: void recycle(java.lang.Object)>(r4);
+
+        virtualinvoke r1.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: void close()>();
+
+        interfaceinvoke r8.<com.sun.xml.internal.ws.transport.http.HttpAdapter$CompletionCallback: void onCompletion()>();
+
+        return;
+
+     label6:
+        $r9 = r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.api.server.WSEndpoint endpoint>;
+
+        $r7 = new com.sun.xml.internal.ws.transport.http.HttpAdapter$1;
+
+        specialinvoke $r7.<com.sun.xml.internal.ws.transport.http.HttpAdapter$1: void <init>(com.sun.xml.internal.ws.transport.http.HttpAdapter,com.sun.xml.internal.ws.transport.http.WSHTTPConnection,com.sun.xml.internal.ws.transport.http.HttpAdapter$HttpToolkit,com.sun.xml.internal.ws.util.Pool,com.sun.xml.internal.ws.transport.http.HttpAdapter$CompletionCallback)>(r0, r1, r4, $r2, r8);
+
+        virtualinvoke $r9.<com.sun.xml.internal.ws.api.server.WSEndpoint: void process(com.sun.xml.internal.ws.api.message.Packet,com.sun.xml.internal.ws.api.server.WSEndpoint$CompletionCallback,com.sun.xml.internal.ws.api.pipe.FiberContextSwitchInterceptor)>($r6, $r7, null);
+
+        return;
+
+        catch com.sun.xml.internal.ws.api.message.ExceptionHasMessage from label2 to label3 with label4;
+        catch com.sun.xml.internal.ws.server.UnsupportedMediaException from label2 to label3 with label5;
+    }
+
+    private boolean isMetadataQuery(java.lang.String)
+    {
+        java.lang.String r0;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r1;
+        boolean $z0, $z1, $z2, $z3;
+
+        r1 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 == null goto label2;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("WSDL");
+
+        if $z0 != 0 goto label1;
+
+        $z1 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("wsdl");
+
+        if $z1 != 0 goto label1;
+
+        $z2 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("xsd=");
+
+        if $z2 == 0 goto label2;
+
+     label1:
+        $z3 = 1;
+
+        goto label3;
+
+     label2:
+        $z3 = 0;
+
+     label3:
+        return $z3;
+    }
+
+    public void publishWSDL(com.sun.xml.internal.ws.transport.http.WSHTTPConnection) throws java.io.IOException
+    {
+        java.io.OutputStream $r11;
+        com.sun.xml.internal.ws.api.server.DocumentAddressResolver $r10;
+        com.sun.xml.internal.ws.transport.http.WSHTTPConnection r0;
+        com.sun.xml.internal.ws.api.server.SDDocument r6;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter$Http10OutputStream $r12;
+        java.util.Map $r3;
+        com.sun.xml.internal.ws.api.server.PortAddressResolver $r9;
+        java.lang.Object $r5;
+        java.lang.String $r4, $r7, $r8;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r2;
+        java.io.InputStream $r1;
+        boolean $z0;
+
+        r2 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.transport.http.WSHTTPConnection;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.io.InputStream getInput()>();
+
+        virtualinvoke $r1.<java.io.InputStream: void close()>();
+
+        $r3 = r2.<com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.Map wsdls>;
+
+        $r4 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.lang.String getQueryString()>();
+
+        $r5 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>($r4);
+
+        r6 = (com.sun.xml.internal.ws.api.server.SDDocument) $r5;
+
+        if r6 != null goto label1;
+
+        specialinvoke r2.<com.sun.xml.internal.ws.transport.http.HttpAdapter: void writeNotFoundErrorPage(com.sun.xml.internal.ws.transport.http.WSHTTPConnection,java.lang.String)>(r0, "Invalid Request");
+
+        return;
+
+     label1:
+        virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: void setStatus(int)>(200);
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: void setContentTypeResponseHeader(java.lang.String)>("text/xml;charset=utf-8");
+
+        $r7 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.lang.String getProtocol()>();
+
+        $z0 = virtualinvoke $r7.<java.lang.String: boolean contains(java.lang.CharSequence)>("1.1");
+
+        if $z0 == 0 goto label2;
+
+        $r11 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.io.OutputStream getOutput()>();
+
+        goto label3;
+
+     label2:
+        $r12 = new com.sun.xml.internal.ws.transport.http.HttpAdapter$Http10OutputStream;
+
+        $r11 = $r12;
+
+        specialinvoke $r12.<com.sun.xml.internal.ws.transport.http.HttpAdapter$Http10OutputStream: void <init>(com.sun.xml.internal.ws.transport.http.WSHTTPConnection)>(r0);
+
+     label3:
+        $r8 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.lang.String getBaseAddress()>();
+
+        $r9 = virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.api.server.PortAddressResolver getPortAddressResolver(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke r2.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.api.server.DocumentAddressResolver getDocumentAddressResolver(com.sun.xml.internal.ws.api.server.PortAddressResolver)>($r9);
+
+        interfaceinvoke r6.<com.sun.xml.internal.ws.api.server.SDDocument: void writeTo(com.sun.xml.internal.ws.api.server.PortAddressResolver,com.sun.xml.internal.ws.api.server.DocumentAddressResolver,java.io.OutputStream)>($r9, $r10, $r11);
+
+        virtualinvoke $r11.<java.io.OutputStream: void close()>();
+
+        return;
+    }
+
+    public com.sun.xml.internal.ws.api.server.PortAddressResolver getPortAddressResolver(java.lang.String)
+    {
+        com.sun.xml.internal.ws.api.server.WSEndpoint $r2;
+        com.sun.xml.internal.ws.transport.http.HttpAdapterList $r3;
+        com.sun.xml.internal.ws.api.server.PortAddressResolver $r5;
+        java.lang.Class $r4;
+        java.lang.String r1;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r3 = r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.transport.http.HttpAdapterList owner>;
+
+        $r2 = r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.api.server.WSEndpoint endpoint>;
+
+        $r4 = virtualinvoke $r2.<com.sun.xml.internal.ws.api.server.WSEndpoint: java.lang.Class getImplementationClass()>();
+
+        $r5 = virtualinvoke $r3.<com.sun.xml.internal.ws.transport.http.HttpAdapterList: com.sun.xml.internal.ws.api.server.PortAddressResolver createPortAddressResolver(java.lang.String,java.lang.Class)>(r1, $r4);
+
+        return $r5;
+    }
+
+    public com.sun.xml.internal.ws.api.server.DocumentAddressResolver getDocumentAddressResolver(com.sun.xml.internal.ws.api.server.PortAddressResolver)
+    {
+        com.sun.xml.internal.ws.api.server.WSEndpoint $r2, $r4;
+        java.lang.AssertionError $r9;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter$3 $r8;
+        com.sun.xml.internal.ws.api.server.PortAddressResolver r0;
+        javax.xml.namespace.QName $r3, $r5;
+        java.lang.String $r6, $r7;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r1;
+        boolean $z0;
+
+        r1 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.api.server.PortAddressResolver;
+
+        $r2 = r1.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.api.server.WSEndpoint endpoint>;
+
+        $r3 = virtualinvoke $r2.<com.sun.xml.internal.ws.api.server.WSEndpoint: javax.xml.namespace.QName getServiceName()>();
+
+        $r4 = r1.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.api.server.WSEndpoint endpoint>;
+
+        $r5 = virtualinvoke $r4.<com.sun.xml.internal.ws.api.server.WSEndpoint: javax.xml.namespace.QName getPortName()>();
+
+        $r6 = virtualinvoke $r5.<javax.xml.namespace.QName: java.lang.String getLocalPart()>();
+
+        $r7 = virtualinvoke r0.<com.sun.xml.internal.ws.api.server.PortAddressResolver: java.lang.String getAddressFor(javax.xml.namespace.QName,java.lang.String)>($r3, $r6);
+
+        $z0 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        if $r7 != null goto label1;
+
+        $r9 = new java.lang.AssertionError;
+
+        specialinvoke $r9.<java.lang.AssertionError: void <init>()>();
+
+        throw $r9;
+
+     label1:
+        $r8 = new com.sun.xml.internal.ws.transport.http.HttpAdapter$3;
+
+        specialinvoke $r8.<com.sun.xml.internal.ws.transport.http.HttpAdapter$3: void <init>(com.sun.xml.internal.ws.transport.http.HttpAdapter,java.lang.String)>(r1, $r7);
+
+        return $r8;
+    }
+
+    private void writeNotFoundErrorPage(com.sun.xml.internal.ws.transport.http.WSHTTPConnection, java.lang.String) throws java.io.IOException
+    {
+        java.io.PrintWriter $r1;
+        java.io.OutputStream $r3;
+        com.sun.xml.internal.ws.transport.http.WSHTTPConnection r0;
+        java.io.OutputStreamWriter $r2;
+        java.lang.String $r4, r5, $r6;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r7;
+
+        r7 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.transport.http.WSHTTPConnection;
+
+        r5 := @parameter1: java.lang.String;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: void setStatus(int)>(404);
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: void setContentTypeResponseHeader(java.lang.String)>("text/html; charset=utf-8");
+
+        $r1 = new java.io.PrintWriter;
+
+        $r2 = new java.io.OutputStreamWriter;
+
+        $r3 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.io.OutputStream getOutput()>();
+
+        specialinvoke $r2.<java.io.OutputStreamWriter: void <init>(java.io.OutputStream,java.lang.String)>($r3, "UTF-8");
+
+        specialinvoke $r1.<java.io.PrintWriter: void <init>(java.io.Writer)>($r2);
+
+        virtualinvoke $r1.<java.io.PrintWriter: void println(java.lang.String)>("<html>");
+
+        virtualinvoke $r1.<java.io.PrintWriter: void println(java.lang.String)>("<head><title>");
+
+        $r4 = staticinvoke <com.sun.xml.internal.ws.resources.WsservletMessages: java.lang.String SERVLET_HTML_TITLE()>();
+
+        virtualinvoke $r1.<java.io.PrintWriter: void println(java.lang.String)>($r4);
+
+        virtualinvoke $r1.<java.io.PrintWriter: void println(java.lang.String)>("</title></head>");
+
+        virtualinvoke $r1.<java.io.PrintWriter: void println(java.lang.String)>("<body>");
+
+        $r6 = staticinvoke <com.sun.xml.internal.ws.resources.WsservletMessages: java.lang.String SERVLET_HTML_NOT_FOUND(java.lang.Object)>(r5);
+
+        virtualinvoke $r1.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        virtualinvoke $r1.<java.io.PrintWriter: void println(java.lang.String)>("</body>");
+
+        virtualinvoke $r1.<java.io.PrintWriter: void println(java.lang.String)>("</html>");
+
+        virtualinvoke $r1.<java.io.PrintWriter: void close()>();
+
+        return;
+    }
+
+    private void writeInternalServerError(com.sun.xml.internal.ws.transport.http.WSHTTPConnection) throws java.io.IOException
+    {
+        java.io.OutputStream $r1;
+        com.sun.xml.internal.ws.transport.http.WSHTTPConnection r0;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r2;
+
+        r2 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.transport.http.WSHTTPConnection;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: void setStatus(int)>(500);
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.io.OutputStream getOutput()>();
+
+        virtualinvoke $r1.<java.io.OutputStream: void close()>();
+
+        return;
+    }
+
+    private static void dump(com.sun.xml.internal.ws.util.ByteArrayBuffer, java.lang.String, java.util.Map) throws java.io.IOException
+    {
+        byte[] $r16;
+        java.util.Map r8;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.io.PrintWriter $r1;
+        java.util.Set $r24;
+        java.util.logging.Logger $r12, $r14;
+        java.util.List $r29, $r31;
+        java.lang.StringBuilder $r2, $r3, $r5, $r6, $r17, $r20, $r21, $r35, $r38, $r39, $r40;
+        java.io.ByteArrayOutputStream $r0;
+        com.sun.xml.internal.ws.util.ByteArrayBuffer r9;
+        java.util.logging.Level $r11, $r13;
+        int $i0, $i1, $i2;
+        java.lang.String r4, $r7, $r10, $r19, $r22, $r23, r34, $r37, $r41;
+        java.io.PrintStream $r15;
+        java.util.Map$Entry r27;
+        java.util.Iterator $r25, $r32;
+        java.lang.Class $r18;
+        java.lang.Object $r26, $r28, $r30, $r33, $r36, $r42;
+
+        r9 := @parameter0: com.sun.xml.internal.ws.util.ByteArrayBuffer;
+
+        r4 := @parameter1: java.lang.String;
+
+        r8 := @parameter2: java.util.Map;
+
+        $r0 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r0.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $r1 = new java.io.PrintWriter;
+
+        specialinvoke $r1.<java.io.PrintWriter: void <init>(java.io.OutputStream,boolean)>($r0, 1);
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("---[");
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]---");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<java.io.PrintWriter: void println(java.lang.String)>($r7);
+
+        if r8 == null goto label5;
+
+        $r24 = interfaceinvoke r8.<java.util.Map: java.util.Set entrySet()>();
+
+        $r25 = interfaceinvoke $r24.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z2 = interfaceinvoke $r25.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label5;
+
+        $r26 = interfaceinvoke $r25.<java.util.Iterator: java.lang.Object next()>();
+
+        r27 = (java.util.Map$Entry) $r26;
+
+        $r28 = interfaceinvoke r27.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r29 = (java.util.List) $r28;
+
+        $z3 = interfaceinvoke $r29.<java.util.List: boolean isEmpty()>();
+
+        if $z3 == 0 goto label2;
+
+        $r42 = interfaceinvoke r27.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        virtualinvoke $r1.<java.io.PrintWriter: void println(java.lang.Object)>($r42);
+
+        goto label4;
+
+     label2:
+        $r30 = interfaceinvoke r27.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r31 = (java.util.List) $r30;
+
+        $r32 = interfaceinvoke $r31.<java.util.List: java.util.Iterator iterator()>();
+
+     label3:
+        $z4 = interfaceinvoke $r32.<java.util.Iterator: boolean hasNext()>();
+
+        if $z4 == 0 goto label4;
+
+        $r33 = interfaceinvoke $r32.<java.util.Iterator: java.lang.Object next()>();
+
+        r34 = (java.lang.String) $r33;
+
+        $r35 = new java.lang.StringBuilder;
+
+        specialinvoke $r35.<java.lang.StringBuilder: void <init>()>();
+
+        $r36 = interfaceinvoke r27.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r37 = (java.lang.String) $r36;
+
+        $r38 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r37);
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r34);
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<java.io.PrintWriter: void println(java.lang.String)>($r41);
+
+        goto label3;
+
+     label4:
+        goto label1;
+
+     label5:
+        $i0 = virtualinvoke r9.<com.sun.xml.internal.ws.util.ByteArrayBuffer: int size()>();
+
+        $i1 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: int dump_threshold>;
+
+        if $i0 <= $i1 goto label6;
+
+        $r16 = virtualinvoke r9.<com.sun.xml.internal.ws.util.ByteArrayBuffer: byte[] getRawData()>();
+
+        $i2 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: int dump_threshold>;
+
+        virtualinvoke $r0.<java.io.ByteArrayOutputStream: void write(byte[],int,int)>($r16, 0, $i2);
+
+        virtualinvoke $r1.<java.io.PrintWriter: void println()>();
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = class "Lcom/sun/xml/internal/ws/transport/http/HttpAdapter;";
+
+        $r19 = virtualinvoke $r18.<java.lang.Class: java.lang.String getName()>();
+
+        $r20 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".dumpTreshold");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r23 = staticinvoke <com.sun.xml.internal.ws.resources.WsservletMessages: java.lang.String MESSAGE_TOO_LONG(java.lang.Object)>($r22);
+
+        virtualinvoke $r1.<java.io.PrintWriter: void println(java.lang.String)>($r23);
+
+        goto label7;
+
+     label6:
+        virtualinvoke r9.<com.sun.xml.internal.ws.util.ByteArrayBuffer: void writeTo(java.io.OutputStream)>($r0);
+
+     label7:
+        virtualinvoke $r1.<java.io.PrintWriter: void println(java.lang.String)>("--------------------");
+
+        $r10 = virtualinvoke $r0.<java.io.ByteArrayOutputStream: java.lang.String toString()>();
+
+        $z0 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: boolean dump>;
+
+        if $z0 == 0 goto label8;
+
+        $r15 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r15.<java.io.PrintStream: void println(java.lang.String)>($r10);
+
+     label8:
+        $r12 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.logging.Logger LOGGER>;
+
+        $r11 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        $z1 = virtualinvoke $r12.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r11);
+
+        if $z1 == 0 goto label9;
+
+        $r14 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.logging.Logger LOGGER>;
+
+        $r13 = <java.util.logging.Level: java.util.logging.Level FINER>;
+
+        virtualinvoke $r14.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String)>($r13, $r10);
+
+     label9:
+        return;
+    }
+
+    private void writeWebServicesHtmlPage(com.sun.xml.internal.ws.transport.http.WSHTTPConnection) throws java.io.IOException
+    {
+        java.net.URI $r18;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r7;
+        com.sun.xml.internal.ws.api.server.BoundEndpoint r16;
+        boolean $z0, $z1, $z2;
+        java.io.PrintWriter $r2;
+        java.util.List r30;
+        javax.xml.namespace.QName $r21, $r23;
+        com.sun.xml.internal.ws.api.server.Module r11;
+        java.io.OutputStreamWriter $r3;
+        java.lang.String $r5, $r6, $r12, $r13, $r17, $r19, $r24, $r27, $r28, $r29;
+        java.io.OutputStream $r4;
+        com.sun.xml.internal.ws.api.server.WSEndpoint $r8, $r20, $r22, $r25;
+        com.sun.xml.internal.ws.api.server.Container $r9;
+        java.util.Iterator $r14;
+        com.sun.xml.internal.ws.transport.http.WSHTTPConnection r0;
+        java.lang.Object $r10, $r15;
+        java.lang.Class $r26;
+        java.io.InputStream $r1;
+
+        r7 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.transport.http.WSHTTPConnection;
+
+        $z0 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: boolean publishStatusPage>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.io.InputStream getInput()>();
+
+        virtualinvoke $r1.<java.io.InputStream: void close()>();
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: void setStatus(int)>(200);
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: void setContentTypeResponseHeader(java.lang.String)>("text/html; charset=utf-8");
+
+        $r2 = new java.io.PrintWriter;
+
+        $r3 = new java.io.OutputStreamWriter;
+
+        $r4 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.io.OutputStream getOutput()>();
+
+        specialinvoke $r3.<java.io.OutputStreamWriter: void <init>(java.io.OutputStream,java.lang.String)>($r4, "UTF-8");
+
+        specialinvoke $r2.<java.io.PrintWriter: void <init>(java.io.Writer)>($r3);
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("<html>");
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("<head><title>");
+
+        $r5 = staticinvoke <com.sun.xml.internal.ws.resources.WsservletMessages: java.lang.String SERVLET_HTML_TITLE()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r5);
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("</title></head>");
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("<body>");
+
+        $r6 = staticinvoke <com.sun.xml.internal.ws.resources.WsservletMessages: java.lang.String SERVLET_HTML_TITLE_2()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke r7.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.api.server.WSEndpoint getEndpoint()>();
+
+        $r9 = virtualinvoke $r8.<com.sun.xml.internal.ws.api.server.WSEndpoint: com.sun.xml.internal.ws.api.server.Container getContainer()>();
+
+        $r10 = virtualinvoke $r9.<com.sun.xml.internal.ws.api.server.Container: java.lang.Object getSPI(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/api/server/Module;");
+
+        r11 = (com.sun.xml.internal.ws.api.server.Module) $r10;
+
+        r30 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+        if r11 == null goto label2;
+
+        r30 = virtualinvoke r11.<com.sun.xml.internal.ws.api.server.Module: java.util.List getBoundEndpoints()>();
+
+     label2:
+        $z1 = interfaceinvoke r30.<java.util.List: boolean isEmpty()>();
+
+        if $z1 == 0 goto label3;
+
+        $r29 = staticinvoke <com.sun.xml.internal.ws.resources.WsservletMessages: java.lang.String SERVLET_HTML_NO_INFO_AVAILABLE()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r29);
+
+        goto label6;
+
+     label3:
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("<table width=\'100%\' border=\'1\'>");
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("<tr>");
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("<td>");
+
+        $r12 = staticinvoke <com.sun.xml.internal.ws.resources.WsservletMessages: java.lang.String SERVLET_HTML_COLUMN_HEADER_PORT_NAME()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r12);
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("</td>");
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("<td>");
+
+        $r13 = staticinvoke <com.sun.xml.internal.ws.resources.WsservletMessages: java.lang.String SERVLET_HTML_COLUMN_HEADER_INFORMATION()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r13);
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("</td>");
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("</tr>");
+
+        $r14 = interfaceinvoke r30.<java.util.List: java.util.Iterator iterator()>();
+
+     label4:
+        $z2 = interfaceinvoke $r14.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label5;
+
+        $r15 = interfaceinvoke $r14.<java.util.Iterator: java.lang.Object next()>();
+
+        r16 = (com.sun.xml.internal.ws.api.server.BoundEndpoint) $r15;
+
+        $r17 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.WSHTTPConnection: java.lang.String getBaseAddress()>();
+
+        $r18 = interfaceinvoke r16.<com.sun.xml.internal.ws.api.server.BoundEndpoint: java.net.URI getAddress(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.net.URI: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("<tr>");
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("<td>");
+
+        $r20 = interfaceinvoke r16.<com.sun.xml.internal.ws.api.server.BoundEndpoint: com.sun.xml.internal.ws.api.server.WSEndpoint getEndpoint()>();
+
+        $r21 = virtualinvoke $r20.<com.sun.xml.internal.ws.api.server.WSEndpoint: javax.xml.namespace.QName getServiceName()>();
+
+        $r22 = interfaceinvoke r16.<com.sun.xml.internal.ws.api.server.BoundEndpoint: com.sun.xml.internal.ws.api.server.WSEndpoint getEndpoint()>();
+
+        $r23 = virtualinvoke $r22.<com.sun.xml.internal.ws.api.server.WSEndpoint: javax.xml.namespace.QName getPortName()>();
+
+        $r24 = staticinvoke <com.sun.xml.internal.ws.resources.WsservletMessages: java.lang.String SERVLET_HTML_ENDPOINT_TABLE(java.lang.Object,java.lang.Object)>($r21, $r23);
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r24);
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("</td>");
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("<td>");
+
+        $r25 = interfaceinvoke r16.<com.sun.xml.internal.ws.api.server.BoundEndpoint: com.sun.xml.internal.ws.api.server.WSEndpoint getEndpoint()>();
+
+        $r26 = virtualinvoke $r25.<com.sun.xml.internal.ws.api.server.WSEndpoint: java.lang.Class getImplementationClass()>();
+
+        $r27 = virtualinvoke $r26.<java.lang.Class: java.lang.String getName()>();
+
+        $r28 = staticinvoke <com.sun.xml.internal.ws.resources.WsservletMessages: java.lang.String SERVLET_HTML_INFORMATION_TABLE(java.lang.Object,java.lang.Object)>($r19, $r27);
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r28);
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("</td>");
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("</tr>");
+
+        goto label4;
+
+     label5:
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("</table>");
+
+     label6:
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("</body>");
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("</html>");
+
+        virtualinvoke $r2.<java.io.PrintWriter: void close()>();
+
+        return;
+    }
+
+    public static synchronized void setPublishStatus(boolean)
+    {
+        boolean z0;
+
+        z0 := @parameter0: boolean;
+
+        <com.sun.xml.internal.ws.transport.http.HttpAdapter: boolean publishStatusPage> = z0;
+
+        return;
+    }
+
+    public static void setDump(boolean)
+    {
+        boolean z0;
+
+        z0 := @parameter0: boolean;
+
+        <com.sun.xml.internal.ws.transport.http.HttpAdapter: boolean dump> = z0;
+
+        return;
+    }
+
+    protected volatile com.sun.xml.internal.ws.api.server.Adapter$Toolkit createToolkit()
+    {
+        com.sun.xml.internal.ws.transport.http.HttpAdapter$HttpToolkit $r1;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r0;
+
+        r0 := @this: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.transport.http.HttpAdapter$HttpToolkit createToolkit()>();
+
+        return $r1;
+    }
+
+    static void access$100(com.sun.xml.internal.ws.transport.http.HttpAdapter, com.sun.xml.internal.ws.api.message.Packet, com.sun.xml.internal.ws.transport.http.WSHTTPConnection, com.sun.xml.internal.ws.api.pipe.Codec) throws java.io.IOException
+    {
+        com.sun.xml.internal.ws.api.message.Packet r1;
+        com.sun.xml.internal.ws.transport.http.WSHTTPConnection r2;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r0;
+        com.sun.xml.internal.ws.api.pipe.Codec r3;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        r1 := @parameter1: com.sun.xml.internal.ws.api.message.Packet;
+
+        r2 := @parameter2: com.sun.xml.internal.ws.transport.http.WSHTTPConnection;
+
+        r3 := @parameter3: com.sun.xml.internal.ws.api.pipe.Codec;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: void encodePacket(com.sun.xml.internal.ws.api.message.Packet,com.sun.xml.internal.ws.transport.http.WSHTTPConnection,com.sun.xml.internal.ws.api.pipe.Codec)>(r1, r2, r3);
+
+        return;
+    }
+
+    static java.util.logging.Logger access$200()
+    {
+        java.util.logging.Logger $r0;
+
+        $r0 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.logging.Logger LOGGER>;
+
+        return $r0;
+    }
+
+    static com.sun.xml.internal.ws.api.server.WSEndpoint access$300(com.sun.xml.internal.ws.transport.http.HttpAdapter)
+    {
+        com.sun.xml.internal.ws.api.server.WSEndpoint $r1;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r0;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.api.server.WSEndpoint endpoint>;
+
+        return $r1;
+    }
+
+    static void access$400(com.sun.xml.internal.ws.util.ByteArrayBuffer, java.lang.String, java.util.Map) throws java.io.IOException
+    {
+        com.sun.xml.internal.ws.util.ByteArrayBuffer r0;
+        java.lang.String r1;
+        java.util.Map r2;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.util.ByteArrayBuffer;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.util.Map;
+
+        staticinvoke <com.sun.xml.internal.ws.transport.http.HttpAdapter: void dump(com.sun.xml.internal.ws.util.ByteArrayBuffer,java.lang.String,java.util.Map)>(r0, r1, r2);
+
+        return;
+    }
+
+    static com.sun.xml.internal.ws.api.message.Packet access$500(com.sun.xml.internal.ws.transport.http.HttpAdapter, com.sun.xml.internal.ws.transport.http.WSHTTPConnection, com.sun.xml.internal.ws.api.pipe.Codec) throws java.io.IOException
+    {
+        com.sun.xml.internal.ws.api.message.Packet $r3;
+        com.sun.xml.internal.ws.transport.http.WSHTTPConnection r1;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r0;
+        com.sun.xml.internal.ws.api.pipe.Codec r2;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        r1 := @parameter1: com.sun.xml.internal.ws.transport.http.WSHTTPConnection;
+
+        r2 := @parameter2: com.sun.xml.internal.ws.api.pipe.Codec;
+
+        $r3 = specialinvoke r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.api.message.Packet decodePacket(com.sun.xml.internal.ws.transport.http.WSHTTPConnection,com.sun.xml.internal.ws.api.pipe.Codec)>(r1, r2);
+
+        return $r3;
+    }
+
+    static void access$600(com.sun.xml.internal.ws.transport.http.HttpAdapter, com.sun.xml.internal.ws.transport.http.WSHTTPConnection) throws java.io.IOException
+    {
+        com.sun.xml.internal.ws.transport.http.WSHTTPConnection r1;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r0;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        r1 := @parameter1: com.sun.xml.internal.ws.transport.http.WSHTTPConnection;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: void writeInternalServerError(com.sun.xml.internal.ws.transport.http.WSHTTPConnection)>(r1);
+
+        return;
+    }
+
+    static java.util.Map access$700(com.sun.xml.internal.ws.transport.http.HttpAdapter)
+    {
+        com.sun.xml.internal.ws.transport.http.HttpAdapter r0;
+        java.util.Map $r1;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.transport.http.HttpAdapter;
+
+        $r1 = r0.<com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.Map revWsdls>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Integer $r53;
+        java.lang.StringBuilder $r5, $r8, $r9, $r15, $r20, $r21, $r27, $r32, $r33, $r39, $r44, $r45, $r47, $r50, $r51, $r54, $r57, $r58;
+        java.lang.Object[] $r14, $r26, $r38;
+        java.lang.String $r2, $r7, $r10, $r19, $r22, $r31, $r34, $r43, $r46, $r49, $r52, $r56, $r59;
+        java.lang.SecurityException $r11, $r23, $r35;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        com.sun.xml.internal.ws.transport.http.HttpAdapter$2 $r4;
+        java.util.logging.Logger $r3, $r13, $r16, $r25, $r28, $r37, $r40;
+        java.util.logging.Level $r12, $r17, $r24, $r29, $r36, $r41;
+        int $i0;
+        java.lang.Class $r0, $r1, $r6, $r18, $r30, $r42, $r48, $r55;
+
+        $r0 = class "Lcom/sun/xml/internal/ws/transport/http/HttpAdapter;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label01;
+
+        $z5 = 1;
+
+        goto label02;
+
+     label01:
+        $z5 = 0;
+
+     label02:
+        <com.sun.xml.internal.ws.transport.http.HttpAdapter: boolean $assertionsDisabled> = $z5;
+
+        $r1 = class "Lcom/sun/xml/internal/ws/transport/http/HttpAdapter;";
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.String getName()>();
+
+        $r3 = staticinvoke <java.util.logging.Logger: java.util.logging.Logger getLogger(java.lang.String)>($r2);
+
+        <com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.logging.Logger LOGGER> = $r3;
+
+        $r4 = new com.sun.xml.internal.ws.transport.http.HttpAdapter$2;
+
+        specialinvoke $r4.<com.sun.xml.internal.ws.transport.http.HttpAdapter$2: void <init>()>();
+
+        <com.sun.xml.internal.ws.transport.http.HttpAdapter: com.sun.xml.internal.ws.transport.http.HttpAdapter$CompletionCallback NO_OP_COMPLETION_CALLBACK> = $r4;
+
+        <com.sun.xml.internal.ws.transport.http.HttpAdapter: boolean dump> = 0;
+
+        <com.sun.xml.internal.ws.transport.http.HttpAdapter: int dump_threshold> = 4096;
+
+        <com.sun.xml.internal.ws.transport.http.HttpAdapter: boolean publishStatusPage> = 1;
+
+     label03:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = class "Lcom/sun/xml/internal/ws/transport/http/HttpAdapter;";
+
+        $r7 = virtualinvoke $r6.<java.lang.Class: java.lang.String getName()>();
+
+        $r8 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".dump");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $z1 = staticinvoke <java.lang.Boolean: boolean getBoolean(java.lang.String)>($r10);
+
+        <com.sun.xml.internal.ws.transport.http.HttpAdapter: boolean dump> = $z1;
+
+     label04:
+        goto label06;
+
+     label05:
+        $r35 := @caughtexception;
+
+        $r37 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.logging.Logger LOGGER>;
+
+        $r36 = <java.util.logging.Level: java.util.logging.Level CONFIG>;
+
+        $z4 = virtualinvoke $r37.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r36);
+
+        if $z4 == 0 goto label06;
+
+        $r40 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.logging.Logger LOGGER>;
+
+        $r41 = <java.util.logging.Level: java.util.logging.Level CONFIG>;
+
+        $r38 = newarray (java.lang.Object)[1];
+
+        $r39 = new java.lang.StringBuilder;
+
+        specialinvoke $r39.<java.lang.StringBuilder: void <init>()>();
+
+        $r42 = class "Lcom/sun/xml/internal/ws/transport/http/HttpAdapter;";
+
+        $r43 = virtualinvoke $r42.<java.lang.Class: java.lang.String getName()>();
+
+        $r44 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r43);
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".dump");
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r38[0] = $r46;
+
+        virtualinvoke $r40.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r41, "Cannot read \'\'{0}\'\' property, using defaults.", $r38);
+
+     label06:
+        $r47 = new java.lang.StringBuilder;
+
+        specialinvoke $r47.<java.lang.StringBuilder: void <init>()>();
+
+        $r48 = class "Lcom/sun/xml/internal/ws/transport/http/HttpAdapter;";
+
+        $r49 = virtualinvoke $r48.<java.lang.Class: java.lang.String getName()>();
+
+        $r50 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r49);
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".dumpTreshold");
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r53 = staticinvoke <java.lang.Integer: java.lang.Integer getInteger(java.lang.String,int)>($r52, 4096);
+
+        $i0 = virtualinvoke $r53.<java.lang.Integer: int intValue()>();
+
+        <com.sun.xml.internal.ws.transport.http.HttpAdapter: int dump_threshold> = $i0;
+
+     label07:
+        goto label09;
+
+     label08:
+        $r23 := @caughtexception;
+
+        $r25 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.logging.Logger LOGGER>;
+
+        $r24 = <java.util.logging.Level: java.util.logging.Level CONFIG>;
+
+        $z3 = virtualinvoke $r25.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r24);
+
+        if $z3 == 0 goto label09;
+
+        $r28 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.logging.Logger LOGGER>;
+
+        $r29 = <java.util.logging.Level: java.util.logging.Level CONFIG>;
+
+        $r26 = newarray (java.lang.Object)[1];
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r30 = class "Lcom/sun/xml/internal/ws/transport/http/HttpAdapter;";
+
+        $r31 = virtualinvoke $r30.<java.lang.Class: java.lang.String getName()>();
+
+        $r32 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r31);
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".dumpTreshold");
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r26[0] = $r34;
+
+        virtualinvoke $r28.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r29, "Cannot read \'\'{0}\'\' property, using defaults.", $r26);
+
+     label09:
+        $r54 = new java.lang.StringBuilder;
+
+        specialinvoke $r54.<java.lang.StringBuilder: void <init>()>();
+
+        $r55 = class "Lcom/sun/xml/internal/ws/transport/http/HttpAdapter;";
+
+        $r56 = virtualinvoke $r55.<java.lang.Class: java.lang.String getName()>();
+
+        $r57 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r56);
+
+        $r58 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".publishStatusPage");
+
+        $r59 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $z6 = staticinvoke <java.lang.Boolean: boolean getBoolean(java.lang.String)>($r59);
+
+        staticinvoke <com.sun.xml.internal.ws.transport.http.HttpAdapter: void setPublishStatus(boolean)>($z6);
+
+     label10:
+        goto label12;
+
+     label11:
+        $r11 := @caughtexception;
+
+        $r13 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.logging.Logger LOGGER>;
+
+        $r12 = <java.util.logging.Level: java.util.logging.Level CONFIG>;
+
+        $z2 = virtualinvoke $r13.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r12);
+
+        if $z2 == 0 goto label12;
+
+        $r16 = <com.sun.xml.internal.ws.transport.http.HttpAdapter: java.util.logging.Logger LOGGER>;
+
+        $r17 = <java.util.logging.Level: java.util.logging.Level CONFIG>;
+
+        $r14 = newarray (java.lang.Object)[1];
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = class "Lcom/sun/xml/internal/ws/transport/http/HttpAdapter;";
+
+        $r19 = virtualinvoke $r18.<java.lang.Class: java.lang.String getName()>();
+
+        $r20 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".publishStatusPage");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r14[0] = $r22;
+
+        virtualinvoke $r16.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r17, "Cannot read \'\'{0}\'\' property, using defaults.", $r14);
+
+     label12:
+        return;
+
+        catch java.lang.SecurityException from label03 to label04 with label05;
+        catch java.lang.SecurityException from label06 to label07 with label08;
+        catch java.lang.SecurityException from label09 to label10 with label11;
+    }
+}

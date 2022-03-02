@@ -1,0 +1,615 @@
+class com.sun.media.sound.SoftJitterCorrector$JitterStream extends java.io.InputStream
+{
+    static int MAX_BUFFER_SIZE;
+    boolean active;
+    java.lang.Thread thread;
+    javax.sound.sampled.AudioInputStream stream;
+    int writepos;
+    int readpos;
+    byte[][] buffers;
+    private final java.lang.Object buffers_mutex;
+    int w_count;
+    int w_min_tol;
+    int w_max_tol;
+    int w;
+    int w_min;
+    int bbuffer_pos;
+    int bbuffer_max;
+    byte[] bbuffer;
+
+    public byte[] nextReadBuffer()
+    {
+        byte[] $r5, $r8;
+        com.sun.media.sound.SoftJitterCorrector$JitterStream r0;
+        byte[][] $r3, $r4, $r6, $r7;
+        java.lang.Throwable $r9, $r11;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, i20, i21, $i23, $i25;
+        java.lang.InterruptedException $r10;
+        java.lang.Object $r1, $r2;
+
+        r0 := @this: com.sun.media.sound.SoftJitterCorrector$JitterStream;
+
+        $r1 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: java.lang.Object buffers_mutex>;
+
+        entermonitor $r1;
+
+     label01:
+        $i1 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int writepos>;
+
+        $i0 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int readpos>;
+
+        if $i1 <= $i0 goto label04;
+
+        $i13 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int writepos>;
+
+        $i12 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int readpos>;
+
+        i20 = $i13 - $i12;
+
+        $i14 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int w_min>;
+
+        if i20 >= $i14 goto label02;
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int w_min> = i20;
+
+     label02:
+        $i19 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int readpos>;
+
+        $i15 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int readpos>;
+
+        $i16 = $i15 + 1;
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int readpos> = $i16;
+
+        $r7 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: byte[][] buffers>;
+
+        $r6 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: byte[][] buffers>;
+
+        $i17 = lengthof $r6;
+
+        $i18 = $i19 % $i17;
+
+        $r8 = $r7[$i18];
+
+        exitmonitor $r1;
+
+     label03:
+        return $r8;
+
+     label04:
+        $i23 = (int) -1;
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int w_min> = $i23;
+
+        $i2 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int w_count>;
+
+        $i3 = $i2 - 1;
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int w> = $i3;
+
+        exitmonitor $r1;
+
+     label05:
+        goto label08;
+
+     label06:
+        $r11 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label07:
+        throw $r11;
+
+     label08:
+        staticinvoke <java.lang.Thread: void sleep(long)>(1L);
+
+     label09:
+        goto label11;
+
+     label10:
+        $r10 := @caughtexception;
+
+        return null;
+
+     label11:
+        $r2 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: java.lang.Object buffers_mutex>;
+
+        entermonitor $r2;
+
+     label12:
+        $i5 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int writepos>;
+
+        $i4 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int readpos>;
+
+        if $i5 <= $i4 goto label14;
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int w> = 0;
+
+        $i25 = (int) -1;
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int w_min> = $i25;
+
+        $i6 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int w_count>;
+
+        $i7 = $i6 - 1;
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int w> = $i7;
+
+        i21 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int readpos>;
+
+        $i8 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int readpos>;
+
+        $i9 = $i8 + 1;
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int readpos> = $i9;
+
+        $r4 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: byte[][] buffers>;
+
+        $r3 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: byte[][] buffers>;
+
+        $i10 = lengthof $r3;
+
+        $i11 = i21 % $i10;
+
+        $r5 = $r4[$i11];
+
+        exitmonitor $r2;
+
+     label13:
+        return $r5;
+
+     label14:
+        exitmonitor $r2;
+
+     label15:
+        goto label18;
+
+     label16:
+        $r9 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label17:
+        throw $r9;
+
+     label18:
+        goto label08;
+
+        catch java.lang.Throwable from label01 to label03 with label06;
+        catch java.lang.Throwable from label04 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+        catch java.lang.InterruptedException from label08 to label09 with label10;
+        catch java.lang.Throwable from label12 to label13 with label16;
+        catch java.lang.Throwable from label14 to label15 with label16;
+        catch java.lang.Throwable from label16 to label17 with label16;
+    }
+
+    public byte[] nextWriteBuffer()
+    {
+        java.lang.Throwable $r5;
+        byte[] $r4;
+        com.sun.media.sound.SoftJitterCorrector$JitterStream r0;
+        byte[][] $r2, $r3;
+        int $i0, $i1, $i2;
+        java.lang.Object $r1;
+
+        r0 := @this: com.sun.media.sound.SoftJitterCorrector$JitterStream;
+
+        $r1 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: java.lang.Object buffers_mutex>;
+
+        entermonitor $r1;
+
+     label1:
+        $r3 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: byte[][] buffers>;
+
+        $i1 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int writepos>;
+
+        $r2 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: byte[][] buffers>;
+
+        $i0 = lengthof $r2;
+
+        $i2 = $i1 % $i0;
+
+        $r4 = $r3[$i2];
+
+        exitmonitor $r1;
+
+     label2:
+        return $r4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void commit()
+    {
+        java.lang.Throwable $r7;
+        byte[] $r5;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, i13;
+        com.sun.media.sound.SoftJitterCorrector$JitterStream r0;
+        byte[][] $r2, $r3, $r4, $r6;
+        java.lang.Object $r1;
+
+        r0 := @this: com.sun.media.sound.SoftJitterCorrector$JitterStream;
+
+        $r1 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: java.lang.Object buffers_mutex>;
+
+        entermonitor $r1;
+
+     label1:
+        $i0 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int writepos>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int writepos> = $i1;
+
+        $i3 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int writepos>;
+
+        $i2 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int readpos>;
+
+        $i5 = $i3 - $i2;
+
+        $r2 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: byte[][] buffers>;
+
+        $i4 = lengthof $r2;
+
+        if $i5 <= $i4 goto label2;
+
+        $i7 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int writepos>;
+
+        $i6 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int readpos>;
+
+        $i8 = $i7 - $i6;
+
+        i13 = $i8 + 10;
+
+        $r3 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: byte[][] buffers>;
+
+        $i9 = lengthof $r3;
+
+        $i10 = $i9 * 2;
+
+        $i11 = staticinvoke <java.lang.Math: int max(int,int)>($i10, i13);
+
+        $r4 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: byte[][] buffers>;
+
+        $r5 = $r4[0];
+
+        $i12 = lengthof $r5;
+
+        $r6 = newmultiarray (byte)[$i11][$i12];
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: byte[][] buffers> = $r6;
+
+     label2:
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r7 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r7;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    void <init>(javax.sound.sampled.AudioInputStream, int, int)
+    {
+        java.lang.Thread $r6, $r7, $r8, $r11;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i10;
+        javax.sound.sampled.AudioInputStream r3;
+        com.sun.media.sound.SoftJitterCorrector$JitterStream$1 $r10;
+        com.sun.media.sound.SoftJitterCorrector$JitterStream r0;
+        byte[][] $r2;
+        java.lang.Object $r9;
+
+        r0 := @this: com.sun.media.sound.SoftJitterCorrector$JitterStream;
+
+        r3 := @parameter0: javax.sound.sampled.AudioInputStream;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<java.io.InputStream: void <init>()>();
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: boolean active> = 1;
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int writepos> = 0;
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int readpos> = 0;
+
+        $r9 = new java.lang.Object;
+
+        specialinvoke $r9.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: java.lang.Object buffers_mutex> = $r9;
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int w_count> = 1000;
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int w_min_tol> = 2;
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int w_max_tol> = 10;
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int w> = 0;
+
+        $i10 = (int) -1;
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int w_min> = $i10;
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int bbuffer_pos> = 0;
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int bbuffer_max> = 0;
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: byte[] bbuffer> = null;
+
+        $i2 = i0 / i1;
+
+        $i3 = 10 * $i2;
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int w_count> = $i3;
+
+        $i4 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int w_count>;
+
+        if $i4 >= 100 goto label1;
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int w_count> = 100;
+
+     label1:
+        $i5 = i0 / i1;
+
+        $i6 = $i5 + 10;
+
+        $r2 = newmultiarray (byte)[$i6][i1];
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: byte[][] buffers> = $r2;
+
+        $i7 = <com.sun.media.sound.SoftJitterCorrector$JitterStream: int MAX_BUFFER_SIZE>;
+
+        $i8 = $i7 / i1;
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int bbuffer_max> = $i8;
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: javax.sound.sampled.AudioInputStream stream> = r3;
+
+        $r10 = new com.sun.media.sound.SoftJitterCorrector$JitterStream$1;
+
+        specialinvoke $r10.<com.sun.media.sound.SoftJitterCorrector$JitterStream$1: void <init>(com.sun.media.sound.SoftJitterCorrector$JitterStream)>(r0);
+
+        $r11 = new java.lang.Thread;
+
+        specialinvoke $r11.<java.lang.Thread: void <init>(java.lang.Runnable)>($r10);
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: java.lang.Thread thread> = $r11;
+
+        $r6 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: java.lang.Thread thread>;
+
+        virtualinvoke $r6.<java.lang.Thread: void setDaemon(boolean)>(1);
+
+        $r7 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: java.lang.Thread thread>;
+
+        virtualinvoke $r7.<java.lang.Thread: void setPriority(int)>(10);
+
+        $r8 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: java.lang.Thread thread>;
+
+        virtualinvoke $r8.<java.lang.Thread: void start()>();
+
+        return;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        java.lang.Throwable $r4;
+        java.lang.InterruptedException $r3;
+        java.lang.Thread $r1;
+        javax.sound.sampled.AudioInputStream $r2;
+        com.sun.media.sound.SoftJitterCorrector$JitterStream r0;
+
+        r0 := @this: com.sun.media.sound.SoftJitterCorrector$JitterStream;
+
+        entermonitor r0;
+
+     label1:
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: boolean active> = 0;
+
+        exitmonitor r0;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r4;
+
+     label5:
+        $r1 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: java.lang.Thread thread>;
+
+        virtualinvoke $r1.<java.lang.Thread: void join()>();
+
+     label6:
+        goto label8;
+
+     label7:
+        $r3 := @caughtexception;
+
+     label8:
+        $r2 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: javax.sound.sampled.AudioInputStream stream>;
+
+        virtualinvoke $r2.<javax.sound.sampled.AudioInputStream: void close()>();
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+        catch java.lang.InterruptedException from label5 to label6 with label7;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        byte[] r0;
+        com.sun.media.sound.SoftJitterCorrector$JitterStream r1;
+        short $s2, $s7;
+        byte $b1;
+        int $i0, $i4, $i6, $i8;
+
+        r1 := @this: com.sun.media.sound.SoftJitterCorrector$JitterStream;
+
+        r0 = newarray (byte)[1];
+
+        $i0 = virtualinvoke r1.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int read(byte[])>(r0);
+
+        $i4 = (int) -1;
+
+        if $i0 != $i4 goto label1;
+
+        $i6 = (int) -1;
+
+        return $i6;
+
+     label1:
+        $b1 = r0[0];
+
+        $s7 = (short) $b1;
+
+        $s2 = $s7 & 255;
+
+        $i8 = (int) $s2;
+
+        return $i8;
+    }
+
+    public void fillBuffer()
+    {
+        byte[] $r1;
+        com.sun.media.sound.SoftJitterCorrector$JitterStream r0;
+
+        r0 := @this: com.sun.media.sound.SoftJitterCorrector$JitterStream;
+
+        $r1 = virtualinvoke r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: byte[] nextReadBuffer()>();
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: byte[] bbuffer> = $r1;
+
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int bbuffer_pos> = 0;
+
+        return;
+    }
+
+    public int read(byte[], int, int)
+    {
+        byte[] $r1, $r2, r3, r4;
+        com.sun.media.sound.SoftJitterCorrector$JitterStream r0;
+        byte $b4;
+        int i0, $i1, $i2, $i3, $i5, $i6, i7, i8;
+
+        r0 := @this: com.sun.media.sound.SoftJitterCorrector$JitterStream;
+
+        r4 := @parameter0: byte[];
+
+        i7 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        $r1 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: byte[] bbuffer>;
+
+        if $r1 != null goto label1;
+
+        virtualinvoke r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: void fillBuffer()>();
+
+     label1:
+        $r2 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: byte[] bbuffer>;
+
+        $i5 = lengthof $r2;
+
+        $i6 = i7 + i0;
+
+     label2:
+        if i7 >= $i6 goto label6;
+
+        $i1 = virtualinvoke r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int available()>();
+
+        if $i1 != 0 goto label3;
+
+        virtualinvoke r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: void fillBuffer()>();
+
+        goto label2;
+
+     label3:
+        r3 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: byte[] bbuffer>;
+
+        i8 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int bbuffer_pos>;
+
+     label4:
+        if i7 >= $i6 goto label5;
+
+        if i8 >= $i5 goto label5;
+
+        $i2 = i7;
+
+        i7 = i7 + 1;
+
+        $i3 = i8;
+
+        i8 = i8 + 1;
+
+        $b4 = r3[$i3];
+
+        r4[$i2] = $b4;
+
+        goto label4;
+
+     label5:
+        r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int bbuffer_pos> = i8;
+
+        goto label2;
+
+     label6:
+        return i0;
+    }
+
+    public int available()
+    {
+        byte[] $r1;
+        int $i0, $i1, $i2;
+        com.sun.media.sound.SoftJitterCorrector$JitterStream r0;
+
+        r0 := @this: com.sun.media.sound.SoftJitterCorrector$JitterStream;
+
+        $r1 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: byte[] bbuffer>;
+
+        $i1 = lengthof $r1;
+
+        $i0 = r0.<com.sun.media.sound.SoftJitterCorrector$JitterStream: int bbuffer_pos>;
+
+        $i2 = $i1 - $i0;
+
+        return $i2;
+    }
+
+    static void <clinit>()
+    {
+        <com.sun.media.sound.SoftJitterCorrector$JitterStream: int MAX_BUFFER_SIZE> = 1048576;
+
+        return;
+    }
+}

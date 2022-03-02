@@ -1,0 +1,1416 @@
+public class sun.nio.ch.DatagramSocketAdaptor extends java.net.DatagramSocket
+{
+    private final sun.nio.ch.DatagramChannelImpl dc;
+    private volatile int timeout;
+    private static final java.net.DatagramSocketImpl dummyDatagramSocket;
+
+    private void <init>(sun.nio.ch.DatagramChannelImpl) throws java.io.IOException
+    {
+        sun.nio.ch.DatagramChannelImpl r2;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        java.net.DatagramSocketImpl $r1;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        r2 := @parameter0: sun.nio.ch.DatagramChannelImpl;
+
+        $r1 = <sun.nio.ch.DatagramSocketAdaptor: java.net.DatagramSocketImpl dummyDatagramSocket>;
+
+        specialinvoke r0.<java.net.DatagramSocket: void <init>(java.net.DatagramSocketImpl)>($r1);
+
+        r0.<sun.nio.ch.DatagramSocketAdaptor: int timeout> = 0;
+
+        r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc> = r2;
+
+        return;
+    }
+
+    public static java.net.DatagramSocket create(sun.nio.ch.DatagramChannelImpl)
+    {
+        sun.nio.ch.DatagramChannelImpl r1;
+        java.lang.Error $r3;
+        java.io.IOException $r2;
+        sun.nio.ch.DatagramSocketAdaptor $r0;
+
+        r1 := @parameter0: sun.nio.ch.DatagramChannelImpl;
+
+     label1:
+        $r0 = new sun.nio.ch.DatagramSocketAdaptor;
+
+        specialinvoke $r0.<sun.nio.ch.DatagramSocketAdaptor: void <init>(sun.nio.ch.DatagramChannelImpl)>(r1);
+
+     label2:
+        return $r0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new java.lang.Error;
+
+        specialinvoke $r3.<java.lang.Error: void <init>(java.lang.Throwable)>($r2);
+
+        throw $r3;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    private void connectInternal(java.net.SocketAddress) throws java.net.SocketException
+    {
+        java.net.SocketAddress r0;
+        java.lang.IllegalArgumentException $r12, $r13;
+        java.net.InetSocketAddress $r1;
+        java.lang.Exception $r10;
+        sun.nio.ch.DatagramChannelImpl $r8;
+        int $i0, $i2;
+        java.lang.StringBuilder $r4, $r5, $r11;
+        java.lang.String $r6;
+        sun.nio.ch.DatagramSocketAdaptor r7;
+        boolean $z0;
+
+        r7 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        r0 := @parameter0: java.net.SocketAddress;
+
+        $r1 = staticinvoke <sun.nio.ch.Net: java.net.InetSocketAddress asInetSocketAddress(java.net.SocketAddress)>(r0);
+
+        $i0 = virtualinvoke $r1.<java.net.InetSocketAddress: int getPort()>();
+
+        if $i0 < 0 goto label1;
+
+        $i2 = (int) 65535;
+
+        if $i0 <= $i2 goto label2;
+
+     label1:
+        $r12 = new java.lang.IllegalArgumentException;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("connect: ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r12.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r6);
+
+        throw $r12;
+
+     label2:
+        if r0 != null goto label3;
+
+        $r13 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r13.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("connect: null address");
+
+        throw $r13;
+
+     label3:
+        $z0 = virtualinvoke r7.<sun.nio.ch.DatagramSocketAdaptor: boolean isClosed()>();
+
+        if $z0 == 0 goto label4;
+
+        return;
+
+     label4:
+        $r8 = r7.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        virtualinvoke $r8.<sun.nio.ch.DatagramChannelImpl: java.nio.channels.DatagramChannel connect(java.net.SocketAddress)>(r0);
+
+     label5:
+        goto label7;
+
+     label6:
+        $r10 := @caughtexception;
+
+        staticinvoke <sun.nio.ch.Net: void translateToSocketException(java.lang.Exception)>($r10);
+
+     label7:
+        return;
+
+        catch java.lang.Exception from label4 to label5 with label6;
+    }
+
+    public void bind(java.net.SocketAddress) throws java.net.SocketException
+    {
+        sun.nio.ch.DatagramChannelImpl $r1;
+        java.net.SocketAddress r4;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        java.net.InetSocketAddress $r2;
+        java.lang.Exception $r3;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        r4 := @parameter0: java.net.SocketAddress;
+
+     label1:
+        if r4 != null goto label2;
+
+        $r2 = new java.net.InetSocketAddress;
+
+        specialinvoke $r2.<java.net.InetSocketAddress: void <init>(int)>(0);
+
+        r4 = $r2;
+
+     label2:
+        $r1 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        virtualinvoke $r1.<sun.nio.ch.DatagramChannelImpl: java.nio.channels.DatagramChannel bind(java.net.SocketAddress)>(r4);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r3 := @caughtexception;
+
+        staticinvoke <sun.nio.ch.Net: void translateToSocketException(java.lang.Exception)>($r3);
+
+     label5:
+        return;
+
+        catch java.lang.Exception from label1 to label3 with label4;
+    }
+
+    public void connect(java.net.InetAddress, int)
+    {
+        java.net.InetAddress r2;
+        java.net.SocketException $r3;
+        int i0;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        java.net.InetSocketAddress $r1;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        r2 := @parameter0: java.net.InetAddress;
+
+        i0 := @parameter1: int;
+
+     label1:
+        $r1 = new java.net.InetSocketAddress;
+
+        specialinvoke $r1.<java.net.InetSocketAddress: void <init>(java.net.InetAddress,int)>(r2, i0);
+
+        specialinvoke r0.<sun.nio.ch.DatagramSocketAdaptor: void connectInternal(java.net.SocketAddress)>($r1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+     label4:
+        return;
+
+        catch java.net.SocketException from label1 to label2 with label3;
+    }
+
+    public void connect(java.net.SocketAddress) throws java.net.SocketException
+    {
+        sun.nio.ch.DatagramSocketAdaptor r1;
+        java.net.SocketAddress r0;
+        java.lang.IllegalArgumentException $r2;
+
+        r1 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        r0 := @parameter0: java.net.SocketAddress;
+
+        if r0 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Address can\'t be null");
+
+        throw $r2;
+
+     label1:
+        specialinvoke r1.<sun.nio.ch.DatagramSocketAdaptor: void connectInternal(java.net.SocketAddress)>(r0);
+
+        return;
+    }
+
+    public void disconnect()
+    {
+        sun.nio.ch.DatagramChannelImpl $r1;
+        java.lang.Error $r3;
+        java.io.IOException $r2;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+     label1:
+        $r1 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        virtualinvoke $r1.<sun.nio.ch.DatagramChannelImpl: java.nio.channels.DatagramChannel disconnect()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new java.lang.Error;
+
+        specialinvoke $r3.<java.lang.Error: void <init>(java.lang.Throwable)>($r2);
+
+        throw $r3;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public boolean isBound()
+    {
+        sun.nio.ch.DatagramChannelImpl $r1;
+        java.net.SocketAddress $r2;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        $r1 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $r2 = virtualinvoke $r1.<sun.nio.ch.DatagramChannelImpl: java.net.SocketAddress localAddress()>();
+
+        if $r2 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean isConnected()
+    {
+        sun.nio.ch.DatagramChannelImpl $r1;
+        java.net.SocketAddress $r2;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        $r1 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $r2 = virtualinvoke $r1.<sun.nio.ch.DatagramChannelImpl: java.net.SocketAddress remoteAddress()>();
+
+        if $r2 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public java.net.InetAddress getInetAddress()
+    {
+        java.net.InetAddress $r4;
+        sun.nio.ch.DatagramChannelImpl $r1;
+        java.net.SocketAddress $r2;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        java.net.InetSocketAddress $r3;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        $z0 = virtualinvoke r0.<sun.nio.ch.DatagramSocketAdaptor: boolean isConnected()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $r2 = virtualinvoke $r1.<sun.nio.ch.DatagramChannelImpl: java.net.SocketAddress remoteAddress()>();
+
+        $r3 = staticinvoke <sun.nio.ch.Net: java.net.InetSocketAddress asInetSocketAddress(java.net.SocketAddress)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        goto label2;
+
+     label1:
+        $r4 = null;
+
+     label2:
+        return $r4;
+    }
+
+    public int getPort()
+    {
+        sun.nio.ch.DatagramChannelImpl $r1;
+        java.net.SocketAddress $r2;
+        int $i0, $i2;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        java.net.InetSocketAddress $r3;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        $z0 = virtualinvoke r0.<sun.nio.ch.DatagramSocketAdaptor: boolean isConnected()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $r2 = virtualinvoke $r1.<sun.nio.ch.DatagramChannelImpl: java.net.SocketAddress remoteAddress()>();
+
+        $r3 = staticinvoke <sun.nio.ch.Net: java.net.InetSocketAddress asInetSocketAddress(java.net.SocketAddress)>($r2);
+
+        $i0 = virtualinvoke $r3.<java.net.InetSocketAddress: int getPort()>();
+
+        goto label2;
+
+     label1:
+        $i2 = (int) -1;
+
+        $i0 = $i2;
+
+     label2:
+        return $i0;
+    }
+
+    public java.net.SocketAddress getLocalSocketAddress()
+    {
+        java.net.SocketAddress $r2;
+        java.net.InetSocketAddress r3, $r9;
+        java.lang.SecurityManager $r5;
+        java.net.InetAddress $r4;
+        sun.nio.ch.DatagramChannelImpl $r1;
+        int $i0, $i2;
+        java.lang.SecurityException $r7;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        java.lang.String $r6;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        $r1 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $r2 = virtualinvoke $r1.<sun.nio.ch.DatagramChannelImpl: java.net.SocketAddress localAddress()>();
+
+        r3 = (java.net.InetSocketAddress) $r2;
+
+        if r3 == null goto label1;
+
+        $z0 = virtualinvoke r0.<sun.nio.ch.DatagramSocketAdaptor: boolean isClosed()>();
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r4 = virtualinvoke r3.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $z1 = virtualinvoke $r4.<java.net.InetAddress: boolean isAnyLocalAddress()>();
+
+        if $z1 == 0 goto label3;
+
+        return r3;
+
+     label3:
+        $r5 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r5 == null goto label7;
+
+     label4:
+        $r6 = virtualinvoke $r4.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+        $i2 = (int) -1;
+
+        virtualinvoke $r5.<java.lang.SecurityManager: void checkConnect(java.lang.String,int)>($r6, $i2);
+
+     label5:
+        goto label7;
+
+     label6:
+        $r7 := @caughtexception;
+
+        $r9 = new java.net.InetSocketAddress;
+
+        $i0 = virtualinvoke r3.<java.net.InetSocketAddress: int getPort()>();
+
+        specialinvoke $r9.<java.net.InetSocketAddress: void <init>(int)>($i0);
+
+        return $r9;
+
+     label7:
+        return r3;
+
+        catch java.lang.SecurityException from label4 to label5 with label6;
+    }
+
+    public void send(java.net.DatagramPacket) throws java.io.IOException
+    {
+        java.lang.Throwable $r19, $r21;
+        byte[] $r5;
+        java.net.SocketAddress $r9, $r12, $r14;
+        java.nio.ByteBuffer $r6;
+        java.net.InetAddress $r10, $r16;
+        sun.nio.ch.DatagramChannelImpl $r1, $r3, $r7, $r8, $r11, $r13, $r17;
+        java.nio.channels.IllegalBlockingModeException $r18;
+        int $i0, $i1, $i2;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        boolean $z0, $z1;
+        java.io.IOException $r20;
+        java.net.InetSocketAddress r15;
+        java.lang.Object $r2;
+        java.net.DatagramPacket r4;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        r4 := @parameter0: java.net.DatagramPacket;
+
+        $r1 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $r2 = virtualinvoke $r1.<sun.nio.ch.DatagramChannelImpl: java.lang.Object blockingLock()>();
+
+        entermonitor $r2;
+
+     label01:
+        $r3 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $z0 = virtualinvoke $r3.<sun.nio.ch.DatagramChannelImpl: boolean isBlocking()>();
+
+        if $z0 != 0 goto label02;
+
+        $r18 = new java.nio.channels.IllegalBlockingModeException;
+
+        specialinvoke $r18.<java.nio.channels.IllegalBlockingModeException: void <init>()>();
+
+        throw $r18;
+
+     label02:
+        entermonitor r4;
+
+     label03:
+        $r5 = virtualinvoke r4.<java.net.DatagramPacket: byte[] getData()>();
+
+        $i0 = virtualinvoke r4.<java.net.DatagramPacket: int getOffset()>();
+
+        $i1 = virtualinvoke r4.<java.net.DatagramPacket: int getLength()>();
+
+        $r6 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[],int,int)>($r5, $i0, $i1);
+
+        $r7 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $z1 = virtualinvoke $r7.<sun.nio.ch.DatagramChannelImpl: boolean isConnected()>();
+
+        if $z1 == 0 goto label05;
+
+        $r10 = virtualinvoke r4.<java.net.DatagramPacket: java.net.InetAddress getAddress()>();
+
+        if $r10 != null goto label04;
+
+        $r13 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $r14 = virtualinvoke $r13.<sun.nio.ch.DatagramChannelImpl: java.net.SocketAddress remoteAddress()>();
+
+        r15 = (java.net.InetSocketAddress) $r14;
+
+        $i2 = virtualinvoke r15.<java.net.InetSocketAddress: int getPort()>();
+
+        virtualinvoke r4.<java.net.DatagramPacket: void setPort(int)>($i2);
+
+        $r16 = virtualinvoke r15.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        virtualinvoke r4.<java.net.DatagramPacket: void setAddress(java.net.InetAddress)>($r16);
+
+        $r17 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        virtualinvoke $r17.<sun.nio.ch.DatagramChannelImpl: int write(java.nio.ByteBuffer)>($r6);
+
+        goto label06;
+
+     label04:
+        $r11 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $r12 = virtualinvoke r4.<java.net.DatagramPacket: java.net.SocketAddress getSocketAddress()>();
+
+        virtualinvoke $r11.<sun.nio.ch.DatagramChannelImpl: int send(java.nio.ByteBuffer,java.net.SocketAddress)>($r6, $r12);
+
+        goto label06;
+
+     label05:
+        $r8 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $r9 = virtualinvoke r4.<java.net.DatagramPacket: java.net.SocketAddress getSocketAddress()>();
+
+        virtualinvoke $r8.<sun.nio.ch.DatagramChannelImpl: int send(java.nio.ByteBuffer,java.net.SocketAddress)>($r6, $r9);
+
+     label06:
+        exitmonitor r4;
+
+     label07:
+        goto label10;
+
+     label08:
+        $r21 := @caughtexception;
+
+        exitmonitor r4;
+
+     label09:
+        throw $r21;
+
+     label10:
+        goto label12;
+
+     label11:
+        $r20 := @caughtexception;
+
+        staticinvoke <sun.nio.ch.Net: void translateException(java.lang.Exception)>($r20);
+
+     label12:
+        exitmonitor $r2;
+
+     label13:
+        goto label16;
+
+     label14:
+        $r19 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label15:
+        throw $r19;
+
+     label16:
+        return;
+
+        catch java.lang.Throwable from label03 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+        catch java.io.IOException from label02 to label10 with label11;
+        catch java.lang.Throwable from label01 to label13 with label14;
+        catch java.lang.Throwable from label14 to label15 with label14;
+    }
+
+    private java.net.SocketAddress receive(java.nio.ByteBuffer) throws java.io.IOException
+    {
+        java.net.SocketAddress $r4, $r9, $r16;
+        java.nio.ByteBuffer r2;
+        byte $b11;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.Throwable $r17;
+        long $l2, l7, $l8, $l9, $l10;
+        sun.nio.ch.DatagramChannelImpl $r1, $r3, $r5, $r6, $r8, $r10, $r11, $r13, $r14, $r15, $r18, $r19;
+        short $s3, $s5;
+        java.net.SocketTimeoutException $r21;
+        int $i0, $i1, $i4, $i6, $i12, $i13, $i14;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        java.nio.channels.ClosedChannelException $r20;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        r2 := @parameter0: java.nio.ByteBuffer;
+
+        $i0 = r0.<sun.nio.ch.DatagramSocketAdaptor: int timeout>;
+
+        if $i0 != 0 goto label01;
+
+        $r15 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $r16 = virtualinvoke $r15.<sun.nio.ch.DatagramChannelImpl: java.net.SocketAddress receive(java.nio.ByteBuffer)>(r2);
+
+        return $r16;
+
+     label01:
+        $r1 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        virtualinvoke $r1.<sun.nio.ch.DatagramChannelImpl: java.nio.channels.SelectableChannel configureBlocking(boolean)>(0);
+
+     label02:
+        $r3 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $r4 = virtualinvoke $r3.<sun.nio.ch.DatagramChannelImpl: java.net.SocketAddress receive(java.nio.ByteBuffer)>(r2);
+
+        if $r4 == null goto label05;
+
+     label03:
+        $r13 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $z2 = virtualinvoke $r13.<sun.nio.ch.DatagramChannelImpl: boolean isOpen()>();
+
+        if $z2 == 0 goto label04;
+
+        $r14 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        virtualinvoke $r14.<sun.nio.ch.DatagramChannelImpl: java.nio.channels.SelectableChannel configureBlocking(boolean)>(1);
+
+     label04:
+        return $r4;
+
+     label05:
+        $i1 = r0.<sun.nio.ch.DatagramSocketAdaptor: int timeout>;
+
+        l7 = (long) $i1;
+
+     label06:
+        $r5 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $z0 = virtualinvoke $r5.<sun.nio.ch.DatagramChannelImpl: boolean isOpen()>();
+
+        if $z0 != 0 goto label07;
+
+        $r20 = new java.nio.channels.ClosedChannelException;
+
+        specialinvoke $r20.<java.nio.channels.ClosedChannelException: void <init>()>();
+
+        throw $r20;
+
+     label07:
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r6 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $s3 = <sun.nio.ch.Net: short POLLIN>;
+
+        $i12 = (int) $s3;
+
+        $i4 = virtualinvoke $r6.<sun.nio.ch.DatagramChannelImpl: int poll(int,long)>($i12, l7);
+
+        if $i4 <= 0 goto label10;
+
+        $s5 = <sun.nio.ch.Net: short POLLIN>;
+
+        $i13 = (int) $s5;
+
+        $i6 = $i4 & $i13;
+
+        if $i6 == 0 goto label10;
+
+        $r8 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $r9 = virtualinvoke $r8.<sun.nio.ch.DatagramChannelImpl: java.net.SocketAddress receive(java.nio.ByteBuffer)>(r2);
+
+        if $r9 == null goto label10;
+
+     label08:
+        $r10 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $z1 = virtualinvoke $r10.<sun.nio.ch.DatagramChannelImpl: boolean isOpen()>();
+
+        if $z1 == 0 goto label09;
+
+        $r11 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        virtualinvoke $r11.<sun.nio.ch.DatagramChannelImpl: java.nio.channels.SelectableChannel configureBlocking(boolean)>(1);
+
+     label09:
+        return $r9;
+
+     label10:
+        $l8 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l9 = $l8 - $l2;
+
+        $l10 = l7 - $l9;
+
+        l7 = $l10;
+
+        $b11 = $l10 cmp 0L;
+
+        $i14 = (int) $b11;
+
+        if $i14 > 0 goto label11;
+
+        $r21 = new java.net.SocketTimeoutException;
+
+        specialinvoke $r21.<java.net.SocketTimeoutException: void <init>()>();
+
+        throw $r21;
+
+     label11:
+        goto label06;
+
+     label12:
+        $r17 := @caughtexception;
+
+     label13:
+        $r18 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $z3 = virtualinvoke $r18.<sun.nio.ch.DatagramChannelImpl: boolean isOpen()>();
+
+        if $z3 == 0 goto label14;
+
+        $r19 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        virtualinvoke $r19.<sun.nio.ch.DatagramChannelImpl: java.nio.channels.SelectableChannel configureBlocking(boolean)>(1);
+
+     label14:
+        throw $r17;
+
+        catch java.lang.Throwable from label02 to label03 with label12;
+        catch java.lang.Throwable from label05 to label08 with label12;
+        catch java.lang.Throwable from label10 to label13 with label12;
+    }
+
+    public void receive(java.net.DatagramPacket) throws java.io.IOException
+    {
+        java.lang.Throwable $r9, $r11;
+        byte[] $r5;
+        java.net.SocketAddress $r7;
+        java.nio.ByteBuffer $r6;
+        sun.nio.ch.DatagramChannelImpl $r1, $r3;
+        java.nio.channels.IllegalBlockingModeException $r8;
+        int $i0, $i1, $i2, $i3, $i4;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        boolean $z0;
+        java.io.IOException $r10;
+        java.lang.Object $r2;
+        java.net.DatagramPacket r4;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        r4 := @parameter0: java.net.DatagramPacket;
+
+        $r1 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $r2 = virtualinvoke $r1.<sun.nio.ch.DatagramChannelImpl: java.lang.Object blockingLock()>();
+
+        entermonitor $r2;
+
+     label01:
+        $r3 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $z0 = virtualinvoke $r3.<sun.nio.ch.DatagramChannelImpl: boolean isBlocking()>();
+
+        if $z0 != 0 goto label02;
+
+        $r8 = new java.nio.channels.IllegalBlockingModeException;
+
+        specialinvoke $r8.<java.nio.channels.IllegalBlockingModeException: void <init>()>();
+
+        throw $r8;
+
+     label02:
+        entermonitor r4;
+
+     label03:
+        $r5 = virtualinvoke r4.<java.net.DatagramPacket: byte[] getData()>();
+
+        $i0 = virtualinvoke r4.<java.net.DatagramPacket: int getOffset()>();
+
+        $i1 = virtualinvoke r4.<java.net.DatagramPacket: int getLength()>();
+
+        $r6 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[],int,int)>($r5, $i0, $i1);
+
+        $r7 = specialinvoke r0.<sun.nio.ch.DatagramSocketAdaptor: java.net.SocketAddress receive(java.nio.ByteBuffer)>($r6);
+
+        virtualinvoke r4.<java.net.DatagramPacket: void setSocketAddress(java.net.SocketAddress)>($r7);
+
+        $i2 = virtualinvoke $r6.<java.nio.ByteBuffer: int position()>();
+
+        $i3 = virtualinvoke r4.<java.net.DatagramPacket: int getOffset()>();
+
+        $i4 = $i2 - $i3;
+
+        virtualinvoke r4.<java.net.DatagramPacket: void setLength(int)>($i4);
+
+        exitmonitor r4;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r11 := @caughtexception;
+
+        exitmonitor r4;
+
+     label06:
+        throw $r11;
+
+     label07:
+        goto label09;
+
+     label08:
+        $r10 := @caughtexception;
+
+        staticinvoke <sun.nio.ch.Net: void translateException(java.lang.Exception)>($r10);
+
+     label09:
+        exitmonitor $r2;
+
+     label10:
+        goto label13;
+
+     label11:
+        $r9 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label12:
+        throw $r9;
+
+     label13:
+        return;
+
+        catch java.lang.Throwable from label03 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.io.IOException from label02 to label07 with label08;
+        catch java.lang.Throwable from label01 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+    }
+
+    public java.net.InetAddress getLocalAddress()
+    {
+        java.net.SocketAddress $r2, r11;
+        java.net.InetSocketAddress $r3, $r12, $r13;
+        java.lang.SecurityManager $r5;
+        java.net.InetAddress $r4, $r10;
+        sun.nio.ch.DatagramChannelImpl $r1;
+        int $i1;
+        java.lang.SecurityException $r8;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        java.lang.String $r6;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        $z0 = virtualinvoke r0.<sun.nio.ch.DatagramSocketAdaptor: boolean isClosed()>();
+
+        if $z0 == 0 goto label1;
+
+        return null;
+
+     label1:
+        $r1 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $r2 = virtualinvoke $r1.<sun.nio.ch.DatagramChannelImpl: java.net.SocketAddress localAddress()>();
+
+        r11 = $r2;
+
+        if $r2 != null goto label2;
+
+        $r12 = new java.net.InetSocketAddress;
+
+        specialinvoke $r12.<java.net.InetSocketAddress: void <init>(int)>(0);
+
+        r11 = $r12;
+
+     label2:
+        $r3 = (java.net.InetSocketAddress) r11;
+
+        $r4 = virtualinvoke $r3.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $r5 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r5 == null goto label6;
+
+     label3:
+        $r6 = virtualinvoke $r4.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+        $i1 = (int) -1;
+
+        virtualinvoke $r5.<java.lang.SecurityManager: void checkConnect(java.lang.String,int)>($r6, $i1);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r8 := @caughtexception;
+
+        $r13 = new java.net.InetSocketAddress;
+
+        specialinvoke $r13.<java.net.InetSocketAddress: void <init>(int)>(0);
+
+        $r10 = virtualinvoke $r13.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        return $r10;
+
+     label6:
+        return $r4;
+
+        catch java.lang.SecurityException from label3 to label4 with label5;
+    }
+
+    public int getLocalPort()
+    {
+        java.net.SocketAddress $r2;
+        java.net.InetSocketAddress $r3;
+        java.lang.Exception $r4;
+        sun.nio.ch.DatagramChannelImpl $r1;
+        int $i0, $i2;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        $z0 = virtualinvoke r0.<sun.nio.ch.DatagramSocketAdaptor: boolean isClosed()>();
+
+        if $z0 == 0 goto label1;
+
+        $i2 = (int) -1;
+
+        return $i2;
+
+     label1:
+        $r1 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $r2 = virtualinvoke $r1.<sun.nio.ch.DatagramChannelImpl: java.net.SocketAddress getLocalAddress()>();
+
+        if $r2 == null goto label3;
+
+        $r3 = (java.net.InetSocketAddress) $r2;
+
+        $i0 = virtualinvoke $r3.<java.net.InetSocketAddress: int getPort()>();
+
+     label2:
+        return $i0;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r4 := @caughtexception;
+
+     label5:
+        return 0;
+
+        catch java.lang.Exception from label1 to label2 with label4;
+    }
+
+    public void setSoTimeout(int) throws java.net.SocketException
+    {
+        int i0;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        i0 := @parameter0: int;
+
+        r0.<sun.nio.ch.DatagramSocketAdaptor: int timeout> = i0;
+
+        return;
+    }
+
+    public int getSoTimeout() throws java.net.SocketException
+    {
+        int $i0;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        $i0 = r0.<sun.nio.ch.DatagramSocketAdaptor: int timeout>;
+
+        return $i0;
+    }
+
+    private void setBooleanOption(java.net.SocketOption, boolean) throws java.net.SocketException
+    {
+        sun.nio.ch.DatagramChannelImpl $r2;
+        java.net.SocketOption r1;
+        java.lang.Boolean $r3;
+        java.io.IOException $r4;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        boolean z0;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        r1 := @parameter0: java.net.SocketOption;
+
+        z0 := @parameter1: boolean;
+
+     label1:
+        $r2 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $r3 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(z0);
+
+        virtualinvoke $r2.<sun.nio.ch.DatagramChannelImpl: java.nio.channels.DatagramChannel setOption(java.net.SocketOption,java.lang.Object)>(r1, $r3);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        staticinvoke <sun.nio.ch.Net: void translateToSocketException(java.lang.Exception)>($r4);
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    private void setIntOption(java.net.SocketOption, int) throws java.net.SocketException
+    {
+        sun.nio.ch.DatagramChannelImpl $r2;
+        java.net.SocketOption r1;
+        int i0;
+        java.io.IOException $r4;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        java.lang.Integer $r3;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        r1 := @parameter0: java.net.SocketOption;
+
+        i0 := @parameter1: int;
+
+     label1:
+        $r2 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        virtualinvoke $r2.<sun.nio.ch.DatagramChannelImpl: java.nio.channels.DatagramChannel setOption(java.net.SocketOption,java.lang.Object)>(r1, $r3);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        staticinvoke <sun.nio.ch.Net: void translateToSocketException(java.lang.Exception)>($r4);
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    private boolean getBooleanOption(java.net.SocketOption) throws java.net.SocketException
+    {
+        sun.nio.ch.DatagramChannelImpl $r2;
+        java.net.SocketOption r1;
+        java.lang.Boolean $r4;
+        java.lang.Object $r3;
+        java.io.IOException $r5;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        r1 := @parameter0: java.net.SocketOption;
+
+     label1:
+        $r2 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $r3 = virtualinvoke $r2.<sun.nio.ch.DatagramChannelImpl: java.lang.Object getOption(java.net.SocketOption)>(r1);
+
+        $r4 = (java.lang.Boolean) $r3;
+
+        $z0 = virtualinvoke $r4.<java.lang.Boolean: boolean booleanValue()>();
+
+     label2:
+        return $z0;
+
+     label3:
+        $r5 := @caughtexception;
+
+        staticinvoke <sun.nio.ch.Net: void translateToSocketException(java.lang.Exception)>($r5);
+
+        return 0;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    private int getIntOption(java.net.SocketOption) throws java.net.SocketException
+    {
+        java.net.SocketOption r1;
+        java.io.IOException $r5;
+        java.lang.Integer $r4;
+        sun.nio.ch.DatagramChannelImpl $r2;
+        int $i0, $i2;
+        java.lang.Object $r3;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        r1 := @parameter0: java.net.SocketOption;
+
+     label1:
+        $r2 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $r3 = virtualinvoke $r2.<sun.nio.ch.DatagramChannelImpl: java.lang.Object getOption(java.net.SocketOption)>(r1);
+
+        $r4 = (java.lang.Integer) $r3;
+
+        $i0 = virtualinvoke $r4.<java.lang.Integer: int intValue()>();
+
+     label2:
+        return $i0;
+
+     label3:
+        $r5 := @caughtexception;
+
+        staticinvoke <sun.nio.ch.Net: void translateToSocketException(java.lang.Exception)>($r5);
+
+        $i2 = (int) -1;
+
+        return $i2;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public void setSendBufferSize(int) throws java.net.SocketException
+    {
+        java.net.SocketOption $r1;
+        int i0;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        java.lang.IllegalArgumentException $r2;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        i0 := @parameter0: int;
+
+        if i0 > 0 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid send size");
+
+        throw $r2;
+
+     label1:
+        $r1 = <java.net.StandardSocketOptions: java.net.SocketOption SO_SNDBUF>;
+
+        specialinvoke r0.<sun.nio.ch.DatagramSocketAdaptor: void setIntOption(java.net.SocketOption,int)>($r1, i0);
+
+        return;
+    }
+
+    public int getSendBufferSize() throws java.net.SocketException
+    {
+        int $i0;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        java.net.SocketOption $r1;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        $r1 = <java.net.StandardSocketOptions: java.net.SocketOption SO_SNDBUF>;
+
+        $i0 = specialinvoke r0.<sun.nio.ch.DatagramSocketAdaptor: int getIntOption(java.net.SocketOption)>($r1);
+
+        return $i0;
+    }
+
+    public void setReceiveBufferSize(int) throws java.net.SocketException
+    {
+        java.net.SocketOption $r1;
+        int i0;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        java.lang.IllegalArgumentException $r2;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        i0 := @parameter0: int;
+
+        if i0 > 0 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid receive size");
+
+        throw $r2;
+
+     label1:
+        $r1 = <java.net.StandardSocketOptions: java.net.SocketOption SO_RCVBUF>;
+
+        specialinvoke r0.<sun.nio.ch.DatagramSocketAdaptor: void setIntOption(java.net.SocketOption,int)>($r1, i0);
+
+        return;
+    }
+
+    public int getReceiveBufferSize() throws java.net.SocketException
+    {
+        int $i0;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        java.net.SocketOption $r1;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        $r1 = <java.net.StandardSocketOptions: java.net.SocketOption SO_RCVBUF>;
+
+        $i0 = specialinvoke r0.<sun.nio.ch.DatagramSocketAdaptor: int getIntOption(java.net.SocketOption)>($r1);
+
+        return $i0;
+    }
+
+    public void setReuseAddress(boolean) throws java.net.SocketException
+    {
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        boolean z0;
+        java.net.SocketOption $r1;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = <java.net.StandardSocketOptions: java.net.SocketOption SO_REUSEADDR>;
+
+        specialinvoke r0.<sun.nio.ch.DatagramSocketAdaptor: void setBooleanOption(java.net.SocketOption,boolean)>($r1, z0);
+
+        return;
+    }
+
+    public boolean getReuseAddress() throws java.net.SocketException
+    {
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        java.net.SocketOption $r1;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        $r1 = <java.net.StandardSocketOptions: java.net.SocketOption SO_REUSEADDR>;
+
+        $z0 = specialinvoke r0.<sun.nio.ch.DatagramSocketAdaptor: boolean getBooleanOption(java.net.SocketOption)>($r1);
+
+        return $z0;
+    }
+
+    public void setBroadcast(boolean) throws java.net.SocketException
+    {
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        boolean z0;
+        java.net.SocketOption $r1;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = <java.net.StandardSocketOptions: java.net.SocketOption SO_BROADCAST>;
+
+        specialinvoke r0.<sun.nio.ch.DatagramSocketAdaptor: void setBooleanOption(java.net.SocketOption,boolean)>($r1, z0);
+
+        return;
+    }
+
+    public boolean getBroadcast() throws java.net.SocketException
+    {
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        java.net.SocketOption $r1;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        $r1 = <java.net.StandardSocketOptions: java.net.SocketOption SO_BROADCAST>;
+
+        $z0 = specialinvoke r0.<sun.nio.ch.DatagramSocketAdaptor: boolean getBooleanOption(java.net.SocketOption)>($r1);
+
+        return $z0;
+    }
+
+    public void setTrafficClass(int) throws java.net.SocketException
+    {
+        int i0;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        java.net.SocketOption $r1;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        i0 := @parameter0: int;
+
+        $r1 = <java.net.StandardSocketOptions: java.net.SocketOption IP_TOS>;
+
+        specialinvoke r0.<sun.nio.ch.DatagramSocketAdaptor: void setIntOption(java.net.SocketOption,int)>($r1, i0);
+
+        return;
+    }
+
+    public int getTrafficClass() throws java.net.SocketException
+    {
+        int $i0;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        java.net.SocketOption $r1;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        $r1 = <java.net.StandardSocketOptions: java.net.SocketOption IP_TOS>;
+
+        $i0 = specialinvoke r0.<sun.nio.ch.DatagramSocketAdaptor: int getIntOption(java.net.SocketOption)>($r1);
+
+        return $i0;
+    }
+
+    public void close()
+    {
+        sun.nio.ch.DatagramChannelImpl $r1;
+        java.lang.Error $r3;
+        java.io.IOException $r2;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+     label1:
+        $r1 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        virtualinvoke $r1.<sun.nio.ch.DatagramChannelImpl: void close()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new java.lang.Error;
+
+        specialinvoke $r3.<java.lang.Error: void <init>(java.lang.Throwable)>($r2);
+
+        throw $r3;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public boolean isClosed()
+    {
+        sun.nio.ch.DatagramChannelImpl $r1;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        $r1 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        $z0 = virtualinvoke $r1.<sun.nio.ch.DatagramChannelImpl: boolean isOpen()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public java.nio.channels.DatagramChannel getChannel()
+    {
+        sun.nio.ch.DatagramChannelImpl $r1;
+        sun.nio.ch.DatagramSocketAdaptor r0;
+
+        r0 := @this: sun.nio.ch.DatagramSocketAdaptor;
+
+        $r1 = r0.<sun.nio.ch.DatagramSocketAdaptor: sun.nio.ch.DatagramChannelImpl dc>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        sun.nio.ch.DatagramSocketAdaptor$1 $r0;
+
+        $r0 = new sun.nio.ch.DatagramSocketAdaptor$1;
+
+        specialinvoke $r0.<sun.nio.ch.DatagramSocketAdaptor$1: void <init>()>();
+
+        <sun.nio.ch.DatagramSocketAdaptor: java.net.DatagramSocketImpl dummyDatagramSocket> = $r0;
+
+        return;
+    }
+}

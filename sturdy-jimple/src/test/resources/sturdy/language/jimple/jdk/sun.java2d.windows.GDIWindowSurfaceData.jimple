@@ -1,0 +1,808 @@
+public class sun.java2d.windows.GDIWindowSurfaceData extends sun.java2d.SurfaceData
+{
+    private sun.awt.windows.WComponentPeer peer;
+    private sun.awt.Win32GraphicsConfig graphicsConfig;
+    private sun.java2d.loops.RenderLoops solidloops;
+    public static final java.lang.String DESC_GDI;
+    public static final sun.java2d.loops.SurfaceType AnyGdi;
+    public static final sun.java2d.loops.SurfaceType IntRgbGdi;
+    public static final sun.java2d.loops.SurfaceType Ushort565RgbGdi;
+    public static final sun.java2d.loops.SurfaceType Ushort555RgbGdi;
+    public static final sun.java2d.loops.SurfaceType ThreeByteBgrGdi;
+    protected static sun.java2d.windows.GDIRenderer gdiPipe;
+    protected static sun.java2d.pipe.PixelToShapeConverter gdiTxPipe;
+
+    private static native void initIDs(java.lang.Class);
+
+    public static sun.java2d.loops.SurfaceType getSurfaceType(java.awt.image.ColorModel)
+    {
+        sun.java2d.loops.SurfaceType $r1, $r3, $r4, $r5, $r7, $r8, $r10, $r12, $r13;
+        java.awt.color.ColorSpace $r9;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.awt.image.IndexColorModel $r11;
+        java.lang.String $r18;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        sun.java2d.InvalidPipeException $r14;
+        java.awt.image.DirectColorModel $r2, $r6;
+        java.awt.image.ColorModel r0;
+        java.lang.StringBuilder $r15, $r16, $r17;
+
+        r0 := @parameter0: java.awt.image.ColorModel;
+
+        $i0 = virtualinvoke r0.<java.awt.image.ColorModel: int getPixelSize()>();
+
+        lookupswitch($i0)
+        {
+            case 8: goto label07;
+            case 15: goto label04;
+            case 16: goto label05;
+            case 24: goto label01;
+            case 32: goto label01;
+            default: goto label10;
+        };
+
+     label01:
+        $z0 = r0 instanceof java.awt.image.DirectColorModel;
+
+        if $z0 == 0 goto label03;
+
+        $r2 = (java.awt.image.DirectColorModel) r0;
+
+        $i1 = virtualinvoke $r2.<java.awt.image.DirectColorModel: int getRedMask()>();
+
+        if $i1 != 16711680 goto label02;
+
+        $r4 = <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.loops.SurfaceType IntRgbGdi>;
+
+        return $r4;
+
+     label02:
+        $r3 = <sun.java2d.loops.SurfaceType: sun.java2d.loops.SurfaceType IntRgbx>;
+
+        return $r3;
+
+     label03:
+        $r1 = <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.loops.SurfaceType ThreeByteBgrGdi>;
+
+        return $r1;
+
+     label04:
+        $r8 = <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.loops.SurfaceType Ushort555RgbGdi>;
+
+        return $r8;
+
+     label05:
+        $z1 = r0 instanceof java.awt.image.DirectColorModel;
+
+        if $z1 == 0 goto label06;
+
+        $r6 = (java.awt.image.DirectColorModel) r0;
+
+        $i2 = virtualinvoke $r6.<java.awt.image.DirectColorModel: int getBlueMask()>();
+
+        if $i2 != 62 goto label06;
+
+        $r7 = <sun.java2d.loops.SurfaceType: sun.java2d.loops.SurfaceType Ushort555Rgbx>;
+
+        return $r7;
+
+     label06:
+        $r5 = <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.loops.SurfaceType Ushort565RgbGdi>;
+
+        return $r5;
+
+     label07:
+        $r9 = virtualinvoke r0.<java.awt.image.ColorModel: java.awt.color.ColorSpace getColorSpace()>();
+
+        $i3 = virtualinvoke $r9.<java.awt.color.ColorSpace: int getType()>();
+
+        if $i3 != 6 goto label08;
+
+        $z4 = r0 instanceof java.awt.image.ComponentColorModel;
+
+        if $z4 == 0 goto label08;
+
+        $r13 = <sun.java2d.loops.SurfaceType: sun.java2d.loops.SurfaceType ByteGray>;
+
+        return $r13;
+
+     label08:
+        $z2 = r0 instanceof java.awt.image.IndexColorModel;
+
+        if $z2 == 0 goto label09;
+
+        $r11 = (java.awt.image.IndexColorModel) r0;
+
+        $z3 = staticinvoke <sun.java2d.windows.GDIWindowSurfaceData: boolean isOpaqueGray(java.awt.image.IndexColorModel)>($r11);
+
+        if $z3 == 0 goto label09;
+
+        $r12 = <sun.java2d.loops.SurfaceType: sun.java2d.loops.SurfaceType Index8Gray>;
+
+        return $r12;
+
+     label09:
+        $r10 = <sun.java2d.loops.SurfaceType: sun.java2d.loops.SurfaceType ByteIndexedOpaque>;
+
+        return $r10;
+
+     label10:
+        $r14 = new sun.java2d.InvalidPipeException;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported bit depth: ");
+
+        $i4 = virtualinvoke r0.<java.awt.image.ColorModel: int getPixelSize()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r14.<sun.java2d.InvalidPipeException: void <init>(java.lang.String)>($r18);
+
+        throw $r14;
+    }
+
+    public static sun.java2d.windows.GDIWindowSurfaceData createData(sun.awt.windows.WComponentPeer)
+    {
+        sun.java2d.loops.SurfaceType $r2;
+        java.awt.image.ColorModel $r1;
+        sun.awt.windows.WComponentPeer r0;
+        sun.java2d.windows.GDIWindowSurfaceData $r3;
+
+        r0 := @parameter0: sun.awt.windows.WComponentPeer;
+
+        $r1 = virtualinvoke r0.<sun.awt.windows.WComponentPeer: java.awt.image.ColorModel getDeviceColorModel()>();
+
+        $r2 = staticinvoke <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.loops.SurfaceType getSurfaceType(java.awt.image.ColorModel)>($r1);
+
+        $r3 = new sun.java2d.windows.GDIWindowSurfaceData;
+
+        specialinvoke $r3.<sun.java2d.windows.GDIWindowSurfaceData: void <init>(sun.awt.windows.WComponentPeer,sun.java2d.loops.SurfaceType)>(r0, $r2);
+
+        return $r3;
+    }
+
+    public sun.java2d.SurfaceDataProxy makeProxyFor(sun.java2d.SurfaceData)
+    {
+        sun.java2d.SurfaceData r2;
+        sun.java2d.windows.GDIWindowSurfaceData r1;
+        sun.java2d.SurfaceDataProxy $r0;
+
+        r1 := @this: sun.java2d.windows.GDIWindowSurfaceData;
+
+        r2 := @parameter0: sun.java2d.SurfaceData;
+
+        $r0 = <sun.java2d.SurfaceDataProxy: sun.java2d.SurfaceDataProxy UNCACHED>;
+
+        return $r0;
+    }
+
+    public java.awt.image.Raster getRaster(int, int, int, int)
+    {
+        int i0, i1, i2, i3;
+        java.lang.InternalError $r0;
+        sun.java2d.windows.GDIWindowSurfaceData r1;
+
+        r1 := @this: sun.java2d.windows.GDIWindowSurfaceData;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        $r0 = new java.lang.InternalError;
+
+        specialinvoke $r0.<java.lang.InternalError: void <init>(java.lang.String)>("not implemented yet");
+
+        throw $r0;
+    }
+
+    public void validatePipe(sun.java2d.SunGraphics2D)
+    {
+        sun.java2d.loops.RenderLoops $r5, $r17;
+        sun.java2d.windows.GDIRenderer $r3, $r4, $r7, $r16;
+        sun.java2d.pipe.PixelToShapeConverter $r6, $r8, $r9;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        sun.java2d.loops.FontInfo $r11;
+        sun.java2d.pipe.DrawImagePipe $r15;
+        sun.java2d.pipe.TextPipe $r2, $r10, $r12, $r13, $r14;
+        sun.java2d.SunGraphics2D r0;
+        sun.java2d.windows.GDIWindowSurfaceData r1;
+
+        r1 := @this: sun.java2d.windows.GDIWindowSurfaceData;
+
+        r0 := @parameter0: sun.java2d.SunGraphics2D;
+
+        $i0 = r0.<sun.java2d.SunGraphics2D: int antialiasHint>;
+
+        if $i0 == 2 goto label13;
+
+        $i1 = r0.<sun.java2d.SunGraphics2D: int paintState>;
+
+        if $i1 > 1 goto label13;
+
+        $i2 = r0.<sun.java2d.SunGraphics2D: int compositeState>;
+
+        if $i2 <= 0 goto label01;
+
+        $i7 = r0.<sun.java2d.SunGraphics2D: int compositeState>;
+
+        if $i7 != 2 goto label13;
+
+     label01:
+        $i3 = r0.<sun.java2d.SunGraphics2D: int clipState>;
+
+        if $i3 != 2 goto label02;
+
+        specialinvoke r1.<sun.java2d.SurfaceData: void validatePipe(sun.java2d.SunGraphics2D)>(r0);
+
+        goto label09;
+
+     label02:
+        $i4 = r0.<sun.java2d.SunGraphics2D: int textAntialiasHint>;
+
+        tableswitch($i4)
+        {
+            case 0: goto label03;
+            case 1: goto label03;
+            case 2: goto label04;
+            default: goto label05;
+        };
+
+     label03:
+        $r10 = <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.pipe.TextPipe solidTextRenderer>;
+
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.TextPipe textpipe> = $r10;
+
+        goto label09;
+
+     label04:
+        $r2 = <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.pipe.TextPipe aaTextRenderer>;
+
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.TextPipe textpipe> = $r2;
+
+        goto label09;
+
+     label05:
+        $r11 = virtualinvoke r0.<sun.java2d.SunGraphics2D: sun.java2d.loops.FontInfo getFontInfo()>();
+
+        $i6 = $r11.<sun.java2d.loops.FontInfo: int aaHint>;
+
+        tableswitch($i6)
+        {
+            case 2: goto label07;
+            case 3: goto label08;
+            case 4: goto label06;
+            case 5: goto label08;
+            case 6: goto label06;
+            default: goto label08;
+        };
+
+     label06:
+        $r12 = <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.pipe.TextPipe lcdTextRenderer>;
+
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.TextPipe textpipe> = $r12;
+
+        goto label09;
+
+     label07:
+        $r13 = <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.pipe.TextPipe aaTextRenderer>;
+
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.TextPipe textpipe> = $r13;
+
+        goto label09;
+
+     label08:
+        $r14 = <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.pipe.TextPipe solidTextRenderer>;
+
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.TextPipe textpipe> = $r14;
+
+     label09:
+        $r15 = <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.pipe.DrawImagePipe imagepipe>;
+
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.DrawImagePipe imagepipe> = $r15;
+
+        $i8 = r0.<sun.java2d.SunGraphics2D: int transformState>;
+
+        if $i8 < 3 goto label10;
+
+        $r8 = <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.pipe.PixelToShapeConverter gdiTxPipe>;
+
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.PixelDrawPipe drawpipe> = $r8;
+
+        $r9 = <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.pipe.PixelToShapeConverter gdiTxPipe>;
+
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.PixelFillPipe fillpipe> = $r9;
+
+        goto label12;
+
+     label10:
+        $i5 = r0.<sun.java2d.SunGraphics2D: int strokeState>;
+
+        if $i5 == 0 goto label11;
+
+        $r6 = <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.pipe.PixelToShapeConverter gdiTxPipe>;
+
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.PixelDrawPipe drawpipe> = $r6;
+
+        $r7 = <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.windows.GDIRenderer gdiPipe>;
+
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.PixelFillPipe fillpipe> = $r7;
+
+        goto label12;
+
+     label11:
+        $r3 = <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.windows.GDIRenderer gdiPipe>;
+
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.PixelDrawPipe drawpipe> = $r3;
+
+        $r4 = <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.windows.GDIRenderer gdiPipe>;
+
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.PixelFillPipe fillpipe> = $r4;
+
+     label12:
+        $r16 = <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.windows.GDIRenderer gdiPipe>;
+
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.ShapeDrawPipe shapepipe> = $r16;
+
+        $r17 = r0.<sun.java2d.SunGraphics2D: sun.java2d.loops.RenderLoops loops>;
+
+        if $r17 != null goto label14;
+
+        $r5 = virtualinvoke r1.<sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.loops.RenderLoops getRenderLoops(sun.java2d.SunGraphics2D)>(r0);
+
+        r0.<sun.java2d.SunGraphics2D: sun.java2d.loops.RenderLoops loops> = $r5;
+
+        goto label14;
+
+     label13:
+        specialinvoke r1.<sun.java2d.SurfaceData: void validatePipe(sun.java2d.SunGraphics2D)>(r0);
+
+     label14:
+        return;
+    }
+
+    public sun.java2d.loops.RenderLoops getRenderLoops(sun.java2d.SunGraphics2D)
+    {
+        sun.java2d.loops.RenderLoops $r2, $r3;
+        int $i0, $i1;
+        sun.java2d.SunGraphics2D r0;
+        sun.java2d.windows.GDIWindowSurfaceData r1;
+
+        r1 := @this: sun.java2d.windows.GDIWindowSurfaceData;
+
+        r0 := @parameter0: sun.java2d.SunGraphics2D;
+
+        $i0 = r0.<sun.java2d.SunGraphics2D: int paintState>;
+
+        if $i0 > 1 goto label1;
+
+        $i1 = r0.<sun.java2d.SunGraphics2D: int compositeState>;
+
+        if $i1 > 0 goto label1;
+
+        $r3 = r1.<sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.loops.RenderLoops solidloops>;
+
+        return $r3;
+
+     label1:
+        $r2 = specialinvoke r1.<sun.java2d.SurfaceData: sun.java2d.loops.RenderLoops getRenderLoops(sun.java2d.SunGraphics2D)>(r0);
+
+        return $r2;
+    }
+
+    public java.awt.GraphicsConfiguration getDeviceConfiguration()
+    {
+        sun.java2d.windows.GDIWindowSurfaceData r0;
+        sun.awt.Win32GraphicsConfig $r1;
+
+        r0 := @this: sun.java2d.windows.GDIWindowSurfaceData;
+
+        $r1 = r0.<sun.java2d.windows.GDIWindowSurfaceData: sun.awt.Win32GraphicsConfig graphicsConfig>;
+
+        return $r1;
+    }
+
+    private native void initOps(sun.awt.windows.WComponentPeer, int, int, int, int, int);
+
+    private void <init>(sun.awt.windows.WComponentPeer, sun.java2d.loops.SurfaceType)
+    {
+        sun.java2d.loops.SurfaceType r1;
+        sun.java2d.loops.RenderLoops $r8;
+        java.awt.GraphicsDevice $r10;
+        int $i0, $i1, i2, i3, i4, i5;
+        boolean $z0, $z1;
+        sun.awt.Win32GraphicsConfig $r6, $r7, $r9, $r11;
+        sun.awt.Win32GraphicsDevice $r13;
+        java.awt.GraphicsConfiguration $r5;
+        java.awt.image.DirectColorModel r14;
+        java.awt.image.ColorModel $r3, $r4;
+        sun.awt.windows.WComponentPeer r2;
+        java.lang.Object $r12;
+        sun.java2d.windows.GDIWindowSurfaceData r0;
+
+        r0 := @this: sun.java2d.windows.GDIWindowSurfaceData;
+
+        r2 := @parameter0: sun.awt.windows.WComponentPeer;
+
+        r1 := @parameter1: sun.java2d.loops.SurfaceType;
+
+        $r3 = virtualinvoke r2.<sun.awt.windows.WComponentPeer: java.awt.image.ColorModel getDeviceColorModel()>();
+
+        specialinvoke r0.<sun.java2d.SurfaceData: void <init>(sun.java2d.loops.SurfaceType,java.awt.image.ColorModel)>(r1, $r3);
+
+        $r4 = virtualinvoke r2.<sun.awt.windows.WComponentPeer: java.awt.image.ColorModel getDeviceColorModel()>();
+
+        r0.<sun.java2d.windows.GDIWindowSurfaceData: sun.awt.windows.WComponentPeer peer> = r2;
+
+        i2 = 0;
+
+        i3 = 0;
+
+        i4 = 0;
+
+        $i0 = virtualinvoke $r4.<java.awt.image.ColorModel: int getPixelSize()>();
+
+        lookupswitch($i0)
+        {
+            case 24: goto label1;
+            case 32: goto label1;
+            default: goto label3;
+        };
+
+     label1:
+        $z0 = $r4 instanceof java.awt.image.DirectColorModel;
+
+        if $z0 == 0 goto label2;
+
+        i5 = 32;
+
+        goto label4;
+
+     label2:
+        i5 = 24;
+
+        goto label4;
+
+     label3:
+        i5 = virtualinvoke $r4.<java.awt.image.ColorModel: int getPixelSize()>();
+
+     label4:
+        $z1 = $r4 instanceof java.awt.image.DirectColorModel;
+
+        if $z1 == 0 goto label5;
+
+        r14 = (java.awt.image.DirectColorModel) $r4;
+
+        i2 = virtualinvoke r14.<java.awt.image.DirectColorModel: int getRedMask()>();
+
+        i3 = virtualinvoke r14.<java.awt.image.DirectColorModel: int getGreenMask()>();
+
+        i4 = virtualinvoke r14.<java.awt.image.DirectColorModel: int getBlueMask()>();
+
+     label5:
+        $r5 = virtualinvoke r2.<sun.awt.windows.WComponentPeer: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+        $r6 = (sun.awt.Win32GraphicsConfig) $r5;
+
+        r0.<sun.java2d.windows.GDIWindowSurfaceData: sun.awt.Win32GraphicsConfig graphicsConfig> = $r6;
+
+        $r7 = r0.<sun.java2d.windows.GDIWindowSurfaceData: sun.awt.Win32GraphicsConfig graphicsConfig>;
+
+        $r8 = virtualinvoke $r7.<sun.awt.Win32GraphicsConfig: sun.java2d.loops.RenderLoops getSolidLoops(sun.java2d.loops.SurfaceType)>(r1);
+
+        r0.<sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.loops.RenderLoops solidloops> = $r8;
+
+        $r9 = r0.<sun.java2d.windows.GDIWindowSurfaceData: sun.awt.Win32GraphicsConfig graphicsConfig>;
+
+        $r10 = virtualinvoke $r9.<sun.awt.Win32GraphicsConfig: java.awt.GraphicsDevice getDevice()>();
+
+        $r13 = (sun.awt.Win32GraphicsDevice) $r10;
+
+        $i1 = virtualinvoke $r13.<sun.awt.Win32GraphicsDevice: int getScreen()>();
+
+        specialinvoke r0.<sun.java2d.windows.GDIWindowSurfaceData: void initOps(sun.awt.windows.WComponentPeer,int,int,int,int,int)>(r2, i5, i2, i3, i4, $i1);
+
+        $r11 = r0.<sun.java2d.windows.GDIWindowSurfaceData: sun.awt.Win32GraphicsConfig graphicsConfig>;
+
+        $r12 = virtualinvoke $r11.<sun.awt.Win32GraphicsConfig: java.lang.Object getProxyKey()>();
+
+        virtualinvoke r0.<sun.java2d.windows.GDIWindowSurfaceData: void setBlitProxyKey(java.lang.Object)>($r12);
+
+        return;
+    }
+
+    public sun.java2d.SurfaceData getReplacement()
+    {
+        sun.awt.windows.WComponentPeer $r2;
+        sun.java2d.SurfaceData $r3;
+        sun.java2d.ScreenUpdateManager $r0;
+        sun.java2d.windows.GDIWindowSurfaceData r1;
+
+        r1 := @this: sun.java2d.windows.GDIWindowSurfaceData;
+
+        $r0 = staticinvoke <sun.java2d.ScreenUpdateManager: sun.java2d.ScreenUpdateManager getInstance()>();
+
+        $r2 = r1.<sun.java2d.windows.GDIWindowSurfaceData: sun.awt.windows.WComponentPeer peer>;
+
+        $r3 = virtualinvoke $r0.<sun.java2d.ScreenUpdateManager: sun.java2d.SurfaceData getReplacementScreenSurface(sun.awt.windows.WComponentPeer,sun.java2d.SurfaceData)>($r2, r1);
+
+        return $r3;
+    }
+
+    public java.awt.Rectangle getBounds()
+    {
+        sun.awt.windows.WComponentPeer $r1;
+        java.awt.Rectangle $r2;
+        sun.java2d.windows.GDIWindowSurfaceData r0;
+
+        r0 := @this: sun.java2d.windows.GDIWindowSurfaceData;
+
+        $r1 = r0.<sun.java2d.windows.GDIWindowSurfaceData: sun.awt.windows.WComponentPeer peer>;
+
+        $r2 = virtualinvoke $r1.<sun.awt.windows.WComponentPeer: java.awt.Rectangle getBounds()>();
+
+        $r2.<java.awt.Rectangle: int y> = 0;
+
+        $r2.<java.awt.Rectangle: int x> = 0;
+
+        return $r2;
+    }
+
+    public boolean copyArea(sun.java2d.SunGraphics2D, int, int, int, int, int, int)
+    {
+        sun.java2d.windows.GDIRenderer $r5;
+        sun.java2d.loops.CompositeType r1, $r2, $r6;
+        boolean $z0, $z1;
+        sun.java2d.SunGraphics2D r0;
+        int $i0, $i1, $i2, $i3, i4, i5, i6, i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, i22, i23, i24, i25, i26, i27;
+        sun.java2d.pipe.Region $r3;
+        sun.java2d.windows.GDIWindowSurfaceData r4;
+
+        r4 := @this: sun.java2d.windows.GDIWindowSurfaceData;
+
+        r0 := @parameter0: sun.java2d.SunGraphics2D;
+
+        i22 := @parameter1: int;
+
+        i23 := @parameter2: int;
+
+        i6 := @parameter3: int;
+
+        i7 := @parameter4: int;
+
+        i4 := @parameter5: int;
+
+        i5 := @parameter6: int;
+
+        r1 = r0.<sun.java2d.SunGraphics2D: sun.java2d.loops.CompositeType imageComp>;
+
+        $i0 = r0.<sun.java2d.SunGraphics2D: int transformState>;
+
+        if $i0 >= 3 goto label7;
+
+        $i1 = r0.<sun.java2d.SunGraphics2D: int clipState>;
+
+        if $i1 == 2 goto label7;
+
+        $r2 = <sun.java2d.loops.CompositeType: sun.java2d.loops.CompositeType SrcOverNoEa>;
+
+        $z0 = virtualinvoke $r2.<sun.java2d.loops.CompositeType: boolean equals(java.lang.Object)>(r1);
+
+        if $z0 != 0 goto label1;
+
+        $r6 = <sun.java2d.loops.CompositeType: sun.java2d.loops.CompositeType SrcNoEa>;
+
+        $z1 = virtualinvoke $r6.<sun.java2d.loops.CompositeType: boolean equals(java.lang.Object)>(r1);
+
+        if $z1 == 0 goto label7;
+
+     label1:
+        $i2 = r0.<sun.java2d.SunGraphics2D: int transX>;
+
+        $i16 = i22 + $i2;
+
+        $i3 = r0.<sun.java2d.SunGraphics2D: int transY>;
+
+        $i17 = i23 + $i3;
+
+        $i18 = $i16 + i4;
+
+        i24 = $i18;
+
+        $i19 = $i17 + i5;
+
+        i25 = $i19;
+
+        $i20 = $i18 + i6;
+
+        i26 = $i20;
+
+        $i21 = $i19 + i7;
+
+        i27 = $i21;
+
+        $r3 = virtualinvoke r0.<sun.java2d.SunGraphics2D: sun.java2d.pipe.Region getCompClip()>();
+
+        $i8 = virtualinvoke $r3.<sun.java2d.pipe.Region: int getLoX()>();
+
+        if $i18 >= $i8 goto label2;
+
+        i24 = virtualinvoke $r3.<sun.java2d.pipe.Region: int getLoX()>();
+
+     label2:
+        $i9 = virtualinvoke $r3.<sun.java2d.pipe.Region: int getLoY()>();
+
+        if $i19 >= $i9 goto label3;
+
+        i25 = virtualinvoke $r3.<sun.java2d.pipe.Region: int getLoY()>();
+
+     label3:
+        $i10 = virtualinvoke $r3.<sun.java2d.pipe.Region: int getHiX()>();
+
+        if $i20 <= $i10 goto label4;
+
+        i26 = virtualinvoke $r3.<sun.java2d.pipe.Region: int getHiX()>();
+
+     label4:
+        $i11 = virtualinvoke $r3.<sun.java2d.pipe.Region: int getHiY()>();
+
+        if $i21 <= $i11 goto label5;
+
+        i27 = virtualinvoke $r3.<sun.java2d.pipe.Region: int getHiY()>();
+
+     label5:
+        if i24 >= i26 goto label6;
+
+        if i25 >= i27 goto label6;
+
+        $r5 = <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.windows.GDIRenderer gdiPipe>;
+
+        $i15 = i24 - i4;
+
+        $i14 = i25 - i5;
+
+        $i13 = i26 - i24;
+
+        $i12 = i27 - i25;
+
+        virtualinvoke $r5.<sun.java2d.windows.GDIRenderer: void devCopyArea(sun.java2d.windows.GDIWindowSurfaceData,int,int,int,int,int,int)>(r4, $i15, $i14, i4, i5, $i13, $i12);
+
+     label6:
+        return 1;
+
+     label7:
+        return 0;
+    }
+
+    private native void invalidateSD();
+
+    public void invalidate()
+    {
+        sun.java2d.windows.GDIWindowSurfaceData r0;
+        boolean $z0;
+
+        r0 := @this: sun.java2d.windows.GDIWindowSurfaceData;
+
+        $z0 = virtualinvoke r0.<sun.java2d.windows.GDIWindowSurfaceData: boolean isValid()>();
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<sun.java2d.windows.GDIWindowSurfaceData: void invalidateSD()>();
+
+        specialinvoke r0.<sun.java2d.SurfaceData: void invalidate()>();
+
+     label1:
+        return;
+    }
+
+    public java.lang.Object getDestination()
+    {
+        sun.awt.windows.WComponentPeer $r1;
+        java.lang.Object $r2;
+        sun.java2d.windows.GDIWindowSurfaceData r0;
+
+        r0 := @this: sun.java2d.windows.GDIWindowSurfaceData;
+
+        $r1 = r0.<sun.java2d.windows.GDIWindowSurfaceData: sun.awt.windows.WComponentPeer peer>;
+
+        $r2 = virtualinvoke $r1.<sun.awt.windows.WComponentPeer: java.lang.Object getTarget()>();
+
+        return $r2;
+    }
+
+    public sun.awt.windows.WComponentPeer getPeer()
+    {
+        sun.awt.windows.WComponentPeer $r1;
+        sun.java2d.windows.GDIWindowSurfaceData r0;
+
+        r0 := @this: sun.java2d.windows.GDIWindowSurfaceData;
+
+        $r1 = r0.<sun.java2d.windows.GDIWindowSurfaceData: sun.awt.windows.WComponentPeer peer>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        sun.java2d.loops.SurfaceType $r0, $r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9;
+        sun.java2d.windows.GDIRenderer $r10, $r12, $r13, $r14;
+        sun.java2d.pipe.PixelToShapeConverter $r11;
+        boolean $z0, $z1;
+
+        <sun.java2d.windows.GDIWindowSurfaceData: java.lang.String DESC_GDI> = "GDI";
+
+        $r0 = <sun.java2d.loops.SurfaceType: sun.java2d.loops.SurfaceType IntRgb>;
+
+        $r1 = virtualinvoke $r0.<sun.java2d.loops.SurfaceType: sun.java2d.loops.SurfaceType deriveSubType(java.lang.String)>("GDI");
+
+        <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.loops.SurfaceType AnyGdi> = $r1;
+
+        $r2 = <sun.java2d.loops.SurfaceType: sun.java2d.loops.SurfaceType IntRgb>;
+
+        $r3 = virtualinvoke $r2.<sun.java2d.loops.SurfaceType: sun.java2d.loops.SurfaceType deriveSubType(java.lang.String)>("GDI");
+
+        <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.loops.SurfaceType IntRgbGdi> = $r3;
+
+        $r4 = <sun.java2d.loops.SurfaceType: sun.java2d.loops.SurfaceType Ushort565Rgb>;
+
+        $r5 = virtualinvoke $r4.<sun.java2d.loops.SurfaceType: sun.java2d.loops.SurfaceType deriveSubType(java.lang.String)>("GDI");
+
+        <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.loops.SurfaceType Ushort565RgbGdi> = $r5;
+
+        $r6 = <sun.java2d.loops.SurfaceType: sun.java2d.loops.SurfaceType Ushort555Rgb>;
+
+        $r7 = virtualinvoke $r6.<sun.java2d.loops.SurfaceType: sun.java2d.loops.SurfaceType deriveSubType(java.lang.String)>("GDI");
+
+        <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.loops.SurfaceType Ushort555RgbGdi> = $r7;
+
+        $r8 = <sun.java2d.loops.SurfaceType: sun.java2d.loops.SurfaceType ThreeByteBgr>;
+
+        $r9 = virtualinvoke $r8.<sun.java2d.loops.SurfaceType: sun.java2d.loops.SurfaceType deriveSubType(java.lang.String)>("GDI");
+
+        <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.loops.SurfaceType ThreeByteBgrGdi> = $r9;
+
+        staticinvoke <sun.java2d.windows.GDIWindowSurfaceData: void initIDs(java.lang.Class)>(class "Lsun/java2d/loops/XORComposite;");
+
+        $z0 = staticinvoke <sun.java2d.windows.WindowsFlags: boolean isGdiBlitEnabled()>();
+
+        if $z0 == 0 goto label1;
+
+        staticinvoke <sun.java2d.windows.GDIBlitLoops: void register()>();
+
+     label1:
+        $r10 = new sun.java2d.windows.GDIRenderer;
+
+        specialinvoke $r10.<sun.java2d.windows.GDIRenderer: void <init>()>();
+
+        <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.windows.GDIRenderer gdiPipe> = $r10;
+
+        $z1 = staticinvoke <sun.java2d.loops.GraphicsPrimitive: boolean tracingEnabled()>();
+
+        if $z1 == 0 goto label2;
+
+        $r13 = <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.windows.GDIRenderer gdiPipe>;
+
+        $r14 = virtualinvoke $r13.<sun.java2d.windows.GDIRenderer: sun.java2d.windows.GDIRenderer traceWrap()>();
+
+        <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.windows.GDIRenderer gdiPipe> = $r14;
+
+     label2:
+        $r11 = new sun.java2d.pipe.PixelToShapeConverter;
+
+        $r12 = <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.windows.GDIRenderer gdiPipe>;
+
+        specialinvoke $r11.<sun.java2d.pipe.PixelToShapeConverter: void <init>(sun.java2d.pipe.ShapeDrawPipe)>($r12);
+
+        <sun.java2d.windows.GDIWindowSurfaceData: sun.java2d.pipe.PixelToShapeConverter gdiTxPipe> = $r11;
+
+        return;
+    }
+}

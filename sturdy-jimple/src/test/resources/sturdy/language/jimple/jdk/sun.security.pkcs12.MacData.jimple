@@ -1,0 +1,392 @@
+class sun.security.pkcs12.MacData extends java.lang.Object
+{
+    private java.lang.String digestAlgorithmName;
+    private java.security.AlgorithmParameters digestAlgorithmParams;
+    private byte[] digest;
+    private byte[] macSalt;
+    private int iterations;
+    private byte[] encoded;
+
+    void <init>(sun.security.util.DerInputStream) throws java.io.IOException, sun.security.pkcs.ParsingException
+    {
+        byte[] $r6, $r13, $r15;
+        sun.security.pkcs.ParsingException $r3, $r17;
+        sun.security.util.DerInputStream r1, $r4;
+        sun.security.util.DerValue[] $r2, $r7;
+        sun.security.pkcs12.MacData r0;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.lang.String $r10;
+        sun.security.util.DerValue $r5, $r8, $r12, $r14, $r16;
+        java.security.AlgorithmParameters $r11;
+        sun.security.x509.AlgorithmId $r9;
+
+        r0 := @this: sun.security.pkcs12.MacData;
+
+        r1 := @parameter0: sun.security.util.DerInputStream;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.pkcs12.MacData: byte[] encoded> = null;
+
+        $r2 = virtualinvoke r1.<sun.security.util.DerInputStream: sun.security.util.DerValue[] getSequence(int)>(2);
+
+        $i0 = lengthof $r2;
+
+        if $i0 < 2 goto label1;
+
+        $i1 = lengthof $r2;
+
+        if $i1 <= 3 goto label2;
+
+     label1:
+        $r3 = new sun.security.pkcs.ParsingException;
+
+        specialinvoke $r3.<sun.security.pkcs.ParsingException: void <init>(java.lang.String)>("Invalid length for MacData");
+
+        throw $r3;
+
+     label2:
+        $r4 = new sun.security.util.DerInputStream;
+
+        $r5 = $r2[0];
+
+        $r6 = virtualinvoke $r5.<sun.security.util.DerValue: byte[] toByteArray()>();
+
+        specialinvoke $r4.<sun.security.util.DerInputStream: void <init>(byte[])>($r6);
+
+        $r7 = virtualinvoke $r4.<sun.security.util.DerInputStream: sun.security.util.DerValue[] getSequence(int)>(2);
+
+        $i2 = lengthof $r7;
+
+        if $i2 == 2 goto label3;
+
+        $r17 = new sun.security.pkcs.ParsingException;
+
+        specialinvoke $r17.<sun.security.pkcs.ParsingException: void <init>(java.lang.String)>("Invalid length for DigestInfo");
+
+        throw $r17;
+
+     label3:
+        $r8 = $r7[0];
+
+        $r9 = staticinvoke <sun.security.x509.AlgorithmId: sun.security.x509.AlgorithmId parse(sun.security.util.DerValue)>($r8);
+
+        $r10 = virtualinvoke $r9.<sun.security.x509.AlgorithmId: java.lang.String getName()>();
+
+        r0.<sun.security.pkcs12.MacData: java.lang.String digestAlgorithmName> = $r10;
+
+        $r11 = virtualinvoke $r9.<sun.security.x509.AlgorithmId: java.security.AlgorithmParameters getParameters()>();
+
+        r0.<sun.security.pkcs12.MacData: java.security.AlgorithmParameters digestAlgorithmParams> = $r11;
+
+        $r12 = $r7[1];
+
+        $r13 = virtualinvoke $r12.<sun.security.util.DerValue: byte[] getOctetString()>();
+
+        r0.<sun.security.pkcs12.MacData: byte[] digest> = $r13;
+
+        $r14 = $r2[1];
+
+        $r15 = virtualinvoke $r14.<sun.security.util.DerValue: byte[] getOctetString()>();
+
+        r0.<sun.security.pkcs12.MacData: byte[] macSalt> = $r15;
+
+        $i3 = lengthof $r2;
+
+        if $i3 <= 2 goto label4;
+
+        $r16 = $r2[2];
+
+        $i4 = virtualinvoke $r16.<sun.security.util.DerValue: int getInteger()>();
+
+        r0.<sun.security.pkcs12.MacData: int iterations> = $i4;
+
+        goto label5;
+
+     label4:
+        r0.<sun.security.pkcs12.MacData: int iterations> = 1;
+
+     label5:
+        return;
+    }
+
+    void <init>(java.lang.String, byte[], byte[], int) throws java.security.NoSuchAlgorithmException
+    {
+        byte[] r5, $r7, r8;
+        java.lang.IllegalArgumentException $r9;
+        java.security.AlgorithmParameters $r4;
+        java.lang.NullPointerException $r10, $r11;
+        sun.security.pkcs12.MacData r0;
+        int $i0, i1;
+        java.lang.Object $r6;
+        java.lang.String r1, $r3;
+        sun.security.x509.AlgorithmId $r2;
+
+        r0 := @this: sun.security.pkcs12.MacData;
+
+        r1 := @parameter0: java.lang.String;
+
+        r5 := @parameter1: byte[];
+
+        r8 := @parameter2: byte[];
+
+        i1 := @parameter3: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.pkcs12.MacData: byte[] encoded> = null;
+
+        if r1 != null goto label1;
+
+        $r11 = new java.lang.NullPointerException;
+
+        specialinvoke $r11.<java.lang.NullPointerException: void <init>(java.lang.String)>("the algName parameter must be non-null");
+
+        throw $r11;
+
+     label1:
+        $r2 = staticinvoke <sun.security.x509.AlgorithmId: sun.security.x509.AlgorithmId get(java.lang.String)>(r1);
+
+        $r3 = virtualinvoke $r2.<sun.security.x509.AlgorithmId: java.lang.String getName()>();
+
+        r0.<sun.security.pkcs12.MacData: java.lang.String digestAlgorithmName> = $r3;
+
+        $r4 = virtualinvoke $r2.<sun.security.x509.AlgorithmId: java.security.AlgorithmParameters getParameters()>();
+
+        r0.<sun.security.pkcs12.MacData: java.security.AlgorithmParameters digestAlgorithmParams> = $r4;
+
+        if r5 != null goto label2;
+
+        $r10 = new java.lang.NullPointerException;
+
+        specialinvoke $r10.<java.lang.NullPointerException: void <init>(java.lang.String)>("the digest parameter must be non-null");
+
+        throw $r10;
+
+     label2:
+        $i0 = lengthof r5;
+
+        if $i0 != 0 goto label3;
+
+        $r9 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r9.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("the digest parameter must not be empty");
+
+        throw $r9;
+
+     label3:
+        $r6 = virtualinvoke r5.<java.lang.Object: java.lang.Object clone()>();
+
+        $r7 = (byte[]) $r6;
+
+        r0.<sun.security.pkcs12.MacData: byte[] digest> = $r7;
+
+        r0.<sun.security.pkcs12.MacData: byte[] macSalt> = r8;
+
+        r0.<sun.security.pkcs12.MacData: int iterations> = i1;
+
+        r0.<sun.security.pkcs12.MacData: byte[] encoded> = null;
+
+        return;
+    }
+
+    void <init>(java.security.AlgorithmParameters, byte[], byte[], int) throws java.security.NoSuchAlgorithmException
+    {
+        byte[] r5, $r7, r8;
+        java.lang.IllegalArgumentException $r9;
+        java.security.AlgorithmParameters r1, $r4;
+        java.lang.NullPointerException $r10, $r11;
+        sun.security.pkcs12.MacData r0;
+        int $i0, i1;
+        java.lang.Object $r6;
+        java.lang.String $r3;
+        sun.security.x509.AlgorithmId $r2;
+
+        r0 := @this: sun.security.pkcs12.MacData;
+
+        r1 := @parameter0: java.security.AlgorithmParameters;
+
+        r5 := @parameter1: byte[];
+
+        r8 := @parameter2: byte[];
+
+        i1 := @parameter3: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.pkcs12.MacData: byte[] encoded> = null;
+
+        if r1 != null goto label1;
+
+        $r11 = new java.lang.NullPointerException;
+
+        specialinvoke $r11.<java.lang.NullPointerException: void <init>(java.lang.String)>("the algParams parameter must be non-null");
+
+        throw $r11;
+
+     label1:
+        $r2 = staticinvoke <sun.security.x509.AlgorithmId: sun.security.x509.AlgorithmId get(java.security.AlgorithmParameters)>(r1);
+
+        $r3 = virtualinvoke $r2.<sun.security.x509.AlgorithmId: java.lang.String getName()>();
+
+        r0.<sun.security.pkcs12.MacData: java.lang.String digestAlgorithmName> = $r3;
+
+        $r4 = virtualinvoke $r2.<sun.security.x509.AlgorithmId: java.security.AlgorithmParameters getParameters()>();
+
+        r0.<sun.security.pkcs12.MacData: java.security.AlgorithmParameters digestAlgorithmParams> = $r4;
+
+        if r5 != null goto label2;
+
+        $r10 = new java.lang.NullPointerException;
+
+        specialinvoke $r10.<java.lang.NullPointerException: void <init>(java.lang.String)>("the digest parameter must be non-null");
+
+        throw $r10;
+
+     label2:
+        $i0 = lengthof r5;
+
+        if $i0 != 0 goto label3;
+
+        $r9 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r9.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("the digest parameter must not be empty");
+
+        throw $r9;
+
+     label3:
+        $r6 = virtualinvoke r5.<java.lang.Object: java.lang.Object clone()>();
+
+        $r7 = (byte[]) $r6;
+
+        r0.<sun.security.pkcs12.MacData: byte[] digest> = $r7;
+
+        r0.<sun.security.pkcs12.MacData: byte[] macSalt> = r8;
+
+        r0.<sun.security.pkcs12.MacData: int iterations> = i1;
+
+        r0.<sun.security.pkcs12.MacData: byte[] encoded> = null;
+
+        return;
+    }
+
+    java.lang.String getDigestAlgName()
+    {
+        sun.security.pkcs12.MacData r0;
+        java.lang.String $r1;
+
+        r0 := @this: sun.security.pkcs12.MacData;
+
+        $r1 = r0.<sun.security.pkcs12.MacData: java.lang.String digestAlgorithmName>;
+
+        return $r1;
+    }
+
+    byte[] getSalt()
+    {
+        sun.security.pkcs12.MacData r0;
+        byte[] $r1;
+
+        r0 := @this: sun.security.pkcs12.MacData;
+
+        $r1 = r0.<sun.security.pkcs12.MacData: byte[] macSalt>;
+
+        return $r1;
+    }
+
+    int getIterations()
+    {
+        int $i0;
+        sun.security.pkcs12.MacData r0;
+
+        r0 := @this: sun.security.pkcs12.MacData;
+
+        $i0 = r0.<sun.security.pkcs12.MacData: int iterations>;
+
+        return $i0;
+    }
+
+    byte[] getDigest()
+    {
+        sun.security.pkcs12.MacData r0;
+        byte[] $r1;
+
+        r0 := @this: sun.security.pkcs12.MacData;
+
+        $r1 = r0.<sun.security.pkcs12.MacData: byte[] digest>;
+
+        return $r1;
+    }
+
+    public byte[] getEncoded() throws java.security.NoSuchAlgorithmException, java.io.IOException
+    {
+        byte[] $r1, $r7, $r8, $r9, $r10, $r12, $r13, $r15;
+        sun.security.pkcs12.MacData r0;
+        int $i0;
+        java.lang.String $r5;
+        sun.security.util.DerOutputStream $r2, $r3, $r4;
+        java.lang.Object $r11, $r14;
+        sun.security.x509.AlgorithmId $r6;
+
+        r0 := @this: sun.security.pkcs12.MacData;
+
+        $r1 = r0.<sun.security.pkcs12.MacData: byte[] encoded>;
+
+        if $r1 == null goto label1;
+
+        $r13 = r0.<sun.security.pkcs12.MacData: byte[] encoded>;
+
+        $r14 = virtualinvoke $r13.<java.lang.Object: java.lang.Object clone()>();
+
+        $r15 = (byte[]) $r14;
+
+        return $r15;
+
+     label1:
+        $r2 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r2.<sun.security.util.DerOutputStream: void <init>()>();
+
+        $r3 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r3.<sun.security.util.DerOutputStream: void <init>()>();
+
+        $r4 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r4.<sun.security.util.DerOutputStream: void <init>()>();
+
+        $r5 = r0.<sun.security.pkcs12.MacData: java.lang.String digestAlgorithmName>;
+
+        $r6 = staticinvoke <sun.security.x509.AlgorithmId: sun.security.x509.AlgorithmId get(java.lang.String)>($r5);
+
+        virtualinvoke $r6.<sun.security.x509.AlgorithmId: void encode(sun.security.util.DerOutputStream)>($r4);
+
+        $r7 = r0.<sun.security.pkcs12.MacData: byte[] digest>;
+
+        virtualinvoke $r4.<sun.security.util.DerOutputStream: void putOctetString(byte[])>($r7);
+
+        virtualinvoke $r3.<sun.security.util.DerOutputStream: void write(byte,sun.security.util.DerOutputStream)>(48, $r4);
+
+        $r8 = r0.<sun.security.pkcs12.MacData: byte[] macSalt>;
+
+        virtualinvoke $r3.<sun.security.util.DerOutputStream: void putOctetString(byte[])>($r8);
+
+        $i0 = r0.<sun.security.pkcs12.MacData: int iterations>;
+
+        virtualinvoke $r3.<sun.security.util.DerOutputStream: void putInteger(int)>($i0);
+
+        virtualinvoke $r2.<sun.security.util.DerOutputStream: void write(byte,sun.security.util.DerOutputStream)>(48, $r3);
+
+        $r9 = virtualinvoke $r2.<sun.security.util.DerOutputStream: byte[] toByteArray()>();
+
+        r0.<sun.security.pkcs12.MacData: byte[] encoded> = $r9;
+
+        $r10 = r0.<sun.security.pkcs12.MacData: byte[] encoded>;
+
+        $r11 = virtualinvoke $r10.<java.lang.Object: java.lang.Object clone()>();
+
+        $r12 = (byte[]) $r11;
+
+        return $r12;
+    }
+}

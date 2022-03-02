@@ -1,0 +1,149 @@
+final class sun.security.ssl.SupportedGroupsExtension$EESupportedGroupsConsumer extends java.lang.Object implements sun.security.ssl.SSLExtension$ExtensionConsumer
+{
+
+    private void <init>()
+    {
+        sun.security.ssl.SupportedGroupsExtension$EESupportedGroupsConsumer r0;
+
+        r0 := @this: sun.security.ssl.SupportedGroupsExtension$EESupportedGroupsConsumer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void consume(sun.security.ssl.ConnectionContext, sun.security.ssl.SSLHandshake$HandshakeMessage, java.nio.ByteBuffer) throws java.io.IOException
+    {
+        sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec $r4;
+        sun.security.ssl.SSLHandshake$HandshakeMessage r19;
+        java.lang.Object[] $r13;
+        java.nio.ByteBuffer r5;
+        java.util.ArrayList $r6;
+        sun.security.ssl.ConnectionContext r0;
+        int[] $r7, r8;
+        java.util.Map $r11;
+        int $i0, i1, i2, i3;
+        sun.security.ssl.SSLConfiguration $r3;
+        boolean $z0, $z1, $z2;
+        sun.security.ssl.ClientHandshakeContext r1;
+        sun.security.ssl.SSLExtension $r2, $r10;
+        sun.security.ssl.SupportedGroupsExtension$EESupportedGroupsConsumer r18;
+        java.io.IOException $r14;
+        sun.security.ssl.TransportContext $r9, $r16;
+        javax.net.ssl.SSLException $r17;
+        sun.security.ssl.Alert $r15;
+        sun.security.ssl.SupportedGroupsExtension$NamedGroup $r12;
+
+        r18 := @this: sun.security.ssl.SupportedGroupsExtension$EESupportedGroupsConsumer;
+
+        r0 := @parameter0: sun.security.ssl.ConnectionContext;
+
+        r19 := @parameter1: sun.security.ssl.SSLHandshake$HandshakeMessage;
+
+        r5 := @parameter2: java.nio.ByteBuffer;
+
+        r1 = (sun.security.ssl.ClientHandshakeContext) r0;
+
+        $r3 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $r2 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension EE_SUPPORTED_GROUPS>;
+
+        $z0 = virtualinvoke $r3.<sun.security.ssl.SSLConfiguration: boolean isAvailable(sun.security.ssl.SSLExtension)>($r2);
+
+        if $z0 != 0 goto label2;
+
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label1;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z2 == 0 goto label1;
+
+        $r13 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Ignore unavailable supported_groups extension", $r13);
+
+     label1:
+        return;
+
+     label2:
+        $r4 = new sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec;
+
+        specialinvoke $r4.<sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec: void <init>(java.nio.ByteBuffer,sun.security.ssl.SupportedGroupsExtension$1)>(r5, null);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r14 := @caughtexception;
+
+        $r16 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r15 = <sun.security.ssl.Alert: sun.security.ssl.Alert UNEXPECTED_MESSAGE>;
+
+        $r17 = virtualinvoke $r16.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.Throwable)>($r15, $r14);
+
+        throw $r17;
+
+     label5:
+        $r6 = new java.util.ArrayList;
+
+        $r7 = $r4.<sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec: int[] namedGroupsIds>;
+
+        $i0 = lengthof $r7;
+
+        specialinvoke $r6.<java.util.ArrayList: void <init>(int)>($i0);
+
+        r8 = $r4.<sun.security.ssl.SupportedGroupsExtension$SupportedGroupsSpec: int[] namedGroupsIds>;
+
+        i1 = lengthof r8;
+
+        i3 = 0;
+
+     label6:
+        if i3 >= i1 goto label8;
+
+        i2 = r8[i3];
+
+        $r12 = staticinvoke <sun.security.ssl.SupportedGroupsExtension$NamedGroup: sun.security.ssl.SupportedGroupsExtension$NamedGroup valueOf(int)>(i2);
+
+        if $r12 == null goto label7;
+
+        interfaceinvoke $r6.<java.util.List: boolean add(java.lang.Object)>($r12);
+
+     label7:
+        i3 = i3 + 1;
+
+        goto label6;
+
+     label8:
+        $r9 = r1.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r9.<sun.security.ssl.TransportContext: java.util.List serverRequestedNamedGroups> = $r6;
+
+        $r11 = r1.<sun.security.ssl.ClientHandshakeContext: java.util.Map handshakeExtensions>;
+
+        $r10 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension EE_SUPPORTED_GROUPS>;
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r10, $r4);
+
+        return;
+
+        catch java.io.IOException from label2 to label3 with label4;
+    }
+
+    void <init>(sun.security.ssl.SupportedGroupsExtension$1)
+    {
+        sun.security.ssl.SupportedGroupsExtension$1 r1;
+        sun.security.ssl.SupportedGroupsExtension$EESupportedGroupsConsumer r0;
+
+        r0 := @this: sun.security.ssl.SupportedGroupsExtension$EESupportedGroupsConsumer;
+
+        r1 := @parameter0: sun.security.ssl.SupportedGroupsExtension$1;
+
+        specialinvoke r0.<sun.security.ssl.SupportedGroupsExtension$EESupportedGroupsConsumer: void <init>()>();
+
+        return;
+    }
+}

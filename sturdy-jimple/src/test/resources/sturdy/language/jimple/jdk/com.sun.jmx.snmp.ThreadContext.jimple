@@ -1,0 +1,282 @@
+public class com.sun.jmx.snmp.ThreadContext extends java.lang.Object implements java.lang.Cloneable
+{
+    private com.sun.jmx.snmp.ThreadContext previous;
+    private java.lang.String key;
+    private java.lang.Object value;
+    private static java.lang.ThreadLocal localContext;
+
+    private void <init>(com.sun.jmx.snmp.ThreadContext, java.lang.String, java.lang.Object)
+    {
+        java.lang.Object r3;
+        com.sun.jmx.snmp.ThreadContext r0, r1;
+        java.lang.String r2;
+
+        r0 := @this: com.sun.jmx.snmp.ThreadContext;
+
+        r1 := @parameter0: com.sun.jmx.snmp.ThreadContext;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.Object;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.jmx.snmp.ThreadContext: com.sun.jmx.snmp.ThreadContext previous> = r1;
+
+        r0.<com.sun.jmx.snmp.ThreadContext: java.lang.String key> = r2;
+
+        r0.<com.sun.jmx.snmp.ThreadContext: java.lang.Object value> = r3;
+
+        return;
+    }
+
+    public static java.lang.Object get(java.lang.String) throws java.lang.IllegalArgumentException
+    {
+        java.lang.Object $r2;
+        java.lang.String r0;
+        com.sun.jmx.snmp.ThreadContext $r1;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <com.sun.jmx.snmp.ThreadContext: com.sun.jmx.snmp.ThreadContext contextContaining(java.lang.String)>(r0);
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = $r1.<com.sun.jmx.snmp.ThreadContext: java.lang.Object value>;
+
+        return $r2;
+    }
+
+    public static boolean contains(java.lang.String) throws java.lang.IllegalArgumentException
+    {
+        java.lang.String r0;
+        com.sun.jmx.snmp.ThreadContext $r1;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <com.sun.jmx.snmp.ThreadContext: com.sun.jmx.snmp.ThreadContext contextContaining(java.lang.String)>(r0);
+
+        if $r1 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private static com.sun.jmx.snmp.ThreadContext contextContaining(java.lang.String) throws java.lang.IllegalArgumentException
+    {
+        java.lang.String r0, $r1;
+        com.sun.jmx.snmp.ThreadContext r3;
+        java.lang.IllegalArgumentException $r2;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("null key");
+
+        throw $r2;
+
+     label1:
+        r3 = staticinvoke <com.sun.jmx.snmp.ThreadContext: com.sun.jmx.snmp.ThreadContext getContext()>();
+
+     label2:
+        if r3 == null goto label4;
+
+        $r1 = r3.<com.sun.jmx.snmp.ThreadContext: java.lang.String key>;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label3;
+
+        return r3;
+
+     label3:
+        r3 = r3.<com.sun.jmx.snmp.ThreadContext: com.sun.jmx.snmp.ThreadContext previous>;
+
+        goto label2;
+
+     label4:
+        return null;
+    }
+
+    public static com.sun.jmx.snmp.ThreadContext push(java.lang.String, java.lang.Object) throws java.lang.IllegalArgumentException
+    {
+        java.lang.Object r3;
+        java.lang.String r0;
+        com.sun.jmx.snmp.ThreadContext $r1, $r2, $r4, r6;
+        java.lang.IllegalArgumentException $r5;
+
+        r0 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("null key");
+
+        throw $r5;
+
+     label1:
+        $r1 = staticinvoke <com.sun.jmx.snmp.ThreadContext: com.sun.jmx.snmp.ThreadContext getContext()>();
+
+        r6 = $r1;
+
+        if $r1 != null goto label2;
+
+        $r4 = new com.sun.jmx.snmp.ThreadContext;
+
+        specialinvoke $r4.<com.sun.jmx.snmp.ThreadContext: void <init>(com.sun.jmx.snmp.ThreadContext,java.lang.String,java.lang.Object)>(null, null, null);
+
+        r6 = $r4;
+
+     label2:
+        $r2 = new com.sun.jmx.snmp.ThreadContext;
+
+        specialinvoke $r2.<com.sun.jmx.snmp.ThreadContext: void <init>(com.sun.jmx.snmp.ThreadContext,java.lang.String,java.lang.Object)>(r6, r0, r3);
+
+        staticinvoke <com.sun.jmx.snmp.ThreadContext: void setContext(com.sun.jmx.snmp.ThreadContext)>($r2);
+
+        return r6;
+    }
+
+    public static com.sun.jmx.snmp.ThreadContext getThreadContext()
+    {
+        com.sun.jmx.snmp.ThreadContext $r0;
+
+        $r0 = staticinvoke <com.sun.jmx.snmp.ThreadContext: com.sun.jmx.snmp.ThreadContext getContext()>();
+
+        return $r0;
+    }
+
+    public static void restore(com.sun.jmx.snmp.ThreadContext) throws java.lang.NullPointerException, java.lang.IllegalArgumentException
+    {
+        java.lang.String $r0;
+        com.sun.jmx.snmp.ThreadContext r3, r4;
+        java.lang.IllegalArgumentException $r1;
+        java.lang.NullPointerException $r2;
+
+        r3 := @parameter0: com.sun.jmx.snmp.ThreadContext;
+
+        if r3 != null goto label1;
+
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        r4 = staticinvoke <com.sun.jmx.snmp.ThreadContext: com.sun.jmx.snmp.ThreadContext getContext()>();
+
+     label2:
+        if r4 == r3 goto label4;
+
+        if r4 != null goto label3;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Restored context is not contained in current context");
+
+        throw $r1;
+
+     label3:
+        r4 = r4.<com.sun.jmx.snmp.ThreadContext: com.sun.jmx.snmp.ThreadContext previous>;
+
+        goto label2;
+
+     label4:
+        $r0 = r3.<com.sun.jmx.snmp.ThreadContext: java.lang.String key>;
+
+        if $r0 != null goto label5;
+
+        r3 = null;
+
+     label5:
+        staticinvoke <com.sun.jmx.snmp.ThreadContext: void setContext(com.sun.jmx.snmp.ThreadContext)>(r3);
+
+        return;
+    }
+
+    public void setInitialContext(com.sun.jmx.snmp.ThreadContext) throws java.lang.IllegalArgumentException
+    {
+        com.sun.jmx.snmp.ThreadContext $r0, r1, r3;
+        java.lang.IllegalArgumentException $r2;
+
+        r3 := @this: com.sun.jmx.snmp.ThreadContext;
+
+        r1 := @parameter0: com.sun.jmx.snmp.ThreadContext;
+
+        $r0 = staticinvoke <com.sun.jmx.snmp.ThreadContext: com.sun.jmx.snmp.ThreadContext getContext()>();
+
+        if $r0 == null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("previous context not empty");
+
+        throw $r2;
+
+     label1:
+        staticinvoke <com.sun.jmx.snmp.ThreadContext: void setContext(com.sun.jmx.snmp.ThreadContext)>(r1);
+
+        return;
+    }
+
+    private static com.sun.jmx.snmp.ThreadContext getContext()
+    {
+        java.lang.ThreadLocal $r0;
+        java.lang.Object $r1;
+        com.sun.jmx.snmp.ThreadContext $r2;
+
+        $r0 = <com.sun.jmx.snmp.ThreadContext: java.lang.ThreadLocal localContext>;
+
+        $r1 = virtualinvoke $r0.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        $r2 = (com.sun.jmx.snmp.ThreadContext) $r1;
+
+        return $r2;
+    }
+
+    private static void setContext(com.sun.jmx.snmp.ThreadContext)
+    {
+        java.lang.ThreadLocal $r1;
+        com.sun.jmx.snmp.ThreadContext r0;
+
+        r0 := @parameter0: com.sun.jmx.snmp.ThreadContext;
+
+        $r1 = <com.sun.jmx.snmp.ThreadContext: java.lang.ThreadLocal localContext>;
+
+        virtualinvoke $r1.<java.lang.ThreadLocal: void set(java.lang.Object)>(r0);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.ThreadLocal $r0;
+
+        $r0 = new java.lang.ThreadLocal;
+
+        specialinvoke $r0.<java.lang.ThreadLocal: void <init>()>();
+
+        <com.sun.jmx.snmp.ThreadContext: java.lang.ThreadLocal localContext> = $r0;
+
+        return;
+    }
+}

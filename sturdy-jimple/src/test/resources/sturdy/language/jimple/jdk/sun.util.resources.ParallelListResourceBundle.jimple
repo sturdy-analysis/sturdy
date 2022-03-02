@@ -1,0 +1,379 @@
+public abstract class sun.util.resources.ParallelListResourceBundle extends java.util.ResourceBundle
+{
+    private volatile java.util.concurrent.ConcurrentMap lookup;
+    private volatile java.util.Set keyset;
+    private final java.util.concurrent.atomic.AtomicMarkableReference parallelContents;
+
+    protected void <init>()
+    {
+        sun.util.resources.ParallelListResourceBundle r0;
+        java.util.concurrent.atomic.AtomicMarkableReference $r1;
+
+        r0 := @this: sun.util.resources.ParallelListResourceBundle;
+
+        specialinvoke r0.<java.util.ResourceBundle: void <init>()>();
+
+        $r1 = new java.util.concurrent.atomic.AtomicMarkableReference;
+
+        specialinvoke $r1.<java.util.concurrent.atomic.AtomicMarkableReference: void <init>(java.lang.Object,boolean)>(null, 0);
+
+        r0.<sun.util.resources.ParallelListResourceBundle: java.util.concurrent.atomic.AtomicMarkableReference parallelContents> = $r1;
+
+        return;
+    }
+
+    protected abstract java.lang.Object[][] getContents();
+
+    java.util.ResourceBundle getParent()
+    {
+        sun.util.resources.ParallelListResourceBundle r0;
+        java.util.ResourceBundle $r1;
+
+        r0 := @this: sun.util.resources.ParallelListResourceBundle;
+
+        $r1 = r0.<sun.util.resources.ParallelListResourceBundle: java.util.ResourceBundle parent>;
+
+        return $r1;
+    }
+
+    public void setParallelContents(sun.util.resources.OpenListResourceBundle)
+    {
+        java.lang.Object[][] $r3;
+        sun.util.resources.ParallelListResourceBundle r1;
+        sun.util.resources.OpenListResourceBundle r0;
+        java.util.concurrent.atomic.AtomicMarkableReference $r2, $r4;
+
+        r1 := @this: sun.util.resources.ParallelListResourceBundle;
+
+        r0 := @parameter0: sun.util.resources.OpenListResourceBundle;
+
+        if r0 != null goto label1;
+
+        $r4 = r1.<sun.util.resources.ParallelListResourceBundle: java.util.concurrent.atomic.AtomicMarkableReference parallelContents>;
+
+        virtualinvoke $r4.<java.util.concurrent.atomic.AtomicMarkableReference: boolean compareAndSet(java.lang.Object,java.lang.Object,boolean,boolean)>(null, null, 0, 1);
+
+        goto label2;
+
+     label1:
+        $r2 = r1.<sun.util.resources.ParallelListResourceBundle: java.util.concurrent.atomic.AtomicMarkableReference parallelContents>;
+
+        $r3 = virtualinvoke r0.<sun.util.resources.OpenListResourceBundle: java.lang.Object[][] getContents()>();
+
+        virtualinvoke $r2.<java.util.concurrent.atomic.AtomicMarkableReference: boolean compareAndSet(java.lang.Object,java.lang.Object,boolean,boolean)>(null, $r3, 0, 0);
+
+     label2:
+        return;
+    }
+
+    boolean areParallelContentsComplete()
+    {
+        sun.util.resources.ParallelListResourceBundle r0;
+        boolean[] r2;
+        java.util.concurrent.atomic.AtomicMarkableReference $r1, $r3;
+        java.lang.Object[][] r5;
+        java.lang.Object $r4;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.util.resources.ParallelListResourceBundle;
+
+        $r1 = r0.<sun.util.resources.ParallelListResourceBundle: java.util.concurrent.atomic.AtomicMarkableReference parallelContents>;
+
+        $z0 = virtualinvoke $r1.<java.util.concurrent.atomic.AtomicMarkableReference: boolean isMarked()>();
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        r2 = newarray (boolean)[1];
+
+        $r3 = r0.<sun.util.resources.ParallelListResourceBundle: java.util.concurrent.atomic.AtomicMarkableReference parallelContents>;
+
+        $r4 = virtualinvoke $r3.<java.util.concurrent.atomic.AtomicMarkableReference: java.lang.Object get(boolean[])>(r2);
+
+        r5 = (java.lang.Object[][]) $r4;
+
+        if r5 != null goto label2;
+
+        $z1 = r2[0];
+
+        if $z1 == 0 goto label3;
+
+     label2:
+        $z2 = 1;
+
+        goto label4;
+
+     label3:
+        $z2 = 0;
+
+     label4:
+        return $z2;
+    }
+
+    protected java.lang.Object handleGetObject(java.lang.String)
+    {
+        sun.util.resources.ParallelListResourceBundle r1;
+        java.lang.Object $r3;
+        java.lang.String r0;
+        java.lang.NullPointerException $r4;
+        java.util.concurrent.ConcurrentMap $r2;
+
+        r1 := @this: sun.util.resources.ParallelListResourceBundle;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        $r4 = new java.lang.NullPointerException;
+
+        specialinvoke $r4.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r4;
+
+     label1:
+        virtualinvoke r1.<sun.util.resources.ParallelListResourceBundle: void loadLookupTablesIfNecessary()>();
+
+        $r2 = r1.<sun.util.resources.ParallelListResourceBundle: java.util.concurrent.ConcurrentMap lookup>;
+
+        $r3 = interfaceinvoke $r2.<java.util.concurrent.ConcurrentMap: java.lang.Object get(java.lang.Object)>(r0);
+
+        return $r3;
+    }
+
+    public java.util.Enumeration getKeys()
+    {
+        java.util.Set $r1;
+        sun.util.resources.ParallelListResourceBundle r0;
+        java.util.Enumeration $r2;
+
+        r0 := @this: sun.util.resources.ParallelListResourceBundle;
+
+        $r1 = virtualinvoke r0.<sun.util.resources.ParallelListResourceBundle: java.util.Set keySet()>();
+
+        $r2 = staticinvoke <java.util.Collections: java.util.Enumeration enumeration(java.util.Collection)>($r1);
+
+        return $r2;
+    }
+
+    public boolean containsKey(java.lang.String)
+    {
+        sun.util.resources.ParallelListResourceBundle r0;
+        java.util.Set $r1;
+        java.lang.String r2;
+        boolean $z0;
+
+        r0 := @this: sun.util.resources.ParallelListResourceBundle;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = virtualinvoke r0.<sun.util.resources.ParallelListResourceBundle: java.util.Set keySet()>();
+
+        $z0 = interfaceinvoke $r1.<java.util.Set: boolean contains(java.lang.Object)>(r2);
+
+        return $z0;
+    }
+
+    protected java.util.Set handleKeySet()
+    {
+        java.util.Set $r2;
+        sun.util.resources.ParallelListResourceBundle r0;
+        java.util.concurrent.ConcurrentMap $r1;
+
+        r0 := @this: sun.util.resources.ParallelListResourceBundle;
+
+        virtualinvoke r0.<sun.util.resources.ParallelListResourceBundle: void loadLookupTablesIfNecessary()>();
+
+        $r1 = r0.<sun.util.resources.ParallelListResourceBundle: java.util.concurrent.ConcurrentMap lookup>;
+
+        $r2 = interfaceinvoke $r1.<java.util.concurrent.ConcurrentMap: java.util.Set keySet()>();
+
+        return $r2;
+    }
+
+    public java.util.Set keySet()
+    {
+        sun.util.resources.ParallelListResourceBundle$KeySet $r2;
+        java.lang.Throwable $r6;
+        sun.util.resources.ParallelListResourceBundle r0;
+        java.util.ResourceBundle $r4;
+        java.util.Set $r1, $r3, $r5;
+
+        r0 := @this: sun.util.resources.ParallelListResourceBundle;
+
+     label1:
+        $r1 = r0.<sun.util.resources.ParallelListResourceBundle: java.util.Set keyset>;
+
+        if $r1 != null goto label8;
+
+        $r2 = new sun.util.resources.ParallelListResourceBundle$KeySet;
+
+        $r3 = virtualinvoke r0.<sun.util.resources.ParallelListResourceBundle: java.util.Set handleKeySet()>();
+
+        $r4 = r0.<sun.util.resources.ParallelListResourceBundle: java.util.ResourceBundle parent>;
+
+        specialinvoke $r2.<sun.util.resources.ParallelListResourceBundle$KeySet: void <init>(java.util.Set,java.util.ResourceBundle,sun.util.resources.ParallelListResourceBundle$1)>($r3, $r4, null);
+
+        entermonitor r0;
+
+     label2:
+        $r5 = r0.<sun.util.resources.ParallelListResourceBundle: java.util.Set keyset>;
+
+        if $r5 != null goto label3;
+
+        r0.<sun.util.resources.ParallelListResourceBundle: java.util.Set keyset> = $r2;
+
+     label3:
+        exitmonitor r0;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r6 := @caughtexception;
+
+        exitmonitor r0;
+
+     label6:
+        throw $r6;
+
+     label7:
+        goto label1;
+
+     label8:
+        return $r1;
+
+        catch java.lang.Throwable from label2 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    synchronized void resetKeySet()
+    {
+        sun.util.resources.ParallelListResourceBundle r0;
+
+        r0 := @this: sun.util.resources.ParallelListResourceBundle;
+
+        r0.<sun.util.resources.ParallelListResourceBundle: java.util.Set keyset> = null;
+
+        return;
+    }
+
+    void loadLookupTablesIfNecessary()
+    {
+        java.lang.Throwable $r16;
+        sun.util.resources.ParallelListResourceBundle r0;
+        java.lang.Object[] r6, r18;
+        java.util.concurrent.ConcurrentMap $r3, $r4, r17;
+        java.lang.Object[][] $r11, $r12;
+        int i0, i1, i2, i3;
+        java.lang.String $r9, $r15;
+        java.util.concurrent.ConcurrentHashMap $r10;
+        java.util.concurrent.atomic.AtomicMarkableReference $r1, $r5;
+        java.lang.Object $r2, $r7, $r8, $r13, $r14;
+
+        r0 := @this: sun.util.resources.ParallelListResourceBundle;
+
+        r17 = r0.<sun.util.resources.ParallelListResourceBundle: java.util.concurrent.ConcurrentMap lookup>;
+
+        if r17 != null goto label02;
+
+        $r10 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r10.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r17 = $r10;
+
+        $r11 = virtualinvoke r0.<sun.util.resources.ParallelListResourceBundle: java.lang.Object[][] getContents()>();
+
+        i0 = lengthof $r11;
+
+        i1 = 0;
+
+     label01:
+        if i1 >= i0 goto label02;
+
+        r18 = $r11[i1];
+
+        $r13 = r18[0];
+
+        $r15 = (java.lang.String) $r13;
+
+        $r14 = r18[1];
+
+        interfaceinvoke $r10.<java.util.concurrent.ConcurrentMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r15, $r14);
+
+        i1 = i1 + 1;
+
+        goto label01;
+
+     label02:
+        $r1 = r0.<sun.util.resources.ParallelListResourceBundle: java.util.concurrent.atomic.AtomicMarkableReference parallelContents>;
+
+        $r2 = virtualinvoke $r1.<java.util.concurrent.atomic.AtomicMarkableReference: java.lang.Object getReference()>();
+
+        $r12 = (java.lang.Object[][]) $r2;
+
+        if $r12 == null goto label05;
+
+        i2 = lengthof $r12;
+
+        i3 = 0;
+
+     label03:
+        if i3 >= i2 goto label04;
+
+        r6 = $r12[i3];
+
+        $r7 = r6[0];
+
+        $r9 = (java.lang.String) $r7;
+
+        $r8 = r6[1];
+
+        interfaceinvoke r17.<java.util.concurrent.ConcurrentMap: java.lang.Object putIfAbsent(java.lang.Object,java.lang.Object)>($r9, $r8);
+
+        i3 = i3 + 1;
+
+        goto label03;
+
+     label04:
+        $r5 = r0.<sun.util.resources.ParallelListResourceBundle: java.util.concurrent.atomic.AtomicMarkableReference parallelContents>;
+
+        virtualinvoke $r5.<java.util.concurrent.atomic.AtomicMarkableReference: void set(java.lang.Object,boolean)>(null, 1);
+
+     label05:
+        $r3 = r0.<sun.util.resources.ParallelListResourceBundle: java.util.concurrent.ConcurrentMap lookup>;
+
+        if $r3 != null goto label11;
+
+        entermonitor r0;
+
+     label06:
+        $r4 = r0.<sun.util.resources.ParallelListResourceBundle: java.util.concurrent.ConcurrentMap lookup>;
+
+        if $r4 != null goto label07;
+
+        r0.<sun.util.resources.ParallelListResourceBundle: java.util.concurrent.ConcurrentMap lookup> = r17;
+
+     label07:
+        exitmonitor r0;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r16 := @caughtexception;
+
+        exitmonitor r0;
+
+     label10:
+        throw $r16;
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label06 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+}

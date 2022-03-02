@@ -1,0 +1,257 @@
+abstract class sun.security.jgss.spnego.SpNegoToken extends sun.security.jgss.GSSToken
+{
+    static final int NEG_TOKEN_INIT_ID;
+    static final int NEG_TOKEN_TARG_ID;
+    private int tokenType;
+    static final boolean DEBUG;
+    public static sun.security.util.ObjectIdentifier OID;
+
+    protected void <init>(int)
+    {
+        int i0;
+        sun.security.jgss.spnego.SpNegoToken r0;
+
+        r0 := @this: sun.security.jgss.spnego.SpNegoToken;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<sun.security.jgss.GSSToken: void <init>()>();
+
+        r0.<sun.security.jgss.spnego.SpNegoToken: int tokenType> = i0;
+
+        return;
+    }
+
+    abstract byte[] encode() throws org.ietf.jgss.GSSException;
+
+    byte[] getEncoded() throws java.io.IOException, org.ietf.jgss.GSSException
+    {
+        byte[] $r2, $r4, $r6, $r7;
+        sun.security.jgss.spnego.SpNegoToken r1;
+        byte $b1, $b2;
+        sun.security.util.DerOutputStream $r0, $r3, $r5;
+        int $i0;
+
+        r1 := @this: sun.security.jgss.spnego.SpNegoToken;
+
+        $r0 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r0.<sun.security.util.DerOutputStream: void <init>()>();
+
+        $r2 = virtualinvoke r1.<sun.security.jgss.spnego.SpNegoToken: byte[] encode()>();
+
+        virtualinvoke $r0.<sun.security.util.DerOutputStream: void write(byte[])>($r2);
+
+        $i0 = r1.<sun.security.jgss.spnego.SpNegoToken: int tokenType>;
+
+        lookupswitch($i0)
+        {
+            case 0: goto label1;
+            case 1: goto label2;
+            default: goto label3;
+        };
+
+     label1:
+        $r5 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r5.<sun.security.util.DerOutputStream: void <init>()>();
+
+        $b2 = staticinvoke <sun.security.util.DerValue: byte createTag(byte,boolean,byte)>(-128, 1, 0);
+
+        virtualinvoke $r5.<sun.security.util.DerOutputStream: void write(byte,sun.security.util.DerOutputStream)>($b2, $r0);
+
+        $r6 = virtualinvoke $r5.<sun.security.util.DerOutputStream: byte[] toByteArray()>();
+
+        return $r6;
+
+     label2:
+        $r3 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r3.<sun.security.util.DerOutputStream: void <init>()>();
+
+        $b1 = staticinvoke <sun.security.util.DerValue: byte createTag(byte,boolean,byte)>(-128, 1, 1);
+
+        virtualinvoke $r3.<sun.security.util.DerOutputStream: void write(byte,sun.security.util.DerOutputStream)>($b1, $r0);
+
+        $r4 = virtualinvoke $r3.<sun.security.util.DerOutputStream: byte[] toByteArray()>();
+
+        return $r4;
+
+     label3:
+        $r7 = virtualinvoke $r0.<sun.security.util.DerOutputStream: byte[] toByteArray()>();
+
+        return $r7;
+    }
+
+    final int getType()
+    {
+        int $i0;
+        sun.security.jgss.spnego.SpNegoToken r0;
+
+        r0 := @this: sun.security.jgss.spnego.SpNegoToken;
+
+        $i0 = r0.<sun.security.jgss.spnego.SpNegoToken: int tokenType>;
+
+        return $i0;
+    }
+
+    static java.lang.String getTokenName(int)
+    {
+        int i0;
+
+        i0 := @parameter0: int;
+
+        lookupswitch(i0)
+        {
+            case 0: goto label1;
+            case 1: goto label2;
+            default: goto label3;
+        };
+
+     label1:
+        return "SPNEGO NegTokenInit";
+
+     label2:
+        return "SPNEGO NegTokenTarg";
+
+     label3:
+        return "SPNEGO Mechanism Token";
+    }
+
+    static sun.security.jgss.spnego.SpNegoToken$NegoResult getNegoResultType(int)
+    {
+        sun.security.jgss.spnego.SpNegoToken$NegoResult $r0, $r1, $r2, $r3;
+        int i0;
+
+        i0 := @parameter0: int;
+
+        tableswitch(i0)
+        {
+            case 0: goto label1;
+            case 1: goto label2;
+            case 2: goto label3;
+            default: goto label4;
+        };
+
+     label1:
+        $r2 = <sun.security.jgss.spnego.SpNegoToken$NegoResult: sun.security.jgss.spnego.SpNegoToken$NegoResult ACCEPT_COMPLETE>;
+
+        return $r2;
+
+     label2:
+        $r1 = <sun.security.jgss.spnego.SpNegoToken$NegoResult: sun.security.jgss.spnego.SpNegoToken$NegoResult ACCEPT_INCOMPLETE>;
+
+        return $r1;
+
+     label3:
+        $r0 = <sun.security.jgss.spnego.SpNegoToken$NegoResult: sun.security.jgss.spnego.SpNegoToken$NegoResult REJECT>;
+
+        return $r0;
+
+     label4:
+        $r3 = <sun.security.jgss.spnego.SpNegoToken$NegoResult: sun.security.jgss.spnego.SpNegoToken$NegoResult ACCEPT_COMPLETE>;
+
+        return $r3;
+    }
+
+    static java.lang.String getNegoResultString(int)
+    {
+        int i0;
+        java.lang.StringBuilder $r0, $r1, $r2;
+        java.lang.String $r3;
+
+        i0 := @parameter0: int;
+
+        tableswitch(i0)
+        {
+            case 0: goto label1;
+            case 1: goto label2;
+            case 2: goto label3;
+            default: goto label4;
+        };
+
+     label1:
+        return "Accept Complete";
+
+     label2:
+        return "Accept InComplete";
+
+     label3:
+        return "Reject";
+
+     label4:
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown Negotiated Result: ");
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+    }
+
+    static int checkNextField(int, int) throws org.ietf.jgss.GSSException
+    {
+        int i0, i1, $i3;
+        org.ietf.jgss.GSSException $r1;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        if i0 >= i1 goto label1;
+
+        return i1;
+
+     label1:
+        $r1 = new org.ietf.jgss.GSSException;
+
+        $i3 = (int) -1;
+
+        specialinvoke $r1.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(10, $i3, "Invalid SpNegoToken token : wrong order");
+
+        throw $r1;
+    }
+
+    static void <clinit>()
+    {
+        org.ietf.jgss.Oid $r1;
+        sun.security.util.ObjectIdentifier $r0;
+        java.io.IOException $r3;
+        java.lang.String $r2;
+        boolean $z0;
+
+        <sun.security.jgss.spnego.SpNegoToken: int NEG_TOKEN_TARG_ID> = 1;
+
+        <sun.security.jgss.spnego.SpNegoToken: int NEG_TOKEN_INIT_ID> = 0;
+
+        $z0 = <sun.security.jgss.spnego.SpNegoContext: boolean DEBUG>;
+
+        <sun.security.jgss.spnego.SpNegoToken: boolean DEBUG> = $z0;
+
+     label1:
+        $r0 = new sun.security.util.ObjectIdentifier;
+
+        $r1 = <sun.security.jgss.spnego.SpNegoMechFactory: org.ietf.jgss.Oid GSS_SPNEGO_MECH_OID>;
+
+        $r2 = virtualinvoke $r1.<org.ietf.jgss.Oid: java.lang.String toString()>();
+
+        specialinvoke $r0.<sun.security.util.ObjectIdentifier: void <init>(java.lang.String)>($r2);
+
+        <sun.security.jgss.spnego.SpNegoToken: sun.security.util.ObjectIdentifier OID> = $r0;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+}

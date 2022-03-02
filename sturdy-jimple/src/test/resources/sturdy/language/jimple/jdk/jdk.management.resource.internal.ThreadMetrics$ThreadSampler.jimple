@@ -1,0 +1,227 @@
+class jdk.management.resource.internal.ThreadMetrics$ThreadSampler extends java.lang.Object implements java.lang.Runnable
+{
+    private static jdk.management.resource.internal.ThreadMetrics$ThreadSampler samplerRunnable;
+    private static java.util.concurrent.ScheduledFuture samplerFuture;
+    private final long interval;
+    private static final java.util.concurrent.ScheduledExecutorService scheduledExecutor;
+
+    static synchronized void init(long)
+    {
+        jdk.management.resource.internal.ThreadMetrics$ThreadSampler $r0, $r1, $r3, $r6;
+        java.util.concurrent.ScheduledFuture $r5;
+        long l0, $l1;
+        java.util.concurrent.TimeUnit $r2;
+        byte $b2;
+        java.util.concurrent.ScheduledExecutorService $r4;
+
+        l0 := @parameter0: long;
+
+        $r0 = <jdk.management.resource.internal.ThreadMetrics$ThreadSampler: jdk.management.resource.internal.ThreadMetrics$ThreadSampler samplerRunnable>;
+
+        if $r0 == null goto label1;
+
+        $r6 = <jdk.management.resource.internal.ThreadMetrics$ThreadSampler: jdk.management.resource.internal.ThreadMetrics$ThreadSampler samplerRunnable>;
+
+        $l1 = $r6.<jdk.management.resource.internal.ThreadMetrics$ThreadSampler: long interval>;
+
+        $b2 = l0 cmp $l1;
+
+        if $b2 == 0 goto label2;
+
+     label1:
+        staticinvoke <jdk.management.resource.internal.ThreadMetrics$ThreadSampler: void terminate()>();
+
+        $r1 = new jdk.management.resource.internal.ThreadMetrics$ThreadSampler;
+
+        specialinvoke $r1.<jdk.management.resource.internal.ThreadMetrics$ThreadSampler: void <init>(long)>(l0);
+
+        <jdk.management.resource.internal.ThreadMetrics$ThreadSampler: jdk.management.resource.internal.ThreadMetrics$ThreadSampler samplerRunnable> = $r1;
+
+        $r4 = <jdk.management.resource.internal.ThreadMetrics$ThreadSampler: java.util.concurrent.ScheduledExecutorService scheduledExecutor>;
+
+        $r3 = <jdk.management.resource.internal.ThreadMetrics$ThreadSampler: jdk.management.resource.internal.ThreadMetrics$ThreadSampler samplerRunnable>;
+
+        $r2 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MILLISECONDS>;
+
+        $r5 = interfaceinvoke $r4.<java.util.concurrent.ScheduledExecutorService: java.util.concurrent.ScheduledFuture scheduleAtFixedRate(java.lang.Runnable,long,long,java.util.concurrent.TimeUnit)>($r3, l0, l0, $r2);
+
+        <jdk.management.resource.internal.ThreadMetrics$ThreadSampler: java.util.concurrent.ScheduledFuture samplerFuture> = $r5;
+
+     label2:
+        return;
+    }
+
+    static synchronized void terminate()
+    {
+        java.util.concurrent.ScheduledFuture $r0, $r1;
+
+        <jdk.management.resource.internal.ThreadMetrics$ThreadSampler: jdk.management.resource.internal.ThreadMetrics$ThreadSampler samplerRunnable> = null;
+
+        $r0 = <jdk.management.resource.internal.ThreadMetrics$ThreadSampler: java.util.concurrent.ScheduledFuture samplerFuture>;
+
+        if $r0 == null goto label1;
+
+        $r1 = <jdk.management.resource.internal.ThreadMetrics$ThreadSampler: java.util.concurrent.ScheduledFuture samplerFuture>;
+
+        interfaceinvoke $r1.<java.util.concurrent.ScheduledFuture: boolean cancel(boolean)>(0);
+
+     label1:
+        return;
+    }
+
+    private void <init>(long)
+    {
+        jdk.management.resource.internal.ThreadMetrics$ThreadSampler r0;
+        long l0;
+
+        r0 := @this: jdk.management.resource.internal.ThreadMetrics$ThreadSampler;
+
+        l0 := @parameter0: long;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<jdk.management.resource.internal.ThreadMetrics$ThreadSampler: long interval> = l0;
+
+        return;
+    }
+
+    public void run()
+    {
+        java.util.function.Consumer $r2;
+        jdk.management.resource.internal.ThreadMetrics$ThreadSampler r4;
+        java.util.concurrent.ConcurrentHashMap $r1;
+        jdk.management.resource.internal.UnassignedContext $r0;
+        java.lang.RuntimeException $r3;
+
+        r4 := @this: jdk.management.resource.internal.ThreadMetrics$ThreadSampler;
+
+        $r0 = staticinvoke <jdk.management.resource.internal.UnassignedContext: jdk.management.resource.internal.UnassignedContext getSystemContext()>();
+
+        virtualinvoke $r0.<jdk.management.resource.internal.UnassignedContext: jdk.management.resource.ResourceContext bindThreadContext()>();
+
+     label1:
+        $r1 = staticinvoke <jdk.management.resource.internal.SimpleResourceContext: java.util.concurrent.ConcurrentHashMap getContexts()>();
+
+        $r2 = staticinvoke <jdk.management.resource.internal.ThreadMetrics$ThreadSampler$lambda_run_2__347: java.util.function.Consumer bootstrap$()>();
+
+        virtualinvoke $r1.<java.util.concurrent.ConcurrentHashMap: void forEachValue(long,java.util.function.Consumer)>(2147483647L, $r2);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+     label4:
+        return;
+
+        catch java.lang.RuntimeException from label1 to label2 with label3;
+    }
+
+    public static void lambda$run$2(jdk.management.resource.internal.SimpleResourceContext)
+    {
+        jdk.management.resource.internal.SimpleResourceContext r0;
+
+        r0 := @parameter0: jdk.management.resource.internal.SimpleResourceContext;
+
+        staticinvoke <jdk.management.resource.internal.ThreadMetrics: void updateThreadMetrics(jdk.management.resource.ResourceContext)>(r0);
+
+        return;
+    }
+
+    public static java.util.concurrent.ScheduledExecutorService lambda$static$1()
+    {
+        java.lang.Thread $r0;
+        java.util.concurrent.ScheduledExecutorService $r3;
+        java.lang.ThreadGroup $r1, r4;
+        java.util.concurrent.ThreadFactory $r2;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        r4 = virtualinvoke $r0.<java.lang.Thread: java.lang.ThreadGroup getThreadGroup()>();
+
+     label1:
+        $r1 = virtualinvoke r4.<java.lang.ThreadGroup: java.lang.ThreadGroup getParent()>();
+
+        if $r1 == null goto label2;
+
+        r4 = virtualinvoke r4.<java.lang.ThreadGroup: java.lang.ThreadGroup getParent()>();
+
+        goto label1;
+
+     label2:
+        $r2 = staticinvoke <jdk.management.resource.internal.ThreadMetrics$ThreadSampler$lambda_null_0__348: java.util.concurrent.ThreadFactory bootstrap$(java.lang.ThreadGroup)>(r4);
+
+        $r3 = staticinvoke <java.util.concurrent.Executors: java.util.concurrent.ScheduledExecutorService newScheduledThreadPool(int,java.util.concurrent.ThreadFactory)>(1, $r2);
+
+        return $r3;
+    }
+
+    public static java.lang.Thread lambda$null$0(java.lang.ThreadGroup, java.lang.Runnable)
+    {
+        java.lang.Thread $r0, $r3;
+        jdk.management.resource.internal.UnassignedContext $r2;
+        java.lang.ThreadGroup r4;
+        jdk.management.resource.ResourceContext $r1;
+        java.lang.Runnable r5;
+
+        r4 := @parameter0: java.lang.ThreadGroup;
+
+        r5 := @parameter1: java.lang.Runnable;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r1 = staticinvoke <jdk.management.resource.internal.SimpleResourceContext: jdk.management.resource.ResourceContext getThreadContext(java.lang.Thread)>($r0);
+
+        $r2 = staticinvoke <jdk.management.resource.internal.UnassignedContext: jdk.management.resource.internal.UnassignedContext getSystemContext()>();
+
+        virtualinvoke $r2.<jdk.management.resource.internal.UnassignedContext: jdk.management.resource.ResourceContext bindThreadContext()>();
+
+        $r3 = new java.lang.Thread;
+
+        specialinvoke $r3.<java.lang.Thread: void <init>(java.lang.ThreadGroup,java.lang.Runnable,java.lang.String)>(r4, r5, "ThreadMetrics");
+
+        virtualinvoke $r3.<java.lang.Thread: void setDaemon(boolean)>(1);
+
+        interfaceinvoke $r1.<jdk.management.resource.ResourceContext: jdk.management.resource.ResourceContext bindThreadContext()>();
+
+        return $r3;
+    }
+
+    static void <clinit>()
+    {
+        java.security.Permission[] $r1;
+        java.util.concurrent.ScheduledExecutorService $r5;
+        java.lang.RuntimePermission $r2, $r3;
+        java.lang.Object $r4;
+        java.security.PrivilegedAction $r0;
+
+        <jdk.management.resource.internal.ThreadMetrics$ThreadSampler: jdk.management.resource.internal.ThreadMetrics$ThreadSampler samplerRunnable> = null;
+
+        <jdk.management.resource.internal.ThreadMetrics$ThreadSampler: java.util.concurrent.ScheduledFuture samplerFuture> = null;
+
+        $r0 = staticinvoke <jdk.management.resource.internal.ThreadMetrics$ThreadSampler$lambda_static_1__349: java.security.PrivilegedAction bootstrap$()>();
+
+        $r1 = newarray (java.security.Permission)[2];
+
+        $r2 = new java.lang.RuntimePermission;
+
+        specialinvoke $r2.<java.lang.RuntimePermission: void <init>(java.lang.String)>("modifyThreadGroup");
+
+        $r1[0] = $r2;
+
+        $r3 = new java.lang.RuntimePermission;
+
+        specialinvoke $r3.<java.lang.RuntimePermission: void <init>(java.lang.String)>("modifyThread");
+
+        $r1[1] = $r3;
+
+        $r4 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction,java.security.AccessControlContext,java.security.Permission[])>($r0, null, $r1);
+
+        $r5 = (java.util.concurrent.ScheduledExecutorService) $r4;
+
+        <jdk.management.resource.internal.ThreadMetrics$ThreadSampler: java.util.concurrent.ScheduledExecutorService scheduledExecutor> = $r5;
+
+        return;
+    }
+}

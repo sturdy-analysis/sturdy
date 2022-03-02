@@ -1,0 +1,311 @@
+class sun.misc.TimerTickThread extends java.lang.Thread
+{
+    static final int MAX_POOL_SIZE;
+    static int curPoolSize;
+    static sun.misc.TimerTickThread pool;
+    sun.misc.TimerTickThread next;
+    sun.misc.Timer timer;
+    long lastSleepUntil;
+
+    void <init>()
+    {
+        sun.misc.TimerTickThread r0;
+
+        r0 := @this: sun.misc.TimerTickThread;
+
+        specialinvoke r0.<java.lang.Thread: void <init>()>();
+
+        r0.<sun.misc.TimerTickThread: sun.misc.TimerTickThread next> = null;
+
+        return;
+    }
+
+    protected static synchronized sun.misc.TimerTickThread call(sun.misc.Timer, long)
+    {
+        java.lang.Throwable $r5;
+        sun.misc.Timer r2;
+        long l0;
+        sun.misc.TimerTickThread $r0, $r1, r3, $r4, r6;
+
+        r2 := @parameter0: sun.misc.Timer;
+
+        l0 := @parameter1: long;
+
+        r6 = <sun.misc.TimerTickThread: sun.misc.TimerTickThread pool>;
+
+        if r6 != null goto label1;
+
+        $r4 = new sun.misc.TimerTickThread;
+
+        specialinvoke $r4.<sun.misc.TimerTickThread: void <init>()>();
+
+        r6 = $r4;
+
+        $r4.<sun.misc.TimerTickThread: sun.misc.Timer timer> = r2;
+
+        $r4.<sun.misc.TimerTickThread: long lastSleepUntil> = l0;
+
+        virtualinvoke $r4.<sun.misc.TimerTickThread: void start()>();
+
+        goto label6;
+
+     label1:
+        $r0 = <sun.misc.TimerTickThread: sun.misc.TimerTickThread pool>;
+
+        $r1 = $r0.<sun.misc.TimerTickThread: sun.misc.TimerTickThread next>;
+
+        <sun.misc.TimerTickThread: sun.misc.TimerTickThread pool> = $r1;
+
+        r6.<sun.misc.TimerTickThread: sun.misc.Timer timer> = r2;
+
+        r6.<sun.misc.TimerTickThread: long lastSleepUntil> = l0;
+
+        r3 = r6;
+
+        entermonitor r6;
+
+     label2:
+        virtualinvoke r6.<java.lang.Object: void notify()>();
+
+        exitmonitor r6;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor r3;
+
+     label5:
+        throw $r5;
+
+     label6:
+        return r6;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private boolean returnToPool()
+    {
+        java.lang.Throwable $r5, $r6, $r8;
+        sun.misc.Timer $r3;
+        sun.misc.TimerTickThread r0, $r2;
+        java.lang.InterruptedException $r7;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.lang.Class $r1, $r4;
+
+        r0 := @this: sun.misc.TimerTickThread;
+
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        entermonitor $r1;
+
+     label01:
+        $i0 = <sun.misc.TimerTickThread: int curPoolSize>;
+
+        if $i0 < 3 goto label03;
+
+        exitmonitor $r1;
+
+     label02:
+        return 0;
+
+     label03:
+        $r2 = <sun.misc.TimerTickThread: sun.misc.TimerTickThread pool>;
+
+        r0.<sun.misc.TimerTickThread: sun.misc.TimerTickThread next> = $r2;
+
+        <sun.misc.TimerTickThread: sun.misc.TimerTickThread pool> = r0;
+
+        $i1 = <sun.misc.TimerTickThread: int curPoolSize>;
+
+        $i2 = $i1 + 1;
+
+        <sun.misc.TimerTickThread: int curPoolSize> = $i2;
+
+        r0.<sun.misc.TimerTickThread: sun.misc.Timer timer> = null;
+
+        exitmonitor $r1;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r8 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label06:
+        throw $r8;
+
+     label07:
+        $r3 = r0.<sun.misc.TimerTickThread: sun.misc.Timer timer>;
+
+        if $r3 != null goto label16;
+
+        entermonitor r0;
+
+     label08:
+        virtualinvoke r0.<java.lang.Object: void wait()>();
+
+     label09:
+        goto label11;
+
+     label10:
+        $r7 := @caughtexception;
+
+     label11:
+        exitmonitor r0;
+
+     label12:
+        goto label15;
+
+     label13:
+        $r6 := @caughtexception;
+
+        exitmonitor r0;
+
+     label14:
+        throw $r6;
+
+     label15:
+        goto label07;
+
+     label16:
+        $r4 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        entermonitor $r4;
+
+     label17:
+        $i3 = <sun.misc.TimerTickThread: int curPoolSize>;
+
+        $i4 = $i3 - 1;
+
+        <sun.misc.TimerTickThread: int curPoolSize> = $i4;
+
+        exitmonitor $r4;
+
+     label18:
+        goto label21;
+
+     label19:
+        $r5 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label20:
+        throw $r5;
+
+     label21:
+        return 1;
+
+        catch java.lang.Throwable from label01 to label02 with label05;
+        catch java.lang.Throwable from label03 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.lang.InterruptedException from label08 to label09 with label10;
+        catch java.lang.Throwable from label08 to label12 with label13;
+        catch java.lang.Throwable from label13 to label14 with label13;
+        catch java.lang.Throwable from label17 to label18 with label19;
+        catch java.lang.Throwable from label19 to label20 with label19;
+    }
+
+    public void run()
+    {
+        java.lang.Throwable $r8, $r9;
+        sun.misc.Timer $r1, $r2, $r5, $r6, $r7;
+        sun.misc.TimerThread $r4;
+        long $l0, $l1;
+        sun.misc.TimerTickThread r0;
+        byte $b2;
+        sun.misc.Timeable $r3;
+        boolean $z0;
+
+        r0 := @this: sun.misc.TimerTickThread;
+
+     label01:
+        $r1 = r0.<sun.misc.TimerTickThread: sun.misc.Timer timer>;
+
+        $r3 = $r1.<sun.misc.Timer: sun.misc.Timeable owner>;
+
+        $r2 = r0.<sun.misc.TimerTickThread: sun.misc.Timer timer>;
+
+        interfaceinvoke $r3.<sun.misc.Timeable: void tick(sun.misc.Timer)>($r2);
+
+        $r4 = <sun.misc.TimerThread: sun.misc.TimerThread timerThread>;
+
+        entermonitor $r4;
+
+     label02:
+        $r5 = r0.<sun.misc.TimerTickThread: sun.misc.Timer timer>;
+
+        entermonitor $r5;
+
+     label03:
+        $l1 = r0.<sun.misc.TimerTickThread: long lastSleepUntil>;
+
+        $r6 = r0.<sun.misc.TimerTickThread: sun.misc.Timer timer>;
+
+        $l0 = $r6.<sun.misc.Timer: long sleepUntil>;
+
+        $b2 = $l1 cmp $l0;
+
+        if $b2 != 0 goto label04;
+
+        $r7 = r0.<sun.misc.TimerTickThread: sun.misc.Timer timer>;
+
+        staticinvoke <sun.misc.TimerThread: void requeue(sun.misc.Timer)>($r7);
+
+     label04:
+        exitmonitor $r5;
+
+     label05:
+        goto label08;
+
+     label06:
+        $r9 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label07:
+        throw $r9;
+
+     label08:
+        exitmonitor $r4;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r8 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label11:
+        throw $r8;
+
+     label12:
+        $z0 = specialinvoke r0.<sun.misc.TimerTickThread: boolean returnToPool()>();
+
+        if $z0 != 0 goto label01;
+
+        return;
+
+        catch java.lang.Throwable from label03 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+        catch java.lang.Throwable from label02 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    static void <clinit>()
+    {
+        <sun.misc.TimerTickThread: int MAX_POOL_SIZE> = 3;
+
+        <sun.misc.TimerTickThread: int curPoolSize> = 0;
+
+        <sun.misc.TimerTickThread: sun.misc.TimerTickThread pool> = null;
+
+        return;
+    }
+}

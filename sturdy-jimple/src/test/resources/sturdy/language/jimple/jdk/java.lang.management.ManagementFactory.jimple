@@ -1,0 +1,768 @@
+public class java.lang.management.ManagementFactory extends java.lang.Object
+{
+    public static final java.lang.String CLASS_LOADING_MXBEAN_NAME;
+    public static final java.lang.String COMPILATION_MXBEAN_NAME;
+    public static final java.lang.String MEMORY_MXBEAN_NAME;
+    public static final java.lang.String OPERATING_SYSTEM_MXBEAN_NAME;
+    public static final java.lang.String RUNTIME_MXBEAN_NAME;
+    public static final java.lang.String THREAD_MXBEAN_NAME;
+    public static final java.lang.String GARBAGE_COLLECTOR_MXBEAN_DOMAIN_TYPE;
+    public static final java.lang.String MEMORY_MANAGER_MXBEAN_DOMAIN_TYPE;
+    public static final java.lang.String MEMORY_POOL_MXBEAN_DOMAIN_TYPE;
+    private static javax.management.MBeanServer platformMBeanServer;
+    private static final java.lang.String NOTIF_EMITTER;
+
+    private void <init>()
+    {
+        java.lang.management.ManagementFactory r0;
+
+        r0 := @this: java.lang.management.ManagementFactory;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static java.lang.management.ClassLoadingMXBean getClassLoadingMXBean()
+    {
+        java.lang.management.ClassLoadingMXBean $r0;
+
+        $r0 = staticinvoke <sun.management.ManagementFactoryHelper: java.lang.management.ClassLoadingMXBean getClassLoadingMXBean()>();
+
+        return $r0;
+    }
+
+    public static java.lang.management.MemoryMXBean getMemoryMXBean()
+    {
+        java.lang.management.MemoryMXBean $r0;
+
+        $r0 = staticinvoke <sun.management.ManagementFactoryHelper: java.lang.management.MemoryMXBean getMemoryMXBean()>();
+
+        return $r0;
+    }
+
+    public static java.lang.management.ThreadMXBean getThreadMXBean()
+    {
+        java.lang.management.ThreadMXBean $r0;
+
+        $r0 = staticinvoke <sun.management.ManagementFactoryHelper: java.lang.management.ThreadMXBean getThreadMXBean()>();
+
+        return $r0;
+    }
+
+    public static java.lang.management.RuntimeMXBean getRuntimeMXBean()
+    {
+        java.lang.management.RuntimeMXBean $r0;
+
+        $r0 = staticinvoke <sun.management.ManagementFactoryHelper: java.lang.management.RuntimeMXBean getRuntimeMXBean()>();
+
+        return $r0;
+    }
+
+    public static java.lang.management.CompilationMXBean getCompilationMXBean()
+    {
+        java.lang.management.CompilationMXBean $r0;
+
+        $r0 = staticinvoke <sun.management.ManagementFactoryHelper: java.lang.management.CompilationMXBean getCompilationMXBean()>();
+
+        return $r0;
+    }
+
+    public static java.lang.management.OperatingSystemMXBean getOperatingSystemMXBean()
+    {
+        java.lang.management.OperatingSystemMXBean $r0;
+
+        $r0 = staticinvoke <sun.management.ManagementFactoryHelper: java.lang.management.OperatingSystemMXBean getOperatingSystemMXBean()>();
+
+        return $r0;
+    }
+
+    public static java.util.List getMemoryPoolMXBeans()
+    {
+        java.util.List $r0;
+
+        $r0 = staticinvoke <sun.management.ManagementFactoryHelper: java.util.List getMemoryPoolMXBeans()>();
+
+        return $r0;
+    }
+
+    public static java.util.List getMemoryManagerMXBeans()
+    {
+        java.util.List $r0;
+
+        $r0 = staticinvoke <sun.management.ManagementFactoryHelper: java.util.List getMemoryManagerMXBeans()>();
+
+        return $r0;
+    }
+
+    public static java.util.List getGarbageCollectorMXBeans()
+    {
+        java.util.List $r0;
+
+        $r0 = staticinvoke <sun.management.ManagementFactoryHelper: java.util.List getGarbageCollectorMXBeans()>();
+
+        return $r0;
+    }
+
+    public static synchronized javax.management.MBeanServer getPlatformMBeanServer()
+    {
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.util.Set $r6;
+        javax.management.ObjectName $r12, $r19, $r27;
+        java.lang.management.PlatformComponent r20;
+        java.util.List $r8, $r22;
+        javax.management.DynamicMBean $r17;
+        java.lang.management.PlatformComponent[] $r4;
+        java.util.HashMap $r5;
+        javax.management.MBeanServer $r1, $r2, $r3, $r11, $r13, $r15, $r26, $r28;
+        int i0, i1;
+        java.lang.management.PlatformManagedObject r25, r31;
+        java.util.Map$Entry r30;
+        java.util.Iterator $r7, $r9, $r23;
+        java.lang.SecurityManager $r0;
+        javax.management.MBeanServerPermission $r29;
+        java.lang.Object $r10, $r14, $r16, $r18, $r24;
+        java.lang.Class $r21;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label01;
+
+        $r29 = new javax.management.MBeanServerPermission;
+
+        specialinvoke $r29.<javax.management.MBeanServerPermission: void <init>(java.lang.String)>("createMBeanServer");
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r29);
+
+     label01:
+        $r1 = <java.lang.management.ManagementFactory: javax.management.MBeanServer platformMBeanServer>;
+
+        if $r1 != null goto label11;
+
+        $r3 = staticinvoke <javax.management.MBeanServerFactory: javax.management.MBeanServer createMBeanServer()>();
+
+        <java.lang.management.ManagementFactory: javax.management.MBeanServer platformMBeanServer> = $r3;
+
+        $r4 = staticinvoke <java.lang.management.PlatformComponent: java.lang.management.PlatformComponent[] values()>();
+
+        i0 = lengthof $r4;
+
+        i1 = 0;
+
+     label02:
+        if i1 >= i0 goto label06;
+
+        r20 = $r4[i1];
+
+        $r21 = virtualinvoke r20.<java.lang.management.PlatformComponent: java.lang.Class getMXBeanInterface()>();
+
+        $r22 = virtualinvoke r20.<java.lang.management.PlatformComponent: java.util.List getMXBeans(java.lang.Class)>($r21);
+
+        $r23 = interfaceinvoke $r22.<java.util.List: java.util.Iterator iterator()>();
+
+     label03:
+        $z3 = interfaceinvoke $r23.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label05;
+
+        $r24 = interfaceinvoke $r23.<java.util.Iterator: java.lang.Object next()>();
+
+        r25 = (java.lang.management.PlatformManagedObject) $r24;
+
+        $r26 = <java.lang.management.ManagementFactory: javax.management.MBeanServer platformMBeanServer>;
+
+        $r27 = interfaceinvoke r25.<java.lang.management.PlatformManagedObject: javax.management.ObjectName getObjectName()>();
+
+        $z4 = interfaceinvoke $r26.<javax.management.MBeanServer: boolean isRegistered(javax.management.ObjectName)>($r27);
+
+        if $z4 != 0 goto label04;
+
+        $r28 = <java.lang.management.ManagementFactory: javax.management.MBeanServer platformMBeanServer>;
+
+        staticinvoke <java.lang.management.ManagementFactory: void addMXBean(javax.management.MBeanServer,java.lang.management.PlatformManagedObject)>($r28, r25);
+
+     label04:
+        goto label03;
+
+     label05:
+        i1 = i1 + 1;
+
+        goto label02;
+
+     label06:
+        $r5 = staticinvoke <sun.management.ManagementFactoryHelper: java.util.HashMap getPlatformDynamicMBeans()>();
+
+        $r6 = virtualinvoke $r5.<java.util.HashMap: java.util.Set entrySet()>();
+
+        $r7 = interfaceinvoke $r6.<java.util.Set: java.util.Iterator iterator()>();
+
+     label07:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label08;
+
+        $r14 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r30 = (java.util.Map$Entry) $r14;
+
+        $r15 = <java.lang.management.ManagementFactory: javax.management.MBeanServer platformMBeanServer>;
+
+        $r16 = interfaceinvoke r30.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r17 = (javax.management.DynamicMBean) $r16;
+
+        $r18 = interfaceinvoke r30.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r19 = (javax.management.ObjectName) $r18;
+
+        staticinvoke <java.lang.management.ManagementFactory: void addDynamicMBean(javax.management.MBeanServer,javax.management.DynamicMBean,javax.management.ObjectName)>($r15, $r17, $r19);
+
+        goto label07;
+
+     label08:
+        $r8 = staticinvoke <sun.management.ExtendedPlatformComponent: java.util.List getMXBeans()>();
+
+        $r9 = interfaceinvoke $r8.<java.util.List: java.util.Iterator iterator()>();
+
+     label09:
+        $z1 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label11;
+
+        $r10 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        r31 = (java.lang.management.PlatformManagedObject) $r10;
+
+        $r11 = <java.lang.management.ManagementFactory: javax.management.MBeanServer platformMBeanServer>;
+
+        $r12 = interfaceinvoke r31.<java.lang.management.PlatformManagedObject: javax.management.ObjectName getObjectName()>();
+
+        $z2 = interfaceinvoke $r11.<javax.management.MBeanServer: boolean isRegistered(javax.management.ObjectName)>($r12);
+
+        if $z2 != 0 goto label10;
+
+        $r13 = <java.lang.management.ManagementFactory: javax.management.MBeanServer platformMBeanServer>;
+
+        staticinvoke <java.lang.management.ManagementFactory: void addMXBean(javax.management.MBeanServer,java.lang.management.PlatformManagedObject)>($r13, r31);
+
+     label10:
+        goto label09;
+
+     label11:
+        $r2 = <java.lang.management.ManagementFactory: javax.management.MBeanServer platformMBeanServer>;
+
+        return $r2;
+    }
+
+    public static java.lang.Object newPlatformMXBeanProxy(javax.management.MBeanServerConnection, java.lang.String, java.lang.Class) throws java.io.IOException
+    {
+        javax.management.OperationsException $r20;
+        java.lang.management.ManagementFactory$1 $r1;
+        java.lang.String r5, $r6, $r14, $r19;
+        boolean $z0, $z1, $z2;
+        javax.management.MBeanServerConnection r7;
+        javax.management.ObjectName $r4;
+        java.lang.IllegalArgumentException $r9, $r15, $r21;
+        java.lang.Class r0;
+        java.lang.Object $r2, $r8;
+        java.lang.StringBuilder $r10, $r11, $r12, $r13, $r16, $r17, $r18;
+        java.lang.ClassLoader r3;
+
+        r7 := @parameter0: javax.management.MBeanServerConnection;
+
+        r5 := @parameter1: java.lang.String;
+
+        r0 := @parameter2: java.lang.Class;
+
+        $r1 = new java.lang.management.ManagementFactory$1;
+
+        specialinvoke $r1.<java.lang.management.ManagementFactory$1: void <init>(java.lang.Class)>(r0);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        r3 = (java.lang.ClassLoader) $r2;
+
+        $z0 = staticinvoke <sun.misc.VM: boolean isSystemDomainLoader(java.lang.ClassLoader)>(r3);
+
+        if $z0 != 0 goto label1;
+
+        $r15 = new java.lang.IllegalArgumentException;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is not a platform MXBean");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r15.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r19);
+
+        throw $r15;
+
+     label1:
+        $r4 = new javax.management.ObjectName;
+
+        specialinvoke $r4.<javax.management.ObjectName: void <init>(java.lang.String)>(r5);
+
+        $r6 = virtualinvoke r0.<java.lang.Class: java.lang.String getName()>();
+
+        $z1 = interfaceinvoke r7.<javax.management.MBeanServerConnection: boolean isInstanceOf(javax.management.ObjectName,java.lang.String)>($r4, $r6);
+
+        if $z1 != 0 goto label2;
+
+        $r9 = new java.lang.IllegalArgumentException;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is not an instance of ");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r14);
+
+        throw $r9;
+
+     label2:
+        $z2 = interfaceinvoke r7.<javax.management.MBeanServerConnection: boolean isInstanceOf(javax.management.ObjectName,java.lang.String)>($r4, "javax.management.NotificationEmitter");
+
+        $r8 = staticinvoke <javax.management.JMX: java.lang.Object newMXBeanProxy(javax.management.MBeanServerConnection,javax.management.ObjectName,java.lang.Class,boolean)>(r7, $r4, r0, $z2);
+
+     label3:
+        return $r8;
+
+     label4:
+        $r20 := @caughtexception;
+
+        $r21 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r21.<java.lang.IllegalArgumentException: void <init>(java.lang.Throwable)>($r20);
+
+        throw $r21;
+
+        catch javax.management.InstanceNotFoundException from label1 to label3 with label4;
+        catch javax.management.MalformedObjectNameException from label1 to label3 with label4;
+    }
+
+    public static java.lang.management.PlatformManagedObject getPlatformMXBean(java.lang.Class)
+    {
+        java.lang.management.PlatformManagedObject $r2, $r9;
+        java.lang.String $r5, $r8, $r12, $r15;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r3, $r10;
+        java.lang.management.PlatformComponent $r1;
+        java.lang.Class r0;
+        java.lang.StringBuilder $r4, $r6, $r7, $r11, $r13, $r14;
+
+        r0 := @parameter0: java.lang.Class;
+
+        $r1 = staticinvoke <java.lang.management.PlatformComponent: java.lang.management.PlatformComponent getPlatformComponent(java.lang.Class)>(r0);
+
+        if $r1 != null goto label2;
+
+        $r9 = staticinvoke <sun.management.ExtendedPlatformComponent: java.lang.management.PlatformManagedObject getMXBean(java.lang.Class)>(r0);
+
+        if $r9 == null goto label1;
+
+        return $r9;
+
+     label1:
+        $r10 = new java.lang.IllegalArgumentException;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is not a platform management interface");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r10.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r15);
+
+        throw $r10;
+
+     label2:
+        $z0 = virtualinvoke $r1.<java.lang.management.PlatformComponent: boolean isSingleton()>();
+
+        if $z0 != 0 goto label3;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" can have zero or more than one instances");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r8);
+
+        throw $r3;
+
+     label3:
+        $r2 = virtualinvoke $r1.<java.lang.management.PlatformComponent: java.lang.management.PlatformManagedObject getSingletonMXBean(java.lang.Class)>(r0);
+
+        return $r2;
+    }
+
+    public static java.util.List getPlatformMXBeans(java.lang.Class)
+    {
+        java.lang.IllegalArgumentException $r5;
+        java.lang.management.PlatformComponent $r1;
+        java.util.List $r2, $r3, $r11;
+        java.lang.management.PlatformManagedObject $r4;
+        java.lang.Class r0;
+        java.lang.StringBuilder $r6, $r8, $r9;
+        java.lang.String $r7, $r10;
+
+        r0 := @parameter0: java.lang.Class;
+
+        $r1 = staticinvoke <java.lang.management.PlatformComponent: java.lang.management.PlatformComponent getPlatformComponent(java.lang.Class)>(r0);
+
+        if $r1 != null goto label2;
+
+        $r4 = staticinvoke <sun.management.ExtendedPlatformComponent: java.lang.management.PlatformManagedObject getMXBean(java.lang.Class)>(r0);
+
+        if $r4 == null goto label1;
+
+        $r11 = staticinvoke <java.util.Collections: java.util.List singletonList(java.lang.Object)>($r4);
+
+        return $r11;
+
+     label1:
+        $r5 = new java.lang.IllegalArgumentException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is not a platform management interface");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r10);
+
+        throw $r5;
+
+     label2:
+        $r2 = virtualinvoke $r1.<java.lang.management.PlatformComponent: java.util.List getMXBeans(java.lang.Class)>(r0);
+
+        $r3 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r2);
+
+        return $r3;
+    }
+
+    public static java.lang.management.PlatformManagedObject getPlatformMXBean(javax.management.MBeanServerConnection, java.lang.Class) throws java.io.IOException
+    {
+        java.lang.management.PlatformManagedObject $r3, $r10, $r20;
+        java.lang.String $r6, $r9, $r13, $r16, $r18;
+        boolean $z0;
+        javax.management.MBeanServerConnection r2;
+        javax.management.ObjectName $r17;
+        java.lang.IllegalArgumentException $r4, $r11;
+        java.lang.management.PlatformComponent $r1;
+        java.lang.Class r0;
+        java.lang.StringBuilder $r5, $r7, $r8, $r12, $r14, $r15;
+        java.lang.Object $r19;
+
+        r2 := @parameter0: javax.management.MBeanServerConnection;
+
+        r0 := @parameter1: java.lang.Class;
+
+        $r1 = staticinvoke <java.lang.management.PlatformComponent: java.lang.management.PlatformComponent getPlatformComponent(java.lang.Class)>(r0);
+
+        if $r1 != null goto label2;
+
+        $r10 = staticinvoke <sun.management.ExtendedPlatformComponent: java.lang.management.PlatformManagedObject getMXBean(java.lang.Class)>(r0);
+
+        if $r10 == null goto label1;
+
+        $r17 = interfaceinvoke $r10.<java.lang.management.PlatformManagedObject: javax.management.ObjectName getObjectName()>();
+
+        $r18 = virtualinvoke $r17.<javax.management.ObjectName: java.lang.String getCanonicalName()>();
+
+        $r19 = staticinvoke <java.lang.management.ManagementFactory: java.lang.Object newPlatformMXBeanProxy(javax.management.MBeanServerConnection,java.lang.String,java.lang.Class)>(r2, $r18, r0);
+
+        $r20 = (java.lang.management.PlatformManagedObject) $r19;
+
+        return $r20;
+
+     label1:
+        $r11 = new java.lang.IllegalArgumentException;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is not a platform management interface");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r11.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r16);
+
+        throw $r11;
+
+     label2:
+        $z0 = virtualinvoke $r1.<java.lang.management.PlatformComponent: boolean isSingleton()>();
+
+        if $z0 != 0 goto label3;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" can have zero or more than one instances");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r9);
+
+        throw $r4;
+
+     label3:
+        $r3 = virtualinvoke $r1.<java.lang.management.PlatformComponent: java.lang.management.PlatformManagedObject getSingletonMXBean(javax.management.MBeanServerConnection,java.lang.Class)>(r2, r0);
+
+        return $r3;
+    }
+
+    public static java.util.List getPlatformMXBeans(javax.management.MBeanServerConnection, java.lang.Class) throws java.io.IOException
+    {
+        java.lang.management.PlatformManagedObject $r5, r15;
+        java.lang.String $r8, $r11, $r13;
+        javax.management.MBeanServerConnection r2;
+        javax.management.ObjectName $r12;
+        java.lang.IllegalArgumentException $r6;
+        java.lang.management.PlatformComponent $r1;
+        java.util.List $r3, $r4, $r16;
+        java.lang.Class r0;
+        java.lang.StringBuilder $r7, $r9, $r10;
+        java.lang.Object $r14;
+
+        r2 := @parameter0: javax.management.MBeanServerConnection;
+
+        r0 := @parameter1: java.lang.Class;
+
+        $r1 = staticinvoke <java.lang.management.PlatformComponent: java.lang.management.PlatformComponent getPlatformComponent(java.lang.Class)>(r0);
+
+        if $r1 != null goto label2;
+
+        $r5 = staticinvoke <sun.management.ExtendedPlatformComponent: java.lang.management.PlatformManagedObject getMXBean(java.lang.Class)>(r0);
+
+        if $r5 == null goto label1;
+
+        $r12 = interfaceinvoke $r5.<java.lang.management.PlatformManagedObject: javax.management.ObjectName getObjectName()>();
+
+        $r13 = virtualinvoke $r12.<javax.management.ObjectName: java.lang.String getCanonicalName()>();
+
+        $r14 = staticinvoke <java.lang.management.ManagementFactory: java.lang.Object newPlatformMXBeanProxy(javax.management.MBeanServerConnection,java.lang.String,java.lang.Class)>(r2, $r13, r0);
+
+        r15 = (java.lang.management.PlatformManagedObject) $r14;
+
+        $r16 = staticinvoke <java.util.Collections: java.util.List singletonList(java.lang.Object)>(r15);
+
+        return $r16;
+
+     label1:
+        $r6 = new java.lang.IllegalArgumentException;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is not a platform management interface");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r11);
+
+        throw $r6;
+
+     label2:
+        $r3 = virtualinvoke $r1.<java.lang.management.PlatformComponent: java.util.List getMXBeans(javax.management.MBeanServerConnection,java.lang.Class)>(r2, r0);
+
+        $r4 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r3);
+
+        return $r4;
+    }
+
+    public static java.util.Set getPlatformManagementInterfaces()
+    {
+        java.util.HashSet $r0;
+        int i0, i1;
+        java.util.Set $r2;
+        java.lang.Class $r4;
+        java.lang.management.PlatformComponent r3;
+        java.lang.management.PlatformComponent[] $r1;
+
+        $r0 = new java.util.HashSet;
+
+        specialinvoke $r0.<java.util.HashSet: void <init>()>();
+
+        $r1 = staticinvoke <java.lang.management.PlatformComponent: java.lang.management.PlatformComponent[] values()>();
+
+        i0 = lengthof $r1;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label2;
+
+        r3 = $r1[i1];
+
+        $r4 = virtualinvoke r3.<java.lang.management.PlatformComponent: java.lang.Class getMXBeanInterface()>();
+
+        interfaceinvoke $r0.<java.util.Set: boolean add(java.lang.Object)>($r4);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        $r2 = staticinvoke <java.util.Collections: java.util.Set unmodifiableSet(java.util.Set)>($r0);
+
+        return $r2;
+    }
+
+    private static void addMXBean(javax.management.MBeanServer, java.lang.management.PlatformManagedObject)
+    {
+        java.lang.management.ManagementFactory$2 $r0;
+        java.security.PrivilegedActionException $r3;
+        javax.management.MBeanServer r2;
+        java.lang.management.PlatformManagedObject r1;
+        java.lang.RuntimeException $r4;
+        java.lang.Exception $r5;
+
+        r2 := @parameter0: javax.management.MBeanServer;
+
+        r1 := @parameter1: java.lang.management.PlatformManagedObject;
+
+     label1:
+        $r0 = new java.lang.management.ManagementFactory$2;
+
+        specialinvoke $r0.<java.lang.management.ManagementFactory$2: void <init>(java.lang.management.PlatformManagedObject,javax.management.MBeanServer)>(r1, r2);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.lang.RuntimeException;
+
+        $r5 = virtualinvoke $r3.<java.security.PrivilegedActionException: java.lang.Exception getException()>();
+
+        specialinvoke $r4.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r5);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.security.PrivilegedActionException from label1 to label2 with label3;
+    }
+
+    private static void addDynamicMBean(javax.management.MBeanServer, javax.management.DynamicMBean, javax.management.ObjectName)
+    {
+        java.lang.management.ManagementFactory$3 $r0;
+        java.security.PrivilegedActionException $r4;
+        javax.management.MBeanServer r1;
+        javax.management.ObjectName r3;
+        java.lang.RuntimeException $r5;
+        javax.management.DynamicMBean r2;
+        java.lang.Exception $r6;
+
+        r1 := @parameter0: javax.management.MBeanServer;
+
+        r2 := @parameter1: javax.management.DynamicMBean;
+
+        r3 := @parameter2: javax.management.ObjectName;
+
+     label1:
+        $r0 = new java.lang.management.ManagementFactory$3;
+
+        specialinvoke $r0.<java.lang.management.ManagementFactory$3: void <init>(javax.management.MBeanServer,javax.management.DynamicMBean,javax.management.ObjectName)>(r1, r2, r3);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = new java.lang.RuntimeException;
+
+        $r6 = virtualinvoke $r4.<java.security.PrivilegedActionException: java.lang.Exception getException()>();
+
+        specialinvoke $r5.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r6);
+
+        throw $r5;
+
+     label4:
+        return;
+
+        catch java.security.PrivilegedActionException from label1 to label2 with label3;
+    }
+
+    public static void <clinit>()
+    {
+        <java.lang.management.ManagementFactory: java.lang.String NOTIF_EMITTER> = "javax.management.NotificationEmitter";
+
+        <java.lang.management.ManagementFactory: java.lang.String MEMORY_POOL_MXBEAN_DOMAIN_TYPE> = "java.lang:type=MemoryPool";
+
+        <java.lang.management.ManagementFactory: java.lang.String MEMORY_MANAGER_MXBEAN_DOMAIN_TYPE> = "java.lang:type=MemoryManager";
+
+        <java.lang.management.ManagementFactory: java.lang.String GARBAGE_COLLECTOR_MXBEAN_DOMAIN_TYPE> = "java.lang:type=GarbageCollector";
+
+        <java.lang.management.ManagementFactory: java.lang.String THREAD_MXBEAN_NAME> = "java.lang:type=Threading";
+
+        <java.lang.management.ManagementFactory: java.lang.String RUNTIME_MXBEAN_NAME> = "java.lang:type=Runtime";
+
+        <java.lang.management.ManagementFactory: java.lang.String OPERATING_SYSTEM_MXBEAN_NAME> = "java.lang:type=OperatingSystem";
+
+        <java.lang.management.ManagementFactory: java.lang.String MEMORY_MXBEAN_NAME> = "java.lang:type=Memory";
+
+        <java.lang.management.ManagementFactory: java.lang.String COMPILATION_MXBEAN_NAME> = "java.lang:type=Compilation";
+
+        <java.lang.management.ManagementFactory: java.lang.String CLASS_LOADING_MXBEAN_NAME> = "java.lang:type=ClassLoading";
+
+        return;
+    }
+}

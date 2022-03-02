@@ -1,0 +1,3119 @@
+final class com.sun.jndi.ldap.LdapReferralContext extends java.lang.Object implements javax.naming.directory.DirContext, javax.naming.ldap.LdapContext
+{
+    private javax.naming.directory.DirContext refCtx;
+    private javax.naming.Name urlName;
+    private java.lang.String urlAttrs;
+    private java.lang.String urlScope;
+    private java.lang.String urlFilter;
+    private com.sun.jndi.ldap.LdapReferralException refEx;
+    private boolean skipThisReferral;
+    private int hopCount;
+    private javax.naming.NamingException previousEx;
+
+    void <init>(com.sun.jndi.ldap.LdapReferralException, java.util.Hashtable, javax.naming.ldap.Control[], javax.naming.ldap.Control[], java.lang.String, boolean, int) throws javax.naming.NamingException
+    {
+        javax.naming.NamingException $r19, $r20, $r21, $r23, $r24, $r28, $r29;
+        boolean z0, $z1, $z2;
+        com.sun.jndi.ldap.LdapReferralException r1, $r30, $r33;
+        javax.naming.Reference $r3;
+        java.lang.Exception $r27;
+        java.lang.StringBuilder $r7, $r8, $r9;
+        javax.naming.ldap.LdapContext $r18;
+        javax.naming.ldap.Control[] r2, r16, r32;
+        java.lang.Throwable $r22;
+        javax.naming.StringRefAddr $r4;
+        int $i0, $i1, i2;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        java.lang.String $r10, r12, $r34;
+        java.util.Hashtable $r25, r31;
+        javax.naming.CompositeName $r11;
+        javax.naming.directory.DirContext $r14, $r15, $r17;
+        javax.naming.NotContextException $r6;
+        javax.naming.Name $r13;
+        java.lang.Object $r5, $r26;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: com.sun.jndi.ldap.LdapReferralException;
+
+        r31 := @parameter1: java.util.Hashtable;
+
+        r2 := @parameter2: javax.naming.ldap.Control[];
+
+        r16 := @parameter3: javax.naming.ldap.Control[];
+
+        r12 := @parameter4: java.lang.String;
+
+        z0 := @parameter5: boolean;
+
+        i2 := @parameter6: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx> = null;
+
+        r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name urlName> = null;
+
+        r0.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String urlAttrs> = null;
+
+        r0.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String urlScope> = null;
+
+        r0.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String urlFilter> = null;
+
+        r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx> = null;
+
+        r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral> = 0;
+
+        r0.<com.sun.jndi.ldap.LdapReferralContext: int hopCount> = 1;
+
+        r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.NamingException previousEx> = null;
+
+        r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx> = r1;
+
+        r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral> = z0;
+
+        if z0 == 0 goto label01;
+
+        return;
+
+     label01:
+        if r31 == null goto label02;
+
+        $r26 = virtualinvoke r31.<java.util.Hashtable: java.lang.Object clone()>();
+
+        r31 = (java.util.Hashtable) $r26;
+
+        if r2 != null goto label03;
+
+        virtualinvoke r31.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>("java.naming.ldap.control.connect");
+
+        goto label03;
+
+     label02:
+        if r2 == null goto label03;
+
+        $r25 = new java.util.Hashtable;
+
+        specialinvoke $r25.<java.util.Hashtable: void <init>(int)>(5);
+
+        r31 = $r25;
+
+     label03:
+        if r2 == null goto label04;
+
+        $i0 = lengthof r2;
+
+        r32 = newarray (javax.naming.ldap.Control)[$i0];
+
+        $i1 = lengthof r2;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r2, 0, r32, 0, $i1);
+
+        virtualinvoke r31.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>("java.naming.ldap.control.connect", r32);
+
+     label04:
+        $r33 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r34 = virtualinvoke $r33.<com.sun.jndi.ldap.LdapReferralException: java.lang.String getNextReferral()>();
+
+        if $r34 != null goto label06;
+
+        $r19 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.NamingException previousEx>;
+
+        if $r19 == null goto label05;
+
+        $r21 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.NamingException previousEx>;
+
+        $r22 = virtualinvoke $r21.<javax.naming.NamingException: java.lang.Throwable fillInStackTrace()>();
+
+        $r23 = (javax.naming.NamingException) $r22;
+
+        $r24 = (javax.naming.NamingException) $r23;
+
+        throw $r24;
+
+     label05:
+        $r20 = new javax.naming.NamingException;
+
+        specialinvoke $r20.<javax.naming.NamingException: void <init>(java.lang.String)>("Illegal encoding: referral is empty");
+
+        throw $r20;
+
+     label06:
+        goto label09;
+
+     label07:
+        $r30 := @caughtexception;
+
+        if i2 != 2 goto label08;
+
+        throw $r30;
+
+     label08:
+        r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx> = $r30;
+
+        goto label04;
+
+     label09:
+        $r3 = new javax.naming.Reference;
+
+        $r4 = new javax.naming.StringRefAddr;
+
+        specialinvoke $r4.<javax.naming.StringRefAddr: void <init>(java.lang.String,java.lang.String)>("URL", $r34);
+
+        specialinvoke $r3.<javax.naming.Reference: void <init>(java.lang.String,javax.naming.RefAddr)>("javax.naming.directory.DirContext", $r4);
+
+     label10:
+        $r5 = staticinvoke <javax.naming.spi.NamingManager: java.lang.Object getObjectInstance(java.lang.Object,javax.naming.Name,javax.naming.Context,java.util.Hashtable)>($r3, null, null, r31);
+
+     label11:
+        goto label15;
+
+     label12:
+        $r29 := @caughtexception;
+
+        if i2 != 2 goto label13;
+
+        throw $r29;
+
+     label13:
+        r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.NamingException previousEx> = $r29;
+
+        goto label04;
+
+     label14:
+        $r27 := @caughtexception;
+
+        $r28 = new javax.naming.NamingException;
+
+        specialinvoke $r28.<javax.naming.NamingException: void <init>(java.lang.String)>("problem generating object using object factory");
+
+        virtualinvoke $r28.<javax.naming.NamingException: void setRootCause(java.lang.Throwable)>($r27);
+
+        throw $r28;
+
+     label15:
+        $z1 = $r5 instanceof javax.naming.directory.DirContext;
+
+        if $z1 == 0 goto label17;
+
+        $r14 = (javax.naming.directory.DirContext) $r5;
+
+        r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx> = $r14;
+
+        $r15 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $z2 = $r15 instanceof javax.naming.ldap.LdapContext;
+
+        if $z2 == 0 goto label16;
+
+        if r16 == null goto label16;
+
+        $r17 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r18 = (javax.naming.ldap.LdapContext) $r17;
+
+        interfaceinvoke $r18.<javax.naming.ldap.LdapContext: void setRequestControls(javax.naming.ldap.Control[])>(r16);
+
+     label16:
+        specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: void initDefaults(java.lang.String,java.lang.String)>($r34, r12);
+
+        goto label18;
+
+     label17:
+        $r6 = new javax.naming.NotContextException;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot create context for: ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r34);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<javax.naming.NotContextException: void <init>(java.lang.String)>($r10);
+
+        $r11 = new javax.naming.CompositeName;
+
+        specialinvoke $r11.<javax.naming.CompositeName: void <init>()>();
+
+        $r13 = virtualinvoke $r11.<javax.naming.CompositeName: javax.naming.Name add(java.lang.String)>(r12);
+
+        virtualinvoke $r6.<javax.naming.NamingException: void setRemainingName(javax.naming.Name)>($r13);
+
+        throw $r6;
+
+     label18:
+        return;
+
+        catch com.sun.jndi.ldap.LdapReferralException from label04 to label06 with label07;
+        catch javax.naming.NamingException from label10 to label11 with label12;
+        catch java.lang.Exception from label10 to label11 with label14;
+    }
+
+    private void initDefaults(java.lang.String, java.lang.String) throws javax.naming.NamingException
+    {
+        javax.naming.CompositeName $r13, $r14;
+        javax.naming.Name $r11;
+        javax.naming.NamingException $r8;
+        com.sun.jndi.ldap.LdapURL $r12;
+        com.sun.jndi.ldap.LdapReferralContext r2;
+        java.lang.String r1, $r3, $r4, $r5, r7, r9, r10;
+        boolean $z0;
+
+        r2 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        r7 := @parameter1: java.lang.String;
+
+     label01:
+        $r12 = new com.sun.jndi.ldap.LdapURL;
+
+        specialinvoke $r12.<com.sun.jndi.ldap.LdapURL: void <init>(java.lang.String)>(r1);
+
+        r9 = virtualinvoke $r12.<com.sun.jndi.ldap.LdapURL: java.lang.String getDN()>();
+
+        $r3 = virtualinvoke $r12.<com.sun.jndi.ldap.LdapURL: java.lang.String getAttributes()>();
+
+        r2.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String urlAttrs> = $r3;
+
+        $r4 = virtualinvoke $r12.<com.sun.jndi.ldap.LdapURL: java.lang.String getScope()>();
+
+        r2.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String urlScope> = $r4;
+
+        $r5 = virtualinvoke $r12.<com.sun.jndi.ldap.LdapURL: java.lang.String getFilter()>();
+
+        r2.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String urlFilter> = $r5;
+
+     label02:
+        goto label04;
+
+     label03:
+        $r8 := @caughtexception;
+
+        r9 = r1;
+
+        r2.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String urlFilter> = null;
+
+        r2.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String urlScope> = null;
+
+        r2.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String urlAttrs> = null;
+
+     label04:
+        if r9 != null goto label05;
+
+        r10 = r7;
+
+        goto label06;
+
+     label05:
+        r10 = "";
+
+     label06:
+        if r10 != null goto label07;
+
+        r2.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name urlName> = null;
+
+        goto label10;
+
+     label07:
+        $z0 = virtualinvoke r10.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z0 == 0 goto label08;
+
+        $r13 = new javax.naming.CompositeName;
+
+        $r11 = $r13;
+
+        specialinvoke $r13.<javax.naming.CompositeName: void <init>()>();
+
+        goto label09;
+
+     label08:
+        $r14 = new javax.naming.CompositeName;
+
+        specialinvoke $r14.<javax.naming.CompositeName: void <init>()>();
+
+        $r11 = virtualinvoke $r14.<javax.naming.CompositeName: javax.naming.Name add(java.lang.String)>(r10);
+
+     label09:
+        r2.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name urlName> = $r11;
+
+     label10:
+        return;
+
+        catch javax.naming.NamingException from label01 to label02 with label03;
+    }
+
+    public void close() throws javax.naming.NamingException
+    {
+        javax.naming.directory.DirContext $r1, $r2;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        $r1 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        interfaceinvoke $r2.<javax.naming.directory.DirContext: void close()>();
+
+        r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx> = null;
+
+     label1:
+        r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx> = null;
+
+        return;
+    }
+
+    void setHopCount(int)
+    {
+        int i0;
+        javax.naming.directory.DirContext $r1, $r2, $r3;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        com.sun.jndi.ldap.LdapCtx $r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        i0 := @parameter0: int;
+
+        r0.<com.sun.jndi.ldap.LdapReferralContext: int hopCount> = i0;
+
+        $r1 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $z0 = $r2 instanceof com.sun.jndi.ldap.LdapCtx;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r4 = (com.sun.jndi.ldap.LdapCtx) $r3;
+
+        virtualinvoke $r4.<com.sun.jndi.ldap.LdapCtx: void setHopCount(int)>(i0);
+
+     label1:
+        return;
+    }
+
+    public java.lang.Object lookup(java.lang.String) throws javax.naming.NamingException
+    {
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name $r2;
+        java.lang.Object $r3;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r1);
+
+        $r3 = virtualinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: java.lang.Object lookup(javax.naming.Name)>($r2);
+
+        return $r3;
+    }
+
+    public java.lang.Object lookup(javax.naming.Name) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r7;
+        com.sun.jndi.ldap.LdapReferralException $r5, $r6;
+        javax.naming.directory.DirContext $r2;
+        javax.naming.Name r1, $r3;
+        javax.naming.NamingException $r8, $r9;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        java.lang.Object $r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: javax.naming.Name;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r6 = virtualinvoke $r5.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r7 = virtualinvoke $r6.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r8 = (javax.naming.NamingException) $r7;
+
+        $r9 = (javax.naming.NamingException) $r8;
+
+        throw $r9;
+
+     label1:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r3 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name overrideName(javax.naming.Name)>(r1);
+
+        $r4 = interfaceinvoke $r2.<javax.naming.directory.DirContext: java.lang.Object lookup(javax.naming.Name)>($r3);
+
+        return $r4;
+    }
+
+    public void bind(java.lang.String, java.lang.Object) throws javax.naming.NamingException
+    {
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name $r2;
+        java.lang.Object r3;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.Object;
+
+        $r2 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r1);
+
+        virtualinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: void bind(javax.naming.Name,java.lang.Object)>($r2, r3);
+
+        return;
+    }
+
+    public void bind(javax.naming.Name, java.lang.Object) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r7;
+        com.sun.jndi.ldap.LdapReferralException $r5, $r6;
+        javax.naming.directory.DirContext $r2;
+        javax.naming.Name r1, $r3;
+        javax.naming.NamingException $r8, $r9;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        java.lang.Object r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: javax.naming.Name;
+
+        r4 := @parameter1: java.lang.Object;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r6 = virtualinvoke $r5.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r7 = virtualinvoke $r6.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r8 = (javax.naming.NamingException) $r7;
+
+        $r9 = (javax.naming.NamingException) $r8;
+
+        throw $r9;
+
+     label1:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r3 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name overrideName(javax.naming.Name)>(r1);
+
+        interfaceinvoke $r2.<javax.naming.directory.DirContext: void bind(javax.naming.Name,java.lang.Object)>($r3, r4);
+
+        return;
+    }
+
+    public void rebind(java.lang.String, java.lang.Object) throws javax.naming.NamingException
+    {
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name $r2;
+        java.lang.Object r3;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.Object;
+
+        $r2 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r1);
+
+        virtualinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: void rebind(javax.naming.Name,java.lang.Object)>($r2, r3);
+
+        return;
+    }
+
+    public void rebind(javax.naming.Name, java.lang.Object) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r7;
+        com.sun.jndi.ldap.LdapReferralException $r5, $r6;
+        javax.naming.directory.DirContext $r2;
+        javax.naming.Name r1, $r3;
+        javax.naming.NamingException $r8, $r9;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        java.lang.Object r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: javax.naming.Name;
+
+        r4 := @parameter1: java.lang.Object;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r6 = virtualinvoke $r5.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r7 = virtualinvoke $r6.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r8 = (javax.naming.NamingException) $r7;
+
+        $r9 = (javax.naming.NamingException) $r8;
+
+        throw $r9;
+
+     label1:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r3 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name overrideName(javax.naming.Name)>(r1);
+
+        interfaceinvoke $r2.<javax.naming.directory.DirContext: void rebind(javax.naming.Name,java.lang.Object)>($r3, r4);
+
+        return;
+    }
+
+    public void unbind(java.lang.String) throws javax.naming.NamingException
+    {
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name $r2;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r1);
+
+        virtualinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: void unbind(javax.naming.Name)>($r2);
+
+        return;
+    }
+
+    public void unbind(javax.naming.Name) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r6;
+        com.sun.jndi.ldap.LdapReferralException $r4, $r5;
+        javax.naming.directory.DirContext $r2;
+        javax.naming.Name r1, $r3;
+        javax.naming.NamingException $r7, $r8;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: javax.naming.Name;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r5 = virtualinvoke $r4.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r6 = virtualinvoke $r5.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r7 = (javax.naming.NamingException) $r6;
+
+        $r8 = (javax.naming.NamingException) $r7;
+
+        throw $r8;
+
+     label1:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r3 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name overrideName(javax.naming.Name)>(r1);
+
+        interfaceinvoke $r2.<javax.naming.directory.DirContext: void unbind(javax.naming.Name)>($r3);
+
+        return;
+    }
+
+    public void rename(java.lang.String, java.lang.String) throws javax.naming.NamingException
+    {
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name $r2, $r4;
+        java.lang.String r1, r3;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        $r2 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r1);
+
+        $r4 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r3);
+
+        virtualinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: void rename(javax.naming.Name,javax.naming.Name)>($r2, $r4);
+
+        return;
+    }
+
+    public void rename(javax.naming.Name, javax.naming.Name) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r9;
+        com.sun.jndi.ldap.LdapReferralException $r4, $r7, $r8;
+        javax.naming.directory.DirContext $r2;
+        javax.naming.Name r1, $r3, $r6, r12;
+        javax.naming.NamingException $r10, $r11;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        java.lang.String $r5;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: javax.naming.Name;
+
+        r12 := @parameter1: javax.naming.Name;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r7 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r8 = virtualinvoke $r7.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r9 = virtualinvoke $r8.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r10 = (javax.naming.NamingException) $r9;
+
+        $r11 = (javax.naming.NamingException) $r10;
+
+        throw $r11;
+
+     label1:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r3 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name overrideName(javax.naming.Name)>(r1);
+
+        $r4 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r5 = virtualinvoke $r4.<com.sun.jndi.ldap.LdapReferralException: java.lang.String getNewRdn()>();
+
+        $r6 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>($r5);
+
+        interfaceinvoke $r2.<javax.naming.directory.DirContext: void rename(javax.naming.Name,javax.naming.Name)>($r3, $r6);
+
+        return;
+    }
+
+    public javax.naming.NamingEnumeration list(java.lang.String) throws javax.naming.NamingException
+    {
+        javax.naming.NamingEnumeration $r3;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name $r2;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r1);
+
+        $r3 = virtualinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.NamingEnumeration list(javax.naming.Name)>($r2);
+
+        return $r3;
+    }
+
+    public javax.naming.NamingEnumeration list(javax.naming.Name) throws javax.naming.NamingException
+    {
+        javax.naming.NamingException $r12, $r13, $r14, $r20, $r21, $r28, $r29;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        com.sun.jndi.ldap.ReferralEnumeration $r32;
+        com.sun.jndi.ldap.LdapReferralException $r9, $r10, $r15, $r16, $r17, $r18, $r22, $r23, $r24, $r25, $r26, $r31, $r33, $r34;
+        javax.naming.NamingEnumeration r30;
+        java.lang.Throwable $r11, $r19, $r27;
+        javax.naming.directory.SearchControls $r6;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        java.lang.String $r1, $r5;
+        javax.naming.directory.DirContext $r3, $r7;
+        javax.naming.Name r2, $r4, $r8;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r2 := @parameter0: javax.naming.Name;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r9 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r10 = virtualinvoke $r9.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r11 = virtualinvoke $r10.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r12 = (javax.naming.NamingException) $r11;
+
+        $r13 = (javax.naming.NamingException) $r12;
+
+        throw $r13;
+
+     label1:
+        $r1 = r0.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String urlScope>;
+
+        if $r1 == null goto label2;
+
+        $r5 = r0.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String urlScope>;
+
+        $z1 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("base");
+
+        if $z1 == 0 goto label2;
+
+        $r6 = new javax.naming.directory.SearchControls;
+
+        specialinvoke $r6.<javax.naming.directory.SearchControls: void <init>()>();
+
+        virtualinvoke $r6.<javax.naming.directory.SearchControls: void setReturningObjFlag(boolean)>(1);
+
+        virtualinvoke $r6.<javax.naming.directory.SearchControls: void setSearchScope(int)>(0);
+
+        $r7 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r8 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name overrideName(javax.naming.Name)>(r2);
+
+        r30 = interfaceinvoke $r7.<javax.naming.directory.DirContext: javax.naming.NamingEnumeration search(javax.naming.Name,java.lang.String,javax.naming.directory.SearchControls)>($r8, "(objectclass=*)", $r6);
+
+        goto label3;
+
+     label2:
+        $r3 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r4 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name overrideName(javax.naming.Name)>(r2);
+
+        r30 = interfaceinvoke $r3.<javax.naming.directory.DirContext: javax.naming.NamingEnumeration list(javax.naming.Name)>($r4);
+
+     label3:
+        $r31 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        virtualinvoke $r31.<com.sun.jndi.ldap.LdapReferralException: void setNameResolved(boolean)>(1);
+
+        $r32 = (com.sun.jndi.ldap.ReferralEnumeration) r30;
+
+        $r33 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        interfaceinvoke $r32.<com.sun.jndi.ldap.ReferralEnumeration: void appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>($r33);
+
+     label4:
+        return r30;
+
+     label5:
+        $r25 := @caughtexception;
+
+        $r26 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        virtualinvoke $r25.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>($r26);
+
+        $r27 = virtualinvoke $r25.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r28 = (javax.naming.NamingException) $r27;
+
+        $r29 = (javax.naming.NamingException) $r28;
+
+        throw $r29;
+
+     label6:
+        $r14 := @caughtexception;
+
+        $r15 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        if $r15 == null goto label7;
+
+        $r23 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $z4 = virtualinvoke $r23.<com.sun.jndi.ldap.LdapReferralException: boolean hasMoreReferrals()>();
+
+        if $z4 != 0 goto label7;
+
+        $r24 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        virtualinvoke $r24.<com.sun.jndi.ldap.LdapReferralException: void setNamingException(javax.naming.NamingException)>($r14);
+
+     label7:
+        $r34 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        if $r34 == null goto label9;
+
+        $r16 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $z2 = virtualinvoke $r16.<com.sun.jndi.ldap.LdapReferralException: boolean hasMoreReferrals()>();
+
+        if $z2 != 0 goto label8;
+
+        $r22 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $z3 = virtualinvoke $r22.<com.sun.jndi.ldap.LdapReferralException: boolean hasMoreReferralExceptions()>();
+
+        if $z3 == 0 goto label9;
+
+     label8:
+        $r17 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r18 = virtualinvoke $r17.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r19 = virtualinvoke $r18.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r20 = (javax.naming.NamingException) $r19;
+
+        $r21 = (javax.naming.NamingException) $r20;
+
+        throw $r21;
+
+     label9:
+        throw $r14;
+
+        catch com.sun.jndi.ldap.LdapReferralException from label1 to label4 with label5;
+        catch javax.naming.NamingException from label1 to label4 with label6;
+    }
+
+    public javax.naming.NamingEnumeration listBindings(java.lang.String) throws javax.naming.NamingException
+    {
+        javax.naming.NamingEnumeration $r3;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name $r2;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r1);
+
+        $r3 = virtualinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.NamingEnumeration listBindings(javax.naming.Name)>($r2);
+
+        return $r3;
+    }
+
+    public javax.naming.NamingEnumeration listBindings(javax.naming.Name) throws javax.naming.NamingException
+    {
+        javax.naming.NamingException $r12, $r13, $r14, $r20, $r21, $r28, $r29;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        com.sun.jndi.ldap.ReferralEnumeration $r32;
+        com.sun.jndi.ldap.LdapReferralException $r9, $r10, $r15, $r16, $r17, $r18, $r22, $r23, $r24, $r25, $r26, $r31, $r33, $r34;
+        javax.naming.NamingEnumeration r30;
+        java.lang.Throwable $r11, $r19, $r27;
+        javax.naming.directory.SearchControls $r6;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        java.lang.String $r1, $r5;
+        javax.naming.directory.DirContext $r3, $r7;
+        javax.naming.Name r2, $r4, $r8;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r2 := @parameter0: javax.naming.Name;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r9 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r10 = virtualinvoke $r9.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r11 = virtualinvoke $r10.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r12 = (javax.naming.NamingException) $r11;
+
+        $r13 = (javax.naming.NamingException) $r12;
+
+        throw $r13;
+
+     label1:
+        $r1 = r0.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String urlScope>;
+
+        if $r1 == null goto label2;
+
+        $r5 = r0.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String urlScope>;
+
+        $z1 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("base");
+
+        if $z1 == 0 goto label2;
+
+        $r6 = new javax.naming.directory.SearchControls;
+
+        specialinvoke $r6.<javax.naming.directory.SearchControls: void <init>()>();
+
+        virtualinvoke $r6.<javax.naming.directory.SearchControls: void setReturningObjFlag(boolean)>(1);
+
+        virtualinvoke $r6.<javax.naming.directory.SearchControls: void setSearchScope(int)>(0);
+
+        $r7 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r8 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name overrideName(javax.naming.Name)>(r2);
+
+        r30 = interfaceinvoke $r7.<javax.naming.directory.DirContext: javax.naming.NamingEnumeration search(javax.naming.Name,java.lang.String,javax.naming.directory.SearchControls)>($r8, "(objectclass=*)", $r6);
+
+        goto label3;
+
+     label2:
+        $r3 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r4 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name overrideName(javax.naming.Name)>(r2);
+
+        r30 = interfaceinvoke $r3.<javax.naming.directory.DirContext: javax.naming.NamingEnumeration listBindings(javax.naming.Name)>($r4);
+
+     label3:
+        $r31 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        virtualinvoke $r31.<com.sun.jndi.ldap.LdapReferralException: void setNameResolved(boolean)>(1);
+
+        $r32 = (com.sun.jndi.ldap.ReferralEnumeration) r30;
+
+        $r33 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        interfaceinvoke $r32.<com.sun.jndi.ldap.ReferralEnumeration: void appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>($r33);
+
+     label4:
+        return r30;
+
+     label5:
+        $r25 := @caughtexception;
+
+        $r26 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        virtualinvoke $r25.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>($r26);
+
+        $r27 = virtualinvoke $r25.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r28 = (javax.naming.NamingException) $r27;
+
+        $r29 = (javax.naming.NamingException) $r28;
+
+        throw $r29;
+
+     label6:
+        $r14 := @caughtexception;
+
+        $r15 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        if $r15 == null goto label7;
+
+        $r23 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $z4 = virtualinvoke $r23.<com.sun.jndi.ldap.LdapReferralException: boolean hasMoreReferrals()>();
+
+        if $z4 != 0 goto label7;
+
+        $r24 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        virtualinvoke $r24.<com.sun.jndi.ldap.LdapReferralException: void setNamingException(javax.naming.NamingException)>($r14);
+
+     label7:
+        $r34 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        if $r34 == null goto label9;
+
+        $r16 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $z2 = virtualinvoke $r16.<com.sun.jndi.ldap.LdapReferralException: boolean hasMoreReferrals()>();
+
+        if $z2 != 0 goto label8;
+
+        $r22 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $z3 = virtualinvoke $r22.<com.sun.jndi.ldap.LdapReferralException: boolean hasMoreReferralExceptions()>();
+
+        if $z3 == 0 goto label9;
+
+     label8:
+        $r17 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r18 = virtualinvoke $r17.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r19 = virtualinvoke $r18.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r20 = (javax.naming.NamingException) $r19;
+
+        $r21 = (javax.naming.NamingException) $r20;
+
+        throw $r21;
+
+     label9:
+        throw $r14;
+
+        catch com.sun.jndi.ldap.LdapReferralException from label1 to label4 with label5;
+        catch javax.naming.NamingException from label1 to label4 with label6;
+    }
+
+    public void destroySubcontext(java.lang.String) throws javax.naming.NamingException
+    {
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name $r2;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r1);
+
+        virtualinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: void destroySubcontext(javax.naming.Name)>($r2);
+
+        return;
+    }
+
+    public void destroySubcontext(javax.naming.Name) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r6;
+        com.sun.jndi.ldap.LdapReferralException $r4, $r5;
+        javax.naming.directory.DirContext $r2;
+        javax.naming.Name r1, $r3;
+        javax.naming.NamingException $r7, $r8;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: javax.naming.Name;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r5 = virtualinvoke $r4.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r6 = virtualinvoke $r5.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r7 = (javax.naming.NamingException) $r6;
+
+        $r8 = (javax.naming.NamingException) $r7;
+
+        throw $r8;
+
+     label1:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r3 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name overrideName(javax.naming.Name)>(r1);
+
+        interfaceinvoke $r2.<javax.naming.directory.DirContext: void destroySubcontext(javax.naming.Name)>($r3);
+
+        return;
+    }
+
+    public javax.naming.Context createSubcontext(java.lang.String) throws javax.naming.NamingException
+    {
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name $r2;
+        java.lang.String r1;
+        javax.naming.Context $r3;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r1);
+
+        $r3 = virtualinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Context createSubcontext(javax.naming.Name)>($r2);
+
+        return $r3;
+    }
+
+    public javax.naming.Context createSubcontext(javax.naming.Name) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r7;
+        com.sun.jndi.ldap.LdapReferralException $r5, $r6;
+        javax.naming.directory.DirContext $r2;
+        javax.naming.Name r1, $r3;
+        javax.naming.NamingException $r8, $r9;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Context $r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: javax.naming.Name;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r6 = virtualinvoke $r5.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r7 = virtualinvoke $r6.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r8 = (javax.naming.NamingException) $r7;
+
+        $r9 = (javax.naming.NamingException) $r8;
+
+        throw $r9;
+
+     label1:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r3 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name overrideName(javax.naming.Name)>(r1);
+
+        $r4 = interfaceinvoke $r2.<javax.naming.directory.DirContext: javax.naming.Context createSubcontext(javax.naming.Name)>($r3);
+
+        return $r4;
+    }
+
+    public java.lang.Object lookupLink(java.lang.String) throws javax.naming.NamingException
+    {
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name $r2;
+        java.lang.Object $r3;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r1);
+
+        $r3 = virtualinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: java.lang.Object lookupLink(javax.naming.Name)>($r2);
+
+        return $r3;
+    }
+
+    public java.lang.Object lookupLink(javax.naming.Name) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r7;
+        com.sun.jndi.ldap.LdapReferralException $r5, $r6;
+        javax.naming.directory.DirContext $r2;
+        javax.naming.Name r1, $r3;
+        javax.naming.NamingException $r8, $r9;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        java.lang.Object $r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: javax.naming.Name;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r6 = virtualinvoke $r5.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r7 = virtualinvoke $r6.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r8 = (javax.naming.NamingException) $r7;
+
+        $r9 = (javax.naming.NamingException) $r8;
+
+        throw $r9;
+
+     label1:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r3 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name overrideName(javax.naming.Name)>(r1);
+
+        $r4 = interfaceinvoke $r2.<javax.naming.directory.DirContext: java.lang.Object lookupLink(javax.naming.Name)>($r3);
+
+        return $r4;
+    }
+
+    public javax.naming.NameParser getNameParser(java.lang.String) throws javax.naming.NamingException
+    {
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name $r2;
+        java.lang.String r1;
+        javax.naming.NameParser $r3;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r1);
+
+        $r3 = virtualinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.NameParser getNameParser(javax.naming.Name)>($r2);
+
+        return $r3;
+    }
+
+    public javax.naming.NameParser getNameParser(javax.naming.Name) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r7;
+        com.sun.jndi.ldap.LdapReferralException $r5, $r6;
+        javax.naming.directory.DirContext $r2;
+        javax.naming.Name r1, $r3;
+        javax.naming.NamingException $r8, $r9;
+        javax.naming.NameParser $r4;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: javax.naming.Name;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r6 = virtualinvoke $r5.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r7 = virtualinvoke $r6.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r8 = (javax.naming.NamingException) $r7;
+
+        $r9 = (javax.naming.NamingException) $r8;
+
+        throw $r9;
+
+     label1:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r3 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name overrideName(javax.naming.Name)>(r1);
+
+        $r4 = interfaceinvoke $r2.<javax.naming.directory.DirContext: javax.naming.NameParser getNameParser(javax.naming.Name)>($r3);
+
+        return $r4;
+    }
+
+    public java.lang.String composeName(java.lang.String, java.lang.String) throws javax.naming.NamingException
+    {
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name $r2, $r4, $r5;
+        java.lang.String r1, r3, $r6;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        $r2 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r1);
+
+        $r4 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r3);
+
+        $r5 = virtualinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name composeName(javax.naming.Name,javax.naming.Name)>($r2, $r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.Object: java.lang.String toString()>();
+
+        return $r6;
+    }
+
+    public javax.naming.Name composeName(javax.naming.Name, javax.naming.Name) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r7;
+        com.sun.jndi.ldap.LdapReferralException $r5, $r6;
+        javax.naming.directory.DirContext $r3;
+        javax.naming.Name r1, r2, $r4;
+        javax.naming.NamingException $r8, $r9;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: javax.naming.Name;
+
+        r2 := @parameter1: javax.naming.Name;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r6 = virtualinvoke $r5.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r7 = virtualinvoke $r6.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r8 = (javax.naming.NamingException) $r7;
+
+        $r9 = (javax.naming.NamingException) $r8;
+
+        throw $r9;
+
+     label1:
+        $r3 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r4 = interfaceinvoke $r3.<javax.naming.directory.DirContext: javax.naming.Name composeName(javax.naming.Name,javax.naming.Name)>(r1, r2);
+
+        return $r4;
+    }
+
+    public java.lang.Object addToEnvironment(java.lang.String, java.lang.Object) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r7;
+        com.sun.jndi.ldap.LdapReferralException $r5, $r6;
+        javax.naming.directory.DirContext $r3;
+        javax.naming.NamingException $r8, $r9;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        java.lang.Object r2, $r4;
+        java.lang.String r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.Object;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r6 = virtualinvoke $r5.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r7 = virtualinvoke $r6.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r8 = (javax.naming.NamingException) $r7;
+
+        $r9 = (javax.naming.NamingException) $r8;
+
+        throw $r9;
+
+     label1:
+        $r3 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r4 = interfaceinvoke $r3.<javax.naming.directory.DirContext: java.lang.Object addToEnvironment(java.lang.String,java.lang.Object)>(r1, r2);
+
+        return $r4;
+    }
+
+    public java.lang.Object removeFromEnvironment(java.lang.String) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r6;
+        com.sun.jndi.ldap.LdapReferralException $r4, $r5;
+        javax.naming.directory.DirContext $r2;
+        javax.naming.NamingException $r7, $r8;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        java.lang.Object $r3;
+        java.lang.String r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r5 = virtualinvoke $r4.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r6 = virtualinvoke $r5.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r7 = (javax.naming.NamingException) $r6;
+
+        $r8 = (javax.naming.NamingException) $r7;
+
+        throw $r8;
+
+     label1:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r3 = interfaceinvoke $r2.<javax.naming.directory.DirContext: java.lang.Object removeFromEnvironment(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    public java.util.Hashtable getEnvironment() throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r5;
+        com.sun.jndi.ldap.LdapReferralException $r3, $r4;
+        javax.naming.directory.DirContext $r1;
+        javax.naming.NamingException $r6, $r7;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        java.util.Hashtable $r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r4 = virtualinvoke $r3.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r5 = virtualinvoke $r4.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r6 = (javax.naming.NamingException) $r5;
+
+        $r7 = (javax.naming.NamingException) $r6;
+
+        throw $r7;
+
+     label1:
+        $r1 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r2 = interfaceinvoke $r1.<javax.naming.directory.DirContext: java.util.Hashtable getEnvironment()>();
+
+        return $r2;
+    }
+
+    public javax.naming.directory.Attributes getAttributes(java.lang.String) throws javax.naming.NamingException
+    {
+        javax.naming.directory.Attributes $r3;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name $r2;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r1);
+
+        $r3 = virtualinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.Attributes getAttributes(javax.naming.Name)>($r2);
+
+        return $r3;
+    }
+
+    public javax.naming.directory.Attributes getAttributes(javax.naming.Name) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r7;
+        com.sun.jndi.ldap.LdapReferralException $r5, $r6;
+        javax.naming.directory.DirContext $r2;
+        javax.naming.Name r1, $r3;
+        javax.naming.NamingException $r8, $r9;
+        javax.naming.directory.Attributes $r4;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: javax.naming.Name;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r6 = virtualinvoke $r5.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r7 = virtualinvoke $r6.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r8 = (javax.naming.NamingException) $r7;
+
+        $r9 = (javax.naming.NamingException) $r8;
+
+        throw $r9;
+
+     label1:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r3 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name overrideName(javax.naming.Name)>(r1);
+
+        $r4 = interfaceinvoke $r2.<javax.naming.directory.DirContext: javax.naming.directory.Attributes getAttributes(javax.naming.Name)>($r3);
+
+        return $r4;
+    }
+
+    public javax.naming.directory.Attributes getAttributes(java.lang.String, java.lang.String[]) throws javax.naming.NamingException
+    {
+        javax.naming.directory.Attributes $r4;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name $r2;
+        java.lang.String[] r3;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String[];
+
+        $r2 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r1);
+
+        $r4 = virtualinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.Attributes getAttributes(javax.naming.Name,java.lang.String[])>($r2, r3);
+
+        return $r4;
+    }
+
+    public javax.naming.directory.Attributes getAttributes(javax.naming.Name, java.lang.String[]) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r8;
+        com.sun.jndi.ldap.LdapReferralException $r6, $r7;
+        javax.naming.directory.DirContext $r2;
+        javax.naming.Name r1, $r3;
+        java.lang.String[] r4;
+        javax.naming.NamingException $r9, $r10;
+        javax.naming.directory.Attributes $r5;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: javax.naming.Name;
+
+        r4 := @parameter1: java.lang.String[];
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r7 = virtualinvoke $r6.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r8 = virtualinvoke $r7.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r9 = (javax.naming.NamingException) $r8;
+
+        $r10 = (javax.naming.NamingException) $r9;
+
+        throw $r10;
+
+     label1:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r3 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name overrideName(javax.naming.Name)>(r1);
+
+        $r5 = interfaceinvoke $r2.<javax.naming.directory.DirContext: javax.naming.directory.Attributes getAttributes(javax.naming.Name,java.lang.String[])>($r3, r4);
+
+        return $r5;
+    }
+
+    public void modifyAttributes(java.lang.String, int, javax.naming.directory.Attributes) throws javax.naming.NamingException
+    {
+        javax.naming.directory.Attributes r3;
+        int i0;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name $r2;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        r3 := @parameter2: javax.naming.directory.Attributes;
+
+        $r2 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r1);
+
+        virtualinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: void modifyAttributes(javax.naming.Name,int,javax.naming.directory.Attributes)>($r2, i0, r3);
+
+        return;
+    }
+
+    public void modifyAttributes(javax.naming.Name, int, javax.naming.directory.Attributes) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r7;
+        com.sun.jndi.ldap.LdapReferralException $r5, $r6;
+        javax.naming.directory.DirContext $r2;
+        javax.naming.Name r1, $r3;
+        javax.naming.NamingException $r8, $r9;
+        javax.naming.directory.Attributes r4;
+        int i0;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: javax.naming.Name;
+
+        i0 := @parameter1: int;
+
+        r4 := @parameter2: javax.naming.directory.Attributes;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r6 = virtualinvoke $r5.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r7 = virtualinvoke $r6.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r8 = (javax.naming.NamingException) $r7;
+
+        $r9 = (javax.naming.NamingException) $r8;
+
+        throw $r9;
+
+     label1:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r3 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name overrideName(javax.naming.Name)>(r1);
+
+        interfaceinvoke $r2.<javax.naming.directory.DirContext: void modifyAttributes(javax.naming.Name,int,javax.naming.directory.Attributes)>($r3, i0, r4);
+
+        return;
+    }
+
+    public void modifyAttributes(java.lang.String, javax.naming.directory.ModificationItem[]) throws javax.naming.NamingException
+    {
+        javax.naming.directory.ModificationItem[] r3;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name $r2;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: javax.naming.directory.ModificationItem[];
+
+        $r2 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r1);
+
+        virtualinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: void modifyAttributes(javax.naming.Name,javax.naming.directory.ModificationItem[])>($r2, r3);
+
+        return;
+    }
+
+    public void modifyAttributes(javax.naming.Name, javax.naming.directory.ModificationItem[]) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r7;
+        com.sun.jndi.ldap.LdapReferralException $r5, $r6;
+        javax.naming.directory.DirContext $r2;
+        javax.naming.Name r1, $r3;
+        javax.naming.NamingException $r8, $r9;
+        javax.naming.directory.ModificationItem[] r4;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: javax.naming.Name;
+
+        r4 := @parameter1: javax.naming.directory.ModificationItem[];
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r6 = virtualinvoke $r5.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r7 = virtualinvoke $r6.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r8 = (javax.naming.NamingException) $r7;
+
+        $r9 = (javax.naming.NamingException) $r8;
+
+        throw $r9;
+
+     label1:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r3 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name overrideName(javax.naming.Name)>(r1);
+
+        interfaceinvoke $r2.<javax.naming.directory.DirContext: void modifyAttributes(javax.naming.Name,javax.naming.directory.ModificationItem[])>($r3, r4);
+
+        return;
+    }
+
+    public void bind(java.lang.String, java.lang.Object, javax.naming.directory.Attributes) throws javax.naming.NamingException
+    {
+        javax.naming.directory.Attributes r4;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name $r2;
+        java.lang.Object r3;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.Object;
+
+        r4 := @parameter2: javax.naming.directory.Attributes;
+
+        $r2 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r1);
+
+        virtualinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: void bind(javax.naming.Name,java.lang.Object,javax.naming.directory.Attributes)>($r2, r3, r4);
+
+        return;
+    }
+
+    public void bind(javax.naming.Name, java.lang.Object, javax.naming.directory.Attributes) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r8;
+        com.sun.jndi.ldap.LdapReferralException $r6, $r7;
+        javax.naming.directory.DirContext $r2;
+        javax.naming.Name r1, $r3;
+        javax.naming.NamingException $r9, $r10;
+        javax.naming.directory.Attributes r5;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        java.lang.Object r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: javax.naming.Name;
+
+        r4 := @parameter1: java.lang.Object;
+
+        r5 := @parameter2: javax.naming.directory.Attributes;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r7 = virtualinvoke $r6.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r8 = virtualinvoke $r7.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r9 = (javax.naming.NamingException) $r8;
+
+        $r10 = (javax.naming.NamingException) $r9;
+
+        throw $r10;
+
+     label1:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r3 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name overrideName(javax.naming.Name)>(r1);
+
+        interfaceinvoke $r2.<javax.naming.directory.DirContext: void bind(javax.naming.Name,java.lang.Object,javax.naming.directory.Attributes)>($r3, r4, r5);
+
+        return;
+    }
+
+    public void rebind(java.lang.String, java.lang.Object, javax.naming.directory.Attributes) throws javax.naming.NamingException
+    {
+        javax.naming.directory.Attributes r4;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name $r2;
+        java.lang.Object r3;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.Object;
+
+        r4 := @parameter2: javax.naming.directory.Attributes;
+
+        $r2 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r1);
+
+        virtualinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: void rebind(javax.naming.Name,java.lang.Object,javax.naming.directory.Attributes)>($r2, r3, r4);
+
+        return;
+    }
+
+    public void rebind(javax.naming.Name, java.lang.Object, javax.naming.directory.Attributes) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r8;
+        com.sun.jndi.ldap.LdapReferralException $r6, $r7;
+        javax.naming.directory.DirContext $r2;
+        javax.naming.Name r1, $r3;
+        javax.naming.NamingException $r9, $r10;
+        javax.naming.directory.Attributes r5;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        java.lang.Object r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: javax.naming.Name;
+
+        r4 := @parameter1: java.lang.Object;
+
+        r5 := @parameter2: javax.naming.directory.Attributes;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r7 = virtualinvoke $r6.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r8 = virtualinvoke $r7.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r9 = (javax.naming.NamingException) $r8;
+
+        $r10 = (javax.naming.NamingException) $r9;
+
+        throw $r10;
+
+     label1:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r3 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name overrideName(javax.naming.Name)>(r1);
+
+        interfaceinvoke $r2.<javax.naming.directory.DirContext: void rebind(javax.naming.Name,java.lang.Object,javax.naming.directory.Attributes)>($r3, r4, r5);
+
+        return;
+    }
+
+    public javax.naming.directory.DirContext createSubcontext(java.lang.String, javax.naming.directory.Attributes) throws javax.naming.NamingException
+    {
+        javax.naming.directory.Attributes r3;
+        javax.naming.directory.DirContext $r4;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name $r2;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: javax.naming.directory.Attributes;
+
+        $r2 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r1);
+
+        $r4 = virtualinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext createSubcontext(javax.naming.Name,javax.naming.directory.Attributes)>($r2, r3);
+
+        return $r4;
+    }
+
+    public javax.naming.directory.DirContext createSubcontext(javax.naming.Name, javax.naming.directory.Attributes) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r8;
+        com.sun.jndi.ldap.LdapReferralException $r6, $r7;
+        javax.naming.directory.DirContext $r2, $r5;
+        javax.naming.Name r1, $r3;
+        javax.naming.NamingException $r9, $r10;
+        javax.naming.directory.Attributes r4;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: javax.naming.Name;
+
+        r4 := @parameter1: javax.naming.directory.Attributes;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r7 = virtualinvoke $r6.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r8 = virtualinvoke $r7.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r9 = (javax.naming.NamingException) $r8;
+
+        $r10 = (javax.naming.NamingException) $r9;
+
+        throw $r10;
+
+     label1:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r3 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name overrideName(javax.naming.Name)>(r1);
+
+        $r5 = interfaceinvoke $r2.<javax.naming.directory.DirContext: javax.naming.directory.DirContext createSubcontext(javax.naming.Name,javax.naming.directory.Attributes)>($r3, r4);
+
+        return $r5;
+    }
+
+    public javax.naming.directory.DirContext getSchema(java.lang.String) throws javax.naming.NamingException
+    {
+        javax.naming.directory.DirContext $r3;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name $r2;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r1);
+
+        $r3 = virtualinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext getSchema(javax.naming.Name)>($r2);
+
+        return $r3;
+    }
+
+    public javax.naming.directory.DirContext getSchema(javax.naming.Name) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r7;
+        com.sun.jndi.ldap.LdapReferralException $r5, $r6;
+        javax.naming.directory.DirContext $r2, $r4;
+        javax.naming.Name r1, $r3;
+        javax.naming.NamingException $r8, $r9;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: javax.naming.Name;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r6 = virtualinvoke $r5.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r7 = virtualinvoke $r6.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r8 = (javax.naming.NamingException) $r7;
+
+        $r9 = (javax.naming.NamingException) $r8;
+
+        throw $r9;
+
+     label1:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r3 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name overrideName(javax.naming.Name)>(r1);
+
+        $r4 = interfaceinvoke $r2.<javax.naming.directory.DirContext: javax.naming.directory.DirContext getSchema(javax.naming.Name)>($r3);
+
+        return $r4;
+    }
+
+    public javax.naming.directory.DirContext getSchemaClassDefinition(java.lang.String) throws javax.naming.NamingException
+    {
+        javax.naming.directory.DirContext $r3;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name $r2;
+        java.lang.String r1;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r1);
+
+        $r3 = virtualinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext getSchemaClassDefinition(javax.naming.Name)>($r2);
+
+        return $r3;
+    }
+
+    public javax.naming.directory.DirContext getSchemaClassDefinition(javax.naming.Name) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r7;
+        com.sun.jndi.ldap.LdapReferralException $r5, $r6;
+        javax.naming.directory.DirContext $r2, $r4;
+        javax.naming.Name r1, $r3;
+        javax.naming.NamingException $r8, $r9;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: javax.naming.Name;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r6 = virtualinvoke $r5.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r7 = virtualinvoke $r6.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r8 = (javax.naming.NamingException) $r7;
+
+        $r9 = (javax.naming.NamingException) $r8;
+
+        throw $r9;
+
+     label1:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r3 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name overrideName(javax.naming.Name)>(r1);
+
+        $r4 = interfaceinvoke $r2.<javax.naming.directory.DirContext: javax.naming.directory.DirContext getSchemaClassDefinition(javax.naming.Name)>($r3);
+
+        return $r4;
+    }
+
+    public javax.naming.NamingEnumeration search(java.lang.String, javax.naming.directory.Attributes) throws javax.naming.NamingException
+    {
+        javax.naming.directory.Attributes r3;
+        javax.naming.NamingEnumeration $r6;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name $r2;
+        java.lang.String r1, $r4;
+        javax.naming.directory.SearchControls $r5;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: javax.naming.directory.Attributes;
+
+        $r2 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r1);
+
+        $r4 = staticinvoke <com.sun.jndi.toolkit.dir.SearchFilter: java.lang.String format(javax.naming.directory.Attributes)>(r3);
+
+        $r5 = new javax.naming.directory.SearchControls;
+
+        specialinvoke $r5.<javax.naming.directory.SearchControls: void <init>()>();
+
+        $r6 = virtualinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.NamingEnumeration search(javax.naming.Name,java.lang.String,javax.naming.directory.SearchControls)>($r2, $r4, $r5);
+
+        return $r6;
+    }
+
+    public javax.naming.NamingEnumeration search(javax.naming.Name, javax.naming.directory.Attributes) throws javax.naming.NamingException
+    {
+        javax.naming.directory.Attributes r2;
+        javax.naming.NamingEnumeration $r5;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name r1;
+        java.lang.String $r3;
+        javax.naming.directory.SearchControls $r4;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: javax.naming.Name;
+
+        r2 := @parameter1: javax.naming.directory.Attributes;
+
+        $r3 = staticinvoke <com.sun.jndi.toolkit.dir.SearchFilter: java.lang.String format(javax.naming.directory.Attributes)>(r2);
+
+        $r4 = new javax.naming.directory.SearchControls;
+
+        specialinvoke $r4.<javax.naming.directory.SearchControls: void <init>()>();
+
+        $r5 = virtualinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.NamingEnumeration search(javax.naming.Name,java.lang.String,javax.naming.directory.SearchControls)>(r1, $r3, $r4);
+
+        return $r5;
+    }
+
+    public javax.naming.NamingEnumeration search(java.lang.String, javax.naming.directory.Attributes, java.lang.String[]) throws javax.naming.NamingException
+    {
+        java.lang.String[] r1;
+        javax.naming.Name $r4;
+        javax.naming.directory.SearchControls $r0;
+        javax.naming.directory.Attributes r5;
+        javax.naming.NamingEnumeration $r7;
+        com.sun.jndi.ldap.LdapReferralContext r2;
+        java.lang.String r3, $r6;
+
+        r2 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r3 := @parameter0: java.lang.String;
+
+        r5 := @parameter1: javax.naming.directory.Attributes;
+
+        r1 := @parameter2: java.lang.String[];
+
+        $r0 = new javax.naming.directory.SearchControls;
+
+        specialinvoke $r0.<javax.naming.directory.SearchControls: void <init>()>();
+
+        virtualinvoke $r0.<javax.naming.directory.SearchControls: void setReturningAttributes(java.lang.String[])>(r1);
+
+        $r4 = specialinvoke r2.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r3);
+
+        $r6 = staticinvoke <com.sun.jndi.toolkit.dir.SearchFilter: java.lang.String format(javax.naming.directory.Attributes)>(r5);
+
+        $r7 = virtualinvoke r2.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.NamingEnumeration search(javax.naming.Name,java.lang.String,javax.naming.directory.SearchControls)>($r4, $r6, $r0);
+
+        return $r7;
+    }
+
+    public javax.naming.NamingEnumeration search(javax.naming.Name, javax.naming.directory.Attributes, java.lang.String[]) throws javax.naming.NamingException
+    {
+        javax.naming.directory.Attributes r4;
+        javax.naming.NamingEnumeration $r6;
+        com.sun.jndi.ldap.LdapReferralContext r2;
+        java.lang.String[] r1;
+        javax.naming.Name r3;
+        java.lang.String $r5;
+        javax.naming.directory.SearchControls $r0;
+
+        r2 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r3 := @parameter0: javax.naming.Name;
+
+        r4 := @parameter1: javax.naming.directory.Attributes;
+
+        r1 := @parameter2: java.lang.String[];
+
+        $r0 = new javax.naming.directory.SearchControls;
+
+        specialinvoke $r0.<javax.naming.directory.SearchControls: void <init>()>();
+
+        virtualinvoke $r0.<javax.naming.directory.SearchControls: void setReturningAttributes(java.lang.String[])>(r1);
+
+        $r5 = staticinvoke <com.sun.jndi.toolkit.dir.SearchFilter: java.lang.String format(javax.naming.directory.Attributes)>(r4);
+
+        $r6 = virtualinvoke r2.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.NamingEnumeration search(javax.naming.Name,java.lang.String,javax.naming.directory.SearchControls)>(r3, $r5, $r0);
+
+        return $r6;
+    }
+
+    public javax.naming.NamingEnumeration search(java.lang.String, java.lang.String, javax.naming.directory.SearchControls) throws javax.naming.NamingException
+    {
+        javax.naming.NamingEnumeration $r5;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name $r2;
+        java.lang.String r1, r3;
+        javax.naming.directory.SearchControls r4;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        r4 := @parameter2: javax.naming.directory.SearchControls;
+
+        $r2 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r1);
+
+        $r5 = virtualinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.NamingEnumeration search(javax.naming.Name,java.lang.String,javax.naming.directory.SearchControls)>($r2, r3, r4);
+
+        return $r5;
+    }
+
+    public javax.naming.NamingEnumeration search(javax.naming.Name, java.lang.String, javax.naming.directory.SearchControls) throws javax.naming.NamingException
+    {
+        javax.naming.NamingException $r15, $r16, $r17, $r23, $r24, $r31, $r32;
+        boolean $z0, $z1, $z2, $z3;
+        com.sun.jndi.ldap.ReferralEnumeration $r11;
+        com.sun.jndi.ldap.LdapReferralException $r9, $r10, $r12, $r13, $r18, $r19, $r20, $r21, $r25, $r26, $r27, $r28, $r29, $r33;
+        javax.naming.NamingEnumeration $r8;
+        java.lang.Throwable $r14, $r22, $r30;
+        javax.naming.directory.SearchControls r6, $r7;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        java.lang.String r4, $r5;
+        javax.naming.directory.DirContext $r2;
+        javax.naming.Name r1, $r3;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: javax.naming.Name;
+
+        r4 := @parameter1: java.lang.String;
+
+        r6 := @parameter2: javax.naming.directory.SearchControls;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r12 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r13 = virtualinvoke $r12.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r14 = virtualinvoke $r13.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r15 = (javax.naming.NamingException) $r14;
+
+        $r16 = (javax.naming.NamingException) $r15;
+
+        throw $r16;
+
+     label1:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r3 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name overrideName(javax.naming.Name)>(r1);
+
+        $r5 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String overrideFilter(java.lang.String)>(r4);
+
+        $r7 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.SearchControls overrideAttributesAndScope(javax.naming.directory.SearchControls)>(r6);
+
+        $r8 = interfaceinvoke $r2.<javax.naming.directory.DirContext: javax.naming.NamingEnumeration search(javax.naming.Name,java.lang.String,javax.naming.directory.SearchControls)>($r3, $r5, $r7);
+
+        $r9 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        virtualinvoke $r9.<com.sun.jndi.ldap.LdapReferralException: void setNameResolved(boolean)>(1);
+
+        $r11 = (com.sun.jndi.ldap.ReferralEnumeration) $r8;
+
+        $r10 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        interfaceinvoke $r11.<com.sun.jndi.ldap.ReferralEnumeration: void appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>($r10);
+
+     label2:
+        return $r8;
+
+     label3:
+        $r28 := @caughtexception;
+
+        $r29 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        virtualinvoke $r28.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>($r29);
+
+        $r30 = virtualinvoke $r28.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r31 = (javax.naming.NamingException) $r30;
+
+        $r32 = (javax.naming.NamingException) $r31;
+
+        throw $r32;
+
+     label4:
+        $r17 := @caughtexception;
+
+        $r18 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        if $r18 == null goto label5;
+
+        $r26 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $z3 = virtualinvoke $r26.<com.sun.jndi.ldap.LdapReferralException: boolean hasMoreReferrals()>();
+
+        if $z3 != 0 goto label5;
+
+        $r27 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        virtualinvoke $r27.<com.sun.jndi.ldap.LdapReferralException: void setNamingException(javax.naming.NamingException)>($r17);
+
+     label5:
+        $r33 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        if $r33 == null goto label7;
+
+        $r19 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $z1 = virtualinvoke $r19.<com.sun.jndi.ldap.LdapReferralException: boolean hasMoreReferrals()>();
+
+        if $z1 != 0 goto label6;
+
+        $r25 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $z2 = virtualinvoke $r25.<com.sun.jndi.ldap.LdapReferralException: boolean hasMoreReferralExceptions()>();
+
+        if $z2 == 0 goto label7;
+
+     label6:
+        $r20 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r21 = virtualinvoke $r20.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r22 = virtualinvoke $r21.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r23 = (javax.naming.NamingException) $r22;
+
+        $r24 = (javax.naming.NamingException) $r23;
+
+        throw $r24;
+
+     label7:
+        throw $r17;
+
+        catch com.sun.jndi.ldap.LdapReferralException from label1 to label2 with label3;
+        catch javax.naming.NamingException from label1 to label2 with label4;
+    }
+
+    public javax.naming.NamingEnumeration search(java.lang.String, java.lang.String, java.lang.Object[], javax.naming.directory.SearchControls) throws javax.naming.NamingException
+    {
+        java.lang.Object[] r4;
+        javax.naming.NamingEnumeration $r6;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name $r2;
+        java.lang.String r1, r3;
+        javax.naming.directory.SearchControls r5;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        r4 := @parameter2: java.lang.Object[];
+
+        r5 := @parameter3: javax.naming.directory.SearchControls;
+
+        $r2 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name toName(java.lang.String)>(r1);
+
+        $r6 = virtualinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.NamingEnumeration search(javax.naming.Name,java.lang.String,java.lang.Object[],javax.naming.directory.SearchControls)>($r2, r3, r4, r5);
+
+        return $r6;
+    }
+
+    public javax.naming.NamingEnumeration search(javax.naming.Name, java.lang.String, java.lang.Object[], javax.naming.directory.SearchControls) throws javax.naming.NamingException
+    {
+        javax.naming.NamingException $r19, $r20, $r21, $r27, $r28, $r35, $r36;
+        boolean $z0, $z1, $z2, $z3;
+        com.sun.jndi.ldap.ReferralEnumeration $r11;
+        com.sun.jndi.ldap.LdapReferralException $r9, $r10, $r16, $r17, $r22, $r23, $r24, $r25, $r29, $r30, $r31, $r32, $r33, $r38;
+        javax.naming.NamingEnumeration r37;
+        java.lang.Throwable $r18, $r26, $r34;
+        java.lang.Object[] r6;
+        javax.naming.directory.SearchControls r7, $r8, $r15;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        java.lang.String $r1, r5, $r14;
+        javax.naming.directory.DirContext $r3, $r12;
+        javax.naming.Name r2, $r4, $r13;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r2 := @parameter0: javax.naming.Name;
+
+        r5 := @parameter1: java.lang.String;
+
+        r6 := @parameter2: java.lang.Object[];
+
+        r7 := @parameter3: javax.naming.directory.SearchControls;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r16 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r17 = virtualinvoke $r16.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r18 = virtualinvoke $r17.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r19 = (javax.naming.NamingException) $r18;
+
+        $r20 = (javax.naming.NamingException) $r19;
+
+        throw $r20;
+
+     label1:
+        $r1 = r0.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String urlFilter>;
+
+        if $r1 == null goto label2;
+
+        $r12 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r13 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name overrideName(javax.naming.Name)>(r2);
+
+        $r14 = r0.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String urlFilter>;
+
+        $r15 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.SearchControls overrideAttributesAndScope(javax.naming.directory.SearchControls)>(r7);
+
+        r37 = interfaceinvoke $r12.<javax.naming.directory.DirContext: javax.naming.NamingEnumeration search(javax.naming.Name,java.lang.String,javax.naming.directory.SearchControls)>($r13, $r14, $r15);
+
+        goto label3;
+
+     label2:
+        $r3 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r4 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name overrideName(javax.naming.Name)>(r2);
+
+        $r8 = specialinvoke r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.SearchControls overrideAttributesAndScope(javax.naming.directory.SearchControls)>(r7);
+
+        r37 = interfaceinvoke $r3.<javax.naming.directory.DirContext: javax.naming.NamingEnumeration search(javax.naming.Name,java.lang.String,java.lang.Object[],javax.naming.directory.SearchControls)>($r4, r5, r6, $r8);
+
+     label3:
+        $r9 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        virtualinvoke $r9.<com.sun.jndi.ldap.LdapReferralException: void setNameResolved(boolean)>(1);
+
+        $r11 = (com.sun.jndi.ldap.ReferralEnumeration) r37;
+
+        $r10 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        interfaceinvoke $r11.<com.sun.jndi.ldap.ReferralEnumeration: void appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>($r10);
+
+     label4:
+        return r37;
+
+     label5:
+        $r32 := @caughtexception;
+
+        $r33 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        virtualinvoke $r32.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>($r33);
+
+        $r34 = virtualinvoke $r32.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r35 = (javax.naming.NamingException) $r34;
+
+        $r36 = (javax.naming.NamingException) $r35;
+
+        throw $r36;
+
+     label6:
+        $r21 := @caughtexception;
+
+        $r22 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        if $r22 == null goto label7;
+
+        $r30 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $z3 = virtualinvoke $r30.<com.sun.jndi.ldap.LdapReferralException: boolean hasMoreReferrals()>();
+
+        if $z3 != 0 goto label7;
+
+        $r31 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        virtualinvoke $r31.<com.sun.jndi.ldap.LdapReferralException: void setNamingException(javax.naming.NamingException)>($r21);
+
+     label7:
+        $r38 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        if $r38 == null goto label9;
+
+        $r23 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $z1 = virtualinvoke $r23.<com.sun.jndi.ldap.LdapReferralException: boolean hasMoreReferrals()>();
+
+        if $z1 != 0 goto label8;
+
+        $r29 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $z2 = virtualinvoke $r29.<com.sun.jndi.ldap.LdapReferralException: boolean hasMoreReferralExceptions()>();
+
+        if $z2 == 0 goto label9;
+
+     label8:
+        $r24 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r25 = virtualinvoke $r24.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r26 = virtualinvoke $r25.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r27 = (javax.naming.NamingException) $r26;
+
+        $r28 = (javax.naming.NamingException) $r27;
+
+        throw $r28;
+
+     label9:
+        throw $r21;
+
+        catch com.sun.jndi.ldap.LdapReferralException from label1 to label4 with label5;
+        catch javax.naming.NamingException from label1 to label4 with label6;
+    }
+
+    public java.lang.String getNameInNamespace() throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r6;
+        com.sun.jndi.ldap.LdapReferralException $r4, $r5;
+        javax.naming.Name $r1, $r2, $r3;
+        javax.naming.NamingException $r7, $r8;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        java.lang.String $r9;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r5 = virtualinvoke $r4.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r6 = virtualinvoke $r5.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r7 = (javax.naming.NamingException) $r6;
+
+        $r8 = (javax.naming.NamingException) $r7;
+
+        throw $r8;
+
+     label1:
+        $r1 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name urlName>;
+
+        if $r1 == null goto label2;
+
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name urlName>;
+
+        $z1 = interfaceinvoke $r2.<javax.naming.Name: boolean isEmpty()>();
+
+        if $z1 != 0 goto label2;
+
+        $r3 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name urlName>;
+
+        $r9 = interfaceinvoke $r3.<javax.naming.Name: java.lang.String get(int)>(0);
+
+        goto label3;
+
+     label2:
+        $r9 = "";
+
+     label3:
+        return $r9;
+    }
+
+    public javax.naming.ldap.ExtendedResponse extendedOperation(javax.naming.ldap.ExtendedRequest) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r9;
+        com.sun.jndi.ldap.LdapReferralException $r7, $r8;
+        javax.naming.directory.DirContext $r1, $r2;
+        javax.naming.ldap.ExtendedRequest r3;
+        javax.naming.NotContextException $r6;
+        javax.naming.NamingException $r10, $r11;
+        javax.naming.ldap.ExtendedResponse $r5;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.ldap.LdapContext $r4;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r3 := @parameter0: javax.naming.ldap.ExtendedRequest;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r7 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r8 = virtualinvoke $r7.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r9 = virtualinvoke $r8.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r10 = (javax.naming.NamingException) $r9;
+
+        $r11 = (javax.naming.NamingException) $r10;
+
+        throw $r11;
+
+     label1:
+        $r1 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $z1 = $r1 instanceof javax.naming.ldap.LdapContext;
+
+        if $z1 != 0 goto label2;
+
+        $r6 = new javax.naming.NotContextException;
+
+        specialinvoke $r6.<javax.naming.NotContextException: void <init>(java.lang.String)>("Referral context not an instance of LdapContext");
+
+        throw $r6;
+
+     label2:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r4 = (javax.naming.ldap.LdapContext) $r2;
+
+        $r5 = interfaceinvoke $r4.<javax.naming.ldap.LdapContext: javax.naming.ldap.ExtendedResponse extendedOperation(javax.naming.ldap.ExtendedRequest)>(r3);
+
+        return $r5;
+    }
+
+    public javax.naming.ldap.LdapContext newInstance(javax.naming.ldap.Control[]) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r9;
+        com.sun.jndi.ldap.LdapReferralException $r7, $r8;
+        javax.naming.directory.DirContext $r1, $r2;
+        javax.naming.NotContextException $r6;
+        javax.naming.NamingException $r10, $r11;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.ldap.LdapContext $r4, $r5;
+        boolean $z0, $z1;
+        javax.naming.ldap.Control[] r3;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r3 := @parameter0: javax.naming.ldap.Control[];
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r7 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r8 = virtualinvoke $r7.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r9 = virtualinvoke $r8.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r10 = (javax.naming.NamingException) $r9;
+
+        $r11 = (javax.naming.NamingException) $r10;
+
+        throw $r11;
+
+     label1:
+        $r1 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $z1 = $r1 instanceof javax.naming.ldap.LdapContext;
+
+        if $z1 != 0 goto label2;
+
+        $r6 = new javax.naming.NotContextException;
+
+        specialinvoke $r6.<javax.naming.NotContextException: void <init>(java.lang.String)>("Referral context not an instance of LdapContext");
+
+        throw $r6;
+
+     label2:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r4 = (javax.naming.ldap.LdapContext) $r2;
+
+        $r5 = interfaceinvoke $r4.<javax.naming.ldap.LdapContext: javax.naming.ldap.LdapContext newInstance(javax.naming.ldap.Control[])>(r3);
+
+        return $r5;
+    }
+
+    public void reconnect(javax.naming.ldap.Control[]) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r8;
+        com.sun.jndi.ldap.LdapReferralException $r6, $r7;
+        javax.naming.directory.DirContext $r1, $r2;
+        javax.naming.NotContextException $r5;
+        javax.naming.NamingException $r9, $r10;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.ldap.LdapContext $r4;
+        boolean $z0, $z1;
+        javax.naming.ldap.Control[] r3;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r3 := @parameter0: javax.naming.ldap.Control[];
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r7 = virtualinvoke $r6.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r8 = virtualinvoke $r7.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r9 = (javax.naming.NamingException) $r8;
+
+        $r10 = (javax.naming.NamingException) $r9;
+
+        throw $r10;
+
+     label1:
+        $r1 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $z1 = $r1 instanceof javax.naming.ldap.LdapContext;
+
+        if $z1 != 0 goto label2;
+
+        $r5 = new javax.naming.NotContextException;
+
+        specialinvoke $r5.<javax.naming.NotContextException: void <init>(java.lang.String)>("Referral context not an instance of LdapContext");
+
+        throw $r5;
+
+     label2:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r4 = (javax.naming.ldap.LdapContext) $r2;
+
+        interfaceinvoke $r4.<javax.naming.ldap.LdapContext: void reconnect(javax.naming.ldap.Control[])>(r3);
+
+        return;
+    }
+
+    public javax.naming.ldap.Control[] getConnectControls() throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r8;
+        com.sun.jndi.ldap.LdapReferralException $r6, $r7;
+        javax.naming.directory.DirContext $r1, $r2;
+        javax.naming.NotContextException $r5;
+        javax.naming.NamingException $r9, $r10;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.ldap.LdapContext $r3;
+        boolean $z0, $z1;
+        javax.naming.ldap.Control[] $r4;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r7 = virtualinvoke $r6.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r8 = virtualinvoke $r7.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r9 = (javax.naming.NamingException) $r8;
+
+        $r10 = (javax.naming.NamingException) $r9;
+
+        throw $r10;
+
+     label1:
+        $r1 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $z1 = $r1 instanceof javax.naming.ldap.LdapContext;
+
+        if $z1 != 0 goto label2;
+
+        $r5 = new javax.naming.NotContextException;
+
+        specialinvoke $r5.<javax.naming.NotContextException: void <init>(java.lang.String)>("Referral context not an instance of LdapContext");
+
+        throw $r5;
+
+     label2:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r3 = (javax.naming.ldap.LdapContext) $r2;
+
+        $r4 = interfaceinvoke $r3.<javax.naming.ldap.LdapContext: javax.naming.ldap.Control[] getConnectControls()>();
+
+        return $r4;
+    }
+
+    public void setRequestControls(javax.naming.ldap.Control[]) throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r8;
+        com.sun.jndi.ldap.LdapReferralException $r6, $r7;
+        javax.naming.directory.DirContext $r1, $r2;
+        javax.naming.NotContextException $r5;
+        javax.naming.NamingException $r9, $r10;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.ldap.LdapContext $r4;
+        boolean $z0, $z1;
+        javax.naming.ldap.Control[] r3;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r3 := @parameter0: javax.naming.ldap.Control[];
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r7 = virtualinvoke $r6.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r8 = virtualinvoke $r7.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r9 = (javax.naming.NamingException) $r8;
+
+        $r10 = (javax.naming.NamingException) $r9;
+
+        throw $r10;
+
+     label1:
+        $r1 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $z1 = $r1 instanceof javax.naming.ldap.LdapContext;
+
+        if $z1 != 0 goto label2;
+
+        $r5 = new javax.naming.NotContextException;
+
+        specialinvoke $r5.<javax.naming.NotContextException: void <init>(java.lang.String)>("Referral context not an instance of LdapContext");
+
+        throw $r5;
+
+     label2:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r4 = (javax.naming.ldap.LdapContext) $r2;
+
+        interfaceinvoke $r4.<javax.naming.ldap.LdapContext: void setRequestControls(javax.naming.ldap.Control[])>(r3);
+
+        return;
+    }
+
+    public javax.naming.ldap.Control[] getRequestControls() throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r8;
+        com.sun.jndi.ldap.LdapReferralException $r6, $r7;
+        javax.naming.directory.DirContext $r1, $r2;
+        javax.naming.NotContextException $r5;
+        javax.naming.NamingException $r9, $r10;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.ldap.LdapContext $r3;
+        boolean $z0, $z1;
+        javax.naming.ldap.Control[] $r4;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r7 = virtualinvoke $r6.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r8 = virtualinvoke $r7.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r9 = (javax.naming.NamingException) $r8;
+
+        $r10 = (javax.naming.NamingException) $r9;
+
+        throw $r10;
+
+     label1:
+        $r1 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $z1 = $r1 instanceof javax.naming.ldap.LdapContext;
+
+        if $z1 != 0 goto label2;
+
+        $r5 = new javax.naming.NotContextException;
+
+        specialinvoke $r5.<javax.naming.NotContextException: void <init>(java.lang.String)>("Referral context not an instance of LdapContext");
+
+        throw $r5;
+
+     label2:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r3 = (javax.naming.ldap.LdapContext) $r2;
+
+        $r4 = interfaceinvoke $r3.<javax.naming.ldap.LdapContext: javax.naming.ldap.Control[] getRequestControls()>();
+
+        return $r4;
+    }
+
+    public javax.naming.ldap.Control[] getResponseControls() throws javax.naming.NamingException
+    {
+        java.lang.Throwable $r8;
+        com.sun.jndi.ldap.LdapReferralException $r6, $r7;
+        javax.naming.directory.DirContext $r1, $r2;
+        javax.naming.NotContextException $r5;
+        javax.naming.NamingException $r9, $r10;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.ldap.LdapContext $r3;
+        boolean $z0, $z1;
+        javax.naming.ldap.Control[] $r4;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        $z0 = r0.<com.sun.jndi.ldap.LdapReferralContext: boolean skipThisReferral>;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = r0.<com.sun.jndi.ldap.LdapReferralContext: com.sun.jndi.ldap.LdapReferralException refEx>;
+
+        $r7 = virtualinvoke $r6.<com.sun.jndi.ldap.LdapReferralException: com.sun.jndi.ldap.LdapReferralException appendUnprocessedReferrals(com.sun.jndi.ldap.LdapReferralException)>(null);
+
+        $r8 = virtualinvoke $r7.<com.sun.jndi.ldap.LdapReferralException: java.lang.Throwable fillInStackTrace()>();
+
+        $r9 = (javax.naming.NamingException) $r8;
+
+        $r10 = (javax.naming.NamingException) $r9;
+
+        throw $r10;
+
+     label1:
+        $r1 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $z1 = $r1 instanceof javax.naming.ldap.LdapContext;
+
+        if $z1 != 0 goto label2;
+
+        $r5 = new javax.naming.NotContextException;
+
+        specialinvoke $r5.<javax.naming.NotContextException: void <init>(java.lang.String)>("Referral context not an instance of LdapContext");
+
+        throw $r5;
+
+     label2:
+        $r2 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.directory.DirContext refCtx>;
+
+        $r3 = (javax.naming.ldap.LdapContext) $r2;
+
+        $r4 = interfaceinvoke $r3.<javax.naming.ldap.LdapContext: javax.naming.ldap.Control[] getResponseControls()>();
+
+        return $r4;
+    }
+
+    private javax.naming.Name toName(java.lang.String) throws javax.naming.InvalidNameException
+    {
+        javax.naming.CompositeName $r4, $r5;
+        com.sun.jndi.ldap.LdapReferralContext r2;
+        javax.naming.Name $r3;
+        java.lang.String r0;
+        boolean $z0;
+
+        r2 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z0 == 0 goto label1;
+
+        $r4 = new javax.naming.CompositeName;
+
+        $r3 = $r4;
+
+        specialinvoke $r4.<javax.naming.CompositeName: void <init>()>();
+
+        goto label2;
+
+     label1:
+        $r5 = new javax.naming.CompositeName;
+
+        specialinvoke $r5.<javax.naming.CompositeName: void <init>()>();
+
+        $r3 = virtualinvoke $r5.<javax.naming.CompositeName: javax.naming.Name add(java.lang.String)>(r0);
+
+     label2:
+        return $r3;
+    }
+
+    private javax.naming.Name overrideName(javax.naming.Name) throws javax.naming.InvalidNameException
+    {
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        javax.naming.Name $r1, r2, $r3;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r2 := @parameter0: javax.naming.Name;
+
+        $r1 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name urlName>;
+
+        if $r1 != null goto label1;
+
+        $r3 = r2;
+
+        goto label2;
+
+     label1:
+        $r3 = r0.<com.sun.jndi.ldap.LdapReferralContext: javax.naming.Name urlName>;
+
+     label2:
+        return $r3;
+    }
+
+    private javax.naming.directory.SearchControls overrideAttributesAndScope(javax.naming.directory.SearchControls)
+    {
+        long $l1;
+        java.lang.String[] $r4, r8;
+        javax.naming.directory.SearchControls $r2, r3;
+        java.util.StringTokenizer $r6;
+        int $i0, $i2, $i3, i4;
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        java.lang.String $r1, $r5, $r7, $r9, $r10, $r11, $r12, $r13, $r14;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r3 := @parameter0: javax.naming.directory.SearchControls;
+
+        $r1 = r0.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String urlScope>;
+
+        if $r1 != null goto label1;
+
+        $r13 = r0.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String urlAttrs>;
+
+        if $r13 == null goto label8;
+
+     label1:
+        $r2 = new javax.naming.directory.SearchControls;
+
+        $i0 = virtualinvoke r3.<javax.naming.directory.SearchControls: int getSearchScope()>();
+
+        $l1 = virtualinvoke r3.<javax.naming.directory.SearchControls: long getCountLimit()>();
+
+        $i2 = virtualinvoke r3.<javax.naming.directory.SearchControls: int getTimeLimit()>();
+
+        $r4 = virtualinvoke r3.<javax.naming.directory.SearchControls: java.lang.String[] getReturningAttributes()>();
+
+        $z0 = virtualinvoke r3.<javax.naming.directory.SearchControls: boolean getReturningObjFlag()>();
+
+        $z1 = virtualinvoke r3.<javax.naming.directory.SearchControls: boolean getDerefLinkFlag()>();
+
+        specialinvoke $r2.<javax.naming.directory.SearchControls: void <init>(int,long,int,java.lang.String[],boolean,boolean)>($i0, $l1, $i2, $r4, $z0, $z1);
+
+        $r5 = r0.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String urlScope>;
+
+        if $r5 == null goto label4;
+
+        $r10 = r0.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String urlScope>;
+
+        $z2 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>("base");
+
+        if $z2 == 0 goto label2;
+
+        virtualinvoke $r2.<javax.naming.directory.SearchControls: void setSearchScope(int)>(0);
+
+        goto label4;
+
+     label2:
+        $r11 = r0.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String urlScope>;
+
+        $z3 = virtualinvoke $r11.<java.lang.String: boolean equals(java.lang.Object)>("one");
+
+        if $z3 == 0 goto label3;
+
+        virtualinvoke $r2.<javax.naming.directory.SearchControls: void setSearchScope(int)>(1);
+
+        goto label4;
+
+     label3:
+        $r12 = r0.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String urlScope>;
+
+        $z4 = virtualinvoke $r12.<java.lang.String: boolean equals(java.lang.Object)>("sub");
+
+        if $z4 == 0 goto label4;
+
+        virtualinvoke $r2.<javax.naming.directory.SearchControls: void setSearchScope(int)>(2);
+
+     label4:
+        $r14 = r0.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String urlAttrs>;
+
+        if $r14 == null goto label7;
+
+        $r6 = new java.util.StringTokenizer;
+
+        $r7 = r0.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String urlAttrs>;
+
+        specialinvoke $r6.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>($r7, ",");
+
+        $i3 = virtualinvoke $r6.<java.util.StringTokenizer: int countTokens()>();
+
+        r8 = newarray (java.lang.String)[$i3];
+
+        i4 = 0;
+
+     label5:
+        if i4 >= $i3 goto label6;
+
+        $r9 = virtualinvoke $r6.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        r8[i4] = $r9;
+
+        i4 = i4 + 1;
+
+        goto label5;
+
+     label6:
+        virtualinvoke $r2.<javax.naming.directory.SearchControls: void setReturningAttributes(java.lang.String[])>(r8);
+
+     label7:
+        return $r2;
+
+     label8:
+        return r3;
+    }
+
+    private java.lang.String overrideFilter(java.lang.String)
+    {
+        com.sun.jndi.ldap.LdapReferralContext r0;
+        java.lang.String $r1, r2, $r3;
+
+        r0 := @this: com.sun.jndi.ldap.LdapReferralContext;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = r0.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String urlFilter>;
+
+        if $r1 != null goto label1;
+
+        $r3 = r2;
+
+        goto label2;
+
+     label1:
+        $r3 = r0.<com.sun.jndi.ldap.LdapReferralContext: java.lang.String urlFilter>;
+
+     label2:
+        return $r3;
+    }
+}

@@ -1,0 +1,620 @@
+class sun.management.HotspotCompilation extends java.lang.Object implements sun.management.HotspotCompilationMBean
+{
+    private sun.management.VMManagement jvm;
+    private static final java.lang.String JAVA_CI;
+    private static final java.lang.String COM_SUN_CI;
+    private static final java.lang.String SUN_CI;
+    private static final java.lang.String CI_COUNTER_NAME_PATTERN;
+    private sun.management.counter.LongCounter compilerThreads;
+    private sun.management.counter.LongCounter totalCompiles;
+    private sun.management.counter.LongCounter totalBailouts;
+    private sun.management.counter.LongCounter totalInvalidates;
+    private sun.management.counter.LongCounter nmethodCodeSize;
+    private sun.management.counter.LongCounter nmethodSize;
+    private sun.management.counter.StringCounter lastMethod;
+    private sun.management.counter.LongCounter lastSize;
+    private sun.management.counter.LongCounter lastType;
+    private sun.management.counter.StringCounter lastFailedMethod;
+    private sun.management.counter.LongCounter lastFailedType;
+    private sun.management.counter.StringCounter lastInvalidatedMethod;
+    private sun.management.counter.LongCounter lastInvalidatedType;
+    private sun.management.HotspotCompilation$CompilerThreadInfo[] threads;
+    private int numActiveThreads;
+    private java.util.Map counters;
+
+    void <init>(sun.management.VMManagement)
+    {
+        sun.management.VMManagement r1;
+        sun.management.HotspotCompilation r0;
+
+        r0 := @this: sun.management.HotspotCompilation;
+
+        r1 := @parameter0: sun.management.VMManagement;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.management.HotspotCompilation: sun.management.VMManagement jvm> = r1;
+
+        specialinvoke r0.<sun.management.HotspotCompilation: void initCompilerCounters()>();
+
+        return;
+    }
+
+    private sun.management.counter.Counter lookup(java.lang.String)
+    {
+        java.lang.AssertionError $r23;
+        java.util.Map $r2, $r10, $r17;
+        java.lang.String r4, $r6, $r13, $r20, $r28;
+        sun.management.counter.Counter $r8, $r15, $r22;
+        sun.management.HotspotCompilation r0;
+        java.lang.StringBuilder $r1, $r3, $r5, $r9, $r11, $r12, $r16, $r18, $r19, $r24, $r25, $r26, $r27;
+        java.lang.Object $r7, $r14, $r21;
+
+        r0 := @this: sun.management.HotspotCompilation;
+
+        r4 := @parameter0: java.lang.String;
+
+        $r2 = r0.<sun.management.HotspotCompilation: java.util.Map counters>;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("sun.ci.");
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r7 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>($r6);
+
+        $r8 = (sun.management.counter.Counter) $r7;
+
+        if $r8 == null goto label1;
+
+        return $r8;
+
+     label1:
+        $r10 = r0.<sun.management.HotspotCompilation: java.util.Map counters>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("com.sun.ci.");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r14 = interfaceinvoke $r10.<java.util.Map: java.lang.Object get(java.lang.Object)>($r13);
+
+        $r15 = (sun.management.counter.Counter) $r14;
+
+        if $r15 == null goto label2;
+
+        return $r15;
+
+     label2:
+        $r17 = r0.<sun.management.HotspotCompilation: java.util.Map counters>;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("java.ci.");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r21 = interfaceinvoke $r17.<java.util.Map: java.lang.Object get(java.lang.Object)>($r20);
+
+        $r22 = (sun.management.counter.Counter) $r21;
+
+        if $r22 == null goto label3;
+
+        return $r22;
+
+     label3:
+        $r23 = new java.lang.AssertionError;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Counter ");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" does not exist");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r23.<java.lang.AssertionError: void <init>(java.lang.Object)>($r28);
+
+        throw $r23;
+    }
+
+    private void initCompilerCounters()
+    {
+        sun.management.counter.LongCounter $r5, $r7, $r9, $r11, $r13, $r15, $r19, $r21, $r25, $r29, $r30;
+        sun.management.HotspotCompilation$CompilerThreadInfo $r34, $r36;
+        java.util.Map $r32, $r40;
+        boolean $z0, $z1;
+        sun.management.HotspotCompilation$CompilerThreadInfo[] $r31, $r33, $r35, $r37, $r42;
+        sun.management.HotspotCompilation r0;
+        java.util.List $r2;
+        sun.management.counter.StringCounter $r17, $r23, $r27;
+        long $l0;
+        int $i1, $i2, $i3, $i4, $i5, $i6, i7, $i8;
+        java.lang.String $r41;
+        sun.management.counter.Counter $r4, $r6, $r8, $r10, $r12, $r14, $r16, $r18, $r20, $r22, $r24, $r26, $r28, r39;
+        java.util.Iterator $r3;
+        java.util.TreeMap $r1;
+        java.lang.Object $r38;
+
+        r0 := @this: sun.management.HotspotCompilation;
+
+        $r1 = new java.util.TreeMap;
+
+        specialinvoke $r1.<java.util.TreeMap: void <init>()>();
+
+        r0.<sun.management.HotspotCompilation: java.util.Map counters> = $r1;
+
+        $r2 = virtualinvoke r0.<sun.management.HotspotCompilation: java.util.List getInternalCompilerCounters()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r38 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r39 = (sun.management.counter.Counter) $r38;
+
+        $r40 = r0.<sun.management.HotspotCompilation: java.util.Map counters>;
+
+        $r41 = interfaceinvoke r39.<sun.management.counter.Counter: java.lang.String getName()>();
+
+        interfaceinvoke $r40.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r41, r39);
+
+        goto label1;
+
+     label2:
+        $r4 = specialinvoke r0.<sun.management.HotspotCompilation: sun.management.counter.Counter lookup(java.lang.String)>("threads");
+
+        $r5 = (sun.management.counter.LongCounter) $r4;
+
+        r0.<sun.management.HotspotCompilation: sun.management.counter.LongCounter compilerThreads> = $r5;
+
+        $r6 = specialinvoke r0.<sun.management.HotspotCompilation: sun.management.counter.Counter lookup(java.lang.String)>("totalCompiles");
+
+        $r7 = (sun.management.counter.LongCounter) $r6;
+
+        r0.<sun.management.HotspotCompilation: sun.management.counter.LongCounter totalCompiles> = $r7;
+
+        $r8 = specialinvoke r0.<sun.management.HotspotCompilation: sun.management.counter.Counter lookup(java.lang.String)>("totalBailouts");
+
+        $r9 = (sun.management.counter.LongCounter) $r8;
+
+        r0.<sun.management.HotspotCompilation: sun.management.counter.LongCounter totalBailouts> = $r9;
+
+        $r10 = specialinvoke r0.<sun.management.HotspotCompilation: sun.management.counter.Counter lookup(java.lang.String)>("totalInvalidates");
+
+        $r11 = (sun.management.counter.LongCounter) $r10;
+
+        r0.<sun.management.HotspotCompilation: sun.management.counter.LongCounter totalInvalidates> = $r11;
+
+        $r12 = specialinvoke r0.<sun.management.HotspotCompilation: sun.management.counter.Counter lookup(java.lang.String)>("nmethodCodeSize");
+
+        $r13 = (sun.management.counter.LongCounter) $r12;
+
+        r0.<sun.management.HotspotCompilation: sun.management.counter.LongCounter nmethodCodeSize> = $r13;
+
+        $r14 = specialinvoke r0.<sun.management.HotspotCompilation: sun.management.counter.Counter lookup(java.lang.String)>("nmethodSize");
+
+        $r15 = (sun.management.counter.LongCounter) $r14;
+
+        r0.<sun.management.HotspotCompilation: sun.management.counter.LongCounter nmethodSize> = $r15;
+
+        $r16 = specialinvoke r0.<sun.management.HotspotCompilation: sun.management.counter.Counter lookup(java.lang.String)>("lastMethod");
+
+        $r17 = (sun.management.counter.StringCounter) $r16;
+
+        r0.<sun.management.HotspotCompilation: sun.management.counter.StringCounter lastMethod> = $r17;
+
+        $r18 = specialinvoke r0.<sun.management.HotspotCompilation: sun.management.counter.Counter lookup(java.lang.String)>("lastSize");
+
+        $r19 = (sun.management.counter.LongCounter) $r18;
+
+        r0.<sun.management.HotspotCompilation: sun.management.counter.LongCounter lastSize> = $r19;
+
+        $r20 = specialinvoke r0.<sun.management.HotspotCompilation: sun.management.counter.Counter lookup(java.lang.String)>("lastType");
+
+        $r21 = (sun.management.counter.LongCounter) $r20;
+
+        r0.<sun.management.HotspotCompilation: sun.management.counter.LongCounter lastType> = $r21;
+
+        $r22 = specialinvoke r0.<sun.management.HotspotCompilation: sun.management.counter.Counter lookup(java.lang.String)>("lastFailedMethod");
+
+        $r23 = (sun.management.counter.StringCounter) $r22;
+
+        r0.<sun.management.HotspotCompilation: sun.management.counter.StringCounter lastFailedMethod> = $r23;
+
+        $r24 = specialinvoke r0.<sun.management.HotspotCompilation: sun.management.counter.Counter lookup(java.lang.String)>("lastFailedType");
+
+        $r25 = (sun.management.counter.LongCounter) $r24;
+
+        r0.<sun.management.HotspotCompilation: sun.management.counter.LongCounter lastFailedType> = $r25;
+
+        $r26 = specialinvoke r0.<sun.management.HotspotCompilation: sun.management.counter.Counter lookup(java.lang.String)>("lastInvalidatedMethod");
+
+        $r27 = (sun.management.counter.StringCounter) $r26;
+
+        r0.<sun.management.HotspotCompilation: sun.management.counter.StringCounter lastInvalidatedMethod> = $r27;
+
+        $r28 = specialinvoke r0.<sun.management.HotspotCompilation: sun.management.counter.Counter lookup(java.lang.String)>("lastInvalidatedType");
+
+        $r29 = (sun.management.counter.LongCounter) $r28;
+
+        r0.<sun.management.HotspotCompilation: sun.management.counter.LongCounter lastInvalidatedType> = $r29;
+
+        $r30 = r0.<sun.management.HotspotCompilation: sun.management.counter.LongCounter compilerThreads>;
+
+        $l0 = interfaceinvoke $r30.<sun.management.counter.LongCounter: long longValue()>();
+
+        $i1 = (int) $l0;
+
+        r0.<sun.management.HotspotCompilation: int numActiveThreads> = $i1;
+
+        $i2 = r0.<sun.management.HotspotCompilation: int numActiveThreads>;
+
+        $i3 = $i2 + 1;
+
+        $r31 = newarray (sun.management.HotspotCompilation$CompilerThreadInfo)[$i3];
+
+        r0.<sun.management.HotspotCompilation: sun.management.HotspotCompilation$CompilerThreadInfo[] threads> = $r31;
+
+        $r32 = r0.<sun.management.HotspotCompilation: java.util.Map counters>;
+
+        $z1 = interfaceinvoke $r32.<java.util.Map: boolean containsKey(java.lang.Object)>("sun.ci.adapterThread.compiles");
+
+        if $z1 == 0 goto label3;
+
+        $r37 = r0.<sun.management.HotspotCompilation: sun.management.HotspotCompilation$CompilerThreadInfo[] threads>;
+
+        $r36 = new sun.management.HotspotCompilation$CompilerThreadInfo;
+
+        specialinvoke $r36.<sun.management.HotspotCompilation$CompilerThreadInfo: void <init>(sun.management.HotspotCompilation,java.lang.String,int)>(r0, "adapterThread", 0);
+
+        $r37[0] = $r36;
+
+        $i5 = r0.<sun.management.HotspotCompilation: int numActiveThreads>;
+
+        $i6 = $i5 + 1;
+
+        r0.<sun.management.HotspotCompilation: int numActiveThreads> = $i6;
+
+        goto label4;
+
+     label3:
+        $r33 = r0.<sun.management.HotspotCompilation: sun.management.HotspotCompilation$CompilerThreadInfo[] threads>;
+
+        $r33[0] = null;
+
+     label4:
+        i7 = 1;
+
+     label5:
+        $r42 = r0.<sun.management.HotspotCompilation: sun.management.HotspotCompilation$CompilerThreadInfo[] threads>;
+
+        $i8 = lengthof $r42;
+
+        if i7 >= $i8 goto label6;
+
+        $r35 = r0.<sun.management.HotspotCompilation: sun.management.HotspotCompilation$CompilerThreadInfo[] threads>;
+
+        $r34 = new sun.management.HotspotCompilation$CompilerThreadInfo;
+
+        $i4 = i7 - 1;
+
+        specialinvoke $r34.<sun.management.HotspotCompilation$CompilerThreadInfo: void <init>(sun.management.HotspotCompilation,java.lang.String,int)>(r0, "compilerThread", $i4);
+
+        $r35[i7] = $r34;
+
+        i7 = i7 + 1;
+
+        goto label5;
+
+     label6:
+        return;
+    }
+
+    public int getCompilerThreadCount()
+    {
+        int $i0;
+        sun.management.HotspotCompilation r0;
+
+        r0 := @this: sun.management.HotspotCompilation;
+
+        $i0 = r0.<sun.management.HotspotCompilation: int numActiveThreads>;
+
+        return $i0;
+    }
+
+    public long getTotalCompileCount()
+    {
+        long $l0;
+        sun.management.counter.LongCounter $r1;
+        sun.management.HotspotCompilation r0;
+
+        r0 := @this: sun.management.HotspotCompilation;
+
+        $r1 = r0.<sun.management.HotspotCompilation: sun.management.counter.LongCounter totalCompiles>;
+
+        $l0 = interfaceinvoke $r1.<sun.management.counter.LongCounter: long longValue()>();
+
+        return $l0;
+    }
+
+    public long getBailoutCompileCount()
+    {
+        long $l0;
+        sun.management.counter.LongCounter $r1;
+        sun.management.HotspotCompilation r0;
+
+        r0 := @this: sun.management.HotspotCompilation;
+
+        $r1 = r0.<sun.management.HotspotCompilation: sun.management.counter.LongCounter totalBailouts>;
+
+        $l0 = interfaceinvoke $r1.<sun.management.counter.LongCounter: long longValue()>();
+
+        return $l0;
+    }
+
+    public long getInvalidatedCompileCount()
+    {
+        long $l0;
+        sun.management.counter.LongCounter $r1;
+        sun.management.HotspotCompilation r0;
+
+        r0 := @this: sun.management.HotspotCompilation;
+
+        $r1 = r0.<sun.management.HotspotCompilation: sun.management.counter.LongCounter totalInvalidates>;
+
+        $l0 = interfaceinvoke $r1.<sun.management.counter.LongCounter: long longValue()>();
+
+        return $l0;
+    }
+
+    public long getCompiledMethodCodeSize()
+    {
+        long $l0;
+        sun.management.counter.LongCounter $r1;
+        sun.management.HotspotCompilation r0;
+
+        r0 := @this: sun.management.HotspotCompilation;
+
+        $r1 = r0.<sun.management.HotspotCompilation: sun.management.counter.LongCounter nmethodCodeSize>;
+
+        $l0 = interfaceinvoke $r1.<sun.management.counter.LongCounter: long longValue()>();
+
+        return $l0;
+    }
+
+    public long getCompiledMethodSize()
+    {
+        long $l0;
+        sun.management.counter.LongCounter $r1;
+        sun.management.HotspotCompilation r0;
+
+        r0 := @this: sun.management.HotspotCompilation;
+
+        $r1 = r0.<sun.management.HotspotCompilation: sun.management.counter.LongCounter nmethodSize>;
+
+        $l0 = interfaceinvoke $r1.<sun.management.counter.LongCounter: long longValue()>();
+
+        return $l0;
+    }
+
+    public java.util.List getCompilerThreadStats()
+    {
+        sun.management.HotspotCompilation$CompilerThreadInfo[] $r2, $r3, $r5, $r8;
+        sun.management.CompilerThreadStat $r7;
+        java.util.ArrayList $r0;
+        sun.management.HotspotCompilation r1;
+        sun.management.HotspotCompilation$CompilerThreadInfo $r4, $r6;
+        int $i0, i1, $i2;
+
+        r1 := @this: sun.management.HotspotCompilation;
+
+        $r0 = new java.util.ArrayList;
+
+        $r2 = r1.<sun.management.HotspotCompilation: sun.management.HotspotCompilation$CompilerThreadInfo[] threads>;
+
+        $i0 = lengthof $r2;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>(int)>($i0);
+
+        i1 = 0;
+
+        $r3 = r1.<sun.management.HotspotCompilation: sun.management.HotspotCompilation$CompilerThreadInfo[] threads>;
+
+        $r4 = $r3[0];
+
+        if $r4 != null goto label1;
+
+        i1 = 1;
+
+     label1:
+        $r8 = r1.<sun.management.HotspotCompilation: sun.management.HotspotCompilation$CompilerThreadInfo[] threads>;
+
+        $i2 = lengthof $r8;
+
+        if i1 >= $i2 goto label2;
+
+        $r5 = r1.<sun.management.HotspotCompilation: sun.management.HotspotCompilation$CompilerThreadInfo[] threads>;
+
+        $r6 = $r5[i1];
+
+        $r7 = virtualinvoke $r6.<sun.management.HotspotCompilation$CompilerThreadInfo: sun.management.CompilerThreadStat getCompilerThreadStat()>();
+
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>($r7);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return $r0;
+    }
+
+    public sun.management.MethodInfo getLastCompile()
+    {
+        sun.management.MethodInfo $r0;
+        long $l0, $l2, $l3;
+        sun.management.counter.LongCounter $r4, $r5;
+        sun.management.HotspotCompilation r1;
+        sun.management.counter.StringCounter $r2;
+        int $i1, $i4;
+        java.lang.String $r3;
+
+        r1 := @this: sun.management.HotspotCompilation;
+
+        $r0 = new sun.management.MethodInfo;
+
+        $r2 = r1.<sun.management.HotspotCompilation: sun.management.counter.StringCounter lastMethod>;
+
+        $r3 = interfaceinvoke $r2.<sun.management.counter.StringCounter: java.lang.String stringValue()>();
+
+        $r4 = r1.<sun.management.HotspotCompilation: sun.management.counter.LongCounter lastType>;
+
+        $l0 = interfaceinvoke $r4.<sun.management.counter.LongCounter: long longValue()>();
+
+        $i1 = (int) $l0;
+
+        $l2 = (long) $i1;
+
+        $r5 = r1.<sun.management.HotspotCompilation: sun.management.counter.LongCounter lastSize>;
+
+        $l3 = interfaceinvoke $r5.<sun.management.counter.LongCounter: long longValue()>();
+
+        $i4 = (int) $l3;
+
+        specialinvoke $r0.<sun.management.MethodInfo: void <init>(java.lang.String,long,int)>($r3, $l2, $i4);
+
+        return $r0;
+    }
+
+    public sun.management.MethodInfo getFailedCompile()
+    {
+        sun.management.MethodInfo $r5;
+        long $l0, $l2;
+        sun.management.counter.LongCounter $r4;
+        sun.management.HotspotCompilation r1;
+        sun.management.counter.StringCounter $r2;
+        int $i1, $i4;
+        java.lang.String $r3;
+
+        r1 := @this: sun.management.HotspotCompilation;
+
+        $r5 = new sun.management.MethodInfo;
+
+        $r2 = r1.<sun.management.HotspotCompilation: sun.management.counter.StringCounter lastFailedMethod>;
+
+        $r3 = interfaceinvoke $r2.<sun.management.counter.StringCounter: java.lang.String stringValue()>();
+
+        $r4 = r1.<sun.management.HotspotCompilation: sun.management.counter.LongCounter lastFailedType>;
+
+        $l0 = interfaceinvoke $r4.<sun.management.counter.LongCounter: long longValue()>();
+
+        $i1 = (int) $l0;
+
+        $l2 = (long) $i1;
+
+        $i4 = (int) -1;
+
+        specialinvoke $r5.<sun.management.MethodInfo: void <init>(java.lang.String,long,int)>($r3, $l2, $i4);
+
+        return $r5;
+    }
+
+    public sun.management.MethodInfo getInvalidatedCompile()
+    {
+        sun.management.MethodInfo $r5;
+        long $l0, $l2;
+        sun.management.counter.LongCounter $r4;
+        sun.management.HotspotCompilation r1;
+        sun.management.counter.StringCounter $r2;
+        int $i1, $i4;
+        java.lang.String $r3;
+
+        r1 := @this: sun.management.HotspotCompilation;
+
+        $r5 = new sun.management.MethodInfo;
+
+        $r2 = r1.<sun.management.HotspotCompilation: sun.management.counter.StringCounter lastInvalidatedMethod>;
+
+        $r3 = interfaceinvoke $r2.<sun.management.counter.StringCounter: java.lang.String stringValue()>();
+
+        $r4 = r1.<sun.management.HotspotCompilation: sun.management.counter.LongCounter lastInvalidatedType>;
+
+        $l0 = interfaceinvoke $r4.<sun.management.counter.LongCounter: long longValue()>();
+
+        $i1 = (int) $l0;
+
+        $l2 = (long) $i1;
+
+        $i4 = (int) -1;
+
+        specialinvoke $r5.<sun.management.MethodInfo: void <init>(java.lang.String,long,int)>($r3, $l2, $i4);
+
+        return $r5;
+    }
+
+    public java.util.List getInternalCompilerCounters()
+    {
+        sun.management.VMManagement $r1;
+        java.util.List $r2;
+        sun.management.HotspotCompilation r0;
+
+        r0 := @this: sun.management.HotspotCompilation;
+
+        $r1 = r0.<sun.management.HotspotCompilation: sun.management.VMManagement jvm>;
+
+        $r2 = interfaceinvoke $r1.<sun.management.VMManagement: java.util.List getInternalCounters(java.lang.String)>("java.ci.|com.sun.ci.|sun.ci.");
+
+        return $r2;
+    }
+
+    static sun.management.counter.Counter access$000(sun.management.HotspotCompilation, java.lang.String)
+    {
+        java.lang.String r1;
+        sun.management.counter.Counter $r2;
+        sun.management.HotspotCompilation r0;
+
+        r0 := @parameter0: sun.management.HotspotCompilation;
+
+        r1 := @parameter1: java.lang.String;
+
+        $r2 = specialinvoke r0.<sun.management.HotspotCompilation: sun.management.counter.Counter lookup(java.lang.String)>(r1);
+
+        return $r2;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.management.HotspotCompilation: java.lang.String CI_COUNTER_NAME_PATTERN> = "java.ci.|com.sun.ci.|sun.ci.";
+
+        <sun.management.HotspotCompilation: java.lang.String SUN_CI> = "sun.ci.";
+
+        <sun.management.HotspotCompilation: java.lang.String COM_SUN_CI> = "com.sun.ci.";
+
+        <sun.management.HotspotCompilation: java.lang.String JAVA_CI> = "java.ci.";
+
+        return;
+    }
+}

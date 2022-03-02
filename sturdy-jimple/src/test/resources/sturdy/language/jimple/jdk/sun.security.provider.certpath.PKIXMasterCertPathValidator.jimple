@@ -1,0 +1,331 @@
+class sun.security.provider.certpath.PKIXMasterCertPathValidator extends java.lang.Object
+{
+    private static final sun.security.util.Debug debug;
+
+    void <init>()
+    {
+        sun.security.provider.certpath.PKIXMasterCertPathValidator r0;
+
+        r0 := @this: sun.security.provider.certpath.PKIXMasterCertPathValidator;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    static void validate(java.security.cert.CertPath, java.util.List, java.util.List) throws java.security.cert.CertPathValidatorException
+    {
+        java.util.Set $r8, r64;
+        sun.security.util.Debug $r1, $r2, $r3, $r4, $r7, $r9, $r11, $r13, $r22, $r23, $r25, $r31, $r43, $r50, $r57, $r58;
+        java.lang.StringBuilder $r12, $r14, $r15, $r16, $r24, $r26, $r27, $r28, $r30, $r32, $r33, $r34, $r37, $r38, $r42, $r44, $r46, $r49, $r51, $r52, $r53, $r55;
+        java.lang.Throwable $r62, $r67;
+        java.security.cert.PKIXCertPathChecker r66;
+        java.lang.String $r17, $r29, $r36, $r39, $r45, $r47, $r56, $r61, r65;
+        java.security.cert.X509Certificate r6;
+        java.security.cert.CertPathValidatorException$Reason $r63;
+        java.security.cert.CertPathValidatorException $r18, $r59, $r60;
+        java.security.cert.PKIXReason $r20;
+        boolean $z0, $z1, $z2;
+        java.util.List r0, r10;
+        javax.security.auth.x500.X500Principal $r54;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, i10, $i11;
+        java.util.Iterator $r41;
+        java.security.cert.CertPath r19;
+        java.util.StringJoiner $r40;
+        java.lang.Object $r5, $r21, $r48;
+        java.lang.Class $r35;
+
+        r19 := @parameter0: java.security.cert.CertPath;
+
+        r0 := @parameter1: java.util.List;
+
+        r10 := @parameter2: java.util.List;
+
+        $i0 = interfaceinvoke r0.<java.util.List: int size()>();
+
+        $r1 = <sun.security.provider.certpath.PKIXMasterCertPathValidator: sun.security.util.Debug debug>;
+
+        if $r1 == null goto label01;
+
+        $r57 = <sun.security.provider.certpath.PKIXMasterCertPathValidator: sun.security.util.Debug debug>;
+
+        virtualinvoke $r57.<sun.security.util.Debug: void println(java.lang.String)>("--------------------------------------------------------------");
+
+        $r58 = <sun.security.provider.certpath.PKIXMasterCertPathValidator: sun.security.util.Debug debug>;
+
+        virtualinvoke $r58.<sun.security.util.Debug: void println(java.lang.String)>("Executing PKIX certification path validation algorithm.");
+
+     label01:
+        i9 = 0;
+
+     label02:
+        if i9 >= $i0 goto label19;
+
+        $r5 = interfaceinvoke r0.<java.util.List: java.lang.Object get(int)>(i9);
+
+        r6 = (java.security.cert.X509Certificate) $r5;
+
+        $r7 = <sun.security.provider.certpath.PKIXMasterCertPathValidator: sun.security.util.Debug debug>;
+
+        if $r7 == null goto label03;
+
+        $r50 = <sun.security.provider.certpath.PKIXMasterCertPathValidator: sun.security.util.Debug debug>;
+
+        $r49 = new java.lang.StringBuilder;
+
+        specialinvoke $r49.<java.lang.StringBuilder: void <init>()>();
+
+        $r51 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Checking cert");
+
+        $i6 = i9 + 1;
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i6);
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" - Subject: ");
+
+        $r54 = virtualinvoke r6.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        $r55 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r54);
+
+        $r56 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r50.<sun.security.util.Debug: void println(java.lang.String)>($r56);
+
+     label03:
+        $r8 = virtualinvoke r6.<java.security.cert.X509Certificate: java.util.Set getCriticalExtensionOIDs()>();
+
+        r64 = $r8;
+
+        if $r8 != null goto label04;
+
+        r64 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+     label04:
+        $r9 = <sun.security.provider.certpath.PKIXMasterCertPathValidator: sun.security.util.Debug debug>;
+
+        if $r9 == null goto label07;
+
+        $z1 = interfaceinvoke r64.<java.util.Set: boolean isEmpty()>();
+
+        if $z1 != 0 goto label07;
+
+        $r40 = new java.util.StringJoiner;
+
+        specialinvoke $r40.<java.util.StringJoiner: void <init>(java.lang.CharSequence,java.lang.CharSequence,java.lang.CharSequence)>(", ", "{", "}");
+
+        $r41 = interfaceinvoke r64.<java.util.Set: java.util.Iterator iterator()>();
+
+     label05:
+        $z2 = interfaceinvoke $r41.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label06;
+
+        $r48 = interfaceinvoke $r41.<java.util.Iterator: java.lang.Object next()>();
+
+        r65 = (java.lang.String) $r48;
+
+        virtualinvoke $r40.<java.util.StringJoiner: java.util.StringJoiner add(java.lang.CharSequence)>(r65);
+
+        goto label05;
+
+     label06:
+        $r43 = <sun.security.provider.certpath.PKIXMasterCertPathValidator: sun.security.util.Debug debug>;
+
+        $r42 = new java.lang.StringBuilder;
+
+        specialinvoke $r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r44 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Set of critical extensions: ");
+
+        $r45 = virtualinvoke $r40.<java.util.StringJoiner: java.lang.String toString()>();
+
+        $r46 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r45);
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r43.<sun.security.util.Debug: void println(java.lang.String)>($r47);
+
+     label07:
+        i10 = 0;
+
+     label08:
+        $i11 = interfaceinvoke r10.<java.util.List: int size()>();
+
+        if i10 >= $i11 goto label16;
+
+        $r21 = interfaceinvoke r10.<java.util.List: java.lang.Object get(int)>(i10);
+
+        r66 = (java.security.cert.PKIXCertPathChecker) $r21;
+
+        $r22 = <sun.security.provider.certpath.PKIXMasterCertPathValidator: sun.security.util.Debug debug>;
+
+        if $r22 == null goto label09;
+
+        $r31 = <sun.security.provider.certpath.PKIXMasterCertPathValidator: sun.security.util.Debug debug>;
+
+        $r30 = new java.lang.StringBuilder;
+
+        specialinvoke $r30.<java.lang.StringBuilder: void <init>()>();
+
+        $r32 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-Using checker");
+
+        $i5 = i10 + 1;
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ... [");
+
+        $r35 = virtualinvoke r66.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r36 = virtualinvoke $r35.<java.lang.Class: java.lang.String getName()>();
+
+        $r37 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r36);
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r31.<sun.security.util.Debug: void println(java.lang.String)>($r39);
+
+     label09:
+        if i9 != 0 goto label10;
+
+        virtualinvoke r66.<java.security.cert.PKIXCertPathChecker: void init(boolean)>(0);
+
+     label10:
+        virtualinvoke r66.<java.security.cert.PKIXCertPathChecker: void check(java.security.cert.Certificate,java.util.Collection)>(r6, r64);
+
+        $r23 = <sun.security.provider.certpath.PKIXMasterCertPathValidator: sun.security.util.Debug debug>;
+
+        if $r23 == null goto label11;
+
+        $r25 = <sun.security.provider.certpath.PKIXMasterCertPathValidator: sun.security.util.Debug debug>;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-checker");
+
+        $i4 = i10 + 1;
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" validation succeeded");
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r25.<sun.security.util.Debug: void println(java.lang.String)>($r29);
+
+     label11:
+        goto label15;
+
+     label12:
+        $r59 := @caughtexception;
+
+        $r60 = new java.security.cert.CertPathValidatorException;
+
+        $r61 = virtualinvoke $r59.<java.security.cert.CertPathValidatorException: java.lang.String getMessage()>();
+
+        $r62 = virtualinvoke $r59.<java.security.cert.CertPathValidatorException: java.lang.Throwable getCause()>();
+
+        if $r62 == null goto label13;
+
+        $r67 = virtualinvoke $r59.<java.security.cert.CertPathValidatorException: java.lang.Throwable getCause()>();
+
+        goto label14;
+
+     label13:
+        $r67 = $r59;
+
+     label14:
+        $i7 = i9 + 1;
+
+        $i8 = $i0 - $i7;
+
+        $r63 = virtualinvoke $r59.<java.security.cert.CertPathValidatorException: java.security.cert.CertPathValidatorException$Reason getReason()>();
+
+        specialinvoke $r60.<java.security.cert.CertPathValidatorException: void <init>(java.lang.String,java.lang.Throwable,java.security.cert.CertPath,int,java.security.cert.CertPathValidatorException$Reason)>($r61, $r67, r19, $i8, $r63);
+
+        throw $r60;
+
+     label15:
+        i10 = i10 + 1;
+
+        goto label08;
+
+     label16:
+        $z0 = interfaceinvoke r64.<java.util.Set: boolean isEmpty()>();
+
+        if $z0 != 0 goto label17;
+
+        $r18 = new java.security.cert.CertPathValidatorException;
+
+        $i2 = i9 + 1;
+
+        $i3 = $i0 - $i2;
+
+        $r20 = <java.security.cert.PKIXReason: java.security.cert.PKIXReason UNRECOGNIZED_CRIT_EXT>;
+
+        specialinvoke $r18.<java.security.cert.CertPathValidatorException: void <init>(java.lang.String,java.lang.Throwable,java.security.cert.CertPath,int,java.security.cert.CertPathValidatorException$Reason)>("unrecognized critical extension(s)", null, r19, $i3, $r20);
+
+        throw $r18;
+
+     label17:
+        $r11 = <sun.security.provider.certpath.PKIXMasterCertPathValidator: sun.security.util.Debug debug>;
+
+        if $r11 == null goto label18;
+
+        $r13 = <sun.security.provider.certpath.PKIXMasterCertPathValidator: sun.security.util.Debug debug>;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\ncert");
+
+        $i1 = i9 + 1;
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" validation succeeded.\n");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r13.<sun.security.util.Debug: void println(java.lang.String)>($r17);
+
+     label18:
+        i9 = i9 + 1;
+
+        goto label02;
+
+     label19:
+        $r2 = <sun.security.provider.certpath.PKIXMasterCertPathValidator: sun.security.util.Debug debug>;
+
+        if $r2 == null goto label20;
+
+        $r3 = <sun.security.provider.certpath.PKIXMasterCertPathValidator: sun.security.util.Debug debug>;
+
+        virtualinvoke $r3.<sun.security.util.Debug: void println(java.lang.String)>("Cert path validation succeeded. (PKIX validation algorithm)");
+
+        $r4 = <sun.security.provider.certpath.PKIXMasterCertPathValidator: sun.security.util.Debug debug>;
+
+        virtualinvoke $r4.<sun.security.util.Debug: void println(java.lang.String)>("--------------------------------------------------------------");
+
+     label20:
+        return;
+
+        catch java.security.cert.CertPathValidatorException from label10 to label11 with label12;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.util.Debug $r0;
+
+        $r0 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String)>("certpath");
+
+        <sun.security.provider.certpath.PKIXMasterCertPathValidator: sun.security.util.Debug debug> = $r0;
+
+        return;
+    }
+}

@@ -1,0 +1,224 @@
+final class sun.security.jgss.wrapper.SunNativeProvider$1 extends java.lang.Object implements java.security.PrivilegedAction
+{
+
+    void <init>()
+    {
+        sun.security.jgss.wrapper.SunNativeProvider$1 r0;
+
+        r0 := @this: sun.security.jgss.wrapper.SunNativeProvider$1;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public java.util.HashMap run()
+    {
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        sun.security.jgss.wrapper.SunNativeProvider$1 r26;
+        org.ietf.jgss.Oid $r12, $r17;
+        java.lang.StringBuilder $r4, $r5, $r6, $r10, $r11, $r13, $r15, $r16, $r18;
+        org.ietf.jgss.Oid[] $r8;
+        java.lang.Error $r25;
+        java.util.HashMap $r9;
+        java.lang.String[] $r20, $r21, $r22, $r24, r27, r28;
+        int $i0, $i1, i2, i3;
+        java.lang.String $r0, $r1, $r2, r3, $r7, $r14, $r19, $r23;
+
+        r26 := @this: sun.security.jgss.wrapper.SunNativeProvider$1;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("sun.security.nativegss.debug");
+
+        $z0 = staticinvoke <java.lang.Boolean: boolean parseBoolean(java.lang.String)>($r0);
+
+        <sun.security.jgss.wrapper.SunNativeProvider: boolean DEBUG> = $z0;
+
+     label01:
+        staticinvoke <java.lang.System: void loadLibrary(java.lang.String)>("j2gss");
+
+     label02:
+        goto label05;
+
+     label03:
+        $r25 := @caughtexception;
+
+        staticinvoke <sun.security.jgss.wrapper.SunNativeProvider: void debug(java.lang.String)>("No j2gss library found!");
+
+        $z7 = <sun.security.jgss.wrapper.SunNativeProvider: boolean DEBUG>;
+
+        if $z7 == 0 goto label04;
+
+        virtualinvoke $r25.<java.lang.Error: void printStackTrace()>();
+
+     label04:
+        return null;
+
+     label05:
+        r27 = newarray (java.lang.String)[0];
+
+        $r1 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("sun.security.jgss.lib");
+
+        if $r1 == null goto label06;
+
+        $r23 = virtualinvoke $r1.<java.lang.String: java.lang.String trim()>();
+
+        $z6 = virtualinvoke $r23.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z6 == 0 goto label10;
+
+     label06:
+        $r2 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("os.name");
+
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>("SunOS");
+
+        if $z1 == 0 goto label07;
+
+        $r22 = newarray (java.lang.String)[1];
+
+        $r22[0] = "libgss.so";
+
+        r27 = $r22;
+
+        goto label09;
+
+     label07:
+        $z2 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>("Linux");
+
+        if $z2 == 0 goto label08;
+
+        $r21 = newarray (java.lang.String)[3];
+
+        $r21[0] = "libgssapi.so";
+
+        $r21[1] = "libgssapi_krb5.so";
+
+        $r21[2] = "libgssapi_krb5.so.2";
+
+        r27 = $r21;
+
+        goto label09;
+
+     label08:
+        $z3 = virtualinvoke $r2.<java.lang.String: boolean contains(java.lang.CharSequence)>("OS X");
+
+        if $z3 == 0 goto label09;
+
+        $r20 = newarray (java.lang.String)[2];
+
+        $r20[0] = "libgssapi_krb5.dylib";
+
+        $r20[1] = "/usr/lib/sasl2/libgssapiv2.2.so";
+
+        r27 = $r20;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r24 = newarray (java.lang.String)[1];
+
+        $r24[0] = $r1;
+
+        r27 = $r24;
+
+     label11:
+        r28 = r27;
+
+        $i1 = lengthof r27;
+
+        i2 = 0;
+
+     label12:
+        if i2 >= $i1 goto label16;
+
+        r3 = r28[i2];
+
+        $z4 = <sun.security.jgss.wrapper.SunNativeProvider: boolean DEBUG>;
+
+        $z5 = staticinvoke <sun.security.jgss.wrapper.GSSLibStub: boolean init(java.lang.String,boolean)>(r3, $z4);
+
+        if $z5 == 0 goto label15;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Loaded GSS library: ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.security.jgss.wrapper.SunNativeProvider: void debug(java.lang.String)>($r7);
+
+        $r8 = staticinvoke <sun.security.jgss.wrapper.GSSLibStub: org.ietf.jgss.Oid[] indicateMechs()>();
+
+        $r9 = new java.util.HashMap;
+
+        specialinvoke $r9.<java.util.HashMap: void <init>()>();
+
+        i3 = 0;
+
+     label13:
+        $i0 = lengthof $r8;
+
+        if i3 >= $i0 goto label14;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Native MF for ");
+
+        $r12 = $r8[i3];
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <sun.security.jgss.wrapper.SunNativeProvider: void debug(java.lang.String)>($r14);
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("GssApiMechanism.");
+
+        $r17 = $r8[i3];
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r9.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r19, "sun.security.jgss.wrapper.NativeGSSFactory");
+
+        i3 = i3 + 1;
+
+        goto label13;
+
+     label14:
+        return $r9;
+
+     label15:
+        i2 = i2 + 1;
+
+        goto label12;
+
+     label16:
+        return null;
+
+        catch java.lang.Error from label01 to label02 with label03;
+    }
+
+    public volatile java.lang.Object run()
+    {
+        sun.security.jgss.wrapper.SunNativeProvider$1 r0;
+        java.util.HashMap $r1;
+
+        r0 := @this: sun.security.jgss.wrapper.SunNativeProvider$1;
+
+        $r1 = virtualinvoke r0.<sun.security.jgss.wrapper.SunNativeProvider$1: java.util.HashMap run()>();
+
+        return $r1;
+    }
+}

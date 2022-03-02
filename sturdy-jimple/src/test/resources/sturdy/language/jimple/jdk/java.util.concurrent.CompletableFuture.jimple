@@ -1,0 +1,5591 @@
+public class java.util.concurrent.CompletableFuture extends java.lang.Object implements java.util.concurrent.Future, java.util.concurrent.CompletionStage
+{
+    volatile java.lang.Object result;
+    volatile java.util.concurrent.CompletableFuture$Completion stack;
+    static final java.util.concurrent.CompletableFuture$AltResult NIL;
+    private static final boolean useCommonPool;
+    private static final java.util.concurrent.Executor asyncPool;
+    static final int SYNC;
+    static final int ASYNC;
+    static final int NESTED;
+    private static final int SPINS;
+    private static final sun.misc.Unsafe UNSAFE;
+    private static final long RESULT;
+    private static final long STACK;
+    private static final long NEXT;
+
+    final boolean internalComplete(java.lang.Object)
+    {
+        sun.misc.Unsafe $r2;
+        java.util.concurrent.CompletableFuture r0;
+        java.lang.Object r1;
+        long $l0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = <java.util.concurrent.CompletableFuture: sun.misc.Unsafe UNSAFE>;
+
+        $l0 = <java.util.concurrent.CompletableFuture: long RESULT>;
+
+        $z0 = virtualinvoke $r2.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r0, $l0, null, r1);
+
+        return $z0;
+    }
+
+    final boolean casStack(java.util.concurrent.CompletableFuture$Completion, java.util.concurrent.CompletableFuture$Completion)
+    {
+        sun.misc.Unsafe $r3;
+        java.util.concurrent.CompletableFuture r0;
+        long $l0;
+        java.util.concurrent.CompletableFuture$Completion r1, r2;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletableFuture$Completion;
+
+        r2 := @parameter1: java.util.concurrent.CompletableFuture$Completion;
+
+        $r3 = <java.util.concurrent.CompletableFuture: sun.misc.Unsafe UNSAFE>;
+
+        $l0 = <java.util.concurrent.CompletableFuture: long STACK>;
+
+        $z0 = virtualinvoke $r3.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r0, $l0, r1, r2);
+
+        return $z0;
+    }
+
+    final boolean tryPushStack(java.util.concurrent.CompletableFuture$Completion)
+    {
+        sun.misc.Unsafe $r3;
+        java.util.concurrent.CompletableFuture r0;
+        long $l0;
+        java.util.concurrent.CompletableFuture$Completion r1, r2;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r2 := @parameter0: java.util.concurrent.CompletableFuture$Completion;
+
+        r1 = r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture$Completion stack>;
+
+        staticinvoke <java.util.concurrent.CompletableFuture: void lazySetNext(java.util.concurrent.CompletableFuture$Completion,java.util.concurrent.CompletableFuture$Completion)>(r2, r1);
+
+        $r3 = <java.util.concurrent.CompletableFuture: sun.misc.Unsafe UNSAFE>;
+
+        $l0 = <java.util.concurrent.CompletableFuture: long STACK>;
+
+        $z0 = virtualinvoke $r3.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r0, $l0, r1, r2);
+
+        return $z0;
+    }
+
+    final void pushStack(java.util.concurrent.CompletableFuture$Completion)
+    {
+        java.util.concurrent.CompletableFuture r0;
+        java.util.concurrent.CompletableFuture$Completion r1;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletableFuture$Completion;
+
+     label1:
+        $z0 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: boolean tryPushStack(java.util.concurrent.CompletableFuture$Completion)>(r1);
+
+        if $z0 == 0 goto label1;
+
+        return;
+    }
+
+    final boolean completeNull()
+    {
+        sun.misc.Unsafe $r2;
+        java.util.concurrent.CompletableFuture r0;
+        long $l0;
+        java.util.concurrent.CompletableFuture$AltResult $r1;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        $r2 = <java.util.concurrent.CompletableFuture: sun.misc.Unsafe UNSAFE>;
+
+        $l0 = <java.util.concurrent.CompletableFuture: long RESULT>;
+
+        $r1 = <java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture$AltResult NIL>;
+
+        $z0 = virtualinvoke $r2.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r0, $l0, null, $r1);
+
+        return $z0;
+    }
+
+    final java.lang.Object encodeValue(java.lang.Object)
+    {
+        java.lang.Object r0, $r2;
+        java.util.concurrent.CompletableFuture r1;
+
+        r1 := @this: java.util.concurrent.CompletableFuture;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        $r2 = <java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture$AltResult NIL>;
+
+        goto label2;
+
+     label1:
+        $r2 = r0;
+
+     label2:
+        return $r2;
+    }
+
+    final boolean completeValue(java.lang.Object)
+    {
+        sun.misc.Unsafe $r2;
+        java.util.concurrent.CompletableFuture r0;
+        java.lang.Object r1, $r3;
+        long $l0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = <java.util.concurrent.CompletableFuture: sun.misc.Unsafe UNSAFE>;
+
+        $l0 = <java.util.concurrent.CompletableFuture: long RESULT>;
+
+        if r1 != null goto label1;
+
+        $r3 = <java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture$AltResult NIL>;
+
+        goto label2;
+
+     label1:
+        $r3 = r1;
+
+     label2:
+        $z0 = virtualinvoke $r2.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r0, $l0, null, $r3);
+
+        return $z0;
+    }
+
+    static java.util.concurrent.CompletableFuture$AltResult encodeThrowable(java.lang.Throwable)
+    {
+        java.lang.Throwable r1, $r2;
+        java.util.concurrent.CompletionException $r3;
+        boolean $z0;
+        java.util.concurrent.CompletableFuture$AltResult $r4;
+
+        r1 := @parameter0: java.lang.Throwable;
+
+        $r4 = new java.util.concurrent.CompletableFuture$AltResult;
+
+        $z0 = r1 instanceof java.util.concurrent.CompletionException;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = r1;
+
+        goto label2;
+
+     label1:
+        $r3 = new java.util.concurrent.CompletionException;
+
+        $r2 = $r3;
+
+        specialinvoke $r3.<java.util.concurrent.CompletionException: void <init>(java.lang.Throwable)>(r1);
+
+     label2:
+        specialinvoke $r4.<java.util.concurrent.CompletableFuture$AltResult: void <init>(java.lang.Throwable)>($r2);
+
+        return $r4;
+    }
+
+    final boolean completeThrowable(java.lang.Throwable)
+    {
+        java.lang.Throwable r1;
+        sun.misc.Unsafe $r2;
+        java.util.concurrent.CompletableFuture r0;
+        long $l0;
+        java.util.concurrent.CompletableFuture$AltResult $r3;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.lang.Throwable;
+
+        $r2 = <java.util.concurrent.CompletableFuture: sun.misc.Unsafe UNSAFE>;
+
+        $l0 = <java.util.concurrent.CompletableFuture: long RESULT>;
+
+        $r3 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture$AltResult encodeThrowable(java.lang.Throwable)>(r1);
+
+        $z0 = virtualinvoke $r2.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r0, $l0, null, $r3);
+
+        return $z0;
+    }
+
+    static java.lang.Object encodeThrowable(java.lang.Throwable, java.lang.Object)
+    {
+        java.lang.Throwable $r2, r4;
+        java.util.concurrent.CompletionException $r3;
+        java.lang.Object r0;
+        boolean $z0, $z1;
+        java.util.concurrent.CompletableFuture$AltResult $r1, $r5;
+
+        r4 := @parameter0: java.lang.Throwable;
+
+        r0 := @parameter1: java.lang.Object;
+
+        $z0 = r4 instanceof java.util.concurrent.CompletionException;
+
+        if $z0 != 0 goto label1;
+
+        $r3 = new java.util.concurrent.CompletionException;
+
+        specialinvoke $r3.<java.util.concurrent.CompletionException: void <init>(java.lang.Throwable)>(r4);
+
+        r4 = $r3;
+
+        goto label2;
+
+     label1:
+        $z1 = r0 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z1 == 0 goto label2;
+
+        $r1 = (java.util.concurrent.CompletableFuture$AltResult) r0;
+
+        $r2 = $r1.<java.util.concurrent.CompletableFuture$AltResult: java.lang.Throwable ex>;
+
+        if r4 != $r2 goto label2;
+
+        return r0;
+
+     label2:
+        $r5 = new java.util.concurrent.CompletableFuture$AltResult;
+
+        specialinvoke $r5.<java.util.concurrent.CompletableFuture$AltResult: void <init>(java.lang.Throwable)>(r4);
+
+        return $r5;
+    }
+
+    final boolean completeThrowable(java.lang.Throwable, java.lang.Object)
+    {
+        java.lang.Throwable r1;
+        sun.misc.Unsafe $r3;
+        java.util.concurrent.CompletableFuture r0;
+        java.lang.Object r2, $r4;
+        long $l0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.lang.Throwable;
+
+        r2 := @parameter1: java.lang.Object;
+
+        $r3 = <java.util.concurrent.CompletableFuture: sun.misc.Unsafe UNSAFE>;
+
+        $l0 = <java.util.concurrent.CompletableFuture: long RESULT>;
+
+        $r4 = staticinvoke <java.util.concurrent.CompletableFuture: java.lang.Object encodeThrowable(java.lang.Throwable,java.lang.Object)>(r1, r2);
+
+        $z0 = virtualinvoke $r3.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r0, $l0, null, $r4);
+
+        return $z0;
+    }
+
+    java.lang.Object encodeOutcome(java.lang.Object, java.lang.Throwable)
+    {
+        java.lang.Throwable r0;
+        java.lang.Object r1, $r3;
+        java.util.concurrent.CompletableFuture r2;
+
+        r2 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r0 := @parameter1: java.lang.Throwable;
+
+        if r0 != null goto label2;
+
+        if r1 != null goto label1;
+
+        $r3 = <java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture$AltResult NIL>;
+
+        goto label3;
+
+     label1:
+        $r3 = r1;
+
+        goto label3;
+
+     label2:
+        $r3 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture$AltResult encodeThrowable(java.lang.Throwable)>(r0);
+
+     label3:
+        return $r3;
+    }
+
+    static java.lang.Object encodeRelay(java.lang.Object)
+    {
+        java.lang.Throwable $r2;
+        java.util.concurrent.CompletionException $r4;
+        java.lang.Object r0, $r5;
+        boolean $z0, $z1;
+        java.util.concurrent.CompletableFuture$AltResult $r1, $r3;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $z0 = r0 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = (java.util.concurrent.CompletableFuture$AltResult) r0;
+
+        $r2 = $r1.<java.util.concurrent.CompletableFuture$AltResult: java.lang.Throwable ex>;
+
+        if $r2 == null goto label1;
+
+        $z1 = $r2 instanceof java.util.concurrent.CompletionException;
+
+        if $z1 != 0 goto label1;
+
+        $r3 = new java.util.concurrent.CompletableFuture$AltResult;
+
+        $r5 = $r3;
+
+        $r4 = new java.util.concurrent.CompletionException;
+
+        specialinvoke $r4.<java.util.concurrent.CompletionException: void <init>(java.lang.Throwable)>($r2);
+
+        specialinvoke $r3.<java.util.concurrent.CompletableFuture$AltResult: void <init>(java.lang.Throwable)>($r4);
+
+        goto label2;
+
+     label1:
+        $r5 = r0;
+
+     label2:
+        return $r5;
+    }
+
+    final boolean completeRelay(java.lang.Object)
+    {
+        sun.misc.Unsafe $r2;
+        java.util.concurrent.CompletableFuture r0;
+        java.lang.Object r1, $r3;
+        long $l0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = <java.util.concurrent.CompletableFuture: sun.misc.Unsafe UNSAFE>;
+
+        $l0 = <java.util.concurrent.CompletableFuture: long RESULT>;
+
+        $r3 = staticinvoke <java.util.concurrent.CompletableFuture: java.lang.Object encodeRelay(java.lang.Object)>(r1);
+
+        $z0 = virtualinvoke $r2.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r0, $l0, null, $r3);
+
+        return $z0;
+    }
+
+    private static java.lang.Object reportGet(java.lang.Object) throws java.lang.InterruptedException, java.util.concurrent.ExecutionException
+    {
+        java.lang.Throwable $r2, $r3, r6;
+        java.util.concurrent.CancellationException $r4;
+        java.util.concurrent.ExecutionException $r7;
+        java.lang.InterruptedException $r5;
+        java.lang.Object r0;
+        boolean $z0, $z1, $z2;
+        java.util.concurrent.CompletableFuture$AltResult $r1;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        $r5 = new java.lang.InterruptedException;
+
+        specialinvoke $r5.<java.lang.InterruptedException: void <init>()>();
+
+        throw $r5;
+
+     label1:
+        $z0 = r0 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z0 == 0 goto label5;
+
+        $r1 = (java.util.concurrent.CompletableFuture$AltResult) r0;
+
+        $r2 = $r1.<java.util.concurrent.CompletableFuture$AltResult: java.lang.Throwable ex>;
+
+        r6 = $r2;
+
+        if $r2 != null goto label2;
+
+        return null;
+
+     label2:
+        $z1 = $r2 instanceof java.util.concurrent.CancellationException;
+
+        if $z1 == 0 goto label3;
+
+        $r4 = (java.util.concurrent.CancellationException) $r2;
+
+        throw $r4;
+
+     label3:
+        $z2 = $r2 instanceof java.util.concurrent.CompletionException;
+
+        if $z2 == 0 goto label4;
+
+        $r3 = virtualinvoke $r2.<java.lang.Throwable: java.lang.Throwable getCause()>();
+
+        if $r3 == null goto label4;
+
+        r6 = $r3;
+
+     label4:
+        $r7 = new java.util.concurrent.ExecutionException;
+
+        specialinvoke $r7.<java.util.concurrent.ExecutionException: void <init>(java.lang.Throwable)>(r6);
+
+        throw $r7;
+
+     label5:
+        return r0;
+    }
+
+    private static java.lang.Object reportJoin(java.lang.Object)
+    {
+        java.lang.Throwable $r2;
+        java.util.concurrent.CancellationException $r5;
+        java.util.concurrent.CompletionException $r3, $r4;
+        java.lang.Object r0;
+        boolean $z0, $z1, $z2;
+        java.util.concurrent.CompletableFuture$AltResult $r1;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $z0 = r0 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z0 == 0 goto label4;
+
+        $r1 = (java.util.concurrent.CompletableFuture$AltResult) r0;
+
+        $r2 = $r1.<java.util.concurrent.CompletableFuture$AltResult: java.lang.Throwable ex>;
+
+        if $r2 != null goto label1;
+
+        return null;
+
+     label1:
+        $z1 = $r2 instanceof java.util.concurrent.CancellationException;
+
+        if $z1 == 0 goto label2;
+
+        $r5 = (java.util.concurrent.CancellationException) $r2;
+
+        throw $r5;
+
+     label2:
+        $z2 = $r2 instanceof java.util.concurrent.CompletionException;
+
+        if $z2 == 0 goto label3;
+
+        $r4 = (java.util.concurrent.CompletionException) $r2;
+
+        throw $r4;
+
+     label3:
+        $r3 = new java.util.concurrent.CompletionException;
+
+        specialinvoke $r3.<java.util.concurrent.CompletionException: void <init>(java.lang.Throwable)>($r2);
+
+        throw $r3;
+
+     label4:
+        return r0;
+    }
+
+    static java.util.concurrent.Executor screenExecutor(java.util.concurrent.Executor)
+    {
+        java.util.concurrent.Executor r0, $r3;
+        java.util.concurrent.ForkJoinPool $r2;
+        java.lang.NullPointerException $r1;
+        boolean $z0;
+
+        r0 := @parameter0: java.util.concurrent.Executor;
+
+        $z0 = <java.util.concurrent.CompletableFuture: boolean useCommonPool>;
+
+        if $z0 != 0 goto label1;
+
+        $r2 = staticinvoke <java.util.concurrent.ForkJoinPool: java.util.concurrent.ForkJoinPool commonPool()>();
+
+        if r0 != $r2 goto label1;
+
+        $r3 = <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor asyncPool>;
+
+        return $r3;
+
+     label1:
+        if r0 != null goto label2;
+
+        $r1 = new java.lang.NullPointerException;
+
+        specialinvoke $r1.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r1;
+
+     label2:
+        return r0;
+    }
+
+    static void lazySetNext(java.util.concurrent.CompletableFuture$Completion, java.util.concurrent.CompletableFuture$Completion)
+    {
+        sun.misc.Unsafe $r2;
+        long $l0;
+        java.util.concurrent.CompletableFuture$Completion r0, r1;
+
+        r0 := @parameter0: java.util.concurrent.CompletableFuture$Completion;
+
+        r1 := @parameter1: java.util.concurrent.CompletableFuture$Completion;
+
+        $r2 = <java.util.concurrent.CompletableFuture: sun.misc.Unsafe UNSAFE>;
+
+        $l0 = <java.util.concurrent.CompletableFuture: long NEXT>;
+
+        virtualinvoke $r2.<sun.misc.Unsafe: void putOrderedObject(java.lang.Object,long,java.lang.Object)>(r0, $l0, r1);
+
+        return;
+    }
+
+    final void postComplete()
+    {
+        java.util.concurrent.CompletableFuture r0, $r2, r4, $r7;
+        int $i1;
+        java.util.concurrent.CompletableFuture$Completion $r1, $r3, $r5, r6;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r4 = r0;
+
+     label1:
+        $r5 = r4.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture$Completion stack>;
+
+        r6 = $r5;
+
+        if $r5 != null goto label2;
+
+        if r4 == r0 goto label8;
+
+        r4 = r0;
+
+        $r3 = r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture$Completion stack>;
+
+        r6 = $r3;
+
+        if $r3 == null goto label8;
+
+     label2:
+        $r1 = r6.<java.util.concurrent.CompletableFuture$Completion: java.util.concurrent.CompletableFuture$Completion next>;
+
+        $z0 = virtualinvoke r4.<java.util.concurrent.CompletableFuture: boolean casStack(java.util.concurrent.CompletableFuture$Completion,java.util.concurrent.CompletableFuture$Completion)>(r6, $r1);
+
+        if $z0 == 0 goto label7;
+
+        if $r1 == null goto label4;
+
+        if r4 == r0 goto label3;
+
+        virtualinvoke r0.<java.util.concurrent.CompletableFuture: void pushStack(java.util.concurrent.CompletableFuture$Completion)>(r6);
+
+        goto label1;
+
+     label3:
+        r6.<java.util.concurrent.CompletableFuture$Completion: java.util.concurrent.CompletableFuture$Completion next> = null;
+
+     label4:
+        $i1 = (int) -1;
+
+        $r2 = virtualinvoke r6.<java.util.concurrent.CompletableFuture$Completion: java.util.concurrent.CompletableFuture tryFire(int)>($i1);
+
+        if $r2 != null goto label5;
+
+        $r7 = r0;
+
+        goto label6;
+
+     label5:
+        $r7 = $r2;
+
+     label6:
+        r4 = $r7;
+
+     label7:
+        goto label1;
+
+     label8:
+        return;
+    }
+
+    final void cleanStack()
+    {
+        java.util.concurrent.CompletableFuture r0;
+        java.util.concurrent.CompletableFuture$Completion r1, r2, r3;
+        boolean $z0, $z1;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r2 = null;
+
+        r3 = r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture$Completion stack>;
+
+     label1:
+        if r3 == null goto label6;
+
+        r1 = r3.<java.util.concurrent.CompletableFuture$Completion: java.util.concurrent.CompletableFuture$Completion next>;
+
+        $z0 = virtualinvoke r3.<java.util.concurrent.CompletableFuture$Completion: boolean isLive()>();
+
+        if $z0 == 0 goto label2;
+
+        r2 = r3;
+
+        r3 = r1;
+
+        goto label5;
+
+     label2:
+        if r2 != null goto label3;
+
+        virtualinvoke r0.<java.util.concurrent.CompletableFuture: boolean casStack(java.util.concurrent.CompletableFuture$Completion,java.util.concurrent.CompletableFuture$Completion)>(r3, r1);
+
+        r3 = r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture$Completion stack>;
+
+        goto label5;
+
+     label3:
+        r2.<java.util.concurrent.CompletableFuture$Completion: java.util.concurrent.CompletableFuture$Completion next> = r1;
+
+        $z1 = virtualinvoke r2.<java.util.concurrent.CompletableFuture$Completion: boolean isLive()>();
+
+        if $z1 == 0 goto label4;
+
+        r3 = r1;
+
+        goto label5;
+
+     label4:
+        r2 = null;
+
+        r3 = r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture$Completion stack>;
+
+     label5:
+        goto label1;
+
+     label6:
+        return;
+    }
+
+    final void push(java.util.concurrent.CompletableFuture$UniCompletion)
+    {
+        java.util.concurrent.CompletableFuture r1;
+        java.lang.Object $r2;
+        java.util.concurrent.CompletableFuture$UniCompletion r0;
+        boolean $z0;
+
+        r1 := @this: java.util.concurrent.CompletableFuture;
+
+        r0 := @parameter0: java.util.concurrent.CompletableFuture$UniCompletion;
+
+        if r0 == null goto label2;
+
+     label1:
+        $r2 = r1.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r2 != null goto label2;
+
+        $z0 = virtualinvoke r1.<java.util.concurrent.CompletableFuture: boolean tryPushStack(java.util.concurrent.CompletableFuture$Completion)>(r0);
+
+        if $z0 != 0 goto label2;
+
+        staticinvoke <java.util.concurrent.CompletableFuture: void lazySetNext(java.util.concurrent.CompletableFuture$Completion,java.util.concurrent.CompletableFuture$Completion)>(r0, null);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    final java.util.concurrent.CompletableFuture postFire(java.util.concurrent.CompletableFuture, int)
+    {
+        int i0;
+        java.util.concurrent.CompletableFuture r0, r1;
+        java.lang.Object $r4, $r5;
+        java.util.concurrent.CompletableFuture$Completion $r2, $r3;
+
+        r1 := @this: java.util.concurrent.CompletableFuture;
+
+        r0 := @parameter0: java.util.concurrent.CompletableFuture;
+
+        i0 := @parameter1: int;
+
+        if r0 == null goto label3;
+
+        $r3 = r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture$Completion stack>;
+
+        if $r3 == null goto label3;
+
+        if i0 < 0 goto label1;
+
+        $r4 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r4 != null goto label2;
+
+     label1:
+        virtualinvoke r0.<java.util.concurrent.CompletableFuture: void cleanStack()>();
+
+        goto label3;
+
+     label2:
+        virtualinvoke r0.<java.util.concurrent.CompletableFuture: void postComplete()>();
+
+     label3:
+        $r5 = r1.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r5 == null goto label5;
+
+        $r2 = r1.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture$Completion stack>;
+
+        if $r2 == null goto label5;
+
+        if i0 >= 0 goto label4;
+
+        return r1;
+
+     label4:
+        virtualinvoke r1.<java.util.concurrent.CompletableFuture: void postComplete()>();
+
+     label5:
+        return null;
+    }
+
+    final boolean uniApply(java.util.concurrent.CompletableFuture, java.util.function.Function, java.util.concurrent.CompletableFuture$UniApply)
+    {
+        java.lang.Throwable $r8, $r9;
+        java.util.concurrent.CompletableFuture r0, r3;
+        java.util.function.Function r2;
+        java.lang.Object $r1, $r4, $r6, r10;
+        java.util.concurrent.CompletableFuture$UniApply r5;
+        boolean $z0, $z1;
+        java.util.concurrent.CompletableFuture$AltResult $r7;
+
+        r3 := @this: java.util.concurrent.CompletableFuture;
+
+        r0 := @parameter0: java.util.concurrent.CompletableFuture;
+
+        r2 := @parameter1: java.util.function.Function;
+
+        r5 := @parameter2: java.util.concurrent.CompletableFuture$UniApply;
+
+        if r0 == null goto label1;
+
+        $r1 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        r10 = $r1;
+
+        if $r1 == null goto label1;
+
+        if r2 != null goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $r4 = r3.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r4 != null goto label9;
+
+        $z0 = $r1 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z0 == 0 goto label4;
+
+        $r7 = (java.util.concurrent.CompletableFuture$AltResult) $r1;
+
+        $r8 = $r7.<java.util.concurrent.CompletableFuture$AltResult: java.lang.Throwable ex>;
+
+        if $r8 == null goto label3;
+
+        virtualinvoke r3.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable,java.lang.Object)>($r8, $r1);
+
+        goto label9;
+
+     label3:
+        r10 = null;
+
+     label4:
+        if r5 == null goto label6;
+
+        $z1 = virtualinvoke r5.<java.util.concurrent.CompletableFuture$UniApply: boolean claim()>();
+
+        if $z1 != 0 goto label6;
+
+     label5:
+        return 0;
+
+     label6:
+        $r6 = interfaceinvoke r2.<java.util.function.Function: java.lang.Object apply(java.lang.Object)>(r10);
+
+        virtualinvoke r3.<java.util.concurrent.CompletableFuture: boolean completeValue(java.lang.Object)>($r6);
+
+     label7:
+        goto label9;
+
+     label8:
+        $r9 := @caughtexception;
+
+        virtualinvoke r3.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable)>($r9);
+
+     label9:
+        return 1;
+
+        catch java.lang.Throwable from label4 to label5 with label8;
+        catch java.lang.Throwable from label6 to label7 with label8;
+    }
+
+    private java.util.concurrent.CompletableFuture uniApplyStage(java.util.concurrent.Executor, java.util.function.Function)
+    {
+        java.util.concurrent.Executor r2;
+        java.util.concurrent.CompletableFuture $r1, r4;
+        java.util.concurrent.CompletableFuture$UniApply $r3;
+        java.util.function.Function r0;
+        java.lang.NullPointerException $r5;
+        boolean $z0;
+
+        r4 := @this: java.util.concurrent.CompletableFuture;
+
+        r2 := @parameter0: java.util.concurrent.Executor;
+
+        r0 := @parameter1: java.util.function.Function;
+
+        if r0 != null goto label1;
+
+        $r5 = new java.lang.NullPointerException;
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r5;
+
+     label1:
+        $r1 = new java.util.concurrent.CompletableFuture;
+
+        specialinvoke $r1.<java.util.concurrent.CompletableFuture: void <init>()>();
+
+        if r2 != null goto label2;
+
+        $z0 = virtualinvoke $r1.<java.util.concurrent.CompletableFuture: boolean uniApply(java.util.concurrent.CompletableFuture,java.util.function.Function,java.util.concurrent.CompletableFuture$UniApply)>(r4, r0, null);
+
+        if $z0 != 0 goto label3;
+
+     label2:
+        $r3 = new java.util.concurrent.CompletableFuture$UniApply;
+
+        specialinvoke $r3.<java.util.concurrent.CompletableFuture$UniApply: void <init>(java.util.concurrent.Executor,java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.util.function.Function)>(r2, $r1, r4, r0);
+
+        virtualinvoke r4.<java.util.concurrent.CompletableFuture: void push(java.util.concurrent.CompletableFuture$UniCompletion)>($r3);
+
+        virtualinvoke $r3.<java.util.concurrent.CompletableFuture$UniApply: java.util.concurrent.CompletableFuture tryFire(int)>(0);
+
+     label3:
+        return $r1;
+    }
+
+    final boolean uniAccept(java.util.concurrent.CompletableFuture, java.util.function.Consumer, java.util.concurrent.CompletableFuture$UniAccept)
+    {
+        java.lang.Throwable $r7, $r8;
+        java.util.concurrent.CompletableFuture r0, r3;
+        java.util.function.Consumer r2;
+        java.lang.Object $r1, $r4, r9;
+        java.util.concurrent.CompletableFuture$UniAccept r5;
+        boolean $z0, $z1;
+        java.util.concurrent.CompletableFuture$AltResult $r6;
+
+        r3 := @this: java.util.concurrent.CompletableFuture;
+
+        r0 := @parameter0: java.util.concurrent.CompletableFuture;
+
+        r2 := @parameter1: java.util.function.Consumer;
+
+        r5 := @parameter2: java.util.concurrent.CompletableFuture$UniAccept;
+
+        if r0 == null goto label1;
+
+        $r1 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        r9 = $r1;
+
+        if $r1 == null goto label1;
+
+        if r2 != null goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $r4 = r3.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r4 != null goto label9;
+
+        $z0 = $r1 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z0 == 0 goto label4;
+
+        $r6 = (java.util.concurrent.CompletableFuture$AltResult) $r1;
+
+        $r7 = $r6.<java.util.concurrent.CompletableFuture$AltResult: java.lang.Throwable ex>;
+
+        if $r7 == null goto label3;
+
+        virtualinvoke r3.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable,java.lang.Object)>($r7, $r1);
+
+        goto label9;
+
+     label3:
+        r9 = null;
+
+     label4:
+        if r5 == null goto label6;
+
+        $z1 = virtualinvoke r5.<java.util.concurrent.CompletableFuture$UniAccept: boolean claim()>();
+
+        if $z1 != 0 goto label6;
+
+     label5:
+        return 0;
+
+     label6:
+        interfaceinvoke r2.<java.util.function.Consumer: void accept(java.lang.Object)>(r9);
+
+        virtualinvoke r3.<java.util.concurrent.CompletableFuture: boolean completeNull()>();
+
+     label7:
+        goto label9;
+
+     label8:
+        $r8 := @caughtexception;
+
+        virtualinvoke r3.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable)>($r8);
+
+     label9:
+        return 1;
+
+        catch java.lang.Throwable from label4 to label5 with label8;
+        catch java.lang.Throwable from label6 to label7 with label8;
+    }
+
+    private java.util.concurrent.CompletableFuture uniAcceptStage(java.util.concurrent.Executor, java.util.function.Consumer)
+    {
+        java.util.function.Consumer r0;
+        java.util.concurrent.Executor r2;
+        java.util.concurrent.CompletableFuture $r1, r4;
+        java.util.concurrent.CompletableFuture$UniAccept $r3;
+        java.lang.NullPointerException $r5;
+        boolean $z0;
+
+        r4 := @this: java.util.concurrent.CompletableFuture;
+
+        r2 := @parameter0: java.util.concurrent.Executor;
+
+        r0 := @parameter1: java.util.function.Consumer;
+
+        if r0 != null goto label1;
+
+        $r5 = new java.lang.NullPointerException;
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r5;
+
+     label1:
+        $r1 = new java.util.concurrent.CompletableFuture;
+
+        specialinvoke $r1.<java.util.concurrent.CompletableFuture: void <init>()>();
+
+        if r2 != null goto label2;
+
+        $z0 = virtualinvoke $r1.<java.util.concurrent.CompletableFuture: boolean uniAccept(java.util.concurrent.CompletableFuture,java.util.function.Consumer,java.util.concurrent.CompletableFuture$UniAccept)>(r4, r0, null);
+
+        if $z0 != 0 goto label3;
+
+     label2:
+        $r3 = new java.util.concurrent.CompletableFuture$UniAccept;
+
+        specialinvoke $r3.<java.util.concurrent.CompletableFuture$UniAccept: void <init>(java.util.concurrent.Executor,java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.util.function.Consumer)>(r2, $r1, r4, r0);
+
+        virtualinvoke r4.<java.util.concurrent.CompletableFuture: void push(java.util.concurrent.CompletableFuture$UniCompletion)>($r3);
+
+        virtualinvoke $r3.<java.util.concurrent.CompletableFuture$UniAccept: java.util.concurrent.CompletableFuture tryFire(int)>(0);
+
+     label3:
+        return $r1;
+    }
+
+    final boolean uniRun(java.util.concurrent.CompletableFuture, java.lang.Runnable, java.util.concurrent.CompletableFuture$UniRun)
+    {
+        java.lang.Throwable $r7, $r8;
+        java.util.concurrent.CompletableFuture r0, r3;
+        java.lang.Runnable r2;
+        java.lang.Object $r1, $r4;
+        java.util.concurrent.CompletableFuture$UniRun r5;
+        boolean $z0, $z1;
+        java.util.concurrent.CompletableFuture$AltResult $r6;
+
+        r3 := @this: java.util.concurrent.CompletableFuture;
+
+        r0 := @parameter0: java.util.concurrent.CompletableFuture;
+
+        r2 := @parameter1: java.lang.Runnable;
+
+        r5 := @parameter2: java.util.concurrent.CompletableFuture$UniRun;
+
+        if r0 == null goto label1;
+
+        $r1 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r1 == null goto label1;
+
+        if r2 != null goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $r4 = r3.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r4 != null goto label8;
+
+        $z0 = $r1 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z0 == 0 goto label3;
+
+        $r6 = (java.util.concurrent.CompletableFuture$AltResult) $r1;
+
+        $r7 = $r6.<java.util.concurrent.CompletableFuture$AltResult: java.lang.Throwable ex>;
+
+        if $r7 == null goto label3;
+
+        virtualinvoke r3.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable,java.lang.Object)>($r7, $r1);
+
+        goto label8;
+
+     label3:
+        if r5 == null goto label5;
+
+        $z1 = virtualinvoke r5.<java.util.concurrent.CompletableFuture$UniRun: boolean claim()>();
+
+        if $z1 != 0 goto label5;
+
+     label4:
+        return 0;
+
+     label5:
+        interfaceinvoke r2.<java.lang.Runnable: void run()>();
+
+        virtualinvoke r3.<java.util.concurrent.CompletableFuture: boolean completeNull()>();
+
+     label6:
+        goto label8;
+
+     label7:
+        $r8 := @caughtexception;
+
+        virtualinvoke r3.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable)>($r8);
+
+     label8:
+        return 1;
+
+        catch java.lang.Throwable from label3 to label4 with label7;
+        catch java.lang.Throwable from label5 to label6 with label7;
+    }
+
+    private java.util.concurrent.CompletableFuture uniRunStage(java.util.concurrent.Executor, java.lang.Runnable)
+    {
+        java.util.concurrent.Executor r2;
+        java.util.concurrent.CompletableFuture $r1, r4;
+        java.lang.Runnable r0;
+        java.util.concurrent.CompletableFuture$UniRun $r3;
+        java.lang.NullPointerException $r5;
+        boolean $z0;
+
+        r4 := @this: java.util.concurrent.CompletableFuture;
+
+        r2 := @parameter0: java.util.concurrent.Executor;
+
+        r0 := @parameter1: java.lang.Runnable;
+
+        if r0 != null goto label1;
+
+        $r5 = new java.lang.NullPointerException;
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r5;
+
+     label1:
+        $r1 = new java.util.concurrent.CompletableFuture;
+
+        specialinvoke $r1.<java.util.concurrent.CompletableFuture: void <init>()>();
+
+        if r2 != null goto label2;
+
+        $z0 = virtualinvoke $r1.<java.util.concurrent.CompletableFuture: boolean uniRun(java.util.concurrent.CompletableFuture,java.lang.Runnable,java.util.concurrent.CompletableFuture$UniRun)>(r4, r0, null);
+
+        if $z0 != 0 goto label3;
+
+     label2:
+        $r3 = new java.util.concurrent.CompletableFuture$UniRun;
+
+        specialinvoke $r3.<java.util.concurrent.CompletableFuture$UniRun: void <init>(java.util.concurrent.Executor,java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.lang.Runnable)>(r2, $r1, r4, r0);
+
+        virtualinvoke r4.<java.util.concurrent.CompletableFuture: void push(java.util.concurrent.CompletableFuture$UniCompletion)>($r3);
+
+        virtualinvoke $r3.<java.util.concurrent.CompletableFuture$UniRun: java.util.concurrent.CompletableFuture tryFire(int)>(0);
+
+     label3:
+        return $r1;
+    }
+
+    final boolean uniWhenComplete(java.util.concurrent.CompletableFuture, java.util.function.BiConsumer, java.util.concurrent.CompletableFuture$UniWhenComplete)
+    {
+        java.util.concurrent.CompletableFuture$UniWhenComplete r5;
+        java.lang.Throwable $r7, r8;
+        java.util.concurrent.CompletableFuture r0, r3;
+        java.util.function.BiConsumer r2;
+        java.lang.Object $r1, $r4, r9;
+        boolean $z0, $z1;
+        java.util.concurrent.CompletableFuture$AltResult $r6;
+
+        r3 := @this: java.util.concurrent.CompletableFuture;
+
+        r0 := @parameter0: java.util.concurrent.CompletableFuture;
+
+        r2 := @parameter1: java.util.function.BiConsumer;
+
+        r5 := @parameter2: java.util.concurrent.CompletableFuture$UniWhenComplete;
+
+        r8 = null;
+
+        if r0 == null goto label01;
+
+        $r1 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r1 == null goto label01;
+
+        if r2 != null goto label02;
+
+     label01:
+        return 0;
+
+     label02:
+        $r4 = r3.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r4 != null goto label12;
+
+     label03:
+        if r5 == null goto label05;
+
+        $z1 = virtualinvoke r5.<java.util.concurrent.CompletableFuture$UniWhenComplete: boolean claim()>();
+
+        if $z1 != 0 goto label05;
+
+     label04:
+        return 0;
+
+     label05:
+        $z0 = $r1 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z0 == 0 goto label06;
+
+        $r6 = (java.util.concurrent.CompletableFuture$AltResult) $r1;
+
+        r8 = $r6.<java.util.concurrent.CompletableFuture$AltResult: java.lang.Throwable ex>;
+
+        r9 = null;
+
+        goto label07;
+
+     label06:
+        r9 = $r1;
+
+     label07:
+        interfaceinvoke r2.<java.util.function.BiConsumer: void accept(java.lang.Object,java.lang.Object)>(r9, r8);
+
+        if r8 != null goto label09;
+
+        virtualinvoke r3.<java.util.concurrent.CompletableFuture: boolean internalComplete(java.lang.Object)>($r1);
+
+     label08:
+        return 1;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r7 := @caughtexception;
+
+        if r8 != null goto label11;
+
+        r8 = $r7;
+
+     label11:
+        virtualinvoke r3.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable,java.lang.Object)>(r8, $r1);
+
+     label12:
+        return 1;
+
+        catch java.lang.Throwable from label03 to label04 with label10;
+        catch java.lang.Throwable from label05 to label08 with label10;
+    }
+
+    private java.util.concurrent.CompletableFuture uniWhenCompleteStage(java.util.concurrent.Executor, java.util.function.BiConsumer)
+    {
+        java.util.concurrent.CompletableFuture$UniWhenComplete $r3;
+        java.util.concurrent.Executor r2;
+        java.util.function.BiConsumer r0;
+        java.util.concurrent.CompletableFuture $r1, r4;
+        java.lang.NullPointerException $r5;
+        boolean $z0;
+
+        r4 := @this: java.util.concurrent.CompletableFuture;
+
+        r2 := @parameter0: java.util.concurrent.Executor;
+
+        r0 := @parameter1: java.util.function.BiConsumer;
+
+        if r0 != null goto label1;
+
+        $r5 = new java.lang.NullPointerException;
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r5;
+
+     label1:
+        $r1 = new java.util.concurrent.CompletableFuture;
+
+        specialinvoke $r1.<java.util.concurrent.CompletableFuture: void <init>()>();
+
+        if r2 != null goto label2;
+
+        $z0 = virtualinvoke $r1.<java.util.concurrent.CompletableFuture: boolean uniWhenComplete(java.util.concurrent.CompletableFuture,java.util.function.BiConsumer,java.util.concurrent.CompletableFuture$UniWhenComplete)>(r4, r0, null);
+
+        if $z0 != 0 goto label3;
+
+     label2:
+        $r3 = new java.util.concurrent.CompletableFuture$UniWhenComplete;
+
+        specialinvoke $r3.<java.util.concurrent.CompletableFuture$UniWhenComplete: void <init>(java.util.concurrent.Executor,java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.util.function.BiConsumer)>(r2, $r1, r4, r0);
+
+        virtualinvoke r4.<java.util.concurrent.CompletableFuture: void push(java.util.concurrent.CompletableFuture$UniCompletion)>($r3);
+
+        virtualinvoke $r3.<java.util.concurrent.CompletableFuture$UniWhenComplete: java.util.concurrent.CompletableFuture tryFire(int)>(0);
+
+     label3:
+        return $r1;
+    }
+
+    final boolean uniHandle(java.util.concurrent.CompletableFuture, java.util.function.BiFunction, java.util.concurrent.CompletableFuture$UniHandle)
+    {
+        java.lang.Throwable $r8, r9;
+        java.util.function.BiFunction r2;
+        java.util.concurrent.CompletableFuture r0, r3;
+        java.util.concurrent.CompletableFuture$UniHandle r5;
+        java.lang.Object $r1, $r4, $r6, r10;
+        boolean $z0, $z1;
+        java.util.concurrent.CompletableFuture$AltResult $r7;
+
+        r3 := @this: java.util.concurrent.CompletableFuture;
+
+        r0 := @parameter0: java.util.concurrent.CompletableFuture;
+
+        r2 := @parameter1: java.util.function.BiFunction;
+
+        r5 := @parameter2: java.util.concurrent.CompletableFuture$UniHandle;
+
+        if r0 == null goto label01;
+
+        $r1 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r1 == null goto label01;
+
+        if r2 != null goto label02;
+
+     label01:
+        return 0;
+
+     label02:
+        $r4 = r3.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r4 != null goto label10;
+
+     label03:
+        if r5 == null goto label05;
+
+        $z1 = virtualinvoke r5.<java.util.concurrent.CompletableFuture$UniHandle: boolean claim()>();
+
+        if $z1 != 0 goto label05;
+
+     label04:
+        return 0;
+
+     label05:
+        $z0 = $r1 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z0 == 0 goto label06;
+
+        $r7 = (java.util.concurrent.CompletableFuture$AltResult) $r1;
+
+        r9 = $r7.<java.util.concurrent.CompletableFuture$AltResult: java.lang.Throwable ex>;
+
+        r10 = null;
+
+        goto label07;
+
+     label06:
+        r9 = null;
+
+        r10 = $r1;
+
+     label07:
+        $r6 = interfaceinvoke r2.<java.util.function.BiFunction: java.lang.Object apply(java.lang.Object,java.lang.Object)>(r10, r9);
+
+        virtualinvoke r3.<java.util.concurrent.CompletableFuture: boolean completeValue(java.lang.Object)>($r6);
+
+     label08:
+        goto label10;
+
+     label09:
+        $r8 := @caughtexception;
+
+        virtualinvoke r3.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable)>($r8);
+
+     label10:
+        return 1;
+
+        catch java.lang.Throwable from label03 to label04 with label09;
+        catch java.lang.Throwable from label05 to label08 with label09;
+    }
+
+    private java.util.concurrent.CompletableFuture uniHandleStage(java.util.concurrent.Executor, java.util.function.BiFunction)
+    {
+        java.util.concurrent.CompletableFuture$UniHandle $r3;
+        java.util.concurrent.Executor r2;
+        java.util.function.BiFunction r0;
+        java.util.concurrent.CompletableFuture $r1, r4;
+        java.lang.NullPointerException $r5;
+        boolean $z0;
+
+        r4 := @this: java.util.concurrent.CompletableFuture;
+
+        r2 := @parameter0: java.util.concurrent.Executor;
+
+        r0 := @parameter1: java.util.function.BiFunction;
+
+        if r0 != null goto label1;
+
+        $r5 = new java.lang.NullPointerException;
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r5;
+
+     label1:
+        $r1 = new java.util.concurrent.CompletableFuture;
+
+        specialinvoke $r1.<java.util.concurrent.CompletableFuture: void <init>()>();
+
+        if r2 != null goto label2;
+
+        $z0 = virtualinvoke $r1.<java.util.concurrent.CompletableFuture: boolean uniHandle(java.util.concurrent.CompletableFuture,java.util.function.BiFunction,java.util.concurrent.CompletableFuture$UniHandle)>(r4, r0, null);
+
+        if $z0 != 0 goto label3;
+
+     label2:
+        $r3 = new java.util.concurrent.CompletableFuture$UniHandle;
+
+        specialinvoke $r3.<java.util.concurrent.CompletableFuture$UniHandle: void <init>(java.util.concurrent.Executor,java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.util.function.BiFunction)>(r2, $r1, r4, r0);
+
+        virtualinvoke r4.<java.util.concurrent.CompletableFuture: void push(java.util.concurrent.CompletableFuture$UniCompletion)>($r3);
+
+        virtualinvoke $r3.<java.util.concurrent.CompletableFuture$UniHandle: java.util.concurrent.CompletableFuture tryFire(int)>(0);
+
+     label3:
+        return $r1;
+    }
+
+    final boolean uniExceptionally(java.util.concurrent.CompletableFuture, java.util.function.Function, java.util.concurrent.CompletableFuture$UniExceptionally)
+    {
+        java.lang.Throwable $r6, $r9;
+        java.util.concurrent.CompletableFuture r0, r3;
+        java.util.concurrent.CompletableFuture$UniExceptionally r7;
+        java.util.function.Function r2;
+        java.lang.Object $r1, $r4, $r8;
+        boolean $z0, $z1;
+        java.util.concurrent.CompletableFuture$AltResult $r5;
+
+        r3 := @this: java.util.concurrent.CompletableFuture;
+
+        r0 := @parameter0: java.util.concurrent.CompletableFuture;
+
+        r2 := @parameter1: java.util.function.Function;
+
+        r7 := @parameter2: java.util.concurrent.CompletableFuture$UniExceptionally;
+
+        if r0 == null goto label1;
+
+        $r1 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r1 == null goto label1;
+
+        if r2 != null goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $r4 = r3.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r4 != null goto label9;
+
+     label3:
+        $z0 = $r1 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z0 == 0 goto label6;
+
+        $r5 = (java.util.concurrent.CompletableFuture$AltResult) $r1;
+
+        $r6 = $r5.<java.util.concurrent.CompletableFuture$AltResult: java.lang.Throwable ex>;
+
+        if $r6 == null goto label6;
+
+        if r7 == null goto label5;
+
+        $z1 = virtualinvoke r7.<java.util.concurrent.CompletableFuture$UniExceptionally: boolean claim()>();
+
+        if $z1 != 0 goto label5;
+
+     label4:
+        return 0;
+
+     label5:
+        $r8 = interfaceinvoke r2.<java.util.function.Function: java.lang.Object apply(java.lang.Object)>($r6);
+
+        virtualinvoke r3.<java.util.concurrent.CompletableFuture: boolean completeValue(java.lang.Object)>($r8);
+
+        goto label7;
+
+     label6:
+        virtualinvoke r3.<java.util.concurrent.CompletableFuture: boolean internalComplete(java.lang.Object)>($r1);
+
+     label7:
+        goto label9;
+
+     label8:
+        $r9 := @caughtexception;
+
+        virtualinvoke r3.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable)>($r9);
+
+     label9:
+        return 1;
+
+        catch java.lang.Throwable from label3 to label4 with label8;
+        catch java.lang.Throwable from label5 to label7 with label8;
+    }
+
+    private java.util.concurrent.CompletableFuture uniExceptionallyStage(java.util.function.Function)
+    {
+        java.util.concurrent.CompletableFuture $r1, r2;
+        java.util.concurrent.CompletableFuture$UniExceptionally $r3;
+        java.util.function.Function r0;
+        java.lang.NullPointerException $r4;
+        boolean $z0;
+
+        r2 := @this: java.util.concurrent.CompletableFuture;
+
+        r0 := @parameter0: java.util.function.Function;
+
+        if r0 != null goto label1;
+
+        $r4 = new java.lang.NullPointerException;
+
+        specialinvoke $r4.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r4;
+
+     label1:
+        $r1 = new java.util.concurrent.CompletableFuture;
+
+        specialinvoke $r1.<java.util.concurrent.CompletableFuture: void <init>()>();
+
+        $z0 = virtualinvoke $r1.<java.util.concurrent.CompletableFuture: boolean uniExceptionally(java.util.concurrent.CompletableFuture,java.util.function.Function,java.util.concurrent.CompletableFuture$UniExceptionally)>(r2, r0, null);
+
+        if $z0 != 0 goto label2;
+
+        $r3 = new java.util.concurrent.CompletableFuture$UniExceptionally;
+
+        specialinvoke $r3.<java.util.concurrent.CompletableFuture$UniExceptionally: void <init>(java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.util.function.Function)>($r1, r2, r0);
+
+        virtualinvoke r2.<java.util.concurrent.CompletableFuture: void push(java.util.concurrent.CompletableFuture$UniCompletion)>($r3);
+
+        virtualinvoke $r3.<java.util.concurrent.CompletableFuture$UniExceptionally: java.util.concurrent.CompletableFuture tryFire(int)>(0);
+
+     label2:
+        return $r1;
+    }
+
+    final boolean uniRelay(java.util.concurrent.CompletableFuture)
+    {
+        java.util.concurrent.CompletableFuture r0, r2;
+        java.lang.Object $r1, $r3;
+
+        r2 := @this: java.util.concurrent.CompletableFuture;
+
+        r0 := @parameter0: java.util.concurrent.CompletableFuture;
+
+        if r0 == null goto label1;
+
+        $r1 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r1 != null goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $r3 = r2.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r3 != null goto label3;
+
+        virtualinvoke r2.<java.util.concurrent.CompletableFuture: boolean completeRelay(java.lang.Object)>($r1);
+
+     label3:
+        return 1;
+    }
+
+    final boolean uniCompose(java.util.concurrent.CompletableFuture, java.util.function.Function, java.util.concurrent.CompletableFuture$UniCompose)
+    {
+        java.lang.Throwable $r13, $r14;
+        java.util.concurrent.CompletableFuture r0, r3, $r8;
+        java.util.function.Function r2;
+        boolean $z0, $z1, $z2;
+        java.util.concurrent.CompletableFuture$UniCompose r5;
+        java.util.concurrent.CompletableFuture$UniRelay $r10;
+        java.util.concurrent.CompletionStage $r7;
+        java.lang.Object $r1, $r4, $r6, $r9, $r11, r15;
+        java.util.concurrent.CompletableFuture$AltResult $r12;
+
+        r3 := @this: java.util.concurrent.CompletableFuture;
+
+        r0 := @parameter0: java.util.concurrent.CompletableFuture;
+
+        r2 := @parameter1: java.util.function.Function;
+
+        r5 := @parameter2: java.util.concurrent.CompletableFuture$UniCompose;
+
+        if r0 == null goto label01;
+
+        $r1 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        r15 = $r1;
+
+        if $r1 == null goto label01;
+
+        if r2 != null goto label02;
+
+     label01:
+        return 0;
+
+     label02:
+        $r4 = r3.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r4 != null goto label11;
+
+        $z0 = $r1 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z0 == 0 goto label04;
+
+        $r12 = (java.util.concurrent.CompletableFuture$AltResult) $r1;
+
+        $r13 = $r12.<java.util.concurrent.CompletableFuture$AltResult: java.lang.Throwable ex>;
+
+        if $r13 == null goto label03;
+
+        virtualinvoke r3.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable,java.lang.Object)>($r13, $r1);
+
+        goto label11;
+
+     label03:
+        r15 = null;
+
+     label04:
+        if r5 == null goto label06;
+
+        $z2 = virtualinvoke r5.<java.util.concurrent.CompletableFuture$UniCompose: boolean claim()>();
+
+        if $z2 != 0 goto label06;
+
+     label05:
+        return 0;
+
+     label06:
+        $r6 = interfaceinvoke r2.<java.util.function.Function: java.lang.Object apply(java.lang.Object)>(r15);
+
+        $r7 = (java.util.concurrent.CompletionStage) $r6;
+
+        $r8 = interfaceinvoke $r7.<java.util.concurrent.CompletionStage: java.util.concurrent.CompletableFuture toCompletableFuture()>();
+
+        $r9 = $r8.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r9 == null goto label07;
+
+        $z1 = virtualinvoke r3.<java.util.concurrent.CompletableFuture: boolean uniRelay(java.util.concurrent.CompletableFuture)>($r8);
+
+        if $z1 != 0 goto label09;
+
+     label07:
+        $r10 = new java.util.concurrent.CompletableFuture$UniRelay;
+
+        specialinvoke $r10.<java.util.concurrent.CompletableFuture$UniRelay: void <init>(java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture)>(r3, $r8);
+
+        virtualinvoke $r8.<java.util.concurrent.CompletableFuture: void push(java.util.concurrent.CompletableFuture$UniCompletion)>($r10);
+
+        virtualinvoke $r10.<java.util.concurrent.CompletableFuture$UniRelay: java.util.concurrent.CompletableFuture tryFire(int)>(0);
+
+        $r11 = r3.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r11 != null goto label09;
+
+     label08:
+        return 0;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r14 := @caughtexception;
+
+        virtualinvoke r3.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable)>($r14);
+
+     label11:
+        return 1;
+
+        catch java.lang.Throwable from label04 to label05 with label10;
+        catch java.lang.Throwable from label06 to label08 with label10;
+    }
+
+    private java.util.concurrent.CompletableFuture uniComposeStage(java.util.concurrent.Executor, java.util.function.Function)
+    {
+        java.lang.Throwable $r14, $r19;
+        java.util.concurrent.CompletableFuture $r2, r4, $r8, $r9, $r11, $r16, $r20;
+        java.util.function.Function r0;
+        java.lang.NullPointerException $r18;
+        java.util.concurrent.CompletableFuture$UniCompose $r3;
+        boolean $z0;
+        java.util.concurrent.Executor r1;
+        java.util.concurrent.CompletableFuture$UniRelay $r10;
+        java.util.concurrent.CompletionStage $r7;
+        java.lang.Object $r5, $r6, $r12, $r15, $r17, r22;
+        java.util.concurrent.CompletableFuture$AltResult $r13, $r21;
+
+        r4 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.Executor;
+
+        r0 := @parameter1: java.util.function.Function;
+
+        if r0 != null goto label1;
+
+        $r18 = new java.lang.NullPointerException;
+
+        specialinvoke $r18.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r18;
+
+     label1:
+        if r1 != null goto label8;
+
+        $r5 = r4.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        r22 = $r5;
+
+        if $r5 == null goto label8;
+
+        $z0 = $r5 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z0 == 0 goto label3;
+
+        $r13 = (java.util.concurrent.CompletableFuture$AltResult) $r5;
+
+        $r14 = $r13.<java.util.concurrent.CompletableFuture$AltResult: java.lang.Throwable ex>;
+
+        if $r14 == null goto label2;
+
+        $r16 = new java.util.concurrent.CompletableFuture;
+
+        $r17 = staticinvoke <java.util.concurrent.CompletableFuture: java.lang.Object encodeThrowable(java.lang.Throwable,java.lang.Object)>($r14, $r5);
+
+        specialinvoke $r16.<java.util.concurrent.CompletableFuture: void <init>(java.lang.Object)>($r17);
+
+        return $r16;
+
+     label2:
+        r22 = null;
+
+     label3:
+        $r6 = interfaceinvoke r0.<java.util.function.Function: java.lang.Object apply(java.lang.Object)>(r22);
+
+        $r7 = (java.util.concurrent.CompletionStage) $r6;
+
+        $r8 = interfaceinvoke $r7.<java.util.concurrent.CompletionStage: java.util.concurrent.CompletableFuture toCompletableFuture()>();
+
+        $r15 = $r8.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r15 == null goto label5;
+
+        $r11 = new java.util.concurrent.CompletableFuture;
+
+        $r12 = staticinvoke <java.util.concurrent.CompletableFuture: java.lang.Object encodeRelay(java.lang.Object)>($r15);
+
+        specialinvoke $r11.<java.util.concurrent.CompletableFuture: void <init>(java.lang.Object)>($r12);
+
+     label4:
+        return $r11;
+
+     label5:
+        $r9 = new java.util.concurrent.CompletableFuture;
+
+        specialinvoke $r9.<java.util.concurrent.CompletableFuture: void <init>()>();
+
+        $r10 = new java.util.concurrent.CompletableFuture$UniRelay;
+
+        specialinvoke $r10.<java.util.concurrent.CompletableFuture$UniRelay: void <init>(java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture)>($r9, $r8);
+
+        virtualinvoke $r8.<java.util.concurrent.CompletableFuture: void push(java.util.concurrent.CompletableFuture$UniCompletion)>($r10);
+
+        virtualinvoke $r10.<java.util.concurrent.CompletableFuture$UniRelay: java.util.concurrent.CompletableFuture tryFire(int)>(0);
+
+     label6:
+        return $r9;
+
+     label7:
+        $r19 := @caughtexception;
+
+        $r20 = new java.util.concurrent.CompletableFuture;
+
+        $r21 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture$AltResult encodeThrowable(java.lang.Throwable)>($r19);
+
+        specialinvoke $r20.<java.util.concurrent.CompletableFuture: void <init>(java.lang.Object)>($r21);
+
+        return $r20;
+
+     label8:
+        $r2 = new java.util.concurrent.CompletableFuture;
+
+        specialinvoke $r2.<java.util.concurrent.CompletableFuture: void <init>()>();
+
+        $r3 = new java.util.concurrent.CompletableFuture$UniCompose;
+
+        specialinvoke $r3.<java.util.concurrent.CompletableFuture$UniCompose: void <init>(java.util.concurrent.Executor,java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.util.function.Function)>(r1, $r2, r4, r0);
+
+        virtualinvoke r4.<java.util.concurrent.CompletableFuture: void push(java.util.concurrent.CompletableFuture$UniCompletion)>($r3);
+
+        virtualinvoke $r3.<java.util.concurrent.CompletableFuture$UniCompose: java.util.concurrent.CompletableFuture tryFire(int)>(0);
+
+        return $r2;
+
+        catch java.lang.Throwable from label3 to label4 with label7;
+        catch java.lang.Throwable from label5 to label6 with label7;
+    }
+
+    final void bipush(java.util.concurrent.CompletableFuture, java.util.concurrent.CompletableFuture$BiCompletion)
+    {
+        java.util.concurrent.CompletableFuture$CoCompletion $r8;
+        java.util.concurrent.CompletableFuture r1, r3;
+        java.lang.Object $r2, $r4, $r7;
+        java.util.concurrent.CompletableFuture$Completion r5, $r6;
+        java.util.concurrent.CompletableFuture$BiCompletion r0;
+        boolean $z0, $z1;
+
+        r1 := @this: java.util.concurrent.CompletableFuture;
+
+        r3 := @parameter0: java.util.concurrent.CompletableFuture;
+
+        r0 := @parameter1: java.util.concurrent.CompletableFuture$BiCompletion;
+
+        if r0 == null goto label6;
+
+     label1:
+        $r2 = r1.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r2 != null goto label2;
+
+        $z1 = virtualinvoke r1.<java.util.concurrent.CompletableFuture: boolean tryPushStack(java.util.concurrent.CompletableFuture$Completion)>(r0);
+
+        if $z1 != 0 goto label2;
+
+        staticinvoke <java.util.concurrent.CompletableFuture: void lazySetNext(java.util.concurrent.CompletableFuture$Completion,java.util.concurrent.CompletableFuture$Completion)>(r0, null);
+
+        goto label1;
+
+     label2:
+        if r3 == null goto label6;
+
+        if r3 == r1 goto label6;
+
+        $r4 = r3.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r4 != null goto label6;
+
+        if $r2 == null goto label3;
+
+        $r6 = r0;
+
+        goto label4;
+
+     label3:
+        $r8 = new java.util.concurrent.CompletableFuture$CoCompletion;
+
+        $r6 = $r8;
+
+        specialinvoke $r8.<java.util.concurrent.CompletableFuture$CoCompletion: void <init>(java.util.concurrent.CompletableFuture$BiCompletion)>(r0);
+
+     label4:
+        r5 = $r6;
+
+     label5:
+        $r7 = r3.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r7 != null goto label6;
+
+        $z0 = virtualinvoke r3.<java.util.concurrent.CompletableFuture: boolean tryPushStack(java.util.concurrent.CompletableFuture$Completion)>(r5);
+
+        if $z0 != 0 goto label6;
+
+        staticinvoke <java.util.concurrent.CompletableFuture: void lazySetNext(java.util.concurrent.CompletableFuture$Completion,java.util.concurrent.CompletableFuture$Completion)>(r5, null);
+
+        goto label5;
+
+     label6:
+        return;
+    }
+
+    final java.util.concurrent.CompletableFuture postFire(java.util.concurrent.CompletableFuture, java.util.concurrent.CompletableFuture, int)
+    {
+        int i0;
+        java.util.concurrent.CompletableFuture r0, r1, r2, $r5;
+        java.lang.Object $r4;
+        java.util.concurrent.CompletableFuture$Completion $r3;
+
+        r1 := @this: java.util.concurrent.CompletableFuture;
+
+        r2 := @parameter0: java.util.concurrent.CompletableFuture;
+
+        r0 := @parameter1: java.util.concurrent.CompletableFuture;
+
+        i0 := @parameter2: int;
+
+        if r0 == null goto label3;
+
+        $r3 = r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture$Completion stack>;
+
+        if $r3 == null goto label3;
+
+        if i0 < 0 goto label1;
+
+        $r4 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r4 != null goto label2;
+
+     label1:
+        virtualinvoke r0.<java.util.concurrent.CompletableFuture: void cleanStack()>();
+
+        goto label3;
+
+     label2:
+        virtualinvoke r0.<java.util.concurrent.CompletableFuture: void postComplete()>();
+
+     label3:
+        $r5 = virtualinvoke r1.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture postFire(java.util.concurrent.CompletableFuture,int)>(r2, i0);
+
+        return $r5;
+    }
+
+    final boolean biApply(java.util.concurrent.CompletableFuture, java.util.concurrent.CompletableFuture, java.util.function.BiFunction, java.util.concurrent.CompletableFuture$BiApply)
+    {
+        java.lang.Throwable $r10, $r12, $r13;
+        java.util.function.BiFunction r4;
+        java.util.concurrent.CompletableFuture r0, r2, r5;
+        boolean $z0, $z1, $z2;
+        java.lang.Object $r1, $r3, $r6, $r8, r14, r15;
+        java.util.concurrent.CompletableFuture$BiApply r7;
+        java.util.concurrent.CompletableFuture$AltResult $r9, $r11;
+
+        r5 := @this: java.util.concurrent.CompletableFuture;
+
+        r0 := @parameter0: java.util.concurrent.CompletableFuture;
+
+        r2 := @parameter1: java.util.concurrent.CompletableFuture;
+
+        r4 := @parameter2: java.util.function.BiFunction;
+
+        r7 := @parameter3: java.util.concurrent.CompletableFuture$BiApply;
+
+        if r0 == null goto label01;
+
+        $r1 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        r14 = $r1;
+
+        if $r1 == null goto label01;
+
+        if r2 == null goto label01;
+
+        $r3 = r2.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        r15 = $r3;
+
+        if $r3 == null goto label01;
+
+        if r4 != null goto label02;
+
+     label01:
+        return 0;
+
+     label02:
+        $r6 = r5.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r6 != null goto label11;
+
+        $z0 = $r1 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z0 == 0 goto label04;
+
+        $r11 = (java.util.concurrent.CompletableFuture$AltResult) $r1;
+
+        $r12 = $r11.<java.util.concurrent.CompletableFuture$AltResult: java.lang.Throwable ex>;
+
+        if $r12 == null goto label03;
+
+        virtualinvoke r5.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable,java.lang.Object)>($r12, $r1);
+
+        goto label11;
+
+     label03:
+        r14 = null;
+
+     label04:
+        $z1 = $r3 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z1 == 0 goto label06;
+
+        $r9 = (java.util.concurrent.CompletableFuture$AltResult) $r3;
+
+        $r10 = $r9.<java.util.concurrent.CompletableFuture$AltResult: java.lang.Throwable ex>;
+
+        if $r10 == null goto label05;
+
+        virtualinvoke r5.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable,java.lang.Object)>($r10, $r3);
+
+        goto label11;
+
+     label05:
+        r15 = null;
+
+     label06:
+        if r7 == null goto label08;
+
+        $z2 = virtualinvoke r7.<java.util.concurrent.CompletableFuture$BiApply: boolean claim()>();
+
+        if $z2 != 0 goto label08;
+
+     label07:
+        return 0;
+
+     label08:
+        $r8 = interfaceinvoke r4.<java.util.function.BiFunction: java.lang.Object apply(java.lang.Object,java.lang.Object)>(r14, r15);
+
+        virtualinvoke r5.<java.util.concurrent.CompletableFuture: boolean completeValue(java.lang.Object)>($r8);
+
+     label09:
+        goto label11;
+
+     label10:
+        $r13 := @caughtexception;
+
+        virtualinvoke r5.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable)>($r13);
+
+     label11:
+        return 1;
+
+        catch java.lang.Throwable from label06 to label07 with label10;
+        catch java.lang.Throwable from label08 to label09 with label10;
+    }
+
+    private java.util.concurrent.CompletableFuture biApplyStage(java.util.concurrent.Executor, java.util.concurrent.CompletionStage, java.util.function.BiFunction)
+    {
+        java.util.concurrent.Executor r5;
+        java.util.function.BiFunction r0;
+        java.util.concurrent.CompletableFuture $r3, $r4, r7;
+        java.lang.NullPointerException $r1;
+        java.util.concurrent.CompletionStage r2;
+        java.util.concurrent.CompletableFuture$BiApply $r6;
+        boolean $z0;
+
+        r7 := @this: java.util.concurrent.CompletableFuture;
+
+        r5 := @parameter0: java.util.concurrent.Executor;
+
+        r2 := @parameter1: java.util.concurrent.CompletionStage;
+
+        r0 := @parameter2: java.util.function.BiFunction;
+
+        if r0 == null goto label1;
+
+        $r3 = interfaceinvoke r2.<java.util.concurrent.CompletionStage: java.util.concurrent.CompletableFuture toCompletableFuture()>();
+
+        if $r3 != null goto label2;
+
+     label1:
+        $r1 = new java.lang.NullPointerException;
+
+        specialinvoke $r1.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r1;
+
+     label2:
+        $r4 = new java.util.concurrent.CompletableFuture;
+
+        specialinvoke $r4.<java.util.concurrent.CompletableFuture: void <init>()>();
+
+        if r5 != null goto label3;
+
+        $z0 = virtualinvoke $r4.<java.util.concurrent.CompletableFuture: boolean biApply(java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.util.function.BiFunction,java.util.concurrent.CompletableFuture$BiApply)>(r7, $r3, r0, null);
+
+        if $z0 != 0 goto label4;
+
+     label3:
+        $r6 = new java.util.concurrent.CompletableFuture$BiApply;
+
+        specialinvoke $r6.<java.util.concurrent.CompletableFuture$BiApply: void <init>(java.util.concurrent.Executor,java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.util.function.BiFunction)>(r5, $r4, r7, $r3, r0);
+
+        virtualinvoke r7.<java.util.concurrent.CompletableFuture: void bipush(java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture$BiCompletion)>($r3, $r6);
+
+        virtualinvoke $r6.<java.util.concurrent.CompletableFuture$BiApply: java.util.concurrent.CompletableFuture tryFire(int)>(0);
+
+     label4:
+        return $r4;
+    }
+
+    final boolean biAccept(java.util.concurrent.CompletableFuture, java.util.concurrent.CompletableFuture, java.util.function.BiConsumer, java.util.concurrent.CompletableFuture$BiAccept)
+    {
+        java.lang.Throwable $r9, $r11, $r12;
+        java.util.concurrent.CompletableFuture r0, r2, r5;
+        java.util.function.BiConsumer r4;
+        boolean $z0, $z1, $z2;
+        java.util.concurrent.CompletableFuture$BiAccept r7;
+        java.lang.Object $r1, $r3, $r6, r13, r14;
+        java.util.concurrent.CompletableFuture$AltResult $r8, $r10;
+
+        r5 := @this: java.util.concurrent.CompletableFuture;
+
+        r0 := @parameter0: java.util.concurrent.CompletableFuture;
+
+        r2 := @parameter1: java.util.concurrent.CompletableFuture;
+
+        r4 := @parameter2: java.util.function.BiConsumer;
+
+        r7 := @parameter3: java.util.concurrent.CompletableFuture$BiAccept;
+
+        if r0 == null goto label01;
+
+        $r1 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        r13 = $r1;
+
+        if $r1 == null goto label01;
+
+        if r2 == null goto label01;
+
+        $r3 = r2.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        r14 = $r3;
+
+        if $r3 == null goto label01;
+
+        if r4 != null goto label02;
+
+     label01:
+        return 0;
+
+     label02:
+        $r6 = r5.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r6 != null goto label11;
+
+        $z0 = $r1 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z0 == 0 goto label04;
+
+        $r10 = (java.util.concurrent.CompletableFuture$AltResult) $r1;
+
+        $r11 = $r10.<java.util.concurrent.CompletableFuture$AltResult: java.lang.Throwable ex>;
+
+        if $r11 == null goto label03;
+
+        virtualinvoke r5.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable,java.lang.Object)>($r11, $r1);
+
+        goto label11;
+
+     label03:
+        r13 = null;
+
+     label04:
+        $z1 = $r3 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z1 == 0 goto label06;
+
+        $r8 = (java.util.concurrent.CompletableFuture$AltResult) $r3;
+
+        $r9 = $r8.<java.util.concurrent.CompletableFuture$AltResult: java.lang.Throwable ex>;
+
+        if $r9 == null goto label05;
+
+        virtualinvoke r5.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable,java.lang.Object)>($r9, $r3);
+
+        goto label11;
+
+     label05:
+        r14 = null;
+
+     label06:
+        if r7 == null goto label08;
+
+        $z2 = virtualinvoke r7.<java.util.concurrent.CompletableFuture$BiAccept: boolean claim()>();
+
+        if $z2 != 0 goto label08;
+
+     label07:
+        return 0;
+
+     label08:
+        interfaceinvoke r4.<java.util.function.BiConsumer: void accept(java.lang.Object,java.lang.Object)>(r13, r14);
+
+        virtualinvoke r5.<java.util.concurrent.CompletableFuture: boolean completeNull()>();
+
+     label09:
+        goto label11;
+
+     label10:
+        $r12 := @caughtexception;
+
+        virtualinvoke r5.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable)>($r12);
+
+     label11:
+        return 1;
+
+        catch java.lang.Throwable from label06 to label07 with label10;
+        catch java.lang.Throwable from label08 to label09 with label10;
+    }
+
+    private java.util.concurrent.CompletableFuture biAcceptStage(java.util.concurrent.Executor, java.util.concurrent.CompletionStage, java.util.function.BiConsumer)
+    {
+        java.util.concurrent.Executor r5;
+        java.util.concurrent.CompletableFuture $r3, $r4, r7;
+        java.util.concurrent.CompletableFuture$BiAccept $r6;
+        java.lang.NullPointerException $r1;
+        java.util.concurrent.CompletionStage r2;
+        java.util.function.BiConsumer r0;
+        boolean $z0;
+
+        r7 := @this: java.util.concurrent.CompletableFuture;
+
+        r5 := @parameter0: java.util.concurrent.Executor;
+
+        r2 := @parameter1: java.util.concurrent.CompletionStage;
+
+        r0 := @parameter2: java.util.function.BiConsumer;
+
+        if r0 == null goto label1;
+
+        $r3 = interfaceinvoke r2.<java.util.concurrent.CompletionStage: java.util.concurrent.CompletableFuture toCompletableFuture()>();
+
+        if $r3 != null goto label2;
+
+     label1:
+        $r1 = new java.lang.NullPointerException;
+
+        specialinvoke $r1.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r1;
+
+     label2:
+        $r4 = new java.util.concurrent.CompletableFuture;
+
+        specialinvoke $r4.<java.util.concurrent.CompletableFuture: void <init>()>();
+
+        if r5 != null goto label3;
+
+        $z0 = virtualinvoke $r4.<java.util.concurrent.CompletableFuture: boolean biAccept(java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.util.function.BiConsumer,java.util.concurrent.CompletableFuture$BiAccept)>(r7, $r3, r0, null);
+
+        if $z0 != 0 goto label4;
+
+     label3:
+        $r6 = new java.util.concurrent.CompletableFuture$BiAccept;
+
+        specialinvoke $r6.<java.util.concurrent.CompletableFuture$BiAccept: void <init>(java.util.concurrent.Executor,java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.util.function.BiConsumer)>(r5, $r4, r7, $r3, r0);
+
+        virtualinvoke r7.<java.util.concurrent.CompletableFuture: void bipush(java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture$BiCompletion)>($r3, $r6);
+
+        virtualinvoke $r6.<java.util.concurrent.CompletableFuture$BiAccept: java.util.concurrent.CompletableFuture tryFire(int)>(0);
+
+     label4:
+        return $r4;
+    }
+
+    final boolean biRun(java.util.concurrent.CompletableFuture, java.util.concurrent.CompletableFuture, java.lang.Runnable, java.util.concurrent.CompletableFuture$BiRun)
+    {
+        java.lang.Throwable $r9, $r11, $r12;
+        java.util.concurrent.CompletableFuture r0, r2, r5;
+        java.lang.Runnable r4;
+        boolean $z0, $z1, $z2;
+        java.util.concurrent.CompletableFuture$BiRun r7;
+        java.lang.Object $r1, $r3, $r6;
+        java.util.concurrent.CompletableFuture$AltResult $r8, $r10;
+
+        r5 := @this: java.util.concurrent.CompletableFuture;
+
+        r0 := @parameter0: java.util.concurrent.CompletableFuture;
+
+        r2 := @parameter1: java.util.concurrent.CompletableFuture;
+
+        r4 := @parameter2: java.lang.Runnable;
+
+        r7 := @parameter3: java.util.concurrent.CompletableFuture$BiRun;
+
+        if r0 == null goto label1;
+
+        $r1 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r1 == null goto label1;
+
+        if r2 == null goto label1;
+
+        $r3 = r2.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r3 == null goto label1;
+
+        if r4 != null goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $r6 = r5.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r6 != null goto label9;
+
+        $z0 = $r1 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z0 == 0 goto label3;
+
+        $r10 = (java.util.concurrent.CompletableFuture$AltResult) $r1;
+
+        $r11 = $r10.<java.util.concurrent.CompletableFuture$AltResult: java.lang.Throwable ex>;
+
+        if $r11 == null goto label3;
+
+        virtualinvoke r5.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable,java.lang.Object)>($r11, $r1);
+
+        goto label9;
+
+     label3:
+        $z1 = $r3 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z1 == 0 goto label4;
+
+        $r8 = (java.util.concurrent.CompletableFuture$AltResult) $r3;
+
+        $r9 = $r8.<java.util.concurrent.CompletableFuture$AltResult: java.lang.Throwable ex>;
+
+        if $r9 == null goto label4;
+
+        virtualinvoke r5.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable,java.lang.Object)>($r9, $r3);
+
+        goto label9;
+
+     label4:
+        if r7 == null goto label6;
+
+        $z2 = virtualinvoke r7.<java.util.concurrent.CompletableFuture$BiRun: boolean claim()>();
+
+        if $z2 != 0 goto label6;
+
+     label5:
+        return 0;
+
+     label6:
+        interfaceinvoke r4.<java.lang.Runnable: void run()>();
+
+        virtualinvoke r5.<java.util.concurrent.CompletableFuture: boolean completeNull()>();
+
+     label7:
+        goto label9;
+
+     label8:
+        $r12 := @caughtexception;
+
+        virtualinvoke r5.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable)>($r12);
+
+     label9:
+        return 1;
+
+        catch java.lang.Throwable from label4 to label5 with label8;
+        catch java.lang.Throwable from label6 to label7 with label8;
+    }
+
+    private java.util.concurrent.CompletableFuture biRunStage(java.util.concurrent.Executor, java.util.concurrent.CompletionStage, java.lang.Runnable)
+    {
+        java.util.concurrent.Executor r5;
+        java.util.concurrent.CompletableFuture $r3, $r4, r7;
+        java.lang.Runnable r0;
+        java.lang.NullPointerException $r1;
+        java.util.concurrent.CompletionStage r2;
+        java.util.concurrent.CompletableFuture$BiRun $r6;
+        boolean $z0;
+
+        r7 := @this: java.util.concurrent.CompletableFuture;
+
+        r5 := @parameter0: java.util.concurrent.Executor;
+
+        r2 := @parameter1: java.util.concurrent.CompletionStage;
+
+        r0 := @parameter2: java.lang.Runnable;
+
+        if r0 == null goto label1;
+
+        $r3 = interfaceinvoke r2.<java.util.concurrent.CompletionStage: java.util.concurrent.CompletableFuture toCompletableFuture()>();
+
+        if $r3 != null goto label2;
+
+     label1:
+        $r1 = new java.lang.NullPointerException;
+
+        specialinvoke $r1.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r1;
+
+     label2:
+        $r4 = new java.util.concurrent.CompletableFuture;
+
+        specialinvoke $r4.<java.util.concurrent.CompletableFuture: void <init>()>();
+
+        if r5 != null goto label3;
+
+        $z0 = virtualinvoke $r4.<java.util.concurrent.CompletableFuture: boolean biRun(java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.lang.Runnable,java.util.concurrent.CompletableFuture$BiRun)>(r7, $r3, r0, null);
+
+        if $z0 != 0 goto label4;
+
+     label3:
+        $r6 = new java.util.concurrent.CompletableFuture$BiRun;
+
+        specialinvoke $r6.<java.util.concurrent.CompletableFuture$BiRun: void <init>(java.util.concurrent.Executor,java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.lang.Runnable)>(r5, $r4, r7, $r3, r0);
+
+        virtualinvoke r7.<java.util.concurrent.CompletableFuture: void bipush(java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture$BiCompletion)>($r3, $r6);
+
+        virtualinvoke $r6.<java.util.concurrent.CompletableFuture$BiRun: java.util.concurrent.CompletableFuture tryFire(int)>(0);
+
+     label4:
+        return $r4;
+    }
+
+    boolean biRelay(java.util.concurrent.CompletableFuture, java.util.concurrent.CompletableFuture)
+    {
+        java.lang.Throwable $r7, $r9;
+        java.util.concurrent.CompletableFuture r0, r2, r4;
+        java.lang.Object $r1, $r3, $r5;
+        boolean $z0, $z1;
+        java.util.concurrent.CompletableFuture$AltResult $r6, $r8;
+
+        r4 := @this: java.util.concurrent.CompletableFuture;
+
+        r0 := @parameter0: java.util.concurrent.CompletableFuture;
+
+        r2 := @parameter1: java.util.concurrent.CompletableFuture;
+
+        if r0 == null goto label1;
+
+        $r1 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r1 == null goto label1;
+
+        if r2 == null goto label1;
+
+        $r3 = r2.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r3 != null goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $r5 = r4.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r5 != null goto label5;
+
+        $z0 = $r1 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z0 == 0 goto label3;
+
+        $r8 = (java.util.concurrent.CompletableFuture$AltResult) $r1;
+
+        $r9 = $r8.<java.util.concurrent.CompletableFuture$AltResult: java.lang.Throwable ex>;
+
+        if $r9 == null goto label3;
+
+        virtualinvoke r4.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable,java.lang.Object)>($r9, $r1);
+
+        goto label5;
+
+     label3:
+        $z1 = $r3 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z1 == 0 goto label4;
+
+        $r6 = (java.util.concurrent.CompletableFuture$AltResult) $r3;
+
+        $r7 = $r6.<java.util.concurrent.CompletableFuture$AltResult: java.lang.Throwable ex>;
+
+        if $r7 == null goto label4;
+
+        virtualinvoke r4.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable,java.lang.Object)>($r7, $r3);
+
+        goto label5;
+
+     label4:
+        virtualinvoke r4.<java.util.concurrent.CompletableFuture: boolean completeNull()>();
+
+     label5:
+        return 1;
+    }
+
+    static java.util.concurrent.CompletableFuture andTree(java.util.concurrent.CompletableFuture[], int, int)
+    {
+        java.util.concurrent.CompletableFuture$BiRelay $r4;
+        java.util.concurrent.CompletableFuture $r0, r2, $r6, $r7;
+        java.lang.NullPointerException $r3;
+        java.util.concurrent.CompletableFuture[] r1;
+        int i0, i1, $i2, i3, $i4, $i5;
+        boolean $z0;
+        java.util.concurrent.CompletableFuture$AltResult $r5;
+
+        r1 := @parameter0: java.util.concurrent.CompletableFuture[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r0 = new java.util.concurrent.CompletableFuture;
+
+        specialinvoke $r0.<java.util.concurrent.CompletableFuture: void <init>()>();
+
+        if i0 <= i1 goto label1;
+
+        $r5 = <java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture$AltResult NIL>;
+
+        $r0.<java.util.concurrent.CompletableFuture: java.lang.Object result> = $r5;
+
+        goto label9;
+
+     label1:
+        $i2 = i0 + i1;
+
+        i3 = $i2 >>> 1;
+
+        if i0 != i3 goto label2;
+
+        $r6 = r1[i0];
+
+        goto label3;
+
+     label2:
+        $r6 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture andTree(java.util.concurrent.CompletableFuture[],int,int)>(r1, i0, i3);
+
+     label3:
+        r2 = $r6;
+
+        if $r6 == null goto label7;
+
+        if i0 != i1 goto label4;
+
+        $r7 = $r6;
+
+        goto label6;
+
+     label4:
+        $i4 = i3 + 1;
+
+        if i1 != $i4 goto label5;
+
+        $r7 = r1[i1];
+
+        goto label6;
+
+     label5:
+        $i5 = i3 + 1;
+
+        $r7 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture andTree(java.util.concurrent.CompletableFuture[],int,int)>(r1, $i5, i1);
+
+     label6:
+        if $r7 != null goto label8;
+
+     label7:
+        $r3 = new java.lang.NullPointerException;
+
+        specialinvoke $r3.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r3;
+
+     label8:
+        $z0 = virtualinvoke $r0.<java.util.concurrent.CompletableFuture: boolean biRelay(java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture)>(r2, $r7);
+
+        if $z0 != 0 goto label9;
+
+        $r4 = new java.util.concurrent.CompletableFuture$BiRelay;
+
+        specialinvoke $r4.<java.util.concurrent.CompletableFuture$BiRelay: void <init>(java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture)>($r0, r2, $r7);
+
+        virtualinvoke r2.<java.util.concurrent.CompletableFuture: void bipush(java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture$BiCompletion)>($r7, $r4);
+
+        virtualinvoke $r4.<java.util.concurrent.CompletableFuture$BiRelay: java.util.concurrent.CompletableFuture tryFire(int)>(0);
+
+     label9:
+        return $r0;
+    }
+
+    final void orpush(java.util.concurrent.CompletableFuture, java.util.concurrent.CompletableFuture$BiCompletion)
+    {
+        java.util.concurrent.CompletableFuture$CoCompletion $r5;
+        java.util.concurrent.CompletableFuture r1, r2;
+        java.lang.Object $r3, $r4, $r6, $r7, $r8;
+        java.util.concurrent.CompletableFuture$BiCompletion r0;
+        boolean $z0, $z1;
+
+        r2 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletableFuture;
+
+        r0 := @parameter1: java.util.concurrent.CompletableFuture$BiCompletion;
+
+        if r0 == null goto label6;
+
+     label1:
+        if r1 == null goto label2;
+
+        $r8 = r1.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r8 != null goto label6;
+
+     label2:
+        $r3 = r2.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r3 != null goto label6;
+
+        $z0 = virtualinvoke r2.<java.util.concurrent.CompletableFuture: boolean tryPushStack(java.util.concurrent.CompletableFuture$Completion)>(r0);
+
+        if $z0 == 0 goto label5;
+
+        if r1 == null goto label6;
+
+        if r1 == r2 goto label6;
+
+        $r4 = r1.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r4 != null goto label6;
+
+        $r5 = new java.util.concurrent.CompletableFuture$CoCompletion;
+
+        specialinvoke $r5.<java.util.concurrent.CompletableFuture$CoCompletion: void <init>(java.util.concurrent.CompletableFuture$BiCompletion)>(r0);
+
+     label3:
+        $r6 = r2.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r6 != null goto label4;
+
+        $r7 = r1.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r7 != null goto label4;
+
+        $z1 = virtualinvoke r1.<java.util.concurrent.CompletableFuture: boolean tryPushStack(java.util.concurrent.CompletableFuture$Completion)>($r5);
+
+        if $z1 != 0 goto label4;
+
+        staticinvoke <java.util.concurrent.CompletableFuture: void lazySetNext(java.util.concurrent.CompletableFuture$Completion,java.util.concurrent.CompletableFuture$Completion)>($r5, null);
+
+        goto label3;
+
+     label4:
+        goto label6;
+
+     label5:
+        staticinvoke <java.util.concurrent.CompletableFuture: void lazySetNext(java.util.concurrent.CompletableFuture$Completion,java.util.concurrent.CompletableFuture$Completion)>(r0, null);
+
+        goto label1;
+
+     label6:
+        return;
+    }
+
+    final boolean orApply(java.util.concurrent.CompletableFuture, java.util.concurrent.CompletableFuture, java.util.function.Function, java.util.concurrent.CompletableFuture$OrApply)
+    {
+        java.lang.Throwable $r9, $r11;
+        java.util.concurrent.CompletableFuture$OrApply r6;
+        java.util.concurrent.CompletableFuture r0, r1, r4;
+        java.util.function.Function r3;
+        java.lang.Object $r2, $r5, $r7, $r10, r12;
+        boolean $z0, $z1;
+        java.util.concurrent.CompletableFuture$AltResult $r8;
+
+        r4 := @this: java.util.concurrent.CompletableFuture;
+
+        r0 := @parameter0: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter1: java.util.concurrent.CompletableFuture;
+
+        r3 := @parameter2: java.util.function.Function;
+
+        r6 := @parameter3: java.util.concurrent.CompletableFuture$OrApply;
+
+        if r0 == null goto label02;
+
+        if r1 == null goto label02;
+
+        $r2 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        r12 = $r2;
+
+        if $r2 != null goto label01;
+
+        $r10 = r1.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        r12 = $r10;
+
+        if $r10 == null goto label02;
+
+     label01:
+        if r3 != null goto label03;
+
+     label02:
+        return 0;
+
+     label03:
+        $r5 = r4.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r5 != null goto label12;
+
+     label04:
+        if r6 == null goto label06;
+
+        $z1 = virtualinvoke r6.<java.util.concurrent.CompletableFuture$OrApply: boolean claim()>();
+
+        if $z1 != 0 goto label06;
+
+     label05:
+        return 0;
+
+     label06:
+        $z0 = r12 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z0 == 0 goto label09;
+
+        $r8 = (java.util.concurrent.CompletableFuture$AltResult) r12;
+
+        $r9 = $r8.<java.util.concurrent.CompletableFuture$AltResult: java.lang.Throwable ex>;
+
+        if $r9 == null goto label08;
+
+        virtualinvoke r4.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable,java.lang.Object)>($r9, r12);
+
+     label07:
+        goto label12;
+
+     label08:
+        r12 = null;
+
+     label09:
+        $r7 = interfaceinvoke r3.<java.util.function.Function: java.lang.Object apply(java.lang.Object)>(r12);
+
+        virtualinvoke r4.<java.util.concurrent.CompletableFuture: boolean completeValue(java.lang.Object)>($r7);
+
+     label10:
+        goto label12;
+
+     label11:
+        $r11 := @caughtexception;
+
+        virtualinvoke r4.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable)>($r11);
+
+     label12:
+        return 1;
+
+        catch java.lang.Throwable from label04 to label05 with label11;
+        catch java.lang.Throwable from label06 to label07 with label11;
+        catch java.lang.Throwable from label08 to label10 with label11;
+    }
+
+    private java.util.concurrent.CompletableFuture orApplyStage(java.util.concurrent.Executor, java.util.concurrent.CompletionStage, java.util.function.Function)
+    {
+        java.util.concurrent.CompletableFuture$OrApply $r6;
+        java.util.concurrent.Executor r5;
+        java.util.concurrent.CompletableFuture $r3, $r4, r7;
+        java.util.function.Function r0;
+        java.lang.NullPointerException $r1;
+        java.util.concurrent.CompletionStage r2;
+        boolean $z0;
+
+        r7 := @this: java.util.concurrent.CompletableFuture;
+
+        r5 := @parameter0: java.util.concurrent.Executor;
+
+        r2 := @parameter1: java.util.concurrent.CompletionStage;
+
+        r0 := @parameter2: java.util.function.Function;
+
+        if r0 == null goto label1;
+
+        $r3 = interfaceinvoke r2.<java.util.concurrent.CompletionStage: java.util.concurrent.CompletableFuture toCompletableFuture()>();
+
+        if $r3 != null goto label2;
+
+     label1:
+        $r1 = new java.lang.NullPointerException;
+
+        specialinvoke $r1.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r1;
+
+     label2:
+        $r4 = new java.util.concurrent.CompletableFuture;
+
+        specialinvoke $r4.<java.util.concurrent.CompletableFuture: void <init>()>();
+
+        if r5 != null goto label3;
+
+        $z0 = virtualinvoke $r4.<java.util.concurrent.CompletableFuture: boolean orApply(java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.util.function.Function,java.util.concurrent.CompletableFuture$OrApply)>(r7, $r3, r0, null);
+
+        if $z0 != 0 goto label4;
+
+     label3:
+        $r6 = new java.util.concurrent.CompletableFuture$OrApply;
+
+        specialinvoke $r6.<java.util.concurrent.CompletableFuture$OrApply: void <init>(java.util.concurrent.Executor,java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.util.function.Function)>(r5, $r4, r7, $r3, r0);
+
+        virtualinvoke r7.<java.util.concurrent.CompletableFuture: void orpush(java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture$BiCompletion)>($r3, $r6);
+
+        virtualinvoke $r6.<java.util.concurrent.CompletableFuture$OrApply: java.util.concurrent.CompletableFuture tryFire(int)>(0);
+
+     label4:
+        return $r4;
+    }
+
+    final boolean orAccept(java.util.concurrent.CompletableFuture, java.util.concurrent.CompletableFuture, java.util.function.Consumer, java.util.concurrent.CompletableFuture$OrAccept)
+    {
+        java.lang.Throwable $r8, $r10;
+        java.util.concurrent.CompletableFuture$OrAccept r6;
+        java.util.concurrent.CompletableFuture r0, r1, r4;
+        java.util.function.Consumer r3;
+        java.lang.Object $r2, $r5, $r9, r11;
+        boolean $z0, $z1;
+        java.util.concurrent.CompletableFuture$AltResult $r7;
+
+        r4 := @this: java.util.concurrent.CompletableFuture;
+
+        r0 := @parameter0: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter1: java.util.concurrent.CompletableFuture;
+
+        r3 := @parameter2: java.util.function.Consumer;
+
+        r6 := @parameter3: java.util.concurrent.CompletableFuture$OrAccept;
+
+        if r0 == null goto label02;
+
+        if r1 == null goto label02;
+
+        $r2 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        r11 = $r2;
+
+        if $r2 != null goto label01;
+
+        $r9 = r1.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        r11 = $r9;
+
+        if $r9 == null goto label02;
+
+     label01:
+        if r3 != null goto label03;
+
+     label02:
+        return 0;
+
+     label03:
+        $r5 = r4.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r5 != null goto label12;
+
+     label04:
+        if r6 == null goto label06;
+
+        $z1 = virtualinvoke r6.<java.util.concurrent.CompletableFuture$OrAccept: boolean claim()>();
+
+        if $z1 != 0 goto label06;
+
+     label05:
+        return 0;
+
+     label06:
+        $z0 = r11 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z0 == 0 goto label09;
+
+        $r7 = (java.util.concurrent.CompletableFuture$AltResult) r11;
+
+        $r8 = $r7.<java.util.concurrent.CompletableFuture$AltResult: java.lang.Throwable ex>;
+
+        if $r8 == null goto label08;
+
+        virtualinvoke r4.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable,java.lang.Object)>($r8, r11);
+
+     label07:
+        goto label12;
+
+     label08:
+        r11 = null;
+
+     label09:
+        interfaceinvoke r3.<java.util.function.Consumer: void accept(java.lang.Object)>(r11);
+
+        virtualinvoke r4.<java.util.concurrent.CompletableFuture: boolean completeNull()>();
+
+     label10:
+        goto label12;
+
+     label11:
+        $r10 := @caughtexception;
+
+        virtualinvoke r4.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable)>($r10);
+
+     label12:
+        return 1;
+
+        catch java.lang.Throwable from label04 to label05 with label11;
+        catch java.lang.Throwable from label06 to label07 with label11;
+        catch java.lang.Throwable from label08 to label10 with label11;
+    }
+
+    private java.util.concurrent.CompletableFuture orAcceptStage(java.util.concurrent.Executor, java.util.concurrent.CompletionStage, java.util.function.Consumer)
+    {
+        java.util.concurrent.Executor r5;
+        java.util.concurrent.CompletableFuture$OrAccept $r6;
+        java.util.concurrent.CompletableFuture $r3, $r4, r7;
+        java.lang.NullPointerException $r1;
+        java.util.function.Consumer r0;
+        java.util.concurrent.CompletionStage r2;
+        boolean $z0;
+
+        r7 := @this: java.util.concurrent.CompletableFuture;
+
+        r5 := @parameter0: java.util.concurrent.Executor;
+
+        r2 := @parameter1: java.util.concurrent.CompletionStage;
+
+        r0 := @parameter2: java.util.function.Consumer;
+
+        if r0 == null goto label1;
+
+        $r3 = interfaceinvoke r2.<java.util.concurrent.CompletionStage: java.util.concurrent.CompletableFuture toCompletableFuture()>();
+
+        if $r3 != null goto label2;
+
+     label1:
+        $r1 = new java.lang.NullPointerException;
+
+        specialinvoke $r1.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r1;
+
+     label2:
+        $r4 = new java.util.concurrent.CompletableFuture;
+
+        specialinvoke $r4.<java.util.concurrent.CompletableFuture: void <init>()>();
+
+        if r5 != null goto label3;
+
+        $z0 = virtualinvoke $r4.<java.util.concurrent.CompletableFuture: boolean orAccept(java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.util.function.Consumer,java.util.concurrent.CompletableFuture$OrAccept)>(r7, $r3, r0, null);
+
+        if $z0 != 0 goto label4;
+
+     label3:
+        $r6 = new java.util.concurrent.CompletableFuture$OrAccept;
+
+        specialinvoke $r6.<java.util.concurrent.CompletableFuture$OrAccept: void <init>(java.util.concurrent.Executor,java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.util.function.Consumer)>(r5, $r4, r7, $r3, r0);
+
+        virtualinvoke r7.<java.util.concurrent.CompletableFuture: void orpush(java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture$BiCompletion)>($r3, $r6);
+
+        virtualinvoke $r6.<java.util.concurrent.CompletableFuture$OrAccept: java.util.concurrent.CompletableFuture tryFire(int)>(0);
+
+     label4:
+        return $r4;
+    }
+
+    final boolean orRun(java.util.concurrent.CompletableFuture, java.util.concurrent.CompletableFuture, java.lang.Runnable, java.util.concurrent.CompletableFuture$OrRun)
+    {
+        java.lang.Throwable $r8, $r10;
+        java.util.concurrent.CompletableFuture r0, r1, r4;
+        java.util.concurrent.CompletableFuture$OrRun r6;
+        java.lang.Runnable r3;
+        java.lang.Object $r2, $r5, $r9, r11;
+        boolean $z0, $z1;
+        java.util.concurrent.CompletableFuture$AltResult $r7;
+
+        r4 := @this: java.util.concurrent.CompletableFuture;
+
+        r0 := @parameter0: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter1: java.util.concurrent.CompletableFuture;
+
+        r3 := @parameter2: java.lang.Runnable;
+
+        r6 := @parameter3: java.util.concurrent.CompletableFuture$OrRun;
+
+        if r0 == null goto label02;
+
+        if r1 == null goto label02;
+
+        $r2 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        r11 = $r2;
+
+        if $r2 != null goto label01;
+
+        $r9 = r1.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        r11 = $r9;
+
+        if $r9 == null goto label02;
+
+     label01:
+        if r3 != null goto label03;
+
+     label02:
+        return 0;
+
+     label03:
+        $r5 = r4.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r5 != null goto label10;
+
+     label04:
+        if r6 == null goto label06;
+
+        $z1 = virtualinvoke r6.<java.util.concurrent.CompletableFuture$OrRun: boolean claim()>();
+
+        if $z1 != 0 goto label06;
+
+     label05:
+        return 0;
+
+     label06:
+        $z0 = r11 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z0 == 0 goto label07;
+
+        $r7 = (java.util.concurrent.CompletableFuture$AltResult) r11;
+
+        $r8 = $r7.<java.util.concurrent.CompletableFuture$AltResult: java.lang.Throwable ex>;
+
+        if $r8 == null goto label07;
+
+        virtualinvoke r4.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable,java.lang.Object)>($r8, r11);
+
+        goto label08;
+
+     label07:
+        interfaceinvoke r3.<java.lang.Runnable: void run()>();
+
+        virtualinvoke r4.<java.util.concurrent.CompletableFuture: boolean completeNull()>();
+
+     label08:
+        goto label10;
+
+     label09:
+        $r10 := @caughtexception;
+
+        virtualinvoke r4.<java.util.concurrent.CompletableFuture: boolean completeThrowable(java.lang.Throwable)>($r10);
+
+     label10:
+        return 1;
+
+        catch java.lang.Throwable from label04 to label05 with label09;
+        catch java.lang.Throwable from label06 to label08 with label09;
+    }
+
+    private java.util.concurrent.CompletableFuture orRunStage(java.util.concurrent.Executor, java.util.concurrent.CompletionStage, java.lang.Runnable)
+    {
+        java.util.concurrent.Executor r5;
+        java.util.concurrent.CompletableFuture $r3, $r4, r7;
+        java.util.concurrent.CompletableFuture$OrRun $r6;
+        java.lang.Runnable r0;
+        java.lang.NullPointerException $r1;
+        java.util.concurrent.CompletionStage r2;
+        boolean $z0;
+
+        r7 := @this: java.util.concurrent.CompletableFuture;
+
+        r5 := @parameter0: java.util.concurrent.Executor;
+
+        r2 := @parameter1: java.util.concurrent.CompletionStage;
+
+        r0 := @parameter2: java.lang.Runnable;
+
+        if r0 == null goto label1;
+
+        $r3 = interfaceinvoke r2.<java.util.concurrent.CompletionStage: java.util.concurrent.CompletableFuture toCompletableFuture()>();
+
+        if $r3 != null goto label2;
+
+     label1:
+        $r1 = new java.lang.NullPointerException;
+
+        specialinvoke $r1.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r1;
+
+     label2:
+        $r4 = new java.util.concurrent.CompletableFuture;
+
+        specialinvoke $r4.<java.util.concurrent.CompletableFuture: void <init>()>();
+
+        if r5 != null goto label3;
+
+        $z0 = virtualinvoke $r4.<java.util.concurrent.CompletableFuture: boolean orRun(java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.lang.Runnable,java.util.concurrent.CompletableFuture$OrRun)>(r7, $r3, r0, null);
+
+        if $z0 != 0 goto label4;
+
+     label3:
+        $r6 = new java.util.concurrent.CompletableFuture$OrRun;
+
+        specialinvoke $r6.<java.util.concurrent.CompletableFuture$OrRun: void <init>(java.util.concurrent.Executor,java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.lang.Runnable)>(r5, $r4, r7, $r3, r0);
+
+        virtualinvoke r7.<java.util.concurrent.CompletableFuture: void orpush(java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture$BiCompletion)>($r3, $r6);
+
+        virtualinvoke $r6.<java.util.concurrent.CompletableFuture$OrRun: java.util.concurrent.CompletableFuture tryFire(int)>(0);
+
+     label4:
+        return $r4;
+    }
+
+    final boolean orRelay(java.util.concurrent.CompletableFuture, java.util.concurrent.CompletableFuture)
+    {
+        java.util.concurrent.CompletableFuture r0, r1, r3;
+        java.lang.Object $r2, $r4, $r5, r6;
+
+        r3 := @this: java.util.concurrent.CompletableFuture;
+
+        r0 := @parameter0: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter1: java.util.concurrent.CompletableFuture;
+
+        if r0 == null goto label1;
+
+        if r1 == null goto label1;
+
+        $r2 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        r6 = $r2;
+
+        if $r2 != null goto label2;
+
+        $r5 = r1.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        r6 = $r5;
+
+        if $r5 != null goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $r4 = r3.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r4 != null goto label3;
+
+        virtualinvoke r3.<java.util.concurrent.CompletableFuture: boolean completeRelay(java.lang.Object)>(r6);
+
+     label3:
+        return 1;
+    }
+
+    static java.util.concurrent.CompletableFuture orTree(java.util.concurrent.CompletableFuture[], int, int)
+    {
+        java.util.concurrent.CompletableFuture $r0, r2, $r5, $r6;
+        java.lang.NullPointerException $r3;
+        java.util.concurrent.CompletableFuture[] r1;
+        int i0, i1, $i2, i3, $i4, $i5;
+        java.util.concurrent.CompletableFuture$OrRelay $r4;
+        boolean $z0;
+
+        r1 := @parameter0: java.util.concurrent.CompletableFuture[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r0 = new java.util.concurrent.CompletableFuture;
+
+        specialinvoke $r0.<java.util.concurrent.CompletableFuture: void <init>()>();
+
+        if i0 > i1 goto label8;
+
+        $i2 = i0 + i1;
+
+        i3 = $i2 >>> 1;
+
+        if i0 != i3 goto label1;
+
+        $r5 = r1[i0];
+
+        goto label2;
+
+     label1:
+        $r5 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture orTree(java.util.concurrent.CompletableFuture[],int,int)>(r1, i0, i3);
+
+     label2:
+        r2 = $r5;
+
+        if $r5 == null goto label6;
+
+        if i0 != i1 goto label3;
+
+        $r6 = $r5;
+
+        goto label5;
+
+     label3:
+        $i4 = i3 + 1;
+
+        if i1 != $i4 goto label4;
+
+        $r6 = r1[i1];
+
+        goto label5;
+
+     label4:
+        $i5 = i3 + 1;
+
+        $r6 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture orTree(java.util.concurrent.CompletableFuture[],int,int)>(r1, $i5, i1);
+
+     label5:
+        if $r6 != null goto label7;
+
+     label6:
+        $r3 = new java.lang.NullPointerException;
+
+        specialinvoke $r3.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r3;
+
+     label7:
+        $z0 = virtualinvoke $r0.<java.util.concurrent.CompletableFuture: boolean orRelay(java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture)>(r2, $r6);
+
+        if $z0 != 0 goto label8;
+
+        $r4 = new java.util.concurrent.CompletableFuture$OrRelay;
+
+        specialinvoke $r4.<java.util.concurrent.CompletableFuture$OrRelay: void <init>(java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture)>($r0, r2, $r6);
+
+        virtualinvoke r2.<java.util.concurrent.CompletableFuture: void orpush(java.util.concurrent.CompletableFuture,java.util.concurrent.CompletableFuture$BiCompletion)>($r6, $r4);
+
+        virtualinvoke $r4.<java.util.concurrent.CompletableFuture$OrRelay: java.util.concurrent.CompletableFuture tryFire(int)>(0);
+
+     label8:
+        return $r0;
+    }
+
+    static java.util.concurrent.CompletableFuture asyncSupplyStage(java.util.concurrent.Executor, java.util.function.Supplier)
+    {
+        java.util.concurrent.CompletableFuture$AsyncSupply $r3;
+        java.util.concurrent.Executor r2;
+        java.util.concurrent.CompletableFuture $r1;
+        java.util.function.Supplier r0;
+        java.lang.NullPointerException $r4;
+
+        r2 := @parameter0: java.util.concurrent.Executor;
+
+        r0 := @parameter1: java.util.function.Supplier;
+
+        if r0 != null goto label1;
+
+        $r4 = new java.lang.NullPointerException;
+
+        specialinvoke $r4.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r4;
+
+     label1:
+        $r1 = new java.util.concurrent.CompletableFuture;
+
+        specialinvoke $r1.<java.util.concurrent.CompletableFuture: void <init>()>();
+
+        $r3 = new java.util.concurrent.CompletableFuture$AsyncSupply;
+
+        specialinvoke $r3.<java.util.concurrent.CompletableFuture$AsyncSupply: void <init>(java.util.concurrent.CompletableFuture,java.util.function.Supplier)>($r1, r0);
+
+        interfaceinvoke r2.<java.util.concurrent.Executor: void execute(java.lang.Runnable)>($r3);
+
+        return $r1;
+    }
+
+    static java.util.concurrent.CompletableFuture asyncRunStage(java.util.concurrent.Executor, java.lang.Runnable)
+    {
+        java.util.concurrent.CompletableFuture$AsyncRun $r3;
+        java.util.concurrent.Executor r2;
+        java.util.concurrent.CompletableFuture $r1;
+        java.lang.Runnable r0;
+        java.lang.NullPointerException $r4;
+
+        r2 := @parameter0: java.util.concurrent.Executor;
+
+        r0 := @parameter1: java.lang.Runnable;
+
+        if r0 != null goto label1;
+
+        $r4 = new java.lang.NullPointerException;
+
+        specialinvoke $r4.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r4;
+
+     label1:
+        $r1 = new java.util.concurrent.CompletableFuture;
+
+        specialinvoke $r1.<java.util.concurrent.CompletableFuture: void <init>()>();
+
+        $r3 = new java.util.concurrent.CompletableFuture$AsyncRun;
+
+        specialinvoke $r3.<java.util.concurrent.CompletableFuture$AsyncRun: void <init>(java.util.concurrent.CompletableFuture,java.lang.Runnable)>($r1, r0);
+
+        interfaceinvoke r2.<java.util.concurrent.Executor: void execute(java.lang.Runnable)>($r3);
+
+        return $r1;
+    }
+
+    private java.lang.Object waitingGet(boolean)
+    {
+        java.util.concurrent.CompletableFuture r0;
+        java.lang.Thread $r1, $r2;
+        int $i0, $i1, $i2, i3, $i5, $i7, $i9;
+        boolean z0, z1;
+        java.util.concurrent.CompletableFuture$Signaller r6, $r9;
+        java.lang.InterruptedException $r5;
+        java.lang.Object $r3, $r7, r8;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        z0 := @parameter0: boolean;
+
+        r6 = null;
+
+        z1 = 0;
+
+        $i5 = (int) -1;
+
+        i3 = $i5;
+
+     label01:
+        $r7 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        r8 = $r7;
+
+        if $r7 != null goto label10;
+
+        if i3 >= 0 goto label02;
+
+        i3 = <java.util.concurrent.CompletableFuture: int SPINS>;
+
+        goto label01;
+
+     label02:
+        if i3 <= 0 goto label03;
+
+        $i2 = staticinvoke <java.util.concurrent.ThreadLocalRandom: int nextSecondarySeed()>();
+
+        if $i2 < 0 goto label01;
+
+        $i7 = (int) -1;
+
+        i3 = i3 + $i7;
+
+        goto label01;
+
+     label03:
+        if r6 != null goto label04;
+
+        $r9 = new java.util.concurrent.CompletableFuture$Signaller;
+
+        specialinvoke $r9.<java.util.concurrent.CompletableFuture$Signaller: void <init>(boolean,long,long)>(z0, 0L, 0L);
+
+        r6 = $r9;
+
+        goto label01;
+
+     label04:
+        if z1 != 0 goto label05;
+
+        z1 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: boolean tryPushStack(java.util.concurrent.CompletableFuture$Completion)>(r6);
+
+        goto label01;
+
+     label05:
+        if z0 == 0 goto label06;
+
+        $i1 = r6.<java.util.concurrent.CompletableFuture$Signaller: int interruptControl>;
+
+        if $i1 >= 0 goto label06;
+
+        r6.<java.util.concurrent.CompletableFuture$Signaller: java.lang.Thread thread> = null;
+
+        virtualinvoke r0.<java.util.concurrent.CompletableFuture: void cleanStack()>();
+
+        return null;
+
+     label06:
+        $r2 = r6.<java.util.concurrent.CompletableFuture$Signaller: java.lang.Thread thread>;
+
+        if $r2 == null goto label01;
+
+        $r3 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r3 != null goto label01;
+
+     label07:
+        staticinvoke <java.util.concurrent.ForkJoinPool: void managedBlock(java.util.concurrent.ForkJoinPool$ManagedBlocker)>(r6);
+
+     label08:
+        goto label01;
+
+     label09:
+        $r5 := @caughtexception;
+
+        $i9 = (int) -1;
+
+        r6.<java.util.concurrent.CompletableFuture$Signaller: int interruptControl> = $i9;
+
+        goto label01;
+
+     label10:
+        if r6 == null goto label12;
+
+        r6.<java.util.concurrent.CompletableFuture$Signaller: java.lang.Thread thread> = null;
+
+        $i0 = r6.<java.util.concurrent.CompletableFuture$Signaller: int interruptControl>;
+
+        if $i0 >= 0 goto label12;
+
+        if z0 == 0 goto label11;
+
+        r8 = null;
+
+        goto label12;
+
+     label11:
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r1.<java.lang.Thread: void interrupt()>();
+
+     label12:
+        virtualinvoke r0.<java.util.concurrent.CompletableFuture: void postComplete()>();
+
+        return r8;
+
+        catch java.lang.InterruptedException from label07 to label08 with label09;
+    }
+
+    private java.lang.Object timedGet(long) throws java.util.concurrent.TimeoutException
+    {
+        java.util.concurrent.TimeoutException $r9, $r11;
+        long l0, $l2, l3, $l8, $l10;
+        java.util.concurrent.CompletableFuture r1;
+        byte $b1, $b4, $b9;
+        java.lang.Thread $r3;
+        int $i5, $i6, $i7, $i11, $i12, $i14;
+        boolean $z0, z1;
+        java.util.concurrent.CompletableFuture$Signaller $r10;
+        java.lang.InterruptedException $r6;
+        java.lang.Object $r4, $r7, r8;
+
+        r1 := @this: java.util.concurrent.CompletableFuture;
+
+        l0 := @parameter0: long;
+
+        $z0 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z0 == 0 goto label01;
+
+        return null;
+
+     label01:
+        $b1 = l0 cmp 0L;
+
+        $i11 = (int) $b1;
+
+        if $i11 > 0 goto label02;
+
+        $r9 = new java.util.concurrent.TimeoutException;
+
+        specialinvoke $r9.<java.util.concurrent.TimeoutException: void <init>()>();
+
+        throw $r9;
+
+     label02:
+        $l2 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        l3 = $l2 + l0;
+
+        $r10 = new java.util.concurrent.CompletableFuture$Signaller;
+
+        $b4 = l3 cmp 0L;
+
+        if $b4 != 0 goto label03;
+
+        $l10 = 1L;
+
+        goto label04;
+
+     label03:
+        $l10 = l3;
+
+     label04:
+        specialinvoke $r10.<java.util.concurrent.CompletableFuture$Signaller: void <init>(boolean,long,long)>(1, l0, $l10);
+
+        z1 = 0;
+
+     label05:
+        $r7 = r1.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        r8 = $r7;
+
+        if $r7 != null goto label13;
+
+        if z1 != 0 goto label06;
+
+        z1 = virtualinvoke r1.<java.util.concurrent.CompletableFuture: boolean tryPushStack(java.util.concurrent.CompletableFuture$Completion)>($r10);
+
+        goto label05;
+
+     label06:
+        $i6 = $r10.<java.util.concurrent.CompletableFuture$Signaller: int interruptControl>;
+
+        if $i6 < 0 goto label07;
+
+        $l8 = $r10.<java.util.concurrent.CompletableFuture$Signaller: long nanos>;
+
+        $b9 = $l8 cmp 0L;
+
+        $i12 = (int) $b9;
+
+        if $i12 > 0 goto label09;
+
+     label07:
+        $r10.<java.util.concurrent.CompletableFuture$Signaller: java.lang.Thread thread> = null;
+
+        virtualinvoke r1.<java.util.concurrent.CompletableFuture: void cleanStack()>();
+
+        $i7 = $r10.<java.util.concurrent.CompletableFuture$Signaller: int interruptControl>;
+
+        if $i7 >= 0 goto label08;
+
+        return null;
+
+     label08:
+        $r11 = new java.util.concurrent.TimeoutException;
+
+        specialinvoke $r11.<java.util.concurrent.TimeoutException: void <init>()>();
+
+        throw $r11;
+
+     label09:
+        $r3 = $r10.<java.util.concurrent.CompletableFuture$Signaller: java.lang.Thread thread>;
+
+        if $r3 == null goto label05;
+
+        $r4 = r1.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r4 != null goto label05;
+
+     label10:
+        staticinvoke <java.util.concurrent.ForkJoinPool: void managedBlock(java.util.concurrent.ForkJoinPool$ManagedBlocker)>($r10);
+
+     label11:
+        goto label05;
+
+     label12:
+        $r6 := @caughtexception;
+
+        $i14 = (int) -1;
+
+        $r10.<java.util.concurrent.CompletableFuture$Signaller: int interruptControl> = $i14;
+
+        goto label05;
+
+     label13:
+        $i5 = $r10.<java.util.concurrent.CompletableFuture$Signaller: int interruptControl>;
+
+        if $i5 >= 0 goto label14;
+
+        r8 = null;
+
+     label14:
+        $r10.<java.util.concurrent.CompletableFuture$Signaller: java.lang.Thread thread> = null;
+
+        virtualinvoke r1.<java.util.concurrent.CompletableFuture: void postComplete()>();
+
+        return r8;
+
+        catch java.lang.InterruptedException from label10 to label11 with label12;
+    }
+
+    public void <init>()
+    {
+        java.util.concurrent.CompletableFuture r0;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private void <init>(java.lang.Object)
+    {
+        java.util.concurrent.CompletableFuture r0;
+        java.lang.Object r1;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.lang.Object;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.util.concurrent.CompletableFuture: java.lang.Object result> = r1;
+
+        return;
+    }
+
+    public static java.util.concurrent.CompletableFuture supplyAsync(java.util.function.Supplier)
+    {
+        java.util.concurrent.CompletableFuture $r2;
+        java.util.function.Supplier r0;
+        java.util.concurrent.Executor $r1;
+
+        r0 := @parameter0: java.util.function.Supplier;
+
+        $r1 = <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor asyncPool>;
+
+        $r2 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture asyncSupplyStage(java.util.concurrent.Executor,java.util.function.Supplier)>($r1, r0);
+
+        return $r2;
+    }
+
+    public static java.util.concurrent.CompletableFuture supplyAsync(java.util.function.Supplier, java.util.concurrent.Executor)
+    {
+        java.util.concurrent.Executor r0, $r1;
+        java.util.concurrent.CompletableFuture $r3;
+        java.util.function.Supplier r2;
+
+        r2 := @parameter0: java.util.function.Supplier;
+
+        r0 := @parameter1: java.util.concurrent.Executor;
+
+        $r1 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor screenExecutor(java.util.concurrent.Executor)>(r0);
+
+        $r3 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture asyncSupplyStage(java.util.concurrent.Executor,java.util.function.Supplier)>($r1, r2);
+
+        return $r3;
+    }
+
+    public static java.util.concurrent.CompletableFuture runAsync(java.lang.Runnable)
+    {
+        java.util.concurrent.CompletableFuture $r2;
+        java.lang.Runnable r0;
+        java.util.concurrent.Executor $r1;
+
+        r0 := @parameter0: java.lang.Runnable;
+
+        $r1 = <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor asyncPool>;
+
+        $r2 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture asyncRunStage(java.util.concurrent.Executor,java.lang.Runnable)>($r1, r0);
+
+        return $r2;
+    }
+
+    public static java.util.concurrent.CompletableFuture runAsync(java.lang.Runnable, java.util.concurrent.Executor)
+    {
+        java.util.concurrent.Executor r0, $r1;
+        java.util.concurrent.CompletableFuture $r3;
+        java.lang.Runnable r2;
+
+        r2 := @parameter0: java.lang.Runnable;
+
+        r0 := @parameter1: java.util.concurrent.Executor;
+
+        $r1 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor screenExecutor(java.util.concurrent.Executor)>(r0);
+
+        $r3 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture asyncRunStage(java.util.concurrent.Executor,java.lang.Runnable)>($r1, r2);
+
+        return $r3;
+    }
+
+    public static java.util.concurrent.CompletableFuture completedFuture(java.lang.Object)
+    {
+        java.util.concurrent.CompletableFuture $r0;
+        java.lang.Object r1, $r2;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r0 = new java.util.concurrent.CompletableFuture;
+
+        if r1 != null goto label1;
+
+        $r2 = <java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture$AltResult NIL>;
+
+        goto label2;
+
+     label1:
+        $r2 = r1;
+
+     label2:
+        specialinvoke $r0.<java.util.concurrent.CompletableFuture: void <init>(java.lang.Object)>($r2);
+
+        return $r0;
+    }
+
+    public boolean isDone()
+    {
+        java.util.concurrent.CompletableFuture r0;
+        java.lang.Object $r1;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        $r1 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r1 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public java.lang.Object get() throws java.lang.InterruptedException, java.util.concurrent.ExecutionException
+    {
+        java.util.concurrent.CompletableFuture r0;
+        java.lang.Object $r1, $r2, $r3;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        $r1 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r1 != null goto label1;
+
+        $r3 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.lang.Object waitingGet(boolean)>(1);
+
+        goto label2;
+
+     label1:
+        $r3 = $r1;
+
+     label2:
+        $r2 = staticinvoke <java.util.concurrent.CompletableFuture: java.lang.Object reportGet(java.lang.Object)>($r3);
+
+        return $r2;
+    }
+
+    public java.lang.Object get(long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException, java.util.concurrent.ExecutionException, java.util.concurrent.TimeoutException
+    {
+        java.util.concurrent.TimeUnit r0;
+        long l0, $l1;
+        java.util.concurrent.CompletableFuture r1;
+        java.lang.Object $r2, $r3, $r4;
+
+        r1 := @this: java.util.concurrent.CompletableFuture;
+
+        l0 := @parameter0: long;
+
+        r0 := @parameter1: java.util.concurrent.TimeUnit;
+
+        $l1 = virtualinvoke r0.<java.util.concurrent.TimeUnit: long toNanos(long)>(l0);
+
+        $r2 = r1.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r2 != null goto label1;
+
+        $r4 = specialinvoke r1.<java.util.concurrent.CompletableFuture: java.lang.Object timedGet(long)>($l1);
+
+        goto label2;
+
+     label1:
+        $r4 = $r2;
+
+     label2:
+        $r3 = staticinvoke <java.util.concurrent.CompletableFuture: java.lang.Object reportGet(java.lang.Object)>($r4);
+
+        return $r3;
+    }
+
+    public java.lang.Object join()
+    {
+        java.util.concurrent.CompletableFuture r0;
+        java.lang.Object $r1, $r2, $r3;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        $r1 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r1 != null goto label1;
+
+        $r3 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.lang.Object waitingGet(boolean)>(0);
+
+        goto label2;
+
+     label1:
+        $r3 = $r1;
+
+     label2:
+        $r2 = staticinvoke <java.util.concurrent.CompletableFuture: java.lang.Object reportJoin(java.lang.Object)>($r3);
+
+        return $r2;
+    }
+
+    public java.lang.Object getNow(java.lang.Object)
+    {
+        java.util.concurrent.CompletableFuture r0;
+        java.lang.Object $r1, r2, $r3;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r2 := @parameter0: java.lang.Object;
+
+        $r1 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r1 != null goto label1;
+
+        $r3 = r2;
+
+        goto label2;
+
+     label1:
+        $r3 = staticinvoke <java.util.concurrent.CompletableFuture: java.lang.Object reportJoin(java.lang.Object)>($r1);
+
+     label2:
+        return $r3;
+    }
+
+    public boolean complete(java.lang.Object)
+    {
+        java.util.concurrent.CompletableFuture r0;
+        java.lang.Object r1;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $z0 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: boolean completeValue(java.lang.Object)>(r1);
+
+        virtualinvoke r0.<java.util.concurrent.CompletableFuture: void postComplete()>();
+
+        return $z0;
+    }
+
+    public boolean completeExceptionally(java.lang.Throwable)
+    {
+        java.lang.Throwable r0;
+        java.util.concurrent.CompletableFuture r1;
+        java.lang.NullPointerException $r3;
+        java.util.concurrent.CompletableFuture$AltResult $r2;
+        boolean $z0;
+
+        r1 := @this: java.util.concurrent.CompletableFuture;
+
+        r0 := @parameter0: java.lang.Throwable;
+
+        if r0 != null goto label1;
+
+        $r3 = new java.lang.NullPointerException;
+
+        specialinvoke $r3.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $r2 = new java.util.concurrent.CompletableFuture$AltResult;
+
+        specialinvoke $r2.<java.util.concurrent.CompletableFuture$AltResult: void <init>(java.lang.Throwable)>(r0);
+
+        $z0 = virtualinvoke r1.<java.util.concurrent.CompletableFuture: boolean internalComplete(java.lang.Object)>($r2);
+
+        virtualinvoke r1.<java.util.concurrent.CompletableFuture: void postComplete()>();
+
+        return $z0;
+    }
+
+    public java.util.concurrent.CompletableFuture thenApply(java.util.function.Function)
+    {
+        java.util.concurrent.CompletableFuture r0, $r2;
+        java.util.function.Function r1;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.Function;
+
+        $r2 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture uniApplyStage(java.util.concurrent.Executor,java.util.function.Function)>(null, r1);
+
+        return $r2;
+    }
+
+    public java.util.concurrent.CompletableFuture thenApplyAsync(java.util.function.Function)
+    {
+        java.util.concurrent.Executor $r2;
+        java.util.concurrent.CompletableFuture r0, $r3;
+        java.util.function.Function r1;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.Function;
+
+        $r2 = <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor asyncPool>;
+
+        $r3 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture uniApplyStage(java.util.concurrent.Executor,java.util.function.Function)>($r2, r1);
+
+        return $r3;
+    }
+
+    public java.util.concurrent.CompletableFuture thenApplyAsync(java.util.function.Function, java.util.concurrent.Executor)
+    {
+        java.util.concurrent.Executor r1, $r2;
+        java.util.concurrent.CompletableFuture r0, $r4;
+        java.util.function.Function r3;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r3 := @parameter0: java.util.function.Function;
+
+        r1 := @parameter1: java.util.concurrent.Executor;
+
+        $r2 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor screenExecutor(java.util.concurrent.Executor)>(r1);
+
+        $r4 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture uniApplyStage(java.util.concurrent.Executor,java.util.function.Function)>($r2, r3);
+
+        return $r4;
+    }
+
+    public java.util.concurrent.CompletableFuture thenAccept(java.util.function.Consumer)
+    {
+        java.util.function.Consumer r1;
+        java.util.concurrent.CompletableFuture r0, $r2;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.Consumer;
+
+        $r2 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture uniAcceptStage(java.util.concurrent.Executor,java.util.function.Consumer)>(null, r1);
+
+        return $r2;
+    }
+
+    public java.util.concurrent.CompletableFuture thenAcceptAsync(java.util.function.Consumer)
+    {
+        java.util.function.Consumer r1;
+        java.util.concurrent.Executor $r2;
+        java.util.concurrent.CompletableFuture r0, $r3;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.Consumer;
+
+        $r2 = <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor asyncPool>;
+
+        $r3 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture uniAcceptStage(java.util.concurrent.Executor,java.util.function.Consumer)>($r2, r1);
+
+        return $r3;
+    }
+
+    public java.util.concurrent.CompletableFuture thenAcceptAsync(java.util.function.Consumer, java.util.concurrent.Executor)
+    {
+        java.util.function.Consumer r3;
+        java.util.concurrent.Executor r1, $r2;
+        java.util.concurrent.CompletableFuture r0, $r4;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r3 := @parameter0: java.util.function.Consumer;
+
+        r1 := @parameter1: java.util.concurrent.Executor;
+
+        $r2 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor screenExecutor(java.util.concurrent.Executor)>(r1);
+
+        $r4 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture uniAcceptStage(java.util.concurrent.Executor,java.util.function.Consumer)>($r2, r3);
+
+        return $r4;
+    }
+
+    public java.util.concurrent.CompletableFuture thenRun(java.lang.Runnable)
+    {
+        java.util.concurrent.CompletableFuture r0, $r2;
+        java.lang.Runnable r1;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.lang.Runnable;
+
+        $r2 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture uniRunStage(java.util.concurrent.Executor,java.lang.Runnable)>(null, r1);
+
+        return $r2;
+    }
+
+    public java.util.concurrent.CompletableFuture thenRunAsync(java.lang.Runnable)
+    {
+        java.util.concurrent.Executor $r2;
+        java.util.concurrent.CompletableFuture r0, $r3;
+        java.lang.Runnable r1;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.lang.Runnable;
+
+        $r2 = <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor asyncPool>;
+
+        $r3 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture uniRunStage(java.util.concurrent.Executor,java.lang.Runnable)>($r2, r1);
+
+        return $r3;
+    }
+
+    public java.util.concurrent.CompletableFuture thenRunAsync(java.lang.Runnable, java.util.concurrent.Executor)
+    {
+        java.util.concurrent.Executor r1, $r2;
+        java.util.concurrent.CompletableFuture r0, $r4;
+        java.lang.Runnable r3;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r3 := @parameter0: java.lang.Runnable;
+
+        r1 := @parameter1: java.util.concurrent.Executor;
+
+        $r2 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor screenExecutor(java.util.concurrent.Executor)>(r1);
+
+        $r4 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture uniRunStage(java.util.concurrent.Executor,java.lang.Runnable)>($r2, r3);
+
+        return $r4;
+    }
+
+    public java.util.concurrent.CompletableFuture thenCombine(java.util.concurrent.CompletionStage, java.util.function.BiFunction)
+    {
+        java.util.concurrent.CompletionStage r1;
+        java.util.function.BiFunction r2;
+        java.util.concurrent.CompletableFuture r0, $r3;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.util.function.BiFunction;
+
+        $r3 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture biApplyStage(java.util.concurrent.Executor,java.util.concurrent.CompletionStage,java.util.function.BiFunction)>(null, r1, r2);
+
+        return $r3;
+    }
+
+    public java.util.concurrent.CompletableFuture thenCombineAsync(java.util.concurrent.CompletionStage, java.util.function.BiFunction)
+    {
+        java.util.concurrent.CompletionStage r1;
+        java.util.concurrent.Executor $r3;
+        java.util.function.BiFunction r2;
+        java.util.concurrent.CompletableFuture r0, $r4;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.util.function.BiFunction;
+
+        $r3 = <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor asyncPool>;
+
+        $r4 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture biApplyStage(java.util.concurrent.Executor,java.util.concurrent.CompletionStage,java.util.function.BiFunction)>($r3, r1, r2);
+
+        return $r4;
+    }
+
+    public java.util.concurrent.CompletableFuture thenCombineAsync(java.util.concurrent.CompletionStage, java.util.function.BiFunction, java.util.concurrent.Executor)
+    {
+        java.util.concurrent.CompletionStage r3;
+        java.util.concurrent.Executor r1, $r2;
+        java.util.function.BiFunction r4;
+        java.util.concurrent.CompletableFuture r0, $r5;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r3 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r4 := @parameter1: java.util.function.BiFunction;
+
+        r1 := @parameter2: java.util.concurrent.Executor;
+
+        $r2 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor screenExecutor(java.util.concurrent.Executor)>(r1);
+
+        $r5 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture biApplyStage(java.util.concurrent.Executor,java.util.concurrent.CompletionStage,java.util.function.BiFunction)>($r2, r3, r4);
+
+        return $r5;
+    }
+
+    public java.util.concurrent.CompletableFuture thenAcceptBoth(java.util.concurrent.CompletionStage, java.util.function.BiConsumer)
+    {
+        java.util.concurrent.CompletionStage r1;
+        java.util.function.BiConsumer r2;
+        java.util.concurrent.CompletableFuture r0, $r3;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.util.function.BiConsumer;
+
+        $r3 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture biAcceptStage(java.util.concurrent.Executor,java.util.concurrent.CompletionStage,java.util.function.BiConsumer)>(null, r1, r2);
+
+        return $r3;
+    }
+
+    public java.util.concurrent.CompletableFuture thenAcceptBothAsync(java.util.concurrent.CompletionStage, java.util.function.BiConsumer)
+    {
+        java.util.concurrent.CompletionStage r1;
+        java.util.concurrent.Executor $r3;
+        java.util.function.BiConsumer r2;
+        java.util.concurrent.CompletableFuture r0, $r4;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.util.function.BiConsumer;
+
+        $r3 = <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor asyncPool>;
+
+        $r4 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture biAcceptStage(java.util.concurrent.Executor,java.util.concurrent.CompletionStage,java.util.function.BiConsumer)>($r3, r1, r2);
+
+        return $r4;
+    }
+
+    public java.util.concurrent.CompletableFuture thenAcceptBothAsync(java.util.concurrent.CompletionStage, java.util.function.BiConsumer, java.util.concurrent.Executor)
+    {
+        java.util.concurrent.CompletionStage r3;
+        java.util.concurrent.Executor r1, $r2;
+        java.util.function.BiConsumer r4;
+        java.util.concurrent.CompletableFuture r0, $r5;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r3 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r4 := @parameter1: java.util.function.BiConsumer;
+
+        r1 := @parameter2: java.util.concurrent.Executor;
+
+        $r2 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor screenExecutor(java.util.concurrent.Executor)>(r1);
+
+        $r5 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture biAcceptStage(java.util.concurrent.Executor,java.util.concurrent.CompletionStage,java.util.function.BiConsumer)>($r2, r3, r4);
+
+        return $r5;
+    }
+
+    public java.util.concurrent.CompletableFuture runAfterBoth(java.util.concurrent.CompletionStage, java.lang.Runnable)
+    {
+        java.util.concurrent.CompletionStage r1;
+        java.util.concurrent.CompletableFuture r0, $r3;
+        java.lang.Runnable r2;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.lang.Runnable;
+
+        $r3 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture biRunStage(java.util.concurrent.Executor,java.util.concurrent.CompletionStage,java.lang.Runnable)>(null, r1, r2);
+
+        return $r3;
+    }
+
+    public java.util.concurrent.CompletableFuture runAfterBothAsync(java.util.concurrent.CompletionStage, java.lang.Runnable)
+    {
+        java.util.concurrent.CompletionStage r1;
+        java.util.concurrent.Executor $r3;
+        java.util.concurrent.CompletableFuture r0, $r4;
+        java.lang.Runnable r2;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.lang.Runnable;
+
+        $r3 = <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor asyncPool>;
+
+        $r4 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture biRunStage(java.util.concurrent.Executor,java.util.concurrent.CompletionStage,java.lang.Runnable)>($r3, r1, r2);
+
+        return $r4;
+    }
+
+    public java.util.concurrent.CompletableFuture runAfterBothAsync(java.util.concurrent.CompletionStage, java.lang.Runnable, java.util.concurrent.Executor)
+    {
+        java.util.concurrent.CompletionStage r3;
+        java.util.concurrent.Executor r1, $r2;
+        java.util.concurrent.CompletableFuture r0, $r5;
+        java.lang.Runnable r4;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r3 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r4 := @parameter1: java.lang.Runnable;
+
+        r1 := @parameter2: java.util.concurrent.Executor;
+
+        $r2 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor screenExecutor(java.util.concurrent.Executor)>(r1);
+
+        $r5 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture biRunStage(java.util.concurrent.Executor,java.util.concurrent.CompletionStage,java.lang.Runnable)>($r2, r3, r4);
+
+        return $r5;
+    }
+
+    public java.util.concurrent.CompletableFuture applyToEither(java.util.concurrent.CompletionStage, java.util.function.Function)
+    {
+        java.util.concurrent.CompletionStage r1;
+        java.util.concurrent.CompletableFuture r0, $r3;
+        java.util.function.Function r2;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.util.function.Function;
+
+        $r3 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture orApplyStage(java.util.concurrent.Executor,java.util.concurrent.CompletionStage,java.util.function.Function)>(null, r1, r2);
+
+        return $r3;
+    }
+
+    public java.util.concurrent.CompletableFuture applyToEitherAsync(java.util.concurrent.CompletionStage, java.util.function.Function)
+    {
+        java.util.concurrent.CompletionStage r1;
+        java.util.concurrent.Executor $r3;
+        java.util.concurrent.CompletableFuture r0, $r4;
+        java.util.function.Function r2;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.util.function.Function;
+
+        $r3 = <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor asyncPool>;
+
+        $r4 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture orApplyStage(java.util.concurrent.Executor,java.util.concurrent.CompletionStage,java.util.function.Function)>($r3, r1, r2);
+
+        return $r4;
+    }
+
+    public java.util.concurrent.CompletableFuture applyToEitherAsync(java.util.concurrent.CompletionStage, java.util.function.Function, java.util.concurrent.Executor)
+    {
+        java.util.concurrent.CompletionStage r3;
+        java.util.concurrent.Executor r1, $r2;
+        java.util.concurrent.CompletableFuture r0, $r5;
+        java.util.function.Function r4;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r3 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r4 := @parameter1: java.util.function.Function;
+
+        r1 := @parameter2: java.util.concurrent.Executor;
+
+        $r2 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor screenExecutor(java.util.concurrent.Executor)>(r1);
+
+        $r5 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture orApplyStage(java.util.concurrent.Executor,java.util.concurrent.CompletionStage,java.util.function.Function)>($r2, r3, r4);
+
+        return $r5;
+    }
+
+    public java.util.concurrent.CompletableFuture acceptEither(java.util.concurrent.CompletionStage, java.util.function.Consumer)
+    {
+        java.util.function.Consumer r2;
+        java.util.concurrent.CompletionStage r1;
+        java.util.concurrent.CompletableFuture r0, $r3;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.util.function.Consumer;
+
+        $r3 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture orAcceptStage(java.util.concurrent.Executor,java.util.concurrent.CompletionStage,java.util.function.Consumer)>(null, r1, r2);
+
+        return $r3;
+    }
+
+    public java.util.concurrent.CompletableFuture acceptEitherAsync(java.util.concurrent.CompletionStage, java.util.function.Consumer)
+    {
+        java.util.function.Consumer r2;
+        java.util.concurrent.CompletionStage r1;
+        java.util.concurrent.Executor $r3;
+        java.util.concurrent.CompletableFuture r0, $r4;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.util.function.Consumer;
+
+        $r3 = <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor asyncPool>;
+
+        $r4 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture orAcceptStage(java.util.concurrent.Executor,java.util.concurrent.CompletionStage,java.util.function.Consumer)>($r3, r1, r2);
+
+        return $r4;
+    }
+
+    public java.util.concurrent.CompletableFuture acceptEitherAsync(java.util.concurrent.CompletionStage, java.util.function.Consumer, java.util.concurrent.Executor)
+    {
+        java.util.function.Consumer r4;
+        java.util.concurrent.CompletionStage r3;
+        java.util.concurrent.Executor r1, $r2;
+        java.util.concurrent.CompletableFuture r0, $r5;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r3 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r4 := @parameter1: java.util.function.Consumer;
+
+        r1 := @parameter2: java.util.concurrent.Executor;
+
+        $r2 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor screenExecutor(java.util.concurrent.Executor)>(r1);
+
+        $r5 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture orAcceptStage(java.util.concurrent.Executor,java.util.concurrent.CompletionStage,java.util.function.Consumer)>($r2, r3, r4);
+
+        return $r5;
+    }
+
+    public java.util.concurrent.CompletableFuture runAfterEither(java.util.concurrent.CompletionStage, java.lang.Runnable)
+    {
+        java.util.concurrent.CompletionStage r1;
+        java.util.concurrent.CompletableFuture r0, $r3;
+        java.lang.Runnable r2;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.lang.Runnable;
+
+        $r3 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture orRunStage(java.util.concurrent.Executor,java.util.concurrent.CompletionStage,java.lang.Runnable)>(null, r1, r2);
+
+        return $r3;
+    }
+
+    public java.util.concurrent.CompletableFuture runAfterEitherAsync(java.util.concurrent.CompletionStage, java.lang.Runnable)
+    {
+        java.util.concurrent.CompletionStage r1;
+        java.util.concurrent.Executor $r3;
+        java.util.concurrent.CompletableFuture r0, $r4;
+        java.lang.Runnable r2;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.lang.Runnable;
+
+        $r3 = <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor asyncPool>;
+
+        $r4 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture orRunStage(java.util.concurrent.Executor,java.util.concurrent.CompletionStage,java.lang.Runnable)>($r3, r1, r2);
+
+        return $r4;
+    }
+
+    public java.util.concurrent.CompletableFuture runAfterEitherAsync(java.util.concurrent.CompletionStage, java.lang.Runnable, java.util.concurrent.Executor)
+    {
+        java.util.concurrent.CompletionStage r3;
+        java.util.concurrent.Executor r1, $r2;
+        java.util.concurrent.CompletableFuture r0, $r5;
+        java.lang.Runnable r4;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r3 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r4 := @parameter1: java.lang.Runnable;
+
+        r1 := @parameter2: java.util.concurrent.Executor;
+
+        $r2 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor screenExecutor(java.util.concurrent.Executor)>(r1);
+
+        $r5 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture orRunStage(java.util.concurrent.Executor,java.util.concurrent.CompletionStage,java.lang.Runnable)>($r2, r3, r4);
+
+        return $r5;
+    }
+
+    public java.util.concurrent.CompletableFuture thenCompose(java.util.function.Function)
+    {
+        java.util.concurrent.CompletableFuture r0, $r2;
+        java.util.function.Function r1;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.Function;
+
+        $r2 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture uniComposeStage(java.util.concurrent.Executor,java.util.function.Function)>(null, r1);
+
+        return $r2;
+    }
+
+    public java.util.concurrent.CompletableFuture thenComposeAsync(java.util.function.Function)
+    {
+        java.util.concurrent.Executor $r2;
+        java.util.concurrent.CompletableFuture r0, $r3;
+        java.util.function.Function r1;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.Function;
+
+        $r2 = <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor asyncPool>;
+
+        $r3 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture uniComposeStage(java.util.concurrent.Executor,java.util.function.Function)>($r2, r1);
+
+        return $r3;
+    }
+
+    public java.util.concurrent.CompletableFuture thenComposeAsync(java.util.function.Function, java.util.concurrent.Executor)
+    {
+        java.util.concurrent.Executor r1, $r2;
+        java.util.concurrent.CompletableFuture r0, $r4;
+        java.util.function.Function r3;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r3 := @parameter0: java.util.function.Function;
+
+        r1 := @parameter1: java.util.concurrent.Executor;
+
+        $r2 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor screenExecutor(java.util.concurrent.Executor)>(r1);
+
+        $r4 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture uniComposeStage(java.util.concurrent.Executor,java.util.function.Function)>($r2, r3);
+
+        return $r4;
+    }
+
+    public java.util.concurrent.CompletableFuture whenComplete(java.util.function.BiConsumer)
+    {
+        java.util.function.BiConsumer r1;
+        java.util.concurrent.CompletableFuture r0, $r2;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.BiConsumer;
+
+        $r2 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture uniWhenCompleteStage(java.util.concurrent.Executor,java.util.function.BiConsumer)>(null, r1);
+
+        return $r2;
+    }
+
+    public java.util.concurrent.CompletableFuture whenCompleteAsync(java.util.function.BiConsumer)
+    {
+        java.util.concurrent.Executor $r2;
+        java.util.function.BiConsumer r1;
+        java.util.concurrent.CompletableFuture r0, $r3;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.BiConsumer;
+
+        $r2 = <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor asyncPool>;
+
+        $r3 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture uniWhenCompleteStage(java.util.concurrent.Executor,java.util.function.BiConsumer)>($r2, r1);
+
+        return $r3;
+    }
+
+    public java.util.concurrent.CompletableFuture whenCompleteAsync(java.util.function.BiConsumer, java.util.concurrent.Executor)
+    {
+        java.util.concurrent.Executor r1, $r2;
+        java.util.function.BiConsumer r3;
+        java.util.concurrent.CompletableFuture r0, $r4;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r3 := @parameter0: java.util.function.BiConsumer;
+
+        r1 := @parameter1: java.util.concurrent.Executor;
+
+        $r2 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor screenExecutor(java.util.concurrent.Executor)>(r1);
+
+        $r4 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture uniWhenCompleteStage(java.util.concurrent.Executor,java.util.function.BiConsumer)>($r2, r3);
+
+        return $r4;
+    }
+
+    public java.util.concurrent.CompletableFuture handle(java.util.function.BiFunction)
+    {
+        java.util.concurrent.CompletableFuture r0, $r2;
+        java.util.function.BiFunction r1;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.BiFunction;
+
+        $r2 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture uniHandleStage(java.util.concurrent.Executor,java.util.function.BiFunction)>(null, r1);
+
+        return $r2;
+    }
+
+    public java.util.concurrent.CompletableFuture handleAsync(java.util.function.BiFunction)
+    {
+        java.util.concurrent.Executor $r2;
+        java.util.function.BiFunction r1;
+        java.util.concurrent.CompletableFuture r0, $r3;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.BiFunction;
+
+        $r2 = <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor asyncPool>;
+
+        $r3 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture uniHandleStage(java.util.concurrent.Executor,java.util.function.BiFunction)>($r2, r1);
+
+        return $r3;
+    }
+
+    public java.util.concurrent.CompletableFuture handleAsync(java.util.function.BiFunction, java.util.concurrent.Executor)
+    {
+        java.util.concurrent.Executor r1, $r2;
+        java.util.function.BiFunction r3;
+        java.util.concurrent.CompletableFuture r0, $r4;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r3 := @parameter0: java.util.function.BiFunction;
+
+        r1 := @parameter1: java.util.concurrent.Executor;
+
+        $r2 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor screenExecutor(java.util.concurrent.Executor)>(r1);
+
+        $r4 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture uniHandleStage(java.util.concurrent.Executor,java.util.function.BiFunction)>($r2, r3);
+
+        return $r4;
+    }
+
+    public java.util.concurrent.CompletableFuture toCompletableFuture()
+    {
+        java.util.concurrent.CompletableFuture r0;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        return r0;
+    }
+
+    public java.util.concurrent.CompletableFuture exceptionally(java.util.function.Function)
+    {
+        java.util.concurrent.CompletableFuture r0, $r2;
+        java.util.function.Function r1;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.Function;
+
+        $r2 = specialinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture uniExceptionallyStage(java.util.function.Function)>(r1);
+
+        return $r2;
+    }
+
+    public static transient java.util.concurrent.CompletableFuture allOf(java.util.concurrent.CompletableFuture[])
+    {
+        java.util.concurrent.CompletableFuture[] r0;
+        int $i0, $i1;
+        java.util.concurrent.CompletableFuture $r1;
+
+        r0 := @parameter0: java.util.concurrent.CompletableFuture[];
+
+        $i0 = lengthof r0;
+
+        $i1 = $i0 - 1;
+
+        $r1 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture andTree(java.util.concurrent.CompletableFuture[],int,int)>(r0, 0, $i1);
+
+        return $r1;
+    }
+
+    public static transient java.util.concurrent.CompletableFuture anyOf(java.util.concurrent.CompletableFuture[])
+    {
+        java.util.concurrent.CompletableFuture[] r0;
+        int $i0, $i1;
+        java.util.concurrent.CompletableFuture $r1;
+
+        r0 := @parameter0: java.util.concurrent.CompletableFuture[];
+
+        $i0 = lengthof r0;
+
+        $i1 = $i0 - 1;
+
+        $r1 = staticinvoke <java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture orTree(java.util.concurrent.CompletableFuture[],int,int)>(r0, 0, $i1);
+
+        return $r1;
+    }
+
+    public boolean cancel(boolean)
+    {
+        java.util.concurrent.CancellationException $r3;
+        java.util.concurrent.CompletableFuture r0;
+        java.lang.Object $r1;
+        boolean $z0, $z1, z2, $z3, $z4;
+        java.util.concurrent.CompletableFuture$AltResult $r2;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        z2 := @parameter0: boolean;
+
+        $r1 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.util.concurrent.CompletableFuture$AltResult;
+
+        $r3 = new java.util.concurrent.CancellationException;
+
+        specialinvoke $r3.<java.util.concurrent.CancellationException: void <init>()>();
+
+        specialinvoke $r2.<java.util.concurrent.CompletableFuture$AltResult: void <init>(java.lang.Throwable)>($r3);
+
+        $z1 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: boolean internalComplete(java.lang.Object)>($r2);
+
+        if $z1 == 0 goto label1;
+
+        $z3 = 1;
+
+        goto label2;
+
+     label1:
+        $z3 = 0;
+
+     label2:
+        virtualinvoke r0.<java.util.concurrent.CompletableFuture: void postComplete()>();
+
+        if $z3 != 0 goto label3;
+
+        $z0 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: boolean isCancelled()>();
+
+        if $z0 == 0 goto label4;
+
+     label3:
+        $z4 = 1;
+
+        goto label5;
+
+     label4:
+        $z4 = 0;
+
+     label5:
+        return $z4;
+    }
+
+    public boolean isCancelled()
+    {
+        java.lang.Throwable $r3;
+        java.util.concurrent.CompletableFuture r0;
+        java.lang.Object $r1;
+        boolean $z0, $z1, $z2;
+        java.util.concurrent.CompletableFuture$AltResult $r2;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        $r1 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        $z0 = $r1 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = (java.util.concurrent.CompletableFuture$AltResult) $r1;
+
+        $r3 = $r2.<java.util.concurrent.CompletableFuture$AltResult: java.lang.Throwable ex>;
+
+        $z1 = $r3 instanceof java.util.concurrent.CancellationException;
+
+        if $z1 == 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        return $z2;
+    }
+
+    public boolean isCompletedExceptionally()
+    {
+        java.util.concurrent.CompletableFuture r0;
+        java.lang.Object $r1;
+        boolean $z0, $z1;
+        java.util.concurrent.CompletableFuture$AltResult $r2;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        $r1 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        $z0 = $r1 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = <java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture$AltResult NIL>;
+
+        if $r1 == $r2 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public void obtrudeValue(java.lang.Object)
+    {
+        java.util.concurrent.CompletableFuture r0;
+        java.lang.Object r1, $r2;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.lang.Object;
+
+        if r1 != null goto label1;
+
+        $r2 = <java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture$AltResult NIL>;
+
+        goto label2;
+
+     label1:
+        $r2 = r1;
+
+     label2:
+        r0.<java.util.concurrent.CompletableFuture: java.lang.Object result> = $r2;
+
+        virtualinvoke r0.<java.util.concurrent.CompletableFuture: void postComplete()>();
+
+        return;
+    }
+
+    public void obtrudeException(java.lang.Throwable)
+    {
+        java.lang.Throwable r0;
+        java.util.concurrent.CompletableFuture r1;
+        java.lang.NullPointerException $r3;
+        java.util.concurrent.CompletableFuture$AltResult $r2;
+
+        r1 := @this: java.util.concurrent.CompletableFuture;
+
+        r0 := @parameter0: java.lang.Throwable;
+
+        if r0 != null goto label1;
+
+        $r3 = new java.lang.NullPointerException;
+
+        specialinvoke $r3.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $r2 = new java.util.concurrent.CompletableFuture$AltResult;
+
+        specialinvoke $r2.<java.util.concurrent.CompletableFuture$AltResult: void <init>(java.lang.Throwable)>(r0);
+
+        r1.<java.util.concurrent.CompletableFuture: java.lang.Object result> = $r2;
+
+        virtualinvoke r1.<java.util.concurrent.CompletableFuture: void postComplete()>();
+
+        return;
+    }
+
+    public int getNumberOfDependents()
+    {
+        int i0;
+        java.util.concurrent.CompletableFuture r0;
+        java.util.concurrent.CompletableFuture$Completion r1;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        i0 = 0;
+
+        r1 = r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture$Completion stack>;
+
+     label1:
+        if r1 == null goto label2;
+
+        i0 = i0 + 1;
+
+        r1 = r1.<java.util.concurrent.CompletableFuture$Completion: java.util.concurrent.CompletableFuture$Completion next>;
+
+        goto label1;
+
+     label2:
+        return i0;
+    }
+
+    public java.lang.String toString()
+    {
+        java.lang.Throwable $r5;
+        java.util.concurrent.CompletableFuture r0;
+        int $i0;
+        java.lang.String $r3, $r11, $r13;
+        boolean $z0;
+        java.lang.Object r1;
+        java.lang.StringBuilder $r2, $r6, $r7, $r8, $r9, $r10, $r12;
+        java.util.concurrent.CompletableFuture$AltResult $r4;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 = r0.<java.util.concurrent.CompletableFuture: java.lang.Object result>;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = specialinvoke r0.<java.lang.Object: java.lang.String toString()>();
+
+        $r10 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        if r1 != null goto label2;
+
+        $i0 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: int getNumberOfDependents()>();
+
+        if $i0 != 0 goto label1;
+
+        $r11 = "[Not completed]";
+
+        goto label4;
+
+     label1:
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[Not completed, ");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" dependents]");
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label4;
+
+     label2:
+        $z0 = r1 instanceof java.util.concurrent.CompletableFuture$AltResult;
+
+        if $z0 == 0 goto label3;
+
+        $r4 = (java.util.concurrent.CompletableFuture$AltResult) r1;
+
+        $r5 = $r4.<java.util.concurrent.CompletableFuture$AltResult: java.lang.Throwable ex>;
+
+        if $r5 == null goto label3;
+
+        $r11 = "[Completed exceptionally]";
+
+        goto label4;
+
+     label3:
+        $r11 = "[Completed normally]";
+
+     label4:
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r13;
+    }
+
+    public volatile java.util.concurrent.CompletionStage handleAsync(java.util.function.BiFunction, java.util.concurrent.Executor)
+    {
+        java.util.concurrent.Executor r2;
+        java.util.function.BiFunction r1;
+        java.util.concurrent.CompletableFuture r0, $r3;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.BiFunction;
+
+        r2 := @parameter1: java.util.concurrent.Executor;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture handleAsync(java.util.function.BiFunction,java.util.concurrent.Executor)>(r1, r2);
+
+        return $r3;
+    }
+
+    public volatile java.util.concurrent.CompletionStage handleAsync(java.util.function.BiFunction)
+    {
+        java.util.concurrent.CompletableFuture r0, $r2;
+        java.util.function.BiFunction r1;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.BiFunction;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture handleAsync(java.util.function.BiFunction)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.util.concurrent.CompletionStage handle(java.util.function.BiFunction)
+    {
+        java.util.concurrent.CompletableFuture r0, $r2;
+        java.util.function.BiFunction r1;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.BiFunction;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture handle(java.util.function.BiFunction)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.util.concurrent.CompletionStage whenCompleteAsync(java.util.function.BiConsumer, java.util.concurrent.Executor)
+    {
+        java.util.concurrent.Executor r2;
+        java.util.function.BiConsumer r1;
+        java.util.concurrent.CompletableFuture r0, $r3;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.BiConsumer;
+
+        r2 := @parameter1: java.util.concurrent.Executor;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture whenCompleteAsync(java.util.function.BiConsumer,java.util.concurrent.Executor)>(r1, r2);
+
+        return $r3;
+    }
+
+    public volatile java.util.concurrent.CompletionStage whenCompleteAsync(java.util.function.BiConsumer)
+    {
+        java.util.function.BiConsumer r1;
+        java.util.concurrent.CompletableFuture r0, $r2;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.BiConsumer;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture whenCompleteAsync(java.util.function.BiConsumer)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.util.concurrent.CompletionStage whenComplete(java.util.function.BiConsumer)
+    {
+        java.util.function.BiConsumer r1;
+        java.util.concurrent.CompletableFuture r0, $r2;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.BiConsumer;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture whenComplete(java.util.function.BiConsumer)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.util.concurrent.CompletionStage exceptionally(java.util.function.Function)
+    {
+        java.util.concurrent.CompletableFuture r0, $r2;
+        java.util.function.Function r1;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.Function;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture exceptionally(java.util.function.Function)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.util.concurrent.CompletionStage thenComposeAsync(java.util.function.Function, java.util.concurrent.Executor)
+    {
+        java.util.concurrent.Executor r2;
+        java.util.concurrent.CompletableFuture r0, $r3;
+        java.util.function.Function r1;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.Function;
+
+        r2 := @parameter1: java.util.concurrent.Executor;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture thenComposeAsync(java.util.function.Function,java.util.concurrent.Executor)>(r1, r2);
+
+        return $r3;
+    }
+
+    public volatile java.util.concurrent.CompletionStage thenComposeAsync(java.util.function.Function)
+    {
+        java.util.concurrent.CompletableFuture r0, $r2;
+        java.util.function.Function r1;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.Function;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture thenComposeAsync(java.util.function.Function)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.util.concurrent.CompletionStage thenCompose(java.util.function.Function)
+    {
+        java.util.concurrent.CompletableFuture r0, $r2;
+        java.util.function.Function r1;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.Function;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture thenCompose(java.util.function.Function)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.util.concurrent.CompletionStage runAfterEitherAsync(java.util.concurrent.CompletionStage, java.lang.Runnable, java.util.concurrent.Executor)
+    {
+        java.util.concurrent.CompletionStage r1;
+        java.util.concurrent.Executor r3;
+        java.util.concurrent.CompletableFuture r0, $r4;
+        java.lang.Runnable r2;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.lang.Runnable;
+
+        r3 := @parameter2: java.util.concurrent.Executor;
+
+        $r4 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture runAfterEitherAsync(java.util.concurrent.CompletionStage,java.lang.Runnable,java.util.concurrent.Executor)>(r1, r2, r3);
+
+        return $r4;
+    }
+
+    public volatile java.util.concurrent.CompletionStage runAfterEitherAsync(java.util.concurrent.CompletionStage, java.lang.Runnable)
+    {
+        java.util.concurrent.CompletionStage r1;
+        java.util.concurrent.CompletableFuture r0, $r3;
+        java.lang.Runnable r2;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.lang.Runnable;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture runAfterEitherAsync(java.util.concurrent.CompletionStage,java.lang.Runnable)>(r1, r2);
+
+        return $r3;
+    }
+
+    public volatile java.util.concurrent.CompletionStage runAfterEither(java.util.concurrent.CompletionStage, java.lang.Runnable)
+    {
+        java.util.concurrent.CompletionStage r1;
+        java.util.concurrent.CompletableFuture r0, $r3;
+        java.lang.Runnable r2;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.lang.Runnable;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture runAfterEither(java.util.concurrent.CompletionStage,java.lang.Runnable)>(r1, r2);
+
+        return $r3;
+    }
+
+    public volatile java.util.concurrent.CompletionStage acceptEitherAsync(java.util.concurrent.CompletionStage, java.util.function.Consumer, java.util.concurrent.Executor)
+    {
+        java.util.function.Consumer r2;
+        java.util.concurrent.CompletionStage r1;
+        java.util.concurrent.Executor r3;
+        java.util.concurrent.CompletableFuture r0, $r4;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.util.function.Consumer;
+
+        r3 := @parameter2: java.util.concurrent.Executor;
+
+        $r4 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture acceptEitherAsync(java.util.concurrent.CompletionStage,java.util.function.Consumer,java.util.concurrent.Executor)>(r1, r2, r3);
+
+        return $r4;
+    }
+
+    public volatile java.util.concurrent.CompletionStage acceptEitherAsync(java.util.concurrent.CompletionStage, java.util.function.Consumer)
+    {
+        java.util.function.Consumer r2;
+        java.util.concurrent.CompletionStage r1;
+        java.util.concurrent.CompletableFuture r0, $r3;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.util.function.Consumer;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture acceptEitherAsync(java.util.concurrent.CompletionStage,java.util.function.Consumer)>(r1, r2);
+
+        return $r3;
+    }
+
+    public volatile java.util.concurrent.CompletionStage acceptEither(java.util.concurrent.CompletionStage, java.util.function.Consumer)
+    {
+        java.util.function.Consumer r2;
+        java.util.concurrent.CompletionStage r1;
+        java.util.concurrent.CompletableFuture r0, $r3;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.util.function.Consumer;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture acceptEither(java.util.concurrent.CompletionStage,java.util.function.Consumer)>(r1, r2);
+
+        return $r3;
+    }
+
+    public volatile java.util.concurrent.CompletionStage applyToEitherAsync(java.util.concurrent.CompletionStage, java.util.function.Function, java.util.concurrent.Executor)
+    {
+        java.util.concurrent.CompletionStage r1;
+        java.util.concurrent.Executor r3;
+        java.util.concurrent.CompletableFuture r0, $r4;
+        java.util.function.Function r2;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.util.function.Function;
+
+        r3 := @parameter2: java.util.concurrent.Executor;
+
+        $r4 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture applyToEitherAsync(java.util.concurrent.CompletionStage,java.util.function.Function,java.util.concurrent.Executor)>(r1, r2, r3);
+
+        return $r4;
+    }
+
+    public volatile java.util.concurrent.CompletionStage applyToEitherAsync(java.util.concurrent.CompletionStage, java.util.function.Function)
+    {
+        java.util.concurrent.CompletionStage r1;
+        java.util.concurrent.CompletableFuture r0, $r3;
+        java.util.function.Function r2;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.util.function.Function;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture applyToEitherAsync(java.util.concurrent.CompletionStage,java.util.function.Function)>(r1, r2);
+
+        return $r3;
+    }
+
+    public volatile java.util.concurrent.CompletionStage applyToEither(java.util.concurrent.CompletionStage, java.util.function.Function)
+    {
+        java.util.concurrent.CompletionStage r1;
+        java.util.concurrent.CompletableFuture r0, $r3;
+        java.util.function.Function r2;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.util.function.Function;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture applyToEither(java.util.concurrent.CompletionStage,java.util.function.Function)>(r1, r2);
+
+        return $r3;
+    }
+
+    public volatile java.util.concurrent.CompletionStage runAfterBothAsync(java.util.concurrent.CompletionStage, java.lang.Runnable, java.util.concurrent.Executor)
+    {
+        java.util.concurrent.CompletionStage r1;
+        java.util.concurrent.Executor r3;
+        java.util.concurrent.CompletableFuture r0, $r4;
+        java.lang.Runnable r2;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.lang.Runnable;
+
+        r3 := @parameter2: java.util.concurrent.Executor;
+
+        $r4 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture runAfterBothAsync(java.util.concurrent.CompletionStage,java.lang.Runnable,java.util.concurrent.Executor)>(r1, r2, r3);
+
+        return $r4;
+    }
+
+    public volatile java.util.concurrent.CompletionStage runAfterBothAsync(java.util.concurrent.CompletionStage, java.lang.Runnable)
+    {
+        java.util.concurrent.CompletionStage r1;
+        java.util.concurrent.CompletableFuture r0, $r3;
+        java.lang.Runnable r2;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.lang.Runnable;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture runAfterBothAsync(java.util.concurrent.CompletionStage,java.lang.Runnable)>(r1, r2);
+
+        return $r3;
+    }
+
+    public volatile java.util.concurrent.CompletionStage runAfterBoth(java.util.concurrent.CompletionStage, java.lang.Runnable)
+    {
+        java.util.concurrent.CompletionStage r1;
+        java.util.concurrent.CompletableFuture r0, $r3;
+        java.lang.Runnable r2;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.lang.Runnable;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture runAfterBoth(java.util.concurrent.CompletionStage,java.lang.Runnable)>(r1, r2);
+
+        return $r3;
+    }
+
+    public volatile java.util.concurrent.CompletionStage thenAcceptBothAsync(java.util.concurrent.CompletionStage, java.util.function.BiConsumer, java.util.concurrent.Executor)
+    {
+        java.util.concurrent.CompletionStage r1;
+        java.util.concurrent.Executor r3;
+        java.util.function.BiConsumer r2;
+        java.util.concurrent.CompletableFuture r0, $r4;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.util.function.BiConsumer;
+
+        r3 := @parameter2: java.util.concurrent.Executor;
+
+        $r4 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture thenAcceptBothAsync(java.util.concurrent.CompletionStage,java.util.function.BiConsumer,java.util.concurrent.Executor)>(r1, r2, r3);
+
+        return $r4;
+    }
+
+    public volatile java.util.concurrent.CompletionStage thenAcceptBothAsync(java.util.concurrent.CompletionStage, java.util.function.BiConsumer)
+    {
+        java.util.concurrent.CompletionStage r1;
+        java.util.function.BiConsumer r2;
+        java.util.concurrent.CompletableFuture r0, $r3;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.util.function.BiConsumer;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture thenAcceptBothAsync(java.util.concurrent.CompletionStage,java.util.function.BiConsumer)>(r1, r2);
+
+        return $r3;
+    }
+
+    public volatile java.util.concurrent.CompletionStage thenAcceptBoth(java.util.concurrent.CompletionStage, java.util.function.BiConsumer)
+    {
+        java.util.concurrent.CompletionStage r1;
+        java.util.function.BiConsumer r2;
+        java.util.concurrent.CompletableFuture r0, $r3;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.util.function.BiConsumer;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture thenAcceptBoth(java.util.concurrent.CompletionStage,java.util.function.BiConsumer)>(r1, r2);
+
+        return $r3;
+    }
+
+    public volatile java.util.concurrent.CompletionStage thenCombineAsync(java.util.concurrent.CompletionStage, java.util.function.BiFunction, java.util.concurrent.Executor)
+    {
+        java.util.concurrent.CompletionStage r1;
+        java.util.concurrent.Executor r3;
+        java.util.function.BiFunction r2;
+        java.util.concurrent.CompletableFuture r0, $r4;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.util.function.BiFunction;
+
+        r3 := @parameter2: java.util.concurrent.Executor;
+
+        $r4 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture thenCombineAsync(java.util.concurrent.CompletionStage,java.util.function.BiFunction,java.util.concurrent.Executor)>(r1, r2, r3);
+
+        return $r4;
+    }
+
+    public volatile java.util.concurrent.CompletionStage thenCombineAsync(java.util.concurrent.CompletionStage, java.util.function.BiFunction)
+    {
+        java.util.concurrent.CompletionStage r1;
+        java.util.function.BiFunction r2;
+        java.util.concurrent.CompletableFuture r0, $r3;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.util.function.BiFunction;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture thenCombineAsync(java.util.concurrent.CompletionStage,java.util.function.BiFunction)>(r1, r2);
+
+        return $r3;
+    }
+
+    public volatile java.util.concurrent.CompletionStage thenCombine(java.util.concurrent.CompletionStage, java.util.function.BiFunction)
+    {
+        java.util.concurrent.CompletionStage r1;
+        java.util.function.BiFunction r2;
+        java.util.concurrent.CompletableFuture r0, $r3;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.concurrent.CompletionStage;
+
+        r2 := @parameter1: java.util.function.BiFunction;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture thenCombine(java.util.concurrent.CompletionStage,java.util.function.BiFunction)>(r1, r2);
+
+        return $r3;
+    }
+
+    public volatile java.util.concurrent.CompletionStage thenRunAsync(java.lang.Runnable, java.util.concurrent.Executor)
+    {
+        java.util.concurrent.Executor r2;
+        java.util.concurrent.CompletableFuture r0, $r3;
+        java.lang.Runnable r1;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.lang.Runnable;
+
+        r2 := @parameter1: java.util.concurrent.Executor;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture thenRunAsync(java.lang.Runnable,java.util.concurrent.Executor)>(r1, r2);
+
+        return $r3;
+    }
+
+    public volatile java.util.concurrent.CompletionStage thenRunAsync(java.lang.Runnable)
+    {
+        java.util.concurrent.CompletableFuture r0, $r2;
+        java.lang.Runnable r1;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.lang.Runnable;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture thenRunAsync(java.lang.Runnable)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.util.concurrent.CompletionStage thenRun(java.lang.Runnable)
+    {
+        java.util.concurrent.CompletableFuture r0, $r2;
+        java.lang.Runnable r1;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.lang.Runnable;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture thenRun(java.lang.Runnable)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.util.concurrent.CompletionStage thenAcceptAsync(java.util.function.Consumer, java.util.concurrent.Executor)
+    {
+        java.util.function.Consumer r1;
+        java.util.concurrent.Executor r2;
+        java.util.concurrent.CompletableFuture r0, $r3;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.Consumer;
+
+        r2 := @parameter1: java.util.concurrent.Executor;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture thenAcceptAsync(java.util.function.Consumer,java.util.concurrent.Executor)>(r1, r2);
+
+        return $r3;
+    }
+
+    public volatile java.util.concurrent.CompletionStage thenAcceptAsync(java.util.function.Consumer)
+    {
+        java.util.function.Consumer r1;
+        java.util.concurrent.CompletableFuture r0, $r2;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.Consumer;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture thenAcceptAsync(java.util.function.Consumer)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.util.concurrent.CompletionStage thenAccept(java.util.function.Consumer)
+    {
+        java.util.function.Consumer r1;
+        java.util.concurrent.CompletableFuture r0, $r2;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.Consumer;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture thenAccept(java.util.function.Consumer)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.util.concurrent.CompletionStage thenApplyAsync(java.util.function.Function, java.util.concurrent.Executor)
+    {
+        java.util.concurrent.Executor r2;
+        java.util.concurrent.CompletableFuture r0, $r3;
+        java.util.function.Function r1;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.Function;
+
+        r2 := @parameter1: java.util.concurrent.Executor;
+
+        $r3 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture thenApplyAsync(java.util.function.Function,java.util.concurrent.Executor)>(r1, r2);
+
+        return $r3;
+    }
+
+    public volatile java.util.concurrent.CompletionStage thenApplyAsync(java.util.function.Function)
+    {
+        java.util.concurrent.CompletableFuture r0, $r2;
+        java.util.function.Function r1;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.Function;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture thenApplyAsync(java.util.function.Function)>(r1);
+
+        return $r2;
+    }
+
+    public volatile java.util.concurrent.CompletionStage thenApply(java.util.function.Function)
+    {
+        java.util.concurrent.CompletableFuture r0, $r2;
+        java.util.function.Function r1;
+
+        r0 := @this: java.util.concurrent.CompletableFuture;
+
+        r1 := @parameter0: java.util.function.Function;
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture thenApply(java.util.function.Function)>(r1);
+
+        return $r2;
+    }
+
+    static void <clinit>()
+    {
+        sun.misc.Unsafe $r2;
+        java.lang.Error $r14;
+        long $l2, $l3, $l4;
+        short $s5;
+        java.util.concurrent.CompletableFuture$ThreadPerTaskExecutor $r13;
+        int $i0, $i1;
+        boolean $z0, $z1;
+        java.util.concurrent.Executor $r11;
+        java.lang.Runtime $r1;
+        java.lang.reflect.Field $r3, $r4, $r6;
+        java.lang.Exception $r9;
+        java.lang.Class $r5, $r7, $r8;
+        java.util.concurrent.CompletableFuture$AltResult $r12;
+
+        <java.util.concurrent.CompletableFuture: int NESTED> = -1;
+
+        <java.util.concurrent.CompletableFuture: int ASYNC> = 1;
+
+        <java.util.concurrent.CompletableFuture: int SYNC> = 0;
+
+        $r12 = new java.util.concurrent.CompletableFuture$AltResult;
+
+        specialinvoke $r12.<java.util.concurrent.CompletableFuture$AltResult: void <init>(java.lang.Throwable)>(null);
+
+        <java.util.concurrent.CompletableFuture: java.util.concurrent.CompletableFuture$AltResult NIL> = $r12;
+
+        $i0 = staticinvoke <java.util.concurrent.ForkJoinPool: int getCommonPoolParallelism()>();
+
+        if $i0 <= 1 goto label01;
+
+        $z1 = 1;
+
+        goto label02;
+
+     label01:
+        $z1 = 0;
+
+     label02:
+        <java.util.concurrent.CompletableFuture: boolean useCommonPool> = $z1;
+
+        $z0 = <java.util.concurrent.CompletableFuture: boolean useCommonPool>;
+
+        if $z0 == 0 goto label03;
+
+        $r11 = staticinvoke <java.util.concurrent.ForkJoinPool: java.util.concurrent.ForkJoinPool commonPool()>();
+
+        goto label04;
+
+     label03:
+        $r13 = new java.util.concurrent.CompletableFuture$ThreadPerTaskExecutor;
+
+        $r11 = $r13;
+
+        specialinvoke $r13.<java.util.concurrent.CompletableFuture$ThreadPerTaskExecutor: void <init>()>();
+
+     label04:
+        <java.util.concurrent.CompletableFuture: java.util.concurrent.Executor asyncPool> = $r11;
+
+        $r1 = staticinvoke <java.lang.Runtime: java.lang.Runtime getRuntime()>();
+
+        $i1 = virtualinvoke $r1.<java.lang.Runtime: int availableProcessors()>();
+
+        if $i1 <= 1 goto label05;
+
+        $s5 = 256;
+
+        goto label06;
+
+     label05:
+        $s5 = 0;
+
+     label06:
+        <java.util.concurrent.CompletableFuture: int SPINS> = $s5;
+
+     label07:
+        $r2 = staticinvoke <sun.misc.Unsafe: sun.misc.Unsafe getUnsafe()>();
+
+        <java.util.concurrent.CompletableFuture: sun.misc.Unsafe UNSAFE> = $r2;
+
+        $r7 = class "Ljava/util/concurrent/CompletableFuture;";
+
+        $r3 = virtualinvoke $r7.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("result");
+
+        $l2 = virtualinvoke $r2.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r3);
+
+        <java.util.concurrent.CompletableFuture: long RESULT> = $l2;
+
+        $r8 = class "Ljava/util/concurrent/CompletableFuture;";
+
+        $r4 = virtualinvoke $r8.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("stack");
+
+        $l3 = virtualinvoke $r2.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r4);
+
+        <java.util.concurrent.CompletableFuture: long STACK> = $l3;
+
+        $r5 = class "Ljava/util/concurrent/CompletableFuture$Completion;";
+
+        $r6 = virtualinvoke $r5.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("next");
+
+        $l4 = virtualinvoke $r2.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r6);
+
+        <java.util.concurrent.CompletableFuture: long NEXT> = $l4;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r9 := @caughtexception;
+
+        $r14 = new java.lang.Error;
+
+        specialinvoke $r14.<java.lang.Error: void <init>(java.lang.Throwable)>($r9);
+
+        throw $r14;
+
+     label10:
+        return;
+
+        catch java.lang.Exception from label07 to label08 with label09;
+    }
+}

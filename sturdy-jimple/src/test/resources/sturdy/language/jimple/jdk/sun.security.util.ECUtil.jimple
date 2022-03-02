@@ -1,0 +1,730 @@
+public final class sun.security.util.ECUtil extends java.lang.Object
+{
+
+    public static java.security.spec.ECPoint decodePoint(byte[], java.security.spec.EllipticCurve) throws java.io.IOException
+    {
+        byte[] r0, $r4, $r5;
+        java.security.spec.ECField $r3;
+        byte $b1;
+        int $i0, $i2, $i3, i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12;
+        java.math.BigInteger $r12, $r13;
+        java.io.IOException $r10, $r11;
+        java.security.spec.EllipticCurve r2;
+        java.security.spec.ECPoint $r14;
+
+        r0 := @parameter0: byte[];
+
+        r2 := @parameter1: java.security.spec.EllipticCurve;
+
+        $i0 = lengthof r0;
+
+        if $i0 == 0 goto label1;
+
+        $b1 = r0[0];
+
+        $i12 = (int) $b1;
+
+        if $i12 == 4 goto label2;
+
+     label1:
+        $r10 = new java.io.IOException;
+
+        specialinvoke $r10.<java.io.IOException: void <init>(java.lang.String)>("Only uncompressed point format supported");
+
+        throw $r10;
+
+     label2:
+        $i2 = lengthof r0;
+
+        $i3 = $i2 - 1;
+
+        i4 = $i3 / 2;
+
+        $r3 = virtualinvoke r2.<java.security.spec.EllipticCurve: java.security.spec.ECField getField()>();
+
+        $i5 = interfaceinvoke $r3.<java.security.spec.ECField: int getFieldSize()>();
+
+        $i6 = $i5 + 7;
+
+        $i7 = $i6 >> 3;
+
+        if i4 == $i7 goto label3;
+
+        $r11 = new java.io.IOException;
+
+        specialinvoke $r11.<java.io.IOException: void <init>(java.lang.String)>("Point does not match field size");
+
+        throw $r11;
+
+     label3:
+        $i8 = 1 + i4;
+
+        $r4 = staticinvoke <java.util.Arrays: byte[] copyOfRange(byte[],int,int)>(r0, 1, $i8);
+
+        $i11 = i4 + 1;
+
+        $i9 = i4 + 1;
+
+        $i10 = $i9 + i4;
+
+        $r5 = staticinvoke <java.util.Arrays: byte[] copyOfRange(byte[],int,int)>(r0, $i11, $i10);
+
+        $r14 = new java.security.spec.ECPoint;
+
+        $r12 = new java.math.BigInteger;
+
+        specialinvoke $r12.<java.math.BigInteger: void <init>(int,byte[])>(1, $r4);
+
+        $r13 = new java.math.BigInteger;
+
+        specialinvoke $r13.<java.math.BigInteger: void <init>(int,byte[])>(1, $r5);
+
+        specialinvoke $r14.<java.security.spec.ECPoint: void <init>(java.math.BigInteger,java.math.BigInteger)>($r12, $r13);
+
+        return $r14;
+    }
+
+    public static byte[] encodePoint(java.security.spec.ECPoint, java.security.spec.EllipticCurve)
+    {
+        byte[] $r4, $r5, $r7, $r8, r10;
+        java.security.spec.ECField $r1;
+        int $i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14;
+        java.math.BigInteger $r3, $r6;
+        java.security.spec.EllipticCurve r0;
+        java.lang.RuntimeException $r9;
+        java.security.spec.ECPoint r2;
+
+        r2 := @parameter0: java.security.spec.ECPoint;
+
+        r0 := @parameter1: java.security.spec.EllipticCurve;
+
+        $r1 = virtualinvoke r0.<java.security.spec.EllipticCurve: java.security.spec.ECField getField()>();
+
+        $i0 = interfaceinvoke $r1.<java.security.spec.ECField: int getFieldSize()>();
+
+        $i1 = $i0 + 7;
+
+        i2 = $i1 >> 3;
+
+        $r3 = virtualinvoke r2.<java.security.spec.ECPoint: java.math.BigInteger getAffineX()>();
+
+        $r4 = virtualinvoke $r3.<java.math.BigInteger: byte[] toByteArray()>();
+
+        $r5 = staticinvoke <sun.security.util.ECUtil: byte[] trimZeroes(byte[])>($r4);
+
+        $r6 = virtualinvoke r2.<java.security.spec.ECPoint: java.math.BigInteger getAffineY()>();
+
+        $r7 = virtualinvoke $r6.<java.math.BigInteger: byte[] toByteArray()>();
+
+        $r8 = staticinvoke <sun.security.util.ECUtil: byte[] trimZeroes(byte[])>($r7);
+
+        $i3 = lengthof $r5;
+
+        if $i3 > i2 goto label1;
+
+        $i4 = lengthof $r8;
+
+        if $i4 <= i2 goto label2;
+
+     label1:
+        $r9 = new java.lang.RuntimeException;
+
+        specialinvoke $r9.<java.lang.RuntimeException: void <init>(java.lang.String)>("Point coordinates do not match field size");
+
+        throw $r9;
+
+     label2:
+        $i5 = i2 << 1;
+
+        $i6 = 1 + $i5;
+
+        r10 = newarray (byte)[$i6];
+
+        r10[0] = 4;
+
+        $i7 = lengthof $r5;
+
+        $i8 = i2 - $i7;
+
+        $i10 = $i8 + 1;
+
+        $i9 = lengthof $r5;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r5, 0, r10, $i10, $i9);
+
+        $i12 = lengthof r10;
+
+        $i11 = lengthof $r8;
+
+        $i14 = $i12 - $i11;
+
+        $i13 = lengthof $r8;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r8, 0, r10, $i14, $i13);
+
+        return r10;
+    }
+
+    public static byte[] trimZeroes(byte[])
+    {
+        byte[] r0, $r1;
+        byte $b3;
+        int $i0, $i1, $i2, i4;
+
+        r0 := @parameter0: byte[];
+
+        i4 = 0;
+
+     label1:
+        $i0 = lengthof r0;
+
+        $i1 = $i0 - 1;
+
+        if i4 >= $i1 goto label2;
+
+        $b3 = r0[i4];
+
+        if $b3 != 0 goto label2;
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label2:
+        if i4 != 0 goto label3;
+
+        return r0;
+
+     label3:
+        $i2 = lengthof r0;
+
+        $r1 = staticinvoke <java.util.Arrays: byte[] copyOfRange(byte[],int,int)>(r0, i4, $i2);
+
+        return $r1;
+    }
+
+    private static java.security.AlgorithmParameters getECParameters(java.security.Provider)
+    {
+        java.security.NoSuchAlgorithmException $r3;
+        java.lang.RuntimeException $r4;
+        java.security.AlgorithmParameters $r1, $r2;
+        java.security.Provider r0;
+
+        r0 := @parameter0: java.security.Provider;
+
+     label1:
+        if r0 == null goto label3;
+
+        $r2 = staticinvoke <java.security.AlgorithmParameters: java.security.AlgorithmParameters getInstance(java.lang.String,java.security.Provider)>("EC", r0);
+
+     label2:
+        return $r2;
+
+     label3:
+        $r1 = staticinvoke <java.security.AlgorithmParameters: java.security.AlgorithmParameters getInstance(java.lang.String)>("EC");
+
+     label4:
+        return $r1;
+
+     label5:
+        $r3 := @caughtexception;
+
+        $r4 = new java.lang.RuntimeException;
+
+        specialinvoke $r4.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r3);
+
+        throw $r4;
+
+        catch java.security.NoSuchAlgorithmException from label1 to label2 with label5;
+        catch java.security.NoSuchAlgorithmException from label3 to label4 with label5;
+    }
+
+    public static byte[] encodeECParameterSpec(java.security.Provider, java.security.spec.ECParameterSpec)
+    {
+        byte[] $r3;
+        java.io.IOException $r4;
+        java.lang.RuntimeException $r5, $r7;
+        java.security.AlgorithmParameters $r1;
+        java.security.Provider r0;
+        java.security.spec.ECParameterSpec r2;
+        java.security.spec.InvalidParameterSpecException $r6;
+        java.lang.StringBuilder $r8, $r9, $r10;
+        java.lang.String $r11;
+
+        r0 := @parameter0: java.security.Provider;
+
+        r2 := @parameter1: java.security.spec.ECParameterSpec;
+
+        $r1 = staticinvoke <sun.security.util.ECUtil: java.security.AlgorithmParameters getECParameters(java.security.Provider)>(r0);
+
+     label1:
+        virtualinvoke $r1.<java.security.AlgorithmParameters: void init(java.security.spec.AlgorithmParameterSpec)>(r2);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = new java.lang.RuntimeException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Not a known named curve: ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.lang.RuntimeException: void <init>(java.lang.String)>($r11);
+
+        throw $r7;
+
+     label4:
+        $r3 = virtualinvoke $r1.<java.security.AlgorithmParameters: byte[] getEncoded()>();
+
+     label5:
+        return $r3;
+
+     label6:
+        $r4 := @caughtexception;
+
+        $r5 = new java.lang.RuntimeException;
+
+        specialinvoke $r5.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r4);
+
+        throw $r5;
+
+        catch java.security.spec.InvalidParameterSpecException from label1 to label2 with label3;
+        catch java.io.IOException from label4 to label5 with label6;
+    }
+
+    public static java.security.spec.ECParameterSpec getECParameterSpec(java.security.Provider, java.security.spec.ECParameterSpec)
+    {
+        java.security.spec.InvalidParameterSpecException $r5;
+        java.security.spec.AlgorithmParameterSpec $r3;
+        java.security.AlgorithmParameters $r1;
+        java.security.Provider r0;
+        java.security.spec.ECParameterSpec r2, $r4;
+
+        r0 := @parameter0: java.security.Provider;
+
+        r2 := @parameter1: java.security.spec.ECParameterSpec;
+
+        $r1 = staticinvoke <sun.security.util.ECUtil: java.security.AlgorithmParameters getECParameters(java.security.Provider)>(r0);
+
+     label1:
+        virtualinvoke $r1.<java.security.AlgorithmParameters: void init(java.security.spec.AlgorithmParameterSpec)>(r2);
+
+        $r3 = virtualinvoke $r1.<java.security.AlgorithmParameters: java.security.spec.AlgorithmParameterSpec getParameterSpec(java.lang.Class)>(class "Ljava/security/spec/ECParameterSpec;");
+
+        $r4 = (java.security.spec.ECParameterSpec) $r3;
+
+     label2:
+        return $r4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        return null;
+
+        catch java.security.spec.InvalidParameterSpecException from label1 to label2 with label3;
+    }
+
+    public static java.security.spec.ECParameterSpec getECParameterSpec(java.security.Provider, byte[]) throws java.io.IOException
+    {
+        byte[] r2;
+        java.security.spec.InvalidParameterSpecException $r5;
+        java.security.spec.AlgorithmParameterSpec $r3;
+        java.security.AlgorithmParameters $r1;
+        java.security.Provider r0;
+        java.security.spec.ECParameterSpec $r4;
+
+        r0 := @parameter0: java.security.Provider;
+
+        r2 := @parameter1: byte[];
+
+        $r1 = staticinvoke <sun.security.util.ECUtil: java.security.AlgorithmParameters getECParameters(java.security.Provider)>(r0);
+
+        virtualinvoke $r1.<java.security.AlgorithmParameters: void init(byte[])>(r2);
+
+     label1:
+        $r3 = virtualinvoke $r1.<java.security.AlgorithmParameters: java.security.spec.AlgorithmParameterSpec getParameterSpec(java.lang.Class)>(class "Ljava/security/spec/ECParameterSpec;");
+
+        $r4 = (java.security.spec.ECParameterSpec) $r3;
+
+     label2:
+        return $r4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        return null;
+
+        catch java.security.spec.InvalidParameterSpecException from label1 to label2 with label3;
+    }
+
+    public static java.security.spec.ECParameterSpec getECParameterSpec(java.security.Provider, java.lang.String)
+    {
+        java.security.spec.ECGenParameterSpec $r2;
+        java.security.spec.InvalidParameterSpecException $r6;
+        java.lang.String r3;
+        java.security.spec.AlgorithmParameterSpec $r4;
+        java.security.AlgorithmParameters $r1;
+        java.security.Provider r0;
+        java.security.spec.ECParameterSpec $r5;
+
+        r0 := @parameter0: java.security.Provider;
+
+        r3 := @parameter1: java.lang.String;
+
+        $r1 = staticinvoke <sun.security.util.ECUtil: java.security.AlgorithmParameters getECParameters(java.security.Provider)>(r0);
+
+     label1:
+        $r2 = new java.security.spec.ECGenParameterSpec;
+
+        specialinvoke $r2.<java.security.spec.ECGenParameterSpec: void <init>(java.lang.String)>(r3);
+
+        virtualinvoke $r1.<java.security.AlgorithmParameters: void init(java.security.spec.AlgorithmParameterSpec)>($r2);
+
+        $r4 = virtualinvoke $r1.<java.security.AlgorithmParameters: java.security.spec.AlgorithmParameterSpec getParameterSpec(java.lang.Class)>(class "Ljava/security/spec/ECParameterSpec;");
+
+        $r5 = (java.security.spec.ECParameterSpec) $r4;
+
+     label2:
+        return $r5;
+
+     label3:
+        $r6 := @caughtexception;
+
+        return null;
+
+        catch java.security.spec.InvalidParameterSpecException from label1 to label2 with label3;
+    }
+
+    public static java.security.spec.ECParameterSpec getECParameterSpec(java.security.Provider, int)
+    {
+        int i0;
+        java.security.spec.InvalidParameterSpecException $r5;
+        sun.security.util.ECKeySizeParameterSpec $r2;
+        java.security.spec.AlgorithmParameterSpec $r3;
+        java.security.AlgorithmParameters $r1;
+        java.security.Provider r0;
+        java.security.spec.ECParameterSpec $r4;
+
+        r0 := @parameter0: java.security.Provider;
+
+        i0 := @parameter1: int;
+
+        $r1 = staticinvoke <sun.security.util.ECUtil: java.security.AlgorithmParameters getECParameters(java.security.Provider)>(r0);
+
+     label1:
+        $r2 = new sun.security.util.ECKeySizeParameterSpec;
+
+        specialinvoke $r2.<sun.security.util.ECKeySizeParameterSpec: void <init>(int)>(i0);
+
+        virtualinvoke $r1.<java.security.AlgorithmParameters: void init(java.security.spec.AlgorithmParameterSpec)>($r2);
+
+        $r3 = virtualinvoke $r1.<java.security.AlgorithmParameters: java.security.spec.AlgorithmParameterSpec getParameterSpec(java.lang.Class)>(class "Ljava/security/spec/ECParameterSpec;");
+
+        $r4 = (java.security.spec.ECParameterSpec) $r3;
+
+     label2:
+        return $r4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        return null;
+
+        catch java.security.spec.InvalidParameterSpecException from label1 to label2 with label3;
+    }
+
+    public static java.lang.String getCurveName(java.security.Provider, java.security.spec.ECParameterSpec)
+    {
+        java.security.spec.ECGenParameterSpec r4;
+        java.security.spec.InvalidParameterSpecException $r6;
+        java.security.spec.AlgorithmParameterSpec $r3;
+        java.lang.String $r5;
+        java.security.AlgorithmParameters $r1;
+        java.security.Provider r0;
+        java.security.spec.ECParameterSpec r2;
+
+        r0 := @parameter0: java.security.Provider;
+
+        r2 := @parameter1: java.security.spec.ECParameterSpec;
+
+        $r1 = staticinvoke <sun.security.util.ECUtil: java.security.AlgorithmParameters getECParameters(java.security.Provider)>(r0);
+
+     label1:
+        virtualinvoke $r1.<java.security.AlgorithmParameters: void init(java.security.spec.AlgorithmParameterSpec)>(r2);
+
+        $r3 = virtualinvoke $r1.<java.security.AlgorithmParameters: java.security.spec.AlgorithmParameterSpec getParameterSpec(java.lang.Class)>(class "Ljava/security/spec/ECGenParameterSpec;");
+
+        r4 = (java.security.spec.ECGenParameterSpec) $r3;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        return null;
+
+     label4:
+        if r4 != null goto label5;
+
+        return null;
+
+     label5:
+        $r5 = virtualinvoke r4.<java.security.spec.ECGenParameterSpec: java.lang.String getName()>();
+
+        return $r5;
+
+        catch java.security.spec.InvalidParameterSpecException from label1 to label2 with label3;
+    }
+
+    public static boolean equals(java.security.spec.ECParameterSpec, java.security.spec.ECParameterSpec)
+    {
+        java.security.spec.EllipticCurve $r4, $r5;
+        java.security.spec.ECParameterSpec r0, r1;
+        int $i0, $i1;
+        java.security.spec.ECPoint $r6, $r7;
+        java.math.BigInteger $r2, $r3;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @parameter0: java.security.spec.ECParameterSpec;
+
+        r1 := @parameter1: java.security.spec.ECParameterSpec;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        if r0 == null goto label2;
+
+        if r1 != null goto label3;
+
+     label2:
+        return 0;
+
+     label3:
+        $i0 = virtualinvoke r0.<java.security.spec.ECParameterSpec: int getCofactor()>();
+
+        $i1 = virtualinvoke r1.<java.security.spec.ECParameterSpec: int getCofactor()>();
+
+        if $i0 != $i1 goto label4;
+
+        $r2 = virtualinvoke r0.<java.security.spec.ECParameterSpec: java.math.BigInteger getOrder()>();
+
+        $r3 = virtualinvoke r1.<java.security.spec.ECParameterSpec: java.math.BigInteger getOrder()>();
+
+        $z0 = virtualinvoke $r2.<java.math.BigInteger: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label4;
+
+        $r4 = virtualinvoke r0.<java.security.spec.ECParameterSpec: java.security.spec.EllipticCurve getCurve()>();
+
+        $r5 = virtualinvoke r1.<java.security.spec.ECParameterSpec: java.security.spec.EllipticCurve getCurve()>();
+
+        $z1 = virtualinvoke $r4.<java.security.spec.EllipticCurve: boolean equals(java.lang.Object)>($r5);
+
+        if $z1 == 0 goto label4;
+
+        $r6 = virtualinvoke r0.<java.security.spec.ECParameterSpec: java.security.spec.ECPoint getGenerator()>();
+
+        $r7 = virtualinvoke r1.<java.security.spec.ECParameterSpec: java.security.spec.ECPoint getGenerator()>();
+
+        $z2 = virtualinvoke $r6.<java.security.spec.ECPoint: boolean equals(java.lang.Object)>($r7);
+
+        if $z2 == 0 goto label4;
+
+        $z3 = 1;
+
+        goto label5;
+
+     label4:
+        $z3 = 0;
+
+     label5:
+        return $z3;
+    }
+
+    public static byte[] encodeSignature(byte[]) throws java.security.SignatureException
+    {
+        sun.security.util.DerValue $r5;
+        byte[] r0, r1, $r6, $r7;
+        java.security.SignatureException $r9;
+        java.lang.Exception $r8;
+        sun.security.util.DerOutputStream $r4;
+        int $i0, $i1, $i2, i3;
+        java.math.BigInteger $r2, $r3;
+
+        r0 := @parameter0: byte[];
+
+     label1:
+        $i0 = lengthof r0;
+
+        i3 = $i0 >> 1;
+
+        r1 = newarray (byte)[i3];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, 0, r1, 0, i3);
+
+        $r2 = new java.math.BigInteger;
+
+        specialinvoke $r2.<java.math.BigInteger: void <init>(int,byte[])>(1, r1);
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, i3, r1, 0, i3);
+
+        $r3 = new java.math.BigInteger;
+
+        specialinvoke $r3.<java.math.BigInteger: void <init>(int,byte[])>(1, r1);
+
+        $r4 = new sun.security.util.DerOutputStream;
+
+        $i1 = lengthof r0;
+
+        $i2 = $i1 + 10;
+
+        specialinvoke $r4.<sun.security.util.DerOutputStream: void <init>(int)>($i2);
+
+        virtualinvoke $r4.<sun.security.util.DerOutputStream: void putInteger(java.math.BigInteger)>($r2);
+
+        virtualinvoke $r4.<sun.security.util.DerOutputStream: void putInteger(java.math.BigInteger)>($r3);
+
+        $r5 = new sun.security.util.DerValue;
+
+        $r6 = virtualinvoke $r4.<sun.security.util.DerOutputStream: byte[] toByteArray()>();
+
+        specialinvoke $r5.<sun.security.util.DerValue: void <init>(byte,byte[])>(48, $r6);
+
+        $r7 = virtualinvoke $r5.<sun.security.util.DerValue: byte[] toByteArray()>();
+
+     label2:
+        return $r7;
+
+     label3:
+        $r8 := @caughtexception;
+
+        $r9 = new java.security.SignatureException;
+
+        specialinvoke $r9.<java.security.SignatureException: void <init>(java.lang.String,java.lang.Throwable)>("Could not encode signature", $r8);
+
+        throw $r9;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public static byte[] decodeSignature(byte[]) throws java.security.SignatureException
+    {
+        byte[] r1, $r8, $r9, $r10, $r11, r12;
+        sun.security.util.DerInputStream $r0;
+        sun.security.util.DerValue[] $r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13;
+        java.math.BigInteger $r5, $r7;
+        sun.security.util.DerValue $r4, $r6;
+        java.security.SignatureException $r14;
+        java.io.IOException $r3;
+        java.lang.Exception $r13;
+
+        r1 := @parameter0: byte[];
+
+     label1:
+        $r0 = new sun.security.util.DerInputStream;
+
+        $i0 = lengthof r1;
+
+        specialinvoke $r0.<sun.security.util.DerInputStream: void <init>(byte[],int,int,boolean)>(r1, 0, $i0, 0);
+
+        $r2 = virtualinvoke $r0.<sun.security.util.DerInputStream: sun.security.util.DerValue[] getSequence(int)>(2);
+
+        $i1 = lengthof $r2;
+
+        if $i1 != 2 goto label2;
+
+        $i2 = virtualinvoke $r0.<sun.security.util.DerInputStream: int available()>();
+
+        if $i2 == 0 goto label3;
+
+     label2:
+        $r3 = new java.io.IOException;
+
+        specialinvoke $r3.<java.io.IOException: void <init>(java.lang.String)>("Invalid encoding for signature");
+
+        throw $r3;
+
+     label3:
+        $r4 = $r2[0];
+
+        $r5 = virtualinvoke $r4.<sun.security.util.DerValue: java.math.BigInteger getPositiveBigInteger()>();
+
+        $r6 = $r2[1];
+
+        $r7 = virtualinvoke $r6.<sun.security.util.DerValue: java.math.BigInteger getPositiveBigInteger()>();
+
+        $r8 = virtualinvoke $r5.<java.math.BigInteger: byte[] toByteArray()>();
+
+        $r9 = staticinvoke <sun.security.util.ECUtil: byte[] trimZeroes(byte[])>($r8);
+
+        $r10 = virtualinvoke $r7.<java.math.BigInteger: byte[] toByteArray()>();
+
+        $r11 = staticinvoke <sun.security.util.ECUtil: byte[] trimZeroes(byte[])>($r10);
+
+        $i4 = lengthof $r9;
+
+        $i3 = lengthof $r11;
+
+        $i5 = staticinvoke <java.lang.Math: int max(int,int)>($i4, $i3);
+
+        $i6 = $i5 << 1;
+
+        r12 = newarray (byte)[$i6];
+
+        $i7 = lengthof $r9;
+
+        $i9 = $i5 - $i7;
+
+        $i8 = lengthof $r9;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r9, 0, r12, $i9, $i8);
+
+        $i11 = lengthof r12;
+
+        $i10 = lengthof $r11;
+
+        $i13 = $i11 - $i10;
+
+        $i12 = lengthof $r11;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r11, 0, r12, $i13, $i12);
+
+     label4:
+        return r12;
+
+     label5:
+        $r13 := @caughtexception;
+
+        $r14 = new java.security.SignatureException;
+
+        specialinvoke $r14.<java.security.SignatureException: void <init>(java.lang.String,java.lang.Throwable)>("Invalid encoding for signature", $r13);
+
+        throw $r14;
+
+        catch java.lang.Exception from label1 to label4 with label5;
+    }
+
+    private void <init>()
+    {
+        sun.security.util.ECUtil r0;
+
+        r0 := @this: sun.security.util.ECUtil;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+}

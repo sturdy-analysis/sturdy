@@ -1,0 +1,435 @@
+public abstract class java.awt.MultipleGradientPaint extends java.lang.Object implements java.awt.Paint
+{
+    final int transparency;
+    final float[] fractions;
+    final java.awt.Color[] colors;
+    final java.awt.geom.AffineTransform gradientTransform;
+    final java.awt.MultipleGradientPaint$CycleMethod cycleMethod;
+    final java.awt.MultipleGradientPaint$ColorSpaceType colorSpace;
+    java.awt.image.ColorModel model;
+    float[] normalizedIntervals;
+    boolean isSimpleLookup;
+    java.lang.ref.SoftReference gradients;
+    java.lang.ref.SoftReference gradient;
+    int fastGradientArraySize;
+
+    void <init>(float[], java.awt.Color[], java.awt.MultipleGradientPaint$CycleMethod, java.awt.MultipleGradientPaint$ColorSpaceType, java.awt.geom.AffineTransform)
+    {
+        java.awt.Color $r11, $r13, $r16;
+        byte $b3, $b6, $b14, $b15, $b16, $b22, b23, b24;
+        java.awt.MultipleGradientPaint r0;
+        java.awt.geom.AffineTransform r5, $r46;
+        java.lang.StringBuilder $r20, $r21, $r25, $r26, $r42, $r44;
+        java.awt.MultipleGradientPaint$ColorSpaceType r4;
+        float[] r1, $r6, $r7, $r12, $r15;
+        java.lang.String $r22, $r27;
+        java.awt.Color[] r2, $r8, $r9, $r14, $r17;
+        java.lang.NullPointerException $r35, $r36, $r37, $r38, $r39;
+        boolean z0, z1, z2, z3, $z4;
+        float $f0, $f1, f2, f3;
+        java.awt.MultipleGradientPaint$CycleMethod r3;
+        int $i0, $i1, $i2, $i4, $i5, $i7, $i8, $i9, $i10, $i11, $i12, $i13, i17, i18, i19, i20, $i21, $i25, $i26, $i27;
+        java.lang.IllegalArgumentException $r40, $r41, $r43, $r45;
+
+        r0 := @this: java.awt.MultipleGradientPaint;
+
+        r1 := @parameter0: float[];
+
+        r2 := @parameter1: java.awt.Color[];
+
+        r3 := @parameter2: java.awt.MultipleGradientPaint$CycleMethod;
+
+        r4 := @parameter3: java.awt.MultipleGradientPaint$ColorSpaceType;
+
+        r5 := @parameter4: java.awt.geom.AffineTransform;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        if r1 != null goto label01;
+
+        $r35 = new java.lang.NullPointerException;
+
+        specialinvoke $r35.<java.lang.NullPointerException: void <init>(java.lang.String)>("Fractions array cannot be null");
+
+        throw $r35;
+
+     label01:
+        if r2 != null goto label02;
+
+        $r36 = new java.lang.NullPointerException;
+
+        specialinvoke $r36.<java.lang.NullPointerException: void <init>(java.lang.String)>("Colors array cannot be null");
+
+        throw $r36;
+
+     label02:
+        if r3 != null goto label03;
+
+        $r37 = new java.lang.NullPointerException;
+
+        specialinvoke $r37.<java.lang.NullPointerException: void <init>(java.lang.String)>("Cycle method cannot be null");
+
+        throw $r37;
+
+     label03:
+        if r4 != null goto label04;
+
+        $r38 = new java.lang.NullPointerException;
+
+        specialinvoke $r38.<java.lang.NullPointerException: void <init>(java.lang.String)>("Color space cannot be null");
+
+        throw $r38;
+
+     label04:
+        if r5 != null goto label05;
+
+        $r39 = new java.lang.NullPointerException;
+
+        specialinvoke $r39.<java.lang.NullPointerException: void <init>(java.lang.String)>("Gradient transform cannot be null");
+
+        throw $r39;
+
+     label05:
+        $i1 = lengthof r1;
+
+        $i0 = lengthof r2;
+
+        if $i1 == $i0 goto label06;
+
+        $r40 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r40.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Colors and fractions must have equal size");
+
+        throw $r40;
+
+     label06:
+        $i2 = lengthof r2;
+
+        if $i2 >= 2 goto label07;
+
+        $r41 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r41.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("User must specify at least 2 colors");
+
+        throw $r41;
+
+     label07:
+        f2 = -1.0F;
+
+        i17 = lengthof r1;
+
+        i18 = 0;
+
+     label08:
+        if i18 >= i17 goto label12;
+
+        f3 = r1[i18];
+
+        $b14 = f3 cmpg 0.0F;
+
+        $i25 = (int) $b14;
+
+        if $i25 < 0 goto label09;
+
+        $b15 = f3 cmpl 1.0F;
+
+        $i26 = (int) $b15;
+
+        if $i26 <= 0 goto label10;
+
+     label09:
+        $r43 = new java.lang.IllegalArgumentException;
+
+        $r42 = new java.lang.StringBuilder;
+
+        specialinvoke $r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Fraction values must be in the range 0 to 1: ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(float)>(f3);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r43.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r22);
+
+        throw $r43;
+
+     label10:
+        $b16 = f3 cmpg f2;
+
+        $i27 = (int) $b16;
+
+        if $i27 > 0 goto label11;
+
+        $r45 = new java.lang.IllegalArgumentException;
+
+        $r44 = new java.lang.StringBuilder;
+
+        specialinvoke $r44.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Keyframe fractions must be increasing: ");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(float)>(f3);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r45.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r27);
+
+        throw $r45;
+
+     label11:
+        f2 = f3;
+
+        i18 = i18 + 1;
+
+        goto label08;
+
+     label12:
+        z0 = 0;
+
+        z1 = 0;
+
+        i19 = lengthof r1;
+
+        z2 = 0;
+
+        b24 = 0;
+
+        b23 = 0;
+
+        $f0 = r1[0];
+
+        $b3 = $f0 cmpl 0.0F;
+
+        if $b3 == 0 goto label13;
+
+        z0 = 1;
+
+        i19 = i19 + 1;
+
+        z2 = 1;
+
+        b24 = 1;
+
+        b23 = 1;
+
+     label13:
+        $i4 = lengthof r1;
+
+        $i5 = $i4 - 1;
+
+        $f1 = r1[$i5];
+
+        $b6 = $f1 cmpl 1.0F;
+
+        if $b6 == 0 goto label14;
+
+        z1 = 1;
+
+        i19 = i19 + 1;
+
+     label14:
+        $r6 = newarray (float)[i19];
+
+        r0.<java.awt.MultipleGradientPaint: float[] fractions> = $r6;
+
+        $r7 = r0.<java.awt.MultipleGradientPaint: float[] fractions>;
+
+        $i7 = lengthof r1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, 0, $r7, b23, $i7);
+
+        $r8 = newarray (java.awt.Color)[i19];
+
+        r0.<java.awt.MultipleGradientPaint: java.awt.Color[] colors> = $r8;
+
+        $r9 = r0.<java.awt.MultipleGradientPaint: java.awt.Color[] colors>;
+
+        $i8 = lengthof r2;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r2, 0, $r9, b24, $i8);
+
+        if z0 == 0 goto label15;
+
+        $r15 = r0.<java.awt.MultipleGradientPaint: float[] fractions>;
+
+        $r15[0] = 0.0F;
+
+        $r17 = r0.<java.awt.MultipleGradientPaint: java.awt.Color[] colors>;
+
+        $r16 = r2[0];
+
+        $r17[0] = $r16;
+
+     label15:
+        if z1 == 0 goto label16;
+
+        $r12 = r0.<java.awt.MultipleGradientPaint: float[] fractions>;
+
+        $i10 = i19 - 1;
+
+        $r12[$i10] = 1.0F;
+
+        $r14 = r0.<java.awt.MultipleGradientPaint: java.awt.Color[] colors>;
+
+        $i13 = i19 - 1;
+
+        $i11 = lengthof r2;
+
+        $i12 = $i11 - 1;
+
+        $r13 = r2[$i12];
+
+        $r14[$i13] = $r13;
+
+     label16:
+        r0.<java.awt.MultipleGradientPaint: java.awt.MultipleGradientPaint$ColorSpaceType colorSpace> = r4;
+
+        r0.<java.awt.MultipleGradientPaint: java.awt.MultipleGradientPaint$CycleMethod cycleMethod> = r3;
+
+        $r46 = new java.awt.geom.AffineTransform;
+
+        specialinvoke $r46.<java.awt.geom.AffineTransform: void <init>(java.awt.geom.AffineTransform)>(r5);
+
+        r0.<java.awt.MultipleGradientPaint: java.awt.geom.AffineTransform gradientTransform> = $r46;
+
+        z3 = 1;
+
+        i20 = 0;
+
+     label17:
+        $i21 = lengthof r2;
+
+        if i20 >= $i21 goto label20;
+
+        if z3 == 0 goto label18;
+
+        $r11 = r2[i20];
+
+        $i9 = virtualinvoke $r11.<java.awt.Color: int getAlpha()>();
+
+        if $i9 != 255 goto label18;
+
+        $z4 = 1;
+
+        goto label19;
+
+     label18:
+        $z4 = 0;
+
+     label19:
+        z3 = $z4;
+
+        i20 = i20 + 1;
+
+        goto label17;
+
+     label20:
+        if z3 == 0 goto label21;
+
+        $b22 = 1;
+
+        goto label22;
+
+     label21:
+        $b22 = 3;
+
+     label22:
+        r0.<java.awt.MultipleGradientPaint: int transparency> = $b22;
+
+        return;
+    }
+
+    public final float[] getFractions()
+    {
+        java.awt.MultipleGradientPaint r0;
+        int $i0;
+        float[] $r1, $r2, $r3;
+
+        r0 := @this: java.awt.MultipleGradientPaint;
+
+        $r2 = r0.<java.awt.MultipleGradientPaint: float[] fractions>;
+
+        $r1 = r0.<java.awt.MultipleGradientPaint: float[] fractions>;
+
+        $i0 = lengthof $r1;
+
+        $r3 = staticinvoke <java.util.Arrays: float[] copyOf(float[],int)>($r2, $i0);
+
+        return $r3;
+    }
+
+    public final java.awt.Color[] getColors()
+    {
+        java.lang.Object[] $r3;
+        java.awt.MultipleGradientPaint r0;
+        int $i0;
+        java.awt.Color[] $r1, $r2, $r4;
+
+        r0 := @this: java.awt.MultipleGradientPaint;
+
+        $r2 = r0.<java.awt.MultipleGradientPaint: java.awt.Color[] colors>;
+
+        $r1 = r0.<java.awt.MultipleGradientPaint: java.awt.Color[] colors>;
+
+        $i0 = lengthof $r1;
+
+        $r3 = staticinvoke <java.util.Arrays: java.lang.Object[] copyOf(java.lang.Object[],int)>($r2, $i0);
+
+        $r4 = (java.awt.Color[]) $r3;
+
+        return $r4;
+    }
+
+    public final java.awt.MultipleGradientPaint$CycleMethod getCycleMethod()
+    {
+        java.awt.MultipleGradientPaint r0;
+        java.awt.MultipleGradientPaint$CycleMethod $r1;
+
+        r0 := @this: java.awt.MultipleGradientPaint;
+
+        $r1 = r0.<java.awt.MultipleGradientPaint: java.awt.MultipleGradientPaint$CycleMethod cycleMethod>;
+
+        return $r1;
+    }
+
+    public final java.awt.MultipleGradientPaint$ColorSpaceType getColorSpace()
+    {
+        java.awt.MultipleGradientPaint$ColorSpaceType $r1;
+        java.awt.MultipleGradientPaint r0;
+
+        r0 := @this: java.awt.MultipleGradientPaint;
+
+        $r1 = r0.<java.awt.MultipleGradientPaint: java.awt.MultipleGradientPaint$ColorSpaceType colorSpace>;
+
+        return $r1;
+    }
+
+    public final java.awt.geom.AffineTransform getTransform()
+    {
+        java.awt.geom.AffineTransform $r0, $r2;
+        java.awt.MultipleGradientPaint r1;
+
+        r1 := @this: java.awt.MultipleGradientPaint;
+
+        $r0 = new java.awt.geom.AffineTransform;
+
+        $r2 = r1.<java.awt.MultipleGradientPaint: java.awt.geom.AffineTransform gradientTransform>;
+
+        specialinvoke $r0.<java.awt.geom.AffineTransform: void <init>(java.awt.geom.AffineTransform)>($r2);
+
+        return $r0;
+    }
+
+    public final int getTransparency()
+    {
+        int $i0;
+        java.awt.MultipleGradientPaint r0;
+
+        r0 := @this: java.awt.MultipleGradientPaint;
+
+        $i0 = r0.<java.awt.MultipleGradientPaint: int transparency>;
+
+        return $i0;
+    }
+}

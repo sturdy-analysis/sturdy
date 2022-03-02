@@ -1,0 +1,1557 @@
+final class sun.security.ssl.StatusResponseManager extends java.lang.Object
+{
+    private static final int DEFAULT_CORE_THREADS;
+    private static final int DEFAULT_CACHE_SIZE;
+    private static final int DEFAULT_CACHE_LIFETIME;
+    private final java.util.concurrent.ScheduledThreadPoolExecutor threadMgr;
+    private final sun.security.util.Cache responseCache;
+    private final java.net.URI defaultResponder;
+    private final boolean respOverride;
+    private final int cacheCapacity;
+    private final int cacheLifetime;
+    private final boolean ignoreExtensions;
+
+    void <init>()
+    {
+        java.net.URISyntaxException $r20;
+        java.lang.Integer $r3, $r6;
+        sun.security.ssl.StatusResponseManager$1 $r11;
+        java.net.URI $r19, $r21, r22;
+        boolean $z0, $z1, $z2;
+        java.util.concurrent.ScheduledThreadPoolExecutor $r10, $r13, $r14, $r16, $r17;
+        java.util.concurrent.ThreadPoolExecutor$DiscardPolicy $r12;
+        sun.security.action.GetIntegerAction $r1, $r4;
+        sun.security.ssl.StatusResponseManager r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.lang.String $r7, $r8, $r9;
+        sun.security.util.Cache $r18;
+        java.util.concurrent.TimeUnit $r15;
+        java.lang.Object $r2, $r5;
+
+        r0 := @this: sun.security.ssl.StatusResponseManager;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new sun.security.action.GetIntegerAction;
+
+        specialinvoke $r1.<sun.security.action.GetIntegerAction: void <init>(java.lang.String,int)>("jdk.tls.stapling.cacheSize", 256);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        $r3 = (java.lang.Integer) $r2;
+
+        $i0 = virtualinvoke $r3.<java.lang.Integer: int intValue()>();
+
+        if $i0 <= 0 goto label01;
+
+        $i4 = $i0;
+
+        goto label02;
+
+     label01:
+        $i4 = 0;
+
+     label02:
+        r0.<sun.security.ssl.StatusResponseManager: int cacheCapacity> = $i4;
+
+        $r4 = new sun.security.action.GetIntegerAction;
+
+        specialinvoke $r4.<sun.security.action.GetIntegerAction: void <init>(java.lang.String,int)>("jdk.tls.stapling.cacheLifetime", 3600);
+
+        $r5 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r4);
+
+        $r6 = (java.lang.Integer) $r5;
+
+        $i1 = virtualinvoke $r6.<java.lang.Integer: int intValue()>();
+
+        if $i1 <= 0 goto label03;
+
+        $i5 = $i1;
+
+        goto label04;
+
+     label03:
+        $i5 = 0;
+
+     label04:
+        r0.<sun.security.ssl.StatusResponseManager: int cacheLifetime> = $i5;
+
+        $r7 = staticinvoke <sun.security.action.GetPropertyAction: java.lang.String privilegedGetProperty(java.lang.String)>("jdk.tls.stapling.responderURI");
+
+     label05:
+        if $r7 == null goto label06;
+
+        $z2 = virtualinvoke $r7.<java.lang.String: boolean isEmpty()>();
+
+        if $z2 != 0 goto label06;
+
+        $r19 = new java.net.URI;
+
+        $r21 = $r19;
+
+        specialinvoke $r19.<java.net.URI: void <init>(java.lang.String)>($r7);
+
+        goto label07;
+
+     label06:
+        $r21 = null;
+
+     label07:
+        r22 = $r21;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r20 := @caughtexception;
+
+        r22 = null;
+
+     label10:
+        r0.<sun.security.ssl.StatusResponseManager: java.net.URI defaultResponder> = r22;
+
+        $r8 = staticinvoke <sun.security.action.GetPropertyAction: java.lang.String privilegedGetProperty(java.lang.String)>("jdk.tls.stapling.responderOverride");
+
+        $z0 = staticinvoke <java.lang.Boolean: boolean parseBoolean(java.lang.String)>($r8);
+
+        r0.<sun.security.ssl.StatusResponseManager: boolean respOverride> = $z0;
+
+        $r9 = staticinvoke <sun.security.action.GetPropertyAction: java.lang.String privilegedGetProperty(java.lang.String)>("jdk.tls.stapling.ignoreExtensions");
+
+        $z1 = staticinvoke <java.lang.Boolean: boolean parseBoolean(java.lang.String)>($r9);
+
+        r0.<sun.security.ssl.StatusResponseManager: boolean ignoreExtensions> = $z1;
+
+        $r10 = new java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        $r11 = new sun.security.ssl.StatusResponseManager$1;
+
+        specialinvoke $r11.<sun.security.ssl.StatusResponseManager$1: void <init>(sun.security.ssl.StatusResponseManager)>(r0);
+
+        $r12 = new java.util.concurrent.ThreadPoolExecutor$DiscardPolicy;
+
+        specialinvoke $r12.<java.util.concurrent.ThreadPoolExecutor$DiscardPolicy: void <init>()>();
+
+        specialinvoke $r10.<java.util.concurrent.ScheduledThreadPoolExecutor: void <init>(int,java.util.concurrent.ThreadFactory,java.util.concurrent.RejectedExecutionHandler)>(8, $r11, $r12);
+
+        r0.<sun.security.ssl.StatusResponseManager: java.util.concurrent.ScheduledThreadPoolExecutor threadMgr> = $r10;
+
+        $r13 = r0.<sun.security.ssl.StatusResponseManager: java.util.concurrent.ScheduledThreadPoolExecutor threadMgr>;
+
+        virtualinvoke $r13.<java.util.concurrent.ScheduledThreadPoolExecutor: void setExecuteExistingDelayedTasksAfterShutdownPolicy(boolean)>(0);
+
+        $r14 = r0.<sun.security.ssl.StatusResponseManager: java.util.concurrent.ScheduledThreadPoolExecutor threadMgr>;
+
+        virtualinvoke $r14.<java.util.concurrent.ScheduledThreadPoolExecutor: void setContinueExistingPeriodicTasksAfterShutdownPolicy(boolean)>(0);
+
+        $r16 = r0.<sun.security.ssl.StatusResponseManager: java.util.concurrent.ScheduledThreadPoolExecutor threadMgr>;
+
+        $r15 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MILLISECONDS>;
+
+        virtualinvoke $r16.<java.util.concurrent.ScheduledThreadPoolExecutor: void setKeepAliveTime(long,java.util.concurrent.TimeUnit)>(5000L, $r15);
+
+        $r17 = r0.<sun.security.ssl.StatusResponseManager: java.util.concurrent.ScheduledThreadPoolExecutor threadMgr>;
+
+        virtualinvoke $r17.<java.util.concurrent.ScheduledThreadPoolExecutor: void allowCoreThreadTimeOut(boolean)>(1);
+
+        $i3 = r0.<sun.security.ssl.StatusResponseManager: int cacheCapacity>;
+
+        $i2 = r0.<sun.security.ssl.StatusResponseManager: int cacheLifetime>;
+
+        $r18 = staticinvoke <sun.security.util.Cache: sun.security.util.Cache newSoftMemoryCache(int,int)>($i3, $i2);
+
+        r0.<sun.security.ssl.StatusResponseManager: sun.security.util.Cache responseCache> = $r18;
+
+        return;
+
+        catch java.net.URISyntaxException from label05 to label08 with label09;
+    }
+
+    int getCacheLifetime()
+    {
+        int $i0;
+        sun.security.ssl.StatusResponseManager r0;
+
+        r0 := @this: sun.security.ssl.StatusResponseManager;
+
+        $i0 = r0.<sun.security.ssl.StatusResponseManager: int cacheLifetime>;
+
+        return $i0;
+    }
+
+    int getCacheCapacity()
+    {
+        int $i0;
+        sun.security.ssl.StatusResponseManager r0;
+
+        r0 := @this: sun.security.ssl.StatusResponseManager;
+
+        $i0 = r0.<sun.security.ssl.StatusResponseManager: int cacheCapacity>;
+
+        return $i0;
+    }
+
+    java.net.URI getDefaultResponder()
+    {
+        sun.security.ssl.StatusResponseManager r0;
+        java.net.URI $r1;
+
+        r0 := @this: sun.security.ssl.StatusResponseManager;
+
+        $r1 = r0.<sun.security.ssl.StatusResponseManager: java.net.URI defaultResponder>;
+
+        return $r1;
+    }
+
+    boolean getURIOverride()
+    {
+        sun.security.ssl.StatusResponseManager r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.ssl.StatusResponseManager;
+
+        $z0 = r0.<sun.security.ssl.StatusResponseManager: boolean respOverride>;
+
+        return $z0;
+    }
+
+    boolean getIgnoreExtensions()
+    {
+        sun.security.ssl.StatusResponseManager r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.ssl.StatusResponseManager;
+
+        $z0 = r0.<sun.security.ssl.StatusResponseManager: boolean ignoreExtensions>;
+
+        return $z0;
+    }
+
+    void clear()
+    {
+        sun.security.ssl.StatusResponseManager r0;
+        java.lang.Object[] $r1;
+        sun.security.util.Cache $r2;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.security.ssl.StatusResponseManager;
+
+        $z0 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z0 == 0 goto label1;
+
+        $z1 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("respmgr");
+
+        if $z1 == 0 goto label1;
+
+        $r1 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Clearing response cache", $r1);
+
+     label1:
+        $r2 = r0.<sun.security.ssl.StatusResponseManager: sun.security.util.Cache responseCache>;
+
+        virtualinvoke $r2.<sun.security.util.Cache: void clear()>();
+
+        return;
+    }
+
+    int size()
+    {
+        int $i0;
+        sun.security.ssl.StatusResponseManager r0;
+        sun.security.util.Cache $r1;
+
+        r0 := @this: sun.security.ssl.StatusResponseManager;
+
+        $r1 = r0.<sun.security.ssl.StatusResponseManager: sun.security.util.Cache responseCache>;
+
+        $i0 = virtualinvoke $r1.<sun.security.util.Cache: int size()>();
+
+        return $i0;
+    }
+
+    java.net.URI getURI(java.security.cert.X509Certificate)
+    {
+        java.security.cert.X509Certificate r0;
+        byte[] $r3;
+        java.lang.Object[] $r12, $r13;
+        sun.security.ssl.StatusResponseManager r4;
+        sun.security.util.ObjectIdentifier $r1;
+        java.lang.String $r2, $r11;
+        java.net.URI $r5, $r6, $r9, $r14, $r15;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.lang.StringBuilder $r7, $r8, $r10;
+
+        r4 := @this: sun.security.ssl.StatusResponseManager;
+
+        r0 := @parameter0: java.security.cert.X509Certificate;
+
+        staticinvoke <java.util.Objects: java.lang.Object requireNonNull(java.lang.Object)>(r0);
+
+        $r1 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier OCSPNoCheck_Id>;
+
+        $r2 = virtualinvoke $r1.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        $r3 = virtualinvoke r0.<java.security.cert.X509Certificate: byte[] getExtensionValue(java.lang.String)>($r2);
+
+        if $r3 == null goto label2;
+
+        $z3 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z3 == 0 goto label1;
+
+        $z4 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("respmgr");
+
+        if $z4 == 0 goto label1;
+
+        $r13 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("OCSP NoCheck extension found.  OCSP will be skipped", $r13);
+
+     label1:
+        return null;
+
+     label2:
+        $r5 = r4.<sun.security.ssl.StatusResponseManager: java.net.URI defaultResponder>;
+
+        if $r5 == null goto label4;
+
+        $z0 = r4.<sun.security.ssl.StatusResponseManager: boolean respOverride>;
+
+        if $z0 == 0 goto label4;
+
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label3;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("respmgr");
+
+        if $z2 == 0 goto label3;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Responder override: URI is ");
+
+        $r9 = r4.<sun.security.ssl.StatusResponseManager: java.net.URI defaultResponder>;
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r12 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r11, $r12);
+
+     label3:
+        $r14 = r4.<sun.security.ssl.StatusResponseManager: java.net.URI defaultResponder>;
+
+        return $r14;
+
+     label4:
+        $r6 = staticinvoke <sun.security.provider.certpath.OCSP: java.net.URI getResponderURI(java.security.cert.X509Certificate)>(r0);
+
+        if $r6 == null goto label5;
+
+        $r15 = $r6;
+
+        goto label6;
+
+     label5:
+        $r15 = r4.<sun.security.ssl.StatusResponseManager: java.net.URI defaultResponder>;
+
+     label6:
+        return $r15;
+    }
+
+    void shutdown()
+    {
+        java.lang.Object[] $r7;
+        java.util.concurrent.ScheduledThreadPoolExecutor $r3, $r8;
+        sun.security.ssl.StatusResponseManager r0;
+        int $i0;
+        java.lang.StringBuilder $r1, $r2, $r4, $r5;
+        java.lang.String $r6;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.security.ssl.StatusResponseManager;
+
+        $z0 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z0 == 0 goto label1;
+
+        $z1 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("respmgr");
+
+        if $z1 == 0 goto label1;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Shutting down ");
+
+        $r3 = r0.<sun.security.ssl.StatusResponseManager: java.util.concurrent.ScheduledThreadPoolExecutor threadMgr>;
+
+        $i0 = virtualinvoke $r3.<java.util.concurrent.ScheduledThreadPoolExecutor: int getActiveCount()>();
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" active threads");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r7 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r6, $r7);
+
+     label1:
+        $r8 = r0.<sun.security.ssl.StatusResponseManager: java.util.concurrent.ScheduledThreadPoolExecutor threadMgr>;
+
+        virtualinvoke $r8.<java.util.concurrent.ScheduledThreadPoolExecutor: void shutdown()>();
+
+        return;
+    }
+
+    java.util.Map get(sun.security.ssl.CertStatusExtension$CertStatusRequestType, sun.security.ssl.CertStatusExtension$CertStatusRequest, java.security.cert.X509Certificate[], long, java.util.concurrent.TimeUnit)
+    {
+        byte[] $r17, $r34, $r45;
+        java.util.concurrent.Future r63;
+        java.util.Map $r47, $r65;
+        java.math.BigInteger $r29, $r40;
+        sun.security.ssl.CertStatusExtension$OCSPStatusRequest r61, r62;
+        java.lang.Exception $r55;
+        java.lang.StringBuilder $r19, $r20, $r21, $r48, $r49, $r50, $r51, $r52;
+        sun.security.ssl.CertStatusExtension$CertStatusRequestType r3, $r4, $r5;
+        java.lang.Object[] $r12, $r14, $r23, $r54, $r56, $r58, $r60;
+        long l0;
+        java.util.ArrayList $r1;
+        sun.security.ssl.StatusResponseManager$ResponseCacheEntry $r15, $r16, $r30, $r41;
+        java.lang.String $r22, $r53;
+        java.io.IOException $r57, $r59;
+        java.security.cert.X509Certificate $r18, $r27, $r28, $r32, $r35, $r38, $r39, $r43, $r46;
+        sun.security.ssl.StatusResponseManager$OCSPFetchCall $r33, $r44;
+        sun.security.provider.certpath.CertId $r25, $r36;
+        sun.security.ssl.CertStatusExtension$CertStatusRequest r24;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17;
+        sun.security.ssl.StatusResponseManager$StatusInfo $r31, $r42, r64;
+        java.util.concurrent.ScheduledThreadPoolExecutor $r8;
+        java.util.List $r9;
+        java.security.cert.X509Certificate[] r2;
+        java.util.HashMap $r0;
+        sun.security.ssl.StatusResponseManager r6;
+        int $i1, $i2, $i3, $i4, $i5, i6;
+        java.util.Iterator $r10;
+        sun.security.x509.SerialNumber $r26, $r37;
+        java.util.concurrent.TimeUnit r7;
+        java.lang.Object $r11, $r13;
+
+        r6 := @this: sun.security.ssl.StatusResponseManager;
+
+        r3 := @parameter0: sun.security.ssl.CertStatusExtension$CertStatusRequestType;
+
+        r24 := @parameter1: sun.security.ssl.CertStatusExtension$CertStatusRequest;
+
+        r2 := @parameter2: java.security.cert.X509Certificate[];
+
+        l0 := @parameter3: long;
+
+        r7 := @parameter4: java.util.concurrent.TimeUnit;
+
+        $r0 = new java.util.HashMap;
+
+        specialinvoke $r0.<java.util.HashMap: void <init>()>();
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        $z0 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z0 == 0 goto label01;
+
+        $z9 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("respmgr");
+
+        if $z9 == 0 goto label01;
+
+        $r48 = new java.lang.StringBuilder;
+
+        specialinvoke $r48.<java.lang.StringBuilder: void <init>()>();
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Beginning check: Type = ");
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r3);
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", Chain length = ");
+
+        $i4 = lengthof r2;
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r54 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r53, $r54);
+
+     label01:
+        $i5 = lengthof r2;
+
+        if $i5 >= 2 goto label02;
+
+        $r47 = staticinvoke <java.util.Collections: java.util.Map emptyMap()>();
+
+        return $r47;
+
+     label02:
+        $r4 = <sun.security.ssl.CertStatusExtension$CertStatusRequestType: sun.security.ssl.CertStatusExtension$CertStatusRequestType OCSP>;
+
+        if r3 != $r4 goto label08;
+
+     label03:
+        r61 = (sun.security.ssl.CertStatusExtension$OCSPStatusRequest) r24;
+
+        $r36 = new sun.security.provider.certpath.CertId;
+
+        $r39 = r2[1];
+
+        $r37 = new sun.security.x509.SerialNumber;
+
+        $r38 = r2[0];
+
+        $r40 = virtualinvoke $r38.<java.security.cert.X509Certificate: java.math.BigInteger getSerialNumber()>();
+
+        specialinvoke $r37.<sun.security.x509.SerialNumber: void <init>(java.math.BigInteger)>($r40);
+
+        specialinvoke $r36.<sun.security.provider.certpath.CertId: void <init>(java.security.cert.X509Certificate,sun.security.x509.SerialNumber)>($r39, $r37);
+
+        $r41 = specialinvoke r6.<sun.security.ssl.StatusResponseManager: sun.security.ssl.StatusResponseManager$ResponseCacheEntry getFromCache(sun.security.provider.certpath.CertId,sun.security.ssl.CertStatusExtension$OCSPStatusRequest)>($r36, r61);
+
+        if $r41 == null goto label04;
+
+        $r46 = r2[0];
+
+        $r45 = $r41.<sun.security.ssl.StatusResponseManager$ResponseCacheEntry: byte[] ocspBytes>;
+
+        interfaceinvoke $r0.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r46, $r45);
+
+        goto label05;
+
+     label04:
+        $r42 = new sun.security.ssl.StatusResponseManager$StatusInfo;
+
+        $r43 = r2[0];
+
+        specialinvoke $r42.<sun.security.ssl.StatusResponseManager$StatusInfo: void <init>(sun.security.ssl.StatusResponseManager,java.security.cert.X509Certificate,sun.security.provider.certpath.CertId)>(r6, $r43, $r36);
+
+        $r44 = new sun.security.ssl.StatusResponseManager$OCSPFetchCall;
+
+        specialinvoke $r44.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: void <init>(sun.security.ssl.StatusResponseManager,sun.security.ssl.StatusResponseManager$StatusInfo,sun.security.ssl.CertStatusExtension$OCSPStatusRequest)>(r6, $r42, r61);
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>($r44);
+
+     label05:
+        goto label17;
+
+     label06:
+        $r59 := @caughtexception;
+
+        $z14 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z14 == 0 goto label07;
+
+        $z15 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("respmgr");
+
+        if $z15 == 0 goto label07;
+
+        $r60 = newarray (java.lang.Object)[1];
+
+        $r60[0] = $r59;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Exception during CertId creation: ", $r60);
+
+     label07:
+        goto label17;
+
+     label08:
+        $r5 = <sun.security.ssl.CertStatusExtension$CertStatusRequestType: sun.security.ssl.CertStatusExtension$CertStatusRequestType OCSP_MULTI>;
+
+        if r3 != $r5 goto label16;
+
+        r62 = (sun.security.ssl.CertStatusExtension$OCSPStatusRequest) r24;
+
+        i6 = 0;
+
+     label09:
+        $i1 = lengthof r2;
+
+        $i2 = $i1 - 1;
+
+        if i6 >= $i2 goto label15;
+
+     label10:
+        $r25 = new sun.security.provider.certpath.CertId;
+
+        $i3 = i6 + 1;
+
+        $r28 = r2[$i3];
+
+        $r26 = new sun.security.x509.SerialNumber;
+
+        $r27 = r2[i6];
+
+        $r29 = virtualinvoke $r27.<java.security.cert.X509Certificate: java.math.BigInteger getSerialNumber()>();
+
+        specialinvoke $r26.<sun.security.x509.SerialNumber: void <init>(java.math.BigInteger)>($r29);
+
+        specialinvoke $r25.<sun.security.provider.certpath.CertId: void <init>(java.security.cert.X509Certificate,sun.security.x509.SerialNumber)>($r28, $r26);
+
+        $r30 = specialinvoke r6.<sun.security.ssl.StatusResponseManager: sun.security.ssl.StatusResponseManager$ResponseCacheEntry getFromCache(sun.security.provider.certpath.CertId,sun.security.ssl.CertStatusExtension$OCSPStatusRequest)>($r25, r62);
+
+        if $r30 == null goto label11;
+
+        $r35 = r2[i6];
+
+        $r34 = $r30.<sun.security.ssl.StatusResponseManager$ResponseCacheEntry: byte[] ocspBytes>;
+
+        interfaceinvoke $r0.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r35, $r34);
+
+        goto label12;
+
+     label11:
+        $r31 = new sun.security.ssl.StatusResponseManager$StatusInfo;
+
+        $r32 = r2[i6];
+
+        specialinvoke $r31.<sun.security.ssl.StatusResponseManager$StatusInfo: void <init>(sun.security.ssl.StatusResponseManager,java.security.cert.X509Certificate,sun.security.provider.certpath.CertId)>(r6, $r32, $r25);
+
+        $r33 = new sun.security.ssl.StatusResponseManager$OCSPFetchCall;
+
+        specialinvoke $r33.<sun.security.ssl.StatusResponseManager$OCSPFetchCall: void <init>(sun.security.ssl.StatusResponseManager,sun.security.ssl.StatusResponseManager$StatusInfo,sun.security.ssl.CertStatusExtension$OCSPStatusRequest)>(r6, $r31, r62);
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>($r33);
+
+     label12:
+        goto label14;
+
+     label13:
+        $r57 := @caughtexception;
+
+        $z12 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z12 == 0 goto label14;
+
+        $z13 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("respmgr");
+
+        if $z13 == 0 goto label14;
+
+        $r58 = newarray (java.lang.Object)[1];
+
+        $r58[0] = $r57;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Exception during CertId creation: ", $r58);
+
+     label14:
+        i6 = i6 + 1;
+
+        goto label09;
+
+     label15:
+        goto label17;
+
+     label16:
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label17;
+
+        $z8 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("respmgr");
+
+        if $z8 == 0 goto label17;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported status request type: ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r3);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r23 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r22, $r23);
+
+     label17:
+        $z16 = interfaceinvoke $r1.<java.util.List: boolean isEmpty()>();
+
+        if $z16 != 0 goto label27;
+
+     label18:
+        $r8 = r6.<sun.security.ssl.StatusResponseManager: java.util.concurrent.ScheduledThreadPoolExecutor threadMgr>;
+
+        $r9 = virtualinvoke $r8.<java.util.concurrent.ScheduledThreadPoolExecutor: java.util.List invokeAll(java.util.Collection,long,java.util.concurrent.TimeUnit)>($r1, l0, r7);
+
+        $r10 = interfaceinvoke $r9.<java.util.List: java.util.Iterator iterator()>();
+
+     label19:
+        $z17 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z17 == 0 goto label25;
+
+        $r11 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        r63 = (java.util.concurrent.Future) $r11;
+
+        $z2 = interfaceinvoke r63.<java.util.concurrent.Future: boolean isDone()>();
+
+        if $z2 != 0 goto label20;
+
+        goto label19;
+
+     label20:
+        $z3 = interfaceinvoke r63.<java.util.concurrent.Future: boolean isCancelled()>();
+
+        if $z3 != 0 goto label23;
+
+        $r13 = interfaceinvoke r63.<java.util.concurrent.Future: java.lang.Object get()>();
+
+        r64 = (sun.security.ssl.StatusResponseManager$StatusInfo) $r13;
+
+        if r64 == null goto label21;
+
+        $r15 = r64.<sun.security.ssl.StatusResponseManager$StatusInfo: sun.security.ssl.StatusResponseManager$ResponseCacheEntry responseData>;
+
+        if $r15 == null goto label21;
+
+        $r18 = r64.<sun.security.ssl.StatusResponseManager$StatusInfo: java.security.cert.X509Certificate cert>;
+
+        $r16 = r64.<sun.security.ssl.StatusResponseManager$StatusInfo: sun.security.ssl.StatusResponseManager$ResponseCacheEntry responseData>;
+
+        $r17 = $r16.<sun.security.ssl.StatusResponseManager$ResponseCacheEntry: byte[] ocspBytes>;
+
+        interfaceinvoke $r0.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r18, $r17);
+
+        goto label22;
+
+     label21:
+        $z6 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z6 == 0 goto label22;
+
+        $z7 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("respmgr");
+
+        if $z7 == 0 goto label22;
+
+        $r14 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Completed task had no response data", $r14);
+
+     label22:
+        goto label24;
+
+     label23:
+        $z4 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z4 == 0 goto label24;
+
+        $z5 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("respmgr");
+
+        if $z5 == 0 goto label24;
+
+        $r12 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Found cancelled task", $r12);
+
+     label24:
+        goto label19;
+
+     label25:
+        goto label27;
+
+     label26:
+        $r55 := @caughtexception;
+
+        $z10 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z10 == 0 goto label27;
+
+        $z11 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("respmgr");
+
+        if $z11 == 0 goto label27;
+
+        $r56 = newarray (java.lang.Object)[1];
+
+        $r56[0] = $r55;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Exception when getting data: ", $r56);
+
+     label27:
+        $r65 = staticinvoke <java.util.Collections: java.util.Map unmodifiableMap(java.util.Map)>($r0);
+
+        return $r65;
+
+        catch java.io.IOException from label03 to label05 with label06;
+        catch java.io.IOException from label10 to label12 with label13;
+        catch java.lang.InterruptedException from label18 to label25 with label26;
+        catch java.util.concurrent.ExecutionException from label18 to label25 with label26;
+    }
+
+    private sun.security.ssl.StatusResponseManager$ResponseCacheEntry getFromCache(sun.security.provider.certpath.CertId, sun.security.ssl.CertStatusExtension$OCSPStatusRequest)
+    {
+        sun.security.provider.certpath.CertId r4;
+        java.util.Date $r15, $r16, $r17;
+        java.math.BigInteger $r9;
+        sun.security.util.ObjectIdentifier $r22;
+        sun.security.ssl.CertStatusExtension$OCSPStatusRequest r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        java.util.List $r1;
+        java.lang.StringBuilder $r7, $r8, $r10, $r11, $r12;
+        java.lang.Object[] $r14, $r18, $r24;
+        sun.security.ssl.StatusResponseManager r3;
+        sun.security.ssl.StatusResponseManager$ResponseCacheEntry r25;
+        java.lang.String $r13, $r21, $r23, $r26;
+        java.util.Iterator $r2;
+        sun.security.util.Cache $r5;
+        java.security.cert.Extension r20;
+        java.lang.Object $r6, $r19;
+
+        r3 := @this: sun.security.ssl.StatusResponseManager;
+
+        r4 := @parameter0: sun.security.provider.certpath.CertId;
+
+        r0 := @parameter1: sun.security.ssl.CertStatusExtension$OCSPStatusRequest;
+
+        $r1 = r0.<sun.security.ssl.CertStatusExtension$OCSPStatusRequest: java.util.List extensions>;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r19 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r20 = (java.security.cert.Extension) $r19;
+
+        $r21 = interfaceinvoke r20.<java.security.cert.Extension: java.lang.String getId()>();
+
+        $r22 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier OCSPNonce_Id>;
+
+        $r23 = virtualinvoke $r22.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        $z5 = virtualinvoke $r21.<java.lang.String: boolean equals(java.lang.Object)>($r23);
+
+        if $z5 == 0 goto label3;
+
+        $z6 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z6 == 0 goto label2;
+
+        $z7 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("respmgr");
+
+        if $z7 == 0 goto label2;
+
+        $r24 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Nonce extension found, skipping cache check", $r24);
+
+     label2:
+        return null;
+
+     label3:
+        goto label1;
+
+     label4:
+        $r5 = r3.<sun.security.ssl.StatusResponseManager: sun.security.util.Cache responseCache>;
+
+        $r6 = virtualinvoke $r5.<sun.security.util.Cache: java.lang.Object get(java.lang.Object)>(r4);
+
+        r25 = (sun.security.ssl.StatusResponseManager$ResponseCacheEntry) $r6;
+
+        if r25 == null goto label6;
+
+        $r15 = r25.<sun.security.ssl.StatusResponseManager$ResponseCacheEntry: java.util.Date nextUpdate>;
+
+        if $r15 == null goto label6;
+
+        $r17 = r25.<sun.security.ssl.StatusResponseManager$ResponseCacheEntry: java.util.Date nextUpdate>;
+
+        $r16 = new java.util.Date;
+
+        specialinvoke $r16.<java.util.Date: void <init>()>();
+
+        $z2 = virtualinvoke $r17.<java.util.Date: boolean before(java.util.Date)>($r16);
+
+        if $z2 == 0 goto label6;
+
+        $z3 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z3 == 0 goto label5;
+
+        $z4 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("respmgr");
+
+        if $z4 == 0 goto label5;
+
+        $r18 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("nextUpdate threshold exceeded, purging from cache", $r18);
+
+     label5:
+        r25 = null;
+
+     label6:
+        $z8 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z8 == 0 goto label9;
+
+        $z1 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("respmgr");
+
+        if $z1 == 0 goto label9;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Check cache for SN");
+
+        $r9 = virtualinvoke r4.<sun.security.provider.certpath.CertId: java.math.BigInteger getSerialNumber()>();
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        if r25 == null goto label7;
+
+        $r26 = "HIT";
+
+        goto label8;
+
+     label7:
+        $r26 = "MISS";
+
+     label8:
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r26);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r14 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r13, $r14);
+
+     label9:
+        return r25;
+    }
+
+    public java.lang.String toString()
+    {
+        java.util.concurrent.ScheduledThreadPoolExecutor $r3;
+        sun.security.ssl.StatusResponseManager r2;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.lang.StringBuilder $r0, $r1, $r7, $r8;
+        java.net.URI $r4, $r6;
+        java.lang.String $r5;
+
+        r2 := @this: sun.security.ssl.StatusResponseManager;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>(java.lang.String)>("StatusResponseManager: ");
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Core threads: ");
+
+        $r3 = r2.<sun.security.ssl.StatusResponseManager: java.util.concurrent.ScheduledThreadPoolExecutor threadMgr>;
+
+        $i0 = virtualinvoke $r3.<java.util.concurrent.ScheduledThreadPoolExecutor: int getCorePoolSize()>();
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", Cache timeout: ");
+
+        $i1 = r2.<sun.security.ssl.StatusResponseManager: int cacheLifetime>;
+
+        if $i1 <= 0 goto label1;
+
+        $i4 = r2.<sun.security.ssl.StatusResponseManager: int cacheLifetime>;
+
+        $r8 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" seconds");
+
+        goto label2;
+
+     label1:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" indefinite");
+
+     label2:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", Cache MaxSize: ");
+
+        $i2 = r2.<sun.security.ssl.StatusResponseManager: int cacheCapacity>;
+
+        if $i2 <= 0 goto label3;
+
+        $i3 = r2.<sun.security.ssl.StatusResponseManager: int cacheCapacity>;
+
+        $r7 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" items");
+
+        goto label4;
+
+     label3:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" unbounded");
+
+     label4:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", Default URI: ");
+
+        $r4 = r2.<sun.security.ssl.StatusResponseManager: java.net.URI defaultResponder>;
+
+        if $r4 == null goto label5;
+
+        $r6 = r2.<sun.security.ssl.StatusResponseManager: java.net.URI defaultResponder>;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        goto label6;
+
+     label5:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("NONE");
+
+     label6:
+        $r5 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r5;
+    }
+
+    static final sun.security.ssl.StatusResponseManager$StaplingParameters processStapling(sun.security.ssl.ServerHandshakeContext)
+    {
+        byte[] r61;
+        byte $b3, $b4, $b5, $b10;
+        java.util.Map r3, $r18;
+        sun.security.ssl.CertStatusExtension$OCSPStatusRequest r50, r51, r55;
+        sun.security.ssl.ServerHandshakeContext r0;
+        sun.security.ssl.SSLPossession r57;
+        java.lang.StringBuilder $r25, $r26, $r27, $r62;
+        java.lang.Object[] $r2, $r10, $r15, $r19, $r23, $r29, $r30, $r34, $r35, $r37, $r44;
+        sun.security.ssl.CertStatusExtension$CertStatusRequestType $r38, $r39, $r41, r47, $r53, $r54, $r59, $r60;
+        long $l0;
+        sun.security.ssl.ProtocolVersion $r16, $r36;
+        java.lang.String $r28;
+        sun.security.ssl.CertStatusExtension$CertStatusRequest[] $r49;
+        java.security.cert.X509Certificate $r21;
+        sun.security.ssl.CertStatusExtension$CertStatusRequest $r32, $r43, r48, $r52;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19, $z20, $z21, $z22, $z23, $z24, $z25, $z26, $z27, $z28, $z29, $z30, $z31;
+        sun.security.ssl.StatusResponseManager$StaplingParameters r45, $r63;
+        sun.security.ssl.SSLContextImpl $r1, $r13;
+        sun.security.ssl.X509Authentication$X509Possession r56;
+        java.util.List $r11, $r33, $r40, $r42;
+        java.security.cert.X509Certificate[] r58;
+        sun.security.ssl.CertStatusExtension$CertStatusRequestSpec r6;
+        sun.security.ssl.CertStatusExtension$CertStatusRequestV2Spec r9;
+        sun.security.ssl.StatusResponseManager $r14;
+        int $i1, $i2, i6, i7, i8, $i9, $i12, $i14, $i16, $i18;
+        java.util.Iterator $r12;
+        sun.security.ssl.SSLExtension $r4, $r7, r46;
+        java.util.concurrent.TimeUnit $r17;
+        java.lang.Object $r5, $r8, $r22, $r31;
+
+        r0 := @parameter0: sun.security.ssl.ServerHandshakeContext;
+
+        r45 = null;
+
+        r46 = null;
+
+        r47 = null;
+
+        r48 = null;
+
+        $r1 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLContextImpl sslContext>;
+
+        $z0 = virtualinvoke $r1.<sun.security.ssl.SSLContextImpl: boolean isStaplingEnabled(boolean)>(0);
+
+        if $z0 == 0 goto label01;
+
+        $z3 = r0.<sun.security.ssl.ServerHandshakeContext: boolean isResumption>;
+
+        if $z3 == 0 goto label03;
+
+     label01:
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label02;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z2 == 0 goto label02;
+
+        $r2 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Staping disabled or is a resumed session", $r2);
+
+     label02:
+        return null;
+
+     label03:
+        r3 = r0.<sun.security.ssl.ServerHandshakeContext: java.util.Map handshakeExtensions>;
+
+        $r4 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension CH_STATUS_REQUEST>;
+
+        $r5 = interfaceinvoke r3.<java.util.Map: java.lang.Object get(java.lang.Object)>($r4);
+
+        r6 = (sun.security.ssl.CertStatusExtension$CertStatusRequestSpec) $r5;
+
+        $r7 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension CH_STATUS_REQUEST_V2>;
+
+        $r8 = interfaceinvoke r3.<java.util.Map: java.lang.Object get(java.lang.Object)>($r7);
+
+        r9 = (sun.security.ssl.CertStatusExtension$CertStatusRequestV2Spec) $r8;
+
+        if r9 == null goto label13;
+
+        $r36 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $z23 = virtualinvoke $r36.<sun.security.ssl.ProtocolVersion: boolean useTLS13PlusSpec()>();
+
+        if $z23 != 0 goto label13;
+
+        $z24 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z24 == 0 goto label04;
+
+        $z29 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake,verbose");
+
+        if $z29 == 0 goto label04;
+
+        $r44 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("SH Processing status_request_v2 extension", $r44);
+
+     label04:
+        r46 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension CH_STATUS_REQUEST_V2>;
+
+        $i12 = (int) -1;
+
+        i6 = $i12;
+
+        $i14 = (int) -1;
+
+        i7 = $i14;
+
+        $r49 = r9.<sun.security.ssl.CertStatusExtension$CertStatusRequestV2Spec: sun.security.ssl.CertStatusExtension$CertStatusRequest[] certStatusRequests>;
+
+        i8 = 0;
+
+     label05:
+        $i9 = lengthof $r49;
+
+        if i8 >= $i9 goto label10;
+
+        $i16 = (int) -1;
+
+        if i6 == $i16 goto label06;
+
+        $i18 = (int) -1;
+
+        if i7 != $i18 goto label10;
+
+     label06:
+        $r43 = $r49[i8];
+
+        $b5 = $r43.<sun.security.ssl.CertStatusExtension$CertStatusRequest: byte statusType>;
+
+        $r38 = staticinvoke <sun.security.ssl.CertStatusExtension$CertStatusRequestType: sun.security.ssl.CertStatusExtension$CertStatusRequestType valueOf(byte)>($b5);
+
+        if i6 >= 0 goto label08;
+
+        $r41 = <sun.security.ssl.CertStatusExtension$CertStatusRequestType: sun.security.ssl.CertStatusExtension$CertStatusRequestType OCSP>;
+
+        if $r38 != $r41 goto label08;
+
+        r50 = (sun.security.ssl.CertStatusExtension$OCSPStatusRequest) $r43;
+
+        $r42 = r50.<sun.security.ssl.CertStatusExtension$OCSPStatusRequest: java.util.List responderIds>;
+
+        $z28 = interfaceinvoke $r42.<java.util.List: boolean isEmpty()>();
+
+        if $z28 == 0 goto label07;
+
+        i6 = i8;
+
+     label07:
+        goto label09;
+
+     label08:
+        if i7 >= 0 goto label09;
+
+        $r39 = <sun.security.ssl.CertStatusExtension$CertStatusRequestType: sun.security.ssl.CertStatusExtension$CertStatusRequestType OCSP_MULTI>;
+
+        if $r38 != $r39 goto label09;
+
+        r51 = (sun.security.ssl.CertStatusExtension$OCSPStatusRequest) $r43;
+
+        $r40 = r51.<sun.security.ssl.CertStatusExtension$OCSPStatusRequest: java.util.List responderIds>;
+
+        $z27 = interfaceinvoke $r40.<java.util.List: boolean isEmpty()>();
+
+        if $z27 == 0 goto label09;
+
+        i7 = i8;
+
+     label09:
+        i8 = i8 + 1;
+
+        goto label05;
+
+     label10:
+        if i7 < 0 goto label11;
+
+        r48 = $r49[i7];
+
+        $b4 = r48.<sun.security.ssl.CertStatusExtension$CertStatusRequest: byte statusType>;
+
+        r47 = staticinvoke <sun.security.ssl.CertStatusExtension$CertStatusRequestType: sun.security.ssl.CertStatusExtension$CertStatusRequestType valueOf(byte)>($b4);
+
+        goto label13;
+
+     label11:
+        if i6 < 0 goto label12;
+
+        r48 = $r49[i6];
+
+        $b3 = r48.<sun.security.ssl.CertStatusExtension$CertStatusRequest: byte statusType>;
+
+        r47 = staticinvoke <sun.security.ssl.CertStatusExtension$CertStatusRequestType: sun.security.ssl.CertStatusExtension$CertStatusRequestType valueOf(byte)>($b3);
+
+        goto label13;
+
+     label12:
+        $z25 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z25 == 0 goto label13;
+
+        $z26 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z26 == 0 goto label13;
+
+        $r37 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>("Warning: No suitable request found in the status_request_v2 extension.", $r37);
+
+     label13:
+        if r6 == null goto label17;
+
+        if r46 == null goto label14;
+
+        if r47 == null goto label14;
+
+        if r48 != null goto label17;
+
+     label14:
+        $z30 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z30 == 0 goto label15;
+
+        $z22 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake,verbose");
+
+        if $z22 == 0 goto label15;
+
+        $r35 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("SH Processing status_request extension", $r35);
+
+     label15:
+        r46 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension CH_STATUS_REQUEST>;
+
+        $r52 = r6.<sun.security.ssl.CertStatusExtension$CertStatusRequestSpec: sun.security.ssl.CertStatusExtension$CertStatusRequest statusRequest>;
+
+        $b10 = $r52.<sun.security.ssl.CertStatusExtension$CertStatusRequest: byte statusType>;
+
+        $r53 = staticinvoke <sun.security.ssl.CertStatusExtension$CertStatusRequestType: sun.security.ssl.CertStatusExtension$CertStatusRequestType valueOf(byte)>($b10);
+
+        r47 = $r53;
+
+        $r54 = <sun.security.ssl.CertStatusExtension$CertStatusRequestType: sun.security.ssl.CertStatusExtension$CertStatusRequestType OCSP>;
+
+        if $r53 != $r54 goto label17;
+
+        $r32 = r6.<sun.security.ssl.CertStatusExtension$CertStatusRequestSpec: sun.security.ssl.CertStatusExtension$CertStatusRequest statusRequest>;
+
+        r55 = (sun.security.ssl.CertStatusExtension$OCSPStatusRequest) $r32;
+
+        $r33 = r55.<sun.security.ssl.CertStatusExtension$OCSPStatusRequest: java.util.List responderIds>;
+
+        $z19 = interfaceinvoke $r33.<java.util.List: boolean isEmpty()>();
+
+        if $z19 == 0 goto label16;
+
+        r48 = r55;
+
+        goto label17;
+
+     label16:
+        $z20 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z20 == 0 goto label17;
+
+        $z21 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z21 == 0 goto label17;
+
+        $r34 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>("Warning: No suitable request found in the status_request extension.", $r34);
+
+     label17:
+        if r47 == null goto label18;
+
+        if r48 == null goto label18;
+
+        if r46 != null goto label20;
+
+     label18:
+        $z31 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z31 == 0 goto label19;
+
+        $z4 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z4 == 0 goto label19;
+
+        $r10 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("No suitable status_request or status_request_v2, stapling is disabled", $r10);
+
+     label19:
+        return null;
+
+     label20:
+        r56 = null;
+
+        $r11 = r0.<sun.security.ssl.ServerHandshakeContext: java.util.List handshakePossessions>;
+
+        $r12 = interfaceinvoke $r11.<java.util.List: java.util.Iterator iterator()>();
+
+     label21:
+        $z5 = interfaceinvoke $r12.<java.util.Iterator: boolean hasNext()>();
+
+        if $z5 == 0 goto label23;
+
+        $r31 = interfaceinvoke $r12.<java.util.Iterator: java.lang.Object next()>();
+
+        r57 = (sun.security.ssl.SSLPossession) $r31;
+
+        $z18 = r57 instanceof sun.security.ssl.X509Authentication$X509Possession;
+
+        if $z18 == 0 goto label22;
+
+        r56 = (sun.security.ssl.X509Authentication$X509Possession) r57;
+
+        goto label23;
+
+     label22:
+        goto label21;
+
+     label23:
+        if r56 != null goto label25;
+
+        $z16 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z16 == 0 goto label24;
+
+        $z17 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z17 == 0 goto label24;
+
+        $r30 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>("Warning: no X.509 certificates found.  Stapling is disabled.", $r30);
+
+     label24:
+        return null;
+
+     label25:
+        r58 = r56.<sun.security.ssl.X509Authentication$X509Possession: java.security.cert.X509Certificate[] popCerts>;
+
+        $r13 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLContextImpl sslContext>;
+
+        $r14 = virtualinvoke $r13.<sun.security.ssl.SSLContextImpl: sun.security.ssl.StatusResponseManager getStatusResponseManager()>();
+
+        if $r14 == null goto label34;
+
+        $r16 = r0.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $z8 = virtualinvoke $r16.<sun.security.ssl.ProtocolVersion: boolean useTLS13PlusSpec()>();
+
+        if $z8 == 0 goto label26;
+
+        $r59 = <sun.security.ssl.CertStatusExtension$CertStatusRequestType: sun.security.ssl.CertStatusExtension$CertStatusRequestType OCSP_MULTI>;
+
+        goto label27;
+
+     label26:
+        $r59 = r47;
+
+     label27:
+        $l0 = r0.<sun.security.ssl.ServerHandshakeContext: long statusRespTimeout>;
+
+        $r17 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MILLISECONDS>;
+
+        $r18 = virtualinvoke $r14.<sun.security.ssl.StatusResponseManager: java.util.Map get(sun.security.ssl.CertStatusExtension$CertStatusRequestType,sun.security.ssl.CertStatusExtension$CertStatusRequest,java.security.cert.X509Certificate[],long,java.util.concurrent.TimeUnit)>($r59, r48, r58, $l0, $r17);
+
+        $z9 = interfaceinvoke $r18.<java.util.Map: boolean isEmpty()>();
+
+        if $z9 != 0 goto label32;
+
+        $z12 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z12 == 0 goto label28;
+
+        $z15 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z15 == 0 goto label28;
+
+        $r62 = new java.lang.StringBuilder;
+
+        specialinvoke $r62.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r62.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Response manager returned ");
+
+        $i2 = interfaceinvoke $r18.<java.util.Map: int size()>();
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" entries.");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r29 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>($r28, $r29);
+
+     label28:
+        $r60 = <sun.security.ssl.CertStatusExtension$CertStatusRequestType: sun.security.ssl.CertStatusExtension$CertStatusRequestType OCSP>;
+
+        if r47 != $r60 goto label31;
+
+        $r21 = r58[0];
+
+        $r22 = interfaceinvoke $r18.<java.util.Map: java.lang.Object get(java.lang.Object)>($r21);
+
+        r61 = (byte[]) $r22;
+
+        if r61 == null goto label29;
+
+        $i1 = lengthof r61;
+
+        if $i1 > 0 goto label31;
+
+     label29:
+        $z13 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z13 == 0 goto label30;
+
+        $z14 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z14 == 0 goto label30;
+
+        $r23 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>("Warning: Null or zero-length response found for leaf certificate. Stapling is disabled.", $r23);
+
+     label30:
+        return null;
+
+     label31:
+        $r63 = new sun.security.ssl.StatusResponseManager$StaplingParameters;
+
+        specialinvoke $r63.<sun.security.ssl.StatusResponseManager$StaplingParameters: void <init>(sun.security.ssl.SSLExtension,sun.security.ssl.CertStatusExtension$CertStatusRequestType,sun.security.ssl.CertStatusExtension$CertStatusRequest,java.util.Map)>(r46, r47, r48, $r18);
+
+        r45 = $r63;
+
+        goto label33;
+
+     label32:
+        $z10 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z10 == 0 goto label33;
+
+        $z11 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z11 == 0 goto label33;
+
+        $r19 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>("Warning: no OCSP responses obtained.  Stapling is disabled.", $r19);
+
+     label33:
+        goto label36;
+
+     label34:
+        $z6 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z6 == 0 goto label35;
+
+        $z7 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z7 == 0 goto label35;
+
+        $r15 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void finest(java.lang.String,java.lang.Object[])>("Warning: lazy initialization of the StatusResponseManager failed.  Stapling is disabled.", $r15);
+
+     label35:
+        r45 = null;
+
+     label36:
+        return r45;
+    }
+
+    static boolean access$000(sun.security.ssl.StatusResponseManager)
+    {
+        sun.security.ssl.StatusResponseManager r0;
+        boolean $z0;
+
+        r0 := @parameter0: sun.security.ssl.StatusResponseManager;
+
+        $z0 = r0.<sun.security.ssl.StatusResponseManager: boolean ignoreExtensions>;
+
+        return $z0;
+    }
+
+    static int access$100(sun.security.ssl.StatusResponseManager)
+    {
+        int $i0;
+        sun.security.ssl.StatusResponseManager r0;
+
+        r0 := @parameter0: sun.security.ssl.StatusResponseManager;
+
+        $i0 = r0.<sun.security.ssl.StatusResponseManager: int cacheLifetime>;
+
+        return $i0;
+    }
+
+    static sun.security.util.Cache access$200(sun.security.ssl.StatusResponseManager)
+    {
+        sun.security.ssl.StatusResponseManager r0;
+        sun.security.util.Cache $r1;
+
+        r0 := @parameter0: sun.security.ssl.StatusResponseManager;
+
+        $r1 = r0.<sun.security.ssl.StatusResponseManager: sun.security.util.Cache responseCache>;
+
+        return $r1;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.security.ssl.StatusResponseManager: int DEFAULT_CACHE_LIFETIME> = 3600;
+
+        <sun.security.ssl.StatusResponseManager: int DEFAULT_CACHE_SIZE> = 256;
+
+        <sun.security.ssl.StatusResponseManager: int DEFAULT_CORE_THREADS> = 8;
+
+        return;
+    }
+}

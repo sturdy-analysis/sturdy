@@ -1,0 +1,592 @@
+public class com.sun.corba.se.impl.encoding.CDROutputStream_1_2 extends com.sun.corba.se.impl.encoding.CDROutputStream_1_1
+{
+    protected boolean primitiveAcrossFragmentedChunk;
+    protected boolean specialChunk;
+    private boolean headerPadding;
+
+    public void <init>()
+    {
+        com.sun.corba.se.impl.encoding.CDROutputStream_1_2 r0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.CDROutputStream_1_2;
+
+        specialinvoke r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_1: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: boolean primitiveAcrossFragmentedChunk> = 0;
+
+        r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: boolean specialChunk> = 0;
+
+        return;
+    }
+
+    protected void handleSpecialChunkBegin(int)
+    {
+        com.sun.corba.se.impl.encoding.CDROutputStream_1_2 r0;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9;
+        com.sun.corba.se.impl.encoding.ByteBufferWithInfo $r1, $r2, $r3, $r4, $r5;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.CDROutputStream_1_2;
+
+        i0 := @parameter0: int;
+
+        $z0 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: boolean inBlock>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: com.sun.corba.se.impl.encoding.ByteBufferWithInfo bbwi>;
+
+        $i1 = virtualinvoke $r1.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: int position()>();
+
+        $i3 = i0 + $i1;
+
+        $r2 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: com.sun.corba.se.impl.encoding.ByteBufferWithInfo bbwi>;
+
+        $i2 = $r2.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: int buflen>;
+
+        if $i3 <= $i2 goto label1;
+
+        $r3 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: com.sun.corba.se.impl.encoding.ByteBufferWithInfo bbwi>;
+
+        $i4 = virtualinvoke $r3.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: int position()>();
+
+        $r4 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: com.sun.corba.se.impl.encoding.ByteBufferWithInfo bbwi>;
+
+        $i5 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: int blockSizeIndex>;
+
+        $i6 = $i5 - 4;
+
+        virtualinvoke $r4.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: void position(int)>($i6);
+
+        $i7 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: int blockSizeIndex>;
+
+        $i8 = $i4 - $i7;
+
+        $i9 = $i8 + i0;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: void writeLongWithoutAlign(int)>($i9);
+
+        $r5 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: com.sun.corba.se.impl.encoding.ByteBufferWithInfo bbwi>;
+
+        virtualinvoke $r5.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: void position(int)>($i4);
+
+        r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: boolean specialChunk> = 1;
+
+     label1:
+        return;
+    }
+
+    protected void handleSpecialChunkEnd()
+    {
+        com.sun.corba.se.impl.encoding.CDROutputStream_1_2 r0;
+        int $i1, $i3;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.CDROutputStream_1_2;
+
+        $z0 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: boolean inBlock>;
+
+        if $z0 == 0 goto label1;
+
+        $z1 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: boolean specialChunk>;
+
+        if $z1 == 0 goto label1;
+
+        r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: boolean inBlock> = 0;
+
+        $i1 = (int) -1;
+
+        r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: int blockSizeIndex> = $i1;
+
+        $i3 = (int) -1;
+
+        r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: int blockSizePosition> = $i3;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: void start_block()>();
+
+        r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: boolean specialChunk> = 0;
+
+     label1:
+        return;
+    }
+
+    private void checkPrimitiveAcrossFragmentedChunk()
+    {
+        com.sun.corba.se.impl.encoding.CDROutputStream_1_2 r0;
+        int $i1, $i3;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.CDROutputStream_1_2;
+
+        $z0 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: boolean primitiveAcrossFragmentedChunk>;
+
+        if $z0 == 0 goto label1;
+
+        r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: boolean primitiveAcrossFragmentedChunk> = 0;
+
+        r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: boolean inBlock> = 0;
+
+        $i1 = (int) -1;
+
+        r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: int blockSizeIndex> = $i1;
+
+        $i3 = (int) -1;
+
+        r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: int blockSizePosition> = $i3;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: void start_block()>();
+
+     label1:
+        return;
+    }
+
+    public void write_octet(byte)
+    {
+        com.sun.corba.se.impl.encoding.CDROutputStream_1_2 r0;
+        byte b0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.CDROutputStream_1_2;
+
+        b0 := @parameter0: byte;
+
+        specialinvoke r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_1: void write_octet(byte)>(b0);
+
+        specialinvoke r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: void checkPrimitiveAcrossFragmentedChunk()>();
+
+        return;
+    }
+
+    public void write_short(short)
+    {
+        com.sun.corba.se.impl.encoding.CDROutputStream_1_2 r0;
+        short s0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.CDROutputStream_1_2;
+
+        s0 := @parameter0: short;
+
+        specialinvoke r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_1: void write_short(short)>(s0);
+
+        specialinvoke r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: void checkPrimitiveAcrossFragmentedChunk()>();
+
+        return;
+    }
+
+    public void write_long(int)
+    {
+        com.sun.corba.se.impl.encoding.CDROutputStream_1_2 r0;
+        int i0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.CDROutputStream_1_2;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_1: void write_long(int)>(i0);
+
+        specialinvoke r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: void checkPrimitiveAcrossFragmentedChunk()>();
+
+        return;
+    }
+
+    public void write_longlong(long)
+    {
+        com.sun.corba.se.impl.encoding.CDROutputStream_1_2 r0;
+        long l0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.CDROutputStream_1_2;
+
+        l0 := @parameter0: long;
+
+        specialinvoke r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_1: void write_longlong(long)>(l0);
+
+        specialinvoke r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: void checkPrimitiveAcrossFragmentedChunk()>();
+
+        return;
+    }
+
+    void setHeaderPadding(boolean)
+    {
+        com.sun.corba.se.impl.encoding.CDROutputStream_1_2 r0;
+        boolean z0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.CDROutputStream_1_2;
+
+        z0 := @parameter0: boolean;
+
+        r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: boolean headerPadding> = z0;
+
+        return;
+    }
+
+    protected void alignAndReserve(int, int)
+    {
+        com.sun.corba.se.impl.encoding.CDROutputStream_1_2 r0;
+        int $i0, i1, $i2, $i3, $i4, i5, $i6, $i7;
+        com.sun.corba.se.impl.encoding.ByteBufferWithInfo $r1, $r2, $r3, $r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.CDROutputStream_1_2;
+
+        i1 := @parameter0: int;
+
+        i5 := @parameter1: int;
+
+        $z0 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: boolean headerPadding>;
+
+        if $z0 != 1 goto label1;
+
+        r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: boolean headerPadding> = 0;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: void alignOnBoundary(int)>(8);
+
+     label1:
+        $r2 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: com.sun.corba.se.impl.encoding.ByteBufferWithInfo bbwi>;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: com.sun.corba.se.impl.encoding.ByteBufferWithInfo bbwi>;
+
+        $i0 = virtualinvoke $r1.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: int position()>();
+
+        $i2 = virtualinvoke r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: int computeAlignment(int)>(i1);
+
+        $i3 = $i0 + $i2;
+
+        virtualinvoke $r2.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: void position(int)>($i3);
+
+        $r3 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: com.sun.corba.se.impl.encoding.ByteBufferWithInfo bbwi>;
+
+        $i4 = virtualinvoke $r3.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: int position()>();
+
+        $i7 = $i4 + i5;
+
+        $r4 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: com.sun.corba.se.impl.encoding.ByteBufferWithInfo bbwi>;
+
+        $i6 = $r4.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: int buflen>;
+
+        if $i7 <= $i6 goto label2;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: void grow(int,int)>(i1, i5);
+
+     label2:
+        return;
+    }
+
+    protected void grow(int, int)
+    {
+        com.sun.corba.se.impl.encoding.BufferManagerWrite $r4;
+        com.sun.corba.se.impl.encoding.CDROutputStream_1_2 r0;
+        int $i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, i12;
+        com.sun.corba.se.impl.encoding.ByteBufferWithInfo $r1, $r2, $r3, $r5, $r6, $r7, $r8, $r9, $r10;
+        boolean $z0, z1, $z2, $z3, $z5, $z6;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.CDROutputStream_1_2;
+
+        i12 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r1 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: com.sun.corba.se.impl.encoding.ByteBufferWithInfo bbwi>;
+
+        $i0 = virtualinvoke $r1.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: int position()>();
+
+        $z0 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: boolean inBlock>;
+
+        if $z0 == 0 goto label1;
+
+        $z3 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: boolean specialChunk>;
+
+        if $z3 != 0 goto label1;
+
+        $z6 = 1;
+
+        $z5 = 1;
+
+        goto label2;
+
+     label1:
+        $z6 = 0;
+
+        $z5 = 0;
+
+     label2:
+        z1 = $z5;
+
+        if $z6 == 0 goto label3;
+
+        $r8 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: com.sun.corba.se.impl.encoding.ByteBufferWithInfo bbwi>;
+
+        $i6 = virtualinvoke $r8.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: int position()>();
+
+        $r9 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: com.sun.corba.se.impl.encoding.ByteBufferWithInfo bbwi>;
+
+        $i7 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: int blockSizeIndex>;
+
+        $i8 = $i7 - 4;
+
+        virtualinvoke $r9.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: void position(int)>($i8);
+
+        $i9 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: int blockSizeIndex>;
+
+        $i10 = $i6 - $i9;
+
+        $i11 = $i10 + i1;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: void writeLongWithoutAlign(int)>($i11);
+
+        $r10 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: com.sun.corba.se.impl.encoding.ByteBufferWithInfo bbwi>;
+
+        virtualinvoke $r10.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: void position(int)>($i6);
+
+     label3:
+        $r2 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: com.sun.corba.se.impl.encoding.ByteBufferWithInfo bbwi>;
+
+        $r2.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: int needed> = i1;
+
+        $r4 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: com.sun.corba.se.impl.encoding.BufferManagerWrite bufferManagerWrite>;
+
+        $r3 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: com.sun.corba.se.impl.encoding.ByteBufferWithInfo bbwi>;
+
+        virtualinvoke $r4.<com.sun.corba.se.impl.encoding.BufferManagerWrite: void overflow(com.sun.corba.se.impl.encoding.ByteBufferWithInfo)>($r3);
+
+        $r5 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: com.sun.corba.se.impl.encoding.ByteBufferWithInfo bbwi>;
+
+        $z2 = $r5.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: boolean fragmented>;
+
+        if $z2 == 0 goto label4;
+
+        $r6 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: com.sun.corba.se.impl.encoding.ByteBufferWithInfo bbwi>;
+
+        $r6.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: boolean fragmented> = 0;
+
+        $i2 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: int fragmentOffset>;
+
+        $r7 = r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: com.sun.corba.se.impl.encoding.ByteBufferWithInfo bbwi>;
+
+        $i3 = virtualinvoke $r7.<com.sun.corba.se.impl.encoding.ByteBufferWithInfo: int position()>();
+
+        $i4 = $i0 - $i3;
+
+        $i5 = $i2 + $i4;
+
+        r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: int fragmentOffset> = $i5;
+
+        if z1 == 0 goto label4;
+
+        r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: boolean primitiveAcrossFragmentedChunk> = 1;
+
+     label4:
+        return;
+    }
+
+    public com.sun.corba.se.spi.ior.iiop.GIOPVersion getGIOPVersion()
+    {
+        com.sun.corba.se.impl.encoding.CDROutputStream_1_2 r1;
+        com.sun.corba.se.spi.ior.iiop.GIOPVersion $r0;
+
+        r1 := @this: com.sun.corba.se.impl.encoding.CDROutputStream_1_2;
+
+        $r0 = <com.sun.corba.se.spi.ior.iiop.GIOPVersion: com.sun.corba.se.spi.ior.iiop.GIOPVersion V1_2>;
+
+        return $r0;
+    }
+
+    public void write_wchar(char)
+    {
+        byte[] $r2;
+        com.sun.corba.se.impl.encoding.CodeSetConversion$CTBConverter $r1;
+        char c0;
+        com.sun.corba.se.impl.encoding.CDROutputStream_1_2 r0;
+        byte $b4;
+        int $i1, $i2, $i3, $i5;
+
+        r0 := @this: com.sun.corba.se.impl.encoding.CDROutputStream_1_2;
+
+        c0 := @parameter0: char;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: com.sun.corba.se.impl.encoding.CodeSetConversion$CTBConverter getWCharConverter()>();
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.encoding.CodeSetConversion$CTBConverter: void convert(char)>(c0);
+
+        $i1 = virtualinvoke $r1.<com.sun.corba.se.impl.encoding.CodeSetConversion$CTBConverter: int getNumBytes()>();
+
+        $i2 = 1 + $i1;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: void handleSpecialChunkBegin(int)>($i2);
+
+        $i3 = virtualinvoke $r1.<com.sun.corba.se.impl.encoding.CodeSetConversion$CTBConverter: int getNumBytes()>();
+
+        $b4 = (byte) $i3;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: void write_octet(byte)>($b4);
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.encoding.CodeSetConversion$CTBConverter: byte[] getBytes()>();
+
+        $i5 = virtualinvoke $r1.<com.sun.corba.se.impl.encoding.CodeSetConversion$CTBConverter: int getNumBytes()>();
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: void internalWriteOctetArray(byte[],int,int)>($r2, 0, $i5);
+
+        virtualinvoke r0.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: void handleSpecialChunkEnd()>();
+
+        return;
+    }
+
+    public void write_wchar_array(char[], int, int)
+    {
+        byte[] r3, $r4;
+        com.sun.corba.se.impl.encoding.CodeSetConversion$CTBConverter $r2;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r6;
+        com.sun.corba.se.impl.encoding.CDROutputStream_1_2 r1;
+        org.omg.CORBA.CompletionStatus $r5;
+        byte $b7;
+        int i0, i1, $i2, i3, $i4, $i6, $i8, $i9, i10, i11, i12;
+        double $d0, $d1;
+        org.omg.CORBA.BAD_PARAM $r7;
+        char $c5;
+        char[] r0;
+        float $f0, $f1, $f2;
+
+        r1 := @this: com.sun.corba.se.impl.encoding.CDROutputStream_1_2;
+
+        r0 := @parameter0: char[];
+
+        i3 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        if r0 != null goto label1;
+
+        $r6 = r1.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r5 = <org.omg.CORBA.CompletionStatus: org.omg.CORBA.CompletionStatus COMPLETED_MAYBE>;
+
+        $r7 = virtualinvoke $r6.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.BAD_PARAM nullParam(org.omg.CORBA.CompletionStatus)>($r5);
+
+        throw $r7;
+
+     label1:
+        $r2 = virtualinvoke r1.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: com.sun.corba.se.impl.encoding.CodeSetConversion$CTBConverter getWCharConverter()>();
+
+        i10 = 0;
+
+        $f0 = virtualinvoke $r2.<com.sun.corba.se.impl.encoding.CodeSetConversion$CTBConverter: float getMaxBytesPerChar()>();
+
+        $f1 = (float) i0;
+
+        $f2 = $f0 * $f1;
+
+        $d0 = (double) $f2;
+
+        $d1 = staticinvoke <java.lang.Math: double ceil(double)>($d0);
+
+        i1 = (int) $d1;
+
+        $i2 = i1 + i0;
+
+        r3 = newarray (byte)[$i2];
+
+        i11 = 0;
+
+     label2:
+        if i11 >= i0 goto label3;
+
+        $i4 = i3 + i11;
+
+        $c5 = r0[$i4];
+
+        virtualinvoke $r2.<com.sun.corba.se.impl.encoding.CodeSetConversion$CTBConverter: void convert(char)>($c5);
+
+        i12 = i10 + 1;
+
+        $i6 = virtualinvoke $r2.<com.sun.corba.se.impl.encoding.CodeSetConversion$CTBConverter: int getNumBytes()>();
+
+        $b7 = (byte) $i6;
+
+        r3[i10] = $b7;
+
+        $r4 = virtualinvoke $r2.<com.sun.corba.se.impl.encoding.CodeSetConversion$CTBConverter: byte[] getBytes()>();
+
+        $i8 = virtualinvoke $r2.<com.sun.corba.se.impl.encoding.CodeSetConversion$CTBConverter: int getNumBytes()>();
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, r3, i12, $i8);
+
+        $i9 = virtualinvoke $r2.<com.sun.corba.se.impl.encoding.CodeSetConversion$CTBConverter: int getNumBytes()>();
+
+        i10 = i12 + $i9;
+
+        i11 = i11 + 1;
+
+        goto label2;
+
+     label3:
+        virtualinvoke r1.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: void handleSpecialChunkBegin(int)>(i10);
+
+        virtualinvoke r1.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: void internalWriteOctetArray(byte[],int,int)>(r3, 0, i10);
+
+        virtualinvoke r1.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: void handleSpecialChunkEnd()>();
+
+        return;
+    }
+
+    public void write_wstring(java.lang.String)
+    {
+        org.omg.CORBA.BAD_PARAM $r6;
+        byte[] $r3;
+        com.sun.corba.se.impl.encoding.CodeSetConversion$CTBConverter $r2;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r5;
+        com.sun.corba.se.impl.encoding.CDROutputStream_1_2 r1;
+        org.omg.CORBA.CompletionStatus $r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        java.lang.String r0;
+
+        r1 := @this: com.sun.corba.se.impl.encoding.CDROutputStream_1_2;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        $r5 = r1.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r4 = <org.omg.CORBA.CompletionStatus: org.omg.CORBA.CompletionStatus COMPLETED_MAYBE>;
+
+        $r6 = virtualinvoke $r5.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.BAD_PARAM nullParam(org.omg.CORBA.CompletionStatus)>($r4);
+
+        throw $r6;
+
+     label1:
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label2;
+
+        virtualinvoke r1.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: void write_long(int)>(0);
+
+        return;
+
+     label2:
+        $r2 = virtualinvoke r1.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: com.sun.corba.se.impl.encoding.CodeSetConversion$CTBConverter getWCharConverter()>();
+
+        virtualinvoke $r2.<com.sun.corba.se.impl.encoding.CodeSetConversion$CTBConverter: void convert(java.lang.String)>(r0);
+
+        $i1 = virtualinvoke r1.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: int computeAlignment(int)>(4);
+
+        $i2 = $i1 + 4;
+
+        $i3 = virtualinvoke $r2.<com.sun.corba.se.impl.encoding.CodeSetConversion$CTBConverter: int getNumBytes()>();
+
+        $i4 = $i2 + $i3;
+
+        virtualinvoke r1.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: void handleSpecialChunkBegin(int)>($i4);
+
+        $i5 = virtualinvoke $r2.<com.sun.corba.se.impl.encoding.CodeSetConversion$CTBConverter: int getNumBytes()>();
+
+        virtualinvoke r1.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: void write_long(int)>($i5);
+
+        $r3 = virtualinvoke $r2.<com.sun.corba.se.impl.encoding.CodeSetConversion$CTBConverter: byte[] getBytes()>();
+
+        $i6 = virtualinvoke $r2.<com.sun.corba.se.impl.encoding.CodeSetConversion$CTBConverter: int getNumBytes()>();
+
+        virtualinvoke r1.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: void internalWriteOctetArray(byte[],int,int)>($r3, 0, $i6);
+
+        virtualinvoke r1.<com.sun.corba.se.impl.encoding.CDROutputStream_1_2: void handleSpecialChunkEnd()>();
+
+        return;
+    }
+}

@@ -1,0 +1,131 @@
+abstract class java.util.stream.Nodes$ToArrayTask extends java.util.concurrent.CountedCompleter
+{
+    protected final java.util.stream.Node node;
+    protected final int offset;
+
+    void <init>(java.util.stream.Node, int)
+    {
+        int i0;
+        java.util.stream.Nodes$ToArrayTask r0;
+        java.util.stream.Node r1;
+
+        r0 := @this: java.util.stream.Nodes$ToArrayTask;
+
+        r1 := @parameter0: java.util.stream.Node;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<java.util.concurrent.CountedCompleter: void <init>()>();
+
+        r0.<java.util.stream.Nodes$ToArrayTask: java.util.stream.Node node> = r1;
+
+        r0.<java.util.stream.Nodes$ToArrayTask: int offset> = i0;
+
+        return;
+    }
+
+    void <init>(java.util.stream.Nodes$ToArrayTask, java.util.stream.Node, int)
+    {
+        java.util.stream.Nodes$ToArrayTask r0, r1;
+        int i0;
+        java.util.stream.Node r2;
+
+        r0 := @this: java.util.stream.Nodes$ToArrayTask;
+
+        r1 := @parameter0: java.util.stream.Nodes$ToArrayTask;
+
+        r2 := @parameter1: java.util.stream.Node;
+
+        i0 := @parameter2: int;
+
+        specialinvoke r0.<java.util.concurrent.CountedCompleter: void <init>(java.util.concurrent.CountedCompleter)>(r1);
+
+        r0.<java.util.stream.Nodes$ToArrayTask: java.util.stream.Node node> = r2;
+
+        r0.<java.util.stream.Nodes$ToArrayTask: int offset> = i0;
+
+        return;
+    }
+
+    abstract void copyNodeToArray();
+
+    abstract java.util.stream.Nodes$ToArrayTask makeChild(int, int);
+
+    public void compute()
+    {
+        long $l9, $l10, $l11;
+        java.util.stream.Node $r1, $r2, $r3, $r5;
+        java.util.stream.Nodes$ToArrayTask r0, $r4, r6;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i12, i13;
+
+        r0 := @this: java.util.stream.Nodes$ToArrayTask;
+
+        r6 = r0;
+
+     label1:
+        $r1 = r6.<java.util.stream.Nodes$ToArrayTask: java.util.stream.Node node>;
+
+        $i0 = interfaceinvoke $r1.<java.util.stream.Node: int getChildCount()>();
+
+        if $i0 != 0 goto label2;
+
+        virtualinvoke r6.<java.util.stream.Nodes$ToArrayTask: void copyNodeToArray()>();
+
+        virtualinvoke r6.<java.util.stream.Nodes$ToArrayTask: void propagateCompletion()>();
+
+        return;
+
+     label2:
+        $r2 = r6.<java.util.stream.Nodes$ToArrayTask: java.util.stream.Node node>;
+
+        $i1 = interfaceinvoke $r2.<java.util.stream.Node: int getChildCount()>();
+
+        $i2 = $i1 - 1;
+
+        virtualinvoke r6.<java.util.stream.Nodes$ToArrayTask: void setPendingCount(int)>($i2);
+
+        i12 = 0;
+
+        i13 = 0;
+
+     label3:
+        $r3 = r6.<java.util.stream.Nodes$ToArrayTask: java.util.stream.Node node>;
+
+        $i3 = interfaceinvoke $r3.<java.util.stream.Node: int getChildCount()>();
+
+        $i4 = $i3 - 1;
+
+        if i13 >= $i4 goto label4;
+
+        $i7 = r6.<java.util.stream.Nodes$ToArrayTask: int offset>;
+
+        $i8 = $i7 + i12;
+
+        $r4 = virtualinvoke r6.<java.util.stream.Nodes$ToArrayTask: java.util.stream.Nodes$ToArrayTask makeChild(int,int)>(i13, $i8);
+
+        $l9 = (long) i12;
+
+        $r5 = $r4.<java.util.stream.Nodes$ToArrayTask: java.util.stream.Node node>;
+
+        $l10 = interfaceinvoke $r5.<java.util.stream.Node: long count()>();
+
+        $l11 = $l9 + $l10;
+
+        i12 = (int) $l11;
+
+        virtualinvoke $r4.<java.util.stream.Nodes$ToArrayTask: java.util.concurrent.ForkJoinTask fork()>();
+
+        i13 = i13 + 1;
+
+        goto label3;
+
+     label4:
+        $i5 = r6.<java.util.stream.Nodes$ToArrayTask: int offset>;
+
+        $i6 = $i5 + i12;
+
+        r6 = virtualinvoke r6.<java.util.stream.Nodes$ToArrayTask: java.util.stream.Nodes$ToArrayTask makeChild(int,int)>(i13, $i6);
+
+        goto label1;
+    }
+}

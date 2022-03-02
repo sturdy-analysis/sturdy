@@ -1,0 +1,763 @@
+public class sun.nio.ch.Util extends java.lang.Object
+{
+    private static final int TEMP_BUF_POOL_SIZE;
+    private static final long MAX_CACHED_BUFFER_SIZE;
+    private static java.lang.ThreadLocal bufferCache;
+    private static sun.misc.Unsafe unsafe;
+    private static int pageSize;
+    private static volatile java.lang.reflect.Constructor directByteBufferConstructor;
+    private static volatile java.lang.reflect.Constructor directByteBufferRConstructor;
+    private static volatile java.lang.String bugLevel;
+    static final boolean $assertionsDisabled;
+
+    public void <init>()
+    {
+        sun.nio.ch.Util r0;
+
+        r0 := @this: sun.nio.ch.Util;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static long getMaxCachedBufferSize()
+    {
+        byte $b1;
+        int $i2;
+        java.lang.Object $r1;
+        long $l0;
+        java.lang.NumberFormatException $r3;
+        java.lang.String r2;
+        sun.nio.ch.Util$2 $r4;
+
+        $r4 = new sun.nio.ch.Util$2;
+
+        specialinvoke $r4.<sun.nio.ch.Util$2: void <init>()>();
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r4);
+
+        r2 = (java.lang.String) $r1;
+
+        if r2 == null goto label5;
+
+     label1:
+        $l0 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>(r2);
+
+        $b1 = $l0 cmp 0L;
+
+        $i2 = (int) $b1;
+
+        if $i2 < 0 goto label3;
+
+     label2:
+        return $l0;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r3 := @caughtexception;
+
+     label5:
+        return 9223372036854775807L;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label4;
+    }
+
+    private static boolean isBufferTooLarge(int)
+    {
+        byte $b3;
+        int i0, $i4;
+        long $l1, $l2;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        $l2 = (long) i0;
+
+        $l1 = <sun.nio.ch.Util: long MAX_CACHED_BUFFER_SIZE>;
+
+        $b3 = $l2 cmp $l1;
+
+        $i4 = (int) $b3;
+
+        if $i4 <= 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private static boolean isBufferTooLarge(java.nio.ByteBuffer)
+    {
+        int $i0;
+        java.nio.ByteBuffer r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        $i0 = virtualinvoke r0.<java.nio.ByteBuffer: int capacity()>();
+
+        $z0 = staticinvoke <sun.nio.ch.Util: boolean isBufferTooLarge(int)>($i0);
+
+        return $z0;
+    }
+
+    public static java.nio.ByteBuffer getTemporaryDirectBuffer(int)
+    {
+        java.lang.ThreadLocal $r0;
+        java.nio.ByteBuffer $r3, $r4, $r5, $r6;
+        int i0;
+        java.lang.Object $r1;
+        sun.nio.ch.Util$BufferCache r2;
+        boolean $z0, $z1;
+
+        i0 := @parameter0: int;
+
+        $z0 = staticinvoke <sun.nio.ch.Util: boolean isBufferTooLarge(int)>(i0);
+
+        if $z0 == 0 goto label1;
+
+        $r6 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer allocateDirect(int)>(i0);
+
+        return $r6;
+
+     label1:
+        $r0 = <sun.nio.ch.Util: java.lang.ThreadLocal bufferCache>;
+
+        $r1 = virtualinvoke $r0.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        r2 = (sun.nio.ch.Util$BufferCache) $r1;
+
+        $r3 = virtualinvoke r2.<sun.nio.ch.Util$BufferCache: java.nio.ByteBuffer get(int)>(i0);
+
+        if $r3 == null goto label2;
+
+        return $r3;
+
+     label2:
+        $z1 = virtualinvoke r2.<sun.nio.ch.Util$BufferCache: boolean isEmpty()>();
+
+        if $z1 != 0 goto label3;
+
+        $r5 = virtualinvoke r2.<sun.nio.ch.Util$BufferCache: java.nio.ByteBuffer removeFirst()>();
+
+        staticinvoke <sun.nio.ch.Util: void free(java.nio.ByteBuffer)>($r5);
+
+     label3:
+        $r4 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer allocateDirect(int)>(i0);
+
+        return $r4;
+    }
+
+    public static void releaseTemporaryDirectBuffer(java.nio.ByteBuffer)
+    {
+        java.nio.ByteBuffer r0;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        staticinvoke <sun.nio.ch.Util: void offerFirstTemporaryDirectBuffer(java.nio.ByteBuffer)>(r0);
+
+        return;
+    }
+
+    static void offerFirstTemporaryDirectBuffer(java.nio.ByteBuffer)
+    {
+        java.lang.ThreadLocal $r1;
+        java.lang.AssertionError $r4;
+        java.nio.ByteBuffer r0;
+        java.lang.Object $r2;
+        sun.nio.ch.Util$BufferCache $r3;
+        boolean $z0, $z1, $z2;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        $z0 = staticinvoke <sun.nio.ch.Util: boolean isBufferTooLarge(java.nio.ByteBuffer)>(r0);
+
+        if $z0 == 0 goto label1;
+
+        staticinvoke <sun.nio.ch.Util: void free(java.nio.ByteBuffer)>(r0);
+
+        return;
+
+     label1:
+        $z1 = <sun.nio.ch.Util: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label2;
+
+        if r0 != null goto label2;
+
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>()>();
+
+        throw $r4;
+
+     label2:
+        $r1 = <sun.nio.ch.Util: java.lang.ThreadLocal bufferCache>;
+
+        $r2 = virtualinvoke $r1.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        $r3 = (sun.nio.ch.Util$BufferCache) $r2;
+
+        $z2 = virtualinvoke $r3.<sun.nio.ch.Util$BufferCache: boolean offerFirst(java.nio.ByteBuffer)>(r0);
+
+        if $z2 != 0 goto label3;
+
+        staticinvoke <sun.nio.ch.Util: void free(java.nio.ByteBuffer)>(r0);
+
+     label3:
+        return;
+    }
+
+    static void offerLastTemporaryDirectBuffer(java.nio.ByteBuffer)
+    {
+        java.lang.ThreadLocal $r1;
+        java.lang.AssertionError $r4;
+        java.nio.ByteBuffer r0;
+        java.lang.Object $r2;
+        sun.nio.ch.Util$BufferCache $r3;
+        boolean $z0, $z1, $z2;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        $z0 = staticinvoke <sun.nio.ch.Util: boolean isBufferTooLarge(java.nio.ByteBuffer)>(r0);
+
+        if $z0 == 0 goto label1;
+
+        staticinvoke <sun.nio.ch.Util: void free(java.nio.ByteBuffer)>(r0);
+
+        return;
+
+     label1:
+        $z1 = <sun.nio.ch.Util: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label2;
+
+        if r0 != null goto label2;
+
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>()>();
+
+        throw $r4;
+
+     label2:
+        $r1 = <sun.nio.ch.Util: java.lang.ThreadLocal bufferCache>;
+
+        $r2 = virtualinvoke $r1.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        $r3 = (sun.nio.ch.Util$BufferCache) $r2;
+
+        $z2 = virtualinvoke $r3.<sun.nio.ch.Util$BufferCache: boolean offerLast(java.nio.ByteBuffer)>(r0);
+
+        if $z2 != 0 goto label3;
+
+        staticinvoke <sun.nio.ch.Util: void free(java.nio.ByteBuffer)>(r0);
+
+     label3:
+        return;
+    }
+
+    private static void free(java.nio.ByteBuffer)
+    {
+        sun.nio.ch.DirectBuffer $r1;
+        sun.misc.Cleaner $r2;
+        java.nio.ByteBuffer r0;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        $r1 = (sun.nio.ch.DirectBuffer) r0;
+
+        $r2 = interfaceinvoke $r1.<sun.nio.ch.DirectBuffer: sun.misc.Cleaner cleaner()>();
+
+        virtualinvoke $r2.<sun.misc.Cleaner: void clean()>();
+
+        return;
+    }
+
+    static java.nio.ByteBuffer[] subsequence(java.nio.ByteBuffer[], int, int)
+    {
+        java.nio.ByteBuffer[] r0, $r2;
+        java.nio.ByteBuffer $r1;
+        int i0, i1, $i2, $i3, i4;
+
+        r0 := @parameter0: java.nio.ByteBuffer[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        if i0 != 0 goto label1;
+
+        $i3 = lengthof r0;
+
+        if i1 != $i3 goto label1;
+
+        return r0;
+
+     label1:
+        $r2 = newarray (java.nio.ByteBuffer)[i1];
+
+        i4 = 0;
+
+     label2:
+        if i4 >= i1 goto label3;
+
+        $i2 = i0 + i4;
+
+        $r1 = r0[$i2];
+
+        $r2[i4] = $r1;
+
+        i4 = i4 + 1;
+
+        goto label2;
+
+     label3:
+        return $r2;
+    }
+
+    static java.util.Set ungrowableSet(java.util.Set)
+    {
+        java.util.Set r1;
+        sun.nio.ch.Util$3 $r0;
+
+        r1 := @parameter0: java.util.Set;
+
+        $r0 = new sun.nio.ch.Util$3;
+
+        specialinvoke $r0.<sun.nio.ch.Util$3: void <init>(java.util.Set)>(r1);
+
+        return $r0;
+    }
+
+    private static byte _get(long)
+    {
+        sun.misc.Unsafe $r0;
+        long l0;
+        byte $b1;
+
+        l0 := @parameter0: long;
+
+        $r0 = <sun.nio.ch.Util: sun.misc.Unsafe unsafe>;
+
+        $b1 = virtualinvoke $r0.<sun.misc.Unsafe: byte getByte(long)>(l0);
+
+        return $b1;
+    }
+
+    private static void _put(long, byte)
+    {
+        sun.misc.Unsafe $r0;
+        long l0;
+        byte b1;
+
+        l0 := @parameter0: long;
+
+        b1 := @parameter1: byte;
+
+        $r0 = <sun.nio.ch.Util: sun.misc.Unsafe unsafe>;
+
+        virtualinvoke $r0.<sun.misc.Unsafe: void putByte(long,byte)>(l0, b1);
+
+        return;
+    }
+
+    static void erase(java.nio.ByteBuffer)
+    {
+        sun.misc.Unsafe $r2;
+        sun.nio.ch.DirectBuffer $r1;
+        int $i1;
+        long $l0, $l2;
+        java.nio.ByteBuffer r0;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        $r2 = <sun.nio.ch.Util: sun.misc.Unsafe unsafe>;
+
+        $r1 = (sun.nio.ch.DirectBuffer) r0;
+
+        $l0 = interfaceinvoke $r1.<sun.nio.ch.DirectBuffer: long address()>();
+
+        $i1 = virtualinvoke r0.<java.nio.ByteBuffer: int capacity()>();
+
+        $l2 = (long) $i1;
+
+        virtualinvoke $r2.<sun.misc.Unsafe: void setMemory(long,long,byte)>($l0, $l2, 0);
+
+        return;
+    }
+
+    static sun.misc.Unsafe unsafe()
+    {
+        sun.misc.Unsafe $r0;
+
+        $r0 = <sun.nio.ch.Util: sun.misc.Unsafe unsafe>;
+
+        return $r0;
+    }
+
+    static int pageSize()
+    {
+        sun.misc.Unsafe $r0;
+        int $i0, $i1, $i2, $i4;
+
+        $i0 = <sun.nio.ch.Util: int pageSize>;
+
+        $i4 = (int) -1;
+
+        if $i0 != $i4 goto label1;
+
+        $r0 = staticinvoke <sun.nio.ch.Util: sun.misc.Unsafe unsafe()>();
+
+        $i2 = virtualinvoke $r0.<sun.misc.Unsafe: int pageSize()>();
+
+        <sun.nio.ch.Util: int pageSize> = $i2;
+
+     label1:
+        $i1 = <sun.nio.ch.Util: int pageSize>;
+
+        return $i1;
+    }
+
+    private static void initDBBConstructor()
+    {
+        sun.nio.ch.Util$4 $r0;
+
+        $r0 = new sun.nio.ch.Util$4;
+
+        specialinvoke $r0.<sun.nio.ch.Util$4: void <init>()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        return;
+    }
+
+    static java.nio.MappedByteBuffer newMappedByteBuffer(int, long, java.io.FileDescriptor, java.lang.Runnable)
+    {
+        java.lang.Object[] $r1;
+        long l1;
+        java.lang.ReflectiveOperationException $r9;
+        java.lang.reflect.Constructor $r0, $r3;
+        java.lang.Integer $r2;
+        java.lang.Runnable r6;
+        java.lang.Long $r4;
+        java.io.FileDescriptor r5;
+        int i0;
+        java.lang.InternalError $r10;
+        java.lang.Object $r7;
+        java.nio.MappedByteBuffer $r8;
+
+        i0 := @parameter0: int;
+
+        l1 := @parameter1: long;
+
+        r5 := @parameter2: java.io.FileDescriptor;
+
+        r6 := @parameter3: java.lang.Runnable;
+
+        $r0 = <sun.nio.ch.Util: java.lang.reflect.Constructor directByteBufferConstructor>;
+
+        if $r0 != null goto label1;
+
+        staticinvoke <sun.nio.ch.Util: void initDBBConstructor()>();
+
+     label1:
+        $r3 = <sun.nio.ch.Util: java.lang.reflect.Constructor directByteBufferConstructor>;
+
+        $r1 = newarray (java.lang.Object)[4];
+
+        $r2 = new java.lang.Integer;
+
+        specialinvoke $r2.<java.lang.Integer: void <init>(int)>(i0);
+
+        $r1[0] = $r2;
+
+        $r4 = new java.lang.Long;
+
+        specialinvoke $r4.<java.lang.Long: void <init>(long)>(l1);
+
+        $r1[1] = $r4;
+
+        $r1[2] = r5;
+
+        $r1[3] = r6;
+
+        $r7 = virtualinvoke $r3.<java.lang.reflect.Constructor: java.lang.Object newInstance(java.lang.Object[])>($r1);
+
+        $r8 = (java.nio.MappedByteBuffer) $r7;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r9 := @caughtexception;
+
+        $r10 = new java.lang.InternalError;
+
+        specialinvoke $r10.<java.lang.InternalError: void <init>(java.lang.Throwable)>($r9);
+
+        throw $r10;
+
+     label4:
+        return $r8;
+
+        catch java.lang.InstantiationException from label1 to label2 with label3;
+        catch java.lang.IllegalAccessException from label1 to label2 with label3;
+        catch java.lang.reflect.InvocationTargetException from label1 to label2 with label3;
+    }
+
+    private static void initDBBRConstructor()
+    {
+        sun.nio.ch.Util$5 $r0;
+
+        $r0 = new sun.nio.ch.Util$5;
+
+        specialinvoke $r0.<sun.nio.ch.Util$5: void <init>()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        return;
+    }
+
+    static java.nio.MappedByteBuffer newMappedByteBufferR(int, long, java.io.FileDescriptor, java.lang.Runnable)
+    {
+        java.lang.Object[] $r1;
+        long l1;
+        java.lang.ReflectiveOperationException $r9;
+        java.lang.reflect.Constructor $r0, $r3;
+        java.lang.Integer $r2;
+        java.lang.Runnable r6;
+        java.lang.Long $r4;
+        java.io.FileDescriptor r5;
+        int i0;
+        java.lang.InternalError $r10;
+        java.lang.Object $r7;
+        java.nio.MappedByteBuffer $r8;
+
+        i0 := @parameter0: int;
+
+        l1 := @parameter1: long;
+
+        r5 := @parameter2: java.io.FileDescriptor;
+
+        r6 := @parameter3: java.lang.Runnable;
+
+        $r0 = <sun.nio.ch.Util: java.lang.reflect.Constructor directByteBufferRConstructor>;
+
+        if $r0 != null goto label1;
+
+        staticinvoke <sun.nio.ch.Util: void initDBBRConstructor()>();
+
+     label1:
+        $r3 = <sun.nio.ch.Util: java.lang.reflect.Constructor directByteBufferRConstructor>;
+
+        $r1 = newarray (java.lang.Object)[4];
+
+        $r2 = new java.lang.Integer;
+
+        specialinvoke $r2.<java.lang.Integer: void <init>(int)>(i0);
+
+        $r1[0] = $r2;
+
+        $r4 = new java.lang.Long;
+
+        specialinvoke $r4.<java.lang.Long: void <init>(long)>(l1);
+
+        $r1[1] = $r4;
+
+        $r1[2] = r5;
+
+        $r1[3] = r6;
+
+        $r7 = virtualinvoke $r3.<java.lang.reflect.Constructor: java.lang.Object newInstance(java.lang.Object[])>($r1);
+
+        $r8 = (java.nio.MappedByteBuffer) $r7;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r9 := @caughtexception;
+
+        $r10 = new java.lang.InternalError;
+
+        specialinvoke $r10.<java.lang.InternalError: void <init>(java.lang.Throwable)>($r9);
+
+        throw $r10;
+
+     label4:
+        return $r8;
+
+        catch java.lang.InstantiationException from label1 to label2 with label3;
+        catch java.lang.IllegalAccessException from label1 to label2 with label3;
+        catch java.lang.reflect.InvocationTargetException from label1 to label2 with label3;
+    }
+
+    static boolean atBugLevel(java.lang.String)
+    {
+        sun.security.action.GetPropertyAction $r2;
+        java.lang.Object $r3;
+        java.lang.String $r0, r1, r4, $r5, $r6;
+        boolean $z0, $z1;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = <sun.nio.ch.Util: java.lang.String bugLevel>;
+
+        if $r0 != null goto label4;
+
+        $z0 = staticinvoke <sun.misc.VM: boolean isBooted()>();
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r2 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r2.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("sun.nio.ch.bugLevel");
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        r4 = (java.lang.String) $r3;
+
+        if r4 == null goto label2;
+
+        $r5 = r4;
+
+        goto label3;
+
+     label2:
+        $r5 = "";
+
+     label3:
+        <sun.nio.ch.Util: java.lang.String bugLevel> = $r5;
+
+     label4:
+        $r6 = <sun.nio.ch.Util: java.lang.String bugLevel>;
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>(r1);
+
+        return $z1;
+    }
+
+    static int access$000()
+    {
+        int $i0;
+
+        $i0 = <sun.nio.ch.Util: int TEMP_BUF_POOL_SIZE>;
+
+        return $i0;
+    }
+
+    static boolean access$100(int)
+    {
+        int i0;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        $z0 = staticinvoke <sun.nio.ch.Util: boolean isBufferTooLarge(int)>(i0);
+
+        return $z0;
+    }
+
+    static boolean access$200(java.nio.ByteBuffer)
+    {
+        java.nio.ByteBuffer r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        $z0 = staticinvoke <sun.nio.ch.Util: boolean isBufferTooLarge(java.nio.ByteBuffer)>(r0);
+
+        return $z0;
+    }
+
+    static java.lang.reflect.Constructor access$302(java.lang.reflect.Constructor)
+    {
+        java.lang.reflect.Constructor r0;
+
+        r0 := @parameter0: java.lang.reflect.Constructor;
+
+        <sun.nio.ch.Util: java.lang.reflect.Constructor directByteBufferConstructor> = r0;
+
+        return r0;
+    }
+
+    static java.lang.reflect.Constructor access$402(java.lang.reflect.Constructor)
+    {
+        java.lang.reflect.Constructor r0;
+
+        r0 := @parameter0: java.lang.reflect.Constructor;
+
+        <sun.nio.ch.Util: java.lang.reflect.Constructor directByteBufferRConstructor> = r0;
+
+        return r0;
+    }
+
+    static void <clinit>()
+    {
+        sun.misc.Unsafe $r2;
+        long $l1;
+        sun.nio.ch.Util$1 $r3;
+        int $i0, $i3;
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        $r0 = class "Lsun/nio/ch/Util;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.nio.ch.Util: boolean $assertionsDisabled> = $z1;
+
+        $i0 = <sun.nio.ch.IOUtil: int IOV_MAX>;
+
+        <sun.nio.ch.Util: int TEMP_BUF_POOL_SIZE> = $i0;
+
+        $l1 = staticinvoke <sun.nio.ch.Util: long getMaxCachedBufferSize()>();
+
+        <sun.nio.ch.Util: long MAX_CACHED_BUFFER_SIZE> = $l1;
+
+        $r3 = new sun.nio.ch.Util$1;
+
+        specialinvoke $r3.<sun.nio.ch.Util$1: void <init>()>();
+
+        <sun.nio.ch.Util: java.lang.ThreadLocal bufferCache> = $r3;
+
+        $r2 = staticinvoke <sun.misc.Unsafe: sun.misc.Unsafe getUnsafe()>();
+
+        <sun.nio.ch.Util: sun.misc.Unsafe unsafe> = $r2;
+
+        $i3 = (int) -1;
+
+        <sun.nio.ch.Util: int pageSize> = $i3;
+
+        <sun.nio.ch.Util: java.lang.reflect.Constructor directByteBufferConstructor> = null;
+
+        <sun.nio.ch.Util: java.lang.reflect.Constructor directByteBufferRConstructor> = null;
+
+        <sun.nio.ch.Util: java.lang.String bugLevel> = null;
+
+        return;
+    }
+}

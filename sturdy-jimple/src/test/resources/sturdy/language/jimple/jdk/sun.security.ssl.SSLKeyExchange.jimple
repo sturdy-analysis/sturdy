@@ -1,0 +1,615 @@
+final class sun.security.ssl.SSLKeyExchange extends java.lang.Object implements sun.security.ssl.SSLKeyAgreementGenerator, sun.security.ssl.SSLHandshakeBinding
+{
+    private final sun.security.ssl.SSLAuthentication authentication;
+    private final sun.security.ssl.SSLKeyAgreement keyAgreement;
+
+    void <init>(sun.security.ssl.SSLAuthentication, sun.security.ssl.SSLKeyAgreement)
+    {
+        sun.security.ssl.SSLKeyExchange r0;
+        sun.security.ssl.SSLAuthentication r1;
+        sun.security.ssl.SSLKeyAgreement r2;
+
+        r0 := @this: sun.security.ssl.SSLKeyExchange;
+
+        r1 := @parameter0: sun.security.ssl.SSLAuthentication;
+
+        r2 := @parameter1: sun.security.ssl.SSLKeyAgreement;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLAuthentication authentication> = r1;
+
+        r0.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLKeyAgreement keyAgreement> = r2;
+
+        return;
+    }
+
+    sun.security.ssl.SSLPossession[] createPossessions(sun.security.ssl.HandshakeContext)
+    {
+        java.security.cert.X509Certificate $r17;
+        boolean $z0;
+        sun.security.ssl.ServerHandshakeContext r28;
+        sun.security.ssl.SSLPossession[] $r14, $r23, $r26, $r31, $r32, $r34, $r35;
+        sun.security.ssl.X509Authentication$X509Possession r15;
+        sun.security.ssl.SSLPossession $r4, $r21, $r25, r27;
+        java.security.cert.X509Certificate[] $r16;
+        sun.security.ssl.SSLAuthentication $r1, $r5, $r19, $r22, $r24, $r33;
+        sun.security.ssl.SSLKeyAgreement $r3, $r7, $r9, $r11, $r13, $r20, $r29;
+        int $i0;
+        sun.security.ssl.SSLKeyExchange$T12KeyAgreement $r6, $r8, $r10, $r12, $r30;
+        java.security.PublicKey $r18;
+        sun.security.ssl.SSLKeyExchange r0;
+        sun.security.ssl.HandshakeContext r2;
+
+        r0 := @this: sun.security.ssl.SSLKeyExchange;
+
+        r2 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        r27 = null;
+
+        $r1 = r0.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLAuthentication authentication>;
+
+        if $r1 == null goto label02;
+
+        $r24 = r0.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLAuthentication authentication>;
+
+        $r25 = interfaceinvoke $r24.<sun.security.ssl.SSLAuthentication: sun.security.ssl.SSLPossession createPossession(sun.security.ssl.HandshakeContext)>(r2);
+
+        r27 = $r25;
+
+        if $r25 != null goto label01;
+
+        $r26 = newarray (sun.security.ssl.SSLPossession)[0];
+
+        return $r26;
+
+     label01:
+        $z0 = r2 instanceof sun.security.ssl.ServerHandshakeContext;
+
+        if $z0 == 0 goto label02;
+
+        r28 = (sun.security.ssl.ServerHandshakeContext) r2;
+
+        r28.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLPossession interimAuthn> = $r25;
+
+     label02:
+        $r29 = r0.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLKeyAgreement keyAgreement>;
+
+        $r30 = <sun.security.ssl.SSLKeyExchange$T12KeyAgreement: sun.security.ssl.SSLKeyExchange$T12KeyAgreement RSA_EXPORT>;
+
+        if $r29 != $r30 goto label09;
+
+        r15 = (sun.security.ssl.X509Authentication$X509Possession) r27;
+
+        $r16 = r15.<sun.security.ssl.X509Authentication$X509Possession: java.security.cert.X509Certificate[] popCerts>;
+
+        $r17 = $r16[0];
+
+        $r18 = virtualinvoke $r17.<java.security.cert.X509Certificate: java.security.PublicKey getPublicKey()>();
+
+        $i0 = staticinvoke <sun.security.ssl.JsseJce: int getRSAKeyLength(java.security.PublicKey)>($r18);
+
+        if $i0 <= 512 goto label06;
+
+        $r20 = r0.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLKeyAgreement keyAgreement>;
+
+        $r21 = interfaceinvoke $r20.<sun.security.ssl.SSLKeyAgreement: sun.security.ssl.SSLPossession createPossession(sun.security.ssl.HandshakeContext)>(r2);
+
+        if $r21 != null goto label03;
+
+        $r23 = newarray (sun.security.ssl.SSLPossession)[0];
+
+        return $r23;
+
+     label03:
+        $r22 = r0.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLAuthentication authentication>;
+
+        if $r22 == null goto label04;
+
+        $r31 = newarray (sun.security.ssl.SSLPossession)[2];
+
+        $r31[0] = r27;
+
+        $r31[1] = $r21;
+
+        goto label05;
+
+     label04:
+        $r31 = newarray (sun.security.ssl.SSLPossession)[1];
+
+        $r31[0] = $r21;
+
+     label05:
+        return $r31;
+
+     label06:
+        $r19 = r0.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLAuthentication authentication>;
+
+        if $r19 == null goto label07;
+
+        $r32 = newarray (sun.security.ssl.SSLPossession)[1];
+
+        $r32[0] = r27;
+
+        goto label08;
+
+     label07:
+        $r32 = newarray (sun.security.ssl.SSLPossession)[0];
+
+     label08:
+        return $r32;
+
+     label09:
+        $r3 = r0.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLKeyAgreement keyAgreement>;
+
+        $r4 = interfaceinvoke $r3.<sun.security.ssl.SSLKeyAgreement: sun.security.ssl.SSLPossession createPossession(sun.security.ssl.HandshakeContext)>(r2);
+
+        if $r4 != null goto label14;
+
+        $r7 = r0.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLKeyAgreement keyAgreement>;
+
+        $r6 = <sun.security.ssl.SSLKeyExchange$T12KeyAgreement: sun.security.ssl.SSLKeyExchange$T12KeyAgreement RSA>;
+
+        if $r7 == $r6 goto label10;
+
+        $r9 = r0.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLKeyAgreement keyAgreement>;
+
+        $r8 = <sun.security.ssl.SSLKeyExchange$T12KeyAgreement: sun.security.ssl.SSLKeyExchange$T12KeyAgreement ECDH>;
+
+        if $r9 == $r8 goto label10;
+
+        $r11 = r0.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLKeyAgreement keyAgreement>;
+
+        $r10 = <sun.security.ssl.SSLKeyExchange$T12KeyAgreement: sun.security.ssl.SSLKeyExchange$T12KeyAgreement KRB5>;
+
+        if $r11 == $r10 goto label10;
+
+        $r13 = r0.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLKeyAgreement keyAgreement>;
+
+        $r12 = <sun.security.ssl.SSLKeyExchange$T12KeyAgreement: sun.security.ssl.SSLKeyExchange$T12KeyAgreement KRB5_EXPORT>;
+
+        if $r13 != $r12 goto label13;
+
+     label10:
+        $r33 = r0.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLAuthentication authentication>;
+
+        if $r33 == null goto label11;
+
+        $r34 = newarray (sun.security.ssl.SSLPossession)[1];
+
+        $r34[0] = r27;
+
+        goto label12;
+
+     label11:
+        $r34 = newarray (sun.security.ssl.SSLPossession)[0];
+
+     label12:
+        return $r34;
+
+     label13:
+        $r14 = newarray (sun.security.ssl.SSLPossession)[0];
+
+        return $r14;
+
+     label14:
+        $r5 = r0.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLAuthentication authentication>;
+
+        if $r5 == null goto label15;
+
+        $r35 = newarray (sun.security.ssl.SSLPossession)[2];
+
+        $r35[0] = r27;
+
+        $r35[1] = $r4;
+
+        goto label16;
+
+     label15:
+        $r35 = newarray (sun.security.ssl.SSLPossession)[1];
+
+        $r35[0] = $r4;
+
+     label16:
+        return $r35;
+    }
+
+    public sun.security.ssl.SSLKeyDerivation createKeyDerivation(sun.security.ssl.HandshakeContext) throws java.io.IOException
+    {
+        sun.security.ssl.SSLKeyAgreement $r2;
+        sun.security.ssl.SSLKeyExchange r0;
+        sun.security.ssl.SSLKeyDerivation $r3;
+        sun.security.ssl.HandshakeContext r1;
+
+        r0 := @this: sun.security.ssl.SSLKeyExchange;
+
+        r1 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        $r2 = r0.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLKeyAgreement keyAgreement>;
+
+        $r3 = interfaceinvoke $r2.<sun.security.ssl.SSLKeyAgreement: sun.security.ssl.SSLKeyDerivation createKeyDerivation(sun.security.ssl.HandshakeContext)>(r1);
+
+        return $r3;
+    }
+
+    public sun.security.ssl.SSLHandshake[] getRelatedHandshakers(sun.security.ssl.HandshakeContext)
+    {
+        java.lang.Object[] $r5;
+        sun.security.ssl.SSLAuthentication $r1, $r7;
+        sun.security.ssl.SSLKeyAgreement $r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        sun.security.ssl.SSLHandshake[] $r4, r6, r8;
+        sun.security.ssl.SSLKeyExchange r0;
+        sun.security.ssl.HandshakeContext r2;
+
+        r0 := @this: sun.security.ssl.SSLKeyExchange;
+
+        r2 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        $r1 = r0.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLAuthentication authentication>;
+
+        if $r1 == null goto label1;
+
+        $r7 = r0.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLAuthentication authentication>;
+
+        r8 = interfaceinvoke $r7.<sun.security.ssl.SSLAuthentication: sun.security.ssl.SSLHandshake[] getRelatedHandshakers(sun.security.ssl.HandshakeContext)>(r2);
+
+        goto label2;
+
+     label1:
+        r8 = null;
+
+     label2:
+        $r3 = r0.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLKeyAgreement keyAgreement>;
+
+        $r4 = interfaceinvoke $r3.<sun.security.ssl.SSLKeyAgreement: sun.security.ssl.SSLHandshake[] getRelatedHandshakers(sun.security.ssl.HandshakeContext)>(r2);
+
+        if r8 == null goto label3;
+
+        $i0 = lengthof r8;
+
+        if $i0 != 0 goto label4;
+
+     label3:
+        return $r4;
+
+     label4:
+        if $r4 == null goto label5;
+
+        $i1 = lengthof $r4;
+
+        if $i1 != 0 goto label6;
+
+     label5:
+        return r8;
+
+     label6:
+        $i3 = lengthof r8;
+
+        $i2 = lengthof $r4;
+
+        $i4 = $i3 + $i2;
+
+        $r5 = staticinvoke <java.util.Arrays: java.lang.Object[] copyOf(java.lang.Object[],int)>(r8, $i4);
+
+        r6 = (sun.security.ssl.SSLHandshake[]) $r5;
+
+        $i6 = lengthof r8;
+
+        $i5 = lengthof $r4;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, r6, $i6, $i5);
+
+        return r6;
+    }
+
+    public java.util.Map$Entry[] getHandshakeProducers(sun.security.ssl.HandshakeContext)
+    {
+        java.lang.Object[] $r5;
+        sun.security.ssl.SSLAuthentication $r1, $r7;
+        sun.security.ssl.SSLKeyAgreement $r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        java.util.Map$Entry[] $r4, r6, r8;
+        sun.security.ssl.SSLKeyExchange r0;
+        sun.security.ssl.HandshakeContext r2;
+
+        r0 := @this: sun.security.ssl.SSLKeyExchange;
+
+        r2 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        $r1 = r0.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLAuthentication authentication>;
+
+        if $r1 == null goto label1;
+
+        $r7 = r0.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLAuthentication authentication>;
+
+        r8 = interfaceinvoke $r7.<sun.security.ssl.SSLAuthentication: java.util.Map$Entry[] getHandshakeProducers(sun.security.ssl.HandshakeContext)>(r2);
+
+        goto label2;
+
+     label1:
+        r8 = null;
+
+     label2:
+        $r3 = r0.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLKeyAgreement keyAgreement>;
+
+        $r4 = interfaceinvoke $r3.<sun.security.ssl.SSLKeyAgreement: java.util.Map$Entry[] getHandshakeProducers(sun.security.ssl.HandshakeContext)>(r2);
+
+        if r8 == null goto label3;
+
+        $i0 = lengthof r8;
+
+        if $i0 != 0 goto label4;
+
+     label3:
+        return $r4;
+
+     label4:
+        if $r4 == null goto label5;
+
+        $i1 = lengthof $r4;
+
+        if $i1 != 0 goto label6;
+
+     label5:
+        return r8;
+
+     label6:
+        $i3 = lengthof r8;
+
+        $i2 = lengthof $r4;
+
+        $i4 = $i3 + $i2;
+
+        $r5 = staticinvoke <java.util.Arrays: java.lang.Object[] copyOf(java.lang.Object[],int)>(r8, $i4);
+
+        r6 = (java.util.Map$Entry[]) $r5;
+
+        $i6 = lengthof r8;
+
+        $i5 = lengthof $r4;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, r6, $i6, $i5);
+
+        return r6;
+    }
+
+    public java.util.Map$Entry[] getHandshakeConsumers(sun.security.ssl.HandshakeContext)
+    {
+        java.lang.Object[] $r5;
+        sun.security.ssl.SSLAuthentication $r1, $r7;
+        sun.security.ssl.SSLKeyAgreement $r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        java.util.Map$Entry[] $r4, r6, r8;
+        sun.security.ssl.SSLKeyExchange r0;
+        sun.security.ssl.HandshakeContext r2;
+
+        r0 := @this: sun.security.ssl.SSLKeyExchange;
+
+        r2 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        $r1 = r0.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLAuthentication authentication>;
+
+        if $r1 == null goto label1;
+
+        $r7 = r0.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLAuthentication authentication>;
+
+        r8 = interfaceinvoke $r7.<sun.security.ssl.SSLAuthentication: java.util.Map$Entry[] getHandshakeConsumers(sun.security.ssl.HandshakeContext)>(r2);
+
+        goto label2;
+
+     label1:
+        r8 = null;
+
+     label2:
+        $r3 = r0.<sun.security.ssl.SSLKeyExchange: sun.security.ssl.SSLKeyAgreement keyAgreement>;
+
+        $r4 = interfaceinvoke $r3.<sun.security.ssl.SSLKeyAgreement: java.util.Map$Entry[] getHandshakeConsumers(sun.security.ssl.HandshakeContext)>(r2);
+
+        if r8 == null goto label3;
+
+        $i0 = lengthof r8;
+
+        if $i0 != 0 goto label4;
+
+     label3:
+        return $r4;
+
+     label4:
+        if $r4 == null goto label5;
+
+        $i1 = lengthof $r4;
+
+        if $i1 != 0 goto label6;
+
+     label5:
+        return r8;
+
+     label6:
+        $i3 = lengthof r8;
+
+        $i2 = lengthof $r4;
+
+        $i4 = $i3 + $i2;
+
+        $r5 = staticinvoke <java.util.Arrays: java.lang.Object[] copyOf(java.lang.Object[],int)>(r8, $i4);
+
+        r6 = (java.util.Map$Entry[]) $r5;
+
+        $i6 = lengthof r8;
+
+        $i5 = lengthof $r4;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, r6, $i6, $i5);
+
+        return r6;
+    }
+
+    static sun.security.ssl.SSLKeyExchange valueOf(sun.security.ssl.CipherSuite$KeyExchange, sun.security.ssl.ProtocolVersion)
+    {
+        sun.security.ssl.ProtocolVersion r1;
+        sun.security.ssl.CipherSuite$KeyExchange r0;
+        int[] $r2;
+        int $i0, $i1;
+        boolean $z0, $z1;
+        sun.security.ssl.SSLKeyExchange $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19;
+
+        r0 := @parameter0: sun.security.ssl.CipherSuite$KeyExchange;
+
+        r1 := @parameter1: sun.security.ssl.ProtocolVersion;
+
+        if r0 == null goto label01;
+
+        if r1 != null goto label02;
+
+     label01:
+        return null;
+
+     label02:
+        $r2 = <sun.security.ssl.SSLKeyExchange$1: int[] $SwitchMap$sun$security$ssl$CipherSuite$KeyExchange>;
+
+        $i0 = virtualinvoke r0.<sun.security.ssl.CipherSuite$KeyExchange: int ordinal()>();
+
+        $i1 = $r2[$i0];
+
+        tableswitch($i1)
+        {
+            case 1: goto label03;
+            case 2: goto label04;
+            case 3: goto label05;
+            case 4: goto label06;
+            case 5: goto label07;
+            case 6: goto label09;
+            case 7: goto label10;
+            case 8: goto label11;
+            case 9: goto label12;
+            case 10: goto label13;
+            case 11: goto label14;
+            case 12: goto label15;
+            case 13: goto label17;
+            case 14: goto label18;
+            case 15: goto label19;
+            default: goto label20;
+        };
+
+     label03:
+        $r19 = staticinvoke <sun.security.ssl.SSLKeyExchange$SSLKeyExRSA: sun.security.ssl.SSLKeyExchange access$000()>();
+
+        return $r19;
+
+     label04:
+        $r18 = staticinvoke <sun.security.ssl.SSLKeyExchange$SSLKeyExRSAExport: sun.security.ssl.SSLKeyExchange access$100()>();
+
+        return $r18;
+
+     label05:
+        $r17 = staticinvoke <sun.security.ssl.SSLKeyExchange$SSLKeyExDHEDSS: sun.security.ssl.SSLKeyExchange access$200()>();
+
+        return $r17;
+
+     label06:
+        $r16 = staticinvoke <sun.security.ssl.SSLKeyExchange$SSLKeyExDHEDSSExport: sun.security.ssl.SSLKeyExchange access$300()>();
+
+        return $r16;
+
+     label07:
+        $z1 = virtualinvoke r1.<sun.security.ssl.ProtocolVersion: boolean useTLS12PlusSpec()>();
+
+        if $z1 == 0 goto label08;
+
+        $r15 = staticinvoke <sun.security.ssl.SSLKeyExchange$SSLKeyExDHERSAOrPSS: sun.security.ssl.SSLKeyExchange access$400()>();
+
+        return $r15;
+
+     label08:
+        $r14 = staticinvoke <sun.security.ssl.SSLKeyExchange$SSLKeyExDHERSA: sun.security.ssl.SSLKeyExchange access$500()>();
+
+        return $r14;
+
+     label09:
+        $r13 = staticinvoke <sun.security.ssl.SSLKeyExchange$SSLKeyExDHERSAExport: sun.security.ssl.SSLKeyExchange access$600()>();
+
+        return $r13;
+
+     label10:
+        $r12 = staticinvoke <sun.security.ssl.SSLKeyExchange$SSLKeyExDHANON: sun.security.ssl.SSLKeyExchange access$700()>();
+
+        return $r12;
+
+     label11:
+        $r11 = staticinvoke <sun.security.ssl.SSLKeyExchange$SSLKeyExDHANONExport: sun.security.ssl.SSLKeyExchange access$800()>();
+
+        return $r11;
+
+     label12:
+        $r10 = staticinvoke <sun.security.ssl.SSLKeyExchange$SSLKeyExECDHECDSA: sun.security.ssl.SSLKeyExchange access$900()>();
+
+        return $r10;
+
+     label13:
+        $r9 = staticinvoke <sun.security.ssl.SSLKeyExchange$SSLKeyExECDHRSA: sun.security.ssl.SSLKeyExchange access$1000()>();
+
+        return $r9;
+
+     label14:
+        $r8 = staticinvoke <sun.security.ssl.SSLKeyExchange$SSLKeyExECDHEECDSA: sun.security.ssl.SSLKeyExchange access$1100()>();
+
+        return $r8;
+
+     label15:
+        $z0 = virtualinvoke r1.<sun.security.ssl.ProtocolVersion: boolean useTLS12PlusSpec()>();
+
+        if $z0 == 0 goto label16;
+
+        $r7 = staticinvoke <sun.security.ssl.SSLKeyExchange$SSLKeyExECDHERSAOrPSS: sun.security.ssl.SSLKeyExchange access$1200()>();
+
+        return $r7;
+
+     label16:
+        $r6 = staticinvoke <sun.security.ssl.SSLKeyExchange$SSLKeyExECDHERSA: sun.security.ssl.SSLKeyExchange access$1300()>();
+
+        return $r6;
+
+     label17:
+        $r5 = staticinvoke <sun.security.ssl.SSLKeyExchange$SSLKeyExECDHANON: sun.security.ssl.SSLKeyExchange access$1400()>();
+
+        return $r5;
+
+     label18:
+        $r4 = staticinvoke <sun.security.ssl.SSLKeyExchange$SSLKeyExKRB5: sun.security.ssl.SSLKeyExchange access$1500()>();
+
+        return $r4;
+
+     label19:
+        $r3 = staticinvoke <sun.security.ssl.SSLKeyExchange$SSLKeyExKRB5Export: sun.security.ssl.SSLKeyExchange access$1600()>();
+
+        return $r3;
+
+     label20:
+        return null;
+    }
+
+    static sun.security.ssl.SSLKeyExchange valueOf(sun.security.ssl.SupportedGroupsExtension$NamedGroup)
+    {
+        sun.security.ssl.SSLKeyExchange$T13KeyAgreement $r1, $r3;
+        sun.security.ssl.SSLKeyExchange $r2;
+        sun.security.ssl.SupportedGroupsExtension$NamedGroup r0;
+
+        r0 := @parameter0: sun.security.ssl.SupportedGroupsExtension$NamedGroup;
+
+        $r1 = staticinvoke <sun.security.ssl.SSLKeyExchange$T13KeyAgreement: sun.security.ssl.SSLKeyExchange$T13KeyAgreement valueOf(sun.security.ssl.SupportedGroupsExtension$NamedGroup)>(r0);
+
+        if $r1 == null goto label1;
+
+        $r2 = new sun.security.ssl.SSLKeyExchange;
+
+        $r3 = staticinvoke <sun.security.ssl.SSLKeyExchange$T13KeyAgreement: sun.security.ssl.SSLKeyExchange$T13KeyAgreement valueOf(sun.security.ssl.SupportedGroupsExtension$NamedGroup)>(r0);
+
+        specialinvoke $r2.<sun.security.ssl.SSLKeyExchange: void <init>(sun.security.ssl.SSLAuthentication,sun.security.ssl.SSLKeyAgreement)>(null, $r3);
+
+        return $r2;
+
+     label1:
+        return null;
+    }
+}

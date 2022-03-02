@@ -1,0 +1,102 @@
+public abstract class javax.net.ssl.SSLContextSpi extends java.lang.Object
+{
+
+    public void <init>()
+    {
+        javax.net.ssl.SSLContextSpi r0;
+
+        r0 := @this: javax.net.ssl.SSLContextSpi;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    protected abstract void engineInit(javax.net.ssl.KeyManager[], javax.net.ssl.TrustManager[], java.security.SecureRandom) throws java.security.KeyManagementException;
+
+    protected abstract javax.net.ssl.SSLSocketFactory engineGetSocketFactory();
+
+    protected abstract javax.net.ssl.SSLServerSocketFactory engineGetServerSocketFactory();
+
+    protected abstract javax.net.ssl.SSLEngine engineCreateSSLEngine();
+
+    protected abstract javax.net.ssl.SSLEngine engineCreateSSLEngine(java.lang.String, int);
+
+    protected abstract javax.net.ssl.SSLSessionContext engineGetServerSessionContext();
+
+    protected abstract javax.net.ssl.SSLSessionContext engineGetClientSessionContext();
+
+    private javax.net.ssl.SSLSocket getDefaultSocket()
+    {
+        java.lang.UnsupportedOperationException $r5;
+        java.net.Socket $r2;
+        javax.net.ssl.SSLContextSpi r0;
+        javax.net.ssl.SSLSocket $r3;
+        java.io.IOException $r4;
+        javax.net.ssl.SSLSocketFactory $r1;
+
+        r0 := @this: javax.net.ssl.SSLContextSpi;
+
+     label1:
+        $r1 = virtualinvoke r0.<javax.net.ssl.SSLContextSpi: javax.net.ssl.SSLSocketFactory engineGetSocketFactory()>();
+
+        $r2 = virtualinvoke $r1.<javax.net.ssl.SSLSocketFactory: java.net.Socket createSocket()>();
+
+        $r3 = (javax.net.ssl.SSLSocket) $r2;
+
+     label2:
+        return $r3;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r5.<java.lang.UnsupportedOperationException: void <init>(java.lang.String,java.lang.Throwable)>("Could not obtain parameters", $r4);
+
+        throw $r5;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    protected javax.net.ssl.SSLParameters engineGetDefaultSSLParameters()
+    {
+        javax.net.ssl.SSLContextSpi r0;
+        javax.net.ssl.SSLSocket $r1;
+        javax.net.ssl.SSLParameters $r2;
+
+        r0 := @this: javax.net.ssl.SSLContextSpi;
+
+        $r1 = specialinvoke r0.<javax.net.ssl.SSLContextSpi: javax.net.ssl.SSLSocket getDefaultSocket()>();
+
+        $r2 = virtualinvoke $r1.<javax.net.ssl.SSLSocket: javax.net.ssl.SSLParameters getSSLParameters()>();
+
+        return $r2;
+    }
+
+    protected javax.net.ssl.SSLParameters engineGetSupportedSSLParameters()
+    {
+        javax.net.ssl.SSLParameters $r2;
+        javax.net.ssl.SSLContextSpi r0;
+        javax.net.ssl.SSLSocket $r1;
+        java.lang.String[] $r3, $r4;
+
+        r0 := @this: javax.net.ssl.SSLContextSpi;
+
+        $r1 = specialinvoke r0.<javax.net.ssl.SSLContextSpi: javax.net.ssl.SSLSocket getDefaultSocket()>();
+
+        $r2 = new javax.net.ssl.SSLParameters;
+
+        specialinvoke $r2.<javax.net.ssl.SSLParameters: void <init>()>();
+
+        $r3 = virtualinvoke $r1.<javax.net.ssl.SSLSocket: java.lang.String[] getSupportedCipherSuites()>();
+
+        virtualinvoke $r2.<javax.net.ssl.SSLParameters: void setCipherSuites(java.lang.String[])>($r3);
+
+        $r4 = virtualinvoke $r1.<javax.net.ssl.SSLSocket: java.lang.String[] getSupportedProtocols()>();
+
+        virtualinvoke $r2.<javax.net.ssl.SSLParameters: void setProtocols(java.lang.String[])>($r4);
+
+        return $r2;
+    }
+}

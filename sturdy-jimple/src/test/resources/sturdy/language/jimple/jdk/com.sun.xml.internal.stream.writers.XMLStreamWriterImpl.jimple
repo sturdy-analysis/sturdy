@@ -1,0 +1,4993 @@
+public final class com.sun.xml.internal.stream.writers.XMLStreamWriterImpl extends java.util.AbstractMap implements javax.xml.stream.XMLStreamWriter
+{
+    public static final java.lang.String START_COMMENT;
+    public static final java.lang.String END_COMMENT;
+    public static final java.lang.String DEFAULT_ENCODING;
+    public static final java.lang.String DEFAULT_XMLDECL;
+    public static final java.lang.String DEFAULT_XML_VERSION;
+    public static final char CLOSE_START_TAG;
+    public static final char OPEN_START_TAG;
+    public static final java.lang.String OPEN_END_TAG;
+    public static final char CLOSE_END_TAG;
+    public static final java.lang.String START_CDATA;
+    public static final java.lang.String END_CDATA;
+    public static final java.lang.String CLOSE_EMPTY_ELEMENT;
+    public static final java.lang.String SPACE;
+    public static final java.lang.String UTF_8;
+    public static final java.lang.String OUTPUTSTREAM_PROPERTY;
+    boolean fEscapeCharacters;
+    private boolean fIsRepairingNamespace;
+    private java.io.Writer fWriter;
+    private java.io.OutputStream fOutputStream;
+    private java.util.List fAttributeCache;
+    private java.util.List fNamespaceDecls;
+    private com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl fNamespaceContext;
+    private com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext;
+    private java.util.Random fPrefixGen;
+    private com.sun.org.apache.xerces.internal.impl.PropertyManager fPropertyManager;
+    private boolean fStartTagOpened;
+    private boolean fReuse;
+    private com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable;
+    private com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack fElementStack;
+    private final java.lang.String DEFAULT_PREFIX;
+    private final com.sun.xml.internal.stream.util.ReadOnlyIterator fReadOnlyIterator;
+    private java.nio.charset.CharsetEncoder fEncoder;
+    java.util.Map fAttrNamespace;
+
+    public void <init>(java.io.OutputStream, com.sun.org.apache.xerces.internal.impl.PropertyManager) throws java.io.IOException
+    {
+        java.io.OutputStream r2;
+        com.sun.org.apache.xerces.internal.impl.PropertyManager r3;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        java.io.OutputStreamWriter $r1;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r2 := @parameter0: java.io.OutputStream;
+
+        r3 := @parameter1: com.sun.org.apache.xerces.internal.impl.PropertyManager;
+
+        $r1 = new java.io.OutputStreamWriter;
+
+        specialinvoke $r1.<java.io.OutputStreamWriter: void <init>(java.io.OutputStream)>(r2);
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void <init>(java.io.Writer,com.sun.org.apache.xerces.internal.impl.PropertyManager)>($r1, r3);
+
+        return;
+    }
+
+    public void <init>(java.io.OutputStream, java.lang.String, com.sun.org.apache.xerces.internal.impl.PropertyManager) throws java.io.IOException
+    {
+        java.io.OutputStream r2;
+        com.sun.org.apache.xerces.internal.impl.PropertyManager r4;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        javax.xml.transform.stream.StreamResult $r1;
+        java.lang.String r3;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r2 := @parameter0: java.io.OutputStream;
+
+        r3 := @parameter1: java.lang.String;
+
+        r4 := @parameter2: com.sun.org.apache.xerces.internal.impl.PropertyManager;
+
+        $r1 = new javax.xml.transform.stream.StreamResult;
+
+        specialinvoke $r1.<javax.xml.transform.stream.StreamResult: void <init>(java.io.OutputStream)>(r2);
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void <init>(javax.xml.transform.stream.StreamResult,java.lang.String,com.sun.org.apache.xerces.internal.impl.PropertyManager)>($r1, r3, r4);
+
+        return;
+    }
+
+    public void <init>(java.io.Writer, com.sun.org.apache.xerces.internal.impl.PropertyManager) throws java.io.IOException
+    {
+        com.sun.org.apache.xerces.internal.impl.PropertyManager r3;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        javax.xml.transform.stream.StreamResult $r1;
+        java.io.Writer r2;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r2 := @parameter0: java.io.Writer;
+
+        r3 := @parameter1: com.sun.org.apache.xerces.internal.impl.PropertyManager;
+
+        $r1 = new javax.xml.transform.stream.StreamResult;
+
+        specialinvoke $r1.<javax.xml.transform.stream.StreamResult: void <init>(java.io.Writer)>(r2);
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void <init>(javax.xml.transform.stream.StreamResult,java.lang.String,com.sun.org.apache.xerces.internal.impl.PropertyManager)>($r1, null, r3);
+
+        return;
+    }
+
+    public void <init>(javax.xml.transform.stream.StreamResult, java.lang.String, com.sun.org.apache.xerces.internal.impl.PropertyManager) throws java.io.IOException
+    {
+        com.sun.org.apache.xerces.internal.impl.PropertyManager r8;
+        com.sun.org.apache.xerces.internal.util.SymbolTable $r1, $r3;
+        javax.xml.transform.stream.StreamResult r6;
+        com.sun.xml.internal.stream.util.ReadOnlyIterator $r5;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        java.lang.String $r4, r7;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack $r2;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r6 := @parameter0: javax.xml.transform.stream.StreamResult;
+
+        r7 := @parameter1: java.lang.String;
+
+        r8 := @parameter2: com.sun.org.apache.xerces.internal.impl.PropertyManager;
+
+        specialinvoke r0.<java.util.AbstractMap: void <init>()>();
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fEscapeCharacters> = 1;
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fIsRepairingNamespace> = 0;
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.OutputStream fOutputStream> = null;
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl fNamespaceContext> = null;
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext> = null;
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.Random fPrefixGen> = null;
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.impl.PropertyManager fPropertyManager> = null;
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fStartTagOpened> = 0;
+
+        $r1 = new com.sun.org.apache.xerces.internal.util.SymbolTable;
+
+        specialinvoke $r1.<com.sun.org.apache.xerces.internal.util.SymbolTable: void <init>()>();
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable> = $r1;
+
+        $r2 = new com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack;
+
+        specialinvoke $r2.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack: void <init>(com.sun.xml.internal.stream.writers.XMLStreamWriterImpl)>(r0);
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack fElementStack> = $r2;
+
+        $r3 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        $r4 = virtualinvoke $r3.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol(java.lang.String)>("");
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.lang.String DEFAULT_PREFIX> = $r4;
+
+        $r5 = new com.sun.xml.internal.stream.util.ReadOnlyIterator;
+
+        specialinvoke $r5.<com.sun.xml.internal.stream.util.ReadOnlyIterator: void <init>()>();
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.util.ReadOnlyIterator fReadOnlyIterator> = $r5;
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.nio.charset.CharsetEncoder fEncoder> = null;
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.Map fAttrNamespace> = null;
+
+        virtualinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void setOutput(javax.xml.transform.stream.StreamResult,java.lang.String)>(r6, r7);
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.impl.PropertyManager fPropertyManager> = r8;
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void init()>();
+
+        return;
+    }
+
+    private void init()
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl $r6, $r8;
+        java.util.Random $r2;
+        java.util.ArrayList $r1, $r3;
+        java.lang.Boolean r13, r14;
+        boolean $z0, $z1;
+        com.sun.org.apache.xerces.internal.impl.PropertyManager $r9, $r11;
+        com.sun.org.apache.xerces.internal.util.NamespaceSupport $r4, $r5, $r7;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        java.lang.Object $r10, $r12;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fReuse> = 0;
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls> = $r1;
+
+        $r2 = new java.util.Random;
+
+        specialinvoke $r2.<java.util.Random: void <init>()>();
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.Random fPrefixGen> = $r2;
+
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>()>();
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fAttributeCache> = $r3;
+
+        $r4 = new com.sun.org.apache.xerces.internal.util.NamespaceSupport;
+
+        specialinvoke $r4.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: void <init>()>();
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext> = $r4;
+
+        $r5 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        virtualinvoke $r5.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: void reset()>();
+
+        $r6 = new com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl;
+
+        specialinvoke $r6.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl: void <init>(com.sun.xml.internal.stream.writers.XMLStreamWriterImpl)>(r0);
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl fNamespaceContext> = $r6;
+
+        $r8 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl fNamespaceContext>;
+
+        $r7 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        $r8.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport internalContext> = $r7;
+
+        $r9 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.impl.PropertyManager fPropertyManager>;
+
+        $r10 = virtualinvoke $r9.<com.sun.org.apache.xerces.internal.impl.PropertyManager: java.lang.Object getProperty(java.lang.String)>("javax.xml.stream.isRepairingNamespaces");
+
+        r13 = (java.lang.Boolean) $r10;
+
+        $z0 = virtualinvoke r13.<java.lang.Boolean: boolean booleanValue()>();
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fIsRepairingNamespace> = $z0;
+
+        $r11 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.impl.PropertyManager fPropertyManager>;
+
+        $r12 = virtualinvoke $r11.<com.sun.org.apache.xerces.internal.impl.PropertyManager: java.lang.Object getProperty(java.lang.String)>("escapeCharacters");
+
+        r14 = (java.lang.Boolean) $r12;
+
+        $z1 = virtualinvoke r14.<java.lang.Boolean: boolean booleanValue()>();
+
+        virtualinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void setEscapeCharacters(boolean)>($z1);
+
+        return;
+    }
+
+    public void reset()
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        virtualinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void reset(boolean)>(0);
+
+        return;
+    }
+
+    void reset(boolean)
+    {
+        java.lang.IllegalStateException $r10;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl $r5;
+        java.lang.Boolean r11, r12;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack $r3;
+        boolean $z0, z1, $z2, $z3;
+        com.sun.org.apache.xerces.internal.impl.PropertyManager $r6, $r8;
+        java.util.List $r1, $r2;
+        com.sun.org.apache.xerces.internal.util.NamespaceSupport $r4;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        java.lang.Object $r7, $r9;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        z1 := @parameter0: boolean;
+
+        $z0 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fReuse>;
+
+        if $z0 != 0 goto label1;
+
+        $r10 = new java.lang.IllegalStateException;
+
+        specialinvoke $r10.<java.lang.IllegalStateException: void <init>(java.lang.String)>("close() Must be called before calling reset()");
+
+        throw $r10;
+
+     label1:
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fReuse> = 0;
+
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        interfaceinvoke $r1.<java.util.List: void clear()>();
+
+        $r2 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fAttributeCache>;
+
+        interfaceinvoke $r2.<java.util.List: void clear()>();
+
+        $r3 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack fElementStack>;
+
+        virtualinvoke $r3.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack: void clear()>();
+
+        $r4 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        virtualinvoke $r4.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: void reset()>();
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fStartTagOpened> = 0;
+
+        $r5 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl fNamespaceContext>;
+
+        $r5.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl: javax.xml.namespace.NamespaceContext userContext> = null;
+
+        if z1 == 0 goto label2;
+
+        $r6 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.impl.PropertyManager fPropertyManager>;
+
+        $r7 = virtualinvoke $r6.<com.sun.org.apache.xerces.internal.impl.PropertyManager: java.lang.Object getProperty(java.lang.String)>("javax.xml.stream.isRepairingNamespaces");
+
+        r11 = (java.lang.Boolean) $r7;
+
+        $z2 = virtualinvoke r11.<java.lang.Boolean: boolean booleanValue()>();
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fIsRepairingNamespace> = $z2;
+
+        $r8 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.impl.PropertyManager fPropertyManager>;
+
+        $r9 = virtualinvoke $r8.<com.sun.org.apache.xerces.internal.impl.PropertyManager: java.lang.Object getProperty(java.lang.String)>("escapeCharacters");
+
+        r12 = (java.lang.Boolean) $r9;
+
+        $z3 = virtualinvoke r12.<java.lang.Boolean: boolean booleanValue()>();
+
+        virtualinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void setEscapeCharacters(boolean)>($z3);
+
+     label2:
+        return;
+    }
+
+    public void setOutput(javax.xml.transform.stream.StreamResult, java.lang.String) throws java.io.IOException
+    {
+        java.io.OutputStream $r1, $r9;
+        javax.xml.transform.stream.StreamResult r0;
+        java.io.FileOutputStream $r5;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r4;
+        java.io.Writer $r2, $r8;
+        java.lang.String $r3, $r6, r7;
+
+        r4 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r0 := @parameter0: javax.xml.transform.stream.StreamResult;
+
+        r7 := @parameter1: java.lang.String;
+
+        $r1 = virtualinvoke r0.<javax.xml.transform.stream.StreamResult: java.io.OutputStream getOutputStream()>();
+
+        if $r1 == null goto label1;
+
+        $r9 = virtualinvoke r0.<javax.xml.transform.stream.StreamResult: java.io.OutputStream getOutputStream()>();
+
+        specialinvoke r4.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void setOutputUsingStream(java.io.OutputStream,java.lang.String)>($r9, r7);
+
+        goto label3;
+
+     label1:
+        $r2 = virtualinvoke r0.<javax.xml.transform.stream.StreamResult: java.io.Writer getWriter()>();
+
+        if $r2 == null goto label2;
+
+        $r8 = virtualinvoke r0.<javax.xml.transform.stream.StreamResult: java.io.Writer getWriter()>();
+
+        specialinvoke r4.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void setOutputUsingWriter(java.io.Writer)>($r8);
+
+        goto label3;
+
+     label2:
+        $r3 = virtualinvoke r0.<javax.xml.transform.stream.StreamResult: java.lang.String getSystemId()>();
+
+        if $r3 == null goto label3;
+
+        $r5 = new java.io.FileOutputStream;
+
+        $r6 = virtualinvoke r0.<javax.xml.transform.stream.StreamResult: java.lang.String getSystemId()>();
+
+        specialinvoke $r5.<java.io.FileOutputStream: void <init>(java.lang.String)>($r6);
+
+        specialinvoke r4.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void setOutputUsingStream(java.io.OutputStream,java.lang.String)>($r5, r7);
+
+     label3:
+        return;
+    }
+
+    private void setOutputUsingWriter(java.io.Writer) throws java.io.IOException
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        java.nio.charset.Charset $r4;
+        java.nio.charset.CharsetEncoder $r5;
+        java.io.Writer r1;
+        java.io.OutputStreamWriter $r2;
+        java.lang.String $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r1 := @parameter0: java.io.Writer;
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter> = r1;
+
+        $z0 = r1 instanceof java.io.OutputStreamWriter;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = (java.io.OutputStreamWriter) r1;
+
+        $r3 = virtualinvoke $r2.<java.io.OutputStreamWriter: java.lang.String getEncoding()>();
+
+        if $r3 == null goto label1;
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("utf-8");
+
+        if $z1 != 0 goto label1;
+
+        $r4 = staticinvoke <java.nio.charset.Charset: java.nio.charset.Charset forName(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.nio.charset.Charset: java.nio.charset.CharsetEncoder newEncoder()>();
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.nio.charset.CharsetEncoder fEncoder> = $r5;
+
+     label1:
+        return;
+    }
+
+    private void setOutputUsingStream(java.io.OutputStream, java.lang.String) throws java.io.IOException
+    {
+        java.io.OutputStream r1;
+        com.sun.xml.internal.stream.writers.XMLWriter $r3, $r6;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        java.nio.charset.Charset $r8;
+        java.nio.charset.CharsetEncoder $r9;
+        java.io.OutputStreamWriter $r4, $r7;
+        java.lang.String $r2, r11;
+        boolean $z0, $z1;
+        com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter $r5, $r10;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r1 := @parameter0: java.io.OutputStream;
+
+        r11 := @parameter1: java.lang.String;
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.OutputStream fOutputStream> = r1;
+
+        if r11 == null goto label2;
+
+        $z1 = virtualinvoke r11.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("utf-8");
+
+        if $z1 == 0 goto label1;
+
+        $r10 = new com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter;
+
+        specialinvoke $r10.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: void <init>(java.io.OutputStream)>(r1);
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter> = $r10;
+
+        goto label4;
+
+     label1:
+        $r6 = new com.sun.xml.internal.stream.writers.XMLWriter;
+
+        $r7 = new java.io.OutputStreamWriter;
+
+        specialinvoke $r7.<java.io.OutputStreamWriter: void <init>(java.io.OutputStream,java.lang.String)>(r1, r11);
+
+        specialinvoke $r6.<com.sun.xml.internal.stream.writers.XMLWriter: void <init>(java.io.Writer)>($r7);
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter> = $r6;
+
+        $r8 = staticinvoke <java.nio.charset.Charset: java.nio.charset.Charset forName(java.lang.String)>(r11);
+
+        $r9 = virtualinvoke $r8.<java.nio.charset.Charset: java.nio.charset.CharsetEncoder newEncoder()>();
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.nio.charset.CharsetEncoder fEncoder> = $r9;
+
+        goto label4;
+
+     label2:
+        $r2 = staticinvoke <com.sun.org.apache.xerces.internal.utils.SecuritySupport: java.lang.String getSystemProperty(java.lang.String)>("file.encoding");
+
+        if $r2 == null goto label3;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("utf-8");
+
+        if $z0 == 0 goto label3;
+
+        $r5 = new com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter;
+
+        specialinvoke $r5.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: void <init>(java.io.OutputStream)>(r1);
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter> = $r5;
+
+        goto label4;
+
+     label3:
+        $r3 = new com.sun.xml.internal.stream.writers.XMLWriter;
+
+        $r4 = new java.io.OutputStreamWriter;
+
+        specialinvoke $r4.<java.io.OutputStreamWriter: void <init>(java.io.OutputStream)>(r1);
+
+        specialinvoke $r3.<com.sun.xml.internal.stream.writers.XMLWriter: void <init>(java.io.Writer)>($r4);
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter> = $r3;
+
+     label4:
+        return;
+    }
+
+    public boolean canReuse()
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        $z0 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fReuse>;
+
+        return $z0;
+    }
+
+    public void setEscapeCharacters(boolean)
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        boolean z0;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        z0 := @parameter0: boolean;
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fEscapeCharacters> = z0;
+
+        return;
+    }
+
+    public boolean getEscapeCharacters()
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        $z0 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fEscapeCharacters>;
+
+        return $z0;
+    }
+
+    public void close() throws javax.xml.stream.XMLStreamException
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl $r6;
+        java.io.IOException $r8;
+        java.util.List $r2, $r3;
+        com.sun.org.apache.xerces.internal.util.NamespaceSupport $r5;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        javax.xml.stream.XMLStreamException $r9;
+        java.io.Writer $r1, $r7;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack $r4;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        if $r1 == null goto label4;
+
+     label1:
+        $r7 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r7.<java.io.Writer: void flush()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r8 := @caughtexception;
+
+        $r9 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r9.<javax.xml.stream.XMLStreamException: void <init>(java.lang.Throwable)>($r8);
+
+        throw $r9;
+
+     label4:
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter> = null;
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.OutputStream fOutputStream> = null;
+
+        $r2 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        interfaceinvoke $r2.<java.util.List: void clear()>();
+
+        $r3 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fAttributeCache>;
+
+        interfaceinvoke $r3.<java.util.List: void clear()>();
+
+        $r4 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack fElementStack>;
+
+        virtualinvoke $r4.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack: void clear()>();
+
+        $r5 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        virtualinvoke $r5.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: void reset()>();
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fReuse> = 1;
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fStartTagOpened> = 0;
+
+        $r6 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl fNamespaceContext>;
+
+        $r6.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl: javax.xml.namespace.NamespaceContext userContext> = null;
+
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public void flush() throws javax.xml.stream.XMLStreamException
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        javax.xml.stream.XMLStreamException $r3;
+        java.io.Writer $r1;
+        java.io.IOException $r2;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+     label1:
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r1.<java.io.Writer: void flush()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r3.<javax.xml.stream.XMLStreamException: void <init>(java.lang.Throwable)>($r2);
+
+        throw $r3;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public javax.xml.namespace.NamespaceContext getNamespaceContext()
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl $r1;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl fNamespaceContext>;
+
+        return $r1;
+    }
+
+    public java.lang.String getPrefix(java.lang.String) throws javax.xml.stream.XMLStreamException
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl $r2;
+        java.lang.String r1, $r3;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl fNamespaceContext>;
+
+        $r3 = virtualinvoke $r2.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl: java.lang.String getPrefix(java.lang.String)>(r1);
+
+        return $r3;
+    }
+
+    public java.lang.Object getProperty(java.lang.String) throws java.lang.IllegalArgumentException
+    {
+        com.sun.org.apache.xerces.internal.impl.PropertyManager $r2, $r3;
+        java.lang.IllegalArgumentException $r5;
+        java.lang.NullPointerException $r11;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r1;
+        java.lang.Object $r4;
+        java.lang.StringBuilder $r6, $r7, $r8, $r9;
+        java.lang.String r0, $r10;
+        boolean $z0;
+
+        r1 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        $r11 = new java.lang.NullPointerException;
+
+        specialinvoke $r11.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r11;
+
+     label1:
+        $r2 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.impl.PropertyManager fPropertyManager>;
+
+        $z0 = virtualinvoke $r2.<com.sun.org.apache.xerces.internal.impl.PropertyManager: boolean containsProperty(java.lang.String)>(r0);
+
+        if $z0 != 0 goto label2;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Property \'");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' is not supported");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r10);
+
+        throw $r5;
+
+     label2:
+        $r3 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.impl.PropertyManager fPropertyManager>;
+
+        $r4 = virtualinvoke $r3.<com.sun.org.apache.xerces.internal.impl.PropertyManager: java.lang.Object getProperty(java.lang.String)>(r0);
+
+        return $r4;
+    }
+
+    public void setDefaultNamespace(java.lang.String) throws javax.xml.stream.XMLStreamException
+    {
+        com.sun.org.apache.xerces.internal.util.SymbolTable $r6;
+        com.sun.org.apache.xerces.internal.util.NamespaceSupport $r2;
+        java.util.List $r5;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        java.lang.String $r1, $r4, r7;
+        com.sun.org.apache.xerces.internal.xni.QName $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r7 := @parameter0: java.lang.String;
+
+        if r7 == null goto label1;
+
+        $r6 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        r7 = virtualinvoke $r6.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol(java.lang.String)>(r7);
+
+     label1:
+        $z0 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fIsRepairingNamespace>;
+
+        if $z0 == 0 goto label3;
+
+        $z1 = specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean isDefaultNamespace(java.lang.String)>(r7);
+
+        if $z1 == 0 goto label2;
+
+        return;
+
+     label2:
+        $r3 = new com.sun.org.apache.xerces.internal.xni.QName;
+
+        specialinvoke $r3.<com.sun.org.apache.xerces.internal.xni.QName: void <init>()>();
+
+        $r4 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.lang.String DEFAULT_PREFIX>;
+
+        virtualinvoke $r3.<com.sun.org.apache.xerces.internal.xni.QName: void setValues(java.lang.String,java.lang.String,java.lang.String,java.lang.String)>($r4, "xmlns", null, r7);
+
+        $r5 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        interfaceinvoke $r5.<java.util.List: boolean add(java.lang.Object)>($r3);
+
+        goto label4;
+
+     label3:
+        $r2 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.lang.String DEFAULT_PREFIX>;
+
+        virtualinvoke $r2.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: boolean declarePrefix(java.lang.String,java.lang.String)>($r1, r7);
+
+     label4:
+        return;
+    }
+
+    public void setNamespaceContext(javax.xml.namespace.NamespaceContext) throws javax.xml.stream.XMLStreamException
+    {
+        javax.xml.namespace.NamespaceContext r1;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl $r2;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r1 := @parameter0: javax.xml.namespace.NamespaceContext;
+
+        $r2 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl fNamespaceContext>;
+
+        $r2.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl: javax.xml.namespace.NamespaceContext userContext> = r1;
+
+        return;
+    }
+
+    public void setPrefix(java.lang.String, java.lang.String) throws javax.xml.stream.XMLStreamException
+    {
+        javax.xml.stream.XMLStreamException $r10, $r11;
+        java.lang.String $r2, $r4, $r7, r12, r13;
+        boolean $z0, $z1;
+        com.sun.org.apache.xerces.internal.util.SymbolTable $r1, $r3;
+        com.sun.org.apache.xerces.internal.util.NamespaceSupport $r5, $r6;
+        java.util.List $r9;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        com.sun.org.apache.xerces.internal.xni.QName $r8;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r12 := @parameter0: java.lang.String;
+
+        r13 := @parameter1: java.lang.String;
+
+        if r12 != null goto label1;
+
+        $r11 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r11.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>("Prefix cannot be null");
+
+        throw $r11;
+
+     label1:
+        if r13 != null goto label2;
+
+        $r10 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r10.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>("URI cannot be null");
+
+        throw $r10;
+
+     label2:
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        $r2 = virtualinvoke $r1.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol(java.lang.String)>(r12);
+
+        $r3 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        $r4 = virtualinvoke $r3.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol(java.lang.String)>(r13);
+
+        $z0 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fIsRepairingNamespace>;
+
+        if $z0 == 0 goto label5;
+
+        $r6 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        $r7 = virtualinvoke $r6.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: java.lang.String getURI(java.lang.String)>($r2);
+
+        if $r7 == null goto label3;
+
+        if $r7 != $r4 goto label3;
+
+        return;
+
+     label3:
+        $z1 = specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean checkUserNamespaceContext(java.lang.String,java.lang.String)>($r2, $r4);
+
+        if $z1 == 0 goto label4;
+
+        return;
+
+     label4:
+        $r8 = new com.sun.org.apache.xerces.internal.xni.QName;
+
+        specialinvoke $r8.<com.sun.org.apache.xerces.internal.xni.QName: void <init>()>();
+
+        virtualinvoke $r8.<com.sun.org.apache.xerces.internal.xni.QName: void setValues(java.lang.String,java.lang.String,java.lang.String,java.lang.String)>($r2, "xmlns", null, $r4);
+
+        $r9 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        interfaceinvoke $r9.<java.util.List: boolean add(java.lang.Object)>($r8);
+
+        return;
+
+     label5:
+        $r5 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        virtualinvoke $r5.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: boolean declarePrefix(java.lang.String,java.lang.String)>($r2, $r4);
+
+        return;
+    }
+
+    public void writeAttribute(java.lang.String, java.lang.String) throws javax.xml.stream.XMLStreamException
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute $r7;
+        java.io.IOException $r10;
+        java.util.List $r8;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        javax.xml.stream.XMLStreamException $r9, $r11;
+        java.io.Writer $r1, $r3, $r4, $r6;
+        java.lang.String r2, r5;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+        r5 := @parameter1: java.lang.String;
+
+     label1:
+        $z0 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fStartTagOpened>;
+
+        if $z0 != 0 goto label2;
+
+        $r9 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r9.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>("Attribute not associated with any element");
+
+        throw $r9;
+
+     label2:
+        $z1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fIsRepairingNamespace>;
+
+        if $z1 == 0 goto label4;
+
+        $r7 = new com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute;
+
+        specialinvoke $r7.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: void <init>(com.sun.xml.internal.stream.writers.XMLStreamWriterImpl,java.lang.String)>(r0, r5);
+
+        virtualinvoke $r7.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: void setValues(java.lang.String,java.lang.String,java.lang.String,java.lang.String)>(null, r2, null, null);
+
+        $r8 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fAttributeCache>;
+
+        interfaceinvoke $r8.<java.util.List: boolean add(java.lang.Object)>($r7);
+
+     label3:
+        return;
+
+     label4:
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r1.<java.io.Writer: void write(java.lang.String)>(" ");
+
+        $r3 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r3.<java.io.Writer: void write(java.lang.String)>(r2);
+
+        $r4 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r4.<java.io.Writer: void write(java.lang.String)>("=\"");
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void writeXMLContent(java.lang.String,boolean,boolean)>(r5, 1, 1);
+
+        $r6 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r6.<java.io.Writer: void write(java.lang.String)>("\"");
+
+     label5:
+        goto label7;
+
+     label6:
+        $r10 := @caughtexception;
+
+        $r11 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r11.<javax.xml.stream.XMLStreamException: void <init>(java.lang.Throwable)>($r10);
+
+        throw $r11;
+
+     label7:
+        return;
+
+        catch java.io.IOException from label1 to label3 with label6;
+        catch java.io.IOException from label4 to label5 with label6;
+    }
+
+    public void writeAttribute(java.lang.String, java.lang.String, java.lang.String) throws javax.xml.stream.XMLStreamException
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute $r5;
+        javax.xml.stream.XMLStreamException $r9, $r10, $r11, $r13;
+        java.lang.String $r2, $r4, r6, r7, r14;
+        boolean $z0, $z1;
+        com.sun.org.apache.xerces.internal.util.SymbolTable $r1;
+        java.io.IOException $r12;
+        com.sun.org.apache.xerces.internal.util.NamespaceSupport $r3;
+        java.util.List $r8;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r14 := @parameter0: java.lang.String;
+
+        r7 := @parameter1: java.lang.String;
+
+        r6 := @parameter2: java.lang.String;
+
+     label1:
+        $z0 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fStartTagOpened>;
+
+        if $z0 != 0 goto label2;
+
+        $r11 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r11.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>("Attribute not associated with any element");
+
+        throw $r11;
+
+     label2:
+        if r14 != null goto label3;
+
+        $r10 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r10.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>("NamespaceURI cannot be null");
+
+        throw $r10;
+
+     label3:
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        $r2 = virtualinvoke $r1.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol(java.lang.String)>(r14);
+
+        $r3 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        $r4 = virtualinvoke $r3.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: java.lang.String getPrefix(java.lang.String)>($r2);
+
+        $z1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fIsRepairingNamespace>;
+
+        if $z1 != 0 goto label5;
+
+        if $r4 != null goto label4;
+
+        $r9 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r9.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>("Prefix cannot be null");
+
+        throw $r9;
+
+     label4:
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void writeAttributeWithPrefix(java.lang.String,java.lang.String,java.lang.String)>($r4, r7, r6);
+
+        goto label6;
+
+     label5:
+        $r5 = new com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute;
+
+        specialinvoke $r5.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: void <init>(com.sun.xml.internal.stream.writers.XMLStreamWriterImpl,java.lang.String)>(r0, r6);
+
+        virtualinvoke $r5.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: void setValues(java.lang.String,java.lang.String,java.lang.String,java.lang.String)>(null, r7, null, $r2);
+
+        $r8 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fAttributeCache>;
+
+        interfaceinvoke $r8.<java.util.List: boolean add(java.lang.Object)>($r5);
+
+     label6:
+        goto label8;
+
+     label7:
+        $r12 := @caughtexception;
+
+        $r13 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r13.<javax.xml.stream.XMLStreamException: void <init>(java.lang.Throwable)>($r12);
+
+        throw $r13;
+
+     label8:
+        return;
+
+        catch java.io.IOException from label1 to label6 with label7;
+    }
+
+    private void writeAttributeWithPrefix(java.lang.String, java.lang.String, java.lang.String) throws java.io.IOException
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        java.io.Writer $r1, $r5, $r6, $r7, $r8, $r9;
+        java.lang.String r2, r3, r4;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        r4 := @parameter2: java.lang.String;
+
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r1.<java.io.Writer: void write(java.lang.String)>(" ");
+
+        if r2 == null goto label1;
+
+        if r2 == "" goto label1;
+
+        $r5 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r5.<java.io.Writer: void write(java.lang.String)>(r2);
+
+        $r6 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r6.<java.io.Writer: void write(java.lang.String)>(":");
+
+     label1:
+        $r7 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r7.<java.io.Writer: void write(java.lang.String)>(r3);
+
+        $r8 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r8.<java.io.Writer: void write(java.lang.String)>("=\"");
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void writeXMLContent(java.lang.String,boolean,boolean)>(r4, 1, 1);
+
+        $r9 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r9.<java.io.Writer: void write(java.lang.String)>("\"");
+
+        return;
+    }
+
+    public void writeAttribute(java.lang.String, java.lang.String, java.lang.String, java.lang.String) throws javax.xml.stream.XMLStreamException
+    {
+        javax.xml.stream.XMLStreamException $r8, $r16, $r26, $r27, $r28, $r30;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.util.List $r6;
+        java.lang.StringBuilder $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute $r4;
+        java.lang.String r1, $r3, r5, $r10, $r12, $r15, $r25, r31, r32;
+        com.sun.org.apache.xerces.internal.util.SymbolTable $r2, $r7, $r9, $r11;
+        java.io.IOException $r29;
+        com.sun.org.apache.xerces.internal.util.NamespaceSupport $r13, $r14, $r33;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r31 := @parameter0: java.lang.String;
+
+        r32 := @parameter1: java.lang.String;
+
+        r1 := @parameter2: java.lang.String;
+
+        r5 := @parameter3: java.lang.String;
+
+     label01:
+        $z0 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fStartTagOpened>;
+
+        if $z0 != 0 goto label02;
+
+        $r28 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r28.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>("Attribute not associated with any element");
+
+        throw $r28;
+
+     label02:
+        if r32 != null goto label03;
+
+        $r27 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r27.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>("NamespaceURI cannot be null");
+
+        throw $r27;
+
+     label03:
+        if r1 != null goto label04;
+
+        $r26 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r26.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>("Local name cannot be null");
+
+        throw $r26;
+
+     label04:
+        $z1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fIsRepairingNamespace>;
+
+        if $z1 != 0 goto label12;
+
+        if r31 == null goto label05;
+
+        $z3 = virtualinvoke r31.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z3 == 0 goto label08;
+
+     label05:
+        $z2 = virtualinvoke r32.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z2 != 0 goto label06;
+
+        $r8 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r8.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>("prefix cannot be null or empty");
+
+        throw $r8;
+
+     label06:
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void writeAttributeWithPrefix(java.lang.String,java.lang.String,java.lang.String)>(null, r1, r5);
+
+     label07:
+        return;
+
+     label08:
+        $z4 = virtualinvoke r31.<java.lang.String: boolean equals(java.lang.Object)>("xml");
+
+        if $z4 == 0 goto label09;
+
+        $z6 = virtualinvoke r32.<java.lang.String: boolean equals(java.lang.Object)>("http://www.w3.org/XML/1998/namespace");
+
+        if $z6 != 0 goto label11;
+
+     label09:
+        $r9 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        $r10 = virtualinvoke $r9.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol(java.lang.String)>(r31);
+
+        r31 = $r10;
+
+        $r11 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        $r12 = virtualinvoke $r11.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol(java.lang.String)>(r32);
+
+        $r13 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        $z5 = virtualinvoke $r13.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: boolean containsPrefixInCurrentContext(java.lang.String)>($r10);
+
+        if $z5 == 0 goto label10;
+
+        $r14 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        $r15 = virtualinvoke $r14.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: java.lang.String getURI(java.lang.String)>($r10);
+
+        if $r15 == null goto label10;
+
+        if $r15 == $r12 goto label10;
+
+        $r16 = new javax.xml.stream.XMLStreamException;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Prefix ");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is already bound to ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(". Trying to rebind it to ");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is an error.");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r16.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>($r25);
+
+        throw $r16;
+
+     label10:
+        $r33 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        virtualinvoke $r33.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: boolean declarePrefix(java.lang.String,java.lang.String)>($r10, $r12);
+
+     label11:
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void writeAttributeWithPrefix(java.lang.String,java.lang.String,java.lang.String)>(r31, r1, r5);
+
+        goto label14;
+
+     label12:
+        if r31 == null goto label13;
+
+        $r7 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        r31 = virtualinvoke $r7.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol(java.lang.String)>(r31);
+
+     label13:
+        $r2 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        $r3 = virtualinvoke $r2.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol(java.lang.String)>(r32);
+
+        $r4 = new com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute;
+
+        specialinvoke $r4.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: void <init>(com.sun.xml.internal.stream.writers.XMLStreamWriterImpl,java.lang.String)>(r0, r5);
+
+        virtualinvoke $r4.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: void setValues(java.lang.String,java.lang.String,java.lang.String,java.lang.String)>(r31, r1, null, $r3);
+
+        $r6 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fAttributeCache>;
+
+        interfaceinvoke $r6.<java.util.List: boolean add(java.lang.Object)>($r4);
+
+     label14:
+        goto label16;
+
+     label15:
+        $r29 := @caughtexception;
+
+        $r30 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r30.<javax.xml.stream.XMLStreamException: void <init>(java.lang.Throwable)>($r29);
+
+        throw $r30;
+
+     label16:
+        return;
+
+        catch java.io.IOException from label01 to label07 with label15;
+        catch java.io.IOException from label08 to label14 with label15;
+    }
+
+    public void writeCData(java.lang.String) throws javax.xml.stream.XMLStreamException
+    {
+        java.io.IOException $r6;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r1;
+        javax.xml.stream.XMLStreamException $r5, $r7;
+        java.io.Writer $r2, $r3, $r4;
+        java.lang.String r0;
+        boolean $z0;
+
+        r1 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+     label1:
+        if r0 != null goto label2;
+
+        $r5 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r5.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>("cdata cannot be null");
+
+        throw $r5;
+
+     label2:
+        $z0 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fStartTagOpened>;
+
+        if $z0 == 0 goto label3;
+
+        specialinvoke r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void closeStartTag()>();
+
+     label3:
+        $r2 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r2.<java.io.Writer: void write(java.lang.String)>("<![CDATA[");
+
+        $r3 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r3.<java.io.Writer: void write(java.lang.String)>(r0);
+
+        $r4 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r4.<java.io.Writer: void write(java.lang.String)>("]]>");
+
+     label4:
+        goto label6;
+
+     label5:
+        $r6 := @caughtexception;
+
+        $r7 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r7.<javax.xml.stream.XMLStreamException: void <init>(java.lang.Throwable)>($r6);
+
+        throw $r7;
+
+     label6:
+        return;
+
+        catch java.io.IOException from label1 to label4 with label5;
+    }
+
+    public void writeCharacters(java.lang.String) throws javax.xml.stream.XMLStreamException
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        javax.xml.stream.XMLStreamException $r3;
+        java.io.IOException $r2;
+        java.lang.String r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+     label1:
+        $z0 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fStartTagOpened>;
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void closeStartTag()>();
+
+     label2:
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void writeXMLContent(java.lang.String)>(r1);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r2 := @caughtexception;
+
+        $r3 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r3.<javax.xml.stream.XMLStreamException: void <init>(java.lang.Throwable)>($r2);
+
+        throw $r3;
+
+     label5:
+        return;
+
+        catch java.io.IOException from label1 to label3 with label4;
+    }
+
+    public void writeCharacters(char[], int, int) throws javax.xml.stream.XMLStreamException
+    {
+        java.io.IOException $r2;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        javax.xml.stream.XMLStreamException $r3;
+        int i0, i1;
+        char[] r1;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r1 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+     label1:
+        $z0 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fStartTagOpened>;
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void closeStartTag()>();
+
+     label2:
+        $z1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fEscapeCharacters>;
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void writeXMLContent(char[],int,int,boolean)>(r1, i0, i1, $z1);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r2 := @caughtexception;
+
+        $r3 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r3.<javax.xml.stream.XMLStreamException: void <init>(java.lang.Throwable)>($r2);
+
+        throw $r3;
+
+     label5:
+        return;
+
+        catch java.io.IOException from label1 to label3 with label4;
+    }
+
+    public void writeComment(java.lang.String) throws javax.xml.stream.XMLStreamException
+    {
+        java.io.IOException $r5;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        javax.xml.stream.XMLStreamException $r6;
+        java.io.Writer $r1, $r3, $r4;
+        java.lang.String r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+     label1:
+        $z0 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fStartTagOpened>;
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void closeStartTag()>();
+
+     label2:
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r1.<java.io.Writer: void write(java.lang.String)>("<!--");
+
+        if r2 == null goto label3;
+
+        $r4 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r4.<java.io.Writer: void write(java.lang.String)>(r2);
+
+     label3:
+        $r3 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r3.<java.io.Writer: void write(java.lang.String)>("-->");
+
+     label4:
+        goto label6;
+
+     label5:
+        $r5 := @caughtexception;
+
+        $r6 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r6.<javax.xml.stream.XMLStreamException: void <init>(java.lang.Throwable)>($r5);
+
+        throw $r6;
+
+     label6:
+        return;
+
+        catch java.io.IOException from label1 to label4 with label5;
+    }
+
+    public void writeDTD(java.lang.String) throws javax.xml.stream.XMLStreamException
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        javax.xml.stream.XMLStreamException $r4;
+        java.io.Writer $r2;
+        java.io.IOException $r3;
+        java.lang.String r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+     label1:
+        $z0 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fStartTagOpened>;
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void closeStartTag()>();
+
+     label2:
+        $r2 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r2.<java.io.Writer: void write(java.lang.String)>(r1);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r3 := @caughtexception;
+
+        $r4 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r4.<javax.xml.stream.XMLStreamException: void <init>(java.lang.Throwable)>($r3);
+
+        throw $r4;
+
+     label5:
+        return;
+
+        catch java.io.IOException from label1 to label3 with label4;
+    }
+
+    public void writeDefaultNamespace(java.lang.String) throws javax.xml.stream.XMLStreamException
+    {
+        java.lang.IllegalStateException $r17;
+        javax.xml.stream.XMLStreamException $r7, $r19;
+        java.lang.String r0, $r3, $r6, $r14, r20;
+        boolean $z0, $z1, $z2;
+        com.sun.org.apache.xerces.internal.util.SymbolTable $r2;
+        java.io.IOException $r18;
+        com.sun.org.apache.xerces.internal.util.NamespaceSupport $r4, $r5, $r21;
+        java.util.List $r16;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r1;
+        java.lang.StringBuilder $r8, $r9, $r10, $r11, $r12, $r13;
+        com.sun.org.apache.xerces.internal.xni.QName $r15;
+
+        r1 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label1;
+
+        r20 = "";
+
+        goto label2;
+
+     label1:
+        r20 = r0;
+
+     label2:
+        $z0 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fStartTagOpened>;
+
+        if $z0 != 0 goto label3;
+
+        $r17 = new java.lang.IllegalStateException;
+
+        specialinvoke $r17.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Namespace Attribute not associated with any element");
+
+        throw $r17;
+
+     label3:
+        $z1 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fIsRepairingNamespace>;
+
+        if $z1 == 0 goto label5;
+
+        $r15 = new com.sun.org.apache.xerces.internal.xni.QName;
+
+        specialinvoke $r15.<com.sun.org.apache.xerces.internal.xni.QName: void <init>()>();
+
+        virtualinvoke $r15.<com.sun.org.apache.xerces.internal.xni.QName: void setValues(java.lang.String,java.lang.String,java.lang.String,java.lang.String)>("", "xmlns", null, r20);
+
+        $r16 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        interfaceinvoke $r16.<java.util.List: boolean add(java.lang.Object)>($r15);
+
+     label4:
+        return;
+
+     label5:
+        $r2 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        $r3 = virtualinvoke $r2.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol(java.lang.String)>(r20);
+
+        $r4 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        $z2 = virtualinvoke $r4.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: boolean containsPrefixInCurrentContext(java.lang.String)>("");
+
+        if $z2 == 0 goto label6;
+
+        $r5 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        $r6 = virtualinvoke $r5.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: java.lang.String getURI(java.lang.String)>("");
+
+        if $r6 == null goto label6;
+
+        if $r6 == $r3 goto label6;
+
+        $r7 = new javax.xml.stream.XMLStreamException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("xmlns has been already bound to ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(". Rebinding it to ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is an error");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>($r14);
+
+        throw $r7;
+
+     label6:
+        $r21 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        virtualinvoke $r21.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: boolean declarePrefix(java.lang.String,java.lang.String)>("", $r3);
+
+        specialinvoke r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void writenamespace(java.lang.String,java.lang.String)>(null, $r3);
+
+     label7:
+        goto label9;
+
+     label8:
+        $r18 := @caughtexception;
+
+        $r19 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r19.<javax.xml.stream.XMLStreamException: void <init>(java.lang.Throwable)>($r18);
+
+        throw $r19;
+
+     label9:
+        return;
+
+        catch java.io.IOException from label2 to label4 with label8;
+        catch java.io.IOException from label5 to label7 with label8;
+    }
+
+    public void writeEmptyElement(java.lang.String) throws javax.xml.stream.XMLStreamException
+    {
+        java.io.IOException $r5;
+        com.sun.org.apache.xerces.internal.util.NamespaceSupport $r3;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        javax.xml.stream.XMLStreamException $r6;
+        java.io.Writer $r4;
+        java.lang.String r1;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack $r2;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+     label1:
+        $z0 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fStartTagOpened>;
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void closeStartTag()>();
+
+     label2:
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void openStartTag()>();
+
+        $r2 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack fElementStack>;
+
+        virtualinvoke $r2.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState push(java.lang.String,java.lang.String,java.lang.String,java.lang.String,boolean)>(null, r1, null, null, 1);
+
+        $r3 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        virtualinvoke $r3.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: void pushContext()>();
+
+        $z1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fIsRepairingNamespace>;
+
+        if $z1 != 0 goto label3;
+
+        $r4 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r4.<java.io.Writer: void write(java.lang.String)>(r1);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r5 := @caughtexception;
+
+        $r6 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r6.<javax.xml.stream.XMLStreamException: void <init>(java.lang.Throwable)>($r5);
+
+        throw $r6;
+
+     label5:
+        return;
+
+        catch java.io.IOException from label1 to label3 with label4;
+    }
+
+    public void writeEmptyElement(java.lang.String, java.lang.String) throws javax.xml.stream.XMLStreamException
+    {
+        com.sun.org.apache.xerces.internal.util.SymbolTable $r1;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl $r3;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        javax.xml.stream.XMLStreamException $r6;
+        java.lang.String $r2, $r4, r5, r7;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r7 := @parameter0: java.lang.String;
+
+        r5 := @parameter1: java.lang.String;
+
+        if r7 != null goto label1;
+
+        $r6 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r6.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>("NamespaceURI cannot be null");
+
+        throw $r6;
+
+     label1:
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        $r2 = virtualinvoke $r1.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol(java.lang.String)>(r7);
+
+        $r3 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl fNamespaceContext>;
+
+        $r4 = virtualinvoke $r3.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl: java.lang.String getPrefix(java.lang.String)>($r2);
+
+        virtualinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void writeEmptyElement(java.lang.String,java.lang.String,java.lang.String)>($r4, r5, $r2);
+
+        return;
+    }
+
+    public void writeEmptyElement(java.lang.String, java.lang.String, java.lang.String) throws javax.xml.stream.XMLStreamException
+    {
+        javax.xml.stream.XMLStreamException $r8, $r15, $r16, $r18;
+        java.lang.String r0, $r3, $r13, r19, r20;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack $r4;
+        boolean $z0, $z1;
+        com.sun.org.apache.xerces.internal.util.SymbolTable $r2, $r14;
+        java.io.IOException $r17;
+        com.sun.org.apache.xerces.internal.util.NamespaceSupport $r5;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r1;
+        java.io.Writer $r6, $r7, $r21;
+        java.lang.StringBuilder $r9, $r10, $r11, $r12;
+
+        r1 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r19 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.lang.String;
+
+        r20 := @parameter2: java.lang.String;
+
+     label01:
+        if r0 != null goto label02;
+
+        $r16 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r16.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>("Local Name cannot be null");
+
+        throw $r16;
+
+     label02:
+        if r20 != null goto label03;
+
+        $r15 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r15.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>("NamespaceURI cannot be null");
+
+        throw $r15;
+
+     label03:
+        if r19 == null goto label04;
+
+        $r14 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        r19 = virtualinvoke $r14.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol(java.lang.String)>(r19);
+
+     label04:
+        $r2 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        $r3 = virtualinvoke $r2.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol(java.lang.String)>(r20);
+
+        $z0 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fStartTagOpened>;
+
+        if $z0 == 0 goto label05;
+
+        specialinvoke r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void closeStartTag()>();
+
+     label05:
+        specialinvoke r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void openStartTag()>();
+
+        $r4 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack fElementStack>;
+
+        virtualinvoke $r4.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState push(java.lang.String,java.lang.String,java.lang.String,java.lang.String,boolean)>(r19, r0, null, $r3, 1);
+
+        $r5 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        virtualinvoke $r5.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: void pushContext()>();
+
+        $z1 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fIsRepairingNamespace>;
+
+        if $z1 != 0 goto label06;
+
+        if r19 != null goto label07;
+
+        $r8 = new javax.xml.stream.XMLStreamException;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("NamespaceURI ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" has not been bound to any prefix");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>($r13);
+
+        throw $r8;
+
+     label06:
+        return;
+
+     label07:
+        if r19 == null goto label08;
+
+        if r19 == "" goto label08;
+
+        $r6 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r6.<java.io.Writer: void write(java.lang.String)>(r19);
+
+        $r7 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r7.<java.io.Writer: void write(java.lang.String)>(":");
+
+     label08:
+        $r21 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r21.<java.io.Writer: void write(java.lang.String)>(r0);
+
+     label09:
+        goto label11;
+
+     label10:
+        $r17 := @caughtexception;
+
+        $r18 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r18.<javax.xml.stream.XMLStreamException: void <init>(java.lang.Throwable)>($r17);
+
+        throw $r18;
+
+     label11:
+        return;
+
+        catch java.io.IOException from label01 to label06 with label10;
+        catch java.io.IOException from label07 to label09 with label10;
+    }
+
+    public void writeEndDocument() throws javax.xml.stream.XMLStreamException
+    {
+        javax.xml.stream.XMLStreamException $r11, $r13;
+        java.lang.String $r5, $r6, $r7, $r16;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack $r1, $r14;
+        boolean $z0, $z1, $z2, $z3;
+        java.io.IOException $r12;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState $r2;
+        java.lang.ArrayIndexOutOfBoundsException $r10;
+        com.sun.org.apache.xerces.internal.util.NamespaceSupport $r3;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        java.io.Writer $r4, $r8, $r9, $r15, $r17;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+     label1:
+        $z0 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fStartTagOpened>;
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void closeStartTag()>();
+
+     label2:
+        $r14 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack fElementStack>;
+
+        $z3 = virtualinvoke $r14.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack: boolean empty()>();
+
+        if $z3 != 0 goto label5;
+
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack fElementStack>;
+
+        $r2 = virtualinvoke $r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState pop()>();
+
+        $r3 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        virtualinvoke $r3.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: void popContext()>();
+
+        $z1 = $r2.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState: boolean isEmpty>;
+
+        if $z1 == 0 goto label3;
+
+        goto label2;
+
+     label3:
+        $r4 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r4.<java.io.Writer: void write(java.lang.String)>("</");
+
+        $r5 = $r2.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState: java.lang.String prefix>;
+
+        if $r5 == null goto label4;
+
+        $r6 = $r2.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState: java.lang.String prefix>;
+
+        $z2 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z2 != 0 goto label4;
+
+        $r8 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        $r7 = $r2.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState: java.lang.String prefix>;
+
+        virtualinvoke $r8.<java.io.Writer: void write(java.lang.String)>($r7);
+
+        $r9 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r9.<java.io.Writer: void write(java.lang.String)>(":");
+
+     label4:
+        $r15 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        $r16 = $r2.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState: java.lang.String localpart>;
+
+        virtualinvoke $r15.<java.io.Writer: void write(java.lang.String)>($r16);
+
+        $r17 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r17.<java.io.Writer: void write(int)>(62);
+
+        goto label2;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r12 := @caughtexception;
+
+        $r13 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r13.<javax.xml.stream.XMLStreamException: void <init>(java.lang.Throwable)>($r12);
+
+        throw $r13;
+
+     label7:
+        $r10 := @caughtexception;
+
+        $r11 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r11.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>("No more elements to write");
+
+        throw $r11;
+
+     label8:
+        return;
+
+        catch java.io.IOException from label1 to label5 with label6;
+        catch java.lang.ArrayIndexOutOfBoundsException from label1 to label5 with label7;
+    }
+
+    public void writeEndElement() throws javax.xml.stream.XMLStreamException
+    {
+        javax.xml.stream.XMLStreamException $r9, $r11, $r18;
+        java.lang.String $r4, $r5, $r6, $r14, $r16, $r20;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack $r1;
+        boolean $z0, $z1, $z2;
+        java.io.IOException $r17;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState $r2;
+        java.lang.ArrayIndexOutOfBoundsException $r10;
+        com.sun.org.apache.xerces.internal.util.NamespaceSupport $r22;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        java.io.Writer $r3, $r7, $r8, $r19, $r21;
+        java.lang.StringBuilder $r12, $r13, $r15;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+     label01:
+        $z0 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fStartTagOpened>;
+
+        if $z0 == 0 goto label02;
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void closeStartTag()>();
+
+     label02:
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack fElementStack>;
+
+        $r2 = virtualinvoke $r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState pop()>();
+
+        if $r2 != null goto label03;
+
+        $r9 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r9.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>("No element was found to write");
+
+        throw $r9;
+
+     label03:
+        $z1 = $r2.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState: boolean isEmpty>;
+
+        if $z1 == 0 goto label05;
+
+     label04:
+        return;
+
+     label05:
+        $r3 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r3.<java.io.Writer: void write(java.lang.String)>("</");
+
+        $r4 = $r2.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState: java.lang.String prefix>;
+
+        if $r4 == null goto label06;
+
+        $r5 = $r2.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState: java.lang.String prefix>;
+
+        $z2 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z2 != 0 goto label06;
+
+        $r7 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        $r6 = $r2.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState: java.lang.String prefix>;
+
+        virtualinvoke $r7.<java.io.Writer: void write(java.lang.String)>($r6);
+
+        $r8 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r8.<java.io.Writer: void write(java.lang.String)>(":");
+
+     label06:
+        $r19 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        $r20 = $r2.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState: java.lang.String localpart>;
+
+        virtualinvoke $r19.<java.io.Writer: void write(java.lang.String)>($r20);
+
+        $r21 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r21.<java.io.Writer: void write(int)>(62);
+
+        $r22 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        virtualinvoke $r22.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: void popContext()>();
+
+     label07:
+        goto label10;
+
+     label08:
+        $r17 := @caughtexception;
+
+        $r18 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r18.<javax.xml.stream.XMLStreamException: void <init>(java.lang.Throwable)>($r17);
+
+        throw $r18;
+
+     label09:
+        $r10 := @caughtexception;
+
+        $r11 = new javax.xml.stream.XMLStreamException;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No element was found to write: ");
+
+        $r14 = virtualinvoke $r10.<java.lang.ArrayIndexOutOfBoundsException: java.lang.String toString()>();
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r11.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String,java.lang.Throwable)>($r16, $r10);
+
+        throw $r11;
+
+     label10:
+        return;
+
+        catch java.io.IOException from label01 to label04 with label08;
+        catch java.io.IOException from label05 to label07 with label08;
+        catch java.lang.ArrayIndexOutOfBoundsException from label01 to label04 with label09;
+        catch java.lang.ArrayIndexOutOfBoundsException from label05 to label07 with label09;
+    }
+
+    public void writeEntityRef(java.lang.String) throws javax.xml.stream.XMLStreamException
+    {
+        java.io.IOException $r5;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        javax.xml.stream.XMLStreamException $r6;
+        java.io.Writer $r1, $r3, $r4;
+        java.lang.String r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+     label1:
+        $z0 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fStartTagOpened>;
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void closeStartTag()>();
+
+     label2:
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r1.<java.io.Writer: void write(int)>(38);
+
+        $r3 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r3.<java.io.Writer: void write(java.lang.String)>(r2);
+
+        $r4 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r4.<java.io.Writer: void write(int)>(59);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r5 := @caughtexception;
+
+        $r6 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r6.<javax.xml.stream.XMLStreamException: void <init>(java.lang.Throwable)>($r5);
+
+        throw $r6;
+
+     label5:
+        return;
+
+        catch java.io.IOException from label1 to label3 with label4;
+    }
+
+    public void writeNamespace(java.lang.String, java.lang.String) throws javax.xml.stream.XMLStreamException
+    {
+        java.lang.IllegalStateException $r23;
+        javax.xml.stream.XMLStreamException $r9, $r32;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.util.List $r22;
+        java.lang.StringBuilder $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r24, $r25, $r26, $r27, $r28, $r29;
+        com.sun.org.apache.xerces.internal.xni.QName $r21;
+        java.lang.String r0, $r3, $r5, $r8, $r18, $r20, $r30, r33, r34;
+        com.sun.org.apache.xerces.internal.util.SymbolTable $r2, $r4;
+        java.io.IOException $r31;
+        com.sun.org.apache.xerces.internal.util.NamespaceSupport $r6, $r7, $r19, $r35;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r1;
+
+        r1 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r33 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.lang.String;
+
+        if r0 != null goto label01;
+
+        r34 = "";
+
+        goto label02;
+
+     label01:
+        r34 = r0;
+
+     label02:
+        $z0 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fStartTagOpened>;
+
+        if $z0 != 0 goto label03;
+
+        $r23 = new java.lang.IllegalStateException;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid state: start tag is not opened at writeNamespace(");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r33);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r34);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r23.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r30);
+
+        throw $r23;
+
+     label03:
+        if r33 == null goto label04;
+
+        $z1 = virtualinvoke r33.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z1 != 0 goto label04;
+
+        $z2 = virtualinvoke r33.<java.lang.String: boolean equals(java.lang.Object)>("xmlns");
+
+        if $z2 == 0 goto label06;
+
+     label04:
+        virtualinvoke r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void writeDefaultNamespace(java.lang.String)>(r34);
+
+     label05:
+        return;
+
+     label06:
+        $z3 = virtualinvoke r33.<java.lang.String: boolean equals(java.lang.Object)>("xml");
+
+        if $z3 == 0 goto label08;
+
+        $z6 = virtualinvoke r34.<java.lang.String: boolean equals(java.lang.Object)>("http://www.w3.org/XML/1998/namespace");
+
+        if $z6 == 0 goto label08;
+
+     label07:
+        return;
+
+     label08:
+        $r2 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        $r3 = virtualinvoke $r2.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol(java.lang.String)>(r33);
+
+        $r4 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        $r5 = virtualinvoke $r4.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol(java.lang.String)>(r34);
+
+        $z4 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fIsRepairingNamespace>;
+
+        if $z4 == 0 goto label12;
+
+        $r19 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        $r20 = virtualinvoke $r19.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: java.lang.String getURI(java.lang.String)>($r3);
+
+        if $r20 == null goto label10;
+
+        if $r20 != $r5 goto label10;
+
+     label09:
+        return;
+
+     label10:
+        $r21 = new com.sun.org.apache.xerces.internal.xni.QName;
+
+        specialinvoke $r21.<com.sun.org.apache.xerces.internal.xni.QName: void <init>()>();
+
+        virtualinvoke $r21.<com.sun.org.apache.xerces.internal.xni.QName: void setValues(java.lang.String,java.lang.String,java.lang.String,java.lang.String)>($r3, "xmlns", null, $r5);
+
+        $r22 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        interfaceinvoke $r22.<java.util.List: boolean add(java.lang.Object)>($r21);
+
+     label11:
+        return;
+
+     label12:
+        $r6 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        $z5 = virtualinvoke $r6.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: boolean containsPrefixInCurrentContext(java.lang.String)>($r3);
+
+        if $z5 == 0 goto label13;
+
+        $r7 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        $r8 = virtualinvoke $r7.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: java.lang.String getURI(java.lang.String)>($r3);
+
+        if $r8 == null goto label13;
+
+        if $r8 == $r5 goto label13;
+
+        $r9 = new javax.xml.stream.XMLStreamException;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("prefix ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" has been already bound to ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(". Rebinding it to ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is an error");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>($r18);
+
+        throw $r9;
+
+     label13:
+        $r35 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        virtualinvoke $r35.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: boolean declarePrefix(java.lang.String,java.lang.String)>($r3, $r5);
+
+        specialinvoke r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void writenamespace(java.lang.String,java.lang.String)>($r3, $r5);
+
+     label14:
+        goto label16;
+
+     label15:
+        $r31 := @caughtexception;
+
+        $r32 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r32.<javax.xml.stream.XMLStreamException: void <init>(java.lang.Throwable)>($r31);
+
+        throw $r32;
+
+     label16:
+        return;
+
+        catch java.io.IOException from label02 to label05 with label15;
+        catch java.io.IOException from label06 to label07 with label15;
+        catch java.io.IOException from label08 to label09 with label15;
+        catch java.io.IOException from label10 to label11 with label15;
+        catch java.io.IOException from label12 to label14 with label15;
+    }
+
+    private void writenamespace(java.lang.String, java.lang.String) throws java.io.IOException
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        java.io.Writer $r1, $r4, $r5, $r6, $r7;
+        java.lang.String r2, r3;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r1.<java.io.Writer: void write(java.lang.String)>(" xmlns");
+
+        if r2 == null goto label1;
+
+        if r2 == "" goto label1;
+
+        $r4 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r4.<java.io.Writer: void write(java.lang.String)>(":");
+
+        $r5 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r5.<java.io.Writer: void write(java.lang.String)>(r2);
+
+     label1:
+        $r6 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r6.<java.io.Writer: void write(java.lang.String)>("=\"");
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void writeXMLContent(java.lang.String,boolean,boolean)>(r3, 1, 1);
+
+        $r7 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r7.<java.io.Writer: void write(java.lang.String)>("\"");
+
+        return;
+    }
+
+    public void writeProcessingInstruction(java.lang.String) throws javax.xml.stream.XMLStreamException
+    {
+        java.io.IOException $r6;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        javax.xml.stream.XMLStreamException $r2, $r7;
+        java.io.Writer $r3, $r4, $r5;
+        java.lang.String r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+     label1:
+        $z0 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fStartTagOpened>;
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void closeStartTag()>();
+
+     label2:
+        if r1 == null goto label4;
+
+        $r3 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r3.<java.io.Writer: void write(java.lang.String)>("<?");
+
+        $r4 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r4.<java.io.Writer: void write(java.lang.String)>(r1);
+
+        $r5 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r5.<java.io.Writer: void write(java.lang.String)>("?>");
+
+     label3:
+        return;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r6 := @caughtexception;
+
+        $r7 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r7.<javax.xml.stream.XMLStreamException: void <init>(java.lang.Throwable)>($r6);
+
+        throw $r7;
+
+     label6:
+        $r2 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r2.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>("PI target cannot be null");
+
+        throw $r2;
+
+        catch java.io.IOException from label1 to label3 with label5;
+    }
+
+    public void writeProcessingInstruction(java.lang.String, java.lang.String) throws javax.xml.stream.XMLStreamException
+    {
+        java.io.IOException $r9;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        javax.xml.stream.XMLStreamException $r2, $r10;
+        java.io.Writer $r4, $r5, $r6, $r7, $r8;
+        java.lang.String r1, r3;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+     label1:
+        $z0 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fStartTagOpened>;
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void closeStartTag()>();
+
+     label2:
+        if r1 == null goto label3;
+
+        if r3 != null goto label4;
+
+     label3:
+        $r2 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r2.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>("PI target cannot be null");
+
+        throw $r2;
+
+     label4:
+        $r4 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r4.<java.io.Writer: void write(java.lang.String)>("<?");
+
+        $r5 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r5.<java.io.Writer: void write(java.lang.String)>(r1);
+
+        $r6 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r6.<java.io.Writer: void write(java.lang.String)>(" ");
+
+        $r7 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r7.<java.io.Writer: void write(java.lang.String)>(r3);
+
+        $r8 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r8.<java.io.Writer: void write(java.lang.String)>("?>");
+
+     label5:
+        goto label7;
+
+     label6:
+        $r9 := @caughtexception;
+
+        $r10 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r10.<javax.xml.stream.XMLStreamException: void <init>(java.lang.Throwable)>($r9);
+
+        throw $r10;
+
+     label7:
+        return;
+
+        catch java.io.IOException from label1 to label5 with label6;
+    }
+
+    public void writeStartDocument() throws javax.xml.stream.XMLStreamException
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        javax.xml.stream.XMLStreamException $r3;
+        java.io.Writer $r1;
+        java.io.IOException $r2;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+     label1:
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r1.<java.io.Writer: void write(java.lang.String)>("<?xml version=\"1.0\" ?>");
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r3.<javax.xml.stream.XMLStreamException: void <init>(java.lang.Throwable)>($r2);
+
+        throw $r3;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public void writeStartDocument(java.lang.String) throws javax.xml.stream.XMLStreamException
+    {
+        java.io.IOException $r6;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r1;
+        javax.xml.stream.XMLStreamException $r7;
+        java.io.Writer $r2, $r3, $r4, $r5;
+        java.lang.String r0;
+        boolean $z0;
+
+        r1 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+     label1:
+        if r0 == null goto label2;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z0 == 0 goto label4;
+
+     label2:
+        virtualinvoke r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void writeStartDocument()>();
+
+     label3:
+        return;
+
+     label4:
+        $r2 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r2.<java.io.Writer: void write(java.lang.String)>("<?xml version=\"");
+
+        $r3 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r3.<java.io.Writer: void write(java.lang.String)>(r0);
+
+        $r4 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r4.<java.io.Writer: void write(java.lang.String)>("\"");
+
+        $r5 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r5.<java.io.Writer: void write(java.lang.String)>("?>");
+
+     label5:
+        goto label7;
+
+     label6:
+        $r6 := @caughtexception;
+
+        $r7 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r7.<javax.xml.stream.XMLStreamException: void <init>(java.lang.Throwable)>($r6);
+
+        throw $r7;
+
+     label7:
+        return;
+
+        catch java.io.IOException from label1 to label3 with label6;
+        catch java.io.IOException from label4 to label5 with label6;
+    }
+
+    public void writeStartDocument(java.lang.String, java.lang.String) throws javax.xml.stream.XMLStreamException
+    {
+        com.sun.xml.internal.stream.writers.XMLWriter $r25;
+        javax.xml.stream.XMLStreamException $r14, $r33;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, z8, z9, z10;
+        java.util.Set $r12;
+        java.io.Writer $r2, $r3, $r4, $r6, $r7, $r8, $r9, $r10, $r24, $r26, $r28, $r30, $r35;
+        java.lang.StringBuilder $r15, $r16, $r17, $r18, $r19, $r20;
+        java.nio.charset.Charset $r11;
+        java.io.OutputStreamWriter $r27, $r31;
+        java.lang.String r0, r5, $r21, $r23, r34;
+        java.util.Iterator $r13;
+        java.io.IOException $r32;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r1;
+        java.lang.Object $r22;
+        com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter $r29;
+
+        r1 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        r5 := @parameter1: java.lang.String;
+
+     label01:
+        if r0 != null goto label03;
+
+        if r5 != null goto label03;
+
+        virtualinvoke r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void writeStartDocument()>();
+
+     label02:
+        return;
+
+     label03:
+        if r0 != null goto label05;
+
+        virtualinvoke r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void writeStartDocument(java.lang.String)>(r5);
+
+     label04:
+        return;
+
+     label05:
+        r34 = null;
+
+        $r2 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        $z0 = $r2 instanceof java.io.OutputStreamWriter;
+
+        if $z0 == 0 goto label06;
+
+        $r30 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        $r31 = (java.io.OutputStreamWriter) $r30;
+
+        r34 = virtualinvoke $r31.<java.io.OutputStreamWriter: java.lang.String getEncoding()>();
+
+        goto label08;
+
+     label06:
+        $r3 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        $z1 = $r3 instanceof com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter;
+
+        if $z1 == 0 goto label07;
+
+        $r28 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        $r29 = (com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter) $r28;
+
+        r34 = virtualinvoke $r29.<com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter: java.lang.String getEncoding()>();
+
+        goto label08;
+
+     label07:
+        $r4 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        $z2 = $r4 instanceof com.sun.xml.internal.stream.writers.XMLWriter;
+
+        if $z2 == 0 goto label08;
+
+        $r24 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        $r25 = (com.sun.xml.internal.stream.writers.XMLWriter) $r24;
+
+        $r26 = virtualinvoke $r25.<com.sun.xml.internal.stream.writers.XMLWriter: java.io.Writer getWriter()>();
+
+        $r27 = (java.io.OutputStreamWriter) $r26;
+
+        r34 = virtualinvoke $r27.<java.io.OutputStreamWriter: java.lang.String getEncoding()>();
+
+     label08:
+        if r34 == null goto label11;
+
+        $z5 = virtualinvoke r34.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r0);
+
+        if $z5 != 0 goto label11;
+
+        z8 = 0;
+
+        z10 = 0;
+
+        z9 = 0;
+
+        $r11 = staticinvoke <java.nio.charset.Charset: java.nio.charset.Charset forName(java.lang.String)>(r0);
+
+        $r12 = virtualinvoke $r11.<java.nio.charset.Charset: java.util.Set aliases()>();
+
+        $r13 = interfaceinvoke $r12.<java.util.Set: java.util.Iterator iterator()>();
+
+     label09:
+        if z10 != 0 goto label10;
+
+        $z6 = interfaceinvoke $r13.<java.util.Iterator: boolean hasNext()>();
+
+        if $z6 == 0 goto label10;
+
+        $r22 = interfaceinvoke $r13.<java.util.Iterator: java.lang.Object next()>();
+
+        $r23 = (java.lang.String) $r22;
+
+        $z7 = virtualinvoke r34.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r23);
+
+        if $z7 == 0 goto label09;
+
+        z8 = 1;
+
+        z10 = 1;
+
+        z9 = 1;
+
+        goto label09;
+
+     label10:
+        if z9 != 0 goto label11;
+
+        $r14 = new javax.xml.stream.XMLStreamException;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Underlying stream encoding \'");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r34);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' and input paramter for writeStartDocument() method \'");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' do not match.");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r14.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>($r21);
+
+        throw $r14;
+
+     label11:
+        $r35 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r35.<java.io.Writer: void write(java.lang.String)>("<?xml version=\"");
+
+        if r5 == null goto label12;
+
+        $z4 = virtualinvoke r5.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z4 == 0 goto label13;
+
+     label12:
+        $r6 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r6.<java.io.Writer: void write(java.lang.String)>("1.0");
+
+        goto label14;
+
+     label13:
+        $r10 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r10.<java.io.Writer: void write(java.lang.String)>(r5);
+
+     label14:
+        $z3 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z3 != 0 goto label15;
+
+        $r8 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r8.<java.io.Writer: void write(java.lang.String)>("\" encoding=\"");
+
+        $r9 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r9.<java.io.Writer: void write(java.lang.String)>(r0);
+
+     label15:
+        $r7 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r7.<java.io.Writer: void write(java.lang.String)>("\"?>");
+
+     label16:
+        goto label18;
+
+     label17:
+        $r32 := @caughtexception;
+
+        $r33 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r33.<javax.xml.stream.XMLStreamException: void <init>(java.lang.Throwable)>($r32);
+
+        throw $r33;
+
+     label18:
+        return;
+
+        catch java.io.IOException from label01 to label02 with label17;
+        catch java.io.IOException from label03 to label04 with label17;
+        catch java.io.IOException from label05 to label16 with label17;
+    }
+
+    public void writeStartElement(java.lang.String) throws javax.xml.stream.XMLStreamException
+    {
+        java.io.IOException $r6;
+        com.sun.org.apache.xerces.internal.util.NamespaceSupport $r3;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r1;
+        javax.xml.stream.XMLStreamException $r5, $r7;
+        java.io.Writer $r4;
+        java.lang.String r0;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack $r2;
+        boolean $z0, $z1;
+
+        r1 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+     label1:
+        if r0 != null goto label2;
+
+        $r5 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r5.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>("Local Name cannot be null");
+
+        throw $r5;
+
+     label2:
+        $z0 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fStartTagOpened>;
+
+        if $z0 == 0 goto label3;
+
+        specialinvoke r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void closeStartTag()>();
+
+     label3:
+        specialinvoke r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void openStartTag()>();
+
+        $r2 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack fElementStack>;
+
+        virtualinvoke $r2.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState push(java.lang.String,java.lang.String,java.lang.String,java.lang.String,boolean)>(null, r0, null, null, 0);
+
+        $r3 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        virtualinvoke $r3.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: void pushContext()>();
+
+        $z1 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fIsRepairingNamespace>;
+
+        if $z1 == 0 goto label5;
+
+     label4:
+        return;
+
+     label5:
+        $r4 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r4.<java.io.Writer: void write(java.lang.String)>(r0);
+
+     label6:
+        goto label8;
+
+     label7:
+        $r6 := @caughtexception;
+
+        $r7 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r7.<javax.xml.stream.XMLStreamException: void <init>(java.lang.Throwable)>($r6);
+
+        throw $r7;
+
+     label8:
+        return;
+
+        catch java.io.IOException from label1 to label4 with label7;
+        catch java.io.IOException from label5 to label6 with label7;
+    }
+
+    public void writeStartElement(java.lang.String, java.lang.String) throws javax.xml.stream.XMLStreamException
+    {
+        com.sun.org.apache.xerces.internal.util.SymbolTable $r2, $r6;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl $r4;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r1;
+        javax.xml.stream.XMLStreamException $r7, $r8;
+        java.lang.String r0, $r3, $r5, r9, r10;
+        boolean $z0;
+
+        r1 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r9 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.lang.String;
+
+        if r0 != null goto label1;
+
+        $r8 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r8.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>("Local Name cannot be null");
+
+        throw $r8;
+
+     label1:
+        if r9 != null goto label2;
+
+        $r7 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r7.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>("NamespaceURI cannot be null");
+
+        throw $r7;
+
+     label2:
+        $r2 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        $r3 = virtualinvoke $r2.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol(java.lang.String)>(r9);
+
+        r10 = null;
+
+        $z0 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fIsRepairingNamespace>;
+
+        if $z0 != 0 goto label3;
+
+        $r4 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl fNamespaceContext>;
+
+        $r5 = virtualinvoke $r4.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl: java.lang.String getPrefix(java.lang.String)>($r3);
+
+        r10 = $r5;
+
+        if $r5 == null goto label3;
+
+        $r6 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        r10 = virtualinvoke $r6.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol(java.lang.String)>($r5);
+
+     label3:
+        virtualinvoke r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void writeStartElement(java.lang.String,java.lang.String,java.lang.String)>(r10, r0, $r3);
+
+        return;
+    }
+
+    public void writeStartElement(java.lang.String, java.lang.String, java.lang.String) throws javax.xml.stream.XMLStreamException
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl $r6;
+        javax.xml.stream.XMLStreamException $r14, $r15, $r16, $r18;
+        java.lang.String r0, $r3, $r7, r19, r20;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack $r4;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        com.sun.org.apache.xerces.internal.util.SymbolTable $r2, $r13;
+        java.io.IOException $r17;
+        com.sun.org.apache.xerces.internal.util.NamespaceSupport $r5, $r12;
+        java.util.List $r11;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r1;
+        java.io.Writer $r8, $r9, $r21;
+        com.sun.org.apache.xerces.internal.xni.QName $r10;
+
+        r1 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r19 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.lang.String;
+
+        r20 := @parameter2: java.lang.String;
+
+     label01:
+        if r0 != null goto label02;
+
+        $r16 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r16.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>("Local Name cannot be null");
+
+        throw $r16;
+
+     label02:
+        if r20 != null goto label03;
+
+        $r15 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r15.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>("NamespaceURI cannot be null");
+
+        throw $r15;
+
+     label03:
+        $z0 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fIsRepairingNamespace>;
+
+        if $z0 != 0 goto label04;
+
+        if r19 != null goto label04;
+
+        $r14 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r14.<javax.xml.stream.XMLStreamException: void <init>(java.lang.String)>("Prefix cannot be null");
+
+        throw $r14;
+
+     label04:
+        $z1 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fStartTagOpened>;
+
+        if $z1 == 0 goto label05;
+
+        specialinvoke r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void closeStartTag()>();
+
+     label05:
+        specialinvoke r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void openStartTag()>();
+
+        $r2 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        $r3 = virtualinvoke $r2.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol(java.lang.String)>(r20);
+
+        if r19 == null goto label06;
+
+        $r13 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        r19 = virtualinvoke $r13.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol(java.lang.String)>(r19);
+
+     label06:
+        $r4 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack fElementStack>;
+
+        virtualinvoke $r4.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState push(java.lang.String,java.lang.String,java.lang.String,java.lang.String,boolean)>(r19, r0, null, $r3, 0);
+
+        $r5 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        virtualinvoke $r5.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: void pushContext()>();
+
+        $r6 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl fNamespaceContext>;
+
+        $r7 = virtualinvoke $r6.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl: java.lang.String getPrefix(java.lang.String)>($r3);
+
+        if r19 == null goto label08;
+
+        if $r7 == null goto label07;
+
+        $z3 = virtualinvoke r19.<java.lang.String: boolean equals(java.lang.Object)>($r7);
+
+        if $z3 != 0 goto label08;
+
+     label07:
+        $r12 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        virtualinvoke $r12.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: boolean declarePrefix(java.lang.String,java.lang.String)>(r19, $r3);
+
+     label08:
+        $z4 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fIsRepairingNamespace>;
+
+        if $z4 == 0 goto label12;
+
+        if r19 == null goto label09;
+
+        if $r7 == null goto label10;
+
+        $z2 = virtualinvoke r19.<java.lang.String: boolean equals(java.lang.Object)>($r7);
+
+        if $z2 == 0 goto label10;
+
+     label09:
+        return;
+
+     label10:
+        $r10 = new com.sun.org.apache.xerces.internal.xni.QName;
+
+        specialinvoke $r10.<com.sun.org.apache.xerces.internal.xni.QName: void <init>()>();
+
+        virtualinvoke $r10.<com.sun.org.apache.xerces.internal.xni.QName: void setValues(java.lang.String,java.lang.String,java.lang.String,java.lang.String)>(r19, "xmlns", null, $r3);
+
+        $r11 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        interfaceinvoke $r11.<java.util.List: boolean add(java.lang.Object)>($r10);
+
+     label11:
+        return;
+
+     label12:
+        if r19 == null goto label13;
+
+        if r19 == "" goto label13;
+
+        $r8 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r8.<java.io.Writer: void write(java.lang.String)>(r19);
+
+        $r9 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r9.<java.io.Writer: void write(java.lang.String)>(":");
+
+     label13:
+        $r21 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r21.<java.io.Writer: void write(java.lang.String)>(r0);
+
+     label14:
+        goto label16;
+
+     label15:
+        $r17 := @caughtexception;
+
+        $r18 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r18.<javax.xml.stream.XMLStreamException: void <init>(java.lang.Throwable)>($r17);
+
+        throw $r18;
+
+     label16:
+        return;
+
+        catch java.io.IOException from label01 to label09 with label15;
+        catch java.io.IOException from label10 to label11 with label15;
+        catch java.io.IOException from label12 to label14 with label15;
+    }
+
+    private void writeCharRef(int) throws java.io.IOException
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        java.io.Writer $r1, $r2, $r4;
+        int i0;
+        java.lang.String $r3;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r1.<java.io.Writer: void write(java.lang.String)>("&#x");
+
+        $r2 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>(i0);
+
+        virtualinvoke $r2.<java.io.Writer: void write(java.lang.String)>($r3);
+
+        $r4 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r4.<java.io.Writer: void write(int)>(59);
+
+        return;
+    }
+
+    private void writeXMLContent(char[], int, int, boolean) throws java.io.IOException
+    {
+        boolean z0, $z1, $z2;
+        java.nio.charset.CharsetEncoder $r3, $r10;
+        java.io.Writer $r2, $r4, $r5, $r6, $r7, $r8, $r9, $r11, $r12;
+        int i0, i1, i2, $i3, $i5, $i6, $i7, $i8, $i9, $i10, $i12, $i14, i15, i16, $i17, $i18;
+        char c4, $c11, $c13;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        char[] r1;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r1 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        z0 := @parameter3: boolean;
+
+        if z0 != 0 goto label01;
+
+        $r12 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r12.<java.io.Writer: void write(char[],int,int)>(r1, i0, i1);
+
+        return;
+
+     label01:
+        i15 = i0;
+
+        i2 = i0 + i1;
+
+        i16 = i0;
+
+     label02:
+        if i16 >= i2 goto label10;
+
+        c4 = r1[i16];
+
+        $r3 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.nio.charset.CharsetEncoder fEncoder>;
+
+        if $r3 == null goto label05;
+
+        $r10 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.nio.charset.CharsetEncoder fEncoder>;
+
+        $z1 = virtualinvoke $r10.<java.nio.charset.CharsetEncoder: boolean canEncode(char)>(c4);
+
+        if $z1 != 0 goto label05;
+
+        $r11 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        $i8 = i16 - i15;
+
+        virtualinvoke $r11.<java.io.Writer: void write(char[],int,int)>(r1, i15, $i8);
+
+        $i9 = i2 - 1;
+
+        if i16 == $i9 goto label03;
+
+        $i10 = i16 + 1;
+
+        $c11 = r1[$i10];
+
+        $z2 = staticinvoke <java.lang.Character: boolean isSurrogatePair(char,char)>(c4, $c11);
+
+        if $z2 == 0 goto label03;
+
+        $i12 = i16 + 1;
+
+        $c13 = r1[$i12];
+
+        $i14 = staticinvoke <java.lang.Character: int toCodePoint(char,char)>(c4, $c13);
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void writeCharRef(int)>($i14);
+
+        i16 = i16 + 1;
+
+        goto label04;
+
+     label03:
+        $i17 = (int) c4;
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void writeCharRef(int)>($i17);
+
+     label04:
+        i15 = i16 + 1;
+
+        goto label09;
+
+     label05:
+        $i18 = (int) c4;
+
+        lookupswitch($i18)
+        {
+            case 38: goto label07;
+            case 60: goto label06;
+            case 62: goto label08;
+            default: goto label09;
+        };
+
+     label06:
+        $r6 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        $i6 = i16 - i15;
+
+        virtualinvoke $r6.<java.io.Writer: void write(char[],int,int)>(r1, i15, $i6);
+
+        $r7 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r7.<java.io.Writer: void write(java.lang.String)>("&lt;");
+
+        i15 = i16 + 1;
+
+        goto label09;
+
+     label07:
+        $r8 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        $i7 = i16 - i15;
+
+        virtualinvoke $r8.<java.io.Writer: void write(char[],int,int)>(r1, i15, $i7);
+
+        $r9 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r9.<java.io.Writer: void write(java.lang.String)>("&amp;");
+
+        i15 = i16 + 1;
+
+        goto label09;
+
+     label08:
+        $r4 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        $i5 = i16 - i15;
+
+        virtualinvoke $r4.<java.io.Writer: void write(char[],int,int)>(r1, i15, $i5);
+
+        $r5 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r5.<java.io.Writer: void write(java.lang.String)>("&gt;");
+
+        i15 = i16 + 1;
+
+     label09:
+        i16 = i16 + 1;
+
+        goto label02;
+
+     label10:
+        $r2 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        $i3 = i2 - i15;
+
+        virtualinvoke $r2.<java.io.Writer: void write(char[],int,int)>(r1, i15, $i3);
+
+        return;
+    }
+
+    private void writeXMLContent(java.lang.String) throws java.io.IOException
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r1;
+        int $i0;
+        java.lang.String r0;
+        boolean $z0;
+
+        r1 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 == null goto label1;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label1;
+
+        $z0 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fEscapeCharacters>;
+
+        specialinvoke r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void writeXMLContent(java.lang.String,boolean,boolean)>(r0, $z0, 0);
+
+     label1:
+        return;
+    }
+
+    private void writeXMLContent(java.lang.String, boolean, boolean) throws java.io.IOException
+    {
+        boolean z0, z1, $z2, $z3;
+        java.nio.charset.CharsetEncoder $r3, $r13;
+        java.io.Writer $r2, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r14, $r15;
+        int $i0, $i1, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i11, $i13, i14, i15, $i16, $i17;
+        java.lang.String r0;
+        char $c2, $c10, $c12;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r1;
+
+        r1 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        z0 := @parameter1: boolean;
+
+        z1 := @parameter2: boolean;
+
+        if z0 != 0 goto label01;
+
+        $r15 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r15.<java.io.Writer: void write(java.lang.String)>(r0);
+
+        return;
+
+     label01:
+        i14 = 0;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        i15 = 0;
+
+     label02:
+        if i15 >= $i0 goto label13;
+
+        $c2 = virtualinvoke r0.<java.lang.String: char charAt(int)>(i15);
+
+        $r3 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.nio.charset.CharsetEncoder fEncoder>;
+
+        if $r3 == null goto label05;
+
+        $r13 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.nio.charset.CharsetEncoder fEncoder>;
+
+        $z2 = virtualinvoke $r13.<java.nio.charset.CharsetEncoder: boolean canEncode(char)>($c2);
+
+        if $z2 != 0 goto label05;
+
+        $r14 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        $i7 = i15 - i14;
+
+        virtualinvoke $r14.<java.io.Writer: void write(java.lang.String,int,int)>(r0, i14, $i7);
+
+        $i8 = $i0 - 1;
+
+        if i15 == $i8 goto label03;
+
+        $i9 = i15 + 1;
+
+        $c10 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i9);
+
+        $z3 = staticinvoke <java.lang.Character: boolean isSurrogatePair(char,char)>($c2, $c10);
+
+        if $z3 == 0 goto label03;
+
+        $i11 = i15 + 1;
+
+        $c12 = virtualinvoke r0.<java.lang.String: char charAt(int)>($i11);
+
+        $i13 = staticinvoke <java.lang.Character: int toCodePoint(char,char)>($c2, $c12);
+
+        specialinvoke r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void writeCharRef(int)>($i13);
+
+        i15 = i15 + 1;
+
+        goto label04;
+
+     label03:
+        $i16 = (int) $c2;
+
+        specialinvoke r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void writeCharRef(int)>($i16);
+
+     label04:
+        i14 = i15 + 1;
+
+        goto label12;
+
+     label05:
+        $i17 = (int) $c2;
+
+        lookupswitch($i17)
+        {
+            case 34: goto label09;
+            case 38: goto label07;
+            case 60: goto label06;
+            case 62: goto label08;
+            default: goto label12;
+        };
+
+     label06:
+        $r6 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        $i4 = i15 - i14;
+
+        virtualinvoke $r6.<java.io.Writer: void write(java.lang.String,int,int)>(r0, i14, $i4);
+
+        $r7 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r7.<java.io.Writer: void write(java.lang.String)>("&lt;");
+
+        i14 = i15 + 1;
+
+        goto label12;
+
+     label07:
+        $r8 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        $i5 = i15 - i14;
+
+        virtualinvoke $r8.<java.io.Writer: void write(java.lang.String,int,int)>(r0, i14, $i5);
+
+        $r9 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r9.<java.io.Writer: void write(java.lang.String)>("&amp;");
+
+        i14 = i15 + 1;
+
+        goto label12;
+
+     label08:
+        $r4 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        $i3 = i15 - i14;
+
+        virtualinvoke $r4.<java.io.Writer: void write(java.lang.String,int,int)>(r0, i14, $i3);
+
+        $r5 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r5.<java.io.Writer: void write(java.lang.String)>("&gt;");
+
+        i14 = i15 + 1;
+
+        goto label12;
+
+     label09:
+        $r10 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        $i6 = i15 - i14;
+
+        virtualinvoke $r10.<java.io.Writer: void write(java.lang.String,int,int)>(r0, i14, $i6);
+
+        if z1 == 0 goto label10;
+
+        $r12 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r12.<java.io.Writer: void write(java.lang.String)>("&quot;");
+
+        goto label11;
+
+     label10:
+        $r11 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r11.<java.io.Writer: void write(int)>(34);
+
+     label11:
+        i14 = i15 + 1;
+
+     label12:
+        i15 = i15 + 1;
+
+        goto label02;
+
+     label13:
+        $r2 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        $i1 = $i0 - i14;
+
+        virtualinvoke $r2.<java.io.Writer: void write(java.lang.String,int,int)>(r0, i14, $i1);
+
+        return;
+    }
+
+    private void closeStartTag() throws javax.xml.stream.XMLStreamException
+    {
+        javax.xml.stream.XMLStreamException $r42;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack $r1, $r4;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.util.List $r8, $r9, $r10, $r11, $r30, $r45;
+        java.io.Writer $r3, $r6, $r39, $r40, $r43;
+        com.sun.org.apache.xerces.internal.xni.QName r46;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute r47;
+        int $i0, $i1, i2, i3;
+        java.lang.String $r7, $r13, $r14, $r15, $r16, $r17, $r19, $r20, $r21, $r22, $r23, $r24, $r25, $r27, $r28, $r29, $r32, $r33, $r35, $r36, $r37, $r38, $r44, $r48, $r49, $r50;
+        java.io.IOException $r41;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState $r2;
+        com.sun.org.apache.xerces.internal.util.NamespaceSupport $r5, $r18, $r26, $r34;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        java.lang.Object $r12, $r31;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+     label01:
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack fElementStack>;
+
+        $r2 = virtualinvoke $r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState peek()>();
+
+        $z0 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fIsRepairingNamespace>;
+
+        if $z0 == 0 goto label11;
+
+        virtualinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void repair()>();
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void correctPrefix(com.sun.org.apache.xerces.internal.xni.QName,int)>($r2, 1);
+
+        $r7 = $r2.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState: java.lang.String prefix>;
+
+        if $r7 == null goto label02;
+
+        $r37 = $r2.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState: java.lang.String prefix>;
+
+        if $r37 == "" goto label02;
+
+        $r39 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        $r38 = $r2.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState: java.lang.String prefix>;
+
+        virtualinvoke $r39.<java.io.Writer: void write(java.lang.String)>($r38);
+
+        $r40 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r40.<java.io.Writer: void write(java.lang.String)>(":");
+
+     label02:
+        $r43 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        $r44 = $r2.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState: java.lang.String localpart>;
+
+        virtualinvoke $r43.<java.io.Writer: void write(java.lang.String)>($r44);
+
+        $r45 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        $i1 = interfaceinvoke $r45.<java.util.List: int size()>();
+
+        i2 = 0;
+
+     label03:
+        if i2 >= $i1 goto label05;
+
+        $r30 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        $r31 = interfaceinvoke $r30.<java.util.List: java.lang.Object get(int)>(i2);
+
+        r46 = (com.sun.org.apache.xerces.internal.xni.QName) $r31;
+
+        if r46 == null goto label04;
+
+        $r34 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        $r33 = r46.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix>;
+
+        $r32 = r46.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        $z5 = virtualinvoke $r34.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: boolean declarePrefix(java.lang.String,java.lang.String)>($r33, $r32);
+
+        if $z5 == 0 goto label04;
+
+        $r36 = r46.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix>;
+
+        $r35 = r46.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void writenamespace(java.lang.String,java.lang.String)>($r36, $r35);
+
+     label04:
+        i2 = i2 + 1;
+
+        goto label03;
+
+     label05:
+        $r8 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        interfaceinvoke $r8.<java.util.List: void clear()>();
+
+        i3 = 0;
+
+     label06:
+        $r9 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fAttributeCache>;
+
+        $i0 = interfaceinvoke $r9.<java.util.List: int size()>();
+
+        if i3 >= $i0 goto label10;
+
+        $r11 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fAttributeCache>;
+
+        $r12 = interfaceinvoke $r11.<java.util.List: java.lang.Object get(int)>(i3);
+
+        r47 = (com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute) $r12;
+
+        $r13 = r47.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String prefix>;
+
+        if $r13 == null goto label09;
+
+        $r14 = r47.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String uri>;
+
+        if $r14 == null goto label09;
+
+        $r15 = r47.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String prefix>;
+
+        $z2 = virtualinvoke $r15.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z2 != 0 goto label09;
+
+        $r16 = r47.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String uri>;
+
+        $z3 = virtualinvoke $r16.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z3 != 0 goto label09;
+
+        $r18 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        $r17 = r47.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String uri>;
+
+        $r19 = virtualinvoke $r18.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: java.lang.String getPrefix(java.lang.String)>($r17);
+
+        if $r19 == null goto label07;
+
+        $r29 = r47.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String prefix>;
+
+        if $r19 == $r29 goto label09;
+
+     label07:
+        $r20 = r47.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String uri>;
+
+        $r21 = specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.lang.String getAttrPrefix(java.lang.String)>($r20);
+
+        if $r21 != null goto label08;
+
+        $r26 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        $r25 = r47.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String prefix>;
+
+        $r24 = r47.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String uri>;
+
+        $z4 = virtualinvoke $r26.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: boolean declarePrefix(java.lang.String,java.lang.String)>($r25, $r24);
+
+        if $z4 == 0 goto label09;
+
+        $r28 = r47.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String prefix>;
+
+        $r27 = r47.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String uri>;
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void writenamespace(java.lang.String,java.lang.String)>($r28, $r27);
+
+        goto label09;
+
+     label08:
+        $r23 = r47.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String prefix>;
+
+        $r22 = r47.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String uri>;
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void writenamespace(java.lang.String,java.lang.String)>($r23, $r22);
+
+     label09:
+        $r48 = r47.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String prefix>;
+
+        $r49 = r47.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String localpart>;
+
+        $r50 = r47.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String value>;
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void writeAttributeWithPrefix(java.lang.String,java.lang.String,java.lang.String)>($r48, $r49, $r50);
+
+        i3 = i3 + 1;
+
+        goto label06;
+
+     label10:
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.Map fAttrNamespace> = null;
+
+        $r10 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fAttributeCache>;
+
+        interfaceinvoke $r10.<java.util.List: void clear()>();
+
+     label11:
+        $z1 = $r2.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState: boolean isEmpty>;
+
+        if $z1 == 0 goto label12;
+
+        $r4 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack fElementStack>;
+
+        virtualinvoke $r4.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState pop()>();
+
+        $r5 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        virtualinvoke $r5.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: void popContext()>();
+
+        $r6 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r6.<java.io.Writer: void write(java.lang.String)>("/>");
+
+        goto label13;
+
+     label12:
+        $r3 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r3.<java.io.Writer: void write(int)>(62);
+
+     label13:
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fStartTagOpened> = 0;
+
+     label14:
+        goto label16;
+
+     label15:
+        $r41 := @caughtexception;
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fStartTagOpened> = 0;
+
+        $r42 = new javax.xml.stream.XMLStreamException;
+
+        specialinvoke $r42.<javax.xml.stream.XMLStreamException: void <init>(java.lang.Throwable)>($r41);
+
+        throw $r42;
+
+     label16:
+        return;
+
+        catch java.io.IOException from label01 to label14 with label15;
+    }
+
+    private void openStartTag() throws java.io.IOException
+    {
+        java.io.Writer $r1;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean fStartTagOpened> = 1;
+
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.Writer fWriter>;
+
+        virtualinvoke $r1.<java.io.Writer: void write(int)>(60);
+
+        return;
+    }
+
+    private void correctPrefix(com.sun.org.apache.xerces.internal.xni.QName, int)
+    {
+        java.util.Random $r15;
+        boolean $z0, z1;
+        java.util.List $r8, $r16, $r23;
+        com.sun.org.apache.xerces.internal.xni.QName r0, $r7, r24;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl $r4;
+        java.lang.StringBuffer $r12;
+        int $i0, i1, i2, $i3, i4;
+        java.lang.String $r3, $r5, $r11, $r13, $r18, $r19, $r20, r21, r22, r25;
+        com.sun.org.apache.xerces.internal.util.SymbolTable $r2, $r6, $r9, $r14;
+        com.sun.org.apache.xerces.internal.util.NamespaceSupport $r10;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r1;
+        java.lang.Object $r17;
+
+        r1 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r0 := @parameter0: com.sun.org.apache.xerces.internal.xni.QName;
+
+        i1 := @parameter1: int;
+
+        r21 = r0.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix>;
+
+        r22 = r0.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        z1 = 0;
+
+        if r21 == null goto label01;
+
+        $z0 = virtualinvoke r21.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z0 == 0 goto label14;
+
+     label01:
+        if r22 != null goto label02;
+
+        return;
+
+     label02:
+        if r21 != "" goto label03;
+
+        if r22 != "" goto label03;
+
+        return;
+
+     label03:
+        $r2 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        $r3 = virtualinvoke $r2.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol(java.lang.String)>(r22);
+
+        i2 = 0;
+
+     label04:
+        $r23 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        $i3 = interfaceinvoke $r23.<java.util.List: int size()>();
+
+        if i2 >= $i3 goto label06;
+
+        $r16 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        $r17 = interfaceinvoke $r16.<java.util.List: java.lang.Object get(int)>(i2);
+
+        r24 = (com.sun.org.apache.xerces.internal.xni.QName) $r17;
+
+        if r24 == null goto label05;
+
+        $r19 = r24.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        $r18 = r0.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        if $r19 != $r18 goto label05;
+
+        $r20 = r24.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix>;
+
+        r0.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix> = $r20;
+
+        return;
+
+     label05:
+        i2 = i2 + 1;
+
+        goto label04;
+
+     label06:
+        $r4 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl fNamespaceContext>;
+
+        $r5 = virtualinvoke $r4.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl: java.lang.String getPrefix(java.lang.String)>($r3);
+
+        r25 = $r5;
+
+        if $r5 != "" goto label08;
+
+        if i1 != 1 goto label07;
+
+        return;
+
+     label07:
+        if i1 != 10 goto label08;
+
+        r25 = specialinvoke r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.lang.String getAttrPrefix(java.lang.String)>($r3);
+
+        z1 = 1;
+
+     label08:
+        if r25 != null goto label11;
+
+        $r12 = new java.lang.StringBuffer;
+
+        specialinvoke $r12.<java.lang.StringBuffer: void <init>(java.lang.String)>("zdef");
+
+        i4 = 0;
+
+     label09:
+        if i4 >= 1 goto label10;
+
+        $r15 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.Random fPrefixGen>;
+
+        $i0 = virtualinvoke $r15.<java.util.Random: int nextInt()>();
+
+        virtualinvoke $r12.<java.lang.StringBuffer: java.lang.StringBuffer append(int)>($i0);
+
+        i4 = i4 + 1;
+
+        goto label09;
+
+     label10:
+        $r13 = virtualinvoke $r12.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $r14 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        r21 = virtualinvoke $r14.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol(java.lang.String)>($r13);
+
+        goto label12;
+
+     label11:
+        $r6 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        r21 = virtualinvoke $r6.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol(java.lang.String)>(r25);
+
+     label12:
+        if r25 != null goto label14;
+
+        if z1 == 0 goto label13;
+
+        specialinvoke r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void addAttrNamespace(java.lang.String,java.lang.String)>(r21, $r3);
+
+        goto label14;
+
+     label13:
+        $r7 = new com.sun.org.apache.xerces.internal.xni.QName;
+
+        specialinvoke $r7.<com.sun.org.apache.xerces.internal.xni.QName: void <init>()>();
+
+        virtualinvoke $r7.<com.sun.org.apache.xerces.internal.xni.QName: void setValues(java.lang.String,java.lang.String,java.lang.String,java.lang.String)>(r21, "xmlns", null, $r3);
+
+        $r8 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        interfaceinvoke $r8.<java.util.List: boolean add(java.lang.Object)>($r7);
+
+        $r10 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        $r9 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        $r11 = virtualinvoke $r9.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol(java.lang.String)>(r21);
+
+        virtualinvoke $r10.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: boolean declarePrefix(java.lang.String,java.lang.String)>($r11, $r3);
+
+     label14:
+        r0.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix> = r21;
+
+        return;
+    }
+
+    private java.lang.String getAttrPrefix(java.lang.String)
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        java.util.Map $r1, $r3;
+        java.lang.Object $r4;
+        java.lang.String r2, $r5;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.Map fAttrNamespace>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.Map fAttrNamespace>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>(r2);
+
+        $r5 = (java.lang.String) $r4;
+
+        return $r5;
+
+     label1:
+        return null;
+    }
+
+    private void addAttrNamespace(java.lang.String, java.lang.String)
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        java.util.Map $r1, $r4;
+        java.util.HashMap $r5;
+        java.lang.String r2, r3;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.lang.String;
+
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.Map fAttrNamespace>;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.util.HashMap;
+
+        specialinvoke $r5.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.Map fAttrNamespace> = $r5;
+
+     label1:
+        $r4 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.Map fAttrNamespace>;
+
+        interfaceinvoke $r4.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r2, r3);
+
+        return;
+    }
+
+    private boolean isDefaultNamespace(java.lang.String)
+    {
+        com.sun.org.apache.xerces.internal.util.NamespaceSupport $r2;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        java.lang.String $r1, $r3, r4;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r4 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.lang.String DEFAULT_PREFIX>;
+
+        $r3 = virtualinvoke $r2.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: java.lang.String getURI(java.lang.String)>($r1);
+
+        if r4 != $r3 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    private boolean checkUserNamespaceContext(java.lang.String, java.lang.String)
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl $r1, $r3;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        javax.xml.namespace.NamespaceContext $r2, $r5;
+        java.lang.String r4, $r6, r7;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r4 := @parameter0: java.lang.String;
+
+        r7 := @parameter1: java.lang.String;
+
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl fNamespaceContext>;
+
+        $r2 = $r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl: javax.xml.namespace.NamespaceContext userContext>;
+
+        if $r2 == null goto label1;
+
+        $r3 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl fNamespaceContext>;
+
+        $r5 = $r3.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl: javax.xml.namespace.NamespaceContext userContext>;
+
+        $r6 = interfaceinvoke $r5.<javax.xml.namespace.NamespaceContext: java.lang.String getNamespaceURI(java.lang.String)>(r4);
+
+        if $r6 == null goto label1;
+
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>(r7);
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    protected void repair()
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack $r1;
+        com.sun.org.apache.xerces.internal.xni.QName r45;
+        java.lang.String $r11, $r12, $r16, $r17, $r18, $r19, $r25, $r26, $r27, $r28, $r29, $r30, $r31, $r32, $r36, $r37, $r38, $r39;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        java.util.List $r3, $r4, $r5, $r6, $r7, $r9, $r14, $r20, $r22, $r23, $r33, $r34, $r41;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute r40, r42, r43, r44, r46;
+        int $i0, $i1, $i2, $i3, $i4, i5, i6, $i7, i8, i9, i10, i11;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState $r2;
+        com.sun.org.apache.xerces.internal.util.NamespaceSupport $r13;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        java.lang.Object $r8, $r10, $r15, $r21, $r24, $r35;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack fElementStack>;
+
+        $r2 = virtualinvoke $r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState peek()>();
+
+        virtualinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void removeDuplicateDecls()>();
+
+        i5 = 0;
+
+     label01:
+        $r3 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fAttributeCache>;
+
+        $i0 = interfaceinvoke $r3.<java.util.List: int size()>();
+
+        if i5 >= $i0 goto label05;
+
+        $r34 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fAttributeCache>;
+
+        $r35 = interfaceinvoke $r34.<java.util.List: java.lang.Object get(int)>(i5);
+
+        r40 = (com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute) $r35;
+
+        $r36 = r40.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String prefix>;
+
+        if $r36 == null goto label02;
+
+        $r39 = r40.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String prefix>;
+
+        $z8 = virtualinvoke $r39.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z8 == 0 goto label03;
+
+     label02:
+        $r37 = r40.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String uri>;
+
+        if $r37 == null goto label04;
+
+        $r38 = r40.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String uri>;
+
+        $z7 = virtualinvoke $r38.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z7 != 0 goto label04;
+
+     label03:
+        virtualinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void correctPrefix(com.sun.org.apache.xerces.internal.xni.QName,com.sun.org.apache.xerces.internal.xni.QName)>($r2, r40);
+
+     label04:
+        i5 = i5 + 1;
+
+        goto label01;
+
+     label05:
+        $z0 = virtualinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: boolean isDeclared(com.sun.org.apache.xerces.internal.xni.QName)>($r2);
+
+        if $z0 != 0 goto label06;
+
+        $r29 = $r2.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState: java.lang.String prefix>;
+
+        if $r29 == null goto label06;
+
+        $r30 = $r2.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState: java.lang.String uri>;
+
+        if $r30 == null goto label06;
+
+        $r31 = $r2.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState: java.lang.String prefix>;
+
+        $z5 = virtualinvoke $r31.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z5 != 0 goto label06;
+
+        $r32 = $r2.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementState: java.lang.String uri>;
+
+        $z6 = virtualinvoke $r32.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z6 != 0 goto label06;
+
+        $r33 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        interfaceinvoke $r33.<java.util.List: boolean add(java.lang.Object)>($r2);
+
+     label06:
+        i6 = 0;
+
+     label07:
+        $r41 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fAttributeCache>;
+
+        $i7 = interfaceinvoke $r41.<java.util.List: int size()>();
+
+        if i6 >= $i7 goto label11;
+
+        $r20 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fAttributeCache>;
+
+        $r21 = interfaceinvoke $r20.<java.util.List: java.lang.Object get(int)>(i6);
+
+        r42 = (com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute) $r21;
+
+        i8 = i6 + 1;
+
+     label08:
+        $r22 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fAttributeCache>;
+
+        $i4 = interfaceinvoke $r22.<java.util.List: int size()>();
+
+        if i8 >= $i4 goto label10;
+
+        $r23 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fAttributeCache>;
+
+        $r24 = interfaceinvoke $r23.<java.util.List: java.lang.Object get(int)>(i8);
+
+        r43 = (com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute) $r24;
+
+        $r26 = "";
+
+        $r25 = r42.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String prefix>;
+
+        $z3 = virtualinvoke $r26.<java.lang.String: boolean equals(java.lang.Object)>($r25);
+
+        if $z3 != 0 goto label09;
+
+        $r28 = "";
+
+        $r27 = r43.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String prefix>;
+
+        $z4 = virtualinvoke $r28.<java.lang.String: boolean equals(java.lang.Object)>($r27);
+
+        if $z4 != 0 goto label09;
+
+        virtualinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void correctPrefix(com.sun.org.apache.xerces.internal.xni.QName,com.sun.org.apache.xerces.internal.xni.QName)>(r42, r43);
+
+     label09:
+        i8 = i8 + 1;
+
+        goto label08;
+
+     label10:
+        i6 = i6 + 1;
+
+        goto label07;
+
+     label11:
+        virtualinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void repairNamespaceDecl(com.sun.org.apache.xerces.internal.xni.QName)>($r2);
+
+        i9 = 0;
+
+     label12:
+        $r4 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fAttributeCache>;
+
+        $i1 = interfaceinvoke $r4.<java.util.List: int size()>();
+
+        if i9 >= $i1 goto label14;
+
+        $r14 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fAttributeCache>;
+
+        $r15 = interfaceinvoke $r14.<java.util.List: java.lang.Object get(int)>(i9);
+
+        r44 = (com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute) $r15;
+
+        $r16 = r44.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String prefix>;
+
+        if $r16 == null goto label13;
+
+        $r17 = r44.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String prefix>;
+
+        $z1 = virtualinvoke $r17.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z1 == 0 goto label13;
+
+        $r18 = r44.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String uri>;
+
+        if $r18 == null goto label13;
+
+        $r19 = r44.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute: java.lang.String uri>;
+
+        $z2 = virtualinvoke $r19.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z2 == 0 goto label13;
+
+        virtualinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void repairNamespaceDecl(com.sun.org.apache.xerces.internal.xni.QName)>(r44);
+
+     label13:
+        i9 = i9 + 1;
+
+        goto label12;
+
+     label14:
+        i10 = 0;
+
+     label15:
+        $r5 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        $i2 = interfaceinvoke $r5.<java.util.List: int size()>();
+
+        if i10 >= $i2 goto label17;
+
+        $r9 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        $r10 = interfaceinvoke $r9.<java.util.List: java.lang.Object get(int)>(i10);
+
+        r45 = (com.sun.org.apache.xerces.internal.xni.QName) $r10;
+
+        if r45 == null goto label16;
+
+        $r13 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.NamespaceSupport fInternalNamespaceContext>;
+
+        $r12 = r45.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix>;
+
+        $r11 = r45.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        virtualinvoke $r13.<com.sun.org.apache.xerces.internal.util.NamespaceSupport: boolean declarePrefix(java.lang.String,java.lang.String)>($r12, $r11);
+
+     label16:
+        i10 = i10 + 1;
+
+        goto label15;
+
+     label17:
+        i11 = 0;
+
+     label18:
+        $r6 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fAttributeCache>;
+
+        $i3 = interfaceinvoke $r6.<java.util.List: int size()>();
+
+        if i11 >= $i3 goto label19;
+
+        $r7 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fAttributeCache>;
+
+        $r8 = interfaceinvoke $r7.<java.util.List: java.lang.Object get(int)>(i11);
+
+        r46 = (com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$Attribute) $r8;
+
+        specialinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void correctPrefix(com.sun.org.apache.xerces.internal.xni.QName,int)>(r46, 10);
+
+        i11 = i11 + 1;
+
+        goto label18;
+
+     label19:
+        return;
+    }
+
+    void correctPrefix(com.sun.org.apache.xerces.internal.xni.QName, com.sun.org.apache.xerces.internal.xni.QName)
+    {
+        java.util.Random $r18;
+        boolean $z0, $z1;
+        java.util.List $r10, $r17, $r19;
+        com.sun.org.apache.xerces.internal.xni.QName r1, r2, $r15, r26;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl $r8;
+        java.lang.StringBuffer $r11;
+        int $i0, $i1, i2, i3;
+        java.lang.String $r3, $r4, $r5, $r6, $r7, $r9, $r12, $r14, $r16, $r21, $r22, $r23, $r25;
+        com.sun.org.apache.xerces.internal.util.SymbolTable $r13, $r24;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        java.lang.Object $r20;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r1 := @parameter0: com.sun.org.apache.xerces.internal.xni.QName;
+
+        r2 := @parameter1: com.sun.org.apache.xerces.internal.xni.QName;
+
+        virtualinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void checkForNull(com.sun.org.apache.xerces.internal.xni.QName)>(r1);
+
+        virtualinvoke r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: void checkForNull(com.sun.org.apache.xerces.internal.xni.QName)>(r2);
+
+        $r4 = r1.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix>;
+
+        $r3 = r2.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix>;
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label7;
+
+        $r6 = r1.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        $r5 = r2.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r5);
+
+        if $z1 != 0 goto label7;
+
+        $r8 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl fNamespaceContext>;
+
+        $r7 = r2.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        $r9 = virtualinvoke $r8.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl: java.lang.String getPrefix(java.lang.String)>($r7);
+
+        if $r9 == null goto label1;
+
+        $r24 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        $r25 = virtualinvoke $r24.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol(java.lang.String)>($r9);
+
+        r2.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix> = $r25;
+
+        goto label7;
+
+     label1:
+        i2 = 0;
+
+     label2:
+        $r10 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        $i0 = interfaceinvoke $r10.<java.util.List: int size()>();
+
+        if i2 >= $i0 goto label4;
+
+        $r19 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        $r20 = interfaceinvoke $r19.<java.util.List: java.lang.Object get(int)>(i2);
+
+        r26 = (com.sun.org.apache.xerces.internal.xni.QName) $r20;
+
+        if r26 == null goto label3;
+
+        $r22 = r26.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        $r21 = r2.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        if $r22 != $r21 goto label3;
+
+        $r23 = r26.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix>;
+
+        r2.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix> = $r23;
+
+        return;
+
+     label3:
+        i2 = i2 + 1;
+
+        goto label2;
+
+     label4:
+        $r11 = new java.lang.StringBuffer;
+
+        specialinvoke $r11.<java.lang.StringBuffer: void <init>(java.lang.String)>("zdef");
+
+        i3 = 0;
+
+     label5:
+        if i3 >= 1 goto label6;
+
+        $r18 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.Random fPrefixGen>;
+
+        $i1 = virtualinvoke $r18.<java.util.Random: int nextInt()>();
+
+        virtualinvoke $r11.<java.lang.StringBuffer: java.lang.StringBuffer append(int)>($i1);
+
+        i3 = i3 + 1;
+
+        goto label5;
+
+     label6:
+        $r12 = virtualinvoke $r11.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $r13 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        $r14 = virtualinvoke $r13.<com.sun.org.apache.xerces.internal.util.SymbolTable: java.lang.String addSymbol(java.lang.String)>($r12);
+
+        r2.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix> = $r14;
+
+        $r15 = new com.sun.org.apache.xerces.internal.xni.QName;
+
+        specialinvoke $r15.<com.sun.org.apache.xerces.internal.xni.QName: void <init>()>();
+
+        $r16 = r2.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        virtualinvoke $r15.<com.sun.org.apache.xerces.internal.xni.QName: void setValues(java.lang.String,java.lang.String,java.lang.String,java.lang.String)>($r14, "xmlns", null, $r16);
+
+        $r17 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        interfaceinvoke $r17.<java.util.List: boolean add(java.lang.Object)>($r15);
+
+     label7:
+        return;
+    }
+
+    void checkForNull(com.sun.org.apache.xerces.internal.xni.QName)
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r3;
+        java.lang.String $r1, $r2;
+        com.sun.org.apache.xerces.internal.xni.QName r0;
+
+        r3 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r0 := @parameter0: com.sun.org.apache.xerces.internal.xni.QName;
+
+        $r1 = r0.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix>;
+
+        if $r1 != null goto label1;
+
+        r0.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix> = "";
+
+     label1:
+        $r2 = r0.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        if $r2 != null goto label2;
+
+        r0.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri> = "";
+
+     label2:
+        return;
+    }
+
+    void removeDuplicateDecls()
+    {
+        int $i0, $i1, i2, i3;
+        java.lang.String $r9, $r10, $r11, $r12;
+        boolean $z0, $z1;
+        java.util.List $r1, $r2, $r5, $r6, $r13;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        java.lang.Object $r3, $r7;
+        com.sun.org.apache.xerces.internal.xni.QName r4, r8;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        i2 = 0;
+
+     label1:
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        $i0 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        if i2 >= $i0 goto label5;
+
+        $r2 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.lang.Object get(int)>(i2);
+
+        r4 = (com.sun.org.apache.xerces.internal.xni.QName) $r3;
+
+        if r4 == null goto label4;
+
+        i3 = i2 + 1;
+
+     label2:
+        $r5 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        $i1 = interfaceinvoke $r5.<java.util.List: int size()>();
+
+        if i3 >= $i1 goto label4;
+
+        $r6 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        $r7 = interfaceinvoke $r6.<java.util.List: java.lang.Object get(int)>(i3);
+
+        r8 = (com.sun.org.apache.xerces.internal.xni.QName) $r7;
+
+        if r8 == null goto label3;
+
+        $r10 = r4.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix>;
+
+        $r9 = r8.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix>;
+
+        $z0 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>($r9);
+
+        if $z0 == 0 goto label3;
+
+        $r12 = r4.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        $r11 = r8.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        $z1 = virtualinvoke $r12.<java.lang.String: boolean equals(java.lang.Object)>($r11);
+
+        if $z1 == 0 goto label3;
+
+        $r13 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        interfaceinvoke $r13.<java.util.List: java.lang.Object remove(int)>(i3);
+
+     label3:
+        i3 = i3 + 1;
+
+        goto label2;
+
+     label4:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label5:
+        return;
+    }
+
+    void repairNamespaceDecl(com.sun.org.apache.xerces.internal.xni.QName)
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl $r11;
+        int $i0, i1;
+        java.lang.String $r5, $r6, $r7, $r8, $r9, $r10, $r12, $r13, $r14;
+        boolean $z0, $z1, $z2;
+        java.util.List $r1, $r2, $r15;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        java.lang.Object $r3;
+        com.sun.org.apache.xerces.internal.xni.QName r4, r16;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r4 := @parameter0: com.sun.org.apache.xerces.internal.xni.QName;
+
+        i1 = 0;
+
+     label1:
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        $i0 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        if i1 >= $i0 goto label4;
+
+        $r2 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.lang.Object get(int)>(i1);
+
+        r16 = (com.sun.org.apache.xerces.internal.xni.QName) $r3;
+
+        if r16 == null goto label3;
+
+        $r5 = r4.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix>;
+
+        if $r5 == null goto label3;
+
+        $r7 = r4.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix>;
+
+        $r6 = r16.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix>;
+
+        $z0 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 == 0 goto label3;
+
+        $r9 = r4.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        $r8 = r16.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        $z1 = virtualinvoke $r9.<java.lang.String: boolean equals(java.lang.Object)>($r8);
+
+        if $z1 != 0 goto label3;
+
+        $r11 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl fNamespaceContext>;
+
+        $r10 = r4.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix>;
+
+        $r12 = virtualinvoke $r11.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl: java.lang.String getNamespaceURI(java.lang.String)>($r10);
+
+        if $r12 == null goto label3;
+
+        $r13 = r4.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        $z2 = virtualinvoke $r12.<java.lang.String: boolean equals(java.lang.Object)>($r13);
+
+        if $z2 == 0 goto label2;
+
+        $r15 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        interfaceinvoke $r15.<java.util.List: java.lang.Object set(int,java.lang.Object)>(i1, null);
+
+        goto label3;
+
+     label2:
+        $r14 = r4.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        r16.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri> = $r14;
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    boolean isDeclared(com.sun.org.apache.xerces.internal.xni.QName)
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl $r5;
+        int $i0, i1;
+        java.lang.String $r3, $r4, $r6, $r9, $r10, $r11, $r12, $r13;
+        java.util.List $r1, $r7;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        java.lang.Object $r8;
+        com.sun.org.apache.xerces.internal.xni.QName r2, r14;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r2 := @parameter0: com.sun.org.apache.xerces.internal.xni.QName;
+
+        i1 = 0;
+
+     label1:
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        $i0 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        if i1 >= $i0 goto label3;
+
+        $r7 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.util.List fNamespaceDecls>;
+
+        $r8 = interfaceinvoke $r7.<java.util.List: java.lang.Object get(int)>(i1);
+
+        r14 = (com.sun.org.apache.xerces.internal.xni.QName) $r8;
+
+        $r9 = r2.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix>;
+
+        if $r9 == null goto label2;
+
+        $r11 = r2.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix>;
+
+        $r10 = r14.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String prefix>;
+
+        if $r11 != $r10 goto label2;
+
+        $r13 = r14.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        $r12 = r2.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        if $r13 != $r12 goto label2;
+
+        return 1;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        $r3 = r2.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        if $r3 == null goto label4;
+
+        $r5 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl fNamespaceContext>;
+
+        $r4 = r2.<com.sun.org.apache.xerces.internal.xni.QName: java.lang.String uri>;
+
+        $r6 = virtualinvoke $r5.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$NamespaceContextImpl: java.lang.String getPrefix(java.lang.String)>($r4);
+
+        if $r6 == null goto label4;
+
+        return 1;
+
+     label4:
+        return 0;
+    }
+
+    public int size()
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        return 1;
+    }
+
+    public boolean isEmpty()
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        return 0;
+    }
+
+    public boolean containsKey(java.lang.Object)
+    {
+        java.lang.Object r0;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r1;
+        boolean $z0;
+
+        r1 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $z0 = virtualinvoke r0.<java.lang.Object: boolean equals(java.lang.Object)>("sjsxp-outputstream");
+
+        return $z0;
+    }
+
+    public java.lang.Object get(java.lang.Object)
+    {
+        java.io.OutputStream $r2;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r1;
+        java.lang.Object r0;
+        boolean $z0;
+
+        r1 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $z0 = virtualinvoke r0.<java.lang.Object: boolean equals(java.lang.Object)>("sjsxp-outputstream");
+
+        if $z0 == 0 goto label1;
+
+        $r2 = r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.io.OutputStream fOutputStream>;
+
+        return $r2;
+
+     label1:
+        return null;
+    }
+
+    public java.util.Set entrySet()
+    {
+        java.lang.UnsupportedOperationException $r0;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r1;
+
+        r1 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        $r0 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r0.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r0;
+    }
+
+    public java.lang.String toString()
+    {
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r1;
+        int $i0;
+        java.lang.StringBuilder $r0, $r4, $r5, $r7;
+        java.lang.Class $r2;
+        java.lang.String $r3, $r6, $r8;
+
+        r1 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        $r4 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("@");
+
+        $i0 = virtualinvoke r1.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: int hashCode()>();
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i0);
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r8;
+    }
+
+    public int hashCode()
+    {
+        int $i0;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack $r1;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl$ElementStack fElementStack>;
+
+        $i0 = virtualinvoke $r1.<java.lang.Object: int hashCode()>();
+
+        return $i0;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        java.lang.Object r1;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        r1 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    static com.sun.org.apache.xerces.internal.util.SymbolTable access$000(com.sun.xml.internal.stream.writers.XMLStreamWriterImpl)
+    {
+        com.sun.org.apache.xerces.internal.util.SymbolTable $r1;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+
+        r0 := @parameter0: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.org.apache.xerces.internal.util.SymbolTable fSymbolTable>;
+
+        return $r1;
+    }
+
+    static com.sun.xml.internal.stream.util.ReadOnlyIterator access$100(com.sun.xml.internal.stream.writers.XMLStreamWriterImpl)
+    {
+        com.sun.xml.internal.stream.util.ReadOnlyIterator $r1;
+        com.sun.xml.internal.stream.writers.XMLStreamWriterImpl r0;
+
+        r0 := @parameter0: com.sun.xml.internal.stream.writers.XMLStreamWriterImpl;
+
+        $r1 = r0.<com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: com.sun.xml.internal.stream.util.ReadOnlyIterator fReadOnlyIterator>;
+
+        return $r1;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.lang.String OUTPUTSTREAM_PROPERTY> = "sjsxp-outputstream";
+
+        <com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.lang.String UTF_8> = "UTF-8";
+
+        <com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.lang.String SPACE> = " ";
+
+        <com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.lang.String CLOSE_EMPTY_ELEMENT> = "/>";
+
+        <com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.lang.String END_CDATA> = "]]>";
+
+        <com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.lang.String START_CDATA> = "<![CDATA[";
+
+        <com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: char CLOSE_END_TAG> = 62;
+
+        <com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.lang.String OPEN_END_TAG> = "</";
+
+        <com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: char OPEN_START_TAG> = 60;
+
+        <com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: char CLOSE_START_TAG> = 62;
+
+        <com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.lang.String DEFAULT_XML_VERSION> = "1.0";
+
+        <com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.lang.String DEFAULT_XMLDECL> = "<?xml version=\"1.0\" ?>";
+
+        <com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.lang.String DEFAULT_ENCODING> = " encoding=\"utf-8\"";
+
+        <com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.lang.String END_COMMENT> = "-->";
+
+        <com.sun.xml.internal.stream.writers.XMLStreamWriterImpl: java.lang.String START_COMMENT> = "<!--";
+
+        return;
+    }
+}

@@ -1,0 +1,1964 @@
+public class sun.security.provider.certpath.DistributionPointFetcher extends java.lang.Object
+{
+    private static final sun.security.util.Debug debug;
+    private static final boolean[] ALL_REASONS;
+
+    private void <init>()
+    {
+        sun.security.provider.certpath.DistributionPointFetcher r0;
+
+        r0 := @this: sun.security.provider.certpath.DistributionPointFetcher;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static java.util.Collection getCRLs(java.security.cert.X509CRLSelector, boolean, java.security.PublicKey, java.lang.String, java.util.List, boolean[], java.util.Set, java.util.Date, java.lang.String) throws java.security.cert.CertStoreException
+    {
+        java.util.Date r6;
+        java.util.Collection $r8;
+        boolean[] r4;
+        java.util.Set r5;
+        java.security.PublicKey r1;
+        java.util.List r3;
+        java.lang.String r2, r7;
+        java.security.cert.X509CRLSelector r0;
+        boolean z0;
+
+        r0 := @parameter0: java.security.cert.X509CRLSelector;
+
+        z0 := @parameter1: boolean;
+
+        r1 := @parameter2: java.security.PublicKey;
+
+        r2 := @parameter3: java.lang.String;
+
+        r3 := @parameter4: java.util.List;
+
+        r4 := @parameter5: boolean[];
+
+        r5 := @parameter6: java.util.Set;
+
+        r6 := @parameter7: java.util.Date;
+
+        r7 := @parameter8: java.lang.String;
+
+        $r8 = staticinvoke <sun.security.provider.certpath.DistributionPointFetcher: java.util.Collection getCRLs(java.security.cert.X509CRLSelector,boolean,java.security.PublicKey,java.security.cert.X509Certificate,java.lang.String,java.util.List,boolean[],java.util.Set,java.util.Date,java.lang.String,java.security.cert.TrustAnchor)>(r0, z0, r1, null, r2, r3, r4, r5, r6, r7, null);
+
+        return $r8;
+    }
+
+    public static java.util.Collection getCRLs(java.security.cert.X509CRLSelector, boolean, java.security.PublicKey, java.lang.String, java.util.List, boolean[], java.util.Set, java.util.Date) throws java.security.cert.CertStoreException
+    {
+        java.util.Iterator $r1;
+        java.util.Date r9;
+        java.util.Collection $r10;
+        boolean[] r8;
+        java.util.Set r0;
+        java.security.PublicKey r5;
+        java.security.cert.CertStoreException $r11;
+        java.util.List r7;
+        java.lang.Object $r2;
+        java.lang.String r6;
+        java.security.cert.X509CRLSelector r4;
+        boolean $z0, z1;
+        java.security.cert.TrustAnchor r3;
+
+        r4 := @parameter0: java.security.cert.X509CRLSelector;
+
+        z1 := @parameter1: boolean;
+
+        r5 := @parameter2: java.security.PublicKey;
+
+        r6 := @parameter3: java.lang.String;
+
+        r7 := @parameter4: java.util.List;
+
+        r8 := @parameter5: boolean[];
+
+        r0 := @parameter6: java.util.Set;
+
+        r9 := @parameter7: java.util.Date;
+
+        $z0 = interfaceinvoke r0.<java.util.Set: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        $r11 = new java.security.cert.CertStoreException;
+
+        specialinvoke $r11.<java.security.cert.CertStoreException: void <init>(java.lang.String)>("at least one TrustAnchor must be specified");
+
+        throw $r11;
+
+     label1:
+        $r1 = interfaceinvoke r0.<java.util.Set: java.util.Iterator iterator()>();
+
+        $r2 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        r3 = (java.security.cert.TrustAnchor) $r2;
+
+        $r10 = staticinvoke <sun.security.provider.certpath.DistributionPointFetcher: java.util.Collection getCRLs(java.security.cert.X509CRLSelector,boolean,java.security.PublicKey,java.security.cert.X509Certificate,java.lang.String,java.util.List,boolean[],java.util.Set,java.util.Date,java.lang.String,java.security.cert.TrustAnchor)>(r4, z1, r5, null, r6, r7, r8, r0, r9, "plugin code signing", r3);
+
+        return $r10;
+    }
+
+    public static java.util.Collection getCRLs(java.security.cert.X509CRLSelector, boolean, java.security.PublicKey, java.security.cert.X509Certificate, java.lang.String, java.util.List, boolean[], java.util.Set, java.util.Date, java.lang.String, java.security.cert.TrustAnchor) throws java.security.cert.CertStoreException
+    {
+        java.security.cert.X509Certificate $r1, r20;
+        java.util.Date r24;
+        sun.security.x509.CRLDistributionPointsExtension $r4;
+        java.security.cert.X509CRLSelector r0;
+        boolean $z0, $z1, z2;
+        java.util.Collection $r27;
+        java.util.Set r23, $r29, $r37, $r39;
+        sun.security.x509.X509CertImpl $r2;
+        sun.security.util.Debug $r3, $r8, $r10, $r28, $r30, $r32;
+        java.lang.Exception $r38;
+        java.util.List $r5, r22;
+        java.lang.StringBuilder $r9, $r11, $r12, $r13, $r31, $r33, $r35;
+        java.security.cert.TrustAnchor r26;
+        javax.security.auth.x500.X500Principal $r34;
+        java.util.HashSet $r6;
+        int $i0;
+        java.lang.String $r14, r21, r25, $r36;
+        java.util.Iterator $r7;
+        sun.security.x509.DistributionPoint r18;
+        boolean[] r15, $r16;
+        java.security.PublicKey r19;
+        java.lang.Object $r17;
+
+        r0 := @parameter0: java.security.cert.X509CRLSelector;
+
+        z2 := @parameter1: boolean;
+
+        r19 := @parameter2: java.security.PublicKey;
+
+        r20 := @parameter3: java.security.cert.X509Certificate;
+
+        r21 := @parameter4: java.lang.String;
+
+        r22 := @parameter5: java.util.List;
+
+        r15 := @parameter6: boolean[];
+
+        r23 := @parameter7: java.util.Set;
+
+        r24 := @parameter8: java.util.Date;
+
+        r25 := @parameter9: java.lang.String;
+
+        r26 := @parameter10: java.security.cert.TrustAnchor;
+
+        $r1 = virtualinvoke r0.<java.security.cert.X509CRLSelector: java.security.cert.X509Certificate getCertificateChecking()>();
+
+        if $r1 != null goto label1;
+
+        $r37 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+        return $r37;
+
+     label1:
+        $r2 = staticinvoke <sun.security.x509.X509CertImpl: sun.security.x509.X509CertImpl toImpl(java.security.cert.X509Certificate)>($r1);
+
+        $r3 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        if $r3 == null goto label2;
+
+        $r32 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        $r31 = new java.lang.StringBuilder;
+
+        specialinvoke $r31.<java.lang.StringBuilder: void <init>()>();
+
+        $r33 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DistributionPointFetcher.getCRLs: Checking CRLDPs for ");
+
+        $r34 = virtualinvoke $r2.<sun.security.x509.X509CertImpl: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        $r35 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r34);
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r32.<sun.security.util.Debug: void println(java.lang.String)>($r36);
+
+     label2:
+        $r4 = virtualinvoke $r2.<sun.security.x509.X509CertImpl: sun.security.x509.CRLDistributionPointsExtension getCRLDistributionPointsExtension()>();
+
+        if $r4 != null goto label5;
+
+        $r28 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        if $r28 == null goto label3;
+
+        $r30 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        virtualinvoke $r30.<sun.security.util.Debug: void println(java.lang.String)>("No CRLDP ext");
+
+     label3:
+        $r29 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+     label4:
+        return $r29;
+
+     label5:
+        $r5 = virtualinvoke $r4.<sun.security.x509.CRLDistributionPointsExtension: java.util.List get(java.lang.String)>("points");
+
+        $r6 = new java.util.HashSet;
+
+        specialinvoke $r6.<java.util.HashSet: void <init>()>();
+
+        $r7 = interfaceinvoke $r5.<java.util.List: java.util.Iterator iterator()>();
+
+     label6:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label7;
+
+        $r16 = <sun.security.provider.certpath.DistributionPointFetcher: boolean[] ALL_REASONS>;
+
+        $z1 = staticinvoke <java.util.Arrays: boolean equals(boolean[],boolean[])>(r15, $r16);
+
+        if $z1 != 0 goto label7;
+
+        $r17 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r18 = (sun.security.x509.DistributionPoint) $r17;
+
+        $r27 = staticinvoke <sun.security.provider.certpath.DistributionPointFetcher: java.util.Collection getCRLs(java.security.cert.X509CRLSelector,sun.security.x509.X509CertImpl,sun.security.x509.DistributionPoint,boolean[],boolean,java.security.PublicKey,java.security.cert.X509Certificate,java.lang.String,java.util.List,java.util.Set,java.util.Date,java.lang.String,java.security.cert.TrustAnchor)>(r0, $r2, r18, r15, z2, r19, r20, r21, r22, r23, r24, r25, r26);
+
+        interfaceinvoke $r6.<java.util.Set: boolean addAll(java.util.Collection)>($r27);
+
+        goto label6;
+
+     label7:
+        $r8 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        if $r8 == null goto label8;
+
+        $r10 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Returning ");
+
+        $i0 = interfaceinvoke $r6.<java.util.Set: int size()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" CRLs");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r10.<sun.security.util.Debug: void println(java.lang.String)>($r14);
+
+     label8:
+        return $r6;
+
+     label9:
+        $r38 := @caughtexception;
+
+        $r39 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+        return $r39;
+
+        catch java.security.cert.CertificateException from label1 to label4 with label9;
+        catch java.io.IOException from label1 to label4 with label9;
+        catch java.security.cert.CertificateException from label5 to label8 with label9;
+        catch java.io.IOException from label5 to label8 with label9;
+    }
+
+    private static java.util.Collection getCRLs(java.security.cert.X509CRLSelector, sun.security.x509.X509CertImpl, sun.security.x509.DistributionPoint, boolean[], boolean, java.security.PublicKey, java.security.cert.X509Certificate, java.lang.String, java.util.List, java.util.Set, java.util.Date, java.lang.String, java.security.cert.TrustAnchor) throws java.security.cert.CertStoreException
+    {
+        java.security.cert.X509Certificate r11;
+        java.util.Date r15;
+        java.security.cert.X509CRL $r20, r49;
+        sun.security.x509.GeneralName $r26, r46;
+        sun.security.x509.X500Name $r28, $r31, r47;
+        sun.security.x509.URIName r48;
+        java.security.cert.X509CRLSelector r7;
+        sun.security.x509.RDN $r24;
+        boolean $z0, $z1, z2, $z3, $z4, $z5;
+        java.util.Collection $r23;
+        java.util.Set r13, $r29, $r32, $r43;
+        sun.security.x509.X509CertImpl r8;
+        sun.security.util.Debug $r34, $r36;
+        java.lang.Exception $r33;
+        java.security.cert.CertStoreException $r41, r45;
+        java.util.List r14;
+        java.security.Principal $r30;
+        sun.security.x509.GeneralNameInterface $r19, $r21, $r27;
+        java.lang.StringBuilder $r35, $r37, $r39;
+        java.security.cert.TrustAnchor r17;
+        javax.security.auth.x500.X500Principal $r22;
+        java.util.ArrayList $r2, $r4;
+        int $i0, $i1, $i2;
+        java.lang.String r12, r16, $r38, $r40;
+        java.util.Iterator $r3, $r5;
+        sun.security.x509.DistributionPoint r0;
+        boolean[] r9;
+        java.security.PublicKey r10;
+        java.io.IOException $r42;
+        java.lang.Object $r6, $r18;
+        sun.security.x509.GeneralNames $r1, $r25, r44;
+
+        r7 := @parameter0: java.security.cert.X509CRLSelector;
+
+        r8 := @parameter1: sun.security.x509.X509CertImpl;
+
+        r0 := @parameter2: sun.security.x509.DistributionPoint;
+
+        r9 := @parameter3: boolean[];
+
+        z2 := @parameter4: boolean;
+
+        r10 := @parameter5: java.security.PublicKey;
+
+        r11 := @parameter6: java.security.cert.X509Certificate;
+
+        r12 := @parameter7: java.lang.String;
+
+        r14 := @parameter8: java.util.List;
+
+        r13 := @parameter9: java.util.Set;
+
+        r15 := @parameter10: java.util.Date;
+
+        r16 := @parameter11: java.lang.String;
+
+        r17 := @parameter12: java.security.cert.TrustAnchor;
+
+        $r1 = virtualinvoke r0.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames getFullName()>();
+
+        r44 = $r1;
+
+        if $r1 != null goto label07;
+
+        $r24 = virtualinvoke r0.<sun.security.x509.DistributionPoint: sun.security.x509.RDN getRelativeName()>();
+
+        if $r24 != null goto label01;
+
+        $r32 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+        return $r32;
+
+     label01:
+        $r25 = virtualinvoke r0.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames getCRLIssuer()>();
+
+        if $r25 != null goto label02;
+
+        $r30 = virtualinvoke r8.<sun.security.x509.X509CertImpl: java.security.Principal getIssuerDN()>();
+
+        $r31 = (sun.security.x509.X500Name) $r30;
+
+        r44 = staticinvoke <sun.security.provider.certpath.DistributionPointFetcher: sun.security.x509.GeneralNames getFullNames(sun.security.x509.X500Name,sun.security.x509.RDN)>($r31, $r24);
+
+        goto label05;
+
+     label02:
+        $i2 = virtualinvoke $r25.<sun.security.x509.GeneralNames: int size()>();
+
+        if $i2 == 1 goto label04;
+
+        $r29 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+     label03:
+        return $r29;
+
+     label04:
+        $r26 = virtualinvoke $r25.<sun.security.x509.GeneralNames: sun.security.x509.GeneralName get(int)>(0);
+
+        $r27 = virtualinvoke $r26.<sun.security.x509.GeneralName: sun.security.x509.GeneralNameInterface getName()>();
+
+        $r28 = (sun.security.x509.X500Name) $r27;
+
+        r44 = staticinvoke <sun.security.provider.certpath.DistributionPointFetcher: sun.security.x509.GeneralNames getFullNames(sun.security.x509.X500Name,sun.security.x509.RDN)>($r28, $r24);
+
+     label05:
+        goto label07;
+
+     label06:
+        $r42 := @caughtexception;
+
+        $r43 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+        return $r43;
+
+     label07:
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        r45 = null;
+
+        $r3 = virtualinvoke r44.<sun.security.x509.GeneralNames: java.util.Iterator iterator()>();
+
+     label08:
+        $z4 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z4 == 0 goto label13;
+
+     label09:
+        $r18 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r46 = (sun.security.x509.GeneralName) $r18;
+
+        $i0 = virtualinvoke r46.<sun.security.x509.GeneralName: int getType()>();
+
+        if $i0 != 4 goto label10;
+
+        $r21 = virtualinvoke r46.<sun.security.x509.GeneralName: sun.security.x509.GeneralNameInterface getName()>();
+
+        r47 = (sun.security.x509.X500Name) $r21;
+
+        $r22 = virtualinvoke r8.<sun.security.x509.X509CertImpl: javax.security.auth.x500.X500Principal getIssuerX500Principal()>();
+
+        $r23 = staticinvoke <sun.security.provider.certpath.DistributionPointFetcher: java.util.Collection getCRLs(sun.security.x509.X500Name,javax.security.auth.x500.X500Principal,java.util.List)>(r47, $r22, r14);
+
+        interfaceinvoke $r2.<java.util.Collection: boolean addAll(java.util.Collection)>($r23);
+
+        goto label11;
+
+     label10:
+        $i1 = virtualinvoke r46.<sun.security.x509.GeneralName: int getType()>();
+
+        if $i1 != 6 goto label11;
+
+        $r19 = virtualinvoke r46.<sun.security.x509.GeneralName: sun.security.x509.GeneralNameInterface getName()>();
+
+        r48 = (sun.security.x509.URIName) $r19;
+
+        $r20 = staticinvoke <sun.security.provider.certpath.DistributionPointFetcher: java.security.cert.X509CRL getCRL(sun.security.x509.URIName)>(r48);
+
+        if $r20 == null goto label11;
+
+        interfaceinvoke $r2.<java.util.Collection: boolean add(java.lang.Object)>($r20);
+
+     label11:
+        goto label08;
+
+     label12:
+        $r41 := @caughtexception;
+
+        r45 = $r41;
+
+        goto label08;
+
+     label13:
+        $z0 = interfaceinvoke $r2.<java.util.Collection: boolean isEmpty()>();
+
+        if $z0 == 0 goto label14;
+
+        if r45 == null goto label14;
+
+        throw r45;
+
+     label14:
+        $r4 = new java.util.ArrayList;
+
+        specialinvoke $r4.<java.util.ArrayList: void <init>(int)>(2);
+
+        $r5 = interfaceinvoke $r2.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label15:
+        $z5 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z5 == 0 goto label20;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r49 = (java.security.cert.X509CRL) $r6;
+
+     label16:
+        virtualinvoke r7.<java.security.cert.X509CRLSelector: void setIssuerNames(java.util.Collection)>(null);
+
+        $z1 = virtualinvoke r7.<java.security.cert.X509CRLSelector: boolean match(java.security.cert.CRL)>(r49);
+
+        if $z1 == 0 goto label17;
+
+        $z3 = staticinvoke <sun.security.provider.certpath.DistributionPointFetcher: boolean verifyCRL(sun.security.x509.X509CertImpl,sun.security.x509.DistributionPoint,java.security.cert.X509CRL,boolean[],boolean,java.security.PublicKey,java.security.cert.X509Certificate,java.lang.String,java.util.Set,java.util.List,java.util.Date,java.lang.String,java.security.cert.TrustAnchor)>(r8, r0, r49, r9, z2, r10, r11, r12, r13, r14, r15, r16, r17);
+
+        if $z3 == 0 goto label17;
+
+        interfaceinvoke $r4.<java.util.Collection: boolean add(java.lang.Object)>(r49);
+
+     label17:
+        goto label19;
+
+     label18:
+        $r33 := @caughtexception;
+
+        $r34 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        if $r34 == null goto label19;
+
+        $r36 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        $r35 = new java.lang.StringBuilder;
+
+        specialinvoke $r35.<java.lang.StringBuilder: void <init>()>();
+
+        $r37 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception verifying CRL: ");
+
+        $r38 = virtualinvoke $r33.<java.lang.Exception: java.lang.String getMessage()>();
+
+        $r39 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r38);
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r36.<sun.security.util.Debug: void println(java.lang.String)>($r40);
+
+        virtualinvoke $r33.<java.lang.Exception: void printStackTrace()>();
+
+     label19:
+        goto label15;
+
+     label20:
+        return $r4;
+
+        catch java.io.IOException from label01 to label03 with label06;
+        catch java.io.IOException from label04 to label05 with label06;
+        catch java.security.cert.CertStoreException from label09 to label11 with label12;
+        catch java.io.IOException from label16 to label17 with label18;
+        catch java.security.cert.CRLException from label16 to label17 with label18;
+    }
+
+    private static java.security.cert.X509CRL getCRL(sun.security.x509.URIName) throws java.security.cert.CertStoreException
+    {
+        java.security.cert.X509CRL $r8;
+        java.security.GeneralSecurityException $r14;
+        sun.security.x509.URIName r0;
+        sun.security.provider.certpath.URICertStore$URICertStoreParameters $r3;
+        java.net.URI $r1;
+        java.lang.String $r13, $r19, $r21;
+        boolean $z0;
+        java.util.Iterator $r6;
+        java.util.Collection $r5;
+        sun.security.util.Debug $r2, $r10, $r15, $r17;
+        java.security.cert.CertStore $r4;
+        java.lang.Object $r7;
+        java.lang.StringBuilder $r9, $r11, $r12, $r16, $r18, $r20;
+
+        r0 := @parameter0: sun.security.x509.URIName;
+
+        $r1 = virtualinvoke r0.<sun.security.x509.URIName: java.net.URI getURI()>();
+
+        $r2 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        if $r2 == null goto label1;
+
+        $r10 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Trying to fetch CRL from DP ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r10.<sun.security.util.Debug: void println(java.lang.String)>($r13);
+
+     label1:
+        $r3 = new sun.security.provider.certpath.URICertStore$URICertStoreParameters;
+
+        specialinvoke $r3.<sun.security.provider.certpath.URICertStore$URICertStoreParameters: void <init>(java.net.URI)>($r1);
+
+        $r4 = staticinvoke <sun.security.provider.certpath.URICertStore: java.security.cert.CertStore getInstance(sun.security.provider.certpath.URICertStore$URICertStoreParameters)>($r3);
+
+     label2:
+        goto label5;
+
+     label3:
+        $r14 := @caughtexception;
+
+        $r15 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        if $r15 == null goto label4;
+
+        $r17 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Can\'t create URICertStore: ");
+
+        $r19 = virtualinvoke $r14.<java.security.GeneralSecurityException: java.lang.String getMessage()>();
+
+        $r20 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r17.<sun.security.util.Debug: void println(java.lang.String)>($r21);
+
+     label4:
+        return null;
+
+     label5:
+        $r5 = virtualinvoke $r4.<java.security.cert.CertStore: java.util.Collection getCRLs(java.security.cert.CRLSelector)>(null);
+
+        $z0 = interfaceinvoke $r5.<java.util.Collection: boolean isEmpty()>();
+
+        if $z0 == 0 goto label6;
+
+        return null;
+
+     label6:
+        $r6 = interfaceinvoke $r5.<java.util.Collection: java.util.Iterator iterator()>();
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        $r8 = (java.security.cert.X509CRL) $r7;
+
+        return $r8;
+
+        catch java.security.InvalidAlgorithmParameterException from label1 to label2 with label3;
+        catch java.security.NoSuchAlgorithmException from label1 to label2 with label3;
+    }
+
+    private static java.util.Collection getCRLs(sun.security.x509.X500Name, javax.security.auth.x500.X500Principal, java.util.List) throws java.security.cert.CertStoreException
+    {
+        java.security.cert.X509CRL $r14;
+        sun.security.x509.X500Name r2;
+        java.security.cert.X509CRLSelector $r1;
+        java.security.cert.CRL r13;
+        boolean $z0, $z1, $z2;
+        java.util.Collection $r10;
+        sun.security.util.Debug $r0, $r16, $r21, $r25;
+        java.security.cert.CertStoreException $r20;
+        sun.security.provider.certpath.PKIX$CertStoreTypeException $r22, r29;
+        java.util.List r6;
+        java.lang.StringBuilder $r15, $r17, $r18, $r24, $r26, $r27;
+        javax.security.auth.x500.X500Principal $r3, r4;
+        java.util.ArrayList $r5;
+        java.lang.String $r19, $r23, $r28;
+        java.util.Iterator $r7, $r11;
+        java.security.cert.CertStore r9;
+        java.lang.Object $r8, $r12;
+
+        r2 := @parameter0: sun.security.x509.X500Name;
+
+        r4 := @parameter1: javax.security.auth.x500.X500Principal;
+
+        r6 := @parameter2: java.util.List;
+
+        $r0 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        if $r0 == null goto label01;
+
+        $r16 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Trying to fetch CRL from DP ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r16.<sun.security.util.Debug: void println(java.lang.String)>($r19);
+
+     label01:
+        $r1 = new java.security.cert.X509CRLSelector;
+
+        specialinvoke $r1.<java.security.cert.X509CRLSelector: void <init>()>();
+
+        $r3 = virtualinvoke r2.<sun.security.x509.X500Name: javax.security.auth.x500.X500Principal asX500Principal()>();
+
+        virtualinvoke $r1.<java.security.cert.X509CRLSelector: void addIssuer(javax.security.auth.x500.X500Principal)>($r3);
+
+        virtualinvoke $r1.<java.security.cert.X509CRLSelector: void addIssuer(javax.security.auth.x500.X500Principal)>(r4);
+
+        $r5 = new java.util.ArrayList;
+
+        specialinvoke $r5.<java.util.ArrayList: void <init>()>();
+
+        r29 = null;
+
+        $r7 = interfaceinvoke r6.<java.util.List: java.util.Iterator iterator()>();
+
+     label02:
+        $z2 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label09;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (java.security.cert.CertStore) $r8;
+
+     label03:
+        $r10 = virtualinvoke r9.<java.security.cert.CertStore: java.util.Collection getCRLs(java.security.cert.CRLSelector)>($r1);
+
+        $r11 = interfaceinvoke $r10.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label04:
+        $z1 = interfaceinvoke $r11.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label05;
+
+        $r12 = interfaceinvoke $r11.<java.util.Iterator: java.lang.Object next()>();
+
+        r13 = (java.security.cert.CRL) $r12;
+
+        $r14 = (java.security.cert.X509CRL) r13;
+
+        interfaceinvoke $r5.<java.util.Collection: boolean add(java.lang.Object)>($r14);
+
+        goto label04;
+
+     label05:
+        goto label08;
+
+     label06:
+        $r20 := @caughtexception;
+
+        $r21 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        if $r21 == null goto label07;
+
+        $r25 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception while retrieving CRLs: ");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r20);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r25.<sun.security.util.Debug: void println(java.lang.String)>($r28);
+
+        virtualinvoke $r20.<java.security.cert.CertStoreException: void printStackTrace()>();
+
+     label07:
+        $r22 = new sun.security.provider.certpath.PKIX$CertStoreTypeException;
+
+        $r23 = virtualinvoke r9.<java.security.cert.CertStore: java.lang.String getType()>();
+
+        specialinvoke $r22.<sun.security.provider.certpath.PKIX$CertStoreTypeException: void <init>(java.lang.String,java.security.cert.CertStoreException)>($r23, $r20);
+
+        r29 = $r22;
+
+     label08:
+        goto label02;
+
+     label09:
+        $z0 = interfaceinvoke $r5.<java.util.Collection: boolean isEmpty()>();
+
+        if $z0 == 0 goto label10;
+
+        if r29 == null goto label10;
+
+        throw r29;
+
+     label10:
+        return $r5;
+
+        catch java.security.cert.CertStoreException from label03 to label05 with label06;
+    }
+
+    static boolean verifyCRL(sun.security.x509.X509CertImpl, sun.security.x509.DistributionPoint, java.security.cert.X509CRL, boolean[], boolean, java.security.PublicKey, java.security.cert.X509Certificate, java.lang.String, java.util.Set, java.util.List, java.util.Date, java.lang.String, java.security.cert.TrustAnchor) throws java.security.cert.CRLException, java.io.IOException
+    {
+        byte[] $r42;
+        java.security.GeneralSecurityException $r147, $r157;
+        sun.security.x509.X500Name $r145, $r146, r162;
+        java.math.BigInteger $r44, $r135;
+        sun.security.x509.GeneralNameInterface $r71, $r76, $r103, $r107, $r131;
+        java.lang.StringBuilder $r22, $r23, $r80, $r81, $r85, $r86, $r94, $r95, $r112, $r113, $r120, $r121, $r122, $r123, $r134, $r137, $r138, $r140, $r141, $r143, $r154, $r155, $r177, $r178, $r179, $r180, $r181, $r182, $r190, $r191;
+        java.security.cert.TrustAnchor r14, r174, $r185, $r186;
+        sun.security.x509.AuthorityKeyIdentifierExtension $r31;
+        sun.security.x509.DistributionPoint r7;
+        boolean[] $r12, r16, $r30, $r47, $r49, $r56, r171;
+        java.security.cert.X509Certificate r38;
+        java.util.Date r34;
+        sun.security.x509.GeneralName $r70, $r75, $r102, $r106, $r130;
+        java.security.cert.CertPathValidatorException $r150;
+        sun.security.x509.RDN $r88, $r99, $r108;
+        sun.security.x509.X509CRLImpl $r2;
+        java.security.cert.X509CertSelector $r183;
+        javax.security.auth.x500.X500Principal $r29, $r39, $r139, $r142;
+        java.util.HashSet $r184;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, i8, $i9, i10, $i11, i12, $i13, $i14, $i16, $i18;
+        java.lang.Boolean $r53, $r55, $r59, $r62, $r126, $r127, $r169, $r170;
+        java.security.PublicKey r161;
+        java.security.cert.PKIXCertPathBuilderResult r37;
+        java.lang.Object $r26, $r43, $r46, $r48, $r50, $r51, $r52, $r54, $r69, $r74, $r101, $r105, $r125, $r129, $r168;
+        java.security.cert.X509CRL r1;
+        java.security.cert.CertPathBuilder $r35;
+        sun.security.util.ObjectIdentifier $r17;
+        sun.security.x509.DistributionPointName r163;
+        java.util.Set $r15, r32;
+        java.security.cert.CertPathBuilderResult $r36;
+        sun.security.util.Debug $r0, $r19, $r21, $r27, $r57, $r58, $r60, $r61, $r63, $r64, $r67, $r68, $r72, $r77, $r79, $r84, $r89, $r90, $r91, $r93, $r97, $r98, $r109, $r111, $r115, $r116, $r117, $r119, $r133, $r148, $r149, $r151, $r153;
+        java.security.cert.PKIXBuilderParameters $r187;
+        sun.security.x509.IssuingDistributionPointExtension $r3;
+        java.security.InvalidAlgorithmParameterException $r159;
+        java.lang.String r11, r13, $r18, $r24, $r82, $r87, $r96, $r114, $r124, $r136, $r144, $r156, r176;
+        sun.security.x509.KeyIdentifier $r9, $r10;
+        sun.security.x509.GeneralNames $r8, $r65, $r66, r164, $r165, r166;
+        sun.security.x509.ReasonFlags r172;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, z16, $z17, $z18, $z19, $z20, $z21, $z22, z23, z24, z25, z26, $z27, $z28, z29, $z30, z31, z32, z33, z34, z35, z36, z37;
+        sun.security.x509.X509CertImpl r4;
+        java.util.List r33;
+        java.security.Principal $r5, $r6;
+        java.security.cert.CRLException $r188, $r189;
+        java.util.Iterator $r25, $r73, $r100, $r104, $r128, $r167;
+        sun.security.x509.SerialNumber $r45;
+
+        r4 := @parameter0: sun.security.x509.X509CertImpl;
+
+        r7 := @parameter1: sun.security.x509.DistributionPoint;
+
+        r1 := @parameter2: java.security.cert.X509CRL;
+
+        r16 := @parameter3: boolean[];
+
+        z16 := @parameter4: boolean;
+
+        r161 := @parameter5: java.security.PublicKey;
+
+        r38 := @parameter6: java.security.cert.X509Certificate;
+
+        r11 := @parameter7: java.lang.String;
+
+        r32 := @parameter8: java.util.Set;
+
+        r33 := @parameter9: java.util.List;
+
+        r34 := @parameter10: java.util.Date;
+
+        r13 := @parameter11: java.lang.String;
+
+        r14 := @parameter12: java.security.cert.TrustAnchor;
+
+        $r0 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        if $r0 == null goto label01;
+
+        $r133 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        $r177 = new java.lang.StringBuilder;
+
+        specialinvoke $r177.<java.lang.StringBuilder: void <init>()>();
+
+        $r134 = virtualinvoke $r177.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DistributionPointFetcher.verifyCRL: checking revocation status for\n  SN: ");
+
+        $r135 = virtualinvoke r4.<sun.security.x509.X509CertImpl: java.math.BigInteger getSerialNumber()>();
+
+        $r136 = staticinvoke <sun.security.util.Debug: java.lang.String toHexString(java.math.BigInteger)>($r135);
+
+        $r137 = virtualinvoke $r134.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r136);
+
+        $r138 = virtualinvoke $r137.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n  Subject: ");
+
+        $r139 = virtualinvoke r4.<sun.security.x509.X509CertImpl: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        $r140 = virtualinvoke $r138.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r139);
+
+        $r141 = virtualinvoke $r140.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n  Issuer: ");
+
+        $r142 = virtualinvoke r4.<sun.security.x509.X509CertImpl: javax.security.auth.x500.X500Principal getIssuerX500Principal()>();
+
+        $r143 = virtualinvoke $r141.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r142);
+
+        $r144 = virtualinvoke $r143.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r133.<sun.security.util.Debug: void println(java.lang.String)>($r144);
+
+     label01:
+        z23 = 0;
+
+        z33 = 0;
+
+        z32 = 0;
+
+        z31 = 0;
+
+        $r2 = staticinvoke <sun.security.x509.X509CRLImpl: sun.security.x509.X509CRLImpl toImpl(java.security.cert.X509CRL)>(r1);
+
+        $r3 = virtualinvoke $r2.<sun.security.x509.X509CRLImpl: sun.security.x509.IssuingDistributionPointExtension getIssuingDistributionPointExtension()>();
+
+        $r5 = virtualinvoke r4.<sun.security.x509.X509CertImpl: java.security.Principal getIssuerDN()>();
+
+        $r145 = (sun.security.x509.X500Name) $r5;
+
+        $r6 = virtualinvoke $r2.<sun.security.x509.X509CRLImpl: java.security.Principal getIssuerDN()>();
+
+        $r146 = (sun.security.x509.X500Name) $r6;
+
+        $r8 = virtualinvoke r7.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames getCRLIssuer()>();
+
+        r162 = null;
+
+        if $r8 == null goto label10;
+
+        if $r3 == null goto label02;
+
+        $r125 = virtualinvoke $r3.<sun.security.x509.IssuingDistributionPointExtension: java.lang.Object get(java.lang.String)>("indirect_crl");
+
+        $r127 = (java.lang.Boolean) $r125;
+
+        $r126 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        $z19 = virtualinvoke $r127.<java.lang.Boolean: boolean equals(java.lang.Object)>($r126);
+
+        if $z19 == 0 goto label03;
+
+     label02:
+        return 0;
+
+     label03:
+        z24 = 0;
+
+        z37 = 0;
+
+        z36 = 0;
+
+        $r128 = virtualinvoke $r8.<sun.security.x509.GeneralNames: java.util.Iterator iterator()>();
+
+     label04:
+        if z37 != 0 goto label06;
+
+        $z21 = interfaceinvoke $r128.<java.util.Iterator: boolean hasNext()>();
+
+        if $z21 == 0 goto label06;
+
+        $r129 = interfaceinvoke $r128.<java.util.Iterator: java.lang.Object next()>();
+
+        $r130 = (sun.security.x509.GeneralName) $r129;
+
+        $r131 = virtualinvoke $r130.<sun.security.x509.GeneralName: sun.security.x509.GeneralNameInterface getName()>();
+
+        $z22 = virtualinvoke $r146.<sun.security.x509.X500Name: boolean equals(java.lang.Object)>($r131);
+
+        if $z22 != 1 goto label05;
+
+        r162 = (sun.security.x509.X500Name) $r131;
+
+        z24 = 1;
+
+        z37 = 1;
+
+        z36 = 1;
+
+     label05:
+        goto label04;
+
+     label06:
+        if z36 != 0 goto label07;
+
+        return 0;
+
+     label07:
+        $z20 = staticinvoke <sun.security.provider.certpath.DistributionPointFetcher: boolean issues(sun.security.x509.X509CertImpl,sun.security.x509.X509CRLImpl,java.lang.String)>(r4, $r2, r11);
+
+        if $z20 == 0 goto label08;
+
+        r161 = virtualinvoke r4.<sun.security.x509.X509CertImpl: java.security.PublicKey getPublicKey()>();
+
+        goto label09;
+
+     label08:
+        z23 = 1;
+
+        z33 = 1;
+
+        z32 = 1;
+
+        z31 = 1;
+
+     label09:
+        goto label16;
+
+     label10:
+        $z0 = virtualinvoke $r146.<sun.security.x509.X500Name: boolean equals(java.lang.Object)>($r145);
+
+        if $z0 != 0 goto label12;
+
+        $r117 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        if $r117 == null goto label11;
+
+        $r119 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        $r178 = new java.lang.StringBuilder;
+
+        specialinvoke $r178.<java.lang.StringBuilder: void <init>()>();
+
+        $r120 = virtualinvoke $r178.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("crl issuer does not equal cert issuer.\ncrl issuer: ");
+
+        $r121 = virtualinvoke $r120.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r146);
+
+        $r122 = virtualinvoke $r121.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\ncert issuer: ");
+
+        $r123 = virtualinvoke $r122.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r145);
+
+        $r124 = virtualinvoke $r123.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r119.<sun.security.util.Debug: void println(java.lang.String)>($r124);
+
+     label11:
+        return 0;
+
+     label12:
+        $r9 = virtualinvoke r4.<sun.security.x509.X509CertImpl: sun.security.x509.KeyIdentifier getAuthKeyId()>();
+
+        $r10 = virtualinvoke $r2.<sun.security.x509.X509CRLImpl: sun.security.x509.KeyIdentifier getAuthKeyId()>();
+
+        if $r9 == null goto label13;
+
+        if $r10 != null goto label14;
+
+     label13:
+        $z1 = staticinvoke <sun.security.provider.certpath.DistributionPointFetcher: boolean issues(sun.security.x509.X509CertImpl,sun.security.x509.X509CRLImpl,java.lang.String)>(r4, $r2, r11);
+
+        if $z1 == 0 goto label16;
+
+        r161 = virtualinvoke r4.<sun.security.x509.X509CertImpl: java.security.PublicKey getPublicKey()>();
+
+        goto label16;
+
+     label14:
+        $z17 = virtualinvoke $r9.<sun.security.x509.KeyIdentifier: boolean equals(java.lang.Object)>($r10);
+
+        if $z17 != 0 goto label16;
+
+        $z18 = staticinvoke <sun.security.provider.certpath.DistributionPointFetcher: boolean issues(sun.security.x509.X509CertImpl,sun.security.x509.X509CRLImpl,java.lang.String)>(r4, $r2, r11);
+
+        if $z18 == 0 goto label15;
+
+        r161 = virtualinvoke r4.<sun.security.x509.X509CertImpl: java.security.PublicKey getPublicKey()>();
+
+        goto label16;
+
+     label15:
+        z23 = 1;
+
+        z33 = 1;
+
+        z32 = 1;
+
+        z31 = 1;
+
+     label16:
+        if z31 != 0 goto label17;
+
+        if z16 != 0 goto label17;
+
+        return 0;
+
+     label17:
+        if $r3 == null goto label49;
+
+        $r51 = virtualinvoke $r3.<sun.security.x509.IssuingDistributionPointExtension: java.lang.Object get(java.lang.String)>("point");
+
+        r163 = (sun.security.x509.DistributionPointName) $r51;
+
+        if r163 == null goto label43;
+
+        $r65 = virtualinvoke r163.<sun.security.x509.DistributionPointName: sun.security.x509.GeneralNames getFullName()>();
+
+        r164 = $r65;
+
+        if $r65 != null goto label21;
+
+        $r108 = virtualinvoke r163.<sun.security.x509.DistributionPointName: sun.security.x509.RDN getRelativeName()>();
+
+        if $r108 != null goto label19;
+
+        $r115 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        if $r115 == null goto label18;
+
+        $r116 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        virtualinvoke $r116.<sun.security.util.Debug: void println(java.lang.String)>("IDP must be relative or full DN");
+
+     label18:
+        return 0;
+
+     label19:
+        $r109 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        if $r109 == null goto label20;
+
+        $r111 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        $r179 = new java.lang.StringBuilder;
+
+        specialinvoke $r179.<java.lang.StringBuilder: void <init>()>();
+
+        $r112 = virtualinvoke $r179.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("IDP relativeName:");
+
+        $r113 = virtualinvoke $r112.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r108);
+
+        $r114 = virtualinvoke $r113.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r111.<sun.security.util.Debug: void println(java.lang.String)>($r114);
+
+     label20:
+        r164 = staticinvoke <sun.security.provider.certpath.DistributionPointFetcher: sun.security.x509.GeneralNames getFullNames(sun.security.x509.X500Name,sun.security.x509.RDN)>($r146, $r108);
+
+     label21:
+        $r165 = virtualinvoke r7.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames getFullName()>();
+
+        if $r165 != null goto label22;
+
+        $r99 = virtualinvoke r7.<sun.security.x509.DistributionPoint: sun.security.x509.RDN getRelativeName()>();
+
+        if $r99 == null goto label38;
+
+     label22:
+        $r66 = virtualinvoke r7.<sun.security.x509.DistributionPoint: sun.security.x509.GeneralNames getFullName()>();
+
+        r166 = $r66;
+
+        if $r66 != null goto label29;
+
+        $r88 = virtualinvoke r7.<sun.security.x509.DistributionPoint: sun.security.x509.RDN getRelativeName()>();
+
+        if $r88 != null goto label24;
+
+        $r97 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        if $r97 == null goto label23;
+
+        $r98 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        virtualinvoke $r98.<sun.security.util.Debug: void println(java.lang.String)>("DP must be relative or full DN");
+
+     label23:
+        return 0;
+
+     label24:
+        $r89 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        if $r89 == null goto label25;
+
+        $r93 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        $r180 = new java.lang.StringBuilder;
+
+        specialinvoke $r180.<java.lang.StringBuilder: void <init>()>();
+
+        $r94 = virtualinvoke $r180.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DP relativeName:");
+
+        $r95 = virtualinvoke $r94.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r88);
+
+        $r96 = virtualinvoke $r95.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r93.<sun.security.util.Debug: void println(java.lang.String)>($r96);
+
+     label25:
+        if z32 == 0 goto label28;
+
+        $i7 = virtualinvoke $r8.<sun.security.x509.GeneralNames: int size()>();
+
+        if $i7 == 1 goto label27;
+
+        $r90 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        if $r90 == null goto label26;
+
+        $r91 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        virtualinvoke $r91.<sun.security.util.Debug: void println(java.lang.String)>("must only be one CRL issuer when relative name present");
+
+     label26:
+        return 0;
+
+     label27:
+        r166 = staticinvoke <sun.security.provider.certpath.DistributionPointFetcher: sun.security.x509.GeneralNames getFullNames(sun.security.x509.X500Name,sun.security.x509.RDN)>(r162, $r88);
+
+        goto label29;
+
+     label28:
+        r166 = staticinvoke <sun.security.provider.certpath.DistributionPointFetcher: sun.security.x509.GeneralNames getFullNames(sun.security.x509.X500Name,sun.security.x509.RDN)>($r145, $r88);
+
+     label29:
+        z25 = 0;
+
+        $r167 = virtualinvoke r164.<sun.security.x509.GeneralNames: java.util.Iterator iterator()>();
+
+     label30:
+        if z25 != 0 goto label35;
+
+        $z12 = interfaceinvoke $r167.<java.util.Iterator: boolean hasNext()>();
+
+        if $z12 == 0 goto label35;
+
+        $r69 = interfaceinvoke $r167.<java.util.Iterator: java.lang.Object next()>();
+
+        $r70 = (sun.security.x509.GeneralName) $r69;
+
+        $r71 = virtualinvoke $r70.<sun.security.x509.GeneralName: sun.security.x509.GeneralNameInterface getName()>();
+
+        $r72 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        if $r72 == null goto label31;
+
+        $r84 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        $r181 = new java.lang.StringBuilder;
+
+        specialinvoke $r181.<java.lang.StringBuilder: void <init>()>();
+
+        $r85 = virtualinvoke $r181.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("idpName: ");
+
+        $r86 = virtualinvoke $r85.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r71);
+
+        $r87 = virtualinvoke $r86.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r84.<sun.security.util.Debug: void println(java.lang.String)>($r87);
+
+     label31:
+        $r73 = virtualinvoke r166.<sun.security.x509.GeneralNames: java.util.Iterator iterator()>();
+
+     label32:
+        if z25 != 0 goto label34;
+
+        $z13 = interfaceinvoke $r73.<java.util.Iterator: boolean hasNext()>();
+
+        if $z13 == 0 goto label34;
+
+        $r74 = interfaceinvoke $r73.<java.util.Iterator: java.lang.Object next()>();
+
+        $r75 = (sun.security.x509.GeneralName) $r74;
+
+        $r76 = virtualinvoke $r75.<sun.security.x509.GeneralName: sun.security.x509.GeneralNameInterface getName()>();
+
+        $r77 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        if $r77 == null goto label33;
+
+        $r79 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        $r182 = new java.lang.StringBuilder;
+
+        specialinvoke $r182.<java.lang.StringBuilder: void <init>()>();
+
+        $r80 = virtualinvoke $r182.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("pointName: ");
+
+        $r81 = virtualinvoke $r80.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r76);
+
+        $r82 = virtualinvoke $r81.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r79.<sun.security.util.Debug: void println(java.lang.String)>($r82);
+
+     label33:
+        z25 = virtualinvoke $r71.<java.lang.Object: boolean equals(java.lang.Object)>($r76);
+
+        goto label32;
+
+     label34:
+        goto label30;
+
+     label35:
+        if z25 != 0 goto label37;
+
+        $r67 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        if $r67 == null goto label36;
+
+        $r68 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        virtualinvoke $r68.<sun.security.util.Debug: void println(java.lang.String)>("IDP name does not match DP name");
+
+     label36:
+        return 0;
+
+     label37:
+        goto label43;
+
+     label38:
+        z26 = 0;
+
+        $r100 = virtualinvoke $r8.<sun.security.x509.GeneralNames: java.util.Iterator iterator()>();
+
+     label39:
+        if z26 != 0 goto label42;
+
+        $z14 = interfaceinvoke $r100.<java.util.Iterator: boolean hasNext()>();
+
+        if $z14 == 0 goto label42;
+
+        $r101 = interfaceinvoke $r100.<java.util.Iterator: java.lang.Object next()>();
+
+        $r102 = (sun.security.x509.GeneralName) $r101;
+
+        $r103 = virtualinvoke $r102.<sun.security.x509.GeneralName: sun.security.x509.GeneralNameInterface getName()>();
+
+        $r104 = virtualinvoke r164.<sun.security.x509.GeneralNames: java.util.Iterator iterator()>();
+
+     label40:
+        if z26 != 0 goto label41;
+
+        $z15 = interfaceinvoke $r104.<java.util.Iterator: boolean hasNext()>();
+
+        if $z15 == 0 goto label41;
+
+        $r105 = interfaceinvoke $r104.<java.util.Iterator: java.lang.Object next()>();
+
+        $r106 = (sun.security.x509.GeneralName) $r105;
+
+        $r107 = virtualinvoke $r106.<sun.security.x509.GeneralName: sun.security.x509.GeneralNameInterface getName()>();
+
+        z26 = virtualinvoke $r103.<java.lang.Object: boolean equals(java.lang.Object)>($r107);
+
+        goto label40;
+
+     label41:
+        goto label39;
+
+     label42:
+        if z26 != 0 goto label43;
+
+        return 0;
+
+     label43:
+        $r168 = virtualinvoke $r3.<sun.security.x509.IssuingDistributionPointExtension: java.lang.Object get(java.lang.String)>("only_user_certs");
+
+        $r169 = (java.lang.Boolean) $r168;
+
+        $r170 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $z27 = virtualinvoke $r169.<java.lang.Boolean: boolean equals(java.lang.Object)>($r170);
+
+        if $z27 == 0 goto label45;
+
+        $i6 = virtualinvoke r4.<sun.security.x509.X509CertImpl: int getBasicConstraints()>();
+
+        $i16 = (int) -1;
+
+        if $i6 == $i16 goto label45;
+
+        $r63 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        if $r63 == null goto label44;
+
+        $r64 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        virtualinvoke $r64.<sun.security.util.Debug: void println(java.lang.String)>("cert must be a EE cert");
+
+     label44:
+        return 0;
+
+     label45:
+        $r52 = virtualinvoke $r3.<sun.security.x509.IssuingDistributionPointExtension: java.lang.Object get(java.lang.String)>("only_ca_certs");
+
+        $r62 = (java.lang.Boolean) $r52;
+
+        $r53 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $z10 = virtualinvoke $r62.<java.lang.Boolean: boolean equals(java.lang.Object)>($r53);
+
+        if $z10 == 0 goto label47;
+
+        $i5 = virtualinvoke r4.<sun.security.x509.X509CertImpl: int getBasicConstraints()>();
+
+        $i18 = (int) -1;
+
+        if $i5 != $i18 goto label47;
+
+        $r60 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        if $r60 == null goto label46;
+
+        $r61 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        virtualinvoke $r61.<sun.security.util.Debug: void println(java.lang.String)>("cert must be a CA cert");
+
+     label46:
+        return 0;
+
+     label47:
+        $r54 = virtualinvoke $r3.<sun.security.x509.IssuingDistributionPointExtension: java.lang.Object get(java.lang.String)>("only_attribute_certs");
+
+        $r59 = (java.lang.Boolean) $r54;
+
+        $r55 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        $z11 = virtualinvoke $r59.<java.lang.Boolean: boolean equals(java.lang.Object)>($r55);
+
+        if $z11 == 0 goto label49;
+
+        $r57 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        if $r57 == null goto label48;
+
+        $r58 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        virtualinvoke $r58.<sun.security.util.Debug: void println(java.lang.String)>("cert must not be an AA cert");
+
+     label48:
+        return 0;
+
+     label49:
+        $r56 = newarray (boolean)[9];
+
+        r171 = $r56;
+
+        r172 = null;
+
+        if $r3 == null goto label50;
+
+        $r50 = virtualinvoke $r3.<sun.security.x509.IssuingDistributionPointExtension: java.lang.Object get(java.lang.String)>("reasons");
+
+        r172 = (sun.security.x509.ReasonFlags) $r50;
+
+     label50:
+        $r12 = virtualinvoke r7.<sun.security.x509.DistributionPoint: boolean[] getReasonFlags()>();
+
+        if r172 == null goto label56;
+
+        if $r12 == null goto label55;
+
+        $r49 = virtualinvoke r172.<sun.security.x509.ReasonFlags: boolean[] getFlags()>();
+
+        i8 = 0;
+
+     label51:
+        $i2 = lengthof $r56;
+
+        if i8 >= $i2 goto label54;
+
+        $i9 = i8;
+
+        $i3 = lengthof $r49;
+
+        if i8 >= $i3 goto label52;
+
+        $z8 = $r49[i8];
+
+        if $z8 == 0 goto label52;
+
+        $i4 = lengthof $r12;
+
+        if i8 >= $i4 goto label52;
+
+        $z9 = $r12[i8];
+
+        if $z9 == 0 goto label52;
+
+        $z28 = 1;
+
+        goto label53;
+
+     label52:
+        $z28 = 0;
+
+     label53:
+        $r56[$i9] = $z28;
+
+        i8 = i8 + 1;
+
+        goto label51;
+
+     label54:
+        goto label59;
+
+     label55:
+        $r47 = virtualinvoke r172.<sun.security.x509.ReasonFlags: boolean[] getFlags()>();
+
+        $r48 = virtualinvoke $r47.<java.lang.Object: java.lang.Object clone()>();
+
+        r171 = (boolean[]) $r48;
+
+        goto label59;
+
+     label56:
+        if $r3 == null goto label57;
+
+        if r172 != null goto label59;
+
+     label57:
+        if $r12 == null goto label58;
+
+        $r46 = virtualinvoke $r12.<java.lang.Object: java.lang.Object clone()>();
+
+        r171 = (boolean[]) $r46;
+
+        goto label59;
+
+     label58:
+        staticinvoke <java.util.Arrays: void fill(boolean[],boolean)>($r56, 1);
+
+     label59:
+        z29 = 0;
+
+        z35 = 0;
+
+        z34 = 0;
+
+        i10 = 0;
+
+     label60:
+        $i11 = lengthof r171;
+
+        if i10 >= $i11 goto label63;
+
+        if z34 != 0 goto label63;
+
+        $z6 = r171[i10];
+
+        if $z6 == 0 goto label62;
+
+        $i1 = lengthof r16;
+
+        if i10 >= $i1 goto label61;
+
+        $z7 = r16[i10];
+
+        if $z7 != 0 goto label62;
+
+     label61:
+        z29 = 1;
+
+        z35 = 1;
+
+        z34 = 1;
+
+     label62:
+        i10 = i10 + 1;
+
+        goto label60;
+
+     label63:
+        if z35 != 0 goto label64;
+
+        return 0;
+
+     label64:
+        if z33 == 0 goto label76;
+
+        $r183 = new java.security.cert.X509CertSelector;
+
+        specialinvoke $r183.<java.security.cert.X509CertSelector: void <init>()>();
+
+        $r29 = virtualinvoke $r146.<sun.security.x509.X500Name: javax.security.auth.x500.X500Principal asX500Principal()>();
+
+        virtualinvoke $r183.<java.security.cert.X509CertSelector: void setSubject(javax.security.auth.x500.X500Principal)>($r29);
+
+        $r30 = newarray (boolean)[7];
+
+        $r30[0] = 0;
+
+        $r30[1] = 0;
+
+        $r30[2] = 0;
+
+        $r30[3] = 0;
+
+        $r30[4] = 0;
+
+        $r30[5] = 0;
+
+        $r30[6] = 1;
+
+        virtualinvoke $r183.<java.security.cert.X509CertSelector: void setKeyUsage(boolean[])>($r30);
+
+        $r31 = virtualinvoke $r2.<sun.security.x509.X509CRLImpl: sun.security.x509.AuthorityKeyIdentifierExtension getAuthKeyIdExtension()>();
+
+        if $r31 == null goto label66;
+
+        $r42 = virtualinvoke $r31.<sun.security.x509.AuthorityKeyIdentifierExtension: byte[] getEncodedKeyIdentifier()>();
+
+        if $r42 == null goto label65;
+
+        virtualinvoke $r183.<java.security.cert.X509CertSelector: void setSubjectKeyIdentifier(byte[])>($r42);
+
+     label65:
+        $r43 = virtualinvoke $r31.<sun.security.x509.AuthorityKeyIdentifierExtension: java.lang.Object get(java.lang.String)>("serial_number");
+
+        $r45 = (sun.security.x509.SerialNumber) $r43;
+
+        if $r45 == null goto label66;
+
+        $r44 = virtualinvoke $r45.<sun.security.x509.SerialNumber: java.math.BigInteger getNumber()>();
+
+        virtualinvoke $r183.<java.security.cert.X509CertSelector: void setSerialNumber(java.math.BigInteger)>($r44);
+
+     label66:
+        $r184 = new java.util.HashSet;
+
+        specialinvoke $r184.<java.util.HashSet: void <init>(java.util.Collection)>(r32);
+
+        if r161 == null goto label69;
+
+        if r38 == null goto label67;
+
+        $r185 = new java.security.cert.TrustAnchor;
+
+        specialinvoke $r185.<java.security.cert.TrustAnchor: void <init>(java.security.cert.X509Certificate,byte[])>(r38, null);
+
+        r174 = $r185;
+
+        goto label68;
+
+     label67:
+        $r39 = virtualinvoke r4.<sun.security.x509.X509CertImpl: javax.security.auth.x500.X500Principal getIssuerX500Principal()>();
+
+        $r186 = new java.security.cert.TrustAnchor;
+
+        specialinvoke $r186.<java.security.cert.TrustAnchor: void <init>(javax.security.auth.x500.X500Principal,java.security.PublicKey,byte[])>($r39, r161, null);
+
+        r174 = $r186;
+
+     label68:
+        interfaceinvoke $r184.<java.util.Set: boolean add(java.lang.Object)>(r174);
+
+     label69:
+        $r187 = new java.security.cert.PKIXBuilderParameters;
+
+        specialinvoke $r187.<java.security.cert.PKIXBuilderParameters: void <init>(java.util.Set,java.security.cert.CertSelector)>($r184, $r183);
+
+     label70:
+        goto label72;
+
+     label71:
+        $r159 := @caughtexception;
+
+        $r188 = new java.security.cert.CRLException;
+
+        specialinvoke $r188.<java.security.cert.CRLException: void <init>(java.lang.Throwable)>($r159);
+
+        throw $r188;
+
+     label72:
+        virtualinvoke $r187.<java.security.cert.PKIXBuilderParameters: void setCertStores(java.util.List)>(r33);
+
+        virtualinvoke $r187.<java.security.cert.PKIXBuilderParameters: void setSigProvider(java.lang.String)>(r11);
+
+        virtualinvoke $r187.<java.security.cert.PKIXBuilderParameters: void setDate(java.util.Date)>(r34);
+
+     label73:
+        $r35 = staticinvoke <java.security.cert.CertPathBuilder: java.security.cert.CertPathBuilder getInstance(java.lang.String)>("PKIX");
+
+        $r36 = virtualinvoke $r35.<java.security.cert.CertPathBuilder: java.security.cert.CertPathBuilderResult build(java.security.cert.CertPathParameters)>($r187);
+
+        r37 = (java.security.cert.PKIXCertPathBuilderResult) $r36;
+
+        r161 = virtualinvoke r37.<java.security.cert.PKIXCertPathBuilderResult: java.security.PublicKey getPublicKey()>();
+
+     label74:
+        goto label76;
+
+     label75:
+        $r157 := @caughtexception;
+
+        $r189 = new java.security.cert.CRLException;
+
+        specialinvoke $r189.<java.security.cert.CRLException: void <init>(java.lang.Throwable)>($r157);
+
+        throw $r189;
+
+     label76:
+        staticinvoke <sun.security.provider.certpath.AlgorithmChecker: void check(java.security.PublicKey,java.security.cert.X509CRL,java.lang.String,java.security.cert.TrustAnchor)>(r161, r1, r13, r14);
+
+     label77:
+        goto label80;
+
+     label78:
+        $r150 := @caughtexception;
+
+        $r151 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        if $r151 == null goto label79;
+
+        $r153 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        $r190 = new java.lang.StringBuilder;
+
+        specialinvoke $r190.<java.lang.StringBuilder: void <init>()>();
+
+        $r154 = virtualinvoke $r190.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("CRL signature algorithm check failed: ");
+
+        $r155 = virtualinvoke $r154.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r150);
+
+        $r156 = virtualinvoke $r155.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r153.<sun.security.util.Debug: void println(java.lang.String)>($r156);
+
+     label79:
+        return 0;
+
+     label80:
+        virtualinvoke r1.<java.security.cert.X509CRL: void verify(java.security.PublicKey,java.lang.String)>(r161, r11);
+
+     label81:
+        goto label84;
+
+     label82:
+        $r147 := @caughtexception;
+
+        $r148 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        if $r148 == null goto label83;
+
+        $r149 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        virtualinvoke $r149.<sun.security.util.Debug: void println(java.lang.String)>("CRL signature failed to verify");
+
+     label83:
+        return 0;
+
+     label84:
+        $r15 = virtualinvoke r1.<java.security.cert.X509CRL: java.util.Set getCriticalExtensionOIDs()>();
+
+        if $r15 == null goto label87;
+
+        $r17 = <sun.security.x509.PKIXExtensions: sun.security.util.ObjectIdentifier IssuingDistributionPoint_Id>;
+
+        $r18 = virtualinvoke $r17.<sun.security.util.ObjectIdentifier: java.lang.String toString()>();
+
+        interfaceinvoke $r15.<java.util.Set: boolean remove(java.lang.Object)>($r18);
+
+        $z4 = interfaceinvoke $r15.<java.util.Set: boolean isEmpty()>();
+
+        if $z4 != 0 goto label87;
+
+        $r19 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        if $r19 == null goto label86;
+
+        $r21 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        $r191 = new java.lang.StringBuilder;
+
+        specialinvoke $r191.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r191.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unrecognized critical extension(s) in CRL: ");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r15);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r21.<sun.security.util.Debug: void println(java.lang.String)>($r24);
+
+        $r25 = interfaceinvoke $r15.<java.util.Set: java.util.Iterator iterator()>();
+
+     label85:
+        $z5 = interfaceinvoke $r25.<java.util.Iterator: boolean hasNext()>();
+
+        if $z5 == 0 goto label86;
+
+        $r26 = interfaceinvoke $r25.<java.util.Iterator: java.lang.Object next()>();
+
+        r176 = (java.lang.String) $r26;
+
+        $r27 = <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug>;
+
+        virtualinvoke $r27.<sun.security.util.Debug: void println(java.lang.String)>(r176);
+
+        goto label85;
+
+     label86:
+        return 0;
+
+     label87:
+        i12 = 0;
+
+     label88:
+        $i13 = lengthof r16;
+
+        if i12 >= $i13 goto label92;
+
+        $i14 = i12;
+
+        $z2 = r16[i12];
+
+        if $z2 != 0 goto label89;
+
+        $i0 = lengthof r171;
+
+        if i12 >= $i0 goto label90;
+
+        $z3 = r171[i12];
+
+        if $z3 == 0 goto label90;
+
+     label89:
+        $z30 = 1;
+
+        goto label91;
+
+     label90:
+        $z30 = 0;
+
+     label91:
+        r16[$i14] = $z30;
+
+        i12 = i12 + 1;
+
+        goto label88;
+
+     label92:
+        return 1;
+
+        catch java.security.InvalidAlgorithmParameterException from label69 to label70 with label71;
+        catch java.security.GeneralSecurityException from label73 to label74 with label75;
+        catch java.security.cert.CertPathValidatorException from label76 to label77 with label78;
+        catch java.security.GeneralSecurityException from label80 to label81 with label82;
+    }
+
+    private static sun.security.x509.GeneralNames getFullNames(sun.security.x509.X500Name, sun.security.x509.RDN) throws java.io.IOException
+    {
+        java.lang.Object[] $r6;
+        sun.security.x509.RDN[] $r5, $r7;
+        sun.security.x509.GeneralName $r9;
+        java.util.ArrayList $r0;
+        java.util.List $r2;
+        sun.security.x509.X500Name r1, $r4;
+        sun.security.x509.GeneralNames $r8;
+        sun.security.x509.RDN r3;
+
+        r1 := @parameter0: sun.security.x509.X500Name;
+
+        r3 := @parameter1: sun.security.x509.RDN;
+
+        $r0 = new java.util.ArrayList;
+
+        $r2 = virtualinvoke r1.<sun.security.x509.X500Name: java.util.List rdns()>();
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>(java.util.Collection)>($r2);
+
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>(r3);
+
+        $r4 = new sun.security.x509.X500Name;
+
+        $r5 = newarray (sun.security.x509.RDN)[0];
+
+        $r6 = interfaceinvoke $r0.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r5);
+
+        $r7 = (sun.security.x509.RDN[]) $r6;
+
+        specialinvoke $r4.<sun.security.x509.X500Name: void <init>(sun.security.x509.RDN[])>($r7);
+
+        $r8 = new sun.security.x509.GeneralNames;
+
+        specialinvoke $r8.<sun.security.x509.GeneralNames: void <init>()>();
+
+        $r9 = new sun.security.x509.GeneralName;
+
+        specialinvoke $r9.<sun.security.x509.GeneralName: void <init>(sun.security.x509.GeneralNameInterface)>($r4);
+
+        virtualinvoke $r8.<sun.security.x509.GeneralNames: sun.security.x509.GeneralNames add(sun.security.x509.GeneralName)>($r9);
+
+        return $r8;
+    }
+
+    private static boolean issues(sun.security.x509.X509CertImpl, sun.security.x509.X509CRLImpl, java.lang.String) throws java.io.IOException
+    {
+        javax.security.auth.x500.X500Principal $r4;
+        sun.security.x509.AuthorityKeyIdentifierExtension $r5, $r8;
+        sun.security.x509.X509CRLImpl r3;
+        boolean[] $r2;
+        java.security.PublicKey $r6;
+        sun.security.provider.certpath.AdaptableX509CertSelector $r0;
+        sun.security.x509.X509CertImpl r1;
+        java.security.GeneralSecurityException $r9;
+        java.lang.String r7;
+        boolean $z0, z1;
+
+        r1 := @parameter0: sun.security.x509.X509CertImpl;
+
+        r3 := @parameter1: sun.security.x509.X509CRLImpl;
+
+        r7 := @parameter2: java.lang.String;
+
+        $r0 = new sun.security.provider.certpath.AdaptableX509CertSelector;
+
+        specialinvoke $r0.<sun.security.provider.certpath.AdaptableX509CertSelector: void <init>()>();
+
+        $r2 = virtualinvoke r1.<sun.security.x509.X509CertImpl: boolean[] getKeyUsage()>();
+
+        if $r2 == null goto label1;
+
+        $r2[6] = 1;
+
+        virtualinvoke $r0.<sun.security.provider.certpath.AdaptableX509CertSelector: void setKeyUsage(boolean[])>($r2);
+
+     label1:
+        $r4 = virtualinvoke r3.<sun.security.x509.X509CRLImpl: javax.security.auth.x500.X500Principal getIssuerX500Principal()>();
+
+        virtualinvoke $r0.<sun.security.provider.certpath.AdaptableX509CertSelector: void setSubject(javax.security.auth.x500.X500Principal)>($r4);
+
+        $r5 = virtualinvoke r3.<sun.security.x509.X509CRLImpl: sun.security.x509.AuthorityKeyIdentifierExtension getAuthKeyIdExtension()>();
+
+        virtualinvoke $r0.<sun.security.provider.certpath.AdaptableX509CertSelector: void setSkiAndSerialNumber(sun.security.x509.AuthorityKeyIdentifierExtension)>($r5);
+
+        $z0 = virtualinvoke $r0.<sun.security.provider.certpath.AdaptableX509CertSelector: boolean match(java.security.cert.Certificate)>(r1);
+
+        z1 = $z0;
+
+        if $z0 == 0 goto label5;
+
+        if $r5 == null goto label2;
+
+        $r8 = virtualinvoke r1.<sun.security.x509.X509CertImpl: sun.security.x509.AuthorityKeyIdentifierExtension getAuthorityKeyIdentifierExtension()>();
+
+        if $r8 != null goto label5;
+
+     label2:
+        $r6 = virtualinvoke r1.<sun.security.x509.X509CertImpl: java.security.PublicKey getPublicKey()>();
+
+        virtualinvoke r3.<sun.security.x509.X509CRLImpl: void verify(java.security.PublicKey,java.lang.String)>($r6, r7);
+
+        z1 = 1;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r9 := @caughtexception;
+
+        z1 = 0;
+
+     label5:
+        return z1;
+
+        catch java.security.GeneralSecurityException from label2 to label3 with label4;
+    }
+
+    static void <clinit>()
+    {
+        boolean[] $r1;
+        sun.security.util.Debug $r0;
+
+        $r0 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String)>("certpath");
+
+        <sun.security.provider.certpath.DistributionPointFetcher: sun.security.util.Debug debug> = $r0;
+
+        $r1 = newarray (boolean)[9];
+
+        $r1[0] = 1;
+
+        $r1[1] = 1;
+
+        $r1[2] = 1;
+
+        $r1[3] = 1;
+
+        $r1[4] = 1;
+
+        $r1[5] = 1;
+
+        $r1[6] = 1;
+
+        $r1[7] = 1;
+
+        $r1[8] = 1;
+
+        <sun.security.provider.certpath.DistributionPointFetcher: boolean[] ALL_REASONS> = $r1;
+
+        return;
+    }
+}

@@ -1,0 +1,201 @@
+public class com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.ECKeyValueResolver extends com.sun.org.apache.xml.internal.security.keys.keyresolver.KeyResolverSpi
+{
+    private static final com.sun.org.slf4j.internal.Logger LOG;
+
+    public void <init>()
+    {
+        com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.ECKeyValueResolver r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.ECKeyValueResolver;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.security.keys.keyresolver.KeyResolverSpi: void <init>()>();
+
+        return;
+    }
+
+    protected boolean engineCanResolve(org.w3c.dom.Element, java.lang.String, com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver)
+    {
+        org.w3c.dom.Element r0;
+        com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.ECKeyValueResolver r1;
+        java.lang.String r2;
+        com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver r3;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.ECKeyValueResolver;
+
+        r0 := @parameter0: org.w3c.dom.Element;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver;
+
+        $z0 = staticinvoke <com.sun.org.apache.xml.internal.security.utils.XMLUtils: boolean elementIsInSignatureSpace(org.w3c.dom.Element,java.lang.String)>(r0, "KeyValue");
+
+        if $z0 != 0 goto label1;
+
+        $z1 = staticinvoke <com.sun.org.apache.xml.internal.security.utils.XMLUtils: boolean elementIsInSignatureSpace(org.w3c.dom.Element,java.lang.String)>(r0, "ECKeyValue");
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+    }
+
+    protected java.security.PublicKey engineResolvePublicKey(org.w3c.dom.Element, java.lang.String, com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver, boolean)
+    {
+        java.security.PublicKey $r3;
+        com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.ECKeyValueResolver r8;
+        org.w3c.dom.Element r0, r10;
+        org.w3c.dom.Node $r4;
+        com.sun.org.slf4j.internal.Logger $r6;
+        java.lang.String r2, $r7;
+        com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException $r5;
+        com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver r9;
+        com.sun.org.apache.xml.internal.security.keys.content.keyvalues.ECKeyValue $r1;
+        boolean $z0, $z1, z2;
+
+        r8 := @this: com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.ECKeyValueResolver;
+
+        r0 := @parameter0: org.w3c.dom.Element;
+
+        r2 := @parameter1: java.lang.String;
+
+        r9 := @parameter2: com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver;
+
+        z2 := @parameter3: boolean;
+
+        if r0 != null goto label1;
+
+        return null;
+
+     label1:
+        r10 = null;
+
+        $z0 = staticinvoke <com.sun.org.apache.xml.internal.security.utils.XMLUtils: boolean elementIsInSignatureSpace(org.w3c.dom.Element,java.lang.String)>(r0, "KeyValue");
+
+        if $z0 == 0 goto label2;
+
+        $r4 = interfaceinvoke r0.<org.w3c.dom.Element: org.w3c.dom.Node getFirstChild()>();
+
+        r10 = staticinvoke <com.sun.org.apache.xml.internal.security.utils.XMLUtils: org.w3c.dom.Element selectDs11Node(org.w3c.dom.Node,java.lang.String,int)>($r4, "ECKeyValue", 0);
+
+        goto label3;
+
+     label2:
+        $z1 = staticinvoke <com.sun.org.apache.xml.internal.security.utils.XMLUtils: boolean elementIsInSignature11Space(org.w3c.dom.Element,java.lang.String)>(r0, "ECKeyValue");
+
+        if $z1 == 0 goto label3;
+
+        r10 = r0;
+
+     label3:
+        if r10 != null goto label4;
+
+        return null;
+
+     label4:
+        $r1 = new com.sun.org.apache.xml.internal.security.keys.content.keyvalues.ECKeyValue;
+
+        specialinvoke $r1.<com.sun.org.apache.xml.internal.security.keys.content.keyvalues.ECKeyValue: void <init>(org.w3c.dom.Element,java.lang.String)>(r10, r2);
+
+        $r3 = virtualinvoke $r1.<com.sun.org.apache.xml.internal.security.keys.content.keyvalues.ECKeyValue: java.security.PublicKey getPublicKey()>();
+
+     label5:
+        return $r3;
+
+     label6:
+        $r5 := @caughtexception;
+
+        $r6 = <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.ECKeyValueResolver: com.sun.org.slf4j.internal.Logger LOG>;
+
+        $r7 = virtualinvoke $r5.<com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException: java.lang.String getMessage()>();
+
+        virtualinvoke $r6.<com.sun.org.slf4j.internal.Logger: void debug(java.lang.String,java.lang.Throwable)>($r7, $r5);
+
+        return null;
+
+        catch com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException from label4 to label5 with label6;
+    }
+
+    protected java.security.cert.X509Certificate engineResolveX509Certificate(org.w3c.dom.Element, java.lang.String, com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver, boolean)
+    {
+        org.w3c.dom.Element r1;
+        com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.ECKeyValueResolver r0;
+        java.lang.String r2;
+        com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver r3;
+        boolean z0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.ECKeyValueResolver;
+
+        r1 := @parameter0: org.w3c.dom.Element;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver;
+
+        z0 := @parameter3: boolean;
+
+        return null;
+    }
+
+    protected javax.crypto.SecretKey engineResolveSecretKey(org.w3c.dom.Element, java.lang.String, com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver, boolean)
+    {
+        org.w3c.dom.Element r1;
+        com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.ECKeyValueResolver r0;
+        java.lang.String r2;
+        com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver r3;
+        boolean z0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.ECKeyValueResolver;
+
+        r1 := @parameter0: org.w3c.dom.Element;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver;
+
+        z0 := @parameter3: boolean;
+
+        return null;
+    }
+
+    protected java.security.PrivateKey engineResolvePrivateKey(org.w3c.dom.Element, java.lang.String, com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver, boolean)
+    {
+        org.w3c.dom.Element r1;
+        com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.ECKeyValueResolver r0;
+        java.lang.String r2;
+        com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver r3;
+        boolean z0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.ECKeyValueResolver;
+
+        r1 := @parameter0: org.w3c.dom.Element;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: com.sun.org.apache.xml.internal.security.keys.storage.StorageResolver;
+
+        z0 := @parameter3: boolean;
+
+        return null;
+    }
+
+    static void <clinit>()
+    {
+        com.sun.org.slf4j.internal.Logger $r0;
+
+        $r0 = staticinvoke <com.sun.org.slf4j.internal.LoggerFactory: com.sun.org.slf4j.internal.Logger getLogger(java.lang.Class)>(class "Lcom/sun/org/apache/xml/internal/security/keys/keyresolver/implementations/ECKeyValueResolver;");
+
+        <com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.ECKeyValueResolver: com.sun.org.slf4j.internal.Logger LOG> = $r0;
+
+        return;
+    }
+}

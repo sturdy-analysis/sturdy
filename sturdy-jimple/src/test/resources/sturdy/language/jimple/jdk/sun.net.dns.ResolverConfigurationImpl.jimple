@@ -1,0 +1,332 @@
+public class sun.net.dns.ResolverConfigurationImpl extends sun.net.dns.ResolverConfiguration
+{
+    private static java.lang.Object lock;
+    private final sun.net.dns.ResolverConfiguration$Options opts;
+    private static boolean changed;
+    private static long lastRefresh;
+    private static final int TIMEOUT;
+    private static java.lang.String os_searchlist;
+    private static java.lang.String os_nameservers;
+    private static java.util.LinkedList searchlist;
+    private static java.util.LinkedList nameservers;
+    static final boolean $assertionsDisabled;
+
+    private java.util.LinkedList stringToList(java.lang.String)
+    {
+        java.util.StringTokenizer $r1;
+        sun.net.dns.ResolverConfigurationImpl r4;
+        java.lang.String r2, $r3;
+        java.util.LinkedList $r0;
+        boolean $z0, $z1;
+
+        r4 := @this: sun.net.dns.ResolverConfigurationImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r0 = new java.util.LinkedList;
+
+        specialinvoke $r0.<java.util.LinkedList: void <init>()>();
+
+        $r1 = new java.util.StringTokenizer;
+
+        specialinvoke $r1.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>(r2, ", ");
+
+     label1:
+        $z0 = virtualinvoke $r1.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label3;
+
+        $r3 = virtualinvoke $r1.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $z1 = virtualinvoke $r0.<java.util.LinkedList: boolean contains(java.lang.Object)>($r3);
+
+        if $z1 != 0 goto label2;
+
+        virtualinvoke $r0.<java.util.LinkedList: boolean add(java.lang.Object)>($r3);
+
+     label2:
+        goto label1;
+
+     label3:
+        return $r0;
+    }
+
+    private void loadConfig()
+    {
+        long $l0, $l2, $l3, $l4, $l6;
+        java.lang.AssertionError $r7;
+        byte $b1, $b5;
+        int $i7, $i8;
+        java.lang.String $r3, $r5;
+        java.util.LinkedList $r4, $r6;
+        boolean $z0, $z1, $z2;
+        sun.net.dns.ResolverConfigurationImpl r0;
+        java.lang.Object $r1;
+
+        r0 := @this: sun.net.dns.ResolverConfigurationImpl;
+
+        $z0 = <sun.net.dns.ResolverConfigurationImpl: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $r1 = <sun.net.dns.ResolverConfigurationImpl: java.lang.Object lock>;
+
+        $z2 = staticinvoke <java.lang.Thread: boolean holdsLock(java.lang.Object)>($r1);
+
+        if $z2 != 0 goto label1;
+
+        $r7 = new java.lang.AssertionError;
+
+        specialinvoke $r7.<java.lang.AssertionError: void <init>()>();
+
+        throw $r7;
+
+     label1:
+        $z1 = <sun.net.dns.ResolverConfigurationImpl: boolean changed>;
+
+        if $z1 == 0 goto label2;
+
+        <sun.net.dns.ResolverConfigurationImpl: boolean changed> = 0;
+
+        goto label3;
+
+     label2:
+        $l0 = <sun.net.dns.ResolverConfigurationImpl: long lastRefresh>;
+
+        $b1 = $l0 cmp 0L;
+
+        $i7 = (int) $b1;
+
+        if $i7 < 0 goto label3;
+
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l3 = <sun.net.dns.ResolverConfigurationImpl: long lastRefresh>;
+
+        $l4 = $l2 - $l3;
+
+        $b5 = $l4 cmp 120000L;
+
+        $i8 = (int) $b5;
+
+        if $i8 >= 0 goto label3;
+
+        return;
+
+     label3:
+        staticinvoke <sun.net.dns.ResolverConfigurationImpl: void loadDNSconfig0()>();
+
+        $l6 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        <sun.net.dns.ResolverConfigurationImpl: long lastRefresh> = $l6;
+
+        $r3 = <sun.net.dns.ResolverConfigurationImpl: java.lang.String os_searchlist>;
+
+        $r4 = specialinvoke r0.<sun.net.dns.ResolverConfigurationImpl: java.util.LinkedList stringToList(java.lang.String)>($r3);
+
+        <sun.net.dns.ResolverConfigurationImpl: java.util.LinkedList searchlist> = $r4;
+
+        $r5 = <sun.net.dns.ResolverConfigurationImpl: java.lang.String os_nameservers>;
+
+        $r6 = specialinvoke r0.<sun.net.dns.ResolverConfigurationImpl: java.util.LinkedList stringToList(java.lang.String)>($r5);
+
+        <sun.net.dns.ResolverConfigurationImpl: java.util.LinkedList nameservers> = $r6;
+
+        <sun.net.dns.ResolverConfigurationImpl: java.lang.String os_searchlist> = null;
+
+        <sun.net.dns.ResolverConfigurationImpl: java.lang.String os_nameservers> = null;
+
+        return;
+    }
+
+    void <init>()
+    {
+        sun.net.dns.ResolverConfigurationImpl r0;
+        sun.net.dns.OptionsImpl $r1;
+
+        r0 := @this: sun.net.dns.ResolverConfigurationImpl;
+
+        specialinvoke r0.<sun.net.dns.ResolverConfiguration: void <init>()>();
+
+        $r1 = new sun.net.dns.OptionsImpl;
+
+        specialinvoke $r1.<sun.net.dns.OptionsImpl: void <init>()>();
+
+        r0.<sun.net.dns.ResolverConfigurationImpl: sun.net.dns.ResolverConfiguration$Options opts> = $r1;
+
+        return;
+    }
+
+    public java.util.List searchlist()
+    {
+        java.lang.Throwable $r5;
+        java.util.List $r4;
+        sun.net.dns.ResolverConfigurationImpl r1;
+        java.lang.Object $r0, $r3;
+        java.util.LinkedList $r2;
+
+        r1 := @this: sun.net.dns.ResolverConfigurationImpl;
+
+        $r0 = <sun.net.dns.ResolverConfigurationImpl: java.lang.Object lock>;
+
+        entermonitor $r0;
+
+     label1:
+        specialinvoke r1.<sun.net.dns.ResolverConfigurationImpl: void loadConfig()>();
+
+        $r2 = <sun.net.dns.ResolverConfigurationImpl: java.util.LinkedList searchlist>;
+
+        $r3 = virtualinvoke $r2.<java.util.LinkedList: java.lang.Object clone()>();
+
+        $r4 = (java.util.List) $r3;
+
+        exitmonitor $r0;
+
+     label2:
+        return $r4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label4:
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public java.util.List nameservers()
+    {
+        java.lang.Throwable $r5;
+        java.util.List $r4;
+        sun.net.dns.ResolverConfigurationImpl r1;
+        java.lang.Object $r0, $r3;
+        java.util.LinkedList $r2;
+
+        r1 := @this: sun.net.dns.ResolverConfigurationImpl;
+
+        $r0 = <sun.net.dns.ResolverConfigurationImpl: java.lang.Object lock>;
+
+        entermonitor $r0;
+
+     label1:
+        specialinvoke r1.<sun.net.dns.ResolverConfigurationImpl: void loadConfig()>();
+
+        $r2 = <sun.net.dns.ResolverConfigurationImpl: java.util.LinkedList nameservers>;
+
+        $r3 = virtualinvoke $r2.<java.util.LinkedList: java.lang.Object clone()>();
+
+        $r4 = (java.util.List) $r3;
+
+        exitmonitor $r0;
+
+     label2:
+        return $r4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label4:
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public sun.net.dns.ResolverConfiguration$Options options()
+    {
+        sun.net.dns.ResolverConfigurationImpl r0;
+        sun.net.dns.ResolverConfiguration$Options $r1;
+
+        r0 := @this: sun.net.dns.ResolverConfigurationImpl;
+
+        $r1 = r0.<sun.net.dns.ResolverConfigurationImpl: sun.net.dns.ResolverConfiguration$Options opts>;
+
+        return $r1;
+    }
+
+    static native void init0();
+
+    static native void loadDNSconfig0();
+
+    static native int notifyAddrChange0();
+
+    static java.lang.Object access$000()
+    {
+        java.lang.Object $r0;
+
+        $r0 = <sun.net.dns.ResolverConfigurationImpl: java.lang.Object lock>;
+
+        return $r0;
+    }
+
+    static boolean access$102(boolean)
+    {
+        boolean z0;
+
+        z0 := @parameter0: boolean;
+
+        <sun.net.dns.ResolverConfigurationImpl: boolean changed> = z0;
+
+        return z0;
+    }
+
+    static void <clinit>()
+    {
+        sun.net.dns.ResolverConfigurationImpl$1 $r2;
+        java.lang.Class $r0;
+        java.lang.Object $r1;
+        sun.net.dns.ResolverConfigurationImpl$AddressChangeListener $r3;
+        boolean $z0, $z1;
+
+        <sun.net.dns.ResolverConfigurationImpl: int TIMEOUT> = 120000;
+
+        $r0 = class "Lsun/net/dns/ResolverConfigurationImpl;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.net.dns.ResolverConfigurationImpl: boolean $assertionsDisabled> = $z1;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        <sun.net.dns.ResolverConfigurationImpl: java.lang.Object lock> = $r1;
+
+        <sun.net.dns.ResolverConfigurationImpl: boolean changed> = 0;
+
+        <sun.net.dns.ResolverConfigurationImpl: long lastRefresh> = -1L;
+
+        $r2 = new sun.net.dns.ResolverConfigurationImpl$1;
+
+        specialinvoke $r2.<sun.net.dns.ResolverConfigurationImpl$1: void <init>()>();
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        staticinvoke <sun.net.dns.ResolverConfigurationImpl: void init0()>();
+
+        $r3 = new sun.net.dns.ResolverConfigurationImpl$AddressChangeListener;
+
+        specialinvoke $r3.<sun.net.dns.ResolverConfigurationImpl$AddressChangeListener: void <init>()>();
+
+        virtualinvoke $r3.<sun.net.dns.ResolverConfigurationImpl$AddressChangeListener: void setDaemon(boolean)>(1);
+
+        virtualinvoke $r3.<sun.net.dns.ResolverConfigurationImpl$AddressChangeListener: void start()>();
+
+        return;
+    }
+}

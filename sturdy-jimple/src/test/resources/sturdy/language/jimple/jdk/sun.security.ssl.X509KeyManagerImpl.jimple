@@ -1,0 +1,1460 @@
+final class sun.security.ssl.X509KeyManagerImpl extends javax.net.ssl.X509ExtendedKeyManager implements javax.net.ssl.X509KeyManager
+{
+    private static java.util.Date verificationDate;
+    private final java.util.List builders;
+    private final java.util.concurrent.atomic.AtomicLong uidCounter;
+    private final java.util.Map entryCacheMap;
+
+    void <init>(java.security.KeyStore$Builder)
+    {
+        java.security.KeyStore$Builder r1;
+        java.util.List $r2;
+        sun.security.ssl.X509KeyManagerImpl r0;
+
+        r0 := @this: sun.security.ssl.X509KeyManagerImpl;
+
+        r1 := @parameter0: java.security.KeyStore$Builder;
+
+        $r2 = staticinvoke <java.util.Collections: java.util.List singletonList(java.lang.Object)>(r1);
+
+        specialinvoke r0.<sun.security.ssl.X509KeyManagerImpl: void <init>(java.util.List)>($r2);
+
+        return;
+    }
+
+    void <init>(java.util.List)
+    {
+        java.util.concurrent.atomic.AtomicLong $r2;
+        java.util.List r1;
+        sun.security.ssl.X509KeyManagerImpl r0;
+        java.util.Map $r4;
+        sun.security.ssl.X509KeyManagerImpl$SizedMap $r3;
+
+        r0 := @this: sun.security.ssl.X509KeyManagerImpl;
+
+        r1 := @parameter0: java.util.List;
+
+        specialinvoke r0.<javax.net.ssl.X509ExtendedKeyManager: void <init>()>();
+
+        r0.<sun.security.ssl.X509KeyManagerImpl: java.util.List builders> = r1;
+
+        $r2 = new java.util.concurrent.atomic.AtomicLong;
+
+        specialinvoke $r2.<java.util.concurrent.atomic.AtomicLong: void <init>()>();
+
+        r0.<sun.security.ssl.X509KeyManagerImpl: java.util.concurrent.atomic.AtomicLong uidCounter> = $r2;
+
+        $r3 = new sun.security.ssl.X509KeyManagerImpl$SizedMap;
+
+        specialinvoke $r3.<sun.security.ssl.X509KeyManagerImpl$SizedMap: void <init>(sun.security.ssl.X509KeyManagerImpl$1)>(null);
+
+        $r4 = staticinvoke <java.util.Collections: java.util.Map synchronizedMap(java.util.Map)>($r3);
+
+        r0.<sun.security.ssl.X509KeyManagerImpl: java.util.Map entryCacheMap> = $r4;
+
+        return;
+    }
+
+    public java.security.cert.X509Certificate[] getCertificateChain(java.lang.String)
+    {
+        sun.security.ssl.X509KeyManagerImpl r0;
+        java.security.KeyStore$PrivateKeyEntry $r2;
+        java.security.cert.Certificate[] $r3;
+        java.lang.String r1;
+        java.security.cert.X509Certificate[] $r4, $r5;
+
+        r0 := @this: sun.security.ssl.X509KeyManagerImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = specialinvoke r0.<sun.security.ssl.X509KeyManagerImpl: java.security.KeyStore$PrivateKeyEntry getEntry(java.lang.String)>(r1);
+
+        if $r2 != null goto label1;
+
+        $r5 = null;
+
+        goto label2;
+
+     label1:
+        $r3 = virtualinvoke $r2.<java.security.KeyStore$PrivateKeyEntry: java.security.cert.Certificate[] getCertificateChain()>();
+
+        $r4 = (java.security.cert.X509Certificate[]) $r3;
+
+        $r5 = (java.security.cert.X509Certificate[]) $r4;
+
+     label2:
+        return $r5;
+    }
+
+    public java.security.PrivateKey getPrivateKey(java.lang.String)
+    {
+        sun.security.ssl.X509KeyManagerImpl r0;
+        java.security.PrivateKey $r3;
+        java.security.KeyStore$PrivateKeyEntry $r2;
+        java.lang.String r1;
+
+        r0 := @this: sun.security.ssl.X509KeyManagerImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r2 = specialinvoke r0.<sun.security.ssl.X509KeyManagerImpl: java.security.KeyStore$PrivateKeyEntry getEntry(java.lang.String)>(r1);
+
+        if $r2 != null goto label1;
+
+        $r3 = null;
+
+        goto label2;
+
+     label1:
+        $r3 = virtualinvoke $r2.<java.security.KeyStore$PrivateKeyEntry: java.security.PrivateKey getPrivateKey()>();
+
+     label2:
+        return $r3;
+    }
+
+    public java.lang.String chooseClientAlias(java.lang.String[], java.security.Principal[], java.net.Socket)
+    {
+        java.security.Principal[] r3;
+        java.net.Socket r4;
+        java.lang.String[] r1;
+        java.util.List $r2;
+        sun.security.ssl.X509KeyManagerImpl r0;
+        java.security.AlgorithmConstraints $r6;
+        java.lang.String $r7;
+        sun.security.ssl.X509KeyManagerImpl$CheckType $r5;
+
+        r0 := @this: sun.security.ssl.X509KeyManagerImpl;
+
+        r1 := @parameter0: java.lang.String[];
+
+        r3 := @parameter1: java.security.Principal[];
+
+        r4 := @parameter2: java.net.Socket;
+
+        $r2 = staticinvoke <sun.security.ssl.X509KeyManagerImpl: java.util.List getKeyTypes(java.lang.String[])>(r1);
+
+        $r5 = <sun.security.ssl.X509KeyManagerImpl$CheckType: sun.security.ssl.X509KeyManagerImpl$CheckType CLIENT>;
+
+        $r6 = specialinvoke r0.<sun.security.ssl.X509KeyManagerImpl: java.security.AlgorithmConstraints getAlgorithmConstraints(java.net.Socket)>(r4);
+
+        $r7 = specialinvoke r0.<sun.security.ssl.X509KeyManagerImpl: java.lang.String chooseAlias(java.util.List,java.security.Principal[],sun.security.ssl.X509KeyManagerImpl$CheckType,java.security.AlgorithmConstraints)>($r2, r3, $r5, $r6);
+
+        return $r7;
+    }
+
+    public java.lang.String chooseEngineClientAlias(java.lang.String[], java.security.Principal[], javax.net.ssl.SSLEngine)
+    {
+        java.security.Principal[] r3;
+        java.lang.String[] r1;
+        javax.net.ssl.SSLEngine r4;
+        java.util.List $r2;
+        sun.security.ssl.X509KeyManagerImpl r0;
+        java.security.AlgorithmConstraints $r6;
+        java.lang.String $r7;
+        sun.security.ssl.X509KeyManagerImpl$CheckType $r5;
+
+        r0 := @this: sun.security.ssl.X509KeyManagerImpl;
+
+        r1 := @parameter0: java.lang.String[];
+
+        r3 := @parameter1: java.security.Principal[];
+
+        r4 := @parameter2: javax.net.ssl.SSLEngine;
+
+        $r2 = staticinvoke <sun.security.ssl.X509KeyManagerImpl: java.util.List getKeyTypes(java.lang.String[])>(r1);
+
+        $r5 = <sun.security.ssl.X509KeyManagerImpl$CheckType: sun.security.ssl.X509KeyManagerImpl$CheckType CLIENT>;
+
+        $r6 = specialinvoke r0.<sun.security.ssl.X509KeyManagerImpl: java.security.AlgorithmConstraints getAlgorithmConstraints(javax.net.ssl.SSLEngine)>(r4);
+
+        $r7 = specialinvoke r0.<sun.security.ssl.X509KeyManagerImpl: java.lang.String chooseAlias(java.util.List,java.security.Principal[],sun.security.ssl.X509KeyManagerImpl$CheckType,java.security.AlgorithmConstraints)>($r2, r3, $r5, $r6);
+
+        return $r7;
+    }
+
+    public java.lang.String chooseServerAlias(java.lang.String, java.security.Principal[], java.net.Socket)
+    {
+        java.security.Principal[] r4;
+        java.net.Socket r5;
+        java.lang.String[] $r1;
+        java.util.List $r3, $r8;
+        sun.security.ssl.X509KeyManagerImpl r0;
+        java.security.AlgorithmConstraints $r7;
+        java.lang.String r2, $r9;
+        sun.security.ssl.X509KeyManagerImpl$CheckType $r6;
+
+        r0 := @this: sun.security.ssl.X509KeyManagerImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.security.Principal[];
+
+        r5 := @parameter2: java.net.Socket;
+
+        $r1 = newarray (java.lang.String)[1];
+
+        $r1[0] = r2;
+
+        $r3 = staticinvoke <sun.security.ssl.X509KeyManagerImpl: java.util.List getKeyTypes(java.lang.String[])>($r1);
+
+        $r6 = <sun.security.ssl.X509KeyManagerImpl$CheckType: sun.security.ssl.X509KeyManagerImpl$CheckType SERVER>;
+
+        $r7 = specialinvoke r0.<sun.security.ssl.X509KeyManagerImpl: java.security.AlgorithmConstraints getAlgorithmConstraints(java.net.Socket)>(r5);
+
+        $r8 = staticinvoke <sun.security.ssl.X509TrustManagerImpl: java.util.List getRequestedServerNames(java.net.Socket)>(r5);
+
+        $r9 = specialinvoke r0.<sun.security.ssl.X509KeyManagerImpl: java.lang.String chooseAlias(java.util.List,java.security.Principal[],sun.security.ssl.X509KeyManagerImpl$CheckType,java.security.AlgorithmConstraints,java.util.List,java.lang.String)>($r3, r4, $r6, $r7, $r8, "HTTPS");
+
+        return $r9;
+    }
+
+    public java.lang.String chooseEngineServerAlias(java.lang.String, java.security.Principal[], javax.net.ssl.SSLEngine)
+    {
+        java.security.Principal[] r4;
+        java.lang.String[] $r1;
+        javax.net.ssl.SSLEngine r5;
+        java.util.List $r3, $r8;
+        sun.security.ssl.X509KeyManagerImpl r0;
+        java.security.AlgorithmConstraints $r7;
+        java.lang.String r2, $r9;
+        sun.security.ssl.X509KeyManagerImpl$CheckType $r6;
+
+        r0 := @this: sun.security.ssl.X509KeyManagerImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.security.Principal[];
+
+        r5 := @parameter2: javax.net.ssl.SSLEngine;
+
+        $r1 = newarray (java.lang.String)[1];
+
+        $r1[0] = r2;
+
+        $r3 = staticinvoke <sun.security.ssl.X509KeyManagerImpl: java.util.List getKeyTypes(java.lang.String[])>($r1);
+
+        $r6 = <sun.security.ssl.X509KeyManagerImpl$CheckType: sun.security.ssl.X509KeyManagerImpl$CheckType SERVER>;
+
+        $r7 = specialinvoke r0.<sun.security.ssl.X509KeyManagerImpl: java.security.AlgorithmConstraints getAlgorithmConstraints(javax.net.ssl.SSLEngine)>(r5);
+
+        $r8 = staticinvoke <sun.security.ssl.X509TrustManagerImpl: java.util.List getRequestedServerNames(javax.net.ssl.SSLEngine)>(r5);
+
+        $r9 = specialinvoke r0.<sun.security.ssl.X509KeyManagerImpl: java.lang.String chooseAlias(java.util.List,java.security.Principal[],sun.security.ssl.X509KeyManagerImpl$CheckType,java.security.AlgorithmConstraints,java.util.List,java.lang.String)>($r3, r4, $r6, $r7, $r8, "HTTPS");
+
+        return $r9;
+    }
+
+    public java.lang.String[] getClientAliases(java.lang.String, java.security.Principal[])
+    {
+        java.security.Principal[] r2;
+        sun.security.ssl.X509KeyManagerImpl r0;
+        java.lang.String[] $r4;
+        java.lang.String r1;
+        sun.security.ssl.X509KeyManagerImpl$CheckType $r3;
+
+        r0 := @this: sun.security.ssl.X509KeyManagerImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.security.Principal[];
+
+        $r3 = <sun.security.ssl.X509KeyManagerImpl$CheckType: sun.security.ssl.X509KeyManagerImpl$CheckType CLIENT>;
+
+        $r4 = virtualinvoke r0.<sun.security.ssl.X509KeyManagerImpl: java.lang.String[] getAliases(java.lang.String,java.security.Principal[],sun.security.ssl.X509KeyManagerImpl$CheckType,java.security.AlgorithmConstraints)>(r1, r2, $r3, null);
+
+        return $r4;
+    }
+
+    public java.lang.String[] getServerAliases(java.lang.String, java.security.Principal[])
+    {
+        java.security.Principal[] r2;
+        sun.security.ssl.X509KeyManagerImpl r0;
+        java.lang.String[] $r4;
+        java.lang.String r1;
+        sun.security.ssl.X509KeyManagerImpl$CheckType $r3;
+
+        r0 := @this: sun.security.ssl.X509KeyManagerImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.security.Principal[];
+
+        $r3 = <sun.security.ssl.X509KeyManagerImpl$CheckType: sun.security.ssl.X509KeyManagerImpl$CheckType SERVER>;
+
+        $r4 = virtualinvoke r0.<sun.security.ssl.X509KeyManagerImpl: java.lang.String[] getAliases(java.lang.String,java.security.Principal[],sun.security.ssl.X509KeyManagerImpl$CheckType,java.security.AlgorithmConstraints)>(r1, r2, $r3, null);
+
+        return $r4;
+    }
+
+    private java.security.AlgorithmConstraints getAlgorithmConstraints(java.net.Socket)
+    {
+        java.net.Socket r0;
+        javax.net.ssl.SSLSocket r1;
+        java.lang.String[] r8;
+        javax.net.ssl.SSLSession $r2;
+        sun.security.ssl.X509KeyManagerImpl r7;
+        sun.security.ssl.SSLAlgorithmConstraints $r3, $r5, $r9;
+        javax.net.ssl.ExtendedSSLSession r6;
+        java.lang.String $r4;
+        boolean $z0, $z1, $z2, $z3;
+
+        r7 := @this: sun.security.ssl.X509KeyManagerImpl;
+
+        r0 := @parameter0: java.net.Socket;
+
+        if r0 == null goto label3;
+
+        $z0 = virtualinvoke r0.<java.net.Socket: boolean isConnected()>();
+
+        if $z0 == 0 goto label3;
+
+        $z1 = r0 instanceof javax.net.ssl.SSLSocket;
+
+        if $z1 == 0 goto label3;
+
+        r1 = (javax.net.ssl.SSLSocket) r0;
+
+        $r2 = virtualinvoke r1.<javax.net.ssl.SSLSocket: javax.net.ssl.SSLSession getHandshakeSession()>();
+
+        if $r2 == null goto label2;
+
+        $r4 = interfaceinvoke $r2.<javax.net.ssl.SSLSession: java.lang.String getProtocol()>();
+
+        $z2 = staticinvoke <sun.security.ssl.ProtocolVersion: boolean useTLS12PlusSpec(java.lang.String)>($r4);
+
+        if $z2 == 0 goto label2;
+
+        r8 = null;
+
+        $z3 = $r2 instanceof javax.net.ssl.ExtendedSSLSession;
+
+        if $z3 == 0 goto label1;
+
+        r6 = (javax.net.ssl.ExtendedSSLSession) $r2;
+
+        r8 = virtualinvoke r6.<javax.net.ssl.ExtendedSSLSession: java.lang.String[] getPeerSupportedSignatureAlgorithms()>();
+
+     label1:
+        $r5 = new sun.security.ssl.SSLAlgorithmConstraints;
+
+        specialinvoke $r5.<sun.security.ssl.SSLAlgorithmConstraints: void <init>(javax.net.ssl.SSLSocket,java.lang.String[],boolean)>(r1, r8, 1);
+
+        return $r5;
+
+     label2:
+        $r3 = new sun.security.ssl.SSLAlgorithmConstraints;
+
+        specialinvoke $r3.<sun.security.ssl.SSLAlgorithmConstraints: void <init>(javax.net.ssl.SSLSocket,boolean)>(r1, 1);
+
+        return $r3;
+
+     label3:
+        $r9 = new sun.security.ssl.SSLAlgorithmConstraints;
+
+        specialinvoke $r9.<sun.security.ssl.SSLAlgorithmConstraints: void <init>(javax.net.ssl.SSLSocket,boolean)>(null, 1);
+
+        return $r9;
+    }
+
+    private java.security.AlgorithmConstraints getAlgorithmConstraints(javax.net.ssl.SSLEngine)
+    {
+        java.lang.String[] r6;
+        javax.net.ssl.SSLEngine r0;
+        javax.net.ssl.SSLSession $r1;
+        sun.security.ssl.X509KeyManagerImpl r5;
+        sun.security.ssl.SSLAlgorithmConstraints $r3, $r7;
+        javax.net.ssl.ExtendedSSLSession r4;
+        java.lang.String $r2;
+        boolean $z0, $z1;
+
+        r5 := @this: sun.security.ssl.X509KeyManagerImpl;
+
+        r0 := @parameter0: javax.net.ssl.SSLEngine;
+
+        if r0 == null goto label2;
+
+        $r1 = virtualinvoke r0.<javax.net.ssl.SSLEngine: javax.net.ssl.SSLSession getHandshakeSession()>();
+
+        if $r1 == null goto label2;
+
+        $r2 = interfaceinvoke $r1.<javax.net.ssl.SSLSession: java.lang.String getProtocol()>();
+
+        $z0 = staticinvoke <sun.security.ssl.ProtocolVersion: boolean useTLS12PlusSpec(java.lang.String)>($r2);
+
+        if $z0 == 0 goto label2;
+
+        r6 = null;
+
+        $z1 = $r1 instanceof javax.net.ssl.ExtendedSSLSession;
+
+        if $z1 == 0 goto label1;
+
+        r4 = (javax.net.ssl.ExtendedSSLSession) $r1;
+
+        r6 = virtualinvoke r4.<javax.net.ssl.ExtendedSSLSession: java.lang.String[] getPeerSupportedSignatureAlgorithms()>();
+
+     label1:
+        $r3 = new sun.security.ssl.SSLAlgorithmConstraints;
+
+        specialinvoke $r3.<sun.security.ssl.SSLAlgorithmConstraints: void <init>(javax.net.ssl.SSLEngine,java.lang.String[],boolean)>(r0, r6, 1);
+
+        return $r3;
+
+     label2:
+        $r7 = new sun.security.ssl.SSLAlgorithmConstraints;
+
+        specialinvoke $r7.<sun.security.ssl.SSLAlgorithmConstraints: void <init>(javax.net.ssl.SSLEngine,boolean)>(r0, 1);
+
+        return $r7;
+    }
+
+    private java.lang.String makeAlias(sun.security.ssl.X509KeyManagerImpl$EntryStatus)
+    {
+        long $l0;
+        java.util.concurrent.atomic.AtomicLong $r2;
+        sun.security.ssl.X509KeyManagerImpl r1;
+        int $i1;
+        java.lang.StringBuilder $r0, $r3, $r4, $r6, $r7, $r9;
+        java.lang.String $r8, $r10;
+        sun.security.ssl.X509KeyManagerImpl$EntryStatus r5;
+
+        r1 := @this: sun.security.ssl.X509KeyManagerImpl;
+
+        r5 := @parameter0: sun.security.ssl.X509KeyManagerImpl$EntryStatus;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = r1.<sun.security.ssl.X509KeyManagerImpl: java.util.concurrent.atomic.AtomicLong uidCounter>;
+
+        $l0 = virtualinvoke $r2.<java.util.concurrent.atomic.AtomicLong: long incrementAndGet()>();
+
+        $r3 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $i1 = r5.<sun.security.ssl.X509KeyManagerImpl$EntryStatus: int builderIndex>;
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r8 = r5.<sun.security.ssl.X509KeyManagerImpl$EntryStatus: java.lang.String alias>;
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r10;
+    }
+
+    private java.security.KeyStore$PrivateKeyEntry getEntry(java.lang.String)
+    {
+        java.security.KeyStore$Builder r9;
+        java.util.Map $r2, $r14;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i7;
+        java.lang.String r0, $r5, $r6;
+        java.lang.ref.SoftReference $r19;
+        boolean $z0;
+        java.security.KeyStore $r10;
+        java.security.KeyStore$ProtectionParameter $r11;
+        java.lang.Exception $r16;
+        java.lang.ref.Reference r4;
+        java.util.List $r7;
+        java.security.KeyStore$Entry $r12;
+        sun.security.ssl.X509KeyManagerImpl r1;
+        java.lang.Object $r3, $r8, $r15;
+        java.security.KeyStore$PrivateKeyEntry $r17, r18;
+
+        r1 := @this: sun.security.ssl.X509KeyManagerImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label01;
+
+        return null;
+
+     label01:
+        $r2 = r1.<sun.security.ssl.X509KeyManagerImpl: java.util.Map entryCacheMap>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r0);
+
+        r4 = (java.lang.ref.Reference) $r3;
+
+        if r4 == null goto label02;
+
+        $r15 = virtualinvoke r4.<java.lang.ref.Reference: java.lang.Object get()>();
+
+        $r17 = (java.security.KeyStore$PrivateKeyEntry) $r15;
+
+        goto label03;
+
+     label02:
+        $r17 = null;
+
+     label03:
+        if $r17 == null goto label04;
+
+        return $r17;
+
+     label04:
+        $i0 = virtualinvoke r0.<java.lang.String: int indexOf(int)>(46);
+
+        $i1 = $i0 + 1;
+
+        $i2 = virtualinvoke r0.<java.lang.String: int indexOf(int,int)>(46, $i1);
+
+        $i7 = (int) -1;
+
+        if $i0 == $i7 goto label05;
+
+        if $i2 != $i0 goto label06;
+
+     label05:
+        return null;
+
+     label06:
+        $i3 = $i0 + 1;
+
+        $r5 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>($i3, $i2);
+
+        $i4 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r5);
+
+        $i5 = $i2 + 1;
+
+        $r6 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>($i5);
+
+        $r7 = r1.<sun.security.ssl.X509KeyManagerImpl: java.util.List builders>;
+
+        $r8 = interfaceinvoke $r7.<java.util.List: java.lang.Object get(int)>($i4);
+
+        r9 = (java.security.KeyStore$Builder) $r8;
+
+        $r10 = virtualinvoke r9.<java.security.KeyStore$Builder: java.security.KeyStore getKeyStore()>();
+
+        $r11 = virtualinvoke r9.<java.security.KeyStore$Builder: java.security.KeyStore$ProtectionParameter getProtectionParameter(java.lang.String)>(r0);
+
+        $r12 = virtualinvoke $r10.<java.security.KeyStore: java.security.KeyStore$Entry getEntry(java.lang.String,java.security.KeyStore$ProtectionParameter)>($r6, $r11);
+
+        $z0 = $r12 instanceof java.security.KeyStore$PrivateKeyEntry;
+
+        if $z0 != 0 goto label08;
+
+     label07:
+        return null;
+
+     label08:
+        r18 = (java.security.KeyStore$PrivateKeyEntry) $r12;
+
+        $r14 = r1.<sun.security.ssl.X509KeyManagerImpl: java.util.Map entryCacheMap>;
+
+        $r19 = new java.lang.ref.SoftReference;
+
+        specialinvoke $r19.<java.lang.ref.SoftReference: void <init>(java.lang.Object)>(r18);
+
+        interfaceinvoke $r14.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r0, $r19);
+
+     label09:
+        return r18;
+
+     label10:
+        $r16 := @caughtexception;
+
+        return null;
+
+        catch java.lang.Exception from label06 to label07 with label10;
+        catch java.lang.Exception from label08 to label09 with label10;
+    }
+
+    private static transient java.util.List getKeyTypes(java.lang.String[])
+    {
+        java.lang.String[] r0;
+        sun.security.ssl.X509KeyManagerImpl$KeyType $r4;
+        java.util.ArrayList $r2;
+        int $i0, $i1, i2, i3;
+        java.lang.String $r1, r3;
+
+        r0 := @parameter0: java.lang.String[];
+
+        if r0 == null goto label1;
+
+        $i0 = lengthof r0;
+
+        if $i0 == 0 goto label1;
+
+        $r1 = r0[0];
+
+        if $r1 != null goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r2 = new java.util.ArrayList;
+
+        $i1 = lengthof r0;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>(int)>($i1);
+
+        i2 = lengthof r0;
+
+        i3 = 0;
+
+     label3:
+        if i3 >= i2 goto label4;
+
+        r3 = r0[i3];
+
+        $r4 = new sun.security.ssl.X509KeyManagerImpl$KeyType;
+
+        specialinvoke $r4.<sun.security.ssl.X509KeyManagerImpl$KeyType: void <init>(java.lang.String)>(r3);
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>($r4);
+
+        i3 = i3 + 1;
+
+        goto label3;
+
+     label4:
+        return $r2;
+    }
+
+    private java.lang.String chooseAlias(java.util.List, java.security.Principal[], sun.security.ssl.X509KeyManagerImpl$CheckType, java.security.AlgorithmConstraints)
+    {
+        java.security.Principal[] r2;
+        java.util.List r1;
+        sun.security.ssl.X509KeyManagerImpl r0;
+        java.security.AlgorithmConstraints r4;
+        java.lang.String $r5;
+        sun.security.ssl.X509KeyManagerImpl$CheckType r3;
+
+        r0 := @this: sun.security.ssl.X509KeyManagerImpl;
+
+        r1 := @parameter0: java.util.List;
+
+        r2 := @parameter1: java.security.Principal[];
+
+        r3 := @parameter2: sun.security.ssl.X509KeyManagerImpl$CheckType;
+
+        r4 := @parameter3: java.security.AlgorithmConstraints;
+
+        $r5 = specialinvoke r0.<sun.security.ssl.X509KeyManagerImpl: java.lang.String chooseAlias(java.util.List,java.security.Principal[],sun.security.ssl.X509KeyManagerImpl$CheckType,java.security.AlgorithmConstraints,java.util.List,java.lang.String)>(r1, r2, r3, r4, null, null);
+
+        return $r5;
+    }
+
+    private java.lang.String chooseAlias(java.util.List, java.security.Principal[], sun.security.ssl.X509KeyManagerImpl$CheckType, java.security.AlgorithmConstraints, java.util.List, java.lang.String)
+    {
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.security.Principal[] r2;
+        java.util.Set $r3;
+        java.lang.Exception $r22;
+        java.util.List r0, $r4, r9, $r11;
+        java.lang.StringBuilder $r17, $r18, $r19;
+        java.lang.Object[] $r5, $r6, $r21;
+        sun.security.ssl.X509KeyManagerImpl$CheckResult $r14, $r15;
+        java.util.ArrayList $r16, r23;
+        int $i0, i1;
+        java.lang.String r10, $r20, $r24, $r27;
+        sun.security.ssl.X509KeyManagerImpl$EntryStatus r13, $r26;
+        sun.security.ssl.X509KeyManagerImpl r1;
+        java.security.AlgorithmConstraints r8;
+        java.lang.Object $r12, $r25;
+        sun.security.ssl.X509KeyManagerImpl$CheckType r7;
+
+        r1 := @this: sun.security.ssl.X509KeyManagerImpl;
+
+        r0 := @parameter0: java.util.List;
+
+        r2 := @parameter1: java.security.Principal[];
+
+        r7 := @parameter2: sun.security.ssl.X509KeyManagerImpl$CheckType;
+
+        r8 := @parameter3: java.security.AlgorithmConstraints;
+
+        r9 := @parameter4: java.util.List;
+
+        r10 := @parameter5: java.lang.String;
+
+        if r0 == null goto label01;
+
+        $z0 = interfaceinvoke r0.<java.util.List: boolean isEmpty()>();
+
+        if $z0 == 0 goto label02;
+
+     label01:
+        return null;
+
+     label02:
+        $r3 = specialinvoke r1.<sun.security.ssl.X509KeyManagerImpl: java.util.Set getIssuerSet(java.security.Principal[])>(r2);
+
+        r23 = null;
+
+        i1 = 0;
+
+        $r4 = r1.<sun.security.ssl.X509KeyManagerImpl: java.util.List builders>;
+
+        $i0 = interfaceinvoke $r4.<java.util.List: int size()>();
+
+     label03:
+        if i1 >= $i0 goto label12;
+
+     label04:
+        $r11 = specialinvoke r1.<sun.security.ssl.X509KeyManagerImpl: java.util.List getAliases(int,java.util.List,java.util.Set,boolean,sun.security.ssl.X509KeyManagerImpl$CheckType,java.security.AlgorithmConstraints,java.util.List,java.lang.String)>(i1, r0, $r3, 0, r7, r8, r9, r10);
+
+        if $r11 == null goto label09;
+
+        $r12 = interfaceinvoke $r11.<java.util.List: java.lang.Object get(int)>(0);
+
+        r13 = (sun.security.ssl.X509KeyManagerImpl$EntryStatus) $r12;
+
+        $r15 = r13.<sun.security.ssl.X509KeyManagerImpl$EntryStatus: sun.security.ssl.X509KeyManagerImpl$CheckResult checkResult>;
+
+        $r14 = <sun.security.ssl.X509KeyManagerImpl$CheckResult: sun.security.ssl.X509KeyManagerImpl$CheckResult OK>;
+
+        if $r15 != $r14 goto label07;
+
+        $z5 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z5 == 0 goto label05;
+
+        $z6 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("keymanager");
+
+        if $z6 == 0 goto label05;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("KeyMgr: choosing key: ");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r13);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r21 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r20, $r21);
+
+     label05:
+        $r24 = specialinvoke r1.<sun.security.ssl.X509KeyManagerImpl: java.lang.String makeAlias(sun.security.ssl.X509KeyManagerImpl$EntryStatus)>(r13);
+
+     label06:
+        return $r24;
+
+     label07:
+        if r23 != null goto label08;
+
+        $r16 = new java.util.ArrayList;
+
+        specialinvoke $r16.<java.util.ArrayList: void <init>()>();
+
+        r23 = $r16;
+
+     label08:
+        interfaceinvoke r23.<java.util.List: boolean addAll(java.util.Collection)>($r11);
+
+     label09:
+        goto label11;
+
+     label10:
+        $r22 := @caughtexception;
+
+     label11:
+        i1 = i1 + 1;
+
+        goto label03;
+
+     label12:
+        if r23 != null goto label14;
+
+        $z3 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z3 == 0 goto label13;
+
+        $z4 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("keymanager");
+
+        if $z4 == 0 goto label13;
+
+        $r6 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("KeyMgr: no matching key found", $r6);
+
+     label13:
+        return null;
+
+     label14:
+        staticinvoke <java.util.Collections: void sort(java.util.List)>(r23);
+
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label15;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("keymanager");
+
+        if $z2 == 0 goto label15;
+
+        $r5 = newarray (java.lang.Object)[1];
+
+        $r5[0] = r23;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("KeyMgr: no good matching key found, returning best match out of", $r5);
+
+     label15:
+        $r25 = interfaceinvoke r23.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r26 = (sun.security.ssl.X509KeyManagerImpl$EntryStatus) $r25;
+
+        $r27 = specialinvoke r1.<sun.security.ssl.X509KeyManagerImpl: java.lang.String makeAlias(sun.security.ssl.X509KeyManagerImpl$EntryStatus)>($r26);
+
+        return $r27;
+
+        catch java.lang.Exception from label04 to label06 with label10;
+        catch java.lang.Exception from label07 to label09 with label10;
+    }
+
+    public java.lang.String[] getAliases(java.lang.String, java.security.Principal[], sun.security.ssl.X509KeyManagerImpl$CheckType, java.security.AlgorithmConstraints)
+    {
+        java.lang.Object[] $r7, $r8;
+        java.lang.String[] $r4, $r15;
+        java.util.ArrayList $r12, r14;
+        int $i0, i1;
+        java.lang.String r0;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.security.Principal[] r2;
+        java.util.Set $r3;
+        java.lang.Exception $r13;
+        java.util.List $r5, $r6, $r11;
+        sun.security.ssl.X509KeyManagerImpl r1;
+        java.security.AlgorithmConstraints r10;
+        sun.security.ssl.X509KeyManagerImpl$CheckType r9;
+
+        r1 := @this: sun.security.ssl.X509KeyManagerImpl;
+
+        r0 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.security.Principal[];
+
+        r9 := @parameter2: sun.security.ssl.X509KeyManagerImpl$CheckType;
+
+        r10 := @parameter3: java.security.AlgorithmConstraints;
+
+        if r0 != null goto label01;
+
+        return null;
+
+     label01:
+        $r3 = specialinvoke r1.<sun.security.ssl.X509KeyManagerImpl: java.util.Set getIssuerSet(java.security.Principal[])>(r2);
+
+        $r4 = newarray (java.lang.String)[1];
+
+        $r4[0] = r0;
+
+        $r5 = staticinvoke <sun.security.ssl.X509KeyManagerImpl: java.util.List getKeyTypes(java.lang.String[])>($r4);
+
+        r14 = null;
+
+        i1 = 0;
+
+        $r6 = r1.<sun.security.ssl.X509KeyManagerImpl: java.util.List builders>;
+
+        $i0 = interfaceinvoke $r6.<java.util.List: int size()>();
+
+     label02:
+        if i1 >= $i0 goto label08;
+
+     label03:
+        $r11 = specialinvoke r1.<sun.security.ssl.X509KeyManagerImpl: java.util.List getAliases(int,java.util.List,java.util.Set,boolean,sun.security.ssl.X509KeyManagerImpl$CheckType,java.security.AlgorithmConstraints,java.util.List,java.lang.String)>(i1, $r5, $r3, 1, r9, r10, null, null);
+
+        if $r11 == null goto label05;
+
+        if r14 != null goto label04;
+
+        $r12 = new java.util.ArrayList;
+
+        specialinvoke $r12.<java.util.ArrayList: void <init>()>();
+
+        r14 = $r12;
+
+     label04:
+        interfaceinvoke r14.<java.util.List: boolean addAll(java.util.Collection)>($r11);
+
+     label05:
+        goto label07;
+
+     label06:
+        $r13 := @caughtexception;
+
+     label07:
+        i1 = i1 + 1;
+
+        goto label02;
+
+     label08:
+        if r14 == null goto label09;
+
+        $z2 = interfaceinvoke r14.<java.util.List: boolean isEmpty()>();
+
+        if $z2 == 0 goto label11;
+
+     label09:
+        $z0 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z0 == 0 goto label10;
+
+        $z1 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("keymanager");
+
+        if $z1 == 0 goto label10;
+
+        $r7 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("KeyMgr: no matching alias found", $r7);
+
+     label10:
+        return null;
+
+     label11:
+        staticinvoke <java.util.Collections: void sort(java.util.List)>(r14);
+
+        $z3 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z3 == 0 goto label12;
+
+        $z4 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("keymanager");
+
+        if $z4 == 0 goto label12;
+
+        $r8 = newarray (java.lang.Object)[1];
+
+        $r8[0] = r14;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("KeyMgr: getting aliases", $r8);
+
+     label12:
+        $r15 = specialinvoke r1.<sun.security.ssl.X509KeyManagerImpl: java.lang.String[] toAliases(java.util.List)>(r14);
+
+        return $r15;
+
+        catch java.lang.Exception from label03 to label05 with label06;
+    }
+
+    private java.lang.String[] toAliases(java.util.List)
+    {
+        java.util.Iterator $r2;
+        java.lang.String[] r1;
+        java.util.List r0;
+        sun.security.ssl.X509KeyManagerImpl r5;
+        int $i0, $i1, i2;
+        java.lang.Object $r3;
+        java.lang.String $r6;
+        sun.security.ssl.X509KeyManagerImpl$EntryStatus r4;
+        boolean $z0;
+
+        r5 := @this: sun.security.ssl.X509KeyManagerImpl;
+
+        r0 := @parameter0: java.util.List;
+
+        $i0 = interfaceinvoke r0.<java.util.List: int size()>();
+
+        r1 = newarray (java.lang.String)[$i0];
+
+        i2 = 0;
+
+        $r2 = interfaceinvoke r0.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (sun.security.ssl.X509KeyManagerImpl$EntryStatus) $r3;
+
+        $i1 = i2;
+
+        i2 = i2 + 1;
+
+        $r6 = specialinvoke r5.<sun.security.ssl.X509KeyManagerImpl: java.lang.String makeAlias(sun.security.ssl.X509KeyManagerImpl$EntryStatus)>(r4);
+
+        r1[$i1] = $r6;
+
+        goto label1;
+
+     label2:
+        return r1;
+    }
+
+    private java.util.Set getIssuerSet(java.security.Principal[])
+    {
+        java.security.Principal[] r0;
+        java.util.HashSet $r1;
+        java.util.List $r2;
+        sun.security.ssl.X509KeyManagerImpl r3;
+        int $i0;
+
+        r3 := @this: sun.security.ssl.X509KeyManagerImpl;
+
+        r0 := @parameter0: java.security.Principal[];
+
+        if r0 == null goto label1;
+
+        $i0 = lengthof r0;
+
+        if $i0 == 0 goto label1;
+
+        $r1 = new java.util.HashSet;
+
+        $r2 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>(r0);
+
+        specialinvoke $r1.<java.util.HashSet: void <init>(java.util.Collection)>($r2);
+
+        return $r1;
+
+     label1:
+        return null;
+    }
+
+    private java.util.List getAliases(int, java.util.List, java.util.Set, boolean, sun.security.ssl.X509KeyManagerImpl$CheckType, java.security.AlgorithmConstraints, java.util.List, java.lang.String) throws java.lang.Exception
+    {
+        java.util.Enumeration $r5;
+        java.util.Set r11;
+        sun.security.ssl.X509KeyManagerImpl$KeyType r50;
+        java.lang.StringBuilder $r26, $r27, $r28, $r32, $r33, $r34, $r41, $r42, $r43, $r51, $r52, $r53;
+        java.lang.Object[] $r30, $r36, $r45;
+        java.util.ArrayList r47, $r56;
+        java.lang.String r7, r16, $r24, $r29, $r35, $r44;
+        sun.security.ssl.X509KeyManagerImpl$EntryStatus $r55;
+        sun.security.ssl.X509KeyManagerImpl r0;
+        java.security.AlgorithmConstraints r12;
+        java.security.cert.X509Certificate $r17, r38;
+        java.util.Date r48, $r54;
+        java.security.KeyStore$Builder r3;
+        boolean $z0, $z1, z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, z13, $z14, z15, z16, z17, z18;
+        java.security.KeyStore $r4;
+        java.util.List $r1, r9, r15, $r21;
+        java.security.cert.Certificate $r14, r37, r49;
+        java.security.cert.Certificate[] $r8;
+        javax.security.auth.x500.X500Principal $r39;
+        sun.security.ssl.X509KeyManagerImpl$CheckResult $r18, $r22;
+        int i0, $i1, i2, i3, i4, i5, i6, i7, $i9, $i11;
+        java.util.Iterator $r10;
+        java.lang.Object $r2, $r6, $r46;
+        sun.security.ssl.X509KeyManagerImpl$CheckType r13;
+
+        r0 := @this: sun.security.ssl.X509KeyManagerImpl;
+
+        i0 := @parameter0: int;
+
+        r9 := @parameter1: java.util.List;
+
+        r11 := @parameter2: java.util.Set;
+
+        z2 := @parameter3: boolean;
+
+        r13 := @parameter4: sun.security.ssl.X509KeyManagerImpl$CheckType;
+
+        r12 := @parameter5: java.security.AlgorithmConstraints;
+
+        r15 := @parameter6: java.util.List;
+
+        r16 := @parameter7: java.lang.String;
+
+        $r1 = r0.<sun.security.ssl.X509KeyManagerImpl: java.util.List builders>;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.lang.Object get(int)>(i0);
+
+        r3 = (java.security.KeyStore$Builder) $r2;
+
+        $r4 = virtualinvoke r3.<java.security.KeyStore$Builder: java.security.KeyStore getKeyStore()>();
+
+        r47 = null;
+
+        r48 = <sun.security.ssl.X509KeyManagerImpl: java.util.Date verificationDate>;
+
+        z13 = 0;
+
+        z18 = 0;
+
+        z17 = 0;
+
+        $r5 = virtualinvoke $r4.<java.security.KeyStore: java.util.Enumeration aliases()>();
+
+     label01:
+        $z14 = interfaceinvoke $r5.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z14 == 0 goto label21;
+
+        $r6 = interfaceinvoke $r5.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r7 = (java.lang.String) $r6;
+
+        $z0 = virtualinvoke $r4.<java.security.KeyStore: boolean isKeyEntry(java.lang.String)>(r7);
+
+        if $z0 != 0 goto label02;
+
+        goto label01;
+
+     label02:
+        $r8 = virtualinvoke $r4.<java.security.KeyStore: java.security.cert.Certificate[] getCertificateChain(java.lang.String)>(r7);
+
+        if $r8 == null goto label01;
+
+        $i1 = lengthof $r8;
+
+        if $i1 != 0 goto label03;
+
+        goto label01;
+
+     label03:
+        z15 = 0;
+
+        i3 = lengthof $r8;
+
+        i4 = 0;
+
+     label04:
+        if i4 >= i3 goto label06;
+
+        r49 = $r8[i4];
+
+        $z12 = r49 instanceof java.security.cert.X509Certificate;
+
+        if $z12 != 0 goto label05;
+
+        z15 = 1;
+
+        goto label06;
+
+     label05:
+        i4 = i4 + 1;
+
+        goto label04;
+
+     label06:
+        if z15 == 0 goto label07;
+
+        goto label01;
+
+     label07:
+        $i9 = (int) -1;
+
+        i5 = $i9;
+
+        i6 = 0;
+
+        $r10 = interfaceinvoke r9.<java.util.List: java.util.Iterator iterator()>();
+
+     label08:
+        $z1 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label10;
+
+        $r46 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        r50 = (sun.security.ssl.X509KeyManagerImpl$KeyType) $r46;
+
+        $z11 = virtualinvoke r50.<sun.security.ssl.X509KeyManagerImpl$KeyType: boolean matches(java.security.cert.Certificate[])>($r8);
+
+        if $z11 == 0 goto label09;
+
+        i5 = i6;
+
+        goto label10;
+
+     label09:
+        i6 = i6 + 1;
+
+        goto label08;
+
+     label10:
+        $i11 = (int) -1;
+
+        if i5 != $i11 goto label11;
+
+        $z9 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z9 == 0 goto label01;
+
+        $z10 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("keymanager");
+
+        if $z10 == 0 goto label01;
+
+        $r51 = new java.lang.StringBuilder;
+
+        specialinvoke $r51.<java.lang.StringBuilder: void <init>()>();
+
+        $r41 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignore alias ");
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r7);
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": key algorithm does not match");
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r45 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r44, $r45);
+
+        goto label01;
+
+     label11:
+        if r11 == null goto label15;
+
+        z16 = 0;
+
+        i2 = lengthof $r8;
+
+        i7 = 0;
+
+     label12:
+        if i7 >= i2 goto label14;
+
+        r37 = $r8[i7];
+
+        r38 = (java.security.cert.X509Certificate) r37;
+
+        $r39 = virtualinvoke r38.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getIssuerX500Principal()>();
+
+        $z8 = interfaceinvoke r11.<java.util.Set: boolean contains(java.lang.Object)>($r39);
+
+        if $z8 == 0 goto label13;
+
+        z16 = 1;
+
+        goto label14;
+
+     label13:
+        i7 = i7 + 1;
+
+        goto label12;
+
+     label14:
+        if z16 != 0 goto label15;
+
+        $z6 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z6 == 0 goto label01;
+
+        $z7 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("keymanager");
+
+        if $z7 == 0 goto label01;
+
+        $r52 = new java.lang.StringBuilder;
+
+        specialinvoke $r52.<java.lang.StringBuilder: void <init>()>();
+
+        $r32 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignore alias ");
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r7);
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": issuers do not match");
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r36 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r35, $r36);
+
+        goto label01;
+
+     label15:
+        if r12 == null goto label16;
+
+        $r24 = virtualinvoke r13.<sun.security.ssl.X509KeyManagerImpl$CheckType: java.lang.String getValidator()>();
+
+        $z3 = staticinvoke <sun.security.ssl.X509KeyManagerImpl: boolean conformsToAlgorithmConstraints(java.security.AlgorithmConstraints,java.security.cert.Certificate[],java.lang.String)>(r12, $r8, $r24);
+
+        if $z3 != 0 goto label16;
+
+        $z4 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z4 == 0 goto label01;
+
+        $z5 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("keymanager");
+
+        if $z5 == 0 goto label01;
+
+        $r53 = new java.lang.StringBuilder;
+
+        specialinvoke $r53.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignore alias ");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r7);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": certificate list does not conform to algorithm constraints");
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r30 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r29, $r30);
+
+        goto label01;
+
+     label16:
+        if r48 != null goto label17;
+
+        $r54 = new java.util.Date;
+
+        specialinvoke $r54.<java.util.Date: void <init>()>();
+
+        r48 = $r54;
+
+     label17:
+        $r14 = $r8[0];
+
+        $r17 = (java.security.cert.X509Certificate) $r14;
+
+        $r18 = virtualinvoke r13.<sun.security.ssl.X509KeyManagerImpl$CheckType: sun.security.ssl.X509KeyManagerImpl$CheckResult check(java.security.cert.X509Certificate,java.util.Date,java.util.List,java.lang.String)>($r17, r48, r15, r16);
+
+        $r55 = new sun.security.ssl.X509KeyManagerImpl$EntryStatus;
+
+        specialinvoke $r55.<sun.security.ssl.X509KeyManagerImpl$EntryStatus: void <init>(int,int,java.lang.String,java.security.cert.Certificate[],sun.security.ssl.X509KeyManagerImpl$CheckResult)>(i0, i5, r7, $r8, $r18);
+
+        if z18 != 0 goto label18;
+
+        $r22 = <sun.security.ssl.X509KeyManagerImpl$CheckResult: sun.security.ssl.X509KeyManagerImpl$CheckResult OK>;
+
+        if $r18 != $r22 goto label18;
+
+        if i5 != 0 goto label18;
+
+        z13 = 1;
+
+        z18 = 1;
+
+        z17 = 1;
+
+     label18:
+        if z17 == 0 goto label19;
+
+        if z2 != 0 goto label19;
+
+        $r21 = staticinvoke <java.util.Collections: java.util.List singletonList(java.lang.Object)>($r55);
+
+        return $r21;
+
+     label19:
+        if r47 != null goto label20;
+
+        $r56 = new java.util.ArrayList;
+
+        specialinvoke $r56.<java.util.ArrayList: void <init>()>();
+
+        r47 = $r56;
+
+     label20:
+        interfaceinvoke r47.<java.util.List: boolean add(java.lang.Object)>($r55);
+
+        goto label01;
+
+     label21:
+        return r47;
+    }
+
+    private static boolean conformsToAlgorithmConstraints(java.security.AlgorithmConstraints, java.security.cert.Certificate[], java.lang.String)
+    {
+        sun.security.provider.certpath.AlgorithmChecker $r10;
+        java.lang.Object[] $r7, $r9;
+        int $i0, i1, $i3;
+        java.lang.String r2;
+        java.security.cert.CertPathValidatorException $r6, $r8;
+        boolean $z0, $z1, $z2, $z3;
+        java.util.Set $r5;
+        java.security.cert.Certificate r4;
+        java.security.AlgorithmConstraints r1;
+        java.security.cert.Certificate[] r3;
+
+        r1 := @parameter0: java.security.AlgorithmConstraints;
+
+        r3 := @parameter1: java.security.cert.Certificate[];
+
+        r2 := @parameter2: java.lang.String;
+
+        $r10 = new sun.security.provider.certpath.AlgorithmChecker;
+
+        specialinvoke $r10.<sun.security.provider.certpath.AlgorithmChecker: void <init>(java.security.AlgorithmConstraints,java.lang.String)>(r1, r2);
+
+     label01:
+        virtualinvoke $r10.<sun.security.provider.certpath.AlgorithmChecker: void init(boolean)>(0);
+
+     label02:
+        goto label05;
+
+     label03:
+        $r8 := @caughtexception;
+
+        $z2 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z2 == 0 goto label04;
+
+        $z3 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("keymanager");
+
+        if $z3 == 0 goto label04;
+
+        $r9 = newarray (java.lang.Object)[1];
+
+        $r9[0] = $r8;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Cannot initialize algorithm constraints checker", $r9);
+
+     label04:
+        return 0;
+
+     label05:
+        $i0 = lengthof r3;
+
+        i1 = $i0 - 1;
+
+     label06:
+        if i1 < 0 goto label12;
+
+        r4 = r3[i1];
+
+     label07:
+        $r5 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+        virtualinvoke $r10.<sun.security.provider.certpath.AlgorithmChecker: void check(java.security.cert.Certificate,java.util.Collection)>(r4, $r5);
+
+     label08:
+        goto label11;
+
+     label09:
+        $r6 := @caughtexception;
+
+        $z0 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z0 == 0 goto label10;
+
+        $z1 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("keymanager");
+
+        if $z1 == 0 goto label10;
+
+        $r7 = newarray (java.lang.Object)[2];
+
+        $r7[0] = r4;
+
+        $r7[1] = $r6;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Certificate does not conform to algorithm constraints", $r7);
+
+     label10:
+        return 0;
+
+     label11:
+        $i3 = (int) -1;
+
+        i1 = i1 + $i3;
+
+        goto label06;
+
+     label12:
+        return 1;
+
+        catch java.security.cert.CertPathValidatorException from label01 to label02 with label03;
+        catch java.security.cert.CertPathValidatorException from label07 to label08 with label09;
+    }
+}

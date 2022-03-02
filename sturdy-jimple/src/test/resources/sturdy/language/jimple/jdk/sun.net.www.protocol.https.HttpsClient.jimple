@@ -1,0 +1,1756 @@
+final class sun.net.www.protocol.https.HttpsClient extends sun.net.www.http.HttpClient implements javax.net.ssl.HandshakeCompletedListener
+{
+    private static final int httpsPortNumber;
+    private static final java.lang.String defaultHVCanonicalName;
+    private static final java.lang.String TLS13_CIPHER1;
+    private static final java.lang.String TLS13_CIPHER2;
+    private javax.net.ssl.HostnameVerifier hv;
+    private javax.net.ssl.SSLSocketFactory sslSocketFactory;
+    private javax.net.ssl.SSLSession session;
+    static final boolean $assertionsDisabled;
+
+    protected int getDefaultPort()
+    {
+        sun.net.www.protocol.https.HttpsClient r0;
+
+        r0 := @this: sun.net.www.protocol.https.HttpsClient;
+
+        return 443;
+    }
+
+    private java.lang.String[] getCipherSuites(java.lang.String[], javax.net.ssl.SSLSocket)
+    {
+        javax.net.ssl.SSLSocket r5;
+        sun.security.action.GetPropertyAction $r0;
+        java.util.Vector $r17;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        sun.net.www.protocol.https.HttpsClient r22;
+        java.util.List $r4, $r7, $r9;
+        java.lang.Object[] $r13;
+        java.lang.String[] r3, $r6, $r8, $r12, $r14, r23;
+        java.util.ArrayList $r10;
+        java.util.StringTokenizer $r18;
+        int $i0, $i1, i2;
+        java.lang.String r2, r16, $r20, $r21;
+        java.util.Iterator $r11;
+        java.lang.Object $r1, $r15, $r19;
+
+        r22 := @this: sun.net.www.protocol.https.HttpsClient;
+
+        r3 := @parameter0: java.lang.String[];
+
+        r5 := @parameter1: javax.net.ssl.SSLSocket;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("https.cipherSuites");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r2 = (java.lang.String) $r1;
+
+        if r2 == null goto label01;
+
+        $z5 = virtualinvoke r2.<java.lang.String: boolean isEmpty()>();
+
+        if $z5 == 0 goto label09;
+
+     label01:
+        if r3 == null goto label02;
+
+        $r4 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>(r3);
+
+        $z0 = interfaceinvoke $r4.<java.util.List: boolean contains(java.lang.Object)>("TLSv1.3");
+
+        if $z0 != 0 goto label03;
+
+     label02:
+        return null;
+
+     label03:
+        $r6 = virtualinvoke r5.<javax.net.ssl.SSLSocket: java.lang.String[] getEnabledCipherSuites()>();
+
+        $r7 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r6);
+
+        $z1 = interfaceinvoke $r7.<java.util.List: boolean contains(java.lang.Object)>("TLS_AES_128_GCM_SHA256");
+
+        if $z1 != 0 goto label08;
+
+        $z2 = interfaceinvoke $r7.<java.util.List: boolean contains(java.lang.Object)>("TLS_AES_256_GCM_SHA384");
+
+        if $z2 != 0 goto label08;
+
+        $r8 = virtualinvoke r5.<javax.net.ssl.SSLSocket: java.lang.String[] getSupportedCipherSuites()>();
+
+        $r9 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r8);
+
+        $r10 = new java.util.ArrayList;
+
+        specialinvoke $r10.<java.util.ArrayList: void <init>()>();
+
+        $z3 = interfaceinvoke $r9.<java.util.List: boolean contains(java.lang.Object)>("TLS_AES_128_GCM_SHA256");
+
+        if $z3 == 0 goto label04;
+
+        interfaceinvoke $r10.<java.util.List: boolean add(java.lang.Object)>("TLS_AES_128_GCM_SHA256");
+
+     label04:
+        $z4 = interfaceinvoke $r9.<java.util.List: boolean contains(java.lang.Object)>("TLS_AES_256_GCM_SHA384");
+
+        if $z4 == 0 goto label05;
+
+        interfaceinvoke $r10.<java.util.List: boolean add(java.lang.Object)>("TLS_AES_256_GCM_SHA384");
+
+     label05:
+        $r11 = interfaceinvoke $r7.<java.util.List: java.util.Iterator iterator()>();
+
+     label06:
+        $z7 = interfaceinvoke $r11.<java.util.Iterator: boolean hasNext()>();
+
+        if $z7 == 0 goto label07;
+
+        $r15 = interfaceinvoke $r11.<java.util.Iterator: java.lang.Object next()>();
+
+        r16 = (java.lang.String) $r15;
+
+        interfaceinvoke $r10.<java.util.List: boolean add(java.lang.Object)>(r16);
+
+        goto label06;
+
+     label07:
+        $r12 = newarray (java.lang.String)[0];
+
+        $r13 = interfaceinvoke $r10.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r12);
+
+        $r14 = (java.lang.String[]) $r13;
+
+        return $r14;
+
+     label08:
+        goto label14;
+
+     label09:
+        $r17 = new java.util.Vector;
+
+        specialinvoke $r17.<java.util.Vector: void <init>()>();
+
+        $r18 = new java.util.StringTokenizer;
+
+        specialinvoke $r18.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>(r2, ",");
+
+     label10:
+        $z6 = virtualinvoke $r18.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z6 == 0 goto label11;
+
+        $r21 = virtualinvoke $r18.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        virtualinvoke $r17.<java.util.Vector: void addElement(java.lang.Object)>($r21);
+
+        goto label10;
+
+     label11:
+        $i0 = virtualinvoke $r17.<java.util.Vector: int size()>();
+
+        r23 = newarray (java.lang.String)[$i0];
+
+        i2 = 0;
+
+     label12:
+        $i1 = lengthof r23;
+
+        if i2 >= $i1 goto label13;
+
+        $r19 = virtualinvoke $r17.<java.util.Vector: java.lang.Object elementAt(int)>(i2);
+
+        $r20 = (java.lang.String) $r19;
+
+        r23[i2] = $r20;
+
+        i2 = i2 + 1;
+
+        goto label12;
+
+     label13:
+        return r23;
+
+     label14:
+        return null;
+    }
+
+    private java.lang.String[] getProtocols()
+    {
+        sun.net.www.protocol.https.HttpsClient r8;
+        java.lang.String[] r9;
+        sun.security.action.GetPropertyAction $r0;
+        java.util.Vector $r3;
+        java.util.StringTokenizer $r4;
+        int $i0, $i1, i2;
+        java.lang.Object $r1, $r5;
+        java.lang.String r2, $r6, $r7;
+        boolean $z0, $z1;
+
+        r8 := @this: sun.net.www.protocol.https.HttpsClient;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("https.protocols");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r2 = (java.lang.String) $r1;
+
+        if r2 == null goto label1;
+
+        $z0 = virtualinvoke r2.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        r9 = null;
+
+        goto label6;
+
+     label2:
+        $r3 = new java.util.Vector;
+
+        specialinvoke $r3.<java.util.Vector: void <init>()>();
+
+        $r4 = new java.util.StringTokenizer;
+
+        specialinvoke $r4.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>(r2, ",");
+
+     label3:
+        $z1 = virtualinvoke $r4.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z1 == 0 goto label4;
+
+        $r7 = virtualinvoke $r4.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        virtualinvoke $r3.<java.util.Vector: void addElement(java.lang.Object)>($r7);
+
+        goto label3;
+
+     label4:
+        $i0 = virtualinvoke $r3.<java.util.Vector: int size()>();
+
+        r9 = newarray (java.lang.String)[$i0];
+
+        i2 = 0;
+
+     label5:
+        $i1 = lengthof r9;
+
+        if i2 >= $i1 goto label6;
+
+        $r5 = virtualinvoke $r3.<java.util.Vector: java.lang.Object elementAt(int)>(i2);
+
+        $r6 = (java.lang.String) $r5;
+
+        r9[i2] = $r6;
+
+        i2 = i2 + 1;
+
+        goto label5;
+
+     label6:
+        return r9;
+    }
+
+    private java.lang.String getUserAgent()
+    {
+        sun.net.www.protocol.https.HttpsClient r2;
+        java.lang.Object $r1;
+        java.lang.String r3;
+        sun.security.action.GetPropertyAction $r0;
+        boolean $z0;
+
+        r2 := @this: sun.net.www.protocol.https.HttpsClient;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("https.agent");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r3 = (java.lang.String) $r1;
+
+        if r3 == null goto label1;
+
+        $z0 = virtualinvoke r3.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        r3 = "JSSE";
+
+     label2:
+        return r3;
+    }
+
+    private void <init>(javax.net.ssl.SSLSocketFactory, java.net.URL) throws java.io.IOException
+    {
+        sun.net.www.protocol.https.HttpsClient r0;
+        java.net.URL r2;
+        int $i1;
+        javax.net.ssl.SSLSocketFactory r1;
+
+        r0 := @this: sun.net.www.protocol.https.HttpsClient;
+
+        r1 := @parameter0: javax.net.ssl.SSLSocketFactory;
+
+        r2 := @parameter1: java.net.URL;
+
+        $i1 = (int) -1;
+
+        specialinvoke r0.<sun.net.www.protocol.https.HttpsClient: void <init>(javax.net.ssl.SSLSocketFactory,java.net.URL,java.lang.String,int)>(r1, r2, null, $i1);
+
+        return;
+    }
+
+    void <init>(javax.net.ssl.SSLSocketFactory, java.net.URL, java.lang.String, int) throws java.io.IOException
+    {
+        sun.net.www.protocol.https.HttpsClient r0;
+        java.net.URL r2;
+        int i0, $i2;
+        java.lang.String r3;
+        javax.net.ssl.SSLSocketFactory r1;
+
+        r0 := @this: sun.net.www.protocol.https.HttpsClient;
+
+        r1 := @parameter0: javax.net.ssl.SSLSocketFactory;
+
+        r2 := @parameter1: java.net.URL;
+
+        r3 := @parameter2: java.lang.String;
+
+        i0 := @parameter3: int;
+
+        $i2 = (int) -1;
+
+        specialinvoke r0.<sun.net.www.protocol.https.HttpsClient: void <init>(javax.net.ssl.SSLSocketFactory,java.net.URL,java.lang.String,int,int)>(r1, r2, r3, i0, $i2);
+
+        return;
+    }
+
+    void <init>(javax.net.ssl.SSLSocketFactory, java.net.URL, java.lang.String, int, int) throws java.io.IOException
+    {
+        java.net.Proxy $r4;
+        sun.net.www.protocol.https.HttpsClient r0;
+        java.net.URL r2;
+        int i0, i1;
+        java.lang.String r3;
+        javax.net.ssl.SSLSocketFactory r1;
+
+        r0 := @this: sun.net.www.protocol.https.HttpsClient;
+
+        r1 := @parameter0: javax.net.ssl.SSLSocketFactory;
+
+        r2 := @parameter1: java.net.URL;
+
+        r3 := @parameter2: java.lang.String;
+
+        i0 := @parameter3: int;
+
+        i1 := @parameter4: int;
+
+        if r3 != null goto label1;
+
+        $r4 = null;
+
+        goto label2;
+
+     label1:
+        $r4 = staticinvoke <sun.net.www.http.HttpClient: java.net.Proxy newHttpProxy(java.lang.String,int,java.lang.String)>(r3, i0, "https");
+
+     label2:
+        specialinvoke r0.<sun.net.www.protocol.https.HttpsClient: void <init>(javax.net.ssl.SSLSocketFactory,java.net.URL,java.net.Proxy,int)>(r1, r2, $r4, i1);
+
+        return;
+    }
+
+    void <init>(javax.net.ssl.SSLSocketFactory, java.net.URL, java.net.Proxy, int) throws java.io.IOException
+    {
+        java.net.URL r5;
+        java.net.Proxy r3;
+        int $i0, $i1, i2, $i3, $i5;
+        java.lang.String $r6, $r14;
+        boolean $z0;
+        sun.util.logging.PlatformLogger$Level $r2;
+        sun.util.logging.PlatformLogger $r1;
+        sun.net.www.protocol.https.HttpsClient r0;
+        javax.net.ssl.SSLSocketFactory r4;
+        java.lang.StringBuilder $r8, $r9, $r10, $r11, $r12, $r13, $r15;
+
+        r0 := @this: sun.net.www.protocol.https.HttpsClient;
+
+        r4 := @parameter0: javax.net.ssl.SSLSocketFactory;
+
+        r5 := @parameter1: java.net.URL;
+
+        r3 := @parameter2: java.net.Proxy;
+
+        i2 := @parameter3: int;
+
+        specialinvoke r0.<sun.net.www.http.HttpClient: void <init>()>();
+
+        $r1 = staticinvoke <sun.net.www.protocol.http.HttpURLConnection: sun.util.logging.PlatformLogger getHttpLogger()>();
+
+        $r2 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINEST>;
+
+        $z0 = virtualinvoke $r1.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Creating new HttpsClient with url:");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r5);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" and proxy:");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r3);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" with connect timeout:");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i2);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<sun.util.logging.PlatformLogger: void finest(java.lang.String)>($r14);
+
+     label1:
+        r0.<sun.net.www.protocol.https.HttpsClient: java.net.Proxy proxy> = r3;
+
+        virtualinvoke r0.<sun.net.www.protocol.https.HttpsClient: void setSSLSocketFactory(javax.net.ssl.SSLSocketFactory)>(r4);
+
+        r0.<sun.net.www.protocol.https.HttpsClient: boolean proxyDisabled> = 1;
+
+        $r6 = virtualinvoke r5.<java.net.URL: java.lang.String getHost()>();
+
+        r0.<sun.net.www.protocol.https.HttpsClient: java.lang.String host> = $r6;
+
+        r0.<sun.net.www.protocol.https.HttpsClient: java.net.URL url> = r5;
+
+        $i0 = virtualinvoke r5.<java.net.URL: int getPort()>();
+
+        r0.<sun.net.www.protocol.https.HttpsClient: int port> = $i0;
+
+        $i1 = r0.<sun.net.www.protocol.https.HttpsClient: int port>;
+
+        $i5 = (int) -1;
+
+        if $i1 != $i5 goto label2;
+
+        $i3 = virtualinvoke r0.<sun.net.www.protocol.https.HttpsClient: int getDefaultPort()>();
+
+        r0.<sun.net.www.protocol.https.HttpsClient: int port> = $i3;
+
+     label2:
+        virtualinvoke r0.<sun.net.www.protocol.https.HttpsClient: void setConnectTimeout(int)>(i2);
+
+        virtualinvoke r0.<sun.net.www.protocol.https.HttpsClient: void openServer()>();
+
+        return;
+    }
+
+    static sun.net.www.http.HttpClient New(javax.net.ssl.SSLSocketFactory, java.net.URL, javax.net.ssl.HostnameVerifier, sun.net.www.protocol.http.HttpURLConnection) throws java.io.IOException
+    {
+        sun.net.www.protocol.http.HttpURLConnection r3;
+        java.net.URL r1;
+        javax.net.ssl.HostnameVerifier r2;
+        sun.net.www.http.HttpClient $r4;
+        javax.net.ssl.SSLSocketFactory r0;
+
+        r0 := @parameter0: javax.net.ssl.SSLSocketFactory;
+
+        r1 := @parameter1: java.net.URL;
+
+        r2 := @parameter2: javax.net.ssl.HostnameVerifier;
+
+        r3 := @parameter3: sun.net.www.protocol.http.HttpURLConnection;
+
+        $r4 = staticinvoke <sun.net.www.protocol.https.HttpsClient: sun.net.www.http.HttpClient New(javax.net.ssl.SSLSocketFactory,java.net.URL,javax.net.ssl.HostnameVerifier,boolean,sun.net.www.protocol.http.HttpURLConnection)>(r0, r1, r2, 1, r3);
+
+        return $r4;
+    }
+
+    static sun.net.www.http.HttpClient New(javax.net.ssl.SSLSocketFactory, java.net.URL, javax.net.ssl.HostnameVerifier, boolean, sun.net.www.protocol.http.HttpURLConnection) throws java.io.IOException
+    {
+        sun.net.www.protocol.http.HttpURLConnection r3;
+        java.net.URL r1;
+        int $i1;
+        javax.net.ssl.HostnameVerifier r2;
+        sun.net.www.http.HttpClient $r4;
+        javax.net.ssl.SSLSocketFactory r0;
+        boolean z0;
+
+        r0 := @parameter0: javax.net.ssl.SSLSocketFactory;
+
+        r1 := @parameter1: java.net.URL;
+
+        r2 := @parameter2: javax.net.ssl.HostnameVerifier;
+
+        z0 := @parameter3: boolean;
+
+        r3 := @parameter4: sun.net.www.protocol.http.HttpURLConnection;
+
+        $i1 = (int) -1;
+
+        $r4 = staticinvoke <sun.net.www.protocol.https.HttpsClient: sun.net.www.http.HttpClient New(javax.net.ssl.SSLSocketFactory,java.net.URL,javax.net.ssl.HostnameVerifier,java.lang.String,int,boolean,sun.net.www.protocol.http.HttpURLConnection)>(r0, r1, r2, null, $i1, z0, r3);
+
+        return $r4;
+    }
+
+    static sun.net.www.http.HttpClient New(javax.net.ssl.SSLSocketFactory, java.net.URL, javax.net.ssl.HostnameVerifier, java.lang.String, int, sun.net.www.protocol.http.HttpURLConnection) throws java.io.IOException
+    {
+        sun.net.www.protocol.http.HttpURLConnection r4;
+        java.net.URL r1;
+        int i0;
+        java.lang.String r3;
+        javax.net.ssl.HostnameVerifier r2;
+        sun.net.www.http.HttpClient $r5;
+        javax.net.ssl.SSLSocketFactory r0;
+
+        r0 := @parameter0: javax.net.ssl.SSLSocketFactory;
+
+        r1 := @parameter1: java.net.URL;
+
+        r2 := @parameter2: javax.net.ssl.HostnameVerifier;
+
+        r3 := @parameter3: java.lang.String;
+
+        i0 := @parameter4: int;
+
+        r4 := @parameter5: sun.net.www.protocol.http.HttpURLConnection;
+
+        $r5 = staticinvoke <sun.net.www.protocol.https.HttpsClient: sun.net.www.http.HttpClient New(javax.net.ssl.SSLSocketFactory,java.net.URL,javax.net.ssl.HostnameVerifier,java.lang.String,int,boolean,sun.net.www.protocol.http.HttpURLConnection)>(r0, r1, r2, r3, i0, 1, r4);
+
+        return $r5;
+    }
+
+    static sun.net.www.http.HttpClient New(javax.net.ssl.SSLSocketFactory, java.net.URL, javax.net.ssl.HostnameVerifier, java.lang.String, int, boolean, sun.net.www.protocol.http.HttpURLConnection) throws java.io.IOException
+    {
+        java.net.URL r1;
+        sun.net.www.http.HttpClient $r5;
+        javax.net.ssl.SSLSocketFactory r0;
+        sun.net.www.protocol.http.HttpURLConnection r4;
+        int i0, $i2;
+        java.lang.String r3;
+        javax.net.ssl.HostnameVerifier r2;
+        boolean z0;
+
+        r0 := @parameter0: javax.net.ssl.SSLSocketFactory;
+
+        r1 := @parameter1: java.net.URL;
+
+        r2 := @parameter2: javax.net.ssl.HostnameVerifier;
+
+        r3 := @parameter3: java.lang.String;
+
+        i0 := @parameter4: int;
+
+        z0 := @parameter5: boolean;
+
+        r4 := @parameter6: sun.net.www.protocol.http.HttpURLConnection;
+
+        $i2 = (int) -1;
+
+        $r5 = staticinvoke <sun.net.www.protocol.https.HttpsClient: sun.net.www.http.HttpClient New(javax.net.ssl.SSLSocketFactory,java.net.URL,javax.net.ssl.HostnameVerifier,java.lang.String,int,boolean,int,sun.net.www.protocol.http.HttpURLConnection)>(r0, r1, r2, r3, i0, z0, $i2, r4);
+
+        return $r5;
+    }
+
+    static sun.net.www.http.HttpClient New(javax.net.ssl.SSLSocketFactory, java.net.URL, javax.net.ssl.HostnameVerifier, java.lang.String, int, boolean, int, sun.net.www.protocol.http.HttpURLConnection) throws java.io.IOException
+    {
+        java.net.URL r1;
+        sun.net.www.http.HttpClient $r5;
+        javax.net.ssl.SSLSocketFactory r0;
+        sun.net.www.protocol.http.HttpURLConnection r4;
+        java.net.Proxy $r6;
+        int i0, i1;
+        java.lang.String r3;
+        javax.net.ssl.HostnameVerifier r2;
+        boolean z0;
+
+        r0 := @parameter0: javax.net.ssl.SSLSocketFactory;
+
+        r1 := @parameter1: java.net.URL;
+
+        r2 := @parameter2: javax.net.ssl.HostnameVerifier;
+
+        r3 := @parameter3: java.lang.String;
+
+        i0 := @parameter4: int;
+
+        z0 := @parameter5: boolean;
+
+        i1 := @parameter6: int;
+
+        r4 := @parameter7: sun.net.www.protocol.http.HttpURLConnection;
+
+        if r3 != null goto label1;
+
+        $r6 = null;
+
+        goto label2;
+
+     label1:
+        $r6 = staticinvoke <sun.net.www.http.HttpClient: java.net.Proxy newHttpProxy(java.lang.String,int,java.lang.String)>(r3, i0, "https");
+
+     label2:
+        $r5 = staticinvoke <sun.net.www.protocol.https.HttpsClient: sun.net.www.http.HttpClient New(javax.net.ssl.SSLSocketFactory,java.net.URL,javax.net.ssl.HostnameVerifier,java.net.Proxy,boolean,int,sun.net.www.protocol.http.HttpURLConnection)>(r0, r1, r2, $r6, z0, i1, r4);
+
+        return $r5;
+    }
+
+    static sun.net.www.http.HttpClient New(javax.net.ssl.SSLSocketFactory, java.net.URL, javax.net.ssl.HostnameVerifier, java.net.Proxy, boolean, int, sun.net.www.protocol.http.HttpURLConnection) throws java.io.IOException
+    {
+        sun.net.www.http.KeepAliveCache $r14;
+        java.net.URL r3;
+        java.net.InetAddress $r8;
+        java.net.Proxy $r5, $r6, $r10, $r16, $r17, $r23, $r31, r41;
+        javax.net.ssl.HostnameVerifier r4;
+        boolean $z0, z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        sun.util.logging.PlatformLogger$Level $r1, $r18, $r44;
+        sun.net.www.protocol.https.HttpsClient $r12, r42, r43, r45;
+        javax.net.ssl.SSLSocketFactory r13;
+        sun.net.www.protocol.http.HttpURLConnection r24;
+        java.lang.StringBuilder $r19, $r20, $r21, $r25, $r26, $r27, $r33, $r34, $r35, $r36, $r37;
+        java.lang.Throwable $r39, $r40;
+        java.lang.AssertionError $r30;
+        sun.net.www.http.HttpClient $r15;
+        sun.net.www.protocol.http.HttpURLConnection$TunnelState $r29;
+        int $i0, $i1, i2;
+        java.lang.String $r7, $r9, $r11, $r22, $r28, $r32, $r38;
+        sun.util.logging.PlatformLogger $r0;
+        java.lang.SecurityManager $r2;
+
+        r13 := @parameter0: javax.net.ssl.SSLSocketFactory;
+
+        r3 := @parameter1: java.net.URL;
+
+        r4 := @parameter2: javax.net.ssl.HostnameVerifier;
+
+        r41 := @parameter3: java.net.Proxy;
+
+        z1 := @parameter4: boolean;
+
+        i2 := @parameter5: int;
+
+        r24 := @parameter6: sun.net.www.protocol.http.HttpURLConnection;
+
+        if r41 != null goto label01;
+
+        r41 = <java.net.Proxy: java.net.Proxy NO_PROXY>;
+
+     label01:
+        $r0 = staticinvoke <sun.net.www.protocol.http.HttpURLConnection: sun.util.logging.PlatformLogger getHttpLogger()>();
+
+        $r1 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINEST>;
+
+        $z0 = virtualinvoke $r0.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r1);
+
+        if $z0 == 0 goto label02;
+
+        $r33 = new java.lang.StringBuilder;
+
+        specialinvoke $r33.<java.lang.StringBuilder: void <init>()>();
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Looking for HttpClient for URL ");
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r3);
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" and proxy value of ");
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r41);
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<sun.util.logging.PlatformLogger: void finest(java.lang.String)>($r38);
+
+     label02:
+        r42 = null;
+
+        if z1 == 0 goto label21;
+
+        $r14 = <sun.net.www.protocol.https.HttpsClient: sun.net.www.http.KeepAliveCache kac>;
+
+        $r15 = virtualinvoke $r14.<sun.net.www.http.KeepAliveCache: sun.net.www.http.HttpClient get(java.net.URL,java.lang.Object)>(r3, r13);
+
+        r42 = (sun.net.www.protocol.https.HttpsClient) $r15;
+
+        if r42 == null goto label03;
+
+        if r24 == null goto label03;
+
+        $z7 = virtualinvoke r24.<sun.net.www.protocol.http.HttpURLConnection: boolean streaming()>();
+
+        if $z7 == 0 goto label03;
+
+        $r32 = virtualinvoke r24.<sun.net.www.protocol.http.HttpURLConnection: java.lang.String getRequestMethod()>();
+
+        if $r32 != "POST" goto label03;
+
+        $z8 = virtualinvoke r42.<sun.net.www.protocol.https.HttpsClient: boolean available()>();
+
+        if $z8 != 0 goto label03;
+
+        r42 = null;
+
+     label03:
+        if r42 == null goto label21;
+
+        $r16 = r42.<sun.net.www.protocol.https.HttpsClient: java.net.Proxy proxy>;
+
+        if $r16 == null goto label04;
+
+        $r31 = r42.<sun.net.www.protocol.https.HttpsClient: java.net.Proxy proxy>;
+
+        $z6 = virtualinvoke $r31.<java.net.Proxy: boolean equals(java.lang.Object)>(r41);
+
+        if $z6 != 0 goto label05;
+
+     label04:
+        $r17 = r42.<sun.net.www.protocol.https.HttpsClient: java.net.Proxy proxy>;
+
+        if $r17 != null goto label14;
+
+        $r23 = <java.net.Proxy: java.net.Proxy NO_PROXY>;
+
+        if r41 != $r23 goto label14;
+
+     label05:
+        r43 = r42;
+
+        entermonitor r42;
+
+     label06:
+        r42.<sun.net.www.protocol.https.HttpsClient: boolean cachedHttpClient> = 1;
+
+        $z3 = <sun.net.www.protocol.https.HttpsClient: boolean $assertionsDisabled>;
+
+        if $z3 != 0 goto label07;
+
+        $z5 = r42.<sun.net.www.protocol.https.HttpsClient: boolean inCache>;
+
+        if $z5 != 0 goto label07;
+
+        $r30 = new java.lang.AssertionError;
+
+        specialinvoke $r30.<java.lang.AssertionError: void <init>()>();
+
+        throw $r30;
+
+     label07:
+        r42.<sun.net.www.protocol.https.HttpsClient: boolean inCache> = 0;
+
+        if r24 == null goto label08;
+
+        $z4 = virtualinvoke r42.<sun.net.www.protocol.https.HttpsClient: boolean needsTunneling()>();
+
+        if $z4 == 0 goto label08;
+
+        $r29 = <sun.net.www.protocol.http.HttpURLConnection$TunnelState: sun.net.www.protocol.http.HttpURLConnection$TunnelState TUNNELING>;
+
+        virtualinvoke r24.<sun.net.www.protocol.http.HttpURLConnection: void setTunnelState(sun.net.www.protocol.http.HttpURLConnection$TunnelState)>($r29);
+
+     label08:
+        $r44 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINEST>;
+
+        $z9 = virtualinvoke $r0.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r44);
+
+        if $z9 == 0 goto label09;
+
+        $r25 = new java.lang.StringBuilder;
+
+        specialinvoke $r25.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("KeepAlive stream retrieved from the cache, ");
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r42);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<sun.util.logging.PlatformLogger: void finest(java.lang.String)>($r28);
+
+     label09:
+        exitmonitor r43;
+
+     label10:
+        goto label13;
+
+     label11:
+        $r40 := @caughtexception;
+
+        exitmonitor r43;
+
+     label12:
+        throw $r40;
+
+     label13:
+        goto label21;
+
+     label14:
+        r45 = r42;
+
+        entermonitor r42;
+
+     label15:
+        $r18 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINEST>;
+
+        $z2 = virtualinvoke $r0.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r18);
+
+        if $z2 == 0 goto label16;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Not returning this connection to cache: ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r42);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<sun.util.logging.PlatformLogger: void finest(java.lang.String)>($r22);
+
+     label16:
+        r42.<sun.net.www.protocol.https.HttpsClient: boolean inCache> = 0;
+
+        virtualinvoke r42.<sun.net.www.protocol.https.HttpsClient: void closeServer()>();
+
+        exitmonitor r45;
+
+     label17:
+        goto label20;
+
+     label18:
+        $r39 := @caughtexception;
+
+        exitmonitor r45;
+
+     label19:
+        throw $r39;
+
+     label20:
+        r42 = null;
+
+     label21:
+        if r42 != null goto label22;
+
+        $r12 = new sun.net.www.protocol.https.HttpsClient;
+
+        specialinvoke $r12.<sun.net.www.protocol.https.HttpsClient: void <init>(javax.net.ssl.SSLSocketFactory,java.net.URL,java.net.Proxy,int)>(r13, r3, r41, i2);
+
+        r42 = $r12;
+
+        goto label26;
+
+     label22:
+        $r2 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r2 == null goto label25;
+
+        $r6 = r42.<sun.net.www.protocol.https.HttpsClient: java.net.Proxy proxy>;
+
+        $r5 = <java.net.Proxy: java.net.Proxy NO_PROXY>;
+
+        if $r6 == $r5 goto label23;
+
+        $r10 = r42.<sun.net.www.protocol.https.HttpsClient: java.net.Proxy proxy>;
+
+        if $r10 != null goto label24;
+
+     label23:
+        $r7 = virtualinvoke r3.<java.net.URL: java.lang.String getHost()>();
+
+        $r8 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByName(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+        $i0 = virtualinvoke r3.<java.net.URL: int getPort()>();
+
+        virtualinvoke $r2.<java.lang.SecurityManager: void checkConnect(java.lang.String,int)>($r9, $i0);
+
+        goto label25;
+
+     label24:
+        $r11 = virtualinvoke r3.<java.net.URL: java.lang.String getHost()>();
+
+        $i1 = virtualinvoke r3.<java.net.URL: int getPort()>();
+
+        virtualinvoke $r2.<java.lang.SecurityManager: void checkConnect(java.lang.String,int)>($r11, $i1);
+
+     label25:
+        r42.<sun.net.www.protocol.https.HttpsClient: java.net.URL url> = r3;
+
+     label26:
+        virtualinvoke r42.<sun.net.www.protocol.https.HttpsClient: void setHostnameVerifier(javax.net.ssl.HostnameVerifier)>(r4);
+
+        return r42;
+
+        catch java.lang.Throwable from label06 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+        catch java.lang.Throwable from label15 to label17 with label18;
+        catch java.lang.Throwable from label18 to label19 with label18;
+    }
+
+    void setHostnameVerifier(javax.net.ssl.HostnameVerifier)
+    {
+        javax.net.ssl.HostnameVerifier r1;
+        sun.net.www.protocol.https.HttpsClient r0;
+
+        r0 := @this: sun.net.www.protocol.https.HttpsClient;
+
+        r1 := @parameter0: javax.net.ssl.HostnameVerifier;
+
+        r0.<sun.net.www.protocol.https.HttpsClient: javax.net.ssl.HostnameVerifier hv> = r1;
+
+        return;
+    }
+
+    void setSSLSocketFactory(javax.net.ssl.SSLSocketFactory)
+    {
+        sun.net.www.protocol.https.HttpsClient r0;
+        javax.net.ssl.SSLSocketFactory r1;
+
+        r0 := @this: sun.net.www.protocol.https.HttpsClient;
+
+        r1 := @parameter0: javax.net.ssl.SSLSocketFactory;
+
+        r0.<sun.net.www.protocol.https.HttpsClient: javax.net.ssl.SSLSocketFactory sslSocketFactory> = r1;
+
+        return;
+    }
+
+    javax.net.ssl.SSLSocketFactory getSSLSocketFactory()
+    {
+        sun.net.www.protocol.https.HttpsClient r0;
+        javax.net.ssl.SSLSocketFactory $r1;
+
+        r0 := @this: sun.net.www.protocol.https.HttpsClient;
+
+        $r1 = r0.<sun.net.www.protocol.https.HttpsClient: javax.net.ssl.SSLSocketFactory sslSocketFactory>;
+
+        return $r1;
+    }
+
+    protected java.net.Socket createSocket() throws java.io.IOException
+    {
+        java.lang.Throwable $r4;
+        java.net.Socket $r2, $r5;
+        java.net.SocketException $r3;
+        sun.net.www.protocol.https.HttpsClient r0;
+        javax.net.ssl.SSLSocketFactory $r1;
+        boolean $z0;
+
+        r0 := @this: sun.net.www.protocol.https.HttpsClient;
+
+     label1:
+        $r1 = r0.<sun.net.www.protocol.https.HttpsClient: javax.net.ssl.SSLSocketFactory sslSocketFactory>;
+
+        $r2 = virtualinvoke $r1.<javax.net.ssl.SSLSocketFactory: java.net.Socket createSocket()>();
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = virtualinvoke $r3.<java.net.SocketException: java.lang.Throwable getCause()>();
+
+        if $r4 == null goto label4;
+
+        $z0 = $r4 instanceof java.lang.UnsupportedOperationException;
+
+        if $z0 == 0 goto label4;
+
+        $r5 = specialinvoke r0.<sun.net.www.http.HttpClient: java.net.Socket createSocket()>();
+
+        return $r5;
+
+     label4:
+        throw $r3;
+
+        catch java.net.SocketException from label1 to label2 with label3;
+    }
+
+    public boolean needsTunneling()
+    {
+        sun.net.www.protocol.https.HttpsClient r0;
+        java.net.Proxy$Type $r3, $r4, $r6, $r7;
+        java.net.Proxy $r1, $r2, $r5;
+        boolean $z0;
+
+        r0 := @this: sun.net.www.protocol.https.HttpsClient;
+
+        $r1 = r0.<sun.net.www.protocol.https.HttpsClient: java.net.Proxy proxy>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.net.www.protocol.https.HttpsClient: java.net.Proxy proxy>;
+
+        $r3 = virtualinvoke $r2.<java.net.Proxy: java.net.Proxy$Type type()>();
+
+        $r4 = <java.net.Proxy$Type: java.net.Proxy$Type DIRECT>;
+
+        if $r3 == $r4 goto label1;
+
+        $r5 = r0.<sun.net.www.protocol.https.HttpsClient: java.net.Proxy proxy>;
+
+        $r6 = virtualinvoke $r5.<java.net.Proxy: java.net.Proxy$Type type()>();
+
+        $r7 = <java.net.Proxy$Type: java.net.Proxy$Type SOCKS>;
+
+        if $r6 == $r7 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public void afterConnect() throws java.io.IOException, java.net.UnknownHostException
+    {
+        javax.net.ssl.SSLSocket $r2, r33;
+        java.lang.InternalError $r23;
+        javax.net.ssl.HostnameVerifier $r11, $r12, $r14;
+        boolean $z0, $z1, $z2, $z3, $z4, z5, z6;
+        sun.net.www.protocol.https.HttpsClient r0;
+        javax.net.ssl.SSLSocketFactory r4;
+        sun.security.ssl.SSLSocketImpl $r18;
+        java.lang.StringBuilder $r24, $r26, $r27;
+        java.io.UnsupportedEncodingException $r22;
+        java.net.Socket $r1, $r5, $r6, $r20, $r21, $r32, $r37;
+        javax.net.ssl.SSLParameters $r9, $r13;
+        java.lang.String[] $r7, $r8;
+        java.io.BufferedOutputStream $r36;
+        javax.net.ssl.SSLSession $r3, $r34;
+        int $i0, $i1, $i2;
+        java.lang.String $r10, $r16, $r17, $r19, $r25, $r28, $r31, $r39;
+        java.io.PrintStream $r35;
+        java.io.OutputStream $r38;
+        java.io.IOException $r29, $r30;
+        java.lang.Class $r15;
+
+        r0 := @this: sun.net.www.protocol.https.HttpsClient;
+
+        $z0 = virtualinvoke r0.<sun.net.www.protocol.https.HttpsClient: boolean isCachedConnection()>();
+
+        if $z0 != 0 goto label21;
+
+        r4 = r0.<sun.net.www.protocol.https.HttpsClient: javax.net.ssl.SSLSocketFactory sslSocketFactory>;
+
+     label01:
+        $r5 = r0.<sun.net.www.protocol.https.HttpsClient: java.net.Socket serverSocket>;
+
+        $z1 = $r5 instanceof javax.net.ssl.SSLSocket;
+
+        if $z1 != 0 goto label02;
+
+        $r20 = r0.<sun.net.www.protocol.https.HttpsClient: java.net.Socket serverSocket>;
+
+        $r19 = r0.<sun.net.www.protocol.https.HttpsClient: java.lang.String host>;
+
+        $i1 = r0.<sun.net.www.protocol.https.HttpsClient: int port>;
+
+        $r21 = virtualinvoke r4.<javax.net.ssl.SSLSocketFactory: java.net.Socket createSocket(java.net.Socket,java.lang.String,int,boolean)>($r20, $r19, $i1, 1);
+
+        r33 = (javax.net.ssl.SSLSocket) $r21;
+
+        goto label03;
+
+     label02:
+        $r6 = r0.<sun.net.www.protocol.https.HttpsClient: java.net.Socket serverSocket>;
+
+        r33 = (javax.net.ssl.SSLSocket) $r6;
+
+        $z2 = r33 instanceof sun.security.ssl.SSLSocketImpl;
+
+        if $z2 == 0 goto label03;
+
+        $r18 = (sun.security.ssl.SSLSocketImpl) r33;
+
+        $r17 = r0.<sun.net.www.protocol.https.HttpsClient: java.lang.String host>;
+
+        virtualinvoke $r18.<sun.security.ssl.SSLSocketImpl: void setHost(java.lang.String)>($r17);
+
+     label03:
+        goto label08;
+
+     label04:
+        $r30 := @caughtexception;
+
+     label05:
+        $r31 = r0.<sun.net.www.protocol.https.HttpsClient: java.lang.String host>;
+
+        $i2 = r0.<sun.net.www.protocol.https.HttpsClient: int port>;
+
+        $r32 = virtualinvoke r4.<javax.net.ssl.SSLSocketFactory: java.net.Socket createSocket(java.lang.String,int)>($r31, $i2);
+
+        r33 = (javax.net.ssl.SSLSocket) $r32;
+
+     label06:
+        goto label08;
+
+     label07:
+        $r29 := @caughtexception;
+
+        throw $r30;
+
+     label08:
+        $r7 = specialinvoke r0.<sun.net.www.protocol.https.HttpsClient: java.lang.String[] getProtocols()>();
+
+        $r8 = specialinvoke r0.<sun.net.www.protocol.https.HttpsClient: java.lang.String[] getCipherSuites(java.lang.String[],javax.net.ssl.SSLSocket)>($r7, r33);
+
+        if $r7 == null goto label09;
+
+        virtualinvoke r33.<javax.net.ssl.SSLSocket: void setEnabledProtocols(java.lang.String[])>($r7);
+
+     label09:
+        if $r8 == null goto label10;
+
+        virtualinvoke r33.<javax.net.ssl.SSLSocket: void setEnabledCipherSuites(java.lang.String[])>($r8);
+
+     label10:
+        virtualinvoke r33.<javax.net.ssl.SSLSocket: void addHandshakeCompletedListener(javax.net.ssl.HandshakeCompletedListener)>(r0);
+
+        z5 = 1;
+
+        $r9 = virtualinvoke r33.<javax.net.ssl.SSLSocket: javax.net.ssl.SSLParameters getSSLParameters()>();
+
+        $r10 = virtualinvoke $r9.<javax.net.ssl.SSLParameters: java.lang.String getEndpointIdentificationAlgorithm()>();
+
+        if $r10 == null goto label11;
+
+        $i0 = virtualinvoke $r10.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label11;
+
+        $z4 = virtualinvoke $r10.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("HTTPS");
+
+        if $z4 == 0 goto label15;
+
+        z5 = 0;
+
+        goto label15;
+
+     label11:
+        z6 = 0;
+
+        $r11 = r0.<sun.net.www.protocol.https.HttpsClient: javax.net.ssl.HostnameVerifier hv>;
+
+        if $r11 == null goto label13;
+
+        $r14 = r0.<sun.net.www.protocol.https.HttpsClient: javax.net.ssl.HostnameVerifier hv>;
+
+        $r15 = virtualinvoke $r14.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.Class: java.lang.String getCanonicalName()>();
+
+        if $r16 == null goto label12;
+
+        $z3 = virtualinvoke $r16.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("javax.net.ssl.HttpsURLConnection.DefaultHostnameVerifier");
+
+        if $z3 == 0 goto label12;
+
+        z6 = 1;
+
+     label12:
+        goto label14;
+
+     label13:
+        z6 = 1;
+
+     label14:
+        if z6 == 0 goto label15;
+
+        $r13 = virtualinvoke r33.<javax.net.ssl.SSLSocket: javax.net.ssl.SSLParameters getSSLParameters()>();
+
+        virtualinvoke $r13.<javax.net.ssl.SSLParameters: void setEndpointIdentificationAlgorithm(java.lang.String)>("HTTPS");
+
+        virtualinvoke r33.<javax.net.ssl.SSLSocket: void setSSLParameters(javax.net.ssl.SSLParameters)>($r13);
+
+        z5 = 0;
+
+     label15:
+        virtualinvoke r33.<javax.net.ssl.SSLSocket: void startHandshake()>();
+
+        $r34 = virtualinvoke r33.<javax.net.ssl.SSLSocket: javax.net.ssl.SSLSession getSession()>();
+
+        r0.<sun.net.www.protocol.https.HttpsClient: javax.net.ssl.SSLSession session> = $r34;
+
+        r0.<sun.net.www.protocol.https.HttpsClient: java.net.Socket serverSocket> = r33;
+
+     label16:
+        $r35 = new java.io.PrintStream;
+
+        $r36 = new java.io.BufferedOutputStream;
+
+        $r37 = r0.<sun.net.www.protocol.https.HttpsClient: java.net.Socket serverSocket>;
+
+        $r38 = virtualinvoke $r37.<java.net.Socket: java.io.OutputStream getOutputStream()>();
+
+        specialinvoke $r36.<java.io.BufferedOutputStream: void <init>(java.io.OutputStream)>($r38);
+
+        $r39 = <sun.net.www.protocol.https.HttpsClient: java.lang.String encoding>;
+
+        specialinvoke $r35.<java.io.PrintStream: void <init>(java.io.OutputStream,boolean,java.lang.String)>($r36, 0, $r39);
+
+        r0.<sun.net.www.protocol.https.HttpsClient: java.io.PrintStream serverOutput> = $r35;
+
+     label17:
+        goto label19;
+
+     label18:
+        $r22 := @caughtexception;
+
+        $r23 = new java.lang.InternalError;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = <sun.net.www.protocol.https.HttpsClient: java.lang.String encoding>;
+
+        $r26 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r25);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" encoding not found");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r23.<java.lang.InternalError: void <init>(java.lang.String)>($r28);
+
+        throw $r23;
+
+     label19:
+        if z5 == 0 goto label20;
+
+        $r12 = r0.<sun.net.www.protocol.https.HttpsClient: javax.net.ssl.HostnameVerifier hv>;
+
+        specialinvoke r0.<sun.net.www.protocol.https.HttpsClient: void checkURLSpoofing(javax.net.ssl.HostnameVerifier)>($r12);
+
+     label20:
+        goto label22;
+
+     label21:
+        $r1 = r0.<sun.net.www.protocol.https.HttpsClient: java.net.Socket serverSocket>;
+
+        $r2 = (javax.net.ssl.SSLSocket) $r1;
+
+        $r3 = virtualinvoke $r2.<javax.net.ssl.SSLSocket: javax.net.ssl.SSLSession getSession()>();
+
+        r0.<sun.net.www.protocol.https.HttpsClient: javax.net.ssl.SSLSession session> = $r3;
+
+     label22:
+        return;
+
+        catch java.io.IOException from label01 to label03 with label04;
+        catch java.io.IOException from label05 to label06 with label07;
+        catch java.io.UnsupportedEncodingException from label16 to label17 with label18;
+    }
+
+    private void checkURLSpoofing(javax.net.ssl.HostnameVerifier) throws java.io.IOException
+    {
+        java.security.cert.X509Certificate r8;
+        java.net.URL $r1, $r18;
+        javax.net.ssl.HostnameVerifier r12;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        sun.net.www.protocol.https.HttpsClient r0;
+        java.security.cert.Certificate $r5, $r7;
+        java.security.Principal $r9;
+        java.security.cert.Certificate[] $r4;
+        java.lang.StringBuilder $r17, $r20, $r21, $r31;
+        java.net.Socket $r13;
+        sun.security.util.HostnameChecker $r28;
+        javax.net.ssl.SSLSession $r3, $r14, $r23, $r26;
+        int $i0, $i1, $i2, $i4;
+        java.lang.String $r2, $r19, $r22, r25, $r27;
+        java.io.IOException $r32;
+        java.security.cert.CertificateException $r11;
+        javax.net.ssl.SSLPeerUnverifiedException $r24, $r29, $r30;
+
+        r0 := @this: sun.net.www.protocol.https.HttpsClient;
+
+        r12 := @parameter0: javax.net.ssl.HostnameVerifier;
+
+        $r1 = r0.<sun.net.www.protocol.https.HttpsClient: java.net.URL url>;
+
+        $r2 = virtualinvoke $r1.<java.net.URL: java.lang.String getHost()>();
+
+        r25 = $r2;
+
+        if $r2 == null goto label01;
+
+        $z2 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>("[");
+
+        if $z2 == 0 goto label01;
+
+        $z3 = virtualinvoke $r2.<java.lang.String: boolean endsWith(java.lang.String)>("]");
+
+        if $z3 == 0 goto label01;
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        $i1 = $i0 - 1;
+
+        r25 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int,int)>(1, $i1);
+
+     label01:
+        $r26 = r0.<sun.net.www.protocol.https.HttpsClient: javax.net.ssl.SSLSession session>;
+
+        $r27 = interfaceinvoke $r26.<javax.net.ssl.SSLSession: java.lang.String getCipherSuite()>();
+
+     label02:
+        $r28 = staticinvoke <sun.security.util.HostnameChecker: sun.security.util.HostnameChecker getInstance(byte)>(1);
+
+        $z5 = virtualinvoke $r27.<java.lang.String: boolean startsWith(java.lang.String)>("TLS_KRB5");
+
+        if $z5 == 0 goto label03;
+
+        $r9 = virtualinvoke r0.<sun.net.www.protocol.https.HttpsClient: java.security.Principal getPeerPrincipal()>();
+
+        $z1 = staticinvoke <sun.security.util.HostnameChecker: boolean match(java.lang.String,java.security.Principal)>(r25, $r9);
+
+        if $z1 != 0 goto label06;
+
+        $r29 = new javax.net.ssl.SSLPeerUnverifiedException;
+
+        specialinvoke $r29.<javax.net.ssl.SSLPeerUnverifiedException: void <init>(java.lang.String)>("Hostname checker failed for Kerberos");
+
+        throw $r29;
+
+     label03:
+        $r3 = r0.<sun.net.www.protocol.https.HttpsClient: javax.net.ssl.SSLSession session>;
+
+        $r4 = interfaceinvoke $r3.<javax.net.ssl.SSLSession: java.security.cert.Certificate[] getPeerCertificates()>();
+
+        $r5 = $r4[0];
+
+        $z0 = $r5 instanceof java.security.cert.X509Certificate;
+
+        if $z0 == 0 goto label04;
+
+        $r7 = $r4[0];
+
+        r8 = (java.security.cert.X509Certificate) $r7;
+
+        goto label05;
+
+     label04:
+        $r30 = new javax.net.ssl.SSLPeerUnverifiedException;
+
+        specialinvoke $r30.<javax.net.ssl.SSLPeerUnverifiedException: void <init>(java.lang.String)>("");
+
+        throw $r30;
+
+     label05:
+        virtualinvoke $r28.<sun.security.util.HostnameChecker: void match(java.lang.String,java.security.cert.X509Certificate)>(r25, r8);
+
+     label06:
+        return;
+
+     label07:
+        $r24 := @caughtexception;
+
+        goto label09;
+
+     label08:
+        $r11 := @caughtexception;
+
+     label09:
+        if $r27 == null goto label10;
+
+        $i2 = virtualinvoke $r27.<java.lang.String: int indexOf(java.lang.String)>("_anon_");
+
+        $i4 = (int) -1;
+
+        if $i2 == $i4 goto label10;
+
+        return;
+
+     label10:
+        if r12 == null goto label11;
+
+        $r23 = r0.<sun.net.www.protocol.https.HttpsClient: javax.net.ssl.SSLSession session>;
+
+        $z4 = interfaceinvoke r12.<javax.net.ssl.HostnameVerifier: boolean verify(java.lang.String,javax.net.ssl.SSLSession)>(r25, $r23);
+
+        if $z4 == 0 goto label11;
+
+        return;
+
+     label11:
+        $r13 = r0.<sun.net.www.protocol.https.HttpsClient: java.net.Socket serverSocket>;
+
+        virtualinvoke $r13.<java.net.Socket: void close()>();
+
+        $r14 = r0.<sun.net.www.protocol.https.HttpsClient: javax.net.ssl.SSLSession session>;
+
+        interfaceinvoke $r14.<javax.net.ssl.SSLSession: void invalidate()>();
+
+        $r32 = new java.io.IOException;
+
+        $r31 = new java.lang.StringBuilder;
+
+        specialinvoke $r31.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("HTTPS hostname wrong:  should be <");
+
+        $r18 = r0.<sun.net.www.protocol.https.HttpsClient: java.net.URL url>;
+
+        $r19 = virtualinvoke $r18.<java.net.URL: java.lang.String getHost()>();
+
+        $r20 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r32.<java.io.IOException: void <init>(java.lang.String)>($r22);
+
+        throw $r32;
+
+        catch javax.net.ssl.SSLPeerUnverifiedException from label02 to label06 with label07;
+        catch java.security.cert.CertificateException from label02 to label06 with label08;
+    }
+
+    protected void putInKeepAliveCache()
+    {
+        sun.net.www.http.KeepAliveCache $r3;
+        sun.net.www.protocol.https.HttpsClient r0;
+        java.net.URL $r2;
+        java.lang.AssertionError $r4;
+        boolean $z0, $z1;
+        javax.net.ssl.SSLSocketFactory $r1;
+
+        r0 := @this: sun.net.www.protocol.https.HttpsClient;
+
+        $z0 = r0.<sun.net.www.protocol.https.HttpsClient: boolean inCache>;
+
+        if $z0 == 0 goto label2;
+
+        $z1 = <sun.net.www.protocol.https.HttpsClient: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label1;
+
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>(java.lang.Object)>("Duplicate put to keep alive cache");
+
+        throw $r4;
+
+     label1:
+        return;
+
+     label2:
+        r0.<sun.net.www.protocol.https.HttpsClient: boolean inCache> = 1;
+
+        $r3 = <sun.net.www.protocol.https.HttpsClient: sun.net.www.http.KeepAliveCache kac>;
+
+        $r2 = r0.<sun.net.www.protocol.https.HttpsClient: java.net.URL url>;
+
+        $r1 = r0.<sun.net.www.protocol.https.HttpsClient: javax.net.ssl.SSLSocketFactory sslSocketFactory>;
+
+        virtualinvoke $r3.<sun.net.www.http.KeepAliveCache: void put(java.net.URL,java.lang.Object,sun.net.www.http.HttpClient)>($r2, $r1, r0);
+
+        return;
+    }
+
+    public void closeIdleConnection()
+    {
+        sun.net.www.http.KeepAliveCache $r3;
+        sun.net.www.protocol.https.HttpsClient r0;
+        java.net.URL $r2;
+        sun.net.www.http.HttpClient $r4;
+        javax.net.ssl.SSLSocketFactory $r1;
+
+        r0 := @this: sun.net.www.protocol.https.HttpsClient;
+
+        $r3 = <sun.net.www.protocol.https.HttpsClient: sun.net.www.http.KeepAliveCache kac>;
+
+        $r2 = r0.<sun.net.www.protocol.https.HttpsClient: java.net.URL url>;
+
+        $r1 = r0.<sun.net.www.protocol.https.HttpsClient: javax.net.ssl.SSLSocketFactory sslSocketFactory>;
+
+        $r4 = virtualinvoke $r3.<sun.net.www.http.KeepAliveCache: sun.net.www.http.HttpClient get(java.net.URL,java.lang.Object)>($r2, $r1);
+
+        if $r4 == null goto label1;
+
+        virtualinvoke $r4.<sun.net.www.http.HttpClient: void closeServer()>();
+
+     label1:
+        return;
+    }
+
+    java.lang.String getCipherSuite()
+    {
+        javax.net.ssl.SSLSession $r1;
+        java.lang.String $r2;
+        sun.net.www.protocol.https.HttpsClient r0;
+
+        r0 := @this: sun.net.www.protocol.https.HttpsClient;
+
+        $r1 = r0.<sun.net.www.protocol.https.HttpsClient: javax.net.ssl.SSLSession session>;
+
+        $r2 = interfaceinvoke $r1.<javax.net.ssl.SSLSession: java.lang.String getCipherSuite()>();
+
+        return $r2;
+    }
+
+    public java.security.cert.Certificate[] getLocalCertificates()
+    {
+        java.security.cert.Certificate[] $r2;
+        javax.net.ssl.SSLSession $r1;
+        sun.net.www.protocol.https.HttpsClient r0;
+
+        r0 := @this: sun.net.www.protocol.https.HttpsClient;
+
+        $r1 = r0.<sun.net.www.protocol.https.HttpsClient: javax.net.ssl.SSLSession session>;
+
+        $r2 = interfaceinvoke $r1.<javax.net.ssl.SSLSession: java.security.cert.Certificate[] getLocalCertificates()>();
+
+        return $r2;
+    }
+
+    java.security.cert.Certificate[] getServerCertificates() throws javax.net.ssl.SSLPeerUnverifiedException
+    {
+        java.security.cert.Certificate[] $r2;
+        javax.net.ssl.SSLSession $r1;
+        sun.net.www.protocol.https.HttpsClient r0;
+
+        r0 := @this: sun.net.www.protocol.https.HttpsClient;
+
+        $r1 = r0.<sun.net.www.protocol.https.HttpsClient: javax.net.ssl.SSLSession session>;
+
+        $r2 = interfaceinvoke $r1.<javax.net.ssl.SSLSession: java.security.cert.Certificate[] getPeerCertificates()>();
+
+        return $r2;
+    }
+
+    javax.security.cert.X509Certificate[] getServerCertificateChain() throws javax.net.ssl.SSLPeerUnverifiedException
+    {
+        javax.security.cert.X509Certificate[] $r2;
+        javax.net.ssl.SSLSession $r1;
+        sun.net.www.protocol.https.HttpsClient r0;
+
+        r0 := @this: sun.net.www.protocol.https.HttpsClient;
+
+        $r1 = r0.<sun.net.www.protocol.https.HttpsClient: javax.net.ssl.SSLSession session>;
+
+        $r2 = interfaceinvoke $r1.<javax.net.ssl.SSLSession: javax.security.cert.X509Certificate[] getPeerCertificateChain()>();
+
+        return $r2;
+    }
+
+    java.security.Principal getPeerPrincipal() throws javax.net.ssl.SSLPeerUnverifiedException
+    {
+        java.security.cert.X509Certificate $r6;
+        sun.net.www.protocol.https.HttpsClient r0;
+        java.lang.AbstractMethodError $r2;
+        javax.net.ssl.SSLSession $r1, $r3;
+        java.security.cert.Certificate $r5;
+        java.security.Principal r7;
+        java.security.cert.Certificate[] $r4;
+
+        r0 := @this: sun.net.www.protocol.https.HttpsClient;
+
+     label1:
+        $r1 = r0.<sun.net.www.protocol.https.HttpsClient: javax.net.ssl.SSLSession session>;
+
+        r7 = interfaceinvoke $r1.<javax.net.ssl.SSLSession: java.security.Principal getPeerPrincipal()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = r0.<sun.net.www.protocol.https.HttpsClient: javax.net.ssl.SSLSession session>;
+
+        $r4 = interfaceinvoke $r3.<javax.net.ssl.SSLSession: java.security.cert.Certificate[] getPeerCertificates()>();
+
+        $r5 = $r4[0];
+
+        $r6 = (java.security.cert.X509Certificate) $r5;
+
+        r7 = virtualinvoke $r6.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+     label4:
+        return r7;
+
+        catch java.lang.AbstractMethodError from label1 to label2 with label3;
+    }
+
+    java.security.Principal getLocalPrincipal()
+    {
+        java.security.cert.X509Certificate $r6;
+        sun.net.www.protocol.https.HttpsClient r0;
+        java.lang.AbstractMethodError $r2;
+        javax.net.ssl.SSLSession $r1, $r3;
+        java.security.cert.Certificate $r5;
+        java.security.Principal r7;
+        java.security.cert.Certificate[] $r4;
+
+        r0 := @this: sun.net.www.protocol.https.HttpsClient;
+
+     label1:
+        $r1 = r0.<sun.net.www.protocol.https.HttpsClient: javax.net.ssl.SSLSession session>;
+
+        r7 = interfaceinvoke $r1.<javax.net.ssl.SSLSession: java.security.Principal getLocalPrincipal()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        r7 = null;
+
+        $r3 = r0.<sun.net.www.protocol.https.HttpsClient: javax.net.ssl.SSLSession session>;
+
+        $r4 = interfaceinvoke $r3.<javax.net.ssl.SSLSession: java.security.cert.Certificate[] getLocalCertificates()>();
+
+        if $r4 == null goto label4;
+
+        $r5 = $r4[0];
+
+        $r6 = (java.security.cert.X509Certificate) $r5;
+
+        r7 = virtualinvoke $r6.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+     label4:
+        return r7;
+
+        catch java.lang.AbstractMethodError from label1 to label2 with label3;
+    }
+
+    public void handshakeCompleted(javax.net.ssl.HandshakeCompletedEvent)
+    {
+        javax.net.ssl.SSLSession $r2;
+        sun.net.www.protocol.https.HttpsClient r0;
+        javax.net.ssl.HandshakeCompletedEvent r1;
+
+        r0 := @this: sun.net.www.protocol.https.HttpsClient;
+
+        r1 := @parameter0: javax.net.ssl.HandshakeCompletedEvent;
+
+        $r2 = virtualinvoke r1.<javax.net.ssl.HandshakeCompletedEvent: javax.net.ssl.SSLSession getSession()>();
+
+        r0.<sun.net.www.protocol.https.HttpsClient: javax.net.ssl.SSLSession session> = $r2;
+
+        return;
+    }
+
+    public java.lang.String getProxyHostUsed()
+    {
+        java.lang.String $r1;
+        sun.net.www.protocol.https.HttpsClient r0;
+        boolean $z0;
+
+        r0 := @this: sun.net.www.protocol.https.HttpsClient;
+
+        $z0 = virtualinvoke r0.<sun.net.www.protocol.https.HttpsClient: boolean needsTunneling()>();
+
+        if $z0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r1 = specialinvoke r0.<sun.net.www.http.HttpClient: java.lang.String getProxyHostUsed()>();
+
+        return $r1;
+    }
+
+    public int getProxyPortUsed()
+    {
+        java.net.SocketAddress $r9;
+        sun.net.www.protocol.https.HttpsClient r0;
+        java.net.InetSocketAddress $r10;
+        java.net.Proxy$Type $r3, $r4, $r6, $r7;
+        java.net.Proxy $r1, $r2, $r5, $r8;
+        int $i0, $i2;
+
+        r0 := @this: sun.net.www.protocol.https.HttpsClient;
+
+        $r1 = r0.<sun.net.www.protocol.https.HttpsClient: java.net.Proxy proxy>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.net.www.protocol.https.HttpsClient: java.net.Proxy proxy>;
+
+        $r3 = virtualinvoke $r2.<java.net.Proxy: java.net.Proxy$Type type()>();
+
+        $r4 = <java.net.Proxy$Type: java.net.Proxy$Type DIRECT>;
+
+        if $r3 == $r4 goto label1;
+
+        $r5 = r0.<sun.net.www.protocol.https.HttpsClient: java.net.Proxy proxy>;
+
+        $r6 = virtualinvoke $r5.<java.net.Proxy: java.net.Proxy$Type type()>();
+
+        $r7 = <java.net.Proxy$Type: java.net.Proxy$Type SOCKS>;
+
+        if $r6 != $r7 goto label2;
+
+     label1:
+        $i2 = (int) -1;
+
+        $i0 = $i2;
+
+        goto label3;
+
+     label2:
+        $r8 = r0.<sun.net.www.protocol.https.HttpsClient: java.net.Proxy proxy>;
+
+        $r9 = virtualinvoke $r8.<java.net.Proxy: java.net.SocketAddress address()>();
+
+        $r10 = (java.net.InetSocketAddress) $r9;
+
+        $i0 = virtualinvoke $r10.<java.net.InetSocketAddress: int getPort()>();
+
+     label3:
+        return $i0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        <sun.net.www.protocol.https.HttpsClient: java.lang.String TLS13_CIPHER2> = "TLS_AES_256_GCM_SHA384";
+
+        <sun.net.www.protocol.https.HttpsClient: java.lang.String TLS13_CIPHER1> = "TLS_AES_128_GCM_SHA256";
+
+        <sun.net.www.protocol.https.HttpsClient: java.lang.String defaultHVCanonicalName> = "javax.net.ssl.HttpsURLConnection.DefaultHostnameVerifier";
+
+        <sun.net.www.protocol.https.HttpsClient: int httpsPortNumber> = 443;
+
+        $r0 = class "Lsun/net/www/protocol/https/HttpsClient;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.net.www.protocol.https.HttpsClient: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

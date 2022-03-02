@@ -1,0 +1,713 @@
+public class com.sun.corba.se.impl.activation.ServerTool extends java.lang.Object
+{
+    static final java.lang.String helpCommand;
+    static final java.lang.String toolName;
+    static final java.lang.String commandArg;
+    private static final boolean debug;
+    org.omg.CORBA.ORB orb;
+    static java.util.Vector handlers;
+    static int maxNameLen;
+
+    public void <init>()
+    {
+        com.sun.corba.se.impl.activation.ServerTool r0;
+
+        r0 := @this: com.sun.corba.se.impl.activation.ServerTool;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.activation.ServerTool: org.omg.CORBA.ORB orb> = null;
+
+        return;
+    }
+
+    static int getServerIdForAlias(org.omg.CORBA.ORB, java.lang.String) throws com.sun.corba.se.spi.activation.ServerNotRegistered
+    {
+        org.omg.CORBA.ORB r0;
+        com.sun.corba.se.spi.activation.ServerNotRegistered $r5;
+        org.omg.CORBA.Object $r1;
+        int $i0;
+        java.lang.String r3;
+        com.sun.corba.se.spi.activation.Repository $r2;
+        java.lang.Exception $r4;
+
+        r0 := @parameter0: org.omg.CORBA.ORB;
+
+        r3 := @parameter1: java.lang.String;
+
+     label1:
+        $r1 = virtualinvoke r0.<org.omg.CORBA.ORB: org.omg.CORBA.Object resolve_initial_references(java.lang.String)>("ServerRepository");
+
+        $r2 = staticinvoke <com.sun.corba.se.spi.activation.RepositoryHelper: com.sun.corba.se.spi.activation.Repository narrow(org.omg.CORBA.Object)>($r1);
+
+        interfaceinvoke $r2.<com.sun.corba.se.spi.activation.Repository: int getServerID(java.lang.String)>(r3);
+
+        $i0 = interfaceinvoke $r2.<com.sun.corba.se.spi.activation.Repository: int getServerID(java.lang.String)>(r3);
+
+     label2:
+        return $i0;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = new com.sun.corba.se.spi.activation.ServerNotRegistered;
+
+        specialinvoke $r5.<com.sun.corba.se.spi.activation.ServerNotRegistered: void <init>()>();
+
+        throw $r5;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    void run(java.lang.String[])
+    {
+        java.lang.String[] r0, r15, $r16;
+        org.omg.CORBA.ORB $r3;
+        int $i0, $i1, $i2, i3, i4, i5;
+        com.sun.corba.se.impl.activation.ServerTool r2;
+        java.lang.String $r8, $r9, $r10, $r13;
+        boolean $z0;
+        java.io.PrintStream $r7, $r12, $r14;
+        java.util.Properties $r1;
+        java.io.InputStreamReader $r5;
+        java.lang.Exception $r11;
+        java.io.BufferedReader $r4;
+        java.io.InputStream $r6;
+
+        r2 := @this: com.sun.corba.se.impl.activation.ServerTool;
+
+        r0 := @parameter0: java.lang.String[];
+
+        r15 = null;
+
+        i3 = 0;
+
+     label01:
+        $i0 = lengthof r0;
+
+        if i3 >= $i0 goto label05;
+
+        $r9 = r0[i3];
+
+        $z0 = virtualinvoke $r9.<java.lang.String: boolean equals(java.lang.Object)>("-cmd");
+
+        if $z0 == 0 goto label04;
+
+        $i1 = lengthof r0;
+
+        $i2 = $i1 - i3;
+
+        i4 = $i2 - 1;
+
+        r15 = newarray (java.lang.String)[i4];
+
+        i5 = 0;
+
+     label02:
+        if i5 >= i4 goto label03;
+
+        i3 = i3 + 1;
+
+        $r10 = r0[i3];
+
+        r15[i5] = $r10;
+
+        i5 = i5 + 1;
+
+        goto label02;
+
+     label03:
+        goto label05;
+
+     label04:
+        i3 = i3 + 1;
+
+        goto label01;
+
+     label05:
+        $r1 = staticinvoke <java.lang.System: java.util.Properties getProperties()>();
+
+        virtualinvoke $r1.<java.util.Properties: java.lang.Object put(java.lang.Object,java.lang.Object)>("org.omg.CORBA.ORBClass", "com.sun.corba.se.impl.orb.ORBImpl");
+
+        $r3 = staticinvoke <org.omg.CORBA.ORB: org.omg.CORBA.ORB init(java.lang.String[],java.util.Properties)>(r0, $r1);
+
+        r2.<com.sun.corba.se.impl.activation.ServerTool: org.omg.CORBA.ORB orb> = $r3;
+
+        if r15 == null goto label06;
+
+        virtualinvoke r2.<com.sun.corba.se.impl.activation.ServerTool: void executeCommand(java.lang.String[])>(r15);
+
+        goto label09;
+
+     label06:
+        $r4 = new java.io.BufferedReader;
+
+        $r5 = new java.io.InputStreamReader;
+
+        $r6 = <java.lang.System: java.io.InputStream in>;
+
+        specialinvoke $r5.<java.io.InputStreamReader: void <init>(java.io.InputStream)>($r6);
+
+        specialinvoke $r4.<java.io.BufferedReader: void <init>(java.io.Reader)>($r5);
+
+        $r7 = <java.lang.System: java.io.PrintStream out>;
+
+        $r8 = staticinvoke <com.sun.corba.se.impl.orbutil.CorbaResourceUtil: java.lang.String getText(java.lang.String)>("servertool.banner");
+
+        virtualinvoke $r7.<java.io.PrintStream: void println(java.lang.String)>($r8);
+
+     label07:
+        $r16 = virtualinvoke r2.<com.sun.corba.se.impl.activation.ServerTool: java.lang.String[] readCommand(java.io.BufferedReader)>($r4);
+
+        if $r16 == null goto label08;
+
+        virtualinvoke r2.<com.sun.corba.se.impl.activation.ServerTool: void executeCommand(java.lang.String[])>($r16);
+
+        goto label07;
+
+     label08:
+        virtualinvoke r2.<com.sun.corba.se.impl.activation.ServerTool: void printAvailableCommands()>();
+
+        goto label07;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r11 := @caughtexception;
+
+        $r12 = <java.lang.System: java.io.PrintStream out>;
+
+        $r13 = staticinvoke <com.sun.corba.se.impl.orbutil.CorbaResourceUtil: java.lang.String getText(java.lang.String,java.lang.String)>("servertool.usage", "servertool");
+
+        virtualinvoke $r12.<java.io.PrintStream: void println(java.lang.String)>($r13);
+
+        $r14 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r14.<java.io.PrintStream: void println()>();
+
+        virtualinvoke $r11.<java.lang.Exception: void printStackTrace()>();
+
+     label11:
+        return;
+
+        catch java.lang.Exception from label05 to label09 with label10;
+    }
+
+    public static void main(java.lang.String[])
+    {
+        com.sun.corba.se.impl.activation.ServerTool $r0;
+        java.lang.String[] r1;
+
+        r1 := @parameter0: java.lang.String[];
+
+        $r0 = new com.sun.corba.se.impl.activation.ServerTool;
+
+        specialinvoke $r0.<com.sun.corba.se.impl.activation.ServerTool: void <init>()>();
+
+        virtualinvoke $r0.<com.sun.corba.se.impl.activation.ServerTool: void run(java.lang.String[])>(r1);
+
+        return;
+    }
+
+    java.lang.String[] readCommand(java.io.BufferedReader)
+    {
+        java.lang.String[] r10;
+        java.util.StringTokenizer $r3;
+        int $i0, $i1, $i2, i3;
+        com.sun.corba.se.impl.activation.ServerTool r9;
+        java.lang.String $r2, $r4, $r7;
+        boolean $z0;
+        java.io.PrintStream $r0, $r6, $r8;
+        java.lang.Exception $r5;
+        java.io.BufferedReader r1;
+
+        r9 := @this: com.sun.corba.se.impl.activation.ServerTool;
+
+        r1 := @parameter0: java.io.BufferedReader;
+
+        $r0 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void print(java.lang.String)>("servertool > ");
+
+     label1:
+        i3 = 0;
+
+        r10 = null;
+
+        $r2 = virtualinvoke r1.<java.io.BufferedReader: java.lang.String readLine()>();
+
+        if $r2 == null goto label3;
+
+        $r3 = new java.util.StringTokenizer;
+
+        specialinvoke $r3.<java.util.StringTokenizer: void <init>(java.lang.String)>($r2);
+
+        $i0 = virtualinvoke $r3.<java.util.StringTokenizer: int countTokens()>();
+
+        if $i0 == 0 goto label3;
+
+        $i1 = virtualinvoke $r3.<java.util.StringTokenizer: int countTokens()>();
+
+        r10 = newarray (java.lang.String)[$i1];
+
+     label2:
+        $z0 = virtualinvoke $r3.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label3;
+
+        $i2 = i3;
+
+        i3 = i3 + 1;
+
+        $r4 = virtualinvoke $r3.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        r10[$i2] = $r4;
+
+        goto label2;
+
+     label3:
+        return r10;
+
+     label4:
+        $r5 := @caughtexception;
+
+        $r6 = <java.lang.System: java.io.PrintStream out>;
+
+        $r7 = staticinvoke <com.sun.corba.se.impl.orbutil.CorbaResourceUtil: java.lang.String getText(java.lang.String,java.lang.String)>("servertool.usage", "servertool");
+
+        virtualinvoke $r6.<java.io.PrintStream: void println(java.lang.String)>($r7);
+
+        $r8 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r8.<java.io.PrintStream: void println()>();
+
+        virtualinvoke $r5.<java.lang.Exception: void printStackTrace()>();
+
+        return null;
+
+        catch java.lang.Exception from label1 to label3 with label4;
+    }
+
+    void printAvailableCommands()
+    {
+        java.util.Vector $r2, $r4;
+        int $i0, $i1, i2, i3;
+        com.sun.corba.se.impl.activation.ServerTool r17;
+        java.lang.String $r1, $r10, $r12, $r13;
+        com.sun.corba.se.impl.activation.CommandHandler r6;
+        java.io.PrintStream $r0, $r3, $r8, $r14, $r15, $r16;
+        java.lang.Object $r5;
+        java.lang.StringBuilder $r7, $r9, $r11;
+
+        r17 := @this: com.sun.corba.se.impl.activation.ServerTool;
+
+        $r0 = <java.lang.System: java.io.PrintStream out>;
+
+        $r1 = staticinvoke <com.sun.corba.se.impl.orbutil.CorbaResourceUtil: java.lang.String getText(java.lang.String)>("servertool.shorthelp");
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>($r1);
+
+        i2 = 0;
+
+     label1:
+        $r2 = <com.sun.corba.se.impl.activation.ServerTool: java.util.Vector handlers>;
+
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        if i2 >= $i0 goto label4;
+
+        $r4 = <com.sun.corba.se.impl.activation.ServerTool: java.util.Vector handlers>;
+
+        $r5 = virtualinvoke $r4.<java.util.Vector: java.lang.Object elementAt(int)>(i2);
+
+        r6 = (com.sun.corba.se.impl.activation.CommandHandler) $r5;
+
+        $r8 = <java.lang.System: java.io.PrintStream out>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\t");
+
+        $r10 = interfaceinvoke r6.<com.sun.corba.se.impl.activation.CommandHandler: java.lang.String getCommandName()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r8.<java.io.PrintStream: void print(java.lang.String)>($r12);
+
+        $r13 = interfaceinvoke r6.<com.sun.corba.se.impl.activation.CommandHandler: java.lang.String getCommandName()>();
+
+        i3 = virtualinvoke $r13.<java.lang.String: int length()>();
+
+     label2:
+        $i1 = <com.sun.corba.se.impl.activation.ServerTool: int maxNameLen>;
+
+        if i3 >= $i1 goto label3;
+
+        $r16 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r16.<java.io.PrintStream: void print(java.lang.String)>(" ");
+
+        i3 = i3 + 1;
+
+        goto label2;
+
+     label3:
+        $r14 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r14.<java.io.PrintStream: void print(java.lang.String)>(" - ");
+
+        $r15 = <java.lang.System: java.io.PrintStream out>;
+
+        interfaceinvoke r6.<com.sun.corba.se.impl.activation.CommandHandler: void printCommandHelp(java.io.PrintStream,boolean)>($r15, 1);
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label4:
+        $r3 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r3.<java.io.PrintStream: void println()>();
+
+        return;
+    }
+
+    void executeCommand(java.lang.String[])
+    {
+        java.util.Vector $r2, $r4, $r15, $r16;
+        com.sun.corba.se.impl.activation.ServerTool r3;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.Exception $r21;
+        java.lang.String[] r0, r8;
+        org.omg.CORBA.ORB $r11;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, i7, i8, i9;
+        java.lang.String $r1, $r6, $r7, $r14, $r18, $r19;
+        com.sun.corba.se.impl.activation.CommandHandler r22, r23;
+        java.io.PrintStream $r9, $r10, $r12, $r13, $r20;
+        java.lang.Object $r5, $r17;
+
+        r3 := @this: com.sun.corba.se.impl.activation.ServerTool;
+
+        r0 := @parameter0: java.lang.String[];
+
+        $r1 = r0[0];
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("help");
+
+        if $z0 == 0 goto label05;
+
+        $i5 = lengthof r0;
+
+        if $i5 != 1 goto label01;
+
+        virtualinvoke r3.<com.sun.corba.se.impl.activation.ServerTool: void printAvailableCommands()>();
+
+        goto label04;
+
+     label01:
+        i7 = 0;
+
+     label02:
+        $r15 = <com.sun.corba.se.impl.activation.ServerTool: java.util.Vector handlers>;
+
+        $i6 = virtualinvoke $r15.<java.util.Vector: int size()>();
+
+        if i7 >= $i6 goto label04;
+
+        $r16 = <com.sun.corba.se.impl.activation.ServerTool: java.util.Vector handlers>;
+
+        $r17 = virtualinvoke $r16.<java.util.Vector: java.lang.Object elementAt(int)>(i7);
+
+        r22 = (com.sun.corba.se.impl.activation.CommandHandler) $r17;
+
+        $r18 = interfaceinvoke r22.<com.sun.corba.se.impl.activation.CommandHandler: java.lang.String getCommandName()>();
+
+        $r19 = r0[1];
+
+        $z3 = virtualinvoke $r18.<java.lang.String: boolean equals(java.lang.Object)>($r19);
+
+        if $z3 == 0 goto label03;
+
+        $r20 = <java.lang.System: java.io.PrintStream out>;
+
+        interfaceinvoke r22.<com.sun.corba.se.impl.activation.CommandHandler: void printCommandHelp(java.io.PrintStream,boolean)>($r20, 0);
+
+     label03:
+        i7 = i7 + 1;
+
+        goto label02;
+
+     label04:
+        return;
+
+     label05:
+        i8 = 0;
+
+     label06:
+        $r2 = <com.sun.corba.se.impl.activation.ServerTool: java.util.Vector handlers>;
+
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        if i8 >= $i0 goto label14;
+
+        $r4 = <com.sun.corba.se.impl.activation.ServerTool: java.util.Vector handlers>;
+
+        $r5 = virtualinvoke $r4.<java.util.Vector: java.lang.Object elementAt(int)>(i8);
+
+        r23 = (com.sun.corba.se.impl.activation.CommandHandler) $r5;
+
+        $r6 = interfaceinvoke r23.<com.sun.corba.se.impl.activation.CommandHandler: java.lang.String getCommandName()>();
+
+        $r7 = r0[0];
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r7);
+
+        if $z1 == 0 goto label13;
+
+        $i1 = lengthof r0;
+
+        $i2 = $i1 - 1;
+
+        r8 = newarray (java.lang.String)[$i2];
+
+        i9 = 0;
+
+     label07:
+        $i3 = lengthof r8;
+
+        if i9 >= $i3 goto label08;
+
+        $i4 = i9 + 1;
+
+        $r14 = r0[$i4];
+
+        r8[i9] = $r14;
+
+        i9 = i9 + 1;
+
+        goto label07;
+
+     label08:
+        $r9 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r9.<java.io.PrintStream: void println()>();
+
+        $r11 = r3.<com.sun.corba.se.impl.activation.ServerTool: org.omg.CORBA.ORB orb>;
+
+        $r10 = <java.lang.System: java.io.PrintStream out>;
+
+        $z2 = interfaceinvoke r23.<com.sun.corba.se.impl.activation.CommandHandler: boolean processCommand(java.lang.String[],org.omg.CORBA.ORB,java.io.PrintStream)>(r8, $r11, $r10);
+
+        if $z2 != 1 goto label09;
+
+        $r13 = <java.lang.System: java.io.PrintStream out>;
+
+        interfaceinvoke r23.<com.sun.corba.se.impl.activation.CommandHandler: void printCommandHelp(java.io.PrintStream,boolean)>($r13, 0);
+
+     label09:
+        $r12 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r12.<java.io.PrintStream: void println()>();
+
+     label10:
+        goto label12;
+
+     label11:
+        $r21 := @caughtexception;
+
+     label12:
+        return;
+
+     label13:
+        i8 = i8 + 1;
+
+        goto label06;
+
+     label14:
+        virtualinvoke r3.<com.sun.corba.se.impl.activation.ServerTool: void printAvailableCommands()>();
+
+        return;
+
+        catch java.lang.Exception from label08 to label10 with label11;
+    }
+
+    static void <clinit>()
+    {
+        com.sun.corba.se.impl.activation.ListServers $r7;
+        com.sun.corba.se.impl.activation.UnRegisterServer $r3;
+        java.util.Vector $r0, $r2, $r4, $r6, $r8, $r10, $r12, $r14, $r16, $r18, $r20, $r22, $r24, $r26, $r27, $r28;
+        com.sun.corba.se.impl.activation.LocateServerForORB $r15;
+        com.sun.corba.se.impl.activation.StartServer $r21;
+        com.sun.corba.se.impl.activation.GetServerID $r5;
+        com.sun.corba.se.impl.activation.ListORBs $r17;
+        com.sun.corba.se.impl.activation.ListActiveServers $r11;
+        com.sun.corba.se.impl.activation.ShutdownServer $r19;
+        com.sun.corba.se.impl.activation.Quit $r25;
+        com.sun.corba.se.impl.activation.ListAliases $r9;
+        com.sun.corba.se.impl.activation.RegisterServer $r1;
+        int $i0, $i1, $i2, i3;
+        com.sun.corba.se.impl.activation.LocateServer $r13;
+        java.lang.String $r31;
+        com.sun.corba.se.impl.activation.Help $r23;
+        com.sun.corba.se.impl.activation.CommandHandler r30;
+        java.lang.Object $r29;
+
+        <com.sun.corba.se.impl.activation.ServerTool: boolean debug> = 0;
+
+        <com.sun.corba.se.impl.activation.ServerTool: java.lang.String commandArg> = "-cmd";
+
+        <com.sun.corba.se.impl.activation.ServerTool: java.lang.String toolName> = "servertool";
+
+        <com.sun.corba.se.impl.activation.ServerTool: java.lang.String helpCommand> = "help";
+
+        $r0 = new java.util.Vector;
+
+        specialinvoke $r0.<java.util.Vector: void <init>()>();
+
+        <com.sun.corba.se.impl.activation.ServerTool: java.util.Vector handlers> = $r0;
+
+        $r2 = <com.sun.corba.se.impl.activation.ServerTool: java.util.Vector handlers>;
+
+        $r1 = new com.sun.corba.se.impl.activation.RegisterServer;
+
+        specialinvoke $r1.<com.sun.corba.se.impl.activation.RegisterServer: void <init>()>();
+
+        virtualinvoke $r2.<java.util.Vector: void addElement(java.lang.Object)>($r1);
+
+        $r4 = <com.sun.corba.se.impl.activation.ServerTool: java.util.Vector handlers>;
+
+        $r3 = new com.sun.corba.se.impl.activation.UnRegisterServer;
+
+        specialinvoke $r3.<com.sun.corba.se.impl.activation.UnRegisterServer: void <init>()>();
+
+        virtualinvoke $r4.<java.util.Vector: void addElement(java.lang.Object)>($r3);
+
+        $r6 = <com.sun.corba.se.impl.activation.ServerTool: java.util.Vector handlers>;
+
+        $r5 = new com.sun.corba.se.impl.activation.GetServerID;
+
+        specialinvoke $r5.<com.sun.corba.se.impl.activation.GetServerID: void <init>()>();
+
+        virtualinvoke $r6.<java.util.Vector: void addElement(java.lang.Object)>($r5);
+
+        $r8 = <com.sun.corba.se.impl.activation.ServerTool: java.util.Vector handlers>;
+
+        $r7 = new com.sun.corba.se.impl.activation.ListServers;
+
+        specialinvoke $r7.<com.sun.corba.se.impl.activation.ListServers: void <init>()>();
+
+        virtualinvoke $r8.<java.util.Vector: void addElement(java.lang.Object)>($r7);
+
+        $r10 = <com.sun.corba.se.impl.activation.ServerTool: java.util.Vector handlers>;
+
+        $r9 = new com.sun.corba.se.impl.activation.ListAliases;
+
+        specialinvoke $r9.<com.sun.corba.se.impl.activation.ListAliases: void <init>()>();
+
+        virtualinvoke $r10.<java.util.Vector: void addElement(java.lang.Object)>($r9);
+
+        $r12 = <com.sun.corba.se.impl.activation.ServerTool: java.util.Vector handlers>;
+
+        $r11 = new com.sun.corba.se.impl.activation.ListActiveServers;
+
+        specialinvoke $r11.<com.sun.corba.se.impl.activation.ListActiveServers: void <init>()>();
+
+        virtualinvoke $r12.<java.util.Vector: void addElement(java.lang.Object)>($r11);
+
+        $r14 = <com.sun.corba.se.impl.activation.ServerTool: java.util.Vector handlers>;
+
+        $r13 = new com.sun.corba.se.impl.activation.LocateServer;
+
+        specialinvoke $r13.<com.sun.corba.se.impl.activation.LocateServer: void <init>()>();
+
+        virtualinvoke $r14.<java.util.Vector: void addElement(java.lang.Object)>($r13);
+
+        $r16 = <com.sun.corba.se.impl.activation.ServerTool: java.util.Vector handlers>;
+
+        $r15 = new com.sun.corba.se.impl.activation.LocateServerForORB;
+
+        specialinvoke $r15.<com.sun.corba.se.impl.activation.LocateServerForORB: void <init>()>();
+
+        virtualinvoke $r16.<java.util.Vector: void addElement(java.lang.Object)>($r15);
+
+        $r18 = <com.sun.corba.se.impl.activation.ServerTool: java.util.Vector handlers>;
+
+        $r17 = new com.sun.corba.se.impl.activation.ListORBs;
+
+        specialinvoke $r17.<com.sun.corba.se.impl.activation.ListORBs: void <init>()>();
+
+        virtualinvoke $r18.<java.util.Vector: void addElement(java.lang.Object)>($r17);
+
+        $r20 = <com.sun.corba.se.impl.activation.ServerTool: java.util.Vector handlers>;
+
+        $r19 = new com.sun.corba.se.impl.activation.ShutdownServer;
+
+        specialinvoke $r19.<com.sun.corba.se.impl.activation.ShutdownServer: void <init>()>();
+
+        virtualinvoke $r20.<java.util.Vector: void addElement(java.lang.Object)>($r19);
+
+        $r22 = <com.sun.corba.se.impl.activation.ServerTool: java.util.Vector handlers>;
+
+        $r21 = new com.sun.corba.se.impl.activation.StartServer;
+
+        specialinvoke $r21.<com.sun.corba.se.impl.activation.StartServer: void <init>()>();
+
+        virtualinvoke $r22.<java.util.Vector: void addElement(java.lang.Object)>($r21);
+
+        $r24 = <com.sun.corba.se.impl.activation.ServerTool: java.util.Vector handlers>;
+
+        $r23 = new com.sun.corba.se.impl.activation.Help;
+
+        specialinvoke $r23.<com.sun.corba.se.impl.activation.Help: void <init>()>();
+
+        virtualinvoke $r24.<java.util.Vector: void addElement(java.lang.Object)>($r23);
+
+        $r26 = <com.sun.corba.se.impl.activation.ServerTool: java.util.Vector handlers>;
+
+        $r25 = new com.sun.corba.se.impl.activation.Quit;
+
+        specialinvoke $r25.<com.sun.corba.se.impl.activation.Quit: void <init>()>();
+
+        virtualinvoke $r26.<java.util.Vector: void addElement(java.lang.Object)>($r25);
+
+        <com.sun.corba.se.impl.activation.ServerTool: int maxNameLen> = 0;
+
+        i3 = 0;
+
+     label1:
+        $r27 = <com.sun.corba.se.impl.activation.ServerTool: java.util.Vector handlers>;
+
+        $i0 = virtualinvoke $r27.<java.util.Vector: int size()>();
+
+        if i3 >= $i0 goto label3;
+
+        $r28 = <com.sun.corba.se.impl.activation.ServerTool: java.util.Vector handlers>;
+
+        $r29 = virtualinvoke $r28.<java.util.Vector: java.lang.Object elementAt(int)>(i3);
+
+        r30 = (com.sun.corba.se.impl.activation.CommandHandler) $r29;
+
+        $r31 = interfaceinvoke r30.<com.sun.corba.se.impl.activation.CommandHandler: java.lang.String getCommandName()>();
+
+        $i1 = virtualinvoke $r31.<java.lang.String: int length()>();
+
+        $i2 = <com.sun.corba.se.impl.activation.ServerTool: int maxNameLen>;
+
+        if $i1 <= $i2 goto label2;
+
+        <com.sun.corba.se.impl.activation.ServerTool: int maxNameLen> = $i1;
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+}

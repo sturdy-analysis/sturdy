@@ -1,0 +1,308 @@
+class java.net.SocketOutputStream extends java.io.FileOutputStream
+{
+    private java.net.AbstractPlainSocketImpl impl;
+    private byte[] temp;
+    private java.net.Socket socket;
+    private boolean closing;
+
+    void <init>(java.net.AbstractPlainSocketImpl) throws java.io.IOException
+    {
+        java.net.AbstractPlainSocketImpl r1;
+        byte[] $r3;
+        java.net.Socket $r4;
+        java.net.SocketOutputStream r0;
+        java.io.FileDescriptor $r2;
+
+        r0 := @this: java.net.SocketOutputStream;
+
+        r1 := @parameter0: java.net.AbstractPlainSocketImpl;
+
+        $r2 = virtualinvoke r1.<java.net.AbstractPlainSocketImpl: java.io.FileDescriptor getFileDescriptor()>();
+
+        specialinvoke r0.<java.io.FileOutputStream: void <init>(java.io.FileDescriptor)>($r2);
+
+        r0.<java.net.SocketOutputStream: java.net.AbstractPlainSocketImpl impl> = null;
+
+        $r3 = newarray (byte)[1];
+
+        r0.<java.net.SocketOutputStream: byte[] temp> = $r3;
+
+        r0.<java.net.SocketOutputStream: java.net.Socket socket> = null;
+
+        r0.<java.net.SocketOutputStream: boolean closing> = 0;
+
+        r0.<java.net.SocketOutputStream: java.net.AbstractPlainSocketImpl impl> = r1;
+
+        $r4 = virtualinvoke r1.<java.net.AbstractPlainSocketImpl: java.net.Socket getSocket()>();
+
+        r0.<java.net.SocketOutputStream: java.net.Socket socket> = $r4;
+
+        return;
+    }
+
+    public final java.nio.channels.FileChannel getChannel()
+    {
+        java.net.SocketOutputStream r0;
+
+        r0 := @this: java.net.SocketOutputStream;
+
+        return null;
+    }
+
+    private native void socketWrite0(java.io.FileDescriptor, byte[], int, int) throws java.io.IOException;
+
+    private void socketWrite(byte[], int, int) throws java.io.IOException
+    {
+        java.lang.Throwable $r14;
+        byte[] r7;
+        java.net.SocketException $r16, $r18, $r20, r21;
+        int i0, i1, $i2, $i3, $i4;
+        java.lang.String $r9;
+        boolean $z0, $z1;
+        java.lang.ArrayIndexOutOfBoundsException $r0;
+        java.net.AbstractPlainSocketImpl $r11, $r13, $r15, $r17, $r19;
+        java.net.SocketOutputStream r10;
+        java.io.FileDescriptor $r12;
+        java.lang.StringBuilder $r1, $r2, $r3, $r4, $r5, $r6, $r8;
+
+        r10 := @this: java.net.SocketOutputStream;
+
+        r7 := @parameter0: byte[];
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        if i0 <= 0 goto label01;
+
+        if i1 < 0 goto label01;
+
+        $i3 = lengthof r7;
+
+        $i4 = $i3 - i1;
+
+        if i0 <= $i4 goto label03;
+
+     label01:
+        if i0 != 0 goto label02;
+
+        return;
+
+     label02:
+        $r0 = new java.lang.ArrayIndexOutOfBoundsException;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("len == ");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" off == ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" buffer length == ");
+
+        $i2 = lengthof r7;
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<java.lang.ArrayIndexOutOfBoundsException: void <init>(java.lang.String)>($r9);
+
+        throw $r0;
+
+     label03:
+        $r11 = r10.<java.net.SocketOutputStream: java.net.AbstractPlainSocketImpl impl>;
+
+        $r12 = virtualinvoke $r11.<java.net.AbstractPlainSocketImpl: java.io.FileDescriptor acquireFD()>();
+
+     label04:
+        specialinvoke r10.<java.net.SocketOutputStream: void socketWrite0(java.io.FileDescriptor,byte[],int,int)>($r12, r7, i1, i0);
+
+     label05:
+        $r13 = r10.<java.net.SocketOutputStream: java.net.AbstractPlainSocketImpl impl>;
+
+        virtualinvoke $r13.<java.net.AbstractPlainSocketImpl: void releaseFD()>();
+
+        goto label11;
+
+     label06:
+        $r16 := @caughtexception;
+
+        r21 = $r16;
+
+        $z0 = $r16 instanceof sun.net.ConnectionResetException;
+
+        if $z0 == 0 goto label07;
+
+        $r19 = r10.<java.net.SocketOutputStream: java.net.AbstractPlainSocketImpl impl>;
+
+        virtualinvoke $r19.<java.net.AbstractPlainSocketImpl: void setConnectionResetPending()>();
+
+        $r20 = new java.net.SocketException;
+
+        specialinvoke $r20.<java.net.SocketException: void <init>(java.lang.String)>("Connection reset");
+
+        r21 = $r20;
+
+     label07:
+        $r17 = r10.<java.net.SocketOutputStream: java.net.AbstractPlainSocketImpl impl>;
+
+        $z1 = virtualinvoke $r17.<java.net.AbstractPlainSocketImpl: boolean isClosedOrPending()>();
+
+        if $z1 == 0 goto label08;
+
+        $r18 = new java.net.SocketException;
+
+        specialinvoke $r18.<java.net.SocketException: void <init>(java.lang.String)>("Socket closed");
+
+        throw $r18;
+
+     label08:
+        throw r21;
+
+     label09:
+        $r14 := @caughtexception;
+
+     label10:
+        $r15 = r10.<java.net.SocketOutputStream: java.net.AbstractPlainSocketImpl impl>;
+
+        virtualinvoke $r15.<java.net.AbstractPlainSocketImpl: void releaseFD()>();
+
+        throw $r14;
+
+     label11:
+        return;
+
+        catch java.net.SocketException from label04 to label05 with label06;
+        catch java.lang.Throwable from label04 to label05 with label09;
+        catch java.lang.Throwable from label06 to label10 with label09;
+    }
+
+    public void write(int) throws java.io.IOException
+    {
+        byte[] $r1, $r2;
+        byte $b1;
+        java.net.SocketOutputStream r0;
+        int i0;
+
+        r0 := @this: java.net.SocketOutputStream;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.net.SocketOutputStream: byte[] temp>;
+
+        $b1 = (byte) i0;
+
+        $r1[0] = $b1;
+
+        $r2 = r0.<java.net.SocketOutputStream: byte[] temp>;
+
+        specialinvoke r0.<java.net.SocketOutputStream: void socketWrite(byte[],int,int)>($r2, 0, 1);
+
+        return;
+    }
+
+    public void write(byte[]) throws java.io.IOException
+    {
+        int $i0;
+        byte[] r1;
+        java.net.SocketOutputStream r0;
+
+        r0 := @this: java.net.SocketOutputStream;
+
+        r1 := @parameter0: byte[];
+
+        $i0 = lengthof r1;
+
+        specialinvoke r0.<java.net.SocketOutputStream: void socketWrite(byte[],int,int)>(r1, 0, $i0);
+
+        return;
+    }
+
+    public void write(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r1;
+        java.net.SocketOutputStream r0;
+        int i0, i1;
+
+        r0 := @this: java.net.SocketOutputStream;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<java.net.SocketOutputStream: void socketWrite(byte[],int,int)>(r1, i0, i1);
+
+        return;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        java.net.AbstractPlainSocketImpl $r2;
+        java.net.Socket $r1, $r3, $r4;
+        java.net.SocketOutputStream r0;
+        boolean $z0, $z1;
+
+        r0 := @this: java.net.SocketOutputStream;
+
+        $z0 = r0.<java.net.SocketOutputStream: boolean closing>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        r0.<java.net.SocketOutputStream: boolean closing> = 1;
+
+        $r1 = r0.<java.net.SocketOutputStream: java.net.Socket socket>;
+
+        if $r1 == null goto label2;
+
+        $r3 = r0.<java.net.SocketOutputStream: java.net.Socket socket>;
+
+        $z1 = virtualinvoke $r3.<java.net.Socket: boolean isClosed()>();
+
+        if $z1 != 0 goto label3;
+
+        $r4 = r0.<java.net.SocketOutputStream: java.net.Socket socket>;
+
+        virtualinvoke $r4.<java.net.Socket: void close()>();
+
+        goto label3;
+
+     label2:
+        $r2 = r0.<java.net.SocketOutputStream: java.net.AbstractPlainSocketImpl impl>;
+
+        virtualinvoke $r2.<java.net.AbstractPlainSocketImpl: void close()>();
+
+     label3:
+        r0.<java.net.SocketOutputStream: boolean closing> = 0;
+
+        return;
+    }
+
+    protected void finalize()
+    {
+        java.net.SocketOutputStream r0;
+
+        r0 := @this: java.net.SocketOutputStream;
+
+        return;
+    }
+
+    private static native void init();
+
+    static void <clinit>()
+    {
+        staticinvoke <java.net.SocketOutputStream: void init()>();
+
+        return;
+    }
+}

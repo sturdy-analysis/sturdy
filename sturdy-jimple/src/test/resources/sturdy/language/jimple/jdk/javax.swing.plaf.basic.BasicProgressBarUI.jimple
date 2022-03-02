@@ -1,0 +1,2576 @@
+public class javax.swing.plaf.basic.BasicProgressBarUI extends javax.swing.plaf.ProgressBarUI
+{
+    private int cachedPercent;
+    private int cellLength;
+    private int cellSpacing;
+    private java.awt.Color selectionForeground;
+    private java.awt.Color selectionBackground;
+    private javax.swing.plaf.basic.BasicProgressBarUI$Animator animator;
+    protected javax.swing.JProgressBar progressBar;
+    protected javax.swing.event.ChangeListener changeListener;
+    private javax.swing.plaf.basic.BasicProgressBarUI$Handler handler;
+    private int animationIndex;
+    private int numFrames;
+    private int repaintInterval;
+    private int cycleTime;
+    private static boolean ADJUSTTIMER;
+    protected java.awt.Rectangle boxRect;
+    private java.awt.Rectangle nextPaintRect;
+    private java.awt.Rectangle componentInnards;
+    private java.awt.Rectangle oldComponentInnards;
+    private double delta;
+    private int maxPosition;
+
+    public void <init>()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        specialinvoke r0.<javax.swing.plaf.ProgressBarUI: void <init>()>();
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: int animationIndex> = 0;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: double delta> = 0.0;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: int maxPosition> = 0;
+
+        return;
+    }
+
+    public static javax.swing.plaf.ComponentUI createUI(javax.swing.JComponent)
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI $r0;
+        javax.swing.JComponent r1;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        $r0 = new javax.swing.plaf.basic.BasicProgressBarUI;
+
+        specialinvoke $r0.<javax.swing.plaf.basic.BasicProgressBarUI: void <init>()>();
+
+        return $r0;
+    }
+
+    public void installUI(javax.swing.JComponent)
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        javax.swing.JComponent r1;
+        javax.swing.JProgressBar $r2, $r3;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        $r2 = (javax.swing.JProgressBar) r1;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar> = $r2;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: void installDefaults()>();
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: void installListeners()>();
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $z0 = virtualinvoke $r3.<javax.swing.JProgressBar: boolean isIndeterminate()>();
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: void initIndeterminateValues()>();
+
+     label1:
+        return;
+    }
+
+    public void uninstallUI(javax.swing.JComponent)
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        javax.swing.JComponent r2;
+        javax.swing.JProgressBar $r1;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        r2 := @parameter0: javax.swing.JComponent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $z0 = virtualinvoke $r1.<javax.swing.JProgressBar: boolean isIndeterminate()>();
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: void cleanUpIndeterminateValues()>();
+
+     label1:
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: void uninstallDefaults()>();
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: void uninstallListeners()>();
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar> = null;
+
+        return;
+    }
+
+    protected void installDefaults()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        java.awt.Color $r5, $r6;
+        int $i0, $i1, $i2;
+        java.lang.Boolean $r1;
+        javax.swing.JProgressBar $r2, $r3, $r4;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r1 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        staticinvoke <javax.swing.LookAndFeel: void installProperty(javax.swing.JComponent,java.lang.String,java.lang.Object)>($r2, "opaque", $r1);
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        staticinvoke <javax.swing.LookAndFeel: void installBorder(javax.swing.JComponent,java.lang.String)>($r3, "ProgressBar.border");
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        staticinvoke <javax.swing.LookAndFeel: void installColorsAndFont(javax.swing.JComponent,java.lang.String,java.lang.String,java.lang.String)>($r4, "ProgressBar.background", "ProgressBar.foreground", "ProgressBar.font");
+
+        $i0 = staticinvoke <javax.swing.UIManager: int getInt(java.lang.Object)>("ProgressBar.cellLength");
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: int cellLength> = $i0;
+
+        $i1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int cellLength>;
+
+        if $i1 != 0 goto label1;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: int cellLength> = 1;
+
+     label1:
+        $i2 = staticinvoke <javax.swing.UIManager: int getInt(java.lang.Object)>("ProgressBar.cellSpacing");
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: int cellSpacing> = $i2;
+
+        $r5 = staticinvoke <javax.swing.UIManager: java.awt.Color getColor(java.lang.Object)>("ProgressBar.selectionForeground");
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Color selectionForeground> = $r5;
+
+        $r6 = staticinvoke <javax.swing.UIManager: java.awt.Color getColor(java.lang.Object)>("ProgressBar.selectionBackground");
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Color selectionBackground> = $r6;
+
+        return;
+    }
+
+    protected void uninstallDefaults()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        javax.swing.JProgressBar $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        staticinvoke <javax.swing.LookAndFeel: void uninstallBorder(javax.swing.JComponent)>($r1);
+
+        return;
+    }
+
+    protected void installListeners()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        javax.swing.event.ChangeListener $r2;
+        javax.swing.JProgressBar $r3, $r4;
+        javax.swing.plaf.basic.BasicProgressBarUI$Handler $r1, $r5;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.plaf.basic.BasicProgressBarUI$Handler getHandler()>();
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.event.ChangeListener changeListener> = $r1;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.event.ChangeListener changeListener>;
+
+        virtualinvoke $r3.<javax.swing.JProgressBar: void addChangeListener(javax.swing.event.ChangeListener)>($r2);
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r5 = specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.plaf.basic.BasicProgressBarUI$Handler getHandler()>();
+
+        virtualinvoke $r4.<javax.swing.JProgressBar: void addPropertyChangeListener(java.beans.PropertyChangeListener)>($r5);
+
+        return;
+    }
+
+    private javax.swing.plaf.basic.BasicProgressBarUI$Handler getHandler()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        javax.swing.plaf.basic.BasicProgressBarUI$Handler $r1, $r2, $r3;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.plaf.basic.BasicProgressBarUI$Handler handler>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new javax.swing.plaf.basic.BasicProgressBarUI$Handler;
+
+        specialinvoke $r3.<javax.swing.plaf.basic.BasicProgressBarUI$Handler: void <init>(javax.swing.plaf.basic.BasicProgressBarUI,javax.swing.plaf.basic.BasicProgressBarUI$1)>(r0, null);
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.plaf.basic.BasicProgressBarUI$Handler handler> = $r3;
+
+     label1:
+        $r2 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.plaf.basic.BasicProgressBarUI$Handler handler>;
+
+        return $r2;
+    }
+
+    protected void startAnimationTimer()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        int $i0;
+        javax.swing.plaf.basic.BasicProgressBarUI$Animator $r1, $r2, $r3;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.plaf.basic.BasicProgressBarUI$Animator animator>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new javax.swing.plaf.basic.BasicProgressBarUI$Animator;
+
+        specialinvoke $r3.<javax.swing.plaf.basic.BasicProgressBarUI$Animator: void <init>(javax.swing.plaf.basic.BasicProgressBarUI,javax.swing.plaf.basic.BasicProgressBarUI$1)>(r0, null);
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.plaf.basic.BasicProgressBarUI$Animator animator> = $r3;
+
+     label1:
+        $r2 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.plaf.basic.BasicProgressBarUI$Animator animator>;
+
+        $i0 = specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: int getRepaintInterval()>();
+
+        staticinvoke <javax.swing.plaf.basic.BasicProgressBarUI$Animator: void access$200(javax.swing.plaf.basic.BasicProgressBarUI$Animator,int)>($r2, $i0);
+
+        return;
+    }
+
+    protected void stopAnimationTimer()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        javax.swing.plaf.basic.BasicProgressBarUI$Animator $r1, $r2;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.plaf.basic.BasicProgressBarUI$Animator animator>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.plaf.basic.BasicProgressBarUI$Animator animator>;
+
+        staticinvoke <javax.swing.plaf.basic.BasicProgressBarUI$Animator: void access$300(javax.swing.plaf.basic.BasicProgressBarUI$Animator)>($r2);
+
+     label1:
+        return;
+    }
+
+    protected void uninstallListeners()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        javax.swing.event.ChangeListener $r1;
+        javax.swing.JProgressBar $r2, $r3;
+        javax.swing.plaf.basic.BasicProgressBarUI$Handler $r4;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.event.ChangeListener changeListener>;
+
+        virtualinvoke $r2.<javax.swing.JProgressBar: void removeChangeListener(javax.swing.event.ChangeListener)>($r1);
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r4 = specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.plaf.basic.BasicProgressBarUI$Handler getHandler()>();
+
+        virtualinvoke $r3.<javax.swing.JProgressBar: void removePropertyChangeListener(java.beans.PropertyChangeListener)>($r4);
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.plaf.basic.BasicProgressBarUI$Handler handler> = null;
+
+        return;
+    }
+
+    public int getBaseline(javax.swing.JComponent, int, int)
+    {
+        java.awt.Insets $r9;
+        int i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, i14, i15, $i17;
+        javax.swing.JProgressBar $r2, $r3, $r4, $r5, $r8;
+        boolean $z0;
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        javax.swing.JComponent r1;
+        java.awt.Font $r6;
+        java.awt.FontMetrics $r7;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        i0 := @parameter1: int;
+
+        i14 := @parameter2: int;
+
+        specialinvoke r0.<javax.swing.plaf.ProgressBarUI: int getBaseline(javax.swing.JComponent,int,int)>(r1, i0, i14);
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $z0 = virtualinvoke $r2.<javax.swing.JProgressBar: boolean isStringPainted()>();
+
+        if $z0 == 0 goto label1;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i1 = virtualinvoke $r3.<javax.swing.JProgressBar: int getOrientation()>();
+
+        if $i1 != 0 goto label1;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r6 = virtualinvoke $r4.<javax.swing.JProgressBar: java.awt.Font getFont()>();
+
+        $r7 = virtualinvoke $r5.<javax.swing.JProgressBar: java.awt.FontMetrics getFontMetrics(java.awt.Font)>($r6);
+
+        $r8 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r9 = virtualinvoke $r8.<javax.swing.JProgressBar: java.awt.Insets getInsets()>();
+
+        i2 = $r9.<java.awt.Insets: int top>;
+
+        $i3 = $r9.<java.awt.Insets: int top>;
+
+        $i5 = i14 - $i3;
+
+        $i4 = $r9.<java.awt.Insets: int bottom>;
+
+        i15 = $i5 - $i4;
+
+        $i6 = virtualinvoke $r7.<java.awt.FontMetrics: int getAscent()>();
+
+        $i7 = i15 + $i6;
+
+        $i8 = virtualinvoke $r7.<java.awt.FontMetrics: int getLeading()>();
+
+        $i9 = $i7 - $i8;
+
+        $i10 = virtualinvoke $r7.<java.awt.FontMetrics: int getDescent()>();
+
+        $i11 = $i9 - $i10;
+
+        $i12 = $i11 / 2;
+
+        $i13 = i2 + $i12;
+
+        return $i13;
+
+     label1:
+        $i17 = (int) -1;
+
+        return $i17;
+    }
+
+    public java.awt.Component$BaselineResizeBehavior getBaselineResizeBehavior(javax.swing.JComponent)
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        javax.swing.JComponent r1;
+        java.awt.Component$BaselineResizeBehavior $r3, $r5;
+        int $i0;
+        javax.swing.JProgressBar $r2, $r4;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        r1 := @parameter0: javax.swing.JComponent;
+
+        specialinvoke r0.<javax.swing.plaf.ProgressBarUI: java.awt.Component$BaselineResizeBehavior getBaselineResizeBehavior(javax.swing.JComponent)>(r1);
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $z0 = virtualinvoke $r2.<javax.swing.JProgressBar: boolean isStringPainted()>();
+
+        if $z0 == 0 goto label1;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i0 = virtualinvoke $r4.<javax.swing.JProgressBar: int getOrientation()>();
+
+        if $i0 != 0 goto label1;
+
+        $r5 = <java.awt.Component$BaselineResizeBehavior: java.awt.Component$BaselineResizeBehavior CENTER_OFFSET>;
+
+        return $r5;
+
+     label1:
+        $r3 = <java.awt.Component$BaselineResizeBehavior: java.awt.Component$BaselineResizeBehavior OTHER>;
+
+        return $r3;
+    }
+
+    protected java.awt.Dimension getPreferredInnerHorizontal()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        java.awt.Dimension $r3, r4;
+        java.lang.Object $r2;
+        javax.swing.JProgressBar $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r2 = staticinvoke <sun.swing.DefaultLookup: java.lang.Object get(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String)>($r1, r0, "ProgressBar.horizontalSize");
+
+        r4 = (java.awt.Dimension) $r2;
+
+        if r4 != null goto label1;
+
+        $r3 = new java.awt.Dimension;
+
+        specialinvoke $r3.<java.awt.Dimension: void <init>(int,int)>(146, 12);
+
+        r4 = $r3;
+
+     label1:
+        return r4;
+    }
+
+    protected java.awt.Dimension getPreferredInnerVertical()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        java.awt.Dimension $r3, r4;
+        java.lang.Object $r2;
+        javax.swing.JProgressBar $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r2 = staticinvoke <sun.swing.DefaultLookup: java.lang.Object get(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String)>($r1, r0, "ProgressBar.verticalSize");
+
+        r4 = (java.awt.Dimension) $r2;
+
+        if r4 != null goto label1;
+
+        $r3 = new java.awt.Dimension;
+
+        specialinvoke $r3.<java.awt.Dimension: void <init>(int,int)>(12, 146);
+
+        r4 = $r3;
+
+     label1:
+        return r4;
+    }
+
+    protected java.awt.Color getSelectionForeground()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        java.awt.Color $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Color selectionForeground>;
+
+        return $r1;
+    }
+
+    protected java.awt.Color getSelectionBackground()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        java.awt.Color $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Color selectionBackground>;
+
+        return $r1;
+    }
+
+    private int getCachedPercent()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        int $i0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $i0 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int cachedPercent>;
+
+        return $i0;
+    }
+
+    private void setCachedPercent(int)
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        int i0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        i0 := @parameter0: int;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: int cachedPercent> = i0;
+
+        return;
+    }
+
+    protected int getCellLength()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        int $i0;
+        javax.swing.JProgressBar $r1;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $z0 = virtualinvoke $r1.<javax.swing.JProgressBar: boolean isStringPainted()>();
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        $i0 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int cellLength>;
+
+        return $i0;
+    }
+
+    protected void setCellLength(int)
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        int i0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        i0 := @parameter0: int;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: int cellLength> = i0;
+
+        return;
+    }
+
+    protected int getCellSpacing()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        int $i0;
+        javax.swing.JProgressBar $r1;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $z0 = virtualinvoke $r1.<javax.swing.JProgressBar: boolean isStringPainted()>();
+
+        if $z0 == 0 goto label1;
+
+        return 0;
+
+     label1:
+        $i0 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int cellSpacing>;
+
+        return $i0;
+    }
+
+    protected void setCellSpacing(int)
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        int i0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        i0 := @parameter0: int;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: int cellSpacing> = i0;
+
+        return;
+    }
+
+    protected int getAmountFull(java.awt.Insets, int, int)
+    {
+        javax.swing.BoundedRangeModel $r2;
+        java.awt.Insets r6;
+        long $l5, $l7;
+        int $i0, $i1, $i2, $i3, i4, i6, i8;
+        javax.swing.JProgressBar $r1, $r3, $r4, $r5;
+        double $d0, $d1, $d2, $d3, $d4, $d5;
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        r6 := @parameter0: java.awt.Insets;
+
+        i6 := @parameter1: int;
+
+        i4 := @parameter2: int;
+
+        i8 = 0;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.JProgressBar: javax.swing.BoundedRangeModel getModel()>();
+
+        $i0 = interfaceinvoke $r2.<javax.swing.BoundedRangeModel: int getMaximum()>();
+
+        $i1 = interfaceinvoke $r2.<javax.swing.BoundedRangeModel: int getMinimum()>();
+
+        $i2 = $i0 - $i1;
+
+        if $i2 == 0 goto label2;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i3 = virtualinvoke $r3.<javax.swing.JProgressBar: int getOrientation()>();
+
+        if $i3 != 0 goto label1;
+
+        $d3 = (double) i6;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $d4 = virtualinvoke $r5.<javax.swing.JProgressBar: double getPercentComplete()>();
+
+        $d5 = $d3 * $d4;
+
+        $l7 = staticinvoke <java.lang.Math: long round(double)>($d5);
+
+        i8 = (int) $l7;
+
+        goto label2;
+
+     label1:
+        $d0 = (double) i4;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $d1 = virtualinvoke $r4.<javax.swing.JProgressBar: double getPercentComplete()>();
+
+        $d2 = $d0 * $d1;
+
+        $l5 = staticinvoke <java.lang.Math: long round(double)>($d2);
+
+        i8 = (int) $l5;
+
+     label2:
+        return i8;
+    }
+
+    public void paint(java.awt.Graphics, javax.swing.JComponent)
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        javax.swing.JComponent r3;
+        java.awt.Graphics r2;
+        javax.swing.JProgressBar $r1;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        r2 := @parameter0: java.awt.Graphics;
+
+        r3 := @parameter1: javax.swing.JComponent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $z0 = virtualinvoke $r1.<javax.swing.JProgressBar: boolean isIndeterminate()>();
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: void paintIndeterminate(java.awt.Graphics,javax.swing.JComponent)>(r2, r3);
+
+        goto label2;
+
+     label1:
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: void paintDeterminate(java.awt.Graphics,javax.swing.JComponent)>(r2, r3);
+
+     label2:
+        return;
+    }
+
+    protected java.awt.Rectangle getBox(java.awt.Rectangle)
+    {
+        byte $b22, $b24;
+        boolean $z0;
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        java.awt.Rectangle $r2, $r3, r4, $r5;
+        long $l6, $l10, $l15, $l19;
+        int $i0, $i1, i2, $i3, $i4, $i5, $i7, $i8, $i9, $i11, $i12, $i13, $i14, $i16, $i17, $i18, $i20, $i21, $i23;
+        javax.swing.JProgressBar $r1;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11, $d12, $d13;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        r4 := @parameter0: java.awt.Rectangle;
+
+        $i0 = virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: int getAnimationIndex()>();
+
+        $i1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int numFrames>;
+
+        i2 = $i1 / 2;
+
+        $z0 = specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: boolean sizeChanged()>();
+
+        if $z0 != 0 goto label1;
+
+        $d12 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: double delta>;
+
+        $b22 = $d12 cmpl 0.0;
+
+        if $b22 == 0 goto label1;
+
+        $i23 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int maxPosition>;
+
+        $d13 = (double) $i23;
+
+        $b24 = $d13 cmpl 0.0;
+
+        if $b24 != 0 goto label2;
+
+     label1:
+        specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: void updateSizes()>();
+
+     label2:
+        $r5 = specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle getGenericBox(java.awt.Rectangle)>(r4);
+
+        if $r5 != null goto label3;
+
+        return null;
+
+     label3:
+        if i2 > 0 goto label4;
+
+        return null;
+
+     label4:
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i3 = virtualinvoke $r1.<javax.swing.JProgressBar: int getOrientation()>();
+
+        if $i3 != 0 goto label6;
+
+        if $i0 >= i2 goto label5;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle componentInnards>;
+
+        $i18 = $r3.<java.awt.Rectangle: int x>;
+
+        $d10 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: double delta>;
+
+        $d9 = (double) $i0;
+
+        $d11 = $d10 * $d9;
+
+        $l19 = staticinvoke <java.lang.Math: long round(double)>($d11);
+
+        $i20 = (int) $l19;
+
+        $i21 = $i18 + $i20;
+
+        $r5.<java.awt.Rectangle: int x> = $i21;
+
+        goto label8;
+
+     label5:
+        $i14 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int maxPosition>;
+
+        $d7 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: double delta>;
+
+        $i13 = $i0 - i2;
+
+        $d6 = (double) $i13;
+
+        $d8 = $d7 * $d6;
+
+        $l15 = staticinvoke <java.lang.Math: long round(double)>($d8);
+
+        $i16 = (int) $l15;
+
+        $i17 = $i14 - $i16;
+
+        $r5.<java.awt.Rectangle: int x> = $i17;
+
+        goto label8;
+
+     label6:
+        if $i0 >= i2 goto label7;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle componentInnards>;
+
+        $i9 = $r2.<java.awt.Rectangle: int y>;
+
+        $d4 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: double delta>;
+
+        $d3 = (double) $i0;
+
+        $d5 = $d4 * $d3;
+
+        $l10 = staticinvoke <java.lang.Math: long round(double)>($d5);
+
+        $i11 = (int) $l10;
+
+        $i12 = $i9 + $i11;
+
+        $r5.<java.awt.Rectangle: int y> = $i12;
+
+        goto label8;
+
+     label7:
+        $i5 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int maxPosition>;
+
+        $d1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: double delta>;
+
+        $i4 = $i0 - i2;
+
+        $d0 = (double) $i4;
+
+        $d2 = $d1 * $d0;
+
+        $l6 = staticinvoke <java.lang.Math: long round(double)>($d2);
+
+        $i7 = (int) $l6;
+
+        $i8 = $i5 - $i7;
+
+        $r5.<java.awt.Rectangle: int y> = $i8;
+
+     label8:
+        return $r5;
+    }
+
+    private void updateSizes()
+    {
+        java.awt.Rectangle $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16;
+        javax.swing.JProgressBar $r1;
+        double $d0, $d1, $d2, $d3;
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i0 = virtualinvoke $r1.<javax.swing.JProgressBar: int getOrientation()>();
+
+        if $i0 != 0 goto label1;
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle componentInnards>;
+
+        $i11 = $r6.<java.awt.Rectangle: int width>;
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle componentInnards>;
+
+        $i10 = $r7.<java.awt.Rectangle: int height>;
+
+        $i12 = virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: int getBoxLength(int,int)>($i11, $i10);
+
+        $r8 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle componentInnards>;
+
+        $i14 = $r8.<java.awt.Rectangle: int x>;
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle componentInnards>;
+
+        $i13 = $r9.<java.awt.Rectangle: int width>;
+
+        $i15 = $i14 + $i13;
+
+        $i16 = $i15 - $i12;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: int maxPosition> = $i16;
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle componentInnards>;
+
+        $i2 = $r2.<java.awt.Rectangle: int height>;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle componentInnards>;
+
+        $i1 = $r3.<java.awt.Rectangle: int width>;
+
+        $i3 = virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: int getBoxLength(int,int)>($i2, $i1);
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle componentInnards>;
+
+        $i5 = $r4.<java.awt.Rectangle: int y>;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle componentInnards>;
+
+        $i4 = $r5.<java.awt.Rectangle: int height>;
+
+        $i6 = $i5 + $i4;
+
+        $i7 = $i6 - $i3;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: int maxPosition> = $i7;
+
+     label2:
+        $i8 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int maxPosition>;
+
+        $d0 = (double) $i8;
+
+        $d2 = 2.0 * $d0;
+
+        $i9 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int numFrames>;
+
+        $d1 = (double) $i9;
+
+        $d3 = $d2 / $d1;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: double delta> = $d3;
+
+        return;
+    }
+
+    private java.awt.Rectangle getGenericBox(java.awt.Rectangle)
+    {
+        java.awt.Rectangle $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, r11;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12;
+        javax.swing.JProgressBar $r1;
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        r11 := @parameter0: java.awt.Rectangle;
+
+        if r11 != null goto label1;
+
+        $r10 = new java.awt.Rectangle;
+
+        specialinvoke $r10.<java.awt.Rectangle: void <init>()>();
+
+        r11 = $r10;
+
+     label1:
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i0 = virtualinvoke $r1.<javax.swing.JProgressBar: int getOrientation()>();
+
+        if $i0 != 0 goto label3;
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle componentInnards>;
+
+        $i8 = $r6.<java.awt.Rectangle: int width>;
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle componentInnards>;
+
+        $i7 = $r7.<java.awt.Rectangle: int height>;
+
+        $i9 = virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: int getBoxLength(int,int)>($i8, $i7);
+
+        r11.<java.awt.Rectangle: int width> = $i9;
+
+        $i10 = r11.<java.awt.Rectangle: int width>;
+
+        if $i10 >= 0 goto label2;
+
+        r11 = null;
+
+        goto label5;
+
+     label2:
+        $r8 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle componentInnards>;
+
+        $i11 = $r8.<java.awt.Rectangle: int height>;
+
+        r11.<java.awt.Rectangle: int height> = $i11;
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle componentInnards>;
+
+        $i12 = $r9.<java.awt.Rectangle: int y>;
+
+        r11.<java.awt.Rectangle: int y> = $i12;
+
+        goto label5;
+
+     label3:
+        $r2 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle componentInnards>;
+
+        $i2 = $r2.<java.awt.Rectangle: int height>;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle componentInnards>;
+
+        $i1 = $r3.<java.awt.Rectangle: int width>;
+
+        $i3 = virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: int getBoxLength(int,int)>($i2, $i1);
+
+        r11.<java.awt.Rectangle: int height> = $i3;
+
+        $i4 = r11.<java.awt.Rectangle: int height>;
+
+        if $i4 >= 0 goto label4;
+
+        r11 = null;
+
+        goto label5;
+
+     label4:
+        $r4 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle componentInnards>;
+
+        $i5 = $r4.<java.awt.Rectangle: int width>;
+
+        r11.<java.awt.Rectangle: int width> = $i5;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle componentInnards>;
+
+        $i6 = $r5.<java.awt.Rectangle: int x>;
+
+        r11.<java.awt.Rectangle: int x> = $i6;
+
+     label5:
+        return r11;
+    }
+
+    protected int getBoxLength(int, int)
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        int i0, $i2, i3;
+        long $l1;
+        double $d0, $d1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        i0 := @parameter0: int;
+
+        i3 := @parameter1: int;
+
+        $d0 = (double) i0;
+
+        $d1 = $d0 / 6.0;
+
+        $l1 = staticinvoke <java.lang.Math: long round(double)>($d1);
+
+        $i2 = (int) $l1;
+
+        return $i2;
+    }
+
+    protected void paintIndeterminate(java.awt.Graphics, javax.swing.JComponent)
+    {
+        java.awt.Color $r17;
+        boolean $z0, $z1;
+        javax.swing.plaf.basic.BasicProgressBarUI r1;
+        java.awt.Graphics r0;
+        java.awt.Rectangle $r7, $r8, $r9, $r12, $r13, $r14, $r15, $r18, $r19, $r20, $r21;
+        java.awt.Insets $r3;
+        java.awt.Graphics2D r6;
+        int $i0, $i1, $i2, $i3, i4, $i5, $i6, $i7, $i8, i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22;
+        javax.swing.JProgressBar $r2, $r4, $r5, $r10, $r11, $r16;
+        javax.swing.JComponent r22;
+
+        r1 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        r0 := @parameter0: java.awt.Graphics;
+
+        r22 := @parameter1: javax.swing.JComponent;
+
+        $z0 = r0 instanceof java.awt.Graphics2D;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r2 = r1.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.JProgressBar: java.awt.Insets getInsets()>();
+
+        $r4 = r1.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i0 = virtualinvoke $r4.<javax.swing.JProgressBar: int getWidth()>();
+
+        $i2 = $r3.<java.awt.Insets: int right>;
+
+        $i1 = $r3.<java.awt.Insets: int left>;
+
+        $i3 = $i2 + $i1;
+
+        i4 = $i0 - $i3;
+
+        $r5 = r1.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i5 = virtualinvoke $r5.<javax.swing.JProgressBar: int getHeight()>();
+
+        $i7 = $r3.<java.awt.Insets: int top>;
+
+        $i6 = $r3.<java.awt.Insets: int bottom>;
+
+        $i8 = $i7 + $i6;
+
+        i9 = $i5 - $i8;
+
+        if i4 <= 0 goto label2;
+
+        if i9 > 0 goto label3;
+
+     label2:
+        return;
+
+     label3:
+        r6 = (java.awt.Graphics2D) r0;
+
+        $r7 = r1.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle boxRect>;
+
+        $r8 = virtualinvoke r1.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle getBox(java.awt.Rectangle)>($r7);
+
+        r1.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle boxRect> = $r8;
+
+        $r9 = r1.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle boxRect>;
+
+        if $r9 == null goto label4;
+
+        $r16 = r1.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r17 = virtualinvoke $r16.<javax.swing.JProgressBar: java.awt.Color getForeground()>();
+
+        virtualinvoke r6.<java.awt.Graphics2D: void setColor(java.awt.Color)>($r17);
+
+        $r18 = r1.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle boxRect>;
+
+        $i22 = $r18.<java.awt.Rectangle: int x>;
+
+        $r19 = r1.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle boxRect>;
+
+        $i21 = $r19.<java.awt.Rectangle: int y>;
+
+        $r20 = r1.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle boxRect>;
+
+        $i20 = $r20.<java.awt.Rectangle: int width>;
+
+        $r21 = r1.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle boxRect>;
+
+        $i19 = $r21.<java.awt.Rectangle: int height>;
+
+        virtualinvoke r6.<java.awt.Graphics2D: void fillRect(int,int,int,int)>($i22, $i21, $i20, $i19);
+
+     label4:
+        $r10 = r1.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $z1 = virtualinvoke $r10.<javax.swing.JProgressBar: boolean isStringPainted()>();
+
+        if $z1 == 0 goto label6;
+
+        $r11 = r1.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i10 = virtualinvoke $r11.<javax.swing.JProgressBar: int getOrientation()>();
+
+        if $i10 != 0 goto label5;
+
+        $i18 = $r3.<java.awt.Insets: int left>;
+
+        $i17 = $r3.<java.awt.Insets: int top>;
+
+        $r14 = r1.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle boxRect>;
+
+        $i16 = $r14.<java.awt.Rectangle: int x>;
+
+        $r15 = r1.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle boxRect>;
+
+        $i15 = $r15.<java.awt.Rectangle: int width>;
+
+        specialinvoke r1.<javax.swing.plaf.basic.BasicProgressBarUI: void paintString(java.awt.Graphics,int,int,int,int,int,int,java.awt.Insets)>(r6, $i18, $i17, i4, i9, $i16, $i15, $r3);
+
+        goto label6;
+
+     label5:
+        $i14 = $r3.<java.awt.Insets: int left>;
+
+        $i13 = $r3.<java.awt.Insets: int top>;
+
+        $r12 = r1.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle boxRect>;
+
+        $i12 = $r12.<java.awt.Rectangle: int y>;
+
+        $r13 = r1.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle boxRect>;
+
+        $i11 = $r13.<java.awt.Rectangle: int height>;
+
+        specialinvoke r1.<javax.swing.plaf.basic.BasicProgressBarUI: void paintString(java.awt.Graphics,int,int,int,int,int,int,java.awt.Insets)>(r6, $i14, $i13, i4, i9, $i12, $i11, $r3);
+
+     label6:
+        return;
+    }
+
+    protected void paintDeterminate(java.awt.Graphics, javax.swing.JComponent)
+    {
+        java.awt.Color $r8;
+        javax.swing.plaf.basic.BasicProgressBarUI r1;
+        java.awt.BasicStroke $r10, $r12, $r13, $r16;
+        float[] $r11, $r14;
+        javax.swing.JProgressBar $r2, $r4, $r5, $r7, $r9, $r17;
+        boolean $z0, $z1, $z2;
+        java.awt.Graphics r0;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7;
+        java.awt.Insets $r3;
+        java.awt.Graphics2D r6;
+        int $i0, $i1, $i2, $i3, i4, $i5, $i6, $i7, $i8, i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, $i32, $i33, $i34, $i35, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i46;
+        javax.swing.JComponent r15;
+
+        r1 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        r0 := @parameter0: java.awt.Graphics;
+
+        r15 := @parameter1: javax.swing.JComponent;
+
+        $z0 = r0 instanceof java.awt.Graphics2D;
+
+        if $z0 != 0 goto label01;
+
+        return;
+
+     label01:
+        $r2 = r1.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.JProgressBar: java.awt.Insets getInsets()>();
+
+        $r4 = r1.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i0 = virtualinvoke $r4.<javax.swing.JProgressBar: int getWidth()>();
+
+        $i2 = $r3.<java.awt.Insets: int right>;
+
+        $i1 = $r3.<java.awt.Insets: int left>;
+
+        $i3 = $i2 + $i1;
+
+        i4 = $i0 - $i3;
+
+        $r5 = r1.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i5 = virtualinvoke $r5.<javax.swing.JProgressBar: int getHeight()>();
+
+        $i7 = $r3.<java.awt.Insets: int top>;
+
+        $i6 = $r3.<java.awt.Insets: int bottom>;
+
+        $i8 = $i7 + $i6;
+
+        i9 = $i5 - $i8;
+
+        if i4 <= 0 goto label02;
+
+        if i9 > 0 goto label03;
+
+     label02:
+        return;
+
+     label03:
+        $i10 = virtualinvoke r1.<javax.swing.plaf.basic.BasicProgressBarUI: int getCellLength()>();
+
+        $i11 = virtualinvoke r1.<javax.swing.plaf.basic.BasicProgressBarUI: int getCellSpacing()>();
+
+        $i12 = virtualinvoke r1.<javax.swing.plaf.basic.BasicProgressBarUI: int getAmountFull(java.awt.Insets,int,int)>($r3, i4, i9);
+
+        r6 = (java.awt.Graphics2D) r0;
+
+        $r7 = r1.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r8 = virtualinvoke $r7.<javax.swing.JProgressBar: java.awt.Color getForeground()>();
+
+        virtualinvoke r6.<java.awt.Graphics2D: void setColor(java.awt.Color)>($r8);
+
+        $r9 = r1.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i13 = virtualinvoke $r9.<javax.swing.JProgressBar: int getOrientation()>();
+
+        if $i13 != 0 goto label07;
+
+        if $i11 != 0 goto label04;
+
+        if $i12 <= 0 goto label04;
+
+        $r16 = new java.awt.BasicStroke;
+
+        $f7 = (float) i9;
+
+        specialinvoke $r16.<java.awt.BasicStroke: void <init>(float,int,int)>($f7, 0, 2);
+
+        virtualinvoke r6.<java.awt.Graphics2D: void setStroke(java.awt.Stroke)>($r16);
+
+        goto label05;
+
+     label04:
+        $r13 = new java.awt.BasicStroke;
+
+        $f6 = (float) i9;
+
+        $r14 = newarray (float)[2];
+
+        $f4 = (float) $i10;
+
+        $r14[0] = $f4;
+
+        $f5 = (float) $i11;
+
+        $r14[1] = $f5;
+
+        specialinvoke $r13.<java.awt.BasicStroke: void <init>(float,int,int,float,float[],float)>($f6, 0, 2, 0.0F, $r14, 0.0F);
+
+        virtualinvoke r6.<java.awt.Graphics2D: void setStroke(java.awt.Stroke)>($r13);
+
+     label05:
+        $z1 = staticinvoke <javax.swing.plaf.basic.BasicGraphicsUtils: boolean isLeftToRight(java.awt.Component)>(r15);
+
+        if $z1 == 0 goto label06;
+
+        $i35 = $r3.<java.awt.Insets: int left>;
+
+        $i28 = i9 / 2;
+
+        $i27 = $r3.<java.awt.Insets: int top>;
+
+        $i34 = $i28 + $i27;
+
+        $i29 = $r3.<java.awt.Insets: int left>;
+
+        $i33 = $i12 + $i29;
+
+        $i31 = i9 / 2;
+
+        $i30 = $r3.<java.awt.Insets: int top>;
+
+        $i32 = $i31 + $i30;
+
+        virtualinvoke r6.<java.awt.Graphics2D: void drawLine(int,int,int,int)>($i35, $i34, $i33, $i32);
+
+        goto label10;
+
+     label06:
+        $i16 = $r3.<java.awt.Insets: int left>;
+
+        $i26 = i4 + $i16;
+
+        $i18 = i9 / 2;
+
+        $i17 = $r3.<java.awt.Insets: int top>;
+
+        $i25 = $i18 + $i17;
+
+        $i19 = $r3.<java.awt.Insets: int left>;
+
+        $i20 = i4 + $i19;
+
+        $i24 = $i20 - $i12;
+
+        $i22 = i9 / 2;
+
+        $i21 = $r3.<java.awt.Insets: int top>;
+
+        $i23 = $i22 + $i21;
+
+        virtualinvoke r6.<java.awt.Graphics2D: void drawLine(int,int,int,int)>($i26, $i25, $i24, $i23);
+
+        goto label10;
+
+     label07:
+        if $i11 != 0 goto label08;
+
+        if $i12 <= 0 goto label08;
+
+        $r12 = new java.awt.BasicStroke;
+
+        $f3 = (float) i4;
+
+        specialinvoke $r12.<java.awt.BasicStroke: void <init>(float,int,int)>($f3, 0, 2);
+
+        virtualinvoke r6.<java.awt.Graphics2D: void setStroke(java.awt.Stroke)>($r12);
+
+        goto label09;
+
+     label08:
+        $r10 = new java.awt.BasicStroke;
+
+        $f2 = (float) i4;
+
+        $r11 = newarray (float)[2];
+
+        $f0 = (float) $i10;
+
+        $r11[0] = $f0;
+
+        $f1 = (float) $i11;
+
+        $r11[1] = $f1;
+
+        specialinvoke $r10.<java.awt.BasicStroke: void <init>(float,int,int,float,float[],float)>($f2, 0, 2, 0.0F, $r11, 0.0F);
+
+        virtualinvoke r6.<java.awt.Graphics2D: void setStroke(java.awt.Stroke)>($r10);
+
+     label09:
+        $i36 = i4 / 2;
+
+        $i37 = $r3.<java.awt.Insets: int left>;
+
+        $i38 = $i36 + $i37;
+
+        $i39 = $r3.<java.awt.Insets: int top>;
+
+        $i40 = $i39 + i9;
+
+        $i41 = i4 / 2;
+
+        $i42 = $r3.<java.awt.Insets: int left>;
+
+        $i43 = $i41 + $i42;
+
+        $i44 = $r3.<java.awt.Insets: int top>;
+
+        $i45 = $i44 + i9;
+
+        $i46 = $i45 - $i12;
+
+        virtualinvoke r6.<java.awt.Graphics2D: void drawLine(int,int,int,int)>($i38, $i40, $i43, $i46);
+
+     label10:
+        $r17 = r1.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $z2 = virtualinvoke $r17.<javax.swing.JProgressBar: boolean isStringPainted()>();
+
+        if $z2 == 0 goto label11;
+
+        $i15 = $r3.<java.awt.Insets: int left>;
+
+        $i14 = $r3.<java.awt.Insets: int top>;
+
+        virtualinvoke r1.<javax.swing.plaf.basic.BasicProgressBarUI: void paintString(java.awt.Graphics,int,int,int,int,int,java.awt.Insets)>(r0, $i15, $i14, i4, i9, $i12, $r3);
+
+     label11:
+        return;
+    }
+
+    protected void paintString(java.awt.Graphics, int, int, int, int, int, java.awt.Insets)
+    {
+        boolean $z0, $z1, $z2;
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        java.awt.Graphics r3;
+        java.awt.Rectangle $r5, $r6, $r7, $r8, $r11, $r12, $r13, $r14;
+        java.awt.Insets r4;
+        int $i0, i1, i2, i3, i4, i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13;
+        javax.swing.JProgressBar $r1, $r2, $r9, $r10;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        r3 := @parameter0: java.awt.Graphics;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        i4 := @parameter4: int;
+
+        i5 := @parameter5: int;
+
+        r4 := @parameter6: java.awt.Insets;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i0 = virtualinvoke $r1.<javax.swing.JProgressBar: int getOrientation()>();
+
+        if $i0 != 0 goto label3;
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $z1 = staticinvoke <javax.swing.plaf.basic.BasicGraphicsUtils: boolean isLeftToRight(java.awt.Component)>($r9);
+
+        if $z1 == 0 goto label2;
+
+        $r10 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $z2 = virtualinvoke $r10.<javax.swing.JProgressBar: boolean isIndeterminate()>();
+
+        if $z2 == 0 goto label1;
+
+        $r11 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle boxRect>;
+
+        $r12 = virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle getBox(java.awt.Rectangle)>($r11);
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle boxRect> = $r12;
+
+        $r13 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle boxRect>;
+
+        $i13 = $r13.<java.awt.Rectangle: int x>;
+
+        $r14 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle boxRect>;
+
+        $i12 = $r14.<java.awt.Rectangle: int width>;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: void paintString(java.awt.Graphics,int,int,int,int,int,int,java.awt.Insets)>(r3, i1, i2, i3, i4, $i13, $i12, r4);
+
+        goto label5;
+
+     label1:
+        specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: void paintString(java.awt.Graphics,int,int,int,int,int,int,java.awt.Insets)>(r3, i1, i2, i3, i4, i1, i5, r4);
+
+        goto label5;
+
+     label2:
+        $i10 = i1 + i3;
+
+        $i11 = $i10 - i5;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: void paintString(java.awt.Graphics,int,int,int,int,int,int,java.awt.Insets)>(r3, i1, i2, i3, i4, $i11, i5, r4);
+
+        goto label5;
+
+     label3:
+        $r2 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $z0 = virtualinvoke $r2.<javax.swing.JProgressBar: boolean isIndeterminate()>();
+
+        if $z0 == 0 goto label4;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle boxRect>;
+
+        $r6 = virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle getBox(java.awt.Rectangle)>($r5);
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle boxRect> = $r6;
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle boxRect>;
+
+        $i9 = $r7.<java.awt.Rectangle: int y>;
+
+        $r8 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle boxRect>;
+
+        $i8 = $r8.<java.awt.Rectangle: int height>;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: void paintString(java.awt.Graphics,int,int,int,int,int,int,java.awt.Insets)>(r3, i1, i2, i3, i4, $i9, $i8, r4);
+
+        goto label5;
+
+     label4:
+        $i6 = i2 + i4;
+
+        $i7 = $i6 - i5;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: void paintString(java.awt.Graphics,int,int,int,int,int,int,java.awt.Insets)>(r3, i1, i2, i3, i4, $i7, i5, r4);
+
+     label5:
+        return;
+    }
+
+    private void paintString(java.awt.Graphics, int, int, int, int, int, int, java.awt.Insets)
+    {
+        java.awt.Color $r10, $r17, $r19, $r21;
+        java.awt.Point $r7, $r15;
+        boolean $z0;
+        javax.swing.plaf.basic.BasicProgressBarUI r2;
+        java.awt.Font $r6, $r13, $r14;
+        java.awt.geom.AffineTransform $r11;
+        java.awt.Graphics r0;
+        java.awt.Rectangle $r8;
+        java.awt.Insets r23;
+        java.awt.Graphics2D r1;
+        int i0, i1, i2, i3, $i4, $i5, $i6, i7, i8, $i9, $i10, $i11, $i12, $i13, $i14;
+        java.lang.String $r4;
+        javax.swing.JProgressBar $r3, $r5, $r9, $r12, $r16, $r18, $r20, $r22;
+
+        r2 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        r0 := @parameter0: java.awt.Graphics;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        i3 := @parameter4: int;
+
+        i7 := @parameter5: int;
+
+        i8 := @parameter6: int;
+
+        r23 := @parameter7: java.awt.Insets;
+
+        $z0 = r0 instanceof java.awt.Graphics2D;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        r1 = (java.awt.Graphics2D) r0;
+
+        $r3 = r2.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r4 = virtualinvoke $r3.<javax.swing.JProgressBar: java.lang.String getString()>();
+
+        $r5 = r2.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r6 = virtualinvoke $r5.<javax.swing.JProgressBar: java.awt.Font getFont()>();
+
+        virtualinvoke r1.<java.awt.Graphics2D: void setFont(java.awt.Font)>($r6);
+
+        $r7 = virtualinvoke r2.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Point getStringPlacement(java.awt.Graphics,java.lang.String,int,int,int,int)>(r1, $r4, i0, i1, i2, i3);
+
+        $r8 = virtualinvoke r1.<java.awt.Graphics2D: java.awt.Rectangle getClipBounds()>();
+
+        $r9 = r2.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i4 = virtualinvoke $r9.<javax.swing.JProgressBar: int getOrientation()>();
+
+        if $i4 != 0 goto label2;
+
+        $r19 = virtualinvoke r2.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Color getSelectionBackground()>();
+
+        virtualinvoke r1.<java.awt.Graphics2D: void setColor(java.awt.Color)>($r19);
+
+        $r20 = r2.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i12 = $r7.<java.awt.Point: int x>;
+
+        $i11 = $r7.<java.awt.Point: int y>;
+
+        staticinvoke <sun.swing.SwingUtilities2: void drawString(javax.swing.JComponent,java.awt.Graphics,java.lang.String,int,int)>($r20, r1, $r4, $i12, $i11);
+
+        $r21 = virtualinvoke r2.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Color getSelectionForeground()>();
+
+        virtualinvoke r1.<java.awt.Graphics2D: void setColor(java.awt.Color)>($r21);
+
+        virtualinvoke r1.<java.awt.Graphics2D: void clipRect(int,int,int,int)>(i7, i1, i8, i3);
+
+        $r22 = r2.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i14 = $r7.<java.awt.Point: int x>;
+
+        $i13 = $r7.<java.awt.Point: int y>;
+
+        staticinvoke <sun.swing.SwingUtilities2: void drawString(javax.swing.JComponent,java.awt.Graphics,java.lang.String,int,int)>($r22, r1, $r4, $i14, $i13);
+
+        goto label3;
+
+     label2:
+        $r10 = virtualinvoke r2.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Color getSelectionBackground()>();
+
+        virtualinvoke r1.<java.awt.Graphics2D: void setColor(java.awt.Color)>($r10);
+
+        $r11 = staticinvoke <java.awt.geom.AffineTransform: java.awt.geom.AffineTransform getRotateInstance(double)>(1.5707963267948966);
+
+        $r12 = r2.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r13 = virtualinvoke $r12.<javax.swing.JProgressBar: java.awt.Font getFont()>();
+
+        $r14 = virtualinvoke $r13.<java.awt.Font: java.awt.Font deriveFont(java.awt.geom.AffineTransform)>($r11);
+
+        virtualinvoke r1.<java.awt.Graphics2D: void setFont(java.awt.Font)>($r14);
+
+        $r15 = virtualinvoke r2.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Point getStringPlacement(java.awt.Graphics,java.lang.String,int,int,int,int)>(r1, $r4, i0, i1, i2, i3);
+
+        $r16 = r2.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i6 = $r15.<java.awt.Point: int x>;
+
+        $i5 = $r15.<java.awt.Point: int y>;
+
+        staticinvoke <sun.swing.SwingUtilities2: void drawString(javax.swing.JComponent,java.awt.Graphics,java.lang.String,int,int)>($r16, r1, $r4, $i6, $i5);
+
+        $r17 = virtualinvoke r2.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Color getSelectionForeground()>();
+
+        virtualinvoke r1.<java.awt.Graphics2D: void setColor(java.awt.Color)>($r17);
+
+        virtualinvoke r1.<java.awt.Graphics2D: void clipRect(int,int,int,int)>(i0, i7, i2, i8);
+
+        $r18 = r2.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i10 = $r15.<java.awt.Point: int x>;
+
+        $i9 = $r15.<java.awt.Point: int y>;
+
+        staticinvoke <sun.swing.SwingUtilities2: void drawString(javax.swing.JComponent,java.awt.Graphics,java.lang.String,int,int)>($r18, r1, $r4, $i10, $i9);
+
+     label3:
+        virtualinvoke r1.<java.awt.Graphics2D: void setClip(java.awt.Shape)>($r8);
+
+        return;
+    }
+
+    protected java.awt.Point getStringPlacement(java.awt.Graphics, java.lang.String, int, int, int, int)
+    {
+        java.awt.Point $r9, $r10;
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        java.awt.Font $r4;
+        java.awt.Graphics r1;
+        float $f0, $f1;
+        int $i0, $i1, i2, i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, i11, i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31;
+        java.lang.String r6;
+        javax.swing.JProgressBar $r2, $r3, $r7, $r8;
+        java.awt.FontMetrics $r5;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        r1 := @parameter0: java.awt.Graphics;
+
+        r6 := @parameter1: java.lang.String;
+
+        i2 := @parameter2: int;
+
+        i11 := @parameter3: int;
+
+        i3 := @parameter4: int;
+
+        i12 := @parameter5: int;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r4 = virtualinvoke $r2.<javax.swing.JProgressBar: java.awt.Font getFont()>();
+
+        $r5 = staticinvoke <sun.swing.SwingUtilities2: java.awt.FontMetrics getFontMetrics(javax.swing.JComponent,java.awt.Graphics,java.awt.Font)>($r3, r1, $r4);
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i0 = staticinvoke <sun.swing.SwingUtilities2: int stringWidth(javax.swing.JComponent,java.awt.FontMetrics,java.lang.String)>($r7, $r5, r6);
+
+        $r8 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i1 = virtualinvoke $r8.<javax.swing.JProgressBar: int getOrientation()>();
+
+        if $i1 != 0 goto label1;
+
+        $r10 = new java.awt.Point;
+
+        $i20 = i3 / 2;
+
+        $i19 = $i0 / 2;
+
+        $i21 = $i20 - $i19;
+
+        $f1 = (float) $i21;
+
+        $i22 = staticinvoke <java.lang.Math: int round(float)>($f1);
+
+        $i23 = i2 + $i22;
+
+        $i24 = virtualinvoke $r5.<java.awt.FontMetrics: int getAscent()>();
+
+        $i25 = i12 + $i24;
+
+        $i26 = virtualinvoke $r5.<java.awt.FontMetrics: int getLeading()>();
+
+        $i27 = $i25 - $i26;
+
+        $i28 = virtualinvoke $r5.<java.awt.FontMetrics: int getDescent()>();
+
+        $i29 = $i27 - $i28;
+
+        $i30 = $i29 / 2;
+
+        $i31 = i11 + $i30;
+
+        specialinvoke $r10.<java.awt.Point: void <init>(int,int)>($i23, $i31);
+
+        return $r10;
+
+     label1:
+        $r9 = new java.awt.Point;
+
+        $i4 = virtualinvoke $r5.<java.awt.FontMetrics: int getAscent()>();
+
+        $i5 = i3 - $i4;
+
+        $i6 = virtualinvoke $r5.<java.awt.FontMetrics: int getLeading()>();
+
+        $i7 = $i5 + $i6;
+
+        $i8 = virtualinvoke $r5.<java.awt.FontMetrics: int getDescent()>();
+
+        $i9 = $i7 + $i8;
+
+        $i10 = $i9 / 2;
+
+        $i16 = i2 + $i10;
+
+        $i14 = i12 / 2;
+
+        $i13 = $i0 / 2;
+
+        $i15 = $i14 - $i13;
+
+        $f0 = (float) $i15;
+
+        $i17 = staticinvoke <java.lang.Math: int round(float)>($f0);
+
+        $i18 = i11 + $i17;
+
+        specialinvoke $r9.<java.awt.Point: void <init>(int,int)>($i16, $i18);
+
+        return $r9;
+    }
+
+    public java.awt.Dimension getPreferredSize(javax.swing.JComponent)
+    {
+        boolean $z0, $z1;
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        java.awt.Font $r5;
+        java.awt.Dimension $r8, $r9, $r14, $r15, r21;
+        java.awt.Insets $r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22;
+        java.lang.String $r12, $r18;
+        javax.swing.JProgressBar $r1, $r3, $r4, $r7, $r10, $r11, $r13, $r16, $r17, $r19;
+        javax.swing.JComponent r20;
+        java.awt.FontMetrics $r6;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        r20 := @parameter0: javax.swing.JComponent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.JProgressBar: java.awt.Insets getInsets()>();
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r5 = virtualinvoke $r3.<javax.swing.JProgressBar: java.awt.Font getFont()>();
+
+        $r6 = virtualinvoke $r4.<javax.swing.JProgressBar: java.awt.FontMetrics getFontMetrics(java.awt.Font)>($r5);
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i0 = virtualinvoke $r7.<javax.swing.JProgressBar: int getOrientation()>();
+
+        if $i0 != 0 goto label3;
+
+        $r14 = new java.awt.Dimension;
+
+        $r15 = virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Dimension getPreferredInnerHorizontal()>();
+
+        specialinvoke $r14.<java.awt.Dimension: void <init>(java.awt.Dimension)>($r15);
+
+        r21 = $r14;
+
+        $r16 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $z1 = virtualinvoke $r16.<javax.swing.JProgressBar: boolean isStringPainted()>();
+
+        if $z1 == 0 goto label5;
+
+        $r17 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r18 = virtualinvoke $r17.<javax.swing.JProgressBar: java.lang.String getString()>();
+
+        $r19 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i6 = staticinvoke <sun.swing.SwingUtilities2: int stringWidth(javax.swing.JComponent,java.awt.FontMetrics,java.lang.String)>($r19, $r6, $r18);
+
+        $i7 = $r14.<java.awt.Dimension: int width>;
+
+        if $i6 <= $i7 goto label1;
+
+        $r14.<java.awt.Dimension: int width> = $i6;
+
+     label1:
+        $i8 = virtualinvoke $r6.<java.awt.FontMetrics: int getHeight()>();
+
+        $i9 = virtualinvoke $r6.<java.awt.FontMetrics: int getDescent()>();
+
+        $i11 = $i8 + $i9;
+
+        $i10 = $r14.<java.awt.Dimension: int height>;
+
+        if $i11 <= $i10 goto label2;
+
+        $r14.<java.awt.Dimension: int height> = $i11;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r8 = new java.awt.Dimension;
+
+        $r9 = virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Dimension getPreferredInnerVertical()>();
+
+        specialinvoke $r8.<java.awt.Dimension: void <init>(java.awt.Dimension)>($r9);
+
+        r21 = $r8;
+
+        $r10 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $z0 = virtualinvoke $r10.<javax.swing.JProgressBar: boolean isStringPainted()>();
+
+        if $z0 == 0 goto label5;
+
+        $r11 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r12 = virtualinvoke $r11.<javax.swing.JProgressBar: java.lang.String getString()>();
+
+        $i1 = virtualinvoke $r6.<java.awt.FontMetrics: int getHeight()>();
+
+        $i2 = virtualinvoke $r6.<java.awt.FontMetrics: int getDescent()>();
+
+        i12 = $i1 + $i2;
+
+        $i3 = $r8.<java.awt.Dimension: int width>;
+
+        if i12 <= $i3 goto label4;
+
+        $r8.<java.awt.Dimension: int width> = i12;
+
+     label4:
+        $r13 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i4 = staticinvoke <sun.swing.SwingUtilities2: int stringWidth(javax.swing.JComponent,java.awt.FontMetrics,java.lang.String)>($r13, $r6, $r12);
+
+        $i5 = $r8.<java.awt.Dimension: int height>;
+
+        if $i4 <= $i5 goto label5;
+
+        $r8.<java.awt.Dimension: int height> = $i4;
+
+     label5:
+        $i13 = r21.<java.awt.Dimension: int width>;
+
+        $i14 = $r2.<java.awt.Insets: int left>;
+
+        $i15 = $r2.<java.awt.Insets: int right>;
+
+        $i16 = $i14 + $i15;
+
+        $i17 = $i13 + $i16;
+
+        r21.<java.awt.Dimension: int width> = $i17;
+
+        $i18 = r21.<java.awt.Dimension: int height>;
+
+        $i19 = $r2.<java.awt.Insets: int top>;
+
+        $i20 = $r2.<java.awt.Insets: int bottom>;
+
+        $i21 = $i19 + $i20;
+
+        $i22 = $i18 + $i21;
+
+        r21.<java.awt.Dimension: int height> = $i22;
+
+        return r21;
+    }
+
+    public java.awt.Dimension getMinimumSize(javax.swing.JComponent)
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        javax.swing.JComponent r4;
+        java.awt.Dimension $r2;
+        int $i0;
+        javax.swing.JProgressBar $r1, $r3;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        r4 := @parameter0: javax.swing.JComponent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r2 = virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Dimension getPreferredSize(javax.swing.JComponent)>($r1);
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i0 = virtualinvoke $r3.<javax.swing.JProgressBar: int getOrientation()>();
+
+        if $i0 != 0 goto label1;
+
+        $r2.<java.awt.Dimension: int width> = 10;
+
+        goto label2;
+
+     label1:
+        $r2.<java.awt.Dimension: int height> = 10;
+
+     label2:
+        return $r2;
+    }
+
+    public java.awt.Dimension getMaximumSize(javax.swing.JComponent)
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        javax.swing.JComponent r4;
+        java.awt.Dimension $r2;
+        int $i0;
+        javax.swing.JProgressBar $r1, $r3;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        r4 := @parameter0: javax.swing.JComponent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r2 = virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Dimension getPreferredSize(javax.swing.JComponent)>($r1);
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i0 = virtualinvoke $r3.<javax.swing.JProgressBar: int getOrientation()>();
+
+        if $i0 != 0 goto label1;
+
+        $r2.<java.awt.Dimension: int width> = 32767;
+
+        goto label2;
+
+     label1:
+        $r2.<java.awt.Dimension: int height> = 32767;
+
+     label2:
+        return $r2;
+    }
+
+    protected int getAnimationIndex()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        int $i0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $i0 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int animationIndex>;
+
+        return $i0;
+    }
+
+    protected final int getFrameCount()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        int $i0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $i0 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int numFrames>;
+
+        return $i0;
+    }
+
+    protected void setAnimationIndex(int)
+    {
+        java.awt.Rectangle $r1, $r2, $r3, $r5, $r7, $r8, $r9, $r10, $r11, $r13;
+        int i0, $i1;
+        javax.swing.JProgressBar $r4, $r6, $r12;
+        boolean $z0;
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        i0 := @parameter0: int;
+
+        $i1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int animationIndex>;
+
+        if $i1 == i0 goto label2;
+
+        $z0 = specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: boolean sizeChanged()>();
+
+        if $z0 == 0 goto label1;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: int animationIndex> = i0;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: int maxPosition> = 0;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: double delta> = 0.0;
+
+        $r12 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        virtualinvoke $r12.<javax.swing.JProgressBar: void repaint()>();
+
+        return;
+
+     label1:
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle nextPaintRect>;
+
+        $r2 = virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle getBox(java.awt.Rectangle)>($r1);
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle nextPaintRect> = $r2;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: int animationIndex> = i0;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle nextPaintRect>;
+
+        if $r3 == null goto label3;
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle boxRect>;
+
+        $r8 = virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle getBox(java.awt.Rectangle)>($r7);
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle boxRect> = $r8;
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle boxRect>;
+
+        if $r9 == null goto label3;
+
+        $r11 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle nextPaintRect>;
+
+        $r10 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle boxRect>;
+
+        virtualinvoke $r11.<java.awt.Rectangle: void add(java.awt.Rectangle)>($r10);
+
+        goto label3;
+
+     label2:
+        return;
+
+     label3:
+        $r13 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle nextPaintRect>;
+
+        if $r13 == null goto label4;
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle nextPaintRect>;
+
+        virtualinvoke $r6.<javax.swing.JProgressBar: void repaint(java.awt.Rectangle)>($r5);
+
+        goto label5;
+
+     label4:
+        $r4 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        virtualinvoke $r4.<javax.swing.JProgressBar: void repaint()>();
+
+     label5:
+        return;
+    }
+
+    private boolean sizeChanged()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        java.awt.Rectangle $r1, $r2, $r3, $r4, $r5, $r7, $r8, $r9;
+        javax.swing.JProgressBar $r6;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle oldComponentInnards>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle componentInnards>;
+
+        if $r2 != null goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        $r4 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle oldComponentInnards>;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle componentInnards>;
+
+        virtualinvoke $r4.<java.awt.Rectangle: void setRect(java.awt.geom.Rectangle2D)>($r3);
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle componentInnards>;
+
+        $r7 = staticinvoke <javax.swing.SwingUtilities: java.awt.Rectangle calculateInnerArea(javax.swing.JComponent,java.awt.Rectangle)>($r6, $r5);
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle componentInnards> = $r7;
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle oldComponentInnards>;
+
+        $r8 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle componentInnards>;
+
+        $z0 = virtualinvoke $r9.<java.awt.Rectangle: boolean equals(java.lang.Object)>($r8);
+
+        if $z0 != 0 goto label3;
+
+        $z1 = 1;
+
+        goto label4;
+
+     label3:
+        $z1 = 0;
+
+     label4:
+        return $z1;
+    }
+
+    protected void incrementAnimationIndex()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        int $i0, i1, $i2;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $i0 = virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: int getAnimationIndex()>();
+
+        i1 = $i0 + 1;
+
+        $i2 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int numFrames>;
+
+        if i1 >= $i2 goto label1;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: void setAnimationIndex(int)>(i1);
+
+        goto label2;
+
+     label1:
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: void setAnimationIndex(int)>(0);
+
+     label2:
+        return;
+    }
+
+    private int getRepaintInterval()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        int $i0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $i0 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int repaintInterval>;
+
+        return $i0;
+    }
+
+    private int initRepaintInterval()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        int $i0, $i1;
+        javax.swing.JProgressBar $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i0 = staticinvoke <sun.swing.DefaultLookup: int getInt(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String,int)>($r1, r0, "ProgressBar.repaintInterval", 50);
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: int repaintInterval> = $i0;
+
+        $i1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int repaintInterval>;
+
+        return $i1;
+    }
+
+    private int getCycleTime()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        int $i0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $i0 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int cycleTime>;
+
+        return $i0;
+    }
+
+    private int initCycleTime()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        int $i0, $i1;
+        javax.swing.JProgressBar $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i0 = staticinvoke <sun.swing.DefaultLookup: int getInt(javax.swing.JComponent,javax.swing.plaf.ComponentUI,java.lang.String,int)>($r1, r0, "ProgressBar.cycleTime", 3000);
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: int cycleTime> = $i0;
+
+        $i1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int cycleTime>;
+
+        return $i1;
+    }
+
+    private void initIndeterminateDefaults()
+    {
+        int $i0, $i1, $i2, $i3, $i4, i5, $i6, $i7, $i8, $i9, $i10;
+        double $d0, $d1, $d2, $d3, $d4;
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: int initRepaintInterval()>();
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: int initCycleTime()>();
+
+        $i0 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int repaintInterval>;
+
+        if $i0 > 0 goto label1;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: int repaintInterval> = 100;
+
+     label1:
+        $i2 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int repaintInterval>;
+
+        $i1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int cycleTime>;
+
+        if $i2 <= $i1 goto label2;
+
+        $i9 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int repaintInterval>;
+
+        $i10 = $i9 * 20;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: int cycleTime> = $i10;
+
+        goto label3;
+
+     label2:
+        $i3 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int cycleTime>;
+
+        $d2 = (double) $i3;
+
+        $i4 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int repaintInterval>;
+
+        $d0 = (double) $i4;
+
+        $d1 = $d0 * 2.0;
+
+        $d3 = $d2 / $d1;
+
+        $d4 = staticinvoke <java.lang.Math: double ceil(double)>($d3);
+
+        i5 = (int) $d4;
+
+        $i6 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int repaintInterval>;
+
+        $i7 = $i6 * i5;
+
+        $i8 = $i7 * 2;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: int cycleTime> = $i8;
+
+     label3:
+        return;
+    }
+
+    private void initIndeterminateValues()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        java.awt.Rectangle $r1, $r2, $r3, $r4;
+        int $i0, $i1, $i2;
+        javax.swing.JProgressBar $r5, $r7;
+        javax.swing.plaf.basic.BasicProgressBarUI$Handler $r6;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: void initIndeterminateDefaults()>();
+
+        $i1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int cycleTime>;
+
+        $i0 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int repaintInterval>;
+
+        $i2 = $i1 / $i0;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: int numFrames> = $i2;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: void initAnimationIndex()>();
+
+        $r1 = new java.awt.Rectangle;
+
+        specialinvoke $r1.<java.awt.Rectangle: void <init>()>();
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle boxRect> = $r1;
+
+        $r2 = new java.awt.Rectangle;
+
+        specialinvoke $r2.<java.awt.Rectangle: void <init>()>();
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle nextPaintRect> = $r2;
+
+        $r3 = new java.awt.Rectangle;
+
+        specialinvoke $r3.<java.awt.Rectangle: void <init>()>();
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle componentInnards> = $r3;
+
+        $r4 = new java.awt.Rectangle;
+
+        specialinvoke $r4.<java.awt.Rectangle: void <init>()>();
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle oldComponentInnards> = $r4;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r6 = specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.plaf.basic.BasicProgressBarUI$Handler getHandler()>();
+
+        virtualinvoke $r5.<javax.swing.JProgressBar: void addHierarchyListener(java.awt.event.HierarchyListener)>($r6);
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $z0 = virtualinvoke $r7.<javax.swing.JProgressBar: boolean isDisplayable()>();
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: void startAnimationTimer()>();
+
+     label1:
+        return;
+    }
+
+    private void cleanUpIndeterminateValues()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        javax.swing.JProgressBar $r1, $r2;
+        javax.swing.plaf.basic.BasicProgressBarUI$Handler $r3;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $z0 = virtualinvoke $r1.<javax.swing.JProgressBar: boolean isDisplayable()>();
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: void stopAnimationTimer()>();
+
+     label1:
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: int repaintInterval> = 0;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: int cycleTime> = 0;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: int animationIndex> = 0;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: int numFrames> = 0;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: int maxPosition> = 0;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: double delta> = 0.0;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle nextPaintRect> = null;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle boxRect> = null;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle oldComponentInnards> = null;
+
+        r0.<javax.swing.plaf.basic.BasicProgressBarUI: java.awt.Rectangle componentInnards> = null;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $r3 = specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.plaf.basic.BasicProgressBarUI$Handler getHandler()>();
+
+        virtualinvoke $r2.<javax.swing.JProgressBar: void removeHierarchyListener(java.awt.event.HierarchyListener)>($r3);
+
+        return;
+    }
+
+    private void initAnimationIndex()
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        int $i0, $i1, $i2;
+        javax.swing.JProgressBar $r1, $r2;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $i0 = virtualinvoke $r1.<javax.swing.JProgressBar: int getOrientation()>();
+
+        if $i0 != 0 goto label1;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.JProgressBar progressBar>;
+
+        $z0 = staticinvoke <javax.swing.plaf.basic.BasicGraphicsUtils: boolean isLeftToRight(java.awt.Component)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: void setAnimationIndex(int)>(0);
+
+        goto label2;
+
+     label1:
+        $i1 = r0.<javax.swing.plaf.basic.BasicProgressBarUI: int numFrames>;
+
+        $i2 = $i1 / 2;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: void setAnimationIndex(int)>($i2);
+
+     label2:
+        return;
+    }
+
+    static boolean access$400()
+    {
+        boolean $z0;
+
+        $z0 = <javax.swing.plaf.basic.BasicProgressBarUI: boolean ADJUSTTIMER>;
+
+        return $z0;
+    }
+
+    static int access$500(javax.swing.plaf.basic.BasicProgressBarUI)
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        int $i0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $i0 = specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: int getRepaintInterval()>();
+
+        return $i0;
+    }
+
+    static javax.swing.plaf.basic.BasicProgressBarUI$Handler access$600(javax.swing.plaf.basic.BasicProgressBarUI)
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        javax.swing.plaf.basic.BasicProgressBarUI$Handler $r1;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: javax.swing.plaf.basic.BasicProgressBarUI$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    static int access$700(javax.swing.plaf.basic.BasicProgressBarUI)
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        int $i0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        $i0 = specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: int getCachedPercent()>();
+
+        return $i0;
+    }
+
+    static void access$800(javax.swing.plaf.basic.BasicProgressBarUI, int)
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+        int i0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: void setCachedPercent(int)>(i0);
+
+        return;
+    }
+
+    static void access$900(javax.swing.plaf.basic.BasicProgressBarUI)
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: void initIndeterminateValues()>();
+
+        return;
+    }
+
+    static void access$1000(javax.swing.plaf.basic.BasicProgressBarUI)
+    {
+        javax.swing.plaf.basic.BasicProgressBarUI r0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicProgressBarUI;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicProgressBarUI: void cleanUpIndeterminateValues()>();
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        <javax.swing.plaf.basic.BasicProgressBarUI: boolean ADJUSTTIMER> = 1;
+
+        return;
+    }
+}

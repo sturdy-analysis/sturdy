@@ -1,0 +1,669 @@
+public final class sun.java2d.loops.GraphicsPrimitiveMgr extends java.lang.Object
+{
+    private static final boolean debugTrace;
+    private static sun.java2d.loops.GraphicsPrimitive[] primitives;
+    private static sun.java2d.loops.GraphicsPrimitive[] generalPrimitives;
+    private static boolean needssort;
+    private static java.util.Comparator primSorter;
+    private static java.util.Comparator primFinder;
+
+    private static native void initIDs(java.lang.Class, java.lang.Class, java.lang.Class, java.lang.Class, java.lang.Class, java.lang.Class, java.lang.Class, java.lang.Class, java.lang.Class, java.lang.Class, java.lang.Class);
+
+    private static native void registerNativeLoops();
+
+    private void <init>()
+    {
+        sun.java2d.loops.GraphicsPrimitiveMgr r0;
+
+        r0 := @this: sun.java2d.loops.GraphicsPrimitiveMgr;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static synchronized void register(sun.java2d.loops.GraphicsPrimitive[])
+    {
+        int i0, $i1, i2;
+        sun.java2d.loops.GraphicsPrimitive[] r0, r1, $r2;
+
+        r1 := @parameter0: sun.java2d.loops.GraphicsPrimitive[];
+
+        r0 = <sun.java2d.loops.GraphicsPrimitiveMgr: sun.java2d.loops.GraphicsPrimitive[] primitives>;
+
+        i2 = 0;
+
+        i0 = lengthof r1;
+
+        if r0 == null goto label1;
+
+        i2 = lengthof r0;
+
+     label1:
+        $i1 = i2 + i0;
+
+        $r2 = newarray (sun.java2d.loops.GraphicsPrimitive)[$i1];
+
+        if r0 == null goto label2;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, 0, $r2, 0, i2);
+
+     label2:
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, 0, $r2, i2, i0);
+
+        <sun.java2d.loops.GraphicsPrimitiveMgr: boolean needssort> = 1;
+
+        <sun.java2d.loops.GraphicsPrimitiveMgr: sun.java2d.loops.GraphicsPrimitive[] primitives> = $r2;
+
+        return;
+    }
+
+    public static synchronized void registerGeneral(sun.java2d.loops.GraphicsPrimitive)
+    {
+        sun.java2d.loops.GraphicsPrimitive[] $r0, $r1, r2, $r3, $r5;
+        int i0, $i1;
+        sun.java2d.loops.GraphicsPrimitive r4;
+
+        r4 := @parameter0: sun.java2d.loops.GraphicsPrimitive;
+
+        $r0 = <sun.java2d.loops.GraphicsPrimitiveMgr: sun.java2d.loops.GraphicsPrimitive[] generalPrimitives>;
+
+        if $r0 != null goto label1;
+
+        $r5 = newarray (sun.java2d.loops.GraphicsPrimitive)[1];
+
+        $r5[0] = r4;
+
+        <sun.java2d.loops.GraphicsPrimitiveMgr: sun.java2d.loops.GraphicsPrimitive[] generalPrimitives> = $r5;
+
+        return;
+
+     label1:
+        $r1 = <sun.java2d.loops.GraphicsPrimitiveMgr: sun.java2d.loops.GraphicsPrimitive[] generalPrimitives>;
+
+        i0 = lengthof $r1;
+
+        $i1 = i0 + 1;
+
+        r2 = newarray (sun.java2d.loops.GraphicsPrimitive)[$i1];
+
+        $r3 = <sun.java2d.loops.GraphicsPrimitiveMgr: sun.java2d.loops.GraphicsPrimitive[] generalPrimitives>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, 0, r2, 0, i0);
+
+        r2[i0] = r4;
+
+        <sun.java2d.loops.GraphicsPrimitiveMgr: sun.java2d.loops.GraphicsPrimitive[] generalPrimitives> = r2;
+
+        return;
+    }
+
+    public static synchronized sun.java2d.loops.GraphicsPrimitive locate(int, sun.java2d.loops.SurfaceType)
+    {
+        sun.java2d.loops.SurfaceType r0, $r2;
+        sun.java2d.loops.CompositeType $r1;
+        int i0;
+        sun.java2d.loops.GraphicsPrimitive $r3;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: sun.java2d.loops.SurfaceType;
+
+        $r2 = <sun.java2d.loops.SurfaceType: sun.java2d.loops.SurfaceType OpaqueColor>;
+
+        $r1 = <sun.java2d.loops.CompositeType: sun.java2d.loops.CompositeType Src>;
+
+        $r3 = staticinvoke <sun.java2d.loops.GraphicsPrimitiveMgr: sun.java2d.loops.GraphicsPrimitive locate(int,sun.java2d.loops.SurfaceType,sun.java2d.loops.CompositeType,sun.java2d.loops.SurfaceType)>(i0, $r2, $r1, r0);
+
+        return $r3;
+    }
+
+    public static synchronized sun.java2d.loops.GraphicsPrimitive locate(int, sun.java2d.loops.SurfaceType, sun.java2d.loops.CompositeType, sun.java2d.loops.SurfaceType)
+    {
+        sun.java2d.loops.SurfaceType r0, r2;
+        sun.java2d.loops.CompositeType r1;
+        int i0, $i1;
+        sun.java2d.loops.GraphicsPrimitive $r3, $r4, $r5, r6;
+
+        i0 := @parameter0: int;
+
+        r0 := @parameter1: sun.java2d.loops.SurfaceType;
+
+        r1 := @parameter2: sun.java2d.loops.CompositeType;
+
+        r2 := @parameter3: sun.java2d.loops.SurfaceType;
+
+        $r3 = staticinvoke <sun.java2d.loops.GraphicsPrimitiveMgr: sun.java2d.loops.GraphicsPrimitive locatePrim(int,sun.java2d.loops.SurfaceType,sun.java2d.loops.CompositeType,sun.java2d.loops.SurfaceType)>(i0, r0, r1, r2);
+
+        r6 = $r3;
+
+        if $r3 != null goto label1;
+
+        $r4 = staticinvoke <sun.java2d.loops.GraphicsPrimitiveMgr: sun.java2d.loops.GraphicsPrimitive locateGeneral(int)>(i0);
+
+        r6 = $r4;
+
+        if $r4 == null goto label1;
+
+        $r5 = virtualinvoke $r4.<sun.java2d.loops.GraphicsPrimitive: sun.java2d.loops.GraphicsPrimitive makePrimitive(sun.java2d.loops.SurfaceType,sun.java2d.loops.CompositeType,sun.java2d.loops.SurfaceType)>(r0, r1, r2);
+
+        r6 = $r5;
+
+        if $r5 == null goto label1;
+
+        $i1 = <sun.java2d.loops.GraphicsPrimitive: int traceflags>;
+
+        if $i1 == 0 goto label1;
+
+        r6 = virtualinvoke $r5.<sun.java2d.loops.GraphicsPrimitive: sun.java2d.loops.GraphicsPrimitive traceWrap()>();
+
+     label1:
+        return r6;
+    }
+
+    public static synchronized sun.java2d.loops.GraphicsPrimitive locatePrim(int, sun.java2d.loops.SurfaceType, sun.java2d.loops.CompositeType, sun.java2d.loops.SurfaceType)
+    {
+        sun.java2d.loops.SurfaceType r1, r2, r5, r6;
+        sun.java2d.loops.GraphicsPrimitiveMgr$PrimitiveSpec $r0;
+        sun.java2d.loops.CompositeType r3, r7;
+        int i0, $i1;
+        sun.java2d.loops.GraphicsPrimitive $r4;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: sun.java2d.loops.SurfaceType;
+
+        r3 := @parameter2: sun.java2d.loops.CompositeType;
+
+        r1 := @parameter3: sun.java2d.loops.SurfaceType;
+
+        $r0 = new sun.java2d.loops.GraphicsPrimitiveMgr$PrimitiveSpec;
+
+        specialinvoke $r0.<sun.java2d.loops.GraphicsPrimitiveMgr$PrimitiveSpec: void <init>(sun.java2d.loops.GraphicsPrimitiveMgr$1)>(null);
+
+        r5 = r1;
+
+     label1:
+        if r5 == null goto label7;
+
+        r6 = r2;
+
+     label2:
+        if r6 == null goto label6;
+
+        r7 = r3;
+
+     label3:
+        if r7 == null goto label5;
+
+        $i1 = staticinvoke <sun.java2d.loops.GraphicsPrimitive: int makeUniqueID(int,sun.java2d.loops.SurfaceType,sun.java2d.loops.CompositeType,sun.java2d.loops.SurfaceType)>(i0, r6, r7, r5);
+
+        $r0.<sun.java2d.loops.GraphicsPrimitiveMgr$PrimitiveSpec: int uniqueID> = $i1;
+
+        $r4 = staticinvoke <sun.java2d.loops.GraphicsPrimitiveMgr: sun.java2d.loops.GraphicsPrimitive locate(sun.java2d.loops.GraphicsPrimitiveMgr$PrimitiveSpec)>($r0);
+
+        if $r4 == null goto label4;
+
+        return $r4;
+
+     label4:
+        r7 = virtualinvoke r7.<sun.java2d.loops.CompositeType: sun.java2d.loops.CompositeType getSuperType()>();
+
+        goto label3;
+
+     label5:
+        r6 = virtualinvoke r6.<sun.java2d.loops.SurfaceType: sun.java2d.loops.SurfaceType getSuperType()>();
+
+        goto label2;
+
+     label6:
+        r5 = virtualinvoke r5.<sun.java2d.loops.SurfaceType: sun.java2d.loops.SurfaceType getSuperType()>();
+
+        goto label1;
+
+     label7:
+        return null;
+    }
+
+    private static sun.java2d.loops.GraphicsPrimitive locateGeneral(int)
+    {
+        sun.java2d.loops.GraphicsPrimitive[] $r0, $r1, $r2;
+        int $i0, $i1, i2, i3;
+        sun.java2d.loops.GraphicsPrimitive r3;
+
+        i2 := @parameter0: int;
+
+        $r0 = <sun.java2d.loops.GraphicsPrimitiveMgr: sun.java2d.loops.GraphicsPrimitive[] generalPrimitives>;
+
+        if $r0 != null goto label1;
+
+        return null;
+
+     label1:
+        i3 = 0;
+
+     label2:
+        $r1 = <sun.java2d.loops.GraphicsPrimitiveMgr: sun.java2d.loops.GraphicsPrimitive[] generalPrimitives>;
+
+        $i0 = lengthof $r1;
+
+        if i3 >= $i0 goto label4;
+
+        $r2 = <sun.java2d.loops.GraphicsPrimitiveMgr: sun.java2d.loops.GraphicsPrimitive[] generalPrimitives>;
+
+        r3 = $r2[i3];
+
+        $i1 = virtualinvoke r3.<sun.java2d.loops.GraphicsPrimitive: int getPrimTypeID()>();
+
+        if $i1 != i2 goto label3;
+
+        return r3;
+
+     label3:
+        i3 = i3 + 1;
+
+        goto label2;
+
+     label4:
+        return null;
+    }
+
+    private static sun.java2d.loops.GraphicsPrimitive locate(sun.java2d.loops.GraphicsPrimitiveMgr$PrimitiveSpec)
+    {
+        sun.java2d.loops.GraphicsPrimitive[] $r5, $r6, $r7, $r9, $r11;
+        sun.java2d.loops.GraphicsPrimitiveMgr$PrimitiveSpec r0;
+        int $i0, $i1, $i2, i3;
+        sun.java2d.loops.GraphicsPrimitive $r3, $r8, $r10, r12;
+        boolean $z0, $z1;
+        sun.java2d.loops.GraphicsPrimitiveProxy $r2;
+        java.util.Comparator $r1, $r4;
+
+        r0 := @parameter0: sun.java2d.loops.GraphicsPrimitiveMgr$PrimitiveSpec;
+
+        $z0 = <sun.java2d.loops.GraphicsPrimitiveMgr: boolean needssort>;
+
+        if $z0 == 0 goto label3;
+
+        $i1 = <sun.java2d.loops.GraphicsPrimitive: int traceflags>;
+
+        if $i1 == 0 goto label2;
+
+        i3 = 0;
+
+     label1:
+        $r6 = <sun.java2d.loops.GraphicsPrimitiveMgr: sun.java2d.loops.GraphicsPrimitive[] primitives>;
+
+        $i2 = lengthof $r6;
+
+        if i3 >= $i2 goto label2;
+
+        $r9 = <sun.java2d.loops.GraphicsPrimitiveMgr: sun.java2d.loops.GraphicsPrimitive[] primitives>;
+
+        $r7 = <sun.java2d.loops.GraphicsPrimitiveMgr: sun.java2d.loops.GraphicsPrimitive[] primitives>;
+
+        $r8 = $r7[i3];
+
+        $r10 = virtualinvoke $r8.<sun.java2d.loops.GraphicsPrimitive: sun.java2d.loops.GraphicsPrimitive traceWrap()>();
+
+        $r9[i3] = $r10;
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label2:
+        $r5 = <sun.java2d.loops.GraphicsPrimitiveMgr: sun.java2d.loops.GraphicsPrimitive[] primitives>;
+
+        $r4 = <sun.java2d.loops.GraphicsPrimitiveMgr: java.util.Comparator primSorter>;
+
+        staticinvoke <java.util.Arrays: void sort(java.lang.Object[],java.util.Comparator)>($r5, $r4);
+
+        <sun.java2d.loops.GraphicsPrimitiveMgr: boolean needssort> = 0;
+
+     label3:
+        $r11 = <sun.java2d.loops.GraphicsPrimitiveMgr: sun.java2d.loops.GraphicsPrimitive[] primitives>;
+
+        if $r11 != null goto label4;
+
+        return null;
+
+     label4:
+        $r1 = <sun.java2d.loops.GraphicsPrimitiveMgr: java.util.Comparator primFinder>;
+
+        $i0 = staticinvoke <java.util.Arrays: int binarySearch(java.lang.Object[],java.lang.Object,java.util.Comparator)>($r11, r0, $r1);
+
+        if $i0 < 0 goto label6;
+
+        r12 = $r11[$i0];
+
+        $z1 = r12 instanceof sun.java2d.loops.GraphicsPrimitiveProxy;
+
+        if $z1 == 0 goto label5;
+
+        $r2 = (sun.java2d.loops.GraphicsPrimitiveProxy) r12;
+
+        $r3 = virtualinvoke $r2.<sun.java2d.loops.GraphicsPrimitiveProxy: sun.java2d.loops.GraphicsPrimitive instantiate()>();
+
+        r12 = $r3;
+
+        $r11[$i0] = $r3;
+
+     label5:
+        return r12;
+
+     label6:
+        return null;
+    }
+
+    private static void writeLog(java.lang.String)
+    {
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        return;
+    }
+
+    public static void testPrimitiveInstantiation()
+    {
+        staticinvoke <sun.java2d.loops.GraphicsPrimitiveMgr: void testPrimitiveInstantiation(boolean)>(0);
+
+        return;
+    }
+
+    public static void testPrimitiveInstantiation(boolean)
+    {
+        java.lang.StringBuilder $r1, $r3, $r4, $r6, $r8, $r9, $r11, $r13, $r14, $r16, $r18, $r19, $r25, $r27, $r29, $r31, $r33, $r34, $r36, $r38, $r40, $r42, $r44, $r45, $r48, $r49, $r50, $r51, $r53;
+        sun.java2d.loops.GraphicsPrimitive[] r0;
+        java.lang.String $r5, $r10, $r15, $r20, $r23, $r24, $r28, $r30, $r35, $r39, $r41, $r46, $r54;
+        java.lang.RuntimeException $r47;
+        boolean $z0, z1, $z2;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, i7, i8;
+        sun.java2d.loops.GraphicsPrimitive $r22, r56;
+        java.io.PrintStream $r2, $r7, $r12, $r17, $r26, $r32, $r37, $r43, $r55;
+        sun.java2d.loops.GraphicsPrimitiveProxy $r21;
+        java.lang.Class $r52;
+
+        z1 := @parameter0: boolean;
+
+        i6 = 0;
+
+        i7 = 0;
+
+        r0 = <sun.java2d.loops.GraphicsPrimitiveMgr: sun.java2d.loops.GraphicsPrimitive[] primitives>;
+
+        i8 = 0;
+
+     label1:
+        $i0 = lengthof r0;
+
+        if i8 >= $i0 goto label8;
+
+        r56 = r0[i8];
+
+        $z0 = r56 instanceof sun.java2d.loops.GraphicsPrimitiveProxy;
+
+        if $z0 == 0 goto label5;
+
+        $r21 = (sun.java2d.loops.GraphicsPrimitiveProxy) r56;
+
+        $r22 = virtualinvoke $r21.<sun.java2d.loops.GraphicsPrimitiveProxy: sun.java2d.loops.GraphicsPrimitive instantiate()>();
+
+        $r23 = virtualinvoke $r22.<sun.java2d.loops.GraphicsPrimitive: java.lang.String getSignature()>();
+
+        $r24 = virtualinvoke r56.<sun.java2d.loops.GraphicsPrimitive: java.lang.String getSignature()>();
+
+        $z2 = virtualinvoke $r23.<java.lang.String: boolean equals(java.lang.Object)>($r24);
+
+        if $z2 == 0 goto label2;
+
+        $i4 = virtualinvoke $r22.<sun.java2d.loops.GraphicsPrimitive: int getUniqueID()>();
+
+        $i5 = virtualinvoke r56.<sun.java2d.loops.GraphicsPrimitive: int getUniqueID()>();
+
+        if $i4 == $i5 goto label3;
+
+     label2:
+        $r26 = <java.lang.System: java.io.PrintStream out>;
+
+        $r25 = new java.lang.StringBuilder;
+
+        specialinvoke $r25.<java.lang.StringBuilder: void <init>()>();
+
+        $r27 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("r.getSignature == ");
+
+        $r28 = virtualinvoke $r22.<sun.java2d.loops.GraphicsPrimitive: java.lang.String getSignature()>();
+
+        $r29 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r28);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r26.<java.io.PrintStream: void println(java.lang.String)>($r30);
+
+        $r32 = <java.lang.System: java.io.PrintStream out>;
+
+        $r31 = new java.lang.StringBuilder;
+
+        specialinvoke $r31.<java.lang.StringBuilder: void <init>()>();
+
+        $r33 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("r.getUniqueID == ");
+
+        $i2 = virtualinvoke $r22.<sun.java2d.loops.GraphicsPrimitive: int getUniqueID()>();
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r32.<java.io.PrintStream: void println(java.lang.String)>($r35);
+
+        $r37 = <java.lang.System: java.io.PrintStream out>;
+
+        $r36 = new java.lang.StringBuilder;
+
+        specialinvoke $r36.<java.lang.StringBuilder: void <init>()>();
+
+        $r38 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("p.getSignature == ");
+
+        $r39 = virtualinvoke r56.<sun.java2d.loops.GraphicsPrimitive: java.lang.String getSignature()>();
+
+        $r40 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r39);
+
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r37.<java.io.PrintStream: void println(java.lang.String)>($r41);
+
+        $r43 = <java.lang.System: java.io.PrintStream out>;
+
+        $r42 = new java.lang.StringBuilder;
+
+        specialinvoke $r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r44 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("p.getUniqueID == ");
+
+        $i3 = virtualinvoke r56.<sun.java2d.loops.GraphicsPrimitive: int getUniqueID()>();
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r43.<java.io.PrintStream: void println(java.lang.String)>($r46);
+
+        $r47 = new java.lang.RuntimeException;
+
+        $r48 = new java.lang.StringBuilder;
+
+        specialinvoke $r48.<java.lang.StringBuilder: void <init>()>();
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Primitive ");
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r56);
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" returns wrong signature for ");
+
+        $r52 = virtualinvoke $r22.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r53 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r52);
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r47.<java.lang.RuntimeException: void <init>(java.lang.String)>($r54);
+
+        throw $r47;
+
+     label3:
+        i7 = i7 + 1;
+
+        if z1 == 0 goto label4;
+
+        $r55 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r55.<java.io.PrintStream: void println(java.lang.Object)>($r22);
+
+     label4:
+        goto label7;
+
+     label5:
+        if z1 == 0 goto label6;
+
+        $r17 = <java.lang.System: java.io.PrintStream out>;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r56);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" (not proxied).");
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r17.<java.io.PrintStream: void println(java.lang.String)>($r20);
+
+     label6:
+        i6 = i6 + 1;
+
+     label7:
+        i8 = i8 + 1;
+
+        goto label1;
+
+     label8:
+        $r2 = <java.lang.System: java.io.PrintStream out>;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i6);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" graphics primitives were not proxied.");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>($r5);
+
+        $r7 = <java.lang.System: java.io.PrintStream out>;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" proxied graphics primitives resolved correctly.");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<java.io.PrintStream: void println(java.lang.String)>($r10);
+
+        $r12 = <java.lang.System: java.io.PrintStream out>;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $i1 = i6 + i7;
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" total graphics primitives");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r12.<java.io.PrintStream: void println(java.lang.String)>($r15);
+
+        return;
+    }
+
+    public static void main(java.lang.String[])
+    {
+        int $i0;
+        java.lang.String[] r0;
+        java.util.Comparator $r1;
+        sun.java2d.loops.GraphicsPrimitive[] $r2;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.String[];
+
+        $z0 = <sun.java2d.loops.GraphicsPrimitiveMgr: boolean needssort>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = <sun.java2d.loops.GraphicsPrimitiveMgr: sun.java2d.loops.GraphicsPrimitive[] primitives>;
+
+        $r1 = <sun.java2d.loops.GraphicsPrimitiveMgr: java.util.Comparator primSorter>;
+
+        staticinvoke <java.util.Arrays: void sort(java.lang.Object[],java.util.Comparator)>($r2, $r1);
+
+        <sun.java2d.loops.GraphicsPrimitiveMgr: boolean needssort> = 0;
+
+     label1:
+        $i0 = lengthof r0;
+
+        if $i0 <= 0 goto label2;
+
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        staticinvoke <sun.java2d.loops.GraphicsPrimitiveMgr: void testPrimitiveInstantiation(boolean)>($z1);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        sun.java2d.loops.GraphicsPrimitiveMgr$1 $r0;
+        sun.java2d.loops.GraphicsPrimitiveMgr$2 $r1;
+
+        <sun.java2d.loops.GraphicsPrimitiveMgr: boolean debugTrace> = 0;
+
+        <sun.java2d.loops.GraphicsPrimitiveMgr: boolean needssort> = 1;
+
+        staticinvoke <sun.java2d.loops.GraphicsPrimitiveMgr: void initIDs(java.lang.Class,java.lang.Class,java.lang.Class,java.lang.Class,java.lang.Class,java.lang.Class,java.lang.Class,java.lang.Class,java.lang.Class,java.lang.Class,java.lang.Class)>(class "Lsun/java2d/loops/GraphicsPrimitive;", class "Lsun/java2d/loops/SurfaceType;", class "Lsun/java2d/loops/CompositeType;", class "Lsun/java2d/SunGraphics2D;", class "Ljava/awt/Color;", class "Ljava/awt/geom/AffineTransform;", class "Lsun/java2d/loops/XORComposite;", class "Ljava/awt/AlphaComposite;", class "Ljava/awt/geom/Path2D;", class "Ljava/awt/geom/Path2D$Float;", class "Lsun/awt/SunHints;");
+
+        staticinvoke <sun.java2d.loops.CustomComponent: void register()>();
+
+        staticinvoke <sun.java2d.loops.GeneralRenderer: void register()>();
+
+        staticinvoke <sun.java2d.loops.GraphicsPrimitiveMgr: void registerNativeLoops()>();
+
+        $r0 = new sun.java2d.loops.GraphicsPrimitiveMgr$1;
+
+        specialinvoke $r0.<sun.java2d.loops.GraphicsPrimitiveMgr$1: void <init>()>();
+
+        <sun.java2d.loops.GraphicsPrimitiveMgr: java.util.Comparator primSorter> = $r0;
+
+        $r1 = new sun.java2d.loops.GraphicsPrimitiveMgr$2;
+
+        specialinvoke $r1.<sun.java2d.loops.GraphicsPrimitiveMgr$2: void <init>()>();
+
+        <sun.java2d.loops.GraphicsPrimitiveMgr: java.util.Comparator primFinder> = $r1;
+
+        return;
+    }
+}

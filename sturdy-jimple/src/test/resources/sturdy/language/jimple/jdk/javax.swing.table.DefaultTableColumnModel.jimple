@@ -1,0 +1,1071 @@
+public class javax.swing.table.DefaultTableColumnModel extends java.lang.Object implements javax.swing.table.TableColumnModel, java.beans.PropertyChangeListener, javax.swing.event.ListSelectionListener, java.io.Serializable
+{
+    protected java.util.Vector tableColumns;
+    protected javax.swing.ListSelectionModel selectionModel;
+    protected int columnMargin;
+    protected javax.swing.event.EventListenerList listenerList;
+    protected transient javax.swing.event.ChangeEvent changeEvent;
+    protected boolean columnSelectionAllowed;
+    protected int totalColumnWidth;
+
+    public void <init>()
+    {
+        javax.swing.ListSelectionModel $r3;
+        java.util.Vector $r2;
+        javax.swing.event.EventListenerList $r1;
+        javax.swing.table.DefaultTableColumnModel r0;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new javax.swing.event.EventListenerList;
+
+        specialinvoke $r1.<javax.swing.event.EventListenerList: void <init>()>();
+
+        r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.event.EventListenerList listenerList> = $r1;
+
+        r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.event.ChangeEvent changeEvent> = null;
+
+        $r2 = new java.util.Vector;
+
+        specialinvoke $r2.<java.util.Vector: void <init>()>();
+
+        r0.<javax.swing.table.DefaultTableColumnModel: java.util.Vector tableColumns> = $r2;
+
+        $r3 = virtualinvoke r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.ListSelectionModel createSelectionModel()>();
+
+        virtualinvoke r0.<javax.swing.table.DefaultTableColumnModel: void setSelectionModel(javax.swing.ListSelectionModel)>($r3);
+
+        virtualinvoke r0.<javax.swing.table.DefaultTableColumnModel: void setColumnMargin(int)>(1);
+
+        specialinvoke r0.<javax.swing.table.DefaultTableColumnModel: void invalidateWidthCache()>();
+
+        virtualinvoke r0.<javax.swing.table.DefaultTableColumnModel: void setColumnSelectionAllowed(boolean)>(0);
+
+        return;
+    }
+
+    public void addColumn(javax.swing.table.TableColumn)
+    {
+        java.util.Vector $r2;
+        javax.swing.table.TableColumn r0;
+        javax.swing.event.TableColumnModelEvent $r3;
+        int $i0, $i1;
+        java.lang.IllegalArgumentException $r4;
+        javax.swing.table.DefaultTableColumnModel r1;
+
+        r1 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        r0 := @parameter0: javax.swing.table.TableColumn;
+
+        if r0 != null goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Object is null");
+
+        throw $r4;
+
+     label1:
+        $r2 = r1.<javax.swing.table.DefaultTableColumnModel: java.util.Vector tableColumns>;
+
+        virtualinvoke $r2.<java.util.Vector: void addElement(java.lang.Object)>(r0);
+
+        virtualinvoke r0.<javax.swing.table.TableColumn: void addPropertyChangeListener(java.beans.PropertyChangeListener)>(r1);
+
+        specialinvoke r1.<javax.swing.table.DefaultTableColumnModel: void invalidateWidthCache()>();
+
+        $r3 = new javax.swing.event.TableColumnModelEvent;
+
+        $i0 = virtualinvoke r1.<javax.swing.table.DefaultTableColumnModel: int getColumnCount()>();
+
+        $i1 = $i0 - 1;
+
+        specialinvoke $r3.<javax.swing.event.TableColumnModelEvent: void <init>(javax.swing.table.TableColumnModel,int,int)>(r1, 0, $i1);
+
+        virtualinvoke r1.<javax.swing.table.DefaultTableColumnModel: void fireColumnAdded(javax.swing.event.TableColumnModelEvent)>($r3);
+
+        return;
+    }
+
+    public void removeColumn(javax.swing.table.TableColumn)
+    {
+        javax.swing.ListSelectionModel $r3, $r6;
+        javax.swing.table.TableColumn r1;
+        javax.swing.table.DefaultTableColumnModel r0;
+        java.util.Vector $r2, $r4;
+        int $i0, $i2;
+        javax.swing.event.TableColumnModelEvent $r7;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        r1 := @parameter0: javax.swing.table.TableColumn;
+
+        $r2 = r0.<javax.swing.table.DefaultTableColumnModel: java.util.Vector tableColumns>;
+
+        $i0 = virtualinvoke $r2.<java.util.Vector: int indexOf(java.lang.Object)>(r1);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label2;
+
+        $r3 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.ListSelectionModel selectionModel>;
+
+        if $r3 == null goto label1;
+
+        $r6 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.ListSelectionModel selectionModel>;
+
+        interfaceinvoke $r6.<javax.swing.ListSelectionModel: void removeIndexInterval(int,int)>($i0, $i0);
+
+     label1:
+        virtualinvoke r1.<javax.swing.table.TableColumn: void removePropertyChangeListener(java.beans.PropertyChangeListener)>(r0);
+
+        $r4 = r0.<javax.swing.table.DefaultTableColumnModel: java.util.Vector tableColumns>;
+
+        virtualinvoke $r4.<java.util.Vector: void removeElementAt(int)>($i0);
+
+        specialinvoke r0.<javax.swing.table.DefaultTableColumnModel: void invalidateWidthCache()>();
+
+        $r7 = new javax.swing.event.TableColumnModelEvent;
+
+        specialinvoke $r7.<javax.swing.event.TableColumnModelEvent: void <init>(javax.swing.table.TableColumnModel,int,int)>(r0, $i0, 0);
+
+        virtualinvoke r0.<javax.swing.table.DefaultTableColumnModel: void fireColumnRemoved(javax.swing.event.TableColumnModelEvent)>($r7);
+
+     label2:
+        return;
+    }
+
+    public void moveColumn(int, int)
+    {
+        javax.swing.ListSelectionModel $r5, $r6, $r8, $r9, $r11;
+        java.util.Vector $r1, $r4, $r7;
+        int i0, $i1, i2, $i3;
+        javax.swing.event.TableColumnModelEvent $r10, $r12;
+        boolean $z0;
+        javax.swing.table.TableColumn r3;
+        java.lang.IllegalArgumentException $r13;
+        javax.swing.table.DefaultTableColumnModel r0;
+        java.lang.Object $r2;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        if i0 < 0 goto label1;
+
+        $i1 = virtualinvoke r0.<javax.swing.table.DefaultTableColumnModel: int getColumnCount()>();
+
+        if i0 >= $i1 goto label1;
+
+        if i2 < 0 goto label1;
+
+        $i3 = virtualinvoke r0.<javax.swing.table.DefaultTableColumnModel: int getColumnCount()>();
+
+        if i2 < $i3 goto label2;
+
+     label1:
+        $r13 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r13.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("moveColumn() - Index out of range");
+
+        throw $r13;
+
+     label2:
+        if i0 != i2 goto label3;
+
+        $r12 = new javax.swing.event.TableColumnModelEvent;
+
+        specialinvoke $r12.<javax.swing.event.TableColumnModelEvent: void <init>(javax.swing.table.TableColumnModel,int,int)>(r0, i0, i2);
+
+        virtualinvoke r0.<javax.swing.table.DefaultTableColumnModel: void fireColumnMoved(javax.swing.event.TableColumnModelEvent)>($r12);
+
+        return;
+
+     label3:
+        $r1 = r0.<javax.swing.table.DefaultTableColumnModel: java.util.Vector tableColumns>;
+
+        $r2 = virtualinvoke $r1.<java.util.Vector: java.lang.Object elementAt(int)>(i0);
+
+        r3 = (javax.swing.table.TableColumn) $r2;
+
+        $r4 = r0.<javax.swing.table.DefaultTableColumnModel: java.util.Vector tableColumns>;
+
+        virtualinvoke $r4.<java.util.Vector: void removeElementAt(int)>(i0);
+
+        $r5 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.ListSelectionModel selectionModel>;
+
+        $z0 = interfaceinvoke $r5.<javax.swing.ListSelectionModel: boolean isSelectedIndex(int)>(i0);
+
+        $r6 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.ListSelectionModel selectionModel>;
+
+        interfaceinvoke $r6.<javax.swing.ListSelectionModel: void removeIndexInterval(int,int)>(i0, i0);
+
+        $r7 = r0.<javax.swing.table.DefaultTableColumnModel: java.util.Vector tableColumns>;
+
+        virtualinvoke $r7.<java.util.Vector: void insertElementAt(java.lang.Object,int)>(r3, i2);
+
+        $r8 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.ListSelectionModel selectionModel>;
+
+        interfaceinvoke $r8.<javax.swing.ListSelectionModel: void insertIndexInterval(int,int,boolean)>(i2, 1, 1);
+
+        if $z0 == 0 goto label4;
+
+        $r11 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.ListSelectionModel selectionModel>;
+
+        interfaceinvoke $r11.<javax.swing.ListSelectionModel: void addSelectionInterval(int,int)>(i2, i2);
+
+        goto label5;
+
+     label4:
+        $r9 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.ListSelectionModel selectionModel>;
+
+        interfaceinvoke $r9.<javax.swing.ListSelectionModel: void removeSelectionInterval(int,int)>(i2, i2);
+
+     label5:
+        $r10 = new javax.swing.event.TableColumnModelEvent;
+
+        specialinvoke $r10.<javax.swing.event.TableColumnModelEvent: void <init>(javax.swing.table.TableColumnModel,int,int)>(r0, i0, i2);
+
+        virtualinvoke r0.<javax.swing.table.DefaultTableColumnModel: void fireColumnMoved(javax.swing.event.TableColumnModelEvent)>($r10);
+
+        return;
+    }
+
+    public void setColumnMargin(int)
+    {
+        int i0, $i1;
+        javax.swing.table.DefaultTableColumnModel r0;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        i0 := @parameter0: int;
+
+        $i1 = r0.<javax.swing.table.DefaultTableColumnModel: int columnMargin>;
+
+        if i0 == $i1 goto label1;
+
+        r0.<javax.swing.table.DefaultTableColumnModel: int columnMargin> = i0;
+
+        virtualinvoke r0.<javax.swing.table.DefaultTableColumnModel: void fireColumnMarginChanged()>();
+
+     label1:
+        return;
+    }
+
+    public int getColumnCount()
+    {
+        int $i0;
+        java.util.Vector $r1;
+        javax.swing.table.DefaultTableColumnModel r0;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        $r1 = r0.<javax.swing.table.DefaultTableColumnModel: java.util.Vector tableColumns>;
+
+        $i0 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        return $i0;
+    }
+
+    public java.util.Enumeration getColumns()
+    {
+        java.util.Vector $r1;
+        java.util.Enumeration $r2;
+        javax.swing.table.DefaultTableColumnModel r0;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        $r1 = r0.<javax.swing.table.DefaultTableColumnModel: java.util.Vector tableColumns>;
+
+        $r2 = virtualinvoke $r1.<java.util.Vector: java.util.Enumeration elements()>();
+
+        return $r2;
+    }
+
+    public int getColumnIndex(java.lang.Object)
+    {
+        java.util.Enumeration $r2;
+        javax.swing.table.TableColumn r5;
+        java.lang.IllegalArgumentException $r3, $r7;
+        javax.swing.table.DefaultTableColumnModel r1;
+        int i0;
+        java.lang.Object r0, $r4, $r6;
+        boolean $z0, $z1;
+
+        r1 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        $r7 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r7.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Identifier is null");
+
+        throw $r7;
+
+     label1:
+        $r2 = virtualinvoke r1.<javax.swing.table.DefaultTableColumnModel: java.util.Enumeration getColumns()>();
+
+        i0 = 0;
+
+     label2:
+        $z0 = interfaceinvoke $r2.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label4;
+
+        $r4 = interfaceinvoke $r2.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r5 = (javax.swing.table.TableColumn) $r4;
+
+        $r6 = virtualinvoke r5.<javax.swing.table.TableColumn: java.lang.Object getIdentifier()>();
+
+        $z1 = virtualinvoke r0.<java.lang.Object: boolean equals(java.lang.Object)>($r6);
+
+        if $z1 == 0 goto label3;
+
+        return i0;
+
+     label3:
+        i0 = i0 + 1;
+
+        goto label2;
+
+     label4:
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Identifier not found");
+
+        throw $r3;
+    }
+
+    public javax.swing.table.TableColumn getColumn(int)
+    {
+        java.util.Vector $r1;
+        javax.swing.table.TableColumn $r3;
+        int i0;
+        java.lang.Object $r2;
+        javax.swing.table.DefaultTableColumnModel r0;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<javax.swing.table.DefaultTableColumnModel: java.util.Vector tableColumns>;
+
+        $r2 = virtualinvoke $r1.<java.util.Vector: java.lang.Object elementAt(int)>(i0);
+
+        $r3 = (javax.swing.table.TableColumn) $r2;
+
+        return $r3;
+    }
+
+    public int getColumnMargin()
+    {
+        int $i0;
+        javax.swing.table.DefaultTableColumnModel r0;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        $i0 = r0.<javax.swing.table.DefaultTableColumnModel: int columnMargin>;
+
+        return $i0;
+    }
+
+    public int getColumnIndexAtX(int)
+    {
+        javax.swing.table.TableColumn $r1;
+        javax.swing.table.DefaultTableColumnModel r0;
+        int $i0, $i1, i2, i3, $i5, $i7;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        i2 := @parameter0: int;
+
+        if i2 >= 0 goto label1;
+
+        $i5 = (int) -1;
+
+        return $i5;
+
+     label1:
+        $i0 = virtualinvoke r0.<javax.swing.table.DefaultTableColumnModel: int getColumnCount()>();
+
+        i3 = 0;
+
+     label2:
+        if i3 >= $i0 goto label4;
+
+        $r1 = virtualinvoke r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.table.TableColumn getColumn(int)>(i3);
+
+        $i1 = virtualinvoke $r1.<javax.swing.table.TableColumn: int getWidth()>();
+
+        i2 = i2 - $i1;
+
+        if i2 >= 0 goto label3;
+
+        return i3;
+
+     label3:
+        i3 = i3 + 1;
+
+        goto label2;
+
+     label4:
+        $i7 = (int) -1;
+
+        return $i7;
+    }
+
+    public int getTotalColumnWidth()
+    {
+        int $i0, $i1, $i3;
+        javax.swing.table.DefaultTableColumnModel r0;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        $i0 = r0.<javax.swing.table.DefaultTableColumnModel: int totalColumnWidth>;
+
+        $i3 = (int) -1;
+
+        if $i0 != $i3 goto label1;
+
+        virtualinvoke r0.<javax.swing.table.DefaultTableColumnModel: void recalcWidthCache()>();
+
+     label1:
+        $i1 = r0.<javax.swing.table.DefaultTableColumnModel: int totalColumnWidth>;
+
+        return $i1;
+    }
+
+    public void setSelectionModel(javax.swing.ListSelectionModel)
+    {
+        javax.swing.ListSelectionModel r0, r2;
+        java.lang.IllegalArgumentException $r3;
+        javax.swing.table.DefaultTableColumnModel r1;
+
+        r1 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        r0 := @parameter0: javax.swing.ListSelectionModel;
+
+        if r0 != null goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Cannot set a null SelectionModel");
+
+        throw $r3;
+
+     label1:
+        r2 = r1.<javax.swing.table.DefaultTableColumnModel: javax.swing.ListSelectionModel selectionModel>;
+
+        if r0 == r2 goto label3;
+
+        if r2 == null goto label2;
+
+        interfaceinvoke r2.<javax.swing.ListSelectionModel: void removeListSelectionListener(javax.swing.event.ListSelectionListener)>(r1);
+
+     label2:
+        r1.<javax.swing.table.DefaultTableColumnModel: javax.swing.ListSelectionModel selectionModel> = r0;
+
+        interfaceinvoke r0.<javax.swing.ListSelectionModel: void addListSelectionListener(javax.swing.event.ListSelectionListener)>(r1);
+
+     label3:
+        return;
+    }
+
+    public javax.swing.ListSelectionModel getSelectionModel()
+    {
+        javax.swing.ListSelectionModel $r1;
+        javax.swing.table.DefaultTableColumnModel r0;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        $r1 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.ListSelectionModel selectionModel>;
+
+        return $r1;
+    }
+
+    public void setColumnSelectionAllowed(boolean)
+    {
+        javax.swing.table.DefaultTableColumnModel r0;
+        boolean z0;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        z0 := @parameter0: boolean;
+
+        r0.<javax.swing.table.DefaultTableColumnModel: boolean columnSelectionAllowed> = z0;
+
+        return;
+    }
+
+    public boolean getColumnSelectionAllowed()
+    {
+        javax.swing.table.DefaultTableColumnModel r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        $z0 = r0.<javax.swing.table.DefaultTableColumnModel: boolean columnSelectionAllowed>;
+
+        return $z0;
+    }
+
+    public int[] getSelectedColumns()
+    {
+        javax.swing.ListSelectionModel $r1, $r3, $r4, $r7;
+        int[] $r2, $r5, r6, r8;
+        int $i0, $i1, $i2, $i3, $i4, i5, i6, $i8, $i10;
+        boolean $z0;
+        javax.swing.table.DefaultTableColumnModel r0;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        $r1 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.ListSelectionModel selectionModel>;
+
+        if $r1 == null goto label6;
+
+        $r3 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.ListSelectionModel selectionModel>;
+
+        $i0 = interfaceinvoke $r3.<javax.swing.ListSelectionModel: int getMinSelectionIndex()>();
+
+        $r4 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.ListSelectionModel selectionModel>;
+
+        $i1 = interfaceinvoke $r4.<javax.swing.ListSelectionModel: int getMaxSelectionIndex()>();
+
+        $i8 = (int) -1;
+
+        if $i0 == $i8 goto label1;
+
+        $i10 = (int) -1;
+
+        if $i1 != $i10 goto label2;
+
+     label1:
+        $r5 = newarray (int)[0];
+
+        return $r5;
+
+     label2:
+        $i2 = $i1 - $i0;
+
+        $i3 = 1 + $i2;
+
+        r6 = newarray (int)[$i3];
+
+        i5 = 0;
+
+        i6 = $i0;
+
+     label3:
+        if i6 > $i1 goto label5;
+
+        $r7 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.ListSelectionModel selectionModel>;
+
+        $z0 = interfaceinvoke $r7.<javax.swing.ListSelectionModel: boolean isSelectedIndex(int)>(i6);
+
+        if $z0 == 0 goto label4;
+
+        $i4 = i5;
+
+        i5 = i5 + 1;
+
+        r6[$i4] = i6;
+
+     label4:
+        i6 = i6 + 1;
+
+        goto label3;
+
+     label5:
+        r8 = newarray (int)[i5];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r6, 0, r8, 0, i5);
+
+        return r8;
+
+     label6:
+        $r2 = newarray (int)[0];
+
+        return $r2;
+    }
+
+    public int getSelectedColumnCount()
+    {
+        javax.swing.ListSelectionModel $r1, $r2, $r3, $r4;
+        javax.swing.table.DefaultTableColumnModel r0;
+        int $i0, $i1, i2, i3;
+        boolean $z0;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        $r1 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.ListSelectionModel selectionModel>;
+
+        if $r1 == null goto label4;
+
+        $r2 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.ListSelectionModel selectionModel>;
+
+        $i0 = interfaceinvoke $r2.<javax.swing.ListSelectionModel: int getMinSelectionIndex()>();
+
+        $r3 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.ListSelectionModel selectionModel>;
+
+        $i1 = interfaceinvoke $r3.<javax.swing.ListSelectionModel: int getMaxSelectionIndex()>();
+
+        i2 = 0;
+
+        i3 = $i0;
+
+     label1:
+        if i3 > $i1 goto label3;
+
+        $r4 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.ListSelectionModel selectionModel>;
+
+        $z0 = interfaceinvoke $r4.<javax.swing.ListSelectionModel: boolean isSelectedIndex(int)>(i3);
+
+        if $z0 == 0 goto label2;
+
+        i2 = i2 + 1;
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        return i2;
+
+     label4:
+        return 0;
+    }
+
+    public void addColumnModelListener(javax.swing.event.TableColumnModelListener)
+    {
+        javax.swing.event.TableColumnModelListener r1;
+        javax.swing.event.EventListenerList $r2;
+        javax.swing.table.DefaultTableColumnModel r0;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        r1 := @parameter0: javax.swing.event.TableColumnModelListener;
+
+        $r2 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.event.EventListenerList listenerList>;
+
+        virtualinvoke $r2.<javax.swing.event.EventListenerList: void add(java.lang.Class,java.util.EventListener)>(class "Ljavax/swing/event/TableColumnModelListener;", r1);
+
+        return;
+    }
+
+    public void removeColumnModelListener(javax.swing.event.TableColumnModelListener)
+    {
+        javax.swing.event.TableColumnModelListener r1;
+        javax.swing.event.EventListenerList $r2;
+        javax.swing.table.DefaultTableColumnModel r0;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        r1 := @parameter0: javax.swing.event.TableColumnModelListener;
+
+        $r2 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.event.EventListenerList listenerList>;
+
+        virtualinvoke $r2.<javax.swing.event.EventListenerList: void remove(java.lang.Class,java.util.EventListener)>(class "Ljavax/swing/event/TableColumnModelListener;", r1);
+
+        return;
+    }
+
+    public javax.swing.event.TableColumnModelListener[] getColumnModelListeners()
+    {
+        java.util.EventListener[] $r2;
+        javax.swing.event.TableColumnModelListener[] $r3;
+        javax.swing.event.EventListenerList $r1;
+        javax.swing.table.DefaultTableColumnModel r0;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        $r1 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.event.EventListenerList listenerList>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.event.EventListenerList: java.util.EventListener[] getListeners(java.lang.Class)>(class "Ljavax/swing/event/TableColumnModelListener;");
+
+        $r3 = (javax.swing.event.TableColumnModelListener[]) $r2;
+
+        return $r3;
+    }
+
+    protected void fireColumnAdded(javax.swing.event.TableColumnModelEvent)
+    {
+        java.lang.Object[] $r2;
+        javax.swing.table.DefaultTableColumnModel r0;
+        javax.swing.event.TableColumnModelListener $r6;
+        javax.swing.event.EventListenerList $r1;
+        int $i0, $i1, i2, $i4;
+        javax.swing.event.TableColumnModelEvent r5;
+        java.lang.Object $r3, $r4;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        r5 := @parameter0: javax.swing.event.TableColumnModelEvent;
+
+        $r1 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.event.EventListenerList listenerList>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.event.EventListenerList: java.lang.Object[] getListenerList()>();
+
+        $i0 = lengthof $r2;
+
+        i2 = $i0 - 2;
+
+     label1:
+        if i2 < 0 goto label3;
+
+        $r3 = $r2[i2];
+
+        if $r3 != class "Ljavax/swing/event/TableColumnModelListener;" goto label2;
+
+        $i1 = i2 + 1;
+
+        $r4 = $r2[$i1];
+
+        $r6 = (javax.swing.event.TableColumnModelListener) $r4;
+
+        interfaceinvoke $r6.<javax.swing.event.TableColumnModelListener: void columnAdded(javax.swing.event.TableColumnModelEvent)>(r5);
+
+     label2:
+        $i4 = (int) -2;
+
+        i2 = i2 + $i4;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    protected void fireColumnRemoved(javax.swing.event.TableColumnModelEvent)
+    {
+        java.lang.Object[] $r2;
+        javax.swing.table.DefaultTableColumnModel r0;
+        javax.swing.event.TableColumnModelListener $r6;
+        javax.swing.event.EventListenerList $r1;
+        int $i0, $i1, i2, $i4;
+        javax.swing.event.TableColumnModelEvent r5;
+        java.lang.Object $r3, $r4;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        r5 := @parameter0: javax.swing.event.TableColumnModelEvent;
+
+        $r1 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.event.EventListenerList listenerList>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.event.EventListenerList: java.lang.Object[] getListenerList()>();
+
+        $i0 = lengthof $r2;
+
+        i2 = $i0 - 2;
+
+     label1:
+        if i2 < 0 goto label3;
+
+        $r3 = $r2[i2];
+
+        if $r3 != class "Ljavax/swing/event/TableColumnModelListener;" goto label2;
+
+        $i1 = i2 + 1;
+
+        $r4 = $r2[$i1];
+
+        $r6 = (javax.swing.event.TableColumnModelListener) $r4;
+
+        interfaceinvoke $r6.<javax.swing.event.TableColumnModelListener: void columnRemoved(javax.swing.event.TableColumnModelEvent)>(r5);
+
+     label2:
+        $i4 = (int) -2;
+
+        i2 = i2 + $i4;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    protected void fireColumnMoved(javax.swing.event.TableColumnModelEvent)
+    {
+        java.lang.Object[] $r2;
+        javax.swing.table.DefaultTableColumnModel r0;
+        javax.swing.event.TableColumnModelListener $r6;
+        javax.swing.event.EventListenerList $r1;
+        int $i0, $i1, i2, $i4;
+        javax.swing.event.TableColumnModelEvent r5;
+        java.lang.Object $r3, $r4;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        r5 := @parameter0: javax.swing.event.TableColumnModelEvent;
+
+        $r1 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.event.EventListenerList listenerList>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.event.EventListenerList: java.lang.Object[] getListenerList()>();
+
+        $i0 = lengthof $r2;
+
+        i2 = $i0 - 2;
+
+     label1:
+        if i2 < 0 goto label3;
+
+        $r3 = $r2[i2];
+
+        if $r3 != class "Ljavax/swing/event/TableColumnModelListener;" goto label2;
+
+        $i1 = i2 + 1;
+
+        $r4 = $r2[$i1];
+
+        $r6 = (javax.swing.event.TableColumnModelListener) $r4;
+
+        interfaceinvoke $r6.<javax.swing.event.TableColumnModelListener: void columnMoved(javax.swing.event.TableColumnModelEvent)>(r5);
+
+     label2:
+        $i4 = (int) -2;
+
+        i2 = i2 + $i4;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    protected void fireColumnSelectionChanged(javax.swing.event.ListSelectionEvent)
+    {
+        java.lang.Object[] $r2;
+        javax.swing.table.DefaultTableColumnModel r0;
+        javax.swing.event.TableColumnModelListener $r6;
+        javax.swing.event.EventListenerList $r1;
+        int $i0, $i1, i2, $i4;
+        java.lang.Object $r3, $r4;
+        javax.swing.event.ListSelectionEvent r5;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        r5 := @parameter0: javax.swing.event.ListSelectionEvent;
+
+        $r1 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.event.EventListenerList listenerList>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.event.EventListenerList: java.lang.Object[] getListenerList()>();
+
+        $i0 = lengthof $r2;
+
+        i2 = $i0 - 2;
+
+     label1:
+        if i2 < 0 goto label3;
+
+        $r3 = $r2[i2];
+
+        if $r3 != class "Ljavax/swing/event/TableColumnModelListener;" goto label2;
+
+        $i1 = i2 + 1;
+
+        $r4 = $r2[$i1];
+
+        $r6 = (javax.swing.event.TableColumnModelListener) $r4;
+
+        interfaceinvoke $r6.<javax.swing.event.TableColumnModelListener: void columnSelectionChanged(javax.swing.event.ListSelectionEvent)>(r5);
+
+     label2:
+        $i4 = (int) -2;
+
+        i2 = i2 + $i4;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    protected void fireColumnMarginChanged()
+    {
+        javax.swing.event.ChangeEvent $r4, $r6, $r9;
+        java.lang.Object[] $r2;
+        javax.swing.table.DefaultTableColumnModel r0;
+        javax.swing.event.TableColumnModelListener $r7;
+        javax.swing.event.EventListenerList $r1;
+        int $i0, $i1, i2, $i4;
+        java.lang.Object $r3, $r5;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        $r1 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.event.EventListenerList listenerList>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.event.EventListenerList: java.lang.Object[] getListenerList()>();
+
+        $i0 = lengthof $r2;
+
+        i2 = $i0 - 2;
+
+     label1:
+        if i2 < 0 goto label4;
+
+        $r3 = $r2[i2];
+
+        if $r3 != class "Ljavax/swing/event/TableColumnModelListener;" goto label3;
+
+        $r4 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.event.ChangeEvent changeEvent>;
+
+        if $r4 != null goto label2;
+
+        $r9 = new javax.swing.event.ChangeEvent;
+
+        specialinvoke $r9.<javax.swing.event.ChangeEvent: void <init>(java.lang.Object)>(r0);
+
+        r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.event.ChangeEvent changeEvent> = $r9;
+
+     label2:
+        $i1 = i2 + 1;
+
+        $r5 = $r2[$i1];
+
+        $r7 = (javax.swing.event.TableColumnModelListener) $r5;
+
+        $r6 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.event.ChangeEvent changeEvent>;
+
+        interfaceinvoke $r7.<javax.swing.event.TableColumnModelListener: void columnMarginChanged(javax.swing.event.ChangeEvent)>($r6);
+
+     label3:
+        $i4 = (int) -2;
+
+        i2 = i2 + $i4;
+
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    public java.util.EventListener[] getListeners(java.lang.Class)
+    {
+        java.util.EventListener[] $r3;
+        javax.swing.event.EventListenerList $r2;
+        java.lang.Class r1;
+        javax.swing.table.DefaultTableColumnModel r0;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        r1 := @parameter0: java.lang.Class;
+
+        $r2 = r0.<javax.swing.table.DefaultTableColumnModel: javax.swing.event.EventListenerList listenerList>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.event.EventListenerList: java.util.EventListener[] getListeners(java.lang.Class)>(r1);
+
+        return $r3;
+    }
+
+    public void propertyChange(java.beans.PropertyChangeEvent)
+    {
+        java.lang.String $r1;
+        java.beans.PropertyChangeEvent r0;
+        javax.swing.table.DefaultTableColumnModel r2;
+
+        r2 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        r0 := @parameter0: java.beans.PropertyChangeEvent;
+
+        $r1 = virtualinvoke r0.<java.beans.PropertyChangeEvent: java.lang.String getPropertyName()>();
+
+        if $r1 == "width" goto label1;
+
+        if $r1 != "preferredWidth" goto label2;
+
+     label1:
+        specialinvoke r2.<javax.swing.table.DefaultTableColumnModel: void invalidateWidthCache()>();
+
+        virtualinvoke r2.<javax.swing.table.DefaultTableColumnModel: void fireColumnMarginChanged()>();
+
+     label2:
+        return;
+    }
+
+    public void valueChanged(javax.swing.event.ListSelectionEvent)
+    {
+        javax.swing.event.ListSelectionEvent r1;
+        javax.swing.table.DefaultTableColumnModel r0;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        r1 := @parameter0: javax.swing.event.ListSelectionEvent;
+
+        virtualinvoke r0.<javax.swing.table.DefaultTableColumnModel: void fireColumnSelectionChanged(javax.swing.event.ListSelectionEvent)>(r1);
+
+        return;
+    }
+
+    protected javax.swing.ListSelectionModel createSelectionModel()
+    {
+        javax.swing.DefaultListSelectionModel $r0;
+        javax.swing.table.DefaultTableColumnModel r1;
+
+        r1 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        $r0 = new javax.swing.DefaultListSelectionModel;
+
+        specialinvoke $r0.<javax.swing.DefaultListSelectionModel: void <init>()>();
+
+        return $r0;
+    }
+
+    protected void recalcWidthCache()
+    {
+        java.util.Enumeration $r1;
+        javax.swing.table.TableColumn $r3;
+        javax.swing.table.DefaultTableColumnModel r0;
+        int $i0, $i1, $i2;
+        java.lang.Object $r2;
+        boolean $z0;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        $r1 = virtualinvoke r0.<javax.swing.table.DefaultTableColumnModel: java.util.Enumeration getColumns()>();
+
+        r0.<javax.swing.table.DefaultTableColumnModel: int totalColumnWidth> = 0;
+
+     label1:
+        $z0 = interfaceinvoke $r1.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label2;
+
+        $i0 = r0.<javax.swing.table.DefaultTableColumnModel: int totalColumnWidth>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        $r3 = (javax.swing.table.TableColumn) $r2;
+
+        $i1 = virtualinvoke $r3.<javax.swing.table.TableColumn: int getWidth()>();
+
+        $i2 = $i0 + $i1;
+
+        r0.<javax.swing.table.DefaultTableColumnModel: int totalColumnWidth> = $i2;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private void invalidateWidthCache()
+    {
+        int $i1;
+        javax.swing.table.DefaultTableColumnModel r0;
+
+        r0 := @this: javax.swing.table.DefaultTableColumnModel;
+
+        $i1 = (int) -1;
+
+        r0.<javax.swing.table.DefaultTableColumnModel: int totalColumnWidth> = $i1;
+
+        return;
+    }
+}

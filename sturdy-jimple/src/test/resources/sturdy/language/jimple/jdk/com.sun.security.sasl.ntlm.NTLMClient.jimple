@@ -1,0 +1,499 @@
+final class com.sun.security.sasl.ntlm.NTLMClient extends java.lang.Object implements javax.security.sasl.SaslClient
+{
+    private static final java.lang.String NTLM_VERSION;
+    private static final java.lang.String NTLM_RANDOM;
+    private static final java.lang.String NTLM_DOMAIN;
+    private static final java.lang.String NTLM_HOSTNAME;
+    private final com.sun.security.ntlm.Client client;
+    private final java.lang.String mech;
+    private final java.util.Random random;
+    private int step;
+
+    void <init>(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.Map, javax.security.auth.callback.CallbackHandler) throws javax.security.sasl.SaslException
+    {
+        javax.security.auth.callback.UnsupportedCallbackException $r23;
+        java.util.Random r27, $r30;
+        javax.security.sasl.SaslException $r17, $r19, $r22, $r24;
+        java.net.InetAddress $r10;
+        com.sun.security.ntlm.NTLMException $r18;
+        javax.security.auth.callback.CallbackHandler r6;
+        java.util.Map r2;
+        com.sun.security.ntlm.Client $r8;
+        boolean $z0, $z1, $z2;
+        javax.security.auth.callback.PasswordCallback $r34;
+        javax.security.auth.callback.Callback[] $r35;
+        com.sun.security.sasl.ntlm.NTLMClient r0;
+        java.lang.String r1, r3, r4, $r7, r25, r26, r28, r29, $r36, r37, r38;
+        javax.security.sasl.RealmCallback $r12, $r31, r32;
+        java.io.IOException $r21;
+        java.net.UnknownHostException $r20;
+        javax.security.auth.callback.NameCallback r5, $r11, $r33;
+        char[] $r9;
+        java.lang.Object $r13, $r14, $r15, $r16;
+
+        r0 := @this: com.sun.security.sasl.ntlm.NTLMClient;
+
+        r1 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.lang.String;
+
+        r25 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: java.lang.String;
+
+        r2 := @parameter4: java.util.Map;
+
+        r6 := @parameter5: javax.security.auth.callback.CallbackHandler;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.security.sasl.ntlm.NTLMClient: int step> = 0;
+
+        r0.<com.sun.security.sasl.ntlm.NTLMClient: java.lang.String mech> = r1;
+
+        r26 = null;
+
+        r27 = null;
+
+        r28 = null;
+
+        if r2 == null goto label02;
+
+        $r13 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>("javax.security.sasl.qop");
+
+        r29 = (java.lang.String) $r13;
+
+        if r29 == null goto label01;
+
+        $z2 = virtualinvoke r29.<java.lang.String: boolean equals(java.lang.Object)>("auth");
+
+        if $z2 != 0 goto label01;
+
+        $r17 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r17.<javax.security.sasl.SaslException: void <init>(java.lang.String)>("NTLM only support auth");
+
+        throw $r17;
+
+     label01:
+        $r14 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>("com.sun.security.sasl.ntlm.version");
+
+        r26 = (java.lang.String) $r14;
+
+        $r15 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>("com.sun.security.sasl.ntlm.random");
+
+        r27 = (java.util.Random) $r15;
+
+        $r16 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>("com.sun.security.sasl.ntlm.hostname");
+
+        r28 = (java.lang.String) $r16;
+
+     label02:
+        if r27 == null goto label03;
+
+        $r30 = r27;
+
+        goto label04;
+
+     label03:
+        $r30 = new java.util.Random;
+
+        specialinvoke $r30.<java.util.Random: void <init>()>();
+
+     label04:
+        r0.<com.sun.security.sasl.ntlm.NTLMClient: java.util.Random random> = $r30;
+
+        if r26 != null goto label05;
+
+        r26 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("ntlm.version");
+
+     label05:
+        if r3 == null goto label06;
+
+        $z1 = virtualinvoke r3.<java.lang.String: boolean isEmpty()>();
+
+        if $z1 != 0 goto label06;
+
+        $r12 = new javax.security.sasl.RealmCallback;
+
+        $r31 = $r12;
+
+        specialinvoke $r12.<javax.security.sasl.RealmCallback: void <init>(java.lang.String,java.lang.String)>("Realm: ", r3);
+
+        goto label07;
+
+     label06:
+        $r31 = new javax.security.sasl.RealmCallback;
+
+        specialinvoke $r31.<javax.security.sasl.RealmCallback: void <init>(java.lang.String)>("Realm: ");
+
+     label07:
+        r32 = $r31;
+
+        if r4 == null goto label08;
+
+        $z0 = virtualinvoke r4.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 != 0 goto label08;
+
+        $r11 = new javax.security.auth.callback.NameCallback;
+
+        $r33 = $r11;
+
+        specialinvoke $r11.<javax.security.auth.callback.NameCallback: void <init>(java.lang.String,java.lang.String)>("User name: ", r4);
+
+        goto label09;
+
+     label08:
+        $r33 = new javax.security.auth.callback.NameCallback;
+
+        specialinvoke $r33.<javax.security.auth.callback.NameCallback: void <init>(java.lang.String)>("User name: ");
+
+     label09:
+        r5 = $r33;
+
+        $r34 = new javax.security.auth.callback.PasswordCallback;
+
+        specialinvoke $r34.<javax.security.auth.callback.PasswordCallback: void <init>(java.lang.String,boolean)>("Password: ", 0);
+
+     label10:
+        $r35 = newarray (javax.security.auth.callback.Callback)[3];
+
+        $r35[0] = r32;
+
+        $r35[1] = $r33;
+
+        $r35[2] = $r34;
+
+        interfaceinvoke r6.<javax.security.auth.callback.CallbackHandler: void handle(javax.security.auth.callback.Callback[])>($r35);
+
+     label11:
+        goto label14;
+
+     label12:
+        $r23 := @caughtexception;
+
+        $r24 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r24.<javax.security.sasl.SaslException: void <init>(java.lang.String,java.lang.Throwable)>("NTLM: Cannot perform callback to acquire realm, username or password", $r23);
+
+        throw $r24;
+
+     label13:
+        $r21 := @caughtexception;
+
+        $r22 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r22.<javax.security.sasl.SaslException: void <init>(java.lang.String,java.lang.Throwable)>("NTLM: Error acquiring realm, username or password", $r21);
+
+        throw $r22;
+
+     label14:
+        if r28 != null goto label18;
+
+     label15:
+        $r10 = staticinvoke <java.net.InetAddress: java.net.InetAddress getLocalHost()>();
+
+        r28 = virtualinvoke $r10.<java.net.InetAddress: java.lang.String getCanonicalHostName()>();
+
+     label16:
+        goto label18;
+
+     label17:
+        $r20 := @caughtexception;
+
+        r28 = "localhost";
+
+     label18:
+        $r36 = virtualinvoke r5.<javax.security.auth.callback.NameCallback: java.lang.String getName()>();
+
+        r37 = $r36;
+
+        if $r36 != null goto label19;
+
+        r37 = r4;
+
+     label19:
+        $r7 = virtualinvoke r32.<javax.security.sasl.RealmCallback: java.lang.String getText()>();
+
+        r38 = $r7;
+
+        if $r7 != null goto label20;
+
+        r38 = r3;
+
+     label20:
+        $r8 = new com.sun.security.ntlm.Client;
+
+        $r9 = virtualinvoke $r34.<javax.security.auth.callback.PasswordCallback: char[] getPassword()>();
+
+        specialinvoke $r8.<com.sun.security.ntlm.Client: void <init>(java.lang.String,java.lang.String,java.lang.String,java.lang.String,char[])>(r26, r28, r37, r38, $r9);
+
+        r0.<com.sun.security.sasl.ntlm.NTLMClient: com.sun.security.ntlm.Client client> = $r8;
+
+     label21:
+        goto label23;
+
+     label22:
+        $r18 := @caughtexception;
+
+        $r19 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r19.<javax.security.sasl.SaslException: void <init>(java.lang.String,java.lang.Throwable)>("NTLM: client creation failure", $r18);
+
+        throw $r19;
+
+     label23:
+        return;
+
+        catch javax.security.auth.callback.UnsupportedCallbackException from label10 to label11 with label12;
+        catch java.io.IOException from label10 to label11 with label13;
+        catch java.net.UnknownHostException from label15 to label16 with label17;
+        catch com.sun.security.ntlm.NTLMException from label18 to label21 with label22;
+    }
+
+    public java.lang.String getMechanismName()
+    {
+        java.lang.String $r1;
+        com.sun.security.sasl.ntlm.NTLMClient r0;
+
+        r0 := @this: com.sun.security.sasl.ntlm.NTLMClient;
+
+        $r1 = r0.<com.sun.security.sasl.ntlm.NTLMClient: java.lang.String mech>;
+
+        return $r1;
+    }
+
+    public boolean isComplete()
+    {
+        int $i0;
+        com.sun.security.sasl.ntlm.NTLMClient r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.security.sasl.ntlm.NTLMClient;
+
+        $i0 = r0.<com.sun.security.sasl.ntlm.NTLMClient: int step>;
+
+        if $i0 < 2 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public byte[] unwrap(byte[], int, int) throws javax.security.sasl.SaslException
+    {
+        java.lang.IllegalStateException $r0;
+        byte[] r2;
+        com.sun.security.sasl.ntlm.NTLMClient r1;
+        int i0, i1;
+
+        r1 := @this: com.sun.security.sasl.ntlm.NTLMClient;
+
+        r2 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r0 = new java.lang.IllegalStateException;
+
+        specialinvoke $r0.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Not supported.");
+
+        throw $r0;
+    }
+
+    public byte[] wrap(byte[], int, int) throws javax.security.sasl.SaslException
+    {
+        java.lang.IllegalStateException $r0;
+        byte[] r2;
+        com.sun.security.sasl.ntlm.NTLMClient r1;
+        int i0, i1;
+
+        r1 := @this: com.sun.security.sasl.ntlm.NTLMClient;
+
+        r2 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r0 = new java.lang.IllegalStateException;
+
+        specialinvoke $r0.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Not supported.");
+
+        throw $r0;
+    }
+
+    public java.lang.Object getNegotiatedProperty(java.lang.String)
+    {
+        java.lang.IllegalStateException $r4;
+        byte b1;
+        com.sun.security.sasl.ntlm.NTLMClient r0;
+        int $i0;
+        com.sun.security.ntlm.Client $r2;
+        java.lang.String r1, $r3;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: com.sun.security.sasl.ntlm.NTLMClient;
+
+        r1 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r0.<com.sun.security.sasl.ntlm.NTLMClient: boolean isComplete()>();
+
+        if $z0 != 0 goto label1;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("authentication not complete");
+
+        throw $r4;
+
+     label1:
+        b1 = -1;
+
+        $i0 = virtualinvoke r1.<java.lang.String: int hashCode()>();
+
+        lookupswitch($i0)
+        {
+            case -1548608927: goto label2;
+            case 11529379: goto label3;
+            default: goto label4;
+        };
+
+     label2:
+        $z2 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("javax.security.sasl.qop");
+
+        if $z2 == 0 goto label4;
+
+        b1 = 0;
+
+        goto label4;
+
+     label3:
+        $z1 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("com.sun.security.sasl.ntlm.domain");
+
+        if $z1 == 0 goto label4;
+
+        b1 = 1;
+
+     label4:
+        lookupswitch(b1)
+        {
+            case 0: goto label5;
+            case 1: goto label6;
+            default: goto label7;
+        };
+
+     label5:
+        return "auth";
+
+     label6:
+        $r2 = r0.<com.sun.security.sasl.ntlm.NTLMClient: com.sun.security.ntlm.Client client>;
+
+        $r3 = virtualinvoke $r2.<com.sun.security.ntlm.Client: java.lang.String getDomain()>();
+
+        return $r3;
+
+     label7:
+        return null;
+    }
+
+    public void dispose() throws javax.security.sasl.SaslException
+    {
+        com.sun.security.ntlm.Client $r1;
+        com.sun.security.sasl.ntlm.NTLMClient r0;
+
+        r0 := @this: com.sun.security.sasl.ntlm.NTLMClient;
+
+        $r1 = r0.<com.sun.security.sasl.ntlm.NTLMClient: com.sun.security.ntlm.Client client>;
+
+        virtualinvoke $r1.<com.sun.security.ntlm.Client: void dispose()>();
+
+        return;
+    }
+
+    public boolean hasInitialResponse()
+    {
+        com.sun.security.sasl.ntlm.NTLMClient r0;
+
+        r0 := @this: com.sun.security.sasl.ntlm.NTLMClient;
+
+        return 1;
+    }
+
+    public byte[] evaluateChallenge(byte[]) throws javax.security.sasl.SaslException
+    {
+        byte[] r2, $r4, $r6, r9;
+        java.util.Random $r1;
+        javax.security.sasl.SaslException $r8;
+        com.sun.security.ntlm.NTLMException $r7;
+        com.sun.security.sasl.ntlm.NTLMClient r0;
+        int $i0, $i1, $i2;
+        com.sun.security.ntlm.Client $r3, $r5;
+
+        r0 := @this: com.sun.security.sasl.ntlm.NTLMClient;
+
+        r2 := @parameter0: byte[];
+
+        $i0 = r0.<com.sun.security.sasl.ntlm.NTLMClient: int step>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.security.sasl.ntlm.NTLMClient: int step> = $i1;
+
+        $i2 = r0.<com.sun.security.sasl.ntlm.NTLMClient: int step>;
+
+        if $i2 != 1 goto label1;
+
+        $r5 = r0.<com.sun.security.sasl.ntlm.NTLMClient: com.sun.security.ntlm.Client client>;
+
+        $r6 = virtualinvoke $r5.<com.sun.security.ntlm.Client: byte[] type1()>();
+
+        return $r6;
+
+     label1:
+        r9 = newarray (byte)[8];
+
+        $r1 = r0.<com.sun.security.sasl.ntlm.NTLMClient: java.util.Random random>;
+
+        virtualinvoke $r1.<java.util.Random: void nextBytes(byte[])>(r9);
+
+        $r3 = r0.<com.sun.security.sasl.ntlm.NTLMClient: com.sun.security.ntlm.Client client>;
+
+        $r4 = virtualinvoke $r3.<com.sun.security.ntlm.Client: byte[] type3(byte[],byte[])>(r2, r9);
+
+     label2:
+        return $r4;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $r8 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r8.<javax.security.sasl.SaslException: void <init>(java.lang.String,java.lang.Throwable)>("Type3 creation failed", $r7);
+
+        throw $r8;
+
+        catch com.sun.security.ntlm.NTLMException from label1 to label2 with label3;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.security.sasl.ntlm.NTLMClient: java.lang.String NTLM_HOSTNAME> = "com.sun.security.sasl.ntlm.hostname";
+
+        <com.sun.security.sasl.ntlm.NTLMClient: java.lang.String NTLM_DOMAIN> = "com.sun.security.sasl.ntlm.domain";
+
+        <com.sun.security.sasl.ntlm.NTLMClient: java.lang.String NTLM_RANDOM> = "com.sun.security.sasl.ntlm.random";
+
+        <com.sun.security.sasl.ntlm.NTLMClient: java.lang.String NTLM_VERSION> = "com.sun.security.sasl.ntlm.version";
+
+        return;
+    }
+}

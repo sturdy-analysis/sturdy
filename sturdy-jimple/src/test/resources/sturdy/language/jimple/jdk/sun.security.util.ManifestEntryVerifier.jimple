@@ -1,0 +1,786 @@
+public class sun.security.util.ManifestEntryVerifier extends java.lang.Object
+{
+    private static final sun.security.util.Debug debug;
+    java.util.HashMap createdDigests;
+    java.util.ArrayList digests;
+    java.util.ArrayList manifestHashes;
+    private java.lang.String name;
+    private java.util.jar.Manifest man;
+    private boolean skip;
+    private java.util.jar.JarEntry entry;
+    private java.security.CodeSigner[] signers;
+    private static final char[] hexc;
+
+    public void <init>(java.util.jar.Manifest)
+    {
+        java.util.jar.Manifest r4;
+        sun.security.util.ManifestEntryVerifier r0;
+        java.util.HashMap $r1;
+        java.util.ArrayList $r2, $r3;
+
+        r0 := @this: sun.security.util.ManifestEntryVerifier;
+
+        r4 := @parameter0: java.util.jar.Manifest;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.util.ManifestEntryVerifier: java.lang.String name> = null;
+
+        r0.<sun.security.util.ManifestEntryVerifier: boolean skip> = 1;
+
+        r0.<sun.security.util.ManifestEntryVerifier: java.security.CodeSigner[] signers> = null;
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>(int)>(11);
+
+        r0.<sun.security.util.ManifestEntryVerifier: java.util.HashMap createdDigests> = $r1;
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        r0.<sun.security.util.ManifestEntryVerifier: java.util.ArrayList digests> = $r2;
+
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>()>();
+
+        r0.<sun.security.util.ManifestEntryVerifier: java.util.ArrayList manifestHashes> = $r3;
+
+        r0.<sun.security.util.ManifestEntryVerifier: java.util.jar.Manifest man> = r4;
+
+        return;
+    }
+
+    public void setEntry(java.lang.String, java.util.jar.JarEntry) throws java.io.IOException
+    {
+        java.util.jar.Manifest $r5, $r6, $r27, $r33;
+        byte[] $r22;
+        java.util.Locale $r12;
+        boolean $z0, $z1;
+        java.util.Set $r40;
+        java.util.jar.Attributes $r7, $r31, $r37, r39;
+        java.security.Provider $r23;
+        java.security.NoSuchAlgorithmException $r38;
+        java.lang.StringBuilder $r26, $r28, $r29, $r32, $r34, $r35;
+        java.util.Base64$Decoder $r19;
+        java.security.MessageDigest $r24, r42;
+        java.util.HashMap $r15, $r25;
+        java.util.ArrayList $r1, $r2, $r17, $r18;
+        java.util.jar.JarEntry r4;
+        int $i0, $i1;
+        java.lang.String r3, $r11, $r13, $r14, $r21, $r30, $r36;
+        java.util.Map$Entry r9;
+        java.util.Iterator $r41;
+        sun.security.util.ManifestEntryVerifier r0;
+        java.lang.Object $r8, $r10, $r16, $r20;
+
+        r0 := @this: sun.security.util.ManifestEntryVerifier;
+
+        r3 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.util.jar.JarEntry;
+
+        $r1 = r0.<sun.security.util.ManifestEntryVerifier: java.util.ArrayList digests>;
+
+        virtualinvoke $r1.<java.util.ArrayList: void clear()>();
+
+        $r2 = r0.<sun.security.util.ManifestEntryVerifier: java.util.ArrayList manifestHashes>;
+
+        virtualinvoke $r2.<java.util.ArrayList: void clear()>();
+
+        r0.<sun.security.util.ManifestEntryVerifier: java.lang.String name> = r3;
+
+        r0.<sun.security.util.ManifestEntryVerifier: java.util.jar.JarEntry entry> = r4;
+
+        r0.<sun.security.util.ManifestEntryVerifier: boolean skip> = 1;
+
+        r0.<sun.security.util.ManifestEntryVerifier: java.security.CodeSigner[] signers> = null;
+
+        $r5 = r0.<sun.security.util.ManifestEntryVerifier: java.util.jar.Manifest man>;
+
+        if $r5 == null goto label01;
+
+        if r3 != null goto label02;
+
+     label01:
+        return;
+
+     label02:
+        r0.<sun.security.util.ManifestEntryVerifier: boolean skip> = 0;
+
+        $r6 = r0.<sun.security.util.ManifestEntryVerifier: java.util.jar.Manifest man>;
+
+        $r7 = virtualinvoke $r6.<java.util.jar.Manifest: java.util.jar.Attributes getAttributes(java.lang.String)>(r3);
+
+        r39 = $r7;
+
+        if $r7 != null goto label03;
+
+        $r27 = r0.<sun.security.util.ManifestEntryVerifier: java.util.jar.Manifest man>;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r28 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("./");
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r31 = virtualinvoke $r27.<java.util.jar.Manifest: java.util.jar.Attributes getAttributes(java.lang.String)>($r30);
+
+        r39 = $r31;
+
+        if $r31 != null goto label03;
+
+        $r33 = r0.<sun.security.util.ManifestEntryVerifier: java.util.jar.Manifest man>;
+
+        $r32 = new java.lang.StringBuilder;
+
+        specialinvoke $r32.<java.lang.StringBuilder: void <init>()>();
+
+        $r34 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r37 = virtualinvoke $r33.<java.util.jar.Manifest: java.util.jar.Attributes getAttributes(java.lang.String)>($r36);
+
+        r39 = $r37;
+
+        if $r37 != null goto label03;
+
+        return;
+
+     label03:
+        $r40 = virtualinvoke r39.<java.util.jar.Attributes: java.util.Set entrySet()>();
+
+        $r41 = interfaceinvoke $r40.<java.util.Set: java.util.Iterator iterator()>();
+
+     label04:
+        $z1 = interfaceinvoke $r41.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label10;
+
+        $r8 = interfaceinvoke $r41.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (java.util.Map$Entry) $r8;
+
+        $r10 = interfaceinvoke r9.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.Object: java.lang.String toString()>();
+
+        $r12 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r13 = virtualinvoke $r11.<java.lang.String: java.lang.String toUpperCase(java.util.Locale)>($r12);
+
+        $z0 = virtualinvoke $r13.<java.lang.String: boolean endsWith(java.lang.String)>("-DIGEST");
+
+        if $z0 == 0 goto label09;
+
+        $i0 = virtualinvoke $r11.<java.lang.String: int length()>();
+
+        $i1 = $i0 - 7;
+
+        $r14 = virtualinvoke $r11.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+        $r15 = r0.<sun.security.util.ManifestEntryVerifier: java.util.HashMap createdDigests>;
+
+        $r16 = virtualinvoke $r15.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r14);
+
+        r42 = (java.security.MessageDigest) $r16;
+
+        if r42 != null goto label08;
+
+     label05:
+        $r23 = staticinvoke <sun.security.util.ManifestEntryVerifier$SunProviderHolder: java.security.Provider access$000()>();
+
+        $r24 = staticinvoke <java.security.MessageDigest: java.security.MessageDigest getInstance(java.lang.String,java.security.Provider)>($r14, $r23);
+
+        r42 = $r24;
+
+        $r25 = r0.<sun.security.util.ManifestEntryVerifier: java.util.HashMap createdDigests>;
+
+        virtualinvoke $r25.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r14, $r24);
+
+     label06:
+        goto label08;
+
+     label07:
+        $r38 := @caughtexception;
+
+     label08:
+        if r42 == null goto label09;
+
+        virtualinvoke r42.<java.security.MessageDigest: void reset()>();
+
+        $r17 = r0.<sun.security.util.ManifestEntryVerifier: java.util.ArrayList digests>;
+
+        virtualinvoke $r17.<java.util.ArrayList: boolean add(java.lang.Object)>(r42);
+
+        $r18 = r0.<sun.security.util.ManifestEntryVerifier: java.util.ArrayList manifestHashes>;
+
+        $r19 = staticinvoke <java.util.Base64: java.util.Base64$Decoder getMimeDecoder()>();
+
+        $r20 = interfaceinvoke r9.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r21 = (java.lang.String) $r20;
+
+        $r22 = virtualinvoke $r19.<java.util.Base64$Decoder: byte[] decode(java.lang.String)>($r21);
+
+        virtualinvoke $r18.<java.util.ArrayList: boolean add(java.lang.Object)>($r22);
+
+     label09:
+        goto label04;
+
+     label10:
+        return;
+
+        catch java.security.NoSuchAlgorithmException from label05 to label06 with label07;
+    }
+
+    public void update(byte)
+    {
+        java.security.MessageDigest $r4;
+        sun.security.util.ManifestEntryVerifier r0;
+        java.util.ArrayList $r1, $r2;
+        byte b1;
+        int $i0, i2;
+        java.lang.Object $r3;
+        boolean $z0;
+
+        r0 := @this: sun.security.util.ManifestEntryVerifier;
+
+        b1 := @parameter0: byte;
+
+        $z0 = r0.<sun.security.util.ManifestEntryVerifier: boolean skip>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        i2 = 0;
+
+     label2:
+        $r1 = r0.<sun.security.util.ManifestEntryVerifier: java.util.ArrayList digests>;
+
+        $i0 = virtualinvoke $r1.<java.util.ArrayList: int size()>();
+
+        if i2 >= $i0 goto label3;
+
+        $r2 = r0.<sun.security.util.ManifestEntryVerifier: java.util.ArrayList digests>;
+
+        $r3 = virtualinvoke $r2.<java.util.ArrayList: java.lang.Object get(int)>(i2);
+
+        $r4 = (java.security.MessageDigest) $r3;
+
+        virtualinvoke $r4.<java.security.MessageDigest: void update(byte)>(b1);
+
+        i2 = i2 + 1;
+
+        goto label2;
+
+     label3:
+        return;
+    }
+
+    public void update(byte[], int, int)
+    {
+        byte[] r4;
+        java.security.MessageDigest $r5;
+        sun.security.util.ManifestEntryVerifier r0;
+        java.util.ArrayList $r1, $r2;
+        int $i0, i1, i2, i3;
+        java.lang.Object $r3;
+        boolean $z0;
+
+        r0 := @this: sun.security.util.ManifestEntryVerifier;
+
+        r4 := @parameter0: byte[];
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $z0 = r0.<sun.security.util.ManifestEntryVerifier: boolean skip>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        i3 = 0;
+
+     label2:
+        $r1 = r0.<sun.security.util.ManifestEntryVerifier: java.util.ArrayList digests>;
+
+        $i0 = virtualinvoke $r1.<java.util.ArrayList: int size()>();
+
+        if i3 >= $i0 goto label3;
+
+        $r2 = r0.<sun.security.util.ManifestEntryVerifier: java.util.ArrayList digests>;
+
+        $r3 = virtualinvoke $r2.<java.util.ArrayList: java.lang.Object get(int)>(i3);
+
+        $r5 = (java.security.MessageDigest) $r3;
+
+        virtualinvoke $r5.<java.security.MessageDigest: void update(byte[],int,int)>(r4, i1, i2);
+
+        i3 = i3 + 1;
+
+        goto label2;
+
+     label3:
+        return;
+    }
+
+    public java.util.jar.JarEntry getEntry()
+    {
+        java.util.jar.JarEntry $r1;
+        sun.security.util.ManifestEntryVerifier r0;
+
+        r0 := @this: sun.security.util.ManifestEntryVerifier;
+
+        $r1 = r0.<sun.security.util.ManifestEntryVerifier: java.util.jar.JarEntry entry>;
+
+        return $r1;
+    }
+
+    public java.security.CodeSigner[] verify(java.util.Hashtable, java.util.Hashtable) throws java.util.jar.JarException
+    {
+        byte[] $r19, $r58;
+        java.security.GeneralSecurityException $r66;
+        sun.security.util.Debug $r20, $r30, $r39, $r45, $r50, $r67, $r69;
+        java.lang.StringBuilder $r22, $r24, $r25, $r27, $r29, $r31, $r33, $r34, $r36, $r38, $r40, $r42, $r44, $r46, $r48, $r51, $r53, $r54, $r61, $r62, $r64, $r68, $r70, $r71;
+        java.util.ArrayList $r1, $r6, $r14, $r17;
+        java.lang.String $r7, $r13, $r23, $r26, $r28, $r32, $r35, $r37, $r41, $r43, $r47, $r49, $r52, $r55, $r57, $r63, $r65, $r72;
+        java.security.CodeSigner[] $r2, $r9, $r10, $r11, $r12, $r59;
+        java.lang.SecurityException $r21, $r60;
+        boolean $z0, $z1, $z2;
+        sun.security.util.JarConstraintsParameters $r5;
+        java.security.MessageDigest r16;
+        int $i0, i1;
+        java.util.Hashtable r3, r4;
+        sun.security.util.DisabledAlgorithmConstraints $r56;
+        sun.security.util.ManifestEntryVerifier r0;
+        java.lang.Object $r8, $r15, $r18;
+
+        r0 := @this: sun.security.util.ManifestEntryVerifier;
+
+        r3 := @parameter0: java.util.Hashtable;
+
+        r4 := @parameter1: java.util.Hashtable;
+
+        $z0 = r0.<sun.security.util.ManifestEntryVerifier: boolean skip>;
+
+        if $z0 == 0 goto label01;
+
+        return null;
+
+     label01:
+        $r1 = r0.<sun.security.util.ManifestEntryVerifier: java.util.ArrayList digests>;
+
+        $z1 = virtualinvoke $r1.<java.util.ArrayList: boolean isEmpty()>();
+
+        if $z1 == 0 goto label02;
+
+        $r60 = new java.lang.SecurityException;
+
+        $r61 = new java.lang.StringBuilder;
+
+        specialinvoke $r61.<java.lang.StringBuilder: void <init>()>();
+
+        $r62 = virtualinvoke $r61.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("digest missing for ");
+
+        $r63 = r0.<sun.security.util.ManifestEntryVerifier: java.lang.String name>;
+
+        $r64 = virtualinvoke $r62.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r63);
+
+        $r65 = virtualinvoke $r64.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r60.<java.lang.SecurityException: void <init>(java.lang.String)>($r65);
+
+        throw $r60;
+
+     label02:
+        $r2 = r0.<sun.security.util.ManifestEntryVerifier: java.security.CodeSigner[] signers>;
+
+        if $r2 == null goto label03;
+
+        $r59 = r0.<sun.security.util.ManifestEntryVerifier: java.security.CodeSigner[] signers>;
+
+        return $r59;
+
+     label03:
+        $r5 = specialinvoke r0.<sun.security.util.ManifestEntryVerifier: sun.security.util.JarConstraintsParameters getParams(java.util.Map,java.util.Map)>(r3, r4);
+
+        i1 = 0;
+
+     label04:
+        $r6 = r0.<sun.security.util.ManifestEntryVerifier: java.util.ArrayList digests>;
+
+        $i0 = virtualinvoke $r6.<java.util.ArrayList: int size()>();
+
+        if i1 >= $i0 goto label12;
+
+        $r14 = r0.<sun.security.util.ManifestEntryVerifier: java.util.ArrayList digests>;
+
+        $r15 = virtualinvoke $r14.<java.util.ArrayList: java.lang.Object get(int)>(i1);
+
+        r16 = (java.security.MessageDigest) $r15;
+
+        if $r5 == null goto label09;
+
+     label05:
+        $r51 = new java.lang.StringBuilder;
+
+        specialinvoke $r51.<java.lang.StringBuilder: void <init>()>();
+
+        $r52 = r0.<sun.security.util.ManifestEntryVerifier: java.lang.String name>;
+
+        $r53 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r52);
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" entry");
+
+        $r55 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<sun.security.util.JarConstraintsParameters: void setExtendedExceptionMsg(java.lang.String,java.lang.String)>("META-INF/MANIFEST.MF", $r55);
+
+        $r56 = staticinvoke <sun.security.util.DisabledAlgorithmConstraints: sun.security.util.DisabledAlgorithmConstraints jarConstraints()>();
+
+        $r57 = virtualinvoke r16.<java.security.MessageDigest: java.lang.String getAlgorithm()>();
+
+        virtualinvoke $r56.<sun.security.util.DisabledAlgorithmConstraints: void permits(java.lang.String,sun.security.util.ConstraintsParameters)>($r57, $r5);
+
+     label06:
+        goto label09;
+
+     label07:
+        $r66 := @caughtexception;
+
+        $r67 = <sun.security.util.ManifestEntryVerifier: sun.security.util.Debug debug>;
+
+        if $r67 == null goto label08;
+
+        $r69 = <sun.security.util.ManifestEntryVerifier: sun.security.util.Debug debug>;
+
+        $r68 = new java.lang.StringBuilder;
+
+        specialinvoke $r68.<java.lang.StringBuilder: void <init>()>();
+
+        $r70 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Digest algorithm is restricted: ");
+
+        $r71 = virtualinvoke $r70.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r66);
+
+        $r72 = virtualinvoke $r71.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r69.<sun.security.util.Debug: void println(java.lang.String)>($r72);
+
+     label08:
+        return null;
+
+     label09:
+        $r17 = r0.<sun.security.util.ManifestEntryVerifier: java.util.ArrayList manifestHashes>;
+
+        $r18 = virtualinvoke $r17.<java.util.ArrayList: java.lang.Object get(int)>(i1);
+
+        $r58 = (byte[]) $r18;
+
+        $r19 = virtualinvoke r16.<java.security.MessageDigest: byte[] digest()>();
+
+        $r20 = <sun.security.util.ManifestEntryVerifier: sun.security.util.Debug debug>;
+
+        if $r20 == null goto label10;
+
+        $r30 = <sun.security.util.ManifestEntryVerifier: sun.security.util.Debug debug>;
+
+        $r29 = new java.lang.StringBuilder;
+
+        specialinvoke $r29.<java.lang.StringBuilder: void <init>()>();
+
+        $r31 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Manifest Entry: ");
+
+        $r32 = r0.<sun.security.util.ManifestEntryVerifier: java.lang.String name>;
+
+        $r33 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r32);
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" digest=");
+
+        $r35 = virtualinvoke r16.<java.security.MessageDigest: java.lang.String getAlgorithm()>();
+
+        $r36 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r35);
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r30.<sun.security.util.Debug: void println(java.lang.String)>($r37);
+
+        $r39 = <sun.security.util.ManifestEntryVerifier: sun.security.util.Debug debug>;
+
+        $r38 = new java.lang.StringBuilder;
+
+        specialinvoke $r38.<java.lang.StringBuilder: void <init>()>();
+
+        $r40 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  manifest ");
+
+        $r41 = staticinvoke <sun.security.util.ManifestEntryVerifier: java.lang.String toHex(byte[])>($r58);
+
+        $r42 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r41);
+
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r39.<sun.security.util.Debug: void println(java.lang.String)>($r43);
+
+        $r45 = <sun.security.util.ManifestEntryVerifier: sun.security.util.Debug debug>;
+
+        $r44 = new java.lang.StringBuilder;
+
+        specialinvoke $r44.<java.lang.StringBuilder: void <init>()>();
+
+        $r46 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  computed ");
+
+        $r47 = staticinvoke <sun.security.util.ManifestEntryVerifier: java.lang.String toHex(byte[])>($r19);
+
+        $r48 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r47);
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r45.<sun.security.util.Debug: void println(java.lang.String)>($r49);
+
+        $r50 = <sun.security.util.ManifestEntryVerifier: sun.security.util.Debug debug>;
+
+        virtualinvoke $r50.<sun.security.util.Debug: void println()>();
+
+     label10:
+        $z2 = staticinvoke <java.security.MessageDigest: boolean isEqual(byte[],byte[])>($r19, $r58);
+
+        if $z2 != 0 goto label11;
+
+        $r21 = new java.lang.SecurityException;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke r16.<java.security.MessageDigest: java.lang.String getAlgorithm()>();
+
+        $r24 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r23);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" digest error for ");
+
+        $r26 = r0.<sun.security.util.ManifestEntryVerifier: java.lang.String name>;
+
+        $r27 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r26);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r21.<java.lang.SecurityException: void <init>(java.lang.String)>($r28);
+
+        throw $r21;
+
+     label11:
+        i1 = i1 + 1;
+
+        goto label04;
+
+     label12:
+        $r7 = r0.<sun.security.util.ManifestEntryVerifier: java.lang.String name>;
+
+        $r8 = virtualinvoke r4.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>($r7);
+
+        $r9 = (java.security.CodeSigner[]) $r8;
+
+        r0.<sun.security.util.ManifestEntryVerifier: java.security.CodeSigner[] signers> = $r9;
+
+        $r10 = r0.<sun.security.util.ManifestEntryVerifier: java.security.CodeSigner[] signers>;
+
+        if $r10 == null goto label13;
+
+        $r13 = r0.<sun.security.util.ManifestEntryVerifier: java.lang.String name>;
+
+        $r12 = r0.<sun.security.util.ManifestEntryVerifier: java.security.CodeSigner[] signers>;
+
+        virtualinvoke r3.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r13, $r12);
+
+     label13:
+        $r11 = r0.<sun.security.util.ManifestEntryVerifier: java.security.CodeSigner[] signers>;
+
+        return $r11;
+
+        catch java.security.GeneralSecurityException from label05 to label06 with label07;
+    }
+
+    private sun.security.util.JarConstraintsParameters getParams(java.util.Map, java.util.Map)
+    {
+        sun.security.util.JarConstraintsParameters $r6, $r7;
+        sun.security.util.ManifestEntryVerifier r2;
+        java.util.Map r0, r1;
+        int $i0;
+        java.lang.Object $r4, $r8;
+        java.lang.String $r3;
+        java.security.CodeSigner[] r5, $r9;
+        boolean $z0, $z1;
+
+        r2 := @this: sun.security.util.ManifestEntryVerifier;
+
+        r0 := @parameter0: java.util.Map;
+
+        r1 := @parameter1: java.util.Map;
+
+        $z0 = interfaceinvoke r0.<java.util.Map: boolean containsKey(java.lang.Object)>("META-INF/MANIFEST.MF");
+
+        if $z0 == 0 goto label2;
+
+        $i0 = interfaceinvoke r0.<java.util.Map: int size()>();
+
+        if $i0 <= 1 goto label1;
+
+        return null;
+
+     label1:
+        $r7 = new sun.security.util.JarConstraintsParameters;
+
+        $r8 = interfaceinvoke r0.<java.util.Map: java.lang.Object get(java.lang.Object)>("META-INF/MANIFEST.MF");
+
+        $r9 = (java.security.CodeSigner[]) $r8;
+
+        specialinvoke $r7.<sun.security.util.JarConstraintsParameters: void <init>(java.security.CodeSigner[])>($r9);
+
+        return $r7;
+
+     label2:
+        $r3 = r2.<sun.security.util.ManifestEntryVerifier: java.lang.String name>;
+
+        $r4 = interfaceinvoke r1.<java.util.Map: java.lang.Object get(java.lang.Object)>($r3);
+
+        r5 = (java.security.CodeSigner[]) $r4;
+
+        $z1 = interfaceinvoke r0.<java.util.Map: boolean containsValue(java.lang.Object)>(r5);
+
+        if $z1 == 0 goto label3;
+
+        return null;
+
+     label3:
+        $r6 = new sun.security.util.JarConstraintsParameters;
+
+        specialinvoke $r6.<sun.security.util.JarConstraintsParameters: void <init>(java.security.CodeSigner[])>(r5);
+
+        return $r6;
+    }
+
+    static java.lang.String toHex(byte[])
+    {
+        byte[] r1;
+        byte $b3, $b7, $b8;
+        java.lang.StringBuffer $r5;
+        int $i0, $i1, $i2, $i4, $i5, i10, $i11, $i12;
+        java.lang.String $r2;
+        char $c6, $c9;
+        char[] $r3, $r4;
+
+        r1 := @parameter0: byte[];
+
+        $r5 = new java.lang.StringBuffer;
+
+        $i0 = lengthof r1;
+
+        $i1 = $i0 * 2;
+
+        specialinvoke $r5.<java.lang.StringBuffer: void <init>(int)>($i1);
+
+        i10 = 0;
+
+     label1:
+        $i2 = lengthof r1;
+
+        if i10 >= $i2 goto label2;
+
+        $r3 = <sun.security.util.ManifestEntryVerifier: char[] hexc>;
+
+        $b3 = r1[i10];
+
+        $i11 = (int) $b3;
+
+        $i4 = $i11 >> 4;
+
+        $i5 = $i4 & 15;
+
+        $c6 = $r3[$i5];
+
+        virtualinvoke $r5.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c6);
+
+        $r4 = <sun.security.util.ManifestEntryVerifier: char[] hexc>;
+
+        $b7 = r1[i10];
+
+        $b8 = $b7 & 15;
+
+        $i12 = (int) $b8;
+
+        $c9 = $r4[$i12];
+
+        virtualinvoke $r5.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c9);
+
+        i10 = i10 + 1;
+
+        goto label1;
+
+     label2:
+        $r2 = virtualinvoke $r5.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r2;
+    }
+
+    static void <clinit>()
+    {
+        char[] $r1;
+        sun.security.util.Debug $r0;
+
+        $r0 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String)>("jar");
+
+        <sun.security.util.ManifestEntryVerifier: sun.security.util.Debug debug> = $r0;
+
+        $r1 = newarray (char)[16];
+
+        $r1[0] = 48;
+
+        $r1[1] = 49;
+
+        $r1[2] = 50;
+
+        $r1[3] = 51;
+
+        $r1[4] = 52;
+
+        $r1[5] = 53;
+
+        $r1[6] = 54;
+
+        $r1[7] = 55;
+
+        $r1[8] = 56;
+
+        $r1[9] = 57;
+
+        $r1[10] = 97;
+
+        $r1[11] = 98;
+
+        $r1[12] = 99;
+
+        $r1[13] = 100;
+
+        $r1[14] = 101;
+
+        $r1[15] = 102;
+
+        <sun.security.util.ManifestEntryVerifier: char[] hexc> = $r1;
+
+        return;
+    }
+}

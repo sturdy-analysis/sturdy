@@ -1,0 +1,1915 @@
+public final class sun.net.idn.Punycode extends java.lang.Object
+{
+    private static final int BASE;
+    private static final int TMIN;
+    private static final int TMAX;
+    private static final int SKEW;
+    private static final int DAMP;
+    private static final int INITIAL_BIAS;
+    private static final int INITIAL_N;
+    private static final int HYPHEN;
+    private static final int DELIMITER;
+    private static final int ZERO;
+    private static final int NINE;
+    private static final int SMALL_A;
+    private static final int SMALL_Z;
+    private static final int CAPITAL_A;
+    private static final int CAPITAL_Z;
+    private static final int MAX_CP_COUNT;
+    private static final int UINT_MAGIC;
+    private static final long ULONG_MAGIC;
+    static final int[] basicToDigit;
+
+    public void <init>()
+    {
+        sun.net.idn.Punycode r0;
+
+        r0 := @this: sun.net.idn.Punycode;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static int adaptBias(int, int, boolean)
+    {
+        int i0, $i1, $i2, $i3, $i4, $i5, i6, i7, i8, i9;
+        boolean z0;
+
+        i6 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        z0 := @parameter2: boolean;
+
+        if z0 == 0 goto label1;
+
+        i7 = i6 / 700;
+
+        goto label2;
+
+     label1:
+        i7 = i6 / 2;
+
+     label2:
+        $i1 = i7 / i0;
+
+        i8 = i7 + $i1;
+
+        i9 = 0;
+
+     label3:
+        if i8 <= 455 goto label4;
+
+        i8 = i8 / 35;
+
+        i9 = i9 + 36;
+
+        goto label3;
+
+     label4:
+        $i3 = 36 * i8;
+
+        $i2 = i8 + 38;
+
+        $i4 = $i3 / $i2;
+
+        $i5 = i9 + $i4;
+
+        return $i5;
+    }
+
+    private static char asciiCaseMap(char, boolean)
+    {
+        char c2;
+        int $i0, $i1, $i3, $i4, $i5, $i6, $i7, $i8;
+        boolean z0;
+
+        c2 := @parameter0: char;
+
+        z0 := @parameter1: boolean;
+
+        if z0 == 0 goto label1;
+
+        $i3 = (int) c2;
+
+        if 97 > $i3 goto label2;
+
+        $i4 = (int) c2;
+
+        if $i4 > 122 goto label2;
+
+        $i5 = (int) c2;
+
+        $i1 = $i5 - 32;
+
+        c2 = (char) $i1;
+
+        goto label2;
+
+     label1:
+        $i6 = (int) c2;
+
+        if 65 > $i6 goto label2;
+
+        $i7 = (int) c2;
+
+        if $i7 > 90 goto label2;
+
+        $i8 = (int) c2;
+
+        $i0 = $i8 + 32;
+
+        c2 = (char) $i0;
+
+     label2:
+        return c2;
+    }
+
+    private static char digitToBasic(int, boolean)
+    {
+        char $c2, $c4, $c6;
+        int i0, $i1, $i3, $i5;
+        boolean z0;
+
+        i0 := @parameter0: int;
+
+        z0 := @parameter1: boolean;
+
+        if i0 >= 26 goto label2;
+
+        if z0 == 0 goto label1;
+
+        $i5 = 65 + i0;
+
+        $c6 = (char) $i5;
+
+        return $c6;
+
+     label1:
+        $i3 = 97 + i0;
+
+        $c4 = (char) $i3;
+
+        return $c4;
+
+     label2:
+        $i1 = 22 + i0;
+
+        $c2 = (char) $i1;
+
+        return $c2;
+    }
+
+    public static java.lang.StringBuffer encode(java.lang.StringBuffer, boolean[]) throws java.text.ParseException
+    {
+        java.lang.StringBuffer r1, $r4, $r9;
+        boolean[] r6;
+        java.lang.RuntimeException $r12;
+        char[] r2;
+        int[] r0;
+        java.text.ParseException $r10, $r11;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        int $i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i20, $i21, $i22, $i23, $i25, $i26, $i28, $i29, $i31, $i32, $i33, $i34, i35, i36, i37, $i39, i40, i41, i42, i43, i44, i45, i46, i47, i48, i49, i50, i51, i52, i53, i54, $i56, $i57, $i58, $i60;
+        char $c19, $c24, $c27, $c30, $c38;
+
+        r1 := @parameter0: java.lang.StringBuffer;
+
+        r6 := @parameter1: boolean[];
+
+        r0 = newarray (int)[256];
+
+        $i0 = virtualinvoke r1.<java.lang.StringBuffer: int length()>();
+
+        r2 = newarray (char)[256];
+
+        $r9 = new java.lang.StringBuffer;
+
+        specialinvoke $r9.<java.lang.StringBuffer: void <init>()>();
+
+        i35 = 0;
+
+        i36 = 0;
+
+        i37 = 0;
+
+     label01:
+        if i37 >= $i0 goto label13;
+
+        if i36 != 256 goto label02;
+
+        $r10 = new java.text.ParseException;
+
+        $i56 = (int) -1;
+
+        specialinvoke $r10.<java.text.ParseException: void <init>(java.lang.String,int)>("Too many input code points", $i56);
+
+        throw $r10;
+
+     label02:
+        $c27 = virtualinvoke r1.<java.lang.StringBuffer: char charAt(int)>(i37);
+
+        $i57 = (int) $c27;
+
+        $z0 = staticinvoke <sun.net.idn.Punycode: boolean isBasic(int)>($i57);
+
+        if $z0 == 0 goto label06;
+
+        if i35 >= 256 goto label05;
+
+        $i33 = i36;
+
+        i36 = i36 + 1;
+
+        r0[$i33] = 0;
+
+        $i34 = i35;
+
+        if r6 == null goto label03;
+
+        $z4 = r6[i37];
+
+        $c38 = staticinvoke <sun.net.idn.Punycode: char asciiCaseMap(char,boolean)>($c27, $z4);
+
+        goto label04;
+
+     label03:
+        $c38 = $c27;
+
+     label04:
+        r2[$i34] = $c38;
+
+     label05:
+        i35 = i35 + 1;
+
+        goto label12;
+
+     label06:
+        if r6 == null goto label07;
+
+        $z3 = r6[i37];
+
+        if $z3 == 0 goto label07;
+
+        $z5 = 1;
+
+        goto label08;
+
+     label07:
+        $z5 = 0;
+
+     label08:
+        $i39 = $z5 << 31;
+
+        $z6 = staticinvoke <sun.text.normalizer.UTF16: boolean isSurrogate(char)>($c27);
+
+        if $z6 != 0 goto label09;
+
+        $i58 = (int) $c27;
+
+        i40 = $i39 | $i58;
+
+        goto label11;
+
+     label09:
+        $z1 = staticinvoke <sun.text.normalizer.UTF16: boolean isLeadSurrogate(char)>($c27);
+
+        if $z1 == 0 goto label10;
+
+        $i28 = i37 + 1;
+
+        if $i28 >= $i0 goto label10;
+
+        $i29 = i37 + 1;
+
+        $c30 = virtualinvoke r1.<java.lang.StringBuffer: char charAt(int)>($i29);
+
+        $z2 = staticinvoke <sun.text.normalizer.UTF16: boolean isTrailSurrogate(char)>($c30);
+
+        if $z2 == 0 goto label10;
+
+        i37 = i37 + 1;
+
+        $i31 = staticinvoke <sun.text.normalizer.UCharacter: int getCodePoint(char,char)>($c27, $c30);
+
+        i40 = $i39 | $i31;
+
+        goto label11;
+
+     label10:
+        $r11 = new java.text.ParseException;
+
+        $i60 = (int) -1;
+
+        specialinvoke $r11.<java.text.ParseException: void <init>(java.lang.String,int)>("Illegal char found", $i60);
+
+        throw $r11;
+
+     label11:
+        $i32 = i36;
+
+        i36 = i36 + 1;
+
+        r0[$i32] = i40;
+
+     label12:
+        i37 = i37 + 1;
+
+        goto label01;
+
+     label13:
+        i1 = i35;
+
+        if i35 <= 0 goto label15;
+
+        if i35 >= 256 goto label14;
+
+        r2[i35] = 45;
+
+     label14:
+        i35 = i35 + 1;
+
+     label15:
+        i41 = 128;
+
+        i42 = 0;
+
+        i43 = 72;
+
+        i44 = i1;
+
+     label16:
+        if i44 >= i36 goto label36;
+
+        i45 = 2147483647;
+
+        i46 = 0;
+
+     label17:
+        if i46 >= i36 goto label19;
+
+        $i26 = r0[i46];
+
+        i47 = $i26 & 2147483647;
+
+        if i41 > i47 goto label18;
+
+        if i47 >= i45 goto label18;
+
+        i45 = i47;
+
+     label18:
+        i46 = i46 + 1;
+
+        goto label17;
+
+     label19:
+        $i5 = i45 - i41;
+
+        $i3 = 2147483391 - i42;
+
+        $i2 = i44 + 1;
+
+        $i4 = $i3 / $i2;
+
+        if $i5 <= $i4 goto label20;
+
+        $r12 = new java.lang.RuntimeException;
+
+        specialinvoke $r12.<java.lang.RuntimeException: void <init>(java.lang.String)>("Internal program error");
+
+        throw $r12;
+
+     label20:
+        $i7 = i45 - i41;
+
+        $i6 = i44 + 1;
+
+        $i8 = $i7 * $i6;
+
+        i48 = i42 + $i8;
+
+        i49 = i45;
+
+        i50 = 0;
+
+     label21:
+        if i50 >= i36 goto label35;
+
+        $i9 = r0[i50];
+
+        i51 = $i9 & 2147483647;
+
+        if i51 >= i49 goto label22;
+
+        i48 = i48 + 1;
+
+        goto label34;
+
+     label22:
+        if i51 != i49 goto label34;
+
+        i52 = i48;
+
+        i53 = 36;
+
+     label23:
+        $i13 = i53 - i43;
+
+        i54 = $i13;
+
+        if $i13 >= 1 goto label24;
+
+        i54 = 1;
+
+        goto label25;
+
+     label24:
+        $i10 = i43 + 26;
+
+        if i53 < $i10 goto label25;
+
+        i54 = 26;
+
+     label25:
+        if i52 >= i54 goto label26;
+
+        goto label28;
+
+     label26:
+        if i35 >= 256 goto label27;
+
+        $i14 = i35;
+
+        i35 = i35 + 1;
+
+        $i16 = i52 - i54;
+
+        $i15 = 36 - i54;
+
+        $i17 = $i16 % $i15;
+
+        $i18 = i54 + $i17;
+
+        $c19 = staticinvoke <sun.net.idn.Punycode: char digitToBasic(int,boolean)>($i18, 0);
+
+        r2[$i14] = $c19;
+
+     label27:
+        $i12 = i52 - i54;
+
+        $i11 = 36 - i54;
+
+        i52 = $i12 / $i11;
+
+        i53 = i53 + 36;
+
+        goto label23;
+
+     label28:
+        if i35 >= 256 goto label31;
+
+        $i22 = i35;
+
+        i35 = i35 + 1;
+
+        $i25 = i52;
+
+        $i23 = r0[i50];
+
+        if $i23 >= 0 goto label29;
+
+        $z7 = 1;
+
+        goto label30;
+
+     label29:
+        $z7 = 0;
+
+     label30:
+        $c24 = staticinvoke <sun.net.idn.Punycode: char digitToBasic(int,boolean)>($i25, $z7);
+
+        r2[$i22] = $c24;
+
+     label31:
+        $i21 = i48;
+
+        $i20 = i44 + 1;
+
+        if i44 != i1 goto label32;
+
+        $z8 = 1;
+
+        goto label33;
+
+     label32:
+        $z8 = 0;
+
+     label33:
+        i43 = staticinvoke <sun.net.idn.Punycode: int adaptBias(int,int,boolean)>($i21, $i20, $z8);
+
+        i48 = 0;
+
+        i44 = i44 + 1;
+
+     label34:
+        i50 = i50 + 1;
+
+        goto label21;
+
+     label35:
+        i42 = i48 + 1;
+
+        i41 = i49 + 1;
+
+        goto label16;
+
+     label36:
+        $r4 = virtualinvoke $r9.<java.lang.StringBuffer: java.lang.StringBuffer append(char[],int,int)>(r2, 0, i35);
+
+        return $r4;
+    }
+
+    private static boolean isBasic(int)
+    {
+        int i0;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 128 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private static boolean isBasicUpperCase(int)
+    {
+        int i0;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        if 65 > i0 goto label1;
+
+        if i0 > 90 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private static boolean isSurrogate(int)
+    {
+        int i0, $i1, $i3, $i5;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        $i3 = (int) -2048;
+
+        $i1 = i0 & $i3;
+
+        $i5 = (int) 55296;
+
+        if $i1 != $i5 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public static java.lang.StringBuffer decode(java.lang.StringBuffer, boolean[]) throws java.text.ParseException
+    {
+        byte $b5;
+        java.lang.StringBuffer r0, $r12;
+        boolean[] r6;
+        char[] r2;
+        int[] $r3;
+        java.text.ParseException $r13, $r14, $r15, $r16, $r17, $r18, $r19;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        int $i0, i1, i2, $i3, i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i22, $i24, $i26, $i28, $i29, $i30, $i31, $i32, i35, i36, i37, i38, i39, i40, i41, $i42, i43, i44, i45, i46, i47, i48, $i50, $i51, $i53, $i54, $i56, $i57, $i59, $i60, $i62, $i64, $i66, $i68, $i70, $i71;
+        char $c4, $c21, $c23, $c25, $c27, $c33, $c34;
+
+        r0 := @parameter0: java.lang.StringBuffer;
+
+        r6 := @parameter1: boolean[];
+
+        $i0 = virtualinvoke r0.<java.lang.StringBuffer: int length()>();
+
+        $r12 = new java.lang.StringBuffer;
+
+        specialinvoke $r12.<java.lang.StringBuffer: void <init>()>();
+
+        r2 = newarray (char)[256];
+
+        i35 = $i0;
+
+     label01:
+        if i35 <= 0 goto label02;
+
+        $i50 = (int) -1;
+
+        i35 = i35 + $i50;
+
+        $c34 = virtualinvoke r0.<java.lang.StringBuffer: char charAt(int)>(i35);
+
+        $i51 = (int) $c34;
+
+        if $i51 != 45 goto label01;
+
+        goto label02;
+
+     label02:
+        i36 = i35;
+
+        i1 = i35;
+
+        i37 = i35;
+
+     label03:
+        if i35 <= 0 goto label05;
+
+        $i53 = (int) -1;
+
+        i35 = i35 + $i53;
+
+        $c33 = virtualinvoke r0.<java.lang.StringBuffer: char charAt(int)>(i35);
+
+        $i54 = (int) $c33;
+
+        $z2 = staticinvoke <sun.net.idn.Punycode: boolean isBasic(int)>($i54);
+
+        if $z2 != 0 goto label04;
+
+        $r13 = new java.text.ParseException;
+
+        $i56 = (int) -1;
+
+        specialinvoke $r13.<java.text.ParseException: void <init>(java.lang.String,int)>("Illegal char found", $i56);
+
+        throw $r13;
+
+     label04:
+        if i35 >= 256 goto label03;
+
+        r2[i35] = $c33;
+
+        if r6 == null goto label03;
+
+        $i57 = (int) $c33;
+
+        $z3 = staticinvoke <sun.net.idn.Punycode: boolean isBasicUpperCase(int)>($i57);
+
+        r6[i35] = $z3;
+
+        goto label03;
+
+     label05:
+        i38 = 128;
+
+        i39 = 0;
+
+        i40 = 72;
+
+        i41 = 1000000000;
+
+        if i1 <= 0 goto label06;
+
+        $i42 = i1 + 1;
+
+        goto label07;
+
+     label06:
+        $i42 = 0;
+
+     label07:
+        i43 = $i42;
+
+     label08:
+        if i43 >= $i0 goto label30;
+
+        i2 = i39;
+
+        i44 = 1;
+
+        i45 = 36;
+
+     label09:
+        if i43 < $i0 goto label10;
+
+        $r14 = new java.text.ParseException;
+
+        $i59 = (int) -1;
+
+        specialinvoke $r14.<java.text.ParseException: void <init>(java.lang.String,int)>("Illegal char found", $i59);
+
+        throw $r14;
+
+     label10:
+        $r3 = <sun.net.idn.Punycode: int[] basicToDigit>;
+
+        $i3 = i43;
+
+        i43 = i43 + 1;
+
+        $c4 = virtualinvoke r0.<java.lang.StringBuffer: char charAt(int)>($i3);
+
+        $b5 = (byte) $c4;
+
+        $i60 = (int) $b5;
+
+        i6 = $r3[$i60];
+
+        if i6 >= 0 goto label11;
+
+        $r15 = new java.text.ParseException;
+
+        $i62 = (int) -1;
+
+        specialinvoke $r15.<java.text.ParseException: void <init>(java.lang.String,int)>("Invalid char found", $i62);
+
+        throw $r15;
+
+     label11:
+        $i7 = 2147483647 - i39;
+
+        $i8 = $i7 / i44;
+
+        if i6 <= $i8 goto label12;
+
+        $r16 = new java.text.ParseException;
+
+        $i64 = (int) -1;
+
+        specialinvoke $r16.<java.text.ParseException: void <init>(java.lang.String,int)>("Illegal char found", $i64);
+
+        throw $r16;
+
+     label12:
+        $i9 = i6 * i44;
+
+        i39 = i39 + $i9;
+
+        i46 = i45 - i40;
+
+        if i46 >= 1 goto label13;
+
+        i46 = 1;
+
+        goto label14;
+
+     label13:
+        $i10 = i40 + 26;
+
+        if i45 < $i10 goto label14;
+
+        i46 = 26;
+
+     label14:
+        if i6 >= i46 goto label15;
+
+        goto label17;
+
+     label15:
+        $i11 = 36 - i46;
+
+        $i12 = 2147483647 / $i11;
+
+        if i44 <= $i12 goto label16;
+
+        $r17 = new java.text.ParseException;
+
+        $i66 = (int) -1;
+
+        specialinvoke $r17.<java.text.ParseException: void <init>(java.lang.String,int)>("Illegal char found", $i66);
+
+        throw $r17;
+
+     label16:
+        $i13 = 36 - i46;
+
+        i44 = i44 * $i13;
+
+        i45 = i45 + 36;
+
+        goto label09;
+
+     label17:
+        i36 = i36 + 1;
+
+        $i14 = i39 - i2;
+
+        $i32 = i36;
+
+        if i2 != 0 goto label18;
+
+        $z4 = 1;
+
+        goto label19;
+
+     label18:
+        $z4 = 0;
+
+     label19:
+        i40 = staticinvoke <sun.net.idn.Punycode: int adaptBias(int,int,boolean)>($i14, $i32, $z4);
+
+        $i16 = i39 / i36;
+
+        $i15 = 2147483647 - i38;
+
+        if $i16 <= $i15 goto label20;
+
+        $r18 = new java.text.ParseException;
+
+        $i68 = (int) -1;
+
+        specialinvoke $r18.<java.text.ParseException: void <init>(java.lang.String,int)>("Illegal char found", $i68);
+
+        throw $r18;
+
+     label20:
+        $i17 = i39 / i36;
+
+        i38 = i38 + $i17;
+
+        i47 = i39 % i36;
+
+        if i38 > 1114111 goto label21;
+
+        $z0 = staticinvoke <sun.net.idn.Punycode: boolean isSurrogate(int)>(i38);
+
+        if $z0 == 0 goto label22;
+
+     label21:
+        $r19 = new java.text.ParseException;
+
+        $i70 = (int) -1;
+
+        specialinvoke $r19.<java.text.ParseException: void <init>(java.lang.String,int)>("Illegal char found", $i70);
+
+        throw $r19;
+
+     label22:
+        $i18 = staticinvoke <sun.text.normalizer.UTF16: int getCharCount(int)>(i38);
+
+        $i19 = i37 + $i18;
+
+        if $i19 >= 256 goto label29;
+
+        if i47 > i41 goto label24;
+
+        i48 = i47;
+
+        if $i18 <= 1 goto label23;
+
+        i41 = i47;
+
+        goto label25;
+
+     label23:
+        i41 = i41 + 1;
+
+        goto label25;
+
+     label24:
+        $i20 = i47 - i41;
+
+        i48 = staticinvoke <sun.text.normalizer.UTF16: int moveCodePointOffset(char[],int,int,int,int)>(r2, 0, i37, i41, $i20);
+
+     label25:
+        if i48 >= i37 goto label26;
+
+        $i29 = i48 + $i18;
+
+        $i28 = i37 - i48;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r2, i48, r2, $i29, $i28);
+
+        if r6 == null goto label26;
+
+        $i31 = i48 + $i18;
+
+        $i30 = i37 - i48;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r6, i48, r6, $i31, $i30);
+
+     label26:
+        if $i18 != 1 goto label27;
+
+        $c27 = (char) i38;
+
+        r2[i48] = $c27;
+
+        goto label28;
+
+     label27:
+        $c21 = staticinvoke <sun.text.normalizer.UTF16: char getLeadSurrogate(int)>(i38);
+
+        r2[i48] = $c21;
+
+        $i22 = i48 + 1;
+
+        $c23 = staticinvoke <sun.text.normalizer.UTF16: char getTrailSurrogate(int)>(i38);
+
+        r2[$i22] = $c23;
+
+     label28:
+        if r6 == null goto label29;
+
+        $i24 = i43 - 1;
+
+        $c25 = virtualinvoke r0.<java.lang.StringBuffer: char charAt(int)>($i24);
+
+        $i71 = (int) $c25;
+
+        $z1 = staticinvoke <sun.net.idn.Punycode: boolean isBasicUpperCase(int)>($i71);
+
+        r6[i48] = $z1;
+
+        if $i18 != 2 goto label29;
+
+        $i26 = i48 + 1;
+
+        r6[$i26] = 0;
+
+     label29:
+        i37 = i37 + $i18;
+
+        i39 = i47 + 1;
+
+        goto label08;
+
+     label30:
+        virtualinvoke $r12.<java.lang.StringBuffer: java.lang.StringBuffer append(char[],int,int)>(r2, 0, i37);
+
+        return $r12;
+    }
+
+    static void <clinit>()
+    {
+        int[] $r0;
+        int $i1, $i3, $i5, $i7, $i9, $i11, $i13, $i15, $i17, $i19, $i21, $i23, $i25, $i27, $i29, $i31, $i33, $i35, $i37, $i39, $i41, $i43, $i45, $i47, $i49, $i51, $i53, $i55, $i57, $i59, $i61, $i63, $i65, $i67, $i69, $i71, $i73, $i75, $i77, $i79, $i81, $i83, $i85, $i87, $i89, $i91, $i93, $i95, $i97, $i99, $i101, $i103, $i105, $i107, $i109, $i111, $i113, $i115, $i117, $i119, $i121, $i123, $i125, $i127, $i129, $i131, $i133, $i135, $i137, $i139, $i141, $i143, $i145, $i147, $i149, $i151, $i153, $i155, $i157, $i159, $i161, $i163, $i165, $i167, $i169, $i171, $i173, $i175, $i177, $i179, $i181, $i183, $i185, $i187, $i189, $i191, $i193, $i195, $i197, $i199, $i201, $i203, $i205, $i207, $i209, $i211, $i213, $i215, $i217, $i219, $i221, $i223, $i225, $i227, $i229, $i231, $i233, $i235, $i237, $i239, $i241, $i243, $i245, $i247, $i249, $i251, $i253, $i255, $i257, $i259, $i261, $i263, $i265, $i267, $i269, $i271, $i273, $i275, $i277, $i279, $i281, $i283, $i285, $i287, $i289, $i291, $i293, $i295, $i297, $i299, $i301, $i303, $i305, $i307, $i309, $i311, $i313, $i315, $i317, $i319, $i321, $i323, $i325, $i327, $i329, $i331, $i333, $i335, $i337, $i339, $i341, $i343, $i345, $i347, $i349, $i351, $i353, $i355, $i357, $i359, $i361, $i363, $i365, $i367, $i369, $i371, $i373, $i375, $i377, $i379, $i381, $i383, $i385, $i387;
+
+        <sun.net.idn.Punycode: long ULONG_MAGIC> = -9223372036854775808L;
+
+        <sun.net.idn.Punycode: int UINT_MAGIC> = -2147483648;
+
+        <sun.net.idn.Punycode: int MAX_CP_COUNT> = 256;
+
+        <sun.net.idn.Punycode: int CAPITAL_Z> = 90;
+
+        <sun.net.idn.Punycode: int CAPITAL_A> = 65;
+
+        <sun.net.idn.Punycode: int SMALL_Z> = 122;
+
+        <sun.net.idn.Punycode: int SMALL_A> = 97;
+
+        <sun.net.idn.Punycode: int NINE> = 57;
+
+        <sun.net.idn.Punycode: int ZERO> = 48;
+
+        <sun.net.idn.Punycode: int DELIMITER> = 45;
+
+        <sun.net.idn.Punycode: int HYPHEN> = 45;
+
+        <sun.net.idn.Punycode: int INITIAL_N> = 128;
+
+        <sun.net.idn.Punycode: int INITIAL_BIAS> = 72;
+
+        <sun.net.idn.Punycode: int DAMP> = 700;
+
+        <sun.net.idn.Punycode: int SKEW> = 38;
+
+        <sun.net.idn.Punycode: int TMAX> = 26;
+
+        <sun.net.idn.Punycode: int TMIN> = 1;
+
+        <sun.net.idn.Punycode: int BASE> = 36;
+
+        $r0 = newarray (int)[256];
+
+        $i1 = (int) -1;
+
+        $r0[0] = $i1;
+
+        $i3 = (int) -1;
+
+        $r0[1] = $i3;
+
+        $i5 = (int) -1;
+
+        $r0[2] = $i5;
+
+        $i7 = (int) -1;
+
+        $r0[3] = $i7;
+
+        $i9 = (int) -1;
+
+        $r0[4] = $i9;
+
+        $i11 = (int) -1;
+
+        $r0[5] = $i11;
+
+        $i13 = (int) -1;
+
+        $r0[6] = $i13;
+
+        $i15 = (int) -1;
+
+        $r0[7] = $i15;
+
+        $i17 = (int) -1;
+
+        $r0[8] = $i17;
+
+        $i19 = (int) -1;
+
+        $r0[9] = $i19;
+
+        $i21 = (int) -1;
+
+        $r0[10] = $i21;
+
+        $i23 = (int) -1;
+
+        $r0[11] = $i23;
+
+        $i25 = (int) -1;
+
+        $r0[12] = $i25;
+
+        $i27 = (int) -1;
+
+        $r0[13] = $i27;
+
+        $i29 = (int) -1;
+
+        $r0[14] = $i29;
+
+        $i31 = (int) -1;
+
+        $r0[15] = $i31;
+
+        $i33 = (int) -1;
+
+        $r0[16] = $i33;
+
+        $i35 = (int) -1;
+
+        $r0[17] = $i35;
+
+        $i37 = (int) -1;
+
+        $r0[18] = $i37;
+
+        $i39 = (int) -1;
+
+        $r0[19] = $i39;
+
+        $i41 = (int) -1;
+
+        $r0[20] = $i41;
+
+        $i43 = (int) -1;
+
+        $r0[21] = $i43;
+
+        $i45 = (int) -1;
+
+        $r0[22] = $i45;
+
+        $i47 = (int) -1;
+
+        $r0[23] = $i47;
+
+        $i49 = (int) -1;
+
+        $r0[24] = $i49;
+
+        $i51 = (int) -1;
+
+        $r0[25] = $i51;
+
+        $i53 = (int) -1;
+
+        $r0[26] = $i53;
+
+        $i55 = (int) -1;
+
+        $r0[27] = $i55;
+
+        $i57 = (int) -1;
+
+        $r0[28] = $i57;
+
+        $i59 = (int) -1;
+
+        $r0[29] = $i59;
+
+        $i61 = (int) -1;
+
+        $r0[30] = $i61;
+
+        $i63 = (int) -1;
+
+        $r0[31] = $i63;
+
+        $i65 = (int) -1;
+
+        $r0[32] = $i65;
+
+        $i67 = (int) -1;
+
+        $r0[33] = $i67;
+
+        $i69 = (int) -1;
+
+        $r0[34] = $i69;
+
+        $i71 = (int) -1;
+
+        $r0[35] = $i71;
+
+        $i73 = (int) -1;
+
+        $r0[36] = $i73;
+
+        $i75 = (int) -1;
+
+        $r0[37] = $i75;
+
+        $i77 = (int) -1;
+
+        $r0[38] = $i77;
+
+        $i79 = (int) -1;
+
+        $r0[39] = $i79;
+
+        $i81 = (int) -1;
+
+        $r0[40] = $i81;
+
+        $i83 = (int) -1;
+
+        $r0[41] = $i83;
+
+        $i85 = (int) -1;
+
+        $r0[42] = $i85;
+
+        $i87 = (int) -1;
+
+        $r0[43] = $i87;
+
+        $i89 = (int) -1;
+
+        $r0[44] = $i89;
+
+        $i91 = (int) -1;
+
+        $r0[45] = $i91;
+
+        $i93 = (int) -1;
+
+        $r0[46] = $i93;
+
+        $i95 = (int) -1;
+
+        $r0[47] = $i95;
+
+        $r0[48] = 26;
+
+        $r0[49] = 27;
+
+        $r0[50] = 28;
+
+        $r0[51] = 29;
+
+        $r0[52] = 30;
+
+        $r0[53] = 31;
+
+        $r0[54] = 32;
+
+        $r0[55] = 33;
+
+        $r0[56] = 34;
+
+        $r0[57] = 35;
+
+        $i97 = (int) -1;
+
+        $r0[58] = $i97;
+
+        $i99 = (int) -1;
+
+        $r0[59] = $i99;
+
+        $i101 = (int) -1;
+
+        $r0[60] = $i101;
+
+        $i103 = (int) -1;
+
+        $r0[61] = $i103;
+
+        $i105 = (int) -1;
+
+        $r0[62] = $i105;
+
+        $i107 = (int) -1;
+
+        $r0[63] = $i107;
+
+        $i109 = (int) -1;
+
+        $r0[64] = $i109;
+
+        $r0[65] = 0;
+
+        $r0[66] = 1;
+
+        $r0[67] = 2;
+
+        $r0[68] = 3;
+
+        $r0[69] = 4;
+
+        $r0[70] = 5;
+
+        $r0[71] = 6;
+
+        $r0[72] = 7;
+
+        $r0[73] = 8;
+
+        $r0[74] = 9;
+
+        $r0[75] = 10;
+
+        $r0[76] = 11;
+
+        $r0[77] = 12;
+
+        $r0[78] = 13;
+
+        $r0[79] = 14;
+
+        $r0[80] = 15;
+
+        $r0[81] = 16;
+
+        $r0[82] = 17;
+
+        $r0[83] = 18;
+
+        $r0[84] = 19;
+
+        $r0[85] = 20;
+
+        $r0[86] = 21;
+
+        $r0[87] = 22;
+
+        $r0[88] = 23;
+
+        $r0[89] = 24;
+
+        $r0[90] = 25;
+
+        $i111 = (int) -1;
+
+        $r0[91] = $i111;
+
+        $i113 = (int) -1;
+
+        $r0[92] = $i113;
+
+        $i115 = (int) -1;
+
+        $r0[93] = $i115;
+
+        $i117 = (int) -1;
+
+        $r0[94] = $i117;
+
+        $i119 = (int) -1;
+
+        $r0[95] = $i119;
+
+        $i121 = (int) -1;
+
+        $r0[96] = $i121;
+
+        $r0[97] = 0;
+
+        $r0[98] = 1;
+
+        $r0[99] = 2;
+
+        $r0[100] = 3;
+
+        $r0[101] = 4;
+
+        $r0[102] = 5;
+
+        $r0[103] = 6;
+
+        $r0[104] = 7;
+
+        $r0[105] = 8;
+
+        $r0[106] = 9;
+
+        $r0[107] = 10;
+
+        $r0[108] = 11;
+
+        $r0[109] = 12;
+
+        $r0[110] = 13;
+
+        $r0[111] = 14;
+
+        $r0[112] = 15;
+
+        $r0[113] = 16;
+
+        $r0[114] = 17;
+
+        $r0[115] = 18;
+
+        $r0[116] = 19;
+
+        $r0[117] = 20;
+
+        $r0[118] = 21;
+
+        $r0[119] = 22;
+
+        $r0[120] = 23;
+
+        $r0[121] = 24;
+
+        $r0[122] = 25;
+
+        $i123 = (int) -1;
+
+        $r0[123] = $i123;
+
+        $i125 = (int) -1;
+
+        $r0[124] = $i125;
+
+        $i127 = (int) -1;
+
+        $r0[125] = $i127;
+
+        $i129 = (int) -1;
+
+        $r0[126] = $i129;
+
+        $i131 = (int) -1;
+
+        $r0[127] = $i131;
+
+        $i133 = (int) -1;
+
+        $r0[128] = $i133;
+
+        $i135 = (int) -1;
+
+        $r0[129] = $i135;
+
+        $i137 = (int) -1;
+
+        $r0[130] = $i137;
+
+        $i139 = (int) -1;
+
+        $r0[131] = $i139;
+
+        $i141 = (int) -1;
+
+        $r0[132] = $i141;
+
+        $i143 = (int) -1;
+
+        $r0[133] = $i143;
+
+        $i145 = (int) -1;
+
+        $r0[134] = $i145;
+
+        $i147 = (int) -1;
+
+        $r0[135] = $i147;
+
+        $i149 = (int) -1;
+
+        $r0[136] = $i149;
+
+        $i151 = (int) -1;
+
+        $r0[137] = $i151;
+
+        $i153 = (int) -1;
+
+        $r0[138] = $i153;
+
+        $i155 = (int) -1;
+
+        $r0[139] = $i155;
+
+        $i157 = (int) -1;
+
+        $r0[140] = $i157;
+
+        $i159 = (int) -1;
+
+        $r0[141] = $i159;
+
+        $i161 = (int) -1;
+
+        $r0[142] = $i161;
+
+        $i163 = (int) -1;
+
+        $r0[143] = $i163;
+
+        $i165 = (int) -1;
+
+        $r0[144] = $i165;
+
+        $i167 = (int) -1;
+
+        $r0[145] = $i167;
+
+        $i169 = (int) -1;
+
+        $r0[146] = $i169;
+
+        $i171 = (int) -1;
+
+        $r0[147] = $i171;
+
+        $i173 = (int) -1;
+
+        $r0[148] = $i173;
+
+        $i175 = (int) -1;
+
+        $r0[149] = $i175;
+
+        $i177 = (int) -1;
+
+        $r0[150] = $i177;
+
+        $i179 = (int) -1;
+
+        $r0[151] = $i179;
+
+        $i181 = (int) -1;
+
+        $r0[152] = $i181;
+
+        $i183 = (int) -1;
+
+        $r0[153] = $i183;
+
+        $i185 = (int) -1;
+
+        $r0[154] = $i185;
+
+        $i187 = (int) -1;
+
+        $r0[155] = $i187;
+
+        $i189 = (int) -1;
+
+        $r0[156] = $i189;
+
+        $i191 = (int) -1;
+
+        $r0[157] = $i191;
+
+        $i193 = (int) -1;
+
+        $r0[158] = $i193;
+
+        $i195 = (int) -1;
+
+        $r0[159] = $i195;
+
+        $i197 = (int) -1;
+
+        $r0[160] = $i197;
+
+        $i199 = (int) -1;
+
+        $r0[161] = $i199;
+
+        $i201 = (int) -1;
+
+        $r0[162] = $i201;
+
+        $i203 = (int) -1;
+
+        $r0[163] = $i203;
+
+        $i205 = (int) -1;
+
+        $r0[164] = $i205;
+
+        $i207 = (int) -1;
+
+        $r0[165] = $i207;
+
+        $i209 = (int) -1;
+
+        $r0[166] = $i209;
+
+        $i211 = (int) -1;
+
+        $r0[167] = $i211;
+
+        $i213 = (int) -1;
+
+        $r0[168] = $i213;
+
+        $i215 = (int) -1;
+
+        $r0[169] = $i215;
+
+        $i217 = (int) -1;
+
+        $r0[170] = $i217;
+
+        $i219 = (int) -1;
+
+        $r0[171] = $i219;
+
+        $i221 = (int) -1;
+
+        $r0[172] = $i221;
+
+        $i223 = (int) -1;
+
+        $r0[173] = $i223;
+
+        $i225 = (int) -1;
+
+        $r0[174] = $i225;
+
+        $i227 = (int) -1;
+
+        $r0[175] = $i227;
+
+        $i229 = (int) -1;
+
+        $r0[176] = $i229;
+
+        $i231 = (int) -1;
+
+        $r0[177] = $i231;
+
+        $i233 = (int) -1;
+
+        $r0[178] = $i233;
+
+        $i235 = (int) -1;
+
+        $r0[179] = $i235;
+
+        $i237 = (int) -1;
+
+        $r0[180] = $i237;
+
+        $i239 = (int) -1;
+
+        $r0[181] = $i239;
+
+        $i241 = (int) -1;
+
+        $r0[182] = $i241;
+
+        $i243 = (int) -1;
+
+        $r0[183] = $i243;
+
+        $i245 = (int) -1;
+
+        $r0[184] = $i245;
+
+        $i247 = (int) -1;
+
+        $r0[185] = $i247;
+
+        $i249 = (int) -1;
+
+        $r0[186] = $i249;
+
+        $i251 = (int) -1;
+
+        $r0[187] = $i251;
+
+        $i253 = (int) -1;
+
+        $r0[188] = $i253;
+
+        $i255 = (int) -1;
+
+        $r0[189] = $i255;
+
+        $i257 = (int) -1;
+
+        $r0[190] = $i257;
+
+        $i259 = (int) -1;
+
+        $r0[191] = $i259;
+
+        $i261 = (int) -1;
+
+        $r0[192] = $i261;
+
+        $i263 = (int) -1;
+
+        $r0[193] = $i263;
+
+        $i265 = (int) -1;
+
+        $r0[194] = $i265;
+
+        $i267 = (int) -1;
+
+        $r0[195] = $i267;
+
+        $i269 = (int) -1;
+
+        $r0[196] = $i269;
+
+        $i271 = (int) -1;
+
+        $r0[197] = $i271;
+
+        $i273 = (int) -1;
+
+        $r0[198] = $i273;
+
+        $i275 = (int) -1;
+
+        $r0[199] = $i275;
+
+        $i277 = (int) -1;
+
+        $r0[200] = $i277;
+
+        $i279 = (int) -1;
+
+        $r0[201] = $i279;
+
+        $i281 = (int) -1;
+
+        $r0[202] = $i281;
+
+        $i283 = (int) -1;
+
+        $r0[203] = $i283;
+
+        $i285 = (int) -1;
+
+        $r0[204] = $i285;
+
+        $i287 = (int) -1;
+
+        $r0[205] = $i287;
+
+        $i289 = (int) -1;
+
+        $r0[206] = $i289;
+
+        $i291 = (int) -1;
+
+        $r0[207] = $i291;
+
+        $i293 = (int) -1;
+
+        $r0[208] = $i293;
+
+        $i295 = (int) -1;
+
+        $r0[209] = $i295;
+
+        $i297 = (int) -1;
+
+        $r0[210] = $i297;
+
+        $i299 = (int) -1;
+
+        $r0[211] = $i299;
+
+        $i301 = (int) -1;
+
+        $r0[212] = $i301;
+
+        $i303 = (int) -1;
+
+        $r0[213] = $i303;
+
+        $i305 = (int) -1;
+
+        $r0[214] = $i305;
+
+        $i307 = (int) -1;
+
+        $r0[215] = $i307;
+
+        $i309 = (int) -1;
+
+        $r0[216] = $i309;
+
+        $i311 = (int) -1;
+
+        $r0[217] = $i311;
+
+        $i313 = (int) -1;
+
+        $r0[218] = $i313;
+
+        $i315 = (int) -1;
+
+        $r0[219] = $i315;
+
+        $i317 = (int) -1;
+
+        $r0[220] = $i317;
+
+        $i319 = (int) -1;
+
+        $r0[221] = $i319;
+
+        $i321 = (int) -1;
+
+        $r0[222] = $i321;
+
+        $i323 = (int) -1;
+
+        $r0[223] = $i323;
+
+        $i325 = (int) -1;
+
+        $r0[224] = $i325;
+
+        $i327 = (int) -1;
+
+        $r0[225] = $i327;
+
+        $i329 = (int) -1;
+
+        $r0[226] = $i329;
+
+        $i331 = (int) -1;
+
+        $r0[227] = $i331;
+
+        $i333 = (int) -1;
+
+        $r0[228] = $i333;
+
+        $i335 = (int) -1;
+
+        $r0[229] = $i335;
+
+        $i337 = (int) -1;
+
+        $r0[230] = $i337;
+
+        $i339 = (int) -1;
+
+        $r0[231] = $i339;
+
+        $i341 = (int) -1;
+
+        $r0[232] = $i341;
+
+        $i343 = (int) -1;
+
+        $r0[233] = $i343;
+
+        $i345 = (int) -1;
+
+        $r0[234] = $i345;
+
+        $i347 = (int) -1;
+
+        $r0[235] = $i347;
+
+        $i349 = (int) -1;
+
+        $r0[236] = $i349;
+
+        $i351 = (int) -1;
+
+        $r0[237] = $i351;
+
+        $i353 = (int) -1;
+
+        $r0[238] = $i353;
+
+        $i355 = (int) -1;
+
+        $r0[239] = $i355;
+
+        $i357 = (int) -1;
+
+        $r0[240] = $i357;
+
+        $i359 = (int) -1;
+
+        $r0[241] = $i359;
+
+        $i361 = (int) -1;
+
+        $r0[242] = $i361;
+
+        $i363 = (int) -1;
+
+        $r0[243] = $i363;
+
+        $i365 = (int) -1;
+
+        $r0[244] = $i365;
+
+        $i367 = (int) -1;
+
+        $r0[245] = $i367;
+
+        $i369 = (int) -1;
+
+        $r0[246] = $i369;
+
+        $i371 = (int) -1;
+
+        $r0[247] = $i371;
+
+        $i373 = (int) -1;
+
+        $r0[248] = $i373;
+
+        $i375 = (int) -1;
+
+        $r0[249] = $i375;
+
+        $i377 = (int) -1;
+
+        $r0[250] = $i377;
+
+        $i379 = (int) -1;
+
+        $r0[251] = $i379;
+
+        $i381 = (int) -1;
+
+        $r0[252] = $i381;
+
+        $i383 = (int) -1;
+
+        $r0[253] = $i383;
+
+        $i385 = (int) -1;
+
+        $r0[254] = $i385;
+
+        $i387 = (int) -1;
+
+        $r0[255] = $i387;
+
+        <sun.net.idn.Punycode: int[] basicToDigit> = $r0;
+
+        return;
+    }
+}

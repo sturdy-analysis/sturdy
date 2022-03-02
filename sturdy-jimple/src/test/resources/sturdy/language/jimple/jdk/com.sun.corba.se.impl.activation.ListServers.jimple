@@ -1,0 +1,336 @@
+class com.sun.corba.se.impl.activation.ListServers extends java.lang.Object implements com.sun.corba.se.impl.activation.CommandHandler
+{
+    static final int illegalServerId;
+
+    void <init>()
+    {
+        com.sun.corba.se.impl.activation.ListServers r0;
+
+        r0 := @this: com.sun.corba.se.impl.activation.ListServers;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public java.lang.String getCommandName()
+    {
+        com.sun.corba.se.impl.activation.ListServers r0;
+
+        r0 := @this: com.sun.corba.se.impl.activation.ListServers;
+
+        return "list";
+    }
+
+    public void printCommandHelp(java.io.PrintStream, boolean)
+    {
+        java.io.PrintStream r0;
+        com.sun.corba.se.impl.activation.ListServers r3;
+        java.lang.String $r1, $r2;
+        boolean z0;
+
+        r3 := @this: com.sun.corba.se.impl.activation.ListServers;
+
+        r0 := @parameter0: java.io.PrintStream;
+
+        z0 := @parameter1: boolean;
+
+        if z0 != 0 goto label1;
+
+        $r2 = staticinvoke <com.sun.corba.se.impl.orbutil.CorbaResourceUtil: java.lang.String getText(java.lang.String)>("servertool.list");
+
+        virtualinvoke r0.<java.io.PrintStream: void println(java.lang.String)>($r2);
+
+        goto label2;
+
+     label1:
+        $r1 = staticinvoke <com.sun.corba.se.impl.orbutil.CorbaResourceUtil: java.lang.String getText(java.lang.String)>("servertool.list1");
+
+        virtualinvoke r0.<java.io.PrintStream: void println(java.lang.String)>($r1);
+
+     label2:
+        return;
+    }
+
+    public boolean processCommand(java.lang.String[], org.omg.CORBA.ORB, java.io.PrintStream)
+    {
+        com.sun.corba.se.impl.activation.ListServers r26;
+        java.lang.Integer $r21;
+        int[] $r4;
+        boolean $z0, $z1, z2;
+        java.lang.Exception $r22;
+        java.lang.StringBuilder $r9, $r10, $r11, $r13, $r14, $r16, $r27;
+        java.lang.String[] r0;
+        org.omg.CORBA.ORB r1;
+        com.sun.corba.se.spi.activation.ServerNotRegistered $r23, $r24;
+        int $i0, $i1, $i2, $i3, $i4, i5, i6, $i8, $i10;
+        java.lang.String $r6, $r12, $r15, $r17, $r19, $r20, $r25;
+        java.io.PrintStream r5;
+        com.sun.corba.se.spi.activation.Repository $r3;
+        org.omg.CORBA.Object $r2;
+        com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef $r7, $r18;
+
+        r26 := @this: com.sun.corba.se.impl.activation.ListServers;
+
+        r0 := @parameter0: java.lang.String[];
+
+        r1 := @parameter1: org.omg.CORBA.ORB;
+
+        r5 := @parameter2: java.io.PrintStream;
+
+        $i8 = (int) -1;
+
+        i5 = $i8;
+
+        $i0 = lengthof r0;
+
+        if $i0 == 0 goto label01;
+
+        $z1 = 1;
+
+        goto label02;
+
+     label01:
+        $z1 = 0;
+
+     label02:
+        z2 = $z1;
+
+        $i1 = lengthof r0;
+
+        if $i1 != 2 goto label03;
+
+        $r19 = r0[0];
+
+        $z0 = virtualinvoke $r19.<java.lang.String: boolean equals(java.lang.Object)>("-serverid");
+
+        if $z0 == 0 goto label03;
+
+        $r20 = r0[1];
+
+        $r21 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(java.lang.String)>($r20);
+
+        i5 = virtualinvoke $r21.<java.lang.Integer: int intValue()>();
+
+     label03:
+        $i10 = (int) -1;
+
+        if i5 != $i10 goto label04;
+
+        if z2 == 0 goto label04;
+
+        return 1;
+
+     label04:
+        $r2 = virtualinvoke r1.<org.omg.CORBA.ORB: org.omg.CORBA.Object resolve_initial_references(java.lang.String)>("ServerRepository");
+
+        $r3 = staticinvoke <com.sun.corba.se.spi.activation.RepositoryHelper: com.sun.corba.se.spi.activation.Repository narrow(org.omg.CORBA.Object)>($r2);
+
+        if z2 == 0 goto label08;
+
+     label05:
+        $r18 = interfaceinvoke $r3.<com.sun.corba.se.spi.activation.Repository: com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef getServer(int)>(i5);
+
+        virtualinvoke r5.<java.io.PrintStream: void println()>();
+
+        staticinvoke <com.sun.corba.se.impl.activation.ListServers: void printServerDef(com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef,int,java.io.PrintStream)>($r18, i5, r5);
+
+        virtualinvoke r5.<java.io.PrintStream: void println()>();
+
+     label06:
+        goto label14;
+
+     label07:
+        $r24 := @caughtexception;
+
+        $r25 = staticinvoke <com.sun.corba.se.impl.orbutil.CorbaResourceUtil: java.lang.String getText(java.lang.String)>("servertool.nosuchserver");
+
+        virtualinvoke r5.<java.io.PrintStream: void println(java.lang.String)>($r25);
+
+        goto label14;
+
+     label08:
+        $r4 = interfaceinvoke $r3.<com.sun.corba.se.spi.activation.Repository: int[] listRegisteredServers()>();
+
+        $r6 = staticinvoke <com.sun.corba.se.impl.orbutil.CorbaResourceUtil: java.lang.String getText(java.lang.String)>("servertool.list2");
+
+        virtualinvoke r5.<java.io.PrintStream: void println(java.lang.String)>($r6);
+
+        staticinvoke <com.sun.corba.se.impl.activation.ListServers: void sortServers(int[])>($r4);
+
+        i6 = 0;
+
+     label09:
+        $i2 = lengthof $r4;
+
+        if i6 >= $i2 goto label14;
+
+     label10:
+        $i3 = $r4[i6];
+
+        $r7 = interfaceinvoke $r3.<com.sun.corba.se.spi.activation.Repository: com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef getServer(int)>($i3);
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\t   ");
+
+        $i4 = $r4[i6];
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\t\t");
+
+        $r12 = $r7.<com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef: java.lang.String serverName>;
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\t\t");
+
+        $r15 = $r7.<com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef: java.lang.String applicationName>;
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r5.<java.io.PrintStream: void println(java.lang.String)>($r17);
+
+     label11:
+        goto label13;
+
+     label12:
+        $r23 := @caughtexception;
+
+     label13:
+        i6 = i6 + 1;
+
+        goto label09;
+
+     label14:
+        goto label16;
+
+     label15:
+        $r22 := @caughtexception;
+
+        virtualinvoke $r22.<java.lang.Exception: void printStackTrace()>();
+
+     label16:
+        return 0;
+
+        catch com.sun.corba.se.spi.activation.ServerNotRegistered from label05 to label06 with label07;
+        catch com.sun.corba.se.spi.activation.ServerNotRegistered from label10 to label11 with label12;
+        catch java.lang.Exception from label04 to label14 with label15;
+    }
+
+    static void printServerDef(com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef, int, java.io.PrintStream)
+    {
+        java.io.PrintStream r0;
+        int i0;
+        java.lang.String $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12;
+        com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef r1;
+
+        r1 := @parameter0: com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef;
+
+        i0 := @parameter1: int;
+
+        r0 := @parameter2: java.io.PrintStream;
+
+        $r2 = r1.<com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef: java.lang.String applicationName>;
+
+        $r3 = staticinvoke <com.sun.corba.se.impl.orbutil.CorbaResourceUtil: java.lang.String getText(java.lang.String,java.lang.String)>("servertool.appname", $r2);
+
+        virtualinvoke r0.<java.io.PrintStream: void println(java.lang.String)>($r3);
+
+        $r4 = r1.<com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef: java.lang.String serverName>;
+
+        $r5 = staticinvoke <com.sun.corba.se.impl.orbutil.CorbaResourceUtil: java.lang.String getText(java.lang.String,java.lang.String)>("servertool.name", $r4);
+
+        virtualinvoke r0.<java.io.PrintStream: void println(java.lang.String)>($r5);
+
+        $r6 = r1.<com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef: java.lang.String serverClassPath>;
+
+        $r7 = staticinvoke <com.sun.corba.se.impl.orbutil.CorbaResourceUtil: java.lang.String getText(java.lang.String,java.lang.String)>("servertool.classpath", $r6);
+
+        virtualinvoke r0.<java.io.PrintStream: void println(java.lang.String)>($r7);
+
+        $r8 = r1.<com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef: java.lang.String serverArgs>;
+
+        $r9 = staticinvoke <com.sun.corba.se.impl.orbutil.CorbaResourceUtil: java.lang.String getText(java.lang.String,java.lang.String)>("servertool.args", $r8);
+
+        virtualinvoke r0.<java.io.PrintStream: void println(java.lang.String)>($r9);
+
+        $r10 = r1.<com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef: java.lang.String serverVmArgs>;
+
+        $r11 = staticinvoke <com.sun.corba.se.impl.orbutil.CorbaResourceUtil: java.lang.String getText(java.lang.String,java.lang.String)>("servertool.vmargs", $r10);
+
+        virtualinvoke r0.<java.io.PrintStream: void println(java.lang.String)>($r11);
+
+        $r12 = staticinvoke <com.sun.corba.se.impl.orbutil.CorbaResourceUtil: java.lang.String getText(java.lang.String,int)>("servertool.serverid", i0);
+
+        virtualinvoke r0.<java.io.PrintStream: void println(java.lang.String)>($r12);
+
+        return;
+    }
+
+    static void sortServers(int[])
+    {
+        int[] r0;
+        int i0, $i1, $i2, $i3, i4, i5, i6, i7;
+
+        r0 := @parameter0: int[];
+
+        i0 = lengthof r0;
+
+        i4 = 0;
+
+     label1:
+        if i4 >= i0 goto label6;
+
+        i5 = i4;
+
+        i6 = i4 + 1;
+
+     label2:
+        if i6 >= i0 goto label4;
+
+        $i3 = r0[i6];
+
+        $i2 = r0[i5];
+
+        if $i3 >= $i2 goto label3;
+
+        i5 = i6;
+
+     label3:
+        i6 = i6 + 1;
+
+        goto label2;
+
+     label4:
+        if i5 == i4 goto label5;
+
+        i7 = r0[i4];
+
+        $i1 = r0[i5];
+
+        r0[i4] = $i1;
+
+        r0[i5] = i7;
+
+     label5:
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label6:
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.corba.se.impl.activation.ListServers: int illegalServerId> = -1;
+
+        return;
+    }
+}

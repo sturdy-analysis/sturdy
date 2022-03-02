@@ -1,0 +1,2596 @@
+class com.sun.java.util.jar.pack.ClassReader extends java.lang.Object
+{
+    int verbose;
+    com.sun.java.util.jar.pack.Package pkg;
+    com.sun.java.util.jar.pack.Package$Class 'cls';
+    long inPos;
+    long constantPoolLimit;
+    java.io.DataInputStream in;
+    java.util.Map attrDefs;
+    java.util.Map attrCommands;
+    java.lang.String unknownAttrCommand;
+    private static final com.sun.java.util.jar.pack.ConstantPool$Entry INVALID_ENTRY;
+    boolean haveUnresolvedEntry;
+    static final boolean $assertionsDisabled;
+
+    void <init>(com.sun.java.util.jar.pack.Package$Class, java.io.InputStream) throws java.io.IOException
+    {
+        java.io.DataInputStream $r4;
+        com.sun.java.util.jar.pack.Package $r2, $r3;
+        com.sun.java.util.jar.pack.ClassReader r0;
+        com.sun.java.util.jar.pack.Package$Class r1;
+        int $i0;
+        com.sun.java.util.jar.pack.ClassReader$1 $r5;
+        java.io.InputStream r6;
+
+        r0 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        r1 := @parameter0: com.sun.java.util.jar.pack.Package$Class;
+
+        r6 := @parameter1: java.io.InputStream;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.java.util.jar.pack.ClassReader: long constantPoolLimit> = -1L;
+
+        r0.<com.sun.java.util.jar.pack.ClassReader: java.lang.String unknownAttrCommand> = "error";
+
+        $r2 = virtualinvoke r1.<com.sun.java.util.jar.pack.Package$Class: com.sun.java.util.jar.pack.Package getPackage()>();
+
+        r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package pkg> = $r2;
+
+        r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'> = r1;
+
+        $r3 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package pkg>;
+
+        $i0 = $r3.<com.sun.java.util.jar.pack.Package: int verbose>;
+
+        r0.<com.sun.java.util.jar.pack.ClassReader: int verbose> = $i0;
+
+        $r4 = new java.io.DataInputStream;
+
+        $r5 = new com.sun.java.util.jar.pack.ClassReader$1;
+
+        specialinvoke $r5.<com.sun.java.util.jar.pack.ClassReader$1: void <init>(com.sun.java.util.jar.pack.ClassReader,java.io.InputStream)>(r0, r6);
+
+        specialinvoke $r4.<java.io.DataInputStream: void <init>(java.io.InputStream)>($r5);
+
+        r0.<com.sun.java.util.jar.pack.ClassReader: java.io.DataInputStream in> = $r4;
+
+        return;
+    }
+
+    public void setAttrDefs(java.util.Map)
+    {
+        com.sun.java.util.jar.pack.ClassReader r0;
+        java.util.Map r1;
+
+        r0 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        r1 := @parameter0: java.util.Map;
+
+        r0.<com.sun.java.util.jar.pack.ClassReader: java.util.Map attrDefs> = r1;
+
+        return;
+    }
+
+    public void setAttrCommands(java.util.Map)
+    {
+        com.sun.java.util.jar.pack.ClassReader r0;
+        java.util.Map r1;
+
+        r0 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        r1 := @parameter0: java.util.Map;
+
+        r0.<com.sun.java.util.jar.pack.ClassReader: java.util.Map attrCommands> = r1;
+
+        return;
+    }
+
+    private void skip(int, java.lang.String) throws java.io.IOException
+    {
+        java.io.DataInputStream $r10;
+        long $l1, $l3, $l5, $l6, $l7, l9;
+        java.lang.AssertionError $r13, $r14;
+        com.sun.java.util.jar.pack.ClassReader r9;
+        com.sun.java.util.jar.pack.Utils$Pack200Logger $r1;
+        byte $b2, $b4, $b8;
+        int i0, $i10, $i11;
+        java.lang.String r5, $r7;
+        boolean $z0, $z1;
+        java.lang.StringBuilder $r2, $r3, $r4, $r6, $r12;
+
+        r9 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        i0 := @parameter0: int;
+
+        r5 := @parameter1: java.lang.String;
+
+        $r1 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("skipping ");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" bytes of ");
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void warning(java.lang.String)>($r7);
+
+        l9 = 0L;
+
+     label1:
+        $l1 = (long) i0;
+
+        $b2 = l9 cmp $l1;
+
+        $i10 = (int) $b2;
+
+        if $i10 >= 0 goto label3;
+
+        $r10 = r9.<com.sun.java.util.jar.pack.ClassReader: java.io.DataInputStream in>;
+
+        $l5 = (long) i0;
+
+        $l6 = $l5 - l9;
+
+        $l7 = virtualinvoke $r10.<java.io.DataInputStream: long skip(long)>($l6);
+
+        $z1 = <com.sun.java.util.jar.pack.ClassReader: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label2;
+
+        $b8 = $l7 cmp 0L;
+
+        $i11 = (int) $b8;
+
+        if $i11 > 0 goto label2;
+
+        $r13 = new java.lang.AssertionError;
+
+        specialinvoke $r13.<java.lang.AssertionError: void <init>()>();
+
+        throw $r13;
+
+     label2:
+        l9 = l9 + $l7;
+
+        goto label1;
+
+     label3:
+        $z0 = <com.sun.java.util.jar.pack.ClassReader: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label4;
+
+        $l3 = (long) i0;
+
+        $b4 = l9 cmp $l3;
+
+        if $b4 == 0 goto label4;
+
+        $r14 = new java.lang.AssertionError;
+
+        specialinvoke $r14.<java.lang.AssertionError: void <init>()>();
+
+        throw $r14;
+
+     label4:
+        return;
+    }
+
+    private int readUnsignedShort() throws java.io.IOException
+    {
+        int $i0;
+        java.io.DataInputStream $r1;
+        com.sun.java.util.jar.pack.ClassReader r0;
+
+        r0 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        $r1 = r0.<com.sun.java.util.jar.pack.ClassReader: java.io.DataInputStream in>;
+
+        $i0 = virtualinvoke $r1.<java.io.DataInputStream: int readUnsignedShort()>();
+
+        return $i0;
+    }
+
+    private int readInt() throws java.io.IOException
+    {
+        int $i0;
+        java.io.DataInputStream $r1;
+        com.sun.java.util.jar.pack.ClassReader r0;
+
+        r0 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        $r1 = r0.<com.sun.java.util.jar.pack.ClassReader: java.io.DataInputStream in>;
+
+        $i0 = virtualinvoke $r1.<java.io.DataInputStream: int readInt()>();
+
+        return $i0;
+    }
+
+    private com.sun.java.util.jar.pack.ConstantPool$Entry readRef() throws java.io.IOException
+    {
+        java.io.DataInputStream $r1;
+        com.sun.java.util.jar.pack.Package$Class $r2;
+        int $i0;
+        com.sun.java.util.jar.pack.ClassReader r0;
+        com.sun.java.util.jar.pack.ConstantPool$Entry $r4;
+        com.sun.java.util.jar.pack.ConstantPool$Entry[] $r3;
+
+        r0 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        $r1 = r0.<com.sun.java.util.jar.pack.ClassReader: java.io.DataInputStream in>;
+
+        $i0 = virtualinvoke $r1.<java.io.DataInputStream: int readUnsignedShort()>();
+
+        if $i0 != 0 goto label1;
+
+        $r4 = null;
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        $r3 = $r2.<com.sun.java.util.jar.pack.Package$Class: com.sun.java.util.jar.pack.ConstantPool$Entry[] cpMap>;
+
+        $r4 = $r3[$i0];
+
+     label2:
+        return $r4;
+    }
+
+    private com.sun.java.util.jar.pack.ConstantPool$Entry readRef(byte) throws java.io.IOException
+    {
+        byte b0;
+        java.lang.AssertionError $r2;
+        com.sun.java.util.jar.pack.ClassReader r0;
+        com.sun.java.util.jar.pack.ConstantPool$Entry $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        b0 := @parameter0: byte;
+
+        $r1 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry readRef()>();
+
+        $z0 = <com.sun.java.util.jar.pack.ClassReader: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = $r1 instanceof com.sun.java.util.jar.pack.ClassReader$UnresolvedEntry;
+
+        if $z1 == 0 goto label1;
+
+        $r2 = new java.lang.AssertionError;
+
+        specialinvoke $r2.<java.lang.AssertionError: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry checkTag(com.sun.java.util.jar.pack.ConstantPool$Entry,byte)>($r1, b0);
+
+        return $r1;
+    }
+
+    private com.sun.java.util.jar.pack.ConstantPool$Entry checkValid(com.sun.java.util.jar.pack.ConstantPool$Entry)
+    {
+        java.lang.IllegalStateException $r2;
+        com.sun.java.util.jar.pack.ConstantPool$Entry r0, $r1;
+        com.sun.java.util.jar.pack.ClassReader r3;
+
+        r3 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        r0 := @parameter0: com.sun.java.util.jar.pack.ConstantPool$Entry;
+
+        $r1 = <com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry INVALID_ENTRY>;
+
+        if r0 != $r1 goto label1;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Invalid constant pool reference");
+
+        throw $r2;
+
+     label1:
+        return r0;
+    }
+
+    private com.sun.java.util.jar.pack.ConstantPool$Entry checkTag(com.sun.java.util.jar.pack.ConstantPool$Entry, byte) throws com.sun.java.util.jar.pack.ClassReader$ClassFormatException
+    {
+        com.sun.java.util.jar.pack.ClassReader r1;
+        byte $b2, $b4, b5;
+        boolean $z0;
+        com.sun.java.util.jar.pack.ClassReader$ClassFormatException $r29;
+        com.sun.java.util.jar.pack.Package$File $r19;
+        com.sun.java.util.jar.pack.Package$Class $r18;
+        java.lang.StringBuilder $r3, $r4, $r7, $r9, $r12, $r14, $r15, $r16, $r17, $r21, $r22, $r26, $r27, $r28;
+        com.sun.java.util.jar.pack.ConstantPool$Entry r0;
+        long $l0, $l1, $l3;
+        int $i6, $i7, $i8;
+        java.lang.String r5, $r8, $r13, $r20, $r23, $r24, $r25;
+
+        r1 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        r0 := @parameter0: com.sun.java.util.jar.pack.ConstantPool$Entry;
+
+        b5 := @parameter1: byte;
+
+        if r0 == null goto label1;
+
+        $i6 = (int) b5;
+
+        $z0 = virtualinvoke r0.<com.sun.java.util.jar.pack.ConstantPool$Entry: boolean tagMatches(int)>($i6);
+
+        if $z0 != 0 goto label6;
+
+     label1:
+        $l1 = r1.<com.sun.java.util.jar.pack.ClassReader: long inPos>;
+
+        $l0 = r1.<com.sun.java.util.jar.pack.ClassReader: long constantPoolLimit>;
+
+        $b2 = $l1 cmp $l0;
+
+        if $b2 != 0 goto label2;
+
+        $r24 = " in constant pool";
+
+        goto label3;
+
+     label2:
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at pos: ");
+
+        $l3 = r1.<com.sun.java.util.jar.pack.ClassReader: long inPos>;
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l3);
+
+        $r24 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label3:
+        r5 = $r24;
+
+        if r0 != null goto label4;
+
+        $r25 = "null CP index";
+
+        goto label5;
+
+     label4:
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("type=");
+
+        $b4 = r0.<com.sun.java.util.jar.pack.ConstantPool$Entry: byte tag>;
+
+        $i7 = (int) $b4;
+
+        $r8 = staticinvoke <com.sun.java.util.jar.pack.ConstantPool: java.lang.String tagName(int)>($i7);
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r25 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label5:
+        $r29 = new com.sun.java.util.jar.pack.ClassReader$ClassFormatException;
+
+        $r28 = new java.lang.StringBuilder;
+
+        specialinvoke $r28.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Bad constant, expected type=");
+
+        $i8 = (int) b5;
+
+        $r13 = staticinvoke <com.sun.java.util.jar.pack.ConstantPool: java.lang.String tagName(int)>($i8);
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" got ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r25);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", in File: ");
+
+        $r18 = r1.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        $r19 = $r18.<com.sun.java.util.jar.pack.Package$Class: com.sun.java.util.jar.pack.Package$File file>;
+
+        $r20 = $r19.<com.sun.java.util.jar.pack.Package$File: java.lang.String nameString>;
+
+        $r21 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r29.<com.sun.java.util.jar.pack.ClassReader$ClassFormatException: void <init>(java.lang.String)>($r23);
+
+        throw $r29;
+
+     label6:
+        return r0;
+    }
+
+    private com.sun.java.util.jar.pack.ConstantPool$Entry checkTag(com.sun.java.util.jar.pack.ConstantPool$Entry, byte, boolean) throws com.sun.java.util.jar.pack.ClassReader$ClassFormatException
+    {
+        byte b0;
+        com.sun.java.util.jar.pack.ClassReader r0;
+        com.sun.java.util.jar.pack.ConstantPool$Entry r1, $r2;
+        boolean z0;
+
+        r0 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        r1 := @parameter0: com.sun.java.util.jar.pack.ConstantPool$Entry;
+
+        b0 := @parameter1: byte;
+
+        z0 := @parameter2: boolean;
+
+        if z0 == 0 goto label1;
+
+        if r1 != null goto label1;
+
+        $r2 = null;
+
+        goto label2;
+
+     label1:
+        $r2 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry checkTag(com.sun.java.util.jar.pack.ConstantPool$Entry,byte)>(r1, b0);
+
+     label2:
+        return $r2;
+    }
+
+    private com.sun.java.util.jar.pack.ConstantPool$Entry readRefOrNull(byte) throws java.io.IOException
+    {
+        com.sun.java.util.jar.pack.ClassReader r0;
+        com.sun.java.util.jar.pack.ConstantPool$Entry $r1;
+        byte b0;
+
+        r0 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        b0 := @parameter0: byte;
+
+        $r1 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry readRef()>();
+
+        specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry checkTag(com.sun.java.util.jar.pack.ConstantPool$Entry,byte,boolean)>($r1, b0, 1);
+
+        return $r1;
+    }
+
+    private com.sun.java.util.jar.pack.ConstantPool$Utf8Entry readUtf8Ref() throws java.io.IOException
+    {
+        com.sun.java.util.jar.pack.ClassReader r0;
+        com.sun.java.util.jar.pack.ConstantPool$Entry $r1;
+        com.sun.java.util.jar.pack.ConstantPool$Utf8Entry $r2;
+
+        r0 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        $r1 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry readRef(byte)>(1);
+
+        $r2 = (com.sun.java.util.jar.pack.ConstantPool$Utf8Entry) $r1;
+
+        return $r2;
+    }
+
+    private com.sun.java.util.jar.pack.ConstantPool$ClassEntry readClassRef() throws java.io.IOException
+    {
+        com.sun.java.util.jar.pack.ConstantPool$ClassEntry $r2;
+        com.sun.java.util.jar.pack.ClassReader r0;
+        com.sun.java.util.jar.pack.ConstantPool$Entry $r1;
+
+        r0 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        $r1 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry readRef(byte)>(7);
+
+        $r2 = (com.sun.java.util.jar.pack.ConstantPool$ClassEntry) $r1;
+
+        return $r2;
+    }
+
+    private com.sun.java.util.jar.pack.ConstantPool$ClassEntry readClassRefOrNull() throws java.io.IOException
+    {
+        com.sun.java.util.jar.pack.ConstantPool$ClassEntry $r2;
+        com.sun.java.util.jar.pack.ClassReader r0;
+        com.sun.java.util.jar.pack.ConstantPool$Entry $r1;
+
+        r0 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        $r1 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry readRefOrNull(byte)>(7);
+
+        $r2 = (com.sun.java.util.jar.pack.ConstantPool$ClassEntry) $r1;
+
+        return $r2;
+    }
+
+    private com.sun.java.util.jar.pack.ConstantPool$SignatureEntry readSignatureRef() throws java.io.IOException
+    {
+        byte $b0;
+        java.lang.String $r2;
+        com.sun.java.util.jar.pack.ConstantPool$SignatureEntry $r3;
+        com.sun.java.util.jar.pack.ClassReader r0;
+        com.sun.java.util.jar.pack.ConstantPool$Entry $r1;
+
+        r0 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        $r1 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry readRef(byte)>(13);
+
+        if $r1 == null goto label1;
+
+        $b0 = virtualinvoke $r1.<com.sun.java.util.jar.pack.ConstantPool$Entry: byte getTag()>();
+
+        if $b0 != 1 goto label1;
+
+        $r2 = virtualinvoke $r1.<com.sun.java.util.jar.pack.ConstantPool$Entry: java.lang.String stringValue()>();
+
+        $r3 = staticinvoke <com.sun.java.util.jar.pack.ConstantPool: com.sun.java.util.jar.pack.ConstantPool$SignatureEntry getSignatureEntry(java.lang.String)>($r2);
+
+        goto label2;
+
+     label1:
+        $r3 = (com.sun.java.util.jar.pack.ConstantPool$SignatureEntry) $r1;
+
+     label2:
+        return $r3;
+    }
+
+    void read() throws java.io.IOException
+    {
+        java.lang.Throwable $r15;
+        byte[] $r12;
+        java.io.DataInputStream $r13;
+        long $l4;
+        java.lang.AssertionError $r14;
+        com.sun.java.util.jar.pack.ClassReader r0;
+        com.sun.java.util.jar.pack.Utils$Pack200Logger $r17;
+        int $i2, $i3;
+        java.lang.String $r24;
+        boolean $z0;
+        com.sun.java.util.jar.pack.Package$File $r22;
+        com.sun.java.util.jar.pack.Package$Class $r1, $r2, $r21;
+        java.lang.StringBuilder $r16, $r18, $r19, $r20, $r23;
+
+        r0 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+     label1:
+        virtualinvoke r0.<com.sun.java.util.jar.pack.ClassReader: void readMagicNumbers()>();
+
+        virtualinvoke r0.<com.sun.java.util.jar.pack.ClassReader: void readConstantPool()>();
+
+        virtualinvoke r0.<com.sun.java.util.jar.pack.ClassReader: void readHeader()>();
+
+        virtualinvoke r0.<com.sun.java.util.jar.pack.ClassReader: void readMembers(boolean)>(0);
+
+        virtualinvoke r0.<com.sun.java.util.jar.pack.ClassReader: void readMembers(boolean)>(1);
+
+        $r1 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        virtualinvoke r0.<com.sun.java.util.jar.pack.ClassReader: void readAttributes(int,com.sun.java.util.jar.pack.Attribute$Holder)>(0, $r1);
+
+        specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: void fixUnresolvedEntries()>();
+
+        $r2 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        virtualinvoke $r2.<com.sun.java.util.jar.pack.Package$Class: void finishReading()>();
+
+        $z0 = <com.sun.java.util.jar.pack.ClassReader: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label2;
+
+        $r13 = r0.<com.sun.java.util.jar.pack.ClassReader: java.io.DataInputStream in>;
+
+        $r12 = newarray (byte)[1];
+
+        $i2 = virtualinvoke $r13.<java.io.DataInputStream: int read(byte[])>($r12);
+
+        if 0 >= $i2 goto label2;
+
+        $r14 = new java.lang.AssertionError;
+
+        specialinvoke $r14.<java.lang.AssertionError: void <init>()>();
+
+        throw $r14;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r15 := @caughtexception;
+
+        $i3 = r0.<com.sun.java.util.jar.pack.ClassReader: int verbose>;
+
+        if $i3 <= 0 goto label4;
+
+        $r17 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Erroneous data at input offset ");
+
+        $l4 = r0.<com.sun.java.util.jar.pack.ClassReader: long inPos>;
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l4);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" of ");
+
+        $r21 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        $r22 = $r21.<com.sun.java.util.jar.pack.Package$Class: com.sun.java.util.jar.pack.Package$File file>;
+
+        $r23 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r22);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r17.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void warning(java.lang.String)>($r24);
+
+     label4:
+        throw $r15;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    void readMagicNumbers() throws java.io.IOException
+    {
+        com.sun.java.util.jar.pack.Attribute$FormatException $r30, $r32;
+        com.sun.java.util.jar.pack.ClassReader r0;
+        com.sun.java.util.jar.pack.Package$File $r19;
+        com.sun.java.util.jar.pack.Package$Class $r2, $r3, $r4, $r6, $r14, $r18, $r25;
+        java.lang.StringBuilder $r11, $r12, $r13, $r16, $r17, $r20, $r24, $r27, $r29, $r31;
+        java.io.DataInputStream $r1;
+        com.sun.java.util.jar.pack.Package$Version $r5, $r7, $r15;
+        short s3, s5;
+        int $i0, $i1, $i2, $i4, $i6, $i7, $i8;
+        java.lang.String $r8, $r21, $r26, $r28;
+
+        r0 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        $r2 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        $r1 = r0.<com.sun.java.util.jar.pack.ClassReader: java.io.DataInputStream in>;
+
+        $i0 = virtualinvoke $r1.<java.io.DataInputStream: int readInt()>();
+
+        $r2.<com.sun.java.util.jar.pack.Package$Class: int magic> = $i0;
+
+        $r3 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        $i1 = $r3.<com.sun.java.util.jar.pack.Package$Class: int magic>;
+
+        if $i1 == -889275714 goto label1;
+
+        $r30 = new com.sun.java.util.jar.pack.Attribute$FormatException;
+
+        $r29 = new java.lang.StringBuilder;
+
+        specialinvoke $r29.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Bad magic number in class file ");
+
+        $r25 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        $i6 = $r25.<com.sun.java.util.jar.pack.Package$Class: int magic>;
+
+        $r26 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i6);
+
+        $r27 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r26);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r30.<com.sun.java.util.jar.pack.Attribute$FormatException: void <init>(java.lang.String,int,java.lang.String,java.lang.String)>($r28, 0, "magic-number", "pass");
+
+        throw $r30;
+
+     label1:
+        $i2 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: int readUnsignedShort()>();
+
+        s3 = (short) $i2;
+
+        $i4 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: int readUnsignedShort()>();
+
+        s5 = (short) $i4;
+
+        $r4 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        $i7 = (int) s5;
+
+        $i8 = (int) s3;
+
+        $r5 = staticinvoke <com.sun.java.util.jar.pack.Package$Version: com.sun.java.util.jar.pack.Package$Version of(int,int)>($i7, $i8);
+
+        $r4.<com.sun.java.util.jar.pack.Package$Class: com.sun.java.util.jar.pack.Package$Version version> = $r5;
+
+        $r6 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        $r7 = $r6.<com.sun.java.util.jar.pack.Package$Class: com.sun.java.util.jar.pack.Package$Version version>;
+
+        $r8 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: java.lang.String checkVersion(com.sun.java.util.jar.pack.Package$Version)>($r7);
+
+        if $r8 == null goto label2;
+
+        $r32 = new com.sun.java.util.jar.pack.Attribute$FormatException;
+
+        $r31 = new java.lang.StringBuilder;
+
+        specialinvoke $r31.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("classfile version too ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r14 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        $r15 = $r14.<com.sun.java.util.jar.pack.Package$Class: com.sun.java.util.jar.pack.Package$Version version>;
+
+        $r16 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" in ");
+
+        $r18 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        $r19 = $r18.<com.sun.java.util.jar.pack.Package$Class: com.sun.java.util.jar.pack.Package$File file>;
+
+        $r20 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r32.<com.sun.java.util.jar.pack.Attribute$FormatException: void <init>(java.lang.String,int,java.lang.String,java.lang.String)>($r21, 0, "version", "pass");
+
+        throw $r32;
+
+     label2:
+        return;
+    }
+
+    private java.lang.String checkVersion(com.sun.java.util.jar.pack.Package$Version)
+    {
+        com.sun.java.util.jar.pack.ClassReader r1;
+        com.sun.java.util.jar.pack.Package $r2, $r4, $r6, $r8, $r10, $r12;
+        com.sun.java.util.jar.pack.Package$Version r0, $r3, $r5, $r7, $r9, $r11, $r13;
+        short s0, s1, $s2, $s3, $s4, $s5, $s6, $s7;
+        int $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19;
+
+        r1 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        r0 := @parameter0: com.sun.java.util.jar.pack.Package$Version;
+
+        s0 = r0.<com.sun.java.util.jar.pack.Package$Version: short major>;
+
+        s1 = r0.<com.sun.java.util.jar.pack.Package$Version: short minor>;
+
+        $r2 = r1.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package pkg>;
+
+        $r3 = $r2.<com.sun.java.util.jar.pack.Package: com.sun.java.util.jar.pack.Package$Version minClassVersion>;
+
+        $s2 = $r3.<com.sun.java.util.jar.pack.Package$Version: short major>;
+
+        $i8 = (int) s0;
+
+        $i9 = (int) $s2;
+
+        if $i8 < $i9 goto label1;
+
+        $r4 = r1.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package pkg>;
+
+        $r5 = $r4.<com.sun.java.util.jar.pack.Package: com.sun.java.util.jar.pack.Package$Version minClassVersion>;
+
+        $s3 = $r5.<com.sun.java.util.jar.pack.Package$Version: short major>;
+
+        $i10 = (int) s0;
+
+        $i11 = (int) $s3;
+
+        if $i10 != $i11 goto label2;
+
+        $r12 = r1.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package pkg>;
+
+        $r13 = $r12.<com.sun.java.util.jar.pack.Package: com.sun.java.util.jar.pack.Package$Version minClassVersion>;
+
+        $s7 = $r13.<com.sun.java.util.jar.pack.Package$Version: short minor>;
+
+        $i12 = (int) s1;
+
+        $i13 = (int) $s7;
+
+        if $i12 >= $i13 goto label2;
+
+     label1:
+        return "small";
+
+     label2:
+        $r6 = r1.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package pkg>;
+
+        $r7 = $r6.<com.sun.java.util.jar.pack.Package: com.sun.java.util.jar.pack.Package$Version maxClassVersion>;
+
+        $s4 = $r7.<com.sun.java.util.jar.pack.Package$Version: short major>;
+
+        $i14 = (int) s0;
+
+        $i15 = (int) $s4;
+
+        if $i14 > $i15 goto label3;
+
+        $r8 = r1.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package pkg>;
+
+        $r9 = $r8.<com.sun.java.util.jar.pack.Package: com.sun.java.util.jar.pack.Package$Version maxClassVersion>;
+
+        $s5 = $r9.<com.sun.java.util.jar.pack.Package$Version: short major>;
+
+        $i16 = (int) s0;
+
+        $i17 = (int) $s5;
+
+        if $i16 != $i17 goto label4;
+
+        $r10 = r1.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package pkg>;
+
+        $r11 = $r10.<com.sun.java.util.jar.pack.Package: com.sun.java.util.jar.pack.Package$Version maxClassVersion>;
+
+        $s6 = $r11.<com.sun.java.util.jar.pack.Package$Version: short minor>;
+
+        $i18 = (int) s1;
+
+        $i19 = (int) $s6;
+
+        if $i18 <= $i19 goto label4;
+
+     label3:
+        return "large";
+
+     label4:
+        return null;
+    }
+
+    void readConstantPool() throws java.io.IOException
+    {
+        com.sun.java.util.jar.pack.ClassReader r0;
+        java.lang.Integer $r12, $r85;
+        byte $b10, b12, $b13, $b15;
+        java.lang.Long $r78;
+        com.sun.java.util.jar.pack.ConstantPool$ClassEntry r30, $r40;
+        com.sun.java.util.jar.pack.ConstantPool$Entry[] r3;
+        com.sun.java.util.jar.pack.ClassReader$ClassFormatException $r103;
+        java.lang.StringBuilder $r48, $r49, $r50, $r52, $r53, $r54, $r55, $r56, $r57, $r61, $r62, $r63, $r92, $r93, $r94, $r98, $r99, $r100, $r102, $r104, $r105;
+        com.sun.java.util.jar.pack.ConstantPool$Entry $r4, $r7, $r8, $r13, $r14, $r17, $r18, $r21, $r22, $r24, $r25, $r28, $r29, $r31, $r32, $r35, $r38, $r42, $r43, $r44, $r45, $r76, $r80;
+        java.lang.Object[] $r11;
+        long $l2, $l25, $l27;
+        com.sun.java.util.jar.pack.ClassReader$UnresolvedEntry $r106;
+        com.sun.java.util.jar.pack.ConstantPool$MemberEntry r19, $r34;
+        com.sun.java.util.jar.pack.Utils$Pack200Logger $r47, $r60;
+        int[] r2;
+        com.sun.java.util.jar.pack.ConstantPool$MethodTypeEntry $r16;
+        com.sun.java.util.jar.pack.ConstantPool$MethodHandleEntry $r20;
+        com.sun.java.util.jar.pack.Package$File $r96;
+        com.sun.java.util.jar.pack.Package$Class $r5, $r95;
+        com.sun.java.util.jar.pack.ConstantPool$DescriptorEntry r9, $r27, r33;
+        java.io.DataInputStream $r1, $r65, $r66, $r67, $r68, $r69, $r70, $r71, $r72, $r73, $r77, $r81, $r84, $r87;
+        com.sun.java.util.jar.pack.ConstantPool$LiteralEntry $r75, $r79, $r83, $r86;
+        int $i0, $i1, $i3, i4, i5, i6, i7, $i8, $i9, $i11, $i14, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i26, i28, i29, i30, i31, i32, i33, i34, i35, i36, i37, i38, i39, i40, i41, i42, i43, i44, i45, i46, i47, i48, i49, $i50, $i51, $i53, $i54, $i55, $i57, $i58, $i60, $i61, $i63, $i65;
+        java.lang.Float $r82;
+        com.sun.java.util.jar.pack.ConstantPool$Utf8Entry $r15, r23, r26, $r89;
+        com.sun.java.util.jar.pack.ConstantPool$StringEntry $r37;
+        java.lang.Double $r74;
+        java.lang.AssertionError $r107, $r108;
+        java.lang.String $r36, $r39, $r51, $r58, $r64, $r88, $r97, $r101;
+        boolean $z0, $z1;
+        float $f0;
+        double $d0;
+
+        r0 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        $r1 = r0.<com.sun.java.util.jar.pack.ClassReader: java.io.DataInputStream in>;
+
+        $i0 = virtualinvoke $r1.<java.io.DataInputStream: int readUnsignedShort()>();
+
+        $i1 = $i0 * 4;
+
+        r2 = newarray (int)[$i1];
+
+        i28 = 0;
+
+        r3 = newarray (com.sun.java.util.jar.pack.ConstantPool$Entry)[$i0];
+
+        $r4 = <com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry INVALID_ENTRY>;
+
+        r3[0] = $r4;
+
+        i29 = 1;
+
+     label01:
+        if i29 >= $i0 goto label13;
+
+        $r65 = r0.<com.sun.java.util.jar.pack.ClassReader: java.io.DataInputStream in>;
+
+        $b15 = virtualinvoke $r65.<java.io.DataInputStream: byte readByte()>();
+
+        $i50 = (int) $b15;
+
+        tableswitch($i50)
+        {
+            case 1: goto label02;
+            case 2: goto label11;
+            case 3: goto label03;
+            case 4: goto label04;
+            case 5: goto label05;
+            case 6: goto label06;
+            case 7: goto label07;
+            case 8: goto label07;
+            case 9: goto label08;
+            case 10: goto label08;
+            case 11: goto label08;
+            case 12: goto label08;
+            case 13: goto label11;
+            case 14: goto label11;
+            case 15: goto label10;
+            case 16: goto label07;
+            case 17: goto label11;
+            case 18: goto label09;
+            default: goto label11;
+        };
+
+     label02:
+        $r87 = r0.<com.sun.java.util.jar.pack.ClassReader: java.io.DataInputStream in>;
+
+        $r88 = virtualinvoke $r87.<java.io.DataInputStream: java.lang.String readUTF()>();
+
+        $r89 = staticinvoke <com.sun.java.util.jar.pack.ConstantPool: com.sun.java.util.jar.pack.ConstantPool$Utf8Entry getUtf8Entry(java.lang.String)>($r88);
+
+        r3[i29] = $r89;
+
+        goto label12;
+
+     label03:
+        $r84 = r0.<com.sun.java.util.jar.pack.ClassReader: java.io.DataInputStream in>;
+
+        $i26 = virtualinvoke $r84.<java.io.DataInputStream: int readInt()>();
+
+        $r85 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i26);
+
+        $r86 = staticinvoke <com.sun.java.util.jar.pack.ConstantPool: com.sun.java.util.jar.pack.ConstantPool$LiteralEntry getLiteralEntry(java.lang.Comparable)>($r85);
+
+        r3[i29] = $r86;
+
+        goto label12;
+
+     label04:
+        $r81 = r0.<com.sun.java.util.jar.pack.ClassReader: java.io.DataInputStream in>;
+
+        $f0 = virtualinvoke $r81.<java.io.DataInputStream: float readFloat()>();
+
+        $r82 = staticinvoke <java.lang.Float: java.lang.Float valueOf(float)>($f0);
+
+        $r83 = staticinvoke <com.sun.java.util.jar.pack.ConstantPool: com.sun.java.util.jar.pack.ConstantPool$LiteralEntry getLiteralEntry(java.lang.Comparable)>($r82);
+
+        r3[i29] = $r83;
+
+        goto label12;
+
+     label05:
+        $r77 = r0.<com.sun.java.util.jar.pack.ClassReader: java.io.DataInputStream in>;
+
+        $l25 = virtualinvoke $r77.<java.io.DataInputStream: long readLong()>();
+
+        $r78 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l25);
+
+        $r79 = staticinvoke <com.sun.java.util.jar.pack.ConstantPool: com.sun.java.util.jar.pack.ConstantPool$LiteralEntry getLiteralEntry(java.lang.Comparable)>($r78);
+
+        r3[i29] = $r79;
+
+        i29 = i29 + 1;
+
+        $r80 = <com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry INVALID_ENTRY>;
+
+        r3[i29] = $r80;
+
+        goto label12;
+
+     label06:
+        $r73 = r0.<com.sun.java.util.jar.pack.ClassReader: java.io.DataInputStream in>;
+
+        $d0 = virtualinvoke $r73.<java.io.DataInputStream: double readDouble()>();
+
+        $r74 = staticinvoke <java.lang.Double: java.lang.Double valueOf(double)>($d0);
+
+        $r75 = staticinvoke <com.sun.java.util.jar.pack.ConstantPool: com.sun.java.util.jar.pack.ConstantPool$LiteralEntry getLiteralEntry(java.lang.Comparable)>($r74);
+
+        r3[i29] = $r75;
+
+        i29 = i29 + 1;
+
+        $r76 = <com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry INVALID_ENTRY>;
+
+        r3[i29] = $r76;
+
+        goto label12;
+
+     label07:
+        i30 = i28 + 1;
+
+        r2[i28] = i29;
+
+        i31 = i30 + 1;
+
+        $i51 = (int) $b15;
+
+        r2[i30] = $i51;
+
+        i32 = i31 + 1;
+
+        $r72 = r0.<com.sun.java.util.jar.pack.ClassReader: java.io.DataInputStream in>;
+
+        $i24 = virtualinvoke $r72.<java.io.DataInputStream: int readUnsignedShort()>();
+
+        r2[i31] = $i24;
+
+        i28 = i32 + 1;
+
+        $i53 = (int) -1;
+
+        r2[i32] = $i53;
+
+        goto label12;
+
+     label08:
+        i33 = i28 + 1;
+
+        r2[i28] = i29;
+
+        i34 = i33 + 1;
+
+        $i54 = (int) $b15;
+
+        r2[i33] = $i54;
+
+        i35 = i34 + 1;
+
+        $r70 = r0.<com.sun.java.util.jar.pack.ClassReader: java.io.DataInputStream in>;
+
+        $i22 = virtualinvoke $r70.<java.io.DataInputStream: int readUnsignedShort()>();
+
+        r2[i34] = $i22;
+
+        i28 = i35 + 1;
+
+        $r71 = r0.<com.sun.java.util.jar.pack.ClassReader: java.io.DataInputStream in>;
+
+        $i23 = virtualinvoke $r71.<java.io.DataInputStream: int readUnsignedShort()>();
+
+        r2[i35] = $i23;
+
+        goto label12;
+
+     label09:
+        i36 = i28 + 1;
+
+        r2[i28] = i29;
+
+        i37 = i36 + 1;
+
+        $i55 = (int) $b15;
+
+        r2[i36] = $i55;
+
+        i38 = i37 + 1;
+
+        $r66 = r0.<com.sun.java.util.jar.pack.ClassReader: java.io.DataInputStream in>;
+
+        $i16 = virtualinvoke $r66.<java.io.DataInputStream: int readUnsignedShort()>();
+
+        $i57 = (int) -1;
+
+        $i17 = $i57 ^ $i16;
+
+        r2[i37] = $i17;
+
+        i28 = i38 + 1;
+
+        $r67 = r0.<com.sun.java.util.jar.pack.ClassReader: java.io.DataInputStream in>;
+
+        $i18 = virtualinvoke $r67.<java.io.DataInputStream: int readUnsignedShort()>();
+
+        r2[i38] = $i18;
+
+        goto label12;
+
+     label10:
+        i39 = i28 + 1;
+
+        r2[i28] = i29;
+
+        i40 = i39 + 1;
+
+        $i58 = (int) $b15;
+
+        r2[i39] = $i58;
+
+        i41 = i40 + 1;
+
+        $r68 = r0.<com.sun.java.util.jar.pack.ClassReader: java.io.DataInputStream in>;
+
+        $i19 = virtualinvoke $r68.<java.io.DataInputStream: int readUnsignedByte()>();
+
+        $i60 = (int) -1;
+
+        $i20 = $i60 ^ $i19;
+
+        r2[i40] = $i20;
+
+        i28 = i41 + 1;
+
+        $r69 = r0.<com.sun.java.util.jar.pack.ClassReader: java.io.DataInputStream in>;
+
+        $i21 = virtualinvoke $r69.<java.io.DataInputStream: int readUnsignedShort()>();
+
+        r2[i41] = $i21;
+
+        goto label12;
+
+     label11:
+        $r103 = new com.sun.java.util.jar.pack.ClassReader$ClassFormatException;
+
+        $r102 = new java.lang.StringBuilder;
+
+        specialinvoke $r102.<java.lang.StringBuilder: void <init>()>();
+
+        $r92 = virtualinvoke $r102.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Bad constant pool tag ");
+
+        $i61 = (int) $b15;
+
+        $r93 = virtualinvoke $r92.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i61);
+
+        $r94 = virtualinvoke $r93.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" in File: ");
+
+        $r95 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        $r96 = $r95.<com.sun.java.util.jar.pack.Package$Class: com.sun.java.util.jar.pack.Package$File file>;
+
+        $r97 = $r96.<com.sun.java.util.jar.pack.Package$File: java.lang.String nameString>;
+
+        $r98 = virtualinvoke $r94.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r97);
+
+        $r99 = virtualinvoke $r98.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at pos: ");
+
+        $l27 = r0.<com.sun.java.util.jar.pack.ClassReader: long inPos>;
+
+        $r100 = virtualinvoke $r99.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l27);
+
+        $r101 = virtualinvoke $r100.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r103.<com.sun.java.util.jar.pack.ClassReader$ClassFormatException: void <init>(java.lang.String)>($r101);
+
+        throw $r103;
+
+     label12:
+        i29 = i29 + 1;
+
+        goto label01;
+
+     label13:
+        $l2 = r0.<com.sun.java.util.jar.pack.ClassReader: long inPos>;
+
+        r0.<com.sun.java.util.jar.pack.ClassReader: long constantPoolLimit> = $l2;
+
+     label14:
+        if i28 <= 0 goto label32;
+
+        $i3 = r0.<com.sun.java.util.jar.pack.ClassReader: int verbose>;
+
+        if $i3 <= 3 goto label15;
+
+        $r60 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r104 = new java.lang.StringBuilder;
+
+        specialinvoke $r104.<java.lang.StringBuilder: void <init>()>();
+
+        $r61 = virtualinvoke $r104.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("CP fixups [");
+
+        $i14 = i28 / 4;
+
+        $r62 = virtualinvoke $r61.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i14);
+
+        $r63 = virtualinvoke $r62.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r64 = virtualinvoke $r63.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r60.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void fine(java.lang.String)>($r64);
+
+     label15:
+        i42 = i28;
+
+        i28 = 0;
+
+        i43 = 0;
+
+     label16:
+        if i43 >= i42 goto label30;
+
+        i44 = i43 + 1;
+
+        i4 = r2[i43];
+
+        i45 = i44 + 1;
+
+        i5 = r2[i44];
+
+        i46 = i45 + 1;
+
+        i6 = r2[i45];
+
+        i43 = i46 + 1;
+
+        i7 = r2[i46];
+
+        $i8 = r0.<com.sun.java.util.jar.pack.ClassReader: int verbose>;
+
+        if $i8 <= 3 goto label17;
+
+        $r47 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r105 = new java.lang.StringBuilder;
+
+        specialinvoke $r105.<java.lang.StringBuilder: void <init>()>();
+
+        $r48 = virtualinvoke $r105.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  cp[");
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i4);
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("] = ");
+
+        $r51 = staticinvoke <com.sun.java.util.jar.pack.ConstantPool: java.lang.String tagName(int)>(i5);
+
+        $r52 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r51);
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("{");
+
+        $r54 = virtualinvoke $r53.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i6);
+
+        $r55 = virtualinvoke $r54.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",");
+
+        $r56 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i7);
+
+        $r57 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("}");
+
+        $r58 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r47.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void fine(java.lang.String)>($r58);
+
+     label17:
+        if i6 < 0 goto label18;
+
+        $r44 = r3[i6];
+
+        $r45 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry checkValid(com.sun.java.util.jar.pack.ConstantPool$Entry)>($r44);
+
+        if $r45 == null goto label19;
+
+     label18:
+        if i7 < 0 goto label20;
+
+        $r42 = r3[i7];
+
+        $r43 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry checkValid(com.sun.java.util.jar.pack.ConstantPool$Entry)>($r42);
+
+        if $r43 != null goto label20;
+
+     label19:
+        i47 = i28 + 1;
+
+        r2[i28] = i4;
+
+        i48 = i47 + 1;
+
+        r2[i47] = i5;
+
+        i49 = i48 + 1;
+
+        r2[i48] = i6;
+
+        i28 = i49 + 1;
+
+        r2[i49] = i7;
+
+        goto label16;
+
+     label20:
+        tableswitch(i5)
+        {
+            case 7: goto label21;
+            case 8: goto label22;
+            case 9: goto label23;
+            case 10: goto label23;
+            case 11: goto label23;
+            case 12: goto label24;
+            case 13: goto label28;
+            case 14: goto label28;
+            case 15: goto label26;
+            case 16: goto label25;
+            case 17: goto label28;
+            case 18: goto label27;
+            default: goto label28;
+        };
+
+     label21:
+        $r38 = r3[i6];
+
+        $r39 = virtualinvoke $r38.<com.sun.java.util.jar.pack.ConstantPool$Entry: java.lang.String stringValue()>();
+
+        $r40 = staticinvoke <com.sun.java.util.jar.pack.ConstantPool: com.sun.java.util.jar.pack.ConstantPool$ClassEntry getClassEntry(java.lang.String)>($r39);
+
+        r3[i4] = $r40;
+
+        goto label29;
+
+     label22:
+        $r35 = r3[i6];
+
+        $r36 = virtualinvoke $r35.<com.sun.java.util.jar.pack.ConstantPool$Entry: java.lang.String stringValue()>();
+
+        $r37 = staticinvoke <com.sun.java.util.jar.pack.ConstantPool: com.sun.java.util.jar.pack.ConstantPool$StringEntry getStringEntry(java.lang.String)>($r36);
+
+        r3[i4] = $r37;
+
+        goto label29;
+
+     label23:
+        $r28 = r3[i6];
+
+        $r29 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry checkTag(com.sun.java.util.jar.pack.ConstantPool$Entry,byte)>($r28, 7);
+
+        r30 = (com.sun.java.util.jar.pack.ConstantPool$ClassEntry) $r29;
+
+        $r31 = r3[i7];
+
+        $r32 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry checkTag(com.sun.java.util.jar.pack.ConstantPool$Entry,byte)>($r31, 12);
+
+        r33 = (com.sun.java.util.jar.pack.ConstantPool$DescriptorEntry) $r32;
+
+        $b13 = (byte) i5;
+
+        $r34 = staticinvoke <com.sun.java.util.jar.pack.ConstantPool: com.sun.java.util.jar.pack.ConstantPool$MemberEntry getMemberEntry(byte,com.sun.java.util.jar.pack.ConstantPool$ClassEntry,com.sun.java.util.jar.pack.ConstantPool$DescriptorEntry)>($b13, r30, r33);
+
+        r3[i4] = $r34;
+
+        goto label29;
+
+     label24:
+        $r21 = r3[i6];
+
+        $r22 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry checkTag(com.sun.java.util.jar.pack.ConstantPool$Entry,byte)>($r21, 1);
+
+        r23 = (com.sun.java.util.jar.pack.ConstantPool$Utf8Entry) $r22;
+
+        $r24 = r3[i7];
+
+        $r25 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry checkTag(com.sun.java.util.jar.pack.ConstantPool$Entry,byte)>($r24, 13);
+
+        r26 = (com.sun.java.util.jar.pack.ConstantPool$Utf8Entry) $r25;
+
+        $r27 = staticinvoke <com.sun.java.util.jar.pack.ConstantPool: com.sun.java.util.jar.pack.ConstantPool$DescriptorEntry getDescriptorEntry(com.sun.java.util.jar.pack.ConstantPool$Utf8Entry,com.sun.java.util.jar.pack.ConstantPool$Utf8Entry)>(r23, r26);
+
+        r3[i4] = $r27;
+
+        goto label29;
+
+     label25:
+        $r13 = r3[i6];
+
+        $r14 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry checkTag(com.sun.java.util.jar.pack.ConstantPool$Entry,byte)>($r13, 13);
+
+        $r15 = (com.sun.java.util.jar.pack.ConstantPool$Utf8Entry) $r14;
+
+        $r16 = staticinvoke <com.sun.java.util.jar.pack.ConstantPool: com.sun.java.util.jar.pack.ConstantPool$MethodTypeEntry getMethodTypeEntry(com.sun.java.util.jar.pack.ConstantPool$Utf8Entry)>($r15);
+
+        r3[i4] = $r16;
+
+        goto label29;
+
+     label26:
+        $i63 = (int) -1;
+
+        $i11 = $i63 ^ i6;
+
+        b12 = (byte) $i11;
+
+        $r17 = r3[i7];
+
+        $r18 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry checkTag(com.sun.java.util.jar.pack.ConstantPool$Entry,byte)>($r17, 52);
+
+        r19 = (com.sun.java.util.jar.pack.ConstantPool$MemberEntry) $r18;
+
+        $r20 = staticinvoke <com.sun.java.util.jar.pack.ConstantPool: com.sun.java.util.jar.pack.ConstantPool$MethodHandleEntry getMethodHandleEntry(byte,com.sun.java.util.jar.pack.ConstantPool$MemberEntry)>(b12, r19);
+
+        r3[i4] = $r20;
+
+        goto label29;
+
+     label27:
+        $r7 = r3[i7];
+
+        $r8 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry checkTag(com.sun.java.util.jar.pack.ConstantPool$Entry,byte)>($r7, 12);
+
+        r9 = (com.sun.java.util.jar.pack.ConstantPool$DescriptorEntry) $r8;
+
+        $r106 = new com.sun.java.util.jar.pack.ClassReader$UnresolvedEntry;
+
+        $b10 = (byte) i5;
+
+        $r11 = newarray (java.lang.Object)[2];
+
+        $i65 = (int) -1;
+
+        $i9 = $i65 ^ i6;
+
+        $r12 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i9);
+
+        $r11[0] = $r12;
+
+        $r11[1] = r9;
+
+        specialinvoke $r106.<com.sun.java.util.jar.pack.ClassReader$UnresolvedEntry: void <init>(com.sun.java.util.jar.pack.ClassReader,byte,java.lang.Object[])>(r0, $b10, $r11);
+
+        r3[i4] = $r106;
+
+        goto label29;
+
+     label28:
+        $z1 = <com.sun.java.util.jar.pack.ClassReader: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label29;
+
+        $r107 = new java.lang.AssertionError;
+
+        specialinvoke $r107.<java.lang.AssertionError: void <init>()>();
+
+        throw $r107;
+
+     label29:
+        goto label16;
+
+     label30:
+        $z0 = <com.sun.java.util.jar.pack.ClassReader: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label31;
+
+        if i28 < i42 goto label31;
+
+        $r108 = new java.lang.AssertionError;
+
+        specialinvoke $r108.<java.lang.AssertionError: void <init>()>();
+
+        throw $r108;
+
+     label31:
+        goto label14;
+
+     label32:
+        $r5 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        $r5.<com.sun.java.util.jar.pack.Package$Class: com.sun.java.util.jar.pack.ConstantPool$Entry[] cpMap> = r3;
+
+        return;
+    }
+
+    private void fixUnresolvedEntries()
+    {
+        java.lang.AssertionError $r5;
+        com.sun.java.util.jar.pack.ClassReader r0;
+        com.sun.java.util.jar.pack.ConstantPool$Entry[] $r2;
+        com.sun.java.util.jar.pack.Package$Class $r1;
+        int $i0, i1;
+        com.sun.java.util.jar.pack.ConstantPool$Entry $r4, r6;
+        com.sun.java.util.jar.pack.ClassReader$UnresolvedEntry $r3;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        $z0 = r0.<com.sun.java.util.jar.pack.ClassReader: boolean haveUnresolvedEntry>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        $r2 = virtualinvoke $r1.<com.sun.java.util.jar.pack.Package$Class: com.sun.java.util.jar.pack.ConstantPool$Entry[] getCPMap()>();
+
+        i1 = 0;
+
+     label2:
+        $i0 = lengthof $r2;
+
+        if i1 >= $i0 goto label4;
+
+        r6 = $r2[i1];
+
+        $z1 = r6 instanceof com.sun.java.util.jar.pack.ClassReader$UnresolvedEntry;
+
+        if $z1 == 0 goto label3;
+
+        $r3 = (com.sun.java.util.jar.pack.ClassReader$UnresolvedEntry) r6;
+
+        $r4 = virtualinvoke $r3.<com.sun.java.util.jar.pack.ClassReader$UnresolvedEntry: com.sun.java.util.jar.pack.ConstantPool$Entry resolve()>();
+
+        $r2[i1] = $r4;
+
+        $z2 = <com.sun.java.util.jar.pack.ClassReader: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label3;
+
+        $z3 = $r4 instanceof com.sun.java.util.jar.pack.ClassReader$UnresolvedEntry;
+
+        if $z3 == 0 goto label3;
+
+        $r5 = new java.lang.AssertionError;
+
+        specialinvoke $r5.<java.lang.AssertionError: void <init>()>();
+
+        throw $r5;
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label4:
+        r0.<com.sun.java.util.jar.pack.ClassReader: boolean haveUnresolvedEntry> = 0;
+
+        return;
+    }
+
+    void readHeader() throws java.io.IOException
+    {
+        com.sun.java.util.jar.pack.ClassReader r0;
+        com.sun.java.util.jar.pack.ConstantPool$ClassEntry[] $r6, $r9;
+        com.sun.java.util.jar.pack.Package$Class $r1, $r2, $r4, $r7, $r8;
+        int $i0, $i1, i2;
+        com.sun.java.util.jar.pack.ConstantPool$ClassEntry $r3, $r5, $r10;
+
+        r0 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        $r1 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        $i0 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: int readUnsignedShort()>();
+
+        $r1.<com.sun.java.util.jar.pack.Package$Class: int flags> = $i0;
+
+        $r2 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        $r3 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$ClassEntry readClassRef()>();
+
+        $r2.<com.sun.java.util.jar.pack.Package$Class: com.sun.java.util.jar.pack.ConstantPool$ClassEntry thisClass> = $r3;
+
+        $r4 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        $r5 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$ClassEntry readClassRefOrNull()>();
+
+        $r4.<com.sun.java.util.jar.pack.Package$Class: com.sun.java.util.jar.pack.ConstantPool$ClassEntry superClass> = $r5;
+
+        $i1 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: int readUnsignedShort()>();
+
+        $r7 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        $r6 = newarray (com.sun.java.util.jar.pack.ConstantPool$ClassEntry)[$i1];
+
+        $r7.<com.sun.java.util.jar.pack.Package$Class: com.sun.java.util.jar.pack.ConstantPool$ClassEntry[] interfaces> = $r6;
+
+        i2 = 0;
+
+     label1:
+        if i2 >= $i1 goto label2;
+
+        $r8 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        $r9 = $r8.<com.sun.java.util.jar.pack.Package$Class: com.sun.java.util.jar.pack.ConstantPool$ClassEntry[] interfaces>;
+
+        $r10 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$ClassEntry readClassRef()>();
+
+        $r9[i2] = $r10;
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    void readMembers(boolean) throws java.io.IOException
+    {
+        int $i0, i1;
+        com.sun.java.util.jar.pack.ClassReader r0;
+        boolean z0;
+
+        r0 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        z0 := @parameter0: boolean;
+
+        $i0 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: int readUnsignedShort()>();
+
+        i1 = 0;
+
+     label1:
+        if i1 >= $i0 goto label2;
+
+        virtualinvoke r0.<com.sun.java.util.jar.pack.ClassReader: void readMember(boolean)>(z0);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    void readMember(boolean) throws java.io.IOException
+    {
+        com.sun.java.util.jar.pack.Package$Class$Member r8;
+        com.sun.java.util.jar.pack.Package$Class$Method $r4;
+        com.sun.java.util.jar.pack.ConstantPool$SignatureEntry $r2;
+        com.sun.java.util.jar.pack.ClassReader r0;
+        com.sun.java.util.jar.pack.ConstantPool$Utf8Entry $r1;
+        com.sun.java.util.jar.pack.Package$Class$Field $r6;
+        com.sun.java.util.jar.pack.Package$Class $r5, $r7;
+        byte $b1;
+        int $i0;
+        com.sun.java.util.jar.pack.ConstantPool$DescriptorEntry $r3;
+        boolean z0;
+
+        r0 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        z0 := @parameter0: boolean;
+
+        $i0 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: int readUnsignedShort()>();
+
+        $r1 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Utf8Entry readUtf8Ref()>();
+
+        $r2 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$SignatureEntry readSignatureRef()>();
+
+        $r3 = staticinvoke <com.sun.java.util.jar.pack.ConstantPool: com.sun.java.util.jar.pack.ConstantPool$DescriptorEntry getDescriptorEntry(com.sun.java.util.jar.pack.ConstantPool$Utf8Entry,com.sun.java.util.jar.pack.ConstantPool$SignatureEntry)>($r1, $r2);
+
+        if z0 != 0 goto label1;
+
+        $r6 = new com.sun.java.util.jar.pack.Package$Class$Field;
+
+        $r7 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        virtualinvoke $r7.<java.lang.Object: java.lang.Class getClass()>();
+
+        specialinvoke $r6.<com.sun.java.util.jar.pack.Package$Class$Field: void <init>(com.sun.java.util.jar.pack.Package$Class,int,com.sun.java.util.jar.pack.ConstantPool$DescriptorEntry)>($r7, $i0, $r3);
+
+        r8 = $r6;
+
+        goto label2;
+
+     label1:
+        $r4 = new com.sun.java.util.jar.pack.Package$Class$Method;
+
+        $r5 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        virtualinvoke $r5.<java.lang.Object: java.lang.Class getClass()>();
+
+        specialinvoke $r4.<com.sun.java.util.jar.pack.Package$Class$Method: void <init>(com.sun.java.util.jar.pack.Package$Class,int,com.sun.java.util.jar.pack.ConstantPool$DescriptorEntry)>($r5, $i0, $r3);
+
+        r8 = $r4;
+
+     label2:
+        if z0 != 0 goto label3;
+
+        $b1 = 1;
+
+        goto label4;
+
+     label3:
+        $b1 = 2;
+
+     label4:
+        virtualinvoke r0.<com.sun.java.util.jar.pack.ClassReader: void readAttributes(int,com.sun.java.util.jar.pack.Attribute$Holder)>($b1, r8);
+
+        return;
+    }
+
+    void readAttributes(int, com.sun.java.util.jar.pack.Attribute$Holder) throws java.io.IOException
+    {
+        byte[] r118;
+        com.sun.java.util.jar.pack.ClassReader r0;
+        byte $b8, $b12, $b16, b24;
+        java.util.Map $r3, $r62, $r79, $r113;
+        com.sun.java.util.jar.pack.ClassReader$ClassFormatException $r17, $r111;
+        com.sun.java.util.jar.pack.Attribute$Holder r10;
+        java.lang.StringBuilder $r11, $r13, $r14, $r18, $r19, $r20, $r21, $r37, $r38, $r39, $r43, $r44, $r45, $r46, $r47, $r49, $r50, $r51, $r55, $r57, $r58, $r59, $r60, $r64, $r66, $r67, $r68, $r69, $r71, $r73, $r74, $r75, $r76, $r81, $r82, $r83, $r84, $r86, $r87, $r88, $r91, $r92, $r93, $r96, $r98, $r99, $r100, $r101, $r102, $r105, $r107, $r108, $r109;
+        long $l5, $l6, $l7, $l9, $l10, $l11, $l13, $l14, $l15, l26;
+        com.sun.java.util.jar.pack.Utils$Pack200Logger $r12, $r56, $r65, $r72, $r97;
+        com.sun.java.util.jar.pack.Attribute$Layout $r4, $r5, $r6, $r7, $r8, $r9, $r16, $r78;
+        com.sun.java.util.jar.pack.Package$Class $r24, $r26, $r28, $r30;
+        java.io.DataInputStream $r23;
+        int $i0, $i1, $i2, i3, $i4, $i17, $i18, $i19, $i20, $i21, $i22, i23, $i25, $i27;
+        com.sun.java.util.jar.pack.Package$Class$Method r117;
+        java.lang.Object $r80;
+        com.sun.java.util.jar.pack.ConstantPool$Utf8Entry $r1;
+        com.sun.java.util.jar.pack.Attribute $r54, $r63, $r114, r115;
+        java.lang.AssertionError $r25, $r27, $r29, $r31, $r34;
+        java.lang.String $r2, $r15, $r22, $r35, $r36, $r40, $r42, $r48, $r52, $r61, $r70, $r77, $r85, $r89, $r94, $r103, $r106, $r110, r112;
+        com.sun.java.util.jar.pack.Code $r32, $r33, r116;
+        com.sun.java.util.jar.pack.Attribute$FormatException $r41, $r53, $r90, $r95;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, z14, $z15, $z16;
+        com.sun.java.util.jar.pack.Instruction$FormatException $r104;
+
+        r0 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        i3 := @parameter0: int;
+
+        r10 := @parameter1: com.sun.java.util.jar.pack.Attribute$Holder;
+
+        $i0 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: int readUnsignedShort()>();
+
+        if $i0 != 0 goto label01;
+
+        return;
+
+     label01:
+        $i1 = r0.<com.sun.java.util.jar.pack.ClassReader: int verbose>;
+
+        if $i1 <= 3 goto label02;
+
+        $r97 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r96 = new java.lang.StringBuilder;
+
+        specialinvoke $r96.<java.lang.StringBuilder: void <init>()>();
+
+        $r98 = virtualinvoke $r96.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("readAttributes ");
+
+        $r99 = virtualinvoke $r98.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r10);
+
+        $r100 = virtualinvoke $r99.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" [");
+
+        $r101 = virtualinvoke $r100.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r102 = virtualinvoke $r101.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r103 = virtualinvoke $r102.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r97.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void fine(java.lang.String)>($r103);
+
+     label02:
+        i23 = 0;
+
+     label03:
+        if i23 >= $i0 goto label37;
+
+        $r1 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Utf8Entry readUtf8Ref()>();
+
+        $r2 = virtualinvoke $r1.<com.sun.java.util.jar.pack.ConstantPool$Utf8Entry: java.lang.String stringValue()>();
+
+        $i2 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: int readInt()>();
+
+        $r3 = r0.<com.sun.java.util.jar.pack.ClassReader: java.util.Map attrCommands>;
+
+        if $r3 == null goto label11;
+
+        $r78 = staticinvoke <com.sun.java.util.jar.pack.Attribute: com.sun.java.util.jar.pack.Attribute$Layout keyForLookup(int,java.lang.String)>(i3, $r2);
+
+        $r79 = r0.<com.sun.java.util.jar.pack.ClassReader: java.util.Map attrCommands>;
+
+        $r80 = interfaceinvoke $r79.<java.util.Map: java.lang.Object get(java.lang.Object)>($r78);
+
+        r112 = (java.lang.String) $r80;
+
+        if r112 == null goto label11;
+
+        b24 = -1;
+
+        $i22 = virtualinvoke r112.<java.lang.String: int hashCode()>();
+
+        lookupswitch($i22)
+        {
+            case 3433489: goto label04;
+            case 96784904: goto label05;
+            case 109773592: goto label06;
+            default: goto label07;
+        };
+
+     label04:
+        $z12 = virtualinvoke r112.<java.lang.String: boolean equals(java.lang.Object)>("pass");
+
+        if $z12 == 0 goto label07;
+
+        b24 = 0;
+
+        goto label07;
+
+     label05:
+        $z11 = virtualinvoke r112.<java.lang.String: boolean equals(java.lang.Object)>("error");
+
+        if $z11 == 0 goto label07;
+
+        b24 = 1;
+
+        goto label07;
+
+     label06:
+        $z10 = virtualinvoke r112.<java.lang.String: boolean equals(java.lang.Object)>("strip");
+
+        if $z10 == 0 goto label07;
+
+        b24 = 2;
+
+     label07:
+        tableswitch(b24)
+        {
+            case 0: goto label08;
+            case 1: goto label09;
+            case 2: goto label10;
+            default: goto label11;
+        };
+
+     label08:
+        $r91 = new java.lang.StringBuilder;
+
+        specialinvoke $r91.<java.lang.StringBuilder: void <init>()>();
+
+        $r92 = virtualinvoke $r91.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("passing attribute bitwise in ");
+
+        $r93 = virtualinvoke $r92.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r10);
+
+        $r94 = virtualinvoke $r93.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r95 = new com.sun.java.util.jar.pack.Attribute$FormatException;
+
+        specialinvoke $r95.<com.sun.java.util.jar.pack.Attribute$FormatException: void <init>(java.lang.String,int,java.lang.String,java.lang.String)>($r94, i3, $r2, r112);
+
+        throw $r95;
+
+     label09:
+        $r86 = new java.lang.StringBuilder;
+
+        specialinvoke $r86.<java.lang.StringBuilder: void <init>()>();
+
+        $r87 = virtualinvoke $r86.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("attribute not allowed in ");
+
+        $r88 = virtualinvoke $r87.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r10);
+
+        $r89 = virtualinvoke $r88.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r90 = new com.sun.java.util.jar.pack.Attribute$FormatException;
+
+        specialinvoke $r90.<com.sun.java.util.jar.pack.Attribute$FormatException: void <init>(java.lang.String,int,java.lang.String,java.lang.String)>($r89, i3, $r2, r112);
+
+        throw $r90;
+
+     label10:
+        $r81 = new java.lang.StringBuilder;
+
+        specialinvoke $r81.<java.lang.StringBuilder: void <init>()>();
+
+        $r82 = virtualinvoke $r81.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r83 = virtualinvoke $r82.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" attribute in ");
+
+        $r84 = virtualinvoke $r83.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r10);
+
+        $r85 = virtualinvoke $r84.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: void skip(int,java.lang.String)>($i2, $r85);
+
+        goto label36;
+
+     label11:
+        $r113 = <com.sun.java.util.jar.pack.Package: java.util.Map attrDefs>;
+
+        $r114 = staticinvoke <com.sun.java.util.jar.pack.Attribute: com.sun.java.util.jar.pack.Attribute lookup(java.util.Map,int,java.lang.String)>($r113, i3, $r2);
+
+        r115 = $r114;
+
+        $i25 = r0.<com.sun.java.util.jar.pack.ClassReader: int verbose>;
+
+        if $i25 <= 4 goto label12;
+
+        if $r114 == null goto label12;
+
+        $r72 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r71 = new java.lang.StringBuilder;
+
+        specialinvoke $r71.<java.lang.StringBuilder: void <init>()>();
+
+        $r73 = virtualinvoke $r71.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("pkg_attribute_lookup ");
+
+        $r74 = virtualinvoke $r73.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r75 = virtualinvoke $r74.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" = ");
+
+        $r76 = virtualinvoke $r75.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r114);
+
+        $r77 = virtualinvoke $r76.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r72.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void fine(java.lang.String)>($r77);
+
+     label12:
+        if $r114 != null goto label13;
+
+        $r62 = r0.<com.sun.java.util.jar.pack.ClassReader: java.util.Map attrDefs>;
+
+        $r63 = staticinvoke <com.sun.java.util.jar.pack.Attribute: com.sun.java.util.jar.pack.Attribute lookup(java.util.Map,int,java.lang.String)>($r62, i3, $r2);
+
+        r115 = $r63;
+
+        $i21 = r0.<com.sun.java.util.jar.pack.ClassReader: int verbose>;
+
+        if $i21 <= 4 goto label13;
+
+        if $r63 == null goto label13;
+
+        $r65 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r64 = new java.lang.StringBuilder;
+
+        specialinvoke $r64.<java.lang.StringBuilder: void <init>()>();
+
+        $r66 = virtualinvoke $r64.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("this ");
+
+        $r67 = virtualinvoke $r66.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r68 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" = ");
+
+        $r69 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r63);
+
+        $r70 = virtualinvoke $r69.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r65.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void fine(java.lang.String)>($r70);
+
+     label13:
+        if r115 != null goto label14;
+
+        $r54 = staticinvoke <com.sun.java.util.jar.pack.Attribute: com.sun.java.util.jar.pack.Attribute lookup(java.util.Map,int,java.lang.String)>(null, i3, $r2);
+
+        r115 = $r54;
+
+        $i20 = r0.<com.sun.java.util.jar.pack.ClassReader: int verbose>;
+
+        if $i20 <= 4 goto label14;
+
+        if $r54 == null goto label14;
+
+        $r56 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r55 = new java.lang.StringBuilder;
+
+        specialinvoke $r55.<java.lang.StringBuilder: void <init>()>();
+
+        $r57 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("null_attribute_lookup ");
+
+        $r58 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r59 = virtualinvoke $r58.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" = ");
+
+        $r60 = virtualinvoke $r59.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r54);
+
+        $r61 = virtualinvoke $r60.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r56.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void fine(java.lang.String)>($r61);
+
+     label14:
+        if r115 != null goto label15;
+
+        if $i2 != 0 goto label15;
+
+        r115 = staticinvoke <com.sun.java.util.jar.pack.Attribute: com.sun.java.util.jar.pack.Attribute find(int,java.lang.String,java.lang.String)>(i3, $r2, "");
+
+     label15:
+        if i3 != 3 goto label17;
+
+        $z8 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("StackMap");
+
+        if $z8 != 0 goto label16;
+
+        $z9 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("StackMapX");
+
+        if $z9 == 0 goto label17;
+
+     label16:
+        $z16 = 1;
+
+        $z15 = 1;
+
+        goto label18;
+
+     label17:
+        $z16 = 0;
+
+        $z15 = 0;
+
+     label18:
+        z14 = $z15;
+
+        if $z16 == 0 goto label20;
+
+        r116 = (com.sun.java.util.jar.pack.Code) r10;
+
+        $i17 = r116.<com.sun.java.util.jar.pack.Code: int max_stack>;
+
+        if $i17 >= 65536 goto label19;
+
+        $i18 = r116.<com.sun.java.util.jar.pack.Code: int max_locals>;
+
+        if $i18 >= 65536 goto label19;
+
+        $i19 = virtualinvoke r116.<com.sun.java.util.jar.pack.Code: int getLength()>();
+
+        if $i19 >= 65536 goto label19;
+
+        $z7 = virtualinvoke $r2.<java.lang.String: boolean endsWith(java.lang.String)>("X");
+
+        if $z7 == 0 goto label20;
+
+     label19:
+        r115 = null;
+
+     label20:
+        if r115 != null goto label23;
+
+        if z14 == 0 goto label21;
+
+        $r49 = new java.lang.StringBuilder;
+
+        specialinvoke $r49.<java.lang.StringBuilder: void <init>()>();
+
+        $r50 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unsupported StackMap variant in ");
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r10);
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r53 = new com.sun.java.util.jar.pack.Attribute$FormatException;
+
+        specialinvoke $r53.<com.sun.java.util.jar.pack.Attribute$FormatException: void <init>(java.lang.String,int,java.lang.String,java.lang.String)>($r52, i3, $r2, "pass");
+
+        throw $r53;
+
+     label21:
+        $r36 = "strip";
+
+        $r35 = r0.<com.sun.java.util.jar.pack.ClassReader: java.lang.String unknownAttrCommand>;
+
+        $z6 = virtualinvoke $r36.<java.lang.String: boolean equals(java.lang.Object)>($r35);
+
+        if $z6 == 0 goto label22;
+
+        $r43 = new java.lang.StringBuilder;
+
+        specialinvoke $r43.<java.lang.StringBuilder: void <init>()>();
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unknown ");
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" attribute in ");
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r10);
+
+        $r48 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: void skip(int,java.lang.String)>($i2, $r48);
+
+        goto label36;
+
+     label22:
+        $r37 = new java.lang.StringBuilder;
+
+        specialinvoke $r37.<java.lang.StringBuilder: void <init>()>();
+
+        $r38 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is unknown attribute in class ");
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r10);
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r41 = new com.sun.java.util.jar.pack.Attribute$FormatException;
+
+        $r42 = r0.<com.sun.java.util.jar.pack.ClassReader: java.lang.String unknownAttrCommand>;
+
+        specialinvoke $r41.<com.sun.java.util.jar.pack.Attribute$FormatException: void <init>(java.lang.String,int,java.lang.String,java.lang.String)>($r40, i3, $r2, $r42);
+
+        throw $r41;
+
+     label23:
+        l26 = r0.<com.sun.java.util.jar.pack.ClassReader: long inPos>;
+
+        $r4 = virtualinvoke r115.<com.sun.java.util.jar.pack.Attribute: com.sun.java.util.jar.pack.Attribute$Layout layout()>();
+
+        $r5 = <com.sun.java.util.jar.pack.Package: com.sun.java.util.jar.pack.Attribute$Layout attrCodeEmpty>;
+
+        if $r4 != $r5 goto label29;
+
+        r117 = (com.sun.java.util.jar.pack.Package$Class$Method) r10;
+
+        $r32 = new com.sun.java.util.jar.pack.Code;
+
+        specialinvoke $r32.<com.sun.java.util.jar.pack.Code: void <init>(com.sun.java.util.jar.pack.Package$Class$Method)>(r117);
+
+        r117.<com.sun.java.util.jar.pack.Package$Class$Method: com.sun.java.util.jar.pack.Code code> = $r32;
+
+     label24:
+        $r33 = r117.<com.sun.java.util.jar.pack.Package$Class$Method: com.sun.java.util.jar.pack.Code code>;
+
+        virtualinvoke r0.<com.sun.java.util.jar.pack.ClassReader: void readCode(com.sun.java.util.jar.pack.Code)>($r33);
+
+     label25:
+        goto label27;
+
+     label26:
+        $r104 := @caughtexception;
+
+        $r105 = new java.lang.StringBuilder;
+
+        specialinvoke $r105.<java.lang.StringBuilder: void <init>()>();
+
+        $r106 = virtualinvoke $r104.<com.sun.java.util.jar.pack.Instruction$FormatException: java.lang.String getMessage()>();
+
+        $r107 = virtualinvoke $r105.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r106);
+
+        $r108 = virtualinvoke $r107.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" in ");
+
+        $r109 = virtualinvoke $r108.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r10);
+
+        $r110 = virtualinvoke $r109.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r111 = new com.sun.java.util.jar.pack.ClassReader$ClassFormatException;
+
+        specialinvoke $r111.<com.sun.java.util.jar.pack.ClassReader$ClassFormatException: void <init>(java.lang.String,java.lang.Throwable)>($r110, $r104);
+
+        throw $r111;
+
+     label27:
+        $z5 = <com.sun.java.util.jar.pack.ClassReader: boolean $assertionsDisabled>;
+
+        if $z5 != 0 goto label28;
+
+        $l15 = (long) $i2;
+
+        $l13 = r0.<com.sun.java.util.jar.pack.ClassReader: long inPos>;
+
+        $l14 = $l13 - l26;
+
+        $b16 = $l15 cmp $l14;
+
+        if $b16 == 0 goto label28;
+
+        $r34 = new java.lang.AssertionError;
+
+        specialinvoke $r34.<java.lang.AssertionError: void <init>()>();
+
+        throw $r34;
+
+     label28:
+        goto label34;
+
+     label29:
+        $r6 = virtualinvoke r115.<com.sun.java.util.jar.pack.Attribute: com.sun.java.util.jar.pack.Attribute$Layout layout()>();
+
+        $r7 = <com.sun.java.util.jar.pack.Package: com.sun.java.util.jar.pack.Attribute$Layout attrBootstrapMethodsEmpty>;
+
+        if $r6 != $r7 goto label31;
+
+        $z3 = <com.sun.java.util.jar.pack.ClassReader: boolean $assertionsDisabled>;
+
+        if $z3 != 0 goto label30;
+
+        $r30 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        if r10 == $r30 goto label30;
+
+        $r31 = new java.lang.AssertionError;
+
+        specialinvoke $r31.<java.lang.AssertionError: void <init>()>();
+
+        throw $r31;
+
+     label30:
+        $r28 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        virtualinvoke r0.<com.sun.java.util.jar.pack.ClassReader: void readBootstrapMethods(com.sun.java.util.jar.pack.Package$Class)>($r28);
+
+        $z4 = <com.sun.java.util.jar.pack.ClassReader: boolean $assertionsDisabled>;
+
+        if $z4 != 0 goto label36;
+
+        $l11 = (long) $i2;
+
+        $l9 = r0.<com.sun.java.util.jar.pack.ClassReader: long inPos>;
+
+        $l10 = $l9 - l26;
+
+        $b12 = $l11 cmp $l10;
+
+        if $b12 == 0 goto label36;
+
+        $r29 = new java.lang.AssertionError;
+
+        specialinvoke $r29.<java.lang.AssertionError: void <init>()>();
+
+        throw $r29;
+
+     label31:
+        $r8 = virtualinvoke r115.<com.sun.java.util.jar.pack.Attribute: com.sun.java.util.jar.pack.Attribute$Layout layout()>();
+
+        $r9 = <com.sun.java.util.jar.pack.Package: com.sun.java.util.jar.pack.Attribute$Layout attrInnerClassesEmpty>;
+
+        if $r8 != $r9 goto label33;
+
+        $z1 = <com.sun.java.util.jar.pack.ClassReader: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label32;
+
+        $r26 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        if r10 == $r26 goto label32;
+
+        $r27 = new java.lang.AssertionError;
+
+        specialinvoke $r27.<java.lang.AssertionError: void <init>()>();
+
+        throw $r27;
+
+     label32:
+        $r24 = r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        virtualinvoke r0.<com.sun.java.util.jar.pack.ClassReader: void readInnerClasses(com.sun.java.util.jar.pack.Package$Class)>($r24);
+
+        $z2 = <com.sun.java.util.jar.pack.ClassReader: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label34;
+
+        $l7 = (long) $i2;
+
+        $l5 = r0.<com.sun.java.util.jar.pack.ClassReader: long inPos>;
+
+        $l6 = $l5 - l26;
+
+        $b8 = $l7 cmp $l6;
+
+        if $b8 == 0 goto label34;
+
+        $r25 = new java.lang.AssertionError;
+
+        specialinvoke $r25.<java.lang.AssertionError: void <init>()>();
+
+        throw $r25;
+
+     label33:
+        if $i2 <= 0 goto label34;
+
+        r118 = newarray (byte)[$i2];
+
+        $r23 = r0.<com.sun.java.util.jar.pack.ClassReader: java.io.DataInputStream in>;
+
+        virtualinvoke $r23.<java.io.DataInputStream: void readFully(byte[])>(r118);
+
+        r115 = virtualinvoke r115.<com.sun.java.util.jar.pack.Attribute: com.sun.java.util.jar.pack.Attribute addContent(byte[])>(r118);
+
+     label34:
+        $i27 = virtualinvoke r115.<com.sun.java.util.jar.pack.Attribute: int size()>();
+
+        if $i27 != 0 goto label35;
+
+        $r16 = virtualinvoke r115.<com.sun.java.util.jar.pack.Attribute: com.sun.java.util.jar.pack.Attribute$Layout layout()>();
+
+        $z0 = virtualinvoke $r16.<com.sun.java.util.jar.pack.Attribute$Layout: boolean isEmpty()>();
+
+        if $z0 != 0 goto label35;
+
+        $r17 = new com.sun.java.util.jar.pack.ClassReader$ClassFormatException;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": attribute length cannot be zero, in ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r10);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r17.<com.sun.java.util.jar.pack.ClassReader$ClassFormatException: void <init>(java.lang.String)>($r22);
+
+        throw $r17;
+
+     label35:
+        virtualinvoke r10.<com.sun.java.util.jar.pack.Attribute$Holder: void addAttribute(com.sun.java.util.jar.pack.Attribute)>(r115);
+
+        $i4 = r0.<com.sun.java.util.jar.pack.ClassReader: int verbose>;
+
+        if $i4 <= 2 goto label36;
+
+        $r12 = <com.sun.java.util.jar.pack.Utils: com.sun.java.util.jar.pack.Utils$Pack200Logger log>;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("read ");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r115);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r12.<com.sun.java.util.jar.pack.Utils$Pack200Logger: void fine(java.lang.String)>($r15);
+
+     label36:
+        i23 = i23 + 1;
+
+        goto label03;
+
+     label37:
+        return;
+
+        catch com.sun.java.util.jar.pack.Instruction$FormatException from label24 to label25 with label26;
+    }
+
+    void readCode(com.sun.java.util.jar.pack.Code) throws java.io.IOException
+    {
+        byte[] $r2, $r3, $r9;
+        java.io.DataInputStream $r4;
+        com.sun.java.util.jar.pack.Package$Version $r8;
+        com.sun.java.util.jar.pack.ClassReader r1;
+        int[] $r10, $r11, $r12;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, i7;
+        com.sun.java.util.jar.pack.ConstantPool$ClassEntry $r14;
+        com.sun.java.util.jar.pack.Code r0;
+        com.sun.java.util.jar.pack.ConstantPool$Entry[] $r6, $r13;
+        com.sun.java.util.jar.pack.Package$Class $r5, $r7;
+
+        r1 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        r0 := @parameter0: com.sun.java.util.jar.pack.Code;
+
+        $i0 = specialinvoke r1.<com.sun.java.util.jar.pack.ClassReader: int readUnsignedShort()>();
+
+        r0.<com.sun.java.util.jar.pack.Code: int max_stack> = $i0;
+
+        $i1 = specialinvoke r1.<com.sun.java.util.jar.pack.ClassReader: int readUnsignedShort()>();
+
+        r0.<com.sun.java.util.jar.pack.Code: int max_locals> = $i1;
+
+        $i2 = specialinvoke r1.<com.sun.java.util.jar.pack.ClassReader: int readInt()>();
+
+        $r2 = newarray (byte)[$i2];
+
+        r0.<com.sun.java.util.jar.pack.Code: byte[] bytes> = $r2;
+
+        $r4 = r1.<com.sun.java.util.jar.pack.ClassReader: java.io.DataInputStream in>;
+
+        $r3 = r0.<com.sun.java.util.jar.pack.Code: byte[] bytes>;
+
+        virtualinvoke $r4.<java.io.DataInputStream: void readFully(byte[])>($r3);
+
+        $r5 = r1.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        $r6 = virtualinvoke $r5.<com.sun.java.util.jar.pack.Package$Class: com.sun.java.util.jar.pack.ConstantPool$Entry[] getCPMap()>();
+
+        $r9 = r0.<com.sun.java.util.jar.pack.Code: byte[] bytes>;
+
+        $r7 = r1.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.Package$Class 'cls'>;
+
+        $r8 = $r7.<com.sun.java.util.jar.pack.Package$Class: com.sun.java.util.jar.pack.Package$Version version>;
+
+        staticinvoke <com.sun.java.util.jar.pack.Instruction: void opcodeChecker(byte[],com.sun.java.util.jar.pack.ConstantPool$Entry[],com.sun.java.util.jar.pack.Package$Version)>($r9, $r6, $r8);
+
+        $i3 = specialinvoke r1.<com.sun.java.util.jar.pack.ClassReader: int readUnsignedShort()>();
+
+        virtualinvoke r0.<com.sun.java.util.jar.pack.Code: void setHandlerCount(int)>($i3);
+
+        i7 = 0;
+
+     label1:
+        if i7 >= $i3 goto label2;
+
+        $r10 = r0.<com.sun.java.util.jar.pack.Code: int[] handler_start>;
+
+        $i4 = specialinvoke r1.<com.sun.java.util.jar.pack.ClassReader: int readUnsignedShort()>();
+
+        $r10[i7] = $i4;
+
+        $r11 = r0.<com.sun.java.util.jar.pack.Code: int[] handler_end>;
+
+        $i5 = specialinvoke r1.<com.sun.java.util.jar.pack.ClassReader: int readUnsignedShort()>();
+
+        $r11[i7] = $i5;
+
+        $r12 = r0.<com.sun.java.util.jar.pack.Code: int[] handler_catch>;
+
+        $i6 = specialinvoke r1.<com.sun.java.util.jar.pack.ClassReader: int readUnsignedShort()>();
+
+        $r12[i7] = $i6;
+
+        $r13 = r0.<com.sun.java.util.jar.pack.Code: com.sun.java.util.jar.pack.ConstantPool$Entry[] handler_class>;
+
+        $r14 = specialinvoke r1.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$ClassEntry readClassRefOrNull()>();
+
+        $r13[i7] = $r14;
+
+        i7 = i7 + 1;
+
+        goto label1;
+
+     label2:
+        virtualinvoke r1.<com.sun.java.util.jar.pack.ClassReader: void readAttributes(int,com.sun.java.util.jar.pack.Attribute$Holder)>(3, r0);
+
+        return;
+    }
+
+    void readBootstrapMethods(com.sun.java.util.jar.pack.Package$Class) throws java.io.IOException
+    {
+        com.sun.java.util.jar.pack.ConstantPool$BootstrapMethodEntry $r7;
+        com.sun.java.util.jar.pack.ClassReader r0;
+        com.sun.java.util.jar.pack.ConstantPool$Entry[] r6;
+        com.sun.java.util.jar.pack.ConstantPool$MethodHandleEntry r5;
+        java.util.List $r3;
+        com.sun.java.util.jar.pack.Package$Class r2;
+        com.sun.java.util.jar.pack.ConstantPool$BootstrapMethodEntry[] r1;
+        int $i0, $i1, $i2, $i3, i4, i5;
+        com.sun.java.util.jar.pack.ConstantPool$Entry $r4, $r8;
+
+        r0 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        r2 := @parameter0: com.sun.java.util.jar.pack.Package$Class;
+
+        $i0 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: int readUnsignedShort()>();
+
+        r1 = newarray (com.sun.java.util.jar.pack.ConstantPool$BootstrapMethodEntry)[$i0];
+
+        i4 = 0;
+
+     label1:
+        $i1 = lengthof r1;
+
+        if i4 >= $i1 goto label4;
+
+        $r4 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry readRef(byte)>(15);
+
+        r5 = (com.sun.java.util.jar.pack.ConstantPool$MethodHandleEntry) $r4;
+
+        $i2 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: int readUnsignedShort()>();
+
+        r6 = newarray (com.sun.java.util.jar.pack.ConstantPool$Entry)[$i2];
+
+        i5 = 0;
+
+     label2:
+        $i3 = lengthof r6;
+
+        if i5 >= $i3 goto label3;
+
+        $r8 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry readRef(byte)>(51);
+
+        r6[i5] = $r8;
+
+        i5 = i5 + 1;
+
+        goto label2;
+
+     label3:
+        $r7 = staticinvoke <com.sun.java.util.jar.pack.ConstantPool: com.sun.java.util.jar.pack.ConstantPool$BootstrapMethodEntry getBootstrapMethodEntry(com.sun.java.util.jar.pack.ConstantPool$MethodHandleEntry,com.sun.java.util.jar.pack.ConstantPool$Entry[])>(r5, r6);
+
+        r1[i4] = $r7;
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label4:
+        $r3 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>(r1);
+
+        virtualinvoke r2.<com.sun.java.util.jar.pack.Package$Class: void setBootstrapMethods(java.util.Collection)>($r3);
+
+        return;
+    }
+
+    void readInnerClasses(com.sun.java.util.jar.pack.Package$Class) throws java.io.IOException
+    {
+        com.sun.java.util.jar.pack.ClassReader r0;
+        com.sun.java.util.jar.pack.ConstantPool$Utf8Entry $r7;
+        java.util.ArrayList $r1;
+        com.sun.java.util.jar.pack.Package$Class r2;
+        int $i0, $i1, i2;
+        com.sun.java.util.jar.pack.Package$InnerClass $r3;
+        com.sun.java.util.jar.pack.ConstantPool$ClassEntry $r4, $r5;
+        com.sun.java.util.jar.pack.ConstantPool$Entry $r6;
+
+        r0 := @this: com.sun.java.util.jar.pack.ClassReader;
+
+        r2 := @parameter0: com.sun.java.util.jar.pack.Package$Class;
+
+        $i0 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: int readUnsignedShort()>();
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>(int)>($i0);
+
+        i2 = 0;
+
+     label1:
+        if i2 >= $i0 goto label2;
+
+        $r3 = new com.sun.java.util.jar.pack.Package$InnerClass;
+
+        $r4 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$ClassEntry readClassRef()>();
+
+        $r5 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$ClassEntry readClassRefOrNull()>();
+
+        $r6 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry readRefOrNull(byte)>(1);
+
+        $r7 = (com.sun.java.util.jar.pack.ConstantPool$Utf8Entry) $r6;
+
+        $i1 = specialinvoke r0.<com.sun.java.util.jar.pack.ClassReader: int readUnsignedShort()>();
+
+        specialinvoke $r3.<com.sun.java.util.jar.pack.Package$InnerClass: void <init>(com.sun.java.util.jar.pack.ConstantPool$ClassEntry,com.sun.java.util.jar.pack.ConstantPool$ClassEntry,com.sun.java.util.jar.pack.ConstantPool$Utf8Entry,int)>($r4, $r5, $r7, $i1);
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r3);
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        r2.<com.sun.java.util.jar.pack.Package$Class: java.util.ArrayList innerClasses> = $r1;
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        com.sun.java.util.jar.pack.ClassReader$2 $r1;
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        $r0 = class "Lcom/sun/java/util/jar/pack/ClassReader;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <com.sun.java.util.jar.pack.ClassReader: boolean $assertionsDisabled> = $z1;
+
+        $r1 = new com.sun.java.util.jar.pack.ClassReader$2;
+
+        specialinvoke $r1.<com.sun.java.util.jar.pack.ClassReader$2: void <init>(byte)>(-1);
+
+        <com.sun.java.util.jar.pack.ClassReader: com.sun.java.util.jar.pack.ConstantPool$Entry INVALID_ENTRY> = $r1;
+
+        return;
+    }
+}

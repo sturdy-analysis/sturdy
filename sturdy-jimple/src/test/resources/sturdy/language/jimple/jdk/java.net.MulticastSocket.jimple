@@ -1,0 +1,1263 @@
+public class java.net.MulticastSocket extends java.net.DatagramSocket
+{
+    private boolean interfaceSet;
+    private java.lang.Object ttlLock;
+    private java.lang.Object infLock;
+    private java.net.InetAddress infAddress;
+    private static final java.net.NetworkInterface defNetIntf;
+
+    public void <init>() throws java.io.IOException
+    {
+        java.net.MulticastSocket r0;
+        java.net.InetSocketAddress $r1;
+
+        r0 := @this: java.net.MulticastSocket;
+
+        $r1 = new java.net.InetSocketAddress;
+
+        specialinvoke $r1.<java.net.InetSocketAddress: void <init>(int)>(0);
+
+        specialinvoke r0.<java.net.MulticastSocket: void <init>(java.net.SocketAddress)>($r1);
+
+        return;
+    }
+
+    public void <init>(int) throws java.io.IOException
+    {
+        int i0;
+        java.net.MulticastSocket r0;
+        java.net.InetSocketAddress $r1;
+
+        r0 := @this: java.net.MulticastSocket;
+
+        i0 := @parameter0: int;
+
+        $r1 = new java.net.InetSocketAddress;
+
+        specialinvoke $r1.<java.net.InetSocketAddress: void <init>(int)>(i0);
+
+        specialinvoke r0.<java.net.MulticastSocket: void <init>(java.net.SocketAddress)>($r1);
+
+        return;
+    }
+
+    public void <init>(java.net.SocketAddress) throws java.io.IOException
+    {
+        java.lang.Throwable $r4;
+        java.net.SocketAddress r3;
+        java.net.MulticastSocket r0;
+        java.lang.Object $r1, $r2;
+        boolean $z0, $z1;
+
+        r0 := @this: java.net.MulticastSocket;
+
+        r3 := @parameter0: java.net.SocketAddress;
+
+        specialinvoke r0.<java.net.DatagramSocket: void <init>(java.net.SocketAddress)>(null);
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        r0.<java.net.MulticastSocket: java.lang.Object ttlLock> = $r1;
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        r0.<java.net.MulticastSocket: java.lang.Object infLock> = $r2;
+
+        r0.<java.net.MulticastSocket: java.net.InetAddress infAddress> = null;
+
+        virtualinvoke r0.<java.net.MulticastSocket: void setReuseAddress(boolean)>(1);
+
+        if r3 == null goto label5;
+
+     label1:
+        virtualinvoke r0.<java.net.MulticastSocket: void bind(java.net.SocketAddress)>(r3);
+
+     label2:
+        $z0 = virtualinvoke r0.<java.net.MulticastSocket: boolean isBound()>();
+
+        if $z0 != 0 goto label5;
+
+        virtualinvoke r0.<java.net.MulticastSocket: void close()>();
+
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $z1 = virtualinvoke r0.<java.net.MulticastSocket: boolean isBound()>();
+
+        if $z1 != 0 goto label4;
+
+        virtualinvoke r0.<java.net.MulticastSocket: void close()>();
+
+     label4:
+        throw $r4;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public void setTTL(byte) throws java.io.IOException
+    {
+        java.net.SocketException $r2;
+        byte b0;
+        java.net.MulticastSocket r0;
+        java.net.DatagramSocketImpl $r1;
+        boolean $z0;
+
+        r0 := @this: java.net.MulticastSocket;
+
+        b0 := @parameter0: byte;
+
+        $z0 = virtualinvoke r0.<java.net.MulticastSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new java.net.SocketException;
+
+        specialinvoke $r2.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r2;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.net.MulticastSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        virtualinvoke $r1.<java.net.DatagramSocketImpl: void setTTL(byte)>(b0);
+
+        return;
+    }
+
+    public void setTimeToLive(int) throws java.io.IOException
+    {
+        java.net.SocketException $r3;
+        java.net.MulticastSocket r1;
+        java.net.DatagramSocketImpl $r2;
+        int i0;
+        java.lang.IllegalArgumentException $r0;
+        boolean $z0;
+
+        r1 := @this: java.net.MulticastSocket;
+
+        i0 := @parameter0: int;
+
+        if i0 < 0 goto label1;
+
+        if i0 <= 255 goto label2;
+
+     label1:
+        $r0 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r0.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("ttl out of range");
+
+        throw $r0;
+
+     label2:
+        $z0 = virtualinvoke r1.<java.net.MulticastSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label3;
+
+        $r3 = new java.net.SocketException;
+
+        specialinvoke $r3.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r3;
+
+     label3:
+        $r2 = virtualinvoke r1.<java.net.MulticastSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        virtualinvoke $r2.<java.net.DatagramSocketImpl: void setTimeToLive(int)>(i0);
+
+        return;
+    }
+
+    public byte getTTL() throws java.io.IOException
+    {
+        java.net.SocketException $r2;
+        byte $b0;
+        java.net.MulticastSocket r0;
+        java.net.DatagramSocketImpl $r1;
+        boolean $z0;
+
+        r0 := @this: java.net.MulticastSocket;
+
+        $z0 = virtualinvoke r0.<java.net.MulticastSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new java.net.SocketException;
+
+        specialinvoke $r2.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r2;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.net.MulticastSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        $b0 = virtualinvoke $r1.<java.net.DatagramSocketImpl: byte getTTL()>();
+
+        return $b0;
+    }
+
+    public int getTimeToLive() throws java.io.IOException
+    {
+        java.net.SocketException $r2;
+        java.net.MulticastSocket r0;
+        java.net.DatagramSocketImpl $r1;
+        int $i0;
+        boolean $z0;
+
+        r0 := @this: java.net.MulticastSocket;
+
+        $z0 = virtualinvoke r0.<java.net.MulticastSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new java.net.SocketException;
+
+        specialinvoke $r2.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r2;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.net.MulticastSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        $i0 = virtualinvoke $r1.<java.net.DatagramSocketImpl: int getTimeToLive()>();
+
+        return $i0;
+    }
+
+    public void joinGroup(java.net.InetAddress) throws java.io.IOException
+    {
+        java.lang.Throwable $r11;
+        java.net.DatagramSocketImpl $r12;
+        java.lang.NullPointerException $r10;
+        java.net.InetAddress r2;
+        java.net.SocketException $r5, $r6;
+        boolean $z0, $z1, $z2, $z3;
+        java.net.NetworkInterface $r4, $r7, $r9;
+        java.net.InetSocketAddress $r8;
+        java.lang.SecurityManager $r3;
+        java.net.MulticastSocket r0;
+        java.lang.Object $r1;
+
+        r0 := @this: java.net.MulticastSocket;
+
+        r2 := @parameter0: java.net.InetAddress;
+
+        $r1 = r0.<java.net.MulticastSocket: java.lang.Object infLock>;
+
+        entermonitor $r1;
+
+     label01:
+        $z0 = r0.<java.net.MulticastSocket: boolean interfaceSet>;
+
+        if $z0 != 0 goto label04;
+
+        $r7 = <java.net.MulticastSocket: java.net.NetworkInterface defNetIntf>;
+
+        if $r7 == null goto label04;
+
+        if r2 != null goto label02;
+
+        $r10 = new java.lang.NullPointerException;
+
+        specialinvoke $r10.<java.lang.NullPointerException: void <init>(java.lang.String)>("Multicast address is null");
+
+        throw $r10;
+
+     label02:
+        $r8 = new java.net.InetSocketAddress;
+
+        specialinvoke $r8.<java.net.InetSocketAddress: void <init>(java.net.InetAddress,int)>(r2, 0);
+
+        $r9 = <java.net.MulticastSocket: java.net.NetworkInterface defNetIntf>;
+
+        virtualinvoke r0.<java.net.MulticastSocket: void joinGroup(java.net.SocketAddress,java.net.NetworkInterface)>($r8, $r9);
+
+        exitmonitor $r1;
+
+     label03:
+        return;
+
+     label04:
+        exitmonitor $r1;
+
+     label05:
+        goto label08;
+
+     label06:
+        $r11 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label07:
+        throw $r11;
+
+     label08:
+        $z1 = virtualinvoke r0.<java.net.MulticastSocket: boolean isClosed()>();
+
+        if $z1 == 0 goto label09;
+
+        $r6 = new java.net.SocketException;
+
+        specialinvoke $r6.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r6;
+
+     label09:
+        virtualinvoke r0.<java.net.MulticastSocket: void checkAddress(java.net.InetAddress,java.lang.String)>(r2, "joinGroup");
+
+        $r3 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r3 == null goto label10;
+
+        virtualinvoke $r3.<java.lang.SecurityManager: void checkMulticast(java.net.InetAddress)>(r2);
+
+     label10:
+        $z2 = virtualinvoke r2.<java.net.InetAddress: boolean isMulticastAddress()>();
+
+        if $z2 != 0 goto label11;
+
+        $r5 = new java.net.SocketException;
+
+        specialinvoke $r5.<java.net.SocketException: void <init>(java.lang.String)>("Not a multicast address");
+
+        throw $r5;
+
+     label11:
+        $r4 = staticinvoke <java.net.NetworkInterface: java.net.NetworkInterface getDefault()>();
+
+        $z3 = r0.<java.net.MulticastSocket: boolean interfaceSet>;
+
+        if $z3 != 0 goto label12;
+
+        if $r4 == null goto label12;
+
+        virtualinvoke r0.<java.net.MulticastSocket: void setNetworkInterface(java.net.NetworkInterface)>($r4);
+
+     label12:
+        $r12 = virtualinvoke r0.<java.net.MulticastSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        virtualinvoke $r12.<java.net.DatagramSocketImpl: void join(java.net.InetAddress)>(r2);
+
+        return;
+
+        catch java.lang.Throwable from label01 to label03 with label06;
+        catch java.lang.Throwable from label04 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+    }
+
+    public void leaveGroup(java.net.InetAddress) throws java.io.IOException
+    {
+        java.lang.Throwable $r11;
+        java.net.DatagramSocketImpl $r4;
+        java.net.NetworkInterface $r7, $r9;
+        java.net.InetSocketAddress $r8;
+        java.lang.SecurityManager $r3;
+        java.lang.NullPointerException $r10;
+        java.net.InetAddress r2;
+        java.net.SocketException $r5, $r6;
+        java.net.MulticastSocket r0;
+        java.lang.Object $r1;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.net.MulticastSocket;
+
+        r2 := @parameter0: java.net.InetAddress;
+
+        $r1 = r0.<java.net.MulticastSocket: java.lang.Object infLock>;
+
+        entermonitor $r1;
+
+     label01:
+        $z0 = r0.<java.net.MulticastSocket: boolean interfaceSet>;
+
+        if $z0 != 0 goto label04;
+
+        $r7 = <java.net.MulticastSocket: java.net.NetworkInterface defNetIntf>;
+
+        if $r7 == null goto label04;
+
+        if r2 != null goto label02;
+
+        $r10 = new java.lang.NullPointerException;
+
+        specialinvoke $r10.<java.lang.NullPointerException: void <init>(java.lang.String)>("Multicast address is null");
+
+        throw $r10;
+
+     label02:
+        $r8 = new java.net.InetSocketAddress;
+
+        specialinvoke $r8.<java.net.InetSocketAddress: void <init>(java.net.InetAddress,int)>(r2, 0);
+
+        $r9 = <java.net.MulticastSocket: java.net.NetworkInterface defNetIntf>;
+
+        virtualinvoke r0.<java.net.MulticastSocket: void leaveGroup(java.net.SocketAddress,java.net.NetworkInterface)>($r8, $r9);
+
+        exitmonitor $r1;
+
+     label03:
+        return;
+
+     label04:
+        exitmonitor $r1;
+
+     label05:
+        goto label08;
+
+     label06:
+        $r11 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label07:
+        throw $r11;
+
+     label08:
+        $z1 = virtualinvoke r0.<java.net.MulticastSocket: boolean isClosed()>();
+
+        if $z1 == 0 goto label09;
+
+        $r6 = new java.net.SocketException;
+
+        specialinvoke $r6.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r6;
+
+     label09:
+        virtualinvoke r0.<java.net.MulticastSocket: void checkAddress(java.net.InetAddress,java.lang.String)>(r2, "leaveGroup");
+
+        $r3 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r3 == null goto label10;
+
+        virtualinvoke $r3.<java.lang.SecurityManager: void checkMulticast(java.net.InetAddress)>(r2);
+
+     label10:
+        $z2 = virtualinvoke r2.<java.net.InetAddress: boolean isMulticastAddress()>();
+
+        if $z2 != 0 goto label11;
+
+        $r5 = new java.net.SocketException;
+
+        specialinvoke $r5.<java.net.SocketException: void <init>(java.lang.String)>("Not a multicast address");
+
+        throw $r5;
+
+     label11:
+        $r4 = virtualinvoke r0.<java.net.MulticastSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        virtualinvoke $r4.<java.net.DatagramSocketImpl: void leave(java.net.InetAddress)>(r2);
+
+        return;
+
+        catch java.lang.Throwable from label01 to label03 with label06;
+        catch java.lang.Throwable from label04 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+    }
+
+    public void joinGroup(java.net.SocketAddress, java.net.NetworkInterface) throws java.io.IOException
+    {
+        java.net.SocketAddress r1;
+        java.net.DatagramSocketImpl $r8;
+        java.net.InetAddress $r4, $r7, $r12;
+        java.net.SocketException $r10, $r14;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.UnsupportedOperationException $r13;
+        java.net.NetworkInterface r9;
+        java.lang.IllegalArgumentException $r2;
+        java.net.InetSocketAddress $r3, $r6, $r11;
+        java.lang.SecurityManager $r5;
+        java.net.MulticastSocket r0;
+
+        r0 := @this: java.net.MulticastSocket;
+
+        r1 := @parameter0: java.net.SocketAddress;
+
+        r9 := @parameter1: java.net.NetworkInterface;
+
+        $z0 = virtualinvoke r0.<java.net.MulticastSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label1;
+
+        $r14 = new java.net.SocketException;
+
+        specialinvoke $r14.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r14;
+
+     label1:
+        if r1 == null goto label2;
+
+        $z1 = r1 instanceof java.net.InetSocketAddress;
+
+        if $z1 != 0 goto label3;
+
+     label2:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Unsupported address type");
+
+        throw $r2;
+
+     label3:
+        $z2 = r0.<java.net.MulticastSocket: boolean oldImpl>;
+
+        if $z2 == 0 goto label4;
+
+        $r13 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r13.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r13;
+
+     label4:
+        $r3 = (java.net.InetSocketAddress) r1;
+
+        $r4 = virtualinvoke $r3.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        virtualinvoke r0.<java.net.MulticastSocket: void checkAddress(java.net.InetAddress,java.lang.String)>($r4, "joinGroup");
+
+        $r5 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r5 == null goto label5;
+
+        $r11 = (java.net.InetSocketAddress) r1;
+
+        $r12 = virtualinvoke $r11.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        virtualinvoke $r5.<java.lang.SecurityManager: void checkMulticast(java.net.InetAddress)>($r12);
+
+     label5:
+        $r6 = (java.net.InetSocketAddress) r1;
+
+        $r7 = virtualinvoke $r6.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $z3 = virtualinvoke $r7.<java.net.InetAddress: boolean isMulticastAddress()>();
+
+        if $z3 != 0 goto label6;
+
+        $r10 = new java.net.SocketException;
+
+        specialinvoke $r10.<java.net.SocketException: void <init>(java.lang.String)>("Not a multicast address");
+
+        throw $r10;
+
+     label6:
+        $r8 = virtualinvoke r0.<java.net.MulticastSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        virtualinvoke $r8.<java.net.DatagramSocketImpl: void joinGroup(java.net.SocketAddress,java.net.NetworkInterface)>(r1, r9);
+
+        return;
+    }
+
+    public void leaveGroup(java.net.SocketAddress, java.net.NetworkInterface) throws java.io.IOException
+    {
+        java.net.SocketAddress r1;
+        java.net.DatagramSocketImpl $r8;
+        java.net.InetAddress $r4, $r7, $r12;
+        java.net.SocketException $r10, $r14;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.UnsupportedOperationException $r13;
+        java.net.NetworkInterface r9;
+        java.lang.IllegalArgumentException $r2;
+        java.net.InetSocketAddress $r3, $r6, $r11;
+        java.lang.SecurityManager $r5;
+        java.net.MulticastSocket r0;
+
+        r0 := @this: java.net.MulticastSocket;
+
+        r1 := @parameter0: java.net.SocketAddress;
+
+        r9 := @parameter1: java.net.NetworkInterface;
+
+        $z0 = virtualinvoke r0.<java.net.MulticastSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label1;
+
+        $r14 = new java.net.SocketException;
+
+        specialinvoke $r14.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r14;
+
+     label1:
+        if r1 == null goto label2;
+
+        $z1 = r1 instanceof java.net.InetSocketAddress;
+
+        if $z1 != 0 goto label3;
+
+     label2:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Unsupported address type");
+
+        throw $r2;
+
+     label3:
+        $z2 = r0.<java.net.MulticastSocket: boolean oldImpl>;
+
+        if $z2 == 0 goto label4;
+
+        $r13 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r13.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r13;
+
+     label4:
+        $r3 = (java.net.InetSocketAddress) r1;
+
+        $r4 = virtualinvoke $r3.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        virtualinvoke r0.<java.net.MulticastSocket: void checkAddress(java.net.InetAddress,java.lang.String)>($r4, "leaveGroup");
+
+        $r5 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r5 == null goto label5;
+
+        $r11 = (java.net.InetSocketAddress) r1;
+
+        $r12 = virtualinvoke $r11.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        virtualinvoke $r5.<java.lang.SecurityManager: void checkMulticast(java.net.InetAddress)>($r12);
+
+     label5:
+        $r6 = (java.net.InetSocketAddress) r1;
+
+        $r7 = virtualinvoke $r6.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $z3 = virtualinvoke $r7.<java.net.InetAddress: boolean isMulticastAddress()>();
+
+        if $z3 != 0 goto label6;
+
+        $r10 = new java.net.SocketException;
+
+        specialinvoke $r10.<java.net.SocketException: void <init>(java.lang.String)>("Not a multicast address");
+
+        throw $r10;
+
+     label6:
+        $r8 = virtualinvoke r0.<java.net.MulticastSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        virtualinvoke $r8.<java.net.DatagramSocketImpl: void leaveGroup(java.net.SocketAddress,java.net.NetworkInterface)>(r1, r9);
+
+        return;
+    }
+
+    public void setInterface(java.net.InetAddress) throws java.net.SocketException
+    {
+        java.net.InetAddress r1;
+        java.lang.Throwable $r5;
+        java.net.SocketException $r4;
+        java.net.MulticastSocket r0;
+        java.net.DatagramSocketImpl $r3;
+        java.lang.Object $r2;
+        boolean $z0;
+
+        r0 := @this: java.net.MulticastSocket;
+
+        r1 := @parameter0: java.net.InetAddress;
+
+        $z0 = virtualinvoke r0.<java.net.MulticastSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label1;
+
+        $r4 = new java.net.SocketException;
+
+        specialinvoke $r4.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r4;
+
+     label1:
+        virtualinvoke r0.<java.net.MulticastSocket: void checkAddress(java.net.InetAddress,java.lang.String)>(r1, "setInterface");
+
+        $r2 = r0.<java.net.MulticastSocket: java.lang.Object infLock>;
+
+        entermonitor $r2;
+
+     label2:
+        $r3 = virtualinvoke r0.<java.net.MulticastSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        virtualinvoke $r3.<java.net.DatagramSocketImpl: void setOption(int,java.lang.Object)>(16, r1);
+
+        r0.<java.net.MulticastSocket: java.net.InetAddress infAddress> = r1;
+
+        r0.<java.net.MulticastSocket: boolean interfaceSet> = 1;
+
+        exitmonitor $r2;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label5:
+        throw $r5;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public java.net.InetAddress getInterface() throws java.net.SocketException
+    {
+        java.lang.Throwable $r14;
+        java.util.Enumeration $r8;
+        java.net.DatagramSocketImpl $r2;
+        java.net.InetAddress r4, $r5, $r6, r10, $r11, $r12;
+        java.net.SocketException $r13;
+        boolean $z0, $z1, $z2, $z3;
+        java.net.NetworkInterface $r7;
+        java.lang.Exception $r15;
+        java.net.MulticastSocket r0;
+        java.lang.Object $r1, $r3, $r9;
+
+        r0 := @this: java.net.MulticastSocket;
+
+        $z0 = virtualinvoke r0.<java.net.MulticastSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label01;
+
+        $r13 = new java.net.SocketException;
+
+        specialinvoke $r13.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r13;
+
+     label01:
+        $r1 = r0.<java.net.MulticastSocket: java.lang.Object infLock>;
+
+        entermonitor $r1;
+
+     label02:
+        $r2 = virtualinvoke r0.<java.net.MulticastSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        $r3 = virtualinvoke $r2.<java.net.DatagramSocketImpl: java.lang.Object getOption(int)>(16);
+
+        r4 = (java.net.InetAddress) $r3;
+
+        $r5 = r0.<java.net.MulticastSocket: java.net.InetAddress infAddress>;
+
+        if $r5 != null goto label04;
+
+        exitmonitor $r1;
+
+     label03:
+        return r4;
+
+     label04:
+        $r6 = r0.<java.net.MulticastSocket: java.net.InetAddress infAddress>;
+
+        $z1 = virtualinvoke r4.<java.net.InetAddress: boolean equals(java.lang.Object)>($r6);
+
+        if $z1 == 0 goto label06;
+
+        exitmonitor $r1;
+
+     label05:
+        return r4;
+
+     label06:
+        $r7 = staticinvoke <java.net.NetworkInterface: java.net.NetworkInterface getByInetAddress(java.net.InetAddress)>(r4);
+
+        $r8 = virtualinvoke $r7.<java.net.NetworkInterface: java.util.Enumeration getInetAddresses()>();
+
+     label07:
+        $z2 = interfaceinvoke $r8.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z2 == 0 goto label11;
+
+        $r9 = interfaceinvoke $r8.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r10 = (java.net.InetAddress) $r9;
+
+        $r11 = r0.<java.net.MulticastSocket: java.net.InetAddress infAddress>;
+
+        $z3 = virtualinvoke r10.<java.net.InetAddress: boolean equals(java.lang.Object)>($r11);
+
+        if $z3 == 0 goto label10;
+
+        $r12 = r0.<java.net.MulticastSocket: java.net.InetAddress infAddress>;
+
+     label08:
+        exitmonitor $r1;
+
+     label09:
+        return $r12;
+
+     label10:
+        goto label07;
+
+     label11:
+        r0.<java.net.MulticastSocket: java.net.InetAddress infAddress> = null;
+
+     label12:
+        exitmonitor $r1;
+
+     label13:
+        return r4;
+
+     label14:
+        $r15 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label15:
+        return r4;
+
+     label16:
+        $r14 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label17:
+        throw $r14;
+
+        catch java.lang.Exception from label06 to label08 with label14;
+        catch java.lang.Exception from label10 to label12 with label14;
+        catch java.lang.Throwable from label02 to label03 with label16;
+        catch java.lang.Throwable from label04 to label05 with label16;
+        catch java.lang.Throwable from label06 to label09 with label16;
+        catch java.lang.Throwable from label10 to label13 with label16;
+        catch java.lang.Throwable from label14 to label15 with label16;
+        catch java.lang.Throwable from label16 to label17 with label16;
+    }
+
+    public void setNetworkInterface(java.net.NetworkInterface) throws java.net.SocketException
+    {
+        java.lang.Throwable $r4;
+        java.net.MulticastSocket r0;
+        java.net.DatagramSocketImpl $r2;
+        java.net.NetworkInterface r3;
+        java.lang.Object $r1;
+
+        r0 := @this: java.net.MulticastSocket;
+
+        r3 := @parameter0: java.net.NetworkInterface;
+
+        $r1 = r0.<java.net.MulticastSocket: java.lang.Object infLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = virtualinvoke r0.<java.net.MulticastSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        virtualinvoke $r2.<java.net.DatagramSocketImpl: void setOption(int,java.lang.Object)>(31, r3);
+
+        r0.<java.net.MulticastSocket: java.net.InetAddress infAddress> = null;
+
+        r0.<java.net.MulticastSocket: boolean interfaceSet> = 1;
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r4;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public java.net.NetworkInterface getNetworkInterface() throws java.net.SocketException
+    {
+        java.net.InetAddress[] $r8;
+        java.net.DatagramSocketImpl $r1;
+        java.net.NetworkInterface r3, $r9;
+        java.net.InetAddress $r4, $r6;
+        java.net.MulticastSocket r0;
+        int $i0, $i1, $i3;
+        java.lang.Object $r2;
+        java.lang.String $r7;
+
+        r0 := @this: java.net.MulticastSocket;
+
+        $r1 = virtualinvoke r0.<java.net.MulticastSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        $r2 = virtualinvoke $r1.<java.net.DatagramSocketImpl: java.lang.Object getOption(int)>(31);
+
+        r3 = (java.net.NetworkInterface) $r2;
+
+        $i0 = virtualinvoke r3.<java.net.NetworkInterface: int getIndex()>();
+
+        if $i0 == 0 goto label1;
+
+        $i1 = virtualinvoke r3.<java.net.NetworkInterface: int getIndex()>();
+
+        $i3 = (int) -1;
+
+        if $i1 != $i3 goto label2;
+
+     label1:
+        $r8 = newarray (java.net.InetAddress)[1];
+
+        $r4 = staticinvoke <java.net.InetAddress: java.net.InetAddress anyLocalAddress()>();
+
+        $r8[0] = $r4;
+
+        $r9 = new java.net.NetworkInterface;
+
+        $r6 = $r8[0];
+
+        $r7 = virtualinvoke $r6.<java.net.InetAddress: java.lang.String getHostName()>();
+
+        specialinvoke $r9.<java.net.NetworkInterface: void <init>(java.lang.String,int,java.net.InetAddress[])>($r7, 0, $r8);
+
+        return $r9;
+
+     label2:
+        return r3;
+    }
+
+    public void setLoopbackMode(boolean) throws java.net.SocketException
+    {
+        java.net.MulticastSocket r0;
+        java.net.DatagramSocketImpl $r1;
+        java.lang.Boolean $r2;
+        boolean z0;
+
+        r0 := @this: java.net.MulticastSocket;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = virtualinvoke r0.<java.net.MulticastSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        $r2 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(z0);
+
+        virtualinvoke $r1.<java.net.DatagramSocketImpl: void setOption(int,java.lang.Object)>(18, $r2);
+
+        return;
+    }
+
+    public boolean getLoopbackMode() throws java.net.SocketException
+    {
+        java.net.MulticastSocket r0;
+        java.net.DatagramSocketImpl $r1;
+        java.lang.Boolean $r3;
+        java.lang.Object $r2;
+        boolean $z0;
+
+        r0 := @this: java.net.MulticastSocket;
+
+        $r1 = virtualinvoke r0.<java.net.MulticastSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        $r2 = virtualinvoke $r1.<java.net.DatagramSocketImpl: java.lang.Object getOption(int)>(18);
+
+        $r3 = (java.lang.Boolean) $r2;
+
+        $z0 = virtualinvoke $r3.<java.lang.Boolean: boolean booleanValue()>();
+
+        return $z0;
+    }
+
+    public void send(java.net.DatagramPacket, byte) throws java.io.IOException
+    {
+        java.net.InetAddress $r2, $r4, $r5, $r10, $r12, $r13, $r15;
+        byte b3, $b6;
+        java.lang.SecurityException $r22;
+        boolean $z0, $z1, $z2;
+        java.net.DatagramPacket r1;
+        java.lang.Throwable $r17, $r18, $r19;
+        java.net.DatagramSocketImpl $r7, $r8, $r9, $r20;
+        java.net.SocketException $r21;
+        int $i0, $i1, $i2, $i4, $i5, $i7, $i8, $i9, $i10, $i11, $i12;
+        java.lang.String $r14;
+        java.lang.SecurityManager $r11;
+        java.net.MulticastSocket r0;
+        java.lang.Object $r3;
+
+        r0 := @this: java.net.MulticastSocket;
+
+        r1 := @parameter0: java.net.DatagramPacket;
+
+        b3 := @parameter1: byte;
+
+        $z0 = virtualinvoke r0.<java.net.MulticastSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label01;
+
+        $r21 = new java.net.SocketException;
+
+        specialinvoke $r21.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r21;
+
+     label01:
+        $r2 = virtualinvoke r1.<java.net.DatagramPacket: java.net.InetAddress getAddress()>();
+
+        virtualinvoke r0.<java.net.MulticastSocket: void checkAddress(java.net.InetAddress,java.lang.String)>($r2, "send");
+
+        $r3 = r0.<java.net.MulticastSocket: java.lang.Object ttlLock>;
+
+        entermonitor $r3;
+
+     label02:
+        entermonitor r1;
+
+     label03:
+        $i0 = r0.<java.net.MulticastSocket: int connectState>;
+
+        if $i0 != 0 goto label06;
+
+        $r11 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r11 == null goto label05;
+
+        $r12 = virtualinvoke r1.<java.net.DatagramPacket: java.net.InetAddress getAddress()>();
+
+        $z2 = virtualinvoke $r12.<java.net.InetAddress: boolean isMulticastAddress()>();
+
+        if $z2 == 0 goto label04;
+
+        $r15 = virtualinvoke r1.<java.net.DatagramPacket: java.net.InetAddress getAddress()>();
+
+        virtualinvoke $r11.<java.lang.SecurityManager: void checkMulticast(java.net.InetAddress,byte)>($r15, b3);
+
+        goto label05;
+
+     label04:
+        $r13 = virtualinvoke r1.<java.net.DatagramPacket: java.net.InetAddress getAddress()>();
+
+        $r14 = virtualinvoke $r13.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+        $i5 = virtualinvoke r1.<java.net.DatagramPacket: int getPort()>();
+
+        virtualinvoke $r11.<java.lang.SecurityManager: void checkConnect(java.lang.String,int)>($r14, $i5);
+
+     label05:
+        goto label09;
+
+     label06:
+        $r4 = virtualinvoke r1.<java.net.DatagramPacket: java.net.InetAddress getAddress()>();
+
+        if $r4 != null goto label07;
+
+        $r10 = r0.<java.net.MulticastSocket: java.net.InetAddress connectedAddress>;
+
+        virtualinvoke r1.<java.net.DatagramPacket: void setAddress(java.net.InetAddress)>($r10);
+
+        $i4 = r0.<java.net.MulticastSocket: int connectedPort>;
+
+        virtualinvoke r1.<java.net.DatagramPacket: void setPort(int)>($i4);
+
+        goto label09;
+
+     label07:
+        $r5 = r0.<java.net.MulticastSocket: java.net.InetAddress connectedAddress>;
+
+        $z1 = virtualinvoke $r4.<java.net.InetAddress: boolean equals(java.lang.Object)>($r5);
+
+        if $z1 == 0 goto label08;
+
+        $i1 = virtualinvoke r1.<java.net.DatagramPacket: int getPort()>();
+
+        $i2 = r0.<java.net.MulticastSocket: int connectedPort>;
+
+        if $i1 == $i2 goto label09;
+
+     label08:
+        $r22 = new java.lang.SecurityException;
+
+        specialinvoke $r22.<java.lang.SecurityException: void <init>(java.lang.String)>("connected address and packet address differ");
+
+        throw $r22;
+
+     label09:
+        $b6 = virtualinvoke r0.<java.net.MulticastSocket: byte getTTL()>();
+
+     label10:
+        $i7 = (int) b3;
+
+        $i8 = (int) $b6;
+
+        if $i7 == $i8 goto label11;
+
+        $r9 = virtualinvoke r0.<java.net.MulticastSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        virtualinvoke $r9.<java.net.DatagramSocketImpl: void setTTL(byte)>(b3);
+
+     label11:
+        $r7 = virtualinvoke r0.<java.net.MulticastSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        virtualinvoke $r7.<java.net.DatagramSocketImpl: void send(java.net.DatagramPacket)>(r1);
+
+     label12:
+        $i9 = (int) b3;
+
+        $i10 = (int) $b6;
+
+        if $i9 == $i10 goto label16;
+
+        $r8 = virtualinvoke r0.<java.net.MulticastSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        virtualinvoke $r8.<java.net.DatagramSocketImpl: void setTTL(byte)>($b6);
+
+        goto label16;
+
+     label13:
+        $r19 := @caughtexception;
+
+     label14:
+        $i11 = (int) b3;
+
+        $i12 = (int) $b6;
+
+        if $i11 == $i12 goto label15;
+
+        $r20 = virtualinvoke r0.<java.net.MulticastSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        virtualinvoke $r20.<java.net.DatagramSocketImpl: void setTTL(byte)>($b6);
+
+     label15:
+        throw $r19;
+
+     label16:
+        exitmonitor r1;
+
+     label17:
+        goto label20;
+
+     label18:
+        $r18 := @caughtexception;
+
+        exitmonitor r1;
+
+     label19:
+        throw $r18;
+
+     label20:
+        exitmonitor $r3;
+
+     label21:
+        goto label24;
+
+     label22:
+        $r17 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label23:
+        throw $r17;
+
+     label24:
+        return;
+
+        catch java.lang.Throwable from label10 to label12 with label13;
+        catch java.lang.Throwable from label13 to label14 with label13;
+        catch java.lang.Throwable from label03 to label17 with label18;
+        catch java.lang.Throwable from label18 to label19 with label18;
+        catch java.lang.Throwable from label02 to label21 with label22;
+        catch java.lang.Throwable from label22 to label23 with label22;
+    }
+
+    static void <clinit>()
+    {
+        java.net.MulticastSocket$1 $r0;
+        java.net.SocketException $r14;
+        java.lang.String r2, $r8, $r13, $r19;
+        java.io.PrintStream $r5, $r10, $r16;
+        java.net.NetworkInterface $r3, r20;
+        java.lang.Object $r1;
+        java.lang.StringBuilder $r4, $r6, $r7, $r9, $r11, $r12, $r15, $r17, $r18;
+
+        $r0 = new java.net.MulticastSocket$1;
+
+        specialinvoke $r0.<java.net.MulticastSocket$1: void <init>()>();
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r2 = (java.lang.String) $r1;
+
+        r20 = null;
+
+        if r2 == null goto label5;
+
+     label1:
+        $r3 = staticinvoke <java.net.NetworkInterface: java.net.NetworkInterface getByName(java.lang.String)>(r2);
+
+        r20 = $r3;
+
+        if $r3 != null goto label2;
+
+        $r10 = <java.lang.System: java.io.PrintStream err>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("WARNING: cannot find network interface ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r10.<java.io.PrintStream: void println(java.lang.String)>($r13);
+
+        goto label3;
+
+     label2:
+        $r5 = <java.lang.System: java.io.PrintStream err>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("INFO: network interface set to ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>($r8);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r14 := @caughtexception;
+
+        $r16 = <java.lang.System: java.io.PrintStream err>;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ERROR: failed to find network interface ");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r16.<java.io.PrintStream: void println(java.lang.String)>($r19);
+
+     label5:
+        <java.net.MulticastSocket: java.net.NetworkInterface defNetIntf> = r20;
+
+        return;
+
+        catch java.net.SocketException from label1 to label3 with label4;
+    }
+}

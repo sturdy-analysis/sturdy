@@ -1,0 +1,248 @@
+public abstract class sun.security.provider.certpath.CertStoreHelper extends java.lang.Object
+{
+    private static final int NUM_TYPES;
+    private static final java.util.Map classMap;
+    private static sun.security.util.Cache cache;
+
+    public void <init>()
+    {
+        sun.security.provider.certpath.CertStoreHelper r0;
+
+        r0 := @this: sun.security.provider.certpath.CertStoreHelper;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static sun.security.provider.certpath.CertStoreHelper getInstance(java.lang.String) throws java.security.NoSuchAlgorithmException
+    {
+        sun.security.provider.certpath.CertStoreHelper$1 $r6;
+        java.util.Map $r3;
+        sun.security.provider.certpath.CertStoreHelper r20, r21;
+        java.lang.String r0, r5, $r12, $r18;
+        java.security.PrivilegedActionException $r13;
+        sun.security.util.Cache $r1;
+        java.lang.Exception $r19;
+        java.security.NoSuchAlgorithmException $r8, $r14;
+        java.lang.Object $r2, $r4, $r7;
+        java.lang.StringBuilder $r9, $r10, $r11, $r15, $r16, $r17;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = <sun.security.provider.certpath.CertStoreHelper: sun.security.util.Cache cache>;
+
+        $r2 = virtualinvoke $r1.<sun.security.util.Cache: java.lang.Object get(java.lang.Object)>(r0);
+
+        r20 = (sun.security.provider.certpath.CertStoreHelper) $r2;
+
+        if r20 == null goto label1;
+
+        return r20;
+
+     label1:
+        $r3 = <sun.security.provider.certpath.CertStoreHelper: java.util.Map classMap>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>(r0);
+
+        r5 = (java.lang.String) $r4;
+
+        if r5 != null goto label2;
+
+        $r8 = new java.security.NoSuchAlgorithmException;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" not available");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<java.security.NoSuchAlgorithmException: void <init>(java.lang.String)>($r12);
+
+        throw $r8;
+
+     label2:
+        $r6 = new sun.security.provider.certpath.CertStoreHelper$1;
+
+        specialinvoke $r6.<sun.security.provider.certpath.CertStoreHelper$1: void <init>(java.lang.String,java.lang.String)>(r5, r0);
+
+        $r7 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r6);
+
+        r21 = (sun.security.provider.certpath.CertStoreHelper) $r7;
+
+     label3:
+        return r21;
+
+     label4:
+        $r13 := @caughtexception;
+
+        $r14 = new java.security.NoSuchAlgorithmException;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" not available");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r19 = virtualinvoke $r13.<java.security.PrivilegedActionException: java.lang.Exception getException()>();
+
+        specialinvoke $r14.<java.security.NoSuchAlgorithmException: void <init>(java.lang.String,java.lang.Throwable)>($r18, $r19);
+
+        throw $r14;
+
+        catch java.security.PrivilegedActionException from label2 to label3 with label4;
+    }
+
+    static boolean isCausedByNetworkIssue(java.lang.String, java.security.cert.CertStoreException)
+    {
+        java.lang.Throwable $r2;
+        java.security.cert.CertStoreException r1;
+        byte b1;
+        java.security.NoSuchAlgorithmException $r4;
+        int $i0;
+        sun.security.provider.certpath.CertStoreHelper $r3;
+        java.lang.String r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.security.cert.CertStoreException;
+
+        b1 = -1;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int hashCode()>();
+
+        lookupswitch($i0)
+        {
+            case 84300: goto label03;
+            case 2331559: goto label01;
+            case 133315663: goto label02;
+            default: goto label04;
+        };
+
+     label01:
+        $z3 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("LDAP");
+
+        if $z3 == 0 goto label04;
+
+        b1 = 0;
+
+        goto label04;
+
+     label02:
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("SSLServer");
+
+        if $z0 == 0 goto label04;
+
+        b1 = 1;
+
+        goto label04;
+
+     label03:
+        $z4 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("URI");
+
+        if $z4 == 0 goto label04;
+
+        b1 = 2;
+
+     label04:
+        tableswitch(b1)
+        {
+            case 0: goto label05;
+            case 1: goto label05;
+            case 2: goto label08;
+            default: goto label11;
+        };
+
+     label05:
+        $r3 = staticinvoke <sun.security.provider.certpath.CertStoreHelper: sun.security.provider.certpath.CertStoreHelper getInstance(java.lang.String)>(r0);
+
+        $z2 = virtualinvoke $r3.<sun.security.provider.certpath.CertStoreHelper: boolean isCausedByNetworkIssue(java.security.cert.CertStoreException)>(r1);
+
+     label06:
+        return $z2;
+
+     label07:
+        $r4 := @caughtexception;
+
+        return 0;
+
+     label08:
+        $r2 = virtualinvoke r1.<java.security.cert.CertStoreException: java.lang.Throwable getCause()>();
+
+        if $r2 == null goto label09;
+
+        $z1 = $r2 instanceof java.io.IOException;
+
+        if $z1 == 0 goto label09;
+
+        $z5 = 1;
+
+        goto label10;
+
+     label09:
+        $z5 = 0;
+
+     label10:
+        return $z5;
+
+     label11:
+        return 0;
+
+        catch java.security.NoSuchAlgorithmException from label05 to label06 with label07;
+    }
+
+    public abstract java.security.cert.CertStore getCertStore(java.net.URI) throws java.security.NoSuchAlgorithmException, java.security.InvalidAlgorithmParameterException;
+
+    public abstract java.security.cert.X509CertSelector wrap(java.security.cert.X509CertSelector, javax.security.auth.x500.X500Principal, java.lang.String) throws java.io.IOException;
+
+    public abstract java.security.cert.X509CRLSelector wrap(java.security.cert.X509CRLSelector, java.util.Collection, java.lang.String) throws java.io.IOException;
+
+    public abstract boolean isCausedByNetworkIssue(java.security.cert.CertStoreException);
+
+    static sun.security.util.Cache access$000()
+    {
+        sun.security.util.Cache $r0;
+
+        $r0 = <sun.security.provider.certpath.CertStoreHelper: sun.security.util.Cache cache>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.util.Map $r1, $r2;
+        java.util.HashMap $r0;
+        sun.security.util.Cache $r3;
+
+        <sun.security.provider.certpath.CertStoreHelper: int NUM_TYPES> = 2;
+
+        $r0 = new java.util.HashMap;
+
+        specialinvoke $r0.<java.util.HashMap: void <init>(int)>(2);
+
+        <sun.security.provider.certpath.CertStoreHelper: java.util.Map classMap> = $r0;
+
+        $r1 = <sun.security.provider.certpath.CertStoreHelper: java.util.Map classMap>;
+
+        interfaceinvoke $r1.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("LDAP", "sun.security.provider.certpath.ldap.LDAPCertStoreHelper");
+
+        $r2 = <sun.security.provider.certpath.CertStoreHelper: java.util.Map classMap>;
+
+        interfaceinvoke $r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("SSLServer", "sun.security.provider.certpath.ssl.SSLServerCertStoreHelper");
+
+        $r3 = staticinvoke <sun.security.util.Cache: sun.security.util.Cache newSoftMemoryCache(int)>(2);
+
+        <sun.security.provider.certpath.CertStoreHelper: sun.security.util.Cache cache> = $r3;
+
+        return;
+    }
+}

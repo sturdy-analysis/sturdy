@@ -1,0 +1,2278 @@
+final class sun.awt.shell.Win32ShellFolder2 extends sun.awt.shell.ShellFolder
+{
+    public static final int DESKTOP;
+    public static final int INTERNET;
+    public static final int PROGRAMS;
+    public static final int CONTROLS;
+    public static final int PRINTERS;
+    public static final int PERSONAL;
+    public static final int FAVORITES;
+    public static final int STARTUP;
+    public static final int RECENT;
+    public static final int SENDTO;
+    public static final int BITBUCKET;
+    public static final int STARTMENU;
+    public static final int DESKTOPDIRECTORY;
+    public static final int DRIVES;
+    public static final int NETWORK;
+    public static final int NETHOOD;
+    public static final int FONTS;
+    public static final int TEMPLATES;
+    public static final int COMMON_STARTMENU;
+    public static final int COMMON_PROGRAMS;
+    public static final int COMMON_STARTUP;
+    public static final int COMMON_DESKTOPDIRECTORY;
+    public static final int APPDATA;
+    public static final int PRINTHOOD;
+    public static final int ALTSTARTUP;
+    public static final int COMMON_ALTSTARTUP;
+    public static final int COMMON_FAVORITES;
+    public static final int INTERNET_CACHE;
+    public static final int COOKIES;
+    public static final int HISTORY;
+    public static final int ATTRIB_CANCOPY;
+    public static final int ATTRIB_CANMOVE;
+    public static final int ATTRIB_CANLINK;
+    public static final int ATTRIB_CANRENAME;
+    public static final int ATTRIB_CANDELETE;
+    public static final int ATTRIB_HASPROPSHEET;
+    public static final int ATTRIB_DROPTARGET;
+    public static final int ATTRIB_LINK;
+    public static final int ATTRIB_SHARE;
+    public static final int ATTRIB_READONLY;
+    public static final int ATTRIB_GHOSTED;
+    public static final int ATTRIB_HIDDEN;
+    public static final int ATTRIB_FILESYSANCESTOR;
+    public static final int ATTRIB_FOLDER;
+    public static final int ATTRIB_FILESYSTEM;
+    public static final int ATTRIB_HASSUBFOLDER;
+    public static final int ATTRIB_VALIDATE;
+    public static final int ATTRIB_REMOVABLE;
+    public static final int ATTRIB_COMPRESSED;
+    public static final int ATTRIB_BROWSABLE;
+    public static final int ATTRIB_NONENUMERATED;
+    public static final int ATTRIB_NEWCONTENT;
+    public static final int SHGDN_NORMAL;
+    public static final int SHGDN_INFOLDER;
+    public static final int SHGDN_INCLUDE_NONFILESYS;
+    public static final int SHGDN_FORADDRESSBAR;
+    public static final int SHGDN_FORPARSING;
+    sun.awt.shell.Win32ShellFolder2$FolderDisposer disposer;
+    private long pIShellIcon;
+    private java.lang.String folderType;
+    private java.lang.String displayName;
+    private java.awt.Image smallIcon;
+    private java.awt.Image largeIcon;
+    private java.lang.Boolean isDir;
+    private boolean isPersonal;
+    private volatile java.lang.Boolean cachedIsFileSystem;
+    private volatile java.lang.Boolean cachedIsLink;
+    private static java.util.Map smallSystemImages;
+    private static java.util.Map largeSystemImages;
+    private static java.util.Map smallLinkedSystemImages;
+    private static java.util.Map largeLinkedSystemImages;
+    private static final int LVCFMT_LEFT;
+    private static final int LVCFMT_RIGHT;
+    private static final int LVCFMT_CENTER;
+
+    private static native void initIDs();
+
+    private void setIShellFolder(long)
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        long l0;
+        sun.awt.shell.Win32ShellFolder2$FolderDisposer $r1;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        l0 := @parameter0: long;
+
+        $r1 = r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.Win32ShellFolder2$FolderDisposer disposer>;
+
+        $r1.<sun.awt.shell.Win32ShellFolder2$FolderDisposer: long pIShellFolder> = l0;
+
+        return;
+    }
+
+    private void setRelativePIDL(long)
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        long l0;
+        sun.awt.shell.Win32ShellFolder2$FolderDisposer $r1;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        l0 := @parameter0: long;
+
+        $r1 = r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.Win32ShellFolder2$FolderDisposer disposer>;
+
+        $r1.<sun.awt.shell.Win32ShellFolder2$FolderDisposer: long relativePIDL> = l0;
+
+        return;
+    }
+
+    private static java.lang.String composePathForCsidl(int) throws java.io.IOException, java.lang.InterruptedException
+    {
+        int i0;
+        java.lang.StringBuilder $r1, $r2, $r4;
+        java.lang.String $r0, $r3, $r5;
+
+        i0 := @parameter0: int;
+
+        $r0 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.String getFileSystemPath(int)>(i0);
+
+        if $r0 != null goto label1;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ShellFolder: 0x");
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>(i0);
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label2;
+
+     label1:
+        $r5 = $r0;
+
+     label2:
+        return $r5;
+    }
+
+    void <init>(int) throws java.io.IOException, java.lang.InterruptedException
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        sun.awt.shell.Win32ShellFolder2$1 $r3;
+        int i0;
+        java.lang.String $r1;
+        sun.awt.shell.Win32ShellFolder2$FolderDisposer $r2, $r4;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        i0 := @parameter0: int;
+
+        $r1 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.String composePathForCsidl(int)>(i0);
+
+        specialinvoke r0.<sun.awt.shell.ShellFolder: void <init>(sun.awt.shell.ShellFolder,java.lang.String)>(null, $r1);
+
+        $r2 = new sun.awt.shell.Win32ShellFolder2$FolderDisposer;
+
+        specialinvoke $r2.<sun.awt.shell.Win32ShellFolder2$FolderDisposer: void <init>()>();
+
+        r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.Win32ShellFolder2$FolderDisposer disposer> = $r2;
+
+        r0.<sun.awt.shell.Win32ShellFolder2: long pIShellIcon> = -1L;
+
+        r0.<sun.awt.shell.Win32ShellFolder2: java.lang.String folderType> = null;
+
+        r0.<sun.awt.shell.Win32ShellFolder2: java.lang.String displayName> = null;
+
+        r0.<sun.awt.shell.Win32ShellFolder2: java.awt.Image smallIcon> = null;
+
+        r0.<sun.awt.shell.Win32ShellFolder2: java.awt.Image largeIcon> = null;
+
+        r0.<sun.awt.shell.Win32ShellFolder2: java.lang.Boolean isDir> = null;
+
+        $r3 = new sun.awt.shell.Win32ShellFolder2$1;
+
+        specialinvoke $r3.<sun.awt.shell.Win32ShellFolder2$1: void <init>(sun.awt.shell.Win32ShellFolder2,int)>(r0, i0);
+
+        staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.Object invoke(java.util.concurrent.Callable,java.lang.Class)>($r3, class "Ljava/lang/InterruptedException;");
+
+        $r4 = r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.Win32ShellFolder2$FolderDisposer disposer>;
+
+        staticinvoke <sun.java2d.Disposer: void addRecord(java.lang.Object,sun.java2d.DisposerRecord)>(r0, $r4);
+
+        return;
+    }
+
+    void <init>(sun.awt.shell.Win32ShellFolder2, long, long, java.lang.String)
+    {
+        long l0, l1;
+        sun.awt.shell.Win32ShellFolder2 r0, r1;
+        java.lang.String r2, $r7;
+        sun.awt.shell.Win32ShellFolder2$FolderDisposer $r3, $r4, $r5, $r6;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        r1 := @parameter0: sun.awt.shell.Win32ShellFolder2;
+
+        l0 := @parameter1: long;
+
+        l1 := @parameter2: long;
+
+        r2 := @parameter3: java.lang.String;
+
+        if r2 == null goto label1;
+
+        $r7 = r2;
+
+        goto label2;
+
+     label1:
+        $r7 = "ShellFolder: ";
+
+     label2:
+        specialinvoke r0.<sun.awt.shell.ShellFolder: void <init>(sun.awt.shell.ShellFolder,java.lang.String)>(r1, $r7);
+
+        $r3 = new sun.awt.shell.Win32ShellFolder2$FolderDisposer;
+
+        specialinvoke $r3.<sun.awt.shell.Win32ShellFolder2$FolderDisposer: void <init>()>();
+
+        r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.Win32ShellFolder2$FolderDisposer disposer> = $r3;
+
+        r0.<sun.awt.shell.Win32ShellFolder2: long pIShellIcon> = -1L;
+
+        r0.<sun.awt.shell.Win32ShellFolder2: java.lang.String folderType> = null;
+
+        r0.<sun.awt.shell.Win32ShellFolder2: java.lang.String displayName> = null;
+
+        r0.<sun.awt.shell.Win32ShellFolder2: java.awt.Image smallIcon> = null;
+
+        r0.<sun.awt.shell.Win32ShellFolder2: java.awt.Image largeIcon> = null;
+
+        r0.<sun.awt.shell.Win32ShellFolder2: java.lang.Boolean isDir> = null;
+
+        $r4 = r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.Win32ShellFolder2$FolderDisposer disposer>;
+
+        $r4.<sun.awt.shell.Win32ShellFolder2$FolderDisposer: long pIShellFolder> = l0;
+
+        $r5 = r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.Win32ShellFolder2$FolderDisposer disposer>;
+
+        $r5.<sun.awt.shell.Win32ShellFolder2$FolderDisposer: long relativePIDL> = l1;
+
+        $r6 = r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.Win32ShellFolder2$FolderDisposer disposer>;
+
+        staticinvoke <sun.java2d.Disposer: void addRecord(java.lang.Object,sun.java2d.DisposerRecord)>(r0, $r6);
+
+        return;
+    }
+
+    void <init>(sun.awt.shell.Win32ShellFolder2, long) throws java.lang.InterruptedException
+    {
+        long l0;
+        sun.awt.shell.Win32ShellFolder2 r0, r1;
+        sun.awt.shell.Win32ShellFolder2$2 $r2;
+        java.lang.Object $r3;
+        java.lang.String $r4;
+        sun.awt.shell.Win32ShellFolder2$FolderDisposer $r5, $r6, $r7;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        r1 := @parameter0: sun.awt.shell.Win32ShellFolder2;
+
+        l0 := @parameter1: long;
+
+        $r2 = new sun.awt.shell.Win32ShellFolder2$2;
+
+        specialinvoke $r2.<sun.awt.shell.Win32ShellFolder2$2: void <init>(sun.awt.shell.Win32ShellFolder2,long)>(r1, l0);
+
+        $r3 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.Object invoke(java.util.concurrent.Callable,java.lang.Class)>($r2, class "Ljava/lang/RuntimeException;");
+
+        $r4 = (java.lang.String) $r3;
+
+        specialinvoke r0.<sun.awt.shell.ShellFolder: void <init>(sun.awt.shell.ShellFolder,java.lang.String)>(r1, $r4);
+
+        $r5 = new sun.awt.shell.Win32ShellFolder2$FolderDisposer;
+
+        specialinvoke $r5.<sun.awt.shell.Win32ShellFolder2$FolderDisposer: void <init>()>();
+
+        r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.Win32ShellFolder2$FolderDisposer disposer> = $r5;
+
+        r0.<sun.awt.shell.Win32ShellFolder2: long pIShellIcon> = -1L;
+
+        r0.<sun.awt.shell.Win32ShellFolder2: java.lang.String folderType> = null;
+
+        r0.<sun.awt.shell.Win32ShellFolder2: java.lang.String displayName> = null;
+
+        r0.<sun.awt.shell.Win32ShellFolder2: java.awt.Image smallIcon> = null;
+
+        r0.<sun.awt.shell.Win32ShellFolder2: java.awt.Image largeIcon> = null;
+
+        r0.<sun.awt.shell.Win32ShellFolder2: java.lang.Boolean isDir> = null;
+
+        $r6 = r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.Win32ShellFolder2$FolderDisposer disposer>;
+
+        $r6.<sun.awt.shell.Win32ShellFolder2$FolderDisposer: long relativePIDL> = l0;
+
+        $r7 = r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.Win32ShellFolder2$FolderDisposer disposer>;
+
+        staticinvoke <sun.java2d.Disposer: void addRecord(java.lang.Object,sun.java2d.DisposerRecord)>(r0, $r7);
+
+        return;
+    }
+
+    private native void initDesktop();
+
+    private native void initSpecial(long, int);
+
+    public void setIsPersonal()
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        r0.<sun.awt.shell.Win32ShellFolder2: boolean isPersonal> = 1;
+
+        return;
+    }
+
+    protected java.lang.Object writeReplace() throws java.io.ObjectStreamException
+    {
+        sun.awt.shell.Win32ShellFolder2$3 $r0;
+        sun.awt.shell.Win32ShellFolder2 r1;
+        java.lang.Object $r2;
+
+        r1 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        $r0 = new sun.awt.shell.Win32ShellFolder2$3;
+
+        specialinvoke $r0.<sun.awt.shell.Win32ShellFolder2$3: void <init>(sun.awt.shell.Win32ShellFolder2)>(r1);
+
+        $r2 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.Object invoke(java.util.concurrent.Callable)>($r0);
+
+        return $r2;
+    }
+
+    protected void dispose()
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        sun.awt.shell.Win32ShellFolder2$FolderDisposer $r1;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        $r1 = r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.Win32ShellFolder2$FolderDisposer disposer>;
+
+        virtualinvoke $r1.<sun.awt.shell.Win32ShellFolder2$FolderDisposer: void dispose()>();
+
+        return;
+    }
+
+    static native long getNextPIDLEntry(long);
+
+    static native long copyFirstPIDLEntry(long);
+
+    private static native long combinePIDLs(long, long);
+
+    static native void releasePIDL(long);
+
+    private static native void releaseIShellFolder(long);
+
+    private long getIShellFolder()
+    {
+        long $l0, $l2, $l3;
+        sun.awt.shell.Win32ShellFolder2$4 $r2;
+        sun.awt.shell.Win32ShellFolder2 r0;
+        byte $b1;
+        java.lang.Long $r5;
+        java.lang.InterruptedException $r6;
+        java.lang.Object $r4;
+        sun.awt.shell.Win32ShellFolder2$FolderDisposer $r1, $r3, $r7;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        $r1 = r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.Win32ShellFolder2$FolderDisposer disposer>;
+
+        $l0 = $r1.<sun.awt.shell.Win32ShellFolder2$FolderDisposer: long pIShellFolder>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label4;
+
+     label1:
+        $r3 = r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.Win32ShellFolder2$FolderDisposer disposer>;
+
+        $r2 = new sun.awt.shell.Win32ShellFolder2$4;
+
+        specialinvoke $r2.<sun.awt.shell.Win32ShellFolder2$4: void <init>(sun.awt.shell.Win32ShellFolder2)>(r0);
+
+        $r4 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.Object invoke(java.util.concurrent.Callable,java.lang.Class)>($r2, class "Ljava/lang/RuntimeException;");
+
+        $r5 = (java.lang.Long) $r4;
+
+        $l2 = virtualinvoke $r5.<java.lang.Long: long longValue()>();
+
+        $r3.<sun.awt.shell.Win32ShellFolder2$FolderDisposer: long pIShellFolder> = $l2;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+     label4:
+        $r7 = r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.Win32ShellFolder2$FolderDisposer disposer>;
+
+        $l3 = $r7.<sun.awt.shell.Win32ShellFolder2$FolderDisposer: long pIShellFolder>;
+
+        return $l3;
+
+        catch java.lang.InterruptedException from label1 to label2 with label3;
+    }
+
+    public long getParentIShellFolder()
+    {
+        sun.awt.shell.Win32ShellFolder2 r0, r2;
+        long $l0, $l1;
+        java.io.File $r1;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        $r1 = virtualinvoke r0.<sun.awt.shell.Win32ShellFolder2: java.io.File getParentFile()>();
+
+        r2 = (sun.awt.shell.Win32ShellFolder2) $r1;
+
+        if r2 != null goto label1;
+
+        $l1 = specialinvoke r0.<sun.awt.shell.Win32ShellFolder2: long getIShellFolder()>();
+
+        return $l1;
+
+     label1:
+        $l0 = specialinvoke r2.<sun.awt.shell.Win32ShellFolder2: long getIShellFolder()>();
+
+        return $l0;
+    }
+
+    public long getRelativePIDL()
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        byte $b1;
+        java.lang.InternalError $r3;
+        long $l0, $l2;
+        sun.awt.shell.Win32ShellFolder2$FolderDisposer $r1, $r2;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        $r1 = r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.Win32ShellFolder2$FolderDisposer disposer>;
+
+        $l0 = $r1.<sun.awt.shell.Win32ShellFolder2$FolderDisposer: long relativePIDL>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        $r3 = new java.lang.InternalError;
+
+        specialinvoke $r3.<java.lang.InternalError: void <init>(java.lang.String)>("Should always have a relative PIDL");
+
+        throw $r3;
+
+     label1:
+        $r2 = r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.Win32ShellFolder2$FolderDisposer disposer>;
+
+        $l2 = $r2.<sun.awt.shell.Win32ShellFolder2$FolderDisposer: long relativePIDL>;
+
+        return $l2;
+    }
+
+    private long getAbsolutePIDL()
+    {
+        long $l0, $l2, $l3, $l4, $l5, $l6;
+        sun.awt.shell.Win32ShellFolder2 r0, $r5;
+        sun.awt.shell.ShellFolder $r1, $r4;
+        byte $b1;
+        sun.awt.shell.Win32ShellFolder2$FolderDisposer $r2, $r3, $r6;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        $r1 = r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.ShellFolder parent>;
+
+        if $r1 != null goto label1;
+
+        $l6 = virtualinvoke r0.<sun.awt.shell.Win32ShellFolder2: long getRelativePIDL()>();
+
+        return $l6;
+
+     label1:
+        $r2 = r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.Win32ShellFolder2$FolderDisposer disposer>;
+
+        $l0 = $r2.<sun.awt.shell.Win32ShellFolder2$FolderDisposer: long absolutePIDL>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label2;
+
+        $r6 = r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.Win32ShellFolder2$FolderDisposer disposer>;
+
+        $r4 = r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.ShellFolder parent>;
+
+        $r5 = (sun.awt.shell.Win32ShellFolder2) $r4;
+
+        $l3 = specialinvoke $r5.<sun.awt.shell.Win32ShellFolder2: long getAbsolutePIDL()>();
+
+        $l4 = virtualinvoke r0.<sun.awt.shell.Win32ShellFolder2: long getRelativePIDL()>();
+
+        $l5 = staticinvoke <sun.awt.shell.Win32ShellFolder2: long combinePIDLs(long,long)>($l3, $l4);
+
+        $r6.<sun.awt.shell.Win32ShellFolder2$FolderDisposer: long absolutePIDL> = $l5;
+
+     label2:
+        $r3 = r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.Win32ShellFolder2$FolderDisposer disposer>;
+
+        $l2 = $r3.<sun.awt.shell.Win32ShellFolder2$FolderDisposer: long absolutePIDL>;
+
+        return $l2;
+    }
+
+    public sun.awt.shell.Win32ShellFolder2 getDesktop()
+    {
+        sun.awt.shell.Win32ShellFolder2 $r0, r1;
+
+        r1 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        $r0 = staticinvoke <sun.awt.shell.Win32ShellFolderManager2: sun.awt.shell.Win32ShellFolder2 getDesktop()>();
+
+        return $r0;
+    }
+
+    public long getDesktopIShellFolder()
+    {
+        sun.awt.shell.Win32ShellFolder2 r0, $r1;
+        long $l0;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        $r1 = virtualinvoke r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.Win32ShellFolder2 getDesktop()>();
+
+        $l0 = specialinvoke $r1.<sun.awt.shell.Win32ShellFolder2: long getIShellFolder()>();
+
+        return $l0;
+    }
+
+    private static boolean pathsEqual(java.lang.String, java.lang.String)
+    {
+        java.lang.String r0, r1;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r1);
+
+        return $z0;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        sun.awt.shell.Win32ShellFolder2 r1, r5;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10;
+        sun.awt.shell.Win32ShellFolder2$FolderDisposer $r10, $r11;
+        long $l0, $l1, $l2;
+        sun.awt.shell.ShellFolder $r6, $r7, $r8, $r9, $r12, $r13, $r16, $r17, $r18, $r19, $r20, $r21;
+        java.lang.String $r2, $r4, $r14, $r15;
+        java.io.File $r3;
+        java.lang.InterruptedException $r22;
+        java.lang.Object r0;
+
+        r1 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 == null goto label01;
+
+        $z3 = r0 instanceof sun.awt.shell.Win32ShellFolder2;
+
+        if $z3 != 0 goto label03;
+
+     label01:
+        $z0 = r0 instanceof java.io.File;
+
+        if $z0 != 0 goto label02;
+
+        $z2 = specialinvoke r1.<sun.awt.shell.ShellFolder: boolean equals(java.lang.Object)>(r0);
+
+        return $z2;
+
+     label02:
+        $r2 = virtualinvoke r1.<sun.awt.shell.Win32ShellFolder2: java.lang.String getPath()>();
+
+        $r3 = (java.io.File) r0;
+
+        $r4 = virtualinvoke $r3.<java.io.File: java.lang.String getPath()>();
+
+        $z1 = staticinvoke <sun.awt.shell.Win32ShellFolder2: boolean pathsEqual(java.lang.String,java.lang.String)>($r2, $r4);
+
+        return $z1;
+
+     label03:
+        r5 = (sun.awt.shell.Win32ShellFolder2) r0;
+
+        $r6 = r1.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.ShellFolder parent>;
+
+        if $r6 != null goto label04;
+
+        $r21 = r5.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.ShellFolder parent>;
+
+        if $r21 != null goto label05;
+
+     label04:
+        $r7 = r1.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.ShellFolder parent>;
+
+        if $r7 == null goto label06;
+
+        $r20 = r5.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.ShellFolder parent>;
+
+        if $r20 != null goto label06;
+
+     label05:
+        return 0;
+
+     label06:
+        $z4 = virtualinvoke r1.<sun.awt.shell.Win32ShellFolder2: boolean isFileSystem()>();
+
+        if $z4 == 0 goto label10;
+
+        $z7 = virtualinvoke r5.<sun.awt.shell.Win32ShellFolder2: boolean isFileSystem()>();
+
+        if $z7 == 0 goto label10;
+
+        $r14 = virtualinvoke r1.<sun.awt.shell.Win32ShellFolder2: java.lang.String getPath()>();
+
+        $r15 = virtualinvoke r5.<sun.awt.shell.Win32ShellFolder2: java.lang.String getPath()>();
+
+        $z8 = staticinvoke <sun.awt.shell.Win32ShellFolder2: boolean pathsEqual(java.lang.String,java.lang.String)>($r14, $r15);
+
+        if $z8 == 0 goto label08;
+
+        $r17 = r1.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.ShellFolder parent>;
+
+        $r16 = r5.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.ShellFolder parent>;
+
+        if $r17 == $r16 goto label07;
+
+        $r19 = r1.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.ShellFolder parent>;
+
+        $r18 = r5.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.ShellFolder parent>;
+
+        $z9 = virtualinvoke $r19.<sun.awt.shell.ShellFolder: boolean equals(java.lang.Object)>($r18);
+
+        if $z9 == 0 goto label08;
+
+     label07:
+        $z10 = 1;
+
+        goto label09;
+
+     label08:
+        $z10 = 0;
+
+     label09:
+        return $z10;
+
+     label10:
+        $r9 = r1.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.ShellFolder parent>;
+
+        $r8 = r5.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.ShellFolder parent>;
+
+        if $r9 == $r8 goto label11;
+
+        $r13 = r1.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.ShellFolder parent>;
+
+        $r12 = r5.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.ShellFolder parent>;
+
+        $z6 = virtualinvoke $r13.<sun.awt.shell.ShellFolder: boolean equals(java.lang.Object)>($r12);
+
+        if $z6 == 0 goto label14;
+
+     label11:
+        $l0 = virtualinvoke r1.<sun.awt.shell.Win32ShellFolder2: long getParentIShellFolder()>();
+
+        $r10 = r1.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.Win32ShellFolder2$FolderDisposer disposer>;
+
+        $l2 = $r10.<sun.awt.shell.Win32ShellFolder2$FolderDisposer: long relativePIDL>;
+
+        $r11 = r5.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.Win32ShellFolder2$FolderDisposer disposer>;
+
+        $l1 = $r11.<sun.awt.shell.Win32ShellFolder2$FolderDisposer: long relativePIDL>;
+
+        $z5 = staticinvoke <sun.awt.shell.Win32ShellFolder2: boolean pidlsEqual(long,long,long)>($l0, $l2, $l1);
+
+     label12:
+        return $z5;
+
+     label13:
+        $r22 := @caughtexception;
+
+        return 0;
+
+     label14:
+        return 0;
+
+        catch java.lang.InterruptedException from label11 to label12 with label13;
+    }
+
+    private static boolean pidlsEqual(long, long, long) throws java.lang.InterruptedException
+    {
+        java.lang.Boolean $r2;
+        long l0, l1, l2;
+        java.lang.Object $r1;
+        sun.awt.shell.Win32ShellFolder2$5 $r0;
+        boolean $z0;
+
+        l0 := @parameter0: long;
+
+        l1 := @parameter1: long;
+
+        l2 := @parameter2: long;
+
+        $r0 = new sun.awt.shell.Win32ShellFolder2$5;
+
+        specialinvoke $r0.<sun.awt.shell.Win32ShellFolder2$5: void <init>(long,long,long)>(l0, l1, l2);
+
+        $r1 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.Object invoke(java.util.concurrent.Callable,java.lang.Class)>($r0, class "Ljava/lang/RuntimeException;");
+
+        $r2 = (java.lang.Boolean) $r1;
+
+        $z0 = virtualinvoke $r2.<java.lang.Boolean: boolean booleanValue()>();
+
+        return $z0;
+    }
+
+    private static native int compareIDs(long, long, long);
+
+    public boolean isFileSystem()
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        java.lang.Boolean $r1, $r2, $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        $r1 = r0.<sun.awt.shell.Win32ShellFolder2: java.lang.Boolean cachedIsFileSystem>;
+
+        if $r1 != null goto label1;
+
+        $z1 = virtualinvoke r0.<sun.awt.shell.Win32ShellFolder2: boolean hasAttribute(int)>(1073741824);
+
+        $r3 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z1);
+
+        r0.<sun.awt.shell.Win32ShellFolder2: java.lang.Boolean cachedIsFileSystem> = $r3;
+
+     label1:
+        $r2 = r0.<sun.awt.shell.Win32ShellFolder2: java.lang.Boolean cachedIsFileSystem>;
+
+        $z0 = virtualinvoke $r2.<java.lang.Boolean: boolean booleanValue()>();
+
+        return $z0;
+    }
+
+    public boolean hasAttribute(int)
+    {
+        sun.awt.shell.Win32ShellFolder2 r1;
+        int i0;
+        java.lang.Boolean r3;
+        java.lang.Object $r2;
+        sun.awt.shell.Win32ShellFolder2$6 $r0;
+        boolean $z0, $z1;
+
+        r1 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        i0 := @parameter0: int;
+
+        $r0 = new sun.awt.shell.Win32ShellFolder2$6;
+
+        specialinvoke $r0.<sun.awt.shell.Win32ShellFolder2$6: void <init>(sun.awt.shell.Win32ShellFolder2,int)>(r1, i0);
+
+        $r2 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.Object invoke(java.util.concurrent.Callable)>($r0);
+
+        r3 = (java.lang.Boolean) $r2;
+
+        if r3 == null goto label1;
+
+        $z0 = virtualinvoke r3.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    private static native int getAttributes0(long, long, int);
+
+    private static java.lang.String getFileSystemPath(long, long)
+    {
+        long l0, $l1, l3, $l5, $l6;
+        sun.awt.shell.Win32ShellFolder2 $r0, $r1;
+        byte $b2;
+        int $i4, $i8;
+        java.lang.String $r2, $r3;
+        boolean $z0;
+
+        l0 := @parameter0: long;
+
+        l3 := @parameter1: long;
+
+        $r0 = staticinvoke <sun.awt.shell.Win32ShellFolderManager2: sun.awt.shell.Win32ShellFolder2 getNetwork()>();
+
+        $l1 = specialinvoke $r0.<sun.awt.shell.Win32ShellFolder2: long getIShellFolder()>();
+
+        $b2 = l0 cmp $l1;
+
+        if $b2 != 0 goto label1;
+
+        $i4 = staticinvoke <sun.awt.shell.Win32ShellFolder2: int getAttributes0(long,long,int)>(l0, l3, 536936448);
+
+        if $i4 != 536936448 goto label1;
+
+        $r1 = staticinvoke <sun.awt.shell.Win32ShellFolderManager2: sun.awt.shell.Win32ShellFolder2 getDesktop()>();
+
+        $l5 = specialinvoke $r1.<sun.awt.shell.Win32ShellFolder2: long getIShellFolder()>();
+
+        $l6 = staticinvoke <sun.awt.shell.Win32ShellFolder2: long getLinkLocation(long,long,boolean)>(l0, l3, 0);
+
+        $r2 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.String getFileSystemPath(long,long)>($l5, $l6);
+
+        if $r2 == null goto label1;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>("\\\\");
+
+        if $z0 == 0 goto label1;
+
+        return $r2;
+
+     label1:
+        $i8 = (int) 32768;
+
+        $r3 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.String getDisplayNameOf(long,long,int)>(l0, l3, $i8);
+
+        return $r3;
+    }
+
+    static java.lang.String getFileSystemPath(int) throws java.io.IOException, java.lang.InterruptedException
+    {
+        int i0;
+        java.lang.Object $r1;
+        java.lang.String r2;
+        sun.awt.shell.Win32ShellFolder2$7 $r0;
+        java.lang.SecurityManager $r3;
+
+        i0 := @parameter0: int;
+
+        $r0 = new sun.awt.shell.Win32ShellFolder2$7;
+
+        specialinvoke $r0.<sun.awt.shell.Win32ShellFolder2$7: void <init>(int)>(i0);
+
+        $r1 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.Object invoke(java.util.concurrent.Callable,java.lang.Class)>($r0, class "Ljava/io/IOException;");
+
+        r2 = (java.lang.String) $r1;
+
+        if r2 == null goto label1;
+
+        $r3 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r3 == null goto label1;
+
+        virtualinvoke $r3.<java.lang.SecurityManager: void checkRead(java.lang.String)>(r2);
+
+     label1:
+        return r2;
+    }
+
+    private static native java.lang.String getFileSystemPath0(int) throws java.io.IOException;
+
+    private static boolean isNetworkRoot(java.lang.String)
+    {
+        java.lang.String r0;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("\\\\");
+
+        if $z0 != 0 goto label1;
+
+        $z1 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("\\");
+
+        if $z1 != 0 goto label1;
+
+        $z2 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("//");
+
+        if $z2 != 0 goto label1;
+
+        $z3 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("/");
+
+        if $z3 == 0 goto label2;
+
+     label1:
+        $z4 = 1;
+
+        goto label3;
+
+     label2:
+        $z4 = 0;
+
+     label3:
+        return $z4;
+    }
+
+    public java.io.File getParentFile()
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        sun.awt.shell.ShellFolder $r1;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        $r1 = r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.ShellFolder parent>;
+
+        return $r1;
+    }
+
+    public boolean isDirectory()
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        sun.awt.shell.ShellFolder $r3;
+        java.lang.Boolean $r1, $r2, $r4, $r5, $r6;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        $r1 = r0.<sun.awt.shell.Win32ShellFolder2: java.lang.Boolean isDir>;
+
+        if $r1 != null goto label5;
+
+        $z0 = virtualinvoke r0.<sun.awt.shell.Win32ShellFolder2: boolean hasAttribute(int)>(536870912);
+
+        if $z0 == 0 goto label1;
+
+        $z3 = virtualinvoke r0.<sun.awt.shell.Win32ShellFolder2: boolean hasAttribute(int)>(134217728);
+
+        if $z3 != 0 goto label1;
+
+        $r4 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        r0.<sun.awt.shell.Win32ShellFolder2: java.lang.Boolean isDir> = $r4;
+
+        goto label5;
+
+     label1:
+        $z1 = virtualinvoke r0.<sun.awt.shell.Win32ShellFolder2: boolean isLink()>();
+
+        if $z1 == 0 goto label4;
+
+        $r3 = specialinvoke r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.ShellFolder getLinkLocation(boolean)>(0);
+
+        if $r3 == null goto label2;
+
+        $z2 = virtualinvoke $r3.<sun.awt.shell.ShellFolder: boolean isDirectory()>();
+
+        if $z2 == 0 goto label2;
+
+        $z4 = 1;
+
+        goto label3;
+
+     label2:
+        $z4 = 0;
+
+     label3:
+        $r5 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z4);
+
+        r0.<sun.awt.shell.Win32ShellFolder2: java.lang.Boolean isDir> = $r5;
+
+        goto label5;
+
+     label4:
+        $r2 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        r0.<sun.awt.shell.Win32ShellFolder2: java.lang.Boolean isDir> = $r2;
+
+     label5:
+        $r6 = r0.<sun.awt.shell.Win32ShellFolder2: java.lang.Boolean isDir>;
+
+        $z5 = virtualinvoke $r6.<java.lang.Boolean: boolean booleanValue()>();
+
+        return $z5;
+    }
+
+    private long getEnumObjects(boolean) throws java.lang.InterruptedException
+    {
+        sun.awt.shell.Win32ShellFolder2 r1;
+        java.lang.Long $r3;
+        java.lang.Object $r2;
+        long $l0;
+        sun.awt.shell.Win32ShellFolder2$8 $r0;
+        boolean z0;
+
+        r1 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        z0 := @parameter0: boolean;
+
+        $r0 = new sun.awt.shell.Win32ShellFolder2$8;
+
+        specialinvoke $r0.<sun.awt.shell.Win32ShellFolder2$8: void <init>(sun.awt.shell.Win32ShellFolder2,boolean)>(r1, z0);
+
+        $r2 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.Object invoke(java.util.concurrent.Callable,java.lang.Class)>($r0, class "Ljava/lang/RuntimeException;");
+
+        $r3 = (java.lang.Long) $r2;
+
+        $l0 = virtualinvoke $r3.<java.lang.Long: long longValue()>();
+
+        return $l0;
+    }
+
+    private native long getEnumObjects(long, boolean, boolean);
+
+    private native long getNextChild(long);
+
+    private native void releaseEnumObjects(long);
+
+    private static native long bindToObject(long, long);
+
+    public java.io.File[] listFiles(boolean)
+    {
+        sun.awt.shell.Win32ShellFolder2$9 $r1;
+        java.lang.SecurityManager $r0;
+        sun.awt.shell.Win32ShellFolder2 r2;
+        java.lang.InterruptedException $r7;
+        java.lang.Object $r3;
+        java.lang.String $r5;
+        java.io.File[] $r4, $r6, $r8;
+        boolean z0;
+
+        r2 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        z0 := @parameter0: boolean;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r5 = virtualinvoke r2.<sun.awt.shell.Win32ShellFolder2: java.lang.String getPath()>();
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkRead(java.lang.String)>($r5);
+
+     label1:
+        $r1 = new sun.awt.shell.Win32ShellFolder2$9;
+
+        specialinvoke $r1.<sun.awt.shell.Win32ShellFolder2$9: void <init>(sun.awt.shell.Win32ShellFolder2,boolean)>(r2, z0);
+
+        $r3 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.Object invoke(java.util.concurrent.Callable,java.lang.Class)>($r1, class "Ljava/lang/InterruptedException;");
+
+        $r6 = (java.io.File[]) $r3;
+
+        $r4 = staticinvoke <sun.awt.shell.Win32ShellFolderManager2: java.io.File[] checkFiles(java.io.File[])>($r6);
+
+     label2:
+        return $r4;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $r8 = newarray (java.io.File)[0];
+
+        return $r8;
+
+        catch java.lang.InterruptedException from label1 to label2 with label3;
+    }
+
+    sun.awt.shell.Win32ShellFolder2 getChildByPath(java.lang.String) throws java.lang.InterruptedException
+    {
+        sun.awt.shell.Win32ShellFolder2 r1, $r4;
+        sun.awt.shell.Win32ShellFolder2$10 $r0;
+        java.lang.Object $r3;
+        java.lang.String r2;
+
+        r1 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r0 = new sun.awt.shell.Win32ShellFolder2$10;
+
+        specialinvoke $r0.<sun.awt.shell.Win32ShellFolder2$10: void <init>(sun.awt.shell.Win32ShellFolder2,java.lang.String)>(r1, r2);
+
+        $r3 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.Object invoke(java.util.concurrent.Callable,java.lang.Class)>($r0, class "Ljava/lang/InterruptedException;");
+
+        $r4 = (sun.awt.shell.Win32ShellFolder2) $r3;
+
+        return $r4;
+    }
+
+    public boolean isLink()
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        java.lang.Boolean $r1, $r2, $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        $r1 = r0.<sun.awt.shell.Win32ShellFolder2: java.lang.Boolean cachedIsLink>;
+
+        if $r1 != null goto label1;
+
+        $z1 = virtualinvoke r0.<sun.awt.shell.Win32ShellFolder2: boolean hasAttribute(int)>(65536);
+
+        $r3 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z1);
+
+        r0.<sun.awt.shell.Win32ShellFolder2: java.lang.Boolean cachedIsLink> = $r3;
+
+     label1:
+        $r2 = r0.<sun.awt.shell.Win32ShellFolder2: java.lang.Boolean cachedIsLink>;
+
+        $z0 = virtualinvoke $r2.<java.lang.Boolean: boolean booleanValue()>();
+
+        return $z0;
+    }
+
+    public boolean isHidden()
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        boolean $z0;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        $z0 = virtualinvoke r0.<sun.awt.shell.Win32ShellFolder2: boolean hasAttribute(int)>(524288);
+
+        return $z0;
+    }
+
+    private static native long getLinkLocation(long, long, boolean);
+
+    public sun.awt.shell.ShellFolder getLinkLocation()
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        sun.awt.shell.ShellFolder $r1;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        $r1 = specialinvoke r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.ShellFolder getLinkLocation(boolean)>(1);
+
+        return $r1;
+    }
+
+    private sun.awt.shell.ShellFolder getLinkLocation(boolean)
+    {
+        sun.awt.shell.Win32ShellFolder2 r1;
+        sun.awt.shell.ShellFolder $r3;
+        java.lang.Object $r2;
+        sun.awt.shell.Win32ShellFolder2$11 $r0;
+        boolean z0;
+
+        r1 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        z0 := @parameter0: boolean;
+
+        $r0 = new sun.awt.shell.Win32ShellFolder2$11;
+
+        specialinvoke $r0.<sun.awt.shell.Win32ShellFolder2$11: void <init>(sun.awt.shell.Win32ShellFolder2,boolean)>(r1, z0);
+
+        $r2 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.Object invoke(java.util.concurrent.Callable)>($r0);
+
+        $r3 = (sun.awt.shell.ShellFolder) $r2;
+
+        return $r3;
+    }
+
+    long parseDisplayName(java.lang.String) throws java.io.IOException, java.lang.InterruptedException
+    {
+        sun.awt.shell.Win32ShellFolder2 r1;
+        java.lang.Long $r4;
+        sun.awt.shell.Win32ShellFolder2$12 $r0;
+        java.lang.Object $r3;
+        long $l0;
+        java.lang.String r2;
+
+        r1 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r0 = new sun.awt.shell.Win32ShellFolder2$12;
+
+        specialinvoke $r0.<sun.awt.shell.Win32ShellFolder2$12: void <init>(sun.awt.shell.Win32ShellFolder2,java.lang.String)>(r1, r2);
+
+        $r3 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.Object invoke(java.util.concurrent.Callable,java.lang.Class)>($r0, class "Ljava/io/IOException;");
+
+        $r4 = (java.lang.Long) $r3;
+
+        $l0 = virtualinvoke $r4.<java.lang.Long: long longValue()>();
+
+        return $l0;
+    }
+
+    private static native long parseDisplayName0(long, java.lang.String) throws java.io.IOException;
+
+    private static native java.lang.String getDisplayNameOf(long, long, int);
+
+    public java.lang.String getDisplayName()
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        sun.awt.shell.Win32ShellFolder2$13 $r3;
+        java.lang.Object $r4;
+        java.lang.String $r1, $r2, $r5;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        $r1 = r0.<sun.awt.shell.Win32ShellFolder2: java.lang.String displayName>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new sun.awt.shell.Win32ShellFolder2$13;
+
+        specialinvoke $r3.<sun.awt.shell.Win32ShellFolder2$13: void <init>(sun.awt.shell.Win32ShellFolder2)>(r0);
+
+        $r4 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.Object invoke(java.util.concurrent.Callable)>($r3);
+
+        $r5 = (java.lang.String) $r4;
+
+        r0.<sun.awt.shell.Win32ShellFolder2: java.lang.String displayName> = $r5;
+
+     label1:
+        $r2 = r0.<sun.awt.shell.Win32ShellFolder2: java.lang.String displayName>;
+
+        return $r2;
+    }
+
+    private static native java.lang.String getFolderType(long);
+
+    public java.lang.String getFolderType()
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        sun.awt.shell.Win32ShellFolder2$14 $r3;
+        long $l0;
+        java.lang.Object $r4;
+        java.lang.String $r1, $r2, $r5;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        $r1 = r0.<sun.awt.shell.Win32ShellFolder2: java.lang.String folderType>;
+
+        if $r1 != null goto label1;
+
+        $l0 = specialinvoke r0.<sun.awt.shell.Win32ShellFolder2: long getAbsolutePIDL()>();
+
+        $r3 = new sun.awt.shell.Win32ShellFolder2$14;
+
+        specialinvoke $r3.<sun.awt.shell.Win32ShellFolder2$14: void <init>(sun.awt.shell.Win32ShellFolder2,long)>(r0, $l0);
+
+        $r4 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.Object invoke(java.util.concurrent.Callable)>($r3);
+
+        $r5 = (java.lang.String) $r4;
+
+        r0.<sun.awt.shell.Win32ShellFolder2: java.lang.String folderType> = $r5;
+
+     label1:
+        $r2 = r0.<sun.awt.shell.Win32ShellFolder2: java.lang.String folderType>;
+
+        return $r2;
+    }
+
+    private native java.lang.String getExecutableType(java.lang.String);
+
+    public java.lang.String getExecutableType()
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        java.lang.String $r1, $r2;
+        boolean $z0;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        $z0 = virtualinvoke r0.<sun.awt.shell.Win32ShellFolder2: boolean isFileSystem()>();
+
+        if $z0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.awt.shell.Win32ShellFolder2: java.lang.String getAbsolutePath()>();
+
+        $r2 = specialinvoke r0.<sun.awt.shell.Win32ShellFolder2: java.lang.String getExecutableType(java.lang.String)>($r1);
+
+        return $r2;
+    }
+
+    private static native long getIShellIcon(long);
+
+    private static native int getIconIndex(long, long);
+
+    private static native long getIcon(java.lang.String, boolean);
+
+    private static native long extractIcon(long, long, boolean);
+
+    private static native long getSystemIcon(int);
+
+    private static native long getIconResource(java.lang.String, int, int, int, boolean);
+
+    private static native int[] getIconBits(long, int);
+
+    private static native void disposeIcon(long);
+
+    static native int[] getStandardViewButton0(int);
+
+    private long getIShellIcon()
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        byte $b1;
+        long $l0, $l2, $l3, $l4;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        $l0 = r0.<sun.awt.shell.Win32ShellFolder2: long pIShellIcon>;
+
+        $b1 = $l0 cmp -1L;
+
+        if $b1 != 0 goto label1;
+
+        $l3 = specialinvoke r0.<sun.awt.shell.Win32ShellFolder2: long getIShellFolder()>();
+
+        $l4 = staticinvoke <sun.awt.shell.Win32ShellFolder2: long getIShellIcon(long)>($l3);
+
+        r0.<sun.awt.shell.Win32ShellFolder2: long pIShellIcon> = $l4;
+
+     label1:
+        $l2 = r0.<sun.awt.shell.Win32ShellFolder2: long pIShellIcon>;
+
+        return $l2;
+    }
+
+    private static java.awt.Image makeIcon(long, boolean)
+    {
+        java.awt.image.BufferedImage $r1;
+        long l0;
+        byte $b1, $b2, $b4, $b5, $b8;
+        int[] $r0;
+        boolean z0;
+
+        l0 := @parameter0: long;
+
+        z0 := @parameter1: boolean;
+
+        $b1 = l0 cmp 0L;
+
+        if $b1 == 0 goto label3;
+
+        $b2 = l0 cmp -1L;
+
+        if $b2 == 0 goto label3;
+
+        if z0 == 0 goto label1;
+
+        $b8 = 32;
+
+        $b5 = 32;
+
+        $b4 = 32;
+
+        goto label2;
+
+     label1:
+        $b8 = 16;
+
+        $b5 = 16;
+
+        $b4 = 16;
+
+     label2:
+        $r0 = staticinvoke <sun.awt.shell.Win32ShellFolder2: int[] getIconBits(long,int)>(l0, $b8);
+
+        if $r0 == null goto label3;
+
+        $r1 = new java.awt.image.BufferedImage;
+
+        specialinvoke $r1.<java.awt.image.BufferedImage: void <init>(int,int,int)>($b5, $b5, 2);
+
+        virtualinvoke $r1.<java.awt.image.BufferedImage: void setRGB(int,int,int,int,int[],int,int)>(0, 0, $b4, $b4, $r0, 0, $b4);
+
+        return $r1;
+
+     label3:
+        return null;
+    }
+
+    public java.awt.Image getIcon(boolean)
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        java.awt.Image $r3, r4;
+        sun.awt.shell.Win32ShellFolder2$15 $r1;
+        java.lang.Object $r2;
+        boolean z0;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        z0 := @parameter0: boolean;
+
+        if z0 == 0 goto label1;
+
+        $r3 = r0.<sun.awt.shell.Win32ShellFolder2: java.awt.Image largeIcon>;
+
+        goto label2;
+
+     label1:
+        $r3 = r0.<sun.awt.shell.Win32ShellFolder2: java.awt.Image smallIcon>;
+
+     label2:
+        r4 = $r3;
+
+        if $r3 != null goto label4;
+
+        $r1 = new sun.awt.shell.Win32ShellFolder2$15;
+
+        specialinvoke $r1.<sun.awt.shell.Win32ShellFolder2$15: void <init>(sun.awt.shell.Win32ShellFolder2,boolean)>(r0, z0);
+
+        $r2 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.Object invoke(java.util.concurrent.Callable)>($r1);
+
+        r4 = (java.awt.Image) $r2;
+
+        if z0 == 0 goto label3;
+
+        r0.<sun.awt.shell.Win32ShellFolder2: java.awt.Image largeIcon> = r4;
+
+        goto label4;
+
+     label3:
+        r0.<sun.awt.shell.Win32ShellFolder2: java.awt.Image smallIcon> = r4;
+
+     label4:
+        return r4;
+    }
+
+    static java.awt.Image getSystemIcon(sun.awt.shell.Win32ShellFolder2$SystemIcon)
+    {
+        java.awt.Image $r1;
+        int $i0;
+        long $l1;
+        sun.awt.shell.Win32ShellFolder2$SystemIcon r0;
+
+        r0 := @parameter0: sun.awt.shell.Win32ShellFolder2$SystemIcon;
+
+        $i0 = virtualinvoke r0.<sun.awt.shell.Win32ShellFolder2$SystemIcon: int getIconID()>();
+
+        $l1 = staticinvoke <sun.awt.shell.Win32ShellFolder2: long getSystemIcon(int)>($i0);
+
+        $r1 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.awt.Image makeIcon(long,boolean)>($l1, 1);
+
+        staticinvoke <sun.awt.shell.Win32ShellFolder2: void disposeIcon(long)>($l1);
+
+        return $r1;
+    }
+
+    static java.awt.Image getShell32Icon(int, boolean)
+    {
+        java.awt.Image $r2;
+        long $l2;
+        byte b0, $b3, $b4;
+        int i1;
+        java.lang.Object $r1;
+        java.lang.String $r3;
+        boolean z0, z1;
+        java.awt.Toolkit $r0;
+
+        i1 := @parameter0: int;
+
+        z0 := @parameter1: boolean;
+
+        z1 = 1;
+
+        if z0 == 0 goto label1;
+
+        $b4 = 32;
+
+        goto label2;
+
+     label1:
+        $b4 = 16;
+
+     label2:
+        b0 = $b4;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r1 = virtualinvoke $r0.<java.awt.Toolkit: java.lang.Object getDesktopProperty(java.lang.String)>("win.icon.shellIconBPP");
+
+        $r3 = (java.lang.String) $r1;
+
+        if $r3 == null goto label3;
+
+        z1 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("4");
+
+     label3:
+        $l2 = staticinvoke <sun.awt.shell.Win32ShellFolder2: long getIconResource(java.lang.String,int,int,int,boolean)>("shell32.dll", i1, b0, b0, z1);
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 == 0 goto label4;
+
+        $r2 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.awt.Image makeIcon(long,boolean)>($l2, z0);
+
+        staticinvoke <sun.awt.shell.Win32ShellFolder2: void disposeIcon(long)>($l2);
+
+        return $r2;
+
+     label4:
+        return null;
+    }
+
+    public java.io.File getCanonicalFile() throws java.io.IOException
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        return r0;
+    }
+
+    public boolean isSpecial()
+    {
+        sun.awt.shell.Win32ShellFolder2 r0, $r1;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        $z0 = r0.<sun.awt.shell.Win32ShellFolder2: boolean isPersonal>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = virtualinvoke r0.<sun.awt.shell.Win32ShellFolder2: boolean isFileSystem()>();
+
+        if $z1 == 0 goto label1;
+
+        $r1 = virtualinvoke r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.Win32ShellFolder2 getDesktop()>();
+
+        if r0 != $r1 goto label2;
+
+     label1:
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+    }
+
+    public int compareTo(java.io.File)
+    {
+        java.io.File r0;
+        sun.awt.shell.Win32ShellFolder2 r1, $r2;
+        int $i0, $i1, $i3;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        r0 := @parameter0: java.io.File;
+
+        $z0 = r0 instanceof sun.awt.shell.Win32ShellFolder2;
+
+        if $z0 != 0 goto label2;
+
+        $z1 = virtualinvoke r1.<sun.awt.shell.Win32ShellFolder2: boolean isFileSystem()>();
+
+        if $z1 == 0 goto label1;
+
+        $z2 = virtualinvoke r1.<sun.awt.shell.Win32ShellFolder2: boolean isSpecial()>();
+
+        if $z2 != 0 goto label1;
+
+        $i1 = specialinvoke r1.<sun.awt.shell.ShellFolder: int compareTo(java.io.File)>(r0);
+
+        return $i1;
+
+     label1:
+        $i3 = (int) -1;
+
+        return $i3;
+
+     label2:
+        $r2 = (sun.awt.shell.Win32ShellFolder2) r0;
+
+        $i0 = staticinvoke <sun.awt.shell.Win32ShellFolderManager2: int compareShellFolders(sun.awt.shell.Win32ShellFolder2,sun.awt.shell.Win32ShellFolder2)>(r1, $r2);
+
+        return $i0;
+    }
+
+    public sun.awt.shell.ShellFolderColumnInfo[] getFolderColumns()
+    {
+        sun.awt.shell.Win32ShellFolder2 r1;
+        sun.awt.shell.Win32ShellFolder2$16 $r0;
+        java.lang.Object $r2;
+        sun.awt.shell.ShellFolderColumnInfo[] $r3;
+
+        r1 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        $r0 = new sun.awt.shell.Win32ShellFolder2$16;
+
+        specialinvoke $r0.<sun.awt.shell.Win32ShellFolder2$16: void <init>(sun.awt.shell.Win32ShellFolder2)>(r1);
+
+        $r2 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.Object invoke(java.util.concurrent.Callable)>($r0);
+
+        $r3 = (sun.awt.shell.ShellFolderColumnInfo[]) $r2;
+
+        return $r3;
+    }
+
+    public java.lang.Object getFolderColumnValue(int)
+    {
+        sun.awt.shell.Win32ShellFolder2 r1;
+        sun.awt.shell.Win32ShellFolder2$17 $r0;
+        int i0;
+        java.lang.Object $r2;
+
+        r1 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        i0 := @parameter0: int;
+
+        $r0 = new sun.awt.shell.Win32ShellFolder2$17;
+
+        specialinvoke $r0.<sun.awt.shell.Win32ShellFolder2$17: void <init>(sun.awt.shell.Win32ShellFolder2,int)>(r1, i0);
+
+        $r2 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.Object invoke(java.util.concurrent.Callable)>($r0);
+
+        return $r2;
+    }
+
+    private native sun.awt.shell.ShellFolderColumnInfo[] doGetColumnInfo(long);
+
+    private native java.lang.Object doGetColumnValue(long, long, int);
+
+    private static native int compareIDsByColumn(long, long, long, int);
+
+    public void sortChildren(java.util.List)
+    {
+        sun.awt.shell.Win32ShellFolder2 r1;
+        sun.awt.shell.Win32ShellFolder2$18 $r0;
+        java.util.List r2;
+
+        r1 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        r2 := @parameter0: java.util.List;
+
+        $r0 = new sun.awt.shell.Win32ShellFolder2$18;
+
+        specialinvoke $r0.<sun.awt.shell.Win32ShellFolder2$18: void <init>(sun.awt.shell.Win32ShellFolder2,java.util.List)>(r1, r2);
+
+        staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.Object invoke(java.util.concurrent.Callable)>($r0);
+
+        return;
+    }
+
+    public volatile int compareTo(java.lang.Object)
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        int $i0;
+        java.lang.Object r1;
+        java.io.File $r2;
+
+        r0 := @this: sun.awt.shell.Win32ShellFolder2;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r2 = (java.io.File) r1;
+
+        $i0 = virtualinvoke r0.<sun.awt.shell.Win32ShellFolder2: int compareTo(java.io.File)>($r2);
+
+        return $i0;
+    }
+
+    static void access$000(long)
+    {
+        long l0;
+
+        l0 := @parameter0: long;
+
+        staticinvoke <sun.awt.shell.Win32ShellFolder2: void releaseIShellFolder(long)>(l0);
+
+        return;
+    }
+
+    static void access$100(sun.awt.shell.Win32ShellFolder2)
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+
+        r0 := @parameter0: sun.awt.shell.Win32ShellFolder2;
+
+        specialinvoke r0.<sun.awt.shell.Win32ShellFolder2: void initDesktop()>();
+
+        return;
+    }
+
+    static long access$200(sun.awt.shell.Win32ShellFolder2)
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        long $l0;
+
+        r0 := @parameter0: sun.awt.shell.Win32ShellFolder2;
+
+        $l0 = specialinvoke r0.<sun.awt.shell.Win32ShellFolder2: long getIShellFolder()>();
+
+        return $l0;
+    }
+
+    static void access$300(sun.awt.shell.Win32ShellFolder2, long, int)
+    {
+        int i1;
+        sun.awt.shell.Win32ShellFolder2 r0;
+        long l0;
+
+        r0 := @parameter0: sun.awt.shell.Win32ShellFolder2;
+
+        l0 := @parameter1: long;
+
+        i1 := @parameter2: int;
+
+        specialinvoke r0.<sun.awt.shell.Win32ShellFolder2: void initSpecial(long,int)>(l0, i1);
+
+        return;
+    }
+
+    static java.lang.String access$400(long, long)
+    {
+        long l0, l1;
+        java.lang.String $r0;
+
+        l0 := @parameter0: long;
+
+        l1 := @parameter1: long;
+
+        $r0 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.String getFileSystemPath(long,long)>(l0, l1);
+
+        return $r0;
+    }
+
+    static long access$500(long, long)
+    {
+        long l0, l1, $l2;
+
+        l0 := @parameter0: long;
+
+        l1 := @parameter1: long;
+
+        $l2 = staticinvoke <sun.awt.shell.Win32ShellFolder2: long bindToObject(long,long)>(l0, l1);
+
+        return $l2;
+    }
+
+    static int access$600(long, long, long)
+    {
+        int $i3;
+        long l0, l1, l2;
+
+        l0 := @parameter0: long;
+
+        l1 := @parameter1: long;
+
+        l2 := @parameter2: long;
+
+        $i3 = staticinvoke <sun.awt.shell.Win32ShellFolder2: int compareIDs(long,long,long)>(l0, l1, l2);
+
+        return $i3;
+    }
+
+    static int access$700(long, long, int)
+    {
+        int i2, $i3;
+        long l0, l1;
+
+        l0 := @parameter0: long;
+
+        l1 := @parameter1: long;
+
+        i2 := @parameter2: int;
+
+        $i3 = staticinvoke <sun.awt.shell.Win32ShellFolder2: int getAttributes0(long,long,int)>(l0, l1, i2);
+
+        return $i3;
+    }
+
+    static java.lang.String access$800(int) throws java.io.IOException
+    {
+        int i0;
+        java.lang.String $r0;
+
+        i0 := @parameter0: int;
+
+        $r0 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.String getFileSystemPath0(int)>(i0);
+
+        return $r0;
+    }
+
+    static long access$900(sun.awt.shell.Win32ShellFolder2, long, boolean, boolean)
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        long l0, $l1;
+        boolean z0, z1;
+
+        r0 := @parameter0: sun.awt.shell.Win32ShellFolder2;
+
+        l0 := @parameter1: long;
+
+        z0 := @parameter2: boolean;
+
+        z1 := @parameter3: boolean;
+
+        $l1 = specialinvoke r0.<sun.awt.shell.Win32ShellFolder2: long getEnumObjects(long,boolean,boolean)>(l0, z0, z1);
+
+        return $l1;
+    }
+
+    static long access$1000(sun.awt.shell.Win32ShellFolder2, boolean) throws java.lang.InterruptedException
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        long $l0;
+        boolean z0;
+
+        r0 := @parameter0: sun.awt.shell.Win32ShellFolder2;
+
+        z0 := @parameter1: boolean;
+
+        $l0 = specialinvoke r0.<sun.awt.shell.Win32ShellFolder2: long getEnumObjects(boolean)>(z0);
+
+        return $l0;
+    }
+
+    static long access$1100(sun.awt.shell.Win32ShellFolder2, long)
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        long l0, $l1;
+
+        r0 := @parameter0: sun.awt.shell.Win32ShellFolder2;
+
+        l0 := @parameter1: long;
+
+        $l1 = specialinvoke r0.<sun.awt.shell.Win32ShellFolder2: long getNextChild(long)>(l0);
+
+        return $l1;
+    }
+
+    static boolean access$1200(long, long, long) throws java.lang.InterruptedException
+    {
+        long l0, l1, l2;
+        boolean $z0;
+
+        l0 := @parameter0: long;
+
+        l1 := @parameter1: long;
+
+        l2 := @parameter2: long;
+
+        $z0 = staticinvoke <sun.awt.shell.Win32ShellFolder2: boolean pidlsEqual(long,long,long)>(l0, l1, l2);
+
+        return $z0;
+    }
+
+    static void access$1300(sun.awt.shell.Win32ShellFolder2, long)
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        long l0;
+
+        r0 := @parameter0: sun.awt.shell.Win32ShellFolder2;
+
+        l0 := @parameter1: long;
+
+        specialinvoke r0.<sun.awt.shell.Win32ShellFolder2: void releaseEnumObjects(long)>(l0);
+
+        return;
+    }
+
+    static long access$1400(long, long, boolean)
+    {
+        long l0, l1, $l2;
+        boolean z0;
+
+        l0 := @parameter0: long;
+
+        l1 := @parameter1: long;
+
+        z0 := @parameter2: boolean;
+
+        $l2 = staticinvoke <sun.awt.shell.Win32ShellFolder2: long getLinkLocation(long,long,boolean)>(l0, l1, z0);
+
+        return $l2;
+    }
+
+    static long access$1500(long, java.lang.String) throws java.io.IOException
+    {
+        long l0, $l1;
+        java.lang.String r0;
+
+        l0 := @parameter0: long;
+
+        r0 := @parameter1: java.lang.String;
+
+        $l1 = staticinvoke <sun.awt.shell.Win32ShellFolder2: long parseDisplayName0(long,java.lang.String)>(l0, r0);
+
+        return $l1;
+    }
+
+    static java.lang.String access$1600(long, long, int)
+    {
+        int i2;
+        long l0, l1;
+        java.lang.String $r0;
+
+        l0 := @parameter0: long;
+
+        l1 := @parameter1: long;
+
+        i2 := @parameter2: int;
+
+        $r0 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.String getDisplayNameOf(long,long,int)>(l0, l1, i2);
+
+        return $r0;
+    }
+
+    static java.lang.String access$1700(long)
+    {
+        long l0;
+        java.lang.String $r0;
+
+        l0 := @parameter0: long;
+
+        $r0 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.lang.String getFolderType(long)>(l0);
+
+        return $r0;
+    }
+
+    static long access$1800(sun.awt.shell.Win32ShellFolder2)
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        long $l0;
+
+        r0 := @parameter0: sun.awt.shell.Win32ShellFolder2;
+
+        $l0 = specialinvoke r0.<sun.awt.shell.Win32ShellFolder2: long getIShellIcon()>();
+
+        return $l0;
+    }
+
+    static int access$1900(long, long)
+    {
+        int $i2;
+        long l0, l1;
+
+        l0 := @parameter0: long;
+
+        l1 := @parameter1: long;
+
+        $i2 = staticinvoke <sun.awt.shell.Win32ShellFolder2: int getIconIndex(long,long)>(l0, l1);
+
+        return $i2;
+    }
+
+    static java.util.Map access$2000()
+    {
+        java.util.Map $r0;
+
+        $r0 = <sun.awt.shell.Win32ShellFolder2: java.util.Map largeLinkedSystemImages>;
+
+        return $r0;
+    }
+
+    static java.util.Map access$2100()
+    {
+        java.util.Map $r0;
+
+        $r0 = <sun.awt.shell.Win32ShellFolder2: java.util.Map smallLinkedSystemImages>;
+
+        return $r0;
+    }
+
+    static java.util.Map access$2200()
+    {
+        java.util.Map $r0;
+
+        $r0 = <sun.awt.shell.Win32ShellFolder2: java.util.Map largeSystemImages>;
+
+        return $r0;
+    }
+
+    static java.util.Map access$2300()
+    {
+        java.util.Map $r0;
+
+        $r0 = <sun.awt.shell.Win32ShellFolder2: java.util.Map smallSystemImages>;
+
+        return $r0;
+    }
+
+    static long access$2400(java.lang.String, boolean)
+    {
+        long $l0;
+        java.lang.String r0;
+        boolean z0;
+
+        r0 := @parameter0: java.lang.String;
+
+        z0 := @parameter1: boolean;
+
+        $l0 = staticinvoke <sun.awt.shell.Win32ShellFolder2: long getIcon(java.lang.String,boolean)>(r0, z0);
+
+        return $l0;
+    }
+
+    static java.awt.Image access$2500(long, boolean)
+    {
+        long l0;
+        java.awt.Image $r0;
+        boolean z0;
+
+        l0 := @parameter0: long;
+
+        z0 := @parameter1: boolean;
+
+        $r0 = staticinvoke <sun.awt.shell.Win32ShellFolder2: java.awt.Image makeIcon(long,boolean)>(l0, z0);
+
+        return $r0;
+    }
+
+    static void access$2600(long)
+    {
+        long l0;
+
+        l0 := @parameter0: long;
+
+        staticinvoke <sun.awt.shell.Win32ShellFolder2: void disposeIcon(long)>(l0);
+
+        return;
+    }
+
+    static long access$2700(long, long, boolean)
+    {
+        long l0, l1, $l2;
+        boolean z0;
+
+        l0 := @parameter0: long;
+
+        l1 := @parameter1: long;
+
+        z0 := @parameter2: boolean;
+
+        $l2 = staticinvoke <sun.awt.shell.Win32ShellFolder2: long extractIcon(long,long,boolean)>(l0, l1, z0);
+
+        return $l2;
+    }
+
+    static java.awt.Image access$2801(sun.awt.shell.Win32ShellFolder2, boolean)
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        java.awt.Image $r1;
+        boolean z0;
+
+        r0 := @parameter0: sun.awt.shell.Win32ShellFolder2;
+
+        z0 := @parameter1: boolean;
+
+        $r1 = specialinvoke r0.<sun.awt.shell.ShellFolder: java.awt.Image getIcon(boolean)>(z0);
+
+        return $r1;
+    }
+
+    static sun.awt.shell.ShellFolderColumnInfo[] access$2900(sun.awt.shell.Win32ShellFolder2, long)
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        long l0;
+        sun.awt.shell.ShellFolderColumnInfo[] $r1;
+
+        r0 := @parameter0: sun.awt.shell.Win32ShellFolder2;
+
+        l0 := @parameter1: long;
+
+        $r1 = specialinvoke r0.<sun.awt.shell.Win32ShellFolder2: sun.awt.shell.ShellFolderColumnInfo[] doGetColumnInfo(long)>(l0);
+
+        return $r1;
+    }
+
+    static java.lang.Object access$3000(sun.awt.shell.Win32ShellFolder2, long, long, int)
+    {
+        sun.awt.shell.Win32ShellFolder2 r0;
+        int i2;
+        long l0, l1;
+        java.lang.Object $r1;
+
+        r0 := @parameter0: sun.awt.shell.Win32ShellFolder2;
+
+        l0 := @parameter1: long;
+
+        l1 := @parameter2: long;
+
+        i2 := @parameter3: int;
+
+        $r1 = specialinvoke r0.<sun.awt.shell.Win32ShellFolder2: java.lang.Object doGetColumnValue(long,long,int)>(l0, l1, i2);
+
+        return $r1;
+    }
+
+    static int access$3300(long, long, long, int)
+    {
+        int i3, $i4;
+        long l0, l1, l2;
+
+        l0 := @parameter0: long;
+
+        l1 := @parameter1: long;
+
+        l2 := @parameter2: long;
+
+        i3 := @parameter3: int;
+
+        $i4 = staticinvoke <sun.awt.shell.Win32ShellFolder2: int compareIDsByColumn(long,long,long,int)>(l0, l1, l2, i3);
+
+        return $i4;
+    }
+
+    static void <clinit>()
+    {
+        java.util.HashMap $r0, $r1, $r2, $r3;
+
+        <sun.awt.shell.Win32ShellFolder2: int LVCFMT_CENTER> = 2;
+
+        <sun.awt.shell.Win32ShellFolder2: int LVCFMT_RIGHT> = 1;
+
+        <sun.awt.shell.Win32ShellFolder2: int LVCFMT_LEFT> = 0;
+
+        <sun.awt.shell.Win32ShellFolder2: int SHGDN_FORPARSING> = 32768;
+
+        <sun.awt.shell.Win32ShellFolder2: int SHGDN_FORADDRESSBAR> = 16384;
+
+        <sun.awt.shell.Win32ShellFolder2: int SHGDN_INCLUDE_NONFILESYS> = 8192;
+
+        <sun.awt.shell.Win32ShellFolder2: int SHGDN_INFOLDER> = 1;
+
+        <sun.awt.shell.Win32ShellFolder2: int SHGDN_NORMAL> = 0;
+
+        <sun.awt.shell.Win32ShellFolder2: int ATTRIB_NEWCONTENT> = 2097152;
+
+        <sun.awt.shell.Win32ShellFolder2: int ATTRIB_NONENUMERATED> = 1048576;
+
+        <sun.awt.shell.Win32ShellFolder2: int ATTRIB_BROWSABLE> = 134217728;
+
+        <sun.awt.shell.Win32ShellFolder2: int ATTRIB_COMPRESSED> = 67108864;
+
+        <sun.awt.shell.Win32ShellFolder2: int ATTRIB_REMOVABLE> = 33554432;
+
+        <sun.awt.shell.Win32ShellFolder2: int ATTRIB_VALIDATE> = 16777216;
+
+        <sun.awt.shell.Win32ShellFolder2: int ATTRIB_HASSUBFOLDER> = -2147483648;
+
+        <sun.awt.shell.Win32ShellFolder2: int ATTRIB_FILESYSTEM> = 1073741824;
+
+        <sun.awt.shell.Win32ShellFolder2: int ATTRIB_FOLDER> = 536870912;
+
+        <sun.awt.shell.Win32ShellFolder2: int ATTRIB_FILESYSANCESTOR> = 268435456;
+
+        <sun.awt.shell.Win32ShellFolder2: int ATTRIB_HIDDEN> = 524288;
+
+        <sun.awt.shell.Win32ShellFolder2: int ATTRIB_GHOSTED> = 524288;
+
+        <sun.awt.shell.Win32ShellFolder2: int ATTRIB_READONLY> = 262144;
+
+        <sun.awt.shell.Win32ShellFolder2: int ATTRIB_SHARE> = 131072;
+
+        <sun.awt.shell.Win32ShellFolder2: int ATTRIB_LINK> = 65536;
+
+        <sun.awt.shell.Win32ShellFolder2: int ATTRIB_DROPTARGET> = 256;
+
+        <sun.awt.shell.Win32ShellFolder2: int ATTRIB_HASPROPSHEET> = 64;
+
+        <sun.awt.shell.Win32ShellFolder2: int ATTRIB_CANDELETE> = 32;
+
+        <sun.awt.shell.Win32ShellFolder2: int ATTRIB_CANRENAME> = 16;
+
+        <sun.awt.shell.Win32ShellFolder2: int ATTRIB_CANLINK> = 4;
+
+        <sun.awt.shell.Win32ShellFolder2: int ATTRIB_CANMOVE> = 2;
+
+        <sun.awt.shell.Win32ShellFolder2: int ATTRIB_CANCOPY> = 1;
+
+        <sun.awt.shell.Win32ShellFolder2: int HISTORY> = 34;
+
+        <sun.awt.shell.Win32ShellFolder2: int COOKIES> = 33;
+
+        <sun.awt.shell.Win32ShellFolder2: int INTERNET_CACHE> = 32;
+
+        <sun.awt.shell.Win32ShellFolder2: int COMMON_FAVORITES> = 31;
+
+        <sun.awt.shell.Win32ShellFolder2: int COMMON_ALTSTARTUP> = 30;
+
+        <sun.awt.shell.Win32ShellFolder2: int ALTSTARTUP> = 29;
+
+        <sun.awt.shell.Win32ShellFolder2: int PRINTHOOD> = 27;
+
+        <sun.awt.shell.Win32ShellFolder2: int APPDATA> = 26;
+
+        <sun.awt.shell.Win32ShellFolder2: int COMMON_DESKTOPDIRECTORY> = 25;
+
+        <sun.awt.shell.Win32ShellFolder2: int COMMON_STARTUP> = 24;
+
+        <sun.awt.shell.Win32ShellFolder2: int COMMON_PROGRAMS> = 23;
+
+        <sun.awt.shell.Win32ShellFolder2: int COMMON_STARTMENU> = 22;
+
+        <sun.awt.shell.Win32ShellFolder2: int TEMPLATES> = 21;
+
+        <sun.awt.shell.Win32ShellFolder2: int FONTS> = 20;
+
+        <sun.awt.shell.Win32ShellFolder2: int NETHOOD> = 19;
+
+        <sun.awt.shell.Win32ShellFolder2: int NETWORK> = 18;
+
+        <sun.awt.shell.Win32ShellFolder2: int DRIVES> = 17;
+
+        <sun.awt.shell.Win32ShellFolder2: int DESKTOPDIRECTORY> = 16;
+
+        <sun.awt.shell.Win32ShellFolder2: int STARTMENU> = 11;
+
+        <sun.awt.shell.Win32ShellFolder2: int BITBUCKET> = 10;
+
+        <sun.awt.shell.Win32ShellFolder2: int SENDTO> = 9;
+
+        <sun.awt.shell.Win32ShellFolder2: int RECENT> = 8;
+
+        <sun.awt.shell.Win32ShellFolder2: int STARTUP> = 7;
+
+        <sun.awt.shell.Win32ShellFolder2: int FAVORITES> = 6;
+
+        <sun.awt.shell.Win32ShellFolder2: int PERSONAL> = 5;
+
+        <sun.awt.shell.Win32ShellFolder2: int PRINTERS> = 4;
+
+        <sun.awt.shell.Win32ShellFolder2: int CONTROLS> = 3;
+
+        <sun.awt.shell.Win32ShellFolder2: int PROGRAMS> = 2;
+
+        <sun.awt.shell.Win32ShellFolder2: int INTERNET> = 1;
+
+        <sun.awt.shell.Win32ShellFolder2: int DESKTOP> = 0;
+
+        staticinvoke <sun.awt.shell.Win32ShellFolder2: void initIDs()>();
+
+        $r0 = new java.util.HashMap;
+
+        specialinvoke $r0.<java.util.HashMap: void <init>()>();
+
+        <sun.awt.shell.Win32ShellFolder2: java.util.Map smallSystemImages> = $r0;
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>()>();
+
+        <sun.awt.shell.Win32ShellFolder2: java.util.Map largeSystemImages> = $r1;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        <sun.awt.shell.Win32ShellFolder2: java.util.Map smallLinkedSystemImages> = $r2;
+
+        $r3 = new java.util.HashMap;
+
+        specialinvoke $r3.<java.util.HashMap: void <init>()>();
+
+        <sun.awt.shell.Win32ShellFolder2: java.util.Map largeLinkedSystemImages> = $r3;
+
+        return;
+    }
+}

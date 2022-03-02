@@ -1,0 +1,1813 @@
+public class java.util.concurrent.Phaser extends java.lang.Object
+{
+    private volatile long state;
+    private static final int MAX_PARTIES;
+    private static final int MAX_PHASE;
+    private static final int PARTIES_SHIFT;
+    private static final int PHASE_SHIFT;
+    private static final int UNARRIVED_MASK;
+    private static final long PARTIES_MASK;
+    private static final long COUNTS_MASK;
+    private static final long TERMINATION_BIT;
+    private static final int ONE_ARRIVAL;
+    private static final int ONE_PARTY;
+    private static final int ONE_DEREGISTER;
+    private static final int EMPTY;
+    private final java.util.concurrent.Phaser parent;
+    private final java.util.concurrent.Phaser root;
+    private final java.util.concurrent.atomic.AtomicReference evenQ;
+    private final java.util.concurrent.atomic.AtomicReference oddQ;
+    private static final int NCPU;
+    static final int SPINS_PER_ARRIVAL;
+    private static final sun.misc.Unsafe UNSAFE;
+    private static final long stateOffset;
+
+    private static int unarrivedOf(long)
+    {
+        int i1, $i2, $i4;
+        long l0;
+
+        l0 := @parameter0: long;
+
+        i1 = (int) l0;
+
+        if i1 != 1 goto label1;
+
+        $i2 = 0;
+
+        goto label2;
+
+     label1:
+        $i4 = (int) 65535;
+
+        $i2 = i1 & $i4;
+
+     label2:
+        return $i2;
+    }
+
+    private static int partiesOf(long)
+    {
+        int $i1, $i2;
+        long l0;
+
+        l0 := @parameter0: long;
+
+        $i1 = (int) l0;
+
+        $i2 = $i1 >>> 16;
+
+        return $i2;
+    }
+
+    private static int phaseOf(long)
+    {
+        int $i2;
+        long l0, $l1;
+
+        l0 := @parameter0: long;
+
+        $l1 = l0 >>> 32;
+
+        $i2 = (int) $l1;
+
+        return $i2;
+    }
+
+    private static int arrivedOf(long)
+    {
+        int i1, $i2, $i3, $i4, $i6;
+        long l0;
+
+        l0 := @parameter0: long;
+
+        i1 = (int) l0;
+
+        if i1 != 1 goto label1;
+
+        $i4 = 0;
+
+        goto label2;
+
+     label1:
+        $i3 = i1 >>> 16;
+
+        $i6 = (int) 65535;
+
+        $i2 = i1 & $i6;
+
+        $i4 = $i3 - $i2;
+
+     label2:
+        return $i4;
+    }
+
+    private java.util.concurrent.atomic.AtomicReference queueFor(int)
+    {
+        java.util.concurrent.Phaser r0;
+        int i0, $i1;
+        java.util.concurrent.atomic.AtomicReference $r1;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        i0 := @parameter0: int;
+
+        $i1 = i0 & 1;
+
+        if $i1 != 0 goto label1;
+
+        $r1 = r0.<java.util.concurrent.Phaser: java.util.concurrent.atomic.AtomicReference evenQ>;
+
+        goto label2;
+
+     label1:
+        $r1 = r0.<java.util.concurrent.Phaser: java.util.concurrent.atomic.AtomicReference oddQ>;
+
+     label2:
+        return $r1;
+    }
+
+    private java.lang.String badArrive(long)
+    {
+        java.util.concurrent.Phaser r2;
+        java.lang.StringBuilder $r0, $r1, $r4;
+        long l0;
+        java.lang.String $r3, $r5;
+
+        r2 := @this: java.util.concurrent.Phaser;
+
+        l0 := @parameter0: long;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Attempted arrival of unregistered party for ");
+
+        $r3 = specialinvoke r2.<java.util.concurrent.Phaser: java.lang.String stateToString(long)>(l0);
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r5;
+    }
+
+    private java.lang.String badRegister(long)
+    {
+        java.util.concurrent.Phaser r2;
+        java.lang.StringBuilder $r0, $r1, $r4;
+        long l0;
+        java.lang.String $r3, $r5;
+
+        r2 := @this: java.util.concurrent.Phaser;
+
+        l0 := @parameter0: long;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Attempt to register more than 65535 parties for ");
+
+        $r3 = specialinvoke r2.<java.util.concurrent.Phaser: java.lang.String stateToString(long)>(l0);
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r5;
+    }
+
+    private int doArrive(int)
+    {
+        java.lang.IllegalStateException $r9;
+        boolean $z0, $z1;
+        sun.misc.Unsafe $r2, $r5, $r8;
+        long $l0, $l3, $l4, $l5, $l8, $l9, $l10, $l12, l13, l16, l17, $l20, $l21, $l22, $l23;
+        int i1, i2, $i6, i7, $i11, i14, $i15, $i18, $i19, $i25;
+        java.lang.String $r7;
+        java.util.concurrent.Phaser r0, r1, $r3, $r4;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        i2 := @parameter0: int;
+
+        r1 = r0.<java.util.concurrent.Phaser: java.util.concurrent.Phaser root>;
+
+     label01:
+        if r1 != r0 goto label02;
+
+        $l12 = r0.<java.util.concurrent.Phaser: long state>;
+
+        goto label03;
+
+     label02:
+        $l12 = specialinvoke r0.<java.util.concurrent.Phaser: long reconcileState()>();
+
+     label03:
+        l13 = $l12;
+
+        $l0 = $l12 >>> 32;
+
+        $i11 = (int) $l0;
+
+        i14 = $i11;
+
+        if $i11 >= 0 goto label04;
+
+        return $i11;
+
+     label04:
+        i1 = (int) $l12;
+
+        if i1 != 1 goto label05;
+
+        $i15 = 0;
+
+        goto label06;
+
+     label05:
+        $i25 = (int) 65535;
+
+        $i15 = i1 & $i25;
+
+     label06:
+        if $i15 > 0 goto label07;
+
+        $r9 = new java.lang.IllegalStateException;
+
+        $r7 = specialinvoke r0.<java.util.concurrent.Phaser: java.lang.String badArrive(long)>(l13);
+
+        specialinvoke $r9.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r7);
+
+        throw $r9;
+
+     label07:
+        $r2 = <java.util.concurrent.Phaser: sun.misc.Unsafe UNSAFE>;
+
+        $l5 = <java.util.concurrent.Phaser: long stateOffset>;
+
+        $l3 = (long) i2;
+
+        $l4 = l13 - $l3;
+
+        $z0 = virtualinvoke $r2.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l5, l13, $l4);
+
+        if $z0 == 0 goto label14;
+
+        if $i15 != 1 goto label13;
+
+        l16 = $l4 & 4294901760L;
+
+        $i6 = (int) l16;
+
+        i7 = $i6 >>> 16;
+
+        if r1 != r0 goto label11;
+
+        $z1 = virtualinvoke r0.<java.util.concurrent.Phaser: boolean onAdvance(int,int)>($i11, i7);
+
+        if $z1 == 0 goto label08;
+
+        l17 = l16 | -9223372036854775808L;
+
+        goto label10;
+
+     label08:
+        if i7 != 0 goto label09;
+
+        l17 = l16 | 1L;
+
+        goto label10;
+
+     label09:
+        $l10 = (long) i7;
+
+        l17 = l16 | $l10;
+
+     label10:
+        $i18 = $i11 + 1;
+
+        $i19 = $i18 & 2147483647;
+
+        $l20 = (long) $i19;
+
+        $l21 = $l20 << 32;
+
+        $l22 = l17 | $l21;
+
+        $r8 = <java.util.concurrent.Phaser: sun.misc.Unsafe UNSAFE>;
+
+        $l23 = <java.util.concurrent.Phaser: long stateOffset>;
+
+        virtualinvoke $r8.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l23, $l4, $l22);
+
+        specialinvoke r0.<java.util.concurrent.Phaser: void releaseWaiters(int)>($i11);
+
+        goto label13;
+
+     label11:
+        if i7 != 0 goto label12;
+
+        $r4 = r0.<java.util.concurrent.Phaser: java.util.concurrent.Phaser parent>;
+
+        i14 = specialinvoke $r4.<java.util.concurrent.Phaser: int doArrive(int)>(65537);
+
+        $r5 = <java.util.concurrent.Phaser: sun.misc.Unsafe UNSAFE>;
+
+        $l9 = <java.util.concurrent.Phaser: long stateOffset>;
+
+        $l8 = $l4 | 1L;
+
+        virtualinvoke $r5.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l9, $l4, $l8);
+
+        goto label13;
+
+     label12:
+        $r3 = r0.<java.util.concurrent.Phaser: java.util.concurrent.Phaser parent>;
+
+        i14 = specialinvoke $r3.<java.util.concurrent.Phaser: int doArrive(int)>(1);
+
+     label13:
+        return i14;
+
+     label14:
+        goto label01;
+    }
+
+    private int doRegister(int)
+    {
+        java.lang.IllegalStateException $r10;
+        byte $b8, $b22;
+        boolean $z0, $z1, $z2;
+        sun.misc.Unsafe $r2, $r4, $r5;
+        java.lang.Throwable $r9;
+        long $l1, $l2, $l3, l4, $l6, $l7, $l10, $l11, $l12, $l13, $l14, $l15, $l16, $l17, $l18, $l19, $l20, $l21, $l26, l27, l29;
+        int i0, $i5, $i9, $i23, $i24, $i25, i28, $i31, $i33;
+        java.lang.String $r8;
+        java.util.concurrent.Phaser r0, r1, $r3, $r6;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        i0 := @parameter0: int;
+
+        $l1 = (long) i0;
+
+        $l3 = $l1 << 16;
+
+        $l2 = (long) i0;
+
+        l4 = $l3 | $l2;
+
+        r1 = r0.<java.util.concurrent.Phaser: java.util.concurrent.Phaser parent>;
+
+     label01:
+        if r1 != null goto label02;
+
+        $l26 = r0.<java.util.concurrent.Phaser: long state>;
+
+        goto label03;
+
+     label02:
+        $l26 = specialinvoke r0.<java.util.concurrent.Phaser: long reconcileState()>();
+
+     label03:
+        l27 = $l26;
+
+        $i23 = (int) $l26;
+
+        $i24 = $i23 >>> 16;
+
+        $i31 = (int) 65535;
+
+        $i25 = $i23 & $i31;
+
+        $i33 = (int) 65535;
+
+        $i5 = $i33 - $i24;
+
+        if i0 <= $i5 goto label04;
+
+        $r10 = new java.lang.IllegalStateException;
+
+        $r8 = specialinvoke r0.<java.util.concurrent.Phaser: java.lang.String badRegister(long)>($l26);
+
+        specialinvoke $r10.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r8);
+
+        throw $r10;
+
+     label04:
+        $l6 = $l26 >>> 32;
+
+        i28 = (int) $l6;
+
+        if i28 >= 0 goto label05;
+
+        goto label21;
+
+     label05:
+        if $i23 == 1 goto label08;
+
+        if r1 == null goto label06;
+
+        $l21 = specialinvoke r0.<java.util.concurrent.Phaser: long reconcileState()>();
+
+        $b22 = $l21 cmp $l26;
+
+        if $b22 != 0 goto label20;
+
+     label06:
+        if $i25 != 0 goto label07;
+
+        $r6 = r0.<java.util.concurrent.Phaser: java.util.concurrent.Phaser root>;
+
+        specialinvoke $r6.<java.util.concurrent.Phaser: int internalAwaitAdvance(int,java.util.concurrent.Phaser$QNode)>(i28, null);
+
+        goto label20;
+
+     label07:
+        $r5 = <java.util.concurrent.Phaser: sun.misc.Unsafe UNSAFE>;
+
+        $l20 = <java.util.concurrent.Phaser: long stateOffset>;
+
+        $l19 = l27 + l4;
+
+        $z2 = virtualinvoke $r5.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l20, l27, $l19);
+
+        if $z2 == 0 goto label20;
+
+        goto label21;
+
+     label08:
+        if r1 != null goto label10;
+
+        $l16 = (long) i28;
+
+        $l17 = $l16 << 32;
+
+        l29 = $l17 | l4;
+
+        $r4 = <java.util.concurrent.Phaser: sun.misc.Unsafe UNSAFE>;
+
+        $l18 = <java.util.concurrent.Phaser: long stateOffset>;
+
+        $z1 = virtualinvoke $r4.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l18, $l26, l29);
+
+        if $z1 == 0 goto label09;
+
+        goto label21;
+
+     label09:
+        goto label20;
+
+     label10:
+        entermonitor r0;
+
+     label11:
+        $l7 = r0.<java.util.concurrent.Phaser: long state>;
+
+        $b8 = $l7 cmp $l26;
+
+        if $b8 != 0 goto label16;
+
+        $i9 = specialinvoke r1.<java.util.concurrent.Phaser: int doRegister(int)>(1);
+
+        i28 = $i9;
+
+        if $i9 >= 0 goto label13;
+
+        exitmonitor r0;
+
+     label12:
+        goto label21;
+
+     label13:
+        $r2 = <java.util.concurrent.Phaser: sun.misc.Unsafe UNSAFE>;
+
+        $l13 = <java.util.concurrent.Phaser: long stateOffset>;
+
+        $l10 = (long) i28;
+
+        $l11 = $l10 << 32;
+
+        $l12 = $l11 | l4;
+
+        $z0 = virtualinvoke $r2.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l13, l27, $l12);
+
+        if $z0 != 0 goto label14;
+
+        l27 = r0.<java.util.concurrent.Phaser: long state>;
+
+        $r3 = r0.<java.util.concurrent.Phaser: java.util.concurrent.Phaser root>;
+
+        $l14 = $r3.<java.util.concurrent.Phaser: long state>;
+
+        $l15 = $l14 >>> 32;
+
+        i28 = (int) $l15;
+
+        goto label13;
+
+     label14:
+        exitmonitor r0;
+
+     label15:
+        goto label21;
+
+     label16:
+        exitmonitor r0;
+
+     label17:
+        goto label20;
+
+     label18:
+        $r9 := @caughtexception;
+
+        exitmonitor r0;
+
+     label19:
+        throw $r9;
+
+     label20:
+        goto label01;
+
+     label21:
+        return i28;
+
+        catch java.lang.Throwable from label11 to label12 with label18;
+        catch java.lang.Throwable from label13 to label15 with label18;
+        catch java.lang.Throwable from label16 to label17 with label18;
+        catch java.lang.Throwable from label18 to label19 with label18;
+    }
+
+    private long reconcileState()
+    {
+        sun.misc.Unsafe $r2;
+        long $l0, $l1, $l3, $l5, $l8, $l9, l10, $l11, $l12, $l13, $l14, $l15;
+        int $i2, $i4, $i6, $i7;
+        boolean $z0;
+        java.util.concurrent.Phaser r0, r1;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        r1 = r0.<java.util.concurrent.Phaser: java.util.concurrent.Phaser root>;
+
+        l10 = r0.<java.util.concurrent.Phaser: long state>;
+
+        if r1 == r0 goto label5;
+
+     label1:
+        $l0 = r1.<java.util.concurrent.Phaser: long state>;
+
+        $l1 = $l0 >>> 32;
+
+        $i2 = (int) $l1;
+
+        $l3 = l10 >>> 32;
+
+        $i4 = (int) $l3;
+
+        if $i2 == $i4 goto label5;
+
+        $r2 = <java.util.concurrent.Phaser: sun.misc.Unsafe UNSAFE>;
+
+        $l11 = <java.util.concurrent.Phaser: long stateOffset>;
+
+        $l12 = l10;
+
+        $l5 = (long) $i2;
+
+        $l13 = $l5 << 32;
+
+        if $i2 >= 0 goto label2;
+
+        $l14 = l10 & 4294967295L;
+
+        goto label4;
+
+     label2:
+        $i6 = (int) l10;
+
+        $i7 = $i6 >>> 16;
+
+        if $i7 != 0 goto label3;
+
+        $l14 = 1L;
+
+        goto label4;
+
+     label3:
+        $l9 = l10 & 4294901760L;
+
+        $l8 = (long) $i7;
+
+        $l14 = $l9 | $l8;
+
+     label4:
+        $l15 = $l13 | $l14;
+
+        l10 = $l15;
+
+        $z0 = virtualinvoke $r2.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l11, $l12, $l15);
+
+        if $z0 != 0 goto label5;
+
+        l10 = r0.<java.util.concurrent.Phaser: long state>;
+
+        goto label1;
+
+     label5:
+        return l10;
+    }
+
+    public void <init>()
+    {
+        java.util.concurrent.Phaser r0;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        specialinvoke r0.<java.util.concurrent.Phaser: void <init>(java.util.concurrent.Phaser,int)>(null, 0);
+
+        return;
+    }
+
+    public void <init>(int)
+    {
+        int i0;
+        java.util.concurrent.Phaser r0;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.util.concurrent.Phaser: void <init>(java.util.concurrent.Phaser,int)>(null, i0);
+
+        return;
+    }
+
+    public void <init>(java.util.concurrent.Phaser)
+    {
+        java.util.concurrent.Phaser r0, r1;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        r1 := @parameter0: java.util.concurrent.Phaser;
+
+        specialinvoke r0.<java.util.concurrent.Phaser: void <init>(java.util.concurrent.Phaser,int)>(r1, 0);
+
+        return;
+    }
+
+    public void <init>(java.util.concurrent.Phaser, int)
+    {
+        long $l2, $l3, $l4, $l5, $l6, $l7, $l9;
+        java.util.concurrent.atomic.AtomicReference $r2, $r3, $r5, $r6;
+        int i0, $i1, i8;
+        java.lang.IllegalArgumentException $r7;
+        java.util.concurrent.Phaser r0, r1, r4;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        r1 := @parameter0: java.util.concurrent.Phaser;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $i1 = i0 >>> 16;
+
+        if $i1 == 0 goto label1;
+
+        $r7 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r7.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Illegal number of parties");
+
+        throw $r7;
+
+     label1:
+        i8 = 0;
+
+        r0.<java.util.concurrent.Phaser: java.util.concurrent.Phaser parent> = r1;
+
+        if r1 == null goto label3;
+
+        r4 = r1.<java.util.concurrent.Phaser: java.util.concurrent.Phaser root>;
+
+        r0.<java.util.concurrent.Phaser: java.util.concurrent.Phaser root> = r4;
+
+        $r5 = r4.<java.util.concurrent.Phaser: java.util.concurrent.atomic.AtomicReference evenQ>;
+
+        r0.<java.util.concurrent.Phaser: java.util.concurrent.atomic.AtomicReference evenQ> = $r5;
+
+        $r6 = r4.<java.util.concurrent.Phaser: java.util.concurrent.atomic.AtomicReference oddQ>;
+
+        r0.<java.util.concurrent.Phaser: java.util.concurrent.atomic.AtomicReference oddQ> = $r6;
+
+        if i0 == 0 goto label2;
+
+        i8 = specialinvoke r1.<java.util.concurrent.Phaser: int doRegister(int)>(1);
+
+     label2:
+        goto label4;
+
+     label3:
+        r0.<java.util.concurrent.Phaser: java.util.concurrent.Phaser root> = r0;
+
+        $r2 = new java.util.concurrent.atomic.AtomicReference;
+
+        specialinvoke $r2.<java.util.concurrent.atomic.AtomicReference: void <init>()>();
+
+        r0.<java.util.concurrent.Phaser: java.util.concurrent.atomic.AtomicReference evenQ> = $r2;
+
+        $r3 = new java.util.concurrent.atomic.AtomicReference;
+
+        specialinvoke $r3.<java.util.concurrent.atomic.AtomicReference: void <init>()>();
+
+        r0.<java.util.concurrent.Phaser: java.util.concurrent.atomic.AtomicReference oddQ> = $r3;
+
+     label4:
+        if i0 != 0 goto label5;
+
+        $l9 = 1L;
+
+        goto label6;
+
+     label5:
+        $l2 = (long) i8;
+
+        $l5 = $l2 << 32;
+
+        $l3 = (long) i0;
+
+        $l4 = $l3 << 16;
+
+        $l7 = $l5 | $l4;
+
+        $l6 = (long) i0;
+
+        $l9 = $l7 | $l6;
+
+     label6:
+        r0.<java.util.concurrent.Phaser: long state> = $l9;
+
+        return;
+    }
+
+    public int register()
+    {
+        int $i0;
+        java.util.concurrent.Phaser r0;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        $i0 = specialinvoke r0.<java.util.concurrent.Phaser: int doRegister(int)>(1);
+
+        return $i0;
+    }
+
+    public int bulkRegister(int)
+    {
+        java.util.concurrent.Phaser r0;
+        int i0, $i1, $i2;
+        java.lang.IllegalArgumentException $r1;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 0 goto label1;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        if i0 != 0 goto label2;
+
+        $i2 = virtualinvoke r0.<java.util.concurrent.Phaser: int getPhase()>();
+
+        return $i2;
+
+     label2:
+        $i1 = specialinvoke r0.<java.util.concurrent.Phaser: int doRegister(int)>(i0);
+
+        return $i1;
+    }
+
+    public int arrive()
+    {
+        int $i0;
+        java.util.concurrent.Phaser r0;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        $i0 = specialinvoke r0.<java.util.concurrent.Phaser: int doArrive(int)>(1);
+
+        return $i0;
+    }
+
+    public int arriveAndDeregister()
+    {
+        int $i0;
+        java.util.concurrent.Phaser r0;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        $i0 = specialinvoke r0.<java.util.concurrent.Phaser: int doArrive(int)>(65537);
+
+        return $i0;
+    }
+
+    public int arriveAndAwaitAdvance()
+    {
+        java.lang.IllegalStateException $r7;
+        boolean $z0, $z1, $z2;
+        sun.misc.Unsafe $r2, $r6;
+        long $l0, $l2, $l3, $l6, $l7, $l8, $l13, l14, l16, l17, $l20, $l21, $l22, $l23;
+        int i1, $i4, i5, $i9, $i10, $i11, $i12, $i15, $i18, $i19, $i25;
+        java.lang.String $r5;
+        java.util.concurrent.Phaser r0, r1, $r3;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        r1 = r0.<java.util.concurrent.Phaser: java.util.concurrent.Phaser root>;
+
+     label01:
+        if r1 != r0 goto label02;
+
+        $l13 = r0.<java.util.concurrent.Phaser: long state>;
+
+        goto label03;
+
+     label02:
+        $l13 = specialinvoke r0.<java.util.concurrent.Phaser: long reconcileState()>();
+
+     label03:
+        l14 = $l13;
+
+        $l0 = $l13 >>> 32;
+
+        $i12 = (int) $l0;
+
+        if $i12 >= 0 goto label04;
+
+        return $i12;
+
+     label04:
+        i1 = (int) $l13;
+
+        if i1 != 1 goto label05;
+
+        $i15 = 0;
+
+        goto label06;
+
+     label05:
+        $i25 = (int) 65535;
+
+        $i15 = i1 & $i25;
+
+     label06:
+        if $i15 > 0 goto label07;
+
+        $r7 = new java.lang.IllegalStateException;
+
+        $r5 = specialinvoke r0.<java.util.concurrent.Phaser: java.lang.String badArrive(long)>(l14);
+
+        specialinvoke $r7.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r5);
+
+        throw $r7;
+
+     label07:
+        $r2 = <java.util.concurrent.Phaser: sun.misc.Unsafe UNSAFE>;
+
+        $l3 = <java.util.concurrent.Phaser: long stateOffset>;
+
+        $l2 = l14 - 1L;
+
+        $z0 = virtualinvoke $r2.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l3, l14, $l2);
+
+        if $z0 == 0 goto label14;
+
+        if $i15 <= 1 goto label08;
+
+        $i11 = specialinvoke r1.<java.util.concurrent.Phaser: int internalAwaitAdvance(int,java.util.concurrent.Phaser$QNode)>($i12, null);
+
+        return $i11;
+
+     label08:
+        if r1 == r0 goto label09;
+
+        $r3 = r0.<java.util.concurrent.Phaser: java.util.concurrent.Phaser parent>;
+
+        $i10 = virtualinvoke $r3.<java.util.concurrent.Phaser: int arriveAndAwaitAdvance()>();
+
+        return $i10;
+
+     label09:
+        l16 = $l2 & 4294901760L;
+
+        $i4 = (int) l16;
+
+        i5 = $i4 >>> 16;
+
+        $z1 = virtualinvoke r0.<java.util.concurrent.Phaser: boolean onAdvance(int,int)>($i12, i5);
+
+        if $z1 == 0 goto label10;
+
+        l17 = l16 | -9223372036854775808L;
+
+        goto label12;
+
+     label10:
+        if i5 != 0 goto label11;
+
+        l17 = l16 | 1L;
+
+        goto label12;
+
+     label11:
+        $l6 = (long) i5;
+
+        l17 = l16 | $l6;
+
+     label12:
+        $i18 = $i12 + 1;
+
+        $i19 = $i18 & 2147483647;
+
+        $l20 = (long) $i19;
+
+        $l21 = $l20 << 32;
+
+        $l22 = l17 | $l21;
+
+        $r6 = <java.util.concurrent.Phaser: sun.misc.Unsafe UNSAFE>;
+
+        $l23 = <java.util.concurrent.Phaser: long stateOffset>;
+
+        $z2 = virtualinvoke $r6.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r0, $l23, $l2, $l22);
+
+        if $z2 != 0 goto label13;
+
+        $l7 = r0.<java.util.concurrent.Phaser: long state>;
+
+        $l8 = $l7 >>> 32;
+
+        $i9 = (int) $l8;
+
+        return $i9;
+
+     label13:
+        specialinvoke r0.<java.util.concurrent.Phaser: void releaseWaiters(int)>($i12);
+
+        return $i19;
+
+     label14:
+        goto label01;
+    }
+
+    public int awaitAdvance(int)
+    {
+        java.util.concurrent.Phaser r0, r1;
+        int i1, $i2, $i3;
+        long $l0, $l4;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        i1 := @parameter0: int;
+
+        r1 = r0.<java.util.concurrent.Phaser: java.util.concurrent.Phaser root>;
+
+        if r1 != r0 goto label1;
+
+        $l4 = r0.<java.util.concurrent.Phaser: long state>;
+
+        goto label2;
+
+     label1:
+        $l4 = specialinvoke r0.<java.util.concurrent.Phaser: long reconcileState()>();
+
+     label2:
+        $l0 = $l4 >>> 32;
+
+        $i3 = (int) $l0;
+
+        if i1 >= 0 goto label3;
+
+        return i1;
+
+     label3:
+        if $i3 != i1 goto label4;
+
+        $i2 = specialinvoke r1.<java.util.concurrent.Phaser: int internalAwaitAdvance(int,java.util.concurrent.Phaser$QNode)>(i1, null);
+
+        return $i2;
+
+     label4:
+        return $i3;
+    }
+
+    public int awaitAdvanceInterruptibly(int) throws java.lang.InterruptedException
+    {
+        long $l0, $l3;
+        java.util.concurrent.Phaser$QNode $r2;
+        java.lang.InterruptedException $r3;
+        java.util.concurrent.Phaser r0, r1;
+        int i1, $i2, i4;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        i1 := @parameter0: int;
+
+        r1 = r0.<java.util.concurrent.Phaser: java.util.concurrent.Phaser root>;
+
+        if r1 != r0 goto label1;
+
+        $l3 = r0.<java.util.concurrent.Phaser: long state>;
+
+        goto label2;
+
+     label1:
+        $l3 = specialinvoke r0.<java.util.concurrent.Phaser: long reconcileState()>();
+
+     label2:
+        $l0 = $l3 >>> 32;
+
+        $i2 = (int) $l0;
+
+        i4 = $i2;
+
+        if i1 >= 0 goto label3;
+
+        return i1;
+
+     label3:
+        if $i2 != i1 goto label4;
+
+        $r2 = new java.util.concurrent.Phaser$QNode;
+
+        specialinvoke $r2.<java.util.concurrent.Phaser$QNode: void <init>(java.util.concurrent.Phaser,int,boolean,boolean,long)>(r0, i1, 1, 0, 0L);
+
+        i4 = specialinvoke r1.<java.util.concurrent.Phaser: int internalAwaitAdvance(int,java.util.concurrent.Phaser$QNode)>(i1, $r2);
+
+        $z0 = $r2.<java.util.concurrent.Phaser$QNode: boolean wasInterrupted>;
+
+        if $z0 == 0 goto label4;
+
+        $r3 = new java.lang.InterruptedException;
+
+        specialinvoke $r3.<java.lang.InterruptedException: void <init>()>();
+
+        throw $r3;
+
+     label4:
+        return i4;
+    }
+
+    public int awaitAdvanceInterruptibly(int, long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException, java.util.concurrent.TimeoutException
+    {
+        java.util.concurrent.TimeoutException $r4;
+        long l0, $l1, $l2, $l6;
+        java.util.concurrent.Phaser$QNode $r3;
+        java.util.concurrent.TimeUnit r0;
+        java.lang.InterruptedException $r5;
+        java.util.concurrent.Phaser r1, r2;
+        int i3, $i4, $i5, i7;
+        boolean $z0;
+
+        r1 := @this: java.util.concurrent.Phaser;
+
+        i3 := @parameter0: int;
+
+        l0 := @parameter1: long;
+
+        r0 := @parameter2: java.util.concurrent.TimeUnit;
+
+        $l1 = virtualinvoke r0.<java.util.concurrent.TimeUnit: long toNanos(long)>(l0);
+
+        r2 = r1.<java.util.concurrent.Phaser: java.util.concurrent.Phaser root>;
+
+        if r2 != r1 goto label1;
+
+        $l6 = r1.<java.util.concurrent.Phaser: long state>;
+
+        goto label2;
+
+     label1:
+        $l6 = specialinvoke r1.<java.util.concurrent.Phaser: long reconcileState()>();
+
+     label2:
+        $l2 = $l6 >>> 32;
+
+        $i5 = (int) $l2;
+
+        i7 = $i5;
+
+        if i3 >= 0 goto label3;
+
+        return i3;
+
+     label3:
+        if $i5 != i3 goto label5;
+
+        $r3 = new java.util.concurrent.Phaser$QNode;
+
+        specialinvoke $r3.<java.util.concurrent.Phaser$QNode: void <init>(java.util.concurrent.Phaser,int,boolean,boolean,long)>(r1, i3, 1, 1, $l1);
+
+        $i4 = specialinvoke r2.<java.util.concurrent.Phaser: int internalAwaitAdvance(int,java.util.concurrent.Phaser$QNode)>(i3, $r3);
+
+        i7 = $i4;
+
+        $z0 = $r3.<java.util.concurrent.Phaser$QNode: boolean wasInterrupted>;
+
+        if $z0 == 0 goto label4;
+
+        $r5 = new java.lang.InterruptedException;
+
+        specialinvoke $r5.<java.lang.InterruptedException: void <init>()>();
+
+        throw $r5;
+
+     label4:
+        if $i4 != i3 goto label5;
+
+        $r4 = new java.util.concurrent.TimeoutException;
+
+        specialinvoke $r4.<java.util.concurrent.TimeoutException: void <init>()>();
+
+        throw $r4;
+
+     label5:
+        return i7;
+    }
+
+    public void forceTermination()
+    {
+        sun.misc.Unsafe $r2;
+        long $l0, $l2, $l3;
+        byte $b1;
+        java.util.concurrent.Phaser r0, r1;
+        int $i4;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        r1 = r0.<java.util.concurrent.Phaser: java.util.concurrent.Phaser root>;
+
+     label1:
+        $l0 = r1.<java.util.concurrent.Phaser: long state>;
+
+        $b1 = $l0 cmp 0L;
+
+        $i4 = (int) $b1;
+
+        if $i4 < 0 goto label2;
+
+        $r2 = <java.util.concurrent.Phaser: sun.misc.Unsafe UNSAFE>;
+
+        $l3 = <java.util.concurrent.Phaser: long stateOffset>;
+
+        $l2 = $l0 | -9223372036854775808L;
+
+        $z0 = virtualinvoke $r2.<sun.misc.Unsafe: boolean compareAndSwapLong(java.lang.Object,long,long,long)>(r1, $l3, $l0, $l2);
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<java.util.concurrent.Phaser: void releaseWaiters(int)>(0);
+
+        specialinvoke r0.<java.util.concurrent.Phaser: void releaseWaiters(int)>(1);
+
+        return;
+
+     label2:
+        return;
+    }
+
+    public final int getPhase()
+    {
+        java.util.concurrent.Phaser r0, $r1;
+        int $i2;
+        long $l0, $l1;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        $r1 = r0.<java.util.concurrent.Phaser: java.util.concurrent.Phaser root>;
+
+        $l0 = $r1.<java.util.concurrent.Phaser: long state>;
+
+        $l1 = $l0 >>> 32;
+
+        $i2 = (int) $l1;
+
+        return $i2;
+    }
+
+    public int getRegisteredParties()
+    {
+        int $i1;
+        long $l0;
+        java.util.concurrent.Phaser r0;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        $l0 = r0.<java.util.concurrent.Phaser: long state>;
+
+        $i1 = staticinvoke <java.util.concurrent.Phaser: int partiesOf(long)>($l0);
+
+        return $i1;
+    }
+
+    public int getArrivedParties()
+    {
+        int $i1;
+        long $l0;
+        java.util.concurrent.Phaser r0;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        $l0 = specialinvoke r0.<java.util.concurrent.Phaser: long reconcileState()>();
+
+        $i1 = staticinvoke <java.util.concurrent.Phaser: int arrivedOf(long)>($l0);
+
+        return $i1;
+    }
+
+    public int getUnarrivedParties()
+    {
+        int $i1;
+        long $l0;
+        java.util.concurrent.Phaser r0;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        $l0 = specialinvoke r0.<java.util.concurrent.Phaser: long reconcileState()>();
+
+        $i1 = staticinvoke <java.util.concurrent.Phaser: int unarrivedOf(long)>($l0);
+
+        return $i1;
+    }
+
+    public java.util.concurrent.Phaser getParent()
+    {
+        java.util.concurrent.Phaser r0, $r1;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        $r1 = r0.<java.util.concurrent.Phaser: java.util.concurrent.Phaser parent>;
+
+        return $r1;
+    }
+
+    public java.util.concurrent.Phaser getRoot()
+    {
+        java.util.concurrent.Phaser r0, $r1;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        $r1 = r0.<java.util.concurrent.Phaser: java.util.concurrent.Phaser root>;
+
+        return $r1;
+    }
+
+    public boolean isTerminated()
+    {
+        byte $b1;
+        java.util.concurrent.Phaser r0, $r1;
+        int $i2;
+        long $l0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        $r1 = r0.<java.util.concurrent.Phaser: java.util.concurrent.Phaser root>;
+
+        $l0 = $r1.<java.util.concurrent.Phaser: long state>;
+
+        $b1 = $l0 cmp 0L;
+
+        $i2 = (int) $b1;
+
+        if $i2 >= 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    protected boolean onAdvance(int, int)
+    {
+        java.util.concurrent.Phaser r0;
+        int i0, i1;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        if i0 != 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public java.lang.String toString()
+    {
+        long $l0;
+        java.lang.String $r1;
+        java.util.concurrent.Phaser r0;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        $l0 = specialinvoke r0.<java.util.concurrent.Phaser: long reconcileState()>();
+
+        $r1 = specialinvoke r0.<java.util.concurrent.Phaser: java.lang.String stateToString(long)>($l0);
+
+        return $r1;
+    }
+
+    private java.lang.String stateToString(long)
+    {
+        long l0;
+        int $i1, $i2, $i3;
+        java.lang.String $r2, $r11;
+        java.util.concurrent.Phaser r1;
+        java.lang.StringBuilder $r0, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10;
+
+        r1 := @this: java.util.concurrent.Phaser;
+
+        l0 := @parameter0: long;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = specialinvoke r1.<java.lang.Object: java.lang.String toString()>();
+
+        $r3 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[phase = ");
+
+        $i1 = staticinvoke <java.util.concurrent.Phaser: int phaseOf(long)>(l0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" parties = ");
+
+        $i2 = staticinvoke <java.util.concurrent.Phaser: int partiesOf(long)>(l0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" arrived = ");
+
+        $i3 = staticinvoke <java.util.concurrent.Phaser: int arrivedOf(long)>(l0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r11;
+    }
+
+    private void releaseWaiters(int)
+    {
+        long $l2, $l3;
+        java.util.concurrent.Phaser$QNode $r3, $r7;
+        java.util.concurrent.atomic.AtomicReference r1, $r5;
+        java.util.concurrent.Phaser r0, $r2;
+        java.lang.Thread $r4;
+        int i0, $i1, $i4, $i5;
+        java.lang.Object $r6;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        i0 := @parameter0: int;
+
+        $i1 = i0 & 1;
+
+        if $i1 != 0 goto label1;
+
+        $r5 = r0.<java.util.concurrent.Phaser: java.util.concurrent.atomic.AtomicReference evenQ>;
+
+        goto label2;
+
+     label1:
+        $r5 = r0.<java.util.concurrent.Phaser: java.util.concurrent.atomic.AtomicReference oddQ>;
+
+     label2:
+        r1 = $r5;
+
+     label3:
+        $r6 = virtualinvoke r1.<java.util.concurrent.atomic.AtomicReference: java.lang.Object get()>();
+
+        $r7 = (java.util.concurrent.Phaser$QNode) $r6;
+
+        if $r7 == null goto label4;
+
+        $i5 = $r7.<java.util.concurrent.Phaser$QNode: int phase>;
+
+        $r2 = r0.<java.util.concurrent.Phaser: java.util.concurrent.Phaser root>;
+
+        $l2 = $r2.<java.util.concurrent.Phaser: long state>;
+
+        $l3 = $l2 >>> 32;
+
+        $i4 = (int) $l3;
+
+        if $i5 == $i4 goto label4;
+
+        $r3 = $r7.<java.util.concurrent.Phaser$QNode: java.util.concurrent.Phaser$QNode next>;
+
+        $z0 = virtualinvoke r1.<java.util.concurrent.atomic.AtomicReference: boolean compareAndSet(java.lang.Object,java.lang.Object)>($r7, $r3);
+
+        if $z0 == 0 goto label3;
+
+        $r4 = $r7.<java.util.concurrent.Phaser$QNode: java.lang.Thread thread>;
+
+        if $r4 == null goto label3;
+
+        $r7.<java.util.concurrent.Phaser$QNode: java.lang.Thread thread> = null;
+
+        staticinvoke <java.util.concurrent.locks.LockSupport: void unpark(java.lang.Thread)>($r4);
+
+        goto label3;
+
+     label4:
+        return;
+    }
+
+    private int abortWait(int)
+    {
+        long $l3, $l4;
+        java.util.concurrent.Phaser$QNode $r3, $r6;
+        java.util.concurrent.atomic.AtomicReference r1, $r4;
+        java.util.concurrent.Phaser r0, $r7;
+        java.lang.Thread $r2;
+        int i0, $i1, $i2, $i5;
+        java.lang.Object $r5;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        i0 := @parameter0: int;
+
+        $i1 = i0 & 1;
+
+        if $i1 != 0 goto label1;
+
+        $r4 = r0.<java.util.concurrent.Phaser: java.util.concurrent.atomic.AtomicReference evenQ>;
+
+        goto label2;
+
+     label1:
+        $r4 = r0.<java.util.concurrent.Phaser: java.util.concurrent.atomic.AtomicReference oddQ>;
+
+     label2:
+        r1 = $r4;
+
+     label3:
+        $r5 = virtualinvoke r1.<java.util.concurrent.atomic.AtomicReference: java.lang.Object get()>();
+
+        $r6 = (java.util.concurrent.Phaser$QNode) $r5;
+
+        $r7 = r0.<java.util.concurrent.Phaser: java.util.concurrent.Phaser root>;
+
+        $l3 = $r7.<java.util.concurrent.Phaser: long state>;
+
+        $l4 = $l3 >>> 32;
+
+        $i5 = (int) $l4;
+
+        if $r6 == null goto label4;
+
+        $r2 = $r6.<java.util.concurrent.Phaser$QNode: java.lang.Thread thread>;
+
+        if $r2 == null goto label5;
+
+        $i2 = $r6.<java.util.concurrent.Phaser$QNode: int phase>;
+
+        if $i2 != $i5 goto label5;
+
+     label4:
+        return $i5;
+
+     label5:
+        $r3 = $r6.<java.util.concurrent.Phaser$QNode: java.util.concurrent.Phaser$QNode next>;
+
+        $z0 = virtualinvoke r1.<java.util.concurrent.atomic.AtomicReference: boolean compareAndSet(java.lang.Object,java.lang.Object)>($r6, $r3);
+
+        if $z0 == 0 goto label6;
+
+        if $r2 == null goto label6;
+
+        $r6.<java.util.concurrent.Phaser$QNode: java.lang.Thread thread> = null;
+
+        staticinvoke <java.util.concurrent.locks.LockSupport: void unpark(java.lang.Thread)>($r2);
+
+     label6:
+        goto label3;
+    }
+
+    private int internalAwaitAdvance(int, java.util.concurrent.Phaser$QNode)
+    {
+        java.lang.Thread $r1, $r2;
+        boolean $z0, $z1, $z2, z3, $z4;
+        long $l2, $l3, $l7, $l8, $l16, $l17;
+        java.util.concurrent.Phaser$QNode $r4, r7, $r10;
+        java.util.concurrent.atomic.AtomicReference $r8, r9;
+        int i0, $i1, $i4, $i5, $i6, $i9, $i10, $i11, $i12, $i13, i14, i15, $i18, i19, i20, $i22, $i24;
+        java.lang.InterruptedException $r6;
+        java.util.concurrent.Phaser r0;
+        java.lang.Object $r3;
+
+        r0 := @this: java.util.concurrent.Phaser;
+
+        i0 := @parameter0: int;
+
+        r7 := @parameter1: java.util.concurrent.Phaser$QNode;
+
+        $i1 = i0 - 1;
+
+        specialinvoke r0.<java.util.concurrent.Phaser: void releaseWaiters(int)>($i1);
+
+        z3 = 0;
+
+        i14 = 0;
+
+        i15 = <java.util.concurrent.Phaser: int SPINS_PER_ARRIVAL>;
+
+     label01:
+        $l16 = r0.<java.util.concurrent.Phaser: long state>;
+
+        $l17 = $l16 >>> 32;
+
+        $i18 = (int) $l17;
+
+        i19 = $i18;
+
+        if $i18 != i0 goto label14;
+
+        if r7 != null goto label05;
+
+        $i11 = (int) $l16;
+
+        $i22 = (int) 65535;
+
+        i20 = $i11 & $i22;
+
+        if i20 == i14 goto label02;
+
+        i14 = i20;
+
+        $i12 = <java.util.concurrent.Phaser: int NCPU>;
+
+        if i20 >= $i12 goto label02;
+
+        $i13 = <java.util.concurrent.Phaser: int SPINS_PER_ARRIVAL>;
+
+        i15 = i15 + $i13;
+
+     label02:
+        $z4 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z4 != 0 goto label03;
+
+        $i24 = (int) -1;
+
+        i15 = i15 + $i24;
+
+        if i15 >= 0 goto label04;
+
+     label03:
+        $r10 = new java.util.concurrent.Phaser$QNode;
+
+        specialinvoke $r10.<java.util.concurrent.Phaser$QNode: void <init>(java.util.concurrent.Phaser,int,boolean,boolean,long)>(r0, i0, 0, 0, 0L);
+
+        r7 = $r10;
+
+        $r10.<java.util.concurrent.Phaser$QNode: boolean wasInterrupted> = $z4;
+
+     label04:
+        goto label01;
+
+     label05:
+        $z2 = virtualinvoke r7.<java.util.concurrent.Phaser$QNode: boolean isReleasable()>();
+
+        if $z2 == 0 goto label06;
+
+        goto label14;
+
+     label06:
+        if z3 != 0 goto label11;
+
+        $i6 = i0 & 1;
+
+        if $i6 != 0 goto label07;
+
+        $r8 = r0.<java.util.concurrent.Phaser: java.util.concurrent.atomic.AtomicReference evenQ>;
+
+        goto label08;
+
+     label07:
+        $r8 = r0.<java.util.concurrent.Phaser: java.util.concurrent.atomic.AtomicReference oddQ>;
+
+     label08:
+        r9 = $r8;
+
+        $r3 = virtualinvoke $r8.<java.util.concurrent.atomic.AtomicReference: java.lang.Object get()>();
+
+        $r4 = (java.util.concurrent.Phaser$QNode) $r3;
+
+        r7.<java.util.concurrent.Phaser$QNode: java.util.concurrent.Phaser$QNode next> = $r4;
+
+        if $r4 == null goto label09;
+
+        $i10 = $r4.<java.util.concurrent.Phaser$QNode: int phase>;
+
+        if $i10 != i0 goto label10;
+
+     label09:
+        $l7 = r0.<java.util.concurrent.Phaser: long state>;
+
+        $l8 = $l7 >>> 32;
+
+        $i9 = (int) $l8;
+
+        if $i9 != i0 goto label10;
+
+        z3 = virtualinvoke r9.<java.util.concurrent.atomic.AtomicReference: boolean compareAndSet(java.lang.Object,java.lang.Object)>($r4, r7);
+
+     label10:
+        goto label01;
+
+     label11:
+        staticinvoke <java.util.concurrent.ForkJoinPool: void managedBlock(java.util.concurrent.ForkJoinPool$ManagedBlocker)>(r7);
+
+     label12:
+        goto label01;
+
+     label13:
+        $r6 := @caughtexception;
+
+        r7.<java.util.concurrent.Phaser$QNode: boolean wasInterrupted> = 1;
+
+        goto label01;
+
+     label14:
+        if r7 == null goto label17;
+
+        $r1 = r7.<java.util.concurrent.Phaser$QNode: java.lang.Thread thread>;
+
+        if $r1 == null goto label15;
+
+        r7.<java.util.concurrent.Phaser$QNode: java.lang.Thread thread> = null;
+
+     label15:
+        $z0 = r7.<java.util.concurrent.Phaser$QNode: boolean wasInterrupted>;
+
+        if $z0 == 0 goto label16;
+
+        $z1 = r7.<java.util.concurrent.Phaser$QNode: boolean interruptible>;
+
+        if $z1 != 0 goto label16;
+
+        $r2 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r2.<java.lang.Thread: void interrupt()>();
+
+     label16:
+        if $i18 != i0 goto label17;
+
+        $l2 = r0.<java.util.concurrent.Phaser: long state>;
+
+        $l3 = $l2 >>> 32;
+
+        $i4 = (int) $l3;
+
+        i19 = $i4;
+
+        if $i4 != i0 goto label17;
+
+        $i5 = specialinvoke r0.<java.util.concurrent.Phaser: int abortWait(int)>(i0);
+
+        return $i5;
+
+     label17:
+        specialinvoke r0.<java.util.concurrent.Phaser: void releaseWaiters(int)>(i0);
+
+        return i19;
+
+        catch java.lang.InterruptedException from label11 to label12 with label13;
+    }
+
+    static void <clinit>()
+    {
+        sun.misc.Unsafe $r1, $r2;
+        java.lang.Runtime $r0;
+        java.lang.Error $r6;
+        long $l2;
+        java.lang.reflect.Field $r3;
+        java.lang.Exception $r5;
+        short $s3;
+        int $i0, $i1;
+        java.lang.Class $r4;
+
+        <java.util.concurrent.Phaser: int EMPTY> = 1;
+
+        <java.util.concurrent.Phaser: int ONE_DEREGISTER> = 65537;
+
+        <java.util.concurrent.Phaser: int ONE_PARTY> = 65536;
+
+        <java.util.concurrent.Phaser: int ONE_ARRIVAL> = 1;
+
+        <java.util.concurrent.Phaser: long TERMINATION_BIT> = -9223372036854775808L;
+
+        <java.util.concurrent.Phaser: long COUNTS_MASK> = 4294967295L;
+
+        <java.util.concurrent.Phaser: long PARTIES_MASK> = 4294901760L;
+
+        <java.util.concurrent.Phaser: int UNARRIVED_MASK> = 65535;
+
+        <java.util.concurrent.Phaser: int PHASE_SHIFT> = 32;
+
+        <java.util.concurrent.Phaser: int PARTIES_SHIFT> = 16;
+
+        <java.util.concurrent.Phaser: int MAX_PHASE> = 2147483647;
+
+        <java.util.concurrent.Phaser: int MAX_PARTIES> = 65535;
+
+        $r0 = staticinvoke <java.lang.Runtime: java.lang.Runtime getRuntime()>();
+
+        $i0 = virtualinvoke $r0.<java.lang.Runtime: int availableProcessors()>();
+
+        <java.util.concurrent.Phaser: int NCPU> = $i0;
+
+        $i1 = <java.util.concurrent.Phaser: int NCPU>;
+
+        if $i1 >= 2 goto label1;
+
+        $s3 = 1;
+
+        goto label2;
+
+     label1:
+        $s3 = 256;
+
+     label2:
+        <java.util.concurrent.Phaser: int SPINS_PER_ARRIVAL> = $s3;
+
+     label3:
+        $r1 = staticinvoke <sun.misc.Unsafe: sun.misc.Unsafe getUnsafe()>();
+
+        <java.util.concurrent.Phaser: sun.misc.Unsafe UNSAFE> = $r1;
+
+        $r2 = <java.util.concurrent.Phaser: sun.misc.Unsafe UNSAFE>;
+
+        $r4 = class "Ljava/util/concurrent/Phaser;";
+
+        $r3 = virtualinvoke $r4.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("state");
+
+        $l2 = virtualinvoke $r2.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r3);
+
+        <java.util.concurrent.Phaser: long stateOffset> = $l2;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r5 := @caughtexception;
+
+        $r6 = new java.lang.Error;
+
+        specialinvoke $r6.<java.lang.Error: void <init>(java.lang.Throwable)>($r5);
+
+        throw $r6;
+
+     label6:
+        return;
+
+        catch java.lang.Exception from label3 to label4 with label5;
+    }
+}

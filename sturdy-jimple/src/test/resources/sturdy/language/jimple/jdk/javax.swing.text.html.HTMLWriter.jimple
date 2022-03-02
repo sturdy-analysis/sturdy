@@ -1,0 +1,2962 @@
+public class javax.swing.text.html.HTMLWriter extends javax.swing.text.AbstractWriter
+{
+    private java.util.Stack blockElementStack;
+    private boolean inContent;
+    private boolean inPre;
+    private int preEndOffset;
+    private boolean inTextArea;
+    private boolean newlineOutputed;
+    private boolean completeDoc;
+    private java.util.Vector tags;
+    private java.util.Vector tagValues;
+    private javax.swing.text.Segment segment;
+    private java.util.Vector tagsToRemove;
+    private boolean wroteHead;
+    private boolean replaceEntities;
+    private char[] tempChars;
+    private boolean indentNext;
+    private boolean writeCSS;
+    private javax.swing.text.MutableAttributeSet convAttr;
+    private javax.swing.text.MutableAttributeSet oConvAttr;
+    private boolean indented;
+
+    public void <init>(java.io.Writer, javax.swing.text.html.HTMLDocument)
+    {
+        javax.swing.text.html.HTMLDocument r2;
+        javax.swing.text.html.HTMLWriter r0;
+        java.io.Writer r1;
+        int $i0;
+
+        r0 := @this: javax.swing.text.html.HTMLWriter;
+
+        r1 := @parameter0: java.io.Writer;
+
+        r2 := @parameter1: javax.swing.text.html.HTMLDocument;
+
+        $i0 = virtualinvoke r2.<javax.swing.text.html.HTMLDocument: int getLength()>();
+
+        specialinvoke r0.<javax.swing.text.html.HTMLWriter: void <init>(java.io.Writer,javax.swing.text.html.HTMLDocument,int,int)>(r1, r2, 0, $i0);
+
+        return;
+    }
+
+    public void <init>(java.io.Writer, javax.swing.text.html.HTMLDocument, int, int)
+    {
+        javax.swing.text.SimpleAttributeSet $r7, $r8;
+        java.util.Stack $r3;
+        javax.swing.text.html.HTMLDocument r2;
+        javax.swing.text.html.HTMLWriter r0;
+        java.util.Vector $r4, $r5, $r6;
+        java.io.Writer r1;
+        int i0, i1, $i2;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.html.HTMLWriter;
+
+        r1 := @parameter0: java.io.Writer;
+
+        r2 := @parameter1: javax.swing.text.html.HTMLDocument;
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        specialinvoke r0.<javax.swing.text.AbstractWriter: void <init>(java.io.Writer,javax.swing.text.Document,int,int)>(r1, r2, i0, i1);
+
+        $r3 = new java.util.Stack;
+
+        specialinvoke $r3.<java.util.Stack: void <init>()>();
+
+        r0.<javax.swing.text.html.HTMLWriter: java.util.Stack blockElementStack> = $r3;
+
+        r0.<javax.swing.text.html.HTMLWriter: boolean inContent> = 0;
+
+        r0.<javax.swing.text.html.HTMLWriter: boolean inPre> = 0;
+
+        r0.<javax.swing.text.html.HTMLWriter: boolean inTextArea> = 0;
+
+        r0.<javax.swing.text.html.HTMLWriter: boolean newlineOutputed> = 0;
+
+        $r4 = new java.util.Vector;
+
+        specialinvoke $r4.<java.util.Vector: void <init>(int)>(10);
+
+        r0.<javax.swing.text.html.HTMLWriter: java.util.Vector tags> = $r4;
+
+        $r5 = new java.util.Vector;
+
+        specialinvoke $r5.<java.util.Vector: void <init>(int)>(10);
+
+        r0.<javax.swing.text.html.HTMLWriter: java.util.Vector tagValues> = $r5;
+
+        $r6 = new java.util.Vector;
+
+        specialinvoke $r6.<java.util.Vector: void <init>(int)>(10);
+
+        r0.<javax.swing.text.html.HTMLWriter: java.util.Vector tagsToRemove> = $r6;
+
+        r0.<javax.swing.text.html.HTMLWriter: boolean indentNext> = 0;
+
+        r0.<javax.swing.text.html.HTMLWriter: boolean writeCSS> = 0;
+
+        $r7 = new javax.swing.text.SimpleAttributeSet;
+
+        specialinvoke $r7.<javax.swing.text.SimpleAttributeSet: void <init>()>();
+
+        r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.MutableAttributeSet convAttr> = $r7;
+
+        $r8 = new javax.swing.text.SimpleAttributeSet;
+
+        specialinvoke $r8.<javax.swing.text.SimpleAttributeSet: void <init>()>();
+
+        r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.MutableAttributeSet oConvAttr> = $r8;
+
+        r0.<javax.swing.text.html.HTMLWriter: boolean indented> = 0;
+
+        if i0 != 0 goto label1;
+
+        $i2 = virtualinvoke r2.<javax.swing.text.html.HTMLDocument: int getLength()>();
+
+        if i1 != $i2 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        r0.<javax.swing.text.html.HTMLWriter: boolean completeDoc> = $z0;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void setLineLength(int)>(80);
+
+        return;
+    }
+
+    public void write() throws java.io.IOException, javax.swing.text.BadLocationException
+    {
+        javax.swing.text.AttributeSet $r6, $r10, $r22, $r24;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, z11, $z12, $z13;
+        javax.swing.text.html.HTMLWriter r0;
+        javax.swing.text.html.HTML$Tag $r7, $r23, $r27;
+        javax.swing.text.ElementIterator $r1;
+        java.util.Stack $r4, $r8, $r9, $r15, $r17, $r18, $r21, $r32, $r35;
+        java.lang.Object $r5, $r16, $r19, $r25, $r26, $r33;
+        javax.swing.text.Segment $r2, $r3, $r28;
+        javax.swing.text.Element $r11, $r12, $r13, $r14, $r20, r29, $r30, r31, r34, r36;
+
+        r0 := @this: javax.swing.text.html.HTMLWriter;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.ElementIterator getElementIterator()>();
+
+        r29 = null;
+
+        r0.<javax.swing.text.html.HTMLWriter: boolean wroteHead> = 0;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void setCurrentLineLength(int)>(0);
+
+        r0.<javax.swing.text.html.HTMLWriter: boolean replaceEntities> = 0;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void setCanWrapLines(boolean)>(0);
+
+        $r2 = r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.Segment segment>;
+
+        if $r2 != null goto label01;
+
+        $r28 = new javax.swing.text.Segment;
+
+        specialinvoke $r28.<javax.swing.text.Segment: void <init>()>();
+
+        r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.Segment segment> = $r28;
+
+     label01:
+        r0.<javax.swing.text.html.HTMLWriter: boolean inPre> = 0;
+
+        z11 = 0;
+
+     label02:
+        $r30 = virtualinvoke $r1.<javax.swing.text.ElementIterator: javax.swing.text.Element next()>();
+
+        if $r30 == null goto label14;
+
+        $z4 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: boolean inRange(javax.swing.text.Element)>($r30);
+
+        if $z4 != 0 goto label03;
+
+        $z10 = r0.<javax.swing.text.html.HTMLWriter: boolean completeDoc>;
+
+        if $z10 == 0 goto label02;
+
+        $r24 = interfaceinvoke $r30.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $r25 = <javax.swing.text.StyleConstants: java.lang.Object NameAttribute>;
+
+        $r26 = interfaceinvoke $r24.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r25);
+
+        $r27 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag BODY>;
+
+        if $r26 != $r27 goto label02;
+
+        z11 = 1;
+
+     label03:
+        if r29 == null goto label10;
+
+        $z6 = specialinvoke r0.<javax.swing.text.html.HTMLWriter: boolean indentNeedsIncrementing(javax.swing.text.Element,javax.swing.text.Element)>(r29, $r30);
+
+        if $z6 == 0 goto label04;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void incrIndent()>();
+
+        goto label10;
+
+     label04:
+        $r11 = interfaceinvoke r29.<javax.swing.text.Element: javax.swing.text.Element getParentElement()>();
+
+        $r12 = interfaceinvoke $r30.<javax.swing.text.Element: javax.swing.text.Element getParentElement()>();
+
+        if $r11 == $r12 goto label09;
+
+        $r18 = r0.<javax.swing.text.html.HTMLWriter: java.util.Stack blockElementStack>;
+
+        $r19 = virtualinvoke $r18.<java.util.Stack: java.lang.Object peek()>();
+
+        r31 = (javax.swing.text.Element) $r19;
+
+     label05:
+        $r20 = interfaceinvoke $r30.<javax.swing.text.Element: javax.swing.text.Element getParentElement()>();
+
+        if r31 == $r20 goto label08;
+
+        $r21 = r0.<javax.swing.text.html.HTMLWriter: java.util.Stack blockElementStack>;
+
+        virtualinvoke $r21.<java.util.Stack: java.lang.Object pop()>();
+
+        $z7 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: boolean synthesizedElement(javax.swing.text.Element)>(r31);
+
+        if $z7 != 0 goto label07;
+
+        $r22 = interfaceinvoke r31.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $r23 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag PRE>;
+
+        $z8 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: boolean matchNameAttribute(javax.swing.text.AttributeSet,javax.swing.text.html.HTML$Tag)>($r22, $r23);
+
+        if $z8 != 0 goto label06;
+
+        $z9 = specialinvoke r0.<javax.swing.text.html.HTMLWriter: boolean isFormElementWithContent(javax.swing.text.AttributeSet)>($r22);
+
+        if $z9 != 0 goto label06;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void decrIndent()>();
+
+     label06:
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void endTag(javax.swing.text.Element)>(r31);
+
+     label07:
+        $r32 = r0.<javax.swing.text.html.HTMLWriter: java.util.Stack blockElementStack>;
+
+        $r33 = virtualinvoke $r32.<java.util.Stack: java.lang.Object peek()>();
+
+        r31 = (javax.swing.text.Element) $r33;
+
+        goto label05;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r13 = interfaceinvoke r29.<javax.swing.text.Element: javax.swing.text.Element getParentElement()>();
+
+        $r14 = interfaceinvoke $r30.<javax.swing.text.Element: javax.swing.text.Element getParentElement()>();
+
+        if $r13 != $r14 goto label10;
+
+        $r15 = r0.<javax.swing.text.html.HTMLWriter: java.util.Stack blockElementStack>;
+
+        $r16 = virtualinvoke $r15.<java.util.Stack: java.lang.Object peek()>();
+
+        r34 = (javax.swing.text.Element) $r16;
+
+        if r34 != r29 goto label10;
+
+        $r17 = r0.<javax.swing.text.html.HTMLWriter: java.util.Stack blockElementStack>;
+
+        virtualinvoke $r17.<java.util.Stack: java.lang.Object pop()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void endTag(javax.swing.text.Element)>(r34);
+
+     label10:
+        $z12 = interfaceinvoke $r30.<javax.swing.text.Element: boolean isLeaf()>();
+
+        if $z12 == 0 goto label11;
+
+        $r10 = interfaceinvoke $r30.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $z5 = specialinvoke r0.<javax.swing.text.html.HTMLWriter: boolean isFormElementWithContent(javax.swing.text.AttributeSet)>($r10);
+
+        if $z5 == 0 goto label12;
+
+     label11:
+        $r9 = r0.<javax.swing.text.html.HTMLWriter: java.util.Stack blockElementStack>;
+
+        virtualinvoke $r9.<java.util.Stack: java.lang.Object push(java.lang.Object)>($r30);
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void startTag(javax.swing.text.Element)>($r30);
+
+        goto label13;
+
+     label12:
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void emptyTag(javax.swing.text.Element)>($r30);
+
+     label13:
+        r29 = $r30;
+
+        goto label02;
+
+     label14:
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void closeOutUnwantedEmbeddedTags(javax.swing.text.AttributeSet)>(null);
+
+        if z11 == 0 goto label15;
+
+        $r8 = r0.<javax.swing.text.html.HTMLWriter: java.util.Stack blockElementStack>;
+
+        virtualinvoke $r8.<java.util.Stack: java.lang.Object pop()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void endTag(javax.swing.text.Element)>(r29);
+
+     label15:
+        $r35 = r0.<javax.swing.text.html.HTMLWriter: java.util.Stack blockElementStack>;
+
+        $z13 = virtualinvoke $r35.<java.util.Stack: boolean empty()>();
+
+        if $z13 != 0 goto label17;
+
+        $r4 = r0.<javax.swing.text.html.HTMLWriter: java.util.Stack blockElementStack>;
+
+        $r5 = virtualinvoke $r4.<java.util.Stack: java.lang.Object pop()>();
+
+        r36 = (javax.swing.text.Element) $r5;
+
+        $z1 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: boolean synthesizedElement(javax.swing.text.Element)>(r36);
+
+        if $z1 != 0 goto label15;
+
+        $r6 = interfaceinvoke r36.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $r7 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag PRE>;
+
+        $z2 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: boolean matchNameAttribute(javax.swing.text.AttributeSet,javax.swing.text.html.HTML$Tag)>($r6, $r7);
+
+        if $z2 != 0 goto label16;
+
+        $z3 = specialinvoke r0.<javax.swing.text.html.HTMLWriter: boolean isFormElementWithContent(javax.swing.text.AttributeSet)>($r6);
+
+        if $z3 != 0 goto label16;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void decrIndent()>();
+
+     label16:
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void endTag(javax.swing.text.Element)>(r36);
+
+        goto label15;
+
+     label17:
+        $z0 = r0.<javax.swing.text.html.HTMLWriter: boolean completeDoc>;
+
+        if $z0 == 0 goto label18;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeAdditionalComments()>();
+
+     label18:
+        $r3 = r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.Segment segment>;
+
+        $r3.<javax.swing.text.Segment: char[] array> = null;
+
+        return;
+    }
+
+    protected void writeAttributes(javax.swing.text.AttributeSet) throws java.io.IOException
+    {
+        java.util.Enumeration $r6;
+        javax.swing.text.html.HTML$Attribute $r8;
+        java.lang.String $r17;
+        javax.swing.text.AttributeSet r3;
+        boolean $z0, $z1, $z2;
+        javax.swing.text.MutableAttributeSet $r1, $r2, $r4, $r5, $r13;
+        javax.swing.text.html.HTMLWriter r0;
+        java.lang.Object $r7, $r14;
+        java.lang.StringBuilder $r9, $r10, $r11, $r12, $r15, $r16;
+
+        r0 := @this: javax.swing.text.html.HTMLWriter;
+
+        r3 := @parameter0: javax.swing.text.AttributeSet;
+
+        $r2 = r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.MutableAttributeSet convAttr>;
+
+        $r1 = r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.MutableAttributeSet convAttr>;
+
+        interfaceinvoke $r2.<javax.swing.text.MutableAttributeSet: void removeAttributes(javax.swing.text.AttributeSet)>($r1);
+
+        $r4 = r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.MutableAttributeSet convAttr>;
+
+        staticinvoke <javax.swing.text.html.HTMLWriter: void convertToHTML32(javax.swing.text.AttributeSet,javax.swing.text.MutableAttributeSet)>(r3, $r4);
+
+        $r5 = r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.MutableAttributeSet convAttr>;
+
+        $r6 = interfaceinvoke $r5.<javax.swing.text.MutableAttributeSet: java.util.Enumeration getAttributeNames()>();
+
+     label1:
+        $z2 = interfaceinvoke $r6.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z2 == 0 goto label3;
+
+        $r7 = interfaceinvoke $r6.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        $z0 = $r7 instanceof javax.swing.text.html.HTML$Tag;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = $r7 instanceof javax.swing.text.StyleConstants;
+
+        if $z1 != 0 goto label1;
+
+        $r8 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute ENDTAG>;
+
+        if $r7 != $r8 goto label2;
+
+        goto label1;
+
+     label2:
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r7);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("=\"");
+
+        $r13 = r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.MutableAttributeSet convAttr>;
+
+        $r14 = interfaceinvoke $r13.<javax.swing.text.MutableAttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r7);
+
+        $r15 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>($r17);
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    protected void emptyTag(javax.swing.text.Element) throws javax.swing.text.BadLocationException, java.io.IOException
+    {
+        javax.swing.text.html.StyleSheet $r13;
+        javax.swing.text.AttributeSet $r3, $r16;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, z12, $z13, z14, z15, z16;
+        javax.swing.text.html.HTMLDocument $r12;
+        javax.swing.text.html.HTMLWriter r0;
+        javax.swing.text.html.HTML$Tag $r2, $r6, $r10, $r17;
+        javax.swing.text.Document $r7, $r11;
+        javax.swing.text.html.HTML$Attribute $r14;
+        java.lang.String $r5, r9;
+        java.lang.Object r4, $r8, $r15, $r18, $r19;
+        javax.swing.text.Element r1;
+
+        r0 := @this: javax.swing.text.html.HTMLWriter;
+
+        r1 := @parameter0: javax.swing.text.Element;
+
+        $z0 = r0.<javax.swing.text.html.HTMLWriter: boolean inContent>;
+
+        if $z0 != 0 goto label01;
+
+        $z10 = r0.<javax.swing.text.html.HTMLWriter: boolean inPre>;
+
+        if $z10 != 0 goto label01;
+
+        specialinvoke r0.<javax.swing.text.html.HTMLWriter: void indentSmart()>();
+
+     label01:
+        $r16 = interfaceinvoke r1.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void closeOutUnwantedEmbeddedTags(javax.swing.text.AttributeSet)>($r16);
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeEmbeddedTags(javax.swing.text.AttributeSet)>($r16);
+
+        $r17 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag CONTENT>;
+
+        $z11 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: boolean matchNameAttribute(javax.swing.text.AttributeSet,javax.swing.text.html.HTML$Tag)>($r16, $r17);
+
+        if $z11 == 0 goto label02;
+
+        r0.<javax.swing.text.html.HTMLWriter: boolean inContent> = 1;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void text(javax.swing.text.Element)>(r1);
+
+        goto label15;
+
+     label02:
+        $r2 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag COMMENT>;
+
+        $z1 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: boolean matchNameAttribute(javax.swing.text.AttributeSet,javax.swing.text.html.HTML$Tag)>($r16, $r2);
+
+        if $z1 == 0 goto label03;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void comment(javax.swing.text.Element)>(r1);
+
+        goto label15;
+
+     label03:
+        $r3 = interfaceinvoke r1.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $z2 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: boolean isBlockTag(javax.swing.text.AttributeSet)>($r3);
+
+        $z3 = r0.<javax.swing.text.html.HTMLWriter: boolean inContent>;
+
+        if $z3 == 0 goto label04;
+
+        if $z2 == 0 goto label04;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeLineSeparator()>();
+
+        specialinvoke r0.<javax.swing.text.html.HTMLWriter: void indentSmart()>();
+
+     label04:
+        if $r16 == null goto label05;
+
+        $r15 = <javax.swing.text.StyleConstants: java.lang.Object NameAttribute>;
+
+        $r18 = interfaceinvoke $r16.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r15);
+
+        goto label06;
+
+     label05:
+        $r18 = null;
+
+     label06:
+        r4 = $r18;
+
+        if $r16 == null goto label07;
+
+        $r14 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute ENDTAG>;
+
+        $r19 = interfaceinvoke $r16.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r14);
+
+        goto label08;
+
+     label07:
+        $r19 = null;
+
+     label08:
+        z12 = 0;
+
+        z16 = 0;
+
+        z15 = 0;
+
+        z14 = 0;
+
+        if r4 == null goto label09;
+
+        if $r19 == null goto label09;
+
+        $z8 = $r19 instanceof java.lang.String;
+
+        if $z8 == 0 goto label09;
+
+        $z9 = virtualinvoke $r19.<java.lang.Object: boolean equals(java.lang.Object)>("true");
+
+        if $z9 == 0 goto label09;
+
+        z12 = 1;
+
+        z16 = 1;
+
+        z15 = 1;
+
+        z14 = 1;
+
+     label09:
+        $z13 = r0.<javax.swing.text.html.HTMLWriter: boolean completeDoc>;
+
+        if $z13 == 0 goto label11;
+
+        $r10 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag HEAD>;
+
+        $z7 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: boolean matchNameAttribute(javax.swing.text.AttributeSet,javax.swing.text.html.HTML$Tag)>($r16, $r10);
+
+        if $z7 == 0 goto label11;
+
+        if z15 == 0 goto label10;
+
+        $r11 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.Document getDocument()>();
+
+        $r12 = (javax.swing.text.html.HTMLDocument) $r11;
+
+        $r13 = virtualinvoke $r12.<javax.swing.text.html.HTMLDocument: javax.swing.text.html.StyleSheet getStyleSheet()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeStyles(javax.swing.text.html.StyleSheet)>($r13);
+
+     label10:
+        r0.<javax.swing.text.html.HTMLWriter: boolean wroteHead> = 1;
+
+     label11:
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(char)>(60);
+
+        if z14 == 0 goto label12;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(char)>(47);
+
+     label12:
+        $r5 = interfaceinvoke r1.<javax.swing.text.Element: java.lang.String getName()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>($r5);
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeAttributes(javax.swing.text.AttributeSet)>($r16);
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(char)>(62);
+
+        $r6 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag TITLE>;
+
+        $z4 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: boolean matchNameAttribute(javax.swing.text.AttributeSet,javax.swing.text.html.HTML$Tag)>($r16, $r6);
+
+        if $z4 == 0 goto label13;
+
+        if z16 != 0 goto label13;
+
+        $r7 = interfaceinvoke r1.<javax.swing.text.Element: javax.swing.text.Document getDocument()>();
+
+        $r8 = interfaceinvoke $r7.<javax.swing.text.Document: java.lang.Object getProperty(java.lang.Object)>("title");
+
+        r9 = (java.lang.String) $r8;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>(r9);
+
+        goto label15;
+
+     label13:
+        $z5 = r0.<javax.swing.text.html.HTMLWriter: boolean inContent>;
+
+        if $z5 == 0 goto label14;
+
+        if $z2 == 0 goto label15;
+
+     label14:
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeLineSeparator()>();
+
+        if $z2 == 0 goto label15;
+
+        $z6 = r0.<javax.swing.text.html.HTMLWriter: boolean inContent>;
+
+        if $z6 == 0 goto label15;
+
+        specialinvoke r0.<javax.swing.text.html.HTMLWriter: void indentSmart()>();
+
+     label15:
+        return;
+    }
+
+    protected boolean isBlockTag(javax.swing.text.AttributeSet)
+    {
+        javax.swing.text.html.HTMLWriter r4;
+        javax.swing.text.html.HTML$Tag r3;
+        java.lang.Object $r1, $r2;
+        javax.swing.text.AttributeSet r0;
+        boolean $z0, $z1;
+
+        r4 := @this: javax.swing.text.html.HTMLWriter;
+
+        r0 := @parameter0: javax.swing.text.AttributeSet;
+
+        $r1 = <javax.swing.text.StyleConstants: java.lang.Object NameAttribute>;
+
+        $r2 = interfaceinvoke r0.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r1);
+
+        $z0 = $r2 instanceof javax.swing.text.html.HTML$Tag;
+
+        if $z0 == 0 goto label1;
+
+        r3 = (javax.swing.text.html.HTML$Tag) $r2;
+
+        $z1 = virtualinvoke r3.<javax.swing.text.html.HTML$Tag: boolean isBlock()>();
+
+        return $z1;
+
+     label1:
+        return 0;
+    }
+
+    protected void startTag(javax.swing.text.Element) throws java.io.IOException, javax.swing.text.BadLocationException
+    {
+        javax.swing.text.html.StyleSheet $r11, $r27;
+        java.util.Enumeration $r21;
+        java.net.URL $r14;
+        javax.swing.text.AttributeSet $r2, $r22, $r23;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        javax.swing.text.html.HTMLDocument r10, $r20, $r26;
+        javax.swing.text.html.HTMLWriter r0;
+        javax.swing.text.html.HTML$Tag $r5, $r6, $r7, $r8, $r18, $r24, r28, $r30;
+        java.lang.StringBuilder $r12, $r13, $r15, $r16;
+        javax.swing.text.Document $r9, $r19, $r25;
+        int $i0;
+        java.lang.String $r17, $r29;
+        java.lang.Object $r3, $r4;
+        javax.swing.text.Element r1;
+
+        r0 := @this: javax.swing.text.html.HTMLWriter;
+
+        r1 := @parameter0: javax.swing.text.Element;
+
+        $z0 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: boolean synthesizedElement(javax.swing.text.Element)>(r1);
+
+        if $z0 == 0 goto label01;
+
+        return;
+
+     label01:
+        $r2 = interfaceinvoke r1.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $r3 = <javax.swing.text.StyleConstants: java.lang.Object NameAttribute>;
+
+        $r4 = interfaceinvoke $r2.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r3);
+
+        $z1 = $r4 instanceof javax.swing.text.html.HTML$Tag;
+
+        if $z1 == 0 goto label02;
+
+        r28 = (javax.swing.text.html.HTML$Tag) $r4;
+
+        goto label03;
+
+     label02:
+        r28 = null;
+
+     label03:
+        $r5 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag PRE>;
+
+        if r28 != $r5 goto label04;
+
+        r0.<javax.swing.text.html.HTMLWriter: boolean inPre> = 1;
+
+        $i0 = interfaceinvoke r1.<javax.swing.text.Element: int getEndOffset()>();
+
+        r0.<javax.swing.text.html.HTMLWriter: int preEndOffset> = $i0;
+
+     label04:
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void closeOutUnwantedEmbeddedTags(javax.swing.text.AttributeSet)>($r2);
+
+        $z2 = r0.<javax.swing.text.html.HTMLWriter: boolean inContent>;
+
+        if $z2 == 0 goto label05;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeLineSeparator()>();
+
+        r0.<javax.swing.text.html.HTMLWriter: boolean inContent> = 0;
+
+        r0.<javax.swing.text.html.HTMLWriter: boolean newlineOutputed> = 0;
+
+     label05:
+        $z3 = r0.<javax.swing.text.html.HTMLWriter: boolean completeDoc>;
+
+        if $z3 == 0 goto label06;
+
+        $r24 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag BODY>;
+
+        if r28 != $r24 goto label06;
+
+        $z6 = r0.<javax.swing.text.html.HTMLWriter: boolean wroteHead>;
+
+        if $z6 != 0 goto label06;
+
+        r0.<javax.swing.text.html.HTMLWriter: boolean wroteHead> = 1;
+
+        specialinvoke r0.<javax.swing.text.html.HTMLWriter: void indentSmart()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>("<head>");
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeLineSeparator()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void incrIndent()>();
+
+        $r25 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.Document getDocument()>();
+
+        $r26 = (javax.swing.text.html.HTMLDocument) $r25;
+
+        $r27 = virtualinvoke $r26.<javax.swing.text.html.HTMLDocument: javax.swing.text.html.StyleSheet getStyleSheet()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeStyles(javax.swing.text.html.StyleSheet)>($r27);
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void decrIndent()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeLineSeparator()>();
+
+        specialinvoke r0.<javax.swing.text.html.HTMLWriter: void indentSmart()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>("</head>");
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeLineSeparator()>();
+
+     label06:
+        specialinvoke r0.<javax.swing.text.html.HTMLWriter: void indentSmart()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(char)>(60);
+
+        $r29 = interfaceinvoke r1.<javax.swing.text.Element: java.lang.String getName()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>($r29);
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeAttributes(javax.swing.text.AttributeSet)>($r2);
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(char)>(62);
+
+        $r30 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag PRE>;
+
+        if r28 == $r30 goto label07;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeLineSeparator()>();
+
+     label07:
+        $r6 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag TEXTAREA>;
+
+        if r28 != $r6 goto label08;
+
+        $r23 = interfaceinvoke r1.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void textAreaContent(javax.swing.text.AttributeSet)>($r23);
+
+        goto label12;
+
+     label08:
+        $r7 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag SELECT>;
+
+        if r28 != $r7 goto label09;
+
+        $r22 = interfaceinvoke r1.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void selectContent(javax.swing.text.AttributeSet)>($r22);
+
+        goto label12;
+
+     label09:
+        $z4 = r0.<javax.swing.text.html.HTMLWriter: boolean completeDoc>;
+
+        if $z4 == 0 goto label10;
+
+        $r18 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag BODY>;
+
+        if r28 != $r18 goto label10;
+
+        $r19 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.Document getDocument()>();
+
+        $r20 = (javax.swing.text.html.HTMLDocument) $r19;
+
+        $r21 = virtualinvoke $r20.<javax.swing.text.html.HTMLDocument: java.util.Enumeration getMaps()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeMaps(java.util.Enumeration)>($r21);
+
+        goto label12;
+
+     label10:
+        $r8 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag HEAD>;
+
+        if r28 != $r8 goto label12;
+
+        $r9 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.Document getDocument()>();
+
+        r10 = (javax.swing.text.html.HTMLDocument) $r9;
+
+        r0.<javax.swing.text.html.HTMLWriter: boolean wroteHead> = 1;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void incrIndent()>();
+
+        $r11 = virtualinvoke r10.<javax.swing.text.html.HTMLDocument: javax.swing.text.html.StyleSheet getStyleSheet()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeStyles(javax.swing.text.html.StyleSheet)>($r11);
+
+        $z5 = virtualinvoke r10.<javax.swing.text.html.HTMLDocument: boolean hasBaseTag()>();
+
+        if $z5 == 0 goto label11;
+
+        specialinvoke r0.<javax.swing.text.html.HTMLWriter: void indentSmart()>();
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<base href=\"");
+
+        $r14 = virtualinvoke r10.<javax.swing.text.html.HTMLDocument: java.net.URL getBase()>();
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\">");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>($r17);
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeLineSeparator()>();
+
+     label11:
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void decrIndent()>();
+
+     label12:
+        return;
+    }
+
+    protected void textAreaContent(javax.swing.text.AttributeSet) throws javax.swing.text.BadLocationException, java.io.IOException
+    {
+        int $i0, $i1, $i2, $i3, $i4;
+        javax.swing.text.AttributeSet r0;
+        javax.swing.text.html.HTMLWriter r4;
+        char[] $r11;
+        java.lang.Object $r1, $r2;
+        javax.swing.text.Document r3;
+        javax.swing.text.Segment $r5, $r6, $r7, $r8, $r9, $r10, $r12;
+
+        r4 := @this: javax.swing.text.html.HTMLWriter;
+
+        r0 := @parameter0: javax.swing.text.AttributeSet;
+
+        $r1 = <javax.swing.text.StyleConstants: java.lang.Object ModelAttribute>;
+
+        $r2 = interfaceinvoke r0.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r1);
+
+        r3 = (javax.swing.text.Document) $r2;
+
+        if r3 == null goto label2;
+
+        $i0 = interfaceinvoke r3.<javax.swing.text.Document: int getLength()>();
+
+        if $i0 <= 0 goto label2;
+
+        $r5 = r4.<javax.swing.text.html.HTMLWriter: javax.swing.text.Segment segment>;
+
+        if $r5 != null goto label1;
+
+        $r12 = new javax.swing.text.Segment;
+
+        specialinvoke $r12.<javax.swing.text.Segment: void <init>()>();
+
+        r4.<javax.swing.text.html.HTMLWriter: javax.swing.text.Segment segment> = $r12;
+
+     label1:
+        $i1 = interfaceinvoke r3.<javax.swing.text.Document: int getLength()>();
+
+        $r6 = r4.<javax.swing.text.html.HTMLWriter: javax.swing.text.Segment segment>;
+
+        interfaceinvoke r3.<javax.swing.text.Document: void getText(int,int,javax.swing.text.Segment)>(0, $i1, $r6);
+
+        $r7 = r4.<javax.swing.text.html.HTMLWriter: javax.swing.text.Segment segment>;
+
+        $i2 = $r7.<javax.swing.text.Segment: int count>;
+
+        if $i2 <= 0 goto label2;
+
+        r4.<javax.swing.text.html.HTMLWriter: boolean inTextArea> = 1;
+
+        virtualinvoke r4.<javax.swing.text.html.HTMLWriter: void incrIndent()>();
+
+        specialinvoke r4.<javax.swing.text.html.HTMLWriter: void indentSmart()>();
+
+        virtualinvoke r4.<javax.swing.text.html.HTMLWriter: void setCanWrapLines(boolean)>(1);
+
+        r4.<javax.swing.text.html.HTMLWriter: boolean replaceEntities> = 1;
+
+        $r8 = r4.<javax.swing.text.html.HTMLWriter: javax.swing.text.Segment segment>;
+
+        $r11 = $r8.<javax.swing.text.Segment: char[] array>;
+
+        $r9 = r4.<javax.swing.text.html.HTMLWriter: javax.swing.text.Segment segment>;
+
+        $i4 = $r9.<javax.swing.text.Segment: int offset>;
+
+        $r10 = r4.<javax.swing.text.html.HTMLWriter: javax.swing.text.Segment segment>;
+
+        $i3 = $r10.<javax.swing.text.Segment: int count>;
+
+        virtualinvoke r4.<javax.swing.text.html.HTMLWriter: void write(char[],int,int)>($r11, $i4, $i3);
+
+        r4.<javax.swing.text.html.HTMLWriter: boolean replaceEntities> = 0;
+
+        virtualinvoke r4.<javax.swing.text.html.HTMLWriter: void setCanWrapLines(boolean)>(0);
+
+        virtualinvoke r4.<javax.swing.text.html.HTMLWriter: void writeLineSeparator()>();
+
+        r4.<javax.swing.text.html.HTMLWriter: boolean inTextArea> = 0;
+
+        virtualinvoke r4.<javax.swing.text.html.HTMLWriter: void decrIndent()>();
+
+     label2:
+        return;
+    }
+
+    protected void text(javax.swing.text.Element) throws javax.swing.text.BadLocationException, java.io.IOException
+    {
+        boolean $z0, $z1, $z2;
+        javax.swing.text.html.HTMLWriter r0;
+        javax.swing.text.Document $r3;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i13, $i14, $i15, $i16, $i17, $i18, $i19;
+        char $c12;
+        char[] $r9, $r13;
+        javax.swing.text.Segment $r2, $r4, $r5, $r6, $r7, $r8, $r10, $r11, $r12, $r14, $r15, $r17;
+        javax.swing.text.Element r1;
+
+        r0 := @this: javax.swing.text.html.HTMLWriter;
+
+        r1 := @parameter0: javax.swing.text.Element;
+
+        $i0 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: int getStartOffset()>();
+
+        $i1 = interfaceinvoke r1.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i2 = staticinvoke <java.lang.Math: int max(int,int)>($i0, $i1);
+
+        $i3 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: int getEndOffset()>();
+
+        $i4 = interfaceinvoke r1.<javax.swing.text.Element: int getEndOffset()>();
+
+        $i5 = staticinvoke <java.lang.Math: int min(int,int)>($i3, $i4);
+
+        if $i2 >= $i5 goto label7;
+
+        $r2 = r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.Segment segment>;
+
+        if $r2 != null goto label1;
+
+        $r17 = new javax.swing.text.Segment;
+
+        specialinvoke $r17.<javax.swing.text.Segment: void <init>()>();
+
+        r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.Segment segment> = $r17;
+
+     label1:
+        $r3 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.Document getDocument()>();
+
+        $i6 = $i5 - $i2;
+
+        $r4 = r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.Segment segment>;
+
+        interfaceinvoke $r3.<javax.swing.text.Document: void getText(int,int,javax.swing.text.Segment)>($i2, $i6, $r4);
+
+        r0.<javax.swing.text.html.HTMLWriter: boolean newlineOutputed> = 0;
+
+        $r5 = r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.Segment segment>;
+
+        $i7 = $r5.<javax.swing.text.Segment: int count>;
+
+        if $i7 <= 0 goto label7;
+
+        $r6 = r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.Segment segment>;
+
+        $r9 = $r6.<javax.swing.text.Segment: char[] array>;
+
+        $r7 = r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.Segment segment>;
+
+        $i9 = $r7.<javax.swing.text.Segment: int offset>;
+
+        $r8 = r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.Segment segment>;
+
+        $i8 = $r8.<javax.swing.text.Segment: int count>;
+
+        $i10 = $i9 + $i8;
+
+        $i11 = $i10 - 1;
+
+        $c12 = $r9[$i11];
+
+        $i19 = (int) $c12;
+
+        if $i19 != 10 goto label2;
+
+        r0.<javax.swing.text.html.HTMLWriter: boolean newlineOutputed> = 1;
+
+     label2:
+        $z0 = r0.<javax.swing.text.html.HTMLWriter: boolean inPre>;
+
+        if $z0 == 0 goto label4;
+
+        $i15 = r0.<javax.swing.text.html.HTMLWriter: int preEndOffset>;
+
+        if $i5 != $i15 goto label4;
+
+        $r14 = r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.Segment segment>;
+
+        $i16 = $r14.<javax.swing.text.Segment: int count>;
+
+        if $i16 <= 1 goto label3;
+
+        $r15 = r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.Segment segment>;
+
+        $i17 = $r15.<javax.swing.text.Segment: int count>;
+
+        $i18 = $i17 - 1;
+
+        $r15.<javax.swing.text.Segment: int count> = $i18;
+
+        goto label4;
+
+     label3:
+        return;
+
+     label4:
+        r0.<javax.swing.text.html.HTMLWriter: boolean replaceEntities> = 1;
+
+        $z1 = r0.<javax.swing.text.html.HTMLWriter: boolean inPre>;
+
+        if $z1 != 0 goto label5;
+
+        $z2 = 1;
+
+        goto label6;
+
+     label5:
+        $z2 = 0;
+
+     label6:
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void setCanWrapLines(boolean)>($z2);
+
+        $r10 = r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.Segment segment>;
+
+        $r13 = $r10.<javax.swing.text.Segment: char[] array>;
+
+        $r11 = r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.Segment segment>;
+
+        $i14 = $r11.<javax.swing.text.Segment: int offset>;
+
+        $r12 = r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.Segment segment>;
+
+        $i13 = $r12.<javax.swing.text.Segment: int count>;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(char[],int,int)>($r13, $i14, $i13);
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void setCanWrapLines(boolean)>(0);
+
+        r0.<javax.swing.text.html.HTMLWriter: boolean replaceEntities> = 0;
+
+     label7:
+        return;
+    }
+
+    protected void selectContent(javax.swing.text.AttributeSet) throws java.io.IOException
+    {
+        javax.swing.text.html.OptionListModel r6;
+        javax.swing.text.html.Option r7, r9;
+        int $i0, $i1, i2, i3;
+        javax.swing.text.AttributeSet r0;
+        boolean $z0, $z1;
+        javax.swing.text.html.OptionComboBoxModel r8;
+        javax.swing.text.html.HTMLWriter r3;
+        java.lang.Object $r1, $r2, $r4, $r5;
+
+        r3 := @this: javax.swing.text.html.HTMLWriter;
+
+        r0 := @parameter0: javax.swing.text.AttributeSet;
+
+        $r1 = <javax.swing.text.StyleConstants: java.lang.Object ModelAttribute>;
+
+        $r2 = interfaceinvoke r0.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r1);
+
+        virtualinvoke r3.<javax.swing.text.html.HTMLWriter: void incrIndent()>();
+
+        $z0 = $r2 instanceof javax.swing.text.html.OptionListModel;
+
+        if $z0 == 0 goto label3;
+
+        r6 = (javax.swing.text.html.OptionListModel) $r2;
+
+        $i1 = virtualinvoke r6.<javax.swing.text.html.OptionListModel: int getSize()>();
+
+        i2 = 0;
+
+     label1:
+        if i2 >= $i1 goto label2;
+
+        $r5 = virtualinvoke r6.<javax.swing.text.html.OptionListModel: java.lang.Object getElementAt(int)>(i2);
+
+        r7 = (javax.swing.text.html.Option) $r5;
+
+        virtualinvoke r3.<javax.swing.text.html.HTMLWriter: void writeOption(javax.swing.text.html.Option)>(r7);
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $z1 = $r2 instanceof javax.swing.text.html.OptionComboBoxModel;
+
+        if $z1 == 0 goto label5;
+
+        r8 = (javax.swing.text.html.OptionComboBoxModel) $r2;
+
+        $i0 = virtualinvoke r8.<javax.swing.text.html.OptionComboBoxModel: int getSize()>();
+
+        i3 = 0;
+
+     label4:
+        if i3 >= $i0 goto label5;
+
+        $r4 = virtualinvoke r8.<javax.swing.text.html.OptionComboBoxModel: java.lang.Object getElementAt(int)>(i3);
+
+        r9 = (javax.swing.text.html.Option) $r4;
+
+        virtualinvoke r3.<javax.swing.text.html.HTMLWriter: void writeOption(javax.swing.text.html.Option)>(r9);
+
+        i3 = i3 + 1;
+
+        goto label4;
+
+     label5:
+        virtualinvoke r3.<javax.swing.text.html.HTMLWriter: void decrIndent()>();
+
+        return;
+    }
+
+    protected void writeOption(javax.swing.text.html.Option) throws java.io.IOException
+    {
+        javax.swing.text.html.HTML$Attribute $r3;
+        javax.swing.text.html.HTMLWriter r0;
+        javax.swing.text.html.Option r1;
+        java.lang.Object $r4;
+        java.lang.StringBuilder $r7, $r8, $r9;
+        java.lang.String $r5, $r6, $r10;
+        javax.swing.text.AttributeSet $r2;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.html.HTMLWriter;
+
+        r1 := @parameter0: javax.swing.text.html.Option;
+
+        specialinvoke r0.<javax.swing.text.html.HTMLWriter: void indentSmart()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(char)>(60);
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>("option");
+
+        $r2 = virtualinvoke r1.<javax.swing.text.html.Option: javax.swing.text.AttributeSet getAttributes()>();
+
+        $r3 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute VALUE>;
+
+        $r4 = interfaceinvoke $r2.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r3);
+
+        if $r4 == null goto label1;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" value=");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>($r10);
+
+     label1:
+        $z0 = virtualinvoke r1.<javax.swing.text.html.Option: boolean isSelected()>();
+
+        if $z0 == 0 goto label2;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>(" selected");
+
+     label2:
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(char)>(62);
+
+        $r5 = virtualinvoke r1.<javax.swing.text.html.Option: java.lang.String getLabel()>();
+
+        if $r5 == null goto label3;
+
+        $r6 = virtualinvoke r1.<javax.swing.text.html.Option: java.lang.String getLabel()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>($r6);
+
+     label3:
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeLineSeparator()>();
+
+        return;
+    }
+
+    protected void endTag(javax.swing.text.Element) throws java.io.IOException
+    {
+        javax.swing.text.html.HTMLWriter r0;
+        javax.swing.text.html.HTML$Tag $r4;
+        java.lang.String $r5;
+        javax.swing.text.Element r1;
+        javax.swing.text.AttributeSet $r2, $r3;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+
+        r0 := @this: javax.swing.text.html.HTMLWriter;
+
+        r1 := @parameter0: javax.swing.text.Element;
+
+        $z0 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: boolean synthesizedElement(javax.swing.text.Element)>(r1);
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r2 = interfaceinvoke r1.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void closeOutUnwantedEmbeddedTags(javax.swing.text.AttributeSet)>($r2);
+
+        $z1 = r0.<javax.swing.text.html.HTMLWriter: boolean inContent>;
+
+        if $z1 == 0 goto label3;
+
+        $z3 = r0.<javax.swing.text.html.HTMLWriter: boolean newlineOutputed>;
+
+        if $z3 != 0 goto label2;
+
+        $z4 = r0.<javax.swing.text.html.HTMLWriter: boolean inPre>;
+
+        if $z4 != 0 goto label2;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeLineSeparator()>();
+
+     label2:
+        r0.<javax.swing.text.html.HTMLWriter: boolean newlineOutputed> = 0;
+
+        r0.<javax.swing.text.html.HTMLWriter: boolean inContent> = 0;
+
+     label3:
+        $z5 = r0.<javax.swing.text.html.HTMLWriter: boolean inPre>;
+
+        if $z5 != 0 goto label4;
+
+        specialinvoke r0.<javax.swing.text.html.HTMLWriter: void indentSmart()>();
+
+     label4:
+        $r3 = interfaceinvoke r1.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $r4 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag PRE>;
+
+        $z2 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: boolean matchNameAttribute(javax.swing.text.AttributeSet,javax.swing.text.html.HTML$Tag)>($r3, $r4);
+
+        if $z2 == 0 goto label5;
+
+        r0.<javax.swing.text.html.HTMLWriter: boolean inPre> = 0;
+
+     label5:
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(char)>(60);
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(char)>(47);
+
+        $r5 = interfaceinvoke r1.<javax.swing.text.Element: java.lang.String getName()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>($r5);
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(char)>(62);
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeLineSeparator()>();
+
+        return;
+    }
+
+    protected void comment(javax.swing.text.Element) throws javax.swing.text.BadLocationException, java.io.IOException
+    {
+        javax.swing.text.html.HTML$Attribute $r4;
+        javax.swing.text.html.HTMLWriter r2;
+        javax.swing.text.html.HTML$Tag $r3;
+        java.lang.Object $r5;
+        java.lang.String $r6;
+        javax.swing.text.Element r0;
+        javax.swing.text.AttributeSet $r1;
+        boolean $z0, $z1;
+
+        r2 := @this: javax.swing.text.html.HTMLWriter;
+
+        r0 := @parameter0: javax.swing.text.Element;
+
+        $r1 = interfaceinvoke r0.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $r3 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag COMMENT>;
+
+        $z0 = virtualinvoke r2.<javax.swing.text.html.HTMLWriter: boolean matchNameAttribute(javax.swing.text.AttributeSet,javax.swing.text.html.HTML$Tag)>($r1, $r3);
+
+        if $z0 == 0 goto label2;
+
+        $r4 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute COMMENT>;
+
+        $r5 = interfaceinvoke $r1.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r4);
+
+        $z1 = $r5 instanceof java.lang.String;
+
+        if $z1 == 0 goto label1;
+
+        $r6 = (java.lang.String) $r5;
+
+        virtualinvoke r2.<javax.swing.text.html.HTMLWriter: void writeComment(java.lang.String)>($r6);
+
+        goto label2;
+
+     label1:
+        virtualinvoke r2.<javax.swing.text.html.HTMLWriter: void writeComment(java.lang.String)>(null);
+
+     label2:
+        return;
+    }
+
+    void writeComment(java.lang.String) throws java.io.IOException
+    {
+        javax.swing.text.html.HTMLWriter r0;
+        java.lang.String r1;
+
+        r0 := @this: javax.swing.text.html.HTMLWriter;
+
+        r1 := @parameter0: java.lang.String;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>("<!--");
+
+        if r1 == null goto label1;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>(r1);
+
+     label1:
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>("-->");
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeLineSeparator()>();
+
+        specialinvoke r0.<javax.swing.text.html.HTMLWriter: void indentSmart()>();
+
+        return;
+    }
+
+    void writeAdditionalComments() throws java.io.IOException
+    {
+        javax.swing.text.html.HTMLWriter r0;
+        java.util.Vector r3;
+        int $i0, i1;
+        java.lang.Object $r2, $r4;
+        javax.swing.text.Document $r1;
+        java.lang.String $r5;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.html.HTMLWriter;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.Document getDocument()>();
+
+        $r2 = interfaceinvoke $r1.<javax.swing.text.Document: java.lang.Object getProperty(java.lang.Object)>("AdditionalComments");
+
+        $z0 = $r2 instanceof java.util.Vector;
+
+        if $z0 == 0 goto label2;
+
+        r3 = (java.util.Vector) $r2;
+
+        i1 = 0;
+
+        $i0 = virtualinvoke r3.<java.util.Vector: int size()>();
+
+     label1:
+        if i1 >= $i0 goto label2;
+
+        $r4 = virtualinvoke r3.<java.util.Vector: java.lang.Object elementAt(int)>(i1);
+
+        $r5 = virtualinvoke $r4.<java.lang.Object: java.lang.String toString()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeComment(java.lang.String)>($r5);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    protected boolean synthesizedElement(javax.swing.text.Element)
+    {
+        javax.swing.text.html.HTMLWriter r0;
+        javax.swing.text.html.HTML$Tag $r3;
+        javax.swing.text.Element r1;
+        javax.swing.text.AttributeSet $r2;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.html.HTMLWriter;
+
+        r1 := @parameter0: javax.swing.text.Element;
+
+        $r2 = interfaceinvoke r1.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $r3 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag IMPLIED>;
+
+        $z0 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: boolean matchNameAttribute(javax.swing.text.AttributeSet,javax.swing.text.html.HTML$Tag)>($r2, $r3);
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    protected boolean matchNameAttribute(javax.swing.text.AttributeSet, javax.swing.text.html.HTML$Tag)
+    {
+        javax.swing.text.html.HTMLWriter r5;
+        javax.swing.text.html.HTML$Tag r3, r4;
+        java.lang.Object $r1, $r2;
+        javax.swing.text.AttributeSet r0;
+        boolean $z0;
+
+        r5 := @this: javax.swing.text.html.HTMLWriter;
+
+        r0 := @parameter0: javax.swing.text.AttributeSet;
+
+        r4 := @parameter1: javax.swing.text.html.HTML$Tag;
+
+        $r1 = <javax.swing.text.StyleConstants: java.lang.Object NameAttribute>;
+
+        $r2 = interfaceinvoke r0.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r1);
+
+        $z0 = $r2 instanceof javax.swing.text.html.HTML$Tag;
+
+        if $z0 == 0 goto label1;
+
+        r3 = (javax.swing.text.html.HTML$Tag) $r2;
+
+        if r3 != r4 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    protected void writeEmbeddedTags(javax.swing.text.AttributeSet) throws java.io.IOException
+    {
+        java.util.Enumeration $r3;
+        java.util.Vector $r7, $r12, $r13;
+        java.lang.String $r8;
+        javax.swing.text.AttributeSet $r2, $r10, r11;
+        boolean $z0, $z1, $z2, $z3;
+        javax.swing.text.MutableAttributeSet $r1;
+        javax.swing.text.html.HTMLWriter r0;
+        javax.swing.text.html.HTML$Tag r5, $r6;
+        java.lang.Object $r4, $r9;
+
+        r0 := @this: javax.swing.text.html.HTMLWriter;
+
+        r11 := @parameter0: javax.swing.text.AttributeSet;
+
+        $r1 = r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.MutableAttributeSet oConvAttr>;
+
+        $r2 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.AttributeSet convertToHTML(javax.swing.text.AttributeSet,javax.swing.text.MutableAttributeSet)>(r11, $r1);
+
+        $r3 = interfaceinvoke $r2.<javax.swing.text.AttributeSet: java.util.Enumeration getAttributeNames()>();
+
+     label1:
+        $z3 = interfaceinvoke $r3.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z3 == 0 goto label5;
+
+        $r4 = interfaceinvoke $r3.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        $z0 = $r4 instanceof javax.swing.text.html.HTML$Tag;
+
+        if $z0 == 0 goto label4;
+
+        r5 = (javax.swing.text.html.HTML$Tag) $r4;
+
+        $r6 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag FORM>;
+
+        if r5 == $r6 goto label1;
+
+        $r7 = r0.<javax.swing.text.html.HTMLWriter: java.util.Vector tags>;
+
+        $z1 = virtualinvoke $r7.<java.util.Vector: boolean contains(java.lang.Object)>(r5);
+
+        if $z1 == 0 goto label2;
+
+        goto label1;
+
+     label2:
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(char)>(60);
+
+        $r8 = virtualinvoke r5.<javax.swing.text.html.HTML$Tag: java.lang.String toString()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>($r8);
+
+        $r9 = interfaceinvoke $r2.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>(r5);
+
+        if $r9 == null goto label3;
+
+        $z2 = $r9 instanceof javax.swing.text.AttributeSet;
+
+        if $z2 == 0 goto label3;
+
+        $r10 = (javax.swing.text.AttributeSet) $r9;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeAttributes(javax.swing.text.AttributeSet)>($r10);
+
+     label3:
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(char)>(62);
+
+        $r12 = r0.<javax.swing.text.html.HTMLWriter: java.util.Vector tags>;
+
+        virtualinvoke $r12.<java.util.Vector: void addElement(java.lang.Object)>(r5);
+
+        $r13 = r0.<javax.swing.text.html.HTMLWriter: java.util.Vector tagValues>;
+
+        virtualinvoke $r13.<java.util.Vector: void addElement(java.lang.Object)>($r9);
+
+     label4:
+        goto label1;
+
+     label5:
+        return;
+    }
+
+    private boolean noMatchForTagInAttributes(javax.swing.text.AttributeSet, javax.swing.text.html.HTML$Tag, java.lang.Object)
+    {
+        javax.swing.text.html.HTMLWriter r4;
+        javax.swing.text.html.HTML$Tag r1;
+        java.lang.Object $r2, r3;
+        javax.swing.text.AttributeSet r0;
+        boolean $z0, $z1;
+
+        r4 := @this: javax.swing.text.html.HTMLWriter;
+
+        r0 := @parameter0: javax.swing.text.AttributeSet;
+
+        r1 := @parameter1: javax.swing.text.html.HTML$Tag;
+
+        r3 := @parameter2: java.lang.Object;
+
+        if r0 == null goto label3;
+
+        $z0 = interfaceinvoke r0.<javax.swing.text.AttributeSet: boolean isDefined(java.lang.Object)>(r1);
+
+        if $z0 == 0 goto label3;
+
+        $r2 = interfaceinvoke r0.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>(r1);
+
+        if r3 != null goto label1;
+
+        if $r2 != null goto label3;
+
+        goto label2;
+
+     label1:
+        if $r2 == null goto label3;
+
+        $z1 = virtualinvoke r3.<java.lang.Object: boolean equals(java.lang.Object)>($r2);
+
+        if $z1 == 0 goto label3;
+
+     label2:
+        return 0;
+
+     label3:
+        return 1;
+    }
+
+    protected void closeOutUnwantedEmbeddedTags(javax.swing.text.AttributeSet) throws java.io.IOException
+    {
+        java.util.Vector $r1, $r3, $r4, $r5, $r6, $r9, $r12, $r14, $r15, $r16, $r17, $r19, $r21;
+        javax.swing.text.AttributeSet $r2, $r11, r22;
+        boolean $z0, $z1, $z2, $z3, z4;
+        javax.swing.text.html.HTMLWriter r0;
+        javax.swing.text.html.HTML$Tag r23, r24, r26;
+        int $i0, $i1, $i2, $i3, i4, i5, i6, i7, $i9, $i11, $i13, $i15;
+        java.lang.String $r8, $r25;
+        java.lang.Object $r7, $r10, $r13, $r18, $r20;
+
+        r0 := @this: javax.swing.text.html.HTMLWriter;
+
+        r22 := @parameter0: javax.swing.text.AttributeSet;
+
+        $r1 = r0.<javax.swing.text.html.HTMLWriter: java.util.Vector tagsToRemove>;
+
+        virtualinvoke $r1.<java.util.Vector: void removeAllElements()>();
+
+        $r2 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.AttributeSet convertToHTML(javax.swing.text.AttributeSet,javax.swing.text.MutableAttributeSet)>(r22, null);
+
+        $i9 = (int) -1;
+
+        i4 = $i9;
+
+        $r3 = r0.<javax.swing.text.html.HTMLWriter: java.util.Vector tags>;
+
+        $i0 = virtualinvoke $r3.<java.util.Vector: int size()>();
+
+        i5 = $i0 - 1;
+
+     label01:
+        if i5 < 0 goto label04;
+
+        $r17 = r0.<javax.swing.text.html.HTMLWriter: java.util.Vector tags>;
+
+        $r18 = virtualinvoke $r17.<java.util.Vector: java.lang.Object elementAt(int)>(i5);
+
+        r23 = (javax.swing.text.html.HTML$Tag) $r18;
+
+        $r19 = r0.<javax.swing.text.html.HTMLWriter: java.util.Vector tagValues>;
+
+        $r20 = virtualinvoke $r19.<java.util.Vector: java.lang.Object elementAt(int)>(i5);
+
+        if $r2 == null goto label02;
+
+        $z2 = specialinvoke r0.<javax.swing.text.html.HTMLWriter: boolean noMatchForTagInAttributes(javax.swing.text.AttributeSet,javax.swing.text.html.HTML$Tag,java.lang.Object)>($r2, r23, $r20);
+
+        if $z2 == 0 goto label03;
+
+     label02:
+        i4 = i5;
+
+        $r21 = r0.<javax.swing.text.html.HTMLWriter: java.util.Vector tagsToRemove>;
+
+        virtualinvoke $r21.<java.util.Vector: void addElement(java.lang.Object)>(r23);
+
+     label03:
+        $i11 = (int) -1;
+
+        i5 = i5 + $i11;
+
+        goto label01;
+
+     label04:
+        $i13 = (int) -1;
+
+        if i4 == $i13 goto label13;
+
+        $i1 = $i0 - i4;
+
+        $r4 = r0.<javax.swing.text.html.HTMLWriter: java.util.Vector tagsToRemove>;
+
+        $i2 = virtualinvoke $r4.<java.util.Vector: int size()>();
+
+        if $i1 != $i2 goto label05;
+
+        $z3 = 1;
+
+        goto label06;
+
+     label05:
+        $z3 = 0;
+
+     label06:
+        z4 = $z3;
+
+        i6 = $i0 - 1;
+
+     label07:
+        if i6 < i4 goto label10;
+
+        $r12 = r0.<javax.swing.text.html.HTMLWriter: java.util.Vector tags>;
+
+        $r13 = virtualinvoke $r12.<java.util.Vector: java.lang.Object elementAt(int)>(i6);
+
+        r24 = (javax.swing.text.html.HTML$Tag) $r13;
+
+        if z4 != 0 goto label08;
+
+        $r16 = r0.<javax.swing.text.html.HTMLWriter: java.util.Vector tagsToRemove>;
+
+        $z1 = virtualinvoke $r16.<java.util.Vector: boolean contains(java.lang.Object)>(r24);
+
+        if $z1 == 0 goto label09;
+
+     label08:
+        $r14 = r0.<javax.swing.text.html.HTMLWriter: java.util.Vector tags>;
+
+        virtualinvoke $r14.<java.util.Vector: void removeElementAt(int)>(i6);
+
+        $r15 = r0.<javax.swing.text.html.HTMLWriter: java.util.Vector tagValues>;
+
+        virtualinvoke $r15.<java.util.Vector: void removeElementAt(int)>(i6);
+
+     label09:
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(char)>(60);
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(char)>(47);
+
+        $r25 = virtualinvoke r24.<javax.swing.text.html.HTML$Tag: java.lang.String toString()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>($r25);
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(char)>(62);
+
+        $i15 = (int) -1;
+
+        i6 = i6 + $i15;
+
+        goto label07;
+
+     label10:
+        $r5 = r0.<javax.swing.text.html.HTMLWriter: java.util.Vector tags>;
+
+        $i3 = virtualinvoke $r5.<java.util.Vector: int size()>();
+
+        i7 = i4;
+
+     label11:
+        if i7 >= $i3 goto label13;
+
+        $r6 = r0.<javax.swing.text.html.HTMLWriter: java.util.Vector tags>;
+
+        $r7 = virtualinvoke $r6.<java.util.Vector: java.lang.Object elementAt(int)>(i7);
+
+        r26 = (javax.swing.text.html.HTML$Tag) $r7;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(char)>(60);
+
+        $r8 = virtualinvoke r26.<javax.swing.text.html.HTML$Tag: java.lang.String toString()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>($r8);
+
+        $r9 = r0.<javax.swing.text.html.HTMLWriter: java.util.Vector tagValues>;
+
+        $r10 = virtualinvoke $r9.<java.util.Vector: java.lang.Object elementAt(int)>(i7);
+
+        if $r10 == null goto label12;
+
+        $z0 = $r10 instanceof javax.swing.text.AttributeSet;
+
+        if $z0 == 0 goto label12;
+
+        $r11 = (javax.swing.text.AttributeSet) $r10;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeAttributes(javax.swing.text.AttributeSet)>($r11);
+
+     label12:
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(char)>(62);
+
+        i7 = i7 + 1;
+
+        goto label11;
+
+     label13:
+        return;
+    }
+
+    private boolean isFormElementWithContent(javax.swing.text.AttributeSet)
+    {
+        javax.swing.text.html.HTMLWriter r0;
+        javax.swing.text.html.HTML$Tag $r2, $r3;
+        javax.swing.text.AttributeSet r1;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: javax.swing.text.html.HTMLWriter;
+
+        r1 := @parameter0: javax.swing.text.AttributeSet;
+
+        $r2 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag TEXTAREA>;
+
+        $z0 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: boolean matchNameAttribute(javax.swing.text.AttributeSet,javax.swing.text.html.HTML$Tag)>(r1, $r2);
+
+        if $z0 != 0 goto label1;
+
+        $r3 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag SELECT>;
+
+        $z1 = virtualinvoke r0.<javax.swing.text.html.HTMLWriter: boolean matchNameAttribute(javax.swing.text.AttributeSet,javax.swing.text.html.HTML$Tag)>(r1, $r3);
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+    }
+
+    private boolean indentNeedsIncrementing(javax.swing.text.Element, javax.swing.text.Element)
+    {
+        javax.swing.text.html.HTMLWriter r3;
+        javax.swing.text.Element r0, $r1, r2;
+        boolean $z0, $z1, $z2, $z3;
+
+        r3 := @this: javax.swing.text.html.HTMLWriter;
+
+        r2 := @parameter0: javax.swing.text.Element;
+
+        r0 := @parameter1: javax.swing.text.Element;
+
+        $r1 = interfaceinvoke r0.<javax.swing.text.Element: javax.swing.text.Element getParentElement()>();
+
+        if $r1 != r2 goto label3;
+
+        $z0 = r3.<javax.swing.text.html.HTMLWriter: boolean inPre>;
+
+        if $z0 != 0 goto label3;
+
+        $z1 = r3.<javax.swing.text.html.HTMLWriter: boolean indentNext>;
+
+        if $z1 == 0 goto label1;
+
+        r3.<javax.swing.text.html.HTMLWriter: boolean indentNext> = 0;
+
+        return 1;
+
+     label1:
+        $z2 = virtualinvoke r3.<javax.swing.text.html.HTMLWriter: boolean synthesizedElement(javax.swing.text.Element)>(r0);
+
+        if $z2 == 0 goto label2;
+
+        r3.<javax.swing.text.html.HTMLWriter: boolean indentNext> = 1;
+
+        goto label3;
+
+     label2:
+        $z3 = virtualinvoke r3.<javax.swing.text.html.HTMLWriter: boolean synthesizedElement(javax.swing.text.Element)>(r2);
+
+        if $z3 != 0 goto label3;
+
+        return 1;
+
+     label3:
+        return 0;
+    }
+
+    void writeMaps(java.util.Enumeration) throws java.io.IOException
+    {
+        java.util.Enumeration r0;
+        javax.swing.text.AttributeSet[] $r5;
+        javax.swing.text.html.HTMLWriter r4;
+        int i0, i1;
+        java.lang.Object $r1;
+        java.lang.String $r3;
+        javax.swing.text.AttributeSet $r6;
+        boolean $z0;
+        javax.swing.text.html.Map r2;
+
+        r4 := @this: javax.swing.text.html.HTMLWriter;
+
+        r0 := @parameter0: java.util.Enumeration;
+
+        if r0 == null goto label6;
+
+     label1:
+        $z0 = interfaceinvoke r0.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label6;
+
+        $r1 = interfaceinvoke r0.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r2 = (javax.swing.text.html.Map) $r1;
+
+        $r3 = virtualinvoke r2.<javax.swing.text.html.Map: java.lang.String getName()>();
+
+        virtualinvoke r4.<javax.swing.text.html.HTMLWriter: void incrIndent()>();
+
+        specialinvoke r4.<javax.swing.text.html.HTMLWriter: void indentSmart()>();
+
+        virtualinvoke r4.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>("<map");
+
+        if $r3 == null goto label2;
+
+        virtualinvoke r4.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>(" name=\"");
+
+        virtualinvoke r4.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>($r3);
+
+        virtualinvoke r4.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>("\">");
+
+        goto label3;
+
+     label2:
+        virtualinvoke r4.<javax.swing.text.html.HTMLWriter: void write(char)>(62);
+
+     label3:
+        virtualinvoke r4.<javax.swing.text.html.HTMLWriter: void writeLineSeparator()>();
+
+        virtualinvoke r4.<javax.swing.text.html.HTMLWriter: void incrIndent()>();
+
+        $r5 = virtualinvoke r2.<javax.swing.text.html.Map: javax.swing.text.AttributeSet[] getAreas()>();
+
+        if $r5 == null goto label5;
+
+        i1 = 0;
+
+        i0 = lengthof $r5;
+
+     label4:
+        if i1 >= i0 goto label5;
+
+        specialinvoke r4.<javax.swing.text.html.HTMLWriter: void indentSmart()>();
+
+        virtualinvoke r4.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>("<area");
+
+        $r6 = $r5[i1];
+
+        virtualinvoke r4.<javax.swing.text.html.HTMLWriter: void writeAttributes(javax.swing.text.AttributeSet)>($r6);
+
+        virtualinvoke r4.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>("></area>");
+
+        virtualinvoke r4.<javax.swing.text.html.HTMLWriter: void writeLineSeparator()>();
+
+        i1 = i1 + 1;
+
+        goto label4;
+
+     label5:
+        virtualinvoke r4.<javax.swing.text.html.HTMLWriter: void decrIndent()>();
+
+        specialinvoke r4.<javax.swing.text.html.HTMLWriter: void indentSmart()>();
+
+        virtualinvoke r4.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>("</map>");
+
+        virtualinvoke r4.<javax.swing.text.html.HTMLWriter: void writeLineSeparator()>();
+
+        virtualinvoke r4.<javax.swing.text.html.HTMLWriter: void decrIndent()>();
+
+        goto label1;
+
+     label6:
+        return;
+    }
+
+    void writeStyles(javax.swing.text.html.StyleSheet) throws java.io.IOException
+    {
+        javax.swing.text.html.StyleSheet r0;
+        java.util.Enumeration $r1;
+        javax.swing.text.html.HTMLWriter r2;
+        javax.swing.text.Style $r6;
+        java.lang.Object $r3;
+        java.lang.String r4, $r5;
+        boolean $z0, $z1, $z2, z3, z4, z5;
+
+        r2 := @this: javax.swing.text.html.HTMLWriter;
+
+        r0 := @parameter0: javax.swing.text.html.StyleSheet;
+
+        if r0 == null goto label4;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.html.StyleSheet: java.util.Enumeration getStyleNames()>();
+
+        if $r1 == null goto label4;
+
+        z3 = 0;
+
+        z5 = 0;
+
+        z4 = 0;
+
+     label1:
+        $z0 = interfaceinvoke $r1.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label3;
+
+        $r3 = interfaceinvoke $r1.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r4 = (java.lang.String) $r3;
+
+        $r5 = "default";
+
+        $z1 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>(r4);
+
+        if $z1 != 0 goto label2;
+
+        $r6 = virtualinvoke r0.<javax.swing.text.html.StyleSheet: javax.swing.text.Style getStyle(java.lang.String)>(r4);
+
+        $z2 = virtualinvoke r2.<javax.swing.text.html.HTMLWriter: boolean writeStyle(java.lang.String,javax.swing.text.Style,boolean)>(r4, $r6, z4);
+
+        if $z2 == 0 goto label2;
+
+        z3 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+     label2:
+        goto label1;
+
+     label3:
+        if z5 == 0 goto label4;
+
+        virtualinvoke r2.<javax.swing.text.html.HTMLWriter: void writeStyleEndTag()>();
+
+     label4:
+        return;
+    }
+
+    boolean writeStyle(java.lang.String, javax.swing.text.Style, boolean) throws java.io.IOException
+    {
+        java.util.Enumeration $r1;
+        javax.swing.text.html.HTMLWriter r2;
+        javax.swing.text.Style r0;
+        java.lang.Object $r3, $r4;
+        java.lang.String $r5, $r6, r7;
+        boolean $z0, $z1, z2, z3, z4, z5, z6;
+
+        r2 := @this: javax.swing.text.html.HTMLWriter;
+
+        r7 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: javax.swing.text.Style;
+
+        z2 := @parameter2: boolean;
+
+        z3 = 0;
+
+        z6 = 0;
+
+        z5 = 0;
+
+        z4 = 0;
+
+        $r1 = interfaceinvoke r0.<javax.swing.text.Style: java.util.Enumeration getAttributeNames()>();
+
+        if $r1 == null goto label6;
+
+     label1:
+        $z0 = interfaceinvoke $r1.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label6;
+
+        $r3 = interfaceinvoke $r1.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        $z1 = $r3 instanceof javax.swing.text.html.CSS$Attribute;
+
+        if $z1 == 0 goto label5;
+
+        $r4 = interfaceinvoke r0.<javax.swing.text.Style: java.lang.Object getAttribute(java.lang.Object)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.Object: java.lang.String toString()>();
+
+        if $r5 == null goto label5;
+
+        if z2 != 0 goto label2;
+
+        virtualinvoke r2.<javax.swing.text.html.HTMLWriter: void writeStyleStartTag()>();
+
+        z2 = 1;
+
+     label2:
+        if z6 != 0 goto label3;
+
+        z3 = 1;
+
+        z6 = 1;
+
+        z5 = 1;
+
+        z4 = 1;
+
+        specialinvoke r2.<javax.swing.text.html.HTMLWriter: void indentSmart()>();
+
+        virtualinvoke r2.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>(r7);
+
+        virtualinvoke r2.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>(" {");
+
+        goto label4;
+
+     label3:
+        virtualinvoke r2.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>(";");
+
+     label4:
+        virtualinvoke r2.<javax.swing.text.html.HTMLWriter: void write(char)>(32);
+
+        $r6 = virtualinvoke $r3.<java.lang.Object: java.lang.String toString()>();
+
+        virtualinvoke r2.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>($r6);
+
+        virtualinvoke r2.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>(": ");
+
+        virtualinvoke r2.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>($r5);
+
+     label5:
+        goto label1;
+
+     label6:
+        if z5 == 0 goto label7;
+
+        virtualinvoke r2.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>(" }");
+
+        virtualinvoke r2.<javax.swing.text.html.HTMLWriter: void writeLineSeparator()>();
+
+     label7:
+        return z4;
+    }
+
+    void writeStyleStartTag() throws java.io.IOException
+    {
+        javax.swing.text.html.HTMLWriter r0;
+
+        r0 := @this: javax.swing.text.html.HTMLWriter;
+
+        specialinvoke r0.<javax.swing.text.html.HTMLWriter: void indentSmart()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>("<style type=\"text/css\">");
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void incrIndent()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeLineSeparator()>();
+
+        specialinvoke r0.<javax.swing.text.html.HTMLWriter: void indentSmart()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>("<!--");
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void incrIndent()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeLineSeparator()>();
+
+        return;
+    }
+
+    void writeStyleEndTag() throws java.io.IOException
+    {
+        javax.swing.text.html.HTMLWriter r0;
+
+        r0 := @this: javax.swing.text.html.HTMLWriter;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void decrIndent()>();
+
+        specialinvoke r0.<javax.swing.text.html.HTMLWriter: void indentSmart()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>("-->");
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeLineSeparator()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void decrIndent()>();
+
+        specialinvoke r0.<javax.swing.text.html.HTMLWriter: void indentSmart()>();
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void write(java.lang.String)>("</style>");
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void writeLineSeparator()>();
+
+        specialinvoke r0.<javax.swing.text.html.HTMLWriter: void indentSmart()>();
+
+        return;
+    }
+
+    javax.swing.text.AttributeSet convertToHTML(javax.swing.text.AttributeSet, javax.swing.text.MutableAttributeSet)
+    {
+        javax.swing.text.html.HTMLWriter r0;
+        javax.swing.text.AttributeSet r1;
+        javax.swing.text.MutableAttributeSet r2;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.html.HTMLWriter;
+
+        r1 := @parameter0: javax.swing.text.AttributeSet;
+
+        r2 := @parameter1: javax.swing.text.MutableAttributeSet;
+
+        if r2 != null goto label1;
+
+        r2 = r0.<javax.swing.text.html.HTMLWriter: javax.swing.text.MutableAttributeSet convAttr>;
+
+     label1:
+        interfaceinvoke r2.<javax.swing.text.MutableAttributeSet: void removeAttributes(javax.swing.text.AttributeSet)>(r2);
+
+        $z0 = r0.<javax.swing.text.html.HTMLWriter: boolean writeCSS>;
+
+        if $z0 == 0 goto label2;
+
+        staticinvoke <javax.swing.text.html.HTMLWriter: void convertToHTML40(javax.swing.text.AttributeSet,javax.swing.text.MutableAttributeSet)>(r1, r2);
+
+        goto label3;
+
+     label2:
+        staticinvoke <javax.swing.text.html.HTMLWriter: void convertToHTML32(javax.swing.text.AttributeSet,javax.swing.text.MutableAttributeSet)>(r1, r2);
+
+     label3:
+        return r2;
+    }
+
+    private static void convertToHTML32(javax.swing.text.AttributeSet, javax.swing.text.MutableAttributeSet)
+    {
+        javax.swing.text.html.CSS$FontWeight r49;
+        java.util.Enumeration $r1;
+        javax.swing.text.AttributeSet r0, $r6, $r29, $r31, $r35, $r37, $r41, $r45;
+        boolean $z0, $z1, $z2;
+        javax.swing.text.MutableAttributeSet r2;
+        javax.swing.text.html.HTML$Tag $r30, $r32, $r36, $r38, $r42, $r46;
+        java.lang.StringBuilder $r15, $r16, $r17, $r18, $r20, $r21, $r22, $r23;
+        javax.swing.text.html.HTML$Attribute $r3, $r24;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7;
+        javax.swing.text.html.CSS$Attribute $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r43, $r48;
+        java.lang.String $r26, $r28, $r34, $r40, r47;
+        java.lang.Object $r4, $r5, $r19, $r25, $r27, $r33, $r39, $r44, r50;
+
+        r0 := @parameter0: javax.swing.text.AttributeSet;
+
+        r2 := @parameter1: javax.swing.text.MutableAttributeSet;
+
+        if r0 != null goto label01;
+
+        return;
+
+     label01:
+        $r1 = interfaceinvoke r0.<javax.swing.text.AttributeSet: java.util.Enumeration getAttributeNames()>();
+
+        r47 = "";
+
+     label02:
+        $z0 = interfaceinvoke $r1.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label20;
+
+        $r4 = interfaceinvoke $r1.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        $z1 = $r4 instanceof javax.swing.text.html.CSS$Attribute;
+
+        if $z1 == 0 goto label17;
+
+        $r7 = <javax.swing.text.html.CSS$Attribute: javax.swing.text.html.CSS$Attribute FONT_FAMILY>;
+
+        if $r4 == $r7 goto label03;
+
+        $r8 = <javax.swing.text.html.CSS$Attribute: javax.swing.text.html.CSS$Attribute FONT_SIZE>;
+
+        if $r4 == $r8 goto label03;
+
+        $r9 = <javax.swing.text.html.CSS$Attribute: javax.swing.text.html.CSS$Attribute COLOR>;
+
+        if $r4 != $r9 goto label04;
+
+     label03:
+        $r48 = (javax.swing.text.html.CSS$Attribute) $r4;
+
+        staticinvoke <javax.swing.text.html.HTMLWriter: void createFontAttribute(javax.swing.text.html.CSS$Attribute,javax.swing.text.AttributeSet,javax.swing.text.MutableAttributeSet)>($r48, r0, r2);
+
+        goto label19;
+
+     label04:
+        $r10 = <javax.swing.text.html.CSS$Attribute: javax.swing.text.html.CSS$Attribute FONT_WEIGHT>;
+
+        if $r4 != $r10 goto label06;
+
+        $r43 = <javax.swing.text.html.CSS$Attribute: javax.swing.text.html.CSS$Attribute FONT_WEIGHT>;
+
+        $r44 = interfaceinvoke r0.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r43);
+
+        r49 = (javax.swing.text.html.CSS$FontWeight) $r44;
+
+        if r49 == null goto label05;
+
+        $i7 = virtualinvoke r49.<javax.swing.text.html.CSS$FontWeight: int getValue()>();
+
+        if $i7 <= 400 goto label05;
+
+        $r46 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag B>;
+
+        $r45 = <javax.swing.text.SimpleAttributeSet: javax.swing.text.AttributeSet EMPTY>;
+
+        staticinvoke <javax.swing.text.html.HTMLWriter: void addAttribute(javax.swing.text.MutableAttributeSet,java.lang.Object,java.lang.Object)>(r2, $r46, $r45);
+
+     label05:
+        goto label19;
+
+     label06:
+        $r11 = <javax.swing.text.html.CSS$Attribute: javax.swing.text.html.CSS$Attribute FONT_STYLE>;
+
+        if $r4 != $r11 goto label08;
+
+        $r39 = interfaceinvoke r0.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r4);
+
+        $r40 = virtualinvoke $r39.<java.lang.Object: java.lang.String toString()>();
+
+        $i6 = virtualinvoke $r40.<java.lang.String: int indexOf(java.lang.String)>("italic");
+
+        if $i6 < 0 goto label07;
+
+        $r42 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag I>;
+
+        $r41 = <javax.swing.text.SimpleAttributeSet: javax.swing.text.AttributeSet EMPTY>;
+
+        staticinvoke <javax.swing.text.html.HTMLWriter: void addAttribute(javax.swing.text.MutableAttributeSet,java.lang.Object,java.lang.Object)>(r2, $r42, $r41);
+
+     label07:
+        goto label19;
+
+     label08:
+        $r12 = <javax.swing.text.html.CSS$Attribute: javax.swing.text.html.CSS$Attribute TEXT_DECORATION>;
+
+        if $r4 != $r12 goto label11;
+
+        $r33 = interfaceinvoke r0.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r4);
+
+        $r34 = virtualinvoke $r33.<java.lang.Object: java.lang.String toString()>();
+
+        $i4 = virtualinvoke $r34.<java.lang.String: int indexOf(java.lang.String)>("underline");
+
+        if $i4 < 0 goto label09;
+
+        $r38 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag U>;
+
+        $r37 = <javax.swing.text.SimpleAttributeSet: javax.swing.text.AttributeSet EMPTY>;
+
+        staticinvoke <javax.swing.text.html.HTMLWriter: void addAttribute(javax.swing.text.MutableAttributeSet,java.lang.Object,java.lang.Object)>(r2, $r38, $r37);
+
+     label09:
+        $i5 = virtualinvoke $r34.<java.lang.String: int indexOf(java.lang.String)>("line-through");
+
+        if $i5 < 0 goto label10;
+
+        $r36 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag STRIKE>;
+
+        $r35 = <javax.swing.text.SimpleAttributeSet: javax.swing.text.AttributeSet EMPTY>;
+
+        staticinvoke <javax.swing.text.html.HTMLWriter: void addAttribute(javax.swing.text.MutableAttributeSet,java.lang.Object,java.lang.Object)>(r2, $r36, $r35);
+
+     label10:
+        goto label19;
+
+     label11:
+        $r13 = <javax.swing.text.html.CSS$Attribute: javax.swing.text.html.CSS$Attribute VERTICAL_ALIGN>;
+
+        if $r4 != $r13 goto label14;
+
+        $r27 = interfaceinvoke r0.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r4);
+
+        $r28 = virtualinvoke $r27.<java.lang.Object: java.lang.String toString()>();
+
+        $i2 = virtualinvoke $r28.<java.lang.String: int indexOf(java.lang.String)>("sup");
+
+        if $i2 < 0 goto label12;
+
+        $r32 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag SUP>;
+
+        $r31 = <javax.swing.text.SimpleAttributeSet: javax.swing.text.AttributeSet EMPTY>;
+
+        staticinvoke <javax.swing.text.html.HTMLWriter: void addAttribute(javax.swing.text.MutableAttributeSet,java.lang.Object,java.lang.Object)>(r2, $r32, $r31);
+
+     label12:
+        $i3 = virtualinvoke $r28.<java.lang.String: int indexOf(java.lang.String)>("sub");
+
+        if $i3 < 0 goto label13;
+
+        $r30 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag SUB>;
+
+        $r29 = <javax.swing.text.SimpleAttributeSet: javax.swing.text.AttributeSet EMPTY>;
+
+        staticinvoke <javax.swing.text.html.HTMLWriter: void addAttribute(javax.swing.text.MutableAttributeSet,java.lang.Object,java.lang.Object)>(r2, $r30, $r29);
+
+     label13:
+        goto label19;
+
+     label14:
+        $r14 = <javax.swing.text.html.CSS$Attribute: javax.swing.text.html.CSS$Attribute TEXT_ALIGN>;
+
+        if $r4 != $r14 goto label15;
+
+        $r24 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute ALIGN>;
+
+        $r25 = interfaceinvoke r0.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r4);
+
+        $r26 = virtualinvoke $r25.<java.lang.Object: java.lang.String toString()>();
+
+        staticinvoke <javax.swing.text.html.HTMLWriter: void addAttribute(javax.swing.text.MutableAttributeSet,java.lang.Object,java.lang.Object)>(r2, $r24, $r26);
+
+        goto label19;
+
+     label15:
+        $i1 = virtualinvoke r47.<java.lang.String: int length()>();
+
+        if $i1 <= 0 goto label16;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r47);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("; ");
+
+        r47 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label16:
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r47);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r19 = interfaceinvoke r0.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r4);
+
+        $r20 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r19);
+
+        r47 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label19;
+
+     label17:
+        $r5 = interfaceinvoke r0.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r4);
+
+        r50 = $r5;
+
+        $z2 = $r5 instanceof javax.swing.text.AttributeSet;
+
+        if $z2 == 0 goto label18;
+
+        $r6 = (javax.swing.text.AttributeSet) $r5;
+
+        r50 = interfaceinvoke $r6.<javax.swing.text.AttributeSet: javax.swing.text.AttributeSet copyAttributes()>();
+
+     label18:
+        staticinvoke <javax.swing.text.html.HTMLWriter: void addAttribute(javax.swing.text.MutableAttributeSet,java.lang.Object,java.lang.Object)>(r2, $r4, r50);
+
+     label19:
+        goto label02;
+
+     label20:
+        $i0 = virtualinvoke r47.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label21;
+
+        $r3 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute STYLE>;
+
+        interfaceinvoke r2.<javax.swing.text.MutableAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>($r3, r47);
+
+     label21:
+        return;
+    }
+
+    private static void addAttribute(javax.swing.text.MutableAttributeSet, java.lang.Object, java.lang.Object)
+    {
+        javax.swing.text.MutableAttributeSet r0, $r6;
+        java.lang.Object r1, $r2, r3;
+        javax.swing.text.AttributeSet $r4, $r5;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: javax.swing.text.MutableAttributeSet;
+
+        r1 := @parameter1: java.lang.Object;
+
+        r3 := @parameter2: java.lang.Object;
+
+        $r2 = interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: java.lang.Object getAttribute(java.lang.Object)>(r1);
+
+        if $r2 == null goto label1;
+
+        $r4 = <javax.swing.text.SimpleAttributeSet: javax.swing.text.AttributeSet EMPTY>;
+
+        if $r2 != $r4 goto label2;
+
+     label1:
+        interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>(r1, r3);
+
+        goto label3;
+
+     label2:
+        $z0 = $r2 instanceof javax.swing.text.MutableAttributeSet;
+
+        if $z0 == 0 goto label3;
+
+        $z1 = r3 instanceof javax.swing.text.AttributeSet;
+
+        if $z1 == 0 goto label3;
+
+        $r6 = (javax.swing.text.MutableAttributeSet) $r2;
+
+        $r5 = (javax.swing.text.AttributeSet) r3;
+
+        interfaceinvoke $r6.<javax.swing.text.MutableAttributeSet: void addAttributes(javax.swing.text.AttributeSet)>($r5);
+
+     label3:
+        return;
+    }
+
+    private static void createFontAttribute(javax.swing.text.html.CSS$Attribute, javax.swing.text.AttributeSet, javax.swing.text.MutableAttributeSet)
+    {
+        javax.swing.text.SimpleAttributeSet $r13;
+        javax.swing.text.html.HTML$Attribute $r10, $r11, $r12;
+        javax.swing.text.html.CSS$Attribute r4, $r7, $r8, $r9;
+        java.lang.String $r6;
+        javax.swing.text.AttributeSet r3;
+        javax.swing.text.MutableAttributeSet r0, r15;
+        javax.swing.text.html.HTML$Tag $r1, $r14;
+        java.lang.Object $r2, $r5;
+
+        r4 := @parameter0: javax.swing.text.html.CSS$Attribute;
+
+        r3 := @parameter1: javax.swing.text.AttributeSet;
+
+        r0 := @parameter2: javax.swing.text.MutableAttributeSet;
+
+        $r1 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag FONT>;
+
+        $r2 = interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r1);
+
+        r15 = (javax.swing.text.MutableAttributeSet) $r2;
+
+        if r15 != null goto label1;
+
+        $r13 = new javax.swing.text.SimpleAttributeSet;
+
+        specialinvoke $r13.<javax.swing.text.SimpleAttributeSet: void <init>()>();
+
+        r15 = $r13;
+
+        $r14 = <javax.swing.text.html.HTML$Tag: javax.swing.text.html.HTML$Tag FONT>;
+
+        interfaceinvoke r0.<javax.swing.text.MutableAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>($r14, $r13);
+
+     label1:
+        $r5 = interfaceinvoke r3.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>(r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.Object: java.lang.String toString()>();
+
+        $r7 = <javax.swing.text.html.CSS$Attribute: javax.swing.text.html.CSS$Attribute FONT_FAMILY>;
+
+        if r4 != $r7 goto label2;
+
+        $r12 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute FACE>;
+
+        interfaceinvoke r15.<javax.swing.text.MutableAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>($r12, $r6);
+
+        goto label4;
+
+     label2:
+        $r8 = <javax.swing.text.html.CSS$Attribute: javax.swing.text.html.CSS$Attribute FONT_SIZE>;
+
+        if r4 != $r8 goto label3;
+
+        $r11 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute SIZE>;
+
+        interfaceinvoke r15.<javax.swing.text.MutableAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>($r11, $r6);
+
+        goto label4;
+
+     label3:
+        $r9 = <javax.swing.text.html.CSS$Attribute: javax.swing.text.html.CSS$Attribute COLOR>;
+
+        if r4 != $r9 goto label4;
+
+        $r10 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute COLOR>;
+
+        interfaceinvoke r15.<javax.swing.text.MutableAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>($r10, $r6);
+
+     label4:
+        return;
+    }
+
+    private static void convertToHTML40(javax.swing.text.AttributeSet, javax.swing.text.MutableAttributeSet)
+    {
+        java.util.Enumeration $r1;
+        javax.swing.text.html.HTML$Attribute $r3;
+        int $i0;
+        java.lang.String r14;
+        javax.swing.text.AttributeSet r0;
+        boolean $z0, $z1;
+        javax.swing.text.MutableAttributeSet r2;
+        java.lang.Object $r4, $r5, $r11;
+        java.lang.StringBuilder $r6, $r7, $r8, $r9, $r10, $r12, $r13;
+
+        r0 := @parameter0: javax.swing.text.AttributeSet;
+
+        r2 := @parameter1: javax.swing.text.MutableAttributeSet;
+
+        $r1 = interfaceinvoke r0.<javax.swing.text.AttributeSet: java.util.Enumeration getAttributeNames()>();
+
+        r14 = "";
+
+     label1:
+        $z0 = interfaceinvoke $r1.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label4;
+
+        $r4 = interfaceinvoke $r1.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        $z1 = $r4 instanceof javax.swing.text.html.CSS$Attribute;
+
+        if $z1 == 0 goto label2;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r14);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("=");
+
+        $r11 = interfaceinvoke r0.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r4);
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(";");
+
+        r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label3;
+
+     label2:
+        $r5 = interfaceinvoke r0.<javax.swing.text.AttributeSet: java.lang.Object getAttribute(java.lang.Object)>($r4);
+
+        interfaceinvoke r2.<javax.swing.text.MutableAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>($r4, $r5);
+
+     label3:
+        goto label1;
+
+     label4:
+        $i0 = virtualinvoke r14.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label5;
+
+        $r3 = <javax.swing.text.html.HTML$Attribute: javax.swing.text.html.HTML$Attribute STYLE>;
+
+        interfaceinvoke r2.<javax.swing.text.MutableAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>($r3, r14);
+
+     label5:
+        return;
+    }
+
+    protected void writeLineSeparator() throws java.io.IOException
+    {
+        javax.swing.text.html.HTMLWriter r0;
+        boolean z0;
+
+        r0 := @this: javax.swing.text.html.HTMLWriter;
+
+        z0 = r0.<javax.swing.text.html.HTMLWriter: boolean replaceEntities>;
+
+        r0.<javax.swing.text.html.HTMLWriter: boolean replaceEntities> = 0;
+
+        specialinvoke r0.<javax.swing.text.AbstractWriter: void writeLineSeparator()>();
+
+        r0.<javax.swing.text.html.HTMLWriter: boolean replaceEntities> = z0;
+
+        r0.<javax.swing.text.html.HTMLWriter: boolean indented> = 0;
+
+        return;
+    }
+
+    protected void output(char[], int, int) throws java.io.IOException
+    {
+        int i0, $i1, $i3, $i4, $i5, $i6, $i9, i11, i12, i13, i14, $i15, $i16, $i17, $i18;
+        java.lang.String $r2;
+        boolean $z0;
+        char $c2, $c7, $c8, $c10;
+        javax.swing.text.html.HTMLWriter r0;
+        char[] r1;
+
+        r0 := @this: javax.swing.text.html.HTMLWriter;
+
+        r1 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i11 := @parameter2: int;
+
+        $z0 = r0.<javax.swing.text.html.HTMLWriter: boolean replaceEntities>;
+
+        if $z0 != 0 goto label01;
+
+        specialinvoke r0.<javax.swing.text.AbstractWriter: void output(char[],int,int)>(r1, i0, i11);
+
+        return;
+
+     label01:
+        i12 = i0;
+
+        i13 = i11 + i0;
+
+        i14 = i0;
+
+     label02:
+        if i14 >= i13 goto label16;
+
+        $c2 = r1[i14];
+
+        $i15 = (int) $c2;
+
+        lookupswitch($i15)
+        {
+            case 9: goto label11;
+            case 10: goto label11;
+            case 13: goto label11;
+            case 34: goto label09;
+            case 38: goto label07;
+            case 60: goto label03;
+            case 62: goto label05;
+            default: goto label12;
+        };
+
+     label03:
+        if i14 <= i12 goto label04;
+
+        $i4 = i14 - i12;
+
+        specialinvoke r0.<javax.swing.text.AbstractWriter: void output(char[],int,int)>(r1, i12, $i4);
+
+     label04:
+        i12 = i14 + 1;
+
+        specialinvoke r0.<javax.swing.text.html.HTMLWriter: void output(java.lang.String)>("&lt;");
+
+        goto label15;
+
+     label05:
+        if i14 <= i12 goto label06;
+
+        $i3 = i14 - i12;
+
+        specialinvoke r0.<javax.swing.text.AbstractWriter: void output(char[],int,int)>(r1, i12, $i3);
+
+     label06:
+        i12 = i14 + 1;
+
+        specialinvoke r0.<javax.swing.text.html.HTMLWriter: void output(java.lang.String)>("&gt;");
+
+        goto label15;
+
+     label07:
+        if i14 <= i12 goto label08;
+
+        $i5 = i14 - i12;
+
+        specialinvoke r0.<javax.swing.text.AbstractWriter: void output(char[],int,int)>(r1, i12, $i5);
+
+     label08:
+        i12 = i14 + 1;
+
+        specialinvoke r0.<javax.swing.text.html.HTMLWriter: void output(java.lang.String)>("&amp;");
+
+        goto label15;
+
+     label09:
+        if i14 <= i12 goto label10;
+
+        $i6 = i14 - i12;
+
+        specialinvoke r0.<javax.swing.text.AbstractWriter: void output(char[],int,int)>(r1, i12, $i6);
+
+     label10:
+        i12 = i14 + 1;
+
+        specialinvoke r0.<javax.swing.text.html.HTMLWriter: void output(java.lang.String)>("&quot;");
+
+        goto label15;
+
+     label11:
+        goto label15;
+
+     label12:
+        $c7 = r1[i14];
+
+        $i16 = (int) $c7;
+
+        if $i16 < 32 goto label13;
+
+        $c10 = r1[i14];
+
+        $i17 = (int) $c10;
+
+        if $i17 <= 127 goto label15;
+
+     label13:
+        if i14 <= i12 goto label14;
+
+        $i9 = i14 - i12;
+
+        specialinvoke r0.<javax.swing.text.AbstractWriter: void output(char[],int,int)>(r1, i12, $i9);
+
+     label14:
+        i12 = i14 + 1;
+
+        specialinvoke r0.<javax.swing.text.html.HTMLWriter: void output(java.lang.String)>("&#");
+
+        $c8 = r1[i14];
+
+        $i18 = (int) $c8;
+
+        $r2 = staticinvoke <java.lang.String: java.lang.String valueOf(int)>($i18);
+
+        specialinvoke r0.<javax.swing.text.html.HTMLWriter: void output(java.lang.String)>($r2);
+
+        specialinvoke r0.<javax.swing.text.html.HTMLWriter: void output(java.lang.String)>(";");
+
+     label15:
+        i14 = i14 + 1;
+
+        goto label02;
+
+     label16:
+        if i12 >= i13 goto label17;
+
+        $i1 = i13 - i12;
+
+        specialinvoke r0.<javax.swing.text.AbstractWriter: void output(char[],int,int)>(r1, i12, $i1);
+
+     label17:
+        return;
+    }
+
+    private void output(java.lang.String) throws java.io.IOException
+    {
+        javax.swing.text.html.HTMLWriter r1;
+        int $i0, $i1;
+        char[] $r2, $r3, $r4, $r5, $r6;
+        java.lang.String r0;
+
+        r1 := @this: javax.swing.text.html.HTMLWriter;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int length()>();
+
+        $r2 = r1.<javax.swing.text.html.HTMLWriter: char[] tempChars>;
+
+        if $r2 == null goto label1;
+
+        $r4 = r1.<javax.swing.text.html.HTMLWriter: char[] tempChars>;
+
+        $i1 = lengthof $r4;
+
+        if $i1 >= $i0 goto label2;
+
+     label1:
+        $r3 = newarray (char)[$i0];
+
+        r1.<javax.swing.text.html.HTMLWriter: char[] tempChars> = $r3;
+
+     label2:
+        $r5 = r1.<javax.swing.text.html.HTMLWriter: char[] tempChars>;
+
+        virtualinvoke r0.<java.lang.String: void getChars(int,int,char[],int)>(0, $i0, $r5, 0);
+
+        $r6 = r1.<javax.swing.text.html.HTMLWriter: char[] tempChars>;
+
+        specialinvoke r1.<javax.swing.text.AbstractWriter: void output(char[],int,int)>($r6, 0, $i0);
+
+        return;
+    }
+
+    private void indentSmart() throws java.io.IOException
+    {
+        javax.swing.text.html.HTMLWriter r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.html.HTMLWriter;
+
+        $z0 = r0.<javax.swing.text.html.HTMLWriter: boolean indented>;
+
+        if $z0 != 0 goto label1;
+
+        virtualinvoke r0.<javax.swing.text.html.HTMLWriter: void indent()>();
+
+        r0.<javax.swing.text.html.HTMLWriter: boolean indented> = 1;
+
+     label1:
+        return;
+    }
+}

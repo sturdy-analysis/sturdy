@@ -1,0 +1,181 @@
+final class java.util.stream.ForEachOps$ForEachTask extends java.util.concurrent.CountedCompleter
+{
+    private java.util.Spliterator spliterator;
+    private final java.util.stream.Sink sink;
+    private final java.util.stream.PipelineHelper helper;
+    private long targetSize;
+
+    void <init>(java.util.stream.PipelineHelper, java.util.Spliterator, java.util.stream.Sink)
+    {
+        java.util.stream.PipelineHelper r2;
+        java.util.stream.ForEachOps$ForEachTask r0;
+        java.util.Spliterator r3;
+        java.util.stream.Sink r1;
+
+        r0 := @this: java.util.stream.ForEachOps$ForEachTask;
+
+        r2 := @parameter0: java.util.stream.PipelineHelper;
+
+        r3 := @parameter1: java.util.Spliterator;
+
+        r1 := @parameter2: java.util.stream.Sink;
+
+        specialinvoke r0.<java.util.concurrent.CountedCompleter: void <init>(java.util.concurrent.CountedCompleter)>(null);
+
+        r0.<java.util.stream.ForEachOps$ForEachTask: java.util.stream.Sink sink> = r1;
+
+        r0.<java.util.stream.ForEachOps$ForEachTask: java.util.stream.PipelineHelper helper> = r2;
+
+        r0.<java.util.stream.ForEachOps$ForEachTask: java.util.Spliterator spliterator> = r3;
+
+        r0.<java.util.stream.ForEachOps$ForEachTask: long targetSize> = 0L;
+
+        return;
+    }
+
+    void <init>(java.util.stream.ForEachOps$ForEachTask, java.util.Spliterator)
+    {
+        java.util.stream.PipelineHelper $r4;
+        long $l0;
+        java.util.stream.ForEachOps$ForEachTask r0, r1;
+        java.util.Spliterator r2;
+        java.util.stream.Sink $r3;
+
+        r0 := @this: java.util.stream.ForEachOps$ForEachTask;
+
+        r1 := @parameter0: java.util.stream.ForEachOps$ForEachTask;
+
+        r2 := @parameter1: java.util.Spliterator;
+
+        specialinvoke r0.<java.util.concurrent.CountedCompleter: void <init>(java.util.concurrent.CountedCompleter)>(r1);
+
+        r0.<java.util.stream.ForEachOps$ForEachTask: java.util.Spliterator spliterator> = r2;
+
+        $r3 = r1.<java.util.stream.ForEachOps$ForEachTask: java.util.stream.Sink sink>;
+
+        r0.<java.util.stream.ForEachOps$ForEachTask: java.util.stream.Sink sink> = $r3;
+
+        $l0 = r1.<java.util.stream.ForEachOps$ForEachTask: long targetSize>;
+
+        r0.<java.util.stream.ForEachOps$ForEachTask: long targetSize> = $l0;
+
+        $r4 = r1.<java.util.stream.ForEachOps$ForEachTask: java.util.stream.PipelineHelper helper>;
+
+        r0.<java.util.stream.ForEachOps$ForEachTask: java.util.stream.PipelineHelper helper> = $r4;
+
+        return;
+    }
+
+    public void compute()
+    {
+        java.util.stream.PipelineHelper $r1, $r3;
+        long $l0, $l1, $l5, l6, l7;
+        byte $b2, $b4;
+        int $i3, $i8;
+        java.util.stream.StreamOpFlag $r2;
+        boolean $z0, $z1, z2;
+        java.util.stream.ForEachOps$ForEachTask r0, r8, r9, $r10;
+        java.util.Spliterator $r4, r7;
+        java.util.stream.Sink $r6;
+
+        r0 := @this: java.util.stream.ForEachOps$ForEachTask;
+
+        r7 = r0.<java.util.stream.ForEachOps$ForEachTask: java.util.Spliterator spliterator>;
+
+        $l0 = interfaceinvoke r7.<java.util.Spliterator: long estimateSize()>();
+
+        l6 = $l0;
+
+        $l1 = r0.<java.util.stream.ForEachOps$ForEachTask: long targetSize>;
+
+        l7 = $l1;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 != 0 goto label1;
+
+        $l5 = staticinvoke <java.util.stream.AbstractTask: long suggestTargetSize(long)>($l0);
+
+        l7 = $l5;
+
+        r0.<java.util.stream.ForEachOps$ForEachTask: long targetSize> = $l5;
+
+     label1:
+        $r2 = <java.util.stream.StreamOpFlag: java.util.stream.StreamOpFlag SHORT_CIRCUIT>;
+
+        $r1 = r0.<java.util.stream.ForEachOps$ForEachTask: java.util.stream.PipelineHelper helper>;
+
+        $i3 = virtualinvoke $r1.<java.util.stream.PipelineHelper: int getStreamAndOpFlags()>();
+
+        $z0 = virtualinvoke $r2.<java.util.stream.StreamOpFlag: boolean isKnown(int)>($i3);
+
+        z2 = 0;
+
+        $r6 = r0.<java.util.stream.ForEachOps$ForEachTask: java.util.stream.Sink sink>;
+
+        r8 = r0;
+
+     label2:
+        if $z0 == 0 goto label3;
+
+        $z1 = interfaceinvoke $r6.<java.util.stream.Sink: boolean cancellationRequested()>();
+
+        if $z1 != 0 goto label8;
+
+     label3:
+        $b4 = l6 cmp l7;
+
+        $i8 = (int) $b4;
+
+        if $i8 <= 0 goto label4;
+
+        $r4 = interfaceinvoke r7.<java.util.Spliterator: java.util.Spliterator trySplit()>();
+
+        if $r4 != null goto label5;
+
+     label4:
+        $r3 = r8.<java.util.stream.ForEachOps$ForEachTask: java.util.stream.PipelineHelper helper>;
+
+        virtualinvoke $r3.<java.util.stream.PipelineHelper: void copyInto(java.util.stream.Sink,java.util.Spliterator)>($r6, r7);
+
+        goto label8;
+
+     label5:
+        $r10 = new java.util.stream.ForEachOps$ForEachTask;
+
+        specialinvoke $r10.<java.util.stream.ForEachOps$ForEachTask: void <init>(java.util.stream.ForEachOps$ForEachTask,java.util.Spliterator)>(r8, $r4);
+
+        virtualinvoke r8.<java.util.stream.ForEachOps$ForEachTask: void addToPendingCount(int)>(1);
+
+        if z2 == 0 goto label6;
+
+        z2 = 0;
+
+        r7 = $r4;
+
+        r9 = r8;
+
+        r8 = $r10;
+
+        goto label7;
+
+     label6:
+        z2 = 1;
+
+        r9 = $r10;
+
+     label7:
+        virtualinvoke r9.<java.util.stream.ForEachOps$ForEachTask: java.util.concurrent.ForkJoinTask fork()>();
+
+        l6 = interfaceinvoke r7.<java.util.Spliterator: long estimateSize()>();
+
+        goto label2;
+
+     label8:
+        r8.<java.util.stream.ForEachOps$ForEachTask: java.util.Spliterator spliterator> = null;
+
+        virtualinvoke r8.<java.util.stream.ForEachOps$ForEachTask: void propagateCompletion()>();
+
+        return;
+    }
+}

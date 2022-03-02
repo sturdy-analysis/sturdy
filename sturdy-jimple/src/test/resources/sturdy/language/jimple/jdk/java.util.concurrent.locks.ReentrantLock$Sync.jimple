@@ -1,0 +1,241 @@
+abstract class java.util.concurrent.locks.ReentrantLock$Sync extends java.util.concurrent.locks.AbstractQueuedSynchronizer
+{
+    private static final long serialVersionUID;
+
+    void <init>()
+    {
+        java.util.concurrent.locks.ReentrantLock$Sync r0;
+
+        r0 := @this: java.util.concurrent.locks.ReentrantLock$Sync;
+
+        specialinvoke r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer: void <init>()>();
+
+        return;
+    }
+
+    abstract void lock();
+
+    final boolean nonfairTryAcquire(int)
+    {
+        java.lang.Error $r3;
+        java.lang.Thread $r0, $r2;
+        int $i0, i1, i2;
+        java.util.concurrent.locks.ReentrantLock$Sync r1;
+        boolean $z0;
+
+        r1 := @this: java.util.concurrent.locks.ReentrantLock$Sync;
+
+        i1 := @parameter0: int;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $i0 = virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock$Sync: int getState()>();
+
+        if $i0 != 0 goto label1;
+
+        $z0 = virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock$Sync: boolean compareAndSetState(int,int)>(0, i1);
+
+        if $z0 == 0 goto label3;
+
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock$Sync: void setExclusiveOwnerThread(java.lang.Thread)>($r0);
+
+        return 1;
+
+     label1:
+        $r2 = virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock$Sync: java.lang.Thread getExclusiveOwnerThread()>();
+
+        if $r0 != $r2 goto label3;
+
+        i2 = $i0 + i1;
+
+        if i2 >= 0 goto label2;
+
+        $r3 = new java.lang.Error;
+
+        specialinvoke $r3.<java.lang.Error: void <init>(java.lang.String)>("Maximum lock count exceeded");
+
+        throw $r3;
+
+     label2:
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock$Sync: void setState(int)>(i2);
+
+        return 1;
+
+     label3:
+        return 0;
+    }
+
+    protected final boolean tryRelease(int)
+    {
+        java.lang.IllegalMonitorStateException $r3;
+        java.lang.Thread $r1, $r2;
+        int $i0, i1, i2;
+        java.util.concurrent.locks.ReentrantLock$Sync r0;
+        boolean z0;
+
+        r0 := @this: java.util.concurrent.locks.ReentrantLock$Sync;
+
+        i1 := @parameter0: int;
+
+        $i0 = virtualinvoke r0.<java.util.concurrent.locks.ReentrantLock$Sync: int getState()>();
+
+        i2 = $i0 - i1;
+
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = virtualinvoke r0.<java.util.concurrent.locks.ReentrantLock$Sync: java.lang.Thread getExclusiveOwnerThread()>();
+
+        if $r1 == $r2 goto label1;
+
+        $r3 = new java.lang.IllegalMonitorStateException;
+
+        specialinvoke $r3.<java.lang.IllegalMonitorStateException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        z0 = 0;
+
+        if i2 != 0 goto label2;
+
+        z0 = 1;
+
+        virtualinvoke r0.<java.util.concurrent.locks.ReentrantLock$Sync: void setExclusiveOwnerThread(java.lang.Thread)>(null);
+
+     label2:
+        virtualinvoke r0.<java.util.concurrent.locks.ReentrantLock$Sync: void setState(int)>(i2);
+
+        return z0;
+    }
+
+    protected final boolean isHeldExclusively()
+    {
+        java.lang.Thread $r1, $r2;
+        java.util.concurrent.locks.ReentrantLock$Sync r0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.locks.ReentrantLock$Sync;
+
+        $r1 = virtualinvoke r0.<java.util.concurrent.locks.ReentrantLock$Sync: java.lang.Thread getExclusiveOwnerThread()>();
+
+        $r2 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        if $r1 != $r2 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    final java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject newCondition()
+    {
+        java.util.concurrent.locks.ReentrantLock$Sync r1;
+        java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject $r0;
+
+        r1 := @this: java.util.concurrent.locks.ReentrantLock$Sync;
+
+        $r0 = new java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject;
+
+        specialinvoke $r0.<java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject: void <init>(java.util.concurrent.locks.AbstractQueuedSynchronizer)>(r1);
+
+        return $r0;
+    }
+
+    final java.lang.Thread getOwner()
+    {
+        int $i0;
+        java.util.concurrent.locks.ReentrantLock$Sync r0;
+        java.lang.Thread $r1;
+
+        r0 := @this: java.util.concurrent.locks.ReentrantLock$Sync;
+
+        $i0 = virtualinvoke r0.<java.util.concurrent.locks.ReentrantLock$Sync: int getState()>();
+
+        if $i0 != 0 goto label1;
+
+        $r1 = null;
+
+        goto label2;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.util.concurrent.locks.ReentrantLock$Sync: java.lang.Thread getExclusiveOwnerThread()>();
+
+     label2:
+        return $r1;
+    }
+
+    final int getHoldCount()
+    {
+        int $i0;
+        java.util.concurrent.locks.ReentrantLock$Sync r0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.locks.ReentrantLock$Sync;
+
+        $z0 = virtualinvoke r0.<java.util.concurrent.locks.ReentrantLock$Sync: boolean isHeldExclusively()>();
+
+        if $z0 == 0 goto label1;
+
+        $i0 = virtualinvoke r0.<java.util.concurrent.locks.ReentrantLock$Sync: int getState()>();
+
+        goto label2;
+
+     label1:
+        $i0 = 0;
+
+     label2:
+        return $i0;
+    }
+
+    final boolean isLocked()
+    {
+        int $i0;
+        java.util.concurrent.locks.ReentrantLock$Sync r0;
+        boolean $z0;
+
+        r0 := @this: java.util.concurrent.locks.ReentrantLock$Sync;
+
+        $i0 = virtualinvoke r0.<java.util.concurrent.locks.ReentrantLock$Sync: int getState()>();
+
+        if $i0 == 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.ObjectInputStream r0;
+        java.util.concurrent.locks.ReentrantLock$Sync r1;
+
+        r1 := @this: java.util.concurrent.locks.ReentrantLock$Sync;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        virtualinvoke r1.<java.util.concurrent.locks.ReentrantLock$Sync: void setState(int)>(0);
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <java.util.concurrent.locks.ReentrantLock$Sync: long serialVersionUID> = -5179523762034025860L;
+
+        return;
+    }
+}

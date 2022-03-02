@@ -1,0 +1,1785 @@
+public class javax.swing.plaf.basic.BasicComboPopup extends javax.swing.JPopupMenu implements javax.swing.plaf.basic.ComboPopup
+{
+    static final javax.swing.ListModel EmptyListModel;
+    private static javax.swing.border.Border LIST_BORDER;
+    protected javax.swing.JComboBox comboBox;
+    protected javax.swing.JList list;
+    protected javax.swing.JScrollPane scroller;
+    protected boolean valueIsAdjusting;
+    private javax.swing.plaf.basic.BasicComboPopup$Handler handler;
+    protected java.awt.event.MouseMotionListener mouseMotionListener;
+    protected java.awt.event.MouseListener mouseListener;
+    protected java.awt.event.KeyListener keyListener;
+    protected javax.swing.event.ListSelectionListener listSelectionListener;
+    protected java.awt.event.MouseListener listMouseListener;
+    protected java.awt.event.MouseMotionListener listMouseMotionListener;
+    protected java.beans.PropertyChangeListener propertyChangeListener;
+    protected javax.swing.event.ListDataListener listDataListener;
+    protected java.awt.event.ItemListener itemListener;
+    private java.awt.event.MouseWheelListener scrollerMouseWheelListener;
+    protected javax.swing.Timer autoscrollTimer;
+    protected boolean hasEntered;
+    protected boolean isAutoScrolling;
+    protected int scrollDirection;
+    protected static final int SCROLL_UP;
+    protected static final int SCROLL_DOWN;
+
+    public void show()
+    {
+        java.awt.Point $r3;
+        int $i0, $i1, $i2;
+        javax.swing.JComboBox $r1, $r2, $r4;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        virtualinvoke $r1.<javax.swing.JComboBox: void firePopupMenuWillBecomeVisible()>();
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $i0 = virtualinvoke $r2.<javax.swing.JComboBox: int getSelectedIndex()>();
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void setListSelection(int)>($i0);
+
+        $r3 = specialinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.Point getPopupLocation()>();
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $i2 = $r3.<java.awt.Point: int x>;
+
+        $i1 = $r3.<java.awt.Point: int y>;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void show(java.awt.Component,int,int)>($r4, $i2, $i1);
+
+        return;
+    }
+
+    public void hide()
+    {
+        javax.swing.MenuSelectionManager $r0;
+        javax.swing.MenuElement $r4;
+        javax.swing.MenuElement[] $r1;
+        int $i0, $i1, i2;
+        javax.swing.JComboBox $r3;
+        javax.swing.plaf.basic.BasicComboPopup r2;
+
+        r2 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r0 = staticinvoke <javax.swing.MenuSelectionManager: javax.swing.MenuSelectionManager defaultManager()>();
+
+        $r1 = virtualinvoke $r0.<javax.swing.MenuSelectionManager: javax.swing.MenuElement[] getSelectedPath()>();
+
+        i2 = 0;
+
+     label1:
+        $i0 = lengthof $r1;
+
+        if i2 >= $i0 goto label3;
+
+        $r4 = $r1[i2];
+
+        if $r4 != r2 goto label2;
+
+        virtualinvoke $r0.<javax.swing.MenuSelectionManager: void clearSelectedPath()>();
+
+        goto label3;
+
+     label2:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label3:
+        $i1 = lengthof $r1;
+
+        if $i1 <= 0 goto label4;
+
+        $r3 = r2.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        virtualinvoke $r3.<javax.swing.JComboBox: void repaint()>();
+
+     label4:
+        return;
+    }
+
+    public javax.swing.JList getList()
+    {
+        javax.swing.JList $r1;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        return $r1;
+    }
+
+    public java.awt.event.MouseListener getMouseListener()
+    {
+        javax.swing.plaf.basic.BasicComboPopup r0;
+        java.awt.event.MouseListener $r1, $r2, $r3;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseListener mouseListener>;
+
+        if $r1 != null goto label1;
+
+        $r3 = virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseListener createMouseListener()>();
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseListener mouseListener> = $r3;
+
+     label1:
+        $r2 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseListener mouseListener>;
+
+        return $r2;
+    }
+
+    public java.awt.event.MouseMotionListener getMouseMotionListener()
+    {
+        java.awt.event.MouseMotionListener $r1, $r2, $r3;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseMotionListener mouseMotionListener>;
+
+        if $r1 != null goto label1;
+
+        $r3 = virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseMotionListener createMouseMotionListener()>();
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseMotionListener mouseMotionListener> = $r3;
+
+     label1:
+        $r2 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseMotionListener mouseMotionListener>;
+
+        return $r2;
+    }
+
+    public java.awt.event.KeyListener getKeyListener()
+    {
+        java.awt.event.KeyListener $r1, $r2, $r3;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.KeyListener keyListener>;
+
+        if $r1 != null goto label1;
+
+        $r3 = virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.KeyListener createKeyListener()>();
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.KeyListener keyListener> = $r3;
+
+     label1:
+        $r2 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.KeyListener keyListener>;
+
+        return $r2;
+    }
+
+    public void uninstallingUI()
+    {
+        javax.swing.JList $r6;
+        java.awt.event.ItemListener $r2, $r7;
+        javax.swing.ComboBoxModel $r4;
+        java.beans.PropertyChangeListener $r1, $r9;
+        javax.swing.JComboBox $r3, $r8, $r10;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+        javax.swing.ListModel $r5;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.beans.PropertyChangeListener propertyChangeListener>;
+
+        if $r1 == null goto label1;
+
+        $r10 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.beans.PropertyChangeListener propertyChangeListener>;
+
+        virtualinvoke $r10.<javax.swing.JComboBox: void removePropertyChangeListener(java.beans.PropertyChangeListener)>($r9);
+
+     label1:
+        $r2 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.ItemListener itemListener>;
+
+        if $r2 == null goto label2;
+
+        $r8 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.ItemListener itemListener>;
+
+        virtualinvoke $r8.<javax.swing.JComboBox: void removeItemListener(java.awt.event.ItemListener)>($r7);
+
+     label2:
+        $r3 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $r4 = virtualinvoke $r3.<javax.swing.JComboBox: javax.swing.ComboBoxModel getModel()>();
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void uninstallComboBoxModelListeners(javax.swing.ComboBoxModel)>($r4);
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void uninstallKeyboardActions()>();
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void uninstallListListeners()>();
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void uninstallScrollerListeners()>();
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $r5 = <javax.swing.plaf.basic.BasicComboPopup: javax.swing.ListModel EmptyListModel>;
+
+        virtualinvoke $r6.<javax.swing.JList: void setModel(javax.swing.ListModel)>($r5);
+
+        return;
+    }
+
+    protected void uninstallComboBoxModelListeners(javax.swing.ComboBoxModel)
+    {
+        javax.swing.event.ListDataListener $r2, $r3;
+        javax.swing.ComboBoxModel r0;
+        javax.swing.plaf.basic.BasicComboPopup r1;
+
+        r1 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        r0 := @parameter0: javax.swing.ComboBoxModel;
+
+        if r0 == null goto label1;
+
+        $r2 = r1.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.event.ListDataListener listDataListener>;
+
+        if $r2 == null goto label1;
+
+        $r3 = r1.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.event.ListDataListener listDataListener>;
+
+        interfaceinvoke r0.<javax.swing.ComboBoxModel: void removeListDataListener(javax.swing.event.ListDataListener)>($r3);
+
+     label1:
+        return;
+    }
+
+    protected void uninstallKeyboardActions()
+    {
+        javax.swing.plaf.basic.BasicComboPopup r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        return;
+    }
+
+    public void <init>(javax.swing.JComboBox)
+    {
+        javax.swing.JList $r3, $r4;
+        javax.swing.JScrollPane $r5, $r6;
+        javax.swing.JComboBox r1, $r2;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        r1 := @parameter0: javax.swing.JComboBox;
+
+        specialinvoke r0.<javax.swing.JPopupMenu: void <init>()>();
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: boolean valueIsAdjusting> = 0;
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: boolean hasEntered> = 0;
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: boolean isAutoScrolling> = 0;
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: int scrollDirection> = 0;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void setName(java.lang.String)>("ComboPopup.popup");
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox> = r1;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $z0 = virtualinvoke $r2.<javax.swing.JComboBox: boolean isLightWeightPopupEnabled()>();
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void setLightWeightPopupEnabled(boolean)>($z0);
+
+        $r3 = virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList createList()>();
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list> = $r3;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        virtualinvoke $r4.<javax.swing.JList: void setName(java.lang.String)>("ComboBox.list");
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void configureList()>();
+
+        $r5 = virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JScrollPane createScroller()>();
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JScrollPane scroller> = $r5;
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JScrollPane scroller>;
+
+        virtualinvoke $r6.<javax.swing.JScrollPane: void setName(java.lang.String)>("ComboBox.scrollPane");
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void configureScroller()>();
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void configurePopup()>();
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void installComboBoxListeners()>();
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void installKeyboardActions()>();
+
+        return;
+    }
+
+    protected void firePopupMenuWillBecomeVisible()
+    {
+        java.awt.event.MouseWheelListener $r1, $r2;
+        javax.swing.JComboBox $r3;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseWheelListener scrollerMouseWheelListener>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseWheelListener scrollerMouseWheelListener>;
+
+        virtualinvoke $r3.<javax.swing.JComboBox: void addMouseWheelListener(java.awt.event.MouseWheelListener)>($r2);
+
+     label1:
+        specialinvoke r0.<javax.swing.JPopupMenu: void firePopupMenuWillBecomeVisible()>();
+
+        return;
+    }
+
+    protected void firePopupMenuWillBecomeInvisible()
+    {
+        java.awt.event.MouseWheelListener $r1, $r3;
+        javax.swing.JComboBox $r2, $r4;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseWheelListener scrollerMouseWheelListener>;
+
+        if $r1 == null goto label1;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseWheelListener scrollerMouseWheelListener>;
+
+        virtualinvoke $r4.<javax.swing.JComboBox: void removeMouseWheelListener(java.awt.event.MouseWheelListener)>($r3);
+
+     label1:
+        specialinvoke r0.<javax.swing.JPopupMenu: void firePopupMenuWillBecomeInvisible()>();
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        virtualinvoke $r2.<javax.swing.JComboBox: void firePopupMenuWillBecomeInvisible()>();
+
+        return;
+    }
+
+    protected void firePopupMenuCanceled()
+    {
+        java.awt.event.MouseWheelListener $r1, $r3;
+        javax.swing.JComboBox $r2, $r4;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseWheelListener scrollerMouseWheelListener>;
+
+        if $r1 == null goto label1;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseWheelListener scrollerMouseWheelListener>;
+
+        virtualinvoke $r4.<javax.swing.JComboBox: void removeMouseWheelListener(java.awt.event.MouseWheelListener)>($r3);
+
+     label1:
+        specialinvoke r0.<javax.swing.JPopupMenu: void firePopupMenuCanceled()>();
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        virtualinvoke $r2.<javax.swing.JComboBox: void firePopupMenuCanceled()>();
+
+        return;
+    }
+
+    protected java.awt.event.MouseListener createMouseListener()
+    {
+        javax.swing.plaf.basic.BasicComboPopup r0;
+        javax.swing.plaf.basic.BasicComboPopup$Handler $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.plaf.basic.BasicComboPopup$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    protected java.awt.event.MouseMotionListener createMouseMotionListener()
+    {
+        javax.swing.plaf.basic.BasicComboPopup r0;
+        javax.swing.plaf.basic.BasicComboPopup$Handler $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.plaf.basic.BasicComboPopup$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    protected java.awt.event.KeyListener createKeyListener()
+    {
+        javax.swing.plaf.basic.BasicComboPopup r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        return null;
+    }
+
+    protected javax.swing.event.ListSelectionListener createListSelectionListener()
+    {
+        javax.swing.plaf.basic.BasicComboPopup r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        return null;
+    }
+
+    protected javax.swing.event.ListDataListener createListDataListener()
+    {
+        javax.swing.plaf.basic.BasicComboPopup r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        return null;
+    }
+
+    protected java.awt.event.MouseListener createListMouseListener()
+    {
+        javax.swing.plaf.basic.BasicComboPopup r0;
+        javax.swing.plaf.basic.BasicComboPopup$Handler $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.plaf.basic.BasicComboPopup$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    protected java.awt.event.MouseMotionListener createListMouseMotionListener()
+    {
+        javax.swing.plaf.basic.BasicComboPopup r0;
+        javax.swing.plaf.basic.BasicComboPopup$Handler $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.plaf.basic.BasicComboPopup$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    protected java.beans.PropertyChangeListener createPropertyChangeListener()
+    {
+        javax.swing.plaf.basic.BasicComboPopup r0;
+        javax.swing.plaf.basic.BasicComboPopup$Handler $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.plaf.basic.BasicComboPopup$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    protected java.awt.event.ItemListener createItemListener()
+    {
+        javax.swing.plaf.basic.BasicComboPopup r0;
+        javax.swing.plaf.basic.BasicComboPopup$Handler $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.plaf.basic.BasicComboPopup$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    private javax.swing.plaf.basic.BasicComboPopup$Handler getHandler()
+    {
+        javax.swing.plaf.basic.BasicComboPopup r0;
+        javax.swing.plaf.basic.BasicComboPopup$Handler $r1, $r2, $r3;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.plaf.basic.BasicComboPopup$Handler handler>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new javax.swing.plaf.basic.BasicComboPopup$Handler;
+
+        specialinvoke $r3.<javax.swing.plaf.basic.BasicComboPopup$Handler: void <init>(javax.swing.plaf.basic.BasicComboPopup,javax.swing.plaf.basic.BasicComboPopup$1)>(r0, null);
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.plaf.basic.BasicComboPopup$Handler handler> = $r3;
+
+     label1:
+        $r2 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.plaf.basic.BasicComboPopup$Handler handler>;
+
+        return $r2;
+    }
+
+    protected javax.swing.JList createList()
+    {
+        javax.swing.ComboBoxModel $r3;
+        javax.swing.plaf.basic.BasicComboPopup$1 $r0;
+        javax.swing.JComboBox $r2;
+        javax.swing.plaf.basic.BasicComboPopup r1;
+
+        r1 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r0 = new javax.swing.plaf.basic.BasicComboPopup$1;
+
+        $r2 = r1.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.JComboBox: javax.swing.ComboBoxModel getModel()>();
+
+        specialinvoke $r0.<javax.swing.plaf.basic.BasicComboPopup$1: void <init>(javax.swing.plaf.basic.BasicComboPopup,javax.swing.ListModel)>(r1, $r3);
+
+        return $r0;
+    }
+
+    protected void configureList()
+    {
+        java.awt.Color $r6, $r9, $r11, $r13;
+        int $i0;
+        javax.swing.JComboBox $r1, $r4, $r7, $r15, $r20;
+        java.awt.Font $r3;
+        javax.swing.JList $r2, $r5, $r8, $r10, $r12, $r14, $r16, $r18, $r19;
+        javax.swing.ListCellRenderer $r17;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $r3 = virtualinvoke $r1.<javax.swing.JComboBox: java.awt.Font getFont()>();
+
+        virtualinvoke $r2.<javax.swing.JList: void setFont(java.awt.Font)>($r3);
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $r6 = virtualinvoke $r4.<javax.swing.JComboBox: java.awt.Color getForeground()>();
+
+        virtualinvoke $r5.<javax.swing.JList: void setForeground(java.awt.Color)>($r6);
+
+        $r8 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $r9 = virtualinvoke $r7.<javax.swing.JComboBox: java.awt.Color getBackground()>();
+
+        virtualinvoke $r8.<javax.swing.JList: void setBackground(java.awt.Color)>($r9);
+
+        $r10 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $r11 = staticinvoke <javax.swing.UIManager: java.awt.Color getColor(java.lang.Object)>("ComboBox.selectionForeground");
+
+        virtualinvoke $r10.<javax.swing.JList: void setSelectionForeground(java.awt.Color)>($r11);
+
+        $r12 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $r13 = staticinvoke <javax.swing.UIManager: java.awt.Color getColor(java.lang.Object)>("ComboBox.selectionBackground");
+
+        virtualinvoke $r12.<javax.swing.JList: void setSelectionBackground(java.awt.Color)>($r13);
+
+        $r14 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        virtualinvoke $r14.<javax.swing.JList: void setBorder(javax.swing.border.Border)>(null);
+
+        $r16 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $r15 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $r17 = virtualinvoke $r15.<javax.swing.JComboBox: javax.swing.ListCellRenderer getRenderer()>();
+
+        virtualinvoke $r16.<javax.swing.JList: void setCellRenderer(javax.swing.ListCellRenderer)>($r17);
+
+        $r18 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        virtualinvoke $r18.<javax.swing.JList: void setFocusable(boolean)>(0);
+
+        $r19 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        virtualinvoke $r19.<javax.swing.JList: void setSelectionMode(int)>(0);
+
+        $r20 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $i0 = virtualinvoke $r20.<javax.swing.JComboBox: int getSelectedIndex()>();
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void setListSelection(int)>($i0);
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void installListListeners()>();
+
+        return;
+    }
+
+    protected void installListListeners()
+    {
+        javax.swing.JList $r5, $r7, $r9;
+        java.awt.event.MouseMotionListener $r2, $r6;
+        javax.swing.event.ListSelectionListener $r3, $r4;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+        java.awt.event.MouseListener $r1, $r8;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseListener createListMouseListener()>();
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseListener listMouseListener> = $r1;
+
+        if $r1 == null goto label1;
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $r8 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseListener listMouseListener>;
+
+        virtualinvoke $r9.<javax.swing.JList: void addMouseListener(java.awt.event.MouseListener)>($r8);
+
+     label1:
+        $r2 = virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseMotionListener createListMouseMotionListener()>();
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseMotionListener listMouseMotionListener> = $r2;
+
+        if $r2 == null goto label2;
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseMotionListener listMouseMotionListener>;
+
+        virtualinvoke $r7.<javax.swing.JList: void addMouseMotionListener(java.awt.event.MouseMotionListener)>($r6);
+
+     label2:
+        $r3 = virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.event.ListSelectionListener createListSelectionListener()>();
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.event.ListSelectionListener listSelectionListener> = $r3;
+
+        if $r3 == null goto label3;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.event.ListSelectionListener listSelectionListener>;
+
+        virtualinvoke $r5.<javax.swing.JList: void addListSelectionListener(javax.swing.event.ListSelectionListener)>($r4);
+
+     label3:
+        return;
+    }
+
+    void uninstallListListeners()
+    {
+        javax.swing.JList $r5, $r7, $r9;
+        java.awt.event.MouseMotionListener $r2, $r6;
+        javax.swing.event.ListSelectionListener $r3, $r4;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+        java.awt.event.MouseListener $r1, $r8;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseListener listMouseListener>;
+
+        if $r1 == null goto label1;
+
+        $r9 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $r8 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseListener listMouseListener>;
+
+        virtualinvoke $r9.<javax.swing.JList: void removeMouseListener(java.awt.event.MouseListener)>($r8);
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseListener listMouseListener> = null;
+
+     label1:
+        $r2 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseMotionListener listMouseMotionListener>;
+
+        if $r2 == null goto label2;
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseMotionListener listMouseMotionListener>;
+
+        virtualinvoke $r7.<javax.swing.JList: void removeMouseMotionListener(java.awt.event.MouseMotionListener)>($r6);
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseMotionListener listMouseMotionListener> = null;
+
+     label2:
+        $r3 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.event.ListSelectionListener listSelectionListener>;
+
+        if $r3 == null goto label3;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.event.ListSelectionListener listSelectionListener>;
+
+        virtualinvoke $r5.<javax.swing.JList: void removeListSelectionListener(javax.swing.event.ListSelectionListener)>($r4);
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.event.ListSelectionListener listSelectionListener> = null;
+
+     label3:
+        r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.plaf.basic.BasicComboPopup$Handler handler> = null;
+
+        return;
+    }
+
+    protected javax.swing.JScrollPane createScroller()
+    {
+        javax.swing.JScrollPane $r0;
+        javax.swing.JList $r2;
+        javax.swing.plaf.basic.BasicComboPopup r1;
+
+        r1 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r0 = new javax.swing.JScrollPane;
+
+        $r2 = r1.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        specialinvoke $r0.<javax.swing.JScrollPane: void <init>(java.awt.Component,int,int)>($r2, 20, 31);
+
+        virtualinvoke $r0.<javax.swing.JScrollPane: void setHorizontalScrollBar(javax.swing.JScrollBar)>(null);
+
+        return $r0;
+    }
+
+    protected void configureScroller()
+    {
+        javax.swing.JScrollPane $r1, $r2, $r4;
+        javax.swing.JScrollBar $r3;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JScrollPane scroller>;
+
+        virtualinvoke $r1.<javax.swing.JScrollPane: void setFocusable(boolean)>(0);
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JScrollPane scroller>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.JScrollPane: javax.swing.JScrollBar getVerticalScrollBar()>();
+
+        virtualinvoke $r3.<javax.swing.JScrollBar: void setFocusable(boolean)>(0);
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JScrollPane scroller>;
+
+        virtualinvoke $r4.<javax.swing.JScrollPane: void setBorder(javax.swing.border.Border)>(null);
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void installScrollerListeners()>();
+
+        return;
+    }
+
+    protected void configurePopup()
+    {
+        javax.swing.JScrollPane $r3;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+        javax.swing.BoxLayout $r1;
+        javax.swing.border.Border $r2;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = new javax.swing.BoxLayout;
+
+        specialinvoke $r1.<javax.swing.BoxLayout: void <init>(java.awt.Container,int)>(r0, 1);
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void setLayout(java.awt.LayoutManager)>($r1);
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void setBorderPainted(boolean)>(1);
+
+        $r2 = <javax.swing.plaf.basic.BasicComboPopup: javax.swing.border.Border LIST_BORDER>;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void setBorder(javax.swing.border.Border)>($r2);
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void setOpaque(boolean)>(0);
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JScrollPane scroller>;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.Component add(java.awt.Component)>($r3);
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void setDoubleBuffered(boolean)>(1);
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void setFocusable(boolean)>(0);
+
+        return;
+    }
+
+    private void installScrollerListeners()
+    {
+        javax.swing.JScrollPane $r4;
+        java.awt.event.MouseWheelListener $r2, $r3;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+        javax.swing.plaf.basic.BasicComboPopup$Handler $r1;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.plaf.basic.BasicComboPopup$Handler getHandler()>();
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseWheelListener scrollerMouseWheelListener> = $r1;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseWheelListener scrollerMouseWheelListener>;
+
+        if $r2 == null goto label1;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JScrollPane scroller>;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseWheelListener scrollerMouseWheelListener>;
+
+        virtualinvoke $r4.<javax.swing.JScrollPane: void addMouseWheelListener(java.awt.event.MouseWheelListener)>($r3);
+
+     label1:
+        return;
+    }
+
+    private void uninstallScrollerListeners()
+    {
+        javax.swing.JScrollPane $r3;
+        java.awt.event.MouseWheelListener $r1, $r2;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseWheelListener scrollerMouseWheelListener>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JScrollPane scroller>;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseWheelListener scrollerMouseWheelListener>;
+
+        virtualinvoke $r3.<javax.swing.JScrollPane: void removeMouseWheelListener(java.awt.event.MouseWheelListener)>($r2);
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.MouseWheelListener scrollerMouseWheelListener> = null;
+
+     label1:
+        return;
+    }
+
+    protected void installComboBoxListeners()
+    {
+        java.awt.event.ItemListener $r2, $r5;
+        javax.swing.ComboBoxModel $r4;
+        java.beans.PropertyChangeListener $r1, $r7;
+        javax.swing.JComboBox $r3, $r6, $r8;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: java.beans.PropertyChangeListener createPropertyChangeListener()>();
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: java.beans.PropertyChangeListener propertyChangeListener> = $r1;
+
+        if $r1 == null goto label1;
+
+        $r8 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.beans.PropertyChangeListener propertyChangeListener>;
+
+        virtualinvoke $r8.<javax.swing.JComboBox: void addPropertyChangeListener(java.beans.PropertyChangeListener)>($r7);
+
+     label1:
+        $r2 = virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.ItemListener createItemListener()>();
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.ItemListener itemListener> = $r2;
+
+        if $r2 == null goto label2;
+
+        $r6 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.event.ItemListener itemListener>;
+
+        virtualinvoke $r6.<javax.swing.JComboBox: void addItemListener(java.awt.event.ItemListener)>($r5);
+
+     label2:
+        $r3 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $r4 = virtualinvoke $r3.<javax.swing.JComboBox: javax.swing.ComboBoxModel getModel()>();
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void installComboBoxModelListeners(javax.swing.ComboBoxModel)>($r4);
+
+        return;
+    }
+
+    protected void installComboBoxModelListeners(javax.swing.ComboBoxModel)
+    {
+        javax.swing.event.ListDataListener $r2, $r3;
+        javax.swing.ComboBoxModel r0;
+        javax.swing.plaf.basic.BasicComboPopup r1;
+
+        r1 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        r0 := @parameter0: javax.swing.ComboBoxModel;
+
+        if r0 == null goto label1;
+
+        $r2 = virtualinvoke r1.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.event.ListDataListener createListDataListener()>();
+
+        r1.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.event.ListDataListener listDataListener> = $r2;
+
+        if $r2 == null goto label1;
+
+        $r3 = r1.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.event.ListDataListener listDataListener>;
+
+        interfaceinvoke r0.<javax.swing.ComboBoxModel: void addListDataListener(javax.swing.event.ListDataListener)>($r3);
+
+     label1:
+        return;
+    }
+
+    protected void installKeyboardActions()
+    {
+        javax.swing.plaf.basic.BasicComboPopup r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        return;
+    }
+
+    public boolean isFocusTraversable()
+    {
+        javax.swing.plaf.basic.BasicComboPopup r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        return 0;
+    }
+
+    protected void startAutoScrolling(int)
+    {
+        java.awt.Point $r3, $r6, $r11, $r14;
+        int i0, $i1, $i2, $i3, $i4, $i5;
+        boolean $z0;
+        javax.swing.Timer $r9, $r17, $r19, $r20;
+        javax.swing.JList $r5, $r7, $r8, $r13, $r15, $r16;
+        javax.swing.JScrollPane $r1, $r4, $r12;
+        java.awt.Dimension $r2;
+        javax.swing.plaf.basic.BasicComboPopup$AutoScrollActionHandler $r10, $r18;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        i0 := @parameter0: int;
+
+        $z0 = r0.<javax.swing.plaf.basic.BasicComboPopup: boolean isAutoScrolling>;
+
+        if $z0 == 0 goto label1;
+
+        $r19 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.Timer autoscrollTimer>;
+
+        virtualinvoke $r19.<javax.swing.Timer: void stop()>();
+
+     label1:
+        r0.<javax.swing.plaf.basic.BasicComboPopup: boolean isAutoScrolling> = 1;
+
+        if i0 != 0 goto label2;
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: int scrollDirection> = 0;
+
+        $r12 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JScrollPane scroller>;
+
+        $r11 = new java.awt.Point;
+
+        specialinvoke $r11.<java.awt.Point: void <init>(int,int)>(1, 1);
+
+        $r13 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $r14 = staticinvoke <javax.swing.SwingUtilities: java.awt.Point convertPoint(java.awt.Component,java.awt.Point,java.awt.Component)>($r12, $r11, $r13);
+
+        $r15 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $i5 = virtualinvoke $r15.<javax.swing.JList: int locationToIndex(java.awt.Point)>($r14);
+
+        $r16 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        virtualinvoke $r16.<javax.swing.JList: void setSelectedIndex(int)>($i5);
+
+        $r17 = new javax.swing.Timer;
+
+        $r18 = new javax.swing.plaf.basic.BasicComboPopup$AutoScrollActionHandler;
+
+        specialinvoke $r18.<javax.swing.plaf.basic.BasicComboPopup$AutoScrollActionHandler: void <init>(javax.swing.plaf.basic.BasicComboPopup,int)>(r0, 0);
+
+        specialinvoke $r17.<javax.swing.Timer: void <init>(int,java.awt.event.ActionListener)>(100, $r18);
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.Timer autoscrollTimer> = $r17;
+
+        goto label3;
+
+     label2:
+        if i0 != 1 goto label3;
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: int scrollDirection> = 1;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JScrollPane scroller>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.JScrollPane: java.awt.Dimension getSize()>();
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JScrollPane scroller>;
+
+        $r3 = new java.awt.Point;
+
+        $i1 = $r2.<java.awt.Dimension: int height>;
+
+        $i2 = $i1 - 1;
+
+        $i3 = $i2 - 2;
+
+        specialinvoke $r3.<java.awt.Point: void <init>(int,int)>(1, $i3);
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $r6 = staticinvoke <javax.swing.SwingUtilities: java.awt.Point convertPoint(java.awt.Component,java.awt.Point,java.awt.Component)>($r4, $r3, $r5);
+
+        $r7 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $i4 = virtualinvoke $r7.<javax.swing.JList: int locationToIndex(java.awt.Point)>($r6);
+
+        $r8 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        virtualinvoke $r8.<javax.swing.JList: void setSelectedIndex(int)>($i4);
+
+        $r9 = new javax.swing.Timer;
+
+        $r10 = new javax.swing.plaf.basic.BasicComboPopup$AutoScrollActionHandler;
+
+        specialinvoke $r10.<javax.swing.plaf.basic.BasicComboPopup$AutoScrollActionHandler: void <init>(javax.swing.plaf.basic.BasicComboPopup,int)>(r0, 1);
+
+        specialinvoke $r9.<javax.swing.Timer: void <init>(int,java.awt.event.ActionListener)>(100, $r10);
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.Timer autoscrollTimer> = $r9;
+
+     label3:
+        $r20 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.Timer autoscrollTimer>;
+
+        virtualinvoke $r20.<javax.swing.Timer: void start()>();
+
+        return;
+    }
+
+    protected void stopAutoScrolling()
+    {
+        javax.swing.plaf.basic.BasicComboPopup r0;
+        javax.swing.Timer $r1, $r2;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: boolean isAutoScrolling> = 0;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.Timer autoscrollTimer>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.Timer autoscrollTimer>;
+
+        virtualinvoke $r2.<javax.swing.Timer: void stop()>();
+
+        r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.Timer autoscrollTimer> = null;
+
+     label1:
+        return;
+    }
+
+    protected void autoScrollUp()
+    {
+        javax.swing.JList $r1, $r2, $r3;
+        int $i0, $i1, $i2;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $i0 = virtualinvoke $r1.<javax.swing.JList: int getSelectedIndex()>();
+
+        if $i0 <= 0 goto label1;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $i1 = $i0 - 1;
+
+        virtualinvoke $r2.<javax.swing.JList: void setSelectedIndex(int)>($i1);
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $i2 = $i0 - 1;
+
+        virtualinvoke $r3.<javax.swing.JList: void ensureIndexIsVisible(int)>($i2);
+
+     label1:
+        return;
+    }
+
+    protected void autoScrollDown()
+    {
+        javax.swing.JList $r1, $r2, $r4, $r5;
+        int $i0, $i1, i2, $i3, $i4;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+        javax.swing.ListModel $r3;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $i0 = virtualinvoke $r1.<javax.swing.JList: int getSelectedIndex()>();
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.JList: javax.swing.ListModel getModel()>();
+
+        $i1 = interfaceinvoke $r3.<javax.swing.ListModel: int getSize()>();
+
+        i2 = $i1 - 1;
+
+        if $i0 >= i2 goto label1;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $i3 = $i0 + 1;
+
+        virtualinvoke $r4.<javax.swing.JList: void setSelectedIndex(int)>($i3);
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $i4 = $i0 + 1;
+
+        virtualinvoke $r5.<javax.swing.JList: void ensureIndexIsVisible(int)>($i4);
+
+     label1:
+        return;
+    }
+
+    public javax.accessibility.AccessibleContext getAccessibleContext()
+    {
+        javax.accessibility.AccessibleContext $r1;
+        javax.swing.JComboBox $r2;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = specialinvoke r0.<javax.swing.JPopupMenu: javax.accessibility.AccessibleContext getAccessibleContext()>();
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        virtualinvoke $r1.<javax.accessibility.AccessibleContext: void setAccessibleParent(javax.accessibility.Accessible)>($r2);
+
+        return $r1;
+    }
+
+    protected void delegateFocus(java.awt.event.MouseEvent)
+    {
+        javax.swing.JComponent $r7;
+        javax.swing.ComboBoxEditor $r5;
+        java.awt.Component $r6;
+        java.awt.event.MouseEvent r8;
+        javax.swing.JComboBox $r1, $r2, $r3, $r4;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        r8 := @parameter0: java.awt.event.MouseEvent;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $z0 = virtualinvoke $r1.<javax.swing.JComboBox: boolean isEditable()>();
+
+        if $z0 == 0 goto label3;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $r5 = virtualinvoke $r4.<javax.swing.JComboBox: javax.swing.ComboBoxEditor getEditor()>();
+
+        $r6 = interfaceinvoke $r5.<javax.swing.ComboBoxEditor: java.awt.Component getEditorComponent()>();
+
+        $z2 = $r6 instanceof javax.swing.JComponent;
+
+        if $z2 == 0 goto label1;
+
+        $r7 = (javax.swing.JComponent) $r6;
+
+        $z3 = virtualinvoke $r7.<javax.swing.JComponent: boolean isRequestFocusEnabled()>();
+
+        if $z3 == 0 goto label2;
+
+     label1:
+        virtualinvoke $r6.<java.awt.Component: void requestFocus()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $z1 = virtualinvoke $r2.<javax.swing.JComboBox: boolean isRequestFocusEnabled()>();
+
+        if $z1 == 0 goto label4;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        virtualinvoke $r3.<javax.swing.JComboBox: void requestFocus()>();
+
+     label4:
+        return;
+    }
+
+    protected void togglePopup()
+    {
+        javax.swing.plaf.basic.BasicComboPopup r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $z0 = virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: boolean isVisible()>();
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void hide()>();
+
+        goto label2;
+
+     label1:
+        virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void show()>();
+
+     label2:
+        return;
+    }
+
+    private void setListSelection(int)
+    {
+        int i0, $i2;
+        javax.swing.JList $r1, $r2, $r3;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        i0 := @parameter0: int;
+
+        $i2 = (int) -1;
+
+        if i0 != $i2 goto label1;
+
+        $r3 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        virtualinvoke $r3.<javax.swing.JList: void clearSelection()>();
+
+        goto label2;
+
+     label1:
+        $r1 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        virtualinvoke $r1.<javax.swing.JList: void setSelectedIndex(int)>(i0);
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        virtualinvoke $r2.<javax.swing.JList: void ensureIndexIsVisible(int)>(i0);
+
+     label2:
+        return;
+    }
+
+    protected java.awt.event.MouseEvent convertMouseEvent(java.awt.event.MouseEvent)
+    {
+        java.awt.Point $r3, $r6;
+        long $l1;
+        int $i0, $i2, $i3, $i4, $i5, $i6, $i7;
+        sun.awt.AWTAccessor$MouseEventAccessor $r10;
+        boolean $z0, $z1;
+        javax.swing.JList $r5;
+        java.awt.Component $r2, $r9;
+        java.awt.event.MouseEvent r0, $r7;
+        java.lang.Object $r1, $r8;
+        javax.swing.plaf.basic.BasicComboPopup r4;
+
+        r4 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        r0 := @parameter0: java.awt.event.MouseEvent;
+
+        $r1 = virtualinvoke r0.<java.awt.event.MouseEvent: java.lang.Object getSource()>();
+
+        $r2 = (java.awt.Component) $r1;
+
+        $r3 = virtualinvoke r0.<java.awt.event.MouseEvent: java.awt.Point getPoint()>();
+
+        $r5 = r4.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $r6 = staticinvoke <javax.swing.SwingUtilities: java.awt.Point convertPoint(java.awt.Component,java.awt.Point,java.awt.Component)>($r2, $r3, $r5);
+
+        $r7 = new java.awt.event.MouseEvent;
+
+        $r8 = virtualinvoke r0.<java.awt.event.MouseEvent: java.lang.Object getSource()>();
+
+        $r9 = (java.awt.Component) $r8;
+
+        $i0 = virtualinvoke r0.<java.awt.event.MouseEvent: int getID()>();
+
+        $l1 = virtualinvoke r0.<java.awt.event.MouseEvent: long getWhen()>();
+
+        $i2 = virtualinvoke r0.<java.awt.event.MouseEvent: int getModifiers()>();
+
+        $i3 = $r6.<java.awt.Point: int x>;
+
+        $i4 = $r6.<java.awt.Point: int y>;
+
+        $i5 = virtualinvoke r0.<java.awt.event.MouseEvent: int getXOnScreen()>();
+
+        $i6 = virtualinvoke r0.<java.awt.event.MouseEvent: int getYOnScreen()>();
+
+        $i7 = virtualinvoke r0.<java.awt.event.MouseEvent: int getClickCount()>();
+
+        $z0 = virtualinvoke r0.<java.awt.event.MouseEvent: boolean isPopupTrigger()>();
+
+        specialinvoke $r7.<java.awt.event.MouseEvent: void <init>(java.awt.Component,int,long,int,int,int,int,int,int,boolean,int)>($r9, $i0, $l1, $i2, $i3, $i4, $i5, $i6, $i7, $z0, 0);
+
+        $r10 = staticinvoke <sun.awt.AWTAccessor: sun.awt.AWTAccessor$MouseEventAccessor getMouseEventAccessor()>();
+
+        $z1 = interfaceinvoke $r10.<sun.awt.AWTAccessor$MouseEventAccessor: boolean isCausedByTouchEvent(java.awt.event.MouseEvent)>(r0);
+
+        interfaceinvoke $r10.<sun.awt.AWTAccessor$MouseEventAccessor: void setCausedByTouchEvent(java.awt.event.MouseEvent,boolean)>($r7, $z1);
+
+        return $r7;
+    }
+
+    protected int getPopupHeightForRowCount(int)
+    {
+        java.awt.Insets $r8, $r9;
+        javax.swing.border.Border $r5, $r7;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, i10, i11;
+        javax.swing.JComboBox $r1, $r10;
+        javax.swing.JList $r2, $r11, $r14;
+        java.awt.Component $r15;
+        javax.swing.JScrollPane $r4, $r6;
+        javax.swing.ListCellRenderer $r3;
+        java.awt.Dimension $r16;
+        java.lang.Object $r13;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+        javax.swing.ListModel $r12;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $i1 = virtualinvoke $r1.<javax.swing.JComboBox: int getItemCount()>();
+
+        $i2 = staticinvoke <java.lang.Math: int min(int,int)>(i0, $i1);
+
+        i10 = 0;
+
+        $r2 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.JList: javax.swing.ListCellRenderer getCellRenderer()>();
+
+        i11 = 0;
+
+     label1:
+        if i11 >= $i2 goto label2;
+
+        $r11 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $r12 = virtualinvoke $r11.<javax.swing.JList: javax.swing.ListModel getModel()>();
+
+        $r13 = interfaceinvoke $r12.<javax.swing.ListModel: java.lang.Object getElementAt(int)>(i11);
+
+        $r14 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $r15 = interfaceinvoke $r3.<javax.swing.ListCellRenderer: java.awt.Component getListCellRendererComponent(javax.swing.JList,java.lang.Object,int,boolean,boolean)>($r14, $r13, i11, 0, 0);
+
+        $r16 = virtualinvoke $r15.<java.awt.Component: java.awt.Dimension getPreferredSize()>();
+
+        $i9 = $r16.<java.awt.Dimension: int height>;
+
+        i10 = i10 + $i9;
+
+        i11 = i11 + 1;
+
+        goto label1;
+
+     label2:
+        if i10 != 0 goto label3;
+
+        $r10 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        i10 = virtualinvoke $r10.<javax.swing.JComboBox: int getHeight()>();
+
+     label3:
+        $r4 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JScrollPane scroller>;
+
+        $r5 = virtualinvoke $r4.<javax.swing.JScrollPane: javax.swing.border.Border getViewportBorder()>();
+
+        if $r5 == null goto label4;
+
+        $r9 = interfaceinvoke $r5.<javax.swing.border.Border: java.awt.Insets getBorderInsets(java.awt.Component)>(null);
+
+        $i7 = $r9.<java.awt.Insets: int top>;
+
+        $i6 = $r9.<java.awt.Insets: int bottom>;
+
+        $i8 = $i7 + $i6;
+
+        i10 = i10 + $i8;
+
+     label4:
+        $r6 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JScrollPane scroller>;
+
+        $r7 = virtualinvoke $r6.<javax.swing.JScrollPane: javax.swing.border.Border getBorder()>();
+
+        if $r7 == null goto label5;
+
+        $r8 = interfaceinvoke $r7.<javax.swing.border.Border: java.awt.Insets getBorderInsets(java.awt.Component)>(null);
+
+        $i4 = $r8.<java.awt.Insets: int top>;
+
+        $i3 = $r8.<java.awt.Insets: int bottom>;
+
+        $i5 = $i4 + $i3;
+
+        i10 = i10 + $i5;
+
+     label5:
+        return i10;
+    }
+
+    protected java.awt.Rectangle computePopupBounds(int, int, int, int)
+    {
+        java.awt.Point $r4;
+        javax.swing.JComboBox $r2, $r5;
+        java.awt.GraphicsConfiguration $r3;
+        java.awt.Dimension $r7;
+        java.awt.Toolkit $r0;
+        java.awt.Rectangle $r6, $r8, $r10, r11;
+        java.awt.Insets $r9;
+        int i0, i1, i2, i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30;
+        javax.swing.plaf.basic.BasicComboPopup r1;
+
+        r1 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r2 = r1.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $r3 = virtualinvoke $r2.<javax.swing.JComboBox: java.awt.GraphicsConfiguration getGraphicsConfiguration()>();
+
+        $r4 = new java.awt.Point;
+
+        specialinvoke $r4.<java.awt.Point: void <init>()>();
+
+        $r5 = r1.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        staticinvoke <javax.swing.SwingUtilities: void convertPointFromScreen(java.awt.Point,java.awt.Component)>($r4, $r5);
+
+        if $r3 == null goto label1;
+
+        $r9 = virtualinvoke $r0.<java.awt.Toolkit: java.awt.Insets getScreenInsets(java.awt.GraphicsConfiguration)>($r3);
+
+        $r10 = virtualinvoke $r3.<java.awt.GraphicsConfiguration: java.awt.Rectangle getBounds()>();
+
+        r11 = $r10;
+
+        $i14 = $r10.<java.awt.Rectangle: int width>;
+
+        $i12 = $r9.<java.awt.Insets: int left>;
+
+        $i11 = $r9.<java.awt.Insets: int right>;
+
+        $i13 = $i12 + $i11;
+
+        $i15 = $i14 - $i13;
+
+        $r10.<java.awt.Rectangle: int width> = $i15;
+
+        $i19 = $r10.<java.awt.Rectangle: int height>;
+
+        $i17 = $r9.<java.awt.Insets: int top>;
+
+        $i16 = $r9.<java.awt.Insets: int bottom>;
+
+        $i18 = $i17 + $i16;
+
+        $i20 = $i19 - $i18;
+
+        $r10.<java.awt.Rectangle: int height> = $i20;
+
+        $i24 = $r10.<java.awt.Rectangle: int x>;
+
+        $i22 = $r4.<java.awt.Point: int x>;
+
+        $i21 = $r9.<java.awt.Insets: int left>;
+
+        $i23 = $i22 + $i21;
+
+        $i25 = $i24 + $i23;
+
+        $r10.<java.awt.Rectangle: int x> = $i25;
+
+        $i29 = $r10.<java.awt.Rectangle: int y>;
+
+        $i27 = $r4.<java.awt.Point: int y>;
+
+        $i26 = $r9.<java.awt.Insets: int top>;
+
+        $i28 = $i27 + $i26;
+
+        $i30 = $i29 + $i28;
+
+        $r10.<java.awt.Rectangle: int y> = $i30;
+
+        goto label2;
+
+     label1:
+        $r6 = new java.awt.Rectangle;
+
+        $r7 = virtualinvoke $r0.<java.awt.Toolkit: java.awt.Dimension getScreenSize()>();
+
+        specialinvoke $r6.<java.awt.Rectangle: void <init>(java.awt.Point,java.awt.Dimension)>($r4, $r7);
+
+        r11 = $r6;
+
+     label2:
+        $r8 = new java.awt.Rectangle;
+
+        specialinvoke $r8.<java.awt.Rectangle: void <init>(int,int,int,int)>(i0, i1, i2, i3);
+
+        $i7 = i1 + i3;
+
+        $i5 = r11.<java.awt.Rectangle: int y>;
+
+        $i4 = r11.<java.awt.Rectangle: int height>;
+
+        $i6 = $i5 + $i4;
+
+        if $i7 <= $i6 goto label3;
+
+        $i8 = r11.<java.awt.Rectangle: int height>;
+
+        if i3 >= $i8 goto label3;
+
+        $i9 = $r8.<java.awt.Rectangle: int height>;
+
+        $i10 = neg $i9;
+
+        $r8.<java.awt.Rectangle: int y> = $i10;
+
+     label3:
+        return $r8;
+    }
+
+    private java.awt.Point getPopupLocation()
+    {
+        java.awt.Rectangle $r6, $r7;
+        java.awt.Insets $r3;
+        java.awt.Point $r9;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9;
+        javax.swing.JComboBox $r1, $r4, $r5;
+        javax.swing.JList $r13;
+        javax.swing.JScrollPane $r10, $r11, $r12;
+        java.awt.Dimension $r2, $r8;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+
+        r0 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.JComboBox: java.awt.Dimension getSize()>();
+
+        $r3 = virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.Insets getInsets()>();
+
+        $i3 = $r2.<java.awt.Dimension: int width>;
+
+        $i1 = $r3.<java.awt.Insets: int right>;
+
+        $i0 = $r3.<java.awt.Insets: int left>;
+
+        $i2 = $i1 + $i0;
+
+        $i4 = $i3 - $i2;
+
+        $r4 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $i5 = virtualinvoke $r4.<javax.swing.JComboBox: int getMaximumRowCount()>();
+
+        $i6 = virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: int getPopupHeightForRowCount(int)>($i5);
+
+        virtualinvoke $r2.<java.awt.Dimension: void setSize(int,int)>($i4, $i6);
+
+        $r5 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $r6 = virtualinvoke $r5.<javax.swing.JComboBox: java.awt.Rectangle getBounds()>();
+
+        $i9 = $r6.<java.awt.Rectangle: int height>;
+
+        $i8 = $r2.<java.awt.Dimension: int width>;
+
+        $i7 = $r2.<java.awt.Dimension: int height>;
+
+        $r7 = virtualinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: java.awt.Rectangle computePopupBounds(int,int,int,int)>(0, $i9, $i8, $i7);
+
+        $r8 = virtualinvoke $r7.<java.awt.Rectangle: java.awt.Dimension getSize()>();
+
+        $r9 = virtualinvoke $r7.<java.awt.Rectangle: java.awt.Point getLocation()>();
+
+        $r10 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JScrollPane scroller>;
+
+        virtualinvoke $r10.<javax.swing.JScrollPane: void setMaximumSize(java.awt.Dimension)>($r8);
+
+        $r11 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JScrollPane scroller>;
+
+        virtualinvoke $r11.<javax.swing.JScrollPane: void setPreferredSize(java.awt.Dimension)>($r8);
+
+        $r12 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JScrollPane scroller>;
+
+        virtualinvoke $r12.<javax.swing.JScrollPane: void setMinimumSize(java.awt.Dimension)>($r8);
+
+        $r13 = r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        virtualinvoke $r13.<javax.swing.JList: void revalidate()>();
+
+        return $r9;
+    }
+
+    protected void updateListBoxSelectionForEvent(java.awt.event.MouseEvent, boolean)
+    {
+        java.awt.Point $r1;
+        int $i0, $i1, $i2, i3, $i4, $i6;
+        javax.swing.JComboBox $r7;
+        boolean z0;
+        javax.swing.JList $r3, $r4, $r5, $r6, $r9;
+        javax.swing.ComboBoxModel $r8;
+        java.awt.event.MouseEvent r0;
+        javax.swing.plaf.basic.BasicComboPopup r2;
+
+        r2 := @this: javax.swing.plaf.basic.BasicComboPopup;
+
+        r0 := @parameter0: java.awt.event.MouseEvent;
+
+        z0 := @parameter1: boolean;
+
+        $r1 = virtualinvoke r0.<java.awt.event.MouseEvent: java.awt.Point getPoint()>();
+
+        $r3 = r2.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        if $r3 != null goto label1;
+
+        return;
+
+     label1:
+        $r4 = r2.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $i0 = virtualinvoke $r4.<javax.swing.JList: int locationToIndex(java.awt.Point)>($r1);
+
+        i3 = $i0;
+
+        $i6 = (int) -1;
+
+        if $i0 != $i6 goto label3;
+
+        $i1 = $r1.<java.awt.Point: int y>;
+
+        if $i1 >= 0 goto label2;
+
+        i3 = 0;
+
+        goto label3;
+
+     label2:
+        $r7 = r2.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JComboBox comboBox>;
+
+        $r8 = virtualinvoke $r7.<javax.swing.JComboBox: javax.swing.ComboBoxModel getModel()>();
+
+        $i2 = interfaceinvoke $r8.<javax.swing.ComboBoxModel: int getSize()>();
+
+        i3 = $i2 - 1;
+
+     label3:
+        $r9 = r2.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        $i4 = virtualinvoke $r9.<javax.swing.JList: int getSelectedIndex()>();
+
+        if $i4 == i3 goto label4;
+
+        $r5 = r2.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        virtualinvoke $r5.<javax.swing.JList: void setSelectedIndex(int)>(i3);
+
+        if z0 == 0 goto label4;
+
+        $r6 = r2.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.JList list>;
+
+        virtualinvoke $r6.<javax.swing.JList: void ensureIndexIsVisible(int)>(i3);
+
+     label4:
+        return;
+    }
+
+    static javax.swing.plaf.basic.BasicComboPopup$Handler access$200(javax.swing.plaf.basic.BasicComboPopup)
+    {
+        javax.swing.plaf.basic.BasicComboPopup r0;
+        javax.swing.plaf.basic.BasicComboPopup$Handler $r1;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicComboPopup;
+
+        $r1 = specialinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: javax.swing.plaf.basic.BasicComboPopup$Handler getHandler()>();
+
+        return $r1;
+    }
+
+    static void access$300(javax.swing.plaf.basic.BasicComboPopup, int)
+    {
+        int i0;
+        javax.swing.plaf.basic.BasicComboPopup r0;
+
+        r0 := @parameter0: javax.swing.plaf.basic.BasicComboPopup;
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<javax.swing.plaf.basic.BasicComboPopup: void setListSelection(int)>(i0);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.awt.Color $r2;
+        javax.swing.border.LineBorder $r1;
+        javax.swing.plaf.basic.BasicComboPopup$EmptyListModelClass $r0;
+
+        <javax.swing.plaf.basic.BasicComboPopup: int SCROLL_DOWN> = 1;
+
+        <javax.swing.plaf.basic.BasicComboPopup: int SCROLL_UP> = 0;
+
+        $r0 = new javax.swing.plaf.basic.BasicComboPopup$EmptyListModelClass;
+
+        specialinvoke $r0.<javax.swing.plaf.basic.BasicComboPopup$EmptyListModelClass: void <init>(javax.swing.plaf.basic.BasicComboPopup$1)>(null);
+
+        <javax.swing.plaf.basic.BasicComboPopup: javax.swing.ListModel EmptyListModel> = $r0;
+
+        $r1 = new javax.swing.border.LineBorder;
+
+        $r2 = <java.awt.Color: java.awt.Color BLACK>;
+
+        specialinvoke $r1.<javax.swing.border.LineBorder: void <init>(java.awt.Color,int)>($r2, 1);
+
+        <javax.swing.plaf.basic.BasicComboPopup: javax.swing.border.Border LIST_BORDER> = $r1;
+
+        return;
+    }
+}

@@ -1,0 +1,3794 @@
+final class java.awt.font.TextLine extends java.lang.Object
+{
+    private sun.font.TextLineComponent[] fComponents;
+    private float[] fBaselineOffsets;
+    private int[] fComponentVisualOrder;
+    private float[] locs;
+    private char[] fChars;
+    private int fCharsStart;
+    private int fCharsLimit;
+    private int[] fCharVisualOrder;
+    private int[] fCharLogicalOrder;
+    private byte[] fCharLevels;
+    private boolean fIsDirectionLTR;
+    private sun.font.LayoutPathImpl lp;
+    private boolean isSimple;
+    private java.awt.Rectangle pixelBounds;
+    private java.awt.font.FontRenderContext frc;
+    private java.awt.font.TextLine$TextLineMetrics fMetrics;
+    private static java.awt.font.TextLine$Function fgPosAdvF;
+    private static java.awt.font.TextLine$Function fgAdvanceF;
+    private static java.awt.font.TextLine$Function fgXPositionF;
+    private static java.awt.font.TextLine$Function fgYPositionF;
+
+    public void <init>(java.awt.font.FontRenderContext, sun.font.TextLineComponent[], float[], char[], int, int, int[], byte[], boolean)
+    {
+        byte[] r7;
+        float[] r5;
+        sun.font.TextLineComponent[] r1;
+        java.awt.font.FontRenderContext r4;
+        int[] r2, $r3;
+        java.awt.font.TextLine r0;
+        int i0, i1;
+        char[] r6;
+        boolean z0;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        r4 := @parameter0: java.awt.font.FontRenderContext;
+
+        r1 := @parameter1: sun.font.TextLineComponent[];
+
+        r5 := @parameter2: float[];
+
+        r6 := @parameter3: char[];
+
+        i0 := @parameter4: int;
+
+        i1 := @parameter5: int;
+
+        r2 := @parameter6: int[];
+
+        r7 := @parameter7: byte[];
+
+        z0 := @parameter8: boolean;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.awt.font.TextLine: java.awt.font.TextLine$TextLineMetrics fMetrics> = null;
+
+        $r3 = staticinvoke <java.awt.font.TextLine: int[] computeComponentOrder(sun.font.TextLineComponent[],int[])>(r1, r2);
+
+        r0.<java.awt.font.TextLine: java.awt.font.FontRenderContext frc> = r4;
+
+        r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents> = r1;
+
+        r0.<java.awt.font.TextLine: float[] fBaselineOffsets> = r5;
+
+        r0.<java.awt.font.TextLine: int[] fComponentVisualOrder> = $r3;
+
+        r0.<java.awt.font.TextLine: char[] fChars> = r6;
+
+        r0.<java.awt.font.TextLine: int fCharsStart> = i0;
+
+        r0.<java.awt.font.TextLine: int fCharsLimit> = i1;
+
+        r0.<java.awt.font.TextLine: int[] fCharLogicalOrder> = r2;
+
+        r0.<java.awt.font.TextLine: byte[] fCharLevels> = r7;
+
+        r0.<java.awt.font.TextLine: boolean fIsDirectionLTR> = z0;
+
+        specialinvoke r0.<java.awt.font.TextLine: void checkCtorArgs()>();
+
+        specialinvoke r0.<java.awt.font.TextLine: void init()>();
+
+        return;
+    }
+
+    private void checkCtorArgs()
+    {
+        sun.font.TextLineComponent $r4;
+        sun.font.TextLineComponent[] $r1, $r3;
+        java.lang.IllegalArgumentException $r2;
+        java.awt.font.TextLine r0;
+        int $i0, $i1, $i2, i3, i4;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        i3 = 0;
+
+        i4 = 0;
+
+     label1:
+        $r1 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i0 = lengthof $r1;
+
+        if i4 >= $i0 goto label2;
+
+        $r3 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $r4 = $r3[i4];
+
+        $i2 = interfaceinvoke $r4.<sun.font.TextLineComponent: int getNumCharacters()>();
+
+        i3 = i3 + $i2;
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label2:
+        $i1 = virtualinvoke r0.<java.awt.font.TextLine: int characterCount()>();
+
+        if i3 == $i1 goto label3;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid TextLine!  char count is different from sum of char counts of components.");
+
+        throw $r2;
+
+     label3:
+        return;
+    }
+
+    private void init()
+    {
+        byte $b4, $b10, $b12, $b13, $b16, $b17, $b18, $b19, b22;
+        sun.font.LayoutPathImpl$SegmentPath $r8;
+        float[] $r3, $r6, $r15, $r18, $r19, $r20, $r21, $r24, $r29, $r30, $r31, $r32, $r33, $r35, $r36, $r39, $r40;
+        java.awt.geom.Point2D$Double $r43;
+        sun.font.LayoutPathImpl$EmptyPath $r45;
+        sun.font.CoreMetrics $r17, $r23, r26;
+        int $i0, $i1, $i2, $i3, $i5, $i6, $i7, $i8, $i9, $i11, $i14, $i15, $i20, i21, i23, i24, $i25, $i26, $i27, $i28, i29, i30, $i31, $i32, $i33, $i34, $i35, $i36;
+        java.awt.font.TextLine$TextLineMetrics $r42;
+        java.awt.geom.AffineTransform $r11, $r14, $r34;
+        sun.font.LayoutPathImpl $r9;
+        sun.font.TextLineComponent r25, r28, r38, r41;
+        boolean $z0, $z1, $z2, $z3, z4, z5, $z6, z7, z8;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $f10, $f11, $f12, $f13, $f14, $f15, $f16, $f17, $f18, $f19, $f20, $f21, $f22, $f23, $f24, $f25, $f26, $f27, $f28, $f29, $f30, $f31, f32, f33, f34, f35, f36, f37, f38, f39, f40, $f41, f42, $f43, $f44, $f45, $f46, $f47, $f48, $f49, $f50, $f51, $f52, $f53, $f54, $f55, $f56, $f57, $f58, $f59, $f60, $f61, $f62, $f63, $f64, $f65, $f66, $f67, $f68, $f69, f70, $f71, f72, f73, $f74, $f75, $f76;
+        sun.font.LayoutPathImpl$SegmentPathBuilder $r44;
+        sun.font.TextLineComponent[] $r1, $r2, $r7, $r10, $r13, $r16, $r22, $r27;
+        java.awt.font.TextLine r0;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, d9, d10, $d11;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        f32 = 0.0F;
+
+        f33 = 0.0F;
+
+        f34 = 0.0F;
+
+        f35 = 0.0F;
+
+        f36 = 0.0F;
+
+        z4 = 0;
+
+        z8 = 0;
+
+        z7 = 0;
+
+        r0.<java.awt.font.TextLine: boolean isSimple> = 1;
+
+        i21 = 0;
+
+     label01:
+        $r1 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i0 = lengthof $r1;
+
+        if i21 >= $i0 goto label04;
+
+        $r22 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        r25 = $r22[i21];
+
+        $z1 = r0.<java.awt.font.TextLine: boolean isSimple>;
+
+        $z2 = interfaceinvoke r25.<sun.font.TextLineComponent: boolean isSimple()>();
+
+        $z3 = $z1 & $z2;
+
+        r0.<java.awt.font.TextLine: boolean isSimple> = $z3;
+
+        $r23 = interfaceinvoke r25.<sun.font.TextLineComponent: sun.font.CoreMetrics getCoreMetrics()>();
+
+        $i20 = $r23.<sun.font.CoreMetrics: int baselineIndex>;
+
+        b22 = (byte) $i20;
+
+        $i32 = (int) b22;
+
+        if $i32 < 0 goto label02;
+
+        $r24 = r0.<java.awt.font.TextLine: float[] fBaselineOffsets>;
+
+        $i33 = (int) b22;
+
+        f37 = $r24[$i33];
+
+        $f27 = neg f37;
+
+        $f26 = $r23.<sun.font.CoreMetrics: float ascent>;
+
+        $f28 = $f27 + $f26;
+
+        f32 = staticinvoke <java.lang.Math: float max(float,float)>(f32, $f28);
+
+        $f29 = $r23.<sun.font.CoreMetrics: float descent>;
+
+        f38 = f37 + $f29;
+
+        f33 = staticinvoke <java.lang.Math: float max(float,float)>(f33, f38);
+
+        $f30 = $r23.<sun.font.CoreMetrics: float leading>;
+
+        $f31 = f38 + $f30;
+
+        f34 = staticinvoke <java.lang.Math: float max(float,float)>(f34, $f31);
+
+        goto label03;
+
+     label02:
+        z4 = 1;
+
+        z8 = 1;
+
+        z7 = 1;
+
+        $f24 = $r23.<sun.font.CoreMetrics: float ascent>;
+
+        $f23 = $r23.<sun.font.CoreMetrics: float descent>;
+
+        f39 = $f24 + $f23;
+
+        $f25 = $r23.<sun.font.CoreMetrics: float leading>;
+
+        f40 = f39 + $f25;
+
+        f35 = staticinvoke <java.lang.Math: float max(float,float)>(f35, f39);
+
+        f36 = staticinvoke <java.lang.Math: float max(float,float)>(f36, f40);
+
+     label03:
+        i21 = i21 + 1;
+
+        goto label01;
+
+     label04:
+        if z7 == 0 goto label06;
+
+        $f21 = f32 + f33;
+
+        $b18 = f35 cmpl $f21;
+
+        $i34 = (int) $b18;
+
+        if $i34 <= 0 goto label05;
+
+        f33 = f35 - f32;
+
+     label05:
+        $f22 = f32 + f34;
+
+        $b19 = f36 cmpl $f22;
+
+        $i35 = (int) $b19;
+
+        if $i35 <= 0 goto label06;
+
+        f34 = f36 - f32;
+
+     label06:
+        $f41 = f34 - f33;
+
+        if z8 == 0 goto label07;
+
+        $r18 = newarray (float)[5];
+
+        $r19 = r0.<java.awt.font.TextLine: float[] fBaselineOffsets>;
+
+        $f17 = $r19[0];
+
+        $r18[0] = $f17;
+
+        $r20 = r0.<java.awt.font.TextLine: float[] fBaselineOffsets>;
+
+        $f18 = $r20[1];
+
+        $r18[1] = $f18;
+
+        $r21 = r0.<java.awt.font.TextLine: float[] fBaselineOffsets>;
+
+        $f19 = $r21[2];
+
+        $r18[2] = $f19;
+
+        $r18[3] = f33;
+
+        $f20 = neg f32;
+
+        $r18[4] = $f20;
+
+        r0.<java.awt.font.TextLine: float[] fBaselineOffsets> = $r18;
+
+     label07:
+        f42 = 0.0F;
+
+        r26 = null;
+
+        z5 = 0;
+
+        $r2 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i1 = lengthof $r2;
+
+        $i2 = $i1 * 2;
+
+        $i3 = $i2 + 2;
+
+        $r3 = newarray (float)[$i3];
+
+        r0.<java.awt.font.TextLine: float[] locs> = $r3;
+
+        i23 = 0;
+
+        i24 = 0;
+
+     label08:
+        $r27 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i25 = lengthof $r27;
+
+        if i23 >= $i25 goto label15;
+
+        $r16 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i11 = specialinvoke r0.<java.awt.font.TextLine: int getComponentLogicalIndex(int)>(i23);
+
+        r28 = $r16[$i11];
+
+        $r17 = interfaceinvoke r28.<sun.font.TextLineComponent: sun.font.CoreMetrics getCoreMetrics()>();
+
+        if r26 == null goto label11;
+
+        $f11 = r26.<sun.font.CoreMetrics: float italicAngle>;
+
+        $b12 = $f11 cmpl 0.0F;
+
+        if $b12 != 0 goto label09;
+
+        $f16 = $r17.<sun.font.CoreMetrics: float italicAngle>;
+
+        $b17 = $f16 cmpl 0.0F;
+
+        if $b17 == 0 goto label11;
+
+     label09:
+        $f13 = r26.<sun.font.CoreMetrics: float italicAngle>;
+
+        $f12 = $r17.<sun.font.CoreMetrics: float italicAngle>;
+
+        $b13 = $f13 cmpl $f12;
+
+        if $b13 != 0 goto label10;
+
+        $i15 = r26.<sun.font.CoreMetrics: int baselineIndex>;
+
+        $i14 = $r17.<sun.font.CoreMetrics: int baselineIndex>;
+
+        if $i15 != $i14 goto label10;
+
+        $f15 = r26.<sun.font.CoreMetrics: float ssOffset>;
+
+        $f14 = $r17.<sun.font.CoreMetrics: float ssOffset>;
+
+        $b16 = $f15 cmpl $f14;
+
+        if $b16 == 0 goto label11;
+
+     label10:
+        $r29 = r0.<java.awt.font.TextLine: float[] fBaselineOffsets>;
+
+        $f43 = virtualinvoke r26.<sun.font.CoreMetrics: float effectiveBaselineOffset(float[])>($r29);
+
+        $f44 = r26.<sun.font.CoreMetrics: float ascent>;
+
+        $f45 = $f43 - $f44;
+
+        $f46 = r26.<sun.font.CoreMetrics: float descent>;
+
+        $f47 = $f43 + $f46;
+
+        $r30 = r0.<java.awt.font.TextLine: float[] fBaselineOffsets>;
+
+        $f48 = virtualinvoke $r17.<sun.font.CoreMetrics: float effectiveBaselineOffset(float[])>($r30);
+
+        $f49 = $r17.<sun.font.CoreMetrics: float ascent>;
+
+        $f50 = $f48 - $f49;
+
+        $f51 = $r17.<sun.font.CoreMetrics: float descent>;
+
+        $f52 = $f48 + $f51;
+
+        $f53 = staticinvoke <java.lang.Math: float max(float,float)>($f45, $f50);
+
+        $f54 = staticinvoke <java.lang.Math: float min(float,float)>($f47, $f52);
+
+        $f55 = r26.<sun.font.CoreMetrics: float italicAngle>;
+
+        $f56 = $f43 - $f53;
+
+        $f57 = $f55 * $f56;
+
+        $f58 = r26.<sun.font.CoreMetrics: float italicAngle>;
+
+        $f59 = $f43 - $f54;
+
+        $f60 = $f58 * $f59;
+
+        $f61 = $r17.<sun.font.CoreMetrics: float italicAngle>;
+
+        $f62 = $f48 - $f53;
+
+        $f63 = $f61 * $f62;
+
+        $f64 = $r17.<sun.font.CoreMetrics: float italicAngle>;
+
+        $f65 = $f48 - $f54;
+
+        $f66 = $f64 * $f65;
+
+        $f67 = $f57 - $f63;
+
+        $f68 = $f60 - $f66;
+
+        $f69 = staticinvoke <java.lang.Math: float max(float,float)>($f67, $f68);
+
+        f42 = f42 + $f69;
+
+        f70 = $f48;
+
+        goto label12;
+
+     label11:
+        $r31 = r0.<java.awt.font.TextLine: float[] fBaselineOffsets>;
+
+        f70 = virtualinvoke $r17.<sun.font.CoreMetrics: float effectiveBaselineOffset(float[])>($r31);
+
+     label12:
+        $r32 = r0.<java.awt.font.TextLine: float[] locs>;
+
+        $r32[i24] = f42;
+
+        $r33 = r0.<java.awt.font.TextLine: float[] locs>;
+
+        $i26 = i24 + 1;
+
+        $r33[$i26] = f70;
+
+        $f71 = interfaceinvoke r28.<sun.font.TextLineComponent: float getAdvance()>();
+
+        f42 = f42 + $f71;
+
+        r26 = $r17;
+
+        $z0 = z5;
+
+        $r34 = interfaceinvoke r28.<sun.font.TextLineComponent: java.awt.geom.AffineTransform getBaselineTransform()>();
+
+        if $r34 == null goto label13;
+
+        $z6 = 1;
+
+        goto label14;
+
+     label13:
+        $z6 = 0;
+
+     label14:
+        z5 = $z0 | $z6;
+
+        i23 = i23 + 1;
+
+        i24 = i24 + 2;
+
+        goto label08;
+
+     label15:
+        $f0 = r26.<sun.font.CoreMetrics: float italicAngle>;
+
+        $b4 = $f0 cmpl 0.0F;
+
+        if $b4 == 0 goto label18;
+
+        $r15 = r0.<java.awt.font.TextLine: float[] fBaselineOffsets>;
+
+        $f2 = virtualinvoke r26.<sun.font.CoreMetrics: float effectiveBaselineOffset(float[])>($r15);
+
+        $f3 = r26.<sun.font.CoreMetrics: float ascent>;
+
+        $f4 = r26.<sun.font.CoreMetrics: float descent>;
+
+        $f5 = r26.<sun.font.CoreMetrics: float ssOffset>;
+
+        f72 = $f2 + $f5;
+
+        $f6 = r26.<sun.font.CoreMetrics: float italicAngle>;
+
+        $b10 = $f6 cmpl 0.0F;
+
+        $i36 = (int) $b10;
+
+        if $i36 <= 0 goto label16;
+
+        $f9 = r26.<sun.font.CoreMetrics: float ascent>;
+
+        f73 = f72 + $f9;
+
+        goto label17;
+
+     label16:
+        $f7 = r26.<sun.font.CoreMetrics: float descent>;
+
+        f73 = f72 - $f7;
+
+     label17:
+        $f8 = r26.<sun.font.CoreMetrics: float italicAngle>;
+
+        $f10 = f73 * $f8;
+
+        f42 = f42 + $f10;
+
+     label18:
+        $r35 = r0.<java.awt.font.TextLine: float[] locs>;
+
+        $r36 = r0.<java.awt.font.TextLine: float[] locs>;
+
+        $i27 = lengthof $r36;
+
+        $i28 = $i27 - 2;
+
+        $r35[$i28] = f42;
+
+        $r42 = new java.awt.font.TextLine$TextLineMetrics;
+
+        specialinvoke $r42.<java.awt.font.TextLine$TextLineMetrics: void <init>(float,float,float,float)>(f32, f33, $f41, f42);
+
+        r0.<java.awt.font.TextLine: java.awt.font.TextLine$TextLineMetrics fMetrics> = $r42;
+
+        if z5 == 0 goto label23;
+
+        r0.<java.awt.font.TextLine: boolean isSimple> = 0;
+
+        $r43 = new java.awt.geom.Point2D$Double;
+
+        specialinvoke $r43.<java.awt.geom.Point2D$Double: void <init>()>();
+
+        d9 = 0.0;
+
+        d10 = 0.0;
+
+        $r44 = new sun.font.LayoutPathImpl$SegmentPathBuilder;
+
+        specialinvoke $r44.<sun.font.LayoutPathImpl$SegmentPathBuilder: void <init>()>();
+
+        $r6 = r0.<java.awt.font.TextLine: float[] locs>;
+
+        $f1 = $r6[0];
+
+        $d0 = (double) $f1;
+
+        virtualinvoke $r44.<sun.font.LayoutPathImpl$SegmentPathBuilder: void moveTo(double,double)>($d0, 0.0);
+
+        i29 = 0;
+
+        i30 = 0;
+
+     label19:
+        $r7 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i5 = lengthof $r7;
+
+        if i29 >= $i5 goto label22;
+
+        $r13 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i7 = specialinvoke r0.<java.awt.font.TextLine: int getComponentLogicalIndex(int)>(i29);
+
+        r38 = $r13[$i7];
+
+        $r14 = interfaceinvoke r38.<sun.font.TextLineComponent: java.awt.geom.AffineTransform getBaselineTransform()>();
+
+        if $r14 == null goto label20;
+
+        $i8 = virtualinvoke $r14.<java.awt.geom.AffineTransform: int getType()>();
+
+        $i9 = $i8 & 1;
+
+        if $i9 == 0 goto label20;
+
+        $d5 = virtualinvoke $r14.<java.awt.geom.AffineTransform: double getTranslateX()>();
+
+        $d6 = virtualinvoke $r14.<java.awt.geom.AffineTransform: double getTranslateY()>();
+
+        $d7 = d9 + $d5;
+
+        d9 = $d7;
+
+        $d8 = d10 + $d6;
+
+        d10 = $d8;
+
+        virtualinvoke $r44.<sun.font.LayoutPathImpl$SegmentPathBuilder: void moveTo(double,double)>($d7, $d8);
+
+     label20:
+        $r39 = r0.<java.awt.font.TextLine: float[] locs>;
+
+        $i31 = i30 + 2;
+
+        $f74 = $r39[$i31];
+
+        $r40 = r0.<java.awt.font.TextLine: float[] locs>;
+
+        $f75 = $r40[i30];
+
+        $f76 = $f74 - $f75;
+
+        $d11 = (double) $f76;
+
+        $r43.<java.awt.geom.Point2D$Double: double x> = $d11;
+
+        $r43.<java.awt.geom.Point2D$Double: double y> = 0.0;
+
+        if $r14 == null goto label21;
+
+        virtualinvoke $r14.<java.awt.geom.AffineTransform: java.awt.geom.Point2D deltaTransform(java.awt.geom.Point2D,java.awt.geom.Point2D)>($r43, $r43);
+
+     label21:
+        $d1 = $r43.<java.awt.geom.Point2D$Double: double x>;
+
+        $d2 = d9 + $d1;
+
+        d9 = $d2;
+
+        $d3 = $r43.<java.awt.geom.Point2D$Double: double y>;
+
+        $d4 = d10 + $d3;
+
+        d10 = $d4;
+
+        virtualinvoke $r44.<sun.font.LayoutPathImpl$SegmentPathBuilder: void lineTo(double,double)>($d2, $d4);
+
+        i29 = i29 + 1;
+
+        i30 = i30 + 2;
+
+        goto label19;
+
+     label22:
+        $r8 = virtualinvoke $r44.<sun.font.LayoutPathImpl$SegmentPathBuilder: sun.font.LayoutPathImpl$SegmentPath complete()>();
+
+        r0.<java.awt.font.TextLine: sun.font.LayoutPathImpl lp> = $r8;
+
+        $r9 = r0.<java.awt.font.TextLine: sun.font.LayoutPathImpl lp>;
+
+        if $r9 != null goto label23;
+
+        $r10 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i6 = specialinvoke r0.<java.awt.font.TextLine: int getComponentLogicalIndex(int)>(0);
+
+        r41 = $r10[$i6];
+
+        $r11 = interfaceinvoke r41.<sun.font.TextLineComponent: java.awt.geom.AffineTransform getBaselineTransform()>();
+
+        if $r11 == null goto label23;
+
+        $r45 = new sun.font.LayoutPathImpl$EmptyPath;
+
+        specialinvoke $r45.<sun.font.LayoutPathImpl$EmptyPath: void <init>(java.awt.geom.AffineTransform)>($r11);
+
+        r0.<java.awt.font.TextLine: sun.font.LayoutPathImpl lp> = $r45;
+
+     label23:
+        return;
+    }
+
+    public java.awt.Rectangle getPixelBounds(java.awt.font.FontRenderContext, float, float)
+    {
+        java.awt.Color $r6, $r7;
+        java.awt.geom.Rectangle2D $r1, r25;
+        byte $b27, $b28;
+        float[] $r15, $r16;
+        sun.font.LayoutPathImpl $r2, $r10;
+        sun.font.TextLineComponent r24;
+        java.awt.font.FontRenderContext $r21, r22;
+        boolean z0, $z1, $z2, $z3, $z5, $z6;
+        java.awt.Shape $r11;
+        java.awt.image.BufferedImage $r4;
+        float f0, f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $f10, $f11, $f12, $f13, $f14, $f15;
+        java.awt.Rectangle $r3, $r8, $r9, $r13, $r17, $r18, $r19, $r20, r23;
+        sun.font.TextLineComponent[] $r12, $r14;
+        java.awt.Graphics2D $r5;
+        java.awt.font.TextLine r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26, $i29, $i30, i31, i32;
+        double $d0, $d1, $d2, $d3;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        r22 := @parameter0: java.awt.font.FontRenderContext;
+
+        f0 := @parameter1: float;
+
+        f1 := @parameter2: float;
+
+        r23 = null;
+
+        if r22 == null goto label01;
+
+        $r21 = r0.<java.awt.font.TextLine: java.awt.font.FontRenderContext frc>;
+
+        $z3 = virtualinvoke r22.<java.awt.font.FontRenderContext: boolean equals(java.awt.font.FontRenderContext)>($r21);
+
+        if $z3 == 0 goto label01;
+
+        r22 = null;
+
+     label01:
+        $d0 = (double) f0;
+
+        $d1 = staticinvoke <java.lang.Math: double floor(double)>($d0);
+
+        $i29 = (int) $d1;
+
+        $d2 = (double) f1;
+
+        $d3 = staticinvoke <java.lang.Math: double floor(double)>($d2);
+
+        $i30 = (int) $d3;
+
+        $f12 = (float) $i29;
+
+        $f13 = f0 - $f12;
+
+        $f14 = (float) $i30;
+
+        $f15 = f1 - $f14;
+
+        if r22 != null goto label02;
+
+        $b27 = $f13 cmpl 0.0F;
+
+        if $b27 != 0 goto label02;
+
+        $b28 = $f15 cmpl 0.0F;
+
+        if $b28 != 0 goto label02;
+
+        $z6 = 1;
+
+        $z5 = 1;
+
+        goto label03;
+
+     label02:
+        $z6 = 0;
+
+        $z5 = 0;
+
+     label03:
+        z0 = $z6;
+
+        if $z5 == 0 goto label04;
+
+        $r18 = r0.<java.awt.font.TextLine: java.awt.Rectangle pixelBounds>;
+
+        if $r18 == null goto label04;
+
+        $r19 = new java.awt.Rectangle;
+
+        $r20 = r0.<java.awt.font.TextLine: java.awt.Rectangle pixelBounds>;
+
+        specialinvoke $r19.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>($r20);
+
+        $i23 = $r19.<java.awt.Rectangle: int x>;
+
+        $i24 = $i23 + $i29;
+
+        $r19.<java.awt.Rectangle: int x> = $i24;
+
+        $i25 = $r19.<java.awt.Rectangle: int y>;
+
+        $i26 = $i25 + $i30;
+
+        $r19.<java.awt.Rectangle: int y> = $i26;
+
+        return $r19;
+
+     label04:
+        $z1 = r0.<java.awt.font.TextLine: boolean isSimple>;
+
+        if $z1 == 0 goto label09;
+
+        i31 = 0;
+
+        i32 = 0;
+
+     label05:
+        $r12 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i20 = lengthof $r12;
+
+        if i31 >= $i20 goto label08;
+
+        $r14 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i21 = specialinvoke r0.<java.awt.font.TextLine: int getComponentLogicalIndex(int)>(i31);
+
+        r24 = $r14[$i21];
+
+        $r15 = r0.<java.awt.font.TextLine: float[] locs>;
+
+        $f8 = $r15[i32];
+
+        $f11 = $f8 + $f13;
+
+        $r16 = r0.<java.awt.font.TextLine: float[] locs>;
+
+        $i22 = i32 + 1;
+
+        $f9 = $r16[$i22];
+
+        $f10 = $f9 + $f15;
+
+        $r17 = interfaceinvoke r24.<sun.font.TextLineComponent: java.awt.Rectangle getPixelBounds(java.awt.font.FontRenderContext,float,float)>(r22, $f11, $f10);
+
+        $z2 = virtualinvoke $r17.<java.awt.Rectangle: boolean isEmpty()>();
+
+        if $z2 != 0 goto label07;
+
+        if r23 != null goto label06;
+
+        r23 = $r17;
+
+        goto label07;
+
+     label06:
+        virtualinvoke r23.<java.awt.Rectangle: void add(java.awt.Rectangle)>($r17);
+
+     label07:
+        i31 = i31 + 1;
+
+        i32 = i32 + 2;
+
+        goto label05;
+
+     label08:
+        if r23 != null goto label11;
+
+        $r13 = new java.awt.Rectangle;
+
+        specialinvoke $r13.<java.awt.Rectangle: void <init>(int,int,int,int)>(0, 0, 0, 0);
+
+        r23 = $r13;
+
+        goto label11;
+
+     label09:
+        $r1 = virtualinvoke r0.<java.awt.font.TextLine: java.awt.geom.Rectangle2D getVisualBounds()>();
+
+        r25 = $r1;
+
+        $r2 = r0.<java.awt.font.TextLine: sun.font.LayoutPathImpl lp>;
+
+        if $r2 == null goto label10;
+
+        $r10 = r0.<java.awt.font.TextLine: sun.font.LayoutPathImpl lp>;
+
+        $r11 = virtualinvoke $r10.<sun.font.LayoutPathImpl: java.awt.Shape mapShape(java.awt.Shape)>($r1);
+
+        r25 = interfaceinvoke $r11.<java.awt.Shape: java.awt.Rectangle getBounds()>();
+
+     label10:
+        $r3 = virtualinvoke r25.<java.awt.geom.Rectangle2D: java.awt.Rectangle getBounds()>();
+
+        $r4 = new java.awt.image.BufferedImage;
+
+        $i0 = $r3.<java.awt.Rectangle: int width>;
+
+        $i3 = $i0 + 6;
+
+        $i1 = $r3.<java.awt.Rectangle: int height>;
+
+        $i2 = $i1 + 6;
+
+        specialinvoke $r4.<java.awt.image.BufferedImage: void <init>(int,int,int)>($i3, $i2, 2);
+
+        $r5 = virtualinvoke $r4.<java.awt.image.BufferedImage: java.awt.Graphics2D createGraphics()>();
+
+        $r6 = <java.awt.Color: java.awt.Color WHITE>;
+
+        virtualinvoke $r5.<java.awt.Graphics2D: void setColor(java.awt.Color)>($r6);
+
+        $i4 = virtualinvoke $r4.<java.awt.image.BufferedImage: int getWidth()>();
+
+        $i5 = virtualinvoke $r4.<java.awt.image.BufferedImage: int getHeight()>();
+
+        virtualinvoke $r5.<java.awt.Graphics2D: void fillRect(int,int,int,int)>(0, 0, $i4, $i5);
+
+        $r7 = <java.awt.Color: java.awt.Color BLACK>;
+
+        virtualinvoke $r5.<java.awt.Graphics2D: void setColor(java.awt.Color)>($r7);
+
+        $f3 = $f13 + 3.0F;
+
+        $i6 = $r3.<java.awt.Rectangle: int x>;
+
+        $f2 = (float) $i6;
+
+        $f7 = $f3 - $f2;
+
+        $f5 = $f15 + 3.0F;
+
+        $i7 = $r3.<java.awt.Rectangle: int y>;
+
+        $f4 = (float) $i7;
+
+        $f6 = $f5 - $f4;
+
+        virtualinvoke r0.<java.awt.font.TextLine: void draw(java.awt.Graphics2D,float,float)>($r5, $f7, $f6);
+
+        $r8 = staticinvoke <java.awt.font.TextLine: java.awt.Rectangle computePixelBounds(java.awt.image.BufferedImage)>($r4);
+
+        r23 = $r8;
+
+        $i10 = $r8.<java.awt.Rectangle: int x>;
+
+        $i8 = $r3.<java.awt.Rectangle: int x>;
+
+        $i9 = 3 - $i8;
+
+        $i11 = $i10 - $i9;
+
+        $r8.<java.awt.Rectangle: int x> = $i11;
+
+        $i14 = $r8.<java.awt.Rectangle: int y>;
+
+        $i12 = $r3.<java.awt.Rectangle: int y>;
+
+        $i13 = 3 - $i12;
+
+        $i15 = $i14 - $i13;
+
+        $r8.<java.awt.Rectangle: int y> = $i15;
+
+     label11:
+        if z0 == 0 goto label12;
+
+        $r9 = new java.awt.Rectangle;
+
+        specialinvoke $r9.<java.awt.Rectangle: void <init>(java.awt.Rectangle)>(r23);
+
+        r0.<java.awt.font.TextLine: java.awt.Rectangle pixelBounds> = $r9;
+
+     label12:
+        $i16 = r23.<java.awt.Rectangle: int x>;
+
+        $i17 = $i16 + $i29;
+
+        r23.<java.awt.Rectangle: int x> = $i17;
+
+        $i18 = r23.<java.awt.Rectangle: int y>;
+
+        $i19 = $i18 + $i30;
+
+        r23.<java.awt.Rectangle: int y> = $i19;
+
+        return r23;
+    }
+
+    static java.awt.Rectangle computePixelBounds(java.awt.image.BufferedImage)
+    {
+        int[] $r2, r3;
+        java.awt.image.BufferedImage r0;
+        java.awt.Rectangle $r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, $i23, $i25, $i27, $i29, $i31, $i33, $i35, $i37;
+
+        r0 := @parameter0: java.awt.image.BufferedImage;
+
+        $i0 = virtualinvoke r0.<java.awt.image.BufferedImage: int getWidth()>();
+
+        $i1 = virtualinvoke r0.<java.awt.image.BufferedImage: int getHeight()>();
+
+        $i23 = (int) -1;
+
+        i12 = $i23;
+
+        $i25 = (int) -1;
+
+        i13 = $i25;
+
+        i14 = $i0;
+
+        i15 = $i1;
+
+        r3 = newarray (int)[$i0];
+
+     label01:
+        i13 = i13 + 1;
+
+        if i13 >= $i1 goto label05;
+
+        $i9 = lengthof r3;
+
+        virtualinvoke r0.<java.awt.image.BufferedImage: int[] getRGB(int,int,int,int,int[],int,int)>(0, i13, $i9, 1, r3, 0, $i0);
+
+        i16 = 0;
+
+     label02:
+        $i10 = lengthof r3;
+
+        if i16 >= $i10 goto label04;
+
+        $i11 = r3[i16];
+
+        $i27 = (int) -1;
+
+        if $i11 == $i27 goto label03;
+
+        goto label05;
+
+     label03:
+        i16 = i16 + 1;
+
+        goto label02;
+
+     label04:
+        goto label01;
+
+     label05:
+        $r2 = newarray (int)[$i0];
+
+     label06:
+        $i29 = (int) -1;
+
+        i15 = i15 + $i29;
+
+        if i15 <= i13 goto label10;
+
+        $i6 = lengthof $r2;
+
+        virtualinvoke r0.<java.awt.image.BufferedImage: int[] getRGB(int,int,int,int,int[],int,int)>(0, i15, $i6, 1, $r2, 0, $i0);
+
+        i17 = 0;
+
+     label07:
+        $i7 = lengthof $r2;
+
+        if i17 >= $i7 goto label09;
+
+        $i8 = $r2[i17];
+
+        $i31 = (int) -1;
+
+        if $i8 == $i31 goto label08;
+
+        goto label10;
+
+     label08:
+        i17 = i17 + 1;
+
+        goto label07;
+
+     label09:
+        goto label06;
+
+     label10:
+        i18 = i15 + 1;
+
+     label11:
+        i12 = i12 + 1;
+
+        if i12 >= $i0 goto label15;
+
+        i19 = i13;
+
+     label12:
+        if i19 >= i18 goto label14;
+
+        $i5 = virtualinvoke r0.<java.awt.image.BufferedImage: int getRGB(int,int)>(i12, i19);
+
+        $i33 = (int) -1;
+
+        if $i5 == $i33 goto label13;
+
+        goto label15;
+
+     label13:
+        i19 = i19 + 1;
+
+        goto label12;
+
+     label14:
+        goto label11;
+
+     label15:
+        $i35 = (int) -1;
+
+        i14 = i14 + $i35;
+
+        if i14 <= i12 goto label19;
+
+        i20 = i13;
+
+     label16:
+        if i20 >= i18 goto label18;
+
+        $i4 = virtualinvoke r0.<java.awt.image.BufferedImage: int getRGB(int,int)>(i14, i20);
+
+        $i37 = (int) -1;
+
+        if $i4 == $i37 goto label17;
+
+        goto label19;
+
+     label17:
+        i20 = i20 + 1;
+
+        goto label16;
+
+     label18:
+        goto label15;
+
+     label19:
+        i21 = i14 + 1;
+
+        $r4 = new java.awt.Rectangle;
+
+        $i3 = i21 - i12;
+
+        $i2 = i18 - i13;
+
+        specialinvoke $r4.<java.awt.Rectangle: void <init>(int,int,int,int)>(i12, i13, $i3, $i2);
+
+        return $r4;
+    }
+
+    public int characterCount()
+    {
+        java.awt.font.TextLine r0;
+        int $i0, $i1, $i2;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        $i1 = r0.<java.awt.font.TextLine: int fCharsLimit>;
+
+        $i0 = r0.<java.awt.font.TextLine: int fCharsStart>;
+
+        $i2 = $i1 - $i0;
+
+        return $i2;
+    }
+
+    public boolean isDirectionLTR()
+    {
+        java.awt.font.TextLine r0;
+        boolean $z0;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        $z0 = r0.<java.awt.font.TextLine: boolean fIsDirectionLTR>;
+
+        return $z0;
+    }
+
+    public java.awt.font.TextLine$TextLineMetrics getMetrics()
+    {
+        java.awt.font.TextLine r0;
+        java.awt.font.TextLine$TextLineMetrics $r1;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        $r1 = r0.<java.awt.font.TextLine: java.awt.font.TextLine$TextLineMetrics fMetrics>;
+
+        return $r1;
+    }
+
+    public int visualToLogical(int)
+    {
+        int[] $r1, $r2, $r3, $r4, $r5;
+        java.awt.font.TextLine r0;
+        int i0, $i1;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.awt.font.TextLine: int[] fCharLogicalOrder>;
+
+        if $r1 != null goto label1;
+
+        return i0;
+
+     label1:
+        $r2 = r0.<java.awt.font.TextLine: int[] fCharVisualOrder>;
+
+        if $r2 != null goto label2;
+
+        $r4 = r0.<java.awt.font.TextLine: int[] fCharLogicalOrder>;
+
+        $r5 = staticinvoke <sun.font.BidiUtils: int[] createInverseMap(int[])>($r4);
+
+        r0.<java.awt.font.TextLine: int[] fCharVisualOrder> = $r5;
+
+     label2:
+        $r3 = r0.<java.awt.font.TextLine: int[] fCharVisualOrder>;
+
+        $i1 = $r3[i0];
+
+        return $i1;
+    }
+
+    public int logicalToVisual(int)
+    {
+        int[] $r1, $r2;
+        java.awt.font.TextLine r0;
+        int i0, $i1;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.awt.font.TextLine: int[] fCharLogicalOrder>;
+
+        if $r1 != null goto label1;
+
+        $i1 = i0;
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<java.awt.font.TextLine: int[] fCharLogicalOrder>;
+
+        $i1 = $r2[i0];
+
+     label2:
+        return $i1;
+    }
+
+    public byte getCharLevel(int)
+    {
+        byte[] $r1, $r2;
+        byte $b1;
+        java.awt.font.TextLine r0;
+        int i0;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.awt.font.TextLine: byte[] fCharLevels>;
+
+        if $r1 != null goto label1;
+
+        $b1 = 0;
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<java.awt.font.TextLine: byte[] fCharLevels>;
+
+        $b1 = $r2[i0];
+
+     label2:
+        return $b1;
+    }
+
+    public boolean isCharLTR(int)
+    {
+        byte $b1, $b2;
+        java.awt.font.TextLine r0;
+        int i0;
+        boolean $z0;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        i0 := @parameter0: int;
+
+        $b1 = virtualinvoke r0.<java.awt.font.TextLine: byte getCharLevel(int)>(i0);
+
+        $b2 = $b1 & 1;
+
+        if $b2 != 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public int getCharType(int)
+    {
+        java.awt.font.TextLine r0;
+        int i0, $i1, $i2, $i4;
+        char[] $r1;
+        char $c3;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.awt.font.TextLine: char[] fChars>;
+
+        $i1 = r0.<java.awt.font.TextLine: int fCharsStart>;
+
+        $i2 = i0 + $i1;
+
+        $c3 = $r1[$i2];
+
+        $i4 = staticinvoke <java.lang.Character: int getType(char)>($c3);
+
+        return $i4;
+    }
+
+    public boolean isCharSpace(int)
+    {
+        java.awt.font.TextLine r0;
+        int i0, $i1, $i2;
+        char[] $r1;
+        char $c3;
+        boolean $z0;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.awt.font.TextLine: char[] fChars>;
+
+        $i1 = r0.<java.awt.font.TextLine: int fCharsStart>;
+
+        $i2 = i0 + $i1;
+
+        $c3 = $r1[$i2];
+
+        $z0 = staticinvoke <java.lang.Character: boolean isSpaceChar(char)>($c3);
+
+        return $z0;
+    }
+
+    public boolean isCharWhitespace(int)
+    {
+        java.awt.font.TextLine r0;
+        int i0, $i1, $i2;
+        char[] $r1;
+        char $c3;
+        boolean $z0;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.awt.font.TextLine: char[] fChars>;
+
+        $i1 = r0.<java.awt.font.TextLine: int fCharsStart>;
+
+        $i2 = i0 + $i1;
+
+        $c3 = $r1[$i2];
+
+        $z0 = staticinvoke <java.lang.Character: boolean isWhitespace(char)>($c3);
+
+        return $z0;
+    }
+
+    public float getCharAngle(int)
+    {
+        sun.font.CoreMetrics $r1;
+        java.awt.font.TextLine r0;
+        int i0;
+        float $f0;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<java.awt.font.TextLine: sun.font.CoreMetrics getCoreMetricsAt(int)>(i0);
+
+        $f0 = $r1.<sun.font.CoreMetrics: float italicAngle>;
+
+        return $f0;
+    }
+
+    public sun.font.CoreMetrics getCoreMetricsAt(int)
+    {
+        sun.font.TextLineComponent[] $r1, $r3, $r4;
+        sun.font.CoreMetrics $r6;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, i7, i8;
+        java.awt.font.TextLine r0;
+        sun.font.TextLineComponent $r2, $r5;
+        java.lang.IllegalArgumentException $r7, $r8;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 0 goto label1;
+
+        $r8 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Negative logicalIndex.");
+
+        throw $r8;
+
+     label1:
+        $i2 = r0.<java.awt.font.TextLine: int fCharsLimit>;
+
+        $i1 = r0.<java.awt.font.TextLine: int fCharsStart>;
+
+        $i3 = $i2 - $i1;
+
+        if i0 <= $i3 goto label2;
+
+        $r7 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r7.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("logicalIndex too large.");
+
+        throw $r7;
+
+     label2:
+        i7 = 0;
+
+        i8 = 0;
+
+     label3:
+        $r1 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $r2 = $r1[i7];
+
+        $i4 = interfaceinvoke $r2.<sun.font.TextLineComponent: int getNumCharacters()>();
+
+        $i6 = i8 + $i4;
+
+        i8 = $i6;
+
+        if $i6 <= i0 goto label4;
+
+        goto label5;
+
+     label4:
+        i7 = i7 + 1;
+
+        $r3 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i5 = lengthof $r3;
+
+        if i7 < $i5 goto label3;
+
+     label5:
+        $r4 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $r5 = $r4[i7];
+
+        $r6 = interfaceinvoke $r5.<sun.font.TextLineComponent: sun.font.CoreMetrics getCoreMetrics()>();
+
+        return $r6;
+    }
+
+    public float getCharAscent(int)
+    {
+        sun.font.CoreMetrics $r1;
+        java.awt.font.TextLine r0;
+        int i0;
+        float $f0;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<java.awt.font.TextLine: sun.font.CoreMetrics getCoreMetricsAt(int)>(i0);
+
+        $f0 = $r1.<sun.font.CoreMetrics: float ascent>;
+
+        return $f0;
+    }
+
+    public float getCharDescent(int)
+    {
+        sun.font.CoreMetrics $r1;
+        java.awt.font.TextLine r0;
+        int i0;
+        float $f0;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<java.awt.font.TextLine: sun.font.CoreMetrics getCoreMetricsAt(int)>(i0);
+
+        $f0 = $r1.<sun.font.CoreMetrics: float descent>;
+
+        return $f0;
+    }
+
+    public float getCharShift(int)
+    {
+        sun.font.CoreMetrics $r1;
+        java.awt.font.TextLine r0;
+        int i0;
+        float $f0;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<java.awt.font.TextLine: sun.font.CoreMetrics getCoreMetricsAt(int)>(i0);
+
+        $f0 = $r1.<sun.font.CoreMetrics: float ssOffset>;
+
+        return $f0;
+    }
+
+    private float applyFunctionAtIndex(int, java.awt.font.TextLine$Function)
+    {
+        sun.font.TextLineComponent $r4;
+        sun.font.TextLineComponent[] $r1, $r3;
+        java.lang.IllegalArgumentException $r2, $r6;
+        java.awt.font.TextLine$Function r5;
+        int i0, $i1, $i2, i3, $i4, i5, i6;
+        java.awt.font.TextLine r0;
+        float $f0;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        i0 := @parameter0: int;
+
+        r5 := @parameter1: java.awt.font.TextLine$Function;
+
+        if i0 >= 0 goto label1;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Negative logicalIndex.");
+
+        throw $r6;
+
+     label1:
+        i5 = 0;
+
+        i6 = 0;
+
+     label2:
+        $r1 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i1 = lengthof $r1;
+
+        if i6 >= $i1 goto label4;
+
+        $r3 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $r4 = $r3[i6];
+
+        $i2 = interfaceinvoke $r4.<sun.font.TextLineComponent: int getNumCharacters()>();
+
+        i3 = i5 + $i2;
+
+        if i3 <= i0 goto label3;
+
+        $i4 = i0 - i5;
+
+        $f0 = virtualinvoke r5.<java.awt.font.TextLine$Function: float computeFunction(java.awt.font.TextLine,int,int)>(r0, i6, $i4);
+
+        return $f0;
+
+     label3:
+        i5 = i3;
+
+        i6 = i6 + 1;
+
+        goto label2;
+
+     label4:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("logicalIndex too large.");
+
+        throw $r2;
+    }
+
+    public float getCharAdvance(int)
+    {
+        java.awt.font.TextLine$Function $r1;
+        java.awt.font.TextLine r0;
+        int i0;
+        float $f0;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        i0 := @parameter0: int;
+
+        $r1 = <java.awt.font.TextLine: java.awt.font.TextLine$Function fgAdvanceF>;
+
+        $f0 = specialinvoke r0.<java.awt.font.TextLine: float applyFunctionAtIndex(int,java.awt.font.TextLine$Function)>(i0, $r1);
+
+        return $f0;
+    }
+
+    public float getCharXPosition(int)
+    {
+        java.awt.font.TextLine$Function $r1;
+        java.awt.font.TextLine r0;
+        int i0;
+        float $f0;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        i0 := @parameter0: int;
+
+        $r1 = <java.awt.font.TextLine: java.awt.font.TextLine$Function fgXPositionF>;
+
+        $f0 = specialinvoke r0.<java.awt.font.TextLine: float applyFunctionAtIndex(int,java.awt.font.TextLine$Function)>(i0, $r1);
+
+        return $f0;
+    }
+
+    public float getCharYPosition(int)
+    {
+        java.awt.font.TextLine$Function $r1;
+        java.awt.font.TextLine r0;
+        int i0;
+        float $f0;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        i0 := @parameter0: int;
+
+        $r1 = <java.awt.font.TextLine: java.awt.font.TextLine$Function fgYPositionF>;
+
+        $f0 = specialinvoke r0.<java.awt.font.TextLine: float applyFunctionAtIndex(int,java.awt.font.TextLine$Function)>(i0, $r1);
+
+        return $f0;
+    }
+
+    public float getCharLinePosition(int)
+    {
+        java.awt.font.TextLine r0;
+        int i0;
+        float $f0;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        i0 := @parameter0: int;
+
+        $f0 = virtualinvoke r0.<java.awt.font.TextLine: float getCharXPosition(int)>(i0);
+
+        return $f0;
+    }
+
+    public float getCharLinePosition(int, boolean)
+    {
+        java.awt.font.TextLine$Function $r1;
+        java.awt.font.TextLine r0;
+        int i0;
+        float $f0;
+        boolean $z0, z1;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        i0 := @parameter0: int;
+
+        z1 := @parameter1: boolean;
+
+        $z0 = virtualinvoke r0.<java.awt.font.TextLine: boolean isCharLTR(int)>(i0);
+
+        if $z0 != z1 goto label1;
+
+        $r1 = <java.awt.font.TextLine: java.awt.font.TextLine$Function fgXPositionF>;
+
+        goto label2;
+
+     label1:
+        $r1 = <java.awt.font.TextLine: java.awt.font.TextLine$Function fgPosAdvF>;
+
+     label2:
+        $f0 = specialinvoke r0.<java.awt.font.TextLine: float applyFunctionAtIndex(int,java.awt.font.TextLine$Function)>(i0, $r1);
+
+        return $f0;
+    }
+
+    public boolean caretAtOffsetIsValid(int)
+    {
+        sun.font.TextLineComponent[] $r1, $r3, $r5;
+        int i0, $i1, $i2, i3, $i4, i5, i6;
+        java.awt.font.TextLine r0;
+        boolean $z0;
+        sun.font.TextLineComponent $r4, $r6;
+        java.lang.IllegalArgumentException $r2, $r7;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 0 goto label1;
+
+        $r7 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r7.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Negative offset.");
+
+        throw $r7;
+
+     label1:
+        i5 = 0;
+
+        i6 = 0;
+
+     label2:
+        $r1 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i1 = lengthof $r1;
+
+        if i6 >= $i1 goto label4;
+
+        $r3 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $r4 = $r3[i6];
+
+        $i2 = interfaceinvoke $r4.<sun.font.TextLineComponent: int getNumCharacters()>();
+
+        i3 = i5 + $i2;
+
+        if i3 <= i0 goto label3;
+
+        $r5 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $r6 = $r5[i6];
+
+        $i4 = i0 - i5;
+
+        $z0 = interfaceinvoke $r6.<sun.font.TextLineComponent: boolean caretAtOffsetIsValid(int)>($i4);
+
+        return $z0;
+
+     label3:
+        i5 = i3;
+
+        i6 = i6 + 1;
+
+        goto label2;
+
+     label4:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("logicalIndex too large.");
+
+        throw $r2;
+    }
+
+    private int getComponentLogicalIndex(int)
+    {
+        int[] $r1, $r2;
+        java.awt.font.TextLine r0;
+        int i0, $i1;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.awt.font.TextLine: int[] fComponentVisualOrder>;
+
+        if $r1 != null goto label1;
+
+        return i0;
+
+     label1:
+        $r2 = r0.<java.awt.font.TextLine: int[] fComponentVisualOrder>;
+
+        $i1 = $r2[i0];
+
+        return $i1;
+    }
+
+    private int getComponentVisualIndex(int)
+    {
+        java.lang.IndexOutOfBoundsException $r3;
+        int[] $r1, $r2, $r8;
+        java.awt.font.TextLine r0;
+        int $i0, i1, $i2, i3;
+        java.lang.StringBuilder $r4, $r5, $r6;
+        java.lang.String $r7;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        i1 := @parameter0: int;
+
+        $r1 = r0.<java.awt.font.TextLine: int[] fComponentVisualOrder>;
+
+        if $r1 != null goto label1;
+
+        return i1;
+
+     label1:
+        i3 = 0;
+
+     label2:
+        $r2 = r0.<java.awt.font.TextLine: int[] fComponentVisualOrder>;
+
+        $i0 = lengthof $r2;
+
+        if i3 >= $i0 goto label4;
+
+        $r8 = r0.<java.awt.font.TextLine: int[] fComponentVisualOrder>;
+
+        $i2 = $r8[i3];
+
+        if $i2 != i1 goto label3;
+
+        return i3;
+
+     label3:
+        i3 = i3 + 1;
+
+        goto label2;
+
+     label4:
+        $r3 = new java.lang.IndexOutOfBoundsException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("bad component index: ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.IndexOutOfBoundsException: void <init>(java.lang.String)>($r7);
+
+        throw $r3;
+    }
+
+    public java.awt.geom.Rectangle2D getCharBounds(int)
+    {
+        java.awt.geom.Rectangle2D $r7;
+        float $f0, $f1;
+        float[] $r8, $r9;
+        sun.font.TextLineComponent[] $r1, $r3, $r5;
+        int i0, $i1, $i2, i3, i4, $i5, $i6, $i7, $i8, i9, i10;
+        java.awt.font.TextLine r0;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7;
+        sun.font.TextLineComponent $r4, r6;
+        java.lang.IllegalArgumentException $r2, $r10;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 0 goto label1;
+
+        $r10 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r10.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Negative logicalIndex.");
+
+        throw $r10;
+
+     label1:
+        i9 = 0;
+
+        i10 = 0;
+
+     label2:
+        $r1 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i1 = lengthof $r1;
+
+        if i10 >= $i1 goto label4;
+
+        $r3 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $r4 = $r3[i10];
+
+        $i2 = interfaceinvoke $r4.<sun.font.TextLineComponent: int getNumCharacters()>();
+
+        i3 = i9 + $i2;
+
+        if i3 <= i0 goto label3;
+
+        $r5 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        r6 = $r5[i10];
+
+        i4 = i0 - i9;
+
+        $r7 = interfaceinvoke r6.<sun.font.TextLineComponent: java.awt.geom.Rectangle2D getCharVisualBounds(int)>(i4);
+
+        $i5 = specialinvoke r0.<java.awt.font.TextLine: int getComponentVisualIndex(int)>(i10);
+
+        $d0 = virtualinvoke $r7.<java.awt.geom.Rectangle2D: double getX()>();
+
+        $r8 = r0.<java.awt.font.TextLine: float[] locs>;
+
+        $i6 = $i5 * 2;
+
+        $f0 = $r8[$i6];
+
+        $d1 = (double) $f0;
+
+        $d2 = $d0 + $d1;
+
+        $d3 = virtualinvoke $r7.<java.awt.geom.Rectangle2D: double getY()>();
+
+        $r9 = r0.<java.awt.font.TextLine: float[] locs>;
+
+        $i7 = $i5 * 2;
+
+        $i8 = $i7 + 1;
+
+        $f1 = $r9[$i8];
+
+        $d4 = (double) $f1;
+
+        $d5 = $d3 + $d4;
+
+        $d6 = virtualinvoke $r7.<java.awt.geom.Rectangle2D: double getWidth()>();
+
+        $d7 = virtualinvoke $r7.<java.awt.geom.Rectangle2D: double getHeight()>();
+
+        virtualinvoke $r7.<java.awt.geom.Rectangle2D: void setRect(double,double,double,double)>($d2, $d5, $d6, $d7);
+
+        return $r7;
+
+     label3:
+        i9 = i3;
+
+        i10 = i10 + 1;
+
+        goto label2;
+
+     label4:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("logicalIndex too large.");
+
+        throw $r2;
+    }
+
+    private float getComponentShift(int)
+    {
+        sun.font.TextLineComponent $r2;
+        sun.font.CoreMetrics $r3;
+        java.awt.font.TextLine r0;
+        int i0;
+        float $f0;
+        float[] $r4;
+        sun.font.TextLineComponent[] $r1;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $r2 = $r1[i0];
+
+        $r3 = interfaceinvoke $r2.<sun.font.TextLineComponent: sun.font.CoreMetrics getCoreMetrics()>();
+
+        $r4 = r0.<java.awt.font.TextLine: float[] fBaselineOffsets>;
+
+        $f0 = virtualinvoke $r3.<sun.font.CoreMetrics: float effectiveBaselineOffset(float[])>($r4);
+
+        return $f0;
+    }
+
+    public void draw(java.awt.Graphics2D, float, float)
+    {
+        java.awt.geom.AffineTransform $r3, $r11;
+        float $f0, $f1, f2, $f3, $f4, f5, $f6, $f7, $f8, $f9, $f10, $f11, $f12, $f13, $f14, $f15;
+        float[] $r8, $r9, $r14, $r15;
+        sun.font.TextLineComponent[] $r5, $r6, $r12, $r13;
+        java.awt.Graphics2D r2;
+        java.awt.font.TextLine r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, i7, i8, i9;
+        sun.font.LayoutPathImpl $r1, $r10;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7;
+        sun.font.TextLineComponent r7, r16;
+        java.awt.geom.Point2D$Float $r4;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        r2 := @parameter0: java.awt.Graphics2D;
+
+        f2 := @parameter1: float;
+
+        f5 := @parameter2: float;
+
+        $r1 = r0.<java.awt.font.TextLine: sun.font.LayoutPathImpl lp>;
+
+        if $r1 != null goto label3;
+
+        i6 = 0;
+
+        i7 = 0;
+
+     label1:
+        $r12 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i3 = lengthof $r12;
+
+        if i6 >= $i3 goto label2;
+
+        $r13 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i4 = specialinvoke r0.<java.awt.font.TextLine: int getComponentLogicalIndex(int)>(i6);
+
+        r16 = $r13[$i4];
+
+        $r14 = r0.<java.awt.font.TextLine: float[] locs>;
+
+        $f12 = $r14[i7];
+
+        $f15 = $f12 + f2;
+
+        $r15 = r0.<java.awt.font.TextLine: float[] locs>;
+
+        $i5 = i7 + 1;
+
+        $f13 = $r15[$i5];
+
+        $f14 = $f13 + f5;
+
+        interfaceinvoke r16.<sun.font.TextLineComponent: void draw(java.awt.Graphics2D,float,float)>(r2, $f15, $f14);
+
+        i6 = i6 + 1;
+
+        i7 = i7 + 2;
+
+        goto label1;
+
+     label2:
+        goto label7;
+
+     label3:
+        $r3 = virtualinvoke r2.<java.awt.Graphics2D: java.awt.geom.AffineTransform getTransform()>();
+
+        $r4 = new java.awt.geom.Point2D$Float;
+
+        specialinvoke $r4.<java.awt.geom.Point2D$Float: void <init>()>();
+
+        i8 = 0;
+
+        i9 = 0;
+
+     label4:
+        $r5 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i0 = lengthof $r5;
+
+        if i8 >= $i0 goto label7;
+
+        $r6 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i1 = specialinvoke r0.<java.awt.font.TextLine: int getComponentLogicalIndex(int)>(i8);
+
+        r7 = $r6[$i1];
+
+        $r10 = r0.<java.awt.font.TextLine: sun.font.LayoutPathImpl lp>;
+
+        $r8 = r0.<java.awt.font.TextLine: float[] locs>;
+
+        $f0 = $r8[i9];
+
+        $d1 = (double) $f0;
+
+        $r9 = r0.<java.awt.font.TextLine: float[] locs>;
+
+        $i2 = i9 + 1;
+
+        $f1 = $r9[$i2];
+
+        $d0 = (double) $f1;
+
+        virtualinvoke $r10.<sun.font.LayoutPathImpl: void pathToPoint(double,double,boolean,java.awt.geom.Point2D)>($d1, $d0, 0, $r4);
+
+        $f3 = $r4.<java.awt.geom.Point2D$Float: float x>;
+
+        $f4 = $f3 + f2;
+
+        $r4.<java.awt.geom.Point2D$Float: float x> = $f4;
+
+        $f6 = $r4.<java.awt.geom.Point2D$Float: float y>;
+
+        $f7 = $f6 + f5;
+
+        $r4.<java.awt.geom.Point2D$Float: float y> = $f7;
+
+        $r11 = interfaceinvoke r7.<sun.font.TextLineComponent: java.awt.geom.AffineTransform getBaselineTransform()>();
+
+        if $r11 == null goto label5;
+
+        $f10 = $r4.<java.awt.geom.Point2D$Float: float x>;
+
+        $d2 = (double) $f10;
+
+        $d3 = virtualinvoke $r11.<java.awt.geom.AffineTransform: double getTranslateX()>();
+
+        $d4 = $d2 - $d3;
+
+        $f11 = $r4.<java.awt.geom.Point2D$Float: float y>;
+
+        $d5 = (double) $f11;
+
+        $d6 = virtualinvoke $r11.<java.awt.geom.AffineTransform: double getTranslateY()>();
+
+        $d7 = $d5 - $d6;
+
+        virtualinvoke r2.<java.awt.Graphics2D: void translate(double,double)>($d4, $d7);
+
+        virtualinvoke r2.<java.awt.Graphics2D: void transform(java.awt.geom.AffineTransform)>($r11);
+
+        interfaceinvoke r7.<sun.font.TextLineComponent: void draw(java.awt.Graphics2D,float,float)>(r2, 0.0F, 0.0F);
+
+        virtualinvoke r2.<java.awt.Graphics2D: void setTransform(java.awt.geom.AffineTransform)>($r3);
+
+        goto label6;
+
+     label5:
+        $f9 = $r4.<java.awt.geom.Point2D$Float: float x>;
+
+        $f8 = $r4.<java.awt.geom.Point2D$Float: float y>;
+
+        interfaceinvoke r7.<sun.font.TextLineComponent: void draw(java.awt.Graphics2D,float,float)>(r2, $f9, $f8);
+
+     label6:
+        i8 = i8 + 1;
+
+        i9 = i9 + 2;
+
+        goto label4;
+
+     label7:
+        return;
+    }
+
+    public java.awt.geom.Rectangle2D getVisualBounds()
+    {
+        java.awt.geom.Rectangle2D $r5, r14, r15;
+        java.awt.geom.Rectangle2D$Float $r2;
+        java.awt.Shape $r13;
+        java.awt.geom.AffineTransform $r11, $r12;
+        float $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7;
+        float[] $r7, $r8;
+        sun.font.TextLineComponent[] $r1, $r3;
+        java.awt.font.TextLine r0;
+        int $i0, $i1, $i2, i3, i4;
+        sun.font.LayoutPathImpl $r9, $r10;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11, $d12, $d13, $d14, $d15, $d16, $d17, $d18, $d19, $d20, $d21;
+        sun.font.TextLineComponent r4;
+        java.awt.geom.Point2D$Float $r6;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        r14 = null;
+
+        i3 = 0;
+
+        i4 = 0;
+
+     label1:
+        $r1 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i0 = lengthof $r1;
+
+        if i3 >= $i0 goto label7;
+
+        $r3 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i1 = specialinvoke r0.<java.awt.font.TextLine: int getComponentLogicalIndex(int)>(i3);
+
+        r4 = $r3[$i1];
+
+        $r5 = interfaceinvoke r4.<sun.font.TextLineComponent: java.awt.geom.Rectangle2D getVisualBounds()>();
+
+        r15 = $r5;
+
+        $r6 = new java.awt.geom.Point2D$Float;
+
+        $r7 = r0.<java.awt.font.TextLine: float[] locs>;
+
+        $f1 = $r7[i4];
+
+        $r8 = r0.<java.awt.font.TextLine: float[] locs>;
+
+        $i2 = i4 + 1;
+
+        $f0 = $r8[$i2];
+
+        specialinvoke $r6.<java.awt.geom.Point2D$Float: void <init>(float,float)>($f1, $f0);
+
+        $r9 = r0.<java.awt.font.TextLine: sun.font.LayoutPathImpl lp>;
+
+        if $r9 != null goto label2;
+
+        $d14 = virtualinvoke $r5.<java.awt.geom.Rectangle2D: double getMinX()>();
+
+        $f6 = $r6.<java.awt.geom.Point2D$Float: float x>;
+
+        $d15 = (double) $f6;
+
+        $d16 = $d14 + $d15;
+
+        $d17 = virtualinvoke $r5.<java.awt.geom.Rectangle2D: double getMinY()>();
+
+        $f7 = $r6.<java.awt.geom.Point2D$Float: float y>;
+
+        $d18 = (double) $f7;
+
+        $d19 = $d17 + $d18;
+
+        $d20 = virtualinvoke $r5.<java.awt.geom.Rectangle2D: double getWidth()>();
+
+        $d21 = virtualinvoke $r5.<java.awt.geom.Rectangle2D: double getHeight()>();
+
+        virtualinvoke $r5.<java.awt.geom.Rectangle2D: void setRect(double,double,double,double)>($d16, $d19, $d20, $d21);
+
+        goto label4;
+
+     label2:
+        $r10 = r0.<java.awt.font.TextLine: sun.font.LayoutPathImpl lp>;
+
+        virtualinvoke $r10.<sun.font.LayoutPathImpl: void pathToPoint(java.awt.geom.Point2D,boolean,java.awt.geom.Point2D)>($r6, 0, $r6);
+
+        $r11 = interfaceinvoke r4.<sun.font.TextLineComponent: java.awt.geom.AffineTransform getBaselineTransform()>();
+
+        if $r11 == null goto label3;
+
+        $f4 = $r6.<java.awt.geom.Point2D$Float: float x>;
+
+        $d8 = (double) $f4;
+
+        $d9 = virtualinvoke $r11.<java.awt.geom.AffineTransform: double getTranslateX()>();
+
+        $d10 = $d8 - $d9;
+
+        $f5 = $r6.<java.awt.geom.Point2D$Float: float y>;
+
+        $d11 = (double) $f5;
+
+        $d12 = virtualinvoke $r11.<java.awt.geom.AffineTransform: double getTranslateY()>();
+
+        $d13 = $d11 - $d12;
+
+        $r12 = staticinvoke <java.awt.geom.AffineTransform: java.awt.geom.AffineTransform getTranslateInstance(double,double)>($d10, $d13);
+
+        virtualinvoke $r12.<java.awt.geom.AffineTransform: void concatenate(java.awt.geom.AffineTransform)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.awt.geom.AffineTransform: java.awt.Shape createTransformedShape(java.awt.Shape)>($r5);
+
+        r15 = interfaceinvoke $r13.<java.awt.Shape: java.awt.geom.Rectangle2D getBounds2D()>();
+
+        goto label4;
+
+     label3:
+        $d0 = virtualinvoke $r5.<java.awt.geom.Rectangle2D: double getMinX()>();
+
+        $f2 = $r6.<java.awt.geom.Point2D$Float: float x>;
+
+        $d1 = (double) $f2;
+
+        $d2 = $d0 + $d1;
+
+        $d3 = virtualinvoke $r5.<java.awt.geom.Rectangle2D: double getMinY()>();
+
+        $f3 = $r6.<java.awt.geom.Point2D$Float: float y>;
+
+        $d4 = (double) $f3;
+
+        $d5 = $d3 + $d4;
+
+        $d6 = virtualinvoke $r5.<java.awt.geom.Rectangle2D: double getWidth()>();
+
+        $d7 = virtualinvoke $r5.<java.awt.geom.Rectangle2D: double getHeight()>();
+
+        virtualinvoke $r5.<java.awt.geom.Rectangle2D: void setRect(double,double,double,double)>($d2, $d5, $d6, $d7);
+
+     label4:
+        if r14 != null goto label5;
+
+        r14 = r15;
+
+        goto label6;
+
+     label5:
+        virtualinvoke r14.<java.awt.geom.Rectangle2D: void add(java.awt.geom.Rectangle2D)>(r15);
+
+     label6:
+        i3 = i3 + 1;
+
+        i4 = i4 + 2;
+
+        goto label1;
+
+     label7:
+        if r14 != null goto label8;
+
+        $r2 = new java.awt.geom.Rectangle2D$Float;
+
+        specialinvoke $r2.<java.awt.geom.Rectangle2D$Float: void <init>(float,float,float,float)>(3.4028235E38F, 3.4028235E38F, 1.4E-45F, 1.4E-45F);
+
+        r14 = $r2;
+
+     label8:
+        return r14;
+    }
+
+    public java.awt.geom.Rectangle2D getItalicBounds()
+    {
+        java.awt.geom.Rectangle2D $r5;
+        java.awt.geom.Rectangle2D$Float $r2;
+        float $f0, $f1, f2, f3, $f4, $f5, $f6, $f7, $f8, $f9, $f10, $f11, f12, f13, f14, f15;
+        float[] $r6, $r7;
+        sun.font.TextLineComponent[] $r1, $r3;
+        java.awt.font.TextLine r0;
+        int $i0, $i1, $i2, i3, i4;
+        double $d0, $d1, $d2, $d3;
+        sun.font.TextLineComponent r4;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        f12 = 3.4028235E38F;
+
+        f13 = -3.4028235E38F;
+
+        f14 = 3.4028235E38F;
+
+        f15 = -3.4028235E38F;
+
+        i3 = 0;
+
+        i4 = 0;
+
+     label1:
+        $r1 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i0 = lengthof $r1;
+
+        if i3 >= $i0 goto label2;
+
+        $r3 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i1 = specialinvoke r0.<java.awt.font.TextLine: int getComponentLogicalIndex(int)>(i3);
+
+        r4 = $r3[$i1];
+
+        $r5 = interfaceinvoke r4.<sun.font.TextLineComponent: java.awt.geom.Rectangle2D getItalicBounds()>();
+
+        $r6 = r0.<java.awt.font.TextLine: float[] locs>;
+
+        f2 = $r6[i4];
+
+        $r7 = r0.<java.awt.font.TextLine: float[] locs>;
+
+        $i2 = i4 + 1;
+
+        f3 = $r7[$i2];
+
+        $d0 = virtualinvoke $r5.<java.awt.geom.Rectangle2D: double getX()>();
+
+        $f4 = (float) $d0;
+
+        $f5 = f2 + $f4;
+
+        f12 = staticinvoke <java.lang.Math: float min(float,float)>(f12, $f5);
+
+        $d1 = virtualinvoke $r5.<java.awt.geom.Rectangle2D: double getMaxX()>();
+
+        $f6 = (float) $d1;
+
+        $f7 = f2 + $f6;
+
+        f13 = staticinvoke <java.lang.Math: float max(float,float)>(f13, $f7);
+
+        $d2 = virtualinvoke $r5.<java.awt.geom.Rectangle2D: double getY()>();
+
+        $f8 = (float) $d2;
+
+        $f9 = f3 + $f8;
+
+        f14 = staticinvoke <java.lang.Math: float min(float,float)>(f14, $f9);
+
+        $d3 = virtualinvoke $r5.<java.awt.geom.Rectangle2D: double getMaxY()>();
+
+        $f10 = (float) $d3;
+
+        $f11 = f3 + $f10;
+
+        f15 = staticinvoke <java.lang.Math: float max(float,float)>(f15, $f11);
+
+        i3 = i3 + 1;
+
+        i4 = i4 + 2;
+
+        goto label1;
+
+     label2:
+        $r2 = new java.awt.geom.Rectangle2D$Float;
+
+        $f1 = f13 - f12;
+
+        $f0 = f15 - f14;
+
+        specialinvoke $r2.<java.awt.geom.Rectangle2D$Float: void <init>(float,float,float,float)>(f12, f14, $f1, $f0);
+
+        return $r2;
+    }
+
+    public java.awt.Shape getOutline(java.awt.geom.AffineTransform)
+    {
+        float[] $r6, $r7;
+        sun.font.TextLineComponent[] $r2, $r4;
+        java.awt.font.TextLine r1;
+        int $i0, $i1, $i2, i3, i4;
+        java.awt.Shape $r8;
+        sun.font.TextLineComponent r5;
+        java.awt.geom.AffineTransform r3;
+        float $f0, $f1;
+        java.awt.geom.GeneralPath $r0;
+
+        r1 := @this: java.awt.font.TextLine;
+
+        r3 := @parameter0: java.awt.geom.AffineTransform;
+
+        $r0 = new java.awt.geom.GeneralPath;
+
+        specialinvoke $r0.<java.awt.geom.GeneralPath: void <init>(int)>(1);
+
+        i3 = 0;
+
+        i4 = 0;
+
+     label1:
+        $r2 = r1.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i0 = lengthof $r2;
+
+        if i3 >= $i0 goto label2;
+
+        $r4 = r1.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i1 = specialinvoke r1.<java.awt.font.TextLine: int getComponentLogicalIndex(int)>(i3);
+
+        r5 = $r4[$i1];
+
+        $r6 = r1.<java.awt.font.TextLine: float[] locs>;
+
+        $f1 = $r6[i4];
+
+        $r7 = r1.<java.awt.font.TextLine: float[] locs>;
+
+        $i2 = i4 + 1;
+
+        $f0 = $r7[$i2];
+
+        $r8 = interfaceinvoke r5.<sun.font.TextLineComponent: java.awt.Shape getOutline(float,float)>($f1, $f0);
+
+        virtualinvoke $r0.<java.awt.geom.GeneralPath: void append(java.awt.Shape,boolean)>($r8, 0);
+
+        i3 = i3 + 1;
+
+        i4 = i4 + 2;
+
+        goto label1;
+
+     label2:
+        if r3 == null goto label3;
+
+        virtualinvoke $r0.<java.awt.geom.GeneralPath: void transform(java.awt.geom.AffineTransform)>(r3);
+
+     label3:
+        return $r0;
+    }
+
+    public int hashCode()
+    {
+        sun.font.TextLineComponent $r3;
+        sun.font.TextLineComponent[] $r1, $r2;
+        java.awt.font.TextLine r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        $r1 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i0 = lengthof $r1;
+
+        $i1 = $i0 << 16;
+
+        $r2 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $r3 = $r2[0];
+
+        $i2 = virtualinvoke $r3.<java.lang.Object: int hashCode()>();
+
+        $i3 = $i2 << 3;
+
+        $i7 = $i1 ^ $i3;
+
+        $i5 = r0.<java.awt.font.TextLine: int fCharsLimit>;
+
+        $i4 = r0.<java.awt.font.TextLine: int fCharsStart>;
+
+        $i6 = $i5 - $i4;
+
+        $i8 = $i7 ^ $i6;
+
+        return $i8;
+    }
+
+    public java.lang.String toString()
+    {
+        sun.font.TextLineComponent $r5;
+        sun.font.TextLineComponent[] $r2, $r4;
+        java.awt.font.TextLine r1;
+        int $i0, i1;
+        java.lang.StringBuilder $r0;
+        java.lang.String $r3;
+
+        r1 := @this: java.awt.font.TextLine;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        i1 = 0;
+
+     label1:
+        $r2 = r1.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i0 = lengthof $r2;
+
+        if i1 >= $i0 goto label2;
+
+        $r4 = r1.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $r5 = $r4[i1];
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r5);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        $r3 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+    }
+
+    public static java.awt.font.TextLine fastCreateTextLine(java.awt.font.FontRenderContext, char[], java.awt.Font, sun.font.CoreMetrics, java.util.Map)
+    {
+        byte[] $r9, r12, r15;
+        sun.font.AttributeValues $r11, r16;
+        sun.font.CoreMetrics r4;
+        java.text.Bidi r14, $r23;
+        byte b10;
+        int[] $r10, r13;
+        java.util.Map r1;
+        sun.font.TextLabelFactory $r24;
+        boolean $z0, z1, z2, $z4, $z5, $z6;
+        java.awt.Font r3;
+        float[] $r6;
+        sun.font.TextLineComponent[] r7, $r19, $r20, r21;
+        sun.font.Decoration $r17;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, i11, $i12, $i13, i14, $i15, $i17, $i19;
+        java.awt.font.TextLine $r25;
+        sun.font.TextLineComponent $r22;
+        java.awt.font.FontRenderContext r2;
+        char[] r0;
+
+        r2 := @parameter0: java.awt.font.FontRenderContext;
+
+        r0 := @parameter1: char[];
+
+        r3 := @parameter2: java.awt.Font;
+
+        r4 := @parameter3: sun.font.CoreMetrics;
+
+        r1 := @parameter4: java.util.Map;
+
+        z1 = 1;
+
+        r12 = null;
+
+        r13 = null;
+
+        r14 = null;
+
+        i0 = lengthof r0;
+
+        z2 = 0;
+
+        r15 = null;
+
+        r16 = null;
+
+        if r1 == null goto label07;
+
+        $r11 = staticinvoke <sun.font.AttributeValues: sun.font.AttributeValues fromMap(java.util.Map)>(r1);
+
+        r16 = $r11;
+
+        $i5 = virtualinvoke $r11.<sun.font.AttributeValues: int getRunDirection()>();
+
+        if $i5 < 0 goto label05;
+
+        $i8 = virtualinvoke $r11.<sun.font.AttributeValues: int getRunDirection()>();
+
+        if $i8 != 0 goto label01;
+
+        $z6 = 1;
+
+        $z5 = 1;
+
+        goto label02;
+
+     label01:
+        $z6 = 0;
+
+        $z5 = 0;
+
+     label02:
+        z1 = $z5;
+
+        if $z6 != 0 goto label03;
+
+        $z4 = 1;
+
+        goto label04;
+
+     label03:
+        $z4 = 0;
+
+     label04:
+        z2 = $z4;
+
+     label05:
+        $i9 = virtualinvoke $r11.<sun.font.AttributeValues: int getBidiEmbedding()>();
+
+        if $i9 == 0 goto label07;
+
+        z2 = 1;
+
+        $i6 = virtualinvoke $r11.<sun.font.AttributeValues: int getBidiEmbedding()>();
+
+        b10 = (byte) $i6;
+
+        r15 = newarray (byte)[i0];
+
+        i11 = 0;
+
+     label06:
+        $i7 = lengthof r15;
+
+        if i11 >= $i7 goto label07;
+
+        r15[i11] = b10;
+
+        i11 = i11 + 1;
+
+        goto label06;
+
+     label07:
+        if z2 != 0 goto label08;
+
+        $i4 = lengthof r0;
+
+        z2 = staticinvoke <java.text.Bidi: boolean requiresBidi(char[],int,int)>(r0, 0, $i4);
+
+     label08:
+        if z2 == 0 goto label11;
+
+        if r16 != null goto label09;
+
+        $i17 = (int) -2;
+
+        $i12 = $i17;
+
+        goto label10;
+
+     label09:
+        $i12 = virtualinvoke r16.<sun.font.AttributeValues: int getRunDirection()>();
+
+     label10:
+        $r23 = new java.text.Bidi;
+
+        $i3 = lengthof r0;
+
+        specialinvoke $r23.<java.text.Bidi: void <init>(char[],int,byte[],int,int,int)>(r0, 0, r15, 0, $i3, $i12);
+
+        r14 = $r23;
+
+        $z0 = virtualinvoke $r23.<java.text.Bidi: boolean isLeftToRight()>();
+
+        if $z0 != 0 goto label11;
+
+        $r9 = staticinvoke <sun.font.BidiUtils: byte[] getLevels(java.text.Bidi)>($r23);
+
+        r12 = $r9;
+
+        $r10 = staticinvoke <sun.font.BidiUtils: int[] createVisualToLogicalMap(byte[])>($r9);
+
+        r13 = staticinvoke <sun.font.BidiUtils: int[] createInverseMap(int[])>($r10);
+
+        z1 = virtualinvoke $r23.<java.text.Bidi: boolean baseIsLeftToRight()>();
+
+     label11:
+        $r17 = staticinvoke <sun.font.Decoration: sun.font.Decoration getDecoration(sun.font.AttributeValues)>(r16);
+
+        $r24 = new sun.font.TextLabelFactory;
+
+        specialinvoke $r24.<sun.font.TextLabelFactory: void <init>(java.awt.font.FontRenderContext,char[],java.text.Bidi,int)>(r2, r0, r14, 0);
+
+        $r19 = newarray (sun.font.TextLineComponent)[1];
+
+        $i13 = lengthof r0;
+
+        $r20 = staticinvoke <java.awt.font.TextLine: sun.font.TextLineComponent[] createComponentsOnRun(int,int,char[],int[],byte[],sun.font.TextLabelFactory,java.awt.Font,sun.font.CoreMetrics,java.awt.font.FontRenderContext,sun.font.Decoration,sun.font.TextLineComponent[],int)>(0, $i13, r0, r13, r12, $r24, r3, r4, r2, $r17, $r19, 0);
+
+        r21 = $r20;
+
+        i14 = lengthof $r20;
+
+     label12:
+        $i15 = i14 - 1;
+
+        $r22 = $r20[$i15];
+
+        if $r22 != null goto label13;
+
+        $i19 = (int) -1;
+
+        i14 = i14 + $i19;
+
+        goto label12;
+
+     label13:
+        $i1 = lengthof $r20;
+
+        if i14 == $i1 goto label14;
+
+        r7 = newarray (sun.font.TextLineComponent)[i14];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r20, 0, r7, 0, i14);
+
+        r21 = r7;
+
+     label14:
+        $r25 = new java.awt.font.TextLine;
+
+        $r6 = r4.<sun.font.CoreMetrics: float[] baselineOffsets>;
+
+        $i2 = lengthof r0;
+
+        specialinvoke $r25.<java.awt.font.TextLine: void <init>(java.awt.font.FontRenderContext,sun.font.TextLineComponent[],float[],char[],int,int,int[],byte[],boolean)>(r2, r21, $r6, r0, 0, $i2, r13, r12, z1);
+
+        return $r25;
+    }
+
+    private static sun.font.TextLineComponent[] expandArray(sun.font.TextLineComponent[])
+    {
+        int $i0, $i1, $i2;
+        sun.font.TextLineComponent[] r0, r1;
+
+        r0 := @parameter0: sun.font.TextLineComponent[];
+
+        $i0 = lengthof r0;
+
+        $i1 = $i0 + 8;
+
+        r1 = newarray (sun.font.TextLineComponent)[$i1];
+
+        $i2 = lengthof r0;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, 0, r1, 0, $i2);
+
+        return r1;
+    }
+
+    public static sun.font.TextLineComponent[] createComponentsOnRun(int, int, char[], int[], byte[], sun.font.TextLabelFactory, java.awt.Font, sun.font.CoreMetrics, java.awt.font.FontRenderContext, sun.font.Decoration, sun.font.TextLineComponent[], int)
+    {
+        byte[] r1;
+        sun.font.TextLineComponent[] r10;
+        sun.font.Decoration r4;
+        sun.font.CoreMetrics r9;
+        int[] r0;
+        int i0, i1, $i2, i3, $i4, $i5, $i6, $i7, i8, i9, i10;
+        sun.font.TextLabelFactory r2;
+        java.awt.font.LineMetrics $r8;
+        java.awt.Font r3;
+        java.awt.font.FontRenderContext r7;
+        char[] r6;
+        sun.font.ExtendedTextLabel $r5;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        r6 := @parameter2: char[];
+
+        r0 := @parameter3: int[];
+
+        r1 := @parameter4: byte[];
+
+        r2 := @parameter5: sun.font.TextLabelFactory;
+
+        r3 := @parameter6: java.awt.Font;
+
+        r9 := @parameter7: sun.font.CoreMetrics;
+
+        r7 := @parameter8: java.awt.font.FontRenderContext;
+
+        r4 := @parameter9: sun.font.Decoration;
+
+        r10 := @parameter10: sun.font.TextLineComponent[];
+
+        i8 := @parameter11: int;
+
+        i9 = i0;
+
+     label1:
+        $i2 = staticinvoke <java.awt.font.TextLine: int firstVisualChunk(int[],byte[],int,int)>(r0, r1, i9, i1);
+
+     label2:
+        i3 = i9;
+
+        if r9 != null goto label3;
+
+        $r8 = virtualinvoke r3.<java.awt.Font: java.awt.font.LineMetrics getLineMetrics(char[],int,int,java.awt.font.FontRenderContext)>(r6, i9, $i2, r7);
+
+        r9 = staticinvoke <sun.font.CoreMetrics: sun.font.CoreMetrics get(java.awt.font.LineMetrics)>($r8);
+
+        i10 = virtualinvoke $r8.<java.awt.font.LineMetrics: int getNumChars()>();
+
+        goto label4;
+
+     label3:
+        i10 = $i2 - i9;
+
+     label4:
+        $i4 = i3 + i10;
+
+        $r5 = virtualinvoke r2.<sun.font.TextLabelFactory: sun.font.ExtendedTextLabel createExtended(java.awt.Font,sun.font.CoreMetrics,sun.font.Decoration,int,int)>(r3, r9, r4, i3, $i4);
+
+        i8 = i8 + 1;
+
+        $i5 = lengthof r10;
+
+        if i8 < $i5 goto label5;
+
+        r10 = staticinvoke <java.awt.font.TextLine: sun.font.TextLineComponent[] expandArray(sun.font.TextLineComponent[])>(r10);
+
+     label5:
+        $i6 = i8 - 1;
+
+        r10[$i6] = $r5;
+
+        $i7 = i9 + i10;
+
+        i9 = $i7;
+
+        if $i7 < $i2 goto label2;
+
+        if $i7 < i1 goto label1;
+
+        return r10;
+    }
+
+    public static sun.font.TextLineComponent[] getComponents(java.awt.font.StyledParagraph, char[], int, int, int[], byte[], sun.font.TextLabelFactory)
+    {
+        byte[] r7;
+        java.awt.font.GraphicAttribute r10;
+        sun.font.TextLineComponent[] $r8, r12, r14;
+        sun.font.Decoration $r3;
+        int[] r6;
+        int i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, i10, $i12;
+        sun.font.TextLabelFactory r0;
+        boolean $z0;
+        sun.font.TextLineComponent $r9;
+        java.awt.Font r13;
+        sun.font.GraphicComponent $r15;
+        java.awt.font.FontRenderContext $r1;
+        java.awt.font.StyledParagraph r2;
+        char[] r5;
+        java.lang.Object $r4;
+
+        r2 := @parameter0: java.awt.font.StyledParagraph;
+
+        r5 := @parameter1: char[];
+
+        i0 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        r6 := @parameter4: int[];
+
+        r7 := @parameter5: byte[];
+
+        r0 := @parameter6: sun.font.TextLabelFactory;
+
+        $r1 = virtualinvoke r0.<sun.font.TextLabelFactory: java.awt.font.FontRenderContext getFontRenderContext()>();
+
+        i9 = 0;
+
+        r12 = newarray (sun.font.TextLineComponent)[1];
+
+        i10 = i0;
+
+     label1:
+        $i1 = virtualinvoke r2.<java.awt.font.StyledParagraph: int getRunLimit(int)>(i10);
+
+        $i3 = staticinvoke <java.lang.Math: int min(int,int)>($i1, i2);
+
+        $r3 = virtualinvoke r2.<java.awt.font.StyledParagraph: sun.font.Decoration getDecorationAt(int)>(i10);
+
+        $r4 = virtualinvoke r2.<java.awt.font.StyledParagraph: java.lang.Object getFontOrGraphicAt(int)>(i10);
+
+        $z0 = $r4 instanceof java.awt.font.GraphicAttribute;
+
+        if $z0 == 0 goto label4;
+
+        r10 = (java.awt.font.GraphicAttribute) $r4;
+
+     label2:
+        $i6 = staticinvoke <java.awt.font.TextLine: int firstVisualChunk(int[],byte[],int,int)>(r6, r7, i10, $i3);
+
+        $r15 = new sun.font.GraphicComponent;
+
+        specialinvoke $r15.<sun.font.GraphicComponent: void <init>(java.awt.font.GraphicAttribute,sun.font.Decoration,int[],byte[],int,int,java.awt.geom.AffineTransform)>(r10, $r3, r6, r7, i10, $i6, null);
+
+        i10 = $i6;
+
+        i9 = i9 + 1;
+
+        $i7 = lengthof r12;
+
+        if i9 < $i7 goto label3;
+
+        r12 = staticinvoke <java.awt.font.TextLine: sun.font.TextLineComponent[] expandArray(sun.font.TextLineComponent[])>(r12);
+
+     label3:
+        $i8 = i9 - 1;
+
+        r12[$i8] = $r15;
+
+        if $i6 < $i3 goto label2;
+
+        goto label6;
+
+     label4:
+        r13 = (java.awt.Font) $r4;
+
+        $r8 = staticinvoke <java.awt.font.TextLine: sun.font.TextLineComponent[] createComponentsOnRun(int,int,char[],int[],byte[],sun.font.TextLabelFactory,java.awt.Font,sun.font.CoreMetrics,java.awt.font.FontRenderContext,sun.font.Decoration,sun.font.TextLineComponent[],int)>(i10, $i3, r5, r6, r7, r0, r13, null, $r1, $r3, r12, i9);
+
+        r12 = $r8;
+
+        i10 = $i3;
+
+        i9 = lengthof $r8;
+
+     label5:
+        $i4 = i9 - 1;
+
+        $r9 = $r8[$i4];
+
+        if $r9 != null goto label6;
+
+        $i12 = (int) -1;
+
+        i9 = i9 + $i12;
+
+        goto label5;
+
+     label6:
+        if i10 < i2 goto label1;
+
+        $i5 = lengthof r12;
+
+        if $i5 != i9 goto label7;
+
+        r14 = r12;
+
+        goto label8;
+
+     label7:
+        r14 = newarray (sun.font.TextLineComponent)[i9];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r12, 0, r14, 0, i9);
+
+     label8:
+        return r14;
+    }
+
+    public static java.awt.font.TextLine createLineFromText(char[], java.awt.font.StyledParagraph, sun.font.TextLabelFactory, boolean, float[])
+    {
+        byte[] $r8, r11;
+        float[] r7;
+        sun.font.TextLineComponent[] $r4;
+        java.text.Bidi $r2;
+        int[] $r9, r10;
+        int $i0, $i1, $i2;
+        java.awt.font.TextLine $r5;
+        sun.font.TextLabelFactory r0;
+        boolean z0;
+        java.awt.font.FontRenderContext $r6;
+        java.awt.font.StyledParagraph r3;
+        char[] r1;
+
+        r1 := @parameter0: char[];
+
+        r3 := @parameter1: java.awt.font.StyledParagraph;
+
+        r0 := @parameter2: sun.font.TextLabelFactory;
+
+        z0 := @parameter3: boolean;
+
+        r7 := @parameter4: float[];
+
+        $i0 = lengthof r1;
+
+        virtualinvoke r0.<sun.font.TextLabelFactory: void setLineContext(int,int)>(0, $i0);
+
+        $r2 = virtualinvoke r0.<sun.font.TextLabelFactory: java.text.Bidi getLineBidi()>();
+
+        r10 = null;
+
+        r11 = null;
+
+        if $r2 == null goto label1;
+
+        $r8 = staticinvoke <sun.font.BidiUtils: byte[] getLevels(java.text.Bidi)>($r2);
+
+        r11 = $r8;
+
+        $r9 = staticinvoke <sun.font.BidiUtils: int[] createVisualToLogicalMap(byte[])>($r8);
+
+        r10 = staticinvoke <sun.font.BidiUtils: int[] createInverseMap(int[])>($r9);
+
+     label1:
+        $i1 = lengthof r1;
+
+        $r4 = staticinvoke <java.awt.font.TextLine: sun.font.TextLineComponent[] getComponents(java.awt.font.StyledParagraph,char[],int,int,int[],byte[],sun.font.TextLabelFactory)>(r3, r1, 0, $i1, r10, r11, r0);
+
+        $r5 = new java.awt.font.TextLine;
+
+        $r6 = virtualinvoke r0.<sun.font.TextLabelFactory: java.awt.font.FontRenderContext getFontRenderContext()>();
+
+        $i2 = lengthof r1;
+
+        specialinvoke $r5.<java.awt.font.TextLine: void <init>(java.awt.font.FontRenderContext,sun.font.TextLineComponent[],float[],char[],int,int,int[],byte[],boolean)>($r6, $r4, r7, r1, 0, $i2, r10, r11, z0);
+
+        return $r5;
+    }
+
+    private static int[] computeComponentOrder(sun.font.TextLineComponent[], int[])
+    {
+        sun.font.TextLineComponent $r3;
+        sun.font.TextLineComponent[] r1;
+        int[] r0, $r2, r4, r5;
+        int $i0, $i1, $i2, $i3, $i4, i5, i6;
+
+        r1 := @parameter0: sun.font.TextLineComponent[];
+
+        r0 := @parameter1: int[];
+
+        r4 = null;
+
+        if r0 == null goto label3;
+
+        $i0 = lengthof r1;
+
+        if $i0 <= 1 goto label3;
+
+        $i1 = lengthof r1;
+
+        r5 = newarray (int)[$i1];
+
+        i5 = 0;
+
+        i6 = 0;
+
+     label1:
+        $i2 = lengthof r1;
+
+        if i6 >= $i2 goto label2;
+
+        $i3 = r0[i5];
+
+        r5[i6] = $i3;
+
+        $r3 = r1[i6];
+
+        $i4 = interfaceinvoke $r3.<sun.font.TextLineComponent: int getNumCharacters()>();
+
+        i5 = i5 + $i4;
+
+        i6 = i6 + 1;
+
+        goto label1;
+
+     label2:
+        $r2 = staticinvoke <sun.font.BidiUtils: int[] createContiguousOrder(int[])>(r5);
+
+        r4 = staticinvoke <sun.font.BidiUtils: int[] createInverseMap(int[])>($r2);
+
+     label3:
+        return r4;
+    }
+
+    public static java.awt.font.TextLine standardCreateTextLine(java.awt.font.FontRenderContext, java.text.AttributedCharacterIterator, char[], float[])
+    {
+        float[] r6;
+        java.awt.font.FontRenderContext r5;
+        java.text.AttributedCharacterIterator r1;
+        java.text.Bidi $r3, r8;
+        java.awt.font.StyledParagraph $r0;
+        java.awt.font.TextLine $r7;
+        char[] r2;
+        sun.font.TextLabelFactory $r4;
+        boolean $z0, z1;
+
+        r5 := @parameter0: java.awt.font.FontRenderContext;
+
+        r1 := @parameter1: java.text.AttributedCharacterIterator;
+
+        r2 := @parameter2: char[];
+
+        r6 := @parameter3: float[];
+
+        $r0 = new java.awt.font.StyledParagraph;
+
+        specialinvoke $r0.<java.awt.font.StyledParagraph: void <init>(java.text.AttributedCharacterIterator,char[])>(r1, r2);
+
+        $r3 = new java.text.Bidi;
+
+        specialinvoke $r3.<java.text.Bidi: void <init>(java.text.AttributedCharacterIterator)>(r1);
+
+        r8 = $r3;
+
+        $z0 = virtualinvoke $r3.<java.text.Bidi: boolean isLeftToRight()>();
+
+        if $z0 == 0 goto label1;
+
+        r8 = null;
+
+     label1:
+        $r4 = new sun.font.TextLabelFactory;
+
+        specialinvoke $r4.<sun.font.TextLabelFactory: void <init>(java.awt.font.FontRenderContext,char[],java.text.Bidi,int)>(r5, r2, r8, 0);
+
+        z1 = 1;
+
+        if r8 == null goto label2;
+
+        z1 = virtualinvoke r8.<java.text.Bidi: boolean baseIsLeftToRight()>();
+
+     label2:
+        $r7 = staticinvoke <java.awt.font.TextLine: java.awt.font.TextLine createLineFromText(char[],java.awt.font.StyledParagraph,sun.font.TextLabelFactory,boolean,float[])>(r2, $r0, $r4, z1, r6);
+
+        return $r7;
+    }
+
+    static boolean advanceToFirstFont(java.text.AttributedCharacterIterator)
+    {
+        java.text.AttributedCharacterIterator r0;
+        java.awt.font.TextAttribute $r1;
+        int $i0, $i2, $i4;
+        java.lang.Object $r2;
+        char c1;
+
+        r0 := @parameter0: java.text.AttributedCharacterIterator;
+
+        c1 = interfaceinvoke r0.<java.text.AttributedCharacterIterator: char first()>();
+
+     label1:
+        $i2 = (int) c1;
+
+        $i4 = (int) 65535;
+
+        if $i2 == $i4 goto label3;
+
+        $r1 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute CHAR_REPLACEMENT>;
+
+        $r2 = interfaceinvoke r0.<java.text.AttributedCharacterIterator: java.lang.Object getAttribute(java.text.AttributedCharacterIterator$Attribute)>($r1);
+
+        if $r2 != null goto label2;
+
+        return 1;
+
+     label2:
+        $i0 = interfaceinvoke r0.<java.text.AttributedCharacterIterator: int getRunLimit()>();
+
+        c1 = interfaceinvoke r0.<java.text.AttributedCharacterIterator: char setIndex(int)>($i0);
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    static float[] getNormalizedOffsets(float[], byte)
+    {
+        float[] r0, r1;
+        byte b0, $b1;
+        int $i2, $i3, i4, $i5, $i6;
+        float $f0, f1, $f2, $f3;
+
+        r1 := @parameter0: float[];
+
+        b0 := @parameter1: byte;
+
+        $i5 = (int) b0;
+
+        $f0 = r1[$i5];
+
+        $b1 = $f0 cmpl 0.0F;
+
+        if $b1 == 0 goto label3;
+
+        $i6 = (int) b0;
+
+        f1 = r1[$i6];
+
+        $i2 = lengthof r1;
+
+        r0 = newarray (float)[$i2];
+
+        i4 = 0;
+
+     label1:
+        $i3 = lengthof r0;
+
+        if i4 >= $i3 goto label2;
+
+        $f2 = r1[i4];
+
+        $f3 = $f2 - f1;
+
+        r0[i4] = $f3;
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label2:
+        r1 = r0;
+
+     label3:
+        return r1;
+    }
+
+    static java.awt.Font getFontAtCurrentPos(java.text.AttributedCharacterIterator)
+    {
+        java.awt.font.TextAttribute $r1, $r3;
+        java.awt.Font $r8, $r10, $r11;
+        sun.text.CodePointIterator $r5;
+        java.text.AttributedCharacterIterator r0;
+        java.util.Map $r7, $r9;
+        int $i0, $i1, $i3;
+        java.lang.Object $r2, $r4;
+        sun.font.FontResolver $r6;
+
+        r0 := @parameter0: java.text.AttributedCharacterIterator;
+
+        $r1 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute FONT>;
+
+        $r2 = interfaceinvoke r0.<java.text.AttributedCharacterIterator: java.lang.Object getAttribute(java.text.AttributedCharacterIterator$Attribute)>($r1);
+
+        if $r2 == null goto label1;
+
+        $r11 = (java.awt.Font) $r2;
+
+        return $r11;
+
+     label1:
+        $r3 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute FAMILY>;
+
+        $r4 = interfaceinvoke r0.<java.text.AttributedCharacterIterator: java.lang.Object getAttribute(java.text.AttributedCharacterIterator$Attribute)>($r3);
+
+        if $r4 == null goto label2;
+
+        $r9 = interfaceinvoke r0.<java.text.AttributedCharacterIterator: java.util.Map getAttributes()>();
+
+        $r10 = staticinvoke <java.awt.Font: java.awt.Font getFont(java.util.Map)>($r9);
+
+        return $r10;
+
+     label2:
+        $r5 = staticinvoke <sun.text.CodePointIterator: sun.text.CodePointIterator create(java.text.CharacterIterator)>(r0);
+
+        $i0 = virtualinvoke $r5.<sun.text.CodePointIterator: int next()>();
+
+        $i3 = (int) -1;
+
+        if $i0 == $i3 goto label3;
+
+        $r6 = staticinvoke <sun.font.FontResolver: sun.font.FontResolver getInstance()>();
+
+        $i1 = virtualinvoke $r6.<sun.font.FontResolver: int getFontIndex(int)>($i0);
+
+        $r7 = interfaceinvoke r0.<java.text.AttributedCharacterIterator: java.util.Map getAttributes()>();
+
+        $r8 = virtualinvoke $r6.<sun.font.FontResolver: java.awt.Font getFont(int,java.util.Map)>($i1, $r7);
+
+        return $r8;
+
+     label3:
+        return null;
+    }
+
+    private static int firstVisualChunk(int[], byte[], int, int)
+    {
+        byte[] r1;
+        byte b1, $b2;
+        int[] r0;
+        int i0, i3, $i4, $i5;
+
+        r0 := @parameter0: int[];
+
+        r1 := @parameter1: byte[];
+
+        i3 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        if r0 == null goto label3;
+
+        if r1 == null goto label3;
+
+        b1 = r1[i3];
+
+     label1:
+        i3 = i3 + 1;
+
+        if i3 >= i0 goto label2;
+
+        $b2 = r1[i3];
+
+        $i4 = (int) $b2;
+
+        $i5 = (int) b1;
+
+        if $i4 != $i5 goto label2;
+
+        goto label1;
+
+     label2:
+        return i3;
+
+     label3:
+        return i0;
+    }
+
+    public java.awt.font.TextLine getJustifiedLine(float, float, int, int)
+    {
+        byte[] $r9;
+        java.awt.font.GlyphJustificationInfo $r17, $r18;
+        java.awt.font.GlyphJustificationInfo[] r20;
+        float[] $r6, $r12;
+        sun.font.TextLineComponent r14, $r15, $r19, r21;
+        boolean[] $r16;
+        java.awt.font.FontRenderContext $r13;
+        char[] $r11;
+        java.awt.font.TextJustifier $r22;
+        int[] $r7, $r10;
+        boolean $z0, $z1, z2, z3, $z5, $z6;
+        float $f0, f1, f2, $f3, $f4;
+        sun.font.TextLineComponent[] $r1, r2, $r3, $r4;
+        java.awt.font.TextLine r0, $r23;
+        int $i0, $i1, $i2, i3, i4, $i5, $i6, $i7, $i8, $i9, i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, i24, i25, $i26, i27, i28, i29, i30, i31, $i32, $i34;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        f1 := @parameter0: float;
+
+        f2 := @parameter1: float;
+
+        i3 := @parameter2: int;
+
+        i4 := @parameter3: int;
+
+        $r1 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i0 = lengthof $r1;
+
+        r2 = newarray (sun.font.TextLineComponent)[$i0];
+
+        $r4 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $r3 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        $i1 = lengthof $r3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, r2, 0, $i1);
+
+        z2 = 0;
+
+     label01:
+        $i2 = virtualinvoke r0.<java.awt.font.TextLine: int characterCount()>();
+
+        staticinvoke <java.awt.font.TextLine: float getAdvanceBetween(sun.font.TextLineComponent[],int,int)>(r2, 0, $i2);
+
+        $f0 = staticinvoke <java.awt.font.TextLine: float getAdvanceBetween(sun.font.TextLineComponent[],int,int)>(r2, i3, i4);
+
+        $f3 = f1 - $f0;
+
+        $f4 = $f3 * f2;
+
+        $i5 = lengthof r2;
+
+        $r7 = newarray (int)[$i5];
+
+        i24 = 0;
+
+        i25 = 0;
+
+     label02:
+        $i26 = lengthof r2;
+
+        if i25 >= $i26 goto label03;
+
+        $i22 = specialinvoke r0.<java.awt.font.TextLine: int getComponentLogicalIndex(int)>(i25);
+
+        $r7[$i22] = i24;
+
+        $r19 = r2[$i22];
+
+        $i23 = interfaceinvoke $r19.<sun.font.TextLineComponent: int getNumJustificationInfos()>();
+
+        i24 = i24 + $i23;
+
+        i25 = i25 + 1;
+
+        goto label02;
+
+     label03:
+        r20 = newarray (java.awt.font.GlyphJustificationInfo)[i24];
+
+        i27 = 0;
+
+     label04:
+        $i6 = lengthof r2;
+
+        if i27 >= $i6 goto label06;
+
+        r21 = r2[i27];
+
+        $i16 = interfaceinvoke r21.<sun.font.TextLineComponent: int getNumCharacters()>();
+
+        i28 = 0 + $i16;
+
+        if i28 <= i3 goto label05;
+
+        $i17 = i3 - 0;
+
+        $i18 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i17);
+
+        $i19 = i4 - 0;
+
+        $i20 = staticinvoke <java.lang.Math: int min(int,int)>($i16, $i19);
+
+        $i21 = $r7[i27];
+
+        interfaceinvoke r21.<sun.font.TextLineComponent: void getJustificationInfos(java.awt.font.GlyphJustificationInfo[],int,int,int)>(r20, $i21, $i18, $i20);
+
+        if i28 < i4 goto label05;
+
+        goto label06;
+
+     label05:
+        i27 = i27 + 1;
+
+        goto label04;
+
+     label06:
+        i29 = 0;
+
+        i30 = i24;
+
+     label07:
+        if i29 >= i30 goto label08;
+
+        $r18 = r20[i29];
+
+        if $r18 != null goto label08;
+
+        i29 = i29 + 1;
+
+        goto label07;
+
+     label08:
+        if i30 <= i29 goto label09;
+
+        $i15 = i30 - 1;
+
+        $r17 = r20[$i15];
+
+        if $r17 != null goto label09;
+
+        $i34 = (int) -1;
+
+        i30 = i30 + $i34;
+
+        goto label08;
+
+     label09:
+        $r22 = new java.awt.font.TextJustifier;
+
+        specialinvoke $r22.<java.awt.font.TextJustifier: void <init>(java.awt.font.GlyphJustificationInfo[],int,int)>(r20, i29, i30);
+
+        $r6 = virtualinvoke $r22.<java.awt.font.TextJustifier: float[] justify(float)>($f4);
+
+        if z2 != 0 goto label10;
+
+        goto label10;
+
+     label10:
+        z3 = 0;
+
+        $r16 = newarray (boolean)[1];
+
+        i31 = 0;
+
+     label11:
+        $i32 = lengthof r2;
+
+        if i31 >= $i32 goto label13;
+
+        r14 = r2[i31];
+
+        $i9 = interfaceinvoke r14.<sun.font.TextLineComponent: int getNumCharacters()>();
+
+        i10 = 0 + $i9;
+
+        if i10 <= i3 goto label12;
+
+        $i11 = i3 - 0;
+
+        staticinvoke <java.lang.Math: int max(int,int)>(0, $i11);
+
+        $i12 = i4 - 0;
+
+        staticinvoke <java.lang.Math: int min(int,int)>($i9, $i12);
+
+        $i13 = $r7[i31];
+
+        $i14 = $i13 * 2;
+
+        $r15 = interfaceinvoke r14.<sun.font.TextLineComponent: sun.font.TextLineComponent applyJustificationDeltas(float[],int,boolean[])>($r6, $i14, $r16);
+
+        r2[i31] = $r15;
+
+        $z1 = $r16[0];
+
+        z3 = z3 | $z1;
+
+        if i10 < i4 goto label12;
+
+        goto label13;
+
+     label12:
+        i31 = i31 + 1;
+
+        goto label11;
+
+     label13:
+        if z3 == 0 goto label14;
+
+        if z2 != 0 goto label14;
+
+        $z6 = 1;
+
+        $z5 = 1;
+
+        goto label15;
+
+     label14:
+        $z6 = 0;
+
+        $z5 = 0;
+
+     label15:
+        z2 = $z5;
+
+        if $z6 != 0 goto label01;
+
+        $r23 = new java.awt.font.TextLine;
+
+        $r13 = r0.<java.awt.font.TextLine: java.awt.font.FontRenderContext frc>;
+
+        $r12 = r0.<java.awt.font.TextLine: float[] fBaselineOffsets>;
+
+        $r11 = r0.<java.awt.font.TextLine: char[] fChars>;
+
+        $i8 = r0.<java.awt.font.TextLine: int fCharsStart>;
+
+        $i7 = r0.<java.awt.font.TextLine: int fCharsLimit>;
+
+        $r10 = r0.<java.awt.font.TextLine: int[] fCharLogicalOrder>;
+
+        $r9 = r0.<java.awt.font.TextLine: byte[] fCharLevels>;
+
+        $z0 = r0.<java.awt.font.TextLine: boolean fIsDirectionLTR>;
+
+        specialinvoke $r23.<java.awt.font.TextLine: void <init>(java.awt.font.FontRenderContext,sun.font.TextLineComponent[],float[],char[],int,int,int[],byte[],boolean)>($r13, r2, $r12, $r11, $i8, $i7, $r10, $r9, $z0);
+
+        return $r23;
+    }
+
+    public static float getAdvanceBetween(sun.font.TextLineComponent[], int, int)
+    {
+        sun.font.TextLineComponent r1;
+        sun.font.TextLineComponent[] r0;
+        int $i0, $i1, i2, i3, $i4, $i5, i6, $i7, $i8, i9, i10;
+        float $f0, f1;
+
+        r0 := @parameter0: sun.font.TextLineComponent[];
+
+        i3 := @parameter1: int;
+
+        i6 := @parameter2: int;
+
+        f1 = 0.0F;
+
+        i9 = 0;
+
+        i10 = 0;
+
+     label1:
+        $i0 = lengthof r0;
+
+        if i10 >= $i0 goto label3;
+
+        r1 = r0[i10];
+
+        $i1 = interfaceinvoke r1.<sun.font.TextLineComponent: int getNumCharacters()>();
+
+        i2 = i9 + $i1;
+
+        if i2 <= i3 goto label2;
+
+        $i4 = i3 - i9;
+
+        $i5 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i4);
+
+        $i7 = i6 - i9;
+
+        $i8 = staticinvoke <java.lang.Math: int min(int,int)>($i1, $i7);
+
+        $f0 = interfaceinvoke r1.<sun.font.TextLineComponent: float getAdvanceBetween(int,int)>($i5, $i8);
+
+        f1 = f1 + $f0;
+
+        if i2 < i6 goto label2;
+
+        goto label3;
+
+     label2:
+        i9 = i2;
+
+        i10 = i10 + 1;
+
+        goto label1;
+
+     label3:
+        return f1;
+    }
+
+    sun.font.LayoutPathImpl getLayoutPath()
+    {
+        java.awt.font.TextLine r0;
+        sun.font.LayoutPathImpl $r1;
+
+        r0 := @this: java.awt.font.TextLine;
+
+        $r1 = r0.<java.awt.font.TextLine: sun.font.LayoutPathImpl lp>;
+
+        return $r1;
+    }
+
+    static sun.font.TextLineComponent[] access$100(java.awt.font.TextLine)
+    {
+        java.awt.font.TextLine r0;
+        sun.font.TextLineComponent[] $r1;
+
+        r0 := @parameter0: java.awt.font.TextLine;
+
+        $r1 = r0.<java.awt.font.TextLine: sun.font.TextLineComponent[] fComponents>;
+
+        return $r1;
+    }
+
+    static int access$200(java.awt.font.TextLine, int)
+    {
+        java.awt.font.TextLine r0;
+        int i0, $i1;
+
+        r0 := @parameter0: java.awt.font.TextLine;
+
+        i0 := @parameter1: int;
+
+        $i1 = specialinvoke r0.<java.awt.font.TextLine: int getComponentVisualIndex(int)>(i0);
+
+        return $i1;
+    }
+
+    static float[] access$300(java.awt.font.TextLine)
+    {
+        java.awt.font.TextLine r0;
+        float[] $r1;
+
+        r0 := @parameter0: java.awt.font.TextLine;
+
+        $r1 = r0.<java.awt.font.TextLine: float[] locs>;
+
+        return $r1;
+    }
+
+    static float access$400(java.awt.font.TextLine, int)
+    {
+        java.awt.font.TextLine r0;
+        int i0;
+        float $f0;
+
+        r0 := @parameter0: java.awt.font.TextLine;
+
+        i0 := @parameter1: int;
+
+        $f0 = specialinvoke r0.<java.awt.font.TextLine: float getComponentShift(int)>(i0);
+
+        return $f0;
+    }
+
+    static void <clinit>()
+    {
+        java.awt.font.TextLine$2 $r1;
+        java.awt.font.TextLine$3 $r2;
+        java.awt.font.TextLine$1 $r0;
+        java.awt.font.TextLine$4 $r3;
+
+        $r0 = new java.awt.font.TextLine$1;
+
+        specialinvoke $r0.<java.awt.font.TextLine$1: void <init>()>();
+
+        <java.awt.font.TextLine: java.awt.font.TextLine$Function fgPosAdvF> = $r0;
+
+        $r1 = new java.awt.font.TextLine$2;
+
+        specialinvoke $r1.<java.awt.font.TextLine$2: void <init>()>();
+
+        <java.awt.font.TextLine: java.awt.font.TextLine$Function fgAdvanceF> = $r1;
+
+        $r2 = new java.awt.font.TextLine$3;
+
+        specialinvoke $r2.<java.awt.font.TextLine$3: void <init>()>();
+
+        <java.awt.font.TextLine: java.awt.font.TextLine$Function fgXPositionF> = $r2;
+
+        $r3 = new java.awt.font.TextLine$4;
+
+        specialinvoke $r3.<java.awt.font.TextLine$4: void <init>()>();
+
+        <java.awt.font.TextLine: java.awt.font.TextLine$Function fgYPositionF> = $r3;
+
+        return;
+    }
+}

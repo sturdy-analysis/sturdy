@@ -1,0 +1,150 @@
+public abstract class sun.tracing.ProbeSkeleton extends java.lang.Object implements com.sun.tracing.Probe
+{
+    protected java.lang.Class[] parameters;
+
+    protected void <init>(java.lang.Class[])
+    {
+        java.lang.Class[] r1;
+        sun.tracing.ProbeSkeleton r0;
+
+        r0 := @this: sun.tracing.ProbeSkeleton;
+
+        r1 := @parameter0: java.lang.Class[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.tracing.ProbeSkeleton: java.lang.Class[] parameters> = r1;
+
+        return;
+    }
+
+    public abstract boolean isEnabled();
+
+    public abstract void uncheckedTrigger(java.lang.Object[]);
+
+    private static boolean isAssignable(java.lang.Object, java.lang.Class)
+    {
+        java.lang.reflect.Field $r3;
+        java.lang.Exception $r6;
+        java.lang.Object r0, $r4;
+        java.lang.Class r1, $r2, $r5;
+        boolean $z0, $z1, $z2;
+
+        r0 := @parameter0: java.lang.Object;
+
+        r1 := @parameter1: java.lang.Class;
+
+        if r0 == null goto label5;
+
+        $z0 = virtualinvoke r1.<java.lang.Class: boolean isInstance(java.lang.Object)>(r0);
+
+        if $z0 != 0 goto label5;
+
+        $z1 = virtualinvoke r1.<java.lang.Class: boolean isPrimitive()>();
+
+        if $z1 == 0 goto label4;
+
+     label1:
+        $r2 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.reflect.Field getField(java.lang.String)>("TYPE");
+
+        $r4 = virtualinvoke $r3.<java.lang.reflect.Field: java.lang.Object get(java.lang.Object)>(null);
+
+        $r5 = (java.lang.Class) $r4;
+
+        $z2 = virtualinvoke r1.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>($r5);
+
+     label2:
+        return $z2;
+
+     label3:
+        $r6 := @caughtexception;
+
+     label4:
+        return 0;
+
+     label5:
+        return 1;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public transient void trigger(java.lang.Object[])
+    {
+        java.lang.Object[] r0;
+        sun.tracing.ProbeSkeleton r1;
+        int $i0, $i1, $i2, i3;
+        java.lang.String $r11;
+        boolean $z0;
+        java.lang.Class[] $r2, $r3, $r4;
+        java.lang.IllegalArgumentException $r7, $r12;
+        java.lang.Class $r5;
+        java.lang.Object $r6;
+        java.lang.StringBuilder $r8, $r9, $r10;
+
+        r1 := @this: sun.tracing.ProbeSkeleton;
+
+        r0 := @parameter0: java.lang.Object[];
+
+        $i1 = lengthof r0;
+
+        $r2 = r1.<sun.tracing.ProbeSkeleton: java.lang.Class[] parameters>;
+
+        $i0 = lengthof $r2;
+
+        if $i1 == $i0 goto label1;
+
+        $r12 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r12.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Wrong number of arguments");
+
+        throw $r12;
+
+     label1:
+        i3 = 0;
+
+     label2:
+        $r3 = r1.<sun.tracing.ProbeSkeleton: java.lang.Class[] parameters>;
+
+        $i2 = lengthof $r3;
+
+        if i3 >= $i2 goto label4;
+
+        $r6 = r0[i3];
+
+        $r4 = r1.<sun.tracing.ProbeSkeleton: java.lang.Class[] parameters>;
+
+        $r5 = $r4[i3];
+
+        $z0 = staticinvoke <sun.tracing.ProbeSkeleton: boolean isAssignable(java.lang.Object,java.lang.Class)>($r6, $r5);
+
+        if $z0 != 0 goto label3;
+
+        $r7 = new java.lang.IllegalArgumentException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Wrong type of argument at position ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i3);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r11);
+
+        throw $r7;
+
+     label3:
+        i3 = i3 + 1;
+
+        goto label2;
+
+     label4:
+        virtualinvoke r1.<sun.tracing.ProbeSkeleton: void uncheckedTrigger(java.lang.Object[])>(r0);
+
+        return;
+    }
+}

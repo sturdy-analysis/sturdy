@@ -1,0 +1,609 @@
+public class sun.misc.UCDecoder extends sun.misc.CharacterDecoder
+{
+    private static final byte[] map_array;
+    private int sequence;
+    private byte[] tmp;
+    private sun.misc.CRC16 crc;
+    private java.io.ByteArrayOutputStream lineAndSeq;
+
+    public void <init>()
+    {
+        byte[] $r1;
+        sun.misc.UCDecoder r0;
+        java.io.ByteArrayOutputStream $r3;
+        sun.misc.CRC16 $r2;
+
+        r0 := @this: sun.misc.UCDecoder;
+
+        specialinvoke r0.<sun.misc.CharacterDecoder: void <init>()>();
+
+        $r1 = newarray (byte)[2];
+
+        r0.<sun.misc.UCDecoder: byte[] tmp> = $r1;
+
+        $r2 = new sun.misc.CRC16;
+
+        specialinvoke $r2.<sun.misc.CRC16: void <init>()>();
+
+        r0.<sun.misc.UCDecoder: sun.misc.CRC16 crc> = $r2;
+
+        $r3 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r3.<java.io.ByteArrayOutputStream: void <init>(int)>(2);
+
+        r0.<sun.misc.UCDecoder: java.io.ByteArrayOutputStream lineAndSeq> = $r3;
+
+        return;
+    }
+
+    protected int bytesPerAtom()
+    {
+        sun.misc.UCDecoder r0;
+
+        r0 := @this: sun.misc.UCDecoder;
+
+        return 2;
+    }
+
+    protected int bytesPerLine()
+    {
+        sun.misc.UCDecoder r0;
+
+        r0 := @this: sun.misc.UCDecoder;
+
+        return 48;
+    }
+
+    protected void decodeAtom(java.io.PushbackInputStream, java.io.OutputStream, int) throws java.io.IOException
+    {
+        byte[] r0, $r8, $r9, $r11;
+        java.io.PushbackInputStream r1;
+        byte $b1, $b2, $b5, $b6, $b9, $b11, $b18, $b19, $b20, $b21, $b22, $b23, b24, b25, b26, $b28, $b29;
+        sun.misc.CEStreamExhausted $r12;
+        sun.misc.UCDecoder r3;
+        int $i0, $i3, $i4, $i7, $i8, i10, i12, $i13, $i14, i15, $i16, $i17, i27, i30, i31, i32, $i33, $i35, $i36, $i38, $i39, $i41, $i42, $i43, $i44, $i45, $i46, $i47, $i48, $i49, $i50, $i51, $i52, $i53, $i54, $i55, $i56, $i57;
+        java.io.OutputStream r2;
+        sun.misc.CEFormatException $r13, $r14;
+        sun.misc.CRC16 $r4, $r5;
+
+        r3 := @this: sun.misc.UCDecoder;
+
+        r1 := @parameter0: java.io.PushbackInputStream;
+
+        r2 := @parameter1: java.io.OutputStream;
+
+        i15 := @parameter2: int;
+
+        b24 = -1;
+
+        b25 = -1;
+
+        b26 = -1;
+
+        r0 = newarray (byte)[3];
+
+        $i0 = virtualinvoke r1.<java.io.PushbackInputStream: int read(byte[])>(r0);
+
+        if $i0 == 3 goto label01;
+
+        $r12 = new sun.misc.CEStreamExhausted;
+
+        specialinvoke $r12.<sun.misc.CEStreamExhausted: void <init>()>();
+
+        throw $r12;
+
+     label01:
+        i27 = 0;
+
+     label02:
+        if i27 >= 64 goto label07;
+
+        $i33 = (int) b24;
+
+        $i35 = (int) -1;
+
+        if $i33 == $i35 goto label03;
+
+        $i36 = (int) b25;
+
+        $i38 = (int) -1;
+
+        if $i36 == $i38 goto label03;
+
+        $i39 = (int) b26;
+
+        $i41 = (int) -1;
+
+        if $i39 != $i41 goto label07;
+
+     label03:
+        $b28 = r0[0];
+
+        $r11 = <sun.misc.UCDecoder: byte[] map_array>;
+
+        $b29 = $r11[i27];
+
+        $i42 = (int) $b28;
+
+        $i43 = (int) $b29;
+
+        if $i42 != $i43 goto label04;
+
+        b24 = (byte) i27;
+
+     label04:
+        $b19 = r0[1];
+
+        $r8 = <sun.misc.UCDecoder: byte[] map_array>;
+
+        $b18 = $r8[i27];
+
+        $i44 = (int) $b19;
+
+        $i45 = (int) $b18;
+
+        if $i44 != $i45 goto label05;
+
+        b25 = (byte) i27;
+
+     label05:
+        $b21 = r0[2];
+
+        $r9 = <sun.misc.UCDecoder: byte[] map_array>;
+
+        $b20 = $r9[i27];
+
+        $i46 = (int) $b21;
+
+        $i47 = (int) $b20;
+
+        if $i46 != $i47 goto label06;
+
+        b26 = (byte) i27;
+
+     label06:
+        i27 = i27 + 1;
+
+        goto label02;
+
+     label07:
+        $b1 = b24 & 56;
+
+        $i48 = (int) $b1;
+
+        $i3 = $i48 << 2;
+
+        $b2 = b25 & 31;
+
+        $i49 = (int) $b2;
+
+        $i4 = $i3 + $i49;
+
+        $b22 = (byte) $i4;
+
+        $b5 = b24 & 7;
+
+        $i50 = (int) $b5;
+
+        $i7 = $i50 << 5;
+
+        $b6 = b26 & 31;
+
+        $i51 = (int) $b6;
+
+        $i8 = $i7 + $i51;
+
+        $b23 = (byte) $i8;
+
+        i30 = 0;
+
+        i31 = 0;
+
+        i32 = 1;
+
+     label08:
+        if i32 >= 256 goto label11;
+
+        $i52 = (int) $b22;
+
+        $i16 = $i52 & i32;
+
+        if $i16 == 0 goto label09;
+
+        i30 = i30 + 1;
+
+     label09:
+        $i53 = (int) $b23;
+
+        $i17 = $i53 & i32;
+
+        if $i17 == 0 goto label10;
+
+        i31 = i31 + 1;
+
+     label10:
+        i32 = i32 * 2;
+
+        goto label08;
+
+     label11:
+        $b9 = b25 & 32;
+
+        $i54 = (int) $b9;
+
+        i10 = $i54 / 32;
+
+        $b11 = b26 & 32;
+
+        $i55 = (int) $b11;
+
+        i12 = $i55 / 32;
+
+        $i13 = i30 & 1;
+
+        if $i13 == i10 goto label12;
+
+        $r13 = new sun.misc.CEFormatException;
+
+        specialinvoke $r13.<sun.misc.CEFormatException: void <init>(java.lang.String)>("UCDecoder: High byte parity error.");
+
+        throw $r13;
+
+     label12:
+        $i14 = i31 & 1;
+
+        if $i14 == i12 goto label13;
+
+        $r14 = new sun.misc.CEFormatException;
+
+        specialinvoke $r14.<sun.misc.CEFormatException: void <init>(java.lang.String)>("UCDecoder: Low byte parity error.");
+
+        throw $r14;
+
+     label13:
+        $i56 = (int) $b22;
+
+        virtualinvoke r2.<java.io.OutputStream: void write(int)>($i56);
+
+        $r4 = r3.<sun.misc.UCDecoder: sun.misc.CRC16 crc>;
+
+        virtualinvoke $r4.<sun.misc.CRC16: void update(byte)>($b22);
+
+        if i15 != 2 goto label14;
+
+        $i57 = (int) $b23;
+
+        virtualinvoke r2.<java.io.OutputStream: void write(int)>($i57);
+
+        $r5 = r3.<sun.misc.UCDecoder: sun.misc.CRC16 crc>;
+
+        virtualinvoke $r5.<sun.misc.CRC16: void update(byte)>($b23);
+
+     label14:
+        return;
+    }
+
+    protected void decodeBufferPrefix(java.io.PushbackInputStream, java.io.OutputStream)
+    {
+        java.io.OutputStream r2;
+        sun.misc.UCDecoder r0;
+        java.io.PushbackInputStream r1;
+
+        r0 := @this: sun.misc.UCDecoder;
+
+        r1 := @parameter0: java.io.PushbackInputStream;
+
+        r2 := @parameter1: java.io.OutputStream;
+
+        r0.<sun.misc.UCDecoder: int sequence> = 0;
+
+        return;
+    }
+
+    protected int decodeLinePrefix(java.io.PushbackInputStream, java.io.OutputStream) throws java.io.IOException
+    {
+        byte[] $r3, $r4, $r8;
+        sun.misc.UCDecoder r0;
+        java.io.ByteArrayOutputStream $r5, $r6, $r7;
+        java.io.PushbackInputStream r2;
+        short s3, s5, $s13, $s14;
+        byte $b1, $b2, $b4;
+        int $i0, $i6, $i7, $i8, $i9, $i11, $i12, $i15, $i16;
+        java.io.OutputStream r11;
+        sun.misc.CEFormatException $r13;
+        sun.misc.CRC16 $r1;
+        sun.misc.CEStreamExhausted $r12;
+
+        r0 := @this: sun.misc.UCDecoder;
+
+        r2 := @parameter0: java.io.PushbackInputStream;
+
+        r11 := @parameter1: java.io.OutputStream;
+
+        $r1 = r0.<sun.misc.UCDecoder: sun.misc.CRC16 crc>;
+
+        $r1.<sun.misc.CRC16: int value> = 0;
+
+     label1:
+        $r3 = r0.<sun.misc.UCDecoder: byte[] tmp>;
+
+        $i0 = virtualinvoke r2.<java.io.PushbackInputStream: int read(byte[],int,int)>($r3, 0, 1);
+
+        $i11 = (int) -1;
+
+        if $i0 != $i11 goto label2;
+
+        $r12 = new sun.misc.CEStreamExhausted;
+
+        specialinvoke $r12.<sun.misc.CEStreamExhausted: void <init>()>();
+
+        throw $r12;
+
+     label2:
+        $r4 = r0.<sun.misc.UCDecoder: byte[] tmp>;
+
+        $b1 = $r4[0];
+
+        $i12 = (int) $b1;
+
+        if $i12 != 42 goto label1;
+
+        goto label3;
+
+     label3:
+        $r5 = r0.<sun.misc.UCDecoder: java.io.ByteArrayOutputStream lineAndSeq>;
+
+        virtualinvoke $r5.<java.io.ByteArrayOutputStream: void reset()>();
+
+        $r6 = r0.<sun.misc.UCDecoder: java.io.ByteArrayOutputStream lineAndSeq>;
+
+        virtualinvoke r0.<sun.misc.UCDecoder: void decodeAtom(java.io.PushbackInputStream,java.io.OutputStream,int)>(r2, $r6, 2);
+
+        $r7 = r0.<sun.misc.UCDecoder: java.io.ByteArrayOutputStream lineAndSeq>;
+
+        $r8 = virtualinvoke $r7.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        $b2 = $r8[0];
+
+        $s13 = (short) $b2;
+
+        s3 = $s13 & 255;
+
+        $b4 = $r8[1];
+
+        $s14 = (short) $b4;
+
+        s5 = $s14 & 255;
+
+        $i6 = r0.<sun.misc.UCDecoder: int sequence>;
+
+        $i15 = (int) s5;
+
+        if $i15 == $i6 goto label4;
+
+        $r13 = new sun.misc.CEFormatException;
+
+        specialinvoke $r13.<sun.misc.CEFormatException: void <init>(java.lang.String)>("UCDecoder: Out of sequence line.");
+
+        throw $r13;
+
+     label4:
+        $i7 = r0.<sun.misc.UCDecoder: int sequence>;
+
+        $i8 = $i7 + 1;
+
+        $i9 = $i8 & 255;
+
+        r0.<sun.misc.UCDecoder: int sequence> = $i9;
+
+        $i16 = (int) s3;
+
+        return $i16;
+    }
+
+    protected void decodeLineSuffix(java.io.PushbackInputStream, java.io.OutputStream) throws java.io.IOException
+    {
+        byte[] $r6;
+        sun.misc.UCDecoder r0;
+        java.io.ByteArrayOutputStream $r2, $r4, $r5;
+        java.io.PushbackInputStream r3;
+        short $s4, $s10;
+        byte $b1, $b3;
+        int i0, $i2, $i5, i6, $i7, $i9, $i11;
+        java.io.OutputStream r8;
+        sun.misc.CEFormatException $r9;
+        sun.misc.CRC16 $r1;
+
+        r0 := @this: sun.misc.UCDecoder;
+
+        r3 := @parameter0: java.io.PushbackInputStream;
+
+        r8 := @parameter1: java.io.OutputStream;
+
+        $r1 = r0.<sun.misc.UCDecoder: sun.misc.CRC16 crc>;
+
+        i0 = $r1.<sun.misc.CRC16: int value>;
+
+        $r2 = r0.<sun.misc.UCDecoder: java.io.ByteArrayOutputStream lineAndSeq>;
+
+        virtualinvoke $r2.<java.io.ByteArrayOutputStream: void reset()>();
+
+        $r4 = r0.<sun.misc.UCDecoder: java.io.ByteArrayOutputStream lineAndSeq>;
+
+        virtualinvoke r0.<sun.misc.UCDecoder: void decodeAtom(java.io.PushbackInputStream,java.io.OutputStream,int)>(r3, $r4, 2);
+
+        $r5 = r0.<sun.misc.UCDecoder: java.io.ByteArrayOutputStream lineAndSeq>;
+
+        $r6 = virtualinvoke $r5.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        $b1 = $r6[0];
+
+        $i7 = (int) $b1;
+
+        $i2 = $i7 << 8;
+
+        $i9 = (int) 65280;
+
+        $i5 = $i2 & $i9;
+
+        $b3 = $r6[1];
+
+        $s10 = (short) $b3;
+
+        $s4 = $s10 & 255;
+
+        $i11 = (int) $s4;
+
+        i6 = $i5 + $i11;
+
+        if i6 == i0 goto label1;
+
+        $r9 = new sun.misc.CEFormatException;
+
+        specialinvoke $r9.<sun.misc.CEFormatException: void <init>(java.lang.String)>("UCDecoder: CRC check failed.");
+
+        throw $r9;
+
+     label1:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        byte[] $r0;
+
+        $r0 = newarray (byte)[64];
+
+        $r0[0] = 48;
+
+        $r0[1] = 49;
+
+        $r0[2] = 50;
+
+        $r0[3] = 51;
+
+        $r0[4] = 52;
+
+        $r0[5] = 53;
+
+        $r0[6] = 54;
+
+        $r0[7] = 55;
+
+        $r0[8] = 56;
+
+        $r0[9] = 57;
+
+        $r0[10] = 65;
+
+        $r0[11] = 66;
+
+        $r0[12] = 67;
+
+        $r0[13] = 68;
+
+        $r0[14] = 69;
+
+        $r0[15] = 70;
+
+        $r0[16] = 71;
+
+        $r0[17] = 72;
+
+        $r0[18] = 73;
+
+        $r0[19] = 74;
+
+        $r0[20] = 75;
+
+        $r0[21] = 76;
+
+        $r0[22] = 77;
+
+        $r0[23] = 78;
+
+        $r0[24] = 79;
+
+        $r0[25] = 80;
+
+        $r0[26] = 81;
+
+        $r0[27] = 82;
+
+        $r0[28] = 83;
+
+        $r0[29] = 84;
+
+        $r0[30] = 85;
+
+        $r0[31] = 86;
+
+        $r0[32] = 87;
+
+        $r0[33] = 88;
+
+        $r0[34] = 89;
+
+        $r0[35] = 90;
+
+        $r0[36] = 97;
+
+        $r0[37] = 98;
+
+        $r0[38] = 99;
+
+        $r0[39] = 100;
+
+        $r0[40] = 101;
+
+        $r0[41] = 102;
+
+        $r0[42] = 103;
+
+        $r0[43] = 104;
+
+        $r0[44] = 105;
+
+        $r0[45] = 106;
+
+        $r0[46] = 107;
+
+        $r0[47] = 108;
+
+        $r0[48] = 109;
+
+        $r0[49] = 110;
+
+        $r0[50] = 111;
+
+        $r0[51] = 112;
+
+        $r0[52] = 113;
+
+        $r0[53] = 114;
+
+        $r0[54] = 115;
+
+        $r0[55] = 116;
+
+        $r0[56] = 117;
+
+        $r0[57] = 118;
+
+        $r0[58] = 119;
+
+        $r0[59] = 120;
+
+        $r0[60] = 121;
+
+        $r0[61] = 122;
+
+        $r0[62] = 40;
+
+        $r0[63] = 41;
+
+        <sun.misc.UCDecoder: byte[] map_array> = $r0;
+
+        return;
+    }
+}

@@ -1,0 +1,507 @@
+public class com.sun.corba.se.impl.orbutil.CacheTable extends java.lang.Object
+{
+    private boolean noReverseMap;
+    static final int INITIAL_SIZE;
+    static final int MAX_SIZE;
+    int size;
+    int entryCount;
+    private com.sun.corba.se.impl.orbutil.CacheTable$Entry[] map;
+    private com.sun.corba.se.impl.orbutil.CacheTable$Entry[] rmap;
+    private com.sun.corba.se.spi.orb.ORB orb;
+    private com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper;
+
+    private void <init>()
+    {
+        com.sun.corba.se.impl.orbutil.CacheTable r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.CacheTable;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void <init>(com.sun.corba.se.spi.orb.ORB, boolean)
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r2;
+        com.sun.corba.se.impl.orbutil.CacheTable r0;
+        com.sun.corba.se.spi.orb.ORB r1;
+        boolean z0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.CacheTable;
+
+        r1 := @parameter0: com.sun.corba.se.spi.orb.ORB;
+
+        z0 := @parameter1: boolean;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.orbutil.CacheTable: com.sun.corba.se.spi.orb.ORB orb> = r1;
+
+        $r2 = staticinvoke <com.sun.corba.se.impl.logging.ORBUtilSystemException: com.sun.corba.se.impl.logging.ORBUtilSystemException get(com.sun.corba.se.spi.orb.ORB,java.lang.String)>(r1, "rpc.encoding");
+
+        r0.<com.sun.corba.se.impl.orbutil.CacheTable: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper> = $r2;
+
+        r0.<com.sun.corba.se.impl.orbutil.CacheTable: boolean noReverseMap> = z0;
+
+        r0.<com.sun.corba.se.impl.orbutil.CacheTable: int size> = 16;
+
+        r0.<com.sun.corba.se.impl.orbutil.CacheTable: int entryCount> = 0;
+
+        specialinvoke r0.<com.sun.corba.se.impl.orbutil.CacheTable: void initTables()>();
+
+        return;
+    }
+
+    private void initTables()
+    {
+        com.sun.corba.se.impl.orbutil.CacheTable$Entry[] $r1, $r2;
+        int $i0, $i1;
+        com.sun.corba.se.impl.orbutil.CacheTable r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.CacheTable;
+
+        $i0 = r0.<com.sun.corba.se.impl.orbutil.CacheTable: int size>;
+
+        $r1 = newarray (com.sun.corba.se.impl.orbutil.CacheTable$Entry)[$i0];
+
+        r0.<com.sun.corba.se.impl.orbutil.CacheTable: com.sun.corba.se.impl.orbutil.CacheTable$Entry[] map> = $r1;
+
+        $z0 = r0.<com.sun.corba.se.impl.orbutil.CacheTable: boolean noReverseMap>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = null;
+
+        goto label2;
+
+     label1:
+        $i1 = r0.<com.sun.corba.se.impl.orbutil.CacheTable: int size>;
+
+        $r2 = newarray (com.sun.corba.se.impl.orbutil.CacheTable$Entry)[$i1];
+
+     label2:
+        r0.<com.sun.corba.se.impl.orbutil.CacheTable: com.sun.corba.se.impl.orbutil.CacheTable$Entry[] rmap> = $r2;
+
+        return;
+    }
+
+    private void grow()
+    {
+        com.sun.corba.se.impl.orbutil.CacheTable$Entry r3;
+        com.sun.corba.se.impl.orbutil.CacheTable r0;
+        com.sun.corba.se.impl.orbutil.CacheTable$Entry[] r1;
+        int $i0, i1, $i2, $i3, $i4, i5;
+        java.lang.Object $r2;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.CacheTable;
+
+        $i0 = r0.<com.sun.corba.se.impl.orbutil.CacheTable: int size>;
+
+        if $i0 != 1073741824 goto label1;
+
+        return;
+
+     label1:
+        r1 = r0.<com.sun.corba.se.impl.orbutil.CacheTable: com.sun.corba.se.impl.orbutil.CacheTable$Entry[] map>;
+
+        i1 = r0.<com.sun.corba.se.impl.orbutil.CacheTable: int size>;
+
+        $i2 = r0.<com.sun.corba.se.impl.orbutil.CacheTable: int size>;
+
+        $i3 = $i2 << 1;
+
+        r0.<com.sun.corba.se.impl.orbutil.CacheTable: int size> = $i3;
+
+        specialinvoke r0.<com.sun.corba.se.impl.orbutil.CacheTable: void initTables()>();
+
+        i5 = 0;
+
+     label2:
+        if i5 >= i1 goto label5;
+
+        r3 = r1[i5];
+
+     label3:
+        if r3 == null goto label4;
+
+        $r2 = r3.<com.sun.corba.se.impl.orbutil.CacheTable$Entry: java.lang.Object key>;
+
+        $i4 = r3.<com.sun.corba.se.impl.orbutil.CacheTable$Entry: int val>;
+
+        specialinvoke r0.<com.sun.corba.se.impl.orbutil.CacheTable: boolean put_table(java.lang.Object,int)>($r2, $i4);
+
+        r3 = r3.<com.sun.corba.se.impl.orbutil.CacheTable$Entry: com.sun.corba.se.impl.orbutil.CacheTable$Entry next>;
+
+        goto label3;
+
+     label4:
+        i5 = i5 + 1;
+
+        goto label2;
+
+     label5:
+        return;
+    }
+
+    private int moduloTableSize(int)
+    {
+        com.sun.corba.se.impl.orbutil.CacheTable r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, i8, i9, i10, i11, i12, $i14;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.CacheTable;
+
+        i8 := @parameter0: int;
+
+        $i0 = i8 << 9;
+
+        $i14 = (int) -1;
+
+        $i1 = $i0 ^ $i14;
+
+        i9 = i8 + $i1;
+
+        $i2 = i9 >>> 14;
+
+        i10 = i9 ^ $i2;
+
+        $i3 = i10 << 4;
+
+        i11 = i10 + $i3;
+
+        $i4 = i11 >>> 10;
+
+        i12 = i11 ^ $i4;
+
+        $i5 = r0.<com.sun.corba.se.impl.orbutil.CacheTable: int size>;
+
+        $i6 = $i5 - 1;
+
+        $i7 = i12 & $i6;
+
+        return $i7;
+    }
+
+    private int hash(java.lang.Object)
+    {
+        int $i0, $i1;
+        java.lang.Object r1;
+        com.sun.corba.se.impl.orbutil.CacheTable r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.CacheTable;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $i0 = staticinvoke <java.lang.System: int identityHashCode(java.lang.Object)>(r1);
+
+        $i1 = specialinvoke r0.<com.sun.corba.se.impl.orbutil.CacheTable: int moduloTableSize(int)>($i0);
+
+        return $i1;
+    }
+
+    private int hash(int)
+    {
+        int i0, $i1;
+        com.sun.corba.se.impl.orbutil.CacheTable r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.CacheTable;
+
+        i0 := @parameter0: int;
+
+        $i1 = specialinvoke r0.<com.sun.corba.se.impl.orbutil.CacheTable: int moduloTableSize(int)>(i0);
+
+        return $i1;
+    }
+
+    public final void put(java.lang.Object, int)
+    {
+        com.sun.corba.se.impl.orbutil.CacheTable r0;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        java.lang.Object r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.CacheTable;
+
+        r1 := @parameter0: java.lang.Object;
+
+        i0 := @parameter1: int;
+
+        $z0 = specialinvoke r0.<com.sun.corba.se.impl.orbutil.CacheTable: boolean put_table(java.lang.Object,int)>(r1, i0);
+
+        if $z0 == 0 goto label1;
+
+        $i1 = r0.<com.sun.corba.se.impl.orbutil.CacheTable: int entryCount>;
+
+        $i2 = $i1 + 1;
+
+        r0.<com.sun.corba.se.impl.orbutil.CacheTable: int entryCount> = $i2;
+
+        $i6 = r0.<com.sun.corba.se.impl.orbutil.CacheTable: int entryCount>;
+
+        $i3 = r0.<com.sun.corba.se.impl.orbutil.CacheTable: int size>;
+
+        $i4 = $i3 * 3;
+
+        $i5 = $i4 / 4;
+
+        if $i6 <= $i5 goto label1;
+
+        specialinvoke r0.<com.sun.corba.se.impl.orbutil.CacheTable: void grow()>();
+
+     label1:
+        return;
+    }
+
+    private boolean put_table(java.lang.Object, int)
+    {
+        org.omg.CORBA.INTERNAL $r12;
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r11;
+        int $i0, i1, $i2, $i3;
+        boolean $z0;
+        com.sun.corba.se.impl.orbutil.CacheTable$Entry $r3, $r5, $r8, r13;
+        com.sun.corba.se.impl.orbutil.CacheTable r0;
+        com.sun.corba.se.impl.orbutil.CacheTable$Entry[] $r2, $r4, $r6, $r7, $r9;
+        java.lang.Object r1, $r10;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.CacheTable;
+
+        r1 := @parameter0: java.lang.Object;
+
+        i1 := @parameter1: int;
+
+        $i0 = specialinvoke r0.<com.sun.corba.se.impl.orbutil.CacheTable: int hash(java.lang.Object)>(r1);
+
+        $r2 = r0.<com.sun.corba.se.impl.orbutil.CacheTable: com.sun.corba.se.impl.orbutil.CacheTable$Entry[] map>;
+
+        r13 = $r2[$i0];
+
+     label1:
+        if r13 == null goto label4;
+
+        $r10 = r13.<com.sun.corba.se.impl.orbutil.CacheTable$Entry: java.lang.Object key>;
+
+        if $r10 != r1 goto label3;
+
+        $i3 = r13.<com.sun.corba.se.impl.orbutil.CacheTable$Entry: int val>;
+
+        if $i3 == i1 goto label2;
+
+        $r11 = r0.<com.sun.corba.se.impl.orbutil.CacheTable: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r12 = virtualinvoke $r11.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL duplicateIndirectionOffset()>();
+
+        throw $r12;
+
+     label2:
+        return 0;
+
+     label3:
+        r13 = r13.<com.sun.corba.se.impl.orbutil.CacheTable$Entry: com.sun.corba.se.impl.orbutil.CacheTable$Entry next>;
+
+        goto label1;
+
+     label4:
+        $r3 = new com.sun.corba.se.impl.orbutil.CacheTable$Entry;
+
+        specialinvoke $r3.<com.sun.corba.se.impl.orbutil.CacheTable$Entry: void <init>(com.sun.corba.se.impl.orbutil.CacheTable,java.lang.Object,int)>(r0, r1, i1);
+
+        $r4 = r0.<com.sun.corba.se.impl.orbutil.CacheTable: com.sun.corba.se.impl.orbutil.CacheTable$Entry[] map>;
+
+        $r5 = $r4[$i0];
+
+        $r3.<com.sun.corba.se.impl.orbutil.CacheTable$Entry: com.sun.corba.se.impl.orbutil.CacheTable$Entry next> = $r5;
+
+        $r6 = r0.<com.sun.corba.se.impl.orbutil.CacheTable: com.sun.corba.se.impl.orbutil.CacheTable$Entry[] map>;
+
+        $r6[$i0] = $r3;
+
+        $z0 = r0.<com.sun.corba.se.impl.orbutil.CacheTable: boolean noReverseMap>;
+
+        if $z0 != 0 goto label5;
+
+        $i2 = specialinvoke r0.<com.sun.corba.se.impl.orbutil.CacheTable: int hash(int)>(i1);
+
+        $r7 = r0.<com.sun.corba.se.impl.orbutil.CacheTable: com.sun.corba.se.impl.orbutil.CacheTable$Entry[] rmap>;
+
+        $r8 = $r7[$i2];
+
+        $r3.<com.sun.corba.se.impl.orbutil.CacheTable$Entry: com.sun.corba.se.impl.orbutil.CacheTable$Entry rnext> = $r8;
+
+        $r9 = r0.<com.sun.corba.se.impl.orbutil.CacheTable: com.sun.corba.se.impl.orbutil.CacheTable$Entry[] rmap>;
+
+        $r9[$i2] = $r3;
+
+     label5:
+        return 1;
+    }
+
+    public final boolean containsKey(java.lang.Object)
+    {
+        int $i0, $i2;
+        java.lang.Object r1;
+        com.sun.corba.se.impl.orbutil.CacheTable r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.CacheTable;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $i0 = virtualinvoke r0.<com.sun.corba.se.impl.orbutil.CacheTable: int getVal(java.lang.Object)>(r1);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public final int getVal(java.lang.Object)
+    {
+        com.sun.corba.se.impl.orbutil.CacheTable$Entry r4;
+        com.sun.corba.se.impl.orbutil.CacheTable r0;
+        com.sun.corba.se.impl.orbutil.CacheTable$Entry[] $r2;
+        int $i0, $i1, $i3;
+        java.lang.Object r1, $r3;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.CacheTable;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $i0 = specialinvoke r0.<com.sun.corba.se.impl.orbutil.CacheTable: int hash(java.lang.Object)>(r1);
+
+        $r2 = r0.<com.sun.corba.se.impl.orbutil.CacheTable: com.sun.corba.se.impl.orbutil.CacheTable$Entry[] map>;
+
+        r4 = $r2[$i0];
+
+     label1:
+        if r4 == null goto label3;
+
+        $r3 = r4.<com.sun.corba.se.impl.orbutil.CacheTable$Entry: java.lang.Object key>;
+
+        if $r3 != r1 goto label2;
+
+        $i1 = r4.<com.sun.corba.se.impl.orbutil.CacheTable$Entry: int val>;
+
+        return $i1;
+
+     label2:
+        r4 = r4.<com.sun.corba.se.impl.orbutil.CacheTable$Entry: com.sun.corba.se.impl.orbutil.CacheTable$Entry next>;
+
+        goto label1;
+
+     label3:
+        $i3 = (int) -1;
+
+        return $i3;
+    }
+
+    public final boolean containsVal(int)
+    {
+        int i0;
+        java.lang.Object $r1;
+        com.sun.corba.se.impl.orbutil.CacheTable r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.CacheTable;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.impl.orbutil.CacheTable: java.lang.Object getKey(int)>(i0);
+
+        if $r1 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public final boolean containsOrderedVal(int)
+    {
+        int i0;
+        com.sun.corba.se.impl.orbutil.CacheTable r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.CacheTable;
+
+        i0 := @parameter0: int;
+
+        $z0 = virtualinvoke r0.<com.sun.corba.se.impl.orbutil.CacheTable: boolean containsVal(int)>(i0);
+
+        return $z0;
+    }
+
+    public final java.lang.Object getKey(int)
+    {
+        com.sun.corba.se.impl.orbutil.CacheTable$Entry r3;
+        com.sun.corba.se.impl.orbutil.CacheTable$Entry[] $r1;
+        int i0, $i1, $i2;
+        java.lang.Object $r2;
+        com.sun.corba.se.impl.orbutil.CacheTable r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.CacheTable;
+
+        i0 := @parameter0: int;
+
+        $i1 = specialinvoke r0.<com.sun.corba.se.impl.orbutil.CacheTable: int hash(int)>(i0);
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.CacheTable: com.sun.corba.se.impl.orbutil.CacheTable$Entry[] rmap>;
+
+        r3 = $r1[$i1];
+
+     label1:
+        if r3 == null goto label3;
+
+        $i2 = r3.<com.sun.corba.se.impl.orbutil.CacheTable$Entry: int val>;
+
+        if $i2 != i0 goto label2;
+
+        $r2 = r3.<com.sun.corba.se.impl.orbutil.CacheTable$Entry: java.lang.Object key>;
+
+        return $r2;
+
+     label2:
+        r3 = r3.<com.sun.corba.se.impl.orbutil.CacheTable$Entry: com.sun.corba.se.impl.orbutil.CacheTable$Entry rnext>;
+
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    public void done()
+    {
+        com.sun.corba.se.impl.orbutil.CacheTable r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.CacheTable;
+
+        r0.<com.sun.corba.se.impl.orbutil.CacheTable: com.sun.corba.se.impl.orbutil.CacheTable$Entry[] map> = null;
+
+        r0.<com.sun.corba.se.impl.orbutil.CacheTable: com.sun.corba.se.impl.orbutil.CacheTable$Entry[] rmap> = null;
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.corba.se.impl.orbutil.CacheTable: int MAX_SIZE> = 1073741824;
+
+        <com.sun.corba.se.impl.orbutil.CacheTable: int INITIAL_SIZE> = 16;
+
+        return;
+    }
+}

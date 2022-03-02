@@ -1,0 +1,305 @@
+final class sun.security.ssl.ServerNameExtension$CHServerNameConsumer extends java.lang.Object implements sun.security.ssl.SSLExtension$ExtensionConsumer
+{
+
+    private void <init>()
+    {
+        sun.security.ssl.ServerNameExtension$CHServerNameConsumer r0;
+
+        r0 := @this: sun.security.ssl.ServerNameExtension$CHServerNameConsumer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void consume(sun.security.ssl.ConnectionContext, sun.security.ssl.SSLHandshake$HandshakeMessage, java.nio.ByteBuffer) throws java.io.IOException
+    {
+        sun.security.ssl.SSLHandshake$HandshakeMessage r40;
+        javax.net.ssl.SNIServerName $r12, $r18, r41;
+        java.nio.ByteBuffer r5;
+        java.util.Map $r7;
+        sun.security.ssl.SSLConfiguration $r3, $r8, $r15;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11;
+        sun.security.ssl.ServerHandshakeContext r1;
+        java.util.Collection $r9, $r17;
+        java.util.List $r16, $r42;
+        javax.net.ssl.SSLException $r21, $r38;
+        sun.security.ssl.ServerNameExtension$CHServerNamesSpec $r4;
+        java.lang.StringBuilder $r22, $r23, $r24, $r25, $r28, $r29, $r32;
+        java.lang.Object[] $r13, $r14, $r27, $r34;
+        sun.security.ssl.ConnectionContext r0;
+        java.lang.String $r26, $r31, $r33;
+        sun.security.ssl.SSLExtension $r2, $r6, $r30;
+        java.io.IOException $r35;
+        sun.security.ssl.TransportContext $r20, $r37;
+        sun.security.ssl.ServerNameExtension$CHServerNameConsumer r39;
+        sun.security.ssl.Alert $r19, $r36;
+        sun.security.ssl.SSLSessionImpl $r10, $r11;
+
+        r39 := @this: sun.security.ssl.ServerNameExtension$CHServerNameConsumer;
+
+        r0 := @parameter0: sun.security.ssl.ConnectionContext;
+
+        r40 := @parameter1: sun.security.ssl.SSLHandshake$HandshakeMessage;
+
+        r5 := @parameter2: java.nio.ByteBuffer;
+
+        r1 = (sun.security.ssl.ServerHandshakeContext) r0;
+
+        $r3 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $r2 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension CH_SERVER_NAME>;
+
+        $z0 = virtualinvoke $r3.<sun.security.ssl.SSLConfiguration: boolean isAvailable(sun.security.ssl.SSLExtension)>($r2);
+
+        if $z0 != 0 goto label2;
+
+        $z9 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z9 == 0 goto label1;
+
+        $z10 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z10 == 0 goto label1;
+
+        $r28 = new java.lang.StringBuilder;
+
+        specialinvoke $r28.<java.lang.StringBuilder: void <init>()>();
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignore unavailable extension: ");
+
+        $r30 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension CH_SERVER_NAME>;
+
+        $r31 = $r30.<sun.security.ssl.SSLExtension: java.lang.String name>;
+
+        $r32 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r31);
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r34 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r33, $r34);
+
+     label1:
+        return;
+
+     label2:
+        $r4 = new sun.security.ssl.ServerNameExtension$CHServerNamesSpec;
+
+        specialinvoke $r4.<sun.security.ssl.ServerNameExtension$CHServerNamesSpec: void <init>(java.nio.ByteBuffer,sun.security.ssl.ServerNameExtension$1)>(r5, null);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r35 := @caughtexception;
+
+        $r37 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r36 = <sun.security.ssl.Alert: sun.security.ssl.Alert UNEXPECTED_MESSAGE>;
+
+        $r38 = virtualinvoke $r37.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.Throwable)>($r36, $r35);
+
+        throw $r38;
+
+     label5:
+        $r7 = r1.<sun.security.ssl.ServerHandshakeContext: java.util.Map handshakeExtensions>;
+
+        $r6 = <sun.security.ssl.SSLExtension: sun.security.ssl.SSLExtension CH_SERVER_NAME>;
+
+        interfaceinvoke $r7.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r6, $r4);
+
+        r41 = null;
+
+        $r8 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $r9 = $r8.<sun.security.ssl.SSLConfiguration: java.util.Collection sniMatchers>;
+
+        $z1 = interfaceinvoke $r9.<java.util.Collection: boolean isEmpty()>();
+
+        if $z1 != 0 goto label7;
+
+        $r15 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $r17 = $r15.<sun.security.ssl.SSLConfiguration: java.util.Collection sniMatchers>;
+
+        $r16 = $r4.<sun.security.ssl.ServerNameExtension$CHServerNamesSpec: java.util.List serverNames>;
+
+        $r18 = staticinvoke <sun.security.ssl.ServerNameExtension$CHServerNameConsumer: javax.net.ssl.SNIServerName chooseSni(java.util.Collection,java.util.List)>($r17, $r16);
+
+        r41 = $r18;
+
+        if $r18 == null goto label6;
+
+        $z7 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z7 == 0 goto label8;
+
+        $z8 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z8 == 0 goto label8;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("server name indication (");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r18);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") is accepted");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r27 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>($r26, $r27);
+
+        goto label8;
+
+     label6:
+        $r20 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r19 = <sun.security.ssl.Alert: sun.security.ssl.Alert UNRECOGNIZED_NAME>;
+
+        $r21 = virtualinvoke $r20.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r19, "Unrecognized server name indication");
+
+        throw $r21;
+
+     label7:
+        $z2 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z2 == 0 goto label8;
+
+        $z6 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z6 == 0 goto label8;
+
+        $r14 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("no server name matchers, ignore server name indication", $r14);
+
+     label8:
+        $z11 = r1.<sun.security.ssl.ServerHandshakeContext: boolean isResumption>;
+
+        if $z11 == 0 goto label9;
+
+        $r10 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLSessionImpl resumingSession>;
+
+        if $r10 == null goto label9;
+
+        $r11 = r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLSessionImpl resumingSession>;
+
+        $r12 = $r11.<sun.security.ssl.SSLSessionImpl: javax.net.ssl.SNIServerName serverNameIndication>;
+
+        $z3 = staticinvoke <java.util.Objects: boolean equals(java.lang.Object,java.lang.Object)>(r41, $r12);
+
+        if $z3 != 0 goto label9;
+
+        r1.<sun.security.ssl.ServerHandshakeContext: boolean isResumption> = 0;
+
+        r1.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLSessionImpl resumingSession> = null;
+
+        $z4 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z4 == 0 goto label9;
+
+        $z5 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z5 == 0 goto label9;
+
+        $r13 = newarray (java.lang.Object)[0];
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("abort session resumption, different server name indication used", $r13);
+
+     label9:
+        $r42 = $r4.<sun.security.ssl.ServerNameExtension$CHServerNamesSpec: java.util.List serverNames>;
+
+        r1.<sun.security.ssl.ServerHandshakeContext: java.util.List requestedServerNames> = $r42;
+
+        r1.<sun.security.ssl.ServerHandshakeContext: javax.net.ssl.SNIServerName negotiatedServerName> = r41;
+
+        return;
+
+        catch java.io.IOException from label2 to label3 with label4;
+    }
+
+    private static javax.net.ssl.SNIServerName chooseSni(java.util.Collection, java.util.List)
+    {
+        java.util.Iterator $r2, $r5;
+        javax.net.ssl.SNIServerName r7;
+        java.util.Collection r1;
+        java.util.List r0;
+        javax.net.ssl.SNIMatcher r4;
+        int $i0, $i1;
+        java.lang.Object $r3, $r6;
+        boolean $z0, $z1, $z2, $z3;
+
+        r1 := @parameter0: java.util.Collection;
+
+        r0 := @parameter1: java.util.List;
+
+        if r0 == null goto label5;
+
+        $z0 = interfaceinvoke r0.<java.util.List: boolean isEmpty()>();
+
+        if $z0 != 0 goto label5;
+
+        $r2 = interfaceinvoke r1.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label1:
+        $z1 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label5;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (javax.net.ssl.SNIMatcher) $r3;
+
+        $i0 = virtualinvoke r4.<javax.net.ssl.SNIMatcher: int getType()>();
+
+        $r5 = interfaceinvoke r0.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z2 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label4;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (javax.net.ssl.SNIServerName) $r6;
+
+        $i1 = virtualinvoke r7.<javax.net.ssl.SNIServerName: int getType()>();
+
+        if $i1 != $i0 goto label3;
+
+        $z3 = virtualinvoke r4.<javax.net.ssl.SNIMatcher: boolean matches(javax.net.ssl.SNIServerName)>(r7);
+
+        if $z3 == 0 goto label4;
+
+        return r7;
+
+     label3:
+        goto label2;
+
+     label4:
+        goto label1;
+
+     label5:
+        return null;
+    }
+
+    void <init>(sun.security.ssl.ServerNameExtension$1)
+    {
+        sun.security.ssl.ServerNameExtension$1 r1;
+        sun.security.ssl.ServerNameExtension$CHServerNameConsumer r0;
+
+        r0 := @this: sun.security.ssl.ServerNameExtension$CHServerNameConsumer;
+
+        r1 := @parameter0: sun.security.ssl.ServerNameExtension$1;
+
+        specialinvoke r0.<sun.security.ssl.ServerNameExtension$CHServerNameConsumer: void <init>()>();
+
+        return;
+    }
+}

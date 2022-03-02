@@ -1,0 +1,267 @@
+public final class sun.management.jdp.JdpController extends java.lang.Object
+{
+    private static sun.management.jdp.JdpController$JDPControllerRunner controller;
+
+    private void <init>()
+    {
+        sun.management.jdp.JdpController r0;
+
+        r0 := @this: sun.management.jdp.JdpController;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static int getInteger(java.lang.String, int, java.lang.String) throws sun.management.jdp.JdpException
+    {
+        sun.management.jdp.JdpException $r2;
+        int i0, $i1;
+        java.lang.NumberFormatException $r1;
+        java.lang.String r0, r3;
+
+        r0 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        r3 := @parameter2: java.lang.String;
+
+     label1:
+        if r0 != null goto label2;
+
+        $i1 = i0;
+
+        goto label3;
+
+     label2:
+        $i1 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>(r0);
+
+     label3:
+        return $i1;
+
+     label4:
+        $r1 := @caughtexception;
+
+        $r2 = new sun.management.jdp.JdpException;
+
+        specialinvoke $r2.<sun.management.jdp.JdpException: void <init>(java.lang.String)>(r3);
+
+        throw $r2;
+
+        catch java.lang.NumberFormatException from label1 to label3 with label4;
+    }
+
+    private static java.net.InetAddress getInetAddress(java.lang.String, java.net.InetAddress, java.lang.String) throws sun.management.jdp.JdpException
+    {
+        java.net.InetAddress r1, $r5;
+        sun.management.jdp.JdpException $r3;
+        java.lang.String r0, r4;
+        java.net.UnknownHostException $r2;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.net.InetAddress;
+
+        r4 := @parameter2: java.lang.String;
+
+     label1:
+        if r0 != null goto label2;
+
+        $r5 = r1;
+
+        goto label3;
+
+     label2:
+        $r5 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByName(java.lang.String)>(r0);
+
+     label3:
+        return $r5;
+
+     label4:
+        $r2 := @caughtexception;
+
+        $r3 = new sun.management.jdp.JdpException;
+
+        specialinvoke $r3.<sun.management.jdp.JdpException: void <init>(java.lang.String)>(r4);
+
+        throw $r3;
+
+        catch java.net.UnknownHostException from label1 to label3 with label4;
+    }
+
+    private static java.lang.Integer getProcessId()
+    {
+        java.lang.management.RuntimeMXBean $r0;
+        java.lang.Object[] $r8;
+        java.lang.Class[] $r6;
+        sun.management.VMManagement r4;
+        java.lang.reflect.Field $r2;
+        java.lang.Integer r10;
+        java.lang.Exception $r11;
+        java.lang.Class $r1, $r5;
+        java.lang.Object $r3, $r9;
+        java.lang.reflect.Method $r7;
+
+     label1:
+        $r0 = staticinvoke <java.lang.management.ManagementFactory: java.lang.management.RuntimeMXBean getRuntimeMXBean()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("jvm");
+
+        virtualinvoke $r2.<java.lang.reflect.Field: void setAccessible(boolean)>(1);
+
+        $r3 = virtualinvoke $r2.<java.lang.reflect.Field: java.lang.Object get(java.lang.Object)>($r0);
+
+        r4 = (sun.management.VMManagement) $r3;
+
+        $r5 = virtualinvoke r4.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r6 = newarray (java.lang.Class)[0];
+
+        $r7 = virtualinvoke $r5.<java.lang.Class: java.lang.reflect.Method getDeclaredMethod(java.lang.String,java.lang.Class[])>("getProcessId", $r6);
+
+        virtualinvoke $r7.<java.lang.reflect.Method: void setAccessible(boolean)>(1);
+
+        $r8 = newarray (java.lang.Object)[0];
+
+        $r9 = virtualinvoke $r7.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>(r4, $r8);
+
+        r10 = (java.lang.Integer) $r9;
+
+     label2:
+        return r10;
+
+     label3:
+        $r11 := @caughtexception;
+
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public static synchronized void startDiscoveryService(java.net.InetAddress, int, java.lang.String, java.lang.String) throws java.io.IOException, sun.management.jdp.JdpException
+    {
+        sun.management.jdp.JdpBroadcaster $r13;
+        java.lang.String[] $r19;
+        java.lang.Integer $r10, $r12;
+        java.net.InetAddress $r3, r14;
+        sun.management.jdp.JdpJmxPacket $r5;
+        java.lang.Thread $r16;
+        int $i0, $i1, i2, i3;
+        java.lang.String $r0, $r1, $r2, r6, $r7, r8, $r9, $r11, $r18, $r20;
+        sun.management.jdp.JdpController$JDPControllerRunner $r15, $r17;
+        java.util.UUID $r4;
+
+        r14 := @parameter0: java.net.InetAddress;
+
+        i2 := @parameter1: int;
+
+        r8 := @parameter2: java.lang.String;
+
+        r6 := @parameter3: java.lang.String;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("com.sun.management.jdp.ttl");
+
+        $i0 = staticinvoke <sun.management.jdp.JdpController: int getInteger(java.lang.String,int,java.lang.String)>($r0, 1, "Invalid jdp packet ttl");
+
+        $r1 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("com.sun.management.jdp.pause");
+
+        $i1 = staticinvoke <sun.management.jdp.JdpController: int getInteger(java.lang.String,int,java.lang.String)>($r1, 5, "Invalid jdp pause");
+
+        i3 = $i1 * 1000;
+
+        $r2 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("com.sun.management.jdp.source_addr");
+
+        $r3 = staticinvoke <sun.management.jdp.JdpController: java.net.InetAddress getInetAddress(java.lang.String,java.net.InetAddress,java.lang.String)>($r2, null, "Invalid source address provided");
+
+        $r4 = staticinvoke <java.util.UUID: java.util.UUID randomUUID()>();
+
+        $r5 = new sun.management.jdp.JdpJmxPacket;
+
+        specialinvoke $r5.<sun.management.jdp.JdpJmxPacket: void <init>(java.util.UUID,java.lang.String)>($r4, r6);
+
+        $r7 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("sun.java.command");
+
+        if $r7 == null goto label1;
+
+        $r19 = virtualinvoke $r7.<java.lang.String: java.lang.String[] split(java.lang.String,int)>(" ", 2);
+
+        $r20 = $r19[0];
+
+        virtualinvoke $r5.<sun.management.jdp.JdpJmxPacket: void setMainClass(java.lang.String)>($r20);
+
+     label1:
+        virtualinvoke $r5.<sun.management.jdp.JdpJmxPacket: void setInstanceName(java.lang.String)>(r8);
+
+        $r9 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("java.rmi.server.hostname");
+
+        virtualinvoke $r5.<sun.management.jdp.JdpJmxPacket: void setRmiHostname(java.lang.String)>($r9);
+
+        $r10 = new java.lang.Integer;
+
+        specialinvoke $r10.<java.lang.Integer: void <init>(int)>(i3);
+
+        $r11 = virtualinvoke $r10.<java.lang.Integer: java.lang.String toString()>();
+
+        virtualinvoke $r5.<sun.management.jdp.JdpJmxPacket: void setBroadcastInterval(java.lang.String)>($r11);
+
+        $r12 = staticinvoke <sun.management.jdp.JdpController: java.lang.Integer getProcessId()>();
+
+        if $r12 == null goto label2;
+
+        $r18 = virtualinvoke $r12.<java.lang.Integer: java.lang.String toString()>();
+
+        virtualinvoke $r5.<sun.management.jdp.JdpJmxPacket: void setProcessId(java.lang.String)>($r18);
+
+     label2:
+        $r13 = new sun.management.jdp.JdpBroadcaster;
+
+        specialinvoke $r13.<sun.management.jdp.JdpBroadcaster: void <init>(java.net.InetAddress,java.net.InetAddress,int,int)>(r14, $r3, i2, $i0);
+
+        staticinvoke <sun.management.jdp.JdpController: void stopDiscoveryService()>();
+
+        $r15 = new sun.management.jdp.JdpController$JDPControllerRunner;
+
+        specialinvoke $r15.<sun.management.jdp.JdpController$JDPControllerRunner: void <init>(sun.management.jdp.JdpBroadcaster,sun.management.jdp.JdpJmxPacket,int,sun.management.jdp.JdpController$1)>($r13, $r5, i3, null);
+
+        <sun.management.jdp.JdpController: sun.management.jdp.JdpController$JDPControllerRunner controller> = $r15;
+
+        $r16 = new java.lang.Thread;
+
+        $r17 = <sun.management.jdp.JdpController: sun.management.jdp.JdpController$JDPControllerRunner controller>;
+
+        specialinvoke $r16.<java.lang.Thread: void <init>(java.lang.Runnable,java.lang.String)>($r17, "JDP broadcaster");
+
+        virtualinvoke $r16.<java.lang.Thread: void setDaemon(boolean)>(1);
+
+        virtualinvoke $r16.<java.lang.Thread: void start()>();
+
+        return;
+    }
+
+    public static synchronized void stopDiscoveryService()
+    {
+        sun.management.jdp.JdpController$JDPControllerRunner $r0, $r1;
+
+        $r0 = <sun.management.jdp.JdpController: sun.management.jdp.JdpController$JDPControllerRunner controller>;
+
+        if $r0 == null goto label1;
+
+        $r1 = <sun.management.jdp.JdpController: sun.management.jdp.JdpController$JDPControllerRunner controller>;
+
+        virtualinvoke $r1.<sun.management.jdp.JdpController$JDPControllerRunner: void stop()>();
+
+        <sun.management.jdp.JdpController: sun.management.jdp.JdpController$JDPControllerRunner controller> = null;
+
+     label1:
+        return;
+    }
+
+    static void <clinit>()
+    {
+        <sun.management.jdp.JdpController: sun.management.jdp.JdpController$JDPControllerRunner controller> = null;
+
+        return;
+    }
+}

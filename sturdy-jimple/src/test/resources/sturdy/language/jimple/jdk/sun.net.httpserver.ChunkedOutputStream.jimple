@@ -1,0 +1,451 @@
+class sun.net.httpserver.ChunkedOutputStream extends java.io.FilterOutputStream
+{
+    private boolean closed;
+    static final int CHUNK_SIZE;
+    static final int OFFSET;
+    private int pos;
+    private int count;
+    private byte[] buf;
+    sun.net.httpserver.ExchangeImpl t;
+    static final boolean $assertionsDisabled;
+
+    void <init>(sun.net.httpserver.ExchangeImpl, java.io.OutputStream)
+    {
+        java.io.OutputStream r1;
+        byte[] $r2;
+        sun.net.httpserver.ExchangeImpl r3;
+        sun.net.httpserver.ChunkedOutputStream r0;
+
+        r0 := @this: sun.net.httpserver.ChunkedOutputStream;
+
+        r3 := @parameter0: sun.net.httpserver.ExchangeImpl;
+
+        r1 := @parameter1: java.io.OutputStream;
+
+        specialinvoke r0.<java.io.FilterOutputStream: void <init>(java.io.OutputStream)>(r1);
+
+        r0.<sun.net.httpserver.ChunkedOutputStream: boolean closed> = 0;
+
+        r0.<sun.net.httpserver.ChunkedOutputStream: int pos> = 6;
+
+        r0.<sun.net.httpserver.ChunkedOutputStream: int count> = 0;
+
+        $r2 = newarray (byte)[4104];
+
+        r0.<sun.net.httpserver.ChunkedOutputStream: byte[] buf> = $r2;
+
+        r0.<sun.net.httpserver.ChunkedOutputStream: sun.net.httpserver.ExchangeImpl t> = r3;
+
+        return;
+    }
+
+    public void write(int) throws java.io.IOException
+    {
+        byte[] $r1;
+        java.lang.AssertionError $r2;
+        sun.net.httpserver.ChunkedOutputStream r0;
+        byte $b3;
+        int $i0, $i1, i2, $i4, $i5, $i6, $i7;
+        sun.net.httpserver.StreamClosedException $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.net.httpserver.ChunkedOutputStream;
+
+        i2 := @parameter0: int;
+
+        $z0 = r0.<sun.net.httpserver.ChunkedOutputStream: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = new sun.net.httpserver.StreamClosedException;
+
+        specialinvoke $r3.<sun.net.httpserver.StreamClosedException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $r1 = r0.<sun.net.httpserver.ChunkedOutputStream: byte[] buf>;
+
+        $i0 = r0.<sun.net.httpserver.ChunkedOutputStream: int pos>;
+
+        $i1 = $i0 + 1;
+
+        r0.<sun.net.httpserver.ChunkedOutputStream: int pos> = $i1;
+
+        $b3 = (byte) i2;
+
+        $r1[$i0] = $b3;
+
+        $i4 = r0.<sun.net.httpserver.ChunkedOutputStream: int count>;
+
+        $i5 = $i4 + 1;
+
+        r0.<sun.net.httpserver.ChunkedOutputStream: int count> = $i5;
+
+        $i6 = r0.<sun.net.httpserver.ChunkedOutputStream: int count>;
+
+        if $i6 != 4096 goto label2;
+
+        specialinvoke r0.<sun.net.httpserver.ChunkedOutputStream: void writeChunk()>();
+
+     label2:
+        $z1 = <sun.net.httpserver.ChunkedOutputStream: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label3;
+
+        $i7 = r0.<sun.net.httpserver.ChunkedOutputStream: int count>;
+
+        if $i7 < 4096 goto label3;
+
+        $r2 = new java.lang.AssertionError;
+
+        specialinvoke $r2.<java.lang.AssertionError: void <init>()>();
+
+        throw $r2;
+
+     label3:
+        return;
+    }
+
+    public void write(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r1, $r2, $r3, $r4;
+        int $i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, i10, $i12;
+        sun.net.httpserver.StreamClosedException $r6;
+        boolean $z0;
+        sun.net.httpserver.ChunkedOutputStream r0;
+
+        r0 := @this: sun.net.httpserver.ChunkedOutputStream;
+
+        r1 := @parameter0: byte[];
+
+        i9 := @parameter1: int;
+
+        i10 := @parameter2: int;
+
+        $z0 = r0.<sun.net.httpserver.ChunkedOutputStream: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = new sun.net.httpserver.StreamClosedException;
+
+        specialinvoke $r6.<sun.net.httpserver.StreamClosedException: void <init>()>();
+
+        throw $r6;
+
+     label1:
+        $i0 = r0.<sun.net.httpserver.ChunkedOutputStream: int count>;
+
+        i1 = 4096 - $i0;
+
+        if i10 <= i1 goto label3;
+
+        $r3 = r0.<sun.net.httpserver.ChunkedOutputStream: byte[] buf>;
+
+        $i8 = r0.<sun.net.httpserver.ChunkedOutputStream: int pos>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, i9, $r3, $i8, i1);
+
+        r0.<sun.net.httpserver.ChunkedOutputStream: int count> = 4096;
+
+        specialinvoke r0.<sun.net.httpserver.ChunkedOutputStream: void writeChunk()>();
+
+        i10 = i10 - i1;
+
+        i9 = i9 + i1;
+
+     label2:
+        if i10 < 4096 goto label3;
+
+        $r4 = r0.<sun.net.httpserver.ChunkedOutputStream: byte[] buf>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, i9, $r4, 6, 4096);
+
+        $i12 = (int) -4096;
+
+        i10 = i10 + $i12;
+
+        i9 = i9 + 4096;
+
+        r0.<sun.net.httpserver.ChunkedOutputStream: int count> = 4096;
+
+        specialinvoke r0.<sun.net.httpserver.ChunkedOutputStream: void writeChunk()>();
+
+        goto label2;
+
+     label3:
+        if i10 <= 0 goto label4;
+
+        $r2 = r0.<sun.net.httpserver.ChunkedOutputStream: byte[] buf>;
+
+        $i3 = r0.<sun.net.httpserver.ChunkedOutputStream: int pos>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, i9, $r2, $i3, i10);
+
+        $i4 = r0.<sun.net.httpserver.ChunkedOutputStream: int count>;
+
+        $i5 = $i4 + i10;
+
+        r0.<sun.net.httpserver.ChunkedOutputStream: int count> = $i5;
+
+        $i6 = r0.<sun.net.httpserver.ChunkedOutputStream: int pos>;
+
+        $i7 = $i6 + i10;
+
+        r0.<sun.net.httpserver.ChunkedOutputStream: int pos> = $i7;
+
+     label4:
+        $i2 = r0.<sun.net.httpserver.ChunkedOutputStream: int count>;
+
+        if $i2 != 4096 goto label5;
+
+        specialinvoke r0.<sun.net.httpserver.ChunkedOutputStream: void writeChunk()>();
+
+     label5:
+        return;
+    }
+
+    private void writeChunk() throws java.io.IOException
+    {
+        byte[] $r3, $r4, $r5, $r6, $r7, $r9;
+        byte $b14;
+        int $i0, i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i15, i16, i17, i18, i19, i20;
+        java.lang.String $r1;
+        java.io.OutputStream $r8;
+        char $c13;
+        sun.net.httpserver.ChunkedOutputStream r0;
+        char[] $r2;
+
+        r0 := @this: sun.net.httpserver.ChunkedOutputStream;
+
+        $i0 = r0.<sun.net.httpserver.ChunkedOutputStream: int count>;
+
+        $r1 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i0);
+
+        $r2 = virtualinvoke $r1.<java.lang.String: char[] toCharArray()>();
+
+        i1 = lengthof $r2;
+
+        i2 = 4 - i1;
+
+        i16 = 0;
+
+     label1:
+        if i16 >= i1 goto label2;
+
+        $r9 = r0.<sun.net.httpserver.ChunkedOutputStream: byte[] buf>;
+
+        $i15 = i2 + i16;
+
+        $c13 = $r2[i16];
+
+        $b14 = (byte) $c13;
+
+        $r9[$i15] = $b14;
+
+        i16 = i16 + 1;
+
+        goto label1;
+
+     label2:
+        $r3 = r0.<sun.net.httpserver.ChunkedOutputStream: byte[] buf>;
+
+        i17 = i16 + 1;
+
+        $i3 = i2 + i16;
+
+        $r3[$i3] = 13;
+
+        $r4 = r0.<sun.net.httpserver.ChunkedOutputStream: byte[] buf>;
+
+        i18 = i17 + 1;
+
+        $i4 = i2 + i17;
+
+        $r4[$i4] = 10;
+
+        $r5 = r0.<sun.net.httpserver.ChunkedOutputStream: byte[] buf>;
+
+        i19 = i18 + 1;
+
+        $i6 = i2 + i18;
+
+        $i5 = r0.<sun.net.httpserver.ChunkedOutputStream: int count>;
+
+        $i7 = $i6 + $i5;
+
+        $r5[$i7] = 13;
+
+        $r6 = r0.<sun.net.httpserver.ChunkedOutputStream: byte[] buf>;
+
+        i20 = i19 + 1;
+
+        $i9 = i2 + i19;
+
+        $i8 = r0.<sun.net.httpserver.ChunkedOutputStream: int count>;
+
+        $i10 = $i9 + $i8;
+
+        $r6[$i10] = 10;
+
+        $r8 = r0.<sun.net.httpserver.ChunkedOutputStream: java.io.OutputStream out>;
+
+        $r7 = r0.<sun.net.httpserver.ChunkedOutputStream: byte[] buf>;
+
+        $i11 = r0.<sun.net.httpserver.ChunkedOutputStream: int count>;
+
+        $i12 = i20 + $i11;
+
+        virtualinvoke $r8.<java.io.OutputStream: void write(byte[],int,int)>($r7, i2, $i12);
+
+        r0.<sun.net.httpserver.ChunkedOutputStream: int count> = 0;
+
+        r0.<sun.net.httpserver.ChunkedOutputStream: int pos> = 6;
+
+        return;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        java.io.OutputStream $r1;
+        java.lang.Throwable $r9;
+        sun.net.httpserver.ExchangeImpl $r2, $r5, $r6;
+        sun.net.httpserver.ServerImpl $r8;
+        sun.net.httpserver.WriteFinishedEvent $r4;
+        java.io.IOException $r10;
+        sun.net.httpserver.ChunkedOutputStream r0;
+        sun.net.httpserver.LeftOverInputStream $r3;
+        sun.net.httpserver.HttpContextImpl $r7;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.net.httpserver.ChunkedOutputStream;
+
+        $z0 = r0.<sun.net.httpserver.ChunkedOutputStream: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        virtualinvoke r0.<sun.net.httpserver.ChunkedOutputStream: void flush()>();
+
+     label2:
+        specialinvoke r0.<sun.net.httpserver.ChunkedOutputStream: void writeChunk()>();
+
+        $r1 = r0.<sun.net.httpserver.ChunkedOutputStream: java.io.OutputStream out>;
+
+        virtualinvoke $r1.<java.io.OutputStream: void flush()>();
+
+        $r2 = r0.<sun.net.httpserver.ChunkedOutputStream: sun.net.httpserver.ExchangeImpl t>;
+
+        $r3 = virtualinvoke $r2.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.LeftOverInputStream getOriginalInputStream()>();
+
+        $z1 = virtualinvoke $r3.<sun.net.httpserver.LeftOverInputStream: boolean isClosed()>();
+
+        if $z1 != 0 goto label3;
+
+        virtualinvoke $r3.<sun.net.httpserver.LeftOverInputStream: void close()>();
+
+     label3:
+        r0.<sun.net.httpserver.ChunkedOutputStream: boolean closed> = 1;
+
+        goto label6;
+
+     label4:
+        $r10 := @caughtexception;
+
+        r0.<sun.net.httpserver.ChunkedOutputStream: boolean closed> = 1;
+
+        goto label6;
+
+     label5:
+        $r9 := @caughtexception;
+
+        r0.<sun.net.httpserver.ChunkedOutputStream: boolean closed> = 1;
+
+        throw $r9;
+
+     label6:
+        $r4 = new sun.net.httpserver.WriteFinishedEvent;
+
+        $r5 = r0.<sun.net.httpserver.ChunkedOutputStream: sun.net.httpserver.ExchangeImpl t>;
+
+        specialinvoke $r4.<sun.net.httpserver.WriteFinishedEvent: void <init>(sun.net.httpserver.ExchangeImpl)>($r5);
+
+        $r6 = r0.<sun.net.httpserver.ChunkedOutputStream: sun.net.httpserver.ExchangeImpl t>;
+
+        $r7 = virtualinvoke $r6.<sun.net.httpserver.ExchangeImpl: sun.net.httpserver.HttpContextImpl getHttpContext()>();
+
+        $r8 = virtualinvoke $r7.<sun.net.httpserver.HttpContextImpl: sun.net.httpserver.ServerImpl getServerImpl()>();
+
+        virtualinvoke $r8.<sun.net.httpserver.ServerImpl: void addEvent(sun.net.httpserver.Event)>($r4);
+
+        return;
+
+        catch java.io.IOException from label2 to label3 with label4;
+        catch java.lang.Throwable from label2 to label3 with label5;
+    }
+
+    public void flush() throws java.io.IOException
+    {
+        java.io.OutputStream $r1;
+        int $i0;
+        sun.net.httpserver.StreamClosedException $r2;
+        sun.net.httpserver.ChunkedOutputStream r0;
+        boolean $z0;
+
+        r0 := @this: sun.net.httpserver.ChunkedOutputStream;
+
+        $z0 = r0.<sun.net.httpserver.ChunkedOutputStream: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new sun.net.httpserver.StreamClosedException;
+
+        specialinvoke $r2.<sun.net.httpserver.StreamClosedException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        $i0 = r0.<sun.net.httpserver.ChunkedOutputStream: int count>;
+
+        if $i0 <= 0 goto label2;
+
+        specialinvoke r0.<sun.net.httpserver.ChunkedOutputStream: void writeChunk()>();
+
+     label2:
+        $r1 = r0.<sun.net.httpserver.ChunkedOutputStream: java.io.OutputStream out>;
+
+        virtualinvoke $r1.<java.io.OutputStream: void flush()>();
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        <sun.net.httpserver.ChunkedOutputStream: int OFFSET> = 6;
+
+        <sun.net.httpserver.ChunkedOutputStream: int CHUNK_SIZE> = 4096;
+
+        $r0 = class "Lsun/net/httpserver/ChunkedOutputStream;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.net.httpserver.ChunkedOutputStream: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

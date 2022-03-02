@@ -1,0 +1,1398 @@
+public class sun.nio.ch.SocketAdaptor extends java.net.Socket
+{
+    private final sun.nio.ch.SocketChannelImpl sc;
+    private volatile int timeout;
+    private java.io.InputStream socketInputStream;
+
+    private void <init>(sun.nio.ch.SocketChannelImpl) throws java.net.SocketException
+    {
+        sun.nio.ch.SocketAdaptor r0;
+        sun.nio.ch.SocketChannelImpl r1;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        r1 := @parameter0: sun.nio.ch.SocketChannelImpl;
+
+        specialinvoke r0.<java.net.Socket: void <init>(java.net.SocketImpl)>(null);
+
+        r0.<sun.nio.ch.SocketAdaptor: int timeout> = 0;
+
+        r0.<sun.nio.ch.SocketAdaptor: java.io.InputStream socketInputStream> = null;
+
+        r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc> = r1;
+
+        return;
+    }
+
+    public static java.net.Socket create(sun.nio.ch.SocketChannelImpl)
+    {
+        java.net.SocketException $r2;
+        sun.nio.ch.SocketAdaptor $r0;
+        java.lang.InternalError $r3;
+        sun.nio.ch.SocketChannelImpl r1;
+
+        r1 := @parameter0: sun.nio.ch.SocketChannelImpl;
+
+     label1:
+        $r0 = new sun.nio.ch.SocketAdaptor;
+
+        specialinvoke $r0.<sun.nio.ch.SocketAdaptor: void <init>(sun.nio.ch.SocketChannelImpl)>(r1);
+
+     label2:
+        return $r0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new java.lang.InternalError;
+
+        specialinvoke $r3.<java.lang.InternalError: void <init>(java.lang.String)>("Should not reach here");
+
+        throw $r3;
+
+        catch java.net.SocketException from label1 to label2 with label3;
+    }
+
+    public java.nio.channels.SocketChannel getChannel()
+    {
+        sun.nio.ch.SocketAdaptor r0;
+        sun.nio.ch.SocketChannelImpl $r1;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        $r1 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        return $r1;
+    }
+
+    public void connect(java.net.SocketAddress) throws java.io.IOException
+    {
+        sun.nio.ch.SocketAdaptor r0;
+        java.net.SocketAddress r1;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        r1 := @parameter0: java.net.SocketAddress;
+
+        virtualinvoke r0.<sun.nio.ch.SocketAdaptor: void connect(java.net.SocketAddress,int)>(r1, 0);
+
+        return;
+    }
+
+    public void connect(java.net.SocketAddress, int) throws java.io.IOException
+    {
+        java.net.SocketAddress r0;
+        byte $b6;
+        java.nio.channels.IllegalBlockingModeException $r29;
+        sun.nio.ch.SocketAdaptor r1;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        sun.nio.ch.SocketChannelImpl $r2, $r4, $r5, $r6, $r7, $r8, $r9, $r11, $r12, $r13, $r15, $r16, $r17, $r24, $r25;
+        java.lang.Exception $r22;
+        java.lang.Throwable $r21, $r23;
+        long $l1, $l4, $l5, $l7, l8;
+        short $s2;
+        java.net.SocketTimeoutException $r31;
+        int i0, $i3, $i9, $i10;
+        java.nio.channels.ClosedChannelException $r30;
+        java.io.IOException $r26;
+        java.lang.IllegalArgumentException $r27, $r28;
+        java.lang.Object $r3;
+
+        r1 := @this: sun.nio.ch.SocketAdaptor;
+
+        r0 := @parameter0: java.net.SocketAddress;
+
+        i0 := @parameter1: int;
+
+        if r0 != null goto label01;
+
+        $r27 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r27.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("connect: The address can\'t be null");
+
+        throw $r27;
+
+     label01:
+        if i0 >= 0 goto label02;
+
+        $r28 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r28.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("connect: timeout can\'t be negative");
+
+        throw $r28;
+
+     label02:
+        $r2 = r1.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $r3 = virtualinvoke $r2.<sun.nio.ch.SocketChannelImpl: java.lang.Object blockingLock()>();
+
+        entermonitor $r3;
+
+     label03:
+        $r4 = r1.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $z0 = virtualinvoke $r4.<sun.nio.ch.SocketChannelImpl: boolean isBlocking()>();
+
+        if $z0 != 0 goto label04;
+
+        $r29 = new java.nio.channels.IllegalBlockingModeException;
+
+        specialinvoke $r29.<java.nio.channels.IllegalBlockingModeException: void <init>()>();
+
+        throw $r29;
+
+     label04:
+        if i0 != 0 goto label07;
+
+        $r17 = r1.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        virtualinvoke $r17.<sun.nio.ch.SocketChannelImpl: boolean connect(java.net.SocketAddress)>(r0);
+
+     label05:
+        exitmonitor $r3;
+
+     label06:
+        return;
+
+     label07:
+        $r5 = r1.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        virtualinvoke $r5.<sun.nio.ch.SocketChannelImpl: java.nio.channels.SelectableChannel configureBlocking(boolean)>(0);
+
+     label08:
+        $r6 = r1.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $z1 = virtualinvoke $r6.<sun.nio.ch.SocketChannelImpl: boolean connect(java.net.SocketAddress)>(r0);
+
+        if $z1 == 0 goto label12;
+
+     label09:
+        $r15 = r1.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $z5 = virtualinvoke $r15.<sun.nio.ch.SocketChannelImpl: boolean isOpen()>();
+
+        if $z5 == 0 goto label10;
+
+        $r16 = r1.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        virtualinvoke $r16.<sun.nio.ch.SocketChannelImpl: java.nio.channels.SelectableChannel configureBlocking(boolean)>(1);
+
+     label10:
+        exitmonitor $r3;
+
+     label11:
+        return;
+
+     label12:
+        l8 = (long) i0;
+
+     label13:
+        $r7 = r1.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $z2 = virtualinvoke $r7.<sun.nio.ch.SocketChannelImpl: boolean isOpen()>();
+
+        if $z2 != 0 goto label14;
+
+        $r30 = new java.nio.channels.ClosedChannelException;
+
+        specialinvoke $r30.<java.nio.channels.ClosedChannelException: void <init>()>();
+
+        throw $r30;
+
+     label14:
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r8 = r1.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $s2 = <sun.nio.ch.Net: short POLLCONN>;
+
+        $i9 = (int) $s2;
+
+        $i3 = virtualinvoke $r8.<sun.nio.ch.SocketChannelImpl: int poll(int,long)>($i9, l8);
+
+        if $i3 <= 0 goto label15;
+
+        $r11 = r1.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $z3 = virtualinvoke $r11.<sun.nio.ch.SocketChannelImpl: boolean finishConnect()>();
+
+        if $z3 == 0 goto label15;
+
+        goto label21;
+
+     label15:
+        $l4 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l5 = $l4 - $l1;
+
+        $l7 = l8 - $l5;
+
+        l8 = $l7;
+
+        $b6 = $l7 cmp 0L;
+
+        $i10 = (int) $b6;
+
+        if $i10 > 0 goto label20;
+
+     label16:
+        $r9 = r1.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        virtualinvoke $r9.<sun.nio.ch.SocketChannelImpl: void close()>();
+
+     label17:
+        goto label19;
+
+     label18:
+        $r26 := @caughtexception;
+
+     label19:
+        $r31 = new java.net.SocketTimeoutException;
+
+        specialinvoke $r31.<java.net.SocketTimeoutException: void <init>()>();
+
+        throw $r31;
+
+     label20:
+        goto label13;
+
+     label21:
+        $r12 = r1.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $z4 = virtualinvoke $r12.<sun.nio.ch.SocketChannelImpl: boolean isOpen()>();
+
+        if $z4 == 0 goto label25;
+
+        $r13 = r1.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        virtualinvoke $r13.<sun.nio.ch.SocketChannelImpl: java.nio.channels.SelectableChannel configureBlocking(boolean)>(1);
+
+        goto label25;
+
+     label22:
+        $r23 := @caughtexception;
+
+     label23:
+        $r24 = r1.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $z6 = virtualinvoke $r24.<sun.nio.ch.SocketChannelImpl: boolean isOpen()>();
+
+        if $z6 == 0 goto label24;
+
+        $r25 = r1.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        virtualinvoke $r25.<sun.nio.ch.SocketChannelImpl: java.nio.channels.SelectableChannel configureBlocking(boolean)>(1);
+
+     label24:
+        throw $r23;
+
+     label25:
+        goto label27;
+
+     label26:
+        $r22 := @caughtexception;
+
+        staticinvoke <sun.nio.ch.Net: void translateException(java.lang.Exception,boolean)>($r22, 1);
+
+     label27:
+        exitmonitor $r3;
+
+     label28:
+        goto label31;
+
+     label29:
+        $r21 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label30:
+        throw $r21;
+
+     label31:
+        return;
+
+        catch java.io.IOException from label16 to label17 with label18;
+        catch java.lang.Throwable from label08 to label09 with label22;
+        catch java.lang.Throwable from label12 to label21 with label22;
+        catch java.lang.Throwable from label22 to label23 with label22;
+        catch java.lang.Exception from label04 to label05 with label26;
+        catch java.lang.Exception from label07 to label10 with label26;
+        catch java.lang.Exception from label12 to label25 with label26;
+        catch java.lang.Throwable from label03 to label06 with label29;
+        catch java.lang.Throwable from label07 to label11 with label29;
+        catch java.lang.Throwable from label12 to label28 with label29;
+        catch java.lang.Throwable from label29 to label30 with label29;
+    }
+
+    public void bind(java.net.SocketAddress) throws java.io.IOException
+    {
+        java.net.SocketAddress r1;
+        sun.nio.ch.SocketAdaptor r0;
+        sun.nio.ch.SocketChannelImpl $r2;
+        java.lang.Exception $r3;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        r1 := @parameter0: java.net.SocketAddress;
+
+     label1:
+        $r2 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        virtualinvoke $r2.<sun.nio.ch.SocketChannelImpl: java.nio.channels.SocketChannel bind(java.net.SocketAddress)>(r1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        staticinvoke <sun.nio.ch.Net: void translateException(java.lang.Exception)>($r3);
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public java.net.InetAddress getInetAddress()
+    {
+        java.net.InetAddress $r4;
+        java.net.SocketAddress $r2;
+        sun.nio.ch.SocketAdaptor r0;
+        java.net.InetSocketAddress $r3;
+        sun.nio.ch.SocketChannelImpl $r1;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        $r1 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $r2 = virtualinvoke $r1.<sun.nio.ch.SocketChannelImpl: java.net.SocketAddress remoteAddress()>();
+
+        if $r2 != null goto label1;
+
+        return null;
+
+     label1:
+        $r3 = (java.net.InetSocketAddress) $r2;
+
+        $r4 = virtualinvoke $r3.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        return $r4;
+    }
+
+    public java.net.InetAddress getLocalAddress()
+    {
+        java.net.InetSocketAddress $r2, $r5, $r6;
+        sun.nio.ch.SocketChannelImpl $r1, $r4;
+        java.net.InetAddress $r3, $r7;
+        sun.nio.ch.SocketAdaptor r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        $r1 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $z0 = virtualinvoke $r1.<sun.nio.ch.SocketChannelImpl: boolean isOpen()>();
+
+        if $z0 == 0 goto label1;
+
+        $r4 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $r5 = virtualinvoke $r4.<sun.nio.ch.SocketChannelImpl: java.net.InetSocketAddress localAddress()>();
+
+        if $r5 == null goto label1;
+
+        $r6 = staticinvoke <sun.nio.ch.Net: java.net.InetSocketAddress getRevealedLocalAddress(java.net.InetSocketAddress)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        return $r7;
+
+     label1:
+        $r2 = new java.net.InetSocketAddress;
+
+        specialinvoke $r2.<java.net.InetSocketAddress: void <init>(int)>(0);
+
+        $r3 = virtualinvoke $r2.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        return $r3;
+    }
+
+    public int getPort()
+    {
+        java.net.SocketAddress $r2;
+        int $i0;
+        sun.nio.ch.SocketAdaptor r0;
+        java.net.InetSocketAddress $r3;
+        sun.nio.ch.SocketChannelImpl $r1;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        $r1 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $r2 = virtualinvoke $r1.<sun.nio.ch.SocketChannelImpl: java.net.SocketAddress remoteAddress()>();
+
+        if $r2 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r3 = (java.net.InetSocketAddress) $r2;
+
+        $i0 = virtualinvoke $r3.<java.net.InetSocketAddress: int getPort()>();
+
+        return $i0;
+    }
+
+    public int getLocalPort()
+    {
+        int $i0, $i2;
+        sun.nio.ch.SocketAdaptor r0;
+        java.net.InetSocketAddress $r2, $r3;
+        sun.nio.ch.SocketChannelImpl $r1;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        $r1 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $r2 = virtualinvoke $r1.<sun.nio.ch.SocketChannelImpl: java.net.InetSocketAddress localAddress()>();
+
+        if $r2 != null goto label1;
+
+        $i2 = (int) -1;
+
+        return $i2;
+
+     label1:
+        $r3 = (java.net.InetSocketAddress) $r2;
+
+        $i0 = virtualinvoke $r3.<java.net.InetSocketAddress: int getPort()>();
+
+        return $i0;
+    }
+
+    public java.io.InputStream getInputStream() throws java.io.IOException
+    {
+        java.net.SocketException $r9, $r10, $r11;
+        sun.nio.ch.SocketAdaptor$1 $r6;
+        sun.nio.ch.SocketAdaptor r0;
+        boolean $z0, $z1, $z2;
+        java.security.PrivilegedActionException $r12;
+        java.io.IOException $r14;
+        sun.nio.ch.SocketChannelImpl $r1, $r2, $r3;
+        java.lang.Exception $r13;
+        java.lang.Object $r7;
+        java.io.InputStream $r4, $r5, $r8;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        $r1 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $z0 = virtualinvoke $r1.<sun.nio.ch.SocketChannelImpl: boolean isOpen()>();
+
+        if $z0 != 0 goto label1;
+
+        $r11 = new java.net.SocketException;
+
+        specialinvoke $r11.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r11;
+
+     label1:
+        $r2 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $z1 = virtualinvoke $r2.<sun.nio.ch.SocketChannelImpl: boolean isConnected()>();
+
+        if $z1 != 0 goto label2;
+
+        $r10 = new java.net.SocketException;
+
+        specialinvoke $r10.<java.net.SocketException: void <init>(java.lang.String)>("Socket is not connected");
+
+        throw $r10;
+
+     label2:
+        $r3 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $z2 = virtualinvoke $r3.<sun.nio.ch.SocketChannelImpl: boolean isInputOpen()>();
+
+        if $z2 != 0 goto label3;
+
+        $r9 = new java.net.SocketException;
+
+        specialinvoke $r9.<java.net.SocketException: void <init>(java.lang.String)>("Socket input is shutdown");
+
+        throw $r9;
+
+     label3:
+        $r4 = r0.<sun.nio.ch.SocketAdaptor: java.io.InputStream socketInputStream>;
+
+        if $r4 != null goto label7;
+
+     label4:
+        $r6 = new sun.nio.ch.SocketAdaptor$1;
+
+        specialinvoke $r6.<sun.nio.ch.SocketAdaptor$1: void <init>(sun.nio.ch.SocketAdaptor)>(r0);
+
+        $r7 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r6);
+
+        $r8 = (java.io.InputStream) $r7;
+
+        r0.<sun.nio.ch.SocketAdaptor: java.io.InputStream socketInputStream> = $r8;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r12 := @caughtexception;
+
+        $r13 = virtualinvoke $r12.<java.security.PrivilegedActionException: java.lang.Exception getException()>();
+
+        $r14 = (java.io.IOException) $r13;
+
+        throw $r14;
+
+     label7:
+        $r5 = r0.<sun.nio.ch.SocketAdaptor: java.io.InputStream socketInputStream>;
+
+        return $r5;
+
+        catch java.security.PrivilegedActionException from label4 to label5 with label6;
+    }
+
+    public java.io.OutputStream getOutputStream() throws java.io.IOException
+    {
+        java.net.SocketException $r6, $r7, $r8;
+        sun.nio.ch.SocketAdaptor r0;
+        sun.nio.ch.SocketAdaptor$2 $r4;
+        boolean $z0, $z1, $z2;
+        java.io.OutputStream r12;
+        java.security.PrivilegedActionException $r9;
+        java.io.IOException $r11;
+        sun.nio.ch.SocketChannelImpl $r1, $r2, $r3;
+        java.lang.Exception $r10;
+        java.lang.Object $r5;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        $r1 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $z0 = virtualinvoke $r1.<sun.nio.ch.SocketChannelImpl: boolean isOpen()>();
+
+        if $z0 != 0 goto label1;
+
+        $r8 = new java.net.SocketException;
+
+        specialinvoke $r8.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r8;
+
+     label1:
+        $r2 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $z1 = virtualinvoke $r2.<sun.nio.ch.SocketChannelImpl: boolean isConnected()>();
+
+        if $z1 != 0 goto label2;
+
+        $r7 = new java.net.SocketException;
+
+        specialinvoke $r7.<java.net.SocketException: void <init>(java.lang.String)>("Socket is not connected");
+
+        throw $r7;
+
+     label2:
+        $r3 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $z2 = virtualinvoke $r3.<sun.nio.ch.SocketChannelImpl: boolean isOutputOpen()>();
+
+        if $z2 != 0 goto label3;
+
+        $r6 = new java.net.SocketException;
+
+        specialinvoke $r6.<java.net.SocketException: void <init>(java.lang.String)>("Socket output is shutdown");
+
+        throw $r6;
+
+     label3:
+        $r4 = new sun.nio.ch.SocketAdaptor$2;
+
+        specialinvoke $r4.<sun.nio.ch.SocketAdaptor$2: void <init>(sun.nio.ch.SocketAdaptor)>(r0);
+
+        $r5 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r4);
+
+        r12 = (java.io.OutputStream) $r5;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r9 := @caughtexception;
+
+        $r10 = virtualinvoke $r9.<java.security.PrivilegedActionException: java.lang.Exception getException()>();
+
+        $r11 = (java.io.IOException) $r10;
+
+        throw $r11;
+
+     label6:
+        return r12;
+
+        catch java.security.PrivilegedActionException from label3 to label4 with label5;
+    }
+
+    private void setBooleanOption(java.net.SocketOption, boolean) throws java.net.SocketException
+    {
+        java.net.SocketOption r1;
+        sun.nio.ch.SocketAdaptor r0;
+        java.lang.Boolean $r3;
+        java.io.IOException $r4;
+        sun.nio.ch.SocketChannelImpl $r2;
+        boolean z0;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        r1 := @parameter0: java.net.SocketOption;
+
+        z0 := @parameter1: boolean;
+
+     label1:
+        $r2 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $r3 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(z0);
+
+        virtualinvoke $r2.<sun.nio.ch.SocketChannelImpl: java.nio.channels.SocketChannel setOption(java.net.SocketOption,java.lang.Object)>(r1, $r3);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        staticinvoke <sun.nio.ch.Net: void translateToSocketException(java.lang.Exception)>($r4);
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    private void setIntOption(java.net.SocketOption, int) throws java.net.SocketException
+    {
+        java.net.SocketOption r1;
+        int i0;
+        sun.nio.ch.SocketAdaptor r0;
+        java.io.IOException $r4;
+        java.lang.Integer $r3;
+        sun.nio.ch.SocketChannelImpl $r2;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        r1 := @parameter0: java.net.SocketOption;
+
+        i0 := @parameter1: int;
+
+     label1:
+        $r2 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        virtualinvoke $r2.<sun.nio.ch.SocketChannelImpl: java.nio.channels.SocketChannel setOption(java.net.SocketOption,java.lang.Object)>(r1, $r3);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        staticinvoke <sun.nio.ch.Net: void translateToSocketException(java.lang.Exception)>($r4);
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    private boolean getBooleanOption(java.net.SocketOption) throws java.net.SocketException
+    {
+        java.net.SocketOption r1;
+        sun.nio.ch.SocketAdaptor r0;
+        java.lang.Boolean $r4;
+        java.lang.Object $r3;
+        java.io.IOException $r5;
+        sun.nio.ch.SocketChannelImpl $r2;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        r1 := @parameter0: java.net.SocketOption;
+
+     label1:
+        $r2 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $r3 = virtualinvoke $r2.<sun.nio.ch.SocketChannelImpl: java.lang.Object getOption(java.net.SocketOption)>(r1);
+
+        $r4 = (java.lang.Boolean) $r3;
+
+        $z0 = virtualinvoke $r4.<java.lang.Boolean: boolean booleanValue()>();
+
+     label2:
+        return $z0;
+
+     label3:
+        $r5 := @caughtexception;
+
+        staticinvoke <sun.nio.ch.Net: void translateToSocketException(java.lang.Exception)>($r5);
+
+        return 0;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    private int getIntOption(java.net.SocketOption) throws java.net.SocketException
+    {
+        java.net.SocketOption r1;
+        java.io.IOException $r5;
+        java.lang.Integer $r4;
+        sun.nio.ch.SocketChannelImpl $r2;
+        int $i0, $i2;
+        sun.nio.ch.SocketAdaptor r0;
+        java.lang.Object $r3;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        r1 := @parameter0: java.net.SocketOption;
+
+     label1:
+        $r2 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $r3 = virtualinvoke $r2.<sun.nio.ch.SocketChannelImpl: java.lang.Object getOption(java.net.SocketOption)>(r1);
+
+        $r4 = (java.lang.Integer) $r3;
+
+        $i0 = virtualinvoke $r4.<java.lang.Integer: int intValue()>();
+
+     label2:
+        return $i0;
+
+     label3:
+        $r5 := @caughtexception;
+
+        staticinvoke <sun.nio.ch.Net: void translateToSocketException(java.lang.Exception)>($r5);
+
+        $i2 = (int) -1;
+
+        return $i2;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public void setTcpNoDelay(boolean) throws java.net.SocketException
+    {
+        sun.nio.ch.SocketAdaptor r0;
+        boolean z0;
+        java.net.SocketOption $r1;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = <java.net.StandardSocketOptions: java.net.SocketOption TCP_NODELAY>;
+
+        specialinvoke r0.<sun.nio.ch.SocketAdaptor: void setBooleanOption(java.net.SocketOption,boolean)>($r1, z0);
+
+        return;
+    }
+
+    public boolean getTcpNoDelay() throws java.net.SocketException
+    {
+        sun.nio.ch.SocketAdaptor r0;
+        java.net.SocketOption $r1;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        $r1 = <java.net.StandardSocketOptions: java.net.SocketOption TCP_NODELAY>;
+
+        $z0 = specialinvoke r0.<sun.nio.ch.SocketAdaptor: boolean getBooleanOption(java.net.SocketOption)>($r1);
+
+        return $z0;
+    }
+
+    public void setSoLinger(boolean, int) throws java.net.SocketException
+    {
+        java.net.SocketOption $r1;
+        int i0, $i2;
+        sun.nio.ch.SocketAdaptor r0;
+        boolean z0;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        z0 := @parameter0: boolean;
+
+        i0 := @parameter1: int;
+
+        if z0 != 0 goto label1;
+
+        $i2 = (int) -1;
+
+        i0 = $i2;
+
+     label1:
+        $r1 = <java.net.StandardSocketOptions: java.net.SocketOption SO_LINGER>;
+
+        specialinvoke r0.<sun.nio.ch.SocketAdaptor: void setIntOption(java.net.SocketOption,int)>($r1, i0);
+
+        return;
+    }
+
+    public int getSoLinger() throws java.net.SocketException
+    {
+        int $i0;
+        sun.nio.ch.SocketAdaptor r0;
+        java.net.SocketOption $r1;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        $r1 = <java.net.StandardSocketOptions: java.net.SocketOption SO_LINGER>;
+
+        $i0 = specialinvoke r0.<sun.nio.ch.SocketAdaptor: int getIntOption(java.net.SocketOption)>($r1);
+
+        return $i0;
+    }
+
+    public void sendUrgentData(int) throws java.io.IOException
+    {
+        byte $b1;
+        int i0, $i2;
+        sun.nio.ch.SocketAdaptor r0;
+        java.io.IOException $r2;
+        sun.nio.ch.SocketChannelImpl $r1;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $b1 = (byte) i0;
+
+        $i2 = virtualinvoke $r1.<sun.nio.ch.SocketChannelImpl: int sendOutOfBandData(byte)>($b1);
+
+        if $i2 != 0 goto label1;
+
+        $r2 = new java.io.IOException;
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>("Socket buffer full");
+
+        throw $r2;
+
+     label1:
+        return;
+    }
+
+    public void setOOBInline(boolean) throws java.net.SocketException
+    {
+        sun.nio.ch.SocketAdaptor r0;
+        boolean z0;
+        java.net.SocketOption $r1;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = <sun.nio.ch.ExtendedSocketOption: java.net.SocketOption SO_OOBINLINE>;
+
+        specialinvoke r0.<sun.nio.ch.SocketAdaptor: void setBooleanOption(java.net.SocketOption,boolean)>($r1, z0);
+
+        return;
+    }
+
+    public boolean getOOBInline() throws java.net.SocketException
+    {
+        sun.nio.ch.SocketAdaptor r0;
+        java.net.SocketOption $r1;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        $r1 = <sun.nio.ch.ExtendedSocketOption: java.net.SocketOption SO_OOBINLINE>;
+
+        $z0 = specialinvoke r0.<sun.nio.ch.SocketAdaptor: boolean getBooleanOption(java.net.SocketOption)>($r1);
+
+        return $z0;
+    }
+
+    public void setSoTimeout(int) throws java.net.SocketException
+    {
+        int i0;
+        sun.nio.ch.SocketAdaptor r0;
+        java.lang.IllegalArgumentException $r1;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        i0 := @parameter0: int;
+
+        if i0 >= 0 goto label1;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("timeout can\'t be negative");
+
+        throw $r1;
+
+     label1:
+        r0.<sun.nio.ch.SocketAdaptor: int timeout> = i0;
+
+        return;
+    }
+
+    public int getSoTimeout() throws java.net.SocketException
+    {
+        int $i0;
+        sun.nio.ch.SocketAdaptor r0;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        $i0 = r0.<sun.nio.ch.SocketAdaptor: int timeout>;
+
+        return $i0;
+    }
+
+    public void setSendBufferSize(int) throws java.net.SocketException
+    {
+        java.net.SocketOption $r1;
+        int i0;
+        sun.nio.ch.SocketAdaptor r0;
+        java.lang.IllegalArgumentException $r2;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        i0 := @parameter0: int;
+
+        if i0 > 0 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid send size");
+
+        throw $r2;
+
+     label1:
+        $r1 = <java.net.StandardSocketOptions: java.net.SocketOption SO_SNDBUF>;
+
+        specialinvoke r0.<sun.nio.ch.SocketAdaptor: void setIntOption(java.net.SocketOption,int)>($r1, i0);
+
+        return;
+    }
+
+    public int getSendBufferSize() throws java.net.SocketException
+    {
+        int $i0;
+        sun.nio.ch.SocketAdaptor r0;
+        java.net.SocketOption $r1;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        $r1 = <java.net.StandardSocketOptions: java.net.SocketOption SO_SNDBUF>;
+
+        $i0 = specialinvoke r0.<sun.nio.ch.SocketAdaptor: int getIntOption(java.net.SocketOption)>($r1);
+
+        return $i0;
+    }
+
+    public void setReceiveBufferSize(int) throws java.net.SocketException
+    {
+        java.net.SocketOption $r1;
+        int i0;
+        sun.nio.ch.SocketAdaptor r0;
+        java.lang.IllegalArgumentException $r2;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        i0 := @parameter0: int;
+
+        if i0 > 0 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid receive size");
+
+        throw $r2;
+
+     label1:
+        $r1 = <java.net.StandardSocketOptions: java.net.SocketOption SO_RCVBUF>;
+
+        specialinvoke r0.<sun.nio.ch.SocketAdaptor: void setIntOption(java.net.SocketOption,int)>($r1, i0);
+
+        return;
+    }
+
+    public int getReceiveBufferSize() throws java.net.SocketException
+    {
+        int $i0;
+        sun.nio.ch.SocketAdaptor r0;
+        java.net.SocketOption $r1;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        $r1 = <java.net.StandardSocketOptions: java.net.SocketOption SO_RCVBUF>;
+
+        $i0 = specialinvoke r0.<sun.nio.ch.SocketAdaptor: int getIntOption(java.net.SocketOption)>($r1);
+
+        return $i0;
+    }
+
+    public void setKeepAlive(boolean) throws java.net.SocketException
+    {
+        sun.nio.ch.SocketAdaptor r0;
+        boolean z0;
+        java.net.SocketOption $r1;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = <java.net.StandardSocketOptions: java.net.SocketOption SO_KEEPALIVE>;
+
+        specialinvoke r0.<sun.nio.ch.SocketAdaptor: void setBooleanOption(java.net.SocketOption,boolean)>($r1, z0);
+
+        return;
+    }
+
+    public boolean getKeepAlive() throws java.net.SocketException
+    {
+        sun.nio.ch.SocketAdaptor r0;
+        java.net.SocketOption $r1;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        $r1 = <java.net.StandardSocketOptions: java.net.SocketOption SO_KEEPALIVE>;
+
+        $z0 = specialinvoke r0.<sun.nio.ch.SocketAdaptor: boolean getBooleanOption(java.net.SocketOption)>($r1);
+
+        return $z0;
+    }
+
+    public void setTrafficClass(int) throws java.net.SocketException
+    {
+        int i0;
+        sun.nio.ch.SocketAdaptor r0;
+        java.net.SocketOption $r1;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        i0 := @parameter0: int;
+
+        $r1 = <java.net.StandardSocketOptions: java.net.SocketOption IP_TOS>;
+
+        specialinvoke r0.<sun.nio.ch.SocketAdaptor: void setIntOption(java.net.SocketOption,int)>($r1, i0);
+
+        return;
+    }
+
+    public int getTrafficClass() throws java.net.SocketException
+    {
+        int $i0;
+        sun.nio.ch.SocketAdaptor r0;
+        java.net.SocketOption $r1;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        $r1 = <java.net.StandardSocketOptions: java.net.SocketOption IP_TOS>;
+
+        $i0 = specialinvoke r0.<sun.nio.ch.SocketAdaptor: int getIntOption(java.net.SocketOption)>($r1);
+
+        return $i0;
+    }
+
+    public void setReuseAddress(boolean) throws java.net.SocketException
+    {
+        sun.nio.ch.SocketAdaptor r0;
+        boolean z0;
+        java.net.SocketOption $r1;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = <java.net.StandardSocketOptions: java.net.SocketOption SO_REUSEADDR>;
+
+        specialinvoke r0.<sun.nio.ch.SocketAdaptor: void setBooleanOption(java.net.SocketOption,boolean)>($r1, z0);
+
+        return;
+    }
+
+    public boolean getReuseAddress() throws java.net.SocketException
+    {
+        sun.nio.ch.SocketAdaptor r0;
+        java.net.SocketOption $r1;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        $r1 = <java.net.StandardSocketOptions: java.net.SocketOption SO_REUSEADDR>;
+
+        $z0 = specialinvoke r0.<sun.nio.ch.SocketAdaptor: boolean getBooleanOption(java.net.SocketOption)>($r1);
+
+        return $z0;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        sun.nio.ch.SocketAdaptor r0;
+        sun.nio.ch.SocketChannelImpl $r1;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        $r1 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        virtualinvoke $r1.<sun.nio.ch.SocketChannelImpl: void close()>();
+
+        return;
+    }
+
+    public void shutdownInput() throws java.io.IOException
+    {
+        sun.nio.ch.SocketAdaptor r0;
+        sun.nio.ch.SocketChannelImpl $r1;
+        java.lang.Exception $r2;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+     label1:
+        $r1 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        virtualinvoke $r1.<sun.nio.ch.SocketChannelImpl: java.nio.channels.SocketChannel shutdownInput()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        staticinvoke <sun.nio.ch.Net: void translateException(java.lang.Exception)>($r2);
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public void shutdownOutput() throws java.io.IOException
+    {
+        sun.nio.ch.SocketAdaptor r0;
+        sun.nio.ch.SocketChannelImpl $r1;
+        java.lang.Exception $r2;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+     label1:
+        $r1 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        virtualinvoke $r1.<sun.nio.ch.SocketChannelImpl: java.nio.channels.SocketChannel shutdownOutput()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        staticinvoke <sun.nio.ch.Net: void translateException(java.lang.Exception)>($r2);
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public java.lang.String toString()
+    {
+        sun.nio.ch.SocketChannelImpl $r1;
+        java.net.InetAddress $r4;
+        int $i0, $i1;
+        sun.nio.ch.SocketAdaptor r0;
+        java.lang.StringBuilder $r2, $r3, $r5, $r6, $r7, $r8, $r9, $r10;
+        java.lang.String $r11;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        $r1 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $z0 = virtualinvoke $r1.<sun.nio.ch.SocketChannelImpl: boolean isConnected()>();
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Socket[addr=");
+
+        $r4 = virtualinvoke r0.<sun.nio.ch.SocketAdaptor: java.net.InetAddress getInetAddress()>();
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",port=");
+
+        $i0 = virtualinvoke r0.<sun.nio.ch.SocketAdaptor: int getPort()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",localport=");
+
+        $i1 = virtualinvoke r0.<sun.nio.ch.SocketAdaptor: int getLocalPort()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r11;
+
+     label1:
+        return "Socket[unconnected]";
+    }
+
+    public boolean isConnected()
+    {
+        sun.nio.ch.SocketAdaptor r0;
+        sun.nio.ch.SocketChannelImpl $r1;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        $r1 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $z0 = virtualinvoke $r1.<sun.nio.ch.SocketChannelImpl: boolean isConnected()>();
+
+        return $z0;
+    }
+
+    public boolean isBound()
+    {
+        sun.nio.ch.SocketAdaptor r0;
+        java.net.InetSocketAddress $r2;
+        sun.nio.ch.SocketChannelImpl $r1;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        $r1 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $r2 = virtualinvoke $r1.<sun.nio.ch.SocketChannelImpl: java.net.InetSocketAddress localAddress()>();
+
+        if $r2 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public boolean isClosed()
+    {
+        sun.nio.ch.SocketAdaptor r0;
+        sun.nio.ch.SocketChannelImpl $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        $r1 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $z0 = virtualinvoke $r1.<sun.nio.ch.SocketChannelImpl: boolean isOpen()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public boolean isInputShutdown()
+    {
+        sun.nio.ch.SocketAdaptor r0;
+        sun.nio.ch.SocketChannelImpl $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        $r1 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $z0 = virtualinvoke $r1.<sun.nio.ch.SocketChannelImpl: boolean isInputOpen()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    public boolean isOutputShutdown()
+    {
+        sun.nio.ch.SocketAdaptor r0;
+        sun.nio.ch.SocketChannelImpl $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.nio.ch.SocketAdaptor;
+
+        $r1 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        $z0 = virtualinvoke $r1.<sun.nio.ch.SocketChannelImpl: boolean isOutputOpen()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    static sun.nio.ch.SocketChannelImpl access$000(sun.nio.ch.SocketAdaptor)
+    {
+        sun.nio.ch.SocketAdaptor r0;
+        sun.nio.ch.SocketChannelImpl $r1;
+
+        r0 := @parameter0: sun.nio.ch.SocketAdaptor;
+
+        $r1 = r0.<sun.nio.ch.SocketAdaptor: sun.nio.ch.SocketChannelImpl sc>;
+
+        return $r1;
+    }
+
+    static int access$100(sun.nio.ch.SocketAdaptor)
+    {
+        int $i0;
+        sun.nio.ch.SocketAdaptor r0;
+
+        r0 := @parameter0: sun.nio.ch.SocketAdaptor;
+
+        $i0 = r0.<sun.nio.ch.SocketAdaptor: int timeout>;
+
+        return $i0;
+    }
+}

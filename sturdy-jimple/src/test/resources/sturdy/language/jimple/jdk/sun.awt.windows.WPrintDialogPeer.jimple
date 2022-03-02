@@ -1,0 +1,619 @@
+class sun.awt.windows.WPrintDialogPeer extends sun.awt.windows.WWindowPeer implements java.awt.peer.DialogPeer
+{
+    private sun.awt.windows.WComponentPeer parent;
+    private java.util.Vector blockedWindows;
+
+    void <init>(sun.awt.windows.WPrintDialog)
+    {
+        java.util.Vector $r2;
+        sun.awt.windows.WPrintDialogPeer r0;
+        sun.awt.windows.WPrintDialog r1;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        r1 := @parameter0: sun.awt.windows.WPrintDialog;
+
+        specialinvoke r0.<sun.awt.windows.WWindowPeer: void <init>(java.awt.Window)>(r1);
+
+        $r2 = new java.util.Vector;
+
+        specialinvoke $r2.<java.util.Vector: void <init>()>();
+
+        r0.<sun.awt.windows.WPrintDialogPeer: java.util.Vector blockedWindows> = $r2;
+
+        return;
+    }
+
+    void create(sun.awt.windows.WComponentPeer)
+    {
+        sun.awt.windows.WComponentPeer r1;
+        sun.awt.windows.WPrintDialogPeer r0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        r1 := @parameter0: sun.awt.windows.WComponentPeer;
+
+        r0.<sun.awt.windows.WPrintDialogPeer: sun.awt.windows.WComponentPeer parent> = r1;
+
+        return;
+    }
+
+    protected void checkCreation()
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        return;
+    }
+
+    protected void disposeImpl()
+    {
+        java.lang.Object $r1;
+        sun.awt.windows.WPrintDialogPeer r0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        $r1 = r0.<sun.awt.windows.WPrintDialogPeer: java.lang.Object target>;
+
+        staticinvoke <sun.awt.windows.WToolkit: void targetDisposedPeer(java.lang.Object,java.lang.Object)>($r1, r0);
+
+        return;
+    }
+
+    private native boolean _show();
+
+    public void show()
+    {
+        sun.awt.windows.WPrintDialogPeer r2;
+        sun.awt.windows.WPrintDialogPeer$1 $r1;
+        java.lang.Thread $r0;
+
+        r2 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        $r0 = new java.lang.Thread;
+
+        $r1 = new sun.awt.windows.WPrintDialogPeer$1;
+
+        specialinvoke $r1.<sun.awt.windows.WPrintDialogPeer$1: void <init>(sun.awt.windows.WPrintDialogPeer)>(r2);
+
+        specialinvoke $r0.<java.lang.Thread: void <init>(java.lang.Runnable)>($r1);
+
+        virtualinvoke $r0.<java.lang.Thread: void start()>();
+
+        return;
+    }
+
+    synchronized void setHWnd(long)
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+        java.util.Iterator $r2;
+        long l0;
+        java.util.Vector $r1;
+        byte $b1;
+        java.lang.Object $r3, $r5, $r7;
+        sun.awt.windows.WWindowPeer r4;
+        java.awt.Dialog $r6, $r8;
+        boolean $z0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        l0 := @parameter0: long;
+
+        r0.<sun.awt.windows.WPrintDialogPeer: long hwnd> = l0;
+
+        $r1 = r0.<sun.awt.windows.WPrintDialogPeer: java.util.Vector blockedWindows>;
+
+        $r2 = virtualinvoke $r1.<java.util.Vector: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (sun.awt.windows.WWindowPeer) $r3;
+
+        $b1 = l0 cmp 0L;
+
+        if $b1 == 0 goto label2;
+
+        $r7 = r0.<sun.awt.windows.WPrintDialogPeer: java.lang.Object target>;
+
+        $r8 = (java.awt.Dialog) $r7;
+
+        virtualinvoke r4.<sun.awt.windows.WWindowPeer: void modalDisable(java.awt.Dialog,long)>($r8, l0);
+
+        goto label3;
+
+     label2:
+        $r5 = r0.<sun.awt.windows.WPrintDialogPeer: java.lang.Object target>;
+
+        $r6 = (java.awt.Dialog) $r5;
+
+        virtualinvoke r4.<sun.awt.windows.WWindowPeer: void modalEnable(java.awt.Dialog)>($r6);
+
+     label3:
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    synchronized void blockWindow(sun.awt.windows.WWindowPeer)
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+        long $l0, $l2;
+        java.util.Vector $r2;
+        byte $b1;
+        java.lang.Object $r3;
+        sun.awt.windows.WWindowPeer r1;
+        java.awt.Dialog $r4;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        r1 := @parameter0: sun.awt.windows.WWindowPeer;
+
+        $r2 = r0.<sun.awt.windows.WPrintDialogPeer: java.util.Vector blockedWindows>;
+
+        virtualinvoke $r2.<java.util.Vector: boolean add(java.lang.Object)>(r1);
+
+        $l0 = r0.<sun.awt.windows.WPrintDialogPeer: long hwnd>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 == 0 goto label1;
+
+        $r3 = r0.<sun.awt.windows.WPrintDialogPeer: java.lang.Object target>;
+
+        $r4 = (java.awt.Dialog) $r3;
+
+        $l2 = r0.<sun.awt.windows.WPrintDialogPeer: long hwnd>;
+
+        virtualinvoke r1.<sun.awt.windows.WWindowPeer: void modalDisable(java.awt.Dialog,long)>($r4, $l2);
+
+     label1:
+        return;
+    }
+
+    synchronized void unblockWindow(sun.awt.windows.WWindowPeer)
+    {
+        java.util.Vector $r2;
+        sun.awt.windows.WPrintDialogPeer r0;
+        byte $b1;
+        long $l0;
+        java.lang.Object $r3;
+        sun.awt.windows.WWindowPeer r1;
+        java.awt.Dialog $r4;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        r1 := @parameter0: sun.awt.windows.WWindowPeer;
+
+        $r2 = r0.<sun.awt.windows.WPrintDialogPeer: java.util.Vector blockedWindows>;
+
+        virtualinvoke $r2.<java.util.Vector: boolean remove(java.lang.Object)>(r1);
+
+        $l0 = r0.<sun.awt.windows.WPrintDialogPeer: long hwnd>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 == 0 goto label1;
+
+        $r3 = r0.<sun.awt.windows.WPrintDialogPeer: java.lang.Object target>;
+
+        $r4 = (java.awt.Dialog) $r3;
+
+        virtualinvoke r1.<sun.awt.windows.WWindowPeer: void modalEnable(java.awt.Dialog)>($r4);
+
+     label1:
+        return;
+    }
+
+    public void blockWindows(java.util.List)
+    {
+        java.awt.peer.ComponentPeer $r5;
+        java.util.Iterator $r1;
+        sun.awt.windows.WPrintDialogPeer r7;
+        java.awt.Window r3;
+        sun.awt.AWTAccessor$ComponentAccessor $r4;
+        java.util.List r0;
+        java.lang.Object $r2;
+        sun.awt.windows.WWindowPeer r6;
+        boolean $z0;
+
+        r7 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        r0 := @parameter0: java.util.List;
+
+        $r1 = interfaceinvoke r0.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r2 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        r3 = (java.awt.Window) $r2;
+
+        $r4 = staticinvoke <sun.awt.AWTAccessor: sun.awt.AWTAccessor$ComponentAccessor getComponentAccessor()>();
+
+        $r5 = interfaceinvoke $r4.<sun.awt.AWTAccessor$ComponentAccessor: java.awt.peer.ComponentPeer getPeer(java.awt.Component)>(r3);
+
+        r6 = (sun.awt.windows.WWindowPeer) $r5;
+
+        if r6 == null goto label2;
+
+        virtualinvoke r7.<sun.awt.windows.WPrintDialogPeer: void blockWindow(sun.awt.windows.WWindowPeer)>(r6);
+
+     label2:
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    public native void toFront();
+
+    public native void toBack();
+
+    void initialize()
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        return;
+    }
+
+    public void updateAlwaysOnTopState()
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        return;
+    }
+
+    public void setResizable(boolean)
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+        boolean z0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        z0 := @parameter0: boolean;
+
+        return;
+    }
+
+    void hide()
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        return;
+    }
+
+    void enable()
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        return;
+    }
+
+    void disable()
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        return;
+    }
+
+    public void reshape(int, int, int, int)
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+        int i0, i1, i2, i3;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        return;
+    }
+
+    public boolean handleEvent(java.awt.Event)
+    {
+        java.awt.Event r1;
+        sun.awt.windows.WPrintDialogPeer r0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        r1 := @parameter0: java.awt.Event;
+
+        return 0;
+    }
+
+    public void setForeground(java.awt.Color)
+    {
+        java.awt.Color r1;
+        sun.awt.windows.WPrintDialogPeer r0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        r1 := @parameter0: java.awt.Color;
+
+        return;
+    }
+
+    public void setBackground(java.awt.Color)
+    {
+        java.awt.Color r1;
+        sun.awt.windows.WPrintDialogPeer r0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        r1 := @parameter0: java.awt.Color;
+
+        return;
+    }
+
+    public void setFont(java.awt.Font)
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+        java.awt.Font r1;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        r1 := @parameter0: java.awt.Font;
+
+        return;
+    }
+
+    public void updateMinimumSize()
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        return;
+    }
+
+    public void updateIconImages()
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        return;
+    }
+
+    public boolean requestFocus(boolean, boolean)
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+        boolean z0, z1;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        z0 := @parameter0: boolean;
+
+        z1 := @parameter1: boolean;
+
+        return 0;
+    }
+
+    public boolean requestFocus(java.awt.Component, boolean, boolean, long, sun.awt.CausedFocusEvent$Cause)
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+        long l0;
+        sun.awt.CausedFocusEvent$Cause r2;
+        java.awt.Component r1;
+        boolean z0, z1;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        r1 := @parameter0: java.awt.Component;
+
+        z0 := @parameter1: boolean;
+
+        z1 := @parameter2: boolean;
+
+        l0 := @parameter3: long;
+
+        r2 := @parameter4: sun.awt.CausedFocusEvent$Cause;
+
+        return 0;
+    }
+
+    public void updateFocusableWindowState()
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        return;
+    }
+
+    void start()
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        return;
+    }
+
+    public void beginValidate()
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        return;
+    }
+
+    public void endValidate()
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        return;
+    }
+
+    void invalidate(int, int, int, int)
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+        int i0, i1, i2, i3;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        return;
+    }
+
+    public void addDropTarget(java.awt.dnd.DropTarget)
+    {
+        java.awt.dnd.DropTarget r1;
+        sun.awt.windows.WPrintDialogPeer r0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        r1 := @parameter0: java.awt.dnd.DropTarget;
+
+        return;
+    }
+
+    public void removeDropTarget(java.awt.dnd.DropTarget)
+    {
+        java.awt.dnd.DropTarget r1;
+        sun.awt.windows.WPrintDialogPeer r0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        r1 := @parameter0: java.awt.dnd.DropTarget;
+
+        return;
+    }
+
+    public void setZOrder(java.awt.peer.ComponentPeer)
+    {
+        java.awt.peer.ComponentPeer r1;
+        sun.awt.windows.WPrintDialogPeer r0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        r1 := @parameter0: java.awt.peer.ComponentPeer;
+
+        return;
+    }
+
+    private static native void initIDs();
+
+    public void applyShape(sun.java2d.pipe.Region)
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+        sun.java2d.pipe.Region r1;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        r1 := @parameter0: sun.java2d.pipe.Region;
+
+        return;
+    }
+
+    public void setOpacity(float)
+    {
+        float f0;
+        sun.awt.windows.WPrintDialogPeer r0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        f0 := @parameter0: float;
+
+        return;
+    }
+
+    public void setOpaque(boolean)
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+        boolean z0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        z0 := @parameter0: boolean;
+
+        return;
+    }
+
+    public void updateWindow(java.awt.image.BufferedImage)
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+        java.awt.image.BufferedImage r1;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        r1 := @parameter0: java.awt.image.BufferedImage;
+
+        return;
+    }
+
+    public void createScreenSurface(boolean)
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+        boolean z0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        z0 := @parameter0: boolean;
+
+        return;
+    }
+
+    public void replaceSurfaceData()
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+
+        r0 := @this: sun.awt.windows.WPrintDialogPeer;
+
+        return;
+    }
+
+    static boolean access$000(sun.awt.windows.WPrintDialogPeer)
+    {
+        sun.awt.windows.WPrintDialogPeer r0;
+        boolean $z0;
+
+        r0 := @parameter0: sun.awt.windows.WPrintDialogPeer;
+
+        $z0 = specialinvoke r0.<sun.awt.windows.WPrintDialogPeer: boolean _show()>();
+
+        return $z0;
+    }
+
+    static void <clinit>()
+    {
+        staticinvoke <sun.awt.windows.WPrintDialogPeer: void initIDs()>();
+
+        return;
+    }
+}

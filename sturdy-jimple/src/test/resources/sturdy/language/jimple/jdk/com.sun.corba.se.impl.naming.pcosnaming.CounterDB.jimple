@@ -1,0 +1,177 @@
+class com.sun.corba.se.impl.naming.pcosnaming.CounterDB extends java.lang.Object implements java.io.Serializable
+{
+    private java.lang.Integer counter;
+    private static java.lang.String counterFileName;
+    private transient java.io.File counterFile;
+    public static final int rootCounter;
+
+    void <init>(java.io.File)
+    {
+        com.sun.corba.se.impl.naming.pcosnaming.CounterDB r0;
+        java.lang.String $r3;
+        java.lang.Integer $r5;
+        java.io.File $r1, r2, $r4;
+        boolean $z0;
+
+        r0 := @this: com.sun.corba.se.impl.naming.pcosnaming.CounterDB;
+
+        r2 := @parameter0: java.io.File;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        <com.sun.corba.se.impl.naming.pcosnaming.CounterDB: java.lang.String counterFileName> = "counter";
+
+        $r1 = new java.io.File;
+
+        $r3 = <com.sun.corba.se.impl.naming.pcosnaming.CounterDB: java.lang.String counterFileName>;
+
+        specialinvoke $r1.<java.io.File: void <init>(java.io.File,java.lang.String)>(r2, $r3);
+
+        r0.<com.sun.corba.se.impl.naming.pcosnaming.CounterDB: java.io.File counterFile> = $r1;
+
+        $r4 = r0.<com.sun.corba.se.impl.naming.pcosnaming.CounterDB: java.io.File counterFile>;
+
+        $z0 = virtualinvoke $r4.<java.io.File: boolean exists()>();
+
+        if $z0 != 0 goto label1;
+
+        $r5 = new java.lang.Integer;
+
+        specialinvoke $r5.<java.lang.Integer: void <init>(int)>(0);
+
+        r0.<com.sun.corba.se.impl.naming.pcosnaming.CounterDB: java.lang.Integer counter> = $r5;
+
+        specialinvoke r0.<com.sun.corba.se.impl.naming.pcosnaming.CounterDB: void writeCounter()>();
+
+        goto label2;
+
+     label1:
+        specialinvoke r0.<com.sun.corba.se.impl.naming.pcosnaming.CounterDB: void readCounter()>();
+
+     label2:
+        return;
+    }
+
+    private void readCounter()
+    {
+        com.sun.corba.se.impl.naming.pcosnaming.CounterDB r1;
+        java.io.ObjectInputStream $r3;
+        java.lang.Object $r4;
+        java.io.FileInputStream $r0;
+        java.lang.Integer $r5;
+        java.io.File $r2;
+        java.lang.Exception $r6;
+
+        r1 := @this: com.sun.corba.se.impl.naming.pcosnaming.CounterDB;
+
+     label1:
+        $r0 = new java.io.FileInputStream;
+
+        $r2 = r1.<com.sun.corba.se.impl.naming.pcosnaming.CounterDB: java.io.File counterFile>;
+
+        specialinvoke $r0.<java.io.FileInputStream: void <init>(java.io.File)>($r2);
+
+        $r3 = new java.io.ObjectInputStream;
+
+        specialinvoke $r3.<java.io.ObjectInputStream: void <init>(java.io.InputStream)>($r0);
+
+        $r4 = virtualinvoke $r3.<java.io.ObjectInputStream: java.lang.Object readObject()>();
+
+        $r5 = (java.lang.Integer) $r4;
+
+        r1.<com.sun.corba.se.impl.naming.pcosnaming.CounterDB: java.lang.Integer counter> = $r5;
+
+        virtualinvoke $r3.<java.io.ObjectInputStream: void close()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    private void writeCounter()
+    {
+        com.sun.corba.se.impl.naming.pcosnaming.CounterDB r0;
+        java.io.FileOutputStream $r2;
+        java.io.ObjectOutputStream $r4;
+        java.lang.Integer $r5;
+        java.io.File $r1, $r3;
+        java.lang.Exception $r6;
+
+        r0 := @this: com.sun.corba.se.impl.naming.pcosnaming.CounterDB;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.naming.pcosnaming.CounterDB: java.io.File counterFile>;
+
+        virtualinvoke $r1.<java.io.File: boolean delete()>();
+
+        $r2 = new java.io.FileOutputStream;
+
+        $r3 = r0.<com.sun.corba.se.impl.naming.pcosnaming.CounterDB: java.io.File counterFile>;
+
+        specialinvoke $r2.<java.io.FileOutputStream: void <init>(java.io.File)>($r3);
+
+        $r4 = new java.io.ObjectOutputStream;
+
+        specialinvoke $r4.<java.io.ObjectOutputStream: void <init>(java.io.OutputStream)>($r2);
+
+        $r5 = r0.<com.sun.corba.se.impl.naming.pcosnaming.CounterDB: java.lang.Integer counter>;
+
+        virtualinvoke $r4.<java.io.ObjectOutputStream: void writeObject(java.lang.Object)>($r5);
+
+        virtualinvoke $r4.<java.io.ObjectOutputStream: void flush()>();
+
+        virtualinvoke $r4.<java.io.ObjectOutputStream: void close()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public synchronized int getNextCounter()
+    {
+        com.sun.corba.se.impl.naming.pcosnaming.CounterDB r0;
+        int $i0, i1;
+        java.lang.Integer $r1, $r2;
+
+        r0 := @this: com.sun.corba.se.impl.naming.pcosnaming.CounterDB;
+
+        $r1 = r0.<com.sun.corba.se.impl.naming.pcosnaming.CounterDB: java.lang.Integer counter>;
+
+        $i0 = virtualinvoke $r1.<java.lang.Integer: int intValue()>();
+
+        $r2 = new java.lang.Integer;
+
+        i1 = $i0 + 1;
+
+        specialinvoke $r2.<java.lang.Integer: void <init>(int)>(i1);
+
+        r0.<com.sun.corba.se.impl.naming.pcosnaming.CounterDB: java.lang.Integer counter> = $r2;
+
+        specialinvoke r0.<com.sun.corba.se.impl.naming.pcosnaming.CounterDB: void writeCounter()>();
+
+        return i1;
+    }
+
+    static void <clinit>()
+    {
+        <com.sun.corba.se.impl.naming.pcosnaming.CounterDB: int rootCounter> = 0;
+
+        <com.sun.corba.se.impl.naming.pcosnaming.CounterDB: java.lang.String counterFileName> = "counter";
+
+        return;
+    }
+}

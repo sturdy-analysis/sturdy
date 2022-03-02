@@ -1,0 +1,2116 @@
+public final class sun.rmi.server.LoaderHandler extends java.lang.Object
+{
+    static final int logLevel;
+    static final sun.rmi.runtime.Log loaderLog;
+    private static java.lang.String codebaseProperty;
+    private static java.net.URL[] codebaseURLs;
+    private static final java.util.Map codebaseLoaders;
+    private static final java.util.HashMap loaderTable;
+    private static final java.lang.ref.ReferenceQueue refQueue;
+    private static final java.util.Map pathToURLsCache;
+
+    private void <init>()
+    {
+        sun.rmi.server.LoaderHandler r0;
+
+        r0 := @this: sun.rmi.server.LoaderHandler;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static synchronized java.net.URL[] getDefaultCodebaseURLs() throws java.net.MalformedURLException
+    {
+        java.net.URL[] $r0, $r2, $r4, $r5;
+        java.lang.String $r1, $r3;
+
+        $r0 = <sun.rmi.server.LoaderHandler: java.net.URL[] codebaseURLs>;
+
+        if $r0 != null goto label2;
+
+        $r1 = <sun.rmi.server.LoaderHandler: java.lang.String codebaseProperty>;
+
+        if $r1 == null goto label1;
+
+        $r3 = <sun.rmi.server.LoaderHandler: java.lang.String codebaseProperty>;
+
+        $r4 = staticinvoke <sun.rmi.server.LoaderHandler: java.net.URL[] pathToURLs(java.lang.String)>($r3);
+
+        <sun.rmi.server.LoaderHandler: java.net.URL[] codebaseURLs> = $r4;
+
+        goto label2;
+
+     label1:
+        $r2 = newarray (java.net.URL)[0];
+
+        <sun.rmi.server.LoaderHandler: java.net.URL[] codebaseURLs> = $r2;
+
+     label2:
+        $r5 = <sun.rmi.server.LoaderHandler: java.net.URL[] codebaseURLs>;
+
+        return $r5;
+    }
+
+    public static java.lang.Class loadClass(java.lang.String, java.lang.String, java.lang.ClassLoader) throws java.net.MalformedURLException, java.lang.ClassNotFoundException
+    {
+        java.net.URL[] r34;
+        boolean $z0, $z1;
+        sun.rmi.runtime.Log $r1, $r8, $r10, $r19;
+        java.lang.StringBuilder $r9, $r12, $r13, $r14, $r16, $r18, $r21, $r22, $r23, $r24, $r25, $r26, $r28, $r29, $r30;
+        java.lang.ClassLoader r3, $r15;
+        java.util.logging.Level $r0, $r7, $r11, $r20;
+        java.lang.String r2, r4, $r17, $r27, $r32, $r33;
+        java.lang.Class $r5, $r6;
+        java.lang.ClassNotFoundException $r31;
+
+        r2 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.ClassLoader;
+
+        $r1 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r0 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z0 = virtualinvoke $r1.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r0);
+
+        if $z0 == 0 goto label05;
+
+        $r19 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r20 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("name = \"");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\", codebase = \"");
+
+        if r2 == null goto label01;
+
+        $r32 = r2;
+
+        goto label02;
+
+     label01:
+        $r32 = "";
+
+     label02:
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r32);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        if r3 == null goto label03;
+
+        $r28 = new java.lang.StringBuilder;
+
+        specialinvoke $r28.<java.lang.StringBuilder: void <init>()>();
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", defaultLoader = ");
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r3);
+
+        $r33 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label04;
+
+     label03:
+        $r33 = "";
+
+     label04:
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r33);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r19.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r20, $r27);
+
+     label05:
+        if r2 == null goto label06;
+
+        r34 = staticinvoke <sun.rmi.server.LoaderHandler: java.net.URL[] pathToURLs(java.lang.String)>(r2);
+
+        goto label07;
+
+     label06:
+        r34 = staticinvoke <sun.rmi.server.LoaderHandler: java.net.URL[] getDefaultCodebaseURLs()>();
+
+     label07:
+        if r3 == null goto label11;
+
+     label08:
+        $r6 = staticinvoke <sun.rmi.server.LoaderHandler: java.lang.Class loadClassForName(java.lang.String,boolean,java.lang.ClassLoader)>(r4, 0, r3);
+
+        $r8 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r7 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z1 = virtualinvoke $r8.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r7);
+
+        if $z1 == 0 goto label09;
+
+        $r10 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r11 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("class \"");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\" found via defaultLoader, defined by ");
+
+        $r15 = virtualinvoke $r6.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r10.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r11, $r17);
+
+     label09:
+        return $r6;
+
+     label10:
+        $r31 := @caughtexception;
+
+     label11:
+        $r5 = staticinvoke <sun.rmi.server.LoaderHandler: java.lang.Class loadClass(java.net.URL[],java.lang.String)>(r34, r4);
+
+        return $r5;
+
+        catch java.lang.ClassNotFoundException from label08 to label09 with label10;
+    }
+
+    public static java.lang.String getClassAnnotation(java.lang.Class)
+    {
+        java.net.URL $r9;
+        java.net.URL[] $r6;
+        java.net.URLClassLoader $r5;
+        java.net.URLConnection $r10;
+        java.util.Map $r3;
+        int $i0, $i1, i5, i6, $i7, $i8, $i9;
+        java.lang.String $r1, $r2, $r4, r15;
+        boolean $z0, $z1, $z2, $z3;
+        java.security.Permissions $r16;
+        char $c2, $c3, $c4;
+        java.lang.SecurityManager $r7;
+        java.lang.Exception $r13;
+        java.security.Permission $r11;
+        sun.rmi.server.LoaderHandler$Loader $r12;
+        java.lang.Class r0;
+        java.lang.ClassLoader $r14;
+
+        r0 := @parameter0: java.lang.Class;
+
+        $r1 = virtualinvoke r0.<java.lang.Class: java.lang.String getName()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label03;
+
+        $c2 = virtualinvoke $r1.<java.lang.String: char charAt(int)>(0);
+
+        $i7 = (int) $c2;
+
+        if $i7 != 91 goto label03;
+
+        i5 = 1;
+
+     label01:
+        if $i0 <= i5 goto label02;
+
+        $c4 = virtualinvoke $r1.<java.lang.String: char charAt(int)>(i5);
+
+        $i8 = (int) $c4;
+
+        if $i8 != 91 goto label02;
+
+        i5 = i5 + 1;
+
+        goto label01;
+
+     label02:
+        if $i0 <= i5 goto label03;
+
+        $c3 = virtualinvoke $r1.<java.lang.String: char charAt(int)>(i5);
+
+        $i9 = (int) $c3;
+
+        if $i9 == 76 goto label03;
+
+        return null;
+
+     label03:
+        $r14 = virtualinvoke r0.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        if $r14 == null goto label04;
+
+        $r3 = <sun.rmi.server.LoaderHandler: java.util.Map codebaseLoaders>;
+
+        $z0 = interfaceinvoke $r3.<java.util.Map: boolean containsKey(java.lang.Object)>($r14);
+
+        if $z0 == 0 goto label05;
+
+     label04:
+        $r2 = <sun.rmi.server.LoaderHandler: java.lang.String codebaseProperty>;
+
+        return $r2;
+
+     label05:
+        r15 = null;
+
+        $z1 = $r14 instanceof sun.rmi.server.LoaderHandler$Loader;
+
+        if $z1 == 0 goto label06;
+
+        $r12 = (sun.rmi.server.LoaderHandler$Loader) $r14;
+
+        r15 = virtualinvoke $r12.<sun.rmi.server.LoaderHandler$Loader: java.lang.String getClassAnnotation()>();
+
+        goto label13;
+
+     label06:
+        $z2 = $r14 instanceof java.net.URLClassLoader;
+
+        if $z2 == 0 goto label13;
+
+     label07:
+        $r5 = (java.net.URLClassLoader) $r14;
+
+        $r6 = virtualinvoke $r5.<java.net.URLClassLoader: java.net.URL[] getURLs()>();
+
+        if $r6 == null goto label11;
+
+        $r7 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r7 == null goto label10;
+
+        $r16 = new java.security.Permissions;
+
+        specialinvoke $r16.<java.security.Permissions: void <init>()>();
+
+        i6 = 0;
+
+     label08:
+        $i1 = lengthof $r6;
+
+        if i6 >= $i1 goto label10;
+
+        $r9 = $r6[i6];
+
+        $r10 = virtualinvoke $r9.<java.net.URL: java.net.URLConnection openConnection()>();
+
+        $r11 = virtualinvoke $r10.<java.net.URLConnection: java.security.Permission getPermission()>();
+
+        if $r11 == null goto label09;
+
+        $z3 = virtualinvoke $r16.<java.security.Permissions: boolean implies(java.security.Permission)>($r11);
+
+        if $z3 != 0 goto label09;
+
+        virtualinvoke $r7.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r11);
+
+        virtualinvoke $r16.<java.security.Permissions: void add(java.security.Permission)>($r11);
+
+     label09:
+        i6 = i6 + 1;
+
+        goto label08;
+
+     label10:
+        r15 = staticinvoke <sun.rmi.server.LoaderHandler: java.lang.String urlsToPath(java.net.URL[])>($r6);
+
+     label11:
+        goto label13;
+
+     label12:
+        $r13 := @caughtexception;
+
+     label13:
+        if r15 == null goto label14;
+
+        return r15;
+
+     label14:
+        $r4 = <sun.rmi.server.LoaderHandler: java.lang.String codebaseProperty>;
+
+        return $r4;
+
+        catch java.lang.SecurityException from label07 to label11 with label12;
+        catch java.io.IOException from label07 to label11 with label12;
+    }
+
+    public static java.lang.ClassLoader getClassLoader(java.lang.String) throws java.net.MalformedURLException
+    {
+        java.net.URL[] r5;
+        sun.rmi.server.LoaderHandler$Loader $r4;
+        java.lang.RuntimePermission $r3;
+        java.lang.ClassLoader $r0;
+        java.lang.String r1;
+        java.lang.SecurityManager $r2;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = staticinvoke <sun.rmi.server.LoaderHandler: java.lang.ClassLoader getRMIContextClassLoader()>();
+
+        if r1 == null goto label1;
+
+        r5 = staticinvoke <sun.rmi.server.LoaderHandler: java.net.URL[] pathToURLs(java.lang.String)>(r1);
+
+        goto label2;
+
+     label1:
+        r5 = staticinvoke <sun.rmi.server.LoaderHandler: java.net.URL[] getDefaultCodebaseURLs()>();
+
+     label2:
+        $r2 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r2 == null goto label3;
+
+        $r3 = new java.lang.RuntimePermission;
+
+        specialinvoke $r3.<java.lang.RuntimePermission: void <init>(java.lang.String)>("getClassLoader");
+
+        virtualinvoke $r2.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r3);
+
+        goto label4;
+
+     label3:
+        return $r0;
+
+     label4:
+        $r4 = staticinvoke <sun.rmi.server.LoaderHandler: sun.rmi.server.LoaderHandler$Loader lookupLoader(java.net.URL[],java.lang.ClassLoader)>(r5, $r0);
+
+        if $r4 == null goto label5;
+
+        staticinvoke <sun.rmi.server.LoaderHandler$Loader: void access$000(sun.rmi.server.LoaderHandler$Loader)>($r4);
+
+     label5:
+        return $r4;
+    }
+
+    public static java.lang.Object getSecurityContext(java.lang.ClassLoader)
+    {
+        java.net.URL[] $r2;
+        sun.rmi.server.LoaderHandler$Loader $r1;
+        java.net.URL $r3;
+        int $i0;
+        java.lang.ClassLoader r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.ClassLoader;
+
+        $z0 = r0 instanceof sun.rmi.server.LoaderHandler$Loader;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = (sun.rmi.server.LoaderHandler$Loader) r0;
+
+        $r2 = virtualinvoke $r1.<sun.rmi.server.LoaderHandler$Loader: java.net.URL[] getURLs()>();
+
+        $i0 = lengthof $r2;
+
+        if $i0 <= 0 goto label1;
+
+        $r3 = $r2[0];
+
+        return $r3;
+
+     label1:
+        return null;
+    }
+
+    public static void registerCodebaseLoader(java.lang.ClassLoader)
+    {
+        java.lang.ClassLoader r0;
+        java.util.Map $r1;
+
+        r0 := @parameter0: java.lang.ClassLoader;
+
+        $r1 = <sun.rmi.server.LoaderHandler: java.util.Map codebaseLoaders>;
+
+        interfaceinvoke $r1.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r0, null);
+
+        return;
+    }
+
+    private static java.lang.Class loadClass(java.net.URL[], java.lang.String) throws java.lang.ClassNotFoundException
+    {
+        sun.rmi.runtime.Log $r2, $r9, $r11, $r21, $r23, $r32, $r40, $r42, $r50, $r53, $r62, $r64, $r74, $r83;
+        java.lang.StringBuilder $r10, $r13, $r14, $r15, $r17, $r22, $r25, $r26, $r27, $r29, $r31, $r34, $r35, $r36, $r41, $r44, $r45, $r46, $r52, $r55, $r56, $r57, $r63, $r66, $r67, $r68, $r70, $r76, $r78, $r79, $r82, $r85, $r86, $r87;
+        java.lang.ClassLoader $r0, $r16, $r28, $r69;
+        java.lang.Throwable $r81;
+        java.lang.String r6, $r18, $r30, $r37, $r47, $r58, $r71, $r77, $r80, $r88;
+        sun.rmi.server.LoaderHandler$Loader $r5;
+        java.lang.ClassNotFoundException $r38, $r48, $r51, $r72, $r75;
+        java.net.URL[] r4;
+        java.lang.SecurityException $r59;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.util.logging.Level $r1, $r8, $r12, $r20, $r24, $r33, $r39, $r43, $r49, $r54, $r61, $r65, $r73, $r84;
+        java.lang.SecurityManager $r3;
+        java.lang.Class $r7, $r19, $r60;
+
+        r4 := @parameter0: java.net.URL[];
+
+        r6 := @parameter1: java.lang.String;
+
+        $r0 = staticinvoke <sun.rmi.server.LoaderHandler: java.lang.ClassLoader getRMIContextClassLoader()>();
+
+        $r2 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r1 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z0 = virtualinvoke $r2.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r1);
+
+        if $z0 == 0 goto label01;
+
+        $r32 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r33 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r31 = new java.lang.StringBuilder;
+
+        specialinvoke $r31.<java.lang.StringBuilder: void <init>()>();
+
+        $r34 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(thread context class loader: ");
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r0);
+
+        $r36 = virtualinvoke $r35.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r32.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r33, $r37);
+
+     label01:
+        $r3 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r3 != null goto label06;
+
+     label02:
+        $r19 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>(r6, 0, $r0);
+
+        $r21 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r20 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z2 = virtualinvoke $r21.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r20);
+
+        if $z2 == 0 goto label03;
+
+        $r23 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r24 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("class \"");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\" found via thread context class loader (no security manager: codebase disabled), defined by ");
+
+        $r28 = virtualinvoke $r19.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $r29 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r28);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r23.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r24, $r30);
+
+     label03:
+        return $r19;
+
+     label04:
+        $r72 := @caughtexception;
+
+        $r74 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r73 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z6 = virtualinvoke $r74.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r73);
+
+        if $z6 == 0 goto label05;
+
+        $r83 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r84 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $r82 = new java.lang.StringBuilder;
+
+        specialinvoke $r82.<java.lang.StringBuilder: void <init>()>();
+
+        $r85 = virtualinvoke $r82.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("class \"");
+
+        $r86 = virtualinvoke $r85.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r87 = virtualinvoke $r86.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\" not found via thread context class loader (no security manager: codebase disabled)");
+
+        $r88 = virtualinvoke $r87.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r83.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r84, $r88, $r72);
+
+     label05:
+        $r75 = new java.lang.ClassNotFoundException;
+
+        $r76 = new java.lang.StringBuilder;
+
+        specialinvoke $r76.<java.lang.StringBuilder: void <init>()>();
+
+        $r77 = virtualinvoke $r72.<java.lang.ClassNotFoundException: java.lang.String getMessage()>();
+
+        $r78 = virtualinvoke $r76.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r77);
+
+        $r79 = virtualinvoke $r78.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" (no security manager: RMI class loader disabled)");
+
+        $r80 = virtualinvoke $r79.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r81 = virtualinvoke $r72.<java.lang.ClassNotFoundException: java.lang.Throwable getException()>();
+
+        specialinvoke $r75.<java.lang.ClassNotFoundException: void <init>(java.lang.String,java.lang.Throwable)>($r80, $r81);
+
+        throw $r75;
+
+     label06:
+        $r5 = staticinvoke <sun.rmi.server.LoaderHandler: sun.rmi.server.LoaderHandler$Loader lookupLoader(java.net.URL[],java.lang.ClassLoader)>(r4, $r0);
+
+     label07:
+        if $r5 == null goto label08;
+
+        staticinvoke <sun.rmi.server.LoaderHandler$Loader: void access$000(sun.rmi.server.LoaderHandler$Loader)>($r5);
+
+     label08:
+        goto label14;
+
+     label09:
+        $r59 := @caughtexception;
+
+     label10:
+        $r60 = staticinvoke <sun.rmi.server.LoaderHandler: java.lang.Class loadClassForName(java.lang.String,boolean,java.lang.ClassLoader)>(r6, 0, $r0);
+
+        $r62 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r61 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z5 = virtualinvoke $r62.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r61);
+
+        if $z5 == 0 goto label11;
+
+        $r64 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r65 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r63 = new java.lang.StringBuilder;
+
+        specialinvoke $r63.<java.lang.StringBuilder: void <init>()>();
+
+        $r66 = virtualinvoke $r63.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("class \"");
+
+        $r67 = virtualinvoke $r66.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r68 = virtualinvoke $r67.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\" found via thread context class loader (access to codebase denied), defined by ");
+
+        $r69 = virtualinvoke $r60.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $r70 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r69);
+
+        $r71 = virtualinvoke $r70.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r64.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r65, $r71);
+
+     label11:
+        return $r60;
+
+     label12:
+        $r48 := @caughtexception;
+
+        $r50 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r49 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z4 = virtualinvoke $r50.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r49);
+
+        if $z4 == 0 goto label13;
+
+        $r53 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r54 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $r52 = new java.lang.StringBuilder;
+
+        specialinvoke $r52.<java.lang.StringBuilder: void <init>()>();
+
+        $r55 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("class \"");
+
+        $r56 = virtualinvoke $r55.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r57 = virtualinvoke $r56.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\" not found via thread context class loader (access to codebase denied)");
+
+        $r58 = virtualinvoke $r57.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r53.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r54, $r58, $r59);
+
+     label13:
+        $r51 = new java.lang.ClassNotFoundException;
+
+        specialinvoke $r51.<java.lang.ClassNotFoundException: void <init>(java.lang.String,java.lang.Throwable)>("access to class loader denied", $r59);
+
+        throw $r51;
+
+     label14:
+        $r7 = staticinvoke <sun.rmi.server.LoaderHandler: java.lang.Class loadClassForName(java.lang.String,boolean,java.lang.ClassLoader)>(r6, 0, $r5);
+
+        $r9 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r8 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z1 = virtualinvoke $r9.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r8);
+
+        if $z1 == 0 goto label15;
+
+        $r11 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r12 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("class \"");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\" found via codebase, defined by ");
+
+        $r16 = virtualinvoke $r7.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $r17 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r16);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r11.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r12, $r18);
+
+     label15:
+        return $r7;
+
+     label16:
+        $r38 := @caughtexception;
+
+        $r40 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r39 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z3 = virtualinvoke $r40.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r39);
+
+        if $z3 == 0 goto label17;
+
+        $r42 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r43 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $r41 = new java.lang.StringBuilder;
+
+        specialinvoke $r41.<java.lang.StringBuilder: void <init>()>();
+
+        $r44 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("class \"");
+
+        $r45 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\" not found via codebase");
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r42.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r43, $r47, $r38);
+
+     label17:
+        throw $r38;
+
+        catch java.lang.ClassNotFoundException from label02 to label03 with label04;
+        catch java.lang.SecurityException from label07 to label08 with label09;
+        catch java.lang.ClassNotFoundException from label10 to label11 with label12;
+        catch java.lang.ClassNotFoundException from label14 to label15 with label16;
+    }
+
+    public static java.lang.Class loadProxyClass(java.lang.String, java.lang.String[], java.lang.ClassLoader) throws java.net.MalformedURLException, java.lang.ClassNotFoundException
+    {
+        sun.rmi.runtime.Log $r1, $r9, $r11, $r19, $r21, $r28, $r35, $r50, $r52, $r55, $r58, $r62, $r64, $r72, $r81, $r85;
+        java.lang.StringBuilder $r10, $r13, $r15, $r20, $r23, $r25, $r27, $r30, $r31, $r32, $r34, $r37, $r39, $r40, $r41, $r42, $r43, $r45, $r46, $r47, $r63, $r66, $r68, $r74, $r76, $r77;
+        java.lang.ClassLoader r6, $r14, $r24, $r67, $r84;
+        java.lang.Throwable $r79;
+        java.lang.String r2, $r16, $r26, $r33, $r44, $r69, $r75, $r78, $r82, $r83;
+        sun.rmi.server.LoaderHandler$Loader $r4;
+        java.lang.ClassNotFoundException $r48, $r53, $r56, $r70, $r73;
+        java.net.URL[] r87;
+        java.lang.SecurityException $r59;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        java.util.List $r38;
+        java.lang.String[] r5;
+        java.util.logging.Level $r0, $r8, $r12, $r18, $r22, $r29, $r36, $r49, $r51, $r54, $r57, $r61, $r65, $r71, $r80, $r86;
+        java.lang.SecurityManager $r3;
+        java.lang.Class $r7, $r17, $r60;
+
+        r2 := @parameter0: java.lang.String;
+
+        r5 := @parameter1: java.lang.String[];
+
+        r6 := @parameter2: java.lang.ClassLoader;
+
+        $r1 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r0 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z0 = virtualinvoke $r1.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r0);
+
+        if $z0 == 0 goto label05;
+
+        $r35 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r36 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $r34 = new java.lang.StringBuilder;
+
+        specialinvoke $r34.<java.lang.StringBuilder: void <init>()>();
+
+        $r37 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("interfaces = ");
+
+        $r38 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>(r5);
+
+        $r39 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r38);
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", codebase = \"");
+
+        if r2 == null goto label01;
+
+        $r82 = r2;
+
+        goto label02;
+
+     label01:
+        $r82 = "";
+
+     label02:
+        $r41 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r82);
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        if r6 == null goto label03;
+
+        $r45 = new java.lang.StringBuilder;
+
+        specialinvoke $r45.<java.lang.StringBuilder: void <init>()>();
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", defaultLoader = ");
+
+        $r47 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r6);
+
+        $r83 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label04;
+
+     label03:
+        $r83 = "";
+
+     label04:
+        $r43 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r83);
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r35.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r36, $r44);
+
+     label05:
+        $r84 = staticinvoke <sun.rmi.server.LoaderHandler: java.lang.ClassLoader getRMIContextClassLoader()>();
+
+        $r85 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r86 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z7 = virtualinvoke $r85.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r86);
+
+        if $z7 == 0 goto label06;
+
+        $r28 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r29 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r30 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(thread context class loader: ");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r84);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r28.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r29, $r33);
+
+     label06:
+        if r2 == null goto label07;
+
+        r87 = staticinvoke <sun.rmi.server.LoaderHandler: java.net.URL[] pathToURLs(java.lang.String)>(r2);
+
+        goto label08;
+
+     label07:
+        r87 = staticinvoke <sun.rmi.server.LoaderHandler: java.net.URL[] getDefaultCodebaseURLs()>();
+
+     label08:
+        $r3 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r3 != null goto label13;
+
+     label09:
+        $r17 = staticinvoke <sun.rmi.server.LoaderHandler: java.lang.Class loadProxyClass(java.lang.String[],java.lang.ClassLoader,java.lang.ClassLoader,boolean)>(r5, r6, $r84, 0);
+
+        $r19 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r18 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z2 = virtualinvoke $r19.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r18);
+
+        if $z2 == 0 goto label10;
+
+        $r21 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r22 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(no security manager: codebase disabled) proxy class defined by ");
+
+        $r24 = virtualinvoke $r17.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $r25 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r24);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r21.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r22, $r26);
+
+     label10:
+        return $r17;
+
+     label11:
+        $r70 := @caughtexception;
+
+        $r72 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r71 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z6 = virtualinvoke $r72.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r71);
+
+        if $z6 == 0 goto label12;
+
+        $r81 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r80 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        virtualinvoke $r81.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r80, "(no security manager: codebase disabled) proxy class resolution failed", $r70);
+
+     label12:
+        $r73 = new java.lang.ClassNotFoundException;
+
+        $r74 = new java.lang.StringBuilder;
+
+        specialinvoke $r74.<java.lang.StringBuilder: void <init>()>();
+
+        $r75 = virtualinvoke $r70.<java.lang.ClassNotFoundException: java.lang.String getMessage()>();
+
+        $r76 = virtualinvoke $r74.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r75);
+
+        $r77 = virtualinvoke $r76.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" (no security manager: RMI class loader disabled)");
+
+        $r78 = virtualinvoke $r77.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r79 = virtualinvoke $r70.<java.lang.ClassNotFoundException: java.lang.Throwable getException()>();
+
+        specialinvoke $r73.<java.lang.ClassNotFoundException: void <init>(java.lang.String,java.lang.Throwable)>($r78, $r79);
+
+        throw $r73;
+
+     label13:
+        $r4 = staticinvoke <sun.rmi.server.LoaderHandler: sun.rmi.server.LoaderHandler$Loader lookupLoader(java.net.URL[],java.lang.ClassLoader)>(r87, $r84);
+
+     label14:
+        if $r4 == null goto label15;
+
+        staticinvoke <sun.rmi.server.LoaderHandler$Loader: void access$000(sun.rmi.server.LoaderHandler$Loader)>($r4);
+
+     label15:
+        goto label21;
+
+     label16:
+        $r59 := @caughtexception;
+
+     label17:
+        $r60 = staticinvoke <sun.rmi.server.LoaderHandler: java.lang.Class loadProxyClass(java.lang.String[],java.lang.ClassLoader,java.lang.ClassLoader,boolean)>(r5, r6, $r84, 0);
+
+        $r62 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r61 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z5 = virtualinvoke $r62.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r61);
+
+        if $z5 == 0 goto label18;
+
+        $r64 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r65 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r63 = new java.lang.StringBuilder;
+
+        specialinvoke $r63.<java.lang.StringBuilder: void <init>()>();
+
+        $r66 = virtualinvoke $r63.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(access to codebase denied) proxy class defined by ");
+
+        $r67 = virtualinvoke $r60.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $r68 = virtualinvoke $r66.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r67);
+
+        $r69 = virtualinvoke $r68.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r64.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r65, $r69);
+
+     label18:
+        return $r60;
+
+     label19:
+        $r53 := @caughtexception;
+
+        $r55 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r54 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z4 = virtualinvoke $r55.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r54);
+
+        if $z4 == 0 goto label20;
+
+        $r58 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r57 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        virtualinvoke $r58.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r57, "(access to codebase denied) proxy class resolution failed", $r59);
+
+     label20:
+        $r56 = new java.lang.ClassNotFoundException;
+
+        specialinvoke $r56.<java.lang.ClassNotFoundException: void <init>(java.lang.String,java.lang.Throwable)>("access to class loader denied", $r59);
+
+        throw $r56;
+
+     label21:
+        $r7 = staticinvoke <sun.rmi.server.LoaderHandler: java.lang.Class loadProxyClass(java.lang.String[],java.lang.ClassLoader,java.lang.ClassLoader,boolean)>(r5, r6, $r4, 1);
+
+        $r9 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r8 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z1 = virtualinvoke $r9.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r8);
+
+        if $z1 == 0 goto label22;
+
+        $r11 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r12 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("proxy class defined by ");
+
+        $r14 = virtualinvoke $r7.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r11.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r12, $r16);
+
+     label22:
+        return $r7;
+
+     label23:
+        $r48 := @caughtexception;
+
+        $r50 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r49 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z3 = virtualinvoke $r50.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r49);
+
+        if $z3 == 0 goto label24;
+
+        $r52 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r51 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        virtualinvoke $r52.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r51, "proxy class resolution failed", $r48);
+
+     label24:
+        throw $r48;
+
+        catch java.lang.ClassNotFoundException from label09 to label10 with label11;
+        catch java.lang.SecurityException from label14 to label15 with label16;
+        catch java.lang.ClassNotFoundException from label17 to label18 with label19;
+        catch java.lang.ClassNotFoundException from label21 to label22 with label23;
+    }
+
+    private static java.lang.Class loadProxyClass(java.lang.String[], java.lang.ClassLoader, java.lang.ClassLoader, boolean) throws java.lang.ClassNotFoundException
+    {
+        java.lang.ClassLoader[] r32, r35;
+        boolean $z0, $z1, $z2, $z3, z4;
+        sun.rmi.runtime.Log $r6, $r9, $r18, $r21;
+        java.util.List $r12, $r24;
+        java.lang.StringBuilder $r8, $r11, $r13, $r20, $r23, $r25;
+        java.lang.ClassLoader r3, r4, $r16, $r28, r31, r34;
+        java.lang.String[] r0;
+        java.util.logging.Level $r5, $r10, $r17, $r22;
+        int $i0, $i1, $i2, $i3, $i4, i5, i6;
+        java.lang.String $r14, $r26;
+        boolean[] $r2;
+        java.lang.Class[] r1;
+        java.lang.IllegalArgumentException $r29;
+        java.lang.Class $r7, $r15, $r19, $r27, $r33;
+        java.lang.ClassNotFoundException $r30;
+
+        r0 := @parameter0: java.lang.String[];
+
+        r3 := @parameter1: java.lang.ClassLoader;
+
+        r4 := @parameter2: java.lang.ClassLoader;
+
+        z4 := @parameter3: boolean;
+
+        $i0 = lengthof r0;
+
+        r1 = newarray (java.lang.Class)[$i0];
+
+        $r2 = newarray (boolean)[1];
+
+        $r2[0] = 0;
+
+        if r3 == null goto label12;
+
+     label01:
+        r31 = staticinvoke <sun.rmi.server.LoaderHandler: java.lang.ClassLoader loadProxyInterfaces(java.lang.String[],java.lang.ClassLoader,java.lang.Class[],boolean[])>(r0, r3, r1, $r2);
+
+        $r18 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r17 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z2 = virtualinvoke $r18.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r17);
+
+        if $z2 == 0 goto label04;
+
+        $i3 = lengthof r1;
+
+        r32 = newarray (java.lang.ClassLoader)[$i3];
+
+        i5 = 0;
+
+     label02:
+        $i4 = lengthof r32;
+
+        if i5 >= $i4 goto label03;
+
+        $r27 = r1[i5];
+
+        $r28 = virtualinvoke $r27.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        r32[i5] = $r28;
+
+        i5 = i5 + 1;
+
+        goto label02;
+
+     label03:
+        $r21 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r22 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("proxy interfaces found via defaultLoader, defined by ");
+
+        $r24 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>(r32);
+
+        $r25 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r24);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r21.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r22, $r26);
+
+     label04:
+        goto label06;
+
+     label05:
+        $r30 := @caughtexception;
+
+        goto label12;
+
+     label06:
+        $z3 = $r2[0];
+
+        if $z3 != 0 goto label11;
+
+        if z4 == 0 goto label10;
+
+     label07:
+        $r19 = staticinvoke <java.lang.reflect.Proxy: java.lang.Class getProxyClass(java.lang.ClassLoader,java.lang.Class[])>(r4, r1);
+
+     label08:
+        return $r19;
+
+     label09:
+        $r29 := @caughtexception;
+
+     label10:
+        r31 = r3;
+
+     label11:
+        $r33 = staticinvoke <sun.rmi.server.LoaderHandler: java.lang.Class loadProxyClass(java.lang.ClassLoader,java.lang.Class[])>(r31, r1);
+
+        return $r33;
+
+     label12:
+        $r2[0] = 0;
+
+        r34 = staticinvoke <sun.rmi.server.LoaderHandler: java.lang.ClassLoader loadProxyInterfaces(java.lang.String[],java.lang.ClassLoader,java.lang.Class[],boolean[])>(r0, r4, r1, $r2);
+
+        $r6 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r5 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z0 = virtualinvoke $r6.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r5);
+
+        if $z0 == 0 goto label15;
+
+        $i1 = lengthof r1;
+
+        r35 = newarray (java.lang.ClassLoader)[$i1];
+
+        i6 = 0;
+
+     label13:
+        $i2 = lengthof r35;
+
+        if i6 >= $i2 goto label14;
+
+        $r15 = r1[i6];
+
+        $r16 = virtualinvoke $r15.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        r35[i6] = $r16;
+
+        i6 = i6 + 1;
+
+        goto label13;
+
+     label14:
+        $r9 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r10 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("proxy interfaces found via codebase, defined by ");
+
+        $r12 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>(r35);
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r9.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r10, $r14);
+
+     label15:
+        $z1 = $r2[0];
+
+        if $z1 != 0 goto label16;
+
+        r34 = r4;
+
+     label16:
+        $r7 = staticinvoke <sun.rmi.server.LoaderHandler: java.lang.Class loadProxyClass(java.lang.ClassLoader,java.lang.Class[])>(r34, r1);
+
+        return $r7;
+
+        catch java.lang.ClassNotFoundException from label01 to label04 with label05;
+        catch java.lang.IllegalArgumentException from label07 to label08 with label09;
+    }
+
+    private static java.lang.Class loadProxyClass(java.lang.ClassLoader, java.lang.Class[]) throws java.lang.ClassNotFoundException
+    {
+        java.lang.Class[] r1;
+        java.lang.Class $r2;
+        java.lang.ClassNotFoundException $r4;
+        java.lang.ClassLoader r0;
+        java.lang.IllegalArgumentException $r3;
+
+        r0 := @parameter0: java.lang.ClassLoader;
+
+        r1 := @parameter1: java.lang.Class[];
+
+     label1:
+        $r2 = staticinvoke <java.lang.reflect.Proxy: java.lang.Class getProxyClass(java.lang.ClassLoader,java.lang.Class[])>(r0, r1);
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.lang.ClassNotFoundException;
+
+        specialinvoke $r4.<java.lang.ClassNotFoundException: void <init>(java.lang.String,java.lang.Throwable)>("error creating dynamic proxy class", $r3);
+
+        throw $r4;
+
+        catch java.lang.IllegalArgumentException from label1 to label2 with label3;
+    }
+
+    private static java.lang.ClassLoader loadProxyInterfaces(java.lang.String[], java.lang.ClassLoader, java.lang.Class[], boolean[]) throws java.lang.ClassNotFoundException
+    {
+        java.lang.String[] r0;
+        java.util.logging.Level $r6, $r12;
+        int $i0, $i1, i2;
+        java.lang.String $r3, $r14, $r18;
+        boolean $z0, $z1, $z2;
+        boolean[] r8;
+        java.lang.Class[] r1;
+        sun.rmi.runtime.Log $r7, $r11;
+        java.lang.IllegalAccessError $r9;
+        java.lang.Class $r4;
+        java.lang.StringBuilder $r10, $r13, $r15, $r16, $r17;
+        java.lang.ClassLoader r2, $r5, r19;
+
+        r0 := @parameter0: java.lang.String[];
+
+        r2 := @parameter1: java.lang.ClassLoader;
+
+        r1 := @parameter2: java.lang.Class[];
+
+        r8 := @parameter3: boolean[];
+
+        r19 = null;
+
+        i2 = 0;
+
+     label1:
+        $i0 = lengthof r0;
+
+        if i2 >= $i0 goto label5;
+
+        $r3 = r0[i2];
+
+        $r4 = staticinvoke <sun.rmi.server.LoaderHandler: java.lang.Class loadClassForName(java.lang.String,boolean,java.lang.ClassLoader)>($r3, 0, r2);
+
+        r1[i2] = $r4;
+
+        $i1 = virtualinvoke $r4.<java.lang.Class: int getModifiers()>();
+
+        $z0 = staticinvoke <java.lang.reflect.Modifier: boolean isPublic(int)>($i1);
+
+        if $z0 != 0 goto label4;
+
+        $r5 = virtualinvoke $r4.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $r7 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r6 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z1 = virtualinvoke $r7.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r6);
+
+        if $z1 == 0 goto label2;
+
+        $r11 = <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog>;
+
+        $r12 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("non-public interface \"");
+
+        $r14 = r0[i2];
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\" defined by ");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r5);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r11.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r12, $r18);
+
+     label2:
+        $z2 = r8[0];
+
+        if $z2 != 0 goto label3;
+
+        r19 = $r5;
+
+        r8[0] = 1;
+
+        goto label4;
+
+     label3:
+        if $r5 == r19 goto label4;
+
+        $r9 = new java.lang.IllegalAccessError;
+
+        specialinvoke $r9.<java.lang.IllegalAccessError: void <init>(java.lang.String)>("non-public interfaces defined in different class loaders");
+
+        throw $r9;
+
+     label4:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label5:
+        return r19;
+    }
+
+    private static java.net.URL[] pathToURLs(java.lang.String) throws java.net.MalformedURLException
+    {
+        java.lang.Throwable $r14, $r15;
+        java.lang.Object[] $r6, r16;
+        java.net.URL $r9;
+        java.net.URL[] $r12, $r13, r17;
+        java.util.StringTokenizer $r4;
+        java.util.Map $r0, $r2, $r5, $r8;
+        int $i0, i1;
+        java.lang.String r1, $r10;
+        java.lang.ref.SoftReference $r7;
+        boolean $z0;
+        java.lang.Object $r3, $r11;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = <sun.rmi.server.LoaderHandler: java.util.Map pathToURLsCache>;
+
+        entermonitor $r0;
+
+     label01:
+        $r2 = <sun.rmi.server.LoaderHandler: java.util.Map pathToURLsCache>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r16 = (java.lang.Object[]) $r3;
+
+        if r16 == null goto label03;
+
+        $r11 = r16[0];
+
+        $r12 = (java.net.URL[]) $r11;
+
+        $r13 = (java.net.URL[]) $r12;
+
+        exitmonitor $r0;
+
+     label02:
+        return $r13;
+
+     label03:
+        exitmonitor $r0;
+
+     label04:
+        goto label07;
+
+     label05:
+        $r15 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label06:
+        throw $r15;
+
+     label07:
+        $r4 = new java.util.StringTokenizer;
+
+        specialinvoke $r4.<java.util.StringTokenizer: void <init>(java.lang.String)>(r1);
+
+        $i0 = virtualinvoke $r4.<java.util.StringTokenizer: int countTokens()>();
+
+        r17 = newarray (java.net.URL)[$i0];
+
+        i1 = 0;
+
+     label08:
+        $z0 = virtualinvoke $r4.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label09;
+
+        $r9 = new java.net.URL;
+
+        $r10 = virtualinvoke $r4.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        specialinvoke $r9.<java.net.URL: void <init>(java.lang.String)>($r10);
+
+        r17[i1] = $r9;
+
+        i1 = i1 + 1;
+
+        goto label08;
+
+     label09:
+        $r5 = <sun.rmi.server.LoaderHandler: java.util.Map pathToURLsCache>;
+
+        entermonitor $r5;
+
+     label10:
+        $r8 = <sun.rmi.server.LoaderHandler: java.util.Map pathToURLsCache>;
+
+        $r6 = newarray (java.lang.Object)[2];
+
+        $r6[0] = r17;
+
+        $r7 = new java.lang.ref.SoftReference;
+
+        specialinvoke $r7.<java.lang.ref.SoftReference: void <init>(java.lang.Object)>(r1);
+
+        $r6[1] = $r7;
+
+        interfaceinvoke $r8.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r6);
+
+        exitmonitor $r5;
+
+     label11:
+        goto label14;
+
+     label12:
+        $r14 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label13:
+        throw $r14;
+
+     label14:
+        return r17;
+
+        catch java.lang.Throwable from label01 to label02 with label05;
+        catch java.lang.Throwable from label03 to label04 with label05;
+        catch java.lang.Throwable from label05 to label06 with label05;
+        catch java.lang.Throwable from label10 to label11 with label12;
+        catch java.lang.Throwable from label12 to label13 with label12;
+    }
+
+    private static java.lang.String urlsToPath(java.net.URL[])
+    {
+        java.net.URL $r2, $r5, $r7;
+        java.net.URL[] r0;
+        java.lang.StringBuffer $r1;
+        int $i0, $i1, $i2, i3;
+        java.lang.String $r3, $r4, $r6, $r8;
+
+        r0 := @parameter0: java.net.URL[];
+
+        $i0 = lengthof r0;
+
+        if $i0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $i1 = lengthof r0;
+
+        if $i1 != 1 goto label2;
+
+        $r7 = r0[0];
+
+        $r8 = virtualinvoke $r7.<java.net.URL: java.lang.String toExternalForm()>();
+
+        return $r8;
+
+     label2:
+        $r1 = new java.lang.StringBuffer;
+
+        $r2 = r0[0];
+
+        $r3 = virtualinvoke $r2.<java.net.URL: java.lang.String toExternalForm()>();
+
+        specialinvoke $r1.<java.lang.StringBuffer: void <init>(java.lang.String)>($r3);
+
+        i3 = 1;
+
+     label3:
+        $i2 = lengthof r0;
+
+        if i3 >= $i2 goto label4;
+
+        virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(32);
+
+        $r5 = r0[i3];
+
+        $r6 = virtualinvoke $r5.<java.net.URL: java.lang.String toExternalForm()>();
+
+        virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r6);
+
+        i3 = i3 + 1;
+
+        goto label3;
+
+     label4:
+        $r4 = virtualinvoke $r1.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r4;
+    }
+
+    private static java.lang.ClassLoader getRMIContextClassLoader()
+    {
+        java.lang.ClassLoader $r1;
+        java.lang.Thread $r0;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.Thread: java.lang.ClassLoader getContextClassLoader()>();
+
+        return $r1;
+    }
+
+    private static sun.rmi.server.LoaderHandler$Loader lookupLoader(java.net.URL[], java.lang.ClassLoader)
+    {
+        java.security.AccessControlContext $r5;
+        java.lang.Throwable $r16;
+        java.util.HashMap $r3, $r9, $r10, $r15;
+        java.lang.ref.ReferenceQueue $r17;
+        java.net.URL[] r1;
+        boolean $z0;
+        sun.rmi.server.LoaderHandler$LoaderEntry $r8, $r19, r20;
+        sun.rmi.server.LoaderHandler$1 $r6;
+        java.lang.ref.Reference $r18;
+        sun.rmi.server.LoaderHandler$LoaderKey $r0, $r14;
+        sun.rmi.server.LoaderHandler$Loader $r11, $r13, r21;
+        java.lang.Object $r4, $r7, $r12;
+        java.lang.ClassLoader r2;
+
+        r1 := @parameter0: java.net.URL[];
+
+        r2 := @parameter1: java.lang.ClassLoader;
+
+        entermonitor class "Lsun/rmi/server/LoaderHandler;";
+
+     label1:
+        $r17 = <sun.rmi.server.LoaderHandler: java.lang.ref.ReferenceQueue refQueue>;
+
+        $r18 = virtualinvoke $r17.<java.lang.ref.ReferenceQueue: java.lang.ref.Reference poll()>();
+
+        $r19 = (sun.rmi.server.LoaderHandler$LoaderEntry) $r18;
+
+        if $r19 == null goto label2;
+
+        $z0 = $r19.<sun.rmi.server.LoaderHandler$LoaderEntry: boolean removed>;
+
+        if $z0 != 0 goto label1;
+
+        $r15 = <sun.rmi.server.LoaderHandler: java.util.HashMap loaderTable>;
+
+        $r14 = $r19.<sun.rmi.server.LoaderHandler$LoaderEntry: sun.rmi.server.LoaderHandler$LoaderKey key>;
+
+        virtualinvoke $r15.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>($r14);
+
+        goto label1;
+
+     label2:
+        $r0 = new sun.rmi.server.LoaderHandler$LoaderKey;
+
+        specialinvoke $r0.<sun.rmi.server.LoaderHandler$LoaderKey: void <init>(java.net.URL[],java.lang.ClassLoader)>(r1, r2);
+
+        $r3 = <sun.rmi.server.LoaderHandler: java.util.HashMap loaderTable>;
+
+        $r4 = virtualinvoke $r3.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r0);
+
+        r20 = (sun.rmi.server.LoaderHandler$LoaderEntry) $r4;
+
+        if r20 == null goto label3;
+
+        $r12 = virtualinvoke r20.<sun.rmi.server.LoaderHandler$LoaderEntry: java.lang.Object get()>();
+
+        $r13 = (sun.rmi.server.LoaderHandler$Loader) $r12;
+
+        r21 = $r13;
+
+        if $r13 != null goto label5;
+
+     label3:
+        if r20 == null goto label4;
+
+        $r10 = <sun.rmi.server.LoaderHandler: java.util.HashMap loaderTable>;
+
+        virtualinvoke $r10.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>($r0);
+
+        r20.<sun.rmi.server.LoaderHandler$LoaderEntry: boolean removed> = 1;
+
+     label4:
+        $r5 = staticinvoke <sun.rmi.server.LoaderHandler: java.security.AccessControlContext getLoaderAccessControlContext(java.net.URL[])>(r1);
+
+        $r6 = new sun.rmi.server.LoaderHandler$1;
+
+        specialinvoke $r6.<sun.rmi.server.LoaderHandler$1: void <init>(java.net.URL[],java.lang.ClassLoader)>(r1, r2);
+
+        $r7 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction,java.security.AccessControlContext)>($r6, $r5);
+
+        $r11 = (sun.rmi.server.LoaderHandler$Loader) $r7;
+
+        r21 = $r11;
+
+        $r8 = new sun.rmi.server.LoaderHandler$LoaderEntry;
+
+        specialinvoke $r8.<sun.rmi.server.LoaderHandler$LoaderEntry: void <init>(sun.rmi.server.LoaderHandler$LoaderKey,sun.rmi.server.LoaderHandler$Loader)>($r0, $r11);
+
+        $r9 = <sun.rmi.server.LoaderHandler: java.util.HashMap loaderTable>;
+
+        virtualinvoke $r9.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r0, $r8);
+
+     label5:
+        exitmonitor class "Lsun/rmi/server/LoaderHandler;";
+
+     label6:
+        goto label9;
+
+     label7:
+        $r16 := @caughtexception;
+
+        exitmonitor class "Lsun/rmi/server/LoaderHandler;";
+
+     label8:
+        throw $r16;
+
+     label9:
+        return r21;
+
+        catch java.lang.Throwable from label1 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    private static java.security.AccessControlContext getLoaderAccessControlContext(java.net.URL[])
+    {
+        java.security.AccessControlContext $r9;
+        java.net.URL $r11;
+        sun.rmi.server.LoaderHandler$2 $r0;
+        java.security.PermissionCollection r2;
+        java.util.PropertyPermission $r4;
+        java.net.URL[] r5;
+        java.security.ProtectionDomain[] $r10;
+        java.security.ProtectionDomain $r6;
+        int $i0;
+        java.lang.Object $r1;
+        java.lang.RuntimePermission $r3;
+        java.security.cert.Certificate[] $r8;
+        java.security.CodeSource $r7;
+
+        r5 := @parameter0: java.net.URL[];
+
+        $r0 = new sun.rmi.server.LoaderHandler$2;
+
+        specialinvoke $r0.<sun.rmi.server.LoaderHandler$2: void <init>()>();
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r2 = (java.security.PermissionCollection) $r1;
+
+        $r3 = new java.lang.RuntimePermission;
+
+        specialinvoke $r3.<java.lang.RuntimePermission: void <init>(java.lang.String)>("createClassLoader");
+
+        virtualinvoke r2.<java.security.PermissionCollection: void add(java.security.Permission)>($r3);
+
+        $r4 = new java.util.PropertyPermission;
+
+        specialinvoke $r4.<java.util.PropertyPermission: void <init>(java.lang.String,java.lang.String)>("java.*", "read");
+
+        virtualinvoke r2.<java.security.PermissionCollection: void add(java.security.Permission)>($r4);
+
+        staticinvoke <sun.rmi.server.LoaderHandler: void addPermissionsForURLs(java.net.URL[],java.security.PermissionCollection,boolean)>(r5, r2, 1);
+
+        $r6 = new java.security.ProtectionDomain;
+
+        $r7 = new java.security.CodeSource;
+
+        $i0 = lengthof r5;
+
+        if $i0 <= 0 goto label1;
+
+        $r11 = r5[0];
+
+        goto label2;
+
+     label1:
+        $r11 = null;
+
+     label2:
+        $r8 = (java.security.cert.Certificate[]) null;
+
+        specialinvoke $r7.<java.security.CodeSource: void <init>(java.net.URL,java.security.cert.Certificate[])>($r11, $r8);
+
+        specialinvoke $r6.<java.security.ProtectionDomain: void <init>(java.security.CodeSource,java.security.PermissionCollection)>($r7, r2);
+
+        $r9 = new java.security.AccessControlContext;
+
+        $r10 = newarray (java.security.ProtectionDomain)[1];
+
+        $r10[0] = $r6;
+
+        specialinvoke $r9.<java.security.AccessControlContext: void <init>(java.security.ProtectionDomain[])>($r10);
+
+        return $r9;
+    }
+
+    private static void addPermissionsForURLs(java.net.URL[], java.security.PermissionCollection, boolean)
+    {
+        java.net.URL r1, $r9, r20;
+        java.net.URL[] r0;
+        java.io.FilePermission $r23, $r24;
+        java.net.SocketPermission $r25, $r26;
+        java.net.JarURLConnection $r8;
+        boolean $z0, $z1, z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        java.security.Permission $r3;
+        java.lang.StringBuilder $r16, $r17, $r22;
+        java.net.URLConnection $r2, r21;
+        int $i0, $i2, $i3, i4, $i5, $i7;
+        java.lang.String $r5, $r10, $r11, $r12, r19;
+        char $c1;
+        java.io.IOException $r18;
+        java.security.PermissionCollection r4;
+
+        r0 := @parameter0: java.net.URL[];
+
+        r4 := @parameter1: java.security.PermissionCollection;
+
+        z2 := @parameter2: boolean;
+
+        i4 = 0;
+
+     label01:
+        $i0 = lengthof r0;
+
+        if i4 >= $i0 goto label14;
+
+        r1 = r0[i4];
+
+     label02:
+        $r2 = virtualinvoke r1.<java.net.URL: java.net.URLConnection openConnection()>();
+
+        $r3 = virtualinvoke $r2.<java.net.URLConnection: java.security.Permission getPermission()>();
+
+        if $r3 == null goto label11;
+
+        $z0 = $r3 instanceof java.io.FilePermission;
+
+        if $z0 == 0 goto label07;
+
+        $r10 = virtualinvoke $r3.<java.security.Permission: java.lang.String getName()>();
+
+        $c1 = <java.io.File: char separatorChar>;
+
+        $i5 = (int) $c1;
+
+        $i2 = virtualinvoke $r10.<java.lang.String: int lastIndexOf(int)>($i5);
+
+        $i7 = (int) -1;
+
+        if $i2 == $i7 goto label05;
+
+        $i3 = $i2 + 1;
+
+        $r11 = virtualinvoke $r10.<java.lang.String: java.lang.String substring(int,int)>(0, $i3);
+
+        r19 = $r11;
+
+        $r12 = <java.io.File: java.lang.String separator>;
+
+        $z7 = virtualinvoke $r11.<java.lang.String: boolean endsWith(java.lang.String)>($r12);
+
+        if $z7 == 0 goto label03;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-");
+
+        r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label03:
+        $r23 = new java.io.FilePermission;
+
+        specialinvoke $r23.<java.io.FilePermission: void <init>(java.lang.String,java.lang.String)>(r19, "read");
+
+        $z8 = virtualinvoke r4.<java.security.PermissionCollection: boolean implies(java.security.Permission)>($r23);
+
+        if $z8 != 0 goto label04;
+
+        virtualinvoke r4.<java.security.PermissionCollection: void add(java.security.Permission)>($r23);
+
+     label04:
+        $r24 = new java.io.FilePermission;
+
+        specialinvoke $r24.<java.io.FilePermission: void <init>(java.lang.String,java.lang.String)>(r19, "read");
+
+        virtualinvoke r4.<java.security.PermissionCollection: void add(java.security.Permission)>($r24);
+
+        goto label06;
+
+     label05:
+        $z6 = virtualinvoke r4.<java.security.PermissionCollection: boolean implies(java.security.Permission)>($r3);
+
+        if $z6 != 0 goto label06;
+
+        virtualinvoke r4.<java.security.PermissionCollection: void add(java.security.Permission)>($r3);
+
+     label06:
+        goto label11;
+
+     label07:
+        $z1 = virtualinvoke r4.<java.security.PermissionCollection: boolean implies(java.security.Permission)>($r3);
+
+        if $z1 != 0 goto label08;
+
+        virtualinvoke r4.<java.security.PermissionCollection: void add(java.security.Permission)>($r3);
+
+     label08:
+        if z2 == 0 goto label11;
+
+        r20 = r1;
+
+        r21 = $r2;
+
+     label09:
+        $z3 = r21 instanceof java.net.JarURLConnection;
+
+        if $z3 == 0 goto label10;
+
+        $r8 = (java.net.JarURLConnection) r21;
+
+        $r9 = virtualinvoke $r8.<java.net.JarURLConnection: java.net.URL getJarFileURL()>();
+
+        r20 = $r9;
+
+        r21 = virtualinvoke $r9.<java.net.URL: java.net.URLConnection openConnection()>();
+
+        goto label09;
+
+     label10:
+        $r5 = virtualinvoke r20.<java.net.URL: java.lang.String getHost()>();
+
+        if $r5 == null goto label11;
+
+        $r25 = new java.net.SocketPermission;
+
+        specialinvoke $r25.<java.net.SocketPermission: void <init>(java.lang.String,java.lang.String)>($r5, "resolve");
+
+        $z4 = virtualinvoke $r3.<java.security.Permission: boolean implies(java.security.Permission)>($r25);
+
+        if $z4 == 0 goto label11;
+
+        $r26 = new java.net.SocketPermission;
+
+        specialinvoke $r26.<java.net.SocketPermission: void <init>(java.lang.String,java.lang.String)>($r5, "connect,accept");
+
+        $z5 = virtualinvoke r4.<java.security.PermissionCollection: boolean implies(java.security.Permission)>($r26);
+
+        if $z5 != 0 goto label11;
+
+        virtualinvoke r4.<java.security.PermissionCollection: void add(java.security.Permission)>($r26);
+
+     label11:
+        goto label13;
+
+     label12:
+        $r18 := @caughtexception;
+
+     label13:
+        i4 = i4 + 1;
+
+        goto label01;
+
+     label14:
+        return;
+
+        catch java.io.IOException from label02 to label11 with label12;
+    }
+
+    private static java.lang.Class loadClassForName(java.lang.String, boolean, java.lang.ClassLoader) throws java.lang.ClassNotFoundException
+    {
+        java.lang.Class $r2;
+        java.lang.ClassLoader r0;
+        java.lang.String r1;
+        boolean z0;
+
+        r1 := @parameter0: java.lang.String;
+
+        z0 := @parameter1: boolean;
+
+        r0 := @parameter2: java.lang.ClassLoader;
+
+        if r0 != null goto label1;
+
+        staticinvoke <sun.reflect.misc.ReflectUtil: void checkPackageAccess(java.lang.String)>(r1);
+
+     label1:
+        $r2 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>(r1, z0, r0);
+
+        return $r2;
+    }
+
+    static java.lang.ref.ReferenceQueue access$200()
+    {
+        java.lang.ref.ReferenceQueue $r0;
+
+        $r0 = <sun.rmi.server.LoaderHandler: java.lang.ref.ReferenceQueue refQueue>;
+
+        return $r0;
+    }
+
+    static void access$300(java.net.URL[], java.security.PermissionCollection, boolean)
+    {
+        java.net.URL[] r0;
+        java.security.PermissionCollection r1;
+        boolean z0;
+
+        r0 := @parameter0: java.net.URL[];
+
+        r1 := @parameter1: java.security.PermissionCollection;
+
+        z0 := @parameter2: boolean;
+
+        staticinvoke <sun.rmi.server.LoaderHandler: void addPermissionsForURLs(java.net.URL[],java.security.PermissionCollection,boolean)>(r0, r1, z0);
+
+        return;
+    }
+
+    static java.lang.String access$400(java.net.URL[])
+    {
+        java.net.URL[] r0;
+        java.lang.String $r1;
+
+        r0 := @parameter0: java.net.URL[];
+
+        $r1 = staticinvoke <sun.rmi.server.LoaderHandler: java.lang.String urlsToPath(java.net.URL[])>(r0);
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        java.util.HashMap $r6;
+        sun.security.action.GetPropertyAction $r0, $r4;
+        java.lang.ref.ReferenceQueue $r7;
+        java.util.Map $r9, $r13;
+        int $i0, $i1, $i2;
+        java.lang.String $r2, $r10, r11;
+        java.util.WeakHashMap $r8;
+        java.util.IdentityHashMap $r12;
+        sun.rmi.runtime.Log $r3;
+        java.lang.Object $r1, $r5;
+        java.lang.ClassLoader r14;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("sun.rmi.loader.logLevel");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r2 = (java.lang.String) $r1;
+
+        $i0 = staticinvoke <java.rmi.server.LogStream: int parseLevel(java.lang.String)>($r2);
+
+        <sun.rmi.server.LoaderHandler: int logLevel> = $i0;
+
+        $i1 = <sun.rmi.server.LoaderHandler: int logLevel>;
+
+        $r3 = staticinvoke <sun.rmi.runtime.Log: sun.rmi.runtime.Log getLog(java.lang.String,java.lang.String,int)>("sun.rmi.loader", "loader", $i1);
+
+        <sun.rmi.server.LoaderHandler: sun.rmi.runtime.Log loaderLog> = $r3;
+
+        <sun.rmi.server.LoaderHandler: java.lang.String codebaseProperty> = null;
+
+        $r4 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r4.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("java.rmi.server.codebase");
+
+        $r5 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r4);
+
+        r11 = (java.lang.String) $r5;
+
+        if r11 == null goto label1;
+
+        $r10 = virtualinvoke r11.<java.lang.String: java.lang.String trim()>();
+
+        $i2 = virtualinvoke $r10.<java.lang.String: int length()>();
+
+        if $i2 <= 0 goto label1;
+
+        <sun.rmi.server.LoaderHandler: java.lang.String codebaseProperty> = r11;
+
+     label1:
+        <sun.rmi.server.LoaderHandler: java.net.URL[] codebaseURLs> = null;
+
+        $r12 = new java.util.IdentityHashMap;
+
+        specialinvoke $r12.<java.util.IdentityHashMap: void <init>(int)>(5);
+
+        $r13 = staticinvoke <java.util.Collections: java.util.Map synchronizedMap(java.util.Map)>($r12);
+
+        <sun.rmi.server.LoaderHandler: java.util.Map codebaseLoaders> = $r13;
+
+        r14 = staticinvoke <java.lang.ClassLoader: java.lang.ClassLoader getSystemClassLoader()>();
+
+     label2:
+        if r14 == null goto label3;
+
+        $r9 = <sun.rmi.server.LoaderHandler: java.util.Map codebaseLoaders>;
+
+        interfaceinvoke $r9.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r14, null);
+
+        r14 = virtualinvoke r14.<java.lang.ClassLoader: java.lang.ClassLoader getParent()>();
+
+        goto label2;
+
+     label3:
+        $r6 = new java.util.HashMap;
+
+        specialinvoke $r6.<java.util.HashMap: void <init>(int)>(5);
+
+        <sun.rmi.server.LoaderHandler: java.util.HashMap loaderTable> = $r6;
+
+        $r7 = new java.lang.ref.ReferenceQueue;
+
+        specialinvoke $r7.<java.lang.ref.ReferenceQueue: void <init>()>();
+
+        <sun.rmi.server.LoaderHandler: java.lang.ref.ReferenceQueue refQueue> = $r7;
+
+        $r8 = new java.util.WeakHashMap;
+
+        specialinvoke $r8.<java.util.WeakHashMap: void <init>(int)>(5);
+
+        <sun.rmi.server.LoaderHandler: java.util.Map pathToURLsCache> = $r8;
+
+        return;
+    }
+}

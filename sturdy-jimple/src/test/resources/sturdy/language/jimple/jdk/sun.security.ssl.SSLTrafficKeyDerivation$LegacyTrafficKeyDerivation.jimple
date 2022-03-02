@@ -1,0 +1,367 @@
+final class sun.security.ssl.SSLTrafficKeyDerivation$LegacyTrafficKeyDerivation extends java.lang.Object implements sun.security.ssl.SSLKeyDerivation
+{
+    private final sun.security.ssl.HandshakeContext context;
+    private final javax.crypto.SecretKey masterSecret;
+    private final sun.security.internal.spec.TlsKeyMaterialSpec keyMaterialSpec;
+
+    void <init>(sun.security.ssl.HandshakeContext, javax.crypto.SecretKey)
+    {
+        byte[] $r18, $r20;
+        sun.security.ssl.CipherSuite$MacAlg $r5;
+        javax.crypto.KeyGenerator $r23;
+        java.security.GeneralSecurityException $r12;
+        byte $b4, $b5;
+        boolean z0, $z1;
+        java.security.ProviderException $r27;
+        sun.security.ssl.SSLTrafficKeyDerivation$LegacyTrafficKeyDerivation r0;
+        javax.crypto.SecretKey r2, $r24;
+        sun.security.ssl.CipherSuite r3;
+        sun.security.internal.spec.TlsKeyMaterialSpec $r25;
+        sun.security.internal.spec.TlsKeyMaterialParameterSpec $r26;
+        sun.security.ssl.ProtocolVersion r4, $r7;
+        sun.security.ssl.SSLCipher r6;
+        short $s8, $s9, $s13, $s14;
+        sun.security.ssl.CipherType $r8, $r9, $r10, $r11;
+        sun.security.ssl.CipherSuite$HashAlg r15;
+        int i0, i1, $i2, $i3, $i6, i7, $i10, $i11, $i12, $i15, $i16;
+        java.lang.String r14, $r21, $r22;
+        sun.security.ssl.RandomCookie $r17, $r19;
+        sun.security.ssl.HandshakeContext r1;
+
+        r0 := @this: sun.security.ssl.SSLTrafficKeyDerivation$LegacyTrafficKeyDerivation;
+
+        r1 := @parameter0: sun.security.ssl.HandshakeContext;
+
+        r2 := @parameter1: javax.crypto.SecretKey;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.ssl.SSLTrafficKeyDerivation$LegacyTrafficKeyDerivation: sun.security.ssl.HandshakeContext context> = r1;
+
+        r0.<sun.security.ssl.SSLTrafficKeyDerivation$LegacyTrafficKeyDerivation: javax.crypto.SecretKey masterSecret> = r2;
+
+        r3 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.CipherSuite negotiatedCipherSuite>;
+
+        r4 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.ProtocolVersion negotiatedProtocol>;
+
+        $r5 = r3.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$MacAlg macAlg>;
+
+        i0 = $r5.<sun.security.ssl.CipherSuite$MacAlg: int size>;
+
+        z0 = r3.<sun.security.ssl.CipherSuite: boolean exportable>;
+
+        r6 = r3.<sun.security.ssl.CipherSuite: sun.security.ssl.SSLCipher bulkCipher>;
+
+        if z0 == 0 goto label01;
+
+        $i6 = r6.<sun.security.ssl.SSLCipher: int expandedKeySize>;
+
+        goto label02;
+
+     label01:
+        $i6 = 0;
+
+     label02:
+        i1 = $i6;
+
+        $b4 = r4.<sun.security.ssl.ProtocolVersion: byte major>;
+
+        $b5 = r4.<sun.security.ssl.ProtocolVersion: byte minor>;
+
+        $i3 = r4.<sun.security.ssl.ProtocolVersion: int id>;
+
+        $r7 = <sun.security.ssl.ProtocolVersion: sun.security.ssl.ProtocolVersion TLS12>;
+
+        $i2 = $r7.<sun.security.ssl.ProtocolVersion: int id>;
+
+        if $i3 < $i2 goto label03;
+
+        r14 = "SunTls12KeyMaterial";
+
+        r15 = r3.<sun.security.ssl.CipherSuite: sun.security.ssl.CipherSuite$HashAlg hashAlg>;
+
+        goto label04;
+
+     label03:
+        r14 = "SunTlsKeyMaterial";
+
+        r15 = <sun.security.ssl.CipherSuite$HashAlg: sun.security.ssl.CipherSuite$HashAlg H_NONE>;
+
+     label04:
+        i7 = r6.<sun.security.ssl.SSLCipher: int ivSize>;
+
+        $r9 = r6.<sun.security.ssl.SSLCipher: sun.security.ssl.CipherType cipherType>;
+
+        $r8 = <sun.security.ssl.CipherType: sun.security.ssl.CipherType AEAD_CIPHER>;
+
+        if $r9 != $r8 goto label05;
+
+        i7 = r6.<sun.security.ssl.SSLCipher: int fixedIvSize>;
+
+        goto label06;
+
+     label05:
+        $r11 = r6.<sun.security.ssl.SSLCipher: sun.security.ssl.CipherType cipherType>;
+
+        $r10 = <sun.security.ssl.CipherType: sun.security.ssl.CipherType BLOCK_CIPHER>;
+
+        if $r11 != $r10 goto label06;
+
+        $z1 = virtualinvoke r4.<sun.security.ssl.ProtocolVersion: boolean useTLS11PlusSpec()>();
+
+        if $z1 == 0 goto label06;
+
+        i7 = 0;
+
+     label06:
+        $r26 = new sun.security.internal.spec.TlsKeyMaterialParameterSpec;
+
+        $s13 = (short) $b4;
+
+        $s8 = $s13 & 255;
+
+        $s14 = (short) $b5;
+
+        $s9 = $s14 & 255;
+
+        $r17 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.RandomCookie clientHelloRandom>;
+
+        $r18 = $r17.<sun.security.ssl.RandomCookie: byte[] randomBytes>;
+
+        $r19 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.RandomCookie serverHelloRandom>;
+
+        $r20 = $r19.<sun.security.ssl.RandomCookie: byte[] randomBytes>;
+
+        $r21 = r6.<sun.security.ssl.SSLCipher: java.lang.String algorithm>;
+
+        $i10 = r6.<sun.security.ssl.SSLCipher: int keySize>;
+
+        $r22 = r15.<sun.security.ssl.CipherSuite$HashAlg: java.lang.String name>;
+
+        $i11 = r15.<sun.security.ssl.CipherSuite$HashAlg: int hashLength>;
+
+        $i12 = r15.<sun.security.ssl.CipherSuite$HashAlg: int blockSize>;
+
+        $i15 = (int) $s8;
+
+        $i16 = (int) $s9;
+
+        specialinvoke $r26.<sun.security.internal.spec.TlsKeyMaterialParameterSpec: void <init>(javax.crypto.SecretKey,int,int,byte[],byte[],java.lang.String,int,int,int,int,java.lang.String,int,int)>(r2, $i15, $i16, $r18, $r20, $r21, $i10, i1, i7, i0, $r22, $i11, $i12);
+
+     label07:
+        $r23 = staticinvoke <sun.security.ssl.JsseJce: javax.crypto.KeyGenerator getKeyGenerator(java.lang.String)>(r14);
+
+        virtualinvoke $r23.<javax.crypto.KeyGenerator: void init(java.security.spec.AlgorithmParameterSpec)>($r26);
+
+        $r24 = virtualinvoke $r23.<javax.crypto.KeyGenerator: javax.crypto.SecretKey generateKey()>();
+
+        $r25 = (sun.security.internal.spec.TlsKeyMaterialSpec) $r24;
+
+        r0.<sun.security.ssl.SSLTrafficKeyDerivation$LegacyTrafficKeyDerivation: sun.security.internal.spec.TlsKeyMaterialSpec keyMaterialSpec> = $r25;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r12 := @caughtexception;
+
+        $r27 = new java.security.ProviderException;
+
+        specialinvoke $r27.<java.security.ProviderException: void <init>(java.lang.Throwable)>($r12);
+
+        throw $r27;
+
+     label10:
+        return;
+
+        catch java.security.GeneralSecurityException from label07 to label08 with label09;
+    }
+
+    javax.crypto.SecretKey getTrafficKey(java.lang.String)
+    {
+        byte[] $r4, $r7;
+        javax.crypto.spec.SecretKeySpec $r16, $r17;
+        javax.crypto.spec.IvParameterSpec $r3, $r6;
+        byte b1;
+        int $i0;
+        java.lang.String r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        sun.security.ssl.SSLTrafficKeyDerivation$LegacyTrafficKeyDerivation r1;
+        javax.crypto.SecretKey $r9, $r11, $r13, $r15;
+        sun.security.internal.spec.TlsKeyMaterialSpec $r2, $r5, $r8, $r10, $r12, $r14;
+
+        r1 := @this: sun.security.ssl.SSLTrafficKeyDerivation$LegacyTrafficKeyDerivation;
+
+        r0 := @parameter0: java.lang.String;
+
+        b1 = -1;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int hashCode()>();
+
+        lookupswitch($i0)
+        {
+            case -1716638551: goto label06;
+            case -1702941973: goto label03;
+            case -1676186013: goto label04;
+            case -1622415813: goto label01;
+            case 1720625075: goto label02;
+            case 2023276321: goto label05;
+            default: goto label07;
+        };
+
+     label01:
+        $z2 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("clientMacKey");
+
+        if $z2 == 0 goto label07;
+
+        b1 = 0;
+
+        goto label07;
+
+     label02:
+        $z1 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("serverMacKey");
+
+        if $z1 == 0 goto label07;
+
+        b1 = 1;
+
+        goto label07;
+
+     label03:
+        $z4 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("clientWriteKey");
+
+        if $z4 == 0 goto label07;
+
+        b1 = 2;
+
+        goto label07;
+
+     label04:
+        $z3 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("serverWriteKey");
+
+        if $z3 == 0 goto label07;
+
+        b1 = 3;
+
+        goto label07;
+
+     label05:
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("clientWriteIv");
+
+        if $z0 == 0 goto label07;
+
+        b1 = 4;
+
+        goto label07;
+
+     label06:
+        $z5 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("serverWriteIv");
+
+        if $z5 == 0 goto label07;
+
+        b1 = 5;
+
+     label07:
+        tableswitch(b1)
+        {
+            case 0: goto label08;
+            case 1: goto label09;
+            case 2: goto label10;
+            case 3: goto label11;
+            case 4: goto label12;
+            case 5: goto label15;
+            default: goto label18;
+        };
+
+     label08:
+        $r14 = r1.<sun.security.ssl.SSLTrafficKeyDerivation$LegacyTrafficKeyDerivation: sun.security.internal.spec.TlsKeyMaterialSpec keyMaterialSpec>;
+
+        $r15 = virtualinvoke $r14.<sun.security.internal.spec.TlsKeyMaterialSpec: javax.crypto.SecretKey getClientMacKey()>();
+
+        return $r15;
+
+     label09:
+        $r12 = r1.<sun.security.ssl.SSLTrafficKeyDerivation$LegacyTrafficKeyDerivation: sun.security.internal.spec.TlsKeyMaterialSpec keyMaterialSpec>;
+
+        $r13 = virtualinvoke $r12.<sun.security.internal.spec.TlsKeyMaterialSpec: javax.crypto.SecretKey getServerMacKey()>();
+
+        return $r13;
+
+     label10:
+        $r10 = r1.<sun.security.ssl.SSLTrafficKeyDerivation$LegacyTrafficKeyDerivation: sun.security.internal.spec.TlsKeyMaterialSpec keyMaterialSpec>;
+
+        $r11 = virtualinvoke $r10.<sun.security.internal.spec.TlsKeyMaterialSpec: javax.crypto.SecretKey getClientCipherKey()>();
+
+        return $r11;
+
+     label11:
+        $r8 = r1.<sun.security.ssl.SSLTrafficKeyDerivation$LegacyTrafficKeyDerivation: sun.security.internal.spec.TlsKeyMaterialSpec keyMaterialSpec>;
+
+        $r9 = virtualinvoke $r8.<sun.security.internal.spec.TlsKeyMaterialSpec: javax.crypto.SecretKey getServerCipherKey()>();
+
+        return $r9;
+
+     label12:
+        $r5 = r1.<sun.security.ssl.SSLTrafficKeyDerivation$LegacyTrafficKeyDerivation: sun.security.internal.spec.TlsKeyMaterialSpec keyMaterialSpec>;
+
+        $r6 = virtualinvoke $r5.<sun.security.internal.spec.TlsKeyMaterialSpec: javax.crypto.spec.IvParameterSpec getClientIv()>();
+
+        if $r6 != null goto label13;
+
+        $r16 = null;
+
+        goto label14;
+
+     label13:
+        $r16 = new javax.crypto.spec.SecretKeySpec;
+
+        $r7 = virtualinvoke $r6.<javax.crypto.spec.IvParameterSpec: byte[] getIV()>();
+
+        specialinvoke $r16.<javax.crypto.spec.SecretKeySpec: void <init>(byte[],java.lang.String)>($r7, "TlsIv");
+
+     label14:
+        return $r16;
+
+     label15:
+        $r2 = r1.<sun.security.ssl.SSLTrafficKeyDerivation$LegacyTrafficKeyDerivation: sun.security.internal.spec.TlsKeyMaterialSpec keyMaterialSpec>;
+
+        $r3 = virtualinvoke $r2.<sun.security.internal.spec.TlsKeyMaterialSpec: javax.crypto.spec.IvParameterSpec getServerIv()>();
+
+        if $r3 != null goto label16;
+
+        $r17 = null;
+
+        goto label17;
+
+     label16:
+        $r17 = new javax.crypto.spec.SecretKeySpec;
+
+        $r4 = virtualinvoke $r3.<javax.crypto.spec.IvParameterSpec: byte[] getIV()>();
+
+        specialinvoke $r17.<javax.crypto.spec.SecretKeySpec: void <init>(byte[],java.lang.String)>($r4, "TlsIv");
+
+     label17:
+        return $r17;
+
+     label18:
+        return null;
+    }
+
+    public javax.crypto.SecretKey deriveKey(java.lang.String, java.security.spec.AlgorithmParameterSpec) throws java.io.IOException
+    {
+        java.lang.String r1;
+        javax.crypto.SecretKey $r2;
+        java.security.spec.AlgorithmParameterSpec r3;
+        sun.security.ssl.SSLTrafficKeyDerivation$LegacyTrafficKeyDerivation r0;
+
+        r0 := @this: sun.security.ssl.SSLTrafficKeyDerivation$LegacyTrafficKeyDerivation;
+
+        r1 := @parameter0: java.lang.String;
+
+        r3 := @parameter1: java.security.spec.AlgorithmParameterSpec;
+
+        $r2 = virtualinvoke r0.<sun.security.ssl.SSLTrafficKeyDerivation$LegacyTrafficKeyDerivation: javax.crypto.SecretKey getTrafficKey(java.lang.String)>(r1);
+
+        return $r2;
+    }
+}

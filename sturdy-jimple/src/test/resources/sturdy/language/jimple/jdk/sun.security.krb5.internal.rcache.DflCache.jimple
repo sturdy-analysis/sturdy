@@ -1,0 +1,384 @@
+public class sun.security.krb5.internal.rcache.DflCache extends sun.security.krb5.internal.ReplayCache
+{
+    private static final int KRB5_RV_VNO;
+    private static final int EXCESSREPS;
+    private final java.lang.String source;
+    private static int uid;
+
+    public void <init>(java.lang.String)
+    {
+        java.lang.String r1;
+        sun.security.krb5.internal.rcache.DflCache r0;
+
+        r0 := @this: sun.security.krb5.internal.rcache.DflCache;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<sun.security.krb5.internal.ReplayCache: void <init>()>();
+
+        r0.<sun.security.krb5.internal.rcache.DflCache: java.lang.String source> = r1;
+
+        return;
+    }
+
+    private static java.lang.String defaultPath()
+    {
+        java.lang.Object $r1;
+        java.lang.String $r2;
+        sun.security.action.GetPropertyAction $r0;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("java.io.tmpdir");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r2 = (java.lang.String) $r1;
+
+        return $r2;
+    }
+
+    private static java.lang.String defaultFile(java.lang.String)
+    {
+        int $i0, $i1, $i2, i3, $i5, $i7, $i9;
+        java.lang.StringBuilder $r1, $r2, $r3, $r5;
+        java.lang.String r4;
+
+        r4 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r4.<java.lang.String: int indexOf(int)>(47);
+
+        i3 = $i0;
+
+        $i5 = (int) -1;
+
+        if $i0 != $i5 goto label1;
+
+        i3 = virtualinvoke r4.<java.lang.String: int indexOf(int)>(64);
+
+     label1:
+        $i7 = (int) -1;
+
+        if i3 == $i7 goto label2;
+
+        r4 = virtualinvoke r4.<java.lang.String: java.lang.String substring(int,int)>(0, i3);
+
+     label2:
+        $i1 = <sun.security.krb5.internal.rcache.DflCache: int uid>;
+
+        $i9 = (int) -1;
+
+        if $i1 == $i9 goto label3;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("_");
+
+        $i2 = <sun.security.krb5.internal.rcache.DflCache: int uid>;
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label3:
+        return r4;
+    }
+
+    private static java.nio.file.Path getFileName(java.lang.String, java.lang.String)
+    {
+        int $i0, $i1, i2, $i4;
+        java.lang.String $r1, r5, r6, r7, r8;
+        java.nio.file.Path $r4;
+        boolean $z0, $z1, $z2;
+        java.lang.IllegalArgumentException $r10;
+        java.io.File $r9, $r11;
+
+        r6 := @parameter0: java.lang.String;
+
+        r5 := @parameter1: java.lang.String;
+
+        $z0 = virtualinvoke r6.<java.lang.String: boolean equals(java.lang.Object)>("dfl");
+
+        if $z0 == 0 goto label1;
+
+        r7 = staticinvoke <sun.security.krb5.internal.rcache.DflCache: java.lang.String defaultPath()>();
+
+        r8 = staticinvoke <sun.security.krb5.internal.rcache.DflCache: java.lang.String defaultFile(java.lang.String)>(r5);
+
+        goto label7;
+
+     label1:
+        $z1 = virtualinvoke r6.<java.lang.String: boolean startsWith(java.lang.String)>("dfl:");
+
+        if $z1 == 0 goto label6;
+
+        $r1 = virtualinvoke r6.<java.lang.String: java.lang.String substring(int)>(4);
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int lastIndexOf(int)>(47);
+
+        i2 = $i0;
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int lastIndexOf(int)>(92);
+
+        if $i1 <= $i0 goto label2;
+
+        i2 = $i1;
+
+     label2:
+        $i4 = (int) -1;
+
+        if i2 != $i4 goto label3;
+
+        r7 = staticinvoke <sun.security.krb5.internal.rcache.DflCache: java.lang.String defaultPath()>();
+
+        r8 = $r1;
+
+        goto label5;
+
+     label3:
+        $r9 = new java.io.File;
+
+        specialinvoke $r9.<java.io.File: void <init>(java.lang.String)>($r1);
+
+        $z2 = virtualinvoke $r9.<java.io.File: boolean isDirectory()>();
+
+        if $z2 == 0 goto label4;
+
+        r7 = $r1;
+
+        r8 = staticinvoke <sun.security.krb5.internal.rcache.DflCache: java.lang.String defaultFile(java.lang.String)>(r5);
+
+        goto label5;
+
+     label4:
+        r7 = null;
+
+        r8 = $r1;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r10 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r10.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r10;
+
+     label7:
+        $r11 = new java.io.File;
+
+        specialinvoke $r11.<java.io.File: void <init>(java.lang.String,java.lang.String)>(r7, r8);
+
+        $r4 = virtualinvoke $r11.<java.io.File: java.nio.file.Path toPath()>();
+
+        return $r4;
+    }
+
+    public void checkAndStore(sun.security.krb5.internal.KerberosTime, sun.security.krb5.internal.rcache.AuthTimeWithHash) throws sun.security.krb5.internal.KrbApErrException
+    {
+        sun.security.krb5.internal.rcache.AuthTimeWithHash r2;
+        sun.security.krb5.internal.rcache.DflCache r0;
+        sun.security.krb5.internal.KrbApErrException $r4;
+        java.io.IOException $r3;
+        sun.security.krb5.internal.KerberosTime r1;
+
+        r0 := @this: sun.security.krb5.internal.rcache.DflCache;
+
+        r1 := @parameter0: sun.security.krb5.internal.KerberosTime;
+
+        r2 := @parameter1: sun.security.krb5.internal.rcache.AuthTimeWithHash;
+
+     label1:
+        specialinvoke r0.<sun.security.krb5.internal.rcache.DflCache: void checkAndStore0(sun.security.krb5.internal.KerberosTime,sun.security.krb5.internal.rcache.AuthTimeWithHash)>(r1, r2);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new sun.security.krb5.internal.KrbApErrException;
+
+        specialinvoke $r4.<sun.security.krb5.internal.KrbApErrException: void <init>(int)>(60);
+
+        virtualinvoke $r4.<sun.security.krb5.internal.KrbApErrException: java.lang.Throwable initCause(java.lang.Throwable)>($r3);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    private synchronized void checkAndStore0(sun.security.krb5.internal.KerberosTime, sun.security.krb5.internal.rcache.AuthTimeWithHash) throws java.io.IOException, sun.security.krb5.internal.KrbApErrException
+    {
+        sun.security.krb5.internal.rcache.AuthTimeWithHash r1;
+        java.lang.Throwable $r7, $r8, $r9, r12;
+        sun.security.krb5.internal.rcache.DflCache$Storage $r5;
+        sun.security.krb5.internal.rcache.DflCache r0;
+        java.io.IOException $r11;
+        sun.security.krb5.internal.KerberosTime r6;
+        int i0;
+        java.lang.String $r2, $r3;
+        java.nio.file.Path $r4;
+
+        r0 := @this: sun.security.krb5.internal.rcache.DflCache;
+
+        r6 := @parameter0: sun.security.krb5.internal.KerberosTime;
+
+        r1 := @parameter1: sun.security.krb5.internal.rcache.AuthTimeWithHash;
+
+        $r3 = r0.<sun.security.krb5.internal.rcache.DflCache: java.lang.String source>;
+
+        $r2 = r1.<sun.security.krb5.internal.rcache.AuthTimeWithHash: java.lang.String server>;
+
+        $r4 = staticinvoke <sun.security.krb5.internal.rcache.DflCache: java.nio.file.Path getFileName(java.lang.String,java.lang.String)>($r3, $r2);
+
+        $r5 = new sun.security.krb5.internal.rcache.DflCache$Storage;
+
+        specialinvoke $r5.<sun.security.krb5.internal.rcache.DflCache$Storage: void <init>(sun.security.krb5.internal.rcache.DflCache$1)>(null);
+
+        r12 = null;
+
+     label01:
+        i0 = staticinvoke <sun.security.krb5.internal.rcache.DflCache$Storage: int access$100(sun.security.krb5.internal.rcache.DflCache$Storage,java.nio.file.Path,sun.security.krb5.internal.rcache.AuthTimeWithHash,sun.security.krb5.internal.KerberosTime)>($r5, $r4, r1, r6);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r11 := @caughtexception;
+
+        staticinvoke <sun.security.krb5.internal.rcache.DflCache$Storage: void access$200(java.nio.file.Path)>($r4);
+
+        i0 = staticinvoke <sun.security.krb5.internal.rcache.DflCache$Storage: int access$100(sun.security.krb5.internal.rcache.DflCache$Storage,java.nio.file.Path,sun.security.krb5.internal.rcache.AuthTimeWithHash,sun.security.krb5.internal.KerberosTime)>($r5, $r4, r1, r6);
+
+     label04:
+        staticinvoke <sun.security.krb5.internal.rcache.DflCache$Storage: void access$300(sun.security.krb5.internal.rcache.DflCache$Storage,sun.security.krb5.internal.rcache.AuthTimeWithHash)>($r5, r1);
+
+     label05:
+        if $r5 == null goto label15;
+
+        goto label06;
+
+     label06:
+        virtualinvoke $r5.<sun.security.krb5.internal.rcache.DflCache$Storage: void close()>();
+
+        goto label15;
+
+     label07:
+        $r9 := @caughtexception;
+
+        r12 = $r9;
+
+        throw $r9;
+
+     label08:
+        $r8 := @caughtexception;
+
+     label09:
+        if $r5 == null goto label14;
+
+        if r12 == null goto label13;
+
+     label10:
+        virtualinvoke $r5.<sun.security.krb5.internal.rcache.DflCache$Storage: void close()>();
+
+     label11:
+        goto label14;
+
+     label12:
+        $r7 := @caughtexception;
+
+        virtualinvoke r12.<java.lang.Throwable: void addSuppressed(java.lang.Throwable)>($r7);
+
+        goto label14;
+
+     label13:
+        virtualinvoke $r5.<sun.security.krb5.internal.rcache.DflCache$Storage: void close()>();
+
+     label14:
+        throw $r8;
+
+     label15:
+        if i0 <= 30 goto label16;
+
+        staticinvoke <sun.security.krb5.internal.rcache.DflCache$Storage: void access$400(java.nio.file.Path,sun.security.krb5.internal.KerberosTime)>($r4, r6);
+
+     label16:
+        return;
+
+        catch java.io.IOException from label01 to label02 with label03;
+        catch java.lang.Throwable from label01 to label05 with label07;
+        catch java.lang.Throwable from label10 to label11 with label12;
+        catch java.lang.Throwable from label07 to label09 with label08;
+    }
+
+    static int access$500()
+    {
+        int $i0;
+
+        $i0 = <sun.security.krb5.internal.rcache.DflCache: int uid>;
+
+        return $i0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Object[] $r4;
+        java.lang.Class[] $r1;
+        long $l0;
+        java.lang.Exception $r7;
+        java.lang.Long $r6;
+        int $i1, $i3;
+        java.lang.Class $r0;
+        java.lang.Object $r3, $r5;
+        java.lang.reflect.Method $r2;
+
+        <sun.security.krb5.internal.rcache.DflCache: int EXCESSREPS> = 30;
+
+        <sun.security.krb5.internal.rcache.DflCache: int KRB5_RV_VNO> = 1281;
+
+     label1:
+        $r0 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String)>("com.sun.security.auth.module.UnixSystem");
+
+        $r1 = newarray (java.lang.Class)[0];
+
+        $r2 = virtualinvoke $r0.<java.lang.Class: java.lang.reflect.Method getMethod(java.lang.String,java.lang.Class[])>("getUid", $r1);
+
+        $r3 = virtualinvoke $r0.<java.lang.Class: java.lang.Object newInstance()>();
+
+        $r4 = newarray (java.lang.Object)[0];
+
+        $r5 = virtualinvoke $r2.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>($r3, $r4);
+
+        $r6 = (java.lang.Long) $r5;
+
+        $l0 = virtualinvoke $r6.<java.lang.Long: long longValue()>();
+
+        $i1 = (int) $l0;
+
+        <sun.security.krb5.internal.rcache.DflCache: int uid> = $i1;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $i3 = (int) -1;
+
+        <sun.security.krb5.internal.rcache.DflCache: int uid> = $i3;
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+}

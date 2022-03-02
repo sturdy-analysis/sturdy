@@ -1,0 +1,176 @@
+public class sun.net.www.protocol.http.ntlm.NTLMAuthSequence extends java.lang.Object
+{
+    private java.lang.String username;
+    private java.lang.String password;
+    private java.lang.String ntdomain;
+    private int state;
+    private long crdHandle;
+    private long ctxHandle;
+    sun.net.www.protocol.http.ntlm.NTLMAuthSequence$Status status;
+    static final boolean $assertionsDisabled;
+
+    void <init>(java.lang.String, java.lang.String, java.lang.String) throws java.io.IOException
+    {
+        sun.net.www.protocol.http.ntlm.NTLMAuthSequence$Status $r4;
+        long $l0, $l1;
+        java.io.IOException $r5;
+        byte $b2;
+        sun.net.www.protocol.http.ntlm.NTLMAuthSequence r0;
+        java.lang.String r1, r2, r3;
+
+        r0 := @this: sun.net.www.protocol.http.ntlm.NTLMAuthSequence;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.net.www.protocol.http.ntlm.NTLMAuthSequence: java.lang.String username> = r1;
+
+        r0.<sun.net.www.protocol.http.ntlm.NTLMAuthSequence: java.lang.String password> = r2;
+
+        r0.<sun.net.www.protocol.http.ntlm.NTLMAuthSequence: java.lang.String ntdomain> = r3;
+
+        $r4 = new sun.net.www.protocol.http.ntlm.NTLMAuthSequence$Status;
+
+        specialinvoke $r4.<sun.net.www.protocol.http.ntlm.NTLMAuthSequence$Status: void <init>(sun.net.www.protocol.http.ntlm.NTLMAuthSequence)>(r0);
+
+        r0.<sun.net.www.protocol.http.ntlm.NTLMAuthSequence: sun.net.www.protocol.http.ntlm.NTLMAuthSequence$Status status> = $r4;
+
+        r0.<sun.net.www.protocol.http.ntlm.NTLMAuthSequence: int state> = 0;
+
+        $l0 = specialinvoke r0.<sun.net.www.protocol.http.ntlm.NTLMAuthSequence: long getCredentialsHandle(java.lang.String,java.lang.String,java.lang.String)>(r1, r3, r2);
+
+        r0.<sun.net.www.protocol.http.ntlm.NTLMAuthSequence: long crdHandle> = $l0;
+
+        $l1 = r0.<sun.net.www.protocol.http.ntlm.NTLMAuthSequence: long crdHandle>;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 != 0 goto label1;
+
+        $r5 = new java.io.IOException;
+
+        specialinvoke $r5.<java.io.IOException: void <init>(java.lang.String)>("could not get credentials handle");
+
+        throw $r5;
+
+     label1:
+        return;
+    }
+
+    public java.lang.String getAuthHeader(java.lang.String) throws java.io.IOException
+    {
+        byte[] $r3, r10;
+        sun.net.www.protocol.http.ntlm.NTLMAuthSequence$Status $r2, $r8;
+        java.util.Base64$Decoder $r7;
+        long $l0;
+        java.util.Base64$Encoder $r4;
+        java.io.IOException $r6;
+        java.lang.AssertionError $r9;
+        sun.net.www.protocol.http.ntlm.NTLMAuthSequence r1;
+        java.lang.String r0, $r5;
+        boolean $z0, $z1;
+
+        r1 := @this: sun.net.www.protocol.http.ntlm.NTLMAuthSequence;
+
+        r0 := @parameter0: java.lang.String;
+
+        r10 = null;
+
+        $z0 = <sun.net.www.protocol.http.ntlm.NTLMAuthSequence: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $r8 = r1.<sun.net.www.protocol.http.ntlm.NTLMAuthSequence: sun.net.www.protocol.http.ntlm.NTLMAuthSequence$Status status>;
+
+        $z1 = $r8.<sun.net.www.protocol.http.ntlm.NTLMAuthSequence$Status: boolean sequenceComplete>;
+
+        if $z1 == 0 goto label1;
+
+        $r9 = new java.lang.AssertionError;
+
+        specialinvoke $r9.<java.lang.AssertionError: void <init>()>();
+
+        throw $r9;
+
+     label1:
+        if r0 == null goto label2;
+
+        $r7 = staticinvoke <java.util.Base64: java.util.Base64$Decoder getDecoder()>();
+
+        r10 = virtualinvoke $r7.<java.util.Base64$Decoder: byte[] decode(java.lang.String)>(r0);
+
+     label2:
+        $l0 = r1.<sun.net.www.protocol.http.ntlm.NTLMAuthSequence: long crdHandle>;
+
+        $r2 = r1.<sun.net.www.protocol.http.ntlm.NTLMAuthSequence: sun.net.www.protocol.http.ntlm.NTLMAuthSequence$Status status>;
+
+        $r3 = specialinvoke r1.<sun.net.www.protocol.http.ntlm.NTLMAuthSequence: byte[] getNextToken(long,byte[],sun.net.www.protocol.http.ntlm.NTLMAuthSequence$Status)>($l0, r10, $r2);
+
+        if $r3 != null goto label3;
+
+        $r6 = new java.io.IOException;
+
+        specialinvoke $r6.<java.io.IOException: void <init>(java.lang.String)>("Internal authentication error");
+
+        throw $r6;
+
+     label3:
+        $r4 = staticinvoke <java.util.Base64: java.util.Base64$Encoder getEncoder()>();
+
+        $r5 = virtualinvoke $r4.<java.util.Base64$Encoder: java.lang.String encodeToString(byte[])>($r3);
+
+        return $r5;
+    }
+
+    public boolean isComplete()
+    {
+        sun.net.www.protocol.http.ntlm.NTLMAuthSequence r0;
+        sun.net.www.protocol.http.ntlm.NTLMAuthSequence$Status $r1;
+        boolean $z0;
+
+        r0 := @this: sun.net.www.protocol.http.ntlm.NTLMAuthSequence;
+
+        $r1 = r0.<sun.net.www.protocol.http.ntlm.NTLMAuthSequence: sun.net.www.protocol.http.ntlm.NTLMAuthSequence$Status status>;
+
+        $z0 = $r1.<sun.net.www.protocol.http.ntlm.NTLMAuthSequence$Status: boolean sequenceComplete>;
+
+        return $z0;
+    }
+
+    private static native void initFirst(java.lang.Class);
+
+    private native long getCredentialsHandle(java.lang.String, java.lang.String, java.lang.String);
+
+    private native byte[] getNextToken(long, byte[], sun.net.www.protocol.http.ntlm.NTLMAuthSequence$Status);
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        $r0 = class "Lsun/net/www/protocol/http/ntlm/NTLMAuthSequence;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.net.www.protocol.http.ntlm.NTLMAuthSequence: boolean $assertionsDisabled> = $z1;
+
+        staticinvoke <sun.net.www.protocol.http.ntlm.NTLMAuthSequence: void initFirst(java.lang.Class)>(class "Lsun/net/www/protocol/http/ntlm/NTLMAuthSequence$Status;");
+
+        return;
+    }
+}

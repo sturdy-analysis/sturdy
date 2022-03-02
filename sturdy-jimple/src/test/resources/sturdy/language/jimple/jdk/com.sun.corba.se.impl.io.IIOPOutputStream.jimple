@@ -1,0 +1,2204 @@
+public class com.sun.corba.se.impl.io.IIOPOutputStream extends com.sun.corba.se.impl.io.OutputStreamHook
+{
+    private com.sun.corba.se.impl.logging.UtilSystemException wrapper;
+    private static sun.corba.Bridge bridge;
+    private org.omg.CORBA_2_3.portable.OutputStream orbStream;
+    private java.lang.Object currentObject;
+    private com.sun.corba.se.impl.io.ObjectStreamClass currentClassDesc;
+    private int recursionDepth;
+    private int simpleWriteDepth;
+    private java.io.IOException abortIOException;
+    private java.util.Stack classDescStack;
+    private java.lang.Object[] writeObjectArgList;
+
+    public void <init>() throws java.io.IOException
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        java.lang.Object[] $r3;
+        com.sun.corba.se.impl.logging.UtilSystemException $r1;
+        java.util.Stack $r2;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        specialinvoke r0.<com.sun.corba.se.impl.io.OutputStreamHook: void <init>()>();
+
+        $r1 = staticinvoke <com.sun.corba.se.impl.logging.UtilSystemException: com.sun.corba.se.impl.logging.UtilSystemException get(java.lang.String)>("rpc.encoding");
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.logging.UtilSystemException wrapper> = $r1;
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.lang.Object currentObject> = null;
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.ObjectStreamClass currentClassDesc> = null;
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: int recursionDepth> = 0;
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: int simpleWriteDepth> = 0;
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.io.IOException abortIOException> = null;
+
+        $r2 = new java.util.Stack;
+
+        specialinvoke $r2.<java.util.Stack: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.util.Stack classDescStack> = $r2;
+
+        $r3 = newarray (java.lang.Object)[1];
+
+        $r3[0] = r0;
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.lang.Object[] writeObjectArgList> = $r3;
+
+        return;
+    }
+
+    protected void beginOptionalCustomData()
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        org.omg.CORBA_2_3.portable.OutputStream $r1;
+        byte $b0;
+        int $i1;
+        com.sun.corba.se.impl.io.ObjectStreamClass $r3;
+        java.lang.String $r4;
+        org.omg.CORBA.portable.ValueOutputStream r2;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        $b0 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: byte streamFormatVersion>;
+
+        $i1 = (int) $b0;
+
+        if $i1 != 2 goto label1;
+
+        $r1 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        r2 = (org.omg.CORBA.portable.ValueOutputStream) $r1;
+
+        $r3 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.ObjectStreamClass currentClassDesc>;
+
+        $r4 = virtualinvoke $r3.<com.sun.corba.se.impl.io.ObjectStreamClass: java.lang.String getRMIIIOPOptionalDataRepId()>();
+
+        interfaceinvoke r2.<org.omg.CORBA.portable.ValueOutputStream: void start_value(java.lang.String)>($r4);
+
+     label1:
+        return;
+    }
+
+    final void setOrbStream(org.omg.CORBA_2_3.portable.OutputStream)
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        org.omg.CORBA_2_3.portable.OutputStream r1;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        r1 := @parameter0: org.omg.CORBA_2_3.portable.OutputStream;
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream> = r1;
+
+        return;
+    }
+
+    final org.omg.CORBA_2_3.portable.OutputStream getOrbStream()
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        org.omg.CORBA_2_3.portable.OutputStream $r1;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        $r1 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        return $r1;
+    }
+
+    final void increaseRecursionDepth()
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        int $i0, $i1;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        $i0 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: int recursionDepth>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: int recursionDepth> = $i1;
+
+        return;
+    }
+
+    final int decreaseRecursionDepth()
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        int $i0, $i1;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        $i0 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: int recursionDepth>;
+
+        $i1 = $i0 - 1;
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: int recursionDepth> = $i1;
+
+        return $i1;
+    }
+
+    public final void writeObjectOverride(java.lang.Object) throws java.io.IOException
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        org.omg.CORBA_2_3.portable.OutputStream $r3;
+        com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState $r1;
+        java.lang.Object r2;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        r2 := @parameter0: java.lang.Object;
+
+        $r1 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState writeObjectState>;
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState: void writeData(com.sun.corba.se.impl.io.OutputStreamHook)>(r0);
+
+        $r3 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        staticinvoke <javax.rmi.CORBA.Util: void writeAbstractObject(org.omg.CORBA.portable.OutputStream,java.lang.Object)>($r3, r2);
+
+        return;
+    }
+
+    public final void simpleWriteObject(java.lang.Object, byte)
+    {
+        java.lang.Throwable $r5;
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        byte b0, b1;
+        int $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10;
+        com.sun.corba.se.impl.io.ObjectStreamClass r2;
+        sun.corba.Bridge $r4;
+        java.io.IOException $r6, $r7, $r8;
+        java.lang.Object r1, r3;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        r3 := @parameter0: java.lang.Object;
+
+        b1 := @parameter1: byte;
+
+        b0 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: byte streamFormatVersion>;
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: byte streamFormatVersion> = b1;
+
+        r1 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.lang.Object currentObject>;
+
+        r2 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.ObjectStreamClass currentClassDesc>;
+
+        $i2 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: int simpleWriteDepth>;
+
+        $i3 = $i2 + 1;
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: int simpleWriteDepth> = $i3;
+
+     label1:
+        specialinvoke r0.<com.sun.corba.se.impl.io.IIOPOutputStream: void outputObject(java.lang.Object)>(r3);
+
+     label2:
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: byte streamFormatVersion> = b0;
+
+        $i4 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: int simpleWriteDepth>;
+
+        $i5 = $i4 - 1;
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: int simpleWriteDepth> = $i5;
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.lang.Object currentObject> = r1;
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.ObjectStreamClass currentClassDesc> = r2;
+
+        goto label7;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.io.IOException abortIOException>;
+
+        if $r7 != null goto label4;
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.io.IOException abortIOException> = $r6;
+
+     label4:
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: byte streamFormatVersion> = b0;
+
+        $i9 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: int simpleWriteDepth>;
+
+        $i10 = $i9 - 1;
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: int simpleWriteDepth> = $i10;
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.lang.Object currentObject> = r1;
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.ObjectStreamClass currentClassDesc> = r2;
+
+        goto label7;
+
+     label5:
+        $r5 := @caughtexception;
+
+     label6:
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: byte streamFormatVersion> = b0;
+
+        $i7 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: int simpleWriteDepth>;
+
+        $i8 = $i7 - 1;
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: int simpleWriteDepth> = $i8;
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.lang.Object currentObject> = r1;
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.ObjectStreamClass currentClassDesc> = r2;
+
+        throw $r5;
+
+     label7:
+        $r8 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.io.IOException abortIOException>;
+
+        $i6 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: int simpleWriteDepth>;
+
+        if $i6 != 0 goto label8;
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.io.IOException abortIOException> = null;
+
+     label8:
+        if $r8 == null goto label9;
+
+        $r4 = <com.sun.corba.se.impl.io.IIOPOutputStream: sun.corba.Bridge bridge>;
+
+        virtualinvoke $r4.<sun.corba.Bridge: void throwException(java.lang.Throwable)>($r8);
+
+     label9:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    com.sun.corba.se.impl.io.ObjectStreamField[] getFieldsNoCopy()
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        com.sun.corba.se.impl.io.ObjectStreamClass $r1;
+        com.sun.corba.se.impl.io.ObjectStreamField[] $r2;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        $r1 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.ObjectStreamClass currentClassDesc>;
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.io.ObjectStreamClass: com.sun.corba.se.impl.io.ObjectStreamField[] getFieldsNoCopy()>();
+
+        return $r2;
+    }
+
+    public final void defaultWriteObjectDelegate()
+    {
+        sun.corba.Bridge $r10;
+        com.sun.corba.se.impl.io.ObjectStreamField[] $r5;
+        java.io.IOException $r9;
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        int $i0;
+        java.lang.Object $r1, $r7;
+        com.sun.corba.se.impl.io.ObjectStreamClass $r3, $r4, $r6;
+        java.lang.Class $r8;
+        java.io.NotActiveException $r2;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.lang.Object currentObject>;
+
+        if $r1 == null goto label2;
+
+        $r3 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.ObjectStreamClass currentClassDesc>;
+
+        if $r3 != null goto label3;
+
+     label2:
+        $r2 = new java.io.NotActiveException;
+
+        specialinvoke $r2.<java.io.NotActiveException: void <init>(java.lang.String)>("defaultWriteObjectDelegate");
+
+        throw $r2;
+
+     label3:
+        $r4 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.ObjectStreamClass currentClassDesc>;
+
+        $r5 = virtualinvoke $r4.<com.sun.corba.se.impl.io.ObjectStreamClass: com.sun.corba.se.impl.io.ObjectStreamField[] getFieldsNoCopy()>();
+
+        $i0 = lengthof $r5;
+
+        if $i0 <= 0 goto label4;
+
+        $r7 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.lang.Object currentObject>;
+
+        $r6 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.ObjectStreamClass currentClassDesc>;
+
+        $r8 = virtualinvoke $r6.<com.sun.corba.se.impl.io.ObjectStreamClass: java.lang.Class forClass()>();
+
+        specialinvoke r0.<com.sun.corba.se.impl.io.IIOPOutputStream: void outputClassFields(java.lang.Object,java.lang.Class,com.sun.corba.se.impl.io.ObjectStreamField[])>($r7, $r8, $r5);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r9 := @caughtexception;
+
+        $r10 = <com.sun.corba.se.impl.io.IIOPOutputStream: sun.corba.Bridge bridge>;
+
+        virtualinvoke $r10.<sun.corba.Bridge: void throwException(java.lang.Throwable)>($r9);
+
+     label6:
+        return;
+
+        catch java.io.IOException from label1 to label4 with label5;
+    }
+
+    public final boolean enableReplaceObjectDelegate(boolean)
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        boolean z0;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        z0 := @parameter0: boolean;
+
+        return 0;
+    }
+
+    protected final void annotateClass(java.lang.Class) throws java.io.IOException
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream r1;
+        java.io.IOException $r0;
+        java.lang.Class r2;
+
+        r1 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        r2 := @parameter0: java.lang.Class;
+
+        $r0 = new java.io.IOException;
+
+        specialinvoke $r0.<java.io.IOException: void <init>(java.lang.String)>("Method annotateClass not supported");
+
+        throw $r0;
+    }
+
+    public final void close() throws java.io.IOException
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        return;
+    }
+
+    protected final void drain() throws java.io.IOException
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        return;
+    }
+
+    public final void flush() throws java.io.IOException
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        org.omg.CORBA_2_3.portable.OutputStream $r1;
+        java.lang.Error $r2;
+        java.io.IOException $r3;
+        java.lang.String $r4;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        virtualinvoke $r1.<org.omg.CORBA_2_3.portable.OutputStream: void flush()>();
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new java.io.IOException;
+
+        $r4 = virtualinvoke $r2.<java.lang.Error: java.lang.String getMessage()>();
+
+        specialinvoke $r3.<java.io.IOException: void <init>(java.lang.String)>($r4);
+
+        virtualinvoke $r3.<java.io.IOException: java.lang.Throwable initCause(java.lang.Throwable)>($r2);
+
+        throw $r3;
+
+     label4:
+        return;
+
+        catch java.lang.Error from label1 to label2 with label3;
+    }
+
+    protected final java.lang.Object replaceObject(java.lang.Object) throws java.io.IOException
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream r1;
+        java.io.IOException $r0;
+        java.lang.Object r2;
+
+        r1 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        r2 := @parameter0: java.lang.Object;
+
+        $r0 = new java.io.IOException;
+
+        specialinvoke $r0.<java.io.IOException: void <init>(java.lang.String)>("Method replaceObject not supported");
+
+        throw $r0;
+    }
+
+    public final void reset() throws java.io.IOException
+    {
+        java.lang.Error $r7;
+        java.io.IOException $r2, $r8;
+        java.util.Stack $r4, $r5, $r6;
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        java.lang.Object $r1;
+        com.sun.corba.se.impl.io.ObjectStreamClass $r3;
+        java.lang.String $r9;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.lang.Object currentObject>;
+
+        if $r1 != null goto label2;
+
+        $r3 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.ObjectStreamClass currentClassDesc>;
+
+        if $r3 == null goto label3;
+
+     label2:
+        $r2 = new java.io.IOException;
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>("Illegal call to reset");
+
+        throw $r2;
+
+     label3:
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.io.IOException abortIOException> = null;
+
+        $r4 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.util.Stack classDescStack>;
+
+        if $r4 != null goto label4;
+
+        $r6 = new java.util.Stack;
+
+        specialinvoke $r6.<java.util.Stack: void <init>()>();
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.util.Stack classDescStack> = $r6;
+
+        goto label5;
+
+     label4:
+        $r5 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.util.Stack classDescStack>;
+
+        virtualinvoke $r5.<java.util.Stack: void setSize(int)>(0);
+
+     label5:
+        goto label7;
+
+     label6:
+        $r7 := @caughtexception;
+
+        $r8 = new java.io.IOException;
+
+        $r9 = virtualinvoke $r7.<java.lang.Error: java.lang.String getMessage()>();
+
+        specialinvoke $r8.<java.io.IOException: void <init>(java.lang.String)>($r9);
+
+        virtualinvoke $r8.<java.io.IOException: java.lang.Throwable initCause(java.lang.Throwable)>($r7);
+
+        throw $r8;
+
+     label7:
+        return;
+
+        catch java.lang.Error from label1 to label5 with label6;
+    }
+
+    public final void write(byte[]) throws java.io.IOException
+    {
+        byte[] r2;
+        java.lang.Error $r4;
+        java.io.IOException $r5;
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        org.omg.CORBA_2_3.portable.OutputStream $r3;
+        int $i0;
+        com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState $r1;
+        java.lang.String $r6;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        r2 := @parameter0: byte[];
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState writeObjectState>;
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState: void writeData(com.sun.corba.se.impl.io.OutputStreamHook)>(r0);
+
+        $r3 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        $i0 = lengthof r2;
+
+        virtualinvoke $r3.<org.omg.CORBA_2_3.portable.OutputStream: void write_octet_array(byte[],int,int)>(r2, 0, $i0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = new java.io.IOException;
+
+        $r6 = virtualinvoke $r4.<java.lang.Error: java.lang.String getMessage()>();
+
+        specialinvoke $r5.<java.io.IOException: void <init>(java.lang.String)>($r6);
+
+        virtualinvoke $r5.<java.io.IOException: java.lang.Throwable initCause(java.lang.Throwable)>($r4);
+
+        throw $r5;
+
+     label4:
+        return;
+
+        catch java.lang.Error from label1 to label2 with label3;
+    }
+
+    public final void write(byte[], int, int) throws java.io.IOException
+    {
+        byte[] r2;
+        java.lang.Error $r4;
+        java.io.IOException $r5;
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        org.omg.CORBA_2_3.portable.OutputStream $r3;
+        int i0, i1;
+        com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState $r1;
+        java.lang.String $r6;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        r2 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState writeObjectState>;
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState: void writeData(com.sun.corba.se.impl.io.OutputStreamHook)>(r0);
+
+        $r3 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        virtualinvoke $r3.<org.omg.CORBA_2_3.portable.OutputStream: void write_octet_array(byte[],int,int)>(r2, i0, i1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = new java.io.IOException;
+
+        $r6 = virtualinvoke $r4.<java.lang.Error: java.lang.String getMessage()>();
+
+        specialinvoke $r5.<java.io.IOException: void <init>(java.lang.String)>($r6);
+
+        virtualinvoke $r5.<java.io.IOException: java.lang.Throwable initCause(java.lang.Throwable)>($r4);
+
+        throw $r5;
+
+     label4:
+        return;
+
+        catch java.lang.Error from label1 to label2 with label3;
+    }
+
+    public final void write(int) throws java.io.IOException
+    {
+        java.lang.Error $r3;
+        java.io.IOException $r4;
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        org.omg.CORBA_2_3.portable.OutputStream $r2;
+        byte $b2;
+        int i0, $i1;
+        com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState $r1;
+        java.lang.String $r5;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        i0 := @parameter0: int;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState writeObjectState>;
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState: void writeData(com.sun.corba.se.impl.io.OutputStreamHook)>(r0);
+
+        $r2 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        $i1 = i0 & 255;
+
+        $b2 = (byte) $i1;
+
+        virtualinvoke $r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_octet(byte)>($b2);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.io.IOException;
+
+        $r5 = virtualinvoke $r3.<java.lang.Error: java.lang.String getMessage()>();
+
+        specialinvoke $r4.<java.io.IOException: void <init>(java.lang.String)>($r5);
+
+        virtualinvoke $r4.<java.io.IOException: java.lang.Throwable initCause(java.lang.Throwable)>($r3);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.lang.Error from label1 to label2 with label3;
+    }
+
+    public final void writeBoolean(boolean) throws java.io.IOException
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        org.omg.CORBA_2_3.portable.OutputStream $r2;
+        com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState $r1;
+        java.lang.Error $r3;
+        java.io.IOException $r4;
+        java.lang.String $r5;
+        boolean z0;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        z0 := @parameter0: boolean;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState writeObjectState>;
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState: void writeData(com.sun.corba.se.impl.io.OutputStreamHook)>(r0);
+
+        $r2 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        virtualinvoke $r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_boolean(boolean)>(z0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.io.IOException;
+
+        $r5 = virtualinvoke $r3.<java.lang.Error: java.lang.String getMessage()>();
+
+        specialinvoke $r4.<java.io.IOException: void <init>(java.lang.String)>($r5);
+
+        virtualinvoke $r4.<java.io.IOException: java.lang.Throwable initCause(java.lang.Throwable)>($r3);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.lang.Error from label1 to label2 with label3;
+    }
+
+    public final void writeByte(int) throws java.io.IOException
+    {
+        java.lang.Error $r3;
+        java.io.IOException $r4;
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        org.omg.CORBA_2_3.portable.OutputStream $r2;
+        byte $b1;
+        int i0;
+        com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState $r1;
+        java.lang.String $r5;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        i0 := @parameter0: int;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState writeObjectState>;
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState: void writeData(com.sun.corba.se.impl.io.OutputStreamHook)>(r0);
+
+        $r2 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        $b1 = (byte) i0;
+
+        virtualinvoke $r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_octet(byte)>($b1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.io.IOException;
+
+        $r5 = virtualinvoke $r3.<java.lang.Error: java.lang.String getMessage()>();
+
+        specialinvoke $r4.<java.io.IOException: void <init>(java.lang.String)>($r5);
+
+        virtualinvoke $r4.<java.io.IOException: java.lang.Throwable initCause(java.lang.Throwable)>($r3);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.lang.Error from label1 to label2 with label3;
+    }
+
+    public final void writeBytes(java.lang.String) throws java.io.IOException
+    {
+        byte[] $r3;
+        java.lang.Error $r5;
+        java.io.IOException $r6;
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        org.omg.CORBA_2_3.portable.OutputStream $r4;
+        int $i0;
+        com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState $r1;
+        java.lang.String r2, $r7;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        r2 := @parameter0: java.lang.String;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState writeObjectState>;
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState: void writeData(com.sun.corba.se.impl.io.OutputStreamHook)>(r0);
+
+        $r3 = virtualinvoke r2.<java.lang.String: byte[] getBytes()>();
+
+        $r4 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        $i0 = lengthof $r3;
+
+        virtualinvoke $r4.<org.omg.CORBA_2_3.portable.OutputStream: void write_octet_array(byte[],int,int)>($r3, 0, $i0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new java.io.IOException;
+
+        $r7 = virtualinvoke $r5.<java.lang.Error: java.lang.String getMessage()>();
+
+        specialinvoke $r6.<java.io.IOException: void <init>(java.lang.String)>($r7);
+
+        virtualinvoke $r6.<java.io.IOException: java.lang.Throwable initCause(java.lang.Throwable)>($r5);
+
+        throw $r6;
+
+     label4:
+        return;
+
+        catch java.lang.Error from label1 to label2 with label3;
+    }
+
+    public final void writeChar(int) throws java.io.IOException
+    {
+        java.lang.Error $r3;
+        char $c1;
+        java.io.IOException $r4;
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        org.omg.CORBA_2_3.portable.OutputStream $r2;
+        int i0;
+        com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState $r1;
+        java.lang.String $r5;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        i0 := @parameter0: int;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState writeObjectState>;
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState: void writeData(com.sun.corba.se.impl.io.OutputStreamHook)>(r0);
+
+        $r2 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        $c1 = (char) i0;
+
+        virtualinvoke $r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_wchar(char)>($c1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.io.IOException;
+
+        $r5 = virtualinvoke $r3.<java.lang.Error: java.lang.String getMessage()>();
+
+        specialinvoke $r4.<java.io.IOException: void <init>(java.lang.String)>($r5);
+
+        virtualinvoke $r4.<java.io.IOException: java.lang.Throwable initCause(java.lang.Throwable)>($r3);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.lang.Error from label1 to label2 with label3;
+    }
+
+    public final void writeChars(java.lang.String) throws java.io.IOException
+    {
+        java.lang.Error $r5;
+        java.io.IOException $r6;
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        org.omg.CORBA_2_3.portable.OutputStream $r4;
+        int $i0;
+        com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState $r1;
+        char[] $r3;
+        java.lang.String r2, $r7;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        r2 := @parameter0: java.lang.String;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState writeObjectState>;
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState: void writeData(com.sun.corba.se.impl.io.OutputStreamHook)>(r0);
+
+        $r3 = virtualinvoke r2.<java.lang.String: char[] toCharArray()>();
+
+        $r4 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        $i0 = lengthof $r3;
+
+        virtualinvoke $r4.<org.omg.CORBA_2_3.portable.OutputStream: void write_wchar_array(char[],int,int)>($r3, 0, $i0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new java.io.IOException;
+
+        $r7 = virtualinvoke $r5.<java.lang.Error: java.lang.String getMessage()>();
+
+        specialinvoke $r6.<java.io.IOException: void <init>(java.lang.String)>($r7);
+
+        virtualinvoke $r6.<java.io.IOException: java.lang.Throwable initCause(java.lang.Throwable)>($r5);
+
+        throw $r6;
+
+     label4:
+        return;
+
+        catch java.lang.Error from label1 to label2 with label3;
+    }
+
+    public final void writeDouble(double) throws java.io.IOException
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        org.omg.CORBA_2_3.portable.OutputStream $r2;
+        com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState $r1;
+        java.lang.Error $r3;
+        java.io.IOException $r4;
+        java.lang.String $r5;
+        double d0;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        d0 := @parameter0: double;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState writeObjectState>;
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState: void writeData(com.sun.corba.se.impl.io.OutputStreamHook)>(r0);
+
+        $r2 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        virtualinvoke $r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_double(double)>(d0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.io.IOException;
+
+        $r5 = virtualinvoke $r3.<java.lang.Error: java.lang.String getMessage()>();
+
+        specialinvoke $r4.<java.io.IOException: void <init>(java.lang.String)>($r5);
+
+        virtualinvoke $r4.<java.io.IOException: java.lang.Throwable initCause(java.lang.Throwable)>($r3);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.lang.Error from label1 to label2 with label3;
+    }
+
+    public final void writeFloat(float) throws java.io.IOException
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        org.omg.CORBA_2_3.portable.OutputStream $r2;
+        com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState $r1;
+        float f0;
+        java.lang.Error $r3;
+        java.io.IOException $r4;
+        java.lang.String $r5;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        f0 := @parameter0: float;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState writeObjectState>;
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState: void writeData(com.sun.corba.se.impl.io.OutputStreamHook)>(r0);
+
+        $r2 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        virtualinvoke $r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_float(float)>(f0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.io.IOException;
+
+        $r5 = virtualinvoke $r3.<java.lang.Error: java.lang.String getMessage()>();
+
+        specialinvoke $r4.<java.io.IOException: void <init>(java.lang.String)>($r5);
+
+        virtualinvoke $r4.<java.io.IOException: java.lang.Throwable initCause(java.lang.Throwable)>($r3);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.lang.Error from label1 to label2 with label3;
+    }
+
+    public final void writeInt(int) throws java.io.IOException
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        org.omg.CORBA_2_3.portable.OutputStream $r2;
+        int i0;
+        com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState $r1;
+        java.lang.Error $r3;
+        java.io.IOException $r4;
+        java.lang.String $r5;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        i0 := @parameter0: int;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState writeObjectState>;
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState: void writeData(com.sun.corba.se.impl.io.OutputStreamHook)>(r0);
+
+        $r2 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        virtualinvoke $r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_long(int)>(i0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.io.IOException;
+
+        $r5 = virtualinvoke $r3.<java.lang.Error: java.lang.String getMessage()>();
+
+        specialinvoke $r4.<java.io.IOException: void <init>(java.lang.String)>($r5);
+
+        virtualinvoke $r4.<java.io.IOException: java.lang.Throwable initCause(java.lang.Throwable)>($r3);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.lang.Error from label1 to label2 with label3;
+    }
+
+    public final void writeLong(long) throws java.io.IOException
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        org.omg.CORBA_2_3.portable.OutputStream $r2;
+        com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState $r1;
+        java.lang.Error $r3;
+        long l0;
+        java.io.IOException $r4;
+        java.lang.String $r5;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        l0 := @parameter0: long;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState writeObjectState>;
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState: void writeData(com.sun.corba.se.impl.io.OutputStreamHook)>(r0);
+
+        $r2 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        virtualinvoke $r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_longlong(long)>(l0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.io.IOException;
+
+        $r5 = virtualinvoke $r3.<java.lang.Error: java.lang.String getMessage()>();
+
+        specialinvoke $r4.<java.io.IOException: void <init>(java.lang.String)>($r5);
+
+        virtualinvoke $r4.<java.io.IOException: java.lang.Throwable initCause(java.lang.Throwable)>($r3);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.lang.Error from label1 to label2 with label3;
+    }
+
+    public final void writeShort(int) throws java.io.IOException
+    {
+        java.lang.Error $r3;
+        java.io.IOException $r4;
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        short $s1;
+        org.omg.CORBA_2_3.portable.OutputStream $r2;
+        int i0;
+        com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState $r1;
+        java.lang.String $r5;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        i0 := @parameter0: int;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState writeObjectState>;
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState: void writeData(com.sun.corba.se.impl.io.OutputStreamHook)>(r0);
+
+        $r2 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        $s1 = (short) i0;
+
+        virtualinvoke $r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_short(short)>($s1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.io.IOException;
+
+        $r5 = virtualinvoke $r3.<java.lang.Error: java.lang.String getMessage()>();
+
+        specialinvoke $r4.<java.io.IOException: void <init>(java.lang.String)>($r5);
+
+        virtualinvoke $r4.<java.io.IOException: java.lang.Throwable initCause(java.lang.Throwable)>($r3);
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.lang.Error from label1 to label2 with label3;
+    }
+
+    protected final void writeStreamHeader() throws java.io.IOException
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        return;
+    }
+
+    protected void internalWriteUTF(org.omg.CORBA.portable.OutputStream, java.lang.String)
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream r2;
+        org.omg.CORBA.portable.OutputStream r0;
+        java.lang.String r1;
+
+        r2 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        r0 := @parameter0: org.omg.CORBA.portable.OutputStream;
+
+        r1 := @parameter1: java.lang.String;
+
+        virtualinvoke r0.<org.omg.CORBA.portable.OutputStream: void write_wstring(java.lang.String)>(r1);
+
+        return;
+    }
+
+    public final void writeUTF(java.lang.String) throws java.io.IOException
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        org.omg.CORBA_2_3.portable.OutputStream $r3;
+        com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState $r1;
+        java.lang.Error $r4;
+        java.io.IOException $r5;
+        java.lang.String r2, $r6;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        r2 := @parameter0: java.lang.String;
+
+     label1:
+        $r1 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState writeObjectState>;
+
+        virtualinvoke $r1.<com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState: void writeData(com.sun.corba.se.impl.io.OutputStreamHook)>(r0);
+
+        $r3 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.io.IIOPOutputStream: void internalWriteUTF(org.omg.CORBA.portable.OutputStream,java.lang.String)>($r3, r2);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = new java.io.IOException;
+
+        $r6 = virtualinvoke $r4.<java.lang.Error: java.lang.String getMessage()>();
+
+        specialinvoke $r5.<java.io.IOException: void <init>(java.lang.String)>($r6);
+
+        virtualinvoke $r5.<java.io.IOException: java.lang.Throwable initCause(java.lang.Throwable)>($r4);
+
+        throw $r5;
+
+     label4:
+        return;
+
+        catch java.lang.Error from label1 to label2 with label3;
+    }
+
+    private boolean checkSpecialClasses(java.lang.Object) throws java.io.IOException
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream r2;
+        java.lang.Object r0;
+        java.io.IOException $r1;
+        boolean $z0;
+
+        r2 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $z0 = r0 instanceof com.sun.corba.se.impl.io.ObjectStreamClass;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new java.io.IOException;
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>("Serialization of ObjectStreamClass not supported");
+
+        throw $r1;
+
+     label1:
+        return 0;
+    }
+
+    private boolean checkSubstitutableSpecialClasses(java.lang.Object) throws java.io.IOException
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream r1;
+        org.omg.CORBA_2_3.portable.OutputStream $r3;
+        java.lang.Object r0;
+        boolean $z0;
+        java.io.Serializable $r2;
+
+        r1 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $z0 = r0 instanceof java.lang.String;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = r1.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        $r2 = (java.io.Serializable) r0;
+
+        virtualinvoke $r3.<org.omg.CORBA_2_3.portable.OutputStream: void write_value(java.io.Serializable)>($r2);
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    private void outputObject(java.lang.Object) throws java.io.IOException
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream r0;
+        byte $b2;
+        com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState $r12, $r19;
+        boolean $z0, $z1, $z2;
+        java.io.Externalizable r30;
+        org.omg.CORBA_2_3.portable.OutputStream $r24;
+        java.lang.Throwable $r27, $r29;
+        java.util.Stack $r9, $r14, $r15, $r16, $r22, $r28;
+        int $i0, $i1;
+        com.sun.corba.se.impl.io.ObjectStreamClass $r3, $r4, $r5, $r6, $r10, $r11, $r13, $r18, $r20, $r21;
+        java.lang.String $r8, $r23, $r26;
+        java.io.NotSerializableException $r25;
+        java.lang.Object r1, $r17;
+        java.lang.Class $r2, $r7;
+
+        r0 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        r1 := @parameter0: java.lang.Object;
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.lang.Object currentObject> = r1;
+
+        $r2 = virtualinvoke r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = staticinvoke <com.sun.corba.se.impl.io.ObjectStreamClass: com.sun.corba.se.impl.io.ObjectStreamClass lookup(java.lang.Class)>($r2);
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.ObjectStreamClass currentClassDesc> = $r3;
+
+        $r4 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.ObjectStreamClass currentClassDesc>;
+
+        if $r4 != null goto label01;
+
+        $r25 = new java.io.NotSerializableException;
+
+        $r26 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        specialinvoke $r25.<java.io.NotSerializableException: void <init>(java.lang.String)>($r26);
+
+        throw $r25;
+
+     label01:
+        $r5 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.ObjectStreamClass currentClassDesc>;
+
+        $z0 = virtualinvoke $r5.<com.sun.corba.se.impl.io.ObjectStreamClass: boolean isExternalizable()>();
+
+        if $z0 == 0 goto label02;
+
+        $r24 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        $b2 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: byte streamFormatVersion>;
+
+        virtualinvoke $r24.<org.omg.CORBA_2_3.portable.OutputStream: void write_octet(byte)>($b2);
+
+        r30 = (java.io.Externalizable) r1;
+
+        interfaceinvoke r30.<java.io.Externalizable: void writeExternal(java.io.ObjectOutput)>(r0);
+
+        goto label15;
+
+     label02:
+        $r6 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.ObjectStreamClass currentClassDesc>;
+
+        $r7 = virtualinvoke $r6.<com.sun.corba.se.impl.io.ObjectStreamClass: java.lang.Class forClass()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.Class: java.lang.String getName()>();
+
+        $z1 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>("java.lang.String");
+
+        if $z1 == 0 goto label03;
+
+        $r23 = (java.lang.String) r1;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.io.IIOPOutputStream: void writeUTF(java.lang.String)>($r23);
+
+        return;
+
+     label03:
+        $r9 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.util.Stack classDescStack>;
+
+        $i0 = virtualinvoke $r9.<java.util.Stack: int size()>();
+
+     label04:
+        $r10 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.ObjectStreamClass currentClassDesc>;
+
+        $r11 = virtualinvoke $r10.<com.sun.corba.se.impl.io.ObjectStreamClass: com.sun.corba.se.impl.io.ObjectStreamClass getSuperclass()>();
+
+        if $r11 == null goto label05;
+
+        $r22 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.util.Stack classDescStack>;
+
+        $r21 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.ObjectStreamClass currentClassDesc>;
+
+        virtualinvoke $r22.<java.util.Stack: java.lang.Object push(java.lang.Object)>($r21);
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.ObjectStreamClass currentClassDesc> = $r11;
+
+        goto label04;
+
+     label05:
+        $r19 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState writeObjectState>;
+
+     label06:
+        $r12 = <com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState NOT_IN_WRITE_OBJECT>;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.io.IIOPOutputStream: void setState(com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState)>($r12);
+
+        $r13 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.ObjectStreamClass currentClassDesc>;
+
+        $z2 = virtualinvoke $r13.<com.sun.corba.se.impl.io.ObjectStreamClass: boolean hasWriteObject()>();
+
+        if $z2 == 0 goto label07;
+
+        $r20 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.ObjectStreamClass currentClassDesc>;
+
+        specialinvoke r0.<com.sun.corba.se.impl.io.IIOPOutputStream: void invokeObjectWriter(com.sun.corba.se.impl.io.ObjectStreamClass,java.lang.Object)>($r20, r1);
+
+        goto label08;
+
+     label07:
+        virtualinvoke r0.<com.sun.corba.se.impl.io.IIOPOutputStream: void defaultWriteObjectDelegate()>();
+
+     label08:
+        virtualinvoke r0.<com.sun.corba.se.impl.io.IIOPOutputStream: void setState(com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState)>($r19);
+
+        goto label11;
+
+     label09:
+        $r29 := @caughtexception;
+
+     label10:
+        virtualinvoke r0.<com.sun.corba.se.impl.io.IIOPOutputStream: void setState(com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState)>($r19);
+
+        throw $r29;
+
+     label11:
+        $r14 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.util.Stack classDescStack>;
+
+        $i1 = virtualinvoke $r14.<java.util.Stack: int size()>();
+
+        if $i1 <= $i0 goto label12;
+
+        $r16 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.util.Stack classDescStack>;
+
+        $r17 = virtualinvoke $r16.<java.util.Stack: java.lang.Object pop()>();
+
+        $r18 = (com.sun.corba.se.impl.io.ObjectStreamClass) $r17;
+
+        r0.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.ObjectStreamClass currentClassDesc> = $r18;
+
+        if $r18 != null goto label05;
+
+     label12:
+        $r15 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.util.Stack classDescStack>;
+
+        virtualinvoke $r15.<java.util.Stack: void setSize(int)>($i0);
+
+        goto label15;
+
+     label13:
+        $r27 := @caughtexception;
+
+     label14:
+        $r28 = r0.<com.sun.corba.se.impl.io.IIOPOutputStream: java.util.Stack classDescStack>;
+
+        virtualinvoke $r28.<java.util.Stack: void setSize(int)>($i0);
+
+        throw $r27;
+
+     label15:
+        return;
+
+        catch java.lang.Throwable from label06 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+        catch java.lang.Throwable from label04 to label12 with label13;
+        catch java.lang.Throwable from label13 to label14 with label13;
+    }
+
+    private void invokeObjectWriter(com.sun.corba.se.impl.io.ObjectStreamClass, java.lang.Object) throws java.io.IOException
+    {
+        java.lang.Throwable $r10;
+        java.lang.Object[] $r5;
+        java.lang.Error $r11, $r12;
+        com.sun.corba.se.impl.io.IIOPOutputStream r1;
+        byte $b0;
+        com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState $r3, $r7;
+        com.sun.corba.se.impl.io.ObjectStreamClass r0;
+        java.lang.reflect.Method $r6;
+        boolean $z0, $z1, $z2;
+        java.lang.IllegalAccessException $r8;
+        java.io.IOException $r14;
+        java.lang.RuntimeException $r13;
+        java.lang.reflect.InvocationTargetException $r9;
+        org.omg.CORBA_2_3.portable.OutputStream $r2;
+        java.lang.Object r4;
+
+        r1 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        r0 := @parameter0: com.sun.corba.se.impl.io.ObjectStreamClass;
+
+        r4 := @parameter1: java.lang.Object;
+
+        virtualinvoke r0.<com.sun.corba.se.impl.io.ObjectStreamClass: java.lang.Class forClass()>();
+
+     label1:
+        $r2 = r1.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        $b0 = r1.<com.sun.corba.se.impl.io.IIOPOutputStream: byte streamFormatVersion>;
+
+        virtualinvoke $r2.<org.omg.CORBA_2_3.portable.OutputStream: void write_octet(byte)>($b0);
+
+        $r3 = r1.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState writeObjectState>;
+
+        virtualinvoke $r3.<com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState: void enterWriteObject(com.sun.corba.se.impl.io.OutputStreamHook)>(r1);
+
+        $r6 = r0.<com.sun.corba.se.impl.io.ObjectStreamClass: java.lang.reflect.Method writeObjectMethod>;
+
+        $r5 = r1.<com.sun.corba.se.impl.io.IIOPOutputStream: java.lang.Object[] writeObjectArgList>;
+
+        virtualinvoke $r6.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>(r4, $r5);
+
+        $r7 = r1.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState writeObjectState>;
+
+        virtualinvoke $r7.<com.sun.corba.se.impl.io.OutputStreamHook$WriteObjectState: void exitWriteObject(com.sun.corba.se.impl.io.OutputStreamHook)>(r1);
+
+     label2:
+        goto label8;
+
+     label3:
+        $r9 := @caughtexception;
+
+        $r10 = virtualinvoke $r9.<java.lang.reflect.InvocationTargetException: java.lang.Throwable getTargetException()>();
+
+        $z0 = $r10 instanceof java.io.IOException;
+
+        if $z0 == 0 goto label4;
+
+        $r14 = (java.io.IOException) $r10;
+
+        throw $r14;
+
+     label4:
+        $z1 = $r10 instanceof java.lang.RuntimeException;
+
+        if $z1 == 0 goto label5;
+
+        $r13 = (java.lang.RuntimeException) $r10;
+
+        throw $r13;
+
+     label5:
+        $z2 = $r10 instanceof java.lang.Error;
+
+        if $z2 == 0 goto label6;
+
+        $r12 = (java.lang.Error) $r10;
+
+        throw $r12;
+
+     label6:
+        $r11 = new java.lang.Error;
+
+        specialinvoke $r11.<java.lang.Error: void <init>(java.lang.String,java.lang.Throwable)>("invokeObjectWriter internal error", $r9);
+
+        throw $r11;
+
+     label7:
+        $r8 := @caughtexception;
+
+     label8:
+        return;
+
+        catch java.lang.reflect.InvocationTargetException from label1 to label2 with label3;
+        catch java.lang.IllegalAccessException from label1 to label2 with label7;
+    }
+
+    void writeField(com.sun.corba.se.impl.io.ObjectStreamField, java.lang.Object) throws java.io.IOException
+    {
+        java.lang.Float $r15;
+        java.lang.Integer $r12;
+        com.sun.corba.se.impl.io.IIOPOutputStream r2;
+        java.lang.Character $r21;
+        byte $b5;
+        java.lang.Long $r9;
+        java.lang.Short $r6;
+        java.lang.Byte $r24;
+        boolean $z0;
+        org.omg.CORBA_2_3.portable.OutputStream $r4, $r5, $r7, $r8, $r10, $r11, $r13, $r14, $r16, $r17, $r19, $r20, $r22, $r23, $r25, $r26;
+        float $f0;
+        java.lang.Double $r18;
+        long $l2;
+        java.io.InvalidClassException $r30;
+        short $s1;
+        int $i3, $i6;
+        java.lang.Boolean $r3;
+        com.sun.corba.se.impl.io.ObjectStreamClass $r28;
+        java.lang.String $r29;
+        double $d0;
+        char $c0, $c4;
+        com.sun.corba.se.impl.io.ObjectStreamField r0;
+        java.lang.Object r1;
+
+        r2 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        r0 := @parameter0: com.sun.corba.se.impl.io.ObjectStreamField;
+
+        r1 := @parameter1: java.lang.Object;
+
+        $c0 = virtualinvoke r0.<com.sun.corba.se.impl.io.ObjectStreamField: char getTypeCode()>();
+
+        $i6 = (int) $c0;
+
+        tableswitch($i6)
+        {
+            case 66: goto label01;
+            case 67: goto label03;
+            case 68: goto label07;
+            case 69: goto label18;
+            case 70: goto label05;
+            case 71: goto label18;
+            case 72: goto label18;
+            case 73: goto label09;
+            case 74: goto label11;
+            case 75: goto label18;
+            case 76: goto label17;
+            case 77: goto label18;
+            case 78: goto label18;
+            case 79: goto label18;
+            case 80: goto label18;
+            case 81: goto label18;
+            case 82: goto label18;
+            case 83: goto label13;
+            case 84: goto label18;
+            case 85: goto label18;
+            case 86: goto label18;
+            case 87: goto label18;
+            case 88: goto label18;
+            case 89: goto label18;
+            case 90: goto label15;
+            case 91: goto label17;
+            default: goto label18;
+        };
+
+     label01:
+        if r1 != null goto label02;
+
+        $r26 = r2.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        virtualinvoke $r26.<org.omg.CORBA_2_3.portable.OutputStream: void write_octet(byte)>(0);
+
+        goto label19;
+
+     label02:
+        $r25 = r2.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        $r24 = (java.lang.Byte) r1;
+
+        $b5 = virtualinvoke $r24.<java.lang.Byte: byte byteValue()>();
+
+        virtualinvoke $r25.<org.omg.CORBA_2_3.portable.OutputStream: void write_octet(byte)>($b5);
+
+        goto label19;
+
+     label03:
+        if r1 != null goto label04;
+
+        $r23 = r2.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        virtualinvoke $r23.<org.omg.CORBA_2_3.portable.OutputStream: void write_wchar(char)>(0);
+
+        goto label19;
+
+     label04:
+        $r22 = r2.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        $r21 = (java.lang.Character) r1;
+
+        $c4 = virtualinvoke $r21.<java.lang.Character: char charValue()>();
+
+        virtualinvoke $r22.<org.omg.CORBA_2_3.portable.OutputStream: void write_wchar(char)>($c4);
+
+        goto label19;
+
+     label05:
+        if r1 != null goto label06;
+
+        $r17 = r2.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        virtualinvoke $r17.<org.omg.CORBA_2_3.portable.OutputStream: void write_float(float)>(0.0F);
+
+        goto label19;
+
+     label06:
+        $r16 = r2.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        $r15 = (java.lang.Float) r1;
+
+        $f0 = virtualinvoke $r15.<java.lang.Float: float floatValue()>();
+
+        virtualinvoke $r16.<org.omg.CORBA_2_3.portable.OutputStream: void write_float(float)>($f0);
+
+        goto label19;
+
+     label07:
+        if r1 != null goto label08;
+
+        $r20 = r2.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        virtualinvoke $r20.<org.omg.CORBA_2_3.portable.OutputStream: void write_double(double)>(0.0);
+
+        goto label19;
+
+     label08:
+        $r19 = r2.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        $r18 = (java.lang.Double) r1;
+
+        $d0 = virtualinvoke $r18.<java.lang.Double: double doubleValue()>();
+
+        virtualinvoke $r19.<org.omg.CORBA_2_3.portable.OutputStream: void write_double(double)>($d0);
+
+        goto label19;
+
+     label09:
+        if r1 != null goto label10;
+
+        $r14 = r2.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        virtualinvoke $r14.<org.omg.CORBA_2_3.portable.OutputStream: void write_long(int)>(0);
+
+        goto label19;
+
+     label10:
+        $r13 = r2.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        $r12 = (java.lang.Integer) r1;
+
+        $i3 = virtualinvoke $r12.<java.lang.Integer: int intValue()>();
+
+        virtualinvoke $r13.<org.omg.CORBA_2_3.portable.OutputStream: void write_long(int)>($i3);
+
+        goto label19;
+
+     label11:
+        if r1 != null goto label12;
+
+        $r11 = r2.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        virtualinvoke $r11.<org.omg.CORBA_2_3.portable.OutputStream: void write_longlong(long)>(0L);
+
+        goto label19;
+
+     label12:
+        $r10 = r2.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        $r9 = (java.lang.Long) r1;
+
+        $l2 = virtualinvoke $r9.<java.lang.Long: long longValue()>();
+
+        virtualinvoke $r10.<org.omg.CORBA_2_3.portable.OutputStream: void write_longlong(long)>($l2);
+
+        goto label19;
+
+     label13:
+        if r1 != null goto label14;
+
+        $r8 = r2.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        virtualinvoke $r8.<org.omg.CORBA_2_3.portable.OutputStream: void write_short(short)>(0);
+
+        goto label19;
+
+     label14:
+        $r7 = r2.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        $r6 = (java.lang.Short) r1;
+
+        $s1 = virtualinvoke $r6.<java.lang.Short: short shortValue()>();
+
+        virtualinvoke $r7.<org.omg.CORBA_2_3.portable.OutputStream: void write_short(short)>($s1);
+
+        goto label19;
+
+     label15:
+        if r1 != null goto label16;
+
+        $r5 = r2.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        virtualinvoke $r5.<org.omg.CORBA_2_3.portable.OutputStream: void write_boolean(boolean)>(0);
+
+        goto label19;
+
+     label16:
+        $r4 = r2.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        $r3 = (java.lang.Boolean) r1;
+
+        $z0 = virtualinvoke $r3.<java.lang.Boolean: boolean booleanValue()>();
+
+        virtualinvoke $r4.<org.omg.CORBA_2_3.portable.OutputStream: void write_boolean(boolean)>($z0);
+
+        goto label19;
+
+     label17:
+        specialinvoke r2.<com.sun.corba.se.impl.io.IIOPOutputStream: void writeObjectField(com.sun.corba.se.impl.io.ObjectStreamField,java.lang.Object)>(r0, r1);
+
+        goto label19;
+
+     label18:
+        $r30 = new java.io.InvalidClassException;
+
+        $r28 = r2.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.io.ObjectStreamClass currentClassDesc>;
+
+        $r29 = virtualinvoke $r28.<com.sun.corba.se.impl.io.ObjectStreamClass: java.lang.String getName()>();
+
+        specialinvoke $r30.<java.io.InvalidClassException: void <init>(java.lang.String)>($r29);
+
+        throw $r30;
+
+     label19:
+        return;
+    }
+
+    private void writeObjectField(com.sun.corba.se.impl.io.ObjectStreamField, java.lang.Object) throws java.io.IOException
+    {
+        java.lang.ClassCastException $r12;
+        com.sun.corba.se.impl.io.IIOPOutputStream r3;
+        byte b0;
+        java.lang.String $r1, $r14;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.io.Serializable $r5;
+        org.omg.CORBA_2_3.portable.OutputStream $r6, $r7, $r8, $r11;
+        com.sun.corba.se.impl.io.ObjectStreamField r0;
+        java.lang.Class $r2, $r9, $r10, $r13;
+        java.lang.Object r4;
+
+        r3 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        r0 := @parameter0: com.sun.corba.se.impl.io.ObjectStreamField;
+
+        r4 := @parameter1: java.lang.Object;
+
+        $r1 = virtualinvoke r0.<com.sun.corba.se.impl.io.ObjectStreamField: java.lang.String getTypeString()>();
+
+        $z0 = staticinvoke <com.sun.corba.se.impl.io.ObjectStreamClassCorbaExt: boolean isAny(java.lang.String)>($r1);
+
+        if $z0 == 0 goto label01;
+
+        $r11 = r3.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        staticinvoke <javax.rmi.CORBA.Util: void writeAny(org.omg.CORBA.portable.OutputStream,java.lang.Object)>($r11, r4);
+
+        goto label12;
+
+     label01:
+        $r2 = virtualinvoke r0.<com.sun.corba.se.impl.io.ObjectStreamField: java.lang.Class getType()>();
+
+        b0 = 2;
+
+        $z1 = virtualinvoke $r2.<java.lang.Class: boolean isInterface()>();
+
+        if $z1 == 0 goto label05;
+
+        virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        $r9 = class "Ljava/rmi/Remote;";
+
+        $z2 = virtualinvoke $r9.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>($r2);
+
+        if $z2 == 0 goto label02;
+
+        b0 = 0;
+
+        goto label05;
+
+     label02:
+        $r10 = class "Lorg/omg/CORBA/Object;";
+
+        $z3 = virtualinvoke $r10.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>($r2);
+
+        if $z3 == 0 goto label03;
+
+        b0 = 0;
+
+        goto label05;
+
+     label03:
+        $z4 = staticinvoke <com.sun.corba.se.impl.util.RepositoryId: boolean isAbstractBase(java.lang.Class)>($r2);
+
+        if $z4 == 0 goto label04;
+
+        b0 = 1;
+
+        goto label05;
+
+     label04:
+        $z5 = staticinvoke <com.sun.corba.se.impl.io.ObjectStreamClassCorbaExt: boolean isAbstractInterface(java.lang.Class)>($r2);
+
+        if $z5 == 0 goto label05;
+
+        b0 = 1;
+
+     label05:
+        tableswitch(b0)
+        {
+            case 0: goto label06;
+            case 1: goto label07;
+            case 2: goto label08;
+            default: goto label12;
+        };
+
+     label06:
+        $r8 = r3.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        staticinvoke <javax.rmi.CORBA.Util: void writeRemoteObject(org.omg.CORBA.portable.OutputStream,java.lang.Object)>($r8, r4);
+
+        goto label12;
+
+     label07:
+        $r7 = r3.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        staticinvoke <javax.rmi.CORBA.Util: void writeAbstractObject(org.omg.CORBA.portable.OutputStream,java.lang.Object)>($r7, r4);
+
+        goto label12;
+
+     label08:
+        $r6 = r3.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        $r5 = (java.io.Serializable) r4;
+
+        virtualinvoke $r6.<org.omg.CORBA_2_3.portable.OutputStream: void write_value(java.io.Serializable,java.lang.Class)>($r5, $r2);
+
+     label09:
+        goto label12;
+
+     label10:
+        $r12 := @caughtexception;
+
+        $z6 = r4 instanceof java.io.Serializable;
+
+        if $z6 == 0 goto label11;
+
+        throw $r12;
+
+     label11:
+        $r13 = virtualinvoke r4.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <com.sun.corba.se.impl.util.Utility: void throwNotSerializableForCorba(java.lang.String)>($r14);
+
+     label12:
+        return;
+
+        catch java.lang.ClassCastException from label08 to label09 with label10;
+    }
+
+    private void outputClassFields(java.lang.Object, java.lang.Class, com.sun.corba.se.impl.io.ObjectStreamField[]) throws java.io.IOException, java.io.InvalidClassException
+    {
+        org.omg.CORBA.INTERNAL $r49;
+        com.sun.corba.se.impl.io.IIOPOutputStream r7;
+        byte $b6;
+        boolean $z0;
+        java.lang.IllegalAccessException $r45;
+        org.omg.CORBA_2_3.portable.OutputStream $r8, $r11, $r18, $r21, $r24, $r27, $r30, $r33;
+        float $f0;
+        java.lang.StringBuilder $r40, $r43, $r50;
+        com.sun.corba.se.impl.io.ObjectStreamField[] r0;
+        long $l3;
+        java.io.InvalidClassException $r51, $r52;
+        short $s2;
+        int $i0, $i4, i7, $i8;
+        java.lang.String $r36, $r38, $r42, $r44, $r48;
+        double $d0;
+        char $c1, $c5;
+        java.lang.reflect.Field $r2, $r5, $r10, $r13, $r17, $r20, $r23, $r26, $r29, $r32;
+        com.sun.corba.se.impl.logging.UtilSystemException $r47;
+        com.sun.corba.se.impl.io.ObjectStreamField $r1, $r3, $r4, $r9, $r12, $r15, $r16, $r19, $r22, $r25, $r28, $r31, $r41, $r46;
+        java.lang.Object r6, $r14;
+        java.lang.Class r35;
+
+        r7 := @this: com.sun.corba.se.impl.io.IIOPOutputStream;
+
+        r6 := @parameter0: java.lang.Object;
+
+        r35 := @parameter1: java.lang.Class;
+
+        r0 := @parameter2: com.sun.corba.se.impl.io.ObjectStreamField[];
+
+        i7 = 0;
+
+     label01:
+        $i0 = lengthof r0;
+
+        if i7 >= $i0 goto label16;
+
+        $r1 = r0[i7];
+
+        $r2 = virtualinvoke $r1.<com.sun.corba.se.impl.io.ObjectStreamField: java.lang.reflect.Field getField()>();
+
+        if $r2 != null goto label02;
+
+        $r51 = new java.io.InvalidClassException;
+
+        $r38 = virtualinvoke r35.<java.lang.Class: java.lang.String getName()>();
+
+        $r50 = new java.lang.StringBuilder;
+
+        specialinvoke $r50.<java.lang.StringBuilder: void <init>()>();
+
+        $r40 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Nonexistent field ");
+
+        $r41 = r0[i7];
+
+        $r42 = virtualinvoke $r41.<com.sun.corba.se.impl.io.ObjectStreamField: java.lang.String getName()>();
+
+        $r43 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r42);
+
+        $r44 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r51.<java.io.InvalidClassException: void <init>(java.lang.String,java.lang.String)>($r38, $r44);
+
+        throw $r51;
+
+     label02:
+        $r3 = r0[i7];
+
+        $c1 = virtualinvoke $r3.<com.sun.corba.se.impl.io.ObjectStreamField: char getTypeCode()>();
+
+        $i8 = (int) $c1;
+
+        tableswitch($i8)
+        {
+            case 66: goto label03;
+            case 67: goto label04;
+            case 68: goto label06;
+            case 69: goto label12;
+            case 70: goto label05;
+            case 71: goto label12;
+            case 72: goto label12;
+            case 73: goto label07;
+            case 74: goto label08;
+            case 75: goto label12;
+            case 76: goto label11;
+            case 77: goto label12;
+            case 78: goto label12;
+            case 79: goto label12;
+            case 80: goto label12;
+            case 81: goto label12;
+            case 82: goto label12;
+            case 83: goto label09;
+            case 84: goto label12;
+            case 85: goto label12;
+            case 86: goto label12;
+            case 87: goto label12;
+            case 88: goto label12;
+            case 89: goto label12;
+            case 90: goto label10;
+            case 91: goto label11;
+            default: goto label12;
+        };
+
+     label03:
+        $r31 = r0[i7];
+
+        $r32 = virtualinvoke $r31.<com.sun.corba.se.impl.io.ObjectStreamField: java.lang.reflect.Field getField()>();
+
+        $b6 = virtualinvoke $r32.<java.lang.reflect.Field: byte getByte(java.lang.Object)>(r6);
+
+        $r33 = r7.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        virtualinvoke $r33.<org.omg.CORBA_2_3.portable.OutputStream: void write_octet(byte)>($b6);
+
+        goto label13;
+
+     label04:
+        $r28 = r0[i7];
+
+        $r29 = virtualinvoke $r28.<com.sun.corba.se.impl.io.ObjectStreamField: java.lang.reflect.Field getField()>();
+
+        $c5 = virtualinvoke $r29.<java.lang.reflect.Field: char getChar(java.lang.Object)>(r6);
+
+        $r30 = r7.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        virtualinvoke $r30.<org.omg.CORBA_2_3.portable.OutputStream: void write_wchar(char)>($c5);
+
+        goto label13;
+
+     label05:
+        $r22 = r0[i7];
+
+        $r23 = virtualinvoke $r22.<com.sun.corba.se.impl.io.ObjectStreamField: java.lang.reflect.Field getField()>();
+
+        $f0 = virtualinvoke $r23.<java.lang.reflect.Field: float getFloat(java.lang.Object)>(r6);
+
+        $r24 = r7.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        virtualinvoke $r24.<org.omg.CORBA_2_3.portable.OutputStream: void write_float(float)>($f0);
+
+        goto label13;
+
+     label06:
+        $r25 = r0[i7];
+
+        $r26 = virtualinvoke $r25.<com.sun.corba.se.impl.io.ObjectStreamField: java.lang.reflect.Field getField()>();
+
+        $d0 = virtualinvoke $r26.<java.lang.reflect.Field: double getDouble(java.lang.Object)>(r6);
+
+        $r27 = r7.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        virtualinvoke $r27.<org.omg.CORBA_2_3.portable.OutputStream: void write_double(double)>($d0);
+
+        goto label13;
+
+     label07:
+        $r19 = r0[i7];
+
+        $r20 = virtualinvoke $r19.<com.sun.corba.se.impl.io.ObjectStreamField: java.lang.reflect.Field getField()>();
+
+        $i4 = virtualinvoke $r20.<java.lang.reflect.Field: int getInt(java.lang.Object)>(r6);
+
+        $r21 = r7.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        virtualinvoke $r21.<org.omg.CORBA_2_3.portable.OutputStream: void write_long(int)>($i4);
+
+        goto label13;
+
+     label08:
+        $r16 = r0[i7];
+
+        $r17 = virtualinvoke $r16.<com.sun.corba.se.impl.io.ObjectStreamField: java.lang.reflect.Field getField()>();
+
+        $l3 = virtualinvoke $r17.<java.lang.reflect.Field: long getLong(java.lang.Object)>(r6);
+
+        $r18 = r7.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        virtualinvoke $r18.<org.omg.CORBA_2_3.portable.OutputStream: void write_longlong(long)>($l3);
+
+        goto label13;
+
+     label09:
+        $r9 = r0[i7];
+
+        $r10 = virtualinvoke $r9.<com.sun.corba.se.impl.io.ObjectStreamField: java.lang.reflect.Field getField()>();
+
+        $s2 = virtualinvoke $r10.<java.lang.reflect.Field: short getShort(java.lang.Object)>(r6);
+
+        $r11 = r7.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        virtualinvoke $r11.<org.omg.CORBA_2_3.portable.OutputStream: void write_short(short)>($s2);
+
+        goto label13;
+
+     label10:
+        $r4 = r0[i7];
+
+        $r5 = virtualinvoke $r4.<com.sun.corba.se.impl.io.ObjectStreamField: java.lang.reflect.Field getField()>();
+
+        $z0 = virtualinvoke $r5.<java.lang.reflect.Field: boolean getBoolean(java.lang.Object)>(r6);
+
+        $r8 = r7.<com.sun.corba.se.impl.io.IIOPOutputStream: org.omg.CORBA_2_3.portable.OutputStream orbStream>;
+
+        virtualinvoke $r8.<org.omg.CORBA_2_3.portable.OutputStream: void write_boolean(boolean)>($z0);
+
+        goto label13;
+
+     label11:
+        $r12 = r0[i7];
+
+        $r13 = virtualinvoke $r12.<com.sun.corba.se.impl.io.ObjectStreamField: java.lang.reflect.Field getField()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.reflect.Field: java.lang.Object get(java.lang.Object)>(r6);
+
+        $r15 = r0[i7];
+
+        specialinvoke r7.<com.sun.corba.se.impl.io.IIOPOutputStream: void writeObjectField(com.sun.corba.se.impl.io.ObjectStreamField,java.lang.Object)>($r15, $r14);
+
+        goto label13;
+
+     label12:
+        $r52 = new java.io.InvalidClassException;
+
+        $r36 = virtualinvoke r35.<java.lang.Class: java.lang.String getName()>();
+
+        specialinvoke $r52.<java.io.InvalidClassException: void <init>(java.lang.String)>($r36);
+
+        throw $r52;
+
+     label13:
+        goto label15;
+
+     label14:
+        $r45 := @caughtexception;
+
+        $r47 = r7.<com.sun.corba.se.impl.io.IIOPOutputStream: com.sun.corba.se.impl.logging.UtilSystemException wrapper>;
+
+        $r46 = r0[i7];
+
+        $r48 = virtualinvoke $r46.<com.sun.corba.se.impl.io.ObjectStreamField: java.lang.String getName()>();
+
+        $r49 = virtualinvoke $r47.<com.sun.corba.se.impl.logging.UtilSystemException: org.omg.CORBA.INTERNAL illegalFieldAccess(java.lang.Throwable,java.lang.Object)>($r45, $r48);
+
+        throw $r49;
+
+     label15:
+        i7 = i7 + 1;
+
+        goto label01;
+
+     label16:
+        return;
+
+        catch java.lang.IllegalAccessException from label02 to label13 with label14;
+    }
+
+    static void <clinit>()
+    {
+        com.sun.corba.se.impl.io.IIOPOutputStream$1 $r0;
+        java.lang.Object $r1;
+        sun.corba.Bridge $r2;
+
+        $r0 = new com.sun.corba.se.impl.io.IIOPOutputStream$1;
+
+        specialinvoke $r0.<com.sun.corba.se.impl.io.IIOPOutputStream$1: void <init>()>();
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r2 = (sun.corba.Bridge) $r1;
+
+        <com.sun.corba.se.impl.io.IIOPOutputStream: sun.corba.Bridge bridge> = $r2;
+
+        return;
+    }
+}

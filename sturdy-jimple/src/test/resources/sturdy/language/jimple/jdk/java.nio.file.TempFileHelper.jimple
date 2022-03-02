@@ -1,0 +1,373 @@
+class java.nio.file.TempFileHelper extends java.lang.Object
+{
+    private static final java.nio.file.Path tmpdir;
+    private static final boolean isPosix;
+    private static final java.security.SecureRandom random;
+
+    private void <init>()
+    {
+        java.nio.file.TempFileHelper r0;
+
+        r0 := @this: java.nio.file.TempFileHelper;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static java.nio.file.Path generatePath(java.lang.String, java.lang.String, java.nio.file.Path)
+    {
+        long $l0, $l2;
+        java.lang.String[] $r11;
+        java.security.SecureRandom $r0;
+        byte $b1;
+        java.lang.String r4, $r6, r8, $r10;
+        java.nio.file.Path r1, $r12, $r13, $r14;
+        java.nio.file.FileSystem $r2;
+        java.lang.IllegalArgumentException $r15;
+        java.lang.StringBuilder $r3, $r5, $r7, $r9;
+
+        r4 := @parameter0: java.lang.String;
+
+        r8 := @parameter1: java.lang.String;
+
+        r1 := @parameter2: java.nio.file.Path;
+
+        $r0 = <java.nio.file.TempFileHelper: java.security.SecureRandom random>;
+
+        $l0 = virtualinvoke $r0.<java.security.SecureRandom: long nextLong()>();
+
+        $b1 = $l0 cmp -9223372036854775808L;
+
+        if $b1 != 0 goto label1;
+
+        $l2 = 0L;
+
+        goto label2;
+
+     label1:
+        $l2 = staticinvoke <java.lang.Math: long abs(long)>($l0);
+
+     label2:
+        $r2 = interfaceinvoke r1.<java.nio.file.Path: java.nio.file.FileSystem getFileSystem()>();
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r6 = staticinvoke <java.lang.Long: java.lang.String toString(long)>($l2);
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r11 = newarray (java.lang.String)[0];
+
+        $r12 = virtualinvoke $r2.<java.nio.file.FileSystem: java.nio.file.Path getPath(java.lang.String,java.lang.String[])>($r10, $r11);
+
+        $r13 = interfaceinvoke $r12.<java.nio.file.Path: java.nio.file.Path getParent()>();
+
+        if $r13 == null goto label3;
+
+        $r15 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r15.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid prefix or suffix");
+
+        throw $r15;
+
+     label3:
+        $r14 = interfaceinvoke r1.<java.nio.file.Path: java.nio.file.Path resolve(java.nio.file.Path)>($r12);
+
+        return $r14;
+    }
+
+    private static java.nio.file.Path create(java.nio.file.Path, java.lang.String, java.lang.String, boolean, java.nio.file.attribute.FileAttribute[]) throws java.io.IOException
+    {
+        java.nio.file.attribute.FileAttribute[] $r6, r16, r19;
+        java.lang.SecurityException $r8, $r10;
+        java.nio.file.Path $r0, $r1, $r9, r13, $r22;
+        boolean $z0, z1, $z2, z3;
+        java.nio.file.attribute.FileAttribute $r4, $r18, $r20;
+        java.nio.file.FileSystem $r2, $r3;
+        java.nio.file.InvalidPathException $r11;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, i7;
+        java.lang.String $r5, r14, r15, $r17;
+        java.nio.file.FileAlreadyExistsException $r7;
+        java.lang.IllegalArgumentException $r12;
+        java.lang.SecurityManager $r21;
+
+        r13 := @parameter0: java.nio.file.Path;
+
+        r14 := @parameter1: java.lang.String;
+
+        r15 := @parameter2: java.lang.String;
+
+        z1 := @parameter3: boolean;
+
+        r16 := @parameter4: java.nio.file.attribute.FileAttribute[];
+
+        if r14 != null goto label01;
+
+        r14 = "";
+
+     label01:
+        if r15 != null goto label04;
+
+        if z1 == 0 goto label02;
+
+        $r17 = "";
+
+        goto label03;
+
+     label02:
+        $r17 = ".tmp";
+
+     label03:
+        r15 = $r17;
+
+     label04:
+        if r13 != null goto label05;
+
+        r13 = <java.nio.file.TempFileHelper: java.nio.file.Path tmpdir>;
+
+     label05:
+        $z0 = <java.nio.file.TempFileHelper: boolean isPosix>;
+
+        if $z0 == 0 goto label14;
+
+        $r2 = interfaceinvoke r13.<java.nio.file.Path: java.nio.file.FileSystem getFileSystem()>();
+
+        $r3 = staticinvoke <java.nio.file.FileSystems: java.nio.file.FileSystem getDefault()>();
+
+        if $r2 != $r3 goto label14;
+
+        $i0 = lengthof r16;
+
+        if $i0 != 0 goto label08;
+
+        r16 = newarray (java.nio.file.attribute.FileAttribute)[1];
+
+        $r6 = r16;
+
+        if z1 == 0 goto label06;
+
+        $r18 = <java.nio.file.TempFileHelper$PosixPermissions: java.nio.file.attribute.FileAttribute dirPermissions>;
+
+        goto label07;
+
+     label06:
+        $r18 = <java.nio.file.TempFileHelper$PosixPermissions: java.nio.file.attribute.FileAttribute filePermissions>;
+
+     label07:
+        $r6[0] = $r18;
+
+        goto label14;
+
+     label08:
+        z3 = 0;
+
+        i7 = 0;
+
+     label09:
+        $i1 = lengthof r16;
+
+        if i7 >= $i1 goto label11;
+
+        $r4 = r16[i7];
+
+        $r5 = interfaceinvoke $r4.<java.nio.file.attribute.FileAttribute: java.lang.String name()>();
+
+        $z2 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("posix:permissions");
+
+        if $z2 == 0 goto label10;
+
+        z3 = 1;
+
+        goto label11;
+
+     label10:
+        i7 = i7 + 1;
+
+        goto label09;
+
+     label11:
+        if z3 != 0 goto label14;
+
+        $i2 = lengthof r16;
+
+        $i3 = $i2 + 1;
+
+        r19 = newarray (java.nio.file.attribute.FileAttribute)[$i3];
+
+        $i4 = lengthof r16;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r16, 0, r19, 0, $i4);
+
+        r16 = r19;
+
+        $i5 = lengthof r19;
+
+        $i6 = $i5 - 1;
+
+        if z1 == 0 goto label12;
+
+        $r20 = <java.nio.file.TempFileHelper$PosixPermissions: java.nio.file.attribute.FileAttribute dirPermissions>;
+
+        goto label13;
+
+     label12:
+        $r20 = <java.nio.file.TempFileHelper$PosixPermissions: java.nio.file.attribute.FileAttribute filePermissions>;
+
+     label13:
+        r19[$i6] = $r20;
+
+     label14:
+        $r21 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+     label15:
+        $r22 = staticinvoke <java.nio.file.TempFileHelper: java.nio.file.Path generatePath(java.lang.String,java.lang.String,java.nio.file.Path)>(r14, r15, r13);
+
+     label16:
+        goto label19;
+
+     label17:
+        $r11 := @caughtexception;
+
+        if $r21 == null goto label18;
+
+        $r12 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r12.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid prefix or suffix");
+
+        throw $r12;
+
+     label18:
+        throw $r11;
+
+     label19:
+        if z1 == 0 goto label21;
+
+        $r1 = staticinvoke <java.nio.file.Files: java.nio.file.Path createDirectory(java.nio.file.Path,java.nio.file.attribute.FileAttribute[])>($r22, r16);
+
+     label20:
+        return $r1;
+
+     label21:
+        $r0 = staticinvoke <java.nio.file.Files: java.nio.file.Path createFile(java.nio.file.Path,java.nio.file.attribute.FileAttribute[])>($r22, r16);
+
+     label22:
+        return $r0;
+
+     label23:
+        $r8 := @caughtexception;
+
+        $r9 = <java.nio.file.TempFileHelper: java.nio.file.Path tmpdir>;
+
+        if r13 != $r9 goto label24;
+
+        if $r21 == null goto label24;
+
+        $r10 = new java.lang.SecurityException;
+
+        specialinvoke $r10.<java.lang.SecurityException: void <init>(java.lang.String)>("Unable to create temporary file or directory");
+
+        throw $r10;
+
+     label24:
+        throw $r8;
+
+     label25:
+        $r7 := @caughtexception;
+
+        goto label15;
+
+        catch java.nio.file.InvalidPathException from label15 to label16 with label17;
+        catch java.lang.SecurityException from label19 to label20 with label23;
+        catch java.lang.SecurityException from label21 to label22 with label23;
+        catch java.nio.file.FileAlreadyExistsException from label19 to label20 with label25;
+        catch java.nio.file.FileAlreadyExistsException from label21 to label22 with label25;
+    }
+
+    static java.nio.file.Path createTempFile(java.nio.file.Path, java.lang.String, java.lang.String, java.nio.file.attribute.FileAttribute[]) throws java.io.IOException
+    {
+        java.nio.file.attribute.FileAttribute[] r3;
+        java.lang.String r1, r2;
+        java.nio.file.Path r0, $r4;
+
+        r0 := @parameter0: java.nio.file.Path;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.String;
+
+        r3 := @parameter3: java.nio.file.attribute.FileAttribute[];
+
+        $r4 = staticinvoke <java.nio.file.TempFileHelper: java.nio.file.Path create(java.nio.file.Path,java.lang.String,java.lang.String,boolean,java.nio.file.attribute.FileAttribute[])>(r0, r1, r2, 0, r3);
+
+        return $r4;
+    }
+
+    static java.nio.file.Path createTempDirectory(java.nio.file.Path, java.lang.String, java.nio.file.attribute.FileAttribute[]) throws java.io.IOException
+    {
+        java.nio.file.attribute.FileAttribute[] r2;
+        java.lang.String r1;
+        java.nio.file.Path r0, $r3;
+
+        r0 := @parameter0: java.nio.file.Path;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.nio.file.attribute.FileAttribute[];
+
+        $r3 = staticinvoke <java.nio.file.TempFileHelper: java.nio.file.Path create(java.nio.file.Path,java.lang.String,java.lang.String,boolean,java.nio.file.attribute.FileAttribute[])>(r0, r1, null, 1, r2);
+
+        return $r3;
+    }
+
+    static void <clinit>()
+    {
+        java.util.Set $r6;
+        java.lang.String[] $r2;
+        java.nio.file.FileSystem $r5;
+        sun.security.action.GetPropertyAction $r0;
+        java.security.SecureRandom $r7;
+        java.lang.Object $r1;
+        java.lang.String $r3;
+        java.nio.file.Path $r4;
+        boolean $z0;
+
+        $r0 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r0.<sun.security.action.GetPropertyAction: void <init>(java.lang.String)>("java.io.tmpdir");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r3 = (java.lang.String) $r1;
+
+        $r2 = newarray (java.lang.String)[0];
+
+        $r4 = staticinvoke <java.nio.file.Paths: java.nio.file.Path get(java.lang.String,java.lang.String[])>($r3, $r2);
+
+        <java.nio.file.TempFileHelper: java.nio.file.Path tmpdir> = $r4;
+
+        $r5 = staticinvoke <java.nio.file.FileSystems: java.nio.file.FileSystem getDefault()>();
+
+        $r6 = virtualinvoke $r5.<java.nio.file.FileSystem: java.util.Set supportedFileAttributeViews()>();
+
+        $z0 = interfaceinvoke $r6.<java.util.Set: boolean contains(java.lang.Object)>("posix");
+
+        <java.nio.file.TempFileHelper: boolean isPosix> = $z0;
+
+        $r7 = new java.security.SecureRandom;
+
+        specialinvoke $r7.<java.security.SecureRandom: void <init>()>();
+
+        <java.nio.file.TempFileHelper: java.security.SecureRandom random> = $r7;
+
+        return;
+    }
+}

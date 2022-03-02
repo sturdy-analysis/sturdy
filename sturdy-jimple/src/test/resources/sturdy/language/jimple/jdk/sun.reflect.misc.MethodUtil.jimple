@@ -1,0 +1,752 @@
+public final class sun.reflect.misc.MethodUtil extends java.security.SecureClassLoader
+{
+    private static final java.lang.String MISC_PKG;
+    private static final java.lang.String TRAMPOLINE;
+    private static final java.lang.reflect.Method bounce;
+
+    private void <init>()
+    {
+        sun.reflect.misc.MethodUtil r0;
+
+        r0 := @this: sun.reflect.misc.MethodUtil;
+
+        specialinvoke r0.<java.security.SecureClassLoader: void <init>()>();
+
+        return;
+    }
+
+    public static java.lang.reflect.Method getMethod(java.lang.Class, java.lang.String, java.lang.Class[]) throws java.lang.NoSuchMethodException
+    {
+        java.lang.Class[] r2;
+        java.lang.Class r0;
+        java.lang.String r1;
+        java.lang.reflect.Method $r3;
+
+        r0 := @parameter0: java.lang.Class;
+
+        r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.lang.Class[];
+
+        staticinvoke <sun.reflect.misc.ReflectUtil: void checkPackageAccess(java.lang.Class)>(r0);
+
+        $r3 = virtualinvoke r0.<java.lang.Class: java.lang.reflect.Method getMethod(java.lang.String,java.lang.Class[])>(r1, r2);
+
+        return $r3;
+    }
+
+    public static java.lang.reflect.Method[] getMethods(java.lang.Class)
+    {
+        java.lang.Class r0;
+        java.lang.reflect.Method[] $r1;
+
+        r0 := @parameter0: java.lang.Class;
+
+        staticinvoke <sun.reflect.misc.ReflectUtil: void checkPackageAccess(java.lang.Class)>(r0);
+
+        $r1 = virtualinvoke r0.<java.lang.Class: java.lang.reflect.Method[] getMethods()>();
+
+        return $r1;
+    }
+
+    public static java.lang.reflect.Method[] getPublicMethods(java.lang.Class)
+    {
+        java.lang.Object[] $r4;
+        java.util.Collection $r2;
+        java.util.HashMap $r1;
+        java.lang.SecurityManager $r0;
+        java.lang.reflect.Method[] $r3, $r5, $r6;
+        int $i0;
+        java.lang.Class r7;
+        boolean $z0;
+
+        r7 := @parameter0: java.lang.Class;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 != null goto label1;
+
+        $r6 = virtualinvoke r7.<java.lang.Class: java.lang.reflect.Method[] getMethods()>();
+
+        return $r6;
+
+     label1:
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>()>();
+
+     label2:
+        if r7 == null goto label4;
+
+        $z0 = staticinvoke <sun.reflect.misc.MethodUtil: boolean getInternalPublicMethods(java.lang.Class,java.util.Map)>(r7, $r1);
+
+        if $z0 == 0 goto label3;
+
+        goto label4;
+
+     label3:
+        staticinvoke <sun.reflect.misc.MethodUtil: void getInterfaceMethods(java.lang.Class,java.util.Map)>(r7, $r1);
+
+        r7 = virtualinvoke r7.<java.lang.Class: java.lang.Class getSuperclass()>();
+
+        goto label2;
+
+     label4:
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.util.Collection values()>();
+
+        $i0 = interfaceinvoke $r1.<java.util.Map: int size()>();
+
+        $r3 = newarray (java.lang.reflect.Method)[$i0];
+
+        $r4 = interfaceinvoke $r2.<java.util.Collection: java.lang.Object[] toArray(java.lang.Object[])>($r3);
+
+        $r5 = (java.lang.reflect.Method[]) $r4;
+
+        return $r5;
+    }
+
+    private static void getInterfaceMethods(java.lang.Class, java.util.Map)
+    {
+        java.util.Map r3;
+        int $i0, i1;
+        java.lang.Class[] $r1;
+        java.lang.Class r0, r2;
+        boolean $z0;
+
+        r0 := @parameter0: java.lang.Class;
+
+        r3 := @parameter1: java.util.Map;
+
+        $r1 = virtualinvoke r0.<java.lang.Class: java.lang.Class[] getInterfaces()>();
+
+        i1 = 0;
+
+     label1:
+        $i0 = lengthof $r1;
+
+        if i1 >= $i0 goto label3;
+
+        r2 = $r1[i1];
+
+        $z0 = staticinvoke <sun.reflect.misc.MethodUtil: boolean getInternalPublicMethods(java.lang.Class,java.util.Map)>(r2, r3);
+
+        if $z0 != 0 goto label2;
+
+        staticinvoke <sun.reflect.misc.MethodUtil: void getInterfaceMethods(java.lang.Class,java.util.Map)>(r2, r3);
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    private static boolean getInternalPublicMethods(java.lang.Class, java.util.Map)
+    {
+        java.lang.reflect.Method[] $r1;
+        java.util.Map r4;
+        int $i0, $i1, $i2, $i3, $i4, i5, i6, i7;
+        java.lang.SecurityException $r9;
+        java.lang.reflect.Method $r2, $r5, $r6, $r7;
+        boolean $z0, $z1, $z2, $z3, z4, z5, z6;
+        java.lang.Class r0, $r3, $r8;
+
+        r0 := @parameter0: java.lang.Class;
+
+        r4 := @parameter1: java.util.Map;
+
+     label01:
+        $i0 = virtualinvoke r0.<java.lang.Class: int getModifiers()>();
+
+        $z0 = staticinvoke <java.lang.reflect.Modifier: boolean isPublic(int)>($i0);
+
+        if $z0 != 0 goto label03;
+
+     label02:
+        return 0;
+
+     label03:
+        $z1 = staticinvoke <sun.reflect.misc.ReflectUtil: boolean isPackageAccessible(java.lang.Class)>(r0);
+
+        if $z1 != 0 goto label05;
+
+     label04:
+        return 0;
+
+     label05:
+        $r1 = virtualinvoke r0.<java.lang.Class: java.lang.reflect.Method[] getMethods()>();
+
+     label06:
+        goto label08;
+
+     label07:
+        $r9 := @caughtexception;
+
+        return 0;
+
+     label08:
+        z4 = 1;
+
+        z6 = 1;
+
+        z5 = 1;
+
+        i5 = 0;
+
+     label09:
+        $i1 = lengthof $r1;
+
+        if i5 >= $i1 goto label11;
+
+        $r7 = $r1[i5];
+
+        $r8 = virtualinvoke $r7.<java.lang.reflect.Method: java.lang.Class getDeclaringClass()>();
+
+        $i4 = virtualinvoke $r8.<java.lang.Class: int getModifiers()>();
+
+        $z3 = staticinvoke <java.lang.reflect.Modifier: boolean isPublic(int)>($i4);
+
+        if $z3 != 0 goto label10;
+
+        z4 = 0;
+
+        z6 = 0;
+
+        z5 = 0;
+
+        goto label11;
+
+     label10:
+        i5 = i5 + 1;
+
+        goto label09;
+
+     label11:
+        if z5 == 0 goto label14;
+
+        i6 = 0;
+
+     label12:
+        $i3 = lengthof $r1;
+
+        if i6 >= $i3 goto label13;
+
+        $r6 = $r1[i6];
+
+        staticinvoke <sun.reflect.misc.MethodUtil: void addMethod(java.util.Map,java.lang.reflect.Method)>(r4, $r6);
+
+        i6 = i6 + 1;
+
+        goto label12;
+
+     label13:
+        goto label17;
+
+     label14:
+        i7 = 0;
+
+     label15:
+        $i2 = lengthof $r1;
+
+        if i7 >= $i2 goto label17;
+
+        $r2 = $r1[i7];
+
+        $r3 = virtualinvoke $r2.<java.lang.reflect.Method: java.lang.Class getDeclaringClass()>();
+
+        $z2 = virtualinvoke r0.<java.lang.Object: boolean equals(java.lang.Object)>($r3);
+
+        if $z2 == 0 goto label16;
+
+        $r5 = $r1[i7];
+
+        staticinvoke <sun.reflect.misc.MethodUtil: void addMethod(java.util.Map,java.lang.reflect.Method)>(r4, $r5);
+
+     label16:
+        i7 = i7 + 1;
+
+        goto label15;
+
+     label17:
+        return z6;
+
+        catch java.lang.SecurityException from label01 to label02 with label07;
+        catch java.lang.SecurityException from label03 to label04 with label07;
+        catch java.lang.SecurityException from label05 to label06 with label07;
+    }
+
+    private static void addMethod(java.util.Map, java.lang.reflect.Method)
+    {
+        java.util.Map r2;
+        sun.reflect.misc.MethodUtil$Signature $r0;
+        java.lang.Class $r3, $r6;
+        java.lang.Object $r4;
+        java.lang.reflect.Method r1, r5;
+        boolean $z0, $z1, $z2;
+
+        r2 := @parameter0: java.util.Map;
+
+        r1 := @parameter1: java.lang.reflect.Method;
+
+        $r0 = new sun.reflect.misc.MethodUtil$Signature;
+
+        specialinvoke $r0.<sun.reflect.misc.MethodUtil$Signature: void <init>(java.lang.reflect.Method)>(r1);
+
+        $z0 = interfaceinvoke r2.<java.util.Map: boolean containsKey(java.lang.Object)>($r0);
+
+        if $z0 != 0 goto label1;
+
+        interfaceinvoke r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r0, r1);
+
+        goto label2;
+
+     label1:
+        $r3 = virtualinvoke r1.<java.lang.reflect.Method: java.lang.Class getDeclaringClass()>();
+
+        $z1 = virtualinvoke $r3.<java.lang.Class: boolean isInterface()>();
+
+        if $z1 != 0 goto label2;
+
+        $r4 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>($r0);
+
+        r5 = (java.lang.reflect.Method) $r4;
+
+        $r6 = virtualinvoke r5.<java.lang.reflect.Method: java.lang.Class getDeclaringClass()>();
+
+        $z2 = virtualinvoke $r6.<java.lang.Class: boolean isInterface()>();
+
+        if $z2 == 0 goto label2;
+
+        interfaceinvoke r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r0, r1);
+
+     label2:
+        return;
+    }
+
+    public static java.lang.Object invoke(java.lang.reflect.Method, java.lang.Object, java.lang.Object[]) throws java.lang.reflect.InvocationTargetException, java.lang.IllegalAccessException
+    {
+        java.lang.Throwable $r9;
+        java.lang.Object[] $r0, r3;
+        java.lang.Error $r7, $r10, $r11;
+        java.lang.reflect.Method r1, $r4;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.IllegalAccessException $r6, $r13;
+        java.lang.RuntimeException $r12;
+        java.lang.reflect.InvocationTargetException $r8, $r14;
+        java.lang.Object r2, $r5;
+
+        r1 := @parameter0: java.lang.reflect.Method;
+
+        r2 := @parameter1: java.lang.Object;
+
+        r3 := @parameter2: java.lang.Object[];
+
+     label1:
+        $r4 = <sun.reflect.misc.MethodUtil: java.lang.reflect.Method bounce>;
+
+        $r0 = newarray (java.lang.Object)[3];
+
+        $r0[0] = r1;
+
+        $r0[1] = r2;
+
+        $r0[2] = r3;
+
+        $r5 = virtualinvoke $r4.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>(null, $r0);
+
+     label2:
+        return $r5;
+
+     label3:
+        $r8 := @caughtexception;
+
+        $r9 = virtualinvoke $r8.<java.lang.reflect.InvocationTargetException: java.lang.Throwable getCause()>();
+
+        $z0 = $r9 instanceof java.lang.reflect.InvocationTargetException;
+
+        if $z0 == 0 goto label4;
+
+        $r14 = (java.lang.reflect.InvocationTargetException) $r9;
+
+        throw $r14;
+
+     label4:
+        $z1 = $r9 instanceof java.lang.IllegalAccessException;
+
+        if $z1 == 0 goto label5;
+
+        $r13 = (java.lang.IllegalAccessException) $r9;
+
+        throw $r13;
+
+     label5:
+        $z2 = $r9 instanceof java.lang.RuntimeException;
+
+        if $z2 == 0 goto label6;
+
+        $r12 = (java.lang.RuntimeException) $r9;
+
+        throw $r12;
+
+     label6:
+        $z3 = $r9 instanceof java.lang.Error;
+
+        if $z3 == 0 goto label7;
+
+        $r11 = (java.lang.Error) $r9;
+
+        throw $r11;
+
+     label7:
+        $r10 = new java.lang.Error;
+
+        specialinvoke $r10.<java.lang.Error: void <init>(java.lang.String,java.lang.Throwable)>("Unexpected invocation error", $r9);
+
+        throw $r10;
+
+     label8:
+        $r6 := @caughtexception;
+
+        $r7 = new java.lang.Error;
+
+        specialinvoke $r7.<java.lang.Error: void <init>(java.lang.String,java.lang.Throwable)>("Unexpected invocation error", $r6);
+
+        throw $r7;
+
+        catch java.lang.reflect.InvocationTargetException from label1 to label2 with label3;
+        catch java.lang.IllegalAccessException from label1 to label2 with label8;
+    }
+
+    private static java.lang.reflect.Method getTrampoline()
+    {
+        sun.reflect.misc.MethodUtil$1 $r0;
+        java.lang.InternalError $r4;
+        java.lang.Object $r1;
+        java.lang.reflect.Method $r2;
+        java.lang.Exception $r3;
+
+     label1:
+        $r0 = new sun.reflect.misc.MethodUtil$1;
+
+        specialinvoke $r0.<sun.reflect.misc.MethodUtil$1: void <init>()>();
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r0);
+
+        $r2 = (java.lang.reflect.Method) $r1;
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.lang.InternalError;
+
+        specialinvoke $r4.<java.lang.InternalError: void <init>(java.lang.String,java.lang.Throwable)>("bouncer cannot be found", $r3);
+
+        throw $r4;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    protected synchronized java.lang.Class loadClass(java.lang.String, boolean) throws java.lang.ClassNotFoundException
+    {
+        java.lang.Class $r2, r5;
+        java.lang.ClassNotFoundException $r4;
+        java.lang.String r0;
+        java.lang.ClassLoader $r3;
+        sun.reflect.misc.MethodUtil r1;
+        boolean z0;
+
+        r1 := @this: sun.reflect.misc.MethodUtil;
+
+        r0 := @parameter0: java.lang.String;
+
+        z0 := @parameter1: boolean;
+
+        staticinvoke <sun.reflect.misc.ReflectUtil: void checkPackageAccess(java.lang.String)>(r0);
+
+        $r2 = virtualinvoke r1.<sun.reflect.misc.MethodUtil: java.lang.Class findLoadedClass(java.lang.String)>(r0);
+
+        r5 = $r2;
+
+        if $r2 != null goto label5;
+
+     label1:
+        r5 = virtualinvoke r1.<sun.reflect.misc.MethodUtil: java.lang.Class findClass(java.lang.String)>(r0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+     label4:
+        if r5 != null goto label5;
+
+        $r3 = virtualinvoke r1.<sun.reflect.misc.MethodUtil: java.lang.ClassLoader getParent()>();
+
+        r5 = virtualinvoke $r3.<java.lang.ClassLoader: java.lang.Class loadClass(java.lang.String)>(r0);
+
+     label5:
+        if z0 == 0 goto label6;
+
+        virtualinvoke r1.<sun.reflect.misc.MethodUtil: void resolveClass(java.lang.Class)>(r5);
+
+     label6:
+        return r5;
+
+        catch java.lang.ClassNotFoundException from label1 to label2 with label3;
+    }
+
+    protected java.lang.Class findClass(java.lang.String) throws java.lang.ClassNotFoundException
+    {
+        java.net.URL $r4;
+        java.io.IOException $r8;
+        java.lang.ClassNotFoundException $r5, $r7, $r9;
+        java.lang.Class $r6;
+        java.lang.String r0, $r1, $r2;
+        sun.reflect.misc.MethodUtil r3;
+        boolean $z0;
+
+        r3 := @this: sun.reflect.misc.MethodUtil;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean startsWith(java.lang.String)>("sun.reflect.misc.");
+
+        if $z0 != 0 goto label1;
+
+        $r7 = new java.lang.ClassNotFoundException;
+
+        specialinvoke $r7.<java.lang.ClassNotFoundException: void <init>(java.lang.String)>(r0);
+
+        throw $r7;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.lang.String: java.lang.String replace(char,char)>(46, 47);
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String concat(java.lang.String)>(".class");
+
+        $r4 = virtualinvoke r3.<sun.reflect.misc.MethodUtil: java.net.URL getResource(java.lang.String)>($r2);
+
+        if $r4 == null goto label5;
+
+     label2:
+        $r6 = specialinvoke r3.<sun.reflect.misc.MethodUtil: java.lang.Class defineClass(java.lang.String,java.net.URL)>(r0, $r4);
+
+     label3:
+        return $r6;
+
+     label4:
+        $r8 := @caughtexception;
+
+        $r9 = new java.lang.ClassNotFoundException;
+
+        specialinvoke $r9.<java.lang.ClassNotFoundException: void <init>(java.lang.String,java.lang.Throwable)>(r0, $r8);
+
+        throw $r9;
+
+     label5:
+        $r5 = new java.lang.ClassNotFoundException;
+
+        specialinvoke $r5.<java.lang.ClassNotFoundException: void <init>(java.lang.String)>(r0);
+
+        throw $r5;
+
+        catch java.io.IOException from label2 to label3 with label4;
+    }
+
+    private java.lang.Class defineClass(java.lang.String, java.net.URL) throws java.io.IOException
+    {
+        byte[] $r1;
+        java.net.URL r0;
+        java.io.IOException $r7;
+        int $i0;
+        java.security.cert.Certificate[] $r3;
+        java.lang.Class $r6;
+        java.lang.StringBuilder $r8, $r9, $r10;
+        java.security.CodeSource $r2;
+        java.lang.String r4, $r11;
+        sun.reflect.misc.MethodUtil r5;
+        boolean $z0;
+
+        r5 := @this: sun.reflect.misc.MethodUtil;
+
+        r4 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: java.net.URL;
+
+        $r1 = staticinvoke <sun.reflect.misc.MethodUtil: byte[] getBytes(java.net.URL)>(r0);
+
+        $r2 = new java.security.CodeSource;
+
+        $r3 = (java.security.cert.Certificate[]) null;
+
+        specialinvoke $r2.<java.security.CodeSource: void <init>(java.net.URL,java.security.cert.Certificate[])>(null, $r3);
+
+        $z0 = virtualinvoke r4.<java.lang.String: boolean equals(java.lang.Object)>("sun.reflect.misc.Trampoline");
+
+        if $z0 != 0 goto label1;
+
+        $r7 = new java.io.IOException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("MethodUtil: bad name ");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.io.IOException: void <init>(java.lang.String)>($r11);
+
+        throw $r7;
+
+     label1:
+        $i0 = lengthof $r1;
+
+        $r6 = virtualinvoke r5.<sun.reflect.misc.MethodUtil: java.lang.Class defineClass(java.lang.String,byte[],int,int,java.security.CodeSource)>(r4, $r1, 0, $i0, $r2);
+
+        return $r6;
+    }
+
+    private static byte[] getBytes(java.net.URL) throws java.io.IOException
+    {
+        java.lang.Throwable $r6;
+        java.net.HttpURLConnection r7;
+        byte[] $r4;
+        java.io.BufferedInputStream $r2;
+        java.net.URL r0;
+        java.io.IOException $r5;
+        java.net.URLConnection $r1;
+        int $i0, $i1;
+        boolean $z0;
+        java.io.InputStream $r3;
+
+        r0 := @parameter0: java.net.URL;
+
+        $r1 = virtualinvoke r0.<java.net.URL: java.net.URLConnection openConnection()>();
+
+        $z0 = $r1 instanceof java.net.HttpURLConnection;
+
+        if $z0 == 0 goto label1;
+
+        r7 = (java.net.HttpURLConnection) $r1;
+
+        $i1 = virtualinvoke r7.<java.net.HttpURLConnection: int getResponseCode()>();
+
+        if $i1 < 400 goto label1;
+
+        $r5 = new java.io.IOException;
+
+        specialinvoke $r5.<java.io.IOException: void <init>(java.lang.String)>("open HTTP connection failed.");
+
+        throw $r5;
+
+     label1:
+        $i0 = virtualinvoke $r1.<java.net.URLConnection: int getContentLength()>();
+
+        $r2 = new java.io.BufferedInputStream;
+
+        $r3 = virtualinvoke $r1.<java.net.URLConnection: java.io.InputStream getInputStream()>();
+
+        specialinvoke $r2.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>($r3);
+
+     label2:
+        $r4 = staticinvoke <sun.misc.IOUtils: byte[] readFully(java.io.InputStream,int,boolean)>($r2, $i0, 1);
+
+     label3:
+        virtualinvoke $r2.<java.io.InputStream: void close()>();
+
+        goto label6;
+
+     label4:
+        $r6 := @caughtexception;
+
+     label5:
+        virtualinvoke $r2.<java.io.InputStream: void close()>();
+
+        throw $r6;
+
+     label6:
+        return $r4;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    protected java.security.PermissionCollection getPermissions(java.security.CodeSource)
+    {
+        java.security.CodeSource r1;
+        sun.reflect.misc.MethodUtil r0;
+        java.security.PermissionCollection $r2;
+        java.security.AllPermission $r3;
+
+        r0 := @this: sun.reflect.misc.MethodUtil;
+
+        r1 := @parameter0: java.security.CodeSource;
+
+        $r2 = specialinvoke r0.<java.security.SecureClassLoader: java.security.PermissionCollection getPermissions(java.security.CodeSource)>(r1);
+
+        $r3 = new java.security.AllPermission;
+
+        specialinvoke $r3.<java.security.AllPermission: void <init>()>();
+
+        virtualinvoke $r2.<java.security.PermissionCollection: void add(java.security.Permission)>($r3);
+
+        return $r2;
+    }
+
+    private static java.lang.Class getTrampolineClass()
+    {
+        java.lang.Class $r1;
+        java.lang.ClassNotFoundException $r2;
+        sun.reflect.misc.MethodUtil $r0;
+
+     label1:
+        $r0 = new sun.reflect.misc.MethodUtil;
+
+        specialinvoke $r0.<sun.reflect.misc.MethodUtil: void <init>()>();
+
+        $r1 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String,boolean,java.lang.ClassLoader)>("sun.reflect.misc.Trampoline", 1, $r0);
+
+     label2:
+        return $r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        return null;
+
+        catch java.lang.ClassNotFoundException from label1 to label2 with label3;
+    }
+
+    static java.lang.Class access$000()
+    {
+        java.lang.Class $r0;
+
+        $r0 = staticinvoke <sun.reflect.misc.MethodUtil: java.lang.Class getTrampolineClass()>();
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.reflect.Method $r0;
+
+        <sun.reflect.misc.MethodUtil: java.lang.String TRAMPOLINE> = "sun.reflect.misc.Trampoline";
+
+        <sun.reflect.misc.MethodUtil: java.lang.String MISC_PKG> = "sun.reflect.misc.";
+
+        $r0 = staticinvoke <sun.reflect.misc.MethodUtil: java.lang.reflect.Method getTrampoline()>();
+
+        <sun.reflect.misc.MethodUtil: java.lang.reflect.Method bounce> = $r0;
+
+        return;
+    }
+}

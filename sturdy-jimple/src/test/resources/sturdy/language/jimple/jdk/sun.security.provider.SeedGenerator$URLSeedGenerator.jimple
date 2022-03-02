@@ -1,0 +1,188 @@
+class sun.security.provider.SeedGenerator$URLSeedGenerator extends sun.security.provider.SeedGenerator
+{
+    private java.lang.String deviceName;
+    private java.io.InputStream seedStream;
+
+    void <init>(java.lang.String) throws java.io.IOException
+    {
+        java.io.IOException $r2;
+        sun.security.provider.SeedGenerator$URLSeedGenerator r0;
+        java.lang.String r1;
+
+        r0 := @this: sun.security.provider.SeedGenerator$URLSeedGenerator;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<sun.security.provider.SeedGenerator: void <init>()>();
+
+        if r1 != null goto label1;
+
+        $r2 = new java.io.IOException;
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>("No random source specified");
+
+        throw $r2;
+
+     label1:
+        r0.<sun.security.provider.SeedGenerator$URLSeedGenerator: java.lang.String deviceName> = r1;
+
+        specialinvoke r0.<sun.security.provider.SeedGenerator$URLSeedGenerator: void init()>();
+
+        return;
+    }
+
+    private void init() throws java.io.IOException
+    {
+        java.lang.Throwable $r13;
+        java.net.URL $r0;
+        java.io.IOException $r7;
+        java.lang.Exception $r6;
+        sun.security.provider.SeedGenerator$URLSeedGenerator$1 $r3;
+        sun.security.provider.SeedGenerator$URLSeedGenerator r1;
+        java.lang.Object $r4;
+        java.lang.StringBuilder $r8, $r9, $r11;
+        java.lang.String $r2, $r10, $r12;
+        java.io.InputStream $r5;
+
+        r1 := @this: sun.security.provider.SeedGenerator$URLSeedGenerator;
+
+        $r0 = new java.net.URL;
+
+        $r2 = r1.<sun.security.provider.SeedGenerator$URLSeedGenerator: java.lang.String deviceName>;
+
+        specialinvoke $r0.<java.net.URL: void <init>(java.lang.String)>($r2);
+
+     label1:
+        $r3 = new sun.security.provider.SeedGenerator$URLSeedGenerator$1;
+
+        specialinvoke $r3.<sun.security.provider.SeedGenerator$URLSeedGenerator$1: void <init>(sun.security.provider.SeedGenerator$URLSeedGenerator,java.net.URL)>(r1, $r0);
+
+        $r4 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r3);
+
+        $r5 = (java.io.InputStream) $r4;
+
+        r1.<sun.security.provider.SeedGenerator$URLSeedGenerator: java.io.InputStream seedStream> = $r5;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = new java.io.IOException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to open ");
+
+        $r10 = r1.<sun.security.provider.SeedGenerator$URLSeedGenerator: java.lang.String deviceName>;
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r13 = virtualinvoke $r6.<java.lang.Exception: java.lang.Throwable getCause()>();
+
+        specialinvoke $r7.<java.io.IOException: void <init>(java.lang.String,java.lang.Throwable)>($r12, $r13);
+
+        throw $r7;
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    void getSeedBytes(byte[])
+    {
+        byte[] r0;
+        int i0, $i1, $i2, i3;
+        java.lang.InternalError $r3, $r11;
+        java.lang.String $r6, $r9, $r14, $r17, $r19;
+        java.io.IOException $r10;
+        sun.security.provider.SeedGenerator$URLSeedGenerator r1;
+        java.lang.StringBuilder $r4, $r5, $r7, $r8, $r12, $r13, $r15, $r16, $r18;
+        java.io.InputStream $r2;
+
+        r1 := @this: sun.security.provider.SeedGenerator$URLSeedGenerator;
+
+        r0 := @parameter0: byte[];
+
+        i0 = lengthof r0;
+
+        i3 = 0;
+
+     label1:
+        if i3 >= i0 goto label3;
+
+        $r2 = r1.<sun.security.provider.SeedGenerator$URLSeedGenerator: java.io.InputStream seedStream>;
+
+        $i1 = i0 - i3;
+
+        $i2 = virtualinvoke $r2.<java.io.InputStream: int read(byte[],int,int)>(r0, i3, $i1);
+
+        if $i2 >= 0 goto label2;
+
+        $r3 = new java.lang.InternalError;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("URLSeedGenerator ");
+
+        $r6 = r1.<sun.security.provider.SeedGenerator$URLSeedGenerator: java.lang.String deviceName>;
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" reached end of file");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.InternalError: void <init>(java.lang.String)>($r9);
+
+        throw $r3;
+
+     label2:
+        i3 = i3 + $i2;
+
+        goto label1;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r10 := @caughtexception;
+
+        $r11 = new java.lang.InternalError;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("URLSeedGenerator ");
+
+        $r14 = r1.<sun.security.provider.SeedGenerator$URLSeedGenerator: java.lang.String deviceName>;
+
+        $r15 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" generated exception: ");
+
+        $r17 = virtualinvoke $r10.<java.io.IOException: java.lang.String getMessage()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r11.<java.lang.InternalError: void <init>(java.lang.String,java.lang.Throwable)>($r19, $r10);
+
+        throw $r11;
+
+     label5:
+        return;
+
+        catch java.io.IOException from label1 to label3 with label4;
+    }
+}

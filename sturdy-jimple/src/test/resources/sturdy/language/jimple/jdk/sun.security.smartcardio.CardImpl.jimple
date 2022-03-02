@@ -1,0 +1,937 @@
+final class sun.security.smartcardio.CardImpl extends javax.smartcardio.Card
+{
+    private final sun.security.smartcardio.TerminalImpl terminal;
+    final long cardId;
+    private final javax.smartcardio.ATR atr;
+    final int protocol;
+    private final sun.security.smartcardio.ChannelImpl basicChannel;
+    private volatile sun.security.smartcardio.CardImpl$State state;
+    private volatile java.lang.Thread exclusiveThread;
+    private static final boolean isWindows;
+    private static byte[] commandOpenChannel;
+    private static final boolean invertReset;
+
+    void <init>(sun.security.smartcardio.TerminalImpl, java.lang.String) throws sun.security.smartcardio.PCSCException
+    {
+        byte[] $r9, $r10;
+        sun.security.smartcardio.CardImpl r0;
+        sun.security.smartcardio.ChannelImpl $r17;
+        long $l3, $l4, $l5;
+        short $s7, $s8;
+        byte b0, $b6;
+        sun.security.smartcardio.TerminalImpl r1;
+        sun.security.smartcardio.CardImpl$State $r13;
+        int i1, $i2, $i9;
+        java.lang.String r2, $r7, $r8;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        javax.smartcardio.ATR $r16;
+        java.lang.IllegalArgumentException $r15;
+        java.lang.StringBuilder $r5, $r6, $r14;
+
+        r0 := @this: sun.security.smartcardio.CardImpl;
+
+        r1 := @parameter0: sun.security.smartcardio.TerminalImpl;
+
+        r2 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<javax.smartcardio.Card: void <init>()>();
+
+        r0.<sun.security.smartcardio.CardImpl: sun.security.smartcardio.TerminalImpl terminal> = r1;
+
+        b0 = 2;
+
+        $z0 = virtualinvoke r2.<java.lang.String: boolean equals(java.lang.Object)>("*");
+
+        if $z0 == 0 goto label1;
+
+        i1 = 3;
+
+        goto label7;
+
+     label1:
+        $z1 = virtualinvoke r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("T=0");
+
+        if $z1 == 0 goto label2;
+
+        i1 = 1;
+
+        goto label7;
+
+     label2:
+        $z2 = virtualinvoke r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("T=1");
+
+        if $z2 == 0 goto label3;
+
+        i1 = 2;
+
+        goto label7;
+
+     label3:
+        $z3 = virtualinvoke r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("direct");
+
+        if $z3 == 0 goto label6;
+
+        $z4 = <sun.security.smartcardio.CardImpl: boolean isWindows>;
+
+        if $z4 == 0 goto label4;
+
+        $i2 = 0;
+
+        goto label5;
+
+     label4:
+        $i2 = 65536;
+
+     label5:
+        i1 = $i2;
+
+        b0 = 3;
+
+        goto label7;
+
+     label6:
+        $r15 = new java.lang.IllegalArgumentException;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported protocol ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r15.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r7);
+
+        throw $r15;
+
+     label7:
+        $l3 = r1.<sun.security.smartcardio.TerminalImpl: long contextId>;
+
+        $r8 = r1.<sun.security.smartcardio.TerminalImpl: java.lang.String name>;
+
+        $l4 = staticinvoke <sun.security.smartcardio.PCSC: long SCardConnect(long,java.lang.String,int,int)>($l3, $r8, b0, i1);
+
+        r0.<sun.security.smartcardio.CardImpl: long cardId> = $l4;
+
+        $r9 = newarray (byte)[2];
+
+        $l5 = r0.<sun.security.smartcardio.CardImpl: long cardId>;
+
+        $r10 = staticinvoke <sun.security.smartcardio.PCSC: byte[] SCardStatus(long,byte[])>($l5, $r9);
+
+        $r16 = new javax.smartcardio.ATR;
+
+        specialinvoke $r16.<javax.smartcardio.ATR: void <init>(byte[])>($r10);
+
+        r0.<sun.security.smartcardio.CardImpl: javax.smartcardio.ATR atr> = $r16;
+
+        $b6 = $r9[1];
+
+        $s8 = (short) $b6;
+
+        $s7 = $s8 & 255;
+
+        $i9 = (int) $s7;
+
+        r0.<sun.security.smartcardio.CardImpl: int protocol> = $i9;
+
+        $r17 = new sun.security.smartcardio.ChannelImpl;
+
+        specialinvoke $r17.<sun.security.smartcardio.ChannelImpl: void <init>(sun.security.smartcardio.CardImpl,int)>(r0, 0);
+
+        r0.<sun.security.smartcardio.CardImpl: sun.security.smartcardio.ChannelImpl basicChannel> = $r17;
+
+        $r13 = <sun.security.smartcardio.CardImpl$State: sun.security.smartcardio.CardImpl$State OK>;
+
+        r0.<sun.security.smartcardio.CardImpl: sun.security.smartcardio.CardImpl$State state> = $r13;
+
+        return;
+    }
+
+    void checkState()
+    {
+        java.lang.IllegalStateException $r4, $r5;
+        sun.security.smartcardio.CardImpl r0;
+        sun.security.smartcardio.CardImpl$State r1, $r2, $r3;
+
+        r0 := @this: sun.security.smartcardio.CardImpl;
+
+        r1 = r0.<sun.security.smartcardio.CardImpl: sun.security.smartcardio.CardImpl$State state>;
+
+        $r2 = <sun.security.smartcardio.CardImpl$State: sun.security.smartcardio.CardImpl$State DISCONNECTED>;
+
+        if r1 != $r2 goto label1;
+
+        $r5 = new java.lang.IllegalStateException;
+
+        specialinvoke $r5.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Card has been disconnected");
+
+        throw $r5;
+
+     label1:
+        $r3 = <sun.security.smartcardio.CardImpl$State: sun.security.smartcardio.CardImpl$State REMOVED>;
+
+        if r1 != $r3 goto label2;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Card has been removed");
+
+        throw $r4;
+
+     label2:
+        return;
+    }
+
+    boolean isValid()
+    {
+        byte[] $r3;
+        sun.security.smartcardio.CardImpl r0;
+        sun.security.smartcardio.PCSCException $r4;
+        sun.security.smartcardio.CardImpl$State $r1, $r2, $r5;
+        long $l0;
+
+        r0 := @this: sun.security.smartcardio.CardImpl;
+
+        $r2 = r0.<sun.security.smartcardio.CardImpl: sun.security.smartcardio.CardImpl$State state>;
+
+        $r1 = <sun.security.smartcardio.CardImpl$State: sun.security.smartcardio.CardImpl$State OK>;
+
+        if $r2 == $r1 goto label1;
+
+        return 0;
+
+     label1:
+        $l0 = r0.<sun.security.smartcardio.CardImpl: long cardId>;
+
+        $r3 = newarray (byte)[2];
+
+        staticinvoke <sun.security.smartcardio.PCSC: byte[] SCardStatus(long,byte[])>($l0, $r3);
+
+     label2:
+        return 1;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = <sun.security.smartcardio.CardImpl$State: sun.security.smartcardio.CardImpl$State REMOVED>;
+
+        r0.<sun.security.smartcardio.CardImpl: sun.security.smartcardio.CardImpl$State state> = $r5;
+
+        return 0;
+
+        catch sun.security.smartcardio.PCSCException from label1 to label2 with label3;
+    }
+
+    private void checkSecurity(java.lang.String)
+    {
+        javax.smartcardio.CardPermission $r1;
+        sun.security.smartcardio.CardImpl r2;
+        sun.security.smartcardio.TerminalImpl $r3;
+        java.lang.String r4, $r5;
+        java.lang.SecurityManager $r0;
+
+        r2 := @this: sun.security.smartcardio.CardImpl;
+
+        r4 := @parameter0: java.lang.String;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 == null goto label1;
+
+        $r1 = new javax.smartcardio.CardPermission;
+
+        $r3 = r2.<sun.security.smartcardio.CardImpl: sun.security.smartcardio.TerminalImpl terminal>;
+
+        $r5 = $r3.<sun.security.smartcardio.TerminalImpl: java.lang.String name>;
+
+        specialinvoke $r1.<javax.smartcardio.CardPermission: void <init>(java.lang.String,java.lang.String)>($r5, r4);
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r1);
+
+     label1:
+        return;
+    }
+
+    void handleError(sun.security.smartcardio.PCSCException)
+    {
+        sun.security.smartcardio.CardImpl r1;
+        sun.security.smartcardio.PCSCException r0;
+        sun.security.smartcardio.CardImpl$State $r2;
+        int $i0;
+
+        r1 := @this: sun.security.smartcardio.CardImpl;
+
+        r0 := @parameter0: sun.security.smartcardio.PCSCException;
+
+        $i0 = r0.<sun.security.smartcardio.PCSCException: int code>;
+
+        if $i0 != -2146434967 goto label1;
+
+        $r2 = <sun.security.smartcardio.CardImpl$State: sun.security.smartcardio.CardImpl$State REMOVED>;
+
+        r1.<sun.security.smartcardio.CardImpl: sun.security.smartcardio.CardImpl$State state> = $r2;
+
+     label1:
+        return;
+    }
+
+    public javax.smartcardio.ATR getATR()
+    {
+        javax.smartcardio.ATR $r1;
+        sun.security.smartcardio.CardImpl r0;
+
+        r0 := @this: sun.security.smartcardio.CardImpl;
+
+        $r1 = r0.<sun.security.smartcardio.CardImpl: javax.smartcardio.ATR atr>;
+
+        return $r1;
+    }
+
+    public java.lang.String getProtocol()
+    {
+        sun.security.smartcardio.CardImpl r0;
+        int $i0, $i1;
+        java.lang.StringBuilder $r1, $r2, $r3;
+        java.lang.String $r4;
+
+        r0 := @this: sun.security.smartcardio.CardImpl;
+
+        $i0 = r0.<sun.security.smartcardio.CardImpl: int protocol>;
+
+        lookupswitch($i0)
+        {
+            case 1: goto label1;
+            case 2: goto label2;
+            default: goto label3;
+        };
+
+     label1:
+        return "T=0";
+
+     label2:
+        return "T=1";
+
+     label3:
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown protocol ");
+
+        $i1 = r0.<sun.security.smartcardio.CardImpl: int protocol>;
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r4;
+    }
+
+    public javax.smartcardio.CardChannel getBasicChannel()
+    {
+        sun.security.smartcardio.CardImpl r0;
+        sun.security.smartcardio.ChannelImpl $r1;
+
+        r0 := @this: sun.security.smartcardio.CardImpl;
+
+        specialinvoke r0.<sun.security.smartcardio.CardImpl: void checkSecurity(java.lang.String)>("getBasicChannel");
+
+        virtualinvoke r0.<sun.security.smartcardio.CardImpl: void checkState()>();
+
+        $r1 = r0.<sun.security.smartcardio.CardImpl: sun.security.smartcardio.ChannelImpl basicChannel>;
+
+        return $r1;
+    }
+
+    private static int getSW(byte[])
+    {
+        byte[] r0;
+        short s4, s8, $s13, $s14;
+        byte $b3, $b7;
+        int $i0, $i1, $i2, $i5, $i6, $i9, $i10, $i12, $i15, $i16;
+
+        r0 := @parameter0: byte[];
+
+        $i0 = lengthof r0;
+
+        if $i0 >= 2 goto label1;
+
+        $i12 = (int) -1;
+
+        return $i12;
+
+     label1:
+        $i1 = lengthof r0;
+
+        $i2 = $i1 - 2;
+
+        $b3 = r0[$i2];
+
+        $s13 = (short) $b3;
+
+        s4 = $s13 & 255;
+
+        $i5 = lengthof r0;
+
+        $i6 = $i5 - 1;
+
+        $b7 = r0[$i6];
+
+        $s14 = (short) $b7;
+
+        s8 = $s14 & 255;
+
+        $i15 = (int) s4;
+
+        $i9 = $i15 << 8;
+
+        $i16 = (int) s8;
+
+        $i10 = $i9 | $i16;
+
+        return $i10;
+    }
+
+    public javax.smartcardio.CardChannel openLogicalChannel() throws javax.smartcardio.CardException
+    {
+        byte[] $r1, $r2, $r3;
+        sun.security.smartcardio.CardImpl r0;
+        sun.security.smartcardio.ChannelImpl $r15;
+        long $l2;
+        byte $b5;
+        int $i0, $i1, $i3, $i4, $i7, $i8;
+        java.lang.String $r7, $r9;
+        sun.security.smartcardio.PCSCException $r11;
+        javax.smartcardio.CardException $r14, $r16;
+        java.lang.StringBuilder $r6, $r8, $r13;
+
+        r0 := @this: sun.security.smartcardio.CardImpl;
+
+        specialinvoke r0.<sun.security.smartcardio.CardImpl: void checkSecurity(java.lang.String)>("openLogicalChannel");
+
+        virtualinvoke r0.<sun.security.smartcardio.CardImpl: void checkState()>();
+
+        virtualinvoke r0.<sun.security.smartcardio.CardImpl: void checkExclusive()>();
+
+     label1:
+        $l2 = r0.<sun.security.smartcardio.CardImpl: long cardId>;
+
+        $i1 = r0.<sun.security.smartcardio.CardImpl: int protocol>;
+
+        $r2 = <sun.security.smartcardio.CardImpl: byte[] commandOpenChannel>;
+
+        $r1 = <sun.security.smartcardio.CardImpl: byte[] commandOpenChannel>;
+
+        $i0 = lengthof $r1;
+
+        $r3 = staticinvoke <sun.security.smartcardio.PCSC: byte[] SCardTransmit(long,int,byte[],int,int)>($l2, $i1, $r2, 0, $i0);
+
+        $i3 = lengthof $r3;
+
+        if $i3 != 3 goto label2;
+
+        $i4 = staticinvoke <sun.security.smartcardio.CardImpl: int getSW(byte[])>($r3);
+
+        $i7 = (int) 36864;
+
+        if $i4 == $i7 goto label3;
+
+     label2:
+        $r14 = new javax.smartcardio.CardException;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("openLogicalChannel() failed, card response: ");
+
+        $r7 = staticinvoke <sun.security.smartcardio.PCSC: java.lang.String toString(byte[])>($r3);
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r14.<javax.smartcardio.CardException: void <init>(java.lang.String)>($r9);
+
+        throw $r14;
+
+     label3:
+        $r15 = new sun.security.smartcardio.ChannelImpl;
+
+        $b5 = $r3[0];
+
+        $i8 = (int) $b5;
+
+        specialinvoke $r15.<sun.security.smartcardio.ChannelImpl: void <init>(sun.security.smartcardio.CardImpl,int)>(r0, $i8);
+
+     label4:
+        return $r15;
+
+     label5:
+        $r11 := @caughtexception;
+
+        virtualinvoke r0.<sun.security.smartcardio.CardImpl: void handleError(sun.security.smartcardio.PCSCException)>($r11);
+
+        $r16 = new javax.smartcardio.CardException;
+
+        specialinvoke $r16.<javax.smartcardio.CardException: void <init>(java.lang.String,java.lang.Throwable)>("openLogicalChannel() failed", $r11);
+
+        throw $r16;
+
+        catch sun.security.smartcardio.PCSCException from label1 to label4 with label5;
+    }
+
+    void checkExclusive() throws javax.smartcardio.CardException
+    {
+        sun.security.smartcardio.CardImpl r0;
+        java.lang.Thread r1, $r2;
+        javax.smartcardio.CardException $r3;
+
+        r0 := @this: sun.security.smartcardio.CardImpl;
+
+        r1 = r0.<sun.security.smartcardio.CardImpl: java.lang.Thread exclusiveThread>;
+
+        if r1 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        if r1 == $r2 goto label2;
+
+        $r3 = new javax.smartcardio.CardException;
+
+        specialinvoke $r3.<javax.smartcardio.CardException: void <init>(java.lang.String)>("Exclusive access established by another Thread");
+
+        throw $r3;
+
+     label2:
+        return;
+    }
+
+    public synchronized void beginExclusive() throws javax.smartcardio.CardException
+    {
+        sun.security.smartcardio.CardImpl r0;
+        sun.security.smartcardio.PCSCException $r10;
+        long $l0;
+        javax.smartcardio.CardException $r3, $r11;
+        java.lang.Thread $r1, $r2, $r6;
+        java.lang.StringBuilder $r4, $r5, $r8;
+        java.lang.String $r7, $r9;
+
+        r0 := @this: sun.security.smartcardio.CardImpl;
+
+        specialinvoke r0.<sun.security.smartcardio.CardImpl: void checkSecurity(java.lang.String)>("exclusive");
+
+        virtualinvoke r0.<sun.security.smartcardio.CardImpl: void checkState()>();
+
+        $r1 = r0.<sun.security.smartcardio.CardImpl: java.lang.Thread exclusiveThread>;
+
+        if $r1 == null goto label1;
+
+        $r3 = new javax.smartcardio.CardException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exclusive access has already been assigned to Thread ");
+
+        $r6 = r0.<sun.security.smartcardio.CardImpl: java.lang.Thread exclusiveThread>;
+
+        $r7 = virtualinvoke $r6.<java.lang.Thread: java.lang.String getName()>();
+
+        $r8 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<javax.smartcardio.CardException: void <init>(java.lang.String)>($r9);
+
+        throw $r3;
+
+     label1:
+        $l0 = r0.<sun.security.smartcardio.CardImpl: long cardId>;
+
+        staticinvoke <sun.security.smartcardio.PCSC: void SCardBeginTransaction(long)>($l0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r10 := @caughtexception;
+
+        virtualinvoke r0.<sun.security.smartcardio.CardImpl: void handleError(sun.security.smartcardio.PCSCException)>($r10);
+
+        $r11 = new javax.smartcardio.CardException;
+
+        specialinvoke $r11.<javax.smartcardio.CardException: void <init>(java.lang.String,java.lang.Throwable)>("beginExclusive() failed", $r10);
+
+        throw $r11;
+
+     label4:
+        $r2 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        r0.<sun.security.smartcardio.CardImpl: java.lang.Thread exclusiveThread> = $r2;
+
+        return;
+
+        catch sun.security.smartcardio.PCSCException from label1 to label2 with label3;
+    }
+
+    public synchronized void endExclusive() throws javax.smartcardio.CardException
+    {
+        java.lang.Throwable $r4;
+        java.lang.IllegalStateException $r3;
+        sun.security.smartcardio.CardImpl r0;
+        sun.security.smartcardio.PCSCException $r5;
+        long $l0;
+        javax.smartcardio.CardException $r6;
+        java.lang.Thread $r1, $r2;
+
+        r0 := @this: sun.security.smartcardio.CardImpl;
+
+        virtualinvoke r0.<sun.security.smartcardio.CardImpl: void checkState()>();
+
+        $r1 = r0.<sun.security.smartcardio.CardImpl: java.lang.Thread exclusiveThread>;
+
+        $r2 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        if $r1 == $r2 goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Exclusive access not assigned to current Thread");
+
+        throw $r3;
+
+     label1:
+        $l0 = r0.<sun.security.smartcardio.CardImpl: long cardId>;
+
+        staticinvoke <sun.security.smartcardio.PCSC: void SCardEndTransaction(long,int)>($l0, 0);
+
+     label2:
+        r0.<sun.security.smartcardio.CardImpl: java.lang.Thread exclusiveThread> = null;
+
+        goto label6;
+
+     label3:
+        $r5 := @caughtexception;
+
+        virtualinvoke r0.<sun.security.smartcardio.CardImpl: void handleError(sun.security.smartcardio.PCSCException)>($r5);
+
+        $r6 = new javax.smartcardio.CardException;
+
+        specialinvoke $r6.<javax.smartcardio.CardException: void <init>(java.lang.String,java.lang.Throwable)>("endExclusive() failed", $r5);
+
+        throw $r6;
+
+     label4:
+        $r4 := @caughtexception;
+
+     label5:
+        r0.<sun.security.smartcardio.CardImpl: java.lang.Thread exclusiveThread> = null;
+
+        throw $r4;
+
+     label6:
+        return;
+
+        catch sun.security.smartcardio.PCSCException from label1 to label2 with label3;
+        catch java.lang.Throwable from label1 to label2 with label4;
+        catch java.lang.Throwable from label3 to label5 with label4;
+    }
+
+    public byte[] transmitControlCommand(int, byte[]) throws javax.smartcardio.CardException
+    {
+        byte[] r1, $r2;
+        sun.security.smartcardio.CardImpl r0;
+        sun.security.smartcardio.PCSCException $r4;
+        long $l1;
+        javax.smartcardio.CardException $r5;
+        java.lang.NullPointerException $r3;
+        int i0;
+
+        r0 := @this: sun.security.smartcardio.CardImpl;
+
+        i0 := @parameter0: int;
+
+        r1 := @parameter1: byte[];
+
+        specialinvoke r0.<sun.security.smartcardio.CardImpl: void checkSecurity(java.lang.String)>("transmitControl");
+
+        virtualinvoke r0.<sun.security.smartcardio.CardImpl: void checkState()>();
+
+        virtualinvoke r0.<sun.security.smartcardio.CardImpl: void checkExclusive()>();
+
+        if r1 != null goto label1;
+
+        $r3 = new java.lang.NullPointerException;
+
+        specialinvoke $r3.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $l1 = r0.<sun.security.smartcardio.CardImpl: long cardId>;
+
+        $r2 = staticinvoke <sun.security.smartcardio.PCSC: byte[] SCardControl(long,int,byte[])>($l1, i0, r1);
+
+     label2:
+        return $r2;
+
+     label3:
+        $r4 := @caughtexception;
+
+        virtualinvoke r0.<sun.security.smartcardio.CardImpl: void handleError(sun.security.smartcardio.PCSCException)>($r4);
+
+        $r5 = new javax.smartcardio.CardException;
+
+        specialinvoke $r5.<javax.smartcardio.CardException: void <init>(java.lang.String,java.lang.Throwable)>("transmitControlCommand() failed", $r4);
+
+        throw $r5;
+
+        catch sun.security.smartcardio.PCSCException from label1 to label2 with label3;
+    }
+
+    public void disconnect(boolean) throws javax.smartcardio.CardException
+    {
+        java.lang.Throwable $r4;
+        sun.security.smartcardio.CardImpl r0;
+        sun.security.smartcardio.PCSCException $r6;
+        long $l0;
+        javax.smartcardio.CardException $r7;
+        byte $b1;
+        sun.security.smartcardio.CardImpl$State $r1, $r2, $r3, $r5;
+        boolean $z0, z1, $z2;
+
+        r0 := @this: sun.security.smartcardio.CardImpl;
+
+        z1 := @parameter0: boolean;
+
+        if z1 == 0 goto label01;
+
+        specialinvoke r0.<sun.security.smartcardio.CardImpl: void checkSecurity(java.lang.String)>("reset");
+
+     label01:
+        $r2 = r0.<sun.security.smartcardio.CardImpl: sun.security.smartcardio.CardImpl$State state>;
+
+        $r1 = <sun.security.smartcardio.CardImpl$State: sun.security.smartcardio.CardImpl$State OK>;
+
+        if $r2 == $r1 goto label02;
+
+        return;
+
+     label02:
+        virtualinvoke r0.<sun.security.smartcardio.CardImpl: void checkExclusive()>();
+
+        $z0 = <sun.security.smartcardio.CardImpl: boolean invertReset>;
+
+        if $z0 == 0 goto label05;
+
+        if z1 != 0 goto label03;
+
+        $z2 = 1;
+
+        goto label04;
+
+     label03:
+        $z2 = 0;
+
+     label04:
+        z1 = $z2;
+
+     label05:
+        $l0 = r0.<sun.security.smartcardio.CardImpl: long cardId>;
+
+        if z1 == 0 goto label06;
+
+        $b1 = 1;
+
+        goto label07;
+
+     label06:
+        $b1 = 0;
+
+     label07:
+        staticinvoke <sun.security.smartcardio.PCSC: void SCardDisconnect(long,int)>($l0, $b1);
+
+     label08:
+        $r3 = <sun.security.smartcardio.CardImpl$State: sun.security.smartcardio.CardImpl$State DISCONNECTED>;
+
+        r0.<sun.security.smartcardio.CardImpl: sun.security.smartcardio.CardImpl$State state> = $r3;
+
+        r0.<sun.security.smartcardio.CardImpl: java.lang.Thread exclusiveThread> = null;
+
+        goto label12;
+
+     label09:
+        $r6 := @caughtexception;
+
+        $r7 = new javax.smartcardio.CardException;
+
+        specialinvoke $r7.<javax.smartcardio.CardException: void <init>(java.lang.String,java.lang.Throwable)>("disconnect() failed", $r6);
+
+        throw $r7;
+
+     label10:
+        $r4 := @caughtexception;
+
+     label11:
+        $r5 = <sun.security.smartcardio.CardImpl$State: sun.security.smartcardio.CardImpl$State DISCONNECTED>;
+
+        r0.<sun.security.smartcardio.CardImpl: sun.security.smartcardio.CardImpl$State state> = $r5;
+
+        r0.<sun.security.smartcardio.CardImpl: java.lang.Thread exclusiveThread> = null;
+
+        throw $r4;
+
+     label12:
+        return;
+
+        catch sun.security.smartcardio.PCSCException from label05 to label08 with label09;
+        catch java.lang.Throwable from label05 to label08 with label10;
+        catch java.lang.Throwable from label09 to label11 with label10;
+    }
+
+    public java.lang.String toString()
+    {
+        sun.security.smartcardio.CardImpl r2;
+        sun.security.smartcardio.TerminalImpl $r3;
+        sun.security.smartcardio.CardImpl$State $r10;
+        java.lang.StringBuilder $r0, $r1, $r5, $r6, $r8, $r9, $r11;
+        java.lang.String $r4, $r7, $r12;
+
+        r2 := @this: sun.security.smartcardio.CardImpl;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PC/SC card in ");
+
+        $r3 = r2.<sun.security.smartcardio.CardImpl: sun.security.smartcardio.TerminalImpl terminal>;
+
+        $r4 = $r3.<sun.security.smartcardio.TerminalImpl: java.lang.String name>;
+
+        $r5 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", protocol ");
+
+        $r7 = virtualinvoke r2.<sun.security.smartcardio.CardImpl: java.lang.String getProtocol()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", state ");
+
+        $r10 = r2.<sun.security.smartcardio.CardImpl: sun.security.smartcardio.CardImpl$State state>;
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r12;
+    }
+
+    protected void finalize() throws java.lang.Throwable
+    {
+        java.lang.Throwable $r4;
+        sun.security.smartcardio.CardImpl r0;
+        sun.security.smartcardio.CardImpl$State $r1, $r2, $r3;
+        long $l0;
+
+        r0 := @this: sun.security.smartcardio.CardImpl;
+
+     label1:
+        $r2 = r0.<sun.security.smartcardio.CardImpl: sun.security.smartcardio.CardImpl$State state>;
+
+        $r1 = <sun.security.smartcardio.CardImpl$State: sun.security.smartcardio.CardImpl$State OK>;
+
+        if $r2 != $r1 goto label2;
+
+        $r3 = <sun.security.smartcardio.CardImpl$State: sun.security.smartcardio.CardImpl$State DISCONNECTED>;
+
+        r0.<sun.security.smartcardio.CardImpl: sun.security.smartcardio.CardImpl$State state> = $r3;
+
+        $l0 = r0.<sun.security.smartcardio.CardImpl: long cardId>;
+
+        staticinvoke <sun.security.smartcardio.PCSC: void SCardDisconnect(long,int)>($l0, 0);
+
+     label2:
+        specialinvoke r0.<java.lang.Object: void finalize()>();
+
+        goto label4;
+
+     label3:
+        $r4 := @caughtexception;
+
+        specialinvoke r0.<java.lang.Object: void finalize()>();
+
+        throw $r4;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public static java.lang.String lambda$static$0()
+    {
+        java.lang.String $r0;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("os.name");
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        byte[] $r3;
+        java.security.PrivilegedAction $r0;
+        sun.security.action.GetPropertyAction $r4;
+        java.lang.Object $r1, $r5;
+        java.lang.String r2, $r6;
+        boolean $z0, $z1;
+
+        $r0 = staticinvoke <sun.security.smartcardio.CardImpl$lambda_static_0__424: java.security.PrivilegedAction bootstrap$()>();
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r2 = (java.lang.String) $r1;
+
+        $z0 = virtualinvoke r2.<java.lang.String: boolean startsWith(java.lang.String)>("Windows");
+
+        <sun.security.smartcardio.CardImpl: boolean isWindows> = $z0;
+
+        $r3 = newarray (byte)[5];
+
+        $r3[0] = 0;
+
+        $r3[1] = 112;
+
+        $r3[2] = 0;
+
+        $r3[3] = 0;
+
+        $r3[4] = 1;
+
+        <sun.security.smartcardio.CardImpl: byte[] commandOpenChannel> = $r3;
+
+        $r4 = new sun.security.action.GetPropertyAction;
+
+        specialinvoke $r4.<sun.security.action.GetPropertyAction: void <init>(java.lang.String,java.lang.String)>("sun.security.smartcardio.invertCardReset", "false");
+
+        $r5 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r4);
+
+        $r6 = (java.lang.String) $r5;
+
+        $z1 = staticinvoke <java.lang.Boolean: boolean parseBoolean(java.lang.String)>($r6);
+
+        <sun.security.smartcardio.CardImpl: boolean invertReset> = $z1;
+
+        return;
+    }
+}

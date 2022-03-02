@@ -1,0 +1,2986 @@
+public class javax.swing.text.DefaultStyledDocument$ElementBuffer extends java.lang.Object implements java.io.Serializable
+{
+    javax.swing.text.Element root;
+    transient int pos;
+    transient int offset;
+    transient int length;
+    transient int endOffset;
+    transient java.util.Vector changes;
+    transient java.util.Stack path;
+    transient boolean insertOp;
+    transient boolean recreateLeafs;
+    transient javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges[] insertPath;
+    transient boolean createdFracture;
+    transient javax.swing.text.Element fracturedParent;
+    transient javax.swing.text.Element fracturedChild;
+    transient boolean offsetLastIndex;
+    transient boolean offsetLastIndexOnReplace;
+    final javax.swing.text.DefaultStyledDocument this$0;
+
+    public void <init>(javax.swing.text.DefaultStyledDocument, javax.swing.text.Element)
+    {
+        java.util.Vector $r3;
+        javax.swing.text.DefaultStyledDocument r1;
+        javax.swing.text.Element r2;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r0;
+        java.util.Stack $r4;
+
+        r0 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        r1 := @parameter0: javax.swing.text.DefaultStyledDocument;
+
+        r2 := @parameter1: javax.swing.text.Element;
+
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0> = r1;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element root> = r2;
+
+        $r3 = new java.util.Vector;
+
+        specialinvoke $r3.<java.util.Vector: void <init>()>();
+
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Vector changes> = $r3;
+
+        $r4 = new java.util.Stack;
+
+        specialinvoke $r4.<java.util.Stack: void <init>()>();
+
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Stack path> = $r4;
+
+        return;
+    }
+
+    public javax.swing.text.Element getRootElement()
+    {
+        javax.swing.text.Element $r1;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r0;
+
+        r0 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        $r1 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element root>;
+
+        return $r1;
+    }
+
+    public void insert(int, int, javax.swing.text.DefaultStyledDocument$ElementSpec[], javax.swing.text.AbstractDocument$DefaultDocumentEvent)
+    {
+        int i0, i1;
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent r2;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r0;
+        javax.swing.text.DefaultStyledDocument$ElementSpec[] r1;
+
+        r0 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        r1 := @parameter2: javax.swing.text.DefaultStyledDocument$ElementSpec[];
+
+        r2 := @parameter3: javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        if i0 != 0 goto label1;
+
+        return;
+
+     label1:
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean insertOp> = 1;
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void beginEdits(int,int)>(i1, i0);
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void insertUpdate(javax.swing.text.DefaultStyledDocument$ElementSpec[])>(r1);
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void endEdits(javax.swing.text.AbstractDocument$DefaultDocumentEvent)>(r2);
+
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean insertOp> = 0;
+
+        return;
+    }
+
+    void create(int, javax.swing.text.DefaultStyledDocument$ElementSpec[], javax.swing.text.AbstractDocument$DefaultDocumentEvent)
+    {
+        java.util.Vector $r5, $r11;
+        javax.swing.text.AttributeSet $r8, $r15, r27;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r0;
+        boolean $z0;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges r26;
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent r16;
+        javax.swing.text.MutableAttributeSet $r21;
+        javax.swing.text.DefaultStyledDocument $r6, $r9;
+        java.util.Stack $r1, $r12, $r19;
+        javax.swing.text.DefaultStyledDocument$ElementSpec $r20, $r22, $r23;
+        short $s8;
+        javax.swing.text.DefaultStyledDocument$AttributeUndoableEdit $r17;
+        int i0, $i1, $i2, $i3, $i4, $i5, i6, $i7, i9, i10;
+        java.lang.Object $r2;
+        javax.swing.text.Element $r3, $r4, $r7, $r10, $r14, $r18, $r24, r25;
+        javax.swing.text.DefaultStyledDocument$ElementSpec[] r13;
+
+        r0 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        i0 := @parameter0: int;
+
+        r13 := @parameter1: javax.swing.text.DefaultStyledDocument$ElementSpec[];
+
+        r16 := @parameter2: javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean insertOp> = 1;
+
+        $i1 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int offset>;
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void beginEdits(int,int)>($i1, i0);
+
+        r25 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element root>;
+
+        i9 = interfaceinvoke r25.<javax.swing.text.Element: int getElementIndex(int)>(0);
+
+     label1:
+        $z0 = interfaceinvoke r25.<javax.swing.text.Element: boolean isLeaf()>();
+
+        if $z0 != 0 goto label2;
+
+        $r24 = interfaceinvoke r25.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(i9);
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void push(javax.swing.text.Element,int)>(r25, i9);
+
+        r25 = $r24;
+
+        i9 = interfaceinvoke $r24.<javax.swing.text.Element: int getElementIndex(int)>(0);
+
+        goto label1;
+
+     label2:
+        $r1 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Stack path>;
+
+        $r2 = virtualinvoke $r1.<java.util.Stack: java.lang.Object peek()>();
+
+        r26 = (javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges) $r2;
+
+        $r3 = r26.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $i2 = r26.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index>;
+
+        $r4 = interfaceinvoke $r3.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i2);
+
+        $r5 = r26.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        $r6 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r7 = r26.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r8 = interfaceinvoke $r4.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $r9 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $i3 = virtualinvoke $r9.<javax.swing.text.DefaultStyledDocument: int getLength()>();
+
+        $i4 = interfaceinvoke $r4.<javax.swing.text.Element: int getEndOffset()>();
+
+        $r10 = virtualinvoke $r6.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createLeafElement(javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>($r7, $r8, $i3, $i4);
+
+        virtualinvoke $r5.<java.util.Vector: void addElement(java.lang.Object)>($r10);
+
+        $r11 = r26.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector removed>;
+
+        virtualinvoke $r11.<java.util.Vector: void addElement(java.lang.Object)>($r4);
+
+     label3:
+        $r12 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Stack path>;
+
+        $i5 = virtualinvoke $r12.<java.util.Stack: int size()>();
+
+        if $i5 <= 1 goto label4;
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void pop()>();
+
+        goto label3;
+
+     label4:
+        i6 = lengthof r13;
+
+        r27 = null;
+
+        if i6 <= 0 goto label5;
+
+        $r22 = r13[0];
+
+        $s8 = virtualinvoke $r22.<javax.swing.text.DefaultStyledDocument$ElementSpec: short getType()>();
+
+        if $s8 != 1 goto label5;
+
+        $r23 = r13[0];
+
+        r27 = virtualinvoke $r23.<javax.swing.text.DefaultStyledDocument$ElementSpec: javax.swing.text.AttributeSet getAttributes()>();
+
+     label5:
+        if r27 != null goto label6;
+
+        r27 = <javax.swing.text.SimpleAttributeSet: javax.swing.text.AttributeSet EMPTY>;
+
+     label6:
+        $r14 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element root>;
+
+        $r15 = interfaceinvoke $r14.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $r21 = (javax.swing.text.MutableAttributeSet) $r15;
+
+        $r17 = new javax.swing.text.DefaultStyledDocument$AttributeUndoableEdit;
+
+        $r18 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element root>;
+
+        specialinvoke $r17.<javax.swing.text.DefaultStyledDocument$AttributeUndoableEdit: void <init>(javax.swing.text.Element,javax.swing.text.AttributeSet,boolean)>($r18, r27, 1);
+
+        virtualinvoke r16.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: boolean addEdit(javax.swing.undo.UndoableEdit)>($r17);
+
+        interfaceinvoke $r21.<javax.swing.text.MutableAttributeSet: void removeAttributes(javax.swing.text.AttributeSet)>($r21);
+
+        interfaceinvoke $r21.<javax.swing.text.MutableAttributeSet: void addAttributes(javax.swing.text.AttributeSet)>(r27);
+
+        i10 = 1;
+
+     label7:
+        if i10 >= i6 goto label8;
+
+        $r20 = r13[i10];
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void insertElement(javax.swing.text.DefaultStyledDocument$ElementSpec)>($r20);
+
+        i10 = i10 + 1;
+
+        goto label7;
+
+     label8:
+        $r19 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Stack path>;
+
+        $i7 = virtualinvoke $r19.<java.util.Stack: int size()>();
+
+        if $i7 == 0 goto label9;
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void pop()>();
+
+        goto label8;
+
+     label9:
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void endEdits(javax.swing.text.AbstractDocument$DefaultDocumentEvent)>(r16);
+
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean insertOp> = 0;
+
+        return;
+    }
+
+    public void remove(int, int, javax.swing.text.AbstractDocument$DefaultDocumentEvent)
+    {
+        int i0, i1;
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent r1;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r0;
+
+        r0 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        r1 := @parameter2: javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void beginEdits(int,int)>(i0, i1);
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void removeUpdate()>();
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void endEdits(javax.swing.text.AbstractDocument$DefaultDocumentEvent)>(r1);
+
+        return;
+    }
+
+    public void change(int, int, javax.swing.text.AbstractDocument$DefaultDocumentEvent)
+    {
+        int i0, i1;
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent r1;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r0;
+
+        r0 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        r1 := @parameter2: javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void beginEdits(int,int)>(i0, i1);
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void changeUpdate()>();
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void endEdits(javax.swing.text.AbstractDocument$DefaultDocumentEvent)>(r1);
+
+        return;
+    }
+
+    protected void insertUpdate(javax.swing.text.DefaultStyledDocument$ElementSpec[])
+    {
+        java.util.Vector $r11, $r19, $r20, $r21, $r22, $r24;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r0;
+        javax.swing.text.DefaultStyledDocument$ElementSpec $r6, $r8, $r14, $r28, $r29;
+        short $s2, $s4, $s11;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges $r15, $r27, r35;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges[] $r2, $r3, $r9, $r10, $r16, $r25, $r26, $r34;
+        java.util.Stack $r1, $r4, $r33;
+        int $i0, $i1, $i3, $i5, $i6, $i7, $i8, $i9, $i10, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, i23, $i24, i25, $i26, $i27, i28, i29, $i30, $i32, $i34, $i35, $i36;
+        javax.swing.text.Element $r7, $r12, $r13, $r17, $r18, $r23, $r30, $r31, r32;
+        javax.swing.text.DefaultStyledDocument$ElementSpec[] r5;
+
+        r0 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        r5 := @parameter0: javax.swing.text.DefaultStyledDocument$ElementSpec[];
+
+        r32 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element root>;
+
+        $i0 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int offset>;
+
+        i23 = interfaceinvoke r32.<javax.swing.text.Element: int getElementIndex(int)>($i0);
+
+     label01:
+        $z0 = interfaceinvoke r32.<javax.swing.text.Element: boolean isLeaf()>();
+
+        if $z0 != 0 goto label04;
+
+        $r30 = interfaceinvoke r32.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(i23);
+
+        $r31 = r32;
+
+        $z5 = interfaceinvoke $r30.<javax.swing.text.Element: boolean isLeaf()>();
+
+        if $z5 == 0 goto label02;
+
+        $i24 = i23;
+
+        goto label03;
+
+     label02:
+        $i24 = i23 + 1;
+
+     label03:
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void push(javax.swing.text.Element,int)>($r31, $i24);
+
+        r32 = $r30;
+
+        $i22 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int offset>;
+
+        i23 = interfaceinvoke $r30.<javax.swing.text.Element: int getElementIndex(int)>($i22);
+
+        goto label01;
+
+     label04:
+        $r1 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Stack path>;
+
+        $i1 = virtualinvoke $r1.<java.util.Stack: int size()>();
+
+        $r2 = newarray (javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges)[$i1];
+
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges[] insertPath> = $r2;
+
+        $r4 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Stack path>;
+
+        $r3 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges[] insertPath>;
+
+        virtualinvoke $r4.<java.util.Stack: void copyInto(java.lang.Object[])>($r3);
+
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean createdFracture> = 0;
+
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean recreateLeafs> = 0;
+
+        $r6 = r5[0];
+
+        $s2 = virtualinvoke $r6.<javax.swing.text.DefaultStyledDocument$ElementSpec: short getType()>();
+
+        $i30 = (int) $s2;
+
+        if $i30 != 3 goto label05;
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void insertFirstContent(javax.swing.text.DefaultStyledDocument$ElementSpec[])>(r5);
+
+        $i18 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int pos>;
+
+        $r29 = r5[0];
+
+        $i19 = virtualinvoke $r29.<javax.swing.text.DefaultStyledDocument$ElementSpec: int getLength()>();
+
+        $i20 = $i18 + $i19;
+
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int pos> = $i20;
+
+        i25 = 1;
+
+        goto label06;
+
+     label05:
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void fractureDeepestLeaf(javax.swing.text.DefaultStyledDocument$ElementSpec[])>(r5);
+
+        i25 = 0;
+
+     label06:
+        $i21 = lengthof r5;
+
+     label07:
+        if i25 >= $i21 goto label08;
+
+        $r28 = r5[i25];
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void insertElement(javax.swing.text.DefaultStyledDocument$ElementSpec)>($r28);
+
+        i25 = i25 + 1;
+
+        goto label07;
+
+     label08:
+        $z1 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean createdFracture>;
+
+        if $z1 != 0 goto label09;
+
+        $i32 = (int) -1;
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void fracture(int)>($i32);
+
+     label09:
+        $r33 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Stack path>;
+
+        $i26 = virtualinvoke $r33.<java.util.Stack: int size()>();
+
+        if $i26 == 0 goto label10;
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void pop()>();
+
+        goto label09;
+
+     label10:
+        $z2 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean offsetLastIndex>;
+
+        if $z2 == 0 goto label11;
+
+        $z4 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean offsetLastIndexOnReplace>;
+
+        if $z4 == 0 goto label11;
+
+        $r26 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges[] insertPath>;
+
+        $r25 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges[] insertPath>;
+
+        $i14 = lengthof $r25;
+
+        $i15 = $i14 - 1;
+
+        $r27 = $r26[$i15];
+
+        $i16 = $r27.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index>;
+
+        $i17 = $i16 + 1;
+
+        $r27.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index> = $i17;
+
+     label11:
+        $r34 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges[] insertPath>;
+
+        $i27 = lengthof $r34;
+
+        i28 = $i27 - 1;
+
+     label12:
+        if i28 < 0 goto label16;
+
+        $r16 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges[] insertPath>;
+
+        r35 = $r16[i28];
+
+        $r18 = r35.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r17 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element fracturedParent>;
+
+        if $r18 != $r17 goto label13;
+
+        $r24 = r35.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        $r23 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element fracturedChild>;
+
+        virtualinvoke $r24.<java.util.Vector: void addElement(java.lang.Object)>($r23);
+
+     label13:
+        $r19 = r35.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        $i12 = virtualinvoke $r19.<java.util.Vector: int size()>();
+
+        if $i12 > 0 goto label14;
+
+        $r22 = r35.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector removed>;
+
+        $i13 = virtualinvoke $r22.<java.util.Vector: int size()>();
+
+        if $i13 <= 0 goto label15;
+
+     label14:
+        $r20 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Vector changes>;
+
+        $z3 = virtualinvoke $r20.<java.util.Vector: boolean contains(java.lang.Object)>(r35);
+
+        if $z3 != 0 goto label15;
+
+        $r21 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Vector changes>;
+
+        virtualinvoke $r21.<java.util.Vector: void addElement(java.lang.Object)>(r35);
+
+     label15:
+        $i34 = (int) -1;
+
+        i28 = i28 + $i34;
+
+        goto label12;
+
+     label16:
+        $i3 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int offset>;
+
+        if $i3 != 0 goto label19;
+
+        $r7 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element fracturedParent>;
+
+        if $r7 == null goto label19;
+
+        $r8 = r5[0];
+
+        $s4 = virtualinvoke $r8.<javax.swing.text.DefaultStyledDocument$ElementSpec: short getType()>();
+
+        $i35 = (int) $s4;
+
+        if $i35 != 2 goto label19;
+
+        i29 = 0;
+
+     label17:
+        $i5 = lengthof r5;
+
+        if i29 >= $i5 goto label18;
+
+        $r14 = r5[i29];
+
+        $s11 = virtualinvoke $r14.<javax.swing.text.DefaultStyledDocument$ElementSpec: short getType()>();
+
+        $i36 = (int) $s11;
+
+        if $i36 != 2 goto label18;
+
+        i29 = i29 + 1;
+
+        goto label17;
+
+     label18:
+        $r10 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges[] insertPath>;
+
+        $r9 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges[] insertPath>;
+
+        $i6 = lengthof $r9;
+
+        $i7 = $i6 - i29;
+
+        $i8 = $i7 - 1;
+
+        $r15 = $r10[$i8];
+
+        $r11 = $r15.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector removed>;
+
+        $r12 = $r15.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $i9 = $r15.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index>;
+
+        $i10 = $i9 - 1;
+
+        $r15.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index> = $i10;
+
+        $r13 = interfaceinvoke $r12.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i10);
+
+        virtualinvoke $r11.<java.util.Vector: void insertElementAt(java.lang.Object,int)>($r13, 0);
+
+     label19:
+        return;
+    }
+
+    protected void removeUpdate()
+    {
+        int $i0, $i1, $i2, $i3;
+        javax.swing.text.Element $r1;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r0;
+
+        r0 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        $r1 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element root>;
+
+        $i3 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int offset>;
+
+        $i1 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int offset>;
+
+        $i0 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int length>;
+
+        $i2 = $i1 + $i0;
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean removeElements(javax.swing.text.Element,int,int)>($r1, $i3, $i2);
+
+        return;
+    }
+
+    protected void changeUpdate()
+    {
+        java.util.Stack $r1, $r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        $i1 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int offset>;
+
+        $i0 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int length>;
+
+        $z0 = virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean split(int,int)>($i1, $i0);
+
+        if $z0 != 0 goto label3;
+
+     label1:
+        $r1 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Stack path>;
+
+        $i2 = virtualinvoke $r1.<java.util.Stack: int size()>();
+
+        if $i2 == 0 goto label2;
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void pop()>();
+
+        goto label1;
+
+     label2:
+        $i4 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int offset>;
+
+        $i3 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int length>;
+
+        $i5 = $i4 + $i3;
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean split(int,int)>($i5, 0);
+
+     label3:
+        $r2 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Stack path>;
+
+        $i6 = virtualinvoke $r2.<java.util.Stack: int size()>();
+
+        if $i6 == 0 goto label4;
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void pop()>();
+
+        goto label3;
+
+     label4:
+        return;
+    }
+
+    boolean split(int, int)
+    {
+        java.util.Vector $r9, $r14, $r19, $r22, $r23, $r27, $r32, $r37, $r42, $r47, $r52, $r57;
+        javax.swing.text.AttributeSet $r12, $r17, $r30, $r35, $r40, $r50, $r55;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r0;
+        boolean $z0, z1;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges r3;
+        javax.swing.text.DefaultStyledDocument $r10, $r15, $r28, $r33, $r38, $r48, $r53;
+        java.util.Stack $r1;
+        int i0, $i1, $i2, $i3, i4, i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, i21, i22, $i23, $i24, $i25, $i26, i27;
+        java.lang.Object $r2;
+        javax.swing.text.Element $r4, $r5, $r6, $r7, $r8, $r11, $r13, $r16, $r18, $r20, $r21, $r24, $r25, $r26, $r29, $r31, $r34, $r36, $r39, $r41, $r43, r44, $r45, $r46, $r49, $r51, $r54, $r56;
+
+        r0 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        i0 := @parameter0: int;
+
+        i5 := @parameter1: int;
+
+        z1 = 0;
+
+        r44 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element root>;
+
+        i21 = interfaceinvoke r44.<javax.swing.text.Element: int getElementIndex(int)>(i0);
+
+     label1:
+        $z0 = interfaceinvoke r44.<javax.swing.text.Element: boolean isLeaf()>();
+
+        if $z0 != 0 goto label2;
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void push(javax.swing.text.Element,int)>(r44, i21);
+
+        $r43 = interfaceinvoke r44.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(i21);
+
+        r44 = $r43;
+
+        i21 = interfaceinvoke $r43.<javax.swing.text.Element: int getElementIndex(int)>(i0);
+
+        goto label1;
+
+     label2:
+        $r1 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Stack path>;
+
+        $r2 = virtualinvoke $r1.<java.util.Stack: java.lang.Object peek()>();
+
+        r3 = (javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges) $r2;
+
+        $r4 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $i1 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index>;
+
+        $r5 = interfaceinvoke $r4.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i1);
+
+        $i2 = interfaceinvoke $r5.<javax.swing.text.Element: int getStartOffset()>();
+
+        if $i2 >= i0 goto label8;
+
+        $i3 = interfaceinvoke $r5.<javax.swing.text.Element: int getEndOffset()>();
+
+        if i0 >= $i3 goto label8;
+
+        i4 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index>;
+
+        i22 = i4;
+
+        $i6 = i0 + i5;
+
+        $r6 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $i7 = interfaceinvoke $r6.<javax.swing.text.Element: int getEndOffset()>();
+
+        if $i6 >= $i7 goto label5;
+
+        if i5 == 0 goto label5;
+
+        $r24 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $i13 = i0 + i5;
+
+        $i14 = interfaceinvoke $r24.<javax.swing.text.Element: int getElementIndex(int)>($i13);
+
+        i22 = $i14;
+
+        if $i14 != i4 goto label3;
+
+        $r27 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector removed>;
+
+        virtualinvoke $r27.<java.util.Vector: void addElement(java.lang.Object)>($r5);
+
+        $r28 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r29 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r30 = interfaceinvoke $r5.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i17 = interfaceinvoke $r5.<javax.swing.text.Element: int getStartOffset()>();
+
+        $r31 = virtualinvoke $r28.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createLeafElement(javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>($r29, $r30, $i17, i0);
+
+        $r32 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        virtualinvoke $r32.<java.util.Vector: void addElement(java.lang.Object)>($r31);
+
+        $r33 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r34 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r35 = interfaceinvoke $r5.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i18 = i0 + i5;
+
+        $r36 = virtualinvoke $r33.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createLeafElement(javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>($r34, $r35, i0, $i18);
+
+        $r37 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        virtualinvoke $r37.<java.util.Vector: void addElement(java.lang.Object)>($r36);
+
+        $r38 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r39 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r40 = interfaceinvoke $r5.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i19 = i0 + i5;
+
+        $i20 = interfaceinvoke $r5.<javax.swing.text.Element: int getEndOffset()>();
+
+        $r41 = virtualinvoke $r38.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createLeafElement(javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>($r39, $r40, $i19, $i20);
+
+        $r42 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        virtualinvoke $r42.<java.util.Vector: void addElement(java.lang.Object)>($r41);
+
+        return 1;
+
+     label3:
+        $r25 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r26 = interfaceinvoke $r25.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i14);
+
+        $i15 = i0 + i5;
+
+        $i16 = interfaceinvoke $r26.<javax.swing.text.Element: int getStartOffset()>();
+
+        if $i15 != $i16 goto label4;
+
+        i22 = i4;
+
+     label4:
+        z1 = 1;
+
+     label5:
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int pos> = i0;
+
+        $r45 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r46 = interfaceinvoke $r45.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(i4);
+
+        $r47 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector removed>;
+
+        virtualinvoke $r47.<java.util.Vector: void addElement(java.lang.Object)>($r46);
+
+        $r48 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r49 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r50 = interfaceinvoke $r46.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i23 = interfaceinvoke $r46.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i24 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int pos>;
+
+        $r51 = virtualinvoke $r48.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createLeafElement(javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>($r49, $r50, $i23, $i24);
+
+        $r52 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        virtualinvoke $r52.<java.util.Vector: void addElement(java.lang.Object)>($r51);
+
+        $r53 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r54 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r55 = interfaceinvoke $r46.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i25 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int pos>;
+
+        $i26 = interfaceinvoke $r46.<javax.swing.text.Element: int getEndOffset()>();
+
+        $r56 = virtualinvoke $r53.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createLeafElement(javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>($r54, $r55, $i25, $i26);
+
+        $r57 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        virtualinvoke $r57.<java.util.Vector: void addElement(java.lang.Object)>($r56);
+
+        i27 = i4 + 1;
+
+     label6:
+        if i27 >= i22 goto label7;
+
+        $r20 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r21 = interfaceinvoke $r20.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(i27);
+
+        $r22 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector removed>;
+
+        virtualinvoke $r22.<java.util.Vector: void addElement(java.lang.Object)>($r21);
+
+        $r23 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        virtualinvoke $r23.<java.util.Vector: void addElement(java.lang.Object)>($r21);
+
+        i27 = i27 + 1;
+
+        goto label6;
+
+     label7:
+        if i22 == i4 goto label8;
+
+        $r7 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r8 = interfaceinvoke $r7.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(i22);
+
+        $i8 = i0 + i5;
+
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int pos> = $i8;
+
+        $r9 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector removed>;
+
+        virtualinvoke $r9.<java.util.Vector: void addElement(java.lang.Object)>($r8);
+
+        $r10 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r11 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r12 = interfaceinvoke $r8.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i9 = interfaceinvoke $r8.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i10 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int pos>;
+
+        $r13 = virtualinvoke $r10.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createLeafElement(javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>($r11, $r12, $i9, $i10);
+
+        $r14 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        virtualinvoke $r14.<java.util.Vector: void addElement(java.lang.Object)>($r13);
+
+        $r15 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r16 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r17 = interfaceinvoke $r8.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i11 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int pos>;
+
+        $i12 = interfaceinvoke $r8.<javax.swing.text.Element: int getEndOffset()>();
+
+        $r18 = virtualinvoke $r15.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createLeafElement(javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>($r16, $r17, $i11, $i12);
+
+        $r19 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        virtualinvoke $r19.<java.util.Vector: void addElement(java.lang.Object)>($r18);
+
+     label8:
+        return z1;
+    }
+
+    void endEdits(javax.swing.text.AbstractDocument$DefaultDocumentEvent)
+    {
+        java.util.Stack $r3;
+        java.util.Vector $r1, $r2, $r4, $r7, $r9, $r10, $r12;
+        int $i0, $i1, $i2, i3, $i4, i5;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r0;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges r6;
+        javax.swing.text.Element[] r8, r11;
+        javax.swing.text.AbstractDocument$DefaultDocumentEvent r17;
+        javax.swing.text.AbstractDocument$ElementEdit $r15;
+        javax.swing.text.AbstractDocument$BranchElement $r14;
+        java.lang.Object $r5;
+        javax.swing.text.Element $r13, $r16;
+
+        r0 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        r17 := @parameter0: javax.swing.text.AbstractDocument$DefaultDocumentEvent;
+
+        $r1 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Vector changes>;
+
+        $i0 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        i5 = 0;
+
+     label1:
+        if i5 >= $i0 goto label2;
+
+        $r4 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Vector changes>;
+
+        $r5 = virtualinvoke $r4.<java.util.Vector: java.lang.Object elementAt(int)>(i5);
+
+        r6 = (javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges) $r5;
+
+        $r7 = r6.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector removed>;
+
+        $i1 = virtualinvoke $r7.<java.util.Vector: int size()>();
+
+        r8 = newarray (javax.swing.text.Element)[$i1];
+
+        $r9 = r6.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector removed>;
+
+        virtualinvoke $r9.<java.util.Vector: void copyInto(java.lang.Object[])>(r8);
+
+        $r10 = r6.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        $i2 = virtualinvoke $r10.<java.util.Vector: int size()>();
+
+        r11 = newarray (javax.swing.text.Element)[$i2];
+
+        $r12 = r6.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        virtualinvoke $r12.<java.util.Vector: void copyInto(java.lang.Object[])>(r11);
+
+        i3 = r6.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index>;
+
+        $r13 = r6.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r14 = (javax.swing.text.AbstractDocument$BranchElement) $r13;
+
+        $i4 = lengthof r8;
+
+        virtualinvoke $r14.<javax.swing.text.AbstractDocument$BranchElement: void replace(int,int,javax.swing.text.Element[])>(i3, $i4, r11);
+
+        $r15 = new javax.swing.text.AbstractDocument$ElementEdit;
+
+        $r16 = r6.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        specialinvoke $r15.<javax.swing.text.AbstractDocument$ElementEdit: void <init>(javax.swing.text.Element,int,javax.swing.text.Element[],javax.swing.text.Element[])>($r16, i3, r8, r11);
+
+        virtualinvoke r17.<javax.swing.text.AbstractDocument$DefaultDocumentEvent: boolean addEdit(javax.swing.undo.UndoableEdit)>($r15);
+
+        i5 = i5 + 1;
+
+        goto label1;
+
+     label2:
+        $r2 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Vector changes>;
+
+        virtualinvoke $r2.<java.util.Vector: void removeAllElements()>();
+
+        $r3 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Stack path>;
+
+        virtualinvoke $r3.<java.util.Stack: void removeAllElements()>();
+
+        return;
+    }
+
+    void beginEdits(int, int)
+    {
+        java.util.Stack $r3, $r4, $r5;
+        java.util.Vector $r1, $r2, $r6;
+        int i0, i1, $i2;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r0;
+
+        r0 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int offset> = i0;
+
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int length> = i1;
+
+        $i2 = i0 + i1;
+
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int endOffset> = $i2;
+
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int pos> = i0;
+
+        $r1 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Vector changes>;
+
+        if $r1 != null goto label1;
+
+        $r6 = new java.util.Vector;
+
+        specialinvoke $r6.<java.util.Vector: void <init>()>();
+
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Vector changes> = $r6;
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Vector changes>;
+
+        virtualinvoke $r2.<java.util.Vector: void removeAllElements()>();
+
+     label2:
+        $r3 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Stack path>;
+
+        if $r3 != null goto label3;
+
+        $r5 = new java.util.Stack;
+
+        specialinvoke $r5.<java.util.Stack: void <init>()>();
+
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Stack path> = $r5;
+
+        goto label4;
+
+     label3:
+        $r4 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Stack path>;
+
+        virtualinvoke $r4.<java.util.Stack: void removeAllElements()>();
+
+     label4:
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element fracturedParent> = null;
+
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element fracturedChild> = null;
+
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean offsetLastIndexOnReplace> = 0;
+
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean offsetLastIndex> = 0;
+
+        return;
+    }
+
+    void push(javax.swing.text.Element, int, boolean)
+    {
+        int i0;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges $r0;
+        javax.swing.text.Element r2;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r1;
+        java.util.Stack $r3;
+        boolean z0;
+
+        r1 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        r2 := @parameter0: javax.swing.text.Element;
+
+        i0 := @parameter1: int;
+
+        z0 := @parameter2: boolean;
+
+        $r0 = new javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges;
+
+        specialinvoke $r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: void <init>(javax.swing.text.DefaultStyledDocument$ElementBuffer,javax.swing.text.Element,int,boolean)>(r1, r2, i0, z0);
+
+        $r3 = r1.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Stack path>;
+
+        virtualinvoke $r3.<java.util.Stack: java.lang.Object push(java.lang.Object)>($r0);
+
+        return;
+    }
+
+    void push(javax.swing.text.Element, int)
+    {
+        int i0;
+        javax.swing.text.Element r1;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r0;
+
+        r0 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        r1 := @parameter0: javax.swing.text.Element;
+
+        i0 := @parameter1: int;
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void push(javax.swing.text.Element,int,boolean)>(r1, i0, 0);
+
+        return;
+    }
+
+    void pop()
+    {
+        java.util.Stack $r1, $r3, $r7, $r9;
+        java.util.Vector $r4, $r5, $r6, $r11;
+        int $i0, $i1, $i2;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r0;
+        boolean $z0;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges r12, r13;
+        java.lang.Object $r2, $r10;
+        javax.swing.text.Element r8;
+
+        r0 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        $r1 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Stack path>;
+
+        $r2 = virtualinvoke $r1.<java.util.Stack: java.lang.Object peek()>();
+
+        r12 = (javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges) $r2;
+
+        $r3 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Stack path>;
+
+        virtualinvoke $r3.<java.util.Stack: java.lang.Object pop()>();
+
+        $r4 = r12.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        $i0 = virtualinvoke $r4.<java.util.Vector: int size()>();
+
+        if $i0 > 0 goto label1;
+
+        $r6 = r12.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector removed>;
+
+        $i1 = virtualinvoke $r6.<java.util.Vector: int size()>();
+
+        if $i1 <= 0 goto label2;
+
+     label1:
+        $r5 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Vector changes>;
+
+        virtualinvoke $r5.<java.util.Vector: void addElement(java.lang.Object)>(r12);
+
+        goto label3;
+
+     label2:
+        $r7 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Stack path>;
+
+        $z0 = virtualinvoke $r7.<java.util.Stack: boolean isEmpty()>();
+
+        if $z0 != 0 goto label3;
+
+        r8 = r12.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $i2 = interfaceinvoke r8.<javax.swing.text.Element: int getElementCount()>();
+
+        if $i2 != 0 goto label3;
+
+        $r9 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Stack path>;
+
+        $r10 = virtualinvoke $r9.<java.util.Stack: java.lang.Object peek()>();
+
+        r13 = (javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges) $r10;
+
+        $r11 = r13.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        virtualinvoke $r11.<java.util.Vector: boolean removeElement(java.lang.Object)>(r8);
+
+     label3:
+        return;
+    }
+
+    void advance(int)
+    {
+        int i0, $i1, $i2;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r0;
+
+        r0 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        i0 := @parameter0: int;
+
+        $i1 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int pos>;
+
+        $i2 = $i1 + i0;
+
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int pos> = $i2;
+
+        return;
+    }
+
+    void insertElement(javax.swing.text.DefaultStyledDocument$ElementSpec)
+    {
+        java.util.Vector $r11, $r12, $r18, $r19, $r30, $r44;
+        javax.swing.text.AttributeSet $r9, $r16, $r28, $r42;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r0;
+        javax.swing.text.StateInvariantError $r47;
+        javax.swing.text.DefaultStyledDocument$ElementSpec r4;
+        short $s0, $s2, $s16;
+        boolean $z0, $z1, $z2, $z3;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges r3, $r23;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges[] $r13, $r21, $r22, $r24;
+        javax.swing.text.DefaultStyledDocument $r7, $r14, $r26, $r40;
+        java.util.Stack $r1, $r34;
+        int $i1, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, i25, $i26, $i27, $i28, $i29, $i30, $i32;
+        java.lang.Object $r2;
+        javax.swing.text.Element $r5, $r6, $r8, $r10, $r15, $r17, $r20, $r25, $r27, $r29, $r31, $r32, $r33, $r35, $r36, $r37, $r39, $r41, $r43, r45, r46;
+
+        r0 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        r4 := @parameter0: javax.swing.text.DefaultStyledDocument$ElementSpec;
+
+        $r1 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Stack path>;
+
+        $r2 = virtualinvoke $r1.<java.util.Stack: java.lang.Object peek()>();
+
+        r3 = (javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges) $r2;
+
+        $s0 = virtualinvoke r4.<javax.swing.text.DefaultStyledDocument$ElementSpec: short getType()>();
+
+        $i28 = (int) $s0;
+
+        tableswitch($i28)
+        {
+            case 1: goto label01;
+            case 2: goto label10;
+            case 3: goto label11;
+            default: goto label19;
+        };
+
+     label01:
+        $s16 = virtualinvoke r4.<javax.swing.text.DefaultStyledDocument$ElementSpec: short getDirection()>();
+
+        $i29 = (int) $s16;
+
+        lookupswitch($i29)
+        {
+            case 5: goto label02;
+            case 7: goto label05;
+            default: goto label08;
+        };
+
+     label02:
+        $r35 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $i19 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index>;
+
+        $r36 = interfaceinvoke $r35.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i19);
+
+        r45 = $r36;
+
+        $z3 = interfaceinvoke $r36.<javax.swing.text.Element: boolean isLeaf()>();
+
+        if $z3 == 0 goto label04;
+
+        $i20 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index>;
+
+        $i21 = $i20 + 1;
+
+        $r37 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $i22 = interfaceinvoke $r37.<javax.swing.text.Element: int getElementCount()>();
+
+        if $i21 >= $i22 goto label03;
+
+        $r39 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $i23 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index>;
+
+        $i24 = $i23 + 1;
+
+        r45 = interfaceinvoke $r39.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i24);
+
+        goto label04;
+
+     label03:
+        $r47 = new javax.swing.text.StateInvariantError;
+
+        specialinvoke $r47.<javax.swing.text.StateInvariantError: void <init>(java.lang.String)>("Join next to leaf");
+
+        throw $r47;
+
+     label04:
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void push(javax.swing.text.Element,int,boolean)>(r45, 0, 1);
+
+        goto label09;
+
+     label05:
+        $z1 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean createdFracture>;
+
+        if $z1 != 0 goto label06;
+
+        $r34 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Stack path>;
+
+        $i17 = virtualinvoke $r34.<java.util.Stack: int size()>();
+
+        $i18 = $i17 - 1;
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void fracture(int)>($i18);
+
+     label06:
+        $z2 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: boolean isFracture>;
+
+        if $z2 != 0 goto label07;
+
+        $r33 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element fracturedChild>;
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void push(javax.swing.text.Element,int,boolean)>($r33, 0, 1);
+
+        goto label09;
+
+     label07:
+        $r31 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r32 = interfaceinvoke $r31.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(0);
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void push(javax.swing.text.Element,int,boolean)>($r32, 0, 1);
+
+        goto label09;
+
+     label08:
+        $r40 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r41 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r42 = virtualinvoke r4.<javax.swing.text.DefaultStyledDocument$ElementSpec: javax.swing.text.AttributeSet getAttributes()>();
+
+        $r43 = virtualinvoke $r40.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createBranchElement(javax.swing.text.Element,javax.swing.text.AttributeSet)>($r41, $r42);
+
+        $r44 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        virtualinvoke $r44.<java.util.Vector: void addElement(java.lang.Object)>($r43);
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void push(javax.swing.text.Element,int)>($r43, 0);
+
+     label09:
+        goto label19;
+
+     label10:
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void pop()>();
+
+        goto label19;
+
+     label11:
+        $i1 = virtualinvoke r4.<javax.swing.text.DefaultStyledDocument$ElementSpec: int getLength()>();
+
+        $s2 = virtualinvoke r4.<javax.swing.text.DefaultStyledDocument$ElementSpec: short getDirection()>();
+
+        $i30 = (int) $s2;
+
+        if $i30 == 5 goto label12;
+
+        $r26 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r27 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r28 = virtualinvoke r4.<javax.swing.text.DefaultStyledDocument$ElementSpec: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i15 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int pos>;
+
+        $i13 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int pos>;
+
+        $i14 = $i13 + $i1;
+
+        $r29 = virtualinvoke $r26.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createLeafElement(javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>($r27, $r28, $i15, $i14);
+
+        $r30 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        virtualinvoke $r30.<java.util.Vector: void addElement(java.lang.Object)>($r29);
+
+        goto label18;
+
+     label12:
+        $z0 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: boolean isFracture>;
+
+        if $z0 != 0 goto label17;
+
+        r46 = null;
+
+        $r13 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges[] insertPath>;
+
+        if $r13 == null goto label15;
+
+        $r21 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges[] insertPath>;
+
+        $i9 = lengthof $r21;
+
+        i25 = $i9 - 1;
+
+     label13:
+        if i25 < 0 goto label15;
+
+        $r22 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges[] insertPath>;
+
+        $r23 = $r22[i25];
+
+        if $r23 != r3 goto label14;
+
+        $r24 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges[] insertPath>;
+
+        $i10 = lengthof $r24;
+
+        $i11 = $i10 - 1;
+
+        if i25 == $i11 goto label15;
+
+        $r25 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $i12 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index>;
+
+        r46 = interfaceinvoke $r25.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i12);
+
+        goto label15;
+
+     label14:
+        $i32 = (int) -1;
+
+        i25 = i25 + $i32;
+
+        goto label13;
+
+     label15:
+        if r46 != null goto label16;
+
+        $r20 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $i7 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index>;
+
+        $i8 = $i7 + 1;
+
+        r46 = interfaceinvoke $r20.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i8);
+
+     label16:
+        $r14 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r15 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r16 = interfaceinvoke r46.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i5 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int pos>;
+
+        $i6 = interfaceinvoke r46.<javax.swing.text.Element: int getEndOffset()>();
+
+        $r17 = virtualinvoke $r14.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createLeafElement(javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>($r15, $r16, $i5, $i6);
+
+        $r18 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        virtualinvoke $r18.<java.util.Vector: void addElement(java.lang.Object)>($r17);
+
+        $r19 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector removed>;
+
+        virtualinvoke $r19.<java.util.Vector: void addElement(java.lang.Object)>(r46);
+
+        goto label18;
+
+     label17:
+        $r5 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r6 = interfaceinvoke $r5.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(0);
+
+        $r7 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r8 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r9 = interfaceinvoke $r6.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i3 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int pos>;
+
+        $i4 = interfaceinvoke $r6.<javax.swing.text.Element: int getEndOffset()>();
+
+        $r10 = virtualinvoke $r7.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createLeafElement(javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>($r8, $r9, $i3, $i4);
+
+        $r11 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        virtualinvoke $r11.<java.util.Vector: void addElement(java.lang.Object)>($r10);
+
+        $r12 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector removed>;
+
+        virtualinvoke $r12.<java.util.Vector: void addElement(java.lang.Object)>($r6);
+
+     label18:
+        $i26 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int pos>;
+
+        $i27 = $i26 + $i1;
+
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int pos> = $i27;
+
+     label19:
+        return;
+    }
+
+    boolean removeElements(javax.swing.text.Element, int, int)
+    {
+        java.util.Vector $r7, $r8, $r9, $r12, $r13, $r16, $r17, $r20, $r21;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r1;
+        boolean $z0, z1, $z2, $z3, $z4, $z5, $z7, $z8;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges r4;
+        java.util.Stack $r2;
+        int i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, i12, i13, i14, i15, $i16, $i17, $i18, $i19;
+        java.lang.Object $r3;
+        javax.swing.text.Element r0, $r5, $r6, $r10, $r11, $r14, $r15, r18, r19;
+
+        r1 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        r0 := @parameter0: javax.swing.text.Element;
+
+        i0 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $z0 = interfaceinvoke r0.<javax.swing.text.Element: boolean isLeaf()>();
+
+        if $z0 != 0 goto label18;
+
+        $i1 = interfaceinvoke r0.<javax.swing.text.Element: int getElementIndex(int)>(i0);
+
+        $i3 = interfaceinvoke r0.<javax.swing.text.Element: int getElementIndex(int)>(i2);
+
+        virtualinvoke r1.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void push(javax.swing.text.Element,int)>(r0, $i1);
+
+        $r2 = r1.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Stack path>;
+
+        $r3 = virtualinvoke $r2.<java.util.Stack: java.lang.Object peek()>();
+
+        r4 = (javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges) $r3;
+
+        if $i1 != $i3 goto label03;
+
+        $r15 = interfaceinvoke r0.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i1);
+
+        $i10 = interfaceinvoke $r15.<javax.swing.text.Element: int getStartOffset()>();
+
+        if i0 > $i10 goto label01;
+
+        $i11 = interfaceinvoke $r15.<javax.swing.text.Element: int getEndOffset()>();
+
+        if i2 < $i11 goto label01;
+
+        $r17 = r4.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector removed>;
+
+        virtualinvoke $r17.<java.util.Vector: void addElement(java.lang.Object)>($r15);
+
+        goto label02;
+
+     label01:
+        $z5 = virtualinvoke r1.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean removeElements(javax.swing.text.Element,int,int)>($r15, i0, i2);
+
+        if $z5 == 0 goto label02;
+
+        $r16 = r4.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector removed>;
+
+        virtualinvoke $r16.<java.util.Vector: void addElement(java.lang.Object)>($r15);
+
+     label02:
+        goto label17;
+
+     label03:
+        $r5 = interfaceinvoke r0.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i1);
+
+        r18 = $r5;
+
+        $r6 = interfaceinvoke r0.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i3);
+
+        r19 = $r6;
+
+        $i4 = interfaceinvoke r0.<javax.swing.text.Element: int getEndOffset()>();
+
+        if i2 >= $i4 goto label04;
+
+        $z8 = 1;
+
+        $z7 = 1;
+
+        goto label05;
+
+     label04:
+        $z8 = 0;
+
+        $z7 = 0;
+
+     label05:
+        z1 = $z7;
+
+        if $z8 == 0 goto label08;
+
+        $z4 = virtualinvoke r1.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean canJoin(javax.swing.text.Element,javax.swing.text.Element)>($r5, $r6);
+
+        if $z4 == 0 goto label08;
+
+        i12 = $i1;
+
+     label06:
+        if i12 > $i3 goto label07;
+
+        $r13 = r4.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector removed>;
+
+        $r14 = interfaceinvoke r0.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(i12);
+
+        virtualinvoke $r13.<java.util.Vector: void addElement(java.lang.Object)>($r14);
+
+        i12 = i12 + 1;
+
+        goto label06;
+
+     label07:
+        $r11 = virtualinvoke r1.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element join(javax.swing.text.Element,javax.swing.text.Element,javax.swing.text.Element,int,int)>(r0, $r5, $r6, i0, i2);
+
+        $r12 = r4.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        virtualinvoke $r12.<java.util.Vector: void addElement(java.lang.Object)>($r11);
+
+        goto label17;
+
+     label08:
+        i13 = $i1 + 1;
+
+        $i9 = $i3 - 1;
+
+        i14 = $i9;
+
+        $i5 = interfaceinvoke $r5.<javax.swing.text.Element: int getStartOffset()>();
+
+        if $i5 == i0 goto label09;
+
+        if $i1 != 0 goto label10;
+
+        $i7 = interfaceinvoke $r5.<javax.swing.text.Element: int getStartOffset()>();
+
+        if $i7 <= i0 goto label10;
+
+        $i8 = interfaceinvoke $r5.<javax.swing.text.Element: int getEndOffset()>();
+
+        if $i8 > i2 goto label10;
+
+     label09:
+        r18 = null;
+
+        i13 = $i1;
+
+     label10:
+        if z1 != 0 goto label11;
+
+        r19 = null;
+
+        i14 = $i9 + 1;
+
+        goto label12;
+
+     label11:
+        $i6 = interfaceinvoke $r6.<javax.swing.text.Element: int getStartOffset()>();
+
+        if $i6 != i2 goto label12;
+
+        r19 = null;
+
+     label12:
+        if i13 > i14 goto label13;
+
+        r4.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index> = i13;
+
+     label13:
+        i15 = i13;
+
+     label14:
+        if i15 > i14 goto label15;
+
+        $r9 = r4.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector removed>;
+
+        $r10 = interfaceinvoke r0.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(i15);
+
+        virtualinvoke $r9.<java.util.Vector: void addElement(java.lang.Object)>($r10);
+
+        i15 = i15 + 1;
+
+        goto label14;
+
+     label15:
+        if r18 == null goto label16;
+
+        $z3 = virtualinvoke r1.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean removeElements(javax.swing.text.Element,int,int)>(r18, i0, i2);
+
+        if $z3 == 0 goto label16;
+
+        $r8 = r4.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector removed>;
+
+        virtualinvoke $r8.<java.util.Vector: void insertElementAt(java.lang.Object,int)>(r18, 0);
+
+        r4.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index> = $i1;
+
+     label16:
+        if r19 == null goto label17;
+
+        $z2 = virtualinvoke r1.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean removeElements(javax.swing.text.Element,int,int)>(r19, i0, i2);
+
+        if $z2 == 0 goto label17;
+
+        $r7 = r4.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector removed>;
+
+        virtualinvoke $r7.<java.util.Vector: void addElement(java.lang.Object)>(r19);
+
+     label17:
+        virtualinvoke r1.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void pop()>();
+
+        $i16 = interfaceinvoke r0.<javax.swing.text.Element: int getElementCount()>();
+
+        $r20 = r4.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector removed>;
+
+        $i17 = virtualinvoke $r20.<java.util.Vector: int size()>();
+
+        $r21 = r4.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        $i18 = virtualinvoke $r21.<java.util.Vector: int size()>();
+
+        $i19 = $i17 - $i18;
+
+        if $i16 != $i19 goto label18;
+
+        return 1;
+
+     label18:
+        return 0;
+    }
+
+    boolean canJoin(javax.swing.text.Element, javax.swing.text.Element)
+    {
+        java.lang.String $r2, $r3;
+        javax.swing.text.Element r0, r1;
+        javax.swing.text.AttributeSet $r4, $r5;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r6;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        r6 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        r0 := @parameter0: javax.swing.text.Element;
+
+        r1 := @parameter1: javax.swing.text.Element;
+
+        if r0 == null goto label1;
+
+        if r1 != null goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $z0 = interfaceinvoke r0.<javax.swing.text.Element: boolean isLeaf()>();
+
+        $z1 = interfaceinvoke r1.<javax.swing.text.Element: boolean isLeaf()>();
+
+        if $z0 == $z1 goto label3;
+
+        return 0;
+
+     label3:
+        if $z0 == 0 goto label4;
+
+        $r4 = interfaceinvoke r0.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $r5 = interfaceinvoke r1.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $z4 = interfaceinvoke $r4.<javax.swing.text.AttributeSet: boolean isEqual(javax.swing.text.AttributeSet)>($r5);
+
+        return $z4;
+
+     label4:
+        $r2 = interfaceinvoke r0.<javax.swing.text.Element: java.lang.String getName()>();
+
+        $r3 = interfaceinvoke r1.<javax.swing.text.Element: java.lang.String getName()>();
+
+        if $r2 == null goto label5;
+
+        $z3 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        return $z3;
+
+     label5:
+        if $r3 == null goto label6;
+
+        $z2 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        return $z2;
+
+     label6:
+        return 1;
+    }
+
+    javax.swing.text.Element join(javax.swing.text.Element, javax.swing.text.Element, javax.swing.text.Element, int, int)
+    {
+        java.util.Vector $r10;
+        javax.swing.text.AttributeSet $r6, $r20;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r3;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        javax.swing.text.AbstractDocument$BranchElement $r11;
+        javax.swing.text.DefaultStyledDocument $r5, $r19;
+        javax.swing.text.StateInvariantError $r1;
+        int i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, $i10, $i11, i12;
+        javax.swing.text.Element[] r24;
+        javax.swing.text.Element r0, r2, r4, $r7, $r8, $r9, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r21, r22, r23;
+
+        r3 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        r4 := @parameter0: javax.swing.text.Element;
+
+        r0 := @parameter1: javax.swing.text.Element;
+
+        r2 := @parameter2: javax.swing.text.Element;
+
+        i0 := @parameter3: int;
+
+        i2 := @parameter4: int;
+
+        $z0 = interfaceinvoke r0.<javax.swing.text.Element: boolean isLeaf()>();
+
+        if $z0 == 0 goto label01;
+
+        $z4 = interfaceinvoke r2.<javax.swing.text.Element: boolean isLeaf()>();
+
+        if $z4 == 0 goto label01;
+
+        $r19 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r20 = interfaceinvoke r0.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i7 = interfaceinvoke r0.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i8 = interfaceinvoke r2.<javax.swing.text.Element: int getEndOffset()>();
+
+        $r21 = virtualinvoke $r19.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createLeafElement(javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>(r4, $r20, $i7, $i8);
+
+        return $r21;
+
+     label01:
+        $z1 = interfaceinvoke r0.<javax.swing.text.Element: boolean isLeaf()>();
+
+        if $z1 != 0 goto label13;
+
+        $z2 = interfaceinvoke r2.<javax.swing.text.Element: boolean isLeaf()>();
+
+        if $z2 != 0 goto label13;
+
+        $r5 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r6 = interfaceinvoke r0.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $r7 = virtualinvoke $r5.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createBranchElement(javax.swing.text.Element,javax.swing.text.AttributeSet)>(r4, $r6);
+
+        $i1 = interfaceinvoke r0.<javax.swing.text.Element: int getElementIndex(int)>(i0);
+
+        $i3 = interfaceinvoke r2.<javax.swing.text.Element: int getElementIndex(int)>(i2);
+
+        $r8 = interfaceinvoke r0.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i1);
+
+        r22 = $r8;
+
+        $i4 = interfaceinvoke $r8.<javax.swing.text.Element: int getStartOffset()>();
+
+        if $i4 < i0 goto label02;
+
+        r22 = null;
+
+     label02:
+        $r9 = interfaceinvoke r2.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i3);
+
+        r23 = $r9;
+
+        $i5 = interfaceinvoke $r9.<javax.swing.text.Element: int getStartOffset()>();
+
+        if $i5 != i2 goto label03;
+
+        r23 = null;
+
+     label03:
+        $r10 = new java.util.Vector;
+
+        specialinvoke $r10.<java.util.Vector: void <init>()>();
+
+        i9 = 0;
+
+     label04:
+        if i9 >= $i1 goto label05;
+
+        $r17 = interfaceinvoke r0.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(i9);
+
+        $r18 = virtualinvoke r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element clone(javax.swing.text.Element,javax.swing.text.Element)>($r7, $r17);
+
+        virtualinvoke $r10.<java.util.Vector: void addElement(java.lang.Object)>($r18);
+
+        i9 = i9 + 1;
+
+        goto label04;
+
+     label05:
+        $z3 = virtualinvoke r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean canJoin(javax.swing.text.Element,javax.swing.text.Element)>(r22, r23);
+
+        if $z3 == 0 goto label06;
+
+        $r16 = virtualinvoke r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element join(javax.swing.text.Element,javax.swing.text.Element,javax.swing.text.Element,int,int)>($r7, r22, r23, i0, i2);
+
+        virtualinvoke $r10.<java.util.Vector: void addElement(java.lang.Object)>($r16);
+
+        goto label08;
+
+     label06:
+        if r22 == null goto label07;
+
+        $r15 = virtualinvoke r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element cloneAsNecessary(javax.swing.text.Element,javax.swing.text.Element,int,int)>($r7, r22, i0, i2);
+
+        virtualinvoke $r10.<java.util.Vector: void addElement(java.lang.Object)>($r15);
+
+     label07:
+        if r23 == null goto label08;
+
+        $r14 = virtualinvoke r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element cloneAsNecessary(javax.swing.text.Element,javax.swing.text.Element,int,int)>($r7, r23, i0, i2);
+
+        virtualinvoke $r10.<java.util.Vector: void addElement(java.lang.Object)>($r14);
+
+     label08:
+        $i10 = interfaceinvoke r2.<javax.swing.text.Element: int getElementCount()>();
+
+        if r23 != null goto label09;
+
+        $i11 = $i3;
+
+        goto label10;
+
+     label09:
+        $i11 = $i3 + 1;
+
+     label10:
+        i12 = $i11;
+
+     label11:
+        if i12 >= $i10 goto label12;
+
+        $r12 = interfaceinvoke r2.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(i12);
+
+        $r13 = virtualinvoke r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element clone(javax.swing.text.Element,javax.swing.text.Element)>($r7, $r12);
+
+        virtualinvoke $r10.<java.util.Vector: void addElement(java.lang.Object)>($r13);
+
+        i12 = i12 + 1;
+
+        goto label11;
+
+     label12:
+        $i6 = virtualinvoke $r10.<java.util.Vector: int size()>();
+
+        r24 = newarray (javax.swing.text.Element)[$i6];
+
+        virtualinvoke $r10.<java.util.Vector: void copyInto(java.lang.Object[])>(r24);
+
+        $r11 = (javax.swing.text.AbstractDocument$BranchElement) $r7;
+
+        virtualinvoke $r11.<javax.swing.text.AbstractDocument$BranchElement: void replace(int,int,javax.swing.text.Element[])>(0, 0, r24);
+
+        return $r7;
+
+     label13:
+        $r1 = new javax.swing.text.StateInvariantError;
+
+        specialinvoke $r1.<javax.swing.text.StateInvariantError: void <init>(java.lang.String)>("No support to join leaf element with non-leaf element");
+
+        throw $r1;
+    }
+
+    public javax.swing.text.Element clone(javax.swing.text.Element, javax.swing.text.Element)
+    {
+        javax.swing.text.DefaultStyledDocument $r3, $r10;
+        int $i0, $i1, $i2, i3;
+        javax.swing.text.AttributeSet $r4, $r11;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r1;
+        boolean $z0;
+        javax.swing.text.Element[] r6;
+        javax.swing.text.AbstractDocument$BranchElement $r7;
+        javax.swing.text.Element r0, r2, $r5, $r8, $r9, $r12;
+
+        r1 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        r2 := @parameter0: javax.swing.text.Element;
+
+        r0 := @parameter1: javax.swing.text.Element;
+
+        $z0 = interfaceinvoke r0.<javax.swing.text.Element: boolean isLeaf()>();
+
+        if $z0 == 0 goto label1;
+
+        $r10 = r1.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r11 = interfaceinvoke r0.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i1 = interfaceinvoke r0.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i2 = interfaceinvoke r0.<javax.swing.text.Element: int getEndOffset()>();
+
+        $r12 = virtualinvoke $r10.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createLeafElement(javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>(r2, $r11, $i1, $i2);
+
+        return $r12;
+
+     label1:
+        $r3 = r1.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r4 = interfaceinvoke r0.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $r5 = virtualinvoke $r3.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createBranchElement(javax.swing.text.Element,javax.swing.text.AttributeSet)>(r2, $r4);
+
+        $i0 = interfaceinvoke r0.<javax.swing.text.Element: int getElementCount()>();
+
+        r6 = newarray (javax.swing.text.Element)[$i0];
+
+        i3 = 0;
+
+     label2:
+        if i3 >= $i0 goto label3;
+
+        $r8 = interfaceinvoke r0.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(i3);
+
+        $r9 = virtualinvoke r1.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element clone(javax.swing.text.Element,javax.swing.text.Element)>($r5, $r8);
+
+        r6[i3] = $r9;
+
+        i3 = i3 + 1;
+
+        goto label2;
+
+     label3:
+        $r7 = (javax.swing.text.AbstractDocument$BranchElement) $r5;
+
+        virtualinvoke $r7.<javax.swing.text.AbstractDocument$BranchElement: void replace(int,int,javax.swing.text.Element[])>(0, 0, r6);
+
+        return $r5;
+    }
+
+    javax.swing.text.Element cloneAsNecessary(javax.swing.text.Element, javax.swing.text.Element, int, int)
+    {
+        java.lang.Object[] $r7;
+        javax.swing.text.DefaultStyledDocument $r3, $r11;
+        java.util.ArrayList $r6;
+        int $i0, $i1, $i2, i3, i4, $i5, $i6, $i7, i8;
+        javax.swing.text.AttributeSet $r4, $r12;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r1;
+        boolean $z0;
+        javax.swing.text.Element[] r14, r15;
+        javax.swing.text.AbstractDocument$BranchElement $r8;
+        javax.swing.text.Element r0, r2, $r5, $r9, $r10, $r13;
+
+        r1 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        r2 := @parameter0: javax.swing.text.Element;
+
+        r0 := @parameter1: javax.swing.text.Element;
+
+        i3 := @parameter2: int;
+
+        i4 := @parameter3: int;
+
+        $z0 = interfaceinvoke r0.<javax.swing.text.Element: boolean isLeaf()>();
+
+        if $z0 == 0 goto label1;
+
+        $r11 = r1.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r12 = interfaceinvoke r0.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i6 = interfaceinvoke r0.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i7 = interfaceinvoke r0.<javax.swing.text.Element: int getEndOffset()>();
+
+        $r13 = virtualinvoke $r11.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createLeafElement(javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>(r2, $r12, $i6, $i7);
+
+        return $r13;
+
+     label1:
+        $r3 = r1.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r4 = interfaceinvoke r0.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $r5 = virtualinvoke $r3.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createBranchElement(javax.swing.text.Element,javax.swing.text.AttributeSet)>(r2, $r4);
+
+        $i0 = interfaceinvoke r0.<javax.swing.text.Element: int getElementCount()>();
+
+        $r6 = new java.util.ArrayList;
+
+        specialinvoke $r6.<java.util.ArrayList: void <init>(int)>($i0);
+
+        i8 = 0;
+
+     label2:
+        if i8 >= $i0 goto label5;
+
+        $r9 = interfaceinvoke r0.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(i8);
+
+        $i2 = interfaceinvoke $r9.<javax.swing.text.Element: int getStartOffset()>();
+
+        if $i2 < i3 goto label3;
+
+        $i5 = interfaceinvoke $r9.<javax.swing.text.Element: int getEndOffset()>();
+
+        if $i5 <= i4 goto label4;
+
+     label3:
+        $r10 = virtualinvoke r1.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element cloneAsNecessary(javax.swing.text.Element,javax.swing.text.Element,int,int)>($r5, $r9, i3, i4);
+
+        virtualinvoke $r6.<java.util.ArrayList: boolean add(java.lang.Object)>($r10);
+
+     label4:
+        i8 = i8 + 1;
+
+        goto label2;
+
+     label5:
+        $i1 = virtualinvoke $r6.<java.util.ArrayList: int size()>();
+
+        r14 = newarray (javax.swing.text.Element)[$i1];
+
+        $r7 = virtualinvoke $r6.<java.util.ArrayList: java.lang.Object[] toArray(java.lang.Object[])>(r14);
+
+        r15 = (javax.swing.text.Element[]) $r7;
+
+        $r8 = (javax.swing.text.AbstractDocument$BranchElement) $r5;
+
+        virtualinvoke $r8.<javax.swing.text.AbstractDocument$BranchElement: void replace(int,int,javax.swing.text.Element[])>(0, 0, r15);
+
+        return $r5;
+    }
+
+    void fracture(int)
+    {
+        java.util.Vector $r8;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r0;
+        boolean z0, $z1, z2;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges r3, r7;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges[] $r1, $r2, $r5, $r6;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, i8, i9, $i10, i11, i12, i13, $i15, $i17, $i19, $i21, $i23;
+        javax.swing.text.Element $r4, $r9;
+
+        r0 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        i8 := @parameter0: int;
+
+        $r1 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges[] insertPath>;
+
+        i0 = lengthof $r1;
+
+        $i15 = (int) -1;
+
+        i9 = $i15;
+
+        z0 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean recreateLeafs>;
+
+        $r2 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges[] insertPath>;
+
+        $i1 = i0 - 1;
+
+        r3 = $r2[$i1];
+
+        $i2 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index>;
+
+        $i3 = $i2 + 1;
+
+        $r4 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $i4 = interfaceinvoke $r4.<javax.swing.text.Element: int getElementCount()>();
+
+        if $i3 >= $i4 goto label01;
+
+        $z1 = 1;
+
+        goto label02;
+
+     label01:
+        $z1 = 0;
+
+     label02:
+        z2 = $z1;
+
+        if z0 == 0 goto label03;
+
+        $i10 = i0;
+
+        goto label04;
+
+     label03:
+        $i17 = (int) -1;
+
+        $i10 = $i17;
+
+     label04:
+        i11 = $i10;
+
+        i12 = i0 - 1;
+
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean createdFracture> = 1;
+
+        i13 = i0 - 2;
+
+     label05:
+        if i13 < 0 goto label09;
+
+        $r6 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges[] insertPath>;
+
+        r7 = $r6[i13];
+
+        $r8 = r7.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        $i5 = virtualinvoke $r8.<java.util.Vector: int size()>();
+
+        if $i5 > 0 goto label06;
+
+        if i13 != i8 goto label07;
+
+     label06:
+        i9 = i13;
+
+        if z0 != 0 goto label07;
+
+        if z2 == 0 goto label07;
+
+        z0 = 1;
+
+        $i19 = (int) -1;
+
+        if i11 != $i19 goto label07;
+
+        i11 = i12 + 1;
+
+     label07:
+        if z2 != 0 goto label08;
+
+        $i6 = r7.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index>;
+
+        $r9 = r7.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $i7 = interfaceinvoke $r9.<javax.swing.text.Element: int getElementCount()>();
+
+        if $i6 >= $i7 goto label08;
+
+        z2 = 1;
+
+        i12 = i13;
+
+     label08:
+        $i21 = (int) -1;
+
+        i13 = i13 + $i21;
+
+        goto label05;
+
+     label09:
+        if z0 == 0 goto label11;
+
+        $i23 = (int) -1;
+
+        if i9 != $i23 goto label10;
+
+        i9 = i0 - 1;
+
+     label10:
+        $r5 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges[] insertPath>;
+
+        virtualinvoke r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: void fractureFrom(javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges[],int,int)>($r5, i9, i11);
+
+     label11:
+        return;
+    }
+
+    void fractureFrom(javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges[], int, int)
+    {
+        java.util.Vector $r12;
+        byte b27;
+        javax.swing.text.AttributeSet $r5, $r15, $r17, $r22;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r2;
+        javax.swing.text.AbstractDocument$BranchElement $r8;
+        javax.swing.text.Element[] $r13, r31;
+        boolean $z0, z1, z2, $z3, $z4, $z5, $z7, $z8;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges $r19, r24;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges[] r0;
+        javax.swing.text.DefaultStyledDocument $r3, $r14, $r16, $r20;
+        int i0, $i1, $i2, $i3, i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, i22, $i23, $i24, $i25, i26, i28, i29, $i31;
+        javax.swing.text.Element $r1, $r4, $r6, $r7, $r9, $r10, $r11, $r18, $r21, $r23, r25, r26, r27, r28, r29, $r30;
+
+        r2 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        r0 := @parameter0: javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges[];
+
+        i22 := @parameter1: int;
+
+        i4 := @parameter2: int;
+
+        r24 = r0[i22];
+
+        i0 = lengthof r0;
+
+        $i1 = i22 + 1;
+
+        if $i1 != i0 goto label01;
+
+        $r23 = r24.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $i21 = r24.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index>;
+
+        r25 = interfaceinvoke $r23.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i21);
+
+        goto label02;
+
+     label01:
+        $r1 = r24.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $i2 = r24.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index>;
+
+        $i3 = $i2 - 1;
+
+        r25 = interfaceinvoke $r1.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i3);
+
+     label02:
+        $z0 = interfaceinvoke r25.<javax.swing.text.Element: boolean isLeaf()>();
+
+        if $z0 == 0 goto label03;
+
+        $r20 = r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r21 = r24.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r22 = interfaceinvoke r25.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i17 = r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int endOffset>;
+
+        $i18 = interfaceinvoke r25.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i19 = staticinvoke <java.lang.Math: int max(int,int)>($i17, $i18);
+
+        $i20 = interfaceinvoke r25.<javax.swing.text.Element: int getEndOffset()>();
+
+        r26 = virtualinvoke $r20.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createLeafElement(javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>($r21, $r22, $i19, $i20);
+
+        goto label04;
+
+     label03:
+        $r3 = r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r4 = r24.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r5 = interfaceinvoke r25.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        r26 = virtualinvoke $r3.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createBranchElement(javax.swing.text.Element,javax.swing.text.AttributeSet)>($r4, $r5);
+
+     label04:
+        $r6 = r24.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element fracturedParent> = $r6;
+
+        r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element fracturedChild> = r26;
+
+        r27 = r26;
+
+     label05:
+        i22 = i22 + 1;
+
+        if i22 >= i4 goto label25;
+
+        $i5 = i22 + 1;
+
+        if $i5 != i4 goto label06;
+
+        $z5 = 1;
+
+        goto label07;
+
+     label06:
+        $z5 = 0;
+
+     label07:
+        z1 = $z5;
+
+        $i6 = i22 + 1;
+
+        if $i6 != i0 goto label08;
+
+        $z8 = 1;
+
+        $z7 = 1;
+
+        goto label09;
+
+     label08:
+        $z8 = 0;
+
+        $z7 = 0;
+
+     label09:
+        z2 = $z8;
+
+        $r19 = r0[i22];
+
+        if z1 == 0 goto label12;
+
+        $z4 = r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean offsetLastIndex>;
+
+        if $z4 != 0 goto label10;
+
+        if $z7 != 0 goto label11;
+
+     label10:
+        r28 = null;
+
+        goto label13;
+
+     label11:
+        $r18 = $r19.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $i16 = $r19.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index>;
+
+        r28 = interfaceinvoke $r18.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i16);
+
+        goto label13;
+
+     label12:
+        $r7 = $r19.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $i7 = $r19.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index>;
+
+        $i8 = $i7 - 1;
+
+        r28 = interfaceinvoke $r7.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i8);
+
+     label13:
+        if r28 == null goto label15;
+
+        $z3 = interfaceinvoke r28.<javax.swing.text.Element: boolean isLeaf()>();
+
+        if $z3 == 0 goto label14;
+
+        $r16 = r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r17 = interfaceinvoke r28.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i12 = r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int endOffset>;
+
+        $i13 = interfaceinvoke r28.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i14 = staticinvoke <java.lang.Math: int max(int,int)>($i12, $i13);
+
+        $i15 = interfaceinvoke r28.<javax.swing.text.Element: int getEndOffset()>();
+
+        r29 = virtualinvoke $r16.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createLeafElement(javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>(r27, $r17, $i14, $i15);
+
+        goto label16;
+
+     label14:
+        $r14 = r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r15 = interfaceinvoke r28.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        r29 = virtualinvoke $r14.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createBranchElement(javax.swing.text.Element,javax.swing.text.AttributeSet)>(r27, $r15);
+
+        goto label16;
+
+     label15:
+        r29 = null;
+
+     label16:
+        $r30 = $r19.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $i23 = interfaceinvoke $r30.<javax.swing.text.Element: int getElementCount()>();
+
+        $i24 = $r19.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index>;
+
+        $i25 = $i23 - $i24;
+
+        i26 = $i25;
+
+        b27 = 1;
+
+        if r29 != null goto label19;
+
+        if z2 == 0 goto label17;
+
+        $i31 = (int) -1;
+
+        i26 = $i25 + $i31;
+
+        $i11 = $r19.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index>;
+
+        i28 = $i11 + 1;
+
+        goto label18;
+
+     label17:
+        i28 = $r19.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index>;
+
+     label18:
+        b27 = 0;
+
+        r31 = newarray (javax.swing.text.Element)[i26];
+
+        goto label22;
+
+     label19:
+        if z1 != 0 goto label20;
+
+        i26 = $i25 + 1;
+
+        i28 = $r19.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index>;
+
+        goto label21;
+
+     label20:
+        $i9 = $r19.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index>;
+
+        i28 = $i9 + 1;
+
+     label21:
+        $r13 = newarray (javax.swing.text.Element)[i26];
+
+        r31 = $r13;
+
+        $r13[0] = r29;
+
+     label22:
+        i29 = b27;
+
+     label23:
+        if i29 >= i26 goto label24;
+
+        $r9 = $r19.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $i10 = i28;
+
+        i28 = i28 + 1;
+
+        $r10 = interfaceinvoke $r9.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i10);
+
+        $r11 = virtualinvoke r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element recreateFracturedElement(javax.swing.text.Element,javax.swing.text.Element)>(r27, $r10);
+
+        r31[i29] = $r11;
+
+        $r12 = $r19.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector removed>;
+
+        virtualinvoke $r12.<java.util.Vector: void addElement(java.lang.Object)>($r10);
+
+        i29 = i29 + 1;
+
+        goto label23;
+
+     label24:
+        $r8 = (javax.swing.text.AbstractDocument$BranchElement) r27;
+
+        virtualinvoke $r8.<javax.swing.text.AbstractDocument$BranchElement: void replace(int,int,javax.swing.text.Element[])>(0, 0, r31);
+
+        r27 = r29;
+
+        goto label05;
+
+     label25:
+        return;
+    }
+
+    javax.swing.text.Element recreateFracturedElement(javax.swing.text.Element, javax.swing.text.Element)
+    {
+        javax.swing.text.DefaultStyledDocument $r3, $r10;
+        int $i0, $i1, $i2, $i3, $i4, i5;
+        javax.swing.text.AttributeSet $r4, $r11;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r1;
+        boolean $z0;
+        javax.swing.text.Element[] r6;
+        javax.swing.text.AbstractDocument$BranchElement $r7;
+        javax.swing.text.Element r0, r2, $r5, $r8, $r9, $r12;
+
+        r1 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        r2 := @parameter0: javax.swing.text.Element;
+
+        r0 := @parameter1: javax.swing.text.Element;
+
+        $z0 = interfaceinvoke r0.<javax.swing.text.Element: boolean isLeaf()>();
+
+        if $z0 == 0 goto label1;
+
+        $r10 = r1.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r11 = interfaceinvoke r0.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i1 = interfaceinvoke r0.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i2 = r1.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int endOffset>;
+
+        $i3 = staticinvoke <java.lang.Math: int max(int,int)>($i1, $i2);
+
+        $i4 = interfaceinvoke r0.<javax.swing.text.Element: int getEndOffset()>();
+
+        $r12 = virtualinvoke $r10.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createLeafElement(javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>(r2, $r11, $i3, $i4);
+
+        return $r12;
+
+     label1:
+        $r3 = r1.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r4 = interfaceinvoke r0.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $r5 = virtualinvoke $r3.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createBranchElement(javax.swing.text.Element,javax.swing.text.AttributeSet)>(r2, $r4);
+
+        $i0 = interfaceinvoke r0.<javax.swing.text.Element: int getElementCount()>();
+
+        r6 = newarray (javax.swing.text.Element)[$i0];
+
+        i5 = 0;
+
+     label2:
+        if i5 >= $i0 goto label3;
+
+        $r8 = interfaceinvoke r0.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>(i5);
+
+        $r9 = virtualinvoke r1.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.Element recreateFracturedElement(javax.swing.text.Element,javax.swing.text.Element)>($r5, $r8);
+
+        r6[i5] = $r9;
+
+        i5 = i5 + 1;
+
+        goto label2;
+
+     label3:
+        $r7 = (javax.swing.text.AbstractDocument$BranchElement) $r5;
+
+        virtualinvoke $r7.<javax.swing.text.AbstractDocument$BranchElement: void replace(int,int,javax.swing.text.Element[])>(0, 0, r6);
+
+        return $r5;
+    }
+
+    void fractureDeepestLeaf(javax.swing.text.DefaultStyledDocument$ElementSpec[])
+    {
+        javax.swing.text.DefaultStyledDocument $r7;
+        java.util.Stack $r1;
+        java.util.Vector $r6, $r11;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        javax.swing.text.AttributeSet $r9;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r0;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges r3;
+        java.lang.Object $r2;
+        javax.swing.text.Element $r4, $r5, $r8, $r10;
+        javax.swing.text.DefaultStyledDocument$ElementSpec[] r12;
+
+        r0 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        r12 := @parameter0: javax.swing.text.DefaultStyledDocument$ElementSpec[];
+
+        $r1 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Stack path>;
+
+        $r2 = virtualinvoke $r1.<java.util.Stack: java.lang.Object peek()>();
+
+        r3 = (javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges) $r2;
+
+        $r4 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $i0 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index>;
+
+        $r5 = interfaceinvoke $r4.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i0);
+
+        $i1 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int offset>;
+
+        if $i1 == 0 goto label1;
+
+        $r7 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r8 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r9 = interfaceinvoke $r5.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i4 = interfaceinvoke $r5.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i5 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int offset>;
+
+        $r10 = virtualinvoke $r7.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createLeafElement(javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>($r8, $r9, $i4, $i5);
+
+        $r11 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        virtualinvoke $r11.<java.util.Vector: void addElement(java.lang.Object)>($r10);
+
+     label1:
+        $r6 = r3.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector removed>;
+
+        virtualinvoke $r6.<java.util.Vector: void addElement(java.lang.Object)>($r5);
+
+        $i2 = interfaceinvoke $r5.<javax.swing.text.Element: int getEndOffset()>();
+
+        $i3 = r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int endOffset>;
+
+        if $i2 == $i3 goto label2;
+
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean recreateLeafs> = 1;
+
+        goto label3;
+
+     label2:
+        r0.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean offsetLastIndex> = 1;
+
+     label3:
+        return;
+    }
+
+    void insertFirstContent(javax.swing.text.DefaultStyledDocument$ElementSpec[])
+    {
+        java.util.Vector $r12, $r18, $r19, $r20, $r28, $r29, $r30, $r35, $r40;
+        javax.swing.text.AttributeSet $r10, $r17, $r23, $r26, $r33, $r38;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer r2;
+        javax.swing.text.DefaultStyledDocument$ElementSpec r1;
+        short $s5;
+        boolean $z1, $z2;
+        javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges r5;
+        javax.swing.text.DefaultStyledDocument $r8, $r15, $r21, $r24, $r31, $r36;
+        java.util.Stack $r3;
+        int $i0, $i1, $i2, i3, $i4, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, $i17, $i18, $i19, $i20, $i21, $i22, $i23, $i24, $i25;
+        java.lang.Object $r4;
+        javax.swing.text.Element $r6, $r7, $r9, $r11, $r13, $r14, $r16, $r22, $r25, $r27, $r32, $r34, $r37, $r39, r41;
+        javax.swing.text.DefaultStyledDocument$ElementSpec[] r0;
+
+        r2 := @this: javax.swing.text.DefaultStyledDocument$ElementBuffer;
+
+        r0 := @parameter0: javax.swing.text.DefaultStyledDocument$ElementSpec[];
+
+        r1 = r0[0];
+
+        $r3 = r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: java.util.Stack path>;
+
+        $r4 = virtualinvoke $r3.<java.util.Stack: java.lang.Object peek()>();
+
+        r5 = (javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges) $r4;
+
+        $r6 = r5.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $i0 = r5.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index>;
+
+        $r7 = interfaceinvoke $r6.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i0);
+
+        $i1 = r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int offset>;
+
+        $i2 = virtualinvoke r1.<javax.swing.text.DefaultStyledDocument$ElementSpec: int getLength()>();
+
+        i3 = $i1 + $i2;
+
+        $i4 = lengthof r0;
+
+        if $i4 != 1 goto label01;
+
+        $z2 = 1;
+
+        $z1 = 1;
+
+        goto label02;
+
+     label01:
+        $z2 = 0;
+
+        $z1 = 0;
+
+     label02:
+        $s5 = virtualinvoke r1.<javax.swing.text.DefaultStyledDocument$ElementSpec: short getDirection()>();
+
+        $i25 = (int) $s5;
+
+        lookupswitch($i25)
+        {
+            case 4: goto label03;
+            case 5: goto label07;
+            default: goto label10;
+        };
+
+     label03:
+        $i14 = interfaceinvoke $r7.<javax.swing.text.Element: int getEndOffset()>();
+
+        if $i14 == i3 goto label06;
+
+        if $z1 != 0 goto label06;
+
+        $r24 = r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r25 = r5.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r26 = interfaceinvoke $r7.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i15 = interfaceinvoke $r7.<javax.swing.text.Element: int getStartOffset()>();
+
+        $r27 = virtualinvoke $r24.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createLeafElement(javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>($r25, $r26, $i15, i3);
+
+        $r28 = r5.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        virtualinvoke $r28.<java.util.Vector: void addElement(java.lang.Object)>($r27);
+
+        $r29 = r5.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector removed>;
+
+        virtualinvoke $r29.<java.util.Vector: void addElement(java.lang.Object)>($r7);
+
+        $i16 = interfaceinvoke $r7.<javax.swing.text.Element: int getEndOffset()>();
+
+        $i17 = r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int endOffset>;
+
+        if $i16 == $i17 goto label04;
+
+        r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean recreateLeafs> = 1;
+
+        goto label05;
+
+     label04:
+        r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean offsetLastIndex> = 1;
+
+     label05:
+        goto label13;
+
+     label06:
+        r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean offsetLastIndex> = 1;
+
+        r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean offsetLastIndexOnReplace> = 1;
+
+        goto label13;
+
+     label07:
+        $i6 = r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int offset>;
+
+        if $i6 == 0 goto label13;
+
+        $r8 = r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r9 = r5.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r10 = interfaceinvoke $r7.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i7 = interfaceinvoke $r7.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i8 = r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int offset>;
+
+        $r11 = virtualinvoke $r8.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createLeafElement(javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>($r9, $r10, $i7, $i8);
+
+        $r12 = r5.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        virtualinvoke $r12.<java.util.Vector: void addElement(java.lang.Object)>($r11);
+
+        $r13 = r5.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $i9 = r5.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: int index>;
+
+        $i10 = $i9 + 1;
+
+        $r14 = interfaceinvoke $r13.<javax.swing.text.Element: javax.swing.text.Element getElement(int)>($i10);
+
+        if $z2 == 0 goto label08;
+
+        $r21 = r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r22 = r5.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r23 = interfaceinvoke $r14.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i12 = r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int offset>;
+
+        $i13 = interfaceinvoke $r14.<javax.swing.text.Element: int getEndOffset()>();
+
+        r41 = virtualinvoke $r21.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createLeafElement(javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>($r22, $r23, $i12, $i13);
+
+        goto label09;
+
+     label08:
+        $r15 = r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r16 = r5.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r17 = interfaceinvoke $r14.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i11 = r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int offset>;
+
+        r41 = virtualinvoke $r15.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createLeafElement(javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>($r16, $r17, $i11, i3);
+
+     label09:
+        $r18 = r5.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        virtualinvoke $r18.<java.util.Vector: void addElement(java.lang.Object)>(r41);
+
+        $r19 = r5.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector removed>;
+
+        virtualinvoke $r19.<java.util.Vector: void addElement(java.lang.Object)>($r7);
+
+        $r20 = r5.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector removed>;
+
+        virtualinvoke $r20.<java.util.Vector: void addElement(java.lang.Object)>($r14);
+
+        goto label13;
+
+     label10:
+        $i18 = interfaceinvoke $r7.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i19 = r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int offset>;
+
+        if $i18 == $i19 goto label11;
+
+        $r36 = r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r37 = r5.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r38 = interfaceinvoke $r7.<javax.swing.text.Element: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i23 = interfaceinvoke $r7.<javax.swing.text.Element: int getStartOffset()>();
+
+        $i24 = r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int offset>;
+
+        $r39 = virtualinvoke $r36.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createLeafElement(javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>($r37, $r38, $i23, $i24);
+
+        $r40 = r5.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        virtualinvoke $r40.<java.util.Vector: void addElement(java.lang.Object)>($r39);
+
+     label11:
+        $r30 = r5.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector removed>;
+
+        virtualinvoke $r30.<java.util.Vector: void addElement(java.lang.Object)>($r7);
+
+        $r31 = r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: javax.swing.text.DefaultStyledDocument this$0>;
+
+        $r32 = r5.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: javax.swing.text.Element parent>;
+
+        $r33 = virtualinvoke r1.<javax.swing.text.DefaultStyledDocument$ElementSpec: javax.swing.text.AttributeSet getAttributes()>();
+
+        $i20 = r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int offset>;
+
+        $r34 = virtualinvoke $r31.<javax.swing.text.DefaultStyledDocument: javax.swing.text.Element createLeafElement(javax.swing.text.Element,javax.swing.text.AttributeSet,int,int)>($r32, $r33, $i20, i3);
+
+        $r35 = r5.<javax.swing.text.DefaultStyledDocument$ElementBuffer$ElemChanges: java.util.Vector added>;
+
+        virtualinvoke $r35.<java.util.Vector: void addElement(java.lang.Object)>($r34);
+
+        $i21 = interfaceinvoke $r7.<javax.swing.text.Element: int getEndOffset()>();
+
+        $i22 = r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: int endOffset>;
+
+        if $i21 == $i22 goto label12;
+
+        r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean recreateLeafs> = 1;
+
+        goto label13;
+
+     label12:
+        r2.<javax.swing.text.DefaultStyledDocument$ElementBuffer: boolean offsetLastIndex> = 1;
+
+     label13:
+        return;
+    }
+}

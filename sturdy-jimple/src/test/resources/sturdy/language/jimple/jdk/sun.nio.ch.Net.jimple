@@ -1,0 +1,1580 @@
+public class sun.nio.ch.Net extends java.lang.Object
+{
+    static final java.net.ProtocolFamily UNSPEC;
+    private static final boolean exclusiveBind;
+    private static final boolean fastLoopback;
+    private static volatile boolean checkedIPv6;
+    private static volatile boolean isIPv6Available;
+    static final sun.net.ExtendedSocketOptions extendedOptions;
+    public static final int SHUT_RD;
+    public static final int SHUT_WR;
+    public static final int SHUT_RDWR;
+    public static final short POLLIN;
+    public static final short POLLOUT;
+    public static final short POLLERR;
+    public static final short POLLHUP;
+    public static final short POLLNVAL;
+    public static final short POLLCONN;
+
+    private void <init>()
+    {
+        sun.nio.ch.Net r0;
+
+        r0 := @this: sun.nio.ch.Net;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    static boolean isIPv6Available()
+    {
+        boolean $z0, $z1, $z2;
+
+        $z0 = <sun.nio.ch.Net: boolean checkedIPv6>;
+
+        if $z0 != 0 goto label1;
+
+        $z2 = staticinvoke <sun.nio.ch.Net: boolean isIPv6Available0()>();
+
+        <sun.nio.ch.Net: boolean isIPv6Available> = $z2;
+
+        <sun.nio.ch.Net: boolean checkedIPv6> = 1;
+
+     label1:
+        $z1 = <sun.nio.ch.Net: boolean isIPv6Available>;
+
+        return $z1;
+    }
+
+    static boolean useExclusiveBind()
+    {
+        boolean $z0;
+
+        $z0 = <sun.nio.ch.Net: boolean exclusiveBind>;
+
+        return $z0;
+    }
+
+    static boolean canIPv6SocketJoinIPv4Group()
+    {
+        boolean $z0;
+
+        $z0 = staticinvoke <sun.nio.ch.Net: boolean canIPv6SocketJoinIPv4Group0()>();
+
+        return $z0;
+    }
+
+    static boolean canJoin6WithIPv4Group()
+    {
+        boolean $z0;
+
+        $z0 = staticinvoke <sun.nio.ch.Net: boolean canJoin6WithIPv4Group0()>();
+
+        return $z0;
+    }
+
+    public static java.net.InetSocketAddress checkAddress(java.net.SocketAddress)
+    {
+        java.net.SocketAddress r0;
+        java.nio.channels.UnsupportedAddressTypeException $r5;
+        java.lang.IllegalArgumentException $r3;
+        java.net.InetSocketAddress r1;
+        java.lang.NullPointerException $r6;
+        java.net.InetAddress $r2;
+        java.nio.channels.UnresolvedAddressException $r4;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @parameter0: java.net.SocketAddress;
+
+        if r0 != null goto label1;
+
+        $r6 = new java.lang.NullPointerException;
+
+        specialinvoke $r6.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r6;
+
+     label1:
+        $z0 = r0 instanceof java.net.InetSocketAddress;
+
+        if $z0 != 0 goto label2;
+
+        $r5 = new java.nio.channels.UnsupportedAddressTypeException;
+
+        specialinvoke $r5.<java.nio.channels.UnsupportedAddressTypeException: void <init>()>();
+
+        throw $r5;
+
+     label2:
+        r1 = (java.net.InetSocketAddress) r0;
+
+        $z1 = virtualinvoke r1.<java.net.InetSocketAddress: boolean isUnresolved()>();
+
+        if $z1 == 0 goto label3;
+
+        $r4 = new java.nio.channels.UnresolvedAddressException;
+
+        specialinvoke $r4.<java.nio.channels.UnresolvedAddressException: void <init>()>();
+
+        throw $r4;
+
+     label3:
+        $r2 = virtualinvoke r1.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $z2 = $r2 instanceof java.net.Inet4Address;
+
+        if $z2 != 0 goto label4;
+
+        $z3 = $r2 instanceof java.net.Inet6Address;
+
+        if $z3 != 0 goto label4;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid address type");
+
+        throw $r3;
+
+     label4:
+        return r1;
+    }
+
+    static java.net.InetSocketAddress asInetSocketAddress(java.net.SocketAddress)
+    {
+        java.net.SocketAddress r0;
+        java.nio.channels.UnsupportedAddressTypeException $r2;
+        java.net.InetSocketAddress $r1;
+        boolean $z0;
+
+        r0 := @parameter0: java.net.SocketAddress;
+
+        $z0 = r0 instanceof java.net.InetSocketAddress;
+
+        if $z0 != 0 goto label1;
+
+        $r2 = new java.nio.channels.UnsupportedAddressTypeException;
+
+        specialinvoke $r2.<java.nio.channels.UnsupportedAddressTypeException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        $r1 = (java.net.InetSocketAddress) r0;
+
+        return $r1;
+    }
+
+    static void translateToSocketException(java.lang.Exception) throws java.net.SocketException
+    {
+        java.lang.Error $r1;
+        java.net.SocketException $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        java.lang.RuntimeException $r2;
+        java.lang.Exception r0, r11;
+
+        r0 := @parameter0: java.lang.Exception;
+
+        $z0 = r0 instanceof java.net.SocketException;
+
+        if $z0 == 0 goto label01;
+
+        $r10 = (java.net.SocketException) r0;
+
+        throw $r10;
+
+     label01:
+        r11 = r0;
+
+        $z1 = r0 instanceof java.nio.channels.ClosedChannelException;
+
+        if $z1 == 0 goto label02;
+
+        $r9 = new java.net.SocketException;
+
+        specialinvoke $r9.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        r11 = $r9;
+
+        goto label07;
+
+     label02:
+        $z2 = r0 instanceof java.nio.channels.NotYetConnectedException;
+
+        if $z2 == 0 goto label03;
+
+        $r8 = new java.net.SocketException;
+
+        specialinvoke $r8.<java.net.SocketException: void <init>(java.lang.String)>("Socket is not connected");
+
+        r11 = $r8;
+
+        goto label07;
+
+     label03:
+        $z3 = r0 instanceof java.nio.channels.AlreadyBoundException;
+
+        if $z3 == 0 goto label04;
+
+        $r7 = new java.net.SocketException;
+
+        specialinvoke $r7.<java.net.SocketException: void <init>(java.lang.String)>("Already bound");
+
+        r11 = $r7;
+
+        goto label07;
+
+     label04:
+        $z4 = r0 instanceof java.nio.channels.NotYetBoundException;
+
+        if $z4 == 0 goto label05;
+
+        $r6 = new java.net.SocketException;
+
+        specialinvoke $r6.<java.net.SocketException: void <init>(java.lang.String)>("Socket is not bound yet");
+
+        r11 = $r6;
+
+        goto label07;
+
+     label05:
+        $z5 = r0 instanceof java.nio.channels.UnsupportedAddressTypeException;
+
+        if $z5 == 0 goto label06;
+
+        $r5 = new java.net.SocketException;
+
+        specialinvoke $r5.<java.net.SocketException: void <init>(java.lang.String)>("Unsupported address type");
+
+        r11 = $r5;
+
+        goto label07;
+
+     label06:
+        $z6 = r0 instanceof java.nio.channels.UnresolvedAddressException;
+
+        if $z6 == 0 goto label07;
+
+        $r4 = new java.net.SocketException;
+
+        specialinvoke $r4.<java.net.SocketException: void <init>(java.lang.String)>("Unresolved address");
+
+        r11 = $r4;
+
+     label07:
+        if r11 == r0 goto label08;
+
+        virtualinvoke r11.<java.lang.Exception: java.lang.Throwable initCause(java.lang.Throwable)>(r0);
+
+     label08:
+        $z7 = r11 instanceof java.net.SocketException;
+
+        if $z7 == 0 goto label09;
+
+        $r3 = (java.net.SocketException) r11;
+
+        throw $r3;
+
+     label09:
+        $z8 = r11 instanceof java.lang.RuntimeException;
+
+        if $z8 == 0 goto label10;
+
+        $r2 = (java.lang.RuntimeException) r11;
+
+        throw $r2;
+
+     label10:
+        $r1 = new java.lang.Error;
+
+        specialinvoke $r1.<java.lang.Error: void <init>(java.lang.String,java.lang.Throwable)>("Untranslated exception", r11);
+
+        throw $r1;
+    }
+
+    static void translateException(java.lang.Exception, boolean) throws java.io.IOException
+    {
+        java.io.IOException $r2;
+        java.net.UnknownHostException $r1;
+        java.lang.Exception r0;
+        boolean $z0, z1, $z2;
+
+        r0 := @parameter0: java.lang.Exception;
+
+        z1 := @parameter1: boolean;
+
+        $z0 = r0 instanceof java.io.IOException;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = (java.io.IOException) r0;
+
+        throw $r2;
+
+     label1:
+        if z1 == 0 goto label2;
+
+        $z2 = r0 instanceof java.nio.channels.UnresolvedAddressException;
+
+        if $z2 == 0 goto label2;
+
+        $r1 = new java.net.UnknownHostException;
+
+        specialinvoke $r1.<java.net.UnknownHostException: void <init>()>();
+
+        throw $r1;
+
+     label2:
+        staticinvoke <sun.nio.ch.Net: void translateToSocketException(java.lang.Exception)>(r0);
+
+        return;
+    }
+
+    static void translateException(java.lang.Exception) throws java.io.IOException
+    {
+        java.lang.Exception r0;
+
+        r0 := @parameter0: java.lang.Exception;
+
+        staticinvoke <sun.nio.ch.Net: void translateException(java.lang.Exception,boolean)>(r0, 0);
+
+        return;
+    }
+
+    static java.net.InetSocketAddress getRevealedLocalAddress(java.net.InetSocketAddress)
+    {
+        java.net.InetAddress $r1;
+        int $i0, $i2;
+        java.lang.SecurityException $r3;
+        java.lang.String $r2;
+        java.net.InetSocketAddress r4;
+        java.lang.SecurityManager $r0;
+
+        r4 := @parameter0: java.net.InetSocketAddress;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if r4 == null goto label1;
+
+        if $r0 != null goto label2;
+
+     label1:
+        return r4;
+
+     label2:
+        $r1 = virtualinvoke r4.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $r2 = virtualinvoke $r1.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+        $i2 = (int) -1;
+
+        virtualinvoke $r0.<java.lang.SecurityManager: void checkConnect(java.lang.String,int)>($r2, $i2);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r3 := @caughtexception;
+
+        $i0 = virtualinvoke r4.<java.net.InetSocketAddress: int getPort()>();
+
+        r4 = staticinvoke <sun.nio.ch.Net: java.net.InetSocketAddress getLoopbackAddress(int)>($i0);
+
+     label5:
+        return r4;
+
+        catch java.lang.SecurityException from label2 to label3 with label4;
+    }
+
+    static java.lang.String getRevealedLocalAddressAsString(java.net.InetSocketAddress)
+    {
+        int $i0;
+        java.lang.String $r3;
+        java.net.InetSocketAddress r1, $r2;
+        java.lang.SecurityManager $r0;
+
+        r1 := @parameter0: java.net.InetSocketAddress;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r0 != null goto label1;
+
+        $r3 = virtualinvoke r1.<java.net.InetSocketAddress: java.lang.String toString()>();
+
+        goto label2;
+
+     label1:
+        $i0 = virtualinvoke r1.<java.net.InetSocketAddress: int getPort()>();
+
+        $r2 = staticinvoke <sun.nio.ch.Net: java.net.InetSocketAddress getLoopbackAddress(int)>($i0);
+
+        $r3 = virtualinvoke $r2.<java.net.InetSocketAddress: java.lang.String toString()>();
+
+     label2:
+        return $r3;
+    }
+
+    private static java.net.InetSocketAddress getLoopbackAddress(int)
+    {
+        java.net.InetAddress $r1;
+        int i0;
+        java.net.InetSocketAddress $r0;
+
+        i0 := @parameter0: int;
+
+        $r0 = new java.net.InetSocketAddress;
+
+        $r1 = staticinvoke <java.net.InetAddress: java.net.InetAddress getLoopbackAddress()>();
+
+        specialinvoke $r0.<java.net.InetSocketAddress: void <init>(java.net.InetAddress,int)>($r1, i0);
+
+        return $r0;
+    }
+
+    static java.net.Inet4Address anyInet4Address(java.net.NetworkInterface)
+    {
+        java.net.NetworkInterface r1;
+        java.lang.Object $r2;
+        sun.nio.ch.Net$2 $r0;
+        java.net.Inet4Address $r3;
+
+        r1 := @parameter0: java.net.NetworkInterface;
+
+        $r0 = new sun.nio.ch.Net$2;
+
+        specialinvoke $r0.<sun.nio.ch.Net$2: void <init>(java.net.NetworkInterface)>(r1);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r3 = (java.net.Inet4Address) $r2;
+
+        return $r3;
+    }
+
+    static int inet4AsInt(java.net.InetAddress)
+    {
+        byte[] $r2;
+        java.lang.AssertionError $r3;
+        java.net.InetAddress r0;
+        short s10, $s14;
+        byte $b0, $b1, $b4, $b7;
+        int $i2, $i3, $i5, $i6, $i8, $i9, i11, i12, i13, $i15, $i17, $i18, $i19, $i20;
+        boolean $z0;
+
+        r0 := @parameter0: java.net.InetAddress;
+
+        $z0 = r0 instanceof java.net.Inet4Address;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = virtualinvoke r0.<java.net.InetAddress: byte[] getAddress()>();
+
+        $b0 = $r2[3];
+
+        $s14 = (short) $b0;
+
+        s10 = $s14 & 255;
+
+        $b1 = $r2[2];
+
+        $i15 = (int) $b1;
+
+        $i2 = $i15 << 8;
+
+        $i17 = (int) 65280;
+
+        $i3 = $i2 & $i17;
+
+        $i18 = (int) s10;
+
+        i11 = $i18 | $i3;
+
+        $b4 = $r2[1];
+
+        $i19 = (int) $b4;
+
+        $i5 = $i19 << 16;
+
+        $i6 = $i5 & 16711680;
+
+        i12 = i11 | $i6;
+
+        $b7 = $r2[0];
+
+        $i20 = (int) $b7;
+
+        $i8 = $i20 << 24;
+
+        $i9 = $i8 & -16777216;
+
+        i13 = i12 | $i9;
+
+        return i13;
+
+     label1:
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>(java.lang.Object)>("Should not reach here");
+
+        throw $r3;
+    }
+
+    static java.net.InetAddress inet4FromInt(int)
+    {
+        byte[] r0;
+        java.lang.AssertionError $r3;
+        java.net.InetAddress $r1;
+        byte $b3, $b6, $b9, $b11;
+        int i0, $i1, $i2, $i4, $i5, $i7, $i8, $i10;
+        java.net.UnknownHostException $r2;
+
+        i0 := @parameter0: int;
+
+        r0 = newarray (byte)[4];
+
+        $i1 = i0 >>> 24;
+
+        $i2 = $i1 & 255;
+
+        $b3 = (byte) $i2;
+
+        r0[0] = $b3;
+
+        $i4 = i0 >>> 16;
+
+        $i5 = $i4 & 255;
+
+        $b6 = (byte) $i5;
+
+        r0[1] = $b6;
+
+        $i7 = i0 >>> 8;
+
+        $i8 = $i7 & 255;
+
+        $b9 = (byte) $i8;
+
+        r0[2] = $b9;
+
+        $i10 = i0 & 255;
+
+        $b11 = (byte) $i10;
+
+        r0[3] = $b11;
+
+     label1:
+        $r1 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByAddress(byte[])>(r0);
+
+     label2:
+        return $r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>(java.lang.Object)>("Should not reach here");
+
+        throw $r3;
+
+        catch java.net.UnknownHostException from label1 to label2 with label3;
+    }
+
+    static byte[] inet6AsByteArray(java.net.InetAddress)
+    {
+        byte[] $r2, r3, $r4;
+        java.lang.AssertionError $r1;
+        java.net.InetAddress r0;
+        byte $b0, $b1, $b2, $b3;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.net.InetAddress;
+
+        $z0 = r0 instanceof java.net.Inet6Address;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = virtualinvoke r0.<java.net.InetAddress: byte[] getAddress()>();
+
+        return $r4;
+
+     label1:
+        $z1 = r0 instanceof java.net.Inet4Address;
+
+        if $z1 == 0 goto label2;
+
+        $r2 = virtualinvoke r0.<java.net.InetAddress: byte[] getAddress()>();
+
+        r3 = newarray (byte)[16];
+
+        r3[10] = -1;
+
+        r3[11] = -1;
+
+        $b0 = $r2[0];
+
+        r3[12] = $b0;
+
+        $b1 = $r2[1];
+
+        r3[13] = $b1;
+
+        $b2 = $r2[2];
+
+        r3[14] = $b2;
+
+        $b3 = $r2[3];
+
+        r3[15] = $b3;
+
+        return r3;
+
+     label2:
+        $r1 = new java.lang.AssertionError;
+
+        specialinvoke $r1.<java.lang.AssertionError: void <init>(java.lang.Object)>("Should not reach here");
+
+        throw $r1;
+    }
+
+    static void setSocketOption(java.io.FileDescriptor, java.net.ProtocolFamily, java.net.SocketOption, java.lang.Object) throws java.io.IOException
+    {
+        sun.net.ExtendedSocketOptions $r2, $r22;
+        jdk.net.NetworkPermission $r31;
+        java.net.SocketOption r0, $r3, $r5, $r6, $r20, $r28;
+        jdk.net.SocketFlow $r24;
+        java.lang.Integer $r4, $r12, $r14, $r16, $r18;
+        byte $b7;
+        java.net.StandardProtocolFamily $r10;
+        boolean $z0, $z1, $z2, z3, $z4;
+        java.net.ProtocolFamily r7, $r29;
+        java.lang.AssertionError $r32, $r36;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, $i9, $i11, $i13;
+        java.lang.Boolean $r9;
+        sun.nio.ch.OptionKey $r8;
+        java.lang.IllegalArgumentException $r30, $r33, $r34, $r35;
+        java.lang.SecurityManager $r23;
+        java.io.FileDescriptor r11;
+        java.lang.Class $r1;
+        java.lang.Object r27;
+
+        r11 := @parameter0: java.io.FileDescriptor;
+
+        r7 := @parameter1: java.net.ProtocolFamily;
+
+        r0 := @parameter2: java.net.SocketOption;
+
+        r27 := @parameter3: java.lang.Object;
+
+        if r27 != null goto label01;
+
+        $r30 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r30.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid option value");
+
+        throw $r30;
+
+     label01:
+        $r1 = interfaceinvoke r0.<java.net.SocketOption: java.lang.Class type()>();
+
+        if $r1 != class "Ljdk/net/SocketFlow;" goto label03;
+
+        $r23 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r23 == null goto label02;
+
+        $r31 = new jdk.net.NetworkPermission;
+
+        specialinvoke $r31.<jdk.net.NetworkPermission: void <init>(java.lang.String)>("setOption.SO_FLOW_SLA");
+
+        virtualinvoke $r23.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r31);
+
+     label02:
+        $r24 = (jdk.net.SocketFlow) r27;
+
+        staticinvoke <jdk.net.ExtendedSocketOptions: void setFlowOption(java.io.FileDescriptor,jdk.net.SocketFlow)>(r11, $r24);
+
+        return;
+
+     label03:
+        $r2 = <sun.nio.ch.Net: sun.net.ExtendedSocketOptions extendedOptions>;
+
+        $z0 = virtualinvoke $r2.<sun.net.ExtendedSocketOptions: boolean isOptionSupported(java.net.SocketOption)>(r0);
+
+        if $z0 == 0 goto label04;
+
+        $r22 = <sun.nio.ch.Net: sun.net.ExtendedSocketOptions extendedOptions>;
+
+        virtualinvoke $r22.<sun.net.ExtendedSocketOptions: void setOption(java.io.FileDescriptor,java.net.SocketOption,java.lang.Object)>(r11, r0, r27);
+
+        return;
+
+     label04:
+        if $r1 == class "Ljava/lang/Integer;" goto label05;
+
+        if $r1 == class "Ljava/lang/Boolean;" goto label05;
+
+        $r32 = new java.lang.AssertionError;
+
+        specialinvoke $r32.<java.lang.AssertionError: void <init>(java.lang.Object)>("Should not reach here");
+
+        throw $r32;
+
+     label05:
+        $r3 = <java.net.StandardSocketOptions: java.net.SocketOption SO_RCVBUF>;
+
+        if r0 == $r3 goto label06;
+
+        $r20 = <java.net.StandardSocketOptions: java.net.SocketOption SO_SNDBUF>;
+
+        if r0 != $r20 goto label07;
+
+     label06:
+        $r4 = (java.lang.Integer) r27;
+
+        $i0 = virtualinvoke $r4.<java.lang.Integer: int intValue()>();
+
+        if $i0 >= 0 goto label07;
+
+        $r33 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r33.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid send/receive buffer size");
+
+        throw $r33;
+
+     label07:
+        $r5 = <java.net.StandardSocketOptions: java.net.SocketOption SO_LINGER>;
+
+        if r0 != $r5 goto label09;
+
+        $r18 = (java.lang.Integer) r27;
+
+        $i5 = virtualinvoke $r18.<java.lang.Integer: int intValue()>();
+
+        if $i5 >= 0 goto label08;
+
+        $i9 = (int) -1;
+
+        r27 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i9);
+
+     label08:
+        $i11 = (int) 65535;
+
+        if $i5 <= $i11 goto label09;
+
+        $i13 = (int) 65535;
+
+        r27 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i13);
+
+     label09:
+        $r28 = <java.net.StandardSocketOptions: java.net.SocketOption IP_TOS>;
+
+        if r0 != $r28 goto label11;
+
+        $r16 = (java.lang.Integer) r27;
+
+        $i4 = virtualinvoke $r16.<java.lang.Integer: int intValue()>();
+
+        if $i4 < 0 goto label10;
+
+        if $i4 <= 255 goto label11;
+
+     label10:
+        $r34 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r34.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid IP_TOS value");
+
+        throw $r34;
+
+     label11:
+        $r6 = <java.net.StandardSocketOptions: java.net.SocketOption IP_MULTICAST_TTL>;
+
+        if r0 != $r6 goto label13;
+
+        $r14 = (java.lang.Integer) r27;
+
+        $i3 = virtualinvoke $r14.<java.lang.Integer: int intValue()>();
+
+        if $i3 < 0 goto label12;
+
+        if $i3 <= 255 goto label13;
+
+     label12:
+        $r35 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r35.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid TTL/hop value");
+
+        throw $r35;
+
+     label13:
+        $r8 = staticinvoke <sun.nio.ch.SocketOptionRegistry: sun.nio.ch.OptionKey findOption(java.net.SocketOption,java.net.ProtocolFamily)>(r0, r7);
+
+        if $r8 != null goto label14;
+
+        $r36 = new java.lang.AssertionError;
+
+        specialinvoke $r36.<java.lang.AssertionError: void <init>(java.lang.Object)>("Option not found");
+
+        throw $r36;
+
+     label14:
+        if $r1 != class "Ljava/lang/Integer;" goto label15;
+
+        $r12 = (java.lang.Integer) r27;
+
+        i6 = virtualinvoke $r12.<java.lang.Integer: int intValue()>();
+
+        goto label18;
+
+     label15:
+        $r9 = (java.lang.Boolean) r27;
+
+        $z1 = virtualinvoke $r9.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z1 == 0 goto label16;
+
+        $b7 = 1;
+
+        goto label17;
+
+     label16:
+        $b7 = 0;
+
+     label17:
+        i6 = $b7;
+
+     label18:
+        $r29 = <sun.nio.ch.Net: java.net.ProtocolFamily UNSPEC>;
+
+        if r7 != $r29 goto label19;
+
+        $z2 = 1;
+
+        goto label20;
+
+     label19:
+        $z2 = 0;
+
+     label20:
+        z3 = $z2;
+
+        $r10 = <java.net.StandardProtocolFamily: java.net.StandardProtocolFamily INET6>;
+
+        if r7 != $r10 goto label21;
+
+        $z4 = 1;
+
+        goto label22;
+
+     label21:
+        $z4 = 0;
+
+     label22:
+        $i1 = virtualinvoke $r8.<sun.nio.ch.OptionKey: int level()>();
+
+        $i2 = virtualinvoke $r8.<sun.nio.ch.OptionKey: int name()>();
+
+        staticinvoke <sun.nio.ch.Net: void setIntOption0(java.io.FileDescriptor,boolean,int,int,int,boolean)>(r11, z3, $i1, $i2, i6, $z4);
+
+        return;
+    }
+
+    static java.lang.Object getSocketOption(java.io.FileDescriptor, java.net.ProtocolFamily, java.net.SocketOption) throws java.io.IOException
+    {
+        sun.net.ExtendedSocketOptions $r2, $r10;
+        jdk.net.NetworkPermission $r14;
+        java.net.SocketOption r0;
+        java.net.ProtocolFamily r3, $r5;
+        java.lang.AssertionError $r8, $r9;
+        jdk.net.SocketFlow $r13;
+        java.lang.Integer $r7;
+        int $i0, $i1, $i2;
+        java.lang.Boolean $r15;
+        sun.nio.ch.OptionKey $r4;
+        boolean $z0, $z1;
+        java.lang.SecurityManager $r12;
+        java.io.FileDescriptor r6;
+        java.lang.Class $r1;
+        java.lang.Object $r11;
+
+        r6 := @parameter0: java.io.FileDescriptor;
+
+        r3 := @parameter1: java.net.ProtocolFamily;
+
+        r0 := @parameter2: java.net.SocketOption;
+
+        $r1 = interfaceinvoke r0.<java.net.SocketOption: java.lang.Class type()>();
+
+        if $r1 != class "Ljdk/net/SocketFlow;" goto label02;
+
+        $r12 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r12 == null goto label01;
+
+        $r14 = new jdk.net.NetworkPermission;
+
+        specialinvoke $r14.<jdk.net.NetworkPermission: void <init>(java.lang.String)>("getOption.SO_FLOW_SLA");
+
+        virtualinvoke $r12.<java.lang.SecurityManager: void checkPermission(java.security.Permission)>($r14);
+
+     label01:
+        $r13 = staticinvoke <jdk.net.SocketFlow: jdk.net.SocketFlow create()>();
+
+        staticinvoke <jdk.net.ExtendedSocketOptions: int getFlowOption(java.io.FileDescriptor,jdk.net.SocketFlow)>(r6, $r13);
+
+        return $r13;
+
+     label02:
+        $r2 = <sun.nio.ch.Net: sun.net.ExtendedSocketOptions extendedOptions>;
+
+        $z0 = virtualinvoke $r2.<sun.net.ExtendedSocketOptions: boolean isOptionSupported(java.net.SocketOption)>(r0);
+
+        if $z0 == 0 goto label03;
+
+        $r10 = <sun.nio.ch.Net: sun.net.ExtendedSocketOptions extendedOptions>;
+
+        $r11 = virtualinvoke $r10.<sun.net.ExtendedSocketOptions: java.lang.Object getOption(java.io.FileDescriptor,java.net.SocketOption)>(r6, r0);
+
+        return $r11;
+
+     label03:
+        if $r1 == class "Ljava/lang/Integer;" goto label04;
+
+        if $r1 == class "Ljava/lang/Boolean;" goto label04;
+
+        $r9 = new java.lang.AssertionError;
+
+        specialinvoke $r9.<java.lang.AssertionError: void <init>(java.lang.Object)>("Should not reach here");
+
+        throw $r9;
+
+     label04:
+        $r4 = staticinvoke <sun.nio.ch.SocketOptionRegistry: sun.nio.ch.OptionKey findOption(java.net.SocketOption,java.net.ProtocolFamily)>(r0, r3);
+
+        if $r4 != null goto label05;
+
+        $r8 = new java.lang.AssertionError;
+
+        specialinvoke $r8.<java.lang.AssertionError: void <init>(java.lang.Object)>("Option not found");
+
+        throw $r8;
+
+     label05:
+        $r5 = <sun.nio.ch.Net: java.net.ProtocolFamily UNSPEC>;
+
+        if r3 != $r5 goto label06;
+
+        $z1 = 1;
+
+        goto label07;
+
+     label06:
+        $z1 = 0;
+
+     label07:
+        $i0 = virtualinvoke $r4.<sun.nio.ch.OptionKey: int level()>();
+
+        $i1 = virtualinvoke $r4.<sun.nio.ch.OptionKey: int name()>();
+
+        $i2 = staticinvoke <sun.nio.ch.Net: int getIntOption0(java.io.FileDescriptor,boolean,int,int)>(r6, $z1, $i0, $i1);
+
+        if $r1 != class "Ljava/lang/Integer;" goto label08;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        return $r7;
+
+     label08:
+        if $i2 != 0 goto label09;
+
+        $r15 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        goto label10;
+
+     label09:
+        $r15 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+     label10:
+        return $r15;
+    }
+
+    public static boolean isFastTcpLoopbackRequested()
+    {
+        java.lang.Object $r1;
+        java.lang.String r2;
+        sun.nio.ch.Net$3 $r0;
+        boolean $z0, $z1;
+
+        $r0 = new sun.nio.ch.Net$3;
+
+        specialinvoke $r0.<sun.nio.ch.Net$3: void <init>()>();
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r2 = (java.lang.String) $r1;
+
+        $z0 = virtualinvoke r2.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = staticinvoke <java.lang.Boolean: boolean parseBoolean(java.lang.String)>(r2);
+
+     label2:
+        return $z1;
+    }
+
+    private static native boolean isIPv6Available0();
+
+    private static native int isExclusiveBindAvailable();
+
+    private static native boolean canIPv6SocketJoinIPv4Group0();
+
+    private static native boolean canJoin6WithIPv4Group0();
+
+    static java.io.FileDescriptor socket(boolean) throws java.io.IOException
+    {
+        boolean z0;
+        java.net.ProtocolFamily $r0;
+        java.io.FileDescriptor $r1;
+
+        z0 := @parameter0: boolean;
+
+        $r0 = <sun.nio.ch.Net: java.net.ProtocolFamily UNSPEC>;
+
+        $r1 = staticinvoke <sun.nio.ch.Net: java.io.FileDescriptor socket(java.net.ProtocolFamily,boolean)>($r0, z0);
+
+        return $r1;
+    }
+
+    static java.io.FileDescriptor socket(java.net.ProtocolFamily, boolean) throws java.io.IOException
+    {
+        java.net.ProtocolFamily r0;
+        java.io.FileDescriptor $r2;
+        int $i0;
+        java.net.StandardProtocolFamily $r1;
+        boolean $z0, z1, $z2, $z3;
+
+        r0 := @parameter0: java.net.ProtocolFamily;
+
+        z1 := @parameter1: boolean;
+
+        $z0 = staticinvoke <sun.nio.ch.Net: boolean isIPv6Available()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = <java.net.StandardProtocolFamily: java.net.StandardProtocolFamily INET>;
+
+        if r0 == $r1 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        $z3 = <sun.nio.ch.Net: boolean fastLoopback>;
+
+        $i0 = staticinvoke <sun.nio.ch.Net: int socket0(boolean,boolean,boolean,boolean)>($z2, z1, 0, $z3);
+
+        $r2 = staticinvoke <sun.nio.ch.IOUtil: java.io.FileDescriptor newFD(int)>($i0);
+
+        return $r2;
+    }
+
+    static java.io.FileDescriptor serverSocket(boolean)
+    {
+        java.io.FileDescriptor $r0;
+        int $i0;
+        boolean $z0, z1, $z2;
+
+        z1 := @parameter0: boolean;
+
+        $z0 = staticinvoke <sun.nio.ch.Net: boolean isIPv6Available()>();
+
+        $z2 = <sun.nio.ch.Net: boolean fastLoopback>;
+
+        $i0 = staticinvoke <sun.nio.ch.Net: int socket0(boolean,boolean,boolean,boolean)>($z0, z1, 1, $z2);
+
+        $r0 = staticinvoke <sun.nio.ch.IOUtil: java.io.FileDescriptor newFD(int)>($i0);
+
+        return $r0;
+    }
+
+    private static native int socket0(boolean, boolean, boolean, boolean);
+
+    public static void bind(java.io.FileDescriptor, java.net.InetAddress, int) throws java.io.IOException
+    {
+        java.net.InetAddress r1;
+        java.io.FileDescriptor r0;
+        java.net.ProtocolFamily $r2;
+        int i0;
+
+        r0 := @parameter0: java.io.FileDescriptor;
+
+        r1 := @parameter1: java.net.InetAddress;
+
+        i0 := @parameter2: int;
+
+        $r2 = <sun.nio.ch.Net: java.net.ProtocolFamily UNSPEC>;
+
+        staticinvoke <sun.nio.ch.Net: void bind(java.net.ProtocolFamily,java.io.FileDescriptor,java.net.InetAddress,int)>($r2, r0, r1, i0);
+
+        return;
+    }
+
+    static void bind(java.net.ProtocolFamily, java.io.FileDescriptor, java.net.InetAddress, int) throws java.io.IOException
+    {
+        java.net.ProtocolFamily r2;
+        java.net.InetAddress r1;
+        java.io.FileDescriptor r0;
+        int i0;
+        java.net.StandardProtocolFamily $r3;
+        boolean $z0, $z1, $z2;
+
+        r2 := @parameter0: java.net.ProtocolFamily;
+
+        r0 := @parameter1: java.io.FileDescriptor;
+
+        r1 := @parameter2: java.net.InetAddress;
+
+        i0 := @parameter3: int;
+
+        $z0 = staticinvoke <sun.nio.ch.Net: boolean isIPv6Available()>();
+
+        if $z0 == 0 goto label1;
+
+        $r3 = <java.net.StandardProtocolFamily: java.net.StandardProtocolFamily INET>;
+
+        if r2 == $r3 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        $z2 = <sun.nio.ch.Net: boolean exclusiveBind>;
+
+        staticinvoke <sun.nio.ch.Net: void bind0(java.io.FileDescriptor,boolean,boolean,java.net.InetAddress,int)>(r0, $z1, $z2, r1, i0);
+
+        return;
+    }
+
+    private static native void bind0(java.io.FileDescriptor, boolean, boolean, java.net.InetAddress, int) throws java.io.IOException;
+
+    static native void listen(java.io.FileDescriptor, int) throws java.io.IOException;
+
+    static int connect(java.io.FileDescriptor, java.net.InetAddress, int) throws java.io.IOException
+    {
+        java.net.InetAddress r1;
+        java.io.FileDescriptor r0;
+        java.net.ProtocolFamily $r2;
+        int i0, $i1;
+
+        r0 := @parameter0: java.io.FileDescriptor;
+
+        r1 := @parameter1: java.net.InetAddress;
+
+        i0 := @parameter2: int;
+
+        $r2 = <sun.nio.ch.Net: java.net.ProtocolFamily UNSPEC>;
+
+        $i1 = staticinvoke <sun.nio.ch.Net: int connect(java.net.ProtocolFamily,java.io.FileDescriptor,java.net.InetAddress,int)>($r2, r0, r1, i0);
+
+        return $i1;
+    }
+
+    static int connect(java.net.ProtocolFamily, java.io.FileDescriptor, java.net.InetAddress, int) throws java.io.IOException
+    {
+        java.net.ProtocolFamily r2;
+        java.net.InetAddress r1;
+        java.io.FileDescriptor r0;
+        int i0, $i1;
+        java.net.StandardProtocolFamily $r3;
+        boolean $z0, $z1;
+
+        r2 := @parameter0: java.net.ProtocolFamily;
+
+        r0 := @parameter1: java.io.FileDescriptor;
+
+        r1 := @parameter2: java.net.InetAddress;
+
+        i0 := @parameter3: int;
+
+        $z0 = staticinvoke <sun.nio.ch.Net: boolean isIPv6Available()>();
+
+        if $z0 == 0 goto label1;
+
+        $r3 = <java.net.StandardProtocolFamily: java.net.StandardProtocolFamily INET>;
+
+        if r2 == $r3 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        $i1 = staticinvoke <sun.nio.ch.Net: int connect0(boolean,java.io.FileDescriptor,java.net.InetAddress,int)>($z1, r0, r1, i0);
+
+        return $i1;
+    }
+
+    private static native int connect0(boolean, java.io.FileDescriptor, java.net.InetAddress, int) throws java.io.IOException;
+
+    static native void shutdown(java.io.FileDescriptor, int) throws java.io.IOException;
+
+    private static native int localPort(java.io.FileDescriptor) throws java.io.IOException;
+
+    private static native java.net.InetAddress localInetAddress(java.io.FileDescriptor) throws java.io.IOException;
+
+    public static java.net.InetSocketAddress localAddress(java.io.FileDescriptor) throws java.io.IOException
+    {
+        java.net.InetAddress $r2;
+        java.io.FileDescriptor r1;
+        int $i0;
+        java.net.InetSocketAddress $r0;
+
+        r1 := @parameter0: java.io.FileDescriptor;
+
+        $r0 = new java.net.InetSocketAddress;
+
+        $r2 = staticinvoke <sun.nio.ch.Net: java.net.InetAddress localInetAddress(java.io.FileDescriptor)>(r1);
+
+        $i0 = staticinvoke <sun.nio.ch.Net: int localPort(java.io.FileDescriptor)>(r1);
+
+        specialinvoke $r0.<java.net.InetSocketAddress: void <init>(java.net.InetAddress,int)>($r2, $i0);
+
+        return $r0;
+    }
+
+    private static native int remotePort(java.io.FileDescriptor) throws java.io.IOException;
+
+    private static native java.net.InetAddress remoteInetAddress(java.io.FileDescriptor) throws java.io.IOException;
+
+    static java.net.InetSocketAddress remoteAddress(java.io.FileDescriptor) throws java.io.IOException
+    {
+        java.net.InetAddress $r2;
+        java.io.FileDescriptor r1;
+        int $i0;
+        java.net.InetSocketAddress $r0;
+
+        r1 := @parameter0: java.io.FileDescriptor;
+
+        $r0 = new java.net.InetSocketAddress;
+
+        $r2 = staticinvoke <sun.nio.ch.Net: java.net.InetAddress remoteInetAddress(java.io.FileDescriptor)>(r1);
+
+        $i0 = staticinvoke <sun.nio.ch.Net: int remotePort(java.io.FileDescriptor)>(r1);
+
+        specialinvoke $r0.<java.net.InetSocketAddress: void <init>(java.net.InetAddress,int)>($r2, $i0);
+
+        return $r0;
+    }
+
+    private static native int getIntOption0(java.io.FileDescriptor, boolean, int, int) throws java.io.IOException;
+
+    private static native void setIntOption0(java.io.FileDescriptor, boolean, int, int, int, boolean) throws java.io.IOException;
+
+    static native int poll(java.io.FileDescriptor, int, long) throws java.io.IOException;
+
+    static int join4(java.io.FileDescriptor, int, int, int) throws java.io.IOException
+    {
+        java.io.FileDescriptor r0;
+        int i0, i1, i2, $i3;
+
+        r0 := @parameter0: java.io.FileDescriptor;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        $i3 = staticinvoke <sun.nio.ch.Net: int joinOrDrop4(boolean,java.io.FileDescriptor,int,int,int)>(1, r0, i0, i1, i2);
+
+        return $i3;
+    }
+
+    static void drop4(java.io.FileDescriptor, int, int, int) throws java.io.IOException
+    {
+        java.io.FileDescriptor r0;
+        int i0, i1, i2;
+
+        r0 := @parameter0: java.io.FileDescriptor;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        staticinvoke <sun.nio.ch.Net: int joinOrDrop4(boolean,java.io.FileDescriptor,int,int,int)>(0, r0, i0, i1, i2);
+
+        return;
+    }
+
+    private static native int joinOrDrop4(boolean, java.io.FileDescriptor, int, int, int) throws java.io.IOException;
+
+    static int block4(java.io.FileDescriptor, int, int, int) throws java.io.IOException
+    {
+        java.io.FileDescriptor r0;
+        int i0, i1, i2, $i3;
+
+        r0 := @parameter0: java.io.FileDescriptor;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        $i3 = staticinvoke <sun.nio.ch.Net: int blockOrUnblock4(boolean,java.io.FileDescriptor,int,int,int)>(1, r0, i0, i1, i2);
+
+        return $i3;
+    }
+
+    static void unblock4(java.io.FileDescriptor, int, int, int) throws java.io.IOException
+    {
+        java.io.FileDescriptor r0;
+        int i0, i1, i2;
+
+        r0 := @parameter0: java.io.FileDescriptor;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        staticinvoke <sun.nio.ch.Net: int blockOrUnblock4(boolean,java.io.FileDescriptor,int,int,int)>(0, r0, i0, i1, i2);
+
+        return;
+    }
+
+    private static native int blockOrUnblock4(boolean, java.io.FileDescriptor, int, int, int) throws java.io.IOException;
+
+    static int join6(java.io.FileDescriptor, byte[], int, byte[]) throws java.io.IOException
+    {
+        byte[] r1, r2;
+        java.io.FileDescriptor r0;
+        int i0, $i1;
+
+        r0 := @parameter0: java.io.FileDescriptor;
+
+        r1 := @parameter1: byte[];
+
+        i0 := @parameter2: int;
+
+        r2 := @parameter3: byte[];
+
+        $i1 = staticinvoke <sun.nio.ch.Net: int joinOrDrop6(boolean,java.io.FileDescriptor,byte[],int,byte[])>(1, r0, r1, i0, r2);
+
+        return $i1;
+    }
+
+    static void drop6(java.io.FileDescriptor, byte[], int, byte[]) throws java.io.IOException
+    {
+        byte[] r1, r2;
+        java.io.FileDescriptor r0;
+        int i0;
+
+        r0 := @parameter0: java.io.FileDescriptor;
+
+        r1 := @parameter1: byte[];
+
+        i0 := @parameter2: int;
+
+        r2 := @parameter3: byte[];
+
+        staticinvoke <sun.nio.ch.Net: int joinOrDrop6(boolean,java.io.FileDescriptor,byte[],int,byte[])>(0, r0, r1, i0, r2);
+
+        return;
+    }
+
+    private static native int joinOrDrop6(boolean, java.io.FileDescriptor, byte[], int, byte[]) throws java.io.IOException;
+
+    static int block6(java.io.FileDescriptor, byte[], int, byte[]) throws java.io.IOException
+    {
+        byte[] r1, r2;
+        java.io.FileDescriptor r0;
+        int i0, $i1;
+
+        r0 := @parameter0: java.io.FileDescriptor;
+
+        r1 := @parameter1: byte[];
+
+        i0 := @parameter2: int;
+
+        r2 := @parameter3: byte[];
+
+        $i1 = staticinvoke <sun.nio.ch.Net: int blockOrUnblock6(boolean,java.io.FileDescriptor,byte[],int,byte[])>(1, r0, r1, i0, r2);
+
+        return $i1;
+    }
+
+    static void unblock6(java.io.FileDescriptor, byte[], int, byte[]) throws java.io.IOException
+    {
+        byte[] r1, r2;
+        java.io.FileDescriptor r0;
+        int i0;
+
+        r0 := @parameter0: java.io.FileDescriptor;
+
+        r1 := @parameter1: byte[];
+
+        i0 := @parameter2: int;
+
+        r2 := @parameter3: byte[];
+
+        staticinvoke <sun.nio.ch.Net: int blockOrUnblock6(boolean,java.io.FileDescriptor,byte[],int,byte[])>(0, r0, r1, i0, r2);
+
+        return;
+    }
+
+    static native int blockOrUnblock6(boolean, java.io.FileDescriptor, byte[], int, byte[]) throws java.io.IOException;
+
+    static native void setInterface4(java.io.FileDescriptor, int) throws java.io.IOException;
+
+    static native int getInterface4(java.io.FileDescriptor) throws java.io.IOException;
+
+    static native void setInterface6(java.io.FileDescriptor, int) throws java.io.IOException;
+
+    static native int getInterface6(java.io.FileDescriptor) throws java.io.IOException;
+
+    private static native void initIDs();
+
+    static native short pollinValue();
+
+    static native short polloutValue();
+
+    static native short pollerrValue();
+
+    static native short pollhupValue();
+
+    static native short pollnvalValue();
+
+    static native short pollconnValue();
+
+    static void <clinit>()
+    {
+        sun.net.ExtendedSocketOptions $r1;
+        sun.nio.ch.Net$4 $r2;
+        short $s0, $s1, $s2, $s3, $s4, $s5;
+        int $i6, $i7;
+        java.lang.Object $r3;
+        java.lang.String r4;
+        sun.nio.ch.Net$1 $r0;
+        boolean $z0, $z1;
+
+        <sun.nio.ch.Net: int SHUT_RDWR> = 2;
+
+        <sun.nio.ch.Net: int SHUT_WR> = 1;
+
+        <sun.nio.ch.Net: int SHUT_RD> = 0;
+
+        $r0 = new sun.nio.ch.Net$1;
+
+        specialinvoke $r0.<sun.nio.ch.Net$1: void <init>()>();
+
+        <sun.nio.ch.Net: java.net.ProtocolFamily UNSPEC> = $r0;
+
+        <sun.nio.ch.Net: boolean checkedIPv6> = 0;
+
+        $r1 = staticinvoke <sun.net.ExtendedSocketOptions: sun.net.ExtendedSocketOptions getInstance()>();
+
+        <sun.nio.ch.Net: sun.net.ExtendedSocketOptions extendedOptions> = $r1;
+
+        staticinvoke <sun.nio.ch.IOUtil: void load()>();
+
+        staticinvoke <sun.nio.ch.Net: void initIDs()>();
+
+        $s0 = staticinvoke <sun.nio.ch.Net: short pollinValue()>();
+
+        <sun.nio.ch.Net: short POLLIN> = $s0;
+
+        $s1 = staticinvoke <sun.nio.ch.Net: short polloutValue()>();
+
+        <sun.nio.ch.Net: short POLLOUT> = $s1;
+
+        $s2 = staticinvoke <sun.nio.ch.Net: short pollerrValue()>();
+
+        <sun.nio.ch.Net: short POLLERR> = $s2;
+
+        $s3 = staticinvoke <sun.nio.ch.Net: short pollhupValue()>();
+
+        <sun.nio.ch.Net: short POLLHUP> = $s3;
+
+        $s4 = staticinvoke <sun.nio.ch.Net: short pollnvalValue()>();
+
+        <sun.nio.ch.Net: short POLLNVAL> = $s4;
+
+        $s5 = staticinvoke <sun.nio.ch.Net: short pollconnValue()>();
+
+        <sun.nio.ch.Net: short POLLCONN> = $s5;
+
+        $i6 = staticinvoke <sun.nio.ch.Net: int isExclusiveBindAvailable()>();
+
+        if $i6 < 0 goto label6;
+
+        $r2 = new sun.nio.ch.Net$4;
+
+        specialinvoke $r2.<sun.nio.ch.Net$4: void <init>()>();
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        r4 = (java.lang.String) $r3;
+
+        if r4 == null goto label3;
+
+        $i7 = virtualinvoke r4.<java.lang.String: int length()>();
+
+        if $i7 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = staticinvoke <java.lang.Boolean: boolean parseBoolean(java.lang.String)>(r4);
+
+     label2:
+        <sun.nio.ch.Net: boolean exclusiveBind> = $z1;
+
+        goto label5;
+
+     label3:
+        if $i6 != 1 goto label4;
+
+        <sun.nio.ch.Net: boolean exclusiveBind> = 1;
+
+        goto label5;
+
+     label4:
+        <sun.nio.ch.Net: boolean exclusiveBind> = 0;
+
+     label5:
+        goto label7;
+
+     label6:
+        <sun.nio.ch.Net: boolean exclusiveBind> = 0;
+
+     label7:
+        $z0 = staticinvoke <sun.nio.ch.Net: boolean isFastTcpLoopbackRequested()>();
+
+        <sun.nio.ch.Net: boolean fastLoopback> = $z0;
+
+        return;
+    }
+}

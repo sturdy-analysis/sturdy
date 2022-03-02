@@ -1,0 +1,2961 @@
+public class com.sun.xml.internal.ws.client.WSServiceDelegate extends com.sun.xml.internal.ws.api.WSService
+{
+    private final java.util.Map ports;
+    private com.sun.xml.internal.ws.client.HandlerConfigurator handlerConfigurator;
+    private final java.lang.Class serviceClass;
+    private final com.sun.xml.internal.ws.binding.WebServiceFeatureList features;
+    private final javax.xml.namespace.QName serviceName;
+    private final java.util.Map seiContext;
+    private volatile java.util.concurrent.Executor executor;
+    private com.sun.xml.internal.ws.api.model.wsdl.WSDLService wsdlService;
+    private final com.sun.xml.internal.ws.api.server.Container container;
+    final com.sun.xml.internal.ws.api.client.ServiceInterceptor serviceInterceptor;
+    private java.net.URL wsdlURL;
+    protected static final javax.xml.ws.WebServiceFeature[] EMPTY_FEATURES;
+
+    protected java.util.Map getQNameToPortInfoMap()
+    {
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        java.util.Map $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        $r1 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.util.Map ports>;
+
+        return $r1;
+    }
+
+    public transient void <init>(java.net.URL, javax.xml.namespace.QName, java.lang.Class, javax.xml.ws.WebServiceFeature[])
+    {
+        com.sun.xml.internal.ws.binding.WebServiceFeatureList $r4;
+        java.net.URL r1;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        java.lang.Class r3;
+        javax.xml.ws.WebServiceFeature[] r5;
+        javax.xml.namespace.QName r2;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r1 := @parameter0: java.net.URL;
+
+        r2 := @parameter1: javax.xml.namespace.QName;
+
+        r3 := @parameter2: java.lang.Class;
+
+        r5 := @parameter3: javax.xml.ws.WebServiceFeature[];
+
+        $r4 = new com.sun.xml.internal.ws.binding.WebServiceFeatureList;
+
+        specialinvoke $r4.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: void <init>(javax.xml.ws.WebServiceFeature[])>(r5);
+
+        specialinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: void <init>(java.net.URL,javax.xml.namespace.QName,java.lang.Class,com.sun.xml.internal.ws.binding.WebServiceFeatureList)>(r1, r2, r3, $r4);
+
+        return;
+    }
+
+    protected void <init>(java.net.URL, javax.xml.namespace.QName, java.lang.Class, com.sun.xml.internal.ws.binding.WebServiceFeatureList)
+    {
+        com.sun.xml.internal.ws.binding.WebServiceFeatureList r5;
+        java.net.URL r1;
+        javax.xml.transform.stream.StreamSource $r6;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        java.lang.Class r4;
+        java.lang.String $r2;
+        javax.xml.namespace.QName r3;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r1 := @parameter0: java.net.URL;
+
+        r3 := @parameter1: javax.xml.namespace.QName;
+
+        r4 := @parameter2: java.lang.Class;
+
+        r5 := @parameter3: com.sun.xml.internal.ws.binding.WebServiceFeatureList;
+
+        if r1 != null goto label1;
+
+        $r6 = null;
+
+        goto label2;
+
+     label1:
+        $r6 = new javax.xml.transform.stream.StreamSource;
+
+        $r2 = virtualinvoke r1.<java.net.URL: java.lang.String toExternalForm()>();
+
+        specialinvoke $r6.<javax.xml.transform.stream.StreamSource: void <init>(java.lang.String)>($r2);
+
+     label2:
+        specialinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: void <init>(javax.xml.transform.Source,javax.xml.namespace.QName,java.lang.Class,com.sun.xml.internal.ws.binding.WebServiceFeatureList)>($r6, r3, r4, r5);
+
+        r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.net.URL wsdlURL> = r1;
+
+        return;
+    }
+
+    public transient void <init>(javax.xml.transform.Source, javax.xml.namespace.QName, java.lang.Class, javax.xml.ws.WebServiceFeature[])
+    {
+        com.sun.xml.internal.ws.binding.WebServiceFeatureList $r4;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        java.lang.Class r3;
+        javax.xml.ws.WebServiceFeature[] r5;
+        javax.xml.transform.Source r1;
+        javax.xml.namespace.QName r2;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r1 := @parameter0: javax.xml.transform.Source;
+
+        r2 := @parameter1: javax.xml.namespace.QName;
+
+        r3 := @parameter2: java.lang.Class;
+
+        r5 := @parameter3: javax.xml.ws.WebServiceFeature[];
+
+        $r4 = new com.sun.xml.internal.ws.binding.WebServiceFeatureList;
+
+        specialinvoke $r4.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: void <init>(javax.xml.ws.WebServiceFeature[])>(r5);
+
+        specialinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: void <init>(javax.xml.transform.Source,javax.xml.namespace.QName,java.lang.Class,com.sun.xml.internal.ws.binding.WebServiceFeatureList)>(r1, r2, r3, $r4);
+
+        return;
+    }
+
+    protected void <init>(javax.xml.transform.Source, javax.xml.namespace.QName, java.lang.Class, com.sun.xml.internal.ws.binding.WebServiceFeatureList)
+    {
+        com.sun.xml.internal.ws.binding.WebServiceFeatureList r4;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        java.lang.Class r3;
+        javax.xml.transform.Source r1;
+        javax.xml.namespace.QName r2;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r1 := @parameter0: javax.xml.transform.Source;
+
+        r2 := @parameter1: javax.xml.namespace.QName;
+
+        r3 := @parameter2: java.lang.Class;
+
+        r4 := @parameter3: com.sun.xml.internal.ws.binding.WebServiceFeatureList;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: void <init>(javax.xml.transform.Source,com.sun.xml.internal.ws.api.model.wsdl.WSDLService,javax.xml.namespace.QName,java.lang.Class,com.sun.xml.internal.ws.binding.WebServiceFeatureList)>(r1, null, r2, r3, r4);
+
+        return;
+    }
+
+    public transient void <init>(javax.xml.transform.Source, com.sun.xml.internal.ws.api.model.wsdl.WSDLService, javax.xml.namespace.QName, java.lang.Class, javax.xml.ws.WebServiceFeature[])
+    {
+        com.sun.xml.internal.ws.binding.WebServiceFeatureList $r5;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLService r2;
+        java.lang.Class r4;
+        javax.xml.ws.WebServiceFeature[] r6;
+        javax.xml.transform.Source r1;
+        javax.xml.namespace.QName r3;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r1 := @parameter0: javax.xml.transform.Source;
+
+        r2 := @parameter1: com.sun.xml.internal.ws.api.model.wsdl.WSDLService;
+
+        r3 := @parameter2: javax.xml.namespace.QName;
+
+        r4 := @parameter3: java.lang.Class;
+
+        r6 := @parameter4: javax.xml.ws.WebServiceFeature[];
+
+        $r5 = new com.sun.xml.internal.ws.binding.WebServiceFeatureList;
+
+        specialinvoke $r5.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: void <init>(javax.xml.ws.WebServiceFeature[])>(r6);
+
+        specialinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: void <init>(javax.xml.transform.Source,com.sun.xml.internal.ws.api.model.wsdl.WSDLService,javax.xml.namespace.QName,java.lang.Class,com.sun.xml.internal.ws.binding.WebServiceFeatureList)>(r1, r2, r3, r4, $r5);
+
+        return;
+    }
+
+    public void <init>(javax.xml.transform.Source, com.sun.xml.internal.ws.api.model.wsdl.WSDLService, javax.xml.namespace.QName, java.lang.Class, com.sun.xml.internal.ws.binding.WebServiceFeatureList)
+    {
+        com.sun.xml.internal.ws.api.server.ContainerResolver $r11;
+        java.lang.Thread $r15;
+        java.util.Map $r26, $r38, $r43;
+        java.util.Set $r44, $r61, $r63, $r69, $r71;
+        javax.jws.HandlerChain r95;
+        com.sun.xml.internal.ws.api.ComponentFeature $r75, r90;
+        java.lang.StringBuilder $r45;
+        javax.xml.namespace.QName r4, $r27, $r32, $r39, $r42;
+        java.lang.ClassLoader $r16;
+        javax.xml.transform.stream.StreamSource $r52;
+        javax.xml.transform.Source r82;
+        com.sun.xml.internal.ws.api.WSService$InitParams r84;
+        com.sun.xml.internal.ws.api.ComponentFeature$Target $r59, $r67;
+        java.lang.String $r29, $r30, $r46, $r49, $r50, $r51, $r77, $r80, $r81;
+        com.sun.xml.internal.ws.api.server.Container $r10, $r12, $r18, $r60, $r68, $r85, r86;
+        javax.xml.ws.WebServiceException $r41, $r76, $r79;
+        com.sun.xml.internal.ws.binding.WebServiceFeatureList r5, $r13, $r87;
+        com.sun.xml.internal.ws.client.HandlerConfigurator$HandlerResolverImpl $r2;
+        com.sun.xml.internal.ws.api.client.ServiceInterceptor[] $r53;
+        com.sun.xml.internal.ws.api.ComponentsFeature $r89;
+        java.net.URL $r93;
+        int[] $r58, $r66;
+        javax.xml.ws.WebServiceClient r92;
+        boolean $z0, $z1, $z2;
+        java.lang.ThreadLocal $r6, $r8;
+        com.sun.xml.internal.ws.client.HandlerConfigurator$AnnotationConfigurator $r24;
+        java.util.List $r54;
+        com.sun.xml.internal.ws.client.ClientContainer $r74;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLService $r33, r83;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLPort r37, r94;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLModel $r31;
+        com.sun.xml.internal.ws.api.Component $r62, $r64, $r70, $r72;
+        java.util.HashMap $r1, $r3;
+        java.lang.Iterable $r20, $r34;
+        com.sun.xml.internal.ws.client.PortInfo $r28, $r40;
+        int $i0, $i1, $i2, $i3;
+        javax.xml.ws.WebServiceFeature $r14, $r88;
+        java.util.Iterator $r21, $r35, $r55;
+        java.net.MalformedURLException $r78;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        com.sun.xml.internal.ws.api.client.ServiceInterceptor $r17, $r56, r91;
+        java.lang.IllegalArgumentException $r65, $r73;
+        com.sun.xml.internal.ws.client.WSServiceDelegate$1 $r47;
+        com.sun.xml.internal.ws.client.WSServiceDelegate$2 $r22;
+        java.lang.Object $r7, $r19, $r23, $r25, $r36, $r48, $r57;
+        java.lang.Class r9;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r82 := @parameter0: javax.xml.transform.Source;
+
+        r83 := @parameter1: com.sun.xml.internal.ws.api.model.wsdl.WSDLService;
+
+        r4 := @parameter2: javax.xml.namespace.QName;
+
+        r9 := @parameter3: java.lang.Class;
+
+        r5 := @parameter4: com.sun.xml.internal.ws.binding.WebServiceFeatureList;
+
+        specialinvoke r0.<com.sun.xml.internal.ws.api.WSService: void <init>()>();
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.util.Map ports> = $r1;
+
+        $r2 = new com.sun.xml.internal.ws.client.HandlerConfigurator$HandlerResolverImpl;
+
+        specialinvoke $r2.<com.sun.xml.internal.ws.client.HandlerConfigurator$HandlerResolverImpl: void <init>(javax.xml.ws.handler.HandlerResolver)>(null);
+
+        r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.client.HandlerConfigurator handlerConfigurator> = $r2;
+
+        $r3 = new java.util.HashMap;
+
+        specialinvoke $r3.<java.util.HashMap: void <init>()>();
+
+        r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.util.Map seiContext> = $r3;
+
+        if r4 != null goto label01;
+
+        $r76 = new javax.xml.ws.WebServiceException;
+
+        $r77 = staticinvoke <com.sun.xml.internal.ws.resources.ClientMessages: java.lang.String INVALID_SERVICE_NAME_NULL(java.lang.Object)>(null);
+
+        specialinvoke $r76.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>($r77);
+
+        throw $r76;
+
+     label01:
+        r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.binding.WebServiceFeatureList features> = r5;
+
+        $r6 = <com.sun.xml.internal.ws.client.WSServiceDelegate: java.lang.ThreadLocal INIT_PARAMS>;
+
+        $r7 = virtualinvoke $r6.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        r84 = (com.sun.xml.internal.ws.api.WSService$InitParams) $r7;
+
+        $r8 = <com.sun.xml.internal.ws.client.WSServiceDelegate: java.lang.ThreadLocal INIT_PARAMS>;
+
+        virtualinvoke $r8.<java.lang.ThreadLocal: void set(java.lang.Object)>(null);
+
+        if r84 != null goto label02;
+
+        r84 = <com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.WSService$InitParams EMPTY_PARAMS>;
+
+     label02:
+        r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.namespace.QName serviceName> = r4;
+
+        r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.lang.Class serviceClass> = r9;
+
+        $r10 = virtualinvoke r84.<com.sun.xml.internal.ws.api.WSService$InitParams: com.sun.xml.internal.ws.api.server.Container getContainer()>();
+
+        if $r10 == null goto label03;
+
+        $r85 = virtualinvoke r84.<com.sun.xml.internal.ws.api.WSService$InitParams: com.sun.xml.internal.ws.api.server.Container getContainer()>();
+
+        goto label04;
+
+     label03:
+        $r11 = staticinvoke <com.sun.xml.internal.ws.api.server.ContainerResolver: com.sun.xml.internal.ws.api.server.ContainerResolver getInstance()>();
+
+        $r85 = virtualinvoke $r11.<com.sun.xml.internal.ws.api.server.ContainerResolver: com.sun.xml.internal.ws.api.server.Container getContainer()>();
+
+     label04:
+        r86 = $r85;
+
+        $r12 = <com.sun.xml.internal.ws.api.server.Container: com.sun.xml.internal.ws.api.server.Container NONE>;
+
+        if $r85 != $r12 goto label05;
+
+        $r74 = new com.sun.xml.internal.ws.client.ClientContainer;
+
+        specialinvoke $r74.<com.sun.xml.internal.ws.client.ClientContainer: void <init>()>();
+
+        r86 = $r74;
+
+     label05:
+        r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.server.Container container> = r86;
+
+        $r13 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.binding.WebServiceFeatureList features>;
+
+        $r14 = virtualinvoke $r13.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: javax.xml.ws.WebServiceFeature get(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/api/ComponentFeature;");
+
+        $r75 = (com.sun.xml.internal.ws.api.ComponentFeature) $r14;
+
+        if $r75 == null goto label09;
+
+        $r66 = <com.sun.xml.internal.ws.client.WSServiceDelegate$5: int[] $SwitchMap$com$sun$xml$internal$ws$api$ComponentFeature$Target>;
+
+        $r67 = virtualinvoke $r75.<com.sun.xml.internal.ws.api.ComponentFeature: com.sun.xml.internal.ws.api.ComponentFeature$Target getTarget()>();
+
+        $i2 = virtualinvoke $r67.<com.sun.xml.internal.ws.api.ComponentFeature$Target: int ordinal()>();
+
+        $i3 = $r66[$i2];
+
+        lookupswitch($i3)
+        {
+            case 1: goto label06;
+            case 2: goto label07;
+            default: goto label08;
+        };
+
+     label06:
+        $r71 = virtualinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.util.Set getComponents()>();
+
+        $r72 = virtualinvoke $r75.<com.sun.xml.internal.ws.api.ComponentFeature: com.sun.xml.internal.ws.api.Component getComponent()>();
+
+        interfaceinvoke $r71.<java.util.Set: boolean add(java.lang.Object)>($r72);
+
+        goto label09;
+
+     label07:
+        $r68 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.server.Container container>;
+
+        $r69 = virtualinvoke $r68.<com.sun.xml.internal.ws.api.server.Container: java.util.Set getComponents()>();
+
+        $r70 = virtualinvoke $r75.<com.sun.xml.internal.ws.api.ComponentFeature: com.sun.xml.internal.ws.api.Component getComponent()>();
+
+        interfaceinvoke $r69.<java.util.Set: boolean add(java.lang.Object)>($r70);
+
+        goto label09;
+
+     label08:
+        $r73 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r73.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r73;
+
+     label09:
+        $r87 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.binding.WebServiceFeatureList features>;
+
+        $r88 = virtualinvoke $r87.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: javax.xml.ws.WebServiceFeature get(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/api/ComponentsFeature;");
+
+        $r89 = (com.sun.xml.internal.ws.api.ComponentsFeature) $r88;
+
+        if $r89 == null goto label15;
+
+        $r54 = virtualinvoke $r89.<com.sun.xml.internal.ws.api.ComponentsFeature: java.util.List getComponentFeatures()>();
+
+        $r55 = interfaceinvoke $r54.<java.util.List: java.util.Iterator iterator()>();
+
+     label10:
+        $z2 = interfaceinvoke $r55.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label15;
+
+        $r57 = interfaceinvoke $r55.<java.util.Iterator: java.lang.Object next()>();
+
+        r90 = (com.sun.xml.internal.ws.api.ComponentFeature) $r57;
+
+        $r58 = <com.sun.xml.internal.ws.client.WSServiceDelegate$5: int[] $SwitchMap$com$sun$xml$internal$ws$api$ComponentFeature$Target>;
+
+        $r59 = virtualinvoke r90.<com.sun.xml.internal.ws.api.ComponentFeature: com.sun.xml.internal.ws.api.ComponentFeature$Target getTarget()>();
+
+        $i0 = virtualinvoke $r59.<com.sun.xml.internal.ws.api.ComponentFeature$Target: int ordinal()>();
+
+        $i1 = $r58[$i0];
+
+        lookupswitch($i1)
+        {
+            case 1: goto label11;
+            case 2: goto label12;
+            default: goto label13;
+        };
+
+     label11:
+        $r63 = virtualinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.util.Set getComponents()>();
+
+        $r64 = virtualinvoke r90.<com.sun.xml.internal.ws.api.ComponentFeature: com.sun.xml.internal.ws.api.Component getComponent()>();
+
+        interfaceinvoke $r63.<java.util.Set: boolean add(java.lang.Object)>($r64);
+
+        goto label14;
+
+     label12:
+        $r60 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.server.Container container>;
+
+        $r61 = virtualinvoke $r60.<com.sun.xml.internal.ws.api.server.Container: java.util.Set getComponents()>();
+
+        $r62 = virtualinvoke r90.<com.sun.xml.internal.ws.api.ComponentFeature: com.sun.xml.internal.ws.api.Component getComponent()>();
+
+        interfaceinvoke $r61.<java.util.Set: boolean add(java.lang.Object)>($r62);
+
+        goto label14;
+
+     label13:
+        $r65 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r65.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r65;
+
+     label14:
+        goto label10;
+
+     label15:
+        $r15 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r16 = virtualinvoke $r15.<java.lang.Thread: java.lang.ClassLoader getContextClassLoader()>();
+
+        $r17 = staticinvoke <com.sun.xml.internal.ws.api.client.ServiceInterceptorFactory: com.sun.xml.internal.ws.api.client.ServiceInterceptor load(com.sun.xml.internal.ws.api.WSService,java.lang.ClassLoader)>(r0, $r16);
+
+        r91 = $r17;
+
+        $r18 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.server.Container container>;
+
+        $r19 = virtualinvoke $r18.<com.sun.xml.internal.ws.api.server.Container: java.lang.Object getSPI(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/api/client/ServiceInterceptor;");
+
+        $r56 = (com.sun.xml.internal.ws.api.client.ServiceInterceptor) $r19;
+
+        if $r56 == null goto label16;
+
+        $r53 = newarray (com.sun.xml.internal.ws.api.client.ServiceInterceptor)[2];
+
+        $r53[0] = $r17;
+
+        $r53[1] = $r56;
+
+        r91 = staticinvoke <com.sun.xml.internal.ws.api.client.ServiceInterceptor: com.sun.xml.internal.ws.api.client.ServiceInterceptor aggregate(com.sun.xml.internal.ws.api.client.ServiceInterceptor[])>($r53);
+
+     label16:
+        r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.client.ServiceInterceptor serviceInterceptor> = r91;
+
+        if r83 != null goto label25;
+
+        if r82 != null goto label17;
+
+        if r9 == class "Ljavax/xml/ws/Service;" goto label17;
+
+        $r47 = new com.sun.xml.internal.ws.client.WSServiceDelegate$1;
+
+        specialinvoke $r47.<com.sun.xml.internal.ws.client.WSServiceDelegate$1: void <init>(com.sun.xml.internal.ws.client.WSServiceDelegate,java.lang.Class)>(r0, r9);
+
+        $r48 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r47);
+
+        r92 = (javax.xml.ws.WebServiceClient) $r48;
+
+        $r49 = interfaceinvoke r92.<javax.xml.ws.WebServiceClient: java.lang.String wsdlLocation()>();
+
+        $r50 = staticinvoke <com.sun.xml.internal.ws.util.JAXWSUtils: java.lang.String getFileOrURLName(java.lang.String)>($r49);
+
+        $r51 = staticinvoke <com.sun.xml.internal.ws.util.JAXWSUtils: java.lang.String absolutize(java.lang.String)>($r50);
+
+        $r52 = new javax.xml.transform.stream.StreamSource;
+
+        specialinvoke $r52.<javax.xml.transform.stream.StreamSource: void <init>(java.lang.String)>($r51);
+
+        r82 = $r52;
+
+     label17:
+        if r82 == null goto label27;
+
+     label18:
+        $r29 = interfaceinvoke r82.<javax.xml.transform.Source: java.lang.String getSystemId()>();
+
+        if $r29 != null goto label19;
+
+        $r93 = null;
+
+        goto label20;
+
+     label19:
+        $r30 = interfaceinvoke r82.<javax.xml.transform.Source: java.lang.String getSystemId()>();
+
+        $r93 = staticinvoke <com.sun.xml.internal.ws.util.JAXWSUtils: java.net.URL getEncodedURL(java.lang.String)>($r30);
+
+     label20:
+        $r31 = specialinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLModel parseWSDL(java.net.URL,javax.xml.transform.Source,java.lang.Class)>($r93, r82, r9);
+
+        $r32 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.namespace.QName serviceName>;
+
+        $r33 = interfaceinvoke $r31.<com.sun.xml.internal.ws.api.model.wsdl.WSDLModel: com.sun.xml.internal.ws.api.model.wsdl.WSDLService getService(javax.xml.namespace.QName)>($r32);
+
+        r83 = $r33;
+
+        if $r33 != null goto label21;
+
+        $r41 = new javax.xml.ws.WebServiceException;
+
+        $r42 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.namespace.QName serviceName>;
+
+        $r43 = interfaceinvoke $r31.<com.sun.xml.internal.ws.api.model.wsdl.WSDLModel: java.util.Map getServices()>();
+
+        $r44 = interfaceinvoke $r43.<java.util.Map: java.util.Set keySet()>();
+
+        $r45 = specialinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.lang.StringBuilder buildNameList(java.util.Collection)>($r44);
+
+        $r46 = staticinvoke <com.sun.xml.internal.ws.resources.ClientMessages: java.lang.String INVALID_SERVICE_NAME(java.lang.Object,java.lang.Object)>($r42, $r45);
+
+        specialinvoke $r41.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>($r46);
+
+        throw $r41;
+
+     label21:
+        $r34 = interfaceinvoke $r33.<com.sun.xml.internal.ws.api.model.wsdl.WSDLService: java.lang.Iterable getPorts()>();
+
+        $r35 = interfaceinvoke $r34.<java.lang.Iterable: java.util.Iterator iterator()>();
+
+     label22:
+        $z1 = interfaceinvoke $r35.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label23;
+
+        $r36 = interfaceinvoke $r35.<java.util.Iterator: java.lang.Object next()>();
+
+        r37 = (com.sun.xml.internal.ws.api.model.wsdl.WSDLPort) $r36;
+
+        $r38 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.util.Map ports>;
+
+        $r39 = interfaceinvoke r37.<com.sun.xml.internal.ws.api.model.wsdl.WSDLPort: javax.xml.namespace.QName getName()>();
+
+        $r40 = new com.sun.xml.internal.ws.client.PortInfo;
+
+        specialinvoke $r40.<com.sun.xml.internal.ws.client.PortInfo: void <init>(com.sun.xml.internal.ws.client.WSServiceDelegate,com.sun.xml.internal.ws.api.model.wsdl.WSDLPort)>(r0, r37);
+
+        interfaceinvoke $r38.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r39, $r40);
+
+        goto label22;
+
+     label23:
+        goto label27;
+
+     label24:
+        $r78 := @caughtexception;
+
+        $r79 = new javax.xml.ws.WebServiceException;
+
+        $r80 = interfaceinvoke r82.<javax.xml.transform.Source: java.lang.String getSystemId()>();
+
+        $r81 = staticinvoke <com.sun.xml.internal.ws.resources.ClientMessages: java.lang.String INVALID_WSDL_URL(java.lang.Object)>($r80);
+
+        specialinvoke $r79.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>($r81);
+
+        throw $r79;
+
+     label25:
+        $r20 = interfaceinvoke r83.<com.sun.xml.internal.ws.api.model.wsdl.WSDLService: java.lang.Iterable getPorts()>();
+
+        $r21 = interfaceinvoke $r20.<java.lang.Iterable: java.util.Iterator iterator()>();
+
+     label26:
+        $z0 = interfaceinvoke $r21.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label27;
+
+        $r25 = interfaceinvoke $r21.<java.util.Iterator: java.lang.Object next()>();
+
+        r94 = (com.sun.xml.internal.ws.api.model.wsdl.WSDLPort) $r25;
+
+        $r26 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.util.Map ports>;
+
+        $r27 = interfaceinvoke r94.<com.sun.xml.internal.ws.api.model.wsdl.WSDLPort: javax.xml.namespace.QName getName()>();
+
+        $r28 = new com.sun.xml.internal.ws.client.PortInfo;
+
+        specialinvoke $r28.<com.sun.xml.internal.ws.client.PortInfo: void <init>(com.sun.xml.internal.ws.client.WSServiceDelegate,com.sun.xml.internal.ws.api.model.wsdl.WSDLPort)>(r0, r94);
+
+        interfaceinvoke $r26.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r27, $r28);
+
+        goto label26;
+
+     label27:
+        r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLService wsdlService> = r83;
+
+        if r9 == class "Ljavax/xml/ws/Service;" goto label28;
+
+        $r22 = new com.sun.xml.internal.ws.client.WSServiceDelegate$2;
+
+        specialinvoke $r22.<com.sun.xml.internal.ws.client.WSServiceDelegate$2: void <init>(com.sun.xml.internal.ws.client.WSServiceDelegate,java.lang.Class)>(r0, r9);
+
+        $r23 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r22);
+
+        r95 = (javax.jws.HandlerChain) $r23;
+
+        if r95 == null goto label28;
+
+        $r24 = new com.sun.xml.internal.ws.client.HandlerConfigurator$AnnotationConfigurator;
+
+        specialinvoke $r24.<com.sun.xml.internal.ws.client.HandlerConfigurator$AnnotationConfigurator: void <init>(com.sun.xml.internal.ws.client.WSServiceDelegate)>(r0);
+
+        r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.client.HandlerConfigurator handlerConfigurator> = $r24;
+
+     label28:
+        return;
+
+        catch java.net.MalformedURLException from label18 to label23 with label24;
+    }
+
+    private com.sun.xml.internal.ws.api.model.wsdl.WSDLModel parseWSDL(java.net.URL, javax.xml.transform.Source, java.lang.Class)
+    {
+        java.lang.Object[] $r7;
+        com.sun.xml.internal.ws.util.ServiceConfigurationError $r10;
+        java.net.URL r0;
+        javax.xml.transform.Source r1;
+        javax.xml.stream.XMLStreamException $r14;
+        org.xml.sax.EntityResolver $r3;
+        com.sun.xml.internal.ws.api.server.Container $r4;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r2;
+        java.io.IOException $r16;
+        com.sun.xml.internal.ws.util.ServiceFinder $r6;
+        javax.xml.ws.WebServiceException $r11, $r13, $r15, $r17;
+        org.xml.sax.SAXException $r12;
+        java.lang.Class r5;
+        com.sun.xml.internal.ws.api.wsdl.parser.WSDLParserExtension[] $r8;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLModel $r9;
+
+        r2 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r0 := @parameter0: java.net.URL;
+
+        r1 := @parameter1: javax.xml.transform.Source;
+
+        r5 := @parameter2: java.lang.Class;
+
+     label1:
+        $r3 = virtualinvoke r2.<com.sun.xml.internal.ws.client.WSServiceDelegate: org.xml.sax.EntityResolver createCatalogResolver()>();
+
+        $r4 = virtualinvoke r2.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.server.Container getContainer()>();
+
+        $r6 = staticinvoke <com.sun.xml.internal.ws.util.ServiceFinder: com.sun.xml.internal.ws.util.ServiceFinder find(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/api/wsdl/parser/WSDLParserExtension;");
+
+        $r7 = virtualinvoke $r6.<com.sun.xml.internal.ws.util.ServiceFinder: java.lang.Object[] toArray()>();
+
+        $r8 = (com.sun.xml.internal.ws.api.wsdl.parser.WSDLParserExtension[]) $r7;
+
+        $r9 = staticinvoke <com.sun.xml.internal.ws.wsdl.parser.RuntimeWSDLParser: com.sun.xml.internal.ws.api.model.wsdl.WSDLModel parse(java.net.URL,javax.xml.transform.Source,org.xml.sax.EntityResolver,boolean,com.sun.xml.internal.ws.api.server.Container,java.lang.Class,com.sun.xml.internal.ws.api.wsdl.parser.WSDLParserExtension[])>(r0, r1, $r3, 1, $r4, r5, $r8);
+
+     label2:
+        return $r9;
+
+     label3:
+        $r16 := @caughtexception;
+
+        $r17 = new javax.xml.ws.WebServiceException;
+
+        specialinvoke $r17.<javax.xml.ws.WebServiceException: void <init>(java.lang.Throwable)>($r16);
+
+        throw $r17;
+
+     label4:
+        $r14 := @caughtexception;
+
+        $r15 = new javax.xml.ws.WebServiceException;
+
+        specialinvoke $r15.<javax.xml.ws.WebServiceException: void <init>(java.lang.Throwable)>($r14);
+
+        throw $r15;
+
+     label5:
+        $r12 := @caughtexception;
+
+        $r13 = new javax.xml.ws.WebServiceException;
+
+        specialinvoke $r13.<javax.xml.ws.WebServiceException: void <init>(java.lang.Throwable)>($r12);
+
+        throw $r13;
+
+     label6:
+        $r10 := @caughtexception;
+
+        $r11 = new javax.xml.ws.WebServiceException;
+
+        specialinvoke $r11.<javax.xml.ws.WebServiceException: void <init>(java.lang.Throwable)>($r10);
+
+        throw $r11;
+
+        catch java.io.IOException from label1 to label2 with label3;
+        catch javax.xml.stream.XMLStreamException from label1 to label2 with label4;
+        catch org.xml.sax.SAXException from label1 to label2 with label5;
+        catch com.sun.xml.internal.ws.util.ServiceConfigurationError from label1 to label2 with label6;
+    }
+
+    protected org.xml.sax.EntityResolver createCatalogResolver()
+    {
+        com.sun.xml.internal.ws.client.WSServiceDelegate r1;
+        org.xml.sax.EntityResolver $r0;
+
+        r1 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        $r0 = staticinvoke <com.sun.xml.internal.ws.util.xml.XmlUtil: org.xml.sax.EntityResolver createDefaultCatalogResolver()>();
+
+        return $r0;
+    }
+
+    public java.util.concurrent.Executor getExecutor()
+    {
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        java.util.concurrent.Executor $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        $r1 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.util.concurrent.Executor executor>;
+
+        return $r1;
+    }
+
+    public void setExecutor(java.util.concurrent.Executor)
+    {
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        java.util.concurrent.Executor r1;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r1 := @parameter0: java.util.concurrent.Executor;
+
+        r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.util.concurrent.Executor executor> = r1;
+
+        return;
+    }
+
+    public javax.xml.ws.handler.HandlerResolver getHandlerResolver()
+    {
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        javax.xml.ws.handler.HandlerResolver $r2;
+        com.sun.xml.internal.ws.client.HandlerConfigurator $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        $r1 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.client.HandlerConfigurator handlerConfigurator>;
+
+        $r2 = virtualinvoke $r1.<com.sun.xml.internal.ws.client.HandlerConfigurator: javax.xml.ws.handler.HandlerResolver getResolver()>();
+
+        return $r2;
+    }
+
+    final com.sun.xml.internal.ws.client.HandlerConfigurator getHandlerConfigurator()
+    {
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        com.sun.xml.internal.ws.client.HandlerConfigurator $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        $r1 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.client.HandlerConfigurator handlerConfigurator>;
+
+        return $r1;
+    }
+
+    public void setHandlerResolver(javax.xml.ws.handler.HandlerResolver)
+    {
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        javax.xml.ws.handler.HandlerResolver r2;
+        com.sun.xml.internal.ws.client.HandlerConfigurator$HandlerResolverImpl $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r2 := @parameter0: javax.xml.ws.handler.HandlerResolver;
+
+        $r1 = new com.sun.xml.internal.ws.client.HandlerConfigurator$HandlerResolverImpl;
+
+        specialinvoke $r1.<com.sun.xml.internal.ws.client.HandlerConfigurator$HandlerResolverImpl: void <init>(javax.xml.ws.handler.HandlerResolver)>(r2);
+
+        r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.client.HandlerConfigurator handlerConfigurator> = $r1;
+
+        return;
+    }
+
+    public java.lang.Object getPort(javax.xml.namespace.QName, java.lang.Class) throws javax.xml.ws.WebServiceException
+    {
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        java.lang.Class r2;
+        javax.xml.ws.WebServiceFeature[] $r3;
+        java.lang.Object $r4;
+        javax.xml.namespace.QName r1;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r1 := @parameter0: javax.xml.namespace.QName;
+
+        r2 := @parameter1: java.lang.Class;
+
+        $r3 = <com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.ws.WebServiceFeature[] EMPTY_FEATURES>;
+
+        $r4 = virtualinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.lang.Object getPort(javax.xml.namespace.QName,java.lang.Class,javax.xml.ws.WebServiceFeature[])>(r1, r2, $r3);
+
+        return $r4;
+    }
+
+    public transient java.lang.Object getPort(javax.xml.namespace.QName, java.lang.Class, javax.xml.ws.WebServiceFeature[])
+    {
+        com.sun.xml.internal.ws.client.WSServiceDelegate r3;
+        javax.xml.ws.WebServiceFeature[] r7;
+        java.lang.IllegalArgumentException $r1;
+        javax.xml.ws.WebServiceException $r10;
+        com.sun.xml.internal.ws.binding.WebServiceFeatureList $r6;
+        com.sun.xml.internal.ws.api.addressing.WSEndpointReference $r5;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLPort $r4;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLService $r9, r13;
+        java.lang.Class r2;
+        java.lang.Object $r8;
+        javax.xml.namespace.QName r0;
+        java.lang.String $r11, $r12;
+
+        r3 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r0 := @parameter0: javax.xml.namespace.QName;
+
+        r2 := @parameter1: java.lang.Class;
+
+        r7 := @parameter2: javax.xml.ws.WebServiceFeature[];
+
+        if r0 == null goto label1;
+
+        if r2 != null goto label2;
+
+     label1:
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r1;
+
+     label2:
+        r13 = r3.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLService wsdlService>;
+
+        if r13 != null goto label3;
+
+        $r9 = specialinvoke r3.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLService getWSDLModelfromSEI(java.lang.Class)>(r2);
+
+        r13 = $r9;
+
+        if $r9 != null goto label3;
+
+        $r10 = new javax.xml.ws.WebServiceException;
+
+        $r11 = virtualinvoke r2.<java.lang.Class: java.lang.String getName()>();
+
+        $r12 = staticinvoke <com.sun.xml.internal.ws.resources.ProviderApiMessages: java.lang.String NO_WSDL_NO_PORT(java.lang.Object)>($r11);
+
+        specialinvoke $r10.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>($r12);
+
+        throw $r10;
+
+     label3:
+        $r4 = virtualinvoke r3.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLPort getPortModel(com.sun.xml.internal.ws.api.model.wsdl.WSDLService,javax.xml.namespace.QName)>(r13, r0);
+
+        $r5 = interfaceinvoke $r4.<com.sun.xml.internal.ws.api.model.wsdl.WSDLPort: com.sun.xml.internal.ws.api.addressing.WSEndpointReference getEPR()>();
+
+        $r6 = new com.sun.xml.internal.ws.binding.WebServiceFeatureList;
+
+        specialinvoke $r6.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: void <init>(javax.xml.ws.WebServiceFeature[])>(r7);
+
+        $r8 = virtualinvoke r3.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.lang.Object getPort(com.sun.xml.internal.ws.api.addressing.WSEndpointReference,javax.xml.namespace.QName,java.lang.Class,com.sun.xml.internal.ws.binding.WebServiceFeatureList)>($r5, r0, r2, $r6);
+
+        return $r8;
+    }
+
+    public transient java.lang.Object getPort(javax.xml.ws.EndpointReference, java.lang.Class, javax.xml.ws.WebServiceFeature[])
+    {
+        javax.xml.ws.EndpointReference r1;
+        com.sun.xml.internal.ws.api.addressing.WSEndpointReference $r2;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        java.lang.Class r3;
+        javax.xml.ws.WebServiceFeature[] r4;
+        java.lang.Object $r5;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r1 := @parameter0: javax.xml.ws.EndpointReference;
+
+        r3 := @parameter1: java.lang.Class;
+
+        r4 := @parameter2: javax.xml.ws.WebServiceFeature[];
+
+        $r2 = staticinvoke <com.sun.xml.internal.ws.api.addressing.WSEndpointReference: com.sun.xml.internal.ws.api.addressing.WSEndpointReference create(javax.xml.ws.EndpointReference)>(r1);
+
+        $r5 = virtualinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.lang.Object getPort(com.sun.xml.internal.ws.api.addressing.WSEndpointReference,java.lang.Class,javax.xml.ws.WebServiceFeature[])>($r2, r3, r4);
+
+        return $r5;
+    }
+
+    public transient java.lang.Object getPort(com.sun.xml.internal.ws.api.addressing.WSEndpointReference, java.lang.Class, javax.xml.ws.WebServiceFeature[])
+    {
+        com.sun.xml.internal.ws.client.WSServiceDelegate r3;
+        javax.xml.ws.WebServiceFeature[] r1;
+        com.sun.xml.internal.ws.api.databinding.MetadataReader $r5;
+        com.sun.xml.internal.ws.binding.WebServiceFeatureList $r0;
+        com.sun.xml.internal.ws.api.addressing.WSEndpointReference r7;
+        java.lang.Class r2;
+        java.lang.Object $r9;
+        java.lang.ClassLoader $r4;
+        javax.xml.namespace.QName $r6, $r8;
+
+        r3 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r7 := @parameter0: com.sun.xml.internal.ws.api.addressing.WSEndpointReference;
+
+        r2 := @parameter1: java.lang.Class;
+
+        r1 := @parameter2: javax.xml.ws.WebServiceFeature[];
+
+        $r0 = new com.sun.xml.internal.ws.binding.WebServiceFeatureList;
+
+        specialinvoke $r0.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: void <init>(javax.xml.ws.WebServiceFeature[])>(r1);
+
+        $r4 = virtualinvoke r2.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $r5 = specialinvoke r3.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.databinding.MetadataReader getMetadadaReader(com.sun.xml.internal.ws.binding.WebServiceFeatureList,java.lang.ClassLoader)>($r0, $r4);
+
+        $r6 = staticinvoke <com.sun.xml.internal.ws.model.RuntimeModeler: javax.xml.namespace.QName getPortTypeName(java.lang.Class,com.sun.xml.internal.ws.api.databinding.MetadataReader)>(r2, $r5);
+
+        $r8 = specialinvoke r3.<com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.namespace.QName getPortNameFromEPR(com.sun.xml.internal.ws.api.addressing.WSEndpointReference,javax.xml.namespace.QName)>(r7, $r6);
+
+        $r9 = virtualinvoke r3.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.lang.Object getPort(com.sun.xml.internal.ws.api.addressing.WSEndpointReference,javax.xml.namespace.QName,java.lang.Class,com.sun.xml.internal.ws.binding.WebServiceFeatureList)>(r7, $r8, r2, $r0);
+
+        return $r9;
+    }
+
+    protected java.lang.Object getPort(com.sun.xml.internal.ws.api.addressing.WSEndpointReference, javax.xml.namespace.QName, java.lang.Class, com.sun.xml.internal.ws.binding.WebServiceFeatureList)
+    {
+        com.sun.xml.internal.ws.api.ComponentsFeature $r20;
+        com.sun.xml.internal.ws.api.addressing.WSEndpointReference r9;
+        com.sun.xml.internal.ws.api.ComponentFeature$Target $r15, $r16, $r18, $r19;
+        javax.xml.ws.WebServiceFeature $r1, $r3;
+        boolean $z0, $z1, $z2;
+        java.util.Iterator $r12;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r4;
+        java.lang.IllegalArgumentException $r17, $r21;
+        java.util.List $r11;
+        com.sun.xml.internal.ws.client.SEIPortInfo $r8;
+        com.sun.xml.internal.ws.binding.WebServiceFeatureList r0, $r5;
+        com.sun.xml.internal.ws.api.ComponentFeature r2, r14;
+        java.lang.Class r7;
+        java.lang.Object $r10, $r13;
+        javax.xml.namespace.QName r6;
+
+        r4 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r9 := @parameter0: com.sun.xml.internal.ws.api.addressing.WSEndpointReference;
+
+        r6 := @parameter1: javax.xml.namespace.QName;
+
+        r7 := @parameter2: java.lang.Class;
+
+        r0 := @parameter3: com.sun.xml.internal.ws.binding.WebServiceFeatureList;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: javax.xml.ws.WebServiceFeature get(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/api/ComponentFeature;");
+
+        r2 = (com.sun.xml.internal.ws.api.ComponentFeature) $r1;
+
+        if r2 == null goto label1;
+
+        $r18 = <com.sun.xml.internal.ws.api.ComponentFeature$Target: com.sun.xml.internal.ws.api.ComponentFeature$Target STUB>;
+
+        $r19 = virtualinvoke r2.<com.sun.xml.internal.ws.api.ComponentFeature: com.sun.xml.internal.ws.api.ComponentFeature$Target getTarget()>();
+
+        $z2 = virtualinvoke $r18.<com.sun.xml.internal.ws.api.ComponentFeature$Target: boolean equals(java.lang.Object)>($r19);
+
+        if $z2 != 0 goto label1;
+
+        $r21 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r21.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r21;
+
+     label1:
+        $r3 = virtualinvoke r0.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: javax.xml.ws.WebServiceFeature get(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/api/ComponentsFeature;");
+
+        $r20 = (com.sun.xml.internal.ws.api.ComponentsFeature) $r3;
+
+        if $r20 == null goto label4;
+
+        $r11 = virtualinvoke $r20.<com.sun.xml.internal.ws.api.ComponentsFeature: java.util.List getComponentFeatures()>();
+
+        $r12 = interfaceinvoke $r11.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r12.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r13 = interfaceinvoke $r12.<java.util.Iterator: java.lang.Object next()>();
+
+        r14 = (com.sun.xml.internal.ws.api.ComponentFeature) $r13;
+
+        $r15 = <com.sun.xml.internal.ws.api.ComponentFeature$Target: com.sun.xml.internal.ws.api.ComponentFeature$Target STUB>;
+
+        $r16 = virtualinvoke r14.<com.sun.xml.internal.ws.api.ComponentFeature: com.sun.xml.internal.ws.api.ComponentFeature$Target getTarget()>();
+
+        $z1 = virtualinvoke $r15.<com.sun.xml.internal.ws.api.ComponentFeature$Target: boolean equals(java.lang.Object)>($r16);
+
+        if $z1 != 0 goto label3;
+
+        $r17 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r17.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r17;
+
+     label3:
+        goto label2;
+
+     label4:
+        $r5 = r4.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.binding.WebServiceFeatureList features>;
+
+        virtualinvoke r0.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: void addAll(java.lang.Iterable)>($r5);
+
+        $r8 = specialinvoke r4.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.client.SEIPortInfo addSEI(javax.xml.namespace.QName,java.lang.Class,com.sun.xml.internal.ws.binding.WebServiceFeatureList)>(r6, r7, r0);
+
+        $r10 = specialinvoke r4.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.lang.Object createEndpointIFBaseProxy(com.sun.xml.internal.ws.api.addressing.WSEndpointReference,javax.xml.namespace.QName,java.lang.Class,com.sun.xml.internal.ws.binding.WebServiceFeatureList,com.sun.xml.internal.ws.client.SEIPortInfo)>(r9, r6, r7, r0, $r8);
+
+        return $r10;
+    }
+
+    public transient java.lang.Object getPort(java.lang.Class, javax.xml.ws.WebServiceFeature[])
+    {
+        java.lang.String $r11, $r14, $r15;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r1;
+        javax.xml.ws.WebServiceFeature[] r3;
+        com.sun.xml.internal.ws.api.databinding.MetadataReader $r5;
+        javax.xml.ws.WebServiceException $r10, $r13;
+        com.sun.xml.internal.ws.binding.WebServiceFeatureList $r2;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLPort $r7;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLService $r12, r16;
+        java.lang.Class r0;
+        java.lang.Object $r9;
+        java.lang.ClassLoader $r4;
+        javax.xml.namespace.QName $r6, $r8;
+
+        r1 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r0 := @parameter0: java.lang.Class;
+
+        r3 := @parameter1: javax.xml.ws.WebServiceFeature[];
+
+        $r2 = new com.sun.xml.internal.ws.binding.WebServiceFeatureList;
+
+        specialinvoke $r2.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: void <init>(javax.xml.ws.WebServiceFeature[])>(r3);
+
+        $r4 = virtualinvoke r0.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $r5 = specialinvoke r1.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.databinding.MetadataReader getMetadadaReader(com.sun.xml.internal.ws.binding.WebServiceFeatureList,java.lang.ClassLoader)>($r2, $r4);
+
+        $r6 = staticinvoke <com.sun.xml.internal.ws.model.RuntimeModeler: javax.xml.namespace.QName getPortTypeName(java.lang.Class,com.sun.xml.internal.ws.api.databinding.MetadataReader)>(r0, $r5);
+
+        r16 = r1.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLService wsdlService>;
+
+        if r16 != null goto label1;
+
+        $r12 = specialinvoke r1.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLService getWSDLModelfromSEI(java.lang.Class)>(r0);
+
+        r16 = $r12;
+
+        if $r12 != null goto label1;
+
+        $r13 = new javax.xml.ws.WebServiceException;
+
+        $r14 = virtualinvoke r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r15 = staticinvoke <com.sun.xml.internal.ws.resources.ProviderApiMessages: java.lang.String NO_WSDL_NO_PORT(java.lang.Object)>($r14);
+
+        specialinvoke $r13.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>($r15);
+
+        throw $r13;
+
+     label1:
+        $r7 = interfaceinvoke r16.<com.sun.xml.internal.ws.api.model.wsdl.WSDLService: com.sun.xml.internal.ws.api.model.wsdl.WSDLPort getMatchingPort(javax.xml.namespace.QName)>($r6);
+
+        if $r7 != null goto label2;
+
+        $r10 = new javax.xml.ws.WebServiceException;
+
+        $r11 = staticinvoke <com.sun.xml.internal.ws.resources.ClientMessages: java.lang.String UNDEFINED_PORT_TYPE(java.lang.Object)>($r6);
+
+        specialinvoke $r10.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>($r11);
+
+        throw $r10;
+
+     label2:
+        $r8 = interfaceinvoke $r7.<com.sun.xml.internal.ws.api.model.wsdl.WSDLPort: javax.xml.namespace.QName getName()>();
+
+        $r9 = virtualinvoke r1.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.lang.Object getPort(javax.xml.namespace.QName,java.lang.Class,javax.xml.ws.WebServiceFeature[])>($r8, r0, r3);
+
+        return $r9;
+    }
+
+    public java.lang.Object getPort(java.lang.Class) throws javax.xml.ws.WebServiceException
+    {
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        java.lang.Class r1;
+        javax.xml.ws.WebServiceFeature[] $r2;
+        java.lang.Object $r3;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r1 := @parameter0: java.lang.Class;
+
+        $r2 = <com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.ws.WebServiceFeature[] EMPTY_FEATURES>;
+
+        $r3 = virtualinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.lang.Object getPort(java.lang.Class,javax.xml.ws.WebServiceFeature[])>(r1, $r2);
+
+        return $r3;
+    }
+
+    public void addPort(javax.xml.namespace.QName, java.lang.String, java.lang.String) throws javax.xml.ws.WebServiceException
+    {
+        com.sun.xml.internal.ws.api.EndpointAddress $r12;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        com.sun.xml.internal.ws.api.BindingID r7, $r11;
+        javax.xml.ws.WebServiceException $r3;
+        com.sun.xml.internal.ws.client.PortInfo $r8;
+        java.util.Map $r2, $r10;
+        javax.xml.namespace.QName r1;
+        java.lang.String $r4, $r5, r6, r9;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r1 := @parameter0: javax.xml.namespace.QName;
+
+        r6 := @parameter1: java.lang.String;
+
+        r9 := @parameter2: java.lang.String;
+
+        $r2 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.util.Map ports>;
+
+        $z0 = interfaceinvoke $r2.<java.util.Map: boolean containsKey(java.lang.Object)>(r1);
+
+        if $z0 != 0 goto label5;
+
+        if r6 != null goto label1;
+
+        $r11 = <com.sun.xml.internal.ws.api.BindingID: com.sun.xml.internal.ws.api.BindingID$SOAPHTTPImpl SOAP11_HTTP>;
+
+        goto label2;
+
+     label1:
+        $r11 = staticinvoke <com.sun.xml.internal.ws.api.BindingID: com.sun.xml.internal.ws.api.BindingID parse(java.lang.String)>(r6);
+
+     label2:
+        r7 = $r11;
+
+        $r10 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.util.Map ports>;
+
+        $r8 = new com.sun.xml.internal.ws.client.PortInfo;
+
+        if r9 != null goto label3;
+
+        $r12 = null;
+
+        goto label4;
+
+     label3:
+        $r12 = staticinvoke <com.sun.xml.internal.ws.api.EndpointAddress: com.sun.xml.internal.ws.api.EndpointAddress create(java.lang.String)>(r9);
+
+     label4:
+        specialinvoke $r8.<com.sun.xml.internal.ws.client.PortInfo: void <init>(com.sun.xml.internal.ws.client.WSServiceDelegate,com.sun.xml.internal.ws.api.EndpointAddress,javax.xml.namespace.QName,com.sun.xml.internal.ws.api.BindingID)>(r0, $r12, r1, r7);
+
+        interfaceinvoke $r10.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r8);
+
+        goto label6;
+
+     label5:
+        $r3 = new javax.xml.ws.WebServiceException;
+
+        $r4 = virtualinvoke r1.<javax.xml.namespace.QName: java.lang.String toString()>();
+
+        $r5 = staticinvoke <com.sun.xml.internal.ws.resources.DispatchMessages: java.lang.String DUPLICATE_PORT(java.lang.Object)>($r4);
+
+        specialinvoke $r3.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>($r5);
+
+        throw $r3;
+
+     label6:
+        return;
+    }
+
+    public javax.xml.ws.Dispatch createDispatch(javax.xml.namespace.QName, java.lang.Class, javax.xml.ws.Service$Mode) throws javax.xml.ws.WebServiceException
+    {
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        javax.xml.ws.Service$Mode r3;
+        javax.xml.ws.Dispatch $r5;
+        java.lang.Class r2;
+        javax.xml.ws.WebServiceFeature[] $r4;
+        javax.xml.namespace.QName r1;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r1 := @parameter0: javax.xml.namespace.QName;
+
+        r2 := @parameter1: java.lang.Class;
+
+        r3 := @parameter2: javax.xml.ws.Service$Mode;
+
+        $r4 = <com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.ws.WebServiceFeature[] EMPTY_FEATURES>;
+
+        $r5 = virtualinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.ws.Dispatch createDispatch(javax.xml.namespace.QName,java.lang.Class,javax.xml.ws.Service$Mode,javax.xml.ws.WebServiceFeature[])>(r1, r2, r3, $r4);
+
+        return $r5;
+    }
+
+    public transient javax.xml.ws.Dispatch createDispatch(javax.xml.namespace.QName, com.sun.xml.internal.ws.api.addressing.WSEndpointReference, java.lang.Class, javax.xml.ws.Service$Mode, javax.xml.ws.WebServiceFeature[])
+    {
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        javax.xml.ws.Service$Mode r4;
+        javax.xml.ws.Dispatch $r7;
+        javax.xml.ws.WebServiceFeature[] r6;
+        com.sun.xml.internal.ws.binding.WebServiceFeatureList $r5;
+        com.sun.xml.internal.ws.api.addressing.WSEndpointReference r2;
+        java.lang.Class r3;
+        javax.xml.namespace.QName r1;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r1 := @parameter0: javax.xml.namespace.QName;
+
+        r2 := @parameter1: com.sun.xml.internal.ws.api.addressing.WSEndpointReference;
+
+        r3 := @parameter2: java.lang.Class;
+
+        r4 := @parameter3: javax.xml.ws.Service$Mode;
+
+        r6 := @parameter4: javax.xml.ws.WebServiceFeature[];
+
+        $r5 = new com.sun.xml.internal.ws.binding.WebServiceFeatureList;
+
+        specialinvoke $r5.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: void <init>(javax.xml.ws.WebServiceFeature[])>(r6);
+
+        $r7 = virtualinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.ws.Dispatch createDispatch(javax.xml.namespace.QName,com.sun.xml.internal.ws.api.addressing.WSEndpointReference,java.lang.Class,javax.xml.ws.Service$Mode,com.sun.xml.internal.ws.binding.WebServiceFeatureList)>(r1, r2, r3, r4, $r5);
+
+        return $r7;
+    }
+
+    public javax.xml.ws.Dispatch createDispatch(javax.xml.namespace.QName, com.sun.xml.internal.ws.api.addressing.WSEndpointReference, java.lang.Class, javax.xml.ws.Service$Mode, com.sun.xml.internal.ws.binding.WebServiceFeatureList)
+    {
+        com.sun.xml.internal.ws.api.ComponentsFeature $r23;
+        javax.xml.ws.Service$Mode r9;
+        javax.xml.ws.Dispatch $r12;
+        com.sun.xml.internal.ws.developer.WSBindingProvider $r13;
+        com.sun.xml.internal.ws.client.PortInfo $r2;
+        com.sun.xml.internal.ws.api.addressing.WSEndpointReference r11;
+        com.sun.xml.internal.ws.api.ComponentFeature$Target $r18, $r19, $r21, $r22;
+        javax.xml.ws.WebServiceFeature $r4, $r6;
+        boolean $z0, $z1, $z2;
+        java.util.Iterator $r16;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        com.sun.xml.internal.ws.binding.BindingImpl $r8;
+        com.sun.xml.internal.ws.api.client.ServiceInterceptor $r14;
+        java.lang.IllegalArgumentException $r20, $r24;
+        java.util.List $r15;
+        com.sun.xml.internal.ws.binding.WebServiceFeatureList r3, $r7;
+        com.sun.xml.internal.ws.api.ComponentFeature r5, r25;
+        java.lang.Class r10;
+        java.lang.Object $r17;
+        javax.xml.namespace.QName r1;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r1 := @parameter0: javax.xml.namespace.QName;
+
+        r11 := @parameter1: com.sun.xml.internal.ws.api.addressing.WSEndpointReference;
+
+        r10 := @parameter2: java.lang.Class;
+
+        r9 := @parameter3: javax.xml.ws.Service$Mode;
+
+        r3 := @parameter4: com.sun.xml.internal.ws.binding.WebServiceFeatureList;
+
+        $r2 = virtualinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.client.PortInfo safeGetPort(javax.xml.namespace.QName)>(r1);
+
+        $r4 = virtualinvoke r3.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: javax.xml.ws.WebServiceFeature get(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/api/ComponentFeature;");
+
+        r5 = (com.sun.xml.internal.ws.api.ComponentFeature) $r4;
+
+        if r5 == null goto label1;
+
+        $r21 = <com.sun.xml.internal.ws.api.ComponentFeature$Target: com.sun.xml.internal.ws.api.ComponentFeature$Target STUB>;
+
+        $r22 = virtualinvoke r5.<com.sun.xml.internal.ws.api.ComponentFeature: com.sun.xml.internal.ws.api.ComponentFeature$Target getTarget()>();
+
+        $z2 = virtualinvoke $r21.<com.sun.xml.internal.ws.api.ComponentFeature$Target: boolean equals(java.lang.Object)>($r22);
+
+        if $z2 != 0 goto label1;
+
+        $r24 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r24.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r24;
+
+     label1:
+        $r6 = virtualinvoke r3.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: javax.xml.ws.WebServiceFeature get(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/api/ComponentsFeature;");
+
+        $r23 = (com.sun.xml.internal.ws.api.ComponentsFeature) $r6;
+
+        if $r23 == null goto label4;
+
+        $r15 = virtualinvoke $r23.<com.sun.xml.internal.ws.api.ComponentsFeature: java.util.List getComponentFeatures()>();
+
+        $r16 = interfaceinvoke $r15.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r16.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r17 = interfaceinvoke $r16.<java.util.Iterator: java.lang.Object next()>();
+
+        r25 = (com.sun.xml.internal.ws.api.ComponentFeature) $r17;
+
+        $r18 = <com.sun.xml.internal.ws.api.ComponentFeature$Target: com.sun.xml.internal.ws.api.ComponentFeature$Target STUB>;
+
+        $r19 = virtualinvoke r25.<com.sun.xml.internal.ws.api.ComponentFeature: com.sun.xml.internal.ws.api.ComponentFeature$Target getTarget()>();
+
+        $z1 = virtualinvoke $r18.<com.sun.xml.internal.ws.api.ComponentFeature$Target: boolean equals(java.lang.Object)>($r19);
+
+        if $z1 != 0 goto label3;
+
+        $r20 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r20.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r20;
+
+     label3:
+        goto label2;
+
+     label4:
+        $r7 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.binding.WebServiceFeatureList features>;
+
+        virtualinvoke r3.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: void addAll(java.lang.Iterable)>($r7);
+
+        $r8 = virtualinvoke $r2.<com.sun.xml.internal.ws.client.PortInfo: com.sun.xml.internal.ws.binding.BindingImpl createBinding(com.sun.xml.internal.ws.binding.WebServiceFeatureList,java.lang.Class,com.sun.xml.internal.ws.binding.BindingImpl)>(r3, null, null);
+
+        virtualinvoke $r8.<com.sun.xml.internal.ws.binding.BindingImpl: void setMode(javax.xml.ws.Service$Mode)>(r9);
+
+        $r12 = staticinvoke <com.sun.xml.internal.ws.api.pipe.Stubs: javax.xml.ws.Dispatch createDispatch(com.sun.xml.internal.ws.api.client.WSPortInfo,com.sun.xml.internal.ws.api.WSService,com.sun.xml.internal.ws.api.WSBinding,java.lang.Class,javax.xml.ws.Service$Mode,com.sun.xml.internal.ws.api.addressing.WSEndpointReference)>($r2, r0, $r8, r10, r9, r11);
+
+        $r14 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.client.ServiceInterceptor serviceInterceptor>;
+
+        $r13 = (com.sun.xml.internal.ws.developer.WSBindingProvider) $r12;
+
+        virtualinvoke $r14.<com.sun.xml.internal.ws.api.client.ServiceInterceptor: void postCreateDispatch(com.sun.xml.internal.ws.developer.WSBindingProvider)>($r13);
+
+        return $r12;
+    }
+
+    public transient javax.xml.ws.Dispatch createDispatch(javax.xml.namespace.QName, java.lang.Class, javax.xml.ws.Service$Mode, javax.xml.ws.WebServiceFeature[])
+    {
+        com.sun.xml.internal.ws.binding.WebServiceFeatureList $r4;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        javax.xml.ws.Service$Mode r3;
+        javax.xml.ws.Dispatch $r6;
+        java.lang.Class r2;
+        javax.xml.ws.WebServiceFeature[] r5;
+        javax.xml.namespace.QName r1;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r1 := @parameter0: javax.xml.namespace.QName;
+
+        r2 := @parameter1: java.lang.Class;
+
+        r3 := @parameter2: javax.xml.ws.Service$Mode;
+
+        r5 := @parameter3: javax.xml.ws.WebServiceFeature[];
+
+        $r4 = new com.sun.xml.internal.ws.binding.WebServiceFeatureList;
+
+        specialinvoke $r4.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: void <init>(javax.xml.ws.WebServiceFeature[])>(r5);
+
+        $r6 = virtualinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.ws.Dispatch createDispatch(javax.xml.namespace.QName,java.lang.Class,javax.xml.ws.Service$Mode,com.sun.xml.internal.ws.binding.WebServiceFeatureList)>(r1, r2, r3, $r4);
+
+        return $r6;
+    }
+
+    public javax.xml.ws.Dispatch createDispatch(javax.xml.namespace.QName, java.lang.Class, javax.xml.ws.Service$Mode, com.sun.xml.internal.ws.binding.WebServiceFeatureList)
+    {
+        javax.xml.ws.Service$Mode r5;
+        javax.xml.ws.Dispatch $r20;
+        com.sun.xml.internal.ws.api.addressing.WSEndpointReference r15;
+        javax.xml.ws.WebServiceFeature $r1, $r12, $r14, $r17;
+        boolean $z0, $z1, z2;
+        com.sun.xml.internal.ws.developer.MemberSubmissionAddressingFeature $r18, r19;
+        javax.xml.ws.soap.AddressingFeature r16;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r2;
+        com.sun.xml.internal.ws.binding.WebServiceFeatureList r0, $r11, $r13;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLService $r6, $r7, $r9;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLPort $r8, $r10;
+        java.lang.Class r4;
+        javax.xml.namespace.QName r3;
+
+        r2 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r3 := @parameter0: javax.xml.namespace.QName;
+
+        r4 := @parameter1: java.lang.Class;
+
+        r5 := @parameter2: javax.xml.ws.Service$Mode;
+
+        r0 := @parameter3: com.sun.xml.internal.ws.binding.WebServiceFeatureList;
+
+        r15 = null;
+
+        z2 = 0;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: javax.xml.ws.WebServiceFeature get(java.lang.Class)>(class "Ljavax/xml/ws/soap/AddressingFeature;");
+
+        r16 = (javax.xml.ws.soap.AddressingFeature) $r1;
+
+        if r16 != null goto label1;
+
+        $r13 = r2.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.binding.WebServiceFeatureList features>;
+
+        $r14 = virtualinvoke $r13.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: javax.xml.ws.WebServiceFeature get(java.lang.Class)>(class "Ljavax/xml/ws/soap/AddressingFeature;");
+
+        r16 = (javax.xml.ws.soap.AddressingFeature) $r14;
+
+     label1:
+        if r16 == null goto label2;
+
+        $z1 = virtualinvoke r16.<javax.xml.ws.soap.AddressingFeature: boolean isEnabled()>();
+
+        if $z1 == 0 goto label2;
+
+        z2 = 1;
+
+     label2:
+        $r17 = virtualinvoke r0.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: javax.xml.ws.WebServiceFeature get(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/developer/MemberSubmissionAddressingFeature;");
+
+        $r18 = (com.sun.xml.internal.ws.developer.MemberSubmissionAddressingFeature) $r17;
+
+        r19 = $r18;
+
+        if $r18 != null goto label3;
+
+        $r11 = r2.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.binding.WebServiceFeatureList features>;
+
+        $r12 = virtualinvoke $r11.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: javax.xml.ws.WebServiceFeature get(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/developer/MemberSubmissionAddressingFeature;");
+
+        r19 = (com.sun.xml.internal.ws.developer.MemberSubmissionAddressingFeature) $r12;
+
+     label3:
+        if r19 == null goto label4;
+
+        $z0 = virtualinvoke r19.<com.sun.xml.internal.ws.developer.MemberSubmissionAddressingFeature: boolean isEnabled()>();
+
+        if $z0 == 0 goto label4;
+
+        z2 = 1;
+
+     label4:
+        if z2 == 0 goto label5;
+
+        $r6 = r2.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLService wsdlService>;
+
+        if $r6 == null goto label5;
+
+        $r7 = r2.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLService wsdlService>;
+
+        $r8 = interfaceinvoke $r7.<com.sun.xml.internal.ws.api.model.wsdl.WSDLService: com.sun.xml.internal.ws.api.model.wsdl.WSDLPort get(javax.xml.namespace.QName)>(r3);
+
+        if $r8 == null goto label5;
+
+        $r9 = r2.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLService wsdlService>;
+
+        $r10 = interfaceinvoke $r9.<com.sun.xml.internal.ws.api.model.wsdl.WSDLService: com.sun.xml.internal.ws.api.model.wsdl.WSDLPort get(javax.xml.namespace.QName)>(r3);
+
+        r15 = interfaceinvoke $r10.<com.sun.xml.internal.ws.api.model.wsdl.WSDLPort: com.sun.xml.internal.ws.api.addressing.WSEndpointReference getEPR()>();
+
+     label5:
+        $r20 = virtualinvoke r2.<com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.ws.Dispatch createDispatch(javax.xml.namespace.QName,com.sun.xml.internal.ws.api.addressing.WSEndpointReference,java.lang.Class,javax.xml.ws.Service$Mode,com.sun.xml.internal.ws.binding.WebServiceFeatureList)>(r3, r15, r4, r5, r0);
+
+        return $r20;
+    }
+
+    public transient javax.xml.ws.Dispatch createDispatch(javax.xml.ws.EndpointReference, java.lang.Class, javax.xml.ws.Service$Mode, javax.xml.ws.WebServiceFeature[])
+    {
+        javax.xml.ws.EndpointReference r1;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r2;
+        javax.xml.ws.Service$Mode r5;
+        javax.xml.ws.Dispatch $r7;
+        javax.xml.ws.WebServiceFeature[] r6;
+        com.sun.xml.internal.ws.api.addressing.WSEndpointReference $r0;
+        java.lang.Class r4;
+        javax.xml.namespace.QName $r3;
+
+        r2 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r1 := @parameter0: javax.xml.ws.EndpointReference;
+
+        r4 := @parameter1: java.lang.Class;
+
+        r5 := @parameter2: javax.xml.ws.Service$Mode;
+
+        r6 := @parameter3: javax.xml.ws.WebServiceFeature[];
+
+        $r0 = new com.sun.xml.internal.ws.api.addressing.WSEndpointReference;
+
+        specialinvoke $r0.<com.sun.xml.internal.ws.api.addressing.WSEndpointReference: void <init>(javax.xml.ws.EndpointReference)>(r1);
+
+        $r3 = specialinvoke r2.<com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.namespace.QName addPortEpr(com.sun.xml.internal.ws.api.addressing.WSEndpointReference)>($r0);
+
+        $r7 = virtualinvoke r2.<com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.ws.Dispatch createDispatch(javax.xml.namespace.QName,com.sun.xml.internal.ws.api.addressing.WSEndpointReference,java.lang.Class,javax.xml.ws.Service$Mode,javax.xml.ws.WebServiceFeature[])>($r3, $r0, r4, r5, r6);
+
+        return $r7;
+    }
+
+    public com.sun.xml.internal.ws.client.PortInfo safeGetPort(javax.xml.namespace.QName)
+    {
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        java.util.Set $r7;
+        javax.xml.ws.WebServiceException $r5;
+        com.sun.xml.internal.ws.client.PortInfo r4;
+        java.util.Map $r2, $r6;
+        java.lang.Object $r3;
+        java.lang.StringBuilder $r8;
+        javax.xml.namespace.QName r1;
+        java.lang.String $r9;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r1 := @parameter0: javax.xml.namespace.QName;
+
+        $r2 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.util.Map ports>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r4 = (com.sun.xml.internal.ws.client.PortInfo) $r3;
+
+        if r4 != null goto label1;
+
+        $r5 = new javax.xml.ws.WebServiceException;
+
+        $r6 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.util.Map ports>;
+
+        $r7 = interfaceinvoke $r6.<java.util.Map: java.util.Set keySet()>();
+
+        $r8 = specialinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.lang.StringBuilder buildNameList(java.util.Collection)>($r7);
+
+        $r9 = staticinvoke <com.sun.xml.internal.ws.resources.ClientMessages: java.lang.String INVALID_PORT_NAME(java.lang.Object,java.lang.Object)>(r1, $r8);
+
+        specialinvoke $r5.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>($r9);
+
+        throw $r5;
+
+     label1:
+        return r4;
+    }
+
+    private java.lang.StringBuilder buildNameList(java.util.Collection)
+    {
+        java.util.Iterator $r2;
+        java.util.Collection r1;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r5;
+        int $i0;
+        java.lang.StringBuilder $r0;
+        java.lang.Object $r3;
+        javax.xml.namespace.QName r4;
+        boolean $z0;
+
+        r5 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r1 := @parameter0: java.util.Collection;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = interfaceinvoke r1.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (javax.xml.namespace.QName) $r3;
+
+        $i0 = virtualinvoke $r0.<java.lang.StringBuilder: int length()>();
+
+        if $i0 <= 0 goto label2;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+     label2:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r4);
+
+        goto label1;
+
+     label3:
+        return $r0;
+    }
+
+    public com.sun.xml.internal.ws.api.EndpointAddress getEndpointAddress(javax.xml.namespace.QName)
+    {
+        com.sun.xml.internal.ws.api.EndpointAddress $r5;
+        com.sun.xml.internal.ws.client.PortInfo r4;
+        java.util.Map $r2;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        java.lang.Object $r3;
+        javax.xml.namespace.QName r1;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r1 := @parameter0: javax.xml.namespace.QName;
+
+        $r2 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.util.Map ports>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        r4 = (com.sun.xml.internal.ws.client.PortInfo) $r3;
+
+        if r4 == null goto label1;
+
+        $r5 = r4.<com.sun.xml.internal.ws.client.PortInfo: com.sun.xml.internal.ws.api.EndpointAddress targetEndpoint>;
+
+        goto label2;
+
+     label1:
+        $r5 = null;
+
+     label2:
+        return $r5;
+    }
+
+    public javax.xml.ws.Dispatch createDispatch(javax.xml.namespace.QName, javax.xml.bind.JAXBContext, javax.xml.ws.Service$Mode) throws javax.xml.ws.WebServiceException
+    {
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        javax.xml.ws.Service$Mode r3;
+        javax.xml.ws.Dispatch $r5;
+        javax.xml.ws.WebServiceFeature[] $r4;
+        javax.xml.namespace.QName r1;
+        javax.xml.bind.JAXBContext r2;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r1 := @parameter0: javax.xml.namespace.QName;
+
+        r2 := @parameter1: javax.xml.bind.JAXBContext;
+
+        r3 := @parameter2: javax.xml.ws.Service$Mode;
+
+        $r4 = <com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.ws.WebServiceFeature[] EMPTY_FEATURES>;
+
+        $r5 = virtualinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.ws.Dispatch createDispatch(javax.xml.namespace.QName,javax.xml.bind.JAXBContext,javax.xml.ws.Service$Mode,javax.xml.ws.WebServiceFeature[])>(r1, r2, r3, $r4);
+
+        return $r5;
+    }
+
+    public transient javax.xml.ws.Dispatch createDispatch(javax.xml.namespace.QName, com.sun.xml.internal.ws.api.addressing.WSEndpointReference, javax.xml.bind.JAXBContext, javax.xml.ws.Service$Mode, javax.xml.ws.WebServiceFeature[])
+    {
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        javax.xml.ws.Service$Mode r4;
+        javax.xml.ws.Dispatch $r7;
+        javax.xml.ws.WebServiceFeature[] r6;
+        com.sun.xml.internal.ws.binding.WebServiceFeatureList $r5;
+        com.sun.xml.internal.ws.api.addressing.WSEndpointReference r2;
+        javax.xml.namespace.QName r1;
+        javax.xml.bind.JAXBContext r3;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r1 := @parameter0: javax.xml.namespace.QName;
+
+        r2 := @parameter1: com.sun.xml.internal.ws.api.addressing.WSEndpointReference;
+
+        r3 := @parameter2: javax.xml.bind.JAXBContext;
+
+        r4 := @parameter3: javax.xml.ws.Service$Mode;
+
+        r6 := @parameter4: javax.xml.ws.WebServiceFeature[];
+
+        $r5 = new com.sun.xml.internal.ws.binding.WebServiceFeatureList;
+
+        specialinvoke $r5.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: void <init>(javax.xml.ws.WebServiceFeature[])>(r6);
+
+        $r7 = virtualinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.ws.Dispatch createDispatch(javax.xml.namespace.QName,com.sun.xml.internal.ws.api.addressing.WSEndpointReference,javax.xml.bind.JAXBContext,javax.xml.ws.Service$Mode,com.sun.xml.internal.ws.binding.WebServiceFeatureList)>(r1, r2, r3, r4, $r5);
+
+        return $r7;
+    }
+
+    protected javax.xml.ws.Dispatch createDispatch(javax.xml.namespace.QName, com.sun.xml.internal.ws.api.addressing.WSEndpointReference, javax.xml.bind.JAXBContext, javax.xml.ws.Service$Mode, com.sun.xml.internal.ws.binding.WebServiceFeatureList)
+    {
+        com.sun.xml.internal.ws.api.ComponentsFeature $r23;
+        javax.xml.ws.Service$Mode r9;
+        javax.xml.ws.Dispatch $r12;
+        com.sun.xml.internal.ws.developer.WSBindingProvider $r13;
+        com.sun.xml.internal.ws.client.PortInfo $r2;
+        com.sun.xml.internal.ws.api.addressing.WSEndpointReference r11;
+        com.sun.xml.internal.ws.api.ComponentFeature$Target $r18, $r19, $r21, $r22;
+        javax.xml.ws.WebServiceFeature $r4, $r6;
+        javax.xml.bind.JAXBContext r10;
+        boolean $z0, $z1, $z2;
+        java.util.Iterator $r16;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        com.sun.xml.internal.ws.binding.BindingImpl $r8;
+        com.sun.xml.internal.ws.api.client.ServiceInterceptor $r14;
+        java.lang.IllegalArgumentException $r20, $r24;
+        java.util.List $r15;
+        com.sun.xml.internal.ws.binding.WebServiceFeatureList r3, $r7;
+        com.sun.xml.internal.ws.api.ComponentFeature r5, r25;
+        java.lang.Object $r17;
+        javax.xml.namespace.QName r1;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r1 := @parameter0: javax.xml.namespace.QName;
+
+        r11 := @parameter1: com.sun.xml.internal.ws.api.addressing.WSEndpointReference;
+
+        r10 := @parameter2: javax.xml.bind.JAXBContext;
+
+        r9 := @parameter3: javax.xml.ws.Service$Mode;
+
+        r3 := @parameter4: com.sun.xml.internal.ws.binding.WebServiceFeatureList;
+
+        $r2 = virtualinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.client.PortInfo safeGetPort(javax.xml.namespace.QName)>(r1);
+
+        $r4 = virtualinvoke r3.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: javax.xml.ws.WebServiceFeature get(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/api/ComponentFeature;");
+
+        r5 = (com.sun.xml.internal.ws.api.ComponentFeature) $r4;
+
+        if r5 == null goto label1;
+
+        $r21 = <com.sun.xml.internal.ws.api.ComponentFeature$Target: com.sun.xml.internal.ws.api.ComponentFeature$Target STUB>;
+
+        $r22 = virtualinvoke r5.<com.sun.xml.internal.ws.api.ComponentFeature: com.sun.xml.internal.ws.api.ComponentFeature$Target getTarget()>();
+
+        $z2 = virtualinvoke $r21.<com.sun.xml.internal.ws.api.ComponentFeature$Target: boolean equals(java.lang.Object)>($r22);
+
+        if $z2 != 0 goto label1;
+
+        $r24 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r24.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r24;
+
+     label1:
+        $r6 = virtualinvoke r3.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: javax.xml.ws.WebServiceFeature get(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/api/ComponentsFeature;");
+
+        $r23 = (com.sun.xml.internal.ws.api.ComponentsFeature) $r6;
+
+        if $r23 == null goto label4;
+
+        $r15 = virtualinvoke $r23.<com.sun.xml.internal.ws.api.ComponentsFeature: java.util.List getComponentFeatures()>();
+
+        $r16 = interfaceinvoke $r15.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r16.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r17 = interfaceinvoke $r16.<java.util.Iterator: java.lang.Object next()>();
+
+        r25 = (com.sun.xml.internal.ws.api.ComponentFeature) $r17;
+
+        $r18 = <com.sun.xml.internal.ws.api.ComponentFeature$Target: com.sun.xml.internal.ws.api.ComponentFeature$Target STUB>;
+
+        $r19 = virtualinvoke r25.<com.sun.xml.internal.ws.api.ComponentFeature: com.sun.xml.internal.ws.api.ComponentFeature$Target getTarget()>();
+
+        $z1 = virtualinvoke $r18.<com.sun.xml.internal.ws.api.ComponentFeature$Target: boolean equals(java.lang.Object)>($r19);
+
+        if $z1 != 0 goto label3;
+
+        $r20 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r20.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r20;
+
+     label3:
+        goto label2;
+
+     label4:
+        $r7 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.binding.WebServiceFeatureList features>;
+
+        virtualinvoke r3.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: void addAll(java.lang.Iterable)>($r7);
+
+        $r8 = virtualinvoke $r2.<com.sun.xml.internal.ws.client.PortInfo: com.sun.xml.internal.ws.binding.BindingImpl createBinding(com.sun.xml.internal.ws.binding.WebServiceFeatureList,java.lang.Class,com.sun.xml.internal.ws.binding.BindingImpl)>(r3, null, null);
+
+        virtualinvoke $r8.<com.sun.xml.internal.ws.binding.BindingImpl: void setMode(javax.xml.ws.Service$Mode)>(r9);
+
+        $r12 = staticinvoke <com.sun.xml.internal.ws.api.pipe.Stubs: javax.xml.ws.Dispatch createJAXBDispatch(com.sun.xml.internal.ws.api.client.WSPortInfo,com.sun.xml.internal.ws.api.WSBinding,javax.xml.bind.JAXBContext,javax.xml.ws.Service$Mode,com.sun.xml.internal.ws.api.addressing.WSEndpointReference)>($r2, $r8, r10, r9, r11);
+
+        $r14 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.client.ServiceInterceptor serviceInterceptor>;
+
+        $r13 = (com.sun.xml.internal.ws.developer.WSBindingProvider) $r12;
+
+        virtualinvoke $r14.<com.sun.xml.internal.ws.api.client.ServiceInterceptor: void postCreateDispatch(com.sun.xml.internal.ws.developer.WSBindingProvider)>($r13);
+
+        return $r12;
+    }
+
+    public com.sun.xml.internal.ws.api.server.Container getContainer()
+    {
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        com.sun.xml.internal.ws.api.server.Container $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        $r1 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.server.Container container>;
+
+        return $r1;
+    }
+
+    public transient javax.xml.ws.Dispatch createDispatch(javax.xml.namespace.QName, javax.xml.bind.JAXBContext, javax.xml.ws.Service$Mode, javax.xml.ws.WebServiceFeature[])
+    {
+        com.sun.xml.internal.ws.binding.WebServiceFeatureList $r4;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        javax.xml.ws.Service$Mode r3;
+        javax.xml.ws.Dispatch $r6;
+        javax.xml.ws.WebServiceFeature[] r5;
+        javax.xml.namespace.QName r1;
+        javax.xml.bind.JAXBContext r2;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r1 := @parameter0: javax.xml.namespace.QName;
+
+        r2 := @parameter1: javax.xml.bind.JAXBContext;
+
+        r3 := @parameter2: javax.xml.ws.Service$Mode;
+
+        r5 := @parameter3: javax.xml.ws.WebServiceFeature[];
+
+        $r4 = new com.sun.xml.internal.ws.binding.WebServiceFeatureList;
+
+        specialinvoke $r4.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: void <init>(javax.xml.ws.WebServiceFeature[])>(r5);
+
+        $r6 = virtualinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.ws.Dispatch createDispatch(javax.xml.namespace.QName,javax.xml.bind.JAXBContext,javax.xml.ws.Service$Mode,com.sun.xml.internal.ws.binding.WebServiceFeatureList)>(r1, r2, r3, $r4);
+
+        return $r6;
+    }
+
+    protected javax.xml.ws.Dispatch createDispatch(javax.xml.namespace.QName, javax.xml.bind.JAXBContext, javax.xml.ws.Service$Mode, com.sun.xml.internal.ws.binding.WebServiceFeatureList)
+    {
+        javax.xml.ws.Service$Mode r5;
+        javax.xml.ws.Dispatch $r20;
+        com.sun.xml.internal.ws.api.addressing.WSEndpointReference r15;
+        javax.xml.ws.WebServiceFeature $r1, $r12, $r14, $r17;
+        javax.xml.bind.JAXBContext r4;
+        boolean $z0, $z1, z2;
+        com.sun.xml.internal.ws.developer.MemberSubmissionAddressingFeature $r18, r19;
+        javax.xml.ws.soap.AddressingFeature r16;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r2;
+        com.sun.xml.internal.ws.binding.WebServiceFeatureList r0, $r11, $r13;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLService $r6, $r7, $r9;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLPort $r8, $r10;
+        javax.xml.namespace.QName r3;
+
+        r2 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r3 := @parameter0: javax.xml.namespace.QName;
+
+        r4 := @parameter1: javax.xml.bind.JAXBContext;
+
+        r5 := @parameter2: javax.xml.ws.Service$Mode;
+
+        r0 := @parameter3: com.sun.xml.internal.ws.binding.WebServiceFeatureList;
+
+        r15 = null;
+
+        z2 = 0;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: javax.xml.ws.WebServiceFeature get(java.lang.Class)>(class "Ljavax/xml/ws/soap/AddressingFeature;");
+
+        r16 = (javax.xml.ws.soap.AddressingFeature) $r1;
+
+        if r16 != null goto label1;
+
+        $r13 = r2.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.binding.WebServiceFeatureList features>;
+
+        $r14 = virtualinvoke $r13.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: javax.xml.ws.WebServiceFeature get(java.lang.Class)>(class "Ljavax/xml/ws/soap/AddressingFeature;");
+
+        r16 = (javax.xml.ws.soap.AddressingFeature) $r14;
+
+     label1:
+        if r16 == null goto label2;
+
+        $z1 = virtualinvoke r16.<javax.xml.ws.soap.AddressingFeature: boolean isEnabled()>();
+
+        if $z1 == 0 goto label2;
+
+        z2 = 1;
+
+     label2:
+        $r17 = virtualinvoke r0.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: javax.xml.ws.WebServiceFeature get(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/developer/MemberSubmissionAddressingFeature;");
+
+        $r18 = (com.sun.xml.internal.ws.developer.MemberSubmissionAddressingFeature) $r17;
+
+        r19 = $r18;
+
+        if $r18 != null goto label3;
+
+        $r11 = r2.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.binding.WebServiceFeatureList features>;
+
+        $r12 = virtualinvoke $r11.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: javax.xml.ws.WebServiceFeature get(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/developer/MemberSubmissionAddressingFeature;");
+
+        r19 = (com.sun.xml.internal.ws.developer.MemberSubmissionAddressingFeature) $r12;
+
+     label3:
+        if r19 == null goto label4;
+
+        $z0 = virtualinvoke r19.<com.sun.xml.internal.ws.developer.MemberSubmissionAddressingFeature: boolean isEnabled()>();
+
+        if $z0 == 0 goto label4;
+
+        z2 = 1;
+
+     label4:
+        if z2 == 0 goto label5;
+
+        $r6 = r2.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLService wsdlService>;
+
+        if $r6 == null goto label5;
+
+        $r7 = r2.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLService wsdlService>;
+
+        $r8 = interfaceinvoke $r7.<com.sun.xml.internal.ws.api.model.wsdl.WSDLService: com.sun.xml.internal.ws.api.model.wsdl.WSDLPort get(javax.xml.namespace.QName)>(r3);
+
+        if $r8 == null goto label5;
+
+        $r9 = r2.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLService wsdlService>;
+
+        $r10 = interfaceinvoke $r9.<com.sun.xml.internal.ws.api.model.wsdl.WSDLService: com.sun.xml.internal.ws.api.model.wsdl.WSDLPort get(javax.xml.namespace.QName)>(r3);
+
+        r15 = interfaceinvoke $r10.<com.sun.xml.internal.ws.api.model.wsdl.WSDLPort: com.sun.xml.internal.ws.api.addressing.WSEndpointReference getEPR()>();
+
+     label5:
+        $r20 = virtualinvoke r2.<com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.ws.Dispatch createDispatch(javax.xml.namespace.QName,com.sun.xml.internal.ws.api.addressing.WSEndpointReference,javax.xml.bind.JAXBContext,javax.xml.ws.Service$Mode,com.sun.xml.internal.ws.binding.WebServiceFeatureList)>(r3, r15, r4, r5, r0);
+
+        return $r20;
+    }
+
+    public transient javax.xml.ws.Dispatch createDispatch(javax.xml.ws.EndpointReference, javax.xml.bind.JAXBContext, javax.xml.ws.Service$Mode, javax.xml.ws.WebServiceFeature[])
+    {
+        javax.xml.ws.EndpointReference r1;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r2;
+        javax.xml.ws.Service$Mode r5;
+        javax.xml.ws.Dispatch $r7;
+        javax.xml.ws.WebServiceFeature[] r6;
+        com.sun.xml.internal.ws.api.addressing.WSEndpointReference $r0;
+        javax.xml.namespace.QName $r3;
+        javax.xml.bind.JAXBContext r4;
+
+        r2 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r1 := @parameter0: javax.xml.ws.EndpointReference;
+
+        r4 := @parameter1: javax.xml.bind.JAXBContext;
+
+        r5 := @parameter2: javax.xml.ws.Service$Mode;
+
+        r6 := @parameter3: javax.xml.ws.WebServiceFeature[];
+
+        $r0 = new com.sun.xml.internal.ws.api.addressing.WSEndpointReference;
+
+        specialinvoke $r0.<com.sun.xml.internal.ws.api.addressing.WSEndpointReference: void <init>(javax.xml.ws.EndpointReference)>(r1);
+
+        $r3 = specialinvoke r2.<com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.namespace.QName addPortEpr(com.sun.xml.internal.ws.api.addressing.WSEndpointReference)>($r0);
+
+        $r7 = virtualinvoke r2.<com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.ws.Dispatch createDispatch(javax.xml.namespace.QName,com.sun.xml.internal.ws.api.addressing.WSEndpointReference,javax.xml.bind.JAXBContext,javax.xml.ws.Service$Mode,javax.xml.ws.WebServiceFeature[])>($r3, $r0, r4, r5, r6);
+
+        return $r7;
+    }
+
+    private javax.xml.namespace.QName addPortEpr(com.sun.xml.internal.ws.api.addressing.WSEndpointReference)
+    {
+        com.sun.xml.internal.ws.api.EndpointAddress $r14;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLBoundPortType $r8;
+        com.sun.xml.internal.ws.api.addressing.WSEndpointReference r0;
+        com.sun.xml.internal.ws.client.PortInfo $r3;
+        java.util.Map $r10, $r11;
+        java.lang.String $r4, $r5, $r13;
+        boolean $z0;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r1;
+        com.sun.xml.internal.ws.api.BindingID $r9;
+        javax.xml.ws.WebServiceException $r12;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLService $r6;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLPort $r7;
+        javax.xml.namespace.QName $r2;
+
+        r1 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.api.addressing.WSEndpointReference;
+
+        if r0 != null goto label1;
+
+        $r12 = new javax.xml.ws.WebServiceException;
+
+        $r13 = staticinvoke <com.sun.xml.internal.ws.resources.ProviderApiMessages: java.lang.String NULL_EPR()>();
+
+        specialinvoke $r12.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>($r13);
+
+        throw $r12;
+
+     label1:
+        $r2 = specialinvoke r1.<com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.namespace.QName getPortNameFromEPR(com.sun.xml.internal.ws.api.addressing.WSEndpointReference,javax.xml.namespace.QName)>(r0, null);
+
+        $r3 = new com.sun.xml.internal.ws.client.PortInfo;
+
+        $r4 = virtualinvoke r0.<com.sun.xml.internal.ws.api.addressing.WSEndpointReference: java.lang.String getAddress()>();
+
+        if $r4 != null goto label2;
+
+        $r14 = null;
+
+        goto label3;
+
+     label2:
+        $r5 = virtualinvoke r0.<com.sun.xml.internal.ws.api.addressing.WSEndpointReference: java.lang.String getAddress()>();
+
+        $r14 = staticinvoke <com.sun.xml.internal.ws.api.EndpointAddress: com.sun.xml.internal.ws.api.EndpointAddress create(java.lang.String)>($r5);
+
+     label3:
+        $r6 = r1.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLService wsdlService>;
+
+        $r7 = virtualinvoke r1.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLPort getPortModel(com.sun.xml.internal.ws.api.model.wsdl.WSDLService,javax.xml.namespace.QName)>($r6, $r2);
+
+        $r8 = interfaceinvoke $r7.<com.sun.xml.internal.ws.api.model.wsdl.WSDLPort: com.sun.xml.internal.ws.api.model.wsdl.WSDLBoundPortType getBinding()>();
+
+        $r9 = interfaceinvoke $r8.<com.sun.xml.internal.ws.api.model.wsdl.WSDLBoundPortType: com.sun.xml.internal.ws.api.BindingID getBindingId()>();
+
+        specialinvoke $r3.<com.sun.xml.internal.ws.client.PortInfo: void <init>(com.sun.xml.internal.ws.client.WSServiceDelegate,com.sun.xml.internal.ws.api.EndpointAddress,javax.xml.namespace.QName,com.sun.xml.internal.ws.api.BindingID)>(r1, $r14, $r2, $r9);
+
+        $r10 = r1.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.util.Map ports>;
+
+        $z0 = interfaceinvoke $r10.<java.util.Map: boolean containsKey(java.lang.Object)>($r2);
+
+        if $z0 != 0 goto label4;
+
+        $r11 = r1.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.util.Map ports>;
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, $r3);
+
+     label4:
+        return $r2;
+    }
+
+    private javax.xml.namespace.QName getPortNameFromEPR(com.sun.xml.internal.ws.api.addressing.WSEndpointReference, javax.xml.namespace.QName)
+    {
+        java.net.URL $r19;
+        java.util.Map $r27;
+        boolean $z0;
+        java.util.Set $r28;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLService $r5, $r6, $r14, $r23, $r24;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLPort $r7, $r15;
+        java.lang.StringBuilder $r9, $r29;
+        javax.xml.namespace.QName $r2, $r3, r13, $r22, $r26, $r33, r39;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLModel $r21;
+        javax.xml.transform.Source $r18;
+        com.sun.xml.internal.ws.api.addressing.WSEndpointReference$Metadata $r1;
+        com.sun.xml.internal.ws.api.addressing.WSEndpointReference r0;
+        java.lang.String $r10, $r12, $r17, $r20, $r30, $r32, $r37, $r38;
+        java.net.MalformedURLException $r35;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r4;
+        javax.xml.ws.WebServiceException $r8, $r11, $r16, $r25, $r31, $r34, $r36;
+
+        r4 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.api.addressing.WSEndpointReference;
+
+        r13 := @parameter1: javax.xml.namespace.QName;
+
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.api.addressing.WSEndpointReference: com.sun.xml.internal.ws.api.addressing.WSEndpointReference$Metadata getMetaData()>();
+
+        $r2 = virtualinvoke $r1.<com.sun.xml.internal.ws.api.addressing.WSEndpointReference$Metadata: javax.xml.namespace.QName getServiceName()>();
+
+        $r3 = virtualinvoke $r1.<com.sun.xml.internal.ws.api.addressing.WSEndpointReference$Metadata: javax.xml.namespace.QName getPortName()>();
+
+        if $r2 == null goto label1;
+
+        $r33 = r4.<com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.namespace.QName serviceName>;
+
+        $z0 = virtualinvoke $r2.<javax.xml.namespace.QName: boolean equals(java.lang.Object)>($r33);
+
+        if $z0 != 0 goto label1;
+
+        $r34 = new javax.xml.ws.WebServiceException;
+
+        specialinvoke $r34.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>("EndpointReference WSDL ServiceName differs from Service Instance WSDL Service QName.\n The two Service QNames must match");
+
+        throw $r34;
+
+     label1:
+        $r5 = r4.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLService wsdlService>;
+
+        if $r5 != null goto label5;
+
+        $r18 = virtualinvoke $r1.<com.sun.xml.internal.ws.api.addressing.WSEndpointReference$Metadata: javax.xml.transform.Source getWsdlSource()>();
+
+        if $r18 != null goto label2;
+
+        $r31 = new javax.xml.ws.WebServiceException;
+
+        $r32 = staticinvoke <com.sun.xml.internal.ws.resources.ProviderApiMessages: java.lang.String NULL_WSDL()>();
+
+        specialinvoke $r31.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>($r32);
+
+        throw $r31;
+
+     label2:
+        $r19 = new java.net.URL;
+
+        $r20 = virtualinvoke r0.<com.sun.xml.internal.ws.api.addressing.WSEndpointReference: java.lang.String getAddress()>();
+
+        specialinvoke $r19.<java.net.URL: void <init>(java.lang.String)>($r20);
+
+        $r21 = specialinvoke r4.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLModel parseWSDL(java.net.URL,javax.xml.transform.Source,java.lang.Class)>($r19, $r18, null);
+
+        $r22 = r4.<com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.namespace.QName serviceName>;
+
+        $r23 = interfaceinvoke $r21.<com.sun.xml.internal.ws.api.model.wsdl.WSDLModel: com.sun.xml.internal.ws.api.model.wsdl.WSDLService getService(javax.xml.namespace.QName)>($r22);
+
+        r4.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLService wsdlService> = $r23;
+
+        $r24 = r4.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLService wsdlService>;
+
+        if $r24 != null goto label3;
+
+        $r25 = new javax.xml.ws.WebServiceException;
+
+        $r26 = r4.<com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.namespace.QName serviceName>;
+
+        $r27 = interfaceinvoke $r21.<com.sun.xml.internal.ws.api.model.wsdl.WSDLModel: java.util.Map getServices()>();
+
+        $r28 = interfaceinvoke $r27.<java.util.Map: java.util.Set keySet()>();
+
+        $r29 = specialinvoke r4.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.lang.StringBuilder buildNameList(java.util.Collection)>($r28);
+
+        $r30 = staticinvoke <com.sun.xml.internal.ws.resources.ClientMessages: java.lang.String INVALID_SERVICE_NAME(java.lang.Object,java.lang.Object)>($r26, $r29);
+
+        specialinvoke $r25.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>($r30);
+
+        throw $r25;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r35 := @caughtexception;
+
+        $r36 = new javax.xml.ws.WebServiceException;
+
+        $r37 = virtualinvoke r0.<com.sun.xml.internal.ws.api.addressing.WSEndpointReference: java.lang.String getAddress()>();
+
+        $r38 = staticinvoke <com.sun.xml.internal.ws.resources.ClientMessages: java.lang.String INVALID_ADDRESS(java.lang.Object)>($r37);
+
+        specialinvoke $r36.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>($r38);
+
+        throw $r36;
+
+     label5:
+        r39 = $r3;
+
+        if $r3 != null goto label7;
+
+        if r13 == null goto label7;
+
+        $r14 = r4.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLService wsdlService>;
+
+        $r15 = interfaceinvoke $r14.<com.sun.xml.internal.ws.api.model.wsdl.WSDLService: com.sun.xml.internal.ws.api.model.wsdl.WSDLPort getMatchingPort(javax.xml.namespace.QName)>(r13);
+
+        if $r15 != null goto label6;
+
+        $r16 = new javax.xml.ws.WebServiceException;
+
+        $r17 = staticinvoke <com.sun.xml.internal.ws.resources.ClientMessages: java.lang.String UNDEFINED_PORT_TYPE(java.lang.Object)>(r13);
+
+        specialinvoke $r16.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>($r17);
+
+        throw $r16;
+
+     label6:
+        r39 = interfaceinvoke $r15.<com.sun.xml.internal.ws.api.model.wsdl.WSDLPort: javax.xml.namespace.QName getName()>();
+
+     label7:
+        if r39 != null goto label8;
+
+        $r11 = new javax.xml.ws.WebServiceException;
+
+        $r12 = staticinvoke <com.sun.xml.internal.ws.resources.ProviderApiMessages: java.lang.String NULL_PORTNAME()>();
+
+        specialinvoke $r11.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>($r12);
+
+        throw $r11;
+
+     label8:
+        $r6 = r4.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLService wsdlService>;
+
+        $r7 = interfaceinvoke $r6.<com.sun.xml.internal.ws.api.model.wsdl.WSDLService: com.sun.xml.internal.ws.api.model.wsdl.WSDLPort get(javax.xml.namespace.QName)>(r39);
+
+        if $r7 != null goto label9;
+
+        $r8 = new javax.xml.ws.WebServiceException;
+
+        $r9 = specialinvoke r4.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.lang.StringBuilder buildWsdlPortNames()>();
+
+        $r10 = staticinvoke <com.sun.xml.internal.ws.resources.ClientMessages: java.lang.String INVALID_EPR_PORT_NAME(java.lang.Object,java.lang.Object)>(r39, $r9);
+
+        specialinvoke $r8.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>($r10);
+
+        throw $r8;
+
+     label9:
+        return r39;
+
+        catch java.net.MalformedURLException from label2 to label3 with label4;
+    }
+
+    private java.lang.Object createProxy(java.lang.Class, java.lang.reflect.InvocationHandler)
+    {
+        java.security.AccessControlContext $r10;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r8;
+        java.security.PermissionCollection $r6;
+        com.sun.xml.internal.ws.client.WSServiceDelegate$3 $r7;
+        java.security.ProtectionDomain[] $r11;
+        java.security.ProtectionDomain $r12;
+        java.lang.Class r0, $r2;
+        java.lang.RuntimePermission $r5;
+        java.lang.Object $r13;
+        java.lang.ClassLoader $r1, $r3, $r4;
+        java.lang.reflect.InvocationHandler r9;
+
+        r8 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r0 := @parameter0: java.lang.Class;
+
+        r9 := @parameter1: java.lang.reflect.InvocationHandler;
+
+        $r1 = virtualinvoke r0.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $r2 = class "Lcom/sun/xml/internal/ws/client/WSServiceDelegate;";
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $r4 = staticinvoke <com.sun.xml.internal.ws.client.WSServiceDelegate: java.lang.ClassLoader getDelegatingLoader(java.lang.ClassLoader,java.lang.ClassLoader)>($r1, $r3);
+
+        $r5 = new java.lang.RuntimePermission;
+
+        specialinvoke $r5.<java.lang.RuntimePermission: void <init>(java.lang.String)>("accessClassInPackage.com.sun.xml.internal.*");
+
+        $r6 = virtualinvoke $r5.<java.lang.RuntimePermission: java.security.PermissionCollection newPermissionCollection()>();
+
+        virtualinvoke $r6.<java.security.PermissionCollection: void add(java.security.Permission)>($r5);
+
+        $r7 = new com.sun.xml.internal.ws.client.WSServiceDelegate$3;
+
+        specialinvoke $r7.<com.sun.xml.internal.ws.client.WSServiceDelegate$3: void <init>(com.sun.xml.internal.ws.client.WSServiceDelegate,java.lang.ClassLoader,java.lang.Class,java.lang.reflect.InvocationHandler)>(r8, $r4, r0, r9);
+
+        $r10 = new java.security.AccessControlContext;
+
+        $r11 = newarray (java.security.ProtectionDomain)[1];
+
+        $r12 = new java.security.ProtectionDomain;
+
+        specialinvoke $r12.<java.security.ProtectionDomain: void <init>(java.security.CodeSource,java.security.PermissionCollection)>(null, $r6);
+
+        $r11[0] = $r12;
+
+        specialinvoke $r10.<java.security.AccessControlContext: void <init>(java.security.ProtectionDomain[])>($r11);
+
+        $r13 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction,java.security.AccessControlContext)>($r7, $r10);
+
+        return $r13;
+    }
+
+    private com.sun.xml.internal.ws.api.model.wsdl.WSDLService getWSDLModelfromSEI(java.lang.Class)
+    {
+        java.net.URL $r25;
+        javax.xml.transform.stream.StreamSource $r9;
+        java.util.Map $r17;
+        java.lang.String $r5, $r6, $r7, $r8, $r10, $r11, $r20, $r23, $r24;
+        boolean $z0;
+        javax.jws.WebService r4;
+        java.net.MalformedURLException $r21;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r1;
+        java.util.Set $r18;
+        com.sun.xml.internal.ws.client.WSServiceDelegate$4 $r0;
+        javax.xml.ws.WebServiceException $r15, $r22;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLService $r14;
+        java.lang.Class r2;
+        java.lang.Object $r3;
+        java.lang.StringBuilder $r19;
+        javax.xml.namespace.QName $r13, $r16;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLModel $r12;
+
+        r1 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r2 := @parameter0: java.lang.Class;
+
+        $r0 = new com.sun.xml.internal.ws.client.WSServiceDelegate$4;
+
+        specialinvoke $r0.<com.sun.xml.internal.ws.client.WSServiceDelegate$4: void <init>(com.sun.xml.internal.ws.client.WSServiceDelegate,java.lang.Class)>(r1, r2);
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r4 = (javax.jws.WebService) $r3;
+
+        if r4 == null goto label1;
+
+        $r5 = interfaceinvoke r4.<javax.jws.WebService: java.lang.String wsdlLocation()>();
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r6 = interfaceinvoke r4.<javax.jws.WebService: java.lang.String wsdlLocation()>();
+
+        $r7 = staticinvoke <com.sun.xml.internal.ws.util.JAXWSUtils: java.lang.String getFileOrURLName(java.lang.String)>($r6);
+
+        $r8 = staticinvoke <com.sun.xml.internal.ws.util.JAXWSUtils: java.lang.String absolutize(java.lang.String)>($r7);
+
+        $r9 = new javax.xml.transform.stream.StreamSource;
+
+        specialinvoke $r9.<javax.xml.transform.stream.StreamSource: void <init>(java.lang.String)>($r8);
+
+     label3:
+        $r10 = interfaceinvoke $r9.<javax.xml.transform.Source: java.lang.String getSystemId()>();
+
+        if $r10 != null goto label4;
+
+        $r25 = null;
+
+        goto label5;
+
+     label4:
+        $r25 = new java.net.URL;
+
+        $r11 = interfaceinvoke $r9.<javax.xml.transform.Source: java.lang.String getSystemId()>();
+
+        specialinvoke $r25.<java.net.URL: void <init>(java.lang.String)>($r11);
+
+     label5:
+        $r12 = specialinvoke r1.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLModel parseWSDL(java.net.URL,javax.xml.transform.Source,java.lang.Class)>($r25, $r9, r2);
+
+        $r13 = r1.<com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.namespace.QName serviceName>;
+
+        $r14 = interfaceinvoke $r12.<com.sun.xml.internal.ws.api.model.wsdl.WSDLModel: com.sun.xml.internal.ws.api.model.wsdl.WSDLService getService(javax.xml.namespace.QName)>($r13);
+
+        if $r14 != null goto label6;
+
+        $r15 = new javax.xml.ws.WebServiceException;
+
+        $r16 = r1.<com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.namespace.QName serviceName>;
+
+        $r17 = interfaceinvoke $r12.<com.sun.xml.internal.ws.api.model.wsdl.WSDLModel: java.util.Map getServices()>();
+
+        $r18 = interfaceinvoke $r17.<java.util.Map: java.util.Set keySet()>();
+
+        $r19 = specialinvoke r1.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.lang.StringBuilder buildNameList(java.util.Collection)>($r18);
+
+        $r20 = staticinvoke <com.sun.xml.internal.ws.resources.ClientMessages: java.lang.String INVALID_SERVICE_NAME(java.lang.Object,java.lang.Object)>($r16, $r19);
+
+        specialinvoke $r15.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>($r20);
+
+        throw $r15;
+
+     label6:
+        goto label8;
+
+     label7:
+        $r21 := @caughtexception;
+
+        $r22 = new javax.xml.ws.WebServiceException;
+
+        $r23 = interfaceinvoke $r9.<javax.xml.transform.Source: java.lang.String getSystemId()>();
+
+        $r24 = staticinvoke <com.sun.xml.internal.ws.resources.ClientMessages: java.lang.String INVALID_WSDL_URL(java.lang.Object)>($r23);
+
+        specialinvoke $r22.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>($r24);
+
+        throw $r22;
+
+     label8:
+        return $r14;
+
+        catch java.net.MalformedURLException from label3 to label6 with label7;
+    }
+
+    public javax.xml.namespace.QName getServiceName()
+    {
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        javax.xml.namespace.QName $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        $r1 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.namespace.QName serviceName>;
+
+        return $r1;
+    }
+
+    public java.lang.Class getServiceClass()
+    {
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        java.lang.Class $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        $r1 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.lang.Class serviceClass>;
+
+        return $r1;
+    }
+
+    public java.util.Iterator getPorts() throws javax.xml.ws.WebServiceException
+    {
+        java.util.Iterator $r3;
+        java.util.Map $r1;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        java.util.Set $r2;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        $r1 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.util.Map ports>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.util.Set keySet()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Set: java.util.Iterator iterator()>();
+
+        return $r3;
+    }
+
+    public java.net.URL getWSDLDocumentLocation()
+    {
+        java.net.MalformedURLException $r7;
+        java.net.URL $r2;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        java.lang.AssertionError $r8;
+        org.xml.sax.Locator $r5;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLService $r1, $r3;
+        java.lang.String $r6;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLModel $r4;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        $r1 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLService wsdlService>;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = new java.net.URL;
+
+        $r3 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLService wsdlService>;
+
+        $r4 = interfaceinvoke $r3.<com.sun.xml.internal.ws.api.model.wsdl.WSDLService: com.sun.xml.internal.ws.api.model.wsdl.WSDLModel getParent()>();
+
+        $r5 = interfaceinvoke $r4.<com.sun.xml.internal.ws.api.model.wsdl.WSDLModel: org.xml.sax.Locator getLocation()>();
+
+        $r6 = interfaceinvoke $r5.<org.xml.sax.Locator: java.lang.String getSystemId()>();
+
+        specialinvoke $r2.<java.net.URL: void <init>(java.lang.String)>($r6);
+
+     label2:
+        return $r2;
+
+     label3:
+        $r7 := @caughtexception;
+
+        $r8 = new java.lang.AssertionError;
+
+        specialinvoke $r8.<java.lang.AssertionError: void <init>(java.lang.Object)>($r7);
+
+        throw $r8;
+
+        catch java.net.MalformedURLException from label1 to label2 with label3;
+    }
+
+    private java.lang.Object createEndpointIFBaseProxy(com.sun.xml.internal.ws.api.addressing.WSEndpointReference, javax.xml.namespace.QName, java.lang.Class, com.sun.xml.internal.ws.binding.WebServiceFeatureList, com.sun.xml.internal.ws.client.SEIPortInfo)
+    {
+        com.sun.xml.internal.ws.developer.WSBindingProvider $r13;
+        com.sun.xml.internal.ws.api.addressing.WSEndpointReference r9;
+        java.lang.String $r17, $r20;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        com.sun.xml.internal.ws.binding.BindingImpl $r8;
+        com.sun.xml.internal.ws.api.client.ServiceInterceptor $r12, $r14;
+        com.sun.xml.internal.ws.client.SEIPortInfo r5;
+        javax.xml.ws.WebServiceException $r15, $r18;
+        com.sun.xml.internal.ws.binding.WebServiceFeatureList r6;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLService $r1, $r3;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLPort $r4;
+        java.lang.Class r7;
+        java.lang.Object $r11;
+        java.lang.StringBuilder $r16;
+        javax.xml.namespace.QName r2, $r19;
+        java.lang.reflect.InvocationHandler $r10;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r9 := @parameter0: com.sun.xml.internal.ws.api.addressing.WSEndpointReference;
+
+        r2 := @parameter1: javax.xml.namespace.QName;
+
+        r7 := @parameter2: java.lang.Class;
+
+        r6 := @parameter3: com.sun.xml.internal.ws.binding.WebServiceFeatureList;
+
+        r5 := @parameter4: com.sun.xml.internal.ws.client.SEIPortInfo;
+
+        $r1 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLService wsdlService>;
+
+        if $r1 != null goto label1;
+
+        $r18 = new javax.xml.ws.WebServiceException;
+
+        $r19 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.namespace.QName serviceName>;
+
+        $r20 = staticinvoke <com.sun.xml.internal.ws.resources.ClientMessages: java.lang.String INVALID_SERVICE_NO_WSDL(java.lang.Object)>($r19);
+
+        specialinvoke $r18.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>($r20);
+
+        throw $r18;
+
+     label1:
+        $r3 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLService wsdlService>;
+
+        $r4 = interfaceinvoke $r3.<com.sun.xml.internal.ws.api.model.wsdl.WSDLService: com.sun.xml.internal.ws.api.model.wsdl.WSDLPort get(javax.xml.namespace.QName)>(r2);
+
+        if $r4 != null goto label2;
+
+        $r15 = new javax.xml.ws.WebServiceException;
+
+        $r16 = specialinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.lang.StringBuilder buildWsdlPortNames()>();
+
+        $r17 = staticinvoke <com.sun.xml.internal.ws.resources.ClientMessages: java.lang.String INVALID_PORT_NAME(java.lang.Object,java.lang.Object)>(r2, $r16);
+
+        specialinvoke $r15.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>($r17);
+
+        throw $r15;
+
+     label2:
+        $r8 = virtualinvoke r5.<com.sun.xml.internal.ws.client.SEIPortInfo: com.sun.xml.internal.ws.binding.BindingImpl createBinding(com.sun.xml.internal.ws.binding.WebServiceFeatureList,java.lang.Class)>(r6, r7);
+
+        $r10 = virtualinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.lang.reflect.InvocationHandler getStubHandler(com.sun.xml.internal.ws.binding.BindingImpl,com.sun.xml.internal.ws.client.SEIPortInfo,com.sun.xml.internal.ws.api.addressing.WSEndpointReference)>($r8, r5, r9);
+
+        $r11 = specialinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.lang.Object createProxy(java.lang.Class,java.lang.reflect.InvocationHandler)>(r7, $r10);
+
+        $r12 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.client.ServiceInterceptor serviceInterceptor>;
+
+        if $r12 == null goto label3;
+
+        $r14 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.client.ServiceInterceptor serviceInterceptor>;
+
+        $r13 = (com.sun.xml.internal.ws.developer.WSBindingProvider) $r11;
+
+        virtualinvoke $r14.<com.sun.xml.internal.ws.api.client.ServiceInterceptor: void postCreateProxy(com.sun.xml.internal.ws.developer.WSBindingProvider,java.lang.Class)>($r13, r7);
+
+     label3:
+        return $r11;
+    }
+
+    protected java.lang.reflect.InvocationHandler getStubHandler(com.sun.xml.internal.ws.binding.BindingImpl, com.sun.xml.internal.ws.client.SEIPortInfo, com.sun.xml.internal.ws.api.addressing.WSEndpointReference)
+    {
+        com.sun.xml.internal.ws.client.sei.SEIStub $r0;
+        com.sun.xml.internal.ws.client.SEIPortInfo r1;
+        com.sun.xml.internal.ws.api.addressing.WSEndpointReference r3;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r5;
+        com.sun.xml.internal.ws.binding.BindingImpl r2;
+        com.sun.xml.internal.ws.model.SOAPSEIModel $r4;
+
+        r5 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r2 := @parameter0: com.sun.xml.internal.ws.binding.BindingImpl;
+
+        r1 := @parameter1: com.sun.xml.internal.ws.client.SEIPortInfo;
+
+        r3 := @parameter2: com.sun.xml.internal.ws.api.addressing.WSEndpointReference;
+
+        $r0 = new com.sun.xml.internal.ws.client.sei.SEIStub;
+
+        $r4 = r1.<com.sun.xml.internal.ws.client.SEIPortInfo: com.sun.xml.internal.ws.model.SOAPSEIModel model>;
+
+        specialinvoke $r0.<com.sun.xml.internal.ws.client.sei.SEIStub: void <init>(com.sun.xml.internal.ws.api.client.WSPortInfo,com.sun.xml.internal.ws.binding.BindingImpl,com.sun.xml.internal.ws.model.SOAPSEIModel,com.sun.xml.internal.ws.api.addressing.WSEndpointReference)>(r1, r2, $r4, r3);
+
+        return $r0;
+    }
+
+    private java.lang.StringBuilder buildWsdlPortNames()
+    {
+        java.util.Iterator $r4;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r1;
+        java.lang.Iterable $r3;
+        java.util.HashSet $r0;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLService $r2;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLPort r7;
+        java.lang.StringBuilder $r5;
+        java.lang.Object $r6;
+        javax.xml.namespace.QName $r8;
+        boolean $z0;
+
+        r1 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        $r0 = new java.util.HashSet;
+
+        specialinvoke $r0.<java.util.HashSet: void <init>()>();
+
+        $r2 = r1.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLService wsdlService>;
+
+        $r3 = interfaceinvoke $r2.<com.sun.xml.internal.ws.api.model.wsdl.WSDLService: java.lang.Iterable getPorts()>();
+
+        $r4 = interfaceinvoke $r3.<java.lang.Iterable: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r6 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (com.sun.xml.internal.ws.api.model.wsdl.WSDLPort) $r6;
+
+        $r8 = interfaceinvoke r7.<com.sun.xml.internal.ws.api.model.wsdl.WSDLPort: javax.xml.namespace.QName getName()>();
+
+        interfaceinvoke $r0.<java.util.Set: boolean add(java.lang.Object)>($r8);
+
+        goto label1;
+
+     label2:
+        $r5 = specialinvoke r1.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.lang.StringBuilder buildNameList(java.util.Collection)>($r0);
+
+        return $r5;
+    }
+
+    public com.sun.xml.internal.ws.api.model.wsdl.WSDLPort getPortModel(com.sun.xml.internal.ws.api.model.wsdl.WSDLService, javax.xml.namespace.QName)
+    {
+        javax.xml.ws.WebServiceException $r3;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r4;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLService r0;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLPort $r2;
+        java.lang.StringBuilder $r5;
+        javax.xml.namespace.QName r1;
+        java.lang.String $r6;
+
+        r4 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.api.model.wsdl.WSDLService;
+
+        r1 := @parameter1: javax.xml.namespace.QName;
+
+        $r2 = interfaceinvoke r0.<com.sun.xml.internal.ws.api.model.wsdl.WSDLService: com.sun.xml.internal.ws.api.model.wsdl.WSDLPort get(javax.xml.namespace.QName)>(r1);
+
+        if $r2 != null goto label1;
+
+        $r3 = new javax.xml.ws.WebServiceException;
+
+        $r5 = specialinvoke r4.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.lang.StringBuilder buildWsdlPortNames()>();
+
+        $r6 = staticinvoke <com.sun.xml.internal.ws.resources.ClientMessages: java.lang.String INVALID_PORT_NAME(java.lang.Object,java.lang.Object)>(r1, $r5);
+
+        specialinvoke $r3.<javax.xml.ws.WebServiceException: void <init>(java.lang.String)>($r6);
+
+        throw $r3;
+
+     label1:
+        return $r2;
+    }
+
+    private com.sun.xml.internal.ws.client.SEIPortInfo addSEI(javax.xml.namespace.QName, java.lang.Class, com.sun.xml.internal.ws.binding.WebServiceFeatureList) throws javax.xml.ws.WebServiceException
+    {
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        com.sun.xml.internal.ws.client.SEIPortInfo $r6, $r11, r12;
+        com.sun.xml.internal.ws.binding.WebServiceFeatureList r1;
+        java.util.Map $r3, $r8, $r10;
+        java.lang.Object $r4;
+        java.lang.Class r5;
+        javax.xml.namespace.QName r2, $r7, $r9;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r2 := @parameter0: javax.xml.namespace.QName;
+
+        r5 := @parameter1: java.lang.Class;
+
+        r1 := @parameter2: com.sun.xml.internal.ws.binding.WebServiceFeatureList;
+
+        $z0 = specialinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: boolean useOwnSEIModel(com.sun.xml.internal.ws.binding.WebServiceFeatureList)>(r1);
+
+        if $z0 == 0 goto label1;
+
+        $r11 = specialinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.client.SEIPortInfo createSEIPortInfo(javax.xml.namespace.QName,java.lang.Class,com.sun.xml.internal.ws.binding.WebServiceFeatureList)>(r2, r5, r1);
+
+        return $r11;
+
+     label1:
+        $r3 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.util.Map seiContext>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>(r2);
+
+        r12 = (com.sun.xml.internal.ws.client.SEIPortInfo) $r4;
+
+        if r12 != null goto label2;
+
+        $r6 = specialinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.client.SEIPortInfo createSEIPortInfo(javax.xml.namespace.QName,java.lang.Class,com.sun.xml.internal.ws.binding.WebServiceFeatureList)>(r2, r5, r1);
+
+        r12 = $r6;
+
+        $r8 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.util.Map seiContext>;
+
+        $r7 = $r6.<com.sun.xml.internal.ws.client.SEIPortInfo: javax.xml.namespace.QName portName>;
+
+        interfaceinvoke $r8.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r7, $r6);
+
+        $r10 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.util.Map ports>;
+
+        $r9 = $r6.<com.sun.xml.internal.ws.client.SEIPortInfo: javax.xml.namespace.QName portName>;
+
+        interfaceinvoke $r10.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r9, $r6);
+
+     label2:
+        return r12;
+    }
+
+    public com.sun.xml.internal.ws.api.model.SEIModel buildRuntimeModel(javax.xml.namespace.QName, javax.xml.namespace.QName, java.lang.Class, com.sun.xml.internal.ws.api.model.wsdl.WSDLPort, com.sun.xml.internal.ws.binding.WebServiceFeatureList)
+    {
+        com.oracle.webservices.internal.api.databinding.Databinding $r14;
+        java.net.URL $r11;
+        com.sun.xml.internal.ws.api.databinding.DatabindingFactory $r0;
+        com.sun.xml.internal.ws.api.databinding.DatabindingConfig $r1;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r10;
+        com.sun.xml.internal.ws.api.databinding.MetadataReader $r13;
+        com.sun.xml.internal.ws.api.databinding.MappingInfo $r3, $r8;
+        com.sun.xml.internal.ws.binding.WebServiceFeatureList r6;
+        com.sun.xml.internal.ws.api.model.SEIModel $r16;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLPort r5;
+        java.lang.Class r2;
+        com.sun.xml.internal.ws.db.DatabindingImpl r15;
+        javax.xml.namespace.QName r4, r9;
+        java.lang.ClassLoader $r7, $r12;
+
+        r10 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r4 := @parameter0: javax.xml.namespace.QName;
+
+        r9 := @parameter1: javax.xml.namespace.QName;
+
+        r2 := @parameter2: java.lang.Class;
+
+        r5 := @parameter3: com.sun.xml.internal.ws.api.model.wsdl.WSDLPort;
+
+        r6 := @parameter4: com.sun.xml.internal.ws.binding.WebServiceFeatureList;
+
+        $r0 = staticinvoke <com.sun.xml.internal.ws.api.databinding.DatabindingFactory: com.sun.xml.internal.ws.api.databinding.DatabindingFactory newInstance()>();
+
+        $r1 = new com.sun.xml.internal.ws.api.databinding.DatabindingConfig;
+
+        specialinvoke $r1.<com.sun.xml.internal.ws.api.databinding.DatabindingConfig: void <init>()>();
+
+        virtualinvoke $r1.<com.sun.xml.internal.ws.api.databinding.DatabindingConfig: void setContractClass(java.lang.Class)>(r2);
+
+        $r3 = virtualinvoke $r1.<com.sun.xml.internal.ws.api.databinding.DatabindingConfig: com.sun.xml.internal.ws.api.databinding.MappingInfo getMappingInfo()>();
+
+        virtualinvoke $r3.<com.sun.xml.internal.ws.api.databinding.MappingInfo: void setServiceName(javax.xml.namespace.QName)>(r4);
+
+        virtualinvoke $r1.<com.sun.xml.internal.ws.api.databinding.DatabindingConfig: void setWsdlPort(com.sun.xml.internal.ws.api.model.wsdl.WSDLPort)>(r5);
+
+        virtualinvoke $r1.<com.sun.xml.internal.ws.api.databinding.DatabindingConfig: void setFeatures(java.lang.Iterable)>(r6);
+
+        $r7 = virtualinvoke r2.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        virtualinvoke $r1.<com.sun.xml.internal.ws.api.databinding.DatabindingConfig: void setClassLoader(java.lang.ClassLoader)>($r7);
+
+        $r8 = virtualinvoke $r1.<com.sun.xml.internal.ws.api.databinding.DatabindingConfig: com.sun.xml.internal.ws.api.databinding.MappingInfo getMappingInfo()>();
+
+        virtualinvoke $r8.<com.sun.xml.internal.ws.api.databinding.MappingInfo: void setPortName(javax.xml.namespace.QName)>(r9);
+
+        $r11 = r10.<com.sun.xml.internal.ws.client.WSServiceDelegate: java.net.URL wsdlURL>;
+
+        virtualinvoke $r1.<com.sun.xml.internal.ws.api.databinding.DatabindingConfig: void setWsdlURL(java.net.URL)>($r11);
+
+        $r12 = virtualinvoke r2.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $r13 = specialinvoke r10.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.databinding.MetadataReader getMetadadaReader(com.sun.xml.internal.ws.binding.WebServiceFeatureList,java.lang.ClassLoader)>(r6, $r12);
+
+        virtualinvoke $r1.<com.sun.xml.internal.ws.api.databinding.DatabindingConfig: void setMetadataReader(com.sun.xml.internal.ws.api.databinding.MetadataReader)>($r13);
+
+        $r14 = virtualinvoke $r0.<com.sun.xml.internal.ws.api.databinding.DatabindingFactory: com.oracle.webservices.internal.api.databinding.Databinding createRuntime(com.sun.xml.internal.ws.api.databinding.DatabindingConfig)>($r1);
+
+        r15 = (com.sun.xml.internal.ws.db.DatabindingImpl) $r14;
+
+        $r16 = virtualinvoke r15.<com.sun.xml.internal.ws.db.DatabindingImpl: com.sun.xml.internal.ws.api.model.SEIModel getModel()>();
+
+        return $r16;
+    }
+
+    private com.sun.xml.internal.ws.api.databinding.MetadataReader getMetadadaReader(com.sun.xml.internal.ws.binding.WebServiceFeatureList, java.lang.ClassLoader)
+    {
+        com.sun.xml.internal.ws.binding.WebServiceFeatureList r0;
+        com.sun.xml.internal.ws.client.WSServiceDelegate r5;
+        javax.xml.ws.WebServiceFeature $r1;
+        com.oracle.webservices.internal.api.databinding.ExternalMetadataFeature r2;
+        com.sun.xml.internal.ws.api.databinding.MetadataReader $r4;
+        java.lang.ClassLoader r3;
+
+        r5 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.binding.WebServiceFeatureList;
+
+        r3 := @parameter1: java.lang.ClassLoader;
+
+        if r0 != null goto label1;
+
+        return null;
+
+     label1:
+        $r1 = virtualinvoke r0.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: javax.xml.ws.WebServiceFeature get(java.lang.Class)>(class "Lcom/oracle/webservices/internal/api/databinding/ExternalMetadataFeature;");
+
+        r2 = (com.oracle.webservices.internal.api.databinding.ExternalMetadataFeature) $r1;
+
+        if r2 == null goto label2;
+
+        $r4 = virtualinvoke r2.<com.oracle.webservices.internal.api.databinding.ExternalMetadataFeature: com.sun.xml.internal.ws.api.databinding.MetadataReader getMetadataReader(java.lang.ClassLoader,boolean)>(r3, 0);
+
+        return $r4;
+
+     label2:
+        return null;
+    }
+
+    private com.sun.xml.internal.ws.client.SEIPortInfo createSEIPortInfo(javax.xml.namespace.QName, java.lang.Class, com.sun.xml.internal.ws.binding.WebServiceFeatureList)
+    {
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        com.sun.xml.internal.ws.model.SOAPSEIModel $r9;
+        com.sun.xml.internal.ws.client.SEIPortInfo $r8;
+        com.sun.xml.internal.ws.binding.WebServiceFeatureList r5;
+        com.sun.xml.internal.ws.api.model.SEIModel $r7;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLService $r2;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLPort $r3;
+        java.lang.Class r4;
+        javax.xml.namespace.QName r1, $r6;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r1 := @parameter0: javax.xml.namespace.QName;
+
+        r4 := @parameter1: java.lang.Class;
+
+        r5 := @parameter2: com.sun.xml.internal.ws.binding.WebServiceFeatureList;
+
+        $r2 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLService wsdlService>;
+
+        $r3 = virtualinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLPort getPortModel(com.sun.xml.internal.ws.api.model.wsdl.WSDLService,javax.xml.namespace.QName)>($r2, r1);
+
+        $r6 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.namespace.QName serviceName>;
+
+        $r7 = virtualinvoke r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.SEIModel buildRuntimeModel(javax.xml.namespace.QName,javax.xml.namespace.QName,java.lang.Class,com.sun.xml.internal.ws.api.model.wsdl.WSDLPort,com.sun.xml.internal.ws.binding.WebServiceFeatureList)>($r6, r1, r4, $r3, r5);
+
+        $r8 = new com.sun.xml.internal.ws.client.SEIPortInfo;
+
+        $r9 = (com.sun.xml.internal.ws.model.SOAPSEIModel) $r7;
+
+        specialinvoke $r8.<com.sun.xml.internal.ws.client.SEIPortInfo: void <init>(com.sun.xml.internal.ws.client.WSServiceDelegate,java.lang.Class,com.sun.xml.internal.ws.model.SOAPSEIModel,com.sun.xml.internal.ws.api.model.wsdl.WSDLPort)>(r0, r4, $r9, $r3);
+
+        return $r8;
+    }
+
+    private boolean useOwnSEIModel(com.sun.xml.internal.ws.binding.WebServiceFeatureList)
+    {
+        com.sun.xml.internal.ws.client.WSServiceDelegate r1;
+        com.sun.xml.internal.ws.binding.WebServiceFeatureList r0;
+        boolean $z0;
+
+        r1 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        r0 := @parameter0: com.sun.xml.internal.ws.binding.WebServiceFeatureList;
+
+        $z0 = virtualinvoke r0.<com.sun.xml.internal.ws.binding.WebServiceFeatureList: boolean contains(java.lang.Class)>(class "Lcom/sun/xml/internal/ws/developer/UsesJAXBContextFeature;");
+
+        return $z0;
+    }
+
+    public com.sun.xml.internal.ws.api.model.wsdl.WSDLService getWsdlService()
+    {
+        com.sun.xml.internal.ws.client.WSServiceDelegate r0;
+        com.sun.xml.internal.ws.api.model.wsdl.WSDLService $r1;
+
+        r0 := @this: com.sun.xml.internal.ws.client.WSServiceDelegate;
+
+        $r1 = r0.<com.sun.xml.internal.ws.client.WSServiceDelegate: com.sun.xml.internal.ws.api.model.wsdl.WSDLService wsdlService>;
+
+        return $r1;
+    }
+
+    private static java.lang.ClassLoader getDelegatingLoader(java.lang.ClassLoader, java.lang.ClassLoader)
+    {
+        java.lang.ClassLoader r0, r1;
+        com.sun.xml.internal.ws.client.WSServiceDelegate$DelegatingLoader $r2;
+
+        r0 := @parameter0: java.lang.ClassLoader;
+
+        r1 := @parameter1: java.lang.ClassLoader;
+
+        if r0 != null goto label1;
+
+        return r1;
+
+     label1:
+        if r1 != null goto label2;
+
+        return r0;
+
+     label2:
+        $r2 = new com.sun.xml.internal.ws.client.WSServiceDelegate$DelegatingLoader;
+
+        specialinvoke $r2.<com.sun.xml.internal.ws.client.WSServiceDelegate$DelegatingLoader: void <init>(java.lang.ClassLoader,java.lang.ClassLoader)>(r0, r1);
+
+        return $r2;
+    }
+
+    static void <clinit>()
+    {
+        javax.xml.ws.WebServiceFeature[] $r0;
+
+        $r0 = newarray (javax.xml.ws.WebServiceFeature)[0];
+
+        <com.sun.xml.internal.ws.client.WSServiceDelegate: javax.xml.ws.WebServiceFeature[] EMPTY_FEATURES> = $r0;
+
+        return;
+    }
+}

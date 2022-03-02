@@ -1,0 +1,4214 @@
+public abstract class javax.swing.text.JTextComponent extends javax.swing.JComponent implements javax.swing.Scrollable, javax.accessibility.Accessible
+{
+    public static final java.lang.String FOCUS_ACCELERATOR_KEY;
+    private javax.swing.text.Document model;
+    private transient javax.swing.text.Caret caret;
+    private javax.swing.text.NavigationFilter navigationFilter;
+    private transient javax.swing.text.Highlighter highlighter;
+    private transient javax.swing.text.Keymap keymap;
+    private transient javax.swing.text.JTextComponent$MutableCaretEvent caretEvent;
+    private java.awt.Color caretColor;
+    private java.awt.Color selectionColor;
+    private java.awt.Color selectedTextColor;
+    private java.awt.Color disabledTextColor;
+    private boolean editable;
+    private java.awt.Insets margin;
+    private char focusAccelerator;
+    private boolean dragEnabled;
+    private javax.swing.DropMode dropMode;
+    private transient javax.swing.text.JTextComponent$DropLocation dropLocation;
+    private static javax.swing.text.JTextComponent$DefaultTransferHandler defaultTransferHandler;
+    private static com.sun.beans.util.Cache METHOD_OVERRIDDEN;
+    private static final java.lang.Object KEYMAP_TABLE;
+    private transient java.awt.im.InputMethodRequests inputMethodRequestsHandler;
+    private javax.swing.text.SimpleAttributeSet composedTextAttribute;
+    private java.lang.String composedTextContent;
+    private javax.swing.text.Position composedTextStart;
+    private javax.swing.text.Position composedTextEnd;
+    private javax.swing.text.Position latestCommittedTextStart;
+    private javax.swing.text.Position latestCommittedTextEnd;
+    private javax.swing.text.JTextComponent$ComposedTextCaret composedTextCaret;
+    private transient javax.swing.text.Caret originalCaret;
+    private boolean checkedInputOverride;
+    private boolean needToSendKeyTypedEvent;
+    private static final java.lang.Object FOCUSED_COMPONENT;
+    public static final java.lang.String DEFAULT_KEYMAP;
+
+    public void <init>()
+    {
+        javax.swing.DropMode $r1;
+        javax.swing.text.JTextComponent$MutableCaretEvent $r2, $r3, $r4;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        specialinvoke r0.<javax.swing.JComponent: void <init>()>();
+
+        $r1 = <javax.swing.DropMode: javax.swing.DropMode USE_SELECTION>;
+
+        r0.<javax.swing.text.JTextComponent: javax.swing.DropMode dropMode> = $r1;
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void enableEvents(long)>(2056L);
+
+        $r2 = new javax.swing.text.JTextComponent$MutableCaretEvent;
+
+        specialinvoke $r2.<javax.swing.text.JTextComponent$MutableCaretEvent: void <init>(javax.swing.text.JTextComponent)>(r0);
+
+        r0.<javax.swing.text.JTextComponent: javax.swing.text.JTextComponent$MutableCaretEvent caretEvent> = $r2;
+
+        $r3 = r0.<javax.swing.text.JTextComponent: javax.swing.text.JTextComponent$MutableCaretEvent caretEvent>;
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void addMouseListener(java.awt.event.MouseListener)>($r3);
+
+        $r4 = r0.<javax.swing.text.JTextComponent: javax.swing.text.JTextComponent$MutableCaretEvent caretEvent>;
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void addFocusListener(java.awt.event.FocusListener)>($r4);
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void setEditable(boolean)>(1);
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void setDragEnabled(boolean)>(0);
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void setLayout(java.awt.LayoutManager)>(null);
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void updateUI()>();
+
+        return;
+    }
+
+    public javax.swing.plaf.TextUI getUI()
+    {
+        javax.swing.plaf.ComponentUI $r1;
+        javax.swing.plaf.TextUI $r2;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.swing.plaf.ComponentUI ui>;
+
+        $r2 = (javax.swing.plaf.TextUI) $r1;
+
+        return $r2;
+    }
+
+    public void setUI(javax.swing.plaf.TextUI)
+    {
+        javax.swing.plaf.TextUI r1;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r1 := @parameter0: javax.swing.plaf.TextUI;
+
+        specialinvoke r0.<javax.swing.JComponent: void setUI(javax.swing.plaf.ComponentUI)>(r1);
+
+        return;
+    }
+
+    public void updateUI()
+    {
+        javax.swing.plaf.ComponentUI $r1;
+        javax.swing.plaf.TextUI $r2;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = staticinvoke <javax.swing.UIManager: javax.swing.plaf.ComponentUI getUI(javax.swing.JComponent)>(r0);
+
+        $r2 = (javax.swing.plaf.TextUI) $r1;
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void setUI(javax.swing.plaf.TextUI)>($r2);
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void invalidate()>();
+
+        return;
+    }
+
+    public void addCaretListener(javax.swing.event.CaretListener)
+    {
+        javax.swing.event.CaretListener r1;
+        javax.swing.event.EventListenerList $r2;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r1 := @parameter0: javax.swing.event.CaretListener;
+
+        $r2 = r0.<javax.swing.text.JTextComponent: javax.swing.event.EventListenerList listenerList>;
+
+        virtualinvoke $r2.<javax.swing.event.EventListenerList: void add(java.lang.Class,java.util.EventListener)>(class "Ljavax/swing/event/CaretListener;", r1);
+
+        return;
+    }
+
+    public void removeCaretListener(javax.swing.event.CaretListener)
+    {
+        javax.swing.event.CaretListener r1;
+        javax.swing.event.EventListenerList $r2;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r1 := @parameter0: javax.swing.event.CaretListener;
+
+        $r2 = r0.<javax.swing.text.JTextComponent: javax.swing.event.EventListenerList listenerList>;
+
+        virtualinvoke $r2.<javax.swing.event.EventListenerList: void remove(java.lang.Class,java.util.EventListener)>(class "Ljavax/swing/event/CaretListener;", r1);
+
+        return;
+    }
+
+    public javax.swing.event.CaretListener[] getCaretListeners()
+    {
+        java.util.EventListener[] $r2;
+        javax.swing.event.CaretListener[] $r3;
+        javax.swing.event.EventListenerList $r1;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.swing.event.EventListenerList listenerList>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.event.EventListenerList: java.util.EventListener[] getListeners(java.lang.Class)>(class "Ljavax/swing/event/CaretListener;");
+
+        $r3 = (javax.swing.event.CaretListener[]) $r2;
+
+        return $r3;
+    }
+
+    protected void fireCaretUpdate(javax.swing.event.CaretEvent)
+    {
+        java.lang.Object[] $r2;
+        javax.swing.event.CaretListener $r6;
+        javax.swing.text.JTextComponent r0;
+        javax.swing.event.EventListenerList $r1;
+        int $i0, $i1, i2, $i4;
+        java.lang.Object $r3, $r4;
+        javax.swing.event.CaretEvent r5;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r5 := @parameter0: javax.swing.event.CaretEvent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.swing.event.EventListenerList listenerList>;
+
+        $r2 = virtualinvoke $r1.<javax.swing.event.EventListenerList: java.lang.Object[] getListenerList()>();
+
+        $i0 = lengthof $r2;
+
+        i2 = $i0 - 2;
+
+     label1:
+        if i2 < 0 goto label3;
+
+        $r3 = $r2[i2];
+
+        if $r3 != class "Ljavax/swing/event/CaretListener;" goto label2;
+
+        $i1 = i2 + 1;
+
+        $r4 = $r2[$i1];
+
+        $r6 = (javax.swing.event.CaretListener) $r4;
+
+        interfaceinvoke $r6.<javax.swing.event.CaretListener: void caretUpdate(javax.swing.event.CaretEvent)>(r5);
+
+     label2:
+        $i4 = (int) -2;
+
+        i2 = i2 + $i4;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    public void setDocument(javax.swing.text.Document)
+    {
+        javax.swing.event.DocumentListener $r11, $r19;
+        javax.swing.text.AbstractDocument $r16, $r24, $r26;
+        boolean $z0, $z1, $z2, $z3;
+        javax.accessibility.AccessibleContext $r2, $r8, $r13, $r21;
+        javax.swing.text.JTextComponent$AccessibleJTextComponent $r14, $r22;
+        javax.swing.text.Document r1, r4, $r12, $r15, $r20, $r23;
+        java.lang.Throwable $r25;
+        java.awt.font.TextAttribute $r6, $r17;
+        java.awt.im.InputMethodRequests $r3, $r9, $r10, $r18;
+        java.lang.Boolean $r27;
+        javax.swing.text.JTextComponent r0;
+        java.awt.ComponentOrientation $r5;
+        java.lang.Object $r7;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r4 := @parameter0: javax.swing.text.Document;
+
+        r1 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Document model>;
+
+     label01:
+        $z0 = r1 instanceof javax.swing.text.AbstractDocument;
+
+        if $z0 == 0 goto label02;
+
+        $r24 = (javax.swing.text.AbstractDocument) r1;
+
+        virtualinvoke $r24.<javax.swing.text.AbstractDocument: void readLock()>();
+
+     label02:
+        $r2 = r0.<javax.swing.text.JTextComponent: javax.accessibility.AccessibleContext accessibleContext>;
+
+        if $r2 == null goto label03;
+
+        $r23 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Document model>;
+
+        $r21 = r0.<javax.swing.text.JTextComponent: javax.accessibility.AccessibleContext accessibleContext>;
+
+        $r22 = (javax.swing.text.JTextComponent$AccessibleJTextComponent) $r21;
+
+        interfaceinvoke $r23.<javax.swing.text.Document: void removeDocumentListener(javax.swing.event.DocumentListener)>($r22);
+
+     label03:
+        $r3 = r0.<javax.swing.text.JTextComponent: java.awt.im.InputMethodRequests inputMethodRequestsHandler>;
+
+        if $r3 == null goto label04;
+
+        $r20 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Document model>;
+
+        $r18 = r0.<javax.swing.text.JTextComponent: java.awt.im.InputMethodRequests inputMethodRequestsHandler>;
+
+        $r19 = (javax.swing.event.DocumentListener) $r18;
+
+        interfaceinvoke $r20.<javax.swing.text.Document: void removeDocumentListener(javax.swing.event.DocumentListener)>($r19);
+
+     label04:
+        r0.<javax.swing.text.JTextComponent: javax.swing.text.Document model> = r4;
+
+        $r5 = virtualinvoke r0.<javax.swing.text.JTextComponent: java.awt.ComponentOrientation getComponentOrientation()>();
+
+        $z1 = virtualinvoke $r5.<java.awt.ComponentOrientation: boolean isLeftToRight()>();
+
+        if $z1 == 0 goto label05;
+
+        $r27 = <java.awt.font.TextAttribute: java.lang.Boolean RUN_DIRECTION_LTR>;
+
+        goto label06;
+
+     label05:
+        $r27 = <java.awt.font.TextAttribute: java.lang.Boolean RUN_DIRECTION_RTL>;
+
+     label06:
+        $r6 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute RUN_DIRECTION>;
+
+        $r7 = interfaceinvoke r4.<javax.swing.text.Document: java.lang.Object getProperty(java.lang.Object)>($r6);
+
+        if $r27 == $r7 goto label07;
+
+        $r17 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute RUN_DIRECTION>;
+
+        interfaceinvoke r4.<javax.swing.text.Document: void putProperty(java.lang.Object,java.lang.Object)>($r17, $r27);
+
+     label07:
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void firePropertyChange(java.lang.String,java.lang.Object,java.lang.Object)>("document", r1, r4);
+
+     label08:
+        $z2 = r1 instanceof javax.swing.text.AbstractDocument;
+
+        if $z2 == 0 goto label12;
+
+        $r16 = (javax.swing.text.AbstractDocument) r1;
+
+        virtualinvoke $r16.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+        goto label12;
+
+     label09:
+        $r25 := @caughtexception;
+
+     label10:
+        $z3 = r1 instanceof javax.swing.text.AbstractDocument;
+
+        if $z3 == 0 goto label11;
+
+        $r26 = (javax.swing.text.AbstractDocument) r1;
+
+        virtualinvoke $r26.<javax.swing.text.AbstractDocument: void readUnlock()>();
+
+     label11:
+        throw $r25;
+
+     label12:
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void revalidate()>();
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void repaint()>();
+
+        $r8 = r0.<javax.swing.text.JTextComponent: javax.accessibility.AccessibleContext accessibleContext>;
+
+        if $r8 == null goto label13;
+
+        $r15 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Document model>;
+
+        $r13 = r0.<javax.swing.text.JTextComponent: javax.accessibility.AccessibleContext accessibleContext>;
+
+        $r14 = (javax.swing.text.JTextComponent$AccessibleJTextComponent) $r13;
+
+        interfaceinvoke $r15.<javax.swing.text.Document: void addDocumentListener(javax.swing.event.DocumentListener)>($r14);
+
+     label13:
+        $r9 = r0.<javax.swing.text.JTextComponent: java.awt.im.InputMethodRequests inputMethodRequestsHandler>;
+
+        if $r9 == null goto label14;
+
+        $r12 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Document model>;
+
+        $r10 = r0.<javax.swing.text.JTextComponent: java.awt.im.InputMethodRequests inputMethodRequestsHandler>;
+
+        $r11 = (javax.swing.event.DocumentListener) $r10;
+
+        interfaceinvoke $r12.<javax.swing.text.Document: void addDocumentListener(javax.swing.event.DocumentListener)>($r11);
+
+     label14:
+        return;
+
+        catch java.lang.Throwable from label01 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    public javax.swing.text.Document getDocument()
+    {
+        javax.swing.text.Document $r1;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Document model>;
+
+        return $r1;
+    }
+
+    public void setComponentOrientation(java.awt.ComponentOrientation)
+    {
+        java.awt.font.TextAttribute $r3;
+        java.lang.Boolean $r4;
+        javax.swing.text.Document $r1;
+        javax.swing.text.JTextComponent r0;
+        java.awt.ComponentOrientation r2;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r2 := @parameter0: java.awt.ComponentOrientation;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        if $r1 == null goto label3;
+
+        $z0 = virtualinvoke r2.<java.awt.ComponentOrientation: boolean isLeftToRight()>();
+
+        if $z0 == 0 goto label1;
+
+        $r4 = <java.awt.font.TextAttribute: java.lang.Boolean RUN_DIRECTION_LTR>;
+
+        goto label2;
+
+     label1:
+        $r4 = <java.awt.font.TextAttribute: java.lang.Boolean RUN_DIRECTION_RTL>;
+
+     label2:
+        $r3 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute RUN_DIRECTION>;
+
+        interfaceinvoke $r1.<javax.swing.text.Document: void putProperty(java.lang.Object,java.lang.Object)>($r3, $r4);
+
+     label3:
+        specialinvoke r0.<javax.swing.JComponent: void setComponentOrientation(java.awt.ComponentOrientation)>(r2);
+
+        return;
+    }
+
+    public javax.swing.Action[] getActions()
+    {
+        javax.swing.text.EditorKit $r2;
+        javax.swing.plaf.TextUI $r1;
+        javax.swing.Action[] $r3;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.plaf.TextUI getUI()>();
+
+        $r2 = virtualinvoke $r1.<javax.swing.plaf.TextUI: javax.swing.text.EditorKit getEditorKit(javax.swing.text.JTextComponent)>(r0);
+
+        $r3 = virtualinvoke $r2.<javax.swing.text.EditorKit: javax.swing.Action[] getActions()>();
+
+        return $r3;
+    }
+
+    public void setMargin(java.awt.Insets)
+    {
+        java.awt.Insets r1, r2;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r2 := @parameter0: java.awt.Insets;
+
+        r1 = r0.<javax.swing.text.JTextComponent: java.awt.Insets margin>;
+
+        r0.<javax.swing.text.JTextComponent: java.awt.Insets margin> = r2;
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void firePropertyChange(java.lang.String,java.lang.Object,java.lang.Object)>("margin", r1, r2);
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void invalidate()>();
+
+        return;
+    }
+
+    public java.awt.Insets getMargin()
+    {
+        java.awt.Insets $r1;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: java.awt.Insets margin>;
+
+        return $r1;
+    }
+
+    public void setNavigationFilter(javax.swing.text.NavigationFilter)
+    {
+        javax.swing.text.JTextComponent r0;
+        javax.swing.text.NavigationFilter r1;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r1 := @parameter0: javax.swing.text.NavigationFilter;
+
+        r0.<javax.swing.text.JTextComponent: javax.swing.text.NavigationFilter navigationFilter> = r1;
+
+        return;
+    }
+
+    public javax.swing.text.NavigationFilter getNavigationFilter()
+    {
+        javax.swing.text.JTextComponent r0;
+        javax.swing.text.NavigationFilter $r1;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.swing.text.NavigationFilter navigationFilter>;
+
+        return $r1;
+    }
+
+    public javax.swing.text.Caret getCaret()
+    {
+        javax.swing.text.Caret $r1;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        return $r1;
+    }
+
+    public void setCaret(javax.swing.text.Caret)
+    {
+        javax.swing.text.Caret $r1, r2, $r3, $r4, $r5, $r7, $r9, $r10, $r11;
+        javax.swing.text.JTextComponent$MutableCaretEvent $r6, $r8;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r2 := @parameter0: javax.swing.text.Caret;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        if $r1 == null goto label1;
+
+        $r9 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $r8 = r0.<javax.swing.text.JTextComponent: javax.swing.text.JTextComponent$MutableCaretEvent caretEvent>;
+
+        interfaceinvoke $r9.<javax.swing.text.Caret: void removeChangeListener(javax.swing.event.ChangeListener)>($r8);
+
+        $r10 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        interfaceinvoke $r10.<javax.swing.text.Caret: void deinstall(javax.swing.text.JTextComponent)>(r0);
+
+     label1:
+        $r11 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret> = r2;
+
+        $r3 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        if $r3 == null goto label2;
+
+        $r5 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        interfaceinvoke $r5.<javax.swing.text.Caret: void install(javax.swing.text.JTextComponent)>(r0);
+
+        $r7 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $r6 = r0.<javax.swing.text.JTextComponent: javax.swing.text.JTextComponent$MutableCaretEvent caretEvent>;
+
+        interfaceinvoke $r7.<javax.swing.text.Caret: void addChangeListener(javax.swing.event.ChangeListener)>($r6);
+
+     label2:
+        $r4 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void firePropertyChange(java.lang.String,java.lang.Object,java.lang.Object)>("caret", $r11, $r4);
+
+        return;
+    }
+
+    public javax.swing.text.Highlighter getHighlighter()
+    {
+        javax.swing.text.JTextComponent r0;
+        javax.swing.text.Highlighter $r1;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Highlighter highlighter>;
+
+        return $r1;
+    }
+
+    public void setHighlighter(javax.swing.text.Highlighter)
+    {
+        javax.swing.text.JTextComponent r0;
+        javax.swing.text.Highlighter $r1, r2, $r3, $r4, $r5, $r6;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r2 := @parameter0: javax.swing.text.Highlighter;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Highlighter highlighter>;
+
+        if $r1 == null goto label1;
+
+        $r5 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Highlighter highlighter>;
+
+        interfaceinvoke $r5.<javax.swing.text.Highlighter: void deinstall(javax.swing.text.JTextComponent)>(r0);
+
+     label1:
+        $r6 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Highlighter highlighter>;
+
+        r0.<javax.swing.text.JTextComponent: javax.swing.text.Highlighter highlighter> = r2;
+
+        $r3 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Highlighter highlighter>;
+
+        if $r3 == null goto label2;
+
+        $r4 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Highlighter highlighter>;
+
+        interfaceinvoke $r4.<javax.swing.text.Highlighter: void install(javax.swing.text.JTextComponent)>(r0);
+
+     label2:
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void firePropertyChange(java.lang.String,java.lang.Object,java.lang.Object)>("highlighter", $r6, r2);
+
+        return;
+    }
+
+    public void setKeymap(javax.swing.text.Keymap)
+    {
+        javax.swing.text.Keymap r1, r2, $r3;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r2 := @parameter0: javax.swing.text.Keymap;
+
+        r1 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Keymap keymap>;
+
+        r0.<javax.swing.text.JTextComponent: javax.swing.text.Keymap keymap> = r2;
+
+        $r3 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Keymap keymap>;
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void firePropertyChange(java.lang.String,java.lang.Object,java.lang.Object)>("keymap", r1, $r3);
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void updateInputMap(javax.swing.text.Keymap,javax.swing.text.Keymap)>(r1, r2);
+
+        return;
+    }
+
+    public void setDragEnabled(boolean)
+    {
+        java.awt.HeadlessException $r1;
+        javax.swing.text.JTextComponent r0;
+        boolean z0, $z1;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        z0 := @parameter0: boolean;
+
+        if z0 == 0 goto label1;
+
+        $z1 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        if $z1 == 0 goto label1;
+
+        $r1 = new java.awt.HeadlessException;
+
+        specialinvoke $r1.<java.awt.HeadlessException: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        r0.<javax.swing.text.JTextComponent: boolean dragEnabled> = z0;
+
+        return;
+    }
+
+    public boolean getDragEnabled()
+    {
+        javax.swing.text.JTextComponent r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $z0 = r0.<javax.swing.text.JTextComponent: boolean dragEnabled>;
+
+        return $z0;
+    }
+
+    public final void setDropMode(javax.swing.DropMode)
+    {
+        java.lang.IllegalArgumentException $r1;
+        javax.swing.text.JTextComponent r7;
+        int[] $r6;
+        javax.swing.DropMode r0;
+        int $i0, $i1;
+        java.lang.StringBuilder $r2, $r3, $r4;
+        java.lang.String $r5;
+
+        r7 := @this: javax.swing.text.JTextComponent;
+
+        r0 := @parameter0: javax.swing.DropMode;
+
+        if r0 == null goto label2;
+
+        $r6 = <javax.swing.text.JTextComponent$5: int[] $SwitchMap$javax$swing$DropMode>;
+
+        $i0 = virtualinvoke r0.<javax.swing.DropMode: int ordinal()>();
+
+        $i1 = $r6[$i0];
+
+        lookupswitch($i1)
+        {
+            case 1: goto label1;
+            case 2: goto label1;
+            default: goto label2;
+        };
+
+     label1:
+        r7.<javax.swing.text.JTextComponent: javax.swing.DropMode dropMode> = r0;
+
+        return;
+
+     label2:
+        $r1 = new java.lang.IllegalArgumentException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": Unsupported drop mode for text");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r5);
+
+        throw $r1;
+    }
+
+    public final javax.swing.DropMode getDropMode()
+    {
+        javax.swing.text.JTextComponent r0;
+        javax.swing.DropMode $r1;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.swing.DropMode dropMode>;
+
+        return $r1;
+    }
+
+    javax.swing.text.JTextComponent$DropLocation dropLocationForPoint(java.awt.Point)
+    {
+        javax.swing.text.Position$Bias[] r0;
+        java.awt.Point r3;
+        javax.swing.text.JTextComponent r1;
+        javax.swing.plaf.TextUI $r2;
+        javax.swing.text.JTextComponent$DropLocation $r5;
+        javax.swing.text.Position$Bias $r4, $r6, $r7;
+        int $i0;
+
+        r1 := @this: javax.swing.text.JTextComponent;
+
+        r3 := @parameter0: java.awt.Point;
+
+        r0 = newarray (javax.swing.text.Position$Bias)[1];
+
+        $r2 = virtualinvoke r1.<javax.swing.text.JTextComponent: javax.swing.plaf.TextUI getUI()>();
+
+        $i0 = virtualinvoke $r2.<javax.swing.plaf.TextUI: int viewToModel(javax.swing.text.JTextComponent,java.awt.Point,javax.swing.text.Position$Bias[])>(r1, r3, r0);
+
+        $r4 = r0[0];
+
+        if $r4 != null goto label1;
+
+        $r7 = <javax.swing.text.Position$Bias: javax.swing.text.Position$Bias Forward>;
+
+        r0[0] = $r7;
+
+     label1:
+        $r5 = new javax.swing.text.JTextComponent$DropLocation;
+
+        $r6 = r0[0];
+
+        specialinvoke $r5.<javax.swing.text.JTextComponent$DropLocation: void <init>(java.awt.Point,int,javax.swing.text.Position$Bias,javax.swing.text.JTextComponent$1)>(r3, $i0, $r6, null);
+
+        return $r5;
+    }
+
+    java.lang.Object setDropLocation(javax.swing.TransferHandler$DropLocation, java.lang.Object, boolean)
+    {
+        java.lang.Integer $r24, $r26, $r32, $r33, $r40, $r43, $r47, $r53;
+        javax.swing.DropMode $r3, $r4;
+        java.lang.Object[] $r22, $r31, $r37, r58;
+        javax.swing.TransferHandler$DropLocation r0;
+        javax.swing.text.Position$Bias $r19, $r35, $r36, $r50, $r56;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, z6, $z7, $z8, $z9;
+        javax.swing.text.JTextComponent$DropLocation r1, $r5, $r14, $r62, $r63;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9;
+        java.lang.Boolean $r12, $r27, $r34, $r61;
+        javax.swing.text.Caret $r7, $r8, $r9, $r10, $r13, $r15, $r16, $r17, $r20, $r21, $r23, $r25, $r28, $r29, $r38, $r41, $r44, $r45, $r51, $r59;
+        javax.swing.text.JTextComponent r2;
+        java.lang.Object r6, $r39, $r42, $r46, $r49, $r52, $r55, r57, $r60;
+        javax.swing.text.DefaultCaret $r11, $r18, r30, $r48, $r54;
+
+        r2 := @this: javax.swing.text.JTextComponent;
+
+        r0 := @parameter0: javax.swing.TransferHandler$DropLocation;
+
+        r6 := @parameter1: java.lang.Object;
+
+        z6 := @parameter2: boolean;
+
+        r57 = null;
+
+        r1 = (javax.swing.text.JTextComponent$DropLocation) r0;
+
+        $r4 = r2.<javax.swing.text.JTextComponent: javax.swing.DropMode dropMode>;
+
+        $r3 = <javax.swing.DropMode: javax.swing.DropMode USE_SELECTION>;
+
+        if $r4 != $r3 goto label09;
+
+        if r1 != null goto label03;
+
+        if r6 == null goto label14;
+
+        $r37 = (java.lang.Object[]) r6;
+
+        r58 = (java.lang.Object[]) $r37;
+
+        if z6 != 0 goto label02;
+
+        $r38 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $z7 = $r38 instanceof javax.swing.text.DefaultCaret;
+
+        if $z7 == 0 goto label01;
+
+        $r45 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $r48 = (javax.swing.text.DefaultCaret) $r45;
+
+        $r46 = r58[0];
+
+        $r47 = (java.lang.Integer) $r46;
+
+        $i8 = virtualinvoke $r47.<java.lang.Integer: int intValue()>();
+
+        $r49 = r58[3];
+
+        $r50 = (javax.swing.text.Position$Bias) $r49;
+
+        virtualinvoke $r48.<javax.swing.text.DefaultCaret: void setDot(int,javax.swing.text.Position$Bias)>($i8, $r50);
+
+        $r51 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $r54 = (javax.swing.text.DefaultCaret) $r51;
+
+        $r52 = r58[1];
+
+        $r53 = (java.lang.Integer) $r52;
+
+        $i9 = virtualinvoke $r53.<java.lang.Integer: int intValue()>();
+
+        $r55 = r58[4];
+
+        $r56 = (javax.swing.text.Position$Bias) $r55;
+
+        virtualinvoke $r54.<javax.swing.text.DefaultCaret: void moveDot(int,javax.swing.text.Position$Bias)>($i9, $r56);
+
+        goto label02;
+
+     label01:
+        $r41 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $r39 = r58[0];
+
+        $r40 = (java.lang.Integer) $r39;
+
+        $i6 = virtualinvoke $r40.<java.lang.Integer: int intValue()>();
+
+        interfaceinvoke $r41.<javax.swing.text.Caret: void setDot(int)>($i6);
+
+        $r44 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $r42 = r58[1];
+
+        $r43 = (java.lang.Integer) $r42;
+
+        $i7 = virtualinvoke $r43.<java.lang.Integer: int intValue()>();
+
+        interfaceinvoke $r44.<javax.swing.text.Caret: void moveDot(int)>($i7);
+
+     label02:
+        $r59 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $r60 = r58[2];
+
+        $r61 = (java.lang.Boolean) $r60;
+
+        $z8 = virtualinvoke $r61.<java.lang.Boolean: boolean booleanValue()>();
+
+        interfaceinvoke $r59.<javax.swing.text.Caret: void setVisible(boolean)>($z8);
+
+        goto label14;
+
+     label03:
+        $r14 = r2.<javax.swing.text.JTextComponent: javax.swing.text.JTextComponent$DropLocation dropLocation>;
+
+        if $r14 != null goto label06;
+
+        $r20 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $z3 = $r20 instanceof javax.swing.text.DefaultCaret;
+
+        if $z3 == 0 goto label04;
+
+        $r29 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        r30 = (javax.swing.text.DefaultCaret) $r29;
+
+        $z5 = virtualinvoke r30.<javax.swing.text.DefaultCaret: boolean isActive()>();
+
+        $r31 = newarray (java.lang.Object)[5];
+
+        $i4 = virtualinvoke r30.<javax.swing.text.DefaultCaret: int getMark()>();
+
+        $r32 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i4);
+
+        $r31[0] = $r32;
+
+        $i5 = virtualinvoke r30.<javax.swing.text.DefaultCaret: int getDot()>();
+
+        $r33 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i5);
+
+        $r31[1] = $r33;
+
+        $r34 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z5);
+
+        $r31[2] = $r34;
+
+        $r35 = virtualinvoke r30.<javax.swing.text.DefaultCaret: javax.swing.text.Position$Bias getMarkBias()>();
+
+        $r31[3] = $r35;
+
+        $r36 = virtualinvoke r30.<javax.swing.text.DefaultCaret: javax.swing.text.Position$Bias getDotBias()>();
+
+        $r31[4] = $r36;
+
+        r57 = $r31;
+
+        goto label05;
+
+     label04:
+        $r21 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $z4 = interfaceinvoke $r21.<javax.swing.text.Caret: boolean isVisible()>();
+
+        $r22 = newarray (java.lang.Object)[3];
+
+        $r23 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $i2 = interfaceinvoke $r23.<javax.swing.text.Caret: int getMark()>();
+
+        $r24 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r22[0] = $r24;
+
+        $r25 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $i3 = interfaceinvoke $r25.<javax.swing.text.Caret: int getDot()>();
+
+        $r26 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i3);
+
+        $r22[1] = $r26;
+
+        $r27 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z4);
+
+        $r22[2] = $r27;
+
+        r57 = $r22;
+
+     label05:
+        $r28 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        interfaceinvoke $r28.<javax.swing.text.Caret: void setVisible(boolean)>(1);
+
+        goto label07;
+
+     label06:
+        r57 = r6;
+
+     label07:
+        $r15 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $z2 = $r15 instanceof javax.swing.text.DefaultCaret;
+
+        if $z2 == 0 goto label08;
+
+        $r17 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $r18 = (javax.swing.text.DefaultCaret) $r17;
+
+        $i1 = virtualinvoke r1.<javax.swing.text.JTextComponent$DropLocation: int getIndex()>();
+
+        $r19 = virtualinvoke r1.<javax.swing.text.JTextComponent$DropLocation: javax.swing.text.Position$Bias getBias()>();
+
+        virtualinvoke $r18.<javax.swing.text.DefaultCaret: void setDot(int,javax.swing.text.Position$Bias)>($i1, $r19);
+
+        goto label14;
+
+     label08:
+        $r16 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $i0 = virtualinvoke r1.<javax.swing.text.JTextComponent$DropLocation: int getIndex()>();
+
+        interfaceinvoke $r16.<javax.swing.text.Caret: void setDot(int)>($i0);
+
+        goto label14;
+
+     label09:
+        if r1 != null goto label10;
+
+        if r6 == null goto label14;
+
+        $r13 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $r12 = (java.lang.Boolean) r6;
+
+        $z1 = virtualinvoke $r12.<java.lang.Boolean: boolean booleanValue()>();
+
+        interfaceinvoke $r13.<javax.swing.text.Caret: void setVisible(boolean)>($z1);
+
+        goto label14;
+
+     label10:
+        $r5 = r2.<javax.swing.text.JTextComponent: javax.swing.text.JTextComponent$DropLocation dropLocation>;
+
+        if $r5 != null goto label13;
+
+        $r7 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $z0 = $r7 instanceof javax.swing.text.DefaultCaret;
+
+        if $z0 == 0 goto label11;
+
+        $r10 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $r11 = (javax.swing.text.DefaultCaret) $r10;
+
+        $z9 = virtualinvoke $r11.<javax.swing.text.DefaultCaret: boolean isActive()>();
+
+        goto label12;
+
+     label11:
+        $r8 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $z9 = interfaceinvoke $r8.<javax.swing.text.Caret: boolean isVisible()>();
+
+     label12:
+        r57 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z9);
+
+        $r9 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        interfaceinvoke $r9.<javax.swing.text.Caret: void setVisible(boolean)>(0);
+
+        goto label14;
+
+     label13:
+        r57 = r6;
+
+     label14:
+        $r62 = r2.<javax.swing.text.JTextComponent: javax.swing.text.JTextComponent$DropLocation dropLocation>;
+
+        r2.<javax.swing.text.JTextComponent: javax.swing.text.JTextComponent$DropLocation dropLocation> = r1;
+
+        $r63 = r2.<javax.swing.text.JTextComponent: javax.swing.text.JTextComponent$DropLocation dropLocation>;
+
+        virtualinvoke r2.<javax.swing.text.JTextComponent: void firePropertyChange(java.lang.String,java.lang.Object,java.lang.Object)>("dropLocation", $r62, $r63);
+
+        return r57;
+    }
+
+    public final javax.swing.text.JTextComponent$DropLocation getDropLocation()
+    {
+        javax.swing.text.JTextComponent$DropLocation $r1;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.swing.text.JTextComponent$DropLocation dropLocation>;
+
+        return $r1;
+    }
+
+    void updateInputMap(javax.swing.text.Keymap, javax.swing.text.Keymap)
+    {
+        javax.swing.text.Keymap r2, r15;
+        javax.swing.ActionMap $r3, $r5, $r7, $r8, $r18, r19, r20;
+        boolean $z0, $z1;
+        javax.swing.text.JTextComponent$KeymapWrapper $r10, $r12;
+        javax.swing.text.JTextComponent r0;
+        javax.swing.text.JTextComponent$KeymapActionMap $r4, $r6;
+        javax.swing.InputMap $r1, $r9, $r11, $r13, $r14, r16, r17;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r15 := @parameter0: javax.swing.text.Keymap;
+
+        r2 := @parameter1: javax.swing.text.Keymap;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.InputMap getInputMap(int)>(0);
+
+        r16 = $r1;
+
+        r17 = $r1;
+
+     label01:
+        if r16 == null goto label02;
+
+        $z1 = r16 instanceof javax.swing.text.JTextComponent$KeymapWrapper;
+
+        if $z1 != 0 goto label02;
+
+        r17 = r16;
+
+        r16 = virtualinvoke r16.<javax.swing.InputMap: javax.swing.InputMap getParent()>();
+
+        goto label01;
+
+     label02:
+        if r16 == null goto label06;
+
+        if r2 != null goto label04;
+
+        if r17 == r16 goto label03;
+
+        $r14 = virtualinvoke r16.<javax.swing.InputMap: javax.swing.InputMap getParent()>();
+
+        virtualinvoke r17.<javax.swing.InputMap: void setParent(javax.swing.InputMap)>($r14);
+
+        goto label07;
+
+     label03:
+        virtualinvoke r17.<javax.swing.InputMap: void setParent(javax.swing.InputMap)>(null);
+
+        goto label07;
+
+     label04:
+        $r12 = new javax.swing.text.JTextComponent$KeymapWrapper;
+
+        specialinvoke $r12.<javax.swing.text.JTextComponent$KeymapWrapper: void <init>(javax.swing.text.Keymap)>(r2);
+
+        virtualinvoke r17.<javax.swing.InputMap: void setParent(javax.swing.InputMap)>($r12);
+
+        if r17 == r16 goto label05;
+
+        $r13 = virtualinvoke r16.<javax.swing.InputMap: javax.swing.InputMap getParent()>();
+
+        virtualinvoke $r12.<javax.swing.InputMap: void setParent(javax.swing.InputMap)>($r13);
+
+     label05:
+        goto label07;
+
+     label06:
+        if r2 == null goto label07;
+
+        $r9 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.InputMap getInputMap(int)>(0);
+
+        if $r9 == null goto label07;
+
+        $r10 = new javax.swing.text.JTextComponent$KeymapWrapper;
+
+        specialinvoke $r10.<javax.swing.text.JTextComponent$KeymapWrapper: void <init>(javax.swing.text.Keymap)>(r2);
+
+        $r11 = virtualinvoke $r9.<javax.swing.InputMap: javax.swing.InputMap getParent()>();
+
+        virtualinvoke $r10.<javax.swing.InputMap: void setParent(javax.swing.InputMap)>($r11);
+
+        virtualinvoke $r9.<javax.swing.InputMap: void setParent(javax.swing.InputMap)>($r10);
+
+     label07:
+        $r18 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.ActionMap getActionMap()>();
+
+        r19 = $r18;
+
+        r20 = $r18;
+
+     label08:
+        if r19 == null goto label09;
+
+        $z0 = r19 instanceof javax.swing.text.JTextComponent$KeymapActionMap;
+
+        if $z0 != 0 goto label09;
+
+        r20 = r19;
+
+        r19 = virtualinvoke r19.<javax.swing.ActionMap: javax.swing.ActionMap getParent()>();
+
+        goto label08;
+
+     label09:
+        if r19 == null goto label13;
+
+        if r2 != null goto label11;
+
+        if r20 == r19 goto label10;
+
+        $r8 = virtualinvoke r19.<javax.swing.ActionMap: javax.swing.ActionMap getParent()>();
+
+        virtualinvoke r20.<javax.swing.ActionMap: void setParent(javax.swing.ActionMap)>($r8);
+
+        goto label14;
+
+     label10:
+        virtualinvoke r20.<javax.swing.ActionMap: void setParent(javax.swing.ActionMap)>(null);
+
+        goto label14;
+
+     label11:
+        $r6 = new javax.swing.text.JTextComponent$KeymapActionMap;
+
+        specialinvoke $r6.<javax.swing.text.JTextComponent$KeymapActionMap: void <init>(javax.swing.text.Keymap)>(r2);
+
+        virtualinvoke r20.<javax.swing.ActionMap: void setParent(javax.swing.ActionMap)>($r6);
+
+        if r20 == r19 goto label12;
+
+        $r7 = virtualinvoke r19.<javax.swing.ActionMap: javax.swing.ActionMap getParent()>();
+
+        virtualinvoke $r6.<javax.swing.ActionMap: void setParent(javax.swing.ActionMap)>($r7);
+
+     label12:
+        goto label14;
+
+     label13:
+        if r2 == null goto label14;
+
+        $r3 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.ActionMap getActionMap()>();
+
+        if $r3 == null goto label14;
+
+        $r4 = new javax.swing.text.JTextComponent$KeymapActionMap;
+
+        specialinvoke $r4.<javax.swing.text.JTextComponent$KeymapActionMap: void <init>(javax.swing.text.Keymap)>(r2);
+
+        $r5 = virtualinvoke $r3.<javax.swing.ActionMap: javax.swing.ActionMap getParent()>();
+
+        virtualinvoke $r4.<javax.swing.ActionMap: void setParent(javax.swing.ActionMap)>($r5);
+
+        virtualinvoke $r3.<javax.swing.ActionMap: void setParent(javax.swing.ActionMap)>($r4);
+
+     label14:
+        return;
+    }
+
+    public javax.swing.text.Keymap getKeymap()
+    {
+        javax.swing.text.JTextComponent r0;
+        javax.swing.text.Keymap $r1;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Keymap keymap>;
+
+        return $r1;
+    }
+
+    public static javax.swing.text.Keymap addKeymap(java.lang.String, javax.swing.text.Keymap)
+    {
+        javax.swing.text.JTextComponent$DefaultKeymap $r0;
+        javax.swing.text.Keymap r2;
+        java.util.HashMap $r3;
+        java.lang.String r1;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: javax.swing.text.Keymap;
+
+        $r0 = new javax.swing.text.JTextComponent$DefaultKeymap;
+
+        specialinvoke $r0.<javax.swing.text.JTextComponent$DefaultKeymap: void <init>(java.lang.String,javax.swing.text.Keymap)>(r1, r2);
+
+        if r1 == null goto label1;
+
+        $r3 = staticinvoke <javax.swing.text.JTextComponent: java.util.HashMap getKeymapTable()>();
+
+        virtualinvoke $r3.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r0);
+
+     label1:
+        return $r0;
+    }
+
+    public static javax.swing.text.Keymap removeKeymap(java.lang.String)
+    {
+        javax.swing.text.Keymap $r3;
+        java.util.HashMap $r0;
+        java.lang.Object $r2;
+        java.lang.String r1;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = staticinvoke <javax.swing.text.JTextComponent: java.util.HashMap getKeymapTable()>();
+
+        $r2 = virtualinvoke $r0.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>(r1);
+
+        $r3 = (javax.swing.text.Keymap) $r2;
+
+        return $r3;
+    }
+
+    public static javax.swing.text.Keymap getKeymap(java.lang.String)
+    {
+        javax.swing.text.Keymap $r3;
+        java.util.HashMap $r0;
+        java.lang.Object $r2;
+        java.lang.String r1;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r0 = staticinvoke <javax.swing.text.JTextComponent: java.util.HashMap getKeymapTable()>();
+
+        $r2 = virtualinvoke $r0.<java.util.HashMap: java.lang.Object get(java.lang.Object)>(r1);
+
+        $r3 = (javax.swing.text.Keymap) $r2;
+
+        return $r3;
+    }
+
+    private static java.util.HashMap getKeymapTable()
+    {
+        java.lang.Throwable $r8;
+        java.util.HashMap $r4, r9;
+        sun.awt.AppContext $r1;
+        javax.swing.text.Keymap $r6;
+        javax.swing.text.DefaultEditorKit$DefaultKeyTypedAction $r7;
+        java.lang.Object $r0, $r2, $r3, $r5;
+
+        $r0 = <javax.swing.text.JTextComponent: java.lang.Object KEYMAP_TABLE>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r2 = <javax.swing.text.JTextComponent: java.lang.Object KEYMAP_TABLE>;
+
+        $r3 = virtualinvoke $r1.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>($r2);
+
+        r9 = (java.util.HashMap) $r3;
+
+        if r9 != null goto label2;
+
+        $r4 = new java.util.HashMap;
+
+        specialinvoke $r4.<java.util.HashMap: void <init>(int)>(17);
+
+        r9 = $r4;
+
+        $r5 = <javax.swing.text.JTextComponent: java.lang.Object KEYMAP_TABLE>;
+
+        virtualinvoke $r1.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>($r5, $r4);
+
+        $r6 = staticinvoke <javax.swing.text.JTextComponent: javax.swing.text.Keymap addKeymap(java.lang.String,javax.swing.text.Keymap)>("default", null);
+
+        $r7 = new javax.swing.text.DefaultEditorKit$DefaultKeyTypedAction;
+
+        specialinvoke $r7.<javax.swing.text.DefaultEditorKit$DefaultKeyTypedAction: void <init>()>();
+
+        interfaceinvoke $r6.<javax.swing.text.Keymap: void setDefaultAction(javax.swing.Action)>($r7);
+
+     label2:
+        exitmonitor $r0;
+
+     label3:
+        return r9;
+
+     label4:
+        $r8 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r8;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public static void loadKeymap(javax.swing.text.Keymap, javax.swing.text.JTextComponent$KeyBinding[], javax.swing.Action[])
+    {
+        javax.swing.Action r8, r12;
+        javax.swing.text.JTextComponent$KeyBinding[] r2;
+        javax.swing.text.Keymap r5;
+        int i0, i1, i2, i3;
+        java.lang.String $r3, r9, $r10;
+        javax.swing.Action[] r1;
+        java.util.Hashtable $r0;
+        javax.swing.KeyStroke $r6;
+        java.lang.Object $r4, $r7;
+        javax.swing.text.JTextComponent$KeyBinding r11;
+
+        r5 := @parameter0: javax.swing.text.Keymap;
+
+        r2 := @parameter1: javax.swing.text.JTextComponent$KeyBinding[];
+
+        r1 := @parameter2: javax.swing.Action[];
+
+        $r0 = new java.util.Hashtable;
+
+        specialinvoke $r0.<java.util.Hashtable: void <init>()>();
+
+        i0 = lengthof r1;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label4;
+
+        r8 = r1[i1];
+
+        $r7 = interfaceinvoke r8.<javax.swing.Action: java.lang.Object getValue(java.lang.String)>("Name");
+
+        r9 = (java.lang.String) $r7;
+
+        if r9 == null goto label2;
+
+        $r10 = r9;
+
+        goto label3;
+
+     label2:
+        $r10 = "";
+
+     label3:
+        virtualinvoke $r0.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r10, r8);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label4:
+        i2 = lengthof r2;
+
+        i3 = 0;
+
+     label5:
+        if i3 >= i2 goto label7;
+
+        r11 = r2[i3];
+
+        $r3 = r11.<javax.swing.text.JTextComponent$KeyBinding: java.lang.String actionName>;
+
+        $r4 = virtualinvoke $r0.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r3);
+
+        r12 = (javax.swing.Action) $r4;
+
+        if r12 == null goto label6;
+
+        $r6 = r11.<javax.swing.text.JTextComponent$KeyBinding: javax.swing.KeyStroke key>;
+
+        interfaceinvoke r5.<javax.swing.text.Keymap: void addActionForKeyStroke(javax.swing.KeyStroke,javax.swing.Action)>($r6, r12);
+
+     label6:
+        i3 = i3 + 1;
+
+        goto label5;
+
+     label7:
+        return;
+    }
+
+    public java.awt.Color getCaretColor()
+    {
+        java.awt.Color $r1;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: java.awt.Color caretColor>;
+
+        return $r1;
+    }
+
+    public void setCaretColor(java.awt.Color)
+    {
+        java.awt.Color r1, r2, $r3;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r2 := @parameter0: java.awt.Color;
+
+        r1 = r0.<javax.swing.text.JTextComponent: java.awt.Color caretColor>;
+
+        r0.<javax.swing.text.JTextComponent: java.awt.Color caretColor> = r2;
+
+        $r3 = r0.<javax.swing.text.JTextComponent: java.awt.Color caretColor>;
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void firePropertyChange(java.lang.String,java.lang.Object,java.lang.Object)>("caretColor", r1, $r3);
+
+        return;
+    }
+
+    public java.awt.Color getSelectionColor()
+    {
+        java.awt.Color $r1;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: java.awt.Color selectionColor>;
+
+        return $r1;
+    }
+
+    public void setSelectionColor(java.awt.Color)
+    {
+        java.awt.Color r1, r2, $r3;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r2 := @parameter0: java.awt.Color;
+
+        r1 = r0.<javax.swing.text.JTextComponent: java.awt.Color selectionColor>;
+
+        r0.<javax.swing.text.JTextComponent: java.awt.Color selectionColor> = r2;
+
+        $r3 = r0.<javax.swing.text.JTextComponent: java.awt.Color selectionColor>;
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void firePropertyChange(java.lang.String,java.lang.Object,java.lang.Object)>("selectionColor", r1, $r3);
+
+        return;
+    }
+
+    public java.awt.Color getSelectedTextColor()
+    {
+        java.awt.Color $r1;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: java.awt.Color selectedTextColor>;
+
+        return $r1;
+    }
+
+    public void setSelectedTextColor(java.awt.Color)
+    {
+        java.awt.Color r1, r2, $r3;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r2 := @parameter0: java.awt.Color;
+
+        r1 = r0.<javax.swing.text.JTextComponent: java.awt.Color selectedTextColor>;
+
+        r0.<javax.swing.text.JTextComponent: java.awt.Color selectedTextColor> = r2;
+
+        $r3 = r0.<javax.swing.text.JTextComponent: java.awt.Color selectedTextColor>;
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void firePropertyChange(java.lang.String,java.lang.Object,java.lang.Object)>("selectedTextColor", r1, $r3);
+
+        return;
+    }
+
+    public java.awt.Color getDisabledTextColor()
+    {
+        java.awt.Color $r1;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: java.awt.Color disabledTextColor>;
+
+        return $r1;
+    }
+
+    public void setDisabledTextColor(java.awt.Color)
+    {
+        java.awt.Color r1, r2, $r3;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r2 := @parameter0: java.awt.Color;
+
+        r1 = r0.<javax.swing.text.JTextComponent: java.awt.Color disabledTextColor>;
+
+        r0.<javax.swing.text.JTextComponent: java.awt.Color disabledTextColor> = r2;
+
+        $r3 = r0.<javax.swing.text.JTextComponent: java.awt.Color disabledTextColor>;
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void firePropertyChange(java.lang.String,java.lang.Object,java.lang.Object)>("disabledTextColor", r1, $r3);
+
+        return;
+    }
+
+    public void replaceSelection(java.lang.String)
+    {
+        javax.swing.text.AbstractDocument $r8;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9;
+        java.lang.String r7;
+        boolean $z0, $z1;
+        javax.swing.text.Caret $r2, $r3, $r4, $r5, $r6;
+        javax.swing.LookAndFeel $r10;
+        javax.swing.text.BadLocationException $r9;
+        javax.swing.text.JTextComponent r0;
+        javax.swing.text.Document $r1;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r7 := @parameter0: java.lang.String;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        if $r1 == null goto label7;
+
+     label1:
+        $r2 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $i0 = interfaceinvoke $r2.<javax.swing.text.Caret: int getDot()>();
+
+        $z0 = virtualinvoke r0.<javax.swing.text.JTextComponent: boolean saveComposedText(int)>($i0);
+
+        $r3 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $i1 = interfaceinvoke $r3.<javax.swing.text.Caret: int getDot()>();
+
+        $r4 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $i2 = interfaceinvoke $r4.<javax.swing.text.Caret: int getMark()>();
+
+        $i3 = staticinvoke <java.lang.Math: int min(int,int)>($i1, $i2);
+
+        $r5 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $i4 = interfaceinvoke $r5.<javax.swing.text.Caret: int getDot()>();
+
+        $r6 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $i5 = interfaceinvoke $r6.<javax.swing.text.Caret: int getMark()>();
+
+        $i6 = staticinvoke <java.lang.Math: int max(int,int)>($i4, $i5);
+
+        $z1 = $r1 instanceof javax.swing.text.AbstractDocument;
+
+        if $z1 == 0 goto label2;
+
+        $r8 = (javax.swing.text.AbstractDocument) $r1;
+
+        $i9 = $i6 - $i3;
+
+        virtualinvoke $r8.<javax.swing.text.AbstractDocument: void replace(int,int,java.lang.String,javax.swing.text.AttributeSet)>($i3, $i9, r7, null);
+
+        goto label4;
+
+     label2:
+        if $i3 == $i6 goto label3;
+
+        $i8 = $i6 - $i3;
+
+        interfaceinvoke $r1.<javax.swing.text.Document: void remove(int,int)>($i3, $i8);
+
+     label3:
+        if r7 == null goto label4;
+
+        $i7 = virtualinvoke r7.<java.lang.String: int length()>();
+
+        if $i7 <= 0 goto label4;
+
+        interfaceinvoke $r1.<javax.swing.text.Document: void insertString(int,java.lang.String,javax.swing.text.AttributeSet)>($i3, r7, null);
+
+     label4:
+        if $z0 == 0 goto label5;
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void restoreComposedText()>();
+
+     label5:
+        goto label7;
+
+     label6:
+        $r9 := @caughtexception;
+
+        $r10 = staticinvoke <javax.swing.UIManager: javax.swing.LookAndFeel getLookAndFeel()>();
+
+        virtualinvoke $r10.<javax.swing.LookAndFeel: void provideErrorFeedback(java.awt.Component)>(r0);
+
+     label7:
+        return;
+
+        catch javax.swing.text.BadLocationException from label1 to label5 with label6;
+    }
+
+    public java.lang.String getText(int, int) throws javax.swing.text.BadLocationException
+    {
+        int i0, i1;
+        javax.swing.text.Document $r1;
+        java.lang.String $r2;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        $r2 = interfaceinvoke $r1.<javax.swing.text.Document: java.lang.String getText(int,int)>(i0, i1);
+
+        return $r2;
+    }
+
+    public java.awt.Rectangle modelToView(int) throws javax.swing.text.BadLocationException
+    {
+        java.awt.Rectangle $r2;
+        javax.swing.plaf.TextUI $r1;
+        int i0;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.plaf.TextUI getUI()>();
+
+        $r2 = virtualinvoke $r1.<javax.swing.plaf.TextUI: java.awt.Rectangle modelToView(javax.swing.text.JTextComponent,int)>(r0, i0);
+
+        return $r2;
+    }
+
+    public int viewToModel(java.awt.Point)
+    {
+        javax.swing.plaf.TextUI $r1;
+        int $i0;
+        java.awt.Point r2;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r2 := @parameter0: java.awt.Point;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.plaf.TextUI getUI()>();
+
+        $i0 = virtualinvoke $r1.<javax.swing.plaf.TextUI: int viewToModel(javax.swing.text.JTextComponent,java.awt.Point)>(r0, r2);
+
+        return $i0;
+    }
+
+    public void cut()
+    {
+        javax.swing.Action $r1;
+        javax.swing.text.JTextComponent r0;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $z0 = virtualinvoke r0.<javax.swing.text.JTextComponent: boolean isEditable()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = virtualinvoke r0.<javax.swing.text.JTextComponent: boolean isEnabled()>();
+
+        if $z1 == 0 goto label1;
+
+        $r1 = staticinvoke <javax.swing.TransferHandler: javax.swing.Action getCutAction()>();
+
+        specialinvoke r0.<javax.swing.text.JTextComponent: void invokeAction(java.lang.String,javax.swing.Action)>("cut", $r1);
+
+     label1:
+        return;
+    }
+
+    public void copy()
+    {
+        javax.swing.Action $r1;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = staticinvoke <javax.swing.TransferHandler: javax.swing.Action getCopyAction()>();
+
+        specialinvoke r0.<javax.swing.text.JTextComponent: void invokeAction(java.lang.String,javax.swing.Action)>("copy", $r1);
+
+        return;
+    }
+
+    public void paste()
+    {
+        javax.swing.Action $r1;
+        javax.swing.text.JTextComponent r0;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $z0 = virtualinvoke r0.<javax.swing.text.JTextComponent: boolean isEditable()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = virtualinvoke r0.<javax.swing.text.JTextComponent: boolean isEnabled()>();
+
+        if $z1 == 0 goto label1;
+
+        $r1 = staticinvoke <javax.swing.TransferHandler: javax.swing.Action getPasteAction()>();
+
+        specialinvoke r0.<javax.swing.text.JTextComponent: void invokeAction(java.lang.String,javax.swing.Action)>("paste", $r1);
+
+     label1:
+        return;
+    }
+
+    private void invokeAction(java.lang.String, javax.swing.Action)
+    {
+        long $l0;
+        javax.swing.Action r5, r7;
+        javax.swing.text.JTextComponent r0;
+        java.awt.event.ActionEvent $r2;
+        int $i1;
+        java.lang.Object $r3;
+        java.lang.String $r4, r6;
+        javax.swing.ActionMap $r1;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r6 := @parameter0: java.lang.String;
+
+        r5 := @parameter1: javax.swing.Action;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.ActionMap getActionMap()>();
+
+        r7 = null;
+
+        if $r1 == null goto label1;
+
+        r7 = virtualinvoke $r1.<javax.swing.ActionMap: javax.swing.Action get(java.lang.Object)>(r6);
+
+     label1:
+        if r7 != null goto label2;
+
+        specialinvoke r0.<javax.swing.text.JTextComponent: void installDefaultTransferHandlerIfNecessary()>();
+
+        r7 = r5;
+
+     label2:
+        $r2 = new java.awt.event.ActionEvent;
+
+        $r3 = interfaceinvoke r7.<javax.swing.Action: java.lang.Object getValue(java.lang.String)>("Name");
+
+        $r4 = (java.lang.String) $r3;
+
+        $l0 = staticinvoke <java.awt.EventQueue: long getMostRecentEventTime()>();
+
+        $i1 = specialinvoke r0.<javax.swing.text.JTextComponent: int getCurrentEventModifiers()>();
+
+        specialinvoke $r2.<java.awt.event.ActionEvent: void <init>(java.lang.Object,int,java.lang.String,long,int)>(r0, 1001, $r4, $l0, $i1);
+
+        interfaceinvoke r7.<javax.swing.Action: void actionPerformed(java.awt.event.ActionEvent)>($r2);
+
+        return;
+    }
+
+    private void installDefaultTransferHandlerIfNecessary()
+    {
+        javax.swing.TransferHandler $r1;
+        javax.swing.text.JTextComponent$DefaultTransferHandler $r2, $r3, $r4;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.TransferHandler getTransferHandler()>();
+
+        if $r1 != null goto label2;
+
+        $r2 = <javax.swing.text.JTextComponent: javax.swing.text.JTextComponent$DefaultTransferHandler defaultTransferHandler>;
+
+        if $r2 != null goto label1;
+
+        $r4 = new javax.swing.text.JTextComponent$DefaultTransferHandler;
+
+        specialinvoke $r4.<javax.swing.text.JTextComponent$DefaultTransferHandler: void <init>()>();
+
+        <javax.swing.text.JTextComponent: javax.swing.text.JTextComponent$DefaultTransferHandler defaultTransferHandler> = $r4;
+
+     label1:
+        $r3 = <javax.swing.text.JTextComponent: javax.swing.text.JTextComponent$DefaultTransferHandler defaultTransferHandler>;
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void setTransferHandler(javax.swing.TransferHandler)>($r3);
+
+     label2:
+        return;
+    }
+
+    public void moveCaretPosition(int)
+    {
+        javax.swing.text.Caret $r7;
+        java.lang.IllegalArgumentException $r2;
+        javax.swing.text.JTextComponent r0;
+        int i0, $i1;
+        java.lang.StringBuilder $r3, $r4, $r5;
+        javax.swing.text.Document $r1;
+        java.lang.String $r6;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        if $r1 == null goto label3;
+
+        $i1 = interfaceinvoke $r1.<javax.swing.text.Document: int getLength()>();
+
+        if i0 > $i1 goto label1;
+
+        if i0 >= 0 goto label2;
+
+     label1:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("bad position: ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r6);
+
+        throw $r2;
+
+     label2:
+        $r7 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        interfaceinvoke $r7.<javax.swing.text.Caret: void moveDot(int)>(i0);
+
+     label3:
+        return;
+    }
+
+    public void setFocusAccelerator(char)
+    {
+        char $c0, c1, $c2, $c3, c4;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        c4 := @parameter0: char;
+
+        $c0 = staticinvoke <java.lang.Character: char toUpperCase(char)>(c4);
+
+        c1 = r0.<javax.swing.text.JTextComponent: char focusAccelerator>;
+
+        r0.<javax.swing.text.JTextComponent: char focusAccelerator> = $c0;
+
+        $c2 = r0.<javax.swing.text.JTextComponent: char focusAccelerator>;
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void firePropertyChange(java.lang.String,char,char)>("focusAcceleratorKey", c1, $c2);
+
+        $c3 = r0.<javax.swing.text.JTextComponent: char focusAccelerator>;
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void firePropertyChange(java.lang.String,char,char)>("focusAccelerator", c1, $c3);
+
+        return;
+    }
+
+    public char getFocusAccelerator()
+    {
+        char $c0;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $c0 = r0.<javax.swing.text.JTextComponent: char focusAccelerator>;
+
+        return $c0;
+    }
+
+    public void read(java.io.Reader, java.lang.Object) throws java.io.IOException
+    {
+        javax.swing.text.EditorKit $r2;
+        java.io.IOException $r7;
+        java.io.Reader r5;
+        javax.swing.text.BadLocationException $r6;
+        javax.swing.text.JTextComponent r0;
+        javax.swing.plaf.TextUI $r1;
+        java.lang.Object r4;
+        javax.swing.text.Document $r3;
+        java.lang.String $r8;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r5 := @parameter0: java.io.Reader;
+
+        r4 := @parameter1: java.lang.Object;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.plaf.TextUI getUI()>();
+
+        $r2 = virtualinvoke $r1.<javax.swing.plaf.TextUI: javax.swing.text.EditorKit getEditorKit(javax.swing.text.JTextComponent)>(r0);
+
+        $r3 = virtualinvoke $r2.<javax.swing.text.EditorKit: javax.swing.text.Document createDefaultDocument()>();
+
+        if r4 == null goto label1;
+
+        interfaceinvoke $r3.<javax.swing.text.Document: void putProperty(java.lang.Object,java.lang.Object)>("stream", r4);
+
+     label1:
+        virtualinvoke $r2.<javax.swing.text.EditorKit: void read(java.io.Reader,javax.swing.text.Document,int)>(r5, $r3, 0);
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void setDocument(javax.swing.text.Document)>($r3);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = new java.io.IOException;
+
+        $r8 = virtualinvoke $r6.<javax.swing.text.BadLocationException: java.lang.String getMessage()>();
+
+        specialinvoke $r7.<java.io.IOException: void <init>(java.lang.String)>($r8);
+
+        throw $r7;
+
+     label4:
+        return;
+
+        catch javax.swing.text.BadLocationException from label1 to label2 with label3;
+    }
+
+    public void write(java.io.Writer) throws java.io.IOException
+    {
+        javax.swing.text.EditorKit $r3;
+        java.io.IOException $r6;
+        javax.swing.text.BadLocationException $r5;
+        javax.swing.text.JTextComponent r0;
+        javax.swing.plaf.TextUI $r2;
+        java.io.Writer r4;
+        int $i0;
+        javax.swing.text.Document $r1;
+        java.lang.String $r7;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r4 := @parameter0: java.io.Writer;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+     label1:
+        $r2 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.plaf.TextUI getUI()>();
+
+        $r3 = virtualinvoke $r2.<javax.swing.plaf.TextUI: javax.swing.text.EditorKit getEditorKit(javax.swing.text.JTextComponent)>(r0);
+
+        $i0 = interfaceinvoke $r1.<javax.swing.text.Document: int getLength()>();
+
+        virtualinvoke $r3.<javax.swing.text.EditorKit: void write(java.io.Writer,javax.swing.text.Document,int,int)>(r4, $r1, 0, $i0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new java.io.IOException;
+
+        $r7 = virtualinvoke $r5.<javax.swing.text.BadLocationException: java.lang.String getMessage()>();
+
+        specialinvoke $r6.<java.io.IOException: void <init>(java.lang.String)>($r7);
+
+        throw $r6;
+
+     label4:
+        return;
+
+        catch javax.swing.text.BadLocationException from label1 to label2 with label3;
+    }
+
+    public void removeNotify()
+    {
+        sun.awt.AppContext $r2;
+        java.lang.Object $r3;
+        javax.swing.text.JTextComponent r0, $r1;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        specialinvoke r0.<javax.swing.JComponent: void removeNotify()>();
+
+        $r1 = staticinvoke <javax.swing.text.JTextComponent: javax.swing.text.JTextComponent getFocusedComponent()>();
+
+        if $r1 != r0 goto label1;
+
+        $r2 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r3 = <javax.swing.text.JTextComponent: java.lang.Object FOCUSED_COMPONENT>;
+
+        virtualinvoke $r2.<sun.awt.AppContext: java.lang.Object remove(java.lang.Object)>($r3);
+
+     label1:
+        return;
+    }
+
+    public void setCaretPosition(int)
+    {
+        javax.swing.text.Caret $r7;
+        java.lang.IllegalArgumentException $r2;
+        javax.swing.text.JTextComponent r0;
+        int i0, $i1;
+        java.lang.StringBuilder $r3, $r4, $r5;
+        javax.swing.text.Document $r1;
+        java.lang.String $r6;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        if $r1 == null goto label3;
+
+        $i1 = interfaceinvoke $r1.<javax.swing.text.Document: int getLength()>();
+
+        if i0 > $i1 goto label1;
+
+        if i0 >= 0 goto label2;
+
+     label1:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("bad position: ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r6);
+
+        throw $r2;
+
+     label2:
+        $r7 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        interfaceinvoke $r7.<javax.swing.text.Caret: void setDot(int)>(i0);
+
+     label3:
+        return;
+    }
+
+    public int getCaretPosition()
+    {
+        int $i0;
+        javax.swing.text.Caret $r1;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $i0 = interfaceinvoke $r1.<javax.swing.text.Caret: int getDot()>();
+
+        return $i0;
+    }
+
+    public void setText(java.lang.String)
+    {
+        javax.swing.text.AbstractDocument $r3;
+        javax.swing.LookAndFeel $r5;
+        javax.swing.text.BadLocationException $r4;
+        javax.swing.text.JTextComponent r0;
+        int $i0, $i1;
+        javax.swing.text.Document $r1;
+        java.lang.String r2;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r2 := @parameter0: java.lang.String;
+
+     label1:
+        $r1 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        $z0 = $r1 instanceof javax.swing.text.AbstractDocument;
+
+        if $z0 == 0 goto label2;
+
+        $r3 = (javax.swing.text.AbstractDocument) $r1;
+
+        $i1 = interfaceinvoke $r1.<javax.swing.text.Document: int getLength()>();
+
+        virtualinvoke $r3.<javax.swing.text.AbstractDocument: void replace(int,int,java.lang.String,javax.swing.text.AttributeSet)>(0, $i1, r2, null);
+
+        goto label3;
+
+     label2:
+        $i0 = interfaceinvoke $r1.<javax.swing.text.Document: int getLength()>();
+
+        interfaceinvoke $r1.<javax.swing.text.Document: void remove(int,int)>(0, $i0);
+
+        interfaceinvoke $r1.<javax.swing.text.Document: void insertString(int,java.lang.String,javax.swing.text.AttributeSet)>(0, r2, null);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r4 := @caughtexception;
+
+        $r5 = staticinvoke <javax.swing.UIManager: javax.swing.LookAndFeel getLookAndFeel()>();
+
+        virtualinvoke $r5.<javax.swing.LookAndFeel: void provideErrorFeedback(java.awt.Component)>(r0);
+
+     label5:
+        return;
+
+        catch javax.swing.text.BadLocationException from label1 to label3 with label4;
+    }
+
+    public java.lang.String getText()
+    {
+        int $i0;
+        javax.swing.text.Document $r1;
+        javax.swing.text.BadLocationException $r2;
+        java.lang.String r3;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+     label1:
+        $i0 = interfaceinvoke $r1.<javax.swing.text.Document: int getLength()>();
+
+        r3 = interfaceinvoke $r1.<javax.swing.text.Document: java.lang.String getText(int,int)>(0, $i0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        r3 = null;
+
+     label4:
+        return r3;
+
+        catch javax.swing.text.BadLocationException from label1 to label2 with label3;
+    }
+
+    public java.lang.String getSelectedText()
+    {
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        java.lang.String $r8, r9;
+        javax.swing.text.Caret $r1, $r2, $r3, $r4;
+        javax.swing.text.BadLocationException $r6;
+        java.lang.IllegalArgumentException $r7;
+        javax.swing.text.JTextComponent r0;
+        javax.swing.text.Document $r5;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r9 = null;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $i0 = interfaceinvoke $r1.<javax.swing.text.Caret: int getDot()>();
+
+        $r2 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $i1 = interfaceinvoke $r2.<javax.swing.text.Caret: int getMark()>();
+
+        $i2 = staticinvoke <java.lang.Math: int min(int,int)>($i0, $i1);
+
+        $r3 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $i3 = interfaceinvoke $r3.<javax.swing.text.Caret: int getDot()>();
+
+        $r4 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $i4 = interfaceinvoke $r4.<javax.swing.text.Caret: int getMark()>();
+
+        $i5 = staticinvoke <java.lang.Math: int max(int,int)>($i3, $i4);
+
+        if $i2 == $i5 goto label4;
+
+     label1:
+        $r5 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        $i6 = $i5 - $i2;
+
+        r9 = interfaceinvoke $r5.<javax.swing.text.Document: java.lang.String getText(int,int)>($i2, $i6);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = new java.lang.IllegalArgumentException;
+
+        $r8 = virtualinvoke $r6.<javax.swing.text.BadLocationException: java.lang.String getMessage()>();
+
+        specialinvoke $r7.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r8);
+
+        throw $r7;
+
+     label4:
+        return r9;
+
+        catch javax.swing.text.BadLocationException from label1 to label2 with label3;
+    }
+
+    public boolean isEditable()
+    {
+        javax.swing.text.JTextComponent r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $z0 = r0.<javax.swing.text.JTextComponent: boolean editable>;
+
+        return $z0;
+    }
+
+    public void setEditable(boolean)
+    {
+        javax.swing.text.JTextComponent r0;
+        java.lang.Boolean $r1, $r2;
+        boolean z0, $z1, z2, $z3, $z4;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        z0 := @parameter0: boolean;
+
+        $z1 = r0.<javax.swing.text.JTextComponent: boolean editable>;
+
+        if z0 == $z1 goto label1;
+
+        z2 = r0.<javax.swing.text.JTextComponent: boolean editable>;
+
+        r0.<javax.swing.text.JTextComponent: boolean editable> = z0;
+
+        $z3 = r0.<javax.swing.text.JTextComponent: boolean editable>;
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void enableInputMethods(boolean)>($z3);
+
+        $r1 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(z2);
+
+        $z4 = r0.<javax.swing.text.JTextComponent: boolean editable>;
+
+        $r2 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z4);
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void firePropertyChange(java.lang.String,java.lang.Object,java.lang.Object)>("editable", $r1, $r2);
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void repaint()>();
+
+     label1:
+        return;
+    }
+
+    public int getSelectionStart()
+    {
+        int $i0, $i1, $i2;
+        javax.swing.text.Caret $r1, $r2;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $i0 = interfaceinvoke $r1.<javax.swing.text.Caret: int getDot()>();
+
+        $r2 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $i1 = interfaceinvoke $r2.<javax.swing.text.Caret: int getMark()>();
+
+        $i2 = staticinvoke <java.lang.Math: int min(int,int)>($i0, $i1);
+
+        return $i2;
+    }
+
+    public void setSelectionStart(int)
+    {
+        int i0, $i1;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        i0 := @parameter0: int;
+
+        $i1 = virtualinvoke r0.<javax.swing.text.JTextComponent: int getSelectionEnd()>();
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void select(int,int)>(i0, $i1);
+
+        return;
+    }
+
+    public int getSelectionEnd()
+    {
+        int $i0, $i1, $i2;
+        javax.swing.text.Caret $r1, $r2;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $i0 = interfaceinvoke $r1.<javax.swing.text.Caret: int getDot()>();
+
+        $r2 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $i1 = interfaceinvoke $r2.<javax.swing.text.Caret: int getMark()>();
+
+        $i2 = staticinvoke <java.lang.Math: int max(int,int)>($i0, $i1);
+
+        return $i2;
+    }
+
+    public void setSelectionEnd(int)
+    {
+        int $i0, i1;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        i1 := @parameter0: int;
+
+        $i0 = virtualinvoke r0.<javax.swing.text.JTextComponent: int getSelectionStart()>();
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void select(int,int)>($i0, i1);
+
+        return;
+    }
+
+    public void select(int, int)
+    {
+        int $i0, i1, i2;
+        javax.swing.text.Document $r1;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        i1 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        $i0 = interfaceinvoke $r1.<javax.swing.text.Document: int getLength()>();
+
+        if i1 >= 0 goto label1;
+
+        i1 = 0;
+
+     label1:
+        if i1 <= $i0 goto label2;
+
+        i1 = $i0;
+
+     label2:
+        if i2 <= $i0 goto label3;
+
+        i2 = $i0;
+
+     label3:
+        if i2 >= i1 goto label4;
+
+        i2 = i1;
+
+     label4:
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void setCaretPosition(int)>(i1);
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void moveCaretPosition(int)>(i2);
+
+        return;
+    }
+
+    public void selectAll()
+    {
+        int $i0;
+        javax.swing.text.Document $r1;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        if $r1 == null goto label1;
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void setCaretPosition(int)>(0);
+
+        $i0 = interfaceinvoke $r1.<javax.swing.text.Document: int getLength()>();
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void moveCaretPosition(int)>($i0);
+
+     label1:
+        return;
+    }
+
+    public java.lang.String getToolTipText(java.awt.event.MouseEvent)
+    {
+        java.awt.Point $r4;
+        javax.swing.text.JTextComponent r0;
+        java.awt.event.MouseEvent r1;
+        javax.swing.plaf.TextUI $r3;
+        int $i0, $i1;
+        java.lang.String $r2, r5;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r1 := @parameter0: java.awt.event.MouseEvent;
+
+        $r2 = specialinvoke r0.<javax.swing.JComponent: java.lang.String getToolTipText(java.awt.event.MouseEvent)>(r1);
+
+        r5 = $r2;
+
+        if $r2 != null goto label1;
+
+        $r3 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.plaf.TextUI getUI()>();
+
+        if $r3 == null goto label1;
+
+        $r4 = new java.awt.Point;
+
+        $i0 = virtualinvoke r1.<java.awt.event.MouseEvent: int getX()>();
+
+        $i1 = virtualinvoke r1.<java.awt.event.MouseEvent: int getY()>();
+
+        specialinvoke $r4.<java.awt.Point: void <init>(int,int)>($i0, $i1);
+
+        r5 = virtualinvoke $r3.<javax.swing.plaf.TextUI: java.lang.String getToolTipText(javax.swing.text.JTextComponent,java.awt.Point)>(r0, $r4);
+
+     label1:
+        return r5;
+    }
+
+    public java.awt.Dimension getPreferredScrollableViewportSize()
+    {
+        java.awt.Dimension $r1;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.JTextComponent: java.awt.Dimension getPreferredSize()>();
+
+        return $r1;
+    }
+
+    public int getScrollableUnitIncrement(java.awt.Rectangle, int, int)
+    {
+        java.awt.Rectangle r0;
+        java.lang.IllegalArgumentException $r1;
+        javax.swing.text.JTextComponent r6;
+        int i0, $i1, $i2, $i3, $i4, i5;
+        java.lang.StringBuilder $r2, $r3, $r4;
+        java.lang.String $r5;
+
+        r6 := @this: javax.swing.text.JTextComponent;
+
+        r0 := @parameter0: java.awt.Rectangle;
+
+        i0 := @parameter1: int;
+
+        i5 := @parameter2: int;
+
+        lookupswitch(i0)
+        {
+            case 0: goto label2;
+            case 1: goto label1;
+            default: goto label3;
+        };
+
+     label1:
+        $i1 = r0.<java.awt.Rectangle: int height>;
+
+        $i2 = $i1 / 10;
+
+        return $i2;
+
+     label2:
+        $i3 = r0.<java.awt.Rectangle: int width>;
+
+        $i4 = $i3 / 10;
+
+        return $i4;
+
+     label3:
+        $r1 = new java.lang.IllegalArgumentException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid orientation: ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r5);
+
+        throw $r1;
+    }
+
+    public int getScrollableBlockIncrement(java.awt.Rectangle, int, int)
+    {
+        java.awt.Rectangle r0;
+        java.lang.IllegalArgumentException $r1;
+        javax.swing.text.JTextComponent r6;
+        int i0, $i1, $i2, i3;
+        java.lang.StringBuilder $r2, $r3, $r4;
+        java.lang.String $r5;
+
+        r6 := @this: javax.swing.text.JTextComponent;
+
+        r0 := @parameter0: java.awt.Rectangle;
+
+        i0 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        lookupswitch(i0)
+        {
+            case 0: goto label2;
+            case 1: goto label1;
+            default: goto label3;
+        };
+
+     label1:
+        $i1 = r0.<java.awt.Rectangle: int height>;
+
+        return $i1;
+
+     label2:
+        $i2 = r0.<java.awt.Rectangle: int width>;
+
+        return $i2;
+
+     label3:
+        $r1 = new java.lang.IllegalArgumentException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid orientation: ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r5);
+
+        throw $r1;
+    }
+
+    public boolean getScrollableTracksViewportWidth()
+    {
+        java.awt.Dimension $r2;
+        int $i0, $i1;
+        java.awt.Container $r1;
+        javax.swing.text.JTextComponent r0;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = staticinvoke <javax.swing.SwingUtilities: java.awt.Container getUnwrappedParent(java.awt.Component)>(r0);
+
+        $z0 = $r1 instanceof javax.swing.JViewport;
+
+        if $z0 == 0 goto label3;
+
+        $i0 = virtualinvoke $r1.<java.awt.Container: int getWidth()>();
+
+        $r2 = virtualinvoke r0.<javax.swing.text.JTextComponent: java.awt.Dimension getPreferredSize()>();
+
+        $i1 = $r2.<java.awt.Dimension: int width>;
+
+        if $i0 <= $i1 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+
+     label3:
+        return 0;
+    }
+
+    public boolean getScrollableTracksViewportHeight()
+    {
+        java.awt.Dimension $r2;
+        int $i0, $i1;
+        java.awt.Container $r1;
+        javax.swing.text.JTextComponent r0;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = staticinvoke <javax.swing.SwingUtilities: java.awt.Container getUnwrappedParent(java.awt.Component)>(r0);
+
+        $z0 = $r1 instanceof javax.swing.JViewport;
+
+        if $z0 == 0 goto label3;
+
+        $i0 = virtualinvoke $r1.<java.awt.Container: int getHeight()>();
+
+        $r2 = virtualinvoke r0.<javax.swing.text.JTextComponent: java.awt.Dimension getPreferredSize()>();
+
+        $i1 = $r2.<java.awt.Dimension: int height>;
+
+        if $i0 <= $i1 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+
+     label3:
+        return 0;
+    }
+
+    public boolean print() throws java.awt.print.PrinterException
+    {
+        javax.swing.text.JTextComponent r0;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $z0 = virtualinvoke r0.<javax.swing.text.JTextComponent: boolean print(java.text.MessageFormat,java.text.MessageFormat,boolean,javax.print.PrintService,javax.print.attribute.PrintRequestAttributeSet,boolean)>(null, null, 1, null, null, 1);
+
+        return $z0;
+    }
+
+    public boolean print(java.text.MessageFormat, java.text.MessageFormat) throws java.awt.print.PrinterException
+    {
+        javax.swing.text.JTextComponent r0;
+        java.text.MessageFormat r1, r2;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r1 := @parameter0: java.text.MessageFormat;
+
+        r2 := @parameter1: java.text.MessageFormat;
+
+        $z0 = virtualinvoke r0.<javax.swing.text.JTextComponent: boolean print(java.text.MessageFormat,java.text.MessageFormat,boolean,javax.print.PrintService,javax.print.attribute.PrintRequestAttributeSet,boolean)>(r1, r2, 1, null, null, 1);
+
+        return $z0;
+    }
+
+    public boolean print(java.text.MessageFormat, java.text.MessageFormat, boolean, javax.print.PrintService, javax.print.attribute.PrintRequestAttributeSet, boolean) throws java.awt.print.PrinterException
+    {
+        sun.swing.PrintingStatus $r9, r19;
+        java.awt.print.PrinterAbortException $r16;
+        javax.print.attribute.HashPrintRequestAttributeSet $r25;
+        java.awt.print.PrinterJob $r0;
+        javax.swing.text.JTextComponent$3 $r28;
+        javax.swing.text.JTextComponent$2 $r26;
+        java.lang.Thread $r29;
+        java.awt.print.Printable $r4, r20;
+        boolean $z0, $z1, z2, z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        javax.print.attribute.PrintRequestAttributeSet r6, r7, $r21;
+        java.awt.print.PrinterException $r15;
+        java.lang.Throwable $r11;
+        java.lang.Error $r13;
+        java.util.concurrent.FutureTask $r27;
+        java.lang.AssertionError $r31;
+        java.text.MessageFormat r2, r3;
+        javax.print.PrintService r5;
+        java.lang.RuntimeException $r14, $r30;
+        javax.swing.text.JTextComponent r1;
+        java.util.concurrent.ExecutionException $r10;
+        java.lang.InterruptedException $r17;
+
+        r1 := @this: javax.swing.text.JTextComponent;
+
+        r2 := @parameter0: java.text.MessageFormat;
+
+        r3 := @parameter1: java.text.MessageFormat;
+
+        z3 := @parameter2: boolean;
+
+        r5 := @parameter3: javax.print.PrintService;
+
+        r6 := @parameter4: javax.print.attribute.PrintRequestAttributeSet;
+
+        z2 := @parameter5: boolean;
+
+        $r0 = staticinvoke <java.awt.print.PrinterJob: java.awt.print.PrinterJob getPrinterJob()>();
+
+        $z0 = staticinvoke <java.awt.GraphicsEnvironment: boolean isHeadless()>();
+
+        $z1 = staticinvoke <javax.swing.SwingUtilities: boolean isEventDispatchThread()>();
+
+        $r4 = virtualinvoke r1.<javax.swing.text.JTextComponent: java.awt.print.Printable getPrintable(java.text.MessageFormat,java.text.MessageFormat)>(r2, r3);
+
+        if z2 == 0 goto label01;
+
+        if $z0 != 0 goto label01;
+
+        $r9 = staticinvoke <sun.swing.PrintingStatus: sun.swing.PrintingStatus createPrintingStatus(java.awt.Component,java.awt.print.PrinterJob)>(r1, $r0);
+
+        r19 = $r9;
+
+        r20 = virtualinvoke $r9.<sun.swing.PrintingStatus: java.awt.print.Printable createNotificationPrintable(java.awt.print.Printable)>($r4);
+
+        goto label02;
+
+     label01:
+        r19 = null;
+
+        r20 = $r4;
+
+     label02:
+        if r5 == null goto label03;
+
+        virtualinvoke $r0.<java.awt.print.PrinterJob: void setPrintService(javax.print.PrintService)>(r5);
+
+     label03:
+        virtualinvoke $r0.<java.awt.print.PrinterJob: void setPrintable(java.awt.print.Printable)>(r20);
+
+        if r6 != null goto label04;
+
+        $r25 = new javax.print.attribute.HashPrintRequestAttributeSet;
+
+        $r21 = $r25;
+
+        specialinvoke $r25.<javax.print.attribute.HashPrintRequestAttributeSet: void <init>()>();
+
+        goto label05;
+
+     label04:
+        $r21 = r6;
+
+     label05:
+        r7 = $r21;
+
+        if z3 == 0 goto label06;
+
+        if $z0 != 0 goto label06;
+
+        $z4 = virtualinvoke $r0.<java.awt.print.PrinterJob: boolean printDialog(javax.print.attribute.PrintRequestAttributeSet)>($r21);
+
+        if $z4 != 0 goto label06;
+
+        return 0;
+
+     label06:
+        $r26 = new javax.swing.text.JTextComponent$2;
+
+        specialinvoke $r26.<javax.swing.text.JTextComponent$2: void <init>(javax.swing.text.JTextComponent,java.awt.print.PrinterJob,javax.print.attribute.PrintRequestAttributeSet,sun.swing.PrintingStatus)>(r1, $r0, r7, r19);
+
+        $r27 = new java.util.concurrent.FutureTask;
+
+        specialinvoke $r27.<java.util.concurrent.FutureTask: void <init>(java.util.concurrent.Callable)>($r26);
+
+        $r28 = new javax.swing.text.JTextComponent$3;
+
+        specialinvoke $r28.<javax.swing.text.JTextComponent$3: void <init>(javax.swing.text.JTextComponent,boolean,java.util.concurrent.FutureTask)>(r1, $z1, $r27);
+
+        if z2 == 0 goto label07;
+
+        if $z0 == 0 goto label08;
+
+     label07:
+        interfaceinvoke $r28.<java.lang.Runnable: void run()>();
+
+        goto label10;
+
+     label08:
+        if $z1 == 0 goto label09;
+
+        $r29 = new java.lang.Thread;
+
+        specialinvoke $r29.<java.lang.Thread: void <init>(java.lang.Runnable)>($r28);
+
+        virtualinvoke $r29.<java.lang.Thread: void start()>();
+
+        virtualinvoke r19.<sun.swing.PrintingStatus: void showModal(boolean)>(1);
+
+        goto label10;
+
+     label09:
+        virtualinvoke r19.<sun.swing.PrintingStatus: void showModal(boolean)>(0);
+
+        interfaceinvoke $r28.<java.lang.Runnable: void run()>();
+
+     label10:
+        virtualinvoke $r27.<java.util.concurrent.FutureTask: java.lang.Object get()>();
+
+     label11:
+        goto label19;
+
+     label12:
+        $r17 := @caughtexception;
+
+        $r30 = new java.lang.RuntimeException;
+
+        specialinvoke $r30.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r17);
+
+        throw $r30;
+
+     label13:
+        $r10 := @caughtexception;
+
+        $r11 = virtualinvoke $r10.<java.util.concurrent.ExecutionException: java.lang.Throwable getCause()>();
+
+        $z5 = $r11 instanceof java.awt.print.PrinterAbortException;
+
+        if $z5 == 0 goto label15;
+
+        if r19 == null goto label14;
+
+        $z9 = virtualinvoke r19.<sun.swing.PrintingStatus: boolean isAborted()>();
+
+        if $z9 == 0 goto label14;
+
+        return 0;
+
+     label14:
+        $r16 = (java.awt.print.PrinterAbortException) $r11;
+
+        throw $r16;
+
+     label15:
+        $z6 = $r11 instanceof java.awt.print.PrinterException;
+
+        if $z6 == 0 goto label16;
+
+        $r15 = (java.awt.print.PrinterException) $r11;
+
+        throw $r15;
+
+     label16:
+        $z7 = $r11 instanceof java.lang.RuntimeException;
+
+        if $z7 == 0 goto label17;
+
+        $r14 = (java.lang.RuntimeException) $r11;
+
+        throw $r14;
+
+     label17:
+        $z8 = $r11 instanceof java.lang.Error;
+
+        if $z8 == 0 goto label18;
+
+        $r13 = (java.lang.Error) $r11;
+
+        throw $r13;
+
+     label18:
+        $r31 = new java.lang.AssertionError;
+
+        specialinvoke $r31.<java.lang.AssertionError: void <init>(java.lang.Object)>($r11);
+
+        throw $r31;
+
+     label19:
+        return 1;
+
+        catch java.lang.InterruptedException from label10 to label11 with label12;
+        catch java.util.concurrent.ExecutionException from label10 to label11 with label13;
+    }
+
+    public java.awt.print.Printable getPrintable(java.text.MessageFormat, java.text.MessageFormat)
+    {
+        java.awt.print.Printable $r3;
+        javax.swing.text.JTextComponent r0;
+        java.text.MessageFormat r1, r2;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r1 := @parameter0: java.text.MessageFormat;
+
+        r2 := @parameter1: java.text.MessageFormat;
+
+        $r3 = staticinvoke <sun.swing.text.TextComponentPrintable: java.awt.print.Printable getPrintable(javax.swing.text.JTextComponent,java.text.MessageFormat,java.text.MessageFormat)>(r0, r1, r2);
+
+        return $r3;
+    }
+
+    public javax.accessibility.AccessibleContext getAccessibleContext()
+    {
+        javax.swing.text.JTextComponent$AccessibleJTextComponent $r3;
+        javax.accessibility.AccessibleContext $r1, $r2;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.accessibility.AccessibleContext accessibleContext>;
+
+        if $r1 != null goto label1;
+
+        $r3 = new javax.swing.text.JTextComponent$AccessibleJTextComponent;
+
+        specialinvoke $r3.<javax.swing.text.JTextComponent$AccessibleJTextComponent: void <init>(javax.swing.text.JTextComponent)>(r0);
+
+        r0.<javax.swing.text.JTextComponent: javax.accessibility.AccessibleContext accessibleContext> = $r3;
+
+     label1:
+        $r2 = r0.<javax.swing.text.JTextComponent: javax.accessibility.AccessibleContext accessibleContext>;
+
+        return $r2;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.ObjectInputStream r0;
+        javax.swing.text.JTextComponent$MutableCaretEvent $r2, $r3, $r4;
+        javax.swing.text.JTextComponent r1;
+
+        r1 := @this: javax.swing.text.JTextComponent;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        $r2 = new javax.swing.text.JTextComponent$MutableCaretEvent;
+
+        specialinvoke $r2.<javax.swing.text.JTextComponent$MutableCaretEvent: void <init>(javax.swing.text.JTextComponent)>(r1);
+
+        r1.<javax.swing.text.JTextComponent: javax.swing.text.JTextComponent$MutableCaretEvent caretEvent> = $r2;
+
+        $r3 = r1.<javax.swing.text.JTextComponent: javax.swing.text.JTextComponent$MutableCaretEvent caretEvent>;
+
+        virtualinvoke r1.<javax.swing.text.JTextComponent: void addMouseListener(java.awt.event.MouseListener)>($r3);
+
+        $r4 = r1.<javax.swing.text.JTextComponent: javax.swing.text.JTextComponent$MutableCaretEvent caretEvent>;
+
+        virtualinvoke r1.<javax.swing.text.JTextComponent: void addFocusListener(java.awt.event.FocusListener)>($r4);
+
+        return;
+    }
+
+    protected java.lang.String paramString()
+    {
+        java.awt.Color $r2, $r4, $r6, $r8, $r28, $r29, $r30, $r31;
+        boolean $z0;
+        java.lang.StringBuilder $r11, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25;
+        java.awt.Insets $r10, $r27;
+        java.lang.String r1, r3, r5, r7, r9, $r12, $r26, $r32, $r33, $r34, $r35, $r36, $r37;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $z0 = r0.<javax.swing.text.JTextComponent: boolean editable>;
+
+        if $z0 == 0 goto label01;
+
+        $r32 = "true";
+
+        goto label02;
+
+     label01:
+        $r32 = "false";
+
+     label02:
+        r1 = $r32;
+
+        $r2 = r0.<javax.swing.text.JTextComponent: java.awt.Color caretColor>;
+
+        if $r2 == null goto label03;
+
+        $r31 = r0.<javax.swing.text.JTextComponent: java.awt.Color caretColor>;
+
+        $r33 = virtualinvoke $r31.<java.awt.Color: java.lang.String toString()>();
+
+        goto label04;
+
+     label03:
+        $r33 = "";
+
+     label04:
+        r3 = $r33;
+
+        $r4 = r0.<javax.swing.text.JTextComponent: java.awt.Color selectionColor>;
+
+        if $r4 == null goto label05;
+
+        $r30 = r0.<javax.swing.text.JTextComponent: java.awt.Color selectionColor>;
+
+        $r34 = virtualinvoke $r30.<java.awt.Color: java.lang.String toString()>();
+
+        goto label06;
+
+     label05:
+        $r34 = "";
+
+     label06:
+        r5 = $r34;
+
+        $r6 = r0.<javax.swing.text.JTextComponent: java.awt.Color selectedTextColor>;
+
+        if $r6 == null goto label07;
+
+        $r29 = r0.<javax.swing.text.JTextComponent: java.awt.Color selectedTextColor>;
+
+        $r35 = virtualinvoke $r29.<java.awt.Color: java.lang.String toString()>();
+
+        goto label08;
+
+     label07:
+        $r35 = "";
+
+     label08:
+        r7 = $r35;
+
+        $r8 = r0.<javax.swing.text.JTextComponent: java.awt.Color disabledTextColor>;
+
+        if $r8 == null goto label09;
+
+        $r28 = r0.<javax.swing.text.JTextComponent: java.awt.Color disabledTextColor>;
+
+        $r36 = virtualinvoke $r28.<java.awt.Color: java.lang.String toString()>();
+
+        goto label10;
+
+     label09:
+        $r36 = "";
+
+     label10:
+        r9 = $r36;
+
+        $r10 = r0.<javax.swing.text.JTextComponent: java.awt.Insets margin>;
+
+        if $r10 == null goto label11;
+
+        $r27 = r0.<javax.swing.text.JTextComponent: java.awt.Insets margin>;
+
+        $r37 = virtualinvoke $r27.<java.awt.Insets: java.lang.String toString()>();
+
+        goto label12;
+
+     label11:
+        $r37 = "";
+
+     label12:
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = specialinvoke r0.<javax.swing.JComponent: java.lang.String paramString()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",caretColor=");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",disabledTextColor=");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r9);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",editable=");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",margin=");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r37);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",selectedTextColor=");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r7);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",selectionColor=");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r26;
+    }
+
+    static final javax.swing.text.JTextComponent getFocusedComponent()
+    {
+        sun.awt.AppContext $r0;
+        java.lang.Object $r1, $r2;
+        javax.swing.text.JTextComponent $r3;
+
+        $r0 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        $r1 = <javax.swing.text.JTextComponent: java.lang.Object FOCUSED_COMPONENT>;
+
+        $r2 = virtualinvoke $r0.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r3 = (javax.swing.text.JTextComponent) $r2;
+
+        return $r3;
+    }
+
+    private int getCurrentEventModifiers()
+    {
+        java.awt.event.InputEvent $r2;
+        java.awt.AWTEvent $r0;
+        int i0;
+        java.awt.event.ActionEvent $r1;
+        javax.swing.text.JTextComponent r3;
+        boolean $z0, $z1;
+
+        r3 := @this: javax.swing.text.JTextComponent;
+
+        i0 = 0;
+
+        $r0 = staticinvoke <java.awt.EventQueue: java.awt.AWTEvent getCurrentEvent()>();
+
+        $z0 = $r0 instanceof java.awt.event.InputEvent;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = (java.awt.event.InputEvent) $r0;
+
+        i0 = virtualinvoke $r2.<java.awt.event.InputEvent: int getModifiers()>();
+
+        goto label2;
+
+     label1:
+        $z1 = $r0 instanceof java.awt.event.ActionEvent;
+
+        if $z1 == 0 goto label2;
+
+        $r1 = (java.awt.event.ActionEvent) $r0;
+
+        i0 = virtualinvoke $r1.<java.awt.event.ActionEvent: int getModifiers()>();
+
+     label2:
+        return i0;
+    }
+
+    protected void processInputMethodEvent(java.awt.event.InputMethodEvent)
+    {
+        java.awt.event.InputMethodEvent r1;
+        int $i0;
+        javax.swing.text.JTextComponent r0;
+        boolean $z0, $z1;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r1 := @parameter0: java.awt.event.InputMethodEvent;
+
+        specialinvoke r0.<javax.swing.JComponent: void processInputMethodEvent(java.awt.event.InputMethodEvent)>(r1);
+
+        $z0 = virtualinvoke r1.<java.awt.event.InputMethodEvent: boolean isConsumed()>();
+
+        if $z0 != 0 goto label5;
+
+        $z1 = virtualinvoke r0.<javax.swing.text.JTextComponent: boolean isEditable()>();
+
+        if $z1 != 0 goto label1;
+
+        return;
+
+     label1:
+        $i0 = virtualinvoke r1.<java.awt.event.InputMethodEvent: int getID()>();
+
+        lookupswitch($i0)
+        {
+            case 1100: goto label2;
+            case 1101: goto label3;
+            default: goto label4;
+        };
+
+     label2:
+        specialinvoke r0.<javax.swing.text.JTextComponent: void replaceInputMethodText(java.awt.event.InputMethodEvent)>(r1);
+
+     label3:
+        specialinvoke r0.<javax.swing.text.JTextComponent: void setInputMethodCaretPosition(java.awt.event.InputMethodEvent)>(r1);
+
+     label4:
+        virtualinvoke r1.<java.awt.event.InputMethodEvent: void consume()>();
+
+     label5:
+        return;
+    }
+
+    public java.awt.im.InputMethodRequests getInputMethodRequests()
+    {
+        javax.swing.event.DocumentListener $r5;
+        javax.swing.text.JTextComponent$InputMethodRequestsHandler $r2;
+        java.awt.im.InputMethodRequests $r1, $r4, $r6;
+        javax.swing.text.Document $r3;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: java.awt.im.InputMethodRequests inputMethodRequestsHandler>;
+
+        if $r1 != null goto label1;
+
+        $r2 = new javax.swing.text.JTextComponent$InputMethodRequestsHandler;
+
+        specialinvoke $r2.<javax.swing.text.JTextComponent$InputMethodRequestsHandler: void <init>(javax.swing.text.JTextComponent)>(r0);
+
+        r0.<javax.swing.text.JTextComponent: java.awt.im.InputMethodRequests inputMethodRequestsHandler> = $r2;
+
+        $r3 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        if $r3 == null goto label1;
+
+        $r4 = r0.<javax.swing.text.JTextComponent: java.awt.im.InputMethodRequests inputMethodRequestsHandler>;
+
+        $r5 = (javax.swing.event.DocumentListener) $r4;
+
+        interfaceinvoke $r3.<javax.swing.text.Document: void addDocumentListener(javax.swing.event.DocumentListener)>($r5);
+
+     label1:
+        $r6 = r0.<javax.swing.text.JTextComponent: java.awt.im.InputMethodRequests inputMethodRequestsHandler>;
+
+        return $r6;
+    }
+
+    public void addInputMethodListener(java.awt.event.InputMethodListener)
+    {
+        java.awt.event.InputMethodListener r1;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r1 := @parameter0: java.awt.event.InputMethodListener;
+
+        specialinvoke r0.<javax.swing.JComponent: void addInputMethodListener(java.awt.event.InputMethodListener)>(r1);
+
+        if r1 == null goto label1;
+
+        r0.<javax.swing.text.JTextComponent: boolean needToSendKeyTypedEvent> = 0;
+
+        r0.<javax.swing.text.JTextComponent: boolean checkedInputOverride> = 1;
+
+     label1:
+        return;
+    }
+
+    private void replaceInputMethodText(java.awt.event.InputMethodEvent)
+    {
+        boolean $z0, $z1;
+        javax.swing.text.BadLocationException $r22, $r23, $r24;
+        java.awt.event.KeyEvent $r25;
+        java.text.AttributedCharacterIterator $r1;
+        java.lang.StringBuilder $r26;
+        javax.swing.text.Document $r3;
+        javax.swing.text.Position $r4, $r5, $r11, $r13, $r19, $r20, $r21;
+        javax.swing.text.SimpleAttributeSet $r7;
+        long $l6;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i7, $i8, $i9, $i10, i11, i12, i13, $i16, $i17, $i19, $i21;
+        java.lang.String $r8, $r10, $r16;
+        javax.swing.text.Caret $r6, $r9, $r12, $r14, $r17;
+        char c14, c15;
+        javax.swing.text.JTextComponent r2;
+        java.awt.event.InputMethodEvent r0;
+
+        r2 := @this: javax.swing.text.JTextComponent;
+
+        r0 := @parameter0: java.awt.event.InputMethodEvent;
+
+        $i0 = virtualinvoke r0.<java.awt.event.InputMethodEvent: int getCommittedCharacterCount()>();
+
+        i11 = $i0;
+
+        $r1 = virtualinvoke r0.<java.awt.event.InputMethodEvent: java.text.AttributedCharacterIterator getText()>();
+
+        $r3 = virtualinvoke r2.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        $z0 = virtualinvoke r2.<javax.swing.text.JTextComponent: boolean composedTextExists()>();
+
+        if $z0 == 0 goto label05;
+
+     label01:
+        $r19 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Position composedTextStart>;
+
+        $i7 = interfaceinvoke $r19.<javax.swing.text.Position: int getOffset()>();
+
+        $r20 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Position composedTextEnd>;
+
+        $i8 = interfaceinvoke $r20.<javax.swing.text.Position: int getOffset()>();
+
+        $r21 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Position composedTextStart>;
+
+        $i9 = interfaceinvoke $r21.<javax.swing.text.Position: int getOffset()>();
+
+        $i10 = $i8 - $i9;
+
+        interfaceinvoke $r3.<javax.swing.text.Document: void remove(int,int)>($i7, $i10);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r24 := @caughtexception;
+
+     label04:
+        r2.<javax.swing.text.JTextComponent: javax.swing.text.Position composedTextEnd> = null;
+
+        r2.<javax.swing.text.JTextComponent: javax.swing.text.Position composedTextStart> = null;
+
+        r2.<javax.swing.text.JTextComponent: javax.swing.text.SimpleAttributeSet composedTextAttribute> = null;
+
+        r2.<javax.swing.text.JTextComponent: java.lang.String composedTextContent> = null;
+
+     label05:
+        if $r1 == null goto label21;
+
+        interfaceinvoke $r1.<java.text.AttributedCharacterIterator: char first()>();
+
+        i12 = 0;
+
+        i13 = 0;
+
+        if $i0 <= 0 goto label12;
+
+        $r14 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        i12 = interfaceinvoke $r14.<javax.swing.text.Caret: int getDot()>();
+
+        $z1 = specialinvoke r2.<javax.swing.text.JTextComponent: boolean shouldSynthensizeKeyEvents()>();
+
+        if $z1 == 0 goto label08;
+
+        c14 = interfaceinvoke $r1.<java.text.AttributedCharacterIterator: char current()>();
+
+     label06:
+        if i11 <= 0 goto label07;
+
+        $r25 = new java.awt.event.KeyEvent;
+
+        $l6 = staticinvoke <java.awt.EventQueue: long getMostRecentEventTime()>();
+
+        specialinvoke $r25.<java.awt.event.KeyEvent: void <init>(java.awt.Component,int,long,int,int,char)>(r2, 400, $l6, 0, 0, c14);
+
+        virtualinvoke r2.<javax.swing.text.JTextComponent: void processKeyEvent(java.awt.event.KeyEvent)>($r25);
+
+        c14 = interfaceinvoke $r1.<java.text.AttributedCharacterIterator: char next()>();
+
+        $i19 = (int) -1;
+
+        i11 = i11 + $i19;
+
+        goto label06;
+
+     label07:
+        goto label11;
+
+     label08:
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        c15 = interfaceinvoke $r1.<java.text.AttributedCharacterIterator: char current()>();
+
+     label09:
+        if i11 <= 0 goto label10;
+
+        virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(c15);
+
+        c15 = interfaceinvoke $r1.<java.text.AttributedCharacterIterator: char next()>();
+
+        $i21 = (int) -1;
+
+        i11 = i11 + $i21;
+
+        goto label09;
+
+     label10:
+        $r16 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r2.<javax.swing.text.JTextComponent: void mapCommittedTextToAction(java.lang.String)>($r16);
+
+     label11:
+        $r17 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        i13 = interfaceinvoke $r17.<javax.swing.text.Caret: int getDot()>();
+
+     label12:
+        $i16 = interfaceinvoke $r1.<java.text.AttributedCharacterIterator: int getIndex()>();
+
+        $i17 = interfaceinvoke $r1.<java.text.AttributedCharacterIterator: int getEndIndex()>();
+
+        if $i16 >= $i17 goto label16;
+
+        specialinvoke r2.<javax.swing.text.JTextComponent: void createComposedTextAttribute(int,java.text.AttributedCharacterIterator)>($i16, $r1);
+
+     label13:
+        virtualinvoke r2.<javax.swing.text.JTextComponent: void replaceSelection(java.lang.String)>(null);
+
+        $r6 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $i1 = interfaceinvoke $r6.<javax.swing.text.Caret: int getDot()>();
+
+        $r8 = r2.<javax.swing.text.JTextComponent: java.lang.String composedTextContent>;
+
+        $r7 = r2.<javax.swing.text.JTextComponent: javax.swing.text.SimpleAttributeSet composedTextAttribute>;
+
+        interfaceinvoke $r3.<javax.swing.text.Document: void insertString(int,java.lang.String,javax.swing.text.AttributeSet)>($i1, $r8, $r7);
+
+        $r9 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $i2 = interfaceinvoke $r9.<javax.swing.text.Caret: int getDot()>();
+
+        $r10 = r2.<javax.swing.text.JTextComponent: java.lang.String composedTextContent>;
+
+        $i3 = virtualinvoke $r10.<java.lang.String: int length()>();
+
+        $i4 = $i2 - $i3;
+
+        $r11 = interfaceinvoke $r3.<javax.swing.text.Document: javax.swing.text.Position createPosition(int)>($i4);
+
+        r2.<javax.swing.text.JTextComponent: javax.swing.text.Position composedTextStart> = $r11;
+
+        $r12 = r2.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $i5 = interfaceinvoke $r12.<javax.swing.text.Caret: int getDot()>();
+
+        $r13 = interfaceinvoke $r3.<javax.swing.text.Document: javax.swing.text.Position createPosition(int)>($i5);
+
+        r2.<javax.swing.text.JTextComponent: javax.swing.text.Position composedTextEnd> = $r13;
+
+     label14:
+        goto label16;
+
+     label15:
+        $r23 := @caughtexception;
+
+        r2.<javax.swing.text.JTextComponent: javax.swing.text.Position composedTextEnd> = null;
+
+        r2.<javax.swing.text.JTextComponent: javax.swing.text.Position composedTextStart> = null;
+
+        r2.<javax.swing.text.JTextComponent: javax.swing.text.SimpleAttributeSet composedTextAttribute> = null;
+
+        r2.<javax.swing.text.JTextComponent: java.lang.String composedTextContent> = null;
+
+     label16:
+        if i12 == i13 goto label20;
+
+     label17:
+        $r4 = interfaceinvoke $r3.<javax.swing.text.Document: javax.swing.text.Position createPosition(int)>(i12);
+
+        r2.<javax.swing.text.JTextComponent: javax.swing.text.Position latestCommittedTextStart> = $r4;
+
+        $r5 = interfaceinvoke $r3.<javax.swing.text.Document: javax.swing.text.Position createPosition(int)>(i13);
+
+        r2.<javax.swing.text.JTextComponent: javax.swing.text.Position latestCommittedTextEnd> = $r5;
+
+     label18:
+        goto label21;
+
+     label19:
+        $r22 := @caughtexception;
+
+        r2.<javax.swing.text.JTextComponent: javax.swing.text.Position latestCommittedTextEnd> = null;
+
+        r2.<javax.swing.text.JTextComponent: javax.swing.text.Position latestCommittedTextStart> = null;
+
+        goto label21;
+
+     label20:
+        r2.<javax.swing.text.JTextComponent: javax.swing.text.Position latestCommittedTextEnd> = null;
+
+        r2.<javax.swing.text.JTextComponent: javax.swing.text.Position latestCommittedTextStart> = null;
+
+     label21:
+        return;
+
+        catch javax.swing.text.BadLocationException from label01 to label02 with label03;
+        catch javax.swing.text.BadLocationException from label13 to label14 with label15;
+        catch javax.swing.text.BadLocationException from label17 to label18 with label19;
+    }
+
+    private void createComposedTextAttribute(int, java.text.AttributedCharacterIterator)
+    {
+        javax.swing.text.SimpleAttributeSet $r6, $r9;
+        char c2;
+        java.text.AttributedString $r10;
+        javax.swing.text.JTextComponent r0;
+        java.text.AttributedCharacterIterator r2;
+        int i0, $i1, $i3, $i5;
+        java.lang.Object $r7;
+        java.lang.StringBuilder $r8;
+        java.lang.String $r3;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.text.AttributedCharacterIterator;
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        c2 = interfaceinvoke r2.<java.text.AttributedCharacterIterator: char setIndex(int)>(i0);
+
+     label1:
+        $i3 = (int) c2;
+
+        $i5 = (int) 65535;
+
+        if $i3 == $i5 goto label2;
+
+        virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(c2);
+
+        c2 = interfaceinvoke r2.<java.text.AttributedCharacterIterator: char next()>();
+
+        goto label1;
+
+     label2:
+        $r3 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r0.<javax.swing.text.JTextComponent: java.lang.String composedTextContent> = $r3;
+
+        $r9 = new javax.swing.text.SimpleAttributeSet;
+
+        specialinvoke $r9.<javax.swing.text.SimpleAttributeSet: void <init>()>();
+
+        r0.<javax.swing.text.JTextComponent: javax.swing.text.SimpleAttributeSet composedTextAttribute> = $r9;
+
+        $r6 = r0.<javax.swing.text.JTextComponent: javax.swing.text.SimpleAttributeSet composedTextAttribute>;
+
+        $r7 = <javax.swing.text.StyleConstants: java.lang.Object ComposedTextAttribute>;
+
+        $r10 = new java.text.AttributedString;
+
+        $i1 = interfaceinvoke r2.<java.text.AttributedCharacterIterator: int getEndIndex()>();
+
+        specialinvoke $r10.<java.text.AttributedString: void <init>(java.text.AttributedCharacterIterator,int,int)>(r2, i0, $i1);
+
+        virtualinvoke $r6.<javax.swing.text.SimpleAttributeSet: void addAttribute(java.lang.Object,java.lang.Object)>($r7, $r10);
+
+        return;
+    }
+
+    protected boolean saveComposedText(int)
+    {
+        javax.swing.text.Position $r1, $r2, $r3;
+        javax.swing.text.BadLocationException $r5;
+        javax.swing.text.JTextComponent r0;
+        int $i0, $i1, $i2, i3, i4, $i5;
+        javax.swing.text.Document $r4;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        i4 := @parameter0: int;
+
+        $z0 = virtualinvoke r0.<javax.swing.text.JTextComponent: boolean composedTextExists()>();
+
+        if $z0 == 0 goto label4;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Position composedTextStart>;
+
+        $i0 = interfaceinvoke $r1.<javax.swing.text.Position: int getOffset()>();
+
+        $r2 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Position composedTextEnd>;
+
+        $i1 = interfaceinvoke $r2.<javax.swing.text.Position: int getOffset()>();
+
+        $r3 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Position composedTextStart>;
+
+        $i2 = interfaceinvoke $r3.<javax.swing.text.Position: int getOffset()>();
+
+        i3 = $i1 - $i2;
+
+        if i4 < $i0 goto label4;
+
+        $i5 = $i0 + i3;
+
+        if i4 > $i5 goto label4;
+
+     label1:
+        $r4 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+        interfaceinvoke $r4.<javax.swing.text.Document: void remove(int,int)>($i0, i3);
+
+     label2:
+        return 1;
+
+     label3:
+        $r5 := @caughtexception;
+
+     label4:
+        return 0;
+
+        catch javax.swing.text.BadLocationException from label1 to label2 with label3;
+    }
+
+    protected void restoreComposedText()
+    {
+        javax.swing.text.SimpleAttributeSet $r3;
+        javax.swing.text.Position $r7, $r9;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.lang.String $r4, $r6;
+        javax.swing.text.Caret $r2, $r5, $r8;
+        javax.swing.text.BadLocationException $r10;
+        javax.swing.text.JTextComponent r0;
+        javax.swing.text.Document $r1;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.text.Document getDocument()>();
+
+     label1:
+        $r2 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $i0 = interfaceinvoke $r2.<javax.swing.text.Caret: int getDot()>();
+
+        $r4 = r0.<javax.swing.text.JTextComponent: java.lang.String composedTextContent>;
+
+        $r3 = r0.<javax.swing.text.JTextComponent: javax.swing.text.SimpleAttributeSet composedTextAttribute>;
+
+        interfaceinvoke $r1.<javax.swing.text.Document: void insertString(int,java.lang.String,javax.swing.text.AttributeSet)>($i0, $r4, $r3);
+
+        $r5 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $i1 = interfaceinvoke $r5.<javax.swing.text.Caret: int getDot()>();
+
+        $r6 = r0.<javax.swing.text.JTextComponent: java.lang.String composedTextContent>;
+
+        $i2 = virtualinvoke $r6.<java.lang.String: int length()>();
+
+        $i3 = $i1 - $i2;
+
+        $r7 = interfaceinvoke $r1.<javax.swing.text.Document: javax.swing.text.Position createPosition(int)>($i3);
+
+        r0.<javax.swing.text.JTextComponent: javax.swing.text.Position composedTextStart> = $r7;
+
+        $r8 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $i4 = interfaceinvoke $r8.<javax.swing.text.Caret: int getDot()>();
+
+        $r9 = interfaceinvoke $r1.<javax.swing.text.Document: javax.swing.text.Position createPosition(int)>($i4);
+
+        r0.<javax.swing.text.JTextComponent: javax.swing.text.Position composedTextEnd> = $r9;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r10 := @caughtexception;
+
+     label4:
+        return;
+
+        catch javax.swing.text.BadLocationException from label1 to label2 with label3;
+    }
+
+    private void mapCommittedTextToAction(java.lang.String)
+    {
+        javax.swing.KeyStroke $r4;
+        long $l1;
+        char $c3;
+        javax.swing.Action r5;
+        javax.swing.text.JTextComponent r0;
+        java.awt.event.ActionEvent $r3;
+        javax.swing.text.Keymap $r1;
+        int $i0, $i2;
+        java.lang.String r2;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = virtualinvoke r0.<javax.swing.text.JTextComponent: javax.swing.text.Keymap getKeymap()>();
+
+        if $r1 == null goto label3;
+
+        r5 = null;
+
+        $i0 = virtualinvoke r2.<java.lang.String: int length()>();
+
+        if $i0 != 1 goto label1;
+
+        $c3 = virtualinvoke r2.<java.lang.String: char charAt(int)>(0);
+
+        $r4 = staticinvoke <javax.swing.KeyStroke: javax.swing.KeyStroke getKeyStroke(char)>($c3);
+
+        r5 = interfaceinvoke $r1.<javax.swing.text.Keymap: javax.swing.Action getAction(javax.swing.KeyStroke)>($r4);
+
+     label1:
+        if r5 != null goto label2;
+
+        r5 = interfaceinvoke $r1.<javax.swing.text.Keymap: javax.swing.Action getDefaultAction()>();
+
+     label2:
+        if r5 == null goto label3;
+
+        $r3 = new java.awt.event.ActionEvent;
+
+        $l1 = staticinvoke <java.awt.EventQueue: long getMostRecentEventTime()>();
+
+        $i2 = specialinvoke r0.<javax.swing.text.JTextComponent: int getCurrentEventModifiers()>();
+
+        specialinvoke $r3.<java.awt.event.ActionEvent: void <init>(java.lang.Object,int,java.lang.String,long,int)>(r0, 1001, r2, $l1, $i2);
+
+        interfaceinvoke r5.<javax.swing.Action: void actionPerformed(java.awt.event.ActionEvent)>($r3);
+
+     label3:
+        return;
+    }
+
+    private void setInputMethodCaretPosition(java.awt.event.InputMethodEvent)
+    {
+        boolean $z0, $z1, $z2;
+        javax.swing.text.BadLocationException $r18;
+        java.awt.Rectangle $r9, $r11, $r12;
+        javax.swing.text.Position $r6, $r10;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, i11;
+        javax.swing.text.JTextComponent$ComposedTextCaret $r13, $r15, $r17;
+        java.awt.font.TextHitInfo $r19;
+        javax.swing.text.Caret $r1, $r2, $r3, $r4, $r5, $r7, $r14, $r16, $r20;
+        javax.swing.text.JTextComponent r0;
+        java.awt.event.InputMethodEvent r8;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        r8 := @parameter0: java.awt.event.InputMethodEvent;
+
+        $z0 = virtualinvoke r0.<javax.swing.text.JTextComponent: boolean composedTextExists()>();
+
+        if $z0 == 0 goto label7;
+
+        $r6 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Position composedTextStart>;
+
+        $i1 = interfaceinvoke $r6.<javax.swing.text.Position: int getOffset()>();
+
+        i11 = $i1;
+
+        $r7 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $z2 = $r7 instanceof javax.swing.text.JTextComponent$ComposedTextCaret;
+
+        if $z2 != 0 goto label2;
+
+        $r13 = r0.<javax.swing.text.JTextComponent: javax.swing.text.JTextComponent$ComposedTextCaret composedTextCaret>;
+
+        if $r13 != null goto label1;
+
+        $r17 = new javax.swing.text.JTextComponent$ComposedTextCaret;
+
+        specialinvoke $r17.<javax.swing.text.JTextComponent$ComposedTextCaret: void <init>(javax.swing.text.JTextComponent)>(r0);
+
+        r0.<javax.swing.text.JTextComponent: javax.swing.text.JTextComponent$ComposedTextCaret composedTextCaret> = $r17;
+
+     label1:
+        $r14 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret originalCaret> = $r14;
+
+        $r16 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret originalCaret>;
+
+        $r15 = r0.<javax.swing.text.JTextComponent: javax.swing.text.JTextComponent$ComposedTextCaret composedTextCaret>;
+
+        specialinvoke r0.<javax.swing.text.JTextComponent: void exchangeCaret(javax.swing.text.Caret,javax.swing.text.Caret)>($r16, $r15);
+
+     label2:
+        $r19 = virtualinvoke r8.<java.awt.event.InputMethodEvent: java.awt.font.TextHitInfo getCaret()>();
+
+        if $r19 == null goto label6;
+
+        $i2 = virtualinvoke $r19.<java.awt.font.TextHitInfo: int getInsertionIndex()>();
+
+        i11 = $i1 + $i2;
+
+        if $i2 != 0 goto label6;
+
+     label3:
+        $r9 = virtualinvoke r0.<javax.swing.text.JTextComponent: java.awt.Rectangle modelToView(int)>(i11);
+
+        $r10 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Position composedTextEnd>;
+
+        $i3 = interfaceinvoke $r10.<javax.swing.text.Position: int getOffset()>();
+
+        $r11 = virtualinvoke r0.<javax.swing.text.JTextComponent: java.awt.Rectangle modelToView(int)>($i3);
+
+        $r12 = virtualinvoke r0.<javax.swing.text.JTextComponent: java.awt.Rectangle getBounds()>();
+
+        $i8 = $r9.<java.awt.Rectangle: int x>;
+
+        $i5 = $r11.<java.awt.Rectangle: int x>;
+
+        $i4 = $r9.<java.awt.Rectangle: int x>;
+
+        $i7 = $i5 - $i4;
+
+        $i6 = $r12.<java.awt.Rectangle: int width>;
+
+        $i9 = staticinvoke <java.lang.Math: int min(int,int)>($i7, $i6);
+
+        $i10 = $i8 + $i9;
+
+        $r9.<java.awt.Rectangle: int x> = $i10;
+
+        virtualinvoke r0.<javax.swing.text.JTextComponent: void scrollRectToVisible(java.awt.Rectangle)>($r9);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r18 := @caughtexception;
+
+     label6:
+        $r20 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        interfaceinvoke $r20.<javax.swing.text.Caret: void setDot(int)>(i11);
+
+        goto label8;
+
+     label7:
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $z1 = $r1 instanceof javax.swing.text.JTextComponent$ComposedTextCaret;
+
+        if $z1 == 0 goto label8;
+
+        $r2 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $i0 = interfaceinvoke $r2.<javax.swing.text.Caret: int getDot()>();
+
+        $r4 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $r3 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret originalCaret>;
+
+        specialinvoke r0.<javax.swing.text.JTextComponent: void exchangeCaret(javax.swing.text.Caret,javax.swing.text.Caret)>($r4, $r3);
+
+        $r5 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        interfaceinvoke $r5.<javax.swing.text.Caret: void setDot(int)>($i0);
+
+     label8:
+        return;
+
+        catch javax.swing.text.BadLocationException from label3 to label4 with label5;
+    }
+
+    private void exchangeCaret(javax.swing.text.Caret, javax.swing.text.Caret)
+    {
+        int $i0;
+        javax.swing.text.Caret r0, r2, $r3, $r4;
+        javax.swing.text.JTextComponent r1;
+        boolean $z0;
+
+        r1 := @this: javax.swing.text.JTextComponent;
+
+        r0 := @parameter0: javax.swing.text.Caret;
+
+        r2 := @parameter1: javax.swing.text.Caret;
+
+        $i0 = interfaceinvoke r0.<javax.swing.text.Caret: int getBlinkRate()>();
+
+        virtualinvoke r1.<javax.swing.text.JTextComponent: void setCaret(javax.swing.text.Caret)>(r2);
+
+        $r3 = r1.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        interfaceinvoke $r3.<javax.swing.text.Caret: void setBlinkRate(int)>($i0);
+
+        $r4 = r1.<javax.swing.text.JTextComponent: javax.swing.text.Caret caret>;
+
+        $z0 = virtualinvoke r1.<javax.swing.text.JTextComponent: boolean hasFocus()>();
+
+        interfaceinvoke $r4.<javax.swing.text.Caret: void setVisible(boolean)>($z0);
+
+        return;
+    }
+
+    private boolean shouldSynthensizeKeyEvents()
+    {
+        javax.swing.text.JTextComponent r0;
+        com.sun.beans.util.Cache $r1;
+        java.lang.Boolean $r4;
+        java.lang.Class $r2;
+        java.lang.Object $r3;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $z0 = r0.<javax.swing.text.JTextComponent: boolean checkedInputOverride>;
+
+        if $z0 != 0 goto label3;
+
+        $r1 = <javax.swing.text.JTextComponent: com.sun.beans.util.Cache METHOD_OVERRIDDEN>;
+
+        $r2 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r1.<com.sun.beans.util.Cache: java.lang.Object get(java.lang.Object)>($r2);
+
+        $r4 = (java.lang.Boolean) $r3;
+
+        $z1 = virtualinvoke $r4.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z1 != 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        r0.<javax.swing.text.JTextComponent: boolean needToSendKeyTypedEvent> = $z2;
+
+        r0.<javax.swing.text.JTextComponent: boolean checkedInputOverride> = 1;
+
+     label3:
+        $z3 = r0.<javax.swing.text.JTextComponent: boolean needToSendKeyTypedEvent>;
+
+        return $z3;
+    }
+
+    boolean composedTextExists()
+    {
+        javax.swing.text.JTextComponent r0;
+        javax.swing.text.Position $r1;
+        boolean $z0;
+
+        r0 := @this: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Position composedTextStart>;
+
+        if $r1 == null goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    static javax.swing.text.Document access$100(javax.swing.text.JTextComponent)
+    {
+        javax.swing.text.Document $r1;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @parameter0: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Document model>;
+
+        return $r1;
+    }
+
+    static int access$300(javax.swing.text.JTextComponent)
+    {
+        int $i0;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @parameter0: javax.swing.text.JTextComponent;
+
+        $i0 = specialinvoke r0.<javax.swing.text.JTextComponent: int getCurrentEventModifiers()>();
+
+        return $i0;
+    }
+
+    static java.lang.Object access$400()
+    {
+        java.lang.Object $r0;
+
+        $r0 = <javax.swing.text.JTextComponent: java.lang.Object FOCUSED_COMPONENT>;
+
+        return $r0;
+    }
+
+    static javax.swing.text.Position access$500(javax.swing.text.JTextComponent)
+    {
+        javax.swing.text.JTextComponent r0;
+        javax.swing.text.Position $r1;
+
+        r0 := @parameter0: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Position latestCommittedTextStart>;
+
+        return $r1;
+    }
+
+    static javax.swing.text.Position access$600(javax.swing.text.JTextComponent)
+    {
+        javax.swing.text.JTextComponent r0;
+        javax.swing.text.Position $r1;
+
+        r0 := @parameter0: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Position latestCommittedTextEnd>;
+
+        return $r1;
+    }
+
+    static javax.swing.text.Position access$700(javax.swing.text.JTextComponent)
+    {
+        javax.swing.text.JTextComponent r0;
+        javax.swing.text.Position $r1;
+
+        r0 := @parameter0: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Position composedTextStart>;
+
+        return $r1;
+    }
+
+    static javax.swing.text.Position access$800(javax.swing.text.JTextComponent)
+    {
+        javax.swing.text.JTextComponent r0;
+        javax.swing.text.Position $r1;
+
+        r0 := @parameter0: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.swing.text.Position composedTextEnd>;
+
+        return $r1;
+    }
+
+    static java.lang.String access$900(javax.swing.text.JTextComponent)
+    {
+        java.lang.String $r1;
+        javax.swing.text.JTextComponent r0;
+
+        r0 := @parameter0: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: java.lang.String composedTextContent>;
+
+        return $r1;
+    }
+
+    static javax.swing.text.SimpleAttributeSet access$1000(javax.swing.text.JTextComponent)
+    {
+        javax.swing.text.JTextComponent r0;
+        javax.swing.text.SimpleAttributeSet $r1;
+
+        r0 := @parameter0: javax.swing.text.JTextComponent;
+
+        $r1 = r0.<javax.swing.text.JTextComponent: javax.swing.text.SimpleAttributeSet composedTextAttribute>;
+
+        return $r1;
+    }
+
+    static javax.swing.text.Position access$502(javax.swing.text.JTextComponent, javax.swing.text.Position)
+    {
+        javax.swing.text.JTextComponent r0;
+        javax.swing.text.Position r1;
+
+        r0 := @parameter0: javax.swing.text.JTextComponent;
+
+        r1 := @parameter1: javax.swing.text.Position;
+
+        r0.<javax.swing.text.JTextComponent: javax.swing.text.Position latestCommittedTextStart> = r1;
+
+        return r1;
+    }
+
+    static javax.swing.text.Position access$602(javax.swing.text.JTextComponent, javax.swing.text.Position)
+    {
+        javax.swing.text.JTextComponent r0;
+        javax.swing.text.Position r1;
+
+        r0 := @parameter0: javax.swing.text.JTextComponent;
+
+        r1 := @parameter1: javax.swing.text.Position;
+
+        r0.<javax.swing.text.JTextComponent: javax.swing.text.Position latestCommittedTextEnd> = r1;
+
+        return r1;
+    }
+
+    static void <clinit>()
+    {
+        javax.swing.text.JTextComponent$4 $r1;
+        javax.swing.text.JTextComponent$1 $r0;
+        com.sun.beans.util.Cache$Kind $r2, $r3;
+        java.lang.StringBuilder $r4, $r5;
+
+        <javax.swing.text.JTextComponent: java.lang.String DEFAULT_KEYMAP> = "default";
+
+        <javax.swing.text.JTextComponent: java.lang.String FOCUS_ACCELERATOR_KEY> = "focusAcceleratorKey";
+
+        $r0 = new javax.swing.text.JTextComponent$1;
+
+        specialinvoke $r0.<javax.swing.text.JTextComponent$1: void <init>()>();
+
+        staticinvoke <sun.swing.SwingAccessor: void setJTextComponentAccessor(sun.swing.SwingAccessor$JTextComponentAccessor)>($r0);
+
+        $r1 = new javax.swing.text.JTextComponent$4;
+
+        $r3 = <com.sun.beans.util.Cache$Kind: com.sun.beans.util.Cache$Kind WEAK>;
+
+        $r2 = <com.sun.beans.util.Cache$Kind: com.sun.beans.util.Cache$Kind STRONG>;
+
+        specialinvoke $r1.<javax.swing.text.JTextComponent$4: void <init>(com.sun.beans.util.Cache$Kind,com.sun.beans.util.Cache$Kind)>($r3, $r2);
+
+        <javax.swing.text.JTextComponent: com.sun.beans.util.Cache METHOD_OVERRIDDEN> = $r1;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>(java.lang.String)>("JTextComponent_KeymapTable");
+
+        <javax.swing.text.JTextComponent: java.lang.Object KEYMAP_TABLE> = $r4;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>(java.lang.String)>("JTextComponent_FocusedComponent");
+
+        <javax.swing.text.JTextComponent: java.lang.Object FOCUSED_COMPONENT> = $r5;
+
+        return;
+    }
+}

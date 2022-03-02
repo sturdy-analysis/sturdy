@@ -1,0 +1,573 @@
+abstract class sun.nio.ch.AsynchronousFileChannelImpl extends java.nio.channels.AsynchronousFileChannel
+{
+    protected final java.util.concurrent.locks.ReadWriteLock closeLock;
+    protected volatile boolean closed;
+    protected final java.io.FileDescriptor fdObj;
+    protected final boolean reading;
+    protected final boolean writing;
+    protected final java.util.concurrent.ExecutorService executor;
+    private volatile sun.nio.ch.FileLockTable fileLockTable;
+
+    protected void <init>(java.io.FileDescriptor, boolean, boolean, java.util.concurrent.ExecutorService)
+    {
+        java.io.FileDescriptor r2;
+        sun.nio.ch.AsynchronousFileChannelImpl r0;
+        java.util.concurrent.locks.ReentrantReadWriteLock $r1;
+        java.util.concurrent.ExecutorService r3;
+        boolean z0, z1;
+
+        r0 := @this: sun.nio.ch.AsynchronousFileChannelImpl;
+
+        r2 := @parameter0: java.io.FileDescriptor;
+
+        z0 := @parameter1: boolean;
+
+        z1 := @parameter2: boolean;
+
+        r3 := @parameter3: java.util.concurrent.ExecutorService;
+
+        specialinvoke r0.<java.nio.channels.AsynchronousFileChannel: void <init>()>();
+
+        $r1 = new java.util.concurrent.locks.ReentrantReadWriteLock;
+
+        specialinvoke $r1.<java.util.concurrent.locks.ReentrantReadWriteLock: void <init>()>();
+
+        r0.<sun.nio.ch.AsynchronousFileChannelImpl: java.util.concurrent.locks.ReadWriteLock closeLock> = $r1;
+
+        r0.<sun.nio.ch.AsynchronousFileChannelImpl: java.io.FileDescriptor fdObj> = r2;
+
+        r0.<sun.nio.ch.AsynchronousFileChannelImpl: boolean reading> = z0;
+
+        r0.<sun.nio.ch.AsynchronousFileChannelImpl: boolean writing> = z1;
+
+        r0.<sun.nio.ch.AsynchronousFileChannelImpl: java.util.concurrent.ExecutorService executor> = r3;
+
+        return;
+    }
+
+    final java.util.concurrent.ExecutorService executor()
+    {
+        sun.nio.ch.AsynchronousFileChannelImpl r0;
+        java.util.concurrent.ExecutorService $r1;
+
+        r0 := @this: sun.nio.ch.AsynchronousFileChannelImpl;
+
+        $r1 = r0.<sun.nio.ch.AsynchronousFileChannelImpl: java.util.concurrent.ExecutorService executor>;
+
+        return $r1;
+    }
+
+    public final boolean isOpen()
+    {
+        sun.nio.ch.AsynchronousFileChannelImpl r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.nio.ch.AsynchronousFileChannelImpl;
+
+        $z0 = r0.<sun.nio.ch.AsynchronousFileChannelImpl: boolean closed>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        return $z1;
+    }
+
+    protected final void begin() throws java.io.IOException
+    {
+        java.util.concurrent.locks.Lock $r2;
+        java.nio.channels.ClosedChannelException $r3;
+        sun.nio.ch.AsynchronousFileChannelImpl r0;
+        java.util.concurrent.locks.ReadWriteLock $r1;
+        boolean $z0;
+
+        r0 := @this: sun.nio.ch.AsynchronousFileChannelImpl;
+
+        $r1 = r0.<sun.nio.ch.AsynchronousFileChannelImpl: java.util.concurrent.locks.ReadWriteLock closeLock>;
+
+        $r2 = interfaceinvoke $r1.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock readLock()>();
+
+        interfaceinvoke $r2.<java.util.concurrent.locks.Lock: void lock()>();
+
+        $z0 = r0.<sun.nio.ch.AsynchronousFileChannelImpl: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = new java.nio.channels.ClosedChannelException;
+
+        specialinvoke $r3.<java.nio.channels.ClosedChannelException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        return;
+    }
+
+    protected final void end()
+    {
+        java.util.concurrent.locks.Lock $r2;
+        sun.nio.ch.AsynchronousFileChannelImpl r0;
+        java.util.concurrent.locks.ReadWriteLock $r1;
+
+        r0 := @this: sun.nio.ch.AsynchronousFileChannelImpl;
+
+        $r1 = r0.<sun.nio.ch.AsynchronousFileChannelImpl: java.util.concurrent.locks.ReadWriteLock closeLock>;
+
+        $r2 = interfaceinvoke $r1.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock readLock()>();
+
+        interfaceinvoke $r2.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return;
+    }
+
+    protected final void end(boolean) throws java.io.IOException
+    {
+        java.nio.channels.AsynchronousCloseException $r1;
+        sun.nio.ch.AsynchronousFileChannelImpl r0;
+        boolean z0, $z1;
+
+        r0 := @this: sun.nio.ch.AsynchronousFileChannelImpl;
+
+        z0 := @parameter0: boolean;
+
+        virtualinvoke r0.<sun.nio.ch.AsynchronousFileChannelImpl: void end()>();
+
+        if z0 != 0 goto label1;
+
+        $z1 = virtualinvoke r0.<sun.nio.ch.AsynchronousFileChannelImpl: boolean isOpen()>();
+
+        if $z1 != 0 goto label1;
+
+        $r1 = new java.nio.channels.AsynchronousCloseException;
+
+        specialinvoke $r1.<java.nio.channels.AsynchronousCloseException: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+
+    abstract java.util.concurrent.Future implLock(long, long, boolean, java.lang.Object, java.nio.channels.CompletionHandler);
+
+    public final java.util.concurrent.Future lock(long, long, boolean)
+    {
+        java.util.concurrent.Future $r1;
+        long l0, l1;
+        sun.nio.ch.AsynchronousFileChannelImpl r0;
+        boolean z0;
+
+        r0 := @this: sun.nio.ch.AsynchronousFileChannelImpl;
+
+        l0 := @parameter0: long;
+
+        l1 := @parameter1: long;
+
+        z0 := @parameter2: boolean;
+
+        $r1 = virtualinvoke r0.<sun.nio.ch.AsynchronousFileChannelImpl: java.util.concurrent.Future implLock(long,long,boolean,java.lang.Object,java.nio.channels.CompletionHandler)>(l0, l1, z0, null, null);
+
+        return $r1;
+    }
+
+    public final void lock(long, long, boolean, java.lang.Object, java.nio.channels.CompletionHandler)
+    {
+        java.nio.channels.CompletionHandler r0;
+        long l0, l1;
+        java.lang.Object r2;
+        sun.nio.ch.AsynchronousFileChannelImpl r1;
+        java.lang.NullPointerException $r3;
+        boolean z0;
+
+        r1 := @this: sun.nio.ch.AsynchronousFileChannelImpl;
+
+        l0 := @parameter0: long;
+
+        l1 := @parameter1: long;
+
+        z0 := @parameter2: boolean;
+
+        r2 := @parameter3: java.lang.Object;
+
+        r0 := @parameter4: java.nio.channels.CompletionHandler;
+
+        if r0 != null goto label1;
+
+        $r3 = new java.lang.NullPointerException;
+
+        specialinvoke $r3.<java.lang.NullPointerException: void <init>(java.lang.String)>("\'handler\' is null");
+
+        throw $r3;
+
+     label1:
+        virtualinvoke r1.<sun.nio.ch.AsynchronousFileChannelImpl: java.util.concurrent.Future implLock(long,long,boolean,java.lang.Object,java.nio.channels.CompletionHandler)>(l0, l1, z0, r2, r0);
+
+        return;
+    }
+
+    final void ensureFileLockTableInitialized() throws java.io.IOException
+    {
+        java.lang.Throwable $r5;
+        sun.nio.ch.FileLockTable $r1, $r2, $r4;
+        java.io.FileDescriptor $r3;
+        sun.nio.ch.AsynchronousFileChannelImpl r0;
+
+        r0 := @this: sun.nio.ch.AsynchronousFileChannelImpl;
+
+        $r1 = r0.<sun.nio.ch.AsynchronousFileChannelImpl: sun.nio.ch.FileLockTable fileLockTable>;
+
+        if $r1 != null goto label6;
+
+        entermonitor r0;
+
+     label1:
+        $r2 = r0.<sun.nio.ch.AsynchronousFileChannelImpl: sun.nio.ch.FileLockTable fileLockTable>;
+
+        if $r2 != null goto label2;
+
+        $r3 = r0.<sun.nio.ch.AsynchronousFileChannelImpl: java.io.FileDescriptor fdObj>;
+
+        $r4 = staticinvoke <sun.nio.ch.FileLockTable: sun.nio.ch.FileLockTable newSharedFileLockTable(java.nio.channels.Channel,java.io.FileDescriptor)>(r0, $r3);
+
+        r0.<sun.nio.ch.AsynchronousFileChannelImpl: sun.nio.ch.FileLockTable fileLockTable> = $r4;
+
+     label2:
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r5;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    final void invalidateAllLocks() throws java.io.IOException
+    {
+        java.lang.Throwable $r8;
+        java.util.Iterator $r4;
+        java.nio.channels.FileLock r6;
+        sun.nio.ch.FileLockImpl r7;
+        java.util.List $r3;
+        sun.nio.ch.FileLockTable $r1, $r2;
+        java.lang.Object $r5;
+        sun.nio.ch.AsynchronousFileChannelImpl r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.nio.ch.AsynchronousFileChannelImpl;
+
+        $r1 = r0.<sun.nio.ch.AsynchronousFileChannelImpl: sun.nio.ch.FileLockTable fileLockTable>;
+
+        if $r1 == null goto label8;
+
+        $r2 = r0.<sun.nio.ch.AsynchronousFileChannelImpl: sun.nio.ch.FileLockTable fileLockTable>;
+
+        $r3 = virtualinvoke $r2.<sun.nio.ch.FileLockTable: java.util.List removeAll()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label8;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (java.nio.channels.FileLock) $r5;
+
+        entermonitor r6;
+
+     label2:
+        $z1 = virtualinvoke r6.<java.nio.channels.FileLock: boolean isValid()>();
+
+        if $z1 == 0 goto label3;
+
+        r7 = (sun.nio.ch.FileLockImpl) r6;
+
+        virtualinvoke r0.<sun.nio.ch.AsynchronousFileChannelImpl: void implRelease(sun.nio.ch.FileLockImpl)>(r7);
+
+        virtualinvoke r7.<sun.nio.ch.FileLockImpl: void invalidate()>();
+
+     label3:
+        exitmonitor r6;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r8 := @caughtexception;
+
+        exitmonitor r6;
+
+     label6:
+        throw $r8;
+
+     label7:
+        goto label1;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label2 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    protected final sun.nio.ch.FileLockImpl addToFileLockTable(long, long, boolean)
+    {
+        java.lang.Throwable $r5;
+        long l0, l1;
+        java.io.IOException $r6;
+        java.lang.AssertionError $r7;
+        sun.nio.ch.FileLockImpl $r3;
+        java.util.concurrent.locks.Lock $r2;
+        sun.nio.ch.FileLockTable $r4;
+        sun.nio.ch.AsynchronousFileChannelImpl r0;
+        java.util.concurrent.locks.ReadWriteLock $r1;
+        boolean $z0, z1;
+
+        r0 := @this: sun.nio.ch.AsynchronousFileChannelImpl;
+
+        l0 := @parameter0: long;
+
+        l1 := @parameter1: long;
+
+        z1 := @parameter2: boolean;
+
+     label01:
+        $r1 = r0.<sun.nio.ch.AsynchronousFileChannelImpl: java.util.concurrent.locks.ReadWriteLock closeLock>;
+
+        $r2 = interfaceinvoke $r1.<java.util.concurrent.locks.ReadWriteLock: java.util.concurrent.locks.Lock readLock()>();
+
+        interfaceinvoke $r2.<java.util.concurrent.locks.Lock: void lock()>();
+
+        $z0 = r0.<sun.nio.ch.AsynchronousFileChannelImpl: boolean closed>;
+
+        if $z0 == 0 goto label03;
+
+     label02:
+        virtualinvoke r0.<sun.nio.ch.AsynchronousFileChannelImpl: void end()>();
+
+        return null;
+
+     label03:
+        virtualinvoke r0.<sun.nio.ch.AsynchronousFileChannelImpl: void ensureFileLockTableInitialized()>();
+
+     label04:
+        goto label06;
+
+     label05:
+        $r6 := @caughtexception;
+
+        $r7 = new java.lang.AssertionError;
+
+        specialinvoke $r7.<java.lang.AssertionError: void <init>(java.lang.Object)>($r6);
+
+        throw $r7;
+
+     label06:
+        $r3 = new sun.nio.ch.FileLockImpl;
+
+        specialinvoke $r3.<sun.nio.ch.FileLockImpl: void <init>(java.nio.channels.AsynchronousFileChannel,long,long,boolean)>(r0, l0, l1, z1);
+
+        $r4 = r0.<sun.nio.ch.AsynchronousFileChannelImpl: sun.nio.ch.FileLockTable fileLockTable>;
+
+        virtualinvoke $r4.<sun.nio.ch.FileLockTable: void add(java.nio.channels.FileLock)>($r3);
+
+     label07:
+        virtualinvoke r0.<sun.nio.ch.AsynchronousFileChannelImpl: void end()>();
+
+        goto label10;
+
+     label08:
+        $r5 := @caughtexception;
+
+     label09:
+        virtualinvoke r0.<sun.nio.ch.AsynchronousFileChannelImpl: void end()>();
+
+        throw $r5;
+
+     label10:
+        return $r3;
+
+        catch java.io.IOException from label03 to label04 with label05;
+        catch java.lang.Throwable from label01 to label02 with label08;
+        catch java.lang.Throwable from label03 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    protected final void removeFromFileLockTable(sun.nio.ch.FileLockImpl)
+    {
+        sun.nio.ch.AsynchronousFileChannelImpl r0;
+        sun.nio.ch.FileLockTable $r2;
+        sun.nio.ch.FileLockImpl r1;
+
+        r0 := @this: sun.nio.ch.AsynchronousFileChannelImpl;
+
+        r1 := @parameter0: sun.nio.ch.FileLockImpl;
+
+        $r2 = r0.<sun.nio.ch.AsynchronousFileChannelImpl: sun.nio.ch.FileLockTable fileLockTable>;
+
+        virtualinvoke $r2.<sun.nio.ch.FileLockTable: void remove(java.nio.channels.FileLock)>(r1);
+
+        return;
+    }
+
+    protected abstract void implRelease(sun.nio.ch.FileLockImpl) throws java.io.IOException;
+
+    final void release(sun.nio.ch.FileLockImpl) throws java.io.IOException
+    {
+        java.lang.Throwable $r2;
+        sun.nio.ch.AsynchronousFileChannelImpl r0;
+        sun.nio.ch.FileLockImpl r1;
+
+        r0 := @this: sun.nio.ch.AsynchronousFileChannelImpl;
+
+        r1 := @parameter0: sun.nio.ch.FileLockImpl;
+
+     label1:
+        virtualinvoke r0.<sun.nio.ch.AsynchronousFileChannelImpl: void begin()>();
+
+        virtualinvoke r0.<sun.nio.ch.AsynchronousFileChannelImpl: void implRelease(sun.nio.ch.FileLockImpl)>(r1);
+
+        virtualinvoke r0.<sun.nio.ch.AsynchronousFileChannelImpl: void removeFromFileLockTable(sun.nio.ch.FileLockImpl)>(r1);
+
+     label2:
+        virtualinvoke r0.<sun.nio.ch.AsynchronousFileChannelImpl: void end()>();
+
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        virtualinvoke r0.<sun.nio.ch.AsynchronousFileChannelImpl: void end()>();
+
+        throw $r2;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    abstract java.util.concurrent.Future implRead(java.nio.ByteBuffer, long, java.lang.Object, java.nio.channels.CompletionHandler);
+
+    public final java.util.concurrent.Future read(java.nio.ByteBuffer, long)
+    {
+        java.util.concurrent.Future $r2;
+        long l0;
+        sun.nio.ch.AsynchronousFileChannelImpl r0;
+        java.nio.ByteBuffer r1;
+
+        r0 := @this: sun.nio.ch.AsynchronousFileChannelImpl;
+
+        r1 := @parameter0: java.nio.ByteBuffer;
+
+        l0 := @parameter1: long;
+
+        $r2 = virtualinvoke r0.<sun.nio.ch.AsynchronousFileChannelImpl: java.util.concurrent.Future implRead(java.nio.ByteBuffer,long,java.lang.Object,java.nio.channels.CompletionHandler)>(r1, l0, null, null);
+
+        return $r2;
+    }
+
+    public final void read(java.nio.ByteBuffer, long, java.lang.Object, java.nio.channels.CompletionHandler)
+    {
+        java.nio.channels.CompletionHandler r0;
+        long l0;
+        java.lang.Object r3;
+        sun.nio.ch.AsynchronousFileChannelImpl r1;
+        java.nio.ByteBuffer r2;
+        java.lang.NullPointerException $r4;
+
+        r1 := @this: sun.nio.ch.AsynchronousFileChannelImpl;
+
+        r2 := @parameter0: java.nio.ByteBuffer;
+
+        l0 := @parameter1: long;
+
+        r3 := @parameter2: java.lang.Object;
+
+        r0 := @parameter3: java.nio.channels.CompletionHandler;
+
+        if r0 != null goto label1;
+
+        $r4 = new java.lang.NullPointerException;
+
+        specialinvoke $r4.<java.lang.NullPointerException: void <init>(java.lang.String)>("\'handler\' is null");
+
+        throw $r4;
+
+     label1:
+        virtualinvoke r1.<sun.nio.ch.AsynchronousFileChannelImpl: java.util.concurrent.Future implRead(java.nio.ByteBuffer,long,java.lang.Object,java.nio.channels.CompletionHandler)>(r2, l0, r3, r0);
+
+        return;
+    }
+
+    abstract java.util.concurrent.Future implWrite(java.nio.ByteBuffer, long, java.lang.Object, java.nio.channels.CompletionHandler);
+
+    public final java.util.concurrent.Future write(java.nio.ByteBuffer, long)
+    {
+        java.util.concurrent.Future $r2;
+        long l0;
+        sun.nio.ch.AsynchronousFileChannelImpl r0;
+        java.nio.ByteBuffer r1;
+
+        r0 := @this: sun.nio.ch.AsynchronousFileChannelImpl;
+
+        r1 := @parameter0: java.nio.ByteBuffer;
+
+        l0 := @parameter1: long;
+
+        $r2 = virtualinvoke r0.<sun.nio.ch.AsynchronousFileChannelImpl: java.util.concurrent.Future implWrite(java.nio.ByteBuffer,long,java.lang.Object,java.nio.channels.CompletionHandler)>(r1, l0, null, null);
+
+        return $r2;
+    }
+
+    public final void write(java.nio.ByteBuffer, long, java.lang.Object, java.nio.channels.CompletionHandler)
+    {
+        java.nio.channels.CompletionHandler r0;
+        long l0;
+        java.lang.Object r3;
+        sun.nio.ch.AsynchronousFileChannelImpl r1;
+        java.nio.ByteBuffer r2;
+        java.lang.NullPointerException $r4;
+
+        r1 := @this: sun.nio.ch.AsynchronousFileChannelImpl;
+
+        r2 := @parameter0: java.nio.ByteBuffer;
+
+        l0 := @parameter1: long;
+
+        r3 := @parameter2: java.lang.Object;
+
+        r0 := @parameter3: java.nio.channels.CompletionHandler;
+
+        if r0 != null goto label1;
+
+        $r4 = new java.lang.NullPointerException;
+
+        specialinvoke $r4.<java.lang.NullPointerException: void <init>(java.lang.String)>("\'handler\' is null");
+
+        throw $r4;
+
+     label1:
+        virtualinvoke r1.<sun.nio.ch.AsynchronousFileChannelImpl: java.util.concurrent.Future implWrite(java.nio.ByteBuffer,long,java.lang.Object,java.nio.channels.CompletionHandler)>(r2, l0, r3, r0);
+
+        return;
+    }
+}

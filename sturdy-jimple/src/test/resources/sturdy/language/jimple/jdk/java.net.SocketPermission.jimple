@@ -1,0 +1,3061 @@
+public final class java.net.SocketPermission extends java.security.Permission implements java.io.Serializable
+{
+    private static final long serialVersionUID;
+    private static final int CONNECT;
+    private static final int LISTEN;
+    private static final int ACCEPT;
+    private static final int RESOLVE;
+    private static final int NONE;
+    private static final int ALL;
+    private static final int PORT_MIN;
+    private static final int PORT_MAX;
+    private static final int PRIV_PORT_MAX;
+    private static final int DEF_EPH_LOW;
+    private transient int mask;
+    private java.lang.String actions;
+    private transient java.lang.String hostname;
+    private transient java.lang.String cname;
+    private transient java.net.InetAddress[] addresses;
+    private transient boolean wildcard;
+    private transient boolean init_with_ip;
+    private transient boolean invalid;
+    private transient int[] portrange;
+    private transient boolean defaultDeny;
+    private transient boolean untrusted;
+    private transient boolean trusted;
+    private static boolean trustNameService;
+    private static sun.security.util.Debug debug;
+    private static boolean debugInit;
+    private transient java.lang.String cdomain;
+    private transient java.lang.String hdomain;
+
+    private static synchronized sun.security.util.Debug getDebug()
+    {
+        sun.security.util.Debug $r0, $r1;
+        boolean $z0;
+
+        $z0 = <java.net.SocketPermission: boolean debugInit>;
+
+        if $z0 != 0 goto label1;
+
+        $r1 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String)>("access");
+
+        <java.net.SocketPermission: sun.security.util.Debug debug> = $r1;
+
+        <java.net.SocketPermission: boolean debugInit> = 1;
+
+     label1:
+        $r0 = <java.net.SocketPermission: sun.security.util.Debug debug>;
+
+        return $r0;
+    }
+
+    public void <init>(java.lang.String, java.lang.String)
+    {
+        int $i0;
+        java.net.SocketPermission r0;
+        java.lang.String r1, $r2, $r3, r4;
+
+        r0 := @this: java.net.SocketPermission;
+
+        r1 := @parameter0: java.lang.String;
+
+        r4 := @parameter1: java.lang.String;
+
+        $r2 = staticinvoke <java.net.SocketPermission: java.lang.String getHost(java.lang.String)>(r1);
+
+        specialinvoke r0.<java.security.Permission: void <init>(java.lang.String)>($r2);
+
+        r0.<java.net.SocketPermission: boolean defaultDeny> = 0;
+
+        $r3 = virtualinvoke r0.<java.net.SocketPermission: java.lang.String getName()>();
+
+        $i0 = staticinvoke <java.net.SocketPermission: int getMask(java.lang.String)>(r4);
+
+        specialinvoke r0.<java.net.SocketPermission: void init(java.lang.String,int)>($r3, $i0);
+
+        return;
+    }
+
+    void <init>(java.lang.String, int)
+    {
+        int i0;
+        java.net.SocketPermission r0;
+        java.lang.String r1, $r2, $r3;
+
+        r0 := @this: java.net.SocketPermission;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $r2 = staticinvoke <java.net.SocketPermission: java.lang.String getHost(java.lang.String)>(r1);
+
+        specialinvoke r0.<java.security.Permission: void <init>(java.lang.String)>($r2);
+
+        r0.<java.net.SocketPermission: boolean defaultDeny> = 0;
+
+        $r3 = virtualinvoke r0.<java.net.SocketPermission: java.lang.String getName()>();
+
+        specialinvoke r0.<java.net.SocketPermission: void init(java.lang.String,int)>($r3, i0);
+
+        return;
+    }
+
+    private void setDeny()
+    {
+        java.net.SocketPermission r0;
+
+        r0 := @this: java.net.SocketPermission;
+
+        r0.<java.net.SocketPermission: boolean defaultDeny> = 1;
+
+        return;
+    }
+
+    private static java.lang.String getHost(java.lang.String)
+    {
+        java.util.StringTokenizer $r14;
+        int $i1, $i2, $i3, $i4, $i5, $i6, $i8;
+        java.lang.String $r8, $r11, r13;
+        boolean $z0;
+        char $c0;
+        java.lang.IllegalArgumentException $r17;
+        java.lang.StringBuilder $r3, $r4, $r5, $r7, $r9, $r10, $r12, $r15, $r16;
+
+        r13 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r13.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z0 == 0 goto label1;
+
+        return "localhost";
+
+     label1:
+        $c0 = virtualinvoke r13.<java.lang.String: char charAt(int)>(0);
+
+        $i6 = (int) $c0;
+
+        if $i6 == 91 goto label4;
+
+        $i1 = virtualinvoke r13.<java.lang.String: int indexOf(int)>(58);
+
+        $i2 = virtualinvoke r13.<java.lang.String: int lastIndexOf(int)>(58);
+
+        if $i1 == $i2 goto label4;
+
+        $r14 = new java.util.StringTokenizer;
+
+        specialinvoke $r14.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>(r13, ":");
+
+        $i3 = virtualinvoke $r14.<java.util.StringTokenizer: int countTokens()>();
+
+        if $i3 != 9 goto label2;
+
+        $i5 = virtualinvoke r13.<java.lang.String: int lastIndexOf(int)>(58);
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r8 = virtualinvoke r13.<java.lang.String: java.lang.String substring(int,int)>(0, $i5);
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r11 = virtualinvoke r13.<java.lang.String: java.lang.String substring(int)>($i5);
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label4;
+
+     label2:
+        if $i3 != 8 goto label3;
+
+        $i4 = virtualinvoke r13.<java.lang.String: int indexOf(java.lang.String)>("::");
+
+        $i8 = (int) -1;
+
+        if $i4 != $i8 goto label3;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r13);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        r13 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label4;
+
+     label3:
+        $r17 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r17.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Ambiguous hostport part");
+
+        throw $r17;
+
+     label4:
+        return r13;
+    }
+
+    private int[] parsePort(java.lang.String) throws java.lang.Exception
+    {
+        int[] $r3, $r4, $r6;
+        int $i0, $i1, $i2, i3, i4, $i6, $i8, $i10;
+        java.lang.String r0, $r1, $r2;
+        java.net.SocketPermission r5;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.IllegalArgumentException $r8;
+
+        r5 := @this: java.net.SocketPermission;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 == null goto label1;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z0 != 0 goto label1;
+
+        $z1 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("*");
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $r6 = newarray (int)[2];
+
+        $r6[0] = 0;
+
+        $i6 = (int) 65535;
+
+        $r6[1] = $i6;
+
+        return $r6;
+
+     label2:
+        $i0 = virtualinvoke r0.<java.lang.String: int indexOf(int)>(45);
+
+        $i8 = (int) -1;
+
+        if $i0 != $i8 goto label3;
+
+        $i2 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>(r0);
+
+        $r4 = newarray (int)[2];
+
+        $r4[0] = $i2;
+
+        $r4[1] = $i2;
+
+        return $r4;
+
+     label3:
+        $r1 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $i1 = $i0 + 1;
+
+        $r2 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>($i1);
+
+        $z2 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z2 == 0 goto label4;
+
+        i3 = 0;
+
+        goto label5;
+
+     label4:
+        i3 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r1);
+
+     label5:
+        $z3 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z3 == 0 goto label6;
+
+        $i10 = (int) 65535;
+
+        i4 = $i10;
+
+        goto label7;
+
+     label6:
+        i4 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r2);
+
+     label7:
+        if i3 < 0 goto label8;
+
+        if i4 < 0 goto label8;
+
+        if i4 >= i3 goto label9;
+
+     label8:
+        $r8 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("invalid port range");
+
+        throw $r8;
+
+     label9:
+        $r3 = newarray (int)[2];
+
+        $r3[0] = i3;
+
+        $r3[1] = i4;
+
+        return $r3;
+    }
+
+    private boolean includesEphemerals()
+    {
+        int[] $r1;
+        int $i0;
+        java.net.SocketPermission r0;
+        boolean $z0;
+
+        r0 := @this: java.net.SocketPermission;
+
+        $r1 = r0.<java.net.SocketPermission: int[] portrange>;
+
+        $i0 = $r1[0];
+
+        if $i0 != 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private void init(java.lang.String, int)
+    {
+        byte[] $r3, r26;
+        java.net.InetAddress[] $r4;
+        java.net.InetAddress $r5;
+        int[] $r2, $r11;
+        java.net.SocketPermission r0;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.Exception $r19;
+        java.lang.StringBuilder $r14, $r15, $r22, $r23, $r28, $r30;
+        int i0, $i1, $i2, $i4, $i5, $i7, $i8, $i9, $i10, i11, $i12, $i14, $i16, $i18, $i20, $i21, $i23;
+        java.lang.String r1, $r7, $r8, $r10, $r16, $r24, r25;
+        char $c3, $c6;
+        java.lang.IllegalArgumentException $r27, $r29, $r31, $r32, $r33;
+        java.net.UnknownHostException $r18;
+
+        r0 := @this: java.net.SocketPermission;
+
+        r25 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $i1 = i0 & 15;
+
+        if $i1 == i0 goto label01;
+
+        $r27 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r27.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("invalid actions mask");
+
+        throw $r27;
+
+     label01:
+        $i2 = i0 | 8;
+
+        r0.<java.net.SocketPermission: int mask> = $i2;
+
+        r1 = r25;
+
+        $c3 = virtualinvoke r25.<java.lang.String: char charAt(int)>(0);
+
+        $i12 = (int) $c3;
+
+        if $i12 != 91 goto label04;
+
+        $i9 = virtualinvoke r25.<java.lang.String: int indexOf(int)>(93);
+
+        $i14 = (int) -1;
+
+        if $i9 == $i14 goto label02;
+
+        r25 = virtualinvoke r25.<java.lang.String: java.lang.String substring(int,int)>(1, $i9);
+
+        goto label03;
+
+     label02:
+        $r29 = new java.lang.IllegalArgumentException;
+
+        $r28 = new java.lang.StringBuilder;
+
+        specialinvoke $r28.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("invalid host/port: ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r25);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r29.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r16);
+
+        throw $r29;
+
+     label03:
+        $i10 = $i9 + 1;
+
+        i11 = virtualinvoke r1.<java.lang.String: int indexOf(int,int)>(58, $i10);
+
+        goto label05;
+
+     label04:
+        $i4 = virtualinvoke r25.<java.lang.String: int indexOf(int,int)>(58, 0);
+
+        i11 = $i4;
+
+        $i16 = (int) -1;
+
+        if $i4 == $i16 goto label05;
+
+        r25 = virtualinvoke r25.<java.lang.String: java.lang.String substring(int,int)>(0, $i4);
+
+     label05:
+        $i18 = (int) -1;
+
+        if i11 == $i18 goto label10;
+
+        $i8 = i11 + 1;
+
+        $r10 = virtualinvoke r1.<java.lang.String: java.lang.String substring(int)>($i8);
+
+     label06:
+        $r11 = specialinvoke r0.<java.net.SocketPermission: int[] parsePort(java.lang.String)>($r10);
+
+        r0.<java.net.SocketPermission: int[] portrange> = $r11;
+
+     label07:
+        goto label09;
+
+     label08:
+        $r19 := @caughtexception;
+
+        $r31 = new java.lang.IllegalArgumentException;
+
+        $r30 = new java.lang.StringBuilder;
+
+        specialinvoke $r30.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("invalid port range: ");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r31.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r24);
+
+        throw $r31;
+
+     label09:
+        goto label11;
+
+     label10:
+        $r2 = newarray (int)[2];
+
+        $r2[0] = 0;
+
+        $i20 = (int) 65535;
+
+        $r2[1] = $i20;
+
+        r0.<java.net.SocketPermission: int[] portrange> = $r2;
+
+     label11:
+        r0.<java.net.SocketPermission: java.lang.String hostname> = r25;
+
+        $i5 = virtualinvoke r25.<java.lang.String: int lastIndexOf(int)>(42);
+
+        if $i5 <= 0 goto label12;
+
+        $r32 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r32.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("invalid host wildcard specification");
+
+        throw $r32;
+
+     label12:
+        $z0 = virtualinvoke r25.<java.lang.String: boolean startsWith(java.lang.String)>("*");
+
+        if $z0 == 0 goto label16;
+
+        r0.<java.net.SocketPermission: boolean wildcard> = 1;
+
+        $z2 = virtualinvoke r25.<java.lang.String: boolean equals(java.lang.Object)>("*");
+
+        if $z2 == 0 goto label13;
+
+        r0.<java.net.SocketPermission: java.lang.String cname> = "";
+
+        goto label15;
+
+     label13:
+        $z3 = virtualinvoke r25.<java.lang.String: boolean startsWith(java.lang.String)>("*.");
+
+        if $z3 == 0 goto label14;
+
+        $r7 = virtualinvoke r25.<java.lang.String: java.lang.String substring(int)>(1);
+
+        $r8 = virtualinvoke $r7.<java.lang.String: java.lang.String toLowerCase()>();
+
+        r0.<java.net.SocketPermission: java.lang.String cname> = $r8;
+
+        goto label15;
+
+     label14:
+        $r33 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r33.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("invalid host wildcard specification");
+
+        throw $r33;
+
+     label15:
+        return;
+
+     label16:
+        $z1 = virtualinvoke r25.<java.lang.String: boolean isEmpty()>();
+
+        if $z1 != 0 goto label22;
+
+        $c6 = virtualinvoke r25.<java.lang.String: char charAt(int)>(0);
+
+        $i21 = (int) $c6;
+
+        if $i21 == 58 goto label17;
+
+        $i7 = staticinvoke <java.lang.Character: int digit(char,int)>($c6, 16);
+
+        $i23 = (int) -1;
+
+        if $i7 == $i23 goto label22;
+
+     label17:
+        $r3 = staticinvoke <sun.net.util.IPAddressUtil: byte[] textToNumericFormatV4(java.lang.String)>(r25);
+
+        r26 = $r3;
+
+        if $r3 != null goto label18;
+
+        r26 = staticinvoke <sun.net.util.IPAddressUtil: byte[] textToNumericFormatV6(java.lang.String)>(r25);
+
+     label18:
+        if r26 == null goto label22;
+
+     label19:
+        $r4 = newarray (java.net.InetAddress)[1];
+
+        $r5 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByAddress(byte[])>(r26);
+
+        $r4[0] = $r5;
+
+        r0.<java.net.SocketPermission: java.net.InetAddress[] addresses> = $r4;
+
+        r0.<java.net.SocketPermission: boolean init_with_ip> = 1;
+
+     label20:
+        goto label22;
+
+     label21:
+        $r18 := @caughtexception;
+
+        r0.<java.net.SocketPermission: boolean invalid> = 1;
+
+     label22:
+        return;
+
+        catch java.lang.Exception from label06 to label07 with label08;
+        catch java.net.UnknownHostException from label19 to label20 with label21;
+    }
+
+    private static int getMask(java.lang.String)
+    {
+        byte b100, b102, b103, b104, b105;
+        java.lang.StringBuilder $r4, $r5, $r11, $r12, $r16, $r18;
+        int $i0, $i1, $i3, $i5, $i7, $i9, $i12, $i15, $i17, $i19, $i21, $i23, $i25, $i27, $i29, $i31, $i33, $i37, $i39, $i41, $i43, $i45, $i47, $i49, $i51, $i53, $i55, $i57, $i61, $i63, $i65, $i67, $i69, $i71, $i73, $i75, $i77, $i79, $i81, $i83, $i87, $i89, $i91, $i93, $i95, $i97, i101, $i107, $i109, $i110, $i111, $i112, $i113, $i114, $i116, $i117, $i118, $i119, $i120, $i121, $i122, $i123, $i124, $i125, $i126, $i127, $i128, $i129, $i130, $i131, $i132, $i133, $i134, $i135, $i136, $i137, $i138, $i139, $i140, $i141, $i142, $i143, $i144, $i145, $i146, $i147, $i148, $i149, $i150, $i151, $i152, $i153, $i154, $i155, $i156, $i157, $i158, $i159, $i160, $i161, $i162, $i163, $i164, $i165, $i166, $i167, $i168, $i169, $i171;
+        java.lang.String r0, $r6, $r13;
+        char[] $r1;
+        java.lang.NullPointerException $r14;
+        boolean $z0, z1;
+        char $c2, $c4, $c6, $c8, $c10, $c11, $c13, $c14, $c16, $c18, $c20, $c22, $c24, $c26, $c28, $c30, $c32, $c34, $c35, $c36, $c38, $c40, $c42, $c44, $c46, $c48, $c50, $c52, $c54, $c56, $c58, $c59, $c60, $c62, $c64, $c66, $c68, $c70, $c72, $c74, $c76, $c78, $c80, $c82, $c84, $c85, $c86, $c88, $c90, $c92, $c94, $c96, $c98, $c99;
+        java.lang.IllegalArgumentException $r15, $r17, $r19;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label01;
+
+        $r14 = new java.lang.NullPointerException;
+
+        specialinvoke $r14.<java.lang.NullPointerException: void <init>(java.lang.String)>("action can\'t be null");
+
+        throw $r14;
+
+     label01:
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z0 == 0 goto label02;
+
+        $r15 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r15.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("action can\'t be empty");
+
+        throw $r15;
+
+     label02:
+        b100 = 0;
+
+        if r0 != "resolve" goto label03;
+
+        return 8;
+
+     label03:
+        if r0 != "connect" goto label04;
+
+        return 1;
+
+     label04:
+        if r0 != "listen" goto label05;
+
+        return 2;
+
+     label05:
+        if r0 != "accept" goto label06;
+
+        return 4;
+
+     label06:
+        if r0 != "connect,accept" goto label07;
+
+        return 5;
+
+     label07:
+        $r1 = virtualinvoke r0.<java.lang.String: char[] toCharArray()>();
+
+        $i0 = lengthof $r1;
+
+        i101 = $i0 - 1;
+
+        if i101 >= 0 goto label08;
+
+        return 0;
+
+     label08:
+        $i107 = (int) -1;
+
+        if i101 == $i107 goto label49;
+
+     label09:
+        $i109 = (int) -1;
+
+        if i101 == $i109 goto label11;
+
+        $c99 = $r1[i101];
+
+        $i110 = (int) $c99;
+
+        if $i110 == 32 goto label10;
+
+        $i111 = (int) $c99;
+
+        if $i111 == 13 goto label10;
+
+        $i112 = (int) $c99;
+
+        if $i112 == 10 goto label10;
+
+        $i113 = (int) $c99;
+
+        if $i113 == 12 goto label10;
+
+        $i114 = (int) $c99;
+
+        if $i114 != 9 goto label11;
+
+     label10:
+        $i116 = (int) -1;
+
+        i101 = i101 + $i116;
+
+        goto label09;
+
+     label11:
+        if i101 < 6 goto label19;
+
+        $i73 = i101 - 6;
+
+        $c74 = $r1[$i73];
+
+        $i117 = (int) $c74;
+
+        if $i117 == 99 goto label12;
+
+        $i97 = i101 - 6;
+
+        $c98 = $r1[$i97];
+
+        $i118 = (int) $c98;
+
+        if $i118 != 67 goto label19;
+
+     label12:
+        $i75 = i101 - 5;
+
+        $c76 = $r1[$i75];
+
+        $i119 = (int) $c76;
+
+        if $i119 == 111 goto label13;
+
+        $i95 = i101 - 5;
+
+        $c96 = $r1[$i95];
+
+        $i120 = (int) $c96;
+
+        if $i120 != 79 goto label19;
+
+     label13:
+        $i77 = i101 - 4;
+
+        $c78 = $r1[$i77];
+
+        $i121 = (int) $c78;
+
+        if $i121 == 110 goto label14;
+
+        $i93 = i101 - 4;
+
+        $c94 = $r1[$i93];
+
+        $i122 = (int) $c94;
+
+        if $i122 != 78 goto label19;
+
+     label14:
+        $i79 = i101 - 3;
+
+        $c80 = $r1[$i79];
+
+        $i123 = (int) $c80;
+
+        if $i123 == 110 goto label15;
+
+        $i91 = i101 - 3;
+
+        $c92 = $r1[$i91];
+
+        $i124 = (int) $c92;
+
+        if $i124 != 78 goto label19;
+
+     label15:
+        $i81 = i101 - 2;
+
+        $c82 = $r1[$i81];
+
+        $i125 = (int) $c82;
+
+        if $i125 == 101 goto label16;
+
+        $i89 = i101 - 2;
+
+        $c90 = $r1[$i89];
+
+        $i126 = (int) $c90;
+
+        if $i126 != 69 goto label19;
+
+     label16:
+        $i83 = i101 - 1;
+
+        $c84 = $r1[$i83];
+
+        $i127 = (int) $c84;
+
+        if $i127 == 99 goto label17;
+
+        $i87 = i101 - 1;
+
+        $c88 = $r1[$i87];
+
+        $i128 = (int) $c88;
+
+        if $i128 != 67 goto label19;
+
+     label17:
+        $c85 = $r1[i101];
+
+        $i129 = (int) $c85;
+
+        if $i129 == 116 goto label18;
+
+        $c86 = $r1[i101];
+
+        $i130 = (int) $c86;
+
+        if $i130 != 84 goto label19;
+
+     label18:
+        b102 = 7;
+
+        b105 = 7;
+
+        b104 = 7;
+
+        b103 = 7;
+
+        b100 = b100 | 1;
+
+        goto label42;
+
+     label19:
+        if i101 < 6 goto label27;
+
+        $i47 = i101 - 6;
+
+        $c48 = $r1[$i47];
+
+        $i131 = (int) $c48;
+
+        if $i131 == 114 goto label20;
+
+        $i71 = i101 - 6;
+
+        $c72 = $r1[$i71];
+
+        $i132 = (int) $c72;
+
+        if $i132 != 82 goto label27;
+
+     label20:
+        $i49 = i101 - 5;
+
+        $c50 = $r1[$i49];
+
+        $i133 = (int) $c50;
+
+        if $i133 == 101 goto label21;
+
+        $i69 = i101 - 5;
+
+        $c70 = $r1[$i69];
+
+        $i134 = (int) $c70;
+
+        if $i134 != 69 goto label27;
+
+     label21:
+        $i51 = i101 - 4;
+
+        $c52 = $r1[$i51];
+
+        $i135 = (int) $c52;
+
+        if $i135 == 115 goto label22;
+
+        $i67 = i101 - 4;
+
+        $c68 = $r1[$i67];
+
+        $i136 = (int) $c68;
+
+        if $i136 != 83 goto label27;
+
+     label22:
+        $i53 = i101 - 3;
+
+        $c54 = $r1[$i53];
+
+        $i137 = (int) $c54;
+
+        if $i137 == 111 goto label23;
+
+        $i65 = i101 - 3;
+
+        $c66 = $r1[$i65];
+
+        $i138 = (int) $c66;
+
+        if $i138 != 79 goto label27;
+
+     label23:
+        $i55 = i101 - 2;
+
+        $c56 = $r1[$i55];
+
+        $i139 = (int) $c56;
+
+        if $i139 == 108 goto label24;
+
+        $i63 = i101 - 2;
+
+        $c64 = $r1[$i63];
+
+        $i140 = (int) $c64;
+
+        if $i140 != 76 goto label27;
+
+     label24:
+        $i57 = i101 - 1;
+
+        $c58 = $r1[$i57];
+
+        $i141 = (int) $c58;
+
+        if $i141 == 118 goto label25;
+
+        $i61 = i101 - 1;
+
+        $c62 = $r1[$i61];
+
+        $i142 = (int) $c62;
+
+        if $i142 != 86 goto label27;
+
+     label25:
+        $c59 = $r1[i101];
+
+        $i143 = (int) $c59;
+
+        if $i143 == 101 goto label26;
+
+        $c60 = $r1[i101];
+
+        $i144 = (int) $c60;
+
+        if $i144 != 69 goto label27;
+
+     label26:
+        b102 = 7;
+
+        b105 = 7;
+
+        b104 = 7;
+
+        b103 = 7;
+
+        b100 = b100 | 8;
+
+        goto label42;
+
+     label27:
+        if i101 < 5 goto label34;
+
+        $i25 = i101 - 5;
+
+        $c26 = $r1[$i25];
+
+        $i145 = (int) $c26;
+
+        if $i145 == 108 goto label28;
+
+        $i45 = i101 - 5;
+
+        $c46 = $r1[$i45];
+
+        $i146 = (int) $c46;
+
+        if $i146 != 76 goto label34;
+
+     label28:
+        $i27 = i101 - 4;
+
+        $c28 = $r1[$i27];
+
+        $i147 = (int) $c28;
+
+        if $i147 == 105 goto label29;
+
+        $i43 = i101 - 4;
+
+        $c44 = $r1[$i43];
+
+        $i148 = (int) $c44;
+
+        if $i148 != 73 goto label34;
+
+     label29:
+        $i29 = i101 - 3;
+
+        $c30 = $r1[$i29];
+
+        $i149 = (int) $c30;
+
+        if $i149 == 115 goto label30;
+
+        $i41 = i101 - 3;
+
+        $c42 = $r1[$i41];
+
+        $i150 = (int) $c42;
+
+        if $i150 != 83 goto label34;
+
+     label30:
+        $i31 = i101 - 2;
+
+        $c32 = $r1[$i31];
+
+        $i151 = (int) $c32;
+
+        if $i151 == 116 goto label31;
+
+        $i39 = i101 - 2;
+
+        $c40 = $r1[$i39];
+
+        $i152 = (int) $c40;
+
+        if $i152 != 84 goto label34;
+
+     label31:
+        $i33 = i101 - 1;
+
+        $c34 = $r1[$i33];
+
+        $i153 = (int) $c34;
+
+        if $i153 == 101 goto label32;
+
+        $i37 = i101 - 1;
+
+        $c38 = $r1[$i37];
+
+        $i154 = (int) $c38;
+
+        if $i154 != 69 goto label34;
+
+     label32:
+        $c35 = $r1[i101];
+
+        $i155 = (int) $c35;
+
+        if $i155 == 110 goto label33;
+
+        $c36 = $r1[i101];
+
+        $i156 = (int) $c36;
+
+        if $i156 != 78 goto label34;
+
+     label33:
+        b102 = 6;
+
+        b105 = 6;
+
+        b104 = 6;
+
+        b103 = 6;
+
+        b100 = b100 | 2;
+
+        goto label42;
+
+     label34:
+        if i101 < 5 goto label41;
+
+        $i1 = i101 - 5;
+
+        $c2 = $r1[$i1];
+
+        $i157 = (int) $c2;
+
+        if $i157 == 97 goto label35;
+
+        $i23 = i101 - 5;
+
+        $c24 = $r1[$i23];
+
+        $i158 = (int) $c24;
+
+        if $i158 != 65 goto label41;
+
+     label35:
+        $i3 = i101 - 4;
+
+        $c4 = $r1[$i3];
+
+        $i159 = (int) $c4;
+
+        if $i159 == 99 goto label36;
+
+        $i21 = i101 - 4;
+
+        $c22 = $r1[$i21];
+
+        $i160 = (int) $c22;
+
+        if $i160 != 67 goto label41;
+
+     label36:
+        $i5 = i101 - 3;
+
+        $c6 = $r1[$i5];
+
+        $i161 = (int) $c6;
+
+        if $i161 == 99 goto label37;
+
+        $i19 = i101 - 3;
+
+        $c20 = $r1[$i19];
+
+        $i162 = (int) $c20;
+
+        if $i162 != 67 goto label41;
+
+     label37:
+        $i7 = i101 - 2;
+
+        $c8 = $r1[$i7];
+
+        $i163 = (int) $c8;
+
+        if $i163 == 101 goto label38;
+
+        $i17 = i101 - 2;
+
+        $c18 = $r1[$i17];
+
+        $i164 = (int) $c18;
+
+        if $i164 != 69 goto label41;
+
+     label38:
+        $i9 = i101 - 1;
+
+        $c10 = $r1[$i9];
+
+        $i165 = (int) $c10;
+
+        if $i165 == 112 goto label39;
+
+        $i15 = i101 - 1;
+
+        $c16 = $r1[$i15];
+
+        $i166 = (int) $c16;
+
+        if $i166 != 80 goto label41;
+
+     label39:
+        $c11 = $r1[i101];
+
+        $i167 = (int) $c11;
+
+        if $i167 == 116 goto label40;
+
+        $c14 = $r1[i101];
+
+        $i168 = (int) $c14;
+
+        if $i168 != 84 goto label41;
+
+     label40:
+        b102 = 6;
+
+        b105 = 6;
+
+        b104 = 6;
+
+        b103 = 6;
+
+        b100 = b100 | 4;
+
+        goto label42;
+
+     label41:
+        $r17 = new java.lang.IllegalArgumentException;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("invalid permission: ");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r17.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r13);
+
+        throw $r17;
+
+     label42:
+        z1 = 0;
+
+     label43:
+        if i101 < b103 goto label48;
+
+        if z1 != 0 goto label48;
+
+        $i12 = i101 - b104;
+
+        $c13 = $r1[$i12];
+
+        $i169 = (int) $c13;
+
+        lookupswitch($i169)
+        {
+            case 9: goto label45;
+            case 10: goto label45;
+            case 12: goto label45;
+            case 13: goto label45;
+            case 32: goto label45;
+            case 44: goto label44;
+            default: goto label46;
+        };
+
+     label44:
+        z1 = 1;
+
+        goto label47;
+
+     label45:
+        goto label47;
+
+     label46:
+        $r19 = new java.lang.IllegalArgumentException;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("invalid permission: ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r19.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r6);
+
+        throw $r19;
+
+     label47:
+        $i171 = (int) -1;
+
+        i101 = i101 + $i171;
+
+        goto label43;
+
+     label48:
+        i101 = i101 - b105;
+
+        goto label08;
+
+     label49:
+        return b100;
+    }
+
+    private boolean isUntrusted() throws java.net.UnknownHostException
+    {
+        byte[] $r7;
+        java.net.InetAddress[] $r4, $r11;
+        java.net.InetAddress $r5, $r12;
+        java.net.SocketPermission r0;
+        java.lang.String $r1, $r2, $r3, $r6, $r15, $r18, $r19;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        sun.security.util.Debug $r8;
+        java.net.UnknownHostException $r20;
+        java.lang.StringBuilder $r9, $r10, $r13, $r14, $r16, $r17;
+
+        r0 := @this: java.net.SocketPermission;
+
+        $z0 = r0.<java.net.SocketPermission: boolean trusted>;
+
+        if $z0 == 0 goto label01;
+
+        return 0;
+
+     label01:
+        $z1 = r0.<java.net.SocketPermission: boolean invalid>;
+
+        if $z1 != 0 goto label02;
+
+        $z2 = r0.<java.net.SocketPermission: boolean untrusted>;
+
+        if $z2 == 0 goto label03;
+
+     label02:
+        return 1;
+
+     label03:
+        $z3 = <java.net.SocketPermission: boolean trustNameService>;
+
+        if $z3 != 0 goto label08;
+
+        $z4 = r0.<java.net.SocketPermission: boolean defaultDeny>;
+
+        if $z4 != 0 goto label04;
+
+        $r19 = r0.<java.net.SocketPermission: java.lang.String hostname>;
+
+        $z8 = staticinvoke <sun.net.www.URLConnection: boolean isProxiedHost(java.lang.String)>($r19);
+
+        if $z8 == 0 goto label08;
+
+     label04:
+        $r1 = r0.<java.net.SocketPermission: java.lang.String cname>;
+
+        if $r1 != null goto label05;
+
+        virtualinvoke r0.<java.net.SocketPermission: void getCanonName()>();
+
+     label05:
+        $r3 = r0.<java.net.SocketPermission: java.lang.String cname>;
+
+        $r2 = r0.<java.net.SocketPermission: java.lang.String hostname>;
+
+        $z5 = specialinvoke r0.<java.net.SocketPermission: boolean match(java.lang.String,java.lang.String)>($r3, $r2);
+
+        if $z5 != 0 goto label07;
+
+        $r6 = r0.<java.net.SocketPermission: java.lang.String hostname>;
+
+        $r4 = r0.<java.net.SocketPermission: java.net.InetAddress[] addresses>;
+
+        $r5 = $r4[0];
+
+        $r7 = virtualinvoke $r5.<java.net.InetAddress: byte[] getAddress()>();
+
+        $z6 = specialinvoke r0.<java.net.SocketPermission: boolean authorized(java.lang.String,byte[])>($r6, $r7);
+
+        if $z6 != 0 goto label07;
+
+        r0.<java.net.SocketPermission: boolean untrusted> = 1;
+
+        $r8 = staticinvoke <java.net.SocketPermission: sun.security.util.Debug getDebug()>();
+
+        if $r8 == null goto label06;
+
+        $z7 = staticinvoke <sun.security.util.Debug: boolean isOn(java.lang.String)>("failure");
+
+        if $z7 == 0 goto label06;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("socket access restriction: proxied host (");
+
+        $r11 = r0.<java.net.SocketPermission: java.net.InetAddress[] addresses>;
+
+        $r12 = $r11[0];
+
+        $r13 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") does not match ");
+
+        $r15 = r0.<java.net.SocketPermission: java.lang.String cname>;
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" from reverse lookup");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r8.<sun.security.util.Debug: void println(java.lang.String)>($r18);
+
+     label06:
+        return 1;
+
+     label07:
+        r0.<java.net.SocketPermission: boolean trusted> = 1;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r20 := @caughtexception;
+
+        r0.<java.net.SocketPermission: boolean invalid> = 1;
+
+        throw $r20;
+
+     label10:
+        return 0;
+
+        catch java.net.UnknownHostException from label03 to label06 with label09;
+        catch java.net.UnknownHostException from label07 to label08 with label09;
+    }
+
+    void getCanonName() throws java.net.UnknownHostException
+    {
+        java.net.InetAddress[] $r2, $r3, $r9;
+        java.net.InetAddress $r4, $r6, $r10;
+        java.net.SocketPermission r0;
+        java.lang.String $r1, $r5, $r7, $r8, $r11, $r12;
+        boolean $z0, $z1, $z2;
+        java.net.UnknownHostException $r13;
+
+        r0 := @this: java.net.SocketPermission;
+
+        $r1 = r0.<java.net.SocketPermission: java.lang.String cname>;
+
+        if $r1 != null goto label1;
+
+        $z0 = r0.<java.net.SocketPermission: boolean invalid>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = r0.<java.net.SocketPermission: boolean untrusted>;
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        $r2 = r0.<java.net.SocketPermission: java.net.InetAddress[] addresses>;
+
+        if $r2 != null goto label3;
+
+        virtualinvoke r0.<java.net.SocketPermission: void getIP()>();
+
+     label3:
+        $z2 = r0.<java.net.SocketPermission: boolean init_with_ip>;
+
+        if $z2 == 0 goto label4;
+
+        $r9 = r0.<java.net.SocketPermission: java.net.InetAddress[] addresses>;
+
+        $r10 = $r9[0];
+
+        $r11 = virtualinvoke $r10.<java.net.InetAddress: java.lang.String getHostName(boolean)>(0);
+
+        $r12 = virtualinvoke $r11.<java.lang.String: java.lang.String toLowerCase()>();
+
+        r0.<java.net.SocketPermission: java.lang.String cname> = $r12;
+
+        goto label5;
+
+     label4:
+        $r3 = r0.<java.net.SocketPermission: java.net.InetAddress[] addresses>;
+
+        $r4 = $r3[0];
+
+        $r5 = virtualinvoke $r4.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+        $r6 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByName(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.net.InetAddress: java.lang.String getHostName(boolean)>(0);
+
+        $r8 = virtualinvoke $r7.<java.lang.String: java.lang.String toLowerCase()>();
+
+        r0.<java.net.SocketPermission: java.lang.String cname> = $r8;
+
+     label5:
+        goto label7;
+
+     label6:
+        $r13 := @caughtexception;
+
+        r0.<java.net.SocketPermission: boolean invalid> = 1;
+
+        throw $r13;
+
+     label7:
+        return;
+
+        catch java.net.UnknownHostException from label2 to label5 with label6;
+    }
+
+    private boolean match(java.lang.String, java.lang.String)
+    {
+        int $i0, $i1, $i2, $i4;
+        java.lang.String r0, $r1, r2, $r3, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12;
+        java.net.SocketPermission r4;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        char $c3;
+
+        r4 := @this: java.net.SocketPermission;
+
+        r0 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.lang.String;
+
+        $r1 = virtualinvoke r0.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $r3 = virtualinvoke r2.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>($r3);
+
+        if $z0 == 0 goto label2;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $i1 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        if $i0 == $i1 goto label1;
+
+        $i2 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        $c3 = virtualinvoke $r1.<java.lang.String: char charAt(int)>($i2);
+
+        $i4 = (int) $c3;
+
+        if $i4 != 46 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        $r5 = r4.<java.net.SocketPermission: java.lang.String cdomain>;
+
+        if $r5 != null goto label3;
+
+        $r12 = staticinvoke <sun.net.RegisteredDomain: java.lang.String getRegisteredDomain(java.lang.String)>($r1);
+
+        r4.<java.net.SocketPermission: java.lang.String cdomain> = $r12;
+
+     label3:
+        $r6 = r4.<java.net.SocketPermission: java.lang.String hdomain>;
+
+        if $r6 != null goto label4;
+
+        $r11 = staticinvoke <sun.net.RegisteredDomain: java.lang.String getRegisteredDomain(java.lang.String)>($r3);
+
+        r4.<java.net.SocketPermission: java.lang.String hdomain> = $r11;
+
+     label4:
+        $r7 = r4.<java.net.SocketPermission: java.lang.String cdomain>;
+
+        $z1 = virtualinvoke $r7.<java.lang.String: boolean isEmpty()>();
+
+        if $z1 != 0 goto label5;
+
+        $r8 = r4.<java.net.SocketPermission: java.lang.String hdomain>;
+
+        $z2 = virtualinvoke $r8.<java.lang.String: boolean isEmpty()>();
+
+        if $z2 != 0 goto label5;
+
+        $r10 = r4.<java.net.SocketPermission: java.lang.String cdomain>;
+
+        $r9 = r4.<java.net.SocketPermission: java.lang.String hdomain>;
+
+        $z3 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>($r9);
+
+        if $z3 == 0 goto label5;
+
+        $z4 = 1;
+
+        goto label6;
+
+     label5:
+        $z4 = 0;
+
+     label6:
+        return $z4;
+    }
+
+    private boolean authorized(java.lang.String, byte[])
+    {
+        byte[] r0;
+        int $i0, $i1;
+        java.net.SocketPermission r1;
+        java.lang.String r2;
+        boolean $z0, $z1;
+
+        r1 := @this: java.net.SocketPermission;
+
+        r2 := @parameter0: java.lang.String;
+
+        r0 := @parameter1: byte[];
+
+        $i0 = lengthof r0;
+
+        if $i0 != 4 goto label1;
+
+        $z1 = specialinvoke r1.<java.net.SocketPermission: boolean authorizedIPv4(java.lang.String,byte[])>(r2, r0);
+
+        return $z1;
+
+     label1:
+        $i1 = lengthof r0;
+
+        if $i1 != 16 goto label2;
+
+        $z0 = specialinvoke r1.<java.net.SocketPermission: boolean authorizedIPv6(java.lang.String,byte[])>(r2, r0);
+
+        return $z0;
+
+     label2:
+        return 0;
+    }
+
+    private boolean authorizedIPv4(java.lang.String, byte[])
+    {
+        byte[] r2;
+        java.net.InetAddress[] $r19;
+        java.net.InetAddress r20, $r21, $r27;
+        byte $b0, $b2, $b4, $b6;
+        java.net.SocketPermission r13;
+        boolean $z0, $z1, $z2;
+        sun.security.util.Debug $r22, $r31;
+        java.lang.StringBuilder $r1, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r15, $r16, $r17, $r24, $r25, $r26, $r28, $r33, $r34, $r38, $r39, $r40, $r41;
+        short $s1, $s3, $s5, $s7, $s8, $s10, $s12, $s14;
+        int $i9, $i11, $i13, $i15;
+        java.lang.String $r11, $r14, $r18, $r29, $r35, r36, r37;
+        java.net.UnknownHostException $r30;
+
+        r13 := @this: java.net.SocketPermission;
+
+        r36 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: byte[];
+
+        r37 = "";
+
+     label1:
+        $r38 = new java.lang.StringBuilder;
+
+        specialinvoke $r38.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("auth.");
+
+        $b0 = r2[3];
+
+        $s8 = (short) $b0;
+
+        $s1 = $s8 & 255;
+
+        $i9 = (int) $s1;
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i9);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $b2 = r2[2];
+
+        $s10 = (short) $b2;
+
+        $s3 = $s10 & 255;
+
+        $i11 = (int) $s3;
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i11);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $b4 = r2[1];
+
+        $s12 = (short) $b4;
+
+        $s5 = $s12 & 255;
+
+        $i13 = (int) $s5;
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i13);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $b6 = r2[0];
+
+        $s14 = (short) $b6;
+
+        $s7 = $s14 & 255;
+
+        $i15 = (int) $s7;
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i15);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".in-addr.arpa");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r37 = $r11;
+
+        $r39 = new java.lang.StringBuilder;
+
+        specialinvoke $r39.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = r13.<java.net.SocketPermission: java.lang.String hostname>;
+
+        $r15 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(46);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r37 = $r18;
+
+        $r19 = staticinvoke <java.net.InetAddress: java.net.InetAddress[] getAllByName0(java.lang.String,boolean)>($r18, 0);
+
+        r20 = $r19[0];
+
+        $r21 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByAddress(byte[])>(r2);
+
+        $z0 = virtualinvoke r20.<java.net.InetAddress: boolean equals(java.lang.Object)>($r21);
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        return 1;
+
+     label3:
+        $r22 = staticinvoke <java.net.SocketPermission: sun.security.util.Debug getDebug()>();
+
+        if $r22 == null goto label4;
+
+        $z1 = staticinvoke <sun.security.util.Debug: boolean isOn(java.lang.String)>("failure");
+
+        if $z1 == 0 goto label4;
+
+        $r40 = new java.lang.StringBuilder;
+
+        specialinvoke $r40.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("socket access restriction: IP address of ");
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r20);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" != ");
+
+        $r27 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByAddress(byte[])>(r2);
+
+        $r28 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r27);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r22.<sun.security.util.Debug: void println(java.lang.String)>($r29);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r30 := @caughtexception;
+
+        $r31 = staticinvoke <java.net.SocketPermission: sun.security.util.Debug getDebug()>();
+
+        if $r31 == null goto label6;
+
+        $z2 = staticinvoke <sun.security.util.Debug: boolean isOn(java.lang.String)>("failure");
+
+        if $z2 == 0 goto label6;
+
+        $r41 = new java.lang.StringBuilder;
+
+        specialinvoke $r41.<java.lang.StringBuilder: void <init>()>();
+
+        $r33 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("socket access restriction: forward lookup failed for ");
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r37);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r31.<sun.security.util.Debug: void println(java.lang.String)>($r35);
+
+     label6:
+        return 0;
+
+        catch java.net.UnknownHostException from label1 to label2 with label5;
+        catch java.net.UnknownHostException from label3 to label4 with label5;
+    }
+
+    private boolean authorizedIPv6(java.lang.String, byte[])
+    {
+        byte[] r16;
+        java.net.InetAddress[] $r14;
+        java.net.InetAddress r15, $r17, $r23;
+        byte $b0, $b1, $b2;
+        java.net.SocketPermission r8;
+        boolean $z0, $z1, $z2;
+        sun.security.util.Debug $r18, $r29;
+        java.lang.StringBuilder $r2, $r4, $r5, $r10, $r11, $r12, $r20, $r21, $r22, $r24, $r31, $r32, $r37, $r38, $r39, $r40;
+        java.lang.StringBuffer $r36;
+        int $i3, $i4, i5, $i6, $i7, $i9;
+        java.lang.String $r3, $r6, $r9, $r13, $r25, $r26, $r27, $r33, r34, r35;
+        java.net.UnknownHostException $r28;
+
+        r8 := @this: java.net.SocketPermission;
+
+        r34 := @parameter0: java.lang.String;
+
+        r16 := @parameter1: byte[];
+
+        r35 = "";
+
+     label1:
+        $r36 = new java.lang.StringBuffer;
+
+        specialinvoke $r36.<java.lang.StringBuffer: void <init>(int)>(39);
+
+        i5 = 15;
+
+     label2:
+        if i5 < 0 goto label3;
+
+        $b0 = r16[i5];
+
+        $b1 = $b0 & 15;
+
+        $i6 = (int) $b1;
+
+        $r26 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i6);
+
+        virtualinvoke $r36.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r26);
+
+        virtualinvoke $r36.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(46);
+
+        $b2 = r16[i5];
+
+        $i7 = (int) $b2;
+
+        $i3 = $i7 >> 4;
+
+        $i4 = $i3 & 15;
+
+        $r27 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i4);
+
+        virtualinvoke $r36.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r27);
+
+        virtualinvoke $r36.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(46);
+
+        $i9 = (int) -1;
+
+        i5 = i5 + $i9;
+
+        goto label2;
+
+     label3:
+        $r37 = new java.lang.StringBuilder;
+
+        specialinvoke $r37.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("auth.");
+
+        $r3 = virtualinvoke $r36.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("IP6.ARPA");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r35 = $r6;
+
+        $r38 = new java.lang.StringBuilder;
+
+        specialinvoke $r38.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = r8.<java.net.SocketPermission: java.lang.String hostname>;
+
+        $r10 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(46);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r35 = $r13;
+
+        $r14 = staticinvoke <java.net.InetAddress: java.net.InetAddress[] getAllByName0(java.lang.String,boolean)>($r13, 0);
+
+        r15 = $r14[0];
+
+        $r17 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByAddress(byte[])>(r16);
+
+        $z0 = virtualinvoke r15.<java.net.InetAddress: boolean equals(java.lang.Object)>($r17);
+
+        if $z0 == 0 goto label5;
+
+     label4:
+        return 1;
+
+     label5:
+        $r18 = staticinvoke <java.net.SocketPermission: sun.security.util.Debug getDebug()>();
+
+        if $r18 == null goto label6;
+
+        $z1 = staticinvoke <sun.security.util.Debug: boolean isOn(java.lang.String)>("failure");
+
+        if $z1 == 0 goto label6;
+
+        $r39 = new java.lang.StringBuilder;
+
+        specialinvoke $r39.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("socket access restriction: IP address of ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r15);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" != ");
+
+        $r23 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByAddress(byte[])>(r16);
+
+        $r24 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r23);
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r18.<sun.security.util.Debug: void println(java.lang.String)>($r25);
+
+     label6:
+        goto label8;
+
+     label7:
+        $r28 := @caughtexception;
+
+        $r29 = staticinvoke <java.net.SocketPermission: sun.security.util.Debug getDebug()>();
+
+        if $r29 == null goto label8;
+
+        $z2 = staticinvoke <sun.security.util.Debug: boolean isOn(java.lang.String)>("failure");
+
+        if $z2 == 0 goto label8;
+
+        $r40 = new java.lang.StringBuilder;
+
+        specialinvoke $r40.<java.lang.StringBuilder: void <init>()>();
+
+        $r31 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("socket access restriction: forward lookup failed for ");
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r35);
+
+        $r33 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r29.<sun.security.util.Debug: void println(java.lang.String)>($r33);
+
+     label8:
+        return 0;
+
+        catch java.net.UnknownHostException from label1 to label4 with label7;
+        catch java.net.UnknownHostException from label5 to label6 with label7;
+    }
+
+    void getIP() throws java.net.UnknownHostException
+    {
+        java.lang.IndexOutOfBoundsException $r7;
+        java.net.InetAddress[] $r1, $r12, $r13;
+        java.net.InetAddress $r14;
+        int $i1, $i2, $i3, $i5;
+        java.net.SocketPermission r0;
+        java.lang.String $r2, $r3, $r4, $r5, $r6, $r9, r11;
+        boolean $z0, $z1;
+        char $c0;
+        java.net.UnknownHostException $r10, $r15;
+
+        r0 := @this: java.net.SocketPermission;
+
+        $r1 = r0.<java.net.SocketPermission: java.net.InetAddress[] addresses>;
+
+        if $r1 != null goto label1;
+
+        $z0 = r0.<java.net.SocketPermission: boolean wildcard>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = r0.<java.net.SocketPermission: boolean invalid>;
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        $r2 = virtualinvoke r0.<java.net.SocketPermission: java.lang.String getName()>();
+
+        $c0 = virtualinvoke $r2.<java.lang.String: char charAt(int)>(0);
+
+        $i3 = (int) $c0;
+
+        if $i3 != 91 goto label3;
+
+        $r5 = virtualinvoke r0.<java.net.SocketPermission: java.lang.String getName()>();
+
+        $r6 = virtualinvoke r0.<java.net.SocketPermission: java.lang.String getName()>();
+
+        $i2 = virtualinvoke $r6.<java.lang.String: int indexOf(int)>(93);
+
+        r11 = virtualinvoke $r5.<java.lang.String: java.lang.String substring(int,int)>(1, $i2);
+
+        goto label5;
+
+     label3:
+        $r3 = virtualinvoke r0.<java.net.SocketPermission: java.lang.String getName()>();
+
+        $i1 = virtualinvoke $r3.<java.lang.String: int indexOf(java.lang.String)>(":");
+
+        $i5 = (int) -1;
+
+        if $i1 != $i5 goto label4;
+
+        r11 = virtualinvoke r0.<java.net.SocketPermission: java.lang.String getName()>();
+
+        goto label5;
+
+     label4:
+        $r4 = virtualinvoke r0.<java.net.SocketPermission: java.lang.String getName()>();
+
+        r11 = virtualinvoke $r4.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+     label5:
+        $r12 = newarray (java.net.InetAddress)[1];
+
+        $r13 = staticinvoke <java.net.InetAddress: java.net.InetAddress[] getAllByName0(java.lang.String,boolean)>(r11, 0);
+
+        $r14 = $r13[0];
+
+        $r12[0] = $r14;
+
+        r0.<java.net.SocketPermission: java.net.InetAddress[] addresses> = $r12;
+
+     label6:
+        goto label9;
+
+     label7:
+        $r10 := @caughtexception;
+
+        r0.<java.net.SocketPermission: boolean invalid> = 1;
+
+        throw $r10;
+
+     label8:
+        $r7 := @caughtexception;
+
+        r0.<java.net.SocketPermission: boolean invalid> = 1;
+
+        $r15 = new java.net.UnknownHostException;
+
+        $r9 = virtualinvoke r0.<java.net.SocketPermission: java.lang.String getName()>();
+
+        specialinvoke $r15.<java.net.UnknownHostException: void <init>(java.lang.String)>($r9);
+
+        throw $r15;
+
+     label9:
+        return;
+
+        catch java.net.UnknownHostException from label2 to label6 with label7;
+        catch java.lang.IndexOutOfBoundsException from label2 to label6 with label8;
+    }
+
+    public boolean implies(java.security.Permission)
+    {
+        java.security.Permission r0;
+        int $i0, $i1, $i2, $i3;
+        java.net.SocketPermission r1, r2;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: java.net.SocketPermission;
+
+        r0 := @parameter0: java.security.Permission;
+
+        $z0 = r0 instanceof java.net.SocketPermission;
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        if r0 != r1 goto label2;
+
+        return 1;
+
+     label2:
+        r2 = (java.net.SocketPermission) r0;
+
+        $i1 = r1.<java.net.SocketPermission: int mask>;
+
+        $i0 = r2.<java.net.SocketPermission: int mask>;
+
+        $i3 = $i1 & $i0;
+
+        $i2 = r2.<java.net.SocketPermission: int mask>;
+
+        if $i3 != $i2 goto label3;
+
+        $z1 = virtualinvoke r1.<java.net.SocketPermission: boolean impliesIgnoreMask(java.net.SocketPermission)>(r2);
+
+        if $z1 == 0 goto label3;
+
+        $z2 = 1;
+
+        goto label4;
+
+     label3:
+        $z2 = 0;
+
+     label4:
+        return $z2;
+    }
+
+    boolean impliesIgnoreMask(java.net.SocketPermission)
+    {
+        java.net.InetAddress[] $r7, $r8, $r13, $r14, $r15, $r18, $r19, $r20, $r23, $r24, $r38, $r39;
+        java.net.InetAddress $r16, $r17, $r21, $r22, $r25, $r26;
+        java.lang.String $r2, $r3, $r4, $r5, $r6, $r9, $r10, $r11, $r12, $r27, $r28;
+        java.net.UnknownHostException $r37;
+        int[] $r29, $r30, $r31, $r32, $r33, $r34, $r35, $r36;
+        java.net.SocketPermission r0, r1;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11, $z12, $z13, $z14, $z15, $z16, $z17, $z18, $z19, $z20, $z21, $z22, $z23, $z24;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, i12, $i13, i14, $i15, i16;
+
+        r1 := @this: java.net.SocketPermission;
+
+        r0 := @parameter0: java.net.SocketPermission;
+
+        $i0 = r0.<java.net.SocketPermission: int mask>;
+
+        $i2 = $i0 & 8;
+
+        $i1 = r0.<java.net.SocketPermission: int mask>;
+
+        if $i2 == $i1 goto label04;
+
+        $r29 = r0.<java.net.SocketPermission: int[] portrange>;
+
+        $i5 = $r29[0];
+
+        $r30 = r1.<java.net.SocketPermission: int[] portrange>;
+
+        $i4 = $r30[0];
+
+        if $i5 < $i4 goto label01;
+
+        $r35 = r0.<java.net.SocketPermission: int[] portrange>;
+
+        $i11 = $r35[1];
+
+        $r36 = r1.<java.net.SocketPermission: int[] portrange>;
+
+        $i10 = $r36[1];
+
+        if $i11 <= $i10 goto label04;
+
+     label01:
+        $z20 = specialinvoke r1.<java.net.SocketPermission: boolean includesEphemerals()>();
+
+        if $z20 != 0 goto label02;
+
+        $z22 = specialinvoke r0.<java.net.SocketPermission: boolean includesEphemerals()>();
+
+        if $z22 == 0 goto label03;
+
+     label02:
+        $r31 = r1.<java.net.SocketPermission: int[] portrange>;
+
+        $i9 = $r31[0];
+
+        $r32 = r1.<java.net.SocketPermission: int[] portrange>;
+
+        $i8 = $r32[1];
+
+        $r33 = r0.<java.net.SocketPermission: int[] portrange>;
+
+        $i7 = $r33[0];
+
+        $r34 = r0.<java.net.SocketPermission: int[] portrange>;
+
+        $i6 = $r34[1];
+
+        $z21 = staticinvoke <java.net.SocketPermission: boolean inRange(int,int,int,int)>($i9, $i8, $i7, $i6);
+
+        if $z21 != 0 goto label04;
+
+        return 0;
+
+     label03:
+        return 0;
+
+     label04:
+        $z24 = r1.<java.net.SocketPermission: boolean wildcard>;
+
+        if $z24 == 0 goto label05;
+
+        $r28 = "";
+
+        $r27 = r1.<java.net.SocketPermission: java.lang.String cname>;
+
+        $z19 = virtualinvoke $r28.<java.lang.String: boolean equals(java.lang.Object)>($r27);
+
+        if $z19 == 0 goto label05;
+
+        return 1;
+
+     label05:
+        $z0 = r1.<java.net.SocketPermission: boolean invalid>;
+
+        if $z0 != 0 goto label06;
+
+        $z2 = r0.<java.net.SocketPermission: boolean invalid>;
+
+        if $z2 == 0 goto label07;
+
+     label06:
+        $z1 = specialinvoke r1.<java.net.SocketPermission: boolean compareHostnames(java.net.SocketPermission)>(r0);
+
+        return $z1;
+
+     label07:
+        $z3 = r1.<java.net.SocketPermission: boolean init_with_ip>;
+
+        if $z3 == 0 goto label17;
+
+        $z15 = r0.<java.net.SocketPermission: boolean wildcard>;
+
+        if $z15 == 0 goto label09;
+
+     label08:
+        return 0;
+
+     label09:
+        $z16 = r0.<java.net.SocketPermission: boolean init_with_ip>;
+
+        if $z16 == 0 goto label11;
+
+        $r23 = r1.<java.net.SocketPermission: java.net.InetAddress[] addresses>;
+
+        $r26 = $r23[0];
+
+        $r24 = r0.<java.net.SocketPermission: java.net.InetAddress[] addresses>;
+
+        $r25 = $r24[0];
+
+        $z18 = virtualinvoke $r26.<java.net.InetAddress: boolean equals(java.lang.Object)>($r25);
+
+     label10:
+        return $z18;
+
+     label11:
+        $r18 = r0.<java.net.SocketPermission: java.net.InetAddress[] addresses>;
+
+        if $r18 != null goto label12;
+
+        virtualinvoke r0.<java.net.SocketPermission: void getIP()>();
+
+     label12:
+        i12 = 0;
+
+     label13:
+        $r38 = r0.<java.net.SocketPermission: java.net.InetAddress[] addresses>;
+
+        $i13 = lengthof $r38;
+
+        if i12 >= $i13 goto label16;
+
+        $r19 = r1.<java.net.SocketPermission: java.net.InetAddress[] addresses>;
+
+        $r22 = $r19[0];
+
+        $r20 = r0.<java.net.SocketPermission: java.net.InetAddress[] addresses>;
+
+        $r21 = $r20[i12];
+
+        $z17 = virtualinvoke $r22.<java.net.InetAddress: boolean equals(java.lang.Object)>($r21);
+
+        if $z17 == 0 goto label15;
+
+     label14:
+        return 1;
+
+     label15:
+        i12 = i12 + 1;
+
+        goto label13;
+
+     label16:
+        return 0;
+
+     label17:
+        $z4 = r1.<java.net.SocketPermission: boolean wildcard>;
+
+        if $z4 != 0 goto label18;
+
+        $z10 = r0.<java.net.SocketPermission: boolean wildcard>;
+
+        if $z10 == 0 goto label25;
+
+     label18:
+        $z5 = r1.<java.net.SocketPermission: boolean wildcard>;
+
+        if $z5 == 0 goto label20;
+
+        $z8 = r0.<java.net.SocketPermission: boolean wildcard>;
+
+        if $z8 == 0 goto label20;
+
+        $r6 = r0.<java.net.SocketPermission: java.lang.String cname>;
+
+        $r5 = r1.<java.net.SocketPermission: java.lang.String cname>;
+
+        $z9 = virtualinvoke $r6.<java.lang.String: boolean endsWith(java.lang.String)>($r5);
+
+     label19:
+        return $z9;
+
+     label20:
+        $z6 = r0.<java.net.SocketPermission: boolean wildcard>;
+
+        if $z6 == 0 goto label22;
+
+     label21:
+        return 0;
+
+     label22:
+        $r2 = r0.<java.net.SocketPermission: java.lang.String cname>;
+
+        if $r2 != null goto label23;
+
+        virtualinvoke r0.<java.net.SocketPermission: void getCanonName()>();
+
+     label23:
+        $r4 = r0.<java.net.SocketPermission: java.lang.String cname>;
+
+        $r3 = r1.<java.net.SocketPermission: java.lang.String cname>;
+
+        $z7 = virtualinvoke $r4.<java.lang.String: boolean endsWith(java.lang.String)>($r3);
+
+     label24:
+        return $z7;
+
+     label25:
+        $r7 = r1.<java.net.SocketPermission: java.net.InetAddress[] addresses>;
+
+        if $r7 != null goto label26;
+
+        virtualinvoke r1.<java.net.SocketPermission: void getIP()>();
+
+     label26:
+        $r8 = r0.<java.net.SocketPermission: java.net.InetAddress[] addresses>;
+
+        if $r8 != null goto label27;
+
+        virtualinvoke r0.<java.net.SocketPermission: void getIP()>();
+
+     label27:
+        $z11 = r0.<java.net.SocketPermission: boolean init_with_ip>;
+
+        if $z11 == 0 goto label28;
+
+        $z14 = specialinvoke r1.<java.net.SocketPermission: boolean isUntrusted()>();
+
+        if $z14 != 0 goto label38;
+
+     label28:
+        i14 = 0;
+
+     label29:
+        $r39 = r1.<java.net.SocketPermission: java.net.InetAddress[] addresses>;
+
+        $i15 = lengthof $r39;
+
+        if i14 >= $i15 goto label34;
+
+        i16 = 0;
+
+     label30:
+        $r13 = r0.<java.net.SocketPermission: java.net.InetAddress[] addresses>;
+
+        $i3 = lengthof $r13;
+
+        if i16 >= $i3 goto label33;
+
+        $r14 = r1.<java.net.SocketPermission: java.net.InetAddress[] addresses>;
+
+        $r17 = $r14[i14];
+
+        $r15 = r0.<java.net.SocketPermission: java.net.InetAddress[] addresses>;
+
+        $r16 = $r15[i16];
+
+        $z13 = virtualinvoke $r17.<java.net.InetAddress: boolean equals(java.lang.Object)>($r16);
+
+        if $z13 == 0 goto label32;
+
+     label31:
+        return 1;
+
+     label32:
+        i16 = i16 + 1;
+
+        goto label30;
+
+     label33:
+        i14 = i14 + 1;
+
+        goto label29;
+
+     label34:
+        $r9 = r1.<java.net.SocketPermission: java.lang.String cname>;
+
+        if $r9 != null goto label35;
+
+        virtualinvoke r1.<java.net.SocketPermission: void getCanonName()>();
+
+     label35:
+        $r10 = r0.<java.net.SocketPermission: java.lang.String cname>;
+
+        if $r10 != null goto label36;
+
+        virtualinvoke r0.<java.net.SocketPermission: void getCanonName()>();
+
+     label36:
+        $r12 = r1.<java.net.SocketPermission: java.lang.String cname>;
+
+        $r11 = r0.<java.net.SocketPermission: java.lang.String cname>;
+
+        $z12 = virtualinvoke $r12.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r11);
+
+     label37:
+        return $z12;
+
+     label38:
+        goto label40;
+
+     label39:
+        $r37 := @caughtexception;
+
+        $z23 = specialinvoke r1.<java.net.SocketPermission: boolean compareHostnames(java.net.SocketPermission)>(r0);
+
+        return $z23;
+
+     label40:
+        return 0;
+
+        catch java.net.UnknownHostException from label07 to label08 with label39;
+        catch java.net.UnknownHostException from label09 to label10 with label39;
+        catch java.net.UnknownHostException from label11 to label14 with label39;
+        catch java.net.UnknownHostException from label15 to label16 with label39;
+        catch java.net.UnknownHostException from label17 to label19 with label39;
+        catch java.net.UnknownHostException from label20 to label21 with label39;
+        catch java.net.UnknownHostException from label22 to label24 with label39;
+        catch java.net.UnknownHostException from label25 to label31 with label39;
+        catch java.net.UnknownHostException from label32 to label37 with label39;
+    }
+
+    private boolean compareHostnames(java.net.SocketPermission)
+    {
+        int $i0, $i1, $i2;
+        java.net.SocketPermission r0, r2;
+        java.lang.String r1, r3, $r4, $r5;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.net.SocketPermission;
+
+        r2 := @parameter0: java.net.SocketPermission;
+
+        r1 = r0.<java.net.SocketPermission: java.lang.String hostname>;
+
+        r3 = r2.<java.net.SocketPermission: java.lang.String hostname>;
+
+        if r1 != null goto label1;
+
+        return 0;
+
+     label1:
+        $z0 = r0.<java.net.SocketPermission: boolean wildcard>;
+
+        if $z0 == 0 goto label2;
+
+        $r4 = r0.<java.net.SocketPermission: java.lang.String cname>;
+
+        $i0 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        $i1 = virtualinvoke r3.<java.lang.String: int length()>();
+
+        $i2 = $i1 - $i0;
+
+        $r5 = r0.<java.net.SocketPermission: java.lang.String cname>;
+
+        $z2 = virtualinvoke r3.<java.lang.String: boolean regionMatches(boolean,int,java.lang.String,int,int)>(1, $i2, $r5, 0, $i0);
+
+        return $z2;
+
+     label2:
+        $z1 = virtualinvoke r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r3);
+
+        return $z1;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        int[] $r8, $r9, $r10, $r11;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        java.net.SocketPermission r1, r2;
+        java.lang.String $r3, $r4, $r5, $r6, $r7;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.net.UnknownHostException $r12;
+        java.lang.Object r0;
+
+        r1 := @this: java.net.SocketPermission;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label01;
+
+        return 1;
+
+     label01:
+        $z0 = r0 instanceof java.net.SocketPermission;
+
+        if $z0 != 0 goto label02;
+
+        return 0;
+
+     label02:
+        r2 = (java.net.SocketPermission) r0;
+
+        $i1 = r1.<java.net.SocketPermission: int mask>;
+
+        $i0 = r2.<java.net.SocketPermission: int mask>;
+
+        if $i1 == $i0 goto label03;
+
+        return 0;
+
+     label03:
+        $i2 = r2.<java.net.SocketPermission: int mask>;
+
+        $i4 = $i2 & 8;
+
+        $i3 = r2.<java.net.SocketPermission: int mask>;
+
+        if $i4 == $i3 goto label05;
+
+        $r8 = r1.<java.net.SocketPermission: int[] portrange>;
+
+        $i6 = $r8[0];
+
+        $r9 = r2.<java.net.SocketPermission: int[] portrange>;
+
+        $i5 = $r9[0];
+
+        if $i6 != $i5 goto label04;
+
+        $r10 = r1.<java.net.SocketPermission: int[] portrange>;
+
+        $i8 = $r10[1];
+
+        $r11 = r2.<java.net.SocketPermission: int[] portrange>;
+
+        $i7 = $r11[1];
+
+        if $i8 == $i7 goto label05;
+
+     label04:
+        return 0;
+
+     label05:
+        $r3 = virtualinvoke r1.<java.net.SocketPermission: java.lang.String getName()>();
+
+        $r4 = virtualinvoke r2.<java.net.SocketPermission: java.lang.String getName()>();
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r4);
+
+        if $z1 == 0 goto label06;
+
+        return 1;
+
+     label06:
+        virtualinvoke r1.<java.net.SocketPermission: void getCanonName()>();
+
+        virtualinvoke r2.<java.net.SocketPermission: void getCanonName()>();
+
+     label07:
+        goto label09;
+
+     label08:
+        $r12 := @caughtexception;
+
+        return 0;
+
+     label09:
+        $z2 = r1.<java.net.SocketPermission: boolean invalid>;
+
+        if $z2 != 0 goto label10;
+
+        $z3 = r2.<java.net.SocketPermission: boolean invalid>;
+
+        if $z3 == 0 goto label11;
+
+     label10:
+        return 0;
+
+     label11:
+        $r5 = r1.<java.net.SocketPermission: java.lang.String cname>;
+
+        if $r5 == null goto label12;
+
+        $r7 = r1.<java.net.SocketPermission: java.lang.String cname>;
+
+        $r6 = r2.<java.net.SocketPermission: java.lang.String cname>;
+
+        $z4 = virtualinvoke $r7.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r6);
+
+        return $z4;
+
+     label12:
+        return 0;
+
+        catch java.net.UnknownHostException from label06 to label07 with label08;
+    }
+
+    public int hashCode()
+    {
+        java.net.UnknownHostException $r5;
+        int $i0, $i1, $i2;
+        java.net.SocketPermission r0;
+        java.lang.String $r1, $r2, $r3, $r4;
+        boolean $z0, $z1, $z2;
+
+        r0 := @this: java.net.SocketPermission;
+
+        $z0 = r0.<java.net.SocketPermission: boolean init_with_ip>;
+
+        if $z0 != 0 goto label1;
+
+        $z1 = r0.<java.net.SocketPermission: boolean wildcard>;
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.net.SocketPermission: java.lang.String getName()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int hashCode()>();
+
+        return $i0;
+
+     label2:
+        virtualinvoke r0.<java.net.SocketPermission: void getCanonName()>();
+
+     label3:
+        goto label5;
+
+     label4:
+        $r5 := @caughtexception;
+
+     label5:
+        $z2 = r0.<java.net.SocketPermission: boolean invalid>;
+
+        if $z2 != 0 goto label6;
+
+        $r3 = r0.<java.net.SocketPermission: java.lang.String cname>;
+
+        if $r3 != null goto label7;
+
+     label6:
+        $r2 = virtualinvoke r0.<java.net.SocketPermission: java.lang.String getName()>();
+
+        $i1 = virtualinvoke $r2.<java.lang.String: int hashCode()>();
+
+        return $i1;
+
+     label7:
+        $r4 = r0.<java.net.SocketPermission: java.lang.String cname>;
+
+        $i2 = virtualinvoke $r4.<java.lang.String: int hashCode()>();
+
+        return $i2;
+
+        catch java.net.UnknownHostException from label2 to label3 with label4;
+    }
+
+    int getMask()
+    {
+        int $i0;
+        java.net.SocketPermission r0;
+
+        r0 := @this: java.net.SocketPermission;
+
+        $i0 = r0.<java.net.SocketPermission: int mask>;
+
+        return $i0;
+    }
+
+    private static java.lang.String getActions(int)
+    {
+        int i0, $i1, $i2, $i3, $i4;
+        java.lang.StringBuilder $r0;
+        java.lang.String $r1;
+        boolean z0, z1, z2, z3;
+
+        i0 := @parameter0: int;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        z0 = 0;
+
+        z3 = 0;
+
+        z2 = 0;
+
+        z1 = 0;
+
+        $i1 = i0 & 1;
+
+        if $i1 != 1 goto label1;
+
+        z0 = 1;
+
+        z3 = 1;
+
+        z2 = 1;
+
+        z1 = 1;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("connect");
+
+     label1:
+        $i2 = i0 & 2;
+
+        if $i2 != 2 goto label4;
+
+        if z1 == 0 goto label2;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        goto label3;
+
+     label2:
+        z0 = 1;
+
+        z3 = 1;
+
+        z2 = 1;
+
+     label3:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("listen");
+
+     label4:
+        $i3 = i0 & 4;
+
+        if $i3 != 4 goto label7;
+
+        if z3 == 0 goto label5;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        goto label6;
+
+     label5:
+        z0 = 1;
+
+        z2 = 1;
+
+     label6:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("accept");
+
+     label7:
+        $i4 = i0 & 8;
+
+        if $i4 != 8 goto label9;
+
+        if z2 == 0 goto label8;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        goto label8;
+
+     label8:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("resolve");
+
+     label9:
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r1;
+    }
+
+    public java.lang.String getActions()
+    {
+        int $i0;
+        java.net.SocketPermission r0;
+        java.lang.String $r1, $r2, $r3;
+
+        r0 := @this: java.net.SocketPermission;
+
+        $r1 = r0.<java.net.SocketPermission: java.lang.String actions>;
+
+        if $r1 != null goto label1;
+
+        $i0 = r0.<java.net.SocketPermission: int mask>;
+
+        $r3 = staticinvoke <java.net.SocketPermission: java.lang.String getActions(int)>($i0);
+
+        r0.<java.net.SocketPermission: java.lang.String actions> = $r3;
+
+     label1:
+        $r2 = r0.<java.net.SocketPermission: java.lang.String actions>;
+
+        return $r2;
+    }
+
+    public java.security.PermissionCollection newPermissionCollection()
+    {
+        java.net.SocketPermission r1;
+        java.net.SocketPermissionCollection $r0;
+
+        r1 := @this: java.net.SocketPermission;
+
+        $r0 = new java.net.SocketPermissionCollection;
+
+        specialinvoke $r0.<java.net.SocketPermissionCollection: void <init>()>();
+
+        return $r0;
+    }
+
+    private synchronized void writeObject(java.io.ObjectOutputStream) throws java.io.IOException
+    {
+        java.io.ObjectOutputStream r2;
+        java.net.SocketPermission r0;
+        java.lang.String $r1;
+
+        r0 := @this: java.net.SocketPermission;
+
+        r2 := @parameter0: java.io.ObjectOutputStream;
+
+        $r1 = r0.<java.net.SocketPermission: java.lang.String actions>;
+
+        if $r1 != null goto label1;
+
+        virtualinvoke r0.<java.net.SocketPermission: java.lang.String getActions()>();
+
+     label1:
+        virtualinvoke r2.<java.io.ObjectOutputStream: void defaultWriteObject()>();
+
+        return;
+    }
+
+    private synchronized void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+        java.io.ObjectInputStream r0;
+        int $i0;
+        java.net.SocketPermission r1;
+        java.lang.String $r2, $r3;
+
+        r1 := @this: java.net.SocketPermission;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        $r2 = virtualinvoke r1.<java.net.SocketPermission: java.lang.String getName()>();
+
+        $r3 = r1.<java.net.SocketPermission: java.lang.String actions>;
+
+        $i0 = staticinvoke <java.net.SocketPermission: int getMask(java.lang.String)>($r3);
+
+        specialinvoke r1.<java.net.SocketPermission: void init(java.lang.String,int)>($r2, $i0);
+
+        return;
+    }
+
+    private static int initEphemeralPorts(java.lang.String, int)
+    {
+        int $i0, i1;
+        java.lang.Object $r2;
+        java.net.SocketPermission$1 $r0;
+        java.lang.String r1;
+        java.lang.Integer $r3;
+
+        r1 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        $r0 = new java.net.SocketPermission$1;
+
+        specialinvoke $r0.<java.net.SocketPermission$1: void <init>(java.lang.String)>(r1);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        $r3 = (java.lang.Integer) $r2;
+
+        $i0 = virtualinvoke $r3.<java.lang.Integer: int intValue()>();
+
+        return $i0;
+    }
+
+    private static boolean inRange(int, int, int, int)
+    {
+        int i0, i1, i2, i3, $i4, i5, i6;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        i2 := @parameter0: int;
+
+        i3 := @parameter1: int;
+
+        i6 := @parameter2: int;
+
+        i5 := @parameter3: int;
+
+        i0 = <java.net.SocketPermission$EphemeralRange: int low>;
+
+        i1 = <java.net.SocketPermission$EphemeralRange: int high>;
+
+        if i6 != 0 goto label03;
+
+        $z0 = staticinvoke <java.net.SocketPermission: boolean inRange(int,int,int,int)>(i2, i3, i0, i1);
+
+        if $z0 != 0 goto label01;
+
+        return 0;
+
+     label01:
+        if i5 != 0 goto label02;
+
+        return 1;
+
+     label02:
+        i6 = 1;
+
+     label03:
+        if i2 != 0 goto label06;
+
+        if i3 != 0 goto label06;
+
+        if i6 < i0 goto label04;
+
+        if i5 > i1 goto label04;
+
+        $z1 = 1;
+
+        goto label05;
+
+     label04:
+        $z1 = 0;
+
+     label05:
+        return $z1;
+
+     label06:
+        if i2 == 0 goto label09;
+
+        if i6 < i2 goto label07;
+
+        if i5 > i3 goto label07;
+
+        $z2 = 1;
+
+        goto label08;
+
+     label07:
+        $z2 = 0;
+
+     label08:
+        return $z2;
+
+     label09:
+        $i4 = i0 - 1;
+
+        if i3 < $i4 goto label12;
+
+        if i5 > i1 goto label10;
+
+        $z3 = 1;
+
+        goto label11;
+
+     label10:
+        $z3 = 0;
+
+     label11:
+        return $z3;
+
+     label12:
+        if i6 > i3 goto label13;
+
+        if i5 <= i3 goto label14;
+
+     label13:
+        if i6 < i0 goto label15;
+
+        if i5 > i1 goto label15;
+
+     label14:
+        $z4 = 1;
+
+        goto label16;
+
+     label15:
+        $z4 = 0;
+
+     label16:
+        return $z4;
+    }
+
+    static int access$000(java.lang.String, int)
+    {
+        int i0, $i1;
+        java.lang.String r0;
+
+        r0 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $i1 = staticinvoke <java.net.SocketPermission: int initEphemeralPorts(java.lang.String,int)>(r0, i0);
+
+        return $i1;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.action.GetBooleanAction $r0;
+        java.lang.Boolean r2;
+        java.lang.Object $r1;
+        boolean $z0;
+
+        <java.net.SocketPermission: int DEF_EPH_LOW> = 49152;
+
+        <java.net.SocketPermission: int PRIV_PORT_MAX> = 1023;
+
+        <java.net.SocketPermission: int PORT_MAX> = 65535;
+
+        <java.net.SocketPermission: int PORT_MIN> = 0;
+
+        <java.net.SocketPermission: int ALL> = 15;
+
+        <java.net.SocketPermission: int NONE> = 0;
+
+        <java.net.SocketPermission: int RESOLVE> = 8;
+
+        <java.net.SocketPermission: int ACCEPT> = 4;
+
+        <java.net.SocketPermission: int LISTEN> = 2;
+
+        <java.net.SocketPermission: int CONNECT> = 1;
+
+        <java.net.SocketPermission: long serialVersionUID> = -7204263841984476862L;
+
+        <java.net.SocketPermission: sun.security.util.Debug debug> = null;
+
+        <java.net.SocketPermission: boolean debugInit> = 0;
+
+        $r0 = new sun.security.action.GetBooleanAction;
+
+        specialinvoke $r0.<sun.security.action.GetBooleanAction: void <init>(java.lang.String)>("sun.net.trustNameService");
+
+        $r1 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r2 = (java.lang.Boolean) $r1;
+
+        $z0 = virtualinvoke r2.<java.lang.Boolean: boolean booleanValue()>();
+
+        <java.net.SocketPermission: boolean trustNameService> = $z0;
+
+        return;
+    }
+}

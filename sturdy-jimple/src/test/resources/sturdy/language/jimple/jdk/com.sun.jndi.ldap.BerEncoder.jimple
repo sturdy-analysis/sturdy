@@ -1,0 +1,1168 @@
+public final class com.sun.jndi.ldap.BerEncoder extends com.sun.jndi.ldap.Ber
+{
+    private int curSeqIndex;
+    private int[] seqOffset;
+    private static final int INITIAL_SEQUENCES;
+    private static final int DEFAULT_BUFSIZE;
+    private static final int BUF_GROWTH_FACTOR;
+
+    public void <init>()
+    {
+        com.sun.jndi.ldap.BerEncoder r0;
+
+        r0 := @this: com.sun.jndi.ldap.BerEncoder;
+
+        specialinvoke r0.<com.sun.jndi.ldap.BerEncoder: void <init>(int)>(1024);
+
+        return;
+    }
+
+    public void <init>(int)
+    {
+        byte[] $r1;
+        int[] $r2;
+        int i0;
+        com.sun.jndi.ldap.BerEncoder r0;
+
+        r0 := @this: com.sun.jndi.ldap.BerEncoder;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<com.sun.jndi.ldap.Ber: void <init>()>();
+
+        $r1 = newarray (byte)[i0];
+
+        r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf> = $r1;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int bufsize> = i0;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int offset> = 0;
+
+        $r2 = newarray (int)[16];
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int[] seqOffset> = $r2;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int curSeqIndex> = 0;
+
+        return;
+    }
+
+    public void reset()
+    {
+        byte[] $r2;
+        int[] $r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        com.sun.jndi.ldap.BerEncoder r0;
+
+        r0 := @this: com.sun.jndi.ldap.BerEncoder;
+
+     label1:
+        $i0 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        if $i0 <= 0 goto label2;
+
+        $r2 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $i4 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        $i5 = $i4 - 1;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int offset> = $i5;
+
+        $r2[$i5] = 0;
+
+        goto label1;
+
+     label2:
+        $i1 = r0.<com.sun.jndi.ldap.BerEncoder: int curSeqIndex>;
+
+        if $i1 <= 0 goto label3;
+
+        $r1 = r0.<com.sun.jndi.ldap.BerEncoder: int[] seqOffset>;
+
+        $i2 = r0.<com.sun.jndi.ldap.BerEncoder: int curSeqIndex>;
+
+        $i3 = $i2 - 1;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int curSeqIndex> = $i3;
+
+        $r1[$i3] = 0;
+
+        goto label2;
+
+     label3:
+        return;
+    }
+
+    public int getDataLen()
+    {
+        int $i0;
+        com.sun.jndi.ldap.BerEncoder r0;
+
+        r0 := @this: com.sun.jndi.ldap.BerEncoder;
+
+        $i0 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        return $i0;
+    }
+
+    public byte[] getBuf()
+    {
+        byte[] $r1;
+        java.lang.IllegalStateException $r2;
+        int $i0;
+        com.sun.jndi.ldap.BerEncoder r0;
+
+        r0 := @this: com.sun.jndi.ldap.BerEncoder;
+
+        $i0 = r0.<com.sun.jndi.ldap.BerEncoder: int curSeqIndex>;
+
+        if $i0 == 0 goto label1;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("BER encode error: Unbalanced SEQUENCEs.");
+
+        throw $r2;
+
+     label1:
+        $r1 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        return $r1;
+    }
+
+    public byte[] getTrimmedBuf()
+    {
+        byte[] r1, $r2;
+        int $i0;
+        com.sun.jndi.ldap.BerEncoder r0;
+
+        r0 := @this: com.sun.jndi.ldap.BerEncoder;
+
+        $i0 = virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: int getDataLen()>();
+
+        r1 = newarray (byte)[$i0];
+
+        $r2 = virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: byte[] getBuf()>();
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, 0, r1, 0, $i0);
+
+        return r1;
+    }
+
+    public void beginSeq(int)
+    {
+        int[] $r1, $r2, $r3, r4, $r5, $r6;
+        int $i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, i13;
+        com.sun.jndi.ldap.BerEncoder r0;
+
+        r0 := @this: com.sun.jndi.ldap.BerEncoder;
+
+        i2 := @parameter0: int;
+
+        $i1 = r0.<com.sun.jndi.ldap.BerEncoder: int curSeqIndex>;
+
+        $r1 = r0.<com.sun.jndi.ldap.BerEncoder: int[] seqOffset>;
+
+        $i0 = lengthof $r1;
+
+        if $i1 < $i0 goto label3;
+
+        $r3 = r0.<com.sun.jndi.ldap.BerEncoder: int[] seqOffset>;
+
+        $i9 = lengthof $r3;
+
+        $i10 = $i9 * 2;
+
+        r4 = newarray (int)[$i10];
+
+        i13 = 0;
+
+     label1:
+        $r5 = r0.<com.sun.jndi.ldap.BerEncoder: int[] seqOffset>;
+
+        $i11 = lengthof $r5;
+
+        if i13 >= $i11 goto label2;
+
+        $r6 = r0.<com.sun.jndi.ldap.BerEncoder: int[] seqOffset>;
+
+        $i12 = $r6[i13];
+
+        r4[i13] = $i12;
+
+        i13 = i13 + 1;
+
+        goto label1;
+
+     label2:
+        r0.<com.sun.jndi.ldap.BerEncoder: int[] seqOffset> = r4;
+
+     label3:
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void encodeByte(int)>(i2);
+
+        $r2 = r0.<com.sun.jndi.ldap.BerEncoder: int[] seqOffset>;
+
+        $i4 = r0.<com.sun.jndi.ldap.BerEncoder: int curSeqIndex>;
+
+        $i3 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        $r2[$i4] = $i3;
+
+        specialinvoke r0.<com.sun.jndi.ldap.BerEncoder: void ensureFreeBytes(int)>(3);
+
+        $i5 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        $i6 = $i5 + 3;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int offset> = $i6;
+
+        $i7 = r0.<com.sun.jndi.ldap.BerEncoder: int curSeqIndex>;
+
+        $i8 = $i7 + 1;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int curSeqIndex> = $i8;
+
+        return;
+    }
+
+    public void endSeq() throws com.sun.jndi.ldap.Ber$EncodeException
+    {
+        byte[] $r4, $r6, $r8, $r10, $r12, $r14, $r16, $r18, $r20, $r22;
+        byte $b13, $b18, $b22, $b29, $b33, $b39, $b42;
+        java.lang.IllegalStateException $r24;
+        int[] $r1, $r3, $r5, $r7, $r9, $r11, $r13, $r15, $r17, $r19, $r21;
+        com.sun.jndi.ldap.BerEncoder r0;
+        com.sun.jndi.ldap.Ber$EncodeException $r25;
+        int $i0, $i1, $i2, $i3, $i4, i5, $i6, i7, $i8, $i9, $i10, $i11, $i12, $i14, $i15, $i16, $i17, $i19, $i20, $i21, $i23, $i24, $i25, $i26, $i27, $i28, $i30, $i31, $i32, $i34, $i35, $i36, $i37, $i38, $i40, $i41, $i43, $i45, $i47, $i49;
+
+        r0 := @this: com.sun.jndi.ldap.BerEncoder;
+
+        $i0 = r0.<com.sun.jndi.ldap.BerEncoder: int curSeqIndex>;
+
+        $i1 = $i0 - 1;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int curSeqIndex> = $i1;
+
+        $i2 = r0.<com.sun.jndi.ldap.BerEncoder: int curSeqIndex>;
+
+        if $i2 >= 0 goto label1;
+
+        $r24 = new java.lang.IllegalStateException;
+
+        specialinvoke $r24.<java.lang.IllegalStateException: void <init>(java.lang.String)>("BER encode error: Unbalanced SEQUENCEs.");
+
+        throw $r24;
+
+     label1:
+        $r1 = r0.<com.sun.jndi.ldap.BerEncoder: int[] seqOffset>;
+
+        $i3 = r0.<com.sun.jndi.ldap.BerEncoder: int curSeqIndex>;
+
+        $i4 = $r1[$i3];
+
+        i5 = $i4 + 3;
+
+        $i6 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        i7 = $i6 - i5;
+
+        if i7 > 127 goto label2;
+
+        $i45 = (int) -2;
+
+        specialinvoke r0.<com.sun.jndi.ldap.BerEncoder: void shiftSeqData(int,int,int)>(i5, i7, $i45);
+
+        $r22 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $r21 = r0.<com.sun.jndi.ldap.BerEncoder: int[] seqOffset>;
+
+        $i41 = r0.<com.sun.jndi.ldap.BerEncoder: int curSeqIndex>;
+
+        $i43 = $r21[$i41];
+
+        $b42 = (byte) i7;
+
+        $r22[$i43] = $b42;
+
+        goto label6;
+
+     label2:
+        if i7 > 255 goto label3;
+
+        $i47 = (int) -1;
+
+        specialinvoke r0.<com.sun.jndi.ldap.BerEncoder: void shiftSeqData(int,int,int)>(i5, i7, $i47);
+
+        $r18 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $r17 = r0.<com.sun.jndi.ldap.BerEncoder: int[] seqOffset>;
+
+        $i35 = r0.<com.sun.jndi.ldap.BerEncoder: int curSeqIndex>;
+
+        $i36 = $r17[$i35];
+
+        $r18[$i36] = -127;
+
+        $r20 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $r19 = r0.<com.sun.jndi.ldap.BerEncoder: int[] seqOffset>;
+
+        $i37 = r0.<com.sun.jndi.ldap.BerEncoder: int curSeqIndex>;
+
+        $i38 = $r19[$i37];
+
+        $i40 = $i38 + 1;
+
+        $b39 = (byte) i7;
+
+        $r20[$i40] = $b39;
+
+        goto label6;
+
+     label3:
+        $i49 = (int) 65535;
+
+        if i7 > $i49 goto label4;
+
+        $r12 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $r11 = r0.<com.sun.jndi.ldap.BerEncoder: int[] seqOffset>;
+
+        $i24 = r0.<com.sun.jndi.ldap.BerEncoder: int curSeqIndex>;
+
+        $i25 = $r11[$i24];
+
+        $r12[$i25] = -126;
+
+        $r14 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $r13 = r0.<com.sun.jndi.ldap.BerEncoder: int[] seqOffset>;
+
+        $i26 = r0.<com.sun.jndi.ldap.BerEncoder: int curSeqIndex>;
+
+        $i27 = $r13[$i26];
+
+        $i30 = $i27 + 1;
+
+        $i28 = i7 >> 8;
+
+        $b29 = (byte) $i28;
+
+        $r14[$i30] = $b29;
+
+        $r16 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $r15 = r0.<com.sun.jndi.ldap.BerEncoder: int[] seqOffset>;
+
+        $i31 = r0.<com.sun.jndi.ldap.BerEncoder: int curSeqIndex>;
+
+        $i32 = $r15[$i31];
+
+        $i34 = $i32 + 2;
+
+        $b33 = (byte) i7;
+
+        $r16[$i34] = $b33;
+
+        goto label6;
+
+     label4:
+        if i7 > 16777215 goto label5;
+
+        specialinvoke r0.<com.sun.jndi.ldap.BerEncoder: void shiftSeqData(int,int,int)>(i5, i7, 1);
+
+        $r4 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $r3 = r0.<com.sun.jndi.ldap.BerEncoder: int[] seqOffset>;
+
+        $i8 = r0.<com.sun.jndi.ldap.BerEncoder: int curSeqIndex>;
+
+        $i9 = $r3[$i8];
+
+        $r4[$i9] = -125;
+
+        $r6 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $r5 = r0.<com.sun.jndi.ldap.BerEncoder: int[] seqOffset>;
+
+        $i10 = r0.<com.sun.jndi.ldap.BerEncoder: int curSeqIndex>;
+
+        $i11 = $r5[$i10];
+
+        $i14 = $i11 + 1;
+
+        $i12 = i7 >> 16;
+
+        $b13 = (byte) $i12;
+
+        $r6[$i14] = $b13;
+
+        $r8 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $r7 = r0.<com.sun.jndi.ldap.BerEncoder: int[] seqOffset>;
+
+        $i15 = r0.<com.sun.jndi.ldap.BerEncoder: int curSeqIndex>;
+
+        $i16 = $r7[$i15];
+
+        $i19 = $i16 + 2;
+
+        $i17 = i7 >> 8;
+
+        $b18 = (byte) $i17;
+
+        $r8[$i19] = $b18;
+
+        $r10 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $r9 = r0.<com.sun.jndi.ldap.BerEncoder: int[] seqOffset>;
+
+        $i20 = r0.<com.sun.jndi.ldap.BerEncoder: int curSeqIndex>;
+
+        $i21 = $r9[$i20];
+
+        $i23 = $i21 + 3;
+
+        $b22 = (byte) i7;
+
+        $r10[$i23] = $b22;
+
+        goto label6;
+
+     label5:
+        $r25 = new com.sun.jndi.ldap.Ber$EncodeException;
+
+        specialinvoke $r25.<com.sun.jndi.ldap.Ber$EncodeException: void <init>(java.lang.String)>("SEQUENCE too long");
+
+        throw $r25;
+
+     label6:
+        return;
+    }
+
+    private void shiftSeqData(int, int, int)
+    {
+        byte[] $r1, $r2;
+        int i0, i1, i2, $i3, $i4, $i5;
+        com.sun.jndi.ldap.BerEncoder r0;
+
+        r0 := @this: com.sun.jndi.ldap.BerEncoder;
+
+        i1 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        if i0 <= 0 goto label1;
+
+        specialinvoke r0.<com.sun.jndi.ldap.BerEncoder: void ensureFreeBytes(int)>(i0);
+
+     label1:
+        $r2 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $r1 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $i3 = i1 + i0;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, i1, $r1, $i3, i2);
+
+        $i4 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        $i5 = $i4 + i0;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int offset> = $i5;
+
+        return;
+    }
+
+    public void encodeByte(int)
+    {
+        byte[] $r1;
+        byte $b3;
+        int $i0, $i1, i2;
+        com.sun.jndi.ldap.BerEncoder r0;
+
+        r0 := @this: com.sun.jndi.ldap.BerEncoder;
+
+        i2 := @parameter0: int;
+
+        specialinvoke r0.<com.sun.jndi.ldap.BerEncoder: void ensureFreeBytes(int)>(1);
+
+        $r1 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $i0 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int offset> = $i1;
+
+        $b3 = (byte) i2;
+
+        $r1[$i0] = $b3;
+
+        return;
+    }
+
+    public void encodeInt(int)
+    {
+        int i0;
+        com.sun.jndi.ldap.BerEncoder r0;
+
+        r0 := @this: com.sun.jndi.ldap.BerEncoder;
+
+        i0 := @parameter0: int;
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void encodeInt(int,int)>(i0, 2);
+
+        return;
+    }
+
+    public void encodeInt(int, int)
+    {
+        int $i0, i1, $i2, i3, i4, $i6;
+        com.sun.jndi.ldap.BerEncoder r0;
+
+        r0 := @this: com.sun.jndi.ldap.BerEncoder;
+
+        i3 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i4 = 4;
+
+     label1:
+        $i0 = i3 & -8388608;
+
+        if $i0 == 0 goto label2;
+
+        $i2 = i3 & -8388608;
+
+        if $i2 != -8388608 goto label3;
+
+     label2:
+        if i4 <= 1 goto label3;
+
+        $i6 = (int) -1;
+
+        i4 = i4 + $i6;
+
+        i3 = i3 << 8;
+
+        goto label1;
+
+     label3:
+        specialinvoke r0.<com.sun.jndi.ldap.BerEncoder: void encodeInt(int,int,int)>(i3, i1, i4);
+
+        return;
+    }
+
+    private void encodeInt(int, int, int)
+    {
+        byte[] $r1, $r2, $r3;
+        byte $b4, $b7, $b13;
+        int $i0, $i1, $i2, i3, $i5, $i6, $i8, $i9, $i10, $i11, $i12, i14, i15, $i17;
+        java.lang.IllegalArgumentException $r5;
+        com.sun.jndi.ldap.BerEncoder r0;
+
+        r0 := @this: com.sun.jndi.ldap.BerEncoder;
+
+        i14 := @parameter0: int;
+
+        i3 := @parameter1: int;
+
+        i15 := @parameter2: int;
+
+        if i15 <= 4 goto label1;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("BER encode error: INTEGER too long.");
+
+        throw $r5;
+
+     label1:
+        $i0 = 2 + i15;
+
+        specialinvoke r0.<com.sun.jndi.ldap.BerEncoder: void ensureFreeBytes(int)>($i0);
+
+        $r1 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $i1 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        $i2 = $i1 + 1;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int offset> = $i2;
+
+        $b4 = (byte) i3;
+
+        $r1[$i1] = $b4;
+
+        $r2 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $i5 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        $i6 = $i5 + 1;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int offset> = $i6;
+
+        $b7 = (byte) i15;
+
+        $r2[$i5] = $b7;
+
+     label2:
+        $i8 = i15;
+
+        $i17 = (int) -1;
+
+        i15 = i15 + $i17;
+
+        if $i8 <= 0 goto label3;
+
+        $r3 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $i9 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        $i10 = $i9 + 1;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int offset> = $i10;
+
+        $i11 = i14 & -16777216;
+
+        $i12 = $i11 >> 24;
+
+        $b13 = (byte) $i12;
+
+        $r3[$i9] = $b13;
+
+        i14 = i14 << 8;
+
+        goto label2;
+
+     label3:
+        return;
+    }
+
+    public void encodeBoolean(boolean)
+    {
+        com.sun.jndi.ldap.BerEncoder r0;
+        boolean z0;
+
+        r0 := @this: com.sun.jndi.ldap.BerEncoder;
+
+        z0 := @parameter0: boolean;
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void encodeBoolean(boolean,int)>(z0, 1);
+
+        return;
+    }
+
+    public void encodeBoolean(boolean, int)
+    {
+        byte[] $r1, $r2, $r3;
+        byte $b3, $b8;
+        int $i0, $i1, i2, $i4, $i5, $i6, $i7;
+        com.sun.jndi.ldap.BerEncoder r0;
+        boolean z0;
+
+        r0 := @this: com.sun.jndi.ldap.BerEncoder;
+
+        z0 := @parameter0: boolean;
+
+        i2 := @parameter1: int;
+
+        specialinvoke r0.<com.sun.jndi.ldap.BerEncoder: void ensureFreeBytes(int)>(3);
+
+        $r1 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $i0 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int offset> = $i1;
+
+        $b3 = (byte) i2;
+
+        $r1[$i0] = $b3;
+
+        $r2 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $i4 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        $i5 = $i4 + 1;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int offset> = $i5;
+
+        $r2[$i4] = 1;
+
+        $r3 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $i6 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        $i7 = $i6 + 1;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int offset> = $i7;
+
+        if z0 == 0 goto label1;
+
+        $b8 = -1;
+
+        goto label2;
+
+     label1:
+        $b8 = 0;
+
+     label2:
+        $r3[$i6] = $b8;
+
+        return;
+    }
+
+    public void encodeString(java.lang.String, boolean) throws com.sun.jndi.ldap.Ber$EncodeException
+    {
+        java.lang.String r1;
+        com.sun.jndi.ldap.BerEncoder r0;
+        boolean z0;
+
+        r0 := @this: com.sun.jndi.ldap.BerEncoder;
+
+        r1 := @parameter0: java.lang.String;
+
+        z0 := @parameter1: boolean;
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void encodeString(java.lang.String,int,boolean)>(r1, 4, z0);
+
+        return;
+    }
+
+    public void encodeString(java.lang.String, int, boolean) throws com.sun.jndi.ldap.Ber$EncodeException
+    {
+        byte[] $r2, $r3, $r4, r9;
+        com.sun.jndi.ldap.Ber$EncodeException $r6, $r8;
+        byte $b4;
+        int i0, $i1, $i2, $i3, i5, i6;
+        java.lang.String r1;
+        boolean z0;
+        com.sun.jndi.ldap.BerEncoder r0;
+        java.io.UnsupportedEncodingException $r5, $r7;
+
+        r0 := @this: com.sun.jndi.ldap.BerEncoder;
+
+        r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        z0 := @parameter2: boolean;
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void encodeByte(int)>(i0);
+
+        i5 = 0;
+
+        r9 = null;
+
+        if r1 != null goto label01;
+
+        i6 = 0;
+
+        goto label08;
+
+     label01:
+        if z0 == 0 goto label05;
+
+     label02:
+        $r4 = virtualinvoke r1.<java.lang.String: byte[] getBytes(java.lang.String)>("UTF8");
+
+        r9 = $r4;
+
+        i6 = lengthof $r4;
+
+     label03:
+        goto label08;
+
+     label04:
+        $r7 := @caughtexception;
+
+        $r8 = new com.sun.jndi.ldap.Ber$EncodeException;
+
+        specialinvoke $r8.<com.sun.jndi.ldap.Ber$EncodeException: void <init>(java.lang.String)>("UTF8 not available on platform");
+
+        throw $r8;
+
+     label05:
+        $r2 = virtualinvoke r1.<java.lang.String: byte[] getBytes(java.lang.String)>("8859_1");
+
+        r9 = $r2;
+
+        i6 = lengthof $r2;
+
+     label06:
+        goto label08;
+
+     label07:
+        $r5 := @caughtexception;
+
+        $r6 = new com.sun.jndi.ldap.Ber$EncodeException;
+
+        specialinvoke $r6.<com.sun.jndi.ldap.Ber$EncodeException: void <init>(java.lang.String)>("8859_1 not available on platform");
+
+        throw $r6;
+
+     label08:
+        specialinvoke r0.<com.sun.jndi.ldap.BerEncoder: void encodeLength(int)>(i6);
+
+        specialinvoke r0.<com.sun.jndi.ldap.BerEncoder: void ensureFreeBytes(int)>(i6);
+
+     label09:
+        if i5 >= i6 goto label10;
+
+        $r3 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $i1 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        $i2 = $i1 + 1;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int offset> = $i2;
+
+        $i3 = i5;
+
+        i5 = i5 + 1;
+
+        $b4 = r9[$i3];
+
+        $r3[$i1] = $b4;
+
+        goto label09;
+
+     label10:
+        return;
+
+        catch java.io.UnsupportedEncodingException from label02 to label03 with label04;
+        catch java.io.UnsupportedEncodingException from label05 to label06 with label07;
+    }
+
+    public void encodeOctetString(byte[], int, int, int) throws com.sun.jndi.ldap.Ber$EncodeException
+    {
+        byte[] r1, $r2;
+        int i0, i1, i2, $i3, $i4, $i5;
+        com.sun.jndi.ldap.BerEncoder r0;
+
+        r0 := @this: com.sun.jndi.ldap.BerEncoder;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void encodeByte(int)>(i0);
+
+        specialinvoke r0.<com.sun.jndi.ldap.BerEncoder: void encodeLength(int)>(i1);
+
+        if i1 <= 0 goto label1;
+
+        specialinvoke r0.<com.sun.jndi.ldap.BerEncoder: void ensureFreeBytes(int)>(i1);
+
+        $r2 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $i3 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, i2, $r2, $i3, i1);
+
+        $i4 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        $i5 = $i4 + i1;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int offset> = $i5;
+
+     label1:
+        return;
+    }
+
+    public void encodeOctetString(byte[], int) throws com.sun.jndi.ldap.Ber$EncodeException
+    {
+        byte[] r1;
+        int i0, $i1;
+        com.sun.jndi.ldap.BerEncoder r0;
+
+        r0 := @this: com.sun.jndi.ldap.BerEncoder;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        $i1 = lengthof r1;
+
+        virtualinvoke r0.<com.sun.jndi.ldap.BerEncoder: void encodeOctetString(byte[],int,int,int)>(r1, i0, 0, $i1);
+
+        return;
+    }
+
+    private void encodeLength(int) throws com.sun.jndi.ldap.Ber$EncodeException
+    {
+        byte[] $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11;
+        byte $b6, $b10, $b14, $b20, $b24, $b29, $b32;
+        com.sun.jndi.ldap.BerEncoder r0;
+        com.sun.jndi.ldap.Ber$EncodeException $r12;
+        int i0, $i1, $i2, $i3, $i4, $i5, $i7, $i8, $i9, $i11, $i12, $i13, $i15, $i16, $i17, $i18, $i19, $i21, $i22, $i23, $i25, $i26, $i27, $i28, $i30, $i31, $i34;
+
+        r0 := @this: com.sun.jndi.ldap.BerEncoder;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<com.sun.jndi.ldap.BerEncoder: void ensureFreeBytes(int)>(4);
+
+        if i0 >= 128 goto label1;
+
+        $r11 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $i30 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        $i31 = $i30 + 1;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int offset> = $i31;
+
+        $b32 = (byte) i0;
+
+        $r11[$i30] = $b32;
+
+        goto label5;
+
+     label1:
+        if i0 > 255 goto label2;
+
+        $r9 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $i25 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        $i26 = $i25 + 1;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int offset> = $i26;
+
+        $r9[$i25] = -127;
+
+        $r10 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $i27 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        $i28 = $i27 + 1;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int offset> = $i28;
+
+        $b29 = (byte) i0;
+
+        $r10[$i27] = $b29;
+
+        goto label5;
+
+     label2:
+        $i34 = (int) 65535;
+
+        if i0 > $i34 goto label3;
+
+        $r6 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $i15 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        $i16 = $i15 + 1;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int offset> = $i16;
+
+        $r6[$i15] = -126;
+
+        $r7 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $i17 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        $i18 = $i17 + 1;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int offset> = $i18;
+
+        $i19 = i0 >> 8;
+
+        $b20 = (byte) $i19;
+
+        $r7[$i17] = $b20;
+
+        $r8 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $i21 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        $i22 = $i21 + 1;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int offset> = $i22;
+
+        $i23 = i0 & 255;
+
+        $b24 = (byte) $i23;
+
+        $r8[$i21] = $b24;
+
+        goto label5;
+
+     label3:
+        if i0 > 16777215 goto label4;
+
+        $r2 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $i1 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        $i2 = $i1 + 1;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int offset> = $i2;
+
+        $r2[$i1] = -125;
+
+        $r3 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $i3 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        $i4 = $i3 + 1;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int offset> = $i4;
+
+        $i5 = i0 >> 16;
+
+        $b6 = (byte) $i5;
+
+        $r3[$i3] = $b6;
+
+        $r4 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $i7 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        $i8 = $i7 + 1;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int offset> = $i8;
+
+        $i9 = i0 >> 8;
+
+        $b10 = (byte) $i9;
+
+        $r4[$i7] = $b10;
+
+        $r5 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $i11 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        $i12 = $i11 + 1;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int offset> = $i12;
+
+        $i13 = i0 & 255;
+
+        $b14 = (byte) $i13;
+
+        $r5[$i11] = $b14;
+
+        goto label5;
+
+     label4:
+        $r12 = new com.sun.jndi.ldap.Ber$EncodeException;
+
+        specialinvoke $r12.<com.sun.jndi.ldap.Ber$EncodeException: void <init>(java.lang.String)>("string too long");
+
+        throw $r12;
+
+     label5:
+        return;
+    }
+
+    public void encodeStringArray(java.lang.String[], boolean) throws com.sun.jndi.ldap.Ber$EncodeException
+    {
+        int $i0, i1;
+        java.lang.String[] r0;
+        java.lang.String $r2;
+        com.sun.jndi.ldap.BerEncoder r1;
+        boolean z0;
+
+        r1 := @this: com.sun.jndi.ldap.BerEncoder;
+
+        r0 := @parameter0: java.lang.String[];
+
+        z0 := @parameter1: boolean;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        i1 = 0;
+
+     label2:
+        $i0 = lengthof r0;
+
+        if i1 >= $i0 goto label3;
+
+        $r2 = r0[i1];
+
+        virtualinvoke r1.<com.sun.jndi.ldap.BerEncoder: void encodeString(java.lang.String,boolean)>($r2, z0);
+
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label3:
+        return;
+    }
+
+    private void ensureFreeBytes(int)
+    {
+        byte[] $r1, $r2;
+        int $i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, i8;
+        com.sun.jndi.ldap.BerEncoder r0;
+
+        r0 := @this: com.sun.jndi.ldap.BerEncoder;
+
+        i2 := @parameter0: int;
+
+        $i1 = r0.<com.sun.jndi.ldap.BerEncoder: int bufsize>;
+
+        $i0 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        $i3 = $i1 - $i0;
+
+        if $i3 >= i2 goto label2;
+
+        $i4 = r0.<com.sun.jndi.ldap.BerEncoder: int bufsize>;
+
+        i8 = $i4 * 8;
+
+        $i5 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        $i6 = i8 - $i5;
+
+        if $i6 >= i2 goto label1;
+
+        i8 = i8 + i2;
+
+     label1:
+        $r2 = newarray (byte)[i8];
+
+        $r1 = r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf>;
+
+        $i7 = r0.<com.sun.jndi.ldap.BerEncoder: int offset>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, 0, $r2, 0, $i7);
+
+        r0.<com.sun.jndi.ldap.BerEncoder: byte[] buf> = $r2;
+
+        r0.<com.sun.jndi.ldap.BerEncoder: int bufsize> = i8;
+
+     label2:
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.jndi.ldap.BerEncoder: int BUF_GROWTH_FACTOR> = 8;
+
+        <com.sun.jndi.ldap.BerEncoder: int DEFAULT_BUFSIZE> = 1024;
+
+        <com.sun.jndi.ldap.BerEncoder: int INITIAL_SEQUENCES> = 16;
+
+        return;
+    }
+}

@@ -1,0 +1,2007 @@
+class sun.nio.cs.UTF_8$Decoder extends java.nio.charset.CharsetDecoder implements sun.nio.cs.ArrayDecoder
+{
+    static final boolean $assertionsDisabled;
+
+    private void <init>(java.nio.charset.Charset)
+    {
+        sun.nio.cs.UTF_8$Decoder r0;
+        java.nio.charset.Charset r1;
+
+        r0 := @this: sun.nio.cs.UTF_8$Decoder;
+
+        r1 := @parameter0: java.nio.charset.Charset;
+
+        specialinvoke r0.<java.nio.charset.CharsetDecoder: void <init>(java.nio.charset.Charset,float,float)>(r1, 1.0F, 1.0F);
+
+        return;
+    }
+
+    private static boolean isNotContinuation(int)
+    {
+        int i0, $i1;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        $i1 = i0 & 192;
+
+        if $i1 == 128 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private static boolean isMalformed3(int, int, int)
+    {
+        int i0, i1, $i2, i3, $i4, $i5, $i7;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        $i7 = (int) -32;
+
+        if i0 != $i7 goto label1;
+
+        $i5 = i1 & 224;
+
+        if $i5 == 128 goto label2;
+
+     label1:
+        $i2 = i1 & 192;
+
+        if $i2 != 128 goto label2;
+
+        $i4 = i3 & 192;
+
+        if $i4 == 128 goto label3;
+
+     label2:
+        $z0 = 1;
+
+        goto label4;
+
+     label3:
+        $z0 = 0;
+
+     label4:
+        return $z0;
+    }
+
+    private static boolean isMalformed3_2(int, int)
+    {
+        int i0, i1, $i2, $i3, $i5;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        $i5 = (int) -32;
+
+        if i0 != $i5 goto label1;
+
+        $i3 = i1 & 224;
+
+        if $i3 == 128 goto label2;
+
+     label1:
+        $i2 = i1 & 192;
+
+        if $i2 == 128 goto label3;
+
+     label2:
+        $z0 = 1;
+
+        goto label4;
+
+     label3:
+        $z0 = 0;
+
+     label4:
+        return $z0;
+    }
+
+    private static boolean isMalformed4(int, int, int)
+    {
+        int i0, $i1, i2, $i3, i4, $i5;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        i2 := @parameter1: int;
+
+        i4 := @parameter2: int;
+
+        $i1 = i0 & 192;
+
+        if $i1 != 128 goto label1;
+
+        $i3 = i2 & 192;
+
+        if $i3 != 128 goto label1;
+
+        $i5 = i4 & 192;
+
+        if $i5 == 128 goto label2;
+
+     label1:
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+    }
+
+    private static boolean isMalformed4_2(int, int)
+    {
+        int i0, i1, $i2, $i3;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        if i0 != 240 goto label1;
+
+        if i1 < 144 goto label3;
+
+        if i1 > 191 goto label3;
+
+     label1:
+        if i0 != 244 goto label2;
+
+        $i3 = i1 & 240;
+
+        if $i3 != 128 goto label3;
+
+     label2:
+        $i2 = i1 & 192;
+
+        if $i2 == 128 goto label4;
+
+     label3:
+        $z0 = 1;
+
+        goto label5;
+
+     label4:
+        $z0 = 0;
+
+     label5:
+        return $z0;
+    }
+
+    private static boolean isMalformed4_3(int)
+    {
+        int i0, $i1;
+        boolean $z0;
+
+        i0 := @parameter0: int;
+
+        $i1 = i0 & 192;
+
+        if $i1 == 128 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    private static java.nio.charset.CoderResult lookupN(java.nio.ByteBuffer, int)
+    {
+        java.nio.ByteBuffer r1;
+        java.nio.charset.CoderResult $r0, $r2;
+        byte $b1;
+        int i0, i2, $i3;
+        boolean $z0;
+
+        r1 := @parameter0: java.nio.ByteBuffer;
+
+        i0 := @parameter1: int;
+
+        i2 = 1;
+
+     label1:
+        if i2 >= i0 goto label3;
+
+        $b1 = virtualinvoke r1.<java.nio.ByteBuffer: byte get()>();
+
+        $i3 = (int) $b1;
+
+        $z0 = staticinvoke <sun.nio.cs.UTF_8$Decoder: boolean isNotContinuation(int)>($i3);
+
+        if $z0 == 0 goto label2;
+
+        $r2 = staticinvoke <java.nio.charset.CoderResult: java.nio.charset.CoderResult malformedForLength(int)>(i2);
+
+        return $r2;
+
+     label2:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label3:
+        $r0 = staticinvoke <java.nio.charset.CoderResult: java.nio.charset.CoderResult malformedForLength(int)>(i0);
+
+        return $r0;
+    }
+
+    private static java.nio.charset.CoderResult malformedN(java.nio.ByteBuffer, int)
+    {
+        java.nio.ByteBuffer r0;
+        byte $b1, $b2, $b3, $b5, $b6, $b8;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.AssertionError $r7;
+        short $s4, $s7, s9, s10, $s14, $s17, $s18;
+        java.nio.charset.CoderResult $r1, $r2, $r3, $r4, $r6;
+        int i0, $i11, $i13, $i15, $i16, $i19, $i20, $i21, $i22, $i23, $i24, $i25, $i26;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        i0 := @parameter1: int;
+
+        tableswitch(i0)
+        {
+            case 1: goto label01;
+            case 2: goto label01;
+            case 3: goto label02;
+            case 4: goto label07;
+            default: goto label13;
+        };
+
+     label01:
+        $r4 = staticinvoke <java.nio.charset.CoderResult: java.nio.charset.CoderResult malformedForLength(int)>(1);
+
+        return $r4;
+
+     label02:
+        $b5 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $b6 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $i11 = (int) $b5;
+
+        $i13 = (int) -32;
+
+        if $i11 != $i13 goto label03;
+
+        $s14 = (short) $b6;
+
+        $s7 = $s14 & 224;
+
+        $i15 = (int) $s7;
+
+        if $i15 == 128 goto label04;
+
+     label03:
+        $i16 = (int) $b6;
+
+        $z2 = staticinvoke <sun.nio.cs.UTF_8$Decoder: boolean isNotContinuation(int)>($i16);
+
+        if $z2 == 0 goto label05;
+
+     label04:
+        $b8 = 1;
+
+        goto label06;
+
+     label05:
+        $b8 = 2;
+
+     label06:
+        $r3 = staticinvoke <java.nio.charset.CoderResult: java.nio.charset.CoderResult malformedForLength(int)>($b8);
+
+        return $r3;
+
+     label07:
+        $b1 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $s17 = (short) $b1;
+
+        s9 = $s17 & 255;
+
+        $b2 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $s18 = (short) $b2;
+
+        s10 = $s18 & 255;
+
+        $i19 = (int) s9;
+
+        if $i19 > 244 goto label10;
+
+        $i20 = (int) s9;
+
+        if $i20 != 240 goto label08;
+
+        $i21 = (int) s10;
+
+        if $i21 < 144 goto label10;
+
+        $i22 = (int) s10;
+
+        if $i22 > 191 goto label10;
+
+     label08:
+        $i23 = (int) s9;
+
+        if $i23 != 244 goto label09;
+
+        $s4 = s10 & 240;
+
+        $i24 = (int) $s4;
+
+        if $i24 != 128 goto label10;
+
+     label09:
+        $i25 = (int) s10;
+
+        $z0 = staticinvoke <sun.nio.cs.UTF_8$Decoder: boolean isNotContinuation(int)>($i25);
+
+        if $z0 == 0 goto label11;
+
+     label10:
+        $r6 = staticinvoke <java.nio.charset.CoderResult: java.nio.charset.CoderResult malformedForLength(int)>(1);
+
+        return $r6;
+
+     label11:
+        $b3 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $i26 = (int) $b3;
+
+        $z1 = staticinvoke <sun.nio.cs.UTF_8$Decoder: boolean isNotContinuation(int)>($i26);
+
+        if $z1 == 0 goto label12;
+
+        $r2 = staticinvoke <java.nio.charset.CoderResult: java.nio.charset.CoderResult malformedForLength(int)>(2);
+
+        return $r2;
+
+     label12:
+        $r1 = staticinvoke <java.nio.charset.CoderResult: java.nio.charset.CoderResult malformedForLength(int)>(3);
+
+        return $r1;
+
+     label13:
+        $z3 = <sun.nio.cs.UTF_8$Decoder: boolean $assertionsDisabled>;
+
+        if $z3 != 0 goto label14;
+
+        $r7 = new java.lang.AssertionError;
+
+        specialinvoke $r7.<java.lang.AssertionError: void <init>()>();
+
+        throw $r7;
+
+     label14:
+        return null;
+    }
+
+    private static java.nio.charset.CoderResult malformed(java.nio.ByteBuffer, int, java.nio.CharBuffer, int, int)
+    {
+        java.nio.CharBuffer r2;
+        java.nio.ByteBuffer r0;
+        java.nio.charset.CoderResult $r1;
+        int i0, $i1, $i2, i3, i4;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        i0 := @parameter1: int;
+
+        r2 := @parameter2: java.nio.CharBuffer;
+
+        i4 := @parameter3: int;
+
+        i3 := @parameter4: int;
+
+        $i1 = virtualinvoke r0.<java.nio.ByteBuffer: int arrayOffset()>();
+
+        $i2 = i0 - $i1;
+
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i2);
+
+        $r1 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult malformedN(java.nio.ByteBuffer,int)>(r0, i3);
+
+        staticinvoke <sun.nio.cs.UTF_8: void access$200(java.nio.Buffer,int,java.nio.Buffer,int)>(r0, i0, r2, i4);
+
+        return $r1;
+    }
+
+    private static java.nio.charset.CoderResult malformed(java.nio.ByteBuffer, int, int)
+    {
+        java.nio.charset.CoderResult $r1;
+        int i0, i1;
+        java.nio.ByteBuffer r0;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i0);
+
+        $r1 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult malformedN(java.nio.ByteBuffer,int)>(r0, i1);
+
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i0);
+
+        return $r1;
+    }
+
+    private static java.nio.charset.CoderResult malformedForLength(java.nio.ByteBuffer, int, java.nio.CharBuffer, int, int)
+    {
+        java.nio.charset.CoderResult $r2;
+        java.nio.CharBuffer r1;
+        int i0, i1, i2;
+        java.nio.ByteBuffer r0;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        i0 := @parameter1: int;
+
+        r1 := @parameter2: java.nio.CharBuffer;
+
+        i1 := @parameter3: int;
+
+        i2 := @parameter4: int;
+
+        staticinvoke <sun.nio.cs.UTF_8: void access$200(java.nio.Buffer,int,java.nio.Buffer,int)>(r0, i0, r1, i1);
+
+        $r2 = staticinvoke <java.nio.charset.CoderResult: java.nio.charset.CoderResult malformedForLength(int)>(i2);
+
+        return $r2;
+    }
+
+    private static java.nio.charset.CoderResult malformedForLength(java.nio.ByteBuffer, int, int)
+    {
+        java.nio.charset.CoderResult $r1;
+        int i0, i1;
+        java.nio.ByteBuffer r0;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        virtualinvoke r0.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i0);
+
+        $r1 = staticinvoke <java.nio.charset.CoderResult: java.nio.charset.CoderResult malformedForLength(int)>(i1);
+
+        return $r1;
+    }
+
+    private static java.nio.charset.CoderResult xflow(java.nio.Buffer, int, int, java.nio.Buffer, int, int)
+    {
+        java.nio.charset.CoderResult $r2;
+        java.nio.Buffer r0, r1;
+        int i0, i1, i2, i3, $i4;
+
+        r0 := @parameter0: java.nio.Buffer;
+
+        i0 := @parameter1: int;
+
+        i3 := @parameter2: int;
+
+        r1 := @parameter3: java.nio.Buffer;
+
+        i1 := @parameter4: int;
+
+        i2 := @parameter5: int;
+
+        staticinvoke <sun.nio.cs.UTF_8: void access$200(java.nio.Buffer,int,java.nio.Buffer,int)>(r0, i0, r1, i1);
+
+        if i2 == 0 goto label1;
+
+        $i4 = i3 - i0;
+
+        if $i4 >= i2 goto label2;
+
+     label1:
+        $r2 = <java.nio.charset.CoderResult: java.nio.charset.CoderResult UNDERFLOW>;
+
+        goto label3;
+
+     label2:
+        $r2 = <java.nio.charset.CoderResult: java.nio.charset.CoderResult OVERFLOW>;
+
+     label3:
+        return $r2;
+    }
+
+    private static java.nio.charset.CoderResult xflow(java.nio.Buffer, int, int)
+    {
+        java.nio.charset.CoderResult $r1;
+        java.nio.Buffer r0;
+        int i0, i1, $i2;
+
+        r0 := @parameter0: java.nio.Buffer;
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        virtualinvoke r0.<java.nio.Buffer: java.nio.Buffer position(int)>(i0);
+
+        if i1 == 0 goto label1;
+
+        $i2 = virtualinvoke r0.<java.nio.Buffer: int remaining()>();
+
+        if $i2 >= i1 goto label2;
+
+     label1:
+        $r1 = <java.nio.charset.CoderResult: java.nio.charset.CoderResult UNDERFLOW>;
+
+        goto label3;
+
+     label2:
+        $r1 = <java.nio.charset.CoderResult: java.nio.charset.CoderResult OVERFLOW>;
+
+     label3:
+        return $r1;
+    }
+
+    private java.nio.charset.CoderResult decodeArrayLoop(java.nio.ByteBuffer, java.nio.CharBuffer)
+    {
+        byte[] $r1;
+        byte $b18, $b20, $b37, $b46, $b56, $b59, b63, b64, b66, b67, b70, b71, b72;
+        sun.nio.cs.UTF_8$Decoder r17;
+        short $s21, $s35, $s96, $s98;
+        int $i0, $i1, $i2, $i3, i4, $i5, $i6, $i7, $i8, i9, $i10, $i11, $i12, i13, $i14, $i15, $i16, $i17, $i19, $i22, $i23, $i24, $i25, $i26, $i27, $i28, $i29, $i30, $i31, i32, $i36, $i38, $i39, $i40, $i41, $i42, $i43, $i44, $i45, $i47, $i48, $i49, $i50, $i51, $i52, $i54, $i57, $i58, i61, i62, i65, i69, i73, $i74, $i75, $i76, $i78, $i79, $i80, $i81, $i82, $i84, $i85, $i86, $i87, $i88, $i89, $i90, $i91, $i92, $i93, $i95, $i97, $i99, $i100, $i101, $i102, $i103, $i104, $i105, $i106, $i107, $i108;
+        char[] $r3;
+        java.nio.ByteBuffer r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        java.nio.CharBuffer r2;
+        java.nio.charset.CoderResult $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16;
+        char $c33, $c34, $c53, $c55, $c60, c68;
+
+        r17 := @this: sun.nio.cs.UTF_8$Decoder;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        r2 := @parameter1: java.nio.CharBuffer;
+
+        $r1 = virtualinvoke r0.<java.nio.ByteBuffer: byte[] array()>();
+
+        $i0 = virtualinvoke r0.<java.nio.ByteBuffer: int arrayOffset()>();
+
+        $i1 = virtualinvoke r0.<java.nio.ByteBuffer: int position()>();
+
+        i61 = $i0 + $i1;
+
+        $i2 = virtualinvoke r0.<java.nio.ByteBuffer: int arrayOffset()>();
+
+        $i3 = virtualinvoke r0.<java.nio.ByteBuffer: int limit()>();
+
+        i4 = $i2 + $i3;
+
+        $r3 = virtualinvoke r2.<java.nio.CharBuffer: char[] array()>();
+
+        $i5 = virtualinvoke r2.<java.nio.CharBuffer: int arrayOffset()>();
+
+        $i6 = virtualinvoke r2.<java.nio.CharBuffer: int position()>();
+
+        i62 = $i5 + $i6;
+
+        $i7 = virtualinvoke r2.<java.nio.CharBuffer: int arrayOffset()>();
+
+        $i8 = virtualinvoke r2.<java.nio.CharBuffer: int limit()>();
+
+        i9 = $i7 + $i8;
+
+        $i11 = i4 - i61;
+
+        $i10 = i9 - i62;
+
+        $i12 = staticinvoke <java.lang.Math: int min(int,int)>($i11, $i10);
+
+        i13 = i62 + $i12;
+
+     label01:
+        if i62 >= i13 goto label02;
+
+        $b56 = $r1[i61];
+
+        $i74 = (int) $b56;
+
+        if $i74 < 0 goto label02;
+
+        $i57 = i62;
+
+        i62 = i62 + 1;
+
+        $i58 = i61;
+
+        i61 = i61 + 1;
+
+        $b59 = $r1[$i58];
+
+        $c60 = (char) $b59;
+
+        $r3[$i57] = $c60;
+
+        goto label01;
+
+     label02:
+        if i61 >= i4 goto label24;
+
+        b63 = $r1[i61];
+
+        $i75 = (int) b63;
+
+        if $i75 < 0 goto label04;
+
+        if i62 < i9 goto label03;
+
+        $r16 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult xflow(java.nio.Buffer,int,int,java.nio.Buffer,int,int)>(r0, i61, i4, r2, i62, 1);
+
+        return $r16;
+
+     label03:
+        $i54 = i62;
+
+        i62 = i62 + 1;
+
+        $c55 = (char) b63;
+
+        $r3[$i54] = $c55;
+
+        i61 = i61 + 1;
+
+        goto label23;
+
+     label04:
+        $i76 = (int) b63;
+
+        $i14 = $i76 >> 5;
+
+        $i78 = (int) -2;
+
+        if $i14 != $i78 goto label08;
+
+        $b46 = b63 & 30;
+
+        if $b46 == 0 goto label08;
+
+        $i47 = i4 - i61;
+
+        if $i47 < 2 goto label05;
+
+        if i62 < i9 goto label06;
+
+     label05:
+        $r14 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult xflow(java.nio.Buffer,int,int,java.nio.Buffer,int,int)>(r0, i61, i4, r2, i62, 2);
+
+        return $r14;
+
+     label06:
+        $i48 = i61 + 1;
+
+        b64 = $r1[$i48];
+
+        $i79 = (int) b64;
+
+        $z7 = staticinvoke <sun.nio.cs.UTF_8$Decoder: boolean isNotContinuation(int)>($i79);
+
+        if $z7 == 0 goto label07;
+
+        $r15 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult malformedForLength(java.nio.ByteBuffer,int,java.nio.CharBuffer,int,int)>(r0, i61, r2, i62, 1);
+
+        return $r15;
+
+     label07:
+        $i49 = i62;
+
+        i62 = i62 + 1;
+
+        $i80 = (int) b63;
+
+        $i50 = $i80 << 6;
+
+        $i81 = (int) b64;
+
+        $i51 = $i50 ^ $i81;
+
+        $i52 = $i51 ^ 3968;
+
+        $c53 = (char) $i52;
+
+        $r3[$i49] = $c53;
+
+        i61 = i61 + 2;
+
+        goto label23;
+
+     label08:
+        $i82 = (int) b63;
+
+        $i15 = $i82 >> 4;
+
+        $i84 = (int) -2;
+
+        if $i15 != $i84 goto label14;
+
+        i65 = i4 - i61;
+
+        if i65 < 3 goto label09;
+
+        if i62 < i9 goto label11;
+
+     label09:
+        if i65 <= 1 goto label10;
+
+        $i36 = i61 + 1;
+
+        $b37 = $r1[$i36];
+
+        $i85 = (int) b63;
+
+        $i86 = (int) $b37;
+
+        $z4 = staticinvoke <sun.nio.cs.UTF_8$Decoder: boolean isMalformed3_2(int,int)>($i85, $i86);
+
+        if $z4 == 0 goto label10;
+
+        $r11 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult malformedForLength(java.nio.ByteBuffer,int,java.nio.CharBuffer,int,int)>(r0, i61, r2, i62, 1);
+
+        return $r11;
+
+     label10:
+        $r10 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult xflow(java.nio.Buffer,int,int,java.nio.Buffer,int,int)>(r0, i61, i4, r2, i62, 3);
+
+        return $r10;
+
+     label11:
+        $i38 = i61 + 1;
+
+        b66 = $r1[$i38];
+
+        $i39 = i61 + 2;
+
+        b67 = $r1[$i39];
+
+        $i87 = (int) b63;
+
+        $i88 = (int) b66;
+
+        $i89 = (int) b67;
+
+        $z5 = staticinvoke <sun.nio.cs.UTF_8$Decoder: boolean isMalformed3(int,int,int)>($i87, $i88, $i89);
+
+        if $z5 == 0 goto label12;
+
+        $r13 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult malformed(java.nio.ByteBuffer,int,java.nio.CharBuffer,int,int)>(r0, i61, r2, i62, 3);
+
+        return $r13;
+
+     label12:
+        $i90 = (int) b63;
+
+        $i41 = $i90 << 12;
+
+        $i91 = (int) b66;
+
+        $i40 = $i91 << 6;
+
+        $i43 = $i41 ^ $i40;
+
+        $i92 = (int) b67;
+
+        $i42 = $i92 ^ -123008;
+
+        $i44 = $i43 ^ $i42;
+
+        c68 = (char) $i44;
+
+        $z6 = staticinvoke <java.lang.Character: boolean isSurrogate(char)>(c68);
+
+        if $z6 == 0 goto label13;
+
+        $r12 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult malformedForLength(java.nio.ByteBuffer,int,java.nio.CharBuffer,int,int)>(r0, i61, r2, i62, 3);
+
+        return $r12;
+
+     label13:
+        $i45 = i62;
+
+        i62 = i62 + 1;
+
+        $r3[$i45] = c68;
+
+        i61 = i61 + 3;
+
+        goto label23;
+
+     label14:
+        $i93 = (int) b63;
+
+        $i16 = $i93 >> 3;
+
+        $i95 = (int) -2;
+
+        if $i16 != $i95 goto label22;
+
+        i69 = i4 - i61;
+
+        if i69 < 4 goto label15;
+
+        $i22 = i9 - i62;
+
+        if $i22 >= 2 goto label19;
+
+     label15:
+        $s96 = (short) b63;
+
+        $s35 = $s96 & 255;
+
+        $i97 = (int) $s35;
+
+        if $i97 > 244 goto label16;
+
+        if i69 <= 1 goto label17;
+
+        $i19 = i61 + 1;
+
+        $b20 = $r1[$i19];
+
+        $s98 = (short) $b20;
+
+        $s21 = $s98 & 255;
+
+        $i99 = (int) $s35;
+
+        $i100 = (int) $s21;
+
+        $z1 = staticinvoke <sun.nio.cs.UTF_8$Decoder: boolean isMalformed4_2(int,int)>($i99, $i100);
+
+        if $z1 == 0 goto label17;
+
+     label16:
+        $r6 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult malformedForLength(java.nio.ByteBuffer,int,java.nio.CharBuffer,int,int)>(r0, i61, r2, i62, 1);
+
+        return $r6;
+
+     label17:
+        if i69 <= 2 goto label18;
+
+        $i17 = i61 + 2;
+
+        $b18 = $r1[$i17];
+
+        $i101 = (int) $b18;
+
+        $z0 = staticinvoke <sun.nio.cs.UTF_8$Decoder: boolean isMalformed4_3(int)>($i101);
+
+        if $z0 == 0 goto label18;
+
+        $r8 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult malformedForLength(java.nio.ByteBuffer,int,java.nio.CharBuffer,int,int)>(r0, i61, r2, i62, 2);
+
+        return $r8;
+
+     label18:
+        $r7 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult xflow(java.nio.Buffer,int,int,java.nio.Buffer,int,int)>(r0, i61, i4, r2, i62, 4);
+
+        return $r7;
+
+     label19:
+        $i23 = i61 + 1;
+
+        b70 = $r1[$i23];
+
+        $i24 = i61 + 2;
+
+        b71 = $r1[$i24];
+
+        $i25 = i61 + 3;
+
+        b72 = $r1[$i25];
+
+        $i102 = (int) b63;
+
+        $i27 = $i102 << 18;
+
+        $i103 = (int) b70;
+
+        $i26 = $i103 << 12;
+
+        $i29 = $i27 ^ $i26;
+
+        $i104 = (int) b71;
+
+        $i28 = $i104 << 6;
+
+        $i31 = $i29 ^ $i28;
+
+        $i105 = (int) b72;
+
+        $i30 = $i105 ^ 3678080;
+
+        i32 = $i31 ^ $i30;
+
+        $i106 = (int) b70;
+
+        $i107 = (int) b71;
+
+        $i108 = (int) b72;
+
+        $z2 = staticinvoke <sun.nio.cs.UTF_8$Decoder: boolean isMalformed4(int,int,int)>($i106, $i107, $i108);
+
+        if $z2 != 0 goto label20;
+
+        $z3 = staticinvoke <java.lang.Character: boolean isSupplementaryCodePoint(int)>(i32);
+
+        if $z3 != 0 goto label21;
+
+     label20:
+        $r9 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult malformed(java.nio.ByteBuffer,int,java.nio.CharBuffer,int,int)>(r0, i61, r2, i62, 4);
+
+        return $r9;
+
+     label21:
+        i73 = i62 + 1;
+
+        $c33 = staticinvoke <java.lang.Character: char highSurrogate(int)>(i32);
+
+        $r3[i62] = $c33;
+
+        i62 = i73 + 1;
+
+        $c34 = staticinvoke <java.lang.Character: char lowSurrogate(int)>(i32);
+
+        $r3[i73] = $c34;
+
+        i61 = i61 + 4;
+
+        goto label23;
+
+     label22:
+        $r5 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult malformed(java.nio.ByteBuffer,int,java.nio.CharBuffer,int,int)>(r0, i61, r2, i62, 1);
+
+        return $r5;
+
+     label23:
+        goto label02;
+
+     label24:
+        $r4 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult xflow(java.nio.Buffer,int,int,java.nio.Buffer,int,int)>(r0, i61, i4, r2, i62, 0);
+
+        return $r4;
+    }
+
+    private java.nio.charset.CoderResult decodeBufferLoop(java.nio.ByteBuffer, java.nio.CharBuffer)
+    {
+        byte $b1, $b5, $b6, $b9, $b10, $b11, $b22, $b24, $b25, $b31, $b34;
+        sun.nio.cs.UTF_8$Decoder r15;
+        short $s7, $s21, $s66, $s68;
+        java.nio.ByteBuffer r0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        java.nio.CharBuffer r6;
+        java.nio.charset.CoderResult $r1, $r2, $r3, $r4, $r5, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14;
+        int $i0, $i2, $i3, $i4, $i8, $i12, $i13, $i14, $i15, $i16, $i17, i18, $i23, $i26, $i27, $i28, $i29, $i30, $i32, $i33, $i35, $i36, $i37, $i39, i41, i42, i44, $i45, $i46, $i48, $i49, $i50, $i51, $i52, $i54, $i55, $i56, $i57, $i58, $i59, $i60, $i61, $i62, $i63, $i65, $i67, $i69, $i70, $i71, $i72, $i73, $i74, $i75, $i76, $i77, $i78;
+        char $c19, $c20, $c38, $c40, c43;
+
+        r15 := @this: sun.nio.cs.UTF_8$Decoder;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        r6 := @parameter1: java.nio.CharBuffer;
+
+        i41 = virtualinvoke r0.<java.nio.ByteBuffer: int position()>();
+
+        $i0 = virtualinvoke r0.<java.nio.ByteBuffer: int limit()>();
+
+     label01:
+        if i41 >= $i0 goto label23;
+
+        $b1 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $i45 = (int) $b1;
+
+        if $i45 < 0 goto label03;
+
+        $i39 = virtualinvoke r6.<java.nio.CharBuffer: int remaining()>();
+
+        if $i39 >= 1 goto label02;
+
+        $r14 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult xflow(java.nio.Buffer,int,int)>(r0, i41, 1);
+
+        return $r14;
+
+     label02:
+        $c40 = (char) $b1;
+
+        virtualinvoke r6.<java.nio.CharBuffer: java.nio.CharBuffer put(char)>($c40);
+
+        i41 = i41 + 1;
+
+        goto label22;
+
+     label03:
+        $i46 = (int) $b1;
+
+        $i2 = $i46 >> 5;
+
+        $i48 = (int) -2;
+
+        if $i2 != $i48 goto label07;
+
+        $b31 = $b1 & 30;
+
+        if $b31 == 0 goto label07;
+
+        $i32 = $i0 - i41;
+
+        if $i32 < 2 goto label04;
+
+        $i33 = virtualinvoke r6.<java.nio.CharBuffer: int remaining()>();
+
+        if $i33 >= 1 goto label05;
+
+     label04:
+        $r12 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult xflow(java.nio.Buffer,int,int)>(r0, i41, 2);
+
+        return $r12;
+
+     label05:
+        $b34 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $i49 = (int) $b34;
+
+        $z7 = staticinvoke <sun.nio.cs.UTF_8$Decoder: boolean isNotContinuation(int)>($i49);
+
+        if $z7 == 0 goto label06;
+
+        $r13 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult malformedForLength(java.nio.ByteBuffer,int,int)>(r0, i41, 1);
+
+        return $r13;
+
+     label06:
+        $i50 = (int) $b1;
+
+        $i35 = $i50 << 6;
+
+        $i51 = (int) $b34;
+
+        $i36 = $i35 ^ $i51;
+
+        $i37 = $i36 ^ 3968;
+
+        $c38 = (char) $i37;
+
+        virtualinvoke r6.<java.nio.CharBuffer: java.nio.CharBuffer put(char)>($c38);
+
+        i41 = i41 + 2;
+
+        goto label22;
+
+     label07:
+        $i52 = (int) $b1;
+
+        $i3 = $i52 >> 4;
+
+        $i54 = (int) -2;
+
+        if $i3 != $i54 goto label13;
+
+        i42 = $i0 - i41;
+
+        if i42 < 3 goto label08;
+
+        $i23 = virtualinvoke r6.<java.nio.CharBuffer: int remaining()>();
+
+        if $i23 >= 1 goto label10;
+
+     label08:
+        if i42 <= 1 goto label09;
+
+        $b22 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $i55 = (int) $b1;
+
+        $i56 = (int) $b22;
+
+        $z4 = staticinvoke <sun.nio.cs.UTF_8$Decoder: boolean isMalformed3_2(int,int)>($i55, $i56);
+
+        if $z4 == 0 goto label09;
+
+        $r9 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult malformedForLength(java.nio.ByteBuffer,int,int)>(r0, i41, 1);
+
+        return $r9;
+
+     label09:
+        $r8 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult xflow(java.nio.Buffer,int,int)>(r0, i41, 3);
+
+        return $r8;
+
+     label10:
+        $b24 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $b25 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $i57 = (int) $b1;
+
+        $i58 = (int) $b24;
+
+        $i59 = (int) $b25;
+
+        $z5 = staticinvoke <sun.nio.cs.UTF_8$Decoder: boolean isMalformed3(int,int,int)>($i57, $i58, $i59);
+
+        if $z5 == 0 goto label11;
+
+        $r11 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult malformed(java.nio.ByteBuffer,int,int)>(r0, i41, 3);
+
+        return $r11;
+
+     label11:
+        $i60 = (int) $b1;
+
+        $i27 = $i60 << 12;
+
+        $i61 = (int) $b24;
+
+        $i26 = $i61 << 6;
+
+        $i29 = $i27 ^ $i26;
+
+        $i62 = (int) $b25;
+
+        $i28 = $i62 ^ -123008;
+
+        $i30 = $i29 ^ $i28;
+
+        c43 = (char) $i30;
+
+        $z6 = staticinvoke <java.lang.Character: boolean isSurrogate(char)>(c43);
+
+        if $z6 == 0 goto label12;
+
+        $r10 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult malformedForLength(java.nio.ByteBuffer,int,int)>(r0, i41, 3);
+
+        return $r10;
+
+     label12:
+        virtualinvoke r6.<java.nio.CharBuffer: java.nio.CharBuffer put(char)>(c43);
+
+        i41 = i41 + 3;
+
+        goto label22;
+
+     label13:
+        $i63 = (int) $b1;
+
+        $i4 = $i63 >> 3;
+
+        $i65 = (int) -2;
+
+        if $i4 != $i65 goto label21;
+
+        i44 = $i0 - i41;
+
+        if i44 < 4 goto label14;
+
+        $i8 = virtualinvoke r6.<java.nio.CharBuffer: int remaining()>();
+
+        if $i8 >= 2 goto label18;
+
+     label14:
+        $s66 = (short) $b1;
+
+        $s21 = $s66 & 255;
+
+        $i67 = (int) $s21;
+
+        if $i67 > 244 goto label15;
+
+        if i44 <= 1 goto label16;
+
+        $b6 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $s68 = (short) $b6;
+
+        $s7 = $s68 & 255;
+
+        $i69 = (int) $s21;
+
+        $i70 = (int) $s7;
+
+        $z1 = staticinvoke <sun.nio.cs.UTF_8$Decoder: boolean isMalformed4_2(int,int)>($i69, $i70);
+
+        if $z1 == 0 goto label16;
+
+     label15:
+        $r3 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult malformedForLength(java.nio.ByteBuffer,int,int)>(r0, i41, 1);
+
+        return $r3;
+
+     label16:
+        if i44 <= 2 goto label17;
+
+        $b5 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $i71 = (int) $b5;
+
+        $z0 = staticinvoke <sun.nio.cs.UTF_8$Decoder: boolean isMalformed4_3(int)>($i71);
+
+        if $z0 == 0 goto label17;
+
+        $r5 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult malformedForLength(java.nio.ByteBuffer,int,int)>(r0, i41, 2);
+
+        return $r5;
+
+     label17:
+        $r4 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult xflow(java.nio.Buffer,int,int)>(r0, i41, 4);
+
+        return $r4;
+
+     label18:
+        $b9 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $b10 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $b11 = virtualinvoke r0.<java.nio.ByteBuffer: byte get()>();
+
+        $i72 = (int) $b1;
+
+        $i13 = $i72 << 18;
+
+        $i73 = (int) $b9;
+
+        $i12 = $i73 << 12;
+
+        $i15 = $i13 ^ $i12;
+
+        $i74 = (int) $b10;
+
+        $i14 = $i74 << 6;
+
+        $i17 = $i15 ^ $i14;
+
+        $i75 = (int) $b11;
+
+        $i16 = $i75 ^ 3678080;
+
+        i18 = $i17 ^ $i16;
+
+        $i76 = (int) $b9;
+
+        $i77 = (int) $b10;
+
+        $i78 = (int) $b11;
+
+        $z2 = staticinvoke <sun.nio.cs.UTF_8$Decoder: boolean isMalformed4(int,int,int)>($i76, $i77, $i78);
+
+        if $z2 != 0 goto label19;
+
+        $z3 = staticinvoke <java.lang.Character: boolean isSupplementaryCodePoint(int)>(i18);
+
+        if $z3 != 0 goto label20;
+
+     label19:
+        $r7 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult malformed(java.nio.ByteBuffer,int,int)>(r0, i41, 4);
+
+        return $r7;
+
+     label20:
+        $c19 = staticinvoke <java.lang.Character: char highSurrogate(int)>(i18);
+
+        virtualinvoke r6.<java.nio.CharBuffer: java.nio.CharBuffer put(char)>($c19);
+
+        $c20 = staticinvoke <java.lang.Character: char lowSurrogate(int)>(i18);
+
+        virtualinvoke r6.<java.nio.CharBuffer: java.nio.CharBuffer put(char)>($c20);
+
+        i41 = i41 + 4;
+
+        goto label22;
+
+     label21:
+        $r2 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult malformed(java.nio.ByteBuffer,int,int)>(r0, i41, 1);
+
+        return $r2;
+
+     label22:
+        goto label01;
+
+     label23:
+        $r1 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult xflow(java.nio.Buffer,int,int)>(r0, i41, 0);
+
+        return $r1;
+    }
+
+    protected java.nio.charset.CoderResult decodeLoop(java.nio.ByteBuffer, java.nio.CharBuffer)
+    {
+        java.nio.charset.CoderResult $r3, $r4;
+        java.nio.CharBuffer r2;
+        sun.nio.cs.UTF_8$Decoder r1;
+        java.nio.ByteBuffer r0;
+        boolean $z0, $z1;
+
+        r1 := @this: sun.nio.cs.UTF_8$Decoder;
+
+        r0 := @parameter0: java.nio.ByteBuffer;
+
+        r2 := @parameter1: java.nio.CharBuffer;
+
+        $z0 = virtualinvoke r0.<java.nio.ByteBuffer: boolean hasArray()>();
+
+        if $z0 == 0 goto label1;
+
+        $z1 = virtualinvoke r2.<java.nio.CharBuffer: boolean hasArray()>();
+
+        if $z1 == 0 goto label1;
+
+        $r4 = specialinvoke r1.<sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult decodeArrayLoop(java.nio.ByteBuffer,java.nio.CharBuffer)>(r0, r2);
+
+        return $r4;
+
+     label1:
+        $r3 = specialinvoke r1.<sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult decodeBufferLoop(java.nio.ByteBuffer,java.nio.CharBuffer)>(r0, r2);
+
+        return $r3;
+    }
+
+    private static java.nio.ByteBuffer getByteBuffer(java.nio.ByteBuffer, byte[], int)
+    {
+        int i0;
+        byte[] r0;
+        java.nio.ByteBuffer r1;
+
+        r1 := @parameter0: java.nio.ByteBuffer;
+
+        r0 := @parameter1: byte[];
+
+        i0 := @parameter2: int;
+
+        if r1 != null goto label1;
+
+        r1 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>(r0);
+
+     label1:
+        virtualinvoke r1.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i0);
+
+        return r1;
+    }
+
+    public int decode(byte[], int, int, char[])
+    {
+        byte[] r1;
+        byte $b14, $b17, $b33, $b47, $b59, $b62, b66, b67, b70, b71, b76, b78, b79;
+        sun.nio.cs.UTF_8$Decoder r2;
+        short $s18, s82, $s133, $s135;
+        java.nio.charset.CodingErrorAction $r3, $r4, $r6, $r7, $r11, $r12, $r16, $r17, $r20, $r21, $r23, $r24, $r28, $r29, $r31, $r32;
+        int i0, i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i10, $i11, $i15, $i19, $i20, $i21, $i22, $i23, $i24, i25, $i26, $i28, $i31, $i34, $i36, $i37, $i38, $i39, $i40, $i41, $i42, $i44, $i46, $i49, $i50, $i51, $i52, $i53, $i55, $i57, $i60, $i61, i64, i65, i68, i69, i72, i74, i75, i77, i80, i81, i83, $i84, $i85, $i86, $i88, $i89, $i91, $i93, $i94, $i95, $i97, $i98, $i100, $i101, $i102, $i103, $i105, $i107, $i108, $i109, $i110, $i112, $i114, $i115, $i116, $i117, $i119, $i120, $i121, $i122, $i123, $i124, $i125, $i126, $i128, $i130, $i132, $i134, $i136, $i137, $i138, $i140;
+        java.lang.String $r5, $r8, $r9, $r10, $r13, $r18, $r19, $r22, $r25, $r30, $r33;
+        char[] r0;
+        java.nio.ByteBuffer $r14, $r26, r34;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        java.nio.charset.CoderResult $r15, $r27;
+        char $c9, $c12, $c13, $c16, $c27, $c29, $c30, $c32, $c35, $c43, $c45, $c48, $c54, $c56, $c58, $c63, c73;
+
+        r2 := @this: sun.nio.cs.UTF_8$Decoder;
+
+        r1 := @parameter0: byte[];
+
+        i64 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        r0 := @parameter3: char[];
+
+        i1 = i64 + i0;
+
+        i65 = 0;
+
+        $i2 = lengthof r0;
+
+        $i3 = staticinvoke <java.lang.Math: int min(int,int)>(i0, $i2);
+
+        r34 = null;
+
+     label01:
+        if i65 >= $i3 goto label02;
+
+        $b59 = r1[i64];
+
+        $i84 = (int) $b59;
+
+        if $i84 < 0 goto label02;
+
+        $i60 = i65;
+
+        i65 = i65 + 1;
+
+        $i61 = i64;
+
+        i64 = i64 + 1;
+
+        $b62 = r1[$i61];
+
+        $c63 = (char) $b62;
+
+        r0[$i60] = $c63;
+
+        goto label01;
+
+     label02:
+        if i64 >= i1 goto label29;
+
+        $i4 = i64;
+
+        i64 = i64 + 1;
+
+        b66 = r1[$i4];
+
+        $i85 = (int) b66;
+
+        if $i85 < 0 goto label03;
+
+        $i57 = i65;
+
+        i65 = i65 + 1;
+
+        $c58 = (char) b66;
+
+        r0[$i57] = $c58;
+
+        goto label28;
+
+     label03:
+        $i86 = (int) b66;
+
+        $i5 = $i86 >> 5;
+
+        $i88 = (int) -2;
+
+        if $i5 != $i88 goto label08;
+
+        $b47 = b66 & 30;
+
+        if $b47 == 0 goto label08;
+
+        if i64 >= i1 goto label06;
+
+        $i49 = i64;
+
+        i64 = i64 + 1;
+
+        b67 = r1[$i49];
+
+        $i89 = (int) b67;
+
+        $z7 = staticinvoke <sun.nio.cs.UTF_8$Decoder: boolean isNotContinuation(int)>($i89);
+
+        if $z7 == 0 goto label05;
+
+        $r31 = virtualinvoke r2.<sun.nio.cs.UTF_8$Decoder: java.nio.charset.CodingErrorAction malformedInputAction()>();
+
+        $r32 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPLACE>;
+
+        if $r31 == $r32 goto label04;
+
+        $i91 = (int) -1;
+
+        return $i91;
+
+     label04:
+        $i55 = i65;
+
+        i65 = i65 + 1;
+
+        $r33 = virtualinvoke r2.<sun.nio.cs.UTF_8$Decoder: java.lang.String replacement()>();
+
+        $c56 = virtualinvoke $r33.<java.lang.String: char charAt(int)>(0);
+
+        r0[$i55] = $c56;
+
+        $i93 = (int) -1;
+
+        i64 = i64 + $i93;
+
+        goto label02;
+
+     label05:
+        $i50 = i65;
+
+        i65 = i65 + 1;
+
+        $i94 = (int) b66;
+
+        $i51 = $i94 << 6;
+
+        $i95 = (int) b67;
+
+        $i52 = $i51 ^ $i95;
+
+        $i53 = $i52 ^ 3968;
+
+        $c54 = (char) $i53;
+
+        r0[$i50] = $c54;
+
+        goto label02;
+
+     label06:
+        $r28 = virtualinvoke r2.<sun.nio.cs.UTF_8$Decoder: java.nio.charset.CodingErrorAction malformedInputAction()>();
+
+        $r29 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPLACE>;
+
+        if $r28 == $r29 goto label07;
+
+        $i97 = (int) -1;
+
+        return $i97;
+
+     label07:
+        i68 = i65 + 1;
+
+        $r30 = virtualinvoke r2.<sun.nio.cs.UTF_8$Decoder: java.lang.String replacement()>();
+
+        $c48 = virtualinvoke $r30.<java.lang.String: char charAt(int)>(0);
+
+        r0[i65] = $c48;
+
+        return i68;
+
+     label08:
+        $i98 = (int) b66;
+
+        $i6 = $i98 >> 4;
+
+        $i100 = (int) -2;
+
+        if $i6 != $i100 goto label17;
+
+        $i31 = i64 + 1;
+
+        if $i31 >= i1 goto label14;
+
+        i69 = i64 + 1;
+
+        b70 = r1[i64];
+
+        i64 = i69 + 1;
+
+        b71 = r1[i69];
+
+        $i101 = (int) b66;
+
+        $i102 = (int) b70;
+
+        $i103 = (int) b71;
+
+        $z5 = staticinvoke <sun.nio.cs.UTF_8$Decoder: boolean isMalformed3(int,int,int)>($i101, $i102, $i103);
+
+        if $z5 == 0 goto label10;
+
+        $r23 = virtualinvoke r2.<sun.nio.cs.UTF_8$Decoder: java.nio.charset.CodingErrorAction malformedInputAction()>();
+
+        $r24 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPLACE>;
+
+        if $r23 == $r24 goto label09;
+
+        $i105 = (int) -1;
+
+        return $i105;
+
+     label09:
+        $i44 = i65;
+
+        i65 = i65 + 1;
+
+        $r25 = virtualinvoke r2.<sun.nio.cs.UTF_8$Decoder: java.lang.String replacement()>();
+
+        $c45 = virtualinvoke $r25.<java.lang.String: char charAt(int)>(0);
+
+        r0[$i44] = $c45;
+
+        $i107 = (int) -3;
+
+        i72 = i64 + $i107;
+
+        $r26 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.ByteBuffer getByteBuffer(java.nio.ByteBuffer,byte[],int)>(r34, r1, i72);
+
+        r34 = $r26;
+
+        $r27 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult malformedN(java.nio.ByteBuffer,int)>($r26, 3);
+
+        $i46 = virtualinvoke $r27.<java.nio.charset.CoderResult: int length()>();
+
+        i64 = i72 + $i46;
+
+        goto label02;
+
+     label10:
+        $i108 = (int) b66;
+
+        $i37 = $i108 << 12;
+
+        $i109 = (int) b70;
+
+        $i36 = $i109 << 6;
+
+        $i39 = $i37 ^ $i36;
+
+        $i110 = (int) b71;
+
+        $i38 = $i110 ^ -123008;
+
+        $i40 = $i39 ^ $i38;
+
+        c73 = (char) $i40;
+
+        $z6 = staticinvoke <java.lang.Character: boolean isSurrogate(char)>(c73);
+
+        if $z6 == 0 goto label12;
+
+        $r20 = virtualinvoke r2.<sun.nio.cs.UTF_8$Decoder: java.nio.charset.CodingErrorAction malformedInputAction()>();
+
+        $r21 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPLACE>;
+
+        if $r20 == $r21 goto label11;
+
+        $i112 = (int) -1;
+
+        return $i112;
+
+     label11:
+        $i42 = i65;
+
+        i65 = i65 + 1;
+
+        $r22 = virtualinvoke r2.<sun.nio.cs.UTF_8$Decoder: java.lang.String replacement()>();
+
+        $c43 = virtualinvoke $r22.<java.lang.String: char charAt(int)>(0);
+
+        r0[$i42] = $c43;
+
+        goto label13;
+
+     label12:
+        $i41 = i65;
+
+        i65 = i65 + 1;
+
+        r0[$i41] = c73;
+
+     label13:
+        goto label02;
+
+     label14:
+        $r16 = virtualinvoke r2.<sun.nio.cs.UTF_8$Decoder: java.nio.charset.CodingErrorAction malformedInputAction()>();
+
+        $r17 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPLACE>;
+
+        if $r16 == $r17 goto label15;
+
+        $i114 = (int) -1;
+
+        return $i114;
+
+     label15:
+        if i64 >= i1 goto label16;
+
+        $b33 = r1[i64];
+
+        $i115 = (int) b66;
+
+        $i116 = (int) $b33;
+
+        $z4 = staticinvoke <sun.nio.cs.UTF_8$Decoder: boolean isMalformed3_2(int,int)>($i115, $i116);
+
+        if $z4 == 0 goto label16;
+
+        $i34 = i65;
+
+        i65 = i65 + 1;
+
+        $r19 = virtualinvoke r2.<sun.nio.cs.UTF_8$Decoder: java.lang.String replacement()>();
+
+        $c35 = virtualinvoke $r19.<java.lang.String: char charAt(int)>(0);
+
+        r0[$i34] = $c35;
+
+        goto label02;
+
+     label16:
+        i74 = i65 + 1;
+
+        $r18 = virtualinvoke r2.<sun.nio.cs.UTF_8$Decoder: java.lang.String replacement()>();
+
+        $c32 = virtualinvoke $r18.<java.lang.String: char charAt(int)>(0);
+
+        r0[i65] = $c32;
+
+        return i74;
+
+     label17:
+        $i117 = (int) b66;
+
+        $i7 = $i117 >> 3;
+
+        $i119 = (int) -2;
+
+        if $i7 != $i119 goto label26;
+
+        $i10 = i64 + 2;
+
+        if $i10 >= i1 goto label21;
+
+        i75 = i64 + 1;
+
+        b76 = r1[i64];
+
+        i77 = i75 + 1;
+
+        b78 = r1[i75];
+
+        i64 = i77 + 1;
+
+        b79 = r1[i77];
+
+        $i120 = (int) b66;
+
+        $i20 = $i120 << 18;
+
+        $i121 = (int) b76;
+
+        $i19 = $i121 << 12;
+
+        $i22 = $i20 ^ $i19;
+
+        $i122 = (int) b78;
+
+        $i21 = $i122 << 6;
+
+        $i24 = $i22 ^ $i21;
+
+        $i123 = (int) b79;
+
+        $i23 = $i123 ^ 3678080;
+
+        i25 = $i24 ^ $i23;
+
+        $i124 = (int) b76;
+
+        $i125 = (int) b78;
+
+        $i126 = (int) b79;
+
+        $z2 = staticinvoke <sun.nio.cs.UTF_8$Decoder: boolean isMalformed4(int,int,int)>($i124, $i125, $i126);
+
+        if $z2 != 0 goto label18;
+
+        $z3 = staticinvoke <java.lang.Character: boolean isSupplementaryCodePoint(int)>(i25);
+
+        if $z3 != 0 goto label20;
+
+     label18:
+        $r11 = virtualinvoke r2.<sun.nio.cs.UTF_8$Decoder: java.nio.charset.CodingErrorAction malformedInputAction()>();
+
+        $r12 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPLACE>;
+
+        if $r11 == $r12 goto label19;
+
+        $i128 = (int) -1;
+
+        return $i128;
+
+     label19:
+        $i26 = i65;
+
+        i65 = i65 + 1;
+
+        $r13 = virtualinvoke r2.<sun.nio.cs.UTF_8$Decoder: java.lang.String replacement()>();
+
+        $c27 = virtualinvoke $r13.<java.lang.String: char charAt(int)>(0);
+
+        r0[$i26] = $c27;
+
+        $i130 = (int) -4;
+
+        i80 = i64 + $i130;
+
+        $r14 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.ByteBuffer getByteBuffer(java.nio.ByteBuffer,byte[],int)>(r34, r1, i80);
+
+        r34 = $r14;
+
+        $r15 = staticinvoke <sun.nio.cs.UTF_8$Decoder: java.nio.charset.CoderResult malformedN(java.nio.ByteBuffer,int)>($r14, 4);
+
+        $i28 = virtualinvoke $r15.<java.nio.charset.CoderResult: int length()>();
+
+        i64 = i80 + $i28;
+
+        goto label02;
+
+     label20:
+        i81 = i65 + 1;
+
+        $c29 = staticinvoke <java.lang.Character: char highSurrogate(int)>(i25);
+
+        r0[i65] = $c29;
+
+        i65 = i81 + 1;
+
+        $c30 = staticinvoke <java.lang.Character: char lowSurrogate(int)>(i25);
+
+        r0[i81] = $c30;
+
+        goto label02;
+
+     label21:
+        $r6 = virtualinvoke r2.<sun.nio.cs.UTF_8$Decoder: java.nio.charset.CodingErrorAction malformedInputAction()>();
+
+        $r7 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPLACE>;
+
+        if $r6 == $r7 goto label22;
+
+        $i132 = (int) -1;
+
+        return $i132;
+
+     label22:
+        $s133 = (short) b66;
+
+        s82 = $s133 & 255;
+
+        $i134 = (int) s82;
+
+        if $i134 > 244 goto label23;
+
+        if i64 >= i1 goto label24;
+
+        $b17 = r1[i64];
+
+        $s135 = (short) $b17;
+
+        $s18 = $s135 & 255;
+
+        $i136 = (int) s82;
+
+        $i137 = (int) $s18;
+
+        $z1 = staticinvoke <sun.nio.cs.UTF_8$Decoder: boolean isMalformed4_2(int,int)>($i136, $i137);
+
+        if $z1 == 0 goto label24;
+
+     label23:
+        $i11 = i65;
+
+        i65 = i65 + 1;
+
+        $r8 = virtualinvoke r2.<sun.nio.cs.UTF_8$Decoder: java.lang.String replacement()>();
+
+        $c12 = virtualinvoke $r8.<java.lang.String: char charAt(int)>(0);
+
+        r0[$i11] = $c12;
+
+        goto label02;
+
+     label24:
+        i64 = i64 + 1;
+
+        if i64 >= i1 goto label25;
+
+        $b14 = r1[i64];
+
+        $i138 = (int) $b14;
+
+        $z0 = staticinvoke <sun.nio.cs.UTF_8$Decoder: boolean isMalformed4_3(int)>($i138);
+
+        if $z0 == 0 goto label25;
+
+        $i15 = i65;
+
+        i65 = i65 + 1;
+
+        $r10 = virtualinvoke r2.<sun.nio.cs.UTF_8$Decoder: java.lang.String replacement()>();
+
+        $c16 = virtualinvoke $r10.<java.lang.String: char charAt(int)>(0);
+
+        r0[$i15] = $c16;
+
+        goto label02;
+
+     label25:
+        i83 = i65 + 1;
+
+        $r9 = virtualinvoke r2.<sun.nio.cs.UTF_8$Decoder: java.lang.String replacement()>();
+
+        $c13 = virtualinvoke $r9.<java.lang.String: char charAt(int)>(0);
+
+        r0[i65] = $c13;
+
+        return i83;
+
+     label26:
+        $r3 = virtualinvoke r2.<sun.nio.cs.UTF_8$Decoder: java.nio.charset.CodingErrorAction malformedInputAction()>();
+
+        $r4 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPLACE>;
+
+        if $r3 == $r4 goto label27;
+
+        $i140 = (int) -1;
+
+        return $i140;
+
+     label27:
+        $i8 = i65;
+
+        i65 = i65 + 1;
+
+        $r5 = virtualinvoke r2.<sun.nio.cs.UTF_8$Decoder: java.lang.String replacement()>();
+
+        $c9 = virtualinvoke $r5.<java.lang.String: char charAt(int)>(0);
+
+        r0[$i8] = $c9;
+
+     label28:
+        goto label02;
+
+     label29:
+        return i65;
+    }
+
+    void <init>(java.nio.charset.Charset, sun.nio.cs.UTF_8$1)
+    {
+        sun.nio.cs.UTF_8$Decoder r0;
+        sun.nio.cs.UTF_8$1 r2;
+        java.nio.charset.Charset r1;
+
+        r0 := @this: sun.nio.cs.UTF_8$Decoder;
+
+        r1 := @parameter0: java.nio.charset.Charset;
+
+        r2 := @parameter1: sun.nio.cs.UTF_8$1;
+
+        specialinvoke r0.<sun.nio.cs.UTF_8$Decoder: void <init>(java.nio.charset.Charset)>(r1);
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        $r0 = class "Lsun/nio/cs/UTF_8;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.nio.cs.UTF_8$Decoder: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

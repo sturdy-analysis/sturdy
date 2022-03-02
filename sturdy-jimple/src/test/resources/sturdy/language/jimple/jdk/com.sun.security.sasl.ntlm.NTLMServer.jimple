@@ -1,0 +1,418 @@
+final class com.sun.security.sasl.ntlm.NTLMServer extends java.lang.Object implements javax.security.sasl.SaslServer
+{
+    private static final java.lang.String NTLM_VERSION;
+    private static final java.lang.String NTLM_DOMAIN;
+    private static final java.lang.String NTLM_HOSTNAME;
+    private static final java.lang.String NTLM_RANDOM;
+    private final java.util.Random random;
+    private final com.sun.security.ntlm.Server server;
+    private byte[] nonce;
+    private int step;
+    private java.lang.String authzId;
+    private final java.lang.String mech;
+    private java.lang.String hostname;
+    private java.lang.String target;
+
+    void <init>(java.lang.String, java.lang.String, java.lang.String, java.util.Map, javax.security.auth.callback.CallbackHandler) throws javax.security.sasl.SaslException
+    {
+        byte[] $r5;
+        java.util.Random r16, $r17;
+        javax.security.sasl.SaslException $r6, $r12;
+        com.sun.security.ntlm.NTLMException $r11;
+        javax.security.auth.callback.CallbackHandler r4;
+        java.util.Map r2;
+        java.lang.String r1, r7, r13, r14, r15;
+        com.sun.security.sasl.ntlm.NTLMServer$1 $r3;
+        java.lang.Object $r8, $r9, $r10;
+        com.sun.security.sasl.ntlm.NTLMServer r0;
+
+        r0 := @this: com.sun.security.sasl.ntlm.NTLMServer;
+
+        r1 := @parameter0: java.lang.String;
+
+        r13 := @parameter1: java.lang.String;
+
+        r7 := @parameter2: java.lang.String;
+
+        r2 := @parameter3: java.util.Map;
+
+        r4 := @parameter4: javax.security.auth.callback.CallbackHandler;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.security.sasl.ntlm.NTLMServer: int step> = 0;
+
+        r0.<com.sun.security.sasl.ntlm.NTLMServer: java.lang.String mech> = r1;
+
+        r14 = null;
+
+        r15 = null;
+
+        r16 = null;
+
+        if r2 == null goto label1;
+
+        $r8 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>("com.sun.security.sasl.ntlm.domain");
+
+        r15 = (java.lang.String) $r8;
+
+        $r9 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>("com.sun.security.sasl.ntlm.version");
+
+        r14 = (java.lang.String) $r9;
+
+        $r10 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>("com.sun.security.sasl.ntlm.random");
+
+        r16 = (java.util.Random) $r10;
+
+     label1:
+        if r16 == null goto label2;
+
+        $r17 = r16;
+
+        goto label3;
+
+     label2:
+        $r17 = new java.util.Random;
+
+        specialinvoke $r17.<java.util.Random: void <init>()>();
+
+     label3:
+        r0.<com.sun.security.sasl.ntlm.NTLMServer: java.util.Random random> = $r17;
+
+        if r14 != null goto label4;
+
+        r14 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("ntlm.version");
+
+     label4:
+        if r15 != null goto label5;
+
+        r15 = r7;
+
+     label5:
+        if r15 != null goto label6;
+
+        $r6 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r6.<javax.security.sasl.SaslException: void <init>(java.lang.String)>("Domain must be provided as the serverName argument or in props");
+
+        throw $r6;
+
+     label6:
+        $r3 = new com.sun.security.sasl.ntlm.NTLMServer$1;
+
+        specialinvoke $r3.<com.sun.security.sasl.ntlm.NTLMServer$1: void <init>(com.sun.security.sasl.ntlm.NTLMServer,java.lang.String,java.lang.String,javax.security.auth.callback.CallbackHandler)>(r0, r14, r15, r4);
+
+        r0.<com.sun.security.sasl.ntlm.NTLMServer: com.sun.security.ntlm.Server server> = $r3;
+
+     label7:
+        goto label9;
+
+     label8:
+        $r11 := @caughtexception;
+
+        $r12 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r12.<javax.security.sasl.SaslException: void <init>(java.lang.String,java.lang.Throwable)>("NTLM: server creation failure", $r11);
+
+        throw $r12;
+
+     label9:
+        $r5 = newarray (byte)[8];
+
+        r0.<com.sun.security.sasl.ntlm.NTLMServer: byte[] nonce> = $r5;
+
+        return;
+
+        catch com.sun.security.ntlm.NTLMException from label6 to label7 with label8;
+    }
+
+    public java.lang.String getMechanismName()
+    {
+        java.lang.String $r1;
+        com.sun.security.sasl.ntlm.NTLMServer r0;
+
+        r0 := @this: com.sun.security.sasl.ntlm.NTLMServer;
+
+        $r1 = r0.<com.sun.security.sasl.ntlm.NTLMServer: java.lang.String mech>;
+
+        return $r1;
+    }
+
+    public byte[] evaluateResponse(byte[]) throws javax.security.sasl.SaslException
+    {
+        byte[] r1, $r2, $r8, $r10, $r12;
+        java.lang.String[] $r4;
+        java.util.Random $r9;
+        javax.security.sasl.SaslException $r14;
+        com.sun.security.ntlm.NTLMException $r13;
+        int $i0, $i1, $i2;
+        java.lang.String $r5, $r6, $r7;
+        com.sun.security.ntlm.Server $r3, $r11;
+        com.sun.security.sasl.ntlm.NTLMServer r0;
+
+        r0 := @this: com.sun.security.sasl.ntlm.NTLMServer;
+
+        r1 := @parameter0: byte[];
+
+     label1:
+        $i0 = r0.<com.sun.security.sasl.ntlm.NTLMServer: int step>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.sun.security.sasl.ntlm.NTLMServer: int step> = $i1;
+
+        $i2 = r0.<com.sun.security.sasl.ntlm.NTLMServer: int step>;
+
+        if $i2 != 1 goto label3;
+
+        $r9 = r0.<com.sun.security.sasl.ntlm.NTLMServer: java.util.Random random>;
+
+        $r8 = r0.<com.sun.security.sasl.ntlm.NTLMServer: byte[] nonce>;
+
+        virtualinvoke $r9.<java.util.Random: void nextBytes(byte[])>($r8);
+
+        $r11 = r0.<com.sun.security.sasl.ntlm.NTLMServer: com.sun.security.ntlm.Server server>;
+
+        $r10 = r0.<com.sun.security.sasl.ntlm.NTLMServer: byte[] nonce>;
+
+        $r12 = virtualinvoke $r11.<com.sun.security.ntlm.Server: byte[] type2(byte[],byte[])>(r1, $r10);
+
+     label2:
+        return $r12;
+
+     label3:
+        $r3 = r0.<com.sun.security.sasl.ntlm.NTLMServer: com.sun.security.ntlm.Server server>;
+
+        $r2 = r0.<com.sun.security.sasl.ntlm.NTLMServer: byte[] nonce>;
+
+        $r4 = virtualinvoke $r3.<com.sun.security.ntlm.Server: java.lang.String[] verify(byte[],byte[])>(r1, $r2);
+
+        $r5 = $r4[0];
+
+        r0.<com.sun.security.sasl.ntlm.NTLMServer: java.lang.String authzId> = $r5;
+
+        $r6 = $r4[1];
+
+        r0.<com.sun.security.sasl.ntlm.NTLMServer: java.lang.String hostname> = $r6;
+
+        $r7 = $r4[2];
+
+        r0.<com.sun.security.sasl.ntlm.NTLMServer: java.lang.String target> = $r7;
+
+     label4:
+        return null;
+
+     label5:
+        $r13 := @caughtexception;
+
+        $r14 = new javax.security.sasl.SaslException;
+
+        specialinvoke $r14.<javax.security.sasl.SaslException: void <init>(java.lang.String,java.lang.Throwable)>("NTLM: generate response failure", $r13);
+
+        throw $r14;
+
+        catch com.sun.security.ntlm.NTLMException from label1 to label2 with label5;
+        catch com.sun.security.ntlm.NTLMException from label3 to label4 with label5;
+    }
+
+    public boolean isComplete()
+    {
+        int $i0;
+        com.sun.security.sasl.ntlm.NTLMServer r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.security.sasl.ntlm.NTLMServer;
+
+        $i0 = r0.<com.sun.security.sasl.ntlm.NTLMServer: int step>;
+
+        if $i0 < 2 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public java.lang.String getAuthorizationID()
+    {
+        java.lang.IllegalStateException $r2;
+        java.lang.String $r1;
+        com.sun.security.sasl.ntlm.NTLMServer r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.security.sasl.ntlm.NTLMServer;
+
+        $z0 = virtualinvoke r0.<com.sun.security.sasl.ntlm.NTLMServer: boolean isComplete()>();
+
+        if $z0 != 0 goto label1;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("authentication not complete");
+
+        throw $r2;
+
+     label1:
+        $r1 = r0.<com.sun.security.sasl.ntlm.NTLMServer: java.lang.String authzId>;
+
+        return $r1;
+    }
+
+    public byte[] unwrap(byte[], int, int) throws javax.security.sasl.SaslException
+    {
+        java.lang.IllegalStateException $r0;
+        byte[] r2;
+        int i0, i1;
+        com.sun.security.sasl.ntlm.NTLMServer r1;
+
+        r1 := @this: com.sun.security.sasl.ntlm.NTLMServer;
+
+        r2 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r0 = new java.lang.IllegalStateException;
+
+        specialinvoke $r0.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Not supported yet.");
+
+        throw $r0;
+    }
+
+    public byte[] wrap(byte[], int, int) throws javax.security.sasl.SaslException
+    {
+        java.lang.IllegalStateException $r0;
+        byte[] r2;
+        int i0, i1;
+        com.sun.security.sasl.ntlm.NTLMServer r1;
+
+        r1 := @this: com.sun.security.sasl.ntlm.NTLMServer;
+
+        r2 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r0 = new java.lang.IllegalStateException;
+
+        specialinvoke $r0.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Not supported yet.");
+
+        throw $r0;
+    }
+
+    public java.lang.Object getNegotiatedProperty(java.lang.String)
+    {
+        java.lang.IllegalStateException $r4;
+        byte b1;
+        int $i0;
+        java.lang.String r1, $r2, $r3;
+        com.sun.security.sasl.ntlm.NTLMServer r0;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: com.sun.security.sasl.ntlm.NTLMServer;
+
+        r1 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r0.<com.sun.security.sasl.ntlm.NTLMServer: boolean isComplete()>();
+
+        if $z0 != 0 goto label1;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("authentication not complete");
+
+        throw $r4;
+
+     label1:
+        b1 = -1;
+
+        $i0 = virtualinvoke r1.<java.lang.String: int hashCode()>();
+
+        lookupswitch($i0)
+        {
+            case -1548608927: goto label2;
+            case 183461877: goto label3;
+            case 1060567122: goto label4;
+            default: goto label5;
+        };
+
+     label2:
+        $z3 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("javax.security.sasl.qop");
+
+        if $z3 == 0 goto label5;
+
+        b1 = 0;
+
+        goto label5;
+
+     label3:
+        $z2 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("javax.security.sasl.bound.server.name");
+
+        if $z2 == 0 goto label5;
+
+        b1 = 1;
+
+        goto label5;
+
+     label4:
+        $z1 = virtualinvoke r1.<java.lang.String: boolean equals(java.lang.Object)>("com.sun.security.sasl.ntlm.hostname");
+
+        if $z1 == 0 goto label5;
+
+        b1 = 2;
+
+     label5:
+        tableswitch(b1)
+        {
+            case 0: goto label6;
+            case 1: goto label7;
+            case 2: goto label8;
+            default: goto label9;
+        };
+
+     label6:
+        return "auth";
+
+     label7:
+        $r3 = r0.<com.sun.security.sasl.ntlm.NTLMServer: java.lang.String target>;
+
+        return $r3;
+
+     label8:
+        $r2 = r0.<com.sun.security.sasl.ntlm.NTLMServer: java.lang.String hostname>;
+
+        return $r2;
+
+     label9:
+        return null;
+    }
+
+    public void dispose() throws javax.security.sasl.SaslException
+    {
+        com.sun.security.sasl.ntlm.NTLMServer r0;
+
+        r0 := @this: com.sun.security.sasl.ntlm.NTLMServer;
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.security.sasl.ntlm.NTLMServer: java.lang.String NTLM_RANDOM> = "com.sun.security.sasl.ntlm.random";
+
+        <com.sun.security.sasl.ntlm.NTLMServer: java.lang.String NTLM_HOSTNAME> = "com.sun.security.sasl.ntlm.hostname";
+
+        <com.sun.security.sasl.ntlm.NTLMServer: java.lang.String NTLM_DOMAIN> = "com.sun.security.sasl.ntlm.domain";
+
+        <com.sun.security.sasl.ntlm.NTLMServer: java.lang.String NTLM_VERSION> = "com.sun.security.sasl.ntlm.version";
+
+        return;
+    }
+}

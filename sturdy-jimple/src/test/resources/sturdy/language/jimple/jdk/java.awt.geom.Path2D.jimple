@@ -1,0 +1,1716 @@
+public abstract class java.awt.geom.Path2D extends java.lang.Object implements java.awt.Shape, java.lang.Cloneable
+{
+    public static final int WIND_EVEN_ODD;
+    public static final int WIND_NON_ZERO;
+    private static final byte SEG_MOVETO;
+    private static final byte SEG_LINETO;
+    private static final byte SEG_QUADTO;
+    private static final byte SEG_CUBICTO;
+    private static final byte SEG_CLOSE;
+    transient byte[] pointTypes;
+    transient int numTypes;
+    transient int numCoords;
+    transient int windingRule;
+    static final int INIT_SIZE;
+    static final int EXPAND_MAX;
+    static final int EXPAND_MAX_COORDS;
+    static final int EXPAND_MIN;
+    private static final byte SERIAL_STORAGE_FLT_ARRAY;
+    private static final byte SERIAL_STORAGE_DBL_ARRAY;
+    private static final byte SERIAL_SEG_FLT_MOVETO;
+    private static final byte SERIAL_SEG_FLT_LINETO;
+    private static final byte SERIAL_SEG_FLT_QUADTO;
+    private static final byte SERIAL_SEG_FLT_CUBICTO;
+    private static final byte SERIAL_SEG_DBL_MOVETO;
+    private static final byte SERIAL_SEG_DBL_LINETO;
+    private static final byte SERIAL_SEG_DBL_QUADTO;
+    private static final byte SERIAL_SEG_DBL_CUBICTO;
+    private static final byte SERIAL_SEG_CLOSE;
+    private static final byte SERIAL_PATH_END;
+    static final boolean $assertionsDisabled;
+
+    void <init>()
+    {
+        java.awt.geom.Path2D r0;
+
+        r0 := @this: java.awt.geom.Path2D;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    void <init>(int, int)
+    {
+        byte[] $r1;
+        int i0, i1;
+        java.awt.geom.Path2D r0;
+
+        r0 := @this: java.awt.geom.Path2D;
+
+        i0 := @parameter0: int;
+
+        i1 := @parameter1: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        virtualinvoke r0.<java.awt.geom.Path2D: void setWindingRule(int)>(i0);
+
+        $r1 = newarray (byte)[i1];
+
+        r0.<java.awt.geom.Path2D: byte[] pointTypes> = $r1;
+
+        return;
+    }
+
+    abstract float[] cloneCoordsFloat(java.awt.geom.AffineTransform);
+
+    abstract double[] cloneCoordsDouble(java.awt.geom.AffineTransform);
+
+    abstract void append(float, float);
+
+    abstract void append(double, double);
+
+    abstract java.awt.geom.Point2D getPoint(int);
+
+    abstract void needRoom(boolean, int);
+
+    abstract int pointCrossings(double, double);
+
+    abstract int rectCrossings(double, double, double, double);
+
+    static byte[] expandPointTypes(byte[], int)
+    {
+        byte[] r0, $r4;
+        java.lang.AssertionError $r1;
+        java.lang.ArrayIndexOutOfBoundsException $r2;
+        int i0, i1, i2, $i3, $i4, $i5, $i6, i7, i8;
+        java.lang.OutOfMemoryError $r3;
+        boolean $z0;
+
+        r0 := @parameter0: byte[];
+
+        i1 := @parameter1: int;
+
+        i0 = lengthof r0;
+
+        i2 = i0 + i1;
+
+        if i2 >= i0 goto label1;
+
+        $r2 = new java.lang.ArrayIndexOutOfBoundsException;
+
+        specialinvoke $r2.<java.lang.ArrayIndexOutOfBoundsException: void <init>(java.lang.String)>("pointTypes exceeds maximum capacity !");
+
+        throw $r2;
+
+     label1:
+        i7 = i0;
+
+        if i0 <= 500 goto label2;
+
+        $i4 = i0 >> 3;
+
+        i7 = staticinvoke <java.lang.Math: int max(int,int)>(500, $i4);
+
+        goto label3;
+
+     label2:
+        if i0 >= 10 goto label3;
+
+        i7 = 10;
+
+     label3:
+        $z0 = <java.awt.geom.Path2D: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label4;
+
+        if i7 > 0 goto label4;
+
+        $r1 = new java.lang.AssertionError;
+
+        specialinvoke $r1.<java.lang.AssertionError: void <init>()>();
+
+        throw $r1;
+
+     label4:
+        $i3 = i0 + i7;
+
+        i8 = $i3;
+
+        if $i3 >= i2 goto label5;
+
+        i8 = 2147483647;
+
+     label5:
+        $r4 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>(r0, i8);
+
+     label6:
+        return $r4;
+
+     label7:
+        $r3 := @caughtexception;
+
+        if i8 != i2 goto label8;
+
+        throw $r3;
+
+     label8:
+        $i5 = i8 - i2;
+
+        $i6 = $i5 / 2;
+
+        i8 = i2 + $i6;
+
+        goto label5;
+
+        catch java.lang.OutOfMemoryError from label5 to label6 with label7;
+    }
+
+    public abstract void moveTo(double, double);
+
+    public abstract void lineTo(double, double);
+
+    public abstract void quadTo(double, double, double, double);
+
+    public abstract void curveTo(double, double, double, double, double, double);
+
+    public final synchronized void closePath()
+    {
+        byte[] $r1, $r2;
+        java.awt.geom.Path2D r0;
+        byte $b5;
+        int $i0, $i1, $i2, $i3, $i4, $i6;
+
+        r0 := @this: java.awt.geom.Path2D;
+
+        $i0 = r0.<java.awt.geom.Path2D: int numTypes>;
+
+        if $i0 == 0 goto label1;
+
+        $r2 = r0.<java.awt.geom.Path2D: byte[] pointTypes>;
+
+        $i3 = r0.<java.awt.geom.Path2D: int numTypes>;
+
+        $i4 = $i3 - 1;
+
+        $b5 = $r2[$i4];
+
+        $i6 = (int) $b5;
+
+        if $i6 == 4 goto label2;
+
+     label1:
+        virtualinvoke r0.<java.awt.geom.Path2D: void needRoom(boolean,int)>(1, 0);
+
+        $r1 = r0.<java.awt.geom.Path2D: byte[] pointTypes>;
+
+        $i1 = r0.<java.awt.geom.Path2D: int numTypes>;
+
+        $i2 = $i1 + 1;
+
+        r0.<java.awt.geom.Path2D: int numTypes> = $i2;
+
+        $r1[$i1] = 4;
+
+     label2:
+        return;
+    }
+
+    public final void append(java.awt.Shape, boolean)
+    {
+        java.awt.Shape r1;
+        java.awt.geom.Path2D r0;
+        java.awt.geom.PathIterator $r2;
+        boolean z0;
+
+        r0 := @this: java.awt.geom.Path2D;
+
+        r1 := @parameter0: java.awt.Shape;
+
+        z0 := @parameter1: boolean;
+
+        $r2 = interfaceinvoke r1.<java.awt.Shape: java.awt.geom.PathIterator getPathIterator(java.awt.geom.AffineTransform)>(null);
+
+        virtualinvoke r0.<java.awt.geom.Path2D: void append(java.awt.geom.PathIterator,boolean)>($r2, z0);
+
+        return;
+    }
+
+    public abstract void append(java.awt.geom.PathIterator, boolean);
+
+    public final synchronized int getWindingRule()
+    {
+        int $i0;
+        java.awt.geom.Path2D r0;
+
+        r0 := @this: java.awt.geom.Path2D;
+
+        $i0 = r0.<java.awt.geom.Path2D: int windingRule>;
+
+        return $i0;
+    }
+
+    public final void setWindingRule(int)
+    {
+        int i0;
+        java.lang.IllegalArgumentException $r1;
+        java.awt.geom.Path2D r0;
+
+        r0 := @this: java.awt.geom.Path2D;
+
+        i0 := @parameter0: int;
+
+        if i0 == 0 goto label1;
+
+        if i0 == 1 goto label1;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("winding rule must be WIND_EVEN_ODD or WIND_NON_ZERO");
+
+        throw $r1;
+
+     label1:
+        r0.<java.awt.geom.Path2D: int windingRule> = i0;
+
+        return;
+    }
+
+    public final synchronized java.awt.geom.Point2D getCurrentPoint()
+    {
+        byte[] $r1, $r2;
+        java.awt.geom.Point2D $r3;
+        byte $b3, $b5;
+        int $i0, $i1, $i2, $i4, i6, i7, $i8, $i9, $i10, $i12, $i14, $i16, $i18;
+        java.awt.geom.Path2D r0;
+
+        r0 := @this: java.awt.geom.Path2D;
+
+        i6 = r0.<java.awt.geom.Path2D: int numCoords>;
+
+        $i0 = r0.<java.awt.geom.Path2D: int numTypes>;
+
+        if $i0 < 1 goto label1;
+
+        if i6 >= 1 goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r1 = r0.<java.awt.geom.Path2D: byte[] pointTypes>;
+
+        $i1 = r0.<java.awt.geom.Path2D: int numTypes>;
+
+        $i2 = $i1 - 1;
+
+        $b3 = $r1[$i2];
+
+        $i9 = (int) $b3;
+
+        if $i9 != 4 goto label9;
+
+        $i4 = r0.<java.awt.geom.Path2D: int numTypes>;
+
+        i7 = $i4 - 2;
+
+     label3:
+        if i7 <= 0 goto label9;
+
+        $r2 = r0.<java.awt.geom.Path2D: byte[] pointTypes>;
+
+        $b5 = $r2[i7];
+
+        $i10 = (int) $b5;
+
+        tableswitch($i10)
+        {
+            case 0: goto label4;
+            case 1: goto label5;
+            case 2: goto label6;
+            case 3: goto label7;
+            case 4: goto label8;
+            default: goto label8;
+        };
+
+     label4:
+        goto label9;
+
+     label5:
+        $i12 = (int) -2;
+
+        i6 = i6 + $i12;
+
+        goto label8;
+
+     label6:
+        $i14 = (int) -4;
+
+        i6 = i6 + $i14;
+
+        goto label8;
+
+     label7:
+        $i16 = (int) -6;
+
+        i6 = i6 + $i16;
+
+        goto label8;
+
+     label8:
+        $i18 = (int) -1;
+
+        i7 = i7 + $i18;
+
+        goto label3;
+
+     label9:
+        $i8 = i6 - 2;
+
+        $r3 = virtualinvoke r0.<java.awt.geom.Path2D: java.awt.geom.Point2D getPoint(int)>($i8);
+
+        return $r3;
+    }
+
+    public final synchronized void reset()
+    {
+        java.awt.geom.Path2D r0;
+
+        r0 := @this: java.awt.geom.Path2D;
+
+        r0.<java.awt.geom.Path2D: int numCoords> = 0;
+
+        r0.<java.awt.geom.Path2D: int numTypes> = 0;
+
+        return;
+    }
+
+    public abstract void transform(java.awt.geom.AffineTransform);
+
+    public final synchronized java.awt.Shape createTransformedShape(java.awt.geom.AffineTransform)
+    {
+        java.lang.Object $r1;
+        java.awt.geom.AffineTransform r3;
+        java.awt.geom.Path2D r0, r2;
+
+        r0 := @this: java.awt.geom.Path2D;
+
+        r3 := @parameter0: java.awt.geom.AffineTransform;
+
+        $r1 = virtualinvoke r0.<java.awt.geom.Path2D: java.lang.Object clone()>();
+
+        r2 = (java.awt.geom.Path2D) $r1;
+
+        if r3 == null goto label1;
+
+        virtualinvoke r2.<java.awt.geom.Path2D: void transform(java.awt.geom.AffineTransform)>(r3);
+
+     label1:
+        return r2;
+    }
+
+    public final java.awt.Rectangle getBounds()
+    {
+        java.awt.Rectangle $r2;
+        java.awt.geom.Path2D r0;
+        java.awt.geom.Rectangle2D $r1;
+
+        r0 := @this: java.awt.geom.Path2D;
+
+        $r1 = virtualinvoke r0.<java.awt.geom.Path2D: java.awt.geom.Rectangle2D getBounds2D()>();
+
+        $r2 = virtualinvoke $r1.<java.awt.geom.Rectangle2D: java.awt.Rectangle getBounds()>();
+
+        return $r2;
+    }
+
+    public static boolean contains(java.awt.geom.PathIterator, double, double)
+    {
+        java.awt.geom.PathIterator r0;
+        byte $b0, $b4;
+        int $i1, $i2, $i3;
+        double d0, d1, $d2, $d3, $d4;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.geom.PathIterator;
+
+        d0 := @parameter1: double;
+
+        d1 := @parameter2: double;
+
+        $d3 = d0 * 0.0;
+
+        $d2 = d1 * 0.0;
+
+        $d4 = $d3 + $d2;
+
+        $b0 = $d4 cmpl 0.0;
+
+        if $b0 != 0 goto label5;
+
+        $i1 = interfaceinvoke r0.<java.awt.geom.PathIterator: int getWindingRule()>();
+
+        if $i1 != 1 goto label1;
+
+        $b4 = -1;
+
+        goto label2;
+
+     label1:
+        $b4 = 1;
+
+     label2:
+        $i2 = staticinvoke <sun.awt.geom.Curve: int pointCrossingsForPath(java.awt.geom.PathIterator,double,double)>(r0, d0, d1);
+
+        $i3 = $i2 & $b4;
+
+        if $i3 == 0 goto label3;
+
+        $z0 = 1;
+
+        goto label4;
+
+     label3:
+        $z0 = 0;
+
+     label4:
+        return $z0;
+
+     label5:
+        return 0;
+    }
+
+    public static boolean contains(java.awt.geom.PathIterator, java.awt.geom.Point2D)
+    {
+        java.awt.geom.Point2D r1;
+        java.awt.geom.PathIterator r0;
+        double $d0, $d1;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.geom.PathIterator;
+
+        r1 := @parameter1: java.awt.geom.Point2D;
+
+        $d0 = virtualinvoke r1.<java.awt.geom.Point2D: double getX()>();
+
+        $d1 = virtualinvoke r1.<java.awt.geom.Point2D: double getY()>();
+
+        $z0 = staticinvoke <java.awt.geom.Path2D: boolean contains(java.awt.geom.PathIterator,double,double)>(r0, $d0, $d1);
+
+        return $z0;
+    }
+
+    public final boolean contains(double, double)
+    {
+        java.awt.geom.Path2D r0;
+        byte $b0, $b5;
+        int $i1, $i2, $i3, $i4;
+        double d0, d1, $d2, $d3, $d4;
+        boolean $z0;
+
+        r0 := @this: java.awt.geom.Path2D;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        $d3 = d0 * 0.0;
+
+        $d2 = d1 * 0.0;
+
+        $d4 = $d3 + $d2;
+
+        $b0 = $d4 cmpl 0.0;
+
+        if $b0 != 0 goto label6;
+
+        $i1 = r0.<java.awt.geom.Path2D: int numTypes>;
+
+        if $i1 >= 2 goto label1;
+
+        return 0;
+
+     label1:
+        $i2 = r0.<java.awt.geom.Path2D: int windingRule>;
+
+        if $i2 != 1 goto label2;
+
+        $b5 = -1;
+
+        goto label3;
+
+     label2:
+        $b5 = 1;
+
+     label3:
+        $i3 = virtualinvoke r0.<java.awt.geom.Path2D: int pointCrossings(double,double)>(d0, d1);
+
+        $i4 = $i3 & $b5;
+
+        if $i4 == 0 goto label4;
+
+        $z0 = 1;
+
+        goto label5;
+
+     label4:
+        $z0 = 0;
+
+     label5:
+        return $z0;
+
+     label6:
+        return 0;
+    }
+
+    public final boolean contains(java.awt.geom.Point2D)
+    {
+        java.awt.geom.Point2D r1;
+        java.awt.geom.Path2D r0;
+        double $d0, $d1;
+        boolean $z0;
+
+        r0 := @this: java.awt.geom.Path2D;
+
+        r1 := @parameter0: java.awt.geom.Point2D;
+
+        $d0 = virtualinvoke r1.<java.awt.geom.Point2D: double getX()>();
+
+        $d1 = virtualinvoke r1.<java.awt.geom.Point2D: double getY()>();
+
+        $z0 = virtualinvoke r0.<java.awt.geom.Path2D: boolean contains(double,double)>($d0, $d1);
+
+        return $z0;
+    }
+
+    public static boolean contains(java.awt.geom.PathIterator, double, double, double, double)
+    {
+        java.awt.geom.PathIterator r0;
+        byte $b0, $b1, $b5;
+        int $i2, $i3, $i4, $i6, $i7;
+        double d0, d1, $d2, d3, d4, $d5, $d6, $d7;
+        boolean $z0, $z1, $z2;
+
+        r0 := @parameter0: java.awt.geom.PathIterator;
+
+        d0 := @parameter1: double;
+
+        d3 := @parameter2: double;
+
+        d1 := @parameter3: double;
+
+        d4 := @parameter4: double;
+
+        $d2 = d0 + d1;
+
+        $z0 = staticinvoke <java.lang.Double: boolean isNaN(double)>($d2);
+
+        if $z0 != 0 goto label1;
+
+        $d5 = d3 + d4;
+
+        $z1 = staticinvoke <java.lang.Double: boolean isNaN(double)>($d5);
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $b0 = d1 cmpg 0.0;
+
+        $i6 = (int) $b0;
+
+        if $i6 <= 0 goto label3;
+
+        $b1 = d4 cmpg 0.0;
+
+        $i7 = (int) $b1;
+
+        if $i7 > 0 goto label4;
+
+     label3:
+        return 0;
+
+     label4:
+        $i2 = interfaceinvoke r0.<java.awt.geom.PathIterator: int getWindingRule()>();
+
+        if $i2 != 1 goto label5;
+
+        $b5 = -1;
+
+        goto label6;
+
+     label5:
+        $b5 = 2;
+
+     label6:
+        $d7 = d0 + d1;
+
+        $d6 = d3 + d4;
+
+        $i3 = staticinvoke <sun.awt.geom.Curve: int rectCrossingsForPath(java.awt.geom.PathIterator,double,double,double,double)>(r0, d0, d3, $d7, $d6);
+
+        if $i3 == -2147483648 goto label7;
+
+        $i4 = $i3 & $b5;
+
+        if $i4 == 0 goto label7;
+
+        $z2 = 1;
+
+        goto label8;
+
+     label7:
+        $z2 = 0;
+
+     label8:
+        return $z2;
+    }
+
+    public static boolean contains(java.awt.geom.PathIterator, java.awt.geom.Rectangle2D)
+    {
+        java.awt.geom.Rectangle2D r1;
+        java.awt.geom.PathIterator r0;
+        double $d0, $d1, $d2, $d3;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.geom.PathIterator;
+
+        r1 := @parameter1: java.awt.geom.Rectangle2D;
+
+        $d0 = virtualinvoke r1.<java.awt.geom.Rectangle2D: double getX()>();
+
+        $d1 = virtualinvoke r1.<java.awt.geom.Rectangle2D: double getY()>();
+
+        $d2 = virtualinvoke r1.<java.awt.geom.Rectangle2D: double getWidth()>();
+
+        $d3 = virtualinvoke r1.<java.awt.geom.Rectangle2D: double getHeight()>();
+
+        $z0 = staticinvoke <java.awt.geom.Path2D: boolean contains(java.awt.geom.PathIterator,double,double,double,double)>(r0, $d0, $d1, $d2, $d3);
+
+        return $z0;
+    }
+
+    public final boolean contains(double, double, double, double)
+    {
+        byte $b0, $b1, $b5;
+        int $i2, $i3, $i4, $i6, $i7;
+        double d0, d1, $d2, d3, d4, $d5, $d6, $d7;
+        boolean $z0, $z1, $z2;
+        java.awt.geom.Path2D r0;
+
+        r0 := @this: java.awt.geom.Path2D;
+
+        d0 := @parameter0: double;
+
+        d3 := @parameter1: double;
+
+        d1 := @parameter2: double;
+
+        d4 := @parameter3: double;
+
+        $d2 = d0 + d1;
+
+        $z0 = staticinvoke <java.lang.Double: boolean isNaN(double)>($d2);
+
+        if $z0 != 0 goto label1;
+
+        $d5 = d3 + d4;
+
+        $z1 = staticinvoke <java.lang.Double: boolean isNaN(double)>($d5);
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $b0 = d1 cmpg 0.0;
+
+        $i6 = (int) $b0;
+
+        if $i6 <= 0 goto label3;
+
+        $b1 = d4 cmpg 0.0;
+
+        $i7 = (int) $b1;
+
+        if $i7 > 0 goto label4;
+
+     label3:
+        return 0;
+
+     label4:
+        $i2 = r0.<java.awt.geom.Path2D: int windingRule>;
+
+        if $i2 != 1 goto label5;
+
+        $b5 = -1;
+
+        goto label6;
+
+     label5:
+        $b5 = 2;
+
+     label6:
+        $d7 = d0 + d1;
+
+        $d6 = d3 + d4;
+
+        $i3 = virtualinvoke r0.<java.awt.geom.Path2D: int rectCrossings(double,double,double,double)>(d0, d3, $d7, $d6);
+
+        if $i3 == -2147483648 goto label7;
+
+        $i4 = $i3 & $b5;
+
+        if $i4 == 0 goto label7;
+
+        $z2 = 1;
+
+        goto label8;
+
+     label7:
+        $z2 = 0;
+
+     label8:
+        return $z2;
+    }
+
+    public final boolean contains(java.awt.geom.Rectangle2D)
+    {
+        java.awt.geom.Rectangle2D r1;
+        java.awt.geom.Path2D r0;
+        double $d0, $d1, $d2, $d3;
+        boolean $z0;
+
+        r0 := @this: java.awt.geom.Path2D;
+
+        r1 := @parameter0: java.awt.geom.Rectangle2D;
+
+        $d0 = virtualinvoke r1.<java.awt.geom.Rectangle2D: double getX()>();
+
+        $d1 = virtualinvoke r1.<java.awt.geom.Rectangle2D: double getY()>();
+
+        $d2 = virtualinvoke r1.<java.awt.geom.Rectangle2D: double getWidth()>();
+
+        $d3 = virtualinvoke r1.<java.awt.geom.Rectangle2D: double getHeight()>();
+
+        $z0 = virtualinvoke r0.<java.awt.geom.Path2D: boolean contains(double,double,double,double)>($d0, $d1, $d2, $d3);
+
+        return $z0;
+    }
+
+    public static boolean intersects(java.awt.geom.PathIterator, double, double, double, double)
+    {
+        java.awt.geom.PathIterator r0;
+        byte $b0, $b1, $b5;
+        int $i2, $i3, $i4, $i6, $i7;
+        double d0, d1, $d2, d3, d4, $d5, $d6, $d7;
+        boolean $z0, $z1, $z2;
+
+        r0 := @parameter0: java.awt.geom.PathIterator;
+
+        d0 := @parameter1: double;
+
+        d3 := @parameter2: double;
+
+        d1 := @parameter3: double;
+
+        d4 := @parameter4: double;
+
+        $d2 = d0 + d1;
+
+        $z0 = staticinvoke <java.lang.Double: boolean isNaN(double)>($d2);
+
+        if $z0 != 0 goto label1;
+
+        $d5 = d3 + d4;
+
+        $z1 = staticinvoke <java.lang.Double: boolean isNaN(double)>($d5);
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $b0 = d1 cmpg 0.0;
+
+        $i6 = (int) $b0;
+
+        if $i6 <= 0 goto label3;
+
+        $b1 = d4 cmpg 0.0;
+
+        $i7 = (int) $b1;
+
+        if $i7 > 0 goto label4;
+
+     label3:
+        return 0;
+
+     label4:
+        $i2 = interfaceinvoke r0.<java.awt.geom.PathIterator: int getWindingRule()>();
+
+        if $i2 != 1 goto label5;
+
+        $b5 = -1;
+
+        goto label6;
+
+     label5:
+        $b5 = 2;
+
+     label6:
+        $d7 = d0 + d1;
+
+        $d6 = d3 + d4;
+
+        $i3 = staticinvoke <sun.awt.geom.Curve: int rectCrossingsForPath(java.awt.geom.PathIterator,double,double,double,double)>(r0, d0, d3, $d7, $d6);
+
+        if $i3 == -2147483648 goto label7;
+
+        $i4 = $i3 & $b5;
+
+        if $i4 == 0 goto label8;
+
+     label7:
+        $z2 = 1;
+
+        goto label9;
+
+     label8:
+        $z2 = 0;
+
+     label9:
+        return $z2;
+    }
+
+    public static boolean intersects(java.awt.geom.PathIterator, java.awt.geom.Rectangle2D)
+    {
+        java.awt.geom.Rectangle2D r1;
+        java.awt.geom.PathIterator r0;
+        double $d0, $d1, $d2, $d3;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.geom.PathIterator;
+
+        r1 := @parameter1: java.awt.geom.Rectangle2D;
+
+        $d0 = virtualinvoke r1.<java.awt.geom.Rectangle2D: double getX()>();
+
+        $d1 = virtualinvoke r1.<java.awt.geom.Rectangle2D: double getY()>();
+
+        $d2 = virtualinvoke r1.<java.awt.geom.Rectangle2D: double getWidth()>();
+
+        $d3 = virtualinvoke r1.<java.awt.geom.Rectangle2D: double getHeight()>();
+
+        $z0 = staticinvoke <java.awt.geom.Path2D: boolean intersects(java.awt.geom.PathIterator,double,double,double,double)>(r0, $d0, $d1, $d2, $d3);
+
+        return $z0;
+    }
+
+    public final boolean intersects(double, double, double, double)
+    {
+        byte $b0, $b1, $b5;
+        int $i2, $i3, $i4, $i6, $i7;
+        double d0, d1, $d2, d3, d4, $d5, $d6, $d7;
+        boolean $z0, $z1, $z2;
+        java.awt.geom.Path2D r0;
+
+        r0 := @this: java.awt.geom.Path2D;
+
+        d0 := @parameter0: double;
+
+        d3 := @parameter1: double;
+
+        d1 := @parameter2: double;
+
+        d4 := @parameter3: double;
+
+        $d2 = d0 + d1;
+
+        $z0 = staticinvoke <java.lang.Double: boolean isNaN(double)>($d2);
+
+        if $z0 != 0 goto label1;
+
+        $d5 = d3 + d4;
+
+        $z1 = staticinvoke <java.lang.Double: boolean isNaN(double)>($d5);
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $b0 = d1 cmpg 0.0;
+
+        $i6 = (int) $b0;
+
+        if $i6 <= 0 goto label3;
+
+        $b1 = d4 cmpg 0.0;
+
+        $i7 = (int) $b1;
+
+        if $i7 > 0 goto label4;
+
+     label3:
+        return 0;
+
+     label4:
+        $i2 = r0.<java.awt.geom.Path2D: int windingRule>;
+
+        if $i2 != 1 goto label5;
+
+        $b5 = -1;
+
+        goto label6;
+
+     label5:
+        $b5 = 2;
+
+     label6:
+        $d7 = d0 + d1;
+
+        $d6 = d3 + d4;
+
+        $i3 = virtualinvoke r0.<java.awt.geom.Path2D: int rectCrossings(double,double,double,double)>(d0, d3, $d7, $d6);
+
+        if $i3 == -2147483648 goto label7;
+
+        $i4 = $i3 & $b5;
+
+        if $i4 == 0 goto label8;
+
+     label7:
+        $z2 = 1;
+
+        goto label9;
+
+     label8:
+        $z2 = 0;
+
+     label9:
+        return $z2;
+    }
+
+    public final boolean intersects(java.awt.geom.Rectangle2D)
+    {
+        java.awt.geom.Rectangle2D r1;
+        java.awt.geom.Path2D r0;
+        double $d0, $d1, $d2, $d3;
+        boolean $z0;
+
+        r0 := @this: java.awt.geom.Path2D;
+
+        r1 := @parameter0: java.awt.geom.Rectangle2D;
+
+        $d0 = virtualinvoke r1.<java.awt.geom.Rectangle2D: double getX()>();
+
+        $d1 = virtualinvoke r1.<java.awt.geom.Rectangle2D: double getY()>();
+
+        $d2 = virtualinvoke r1.<java.awt.geom.Rectangle2D: double getWidth()>();
+
+        $d3 = virtualinvoke r1.<java.awt.geom.Rectangle2D: double getHeight()>();
+
+        $z0 = virtualinvoke r0.<java.awt.geom.Path2D: boolean intersects(double,double,double,double)>($d0, $d1, $d2, $d3);
+
+        return $z0;
+    }
+
+    public final java.awt.geom.PathIterator getPathIterator(java.awt.geom.AffineTransform, double)
+    {
+        java.awt.geom.FlatteningPathIterator $r0;
+        java.awt.geom.AffineTransform r2;
+        java.awt.geom.Path2D r1;
+        java.awt.geom.PathIterator $r3;
+        double d0;
+
+        r1 := @this: java.awt.geom.Path2D;
+
+        r2 := @parameter0: java.awt.geom.AffineTransform;
+
+        d0 := @parameter1: double;
+
+        $r0 = new java.awt.geom.FlatteningPathIterator;
+
+        $r3 = virtualinvoke r1.<java.awt.geom.Path2D: java.awt.geom.PathIterator getPathIterator(java.awt.geom.AffineTransform)>(r2);
+
+        specialinvoke $r0.<java.awt.geom.FlatteningPathIterator: void <init>(java.awt.geom.PathIterator,double)>($r3, d0);
+
+        return $r0;
+    }
+
+    public abstract java.lang.Object clone();
+
+    final void writeObject(java.io.ObjectOutputStream, boolean) throws java.io.IOException
+    {
+        byte[] $r3;
+        byte $b2, $b3, $b5, $b9, b10, $b11, $b12, $b13;
+        java.lang.InternalError $r8;
+        boolean z0;
+        java.awt.geom.Path2D$Float $r2;
+        java.awt.geom.Path2D$Double $r5;
+        float $f0, $f1;
+        double[] r6;
+        float[] r7;
+        int $i0, $i1, $i4, i6, i7, i8, i14, i15, $i16, $i17, $i19;
+        java.io.ObjectOutputStream r0;
+        double $d0, $d1;
+        java.awt.geom.Path2D r1;
+
+        r1 := @this: java.awt.geom.Path2D;
+
+        r0 := @parameter0: java.io.ObjectOutputStream;
+
+        z0 := @parameter1: boolean;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void defaultWriteObject()>();
+
+        if z0 == 0 goto label01;
+
+        $r5 = (java.awt.geom.Path2D$Double) r1;
+
+        r6 = $r5.<java.awt.geom.Path2D$Double: double[] doubleCoords>;
+
+        r7 = null;
+
+        goto label02;
+
+     label01:
+        $r2 = (java.awt.geom.Path2D$Float) r1;
+
+        r7 = $r2.<java.awt.geom.Path2D$Float: float[] floatCoords>;
+
+        r6 = null;
+
+     label02:
+        $i4 = r1.<java.awt.geom.Path2D: int numTypes>;
+
+        if z0 == 0 goto label03;
+
+        $b5 = 49;
+
+        goto label04;
+
+     label03:
+        $b5 = 48;
+
+     label04:
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeByte(int)>($b5);
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeInt(int)>($i4);
+
+        $i0 = r1.<java.awt.geom.Path2D: int numCoords>;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeInt(int)>($i0);
+
+        $i1 = r1.<java.awt.geom.Path2D: int windingRule>;
+
+        $b2 = (byte) $i1;
+
+        $i16 = (int) $b2;
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeByte(int)>($i16);
+
+        i6 = 0;
+
+        i7 = 0;
+
+     label05:
+        if i7 >= $i4 goto label24;
+
+        $r3 = r1.<java.awt.geom.Path2D: byte[] pointTypes>;
+
+        $b3 = $r3[i7];
+
+        $i17 = (int) $b3;
+
+        tableswitch($i17)
+        {
+            case 0: goto label06;
+            case 1: goto label09;
+            case 2: goto label12;
+            case 3: goto label15;
+            case 4: goto label18;
+            default: goto label19;
+        };
+
+     label06:
+        i8 = 1;
+
+        if z0 == 0 goto label07;
+
+        $b9 = 80;
+
+        goto label08;
+
+     label07:
+        $b9 = 64;
+
+     label08:
+        b10 = $b9;
+
+        goto label20;
+
+     label09:
+        i8 = 1;
+
+        if z0 == 0 goto label10;
+
+        $b11 = 81;
+
+        goto label11;
+
+     label10:
+        $b11 = 65;
+
+     label11:
+        b10 = $b11;
+
+        goto label20;
+
+     label12:
+        i8 = 2;
+
+        if z0 == 0 goto label13;
+
+        $b12 = 82;
+
+        goto label14;
+
+     label13:
+        $b12 = 66;
+
+     label14:
+        b10 = $b12;
+
+        goto label20;
+
+     label15:
+        i8 = 3;
+
+        if z0 == 0 goto label16;
+
+        $b13 = 83;
+
+        goto label17;
+
+     label16:
+        $b13 = 67;
+
+     label17:
+        b10 = $b13;
+
+        goto label20;
+
+     label18:
+        i8 = 0;
+
+        b10 = 96;
+
+        goto label20;
+
+     label19:
+        $r8 = new java.lang.InternalError;
+
+        specialinvoke $r8.<java.lang.InternalError: void <init>(java.lang.String)>("unrecognized path type");
+
+        throw $r8;
+
+     label20:
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeByte(int)>(b10);
+
+     label21:
+        $i19 = (int) -1;
+
+        i8 = i8 + $i19;
+
+        if i8 < 0 goto label23;
+
+        if z0 == 0 goto label22;
+
+        i14 = i6 + 1;
+
+        $d0 = r6[i6];
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeDouble(double)>($d0);
+
+        i6 = i14 + 1;
+
+        $d1 = r6[i14];
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeDouble(double)>($d1);
+
+        goto label21;
+
+     label22:
+        i15 = i6 + 1;
+
+        $f0 = r7[i6];
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeFloat(float)>($f0);
+
+        i6 = i15 + 1;
+
+        $f1 = r7[i15];
+
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeFloat(float)>($f1);
+
+        goto label21;
+
+     label23:
+        i7 = i7 + 1;
+
+        goto label05;
+
+     label24:
+        virtualinvoke r0.<java.io.ObjectOutputStream: void writeByte(int)>(97);
+
+        return;
+    }
+
+    final void readObject(java.io.ObjectInputStream, boolean) throws java.lang.ClassNotFoundException, java.io.IOException
+    {
+        byte[] $r2, $r7;
+        java.io.ObjectInputStream r0;
+        byte $b2, $b3, $b4, b12, b13, b14;
+        java.io.InvalidObjectException $r14;
+        boolean z0, z1, $z2;
+        java.io.StreamCorruptedException $r15, $r16, $r17;
+        java.awt.geom.Path2D$Float $r4;
+        java.awt.geom.Path2D$Double $r10;
+        float $f0, $f1;
+        double[] $r9;
+        float[] $r3;
+        int $i0, $i1, $i5, $i6, $i7, i8, $i9, i10, i11, $i15, $i16, $i18, $i20, $i21;
+        java.lang.String $r13;
+        double $d0, $d1;
+        java.lang.IllegalArgumentException $r11;
+        java.awt.geom.Path2D r1;
+
+        r1 := @this: java.awt.geom.Path2D;
+
+        r0 := @parameter0: java.io.ObjectInputStream;
+
+        z0 := @parameter1: boolean;
+
+        virtualinvoke r0.<java.io.ObjectInputStream: void defaultReadObject()>();
+
+        virtualinvoke r0.<java.io.ObjectInputStream: byte readByte()>();
+
+        $i0 = virtualinvoke r0.<java.io.ObjectInputStream: int readInt()>();
+
+        $i1 = virtualinvoke r0.<java.io.ObjectInputStream: int readInt()>();
+
+        i8 = $i1;
+
+     label01:
+        $b2 = virtualinvoke r0.<java.io.ObjectInputStream: byte readByte()>();
+
+        $i15 = (int) $b2;
+
+        virtualinvoke r1.<java.awt.geom.Path2D: void setWindingRule(int)>($i15);
+
+     label02:
+        goto label04;
+
+     label03:
+        $r11 := @caughtexception;
+
+        $r14 = new java.io.InvalidObjectException;
+
+        $r13 = virtualinvoke $r11.<java.lang.IllegalArgumentException: java.lang.String getMessage()>();
+
+        specialinvoke $r14.<java.io.InvalidObjectException: void <init>(java.lang.String)>($r13);
+
+        throw $r14;
+
+     label04:
+        if $i0 < 0 goto label05;
+
+        if $i0 <= 20 goto label06;
+
+     label05:
+        $i9 = 20;
+
+        goto label07;
+
+     label06:
+        $i9 = $i0;
+
+     label07:
+        $r2 = newarray (byte)[$i9];
+
+        r1.<java.awt.geom.Path2D: byte[] pointTypes> = $r2;
+
+        if $i1 < 0 goto label08;
+
+        if $i1 <= 40 goto label09;
+
+     label08:
+        i8 = 40;
+
+     label09:
+        if z0 == 0 goto label10;
+
+        $r10 = (java.awt.geom.Path2D$Double) r1;
+
+        $r9 = newarray (double)[i8];
+
+        $r10.<java.awt.geom.Path2D$Double: double[] doubleCoords> = $r9;
+
+        goto label11;
+
+     label10:
+        $r4 = (java.awt.geom.Path2D$Float) r1;
+
+        $r3 = newarray (float)[i8];
+
+        $r4.<java.awt.geom.Path2D$Float: float[] floatCoords> = $r3;
+
+     label11:
+        i10 = 0;
+
+     label12:
+        if $i0 < 0 goto label13;
+
+        if i10 >= $i0 goto label32;
+
+     label13:
+        $b3 = virtualinvoke r0.<java.io.ObjectInputStream: byte readByte()>();
+
+        $i16 = (int) $b3;
+
+        tableswitch($i16)
+        {
+            case 64: goto label14;
+            case 65: goto label15;
+            case 66: goto label16;
+            case 67: goto label17;
+            case 68: goto label25;
+            case 69: goto label25;
+            case 70: goto label25;
+            case 71: goto label25;
+            case 72: goto label25;
+            case 73: goto label25;
+            case 74: goto label25;
+            case 75: goto label25;
+            case 76: goto label25;
+            case 77: goto label25;
+            case 78: goto label25;
+            case 79: goto label25;
+            case 80: goto label18;
+            case 81: goto label19;
+            case 82: goto label20;
+            case 83: goto label21;
+            case 84: goto label25;
+            case 85: goto label25;
+            case 86: goto label25;
+            case 87: goto label25;
+            case 88: goto label25;
+            case 89: goto label25;
+            case 90: goto label25;
+            case 91: goto label25;
+            case 92: goto label25;
+            case 93: goto label25;
+            case 94: goto label25;
+            case 95: goto label25;
+            case 96: goto label22;
+            case 97: goto label23;
+            default: goto label25;
+        };
+
+     label14:
+        z1 = 0;
+
+        i11 = 1;
+
+        b12 = 0;
+
+        b14 = 0;
+
+        b13 = 0;
+
+        goto label26;
+
+     label15:
+        z1 = 0;
+
+        i11 = 1;
+
+        b12 = 1;
+
+        b14 = 1;
+
+        b13 = 1;
+
+        goto label26;
+
+     label16:
+        z1 = 0;
+
+        i11 = 2;
+
+        b12 = 2;
+
+        b14 = 2;
+
+        b13 = 2;
+
+        goto label26;
+
+     label17:
+        z1 = 0;
+
+        i11 = 3;
+
+        b12 = 3;
+
+        b14 = 3;
+
+        b13 = 3;
+
+        goto label26;
+
+     label18:
+        z1 = 1;
+
+        i11 = 1;
+
+        b12 = 0;
+
+        b14 = 0;
+
+        b13 = 0;
+
+        goto label26;
+
+     label19:
+        z1 = 1;
+
+        i11 = 1;
+
+        b12 = 1;
+
+        b14 = 1;
+
+        b13 = 1;
+
+        goto label26;
+
+     label20:
+        z1 = 1;
+
+        i11 = 2;
+
+        b12 = 2;
+
+        b14 = 2;
+
+        b13 = 2;
+
+        goto label26;
+
+     label21:
+        z1 = 1;
+
+        i11 = 3;
+
+        b12 = 3;
+
+        b14 = 3;
+
+        b13 = 3;
+
+        goto label26;
+
+     label22:
+        z1 = 0;
+
+        i11 = 0;
+
+        b12 = 4;
+
+        b14 = 4;
+
+        b13 = 4;
+
+        goto label26;
+
+     label23:
+        if $i0 >= 0 goto label24;
+
+        goto label32;
+
+     label24:
+        $r15 = new java.io.StreamCorruptedException;
+
+        specialinvoke $r15.<java.io.StreamCorruptedException: void <init>(java.lang.String)>("unexpected PATH_END");
+
+        throw $r15;
+
+     label25:
+        $r16 = new java.io.StreamCorruptedException;
+
+        specialinvoke $r16.<java.io.StreamCorruptedException: void <init>(java.lang.String)>("unrecognized path type");
+
+        throw $r16;
+
+     label26:
+        if b13 == 0 goto label27;
+
+        $z2 = 1;
+
+        goto label28;
+
+     label27:
+        $z2 = 0;
+
+     label28:
+        $i5 = i11 * 2;
+
+        virtualinvoke r1.<java.awt.geom.Path2D: void needRoom(boolean,int)>($z2, $i5);
+
+        if z1 == 0 goto label30;
+
+     label29:
+        $i18 = (int) -1;
+
+        i11 = i11 + $i18;
+
+        if i11 < 0 goto label31;
+
+        $d0 = virtualinvoke r0.<java.io.ObjectInputStream: double readDouble()>();
+
+        $d1 = virtualinvoke r0.<java.io.ObjectInputStream: double readDouble()>();
+
+        virtualinvoke r1.<java.awt.geom.Path2D: void append(double,double)>($d0, $d1);
+
+        goto label29;
+
+     label30:
+        $i20 = (int) -1;
+
+        i11 = i11 + $i20;
+
+        if i11 < 0 goto label31;
+
+        $f0 = virtualinvoke r0.<java.io.ObjectInputStream: float readFloat()>();
+
+        $f1 = virtualinvoke r0.<java.io.ObjectInputStream: float readFloat()>();
+
+        virtualinvoke r1.<java.awt.geom.Path2D: void append(float,float)>($f0, $f1);
+
+        goto label30;
+
+     label31:
+        $r7 = r1.<java.awt.geom.Path2D: byte[] pointTypes>;
+
+        $i6 = r1.<java.awt.geom.Path2D: int numTypes>;
+
+        $i7 = $i6 + 1;
+
+        r1.<java.awt.geom.Path2D: int numTypes> = $i7;
+
+        $r7[$i6] = b14;
+
+        i10 = i10 + 1;
+
+        goto label12;
+
+     label32:
+        if $i0 < 0 goto label33;
+
+        $b4 = virtualinvoke r0.<java.io.ObjectInputStream: byte readByte()>();
+
+        $i21 = (int) $b4;
+
+        if $i21 == 97 goto label33;
+
+        $r17 = new java.io.StreamCorruptedException;
+
+        specialinvoke $r17.<java.io.StreamCorruptedException: void <init>(java.lang.String)>("missing PATH_END");
+
+        throw $r17;
+
+     label33:
+        return;
+
+        catch java.lang.IllegalArgumentException from label01 to label02 with label03;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        <java.awt.geom.Path2D: byte SERIAL_PATH_END> = 97;
+
+        <java.awt.geom.Path2D: byte SERIAL_SEG_CLOSE> = 96;
+
+        <java.awt.geom.Path2D: byte SERIAL_SEG_DBL_CUBICTO> = 83;
+
+        <java.awt.geom.Path2D: byte SERIAL_SEG_DBL_QUADTO> = 82;
+
+        <java.awt.geom.Path2D: byte SERIAL_SEG_DBL_LINETO> = 81;
+
+        <java.awt.geom.Path2D: byte SERIAL_SEG_DBL_MOVETO> = 80;
+
+        <java.awt.geom.Path2D: byte SERIAL_SEG_FLT_CUBICTO> = 67;
+
+        <java.awt.geom.Path2D: byte SERIAL_SEG_FLT_QUADTO> = 66;
+
+        <java.awt.geom.Path2D: byte SERIAL_SEG_FLT_LINETO> = 65;
+
+        <java.awt.geom.Path2D: byte SERIAL_SEG_FLT_MOVETO> = 64;
+
+        <java.awt.geom.Path2D: byte SERIAL_STORAGE_DBL_ARRAY> = 49;
+
+        <java.awt.geom.Path2D: byte SERIAL_STORAGE_FLT_ARRAY> = 48;
+
+        <java.awt.geom.Path2D: int EXPAND_MIN> = 10;
+
+        <java.awt.geom.Path2D: int EXPAND_MAX_COORDS> = 1000;
+
+        <java.awt.geom.Path2D: int EXPAND_MAX> = 500;
+
+        <java.awt.geom.Path2D: int INIT_SIZE> = 20;
+
+        <java.awt.geom.Path2D: byte SEG_CLOSE> = 4;
+
+        <java.awt.geom.Path2D: byte SEG_CUBICTO> = 3;
+
+        <java.awt.geom.Path2D: byte SEG_QUADTO> = 2;
+
+        <java.awt.geom.Path2D: byte SEG_LINETO> = 1;
+
+        <java.awt.geom.Path2D: byte SEG_MOVETO> = 0;
+
+        <java.awt.geom.Path2D: int WIND_NON_ZERO> = 1;
+
+        <java.awt.geom.Path2D: int WIND_EVEN_ODD> = 0;
+
+        $r0 = class "Ljava/awt/geom/Path2D;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <java.awt.geom.Path2D: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

@@ -1,0 +1,916 @@
+public final class sun.rmi.transport.Target extends java.lang.Object
+{
+    private final java.rmi.server.ObjID id;
+    private final boolean permanent;
+    private final sun.rmi.transport.WeakRef weakImpl;
+    private volatile sun.rmi.server.Dispatcher disp;
+    private final java.rmi.Remote stub;
+    private final java.util.Vector refSet;
+    private final java.util.Hashtable sequenceTable;
+    private final java.security.AccessControlContext acc;
+    private final java.lang.ClassLoader ccl;
+    private int callCount;
+    private boolean removed;
+    private volatile sun.rmi.transport.Transport exportedTransport;
+    private static int nextThreadNum;
+
+    public void <init>(java.rmi.Remote, sun.rmi.server.Dispatcher, java.rmi.Remote, java.rmi.server.ObjID, boolean)
+    {
+        java.security.AccessControlContext $r9;
+        sun.rmi.server.Dispatcher r6;
+        java.lang.ref.ReferenceQueue $r5;
+        sun.rmi.transport.WeakRef $r3;
+        java.util.Vector $r1;
+        java.lang.Thread $r10;
+        java.util.Hashtable $r2;
+        boolean $z0, z1;
+        java.rmi.Remote r4, r7;
+        java.lang.Class $r12;
+        java.lang.ClassLoader $r11, $r13;
+        sun.rmi.transport.Target r0;
+        java.rmi.server.ObjID r8;
+
+        r0 := @this: sun.rmi.transport.Target;
+
+        r4 := @parameter0: java.rmi.Remote;
+
+        r6 := @parameter1: sun.rmi.server.Dispatcher;
+
+        r7 := @parameter2: java.rmi.Remote;
+
+        r8 := @parameter3: java.rmi.server.ObjID;
+
+        z1 := @parameter4: boolean;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.Vector;
+
+        specialinvoke $r1.<java.util.Vector: void <init>()>();
+
+        r0.<sun.rmi.transport.Target: java.util.Vector refSet> = $r1;
+
+        $r2 = new java.util.Hashtable;
+
+        specialinvoke $r2.<java.util.Hashtable: void <init>(int)>(5);
+
+        r0.<sun.rmi.transport.Target: java.util.Hashtable sequenceTable> = $r2;
+
+        r0.<sun.rmi.transport.Target: int callCount> = 0;
+
+        r0.<sun.rmi.transport.Target: boolean removed> = 0;
+
+        r0.<sun.rmi.transport.Target: sun.rmi.transport.Transport exportedTransport> = null;
+
+        $r3 = new sun.rmi.transport.WeakRef;
+
+        $r5 = <sun.rmi.transport.ObjectTable: java.lang.ref.ReferenceQueue reapQueue>;
+
+        specialinvoke $r3.<sun.rmi.transport.WeakRef: void <init>(java.lang.Object,java.lang.ref.ReferenceQueue)>(r4, $r5);
+
+        r0.<sun.rmi.transport.Target: sun.rmi.transport.WeakRef weakImpl> = $r3;
+
+        r0.<sun.rmi.transport.Target: sun.rmi.server.Dispatcher disp> = r6;
+
+        r0.<sun.rmi.transport.Target: java.rmi.Remote stub> = r7;
+
+        r0.<sun.rmi.transport.Target: java.rmi.server.ObjID id> = r8;
+
+        $r9 = staticinvoke <java.security.AccessController: java.security.AccessControlContext getContext()>();
+
+        r0.<sun.rmi.transport.Target: java.security.AccessControlContext acc> = $r9;
+
+        $r10 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.Thread: java.lang.ClassLoader getContextClassLoader()>();
+
+        $r12 = virtualinvoke r4.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.Class: java.lang.ClassLoader getClassLoader()>();
+
+        $z0 = staticinvoke <sun.rmi.transport.Target: boolean checkLoaderAncestry(java.lang.ClassLoader,java.lang.ClassLoader)>($r11, $r13);
+
+        if $z0 == 0 goto label1;
+
+        r0.<sun.rmi.transport.Target: java.lang.ClassLoader ccl> = $r11;
+
+        goto label2;
+
+     label1:
+        r0.<sun.rmi.transport.Target: java.lang.ClassLoader ccl> = $r13;
+
+     label2:
+        r0.<sun.rmi.transport.Target: boolean permanent> = z1;
+
+        if z1 == 0 goto label3;
+
+        virtualinvoke r0.<sun.rmi.transport.Target: void pinImpl()>();
+
+     label3:
+        return;
+    }
+
+    private static boolean checkLoaderAncestry(java.lang.ClassLoader, java.lang.ClassLoader)
+    {
+        java.lang.ClassLoader r0, r1, r2;
+
+        r1 := @parameter0: java.lang.ClassLoader;
+
+        r0 := @parameter1: java.lang.ClassLoader;
+
+        if r0 != null goto label1;
+
+        return 1;
+
+     label1:
+        if r1 != null goto label2;
+
+        return 0;
+
+     label2:
+        r2 = r1;
+
+     label3:
+        if r2 == null goto label5;
+
+        if r2 != r0 goto label4;
+
+        return 1;
+
+     label4:
+        r2 = virtualinvoke r2.<java.lang.ClassLoader: java.lang.ClassLoader getParent()>();
+
+        goto label3;
+
+     label5:
+        return 0;
+    }
+
+    public java.rmi.Remote getStub()
+    {
+        java.rmi.Remote $r1;
+        sun.rmi.transport.Target r0;
+
+        r0 := @this: sun.rmi.transport.Target;
+
+        $r1 = r0.<sun.rmi.transport.Target: java.rmi.Remote stub>;
+
+        return $r1;
+    }
+
+    sun.rmi.transport.ObjectEndpoint getObjectEndpoint()
+    {
+        sun.rmi.transport.Transport $r2;
+        sun.rmi.transport.ObjectEndpoint $r0;
+        sun.rmi.transport.Target r1;
+        java.rmi.server.ObjID $r3;
+
+        r1 := @this: sun.rmi.transport.Target;
+
+        $r0 = new sun.rmi.transport.ObjectEndpoint;
+
+        $r3 = r1.<sun.rmi.transport.Target: java.rmi.server.ObjID id>;
+
+        $r2 = r1.<sun.rmi.transport.Target: sun.rmi.transport.Transport exportedTransport>;
+
+        specialinvoke $r0.<sun.rmi.transport.ObjectEndpoint: void <init>(java.rmi.server.ObjID,sun.rmi.transport.Transport)>($r3, $r2);
+
+        return $r0;
+    }
+
+    sun.rmi.transport.WeakRef getWeakImpl()
+    {
+        sun.rmi.transport.WeakRef $r1;
+        sun.rmi.transport.Target r0;
+
+        r0 := @this: sun.rmi.transport.Target;
+
+        $r1 = r0.<sun.rmi.transport.Target: sun.rmi.transport.WeakRef weakImpl>;
+
+        return $r1;
+    }
+
+    sun.rmi.server.Dispatcher getDispatcher()
+    {
+        sun.rmi.server.Dispatcher $r1;
+        sun.rmi.transport.Target r0;
+
+        r0 := @this: sun.rmi.transport.Target;
+
+        $r1 = r0.<sun.rmi.transport.Target: sun.rmi.server.Dispatcher disp>;
+
+        return $r1;
+    }
+
+    java.security.AccessControlContext getAccessControlContext()
+    {
+        java.security.AccessControlContext $r1;
+        sun.rmi.transport.Target r0;
+
+        r0 := @this: sun.rmi.transport.Target;
+
+        $r1 = r0.<sun.rmi.transport.Target: java.security.AccessControlContext acc>;
+
+        return $r1;
+    }
+
+    java.lang.ClassLoader getContextClassLoader()
+    {
+        java.lang.ClassLoader $r1;
+        sun.rmi.transport.Target r0;
+
+        r0 := @this: sun.rmi.transport.Target;
+
+        $r1 = r0.<sun.rmi.transport.Target: java.lang.ClassLoader ccl>;
+
+        return $r1;
+    }
+
+    java.rmi.Remote getImpl()
+    {
+        sun.rmi.transport.WeakRef $r1;
+        java.rmi.Remote $r3;
+        java.lang.Object $r2;
+        sun.rmi.transport.Target r0;
+
+        r0 := @this: sun.rmi.transport.Target;
+
+        $r1 = r0.<sun.rmi.transport.Target: sun.rmi.transport.WeakRef weakImpl>;
+
+        $r2 = virtualinvoke $r1.<sun.rmi.transport.WeakRef: java.lang.Object get()>();
+
+        $r3 = (java.rmi.Remote) $r2;
+
+        return $r3;
+    }
+
+    boolean isPermanent()
+    {
+        sun.rmi.transport.Target r0;
+        boolean $z0;
+
+        r0 := @this: sun.rmi.transport.Target;
+
+        $z0 = r0.<sun.rmi.transport.Target: boolean permanent>;
+
+        return $z0;
+    }
+
+    synchronized void pinImpl()
+    {
+        sun.rmi.transport.WeakRef $r1;
+        sun.rmi.transport.Target r0;
+
+        r0 := @this: sun.rmi.transport.Target;
+
+        $r1 = r0.<sun.rmi.transport.Target: sun.rmi.transport.WeakRef weakImpl>;
+
+        virtualinvoke $r1.<sun.rmi.transport.WeakRef: void pin()>();
+
+        return;
+    }
+
+    synchronized void unpinImpl()
+    {
+        sun.rmi.transport.WeakRef $r2;
+        java.util.Vector $r1;
+        sun.rmi.transport.Target r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.rmi.transport.Target;
+
+        $z0 = r0.<sun.rmi.transport.Target: boolean permanent>;
+
+        if $z0 != 0 goto label1;
+
+        $r1 = r0.<sun.rmi.transport.Target: java.util.Vector refSet>;
+
+        $z1 = virtualinvoke $r1.<java.util.Vector: boolean isEmpty()>();
+
+        if $z1 == 0 goto label1;
+
+        $r2 = r0.<sun.rmi.transport.Target: sun.rmi.transport.WeakRef weakImpl>;
+
+        virtualinvoke $r2.<sun.rmi.transport.WeakRef: void unpin()>();
+
+     label1:
+        return;
+    }
+
+    void setExportedTransport(sun.rmi.transport.Transport)
+    {
+        sun.rmi.transport.Transport $r1, r2;
+        sun.rmi.transport.Target r0;
+
+        r0 := @this: sun.rmi.transport.Target;
+
+        r2 := @parameter0: sun.rmi.transport.Transport;
+
+        $r1 = r0.<sun.rmi.transport.Target: sun.rmi.transport.Transport exportedTransport>;
+
+        if $r1 != null goto label1;
+
+        r0.<sun.rmi.transport.Target: sun.rmi.transport.Transport exportedTransport> = r2;
+
+     label1:
+        return;
+    }
+
+    synchronized void referenced(long, java.rmi.dgc.VMID)
+    {
+        long l0, $l1;
+        java.util.logging.Level $r7, $r13;
+        sun.rmi.transport.DGCImpl $r10;
+        java.util.Vector $r5, $r9;
+        byte $b2;
+        int $i3;
+        java.lang.String $r16;
+        sun.rmi.transport.SequenceEntry r4, $r19;
+        java.rmi.dgc.VMID r1;
+        java.util.Hashtable $r2, $r18;
+        boolean $z0, $z1;
+        java.rmi.Remote $r6;
+        sun.rmi.runtime.Log $r8, $r12;
+        java.lang.Object $r3;
+        java.lang.StringBuilder $r14, $r15, $r20;
+        sun.rmi.transport.Target r0;
+
+        r0 := @this: sun.rmi.transport.Target;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: java.rmi.dgc.VMID;
+
+        $r2 = r0.<sun.rmi.transport.Target: java.util.Hashtable sequenceTable>;
+
+        $r3 = virtualinvoke $r2.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r1);
+
+        r4 = (sun.rmi.transport.SequenceEntry) $r3;
+
+        if r4 != null goto label1;
+
+        $r18 = r0.<sun.rmi.transport.Target: java.util.Hashtable sequenceTable>;
+
+        $r19 = new sun.rmi.transport.SequenceEntry;
+
+        specialinvoke $r19.<sun.rmi.transport.SequenceEntry: void <init>(long)>(l0);
+
+        virtualinvoke $r18.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r19);
+
+        goto label3;
+
+     label1:
+        $l1 = r4.<sun.rmi.transport.SequenceEntry: long sequenceNum>;
+
+        $b2 = $l1 cmp l0;
+
+        $i3 = (int) $b2;
+
+        if $i3 >= 0 goto label2;
+
+        virtualinvoke r4.<sun.rmi.transport.SequenceEntry: void update(long)>(l0);
+
+        goto label3;
+
+     label2:
+        return;
+
+     label3:
+        $r5 = r0.<sun.rmi.transport.Target: java.util.Vector refSet>;
+
+        $z0 = virtualinvoke $r5.<java.util.Vector: boolean contains(java.lang.Object)>(r1);
+
+        if $z0 != 0 goto label6;
+
+        virtualinvoke r0.<sun.rmi.transport.Target: void pinImpl()>();
+
+        $r6 = virtualinvoke r0.<sun.rmi.transport.Target: java.rmi.Remote getImpl()>();
+
+        if $r6 != null goto label4;
+
+        return;
+
+     label4:
+        $r8 = <sun.rmi.transport.DGCImpl: sun.rmi.runtime.Log dgcLog>;
+
+        $r7 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z1 = virtualinvoke $r8.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r7);
+
+        if $z1 == 0 goto label5;
+
+        $r12 = <sun.rmi.transport.DGCImpl: sun.rmi.runtime.Log dgcLog>;
+
+        $r13 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("add to dirty set: ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r12.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r13, $r16);
+
+     label5:
+        $r9 = r0.<sun.rmi.transport.Target: java.util.Vector refSet>;
+
+        virtualinvoke $r9.<java.util.Vector: void addElement(java.lang.Object)>(r1);
+
+        $r10 = staticinvoke <sun.rmi.transport.DGCImpl: sun.rmi.transport.DGCImpl getDGCImpl()>();
+
+        virtualinvoke $r10.<sun.rmi.transport.DGCImpl: void registerTarget(java.rmi.dgc.VMID,sun.rmi.transport.Target)>(r1, r0);
+
+     label6:
+        return;
+    }
+
+    synchronized void unreferenced(long, java.rmi.dgc.VMID, boolean)
+    {
+        long l0, $l1;
+        java.util.logging.Level $r7, $r13;
+        byte $b2;
+        int $i3;
+        java.lang.String $r10;
+        sun.rmi.transport.SequenceEntry r4;
+        java.rmi.dgc.VMID r1;
+        java.util.Hashtable $r2, $r11;
+        boolean z0, $z1, $z2;
+        sun.rmi.runtime.Log $r6, $r12;
+        java.lang.Object $r3;
+        java.lang.StringBuilder $r8, $r9, $r14;
+        sun.rmi.transport.Target r0;
+
+        r0 := @this: sun.rmi.transport.Target;
+
+        l0 := @parameter0: long;
+
+        r1 := @parameter1: java.rmi.dgc.VMID;
+
+        z0 := @parameter2: boolean;
+
+        $r2 = r0.<sun.rmi.transport.Target: java.util.Hashtable sequenceTable>;
+
+        $r3 = virtualinvoke $r2.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>(r1);
+
+        r4 = (sun.rmi.transport.SequenceEntry) $r3;
+
+        if r4 == null goto label1;
+
+        $l1 = r4.<sun.rmi.transport.SequenceEntry: long sequenceNum>;
+
+        $b2 = $l1 cmp l0;
+
+        $i3 = (int) $b2;
+
+        if $i3 <= 0 goto label2;
+
+     label1:
+        return;
+
+     label2:
+        if z0 == 0 goto label3;
+
+        virtualinvoke r4.<sun.rmi.transport.SequenceEntry: void retain(long)>(l0);
+
+        goto label4;
+
+     label3:
+        $z1 = r4.<sun.rmi.transport.SequenceEntry: boolean keep>;
+
+        if $z1 != 0 goto label4;
+
+        $r11 = r0.<sun.rmi.transport.Target: java.util.Hashtable sequenceTable>;
+
+        virtualinvoke $r11.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>(r1);
+
+     label4:
+        $r12 = <sun.rmi.transport.DGCImpl: sun.rmi.runtime.Log dgcLog>;
+
+        $r13 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z2 = virtualinvoke $r12.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r13);
+
+        if $z2 == 0 goto label5;
+
+        $r6 = <sun.rmi.transport.DGCImpl: sun.rmi.runtime.Log dgcLog>;
+
+        $r7 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("remove from dirty set: ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r7, $r10);
+
+     label5:
+        specialinvoke r0.<sun.rmi.transport.Target: void refSetRemove(java.rmi.dgc.VMID)>(r1);
+
+        return;
+    }
+
+    private synchronized void refSetRemove(java.rmi.dgc.VMID)
+    {
+        java.lang.Runnable $r10;
+        java.util.logging.Level $r5, $r19;
+        sun.rmi.transport.DGCImpl $r0;
+        java.rmi.server.Unreferenced r8;
+        java.util.Vector $r3, $r4;
+        java.lang.Thread $r16;
+        int $i0, $i1;
+        java.lang.String $r14, $r22;
+        java.rmi.dgc.VMID r1;
+        boolean $z0, $z1, $z2, $z3;
+        java.rmi.Remote $r7;
+        sun.rmi.runtime.Log $r6, $r18;
+        java.lang.StringBuilder $r11, $r12, $r13, $r17, $r20, $r21;
+        java.lang.Object $r15;
+        sun.rmi.transport.Target r2;
+        sun.rmi.runtime.NewThreadAction $r9;
+
+        r2 := @this: sun.rmi.transport.Target;
+
+        r1 := @parameter0: java.rmi.dgc.VMID;
+
+        $r0 = staticinvoke <sun.rmi.transport.DGCImpl: sun.rmi.transport.DGCImpl getDGCImpl()>();
+
+        virtualinvoke $r0.<sun.rmi.transport.DGCImpl: void unregisterTarget(java.rmi.dgc.VMID,sun.rmi.transport.Target)>(r1, r2);
+
+        $r3 = r2.<sun.rmi.transport.Target: java.util.Vector refSet>;
+
+        $z0 = virtualinvoke $r3.<java.util.Vector: boolean removeElement(java.lang.Object)>(r1);
+
+        if $z0 == 0 goto label3;
+
+        $r4 = r2.<sun.rmi.transport.Target: java.util.Vector refSet>;
+
+        $z1 = virtualinvoke $r4.<java.util.Vector: boolean isEmpty()>();
+
+        if $z1 == 0 goto label3;
+
+        $r6 = <sun.rmi.transport.DGCImpl: sun.rmi.runtime.Log dgcLog>;
+
+        $r5 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $z2 = virtualinvoke $r6.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r5);
+
+        if $z2 == 0 goto label1;
+
+        $r18 = <sun.rmi.transport.DGCImpl: sun.rmi.runtime.Log dgcLog>;
+
+        $r19 = <sun.rmi.runtime.Log: java.util.logging.Level VERBOSE>;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("reference set is empty: target = ");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r18.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r19, $r22);
+
+     label1:
+        $r7 = virtualinvoke r2.<sun.rmi.transport.Target: java.rmi.Remote getImpl()>();
+
+        $z3 = $r7 instanceof java.rmi.server.Unreferenced;
+
+        if $z3 == 0 goto label2;
+
+        r8 = (java.rmi.server.Unreferenced) $r7;
+
+        $r9 = new sun.rmi.runtime.NewThreadAction;
+
+        $r10 = staticinvoke <sun.rmi.transport.Target$lambda_refSetRemove_1__417: java.lang.Runnable bootstrap$(sun.rmi.transport.Target,java.rmi.server.Unreferenced)>(r2, r8);
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unreferenced-");
+
+        $i0 = <sun.rmi.transport.Target: int nextThreadNum>;
+
+        $i1 = $i0 + 1;
+
+        <sun.rmi.transport.Target: int nextThreadNum> = $i1;
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<sun.rmi.runtime.NewThreadAction: void <init>(java.lang.Runnable,java.lang.String,boolean,boolean)>($r10, $r14, 0, 1);
+
+        $r15 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r9);
+
+        $r16 = (java.lang.Thread) $r15;
+
+        virtualinvoke $r16.<java.lang.Thread: void start()>();
+
+     label2:
+        virtualinvoke r2.<sun.rmi.transport.Target: void unpinImpl()>();
+
+     label3:
+        return;
+    }
+
+    synchronized boolean unexport(boolean)
+    {
+        java.util.Enumeration $r6;
+        sun.rmi.server.Dispatcher $r3;
+        sun.rmi.transport.DGCImpl $r4;
+        java.util.Vector $r5;
+        int $i0;
+        java.lang.Object $r1;
+        sun.rmi.transport.Target r0;
+        java.rmi.dgc.VMID r2;
+        boolean z0, $z1;
+
+        r0 := @this: sun.rmi.transport.Target;
+
+        z0 := @parameter0: boolean;
+
+        if z0 == 1 goto label1;
+
+        $i0 = r0.<sun.rmi.transport.Target: int callCount>;
+
+        if $i0 == 0 goto label1;
+
+        $r3 = r0.<sun.rmi.transport.Target: sun.rmi.server.Dispatcher disp>;
+
+        if $r3 != null goto label4;
+
+     label1:
+        r0.<sun.rmi.transport.Target: sun.rmi.server.Dispatcher disp> = null;
+
+        virtualinvoke r0.<sun.rmi.transport.Target: void unpinImpl()>();
+
+        $r4 = staticinvoke <sun.rmi.transport.DGCImpl: sun.rmi.transport.DGCImpl getDGCImpl()>();
+
+        $r5 = r0.<sun.rmi.transport.Target: java.util.Vector refSet>;
+
+        $r6 = virtualinvoke $r5.<java.util.Vector: java.util.Enumeration elements()>();
+
+     label2:
+        $z1 = interfaceinvoke $r6.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z1 == 0 goto label3;
+
+        $r1 = interfaceinvoke $r6.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r2 = (java.rmi.dgc.VMID) $r1;
+
+        virtualinvoke $r4.<sun.rmi.transport.DGCImpl: void unregisterTarget(java.rmi.dgc.VMID,sun.rmi.transport.Target)>(r2, r0);
+
+        goto label2;
+
+     label3:
+        return 1;
+
+     label4:
+        return 0;
+    }
+
+    synchronized void markRemoved()
+    {
+        sun.rmi.transport.Transport $r1, $r3;
+        int $i0;
+        java.lang.AssertionError $r2;
+        sun.rmi.transport.Target r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.rmi.transport.Target;
+
+        $z0 = r0.<sun.rmi.transport.Target: boolean removed>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new java.lang.AssertionError;
+
+        specialinvoke $r2.<java.lang.AssertionError: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        r0.<sun.rmi.transport.Target: boolean removed> = 1;
+
+        $z1 = r0.<sun.rmi.transport.Target: boolean permanent>;
+
+        if $z1 != 0 goto label2;
+
+        $i0 = r0.<sun.rmi.transport.Target: int callCount>;
+
+        if $i0 != 0 goto label2;
+
+        staticinvoke <sun.rmi.transport.ObjectTable: void decrementKeepAliveCount()>();
+
+     label2:
+        $r3 = r0.<sun.rmi.transport.Target: sun.rmi.transport.Transport exportedTransport>;
+
+        if $r3 == null goto label3;
+
+        $r1 = r0.<sun.rmi.transport.Target: sun.rmi.transport.Transport exportedTransport>;
+
+        virtualinvoke $r1.<sun.rmi.transport.Transport: void targetUnexported()>();
+
+     label3:
+        return;
+    }
+
+    synchronized void incrementCallCount() throws java.rmi.NoSuchObjectException
+    {
+        java.rmi.NoSuchObjectException $r2;
+        int $i0, $i1;
+        sun.rmi.server.Dispatcher $r1;
+        sun.rmi.transport.Target r0;
+
+        r0 := @this: sun.rmi.transport.Target;
+
+        $r1 = r0.<sun.rmi.transport.Target: sun.rmi.server.Dispatcher disp>;
+
+        if $r1 == null goto label1;
+
+        $i0 = r0.<sun.rmi.transport.Target: int callCount>;
+
+        $i1 = $i0 + 1;
+
+        r0.<sun.rmi.transport.Target: int callCount> = $i1;
+
+        goto label2;
+
+     label1:
+        $r2 = new java.rmi.NoSuchObjectException;
+
+        specialinvoke $r2.<java.rmi.NoSuchObjectException: void <init>(java.lang.String)>("object not accepting new calls");
+
+        throw $r2;
+
+     label2:
+        return;
+    }
+
+    synchronized void decrementCallCount()
+    {
+        int $i0, $i1, $i2;
+        java.lang.Error $r1;
+        sun.rmi.transport.Target r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.rmi.transport.Target;
+
+        $i0 = r0.<sun.rmi.transport.Target: int callCount>;
+
+        $i1 = $i0 - 1;
+
+        r0.<sun.rmi.transport.Target: int callCount> = $i1;
+
+        if $i1 >= 0 goto label1;
+
+        $r1 = new java.lang.Error;
+
+        specialinvoke $r1.<java.lang.Error: void <init>(java.lang.String)>("internal error: call count less than zero");
+
+        throw $r1;
+
+     label1:
+        $z0 = r0.<sun.rmi.transport.Target: boolean permanent>;
+
+        if $z0 != 0 goto label2;
+
+        $z1 = r0.<sun.rmi.transport.Target: boolean removed>;
+
+        if $z1 == 0 goto label2;
+
+        $i2 = r0.<sun.rmi.transport.Target: int callCount>;
+
+        if $i2 != 0 goto label2;
+
+        staticinvoke <sun.rmi.transport.ObjectTable: void decrementKeepAliveCount()>();
+
+     label2:
+        return;
+    }
+
+    boolean isEmpty()
+    {
+        java.util.Vector $r1;
+        sun.rmi.transport.Target r0;
+        boolean $z0;
+
+        r0 := @this: sun.rmi.transport.Target;
+
+        $r1 = r0.<sun.rmi.transport.Target: java.util.Vector refSet>;
+
+        $z0 = virtualinvoke $r1.<java.util.Vector: boolean isEmpty()>();
+
+        return $z0;
+    }
+
+    public synchronized void vmidDead(java.rmi.dgc.VMID)
+    {
+        java.util.logging.Level $r0, $r7;
+        sun.rmi.runtime.Log $r1, $r6;
+        java.lang.StringBuilder $r5, $r8, $r9, $r10;
+        java.lang.String $r11;
+        sun.rmi.transport.Target r2;
+        java.rmi.dgc.VMID r3;
+        java.util.Hashtable $r4;
+        boolean $z0;
+
+        r2 := @this: sun.rmi.transport.Target;
+
+        r3 := @parameter0: java.rmi.dgc.VMID;
+
+        $r1 = <sun.rmi.transport.DGCImpl: sun.rmi.runtime.Log dgcLog>;
+
+        $r0 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $z0 = virtualinvoke $r1.<sun.rmi.runtime.Log: boolean isLoggable(java.util.logging.Level)>($r0);
+
+        if $z0 == 0 goto label1;
+
+        $r6 = <sun.rmi.transport.DGCImpl: sun.rmi.runtime.Log dgcLog>;
+
+        $r7 = <sun.rmi.runtime.Log: java.util.logging.Level BRIEF>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("removing endpoint ");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r3);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" from reference set");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<sun.rmi.runtime.Log: void log(java.util.logging.Level,java.lang.String)>($r7, $r11);
+
+     label1:
+        $r4 = r2.<sun.rmi.transport.Target: java.util.Hashtable sequenceTable>;
+
+        virtualinvoke $r4.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>(r3);
+
+        specialinvoke r2.<sun.rmi.transport.Target: void refSetRemove(java.rmi.dgc.VMID)>(r3);
+
+        return;
+    }
+
+    public void lambda$refSetRemove$1(java.rmi.server.Unreferenced)
+    {
+        java.security.AccessControlContext $r5;
+        java.rmi.server.Unreferenced r3;
+        java.lang.Thread $r0;
+        java.lang.ClassLoader $r2;
+        sun.rmi.transport.Target r1;
+        java.security.PrivilegedAction $r4;
+
+        r1 := @this: sun.rmi.transport.Target;
+
+        r3 := @parameter0: java.rmi.server.Unreferenced;
+
+        $r0 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = r1.<sun.rmi.transport.Target: java.lang.ClassLoader ccl>;
+
+        virtualinvoke $r0.<java.lang.Thread: void setContextClassLoader(java.lang.ClassLoader)>($r2);
+
+        $r4 = staticinvoke <sun.rmi.transport.Target$lambda_null_0__418: java.security.PrivilegedAction bootstrap$(java.rmi.server.Unreferenced)>(r3);
+
+        $r5 = r1.<sun.rmi.transport.Target: java.security.AccessControlContext acc>;
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction,java.security.AccessControlContext)>($r4, $r5);
+
+        return;
+    }
+
+    public static java.lang.Void lambda$null$0(java.rmi.server.Unreferenced)
+    {
+        java.rmi.server.Unreferenced r0;
+
+        r0 := @parameter0: java.rmi.server.Unreferenced;
+
+        interfaceinvoke r0.<java.rmi.server.Unreferenced: void unreferenced()>();
+
+        return null;
+    }
+
+    static void <clinit>()
+    {
+        <sun.rmi.transport.Target: int nextThreadNum> = 0;
+
+        return;
+    }
+}

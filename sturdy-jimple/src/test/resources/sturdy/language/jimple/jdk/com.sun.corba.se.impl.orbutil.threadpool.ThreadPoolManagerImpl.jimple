@@ -1,0 +1,312 @@
+public class com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl extends java.lang.Object implements com.sun.corba.se.spi.orbutil.threadpool.ThreadPoolManager
+{
+    private com.sun.corba.se.spi.orbutil.threadpool.ThreadPool threadPool;
+    private java.lang.ThreadGroup threadGroup;
+    private static final com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper;
+    private static java.util.concurrent.atomic.AtomicInteger tgCount;
+
+    public void <init>()
+    {
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl $r2;
+        java.lang.ThreadGroup $r1, $r3;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = specialinvoke r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl: java.lang.ThreadGroup getThreadGroup()>();
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl: java.lang.ThreadGroup threadGroup> = $r1;
+
+        $r2 = new com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl;
+
+        $r3 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl: java.lang.ThreadGroup threadGroup>;
+
+        specialinvoke $r2.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolImpl: void <init>(java.lang.ThreadGroup,java.lang.String)>($r3, "default-threadpool");
+
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl: com.sun.corba.se.spi.orbutil.threadpool.ThreadPool threadPool> = $r2;
+
+        return;
+    }
+
+    private java.lang.ThreadGroup getThreadGroup()
+    {
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl$1 $r0;
+        java.lang.Thread $r4;
+        java.lang.Object $r2;
+        java.lang.SecurityException $r3;
+        java.lang.ThreadGroup r5;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl r1;
+
+        r1 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl;
+
+     label1:
+        $r0 = new com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl$1;
+
+        specialinvoke $r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl$1: void <init>(com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl)>(r1);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r0);
+
+        r5 = (java.lang.ThreadGroup) $r2;
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        r5 = virtualinvoke $r4.<java.lang.Thread: java.lang.ThreadGroup getThreadGroup()>();
+
+     label4:
+        return r5;
+
+        catch java.lang.SecurityException from label1 to label2 with label3;
+    }
+
+    public void close()
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r6, $r9, $r13, $r16, $r18;
+        com.sun.corba.se.spi.orbutil.threadpool.ThreadPool $r1;
+        java.lang.ThreadGroup $r2, $r3, $r4, $r5, $r7, $r10, $r12, $r15;
+        java.lang.Integer $r8, $r11;
+        int $i0, $i1;
+        boolean $z0;
+        java.lang.IllegalThreadStateException $r14;
+        java.io.IOException $r17;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl;
+
+     label01:
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl: com.sun.corba.se.spi.orbutil.threadpool.ThreadPool threadPool>;
+
+        interfaceinvoke $r1.<com.sun.corba.se.spi.orbutil.threadpool.ThreadPool: void close()>();
+
+     label02:
+        goto label04;
+
+     label03:
+        $r17 := @caughtexception;
+
+        $r18 = <com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        virtualinvoke $r18.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL threadPoolCloseError()>();
+
+     label04:
+        $r2 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl: java.lang.ThreadGroup threadGroup>;
+
+        $z0 = virtualinvoke $r2.<java.lang.ThreadGroup: boolean isDestroyed()>();
+
+        $r3 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl: java.lang.ThreadGroup threadGroup>;
+
+        $i0 = virtualinvoke $r3.<java.lang.ThreadGroup: int activeCount()>();
+
+        $r4 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl: java.lang.ThreadGroup threadGroup>;
+
+        $i1 = virtualinvoke $r4.<java.lang.ThreadGroup: int activeGroupCount()>();
+
+        if $z0 == 0 goto label05;
+
+        $r13 = <com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r12 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl: java.lang.ThreadGroup threadGroup>;
+
+        virtualinvoke $r13.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL threadGroupIsDestroyed(java.lang.Object)>($r12);
+
+        goto label08;
+
+     label05:
+        if $i0 <= 0 goto label06;
+
+        $r9 = <com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r10 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl: java.lang.ThreadGroup threadGroup>;
+
+        $r11 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        virtualinvoke $r9.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL threadGroupHasActiveThreadsInClose(java.lang.Object,java.lang.Object)>($r10, $r11);
+
+     label06:
+        if $i1 <= 0 goto label07;
+
+        $r6 = <com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r7 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl: java.lang.ThreadGroup threadGroup>;
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        virtualinvoke $r6.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL threadGroupHasSubGroupsInClose(java.lang.Object,java.lang.Object)>($r7, $r8);
+
+     label07:
+        $r5 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl: java.lang.ThreadGroup threadGroup>;
+
+        virtualinvoke $r5.<java.lang.ThreadGroup: void destroy()>();
+
+     label08:
+        goto label10;
+
+     label09:
+        $r14 := @caughtexception;
+
+        $r16 = <com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper>;
+
+        $r15 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl: java.lang.ThreadGroup threadGroup>;
+
+        virtualinvoke $r16.<com.sun.corba.se.impl.logging.ORBUtilSystemException: org.omg.CORBA.INTERNAL threadGroupDestroyFailed(java.lang.Throwable,java.lang.Object)>($r14, $r15);
+
+     label10:
+        r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl: java.lang.ThreadGroup threadGroup> = null;
+
+        return;
+
+        catch java.io.IOException from label01 to label02 with label03;
+        catch java.lang.IllegalThreadStateException from label04 to label08 with label09;
+    }
+
+    public com.sun.corba.se.spi.orbutil.threadpool.ThreadPool getThreadPool(java.lang.String) throws com.sun.corba.se.spi.orbutil.threadpool.NoSuchThreadPoolException
+    {
+        java.lang.String r2;
+        com.sun.corba.se.spi.orbutil.threadpool.ThreadPool $r1;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl: com.sun.corba.se.spi.orbutil.threadpool.ThreadPool threadPool>;
+
+        return $r1;
+    }
+
+    public com.sun.corba.se.spi.orbutil.threadpool.ThreadPool getThreadPool(int) throws com.sun.corba.se.spi.orbutil.threadpool.NoSuchThreadPoolException
+    {
+        int i0;
+        com.sun.corba.se.spi.orbutil.threadpool.ThreadPool $r1;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl;
+
+        i0 := @parameter0: int;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl: com.sun.corba.se.spi.orbutil.threadpool.ThreadPool threadPool>;
+
+        return $r1;
+    }
+
+    public int getThreadPoolNumericId(java.lang.String)
+    {
+        java.lang.String r1;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        return 0;
+    }
+
+    public java.lang.String getThreadPoolStringId(int)
+    {
+        int i0;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl;
+
+        i0 := @parameter0: int;
+
+        return "";
+    }
+
+    public com.sun.corba.se.spi.orbutil.threadpool.ThreadPool getDefaultThreadPool()
+    {
+        com.sun.corba.se.spi.orbutil.threadpool.ThreadPool $r1;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl;
+
+        $r1 = r0.<com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl: com.sun.corba.se.spi.orbutil.threadpool.ThreadPool threadPool>;
+
+        return $r1;
+    }
+
+    public com.sun.corba.se.spi.orbutil.threadpool.ThreadPoolChooser getThreadPoolChooser(java.lang.String)
+    {
+        java.lang.String r1;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        return null;
+    }
+
+    public com.sun.corba.se.spi.orbutil.threadpool.ThreadPoolChooser getThreadPoolChooser(int)
+    {
+        int i0;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl;
+
+        i0 := @parameter0: int;
+
+        return null;
+    }
+
+    public void setThreadPoolChooser(java.lang.String, com.sun.corba.se.spi.orbutil.threadpool.ThreadPoolChooser)
+    {
+        java.lang.String r1;
+        com.sun.corba.se.spi.orbutil.threadpool.ThreadPoolChooser r2;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: com.sun.corba.se.spi.orbutil.threadpool.ThreadPoolChooser;
+
+        return;
+    }
+
+    public int getThreadPoolChooserNumericId(java.lang.String)
+    {
+        java.lang.String r1;
+        com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl r0;
+
+        r0 := @this: com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl;
+
+        r1 := @parameter0: java.lang.String;
+
+        return 0;
+    }
+
+    static java.util.concurrent.atomic.AtomicInteger access$000()
+    {
+        java.util.concurrent.atomic.AtomicInteger $r0;
+
+        $r0 = <com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl: java.util.concurrent.atomic.AtomicInteger tgCount>;
+
+        return $r0;
+    }
+
+    static void <clinit>()
+    {
+        com.sun.corba.se.impl.logging.ORBUtilSystemException $r0;
+        java.util.concurrent.atomic.AtomicInteger $r1;
+
+        $r0 = staticinvoke <com.sun.corba.se.impl.logging.ORBUtilSystemException: com.sun.corba.se.impl.logging.ORBUtilSystemException get(java.lang.String)>("rpc.transport");
+
+        <com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl: com.sun.corba.se.impl.logging.ORBUtilSystemException wrapper> = $r0;
+
+        $r1 = new java.util.concurrent.atomic.AtomicInteger;
+
+        specialinvoke $r1.<java.util.concurrent.atomic.AtomicInteger: void <init>()>();
+
+        <com.sun.corba.se.impl.orbutil.threadpool.ThreadPoolManagerImpl: java.util.concurrent.atomic.AtomicInteger tgCount> = $r1;
+
+        return;
+    }
+}

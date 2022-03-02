@@ -1,0 +1,750 @@
+abstract class com.sun.media.sound.AbstractDataLine extends com.sun.media.sound.AbstractLine implements javax.sound.sampled.DataLine
+{
+    private final javax.sound.sampled.AudioFormat defaultFormat;
+    private final int defaultBufferSize;
+    protected final java.lang.Object lock;
+    protected javax.sound.sampled.AudioFormat format;
+    protected int bufferSize;
+    private volatile boolean running;
+    private volatile boolean started;
+    private volatile boolean active;
+
+    protected void <init>(javax.sound.sampled.DataLine$Info, com.sun.media.sound.AbstractMixer, javax.sound.sampled.Control[])
+    {
+        com.sun.media.sound.AbstractDataLine r0;
+        int $i1;
+        com.sun.media.sound.AbstractMixer r2;
+        javax.sound.sampled.DataLine$Info r1;
+        javax.sound.sampled.Control[] r3;
+
+        r0 := @this: com.sun.media.sound.AbstractDataLine;
+
+        r1 := @parameter0: javax.sound.sampled.DataLine$Info;
+
+        r2 := @parameter1: com.sun.media.sound.AbstractMixer;
+
+        r3 := @parameter2: javax.sound.sampled.Control[];
+
+        $i1 = (int) -1;
+
+        specialinvoke r0.<com.sun.media.sound.AbstractDataLine: void <init>(javax.sound.sampled.DataLine$Info,com.sun.media.sound.AbstractMixer,javax.sound.sampled.Control[],javax.sound.sampled.AudioFormat,int)>(r1, r2, r3, null, $i1);
+
+        return;
+    }
+
+    protected void <init>(javax.sound.sampled.DataLine$Info, com.sun.media.sound.AbstractMixer, javax.sound.sampled.Control[], javax.sound.sampled.AudioFormat, int)
+    {
+        javax.sound.sampled.AudioFormat r5, $r6, $r7, $r8, $r9;
+        com.sun.media.sound.AbstractMixer r2;
+        com.sun.media.sound.AbstractDataLine r0;
+        int i0, $i1, $i2, $i3, $i4;
+        javax.sound.sampled.DataLine$Info r1;
+        boolean $z0;
+        float $f0, $f1;
+        java.lang.Object $r4;
+        javax.sound.sampled.Control[] r3;
+
+        r0 := @this: com.sun.media.sound.AbstractDataLine;
+
+        r1 := @parameter0: javax.sound.sampled.DataLine$Info;
+
+        r2 := @parameter1: com.sun.media.sound.AbstractMixer;
+
+        r3 := @parameter2: javax.sound.sampled.Control[];
+
+        r5 := @parameter3: javax.sound.sampled.AudioFormat;
+
+        i0 := @parameter4: int;
+
+        specialinvoke r0.<com.sun.media.sound.AbstractLine: void <init>(javax.sound.sampled.Line$Info,com.sun.media.sound.AbstractMixer,javax.sound.sampled.Control[])>(r1, r2, r3);
+
+        $r4 = new java.lang.Object;
+
+        specialinvoke $r4.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.media.sound.AbstractDataLine: java.lang.Object lock> = $r4;
+
+        if r5 == null goto label1;
+
+        r0.<com.sun.media.sound.AbstractDataLine: javax.sound.sampled.AudioFormat defaultFormat> = r5;
+
+        goto label2;
+
+     label1:
+        $r6 = new javax.sound.sampled.AudioFormat;
+
+        $z0 = staticinvoke <com.sun.media.sound.Platform: boolean isBigEndian()>();
+
+        specialinvoke $r6.<javax.sound.sampled.AudioFormat: void <init>(float,int,int,boolean,boolean)>(44100.0F, 16, 2, 1, $z0);
+
+        r0.<com.sun.media.sound.AbstractDataLine: javax.sound.sampled.AudioFormat defaultFormat> = $r6;
+
+     label2:
+        if i0 <= 0 goto label3;
+
+        r0.<com.sun.media.sound.AbstractDataLine: int defaultBufferSize> = i0;
+
+        goto label4;
+
+     label3:
+        $r7 = r0.<com.sun.media.sound.AbstractDataLine: javax.sound.sampled.AudioFormat defaultFormat>;
+
+        $f0 = virtualinvoke $r7.<javax.sound.sampled.AudioFormat: float getFrameRate()>();
+
+        $f1 = $f0 / 2.0F;
+
+        $i1 = (int) $f1;
+
+        $r8 = r0.<com.sun.media.sound.AbstractDataLine: javax.sound.sampled.AudioFormat defaultFormat>;
+
+        $i2 = virtualinvoke $r8.<javax.sound.sampled.AudioFormat: int getFrameSize()>();
+
+        $i3 = $i1 * $i2;
+
+        r0.<com.sun.media.sound.AbstractDataLine: int defaultBufferSize> = $i3;
+
+     label4:
+        $r9 = r0.<com.sun.media.sound.AbstractDataLine: javax.sound.sampled.AudioFormat defaultFormat>;
+
+        r0.<com.sun.media.sound.AbstractDataLine: javax.sound.sampled.AudioFormat format> = $r9;
+
+        $i4 = r0.<com.sun.media.sound.AbstractDataLine: int defaultBufferSize>;
+
+        r0.<com.sun.media.sound.AbstractDataLine: int bufferSize> = $i4;
+
+        return;
+    }
+
+    public final void open(javax.sound.sampled.AudioFormat, int) throws javax.sound.sampled.LineUnavailableException
+    {
+        java.lang.Throwable $r13;
+        java.lang.IllegalStateException $r4;
+        javax.sound.sampled.AudioFormat r2, $r3, $r7;
+        com.sun.media.sound.AbstractMixer $r1, $r12, $r15;
+        com.sun.media.sound.AbstractDataLine r0;
+        int i0, $i1;
+        java.lang.String $r11;
+        boolean $z0, $z1;
+        javax.sound.sampled.LineUnavailableException $r14;
+        java.lang.StringBuilder $r5, $r6, $r8, $r9, $r10;
+
+        r0 := @this: com.sun.media.sound.AbstractDataLine;
+
+        r2 := @parameter0: javax.sound.sampled.AudioFormat;
+
+        i0 := @parameter1: int;
+
+        $r1 = r0.<com.sun.media.sound.AbstractDataLine: com.sun.media.sound.AbstractMixer mixer>;
+
+        entermonitor $r1;
+
+     label01:
+        $z0 = virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: boolean isOpen()>();
+
+        if $z0 != 0 goto label05;
+
+        staticinvoke <com.sun.media.sound.Toolkit: void isFullySpecifiedAudioFormat(javax.sound.sampled.AudioFormat)>(r2);
+
+        $r12 = r0.<com.sun.media.sound.AbstractDataLine: com.sun.media.sound.AbstractMixer mixer>;
+
+        virtualinvoke $r12.<com.sun.media.sound.AbstractMixer: void open(javax.sound.sampled.Line)>(r0);
+
+     label02:
+        virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: void implOpen(javax.sound.sampled.AudioFormat,int)>(r2, i0);
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: void setOpen(boolean)>(1);
+
+     label03:
+        goto label07;
+
+     label04:
+        $r14 := @caughtexception;
+
+        $r15 = r0.<com.sun.media.sound.AbstractDataLine: com.sun.media.sound.AbstractMixer mixer>;
+
+        virtualinvoke $r15.<com.sun.media.sound.AbstractMixer: void close(javax.sound.sampled.Line)>(r0);
+
+        throw $r14;
+
+     label05:
+        $r3 = virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $z1 = virtualinvoke r2.<javax.sound.sampled.AudioFormat: boolean matches(javax.sound.sampled.AudioFormat)>($r3);
+
+        if $z1 != 0 goto label06;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Line is already open with format ");
+
+        $r7 = virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: javax.sound.sampled.AudioFormat getFormat()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" and bufferSize ");
+
+        $i1 = virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: int getBufferSize()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r11);
+
+        throw $r4;
+
+     label06:
+        if i0 <= 0 goto label07;
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: int setBufferSize(int)>(i0);
+
+     label07:
+        exitmonitor $r1;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r13 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label10:
+        throw $r13;
+
+     label11:
+        return;
+
+        catch javax.sound.sampled.LineUnavailableException from label02 to label03 with label04;
+        catch java.lang.Throwable from label01 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    public final void open(javax.sound.sampled.AudioFormat) throws javax.sound.sampled.LineUnavailableException
+    {
+        com.sun.media.sound.AbstractDataLine r0;
+        int $i1;
+        javax.sound.sampled.AudioFormat r1;
+
+        r0 := @this: com.sun.media.sound.AbstractDataLine;
+
+        r1 := @parameter0: javax.sound.sampled.AudioFormat;
+
+        $i1 = (int) -1;
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: void open(javax.sound.sampled.AudioFormat,int)>(r1, $i1);
+
+        return;
+    }
+
+    public int available()
+    {
+        com.sun.media.sound.AbstractDataLine r0;
+
+        r0 := @this: com.sun.media.sound.AbstractDataLine;
+
+        return 0;
+    }
+
+    public void drain()
+    {
+        com.sun.media.sound.AbstractDataLine r0;
+
+        r0 := @this: com.sun.media.sound.AbstractDataLine;
+
+        return;
+    }
+
+    public void flush()
+    {
+        com.sun.media.sound.AbstractDataLine r0;
+
+        r0 := @this: com.sun.media.sound.AbstractDataLine;
+
+        return;
+    }
+
+    public final void start()
+    {
+        java.lang.Throwable $r5, $r6;
+        com.sun.media.sound.AbstractMixer $r1, $r4;
+        com.sun.media.sound.AbstractDataLine r0;
+        java.lang.Object $r2, $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: com.sun.media.sound.AbstractDataLine;
+
+        $r1 = r0.<com.sun.media.sound.AbstractDataLine: com.sun.media.sound.AbstractMixer mixer>;
+
+        entermonitor $r1;
+
+     label01:
+        $z0 = virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: boolean isOpen()>();
+
+        if $z0 == 0 goto label02;
+
+        $z1 = virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: boolean isStartedRunning()>();
+
+        if $z1 != 0 goto label02;
+
+        $r4 = r0.<com.sun.media.sound.AbstractDataLine: com.sun.media.sound.AbstractMixer mixer>;
+
+        virtualinvoke $r4.<com.sun.media.sound.AbstractMixer: void start(javax.sound.sampled.Line)>(r0);
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: void implStart()>();
+
+        r0.<com.sun.media.sound.AbstractDataLine: boolean running> = 1;
+
+     label02:
+        exitmonitor $r1;
+
+     label03:
+        goto label06;
+
+     label04:
+        $r6 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label05:
+        throw $r6;
+
+     label06:
+        $r2 = r0.<com.sun.media.sound.AbstractDataLine: java.lang.Object lock>;
+
+        entermonitor $r2;
+
+     label07:
+        $r3 = r0.<com.sun.media.sound.AbstractDataLine: java.lang.Object lock>;
+
+        virtualinvoke $r3.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor $r2;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r5 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label10:
+        throw $r5;
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label01 to label03 with label04;
+        catch java.lang.Throwable from label04 to label05 with label04;
+        catch java.lang.Throwable from label07 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    public final void stop()
+    {
+        java.lang.Throwable $r5, $r6;
+        com.sun.media.sound.AbstractMixer $r1, $r4;
+        com.sun.media.sound.AbstractDataLine r0;
+        java.lang.Object $r2, $r3;
+        boolean $z0, $z1, $z2, $z3;
+
+        r0 := @this: com.sun.media.sound.AbstractDataLine;
+
+        $r1 = r0.<com.sun.media.sound.AbstractDataLine: com.sun.media.sound.AbstractMixer mixer>;
+
+        entermonitor $r1;
+
+     label01:
+        $z0 = virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: boolean isOpen()>();
+
+        if $z0 == 0 goto label02;
+
+        $z1 = virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: boolean isStartedRunning()>();
+
+        if $z1 == 0 goto label02;
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: void implStop()>();
+
+        $r4 = r0.<com.sun.media.sound.AbstractDataLine: com.sun.media.sound.AbstractMixer mixer>;
+
+        virtualinvoke $r4.<com.sun.media.sound.AbstractMixer: void stop(javax.sound.sampled.Line)>(r0);
+
+        r0.<com.sun.media.sound.AbstractDataLine: boolean running> = 0;
+
+        $z2 = r0.<com.sun.media.sound.AbstractDataLine: boolean started>;
+
+        if $z2 == 0 goto label02;
+
+        $z3 = virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: boolean isActive()>();
+
+        if $z3 != 0 goto label02;
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: void setStarted(boolean)>(0);
+
+     label02:
+        exitmonitor $r1;
+
+     label03:
+        goto label06;
+
+     label04:
+        $r6 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label05:
+        throw $r6;
+
+     label06:
+        $r2 = r0.<com.sun.media.sound.AbstractDataLine: java.lang.Object lock>;
+
+        entermonitor $r2;
+
+     label07:
+        $r3 = r0.<com.sun.media.sound.AbstractDataLine: java.lang.Object lock>;
+
+        virtualinvoke $r3.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor $r2;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r5 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label10:
+        throw $r5;
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label01 to label03 with label04;
+        catch java.lang.Throwable from label04 to label05 with label04;
+        catch java.lang.Throwable from label07 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    public final boolean isRunning()
+    {
+        com.sun.media.sound.AbstractDataLine r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.AbstractDataLine;
+
+        $z0 = r0.<com.sun.media.sound.AbstractDataLine: boolean started>;
+
+        return $z0;
+    }
+
+    public final boolean isActive()
+    {
+        com.sun.media.sound.AbstractDataLine r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.AbstractDataLine;
+
+        $z0 = r0.<com.sun.media.sound.AbstractDataLine: boolean active>;
+
+        return $z0;
+    }
+
+    public final long getMicrosecondPosition()
+    {
+        com.sun.media.sound.AbstractDataLine r0;
+        byte $b1;
+        javax.sound.sampled.AudioFormat $r1;
+        long $l0, l2;
+
+        r0 := @this: com.sun.media.sound.AbstractDataLine;
+
+        $l0 = virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: long getLongFramePosition()>();
+
+        l2 = $l0;
+
+        $b1 = $l0 cmp -1L;
+
+        if $b1 == 0 goto label1;
+
+        $r1 = virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: javax.sound.sampled.AudioFormat getFormat()>();
+
+        l2 = staticinvoke <com.sun.media.sound.Toolkit: long frames2micros(javax.sound.sampled.AudioFormat,long)>($r1, $l0);
+
+     label1:
+        return l2;
+    }
+
+    public final javax.sound.sampled.AudioFormat getFormat()
+    {
+        com.sun.media.sound.AbstractDataLine r0;
+        javax.sound.sampled.AudioFormat $r1;
+
+        r0 := @this: com.sun.media.sound.AbstractDataLine;
+
+        $r1 = r0.<com.sun.media.sound.AbstractDataLine: javax.sound.sampled.AudioFormat format>;
+
+        return $r1;
+    }
+
+    public final int getBufferSize()
+    {
+        com.sun.media.sound.AbstractDataLine r0;
+        int $i0;
+
+        r0 := @this: com.sun.media.sound.AbstractDataLine;
+
+        $i0 = r0.<com.sun.media.sound.AbstractDataLine: int bufferSize>;
+
+        return $i0;
+    }
+
+    public final int setBufferSize(int)
+    {
+        com.sun.media.sound.AbstractDataLine r0;
+        int $i0, i1;
+
+        r0 := @this: com.sun.media.sound.AbstractDataLine;
+
+        i1 := @parameter0: int;
+
+        $i0 = virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: int getBufferSize()>();
+
+        return $i0;
+    }
+
+    public final float getLevel()
+    {
+        com.sun.media.sound.AbstractDataLine r0;
+
+        r0 := @this: com.sun.media.sound.AbstractDataLine;
+
+        return -1.0F;
+    }
+
+    final boolean isStartedRunning()
+    {
+        com.sun.media.sound.AbstractDataLine r0;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.AbstractDataLine;
+
+        $z0 = r0.<com.sun.media.sound.AbstractDataLine: boolean running>;
+
+        return $z0;
+    }
+
+    final void setActive(boolean)
+    {
+        com.sun.media.sound.AbstractDataLine r0;
+        java.lang.Throwable $r1;
+        boolean z0, $z1;
+
+        r0 := @this: com.sun.media.sound.AbstractDataLine;
+
+        z0 := @parameter0: boolean;
+
+        entermonitor r0;
+
+     label1:
+        $z1 = r0.<com.sun.media.sound.AbstractDataLine: boolean active>;
+
+        if $z1 == z0 goto label2;
+
+        r0.<com.sun.media.sound.AbstractDataLine: boolean active> = z0;
+
+     label2:
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r1;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    final void setStarted(boolean)
+    {
+        java.lang.Throwable $r5;
+        long $l0;
+        com.sun.media.sound.AbstractDataLine r0;
+        javax.sound.sampled.LineEvent $r1, $r3;
+        javax.sound.sampled.LineEvent$Type $r2, $r4;
+        boolean z0, $z1, z2;
+
+        r0 := @this: com.sun.media.sound.AbstractDataLine;
+
+        z0 := @parameter0: boolean;
+
+        z2 = 0;
+
+        $l0 = virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: long getLongFramePosition()>();
+
+        entermonitor r0;
+
+     label1:
+        $z1 = r0.<com.sun.media.sound.AbstractDataLine: boolean started>;
+
+        if $z1 == z0 goto label2;
+
+        r0.<com.sun.media.sound.AbstractDataLine: boolean started> = z0;
+
+        z2 = 1;
+
+     label2:
+        exitmonitor r0;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+     label5:
+        throw $r5;
+
+     label6:
+        if z2 == 0 goto label8;
+
+        if z0 == 0 goto label7;
+
+        $r3 = new javax.sound.sampled.LineEvent;
+
+        $r4 = <javax.sound.sampled.LineEvent$Type: javax.sound.sampled.LineEvent$Type START>;
+
+        specialinvoke $r3.<javax.sound.sampled.LineEvent: void <init>(javax.sound.sampled.Line,javax.sound.sampled.LineEvent$Type,long)>(r0, $r4, $l0);
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: void sendEvents(javax.sound.sampled.LineEvent)>($r3);
+
+        goto label8;
+
+     label7:
+        $r1 = new javax.sound.sampled.LineEvent;
+
+        $r2 = <javax.sound.sampled.LineEvent$Type: javax.sound.sampled.LineEvent$Type STOP>;
+
+        specialinvoke $r1.<javax.sound.sampled.LineEvent: void <init>(javax.sound.sampled.Line,javax.sound.sampled.LineEvent$Type,long)>(r0, $r2, $l0);
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: void sendEvents(javax.sound.sampled.LineEvent)>($r1);
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    final void setEOM()
+    {
+        com.sun.media.sound.AbstractDataLine r0;
+
+        r0 := @this: com.sun.media.sound.AbstractDataLine;
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: void setStarted(boolean)>(0);
+
+        return;
+    }
+
+    public final void open() throws javax.sound.sampled.LineUnavailableException
+    {
+        com.sun.media.sound.AbstractDataLine r0;
+        int $i0;
+        javax.sound.sampled.AudioFormat $r1;
+
+        r0 := @this: com.sun.media.sound.AbstractDataLine;
+
+        $r1 = r0.<com.sun.media.sound.AbstractDataLine: javax.sound.sampled.AudioFormat format>;
+
+        $i0 = r0.<com.sun.media.sound.AbstractDataLine: int bufferSize>;
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: void open(javax.sound.sampled.AudioFormat,int)>($r1, $i0);
+
+        return;
+    }
+
+    public final void close()
+    {
+        com.sun.media.sound.AbstractDataLine r0;
+        java.lang.Throwable $r4;
+        int $i0;
+        javax.sound.sampled.AudioFormat $r3;
+        com.sun.media.sound.AbstractMixer $r1, $r2;
+        boolean $z0;
+
+        r0 := @this: com.sun.media.sound.AbstractDataLine;
+
+        $r1 = r0.<com.sun.media.sound.AbstractDataLine: com.sun.media.sound.AbstractMixer mixer>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: boolean isOpen()>();
+
+        if $z0 == 0 goto label2;
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: void stop()>();
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: void setOpen(boolean)>(0);
+
+        virtualinvoke r0.<com.sun.media.sound.AbstractDataLine: void implClose()>();
+
+        $r2 = r0.<com.sun.media.sound.AbstractDataLine: com.sun.media.sound.AbstractMixer mixer>;
+
+        virtualinvoke $r2.<com.sun.media.sound.AbstractMixer: void close(javax.sound.sampled.Line)>(r0);
+
+        $r3 = r0.<com.sun.media.sound.AbstractDataLine: javax.sound.sampled.AudioFormat defaultFormat>;
+
+        r0.<com.sun.media.sound.AbstractDataLine: javax.sound.sampled.AudioFormat format> = $r3;
+
+        $i0 = r0.<com.sun.media.sound.AbstractDataLine: int defaultBufferSize>;
+
+        r0.<com.sun.media.sound.AbstractDataLine: int bufferSize> = $i0;
+
+     label2:
+        exitmonitor $r1;
+
+     label3:
+        goto label6;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r4;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    abstract void implOpen(javax.sound.sampled.AudioFormat, int) throws javax.sound.sampled.LineUnavailableException;
+
+    abstract void implClose();
+
+    abstract void implStart();
+
+    abstract void implStop();
+}

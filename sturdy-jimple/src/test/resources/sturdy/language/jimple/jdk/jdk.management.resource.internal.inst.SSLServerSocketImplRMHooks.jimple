@@ -1,0 +1,141 @@
+final class jdk.management.resource.internal.inst.SSLServerSocketImplRMHooks extends java.lang.Object
+{
+
+    void <init>()
+    {
+        jdk.management.resource.internal.inst.SSLServerSocketImplRMHooks r0;
+
+        r0 := @this: jdk.management.resource.internal.inst.SSLServerSocketImplRMHooks;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public java.net.Socket accept() throws java.io.IOException
+    {
+        java.lang.Throwable $r7;
+        java.net.Socket $r1;
+        long $l0, $l2, $l3, $l4, $l5, l6, l7;
+        jdk.management.resource.ResourceRequestDeniedException $r10;
+        java.net.InetAddress $r4;
+        byte $b1;
+        int $i8;
+        jdk.management.resource.internal.inst.SSLServerSocketImplRMHooks r0;
+        jdk.management.resource.internal.ApproverGroup $r2;
+        jdk.management.resource.internal.ResourceIdImpl $r5, r12;
+        java.io.IOException $r8, $r11, $r14, $r15;
+        jdk.management.resource.ResourceRequest $r3, r13;
+
+        r0 := @this: jdk.management.resource.internal.inst.SSLServerSocketImplRMHooks;
+
+        l6 = 0L;
+
+        l7 = 0L;
+
+        r12 = null;
+
+        r13 = null;
+
+     label01:
+        $r1 = virtualinvoke r0.<jdk.management.resource.internal.inst.SSLServerSocketImplRMHooks: java.net.Socket accept()>();
+
+        l7 = 1L;
+
+        $r2 = <jdk.management.resource.internal.ApproverGroup: jdk.management.resource.internal.ApproverGroup SOCKET_OPEN_GROUP>;
+
+        $r3 = virtualinvoke $r2.<jdk.management.resource.internal.ApproverGroup: jdk.management.resource.ResourceRequest getApprover(java.lang.Object)>($r1);
+
+        r13 = $r3;
+
+        $r4 = virtualinvoke $r1.<java.net.Socket: java.net.InetAddress getLocalAddress()>();
+
+        $r5 = staticinvoke <jdk.management.resource.internal.ResourceIdImpl: jdk.management.resource.internal.ResourceIdImpl of(java.lang.Object)>($r4);
+
+        r12 = $r5;
+
+     label02:
+        $l0 = interfaceinvoke $r3.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>(1L, $r5);
+
+        l6 = $l0;
+
+        $b1 = $l0 cmp 1L;
+
+        $i8 = (int) $b1;
+
+        if $i8 >= 0 goto label07;
+
+     label03:
+        virtualinvoke $r1.<java.net.Socket: void close()>();
+
+     label04:
+        goto label06;
+
+     label05:
+        $r11 := @caughtexception;
+
+     label06:
+        $r14 = new java.io.IOException;
+
+        specialinvoke $r14.<java.io.IOException: void <init>(java.lang.String)>("Resource limited: too many open sockets");
+
+        throw $r14;
+
+     label07:
+        goto label13;
+
+     label08:
+        $r10 := @caughtexception;
+
+     label09:
+        virtualinvoke $r1.<java.net.Socket: void close()>();
+
+     label10:
+        goto label12;
+
+     label11:
+        $r8 := @caughtexception;
+
+     label12:
+        $r15 = new java.io.IOException;
+
+        specialinvoke $r15.<java.io.IOException: void <init>(java.lang.String,java.lang.Throwable)>("Resource limited: too many open sockets", $r10);
+
+        throw $r15;
+
+     label13:
+        if $r3 == null goto label17;
+
+        $l2 = $l0 - 1L;
+
+        $l3 = neg $l2;
+
+        interfaceinvoke $r3.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>($l3, $r5);
+
+        goto label17;
+
+     label14:
+        $r7 := @caughtexception;
+
+     label15:
+        if r13 == null goto label16;
+
+        $l4 = l6 - l7;
+
+        $l5 = neg $l4;
+
+        interfaceinvoke r13.<jdk.management.resource.ResourceRequest: long request(long,jdk.management.resource.ResourceId)>($l5, r12);
+
+     label16:
+        throw $r7;
+
+     label17:
+        return $r1;
+
+        catch java.io.IOException from label03 to label04 with label05;
+        catch jdk.management.resource.ResourceRequestDeniedException from label02 to label07 with label08;
+        catch java.io.IOException from label09 to label10 with label11;
+        catch java.lang.Throwable from label01 to label13 with label14;
+        catch java.lang.Throwable from label14 to label15 with label14;
+    }
+}

@@ -1,0 +1,3333 @@
+public class java.awt.EventQueue extends java.lang.Object
+{
+    private static final java.util.concurrent.atomic.AtomicInteger threadInitNumber;
+    private static final int LOW_PRIORITY;
+    private static final int NORM_PRIORITY;
+    private static final int HIGH_PRIORITY;
+    private static final int ULTIMATE_PRIORITY;
+    private static final int NUM_PRIORITIES;
+    private java.awt.Queue[] queues;
+    private java.awt.EventQueue nextQueue;
+    private java.awt.EventQueue previousQueue;
+    private final java.util.concurrent.locks.Lock pushPopLock;
+    private final java.util.concurrent.locks.Condition pushPopCond;
+    private static final java.lang.Runnable dummyRunnable;
+    private java.awt.EventDispatchThread dispatchThread;
+    private final java.lang.ThreadGroup threadGroup;
+    private final java.lang.ClassLoader classLoader;
+    private long mostRecentEventTime;
+    private long mostRecentKeyEventTime;
+    private java.lang.ref.WeakReference currentEvent;
+    private volatile int waitForID;
+    private final sun.awt.AppContext appContext;
+    private final java.lang.String name;
+    private sun.awt.FwDispatcher fwDispatcher;
+    private static volatile sun.util.logging.PlatformLogger eventLog;
+    private static final int PAINT;
+    private static final int UPDATE;
+    private static final int MOVE;
+    private static final int DRAG;
+    private static final int PEER;
+    private static final int CACHE_LENGTH;
+    private static final sun.misc.JavaSecurityAccess javaSecurityAccess;
+
+    private static final sun.util.logging.PlatformLogger getEventLog()
+    {
+        sun.util.logging.PlatformLogger $r0, $r1, $r2;
+
+        $r0 = <java.awt.EventQueue: sun.util.logging.PlatformLogger eventLog>;
+
+        if $r0 != null goto label1;
+
+        $r2 = staticinvoke <sun.util.logging.PlatformLogger: sun.util.logging.PlatformLogger getLogger(java.lang.String)>("java.awt.event.EventQueue");
+
+        <java.awt.EventQueue: sun.util.logging.PlatformLogger eventLog> = $r2;
+
+     label1:
+        $r1 = <java.awt.EventQueue: sun.util.logging.PlatformLogger eventLog>;
+
+        return $r1;
+    }
+
+    public void <init>()
+    {
+        long $l0, $l1;
+        java.awt.Queue[] $r1, $r21;
+        java.lang.ThreadGroup $r3;
+        java.util.concurrent.atomic.AtomicInteger $r8;
+        java.lang.Thread $r2, $r4;
+        sun.awt.AppContext $r11, $r13, $r17;
+        int $i2, i3;
+        java.lang.String $r10;
+        java.awt.EventQueue r0;
+        java.util.concurrent.locks.Lock $r15;
+        java.util.concurrent.locks.Condition $r19;
+        java.lang.StringBuilder $r6, $r7, $r9;
+        java.lang.Object $r12, $r14, $r16, $r18;
+        java.awt.Queue $r20;
+        java.lang.ClassLoader $r5;
+
+        r0 := @this: java.awt.EventQueue;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = newarray (java.awt.Queue)[4];
+
+        r0.<java.awt.EventQueue: java.awt.Queue[] queues> = $r1;
+
+        $r2 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Thread: java.lang.ThreadGroup getThreadGroup()>();
+
+        r0.<java.awt.EventQueue: java.lang.ThreadGroup threadGroup> = $r3;
+
+        $r4 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.Thread: java.lang.ClassLoader getContextClassLoader()>();
+
+        r0.<java.awt.EventQueue: java.lang.ClassLoader classLoader> = $r5;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        r0.<java.awt.EventQueue: long mostRecentEventTime> = $l0;
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        r0.<java.awt.EventQueue: long mostRecentKeyEventTime> = $l1;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("AWT-EventQueue-");
+
+        $r8 = <java.awt.EventQueue: java.util.concurrent.atomic.AtomicInteger threadInitNumber>;
+
+        $i2 = virtualinvoke $r8.<java.util.concurrent.atomic.AtomicInteger: int getAndIncrement()>();
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r0.<java.awt.EventQueue: java.lang.String name> = $r10;
+
+        i3 = 0;
+
+     label1:
+        if i3 >= 4 goto label2;
+
+        $r21 = r0.<java.awt.EventQueue: java.awt.Queue[] queues>;
+
+        $r20 = new java.awt.Queue;
+
+        specialinvoke $r20.<java.awt.Queue: void <init>()>();
+
+        $r21[i3] = $r20;
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label2:
+        $r11 = staticinvoke <sun.awt.AppContext: sun.awt.AppContext getAppContext()>();
+
+        r0.<java.awt.EventQueue: sun.awt.AppContext appContext> = $r11;
+
+        $r13 = r0.<java.awt.EventQueue: sun.awt.AppContext appContext>;
+
+        $r12 = <sun.awt.AppContext: java.lang.Object EVENT_QUEUE_LOCK_KEY>;
+
+        $r14 = virtualinvoke $r13.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>($r12);
+
+        $r15 = (java.util.concurrent.locks.Lock) $r14;
+
+        r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock> = $r15;
+
+        $r17 = r0.<java.awt.EventQueue: sun.awt.AppContext appContext>;
+
+        $r16 = <sun.awt.AppContext: java.lang.Object EVENT_QUEUE_COND_KEY>;
+
+        $r18 = virtualinvoke $r17.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>($r16);
+
+        $r19 = (java.util.concurrent.locks.Condition) $r18;
+
+        r0.<java.awt.EventQueue: java.util.concurrent.locks.Condition pushPopCond> = $r19;
+
+        return;
+    }
+
+    public void postEvent(java.awt.AWTEvent)
+    {
+        java.awt.EventQueue r0;
+        java.awt.AWTEvent r2;
+        sun.awt.AppContext $r1;
+
+        r0 := @this: java.awt.EventQueue;
+
+        r2 := @parameter0: java.awt.AWTEvent;
+
+        $r1 = r0.<java.awt.EventQueue: sun.awt.AppContext appContext>;
+
+        staticinvoke <sun.awt.SunToolkit: void flushPendingEvents(sun.awt.AppContext)>($r1);
+
+        specialinvoke r0.<java.awt.EventQueue: void postEventPrivate(java.awt.AWTEvent)>(r2);
+
+        return;
+    }
+
+    private final void postEventPrivate(java.awt.AWTEvent)
+    {
+        java.awt.EventQueue r1, $r3, $r9;
+        java.awt.EventDispatchThread $r4;
+        java.lang.Throwable $r11;
+        java.awt.AWTEvent r0;
+        java.util.concurrent.locks.Lock $r2, $r5, $r8, $r10, $r12;
+        int $i0;
+        java.lang.Object $r6;
+        sun.awt.AWTAutoShutdown $r7;
+
+        r1 := @this: java.awt.EventQueue;
+
+        r0 := @parameter0: java.awt.AWTEvent;
+
+        r0.<java.awt.AWTEvent: boolean isPosted> = 1;
+
+        $r2 = r1.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r2.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $r3 = r1.<java.awt.EventQueue: java.awt.EventQueue nextQueue>;
+
+        if $r3 == null goto label3;
+
+        $r9 = r1.<java.awt.EventQueue: java.awt.EventQueue nextQueue>;
+
+        specialinvoke $r9.<java.awt.EventQueue: void postEventPrivate(java.awt.AWTEvent)>(r0);
+
+     label2:
+        $r10 = r1.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r10.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return;
+
+     label3:
+        $r4 = r1.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread>;
+
+        if $r4 != null goto label6;
+
+        $r6 = virtualinvoke r0.<java.awt.AWTEvent: java.lang.Object getSource()>();
+
+        $r7 = staticinvoke <sun.awt.AWTAutoShutdown: sun.awt.AWTAutoShutdown getInstance()>();
+
+        if $r6 != $r7 goto label5;
+
+     label4:
+        $r8 = r1.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r8.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return;
+
+     label5:
+        virtualinvoke r1.<java.awt.EventQueue: void initDispatchThread()>();
+
+     label6:
+        $i0 = staticinvoke <java.awt.EventQueue: int getPriority(java.awt.AWTEvent)>(r0);
+
+        specialinvoke r1.<java.awt.EventQueue: void postEvent(java.awt.AWTEvent,int)>(r0, $i0);
+
+     label7:
+        $r5 = r1.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r5.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label9;
+
+     label8:
+        $r11 := @caughtexception;
+
+        $r12 = r1.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r12.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r11;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label8;
+        catch java.lang.Throwable from label3 to label4 with label8;
+        catch java.lang.Throwable from label5 to label7 with label8;
+    }
+
+    private static int getPriority(java.awt.AWTEvent)
+    {
+        sun.awt.PeerEvent r1;
+        long $l1, $l2, $l4, $l5, $l7, $l8;
+        java.awt.AWTEvent r0;
+        byte $b3, $b6, $b9;
+        int $i0;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.AWTEvent;
+
+        $z0 = r0 instanceof sun.awt.PeerEvent;
+
+        if $z0 == 0 goto label3;
+
+        r1 = (sun.awt.PeerEvent) r0;
+
+        $l1 = virtualinvoke r1.<sun.awt.PeerEvent: long getFlags()>();
+
+        $l2 = $l1 & 2L;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 == 0 goto label1;
+
+        return 3;
+
+     label1:
+        $l4 = virtualinvoke r1.<sun.awt.PeerEvent: long getFlags()>();
+
+        $l5 = $l4 & 1L;
+
+        $b6 = $l5 cmp 0L;
+
+        if $b6 == 0 goto label2;
+
+        return 2;
+
+     label2:
+        $l7 = virtualinvoke r1.<sun.awt.PeerEvent: long getFlags()>();
+
+        $l8 = $l7 & 4L;
+
+        $b9 = $l8 cmp 0L;
+
+        if $b9 == 0 goto label3;
+
+        return 0;
+
+     label3:
+        $i0 = virtualinvoke r0.<java.awt.AWTEvent: int getID()>();
+
+        if $i0 < 800 goto label4;
+
+        if $i0 > 801 goto label4;
+
+        return 0;
+
+     label4:
+        return 1;
+    }
+
+    private void postEvent(java.awt.AWTEvent, int)
+    {
+        java.awt.Queue[] $r3, $r6, $r9, $r12, $r13;
+        sun.awt.EventQueueItem $r2, $r5, $r8;
+        java.awt.AWTEvent r1;
+        int i0, $i1, $i2;
+        boolean $z0, $z1, $z3, $z4;
+        java.awt.EventQueue r0;
+        java.awt.EventDispatchThread $r21;
+        java.util.concurrent.locks.Condition $r11, $r16, $r19;
+        java.awt.Queue $r4, $r7, $r10, $r14, $r15;
+        java.lang.Object $r17;
+        sun.awt.AWTAutoShutdown $r18, $r20;
+
+        r0 := @this: java.awt.EventQueue;
+
+        r1 := @parameter0: java.awt.AWTEvent;
+
+        i0 := @parameter1: int;
+
+        $z0 = specialinvoke r0.<java.awt.EventQueue: boolean coalesceEvent(java.awt.AWTEvent,int)>(r1, i0);
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r2 = new sun.awt.EventQueueItem;
+
+        specialinvoke $r2.<sun.awt.EventQueueItem: void <init>(java.awt.AWTEvent)>(r1);
+
+        specialinvoke r0.<java.awt.EventQueue: void cacheEQItem(sun.awt.EventQueueItem)>($r2);
+
+        $i1 = virtualinvoke r1.<java.awt.AWTEvent: int getID()>();
+
+        $i2 = r0.<java.awt.EventQueue: int waitForID>;
+
+        if $i1 != $i2 goto label2;
+
+        $z4 = 1;
+
+        $z3 = 1;
+
+        goto label3;
+
+     label2:
+        $z4 = 0;
+
+        $z3 = 0;
+
+     label3:
+        $r3 = r0.<java.awt.EventQueue: java.awt.Queue[] queues>;
+
+        $r4 = $r3[i0];
+
+        $r5 = $r4.<java.awt.Queue: sun.awt.EventQueueItem head>;
+
+        if $r5 != null goto label7;
+
+        $z1 = specialinvoke r0.<java.awt.EventQueue: boolean noEvents()>();
+
+        $r12 = r0.<java.awt.EventQueue: java.awt.Queue[] queues>;
+
+        $r15 = $r12[i0];
+
+        $r13 = r0.<java.awt.EventQueue: java.awt.Queue[] queues>;
+
+        $r14 = $r13[i0];
+
+        $r14.<java.awt.Queue: sun.awt.EventQueueItem tail> = $r2;
+
+        $r15.<java.awt.Queue: sun.awt.EventQueueItem head> = $r2;
+
+        if $z1 == 0 goto label5;
+
+        $r17 = virtualinvoke r1.<java.awt.AWTEvent: java.lang.Object getSource()>();
+
+        $r18 = staticinvoke <sun.awt.AWTAutoShutdown: sun.awt.AWTAutoShutdown getInstance()>();
+
+        if $r17 == $r18 goto label4;
+
+        $r20 = staticinvoke <sun.awt.AWTAutoShutdown: sun.awt.AWTAutoShutdown getInstance()>();
+
+        $r21 = r0.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread>;
+
+        virtualinvoke $r20.<sun.awt.AWTAutoShutdown: void notifyThreadBusy(java.lang.Thread)>($r21);
+
+     label4:
+        $r19 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Condition pushPopCond>;
+
+        interfaceinvoke $r19.<java.util.concurrent.locks.Condition: void signalAll()>();
+
+        goto label6;
+
+     label5:
+        if $z3 == 0 goto label6;
+
+        $r16 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Condition pushPopCond>;
+
+        interfaceinvoke $r16.<java.util.concurrent.locks.Condition: void signalAll()>();
+
+     label6:
+        goto label8;
+
+     label7:
+        $r6 = r0.<java.awt.EventQueue: java.awt.Queue[] queues>;
+
+        $r7 = $r6[i0];
+
+        $r8 = $r7.<java.awt.Queue: sun.awt.EventQueueItem tail>;
+
+        $r8.<sun.awt.EventQueueItem: sun.awt.EventQueueItem next> = $r2;
+
+        $r9 = r0.<java.awt.EventQueue: java.awt.Queue[] queues>;
+
+        $r10 = $r9[i0];
+
+        $r10.<java.awt.Queue: sun.awt.EventQueueItem tail> = $r2;
+
+        if $z4 == 0 goto label8;
+
+        $r11 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Condition pushPopCond>;
+
+        interfaceinvoke $r11.<java.util.concurrent.locks.Condition: void signalAll()>();
+
+     label8:
+        return;
+    }
+
+    private boolean coalescePaintEvent(java.awt.event.PaintEvent)
+    {
+        sun.awt.EventQueueItem $r6, $r8, $r12;
+        java.awt.AWTEvent $r9;
+        int $i0, $i2;
+        sun.awt.EventQueueItem[] $r13;
+        java.awt.EventQueue r7;
+        java.awt.peer.ComponentPeer r3;
+        java.awt.Component $r2, $r5;
+        java.awt.event.PaintEvent r0, $r10, $r11;
+        java.lang.Object $r1, $r4;
+
+        r7 := @this: java.awt.EventQueue;
+
+        r0 := @parameter0: java.awt.event.PaintEvent;
+
+        $r1 = virtualinvoke r0.<java.awt.event.PaintEvent: java.lang.Object getSource()>();
+
+        $r2 = (java.awt.Component) $r1;
+
+        r3 = $r2.<java.awt.Component: java.awt.peer.ComponentPeer peer>;
+
+        if r3 == null goto label1;
+
+        interfaceinvoke r3.<java.awt.peer.ComponentPeer: void coalescePaintEvent(java.awt.event.PaintEvent)>(r0);
+
+     label1:
+        $r4 = virtualinvoke r0.<java.awt.event.PaintEvent: java.lang.Object getSource()>();
+
+        $r5 = (java.awt.Component) $r4;
+
+        $r13 = $r5.<java.awt.Component: sun.awt.EventQueueItem[] eventCache>;
+
+        if $r13 != null goto label2;
+
+        return 0;
+
+     label2:
+        $i0 = staticinvoke <java.awt.EventQueue: int eventToCacheIndex(java.awt.AWTEvent)>(r0);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label3;
+
+        $r6 = $r13[$i0];
+
+        if $r6 == null goto label3;
+
+        $r8 = $r13[$i0];
+
+        $r9 = $r8.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $r10 = (java.awt.event.PaintEvent) $r9;
+
+        $r11 = specialinvoke r7.<java.awt.EventQueue: java.awt.event.PaintEvent mergePaintEvents(java.awt.event.PaintEvent,java.awt.event.PaintEvent)>(r0, $r10);
+
+        if $r11 == null goto label3;
+
+        $r12 = $r13[$i0];
+
+        $r12.<sun.awt.EventQueueItem: java.awt.AWTEvent event> = $r11;
+
+        return 1;
+
+     label3:
+        return 0;
+    }
+
+    private java.awt.event.PaintEvent mergePaintEvents(java.awt.event.PaintEvent, java.awt.event.PaintEvent)
+    {
+        java.awt.EventQueue r4;
+        java.awt.Rectangle $r1, $r3;
+        java.awt.event.PaintEvent r0, r2;
+        boolean $z0, $z1;
+
+        r4 := @this: java.awt.EventQueue;
+
+        r0 := @parameter0: java.awt.event.PaintEvent;
+
+        r2 := @parameter1: java.awt.event.PaintEvent;
+
+        $r1 = virtualinvoke r0.<java.awt.event.PaintEvent: java.awt.Rectangle getUpdateRect()>();
+
+        $r3 = virtualinvoke r2.<java.awt.event.PaintEvent: java.awt.Rectangle getUpdateRect()>();
+
+        $z0 = virtualinvoke $r3.<java.awt.Rectangle: boolean contains(java.awt.Rectangle)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        return r2;
+
+     label1:
+        $z1 = virtualinvoke $r1.<java.awt.Rectangle: boolean contains(java.awt.Rectangle)>($r3);
+
+        if $z1 == 0 goto label2;
+
+        return r0;
+
+     label2:
+        return null;
+    }
+
+    private boolean coalesceMouseEvent(java.awt.event.MouseEvent)
+    {
+        java.awt.EventQueue r6;
+        java.awt.Component $r2;
+        java.awt.event.MouseEvent r0;
+        sun.awt.EventQueueItem $r4, $r5;
+        int $i0, $i2;
+        java.lang.Object $r1;
+        sun.awt.EventQueueItem[] r3;
+
+        r6 := @this: java.awt.EventQueue;
+
+        r0 := @parameter0: java.awt.event.MouseEvent;
+
+        $r1 = virtualinvoke r0.<java.awt.event.MouseEvent: java.lang.Object getSource()>();
+
+        $r2 = (java.awt.Component) $r1;
+
+        r3 = $r2.<java.awt.Component: sun.awt.EventQueueItem[] eventCache>;
+
+        if r3 != null goto label1;
+
+        return 0;
+
+     label1:
+        $i0 = staticinvoke <java.awt.EventQueue: int eventToCacheIndex(java.awt.AWTEvent)>(r0);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label2;
+
+        $r4 = r3[$i0];
+
+        if $r4 == null goto label2;
+
+        $r5 = r3[$i0];
+
+        $r5.<sun.awt.EventQueueItem: java.awt.AWTEvent event> = r0;
+
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    private boolean coalescePeerEvent(sun.awt.PeerEvent)
+    {
+        java.awt.EventQueue r9;
+        sun.awt.PeerEvent $r6, $r7, r10;
+        java.awt.Component $r1;
+        sun.awt.EventQueueItem $r3, $r4, $r8;
+        java.awt.AWTEvent $r5;
+        int $i0, $i2;
+        java.lang.Object $r0;
+        sun.awt.EventQueueItem[] r2;
+
+        r9 := @this: java.awt.EventQueue;
+
+        r10 := @parameter0: sun.awt.PeerEvent;
+
+        $r0 = virtualinvoke r10.<sun.awt.PeerEvent: java.lang.Object getSource()>();
+
+        $r1 = (java.awt.Component) $r0;
+
+        r2 = $r1.<java.awt.Component: sun.awt.EventQueueItem[] eventCache>;
+
+        if r2 != null goto label1;
+
+        return 0;
+
+     label1:
+        $i0 = staticinvoke <java.awt.EventQueue: int eventToCacheIndex(java.awt.AWTEvent)>(r10);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label3;
+
+        $r3 = r2[$i0];
+
+        if $r3 == null goto label3;
+
+        $r4 = r2[$i0];
+
+        $r5 = $r4.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $r6 = (sun.awt.PeerEvent) $r5;
+
+        $r7 = virtualinvoke r10.<sun.awt.PeerEvent: sun.awt.PeerEvent coalesceEvents(sun.awt.PeerEvent)>($r6);
+
+        if $r7 == null goto label2;
+
+        $r8 = r2[$i0];
+
+        $r8.<sun.awt.EventQueueItem: java.awt.AWTEvent event> = $r7;
+
+        return 1;
+
+     label2:
+        r2[$i0] = null;
+
+     label3:
+        return 0;
+    }
+
+    private boolean coalesceOtherEvent(java.awt.AWTEvent, int)
+    {
+        java.awt.EventQueue r3;
+        java.awt.Queue[] $r4;
+        java.awt.Component r2;
+        sun.awt.EventQueueItem r11;
+        java.awt.AWTEvent r0, $r6, $r8, $r9, $r10;
+        int $i0, i1, $i2;
+        java.lang.Object $r1, $r7;
+        java.awt.Queue $r5;
+
+        r3 := @this: java.awt.EventQueue;
+
+        r0 := @parameter0: java.awt.AWTEvent;
+
+        i1 := @parameter1: int;
+
+        $i0 = virtualinvoke r0.<java.awt.AWTEvent: int getID()>();
+
+        $r1 = virtualinvoke r0.<java.awt.AWTEvent: java.lang.Object getSource()>();
+
+        r2 = (java.awt.Component) $r1;
+
+        $r4 = r3.<java.awt.EventQueue: java.awt.Queue[] queues>;
+
+        $r5 = $r4[i1];
+
+        r11 = $r5.<java.awt.Queue: sun.awt.EventQueueItem head>;
+
+     label1:
+        if r11 == null goto label3;
+
+        $r6 = r11.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $r7 = virtualinvoke $r6.<java.awt.AWTEvent: java.lang.Object getSource()>();
+
+        if $r7 != r2 goto label2;
+
+        $r8 = r11.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $i2 = virtualinvoke $r8.<java.awt.AWTEvent: int getID()>();
+
+        if $i2 != $i0 goto label2;
+
+        $r9 = r11.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $r10 = virtualinvoke r2.<java.awt.Component: java.awt.AWTEvent coalesceEvents(java.awt.AWTEvent,java.awt.AWTEvent)>($r9, r0);
+
+        if $r10 == null goto label2;
+
+        r11.<sun.awt.EventQueueItem: java.awt.AWTEvent event> = $r10;
+
+        return 1;
+
+     label2:
+        r11 = r11.<sun.awt.EventQueueItem: sun.awt.EventQueueItem next>;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    private boolean coalesceEvent(java.awt.AWTEvent, int)
+    {
+        java.awt.AWTEvent r0;
+        int i0;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        java.awt.EventQueue r4;
+        sun.awt.PeerEvent $r7;
+        java.awt.Component $r3;
+        java.awt.event.MouseEvent $r5;
+        java.awt.event.PaintEvent $r6;
+        java.lang.Object $r1, $r2;
+
+        r4 := @this: java.awt.EventQueue;
+
+        r0 := @parameter0: java.awt.AWTEvent;
+
+        i0 := @parameter1: int;
+
+        $r1 = virtualinvoke r0.<java.awt.AWTEvent: java.lang.Object getSource()>();
+
+        $z0 = $r1 instanceof java.awt.Component;
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $z1 = r0 instanceof sun.awt.PeerEvent;
+
+        if $z1 == 0 goto label2;
+
+        $r7 = (sun.awt.PeerEvent) r0;
+
+        $z8 = specialinvoke r4.<java.awt.EventQueue: boolean coalescePeerEvent(sun.awt.PeerEvent)>($r7);
+
+        return $z8;
+
+     label2:
+        $r2 = virtualinvoke r0.<java.awt.AWTEvent: java.lang.Object getSource()>();
+
+        $r3 = (java.awt.Component) $r2;
+
+        $z2 = virtualinvoke $r3.<java.awt.Component: boolean isCoalescingEnabled()>();
+
+        if $z2 == 0 goto label3;
+
+        $z7 = specialinvoke r4.<java.awt.EventQueue: boolean coalesceOtherEvent(java.awt.AWTEvent,int)>(r0, i0);
+
+        if $z7 == 0 goto label3;
+
+        return 1;
+
+     label3:
+        $z3 = r0 instanceof java.awt.event.PaintEvent;
+
+        if $z3 == 0 goto label4;
+
+        $r6 = (java.awt.event.PaintEvent) r0;
+
+        $z6 = specialinvoke r4.<java.awt.EventQueue: boolean coalescePaintEvent(java.awt.event.PaintEvent)>($r6);
+
+        return $z6;
+
+     label4:
+        $z4 = r0 instanceof java.awt.event.MouseEvent;
+
+        if $z4 == 0 goto label5;
+
+        $r5 = (java.awt.event.MouseEvent) r0;
+
+        $z5 = specialinvoke r4.<java.awt.EventQueue: boolean coalesceMouseEvent(java.awt.event.MouseEvent)>($r5);
+
+        return $z5;
+
+     label5:
+        return 0;
+    }
+
+    private void cacheEQItem(sun.awt.EventQueueItem)
+    {
+        java.awt.EventQueue r10;
+        java.awt.Component r6;
+        sun.awt.EventQueueItem r0;
+        java.awt.AWTEvent $r1, $r2, $r4;
+        int $i0, $i2;
+        java.lang.Object $r3, $r5;
+        sun.awt.EventQueueItem[] $r7, $r8, $r9;
+        boolean $z0;
+
+        r10 := @this: java.awt.EventQueue;
+
+        r0 := @parameter0: sun.awt.EventQueueItem;
+
+        $r1 = r0.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $i0 = staticinvoke <java.awt.EventQueue: int eventToCacheIndex(java.awt.AWTEvent)>($r1);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label2;
+
+        $r2 = r0.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $r3 = virtualinvoke $r2.<java.awt.AWTEvent: java.lang.Object getSource()>();
+
+        $z0 = $r3 instanceof java.awt.Component;
+
+        if $z0 == 0 goto label2;
+
+        $r4 = r0.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $r5 = virtualinvoke $r4.<java.awt.AWTEvent: java.lang.Object getSource()>();
+
+        r6 = (java.awt.Component) $r5;
+
+        $r7 = r6.<java.awt.Component: sun.awt.EventQueueItem[] eventCache>;
+
+        if $r7 != null goto label1;
+
+        $r9 = newarray (sun.awt.EventQueueItem)[5];
+
+        r6.<java.awt.Component: sun.awt.EventQueueItem[] eventCache> = $r9;
+
+     label1:
+        $r8 = r6.<java.awt.Component: sun.awt.EventQueueItem[] eventCache>;
+
+        $r8[$i0] = r0;
+
+     label2:
+        return;
+    }
+
+    private void uncacheEQItem(sun.awt.EventQueueItem)
+    {
+        java.awt.EventQueue r9;
+        java.awt.Component r6;
+        sun.awt.EventQueueItem r0;
+        java.awt.AWTEvent $r1, $r2, $r4;
+        int $i0, $i2;
+        java.lang.Object $r3, $r5;
+        sun.awt.EventQueueItem[] $r7, $r8;
+        boolean $z0;
+
+        r9 := @this: java.awt.EventQueue;
+
+        r0 := @parameter0: sun.awt.EventQueueItem;
+
+        $r1 = r0.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $i0 = staticinvoke <java.awt.EventQueue: int eventToCacheIndex(java.awt.AWTEvent)>($r1);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label2;
+
+        $r2 = r0.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $r3 = virtualinvoke $r2.<java.awt.AWTEvent: java.lang.Object getSource()>();
+
+        $z0 = $r3 instanceof java.awt.Component;
+
+        if $z0 == 0 goto label2;
+
+        $r4 = r0.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $r5 = virtualinvoke $r4.<java.awt.AWTEvent: java.lang.Object getSource()>();
+
+        r6 = (java.awt.Component) $r5;
+
+        $r7 = r6.<java.awt.Component: sun.awt.EventQueueItem[] eventCache>;
+
+        if $r7 != null goto label1;
+
+        return;
+
+     label1:
+        $r8 = r6.<java.awt.Component: sun.awt.EventQueueItem[] eventCache>;
+
+        $r8[$i0] = null;
+
+     label2:
+        return;
+    }
+
+    private static int eventToCacheIndex(java.awt.AWTEvent)
+    {
+        java.awt.AWTEvent r0;
+        byte $b1, $b2;
+        int $i0;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.awt.AWTEvent;
+
+        $i0 = virtualinvoke r0.<java.awt.AWTEvent: int getID()>();
+
+        lookupswitch($i0)
+        {
+            case 503: goto label3;
+            case 506: goto label4;
+            case 800: goto label1;
+            case 801: goto label2;
+            default: goto label7;
+        };
+
+     label1:
+        return 0;
+
+     label2:
+        return 1;
+
+     label3:
+        return 2;
+
+     label4:
+        $z0 = r0 instanceof sun.awt.dnd.SunDropTargetEvent;
+
+        if $z0 == 0 goto label5;
+
+        $b1 = -1;
+
+        goto label6;
+
+     label5:
+        $b1 = 3;
+
+     label6:
+        return $b1;
+
+     label7:
+        $z1 = r0 instanceof sun.awt.PeerEvent;
+
+        if $z1 == 0 goto label8;
+
+        $b2 = 4;
+
+        goto label9;
+
+     label8:
+        $b2 = -1;
+
+     label9:
+        return $b2;
+    }
+
+    private boolean noEvents()
+    {
+        java.awt.EventQueue r0;
+        int i0;
+        java.awt.Queue $r2;
+        java.awt.Queue[] $r1;
+        sun.awt.EventQueueItem $r3;
+
+        r0 := @this: java.awt.EventQueue;
+
+        i0 = 0;
+
+     label1:
+        if i0 >= 4 goto label3;
+
+        $r1 = r0.<java.awt.EventQueue: java.awt.Queue[] queues>;
+
+        $r2 = $r1[i0];
+
+        $r3 = $r2.<java.awt.Queue: sun.awt.EventQueueItem head>;
+
+        if $r3 == null goto label2;
+
+        return 0;
+
+     label2:
+        i0 = i0 + 1;
+
+        goto label1;
+
+     label3:
+        return 1;
+    }
+
+    public java.awt.AWTEvent getNextEvent() throws java.lang.InterruptedException
+    {
+        java.awt.EventQueue r0;
+        java.awt.EventDispatchThread $r5;
+        java.lang.Throwable $r9;
+        java.awt.AWTEvent $r3;
+        java.util.concurrent.locks.Lock $r2, $r7, $r8, $r10;
+        java.util.concurrent.locks.Condition $r6;
+        sun.awt.AppContext $r1;
+        sun.awt.AWTAutoShutdown $r4;
+
+        r0 := @this: java.awt.EventQueue;
+
+     label1:
+        $r1 = r0.<java.awt.EventQueue: sun.awt.AppContext appContext>;
+
+        staticinvoke <sun.awt.SunToolkit: void flushPendingEvents(sun.awt.AppContext)>($r1);
+
+        $r2 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r2.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label2:
+        $r3 = virtualinvoke r0.<java.awt.EventQueue: java.awt.AWTEvent getNextEventPrivate()>();
+
+        if $r3 == null goto label4;
+
+     label3:
+        $r8 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r8.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return $r3;
+
+     label4:
+        $r4 = staticinvoke <sun.awt.AWTAutoShutdown: sun.awt.AWTAutoShutdown getInstance()>();
+
+        $r5 = r0.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread>;
+
+        virtualinvoke $r4.<sun.awt.AWTAutoShutdown: void notifyThreadFree(java.lang.Thread)>($r5);
+
+        $r6 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Condition pushPopCond>;
+
+        interfaceinvoke $r6.<java.util.concurrent.locks.Condition: void await()>();
+
+     label5:
+        $r7 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r7.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label7;
+
+     label6:
+        $r9 := @caughtexception;
+
+        $r10 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r10.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r9;
+
+     label7:
+        goto label1;
+
+        catch java.lang.Throwable from label2 to label3 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+
+    java.awt.AWTEvent getNextEventPrivate() throws java.lang.InterruptedException
+    {
+        java.awt.Queue[] $r1, $r4, $r7, $r12;
+        sun.awt.EventQueueItem $r3, r6, $r8, $r10;
+        java.awt.AWTEvent $r11;
+        int i0, $i2;
+        java.awt.EventQueue r0;
+        java.awt.Queue $r2, $r5, $r9, $r13;
+
+        r0 := @this: java.awt.EventQueue;
+
+        i0 = 3;
+
+     label1:
+        if i0 < 0 goto label4;
+
+        $r1 = r0.<java.awt.EventQueue: java.awt.Queue[] queues>;
+
+        $r2 = $r1[i0];
+
+        $r3 = $r2.<java.awt.Queue: sun.awt.EventQueueItem head>;
+
+        if $r3 == null goto label3;
+
+        $r4 = r0.<java.awt.EventQueue: java.awt.Queue[] queues>;
+
+        $r5 = $r4[i0];
+
+        r6 = $r5.<java.awt.Queue: sun.awt.EventQueueItem head>;
+
+        $r7 = r0.<java.awt.EventQueue: java.awt.Queue[] queues>;
+
+        $r9 = $r7[i0];
+
+        $r8 = r6.<sun.awt.EventQueueItem: sun.awt.EventQueueItem next>;
+
+        $r9.<java.awt.Queue: sun.awt.EventQueueItem head> = $r8;
+
+        $r10 = r6.<sun.awt.EventQueueItem: sun.awt.EventQueueItem next>;
+
+        if $r10 != null goto label2;
+
+        $r12 = r0.<java.awt.EventQueue: java.awt.Queue[] queues>;
+
+        $r13 = $r12[i0];
+
+        $r13.<java.awt.Queue: sun.awt.EventQueueItem tail> = null;
+
+     label2:
+        specialinvoke r0.<java.awt.EventQueue: void uncacheEQItem(sun.awt.EventQueueItem)>(r6);
+
+        $r11 = r6.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        return $r11;
+
+     label3:
+        $i2 = (int) -1;
+
+        i0 = i0 + $i2;
+
+        goto label1;
+
+     label4:
+        return null;
+    }
+
+    java.awt.AWTEvent getNextEvent(int) throws java.lang.InterruptedException
+    {
+        java.lang.Throwable $r19;
+        java.awt.Queue[] $r5, $r9, $r13, $r16;
+        sun.awt.EventQueueItem $r8, $r11, $r17, r21, r22;
+        java.awt.AWTEvent $r7, $r15;
+        sun.awt.AppContext $r1;
+        int i0, $i1, i2;
+        java.awt.EventQueue r0;
+        java.util.concurrent.locks.Lock $r2, $r4, $r12, $r20;
+        java.util.concurrent.locks.Condition $r3;
+        java.awt.Queue $r6, $r10, $r14, $r18;
+
+        r0 := @this: java.awt.EventQueue;
+
+        i0 := @parameter0: int;
+
+     label01:
+        $r1 = r0.<java.awt.EventQueue: sun.awt.AppContext appContext>;
+
+        staticinvoke <sun.awt.SunToolkit: void flushPendingEvents(sun.awt.AppContext)>($r1);
+
+        $r2 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r2.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label02:
+        i2 = 0;
+
+     label03:
+        if i2 >= 4 goto label11;
+
+        $r5 = r0.<java.awt.EventQueue: java.awt.Queue[] queues>;
+
+        $r6 = $r5[i2];
+
+        r21 = $r6.<java.awt.Queue: sun.awt.EventQueueItem head>;
+
+        r22 = null;
+
+     label04:
+        if r21 == null goto label10;
+
+        $r7 = r21.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $i1 = virtualinvoke $r7.<java.awt.AWTEvent: int getID()>();
+
+        if $i1 != i0 goto label09;
+
+        if r22 != null goto label05;
+
+        $r16 = r0.<java.awt.EventQueue: java.awt.Queue[] queues>;
+
+        $r18 = $r16[i2];
+
+        $r17 = r21.<sun.awt.EventQueueItem: sun.awt.EventQueueItem next>;
+
+        $r18.<java.awt.Queue: sun.awt.EventQueueItem head> = $r17;
+
+        goto label06;
+
+     label05:
+        $r8 = r21.<sun.awt.EventQueueItem: sun.awt.EventQueueItem next>;
+
+        r22.<sun.awt.EventQueueItem: sun.awt.EventQueueItem next> = $r8;
+
+     label06:
+        $r9 = r0.<java.awt.EventQueue: java.awt.Queue[] queues>;
+
+        $r10 = $r9[i2];
+
+        $r11 = $r10.<java.awt.Queue: sun.awt.EventQueueItem tail>;
+
+        if $r11 != r21 goto label07;
+
+        $r13 = r0.<java.awt.EventQueue: java.awt.Queue[] queues>;
+
+        $r14 = $r13[i2];
+
+        $r14.<java.awt.Queue: sun.awt.EventQueueItem tail> = r22;
+
+     label07:
+        specialinvoke r0.<java.awt.EventQueue: void uncacheEQItem(sun.awt.EventQueueItem)>(r21);
+
+        $r15 = r21.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+     label08:
+        $r12 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r12.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return $r15;
+
+     label09:
+        r22 = r21;
+
+        r21 = r21.<sun.awt.EventQueueItem: sun.awt.EventQueueItem next>;
+
+        goto label04;
+
+     label10:
+        i2 = i2 + 1;
+
+        goto label03;
+
+     label11:
+        r0.<java.awt.EventQueue: int waitForID> = i0;
+
+        $r3 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Condition pushPopCond>;
+
+        interfaceinvoke $r3.<java.util.concurrent.locks.Condition: void await()>();
+
+        r0.<java.awt.EventQueue: int waitForID> = 0;
+
+     label12:
+        $r4 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r4.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label15;
+
+     label13:
+        $r19 := @caughtexception;
+
+     label14:
+        $r20 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r20.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r19;
+
+     label15:
+        goto label01;
+
+        catch java.lang.Throwable from label02 to label08 with label13;
+        catch java.lang.Throwable from label09 to label12 with label13;
+        catch java.lang.Throwable from label13 to label14 with label13;
+    }
+
+    public java.awt.AWTEvent peekEvent()
+    {
+        java.awt.EventQueue r0;
+        java.lang.Throwable $r11;
+        java.awt.Queue[] $r3, $r6;
+        sun.awt.EventQueueItem $r5, $r8;
+        java.awt.AWTEvent r9;
+        java.util.concurrent.locks.Lock $r1, $r2, $r10, $r12;
+        int i0, $i2;
+        java.awt.Queue $r4, $r7;
+
+        r0 := @this: java.awt.EventQueue;
+
+        $r1 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r1.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        i0 = 3;
+
+     label2:
+        if i0 < 0 goto label5;
+
+        $r3 = r0.<java.awt.EventQueue: java.awt.Queue[] queues>;
+
+        $r4 = $r3[i0];
+
+        $r5 = $r4.<java.awt.Queue: sun.awt.EventQueueItem head>;
+
+        if $r5 == null goto label4;
+
+        $r6 = r0.<java.awt.EventQueue: java.awt.Queue[] queues>;
+
+        $r7 = $r6[i0];
+
+        $r8 = $r7.<java.awt.Queue: sun.awt.EventQueueItem head>;
+
+        r9 = $r8.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+     label3:
+        $r10 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r10.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return r9;
+
+     label4:
+        $i2 = (int) -1;
+
+        i0 = i0 + $i2;
+
+        goto label2;
+
+     label5:
+        $r2 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r2.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label7;
+
+     label6:
+        $r11 := @caughtexception;
+
+        $r12 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r12.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r11;
+
+     label7:
+        return null;
+
+        catch java.lang.Throwable from label1 to label3 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+
+    public java.awt.AWTEvent peekEvent(int)
+    {
+        java.awt.EventQueue r0;
+        java.lang.Throwable $r8;
+        java.awt.Queue[] $r3;
+        sun.awt.EventQueueItem r10;
+        java.awt.AWTEvent $r5, r6;
+        java.util.concurrent.locks.Lock $r1, $r2, $r7, $r9;
+        int $i0, i1, i2, $i4;
+        java.awt.Queue $r4;
+
+        r0 := @this: java.awt.EventQueue;
+
+        i1 := @parameter0: int;
+
+        $r1 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r1.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label01:
+        i2 = 3;
+
+     label02:
+        if i2 < 0 goto label07;
+
+        $r3 = r0.<java.awt.EventQueue: java.awt.Queue[] queues>;
+
+        $r4 = $r3[i2];
+
+        r10 = $r4.<java.awt.Queue: sun.awt.EventQueueItem head>;
+
+     label03:
+        if r10 == null goto label06;
+
+        $r5 = r10.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $i0 = virtualinvoke $r5.<java.awt.AWTEvent: int getID()>();
+
+        if $i0 != i1 goto label05;
+
+        r6 = r10.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+     label04:
+        $r7 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r7.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return r6;
+
+     label05:
+        r10 = r10.<sun.awt.EventQueueItem: sun.awt.EventQueueItem next>;
+
+        goto label03;
+
+     label06:
+        $i4 = (int) -1;
+
+        i2 = i2 + $i4;
+
+        goto label02;
+
+     label07:
+        $r2 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r2.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label10;
+
+     label08:
+        $r8 := @caughtexception;
+
+     label09:
+        $r9 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r9.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r8;
+
+     label10:
+        return null;
+
+        catch java.lang.Throwable from label01 to label04 with label08;
+        catch java.lang.Throwable from label05 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    protected void dispatchEvent(java.awt.AWTEvent)
+    {
+        java.awt.EventQueue r3;
+        java.security.AccessControlContext $r4, $r5, $r6;
+        java.awt.EventQueue$3 $r2;
+        java.awt.EventQueue$4 $r7;
+        sun.misc.JavaSecurityAccess $r8, $r9;
+        java.awt.AWTEvent r0;
+        java.lang.Object $r1;
+
+        r3 := @this: java.awt.EventQueue;
+
+        r0 := @parameter0: java.awt.AWTEvent;
+
+        $r1 = virtualinvoke r0.<java.awt.AWTEvent: java.lang.Object getSource()>();
+
+        $r2 = new java.awt.EventQueue$3;
+
+        specialinvoke $r2.<java.awt.EventQueue$3: void <init>(java.awt.EventQueue,java.awt.AWTEvent,java.lang.Object)>(r3, r0, $r1);
+
+        $r4 = staticinvoke <java.security.AccessController: java.security.AccessControlContext getContext()>();
+
+        $r5 = staticinvoke <java.awt.EventQueue: java.security.AccessControlContext getAccessControlContextFrom(java.lang.Object)>($r1);
+
+        $r6 = virtualinvoke r0.<java.awt.AWTEvent: java.security.AccessControlContext getAccessControlContext()>();
+
+        if $r5 != null goto label1;
+
+        $r9 = <java.awt.EventQueue: sun.misc.JavaSecurityAccess javaSecurityAccess>;
+
+        interfaceinvoke $r9.<sun.misc.JavaSecurityAccess: java.lang.Object doIntersectionPrivilege(java.security.PrivilegedAction,java.security.AccessControlContext,java.security.AccessControlContext)>($r2, $r4, $r6);
+
+        goto label2;
+
+     label1:
+        $r8 = <java.awt.EventQueue: sun.misc.JavaSecurityAccess javaSecurityAccess>;
+
+        $r7 = new java.awt.EventQueue$4;
+
+        specialinvoke $r7.<java.awt.EventQueue$4: void <init>(java.awt.EventQueue,java.security.PrivilegedAction,java.security.AccessControlContext)>(r3, $r2, $r6);
+
+        interfaceinvoke $r8.<sun.misc.JavaSecurityAccess: java.lang.Object doIntersectionPrivilege(java.security.PrivilegedAction,java.security.AccessControlContext,java.security.AccessControlContext)>($r7, $r4, $r5);
+
+     label2:
+        return;
+    }
+
+    private static java.security.AccessControlContext getAccessControlContextFrom(java.lang.Object)
+    {
+        java.security.AccessControlContext $r4;
+        java.awt.Component $r3;
+        java.awt.TrayIcon $r1;
+        java.awt.MenuComponent $r2;
+        java.lang.Object r0;
+        boolean $z0, $z1, $z2;
+
+        r0 := @parameter0: java.lang.Object;
+
+        $z0 = r0 instanceof java.awt.Component;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = (java.awt.Component) r0;
+
+        $r4 = virtualinvoke $r3.<java.awt.Component: java.security.AccessControlContext getAccessControlContext()>();
+
+        goto label4;
+
+     label1:
+        $z1 = r0 instanceof java.awt.MenuComponent;
+
+        if $z1 == 0 goto label2;
+
+        $r2 = (java.awt.MenuComponent) r0;
+
+        $r4 = virtualinvoke $r2.<java.awt.MenuComponent: java.security.AccessControlContext getAccessControlContext()>();
+
+        goto label4;
+
+     label2:
+        $z2 = r0 instanceof java.awt.TrayIcon;
+
+        if $z2 == 0 goto label3;
+
+        $r1 = (java.awt.TrayIcon) r0;
+
+        $r4 = virtualinvoke $r1.<java.awt.TrayIcon: java.security.AccessControlContext getAccessControlContext()>();
+
+        goto label4;
+
+     label3:
+        $r4 = null;
+
+     label4:
+        return $r4;
+    }
+
+    private void dispatchEventImpl(java.awt.AWTEvent, java.lang.Object)
+    {
+        java.awt.AWTEvent r0;
+        java.awt.TrayIcon $r11;
+        java.lang.String $r8;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        java.awt.EventQueue r9;
+        java.awt.EventDispatchThread $r10;
+        sun.util.logging.PlatformLogger$Level $r3;
+        sun.util.logging.PlatformLogger $r2, $r4;
+        java.awt.ActiveEvent $r14;
+        java.awt.Component $r13;
+        java.awt.MenuComponent $r12;
+        java.lang.Object r1;
+        java.lang.StringBuilder $r5, $r6, $r7;
+
+        r9 := @this: java.awt.EventQueue;
+
+        r0 := @parameter0: java.awt.AWTEvent;
+
+        r1 := @parameter1: java.lang.Object;
+
+        r0.<java.awt.AWTEvent: boolean isPosted> = 1;
+
+        $z0 = r0 instanceof java.awt.ActiveEvent;
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r9.<java.awt.EventQueue: void setCurrentEventAndMostRecentTimeImpl(java.awt.AWTEvent)>(r0);
+
+        $r14 = (java.awt.ActiveEvent) r0;
+
+        interfaceinvoke $r14.<java.awt.ActiveEvent: void dispatch()>();
+
+        goto label6;
+
+     label1:
+        $z1 = r1 instanceof java.awt.Component;
+
+        if $z1 == 0 goto label2;
+
+        $r13 = (java.awt.Component) r1;
+
+        virtualinvoke $r13.<java.awt.Component: void dispatchEvent(java.awt.AWTEvent)>(r0);
+
+        virtualinvoke r0.<java.awt.AWTEvent: void dispatched()>();
+
+        goto label6;
+
+     label2:
+        $z2 = r1 instanceof java.awt.MenuComponent;
+
+        if $z2 == 0 goto label3;
+
+        $r12 = (java.awt.MenuComponent) r1;
+
+        virtualinvoke $r12.<java.awt.MenuComponent: void dispatchEvent(java.awt.AWTEvent)>(r0);
+
+        goto label6;
+
+     label3:
+        $z3 = r1 instanceof java.awt.TrayIcon;
+
+        if $z3 == 0 goto label4;
+
+        $r11 = (java.awt.TrayIcon) r1;
+
+        virtualinvoke $r11.<java.awt.TrayIcon: void dispatchEvent(java.awt.AWTEvent)>(r0);
+
+        goto label6;
+
+     label4:
+        $z4 = r1 instanceof sun.awt.AWTAutoShutdown;
+
+        if $z4 == 0 goto label5;
+
+        $z6 = specialinvoke r9.<java.awt.EventQueue: boolean noEvents()>();
+
+        if $z6 == 0 goto label6;
+
+        $r10 = r9.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread>;
+
+        virtualinvoke $r10.<java.awt.EventDispatchThread: void stopDispatching()>();
+
+        goto label6;
+
+     label5:
+        $r2 = staticinvoke <java.awt.EventQueue: sun.util.logging.PlatformLogger getEventLog()>();
+
+        $r3 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINE>;
+
+        $z5 = virtualinvoke $r2.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r3);
+
+        if $z5 == 0 goto label6;
+
+        $r4 = staticinvoke <java.awt.EventQueue: sun.util.logging.PlatformLogger getEventLog()>();
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to dispatch event: ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<sun.util.logging.PlatformLogger: void fine(java.lang.String)>($r8);
+
+     label6:
+        return;
+    }
+
+    public static long getMostRecentEventTime()
+    {
+        java.awt.EventQueue $r0;
+        long $l0;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.EventQueue getEventQueue()>();
+
+        $l0 = specialinvoke $r0.<java.awt.EventQueue: long getMostRecentEventTimeImpl()>();
+
+        return $l0;
+    }
+
+    private long getMostRecentEventTimeImpl()
+    {
+        java.awt.EventQueue r0;
+        java.awt.EventDispatchThread $r3;
+        java.lang.Throwable $r5;
+        long $l0;
+        java.util.concurrent.locks.Lock $r1, $r4, $r6;
+        java.lang.Thread $r2;
+
+        r0 := @this: java.awt.EventQueue;
+
+        $r1 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r1.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $r2 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r3 = r0.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread>;
+
+        if $r2 != $r3 goto label2;
+
+        $l0 = r0.<java.awt.EventQueue: long mostRecentEventTime>;
+
+        goto label3;
+
+     label2:
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+     label3:
+        $r4 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r4.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return $l0;
+
+     label4:
+        $r5 := @caughtexception;
+
+        $r6 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r6.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+    }
+
+    long getMostRecentEventTimeEx()
+    {
+        java.awt.EventQueue r0;
+        java.lang.Throwable $r3;
+        java.util.concurrent.locks.Lock $r1, $r2, $r4;
+        long l0;
+
+        r0 := @this: java.awt.EventQueue;
+
+        $r1 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r1.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        l0 = r0.<java.awt.EventQueue: long mostRecentEventTime>;
+
+     label2:
+        $r2 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r2.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return l0;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r4.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public static java.awt.AWTEvent getCurrentEvent()
+    {
+        java.awt.EventQueue $r0;
+        java.awt.AWTEvent $r1;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.EventQueue getEventQueue()>();
+
+        $r1 = specialinvoke $r0.<java.awt.EventQueue: java.awt.AWTEvent getCurrentEventImpl()>();
+
+        return $r1;
+    }
+
+    private java.awt.AWTEvent getCurrentEventImpl()
+    {
+        java.awt.EventQueue r0;
+        java.awt.EventDispatchThread $r3;
+        java.lang.Throwable $r7;
+        java.awt.AWTEvent $r9;
+        java.util.concurrent.locks.Lock $r1, $r4, $r8;
+        java.lang.Thread $r2;
+        java.lang.Object $r6;
+        java.lang.ref.WeakReference $r5;
+
+        r0 := @this: java.awt.EventQueue;
+
+        $r1 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r1.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $r2 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r3 = r0.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread>;
+
+        if $r2 != $r3 goto label2;
+
+        $r5 = r0.<java.awt.EventQueue: java.lang.ref.WeakReference currentEvent>;
+
+        $r6 = virtualinvoke $r5.<java.lang.ref.WeakReference: java.lang.Object get()>();
+
+        $r9 = (java.awt.AWTEvent) $r6;
+
+        goto label3;
+
+     label2:
+        $r9 = null;
+
+     label3:
+        $r4 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r4.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return $r9;
+
+     label4:
+        $r7 := @caughtexception;
+
+        $r8 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r8.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+    }
+
+    public void push(java.awt.EventQueue)
+    {
+        java.lang.Runnable $r16;
+        sun.awt.AppContext $r9, $r14;
+        boolean $z0, $z1;
+        sun.util.logging.PlatformLogger$Level $r1, $r33;
+        java.lang.StringBuilder $r24, $r25, $r26, $r27;
+        java.lang.Throwable $r29;
+        sun.awt.FwDispatcher $r4;
+        java.awt.event.InvocationEvent $r15;
+        java.awt.AWTEvent $r17, $r37;
+        java.lang.String $r28;
+        java.awt.EventQueue r2, r7, $r19, r35, $r36;
+        java.awt.EventDispatchThread $r5, $r6, $r18, $r20, $r21;
+        sun.util.logging.PlatformLogger $r0, $r23, $r32, $r34;
+        java.lang.RuntimeException $r22;
+        java.util.concurrent.locks.Lock $r3, $r12, $r30;
+        java.util.concurrent.locks.Condition $r11;
+        java.lang.InterruptedException $r31;
+        java.lang.Object $r8, $r10, $r13;
+
+        r2 := @this: java.awt.EventQueue;
+
+        r7 := @parameter0: java.awt.EventQueue;
+
+        $r0 = staticinvoke <java.awt.EventQueue: sun.util.logging.PlatformLogger getEventLog()>();
+
+        $r1 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINE>;
+
+        $z0 = virtualinvoke $r0.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r1);
+
+        if $z0 == 0 goto label01;
+
+        $r23 = staticinvoke <java.awt.EventQueue: sun.util.logging.PlatformLogger getEventLog()>();
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("EventQueue.push(");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r7);
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r23.<sun.util.logging.PlatformLogger: void fine(java.lang.String)>($r28);
+
+     label01:
+        $r3 = r2.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r3.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label02:
+        r35 = r2;
+
+     label03:
+        $r36 = r35.<java.awt.EventQueue: java.awt.EventQueue nextQueue>;
+
+        if $r36 == null goto label04;
+
+        r35 = r35.<java.awt.EventQueue: java.awt.EventQueue nextQueue>;
+
+        goto label03;
+
+     label04:
+        $r4 = r35.<java.awt.EventQueue: sun.awt.FwDispatcher fwDispatcher>;
+
+        if $r4 == null goto label05;
+
+        $r22 = new java.lang.RuntimeException;
+
+        specialinvoke $r22.<java.lang.RuntimeException: void <init>(java.lang.String)>("push() to queue with fwDispatcher");
+
+        throw $r22;
+
+     label05:
+        $r5 = r35.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread>;
+
+        if $r5 == null goto label06;
+
+        $r18 = r35.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread>;
+
+        $r19 = virtualinvoke $r18.<java.awt.EventDispatchThread: java.awt.EventQueue getEventQueue()>();
+
+        if $r19 != r2 goto label06;
+
+        $r20 = r35.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread>;
+
+        r7.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread> = $r20;
+
+        $r21 = r35.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread>;
+
+        virtualinvoke $r21.<java.awt.EventDispatchThread: void setEventQueue(java.awt.EventQueue)>(r7);
+
+     label06:
+        $r37 = virtualinvoke r35.<java.awt.EventQueue: java.awt.AWTEvent peekEvent()>();
+
+        if $r37 == null goto label11;
+
+     label07:
+        $r17 = virtualinvoke r35.<java.awt.EventQueue: java.awt.AWTEvent getNextEventPrivate()>();
+
+        specialinvoke r7.<java.awt.EventQueue: void postEventPrivate(java.awt.AWTEvent)>($r17);
+
+     label08:
+        goto label06;
+
+     label09:
+        $r31 := @caughtexception;
+
+        $r32 = staticinvoke <java.awt.EventQueue: sun.util.logging.PlatformLogger getEventLog()>();
+
+        $r33 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINE>;
+
+        $z1 = virtualinvoke $r32.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r33);
+
+        if $z1 == 0 goto label10;
+
+        $r34 = staticinvoke <java.awt.EventQueue: sun.util.logging.PlatformLogger getEventLog()>();
+
+        virtualinvoke $r34.<sun.util.logging.PlatformLogger: void fine(java.lang.String,java.lang.Throwable)>("Interrupted push", $r31);
+
+     label10:
+        goto label06;
+
+     label11:
+        $r6 = r35.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread>;
+
+        if $r6 == null goto label12;
+
+        $r15 = new java.awt.event.InvocationEvent;
+
+        $r16 = <java.awt.EventQueue: java.lang.Runnable dummyRunnable>;
+
+        specialinvoke $r15.<java.awt.event.InvocationEvent: void <init>(java.lang.Object,java.lang.Runnable)>(r35, $r16);
+
+        specialinvoke r35.<java.awt.EventQueue: void postEventPrivate(java.awt.AWTEvent)>($r15);
+
+     label12:
+        r7.<java.awt.EventQueue: java.awt.EventQueue previousQueue> = r35;
+
+        r35.<java.awt.EventQueue: java.awt.EventQueue nextQueue> = r7;
+
+        $r9 = r2.<java.awt.EventQueue: sun.awt.AppContext appContext>;
+
+        $r8 = <sun.awt.AppContext: java.lang.Object EVENT_QUEUE_KEY>;
+
+        $r10 = virtualinvoke $r9.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>($r8);
+
+        if $r10 != r35 goto label13;
+
+        $r14 = r2.<java.awt.EventQueue: sun.awt.AppContext appContext>;
+
+        $r13 = <sun.awt.AppContext: java.lang.Object EVENT_QUEUE_KEY>;
+
+        virtualinvoke $r14.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>($r13, r7);
+
+     label13:
+        $r11 = r2.<java.awt.EventQueue: java.util.concurrent.locks.Condition pushPopCond>;
+
+        interfaceinvoke $r11.<java.util.concurrent.locks.Condition: void signalAll()>();
+
+     label14:
+        $r12 = r2.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r12.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label17;
+
+     label15:
+        $r29 := @caughtexception;
+
+     label16:
+        $r30 = r2.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r30.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r29;
+
+     label17:
+        return;
+
+        catch java.lang.InterruptedException from label07 to label08 with label09;
+        catch java.lang.Throwable from label02 to label14 with label15;
+        catch java.lang.Throwable from label15 to label16 with label15;
+    }
+
+    protected void pop() throws java.util.EmptyStackException
+    {
+        java.lang.Runnable $r7;
+        sun.awt.AppContext $r11, $r33;
+        boolean $z0, $z1;
+        sun.util.logging.PlatformLogger$Level $r1, $r28;
+        java.lang.StringBuilder $r19, $r20, $r21, $r22;
+        java.lang.Throwable $r24;
+        java.awt.event.InvocationEvent $r6;
+        java.awt.AWTEvent $r16, $r32;
+        java.lang.String $r23;
+        java.awt.EventQueue r2, r4, $r13, r30, $r31;
+        java.awt.EventDispatchThread $r5, $r12, $r14, $r15;
+        java.util.EmptyStackException $r17;
+        sun.util.logging.PlatformLogger $r0, $r18, $r27, $r29;
+        java.util.concurrent.locks.Lock $r3, $r9, $r25;
+        java.util.concurrent.locks.Condition $r8;
+        java.lang.InterruptedException $r26;
+        java.lang.Object $r10, $r34, $r35;
+
+        r2 := @this: java.awt.EventQueue;
+
+        $r0 = staticinvoke <java.awt.EventQueue: sun.util.logging.PlatformLogger getEventLog()>();
+
+        $r1 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINE>;
+
+        $z0 = virtualinvoke $r0.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r1);
+
+        if $z0 == 0 goto label01;
+
+        $r18 = staticinvoke <java.awt.EventQueue: sun.util.logging.PlatformLogger getEventLog()>();
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("EventQueue.pop(");
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r18.<sun.util.logging.PlatformLogger: void fine(java.lang.String)>($r23);
+
+     label01:
+        $r3 = r2.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r3.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label02:
+        r30 = r2;
+
+     label03:
+        $r31 = r30.<java.awt.EventQueue: java.awt.EventQueue nextQueue>;
+
+        if $r31 == null goto label04;
+
+        r30 = r30.<java.awt.EventQueue: java.awt.EventQueue nextQueue>;
+
+        goto label03;
+
+     label04:
+        r4 = r30.<java.awt.EventQueue: java.awt.EventQueue previousQueue>;
+
+        if r4 != null goto label05;
+
+        $r17 = new java.util.EmptyStackException;
+
+        specialinvoke $r17.<java.util.EmptyStackException: void <init>()>();
+
+        throw $r17;
+
+     label05:
+        r30.<java.awt.EventQueue: java.awt.EventQueue previousQueue> = null;
+
+        r4.<java.awt.EventQueue: java.awt.EventQueue nextQueue> = null;
+
+     label06:
+        $r32 = virtualinvoke r30.<java.awt.EventQueue: java.awt.AWTEvent peekEvent()>();
+
+        if $r32 == null goto label11;
+
+     label07:
+        $r16 = virtualinvoke r30.<java.awt.EventQueue: java.awt.AWTEvent getNextEventPrivate()>();
+
+        specialinvoke r4.<java.awt.EventQueue: void postEventPrivate(java.awt.AWTEvent)>($r16);
+
+     label08:
+        goto label06;
+
+     label09:
+        $r26 := @caughtexception;
+
+        $r27 = staticinvoke <java.awt.EventQueue: sun.util.logging.PlatformLogger getEventLog()>();
+
+        $r28 = <sun.util.logging.PlatformLogger$Level: sun.util.logging.PlatformLogger$Level FINE>;
+
+        $z1 = virtualinvoke $r27.<sun.util.logging.PlatformLogger: boolean isLoggable(sun.util.logging.PlatformLogger$Level)>($r28);
+
+        if $z1 == 0 goto label10;
+
+        $r29 = staticinvoke <java.awt.EventQueue: sun.util.logging.PlatformLogger getEventLog()>();
+
+        virtualinvoke $r29.<sun.util.logging.PlatformLogger: void fine(java.lang.String,java.lang.Throwable)>("Interrupted pop", $r26);
+
+     label10:
+        goto label06;
+
+     label11:
+        $r5 = r30.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread>;
+
+        if $r5 == null goto label12;
+
+        $r12 = r30.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread>;
+
+        $r13 = virtualinvoke $r12.<java.awt.EventDispatchThread: java.awt.EventQueue getEventQueue()>();
+
+        if $r13 != r2 goto label12;
+
+        $r14 = r30.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread>;
+
+        r4.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread> = $r14;
+
+        $r15 = r30.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread>;
+
+        virtualinvoke $r15.<java.awt.EventDispatchThread: void setEventQueue(java.awt.EventQueue)>(r4);
+
+     label12:
+        $r33 = r2.<java.awt.EventQueue: sun.awt.AppContext appContext>;
+
+        $r34 = <sun.awt.AppContext: java.lang.Object EVENT_QUEUE_KEY>;
+
+        $r35 = virtualinvoke $r33.<sun.awt.AppContext: java.lang.Object get(java.lang.Object)>($r34);
+
+        if $r35 != r2 goto label13;
+
+        $r11 = r2.<java.awt.EventQueue: sun.awt.AppContext appContext>;
+
+        $r10 = <sun.awt.AppContext: java.lang.Object EVENT_QUEUE_KEY>;
+
+        virtualinvoke $r11.<sun.awt.AppContext: java.lang.Object put(java.lang.Object,java.lang.Object)>($r10, r4);
+
+     label13:
+        $r6 = new java.awt.event.InvocationEvent;
+
+        $r7 = <java.awt.EventQueue: java.lang.Runnable dummyRunnable>;
+
+        specialinvoke $r6.<java.awt.event.InvocationEvent: void <init>(java.lang.Object,java.lang.Runnable)>(r30, $r7);
+
+        specialinvoke r30.<java.awt.EventQueue: void postEventPrivate(java.awt.AWTEvent)>($r6);
+
+        $r8 = r2.<java.awt.EventQueue: java.util.concurrent.locks.Condition pushPopCond>;
+
+        interfaceinvoke $r8.<java.util.concurrent.locks.Condition: void signalAll()>();
+
+     label14:
+        $r9 = r2.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r9.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label17;
+
+     label15:
+        $r24 := @caughtexception;
+
+     label16:
+        $r25 = r2.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r25.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r24;
+
+     label17:
+        return;
+
+        catch java.lang.InterruptedException from label07 to label08 with label09;
+        catch java.lang.Throwable from label02 to label14 with label15;
+        catch java.lang.Throwable from label15 to label16 with label15;
+    }
+
+    public java.awt.SecondaryLoop createSecondaryLoop()
+    {
+        java.awt.EventQueue r0;
+        java.awt.SecondaryLoop $r1;
+
+        r0 := @this: java.awt.EventQueue;
+
+        $r1 = virtualinvoke r0.<java.awt.EventQueue: java.awt.SecondaryLoop createSecondaryLoop(java.awt.Conditional,java.awt.EventFilter,long)>(null, null, 0L);
+
+        return $r1;
+    }
+
+    java.awt.SecondaryLoop createSecondaryLoop(java.awt.Conditional, java.awt.EventFilter, long)
+    {
+        java.lang.Throwable $r17;
+        sun.awt.FwDispatcher $r3, $r11;
+        long l0;
+        java.awt.WaitDispatchSupport $r5;
+        java.awt.EventQueue r0, $r2, $r14;
+        java.awt.EventDispatchThread $r4, $r8;
+        java.util.concurrent.locks.Lock $r1, $r9, $r13, $r16, $r18;
+        java.awt.SecondaryLoop $r12, $r15;
+        java.awt.Conditional r6;
+        java.awt.EventFilter r7;
+        java.awt.EventQueue$FwSecondaryLoopWrapper $r10;
+
+        r0 := @this: java.awt.EventQueue;
+
+        r6 := @parameter0: java.awt.Conditional;
+
+        r7 := @parameter1: java.awt.EventFilter;
+
+        l0 := @parameter2: long;
+
+        $r1 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r1.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $r2 = r0.<java.awt.EventQueue: java.awt.EventQueue nextQueue>;
+
+        if $r2 == null goto label3;
+
+        $r14 = r0.<java.awt.EventQueue: java.awt.EventQueue nextQueue>;
+
+        $r15 = virtualinvoke $r14.<java.awt.EventQueue: java.awt.SecondaryLoop createSecondaryLoop(java.awt.Conditional,java.awt.EventFilter,long)>(r6, r7, l0);
+
+     label2:
+        $r16 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r16.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return $r15;
+
+     label3:
+        $r3 = r0.<java.awt.EventQueue: sun.awt.FwDispatcher fwDispatcher>;
+
+        if $r3 == null goto label5;
+
+        $r10 = new java.awt.EventQueue$FwSecondaryLoopWrapper;
+
+        $r11 = r0.<java.awt.EventQueue: sun.awt.FwDispatcher fwDispatcher>;
+
+        $r12 = interfaceinvoke $r11.<sun.awt.FwDispatcher: java.awt.SecondaryLoop createSecondaryLoop()>();
+
+        specialinvoke $r10.<java.awt.EventQueue$FwSecondaryLoopWrapper: void <init>(java.awt.EventQueue,java.awt.SecondaryLoop,java.awt.EventFilter)>(r0, $r12, r7);
+
+     label4:
+        $r13 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r13.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return $r10;
+
+     label5:
+        $r4 = r0.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread>;
+
+        if $r4 != null goto label6;
+
+        virtualinvoke r0.<java.awt.EventQueue: void initDispatchThread()>();
+
+     label6:
+        $r5 = new java.awt.WaitDispatchSupport;
+
+        $r8 = r0.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread>;
+
+        specialinvoke $r5.<java.awt.WaitDispatchSupport: void <init>(java.awt.EventDispatchThread,java.awt.Conditional,java.awt.EventFilter,long)>($r8, r6, r7, l0);
+
+     label7:
+        $r9 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r9.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return $r5;
+
+     label8:
+        $r17 := @caughtexception;
+
+     label9:
+        $r18 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r18.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r17;
+
+        catch java.lang.Throwable from label1 to label2 with label8;
+        catch java.lang.Throwable from label3 to label4 with label8;
+        catch java.lang.Throwable from label5 to label7 with label8;
+        catch java.lang.Throwable from label8 to label9 with label8;
+    }
+
+    public static boolean isDispatchThread()
+    {
+        java.awt.EventQueue $r0;
+        boolean $z0;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.EventQueue getEventQueue()>();
+
+        $z0 = virtualinvoke $r0.<java.awt.EventQueue: boolean isDispatchThreadImpl()>();
+
+        return $z0;
+    }
+
+    final boolean isDispatchThreadImpl()
+    {
+        java.awt.EventQueue r0, r10, r11;
+        java.awt.EventDispatchThread $r4;
+        java.lang.Throwable $r8;
+        sun.awt.FwDispatcher $r2, $r6;
+        java.util.concurrent.locks.Lock $r1, $r5, $r7, $r9;
+        java.lang.Thread $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: java.awt.EventQueue;
+
+        r10 = r0;
+
+        $r1 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r1.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        r11 = r0.<java.awt.EventQueue: java.awt.EventQueue nextQueue>;
+
+     label2:
+        if r11 == null goto label3;
+
+        r10 = r11;
+
+        r11 = r11.<java.awt.EventQueue: java.awt.EventQueue nextQueue>;
+
+        goto label2;
+
+     label3:
+        $r2 = r10.<java.awt.EventQueue: sun.awt.FwDispatcher fwDispatcher>;
+
+        if $r2 == null goto label5;
+
+        $r6 = r10.<java.awt.EventQueue: sun.awt.FwDispatcher fwDispatcher>;
+
+        $z0 = interfaceinvoke $r6.<sun.awt.FwDispatcher: boolean isDispatchThread()>();
+
+     label4:
+        $r7 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r7.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return $z0;
+
+     label5:
+        $r3 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r4 = r10.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread>;
+
+        if $r3 != $r4 goto label6;
+
+        $z1 = 1;
+
+        goto label7;
+
+     label6:
+        $z1 = 0;
+
+     label7:
+        $r5 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r5.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return $z1;
+
+     label8:
+        $r8 := @caughtexception;
+
+     label9:
+        $r9 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r9.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r8;
+
+        catch java.lang.Throwable from label1 to label4 with label8;
+        catch java.lang.Throwable from label5 to label7 with label8;
+        catch java.lang.Throwable from label8 to label9 with label8;
+    }
+
+    final void initDispatchThread()
+    {
+        java.awt.EventQueue r0;
+        java.awt.EventDispatchThread $r2, $r7, $r8;
+        java.lang.Throwable $r9;
+        java.awt.EventQueue$5 $r5;
+        java.lang.ThreadGroup $r3;
+        java.util.concurrent.locks.Lock $r1, $r10, $r11;
+        sun.awt.AppContext $r4;
+        java.lang.Object $r6;
+        boolean $z0, $z1;
+
+        r0 := @this: java.awt.EventQueue;
+
+        $r1 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r1.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $r2 = r0.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread>;
+
+        if $r2 != null goto label2;
+
+        $r3 = r0.<java.awt.EventQueue: java.lang.ThreadGroup threadGroup>;
+
+        $z0 = virtualinvoke $r3.<java.lang.ThreadGroup: boolean isDestroyed()>();
+
+        if $z0 != 0 goto label2;
+
+        $r4 = r0.<java.awt.EventQueue: sun.awt.AppContext appContext>;
+
+        $z1 = virtualinvoke $r4.<sun.awt.AppContext: boolean isDisposed()>();
+
+        if $z1 != 0 goto label2;
+
+        $r5 = new java.awt.EventQueue$5;
+
+        specialinvoke $r5.<java.awt.EventQueue$5: void <init>(java.awt.EventQueue)>(r0);
+
+        $r6 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r5);
+
+        $r7 = (java.awt.EventDispatchThread) $r6;
+
+        r0.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread> = $r7;
+
+        $r8 = r0.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread>;
+
+        virtualinvoke $r8.<java.awt.EventDispatchThread: void start()>();
+
+     label2:
+        $r11 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r11.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label4;
+
+     label3:
+        $r9 := @caughtexception;
+
+        $r10 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r10.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r9;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    final void detachDispatchThread(java.awt.EventDispatchThread)
+    {
+        java.awt.EventQueue r0;
+        java.awt.EventDispatchThread r3, $r4;
+        java.lang.Throwable $r8;
+        java.awt.AWTEvent $r6;
+        java.util.concurrent.locks.Lock $r2, $r7, $r9;
+        sun.awt.AppContext $r1;
+        sun.awt.AWTAutoShutdown $r5;
+
+        r0 := @this: java.awt.EventQueue;
+
+        r3 := @parameter0: java.awt.EventDispatchThread;
+
+        $r1 = r0.<java.awt.EventQueue: sun.awt.AppContext appContext>;
+
+        staticinvoke <sun.awt.SunToolkit: void flushPendingEvents(sun.awt.AppContext)>($r1);
+
+        $r2 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r2.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $r4 = r0.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread>;
+
+        if r3 != $r4 goto label2;
+
+        r0.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread> = null;
+
+     label2:
+        $r5 = staticinvoke <sun.awt.AWTAutoShutdown: sun.awt.AWTAutoShutdown getInstance()>();
+
+        virtualinvoke $r5.<sun.awt.AWTAutoShutdown: void notifyThreadFree(java.lang.Thread)>(r3);
+
+        $r6 = virtualinvoke r0.<java.awt.EventQueue: java.awt.AWTEvent peekEvent()>();
+
+        if $r6 == null goto label3;
+
+        virtualinvoke r0.<java.awt.EventQueue: void initDispatchThread()>();
+
+     label3:
+        $r7 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r7.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label5;
+
+     label4:
+        $r8 := @caughtexception;
+
+        $r9 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r9.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r8;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+    }
+
+    final java.awt.EventDispatchThread getDispatchThread()
+    {
+        java.awt.EventQueue r0;
+        java.awt.EventDispatchThread r2;
+        java.lang.Throwable $r4;
+        java.util.concurrent.locks.Lock $r1, $r3, $r5;
+
+        r0 := @this: java.awt.EventQueue;
+
+        $r1 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r1.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        r2 = r0.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread>;
+
+     label2:
+        $r3 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r3.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return r2;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r5 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r5.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    final void removeSourceEvents(java.lang.Object, boolean)
+    {
+        java.awt.Queue[] $r4, $r6, $r15;
+        java.awt.SequencedEvent $r24;
+        sun.awt.AppContext $r1;
+        boolean z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        java.lang.Throwable $r31;
+        sun.awt.EventQueueItem $r14, $r16, r33, r34;
+        java.awt.event.InvocationEvent $r20;
+        java.awt.AWTEvent $r8, $r11, $r12, $r13, $r19, $r21, $r23, $r25, $r26, $r27, $r28, $r29, $r30;
+        sun.awt.AWTAccessor$InvocationEventAccessor $r18;
+        int i0;
+        java.awt.EventQueue r0;
+        java.util.concurrent.locks.Lock $r2, $r3, $r32;
+        java.awt.SentEvent $r22;
+        java.awt.Queue $r5, $r7, $r17;
+        java.lang.Object $r9, r10;
+
+        r0 := @this: java.awt.EventQueue;
+
+        r10 := @parameter0: java.lang.Object;
+
+        z0 := @parameter1: boolean;
+
+        $r1 = r0.<java.awt.EventQueue: sun.awt.AppContext appContext>;
+
+        staticinvoke <sun.awt.SunToolkit: void flushPendingEvents(sun.awt.AppContext)>($r1);
+
+        $r2 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r2.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label01:
+        i0 = 0;
+
+     label02:
+        if i0 >= 4 goto label13;
+
+        $r4 = r0.<java.awt.EventQueue: java.awt.Queue[] queues>;
+
+        $r5 = $r4[i0];
+
+        r33 = $r5.<java.awt.Queue: sun.awt.EventQueueItem head>;
+
+        r34 = null;
+
+     label03:
+        if r33 == null goto label12;
+
+        $r8 = r33.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $r9 = virtualinvoke $r8.<java.awt.AWTEvent: java.lang.Object getSource()>();
+
+        if $r9 != r10 goto label10;
+
+        if z0 != 0 goto label04;
+
+        $r25 = r33.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $z4 = $r25 instanceof java.awt.SequencedEvent;
+
+        if $z4 != 0 goto label10;
+
+        $r26 = r33.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $z5 = $r26 instanceof java.awt.SentEvent;
+
+        if $z5 != 0 goto label10;
+
+        $r27 = r33.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $z6 = $r27 instanceof java.awt.event.FocusEvent;
+
+        if $z6 != 0 goto label10;
+
+        $r28 = r33.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $z7 = $r28 instanceof java.awt.event.WindowEvent;
+
+        if $z7 != 0 goto label10;
+
+        $r29 = r33.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $z8 = $r29 instanceof java.awt.event.KeyEvent;
+
+        if $z8 != 0 goto label10;
+
+        $r30 = r33.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $z9 = $r30 instanceof java.awt.event.InputMethodEvent;
+
+        if $z9 != 0 goto label10;
+
+     label04:
+        $r11 = r33.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $z1 = $r11 instanceof java.awt.SequencedEvent;
+
+        if $z1 == 0 goto label05;
+
+        $r23 = r33.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $r24 = (java.awt.SequencedEvent) $r23;
+
+        virtualinvoke $r24.<java.awt.SequencedEvent: void dispose()>();
+
+     label05:
+        $r12 = r33.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $z2 = $r12 instanceof java.awt.SentEvent;
+
+        if $z2 == 0 goto label06;
+
+        $r21 = r33.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $r22 = (java.awt.SentEvent) $r21;
+
+        virtualinvoke $r22.<java.awt.SentEvent: void dispose()>();
+
+     label06:
+        $r13 = r33.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $z3 = $r13 instanceof java.awt.event.InvocationEvent;
+
+        if $z3 == 0 goto label07;
+
+        $r18 = staticinvoke <sun.awt.AWTAccessor: sun.awt.AWTAccessor$InvocationEventAccessor getInvocationEventAccessor()>();
+
+        $r19 = r33.<sun.awt.EventQueueItem: java.awt.AWTEvent event>;
+
+        $r20 = (java.awt.event.InvocationEvent) $r19;
+
+        interfaceinvoke $r18.<sun.awt.AWTAccessor$InvocationEventAccessor: void dispose(java.awt.event.InvocationEvent)>($r20);
+
+     label07:
+        if r34 != null goto label08;
+
+        $r15 = r0.<java.awt.EventQueue: java.awt.Queue[] queues>;
+
+        $r17 = $r15[i0];
+
+        $r16 = r33.<sun.awt.EventQueueItem: sun.awt.EventQueueItem next>;
+
+        $r17.<java.awt.Queue: sun.awt.EventQueueItem head> = $r16;
+
+        goto label09;
+
+     label08:
+        $r14 = r33.<sun.awt.EventQueueItem: sun.awt.EventQueueItem next>;
+
+        r34.<sun.awt.EventQueueItem: sun.awt.EventQueueItem next> = $r14;
+
+     label09:
+        specialinvoke r0.<java.awt.EventQueue: void uncacheEQItem(sun.awt.EventQueueItem)>(r33);
+
+        goto label11;
+
+     label10:
+        r34 = r33;
+
+     label11:
+        r33 = r33.<sun.awt.EventQueueItem: sun.awt.EventQueueItem next>;
+
+        goto label03;
+
+     label12:
+        $r6 = r0.<java.awt.EventQueue: java.awt.Queue[] queues>;
+
+        $r7 = $r6[i0];
+
+        $r7.<java.awt.Queue: sun.awt.EventQueueItem tail> = r34;
+
+        i0 = i0 + 1;
+
+        goto label02;
+
+     label13:
+        $r3 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r3.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label16;
+
+     label14:
+        $r31 := @caughtexception;
+
+     label15:
+        $r32 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r32.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r31;
+
+     label16:
+        return;
+
+        catch java.lang.Throwable from label01 to label13 with label14;
+        catch java.lang.Throwable from label14 to label15 with label14;
+    }
+
+    synchronized long getMostRecentKeyEventTime()
+    {
+        java.awt.EventQueue r0;
+        java.lang.Throwable $r3;
+        java.util.concurrent.locks.Lock $r1, $r2, $r4;
+        long l0;
+
+        r0 := @this: java.awt.EventQueue;
+
+        $r1 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r1.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        l0 = r0.<java.awt.EventQueue: long mostRecentKeyEventTime>;
+
+     label2:
+        $r2 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r2.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return l0;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r4.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    static void setCurrentEventAndMostRecentTime(java.awt.AWTEvent)
+    {
+        java.awt.EventQueue $r0;
+        java.awt.AWTEvent r1;
+
+        r1 := @parameter0: java.awt.AWTEvent;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.EventQueue getEventQueue()>();
+
+        specialinvoke $r0.<java.awt.EventQueue: void setCurrentEventAndMostRecentTimeImpl(java.awt.AWTEvent)>(r1);
+
+        return;
+    }
+
+    private void setCurrentEventAndMostRecentTimeImpl(java.awt.AWTEvent)
+    {
+        java.lang.Throwable $r7;
+        java.awt.event.InputEvent r9;
+        long $l0, l1, $l2, $l3;
+        java.awt.event.InvocationEvent r12;
+        java.awt.AWTEvent r5;
+        java.lang.Thread $r2;
+        java.lang.ref.WeakReference $r4;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.awt.EventQueue r0;
+        java.awt.EventDispatchThread $r3;
+        java.awt.event.ActionEvent r11;
+        java.util.concurrent.locks.Lock $r1, $r6, $r8, $r13;
+        java.awt.event.InputMethodEvent r10;
+
+        r0 := @this: java.awt.EventQueue;
+
+        r5 := @parameter0: java.awt.AWTEvent;
+
+        $r1 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r1.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label01:
+        $r2 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r3 = r0.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread>;
+
+        if $r2 == $r3 goto label03;
+
+     label02:
+        $r6 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r6.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return;
+
+     label03:
+        $r4 = new java.lang.ref.WeakReference;
+
+        specialinvoke $r4.<java.lang.ref.WeakReference: void <init>(java.lang.Object)>(r5);
+
+        r0.<java.awt.EventQueue: java.lang.ref.WeakReference currentEvent> = $r4;
+
+        l1 = -9223372036854775808L;
+
+        $z0 = r5 instanceof java.awt.event.InputEvent;
+
+        if $z0 == 0 goto label05;
+
+        r9 = (java.awt.event.InputEvent) r5;
+
+        l1 = virtualinvoke r9.<java.awt.event.InputEvent: long getWhen()>();
+
+        $z4 = r5 instanceof java.awt.event.KeyEvent;
+
+        if $z4 == 0 goto label04;
+
+        $l0 = virtualinvoke r9.<java.awt.event.InputEvent: long getWhen()>();
+
+        r0.<java.awt.EventQueue: long mostRecentKeyEventTime> = $l0;
+
+     label04:
+        goto label08;
+
+     label05:
+        $z1 = r5 instanceof java.awt.event.InputMethodEvent;
+
+        if $z1 == 0 goto label06;
+
+        r10 = (java.awt.event.InputMethodEvent) r5;
+
+        l1 = virtualinvoke r10.<java.awt.event.InputMethodEvent: long getWhen()>();
+
+        goto label08;
+
+     label06:
+        $z2 = r5 instanceof java.awt.event.ActionEvent;
+
+        if $z2 == 0 goto label07;
+
+        r11 = (java.awt.event.ActionEvent) r5;
+
+        l1 = virtualinvoke r11.<java.awt.event.ActionEvent: long getWhen()>();
+
+        goto label08;
+
+     label07:
+        $z3 = r5 instanceof java.awt.event.InvocationEvent;
+
+        if $z3 == 0 goto label08;
+
+        r12 = (java.awt.event.InvocationEvent) r5;
+
+        l1 = virtualinvoke r12.<java.awt.event.InvocationEvent: long getWhen()>();
+
+     label08:
+        $l2 = r0.<java.awt.EventQueue: long mostRecentEventTime>;
+
+        $l3 = staticinvoke <java.lang.Math: long max(long,long)>($l2, l1);
+
+        r0.<java.awt.EventQueue: long mostRecentEventTime> = $l3;
+
+     label09:
+        $r13 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r13.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label12;
+
+     label10:
+        $r7 := @caughtexception;
+
+     label11:
+        $r8 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r8.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r7;
+
+     label12:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label10;
+        catch java.lang.Throwable from label03 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    public static void invokeLater(java.lang.Runnable)
+    {
+        java.awt.EventQueue $r0;
+        java.awt.event.InvocationEvent $r1;
+        java.lang.Runnable r3;
+        java.awt.Toolkit $r2;
+
+        r3 := @parameter0: java.lang.Runnable;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.EventQueue getEventQueue()>();
+
+        $r1 = new java.awt.event.InvocationEvent;
+
+        $r2 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        specialinvoke $r1.<java.awt.event.InvocationEvent: void <init>(java.lang.Object,java.lang.Runnable)>($r2, r3);
+
+        virtualinvoke $r0.<java.awt.EventQueue: void postEvent(java.awt.AWTEvent)>($r1);
+
+        return;
+    }
+
+    public static void invokeAndWait(java.lang.Runnable) throws java.lang.InterruptedException, java.lang.reflect.InvocationTargetException
+    {
+        java.lang.Runnable r1;
+        java.awt.Toolkit $r0;
+
+        r1 := @parameter0: java.lang.Runnable;
+
+        $r0 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        staticinvoke <java.awt.EventQueue: void invokeAndWait(java.lang.Object,java.lang.Runnable)>($r0, r1);
+
+        return;
+    }
+
+    static void invokeAndWait(java.lang.Object, java.lang.Runnable) throws java.lang.InterruptedException, java.lang.reflect.InvocationTargetException
+    {
+        java.awt.EventQueue $r4;
+        java.lang.Throwable $r5, $r8;
+        java.lang.Error $r7;
+        java.lang.Runnable r3;
+        java.awt.EventQueue$1AWTInvocationLock $r0;
+        java.lang.reflect.InvocationTargetException $r6;
+        java.awt.event.InvocationEvent $r1;
+        java.lang.Object r2;
+        boolean $z0, $z1;
+
+        r2 := @parameter0: java.lang.Object;
+
+        r3 := @parameter1: java.lang.Runnable;
+
+        $z0 = staticinvoke <java.awt.EventQueue: boolean isDispatchThread()>();
+
+        if $z0 == 0 goto label1;
+
+        $r7 = new java.lang.Error;
+
+        specialinvoke $r7.<java.lang.Error: void <init>(java.lang.String)>("Cannot call invokeAndWait from the event dispatcher thread");
+
+        throw $r7;
+
+     label1:
+        $r0 = new java.awt.EventQueue$1AWTInvocationLock;
+
+        specialinvoke $r0.<java.awt.EventQueue$1AWTInvocationLock: void <init>()>();
+
+        $r1 = new java.awt.event.InvocationEvent;
+
+        specialinvoke $r1.<java.awt.event.InvocationEvent: void <init>(java.lang.Object,java.lang.Runnable,java.lang.Object,boolean)>(r2, r3, $r0, 1);
+
+        entermonitor $r0;
+
+     label2:
+        $r4 = staticinvoke <java.awt.Toolkit: java.awt.EventQueue getEventQueue()>();
+
+        virtualinvoke $r4.<java.awt.EventQueue: void postEvent(java.awt.AWTEvent)>($r1);
+
+     label3:
+        $z1 = virtualinvoke $r1.<java.awt.event.InvocationEvent: boolean isDispatched()>();
+
+        if $z1 != 0 goto label4;
+
+        virtualinvoke $r0.<java.lang.Object: void wait()>();
+
+        goto label3;
+
+     label4:
+        exitmonitor $r0;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r8 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label7:
+        throw $r8;
+
+     label8:
+        $r5 = virtualinvoke $r1.<java.awt.event.InvocationEvent: java.lang.Throwable getThrowable()>();
+
+        if $r5 == null goto label9;
+
+        $r6 = new java.lang.reflect.InvocationTargetException;
+
+        specialinvoke $r6.<java.lang.reflect.InvocationTargetException: void <init>(java.lang.Throwable)>($r5);
+
+        throw $r6;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label2 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    private void wakeup(boolean)
+    {
+        java.awt.EventQueue r0, $r2, $r5;
+        java.awt.EventDispatchThread $r3;
+        java.lang.Throwable $r6;
+        java.util.concurrent.locks.Lock $r1, $r7, $r8;
+        java.util.concurrent.locks.Condition $r4;
+        boolean z0;
+
+        r0 := @this: java.awt.EventQueue;
+
+        z0 := @parameter0: boolean;
+
+        $r1 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r1.<java.util.concurrent.locks.Lock: void lock()>();
+
+     label1:
+        $r2 = r0.<java.awt.EventQueue: java.awt.EventQueue nextQueue>;
+
+        if $r2 == null goto label2;
+
+        $r5 = r0.<java.awt.EventQueue: java.awt.EventQueue nextQueue>;
+
+        specialinvoke $r5.<java.awt.EventQueue: void wakeup(boolean)>(z0);
+
+        goto label4;
+
+     label2:
+        $r3 = r0.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread>;
+
+        if $r3 == null goto label3;
+
+        $r4 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Condition pushPopCond>;
+
+        interfaceinvoke $r4.<java.util.concurrent.locks.Condition: void signalAll()>();
+
+        goto label4;
+
+     label3:
+        if z0 != 0 goto label4;
+
+        virtualinvoke r0.<java.awt.EventQueue: void initDispatchThread()>();
+
+     label4:
+        $r8 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r8.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label6;
+
+     label5:
+        $r6 := @caughtexception;
+
+        $r7 = r0.<java.awt.EventQueue: java.util.concurrent.locks.Lock pushPopLock>;
+
+        interfaceinvoke $r7.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r6;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+    }
+
+    private void setFwDispatcher(sun.awt.FwDispatcher)
+    {
+        java.awt.EventQueue r0, $r1, $r3;
+        sun.awt.FwDispatcher r2;
+
+        r0 := @this: java.awt.EventQueue;
+
+        r2 := @parameter0: sun.awt.FwDispatcher;
+
+        $r1 = r0.<java.awt.EventQueue: java.awt.EventQueue nextQueue>;
+
+        if $r1 == null goto label1;
+
+        $r3 = r0.<java.awt.EventQueue: java.awt.EventQueue nextQueue>;
+
+        specialinvoke $r3.<java.awt.EventQueue: void setFwDispatcher(sun.awt.FwDispatcher)>(r2);
+
+        goto label2;
+
+     label1:
+        r0.<java.awt.EventQueue: sun.awt.FwDispatcher fwDispatcher> = r2;
+
+     label2:
+        return;
+    }
+
+    static boolean access$000(java.awt.EventQueue)
+    {
+        java.awt.EventQueue r0;
+        boolean $z0;
+
+        r0 := @parameter0: java.awt.EventQueue;
+
+        $z0 = specialinvoke r0.<java.awt.EventQueue: boolean noEvents()>();
+
+        return $z0;
+    }
+
+    static void access$100(java.awt.EventQueue, boolean)
+    {
+        java.awt.EventQueue r0;
+        boolean z0;
+
+        r0 := @parameter0: java.awt.EventQueue;
+
+        z0 := @parameter1: boolean;
+
+        specialinvoke r0.<java.awt.EventQueue: void wakeup(boolean)>(z0);
+
+        return;
+    }
+
+    static void access$200(java.awt.EventQueue, sun.awt.FwDispatcher)
+    {
+        java.awt.EventQueue r0;
+        sun.awt.FwDispatcher r1;
+
+        r0 := @parameter0: java.awt.EventQueue;
+
+        r1 := @parameter1: sun.awt.FwDispatcher;
+
+        specialinvoke r0.<java.awt.EventQueue: void setFwDispatcher(sun.awt.FwDispatcher)>(r1);
+
+        return;
+    }
+
+    static long access$300(java.awt.EventQueue)
+    {
+        java.awt.EventQueue r0;
+        long $l0;
+
+        r0 := @parameter0: java.awt.EventQueue;
+
+        $l0 = specialinvoke r0.<java.awt.EventQueue: long getMostRecentEventTimeImpl()>();
+
+        return $l0;
+    }
+
+    static sun.awt.FwDispatcher access$400(java.awt.EventQueue)
+    {
+        java.awt.EventQueue r0;
+        sun.awt.FwDispatcher $r1;
+
+        r0 := @parameter0: java.awt.EventQueue;
+
+        $r1 = r0.<java.awt.EventQueue: sun.awt.FwDispatcher fwDispatcher>;
+
+        return $r1;
+    }
+
+    static void access$500(java.awt.EventQueue, java.awt.AWTEvent, java.lang.Object)
+    {
+        java.awt.EventQueue r0;
+        java.awt.AWTEvent r1;
+        java.lang.Object r2;
+
+        r0 := @parameter0: java.awt.EventQueue;
+
+        r1 := @parameter1: java.awt.AWTEvent;
+
+        r2 := @parameter2: java.lang.Object;
+
+        specialinvoke r0.<java.awt.EventQueue: void dispatchEventImpl(java.awt.AWTEvent,java.lang.Object)>(r1, r2);
+
+        return;
+    }
+
+    static java.awt.EventDispatchThread access$600(java.awt.EventQueue)
+    {
+        java.awt.EventQueue r0;
+        java.awt.EventDispatchThread $r1;
+
+        r0 := @parameter0: java.awt.EventQueue;
+
+        $r1 = r0.<java.awt.EventQueue: java.awt.EventDispatchThread dispatchThread>;
+
+        return $r1;
+    }
+
+    static sun.misc.JavaSecurityAccess access$700()
+    {
+        sun.misc.JavaSecurityAccess $r0;
+
+        $r0 = <java.awt.EventQueue: sun.misc.JavaSecurityAccess javaSecurityAccess>;
+
+        return $r0;
+    }
+
+    static java.lang.ThreadGroup access$800(java.awt.EventQueue)
+    {
+        java.awt.EventQueue r0;
+        java.lang.ThreadGroup $r1;
+
+        r0 := @parameter0: java.awt.EventQueue;
+
+        $r1 = r0.<java.awt.EventQueue: java.lang.ThreadGroup threadGroup>;
+
+        return $r1;
+    }
+
+    static java.lang.String access$900(java.awt.EventQueue)
+    {
+        java.awt.EventQueue r0;
+        java.lang.String $r1;
+
+        r0 := @parameter0: java.awt.EventQueue;
+
+        $r1 = r0.<java.awt.EventQueue: java.lang.String name>;
+
+        return $r1;
+    }
+
+    static java.lang.ClassLoader access$1000(java.awt.EventQueue)
+    {
+        java.awt.EventQueue r0;
+        java.lang.ClassLoader $r1;
+
+        r0 := @parameter0: java.awt.EventQueue;
+
+        $r1 = r0.<java.awt.EventQueue: java.lang.ClassLoader classLoader>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        java.util.concurrent.atomic.AtomicInteger $r0;
+        java.awt.EventQueue$1 $r1;
+        java.awt.EventQueue$2 $r2;
+        sun.misc.JavaSecurityAccess $r3;
+
+        <java.awt.EventQueue: int CACHE_LENGTH> = 5;
+
+        <java.awt.EventQueue: int PEER> = 4;
+
+        <java.awt.EventQueue: int DRAG> = 3;
+
+        <java.awt.EventQueue: int MOVE> = 2;
+
+        <java.awt.EventQueue: int UPDATE> = 1;
+
+        <java.awt.EventQueue: int PAINT> = 0;
+
+        <java.awt.EventQueue: int NUM_PRIORITIES> = 4;
+
+        <java.awt.EventQueue: int ULTIMATE_PRIORITY> = 3;
+
+        <java.awt.EventQueue: int HIGH_PRIORITY> = 2;
+
+        <java.awt.EventQueue: int NORM_PRIORITY> = 1;
+
+        <java.awt.EventQueue: int LOW_PRIORITY> = 0;
+
+        $r0 = new java.util.concurrent.atomic.AtomicInteger;
+
+        specialinvoke $r0.<java.util.concurrent.atomic.AtomicInteger: void <init>(int)>(0);
+
+        <java.awt.EventQueue: java.util.concurrent.atomic.AtomicInteger threadInitNumber> = $r0;
+
+        $r1 = new java.awt.EventQueue$1;
+
+        specialinvoke $r1.<java.awt.EventQueue$1: void <init>()>();
+
+        <java.awt.EventQueue: java.lang.Runnable dummyRunnable> = $r1;
+
+        $r2 = new java.awt.EventQueue$2;
+
+        specialinvoke $r2.<java.awt.EventQueue$2: void <init>()>();
+
+        staticinvoke <sun.awt.AWTAccessor: void setEventQueueAccessor(sun.awt.AWTAccessor$EventQueueAccessor)>($r2);
+
+        $r3 = staticinvoke <sun.misc.SharedSecrets: sun.misc.JavaSecurityAccess getJavaSecurityAccess()>();
+
+        <java.awt.EventQueue: sun.misc.JavaSecurityAccess javaSecurityAccess> = $r3;
+
+        return;
+    }
+}

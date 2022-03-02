@@ -1,0 +1,239 @@
+final class java.nio.channels.Channels$2 extends java.io.InputStream
+{
+    private java.nio.ByteBuffer bb;
+    private byte[] bs;
+    private byte[] b1;
+    final java.nio.channels.AsynchronousByteChannel val$ch;
+
+    void <init>(java.nio.channels.AsynchronousByteChannel)
+    {
+        java.nio.channels.Channels$2 r0;
+        java.nio.channels.AsynchronousByteChannel r1;
+
+        r0 := @this: java.nio.channels.Channels$2;
+
+        r1 := @parameter0: java.nio.channels.AsynchronousByteChannel;
+
+        r0.<java.nio.channels.Channels$2: java.nio.channels.AsynchronousByteChannel val$ch> = r1;
+
+        specialinvoke r0.<java.io.InputStream: void <init>()>();
+
+        r0.<java.nio.channels.Channels$2: java.nio.ByteBuffer bb> = null;
+
+        r0.<java.nio.channels.Channels$2: byte[] bs> = null;
+
+        r0.<java.nio.channels.Channels$2: byte[] b1> = null;
+
+        return;
+    }
+
+    public synchronized int read() throws java.io.IOException
+    {
+        byte[] $r1, $r2, $r3, $r4;
+        java.nio.channels.Channels$2 r0;
+        short $s2, $s3;
+        byte $b1;
+        int $i0, $i4, $i6;
+
+        r0 := @this: java.nio.channels.Channels$2;
+
+        $r1 = r0.<java.nio.channels.Channels$2: byte[] b1>;
+
+        if $r1 != null goto label1;
+
+        $r4 = newarray (byte)[1];
+
+        r0.<java.nio.channels.Channels$2: byte[] b1> = $r4;
+
+     label1:
+        $r2 = r0.<java.nio.channels.Channels$2: byte[] b1>;
+
+        $i0 = virtualinvoke r0.<java.nio.channels.Channels$2: int read(byte[])>($r2);
+
+        if $i0 != 1 goto label2;
+
+        $r3 = r0.<java.nio.channels.Channels$2: byte[] b1>;
+
+        $b1 = $r3[0];
+
+        $s3 = (short) $b1;
+
+        $s2 = $s3 & 255;
+
+        $i4 = (int) $s2;
+
+        return $i4;
+
+     label2:
+        $i6 = (int) -1;
+
+        return $i6;
+    }
+
+    public synchronized int read(byte[], int, int) throws java.io.IOException
+    {
+        java.lang.Throwable $r5, $r10;
+        byte[] r0, $r2;
+        java.lang.IndexOutOfBoundsException $r11;
+        java.lang.Integer $r16;
+        java.nio.channels.Channels$2 r1;
+        java.nio.ByteBuffer r3, $r12;
+        java.nio.channels.AsynchronousByteChannel $r13;
+        java.util.concurrent.Future $r14;
+        java.lang.Thread $r4, $r6;
+        int i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9;
+        boolean z0, z1, z2;
+        java.io.IOException $r9;
+        java.util.concurrent.ExecutionException $r8;
+        java.lang.InterruptedException $r7;
+        java.lang.Object $r15;
+
+        r1 := @this: java.nio.channels.Channels$2;
+
+        r0 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        if i0 < 0 goto label01;
+
+        $i1 = lengthof r0;
+
+        if i0 > $i1 goto label01;
+
+        if i2 < 0 goto label01;
+
+        $i4 = i0 + i2;
+
+        $i3 = lengthof r0;
+
+        if $i4 > $i3 goto label01;
+
+        $i5 = i0 + i2;
+
+        if $i5 >= 0 goto label02;
+
+     label01:
+        $r11 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r11.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r11;
+
+     label02:
+        if i2 != 0 goto label03;
+
+        return 0;
+
+     label03:
+        $r2 = r1.<java.nio.channels.Channels$2: byte[] bs>;
+
+        if $r2 != r0 goto label04;
+
+        $r12 = r1.<java.nio.channels.Channels$2: java.nio.ByteBuffer bb>;
+
+        goto label05;
+
+     label04:
+        $r12 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>(r0);
+
+     label05:
+        r3 = $r12;
+
+        virtualinvoke $r12.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(i0);
+
+        $i6 = i0 + i2;
+
+        $i7 = virtualinvoke $r12.<java.nio.ByteBuffer: int capacity()>();
+
+        $i8 = staticinvoke <java.lang.Math: int min(int,int)>($i6, $i7);
+
+        virtualinvoke $r12.<java.nio.ByteBuffer: java.nio.Buffer limit(int)>($i8);
+
+        r1.<java.nio.channels.Channels$2: java.nio.ByteBuffer bb> = $r12;
+
+        r1.<java.nio.channels.Channels$2: byte[] bs> = r0;
+
+        z0 = 0;
+
+        z2 = 0;
+
+        z1 = 0;
+
+     label06:
+        $r13 = r1.<java.nio.channels.Channels$2: java.nio.channels.AsynchronousByteChannel val$ch>;
+
+        $r14 = interfaceinvoke $r13.<java.nio.channels.AsynchronousByteChannel: java.util.concurrent.Future read(java.nio.ByteBuffer)>(r3);
+
+        $r15 = interfaceinvoke $r14.<java.util.concurrent.Future: java.lang.Object get()>();
+
+        $r16 = (java.lang.Integer) $r15;
+
+        $i9 = virtualinvoke $r16.<java.lang.Integer: int intValue()>();
+
+     label07:
+        if z1 == 0 goto label08;
+
+        $r4 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r4.<java.lang.Thread: void interrupt()>();
+
+     label08:
+        return $i9;
+
+     label09:
+        $r8 := @caughtexception;
+
+        $r9 = new java.io.IOException;
+
+        $r10 = virtualinvoke $r8.<java.util.concurrent.ExecutionException: java.lang.Throwable getCause()>();
+
+        specialinvoke $r9.<java.io.IOException: void <init>(java.lang.Throwable)>($r10);
+
+        throw $r9;
+
+     label10:
+        $r7 := @caughtexception;
+
+        z0 = 1;
+
+        z2 = 1;
+
+        z1 = 1;
+
+        goto label06;
+
+     label11:
+        $r5 := @caughtexception;
+
+     label12:
+        if z2 == 0 goto label13;
+
+        $r6 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r6.<java.lang.Thread: void interrupt()>();
+
+     label13:
+        throw $r5;
+
+        catch java.util.concurrent.ExecutionException from label06 to label07 with label09;
+        catch java.lang.InterruptedException from label06 to label07 with label10;
+        catch java.lang.Throwable from label06 to label07 with label11;
+        catch java.lang.Throwable from label09 to label12 with label11;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        java.nio.channels.Channels$2 r0;
+        java.nio.channels.AsynchronousByteChannel $r1;
+
+        r0 := @this: java.nio.channels.Channels$2;
+
+        $r1 = r0.<java.nio.channels.Channels$2: java.nio.channels.AsynchronousByteChannel val$ch>;
+
+        interfaceinvoke $r1.<java.nio.channels.AsynchronousByteChannel: void close()>();
+
+        return;
+    }
+}

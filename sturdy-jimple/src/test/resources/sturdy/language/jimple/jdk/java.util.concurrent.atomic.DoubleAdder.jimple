@@ -1,0 +1,326 @@
+public class java.util.concurrent.atomic.DoubleAdder extends java.util.concurrent.atomic.Striped64 implements java.io.Serializable
+{
+    private static final long serialVersionUID;
+
+    public void <init>()
+    {
+        java.util.concurrent.atomic.DoubleAdder r0;
+
+        r0 := @this: java.util.concurrent.atomic.DoubleAdder;
+
+        specialinvoke r0.<java.util.concurrent.atomic.Striped64: void <init>()>();
+
+        return;
+    }
+
+    public void add(double)
+    {
+        java.util.concurrent.atomic.Striped64$Cell[] $r1;
+        long $l4, $l5, $l6, $l7;
+        int $i0, $i1, $i2, $i3;
+        double d0, $d1, $d2, $d3, $d4;
+        boolean $z0, $z1, z2;
+        java.util.concurrent.atomic.DoubleAdder r0;
+        java.util.concurrent.atomic.Striped64$Cell $r2;
+
+        r0 := @this: java.util.concurrent.atomic.DoubleAdder;
+
+        d0 := @parameter0: double;
+
+        $r1 = r0.<java.util.concurrent.atomic.DoubleAdder: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        if $r1 != null goto label1;
+
+        $l6 = r0.<java.util.concurrent.atomic.DoubleAdder: long base>;
+
+        $d3 = staticinvoke <java.lang.Double: double longBitsToDouble(long)>($l6);
+
+        $d4 = $d3 + d0;
+
+        $l7 = staticinvoke <java.lang.Double: long doubleToRawLongBits(double)>($d4);
+
+        $z1 = virtualinvoke r0.<java.util.concurrent.atomic.DoubleAdder: boolean casBase(long,long)>($l6, $l7);
+
+        if $z1 != 0 goto label3;
+
+     label1:
+        z2 = 1;
+
+        if $r1 == null goto label2;
+
+        $i0 = lengthof $r1;
+
+        $i1 = $i0 - 1;
+
+        if $i1 < 0 goto label2;
+
+        $i2 = staticinvoke <java.util.concurrent.atomic.DoubleAdder: int getProbe()>();
+
+        $i3 = $i2 & $i1;
+
+        $r2 = $r1[$i3];
+
+        if $r2 == null goto label2;
+
+        $l4 = $r2.<java.util.concurrent.atomic.Striped64$Cell: long value>;
+
+        $d1 = staticinvoke <java.lang.Double: double longBitsToDouble(long)>($l4);
+
+        $d2 = $d1 + d0;
+
+        $l5 = staticinvoke <java.lang.Double: long doubleToRawLongBits(double)>($d2);
+
+        $z0 = virtualinvoke $r2.<java.util.concurrent.atomic.Striped64$Cell: boolean cas(long,long)>($l4, $l5);
+
+        z2 = $z0;
+
+        if $z0 != 0 goto label3;
+
+     label2:
+        virtualinvoke r0.<java.util.concurrent.atomic.DoubleAdder: void doubleAccumulate(double,java.util.function.DoubleBinaryOperator,boolean)>(d0, null, z2);
+
+     label3:
+        return;
+    }
+
+    public double sum()
+    {
+        java.util.concurrent.atomic.Striped64$Cell[] r1;
+        java.util.concurrent.atomic.DoubleAdder r0;
+        long $l0, $l2;
+        java.util.concurrent.atomic.Striped64$Cell $r2;
+        int $i1, i3;
+        double $d0, d1;
+
+        r0 := @this: java.util.concurrent.atomic.DoubleAdder;
+
+        r1 = r0.<java.util.concurrent.atomic.DoubleAdder: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        $l0 = r0.<java.util.concurrent.atomic.DoubleAdder: long base>;
+
+        d1 = staticinvoke <java.lang.Double: double longBitsToDouble(long)>($l0);
+
+        if r1 == null goto label3;
+
+        i3 = 0;
+
+     label1:
+        $i1 = lengthof r1;
+
+        if i3 >= $i1 goto label3;
+
+        $r2 = r1[i3];
+
+        if $r2 == null goto label2;
+
+        $l2 = $r2.<java.util.concurrent.atomic.Striped64$Cell: long value>;
+
+        $d0 = staticinvoke <java.lang.Double: double longBitsToDouble(long)>($l2);
+
+        d1 = d1 + $d0;
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        return d1;
+    }
+
+    public void reset()
+    {
+        java.util.concurrent.atomic.Striped64$Cell[] r1;
+        int $i0, i1;
+        java.util.concurrent.atomic.DoubleAdder r0;
+        java.util.concurrent.atomic.Striped64$Cell $r2;
+
+        r0 := @this: java.util.concurrent.atomic.DoubleAdder;
+
+        r1 = r0.<java.util.concurrent.atomic.DoubleAdder: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        r0.<java.util.concurrent.atomic.DoubleAdder: long base> = 0L;
+
+        if r1 == null goto label3;
+
+        i1 = 0;
+
+     label1:
+        $i0 = lengthof r1;
+
+        if i1 >= $i0 goto label3;
+
+        $r2 = r1[i1];
+
+        if $r2 == null goto label2;
+
+        $r2.<java.util.concurrent.atomic.Striped64$Cell: long value> = 0L;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    public double sumThenReset()
+    {
+        java.util.concurrent.atomic.Striped64$Cell[] r1;
+        java.util.concurrent.atomic.DoubleAdder r0;
+        long $l0, l2;
+        java.util.concurrent.atomic.Striped64$Cell $r2;
+        int $i1, i3;
+        double $d0, d1;
+
+        r0 := @this: java.util.concurrent.atomic.DoubleAdder;
+
+        r1 = r0.<java.util.concurrent.atomic.DoubleAdder: java.util.concurrent.atomic.Striped64$Cell[] cells>;
+
+        $l0 = r0.<java.util.concurrent.atomic.DoubleAdder: long base>;
+
+        d1 = staticinvoke <java.lang.Double: double longBitsToDouble(long)>($l0);
+
+        r0.<java.util.concurrent.atomic.DoubleAdder: long base> = 0L;
+
+        if r1 == null goto label3;
+
+        i3 = 0;
+
+     label1:
+        $i1 = lengthof r1;
+
+        if i3 >= $i1 goto label3;
+
+        $r2 = r1[i3];
+
+        if $r2 == null goto label2;
+
+        l2 = $r2.<java.util.concurrent.atomic.Striped64$Cell: long value>;
+
+        $r2.<java.util.concurrent.atomic.Striped64$Cell: long value> = 0L;
+
+        $d0 = staticinvoke <java.lang.Double: double longBitsToDouble(long)>(l2);
+
+        d1 = d1 + $d0;
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        return d1;
+    }
+
+    public java.lang.String toString()
+    {
+        java.util.concurrent.atomic.DoubleAdder r0;
+        java.lang.String $r1;
+        double $d0;
+
+        r0 := @this: java.util.concurrent.atomic.DoubleAdder;
+
+        $d0 = virtualinvoke r0.<java.util.concurrent.atomic.DoubleAdder: double sum()>();
+
+        $r1 = staticinvoke <java.lang.Double: java.lang.String toString(double)>($d0);
+
+        return $r1;
+    }
+
+    public double doubleValue()
+    {
+        java.util.concurrent.atomic.DoubleAdder r0;
+        double $d0;
+
+        r0 := @this: java.util.concurrent.atomic.DoubleAdder;
+
+        $d0 = virtualinvoke r0.<java.util.concurrent.atomic.DoubleAdder: double sum()>();
+
+        return $d0;
+    }
+
+    public long longValue()
+    {
+        java.util.concurrent.atomic.DoubleAdder r0;
+        long $l0;
+        double $d0;
+
+        r0 := @this: java.util.concurrent.atomic.DoubleAdder;
+
+        $d0 = virtualinvoke r0.<java.util.concurrent.atomic.DoubleAdder: double sum()>();
+
+        $l0 = (long) $d0;
+
+        return $l0;
+    }
+
+    public int intValue()
+    {
+        int $i0;
+        java.util.concurrent.atomic.DoubleAdder r0;
+        double $d0;
+
+        r0 := @this: java.util.concurrent.atomic.DoubleAdder;
+
+        $d0 = virtualinvoke r0.<java.util.concurrent.atomic.DoubleAdder: double sum()>();
+
+        $i0 = (int) $d0;
+
+        return $i0;
+    }
+
+    public float floatValue()
+    {
+        float $f0;
+        java.util.concurrent.atomic.DoubleAdder r0;
+        double $d0;
+
+        r0 := @this: java.util.concurrent.atomic.DoubleAdder;
+
+        $d0 = virtualinvoke r0.<java.util.concurrent.atomic.DoubleAdder: double sum()>();
+
+        $f0 = (float) $d0;
+
+        return $f0;
+    }
+
+    private java.lang.Object writeReplace()
+    {
+        java.util.concurrent.atomic.DoubleAdder r1;
+        java.util.concurrent.atomic.DoubleAdder$SerializationProxy $r0;
+
+        r1 := @this: java.util.concurrent.atomic.DoubleAdder;
+
+        $r0 = new java.util.concurrent.atomic.DoubleAdder$SerializationProxy;
+
+        specialinvoke $r0.<java.util.concurrent.atomic.DoubleAdder$SerializationProxy: void <init>(java.util.concurrent.atomic.DoubleAdder)>(r1);
+
+        return $r0;
+    }
+
+    private void readObject(java.io.ObjectInputStream) throws java.io.InvalidObjectException
+    {
+        java.io.ObjectInputStream r2;
+        java.io.InvalidObjectException $r0;
+        java.util.concurrent.atomic.DoubleAdder r1;
+
+        r1 := @this: java.util.concurrent.atomic.DoubleAdder;
+
+        r2 := @parameter0: java.io.ObjectInputStream;
+
+        $r0 = new java.io.InvalidObjectException;
+
+        specialinvoke $r0.<java.io.InvalidObjectException: void <init>(java.lang.String)>("Proxy required");
+
+        throw $r0;
+    }
+
+    public static void <clinit>()
+    {
+        <java.util.concurrent.atomic.DoubleAdder: long serialVersionUID> = 7249069246863182397L;
+
+        return;
+    }
+}

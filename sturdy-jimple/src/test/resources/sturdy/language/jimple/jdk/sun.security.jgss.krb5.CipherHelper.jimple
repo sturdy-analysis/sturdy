@@ -1,0 +1,3178 @@
+class sun.security.jgss.krb5.CipherHelper extends java.lang.Object
+{
+    private static final int KG_USAGE_SEAL;
+    private static final int KG_USAGE_SIGN;
+    private static final int KG_USAGE_SEQ;
+    private static final int DES_CHECKSUM_SIZE;
+    private static final int DES_IV_SIZE;
+    private static final int AES_IV_SIZE;
+    private static final int HMAC_CHECKSUM_SIZE;
+    private static final int KG_USAGE_SIGN_MS;
+    private static final boolean DEBUG;
+    private static final byte[] ZERO_IV;
+    private static final byte[] ZERO_IV_AES;
+    private int etype;
+    private int sgnAlg;
+    private int sealAlg;
+    private byte[] keybytes;
+    private int proto;
+
+    void <init>(sun.security.krb5.EncryptionKey) throws org.ietf.jgss.GSSException
+    {
+        byte[] $r2;
+        sun.security.jgss.krb5.CipherHelper r0;
+        org.ietf.jgss.GSSException $r9;
+        sun.security.krb5.EncryptionKey r1;
+        int $i0, $i1, $i2, $i4, $i6, $i8;
+        java.lang.StringBuilder $r5, $r6, $r8;
+        java.lang.String $r7;
+
+        r0 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        r1 := @parameter0: sun.security.krb5.EncryptionKey;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.jgss.krb5.CipherHelper: int proto> = 0;
+
+        $i0 = virtualinvoke r1.<sun.security.krb5.EncryptionKey: int getEType()>();
+
+        r0.<sun.security.jgss.krb5.CipherHelper: int etype> = $i0;
+
+        $r2 = virtualinvoke r1.<sun.security.krb5.EncryptionKey: byte[] getBytes()>();
+
+        r0.<sun.security.jgss.krb5.CipherHelper: byte[] keybytes> = $r2;
+
+        $i1 = r0.<sun.security.jgss.krb5.CipherHelper: int etype>;
+
+        lookupswitch($i1)
+        {
+            case 1: goto label1;
+            case 3: goto label1;
+            case 16: goto label2;
+            case 17: goto label4;
+            case 18: goto label4;
+            case 23: goto label3;
+            default: goto label5;
+        };
+
+     label1:
+        r0.<sun.security.jgss.krb5.CipherHelper: int sgnAlg> = 0;
+
+        r0.<sun.security.jgss.krb5.CipherHelper: int sealAlg> = 0;
+
+        goto label6;
+
+     label2:
+        r0.<sun.security.jgss.krb5.CipherHelper: int sgnAlg> = 1024;
+
+        r0.<sun.security.jgss.krb5.CipherHelper: int sealAlg> = 512;
+
+        goto label6;
+
+     label3:
+        r0.<sun.security.jgss.krb5.CipherHelper: int sgnAlg> = 4352;
+
+        r0.<sun.security.jgss.krb5.CipherHelper: int sealAlg> = 4096;
+
+        goto label6;
+
+     label4:
+        $i4 = (int) -1;
+
+        r0.<sun.security.jgss.krb5.CipherHelper: int sgnAlg> = $i4;
+
+        $i6 = (int) -1;
+
+        r0.<sun.security.jgss.krb5.CipherHelper: int sealAlg> = $i6;
+
+        r0.<sun.security.jgss.krb5.CipherHelper: int proto> = 1;
+
+        goto label6;
+
+     label5:
+        $r9 = new org.ietf.jgss.GSSException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported encryption type: ");
+
+        $i2 = r0.<sun.security.jgss.krb5.CipherHelper: int etype>;
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i8 = (int) -1;
+
+        specialinvoke $r9.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i8, $r7);
+
+        throw $r9;
+
+     label6:
+        return;
+    }
+
+    int getSgnAlg()
+    {
+        int $i0;
+        sun.security.jgss.krb5.CipherHelper r0;
+
+        r0 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        $i0 = r0.<sun.security.jgss.krb5.CipherHelper: int sgnAlg>;
+
+        return $i0;
+    }
+
+    int getSealAlg()
+    {
+        int $i0;
+        sun.security.jgss.krb5.CipherHelper r0;
+
+        r0 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        $i0 = r0.<sun.security.jgss.krb5.CipherHelper: int sealAlg>;
+
+        return $i0;
+    }
+
+    int getProto()
+    {
+        int $i0;
+        sun.security.jgss.krb5.CipherHelper r0;
+
+        r0 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        $i0 = r0.<sun.security.jgss.krb5.CipherHelper: int proto>;
+
+        return $i0;
+    }
+
+    int getEType()
+    {
+        int $i0;
+        sun.security.jgss.krb5.CipherHelper r0;
+
+        r0 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        $i0 = r0.<sun.security.jgss.krb5.CipherHelper: int etype>;
+
+        return $i0;
+    }
+
+    boolean isArcFour()
+    {
+        int $i0;
+        sun.security.jgss.krb5.CipherHelper r0;
+        boolean z0;
+
+        r0 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        z0 = 0;
+
+        $i0 = r0.<sun.security.jgss.krb5.CipherHelper: int etype>;
+
+        if $i0 != 23 goto label1;
+
+        z0 = 1;
+
+     label1:
+        return z0;
+    }
+
+    byte[] calculateChecksum(int, byte[], byte[], byte[], int, int, int) throws org.ietf.jgss.GSSException
+    {
+        byte[] $r1, $r2, $r3, $r4, $r5, $r6, $r7, $r9, r36, r37, r38, r39, $r40, $r41, r42;
+        java.security.GeneralSecurityException $r15, $r22;
+        byte b27;
+        java.security.NoSuchAlgorithmException $r29;
+        java.lang.StringBuilder $r12, $r13, $r18, $r20, $r25, $r27, $r32, $r34, $r43, $r45, $r47, $r49;
+        java.lang.String $r14, $r19, $r21, $r26, $r28, $r33, $r35;
+        org.ietf.jgss.GSSException $r44, $r46, $r48, $r50;
+        java.security.MessageDigest $r8;
+        sun.security.jgss.krb5.CipherHelper r0;
+        int i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, i15, i16, i17, i18, $i19, $i20, i21, i22, i23, $i24, $i25, i26, $i29, $i31, $i33, $i35;
+
+        r0 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        i0 := @parameter0: int;
+
+        r36 := @parameter1: byte[];
+
+        r37 := @parameter2: byte[];
+
+        r38 := @parameter3: byte[];
+
+        i15 := @parameter4: int;
+
+        i16 := @parameter5: int;
+
+        i2 := @parameter6: int;
+
+        lookupswitch(i0)
+        {
+            case 0: goto label01;
+            case 512: goto label05;
+            case 1024: goto label06;
+            case 4352: goto label17;
+            default: goto label29;
+        };
+
+     label01:
+        $r8 = staticinvoke <java.security.MessageDigest: java.security.MessageDigest getInstance(java.lang.String)>("MD5");
+
+        virtualinvoke $r8.<java.security.MessageDigest: void update(byte[])>(r36);
+
+        virtualinvoke $r8.<java.security.MessageDigest: void update(byte[],int,int)>(r38, i15, i16);
+
+        if r37 == null goto label02;
+
+        virtualinvoke $r8.<java.security.MessageDigest: void update(byte[])>(r37);
+
+     label02:
+        $r9 = virtualinvoke $r8.<java.security.MessageDigest: byte[] digest()>();
+
+        r38 = $r9;
+
+        i15 = 0;
+
+        i16 = lengthof $r9;
+
+        r36 = null;
+
+     label03:
+        goto label05;
+
+     label04:
+        $r29 := @caughtexception;
+
+        $r44 = new org.ietf.jgss.GSSException;
+
+        $r43 = new java.lang.StringBuilder;
+
+        specialinvoke $r43.<java.lang.StringBuilder: void <init>()>();
+
+        $r32 = virtualinvoke $r43.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not get MD5 Message Digest - ");
+
+        $r33 = virtualinvoke $r29.<java.security.NoSuchAlgorithmException: java.lang.String getMessage()>();
+
+        $r34 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r33);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i29 = (int) -1;
+
+        specialinvoke $r44.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i29, $r35);
+
+        virtualinvoke $r44.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r29);
+
+        throw $r44;
+
+     label05:
+        $r6 = r0.<sun.security.jgss.krb5.CipherHelper: byte[] keybytes>;
+
+        $r7 = specialinvoke r0.<sun.security.jgss.krb5.CipherHelper: byte[] getDesCbcChecksum(byte[],byte[],byte[],int,int)>($r6, r36, r38, i15, i16);
+
+        return $r7;
+
+     label06:
+        if r36 != null goto label07;
+
+        if r37 != null goto label07;
+
+        r39 = r38;
+
+        i17 = i16;
+
+        i18 = i15;
+
+        goto label14;
+
+     label07:
+        if r36 == null goto label08;
+
+        $i19 = lengthof r36;
+
+        goto label09;
+
+     label08:
+        $i19 = 0;
+
+     label09:
+        $i9 = $i19 + i16;
+
+        if r37 == null goto label10;
+
+        $i20 = lengthof r37;
+
+        goto label11;
+
+     label10:
+        $i20 = 0;
+
+     label11:
+        $i13 = $i9 + $i20;
+
+        i17 = $i13;
+
+        $r5 = newarray (byte)[$i13];
+
+        r39 = $r5;
+
+        i21 = 0;
+
+        if r36 == null goto label12;
+
+        $i11 = lengthof r36;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r36, 0, $r5, 0, $i11);
+
+        i21 = lengthof r36;
+
+     label12:
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r38, i15, $r5, i21, i16);
+
+        $i12 = i21 + i16;
+
+        if r37 == null goto label13;
+
+        $i10 = lengthof r37;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r37, 0, $r5, $i12, $i10);
+
+     label13:
+        i18 = 0;
+
+     label14:
+        $r40 = r0.<sun.security.jgss.krb5.CipherHelper: byte[] keybytes>;
+
+        $r41 = staticinvoke <sun.security.krb5.internal.crypto.Des3: byte[] calculateChecksum(byte[],int,byte[],int,int)>($r40, 23, r39, i18, i17);
+
+     label15:
+        return $r41;
+
+     label16:
+        $r22 := @caughtexception;
+
+        $r46 = new org.ietf.jgss.GSSException;
+
+        $r45 = new java.lang.StringBuilder;
+
+        specialinvoke $r45.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not use HMAC-SHA1-DES3-KD signing algorithm - ");
+
+        $r26 = virtualinvoke $r22.<java.security.GeneralSecurityException: java.lang.String getMessage()>();
+
+        $r27 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r26);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i31 = (int) -1;
+
+        specialinvoke $r46.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i31, $r28);
+
+        virtualinvoke $r46.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r22);
+
+        throw $r46;
+
+     label17:
+        if r36 != null goto label18;
+
+        if r37 != null goto label18;
+
+        r42 = r38;
+
+        i22 = i16;
+
+        i23 = i15;
+
+        goto label25;
+
+     label18:
+        if r36 == null goto label19;
+
+        $i24 = lengthof r36;
+
+        goto label20;
+
+     label19:
+        $i24 = 0;
+
+     label20:
+        $i1 = $i24 + i16;
+
+        if r37 == null goto label21;
+
+        $i25 = lengthof r37;
+
+        goto label22;
+
+     label21:
+        $i25 = 0;
+
+     label22:
+        $i8 = $i1 + $i25;
+
+        i22 = $i8;
+
+        $r4 = newarray (byte)[$i8];
+
+        r42 = $r4;
+
+        i26 = 0;
+
+        if r36 == null goto label23;
+
+        $i6 = lengthof r36;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r36, 0, $r4, 0, $i6);
+
+        i26 = lengthof r36;
+
+     label23:
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r38, i15, $r4, i26, i16);
+
+        $i7 = i26 + i16;
+
+        if r37 == null goto label24;
+
+        $i5 = lengthof r37;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r37, 0, $r4, $i7, $i5);
+
+     label24:
+        i23 = 0;
+
+     label25:
+        b27 = 23;
+
+        if i2 != 257 goto label26;
+
+        b27 = 15;
+
+     label26:
+        $r1 = r0.<sun.security.jgss.krb5.CipherHelper: byte[] keybytes>;
+
+        $r2 = staticinvoke <sun.security.krb5.internal.crypto.ArcFourHmac: byte[] calculateChecksum(byte[],int,byte[],int,int)>($r1, b27, r42, i23, i22);
+
+        $i3 = virtualinvoke r0.<sun.security.jgss.krb5.CipherHelper: int getChecksumLength()>();
+
+        $r3 = newarray (byte)[$i3];
+
+        $i4 = lengthof $r3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, 0, $r3, 0, $i4);
+
+     label27:
+        return $r3;
+
+     label28:
+        $r15 := @caughtexception;
+
+        $r48 = new org.ietf.jgss.GSSException;
+
+        $r47 = new java.lang.StringBuilder;
+
+        specialinvoke $r47.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r47.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not use HMAC_MD5_ARCFOUR signing algorithm - ");
+
+        $r19 = virtualinvoke $r15.<java.security.GeneralSecurityException: java.lang.String getMessage()>();
+
+        $r20 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i33 = (int) -1;
+
+        specialinvoke $r48.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i33, $r21);
+
+        virtualinvoke $r48.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r15);
+
+        throw $r48;
+
+     label29:
+        $r50 = new org.ietf.jgss.GSSException;
+
+        $r49 = new java.lang.StringBuilder;
+
+        specialinvoke $r49.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r49.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported signing algorithm: ");
+
+        $i14 = r0.<sun.security.jgss.krb5.CipherHelper: int sgnAlg>;
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i14);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i35 = (int) -1;
+
+        specialinvoke $r50.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i35, $r14);
+
+        throw $r50;
+
+        catch java.security.NoSuchAlgorithmException from label01 to label03 with label04;
+        catch java.security.GeneralSecurityException from label14 to label15 with label16;
+        catch java.security.GeneralSecurityException from label25 to label27 with label28;
+    }
+
+    byte[] calculateChecksum(byte[], byte[], int, int, int) throws org.ietf.jgss.GSSException
+    {
+        byte[] r0, r1, $r3, $r4, $r5, $r6, $r12;
+        java.security.GeneralSecurityException $r13, $r20;
+        org.ietf.jgss.GSSException $r28, $r30, $r32;
+        java.lang.StringBuilder $r9, $r10, $r16, $r18, $r23, $r25, $r27, $r29, $r31;
+        sun.security.jgss.krb5.CipherHelper r2;
+        int i0, i1, $i2, i3, $i4, $i5, $i6, $i7, $i9, $i11, $i13;
+        java.lang.String $r11, $r17, $r19, $r24, $r26;
+
+        r2 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        r0 := @parameter0: byte[];
+
+        r1 := @parameter1: byte[];
+
+        i1 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        i3 := @parameter4: int;
+
+        if r0 == null goto label01;
+
+        $i7 = lengthof r0;
+
+        goto label02;
+
+     label01:
+        $i7 = 0;
+
+     label02:
+        $i6 = $i7 + i0;
+
+        $r12 = newarray (byte)[$i6];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, i1, $r12, 0, i0);
+
+        if r0 == null goto label03;
+
+        $i5 = lengthof r0;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, 0, $r12, i0, $i5);
+
+     label03:
+        $i2 = r2.<sun.security.jgss.krb5.CipherHelper: int etype>;
+
+        lookupswitch($i2)
+        {
+            case 17: goto label04;
+            case 18: goto label07;
+            default: goto label10;
+        };
+
+     label04:
+        $r5 = r2.<sun.security.jgss.krb5.CipherHelper: byte[] keybytes>;
+
+        $r6 = staticinvoke <sun.security.krb5.internal.crypto.Aes128: byte[] calculateChecksum(byte[],int,byte[],int,int)>($r5, i3, $r12, 0, $i6);
+
+     label05:
+        return $r6;
+
+     label06:
+        $r20 := @caughtexception;
+
+        $r28 = new org.ietf.jgss.GSSException;
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not use AES128 signing algorithm - ");
+
+        $r24 = virtualinvoke $r20.<java.security.GeneralSecurityException: java.lang.String getMessage()>();
+
+        $r25 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r24);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i9 = (int) -1;
+
+        specialinvoke $r28.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i9, $r26);
+
+        virtualinvoke $r28.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r20);
+
+        throw $r28;
+
+     label07:
+        $r3 = r2.<sun.security.jgss.krb5.CipherHelper: byte[] keybytes>;
+
+        $r4 = staticinvoke <sun.security.krb5.internal.crypto.Aes256: byte[] calculateChecksum(byte[],int,byte[],int,int)>($r3, i3, $r12, 0, $i6);
+
+     label08:
+        return $r4;
+
+     label09:
+        $r13 := @caughtexception;
+
+        $r30 = new org.ietf.jgss.GSSException;
+
+        $r29 = new java.lang.StringBuilder;
+
+        specialinvoke $r29.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not use AES256 signing algorithm - ");
+
+        $r17 = virtualinvoke $r13.<java.security.GeneralSecurityException: java.lang.String getMessage()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i11 = (int) -1;
+
+        specialinvoke $r30.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i11, $r19);
+
+        virtualinvoke $r30.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r13);
+
+        throw $r30;
+
+     label10:
+        $r32 = new org.ietf.jgss.GSSException;
+
+        $r31 = new java.lang.StringBuilder;
+
+        specialinvoke $r31.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported encryption type: ");
+
+        $i4 = r2.<sun.security.jgss.krb5.CipherHelper: int etype>;
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i13 = (int) -1;
+
+        specialinvoke $r32.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i13, $r11);
+
+        throw $r32;
+
+        catch java.security.GeneralSecurityException from label04 to label05 with label06;
+        catch java.security.GeneralSecurityException from label07 to label08 with label09;
+    }
+
+    byte[] encryptSeq(byte[], byte[], int, int) throws org.ietf.jgss.GSSException
+    {
+        byte[] r1, r2, $r3, $r4, $r5, $r6, $r7, $r9, r36, r37;
+        java.security.GeneralSecurityException $r29;
+        org.ietf.jgss.GSSException $r39, $r41, $r43, $r45;
+        java.lang.Exception $r15, $r22;
+        java.lang.StringBuilder $r12, $r13, $r18, $r20, $r25, $r27, $r32, $r34, $r38, $r40, $r42, $r44;
+        sun.security.jgss.krb5.CipherHelper r0;
+        javax.crypto.Cipher $r8;
+        int $i0, $i1, i2, i3, $i4, $i5, $i7, $i9, $i11, $i13;
+        java.lang.String $r14, $r19, $r21, $r26, $r28, $r33, $r35;
+
+        r0 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        r1 := @parameter0: byte[];
+
+        r2 := @parameter1: byte[];
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        $i0 = r0.<sun.security.jgss.krb5.CipherHelper: int sgnAlg>;
+
+        lookupswitch($i0)
+        {
+            case 0: goto label01;
+            case 512: goto label01;
+            case 1024: goto label04;
+            case 4352: goto label09;
+            default: goto label14;
+        };
+
+     label01:
+        $r7 = r0.<sun.security.jgss.krb5.CipherHelper: byte[] keybytes>;
+
+        $r8 = specialinvoke r0.<sun.security.jgss.krb5.CipherHelper: javax.crypto.Cipher getInitializedDes(boolean,byte[],byte[])>(1, $r7, r1);
+
+        $r9 = virtualinvoke $r8.<javax.crypto.Cipher: byte[] doFinal(byte[],int,int)>(r2, i2, i3);
+
+     label02:
+        return $r9;
+
+     label03:
+        $r29 := @caughtexception;
+
+        $r39 = new org.ietf.jgss.GSSException;
+
+        $r38 = new java.lang.StringBuilder;
+
+        specialinvoke $r38.<java.lang.StringBuilder: void <init>()>();
+
+        $r32 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not encrypt sequence number using DES - ");
+
+        $r33 = virtualinvoke $r29.<java.security.GeneralSecurityException: java.lang.String getMessage()>();
+
+        $r34 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r33);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i7 = (int) -1;
+
+        specialinvoke $r39.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i7, $r35);
+
+        virtualinvoke $r39.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r29);
+
+        throw $r39;
+
+     label04:
+        $i4 = lengthof r1;
+
+        if $i4 != 8 goto label05;
+
+        r36 = r1;
+
+        goto label06;
+
+     label05:
+        r36 = newarray (byte)[8];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, 0, r36, 0, 8);
+
+     label06:
+        $r5 = r0.<sun.security.jgss.krb5.CipherHelper: byte[] keybytes>;
+
+        $r6 = staticinvoke <sun.security.krb5.internal.crypto.Des3: byte[] encryptRaw(byte[],int,byte[],byte[],int,int)>($r5, 24, r36, r2, i2, i3);
+
+     label07:
+        return $r6;
+
+     label08:
+        $r22 := @caughtexception;
+
+        $r41 = new org.ietf.jgss.GSSException;
+
+        $r40 = new java.lang.StringBuilder;
+
+        specialinvoke $r40.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not encrypt sequence number using DES3-KD - ");
+
+        $r26 = virtualinvoke $r22.<java.lang.Exception: java.lang.String getMessage()>();
+
+        $r27 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r26);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i9 = (int) -1;
+
+        specialinvoke $r41.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i9, $r28);
+
+        virtualinvoke $r41.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r22);
+
+        throw $r41;
+
+     label09:
+        $i1 = lengthof r1;
+
+        if $i1 != 8 goto label10;
+
+        r37 = r1;
+
+        goto label11;
+
+     label10:
+        r37 = newarray (byte)[8];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, 0, r37, 0, 8);
+
+     label11:
+        $r3 = r0.<sun.security.jgss.krb5.CipherHelper: byte[] keybytes>;
+
+        $r4 = staticinvoke <sun.security.krb5.internal.crypto.ArcFourHmac: byte[] encryptSeq(byte[],int,byte[],byte[],int,int)>($r3, 24, r37, r2, i2, i3);
+
+     label12:
+        return $r4;
+
+     label13:
+        $r15 := @caughtexception;
+
+        $r43 = new org.ietf.jgss.GSSException;
+
+        $r42 = new java.lang.StringBuilder;
+
+        specialinvoke $r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not encrypt sequence number using RC4-HMAC - ");
+
+        $r19 = virtualinvoke $r15.<java.lang.Exception: java.lang.String getMessage()>();
+
+        $r20 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i11 = (int) -1;
+
+        specialinvoke $r43.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i11, $r21);
+
+        virtualinvoke $r43.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r15);
+
+        throw $r43;
+
+     label14:
+        $r45 = new org.ietf.jgss.GSSException;
+
+        $r44 = new java.lang.StringBuilder;
+
+        specialinvoke $r44.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported signing algorithm: ");
+
+        $i5 = r0.<sun.security.jgss.krb5.CipherHelper: int sgnAlg>;
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i13 = (int) -1;
+
+        specialinvoke $r45.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i13, $r14);
+
+        throw $r45;
+
+        catch java.security.GeneralSecurityException from label01 to label02 with label03;
+        catch java.lang.Exception from label06 to label07 with label08;
+        catch java.lang.Exception from label11 to label12 with label13;
+    }
+
+    byte[] decryptSeq(byte[], byte[], int, int) throws org.ietf.jgss.GSSException
+    {
+        byte[] r1, r2, $r3, $r4, $r5, $r6, $r7, $r9, r36, r37;
+        java.security.GeneralSecurityException $r29;
+        org.ietf.jgss.GSSException $r39, $r41, $r43, $r45;
+        java.lang.Exception $r15, $r22;
+        java.lang.StringBuilder $r12, $r13, $r18, $r20, $r25, $r27, $r32, $r34, $r38, $r40, $r42, $r44;
+        sun.security.jgss.krb5.CipherHelper r0;
+        javax.crypto.Cipher $r8;
+        int $i0, $i1, i2, i3, $i4, $i5, $i7, $i9, $i11, $i13;
+        java.lang.String $r14, $r19, $r21, $r26, $r28, $r33, $r35;
+
+        r0 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        r1 := @parameter0: byte[];
+
+        r2 := @parameter1: byte[];
+
+        i2 := @parameter2: int;
+
+        i3 := @parameter3: int;
+
+        $i0 = r0.<sun.security.jgss.krb5.CipherHelper: int sgnAlg>;
+
+        lookupswitch($i0)
+        {
+            case 0: goto label01;
+            case 512: goto label01;
+            case 1024: goto label04;
+            case 4352: goto label09;
+            default: goto label14;
+        };
+
+     label01:
+        $r7 = r0.<sun.security.jgss.krb5.CipherHelper: byte[] keybytes>;
+
+        $r8 = specialinvoke r0.<sun.security.jgss.krb5.CipherHelper: javax.crypto.Cipher getInitializedDes(boolean,byte[],byte[])>(0, $r7, r1);
+
+        $r9 = virtualinvoke $r8.<javax.crypto.Cipher: byte[] doFinal(byte[],int,int)>(r2, i2, i3);
+
+     label02:
+        return $r9;
+
+     label03:
+        $r29 := @caughtexception;
+
+        $r39 = new org.ietf.jgss.GSSException;
+
+        $r38 = new java.lang.StringBuilder;
+
+        specialinvoke $r38.<java.lang.StringBuilder: void <init>()>();
+
+        $r32 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not decrypt sequence number using DES - ");
+
+        $r33 = virtualinvoke $r29.<java.security.GeneralSecurityException: java.lang.String getMessage()>();
+
+        $r34 = virtualinvoke $r32.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r33);
+
+        $r35 = virtualinvoke $r34.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i7 = (int) -1;
+
+        specialinvoke $r39.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i7, $r35);
+
+        virtualinvoke $r39.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r29);
+
+        throw $r39;
+
+     label04:
+        $i4 = lengthof r1;
+
+        if $i4 != 8 goto label05;
+
+        r36 = r1;
+
+        goto label06;
+
+     label05:
+        r36 = newarray (byte)[8];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, 0, r36, 0, 8);
+
+     label06:
+        $r5 = r0.<sun.security.jgss.krb5.CipherHelper: byte[] keybytes>;
+
+        $r6 = staticinvoke <sun.security.krb5.internal.crypto.Des3: byte[] decryptRaw(byte[],int,byte[],byte[],int,int)>($r5, 24, r36, r2, i2, i3);
+
+     label07:
+        return $r6;
+
+     label08:
+        $r22 := @caughtexception;
+
+        $r41 = new org.ietf.jgss.GSSException;
+
+        $r40 = new java.lang.StringBuilder;
+
+        specialinvoke $r40.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r40.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not decrypt sequence number using DES3-KD - ");
+
+        $r26 = virtualinvoke $r22.<java.lang.Exception: java.lang.String getMessage()>();
+
+        $r27 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r26);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i9 = (int) -1;
+
+        specialinvoke $r41.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i9, $r28);
+
+        virtualinvoke $r41.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r22);
+
+        throw $r41;
+
+     label09:
+        $i1 = lengthof r1;
+
+        if $i1 != 8 goto label10;
+
+        r37 = r1;
+
+        goto label11;
+
+     label10:
+        r37 = newarray (byte)[8];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, 0, r37, 0, 8);
+
+     label11:
+        $r3 = r0.<sun.security.jgss.krb5.CipherHelper: byte[] keybytes>;
+
+        $r4 = staticinvoke <sun.security.krb5.internal.crypto.ArcFourHmac: byte[] decryptSeq(byte[],int,byte[],byte[],int,int)>($r3, 24, r37, r2, i2, i3);
+
+     label12:
+        return $r4;
+
+     label13:
+        $r15 := @caughtexception;
+
+        $r43 = new org.ietf.jgss.GSSException;
+
+        $r42 = new java.lang.StringBuilder;
+
+        specialinvoke $r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not decrypt sequence number using RC4-HMAC - ");
+
+        $r19 = virtualinvoke $r15.<java.lang.Exception: java.lang.String getMessage()>();
+
+        $r20 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r21 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i11 = (int) -1;
+
+        specialinvoke $r43.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i11, $r21);
+
+        virtualinvoke $r43.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r15);
+
+        throw $r43;
+
+     label14:
+        $r45 = new org.ietf.jgss.GSSException;
+
+        $r44 = new java.lang.StringBuilder;
+
+        specialinvoke $r44.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported signing algorithm: ");
+
+        $i5 = r0.<sun.security.jgss.krb5.CipherHelper: int sgnAlg>;
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i13 = (int) -1;
+
+        specialinvoke $r45.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i13, $r14);
+
+        throw $r45;
+
+        catch java.security.GeneralSecurityException from label01 to label02 with label03;
+        catch java.lang.Exception from label06 to label07 with label08;
+        catch java.lang.Exception from label11 to label12 with label13;
+    }
+
+    int getChecksumLength() throws org.ietf.jgss.GSSException
+    {
+        sun.security.jgss.krb5.CipherHelper r0;
+        org.ietf.jgss.GSSException $r7;
+        int $i0, $i1, $i2, $i3, $i4, $i6;
+        java.lang.StringBuilder $r3, $r4, $r6;
+        java.lang.String $r5;
+
+        r0 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        $i0 = r0.<sun.security.jgss.krb5.CipherHelper: int etype>;
+
+        lookupswitch($i0)
+        {
+            case 1: goto label1;
+            case 3: goto label1;
+            case 16: goto label2;
+            case 17: goto label3;
+            case 18: goto label4;
+            case 23: goto label5;
+            default: goto label6;
+        };
+
+     label1:
+        return 8;
+
+     label2:
+        $i3 = staticinvoke <sun.security.krb5.internal.crypto.Des3: int getChecksumLength()>();
+
+        return $i3;
+
+     label3:
+        $i2 = staticinvoke <sun.security.krb5.internal.crypto.Aes128: int getChecksumLength()>();
+
+        return $i2;
+
+     label4:
+        $i1 = staticinvoke <sun.security.krb5.internal.crypto.Aes256: int getChecksumLength()>();
+
+        return $i1;
+
+     label5:
+        return 8;
+
+     label6:
+        $r7 = new org.ietf.jgss.GSSException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported encryption type: ");
+
+        $i4 = r0.<sun.security.jgss.krb5.CipherHelper: int etype>;
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i6 = (int) -1;
+
+        specialinvoke $r7.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i6, $r5);
+
+        throw $r7;
+    }
+
+    void decryptData(sun.security.jgss.krb5.WrapToken, byte[], int, int, byte[], int) throws org.ietf.jgss.GSSException
+    {
+        byte[] r2, r3, $r4, $r5;
+        sun.security.jgss.krb5.CipherHelper r0;
+        sun.security.jgss.krb5.WrapToken r1;
+        int $i0, i1, i2, i3, $i4, $i6;
+        java.lang.String $r10;
+        org.ietf.jgss.GSSException $r12;
+        java.lang.StringBuilder $r8, $r9, $r11;
+
+        r0 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        r1 := @parameter0: sun.security.jgss.krb5.WrapToken;
+
+        r2 := @parameter1: byte[];
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        r3 := @parameter4: byte[];
+
+        i3 := @parameter5: int;
+
+        $i0 = r0.<sun.security.jgss.krb5.CipherHelper: int sealAlg>;
+
+        lookupswitch($i0)
+        {
+            case 0: goto label1;
+            case 512: goto label2;
+            case 4096: goto label3;
+            default: goto label4;
+        };
+
+     label1:
+        $r4 = r0.<sun.security.jgss.krb5.CipherHelper: byte[] keybytes>;
+
+        $r5 = staticinvoke <sun.security.jgss.krb5.CipherHelper: byte[] getDesEncryptionKey(byte[])>($r4);
+
+        specialinvoke r0.<sun.security.jgss.krb5.CipherHelper: void desCbcDecrypt(sun.security.jgss.krb5.WrapToken,byte[],byte[],int,int,byte[],int)>(r1, $r5, r2, i1, i2, r3, i3);
+
+        goto label5;
+
+     label2:
+        specialinvoke r0.<sun.security.jgss.krb5.CipherHelper: void des3KdDecrypt(sun.security.jgss.krb5.WrapToken,byte[],int,int,byte[],int)>(r1, r2, i1, i2, r3, i3);
+
+        goto label5;
+
+     label3:
+        specialinvoke r0.<sun.security.jgss.krb5.CipherHelper: void arcFourDecrypt(sun.security.jgss.krb5.WrapToken,byte[],int,int,byte[],int)>(r1, r2, i1, i2, r3, i3);
+
+        goto label5;
+
+     label4:
+        $r12 = new org.ietf.jgss.GSSException;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported seal algorithm: ");
+
+        $i4 = r0.<sun.security.jgss.krb5.CipherHelper: int sealAlg>;
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i6 = (int) -1;
+
+        specialinvoke $r12.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i6, $r10);
+
+        throw $r12;
+
+     label5:
+        return;
+    }
+
+    void decryptData(sun.security.jgss.krb5.WrapToken_v2, byte[], int, int, byte[], int, int) throws org.ietf.jgss.GSSException
+    {
+        byte[] r2, r3;
+        sun.security.jgss.krb5.CipherHelper r0;
+        sun.security.jgss.krb5.WrapToken_v2 r1;
+        int $i0, i1, i2, i3, i4, $i5, $i7;
+        java.lang.String $r8;
+        org.ietf.jgss.GSSException $r10;
+        java.lang.StringBuilder $r6, $r7, $r9;
+
+        r0 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        r1 := @parameter0: sun.security.jgss.krb5.WrapToken_v2;
+
+        r2 := @parameter1: byte[];
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        r3 := @parameter4: byte[];
+
+        i3 := @parameter5: int;
+
+        i4 := @parameter6: int;
+
+        $i0 = r0.<sun.security.jgss.krb5.CipherHelper: int etype>;
+
+        lookupswitch($i0)
+        {
+            case 17: goto label1;
+            case 18: goto label2;
+            default: goto label3;
+        };
+
+     label1:
+        specialinvoke r0.<sun.security.jgss.krb5.CipherHelper: void aes128Decrypt(sun.security.jgss.krb5.WrapToken_v2,byte[],int,int,byte[],int,int)>(r1, r2, i1, i2, r3, i3, i4);
+
+        goto label4;
+
+     label2:
+        specialinvoke r0.<sun.security.jgss.krb5.CipherHelper: void aes256Decrypt(sun.security.jgss.krb5.WrapToken_v2,byte[],int,int,byte[],int,int)>(r1, r2, i1, i2, r3, i3, i4);
+
+        goto label4;
+
+     label3:
+        $r10 = new org.ietf.jgss.GSSException;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported etype: ");
+
+        $i5 = r0.<sun.security.jgss.krb5.CipherHelper: int etype>;
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i7 = (int) -1;
+
+        specialinvoke $r10.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i7, $r8);
+
+        throw $r10;
+
+     label4:
+        return;
+    }
+
+    void decryptData(sun.security.jgss.krb5.WrapToken, java.io.InputStream, int, byte[], int) throws org.ietf.jgss.GSSException, java.io.IOException
+    {
+        byte[] r3, r4, $r5, $r6, r16;
+        sun.security.jgss.krb5.CipherHelper r0;
+        sun.security.jgss.krb5.WrapToken r2;
+        int $i0, i1, i2, $i3, $i5, $i7, $i9;
+        java.lang.String $r11;
+        java.io.IOException $r12, $r14;
+        org.ietf.jgss.GSSException $r17, $r18, $r20;
+        java.lang.StringBuilder $r9, $r10, $r19;
+        java.io.InputStream r1;
+
+        r0 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        r2 := @parameter0: sun.security.jgss.krb5.WrapToken;
+
+        r1 := @parameter1: java.io.InputStream;
+
+        i1 := @parameter2: int;
+
+        r3 := @parameter3: byte[];
+
+        i2 := @parameter4: int;
+
+        $i0 = r0.<sun.security.jgss.krb5.CipherHelper: int sealAlg>;
+
+        lookupswitch($i0)
+        {
+            case 0: goto label01;
+            case 512: goto label02;
+            case 4096: goto label07;
+            default: goto label12;
+        };
+
+     label01:
+        $r5 = r0.<sun.security.jgss.krb5.CipherHelper: byte[] keybytes>;
+
+        $r6 = staticinvoke <sun.security.jgss.krb5.CipherHelper: byte[] getDesEncryptionKey(byte[])>($r5);
+
+        specialinvoke r0.<sun.security.jgss.krb5.CipherHelper: void desCbcDecrypt(sun.security.jgss.krb5.WrapToken,byte[],java.io.InputStream,int,byte[],int)>(r2, $r6, r1, i1, r3, i2);
+
+        goto label13;
+
+     label02:
+        r4 = newarray (byte)[i1];
+
+     label03:
+        staticinvoke <sun.security.jgss.krb5.Krb5Token: void readFully(java.io.InputStream,byte[],int,int)>(r1, r4, 0, i1);
+
+     label04:
+        goto label06;
+
+     label05:
+        $r14 := @caughtexception;
+
+        $r17 = new org.ietf.jgss.GSSException;
+
+        $i5 = (int) -1;
+
+        specialinvoke $r17.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(10, $i5, "Cannot read complete token");
+
+        virtualinvoke $r17.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r14);
+
+        throw $r17;
+
+     label06:
+        specialinvoke r0.<sun.security.jgss.krb5.CipherHelper: void des3KdDecrypt(sun.security.jgss.krb5.WrapToken,byte[],int,int,byte[],int)>(r2, r4, 0, i1, r3, i2);
+
+        goto label13;
+
+     label07:
+        r16 = newarray (byte)[i1];
+
+     label08:
+        staticinvoke <sun.security.jgss.krb5.Krb5Token: void readFully(java.io.InputStream,byte[],int,int)>(r1, r16, 0, i1);
+
+     label09:
+        goto label11;
+
+     label10:
+        $r12 := @caughtexception;
+
+        $r18 = new org.ietf.jgss.GSSException;
+
+        $i7 = (int) -1;
+
+        specialinvoke $r18.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(10, $i7, "Cannot read complete token");
+
+        virtualinvoke $r18.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r12);
+
+        throw $r18;
+
+     label11:
+        specialinvoke r0.<sun.security.jgss.krb5.CipherHelper: void arcFourDecrypt(sun.security.jgss.krb5.WrapToken,byte[],int,int,byte[],int)>(r2, r16, 0, i1, r3, i2);
+
+        goto label13;
+
+     label12:
+        $r20 = new org.ietf.jgss.GSSException;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported seal algorithm: ");
+
+        $i3 = r0.<sun.security.jgss.krb5.CipherHelper: int sealAlg>;
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i9 = (int) -1;
+
+        specialinvoke $r20.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i9, $r11);
+
+        throw $r20;
+
+     label13:
+        return;
+
+        catch java.io.IOException from label03 to label04 with label05;
+        catch java.io.IOException from label08 to label09 with label10;
+    }
+
+    void decryptData(sun.security.jgss.krb5.WrapToken_v2, java.io.InputStream, int, byte[], int, int) throws org.ietf.jgss.GSSException, java.io.IOException
+    {
+        byte[] r0, r4;
+        sun.security.jgss.krb5.CipherHelper r2;
+        sun.security.jgss.krb5.WrapToken_v2 r3;
+        int i0, $i1, i2, i3, $i4, $i6, $i8;
+        java.lang.String $r9;
+        java.io.IOException $r10;
+        org.ietf.jgss.GSSException $r12, $r14;
+        java.lang.StringBuilder $r7, $r8, $r13;
+        java.io.InputStream r1;
+
+        r2 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        r3 := @parameter0: sun.security.jgss.krb5.WrapToken_v2;
+
+        r1 := @parameter1: java.io.InputStream;
+
+        i0 := @parameter2: int;
+
+        r4 := @parameter3: byte[];
+
+        i2 := @parameter4: int;
+
+        i3 := @parameter5: int;
+
+        r0 = newarray (byte)[i0];
+
+     label1:
+        staticinvoke <sun.security.jgss.krb5.Krb5Token: void readFully(java.io.InputStream,byte[],int,int)>(r1, r0, 0, i0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r10 := @caughtexception;
+
+        $r12 = new org.ietf.jgss.GSSException;
+
+        $i6 = (int) -1;
+
+        specialinvoke $r12.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(10, $i6, "Cannot read complete token");
+
+        virtualinvoke $r12.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r10);
+
+        throw $r12;
+
+     label4:
+        $i1 = r2.<sun.security.jgss.krb5.CipherHelper: int etype>;
+
+        lookupswitch($i1)
+        {
+            case 17: goto label5;
+            case 18: goto label6;
+            default: goto label7;
+        };
+
+     label5:
+        specialinvoke r2.<sun.security.jgss.krb5.CipherHelper: void aes128Decrypt(sun.security.jgss.krb5.WrapToken_v2,byte[],int,int,byte[],int,int)>(r3, r0, 0, i0, r4, i2, i3);
+
+        goto label8;
+
+     label6:
+        specialinvoke r2.<sun.security.jgss.krb5.CipherHelper: void aes256Decrypt(sun.security.jgss.krb5.WrapToken_v2,byte[],int,int,byte[],int,int)>(r3, r0, 0, i0, r4, i2, i3);
+
+        goto label8;
+
+     label7:
+        $r14 = new org.ietf.jgss.GSSException;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported etype: ");
+
+        $i4 = r2.<sun.security.jgss.krb5.CipherHelper: int etype>;
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i8 = (int) -1;
+
+        specialinvoke $r14.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i8, $r9);
+
+        throw $r14;
+
+     label8:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    void encryptData(sun.security.jgss.krb5.WrapToken, byte[], byte[], int, int, byte[], java.io.OutputStream) throws org.ietf.jgss.GSSException, java.io.IOException
+    {
+        byte[] r2, r3, r4, $r5, $r7, $r8, $r9, $r10;
+        sun.security.jgss.krb5.CipherHelper r0;
+        javax.crypto.Cipher $r11;
+        sun.security.jgss.krb5.WrapToken r1;
+        int $i0, i1, i2, $i3, $i5;
+        java.lang.String $r17;
+        javax.crypto.CipherOutputStream $r18;
+        java.io.OutputStream r6;
+        org.ietf.jgss.GSSException $r20;
+        java.lang.StringBuilder $r15, $r16, $r19;
+
+        r0 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        r1 := @parameter0: sun.security.jgss.krb5.WrapToken;
+
+        r2 := @parameter1: byte[];
+
+        r3 := @parameter2: byte[];
+
+        i1 := @parameter3: int;
+
+        i2 := @parameter4: int;
+
+        r4 := @parameter5: byte[];
+
+        r6 := @parameter6: java.io.OutputStream;
+
+        $i0 = r0.<sun.security.jgss.krb5.CipherHelper: int sealAlg>;
+
+        lookupswitch($i0)
+        {
+            case 0: goto label1;
+            case 512: goto label2;
+            case 4096: goto label3;
+            default: goto label4;
+        };
+
+     label1:
+        $r8 = r0.<sun.security.jgss.krb5.CipherHelper: byte[] keybytes>;
+
+        $r9 = staticinvoke <sun.security.jgss.krb5.CipherHelper: byte[] getDesEncryptionKey(byte[])>($r8);
+
+        $r10 = <sun.security.jgss.krb5.CipherHelper: byte[] ZERO_IV>;
+
+        $r11 = specialinvoke r0.<sun.security.jgss.krb5.CipherHelper: javax.crypto.Cipher getInitializedDes(boolean,byte[],byte[])>(1, $r9, $r10);
+
+        $r18 = new javax.crypto.CipherOutputStream;
+
+        specialinvoke $r18.<javax.crypto.CipherOutputStream: void <init>(java.io.OutputStream,javax.crypto.Cipher)>(r6, $r11);
+
+        virtualinvoke $r18.<javax.crypto.CipherOutputStream: void write(byte[])>(r2);
+
+        virtualinvoke $r18.<javax.crypto.CipherOutputStream: void write(byte[],int,int)>(r3, i1, i2);
+
+        virtualinvoke $r18.<javax.crypto.CipherOutputStream: void write(byte[])>(r4);
+
+        goto label5;
+
+     label2:
+        $r7 = specialinvoke r0.<sun.security.jgss.krb5.CipherHelper: byte[] des3KdEncrypt(byte[],byte[],int,int,byte[])>(r2, r3, i1, i2, r4);
+
+        virtualinvoke r6.<java.io.OutputStream: void write(byte[])>($r7);
+
+        goto label5;
+
+     label3:
+        $r5 = specialinvoke r0.<sun.security.jgss.krb5.CipherHelper: byte[] arcFourEncrypt(sun.security.jgss.krb5.WrapToken,byte[],byte[],int,int,byte[])>(r1, r2, r3, i1, i2, r4);
+
+        virtualinvoke r6.<java.io.OutputStream: void write(byte[])>($r5);
+
+        goto label5;
+
+     label4:
+        $r20 = new org.ietf.jgss.GSSException;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported seal algorithm: ");
+
+        $i3 = r0.<sun.security.jgss.krb5.CipherHelper: int sealAlg>;
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i5 = (int) -1;
+
+        specialinvoke $r20.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i5, $r17);
+
+        throw $r20;
+
+     label5:
+        return;
+    }
+
+    byte[] encryptData(sun.security.jgss.krb5.WrapToken_v2, byte[], byte[], byte[], int, int, int) throws org.ietf.jgss.GSSException
+    {
+        byte[] r1, r2, r3, $r4, $r5;
+        sun.security.jgss.krb5.CipherHelper r0;
+        sun.security.jgss.krb5.WrapToken_v2 r11;
+        int $i0, i1, i2, i3, $i4, $i6;
+        java.lang.String $r10;
+        org.ietf.jgss.GSSException $r13;
+        java.lang.StringBuilder $r8, $r9, $r12;
+
+        r0 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        r11 := @parameter0: sun.security.jgss.krb5.WrapToken_v2;
+
+        r1 := @parameter1: byte[];
+
+        r2 := @parameter2: byte[];
+
+        r3 := @parameter3: byte[];
+
+        i1 := @parameter4: int;
+
+        i2 := @parameter5: int;
+
+        i3 := @parameter6: int;
+
+        $i0 = r0.<sun.security.jgss.krb5.CipherHelper: int etype>;
+
+        lookupswitch($i0)
+        {
+            case 17: goto label1;
+            case 18: goto label2;
+            default: goto label3;
+        };
+
+     label1:
+        $r5 = specialinvoke r0.<sun.security.jgss.krb5.CipherHelper: byte[] aes128Encrypt(byte[],byte[],byte[],int,int,int)>(r1, r2, r3, i1, i2, i3);
+
+        return $r5;
+
+     label2:
+        $r4 = specialinvoke r0.<sun.security.jgss.krb5.CipherHelper: byte[] aes256Encrypt(byte[],byte[],byte[],int,int,int)>(r1, r2, r3, i1, i2, i3);
+
+        return $r4;
+
+     label3:
+        $r13 = new org.ietf.jgss.GSSException;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported etype: ");
+
+        $i4 = r0.<sun.security.jgss.krb5.CipherHelper: int etype>;
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i6 = (int) -1;
+
+        specialinvoke $r13.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i6, $r10);
+
+        throw $r13;
+    }
+
+    void encryptData(sun.security.jgss.krb5.WrapToken, byte[], byte[], int, int, byte[], byte[], int) throws org.ietf.jgss.GSSException
+    {
+        byte[] r2, r3, r4, $r5, r6, $r7, $r8, $r9, $r10;
+        sun.security.jgss.krb5.WrapToken r1;
+        java.security.GeneralSecurityException $r17;
+        org.ietf.jgss.GSSException $r25, $r27;
+        java.lang.StringBuilder $r14, $r15, $r20, $r22, $r24, $r26;
+        sun.security.jgss.krb5.CipherHelper r0;
+        javax.crypto.Cipher $r11;
+        int $i0, i1, i2, i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, i11, i12, $i14, $i16;
+        java.lang.String $r16, $r21, $r23;
+
+        r0 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        r1 := @parameter0: sun.security.jgss.krb5.WrapToken;
+
+        r2 := @parameter1: byte[];
+
+        r3 := @parameter2: byte[];
+
+        i1 := @parameter3: int;
+
+        i2 := @parameter4: int;
+
+        r4 := @parameter5: byte[];
+
+        r6 := @parameter6: byte[];
+
+        i3 := @parameter7: int;
+
+        $i0 = r0.<sun.security.jgss.krb5.CipherHelper: int sealAlg>;
+
+        lookupswitch($i0)
+        {
+            case 0: goto label1;
+            case 512: goto label5;
+            case 4096: goto label6;
+            default: goto label7;
+        };
+
+     label1:
+        $r8 = r0.<sun.security.jgss.krb5.CipherHelper: byte[] keybytes>;
+
+        $r9 = staticinvoke <sun.security.jgss.krb5.CipherHelper: byte[] getDesEncryptionKey(byte[])>($r8);
+
+        $r10 = <sun.security.jgss.krb5.CipherHelper: byte[] ZERO_IV>;
+
+        $r11 = specialinvoke r0.<sun.security.jgss.krb5.CipherHelper: javax.crypto.Cipher getInitializedDes(boolean,byte[],byte[])>(1, $r9, $r10);
+
+     label2:
+        $i6 = lengthof r2;
+
+        $i7 = virtualinvoke $r11.<javax.crypto.Cipher: int update(byte[],int,int,byte[],int)>(r2, 0, $i6, r6, i3);
+
+        i11 = i3 + $i7;
+
+        $i8 = virtualinvoke $r11.<javax.crypto.Cipher: int update(byte[],int,int,byte[],int)>(r3, i1, i2, r6, i11);
+
+        i12 = i11 + $i8;
+
+        $i9 = lengthof r4;
+
+        virtualinvoke $r11.<javax.crypto.Cipher: int update(byte[],int,int,byte[],int)>(r4, 0, $i9, r6, i12);
+
+        virtualinvoke $r11.<javax.crypto.Cipher: byte[] doFinal()>();
+
+     label3:
+        goto label8;
+
+     label4:
+        $r17 := @caughtexception;
+
+        $r25 = new org.ietf.jgss.GSSException;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not use DES Cipher - ");
+
+        $r21 = virtualinvoke $r17.<java.security.GeneralSecurityException: java.lang.String getMessage()>();
+
+        $r22 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r21);
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i14 = (int) -1;
+
+        specialinvoke $r25.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i14, $r23);
+
+        virtualinvoke $r25.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r17);
+
+        throw $r25;
+
+     label5:
+        $r7 = specialinvoke r0.<sun.security.jgss.krb5.CipherHelper: byte[] des3KdEncrypt(byte[],byte[],int,int,byte[])>(r2, r3, i1, i2, r4);
+
+        $i5 = lengthof $r7;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r7, 0, r6, i3, $i5);
+
+        goto label8;
+
+     label6:
+        $r5 = specialinvoke r0.<sun.security.jgss.krb5.CipherHelper: byte[] arcFourEncrypt(sun.security.jgss.krb5.WrapToken,byte[],byte[],int,int,byte[])>(r1, r2, r3, i1, i2, r4);
+
+        $i4 = lengthof $r5;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r5, 0, r6, i3, $i4);
+
+        goto label8;
+
+     label7:
+        $r27 = new org.ietf.jgss.GSSException;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported seal algorithm: ");
+
+        $i10 = r0.<sun.security.jgss.krb5.CipherHelper: int sealAlg>;
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i10);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i16 = (int) -1;
+
+        specialinvoke $r27.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i16, $r16);
+
+        throw $r27;
+
+     label8:
+        return;
+
+        catch java.security.GeneralSecurityException from label2 to label3 with label4;
+    }
+
+    int encryptData(sun.security.jgss.krb5.WrapToken_v2, byte[], byte[], byte[], int, int, byte[], int, int) throws org.ietf.jgss.GSSException
+    {
+        byte[] r1, r2, r3, r4, r11;
+        sun.security.jgss.krb5.CipherHelper r0;
+        sun.security.jgss.krb5.WrapToken_v2 r10;
+        int $i0, i1, i2, i3, i4, $i5, $i6, $i7, $i9;
+        java.lang.String $r9;
+        org.ietf.jgss.GSSException $r13;
+        java.lang.StringBuilder $r7, $r8, $r12;
+
+        r0 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        r10 := @parameter0: sun.security.jgss.krb5.WrapToken_v2;
+
+        r1 := @parameter1: byte[];
+
+        r2 := @parameter2: byte[];
+
+        r3 := @parameter3: byte[];
+
+        i1 := @parameter4: int;
+
+        i2 := @parameter5: int;
+
+        r4 := @parameter6: byte[];
+
+        i4 := @parameter7: int;
+
+        i3 := @parameter8: int;
+
+        $i0 = r0.<sun.security.jgss.krb5.CipherHelper: int etype>;
+
+        lookupswitch($i0)
+        {
+            case 17: goto label1;
+            case 18: goto label2;
+            default: goto label3;
+        };
+
+     label1:
+        r11 = specialinvoke r0.<sun.security.jgss.krb5.CipherHelper: byte[] aes128Encrypt(byte[],byte[],byte[],int,int,int)>(r1, r2, r3, i1, i2, i3);
+
+        goto label4;
+
+     label2:
+        r11 = specialinvoke r0.<sun.security.jgss.krb5.CipherHelper: byte[] aes256Encrypt(byte[],byte[],byte[],int,int,int)>(r1, r2, r3, i1, i2, i3);
+
+        goto label4;
+
+     label3:
+        $r13 = new org.ietf.jgss.GSSException;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported etype: ");
+
+        $i7 = r0.<sun.security.jgss.krb5.CipherHelper: int etype>;
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i9 = (int) -1;
+
+        specialinvoke $r13.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i9, $r9);
+
+        throw $r13;
+
+     label4:
+        $i5 = lengthof r11;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r11, 0, r4, i4, $i5);
+
+        $i6 = lengthof r11;
+
+        return $i6;
+    }
+
+    private byte[] getDesCbcChecksum(byte[], byte[], byte[], int, int) throws org.ietf.jgss.GSSException
+    {
+        byte[] r1, $r2, r4, r5, r6, $r7, r15;
+        sun.security.jgss.krb5.CipherHelper r0;
+        javax.crypto.Cipher $r3;
+        java.security.GeneralSecurityException $r8;
+        int $i0, i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, i9, i10, $i11, i12, $i14, $i16;
+        java.lang.String $r12, $r14;
+        org.ietf.jgss.GSSException $r17;
+        java.lang.StringBuilder $r11, $r13, $r16;
+
+        r0 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        r1 := @parameter0: byte[];
+
+        r6 := @parameter1: byte[];
+
+        r5 := @parameter2: byte[];
+
+        i9 := @parameter3: int;
+
+        i1 := @parameter4: int;
+
+        $r2 = <sun.security.jgss.krb5.CipherHelper: byte[] ZERO_IV>;
+
+        $r3 = specialinvoke r0.<sun.security.jgss.krb5.CipherHelper: javax.crypto.Cipher getInitializedDes(boolean,byte[],byte[])>(1, r1, $r2);
+
+        $i0 = virtualinvoke $r3.<javax.crypto.Cipher: int getBlockSize()>();
+
+        r4 = newarray (byte)[$i0];
+
+        i10 = i1 / $i0;
+
+        i2 = i1 % $i0;
+
+        if i2 != 0 goto label1;
+
+        $i14 = (int) -1;
+
+        i10 = i10 + $i14;
+
+        $i7 = i10 * $i0;
+
+        $i8 = i9 + $i7;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r5, $i8, r4, 0, $i0);
+
+        goto label2;
+
+     label1:
+        $i3 = i10 * $i0;
+
+        $i4 = i9 + $i3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r5, $i4, r4, 0, i2);
+
+     label2:
+        if r6 != null goto label3;
+
+        $i11 = $i0;
+
+        goto label4;
+
+     label3:
+        $i11 = lengthof r6;
+
+     label4:
+        $i5 = staticinvoke <java.lang.Math: int max(int,int)>($i0, $i11);
+
+        $r7 = newarray (byte)[$i5];
+
+        if r6 == null goto label5;
+
+        $i6 = lengthof r6;
+
+        virtualinvoke $r3.<javax.crypto.Cipher: int update(byte[],int,int,byte[],int)>(r6, 0, $i6, $r7, 0);
+
+     label5:
+        i12 = 0;
+
+     label6:
+        if i12 >= i10 goto label7;
+
+        virtualinvoke $r3.<javax.crypto.Cipher: int update(byte[],int,int,byte[],int)>(r5, i9, $i0, $r7, 0);
+
+        i9 = i9 + $i0;
+
+        i12 = i12 + 1;
+
+        goto label6;
+
+     label7:
+        r15 = newarray (byte)[$i0];
+
+        virtualinvoke $r3.<javax.crypto.Cipher: int update(byte[],int,int,byte[],int)>(r4, 0, $i0, r15, 0);
+
+        virtualinvoke $r3.<javax.crypto.Cipher: byte[] doFinal()>();
+
+     label8:
+        return r15;
+
+     label9:
+        $r8 := @caughtexception;
+
+        $r17 = new org.ietf.jgss.GSSException;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not use DES Cipher - ");
+
+        $r12 = virtualinvoke $r8.<java.security.GeneralSecurityException: java.lang.String getMessage()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i16 = (int) -1;
+
+        specialinvoke $r17.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i16, $r14);
+
+        virtualinvoke $r17.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r8);
+
+        throw $r17;
+
+        catch java.security.GeneralSecurityException from label2 to label8 with label9;
+    }
+
+    private final javax.crypto.Cipher getInitializedDes(boolean, byte[], byte[]) throws org.ietf.jgss.GSSException
+    {
+        byte[] r1, r3;
+        javax.crypto.spec.SecretKeySpec $r10;
+        sun.security.jgss.krb5.CipherHelper r8;
+        org.ietf.jgss.GSSException $r11;
+        javax.crypto.Cipher $r4;
+        java.security.GeneralSecurityException $r5;
+        byte $b0;
+        javax.crypto.spec.IvParameterSpec $r9;
+        int $i2;
+        java.lang.String $r7;
+        boolean z0;
+
+        r8 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        z0 := @parameter0: boolean;
+
+        r3 := @parameter1: byte[];
+
+        r1 := @parameter2: byte[];
+
+     label1:
+        $r9 = new javax.crypto.spec.IvParameterSpec;
+
+        specialinvoke $r9.<javax.crypto.spec.IvParameterSpec: void <init>(byte[])>(r1);
+
+        $r10 = new javax.crypto.spec.SecretKeySpec;
+
+        specialinvoke $r10.<javax.crypto.spec.SecretKeySpec: void <init>(byte[],java.lang.String)>(r3, "DES");
+
+        $r4 = staticinvoke <javax.crypto.Cipher: javax.crypto.Cipher getInstance(java.lang.String)>("DES/CBC/NoPadding");
+
+        if z0 == 0 goto label2;
+
+        $b0 = 1;
+
+        goto label3;
+
+     label2:
+        $b0 = 2;
+
+     label3:
+        virtualinvoke $r4.<javax.crypto.Cipher: void init(int,java.security.Key,java.security.spec.AlgorithmParameterSpec)>($b0, $r10, $r9);
+
+     label4:
+        return $r4;
+
+     label5:
+        $r5 := @caughtexception;
+
+        $r11 = new org.ietf.jgss.GSSException;
+
+        $r7 = virtualinvoke $r5.<java.security.GeneralSecurityException: java.lang.String getMessage()>();
+
+        $i2 = (int) -1;
+
+        specialinvoke $r11.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i2, $r7);
+
+        virtualinvoke $r11.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r5);
+
+        throw $r11;
+
+        catch java.security.GeneralSecurityException from label1 to label4 with label5;
+    }
+
+    private void desCbcDecrypt(sun.security.jgss.krb5.WrapToken, byte[], byte[], int, int, byte[], int) throws org.ietf.jgss.GSSException
+    {
+        byte[] r1, $r2, r4, $r6, $r9, r10, r18;
+        sun.security.jgss.krb5.WrapToken r5;
+        java.security.GeneralSecurityException $r11;
+        byte b4;
+        org.ietf.jgss.GSSException $r19, $r21;
+        byte[][] $r8;
+        java.lang.StringBuilder $r14, $r16, $r20;
+        sun.security.jgss.krb5.CipherHelper r0;
+        javax.crypto.Cipher $r3;
+        int $i0, $i1, i2, $i3, i5, i6, i7, i8, i9, i10, i11, $i13, $i14, $i15, $i17, $i18, $i19, $i21;
+        java.lang.String $r15, $r17;
+
+        r0 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        r5 := @parameter0: sun.security.jgss.krb5.WrapToken;
+
+        r1 := @parameter1: byte[];
+
+        r4 := @parameter2: byte[];
+
+        i5 := @parameter3: int;
+
+        i6 := @parameter4: int;
+
+        r10 := @parameter5: byte[];
+
+        i7 := @parameter6: int;
+
+     label1:
+        $r2 = <sun.security.jgss.krb5.CipherHelper: byte[] ZERO_IV>;
+
+        $r3 = specialinvoke r0.<sun.security.jgss.krb5.CipherHelper: javax.crypto.Cipher getInitializedDes(boolean,byte[],byte[])>(0, r1, $r2);
+
+        $r6 = r5.<sun.security.jgss.krb5.WrapToken: byte[] confounder>;
+
+        virtualinvoke $r3.<javax.crypto.Cipher: int update(byte[],int,int,byte[])>(r4, i5, 8, $r6);
+
+        i8 = i5 + 8;
+
+        $i13 = (int) -8;
+
+        i9 = i6 + $i13;
+
+        $i0 = virtualinvoke $r3.<javax.crypto.Cipher: int getBlockSize()>();
+
+        $i1 = i9 / $i0;
+
+        i2 = $i1 - 1;
+
+        i10 = 0;
+
+     label2:
+        if i10 >= i2 goto label3;
+
+        virtualinvoke $r3.<javax.crypto.Cipher: int update(byte[],int,int,byte[],int)>(r4, i8, $i0, r10, i7);
+
+        i8 = i8 + $i0;
+
+        i7 = i7 + $i0;
+
+        i10 = i10 + 1;
+
+        goto label2;
+
+     label3:
+        r18 = newarray (byte)[$i0];
+
+        virtualinvoke $r3.<javax.crypto.Cipher: int update(byte[],int,int,byte[])>(r4, i8, $i0, r18);
+
+        virtualinvoke $r3.<javax.crypto.Cipher: byte[] doFinal()>();
+
+        $i3 = $i0 - 1;
+
+        b4 = r18[$i3];
+
+        $i14 = (int) b4;
+
+        if $i14 < 1 goto label4;
+
+        $i15 = (int) b4;
+
+        if $i15 <= 8 goto label5;
+
+     label4:
+        $r19 = new org.ietf.jgss.GSSException;
+
+        $i17 = (int) -1;
+
+        specialinvoke $r19.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(10, $i17, "Invalid padding on Wrap Token");
+
+        throw $r19;
+
+     label5:
+        $r8 = <sun.security.jgss.krb5.WrapToken: byte[][] pads>;
+
+        $i18 = (int) b4;
+
+        $r9 = $r8[$i18];
+
+        r5.<sun.security.jgss.krb5.WrapToken: byte[] padding> = $r9;
+
+        $i19 = (int) b4;
+
+        i11 = $i0 - $i19;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r18, 0, r10, i7, i11);
+
+     label6:
+        goto label8;
+
+     label7:
+        $r11 := @caughtexception;
+
+        $r21 = new org.ietf.jgss.GSSException;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not use DES cipher - ");
+
+        $r15 = virtualinvoke $r11.<java.security.GeneralSecurityException: java.lang.String getMessage()>();
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i21 = (int) -1;
+
+        specialinvoke $r21.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i21, $r17);
+
+        virtualinvoke $r21.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r11);
+
+        throw $r21;
+
+     label8:
+        return;
+
+        catch java.security.GeneralSecurityException from label1 to label6 with label7;
+    }
+
+    private void desCbcDecrypt(sun.security.jgss.krb5.WrapToken, byte[], java.io.InputStream, int, byte[], int) throws org.ietf.jgss.GSSException, java.io.IOException
+    {
+        byte[] r1, $r2, $r8, $r11, r12, r20;
+        sun.security.jgss.krb5.WrapToken r7;
+        java.security.GeneralSecurityException $r13;
+        byte b9;
+        sun.security.jgss.krb5.CipherHelper$WrapTokenInputStream $r21;
+        org.ietf.jgss.GSSException $r24, $r25;
+        byte[][] $r10;
+        java.lang.StringBuilder $r16, $r18, $r23;
+        sun.security.jgss.krb5.CipherHelper r0;
+        javax.crypto.Cipher $r3;
+        javax.crypto.CipherInputStream $r22;
+        int $i0, $i1, $i2, i3, $i4, i5, i6, i7, i8, i10, $i12, $i13, $i14, $i16, $i17, $i18;
+        java.lang.String $r17, $r19;
+        java.io.InputStream r5;
+
+        r0 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        r7 := @parameter0: sun.security.jgss.krb5.WrapToken;
+
+        r1 := @parameter1: byte[];
+
+        r5 := @parameter2: java.io.InputStream;
+
+        i5 := @parameter3: int;
+
+        r12 := @parameter4: byte[];
+
+        i6 := @parameter5: int;
+
+        $r2 = <sun.security.jgss.krb5.CipherHelper: byte[] ZERO_IV>;
+
+        $r3 = specialinvoke r0.<sun.security.jgss.krb5.CipherHelper: javax.crypto.Cipher getInitializedDes(boolean,byte[],byte[])>(0, r1, $r2);
+
+        $r21 = new sun.security.jgss.krb5.CipherHelper$WrapTokenInputStream;
+
+        specialinvoke $r21.<sun.security.jgss.krb5.CipherHelper$WrapTokenInputStream: void <init>(sun.security.jgss.krb5.CipherHelper,java.io.InputStream,int)>(r0, r5, i5);
+
+        $r22 = new javax.crypto.CipherInputStream;
+
+        specialinvoke $r22.<javax.crypto.CipherInputStream: void <init>(java.io.InputStream,javax.crypto.Cipher)>($r21, $r3);
+
+        $r8 = r7.<sun.security.jgss.krb5.WrapToken: byte[] confounder>;
+
+        $i0 = virtualinvoke $r22.<javax.crypto.CipherInputStream: int read(byte[])>($r8);
+
+        i7 = i5 - $i0;
+
+        $i1 = virtualinvoke $r3.<javax.crypto.Cipher: int getBlockSize()>();
+
+        $i2 = i7 / $i1;
+
+        i3 = $i2 - 1;
+
+        i8 = 0;
+
+     label1:
+        if i8 >= i3 goto label2;
+
+        virtualinvoke $r22.<javax.crypto.CipherInputStream: int read(byte[],int,int)>(r12, i6, $i1);
+
+        i6 = i6 + $i1;
+
+        i8 = i8 + 1;
+
+        goto label1;
+
+     label2:
+        r20 = newarray (byte)[$i1];
+
+        virtualinvoke $r22.<javax.crypto.CipherInputStream: int read(byte[])>(r20);
+
+     label3:
+        virtualinvoke $r3.<javax.crypto.Cipher: byte[] doFinal()>();
+
+     label4:
+        goto label6;
+
+     label5:
+        $r13 := @caughtexception;
+
+        $r24 = new org.ietf.jgss.GSSException;
+
+        $r23 = new java.lang.StringBuilder;
+
+        specialinvoke $r23.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not use DES cipher - ");
+
+        $r17 = virtualinvoke $r13.<java.security.GeneralSecurityException: java.lang.String getMessage()>();
+
+        $r18 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i12 = (int) -1;
+
+        specialinvoke $r24.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i12, $r19);
+
+        virtualinvoke $r24.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r13);
+
+        throw $r24;
+
+     label6:
+        $i4 = $i1 - 1;
+
+        b9 = r20[$i4];
+
+        $i13 = (int) b9;
+
+        if $i13 < 1 goto label7;
+
+        $i14 = (int) b9;
+
+        if $i14 <= 8 goto label8;
+
+     label7:
+        $r25 = new org.ietf.jgss.GSSException;
+
+        $i16 = (int) -1;
+
+        specialinvoke $r25.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(10, $i16, "Invalid padding on Wrap Token");
+
+        throw $r25;
+
+     label8:
+        $r10 = <sun.security.jgss.krb5.WrapToken: byte[][] pads>;
+
+        $i17 = (int) b9;
+
+        $r11 = $r10[$i17];
+
+        r7.<sun.security.jgss.krb5.WrapToken: byte[] padding> = $r11;
+
+        $i18 = (int) b9;
+
+        i10 = $i1 - $i18;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r20, 0, r12, i6, i10);
+
+        return;
+
+        catch java.security.GeneralSecurityException from label3 to label4 with label5;
+    }
+
+    private static byte[] getDesEncryptionKey(byte[]) throws org.ietf.jgss.GSSException
+    {
+        byte[] r0, r1;
+        org.ietf.jgss.GSSException $r3;
+        short $s4, $s9;
+        byte $b3, $b5;
+        int $i0, $i1, $i2, i6, $i8;
+
+        r0 := @parameter0: byte[];
+
+        $i0 = lengthof r0;
+
+        if $i0 <= 8 goto label1;
+
+        $r3 = new org.ietf.jgss.GSSException;
+
+        $i8 = (int) -100;
+
+        specialinvoke $r3.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i8, "Invalid DES Key!");
+
+        throw $r3;
+
+     label1:
+        $i1 = lengthof r0;
+
+        r1 = newarray (byte)[$i1];
+
+        i6 = 0;
+
+     label2:
+        $i2 = lengthof r0;
+
+        if i6 >= $i2 goto label3;
+
+        $b3 = r0[i6];
+
+        $s9 = (short) $b3;
+
+        $s4 = $s9 ^ 240;
+
+        $b5 = (byte) $s4;
+
+        r1[i6] = $b5;
+
+        i6 = i6 + 1;
+
+        goto label2;
+
+     label3:
+        return r1;
+    }
+
+    private void des3KdDecrypt(sun.security.jgss.krb5.WrapToken, byte[], int, int, byte[], int) throws org.ietf.jgss.GSSException
+    {
+        byte[] r1, $r2, $r3, $r4, $r8, r9, $r10;
+        sun.security.jgss.krb5.WrapToken r6;
+        java.security.GeneralSecurityException $r11;
+        byte b7;
+        org.ietf.jgss.GSSException $r19, $r20;
+        byte[][] $r7;
+        java.lang.StringBuilder $r14, $r16, $r18;
+        sun.security.jgss.krb5.CipherHelper r0;
+        int i0, i1, $i2, $i3, $i4, $i5, i6, i8, $i10, $i11, $i12, $i14, $i15, $i16;
+        java.lang.String $r15, $r17;
+
+        r0 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        r6 := @parameter0: sun.security.jgss.krb5.WrapToken;
+
+        r1 := @parameter1: byte[];
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        r9 := @parameter4: byte[];
+
+        i6 := @parameter5: int;
+
+     label1:
+        $r3 = r0.<sun.security.jgss.krb5.CipherHelper: byte[] keybytes>;
+
+        $r2 = <sun.security.jgss.krb5.CipherHelper: byte[] ZERO_IV>;
+
+        $r4 = staticinvoke <sun.security.krb5.internal.crypto.Des3: byte[] decryptRaw(byte[],int,byte[],byte[],int,int)>($r3, 22, $r2, r1, i0, i1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r11 := @caughtexception;
+
+        $r19 = new org.ietf.jgss.GSSException;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not use DES3-KD Cipher - ");
+
+        $r15 = virtualinvoke $r11.<java.security.GeneralSecurityException: java.lang.String getMessage()>();
+
+        $r16 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i10 = (int) -1;
+
+        specialinvoke $r19.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i10, $r17);
+
+        virtualinvoke $r19.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r11);
+
+        throw $r19;
+
+     label4:
+        $i2 = lengthof $r4;
+
+        $i3 = $i2 - 1;
+
+        b7 = $r4[$i3];
+
+        $i11 = (int) b7;
+
+        if $i11 < 1 goto label5;
+
+        $i12 = (int) b7;
+
+        if $i12 <= 8 goto label6;
+
+     label5:
+        $r20 = new org.ietf.jgss.GSSException;
+
+        $i14 = (int) -1;
+
+        specialinvoke $r20.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(10, $i14, "Invalid padding on Wrap Token");
+
+        throw $r20;
+
+     label6:
+        $r7 = <sun.security.jgss.krb5.WrapToken: byte[][] pads>;
+
+        $i15 = (int) b7;
+
+        $r8 = $r7[$i15];
+
+        r6.<sun.security.jgss.krb5.WrapToken: byte[] padding> = $r8;
+
+        $i4 = lengthof $r4;
+
+        $i5 = $i4 - 8;
+
+        $i16 = (int) b7;
+
+        i8 = $i5 - $i16;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 8, r9, i6, i8);
+
+        $r10 = r6.<sun.security.jgss.krb5.WrapToken: byte[] confounder>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, $r10, 0, 8);
+
+        return;
+
+        catch java.security.GeneralSecurityException from label1 to label2 with label3;
+    }
+
+    private byte[] des3KdEncrypt(byte[], byte[], int, int, byte[]) throws org.ietf.jgss.GSSException
+    {
+        byte[] r0, r1, r2, r3, $r5, $r6, $r7;
+        sun.security.jgss.krb5.CipherHelper r4;
+        int i0, $i1, $i2, $i3, $i4, $i5, i6, $i7, $i8, $i9, $i10, $i11, $i13;
+        java.lang.String $r12, $r14;
+        org.ietf.jgss.GSSException $r16;
+        java.lang.Exception $r8;
+        java.lang.StringBuilder $r11, $r13, $r15;
+
+        r4 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        r0 := @parameter0: byte[];
+
+        r3 := @parameter1: byte[];
+
+        i6 := @parameter2: int;
+
+        i0 := @parameter3: int;
+
+        r1 := @parameter4: byte[];
+
+        $i1 = lengthof r0;
+
+        $i3 = $i1 + i0;
+
+        $i2 = lengthof r1;
+
+        $i4 = $i3 + $i2;
+
+        r2 = newarray (byte)[$i4];
+
+        $i5 = lengthof r0;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, 0, r2, 0, $i5);
+
+        $i7 = lengthof r0;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r3, i6, r2, $i7, i0);
+
+        $i8 = lengthof r0;
+
+        $i10 = $i8 + i0;
+
+        $i9 = lengthof r1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, 0, r2, $i10, $i9);
+
+     label1:
+        $r6 = r4.<sun.security.jgss.krb5.CipherHelper: byte[] keybytes>;
+
+        $r5 = <sun.security.jgss.krb5.CipherHelper: byte[] ZERO_IV>;
+
+        $i11 = lengthof r2;
+
+        $r7 = staticinvoke <sun.security.krb5.internal.crypto.Des3: byte[] encryptRaw(byte[],int,byte[],byte[],int,int)>($r6, 22, $r5, r2, 0, $i11);
+
+     label2:
+        return $r7;
+
+     label3:
+        $r8 := @caughtexception;
+
+        $r16 = new org.ietf.jgss.GSSException;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not use DES3-KD Cipher - ");
+
+        $r12 = virtualinvoke $r8.<java.lang.Exception: java.lang.String getMessage()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i13 = (int) -1;
+
+        specialinvoke $r16.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i13, $r14);
+
+        virtualinvoke $r16.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r8);
+
+        throw $r16;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    private void arcFourDecrypt(sun.security.jgss.krb5.WrapToken, byte[], int, int, byte[], int) throws org.ietf.jgss.GSSException
+    {
+        byte[] $r2, $r3, $r4, r5, $r6, $r7, $r8, $r10, r11, $r12;
+        sun.security.jgss.krb5.WrapToken r1;
+        java.security.GeneralSecurityException $r14;
+        byte b7;
+        org.ietf.jgss.GSSException $r22, $r23;
+        byte[][] $r9;
+        java.lang.StringBuilder $r17, $r19, $r21;
+        sun.security.jgss.krb5.CipherHelper r0;
+        int i0, i1, $i2, $i3, $i4, $i5, i6, i8, $i10, $i11, $i13, $i14, $i15;
+        java.lang.String $r18, $r20;
+
+        r0 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        r1 := @parameter0: sun.security.jgss.krb5.WrapToken;
+
+        r5 := @parameter1: byte[];
+
+        i0 := @parameter2: int;
+
+        i1 := @parameter3: int;
+
+        r11 := @parameter4: byte[];
+
+        i6 := @parameter5: int;
+
+        $r2 = virtualinvoke r1.<sun.security.jgss.krb5.WrapToken: byte[] getChecksum()>();
+
+        $r3 = virtualinvoke r1.<sun.security.jgss.krb5.WrapToken: byte[] getEncSeqNumber()>();
+
+        $r4 = virtualinvoke r0.<sun.security.jgss.krb5.CipherHelper: byte[] decryptSeq(byte[],byte[],int,int)>($r2, $r3, 0, 8);
+
+     label1:
+        $r7 = r0.<sun.security.jgss.krb5.CipherHelper: byte[] keybytes>;
+
+        $r6 = <sun.security.jgss.krb5.CipherHelper: byte[] ZERO_IV>;
+
+        $r8 = staticinvoke <sun.security.krb5.internal.crypto.ArcFourHmac: byte[] decryptRaw(byte[],int,byte[],byte[],int,int,byte[])>($r7, 22, $r6, r5, i0, i1, $r4);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r14 := @caughtexception;
+
+        $r22 = new org.ietf.jgss.GSSException;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not use ArcFour Cipher - ");
+
+        $r18 = virtualinvoke $r14.<java.security.GeneralSecurityException: java.lang.String getMessage()>();
+
+        $r19 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i10 = (int) -1;
+
+        specialinvoke $r22.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i10, $r20);
+
+        virtualinvoke $r22.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r14);
+
+        throw $r22;
+
+     label4:
+        $i2 = lengthof $r8;
+
+        $i3 = $i2 - 1;
+
+        b7 = $r8[$i3];
+
+        $i11 = (int) b7;
+
+        if $i11 >= 1 goto label5;
+
+        $r23 = new org.ietf.jgss.GSSException;
+
+        $i13 = (int) -1;
+
+        specialinvoke $r23.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(10, $i13, "Invalid padding on Wrap Token");
+
+        throw $r23;
+
+     label5:
+        $r9 = <sun.security.jgss.krb5.WrapToken: byte[][] pads>;
+
+        $i14 = (int) b7;
+
+        $r10 = $r9[$i14];
+
+        r1.<sun.security.jgss.krb5.WrapToken: byte[] padding> = $r10;
+
+        $i4 = lengthof $r8;
+
+        $i5 = $i4 - 8;
+
+        $i15 = (int) b7;
+
+        i8 = $i5 - $i15;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r8, 8, r11, i6, i8);
+
+        $r12 = r1.<sun.security.jgss.krb5.WrapToken: byte[] confounder>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r8, 0, $r12, 0, 8);
+
+        return;
+
+        catch java.security.GeneralSecurityException from label1 to label2 with label3;
+    }
+
+    private byte[] arcFourEncrypt(sun.security.jgss.krb5.WrapToken, byte[], byte[], int, int, byte[]) throws org.ietf.jgss.GSSException
+    {
+        byte[] r0, r1, r2, r3, r4, $r7, $r8;
+        sun.security.jgss.krb5.CipherHelper r6;
+        sun.security.jgss.krb5.WrapToken r5;
+        int i0, $i1, $i2, $i3, $i4, $i5, i6, $i7, $i8, $i9, $i10, $i11, $i12, $i14;
+        java.lang.String $r13, $r15;
+        org.ietf.jgss.GSSException $r17;
+        java.lang.Exception $r9;
+        java.lang.StringBuilder $r12, $r14, $r16;
+
+        r6 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        r5 := @parameter0: sun.security.jgss.krb5.WrapToken;
+
+        r0 := @parameter1: byte[];
+
+        r3 := @parameter2: byte[];
+
+        i6 := @parameter3: int;
+
+        i0 := @parameter4: int;
+
+        r1 := @parameter5: byte[];
+
+        $i1 = lengthof r0;
+
+        $i3 = $i1 + i0;
+
+        $i2 = lengthof r1;
+
+        $i4 = $i3 + $i2;
+
+        r2 = newarray (byte)[$i4];
+
+        $i5 = lengthof r0;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, 0, r2, 0, $i5);
+
+        $i7 = lengthof r0;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r3, i6, r2, $i7, i0);
+
+        $i8 = lengthof r0;
+
+        $i10 = $i8 + i0;
+
+        $i9 = lengthof r1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, 0, r2, $i10, $i9);
+
+        r4 = newarray (byte)[4];
+
+        $i11 = virtualinvoke r5.<sun.security.jgss.krb5.WrapToken: int getSequenceNumber()>();
+
+        staticinvoke <sun.security.jgss.krb5.WrapToken: void writeBigEndian(int,byte[])>($i11, r4);
+
+     label1:
+        $r7 = r6.<sun.security.jgss.krb5.CipherHelper: byte[] keybytes>;
+
+        $i12 = lengthof r2;
+
+        $r8 = staticinvoke <sun.security.krb5.internal.crypto.ArcFourHmac: byte[] encryptRaw(byte[],int,byte[],byte[],int,int)>($r7, 22, r4, r2, 0, $i12);
+
+     label2:
+        return $r8;
+
+     label3:
+        $r9 := @caughtexception;
+
+        $r17 = new org.ietf.jgss.GSSException;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not use ArcFour Cipher - ");
+
+        $r13 = virtualinvoke $r9.<java.lang.Exception: java.lang.String getMessage()>();
+
+        $r14 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i14 = (int) -1;
+
+        specialinvoke $r17.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i14, $r15);
+
+        virtualinvoke $r17.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r9);
+
+        throw $r17;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    private byte[] aes128Encrypt(byte[], byte[], byte[], int, int, int) throws org.ietf.jgss.GSSException
+    {
+        byte[] r0, r1, r2, r3, $r5, $r6, $r7;
+        sun.security.jgss.krb5.CipherHelper r4;
+        int i0, $i1, $i2, $i3, $i4, $i5, i6, $i7, $i8, $i9, $i10, i11, $i12, $i14;
+        java.lang.String $r12, $r14;
+        org.ietf.jgss.GSSException $r16;
+        java.lang.Exception $r8;
+        java.lang.StringBuilder $r11, $r13, $r15;
+
+        r4 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        r0 := @parameter0: byte[];
+
+        r1 := @parameter1: byte[];
+
+        r3 := @parameter2: byte[];
+
+        i6 := @parameter3: int;
+
+        i0 := @parameter4: int;
+
+        i11 := @parameter5: int;
+
+        $i1 = lengthof r0;
+
+        $i3 = $i1 + i0;
+
+        $i2 = lengthof r1;
+
+        $i4 = $i3 + $i2;
+
+        r2 = newarray (byte)[$i4];
+
+        $i5 = lengthof r0;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, 0, r2, 0, $i5);
+
+        $i7 = lengthof r0;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r3, i6, r2, $i7, i0);
+
+        $i8 = lengthof r0;
+
+        $i10 = $i8 + i0;
+
+        $i9 = lengthof r1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, 0, r2, $i10, $i9);
+
+     label1:
+        $r6 = r4.<sun.security.jgss.krb5.CipherHelper: byte[] keybytes>;
+
+        $r5 = <sun.security.jgss.krb5.CipherHelper: byte[] ZERO_IV_AES>;
+
+        $i12 = lengthof r2;
+
+        $r7 = staticinvoke <sun.security.krb5.internal.crypto.Aes128: byte[] encryptRaw(byte[],int,byte[],byte[],int,int)>($r6, i11, $r5, r2, 0, $i12);
+
+     label2:
+        return $r7;
+
+     label3:
+        $r8 := @caughtexception;
+
+        $r16 = new org.ietf.jgss.GSSException;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not use AES128 Cipher - ");
+
+        $r12 = virtualinvoke $r8.<java.lang.Exception: java.lang.String getMessage()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i14 = (int) -1;
+
+        specialinvoke $r16.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i14, $r14);
+
+        virtualinvoke $r16.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r8);
+
+        throw $r16;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    private void aes128Decrypt(sun.security.jgss.krb5.WrapToken_v2, byte[], int, int, byte[], int, int) throws org.ietf.jgss.GSSException
+    {
+        byte[] r1, $r2, $r3, $r4, r5;
+        sun.security.jgss.krb5.CipherHelper r0;
+        sun.security.jgss.krb5.WrapToken_v2 r13;
+        java.security.GeneralSecurityException $r6;
+        int i0, i1, i2, $i3, $i4, i5, i6, $i8;
+        java.lang.String $r10, $r12;
+        org.ietf.jgss.GSSException $r15;
+        java.lang.StringBuilder $r9, $r11, $r14;
+
+        r0 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        r13 := @parameter0: sun.security.jgss.krb5.WrapToken_v2;
+
+        r1 := @parameter1: byte[];
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        r5 := @parameter4: byte[];
+
+        i5 := @parameter5: int;
+
+        i0 := @parameter6: int;
+
+     label1:
+        $r3 = r0.<sun.security.jgss.krb5.CipherHelper: byte[] keybytes>;
+
+        $r2 = <sun.security.jgss.krb5.CipherHelper: byte[] ZERO_IV_AES>;
+
+        $r4 = staticinvoke <sun.security.krb5.internal.crypto.Aes128: byte[] decryptRaw(byte[],int,byte[],byte[],int,int)>($r3, i0, $r2, r1, i1, i2);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r15 = new org.ietf.jgss.GSSException;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not use AES128 Cipher - ");
+
+        $r10 = virtualinvoke $r6.<java.security.GeneralSecurityException: java.lang.String getMessage()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i8 = (int) -1;
+
+        specialinvoke $r15.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i8, $r12);
+
+        virtualinvoke $r15.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r6);
+
+        throw $r15;
+
+     label4:
+        $i3 = lengthof $r4;
+
+        $i4 = $i3 - 16;
+
+        i6 = $i4 - 16;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 16, r5, i5, i6);
+
+        return;
+
+        catch java.security.GeneralSecurityException from label1 to label2 with label3;
+    }
+
+    private byte[] aes256Encrypt(byte[], byte[], byte[], int, int, int) throws org.ietf.jgss.GSSException
+    {
+        byte[] r0, r1, r2, r3, $r5, $r6, $r7;
+        sun.security.jgss.krb5.CipherHelper r4;
+        int i0, $i1, $i2, $i3, $i4, $i5, i6, $i7, $i8, $i9, $i10, i11, $i12, $i14;
+        java.lang.String $r12, $r14;
+        org.ietf.jgss.GSSException $r16;
+        java.lang.Exception $r8;
+        java.lang.StringBuilder $r11, $r13, $r15;
+
+        r4 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        r0 := @parameter0: byte[];
+
+        r1 := @parameter1: byte[];
+
+        r3 := @parameter2: byte[];
+
+        i6 := @parameter3: int;
+
+        i0 := @parameter4: int;
+
+        i11 := @parameter5: int;
+
+        $i1 = lengthof r0;
+
+        $i3 = $i1 + i0;
+
+        $i2 = lengthof r1;
+
+        $i4 = $i3 + $i2;
+
+        r2 = newarray (byte)[$i4];
+
+        $i5 = lengthof r0;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r0, 0, r2, 0, $i5);
+
+        $i7 = lengthof r0;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r3, i6, r2, $i7, i0);
+
+        $i8 = lengthof r0;
+
+        $i10 = $i8 + i0;
+
+        $i9 = lengthof r1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r1, 0, r2, $i10, $i9);
+
+     label1:
+        $r6 = r4.<sun.security.jgss.krb5.CipherHelper: byte[] keybytes>;
+
+        $r5 = <sun.security.jgss.krb5.CipherHelper: byte[] ZERO_IV_AES>;
+
+        $i12 = lengthof r2;
+
+        $r7 = staticinvoke <sun.security.krb5.internal.crypto.Aes256: byte[] encryptRaw(byte[],int,byte[],byte[],int,int)>($r6, i11, $r5, r2, 0, $i12);
+
+     label2:
+        return $r7;
+
+     label3:
+        $r8 := @caughtexception;
+
+        $r16 = new org.ietf.jgss.GSSException;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not use AES256 Cipher - ");
+
+        $r12 = virtualinvoke $r8.<java.lang.Exception: java.lang.String getMessage()>();
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i14 = (int) -1;
+
+        specialinvoke $r16.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i14, $r14);
+
+        virtualinvoke $r16.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r8);
+
+        throw $r16;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    private void aes256Decrypt(sun.security.jgss.krb5.WrapToken_v2, byte[], int, int, byte[], int, int) throws org.ietf.jgss.GSSException
+    {
+        byte[] r1, $r2, $r3, $r4, r5;
+        sun.security.jgss.krb5.CipherHelper r0;
+        sun.security.jgss.krb5.WrapToken_v2 r13;
+        java.security.GeneralSecurityException $r6;
+        int i0, i1, i2, $i3, $i4, i5, i6, $i8;
+        java.lang.String $r10, $r12;
+        org.ietf.jgss.GSSException $r15;
+        java.lang.StringBuilder $r9, $r11, $r14;
+
+        r0 := @this: sun.security.jgss.krb5.CipherHelper;
+
+        r13 := @parameter0: sun.security.jgss.krb5.WrapToken_v2;
+
+        r1 := @parameter1: byte[];
+
+        i1 := @parameter2: int;
+
+        i2 := @parameter3: int;
+
+        r5 := @parameter4: byte[];
+
+        i5 := @parameter5: int;
+
+        i0 := @parameter6: int;
+
+     label1:
+        $r3 = r0.<sun.security.jgss.krb5.CipherHelper: byte[] keybytes>;
+
+        $r2 = <sun.security.jgss.krb5.CipherHelper: byte[] ZERO_IV_AES>;
+
+        $r4 = staticinvoke <sun.security.krb5.internal.crypto.Aes256: byte[] decryptRaw(byte[],int,byte[],byte[],int,int)>($r3, i0, $r2, r1, i1, i2);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r15 = new org.ietf.jgss.GSSException;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not use AES128 Cipher - ");
+
+        $r10 = virtualinvoke $r6.<java.security.GeneralSecurityException: java.lang.String getMessage()>();
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i8 = (int) -1;
+
+        specialinvoke $r15.<org.ietf.jgss.GSSException: void <init>(int,int,java.lang.String)>(11, $i8, $r12);
+
+        virtualinvoke $r15.<org.ietf.jgss.GSSException: java.lang.Throwable initCause(java.lang.Throwable)>($r6);
+
+        throw $r15;
+
+     label4:
+        $i3 = lengthof $r4;
+
+        $i4 = $i3 - 16;
+
+        i6 = $i4 - 16;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 16, r5, i5, i6);
+
+        return;
+
+        catch java.security.GeneralSecurityException from label1 to label2 with label3;
+    }
+
+    static void <clinit>()
+    {
+        byte[] $r0, $r1;
+        boolean $z0;
+
+        <sun.security.jgss.krb5.CipherHelper: int KG_USAGE_SIGN_MS> = 15;
+
+        <sun.security.jgss.krb5.CipherHelper: int HMAC_CHECKSUM_SIZE> = 8;
+
+        <sun.security.jgss.krb5.CipherHelper: int AES_IV_SIZE> = 16;
+
+        <sun.security.jgss.krb5.CipherHelper: int DES_IV_SIZE> = 8;
+
+        <sun.security.jgss.krb5.CipherHelper: int DES_CHECKSUM_SIZE> = 8;
+
+        <sun.security.jgss.krb5.CipherHelper: int KG_USAGE_SEQ> = 24;
+
+        <sun.security.jgss.krb5.CipherHelper: int KG_USAGE_SIGN> = 23;
+
+        <sun.security.jgss.krb5.CipherHelper: int KG_USAGE_SEAL> = 22;
+
+        $z0 = <sun.security.jgss.krb5.Krb5Util: boolean DEBUG>;
+
+        <sun.security.jgss.krb5.CipherHelper: boolean DEBUG> = $z0;
+
+        $r0 = newarray (byte)[8];
+
+        <sun.security.jgss.krb5.CipherHelper: byte[] ZERO_IV> = $r0;
+
+        $r1 = newarray (byte)[16];
+
+        <sun.security.jgss.krb5.CipherHelper: byte[] ZERO_IV_AES> = $r1;
+
+        return;
+    }
+}

@@ -1,0 +1,121 @@
+public class com.sun.org.apache.xml.internal.security.transforms.implementations.TransformEnvelopedSignature extends com.sun.org.apache.xml.internal.security.transforms.TransformSpi
+{
+
+    public void <init>()
+    {
+        com.sun.org.apache.xml.internal.security.transforms.implementations.TransformEnvelopedSignature r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.transforms.implementations.TransformEnvelopedSignature;
+
+        specialinvoke r0.<com.sun.org.apache.xml.internal.security.transforms.TransformSpi: void <init>()>();
+
+        return;
+    }
+
+    protected java.lang.String engineGetURI()
+    {
+        com.sun.org.apache.xml.internal.security.transforms.implementations.TransformEnvelopedSignature r0;
+
+        r0 := @this: com.sun.org.apache.xml.internal.security.transforms.implementations.TransformEnvelopedSignature;
+
+        return "http://www.w3.org/2000/09/xmldsig#enveloped-signature";
+    }
+
+    protected com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput enginePerformTransform(com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput, java.io.OutputStream, org.w3c.dom.Element, java.lang.String, boolean) throws com.sun.org.apache.xml.internal.security.transforms.TransformationException
+    {
+        java.io.OutputStream r5;
+        com.sun.org.apache.xml.internal.security.transforms.implementations.TransformEnvelopedSignature$EnvelopedNodeFilter $r3;
+        com.sun.org.apache.xml.internal.security.transforms.implementations.TransformEnvelopedSignature r4;
+        org.w3c.dom.Element r0;
+        org.w3c.dom.Node $r1;
+        com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput r2;
+        java.lang.String r6;
+        boolean z0;
+
+        r4 := @this: com.sun.org.apache.xml.internal.security.transforms.implementations.TransformEnvelopedSignature;
+
+        r2 := @parameter0: com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput;
+
+        r5 := @parameter1: java.io.OutputStream;
+
+        r0 := @parameter2: org.w3c.dom.Element;
+
+        r6 := @parameter3: java.lang.String;
+
+        z0 := @parameter4: boolean;
+
+        $r1 = staticinvoke <com.sun.org.apache.xml.internal.security.transforms.implementations.TransformEnvelopedSignature: org.w3c.dom.Node searchSignatureElement(org.w3c.dom.Node)>(r0);
+
+        virtualinvoke r2.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput: void setExcludeNode(org.w3c.dom.Node)>($r1);
+
+        $r3 = new com.sun.org.apache.xml.internal.security.transforms.implementations.TransformEnvelopedSignature$EnvelopedNodeFilter;
+
+        specialinvoke $r3.<com.sun.org.apache.xml.internal.security.transforms.implementations.TransformEnvelopedSignature$EnvelopedNodeFilter: void <init>(org.w3c.dom.Node)>($r1);
+
+        virtualinvoke r2.<com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput: void addNodeFilter(com.sun.org.apache.xml.internal.security.signature.NodeFilter)>($r3);
+
+        return r2;
+    }
+
+    private static org.w3c.dom.Node searchSignatureElement(org.w3c.dom.Node) throws com.sun.org.apache.xml.internal.security.transforms.TransformationException
+    {
+        short $s0;
+        org.w3c.dom.Element r1;
+        org.w3c.dom.Node r4;
+        int $i1;
+        com.sun.org.apache.xml.internal.security.transforms.TransformationException $r5;
+        java.lang.String $r2, $r3;
+        boolean $z0, $z1, z2;
+
+        r4 := @parameter0: org.w3c.dom.Node;
+
+        z2 = 0;
+
+     label1:
+        if r4 == null goto label4;
+
+        $s0 = interfaceinvoke r4.<org.w3c.dom.Node: short getNodeType()>();
+
+        $i1 = (int) $s0;
+
+        if $i1 != 9 goto label2;
+
+        goto label4;
+
+     label2:
+        r1 = (org.w3c.dom.Element) r4;
+
+        $r2 = interfaceinvoke r1.<org.w3c.dom.Element: java.lang.String getNamespaceURI()>();
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("http://www.w3.org/2000/09/xmldsig#");
+
+        if $z0 == 0 goto label3;
+
+        $r3 = interfaceinvoke r1.<org.w3c.dom.Element: java.lang.String getLocalName()>();
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("Signature");
+
+        if $z1 == 0 goto label3;
+
+        z2 = 1;
+
+        goto label4;
+
+     label3:
+        r4 = interfaceinvoke r4.<org.w3c.dom.Node: org.w3c.dom.Node getParentNode()>();
+
+        goto label1;
+
+     label4:
+        if z2 != 0 goto label5;
+
+        $r5 = new com.sun.org.apache.xml.internal.security.transforms.TransformationException;
+
+        specialinvoke $r5.<com.sun.org.apache.xml.internal.security.transforms.TransformationException: void <init>(java.lang.String)>("transform.envelopedSignatureTransformNotInSignatureElement");
+
+        throw $r5;
+
+     label5:
+        return r4;
+    }
+}

@@ -1,0 +1,436 @@
+class sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl extends sun.nio.ch.AsynchronousServerSocketChannelImpl implements sun.nio.ch.Iocp$OverlappedChannel
+{
+    private static final sun.misc.Unsafe unsafe;
+    private static final int DATA_BUFFER_SIZE;
+    private final long handle;
+    private final int completionKey;
+    private final sun.nio.ch.Iocp iocp;
+    private final sun.nio.ch.PendingIoCache ioCache;
+    private final long dataBuffer;
+    private java.util.concurrent.atomic.AtomicBoolean accepting;
+
+    void <init>(sun.nio.ch.Iocp) throws java.io.IOException
+    {
+        sun.misc.Unsafe $r5;
+        java.util.concurrent.atomic.AtomicBoolean $r2;
+        long l1, $l3;
+        java.io.IOException $r6;
+        java.io.FileDescriptor $r3;
+        sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl r0;
+        sun.nio.ch.Iocp r1;
+        int $i0, $i2;
+        sun.nio.ch.PendingIoCache $r4;
+
+        r0 := @this: sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl;
+
+        r1 := @parameter0: sun.nio.ch.Iocp;
+
+        specialinvoke r0.<sun.nio.ch.AsynchronousServerSocketChannelImpl: void <init>(sun.nio.ch.AsynchronousChannelGroupImpl)>(r1);
+
+        $r2 = new java.util.concurrent.atomic.AtomicBoolean;
+
+        specialinvoke $r2.<java.util.concurrent.atomic.AtomicBoolean: void <init>()>();
+
+        r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: java.util.concurrent.atomic.AtomicBoolean accepting> = $r2;
+
+        $r3 = r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: java.io.FileDescriptor fd>;
+
+        $i0 = staticinvoke <sun.nio.ch.IOUtil: int fdVal(java.io.FileDescriptor)>($r3);
+
+        l1 = (long) $i0;
+
+     label1:
+        $i2 = virtualinvoke r1.<sun.nio.ch.Iocp: int associate(sun.nio.ch.Iocp$OverlappedChannel,long)>(r0, l1);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        staticinvoke <sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: void closesocket0(long)>(l1);
+
+        throw $r6;
+
+     label4:
+        r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: long handle> = l1;
+
+        r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: int completionKey> = $i2;
+
+        r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: sun.nio.ch.Iocp iocp> = r1;
+
+        $r4 = new sun.nio.ch.PendingIoCache;
+
+        specialinvoke $r4.<sun.nio.ch.PendingIoCache: void <init>()>();
+
+        r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: sun.nio.ch.PendingIoCache ioCache> = $r4;
+
+        $r5 = <sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: sun.misc.Unsafe unsafe>;
+
+        $l3 = virtualinvoke $r5.<sun.misc.Unsafe: long allocateMemory(long)>(88L);
+
+        r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: long dataBuffer> = $l3;
+
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public sun.nio.ch.PendingFuture getByOverlapped(long)
+    {
+        sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl r0;
+        sun.nio.ch.PendingIoCache $r1;
+        long l0;
+        sun.nio.ch.PendingFuture $r2;
+
+        r0 := @this: sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl;
+
+        l0 := @parameter0: long;
+
+        $r1 = r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: sun.nio.ch.PendingIoCache ioCache>;
+
+        $r2 = virtualinvoke $r1.<sun.nio.ch.PendingIoCache: sun.nio.ch.PendingFuture remove(long)>(l0);
+
+        return $r2;
+    }
+
+    void implClose() throws java.io.IOException
+    {
+        sun.misc.Unsafe $r3;
+        sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl r0;
+        int $i1;
+        sun.nio.ch.Iocp $r2;
+        sun.nio.ch.PendingIoCache $r1;
+        long $l0, $l2;
+
+        r0 := @this: sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl;
+
+        $l0 = r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: long handle>;
+
+        staticinvoke <sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: void closesocket0(long)>($l0);
+
+        $r1 = r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: sun.nio.ch.PendingIoCache ioCache>;
+
+        virtualinvoke $r1.<sun.nio.ch.PendingIoCache: void close()>();
+
+        $r2 = r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: sun.nio.ch.Iocp iocp>;
+
+        $i1 = r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: int completionKey>;
+
+        virtualinvoke $r2.<sun.nio.ch.Iocp: void disassociate(int)>($i1);
+
+        $r3 = <sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: sun.misc.Unsafe unsafe>;
+
+        $l2 = r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: long dataBuffer>;
+
+        virtualinvoke $r3.<sun.misc.Unsafe: void freeMemory(long)>($l2);
+
+        return;
+    }
+
+    public sun.nio.ch.AsynchronousChannelGroupImpl group()
+    {
+        sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl r0;
+        sun.nio.ch.Iocp $r1;
+
+        r0 := @this: sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl;
+
+        $r1 = r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: sun.nio.ch.Iocp iocp>;
+
+        return $r1;
+    }
+
+    java.util.concurrent.Future implAccept(java.lang.Object, java.nio.channels.CompletionHandler)
+    {
+        java.lang.Throwable $r16;
+        java.security.AccessControlContext $r20;
+        java.util.concurrent.atomic.AtomicBoolean $r9;
+        sun.nio.ch.WindowsAsynchronousSocketChannelImpl $r2, r18;
+        java.nio.channels.NotYetBoundException $r12;
+        sun.nio.ch.CompletedFuture $r11, $r15;
+        boolean $z0, $z1, $z2, $z3;
+        java.nio.channels.ClosedChannelException $r14;
+        java.nio.channels.CompletionHandler r6;
+        java.io.IOException $r17, r19;
+        java.lang.RuntimeException $r13;
+        java.net.InetSocketAddress $r1;
+        java.lang.SecurityManager $r4;
+        sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl$AcceptTask $r8;
+        sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl r0;
+        sun.nio.ch.Iocp $r3;
+        java.lang.Object r7;
+        sun.nio.ch.PendingFuture $r5;
+        java.nio.channels.AcceptPendingException $r10;
+
+        r0 := @this: sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl;
+
+        r7 := @parameter0: java.lang.Object;
+
+        r6 := @parameter1: java.nio.channels.CompletionHandler;
+
+        $z0 = virtualinvoke r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: boolean isOpen()>();
+
+        if $z0 != 0 goto label02;
+
+        $r14 = new java.nio.channels.ClosedChannelException;
+
+        specialinvoke $r14.<java.nio.channels.ClosedChannelException: void <init>()>();
+
+        if r6 != null goto label01;
+
+        $r15 = staticinvoke <sun.nio.ch.CompletedFuture: sun.nio.ch.CompletedFuture withFailure(java.lang.Throwable)>($r14);
+
+        return $r15;
+
+     label01:
+        staticinvoke <sun.nio.ch.Invoker: void invokeIndirectly(java.nio.channels.AsynchronousChannel,java.nio.channels.CompletionHandler,java.lang.Object,java.lang.Object,java.lang.Throwable)>(r0, r6, r7, null, $r14);
+
+        return null;
+
+     label02:
+        $z1 = virtualinvoke r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: boolean isAcceptKilled()>();
+
+        if $z1 == 0 goto label03;
+
+        $r13 = new java.lang.RuntimeException;
+
+        specialinvoke $r13.<java.lang.RuntimeException: void <init>(java.lang.String)>("Accept not allowed due to cancellation");
+
+        throw $r13;
+
+     label03:
+        $r1 = r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: java.net.InetSocketAddress localAddress>;
+
+        if $r1 != null goto label04;
+
+        $r12 = new java.nio.channels.NotYetBoundException;
+
+        specialinvoke $r12.<java.nio.channels.NotYetBoundException: void <init>()>();
+
+        throw $r12;
+
+     label04:
+        r18 = null;
+
+        r19 = null;
+
+     label05:
+        virtualinvoke r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: void begin()>();
+
+        $r2 = new sun.nio.ch.WindowsAsynchronousSocketChannelImpl;
+
+        $r3 = r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: sun.nio.ch.Iocp iocp>;
+
+        specialinvoke $r2.<sun.nio.ch.WindowsAsynchronousSocketChannelImpl: void <init>(sun.nio.ch.Iocp,boolean)>($r3, 0);
+
+        r18 = $r2;
+
+     label06:
+        virtualinvoke r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: void end()>();
+
+        goto label11;
+
+     label07:
+        $r17 := @caughtexception;
+
+        r19 = $r17;
+
+     label08:
+        virtualinvoke r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: void end()>();
+
+        goto label11;
+
+     label09:
+        $r16 := @caughtexception;
+
+     label10:
+        virtualinvoke r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: void end()>();
+
+        throw $r16;
+
+     label11:
+        if r19 == null goto label13;
+
+        if r6 != null goto label12;
+
+        $r11 = staticinvoke <sun.nio.ch.CompletedFuture: sun.nio.ch.CompletedFuture withFailure(java.lang.Throwable)>(r19);
+
+        return $r11;
+
+     label12:
+        staticinvoke <sun.nio.ch.Invoker: void invokeIndirectly(java.nio.channels.AsynchronousChannel,java.nio.channels.CompletionHandler,java.lang.Object,java.lang.Object,java.lang.Throwable)>(r0, r6, r7, null, r19);
+
+        return null;
+
+     label13:
+        $r4 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r4 != null goto label14;
+
+        $r20 = null;
+
+        goto label15;
+
+     label14:
+        $r20 = staticinvoke <java.security.AccessController: java.security.AccessControlContext getContext()>();
+
+     label15:
+        $r5 = new sun.nio.ch.PendingFuture;
+
+        specialinvoke $r5.<sun.nio.ch.PendingFuture: void <init>(java.nio.channels.AsynchronousChannel,java.nio.channels.CompletionHandler,java.lang.Object)>(r0, r6, r7);
+
+        $r8 = new sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl$AcceptTask;
+
+        specialinvoke $r8.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl$AcceptTask: void <init>(sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl,sun.nio.ch.WindowsAsynchronousSocketChannelImpl,java.security.AccessControlContext,sun.nio.ch.PendingFuture)>(r0, r18, $r20, $r5);
+
+        virtualinvoke $r5.<sun.nio.ch.PendingFuture: void setContext(java.lang.Object)>($r8);
+
+        $r9 = r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: java.util.concurrent.atomic.AtomicBoolean accepting>;
+
+        $z2 = virtualinvoke $r9.<java.util.concurrent.atomic.AtomicBoolean: boolean compareAndSet(boolean,boolean)>(0, 1);
+
+        if $z2 != 0 goto label16;
+
+        $r10 = new java.nio.channels.AcceptPendingException;
+
+        specialinvoke $r10.<java.nio.channels.AcceptPendingException: void <init>()>();
+
+        throw $r10;
+
+     label16:
+        $z3 = staticinvoke <sun.nio.ch.Iocp: boolean supportsThreadAgnosticIo()>();
+
+        if $z3 == 0 goto label17;
+
+        virtualinvoke $r8.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl$AcceptTask: void run()>();
+
+        goto label18;
+
+     label17:
+        staticinvoke <sun.nio.ch.Invoker: void invokeOnThreadInThreadPool(sun.nio.ch.Groupable,java.lang.Runnable)>(r0, $r8);
+
+     label18:
+        return $r5;
+
+        catch java.io.IOException from label05 to label06 with label07;
+        catch java.lang.Throwable from label05 to label06 with label09;
+        catch java.lang.Throwable from label07 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    private static native void initIDs();
+
+    private static native int accept0(long, long, long, long) throws java.io.IOException;
+
+    private static native void updateAcceptContext(long, long) throws java.io.IOException;
+
+    private static native void closesocket0(long) throws java.io.IOException;
+
+    static java.util.concurrent.atomic.AtomicBoolean access$000(sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl)
+    {
+        sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl r0;
+        java.util.concurrent.atomic.AtomicBoolean $r1;
+
+        r0 := @parameter0: sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl;
+
+        $r1 = r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: java.util.concurrent.atomic.AtomicBoolean accepting>;
+
+        return $r1;
+    }
+
+    static long access$100(sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl)
+    {
+        sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl r0;
+        long $l0;
+
+        r0 := @parameter0: sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl;
+
+        $l0 = r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: long handle>;
+
+        return $l0;
+    }
+
+    static void access$200(long, long) throws java.io.IOException
+    {
+        long l0, l1;
+
+        l0 := @parameter0: long;
+
+        l1 := @parameter1: long;
+
+        staticinvoke <sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: void updateAcceptContext(long,long)>(l0, l1);
+
+        return;
+    }
+
+    static sun.nio.ch.PendingIoCache access$300(sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl)
+    {
+        sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl r0;
+        sun.nio.ch.PendingIoCache $r1;
+
+        r0 := @parameter0: sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl;
+
+        $r1 = r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: sun.nio.ch.PendingIoCache ioCache>;
+
+        return $r1;
+    }
+
+    static long access$400(sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl)
+    {
+        sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl r0;
+        long $l0;
+
+        r0 := @parameter0: sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl;
+
+        $l0 = r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: long dataBuffer>;
+
+        return $l0;
+    }
+
+    static int access$500(long, long, long, long) throws java.io.IOException
+    {
+        int $i4;
+        long l0, l1, l2, l3;
+
+        l0 := @parameter0: long;
+
+        l1 := @parameter1: long;
+
+        l2 := @parameter2: long;
+
+        l3 := @parameter3: long;
+
+        $i4 = staticinvoke <sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: int accept0(long,long,long,long)>(l0, l1, l2, l3);
+
+        return $i4;
+    }
+
+    static sun.nio.ch.Iocp access$600(sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl)
+    {
+        sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl r0;
+        sun.nio.ch.Iocp $r1;
+
+        r0 := @parameter0: sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl;
+
+        $r1 = r0.<sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: sun.nio.ch.Iocp iocp>;
+
+        return $r1;
+    }
+
+    static void <clinit>()
+    {
+        sun.misc.Unsafe $r0;
+
+        <sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: int DATA_BUFFER_SIZE> = 88;
+
+        $r0 = staticinvoke <sun.misc.Unsafe: sun.misc.Unsafe getUnsafe()>();
+
+        <sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: sun.misc.Unsafe unsafe> = $r0;
+
+        staticinvoke <sun.nio.ch.IOUtil: void load()>();
+
+        staticinvoke <sun.nio.ch.WindowsAsynchronousServerSocketChannelImpl: void initIDs()>();
+
+        return;
+    }
+}

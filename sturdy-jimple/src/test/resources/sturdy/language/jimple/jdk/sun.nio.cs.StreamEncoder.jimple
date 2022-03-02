@@ -1,0 +1,1151 @@
+public class sun.nio.cs.StreamEncoder extends java.io.Writer
+{
+    private static final int DEFAULT_BYTE_BUFFER_SIZE;
+    private volatile boolean isOpen;
+    private java.nio.charset.Charset cs;
+    private java.nio.charset.CharsetEncoder encoder;
+    private java.nio.ByteBuffer bb;
+    private final java.io.OutputStream out;
+    private java.nio.channels.WritableByteChannel ch;
+    private boolean haveLeftoverChar;
+    private char leftoverChar;
+    private java.nio.CharBuffer lcb;
+    static final boolean $assertionsDisabled;
+
+    private void ensureOpen() throws java.io.IOException
+    {
+        sun.nio.cs.StreamEncoder r0;
+        java.io.IOException $r1;
+        boolean $z0;
+
+        r0 := @this: sun.nio.cs.StreamEncoder;
+
+        $z0 = r0.<sun.nio.cs.StreamEncoder: boolean isOpen>;
+
+        if $z0 != 0 goto label1;
+
+        $r1 = new java.io.IOException;
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>("Stream closed");
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+
+    public static sun.nio.cs.StreamEncoder forOutputStreamWriter(java.io.OutputStream, java.lang.Object, java.lang.String) throws java.io.UnsupportedEncodingException
+    {
+        sun.nio.cs.StreamEncoder $r2;
+        java.io.OutputStream r3;
+        java.nio.charset.Charset $r5, $r6;
+        java.lang.Object r4;
+        java.nio.charset.IllegalCharsetNameException $r7;
+        java.lang.String r0, r8;
+        java.io.UnsupportedEncodingException $r1;
+        boolean $z0;
+
+        r3 := @parameter0: java.io.OutputStream;
+
+        r4 := @parameter1: java.lang.Object;
+
+        r0 := @parameter2: java.lang.String;
+
+        r8 = r0;
+
+        if r0 != null goto label1;
+
+        $r6 = staticinvoke <java.nio.charset.Charset: java.nio.charset.Charset defaultCharset()>();
+
+        r8 = virtualinvoke $r6.<java.nio.charset.Charset: java.lang.String name()>();
+
+     label1:
+        $z0 = staticinvoke <java.nio.charset.Charset: boolean isSupported(java.lang.String)>(r8);
+
+        if $z0 == 0 goto label3;
+
+        $r2 = new sun.nio.cs.StreamEncoder;
+
+        $r5 = staticinvoke <java.nio.charset.Charset: java.nio.charset.Charset forName(java.lang.String)>(r8);
+
+        specialinvoke $r2.<sun.nio.cs.StreamEncoder: void <init>(java.io.OutputStream,java.lang.Object,java.nio.charset.Charset)>(r3, r4, $r5);
+
+     label2:
+        return $r2;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r7 := @caughtexception;
+
+     label5:
+        $r1 = new java.io.UnsupportedEncodingException;
+
+        specialinvoke $r1.<java.io.UnsupportedEncodingException: void <init>(java.lang.String)>(r8);
+
+        throw $r1;
+
+        catch java.nio.charset.IllegalCharsetNameException from label1 to label2 with label4;
+    }
+
+    public static sun.nio.cs.StreamEncoder forOutputStreamWriter(java.io.OutputStream, java.lang.Object, java.nio.charset.Charset)
+    {
+        sun.nio.cs.StreamEncoder $r0;
+        java.io.OutputStream r1;
+        java.nio.charset.Charset r3;
+        java.lang.Object r2;
+
+        r1 := @parameter0: java.io.OutputStream;
+
+        r2 := @parameter1: java.lang.Object;
+
+        r3 := @parameter2: java.nio.charset.Charset;
+
+        $r0 = new sun.nio.cs.StreamEncoder;
+
+        specialinvoke $r0.<sun.nio.cs.StreamEncoder: void <init>(java.io.OutputStream,java.lang.Object,java.nio.charset.Charset)>(r1, r2, r3);
+
+        return $r0;
+    }
+
+    public static sun.nio.cs.StreamEncoder forOutputStreamWriter(java.io.OutputStream, java.lang.Object, java.nio.charset.CharsetEncoder)
+    {
+        sun.nio.cs.StreamEncoder $r0;
+        java.io.OutputStream r1;
+        java.nio.charset.CharsetEncoder r3;
+        java.lang.Object r2;
+
+        r1 := @parameter0: java.io.OutputStream;
+
+        r2 := @parameter1: java.lang.Object;
+
+        r3 := @parameter2: java.nio.charset.CharsetEncoder;
+
+        $r0 = new sun.nio.cs.StreamEncoder;
+
+        specialinvoke $r0.<sun.nio.cs.StreamEncoder: void <init>(java.io.OutputStream,java.lang.Object,java.nio.charset.CharsetEncoder)>(r1, r2, r3);
+
+        return $r0;
+    }
+
+    public static sun.nio.cs.StreamEncoder forEncoder(java.nio.channels.WritableByteChannel, java.nio.charset.CharsetEncoder, int)
+    {
+        sun.nio.cs.StreamEncoder $r0;
+        java.nio.charset.CharsetEncoder r2;
+        int i0;
+        java.nio.channels.WritableByteChannel r1;
+
+        r1 := @parameter0: java.nio.channels.WritableByteChannel;
+
+        r2 := @parameter1: java.nio.charset.CharsetEncoder;
+
+        i0 := @parameter2: int;
+
+        $r0 = new sun.nio.cs.StreamEncoder;
+
+        specialinvoke $r0.<sun.nio.cs.StreamEncoder: void <init>(java.nio.channels.WritableByteChannel,java.nio.charset.CharsetEncoder,int)>(r1, r2, i0);
+
+        return $r0;
+    }
+
+    public java.lang.String getEncoding()
+    {
+        sun.nio.cs.StreamEncoder r0;
+        java.lang.String $r1;
+        boolean $z0;
+
+        r0 := @this: sun.nio.cs.StreamEncoder;
+
+        $z0 = specialinvoke r0.<sun.nio.cs.StreamEncoder: boolean isOpen()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = virtualinvoke r0.<sun.nio.cs.StreamEncoder: java.lang.String encodingName()>();
+
+        return $r1;
+
+     label1:
+        return null;
+    }
+
+    public void flushBuffer() throws java.io.IOException
+    {
+        sun.nio.cs.StreamEncoder r0;
+        java.lang.Throwable $r3;
+        java.lang.Object $r1;
+        java.io.IOException $r2;
+        boolean $z0;
+
+        r0 := @this: sun.nio.cs.StreamEncoder;
+
+        $r1 = r0.<sun.nio.cs.StreamEncoder: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = specialinvoke r0.<sun.nio.cs.StreamEncoder: boolean isOpen()>();
+
+        if $z0 == 0 goto label2;
+
+        virtualinvoke r0.<sun.nio.cs.StreamEncoder: void implFlushBuffer()>();
+
+        goto label3;
+
+     label2:
+        $r2 = new java.io.IOException;
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>("Stream closed");
+
+        throw $r2;
+
+     label3:
+        exitmonitor $r1;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r3;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public void write(int) throws java.io.IOException
+    {
+        sun.nio.cs.StreamEncoder r1;
+        int i0;
+        char[] r0;
+        char $c1;
+
+        r1 := @this: sun.nio.cs.StreamEncoder;
+
+        i0 := @parameter0: int;
+
+        r0 = newarray (char)[1];
+
+        $c1 = (char) i0;
+
+        r0[0] = $c1;
+
+        virtualinvoke r1.<sun.nio.cs.StreamEncoder: void write(char[],int,int)>(r0, 0, 1);
+
+        return;
+    }
+
+    public void write(char[], int, int) throws java.io.IOException
+    {
+        sun.nio.cs.StreamEncoder r0;
+        java.lang.Throwable $r3;
+        java.lang.IndexOutOfBoundsException $r4;
+        int i0, $i1, i2, $i3, $i4, $i5;
+        char[] r2;
+        java.lang.Object $r1;
+
+        r0 := @this: sun.nio.cs.StreamEncoder;
+
+        r2 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i2 := @parameter2: int;
+
+        $r1 = r0.<sun.nio.cs.StreamEncoder: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label1:
+        specialinvoke r0.<sun.nio.cs.StreamEncoder: void ensureOpen()>();
+
+        if i0 < 0 goto label2;
+
+        $i1 = lengthof r2;
+
+        if i0 > $i1 goto label2;
+
+        if i2 < 0 goto label2;
+
+        $i4 = i0 + i2;
+
+        $i3 = lengthof r2;
+
+        if $i4 > $i3 goto label2;
+
+        $i5 = i0 + i2;
+
+        if $i5 >= 0 goto label3;
+
+     label2:
+        $r4 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r4.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r4;
+
+     label3:
+        if i2 != 0 goto label5;
+
+        exitmonitor $r1;
+
+     label4:
+        return;
+
+     label5:
+        virtualinvoke r0.<sun.nio.cs.StreamEncoder: void implWrite(char[],int,int)>(r2, i0, i2);
+
+        exitmonitor $r1;
+
+     label6:
+        goto label9;
+
+     label7:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label8:
+        throw $r3;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label7;
+        catch java.lang.Throwable from label5 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public void write(java.lang.String, int, int) throws java.io.IOException
+    {
+        sun.nio.cs.StreamEncoder r2;
+        java.lang.IndexOutOfBoundsException $r3;
+        int i0, i1, $i2;
+        char[] r0;
+        java.lang.String r1;
+
+        r2 := @this: sun.nio.cs.StreamEncoder;
+
+        r1 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        i0 := @parameter2: int;
+
+        if i0 >= 0 goto label1;
+
+        $r3 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r3.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        r0 = newarray (char)[i0];
+
+        $i2 = i1 + i0;
+
+        virtualinvoke r1.<java.lang.String: void getChars(int,int,char[],int)>(i1, $i2, r0, 0);
+
+        virtualinvoke r2.<sun.nio.cs.StreamEncoder: void write(char[],int,int)>(r0, 0, i0);
+
+        return;
+    }
+
+    public void flush() throws java.io.IOException
+    {
+        sun.nio.cs.StreamEncoder r0;
+        java.lang.Throwable $r2;
+        java.lang.Object $r1;
+
+        r0 := @this: sun.nio.cs.StreamEncoder;
+
+        $r1 = r0.<sun.nio.cs.StreamEncoder: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label1:
+        specialinvoke r0.<sun.nio.cs.StreamEncoder: void ensureOpen()>();
+
+        virtualinvoke r0.<sun.nio.cs.StreamEncoder: void implFlush()>();
+
+        exitmonitor $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        sun.nio.cs.StreamEncoder r0;
+        java.lang.Throwable $r2;
+        java.lang.Object $r1;
+        boolean $z0;
+
+        r0 := @this: sun.nio.cs.StreamEncoder;
+
+        $r1 = r0.<sun.nio.cs.StreamEncoder: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = r0.<sun.nio.cs.StreamEncoder: boolean isOpen>;
+
+        if $z0 != 0 goto label3;
+
+        exitmonitor $r1;
+
+     label2:
+        return;
+
+     label3:
+        virtualinvoke r0.<sun.nio.cs.StreamEncoder: void implClose()>();
+
+        r0.<sun.nio.cs.StreamEncoder: boolean isOpen> = 0;
+
+        exitmonitor $r1;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r2;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    private boolean isOpen()
+    {
+        sun.nio.cs.StreamEncoder r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.cs.StreamEncoder;
+
+        $z0 = r0.<sun.nio.cs.StreamEncoder: boolean isOpen>;
+
+        return $z0;
+    }
+
+    private void <init>(java.io.OutputStream, java.lang.Object, java.nio.charset.Charset)
+    {
+        sun.nio.cs.StreamEncoder r0;
+        java.io.OutputStream r1;
+        java.nio.charset.Charset r3;
+        java.nio.charset.CharsetEncoder $r4, $r6, $r8;
+        java.nio.charset.CodingErrorAction $r5, $r7;
+        java.lang.Object r2;
+
+        r0 := @this: sun.nio.cs.StreamEncoder;
+
+        r1 := @parameter0: java.io.OutputStream;
+
+        r2 := @parameter1: java.lang.Object;
+
+        r3 := @parameter2: java.nio.charset.Charset;
+
+        $r4 = virtualinvoke r3.<java.nio.charset.Charset: java.nio.charset.CharsetEncoder newEncoder()>();
+
+        $r5 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPLACE>;
+
+        $r6 = virtualinvoke $r4.<java.nio.charset.CharsetEncoder: java.nio.charset.CharsetEncoder onMalformedInput(java.nio.charset.CodingErrorAction)>($r5);
+
+        $r7 = <java.nio.charset.CodingErrorAction: java.nio.charset.CodingErrorAction REPLACE>;
+
+        $r8 = virtualinvoke $r6.<java.nio.charset.CharsetEncoder: java.nio.charset.CharsetEncoder onUnmappableCharacter(java.nio.charset.CodingErrorAction)>($r7);
+
+        specialinvoke r0.<sun.nio.cs.StreamEncoder: void <init>(java.io.OutputStream,java.lang.Object,java.nio.charset.CharsetEncoder)>(r1, r2, $r8);
+
+        return;
+    }
+
+    private void <init>(java.io.OutputStream, java.lang.Object, java.nio.charset.CharsetEncoder)
+    {
+        sun.nio.cs.StreamEncoder r0;
+        java.io.OutputStream r2;
+        java.nio.charset.Charset $r4;
+        java.nio.charset.CharsetEncoder r3;
+        java.nio.channels.WritableByteChannel $r5;
+        java.lang.Object r1;
+        java.nio.ByteBuffer $r6;
+
+        r0 := @this: sun.nio.cs.StreamEncoder;
+
+        r2 := @parameter0: java.io.OutputStream;
+
+        r1 := @parameter1: java.lang.Object;
+
+        r3 := @parameter2: java.nio.charset.CharsetEncoder;
+
+        specialinvoke r0.<java.io.Writer: void <init>(java.lang.Object)>(r1);
+
+        r0.<sun.nio.cs.StreamEncoder: boolean isOpen> = 1;
+
+        r0.<sun.nio.cs.StreamEncoder: boolean haveLeftoverChar> = 0;
+
+        r0.<sun.nio.cs.StreamEncoder: java.nio.CharBuffer lcb> = null;
+
+        r0.<sun.nio.cs.StreamEncoder: java.io.OutputStream out> = r2;
+
+        r0.<sun.nio.cs.StreamEncoder: java.nio.channels.WritableByteChannel ch> = null;
+
+        $r4 = virtualinvoke r3.<java.nio.charset.CharsetEncoder: java.nio.charset.Charset charset()>();
+
+        r0.<sun.nio.cs.StreamEncoder: java.nio.charset.Charset cs> = $r4;
+
+        r0.<sun.nio.cs.StreamEncoder: java.nio.charset.CharsetEncoder encoder> = r3;
+
+        $r5 = r0.<sun.nio.cs.StreamEncoder: java.nio.channels.WritableByteChannel ch>;
+
+        if $r5 != null goto label1;
+
+        $r6 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer allocate(int)>(8192);
+
+        r0.<sun.nio.cs.StreamEncoder: java.nio.ByteBuffer bb> = $r6;
+
+     label1:
+        return;
+    }
+
+    private void <init>(java.nio.channels.WritableByteChannel, java.nio.charset.CharsetEncoder, int)
+    {
+        sun.nio.cs.StreamEncoder r0;
+        java.nio.charset.Charset $r3;
+        java.nio.charset.CharsetEncoder r2;
+        int i0, $i1;
+        java.nio.channels.WritableByteChannel r1;
+        java.nio.ByteBuffer $r4;
+
+        r0 := @this: sun.nio.cs.StreamEncoder;
+
+        r1 := @parameter0: java.nio.channels.WritableByteChannel;
+
+        r2 := @parameter1: java.nio.charset.CharsetEncoder;
+
+        i0 := @parameter2: int;
+
+        specialinvoke r0.<java.io.Writer: void <init>()>();
+
+        r0.<sun.nio.cs.StreamEncoder: boolean isOpen> = 1;
+
+        r0.<sun.nio.cs.StreamEncoder: boolean haveLeftoverChar> = 0;
+
+        r0.<sun.nio.cs.StreamEncoder: java.nio.CharBuffer lcb> = null;
+
+        r0.<sun.nio.cs.StreamEncoder: java.io.OutputStream out> = null;
+
+        r0.<sun.nio.cs.StreamEncoder: java.nio.channels.WritableByteChannel ch> = r1;
+
+        $r3 = virtualinvoke r2.<java.nio.charset.CharsetEncoder: java.nio.charset.Charset charset()>();
+
+        r0.<sun.nio.cs.StreamEncoder: java.nio.charset.Charset cs> = $r3;
+
+        r0.<sun.nio.cs.StreamEncoder: java.nio.charset.CharsetEncoder encoder> = r2;
+
+        if i0 >= 0 goto label1;
+
+        $i1 = 8192;
+
+        goto label2;
+
+     label1:
+        $i1 = i0;
+
+     label2:
+        $r4 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer allocate(int)>($i1);
+
+        r0.<sun.nio.cs.StreamEncoder: java.nio.ByteBuffer bb> = $r4;
+
+        return;
+    }
+
+    private void writeBytes() throws java.io.IOException
+    {
+        sun.nio.cs.StreamEncoder r0;
+        byte[] $r7;
+        java.lang.AssertionError $r11, $r12;
+        java.nio.ByteBuffer $r1, $r2, $r3, $r5, $r8, $r9, $r13;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        boolean $z0, $z1;
+        java.io.OutputStream $r6;
+        java.nio.channels.WritableByteChannel $r4, $r10;
+
+        r0 := @this: sun.nio.cs.StreamEncoder;
+
+        $r1 = r0.<sun.nio.cs.StreamEncoder: java.nio.ByteBuffer bb>;
+
+        virtualinvoke $r1.<java.nio.ByteBuffer: java.nio.Buffer flip()>();
+
+        $r2 = r0.<sun.nio.cs.StreamEncoder: java.nio.ByteBuffer bb>;
+
+        $i0 = virtualinvoke $r2.<java.nio.ByteBuffer: int limit()>();
+
+        $r3 = r0.<sun.nio.cs.StreamEncoder: java.nio.ByteBuffer bb>;
+
+        $i1 = virtualinvoke $r3.<java.nio.ByteBuffer: int position()>();
+
+        $z0 = <sun.nio.cs.StreamEncoder: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        if $i1 <= $i0 goto label1;
+
+        $r12 = new java.lang.AssertionError;
+
+        specialinvoke $r12.<java.lang.AssertionError: void <init>()>();
+
+        throw $r12;
+
+     label1:
+        if $i1 > $i0 goto label2;
+
+        $i5 = $i0 - $i1;
+
+        goto label3;
+
+     label2:
+        $i5 = 0;
+
+     label3:
+        if $i5 <= 0 goto label5;
+
+        $r4 = r0.<sun.nio.cs.StreamEncoder: java.nio.channels.WritableByteChannel ch>;
+
+        if $r4 == null goto label4;
+
+        $r10 = r0.<sun.nio.cs.StreamEncoder: java.nio.channels.WritableByteChannel ch>;
+
+        $r9 = r0.<sun.nio.cs.StreamEncoder: java.nio.ByteBuffer bb>;
+
+        $i4 = interfaceinvoke $r10.<java.nio.channels.WritableByteChannel: int write(java.nio.ByteBuffer)>($r9);
+
+        if $i4 == $i5 goto label5;
+
+        $z1 = <sun.nio.cs.StreamEncoder: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label5;
+
+        $r11 = new java.lang.AssertionError;
+
+        specialinvoke $r11.<java.lang.AssertionError: void <init>(int)>($i5);
+
+        throw $r11;
+
+     label4:
+        $r6 = r0.<sun.nio.cs.StreamEncoder: java.io.OutputStream out>;
+
+        $r5 = r0.<sun.nio.cs.StreamEncoder: java.nio.ByteBuffer bb>;
+
+        $r7 = virtualinvoke $r5.<java.nio.ByteBuffer: byte[] array()>();
+
+        $r8 = r0.<sun.nio.cs.StreamEncoder: java.nio.ByteBuffer bb>;
+
+        $i2 = virtualinvoke $r8.<java.nio.ByteBuffer: int arrayOffset()>();
+
+        $i3 = $i2 + $i1;
+
+        virtualinvoke $r6.<java.io.OutputStream: void write(byte[],int,int)>($r7, $i3, $i5);
+
+     label5:
+        $r13 = r0.<sun.nio.cs.StreamEncoder: java.nio.ByteBuffer bb>;
+
+        virtualinvoke $r13.<java.nio.ByteBuffer: java.nio.Buffer clear()>();
+
+        return;
+    }
+
+    private void flushLeftoverChar(java.nio.CharBuffer, boolean) throws java.io.IOException
+    {
+        sun.nio.cs.StreamEncoder r0;
+        java.lang.AssertionError $r9;
+        java.nio.ByteBuffer $r4, $r8;
+        java.nio.charset.CoderResult $r7;
+        int $i0;
+        boolean $z0, $z1, z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9;
+        java.nio.CharBuffer $r1, $r2, r3, $r5, $r10, $r11, $r12, $r13, $r14, $r15, $r16;
+        char $c1, $c2, $c3;
+        java.nio.charset.CharsetEncoder $r6;
+
+        r0 := @this: sun.nio.cs.StreamEncoder;
+
+        r3 := @parameter0: java.nio.CharBuffer;
+
+        z2 := @parameter1: boolean;
+
+        $z0 = r0.<sun.nio.cs.StreamEncoder: boolean haveLeftoverChar>;
+
+        if $z0 != 0 goto label01;
+
+        if z2 != 0 goto label01;
+
+        return;
+
+     label01:
+        $r1 = r0.<sun.nio.cs.StreamEncoder: java.nio.CharBuffer lcb>;
+
+        if $r1 != null goto label02;
+
+        $r14 = staticinvoke <java.nio.CharBuffer: java.nio.CharBuffer allocate(int)>(2);
+
+        r0.<sun.nio.cs.StreamEncoder: java.nio.CharBuffer lcb> = $r14;
+
+        goto label03;
+
+     label02:
+        $r2 = r0.<sun.nio.cs.StreamEncoder: java.nio.CharBuffer lcb>;
+
+        virtualinvoke $r2.<java.nio.CharBuffer: java.nio.Buffer clear()>();
+
+     label03:
+        $z1 = r0.<sun.nio.cs.StreamEncoder: boolean haveLeftoverChar>;
+
+        if $z1 == 0 goto label04;
+
+        $r13 = r0.<sun.nio.cs.StreamEncoder: java.nio.CharBuffer lcb>;
+
+        $c3 = r0.<sun.nio.cs.StreamEncoder: char leftoverChar>;
+
+        virtualinvoke $r13.<java.nio.CharBuffer: java.nio.CharBuffer put(char)>($c3);
+
+     label04:
+        if r3 == null goto label05;
+
+        $z8 = virtualinvoke r3.<java.nio.CharBuffer: boolean hasRemaining()>();
+
+        if $z8 == 0 goto label05;
+
+        $r12 = r0.<sun.nio.cs.StreamEncoder: java.nio.CharBuffer lcb>;
+
+        $c2 = virtualinvoke r3.<java.nio.CharBuffer: char get()>();
+
+        virtualinvoke $r12.<java.nio.CharBuffer: java.nio.CharBuffer put(char)>($c2);
+
+     label05:
+        $r15 = r0.<sun.nio.cs.StreamEncoder: java.nio.CharBuffer lcb>;
+
+        virtualinvoke $r15.<java.nio.CharBuffer: java.nio.Buffer flip()>();
+
+     label06:
+        $r16 = r0.<sun.nio.cs.StreamEncoder: java.nio.CharBuffer lcb>;
+
+        $z9 = virtualinvoke $r16.<java.nio.CharBuffer: boolean hasRemaining()>();
+
+        if $z9 != 0 goto label07;
+
+        if z2 == 0 goto label12;
+
+     label07:
+        $r6 = r0.<sun.nio.cs.StreamEncoder: java.nio.charset.CharsetEncoder encoder>;
+
+        $r5 = r0.<sun.nio.cs.StreamEncoder: java.nio.CharBuffer lcb>;
+
+        $r4 = r0.<sun.nio.cs.StreamEncoder: java.nio.ByteBuffer bb>;
+
+        $r7 = virtualinvoke $r6.<java.nio.charset.CharsetEncoder: java.nio.charset.CoderResult encode(java.nio.CharBuffer,java.nio.ByteBuffer,boolean)>($r5, $r4, z2);
+
+        $z3 = virtualinvoke $r7.<java.nio.charset.CoderResult: boolean isUnderflow()>();
+
+        if $z3 == 0 goto label09;
+
+        $r10 = r0.<sun.nio.cs.StreamEncoder: java.nio.CharBuffer lcb>;
+
+        $z6 = virtualinvoke $r10.<java.nio.CharBuffer: boolean hasRemaining()>();
+
+        if $z6 == 0 goto label12;
+
+        $r11 = r0.<sun.nio.cs.StreamEncoder: java.nio.CharBuffer lcb>;
+
+        $c1 = virtualinvoke $r11.<java.nio.CharBuffer: char get()>();
+
+        r0.<sun.nio.cs.StreamEncoder: char leftoverChar> = $c1;
+
+        if r3 == null goto label08;
+
+        $z7 = virtualinvoke r3.<java.nio.CharBuffer: boolean hasRemaining()>();
+
+        if $z7 == 0 goto label08;
+
+        specialinvoke r0.<sun.nio.cs.StreamEncoder: void flushLeftoverChar(java.nio.CharBuffer,boolean)>(r3, z2);
+
+     label08:
+        return;
+
+     label09:
+        $z4 = virtualinvoke $r7.<java.nio.charset.CoderResult: boolean isOverflow()>();
+
+        if $z4 == 0 goto label11;
+
+        $z5 = <sun.nio.cs.StreamEncoder: boolean $assertionsDisabled>;
+
+        if $z5 != 0 goto label10;
+
+        $r8 = r0.<sun.nio.cs.StreamEncoder: java.nio.ByteBuffer bb>;
+
+        $i0 = virtualinvoke $r8.<java.nio.ByteBuffer: int position()>();
+
+        if $i0 > 0 goto label10;
+
+        $r9 = new java.lang.AssertionError;
+
+        specialinvoke $r9.<java.lang.AssertionError: void <init>()>();
+
+        throw $r9;
+
+     label10:
+        specialinvoke r0.<sun.nio.cs.StreamEncoder: void writeBytes()>();
+
+        goto label06;
+
+     label11:
+        virtualinvoke $r7.<java.nio.charset.CoderResult: void throwException()>();
+
+        goto label06;
+
+     label12:
+        r0.<sun.nio.cs.StreamEncoder: boolean haveLeftoverChar> = 0;
+
+        return;
+    }
+
+    void implWrite(char[], int, int) throws java.io.IOException
+    {
+        sun.nio.cs.StreamEncoder r2;
+        java.lang.AssertionError $r7, $r8;
+        java.nio.ByteBuffer $r3, $r6;
+        java.nio.charset.CoderResult $r5;
+        int i0, i1, $i2, $i3, $i5, $i6;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.nio.CharBuffer $r1;
+        char $c4;
+        java.nio.charset.CharsetEncoder $r4;
+        char[] r0;
+
+        r2 := @this: sun.nio.cs.StreamEncoder;
+
+        r0 := @parameter0: char[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        $r1 = staticinvoke <java.nio.CharBuffer: java.nio.CharBuffer wrap(char[],int,int)>(r0, i0, i1);
+
+        $z0 = r2.<sun.nio.cs.StreamEncoder: boolean haveLeftoverChar>;
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r2.<sun.nio.cs.StreamEncoder: void flushLeftoverChar(java.nio.CharBuffer,boolean)>($r1, 0);
+
+     label1:
+        $z5 = virtualinvoke $r1.<java.nio.CharBuffer: boolean hasRemaining()>();
+
+        if $z5 == 0 goto label6;
+
+        $r4 = r2.<sun.nio.cs.StreamEncoder: java.nio.charset.CharsetEncoder encoder>;
+
+        $r3 = r2.<sun.nio.cs.StreamEncoder: java.nio.ByteBuffer bb>;
+
+        $r5 = virtualinvoke $r4.<java.nio.charset.CharsetEncoder: java.nio.charset.CoderResult encode(java.nio.CharBuffer,java.nio.ByteBuffer,boolean)>($r1, $r3, 0);
+
+        $z1 = virtualinvoke $r5.<java.nio.charset.CoderResult: boolean isUnderflow()>();
+
+        if $z1 == 0 goto label3;
+
+        $z4 = <sun.nio.cs.StreamEncoder: boolean $assertionsDisabled>;
+
+        if $z4 != 0 goto label2;
+
+        $i5 = virtualinvoke $r1.<java.nio.CharBuffer: int remaining()>();
+
+        if $i5 <= 1 goto label2;
+
+        $r8 = new java.lang.AssertionError;
+
+        $i6 = virtualinvoke $r1.<java.nio.CharBuffer: int remaining()>();
+
+        specialinvoke $r8.<java.lang.AssertionError: void <init>(int)>($i6);
+
+        throw $r8;
+
+     label2:
+        $i3 = virtualinvoke $r1.<java.nio.CharBuffer: int remaining()>();
+
+        if $i3 != 1 goto label6;
+
+        r2.<sun.nio.cs.StreamEncoder: boolean haveLeftoverChar> = 1;
+
+        $c4 = virtualinvoke $r1.<java.nio.CharBuffer: char get()>();
+
+        r2.<sun.nio.cs.StreamEncoder: char leftoverChar> = $c4;
+
+        goto label6;
+
+     label3:
+        $z2 = virtualinvoke $r5.<java.nio.charset.CoderResult: boolean isOverflow()>();
+
+        if $z2 == 0 goto label5;
+
+        $z3 = <sun.nio.cs.StreamEncoder: boolean $assertionsDisabled>;
+
+        if $z3 != 0 goto label4;
+
+        $r6 = r2.<sun.nio.cs.StreamEncoder: java.nio.ByteBuffer bb>;
+
+        $i2 = virtualinvoke $r6.<java.nio.ByteBuffer: int position()>();
+
+        if $i2 > 0 goto label4;
+
+        $r7 = new java.lang.AssertionError;
+
+        specialinvoke $r7.<java.lang.AssertionError: void <init>()>();
+
+        throw $r7;
+
+     label4:
+        specialinvoke r2.<sun.nio.cs.StreamEncoder: void writeBytes()>();
+
+        goto label1;
+
+     label5:
+        virtualinvoke $r5.<java.nio.charset.CoderResult: void throwException()>();
+
+        goto label1;
+
+     label6:
+        return;
+    }
+
+    void implFlushBuffer() throws java.io.IOException
+    {
+        sun.nio.cs.StreamEncoder r0;
+        int $i0;
+        java.nio.ByteBuffer $r1;
+
+        r0 := @this: sun.nio.cs.StreamEncoder;
+
+        $r1 = r0.<sun.nio.cs.StreamEncoder: java.nio.ByteBuffer bb>;
+
+        $i0 = virtualinvoke $r1.<java.nio.ByteBuffer: int position()>();
+
+        if $i0 <= 0 goto label1;
+
+        specialinvoke r0.<sun.nio.cs.StreamEncoder: void writeBytes()>();
+
+     label1:
+        return;
+    }
+
+    void implFlush() throws java.io.IOException
+    {
+        sun.nio.cs.StreamEncoder r0;
+        java.io.OutputStream $r1, $r2;
+
+        r0 := @this: sun.nio.cs.StreamEncoder;
+
+        virtualinvoke r0.<sun.nio.cs.StreamEncoder: void implFlushBuffer()>();
+
+        $r1 = r0.<sun.nio.cs.StreamEncoder: java.io.OutputStream out>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<sun.nio.cs.StreamEncoder: java.io.OutputStream out>;
+
+        virtualinvoke $r2.<java.io.OutputStream: void flush()>();
+
+     label1:
+        return;
+    }
+
+    void implClose() throws java.io.IOException
+    {
+        sun.nio.cs.StreamEncoder r0;
+        java.lang.AssertionError $r2;
+        java.nio.ByteBuffer $r1, $r3, $r10;
+        java.nio.charset.CoderResult $r11;
+        int $i0, $i1;
+        boolean $z0, $z1, $z2;
+        java.io.OutputStream $r5;
+        java.io.IOException $r7;
+        java.nio.charset.CharsetEncoder $r8, $r9;
+        java.nio.channels.WritableByteChannel $r4, $r6;
+
+        r0 := @this: sun.nio.cs.StreamEncoder;
+
+        specialinvoke r0.<sun.nio.cs.StreamEncoder: void flushLeftoverChar(java.nio.CharBuffer,boolean)>(null, 1);
+
+     label01:
+        $r9 = r0.<sun.nio.cs.StreamEncoder: java.nio.charset.CharsetEncoder encoder>;
+
+        $r10 = r0.<sun.nio.cs.StreamEncoder: java.nio.ByteBuffer bb>;
+
+        $r11 = virtualinvoke $r9.<java.nio.charset.CharsetEncoder: java.nio.charset.CoderResult flush(java.nio.ByteBuffer)>($r10);
+
+        $z2 = virtualinvoke $r11.<java.nio.charset.CoderResult: boolean isUnderflow()>();
+
+        if $z2 == 0 goto label02;
+
+        goto label05;
+
+     label02:
+        $z0 = virtualinvoke $r11.<java.nio.charset.CoderResult: boolean isOverflow()>();
+
+        if $z0 == 0 goto label04;
+
+        $z1 = <sun.nio.cs.StreamEncoder: boolean $assertionsDisabled>;
+
+        if $z1 != 0 goto label03;
+
+        $r1 = r0.<sun.nio.cs.StreamEncoder: java.nio.ByteBuffer bb>;
+
+        $i0 = virtualinvoke $r1.<java.nio.ByteBuffer: int position()>();
+
+        if $i0 > 0 goto label03;
+
+        $r2 = new java.lang.AssertionError;
+
+        specialinvoke $r2.<java.lang.AssertionError: void <init>()>();
+
+        throw $r2;
+
+     label03:
+        specialinvoke r0.<sun.nio.cs.StreamEncoder: void writeBytes()>();
+
+        goto label01;
+
+     label04:
+        virtualinvoke $r11.<java.nio.charset.CoderResult: void throwException()>();
+
+        goto label01;
+
+     label05:
+        $r3 = r0.<sun.nio.cs.StreamEncoder: java.nio.ByteBuffer bb>;
+
+        $i1 = virtualinvoke $r3.<java.nio.ByteBuffer: int position()>();
+
+        if $i1 <= 0 goto label06;
+
+        specialinvoke r0.<sun.nio.cs.StreamEncoder: void writeBytes()>();
+
+     label06:
+        $r4 = r0.<sun.nio.cs.StreamEncoder: java.nio.channels.WritableByteChannel ch>;
+
+        if $r4 == null goto label07;
+
+        $r6 = r0.<sun.nio.cs.StreamEncoder: java.nio.channels.WritableByteChannel ch>;
+
+        interfaceinvoke $r6.<java.nio.channels.WritableByteChannel: void close()>();
+
+        goto label08;
+
+     label07:
+        $r5 = r0.<sun.nio.cs.StreamEncoder: java.io.OutputStream out>;
+
+        virtualinvoke $r5.<java.io.OutputStream: void close()>();
+
+     label08:
+        goto label10;
+
+     label09:
+        $r7 := @caughtexception;
+
+        $r8 = r0.<sun.nio.cs.StreamEncoder: java.nio.charset.CharsetEncoder encoder>;
+
+        virtualinvoke $r8.<java.nio.charset.CharsetEncoder: java.nio.charset.CharsetEncoder reset()>();
+
+        throw $r7;
+
+     label10:
+        return;
+
+        catch java.io.IOException from label01 to label08 with label09;
+    }
+
+    java.lang.String encodingName()
+    {
+        sun.nio.cs.StreamEncoder r0;
+        sun.nio.cs.HistoricallyNamedCharset $r4;
+        java.nio.charset.Charset $r1, $r2, $r3;
+        java.lang.String $r5;
+        boolean $z0;
+
+        r0 := @this: sun.nio.cs.StreamEncoder;
+
+        $r1 = r0.<sun.nio.cs.StreamEncoder: java.nio.charset.Charset cs>;
+
+        $z0 = $r1 instanceof sun.nio.cs.HistoricallyNamedCharset;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = r0.<sun.nio.cs.StreamEncoder: java.nio.charset.Charset cs>;
+
+        $r4 = (sun.nio.cs.HistoricallyNamedCharset) $r3;
+
+        $r5 = interfaceinvoke $r4.<sun.nio.cs.HistoricallyNamedCharset: java.lang.String historicalName()>();
+
+        goto label2;
+
+     label1:
+        $r2 = r0.<sun.nio.cs.StreamEncoder: java.nio.charset.Charset cs>;
+
+        $r5 = virtualinvoke $r2.<java.nio.charset.Charset: java.lang.String name()>();
+
+     label2:
+        return $r5;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0, $z1;
+
+        <sun.nio.cs.StreamEncoder: int DEFAULT_BYTE_BUFFER_SIZE> = 8192;
+
+        $r0 = class "Lsun/nio/cs/StreamEncoder;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label1;
+
+        $z1 = 1;
+
+        goto label2;
+
+     label1:
+        $z1 = 0;
+
+     label2:
+        <sun.nio.cs.StreamEncoder: boolean $assertionsDisabled> = $z1;
+
+        return;
+    }
+}

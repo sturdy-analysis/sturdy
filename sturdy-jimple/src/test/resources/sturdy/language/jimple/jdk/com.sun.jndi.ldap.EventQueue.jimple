@@ -1,0 +1,250 @@
+final class com.sun.jndi.ldap.EventQueue extends java.lang.Object implements java.lang.Runnable
+{
+    private static final boolean debug;
+    private com.sun.jndi.ldap.EventQueue$QueueElement head;
+    private com.sun.jndi.ldap.EventQueue$QueueElement tail;
+    private java.lang.Thread qThread;
+
+    void <init>()
+    {
+        com.sun.jndi.ldap.EventQueue r0;
+        java.lang.Thread $r2, $r3, $r4;
+        com.sun.jndi.ldap.VersionHelper $r1;
+
+        r0 := @this: com.sun.jndi.ldap.EventQueue;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.sun.jndi.ldap.EventQueue: com.sun.jndi.ldap.EventQueue$QueueElement head> = null;
+
+        r0.<com.sun.jndi.ldap.EventQueue: com.sun.jndi.ldap.EventQueue$QueueElement tail> = null;
+
+        $r1 = <com.sun.jndi.ldap.Obj: com.sun.jndi.ldap.VersionHelper helper>;
+
+        $r2 = virtualinvoke $r1.<com.sun.jndi.ldap.VersionHelper: java.lang.Thread createThread(java.lang.Runnable)>(r0);
+
+        r0.<com.sun.jndi.ldap.EventQueue: java.lang.Thread qThread> = $r2;
+
+        $r3 = r0.<com.sun.jndi.ldap.EventQueue: java.lang.Thread qThread>;
+
+        virtualinvoke $r3.<java.lang.Thread: void setDaemon(boolean)>(1);
+
+        $r4 = r0.<com.sun.jndi.ldap.EventQueue: java.lang.Thread qThread>;
+
+        virtualinvoke $r4.<java.lang.Thread: void start()>();
+
+        return;
+    }
+
+    synchronized void enqueue(java.util.EventObject, java.util.Vector)
+    {
+        java.util.Vector r2;
+        com.sun.jndi.ldap.EventQueue r3;
+        com.sun.jndi.ldap.EventQueue$QueueElement $r0, $r4, $r5, $r6;
+        java.util.EventObject r1;
+
+        r3 := @this: com.sun.jndi.ldap.EventQueue;
+
+        r1 := @parameter0: java.util.EventObject;
+
+        r2 := @parameter1: java.util.Vector;
+
+        $r0 = new com.sun.jndi.ldap.EventQueue$QueueElement;
+
+        specialinvoke $r0.<com.sun.jndi.ldap.EventQueue$QueueElement: void <init>(java.util.EventObject,java.util.Vector)>(r1, r2);
+
+        $r4 = r3.<com.sun.jndi.ldap.EventQueue: com.sun.jndi.ldap.EventQueue$QueueElement head>;
+
+        if $r4 != null goto label1;
+
+        r3.<com.sun.jndi.ldap.EventQueue: com.sun.jndi.ldap.EventQueue$QueueElement head> = $r0;
+
+        r3.<com.sun.jndi.ldap.EventQueue: com.sun.jndi.ldap.EventQueue$QueueElement tail> = $r0;
+
+        goto label2;
+
+     label1:
+        $r5 = r3.<com.sun.jndi.ldap.EventQueue: com.sun.jndi.ldap.EventQueue$QueueElement head>;
+
+        $r0.<com.sun.jndi.ldap.EventQueue$QueueElement: com.sun.jndi.ldap.EventQueue$QueueElement next> = $r5;
+
+        $r6 = r3.<com.sun.jndi.ldap.EventQueue: com.sun.jndi.ldap.EventQueue$QueueElement head>;
+
+        $r6.<com.sun.jndi.ldap.EventQueue$QueueElement: com.sun.jndi.ldap.EventQueue$QueueElement prev> = $r0;
+
+        r3.<com.sun.jndi.ldap.EventQueue: com.sun.jndi.ldap.EventQueue$QueueElement head> = $r0;
+
+     label2:
+        virtualinvoke r3.<java.lang.Object: void notify()>();
+
+        return;
+    }
+
+    private synchronized com.sun.jndi.ldap.EventQueue$QueueElement dequeue() throws java.lang.InterruptedException
+    {
+        com.sun.jndi.ldap.EventQueue r0;
+        com.sun.jndi.ldap.EventQueue$QueueElement $r1, r2, $r3, $r4, $r5;
+
+        r0 := @this: com.sun.jndi.ldap.EventQueue;
+
+     label1:
+        $r1 = r0.<com.sun.jndi.ldap.EventQueue: com.sun.jndi.ldap.EventQueue$QueueElement tail>;
+
+        if $r1 != null goto label2;
+
+        virtualinvoke r0.<java.lang.Object: void wait()>();
+
+        goto label1;
+
+     label2:
+        r2 = r0.<com.sun.jndi.ldap.EventQueue: com.sun.jndi.ldap.EventQueue$QueueElement tail>;
+
+        $r3 = r2.<com.sun.jndi.ldap.EventQueue$QueueElement: com.sun.jndi.ldap.EventQueue$QueueElement prev>;
+
+        r0.<com.sun.jndi.ldap.EventQueue: com.sun.jndi.ldap.EventQueue$QueueElement tail> = $r3;
+
+        $r4 = r0.<com.sun.jndi.ldap.EventQueue: com.sun.jndi.ldap.EventQueue$QueueElement tail>;
+
+        if $r4 != null goto label3;
+
+        r0.<com.sun.jndi.ldap.EventQueue: com.sun.jndi.ldap.EventQueue$QueueElement head> = null;
+
+        goto label4;
+
+     label3:
+        $r5 = r0.<com.sun.jndi.ldap.EventQueue: com.sun.jndi.ldap.EventQueue$QueueElement tail>;
+
+        $r5.<com.sun.jndi.ldap.EventQueue$QueueElement: com.sun.jndi.ldap.EventQueue$QueueElement next> = null;
+
+     label4:
+        r2.<com.sun.jndi.ldap.EventQueue$QueueElement: com.sun.jndi.ldap.EventQueue$QueueElement next> = null;
+
+        r2.<com.sun.jndi.ldap.EventQueue$QueueElement: com.sun.jndi.ldap.EventQueue$QueueElement prev> = null;
+
+        return r2;
+    }
+
+    public void run()
+    {
+        javax.naming.event.NamingListener $r7, $r10;
+        javax.naming.event.NamingEvent $r8;
+        javax.naming.ldap.UnsolicitedNotificationEvent $r2;
+        java.util.EventObject r12;
+        java.util.Vector r13;
+        com.sun.jndi.ldap.EventQueue r0;
+        int $i0, i1;
+        boolean $z0, $z1, $z2;
+        javax.naming.ldap.UnsolicitedNotificationListener $r4;
+        com.sun.jndi.ldap.EventQueue$QueueElement $r1;
+        javax.naming.event.NamingExceptionEvent $r5;
+        java.lang.InterruptedException $r11;
+        java.lang.Object $r3, $r6, $r9;
+
+        r0 := @this: com.sun.jndi.ldap.EventQueue;
+
+     label1:
+        $r1 = specialinvoke r0.<com.sun.jndi.ldap.EventQueue: com.sun.jndi.ldap.EventQueue$QueueElement dequeue()>();
+
+        if $r1 == null goto label7;
+
+        r12 = $r1.<com.sun.jndi.ldap.EventQueue$QueueElement: java.util.EventObject event>;
+
+        r13 = $r1.<com.sun.jndi.ldap.EventQueue$QueueElement: java.util.Vector vector>;
+
+        i1 = 0;
+
+     label2:
+        $i0 = virtualinvoke r13.<java.util.Vector: int size()>();
+
+        if i1 >= $i0 goto label6;
+
+        $z0 = r12 instanceof javax.naming.event.NamingEvent;
+
+        if $z0 == 0 goto label3;
+
+        $r8 = (javax.naming.event.NamingEvent) r12;
+
+        $r9 = virtualinvoke r13.<java.util.Vector: java.lang.Object elementAt(int)>(i1);
+
+        $r10 = (javax.naming.event.NamingListener) $r9;
+
+        virtualinvoke $r8.<javax.naming.event.NamingEvent: void dispatch(javax.naming.event.NamingListener)>($r10);
+
+        goto label5;
+
+     label3:
+        $z1 = r12 instanceof javax.naming.event.NamingExceptionEvent;
+
+        if $z1 == 0 goto label4;
+
+        $r5 = (javax.naming.event.NamingExceptionEvent) r12;
+
+        $r6 = virtualinvoke r13.<java.util.Vector: java.lang.Object elementAt(int)>(i1);
+
+        $r7 = (javax.naming.event.NamingListener) $r6;
+
+        virtualinvoke $r5.<javax.naming.event.NamingExceptionEvent: void dispatch(javax.naming.event.NamingListener)>($r7);
+
+        goto label5;
+
+     label4:
+        $z2 = r12 instanceof javax.naming.ldap.UnsolicitedNotificationEvent;
+
+        if $z2 == 0 goto label5;
+
+        $r2 = (javax.naming.ldap.UnsolicitedNotificationEvent) r12;
+
+        $r3 = virtualinvoke r13.<java.util.Vector: java.lang.Object elementAt(int)>(i1);
+
+        $r4 = (javax.naming.ldap.UnsolicitedNotificationListener) $r3;
+
+        virtualinvoke $r2.<javax.naming.ldap.UnsolicitedNotificationEvent: void dispatch(javax.naming.ldap.UnsolicitedNotificationListener)>($r4);
+
+     label5:
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label6:
+        goto label1;
+
+     label7:
+        goto label9;
+
+     label8:
+        $r11 := @caughtexception;
+
+     label9:
+        return;
+
+        catch java.lang.InterruptedException from label1 to label7 with label8;
+    }
+
+    void stop()
+    {
+        com.sun.jndi.ldap.EventQueue r0;
+        java.lang.Thread $r1, $r2;
+
+        r0 := @this: com.sun.jndi.ldap.EventQueue;
+
+        $r1 = r0.<com.sun.jndi.ldap.EventQueue: java.lang.Thread qThread>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<com.sun.jndi.ldap.EventQueue: java.lang.Thread qThread>;
+
+        virtualinvoke $r2.<java.lang.Thread: void interrupt()>();
+
+        r0.<com.sun.jndi.ldap.EventQueue: java.lang.Thread qThread> = null;
+
+     label1:
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <com.sun.jndi.ldap.EventQueue: boolean debug> = 0;
+
+        return;
+    }
+}

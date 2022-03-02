@@ -1,0 +1,1295 @@
+public class sun.security.x509.IPAddressName extends java.lang.Object implements sun.security.x509.GeneralNameInterface
+{
+    private byte[] address;
+    private boolean isIPv4;
+    private java.lang.String name;
+    private static final int MASKSIZE;
+
+    public void <init>(sun.security.util.DerValue) throws java.io.IOException
+    {
+        sun.security.util.DerValue r1;
+        byte[] $r2;
+        sun.security.x509.IPAddressName r0;
+
+        r0 := @this: sun.security.x509.IPAddressName;
+
+        r1 := @parameter0: sun.security.util.DerValue;
+
+        $r2 = virtualinvoke r1.<sun.security.util.DerValue: byte[] getOctetString()>();
+
+        specialinvoke r0.<sun.security.x509.IPAddressName: void <init>(byte[])>($r2);
+
+        return;
+    }
+
+    public void <init>(byte[]) throws java.io.IOException
+    {
+        byte[] r1;
+        int $i0, $i1, $i2, $i3;
+        java.io.IOException $r2;
+        sun.security.x509.IPAddressName r0;
+
+        r0 := @this: sun.security.x509.IPAddressName;
+
+        r1 := @parameter0: byte[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $i0 = lengthof r1;
+
+        if $i0 == 4 goto label1;
+
+        $i1 = lengthof r1;
+
+        if $i1 != 8 goto label2;
+
+     label1:
+        r0.<sun.security.x509.IPAddressName: boolean isIPv4> = 1;
+
+        goto label5;
+
+     label2:
+        $i2 = lengthof r1;
+
+        if $i2 == 16 goto label3;
+
+        $i3 = lengthof r1;
+
+        if $i3 != 32 goto label4;
+
+     label3:
+        r0.<sun.security.x509.IPAddressName: boolean isIPv4> = 0;
+
+        goto label5;
+
+     label4:
+        $r2 = new java.io.IOException;
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>("Invalid IPAddressName");
+
+        throw $r2;
+
+     label5:
+        r0.<sun.security.x509.IPAddressName: byte[] address> = r1;
+
+        return;
+    }
+
+    public void <init>(java.lang.String) throws java.io.IOException
+    {
+        sun.security.x509.IPAddressName r0;
+        int $i0, $i1, $i3, $i4, $i5;
+        java.lang.String r1, $r7, $r12;
+        boolean $z0;
+        char $c2;
+        java.io.IOException $r13, $r15, $r17;
+        java.lang.StringBuilder $r5, $r6, $r10, $r11, $r14, $r16;
+
+        r0 := @this: sun.security.x509.IPAddressName;
+
+        r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        if r1 == null goto label1;
+
+        $z0 = virtualinvoke r1.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        $r13 = new java.io.IOException;
+
+        specialinvoke $r13.<java.io.IOException: void <init>(java.lang.String)>("IPAddress cannot be null or empty");
+
+        throw $r13;
+
+     label2:
+        $i0 = virtualinvoke r1.<java.lang.String: int length()>();
+
+        $i1 = $i0 - 1;
+
+        $c2 = virtualinvoke r1.<java.lang.String: char charAt(int)>($i1);
+
+        $i5 = (int) $c2;
+
+        if $i5 != 47 goto label3;
+
+        $r15 = new java.io.IOException;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid IPAddress: ");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r15.<java.io.IOException: void <init>(java.lang.String)>($r12);
+
+        throw $r15;
+
+     label3:
+        $i3 = virtualinvoke r1.<java.lang.String: int indexOf(int)>(58);
+
+        if $i3 < 0 goto label4;
+
+        specialinvoke r0.<sun.security.x509.IPAddressName: void parseIPv6(java.lang.String)>(r1);
+
+        r0.<sun.security.x509.IPAddressName: boolean isIPv4> = 0;
+
+        goto label6;
+
+     label4:
+        $i4 = virtualinvoke r1.<java.lang.String: int indexOf(int)>(46);
+
+        if $i4 < 0 goto label5;
+
+        specialinvoke r0.<sun.security.x509.IPAddressName: void parseIPv4(java.lang.String)>(r1);
+
+        r0.<sun.security.x509.IPAddressName: boolean isIPv4> = 1;
+
+        goto label6;
+
+     label5:
+        $r17 = new java.io.IOException;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid IPAddress: ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r17.<java.io.IOException: void <init>(java.lang.String)>($r7);
+
+        throw $r17;
+
+     label6:
+        return;
+    }
+
+    private void parseIPv4(java.lang.String) throws java.io.IOException
+    {
+        byte[] $r2, $r5, $r8, $r9, $r10, $r12;
+        sun.security.x509.IPAddressName r1;
+        java.net.InetAddress $r4, $r7, $r11;
+        int $i0, $i1, $i3;
+        java.lang.String r0, $r3, $r6;
+
+        r1 := @this: sun.security.x509.IPAddressName;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int indexOf(int)>(47);
+
+        $i3 = (int) -1;
+
+        if $i0 != $i3 goto label1;
+
+        $r11 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByName(java.lang.String)>(r0);
+
+        $r12 = virtualinvoke $r11.<java.net.InetAddress: byte[] getAddress()>();
+
+        r1.<sun.security.x509.IPAddressName: byte[] address> = $r12;
+
+        goto label2;
+
+     label1:
+        $r2 = newarray (byte)[8];
+
+        r1.<sun.security.x509.IPAddressName: byte[] address> = $r2;
+
+        $i1 = $i0 + 1;
+
+        $r3 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>($i1);
+
+        $r4 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByName(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.net.InetAddress: byte[] getAddress()>();
+
+        $r6 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $r7 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByName(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r7.<java.net.InetAddress: byte[] getAddress()>();
+
+        $r9 = r1.<sun.security.x509.IPAddressName: byte[] address>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r8, 0, $r9, 0, 4);
+
+        $r10 = r1.<sun.security.x509.IPAddressName: byte[] address>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r5, 0, $r10, 4, 4);
+
+     label2:
+        return;
+    }
+
+    private void parseIPv6(java.lang.String) throws java.io.IOException
+    {
+        byte[] $r2, $r5, $r6, $r15, $r16, $r18;
+        sun.security.x509.IPAddressName r1;
+        java.net.InetAddress $r4, $r17;
+        byte $b3;
+        int $i0, $i1, $i2, $i4, i5, i6, $i8;
+        java.lang.String r0, $r3, $r7, $r13;
+        java.io.IOException $r20;
+        sun.security.util.BitArray $r21;
+        java.lang.StringBuilder $r10, $r11, $r12, $r19;
+
+        r1 := @this: sun.security.x509.IPAddressName;
+
+        r0 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int indexOf(int)>(47);
+
+        $i8 = (int) -1;
+
+        if $i0 != $i8 goto label1;
+
+        $r17 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByName(java.lang.String)>(r0);
+
+        $r18 = virtualinvoke $r17.<java.net.InetAddress: byte[] getAddress()>();
+
+        r1.<sun.security.x509.IPAddressName: byte[] address> = $r18;
+
+        goto label7;
+
+     label1:
+        $r2 = newarray (byte)[32];
+
+        r1.<sun.security.x509.IPAddressName: byte[] address> = $r2;
+
+        $r3 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $r4 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByName(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.net.InetAddress: byte[] getAddress()>();
+
+        $r6 = r1.<sun.security.x509.IPAddressName: byte[] address>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r5, 0, $r6, 0, 16);
+
+        $i1 = $i0 + 1;
+
+        $r7 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>($i1);
+
+        $i2 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r7);
+
+        if $i2 < 0 goto label2;
+
+        if $i2 <= 128 goto label3;
+
+     label2:
+        $r20 = new java.io.IOException;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("IPv6Address prefix length (");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") in out of valid range [0,128]");
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r20.<java.io.IOException: void <init>(java.lang.String)>($r13);
+
+        throw $r20;
+
+     label3:
+        $r21 = new sun.security.util.BitArray;
+
+        specialinvoke $r21.<sun.security.util.BitArray: void <init>(int)>(128);
+
+        i5 = 0;
+
+     label4:
+        if i5 >= $i2 goto label5;
+
+        virtualinvoke $r21.<sun.security.util.BitArray: void set(int,boolean)>(i5, 1);
+
+        i5 = i5 + 1;
+
+        goto label4;
+
+     label5:
+        $r15 = virtualinvoke $r21.<sun.security.util.BitArray: byte[] toByteArray()>();
+
+        i6 = 0;
+
+     label6:
+        if i6 >= 16 goto label7;
+
+        $r16 = r1.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i4 = 16 + i6;
+
+        $b3 = $r15[i6];
+
+        $r16[$i4] = $b3;
+
+        i6 = i6 + 1;
+
+        goto label6;
+
+     label7:
+        return;
+    }
+
+    public int getType()
+    {
+        sun.security.x509.IPAddressName r0;
+
+        r0 := @this: sun.security.x509.IPAddressName;
+
+        return 7;
+    }
+
+    public void encode(sun.security.util.DerOutputStream) throws java.io.IOException
+    {
+        byte[] $r2;
+        sun.security.util.DerOutputStream r0;
+        sun.security.x509.IPAddressName r1;
+
+        r1 := @this: sun.security.x509.IPAddressName;
+
+        r0 := @parameter0: sun.security.util.DerOutputStream;
+
+        $r2 = r1.<sun.security.x509.IPAddressName: byte[] address>;
+
+        virtualinvoke r0.<sun.security.util.DerOutputStream: void putOctetString(byte[])>($r2);
+
+        return;
+    }
+
+    public java.lang.String toString()
+    {
+        byte[] $r10;
+        java.io.IOException $r6;
+        sun.security.x509.IPAddressName r2;
+        java.lang.StringBuilder $r0, $r1, $r4, $r8, $r9, $r12;
+        java.lang.String $r3, $r5, $r11, $r13;
+        sun.misc.HexDumpEncoder $r7;
+
+        r2 := @this: sun.security.x509.IPAddressName;
+
+     label1:
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("IPAddress: ");
+
+        $r3 = virtualinvoke r2.<sun.security.x509.IPAddressName: java.lang.String getName()>();
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label2:
+        return $r5;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = new sun.misc.HexDumpEncoder;
+
+        specialinvoke $r7.<sun.misc.HexDumpEncoder: void <init>()>();
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("IPAddress: ");
+
+        $r10 = r2.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $r11 = virtualinvoke $r7.<sun.misc.HexDumpEncoder: java.lang.String encodeBuffer(byte[])>($r10);
+
+        $r12 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r13;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public java.lang.String getName() throws java.io.IOException
+    {
+        byte[] $r2, $r5, $r19, $r20, $r23, $r24, r34, r35, r36, r37;
+        java.net.InetAddress $r3, $r21, $r29;
+        byte $b1;
+        boolean $z0, $z1, $z2;
+        sun.security.util.BitArray $r6;
+        java.lang.StringBuilder $r7, $r9, $r10, $r11, $r14, $r15, $r16, $r17, $r25, $r27, $r28, $r31;
+        sun.security.x509.IPAddressName r0;
+        int $i0, $i2, $i3, i4, i5;
+        java.lang.String $r1, $r4, $r8, $r12, $r18, $r22, $r26, $r30, $r32, $r33, $r38;
+        java.io.IOException $r13;
+
+        r0 := @this: sun.security.x509.IPAddressName;
+
+        $r1 = r0.<sun.security.x509.IPAddressName: java.lang.String name>;
+
+        if $r1 == null goto label01;
+
+        $r33 = r0.<sun.security.x509.IPAddressName: java.lang.String name>;
+
+        return $r33;
+
+     label01:
+        $z0 = r0.<sun.security.x509.IPAddressName: boolean isIPv4>;
+
+        if $z0 == 0 goto label03;
+
+        r34 = newarray (byte)[4];
+
+        $r20 = r0.<sun.security.x509.IPAddressName: byte[] address>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r20, 0, r34, 0, 4);
+
+        $r21 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByAddress(byte[])>(r34);
+
+        $r22 = virtualinvoke $r21.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+        r0.<sun.security.x509.IPAddressName: java.lang.String name> = $r22;
+
+        $r23 = r0.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i3 = lengthof $r23;
+
+        if $i3 != 8 goto label02;
+
+        r35 = newarray (byte)[4];
+
+        $r24 = r0.<sun.security.x509.IPAddressName: byte[] address>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r24, 4, r35, 0, 4);
+
+        $r25 = new java.lang.StringBuilder;
+
+        specialinvoke $r25.<java.lang.StringBuilder: void <init>()>();
+
+        $r26 = r0.<sun.security.x509.IPAddressName: java.lang.String name>;
+
+        $r27 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r26);
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r29 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByAddress(byte[])>(r35);
+
+        $r30 = virtualinvoke $r29.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+        $r31 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r30);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r0.<sun.security.x509.IPAddressName: java.lang.String name> = $r32;
+
+     label02:
+        goto label11;
+
+     label03:
+        r36 = newarray (byte)[16];
+
+        $r2 = r0.<sun.security.x509.IPAddressName: byte[] address>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, 0, r36, 0, 16);
+
+        $r3 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByAddress(byte[])>(r36);
+
+        $r4 = virtualinvoke $r3.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+        r0.<sun.security.x509.IPAddressName: java.lang.String name> = $r4;
+
+        $r5 = r0.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i0 = lengthof $r5;
+
+        if $i0 != 32 goto label11;
+
+        r37 = newarray (byte)[16];
+
+        i4 = 16;
+
+     label04:
+        if i4 >= 32 goto label05;
+
+        $i2 = i4 - 16;
+
+        $r19 = r0.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $b1 = $r19[i4];
+
+        r37[$i2] = $b1;
+
+        i4 = i4 + 1;
+
+        goto label04;
+
+     label05:
+        $r6 = new sun.security.util.BitArray;
+
+        specialinvoke $r6.<sun.security.util.BitArray: void <init>(int,byte[])>(128, r37);
+
+        i5 = 0;
+
+     label06:
+        if i5 >= 128 goto label08;
+
+        $z2 = virtualinvoke $r6.<sun.security.util.BitArray: boolean get(int)>(i5);
+
+        if $z2 != 0 goto label07;
+
+        goto label08;
+
+     label07:
+        i5 = i5 + 1;
+
+        goto label06;
+
+     label08:
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = r0.<sun.security.x509.IPAddressName: java.lang.String name>;
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i5);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r0.<sun.security.x509.IPAddressName: java.lang.String name> = $r12;
+
+     label09:
+        if i5 >= 128 goto label11;
+
+        $z1 = virtualinvoke $r6.<sun.security.util.BitArray: boolean get(int)>(i5);
+
+        if $z1 == 0 goto label10;
+
+        $r13 = new java.io.IOException;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid IPv6 subdomain - set bit ");
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i5);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" not contiguous");
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<java.io.IOException: void <init>(java.lang.String)>($r18);
+
+        throw $r13;
+
+     label10:
+        i5 = i5 + 1;
+
+        goto label09;
+
+     label11:
+        $r38 = r0.<sun.security.x509.IPAddressName: java.lang.String name>;
+
+        return $r38;
+    }
+
+    public byte[] getBytes()
+    {
+        byte[] $r1, $r3;
+        java.lang.Object $r2;
+        sun.security.x509.IPAddressName r0;
+
+        r0 := @this: sun.security.x509.IPAddressName;
+
+        $r1 = r0.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $r2 = virtualinvoke $r1.<java.lang.Object: java.lang.Object clone()>();
+
+        $r3 = (byte[]) $r2;
+
+        return $r3;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        byte[] r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12;
+        byte $b5, $b6, $b8, $b9, $b10, b11, $b13, $b14, $b15, b16;
+        boolean $z0, $z1;
+        sun.security.x509.IPAddressName r0, r2;
+        int $i0, $i1, $i2, $i3, $i4, $i7, $i12, $i17, $i18, i19, i20, $i21, $i22, $i23, $i24;
+        java.lang.Object r1;
+
+        r0 := @this: sun.security.x509.IPAddressName;
+
+        r1 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label01;
+
+        return 1;
+
+     label01:
+        $z0 = r1 instanceof sun.security.x509.IPAddressName;
+
+        if $z0 != 0 goto label02;
+
+        return 0;
+
+     label02:
+        r2 = (sun.security.x509.IPAddressName) r1;
+
+        r3 = r2.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i1 = lengthof r3;
+
+        $r4 = r0.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i0 = lengthof $r4;
+
+        if $i1 == $i0 goto label03;
+
+        return 0;
+
+     label03:
+        $r5 = r0.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i2 = lengthof $r5;
+
+        if $i2 == 8 goto label04;
+
+        $r11 = r0.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i17 = lengthof $r11;
+
+        if $i17 != 32 goto label11;
+
+     label04:
+        $r6 = r0.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i3 = lengthof $r6;
+
+        $i18 = $i3 / 2;
+
+        i19 = 0;
+
+     label05:
+        if i19 >= $i18 goto label07;
+
+        $r9 = r0.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $b9 = $r9[i19];
+
+        $r10 = r0.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i7 = i19 + $i18;
+
+        $b8 = $r10[$i7];
+
+        $b10 = $b9 & $b8;
+
+        b11 = (byte) $b10;
+
+        $b14 = r3[i19];
+
+        $i12 = i19 + $i18;
+
+        $b13 = r3[$i12];
+
+        $b15 = $b14 & $b13;
+
+        b16 = (byte) $b15;
+
+        $i21 = (int) b11;
+
+        $i22 = (int) b16;
+
+        if $i21 == $i22 goto label06;
+
+        return 0;
+
+     label06:
+        i19 = i19 + 1;
+
+        goto label05;
+
+     label07:
+        i20 = $i18;
+
+     label08:
+        $r7 = r0.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i4 = lengthof $r7;
+
+        if i20 >= $i4 goto label10;
+
+        $r8 = r0.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $b6 = $r8[i20];
+
+        $b5 = r3[i20];
+
+        $i23 = (int) $b6;
+
+        $i24 = (int) $b5;
+
+        if $i23 == $i24 goto label09;
+
+        return 0;
+
+     label09:
+        i20 = i20 + 1;
+
+        goto label08;
+
+     label10:
+        return 1;
+
+     label11:
+        $r12 = r0.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $z1 = staticinvoke <java.util.Arrays: boolean equals(byte[],byte[])>(r3, $r12);
+
+        return $z1;
+    }
+
+    public int hashCode()
+    {
+        byte[] $r1, $r2;
+        sun.security.x509.IPAddressName r0;
+        byte $b1;
+        int $i0, $i2, i3, i4, $i5;
+
+        r0 := @this: sun.security.x509.IPAddressName;
+
+        i3 = 0;
+
+        i4 = 0;
+
+     label1:
+        $r1 = r0.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i0 = lengthof $r1;
+
+        if i4 >= $i0 goto label2;
+
+        $r2 = r0.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $b1 = $r2[i4];
+
+        $i5 = (int) $b1;
+
+        $i2 = $i5 * i4;
+
+        i3 = i3 + $i2;
+
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label2:
+        return i3;
+    }
+
+    public int constrains(sun.security.x509.GeneralNameInterface) throws java.lang.UnsupportedOperationException
+    {
+        byte[] r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24;
+        byte $b7, $b8, $b9, $b10, $b15, $b16, $b17, $b18, $b25, $b26, $b27, $b28, $b29, $b31, $b32, $b33, $b34, $b35, $b38, $b39, $b40, $b42, $b43, $b45, $b46, $b47, $b49, $b50, $b51, $b52, $b53, $b55, $b56, $b57, $b59, $b60, $b61, $b62, $b63, b67, $b70, $b72, $b73, $b74, $b76;
+        sun.security.x509.GeneralNameInterface r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i11, $i12, $i13, $i14, $i19, $i20, $i21, $i22, $i23, $i24, $i30, $i36, $i37, $i41, $i44, $i48, $i54, $i58, $i64, $i65, $i66, i68, $i69, $i71, $i75, i77, i78, $i79, $i80, $i81, $i82, $i83, $i84, $i85, $i86, $i87, $i88, $i89, $i90, $i91, $i92, $i93, $i94;
+        sun.security.x509.IPAddressName r1, $r2, r3;
+        boolean $z0, z1, z2, z3, z4, z5, z6, z7, z8, z9;
+
+        r1 := @this: sun.security.x509.IPAddressName;
+
+        r0 := @parameter0: sun.security.x509.GeneralNameInterface;
+
+        if r0 != null goto label01;
+
+        b67 = -1;
+
+        goto label37;
+
+     label01:
+        $i0 = interfaceinvoke r0.<sun.security.x509.GeneralNameInterface: int getType()>();
+
+        if $i0 == 7 goto label02;
+
+        b67 = -1;
+
+        goto label37;
+
+     label02:
+        $r2 = (sun.security.x509.IPAddressName) r0;
+
+        $z0 = virtualinvoke $r2.<sun.security.x509.IPAddressName: boolean equals(java.lang.Object)>(r1);
+
+        if $z0 == 0 goto label03;
+
+        b67 = 0;
+
+        goto label37;
+
+     label03:
+        r3 = (sun.security.x509.IPAddressName) r0;
+
+        r4 = r3.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i1 = lengthof r4;
+
+        if $i1 != 4 goto label04;
+
+        $r23 = r1.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i66 = lengthof $r23;
+
+        if $i66 != 4 goto label04;
+
+        b67 = 3;
+
+        goto label37;
+
+     label04:
+        $i2 = lengthof r4;
+
+        if $i2 != 8 goto label05;
+
+        $r22 = r1.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i64 = lengthof $r22;
+
+        if $i64 == 8 goto label06;
+
+     label05:
+        $i3 = lengthof r4;
+
+        if $i3 != 32 goto label22;
+
+        $r11 = r1.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i22 = lengthof $r11;
+
+        if $i22 != 32 goto label22;
+
+     label06:
+        z1 = 1;
+
+        z2 = 1;
+
+        z3 = 0;
+
+        z9 = 0;
+
+        z8 = 0;
+
+        z7 = 0;
+
+        z4 = 0;
+
+        z6 = 0;
+
+        z5 = 0;
+
+        $r12 = r1.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i23 = lengthof $r12;
+
+        $i65 = $i23 / 2;
+
+        i68 = 0;
+
+     label07:
+        if i68 >= $i65 goto label14;
+
+        $r13 = r1.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $b26 = $r13[i68];
+
+        $r14 = r1.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i24 = i68 + $i65;
+
+        $b25 = $r14[$i24];
+
+        $b27 = $b26 & $b25;
+
+        $b29 = (byte) $b27;
+
+        $r15 = r1.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $b28 = $r15[i68];
+
+        $i79 = (int) $b29;
+
+        $i80 = (int) $b28;
+
+        if $i79 == $i80 goto label08;
+
+        z3 = 1;
+
+        z9 = 1;
+
+        z8 = 1;
+
+        z7 = 1;
+
+     label08:
+        $b32 = r4[i68];
+
+        $i30 = i68 + $i65;
+
+        $b31 = r4[$i30];
+
+        $b33 = $b32 & $b31;
+
+        $b35 = (byte) $b33;
+
+        $b34 = r4[i68];
+
+        $i81 = (int) $b35;
+
+        $i82 = (int) $b34;
+
+        if $i81 == $i82 goto label09;
+
+        z4 = 1;
+
+        z6 = 1;
+
+        z5 = 1;
+
+     label09:
+        $r16 = r1.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i36 = i68 + $i65;
+
+        $b39 = $r16[$i36];
+
+        $i37 = i68 + $i65;
+
+        $b38 = r4[$i37];
+
+        $b40 = $b39 & $b38;
+
+        $b43 = (byte) $b40;
+
+        $r17 = r1.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i41 = i68 + $i65;
+
+        $b42 = $r17[$i41];
+
+        $i83 = (int) $b43;
+
+        $i84 = (int) $b42;
+
+        if $i83 != $i84 goto label10;
+
+        $r19 = r1.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $b56 = $r19[i68];
+
+        $r20 = r1.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i54 = i68 + $i65;
+
+        $b55 = $r20[$i54];
+
+        $b57 = $b56 & $b55;
+
+        $b63 = (byte) $b57;
+
+        $b60 = r4[i68];
+
+        $r21 = r1.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i58 = i68 + $i65;
+
+        $b59 = $r21[$i58];
+
+        $b61 = $b60 & $b59;
+
+        $b62 = (byte) $b61;
+
+        $i85 = (int) $b63;
+
+        $i86 = (int) $b62;
+
+        if $i85 == $i86 goto label11;
+
+     label10:
+        z1 = 0;
+
+     label11:
+        $i69 = i68 + $i65;
+
+        $b70 = r4[$i69];
+
+        $r24 = r1.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i71 = i68 + $i65;
+
+        $b72 = $r24[$i71];
+
+        $b73 = $b70 & $b72;
+
+        $b74 = (byte) $b73;
+
+        $i75 = i68 + $i65;
+
+        $b76 = r4[$i75];
+
+        $i87 = (int) $b74;
+
+        $i88 = (int) $b76;
+
+        if $i87 != $i88 goto label12;
+
+        $b46 = r4[i68];
+
+        $i44 = i68 + $i65;
+
+        $b45 = r4[$i44];
+
+        $b47 = $b46 & $b45;
+
+        $b53 = (byte) $b47;
+
+        $r18 = r1.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $b50 = $r18[i68];
+
+        $i48 = i68 + $i65;
+
+        $b49 = r4[$i48];
+
+        $b51 = $b50 & $b49;
+
+        $b52 = (byte) $b51;
+
+        $i89 = (int) $b53;
+
+        $i90 = (int) $b52;
+
+        if $i89 == $i90 goto label13;
+
+     label12:
+        z2 = 0;
+
+     label13:
+        i68 = i68 + 1;
+
+        goto label07;
+
+     label14:
+        if z7 != 0 goto label15;
+
+        if z6 == 0 goto label18;
+
+     label15:
+        if z8 == 0 goto label16;
+
+        if z5 == 0 goto label16;
+
+        b67 = 0;
+
+        goto label21;
+
+     label16:
+        if z9 == 0 goto label17;
+
+        b67 = 2;
+
+        goto label21;
+
+     label17:
+        b67 = 1;
+
+        goto label21;
+
+     label18:
+        if z1 == 0 goto label19;
+
+        b67 = 1;
+
+        goto label21;
+
+     label19:
+        if z2 == 0 goto label20;
+
+        b67 = 2;
+
+        goto label21;
+
+     label20:
+        b67 = 3;
+
+     label21:
+        goto label37;
+
+     label22:
+        $i4 = lengthof r4;
+
+        if $i4 == 8 goto label23;
+
+        $i11 = lengthof r4;
+
+        if $i11 != 32 goto label29;
+
+     label23:
+        i77 = 0;
+
+        $i5 = lengthof r4;
+
+        $i21 = $i5 / 2;
+
+     label24:
+        if i77 >= $i21 goto label26;
+
+        $r5 = r1.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $b8 = $r5[i77];
+
+        $i6 = i77 + $i21;
+
+        $b7 = r4[$i6];
+
+        $b10 = $b8 & $b7;
+
+        $b9 = r4[i77];
+
+        $i91 = (int) $b10;
+
+        $i92 = (int) $b9;
+
+        if $i91 == $i92 goto label25;
+
+        goto label26;
+
+     label25:
+        i77 = i77 + 1;
+
+        goto label24;
+
+     label26:
+        if i77 != $i21 goto label27;
+
+        b67 = 2;
+
+        goto label28;
+
+     label27:
+        b67 = 3;
+
+     label28:
+        goto label37;
+
+     label29:
+        $r6 = r1.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i12 = lengthof $r6;
+
+        if $i12 == 8 goto label30;
+
+        $r10 = r1.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i19 = lengthof $r10;
+
+        if $i19 != 32 goto label36;
+
+     label30:
+        i78 = 0;
+
+        $r7 = r1.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i13 = lengthof $r7;
+
+        $i20 = $i13 / 2;
+
+     label31:
+        if i78 >= $i20 goto label33;
+
+        $b16 = r4[i78];
+
+        $r8 = r1.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $i14 = i78 + $i20;
+
+        $b15 = $r8[$i14];
+
+        $b18 = $b16 & $b15;
+
+        $r9 = r1.<sun.security.x509.IPAddressName: byte[] address>;
+
+        $b17 = $r9[i78];
+
+        $i93 = (int) $b18;
+
+        $i94 = (int) $b17;
+
+        if $i93 == $i94 goto label32;
+
+        goto label33;
+
+     label32:
+        i78 = i78 + 1;
+
+        goto label31;
+
+     label33:
+        if i78 != $i20 goto label34;
+
+        b67 = 1;
+
+        goto label35;
+
+     label34:
+        b67 = 3;
+
+     label35:
+        goto label37;
+
+     label36:
+        b67 = 3;
+
+     label37:
+        return b67;
+    }
+
+    public int subtreeDepth() throws java.lang.UnsupportedOperationException
+    {
+        java.lang.UnsupportedOperationException $r0;
+        sun.security.x509.IPAddressName r1;
+
+        r1 := @this: sun.security.x509.IPAddressName;
+
+        $r0 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r0.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("subtreeDepth() not defined for IPAddressName");
+
+        throw $r0;
+    }
+
+    public static void <clinit>()
+    {
+        <sun.security.x509.IPAddressName: int MASKSIZE> = 16;
+
+        return;
+    }
+}

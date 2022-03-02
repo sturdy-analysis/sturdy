@@ -1,0 +1,345 @@
+abstract class java.util.stream.AbstractShortCircuitTask extends java.util.stream.AbstractTask
+{
+    protected final java.util.concurrent.atomic.AtomicReference sharedResult;
+    protected volatile boolean canceled;
+
+    protected void <init>(java.util.stream.PipelineHelper, java.util.Spliterator)
+    {
+        java.util.stream.PipelineHelper r1;
+        java.util.Spliterator r2;
+        java.util.concurrent.atomic.AtomicReference $r3;
+        java.util.stream.AbstractShortCircuitTask r0;
+
+        r0 := @this: java.util.stream.AbstractShortCircuitTask;
+
+        r1 := @parameter0: java.util.stream.PipelineHelper;
+
+        r2 := @parameter1: java.util.Spliterator;
+
+        specialinvoke r0.<java.util.stream.AbstractTask: void <init>(java.util.stream.PipelineHelper,java.util.Spliterator)>(r1, r2);
+
+        $r3 = new java.util.concurrent.atomic.AtomicReference;
+
+        specialinvoke $r3.<java.util.concurrent.atomic.AtomicReference: void <init>(java.lang.Object)>(null);
+
+        r0.<java.util.stream.AbstractShortCircuitTask: java.util.concurrent.atomic.AtomicReference sharedResult> = $r3;
+
+        return;
+    }
+
+    protected void <init>(java.util.stream.AbstractShortCircuitTask, java.util.Spliterator)
+    {
+        java.util.Spliterator r2;
+        java.util.concurrent.atomic.AtomicReference $r3;
+        java.util.stream.AbstractShortCircuitTask r0, r1;
+
+        r0 := @this: java.util.stream.AbstractShortCircuitTask;
+
+        r1 := @parameter0: java.util.stream.AbstractShortCircuitTask;
+
+        r2 := @parameter1: java.util.Spliterator;
+
+        specialinvoke r0.<java.util.stream.AbstractTask: void <init>(java.util.stream.AbstractTask,java.util.Spliterator)>(r1, r2);
+
+        $r3 = r1.<java.util.stream.AbstractShortCircuitTask: java.util.concurrent.atomic.AtomicReference sharedResult>;
+
+        r0.<java.util.stream.AbstractShortCircuitTask: java.util.concurrent.atomic.AtomicReference sharedResult> = $r3;
+
+        return;
+    }
+
+    protected abstract java.lang.Object getEmptyResult();
+
+    public void compute()
+    {
+        long $l0, $l1, l3;
+        java.util.concurrent.atomic.AtomicReference r1;
+        byte $b2;
+        int $i4;
+        java.util.stream.AbstractTask $r4, $r6;
+        boolean $z0, z1;
+        java.lang.Object $r2, r10;
+        java.util.Spliterator $r3, r8;
+        java.util.stream.AbstractShortCircuitTask r0, $r5, $r7, r9, r11;
+
+        r0 := @this: java.util.stream.AbstractShortCircuitTask;
+
+        r8 = r0.<java.util.stream.AbstractShortCircuitTask: java.util.Spliterator spliterator>;
+
+        $l0 = interfaceinvoke r8.<java.util.Spliterator: long estimateSize()>();
+
+        l3 = $l0;
+
+        $l1 = virtualinvoke r0.<java.util.stream.AbstractShortCircuitTask: long getTargetSize(long)>($l0);
+
+        z1 = 0;
+
+        r9 = r0;
+
+        r1 = r0.<java.util.stream.AbstractShortCircuitTask: java.util.concurrent.atomic.AtomicReference sharedResult>;
+
+     label1:
+        $r2 = virtualinvoke r1.<java.util.concurrent.atomic.AtomicReference: java.lang.Object get()>();
+
+        r10 = $r2;
+
+        if $r2 != null goto label7;
+
+        $z0 = virtualinvoke r9.<java.util.stream.AbstractShortCircuitTask: boolean taskCanceled()>();
+
+        if $z0 == 0 goto label2;
+
+        r10 = virtualinvoke r9.<java.util.stream.AbstractShortCircuitTask: java.lang.Object getEmptyResult()>();
+
+        goto label7;
+
+     label2:
+        $b2 = l3 cmp $l1;
+
+        $i4 = (int) $b2;
+
+        if $i4 <= 0 goto label3;
+
+        $r3 = interfaceinvoke r8.<java.util.Spliterator: java.util.Spliterator trySplit()>();
+
+        if $r3 != null goto label4;
+
+     label3:
+        r10 = virtualinvoke r9.<java.util.stream.AbstractShortCircuitTask: java.lang.Object doLeaf()>();
+
+        goto label7;
+
+     label4:
+        $r4 = virtualinvoke r9.<java.util.stream.AbstractShortCircuitTask: java.util.stream.AbstractTask makeChild(java.util.Spliterator)>($r3);
+
+        $r5 = (java.util.stream.AbstractShortCircuitTask) $r4;
+
+        r9.<java.util.stream.AbstractShortCircuitTask: java.util.stream.AbstractTask leftChild> = $r5;
+
+        $r6 = virtualinvoke r9.<java.util.stream.AbstractShortCircuitTask: java.util.stream.AbstractTask makeChild(java.util.Spliterator)>(r8);
+
+        $r7 = (java.util.stream.AbstractShortCircuitTask) $r6;
+
+        r9.<java.util.stream.AbstractShortCircuitTask: java.util.stream.AbstractTask rightChild> = $r7;
+
+        virtualinvoke r9.<java.util.stream.AbstractShortCircuitTask: void setPendingCount(int)>(1);
+
+        if z1 == 0 goto label5;
+
+        z1 = 0;
+
+        r8 = $r3;
+
+        r9 = $r5;
+
+        r11 = $r7;
+
+        goto label6;
+
+     label5:
+        z1 = 1;
+
+        r9 = $r7;
+
+        r11 = $r5;
+
+     label6:
+        virtualinvoke r11.<java.util.stream.AbstractShortCircuitTask: java.util.concurrent.ForkJoinTask fork()>();
+
+        l3 = interfaceinvoke r8.<java.util.Spliterator: long estimateSize()>();
+
+        goto label1;
+
+     label7:
+        virtualinvoke r9.<java.util.stream.AbstractShortCircuitTask: void setLocalResult(java.lang.Object)>(r10);
+
+        virtualinvoke r9.<java.util.stream.AbstractShortCircuitTask: void tryComplete()>();
+
+        return;
+    }
+
+    protected void shortCircuit(java.lang.Object)
+    {
+        java.lang.Object r0;
+        java.util.concurrent.atomic.AtomicReference $r2;
+        java.util.stream.AbstractShortCircuitTask r1;
+
+        r1 := @this: java.util.stream.AbstractShortCircuitTask;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 == null goto label1;
+
+        $r2 = r1.<java.util.stream.AbstractShortCircuitTask: java.util.concurrent.atomic.AtomicReference sharedResult>;
+
+        virtualinvoke $r2.<java.util.concurrent.atomic.AtomicReference: boolean compareAndSet(java.lang.Object,java.lang.Object)>(null, r0);
+
+     label1:
+        return;
+    }
+
+    protected void setLocalResult(java.lang.Object)
+    {
+        java.lang.Object r1;
+        java.util.concurrent.atomic.AtomicReference $r2;
+        java.util.stream.AbstractShortCircuitTask r0;
+        boolean $z0;
+
+        r0 := @this: java.util.stream.AbstractShortCircuitTask;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $z0 = virtualinvoke r0.<java.util.stream.AbstractShortCircuitTask: boolean isRoot()>();
+
+        if $z0 == 0 goto label1;
+
+        if r1 == null goto label2;
+
+        $r2 = r0.<java.util.stream.AbstractShortCircuitTask: java.util.concurrent.atomic.AtomicReference sharedResult>;
+
+        virtualinvoke $r2.<java.util.concurrent.atomic.AtomicReference: boolean compareAndSet(java.lang.Object,java.lang.Object)>(null, r1);
+
+        goto label2;
+
+     label1:
+        specialinvoke r0.<java.util.stream.AbstractTask: void setLocalResult(java.lang.Object)>(r1);
+
+     label2:
+        return;
+    }
+
+    public java.lang.Object getRawResult()
+    {
+        java.lang.Object $r1;
+        java.util.stream.AbstractShortCircuitTask r0;
+
+        r0 := @this: java.util.stream.AbstractShortCircuitTask;
+
+        $r1 = virtualinvoke r0.<java.util.stream.AbstractShortCircuitTask: java.lang.Object getLocalResult()>();
+
+        return $r1;
+    }
+
+    public java.lang.Object getLocalResult()
+    {
+        java.lang.Object $r1, $r3, $r4;
+        java.util.concurrent.atomic.AtomicReference $r2;
+        java.util.stream.AbstractShortCircuitTask r0;
+        boolean $z0;
+
+        r0 := @this: java.util.stream.AbstractShortCircuitTask;
+
+        $z0 = virtualinvoke r0.<java.util.stream.AbstractShortCircuitTask: boolean isRoot()>();
+
+        if $z0 == 0 goto label3;
+
+        $r2 = r0.<java.util.stream.AbstractShortCircuitTask: java.util.concurrent.atomic.AtomicReference sharedResult>;
+
+        $r3 = virtualinvoke $r2.<java.util.concurrent.atomic.AtomicReference: java.lang.Object get()>();
+
+        if $r3 != null goto label1;
+
+        $r4 = virtualinvoke r0.<java.util.stream.AbstractShortCircuitTask: java.lang.Object getEmptyResult()>();
+
+        goto label2;
+
+     label1:
+        $r4 = $r3;
+
+     label2:
+        return $r4;
+
+     label3:
+        $r1 = specialinvoke r0.<java.util.stream.AbstractTask: java.lang.Object getLocalResult()>();
+
+        return $r1;
+    }
+
+    protected void cancel()
+    {
+        java.util.stream.AbstractShortCircuitTask r0;
+
+        r0 := @this: java.util.stream.AbstractShortCircuitTask;
+
+        r0.<java.util.stream.AbstractShortCircuitTask: boolean canceled> = 1;
+
+        return;
+    }
+
+    protected boolean taskCanceled()
+    {
+        java.util.stream.AbstractTask $r1, $r2;
+        java.util.stream.AbstractShortCircuitTask r0, r3;
+        boolean z0;
+
+        r0 := @this: java.util.stream.AbstractShortCircuitTask;
+
+        z0 = r0.<java.util.stream.AbstractShortCircuitTask: boolean canceled>;
+
+        if z0 != 0 goto label2;
+
+        $r1 = virtualinvoke r0.<java.util.stream.AbstractShortCircuitTask: java.util.stream.AbstractTask getParent()>();
+
+        r3 = (java.util.stream.AbstractShortCircuitTask) $r1;
+
+     label1:
+        if z0 != 0 goto label2;
+
+        if r3 == null goto label2;
+
+        z0 = r3.<java.util.stream.AbstractShortCircuitTask: boolean canceled>;
+
+        $r2 = virtualinvoke r3.<java.util.stream.AbstractShortCircuitTask: java.util.stream.AbstractTask getParent()>();
+
+        r3 = (java.util.stream.AbstractShortCircuitTask) $r2;
+
+        goto label1;
+
+     label2:
+        return z0;
+    }
+
+    protected void cancelLaterNodes()
+    {
+        java.util.stream.AbstractTask $r1, $r2, $r3, $r7;
+        java.util.stream.AbstractShortCircuitTask r0, r4, r5, r6;
+        boolean $z0;
+
+        r0 := @this: java.util.stream.AbstractShortCircuitTask;
+
+        $r1 = virtualinvoke r0.<java.util.stream.AbstractShortCircuitTask: java.util.stream.AbstractTask getParent()>();
+
+        r5 = (java.util.stream.AbstractShortCircuitTask) $r1;
+
+        r6 = r0;
+
+     label1:
+        if r5 == null goto label3;
+
+        $r2 = r5.<java.util.stream.AbstractShortCircuitTask: java.util.stream.AbstractTask leftChild>;
+
+        if $r2 != r6 goto label2;
+
+        $r3 = r5.<java.util.stream.AbstractShortCircuitTask: java.util.stream.AbstractTask rightChild>;
+
+        r4 = (java.util.stream.AbstractShortCircuitTask) $r3;
+
+        $z0 = r4.<java.util.stream.AbstractShortCircuitTask: boolean canceled>;
+
+        if $z0 != 0 goto label2;
+
+        virtualinvoke r4.<java.util.stream.AbstractShortCircuitTask: void cancel()>();
+
+     label2:
+        r6 = r5;
+
+        $r7 = virtualinvoke r5.<java.util.stream.AbstractShortCircuitTask: java.util.stream.AbstractTask getParent()>();
+
+        r5 = (java.util.stream.AbstractShortCircuitTask) $r7;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+}

@@ -1,0 +1,1156 @@
+public final class com.sun.org.apache.xerces.internal.impl.dv.util.Base64 extends java.lang.Object
+{
+    private static final int BASELENGTH;
+    private static final int LOOKUPLENGTH;
+    private static final int TWENTYFOURBITGROUP;
+    private static final int EIGHTBIT;
+    private static final int SIXTEENBIT;
+    private static final int SIXBIT;
+    private static final int FOURBYTE;
+    private static final int SIGN;
+    private static final char PAD;
+    private static final boolean fDebug;
+    private static final byte[] base64Alphabet;
+    private static final char[] lookUpBase64Alphabet;
+
+    public void <init>()
+    {
+        com.sun.org.apache.xerces.internal.impl.dv.util.Base64 r0;
+
+        r0 := @this: com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    protected static boolean isWhiteSpace(char)
+    {
+        int $i1, $i2, $i3, $i4;
+        char c0;
+        boolean $z0;
+
+        c0 := @parameter0: char;
+
+        $i1 = (int) c0;
+
+        if $i1 == 32 goto label1;
+
+        $i2 = (int) c0;
+
+        if $i2 == 13 goto label1;
+
+        $i3 = (int) c0;
+
+        if $i3 == 10 goto label1;
+
+        $i4 = (int) c0;
+
+        if $i4 != 9 goto label2;
+
+     label1:
+        $z0 = 1;
+
+        goto label3;
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        return $z0;
+    }
+
+    protected static boolean isPad(char)
+    {
+        int $i1;
+        char c0;
+        boolean $z0;
+
+        c0 := @parameter0: char;
+
+        $i1 = (int) c0;
+
+        if $i1 != 61 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    protected static boolean isData(char)
+    {
+        byte[] $r0;
+        char c0;
+        byte $b1;
+        int $i2, $i3, $i4, $i6;
+        boolean $z0;
+
+        c0 := @parameter0: char;
+
+        $i2 = (int) c0;
+
+        if $i2 >= 128 goto label1;
+
+        $r0 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: byte[] base64Alphabet>;
+
+        $i3 = (int) c0;
+
+        $b1 = $r0[$i3];
+
+        $i4 = (int) $b1;
+
+        $i6 = (int) -1;
+
+        if $i4 == $i6 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    protected static boolean isBase64(char)
+    {
+        char c0;
+        boolean $z0, $z1, $z2, $z3;
+
+        c0 := @parameter0: char;
+
+        $z0 = staticinvoke <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: boolean isWhiteSpace(char)>(c0);
+
+        if $z0 != 0 goto label1;
+
+        $z1 = staticinvoke <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: boolean isPad(char)>(c0);
+
+        if $z1 != 0 goto label1;
+
+        $z2 = staticinvoke <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: boolean isData(char)>(c0);
+
+        if $z2 == 0 goto label2;
+
+     label1:
+        $z3 = 1;
+
+        goto label3;
+
+     label2:
+        $z3 = 0;
+
+     label3:
+        return $z3;
+    }
+
+    public static java.lang.String encode(byte[])
+    {
+        byte[] r0;
+        byte $b6, $b7, $b8, $b11, $b22, $b23, $b30, $b31, $b32, $b35, b38, $b39, $b49, b59, b61, b62, b63, b64, $b65, b66, $b67, $b68, b72, b73, $b74, b78, b79, b80, b81, $b82, b83, $b84;
+        java.lang.String $r12;
+        char[] $r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10;
+        int $i0, i1, i2, i3, $i4, $i5, $i9, $i10, $i12, $i13, $i15, $i16, $i18, $i20, $i21, $i24, $i25, $i27, $i29, $i33, $i34, $i36, $i37, $i40, $i41, $i43, $i44, $i46, $i47, $i51, $i52, $i53, $i54, i55, i56, i57, i58, i60, i69, i70, i71, i75, i76, i77, i85, i86, i87, $i88, $i89, $i90, $i91, $i92, $i93, $i94, $i95, $i96, $i97, $i98, $i99, $i100, $i101, $i102, $i103, $i104, $i105, $i106, $i107, $i108, $i109, $i110, $i111;
+        char $c14, $c17, $c19, $c26, $c28, $c42, $c45, $c48, $c50;
+
+        r0 := @parameter0: byte[];
+
+        if r0 != null goto label01;
+
+        return null;
+
+     label01:
+        $i0 = lengthof r0;
+
+        i1 = $i0 * 8;
+
+        if i1 != 0 goto label02;
+
+        return "";
+
+     label02:
+        i2 = i1 % 24;
+
+        i3 = i1 / 24;
+
+        if i2 == 0 goto label03;
+
+        $i54 = i3 + 1;
+
+        goto label04;
+
+     label03:
+        $i54 = i3;
+
+     label04:
+        $i4 = $i54 * 4;
+
+        $r10 = newarray (char)[$i4];
+
+        i55 = 0;
+
+        i56 = 0;
+
+        i57 = 0;
+
+     label05:
+        if i57 >= i3 goto label12;
+
+        i58 = i56 + 1;
+
+        b59 = r0[i56];
+
+        i60 = i58 + 1;
+
+        b61 = r0[i58];
+
+        i56 = i60 + 1;
+
+        b62 = r0[i60];
+
+        $b30 = b61 & 15;
+
+        b63 = (byte) $b30;
+
+        $b31 = b59 & 3;
+
+        b64 = (byte) $b31;
+
+        $b32 = b59 & -128;
+
+        if $b32 != 0 goto label06;
+
+        $i88 = (int) b59;
+
+        $i53 = $i88 >> 2;
+
+        $b65 = (byte) $i53;
+
+        goto label07;
+
+     label06:
+        $i89 = (int) b59;
+
+        $i33 = $i89 >> 2;
+
+        $i34 = $i33 ^ 192;
+
+        $b65 = (byte) $i34;
+
+     label07:
+        b66 = $b65;
+
+        $b35 = b61 & -128;
+
+        if $b35 != 0 goto label08;
+
+        $i90 = (int) b61;
+
+        $i52 = $i90 >> 4;
+
+        $b67 = (byte) $i52;
+
+        goto label09;
+
+     label08:
+        $i91 = (int) b61;
+
+        $i36 = $i91 >> 4;
+
+        $i37 = $i36 ^ 240;
+
+        $b67 = (byte) $i37;
+
+     label09:
+        b38 = $b67;
+
+        $b39 = b62 & -128;
+
+        if $b39 != 0 goto label10;
+
+        $i92 = (int) b62;
+
+        $i51 = $i92 >> 6;
+
+        $b68 = (byte) $i51;
+
+        goto label11;
+
+     label10:
+        $i93 = (int) b62;
+
+        $i40 = $i93 >> 6;
+
+        $i41 = $i40 ^ 252;
+
+        $b68 = (byte) $i41;
+
+     label11:
+        i69 = i55 + 1;
+
+        $r6 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: char[] lookUpBase64Alphabet>;
+
+        $i94 = (int) b66;
+
+        $c42 = $r6[$i94];
+
+        $r10[i55] = $c42;
+
+        i70 = i69 + 1;
+
+        $r7 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: char[] lookUpBase64Alphabet>;
+
+        $i95 = (int) b64;
+
+        $i43 = $i95 << 4;
+
+        $i96 = (int) b38;
+
+        $i44 = $i96 | $i43;
+
+        $c45 = $r7[$i44];
+
+        $r10[i69] = $c45;
+
+        i71 = i70 + 1;
+
+        $r8 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: char[] lookUpBase64Alphabet>;
+
+        $i97 = (int) b63;
+
+        $i46 = $i97 << 2;
+
+        $i98 = (int) $b68;
+
+        $i47 = $i46 | $i98;
+
+        $c48 = $r8[$i47];
+
+        $r10[i70] = $c48;
+
+        i55 = i71 + 1;
+
+        $r9 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: char[] lookUpBase64Alphabet>;
+
+        $b49 = b62 & 63;
+
+        $i99 = (int) $b49;
+
+        $c50 = $r9[$i99];
+
+        $r10[i71] = $c50;
+
+        i57 = i57 + 1;
+
+        goto label05;
+
+     label12:
+        if i2 != 8 goto label15;
+
+        b72 = r0[i56];
+
+        $b22 = b72 & 3;
+
+        b73 = (byte) $b22;
+
+        $b23 = b72 & -128;
+
+        if $b23 != 0 goto label13;
+
+        $i100 = (int) b72;
+
+        $i29 = $i100 >> 2;
+
+        $b74 = (byte) $i29;
+
+        goto label14;
+
+     label13:
+        $i101 = (int) b72;
+
+        $i24 = $i101 >> 2;
+
+        $i25 = $i24 ^ 192;
+
+        $b74 = (byte) $i25;
+
+     label14:
+        i75 = i55 + 1;
+
+        $r4 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: char[] lookUpBase64Alphabet>;
+
+        $i102 = (int) $b74;
+
+        $c26 = $r4[$i102];
+
+        $r10[i55] = $c26;
+
+        i76 = i75 + 1;
+
+        $r5 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: char[] lookUpBase64Alphabet>;
+
+        $i103 = (int) b73;
+
+        $i27 = $i103 << 4;
+
+        $c28 = $r5[$i27];
+
+        $r10[i75] = $c28;
+
+        i77 = i76 + 1;
+
+        $r10[i76] = 61;
+
+        $r10[i77] = 61;
+
+        goto label20;
+
+     label15:
+        if i2 != 16 goto label20;
+
+        b78 = r0[i56];
+
+        $i5 = i56 + 1;
+
+        b79 = r0[$i5];
+
+        $b6 = b79 & 15;
+
+        b80 = (byte) $b6;
+
+        $b7 = b78 & 3;
+
+        b81 = (byte) $b7;
+
+        $b8 = b78 & -128;
+
+        if $b8 != 0 goto label16;
+
+        $i104 = (int) b78;
+
+        $i21 = $i104 >> 2;
+
+        $b82 = (byte) $i21;
+
+        goto label17;
+
+     label16:
+        $i105 = (int) b78;
+
+        $i9 = $i105 >> 2;
+
+        $i10 = $i9 ^ 192;
+
+        $b82 = (byte) $i10;
+
+     label17:
+        b83 = $b82;
+
+        $b11 = b79 & -128;
+
+        if $b11 != 0 goto label18;
+
+        $i106 = (int) b79;
+
+        $i20 = $i106 >> 4;
+
+        $b84 = (byte) $i20;
+
+        goto label19;
+
+     label18:
+        $i107 = (int) b79;
+
+        $i12 = $i107 >> 4;
+
+        $i13 = $i12 ^ 240;
+
+        $b84 = (byte) $i13;
+
+     label19:
+        i85 = i55 + 1;
+
+        $r1 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: char[] lookUpBase64Alphabet>;
+
+        $i108 = (int) b83;
+
+        $c14 = $r1[$i108];
+
+        $r10[i55] = $c14;
+
+        i86 = i85 + 1;
+
+        $r2 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: char[] lookUpBase64Alphabet>;
+
+        $i109 = (int) b81;
+
+        $i15 = $i109 << 4;
+
+        $i110 = (int) $b84;
+
+        $i16 = $i110 | $i15;
+
+        $c17 = $r2[$i16];
+
+        $r10[i85] = $c17;
+
+        i87 = i86 + 1;
+
+        $r3 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: char[] lookUpBase64Alphabet>;
+
+        $i111 = (int) b80;
+
+        $i18 = $i111 << 2;
+
+        $c19 = $r3[$i18];
+
+        $r10[i86] = $c19;
+
+        $r10[i87] = 61;
+
+     label20:
+        $r12 = new java.lang.String;
+
+        specialinvoke $r12.<java.lang.String: void <init>(char[])>($r10);
+
+        return $r12;
+    }
+
+    public static byte[] decode(java.lang.String)
+    {
+        byte[] $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r10, $r11, r12, r13, r14;
+        byte $b7, $b14, $b15, $b20, $b21, $b28, $b32, $b33, $b38, $b41, $b49, $b50, $b55, $b58, b65, b66, b67, b68, b73, b74, b78, b80, b81;
+        int $i0, $i1, i2, $i3, $i4, $i8, $i9, $i10, $i11, $i12, $i13, $i16, $i17, $i18, $i19, $i22, $i23, $i24, $i25, $i26, $i27, $i29, $i30, $i31, $i34, $i35, $i36, $i37, $i39, $i40, $i46, $i47, $i48, $i51, $i52, $i53, $i54, $i56, $i57, i59, i60, i61, i62, i63, i64, i69, i70, i71, i72, i75, i79, i82, i83, $i84, $i85, $i86, $i87, $i88, $i89, $i90, $i91, $i92, $i93, $i94, $i95, $i96, $i97, $i98, $i99, $i100, $i101, $i102, $i103, $i104, $i105, $i106, $i107, $i108, $i109, $i110;
+        java.lang.String r0;
+        char[] $r1;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8, $z9, $z10, $z11;
+        char $c5, $c6, $c42, $c43, $c44, $c45, c76, c77;
+
+        r0 := @parameter0: java.lang.String;
+
+        if r0 != null goto label01;
+
+        return null;
+
+     label01:
+        $r1 = virtualinvoke r0.<java.lang.String: char[] toCharArray()>();
+
+        $i0 = staticinvoke <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: int removeWhiteSpace(char[])>($r1);
+
+        $i1 = $i0 % 4;
+
+        if $i1 == 0 goto label02;
+
+        return null;
+
+     label02:
+        i2 = $i0 / 4;
+
+        if i2 != 0 goto label03;
+
+        $r11 = newarray (byte)[0];
+
+        return $r11;
+
+     label03:
+        i59 = 0;
+
+        i60 = 0;
+
+        i61 = 0;
+
+        $i3 = i2 * 3;
+
+        r12 = newarray (byte)[$i3];
+
+     label04:
+        $i4 = i2 - 1;
+
+        if i59 >= $i4 goto label07;
+
+        i62 = i61 + 1;
+
+        $c42 = $r1[i61];
+
+        $z8 = staticinvoke <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: boolean isData(char)>($c42);
+
+        if $z8 == 0 goto label05;
+
+        i63 = i62 + 1;
+
+        $c43 = $r1[i62];
+
+        $z9 = staticinvoke <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: boolean isData(char)>($c43);
+
+        if $z9 == 0 goto label05;
+
+        i64 = i63 + 1;
+
+        $c44 = $r1[i63];
+
+        $z10 = staticinvoke <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: boolean isData(char)>($c44);
+
+        if $z10 == 0 goto label05;
+
+        i61 = i64 + 1;
+
+        $c45 = $r1[i64];
+
+        $z11 = staticinvoke <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: boolean isData(char)>($c45);
+
+        if $z11 != 0 goto label06;
+
+     label05:
+        return null;
+
+     label06:
+        $r7 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: byte[] base64Alphabet>;
+
+        $i84 = (int) $c42;
+
+        b65 = $r7[$i84];
+
+        $r8 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: byte[] base64Alphabet>;
+
+        $i85 = (int) $c43;
+
+        b66 = $r8[$i85];
+
+        $r9 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: byte[] base64Alphabet>;
+
+        $i86 = (int) $c44;
+
+        b67 = $r9[$i86];
+
+        $r10 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: byte[] base64Alphabet>;
+
+        $i87 = (int) $c45;
+
+        b68 = $r10[$i87];
+
+        i69 = i60 + 1;
+
+        $i88 = (int) b65;
+
+        $i47 = $i88 << 2;
+
+        $i89 = (int) b66;
+
+        $i46 = $i89 >> 4;
+
+        $i48 = $i47 | $i46;
+
+        $b49 = (byte) $i48;
+
+        r12[i60] = $b49;
+
+        i70 = i69 + 1;
+
+        $b50 = b66 & 15;
+
+        $i90 = (int) $b50;
+
+        $i53 = $i90 << 4;
+
+        $i91 = (int) b67;
+
+        $i51 = $i91 >> 2;
+
+        $i52 = $i51 & 15;
+
+        $i54 = $i53 | $i52;
+
+        $b55 = (byte) $i54;
+
+        r12[i69] = $b55;
+
+        i60 = i70 + 1;
+
+        $i92 = (int) b67;
+
+        $i56 = $i92 << 6;
+
+        $i93 = (int) b68;
+
+        $i57 = $i56 | $i93;
+
+        $b58 = (byte) $i57;
+
+        r12[i70] = $b58;
+
+        i59 = i59 + 1;
+
+        goto label04;
+
+     label07:
+        i71 = i61 + 1;
+
+        $c5 = $r1[i61];
+
+        $z0 = staticinvoke <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: boolean isData(char)>($c5);
+
+        if $z0 == 0 goto label08;
+
+        i72 = i71 + 1;
+
+        $c6 = $r1[i71];
+
+        $z1 = staticinvoke <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: boolean isData(char)>($c6);
+
+        if $z1 != 0 goto label09;
+
+     label08:
+        return null;
+
+     label09:
+        $r2 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: byte[] base64Alphabet>;
+
+        $i94 = (int) $c5;
+
+        b73 = $r2[$i94];
+
+        $r3 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: byte[] base64Alphabet>;
+
+        $i95 = (int) $c6;
+
+        b74 = $r3[$i95];
+
+        i75 = i72 + 1;
+
+        c76 = $r1[i72];
+
+        c77 = $r1[i75];
+
+        $z2 = staticinvoke <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: boolean isData(char)>(c76);
+
+        if $z2 == 0 goto label10;
+
+        $z7 = staticinvoke <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: boolean isData(char)>(c77);
+
+        if $z7 != 0 goto label15;
+
+     label10:
+        $z3 = staticinvoke <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: boolean isPad(char)>(c76);
+
+        if $z3 == 0 goto label12;
+
+        $z6 = staticinvoke <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: boolean isPad(char)>(c77);
+
+        if $z6 == 0 goto label12;
+
+        $b21 = b74 & 15;
+
+        if $b21 == 0 goto label11;
+
+        return null;
+
+     label11:
+        $i22 = i59 * 3;
+
+        $i23 = $i22 + 1;
+
+        r13 = newarray (byte)[$i23];
+
+        $i24 = i59 * 3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r12, 0, r13, 0, $i24);
+
+        $i96 = (int) b73;
+
+        $i26 = $i96 << 2;
+
+        $i97 = (int) b74;
+
+        $i25 = $i97 >> 4;
+
+        $i27 = $i26 | $i25;
+
+        $b28 = (byte) $i27;
+
+        r13[i60] = $b28;
+
+        return r13;
+
+     label12:
+        $z4 = staticinvoke <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: boolean isPad(char)>(c76);
+
+        if $z4 != 0 goto label14;
+
+        $z5 = staticinvoke <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: boolean isPad(char)>(c77);
+
+        if $z5 == 0 goto label14;
+
+        $r4 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: byte[] base64Alphabet>;
+
+        $i98 = (int) c76;
+
+        b78 = $r4[$i98];
+
+        $b7 = b78 & 3;
+
+        if $b7 == 0 goto label13;
+
+        return null;
+
+     label13:
+        $i8 = i59 * 3;
+
+        $i9 = $i8 + 2;
+
+        r14 = newarray (byte)[$i9];
+
+        $i10 = i59 * 3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r12, 0, r14, 0, $i10);
+
+        i79 = i60 + 1;
+
+        $i99 = (int) b73;
+
+        $i12 = $i99 << 2;
+
+        $i100 = (int) b74;
+
+        $i11 = $i100 >> 4;
+
+        $i13 = $i12 | $i11;
+
+        $b14 = (byte) $i13;
+
+        r14[i60] = $b14;
+
+        $b15 = b74 & 15;
+
+        $i101 = (int) $b15;
+
+        $i18 = $i101 << 4;
+
+        $i102 = (int) b78;
+
+        $i16 = $i102 >> 2;
+
+        $i17 = $i16 & 15;
+
+        $i19 = $i18 | $i17;
+
+        $b20 = (byte) $i19;
+
+        r14[i79] = $b20;
+
+        return r14;
+
+     label14:
+        return null;
+
+     label15:
+        $r5 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: byte[] base64Alphabet>;
+
+        $i103 = (int) c76;
+
+        b80 = $r5[$i103];
+
+        $r6 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: byte[] base64Alphabet>;
+
+        $i104 = (int) c77;
+
+        b81 = $r6[$i104];
+
+        i82 = i60 + 1;
+
+        $i105 = (int) b73;
+
+        $i30 = $i105 << 2;
+
+        $i106 = (int) b74;
+
+        $i29 = $i106 >> 4;
+
+        $i31 = $i30 | $i29;
+
+        $b32 = (byte) $i31;
+
+        r12[i60] = $b32;
+
+        i83 = i82 + 1;
+
+        $b33 = b74 & 15;
+
+        $i107 = (int) $b33;
+
+        $i36 = $i107 << 4;
+
+        $i108 = (int) b80;
+
+        $i34 = $i108 >> 2;
+
+        $i35 = $i34 & 15;
+
+        $i37 = $i36 | $i35;
+
+        $b38 = (byte) $i37;
+
+        r12[i82] = $b38;
+
+        $i109 = (int) b80;
+
+        $i39 = $i109 << 6;
+
+        $i110 = (int) b81;
+
+        $i40 = $i39 | $i110;
+
+        $b41 = (byte) $i40;
+
+        r12[i83] = $b41;
+
+        return r12;
+    }
+
+    protected static int removeWhiteSpace(char[])
+    {
+        char $c1, $c3;
+        int i0, $i2, i4, i5;
+        char[] r0;
+        boolean $z0;
+
+        r0 := @parameter0: char[];
+
+        if r0 != null goto label1;
+
+        return 0;
+
+     label1:
+        i4 = 0;
+
+        i0 = lengthof r0;
+
+        i5 = 0;
+
+     label2:
+        if i5 >= i0 goto label4;
+
+        $c1 = r0[i5];
+
+        $z0 = staticinvoke <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: boolean isWhiteSpace(char)>($c1);
+
+        if $z0 != 0 goto label3;
+
+        $i2 = i4;
+
+        i4 = i4 + 1;
+
+        $c3 = r0[i5];
+
+        r0[$i2] = $c3;
+
+     label3:
+        i5 = i5 + 1;
+
+        goto label2;
+
+     label4:
+        return i4;
+    }
+
+    static void <clinit>()
+    {
+        byte[] $r0, $r2, $r3, $r9, $r10, $r11, $r12;
+        byte $b8, $b11, $b13;
+        int $i0, $i2, $i4, $i6, $i7, $i9, $i10, $i12, i14, i15, i16, i17, i18, i19, i20, i21, i22, $i24, $i26, $i28;
+        char $c1, $c3, $c5;
+        char[] $r1, $r4, $r5, $r6, $r7, $r8;
+
+        <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: boolean fDebug> = 0;
+
+        <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: char PAD> = 61;
+
+        <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: int SIGN> = -128;
+
+        <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: int FOURBYTE> = 4;
+
+        <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: int SIXBIT> = 6;
+
+        <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: int SIXTEENBIT> = 16;
+
+        <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: int EIGHTBIT> = 8;
+
+        <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: int TWENTYFOURBITGROUP> = 24;
+
+        <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: int LOOKUPLENGTH> = 64;
+
+        <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: int BASELENGTH> = 128;
+
+        $r0 = newarray (byte)[128];
+
+        <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: byte[] base64Alphabet> = $r0;
+
+        $r1 = newarray (char)[64];
+
+        <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: char[] lookUpBase64Alphabet> = $r1;
+
+        i14 = 0;
+
+     label01:
+        if i14 >= 128 goto label02;
+
+        $r12 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: byte[] base64Alphabet>;
+
+        $r12[i14] = -1;
+
+        i14 = i14 + 1;
+
+        goto label01;
+
+     label02:
+        i15 = 90;
+
+     label03:
+        if i15 < 65 goto label04;
+
+        $r11 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: byte[] base64Alphabet>;
+
+        $i12 = i15 - 65;
+
+        $b13 = (byte) $i12;
+
+        $r11[i15] = $b13;
+
+        $i24 = (int) -1;
+
+        i15 = i15 + $i24;
+
+        goto label03;
+
+     label04:
+        i16 = 122;
+
+     label05:
+        if i16 < 97 goto label06;
+
+        $r10 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: byte[] base64Alphabet>;
+
+        $i9 = i16 - 97;
+
+        $i10 = $i9 + 26;
+
+        $b11 = (byte) $i10;
+
+        $r10[i16] = $b11;
+
+        $i26 = (int) -1;
+
+        i16 = i16 + $i26;
+
+        goto label05;
+
+     label06:
+        i17 = 57;
+
+     label07:
+        if i17 < 48 goto label08;
+
+        $r9 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: byte[] base64Alphabet>;
+
+        $i6 = i17 - 48;
+
+        $i7 = $i6 + 52;
+
+        $b8 = (byte) $i7;
+
+        $r9[i17] = $b8;
+
+        $i28 = (int) -1;
+
+        i17 = i17 + $i28;
+
+        goto label07;
+
+     label08:
+        $r2 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: byte[] base64Alphabet>;
+
+        $r2[43] = 62;
+
+        $r3 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: byte[] base64Alphabet>;
+
+        $r3[47] = 63;
+
+        i18 = 0;
+
+     label09:
+        if i18 > 25 goto label10;
+
+        $r8 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: char[] lookUpBase64Alphabet>;
+
+        $i4 = 65 + i18;
+
+        $c5 = (char) $i4;
+
+        $r8[i18] = $c5;
+
+        i18 = i18 + 1;
+
+        goto label09;
+
+     label10:
+        i19 = 26;
+
+        i20 = 0;
+
+     label11:
+        if i19 > 51 goto label12;
+
+        $r7 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: char[] lookUpBase64Alphabet>;
+
+        $i2 = 97 + i20;
+
+        $c3 = (char) $i2;
+
+        $r7[i19] = $c3;
+
+        i19 = i19 + 1;
+
+        i20 = i20 + 1;
+
+        goto label11;
+
+     label12:
+        i21 = 52;
+
+        i22 = 0;
+
+     label13:
+        if i21 > 61 goto label14;
+
+        $r6 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: char[] lookUpBase64Alphabet>;
+
+        $i0 = 48 + i22;
+
+        $c1 = (char) $i0;
+
+        $r6[i21] = $c1;
+
+        i21 = i21 + 1;
+
+        i22 = i22 + 1;
+
+        goto label13;
+
+     label14:
+        $r4 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: char[] lookUpBase64Alphabet>;
+
+        $r4[62] = 43;
+
+        $r5 = <com.sun.org.apache.xerces.internal.impl.dv.util.Base64: char[] lookUpBase64Alphabet>;
+
+        $r5[63] = 47;
+
+        return;
+    }
+}

@@ -1,0 +1,1017 @@
+public class java.util.concurrent.Exchanger extends java.lang.Object
+{
+    private static final int ASHIFT;
+    private static final int MMASK;
+    private static final int SEQ;
+    private static final int NCPU;
+    static final int FULL;
+    private static final int SPINS;
+    private static final java.lang.Object NULL_ITEM;
+    private static final java.lang.Object TIMED_OUT;
+    private final java.util.concurrent.Exchanger$Participant participant;
+    private volatile java.util.concurrent.Exchanger$Node[] arena;
+    private volatile java.util.concurrent.Exchanger$Node slot;
+    private volatile int bound;
+    private static final sun.misc.Unsafe U;
+    private static final long BOUND;
+    private static final long SLOT;
+    private static final long MATCH;
+    private static final long BLOCKER;
+    private static final int ABASE;
+
+    private final java.lang.Object arenaExchange(java.lang.Object, boolean, long)
+    {
+        byte $b14, $b22;
+        java.lang.Thread r23, $r26;
+        sun.misc.Unsafe $r5, $r8, $r10, $r11, $r13, $r15, $r16, $r17, $r19, $r20, $r21, $r22, $r24, $r28;
+        long $l3, $l11, $l17, $l18, $l19, $l20, $l21, $l27, $l29, $l30, l31, $l33, l34;
+        java.util.concurrent.Exchanger$Node r4, $r7;
+        java.util.concurrent.Exchanger r0;
+        boolean $z0, $z1, z2, $z3, $z4, $z5, $z6;
+        java.util.concurrent.Exchanger$Participant $r2;
+        java.util.concurrent.Exchanger$Node[] r1;
+        int $i0, $i1, $i2, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i12, $i13, $i15, $i16, $i23, $i24, $i25, $i26, $i28, i32, i35, i36, i37, i38, $i39, $i40, $i41, $i43, $i44, $i45;
+        java.lang.Object $r3, $r6, r9, $r12, $r14, $r18, r25, $r27, $r29;
+
+        r0 := @this: java.util.concurrent.Exchanger;
+
+        r9 := @parameter0: java.lang.Object;
+
+        z2 := @parameter1: boolean;
+
+        l31 := @parameter2: long;
+
+        r1 = r0.<java.util.concurrent.Exchanger: java.util.concurrent.Exchanger$Node[] arena>;
+
+        $r2 = r0.<java.util.concurrent.Exchanger: java.util.concurrent.Exchanger$Participant participant>;
+
+        $r3 = virtualinvoke $r2.<java.util.concurrent.Exchanger$Participant: java.lang.Object get()>();
+
+        r4 = (java.util.concurrent.Exchanger$Node) $r3;
+
+        i32 = r4.<java.util.concurrent.Exchanger$Node: int index>;
+
+     label01:
+        $r5 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        $i1 = i32 << 7;
+
+        $i0 = <java.util.concurrent.Exchanger: int ABASE>;
+
+        $i2 = $i1 + $i0;
+
+        $l3 = (long) $i2;
+
+        $r6 = virtualinvoke $r5.<sun.misc.Unsafe: java.lang.Object getObjectVolatile(java.lang.Object,long)>(r1, $l3);
+
+        $r7 = (java.util.concurrent.Exchanger$Node) $r6;
+
+        if $r7 == null goto label03;
+
+        $r22 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        $z6 = virtualinvoke $r22.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r1, $l3, $r7, null);
+
+        if $z6 == 0 goto label03;
+
+        r25 = $r7.<java.util.concurrent.Exchanger$Node: java.lang.Object item>;
+
+        $r7.<java.util.concurrent.Exchanger$Node: java.lang.Object match> = r9;
+
+        r23 = $r7.<java.util.concurrent.Exchanger$Node: java.lang.Thread parked>;
+
+        if r23 == null goto label02;
+
+        $r24 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        virtualinvoke $r24.<sun.misc.Unsafe: void unpark(java.lang.Object)>(r23);
+
+     label02:
+        return r25;
+
+     label03:
+        $i4 = r0.<java.util.concurrent.Exchanger: int bound>;
+
+        $i5 = $i4 & 255;
+
+        if i32 > $i5 goto label19;
+
+        if $r7 != null goto label19;
+
+        r4.<java.util.concurrent.Exchanger$Node: java.lang.Object item> = r9;
+
+        $r10 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        $z1 = virtualinvoke $r10.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r1, $l3, null, r4);
+
+        if $z1 == 0 goto label18;
+
+        if z2 == 0 goto label04;
+
+        if $i5 != 0 goto label04;
+
+        $l30 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        $l33 = $l30 + l31;
+
+        goto label05;
+
+     label04:
+        $l33 = 0L;
+
+     label05:
+        l34 = $l33;
+
+        $r26 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        i35 = r4.<java.util.concurrent.Exchanger$Node: int hash>;
+
+        i36 = 1024;
+
+     label06:
+        $r27 = r4.<java.util.concurrent.Exchanger$Node: java.lang.Object match>;
+
+        if $r27 == null goto label07;
+
+        $r21 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        $l29 = <java.util.concurrent.Exchanger: long MATCH>;
+
+        virtualinvoke $r21.<sun.misc.Unsafe: void putOrderedObject(java.lang.Object,long,java.lang.Object)>(r4, $l29, null);
+
+        r4.<java.util.concurrent.Exchanger$Node: java.lang.Object item> = null;
+
+        r4.<java.util.concurrent.Exchanger$Node: int hash> = i35;
+
+        return $r27;
+
+     label07:
+        if i36 <= 0 goto label09;
+
+        $i23 = i35 << 1;
+
+        i37 = i35 ^ $i23;
+
+        $i24 = i37 >>> 3;
+
+        i38 = i37 ^ $i24;
+
+        $i25 = i38 << 10;
+
+        i35 = i38 ^ $i25;
+
+        if i35 != 0 goto label08;
+
+        $l27 = virtualinvoke $r26.<java.lang.Thread: long getId()>();
+
+        $i28 = (int) $l27;
+
+        i35 = 1024 | $i28;
+
+        goto label16;
+
+     label08:
+        if i35 >= 0 goto label16;
+
+        $i43 = (int) -1;
+
+        i36 = i36 + $i43;
+
+        $i26 = i36 & 511;
+
+        if $i26 != 0 goto label16;
+
+        staticinvoke <java.lang.Thread: void yield()>();
+
+        goto label16;
+
+     label09:
+        $r11 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        $r12 = virtualinvoke $r11.<sun.misc.Unsafe: java.lang.Object getObjectVolatile(java.lang.Object,long)>(r1, $l3);
+
+        if $r12 == r4 goto label10;
+
+        i36 = 1024;
+
+        goto label16;
+
+     label10:
+        $z3 = virtualinvoke $r26.<java.lang.Thread: boolean isInterrupted()>();
+
+        if $z3 != 0 goto label13;
+
+        if $i5 != 0 goto label13;
+
+        if z2 == 0 goto label11;
+
+        $l20 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        $l21 = l34 - $l20;
+
+        l31 = $l21;
+
+        $b22 = $l21 cmp 0L;
+
+        $i44 = (int) $b22;
+
+        if $i44 <= 0 goto label13;
+
+     label11:
+        $r16 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        $l18 = <java.util.concurrent.Exchanger: long BLOCKER>;
+
+        virtualinvoke $r16.<sun.misc.Unsafe: void putObject(java.lang.Object,long,java.lang.Object)>($r26, $l18, r0);
+
+        r4.<java.util.concurrent.Exchanger$Node: java.lang.Thread parked> = $r26;
+
+        $r17 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        $r18 = virtualinvoke $r17.<sun.misc.Unsafe: java.lang.Object getObjectVolatile(java.lang.Object,long)>(r1, $l3);
+
+        if $r18 != r4 goto label12;
+
+        $r20 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        virtualinvoke $r20.<sun.misc.Unsafe: void park(boolean,long)>(0, l31);
+
+     label12:
+        r4.<java.util.concurrent.Exchanger$Node: java.lang.Thread parked> = null;
+
+        $r19 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        $l19 = <java.util.concurrent.Exchanger: long BLOCKER>;
+
+        virtualinvoke $r19.<sun.misc.Unsafe: void putObject(java.lang.Object,long,java.lang.Object)>($r26, $l19, null);
+
+        goto label16;
+
+     label13:
+        $r28 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        $r29 = virtualinvoke $r28.<sun.misc.Unsafe: java.lang.Object getObjectVolatile(java.lang.Object,long)>(r1, $l3);
+
+        if $r29 != r4 goto label16;
+
+        $r13 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        $z4 = virtualinvoke $r13.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r1, $l3, r4, null);
+
+        if $z4 == 0 goto label16;
+
+        if $i5 == 0 goto label14;
+
+        $r15 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        $l17 = <java.util.concurrent.Exchanger: long BOUND>;
+
+        $i15 = $i4 + 256;
+
+        $i16 = $i15 - 1;
+
+        virtualinvoke $r15.<sun.misc.Unsafe: boolean compareAndSwapInt(java.lang.Object,long,int,int)>(r0, $l17, $i4, $i16);
+
+     label14:
+        r4.<java.util.concurrent.Exchanger$Node: java.lang.Object item> = null;
+
+        r4.<java.util.concurrent.Exchanger$Node: int hash> = i35;
+
+        $i12 = r4.<java.util.concurrent.Exchanger$Node: int index>;
+
+        $i13 = $i12 >>> 1;
+
+        r4.<java.util.concurrent.Exchanger$Node: int index> = $i13;
+
+        i32 = $i13;
+
+        $z5 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z5 == 0 goto label15;
+
+        return null;
+
+     label15:
+        if z2 == 0 goto label17;
+
+        if $i5 != 0 goto label17;
+
+        $b14 = l31 cmp 0L;
+
+        $i45 = (int) $b14;
+
+        if $i45 > 0 goto label17;
+
+        $r14 = <java.util.concurrent.Exchanger: java.lang.Object TIMED_OUT>;
+
+        return $r14;
+
+     label16:
+        goto label06;
+
+     label17:
+        goto label29;
+
+     label18:
+        r4.<java.util.concurrent.Exchanger$Node: java.lang.Object item> = null;
+
+        goto label29;
+
+     label19:
+        $i6 = r4.<java.util.concurrent.Exchanger$Node: int bound>;
+
+        if $i6 == $i4 goto label23;
+
+        r4.<java.util.concurrent.Exchanger$Node: int bound> = $i4;
+
+        r4.<java.util.concurrent.Exchanger$Node: int collides> = 0;
+
+        if i32 != $i5 goto label20;
+
+        if $i5 != 0 goto label21;
+
+     label20:
+        $i39 = $i5;
+
+        goto label22;
+
+     label21:
+        $i39 = $i5 - 1;
+
+     label22:
+        i32 = $i39;
+
+        goto label28;
+
+     label23:
+        $i7 = r4.<java.util.concurrent.Exchanger$Node: int collides>;
+
+        if $i7 < $i5 goto label24;
+
+        $i8 = <java.util.concurrent.Exchanger: int FULL>;
+
+        if $i5 == $i8 goto label24;
+
+        $r8 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        $l11 = <java.util.concurrent.Exchanger: long BOUND>;
+
+        $i9 = $i4 + 256;
+
+        $i10 = $i9 + 1;
+
+        $z0 = virtualinvoke $r8.<sun.misc.Unsafe: boolean compareAndSwapInt(java.lang.Object,long,int,int)>(r0, $l11, $i4, $i10);
+
+        if $z0 != 0 goto label27;
+
+     label24:
+        $i40 = $i7 + 1;
+
+        r4.<java.util.concurrent.Exchanger$Node: int collides> = $i40;
+
+        if i32 != 0 goto label25;
+
+        $i41 = $i5;
+
+        goto label26;
+
+     label25:
+        $i41 = i32 - 1;
+
+     label26:
+        i32 = $i41;
+
+        goto label28;
+
+     label27:
+        i32 = $i5 + 1;
+
+     label28:
+        r4.<java.util.concurrent.Exchanger$Node: int index> = i32;
+
+     label29:
+        goto label01;
+    }
+
+    private final java.lang.Object slotExchange(java.lang.Object, boolean, long)
+    {
+        byte $b3, $b8;
+        java.lang.Thread $r4, r18;
+        sun.misc.Unsafe $r7, $r8, $r11, $r13, $r14, $r15, $r16, $r19, $r24;
+        long $l0, $l2, $l4, $l5, $l6, $l7, $l13, $l15, $l16, $l19, l23, $l25, l26, $l31;
+        java.util.concurrent.Exchanger$Node r3, $r9, $r12, $r20;
+        short $s27;
+        java.util.concurrent.Exchanger r0;
+        boolean $z0, $z1, z2, $z3, $z4, $z5, $z6, $z7;
+        java.util.concurrent.Exchanger$Participant $r1;
+        java.util.concurrent.Exchanger$Node[] $r5, $r10, $r17;
+        int $i1, $i9, $i10, $i11, $i12, $i14, $i17, $i18, $i20, $i21, $i22, i24, i28, i29, i30, $i33, $i34, $i35;
+        java.lang.Object $r2, r6, r21, $r22, r23, $r25;
+
+        r0 := @this: java.util.concurrent.Exchanger;
+
+        r6 := @parameter0: java.lang.Object;
+
+        z2 := @parameter1: boolean;
+
+        l23 := @parameter2: long;
+
+        $r1 = r0.<java.util.concurrent.Exchanger: java.util.concurrent.Exchanger$Participant participant>;
+
+        $r2 = virtualinvoke $r1.<java.util.concurrent.Exchanger$Participant: java.lang.Object get()>();
+
+        r3 = (java.util.concurrent.Exchanger$Node) $r2;
+
+        $r4 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $z0 = virtualinvoke $r4.<java.lang.Thread: boolean isInterrupted()>();
+
+        if $z0 == 0 goto label01;
+
+        return null;
+
+     label01:
+        $r20 = r0.<java.util.concurrent.Exchanger: java.util.concurrent.Exchanger$Node slot>;
+
+        if $r20 == null goto label04;
+
+        $r15 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        $l16 = <java.util.concurrent.Exchanger: long SLOT>;
+
+        $z5 = virtualinvoke $r15.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r0, $l16, $r20, null);
+
+        if $z5 == 0 goto label03;
+
+        r21 = $r20.<java.util.concurrent.Exchanger$Node: java.lang.Object item>;
+
+        $r20.<java.util.concurrent.Exchanger$Node: java.lang.Object match> = r6;
+
+        r18 = $r20.<java.util.concurrent.Exchanger$Node: java.lang.Thread parked>;
+
+        if r18 == null goto label02;
+
+        $r19 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        virtualinvoke $r19.<sun.misc.Unsafe: void unpark(java.lang.Object)>(r18);
+
+     label02:
+        return r21;
+
+     label03:
+        $i17 = <java.util.concurrent.Exchanger: int NCPU>;
+
+        if $i17 <= 1 goto label01;
+
+        $i18 = r0.<java.util.concurrent.Exchanger: int bound>;
+
+        if $i18 != 0 goto label01;
+
+        $r16 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        $l19 = <java.util.concurrent.Exchanger: long BOUND>;
+
+        $z6 = virtualinvoke $r16.<sun.misc.Unsafe: boolean compareAndSwapInt(java.lang.Object,long,int,int)>(r0, $l19, 0, 256);
+
+        if $z6 == 0 goto label01;
+
+        $i20 = <java.util.concurrent.Exchanger: int FULL>;
+
+        $i21 = $i20 + 2;
+
+        $i22 = $i21 << 7;
+
+        $r17 = newarray (java.util.concurrent.Exchanger$Node)[$i22];
+
+        r0.<java.util.concurrent.Exchanger: java.util.concurrent.Exchanger$Node[] arena> = $r17;
+
+        goto label01;
+
+     label04:
+        $r5 = r0.<java.util.concurrent.Exchanger: java.util.concurrent.Exchanger$Node[] arena>;
+
+        if $r5 == null goto label05;
+
+        return null;
+
+     label05:
+        r3.<java.util.concurrent.Exchanger$Node: java.lang.Object item> = r6;
+
+        $r7 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        $l0 = <java.util.concurrent.Exchanger: long SLOT>;
+
+        $z1 = virtualinvoke $r7.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r0, $l0, null, r3);
+
+        if $z1 == 0 goto label06;
+
+        goto label07;
+
+     label06:
+        r3.<java.util.concurrent.Exchanger$Node: java.lang.Object item> = null;
+
+        goto label01;
+
+     label07:
+        i24 = r3.<java.util.concurrent.Exchanger$Node: int hash>;
+
+        if z2 == 0 goto label08;
+
+        $l15 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        $l25 = $l15 + l23;
+
+        goto label09;
+
+     label08:
+        $l25 = 0L;
+
+     label09:
+        l26 = $l25;
+
+        $i1 = <java.util.concurrent.Exchanger: int NCPU>;
+
+        if $i1 <= 1 goto label10;
+
+        $s27 = 1024;
+
+        goto label11;
+
+     label10:
+        $s27 = 1;
+
+     label11:
+        i28 = $s27;
+
+     label12:
+        $r22 = r3.<java.util.concurrent.Exchanger$Node: java.lang.Object match>;
+
+        r23 = $r22;
+
+        if $r22 != null goto label21;
+
+        if i28 <= 0 goto label14;
+
+        $i9 = i24 << 1;
+
+        i29 = i24 ^ $i9;
+
+        $i10 = i29 >>> 3;
+
+        i30 = i29 ^ $i10;
+
+        $i11 = i30 << 10;
+
+        i24 = i30 ^ $i11;
+
+        if i24 != 0 goto label13;
+
+        $l13 = virtualinvoke $r4.<java.lang.Thread: long getId()>();
+
+        $i14 = (int) $l13;
+
+        i24 = 1024 | $i14;
+
+        goto label12;
+
+     label13:
+        if i24 >= 0 goto label12;
+
+        $i33 = (int) -1;
+
+        i28 = i28 + $i33;
+
+        $i12 = i28 & 511;
+
+        if $i12 != 0 goto label12;
+
+        staticinvoke <java.lang.Thread: void yield()>();
+
+        goto label12;
+
+     label14:
+        $r9 = r0.<java.util.concurrent.Exchanger: java.util.concurrent.Exchanger$Node slot>;
+
+        if $r9 == r3 goto label15;
+
+        i28 = 1024;
+
+        goto label12;
+
+     label15:
+        $z3 = virtualinvoke $r4.<java.lang.Thread: boolean isInterrupted()>();
+
+        if $z3 != 0 goto label18;
+
+        $r10 = r0.<java.util.concurrent.Exchanger: java.util.concurrent.Exchanger$Node[] arena>;
+
+        if $r10 != null goto label18;
+
+        if z2 == 0 goto label16;
+
+        $l6 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        $l7 = l26 - $l6;
+
+        l23 = $l7;
+
+        $b8 = $l7 cmp 0L;
+
+        $i34 = (int) $b8;
+
+        if $i34 <= 0 goto label18;
+
+     label16:
+        $r11 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        $l4 = <java.util.concurrent.Exchanger: long BLOCKER>;
+
+        virtualinvoke $r11.<sun.misc.Unsafe: void putObject(java.lang.Object,long,java.lang.Object)>($r4, $l4, r0);
+
+        r3.<java.util.concurrent.Exchanger$Node: java.lang.Thread parked> = $r4;
+
+        $r12 = r0.<java.util.concurrent.Exchanger: java.util.concurrent.Exchanger$Node slot>;
+
+        if $r12 != r3 goto label17;
+
+        $r14 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        virtualinvoke $r14.<sun.misc.Unsafe: void park(boolean,long)>(0, l23);
+
+     label17:
+        r3.<java.util.concurrent.Exchanger$Node: java.lang.Thread parked> = null;
+
+        $r13 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        $l5 = <java.util.concurrent.Exchanger: long BLOCKER>;
+
+        virtualinvoke $r13.<sun.misc.Unsafe: void putObject(java.lang.Object,long,java.lang.Object)>($r4, $l5, null);
+
+        goto label12;
+
+     label18:
+        $r24 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        $l31 = <java.util.concurrent.Exchanger: long SLOT>;
+
+        $z7 = virtualinvoke $r24.<sun.misc.Unsafe: boolean compareAndSwapObject(java.lang.Object,long,java.lang.Object,java.lang.Object)>(r0, $l31, r3, null);
+
+        if $z7 == 0 goto label12;
+
+        if z2 == 0 goto label19;
+
+        $b3 = l23 cmp 0L;
+
+        $i35 = (int) $b3;
+
+        if $i35 > 0 goto label19;
+
+        $z4 = virtualinvoke $r4.<java.lang.Thread: boolean isInterrupted()>();
+
+        if $z4 != 0 goto label19;
+
+        $r25 = <java.util.concurrent.Exchanger: java.lang.Object TIMED_OUT>;
+
+        goto label20;
+
+     label19:
+        $r25 = null;
+
+     label20:
+        r23 = $r25;
+
+        goto label21;
+
+     label21:
+        $r8 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        $l2 = <java.util.concurrent.Exchanger: long MATCH>;
+
+        virtualinvoke $r8.<sun.misc.Unsafe: void putOrderedObject(java.lang.Object,long,java.lang.Object)>(r3, $l2, null);
+
+        r3.<java.util.concurrent.Exchanger$Node: java.lang.Object item> = null;
+
+        r3.<java.util.concurrent.Exchanger$Node: int hash> = i24;
+
+        return r23;
+    }
+
+    public void <init>()
+    {
+        java.util.concurrent.Exchanger$Participant $r1;
+        java.util.concurrent.Exchanger r0;
+
+        r0 := @this: java.util.concurrent.Exchanger;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.concurrent.Exchanger$Participant;
+
+        specialinvoke $r1.<java.util.concurrent.Exchanger$Participant: void <init>()>();
+
+        r0.<java.util.concurrent.Exchanger: java.util.concurrent.Exchanger$Participant participant> = $r1;
+
+        return;
+    }
+
+    public java.lang.Object exchange(java.lang.Object) throws java.lang.InterruptedException
+    {
+        java.util.concurrent.Exchanger$Node[] $r3;
+        java.lang.InterruptedException $r4;
+        java.lang.Object r0, r1, $r5, $r6, $r7, $r8, r9, $r10;
+        java.util.concurrent.Exchanger r2;
+        boolean $z0;
+
+        r2 := @this: java.util.concurrent.Exchanger;
+
+        r0 := @parameter0: java.lang.Object;
+
+        if r0 != null goto label1;
+
+        $r8 = <java.util.concurrent.Exchanger: java.lang.Object NULL_ITEM>;
+
+        goto label2;
+
+     label1:
+        $r8 = r0;
+
+     label2:
+        r1 = $r8;
+
+        $r3 = r2.<java.util.concurrent.Exchanger: java.util.concurrent.Exchanger$Node[] arena>;
+
+        if $r3 != null goto label3;
+
+        $r7 = specialinvoke r2.<java.util.concurrent.Exchanger: java.lang.Object slotExchange(java.lang.Object,boolean,long)>($r8, 0, 0L);
+
+        r9 = $r7;
+
+        if $r7 != null goto label5;
+
+     label3:
+        $z0 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z0 != 0 goto label4;
+
+        $r5 = specialinvoke r2.<java.util.concurrent.Exchanger: java.lang.Object arenaExchange(java.lang.Object,boolean,long)>(r1, 0, 0L);
+
+        r9 = $r5;
+
+        if $r5 != null goto label5;
+
+     label4:
+        $r4 = new java.lang.InterruptedException;
+
+        specialinvoke $r4.<java.lang.InterruptedException: void <init>()>();
+
+        throw $r4;
+
+     label5:
+        $r6 = <java.util.concurrent.Exchanger: java.lang.Object NULL_ITEM>;
+
+        if r9 != $r6 goto label6;
+
+        $r10 = null;
+
+        goto label7;
+
+     label6:
+        $r10 = r9;
+
+     label7:
+        return $r10;
+    }
+
+    public java.lang.Object exchange(java.lang.Object, long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException, java.util.concurrent.TimeoutException
+    {
+        java.util.concurrent.Exchanger$Node[] $r4;
+        java.util.concurrent.TimeoutException $r9;
+        long l0, $l1;
+        boolean $z0;
+        java.util.concurrent.TimeUnit r2;
+        java.lang.InterruptedException $r5;
+        java.lang.Object r0, r1, $r6, $r7, $r8, $r10, $r11, r12, $r13;
+        java.util.concurrent.Exchanger r3;
+
+        r3 := @this: java.util.concurrent.Exchanger;
+
+        r0 := @parameter0: java.lang.Object;
+
+        l0 := @parameter1: long;
+
+        r2 := @parameter2: java.util.concurrent.TimeUnit;
+
+        if r0 != null goto label1;
+
+        $r11 = <java.util.concurrent.Exchanger: java.lang.Object NULL_ITEM>;
+
+        goto label2;
+
+     label1:
+        $r11 = r0;
+
+     label2:
+        r1 = $r11;
+
+        $l1 = virtualinvoke r2.<java.util.concurrent.TimeUnit: long toNanos(long)>(l0);
+
+        $r4 = r3.<java.util.concurrent.Exchanger: java.util.concurrent.Exchanger$Node[] arena>;
+
+        if $r4 != null goto label3;
+
+        $r10 = specialinvoke r3.<java.util.concurrent.Exchanger: java.lang.Object slotExchange(java.lang.Object,boolean,long)>($r11, 1, $l1);
+
+        r12 = $r10;
+
+        if $r10 != null goto label5;
+
+     label3:
+        $z0 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z0 != 0 goto label4;
+
+        $r6 = specialinvoke r3.<java.util.concurrent.Exchanger: java.lang.Object arenaExchange(java.lang.Object,boolean,long)>(r1, 1, $l1);
+
+        r12 = $r6;
+
+        if $r6 != null goto label5;
+
+     label4:
+        $r5 = new java.lang.InterruptedException;
+
+        specialinvoke $r5.<java.lang.InterruptedException: void <init>()>();
+
+        throw $r5;
+
+     label5:
+        $r7 = <java.util.concurrent.Exchanger: java.lang.Object TIMED_OUT>;
+
+        if r12 != $r7 goto label6;
+
+        $r9 = new java.util.concurrent.TimeoutException;
+
+        specialinvoke $r9.<java.util.concurrent.TimeoutException: void <init>()>();
+
+        throw $r9;
+
+     label6:
+        $r8 = <java.util.concurrent.Exchanger: java.lang.Object NULL_ITEM>;
+
+        if r12 != $r8 goto label7;
+
+        $r13 = null;
+
+        goto label8;
+
+     label7:
+        $r13 = r12;
+
+     label8:
+        return $r13;
+    }
+
+    static void <clinit>()
+    {
+        java.lang.Runtime $r0;
+        java.lang.Exception $r19;
+        sun.misc.Unsafe $r3, $r4, $r6, $r8, $r10, $r12, $r13;
+        java.lang.Error $r14, $r20;
+        long $l3, $l4, $l5, $l6;
+        int $i0, $i1, $i2, $i7, $i8, $i9, $i10, $i11, $i12;
+        java.lang.reflect.Field $r5, $r7, $r9, $r11;
+        java.lang.Object $r1, $r2;
+        java.lang.Class $r15, $r16, $r17, $r18;
+
+        <java.util.concurrent.Exchanger: int SPINS> = 1024;
+
+        <java.util.concurrent.Exchanger: int SEQ> = 256;
+
+        <java.util.concurrent.Exchanger: int MMASK> = 255;
+
+        <java.util.concurrent.Exchanger: int ASHIFT> = 7;
+
+        $r0 = staticinvoke <java.lang.Runtime: java.lang.Runtime getRuntime()>();
+
+        $i0 = virtualinvoke $r0.<java.lang.Runtime: int availableProcessors()>();
+
+        <java.util.concurrent.Exchanger: int NCPU> = $i0;
+
+        $i1 = <java.util.concurrent.Exchanger: int NCPU>;
+
+        if $i1 < 510 goto label1;
+
+        $i12 = 255;
+
+        goto label2;
+
+     label1:
+        $i2 = <java.util.concurrent.Exchanger: int NCPU>;
+
+        $i12 = $i2 >>> 1;
+
+     label2:
+        <java.util.concurrent.Exchanger: int FULL> = $i12;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        <java.util.concurrent.Exchanger: java.lang.Object NULL_ITEM> = $r1;
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        <java.util.concurrent.Exchanger: java.lang.Object TIMED_OUT> = $r2;
+
+     label3:
+        $r3 = staticinvoke <sun.misc.Unsafe: sun.misc.Unsafe getUnsafe()>();
+
+        <java.util.concurrent.Exchanger: sun.misc.Unsafe U> = $r3;
+
+        $r4 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        $r15 = class "Ljava/util/concurrent/Exchanger;";
+
+        $r5 = virtualinvoke $r15.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("bound");
+
+        $l3 = virtualinvoke $r4.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r5);
+
+        <java.util.concurrent.Exchanger: long BOUND> = $l3;
+
+        $r6 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        $r16 = class "Ljava/util/concurrent/Exchanger;";
+
+        $r7 = virtualinvoke $r16.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("slot");
+
+        $l4 = virtualinvoke $r6.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r7);
+
+        <java.util.concurrent.Exchanger: long SLOT> = $l4;
+
+        $r8 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        $r17 = class "Ljava/util/concurrent/Exchanger$Node;";
+
+        $r9 = virtualinvoke $r17.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("match");
+
+        $l5 = virtualinvoke $r8.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r9);
+
+        <java.util.concurrent.Exchanger: long MATCH> = $l5;
+
+        $r10 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        $r18 = class "Ljava/lang/Thread;";
+
+        $r11 = virtualinvoke $r18.<java.lang.Class: java.lang.reflect.Field getDeclaredField(java.lang.String)>("parkBlocker");
+
+        $l6 = virtualinvoke $r10.<sun.misc.Unsafe: long objectFieldOffset(java.lang.reflect.Field)>($r11);
+
+        <java.util.concurrent.Exchanger: long BLOCKER> = $l6;
+
+        $r12 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        $i7 = virtualinvoke $r12.<sun.misc.Unsafe: int arrayIndexScale(java.lang.Class)>(class "[Ljava/util/concurrent/Exchanger$Node;");
+
+        $r13 = <java.util.concurrent.Exchanger: sun.misc.Unsafe U>;
+
+        $i8 = virtualinvoke $r13.<sun.misc.Unsafe: int arrayBaseOffset(java.lang.Class)>(class "[Ljava/util/concurrent/Exchanger$Node;");
+
+        $i9 = $i8 + 128;
+
+        <java.util.concurrent.Exchanger: int ABASE> = $i9;
+
+     label4:
+        goto label6;
+
+     label5:
+        $r19 := @caughtexception;
+
+        $r20 = new java.lang.Error;
+
+        specialinvoke $r20.<java.lang.Error: void <init>(java.lang.Throwable)>($r19);
+
+        throw $r20;
+
+     label6:
+        $i10 = $i7 - 1;
+
+        $i11 = $i7 & $i10;
+
+        if $i11 != 0 goto label7;
+
+        if $i7 <= 128 goto label8;
+
+     label7:
+        $r14 = new java.lang.Error;
+
+        specialinvoke $r14.<java.lang.Error: void <init>(java.lang.String)>("Unsupported array scale");
+
+        throw $r14;
+
+     label8:
+        return;
+
+        catch java.lang.Exception from label3 to label4 with label5;
+    }
+}

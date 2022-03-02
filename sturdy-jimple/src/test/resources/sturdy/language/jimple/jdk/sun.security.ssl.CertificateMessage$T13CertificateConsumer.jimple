@@ -1,0 +1,785 @@
+final class sun.security.ssl.CertificateMessage$T13CertificateConsumer extends java.lang.Object implements sun.security.ssl.SSLConsumer
+{
+
+    private void <init>()
+    {
+        sun.security.ssl.CertificateMessage$T13CertificateConsumer r0;
+
+        r0 := @this: sun.security.ssl.CertificateMessage$T13CertificateConsumer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void consume(sun.security.ssl.ConnectionContext, java.nio.ByteBuffer) throws java.io.IOException
+    {
+        java.lang.Object[] $r9, $r10;
+        java.nio.ByteBuffer r6;
+        java.util.LinkedHashMap $r3;
+        byte $b0;
+        sun.security.ssl.CertificateMessage$T13CertificateConsumer r8;
+        sun.security.ssl.ConnectionContext r0;
+        sun.security.ssl.SSLConfiguration $r7;
+        java.lang.Byte $r4;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        sun.security.ssl.ServerHandshakeContext $r12;
+        sun.security.ssl.ClientHandshakeContext $r11;
+        sun.security.ssl.SSLHandshake $r2;
+        sun.security.ssl.HandshakeContext r1;
+        sun.security.ssl.CertificateMessage$T13CertificateMessage $r5;
+
+        r8 := @this: sun.security.ssl.CertificateMessage$T13CertificateConsumer;
+
+        r0 := @parameter0: sun.security.ssl.ConnectionContext;
+
+        r6 := @parameter1: java.nio.ByteBuffer;
+
+        r1 = (sun.security.ssl.HandshakeContext) r0;
+
+        $r3 = r1.<sun.security.ssl.HandshakeContext: java.util.LinkedHashMap handshakeConsumers>;
+
+        $r2 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake CERTIFICATE>;
+
+        $b0 = $r2.<sun.security.ssl.SSLHandshake: byte id>;
+
+        $r4 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b0);
+
+        virtualinvoke $r3.<java.util.LinkedHashMap: java.lang.Object remove(java.lang.Object)>($r4);
+
+        $r5 = new sun.security.ssl.CertificateMessage$T13CertificateMessage;
+
+        specialinvoke $r5.<sun.security.ssl.CertificateMessage$T13CertificateMessage: void <init>(sun.security.ssl.HandshakeContext,java.nio.ByteBuffer)>(r1, r6);
+
+        $r7 = r1.<sun.security.ssl.HandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $z0 = $r7.<sun.security.ssl.SSLConfiguration: boolean isClientMode>;
+
+        if $z0 == 0 goto label2;
+
+        $z3 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z3 == 0 goto label1;
+
+        $z4 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z4 == 0 goto label1;
+
+        $r10 = newarray (java.lang.Object)[1];
+
+        $r10[0] = $r5;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Consuming server Certificate handshake message", $r10);
+
+     label1:
+        $r11 = (sun.security.ssl.ClientHandshakeContext) r0;
+
+        specialinvoke r8.<sun.security.ssl.CertificateMessage$T13CertificateConsumer: void onConsumeCertificate(sun.security.ssl.ClientHandshakeContext,sun.security.ssl.CertificateMessage$T13CertificateMessage)>($r11, $r5);
+
+        goto label4;
+
+     label2:
+        $z1 = <sun.security.ssl.SSLLogger: boolean isOn>;
+
+        if $z1 == 0 goto label3;
+
+        $z2 = staticinvoke <sun.security.ssl.SSLLogger: boolean isOn(java.lang.String)>("ssl,handshake");
+
+        if $z2 == 0 goto label3;
+
+        $r9 = newarray (java.lang.Object)[1];
+
+        $r9[0] = $r5;
+
+        staticinvoke <sun.security.ssl.SSLLogger: void fine(java.lang.String,java.lang.Object[])>("Consuming client Certificate handshake message", $r9);
+
+     label3:
+        $r12 = (sun.security.ssl.ServerHandshakeContext) r0;
+
+        specialinvoke r8.<sun.security.ssl.CertificateMessage$T13CertificateConsumer: void onConsumeCertificate(sun.security.ssl.ServerHandshakeContext,sun.security.ssl.CertificateMessage$T13CertificateMessage)>($r12, $r5);
+
+     label4:
+        return;
+    }
+
+    private void onConsumeCertificate(sun.security.ssl.ServerHandshakeContext, sun.security.ssl.CertificateMessage$T13CertificateMessage) throws java.io.IOException
+    {
+        sun.security.ssl.X509Authentication$X509Credentials $r15;
+        java.security.cert.X509Certificate $r16;
+        java.util.LinkedHashMap $r4;
+        byte $b0;
+        sun.security.ssl.CertificateMessage$T13CertificateConsumer r20;
+        sun.security.ssl.SSLConfiguration $r6;
+        java.lang.Byte $r5;
+        boolean $z0;
+        sun.security.ssl.ServerHandshakeContext r2;
+        sun.security.ssl.SSLHandshake $r3;
+        java.security.PublicKey $r18;
+        sun.security.ssl.TransportContext $r10;
+        java.util.List $r1, $r12, $r13, $r17;
+        sun.security.ssl.ClientAuthType $r7, $r8;
+        javax.net.ssl.SSLException $r11;
+        sun.security.ssl.Alert $r9;
+        sun.security.ssl.SSLSessionImpl $r19;
+        java.security.cert.X509Certificate[] $r14;
+        sun.security.ssl.CertificateMessage$T13CertificateMessage r0;
+
+        r20 := @this: sun.security.ssl.CertificateMessage$T13CertificateConsumer;
+
+        r2 := @parameter0: sun.security.ssl.ServerHandshakeContext;
+
+        r0 := @parameter1: sun.security.ssl.CertificateMessage$T13CertificateMessage;
+
+        $r1 = staticinvoke <sun.security.ssl.CertificateMessage$T13CertificateMessage: java.util.List access$600(sun.security.ssl.CertificateMessage$T13CertificateMessage)>(r0);
+
+        if $r1 == null goto label1;
+
+        $r12 = staticinvoke <sun.security.ssl.CertificateMessage$T13CertificateMessage: java.util.List access$600(sun.security.ssl.CertificateMessage$T13CertificateMessage)>(r0);
+
+        $z0 = interfaceinvoke $r12.<java.util.List: boolean isEmpty()>();
+
+        if $z0 == 0 goto label3;
+
+     label1:
+        $r4 = r2.<sun.security.ssl.ServerHandshakeContext: java.util.LinkedHashMap handshakeConsumers>;
+
+        $r3 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake CERTIFICATE_VERIFY>;
+
+        $b0 = $r3.<sun.security.ssl.SSLHandshake: byte id>;
+
+        $r5 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b0);
+
+        virtualinvoke $r4.<java.util.LinkedHashMap: java.lang.Object remove(java.lang.Object)>($r5);
+
+        $r6 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $r8 = $r6.<sun.security.ssl.SSLConfiguration: sun.security.ssl.ClientAuthType clientAuthType>;
+
+        $r7 = <sun.security.ssl.ClientAuthType: sun.security.ssl.ClientAuthType CLIENT_AUTH_REQUIRED>;
+
+        if $r8 != $r7 goto label2;
+
+        $r10 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r9 = <sun.security.ssl.Alert: sun.security.ssl.Alert BAD_CERTIFICATE>;
+
+        $r11 = virtualinvoke $r10.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r9, "Empty client certificate chain");
+
+        throw $r11;
+
+     label2:
+        return;
+
+     label3:
+        $r13 = staticinvoke <sun.security.ssl.CertificateMessage$T13CertificateMessage: java.util.List access$600(sun.security.ssl.CertificateMessage$T13CertificateMessage)>(r0);
+
+        $r14 = staticinvoke <sun.security.ssl.CertificateMessage$T13CertificateConsumer: java.security.cert.X509Certificate[] checkClientCerts(sun.security.ssl.ServerHandshakeContext,java.util.List)>(r2, $r13);
+
+        $r17 = r2.<sun.security.ssl.ServerHandshakeContext: java.util.List handshakeCredentials>;
+
+        $r15 = new sun.security.ssl.X509Authentication$X509Credentials;
+
+        $r16 = $r14[0];
+
+        $r18 = virtualinvoke $r16.<java.security.cert.X509Certificate: java.security.PublicKey getPublicKey()>();
+
+        specialinvoke $r15.<sun.security.ssl.X509Authentication$X509Credentials: void <init>(java.security.PublicKey,java.security.cert.X509Certificate[])>($r18, $r14);
+
+        interfaceinvoke $r17.<java.util.List: boolean add(java.lang.Object)>($r15);
+
+        $r19 = r2.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        virtualinvoke $r19.<sun.security.ssl.SSLSessionImpl: void setPeerCertificates(java.security.cert.X509Certificate[])>($r14);
+
+        return;
+    }
+
+    private void onConsumeCertificate(sun.security.ssl.ClientHandshakeContext, sun.security.ssl.CertificateMessage$T13CertificateMessage) throws java.io.IOException
+    {
+        sun.security.ssl.X509Authentication$X509Credentials $r14;
+        java.security.cert.X509Certificate $r15;
+        sun.security.ssl.SSLExtensions $r21;
+        sun.security.ssl.CertificateMessage$T13CertificateConsumer r22;
+        sun.security.ssl.SSLExtension[] $r9;
+        sun.security.ssl.SSLConfiguration $r8;
+        boolean $z0, $z1;
+        java.util.Iterator $r11;
+        sun.security.ssl.ClientHandshakeContext r2;
+        sun.security.ssl.SSLHandshake $r7;
+        java.security.PublicKey $r17;
+        sun.security.ssl.TransportContext $r4;
+        java.util.List $r1, $r6, $r10, $r12, $r16;
+        javax.net.ssl.SSLException $r5;
+        sun.security.ssl.Alert $r3;
+        sun.security.ssl.CertificateMessage$CertificateEntry r20;
+        java.lang.Object $r19;
+        sun.security.ssl.SSLSessionImpl $r18;
+        java.security.cert.X509Certificate[] $r13;
+        sun.security.ssl.CertificateMessage$T13CertificateMessage r0;
+
+        r22 := @this: sun.security.ssl.CertificateMessage$T13CertificateConsumer;
+
+        r2 := @parameter0: sun.security.ssl.ClientHandshakeContext;
+
+        r0 := @parameter1: sun.security.ssl.CertificateMessage$T13CertificateMessage;
+
+        $r1 = staticinvoke <sun.security.ssl.CertificateMessage$T13CertificateMessage: java.util.List access$600(sun.security.ssl.CertificateMessage$T13CertificateMessage)>(r0);
+
+        if $r1 == null goto label1;
+
+        $r6 = staticinvoke <sun.security.ssl.CertificateMessage$T13CertificateMessage: java.util.List access$600(sun.security.ssl.CertificateMessage$T13CertificateMessage)>(r0);
+
+        $z0 = interfaceinvoke $r6.<java.util.List: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        $r4 = r2.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r3 = <sun.security.ssl.Alert: sun.security.ssl.Alert BAD_CERTIFICATE>;
+
+        $r5 = virtualinvoke $r4.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String)>($r3, "Empty server certificate chain");
+
+        throw $r5;
+
+     label2:
+        $r8 = r2.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLConfiguration sslConfig>;
+
+        $r7 = <sun.security.ssl.SSLHandshake: sun.security.ssl.SSLHandshake CERTIFICATE>;
+
+        $r9 = virtualinvoke $r8.<sun.security.ssl.SSLConfiguration: sun.security.ssl.SSLExtension[] getEnabledExtensions(sun.security.ssl.SSLHandshake)>($r7);
+
+        $r10 = staticinvoke <sun.security.ssl.CertificateMessage$T13CertificateMessage: java.util.List access$600(sun.security.ssl.CertificateMessage$T13CertificateMessage)>(r0);
+
+        $r11 = interfaceinvoke $r10.<java.util.List: java.util.Iterator iterator()>();
+
+     label3:
+        $z1 = interfaceinvoke $r11.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label4;
+
+        $r19 = interfaceinvoke $r11.<java.util.Iterator: java.lang.Object next()>();
+
+        r20 = (sun.security.ssl.CertificateMessage$CertificateEntry) $r19;
+
+        $r21 = staticinvoke <sun.security.ssl.CertificateMessage$CertificateEntry: sun.security.ssl.SSLExtensions access$500(sun.security.ssl.CertificateMessage$CertificateEntry)>(r20);
+
+        virtualinvoke $r21.<sun.security.ssl.SSLExtensions: void consumeOnLoad(sun.security.ssl.HandshakeContext,sun.security.ssl.SSLExtension[])>(r2, $r9);
+
+        goto label3;
+
+     label4:
+        $r12 = staticinvoke <sun.security.ssl.CertificateMessage$T13CertificateMessage: java.util.List access$600(sun.security.ssl.CertificateMessage$T13CertificateMessage)>(r0);
+
+        $r13 = staticinvoke <sun.security.ssl.CertificateMessage$T13CertificateConsumer: java.security.cert.X509Certificate[] checkServerCerts(sun.security.ssl.ClientHandshakeContext,java.util.List)>(r2, $r12);
+
+        $r16 = r2.<sun.security.ssl.ClientHandshakeContext: java.util.List handshakeCredentials>;
+
+        $r14 = new sun.security.ssl.X509Authentication$X509Credentials;
+
+        $r15 = $r13[0];
+
+        $r17 = virtualinvoke $r15.<java.security.cert.X509Certificate: java.security.PublicKey getPublicKey()>();
+
+        specialinvoke $r14.<sun.security.ssl.X509Authentication$X509Credentials: void <init>(java.security.PublicKey,java.security.cert.X509Certificate[])>($r17, $r13);
+
+        interfaceinvoke $r16.<java.util.List: boolean add(java.lang.Object)>($r14);
+
+        $r18 = r2.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        virtualinvoke $r18.<sun.security.ssl.SSLSessionImpl: void setPeerCertificates(java.security.cert.X509Certificate[])>($r13);
+
+        return;
+    }
+
+    private static java.security.cert.X509Certificate[] checkClientCerts(sun.security.ssl.ServerHandshakeContext, java.util.List) throws java.io.IOException
+    {
+        java.security.cert.X509Certificate $r4, $r28;
+        sun.security.ssl.SSLTransport $r12, $r14, $r20;
+        byte[] $r26;
+        java.security.cert.CertificateFactory $r2;
+        javax.net.ssl.SSLSocket r40;
+        java.io.ByteArrayInputStream $r25;
+        byte b4;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6;
+        sun.security.ssl.ServerHandshakeContext r7;
+        sun.security.ssl.SSLContextImpl $r8;
+        java.util.List r0;
+        javax.net.ssl.SSLException $r32, $r36;
+        java.security.cert.Certificate $r27;
+        sun.security.ssl.CertificateMessage$CertificateEntry r37;
+        java.security.cert.X509Certificate[] r1, $r17, $r23;
+        javax.net.ssl.SSLEngine r39;
+        javax.net.ssl.X509ExtendedTrustManager $r15, $r21;
+        int $i0, $i1, $i2, i3;
+        java.lang.String $r6, r38;
+        java.util.Iterator $r3;
+        java.security.PublicKey $r5;
+        java.security.cert.CertificateException $r10, $r29, $r33;
+        sun.security.ssl.TransportContext $r11, $r13, $r19, $r31, $r35;
+        javax.net.ssl.X509TrustManager $r9;
+        sun.security.ssl.Alert $r30, $r34;
+        java.lang.Object $r16, $r22, $r24;
+        sun.security.ssl.SSLSessionImpl $r18;
+
+        r7 := @parameter0: sun.security.ssl.ServerHandshakeContext;
+
+        r0 := @parameter1: java.util.List;
+
+        $i0 = interfaceinvoke r0.<java.util.List: int size()>();
+
+        r1 = newarray (java.security.cert.X509Certificate)[$i0];
+
+     label01:
+        $r2 = staticinvoke <java.security.cert.CertificateFactory: java.security.cert.CertificateFactory getInstance(java.lang.String)>("X.509");
+
+        i3 = 0;
+
+        $r3 = interfaceinvoke r0.<java.util.List: java.util.Iterator iterator()>();
+
+     label02:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label03;
+
+        $r24 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r37 = (sun.security.ssl.CertificateMessage$CertificateEntry) $r24;
+
+        $i2 = i3;
+
+        i3 = i3 + 1;
+
+        $r25 = new java.io.ByteArrayInputStream;
+
+        $r26 = r37.<sun.security.ssl.CertificateMessage$CertificateEntry: byte[] encoded>;
+
+        specialinvoke $r25.<java.io.ByteArrayInputStream: void <init>(byte[])>($r26);
+
+        $r27 = virtualinvoke $r2.<java.security.cert.CertificateFactory: java.security.cert.Certificate generateCertificate(java.io.InputStream)>($r25);
+
+        $r28 = (java.security.cert.X509Certificate) $r27;
+
+        r1[$i2] = $r28;
+
+        goto label02;
+
+     label03:
+        goto label05;
+
+     label04:
+        $r33 := @caughtexception;
+
+        $r35 = r7.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r34 = <sun.security.ssl.Alert: sun.security.ssl.Alert BAD_CERTIFICATE>;
+
+        $r36 = virtualinvoke $r35.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String,java.lang.Throwable)>($r34, "Failed to parse server certificates", $r33);
+
+        throw $r36;
+
+     label05:
+        $r4 = r1[0];
+
+        $r5 = virtualinvoke $r4.<java.security.cert.X509Certificate: java.security.PublicKey getPublicKey()>();
+
+        $r6 = interfaceinvoke $r5.<java.security.PublicKey: java.lang.String getAlgorithm()>();
+
+        b4 = -1;
+
+        $i1 = virtualinvoke $r6.<java.lang.String: int hashCode()>();
+
+        lookupswitch($i1)
+        {
+            case 2206: goto label08;
+            case 67986: goto label07;
+            case 81440: goto label06;
+            case 1775481508: goto label09;
+            default: goto label10;
+        };
+
+     label06:
+        $z4 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>("RSA");
+
+        if $z4 == 0 goto label10;
+
+        b4 = 0;
+
+        goto label10;
+
+     label07:
+        $z5 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>("DSA");
+
+        if $z5 == 0 goto label10;
+
+        b4 = 1;
+
+        goto label10;
+
+     label08:
+        $z6 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>("EC");
+
+        if $z6 == 0 goto label10;
+
+        b4 = 2;
+
+        goto label10;
+
+     label09:
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>("RSASSA-PSS");
+
+        if $z1 == 0 goto label10;
+
+        b4 = 3;
+
+     label10:
+        tableswitch(b4)
+        {
+            case 0: goto label11;
+            case 1: goto label11;
+            case 2: goto label11;
+            case 3: goto label11;
+            default: goto label12;
+        };
+
+     label11:
+        r38 = $r6;
+
+        goto label13;
+
+     label12:
+        r38 = "UNKNOWN";
+
+     label13:
+        $r8 = r7.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLContextImpl sslContext>;
+
+        $r9 = virtualinvoke $r8.<sun.security.ssl.SSLContextImpl: javax.net.ssl.X509TrustManager getX509TrustManager()>();
+
+        $z2 = $r9 instanceof javax.net.ssl.X509ExtendedTrustManager;
+
+        if $z2 == 0 goto label15;
+
+        $r11 = r7.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r12 = $r11.<sun.security.ssl.TransportContext: sun.security.ssl.SSLTransport transport>;
+
+        $z3 = $r12 instanceof javax.net.ssl.SSLEngine;
+
+        if $z3 == 0 goto label14;
+
+        $r19 = r7.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r20 = $r19.<sun.security.ssl.TransportContext: sun.security.ssl.SSLTransport transport>;
+
+        r39 = (javax.net.ssl.SSLEngine) $r20;
+
+        $r21 = (javax.net.ssl.X509ExtendedTrustManager) $r9;
+
+        $r22 = virtualinvoke r1.<java.lang.Object: java.lang.Object clone()>();
+
+        $r23 = (java.security.cert.X509Certificate[]) $r22;
+
+        virtualinvoke $r21.<javax.net.ssl.X509ExtendedTrustManager: void checkClientTrusted(java.security.cert.X509Certificate[],java.lang.String,javax.net.ssl.SSLEngine)>($r23, r38, r39);
+
+        goto label16;
+
+     label14:
+        $r13 = r7.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r14 = $r13.<sun.security.ssl.TransportContext: sun.security.ssl.SSLTransport transport>;
+
+        r40 = (javax.net.ssl.SSLSocket) $r14;
+
+        $r15 = (javax.net.ssl.X509ExtendedTrustManager) $r9;
+
+        $r16 = virtualinvoke r1.<java.lang.Object: java.lang.Object clone()>();
+
+        $r17 = (java.security.cert.X509Certificate[]) $r16;
+
+        virtualinvoke $r15.<javax.net.ssl.X509ExtendedTrustManager: void checkClientTrusted(java.security.cert.X509Certificate[],java.lang.String,java.net.Socket)>($r17, r38, r40);
+
+        goto label16;
+
+     label15:
+        $r10 = new java.security.cert.CertificateException;
+
+        specialinvoke $r10.<java.security.cert.CertificateException: void <init>(java.lang.String)>("Improper X509TrustManager implementation");
+
+        throw $r10;
+
+     label16:
+        $r18 = r7.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        virtualinvoke $r18.<sun.security.ssl.SSLSessionImpl: void setPeerCertificates(java.security.cert.X509Certificate[])>(r1);
+
+     label17:
+        goto label19;
+
+     label18:
+        $r29 := @caughtexception;
+
+        $r31 = r7.<sun.security.ssl.ServerHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r30 = <sun.security.ssl.Alert: sun.security.ssl.Alert CERTIFICATE_UNKNOWN>;
+
+        $r32 = virtualinvoke $r31.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.Throwable)>($r30, $r29);
+
+        throw $r32;
+
+     label19:
+        return r1;
+
+        catch java.security.cert.CertificateException from label01 to label03 with label04;
+        catch java.security.cert.CertificateException from label13 to label17 with label18;
+    }
+
+    private static java.security.cert.X509Certificate[] checkServerCerts(sun.security.ssl.ClientHandshakeContext, java.util.List) throws java.io.IOException
+    {
+        sun.security.ssl.SSLTransport $r9, $r11, $r17;
+        java.security.cert.X509Certificate $r26;
+        byte[] $r24;
+        java.security.cert.CertificateFactory $r2;
+        javax.net.ssl.SSLSocket r36;
+        java.io.ByteArrayInputStream $r23;
+        boolean $z0, $z1, $z2;
+        sun.security.ssl.SSLContextImpl $r5;
+        java.util.List r0;
+        javax.net.ssl.SSLException $r30, $r34;
+        java.security.cert.Certificate $r25;
+        sun.security.ssl.CertificateMessage$CertificateEntry r22;
+        java.security.cert.X509Certificate[] r1, $r14, $r20;
+        javax.net.ssl.SSLEngine r35;
+        javax.net.ssl.X509ExtendedTrustManager $r12, $r18;
+        int $i0, $i1, i2;
+        java.util.Iterator $r3;
+        sun.security.ssl.ClientHandshakeContext r4;
+        java.security.cert.CertificateException $r7, $r27, $r31;
+        sun.security.ssl.TransportContext $r8, $r10, $r16, $r28, $r33;
+        javax.net.ssl.X509TrustManager $r6;
+        sun.security.ssl.Alert $r29, $r32;
+        java.lang.Object $r13, $r19, $r21;
+        sun.security.ssl.SSLSessionImpl $r15;
+
+        r4 := @parameter0: sun.security.ssl.ClientHandshakeContext;
+
+        r0 := @parameter1: java.util.List;
+
+        $i0 = interfaceinvoke r0.<java.util.List: int size()>();
+
+        r1 = newarray (java.security.cert.X509Certificate)[$i0];
+
+     label01:
+        $r2 = staticinvoke <java.security.cert.CertificateFactory: java.security.cert.CertificateFactory getInstance(java.lang.String)>("X.509");
+
+        i2 = 0;
+
+        $r3 = interfaceinvoke r0.<java.util.List: java.util.Iterator iterator()>();
+
+     label02:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label03;
+
+        $r21 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r22 = (sun.security.ssl.CertificateMessage$CertificateEntry) $r21;
+
+        $i1 = i2;
+
+        i2 = i2 + 1;
+
+        $r23 = new java.io.ByteArrayInputStream;
+
+        $r24 = r22.<sun.security.ssl.CertificateMessage$CertificateEntry: byte[] encoded>;
+
+        specialinvoke $r23.<java.io.ByteArrayInputStream: void <init>(byte[])>($r24);
+
+        $r25 = virtualinvoke $r2.<java.security.cert.CertificateFactory: java.security.cert.Certificate generateCertificate(java.io.InputStream)>($r23);
+
+        $r26 = (java.security.cert.X509Certificate) $r25;
+
+        r1[$i1] = $r26;
+
+        goto label02;
+
+     label03:
+        goto label05;
+
+     label04:
+        $r31 := @caughtexception;
+
+        $r33 = r4.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r32 = <sun.security.ssl.Alert: sun.security.ssl.Alert BAD_CERTIFICATE>;
+
+        $r34 = virtualinvoke $r33.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.String,java.lang.Throwable)>($r32, "Failed to parse server certificates", $r31);
+
+        throw $r34;
+
+     label05:
+        $r5 = r4.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLContextImpl sslContext>;
+
+        $r6 = virtualinvoke $r5.<sun.security.ssl.SSLContextImpl: javax.net.ssl.X509TrustManager getX509TrustManager()>();
+
+        $z1 = $r6 instanceof javax.net.ssl.X509ExtendedTrustManager;
+
+        if $z1 == 0 goto label07;
+
+        $r8 = r4.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r9 = $r8.<sun.security.ssl.TransportContext: sun.security.ssl.SSLTransport transport>;
+
+        $z2 = $r9 instanceof javax.net.ssl.SSLEngine;
+
+        if $z2 == 0 goto label06;
+
+        $r16 = r4.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r17 = $r16.<sun.security.ssl.TransportContext: sun.security.ssl.SSLTransport transport>;
+
+        r35 = (javax.net.ssl.SSLEngine) $r17;
+
+        $r18 = (javax.net.ssl.X509ExtendedTrustManager) $r6;
+
+        $r19 = virtualinvoke r1.<java.lang.Object: java.lang.Object clone()>();
+
+        $r20 = (java.security.cert.X509Certificate[]) $r19;
+
+        virtualinvoke $r18.<javax.net.ssl.X509ExtendedTrustManager: void checkServerTrusted(java.security.cert.X509Certificate[],java.lang.String,javax.net.ssl.SSLEngine)>($r20, "UNKNOWN", r35);
+
+        goto label08;
+
+     label06:
+        $r10 = r4.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r11 = $r10.<sun.security.ssl.TransportContext: sun.security.ssl.SSLTransport transport>;
+
+        r36 = (javax.net.ssl.SSLSocket) $r11;
+
+        $r12 = (javax.net.ssl.X509ExtendedTrustManager) $r6;
+
+        $r13 = virtualinvoke r1.<java.lang.Object: java.lang.Object clone()>();
+
+        $r14 = (java.security.cert.X509Certificate[]) $r13;
+
+        virtualinvoke $r12.<javax.net.ssl.X509ExtendedTrustManager: void checkServerTrusted(java.security.cert.X509Certificate[],java.lang.String,java.net.Socket)>($r14, "UNKNOWN", r36);
+
+        goto label08;
+
+     label07:
+        $r7 = new java.security.cert.CertificateException;
+
+        specialinvoke $r7.<java.security.cert.CertificateException: void <init>(java.lang.String)>("Improper X509TrustManager implementation");
+
+        throw $r7;
+
+     label08:
+        $r15 = r4.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.SSLSessionImpl handshakeSession>;
+
+        virtualinvoke $r15.<sun.security.ssl.SSLSessionImpl: void setPeerCertificates(java.security.cert.X509Certificate[])>(r1);
+
+     label09:
+        goto label11;
+
+     label10:
+        $r27 := @caughtexception;
+
+        $r28 = r4.<sun.security.ssl.ClientHandshakeContext: sun.security.ssl.TransportContext conContext>;
+
+        $r29 = staticinvoke <sun.security.ssl.CertificateMessage$T13CertificateConsumer: sun.security.ssl.Alert getCertificateAlert(sun.security.ssl.ClientHandshakeContext,java.security.cert.CertificateException)>(r4, $r27);
+
+        $r30 = virtualinvoke $r28.<sun.security.ssl.TransportContext: javax.net.ssl.SSLException fatal(sun.security.ssl.Alert,java.lang.Throwable)>($r29, $r27);
+
+        throw $r30;
+
+     label11:
+        return r1;
+
+        catch java.security.cert.CertificateException from label01 to label03 with label04;
+        catch java.security.cert.CertificateException from label05 to label09 with label10;
+    }
+
+    private static sun.security.ssl.Alert getCertificateAlert(sun.security.ssl.ClientHandshakeContext, java.security.cert.CertificateException)
+    {
+        java.lang.Throwable $r1;
+        java.security.cert.CertPathValidatorException$BasicReason $r4, $r5;
+        sun.security.ssl.ClientHandshakeContext r6;
+        java.security.cert.CertPathValidatorException$Reason $r3;
+        java.security.cert.CertificateException r0;
+        sun.security.ssl.Alert r7, $r8, $r9;
+        java.security.cert.CertPathValidatorException r2;
+        boolean $z0, $z1, $z2;
+
+        r6 := @parameter0: sun.security.ssl.ClientHandshakeContext;
+
+        r0 := @parameter1: java.security.cert.CertificateException;
+
+        r7 = <sun.security.ssl.Alert: sun.security.ssl.Alert CERTIFICATE_UNKNOWN>;
+
+        $r1 = virtualinvoke r0.<java.security.cert.CertificateException: java.lang.Throwable getCause()>();
+
+        $z0 = $r1 instanceof java.security.cert.CertPathValidatorException;
+
+        if $z0 == 0 goto label6;
+
+        r2 = (java.security.cert.CertPathValidatorException) $r1;
+
+        $r3 = virtualinvoke r2.<java.security.cert.CertPathValidatorException: java.security.cert.CertPathValidatorException$Reason getReason()>();
+
+        $r4 = <java.security.cert.CertPathValidatorException$BasicReason: java.security.cert.CertPathValidatorException$BasicReason REVOKED>;
+
+        if $r3 != $r4 goto label3;
+
+        $z2 = r6.<sun.security.ssl.ClientHandshakeContext: boolean staplingActive>;
+
+        if $z2 == 0 goto label1;
+
+        $r8 = <sun.security.ssl.Alert: sun.security.ssl.Alert BAD_CERT_STATUS_RESPONSE>;
+
+        goto label2;
+
+     label1:
+        $r8 = <sun.security.ssl.Alert: sun.security.ssl.Alert CERTIFICATE_REVOKED>;
+
+     label2:
+        r7 = $r8;
+
+        goto label6;
+
+     label3:
+        $r5 = <java.security.cert.CertPathValidatorException$BasicReason: java.security.cert.CertPathValidatorException$BasicReason UNDETERMINED_REVOCATION_STATUS>;
+
+        if $r3 != $r5 goto label6;
+
+        $z1 = r6.<sun.security.ssl.ClientHandshakeContext: boolean staplingActive>;
+
+        if $z1 == 0 goto label4;
+
+        $r9 = <sun.security.ssl.Alert: sun.security.ssl.Alert BAD_CERT_STATUS_RESPONSE>;
+
+        goto label5;
+
+     label4:
+        $r9 = <sun.security.ssl.Alert: sun.security.ssl.Alert CERTIFICATE_UNKNOWN>;
+
+     label5:
+        r7 = $r9;
+
+     label6:
+        return r7;
+    }
+
+    void <init>(sun.security.ssl.CertificateMessage$1)
+    {
+        sun.security.ssl.CertificateMessage$T13CertificateConsumer r0;
+        sun.security.ssl.CertificateMessage$1 r1;
+
+        r0 := @this: sun.security.ssl.CertificateMessage$T13CertificateConsumer;
+
+        r1 := @parameter0: sun.security.ssl.CertificateMessage$1;
+
+        specialinvoke r0.<sun.security.ssl.CertificateMessage$T13CertificateConsumer: void <init>()>();
+
+        return;
+    }
+}

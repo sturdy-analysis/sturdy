@@ -1,0 +1,657 @@
+public class sun.security.krb5.Checksum extends java.lang.Object
+{
+    private int cksumType;
+    private byte[] checksum;
+    public static final int CKSUMTYPE_NULL;
+    public static final int CKSUMTYPE_CRC32;
+    public static final int CKSUMTYPE_RSA_MD4;
+    public static final int CKSUMTYPE_RSA_MD4_DES;
+    public static final int CKSUMTYPE_DES_MAC;
+    public static final int CKSUMTYPE_DES_MAC_K;
+    public static final int CKSUMTYPE_RSA_MD4_DES_K;
+    public static final int CKSUMTYPE_RSA_MD5;
+    public static final int CKSUMTYPE_RSA_MD5_DES;
+    public static final int CKSUMTYPE_HMAC_SHA1_DES3_KD;
+    public static final int CKSUMTYPE_HMAC_SHA1_96_AES128;
+    public static final int CKSUMTYPE_HMAC_SHA1_96_AES256;
+    public static final int CKSUMTYPE_HMAC_MD5_ARCFOUR;
+    static int CKSUMTYPE_DEFAULT;
+    static int SAFECKSUMTYPE_DEFAULT;
+    private static boolean DEBUG;
+
+    public static void initStatic()
+    {
+        java.lang.String[] $r1, $r8;
+        int $i0, $i1, $i3, $i5, $i7, $i9;
+        java.lang.String $r2, $r9;
+        boolean $z0, $z1;
+        java.io.PrintStream $r4, $r6;
+        java.lang.Exception $r3, $r5;
+        sun.security.krb5.Config $r0, r7;
+
+        r7 = null;
+
+     label01:
+        $r0 = staticinvoke <sun.security.krb5.Config: sun.security.krb5.Config getInstance()>();
+
+        r7 = $r0;
+
+        $r1 = newarray (java.lang.String)[2];
+
+        $r1[0] = "libdefaults";
+
+        $r1[1] = "default_checksum";
+
+        $r2 = virtualinvoke $r0.<sun.security.krb5.Config: java.lang.String get(java.lang.String[])>($r1);
+
+        if $r2 == null goto label02;
+
+        $i1 = staticinvoke <sun.security.krb5.Config: int getType(java.lang.String)>($r2);
+
+        <sun.security.krb5.Checksum: int CKSUMTYPE_DEFAULT> = $i1;
+
+        goto label03;
+
+     label02:
+        $i3 = (int) -1;
+
+        <sun.security.krb5.Checksum: int CKSUMTYPE_DEFAULT> = $i3;
+
+     label03:
+        goto label06;
+
+     label04:
+        $r5 := @caughtexception;
+
+        $z1 = <sun.security.krb5.Checksum: boolean DEBUG>;
+
+        if $z1 == 0 goto label05;
+
+        $r6 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r6.<java.io.PrintStream: void println(java.lang.String)>("Exception in getting default checksum value from the configuration. No default checksum set.");
+
+        virtualinvoke $r5.<java.lang.Exception: void printStackTrace()>();
+
+     label05:
+        $i5 = (int) -1;
+
+        <sun.security.krb5.Checksum: int CKSUMTYPE_DEFAULT> = $i5;
+
+     label06:
+        $r8 = newarray (java.lang.String)[2];
+
+        $r8[0] = "libdefaults";
+
+        $r8[1] = "safe_checksum_type";
+
+        $r9 = virtualinvoke r7.<sun.security.krb5.Config: java.lang.String get(java.lang.String[])>($r8);
+
+        if $r9 == null goto label07;
+
+        $i0 = staticinvoke <sun.security.krb5.Config: int getType(java.lang.String)>($r9);
+
+        <sun.security.krb5.Checksum: int SAFECKSUMTYPE_DEFAULT> = $i0;
+
+        goto label08;
+
+     label07:
+        $i7 = (int) -1;
+
+        <sun.security.krb5.Checksum: int SAFECKSUMTYPE_DEFAULT> = $i7;
+
+     label08:
+        goto label11;
+
+     label09:
+        $r3 := @caughtexception;
+
+        $z0 = <sun.security.krb5.Checksum: boolean DEBUG>;
+
+        if $z0 == 0 goto label10;
+
+        $r4 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r4.<java.io.PrintStream: void println(java.lang.String)>("Exception in getting safe default checksum value from the configuration Setting.  No safe default checksum set.");
+
+        virtualinvoke $r3.<java.lang.Exception: void printStackTrace()>();
+
+     label10:
+        $i9 = (int) -1;
+
+        <sun.security.krb5.Checksum: int SAFECKSUMTYPE_DEFAULT> = $i9;
+
+     label11:
+        return;
+
+        catch java.lang.Exception from label01 to label03 with label04;
+        catch java.lang.Exception from label06 to label08 with label09;
+    }
+
+    public void <init>(byte[], int)
+    {
+        int i0;
+        byte[] r1;
+        sun.security.krb5.Checksum r0;
+
+        r0 := @this: sun.security.krb5.Checksum;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.krb5.Checksum: int cksumType> = i0;
+
+        r0.<sun.security.krb5.Checksum: byte[] checksum> = r1;
+
+        return;
+    }
+
+    public boolean verifyAnyChecksum(byte[], sun.security.krb5.EncryptionKey, int) throws sun.security.krb5.internal.KdcErrException, sun.security.krb5.KrbCryptoException
+    {
+        byte[] r2, $r4, $r5;
+        sun.security.krb5.internal.crypto.CksumType $r1;
+        sun.security.krb5.EncryptionKey r3;
+        int $i0, $i1, i2;
+        sun.security.krb5.Checksum r0;
+        boolean $z0;
+
+        r0 := @this: sun.security.krb5.Checksum;
+
+        r2 := @parameter0: byte[];
+
+        r3 := @parameter1: sun.security.krb5.EncryptionKey;
+
+        i2 := @parameter2: int;
+
+        $i0 = r0.<sun.security.krb5.Checksum: int cksumType>;
+
+        $r1 = staticinvoke <sun.security.krb5.internal.crypto.CksumType: sun.security.krb5.internal.crypto.CksumType getInstance(int)>($i0);
+
+        $i1 = lengthof r2;
+
+        $r4 = virtualinvoke r3.<sun.security.krb5.EncryptionKey: byte[] getBytes()>();
+
+        $r5 = r0.<sun.security.krb5.Checksum: byte[] checksum>;
+
+        $z0 = virtualinvoke $r1.<sun.security.krb5.internal.crypto.CksumType: boolean verifyChecksum(byte[],int,byte[],byte[],int)>(r2, $i1, $r4, $r5, i2);
+
+        return $z0;
+    }
+
+    public void <init>(int, byte[], sun.security.krb5.EncryptionKey, int) throws sun.security.krb5.internal.KdcErrException, sun.security.krb5.internal.KrbApErrException, sun.security.krb5.KrbCryptoException
+    {
+        byte[] r2, $r4, $r5;
+        sun.security.krb5.internal.crypto.EType $r6;
+        sun.security.krb5.internal.crypto.CksumType $r1;
+        sun.security.krb5.EncryptionKey r3;
+        int i0, $i1, $i2, i3, $i4, $i5, $i7;
+        sun.security.krb5.Checksum r0;
+
+        r0 := @this: sun.security.krb5.Checksum;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: byte[];
+
+        r3 := @parameter2: sun.security.krb5.EncryptionKey;
+
+        i3 := @parameter3: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $i7 = (int) -1;
+
+        if i0 != $i7 goto label1;
+
+        $i4 = virtualinvoke r3.<sun.security.krb5.EncryptionKey: int getEType()>();
+
+        $r6 = staticinvoke <sun.security.krb5.internal.crypto.EType: sun.security.krb5.internal.crypto.EType getInstance(int)>($i4);
+
+        $i5 = virtualinvoke $r6.<sun.security.krb5.internal.crypto.EType: int checksumType()>();
+
+        r0.<sun.security.krb5.Checksum: int cksumType> = $i5;
+
+        goto label2;
+
+     label1:
+        r0.<sun.security.krb5.Checksum: int cksumType> = i0;
+
+     label2:
+        $i1 = r0.<sun.security.krb5.Checksum: int cksumType>;
+
+        $r1 = staticinvoke <sun.security.krb5.internal.crypto.CksumType: sun.security.krb5.internal.crypto.CksumType getInstance(int)>($i1);
+
+        $i2 = lengthof r2;
+
+        $r4 = virtualinvoke r3.<sun.security.krb5.EncryptionKey: byte[] getBytes()>();
+
+        $r5 = virtualinvoke $r1.<sun.security.krb5.internal.crypto.CksumType: byte[] calculateChecksum(byte[],int,byte[],int)>(r2, $i2, $r4, i3);
+
+        r0.<sun.security.krb5.Checksum: byte[] checksum> = $r5;
+
+        return;
+    }
+
+    public boolean verifyKeyedChecksum(byte[], sun.security.krb5.EncryptionKey, int) throws sun.security.krb5.internal.KdcErrException, sun.security.krb5.internal.KrbApErrException, sun.security.krb5.KrbCryptoException
+    {
+        byte[] r2, $r4, $r5;
+        sun.security.krb5.internal.crypto.CksumType $r1;
+        sun.security.krb5.EncryptionKey r3;
+        int $i0, $i1, i2;
+        sun.security.krb5.internal.KrbApErrException $r6;
+        sun.security.krb5.Checksum r0;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.security.krb5.Checksum;
+
+        r2 := @parameter0: byte[];
+
+        r3 := @parameter1: sun.security.krb5.EncryptionKey;
+
+        i2 := @parameter2: int;
+
+        $i0 = r0.<sun.security.krb5.Checksum: int cksumType>;
+
+        $r1 = staticinvoke <sun.security.krb5.internal.crypto.CksumType: sun.security.krb5.internal.crypto.CksumType getInstance(int)>($i0);
+
+        $z0 = virtualinvoke $r1.<sun.security.krb5.internal.crypto.CksumType: boolean isKeyed()>();
+
+        if $z0 != 0 goto label1;
+
+        $r6 = new sun.security.krb5.internal.KrbApErrException;
+
+        specialinvoke $r6.<sun.security.krb5.internal.KrbApErrException: void <init>(int)>(50);
+
+        throw $r6;
+
+     label1:
+        $i1 = lengthof r2;
+
+        $r4 = virtualinvoke r3.<sun.security.krb5.EncryptionKey: byte[] getBytes()>();
+
+        $r5 = r0.<sun.security.krb5.Checksum: byte[] checksum>;
+
+        $z1 = virtualinvoke $r1.<sun.security.krb5.internal.crypto.CksumType: boolean verifyChecksum(byte[],int,byte[],byte[],int)>(r2, $i1, $r4, $r5, i2);
+
+        return $z1;
+    }
+
+    boolean isEqual(sun.security.krb5.Checksum) throws sun.security.krb5.internal.KdcErrException
+    {
+        byte[] $r2, $r3;
+        int $i0, $i1;
+        sun.security.krb5.Checksum r0, r1;
+        boolean $z0;
+
+        r0 := @this: sun.security.krb5.Checksum;
+
+        r1 := @parameter0: sun.security.krb5.Checksum;
+
+        $i1 = r0.<sun.security.krb5.Checksum: int cksumType>;
+
+        $i0 = r1.<sun.security.krb5.Checksum: int cksumType>;
+
+        if $i1 == $i0 goto label1;
+
+        return 0;
+
+     label1:
+        $r3 = r0.<sun.security.krb5.Checksum: byte[] checksum>;
+
+        $r2 = r1.<sun.security.krb5.Checksum: byte[] checksum>;
+
+        $z0 = staticinvoke <sun.security.krb5.internal.crypto.CksumType: boolean isChecksumEqual(byte[],byte[])>($r3, $r2);
+
+        return $z0;
+    }
+
+    public void <init>(sun.security.util.DerValue) throws sun.security.krb5.Asn1Exception, java.io.IOException
+    {
+        byte[] $r11;
+        sun.security.util.DerInputStream $r2, $r5, $r7, $r10, $r12;
+        byte $b0, $b1, $b2, $b4, $b5;
+        int $i3, $i6, $i7;
+        java.math.BigInteger $r6;
+        sun.security.krb5.Checksum r0;
+        sun.security.util.DerValue r1, $r3, $r8;
+        sun.security.krb5.Asn1Exception $r15, $r16, $r17, $r18;
+
+        r0 := @this: sun.security.krb5.Checksum;
+
+        r1 := @parameter0: sun.security.util.DerValue;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $b0 = virtualinvoke r1.<sun.security.util.DerValue: byte getTag()>();
+
+        $i7 = (int) $b0;
+
+        if $i7 == 48 goto label1;
+
+        $r15 = new sun.security.krb5.Asn1Exception;
+
+        specialinvoke $r15.<sun.security.krb5.Asn1Exception: void <init>(int)>(906);
+
+        throw $r15;
+
+     label1:
+        $r2 = virtualinvoke r1.<sun.security.util.DerValue: sun.security.util.DerInputStream getData()>();
+
+        $r3 = virtualinvoke $r2.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+        $b1 = virtualinvoke $r3.<sun.security.util.DerValue: byte getTag()>();
+
+        $b2 = $b1 & 31;
+
+        if $b2 != 0 goto label2;
+
+        $r5 = virtualinvoke $r3.<sun.security.util.DerValue: sun.security.util.DerInputStream getData()>();
+
+        $r6 = virtualinvoke $r5.<sun.security.util.DerInputStream: java.math.BigInteger getBigInteger()>();
+
+        $i3 = virtualinvoke $r6.<java.math.BigInteger: int intValue()>();
+
+        r0.<sun.security.krb5.Checksum: int cksumType> = $i3;
+
+        goto label3;
+
+     label2:
+        $r16 = new sun.security.krb5.Asn1Exception;
+
+        specialinvoke $r16.<sun.security.krb5.Asn1Exception: void <init>(int)>(906);
+
+        throw $r16;
+
+     label3:
+        $r7 = virtualinvoke r1.<sun.security.util.DerValue: sun.security.util.DerInputStream getData()>();
+
+        $r8 = virtualinvoke $r7.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+        $b4 = virtualinvoke $r8.<sun.security.util.DerValue: byte getTag()>();
+
+        $b5 = $b4 & 31;
+
+        if $b5 != 1 goto label4;
+
+        $r10 = virtualinvoke $r8.<sun.security.util.DerValue: sun.security.util.DerInputStream getData()>();
+
+        $r11 = virtualinvoke $r10.<sun.security.util.DerInputStream: byte[] getOctetString()>();
+
+        r0.<sun.security.krb5.Checksum: byte[] checksum> = $r11;
+
+        goto label5;
+
+     label4:
+        $r17 = new sun.security.krb5.Asn1Exception;
+
+        specialinvoke $r17.<sun.security.krb5.Asn1Exception: void <init>(int)>(906);
+
+        throw $r17;
+
+     label5:
+        $r12 = virtualinvoke r1.<sun.security.util.DerValue: sun.security.util.DerInputStream getData()>();
+
+        $i6 = virtualinvoke $r12.<sun.security.util.DerInputStream: int available()>();
+
+        if $i6 <= 0 goto label6;
+
+        $r18 = new sun.security.krb5.Asn1Exception;
+
+        specialinvoke $r18.<sun.security.krb5.Asn1Exception: void <init>(int)>(906);
+
+        throw $r18;
+
+     label6:
+        return;
+    }
+
+    public byte[] asn1Encode() throws sun.security.krb5.Asn1Exception, java.io.IOException
+    {
+        byte[] $r5, $r7;
+        long $l1;
+        byte $b2, $b3;
+        sun.security.util.DerOutputStream $r0, $r1, $r4, $r6;
+        int $i0;
+        java.math.BigInteger $r3;
+        sun.security.krb5.Checksum r2;
+
+        r2 := @this: sun.security.krb5.Checksum;
+
+        $r0 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r0.<sun.security.util.DerOutputStream: void <init>()>();
+
+        $r1 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r1.<sun.security.util.DerOutputStream: void <init>()>();
+
+        $i0 = r2.<sun.security.krb5.Checksum: int cksumType>;
+
+        $l1 = (long) $i0;
+
+        $r3 = staticinvoke <java.math.BigInteger: java.math.BigInteger valueOf(long)>($l1);
+
+        virtualinvoke $r1.<sun.security.util.DerOutputStream: void putInteger(java.math.BigInteger)>($r3);
+
+        $b2 = staticinvoke <sun.security.util.DerValue: byte createTag(byte,boolean,byte)>(-128, 1, 0);
+
+        virtualinvoke $r0.<sun.security.util.DerOutputStream: void write(byte,sun.security.util.DerOutputStream)>($b2, $r1);
+
+        $r4 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r4.<sun.security.util.DerOutputStream: void <init>()>();
+
+        $r5 = r2.<sun.security.krb5.Checksum: byte[] checksum>;
+
+        virtualinvoke $r4.<sun.security.util.DerOutputStream: void putOctetString(byte[])>($r5);
+
+        $b3 = staticinvoke <sun.security.util.DerValue: byte createTag(byte,boolean,byte)>(-128, 1, 1);
+
+        virtualinvoke $r0.<sun.security.util.DerOutputStream: void write(byte,sun.security.util.DerOutputStream)>($b3, $r4);
+
+        $r6 = new sun.security.util.DerOutputStream;
+
+        specialinvoke $r6.<sun.security.util.DerOutputStream: void <init>()>();
+
+        virtualinvoke $r6.<sun.security.util.DerOutputStream: void write(byte,sun.security.util.DerOutputStream)>(48, $r0);
+
+        $r7 = virtualinvoke $r6.<sun.security.util.DerOutputStream: byte[] toByteArray()>();
+
+        return $r7;
+    }
+
+    public static sun.security.krb5.Checksum parse(sun.security.util.DerInputStream, byte, boolean) throws sun.security.krb5.Asn1Exception, java.io.IOException
+    {
+        sun.security.util.DerInputStream r0, $r2;
+        byte b0, $b1, $b2, $b4, $b5;
+        int $i3, $i6, $i7, $i8, $i9;
+        sun.security.krb5.Checksum $r7;
+        boolean z0;
+        sun.security.util.DerValue $r1, $r3;
+        sun.security.krb5.Asn1Exception $r6;
+
+        r0 := @parameter0: sun.security.util.DerInputStream;
+
+        b0 := @parameter1: byte;
+
+        z0 := @parameter2: boolean;
+
+        if z0 == 0 goto label1;
+
+        $i3 = virtualinvoke r0.<sun.security.util.DerInputStream: int peekByte()>();
+
+        $b4 = (byte) $i3;
+
+        $b5 = $b4 & 31;
+
+        $i6 = (int) $b5;
+
+        $i7 = (int) b0;
+
+        if $i6 == $i7 goto label1;
+
+        return null;
+
+     label1:
+        $r1 = virtualinvoke r0.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+        $b1 = virtualinvoke $r1.<sun.security.util.DerValue: byte getTag()>();
+
+        $b2 = $b1 & 31;
+
+        $i8 = (int) b0;
+
+        $i9 = (int) $b2;
+
+        if $i8 == $i9 goto label2;
+
+        $r6 = new sun.security.krb5.Asn1Exception;
+
+        specialinvoke $r6.<sun.security.krb5.Asn1Exception: void <init>(int)>(906);
+
+        throw $r6;
+
+     label2:
+        $r2 = virtualinvoke $r1.<sun.security.util.DerValue: sun.security.util.DerInputStream getData()>();
+
+        $r3 = virtualinvoke $r2.<sun.security.util.DerInputStream: sun.security.util.DerValue getDerValue()>();
+
+        $r7 = new sun.security.krb5.Checksum;
+
+        specialinvoke $r7.<sun.security.krb5.Checksum: void <init>(sun.security.util.DerValue)>($r3);
+
+        return $r7;
+    }
+
+    public final byte[] getBytes()
+    {
+        byte[] $r1;
+        sun.security.krb5.Checksum r0;
+
+        r0 := @this: sun.security.krb5.Checksum;
+
+        $r1 = r0.<sun.security.krb5.Checksum: byte[] checksum>;
+
+        return $r1;
+    }
+
+    public final int getType()
+    {
+        int $i0;
+        sun.security.krb5.Checksum r0;
+
+        r0 := @this: sun.security.krb5.Checksum;
+
+        $i0 = r0.<sun.security.krb5.Checksum: int cksumType>;
+
+        return $i0;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        sun.security.krb5.internal.KdcErrException $r3;
+        java.lang.Object r1;
+        sun.security.krb5.Checksum r0, $r2;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.security.krb5.Checksum;
+
+        r1 := @parameter0: java.lang.Object;
+
+        if r0 != r1 goto label1;
+
+        return 1;
+
+     label1:
+        $z0 = r1 instanceof sun.security.krb5.Checksum;
+
+        if $z0 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        $r2 = (sun.security.krb5.Checksum) r1;
+
+        $z1 = virtualinvoke r0.<sun.security.krb5.Checksum: boolean isEqual(sun.security.krb5.Checksum)>($r2);
+
+     label3:
+        return $z1;
+
+     label4:
+        $r3 := @caughtexception;
+
+        return 0;
+
+        catch sun.security.krb5.internal.KdcErrException from label2 to label3 with label4;
+    }
+
+    public int hashCode()
+    {
+        byte[] $r1, $r2;
+        int $i0, $i1, $i2, i3;
+        sun.security.krb5.Checksum r0;
+
+        r0 := @this: sun.security.krb5.Checksum;
+
+        $i0 = r0.<sun.security.krb5.Checksum: int cksumType>;
+
+        i3 = 629 + $i0;
+
+        $r1 = r0.<sun.security.krb5.Checksum: byte[] checksum>;
+
+        if $r1 == null goto label1;
+
+        $i1 = 37 * i3;
+
+        $r2 = r0.<sun.security.krb5.Checksum: byte[] checksum>;
+
+        $i2 = staticinvoke <java.util.Arrays: int hashCode(byte[])>($r2);
+
+        i3 = $i1 + $i2;
+
+     label1:
+        return i3;
+    }
+
+    static void <clinit>()
+    {
+        boolean $z0;
+
+        <sun.security.krb5.Checksum: int CKSUMTYPE_HMAC_MD5_ARCFOUR> = -138;
+
+        <sun.security.krb5.Checksum: int CKSUMTYPE_HMAC_SHA1_96_AES256> = 16;
+
+        <sun.security.krb5.Checksum: int CKSUMTYPE_HMAC_SHA1_96_AES128> = 15;
+
+        <sun.security.krb5.Checksum: int CKSUMTYPE_HMAC_SHA1_DES3_KD> = 12;
+
+        <sun.security.krb5.Checksum: int CKSUMTYPE_RSA_MD5_DES> = 8;
+
+        <sun.security.krb5.Checksum: int CKSUMTYPE_RSA_MD5> = 7;
+
+        <sun.security.krb5.Checksum: int CKSUMTYPE_RSA_MD4_DES_K> = 6;
+
+        <sun.security.krb5.Checksum: int CKSUMTYPE_DES_MAC_K> = 5;
+
+        <sun.security.krb5.Checksum: int CKSUMTYPE_DES_MAC> = 4;
+
+        <sun.security.krb5.Checksum: int CKSUMTYPE_RSA_MD4_DES> = 3;
+
+        <sun.security.krb5.Checksum: int CKSUMTYPE_RSA_MD4> = 2;
+
+        <sun.security.krb5.Checksum: int CKSUMTYPE_CRC32> = 1;
+
+        <sun.security.krb5.Checksum: int CKSUMTYPE_NULL> = 0;
+
+        $z0 = <sun.security.krb5.internal.Krb5: boolean DEBUG>;
+
+        <sun.security.krb5.Checksum: boolean DEBUG> = $z0;
+
+        staticinvoke <sun.security.krb5.Checksum: void initStatic()>();
+
+        return;
+    }
+}

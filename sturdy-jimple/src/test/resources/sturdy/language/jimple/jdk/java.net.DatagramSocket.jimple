@@ -1,0 +1,2064 @@
+public class java.net.DatagramSocket extends java.lang.Object implements java.io.Closeable
+{
+    private boolean created;
+    private boolean bound;
+    private boolean closed;
+    private java.lang.Object closeLock;
+    java.net.DatagramSocketImpl impl;
+    boolean oldImpl;
+    private boolean explicitFilter;
+    private int bytesLeftToFilter;
+    static final int ST_NOT_CONNECTED;
+    static final int ST_CONNECTED;
+    static final int ST_CONNECTED_NO_IMPL;
+    int connectState;
+    java.net.InetAddress connectedAddress;
+    int connectedPort;
+    static java.lang.Class implClass;
+    static java.net.DatagramSocketImplFactory factory;
+
+    private synchronized void connectInternal(java.net.InetAddress, int) throws java.net.SocketException
+    {
+        java.net.InetAddress r5;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        java.net.InetSocketAddress $r22;
+        java.lang.StringBuilder $r2, $r3, $r19;
+        java.net.DatagramSocketImpl $r8, $r9, $r10, $r12;
+        java.net.DatagramSocket r6;
+        java.net.SocketException $r18, $r23;
+        int i0, $i1, $i2, $i4, $i6;
+        java.lang.String $r4, $r15, $r16;
+        java.lang.IllegalArgumentException $r20, $r21;
+        java.lang.SecurityManager $r7;
+        java.net.AbstractPlainDatagramSocketImpl $r13;
+
+        r6 := @this: java.net.DatagramSocket;
+
+        r5 := @parameter0: java.net.InetAddress;
+
+        i0 := @parameter1: int;
+
+        if i0 < 0 goto label01;
+
+        $i4 = (int) 65535;
+
+        if i0 <= $i4 goto label02;
+
+     label01:
+        $r20 = new java.lang.IllegalArgumentException;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("connect: ");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r20.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r4);
+
+        throw $r20;
+
+     label02:
+        if r5 != null goto label03;
+
+        $r21 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r21.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("connect: null address");
+
+        throw $r21;
+
+     label03:
+        virtualinvoke r6.<java.net.DatagramSocket: void checkAddress(java.net.InetAddress,java.lang.String)>(r5, "connect");
+
+        $z0 = virtualinvoke r6.<java.net.DatagramSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label04;
+
+        return;
+
+     label04:
+        $r7 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r7 == null goto label06;
+
+        $z5 = virtualinvoke r5.<java.net.InetAddress: boolean isMulticastAddress()>();
+
+        if $z5 == 0 goto label05;
+
+        virtualinvoke $r7.<java.lang.SecurityManager: void checkMulticast(java.net.InetAddress)>(r5);
+
+        goto label06;
+
+     label05:
+        $r15 = virtualinvoke r5.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+        virtualinvoke $r7.<java.lang.SecurityManager: void checkConnect(java.lang.String,int)>($r15, i0);
+
+        $r16 = virtualinvoke r5.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+        virtualinvoke $r7.<java.lang.SecurityManager: void checkAccept(java.lang.String,int)>($r16, i0);
+
+     label06:
+        $z6 = virtualinvoke r6.<java.net.DatagramSocket: boolean isBound()>();
+
+        if $z6 != 0 goto label07;
+
+        $r22 = new java.net.InetSocketAddress;
+
+        specialinvoke $r22.<java.net.InetSocketAddress: void <init>(int)>(0);
+
+        virtualinvoke r6.<java.net.DatagramSocket: void bind(java.net.SocketAddress)>($r22);
+
+     label07:
+        $z1 = r6.<java.net.DatagramSocket: boolean oldImpl>;
+
+        if $z1 != 0 goto label08;
+
+        $r8 = r6.<java.net.DatagramSocket: java.net.DatagramSocketImpl impl>;
+
+        $z2 = $r8 instanceof java.net.AbstractPlainDatagramSocketImpl;
+
+        if $z2 == 0 goto label09;
+
+        $r12 = r6.<java.net.DatagramSocket: java.net.DatagramSocketImpl impl>;
+
+        $r13 = (java.net.AbstractPlainDatagramSocketImpl) $r12;
+
+        $z4 = virtualinvoke $r13.<java.net.AbstractPlainDatagramSocketImpl: boolean nativeConnectDisabled()>();
+
+        if $z4 == 0 goto label09;
+
+     label08:
+        r6.<java.net.DatagramSocket: int connectState> = 2;
+
+        goto label15;
+
+     label09:
+        $r9 = virtualinvoke r6.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        virtualinvoke $r9.<java.net.DatagramSocketImpl: void connect(java.net.InetAddress,int)>(r5, i0);
+
+        r6.<java.net.DatagramSocket: int connectState> = 1;
+
+        $r10 = virtualinvoke r6.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        $i1 = virtualinvoke $r10.<java.net.DatagramSocketImpl: int dataAvailable()>();
+
+        $i6 = (int) -1;
+
+        if $i1 != $i6 goto label10;
+
+        $r23 = new java.net.SocketException;
+
+        specialinvoke $r23.<java.net.SocketException: void <init>()>();
+
+        throw $r23;
+
+     label10:
+        if $i1 <= 0 goto label11;
+
+        $z7 = 1;
+
+        goto label12;
+
+     label11:
+        $z7 = 0;
+
+     label12:
+        r6.<java.net.DatagramSocket: boolean explicitFilter> = $z7;
+
+        $z3 = r6.<java.net.DatagramSocket: boolean explicitFilter>;
+
+        if $z3 == 0 goto label13;
+
+        $i2 = virtualinvoke r6.<java.net.DatagramSocket: int getReceiveBufferSize()>();
+
+        r6.<java.net.DatagramSocket: int bytesLeftToFilter> = $i2;
+
+     label13:
+        goto label15;
+
+     label14:
+        $r18 := @caughtexception;
+
+        r6.<java.net.DatagramSocket: int connectState> = 2;
+
+     label15:
+        r6.<java.net.DatagramSocket: java.net.InetAddress connectedAddress> = r5;
+
+        r6.<java.net.DatagramSocket: int connectedPort> = i0;
+
+        return;
+
+        catch java.net.SocketException from label09 to label13 with label14;
+    }
+
+    public void <init>() throws java.net.SocketException
+    {
+        java.net.DatagramSocket r0;
+        java.net.InetSocketAddress $r1;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        $r1 = new java.net.InetSocketAddress;
+
+        specialinvoke $r1.<java.net.InetSocketAddress: void <init>(int)>(0);
+
+        specialinvoke r0.<java.net.DatagramSocket: void <init>(java.net.SocketAddress)>($r1);
+
+        return;
+    }
+
+    protected void <init>(java.net.DatagramSocketImpl)
+    {
+        java.net.DatagramSocket r0;
+        java.net.DatagramSocketImpl r2;
+        int $i1;
+        java.lang.Object $r4;
+        java.lang.NullPointerException $r5;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        r2 := @parameter0: java.net.DatagramSocketImpl;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.net.DatagramSocket: boolean created> = 0;
+
+        r0.<java.net.DatagramSocket: boolean bound> = 0;
+
+        r0.<java.net.DatagramSocket: boolean closed> = 0;
+
+        $r4 = new java.lang.Object;
+
+        specialinvoke $r4.<java.lang.Object: void <init>()>();
+
+        r0.<java.net.DatagramSocket: java.lang.Object closeLock> = $r4;
+
+        r0.<java.net.DatagramSocket: boolean oldImpl> = 0;
+
+        r0.<java.net.DatagramSocket: boolean explicitFilter> = 0;
+
+        r0.<java.net.DatagramSocket: int connectState> = 0;
+
+        r0.<java.net.DatagramSocket: java.net.InetAddress connectedAddress> = null;
+
+        $i1 = (int) -1;
+
+        r0.<java.net.DatagramSocket: int connectedPort> = $i1;
+
+        if r2 != null goto label1;
+
+        $r5 = new java.lang.NullPointerException;
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r5;
+
+     label1:
+        r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl impl> = r2;
+
+        specialinvoke r0.<java.net.DatagramSocket: void checkOldImpl()>();
+
+        return;
+    }
+
+    public void <init>(java.net.SocketAddress) throws java.net.SocketException
+    {
+        java.net.DatagramSocket r0;
+        java.lang.Throwable $r3;
+        java.net.SocketAddress r2;
+        int $i1;
+        java.lang.Object $r4;
+        boolean $z0, $z1;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        r2 := @parameter0: java.net.SocketAddress;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<java.net.DatagramSocket: boolean created> = 0;
+
+        r0.<java.net.DatagramSocket: boolean bound> = 0;
+
+        r0.<java.net.DatagramSocket: boolean closed> = 0;
+
+        $r4 = new java.lang.Object;
+
+        specialinvoke $r4.<java.lang.Object: void <init>()>();
+
+        r0.<java.net.DatagramSocket: java.lang.Object closeLock> = $r4;
+
+        r0.<java.net.DatagramSocket: boolean oldImpl> = 0;
+
+        r0.<java.net.DatagramSocket: boolean explicitFilter> = 0;
+
+        r0.<java.net.DatagramSocket: int connectState> = 0;
+
+        r0.<java.net.DatagramSocket: java.net.InetAddress connectedAddress> = null;
+
+        $i1 = (int) -1;
+
+        r0.<java.net.DatagramSocket: int connectedPort> = $i1;
+
+        virtualinvoke r0.<java.net.DatagramSocket: void createImpl()>();
+
+        if r2 == null goto label5;
+
+     label1:
+        virtualinvoke r0.<java.net.DatagramSocket: void bind(java.net.SocketAddress)>(r2);
+
+     label2:
+        $z0 = virtualinvoke r0.<java.net.DatagramSocket: boolean isBound()>();
+
+        if $z0 != 0 goto label5;
+
+        virtualinvoke r0.<java.net.DatagramSocket: void close()>();
+
+        goto label5;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $z1 = virtualinvoke r0.<java.net.DatagramSocket: boolean isBound()>();
+
+        if $z1 != 0 goto label4;
+
+        virtualinvoke r0.<java.net.DatagramSocket: void close()>();
+
+     label4:
+        throw $r3;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public void <init>(int) throws java.net.SocketException
+    {
+        java.net.DatagramSocket r0;
+        int i0;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        i0 := @parameter0: int;
+
+        specialinvoke r0.<java.net.DatagramSocket: void <init>(int,java.net.InetAddress)>(i0, null);
+
+        return;
+    }
+
+    public void <init>(int, java.net.InetAddress) throws java.net.SocketException
+    {
+        java.net.DatagramSocket r0;
+        java.net.InetAddress r2;
+        int i0;
+        java.net.InetSocketAddress $r1;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        i0 := @parameter0: int;
+
+        r2 := @parameter1: java.net.InetAddress;
+
+        $r1 = new java.net.InetSocketAddress;
+
+        specialinvoke $r1.<java.net.InetSocketAddress: void <init>(java.net.InetAddress,int)>(r2, i0);
+
+        specialinvoke r0.<java.net.DatagramSocket: void <init>(java.net.SocketAddress)>($r1);
+
+        return;
+    }
+
+    private void checkOldImpl()
+    {
+        java.net.DatagramSocket r0;
+        java.security.PrivilegedActionException $r3;
+        java.net.DatagramSocketImpl $r1;
+        java.net.DatagramSocket$1 $r2;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        $r1 = r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl impl>;
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = new java.net.DatagramSocket$1;
+
+        specialinvoke $r2.<java.net.DatagramSocket$1: void <init>(java.net.DatagramSocket)>(r0);
+
+        staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>($r2);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r3 := @caughtexception;
+
+        r0.<java.net.DatagramSocket: boolean oldImpl> = 1;
+
+     label4:
+        return;
+
+        catch java.security.PrivilegedActionException from label1 to label2 with label3;
+    }
+
+    void createImpl() throws java.net.SocketException
+    {
+        java.net.DatagramSocketImpl $r1, $r3, $r5, $r6, $r7;
+        java.net.DatagramSocket r0;
+        java.net.DatagramSocketImplFactory $r2, $r4;
+        boolean $z0, $z1;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        $r1 = r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl impl>;
+
+        if $r1 != null goto label4;
+
+        $r2 = <java.net.DatagramSocket: java.net.DatagramSocketImplFactory factory>;
+
+        if $r2 == null goto label1;
+
+        $r4 = <java.net.DatagramSocket: java.net.DatagramSocketImplFactory factory>;
+
+        $r5 = interfaceinvoke $r4.<java.net.DatagramSocketImplFactory: java.net.DatagramSocketImpl createDatagramSocketImpl()>();
+
+        r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl impl> = $r5;
+
+        specialinvoke r0.<java.net.DatagramSocket: void checkOldImpl()>();
+
+        goto label4;
+
+     label1:
+        $z0 = r0 instanceof java.net.MulticastSocket;
+
+        if $z0 == 0 goto label2;
+
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        $r3 = staticinvoke <java.net.DefaultDatagramSocketImplFactory: java.net.DatagramSocketImpl createDatagramSocketImpl(boolean)>($z1);
+
+        r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl impl> = $r3;
+
+        specialinvoke r0.<java.net.DatagramSocket: void checkOldImpl()>();
+
+     label4:
+        $r6 = r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl impl>;
+
+        virtualinvoke $r6.<java.net.DatagramSocketImpl: void create()>();
+
+        $r7 = r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl impl>;
+
+        virtualinvoke $r7.<java.net.DatagramSocketImpl: void setDatagramSocket(java.net.DatagramSocket)>(r0);
+
+        r0.<java.net.DatagramSocket: boolean created> = 1;
+
+        return;
+    }
+
+    java.net.DatagramSocketImpl getImpl() throws java.net.SocketException
+    {
+        java.net.DatagramSocket r0;
+        boolean $z0;
+        java.net.DatagramSocketImpl $r1;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        $z0 = r0.<java.net.DatagramSocket: boolean created>;
+
+        if $z0 != 0 goto label1;
+
+        virtualinvoke r0.<java.net.DatagramSocket: void createImpl()>();
+
+     label1:
+        $r1 = r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl impl>;
+
+        return $r1;
+    }
+
+    public synchronized void bind(java.net.SocketAddress) throws java.net.SocketException
+    {
+        java.net.SocketAddress r12;
+        java.net.DatagramSocketImpl $r4, $r11;
+        java.net.DatagramSocket r0;
+        java.net.InetAddress $r2;
+        java.net.SocketException $r5, $r8, $r9, $r10;
+        int $i0;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.IllegalArgumentException $r6;
+        java.net.InetSocketAddress r1, $r7;
+        java.lang.SecurityManager $r3;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        r12 := @parameter0: java.net.SocketAddress;
+
+        $z0 = virtualinvoke r0.<java.net.DatagramSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label1;
+
+        $r9 = new java.net.SocketException;
+
+        specialinvoke $r9.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r9;
+
+     label1:
+        $z1 = virtualinvoke r0.<java.net.DatagramSocket: boolean isBound()>();
+
+        if $z1 == 0 goto label2;
+
+        $r8 = new java.net.SocketException;
+
+        specialinvoke $r8.<java.net.SocketException: void <init>(java.lang.String)>("already bound");
+
+        throw $r8;
+
+     label2:
+        if r12 != null goto label3;
+
+        $r7 = new java.net.InetSocketAddress;
+
+        specialinvoke $r7.<java.net.InetSocketAddress: void <init>(int)>(0);
+
+        r12 = $r7;
+
+     label3:
+        $z2 = r12 instanceof java.net.InetSocketAddress;
+
+        if $z2 != 0 goto label4;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Unsupported address type!");
+
+        throw $r6;
+
+     label4:
+        r1 = (java.net.InetSocketAddress) r12;
+
+        $z3 = virtualinvoke r1.<java.net.InetSocketAddress: boolean isUnresolved()>();
+
+        if $z3 == 0 goto label5;
+
+        $r5 = new java.net.SocketException;
+
+        specialinvoke $r5.<java.net.SocketException: void <init>(java.lang.String)>("Unresolved address");
+
+        throw $r5;
+
+     label5:
+        $r2 = virtualinvoke r1.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $i0 = virtualinvoke r1.<java.net.InetSocketAddress: int getPort()>();
+
+        virtualinvoke r0.<java.net.DatagramSocket: void checkAddress(java.net.InetAddress,java.lang.String)>($r2, "bind");
+
+        $r3 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r3 == null goto label6;
+
+        virtualinvoke $r3.<java.lang.SecurityManager: void checkListen(int)>($i0);
+
+     label6:
+        $r4 = virtualinvoke r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        virtualinvoke $r4.<java.net.DatagramSocketImpl: void bind(int,java.net.InetAddress)>($i0, $r2);
+
+     label7:
+        goto label9;
+
+     label8:
+        $r10 := @caughtexception;
+
+        $r11 = virtualinvoke r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        virtualinvoke $r11.<java.net.DatagramSocketImpl: void close()>();
+
+        throw $r10;
+
+     label9:
+        r0.<java.net.DatagramSocket: boolean bound> = 1;
+
+        return;
+
+        catch java.net.SocketException from label6 to label7 with label8;
+    }
+
+    void checkAddress(java.net.InetAddress, java.lang.String)
+    {
+        java.lang.IllegalArgumentException $r1;
+        java.net.InetAddress r0;
+        java.net.DatagramSocket r7;
+        java.lang.StringBuilder $r2, $r4, $r5;
+        java.lang.String r3, $r6;
+        boolean $z0, $z1;
+
+        r7 := @this: java.net.DatagramSocket;
+
+        r0 := @parameter0: java.net.InetAddress;
+
+        r3 := @parameter1: java.lang.String;
+
+        if r0 != null goto label1;
+
+        return;
+
+     label1:
+        $z0 = r0 instanceof java.net.Inet4Address;
+
+        if $z0 != 0 goto label2;
+
+        $z1 = r0 instanceof java.net.Inet6Address;
+
+        if $z1 != 0 goto label2;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": invalid address type");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r6);
+
+        throw $r1;
+
+     label2:
+        return;
+    }
+
+    public void connect(java.net.InetAddress, int)
+    {
+        java.net.DatagramSocket r0;
+        java.net.InetAddress r1;
+        java.net.SocketException $r2;
+        int i0;
+        java.lang.Error $r3;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        r1 := @parameter0: java.net.InetAddress;
+
+        i0 := @parameter1: int;
+
+     label1:
+        specialinvoke r0.<java.net.DatagramSocket: void connectInternal(java.net.InetAddress,int)>(r1, i0);
+
+     label2:
+        goto label4;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new java.lang.Error;
+
+        specialinvoke $r3.<java.lang.Error: void <init>(java.lang.String,java.lang.Throwable)>("connect failed", $r2);
+
+        throw $r3;
+
+     label4:
+        return;
+
+        catch java.net.SocketException from label1 to label2 with label3;
+    }
+
+    public void connect(java.net.SocketAddress) throws java.net.SocketException
+    {
+        java.net.SocketAddress r0;
+        java.lang.IllegalArgumentException $r5, $r6;
+        java.net.InetSocketAddress r1;
+        java.net.DatagramSocket r2;
+        java.net.InetAddress $r3;
+        java.net.SocketException $r4;
+        int $i0;
+        boolean $z0, $z1;
+
+        r2 := @this: java.net.DatagramSocket;
+
+        r0 := @parameter0: java.net.SocketAddress;
+
+        if r0 != null goto label1;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Address can\'t be null");
+
+        throw $r6;
+
+     label1:
+        $z0 = r0 instanceof java.net.InetSocketAddress;
+
+        if $z0 != 0 goto label2;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Unsupported address type");
+
+        throw $r5;
+
+     label2:
+        r1 = (java.net.InetSocketAddress) r0;
+
+        $z1 = virtualinvoke r1.<java.net.InetSocketAddress: boolean isUnresolved()>();
+
+        if $z1 == 0 goto label3;
+
+        $r4 = new java.net.SocketException;
+
+        specialinvoke $r4.<java.net.SocketException: void <init>(java.lang.String)>("Unresolved address");
+
+        throw $r4;
+
+     label3:
+        $r3 = virtualinvoke r1.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $i0 = virtualinvoke r1.<java.net.InetSocketAddress: int getPort()>();
+
+        specialinvoke r2.<java.net.DatagramSocket: void connectInternal(java.net.InetAddress,int)>($r3, $i0);
+
+        return;
+    }
+
+    public void disconnect()
+    {
+        java.net.DatagramSocket r0;
+        java.lang.Throwable $r2;
+        java.net.DatagramSocketImpl $r1;
+        int $i0, $i2;
+        boolean $z0;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = virtualinvoke r0.<java.net.DatagramSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label3;
+
+        exitmonitor r0;
+
+     label2:
+        return;
+
+     label3:
+        $i0 = r0.<java.net.DatagramSocket: int connectState>;
+
+        if $i0 != 1 goto label4;
+
+        $r1 = r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl impl>;
+
+        virtualinvoke $r1.<java.net.DatagramSocketImpl: void disconnect()>();
+
+     label4:
+        r0.<java.net.DatagramSocket: java.net.InetAddress connectedAddress> = null;
+
+        $i2 = (int) -1;
+
+        r0.<java.net.DatagramSocket: int connectedPort> = $i2;
+
+        r0.<java.net.DatagramSocket: int connectState> = 0;
+
+        r0.<java.net.DatagramSocket: boolean explicitFilter> = 0;
+
+        exitmonitor r0;
+
+     label5:
+        goto label8;
+
+     label6:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+     label7:
+        throw $r2;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label3 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public boolean isBound()
+    {
+        java.net.DatagramSocket r0;
+        boolean $z0;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        $z0 = r0.<java.net.DatagramSocket: boolean bound>;
+
+        return $z0;
+    }
+
+    public boolean isConnected()
+    {
+        java.net.DatagramSocket r0;
+        int $i0;
+        boolean $z0;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        $i0 = r0.<java.net.DatagramSocket: int connectState>;
+
+        if $i0 == 0 goto label1;
+
+        $z0 = 1;
+
+        goto label2;
+
+     label1:
+        $z0 = 0;
+
+     label2:
+        return $z0;
+    }
+
+    public java.net.InetAddress getInetAddress()
+    {
+        java.net.DatagramSocket r0;
+        java.net.InetAddress $r1;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        $r1 = r0.<java.net.DatagramSocket: java.net.InetAddress connectedAddress>;
+
+        return $r1;
+    }
+
+    public int getPort()
+    {
+        java.net.DatagramSocket r0;
+        int $i0;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        $i0 = r0.<java.net.DatagramSocket: int connectedPort>;
+
+        return $i0;
+    }
+
+    public java.net.SocketAddress getRemoteSocketAddress()
+    {
+        java.net.DatagramSocket r0;
+        java.net.InetAddress $r2;
+        int $i0;
+        java.net.InetSocketAddress $r1;
+        boolean $z0;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        $z0 = virtualinvoke r0.<java.net.DatagramSocket: boolean isConnected()>();
+
+        if $z0 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r1 = new java.net.InetSocketAddress;
+
+        $r2 = virtualinvoke r0.<java.net.DatagramSocket: java.net.InetAddress getInetAddress()>();
+
+        $i0 = virtualinvoke r0.<java.net.DatagramSocket: int getPort()>();
+
+        specialinvoke $r1.<java.net.InetSocketAddress: void <init>(java.net.InetAddress,int)>($r2, $i0);
+
+        return $r1;
+    }
+
+    public java.net.SocketAddress getLocalSocketAddress()
+    {
+        java.net.DatagramSocket r0;
+        java.net.InetAddress $r2;
+        int $i0;
+        java.net.InetSocketAddress $r1;
+        boolean $z0, $z1;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        $z0 = virtualinvoke r0.<java.net.DatagramSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label1;
+
+        return null;
+
+     label1:
+        $z1 = virtualinvoke r0.<java.net.DatagramSocket: boolean isBound()>();
+
+        if $z1 != 0 goto label2;
+
+        return null;
+
+     label2:
+        $r1 = new java.net.InetSocketAddress;
+
+        $r2 = virtualinvoke r0.<java.net.DatagramSocket: java.net.InetAddress getLocalAddress()>();
+
+        $i0 = virtualinvoke r0.<java.net.DatagramSocket: int getLocalPort()>();
+
+        specialinvoke $r1.<java.net.InetSocketAddress: void <init>(java.net.InetAddress,int)>($r2, $i0);
+
+        return $r1;
+    }
+
+    public void send(java.net.DatagramPacket) throws java.io.IOException
+    {
+        java.lang.Throwable $r15;
+        java.net.DatagramSocketImpl $r6;
+        java.net.DatagramSocket r1;
+        java.net.InetAddress $r2, $r3, $r4, $r8, $r10, $r11, $r13;
+        java.net.SocketException $r14;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.lang.String $r12;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.IllegalArgumentException $r5;
+        java.net.InetSocketAddress $r7;
+        java.lang.SecurityManager $r9;
+        java.net.DatagramPacket r0;
+
+        r1 := @this: java.net.DatagramSocket;
+
+        r0 := @parameter0: java.net.DatagramPacket;
+
+        entermonitor r0;
+
+     label01:
+        $z0 = virtualinvoke r1.<java.net.DatagramSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label02;
+
+        $r14 = new java.net.SocketException;
+
+        specialinvoke $r14.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r14;
+
+     label02:
+        $r2 = virtualinvoke r0.<java.net.DatagramPacket: java.net.InetAddress getAddress()>();
+
+        virtualinvoke r1.<java.net.DatagramSocket: void checkAddress(java.net.InetAddress,java.lang.String)>($r2, "send");
+
+        $i0 = r1.<java.net.DatagramSocket: int connectState>;
+
+        if $i0 != 0 goto label05;
+
+        $r9 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r9 == null goto label04;
+
+        $r10 = virtualinvoke r0.<java.net.DatagramPacket: java.net.InetAddress getAddress()>();
+
+        $z2 = virtualinvoke $r10.<java.net.InetAddress: boolean isMulticastAddress()>();
+
+        if $z2 == 0 goto label03;
+
+        $r13 = virtualinvoke r0.<java.net.DatagramPacket: java.net.InetAddress getAddress()>();
+
+        virtualinvoke $r9.<java.lang.SecurityManager: void checkMulticast(java.net.InetAddress)>($r13);
+
+        goto label04;
+
+     label03:
+        $r11 = virtualinvoke r0.<java.net.DatagramPacket: java.net.InetAddress getAddress()>();
+
+        $r12 = virtualinvoke $r11.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+        $i4 = virtualinvoke r0.<java.net.DatagramPacket: int getPort()>();
+
+        virtualinvoke $r9.<java.lang.SecurityManager: void checkConnect(java.lang.String,int)>($r12, $i4);
+
+     label04:
+        goto label08;
+
+     label05:
+        $r3 = virtualinvoke r0.<java.net.DatagramPacket: java.net.InetAddress getAddress()>();
+
+        if $r3 != null goto label06;
+
+        $r8 = r1.<java.net.DatagramSocket: java.net.InetAddress connectedAddress>;
+
+        virtualinvoke r0.<java.net.DatagramPacket: void setAddress(java.net.InetAddress)>($r8);
+
+        $i3 = r1.<java.net.DatagramSocket: int connectedPort>;
+
+        virtualinvoke r0.<java.net.DatagramPacket: void setPort(int)>($i3);
+
+        goto label08;
+
+     label06:
+        $r4 = r1.<java.net.DatagramSocket: java.net.InetAddress connectedAddress>;
+
+        $z1 = virtualinvoke $r3.<java.net.InetAddress: boolean equals(java.lang.Object)>($r4);
+
+        if $z1 == 0 goto label07;
+
+        $i1 = virtualinvoke r0.<java.net.DatagramPacket: int getPort()>();
+
+        $i2 = r1.<java.net.DatagramSocket: int connectedPort>;
+
+        if $i1 == $i2 goto label08;
+
+     label07:
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("connected address and packet address differ");
+
+        throw $r5;
+
+     label08:
+        $z3 = virtualinvoke r1.<java.net.DatagramSocket: boolean isBound()>();
+
+        if $z3 != 0 goto label09;
+
+        $r7 = new java.net.InetSocketAddress;
+
+        specialinvoke $r7.<java.net.InetSocketAddress: void <init>(int)>(0);
+
+        virtualinvoke r1.<java.net.DatagramSocket: void bind(java.net.SocketAddress)>($r7);
+
+     label09:
+        $r6 = virtualinvoke r1.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        virtualinvoke $r6.<java.net.DatagramSocketImpl: void send(java.net.DatagramPacket)>(r0);
+
+        exitmonitor r0;
+
+     label10:
+        goto label13;
+
+     label11:
+        $r15 := @caughtexception;
+
+        exitmonitor r0;
+
+     label12:
+        throw $r15;
+
+     label13:
+        return;
+
+        catch java.lang.Throwable from label01 to label10 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+    }
+
+    public synchronized void receive(java.net.DatagramPacket) throws java.io.IOException
+    {
+        byte[] $r7, $r10, $r16, $r23;
+        java.net.InetAddress $r3, $r5, $r13, $r18, r27;
+        java.lang.SecurityException $r21;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, z8;
+        java.net.InetSocketAddress $r19;
+        java.net.DatagramPacket r0, $r6, $r9, $r15, $r22, r26;
+        java.lang.Throwable $r20;
+        java.net.DatagramSocketImpl $r2, $r4, $r8, $r11, $r14, $r17, $r24;
+        java.net.DatagramSocket r1;
+        int $i0, $i1, i2, $i3, i4;
+        java.lang.String r25;
+        java.lang.SecurityManager $r12;
+
+        r1 := @this: java.net.DatagramSocket;
+
+        r0 := @parameter0: java.net.DatagramPacket;
+
+        entermonitor r0;
+
+     label01:
+        $z0 = virtualinvoke r1.<java.net.DatagramSocket: boolean isBound()>();
+
+        if $z0 != 0 goto label02;
+
+        $r19 = new java.net.InetSocketAddress;
+
+        specialinvoke $r19.<java.net.InetSocketAddress: void <init>(int)>(0);
+
+        virtualinvoke r1.<java.net.DatagramSocket: void bind(java.net.SocketAddress)>($r19);
+
+     label02:
+        $i0 = r1.<java.net.DatagramSocket: int connectState>;
+
+        if $i0 != 0 goto label08;
+
+        $r12 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r12 == null goto label08;
+
+     label03:
+        $z7 = r1.<java.net.DatagramSocket: boolean oldImpl>;
+
+        if $z7 != 0 goto label04;
+
+        $r15 = new java.net.DatagramPacket;
+
+        $r16 = newarray (byte)[1];
+
+        specialinvoke $r15.<java.net.DatagramPacket: void <init>(byte[],int)>($r16, 1);
+
+        $r17 = virtualinvoke r1.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        i2 = virtualinvoke $r17.<java.net.DatagramSocketImpl: int peekData(java.net.DatagramPacket)>($r15);
+
+        $r18 = virtualinvoke $r15.<java.net.DatagramPacket: java.net.InetAddress getAddress()>();
+
+        r25 = virtualinvoke $r18.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+        goto label05;
+
+     label04:
+        $r13 = new java.net.InetAddress;
+
+        specialinvoke $r13.<java.net.InetAddress: void <init>()>();
+
+        $r14 = virtualinvoke r1.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        i2 = virtualinvoke $r14.<java.net.DatagramSocketImpl: int peek(java.net.InetAddress)>($r13);
+
+        r25 = virtualinvoke $r13.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+     label05:
+        virtualinvoke $r12.<java.lang.SecurityManager: void checkAccept(java.lang.String,int)>(r25, i2);
+
+     label06:
+        goto label08;
+
+     label07:
+        $r21 := @caughtexception;
+
+        $r22 = new java.net.DatagramPacket;
+
+        $r23 = newarray (byte)[1];
+
+        specialinvoke $r22.<java.net.DatagramPacket: void <init>(byte[],int)>($r23, 1);
+
+        $r24 = virtualinvoke r1.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        virtualinvoke $r24.<java.net.DatagramSocketImpl: void receive(java.net.DatagramPacket)>($r22);
+
+        goto label03;
+
+     label08:
+        r26 = null;
+
+        $i3 = r1.<java.net.DatagramSocket: int connectState>;
+
+        if $i3 == 2 goto label09;
+
+        $z6 = r1.<java.net.DatagramSocket: boolean explicitFilter>;
+
+        if $z6 == 0 goto label16;
+
+     label09:
+        z8 = 0;
+
+     label10:
+        if z8 != 0 goto label16;
+
+        $z2 = r1.<java.net.DatagramSocket: boolean oldImpl>;
+
+        if $z2 != 0 goto label11;
+
+        $r9 = new java.net.DatagramPacket;
+
+        $r10 = newarray (byte)[1];
+
+        specialinvoke $r9.<java.net.DatagramPacket: void <init>(byte[],int)>($r10, 1);
+
+        $r11 = virtualinvoke r1.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        i4 = virtualinvoke $r11.<java.net.DatagramSocketImpl: int peekData(java.net.DatagramPacket)>($r9);
+
+        r27 = virtualinvoke $r9.<java.net.DatagramPacket: java.net.InetAddress getAddress()>();
+
+        goto label12;
+
+     label11:
+        $r3 = new java.net.InetAddress;
+
+        specialinvoke $r3.<java.net.InetAddress: void <init>()>();
+
+        r27 = $r3;
+
+        $r4 = virtualinvoke r1.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        i4 = virtualinvoke $r4.<java.net.DatagramSocketImpl: int peek(java.net.InetAddress)>($r3);
+
+     label12:
+        $r5 = r1.<java.net.DatagramSocket: java.net.InetAddress connectedAddress>;
+
+        $z3 = virtualinvoke $r5.<java.net.InetAddress: boolean equals(java.lang.Object)>(r27);
+
+        if $z3 == 0 goto label13;
+
+        $i1 = r1.<java.net.DatagramSocket: int connectedPort>;
+
+        if $i1 == i4 goto label14;
+
+     label13:
+        $r6 = new java.net.DatagramPacket;
+
+        $r7 = newarray (byte)[1024];
+
+        specialinvoke $r6.<java.net.DatagramPacket: void <init>(byte[],int)>($r7, 1024);
+
+        r26 = $r6;
+
+        $r8 = virtualinvoke r1.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        virtualinvoke $r8.<java.net.DatagramSocketImpl: void receive(java.net.DatagramPacket)>($r6);
+
+        $z4 = r1.<java.net.DatagramSocket: boolean explicitFilter>;
+
+        if $z4 == 0 goto label15;
+
+        $z5 = specialinvoke r1.<java.net.DatagramSocket: boolean checkFiltering(java.net.DatagramPacket)>($r6);
+
+        if $z5 == 0 goto label15;
+
+        z8 = 1;
+
+        goto label15;
+
+     label14:
+        z8 = 1;
+
+     label15:
+        goto label10;
+
+     label16:
+        $r2 = virtualinvoke r1.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        virtualinvoke $r2.<java.net.DatagramSocketImpl: void receive(java.net.DatagramPacket)>(r0);
+
+        $z1 = r1.<java.net.DatagramSocket: boolean explicitFilter>;
+
+        if $z1 == 0 goto label17;
+
+        if r26 != null goto label17;
+
+        specialinvoke r1.<java.net.DatagramSocket: boolean checkFiltering(java.net.DatagramPacket)>(r0);
+
+     label17:
+        exitmonitor r0;
+
+     label18:
+        goto label21;
+
+     label19:
+        $r20 := @caughtexception;
+
+        exitmonitor r0;
+
+     label20:
+        throw $r20;
+
+     label21:
+        return;
+
+        catch java.lang.SecurityException from label05 to label06 with label07;
+        catch java.lang.Throwable from label01 to label18 with label19;
+        catch java.lang.Throwable from label19 to label20 with label19;
+    }
+
+    private boolean checkFiltering(java.net.DatagramPacket) throws java.net.SocketException
+    {
+        java.net.DatagramSocketImpl $r2;
+        java.net.DatagramSocket r0;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.net.DatagramPacket r1;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        r1 := @parameter0: java.net.DatagramPacket;
+
+        $i0 = r0.<java.net.DatagramSocket: int bytesLeftToFilter>;
+
+        $i1 = virtualinvoke r1.<java.net.DatagramPacket: int getLength()>();
+
+        $i2 = $i0 - $i1;
+
+        r0.<java.net.DatagramSocket: int bytesLeftToFilter> = $i2;
+
+        $i3 = r0.<java.net.DatagramSocket: int bytesLeftToFilter>;
+
+        if $i3 <= 0 goto label1;
+
+        $r2 = virtualinvoke r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        $i4 = virtualinvoke $r2.<java.net.DatagramSocketImpl: int dataAvailable()>();
+
+        if $i4 > 0 goto label2;
+
+     label1:
+        r0.<java.net.DatagramSocket: boolean explicitFilter> = 0;
+
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    public java.net.InetAddress getLocalAddress()
+    {
+        java.net.DatagramSocketImpl $r1;
+        java.lang.SecurityManager $r3;
+        java.lang.Exception $r5;
+        java.net.DatagramSocket r0;
+        java.net.InetAddress r6;
+        int $i1;
+        java.lang.Object $r2;
+        java.lang.String $r4;
+        boolean $z0, $z1;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        $z0 = virtualinvoke r0.<java.net.DatagramSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label1;
+
+        return null;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        $r2 = virtualinvoke $r1.<java.net.DatagramSocketImpl: java.lang.Object getOption(int)>(15);
+
+        r6 = (java.net.InetAddress) $r2;
+
+        $z1 = virtualinvoke r6.<java.net.InetAddress: boolean isAnyLocalAddress()>();
+
+        if $z1 == 0 goto label2;
+
+        r6 = staticinvoke <java.net.InetAddress: java.net.InetAddress anyLocalAddress()>();
+
+     label2:
+        $r3 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r3 == null goto label3;
+
+        $r4 = virtualinvoke r6.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+        $i1 = (int) -1;
+
+        virtualinvoke $r3.<java.lang.SecurityManager: void checkConnect(java.lang.String,int)>($r4, $i1);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r5 := @caughtexception;
+
+        r6 = staticinvoke <java.net.InetAddress: java.net.InetAddress anyLocalAddress()>();
+
+     label5:
+        return r6;
+
+        catch java.lang.Exception from label1 to label3 with label4;
+    }
+
+    public int getLocalPort()
+    {
+        java.net.DatagramSocket r0;
+        java.net.DatagramSocketImpl $r1;
+        int $i0, $i2;
+        java.lang.Exception $r2;
+        boolean $z0;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        $z0 = virtualinvoke r0.<java.net.DatagramSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label1;
+
+        $i2 = (int) -1;
+
+        return $i2;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        $i0 = virtualinvoke $r1.<java.net.DatagramSocketImpl: int getLocalPort()>();
+
+     label2:
+        return $i0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        return 0;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public synchronized void setSoTimeout(int) throws java.net.SocketException
+    {
+        java.net.DatagramSocket r0;
+        java.net.SocketException $r3;
+        java.net.DatagramSocketImpl $r1;
+        int i0;
+        java.lang.Integer $r2;
+        boolean $z0;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        i0 := @parameter0: int;
+
+        $z0 = virtualinvoke r0.<java.net.DatagramSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label1;
+
+        $r3 = new java.net.SocketException;
+
+        specialinvoke $r3.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r3;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        $r2 = new java.lang.Integer;
+
+        specialinvoke $r2.<java.lang.Integer: void <init>(int)>(i0);
+
+        virtualinvoke $r1.<java.net.DatagramSocketImpl: void setOption(int,java.lang.Object)>(4102, $r2);
+
+        return;
+    }
+
+    public synchronized int getSoTimeout() throws java.net.SocketException
+    {
+        java.net.DatagramSocketImpl $r1, $r2;
+        java.lang.Integer $r4;
+        java.net.DatagramSocket r0;
+        java.net.SocketException $r5;
+        int $i0;
+        java.lang.Object $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        $z0 = virtualinvoke r0.<java.net.DatagramSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label1;
+
+        $r5 = new java.net.SocketException;
+
+        specialinvoke $r5.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r5;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        if $r1 != null goto label2;
+
+        return 0;
+
+     label2:
+        $r2 = virtualinvoke r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        $r3 = virtualinvoke $r2.<java.net.DatagramSocketImpl: java.lang.Object getOption(int)>(4102);
+
+        $z1 = $r3 instanceof java.lang.Integer;
+
+        if $z1 == 0 goto label3;
+
+        $r4 = (java.lang.Integer) $r3;
+
+        $i0 = virtualinvoke $r4.<java.lang.Integer: int intValue()>();
+
+        return $i0;
+
+     label3:
+        return 0;
+    }
+
+    public synchronized void setSendBufferSize(int) throws java.net.SocketException
+    {
+        java.net.DatagramSocket r0;
+        java.net.SocketException $r3;
+        java.net.DatagramSocketImpl $r1;
+        int i0;
+        java.lang.IllegalArgumentException $r4;
+        java.lang.Integer $r2;
+        boolean $z0;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        i0 := @parameter0: int;
+
+        if i0 > 0 goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("negative send size");
+
+        throw $r4;
+
+     label1:
+        $z0 = virtualinvoke r0.<java.net.DatagramSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = new java.net.SocketException;
+
+        specialinvoke $r3.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r3;
+
+     label2:
+        $r1 = virtualinvoke r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        $r2 = new java.lang.Integer;
+
+        specialinvoke $r2.<java.lang.Integer: void <init>(int)>(i0);
+
+        virtualinvoke $r1.<java.net.DatagramSocketImpl: void setOption(int,java.lang.Object)>(4097, $r2);
+
+        return;
+    }
+
+    public synchronized int getSendBufferSize() throws java.net.SocketException
+    {
+        java.net.DatagramSocketImpl $r1;
+        java.lang.Integer $r3;
+        java.net.DatagramSocket r0;
+        java.net.SocketException $r4;
+        int i0;
+        java.lang.Object $r2;
+        boolean $z0, $z1;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        $z0 = virtualinvoke r0.<java.net.DatagramSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label1;
+
+        $r4 = new java.net.SocketException;
+
+        specialinvoke $r4.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r4;
+
+     label1:
+        i0 = 0;
+
+        $r1 = virtualinvoke r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        $r2 = virtualinvoke $r1.<java.net.DatagramSocketImpl: java.lang.Object getOption(int)>(4097);
+
+        $z1 = $r2 instanceof java.lang.Integer;
+
+        if $z1 == 0 goto label2;
+
+        $r3 = (java.lang.Integer) $r2;
+
+        i0 = virtualinvoke $r3.<java.lang.Integer: int intValue()>();
+
+     label2:
+        return i0;
+    }
+
+    public synchronized void setReceiveBufferSize(int) throws java.net.SocketException
+    {
+        java.net.DatagramSocket r0;
+        java.net.SocketException $r3;
+        java.net.DatagramSocketImpl $r1;
+        int i0;
+        java.lang.IllegalArgumentException $r4;
+        java.lang.Integer $r2;
+        boolean $z0;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        i0 := @parameter0: int;
+
+        if i0 > 0 goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("invalid receive size");
+
+        throw $r4;
+
+     label1:
+        $z0 = virtualinvoke r0.<java.net.DatagramSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = new java.net.SocketException;
+
+        specialinvoke $r3.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r3;
+
+     label2:
+        $r1 = virtualinvoke r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        $r2 = new java.lang.Integer;
+
+        specialinvoke $r2.<java.lang.Integer: void <init>(int)>(i0);
+
+        virtualinvoke $r1.<java.net.DatagramSocketImpl: void setOption(int,java.lang.Object)>(4098, $r2);
+
+        return;
+    }
+
+    public synchronized int getReceiveBufferSize() throws java.net.SocketException
+    {
+        java.net.DatagramSocketImpl $r1;
+        java.lang.Integer $r3;
+        java.net.DatagramSocket r0;
+        java.net.SocketException $r4;
+        int i0;
+        java.lang.Object $r2;
+        boolean $z0, $z1;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        $z0 = virtualinvoke r0.<java.net.DatagramSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label1;
+
+        $r4 = new java.net.SocketException;
+
+        specialinvoke $r4.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r4;
+
+     label1:
+        i0 = 0;
+
+        $r1 = virtualinvoke r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        $r2 = virtualinvoke $r1.<java.net.DatagramSocketImpl: java.lang.Object getOption(int)>(4098);
+
+        $z1 = $r2 instanceof java.lang.Integer;
+
+        if $z1 == 0 goto label2;
+
+        $r3 = (java.lang.Integer) $r2;
+
+        i0 = virtualinvoke $r3.<java.lang.Integer: int intValue()>();
+
+     label2:
+        return i0;
+    }
+
+    public synchronized void setReuseAddress(boolean) throws java.net.SocketException
+    {
+        java.net.DatagramSocketImpl $r1, $r3;
+        java.lang.Integer $r4;
+        java.net.DatagramSocket r0;
+        java.net.SocketException $r5;
+        byte $b0;
+        java.lang.Boolean $r2;
+        boolean $z0, $z1, z2;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        z2 := @parameter0: boolean;
+
+        $z0 = virtualinvoke r0.<java.net.DatagramSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label1;
+
+        $r5 = new java.net.SocketException;
+
+        specialinvoke $r5.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r5;
+
+     label1:
+        $z1 = r0.<java.net.DatagramSocket: boolean oldImpl>;
+
+        if $z1 == 0 goto label4;
+
+        $r3 = virtualinvoke r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        $r4 = new java.lang.Integer;
+
+        if z2 == 0 goto label2;
+
+        $b0 = -1;
+
+        goto label3;
+
+     label2:
+        $b0 = 0;
+
+     label3:
+        specialinvoke $r4.<java.lang.Integer: void <init>(int)>($b0);
+
+        virtualinvoke $r3.<java.net.DatagramSocketImpl: void setOption(int,java.lang.Object)>(4, $r4);
+
+        goto label5;
+
+     label4:
+        $r1 = virtualinvoke r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        $r2 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(z2);
+
+        virtualinvoke $r1.<java.net.DatagramSocketImpl: void setOption(int,java.lang.Object)>(4, $r2);
+
+     label5:
+        return;
+    }
+
+    public synchronized boolean getReuseAddress() throws java.net.SocketException
+    {
+        java.net.DatagramSocket r0;
+        java.net.SocketException $r4;
+        java.net.DatagramSocketImpl $r1;
+        java.lang.Boolean $r3;
+        java.lang.Object $r2;
+        boolean $z0, $z1;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        $z0 = virtualinvoke r0.<java.net.DatagramSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label1;
+
+        $r4 = new java.net.SocketException;
+
+        specialinvoke $r4.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r4;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        $r2 = virtualinvoke $r1.<java.net.DatagramSocketImpl: java.lang.Object getOption(int)>(4);
+
+        $r3 = (java.lang.Boolean) $r2;
+
+        $z1 = virtualinvoke $r3.<java.lang.Boolean: boolean booleanValue()>();
+
+        return $z1;
+    }
+
+    public synchronized void setBroadcast(boolean) throws java.net.SocketException
+    {
+        java.net.DatagramSocket r0;
+        java.net.SocketException $r3;
+        java.net.DatagramSocketImpl $r1;
+        java.lang.Boolean $r2;
+        boolean $z0, z1;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        z1 := @parameter0: boolean;
+
+        $z0 = virtualinvoke r0.<java.net.DatagramSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label1;
+
+        $r3 = new java.net.SocketException;
+
+        specialinvoke $r3.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r3;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        $r2 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(z1);
+
+        virtualinvoke $r1.<java.net.DatagramSocketImpl: void setOption(int,java.lang.Object)>(32, $r2);
+
+        return;
+    }
+
+    public synchronized boolean getBroadcast() throws java.net.SocketException
+    {
+        java.net.DatagramSocketImpl $r1;
+        java.net.DatagramSocket r0;
+        java.net.SocketException $r5;
+        java.lang.Boolean $r3, $r4;
+        java.lang.Object $r2;
+        boolean $z0, $z1;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        $z0 = virtualinvoke r0.<java.net.DatagramSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label1;
+
+        $r5 = new java.net.SocketException;
+
+        specialinvoke $r5.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r5;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        $r2 = virtualinvoke $r1.<java.net.DatagramSocketImpl: java.lang.Object getOption(int)>(32);
+
+        $r3 = (java.lang.Boolean) $r2;
+
+        $r4 = (java.lang.Boolean) $r3;
+
+        $z1 = virtualinvoke $r4.<java.lang.Boolean: boolean booleanValue()>();
+
+        return $z1;
+    }
+
+    public synchronized void setTrafficClass(int) throws java.net.SocketException
+    {
+        java.net.DatagramSocketImpl $r2;
+        java.lang.IllegalArgumentException $r0;
+        java.lang.Integer $r3;
+        java.net.DatagramSocket r1;
+        java.net.SocketException $r4, $r5;
+        int i0;
+        boolean $z0, $z1;
+
+        r1 := @this: java.net.DatagramSocket;
+
+        i0 := @parameter0: int;
+
+        if i0 < 0 goto label1;
+
+        if i0 <= 255 goto label2;
+
+     label1:
+        $r0 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r0.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("tc is not in range 0 -- 255");
+
+        throw $r0;
+
+     label2:
+        $z0 = virtualinvoke r1.<java.net.DatagramSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label3;
+
+        $r4 = new java.net.SocketException;
+
+        specialinvoke $r4.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r4;
+
+     label3:
+        $r2 = virtualinvoke r1.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        virtualinvoke $r2.<java.net.DatagramSocketImpl: void setOption(int,java.lang.Object)>(3, $r3);
+
+     label4:
+        goto label6;
+
+     label5:
+        $r5 := @caughtexception;
+
+        $z1 = virtualinvoke r1.<java.net.DatagramSocket: boolean isConnected()>();
+
+        if $z1 != 0 goto label6;
+
+        throw $r5;
+
+     label6:
+        return;
+
+        catch java.net.SocketException from label3 to label4 with label5;
+    }
+
+    public synchronized int getTrafficClass() throws java.net.SocketException
+    {
+        java.net.DatagramSocketImpl $r1;
+        java.lang.Integer $r3, $r4;
+        java.net.DatagramSocket r0;
+        java.net.SocketException $r5;
+        int $i0;
+        java.lang.Object $r2;
+        boolean $z0;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        $z0 = virtualinvoke r0.<java.net.DatagramSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label1;
+
+        $r5 = new java.net.SocketException;
+
+        specialinvoke $r5.<java.net.SocketException: void <init>(java.lang.String)>("Socket is closed");
+
+        throw $r5;
+
+     label1:
+        $r1 = virtualinvoke r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl getImpl()>();
+
+        $r2 = virtualinvoke $r1.<java.net.DatagramSocketImpl: java.lang.Object getOption(int)>(3);
+
+        $r3 = (java.lang.Integer) $r2;
+
+        $r4 = (java.lang.Integer) $r3;
+
+        $i0 = virtualinvoke $r4.<java.lang.Integer: int intValue()>();
+
+        return $i0;
+    }
+
+    public void close()
+    {
+        java.net.DatagramSocket r0;
+        java.lang.Throwable $r3;
+        java.net.DatagramSocketImpl $r2;
+        java.lang.Object $r1;
+        boolean $z0;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        $r1 = r0.<java.net.DatagramSocket: java.lang.Object closeLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = virtualinvoke r0.<java.net.DatagramSocket: boolean isClosed()>();
+
+        if $z0 == 0 goto label3;
+
+        exitmonitor $r1;
+
+     label2:
+        return;
+
+     label3:
+        $r2 = r0.<java.net.DatagramSocket: java.net.DatagramSocketImpl impl>;
+
+        virtualinvoke $r2.<java.net.DatagramSocketImpl: void close()>();
+
+        r0.<java.net.DatagramSocket: boolean closed> = 1;
+
+        exitmonitor $r1;
+
+     label4:
+        goto label7;
+
+     label5:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r3;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public boolean isClosed()
+    {
+        java.net.DatagramSocket r0;
+        java.lang.Throwable $r2;
+        java.lang.Object $r1;
+        boolean $z0;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        $r1 = r0.<java.net.DatagramSocket: java.lang.Object closeLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = r0.<java.net.DatagramSocket: boolean closed>;
+
+        exitmonitor $r1;
+
+     label2:
+        return $z0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public java.nio.channels.DatagramChannel getChannel()
+    {
+        java.net.DatagramSocket r0;
+
+        r0 := @this: java.net.DatagramSocket;
+
+        return null;
+    }
+
+    public static synchronized void setDatagramSocketImplFactory(java.net.DatagramSocketImplFactory) throws java.io.IOException
+    {
+        java.net.SocketException $r3;
+        java.net.DatagramSocketImplFactory $r0, r2;
+        java.lang.SecurityManager $r1;
+
+        r2 := @parameter0: java.net.DatagramSocketImplFactory;
+
+        $r0 = <java.net.DatagramSocket: java.net.DatagramSocketImplFactory factory>;
+
+        if $r0 == null goto label1;
+
+        $r3 = new java.net.SocketException;
+
+        specialinvoke $r3.<java.net.SocketException: void <init>(java.lang.String)>("factory already defined");
+
+        throw $r3;
+
+     label1:
+        $r1 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r1 == null goto label2;
+
+        virtualinvoke $r1.<java.lang.SecurityManager: void checkSetFactory()>();
+
+     label2:
+        <java.net.DatagramSocket: java.net.DatagramSocketImplFactory factory> = r2;
+
+        return;
+    }
+
+    static void <clinit>()
+    {
+        <java.net.DatagramSocket: int ST_CONNECTED_NO_IMPL> = 2;
+
+        <java.net.DatagramSocket: int ST_CONNECTED> = 1;
+
+        <java.net.DatagramSocket: int ST_NOT_CONNECTED> = 0;
+
+        <java.net.DatagramSocket: java.lang.Class implClass> = null;
+
+        return;
+    }
+}

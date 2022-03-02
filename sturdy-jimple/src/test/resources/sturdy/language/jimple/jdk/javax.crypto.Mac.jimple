@@ -1,0 +1,1136 @@
+public class javax.crypto.Mac extends java.lang.Object implements java.lang.Cloneable
+{
+    private static final sun.security.util.Debug debug;
+    private static final sun.security.util.Debug pdebug;
+    private static final boolean skipDebug;
+    private java.security.Provider provider;
+    private javax.crypto.MacSpi spi;
+    private final java.lang.String algorithm;
+    private boolean initialized;
+    private java.security.Provider$Service firstService;
+    private java.util.Iterator serviceIterator;
+    private final java.lang.Object lock;
+    private static int warnCount;
+
+    protected void <init>(javax.crypto.MacSpi, java.security.Provider, java.lang.String)
+    {
+        javax.crypto.MacSpi r1;
+        javax.crypto.Mac r0;
+        java.lang.String r3;
+        java.security.Provider r2;
+
+        r0 := @this: javax.crypto.Mac;
+
+        r1 := @parameter0: javax.crypto.MacSpi;
+
+        r2 := @parameter1: java.security.Provider;
+
+        r3 := @parameter2: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<javax.crypto.Mac: boolean initialized> = 0;
+
+        r0.<javax.crypto.Mac: javax.crypto.MacSpi spi> = r1;
+
+        r0.<javax.crypto.Mac: java.security.Provider provider> = r2;
+
+        r0.<javax.crypto.Mac: java.lang.String algorithm> = r3;
+
+        r0.<javax.crypto.Mac: java.util.Iterator serviceIterator> = null;
+
+        r0.<javax.crypto.Mac: java.lang.Object lock> = null;
+
+        return;
+    }
+
+    private void <init>(java.security.Provider$Service, java.util.Iterator, java.lang.String)
+    {
+        java.util.Iterator r2;
+        java.security.Provider$Service r1;
+        javax.crypto.Mac r0;
+        java.lang.Object $r4;
+        java.lang.String r3;
+
+        r0 := @this: javax.crypto.Mac;
+
+        r1 := @parameter0: java.security.Provider$Service;
+
+        r2 := @parameter1: java.util.Iterator;
+
+        r3 := @parameter2: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<javax.crypto.Mac: boolean initialized> = 0;
+
+        r0.<javax.crypto.Mac: java.security.Provider$Service firstService> = r1;
+
+        r0.<javax.crypto.Mac: java.util.Iterator serviceIterator> = r2;
+
+        r0.<javax.crypto.Mac: java.lang.String algorithm> = r3;
+
+        $r4 = new java.lang.Object;
+
+        specialinvoke $r4.<java.lang.Object: void <init>()>();
+
+        r0.<javax.crypto.Mac: java.lang.Object lock> = $r4;
+
+        return;
+    }
+
+    public final java.lang.String getAlgorithm()
+    {
+        javax.crypto.Mac r0;
+        java.lang.String $r1;
+
+        r0 := @this: javax.crypto.Mac;
+
+        $r1 = r0.<javax.crypto.Mac: java.lang.String algorithm>;
+
+        return $r1;
+    }
+
+    public static final javax.crypto.Mac getInstance(java.lang.String) throws java.security.NoSuchAlgorithmException
+    {
+        java.util.Iterator $r2;
+        javax.crypto.Mac $r12;
+        java.security.Provider $r11;
+        java.util.List $r1;
+        java.security.Provider$Service r10;
+        java.security.NoSuchAlgorithmException $r3;
+        java.lang.StringBuilder $r4, $r5, $r6, $r7;
+        java.lang.Object $r9;
+        java.lang.String r0, $r8;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <sun.security.jca.GetInstance: java.util.List getServices(java.lang.String,java.lang.String)>("Mac", r0);
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r9 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r10 = (java.security.Provider$Service) $r9;
+
+        $r11 = virtualinvoke r10.<java.security.Provider$Service: java.security.Provider getProvider()>();
+
+        $z1 = staticinvoke <javax.crypto.JceSecurity: boolean canUseProvider(java.security.Provider)>($r11);
+
+        if $z1 != 0 goto label2;
+
+        goto label1;
+
+     label2:
+        $r12 = new javax.crypto.Mac;
+
+        specialinvoke $r12.<javax.crypto.Mac: void <init>(java.security.Provider$Service,java.util.Iterator,java.lang.String)>(r10, $r2, r0);
+
+        return $r12;
+
+     label3:
+        $r3 = new java.security.NoSuchAlgorithmException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Algorithm ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" not available");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.security.NoSuchAlgorithmException: void <init>(java.lang.String)>($r8);
+
+        throw $r3;
+    }
+
+    public static final javax.crypto.Mac getInstance(java.lang.String, java.lang.String) throws java.security.NoSuchAlgorithmException, java.security.NoSuchProviderException
+    {
+        javax.crypto.MacSpi $r6;
+        sun.security.jca.GetInstance$Instance $r2;
+        javax.crypto.Mac $r3;
+        java.lang.Object $r4;
+        java.lang.String r0, r1;
+        java.security.Provider $r5;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.lang.String;
+
+        $r2 = staticinvoke <javax.crypto.JceSecurity: sun.security.jca.GetInstance$Instance getInstance(java.lang.String,java.lang.Class,java.lang.String,java.lang.String)>("Mac", class "Ljavax/crypto/MacSpi;", r0, r1);
+
+        $r3 = new javax.crypto.Mac;
+
+        $r4 = $r2.<sun.security.jca.GetInstance$Instance: java.lang.Object impl>;
+
+        $r6 = (javax.crypto.MacSpi) $r4;
+
+        $r5 = $r2.<sun.security.jca.GetInstance$Instance: java.security.Provider provider>;
+
+        specialinvoke $r3.<javax.crypto.Mac: void <init>(javax.crypto.MacSpi,java.security.Provider,java.lang.String)>($r6, $r5, r0);
+
+        return $r3;
+    }
+
+    public static final javax.crypto.Mac getInstance(java.lang.String, java.security.Provider) throws java.security.NoSuchAlgorithmException
+    {
+        javax.crypto.MacSpi $r6;
+        sun.security.jca.GetInstance$Instance $r2;
+        javax.crypto.Mac $r3;
+        java.lang.Object $r4;
+        java.lang.String r0;
+        java.security.Provider r1, $r5;
+
+        r0 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.security.Provider;
+
+        $r2 = staticinvoke <javax.crypto.JceSecurity: sun.security.jca.GetInstance$Instance getInstance(java.lang.String,java.lang.Class,java.lang.String,java.security.Provider)>("Mac", class "Ljavax/crypto/MacSpi;", r0, r1);
+
+        $r3 = new javax.crypto.Mac;
+
+        $r4 = $r2.<sun.security.jca.GetInstance$Instance: java.lang.Object impl>;
+
+        $r6 = (javax.crypto.MacSpi) $r4;
+
+        $r5 = $r2.<sun.security.jca.GetInstance$Instance: java.security.Provider provider>;
+
+        specialinvoke $r3.<javax.crypto.Mac: void <init>(javax.crypto.MacSpi,java.security.Provider,java.lang.String)>($r6, $r5, r0);
+
+        return $r3;
+    }
+
+    void chooseFirstProvider()
+    {
+        java.lang.Throwable $r18;
+        int $i0, $i1;
+        boolean $z0, $z1, $z2;
+        java.util.Iterator $r2, $r7, $r13;
+        javax.crypto.Mac r0;
+        java.security.ProviderException $r14;
+        sun.security.util.Debug $r5, $r15, $r17;
+        java.lang.Exception $r16;
+        java.security.Provider $r9, $r12;
+        javax.crypto.MacSpi $r1, $r4, $r11;
+        java.security.Provider$Service $r6, $r21, r22;
+        java.security.NoSuchAlgorithmException $r19, r20;
+        java.lang.Object $r3, $r8, $r10;
+
+        r0 := @this: javax.crypto.Mac;
+
+        $r1 = r0.<javax.crypto.Mac: javax.crypto.MacSpi spi>;
+
+        if $r1 != null goto label01;
+
+        $r2 = r0.<javax.crypto.Mac: java.util.Iterator serviceIterator>;
+
+        if $r2 != null goto label02;
+
+     label01:
+        return;
+
+     label02:
+        $r3 = r0.<javax.crypto.Mac: java.lang.Object lock>;
+
+        entermonitor $r3;
+
+     label03:
+        $r4 = r0.<javax.crypto.Mac: javax.crypto.MacSpi spi>;
+
+        if $r4 == null goto label05;
+
+        exitmonitor $r3;
+
+     label04:
+        return;
+
+     label05:
+        $r5 = <javax.crypto.Mac: sun.security.util.Debug debug>;
+
+        if $r5 == null goto label07;
+
+        $i0 = <javax.crypto.Mac: int warnCount>;
+
+        $i1 = $i0 - 1;
+
+        <javax.crypto.Mac: int warnCount> = $i1;
+
+        if $i1 < 0 goto label07;
+
+        $r15 = <javax.crypto.Mac: sun.security.util.Debug debug>;
+
+        virtualinvoke $r15.<sun.security.util.Debug: void println(java.lang.String)>("Mac.init() not first method called, disabling delayed provider selection");
+
+        if $i1 != 0 goto label06;
+
+        $r17 = <javax.crypto.Mac: sun.security.util.Debug debug>;
+
+        virtualinvoke $r17.<sun.security.util.Debug: void println(java.lang.String)>("Further warnings of this type will be suppressed");
+
+     label06:
+        $r16 = new java.lang.Exception;
+
+        specialinvoke $r16.<java.lang.Exception: void <init>(java.lang.String)>("Call trace");
+
+        virtualinvoke $r16.<java.lang.Exception: void printStackTrace()>();
+
+     label07:
+        r20 = null;
+
+     label08:
+        $r21 = r0.<javax.crypto.Mac: java.security.Provider$Service firstService>;
+
+        if $r21 != null goto label09;
+
+        $r13 = r0.<javax.crypto.Mac: java.util.Iterator serviceIterator>;
+
+        $z2 = interfaceinvoke $r13.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label18;
+
+     label09:
+        $r6 = r0.<javax.crypto.Mac: java.security.Provider$Service firstService>;
+
+        if $r6 == null goto label10;
+
+        r22 = r0.<javax.crypto.Mac: java.security.Provider$Service firstService>;
+
+        r0.<javax.crypto.Mac: java.security.Provider$Service firstService> = null;
+
+        goto label11;
+
+     label10:
+        $r7 = r0.<javax.crypto.Mac: java.util.Iterator serviceIterator>;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r22 = (java.security.Provider$Service) $r8;
+
+     label11:
+        $r9 = virtualinvoke r22.<java.security.Provider$Service: java.security.Provider getProvider()>();
+
+        $z0 = staticinvoke <javax.crypto.JceSecurity: boolean canUseProvider(java.security.Provider)>($r9);
+
+        if $z0 != 0 goto label12;
+
+        goto label08;
+
+     label12:
+        $r10 = virtualinvoke r22.<java.security.Provider$Service: java.lang.Object newInstance(java.lang.Object)>(null);
+
+        $z1 = $r10 instanceof javax.crypto.MacSpi;
+
+        if $z1 != 0 goto label14;
+
+     label13:
+        goto label08;
+
+     label14:
+        $r11 = (javax.crypto.MacSpi) $r10;
+
+        r0.<javax.crypto.Mac: javax.crypto.MacSpi spi> = $r11;
+
+        $r12 = virtualinvoke r22.<java.security.Provider$Service: java.security.Provider getProvider()>();
+
+        r0.<javax.crypto.Mac: java.security.Provider provider> = $r12;
+
+        r0.<javax.crypto.Mac: java.security.Provider$Service firstService> = null;
+
+        r0.<javax.crypto.Mac: java.util.Iterator serviceIterator> = null;
+
+     label15:
+        exitmonitor $r3;
+
+     label16:
+        return;
+
+     label17:
+        $r19 := @caughtexception;
+
+        r20 = $r19;
+
+        goto label08;
+
+     label18:
+        $r14 = new java.security.ProviderException;
+
+        specialinvoke $r14.<java.security.ProviderException: void <init>(java.lang.String)>("Could not construct MacSpi instance");
+
+        if r20 == null goto label19;
+
+        virtualinvoke $r14.<java.security.ProviderException: java.lang.Throwable initCause(java.lang.Throwable)>(r20);
+
+     label19:
+        throw $r14;
+
+     label20:
+        $r18 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label21:
+        throw $r18;
+
+        catch java.security.NoSuchAlgorithmException from label12 to label13 with label17;
+        catch java.security.NoSuchAlgorithmException from label14 to label15 with label17;
+        catch java.lang.Throwable from label03 to label04 with label20;
+        catch java.lang.Throwable from label05 to label16 with label20;
+        catch java.lang.Throwable from label17 to label21 with label20;
+    }
+
+    private void chooseProvider(java.security.Key, java.security.spec.AlgorithmParameterSpec) throws java.security.InvalidKeyException, java.security.InvalidAlgorithmParameterException
+    {
+        java.security.spec.AlgorithmParameterSpec r9;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        javax.crypto.Mac r0;
+        java.lang.Exception $r23, r24;
+        java.security.Provider $r7, $r10;
+        java.security.Key r6;
+        java.security.InvalidKeyException $r12, $r20;
+        java.lang.StringBuilder $r13, $r14, $r15;
+        java.lang.Throwable $r22;
+        java.security.InvalidAlgorithmParameterException $r19;
+        java.lang.String $r16, $r28;
+        java.util.Iterator $r4, $r11;
+        java.lang.RuntimeException $r18;
+        javax.crypto.MacSpi $r2, $r21, r27;
+        java.security.Provider$Service $r3, $r25, r26;
+        java.lang.Object $r1, $r5, $r8;
+        java.lang.Class $r17;
+
+        r0 := @this: javax.crypto.Mac;
+
+        r6 := @parameter0: java.security.Key;
+
+        r9 := @parameter1: java.security.spec.AlgorithmParameterSpec;
+
+        $r1 = r0.<javax.crypto.Mac: java.lang.Object lock>;
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = r0.<javax.crypto.Mac: javax.crypto.MacSpi spi>;
+
+        if $r2 == null goto label03;
+
+        $r21 = r0.<javax.crypto.Mac: javax.crypto.MacSpi spi>;
+
+        virtualinvoke $r21.<javax.crypto.MacSpi: void engineInit(java.security.Key,java.security.spec.AlgorithmParameterSpec)>(r6, r9);
+
+        exitmonitor $r1;
+
+     label02:
+        return;
+
+     label03:
+        r24 = null;
+
+     label04:
+        $r25 = r0.<javax.crypto.Mac: java.security.Provider$Service firstService>;
+
+        if $r25 != null goto label05;
+
+        $r11 = r0.<javax.crypto.Mac: java.util.Iterator serviceIterator>;
+
+        $z2 = interfaceinvoke $r11.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label14;
+
+     label05:
+        $r3 = r0.<javax.crypto.Mac: java.security.Provider$Service firstService>;
+
+        if $r3 == null goto label06;
+
+        r26 = r0.<javax.crypto.Mac: java.security.Provider$Service firstService>;
+
+        r0.<javax.crypto.Mac: java.security.Provider$Service firstService> = null;
+
+        goto label07;
+
+     label06:
+        $r4 = r0.<javax.crypto.Mac: java.util.Iterator serviceIterator>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r26 = (java.security.Provider$Service) $r5;
+
+     label07:
+        $z0 = virtualinvoke r26.<java.security.Provider$Service: boolean supportsParameter(java.lang.Object)>(r6);
+
+        if $z0 != 0 goto label08;
+
+        goto label04;
+
+     label08:
+        $r7 = virtualinvoke r26.<java.security.Provider$Service: java.security.Provider getProvider()>();
+
+        $z1 = staticinvoke <javax.crypto.JceSecurity: boolean canUseProvider(java.security.Provider)>($r7);
+
+        if $z1 != 0 goto label09;
+
+        goto label04;
+
+     label09:
+        $r8 = virtualinvoke r26.<java.security.Provider$Service: java.lang.Object newInstance(java.lang.Object)>(null);
+
+        r27 = (javax.crypto.MacSpi) $r8;
+
+        virtualinvoke r27.<javax.crypto.MacSpi: void engineInit(java.security.Key,java.security.spec.AlgorithmParameterSpec)>(r6, r9);
+
+        $r10 = virtualinvoke r26.<java.security.Provider$Service: java.security.Provider getProvider()>();
+
+        r0.<javax.crypto.Mac: java.security.Provider provider> = $r10;
+
+        r0.<javax.crypto.Mac: javax.crypto.MacSpi spi> = r27;
+
+        r0.<javax.crypto.Mac: java.security.Provider$Service firstService> = null;
+
+        r0.<javax.crypto.Mac: java.util.Iterator serviceIterator> = null;
+
+     label10:
+        exitmonitor $r1;
+
+     label11:
+        return;
+
+     label12:
+        $r23 := @caughtexception;
+
+        if r24 != null goto label13;
+
+        r24 = $r23;
+
+     label13:
+        goto label04;
+
+     label14:
+        $z3 = r24 instanceof java.security.InvalidKeyException;
+
+        if $z3 == 0 goto label15;
+
+        $r20 = (java.security.InvalidKeyException) r24;
+
+        throw $r20;
+
+     label15:
+        $z4 = r24 instanceof java.security.InvalidAlgorithmParameterException;
+
+        if $z4 == 0 goto label16;
+
+        $r19 = (java.security.InvalidAlgorithmParameterException) r24;
+
+        throw $r19;
+
+     label16:
+        $z5 = r24 instanceof java.lang.RuntimeException;
+
+        if $z5 == 0 goto label17;
+
+        $r18 = (java.lang.RuntimeException) r24;
+
+        throw $r18;
+
+     label17:
+        if r6 == null goto label18;
+
+        $r17 = virtualinvoke r6.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r28 = virtualinvoke $r17.<java.lang.Class: java.lang.String getName()>();
+
+        goto label19;
+
+     label18:
+        $r28 = "(null)";
+
+     label19:
+        $r12 = new java.security.InvalidKeyException;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No installed provider supports this key: ");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r28);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r12.<java.security.InvalidKeyException: void <init>(java.lang.String,java.lang.Throwable)>($r16, r24);
+
+        throw $r12;
+
+     label20:
+        $r22 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label21:
+        throw $r22;
+
+        catch java.lang.Exception from label09 to label10 with label12;
+        catch java.lang.Throwable from label01 to label02 with label20;
+        catch java.lang.Throwable from label03 to label11 with label20;
+        catch java.lang.Throwable from label12 to label21 with label20;
+    }
+
+    public final java.security.Provider getProvider()
+    {
+        javax.crypto.Mac r0;
+        java.security.Provider $r1;
+
+        r0 := @this: javax.crypto.Mac;
+
+        virtualinvoke r0.<javax.crypto.Mac: void chooseFirstProvider()>();
+
+        $r1 = r0.<javax.crypto.Mac: java.security.Provider provider>;
+
+        return $r1;
+    }
+
+    public final int getMacLength()
+    {
+        int $i0;
+        javax.crypto.Mac r0;
+        javax.crypto.MacSpi $r1;
+
+        r0 := @this: javax.crypto.Mac;
+
+        virtualinvoke r0.<javax.crypto.Mac: void chooseFirstProvider()>();
+
+        $r1 = r0.<javax.crypto.Mac: javax.crypto.MacSpi spi>;
+
+        $i0 = virtualinvoke $r1.<javax.crypto.MacSpi: int engineGetMacLength()>();
+
+        return $i0;
+    }
+
+    public final void init(java.security.Key) throws java.security.InvalidKeyException
+    {
+        java.security.InvalidAlgorithmParameterException $r15;
+        java.lang.String $r7, $r11, $r13;
+        boolean $z0;
+        javax.crypto.Mac r0;
+        sun.security.util.Debug $r3, $r5;
+        java.security.Provider $r10;
+        java.security.Key r2;
+        javax.crypto.MacSpi $r1, $r14;
+        java.lang.StringBuilder $r4, $r6, $r8, $r9, $r12;
+        java.security.InvalidKeyException $r16;
+
+        r0 := @this: javax.crypto.Mac;
+
+        r2 := @parameter0: java.security.Key;
+
+     label1:
+        $r1 = r0.<javax.crypto.Mac: javax.crypto.MacSpi spi>;
+
+        if $r1 == null goto label2;
+
+        $r14 = r0.<javax.crypto.Mac: javax.crypto.MacSpi spi>;
+
+        virtualinvoke $r14.<javax.crypto.MacSpi: void engineInit(java.security.Key,java.security.spec.AlgorithmParameterSpec)>(r2, null);
+
+        goto label3;
+
+     label2:
+        specialinvoke r0.<javax.crypto.Mac: void chooseProvider(java.security.Key,java.security.spec.AlgorithmParameterSpec)>(r2, null);
+
+     label3:
+        goto label5;
+
+     label4:
+        $r15 := @caughtexception;
+
+        $r16 = new java.security.InvalidKeyException;
+
+        specialinvoke $r16.<java.security.InvalidKeyException: void <init>(java.lang.String,java.lang.Throwable)>("init() failed", $r15);
+
+        throw $r16;
+
+     label5:
+        r0.<javax.crypto.Mac: boolean initialized> = 1;
+
+        $z0 = <javax.crypto.Mac: boolean skipDebug>;
+
+        if $z0 != 0 goto label6;
+
+        $r3 = <javax.crypto.Mac: sun.security.util.Debug pdebug>;
+
+        if $r3 == null goto label6;
+
+        $r5 = <javax.crypto.Mac: sun.security.util.Debug pdebug>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Mac.");
+
+        $r7 = r0.<javax.crypto.Mac: java.lang.String algorithm>;
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" algorithm from: ");
+
+        $r10 = r0.<javax.crypto.Mac: java.security.Provider provider>;
+
+        $r11 = virtualinvoke $r10.<java.security.Provider: java.lang.String getName()>();
+
+        $r12 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<sun.security.util.Debug: void println(java.lang.String)>($r13);
+
+     label6:
+        return;
+
+        catch java.security.InvalidAlgorithmParameterException from label1 to label3 with label4;
+    }
+
+    public final void init(java.security.Key, java.security.spec.AlgorithmParameterSpec) throws java.security.InvalidKeyException, java.security.InvalidAlgorithmParameterException
+    {
+        java.security.spec.AlgorithmParameterSpec r3;
+        java.lang.String $r8, $r12, $r14;
+        boolean $z0;
+        javax.crypto.Mac r0;
+        sun.security.util.Debug $r4, $r6;
+        java.security.Provider $r11;
+        java.security.Key r2;
+        javax.crypto.MacSpi $r1, $r15;
+        java.lang.StringBuilder $r5, $r7, $r9, $r10, $r13;
+
+        r0 := @this: javax.crypto.Mac;
+
+        r2 := @parameter0: java.security.Key;
+
+        r3 := @parameter1: java.security.spec.AlgorithmParameterSpec;
+
+        $r1 = r0.<javax.crypto.Mac: javax.crypto.MacSpi spi>;
+
+        if $r1 == null goto label1;
+
+        $r15 = r0.<javax.crypto.Mac: javax.crypto.MacSpi spi>;
+
+        virtualinvoke $r15.<javax.crypto.MacSpi: void engineInit(java.security.Key,java.security.spec.AlgorithmParameterSpec)>(r2, r3);
+
+        goto label2;
+
+     label1:
+        specialinvoke r0.<javax.crypto.Mac: void chooseProvider(java.security.Key,java.security.spec.AlgorithmParameterSpec)>(r2, r3);
+
+     label2:
+        r0.<javax.crypto.Mac: boolean initialized> = 1;
+
+        $z0 = <javax.crypto.Mac: boolean skipDebug>;
+
+        if $z0 != 0 goto label3;
+
+        $r4 = <javax.crypto.Mac: sun.security.util.Debug pdebug>;
+
+        if $r4 == null goto label3;
+
+        $r6 = <javax.crypto.Mac: sun.security.util.Debug pdebug>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Mac.");
+
+        $r8 = r0.<javax.crypto.Mac: java.lang.String algorithm>;
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" algorithm from: ");
+
+        $r11 = r0.<javax.crypto.Mac: java.security.Provider provider>;
+
+        $r12 = virtualinvoke $r11.<java.security.Provider: java.lang.String getName()>();
+
+        $r13 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<sun.security.util.Debug: void println(java.lang.String)>($r14);
+
+     label3:
+        return;
+    }
+
+    public final void update(byte) throws java.lang.IllegalStateException
+    {
+        java.lang.IllegalStateException $r2;
+        byte b0;
+        javax.crypto.MacSpi $r1;
+        javax.crypto.Mac r0;
+        boolean $z0;
+
+        r0 := @this: javax.crypto.Mac;
+
+        b0 := @parameter0: byte;
+
+        virtualinvoke r0.<javax.crypto.Mac: void chooseFirstProvider()>();
+
+        $z0 = r0.<javax.crypto.Mac: boolean initialized>;
+
+        if $z0 != 0 goto label1;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("MAC not initialized");
+
+        throw $r2;
+
+     label1:
+        $r1 = r0.<javax.crypto.Mac: javax.crypto.MacSpi spi>;
+
+        virtualinvoke $r1.<javax.crypto.MacSpi: void engineUpdate(byte)>(b0);
+
+        return;
+    }
+
+    public final void update(byte[]) throws java.lang.IllegalStateException
+    {
+        byte[] r1;
+        java.lang.IllegalStateException $r3;
+        javax.crypto.MacSpi $r2;
+        int $i0;
+        javax.crypto.Mac r0;
+        boolean $z0;
+
+        r0 := @this: javax.crypto.Mac;
+
+        r1 := @parameter0: byte[];
+
+        virtualinvoke r0.<javax.crypto.Mac: void chooseFirstProvider()>();
+
+        $z0 = r0.<javax.crypto.Mac: boolean initialized>;
+
+        if $z0 != 0 goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("MAC not initialized");
+
+        throw $r3;
+
+     label1:
+        if r1 == null goto label2;
+
+        $r2 = r0.<javax.crypto.Mac: javax.crypto.MacSpi spi>;
+
+        $i0 = lengthof r1;
+
+        virtualinvoke $r2.<javax.crypto.MacSpi: void engineUpdate(byte[],int,int)>(r1, 0, $i0);
+
+     label2:
+        return;
+    }
+
+    public final void update(byte[], int, int) throws java.lang.IllegalStateException
+    {
+        byte[] r1;
+        java.lang.IllegalStateException $r3;
+        javax.crypto.Mac r0;
+        java.lang.IllegalArgumentException $r4;
+        javax.crypto.MacSpi $r2;
+        int i0, i1, $i2, $i3;
+        boolean $z0;
+
+        r0 := @this: javax.crypto.Mac;
+
+        r1 := @parameter0: byte[];
+
+        i0 := @parameter1: int;
+
+        i1 := @parameter2: int;
+
+        virtualinvoke r0.<javax.crypto.Mac: void chooseFirstProvider()>();
+
+        $z0 = r0.<javax.crypto.Mac: boolean initialized>;
+
+        if $z0 != 0 goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("MAC not initialized");
+
+        throw $r3;
+
+     label1:
+        if r1 == null goto label4;
+
+        if i0 < 0 goto label2;
+
+        $i2 = lengthof r1;
+
+        $i3 = $i2 - i0;
+
+        if i1 > $i3 goto label2;
+
+        if i1 >= 0 goto label3;
+
+     label2:
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Bad arguments");
+
+        throw $r4;
+
+     label3:
+        $r2 = r0.<javax.crypto.Mac: javax.crypto.MacSpi spi>;
+
+        virtualinvoke $r2.<javax.crypto.MacSpi: void engineUpdate(byte[],int,int)>(r1, i0, i1);
+
+     label4:
+        return;
+    }
+
+    public final void update(java.nio.ByteBuffer)
+    {
+        java.lang.IllegalStateException $r4;
+        javax.crypto.MacSpi $r2;
+        javax.crypto.Mac r0;
+        java.lang.IllegalArgumentException $r3;
+        java.nio.ByteBuffer r1;
+        boolean $z0;
+
+        r0 := @this: javax.crypto.Mac;
+
+        r1 := @parameter0: java.nio.ByteBuffer;
+
+        virtualinvoke r0.<javax.crypto.Mac: void chooseFirstProvider()>();
+
+        $z0 = r0.<javax.crypto.Mac: boolean initialized>;
+
+        if $z0 != 0 goto label1;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("MAC not initialized");
+
+        throw $r4;
+
+     label1:
+        if r1 != null goto label2;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Buffer must not be null");
+
+        throw $r3;
+
+     label2:
+        $r2 = r0.<javax.crypto.Mac: javax.crypto.MacSpi spi>;
+
+        virtualinvoke $r2.<javax.crypto.MacSpi: void engineUpdate(java.nio.ByteBuffer)>(r1);
+
+        return;
+    }
+
+    public final byte[] doFinal() throws java.lang.IllegalStateException
+    {
+        byte[] $r2;
+        java.lang.IllegalStateException $r4;
+        javax.crypto.MacSpi $r1, $r3;
+        javax.crypto.Mac r0;
+        boolean $z0;
+
+        r0 := @this: javax.crypto.Mac;
+
+        virtualinvoke r0.<javax.crypto.Mac: void chooseFirstProvider()>();
+
+        $z0 = r0.<javax.crypto.Mac: boolean initialized>;
+
+        if $z0 != 0 goto label1;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("MAC not initialized");
+
+        throw $r4;
+
+     label1:
+        $r1 = r0.<javax.crypto.Mac: javax.crypto.MacSpi spi>;
+
+        $r2 = virtualinvoke $r1.<javax.crypto.MacSpi: byte[] engineDoFinal()>();
+
+        $r3 = r0.<javax.crypto.Mac: javax.crypto.MacSpi spi>;
+
+        virtualinvoke $r3.<javax.crypto.MacSpi: void engineReset()>();
+
+        return $r2;
+    }
+
+    public final void doFinal(byte[], int) throws javax.crypto.ShortBufferException, java.lang.IllegalStateException
+    {
+        byte[] r1, $r3;
+        java.lang.IllegalStateException $r4;
+        javax.crypto.Mac r0;
+        int $i0, i1, $i2, $i3;
+        boolean $z0;
+        javax.crypto.ShortBufferException $r2;
+
+        r0 := @this: javax.crypto.Mac;
+
+        r1 := @parameter0: byte[];
+
+        i1 := @parameter1: int;
+
+        virtualinvoke r0.<javax.crypto.Mac: void chooseFirstProvider()>();
+
+        $z0 = r0.<javax.crypto.Mac: boolean initialized>;
+
+        if $z0 != 0 goto label1;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("MAC not initialized");
+
+        throw $r4;
+
+     label1:
+        $i0 = virtualinvoke r0.<javax.crypto.Mac: int getMacLength()>();
+
+        if r1 == null goto label2;
+
+        $i2 = lengthof r1;
+
+        $i3 = $i2 - i1;
+
+        if $i3 >= $i0 goto label3;
+
+     label2:
+        $r2 = new javax.crypto.ShortBufferException;
+
+        specialinvoke $r2.<javax.crypto.ShortBufferException: void <init>(java.lang.String)>("Cannot store MAC in output buffer");
+
+        throw $r2;
+
+     label3:
+        $r3 = virtualinvoke r0.<javax.crypto.Mac: byte[] doFinal()>();
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, 0, r1, i1, $i0);
+
+        return;
+    }
+
+    public final byte[] doFinal(byte[]) throws java.lang.IllegalStateException
+    {
+        byte[] r1, $r2;
+        java.lang.IllegalStateException $r3;
+        javax.crypto.Mac r0;
+        boolean $z0;
+
+        r0 := @this: javax.crypto.Mac;
+
+        r1 := @parameter0: byte[];
+
+        virtualinvoke r0.<javax.crypto.Mac: void chooseFirstProvider()>();
+
+        $z0 = r0.<javax.crypto.Mac: boolean initialized>;
+
+        if $z0 != 0 goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("MAC not initialized");
+
+        throw $r3;
+
+     label1:
+        virtualinvoke r0.<javax.crypto.Mac: void update(byte[])>(r1);
+
+        $r2 = virtualinvoke r0.<javax.crypto.Mac: byte[] doFinal()>();
+
+        return $r2;
+    }
+
+    public final void reset()
+    {
+        javax.crypto.Mac r0;
+        javax.crypto.MacSpi $r1;
+
+        r0 := @this: javax.crypto.Mac;
+
+        virtualinvoke r0.<javax.crypto.Mac: void chooseFirstProvider()>();
+
+        $r1 = r0.<javax.crypto.Mac: javax.crypto.MacSpi spi>;
+
+        virtualinvoke $r1.<javax.crypto.MacSpi: void engineReset()>();
+
+        return;
+    }
+
+    public final java.lang.Object clone() throws java.lang.CloneNotSupportedException
+    {
+        javax.crypto.MacSpi $r3, $r5;
+        javax.crypto.Mac r0, r2;
+        java.lang.Object $r1, $r4;
+
+        r0 := @this: javax.crypto.Mac;
+
+        virtualinvoke r0.<javax.crypto.Mac: void chooseFirstProvider()>();
+
+        $r1 = specialinvoke r0.<java.lang.Object: java.lang.Object clone()>();
+
+        r2 = (javax.crypto.Mac) $r1;
+
+        $r3 = r0.<javax.crypto.Mac: javax.crypto.MacSpi spi>;
+
+        $r4 = virtualinvoke $r3.<javax.crypto.MacSpi: java.lang.Object clone()>();
+
+        $r5 = (javax.crypto.MacSpi) $r4;
+
+        r2.<javax.crypto.Mac: javax.crypto.MacSpi spi> = $r5;
+
+        return r2;
+    }
+
+    static void <clinit>()
+    {
+        sun.security.util.Debug $r0, $r1;
+        boolean $z0, $z1, $z2;
+
+        $r0 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String,java.lang.String)>("jca", "Mac");
+
+        <javax.crypto.Mac: sun.security.util.Debug debug> = $r0;
+
+        $r1 = staticinvoke <sun.security.util.Debug: sun.security.util.Debug getInstance(java.lang.String,java.lang.String)>("provider", "Provider");
+
+        <javax.crypto.Mac: sun.security.util.Debug pdebug> = $r1;
+
+        $z0 = staticinvoke <sun.security.util.Debug: boolean isOn(java.lang.String)>("engine=");
+
+        if $z0 == 0 goto label1;
+
+        $z1 = staticinvoke <sun.security.util.Debug: boolean isOn(java.lang.String)>("mac");
+
+        if $z1 != 0 goto label1;
+
+        $z2 = 1;
+
+        goto label2;
+
+     label1:
+        $z2 = 0;
+
+     label2:
+        <javax.crypto.Mac: boolean skipDebug> = $z2;
+
+        <javax.crypto.Mac: int warnCount> = 10;
+
+        return;
+    }
+}

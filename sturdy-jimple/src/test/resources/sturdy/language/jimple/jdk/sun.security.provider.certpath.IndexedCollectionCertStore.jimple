@@ -1,0 +1,818 @@
+public class sun.security.provider.certpath.IndexedCollectionCertStore extends java.security.cert.CertStoreSpi
+{
+    private java.util.Map certSubjects;
+    private java.util.Map crlIssuers;
+    private java.util.Set otherCertificates;
+    private java.util.Set otherCRLs;
+
+    public void <init>(java.security.cert.CertStoreParameters) throws java.security.InvalidAlgorithmParameterException
+    {
+        java.security.cert.CollectionCertStoreParameters $r2;
+        java.security.cert.CertStoreParameters r1;
+        sun.security.provider.certpath.IndexedCollectionCertStore r0;
+        java.util.Collection $r3;
+        boolean $z0;
+        java.security.InvalidAlgorithmParameterException $r4, $r5;
+
+        r0 := @this: sun.security.provider.certpath.IndexedCollectionCertStore;
+
+        r1 := @parameter0: java.security.cert.CertStoreParameters;
+
+        specialinvoke r0.<java.security.cert.CertStoreSpi: void <init>(java.security.cert.CertStoreParameters)>(r1);
+
+        $z0 = r1 instanceof java.security.cert.CollectionCertStoreParameters;
+
+        if $z0 != 0 goto label1;
+
+        $r5 = new java.security.InvalidAlgorithmParameterException;
+
+        specialinvoke $r5.<java.security.InvalidAlgorithmParameterException: void <init>(java.lang.String)>("parameters must be CollectionCertStoreParameters");
+
+        throw $r5;
+
+     label1:
+        $r2 = (java.security.cert.CollectionCertStoreParameters) r1;
+
+        $r3 = virtualinvoke $r2.<java.security.cert.CollectionCertStoreParameters: java.util.Collection getCollection()>();
+
+        if $r3 != null goto label2;
+
+        $r4 = new java.security.InvalidAlgorithmParameterException;
+
+        specialinvoke $r4.<java.security.InvalidAlgorithmParameterException: void <init>(java.lang.String)>("Collection must not be null");
+
+        throw $r4;
+
+     label2:
+        specialinvoke r0.<sun.security.provider.certpath.IndexedCollectionCertStore: void buildIndex(java.util.Collection)>($r3);
+
+        return;
+    }
+
+    private void buildIndex(java.util.Collection)
+    {
+        java.security.cert.X509Certificate $r19;
+        sun.security.provider.certpath.IndexedCollectionCertStore r0;
+        java.security.cert.X509CRL $r18;
+        java.util.HashMap $r1, $r2;
+        java.util.HashSet $r13, $r17;
+        java.security.cert.CRL $r11;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.util.Iterator $r4;
+        java.util.Collection r3;
+        java.util.Set $r5, $r6, $r7, $r8, $r10, $r12, $r14, $r16;
+        java.security.cert.Certificate $r15;
+        java.lang.Object $r9;
+
+        r0 := @this: sun.security.provider.certpath.IndexedCollectionCertStore;
+
+        r3 := @parameter0: java.util.Collection;
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>()>();
+
+        r0.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Map certSubjects> = $r1;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        r0.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Map crlIssuers> = $r2;
+
+        r0.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Set otherCertificates> = null;
+
+        r0.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Set otherCRLs> = null;
+
+        $r4 = interfaceinvoke r3.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label01:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label08;
+
+        $r9 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        $z1 = $r9 instanceof java.security.cert.X509Certificate;
+
+        if $z1 == 0 goto label02;
+
+        $r19 = (java.security.cert.X509Certificate) $r9;
+
+        specialinvoke r0.<sun.security.provider.certpath.IndexedCollectionCertStore: void indexCertificate(java.security.cert.X509Certificate)>($r19);
+
+        goto label07;
+
+     label02:
+        $z2 = $r9 instanceof java.security.cert.X509CRL;
+
+        if $z2 == 0 goto label03;
+
+        $r18 = (java.security.cert.X509CRL) $r9;
+
+        specialinvoke r0.<sun.security.provider.certpath.IndexedCollectionCertStore: void indexCRL(java.security.cert.X509CRL)>($r18);
+
+        goto label07;
+
+     label03:
+        $z3 = $r9 instanceof java.security.cert.Certificate;
+
+        if $z3 == 0 goto label05;
+
+        $r14 = r0.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Set otherCertificates>;
+
+        if $r14 != null goto label04;
+
+        $r17 = new java.util.HashSet;
+
+        specialinvoke $r17.<java.util.HashSet: void <init>()>();
+
+        r0.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Set otherCertificates> = $r17;
+
+     label04:
+        $r16 = r0.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Set otherCertificates>;
+
+        $r15 = (java.security.cert.Certificate) $r9;
+
+        interfaceinvoke $r16.<java.util.Set: boolean add(java.lang.Object)>($r15);
+
+        goto label07;
+
+     label05:
+        $z4 = $r9 instanceof java.security.cert.CRL;
+
+        if $z4 == 0 goto label07;
+
+        $r10 = r0.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Set otherCRLs>;
+
+        if $r10 != null goto label06;
+
+        $r13 = new java.util.HashSet;
+
+        specialinvoke $r13.<java.util.HashSet: void <init>()>();
+
+        r0.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Set otherCRLs> = $r13;
+
+     label06:
+        $r12 = r0.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Set otherCRLs>;
+
+        $r11 = (java.security.cert.CRL) $r9;
+
+        interfaceinvoke $r12.<java.util.Set: boolean add(java.lang.Object)>($r11);
+
+     label07:
+        goto label01;
+
+     label08:
+        $r5 = r0.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Set otherCertificates>;
+
+        if $r5 != null goto label09;
+
+        $r8 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+        r0.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Set otherCertificates> = $r8;
+
+     label09:
+        $r6 = r0.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Set otherCRLs>;
+
+        if $r6 != null goto label10;
+
+        $r7 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+        r0.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Set otherCRLs> = $r7;
+
+     label10:
+        return;
+    }
+
+    private void indexCertificate(java.security.cert.X509Certificate)
+    {
+        java.security.cert.X509Certificate r0, $r7;
+        javax.security.auth.x500.X500Principal $r1;
+        sun.security.provider.certpath.IndexedCollectionCertStore r2;
+        java.util.ArrayList $r6;
+        java.util.List r9;
+        java.util.Map $r3, $r5, $r8;
+        java.lang.Object $r4;
+        boolean $z0, $z1, $z2;
+
+        r2 := @this: sun.security.provider.certpath.IndexedCollectionCertStore;
+
+        r0 := @parameter0: java.security.cert.X509Certificate;
+
+        $r1 = virtualinvoke r0.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        $r3 = r2.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Map certSubjects>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, r0);
+
+        if $r4 == null goto label4;
+
+        $z0 = $r4 instanceof java.security.cert.X509Certificate;
+
+        if $z0 == 0 goto label2;
+
+        $z2 = virtualinvoke r0.<java.security.cert.X509Certificate: boolean equals(java.lang.Object)>($r4);
+
+        if $z2 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r6 = new java.util.ArrayList;
+
+        specialinvoke $r6.<java.util.ArrayList: void <init>(int)>(2);
+
+        interfaceinvoke $r6.<java.util.List: boolean add(java.lang.Object)>(r0);
+
+        $r7 = (java.security.cert.X509Certificate) $r4;
+
+        interfaceinvoke $r6.<java.util.List: boolean add(java.lang.Object)>($r7);
+
+        $r8 = r2.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Map certSubjects>;
+
+        interfaceinvoke $r8.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r6);
+
+        goto label4;
+
+     label2:
+        r9 = (java.util.List) $r4;
+
+        $z1 = interfaceinvoke r9.<java.util.List: boolean contains(java.lang.Object)>(r0);
+
+        if $z1 != 0 goto label3;
+
+        interfaceinvoke r9.<java.util.List: boolean add(java.lang.Object)>(r0);
+
+     label3:
+        $r5 = r2.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Map certSubjects>;
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, r9);
+
+     label4:
+        return;
+    }
+
+    private void indexCRL(java.security.cert.X509CRL)
+    {
+        javax.security.auth.x500.X500Principal $r1;
+        sun.security.provider.certpath.IndexedCollectionCertStore r2;
+        java.security.cert.X509CRL r0, $r7;
+        java.util.ArrayList $r6;
+        java.util.List r9;
+        java.util.Map $r3, $r5, $r8;
+        java.lang.Object $r4;
+        boolean $z0, $z1, $z2;
+
+        r2 := @this: sun.security.provider.certpath.IndexedCollectionCertStore;
+
+        r0 := @parameter0: java.security.cert.X509CRL;
+
+        $r1 = virtualinvoke r0.<java.security.cert.X509CRL: javax.security.auth.x500.X500Principal getIssuerX500Principal()>();
+
+        $r3 = r2.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Map crlIssuers>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, r0);
+
+        if $r4 == null goto label4;
+
+        $z0 = $r4 instanceof java.security.cert.X509CRL;
+
+        if $z0 == 0 goto label2;
+
+        $z2 = virtualinvoke r0.<java.security.cert.X509CRL: boolean equals(java.lang.Object)>($r4);
+
+        if $z2 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r6 = new java.util.ArrayList;
+
+        specialinvoke $r6.<java.util.ArrayList: void <init>(int)>(2);
+
+        interfaceinvoke $r6.<java.util.List: boolean add(java.lang.Object)>(r0);
+
+        $r7 = (java.security.cert.X509CRL) $r4;
+
+        interfaceinvoke $r6.<java.util.List: boolean add(java.lang.Object)>($r7);
+
+        $r8 = r2.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Map crlIssuers>;
+
+        interfaceinvoke $r8.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r6);
+
+        goto label4;
+
+     label2:
+        r9 = (java.util.List) $r4;
+
+        $z1 = interfaceinvoke r9.<java.util.List: boolean contains(java.lang.Object)>(r0);
+
+        if $z1 != 0 goto label3;
+
+        interfaceinvoke r9.<java.util.List: boolean add(java.lang.Object)>(r0);
+
+     label3:
+        $r5 = r2.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Map crlIssuers>;
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, r9);
+
+     label4:
+        return;
+    }
+
+    public java.util.Collection engineGetCertificates(java.security.cert.CertSelector) throws java.security.cert.CertStoreException
+    {
+        java.security.cert.X509Certificate $r3, r10, r25;
+        sun.security.provider.certpath.IndexedCollectionCertStore r1;
+        java.util.Map $r2, $r5;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7;
+        java.security.cert.X509CertSelector $r20, r23;
+        java.util.Set $r11, $r12, $r13, $r14, $r16, $r21;
+        java.util.List r26;
+        java.security.cert.Certificate r22;
+        javax.security.auth.x500.X500Principal r24;
+        java.util.HashSet $r4, $r7, $r15, $r19;
+        java.util.Iterator $r8, $r17;
+        java.security.cert.CertSelector r0;
+        java.lang.Object $r6, $r9, $r18;
+
+        r1 := @this: sun.security.provider.certpath.IndexedCollectionCertStore;
+
+        r0 := @parameter0: java.security.cert.CertSelector;
+
+        if r0 != null goto label01;
+
+        $r19 = new java.util.HashSet;
+
+        specialinvoke $r19.<java.util.HashSet: void <init>()>();
+
+        $r20 = new java.security.cert.X509CertSelector;
+
+        specialinvoke $r20.<java.security.cert.X509CertSelector: void <init>()>();
+
+        specialinvoke r1.<sun.security.provider.certpath.IndexedCollectionCertStore: void matchX509Certs(java.security.cert.CertSelector,java.util.Collection)>($r20, $r19);
+
+        $r21 = r1.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Set otherCertificates>;
+
+        interfaceinvoke $r19.<java.util.Set: boolean addAll(java.util.Collection)>($r21);
+
+        return $r19;
+
+     label01:
+        $z0 = r0 instanceof java.security.cert.X509CertSelector;
+
+        if $z0 != 0 goto label05;
+
+        $r15 = new java.util.HashSet;
+
+        specialinvoke $r15.<java.util.HashSet: void <init>()>();
+
+        specialinvoke r1.<sun.security.provider.certpath.IndexedCollectionCertStore: void matchX509Certs(java.security.cert.CertSelector,java.util.Collection)>(r0, $r15);
+
+        $r16 = r1.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Set otherCertificates>;
+
+        $r17 = interfaceinvoke $r16.<java.util.Set: java.util.Iterator iterator()>();
+
+     label02:
+        $z6 = interfaceinvoke $r17.<java.util.Iterator: boolean hasNext()>();
+
+        if $z6 == 0 goto label04;
+
+        $r18 = interfaceinvoke $r17.<java.util.Iterator: java.lang.Object next()>();
+
+        r22 = (java.security.cert.Certificate) $r18;
+
+        $z7 = interfaceinvoke r0.<java.security.cert.CertSelector: boolean match(java.security.cert.Certificate)>(r22);
+
+        if $z7 == 0 goto label03;
+
+        interfaceinvoke $r15.<java.util.Set: boolean add(java.lang.Object)>(r22);
+
+     label03:
+        goto label02;
+
+     label04:
+        return $r15;
+
+     label05:
+        $r2 = r1.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Map certSubjects>;
+
+        $z1 = interfaceinvoke $r2.<java.util.Map: boolean isEmpty()>();
+
+        if $z1 == 0 goto label06;
+
+        $r14 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+        return $r14;
+
+     label06:
+        r23 = (java.security.cert.X509CertSelector) r0;
+
+        $r3 = virtualinvoke r23.<java.security.cert.X509CertSelector: java.security.cert.X509Certificate getCertificate()>();
+
+        if $r3 == null goto label07;
+
+        r24 = virtualinvoke $r3.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        goto label08;
+
+     label07:
+        r24 = virtualinvoke r23.<java.security.cert.X509CertSelector: javax.security.auth.x500.X500Principal getSubject()>();
+
+     label08:
+        if r24 == null goto label15;
+
+        $r5 = r1.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Map certSubjects>;
+
+        $r6 = interfaceinvoke $r5.<java.util.Map: java.lang.Object get(java.lang.Object)>(r24);
+
+        if $r6 != null goto label09;
+
+        $r13 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+        return $r13;
+
+     label09:
+        $z2 = $r6 instanceof java.security.cert.X509Certificate;
+
+        if $z2 == 0 goto label11;
+
+        r25 = (java.security.cert.X509Certificate) $r6;
+
+        $z5 = virtualinvoke r23.<java.security.cert.X509CertSelector: boolean match(java.security.cert.Certificate)>(r25);
+
+        if $z5 == 0 goto label10;
+
+        $r12 = staticinvoke <java.util.Collections: java.util.Set singleton(java.lang.Object)>(r25);
+
+        return $r12;
+
+     label10:
+        $r11 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+        return $r11;
+
+     label11:
+        r26 = (java.util.List) $r6;
+
+        $r7 = new java.util.HashSet;
+
+        specialinvoke $r7.<java.util.HashSet: void <init>(int)>(16);
+
+        $r8 = interfaceinvoke r26.<java.util.List: java.util.Iterator iterator()>();
+
+     label12:
+        $z3 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z3 == 0 goto label14;
+
+        $r9 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        r10 = (java.security.cert.X509Certificate) $r9;
+
+        $z4 = virtualinvoke r23.<java.security.cert.X509CertSelector: boolean match(java.security.cert.Certificate)>(r10);
+
+        if $z4 == 0 goto label13;
+
+        interfaceinvoke $r7.<java.util.Set: boolean add(java.lang.Object)>(r10);
+
+     label13:
+        goto label12;
+
+     label14:
+        return $r7;
+
+     label15:
+        $r4 = new java.util.HashSet;
+
+        specialinvoke $r4.<java.util.HashSet: void <init>(int)>(16);
+
+        specialinvoke r1.<sun.security.provider.certpath.IndexedCollectionCertStore: void matchX509Certs(java.security.cert.CertSelector,java.util.Collection)>(r23, $r4);
+
+        return $r4;
+    }
+
+    private void matchX509Certs(java.security.cert.CertSelector, java.util.Collection)
+    {
+        java.security.cert.X509Certificate r7, r10;
+        sun.security.provider.certpath.IndexedCollectionCertStore r0;
+        java.util.Map $r1;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.util.Iterator $r3, $r5;
+        java.util.Collection $r2, r9;
+        java.security.cert.CertSelector r8;
+        java.util.List r11;
+        java.lang.Object $r4, $r6;
+
+        r0 := @this: sun.security.provider.certpath.IndexedCollectionCertStore;
+
+        r8 := @parameter0: java.security.cert.CertSelector;
+
+        r9 := @parameter1: java.util.Collection;
+
+        $r1 = r0.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Map certSubjects>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.util.Collection values()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label7;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        $z1 = $r4 instanceof java.security.cert.X509Certificate;
+
+        if $z1 == 0 goto label3;
+
+        r10 = (java.security.cert.X509Certificate) $r4;
+
+        $z4 = interfaceinvoke r8.<java.security.cert.CertSelector: boolean match(java.security.cert.Certificate)>(r10);
+
+        if $z4 == 0 goto label2;
+
+        interfaceinvoke r9.<java.util.Collection: boolean add(java.lang.Object)>(r10);
+
+     label2:
+        goto label6;
+
+     label3:
+        r11 = (java.util.List) $r4;
+
+        $r5 = interfaceinvoke r11.<java.util.List: java.util.Iterator iterator()>();
+
+     label4:
+        $z2 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label6;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (java.security.cert.X509Certificate) $r6;
+
+        $z3 = interfaceinvoke r8.<java.security.cert.CertSelector: boolean match(java.security.cert.Certificate)>(r7);
+
+        if $z3 == 0 goto label5;
+
+        interfaceinvoke r9.<java.util.Collection: boolean add(java.lang.Object)>(r7);
+
+     label5:
+        goto label4;
+
+     label6:
+        goto label1;
+
+     label7:
+        return;
+    }
+
+    public java.util.Collection engineGetCRLs(java.security.cert.CRLSelector) throws java.security.cert.CertStoreException
+    {
+        sun.security.provider.certpath.IndexedCollectionCertStore r1;
+        java.security.cert.X509CRL r13, r24;
+        java.util.Map $r2, $r9;
+        java.security.cert.X509CRLSelector $r20, r23;
+        java.security.cert.CRL r22;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, $z7, $z8;
+        java.util.Collection $r3;
+        java.util.Set $r14, $r16, $r21;
+        java.util.List r25;
+        javax.security.auth.x500.X500Principal r8;
+        java.util.HashSet $r4, $r5, $r15, $r19;
+        java.security.cert.CRLSelector r0;
+        java.util.Iterator $r6, $r11, $r17;
+        java.lang.Object $r7, $r10, $r12, $r18;
+
+        r1 := @this: sun.security.provider.certpath.IndexedCollectionCertStore;
+
+        r0 := @parameter0: java.security.cert.CRLSelector;
+
+        if r0 != null goto label01;
+
+        $r19 = new java.util.HashSet;
+
+        specialinvoke $r19.<java.util.HashSet: void <init>()>();
+
+        $r20 = new java.security.cert.X509CRLSelector;
+
+        specialinvoke $r20.<java.security.cert.X509CRLSelector: void <init>()>();
+
+        specialinvoke r1.<sun.security.provider.certpath.IndexedCollectionCertStore: void matchX509CRLs(java.security.cert.CRLSelector,java.util.Collection)>($r20, $r19);
+
+        $r21 = r1.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Set otherCRLs>;
+
+        interfaceinvoke $r19.<java.util.Set: boolean addAll(java.util.Collection)>($r21);
+
+        return $r19;
+
+     label01:
+        $z0 = r0 instanceof java.security.cert.X509CRLSelector;
+
+        if $z0 != 0 goto label05;
+
+        $r15 = new java.util.HashSet;
+
+        specialinvoke $r15.<java.util.HashSet: void <init>()>();
+
+        specialinvoke r1.<sun.security.provider.certpath.IndexedCollectionCertStore: void matchX509CRLs(java.security.cert.CRLSelector,java.util.Collection)>(r0, $r15);
+
+        $r16 = r1.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Set otherCRLs>;
+
+        $r17 = interfaceinvoke $r16.<java.util.Set: java.util.Iterator iterator()>();
+
+     label02:
+        $z7 = interfaceinvoke $r17.<java.util.Iterator: boolean hasNext()>();
+
+        if $z7 == 0 goto label04;
+
+        $r18 = interfaceinvoke $r17.<java.util.Iterator: java.lang.Object next()>();
+
+        r22 = (java.security.cert.CRL) $r18;
+
+        $z8 = interfaceinvoke r0.<java.security.cert.CRLSelector: boolean match(java.security.cert.CRL)>(r22);
+
+        if $z8 == 0 goto label03;
+
+        interfaceinvoke $r15.<java.util.Set: boolean add(java.lang.Object)>(r22);
+
+     label03:
+        goto label02;
+
+     label04:
+        return $r15;
+
+     label05:
+        $r2 = r1.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Map crlIssuers>;
+
+        $z1 = interfaceinvoke $r2.<java.util.Map: boolean isEmpty()>();
+
+        if $z1 == 0 goto label06;
+
+        $r14 = staticinvoke <java.util.Collections: java.util.Set emptySet()>();
+
+        return $r14;
+
+     label06:
+        r23 = (java.security.cert.X509CRLSelector) r0;
+
+        $r3 = virtualinvoke r23.<java.security.cert.X509CRLSelector: java.util.Collection getIssuers()>();
+
+        if $r3 == null goto label15;
+
+        $r5 = new java.util.HashSet;
+
+        specialinvoke $r5.<java.util.HashSet: void <init>(int)>(16);
+
+        $r6 = interfaceinvoke $r3.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label07:
+        $z2 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label14;
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r8 = (javax.security.auth.x500.X500Principal) $r7;
+
+        $r9 = r1.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Map crlIssuers>;
+
+        $r10 = interfaceinvoke $r9.<java.util.Map: java.lang.Object get(java.lang.Object)>(r8);
+
+        if $r10 != null goto label08;
+
+        goto label13;
+
+     label08:
+        $z3 = $r10 instanceof java.security.cert.X509CRL;
+
+        if $z3 == 0 goto label10;
+
+        r24 = (java.security.cert.X509CRL) $r10;
+
+        $z6 = virtualinvoke r23.<java.security.cert.X509CRLSelector: boolean match(java.security.cert.CRL)>(r24);
+
+        if $z6 == 0 goto label09;
+
+        virtualinvoke $r5.<java.util.HashSet: boolean add(java.lang.Object)>(r24);
+
+     label09:
+        goto label13;
+
+     label10:
+        r25 = (java.util.List) $r10;
+
+        $r11 = interfaceinvoke r25.<java.util.List: java.util.Iterator iterator()>();
+
+     label11:
+        $z4 = interfaceinvoke $r11.<java.util.Iterator: boolean hasNext()>();
+
+        if $z4 == 0 goto label13;
+
+        $r12 = interfaceinvoke $r11.<java.util.Iterator: java.lang.Object next()>();
+
+        r13 = (java.security.cert.X509CRL) $r12;
+
+        $z5 = virtualinvoke r23.<java.security.cert.X509CRLSelector: boolean match(java.security.cert.CRL)>(r13);
+
+        if $z5 == 0 goto label12;
+
+        virtualinvoke $r5.<java.util.HashSet: boolean add(java.lang.Object)>(r13);
+
+     label12:
+        goto label11;
+
+     label13:
+        goto label07;
+
+     label14:
+        return $r5;
+
+     label15:
+        $r4 = new java.util.HashSet;
+
+        specialinvoke $r4.<java.util.HashSet: void <init>(int)>(16);
+
+        specialinvoke r1.<sun.security.provider.certpath.IndexedCollectionCertStore: void matchX509CRLs(java.security.cert.CRLSelector,java.util.Collection)>(r23, $r4);
+
+        return $r4;
+    }
+
+    private void matchX509CRLs(java.security.cert.CRLSelector, java.util.Collection)
+    {
+        sun.security.provider.certpath.IndexedCollectionCertStore r0;
+        java.security.cert.X509CRL r7, r10;
+        java.security.cert.CRLSelector r8;
+        java.util.Map $r1;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.util.Iterator $r3, $r5;
+        java.util.Collection $r2, r9;
+        java.util.List r11;
+        java.lang.Object $r4, $r6;
+
+        r0 := @this: sun.security.provider.certpath.IndexedCollectionCertStore;
+
+        r8 := @parameter0: java.security.cert.CRLSelector;
+
+        r9 := @parameter1: java.util.Collection;
+
+        $r1 = r0.<sun.security.provider.certpath.IndexedCollectionCertStore: java.util.Map crlIssuers>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.util.Collection values()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label7;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        $z1 = $r4 instanceof java.security.cert.X509CRL;
+
+        if $z1 == 0 goto label3;
+
+        r10 = (java.security.cert.X509CRL) $r4;
+
+        $z4 = interfaceinvoke r8.<java.security.cert.CRLSelector: boolean match(java.security.cert.CRL)>(r10);
+
+        if $z4 == 0 goto label2;
+
+        interfaceinvoke r9.<java.util.Collection: boolean add(java.lang.Object)>(r10);
+
+     label2:
+        goto label6;
+
+     label3:
+        r11 = (java.util.List) $r4;
+
+        $r5 = interfaceinvoke r11.<java.util.List: java.util.Iterator iterator()>();
+
+     label4:
+        $z2 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label6;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (java.security.cert.X509CRL) $r6;
+
+        $z3 = interfaceinvoke r8.<java.security.cert.CRLSelector: boolean match(java.security.cert.CRL)>(r7);
+
+        if $z3 == 0 goto label5;
+
+        interfaceinvoke r9.<java.util.Collection: boolean add(java.lang.Object)>(r7);
+
+     label5:
+        goto label4;
+
+     label6:
+        goto label1;
+
+     label7:
+        return;
+    }
+}

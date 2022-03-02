@@ -1,0 +1,308 @@
+abstract class sun.security.ssl.Authenticator extends java.lang.Object
+{
+    protected final byte[] block;
+
+    private void <init>(byte[])
+    {
+        byte[] r1;
+        sun.security.ssl.Authenticator r0;
+
+        r0 := @this: sun.security.ssl.Authenticator;
+
+        r1 := @parameter0: byte[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.security.ssl.Authenticator: byte[] block> = r1;
+
+        return;
+    }
+
+    static sun.security.ssl.Authenticator valueOf(sun.security.ssl.ProtocolVersion)
+    {
+        sun.security.ssl.Authenticator$SSL30Authenticator $r1;
+        sun.security.ssl.Authenticator$TLS13Authenticator $r3;
+        sun.security.ssl.Authenticator$TLS10Authenticator $r2;
+        sun.security.ssl.ProtocolVersion r0;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: sun.security.ssl.ProtocolVersion;
+
+        $z0 = virtualinvoke r0.<sun.security.ssl.ProtocolVersion: boolean useTLS13PlusSpec()>();
+
+        if $z0 == 0 goto label1;
+
+        $r3 = new sun.security.ssl.Authenticator$TLS13Authenticator;
+
+        specialinvoke $r3.<sun.security.ssl.Authenticator$TLS13Authenticator: void <init>(sun.security.ssl.ProtocolVersion,sun.security.ssl.Authenticator$1)>(r0, null);
+
+        return $r3;
+
+     label1:
+        $z1 = virtualinvoke r0.<sun.security.ssl.ProtocolVersion: boolean useTLS10PlusSpec()>();
+
+        if $z1 == 0 goto label2;
+
+        $r2 = new sun.security.ssl.Authenticator$TLS10Authenticator;
+
+        specialinvoke $r2.<sun.security.ssl.Authenticator$TLS10Authenticator: void <init>(sun.security.ssl.ProtocolVersion,sun.security.ssl.Authenticator$1)>(r0, null);
+
+        return $r2;
+
+     label2:
+        $r1 = new sun.security.ssl.Authenticator$SSL30Authenticator;
+
+        specialinvoke $r1.<sun.security.ssl.Authenticator$SSL30Authenticator: void <init>(sun.security.ssl.Authenticator$1)>(null);
+
+        return $r1;
+    }
+
+    static sun.security.ssl.Authenticator valueOf(sun.security.ssl.ProtocolVersion, sun.security.ssl.CipherSuite$MacAlg, javax.crypto.SecretKey) throws java.security.NoSuchAlgorithmException, java.security.InvalidKeyException
+    {
+        sun.security.ssl.Authenticator$TLS10Mac $r4;
+        sun.security.ssl.Authenticator$SSL30Mac $r1;
+        java.lang.RuntimeException $r5;
+        sun.security.ssl.ProtocolVersion r0;
+        sun.security.ssl.CipherSuite$MacAlg r2;
+        javax.crypto.SecretKey r3;
+        boolean $z0, $z1;
+
+        r0 := @parameter0: sun.security.ssl.ProtocolVersion;
+
+        r2 := @parameter1: sun.security.ssl.CipherSuite$MacAlg;
+
+        r3 := @parameter2: javax.crypto.SecretKey;
+
+        $z0 = virtualinvoke r0.<sun.security.ssl.ProtocolVersion: boolean useTLS13PlusSpec()>();
+
+        if $z0 == 0 goto label1;
+
+        $r5 = new java.lang.RuntimeException;
+
+        specialinvoke $r5.<java.lang.RuntimeException: void <init>(java.lang.String)>("No MacAlg used in TLS 1.3");
+
+        throw $r5;
+
+     label1:
+        $z1 = virtualinvoke r0.<sun.security.ssl.ProtocolVersion: boolean useTLS10PlusSpec()>();
+
+        if $z1 == 0 goto label2;
+
+        $r4 = new sun.security.ssl.Authenticator$TLS10Mac;
+
+        specialinvoke $r4.<sun.security.ssl.Authenticator$TLS10Mac: void <init>(sun.security.ssl.ProtocolVersion,sun.security.ssl.CipherSuite$MacAlg,javax.crypto.SecretKey)>(r0, r2, r3);
+
+        return $r4;
+
+     label2:
+        $r1 = new sun.security.ssl.Authenticator$SSL30Mac;
+
+        specialinvoke $r1.<sun.security.ssl.Authenticator$SSL30Mac: void <init>(sun.security.ssl.ProtocolVersion,sun.security.ssl.CipherSuite$MacAlg,javax.crypto.SecretKey)>(r0, r2, r3);
+
+        return $r1;
+    }
+
+    static sun.security.ssl.Authenticator nullTlsMac()
+    {
+        sun.security.ssl.Authenticator$SSLNullMac $r0;
+
+        $r0 = new sun.security.ssl.Authenticator$SSLNullMac;
+
+        specialinvoke $r0.<sun.security.ssl.Authenticator$SSLNullMac: void <init>()>();
+
+        return $r0;
+    }
+
+    abstract boolean seqNumOverflow();
+
+    abstract boolean seqNumIsHuge();
+
+    final byte[] sequenceNumber()
+    {
+        byte[] $r1, $r2;
+        sun.security.ssl.Authenticator r0;
+
+        r0 := @this: sun.security.ssl.Authenticator;
+
+        $r1 = r0.<sun.security.ssl.Authenticator: byte[] block>;
+
+        $r2 = staticinvoke <java.util.Arrays: byte[] copyOf(byte[],int)>($r1, 8);
+
+        return $r2;
+    }
+
+    final void increaseSequenceNumber()
+    {
+        byte[] $r1;
+        sun.security.ssl.Authenticator r0;
+        byte $b0, $b2;
+        int $i1, i3, $i4, $i6;
+
+        r0 := @this: sun.security.ssl.Authenticator;
+
+        i3 = 7;
+
+     label1:
+        if i3 < 0 goto label2;
+
+        $r1 = r0.<sun.security.ssl.Authenticator: byte[] block>;
+
+        $b0 = $r1[i3];
+
+        $i4 = (int) $b0;
+
+        $i1 = $i4 + 1;
+
+        $b2 = (byte) $i1;
+
+        $r1[i3] = $b2;
+
+        if $b2 != 0 goto label2;
+
+        $i6 = (int) -1;
+
+        i3 = i3 + $i6;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    byte[] acquireAuthenticationBytes(byte, int, byte[])
+    {
+        java.lang.UnsupportedOperationException $r0;
+        byte[] r2;
+        sun.security.ssl.Authenticator r1;
+        byte b0;
+        int i1;
+
+        r1 := @this: sun.security.ssl.Authenticator;
+
+        b0 := @parameter0: byte;
+
+        i1 := @parameter1: int;
+
+        r2 := @parameter2: byte[];
+
+        $r0 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r0.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("Used by AEAD algorithms only");
+
+        throw $r0;
+    }
+
+    static final long toLong(byte[])
+    {
+        byte[] r0;
+        byte $b1, $b4, $b9, $b14, $b19, $b24, $b29, $b34;
+        long $l2, $l3, $l5, $l6, $l7, $l8, $l10, $l11, $l12, $l13, $l15, $l16, $l17, $l18, $l20, $l21, $l22, $l23, $l25, $l26, $l27, $l28, $l30, $l31, $l32, $l33, $l35, $l36, $l37, $l38;
+        int $i0;
+
+        r0 := @parameter0: byte[];
+
+        if r0 == null goto label1;
+
+        $i0 = lengthof r0;
+
+        if $i0 != 8 goto label1;
+
+        $b1 = r0[0];
+
+        $l2 = (long) $b1;
+
+        $l3 = $l2 & 255L;
+
+        $l8 = $l3 << 56;
+
+        $b4 = r0[1];
+
+        $l5 = (long) $b4;
+
+        $l6 = $l5 & 255L;
+
+        $l7 = $l6 << 48;
+
+        $l13 = $l8 | $l7;
+
+        $b9 = r0[2];
+
+        $l10 = (long) $b9;
+
+        $l11 = $l10 & 255L;
+
+        $l12 = $l11 << 40;
+
+        $l18 = $l13 | $l12;
+
+        $b14 = r0[3];
+
+        $l15 = (long) $b14;
+
+        $l16 = $l15 & 255L;
+
+        $l17 = $l16 << 32;
+
+        $l23 = $l18 | $l17;
+
+        $b19 = r0[4];
+
+        $l20 = (long) $b19;
+
+        $l21 = $l20 & 255L;
+
+        $l22 = $l21 << 24;
+
+        $l28 = $l23 | $l22;
+
+        $b24 = r0[5];
+
+        $l25 = (long) $b24;
+
+        $l26 = $l25 & 255L;
+
+        $l27 = $l26 << 16;
+
+        $l33 = $l28 | $l27;
+
+        $b29 = r0[6];
+
+        $l30 = (long) $b29;
+
+        $l31 = $l30 & 255L;
+
+        $l32 = $l31 << 8;
+
+        $l37 = $l33 | $l32;
+
+        $b34 = r0[7];
+
+        $l35 = (long) $b34;
+
+        $l36 = $l35 & 255L;
+
+        $l38 = $l37 | $l36;
+
+        return $l38;
+
+     label1:
+        return -1L;
+    }
+
+    void <init>(byte[], sun.security.ssl.Authenticator$1)
+    {
+        byte[] r1;
+        sun.security.ssl.Authenticator$1 r2;
+        sun.security.ssl.Authenticator r0;
+
+        r0 := @this: sun.security.ssl.Authenticator;
+
+        r1 := @parameter0: byte[];
+
+        r2 := @parameter1: sun.security.ssl.Authenticator$1;
+
+        specialinvoke r0.<sun.security.ssl.Authenticator: void <init>(byte[])>(r1);
+
+        return;
+    }
+}

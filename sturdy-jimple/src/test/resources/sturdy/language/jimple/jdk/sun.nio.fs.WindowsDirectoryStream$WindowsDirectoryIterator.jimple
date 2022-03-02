@@ -1,0 +1,423 @@
+class sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator extends java.lang.Object implements java.util.Iterator
+{
+    private boolean atEof;
+    private java.lang.String first;
+    private java.nio.file.Path nextEntry;
+    private java.lang.String prefix;
+    final sun.nio.fs.WindowsDirectoryStream this$0;
+
+    void <init>(sun.nio.fs.WindowsDirectoryStream, java.lang.String)
+    {
+        sun.nio.fs.WindowsDirectoryStream r1;
+        sun.nio.fs.WindowsPath $r3, $r4, $r7;
+        java.lang.StringBuilder $r6, $r9, $r10;
+        java.lang.String r2, $r5, $r8, $r11;
+        sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator r0;
+        boolean $z0;
+
+        r0 := @this: sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator;
+
+        r1 := @parameter0: sun.nio.fs.WindowsDirectoryStream;
+
+        r2 := @parameter1: java.lang.String;
+
+        r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: sun.nio.fs.WindowsDirectoryStream this$0> = r1;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: boolean atEof> = 0;
+
+        r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: java.lang.String first> = r2;
+
+        $r3 = staticinvoke <sun.nio.fs.WindowsDirectoryStream: sun.nio.fs.WindowsPath access$000(sun.nio.fs.WindowsDirectoryStream)>(r1);
+
+        $z0 = virtualinvoke $r3.<sun.nio.fs.WindowsPath: boolean needsSlashWhenResolving()>();
+
+        if $z0 == 0 goto label1;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = staticinvoke <sun.nio.fs.WindowsDirectoryStream: sun.nio.fs.WindowsPath access$000(sun.nio.fs.WindowsDirectoryStream)>(r1);
+
+        $r8 = virtualinvoke $r7.<sun.nio.fs.WindowsPath: java.lang.String toString()>();
+
+        $r9 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\\");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: java.lang.String prefix> = $r11;
+
+        goto label2;
+
+     label1:
+        $r4 = staticinvoke <sun.nio.fs.WindowsDirectoryStream: sun.nio.fs.WindowsPath access$000(sun.nio.fs.WindowsDirectoryStream)>(r1);
+
+        $r5 = virtualinvoke $r4.<sun.nio.fs.WindowsPath: java.lang.String toString()>();
+
+        r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: java.lang.String prefix> = $r5;
+
+     label2:
+        return;
+    }
+
+    private boolean isSelfOrParent(java.lang.String)
+    {
+        java.lang.String r0;
+        sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator r1;
+        boolean $z0, $z1, $z2;
+
+        r1 := @this: sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator;
+
+        r0 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>(".");
+
+        if $z0 != 0 goto label1;
+
+        $z1 = virtualinvoke r0.<java.lang.String: boolean equals(java.lang.Object)>("..");
+
+        if $z1 == 0 goto label2;
+
+     label1:
+        $z2 = 1;
+
+        goto label3;
+
+     label2:
+        $z2 = 0;
+
+     label3:
+        return $z2;
+    }
+
+    private java.nio.file.Path acceptEntry(java.lang.String, java.nio.file.attribute.BasicFileAttributes)
+    {
+        java.lang.String $r5, r7, $r9;
+        sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator r0;
+        boolean $z0;
+        sun.nio.fs.WindowsDirectoryStream $r1, $r12;
+        java.nio.file.DirectoryStream$Filter $r13;
+        sun.nio.fs.WindowsPath $r2, $r11;
+        sun.nio.fs.WindowsFileSystem $r3;
+        java.io.IOException $r14;
+        java.nio.file.attribute.BasicFileAttributes r10;
+        java.nio.file.DirectoryIteratorException $r15;
+        java.lang.StringBuilder $r4, $r6, $r8;
+
+        r0 := @this: sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator;
+
+        r7 := @parameter0: java.lang.String;
+
+        r10 := @parameter1: java.nio.file.attribute.BasicFileAttributes;
+
+        $r1 = r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: sun.nio.fs.WindowsDirectoryStream this$0>;
+
+        $r2 = staticinvoke <sun.nio.fs.WindowsDirectoryStream: sun.nio.fs.WindowsPath access$000(sun.nio.fs.WindowsDirectoryStream)>($r1);
+
+        $r3 = virtualinvoke $r2.<sun.nio.fs.WindowsPath: sun.nio.fs.WindowsFileSystem getFileSystem()>();
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: java.lang.String prefix>;
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r7);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r11 = staticinvoke <sun.nio.fs.WindowsPath: sun.nio.fs.WindowsPath createFromNormalizedPath(sun.nio.fs.WindowsFileSystem,java.lang.String,java.nio.file.attribute.BasicFileAttributes)>($r3, $r9, r10);
+
+     label1:
+        $r12 = r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: sun.nio.fs.WindowsDirectoryStream this$0>;
+
+        $r13 = staticinvoke <sun.nio.fs.WindowsDirectoryStream: java.nio.file.DirectoryStream$Filter access$100(sun.nio.fs.WindowsDirectoryStream)>($r12);
+
+        $z0 = interfaceinvoke $r13.<java.nio.file.DirectoryStream$Filter: boolean accept(java.lang.Object)>($r11);
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        return $r11;
+
+     label3:
+        goto label5;
+
+     label4:
+        $r14 := @caughtexception;
+
+        $r15 = new java.nio.file.DirectoryIteratorException;
+
+        specialinvoke $r15.<java.nio.file.DirectoryIteratorException: void <init>(java.io.IOException)>($r14);
+
+        throw $r15;
+
+     label5:
+        return null;
+
+        catch java.io.IOException from label1 to label2 with label4;
+    }
+
+    private java.nio.file.Path readNextEntry()
+    {
+        java.lang.Throwable $r13;
+        long $l0, $l1, $l2;
+        sun.nio.fs.WindowsException $r14;
+        java.lang.String $r1, $r9, $r10, r20;
+        sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator r0;
+        java.nio.file.Path $r5, $r11, $r12, $r19;
+        boolean $z0, $z1, $z2;
+        sun.nio.fs.WindowsDirectoryStream $r2, $r6, $r7, $r15, $r21, $r23;
+        sun.nio.fs.WindowsPath $r16;
+        java.io.IOException $r17;
+        sun.nio.fs.NativeBuffer $r3, $r8;
+        java.nio.file.DirectoryIteratorException $r18;
+        sun.nio.fs.WindowsFileAttributes $r4;
+        java.lang.Object $r22;
+
+        r0 := @this: sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator;
+
+        $r1 = r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: java.lang.String first>;
+
+        if $r1 == null goto label03;
+
+        $r9 = r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: java.lang.String first>;
+
+        $z1 = specialinvoke r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: boolean isSelfOrParent(java.lang.String)>($r9);
+
+        if $z1 == 0 goto label01;
+
+        $r19 = null;
+
+        goto label02;
+
+     label01:
+        $r10 = r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: java.lang.String first>;
+
+        $r19 = specialinvoke r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: java.nio.file.Path acceptEntry(java.lang.String,java.nio.file.attribute.BasicFileAttributes)>($r10, null);
+
+     label02:
+        r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: java.nio.file.Path nextEntry> = $r19;
+
+        r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: java.lang.String first> = null;
+
+        $r11 = r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: java.nio.file.Path nextEntry>;
+
+        if $r11 == null goto label03;
+
+        $r12 = r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: java.nio.file.Path nextEntry>;
+
+        return $r12;
+
+     label03:
+        r20 = null;
+
+        $r21 = r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: sun.nio.fs.WindowsDirectoryStream this$0>;
+
+        $r22 = staticinvoke <sun.nio.fs.WindowsDirectoryStream: java.lang.Object access$200(sun.nio.fs.WindowsDirectoryStream)>($r21);
+
+        entermonitor $r22;
+
+     label04:
+        $r23 = r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: sun.nio.fs.WindowsDirectoryStream this$0>;
+
+        $z2 = staticinvoke <sun.nio.fs.WindowsDirectoryStream: boolean access$300(sun.nio.fs.WindowsDirectoryStream)>($r23);
+
+        if $z2 == 0 goto label05;
+
+        $r6 = r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: sun.nio.fs.WindowsDirectoryStream this$0>;
+
+        $l1 = staticinvoke <sun.nio.fs.WindowsDirectoryStream: long access$400(sun.nio.fs.WindowsDirectoryStream)>($r6);
+
+        $r7 = r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: sun.nio.fs.WindowsDirectoryStream this$0>;
+
+        $r8 = staticinvoke <sun.nio.fs.WindowsDirectoryStream: sun.nio.fs.NativeBuffer access$500(sun.nio.fs.WindowsDirectoryStream)>($r7);
+
+        $l2 = virtualinvoke $r8.<sun.nio.fs.NativeBuffer: long address()>();
+
+        r20 = staticinvoke <sun.nio.fs.WindowsNativeDispatcher: java.lang.String FindNextFile(long,long)>($l1, $l2);
+
+     label05:
+        goto label07;
+
+     label06:
+        $r14 := @caughtexception;
+
+        $r15 = r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: sun.nio.fs.WindowsDirectoryStream this$0>;
+
+        $r16 = staticinvoke <sun.nio.fs.WindowsDirectoryStream: sun.nio.fs.WindowsPath access$000(sun.nio.fs.WindowsDirectoryStream)>($r15);
+
+        $r17 = virtualinvoke $r14.<sun.nio.fs.WindowsException: java.io.IOException asIOException(sun.nio.fs.WindowsPath)>($r16);
+
+        $r18 = new java.nio.file.DirectoryIteratorException;
+
+        specialinvoke $r18.<java.nio.file.DirectoryIteratorException: void <init>(java.io.IOException)>($r17);
+
+        throw $r18;
+
+     label07:
+        if r20 != null goto label09;
+
+        r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: boolean atEof> = 1;
+
+        exitmonitor $r22;
+
+     label08:
+        return null;
+
+     label09:
+        $z0 = specialinvoke r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: boolean isSelfOrParent(java.lang.String)>(r20);
+
+        if $z0 == 0 goto label11;
+
+        exitmonitor $r22;
+
+     label10:
+        goto label03;
+
+     label11:
+        $r2 = r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: sun.nio.fs.WindowsDirectoryStream this$0>;
+
+        $r3 = staticinvoke <sun.nio.fs.WindowsDirectoryStream: sun.nio.fs.NativeBuffer access$500(sun.nio.fs.WindowsDirectoryStream)>($r2);
+
+        $l0 = virtualinvoke $r3.<sun.nio.fs.NativeBuffer: long address()>();
+
+        $r4 = staticinvoke <sun.nio.fs.WindowsFileAttributes: sun.nio.fs.WindowsFileAttributes fromFindData(long)>($l0);
+
+        exitmonitor $r22;
+
+     label12:
+        goto label15;
+
+     label13:
+        $r13 := @caughtexception;
+
+        exitmonitor $r22;
+
+     label14:
+        throw $r13;
+
+     label15:
+        $r5 = specialinvoke r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: java.nio.file.Path acceptEntry(java.lang.String,java.nio.file.attribute.BasicFileAttributes)>(r20, $r4);
+
+        if $r5 == null goto label16;
+
+        return $r5;
+
+     label16:
+        goto label03;
+
+        catch sun.nio.fs.WindowsException from label04 to label05 with label06;
+        catch java.lang.Throwable from label04 to label08 with label13;
+        catch java.lang.Throwable from label09 to label10 with label13;
+        catch java.lang.Throwable from label11 to label12 with label13;
+        catch java.lang.Throwable from label13 to label14 with label13;
+    }
+
+    public synchronized boolean hasNext()
+    {
+        sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator r0;
+        java.nio.file.Path $r1, $r2, $r3;
+        boolean $z0, $z1;
+
+        r0 := @this: sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator;
+
+        $r1 = r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: java.nio.file.Path nextEntry>;
+
+        if $r1 != null goto label1;
+
+        $z0 = r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: boolean atEof>;
+
+        if $z0 != 0 goto label1;
+
+        $r2 = specialinvoke r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: java.nio.file.Path readNextEntry()>();
+
+        r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: java.nio.file.Path nextEntry> = $r2;
+
+     label1:
+        $r3 = r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: java.nio.file.Path nextEntry>;
+
+        if $r3 == null goto label2;
+
+        $z1 = 1;
+
+        goto label3;
+
+     label2:
+        $z1 = 0;
+
+     label3:
+        return $z1;
+    }
+
+    public synchronized java.nio.file.Path next()
+    {
+        sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator r0;
+        java.util.NoSuchElementException $r2;
+        java.nio.file.Path $r1, r3;
+        boolean $z0;
+
+        r0 := @this: sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator;
+
+        $r1 = r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: java.nio.file.Path nextEntry>;
+
+        if $r1 != null goto label1;
+
+        $z0 = r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: boolean atEof>;
+
+        if $z0 != 0 goto label1;
+
+        r3 = specialinvoke r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: java.nio.file.Path readNextEntry()>();
+
+        goto label2;
+
+     label1:
+        r3 = r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: java.nio.file.Path nextEntry>;
+
+        r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: java.nio.file.Path nextEntry> = null;
+
+     label2:
+        if r3 != null goto label3;
+
+        $r2 = new java.util.NoSuchElementException;
+
+        specialinvoke $r2.<java.util.NoSuchElementException: void <init>()>();
+
+        throw $r2;
+
+     label3:
+        return r3;
+    }
+
+    public void remove()
+    {
+        java.lang.UnsupportedOperationException $r0;
+        sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator r1;
+
+        r1 := @this: sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator;
+
+        $r0 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r0.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r0;
+    }
+
+    public volatile java.lang.Object next()
+    {
+        sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator r0;
+        java.nio.file.Path $r1;
+
+        r0 := @this: sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator;
+
+        $r1 = virtualinvoke r0.<sun.nio.fs.WindowsDirectoryStream$WindowsDirectoryIterator: java.nio.file.Path next()>();
+
+        return $r1;
+    }
+}

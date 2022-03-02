@@ -1,0 +1,898 @@
+final class sun.java2d.marlin.DHelpers$PolyStack extends java.lang.Object
+{
+    private static final byte TYPE_LINETO;
+    private static final byte TYPE_QUADTO;
+    private static final byte TYPE_CUBICTO;
+    private static final int INITIAL_CURVES_COUNT;
+    private static final int INITIAL_TYPES_COUNT;
+    double[] curves;
+    int end;
+    byte[] curveTypes;
+    int numCurves;
+    final sun.java2d.marlin.DoubleArrayCache$Reference curves_ref;
+    final sun.java2d.marlin.ByteArrayCache$Reference curveTypes_ref;
+    int curveTypesUseMark;
+    int curvesUseMark;
+    private final sun.java2d.marlin.stats.StatLong stat_polystack_types;
+    private final sun.java2d.marlin.stats.StatLong stat_polystack_curves;
+    private final sun.java2d.marlin.stats.Histogram hist_polystack_curves;
+    private final sun.java2d.marlin.stats.StatLong stat_array_polystack_curves;
+    private final sun.java2d.marlin.stats.StatLong stat_array_polystack_curveTypes;
+
+    void <init>(sun.java2d.marlin.DRendererContext)
+    {
+        sun.java2d.marlin.DHelpers$PolyStack r0;
+        sun.java2d.marlin.DRendererContext r1;
+
+        r0 := @this: sun.java2d.marlin.DHelpers$PolyStack;
+
+        r1 := @parameter0: sun.java2d.marlin.DRendererContext;
+
+        specialinvoke r0.<sun.java2d.marlin.DHelpers$PolyStack: void <init>(sun.java2d.marlin.DRendererContext,sun.java2d.marlin.stats.StatLong,sun.java2d.marlin.stats.StatLong,sun.java2d.marlin.stats.Histogram,sun.java2d.marlin.stats.StatLong,sun.java2d.marlin.stats.StatLong)>(r1, null, null, null, null, null);
+
+        return;
+    }
+
+    void <init>(sun.java2d.marlin.DRendererContext, sun.java2d.marlin.stats.StatLong, sun.java2d.marlin.stats.StatLong, sun.java2d.marlin.stats.Histogram, sun.java2d.marlin.stats.StatLong, sun.java2d.marlin.stats.StatLong)
+    {
+        byte[] $r7;
+        double[] $r4;
+        sun.java2d.marlin.DRendererContext r1;
+        int $i0, $i1;
+        boolean $z0;
+        sun.java2d.marlin.DHelpers$PolyStack r0;
+        sun.java2d.marlin.ByteArrayCache$Reference $r5, $r6;
+        sun.java2d.marlin.stats.StatLong r8, r9, r11, r12;
+        sun.java2d.marlin.stats.Histogram r10;
+        sun.java2d.marlin.DoubleArrayCache$Reference $r2, $r3;
+
+        r0 := @this: sun.java2d.marlin.DHelpers$PolyStack;
+
+        r1 := @parameter0: sun.java2d.marlin.DRendererContext;
+
+        r8 := @parameter1: sun.java2d.marlin.stats.StatLong;
+
+        r9 := @parameter2: sun.java2d.marlin.stats.StatLong;
+
+        r10 := @parameter3: sun.java2d.marlin.stats.Histogram;
+
+        r11 := @parameter4: sun.java2d.marlin.stats.StatLong;
+
+        r12 := @parameter5: sun.java2d.marlin.stats.StatLong;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $i0 = <sun.java2d.marlin.DHelpers$PolyStack: int INITIAL_CURVES_COUNT>;
+
+        $r2 = virtualinvoke r1.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.DoubleArrayCache$Reference newDirtyDoubleArrayRef(int)>($i0);
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: sun.java2d.marlin.DoubleArrayCache$Reference curves_ref> = $r2;
+
+        $r3 = r0.<sun.java2d.marlin.DHelpers$PolyStack: sun.java2d.marlin.DoubleArrayCache$Reference curves_ref>;
+
+        $r4 = $r3.<sun.java2d.marlin.DoubleArrayCache$Reference: double[] initial>;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: double[] curves> = $r4;
+
+        $i1 = <sun.java2d.marlin.DHelpers$PolyStack: int INITIAL_TYPES_COUNT>;
+
+        $r5 = virtualinvoke r1.<sun.java2d.marlin.DRendererContext: sun.java2d.marlin.ByteArrayCache$Reference newDirtyByteArrayRef(int)>($i1);
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: sun.java2d.marlin.ByteArrayCache$Reference curveTypes_ref> = $r5;
+
+        $r6 = r0.<sun.java2d.marlin.DHelpers$PolyStack: sun.java2d.marlin.ByteArrayCache$Reference curveTypes_ref>;
+
+        $r7 = $r6.<sun.java2d.marlin.ByteArrayCache$Reference: byte[] initial>;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: byte[] curveTypes> = $r7;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: int numCurves> = 0;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: int end> = 0;
+
+        $z0 = <sun.java2d.marlin.MarlinConst: boolean DO_STATS>;
+
+        if $z0 == 0 goto label1;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: int curveTypesUseMark> = 0;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: int curvesUseMark> = 0;
+
+     label1:
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: sun.java2d.marlin.stats.StatLong stat_polystack_types> = r8;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: sun.java2d.marlin.stats.StatLong stat_polystack_curves> = r9;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: sun.java2d.marlin.stats.Histogram hist_polystack_curves> = r10;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: sun.java2d.marlin.stats.StatLong stat_array_polystack_curves> = r11;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: sun.java2d.marlin.stats.StatLong stat_array_polystack_curveTypes> = r12;
+
+        return;
+    }
+
+    void dispose()
+    {
+        byte[] $r4, $r6;
+        double[] $r1, $r3;
+        sun.java2d.marlin.DHelpers$PolyStack r0;
+        sun.java2d.marlin.ByteArrayCache$Reference $r5;
+        sun.java2d.marlin.stats.StatLong $r7, $r8;
+        sun.java2d.marlin.stats.Histogram $r9;
+        int $i0, $i1, $i2;
+        sun.java2d.marlin.DoubleArrayCache$Reference $r2;
+        boolean $z0;
+
+        r0 := @this: sun.java2d.marlin.DHelpers$PolyStack;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: int end> = 0;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: int numCurves> = 0;
+
+        $z0 = <sun.java2d.marlin.MarlinConst: boolean DO_STATS>;
+
+        if $z0 == 0 goto label1;
+
+        $r7 = r0.<sun.java2d.marlin.DHelpers$PolyStack: sun.java2d.marlin.stats.StatLong stat_polystack_types>;
+
+        $i0 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int curveTypesUseMark>;
+
+        virtualinvoke $r7.<sun.java2d.marlin.stats.StatLong: void add(int)>($i0);
+
+        $r8 = r0.<sun.java2d.marlin.DHelpers$PolyStack: sun.java2d.marlin.stats.StatLong stat_polystack_curves>;
+
+        $i1 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int curvesUseMark>;
+
+        virtualinvoke $r8.<sun.java2d.marlin.stats.StatLong: void add(int)>($i1);
+
+        $r9 = r0.<sun.java2d.marlin.DHelpers$PolyStack: sun.java2d.marlin.stats.Histogram hist_polystack_curves>;
+
+        $i2 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int curvesUseMark>;
+
+        virtualinvoke $r9.<sun.java2d.marlin.stats.Histogram: void add(int)>($i2);
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: int curveTypesUseMark> = 0;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: int curvesUseMark> = 0;
+
+     label1:
+        $r2 = r0.<sun.java2d.marlin.DHelpers$PolyStack: sun.java2d.marlin.DoubleArrayCache$Reference curves_ref>;
+
+        $r1 = r0.<sun.java2d.marlin.DHelpers$PolyStack: double[] curves>;
+
+        $r3 = virtualinvoke $r2.<sun.java2d.marlin.DoubleArrayCache$Reference: double[] putArray(double[])>($r1);
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: double[] curves> = $r3;
+
+        $r5 = r0.<sun.java2d.marlin.DHelpers$PolyStack: sun.java2d.marlin.ByteArrayCache$Reference curveTypes_ref>;
+
+        $r4 = r0.<sun.java2d.marlin.DHelpers$PolyStack: byte[] curveTypes>;
+
+        $r6 = virtualinvoke $r5.<sun.java2d.marlin.ByteArrayCache$Reference: byte[] putArray(byte[])>($r4);
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: byte[] curveTypes> = $r6;
+
+        return;
+    }
+
+    private void ensureSpace(int)
+    {
+        byte[] $r2, $r4, $r10;
+        double[] $r1, $r6, $r8;
+        int $i0, $i1, i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15;
+        boolean $z0, $z1;
+        sun.java2d.marlin.DHelpers$PolyStack r0;
+        sun.java2d.marlin.ByteArrayCache$Reference $r3;
+        sun.java2d.marlin.stats.StatLong $r5, $r9;
+        sun.java2d.marlin.DoubleArrayCache$Reference $r7;
+
+        r0 := @this: sun.java2d.marlin.DHelpers$PolyStack;
+
+        i2 := @parameter0: int;
+
+        $r1 = r0.<sun.java2d.marlin.DHelpers$PolyStack: double[] curves>;
+
+        $i1 = lengthof $r1;
+
+        $i0 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int end>;
+
+        $i3 = $i1 - $i0;
+
+        if $i3 >= i2 goto label2;
+
+        $z1 = <sun.java2d.marlin.MarlinConst: boolean DO_STATS>;
+
+        if $z1 == 0 goto label1;
+
+        $r9 = r0.<sun.java2d.marlin.DHelpers$PolyStack: sun.java2d.marlin.stats.StatLong stat_array_polystack_curves>;
+
+        $i12 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int end>;
+
+        $i13 = $i12 + i2;
+
+        virtualinvoke $r9.<sun.java2d.marlin.stats.StatLong: void add(int)>($i13);
+
+     label1:
+        $r7 = r0.<sun.java2d.marlin.DHelpers$PolyStack: sun.java2d.marlin.DoubleArrayCache$Reference curves_ref>;
+
+        $r6 = r0.<sun.java2d.marlin.DHelpers$PolyStack: double[] curves>;
+
+        $i11 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int end>;
+
+        $i9 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int end>;
+
+        $i10 = $i9 + i2;
+
+        $r8 = virtualinvoke $r7.<sun.java2d.marlin.DoubleArrayCache$Reference: double[] widenArray(double[],int,int)>($r6, $i11, $i10);
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: double[] curves> = $r8;
+
+     label2:
+        $r10 = r0.<sun.java2d.marlin.DHelpers$PolyStack: byte[] curveTypes>;
+
+        $i14 = lengthof $r10;
+
+        $i15 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int numCurves>;
+
+        if $i14 > $i15 goto label4;
+
+        $z0 = <sun.java2d.marlin.MarlinConst: boolean DO_STATS>;
+
+        if $z0 == 0 goto label3;
+
+        $r5 = r0.<sun.java2d.marlin.DHelpers$PolyStack: sun.java2d.marlin.stats.StatLong stat_array_polystack_curveTypes>;
+
+        $i7 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int numCurves>;
+
+        $i8 = $i7 + 1;
+
+        virtualinvoke $r5.<sun.java2d.marlin.stats.StatLong: void add(int)>($i8);
+
+     label3:
+        $r3 = r0.<sun.java2d.marlin.DHelpers$PolyStack: sun.java2d.marlin.ByteArrayCache$Reference curveTypes_ref>;
+
+        $r2 = r0.<sun.java2d.marlin.DHelpers$PolyStack: byte[] curveTypes>;
+
+        $i6 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int numCurves>;
+
+        $i4 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int numCurves>;
+
+        $i5 = $i4 + 1;
+
+        $r4 = virtualinvoke $r3.<sun.java2d.marlin.ByteArrayCache$Reference: byte[] widenArray(byte[],int,int)>($r2, $i6, $i5);
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: byte[] curveTypes> = $r4;
+
+     label4:
+        return;
+    }
+
+    void pushCubic(double, double, double, double, double, double)
+    {
+        byte[] $r1;
+        double[] r2;
+        int $i0, $i1, i2, i3, i4, i5, i6, i7, i8;
+        double d0, d1, d2, d3, d4, d5;
+        sun.java2d.marlin.DHelpers$PolyStack r0;
+
+        r0 := @this: sun.java2d.marlin.DHelpers$PolyStack;
+
+        d4 := @parameter0: double;
+
+        d5 := @parameter1: double;
+
+        d2 := @parameter2: double;
+
+        d3 := @parameter3: double;
+
+        d0 := @parameter4: double;
+
+        d1 := @parameter5: double;
+
+        specialinvoke r0.<sun.java2d.marlin.DHelpers$PolyStack: void ensureSpace(int)>(6);
+
+        $r1 = r0.<sun.java2d.marlin.DHelpers$PolyStack: byte[] curveTypes>;
+
+        $i0 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int numCurves>;
+
+        $i1 = $i0 + 1;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: int numCurves> = $i1;
+
+        $r1[$i0] = 2;
+
+        r2 = r0.<sun.java2d.marlin.DHelpers$PolyStack: double[] curves>;
+
+        i2 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int end>;
+
+        i3 = i2 + 1;
+
+        r2[i2] = d0;
+
+        i4 = i3 + 1;
+
+        r2[i3] = d1;
+
+        i5 = i4 + 1;
+
+        r2[i4] = d2;
+
+        i6 = i5 + 1;
+
+        r2[i5] = d3;
+
+        i7 = i6 + 1;
+
+        r2[i6] = d4;
+
+        i8 = i7 + 1;
+
+        r2[i7] = d5;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: int end> = i8;
+
+        return;
+    }
+
+    void pushQuad(double, double, double, double)
+    {
+        byte[] $r1;
+        double[] r2;
+        sun.java2d.marlin.DHelpers$PolyStack r0;
+        int $i0, $i1, i2, i3, i4, i5, i6;
+        double d0, d1, d2, d3;
+
+        r0 := @this: sun.java2d.marlin.DHelpers$PolyStack;
+
+        d2 := @parameter0: double;
+
+        d3 := @parameter1: double;
+
+        d0 := @parameter2: double;
+
+        d1 := @parameter3: double;
+
+        specialinvoke r0.<sun.java2d.marlin.DHelpers$PolyStack: void ensureSpace(int)>(4);
+
+        $r1 = r0.<sun.java2d.marlin.DHelpers$PolyStack: byte[] curveTypes>;
+
+        $i0 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int numCurves>;
+
+        $i1 = $i0 + 1;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: int numCurves> = $i1;
+
+        $r1[$i0] = 1;
+
+        r2 = r0.<sun.java2d.marlin.DHelpers$PolyStack: double[] curves>;
+
+        i2 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int end>;
+
+        i3 = i2 + 1;
+
+        r2[i2] = d0;
+
+        i4 = i3 + 1;
+
+        r2[i3] = d1;
+
+        i5 = i4 + 1;
+
+        r2[i4] = d2;
+
+        i6 = i5 + 1;
+
+        r2[i5] = d3;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: int end> = i6;
+
+        return;
+    }
+
+    void pushLine(double, double)
+    {
+        byte[] $r1;
+        double[] $r2, $r3;
+        sun.java2d.marlin.DHelpers$PolyStack r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        double d0, d1;
+
+        r0 := @this: sun.java2d.marlin.DHelpers$PolyStack;
+
+        d0 := @parameter0: double;
+
+        d1 := @parameter1: double;
+
+        specialinvoke r0.<sun.java2d.marlin.DHelpers$PolyStack: void ensureSpace(int)>(2);
+
+        $r1 = r0.<sun.java2d.marlin.DHelpers$PolyStack: byte[] curveTypes>;
+
+        $i0 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int numCurves>;
+
+        $i1 = $i0 + 1;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: int numCurves> = $i1;
+
+        $r1[$i0] = 0;
+
+        $r2 = r0.<sun.java2d.marlin.DHelpers$PolyStack: double[] curves>;
+
+        $i2 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int end>;
+
+        $i3 = $i2 + 1;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: int end> = $i3;
+
+        $r2[$i2] = d0;
+
+        $r3 = r0.<sun.java2d.marlin.DHelpers$PolyStack: double[] curves>;
+
+        $i4 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int end>;
+
+        $i5 = $i4 + 1;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: int end> = $i5;
+
+        $r3[$i4] = d1;
+
+        return;
+    }
+
+    void pullAll(sun.java2d.marlin.DPathConsumer2D)
+    {
+        byte[] $r2;
+        byte $b1;
+        boolean $z0;
+        double[] $r3;
+        sun.java2d.marlin.DPathConsumer2D r1;
+        int i0, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, $i16, i17, i18, $i19;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11;
+        sun.java2d.marlin.DHelpers$PolyStack r0;
+
+        r0 := @this: sun.java2d.marlin.DHelpers$PolyStack;
+
+        r1 := @parameter0: sun.java2d.marlin.DPathConsumer2D;
+
+        i0 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int numCurves>;
+
+        if i0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $z0 = <sun.java2d.marlin.MarlinConst: boolean DO_STATS>;
+
+        if $z0 == 0 goto label3;
+
+        $i12 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int numCurves>;
+
+        $i11 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int curveTypesUseMark>;
+
+        if $i12 <= $i11 goto label2;
+
+        $i16 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int numCurves>;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: int curveTypesUseMark> = $i16;
+
+     label2:
+        $i14 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int end>;
+
+        $i13 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int curvesUseMark>;
+
+        if $i14 <= $i13 goto label3;
+
+        $i15 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int end>;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: int curvesUseMark> = $i15;
+
+     label3:
+        $r2 = r0.<sun.java2d.marlin.DHelpers$PolyStack: byte[] curveTypes>;
+
+        $r3 = r0.<sun.java2d.marlin.DHelpers$PolyStack: double[] curves>;
+
+        i17 = 0;
+
+        i18 = 0;
+
+     label4:
+        if i18 >= i0 goto label9;
+
+        $b1 = $r2[i18];
+
+        $i19 = (int) $b1;
+
+        tableswitch($i19)
+        {
+            case 0: goto label5;
+            case 1: goto label7;
+            case 2: goto label6;
+            default: goto label8;
+        };
+
+     label5:
+        $d11 = $r3[i17];
+
+        $i10 = i17 + 1;
+
+        $d10 = $r3[$i10];
+
+        interfaceinvoke r1.<sun.java2d.marlin.DPathConsumer2D: void lineTo(double,double)>($d11, $d10);
+
+        i17 = i17 + 2;
+
+        goto label8;
+
+     label6:
+        $d5 = $r3[i17];
+
+        $i2 = i17 + 1;
+
+        $d4 = $r3[$i2];
+
+        $i3 = i17 + 2;
+
+        $d3 = $r3[$i3];
+
+        $i4 = i17 + 3;
+
+        $d2 = $r3[$i4];
+
+        $i5 = i17 + 4;
+
+        $d1 = $r3[$i5];
+
+        $i6 = i17 + 5;
+
+        $d0 = $r3[$i6];
+
+        interfaceinvoke r1.<sun.java2d.marlin.DPathConsumer2D: void curveTo(double,double,double,double,double,double)>($d5, $d4, $d3, $d2, $d1, $d0);
+
+        i17 = i17 + 6;
+
+        goto label8;
+
+     label7:
+        $d9 = $r3[i17];
+
+        $i7 = i17 + 1;
+
+        $d8 = $r3[$i7];
+
+        $i8 = i17 + 2;
+
+        $d7 = $r3[$i8];
+
+        $i9 = i17 + 3;
+
+        $d6 = $r3[$i9];
+
+        interfaceinvoke r1.<sun.java2d.marlin.DPathConsumer2D: void quadTo(double,double,double,double)>($d9, $d8, $d7, $d6);
+
+        i17 = i17 + 4;
+
+        goto label8;
+
+     label8:
+        i18 = i18 + 1;
+
+        goto label4;
+
+     label9:
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: int numCurves> = 0;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: int end> = 0;
+
+        return;
+    }
+
+    void popAll(sun.java2d.marlin.DPathConsumer2D)
+    {
+        byte[] $r2;
+        byte $b0;
+        boolean $z0;
+        double[] $r3;
+        sun.java2d.marlin.DPathConsumer2D r1;
+        int $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11, $i12, $i13, $i14, $i15, i16, i17, $i19, $i20, $i22, $i24, $i26;
+        double $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $d10, $d11;
+        sun.java2d.marlin.DHelpers$PolyStack r0;
+
+        r0 := @this: sun.java2d.marlin.DHelpers$PolyStack;
+
+        r1 := @parameter0: sun.java2d.marlin.DPathConsumer2D;
+
+        i16 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int numCurves>;
+
+        if i16 != 0 goto label1;
+
+        return;
+
+     label1:
+        $z0 = <sun.java2d.marlin.MarlinConst: boolean DO_STATS>;
+
+        if $z0 == 0 goto label3;
+
+        $i11 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int numCurves>;
+
+        $i10 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int curveTypesUseMark>;
+
+        if $i11 <= $i10 goto label2;
+
+        $i15 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int numCurves>;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: int curveTypesUseMark> = $i15;
+
+     label2:
+        $i13 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int end>;
+
+        $i12 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int curvesUseMark>;
+
+        if $i13 <= $i12 goto label3;
+
+        $i14 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int end>;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: int curvesUseMark> = $i14;
+
+     label3:
+        $r2 = r0.<sun.java2d.marlin.DHelpers$PolyStack: byte[] curveTypes>;
+
+        $r3 = r0.<sun.java2d.marlin.DHelpers$PolyStack: double[] curves>;
+
+        i17 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int end>;
+
+     label4:
+        if i16 == 0 goto label9;
+
+        $i19 = (int) -1;
+
+        i16 = i16 + $i19;
+
+        $b0 = $r2[i16];
+
+        $i20 = (int) $b0;
+
+        tableswitch($i20)
+        {
+            case 0: goto label5;
+            case 1: goto label7;
+            case 2: goto label6;
+            default: goto label8;
+        };
+
+     label5:
+        $i22 = (int) -2;
+
+        i17 = i17 + $i22;
+
+        $d11 = $r3[i17];
+
+        $i9 = i17 + 1;
+
+        $d10 = $r3[$i9];
+
+        interfaceinvoke r1.<sun.java2d.marlin.DPathConsumer2D: void lineTo(double,double)>($d11, $d10);
+
+        goto label4;
+
+     label6:
+        $i24 = (int) -6;
+
+        i17 = i17 + $i24;
+
+        $d5 = $r3[i17];
+
+        $i1 = i17 + 1;
+
+        $d4 = $r3[$i1];
+
+        $i2 = i17 + 2;
+
+        $d3 = $r3[$i2];
+
+        $i3 = i17 + 3;
+
+        $d2 = $r3[$i3];
+
+        $i4 = i17 + 4;
+
+        $d1 = $r3[$i4];
+
+        $i5 = i17 + 5;
+
+        $d0 = $r3[$i5];
+
+        interfaceinvoke r1.<sun.java2d.marlin.DPathConsumer2D: void curveTo(double,double,double,double,double,double)>($d5, $d4, $d3, $d2, $d1, $d0);
+
+        goto label4;
+
+     label7:
+        $i26 = (int) -4;
+
+        i17 = i17 + $i26;
+
+        $d9 = $r3[i17];
+
+        $i6 = i17 + 1;
+
+        $d8 = $r3[$i6];
+
+        $i7 = i17 + 2;
+
+        $d7 = $r3[$i7];
+
+        $i8 = i17 + 3;
+
+        $d6 = $r3[$i8];
+
+        interfaceinvoke r1.<sun.java2d.marlin.DPathConsumer2D: void quadTo(double,double,double,double)>($d9, $d8, $d7, $d6);
+
+        goto label4;
+
+     label8:
+        goto label4;
+
+     label9:
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: int numCurves> = 0;
+
+        r0.<sun.java2d.marlin.DHelpers$PolyStack: int end> = 0;
+
+        return;
+    }
+
+    public java.lang.String toString()
+    {
+        byte[] $r1;
+        double[] $r14, $r15;
+        byte $b0, b3, b6, b7;
+        int i1, i2, $i4, $i5, $i9, $i10;
+        java.lang.String r11, $r16;
+        sun.java2d.marlin.DHelpers$PolyStack r0;
+        java.lang.StringBuilder $r3, $r4, $r6, $r7, $r9, $r10, $r13, $r17, $r18, $r19, $r20, $r21, $r22;
+
+        r0 := @this: sun.java2d.marlin.DHelpers$PolyStack;
+
+        r11 = "";
+
+        i1 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int numCurves>;
+
+        i2 = r0.<sun.java2d.marlin.DHelpers$PolyStack: int end>;
+
+     label1:
+        if i1 == 0 goto label7;
+
+        $r1 = r0.<sun.java2d.marlin.DHelpers$PolyStack: byte[] curveTypes>;
+
+        $i9 = (int) -1;
+
+        i1 = i1 + $i9;
+
+        $b0 = $r1[i1];
+
+        $i10 = (int) $b0;
+
+        tableswitch($i10)
+        {
+            case 0: goto label2;
+            case 1: goto label3;
+            case 2: goto label4;
+            default: goto label5;
+        };
+
+     label2:
+        b3 = 2;
+
+        b7 = 2;
+
+        b6 = 2;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r11);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("line: ");
+
+        r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label6;
+
+     label3:
+        b3 = 4;
+
+        b7 = 4;
+
+        b6 = 4;
+
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r11);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("quad: ");
+
+        r11 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label6;
+
+     label4:
+        b3 = 6;
+
+        b7 = 6;
+
+        b6 = 6;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r11);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("cubic: ");
+
+        r11 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label6;
+
+     label5:
+        b3 = 0;
+
+        b7 = 0;
+
+        b6 = 0;
+
+     label6:
+        $i4 = i2 - b6;
+
+        i2 = $i4;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r11);
+
+        $r14 = r0.<sun.java2d.marlin.DHelpers$PolyStack: double[] curves>;
+
+        $i5 = $i4 + b7;
+
+        $r15 = staticinvoke <java.util.Arrays: double[] copyOfRange(double[],int,int)>($r14, $i4, $i5);
+
+        $r16 = staticinvoke <java.util.Arrays: java.lang.String toString(double[])>($r15);
+
+        $r17 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r16);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        r11 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label1;
+
+     label7:
+        return r11;
+    }
+
+    static void <clinit>()
+    {
+        int $i0, $i1, $i2;
+
+        <sun.java2d.marlin.DHelpers$PolyStack: byte TYPE_CUBICTO> = 2;
+
+        <sun.java2d.marlin.DHelpers$PolyStack: byte TYPE_QUADTO> = 1;
+
+        <sun.java2d.marlin.DHelpers$PolyStack: byte TYPE_LINETO> = 0;
+
+        $i0 = <sun.java2d.marlin.MarlinConst: int INITIAL_EDGES_COUNT>;
+
+        $i1 = $i0 << 1;
+
+        <sun.java2d.marlin.DHelpers$PolyStack: int INITIAL_CURVES_COUNT> = $i1;
+
+        $i2 = <sun.java2d.marlin.MarlinConst: int INITIAL_EDGES_COUNT>;
+
+        <sun.java2d.marlin.DHelpers$PolyStack: int INITIAL_TYPES_COUNT> = $i2;
+
+        return;
+    }
+}

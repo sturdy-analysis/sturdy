@@ -1,0 +1,1837 @@
+class com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection extends javax.xml.soap.SOAPConnection
+{
+    public static final java.lang.String vmVendor;
+    private static final java.lang.String sunVmVendor;
+    private static final java.lang.String ibmVmVendor;
+    private static final boolean isSunVM;
+    private static final boolean isIBMVM;
+    private static final java.lang.String JAXM_URLENDPOINT;
+    protected static final java.util.logging.Logger log;
+    javax.xml.soap.MessageFactory messageFactory;
+    boolean closed;
+    private static final java.lang.String SSL_PKG;
+    private static final java.lang.String SSL_PROVIDER;
+    private static final int dL;
+
+    public void <init>() throws javax.xml.soap.SOAPException
+    {
+        com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl $r5;
+        java.lang.NoSuchMethodError $r6;
+        java.util.logging.Logger $r4;
+        java.lang.Exception $r2;
+        java.util.logging.Level $r3;
+        com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection r0;
+        javax.xml.soap.MessageFactory $r1, $r7;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection;
+
+        specialinvoke r0.<javax.xml.soap.SOAPConnection: void <init>()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: javax.xml.soap.MessageFactory messageFactory> = null;
+
+        r0.<com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: boolean closed> = 0;
+
+     label1:
+        $r1 = staticinvoke <javax.xml.soap.MessageFactory: javax.xml.soap.MessageFactory newInstance(java.lang.String)>("Dynamic Protocol");
+
+        r0.<com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: javax.xml.soap.MessageFactory messageFactory> = $r1;
+
+     label2:
+        goto label5;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = staticinvoke <javax.xml.soap.MessageFactory: javax.xml.soap.MessageFactory newInstance()>();
+
+        r0.<com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: javax.xml.soap.MessageFactory messageFactory> = $r7;
+
+        goto label5;
+
+     label4:
+        $r2 := @caughtexception;
+
+        $r4 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        $r3 = <java.util.logging.Level: java.util.logging.Level SEVERE>;
+
+        virtualinvoke $r4.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r3, "SAAJ0001.p2p.cannot.create.msg.factory", $r2);
+
+        $r5 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        specialinvoke $r5.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String,java.lang.Throwable)>("Unable to create message factory", $r2);
+
+        throw $r5;
+
+     label5:
+        return;
+
+        catch java.lang.NoSuchMethodError from label1 to label2 with label3;
+        catch java.lang.Exception from label1 to label2 with label4;
+    }
+
+    public void close() throws javax.xml.soap.SOAPException
+    {
+        com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl $r2;
+        com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection r0;
+        java.util.logging.Logger $r1;
+        boolean $z0;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection;
+
+        $z0 = r0.<com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        virtualinvoke $r1.<java.util.logging.Logger: void severe(java.lang.String)>("SAAJ0002.p2p.close.already.closed.conn");
+
+        $r2 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        specialinvoke $r2.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String)>("Connection already closed");
+
+        throw $r2;
+
+     label1:
+        r0.<com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: javax.xml.soap.MessageFactory messageFactory> = null;
+
+        r0.<com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: boolean closed> = 1;
+
+        return;
+    }
+
+    public javax.xml.soap.SOAPMessage call(javax.xml.soap.SOAPMessage, java.lang.Object) throws javax.xml.soap.SOAPException
+    {
+        java.net.URL $r10, $r12, $r18;
+        java.lang.Thread $r1;
+        java.lang.reflect.Method $r15;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        java.util.logging.Logger $r3, $r19, $r25, $r34, $r43, $r52, $r53;
+        java.lang.Exception $r21, $r41;
+        java.lang.StringBuilder $r5, $r6, $r7, $r27, $r28, $r30, $r36, $r37, $r39, $r45, $r46, $r48;
+        java.lang.ClassLoader $r2;
+        com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl $r4, $r20, $r22, $r26, $r35, $r44;
+        java.lang.Object[] $r16;
+        java.util.logging.Level $r24, $r33, $r42, $r51;
+        java.lang.String $r8, $r13, $r29, $r31, $r38, $r40, $r47, $r49, r56;
+        java.net.MalformedURLException $r23, $r32;
+        java.lang.Class[] $r14;
+        com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection r0;
+        java.lang.Object $r17, r54;
+        java.lang.ClassNotFoundException $r50;
+        java.lang.Class r55;
+        javax.xml.soap.SOAPMessage r9, $r11;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection;
+
+        r9 := @parameter0: javax.xml.soap.SOAPMessage;
+
+        r54 := @parameter1: java.lang.Object;
+
+        $z0 = r0.<com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: boolean closed>;
+
+        if $z0 == 0 goto label01;
+
+        $r19 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        virtualinvoke $r19.<java.util.logging.Logger: void severe(java.lang.String)>("SAAJ0003.p2p.call.already.closed.conn");
+
+        $r20 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        specialinvoke $r20.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String)>("Connection is closed");
+
+        throw $r20;
+
+     label01:
+        r55 = null;
+
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.Thread: java.lang.ClassLoader getContextClassLoader()>();
+
+     label02:
+        if $r2 == null goto label03;
+
+        r55 = virtualinvoke $r2.<java.lang.ClassLoader: java.lang.Class loadClass(java.lang.String)>("javax.xml.messaging.URLEndpoint");
+
+        goto label04;
+
+     label03:
+        r55 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String)>("javax.xml.messaging.URLEndpoint");
+
+     label04:
+        goto label06;
+
+     label05:
+        $r50 := @caughtexception;
+
+        $r52 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        $r51 = <java.util.logging.Level: java.util.logging.Level FINEST>;
+
+        $z3 = virtualinvoke $r52.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r51);
+
+        if $z3 == 0 goto label06;
+
+        $r53 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        virtualinvoke $r53.<java.util.logging.Logger: void finest(java.lang.String)>("SAAJ0090.p2p.endpoint.available.only.for.JAXM");
+
+     label06:
+        if r55 == null goto label13;
+
+        $z2 = virtualinvoke r55.<java.lang.Class: boolean isInstance(java.lang.Object)>(r54);
+
+        if $z2 == 0 goto label13;
+
+     label07:
+        $r14 = (java.lang.Class[]) null;
+
+        $r15 = virtualinvoke r55.<java.lang.Class: java.lang.reflect.Method getMethod(java.lang.String,java.lang.Class[])>("getURL", $r14);
+
+        $r16 = (java.lang.Object[]) null;
+
+        $r17 = virtualinvoke $r15.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>(r54, $r16);
+
+        r56 = (java.lang.String) $r17;
+
+     label08:
+        goto label10;
+
+     label09:
+        $r41 := @caughtexception;
+
+        $r43 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        $r42 = <java.util.logging.Level: java.util.logging.Level SEVERE>;
+
+        virtualinvoke $r43.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r42, "SAAJ0004.p2p.internal.err", $r41);
+
+        $r44 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        $r45 = new java.lang.StringBuilder;
+
+        specialinvoke $r45.<java.lang.StringBuilder: void <init>()>();
+
+        $r46 = virtualinvoke $r45.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Internal error: ");
+
+        $r47 = virtualinvoke $r41.<java.lang.Exception: java.lang.String getMessage()>();
+
+        $r48 = virtualinvoke $r46.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r47);
+
+        $r49 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r44.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String)>($r49);
+
+        throw $r44;
+
+     label10:
+        $r18 = new java.net.URL;
+
+        specialinvoke $r18.<java.net.URL: void <init>(java.lang.String)>(r56);
+
+        r54 = $r18;
+
+     label11:
+        goto label13;
+
+     label12:
+        $r32 := @caughtexception;
+
+        $r34 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        $r33 = <java.util.logging.Level: java.util.logging.Level SEVERE>;
+
+        virtualinvoke $r34.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r33, "SAAJ0005.p2p.", $r32);
+
+        $r35 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        $r36 = new java.lang.StringBuilder;
+
+        specialinvoke $r36.<java.lang.StringBuilder: void <init>()>();
+
+        $r37 = virtualinvoke $r36.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Bad URL: ");
+
+        $r38 = virtualinvoke $r32.<java.net.MalformedURLException: java.lang.String getMessage()>();
+
+        $r39 = virtualinvoke $r37.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r38);
+
+        $r40 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r35.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String)>($r40);
+
+        throw $r35;
+
+     label13:
+        $z4 = r54 instanceof java.lang.String;
+
+        if $z4 == 0 goto label17;
+
+     label14:
+        $r12 = new java.net.URL;
+
+        $r13 = (java.lang.String) r54;
+
+        specialinvoke $r12.<java.net.URL: void <init>(java.lang.String)>($r13);
+
+        r54 = $r12;
+
+     label15:
+        goto label17;
+
+     label16:
+        $r23 := @caughtexception;
+
+        $r25 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        $r24 = <java.util.logging.Level: java.util.logging.Level SEVERE>;
+
+        virtualinvoke $r25.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r24, "SAAJ0006.p2p.bad.URL", $r23);
+
+        $r26 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r28 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Bad URL: ");
+
+        $r29 = virtualinvoke $r23.<java.net.MalformedURLException: java.lang.String getMessage()>();
+
+        $r30 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r29);
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r26.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String)>($r31);
+
+        throw $r26;
+
+     label17:
+        $z1 = r54 instanceof java.net.URL;
+
+        if $z1 == 0 goto label21;
+
+     label18:
+        $r10 = (java.net.URL) r54;
+
+        $r11 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: javax.xml.soap.SOAPMessage post(javax.xml.soap.SOAPMessage,java.net.URL)>(r9, $r10);
+
+     label19:
+        return $r11;
+
+     label20:
+        $r21 := @caughtexception;
+
+        $r22 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        specialinvoke $r22.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.Throwable)>($r21);
+
+        throw $r22;
+
+     label21:
+        $r3 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        virtualinvoke $r3.<java.util.logging.Logger: void severe(java.lang.String)>("SAAJ0007.p2p.bad.endPoint.type");
+
+        $r4 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Bad endPoint type ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r54);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String)>($r8);
+
+        throw $r4;
+
+        catch java.lang.ClassNotFoundException from label02 to label04 with label05;
+        catch java.lang.Exception from label07 to label08 with label09;
+        catch java.net.MalformedURLException from label10 to label11 with label12;
+        catch java.net.MalformedURLException from label14 to label15 with label16;
+        catch java.lang.Exception from label18 to label19 with label20;
+    }
+
+    javax.xml.soap.SOAPMessage post(javax.xml.soap.SOAPMessage, java.net.URL) throws javax.xml.soap.SOAPException, java.io.IOException
+    {
+        java.net.HttpURLConnection $r7;
+        byte[] $r15;
+        javax.xml.soap.SOAPException $r64, $r68;
+        javax.xml.soap.MimeHeaders $r9, $r85;
+        java.lang.Exception $r55, $r65;
+        java.lang.StringBuilder $r25, $r26, $r28, $r48, $r50, $r51, $r52, $r60, $r62, $r79, $r82, $r88;
+        java.lang.Throwable $r54, $r70;
+        com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl $r83, $r84, $r89;
+        javax.xml.soap.MessageFactory $r17;
+        java.lang.StringBuffer $r81;
+        java.util.StringTokenizer $r86;
+        java.lang.String $r1, $r3, $r4, $r5, $r13, $r14, $r22, $r27, $r29, $r31, $r34, $r35, $r36, $r37, $r41, $r42, $r43, $r44, $r49, $r53, $r61, $r63, $r75, $r76;
+        java.io.IOException $r69;
+        com.sun.xml.internal.messaging.saaj.util.ByteInputStream $r87;
+        javax.xml.soap.SOAPMessage r8, r73;
+        javax.xml.soap.MimeHeader r71;
+        java.net.URL r0;
+        java.net.URI $r78;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5, $z6, z7, z8, $z9, z10, z11;
+        java.util.logging.Logger $r18, $r20, $r39, $r40, $r45, $r57, $r66;
+        java.lang.String[] $r19, $r32;
+        java.util.logging.Level $r21, $r38, $r56;
+        int $i0, $i1, $i2, $i3, $i4, $i5, i6, i7, i8, $i9, $i11;
+        java.io.OutputStream $r72;
+        java.util.Iterator $r10;
+        java.lang.IllegalArgumentException $r80;
+        com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection r6;
+        java.lang.Object $r30;
+        java.io.InputStream r74, $r77;
+
+        r6 := @this: com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection;
+
+        r8 := @parameter0: javax.xml.soap.SOAPMessage;
+
+        r0 := @parameter1: java.net.URL;
+
+        z7 = 0;
+
+        z11 = 0;
+
+        z10 = 0;
+
+     label01:
+        $r1 = virtualinvoke r0.<java.net.URL: java.lang.String getProtocol()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("https");
+
+        if $z0 == 0 goto label02;
+
+        specialinvoke r6.<com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: void initHttps()>();
+
+     label02:
+        $r78 = new java.net.URI;
+
+        $r3 = virtualinvoke r0.<java.net.URL: java.lang.String toString()>();
+
+        specialinvoke $r78.<java.net.URI: void <init>(java.lang.String)>($r3);
+
+        $r4 = virtualinvoke $r78.<java.net.URI: java.lang.String getRawUserInfo()>();
+
+        $r5 = virtualinvoke r0.<java.net.URL: java.lang.String getProtocol()>();
+
+        $z1 = virtualinvoke $r5.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("http");
+
+        if $z1 != 0 goto label03;
+
+        $r44 = virtualinvoke r0.<java.net.URL: java.lang.String getProtocol()>();
+
+        $z6 = virtualinvoke $r44.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("https");
+
+        if $z6 != 0 goto label03;
+
+        $r45 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        virtualinvoke $r45.<java.util.logging.Logger: void severe(java.lang.String)>("SAAJ0052.p2p.protocol.mustbe.http.or.https");
+
+        $r80 = new java.lang.IllegalArgumentException;
+
+        $r79 = new java.lang.StringBuilder;
+
+        specialinvoke $r79.<java.lang.StringBuilder: void <init>()>();
+
+        $r48 = virtualinvoke $r79.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Protocol ");
+
+        $r49 = virtualinvoke r0.<java.net.URL: java.lang.String getProtocol()>();
+
+        $r50 = virtualinvoke $r48.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r49);
+
+        $r51 = virtualinvoke $r50.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" not supported in URL ");
+
+        $r52 = virtualinvoke $r51.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r53 = virtualinvoke $r52.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r80.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r53);
+
+        throw $r80;
+
+     label03:
+        $r7 = specialinvoke r6.<com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.net.HttpURLConnection createConnection(java.net.URL)>(r0);
+
+        virtualinvoke $r7.<java.net.HttpURLConnection: void setRequestMethod(java.lang.String)>("POST");
+
+        virtualinvoke $r7.<java.net.HttpURLConnection: void setDoOutput(boolean)>(1);
+
+        virtualinvoke $r7.<java.net.HttpURLConnection: void setDoInput(boolean)>(1);
+
+        virtualinvoke $r7.<java.net.HttpURLConnection: void setUseCaches(boolean)>(0);
+
+        virtualinvoke $r7.<java.net.HttpURLConnection: void setInstanceFollowRedirects(boolean)>(1);
+
+        $z2 = virtualinvoke r8.<javax.xml.soap.SOAPMessage: boolean saveRequired()>();
+
+        if $z2 == 0 goto label04;
+
+        virtualinvoke r8.<javax.xml.soap.SOAPMessage: void saveChanges()>();
+
+     label04:
+        $r9 = virtualinvoke r8.<javax.xml.soap.SOAPMessage: javax.xml.soap.MimeHeaders getMimeHeaders()>();
+
+        $r10 = virtualinvoke $r9.<javax.xml.soap.MimeHeaders: java.util.Iterator getAllHeaders()>();
+
+        z8 = 0;
+
+     label05:
+        $z9 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z9 == 0 goto label12;
+
+        $r30 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        r71 = (javax.xml.soap.MimeHeader) $r30;
+
+        $r31 = virtualinvoke r71.<javax.xml.soap.MimeHeader: java.lang.String getName()>();
+
+        $r32 = virtualinvoke $r9.<javax.xml.soap.MimeHeaders: java.lang.String[] getHeader(java.lang.String)>($r31);
+
+        $i3 = lengthof $r32;
+
+        if $i3 != 1 goto label06;
+
+        $r42 = virtualinvoke r71.<javax.xml.soap.MimeHeader: java.lang.String getName()>();
+
+        $r43 = virtualinvoke r71.<javax.xml.soap.MimeHeader: java.lang.String getValue()>();
+
+        virtualinvoke $r7.<java.net.HttpURLConnection: void setRequestProperty(java.lang.String,java.lang.String)>($r42, $r43);
+
+        goto label10;
+
+     label06:
+        $r81 = new java.lang.StringBuffer;
+
+        specialinvoke $r81.<java.lang.StringBuffer: void <init>()>();
+
+        i6 = 0;
+
+     label07:
+        $i4 = lengthof $r32;
+
+        if i6 >= $i4 goto label09;
+
+        if i6 == 0 goto label08;
+
+        virtualinvoke $r81.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(44);
+
+     label08:
+        $r41 = $r32[i6];
+
+        virtualinvoke $r81.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r41);
+
+        i6 = i6 + 1;
+
+        goto label07;
+
+     label09:
+        $r34 = virtualinvoke r71.<javax.xml.soap.MimeHeader: java.lang.String getName()>();
+
+        $r35 = virtualinvoke $r81.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        virtualinvoke $r7.<java.net.HttpURLConnection: void setRequestProperty(java.lang.String,java.lang.String)>($r34, $r35);
+
+     label10:
+        $r36 = "Authorization";
+
+        $r37 = virtualinvoke r71.<javax.xml.soap.MimeHeader: java.lang.String getName()>();
+
+        $z4 = virtualinvoke $r36.<java.lang.String: boolean equals(java.lang.Object)>($r37);
+
+        if $z4 == 0 goto label11;
+
+        z8 = 1;
+
+        $r39 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        $r38 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $z5 = virtualinvoke $r39.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r38);
+
+        if $z5 == 0 goto label11;
+
+        $r40 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        virtualinvoke $r40.<java.util.logging.Logger: void fine(java.lang.String)>("SAAJ0091.p2p.https.auth.in.POST.true");
+
+     label11:
+        goto label05;
+
+     label12:
+        if z8 != 0 goto label13;
+
+        if $r4 == null goto label13;
+
+        specialinvoke r6.<com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: void initAuthUserInfo(java.net.HttpURLConnection,java.lang.String)>($r7, $r4);
+
+     label13:
+        $r72 = virtualinvoke $r7.<java.net.HttpURLConnection: java.io.OutputStream getOutputStream()>();
+
+     label14:
+        virtualinvoke r8.<javax.xml.soap.SOAPMessage: void writeTo(java.io.OutputStream)>($r72);
+
+        virtualinvoke $r72.<java.io.OutputStream: void flush()>();
+
+     label15:
+        virtualinvoke $r72.<java.io.OutputStream: void close()>();
+
+        goto label18;
+
+     label16:
+        $r70 := @caughtexception;
+
+     label17:
+        virtualinvoke $r72.<java.io.OutputStream: void close()>();
+
+        throw $r70;
+
+     label18:
+        virtualinvoke $r7.<java.net.HttpURLConnection: void connect()>();
+
+     label19:
+        $i0 = virtualinvoke $r7.<java.net.HttpURLConnection: int getResponseCode()>();
+
+        i7 = $i0;
+
+        if $i0 != 500 goto label20;
+
+        z7 = 1;
+
+        z11 = 1;
+
+        z10 = 1;
+
+        goto label21;
+
+     label20:
+        $i1 = $i0 / 100;
+
+        if $i1 == 2 goto label21;
+
+        $r20 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        $r21 = <java.util.logging.Level: java.util.logging.Level SEVERE>;
+
+        $r19 = newarray (java.lang.String)[1];
+
+        $r22 = virtualinvoke $r7.<java.net.HttpURLConnection: java.lang.String getResponseMessage()>();
+
+        $r19[0] = $r22;
+
+        virtualinvoke $r20.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r21, "SAAJ0008.p2p.bad.response", $r19);
+
+        $r83 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        $r82 = new java.lang.StringBuilder;
+
+        specialinvoke $r82.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = virtualinvoke $r82.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Bad response: (");
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r27 = virtualinvoke $r7.<java.net.HttpURLConnection: java.lang.String getResponseMessage()>();
+
+        $r28 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r27);
+
+        $r29 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r83.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String)>($r29);
+
+        throw $r83;
+
+     label21:
+        goto label24;
+
+     label22:
+        $r69 := @caughtexception;
+
+        $i5 = virtualinvoke $r7.<java.net.HttpURLConnection: int getResponseCode()>();
+
+        i7 = $i5;
+
+        if $i5 != 500 goto label23;
+
+        z7 = 1;
+
+        z11 = 1;
+
+        z10 = 1;
+
+        goto label24;
+
+     label23:
+        throw $r69;
+
+     label24:
+        goto label27;
+
+     label25:
+        $r68 := @caughtexception;
+
+        throw $r68;
+
+     label26:
+        $r65 := @caughtexception;
+
+        $r66 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        virtualinvoke $r66.<java.util.logging.Logger: void severe(java.lang.String)>("SAAJ0009.p2p.msg.send.failed");
+
+        $r84 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        specialinvoke $r84.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String,java.lang.Throwable)>("Message send failed", $r65);
+
+        throw $r84;
+
+     label27:
+        r73 = null;
+
+        r74 = null;
+
+        if i7 == 200 goto label28;
+
+        if z11 == 0 goto label46;
+
+     label28:
+        $r85 = new javax.xml.soap.MimeHeaders;
+
+        specialinvoke $r85.<javax.xml.soap.MimeHeaders: void <init>()>();
+
+        i8 = 1;
+
+     label29:
+        $r75 = virtualinvoke $r7.<java.net.HttpURLConnection: java.lang.String getHeaderFieldKey(int)>(i8);
+
+        $r76 = virtualinvoke $r7.<java.net.HttpURLConnection: java.lang.String getHeaderField(int)>(i8);
+
+        if $r75 != null goto label30;
+
+        if $r76 != null goto label30;
+
+        goto label33;
+
+     label30:
+        if $r75 == null goto label32;
+
+        $r86 = new java.util.StringTokenizer;
+
+        specialinvoke $r86.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>($r76, ",");
+
+     label31:
+        $z3 = virtualinvoke $r86.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z3 == 0 goto label32;
+
+        $r13 = virtualinvoke $r86.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $r14 = virtualinvoke $r13.<java.lang.String: java.lang.String trim()>();
+
+        virtualinvoke $r85.<javax.xml.soap.MimeHeaders: void addHeader(java.lang.String,java.lang.String)>($r75, $r14);
+
+        goto label31;
+
+     label32:
+        i8 = i8 + 1;
+
+        goto label29;
+
+     label33:
+        if z10 == 0 goto label34;
+
+        $r77 = virtualinvoke $r7.<java.net.HttpURLConnection: java.io.InputStream getErrorStream()>();
+
+        goto label35;
+
+     label34:
+        $r77 = virtualinvoke $r7.<java.net.HttpURLConnection: java.io.InputStream getInputStream()>();
+
+     label35:
+        r74 = $r77;
+
+        $r15 = specialinvoke r6.<com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: byte[] readFully(java.io.InputStream)>($r77);
+
+        $i2 = virtualinvoke $r7.<java.net.HttpURLConnection: int getContentLength()>();
+
+        $i11 = (int) -1;
+
+        if $i2 != $i11 goto label36;
+
+        $i9 = lengthof $r15;
+
+        goto label37;
+
+     label36:
+        $i9 = virtualinvoke $r7.<java.net.HttpURLConnection: int getContentLength()>();
+
+     label37:
+        if $i9 != 0 goto label38;
+
+        r73 = null;
+
+        $r18 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        virtualinvoke $r18.<java.util.logging.Logger: void warning(java.lang.String)>("SAAJ0014.p2p.content.zero");
+
+        goto label39;
+
+     label38:
+        $r87 = new com.sun.xml.internal.messaging.saaj.util.ByteInputStream;
+
+        specialinvoke $r87.<com.sun.xml.internal.messaging.saaj.util.ByteInputStream: void <init>(byte[],int)>($r15, $i9);
+
+        $r17 = r6.<com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: javax.xml.soap.MessageFactory messageFactory>;
+
+        r73 = virtualinvoke $r17.<javax.xml.soap.MessageFactory: javax.xml.soap.SOAPMessage createMessage(javax.xml.soap.MimeHeaders,java.io.InputStream)>($r85, $r87);
+
+     label39:
+        if r74 == null goto label40;
+
+        virtualinvoke r74.<java.io.InputStream: void close()>();
+
+     label40:
+        virtualinvoke $r7.<java.net.HttpURLConnection: void disconnect()>();
+
+        goto label46;
+
+     label41:
+        $r64 := @caughtexception;
+
+        throw $r64;
+
+     label42:
+        $r55 := @caughtexception;
+
+        $r57 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        $r56 = <java.util.logging.Level: java.util.logging.Level SEVERE>;
+
+        virtualinvoke $r57.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r56, "SAAJ0010.p2p.cannot.read.resp", $r55);
+
+        $r89 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        $r88 = new java.lang.StringBuilder;
+
+        specialinvoke $r88.<java.lang.StringBuilder: void <init>()>();
+
+        $r60 = virtualinvoke $r88.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to read response: ");
+
+        $r61 = virtualinvoke $r55.<java.lang.Exception: java.lang.String getMessage()>();
+
+        $r62 = virtualinvoke $r60.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r61);
+
+        $r63 = virtualinvoke $r62.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r89.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String)>($r63);
+
+        throw $r89;
+
+     label43:
+        $r54 := @caughtexception;
+
+     label44:
+        if r74 == null goto label45;
+
+        virtualinvoke r74.<java.io.InputStream: void close()>();
+
+     label45:
+        virtualinvoke $r7.<java.net.HttpURLConnection: void disconnect()>();
+
+        throw $r54;
+
+     label46:
+        return r73;
+
+        catch java.lang.Throwable from label14 to label15 with label16;
+        catch java.lang.Throwable from label16 to label17 with label16;
+        catch java.io.IOException from label19 to label21 with label22;
+        catch javax.xml.soap.SOAPException from label01 to label24 with label25;
+        catch java.lang.Exception from label01 to label24 with label26;
+        catch javax.xml.soap.SOAPException from label28 to label39 with label41;
+        catch java.lang.Exception from label28 to label39 with label42;
+        catch java.lang.Throwable from label28 to label39 with label43;
+        catch java.lang.Throwable from label41 to label44 with label43;
+    }
+
+    public javax.xml.soap.SOAPMessage get(java.lang.Object) throws javax.xml.soap.SOAPException
+    {
+        java.net.URL $r6, $r8, $r14;
+        java.lang.reflect.Method $r11;
+        boolean $z0, $z1, $z2, $z3;
+        java.util.logging.Logger $r15, $r20, $r28, $r36;
+        java.lang.Exception $r17, $r35, $r43;
+        java.lang.StringBuilder $r2, $r3, $r4, $r22, $r23, $r25, $r30, $r31, $r33, $r38, $r39, $r41;
+        com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl $r1, $r16, $r18, $r21, $r29, $r37;
+        java.lang.Object[] $r12;
+        java.lang.String $r5, $r9, $r24, $r26, $r32, $r34, $r40, $r42, r46;
+        java.net.MalformedURLException $r19, $r27;
+        java.lang.Class[] $r10;
+        com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection r0;
+        java.lang.Object $r13, r44;
+        java.lang.Class r45;
+        javax.xml.soap.SOAPMessage $r7;
+
+        r0 := @this: com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection;
+
+        r44 := @parameter0: java.lang.Object;
+
+        $z0 = r0.<com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: boolean closed>;
+
+        if $z0 == 0 goto label01;
+
+        $r15 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        virtualinvoke $r15.<java.util.logging.Logger: void severe(java.lang.String)>("SAAJ0011.p2p.get.already.closed.conn");
+
+        $r16 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        specialinvoke $r16.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String)>("Connection is closed");
+
+        throw $r16;
+
+     label01:
+        r45 = null;
+
+     label02:
+        r45 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String)>("javax.xml.messaging.URLEndpoint");
+
+     label03:
+        goto label05;
+
+     label04:
+        $r43 := @caughtexception;
+
+     label05:
+        if r45 == null goto label12;
+
+        $z2 = virtualinvoke r45.<java.lang.Class: boolean isInstance(java.lang.Object)>(r44);
+
+        if $z2 == 0 goto label12;
+
+     label06:
+        $r10 = (java.lang.Class[]) null;
+
+        $r11 = virtualinvoke r45.<java.lang.Class: java.lang.reflect.Method getMethod(java.lang.String,java.lang.Class[])>("getURL", $r10);
+
+        $r12 = (java.lang.Object[]) null;
+
+        $r13 = virtualinvoke $r11.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>(r44, $r12);
+
+        r46 = (java.lang.String) $r13;
+
+     label07:
+        goto label09;
+
+     label08:
+        $r35 := @caughtexception;
+
+        $r36 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        virtualinvoke $r36.<java.util.logging.Logger: void severe(java.lang.String)>("SAAJ0004.p2p.internal.err");
+
+        $r37 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        $r38 = new java.lang.StringBuilder;
+
+        specialinvoke $r38.<java.lang.StringBuilder: void <init>()>();
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Internal error: ");
+
+        $r40 = virtualinvoke $r35.<java.lang.Exception: java.lang.String getMessage()>();
+
+        $r41 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r40);
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r37.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String)>($r42);
+
+        throw $r37;
+
+     label09:
+        $r14 = new java.net.URL;
+
+        specialinvoke $r14.<java.net.URL: void <init>(java.lang.String)>(r46);
+
+        r44 = $r14;
+
+     label10:
+        goto label12;
+
+     label11:
+        $r27 := @caughtexception;
+
+        $r28 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        virtualinvoke $r28.<java.util.logging.Logger: void severe(java.lang.String)>("SAAJ0005.p2p.");
+
+        $r29 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        $r30 = new java.lang.StringBuilder;
+
+        specialinvoke $r30.<java.lang.StringBuilder: void <init>()>();
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Bad URL: ");
+
+        $r32 = virtualinvoke $r27.<java.net.MalformedURLException: java.lang.String getMessage()>();
+
+        $r33 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r32);
+
+        $r34 = virtualinvoke $r33.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r29.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String)>($r34);
+
+        throw $r29;
+
+     label12:
+        $z3 = r44 instanceof java.lang.String;
+
+        if $z3 == 0 goto label16;
+
+     label13:
+        $r8 = new java.net.URL;
+
+        $r9 = (java.lang.String) r44;
+
+        specialinvoke $r8.<java.net.URL: void <init>(java.lang.String)>($r9);
+
+        r44 = $r8;
+
+     label14:
+        goto label16;
+
+     label15:
+        $r19 := @caughtexception;
+
+        $r20 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        virtualinvoke $r20.<java.util.logging.Logger: void severe(java.lang.String)>("SAAJ0006.p2p.bad.URL");
+
+        $r21 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Bad URL: ");
+
+        $r24 = virtualinvoke $r19.<java.net.MalformedURLException: java.lang.String getMessage()>();
+
+        $r25 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r24);
+
+        $r26 = virtualinvoke $r25.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r21.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String)>($r26);
+
+        throw $r21;
+
+     label16:
+        $z1 = r44 instanceof java.net.URL;
+
+        if $z1 == 0 goto label20;
+
+     label17:
+        $r6 = (java.net.URL) r44;
+
+        $r7 = virtualinvoke r0.<com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: javax.xml.soap.SOAPMessage doGet(java.net.URL)>($r6);
+
+     label18:
+        return $r7;
+
+     label19:
+        $r17 := @caughtexception;
+
+        $r18 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        specialinvoke $r18.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.Throwable)>($r17);
+
+        throw $r18;
+
+     label20:
+        $r1 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Bad endPoint type ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r44);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String)>($r5);
+
+        throw $r1;
+
+        catch java.lang.Exception from label02 to label03 with label04;
+        catch java.lang.Exception from label06 to label07 with label08;
+        catch java.net.MalformedURLException from label09 to label10 with label11;
+        catch java.net.MalformedURLException from label13 to label14 with label15;
+        catch java.lang.Exception from label17 to label18 with label19;
+    }
+
+    javax.xml.soap.SOAPMessage doGet(java.net.URL) throws javax.xml.soap.SOAPException, java.io.IOException
+    {
+        java.net.HttpURLConnection $r6;
+        javax.xml.soap.SOAPException $r43, $r47;
+        javax.xml.soap.MimeHeaders $r7;
+        java.lang.Exception $r34, $r44;
+        java.lang.StringBuilder $r17, $r18, $r19, $r21, $r26, $r27, $r29, $r30, $r31, $r38, $r39, $r41;
+        com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl $r16, $r37, $r46;
+        java.lang.Throwable $r33;
+        javax.xml.soap.MessageFactory $r11;
+        java.util.StringTokenizer $r8;
+        java.lang.String $r1, $r3, $r4, $r9, $r10, $r15, $r20, $r22, $r23, $r28, $r32, $r40, $r42, $r51, $r52;
+        java.io.IOException $r48;
+        javax.xml.soap.SOAPMessage r49;
+        java.net.URL r0;
+        java.net.URI $r2;
+        boolean $z0, $z1, $z2, $z3, z4, z5, z6;
+        java.util.logging.Logger $r13, $r24, $r36, $r45, $r54;
+        java.lang.String[] $r12;
+        java.util.logging.Level $r14, $r35;
+        int $i0, $i1, $i2, $i3, $i4, i5, i6;
+        java.lang.IllegalArgumentException $r25;
+        com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection r5;
+        java.io.InputStream r50, $r53;
+
+        r5 := @this: com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection;
+
+        r0 := @parameter0: java.net.URL;
+
+        z4 = 0;
+
+        z6 = 0;
+
+        z5 = 0;
+
+     label01:
+        $r1 = virtualinvoke r0.<java.net.URL: java.lang.String getProtocol()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("https");
+
+        if $z0 == 0 goto label02;
+
+        specialinvoke r5.<com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: void initHttps()>();
+
+     label02:
+        $r2 = new java.net.URI;
+
+        $r3 = virtualinvoke r0.<java.net.URL: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.net.URI: void <init>(java.lang.String)>($r3);
+
+        virtualinvoke $r2.<java.net.URI: java.lang.String getRawUserInfo()>();
+
+        $r4 = virtualinvoke r0.<java.net.URL: java.lang.String getProtocol()>();
+
+        $z1 = virtualinvoke $r4.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("http");
+
+        if $z1 != 0 goto label03;
+
+        $r23 = virtualinvoke r0.<java.net.URL: java.lang.String getProtocol()>();
+
+        $z3 = virtualinvoke $r23.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("https");
+
+        if $z3 != 0 goto label03;
+
+        $r24 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        virtualinvoke $r24.<java.util.logging.Logger: void severe(java.lang.String)>("SAAJ0052.p2p.protocol.mustbe.http.or.https");
+
+        $r25 = new java.lang.IllegalArgumentException;
+
+        $r26 = new java.lang.StringBuilder;
+
+        specialinvoke $r26.<java.lang.StringBuilder: void <init>()>();
+
+        $r27 = virtualinvoke $r26.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Protocol ");
+
+        $r28 = virtualinvoke r0.<java.net.URL: java.lang.String getProtocol()>();
+
+        $r29 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r28);
+
+        $r30 = virtualinvoke $r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" not supported in URL ");
+
+        $r31 = virtualinvoke $r30.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r32 = virtualinvoke $r31.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r25.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r32);
+
+        throw $r25;
+
+     label03:
+        $r6 = specialinvoke r5.<com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.net.HttpURLConnection createConnection(java.net.URL)>(r0);
+
+        virtualinvoke $r6.<java.net.HttpURLConnection: void setRequestMethod(java.lang.String)>("GET");
+
+        virtualinvoke $r6.<java.net.HttpURLConnection: void setDoOutput(boolean)>(1);
+
+        virtualinvoke $r6.<java.net.HttpURLConnection: void setDoInput(boolean)>(1);
+
+        virtualinvoke $r6.<java.net.HttpURLConnection: void setUseCaches(boolean)>(0);
+
+        staticinvoke <java.net.HttpURLConnection: void setFollowRedirects(boolean)>(1);
+
+        virtualinvoke $r6.<java.net.HttpURLConnection: void connect()>();
+
+     label04:
+        $i0 = virtualinvoke $r6.<java.net.HttpURLConnection: int getResponseCode()>();
+
+        i5 = $i0;
+
+        if $i0 != 500 goto label05;
+
+        z4 = 1;
+
+        z6 = 1;
+
+        z5 = 1;
+
+        goto label06;
+
+     label05:
+        $i1 = $i0 / 100;
+
+        if $i1 == 2 goto label06;
+
+        $r13 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        $r14 = <java.util.logging.Level: java.util.logging.Level SEVERE>;
+
+        $r12 = newarray (java.lang.String)[1];
+
+        $r15 = virtualinvoke $r6.<java.net.HttpURLConnection: java.lang.String getResponseMessage()>();
+
+        $r12[0] = $r15;
+
+        virtualinvoke $r13.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r14, "SAAJ0008.p2p.bad.response", $r12);
+
+        $r16 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Bad response: (");
+
+        $r19 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r20 = virtualinvoke $r6.<java.net.HttpURLConnection: java.lang.String getResponseMessage()>();
+
+        $r21 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r16.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String)>($r22);
+
+        throw $r16;
+
+     label06:
+        goto label09;
+
+     label07:
+        $r48 := @caughtexception;
+
+        $i4 = virtualinvoke $r6.<java.net.HttpURLConnection: int getResponseCode()>();
+
+        i5 = $i4;
+
+        if $i4 != 500 goto label08;
+
+        z4 = 1;
+
+        z6 = 1;
+
+        z5 = 1;
+
+        goto label09;
+
+     label08:
+        throw $r48;
+
+     label09:
+        goto label12;
+
+     label10:
+        $r47 := @caughtexception;
+
+        throw $r47;
+
+     label11:
+        $r44 := @caughtexception;
+
+        $r45 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        virtualinvoke $r45.<java.util.logging.Logger: void severe(java.lang.String)>("SAAJ0012.p2p.get.failed");
+
+        $r46 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        specialinvoke $r46.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String,java.lang.Throwable)>("Get failed", $r44);
+
+        throw $r46;
+
+     label12:
+        r49 = null;
+
+        r50 = null;
+
+        if i5 == 200 goto label13;
+
+        if z5 == 0 goto label30;
+
+     label13:
+        $r7 = new javax.xml.soap.MimeHeaders;
+
+        specialinvoke $r7.<javax.xml.soap.MimeHeaders: void <init>()>();
+
+        i6 = 1;
+
+     label14:
+        $r51 = virtualinvoke $r6.<java.net.HttpURLConnection: java.lang.String getHeaderFieldKey(int)>(i6);
+
+        $r52 = virtualinvoke $r6.<java.net.HttpURLConnection: java.lang.String getHeaderField(int)>(i6);
+
+        if $r51 != null goto label15;
+
+        if $r52 != null goto label15;
+
+        goto label18;
+
+     label15:
+        if $r51 == null goto label17;
+
+        $r8 = new java.util.StringTokenizer;
+
+        specialinvoke $r8.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>($r52, ",");
+
+     label16:
+        $z2 = virtualinvoke $r8.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z2 == 0 goto label17;
+
+        $r9 = virtualinvoke $r8.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.String: java.lang.String trim()>();
+
+        virtualinvoke $r7.<javax.xml.soap.MimeHeaders: void addHeader(java.lang.String,java.lang.String)>($r51, $r10);
+
+        goto label16;
+
+     label17:
+        i6 = i6 + 1;
+
+        goto label14;
+
+     label18:
+        if z6 == 0 goto label19;
+
+        $r53 = virtualinvoke $r6.<java.net.HttpURLConnection: java.io.InputStream getErrorStream()>();
+
+        goto label20;
+
+     label19:
+        $r53 = virtualinvoke $r6.<java.net.HttpURLConnection: java.io.InputStream getInputStream()>();
+
+     label20:
+        r50 = $r53;
+
+        if $r53 == null goto label21;
+
+        $i2 = virtualinvoke $r6.<java.net.HttpURLConnection: int getContentLength()>();
+
+        if $i2 == 0 goto label21;
+
+        $i3 = virtualinvoke $r53.<java.io.InputStream: int available()>();
+
+        if $i3 != 0 goto label22;
+
+     label21:
+        r49 = null;
+
+        $r54 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        virtualinvoke $r54.<java.util.logging.Logger: void warning(java.lang.String)>("SAAJ0014.p2p.content.zero");
+
+        goto label23;
+
+     label22:
+        $r11 = r5.<com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: javax.xml.soap.MessageFactory messageFactory>;
+
+        r49 = virtualinvoke $r11.<javax.xml.soap.MessageFactory: javax.xml.soap.SOAPMessage createMessage(javax.xml.soap.MimeHeaders,java.io.InputStream)>($r7, $r53);
+
+     label23:
+        if r50 == null goto label24;
+
+        virtualinvoke r50.<java.io.InputStream: void close()>();
+
+     label24:
+        virtualinvoke $r6.<java.net.HttpURLConnection: void disconnect()>();
+
+        goto label30;
+
+     label25:
+        $r43 := @caughtexception;
+
+        throw $r43;
+
+     label26:
+        $r34 := @caughtexception;
+
+        $r36 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        $r35 = <java.util.logging.Level: java.util.logging.Level SEVERE>;
+
+        virtualinvoke $r36.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r35, "SAAJ0010.p2p.cannot.read.resp", $r34);
+
+        $r37 = new com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl;
+
+        $r38 = new java.lang.StringBuilder;
+
+        specialinvoke $r38.<java.lang.StringBuilder: void <init>()>();
+
+        $r39 = virtualinvoke $r38.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to read response: ");
+
+        $r40 = virtualinvoke $r34.<java.lang.Exception: java.lang.String getMessage()>();
+
+        $r41 = virtualinvoke $r39.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r40);
+
+        $r42 = virtualinvoke $r41.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r37.<com.sun.xml.internal.messaging.saaj.SOAPExceptionImpl: void <init>(java.lang.String)>($r42);
+
+        throw $r37;
+
+     label27:
+        $r33 := @caughtexception;
+
+     label28:
+        if r50 == null goto label29;
+
+        virtualinvoke r50.<java.io.InputStream: void close()>();
+
+     label29:
+        virtualinvoke $r6.<java.net.HttpURLConnection: void disconnect()>();
+
+        throw $r33;
+
+     label30:
+        return r49;
+
+        catch java.io.IOException from label04 to label06 with label07;
+        catch javax.xml.soap.SOAPException from label01 to label09 with label10;
+        catch java.lang.Exception from label01 to label09 with label11;
+        catch javax.xml.soap.SOAPException from label13 to label23 with label25;
+        catch java.lang.Exception from label13 to label23 with label26;
+        catch java.lang.Throwable from label13 to label23 with label27;
+        catch java.lang.Throwable from label25 to label28 with label27;
+    }
+
+    private byte[] readFully(java.io.InputStream) throws java.io.IOException
+    {
+        byte[] r1, $r3;
+        com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection r4;
+        java.io.ByteArrayOutputStream $r5;
+        int $i0, $i2;
+        java.io.InputStream r2;
+
+        r4 := @this: com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection;
+
+        r2 := @parameter0: java.io.InputStream;
+
+        $r5 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r5.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        r1 = newarray (byte)[1024];
+
+     label1:
+        $i0 = virtualinvoke r2.<java.io.InputStream: int read(byte[])>(r1);
+
+        $i2 = (int) -1;
+
+        if $i0 == $i2 goto label2;
+
+        virtualinvoke $r5.<java.io.ByteArrayOutputStream: void write(byte[],int,int)>(r1, 0, $i0);
+
+        goto label1;
+
+     label2:
+        $r3 = virtualinvoke $r5.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        return $r3;
+    }
+
+    private void initHttps()
+    {
+        boolean $z0, $z1, $z2;
+        java.util.logging.Logger $r2, $r9, $r14, $r18, $r21, $r26;
+        java.lang.Exception $r27;
+        java.security.Provider $r22;
+        java.lang.StringBuilder $r3, $r4, $r5, $r7;
+        java.lang.String[] $r15, $r19, $r24;
+        java.util.logging.Level $r1, $r8, $r13, $r17, $r20, $r25;
+        int $i0;
+        java.lang.String $r0, $r6, $r10, $r16, $r23, r29;
+        com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection r28;
+        java.lang.Class $r11;
+        java.lang.Object $r12;
+
+        r28 := @this: com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection;
+
+        $r0 = staticinvoke <com.sun.xml.internal.messaging.saaj.util.SAAJUtil: java.lang.String getSystemProperty(java.lang.String)>("java.protocol.handler.pkgs");
+
+        $r2 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        $r1 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $z0 = virtualinvoke $r2.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        $r26 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        $r25 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r24 = newarray (java.lang.String)[1];
+
+        $r24[0] = $r0;
+
+        virtualinvoke $r26.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r25, "SAAJ0053.p2p.providers", $r24);
+
+     label1:
+        if $r0 == null goto label2;
+
+        $r23 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.lang.String SSL_PKG>;
+
+        $i0 = virtualinvoke $r0.<java.lang.String: int indexOf(java.lang.String)>($r23);
+
+        if $i0 >= 0 goto label8;
+
+     label2:
+        if $r0 != null goto label3;
+
+        r29 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.lang.String SSL_PKG>;
+
+        goto label4;
+
+     label3:
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("|");
+
+        $r6 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.lang.String SSL_PKG>;
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        r29 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label4:
+        staticinvoke <java.lang.System: java.lang.String setProperty(java.lang.String,java.lang.String)>("java.protocol.handler.pkgs", r29);
+
+        $r9 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        $r8 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $z1 = virtualinvoke $r9.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r8);
+
+        if $z1 == 0 goto label5;
+
+        $r21 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        $r20 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r19 = newarray (java.lang.String)[1];
+
+        $r19[0] = r29;
+
+        virtualinvoke $r21.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r20, "SAAJ0054.p2p.set.providers", $r19);
+
+     label5:
+        $r10 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.lang.String SSL_PROVIDER>;
+
+        $r11 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.Class: java.lang.Object newInstance()>();
+
+        $r22 = (java.security.Provider) $r12;
+
+        staticinvoke <java.security.Security: int addProvider(java.security.Provider)>($r22);
+
+        $r14 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        $r13 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $z2 = virtualinvoke $r14.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r13);
+
+        if $z2 == 0 goto label6;
+
+        $r18 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        $r17 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $r15 = newarray (java.lang.String)[1];
+
+        $r16 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.lang.String SSL_PROVIDER>;
+
+        $r15[0] = $r16;
+
+        virtualinvoke $r18.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r17, "SAAJ0055.p2p.added.ssl.provider", $r15);
+
+     label6:
+        goto label8;
+
+     label7:
+        $r27 := @caughtexception;
+
+     label8:
+        return;
+
+        catch java.lang.Exception from label5 to label6 with label7;
+    }
+
+    private void initAuthUserInfo(java.net.HttpURLConnection, java.lang.String)
+    {
+        java.net.HttpURLConnection r15;
+        byte[] $r7, $r8, $r12, $r16;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, i7, $i9;
+        java.lang.String r0, $r1, $r2, $r6, $r14, r18, r19, $r22;
+        com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection r17;
+        java.lang.StringBuilder $r4, $r5, $r10, $r13, $r20, $r21;
+
+        r17 := @this: com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection;
+
+        r15 := @parameter0: java.net.HttpURLConnection;
+
+        r0 := @parameter1: java.lang.String;
+
+        if r0 == null goto label3;
+
+        $i0 = virtualinvoke r0.<java.lang.String: int indexOf(int)>(58);
+
+        $i9 = (int) -1;
+
+        if $i0 != $i9 goto label1;
+
+        r18 = staticinvoke <com.sun.xml.internal.messaging.saaj.util.ParseUtil: java.lang.String decode(java.lang.String)>(r0);
+
+        r19 = null;
+
+        goto label2;
+
+     label1:
+        i7 = $i0 + 1;
+
+        $r1 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        r18 = staticinvoke <com.sun.xml.internal.messaging.saaj.util.ParseUtil: java.lang.String decode(java.lang.String)>($r1);
+
+        $r2 = virtualinvoke r0.<java.lang.String: java.lang.String substring(int)>(i7);
+
+        r19 = staticinvoke <com.sun.xml.internal.messaging.saaj.util.ParseUtil: java.lang.String decode(java.lang.String)>($r2);
+
+     label2:
+        $r20 = new java.lang.StringBuilder;
+
+        specialinvoke $r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r18);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.String: byte[] getBytes()>();
+
+        $r8 = virtualinvoke r19.<java.lang.String: byte[] getBytes()>();
+
+        $i2 = lengthof $r7;
+
+        $i1 = lengthof $r8;
+
+        $i3 = $i2 + $i1;
+
+        $r16 = newarray (byte)[$i3];
+
+        $i4 = lengthof $r7;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r7, 0, $r16, 0, $i4);
+
+        $i6 = lengthof $r7;
+
+        $i5 = lengthof $r8;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r8, 0, $r16, $i6, $i5);
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Basic ");
+
+        $r22 = new java.lang.String;
+
+        $r12 = staticinvoke <com.sun.xml.internal.messaging.saaj.util.Base64: byte[] encode(byte[])>($r16);
+
+        specialinvoke $r22.<java.lang.String: void <init>(byte[])>($r12);
+
+        $r13 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r15.<java.net.HttpURLConnection: void setRequestProperty(java.lang.String,java.lang.String)>("Authorization", $r14);
+
+     label3:
+        return;
+    }
+
+    private void d(java.lang.String)
+    {
+        java.io.PrintStream $r5;
+        java.lang.String[] $r0;
+        java.util.logging.Logger $r3;
+        java.util.logging.Level $r2;
+        com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection r9;
+        java.lang.StringBuilder $r4, $r6, $r7;
+        java.lang.String r1, $r8;
+
+        r9 := @this: com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection;
+
+        r1 := @parameter0: java.lang.String;
+
+        $r3 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log>;
+
+        $r2 = <java.util.logging.Level: java.util.logging.Level SEVERE>;
+
+        $r0 = newarray (java.lang.String)[1];
+
+        $r0[0] = r1;
+
+        virtualinvoke $r3.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Object[])>($r2, "SAAJ0013.p2p.HttpSOAPConnection", $r0);
+
+        $r5 = <java.lang.System: java.io.PrintStream err>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("HttpSOAPConnection: ");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r1);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>($r8);
+
+        return;
+    }
+
+    private java.net.HttpURLConnection createConnection(java.net.URL) throws java.io.IOException
+    {
+        java.net.HttpURLConnection $r2;
+        com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection r3;
+        java.net.URL r0;
+        java.net.URLConnection $r1;
+
+        r3 := @this: com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection;
+
+        r0 := @parameter0: java.net.URL;
+
+        $r1 = virtualinvoke r0.<java.net.URL: java.net.URLConnection openConnection()>();
+
+        $r2 = (java.net.HttpURLConnection) $r1;
+
+        return $r2;
+    }
+
+    static void <clinit>()
+    {
+        java.util.logging.Logger $r5;
+        java.lang.String $r0, $r1, $r2, $r3, $r4;
+        boolean $z0, $z1, $z2, $z3, $z4;
+
+        <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: int dL> = 0;
+
+        <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.lang.String JAXM_URLENDPOINT> = "javax.xml.messaging.URLEndpoint";
+
+        <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.lang.String ibmVmVendor> = "http://www.ibm.com/";
+
+        <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.lang.String sunVmVendor> = "http://java.sun.com/";
+
+        $r0 = staticinvoke <com.sun.xml.internal.messaging.saaj.util.SAAJUtil: java.lang.String getSystemProperty(java.lang.String)>("java.vendor.url");
+
+        <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.lang.String vmVendor> = $r0;
+
+        $r2 = "http://java.sun.com/";
+
+        $r1 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.lang.String vmVendor>;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        $z3 = 1;
+
+        goto label2;
+
+     label1:
+        $z3 = 0;
+
+     label2:
+        <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: boolean isSunVM> = $z3;
+
+        $r4 = "http://www.ibm.com/";
+
+        $r3 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.lang.String vmVendor>;
+
+        $z1 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z1 == 0 goto label3;
+
+        $z4 = 1;
+
+        goto label4;
+
+     label3:
+        $z4 = 0;
+
+     label4:
+        <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: boolean isIBMVM> = $z4;
+
+        $r5 = staticinvoke <java.util.logging.Logger: java.util.logging.Logger getLogger(java.lang.String,java.lang.String)>("com.sun.xml.internal.messaging.saaj.client.p2p", "com.sun.xml.internal.messaging.saaj.client.p2p.LocalStrings");
+
+        <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.util.logging.Logger log> = $r5;
+
+        $z2 = <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: boolean isIBMVM>;
+
+        if $z2 == 0 goto label5;
+
+        <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.lang.String SSL_PKG> = "com.ibm.net.ssl.internal.www.protocol";
+
+        <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.lang.String SSL_PROVIDER> = "com.ibm.net.ssl.internal.ssl.Provider";
+
+        goto label6;
+
+     label5:
+        <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.lang.String SSL_PKG> = "com.sun.net.ssl.internal.www.protocol";
+
+        <com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnection: java.lang.String SSL_PROVIDER> = "com.sun.net.ssl.internal.ssl.Provider";
+
+     label6:
+        return;
+    }
+}
